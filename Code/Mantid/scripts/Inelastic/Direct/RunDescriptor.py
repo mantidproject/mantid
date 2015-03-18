@@ -6,13 +6,14 @@ from Direct.PropertiesDescriptors import *
 import re
 
 class RunList(object):
-    """Helper class to maintain list of runs used in RunDescriptor for summing 
+    """Helper class to maintain list of runs used in RunDescriptor for summing
        or subsequent processing range of files.
 
-       Supports basic operations with this list 
-    """ 
-    def __init__(self,run_list,file_names=None,fext=None):
+       Supports basic operations with this list
+    """
+    def __init__(self,theRumDescr,run_list,file_names=None,fext=None):
         """ """
+        self._theRun = theRumDescr
         self._last_ind2sum = -1
         self._file_path = None
         self._fext = None
@@ -105,13 +106,23 @@ class RunList(object):
                 self._fext = [fext]
 
         if not self._fext:
-            self._fext = [''] * len(self._run_numbers)
+            self._fext = [None] * len(self._run_numbers)
         else:
             if len(self._fext) != len(self._run_numbers):
                 base_fext = self._fext[-1]
                 self._fext = [base_fext] * len(self._run_numbers)
     #
-    def get_file_guess(self,inst_name,run_num,default_fext=None,index=None):
+    def get_fext(self,index=0):
+        """Get file extension for file with run number
+           Should be used on defined Run_list only(which should be always true)
+        """
+        fext_given =self._fext[index]
+        if fext_given is None:
+            return self._theRun._holder.data_file_ext
+        else:
+            return fext_given
+    #
+    def get_file_guess(self,inst_name,run_num,index=None):
         """Return the name of run file for run number provided
 
           Note: internal file extension overwrites
@@ -120,24 +131,23 @@ class RunList(object):
         if index is None:
             index = self._run_numbers.index(run_num)
         path_guess = self._file_path[index]
-        fext = self._fext[index]
-        if default_fext and len(fext) == 0:
-            fext = def_fext
+        fext = self.get_fext(index)
+
         guess = build_run_file_name(run_num,inst_name,path_guess,fext)
         return (guess,index)
     #
-    def get_run_file_list(self,inst_name,default_fext):
+    def get_run_file_list(self,inst_name):
         """Return list of files, used corresponding to runs"""
         run_files = []
         for ind,run in enumerate(self._run_numbers):
-            fname,index = self.get_file_guess(inst_name,run,default_fext,ind)
+            fname,index = self.get_file_guess(inst_name,run,ind)
             run_files.append(fname)
         return run_files
     #
     def get_all_run_list(self):
         return self._run_numbers
     #
-    def add_or_replace_run(self,run_number,fpath='',fext=None,default_fext=False):
+    def add_or_replace_run(self,run_number,fpath='',fext=None):
         """Add run number to list of existing runs
 
          Let's prohibit adding the same run numbers using this method.
@@ -146,13 +156,12 @@ class RunList(object):
          file path and file extension are added/modified if present
          regardless of run being added or replaced
         """
-        if not(run_number in self._run_numbers):
+        if not run_number in self._run_numbers:
             self._run_numbers.append(run_number)
             if not fpath:
                 fpath = self._file_path[-1]
             self._file_path.append(fpath)
-            if not fext:
-                fext = self._fext[-1]
+
             self._fext.append(fext)
 
             self._last_ind2sum = len(self._run_numbers) - 1
@@ -161,9 +170,8 @@ class RunList(object):
             ext_ind = self._run_numbers.index(run_number)
             if len(fpath) > 0:
                 self._file_path[ext_ind] = fpath
-            if fext:
-                if not(default_fext and len(self._fext[ext_ind]) > 0): #not keep existing
-                    self._fext[ext_ind] = fext
+            if fext: #not to keep existing extension if new one is provided
+                self._fext[ext_ind] = fext
             self._last_ind2sum = ext_ind
             return ext_ind
     #
@@ -190,15 +198,15 @@ class RunList(object):
                 raise RuntimeError("Index {0} is outside of the run list of {1} runs".format(ind,len(self._run_numbers)))
         else:
             ind = self.get_last_ind2sum(sum_runs)
-        return self._run_numbers[ind],self._file_path[ind],self._fext[ind],ind
+        return self._run_numbers[ind],self._file_path[ind],self.get_fext(ind),ind
     #
     def set_last_ind2sum(self,run_number):
-        """Check and set last number, contributing to summation 
+        """Check and set last number, contributing to summation
            if this number is out of summation range, clear the summation
         """
         run_number = int(run_number)
         if run_number in self._run_numbers:
-            self._last_ind2sum = self._run_numbers.index(run_number) 
+            self._last_ind2sum = self._run_numbers.index(run_number)
         else:
             self._last_ind2sum = -1
     #
@@ -209,11 +217,11 @@ class RunList(object):
         n_runs = len(self._run_numbers)
         if num_to_sum:
             if num_to_sum <= 0:
-               num_to_sum = 1
+                num_to_sum = 1
             if num_to_sum > n_runs:
-               num_to_sum = n_runs
+                num_to_sum = n_runs
         else:
-          num_to_sum = n_runs
+            num_to_sum = n_runs
 
         if self._last_ind2sum >= 0 and self._last_ind2sum < num_to_sum:
             num_to_sum = self._last_ind2sum + 1
@@ -240,13 +248,13 @@ class RunList(object):
             sum_ext = ''
         return sum_ext
     #
-    def find_run_files(self,inst_name,run_list=None,default_fext=None):
+    def find_run_files(self,inst_name,run_list=None):
         """Find run files correspondent to the run list provided
           and set path to these files as new internal parameters
           for the files in list
 
-          Return the list of the runs, which files were 
-          not found and found 
+          Return the list of the runs, which files were
+          not found and found
 
           Run list have to coincide or be part of self._run_numbers
           No special check for correctness is performed, so may fail
@@ -258,7 +266,7 @@ class RunList(object):
         not_found = []
         found = []
         for run in run_list:
-            file_hint,index = self.get_file_guess(inst_name,run,default_fext)
+            file_hint,index = self.get_file_guess(inst_name,run)
             try:
                 file = FileFinder.findRuns(file_hint)[0]
                 fpath,fname = os.path.split(file)
@@ -305,7 +313,7 @@ class RunDescriptor(PropDescriptor):
            return length of the run-files list
            to work with
         """
-        if not(self._run_number):
+        if not self._run_number:
             return 0
         if self._run_list:
             return len(self._run_list._run_numbers)
@@ -314,7 +322,7 @@ class RunDescriptor(PropDescriptor):
 #--------------------------------------------------------------------------------------------------------------------
     def _clear_all(self):
         """clear all internal properties, workspaces and caches,
-           associated with this run 
+           associated with this run
         """
         # Run number
         self._run_number = None
@@ -386,22 +394,31 @@ class RunDescriptor(PropDescriptor):
                 if isinstance(run_num,list):
                     self._set_run_list(instance,run_num,file_path,fext)
                 else:
-                    self._set_single_run(instance,run_num,file_path,fext,False)
+                    self._set_single_run(instance,run_num,file_path,fext)
         elif isinstance(value,list):
-            self._set_run_list(instance,value,"",instance.data_file_ext)
+            self._set_run_list(instance,value,"",None)
         else:
-            self._set_single_run(instance,value,"",instance.data_file_ext,True)
+            self._set_single_run(instance,value,"",None)
 
 #--------------------------------------------------------------------------------------------------------------------
+    def get_fext(self):
+        """Return actual file extension for given run regardless of it
+           has been set or not
+        """
+        if self._fext is None:
+            return self._holder.data_file_ext
+        else:
+            return self._fext
+#--------------------------------------------------------------------------------------------------------------------
 
-    def _set_single_run(self,instance,run_number,file_path='',fext=None,default_fext=False):
+    def _set_single_run(self,instance,run_number,file_path='',fext=None):
         """ """
         self._run_number = int(run_number)
         # build workspace name for current run number
-        new_ws_name = self._build_ws_name() 
+        new_ws_name = self._build_ws_name()
 
         if self._run_list and instance.sum_runs:
-            ind = self._run_list.add_or_replace_run(self._run_number,file_path,fext,default_fext)
+            ind = self._run_list.add_or_replace_run(self._run_number,file_path,fext)
             self._run_file_path = self._run_list._file_path[ind]
             self._fext = self._run_list._fext[ind]
             self._ws_name = new_ws_name
@@ -410,28 +427,35 @@ class RunDescriptor(PropDescriptor):
                 self._clear_all()
                 # clear all would invalidate run number and workspace number
                 self._run_number = int(run_number)
+                self._ws_name = self._build_ws_name()
                 self._run_file_path = file_path
                 self._fext = fext
-                self._ws_name = self._build_ws_name()
             else: # nothing to do, there is workspace, which corresponds to this run number
                 # and it may be already loaded (may be not).  Just nullify run list
                                  # in case of previous workspace name came from a list.
                 self._run_list = None
+                if not self._ws_name in mtd:
+                    # Change existing file path and file extension if alternatives are provided
+                    if len(file_path)>0:
+                        self._run_file_path = file_path
+                    if not fext is None: # Change only if real new extension is provided
+                        self._fext = fext
+
 
 
 #--------------------------------------------------------------------------------------------------------------------
     def _set_run_list(self,instance,run_list,file_path=None,fext=None):
 
         if self._run_list and self._run_list.check_runs_equal(run_list,file_path,fext):
-            return 
+            return
         else:
             self._clear_all()
-            self._run_list = RunList(run_list,file_path,fext)
+            self._run_list = RunList(self,run_list,file_path,fext)
             run_num,file_path,main_fext,ind = self._run_list.get_current_run_info(instance.sum_runs)
             self._run_list.set_last_ind2sum(ind)
             self._run_number = run_num
             self._run_file_path = file_path
-            self._fext = main_fext 
+            self._fext = main_fext
             self._ws_name = self._build_ws_name()
 
     def run_number(self):
@@ -475,7 +499,7 @@ class RunDescriptor(PropDescriptor):
 #--------------------------------------------------------------------------------------------------------------------
     def add_masked_ws(self,masked_ws):
         """Extract masking from the workspace provided and store masks
-           to use with this run workspace 
+           to use with this run workspace
         """
         if self._mask_ws_name:
             mask_ws = mtd[self._mask_ws_name]
@@ -520,18 +544,18 @@ class RunDescriptor(PropDescriptor):
         """Returns list of the files, assigned to current property """
 
         inst = RunDescriptor._holder.short_inst_name
-        fext = self.get_file_ext()
+        fext = self.get_fext()
         run_num = self.run_number()
         current_run = build_run_file_name(run_num,inst,self._run_file_path,fext)
         if self._run_list:
             runs = self._run_list.get_all_run_list()
             if run_num in runs:
-                runf = self._run_list.get_run_file_list(inst,fext)
-                return runf 
+                runf = self._run_list.get_run_file_list(inst)
+                return runf
             else:
                 return [current_run]
         else:
-           return [current_run]
+            return [current_run]
 
 #--------------------------------------------------------------------------------------------------------------------
     @staticmethod
@@ -554,15 +578,15 @@ class RunDescriptor(PropDescriptor):
         """
 
         if not RunDescriptor._holder.sum_runs:
-           return ([],None,0)
+            return ([],None,0)
         if not self._run_list:
-           return ([],None,0)
+            return ([],None,0)
         #
         summed_runs = []
         if not existing_sum_ws:
-           existing_sum_ws = self._run_list.get_cashed_sum_ws()
+            existing_sum_ws = self._run_list.get_cashed_sum_ws()
         if existing_sum_ws:
-           summed_runs = RunDescriptor.get_sum_run_list(existing_sum_ws)
+            summed_runs = RunDescriptor.get_sum_run_list(existing_sum_ws)
         n_existing_sums = len(summed_runs)
 
         runs2_sum = self._run_list.get_run_list2sum(num_files)
@@ -578,10 +602,10 @@ class RunDescriptor(PropDescriptor):
 
           Returns True and empty list or False and
           the list of the runs, which files were not found
-          or not belong to the existing run list. 
+          or not belong to the existing run list.
         """
 
-        if not self._run_list: 
+        if not self._run_list:
             if not run_list:
                 return (True,[],[])
             else:
@@ -591,23 +615,24 @@ class RunDescriptor(PropDescriptor):
             existing = self._run_list.get_all_run_list()
             non_existing = []
             for run in run_list:
-                if not(run in existing):
+                if not run in existing:
                     raise RuntimeError('run {0} is not in the existing run list'.format(run))
-
+        not_found=[]
+        found = []
         inst = RunDescriptor._holder.short_instr_name
-        default_fext = RunDescriptor._holder.data_file_ext
-        not_found,found = self._run_list.find_run_files(inst,run_list,default_fext)
+        not_found,found = self._run_list.find_run_files(inst,run_list)
         if len(not_found) == 0:
-            return (True,[],found)
+            Ok = True
         else:
-            return (False,not_found,found)
+            Ok = False
+        return (Ok,not_found,found)
 #--------------------------------------------------------------------------------------------------------------------
     def set_action_suffix(self,suffix=None):
         """Method to set part of the workspace name, which indicate some action performed over this workspace
            e.g.: default suffix of a loaded workspace is 'RAW' but we can set it to SPE to show that conversion to
            energy will be performed for this workspace.
 
-           method returns the name of the workspace is will have with this suffix. 
+           method returns the name of the workspace is will have with this suffix.
            Algorithms would later  work on the initial workspace and modify it in-place or to produce workspace
            with new name (depending if one wants to keep initial workspace)
 
@@ -784,6 +809,12 @@ class RunDescriptor(PropDescriptor):
                 try:
                     ws_ind = mon_ws.getIndexFromSpectrumNumber(int(monID))
                 except:
+                    try:
+                        monws_name = mon_ws.name()
+                    except: 
+                        monws_name = 'None'
+                    RunDescriptor._logger('*** Monitor workspace {0} does not have monitor with ID {1}. Monitor workspace set to None'.\
+                                          format(monws_name,monID),'warning')
                     mon_ws = None
                     break
         return mon_ws
@@ -798,15 +829,6 @@ class RunDescriptor(PropDescriptor):
         else:
             return False
 #--------------------------------------------------------------------------------------------------------------------
-#--------------------------------------------------------------------------------------------------------------------
-    def get_file_ext(self):
-        """Method returns current file extension for file to load workspace from
-           e.g. .raw or .nxs extension
-        """
-        if self._fext and len(self._fext) > 0:
-            return self._fext
-        else: # return IDF default
-            return RunDescriptor._holder.data_file_ext
 #--------------------------------------------------------------------------------------------------------------------
     def set_file_ext(self,val):
         """Set non-default file extension """
@@ -832,11 +854,11 @@ class RunDescriptor(PropDescriptor):
             hint = kwargs['file_hint']
             fname,old_ext = os.path.splitext(hint)
             if len(old_ext) == 0:
-                old_ext = self.get_file_ext()
+                old_ext = self.get_fext()
         else:
-            old_ext = self._fext
+            old_ext = self.get_fext()
             if fileExt is None:
-                fileExt = self.get_file_ext()
+                fileExt = old_ext
             if filePath is None:
                 filePath = self._run_file_path
             fname = build_run_file_name(run_num_str,inst_name,filePath,fileExt)
@@ -884,8 +906,8 @@ class RunDescriptor(PropDescriptor):
 
         ok,data_file = self.find_file(None,filePath,fileExt,**kwargs)
         if not ok:
-           self._ws_name = None
-           raise IOError(data_file)
+            self._ws_name = None
+            raise IOError(data_file)
 
         if load_mon_with_workspace:
             mon_load_option = 'Include'
@@ -993,7 +1015,11 @@ class RunDescriptor(PropDescriptor):
             # Spectra is already in the monitor workspace
             return mon_ws
         except:
-            ws_index = data_ws.getIndexFromSpectrumNumber(spectraID)
+            try:
+                ws_index = data_ws.getIndexFromSpectrumNumber(spectraID)
+            except: 
+                raise RuntimeError('*** Error: Can not retrieve spectra with ID {0} from source workspace: {1}'.\
+                                    format(spectraID,data_ws.name()))
 
         #
         x_param = mon_ws.readX(0)
@@ -1023,10 +1049,10 @@ class RunDescriptor(PropDescriptor):
         """Remove workspace from memory as if it has not been processed
            and clear all operations indicators except cashes and run lists.
 
-           Attempt to get workspace for a file based run should in this case 
-           load workspace again 
+           Attempt to get workspace for a file based run should in this case
+           load workspace again
         """
-        ws_name = self._ws_name 
+        ws_name = self._ws_name
         mon_name = ws_name + '_monitors'
 
         self._ws_name = ''
@@ -1041,7 +1067,7 @@ class RunDescriptor(PropDescriptor):
         if self._run_list:
             ind = self._run_list.add_or_replace_run(self._run_number)
             self._run_file_path = self._run_list._file_path[ind]
-            self._fext = self._run_list._fext[ind]
+            self._fext = self._run_list.get_fext(ind)
 #--------------------------------------------------------------------------------------------------------------------
 
     def _build_ws_name(self,sum_runs=None):
@@ -1084,10 +1110,10 @@ class RunDescriptor(PropDescriptor):
         name = name.replace(self._prop_name,'',1)
 
         try:
-           part_ind = re.search('#(.+?)#', name).group(0)
-           name = name.replace(part_ind,'',1)
+            part_ind = re.search('#(.+?)#', name).group(0)
+            name = name.replace(part_ind,'',1)
         except AttributeError:
-           part_ind = ''
+            part_ind = ''
 
         if self._run_number:
             instr_name = self._instr_name()
@@ -1106,10 +1132,10 @@ class RunDescriptor(PropDescriptor):
 
     def has_own_value(self):
         """Interface property used to verify if
-           the class got its own values or been shadowed by 
-           property, this one depends on 
+           the class got its own values or been shadowed by
+           property, this one depends on
         """
-        return not(self._in_cash)
+        return not self._in_cash
 
     def notify_sum_runs_changed(self,old_value,new_value):
         """Take actions on changes to sum_runs option
@@ -1124,13 +1150,13 @@ class RunDescriptor(PropDescriptor):
                 self._run_list.set_last_ind2sum(ind)
                 self._run_number = run_num
                 self._run_file_path = file_path
-                self._fext = main_fext 
+                self._fext = main_fext
                 self._ws_name = self._build_ws_name(new_value)
             if new_value is False:
                 self._run_list.del_cashed_sum()
 
     def _load_and_sum_runs(self,inst_name,monitors_with_ws):
-        """Load multiple runs and sum them together 
+        """Load multiple runs and sum them together
 
            monitors_with_ws -- if true, load monitors with workspace
         """
@@ -1239,8 +1265,8 @@ class RunDescriptorDependent(RunDescriptor):
 
     def has_own_value(self):
         """Interface property used to verify if
-           the class got its own values or been shadowed by 
-           property, this one depends on           
+           the class got its own values or been shadowed by
+           property, this one depends on
         """
         return self._has_own_value
     #--------------------------------------------------------------
@@ -1282,11 +1308,11 @@ class RunDescriptorDependent(RunDescriptor):
         else:
             return self._host.synchronize_ws(workspace)
 
-    def get_file_ext(self):
+    def get_fext(self):
         if self._has_own_value:
-            return super(RunDescriptorDependent,self).get_file_ext()
+            return super(RunDescriptorDependent,self).get_fext()
         else:
-            return self._host.get_file_ext()
+            return self._host.get_fext()
 
     def set_file_ext(self,val):
         if self._has_own_value:
@@ -1323,7 +1349,7 @@ class RunDescriptorDependent(RunDescriptor):
             return super(RunDescriptorDependent,self).is_existing_ws()
         else:
             return self._host.is_existing_ws()
-      
+
     def file_hint(self,run_num_str=None,filePath=None,fileExt=None,**kwargs):
         if self._has_own_value:
             return super(RunDescriptorDependent,self).file_hint(run_num_str,filePath,fileExt,**kwargs)

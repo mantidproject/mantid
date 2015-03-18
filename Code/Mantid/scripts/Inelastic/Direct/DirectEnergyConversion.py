@@ -90,7 +90,7 @@ class DirectEnergyConversion(object):
 
    bkgd_range  =[15000,19000]  :integration range for background tests
 
-   second_white     - If provided an additional set of tests is performed on this. 
+   second_white     - If provided an additional set of tests is performed on this.
                          (default = None)
    hardmaskPlus     - A file specifying those spectra that should be masked
                          without testing (default=None)
@@ -275,7 +275,7 @@ class DirectEnergyConversion(object):
         # Check how we should run diag
         diag_spectra_blocks = self.diag_spectra
 
-        if not(white_mask is None):
+        if not white_mask is None:
             diag_params['white_mask'] = white
         # keep white mask workspace for further usage
         if diag_spectra_blocks is None:
@@ -294,7 +294,7 @@ class DirectEnergyConversion(object):
                     DeleteWorkspace(white_masked_ws)
 
         if out_ws_name:
-            if not(diag_sample is None):
+            if not diag_sample is None:
                 diag_sample.add_masked_ws(whiteintegrals)
                 mask = diag_sample.get_masking(1)
                 diag_mask = CloneWorkspace(mask,OutputWorkspace=out_ws_name)
@@ -551,7 +551,7 @@ class DirectEnergyConversion(object):
                 else:
                     # in this case the masking2 is different but points to the
                     # same  workspace Should be better solution for that
-                    if not self.use_hard_mask_only : 
+                    if not self.use_hard_mask_only :
                         prop_man.log("======== Run diagnose for monochromatic vanadium run ===========",'notice')
                         masking2 = self.diagnose(PropertyManager.wb_for_monovan_run,PropertyManager.monovan_run,\
                                         second_white = None,print_diag_results=True)
@@ -623,7 +623,7 @@ class DirectEnergyConversion(object):
 
         data_ws = data_run.get_workspace()
         monitor_ws = data_run.get_monitors_ws()
-        if not monitor_ws:
+        if monitor_ws is None:
            raise RuntimeError("Can not find monitors workspace for workspace {0}, run N{1}".\
                  format(data_ws.name(),data_ws.getRunNumber()))
         separate_monitors = data_run.is_monws_separate()
@@ -1450,7 +1450,7 @@ class DirectEnergyConversion(object):
         return result_ws
 #-------------------------------------------------------------------------------
     def _get_wb_inegrals(self,run):
-        """Obtain white bean vanadium integrals either by integrating 
+        """Obtain white bean vanadium integrals either by integrating
            workspace in question or cashed value
         """
         run = self.get_run_descriptor(run)

@@ -147,12 +147,11 @@ public:
   const coord_t *getBinWidths() const { return m_boxLength; }
 
   /// Get the special coordinate system.
-  virtual Mantid::Kernel::SpecialCoordinateSystem
-  getSpecialCoordinateSystem() const;
+  virtual Kernel::SpecialCoordinateSystem getSpecialCoordinateSystem() const;
 
   /// Set the special coordinate system.
-  void setCoordinateSystem(
-      const Mantid::Kernel::SpecialCoordinateSystem coordinateSystem);
+  void
+  setCoordinateSystem(const Kernel::SpecialCoordinateSystem coordinateSystem);
 
   void setTo(signal_t signal, signal_t errorSquared, signal_t numEvents);
 
@@ -161,7 +160,7 @@ public:
 
   coord_t *getVertexesArray(size_t linearIndex, size_t &numVertices) const;
 
-  Mantid::Kernel::VMD getCenter(size_t linearIndex) const;
+  Kernel::VMD getCenter(size_t linearIndex) const;
 
   /// Returns the (normalized) signal at a given coordinates
   signal_t
@@ -421,6 +420,8 @@ private:
   coord_t *m_origin;
   /// the number of events, contributed into the workspace;
   mutable uint64_t m_nEventsContributed;
+
+  Kernel::SpecialCoordinateSystem m_coordSystem;
 
 protected:
   /// Linear array of masks for each bin

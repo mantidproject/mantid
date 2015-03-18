@@ -745,6 +745,9 @@ MDBoxFlatTree::createOrOpenMDWSgroup(const std::string &fileName, int &nDims,
  * dimensions etc.*/
 void MDBoxFlatTree::saveWSGenericInfo(::NeXus::File *const file,
                                       API::IMDWorkspace_const_sptr ws) {
+  // Write out the coordinate system
+  file->writeData("coordinate_system",
+                  static_cast<uint32_t>(ws->getSpecialCoordinateSystem()));
 
   // Save the algorithm history under "process"
   ws->getHistory().saveNexus(file);

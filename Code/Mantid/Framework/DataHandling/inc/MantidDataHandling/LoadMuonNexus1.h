@@ -119,8 +119,8 @@ private:
 
   /// Creates Detector Grouping Table using all the data from the range
   DataObjects::TableWorkspace_sptr
-  createDetectorGroupingTable(std::vector<int>::const_iterator begin,
-                              std::vector<int>::const_iterator end);
+  createDetectorGroupingTable(std::vector<int> specToLoad,
+                              std::vector<int> grouping);
 };
 
 } // namespace DataHandling

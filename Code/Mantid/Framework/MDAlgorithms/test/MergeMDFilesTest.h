@@ -48,6 +48,7 @@ public:
 
     // Create a bunch of input files
     std::vector<std::vector<std::string> > filenames;
+    Mantid::Kernel::SpecialCoordinateSystem appliedCoord = Mantid::Kernel::QSample;
     std::vector<MDEventWorkspace3Lean::sptr> inWorkspaces;
     // how many events put into each file.
     long nFileEvents(1000);
@@ -55,7 +56,9 @@ public:
     {
       std::ostringstream mess;
       mess << "MergeMDFilesTestInput" << i;
-      MDEventWorkspace3Lean::sptr ws = MDEventsTestHelper::makeFileBackedMDEW(mess.str(), true,-nFileEvents);
+      MDEventWorkspace3Lean::sptr ws = 
+          MDEventsTestHelper::makeFileBackedMDEW(mess.str(), true,-nFileEvents, appliedCoord);
+
       inWorkspaces.push_back(ws);
       filenames.push_back(std::vector<std::string>(1,ws->getBoxController()->getFilename()));
     }
@@ -87,6 +90,7 @@ public:
     TS_ASSERT(ws);
     if (!ws) return;
     
+    TS_ASSERT_EQUALS(appliedCoord, ws->getSpecialCoordinateSystem());
     TS_ASSERT_EQUALS( ws->getNPoints(), 3*nFileEvents);
     MDBoxBase3Lean * box = ws->getBox();
     TS_ASSERT_EQUALS( box->getNumChildren(), 1000);

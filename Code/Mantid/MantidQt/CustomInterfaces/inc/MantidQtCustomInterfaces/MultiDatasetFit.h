@@ -1,6 +1,7 @@
 #ifndef MULTIDATASETFIT_H_
 #define MULTIDATASETFIT_H_
 
+#include "MantidQtCustomInterfaces/DllConfig.h"
 #include "MantidQtAPI/UserSubWindow.h"
 #include "MantidAPI/AlgorithmObserver.h"
 #include "MantidQtAPI/WorkspaceObserver.h"
@@ -27,6 +28,7 @@ namespace API
 {
   class IFunction;
   class IAlgorithm;
+  class MatrixWorkspace;
 }
 }
 
@@ -37,6 +39,7 @@ namespace MantidQt
 namespace MantidWidgets
 {
   class FunctionBrowser;
+  class RangeSelector;
   class FitOptionsBrowser;
 }
 
@@ -51,13 +54,14 @@ namespace CustomInterfaces
 // Forward declarations
 class PlotController;
 class DatasetPlotData;
+class DataController;
 
 /**
  * Class MultiDatasetFitDialog implements a dialog for setting up a multi-dataset fit
  * and displaying the results.
  */
 
-class MultiDatasetFit: public API::UserSubWindow
+class MANTIDQT_CUSTOMINTERFACES_DLL MultiDatasetFit: public API::UserSubWindow
 {
   Q_OBJECT
 public:
@@ -74,6 +78,8 @@ public:
   std::string getWorkspaceName(int i) const;
   /// Workspace index of the i-th spectrum
   int getWorkspaceIndex(int i) const;
+  /// Get the fitting range for the i-th spectrum
+  std::pair<double,double> getFittingRange(int i) const;
   /// Total number of spectra (datasets).
   int getNumberOfSpectra() const;
   /// Get value of a local parameter
@@ -83,21 +89,18 @@ public:
   /// Check that the data sets in the table are valid
   void checkDataSets();
 
-signals:
-  void dataTableUpdated();
-
 public slots:
   void setLocalParameterValue(const QString& parName, int i, double value);
   void reset();
 
 private slots:
-  void addWorkspace();
-  void workspaceSelectionChanged();
-  void removeSelectedSpectra();
   void fit();
   void editLocalParameterValues(const QString& parName);
   void finishFit(bool);
   void updateLocalParameters(int index);
+  void enableZoom();
+  void enablePan();
+  void enableRange();
 
 protected:
   /// To be overridden to set the appropriate layout
@@ -105,7 +108,6 @@ protected:
 
 private:
   void createPlotToolbar();
-  void addWorkspaceSpectrum(const QString &wsName, int wsIndex);
   boost::shared_ptr<Mantid::API::IFunction> createFunction() const;
   void initLocalParameter(const QString& parName)const;
   void updateParameters(const Mantid::API::IFunction& fun);
@@ -122,6 +124,8 @@ private:
   Ui::MultiDatasetFit m_uiForm;
   /// Controls the plot and plotted data.
   PlotController *m_plotController;
+  /// Contains all logic of dealing with data sets.
+  DataController *m_dataController;
   /// Function editor
   MantidWidgets::FunctionBrowser *m_functionBrowser;
   /// Browser for setting other Fit properties
@@ -175,26 +179,45 @@ public:
   int getCurrentIndex() const {return m_currentIndex;}
   bool isZoomEnabled() const;
   bool isPanEnabled() const;
+  bool isRangeSelectorEnabled() const;
 signals:
   void currentIndexChanged(int);
+  void fittingRangeChanged(int, double, double);
 public slots:
   void enableZoom();
   void enablePan();
+  void enableRange();
+  void updateRange(int index);
 private slots:
   void tableUpdated();
   void prevPlot();
   void nextPlot();
   void plotDataSet(int);
+  void updateFittingRange(double startX, double endX);
 private:
   MultiDatasetFit *owner() const {return static_cast<MultiDatasetFit*>(parent());}
+  void disableAllTools();
+  template<class Tool>
+  void enableTool(Tool* tool, int cursor);
+  bool eventFilter(QObject *widget, QEvent *evn);
+  void resetRange();
+  void zoomToRange();
+  boost::shared_ptr<DatasetPlotData> getData(int i);
+
   /// The plot widget
   QwtPlot *m_plot;
+
+  ///@name Plot tools
+  ///@{
   /// The zoomer
   QwtPlotZoomer *m_zoomer;
   /// The panner
   QwtPlotPanner *m_panner;
   /// The magnifier
   QwtPlotMagnifier *m_magnifier;
+  /// The fitting range selector
+  MantidWidgets::RangeSelector* m_rangeSelector;
+  ///@}
 
   /// The workspace table
   QTableWidget *m_table;
@@ -224,7 +247,49 @@ private:
   QString m_parName;
 };
 
+/*==========================================================================================*/
+/**
+  * A class for controlling the plot widget and the displayed data.
+  */
+class DataController: public QObject
+{
+  Q_OBJECT
+public:
+  DataController(MultiDatasetFit *parent, QTableWidget *dataTable);
+  std::string getWorkspaceName(int i) const;
+  int getWorkspaceIndex(int i) const;
+  int getNumberOfSpectra() const;
+  void checkDataSets();
+  std::pair<double,double> getFittingRange(int i) const;
+
+signals:
+  void dataTableUpdated();
+  void dataSetUpdated(int i);
+  void hasSelection(bool);
+
+public slots:
+  void setFittingRangeGlobal(bool);
+  void setFittingRange(int, double, double);
+
+private slots:
+  void addWorkspace();
+  void workspaceSelectionChanged();
+  void removeSelectedSpectra();
+  void updateDataset(int, int);
+
+private:
+  MultiDatasetFit *owner() const {return static_cast<MultiDatasetFit*>(parent());}
+  void addWorkspaceSpectrum(const QString &wsName, int wsIndex, const Mantid::API::MatrixWorkspace& ws);
+  void removeDataSets(std::vector<int>& rows);
+
+  /// Table with data set names and other data.
+  QTableWidget *m_dataTable;
+  /// Flag for setting the fitting range.
+  bool m_isFittingRangeGlobal;
+};
+
 } // CustomInterfaces
 } // MantidQt
+
 
 #endif /*MULTIDATASETFITDIALOG_H_*/

@@ -23,27 +23,27 @@ class ReductionWrapper(object):
             self.advanced_vars = None
 
     def __init__(self,instrumentName,web_var=None):
-      """ sets properties defaults for the instrument with Name
+        """ sets properties defaults for the instrument with Name
           and define if wrapper runs from web services or not
       """
       # internal variable, indicating if we should try to wait for input files to appear
-      self._wait_for_file = False
+        self._wait_for_file = False
       # internal variable, used in system tests to validate workflow,
       # with waiting for files.  It is the holder to the function
       # used during debugging "wait for files" workflow
       # instead of Pause algorithm
-      self._debug_wait_for_files_operation = None
+        self._debug_wait_for_files_operation = None
 
       # The variables which are set up from web interface or to be exported to
       # web interface
-      if web_var:
-        self._run_from_web = True
-        self._wvs = web_var
-      else:
-        self._run_from_web = False
-        self._wvs = ReductionWrapper.var_holder()
+        if web_var:
+            self._run_from_web = True
+            self._wvs = web_var
+        else:
+            self._run_from_web = False
+            self._wvs = ReductionWrapper.var_holder()
       # Initialize reduced for given instrument
-      self.reducer = DirectEnergyConversion(instrumentName)
+        self.reducer = DirectEnergyConversion(instrumentName)
 
 
 
@@ -81,27 +81,27 @@ class ReductionWrapper(object):
         f.write("standard_vars = {\n")
         str_wrapper = '         '
         for key,val in self._wvs.standard_vars.iteritems():
-                  if isinstance(val,str):
-                      row = "{0}\'{1}\':\'{2}\'".format(str_wrapper,key,val)
-                  else:
-                      row = "{0}\'{1}\':{2}".format(str_wrapper,key,val)
-                  f.write(row)
-                  str_wrapper = ',\n         '
+            if isinstance(val,str):
+                row = "{0}\'{1}\':\'{2}\'".format(str_wrapper,key,val)
+            else:
+                row = "{0}\'{1}\':{2}".format(str_wrapper,key,val)
+            f.write(row)
+            str_wrapper = ',\n         '
         f.write("\n}\nadvanced_vars={\n")
 
         str_wrapper = '         '
         for key,val in self._wvs.advanced_vars.iteritems():
-                  if isinstance(val,str):
-                      row = "{0}\'{1}\':\'{2}\'".format(str_wrapper,key,val)
-                  else:
-                      row = "{0}\'{1}\':{2}".format(str_wrapper,key,val)
-                  f.write(row)
-                  str_wrapper = ',\n        '
+            if isinstance(val,str):
+                row = "{0}\'{1}\':\'{2}\'".format(str_wrapper,key,val)
+            else:
+                row = "{0}\'{1}\':{2}".format(str_wrapper,key,val)
+            f.write(row)
+            str_wrapper = ',\n        '
         f.write("\n}\n")
         f.close()
 
     def validate_settings(self):
-        """ method validates initial parameters, provided for reduction """ 
+        """ method validates initial parameters, provided for reduction """
 
         self.def_advanced_properties()
         self.def_main_properties()
@@ -116,14 +116,14 @@ class ReductionWrapper(object):
 #
 #
     def validate_result(self,build_validation=False,Error=1.e-3,ToleranceRelErr=True):
-        """ Overload this using build_or_validate_result to have possibility to run or validate result """ 
+        """ Overload this using build_or_validate_result to have possibility to run or validate result """
         return True
 
     def set_custom_output_filename(self):
-      """ define custom name of output files if standard one is not satisfactory 
+        """ define custom name of output files if standard one is not satisfactory
           User expected to overload this method within class instantiation """
-      return None
-       
+        return None
+
 
     def build_or_validate_result(self,sample_run,validation_file,build_validation=False,Error=1.e-3,ToleranceRelErr=True):
         """ Method validates results of the reduction against reference file or workspace.
@@ -131,7 +131,7 @@ class ReductionWrapper(object):
             Inputs:
             sample_run     -- the run number to reduce or validate against existing result
             validation_file -- The name of nxs file, containing workspace, produced by reducing SampleRun,
-                              or the pointer to the workspace, which is the reference workspace 
+                              or the pointer to the workspace, which is the reference workspace
                               for SampleRun reduction.
 
             Returns:
@@ -139,26 +139,26 @@ class ReductionWrapper(object):
                    as reported by CheckWorkspaceMatch.
             False  if CheckWorkspaceMatch comparison between sample and reduction is unsuccessful
 
-            True  if was not able to load reference file. In this case, algorithm builds validation 
+            True  if was not able to load reference file. In this case, algorithm builds validation
                   file and returns True if the reduction and saving of this file is successful
-            
+
         """
 
         if not build_validation:
-           if validation_file:
-              if isinstance(validation_file,api.Workspace):
-                 sample = validation_file
-                 validation_file = sample.name()
-              else:
-                 try:
-                    sample = Load(validation_file)
-                 except:
-                    self.reducer.prop_man.log\
+            if validation_file:
+                if isinstance(validation_file,api.Workspace):
+                    sample = validation_file
+                    validation_file = sample.name()
+                else:
+                    try:
+                        sample = Load(validation_file)
+                    except:
+                        self.reducer.prop_man.log\
                         ("*** WARNING:can not load (find?) validation file {0}\n"\
                          "    Building validation".format(validation_file),'warning')
-                    build_validation = True
-           else:
-              build_validation = True
+                        build_validation = True
+            else:
+                build_validation = True
 
 
         # just in case, to be sure
@@ -178,9 +178,9 @@ class ReductionWrapper(object):
 
         if build_validation:
             if validation_file:
-               result_name = os.path.splitext(validation_file)[0]
+                result_name = os.path.splitext(validation_file)[0]
             else:
-               result_name = self.reducer.prop_man.save_file_name
+                result_name = self.reducer.prop_man.save_file_name
             self.reducer.prop_man.log("*** Saving validation file with name: {0}.nxs".format(result_name),'notice')
             SaveNexus(reduced,Filename=result_name + '.nxs')
             return True,'Created validation file {0}.nxs'.format(result_name)
@@ -221,9 +221,9 @@ class ReductionWrapper(object):
         raise NotImplementedError('def_advanced_properties  has to be implemented')
     #
     def _run_pause(self,timeToWait=0):
-        """ a wrapper around pause algorithm allowing to run something 
+        """ a wrapper around pause algorithm allowing to run something
             instead of pause in debug mode
-        """ 
+        """
 
         if not self._debug_wait_for_files_operation is None:
             self._debug_wait_for_files_operation()
@@ -238,9 +238,9 @@ class ReductionWrapper(object):
             reduction properties between script and web variables
         """
         if input_file:
-           self.reducer.sample_run = str(input_file)
+            self.reducer.sample_run = str(input_file)
         if output_directory:
-           config['defaultsave.directory'] = str(output_directory)
+            config['defaultsave.directory'] = str(output_directory)
 
         timeToWait = self._wait_for_file
         if timeToWait > 0:
@@ -260,50 +260,50 @@ class ReductionWrapper(object):
         return ws
     #
     def sum_and_reduce(self):
-       """ procedure used to sum and reduce runs in case when not all files 
+        """ procedure used to sum and reduce runs in case when not all files
            are available and user have to wait for these files to appear
-       """ 
-       if not PropertyManager.sample_run._run_list:
-              raise RuntimeError("sum_and_reduce expects run file list to be defined")
+       """
+        if not PropertyManager.sample_run._run_list:
+            raise RuntimeError("sum_and_reduce expects run file list to be defined")
 
-       self.reducer.prop_man.sum_runs = True
+        self.reducer.prop_man.sum_runs = True
 
-       timeToWait = self._wait_for_file
-       if timeToWait > 0:
-          run_files = PropertyManager.sample_run.get_run_list()
-          num_files_to_sum = len(PropertyManager.sample_run)
+        timeToWait = self._wait_for_file
+        if timeToWait > 0:
+            run_files = PropertyManager.sample_run.get_run_list()
+            num_files_to_sum = len(PropertyManager.sample_run)
 
-          ok,missing,found = self.reducer.prop_man.find_files_to_sum()
-          n_found = len(found)
-          if not ok:
+            ok,missing,found = self.reducer.prop_man.find_files_to_sum()
+            n_found = len(found)
+            if not ok:
               # necessary to cache intermediate sums in memory
-              self.reducer.prop_man.cashe_sum_ws = True
-          while not(ok):
-              while n_found > 0:
-                 last_found = found[-1]
-                 self.reducer.prop_man.sample_run = last_found # request to reduce all up to last found
-                 ws = self.reducer.convert_to_energy()
+                self.reducer.prop_man.cashe_sum_ws = True
+            while not ok:
+                while n_found > 0:
+                    last_found = found[-1]
+                    self.reducer.prop_man.sample_run = last_found # request to reduce all up to last found
+                    ws = self.reducer.convert_to_energy()
                  # reset search to whole file list again
-                 self.reducer.prop_man.sample_run = run_files[num_files_to_sum - 1]
-                 ok,missing,found = self.reducer.prop_man.find_files_to_sum()
-                 n_found = len(found)
-                 if ok: # no need to cache sum any more.  All necessary files found
-                    self.reducer.prop_man.cashe_sum_ws = False
+                    self.reducer.prop_man.sample_run = run_files[num_files_to_sum - 1]
+                    ok,missing,found = self.reducer.prop_man.find_files_to_sum()
+                    n_found = len(found)
+                    if ok: # no need to cache sum any more.  All necessary files found
+                        self.reducer.prop_man.cashe_sum_ws = False
 
-              self.reducer.prop_man.log("*** Waiting {0} sec for runs {1} to appear on the data search path"\
+                self.reducer.prop_man.log("*** Waiting {0} sec for runs {1} to appear on the data search path"\
                     .format(timeToWait,str(missing)),'notice')
-              self._run_pause(timeToWait)
-              ok,missing,found = self.reducer.prop_man.find_files_to_sum()
-              n_found = len(found)
+                self._run_pause(timeToWait)
+                ok,missing,found = self.reducer.prop_man.find_files_to_sum()
+                n_found = len(found)
           #end not(ok)
-          if n_found > 0:
+            if n_found > 0:
             # cash sum can be dropped now if it has not been done before
-             self.reducer.prop_man.cashe_sum_ws = False
-             ws = self.reducer.convert_to_energy()
-       else:
-         ws = self.reducer.convert_to_energy()
+                self.reducer.prop_man.cashe_sum_ws = False
+                ws = self.reducer.convert_to_energy()
+        else:
+            ws = self.reducer.convert_to_energy()
 
-       return ws
+        return ws
     #
     def run_reduction(self):
         """" Reduces runs one by one or sum all them together and reduce after this
@@ -323,7 +323,7 @@ class ReductionWrapper(object):
                 self.sum_and_reduce()
                 return None
             else:
-                red_ws = self.sum_and_reduce() 
+                red_ws = self.sum_and_reduce()
                 RenameWorkspace(InputWorkspace=red_ws,OutputWorkspace=out_ws_name)
                 return mtd[out_ws_name]
         else:
@@ -348,7 +348,7 @@ class ReductionWrapper(object):
                     return results[0]
                 else:
                     return results
-                #end if 
+                #end if
             #end if
         #end
 
@@ -409,15 +409,15 @@ def iliad(reduce):
             output_directory = None
         # add input file folder to data search directory if file has it
         if input_file and isinstance(input_file,str):
-           data_path = os.path.dirname(input_file)
-           if len(data_path) > 0:
-              try:
-                 config.appendDataSearchDir(str(data_path))
-                 args[1] = os.path.basename(input_file)
-              except: # if mantid is not available, this should ignore config
-                 pass
+            data_path = os.path.dirname(input_file)
+            if len(data_path) > 0:
+                try:
+                    config.appendDataSearchDir(str(data_path))
+                    args[1] = os.path.basename(input_file)
+                except: # if mantid is not available, this should ignore config
+                    pass
         if output_directory:
-           config['defaultsave.directory'] = str(output_directory)
+            config['defaultsave.directory'] = str(output_directory)
 
         if host._run_from_web:
             web_vars = dict(host._wvs.standard_vars.items() + host._wvs.advanced_vars.items())
@@ -427,7 +427,7 @@ def iliad(reduce):
 
         custom_print_function = host.set_custom_output_filename()
         if not custom_print_function is None:
-           PropertyManager.save_file_name.set_custom_print(custom_print_function)
+            PropertyManager.save_file_name.set_custom_print(custom_print_function)
         #
         rez = reduce(*args)
 
@@ -435,11 +435,11 @@ def iliad(reduce):
         if host._run_from_web and not isinstance(rez,str):
             rez = ""
         else:
-          if isinstance(rez,list):
+            if isinstance(rez,list):
               # multirep run, just return as it is
-              return rez
-          if out_ws_name and rez.name() != out_ws_name :
-              rez = RenameWorkspace(InputWorkspace=rez,OutputWorkspace=out_ws_name)
+                return rez
+            if out_ws_name and rez.name() != out_ws_name :
+                rez = RenameWorkspace(InputWorkspace=rez,OutputWorkspace=out_ws_name)
 
         return rez
 

@@ -6,7 +6,7 @@ from mantid import logger, config
 import os
 from itertools import ifilterfalse
 
-class Intervals:
+class Intervals(object):
     # Having "*intervals" as a parameter instead of "intervals" allows us
     # to type "Intervals( (0,3), (6, 8) )" instead of "Intervals( ( (0,3), (6, 8) ) )"
     def __init__(self, *intervals):
@@ -52,9 +52,9 @@ class Intervals:
         return self._intervals
 
     # So that "2 in Intervals( (0, 3) )" returns True.
-    def __contains__(self, id):
+    def __contains__(self, ids):
         for interval in self._intervals:
-            if interval[0] <= id <= interval[1]:
+            if interval[0] <= ids <= interval[1]:
                 return True
         return False
 
@@ -92,21 +92,21 @@ def sumWsList(wsList, summedWsName = None):
             return mtd[summedWsName]
         return wsList[0]
 
-    sum = wsList[0] + wsList[1]
+    sumws = wsList[0] + wsList[1]
 
     if len(wsList) > 2:
         for i in range(2, len(wsList) - 1):
-            sum += wsList[i]
+            sumws += wsList[i]
 
     if summedWsName is None:
         summedWsName = "_PLUS_".join([ws.getName() for ws in wsList])
 
-    RenameWorkspace(InputWorkspace=sum.getName(), OutputWorkspace=summedWsName)
+    RenameWorkspace(InputWorkspace=sumws.getName(), OutputWorkspace=summedWsName)
 
     return mtd[summedWsName]
 
 
-class FileBackedWsIterator:
+class FileBackedWsIterator(object):
     ''' An iterator to iterate over workspaces.  Each filename in the list
     provided is loaded into a workspace, validated by the given ws_validator,
     yielded, and then deleted from memory. '''
@@ -140,7 +140,7 @@ class FileBackedWsIterator:
             self._delete_loaded_ws()
             try:
                 self._load_into_ws(filename)
-            except RuntimeError as re:
+            except RuntimeError:
                 raise RuntimeError("Problem loading file \"" + filename + "\"")
 
             # Yield the newly loaded ws.
@@ -158,7 +158,7 @@ class FileBackedWsIterator:
         so we can turn LoadLogFiles off. '''
         wsName = "__temp_" + filename
 
-        base, ext = os.path.splitext(filename)
+        dummy_base, ext = os.path.splitext(filename)
         if ext == ".raw":
             # Loading log files is extremely slow on archive
             LoadRaw(Filename = filename,

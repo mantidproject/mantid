@@ -1,3 +1,4 @@
+#pylint: disable=invalid-name,no-init
 import stresstesting
 
 from mantid.api import MatrixWorkspace, mtd
@@ -8,7 +9,7 @@ import unittest
 DIFF_PLACES = 12
 
 class VesuvioTests(unittest.TestCase):
-    
+
     ws_name = "evs_raw"
 
 
@@ -100,10 +101,10 @@ class VesuvioTests(unittest.TestCase):
         evs_raw = mtd[self.ws_name]
         self.assertAlmostEqual(37594.0, evs_raw.readY(0)[1], places=DIFF_PLACES)
         self.assertAlmostEqual(193.89172236070317, evs_raw.readE(0)[1], places=DIFF_PLACES)
-        
+
     def test_using_ip_file_adjusts_instrument_and_attaches_parameters(self):
         self._run_load("14188", "3", "SingleDifference","IP0005.dat")
-        
+
         # Check some data
         evs_raw = mtd[self.ws_name]
         det0 = evs_raw.getDetector(0)
@@ -124,7 +125,7 @@ class VesuvioTests(unittest.TestCase):
 
     def test_sumspectra_with_multiple_groups_gives_number_output_spectra_as_input_groups(self):
         self._run_load("14188", "135-148;152-165", "SingleDifference","IP0005.dat",sum=True)
-        
+
         evs_raw = mtd[self.ws_name]
 
         # Verify
@@ -171,23 +172,23 @@ class VesuvioTests(unittest.TestCase):
     def _do_size_check(self,name, expected_nhist):
         loaded_data = mtd[name]
         self.assertEquals(expected_nhist, loaded_data.getNumberHistograms())
-        
+
     #================== Failure cases ================================
 
     def test_missing_spectra_property_raises_error(self):
         self.assertRaises(RuntimeError, LoadVesuvio, Filename="14188",
                           OutputWorkspace=self.ws_name)
-        
+
     def test_load_with_invalid_spectra_raises_error(self):
         self.assertRaises(RuntimeError, LoadVesuvio, Filename="14188",
                           OutputWorkspace=self.ws_name, SpectrumList="200")
-        
+
     def test_load_with_spectra_that_are_just_monitors_raises_error(self):
         self.assertRaises(RuntimeError, LoadVesuvio, Filename="14188",
           OutputWorkspace=self.ws_name, SpectrumList="1")
         self.assertRaises(RuntimeError, LoadVesuvio, Filename="14188",
                           OutputWorkspace=self.ws_name, SpectrumList="1-2")
-        
+
     def test_load_with_invalid_difference_option_raises_error(self):
         self.assertRaises(ValueError, LoadVesuvio, Filename="14188",
           OutputWorkspace=self.ws_name, Mode="Unknown",SpectrumList="3-134")
@@ -203,7 +204,7 @@ class VesuvioTests(unittest.TestCase):
         self._do_test_temp_raw_workspaces_not_left_around()
 
     def _do_test_temp_raw_workspaces_not_left_around(self):
-        self.assertTrue("__loadraw_evs" not in mtd) 
+        self.assertTrue("__loadraw_evs" not in mtd)
         self.assertTrue("__loadraw_evs_monitors" not in mtd)
 
 
@@ -220,7 +221,7 @@ class LoadVesuvioTest(stresstesting.MantidStressTest):
         # Run using either runner
         res = runner.run(suite)
         if res.wasSuccessful():
-            self._success = True 
+            self._success = True
         else:
             self._success = False
 
