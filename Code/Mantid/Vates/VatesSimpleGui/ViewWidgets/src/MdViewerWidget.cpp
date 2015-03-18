@@ -85,7 +85,7 @@
 #include <pqStandardViewFrameActionsImplementation.h>
 #include <pqUndoRedoBehavior.h>
 #include <pqView.h>
-#include <pqViewFrameActionsBehavior.h>
+//#include <pqViewFrameActionsBehavior.h>
 #include <pqViewStreamingBehavior.h>
 #include <pqVerifyRequiredPluginBehavior.h>
 #include <pqSaveDataReaction.h>

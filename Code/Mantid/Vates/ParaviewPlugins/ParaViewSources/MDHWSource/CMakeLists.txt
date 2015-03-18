@@ -9,8 +9,7 @@ set_property( TARGET MantidParaViewMDHWSourceSMPlugin PROPERTY FOLDER "MantidVat
 
 include_directories ( SYSTEM ${QWT_INCLUDE_DIR} )
 
-target_link_libraries( MantidParaViewMDHWSourceSMPlugin 
-${MANTID_SUBPROJECT_LIBS} ${QWT_LIBRARIES})
+target_link_libraries( MantidParaViewMDHWSourceSMPlugin LINK_PUBLIC ${MANTID_SUBPROJECT_LIBS} ${QWT_LIBRARIES})
 
 # Put library into subfolder.
 SET_TARGET_OUTPUT_DIRECTORY(MantidParaViewMDHWSourceSMPlugin ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/${PVPLUGINS_DIR}/${PVPLUGINS_SUBDIR})

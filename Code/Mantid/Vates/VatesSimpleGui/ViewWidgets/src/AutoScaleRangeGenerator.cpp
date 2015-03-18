@@ -239,11 +239,11 @@ namespace SimpleGui
     }
 
     // Otherwise get the data range of the representation for the active view
-    pqPipelineRepresentation* pipelineRepresenation = qobject_cast<pqPipelineRepresentation*>(source->getRepresentation(pqActiveObjects::instance().activeView()));
+    pqPipelineRepresentation* pipelineRepresentation = qobject_cast<pqPipelineRepresentation*>(source->getRepresentation(pqActiveObjects::instance().activeView()));
 
-    if (pipelineRepresenation)
+    if (pipelineRepresentation)
     {
-      QPair<double, double> range = pipelineRepresenation->getColorFieldRange();
+      QPair<double, double> range = pipelineRepresentation->getLookupTable()->getScalarRange();
 
       minValue = range.first;
       maxValue = range.second;

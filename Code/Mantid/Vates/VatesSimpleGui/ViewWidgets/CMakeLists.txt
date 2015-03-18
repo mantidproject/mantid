@@ -146,7 +146,7 @@ MantidWidgets
 
 # Create test file projects
 if( CXXTEST_FOUND AND GMOCK_FOUND AND GTEST_FOUND )
-  include_directories ( SYSTEM ${CXXTEST_INCLUDE_DIR} ${GMOCK_INCLUDE_DIR} ${GTEST_INCLUDE_DIR} )
+  include_directories ( SYSTEM ${CXXTEST_INCLUDE_DIR} ${GMOCK_INCLUDE_DIR} ${GTEST_INCLUDE_DIR})
 
   include_directories( inc ../../../Framework/TestHelpers/inc ../../../Framework/DataHandling/inc ../../../Framework/DataObjects/inc)
   set ( TESTHELPER_SRCS ../../../Framework/TestHelpers/src/ComponentCreationHelper.cpp 
@@ -154,7 +154,7 @@ if( CXXTEST_FOUND AND GMOCK_FOUND AND GTEST_FOUND )
                         ../../../Framework/TestHelpers/src/MDEventsTestHelper.cpp 
                         ../../../Framework/TestHelpers/src/StartFrameworkManager.cpp )
   cxxtest_add_test( VatesSimpleGuiViewWidgetsTest ${TEST_FILES} )
-  target_link_libraries( VatesSimpleGuiViewWidgetsTest VatesSimpleGuiViewWidgets DataHandling Kernel DataObjects ${GMOCK_LIBRARIES} ${GTEST_LIBRARIES} )
+  target_link_libraries( VatesSimpleGuiViewWidgetsTest VatesSimpleGuiViewWidgets DataHandling Kernel DataObjects ${GMOCK_LIBRARIES} ${GTEST_LIBRARIES})
   add_dependencies( AllTests VatesSimpleGuiViewWidgetsTest )
   # Add to the 'UnitTests' group in VS
   set_property ( TARGET VatesSimpleGuiViewWidgetsTest PROPERTY FOLDER "UnitTests" )

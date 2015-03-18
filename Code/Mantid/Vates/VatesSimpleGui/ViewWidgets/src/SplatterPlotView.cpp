@@ -498,8 +498,12 @@ void SplatterPlotView::createPeaksFilter()
     vtkSMPropertyHelper(dataRepresentation->getProxy(), "PointSize").Set(pointSize);
     dataRepresentation->getProxy()->UpdateVTKObjects();
 
-    pqPipelineRepresentation *pipelineRepresentation = qobject_cast<pqPipelineRepresentation*>(dataRepresentation);
-    pipelineRepresentation->colorByArray("signal", vtkDataObject::FIELD_ASSOCIATION_CELLS);
+    if (!this->isPeaksWorkspace(this->origSrc))
+    {
+      vtkSMPVRepresentationProxy::SetScalarColoring(dataRepresentation->getProxy(), "signal",
+                                                  vtkDataObject::FIELD_ASSOCIATION_CELLS);
+      dataRepresentation->getProxy()->UpdateVTKObjects();
+    }
     this->resetDisplay();
     this->setVisibilityListener();
     this->renderAll();

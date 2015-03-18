@@ -11,7 +11,7 @@ set_property( TARGET MantidParaViewSplatterPlotSMPlugin PROPERTY FOLDER "MantidV
 
 include_directories ( SYSTEM ${QWT_INCLUDE_DIR} )
 
-target_link_libraries( MantidParaViewSplatterPlotSMPlugin 
+target_link_libraries( MantidParaViewSplatterPlotSMPlugin LINK_PUBLIC 
 ${MANTID_SUBPROJECT_LIBS} ${QWT_LIBRARIES})
 
 # Put library into subfolder.
