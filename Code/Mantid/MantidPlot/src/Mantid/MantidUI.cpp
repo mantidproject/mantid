@@ -743,7 +743,7 @@ void MantidUI::showVatesSimpleInterface()
         //m_appWindow->setGeometry(m_vatesSubWindow, vsui);
         vatesSubWindow->setWidget(vsui);
         vatesSubWindow->widget()->show();
-        vsui->renderWorkspace(wsName, wsType);
+        vsui->renderWorkspace(wsName, wsType,instrumentName);
       }
       else
       {
