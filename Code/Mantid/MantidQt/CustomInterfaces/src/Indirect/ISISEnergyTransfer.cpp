@@ -348,7 +348,7 @@ namespace CustomInterfaces
 
   /**
    * Converts the checkbox selection to a comma delimited list of save formats for the
-   * InelasticIndirectReduction algorithm.
+   * ISISIndirectEnergyTransfer algorithm.
    *
    * @return A vector of save formats
    */
