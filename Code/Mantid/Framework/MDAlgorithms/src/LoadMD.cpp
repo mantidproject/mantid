@@ -40,7 +40,8 @@ DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadMD);
 /** Constructor
 */
 LoadMD::LoadMD()
-    : m_numDims(0),                    // uninitialized incorrect value
+    : m_numDims(0), // uninitialized incorrect value
+      m_coordSystem(None),
       m_BoxStructureAndMethadata(true) // this is faster but rarely needed.
 {}
 
@@ -168,6 +169,8 @@ void LoadMD::exec() {
 
   // Now load all the dimension xml
   this->loadDimensions();
+  // Coordinate system
+  this->loadCoordinateSystem();
 
   if (entryName == "MDEventWorkspace") {
     // The type of event
@@ -233,6 +236,9 @@ void LoadMD::loadHisto() {
   // Now the ExperimentInfo
   MDBoxFlatTree::loadExperimentInfos(m_file.get(), m_filename, ws);
 
+  // Coordinate system
+  ws->setCoordinateSystem(m_coordSystem);
+
   // Load the WorkspaceHistory "process"
   ws->history().loadNexus(m_file.get());
 
@@ -264,6 +270,30 @@ void LoadMD::loadDimensions() {
     m_file->getAttr(mess.str(), dimXML);
     // Use the dimension factory to read the XML
     m_dims.push_back(createDimension(dimXML));
+  }
+}
+
+/** Load the coordinate system **/
+void LoadMD::loadCoordinateSystem() {
+  // Current version stores the coordinate system
+  // in its own field. The first version stored it
+  // as a log value so fallback on that if it can't
+  // be found.
+  try {
+    uint32_t readCoord(0);
+    m_file->readData("coordinate_system", readCoord);
+    m_coordSystem = static_cast<SpecialCoordinateSystem>(readCoord);
+  } catch (::NeXus::Exception &) {
+    auto pathOnEntry = m_file->getPath();
+    try {
+      m_file->openPath(pathOnEntry + "/experiment0/logs/CoordinateSystem");
+      int readCoord(0);
+      m_file->readData("value", readCoord);
+      m_coordSystem = static_cast<SpecialCoordinateSystem>(readCoord);
+    } catch (::NeXus::Exception &) {
+    }
+    // return to where we started
+    m_file->openPath(pathOnEntry);
   }
 }
 
@@ -301,6 +331,9 @@ void LoadMD::doLoad(typename MDEventWorkspace<MDE, nd>::sptr ws) {
   // Add each of the dimension
   for (size_t d = 0; d < nd; d++)
     ws->addDimension(m_dims[d]);
+
+  // Coordinate system
+  ws->setCoordinateSystem(m_coordSystem);
 
   // ----------------------------------------- Box Structure
   // ------------------------------

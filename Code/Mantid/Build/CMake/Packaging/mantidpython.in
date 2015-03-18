@@ -7,6 +7,7 @@
 # Find out where we are
 SCRIPTFILE=$(readlink -f "$0")
 INSTALLDIR=$(echo $SCRIPTFILE | sed -r -e 's|^(.*)/(.*)$|\1|g') #.* is greedy and eats up until the final slash
+IPYTHON=$(command -v ipython)
 
 # Define extra libraries and load paths
 LOCAL_PRELOAD=`readlink --no-newline --canonicalize-existing @TCMALLOC_LIBRARIES@`
@@ -20,7 +21,14 @@ else
     TCM_RELEASE=${TCMALLOC_RELEASE_RATE}
 fi
 
+# Define extra libraries for python
+LOCAL_PYTHONPATH=@WRAPPER_PREFIX@$INSTALLDIR
+if [ -n "${PYTHONPATH}" ]; then
+    LOCAL_PYTHONPATH=${LOCAL_PYTHONPATH}:${PYTHONPATH}
+fi
+
 # Launch
 LD_PRELOAD=${LOCAL_PRELOAD} TCMALLOC_RELEASE_RATE=${TCM_RELEASE} \
     LD_LIBRARY_PATH=${LOCAL_LDPATH} QT_API=pyqt \
-    @WRAPPER_PREFIX@$INSTALLDIR/@MANTIDPLOT_EXEC@ $*@WRAPPER_POSTFIX@
+    PYTHONPATH=${LOCAL_PYTHONPATH} \
+    ${IPYTHON} $*@WRAPPER_POSTFIX@

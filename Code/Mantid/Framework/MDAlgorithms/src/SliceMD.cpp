@@ -122,8 +122,10 @@ void SliceMD::slice(typename MDEventWorkspace<MDE, nd>::sptr ws) {
   // Create the ouput workspace
   typename MDEventWorkspace<OMDE, ond>::sptr outWS(
       new MDEventWorkspace<OMDE, ond>());
-  for (size_t od = 0; od < m_binDimensions.size(); od++)
+  for (size_t od = 0; od < m_binDimensions.size(); od++) {
     outWS->addDimension(m_binDimensions[od]);
+  }
+  outWS->setCoordinateSystem(ws->getSpecialCoordinateSystem());
   outWS->initialize();
   // Copy settings from the original box controller
   BoxController_sptr bc = ws->getBoxController();
