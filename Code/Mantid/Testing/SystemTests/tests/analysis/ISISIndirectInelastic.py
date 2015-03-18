@@ -11,8 +11,7 @@ from mantid.api import FileFinder
 
 # Import our workflows.
 from inelastic_indirect_reducer import IndirectReducer
-from inelastic_indirect_reduction_steps import IndirectCalibration
-from IndirectDataAnalysis import msdfit, furyfitSeq, furyfitMult, confitSeq, abscorFeeder
+from IndirectDataAnalysis import furyfitSeq, furyfitMult, confitSeq, abscorFeeder
 
 '''
 - TOSCA only supported by "Reduction" (the Energy Transfer tab of C2E).
@@ -780,20 +779,11 @@ class ISISIndirectInelasticElwinAndMSDFit(ISISIndirectInelasticBase):
                                InputWorkspace=ws)
 
         eq2_file = elwin_results[1]
-        msdfit_result = msdfit(eq2_file,
-                               startX=self.startX,
-                               endX=self.endX,
-                               Save=False,
+        msdfit_result = MSDFit(InputWorkspace=eq2_file,
+                               XStart=self.startX,
+                               XEnd=self.endX,
+                               SpecMax=1,
                                Plot=False)
-
-        # @TODO: MSDFit has some other, as yet unfinalised, workspaces as its
-        #        output.  We need to test these too, eventually.
-
-        # Annoyingly, MSDFit eats the EQ2 workspaces we feed it, so let's
-        # reload them for checking against the reference files later.
-        for ws, filename in zip(elwin_results, int_files):
-            LoadNexusProcessed(Filename=filename,
-                               OutputWorkspace=ws)
 
         # Clean up the intermediate files.
         for filename in int_files:
@@ -803,17 +793,15 @@ class ISISIndirectInelasticElwinAndMSDFit(ISISIndirectInelasticBase):
         # final MSDFit result.
         self.result_names = [elwin_results[0],  # EQ1
                              elwin_results[1],  # EQ2
-                             msdfit_result]
+                             msdfit_result[2].name()]  # Fit workspace
 
     def _validate_properties(self):
         """Check the object properties are in an expected state to continue"""
 
         if type(self.files) != list or len(self.files) != 2:
-            raise RuntimeError("files should be a list of exactly 2 "
-                               "strings")
+            raise RuntimeError("files should be a list of exactly 2 strings")
         if type(self.eRange) != list or len(self.eRange) != 2:
-            raise RuntimeError("eRange should be a list of exactly 2 "
-                               "values")
+            raise RuntimeError("eRange should be a list of exactly 2 values")
         if type(self.startX) != float:
             raise RuntimeError("startX should be a float")
         if type(self.endX) != float:

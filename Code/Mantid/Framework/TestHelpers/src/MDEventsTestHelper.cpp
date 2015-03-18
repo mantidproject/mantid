@@ -128,11 +128,13 @@ createDiffractionEventWorkspace(int numEvents, int numPixels, int numBins) {
  * @return MDEW sptr
  */
 MDEventWorkspace3Lean::sptr
-makeFileBackedMDEW(std::string wsName, bool fileBacked, long numEvents) {
+makeFileBackedMDEW(std::string wsName, bool fileBacked, long numEvents,
+                   Kernel::SpecialCoordinateSystem coord) {
   // ---------- Make a file-backed MDEventWorkspace -----------------------
   std::string snEvents = boost::lexical_cast<std::string>(numEvents);
   MDEventWorkspace3Lean::sptr ws1 =
       MDEventsTestHelper::makeMDEW<3>(10, 0.0, 10.0, 0);
+  ws1->setCoordinateSystem(coord);
   ws1->getBoxController()->setSplitThreshold(100);
   Mantid::API::AnalysisDataService::Instance().addOrReplace(
       wsName, boost::dynamic_pointer_cast<Mantid::API::IMDEventWorkspace>(ws1));

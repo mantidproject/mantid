@@ -4,11 +4,16 @@
 #include "ui_SplatterPlotView.h"
 #include "MantidVatesSimpleGuiViewWidgets/ViewBase.h"
 #include "MantidVatesSimpleGuiViewWidgets/WidgetDllOption.h"
+#include "MantidVatesSimpleGuiViewWidgets/CameraManager.h"
+#include "MantidVatesSimpleGuiViewWidgets/PeaksTableControllerVsi.h"
+#include <boost/shared_ptr.hpp>
 
+#include <string>
 #include <QList>
 #include <QPointer>
 
 class QWidget;
+class QAction;
 
 class pqPipelineRepresentation;
 class pqPipelineSource;
@@ -85,6 +90,10 @@ public:
    * ViewBase::resetDisplay()
    */
   void resetDisplay();
+  /**
+   * Destroy all sources in the view. 
+   */
+  virtual void destroyAllSourcesInView();
 
 signals:
   /// Reset to the Standard View
@@ -95,8 +104,10 @@ signals:
 public slots:
   /// Check the coordinates for the peaks overlay if necessary
   void checkPeaksCoordinates();
-  /// Listen to destruction of peak sources
-  void onPeakSourceDestroyed();
+  /// Remove the visible peaks table.
+  void onRemovePeaksTable();
+  /// Show all peaks in table.
+  void onShowAllPeaksTable();
 
 protected slots:
   /// Check state of toggle button with respect to peak coordinates.
@@ -107,6 +118,10 @@ protected slots:
    * Create and apply a threshold filter to the data.
    */
   void onThresholdButtonClicked();
+  /// On peaks filter destroyed
+  void onPeaksFilterDestroyed();
+  /// On peaks source destroyed
+  void onPeakSourceDestroyed();
 
 private:
   Q_DISABLE_COPY(SplatterPlotView)
@@ -119,6 +134,20 @@ private:
   bool eventFilter(QObject *obj, QEvent *ev);
   /// Read the coordinates and send to service.
   void readAndSendCoordinates();
+  /// Setup the buttons for the visible peaks
+  void setupVisiblePeaksButtons();
+  /// Create the peaks filter
+  void createPeaksFilter();
+  /// Set the state of the peak button
+  void setPeakButton(bool state);
+  /// Set the frame for the peaks
+  void setPeakSourceFrame(pqPipelineSource* source);
+  /// Check if a peaks workspace is already part of the recorded peaks sources.
+  bool checkIfPeaksWorkspaceIsAlreadyBeingTracked(pqPipelineSource* source);
+  /// Update the peaks filter
+  void updatePeaksFilter(pqPipelineSource* filter);
+  /// Destroy splatter plot specific sources and filters
+  void destroyFiltersForSplatterPlotView();
 
   bool noOverlay; ///< Flag to respond to overlay situation correctly
   QList<QPointer<pqPipelineSource> > peaksSource; ///< A list of peaks sources
@@ -126,8 +155,14 @@ private:
   QPointer<pqPipelineRepresentation> splatRepr; ///< The splatter plot representation
   QPointer<pqPipelineSource> splatSource; ///< The splatter plot source
   QPointer<pqPipelineSource> threshSource; ///< The thresholding filter source
+  QPointer<pqPipelineSource> m_peaksFilter; ///< The peaks filter
   Ui::SplatterPlotView ui; ///< The splatter plot view'a UI form
   QPointer<pqRenderView> view; ///< The main view area
+  boost::shared_ptr<CameraManager> m_cameraManager; ///< The camera manager
+  PeaksTableControllerVsi* m_peaksTableController; ///< The peaks table controller
+  QAction* m_allPeaksAction;///<The action for showing all peaks in the table.
+  QAction* m_removePeaksAction; ///<The action for removing the peaks table.
+  std::string m_peaksWorkspaceNameDelimiter;///<Delimiter for peaks workspace strings.
 };
 
 } // SimpleGui

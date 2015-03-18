@@ -1,6 +1,6 @@
 .. _Workflow Algorithm:
 
-Workflow_Algorithm
+Workflow Algorithm
 ==================
 
 A workflow algorithm is a special subset of algorithms that perform

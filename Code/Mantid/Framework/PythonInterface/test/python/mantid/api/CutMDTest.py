@@ -151,11 +151,6 @@ class CutMDTest(unittest.TestCase):
         
         self.assertTrue(isinstance(out_md, IMDHistoWorkspace), "Expect that the output was an IMDHistoWorkspace given the NoPix flag.")
         
-        run = out_md.getExperimentInfo(0).run()
-        w_matrix = run.getLogData("W_MATRIX").value
-        w_matrix = list(w_matrix)
-        self.assertEquals([1,1,0,-1,1,0,0,0,1], w_matrix, "W-matrix should have been set, but should be an identity matrix")
-        
     def test_orthogonal_slice_with_cropping(self):
          # We create a fake workspace and check to see that using bin inputs for cropping works
         to_cut = CreateMDWorkspace(Dimensions=3, Extents=[-1,1,-1,1,-1,1], Names='H,K,L', Units='U,U,U')
