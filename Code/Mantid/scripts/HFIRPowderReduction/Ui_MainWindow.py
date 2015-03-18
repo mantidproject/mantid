@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'Ui_MainWindow.ui'
 #
-# Created: Tue Mar 17 10:53:31 2015
+# Created: Wed Mar 18 11:53:52 2015
 #      by: PyQt4 UI code generator 4.11.2
 #
 # WARNING! All changes made in this file will be lost!
@@ -114,7 +114,7 @@ class Ui_MainWindow(object):
         self.verticalLayout_7.addLayout(self.horizontalLayout_13)
         self.horizontalLayout_14 = QtGui.QHBoxLayout()
         self.horizontalLayout_14.setObjectName(_fromUtf8("horizontalLayout_14"))
-        self.graphicsView_Raw = Qt4MplCanvas(self.tab_3)
+        self.graphicsView_Raw = Qt4MplPlotView(self.tab_3)
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -241,15 +241,17 @@ class Ui_MainWindow(object):
         self.verticalLayout_2.addLayout(self.horizontalLayout_6)
         self.horizontalLayout_5 = QtGui.QHBoxLayout()
         self.horizontalLayout_5.setObjectName(_fromUtf8("horizontalLayout_5"))
-        self.graphicsView_reducedData = Qt4MplCanvas(self.tab)
-        self.toolbar_reducedData = MyNavigationToolbar(self.graphicsView_reducedData, self.graphicsView_reducedData)
-        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Preferred)
+        self.gridLayout_reductionView = QtGui.QGridLayout()
+        self.gridLayout_reductionView.setObjectName(_fromUtf8("gridLayout_reductionView"))
+        self.graphicsView_reducedData = Qt4MplPlotView(self.tab)
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.graphicsView_reducedData.sizePolicy().hasHeightForWidth())
         self.graphicsView_reducedData.setSizePolicy(sizePolicy)
         self.graphicsView_reducedData.setObjectName(_fromUtf8("graphicsView_reducedData"))
-        self.horizontalLayout_5.addWidget(self.graphicsView_reducedData)
+        self.gridLayout_reductionView.addWidget(self.graphicsView_reducedData, 0, 0, 1, 1)
+        self.horizontalLayout_5.addLayout(self.gridLayout_reductionView)
         self.verticalLayout_3 = QtGui.QVBoxLayout()
         self.verticalLayout_3.setObjectName(_fromUtf8("verticalLayout_3"))
         self.pushButton_prevScan = QtGui.QPushButton(self.tab)
@@ -352,7 +354,7 @@ class Ui_MainWindow(object):
         self.verticalLayout_5.addLayout(self.horizontalLayout_15)
         self.horizontalLayout_11 = QtGui.QHBoxLayout()
         self.horizontalLayout_11.setObjectName(_fromUtf8("horizontalLayout_11"))
-        self.graphicsView_vanPeaks = Qt4MplCanvas(self.tab_4)
+        self.graphicsView_vanPeaks = Qt4MplPlotView(self.tab_4)
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -518,6 +520,8 @@ class Ui_MainWindow(object):
         self.menuHelp.setObjectName(_fromUtf8("menuHelp"))
         self.menuWindow = QtGui.QMenu(self.menubar)
         self.menuWindow.setObjectName(_fromUtf8("menuWindow"))
+        self.menuTool = QtGui.QMenu(self.menubar)
+        self.menuTool.setObjectName(_fromUtf8("menuTool"))
         MainWindow.setMenuBar(self.menubar)
         self.statusbar = QtGui.QStatusBar(MainWindow)
         self.statusbar.setObjectName(_fromUtf8("statusbar"))
@@ -532,13 +536,17 @@ class Ui_MainWindow(object):
         self.actionOpen.setObjectName(_fromUtf8("actionOpen"))
         self.actionOpen_2 = QtGui.QAction(MainWindow)
         self.actionOpen_2.setObjectName(_fromUtf8("actionOpen_2"))
+        self.actionLoad_Setup_File = QtGui.QAction(MainWindow)
+        self.actionLoad_Setup_File.setObjectName(_fromUtf8("actionLoad_Setup_File"))
         self.menuFile.addAction(self.actionNew)
         self.menuFile.addAction(self.actionOpen_2)
         self.menuFile.addSeparator()
         self.menuFile.addAction(self.actionQuit)
         self.menuView.addAction(self.actionLog)
+        self.menuTool.addAction(self.actionLoad_Setup_File)
         self.menubar.addAction(self.menuFile.menuAction())
         self.menubar.addAction(self.menuView.menuAction())
+        self.menubar.addAction(self.menuTool.menuAction())
         self.menubar.addAction(self.menuWindow.menuAction())
         self.menubar.addAction(self.menuHelp.menuAction())
 
@@ -599,6 +607,7 @@ class Ui_MainWindow(object):
         self.menuView.setTitle(_translate("MainWindow", "View", None))
         self.menuHelp.setTitle(_translate("MainWindow", "Help", None))
         self.menuWindow.setTitle(_translate("MainWindow", "Window", None))
+        self.menuTool.setTitle(_translate("MainWindow", "Tool", None))
         self.actionQuit.setText(_translate("MainWindow", "Quit", None))
         self.actionQuit.setShortcut(_translate("MainWindow", "Ctrl+Q", None))
         self.actionLog.setText(_translate("MainWindow", "Log", None))
@@ -608,4 +617,5 @@ class Ui_MainWindow(object):
         self.actionOpen.setText(_translate("MainWindow", "Open", None))
         self.actionOpen_2.setText(_translate("MainWindow", "Open", None))
         self.actionOpen_2.setShortcut(_translate("MainWindow", "Ctrl+O", None))
+        self.actionLoad_Setup_File.setText(_translate("MainWindow", "Load Setup File", None))
 

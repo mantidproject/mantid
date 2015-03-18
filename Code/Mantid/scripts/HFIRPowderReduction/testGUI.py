@@ -4,7 +4,7 @@
 # Next:
 # (-) Add an option/option groups such that the new reduced data can be plot 
 #     on a clean canvas or over plot on the original one;
-# (2) An inner sequence for line-color-marker-style of the plot should be made
+# (-) An inner sequence for line-color-marker-style of the plot should be made
 # (3) A dictionary should be used to manage the history data
 # (4) Shall add button to load 'next' and 'previous' 
 # (5) Make Ge 113 In Config and etc a comboBox for wavelength
@@ -12,6 +12,8 @@
 # (7) Label of the plots
 # (8) Merge runs
 # (9) Proper quit
+# (10) Need a configuration file to load
+# (11) Auto reset the x-y-limit of the plot
 #
 ###############################################################################
 

@@ -1,3 +1,4 @@
+#!/usr/bin/python
 ################################################################################
 # Customize the widigets in a gui python file generated from pyuic4
 ################################################################################
@@ -34,7 +35,7 @@ def main(argv):
             importclass = False
         if line.count('QtGui.QGraphicsView(') == 1:
             # replace QGraphicsView by Qt4MplCanvas
-            line = line.replace('QtGui.QGraphicsView(', 'Qt4MplCanvas(')
+            line = line.replace('QtGui.QGraphicsView(', 'Qt4MplPlotView(')
 
         wbuf += line
 

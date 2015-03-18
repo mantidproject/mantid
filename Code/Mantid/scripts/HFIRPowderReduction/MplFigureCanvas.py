@@ -42,6 +42,89 @@ MplBasicColors = [
         "magenta",
         "yellow",
         "white"]
+        
+        
+class Qt4MplPlotView(QtGui.QWidget):
+    """ A combined graphics view including matplotlib canvas and 
+    a navigation tool bar
+    """
+    def __init__(self, parent):
+        """ Initialization
+        """
+        # instantianize parent
+        QtGui.QWidget.__init__(self, parent)
+        
+        # set up canvas
+        self.canvas = Qt4MplCanvas(self)
+        self.toolbar = MyNavigationToolbar(self.canvas, self.canvas)
+        
+        # set up layout
+        self.vbox = QtGui.QVBoxLayout(self)
+        self.vbox.addWidget(self.canvas)
+        self.vbox.addWidget(self.toolbar)
+        
+        return
+        
+    def addPlot(self, x, y, color=None, label="", xlabel=None, ylabel=None, marker=None, linestyle=None, linewidth=1):
+        """ Add a new plot
+        """
+        self.canvas.addPlot(x, y, color, label, xlabel, ylabel, marker, linestyle, linewidth)
+        
+        return
+
+    def clearAllLines(self):
+        """
+        """
+        self.canvas.clearAllLines()
+        
+    def draw(self):
+        """ Draw to commit the change
+        """
+        return self.canvas.draw()
+
+    def getPlot(self):
+        """
+        """
+        return self.canvas.getPlot()
+        
+    def getLastPlotIndexKey(self):
+        """ Get ...
+        """
+        return self.canvas.getLastPlotIndexKey()
+        
+    def removePlot(self, ikey):
+        """
+        """
+        return self.canvas.removePlot(ikey)
+        
+    def updateLine(self, ikey, vecx, vecy, linestyle=None, linecolor=None, marker=None, markercolor=None):
+        """
+        """
+        return self.canvas.updateLine(ikey, vecx, vecy, linestyle, linecolor, marker, markercolor)
+
+
+    def getLineStyleList(self):
+        """
+        """
+        return MplLineStyles
+
+
+    def getLineMarkerList(self):
+        """
+        """
+        return MplLineMarkers
+
+    def getLineBasicColorList(self):
+        """
+        """
+        return MplBasicColors 
+        
+    def getDefaultColorMarkerComboList(self):
+        """ Get a list of line/marker color and marker style combination 
+        as default to add more and more line to plot
+        """
+        return self.canvas.getDefaultColorMarkerComboList()
+
 
 class Qt4MplCanvas(FigureCanvas):
     """  A customized Qt widget for matplotlib figure.
@@ -93,14 +176,6 @@ class Qt4MplCanvas(FigureCanvas):
 
         # set x-axis and y-axis label
         if xlabel is not None:
-            # FIXME - I cannot find out how to pass r'$math formula$' via method parameters
-            if xlabel.count('theta') == 1: 
-                s = r'$2\theta$'
-            elif xlabel.lower().count('dspace') == 1:
-                s = r'd ($\AA$)'
-            elif xlabel.lower().count('momentum') == 1:
-                s = r'$Q \AA^{-1}$'
-            #print "[DB] Input x-label = %s; set to %s." % (xlabel, s)
             self.axes.set_xlabel(xlabel, fontsize=20)  
         if ylabel is not None:
             self.axes.set_ylabel(ylabel, fontsize=20)
@@ -114,7 +189,7 @@ class Qt4MplCanvas(FigureCanvas):
         else:
             print "Impoooooooooooooooosible!"
         self._lineIndex += 1
-        
+
         # Flush/commit
         self.draw()
 
@@ -186,7 +261,7 @@ class Qt4MplCanvas(FigureCanvas):
         line.set_label(oldlabel)
 
         self.axes.legend()
-        
+
         # commit
         self.draw()
 
