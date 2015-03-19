@@ -340,6 +340,7 @@ void PawleyFunction::setUnitCell(const std::string &unitCellString) {
       strToUnitCell(unitCellString));
 }
 
+/// Transform d value to workspace unit
 double PawleyFunction::getTransformedCenter(double d) const {
   if ((m_dUnit && m_wsUnit) && m_dUnit != m_wsUnit) {
     return UnitConversion::run(*m_dUnit, *m_wsUnit, d, 0, 0, 0,

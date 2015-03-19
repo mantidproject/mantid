@@ -39,6 +39,16 @@ std::vector<V3D> PawleyFit::hklsFromString(const std::string &hklString) const {
   return hkls;
 }
 
+double PawleyFit::getTransformedCenter(const Unit_sptr &unit, double d) const {
+  if (boost::dynamic_pointer_cast<Units::Empty>(unit) ||
+      boost::dynamic_pointer_cast<Units::dSpacing>(unit)) {
+    return d;
+  }
+
+  return UnitConversion::run(*m_dUnit, *unit, d, 0, 0, 0, DeltaEMode::Elastic,
+                             0);
+}
+
 void PawleyFit::addHKLsToFunction(PawleyFunction_sptr &pawleyFn,
                                   const ITableWorkspace_sptr &tableWs,
                                   const Unit_sptr &unit) const {
@@ -48,24 +58,32 @@ void PawleyFit::addHKLsToFunction(PawleyFunction_sptr &pawleyFn,
 
   pawleyFn->clearPeaks();
 
-  for (size_t i = 0; i < tableWs->rowCount(); ++i) {
-    TableRow currentRow = tableWs->getRow(i);
+  try {
+    Column_const_sptr hklColumn = tableWs->getColumn("HKL");
+    Column_const_sptr dColumn = tableWs->getColumn("d");
+    Column_const_sptr intensityColumn = tableWs->getColumn("Intensity");
+    Column_const_sptr fwhmColumn = tableWs->getColumn("FWHM (rel.)");
 
-    try {
-      V3D hkl = getHkl(currentRow.String(0));
+    for (size_t i = 0; i < tableWs->rowCount(); ++i) {
+      try {
+        V3D hkl = getHkl(hklColumn->cell<std::string>(i));
 
-      double d = boost::lexical_cast<double>(currentRow.String(1));
-      double center = UnitConversion::run(*m_dUnit, *unit, d, 0, 0, 0,
-                                          DeltaEMode::Elastic, 0);
-      double fwhm = boost::lexical_cast<double>(currentRow.String(4)) * center;
+        double d = (*dColumn)[i];
+        double center = getTransformedCenter(unit, d);
+        double fwhm = (*fwhmColumn)[i] * center;
+        double height = (*intensityColumn)[i];
 
-      double height = boost::lexical_cast<double>(currentRow.String(3));
-
-      pawleyFn->addPeak(hkl, fwhm, height);
+        pawleyFn->addPeak(hkl, fwhm, height);
+      }
+      catch (...) {
+        // do nothing.
+      }
     }
-    catch (...) {
-      // do nothing.
-    }
+  }
+  catch (std::runtime_error) {
+    // Column does not exist
+    throw std::runtime_error("Can not process table, the following columns are "
+                             "required: HKL, d, Intensity, FWHM (rel.)");
   }
 }
 
