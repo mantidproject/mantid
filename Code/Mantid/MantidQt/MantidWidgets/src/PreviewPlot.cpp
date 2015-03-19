@@ -596,10 +596,11 @@ QwtPlotCurve * PreviewPlot::addCurve(MatrixWorkspace_sptr ws, const size_t specI
   }
 
   // Create the plot data
-  QwtWorkspaceSpectrumData wsData(*ws, static_cast<int>(specIndex), false, false);
+  bool logYScale = getAxisType(QwtPlot::yLeft) == "Logarithmic";
+  QwtWorkspaceSpectrumData wsData(*ws, static_cast<int>(specIndex), logYScale, false);
 
   // Create the new curve
-  QwtPlotCurve *curve = new QwtPlotCurve();
+  QwtPlotCurve * curve = new QwtPlotCurve();
   curve->setData(wsData);
   curve->setPen(curveColour);
   curve->attach(m_uiForm.plot);
