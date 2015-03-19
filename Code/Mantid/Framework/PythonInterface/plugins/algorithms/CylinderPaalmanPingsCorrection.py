@@ -1,8 +1,8 @@
 from mantid.simpleapi import *
 from mantid.api import PythonAlgorithm, AlgorithmFactory, PropertyMode, MatrixWorkspaceProperty, \
-                       WorkspaceGroupProperty
+                       WorkspaceGroupProperty, InstrumentValidator, WorkspaceUnitValidator
 from mantid.kernel import StringListValidator, StringMandatoryValidator, IntBoundedValidator, \
-                          FloatBoundedValidator, Direction, logger
+                          FloatBoundedValidator, Direction, logger, CompositeValidator
 from mantid import config
 import math, os.path, numpy as np
 
@@ -25,12 +25,17 @@ class CylinderPaalmanPingsCorrection(PythonAlgorithm):
     _efixed = 0.0
     _output_ws_name = None
 
+
     def category(self):
         return "Workflow\\MIDAS;PythonAlgorithms;CorrectionFunctions\\AbsorptionCorrections"
 
+
     def PyInit(self):
+        ws_validator = CompositeValidator([WorkspaceUnitValidator('Wavelength'), InstrumentValidator()])
+
         self.declareProperty(MatrixWorkspaceProperty('SampleWorkspace', '',
-                             direction=Direction.Input),
+                             direction=Direction.Input,
+                             validator=ws_validator),
                              doc='Name for the input sample workspace')
 
         self.declareProperty(name='SampleChemicalFormula', defaultValue='',
@@ -39,14 +44,15 @@ class CylinderPaalmanPingsCorrection(PythonAlgorithm):
         self.declareProperty(name='SampleNumberDensity', defaultValue=0.1,
                              validator=FloatBoundedValidator(0.0),
                              doc='Sample number density in atoms/Angstrom3')
-        self.declareProperty(name='SampleInnerRadius', defaultValue='',
-                             doc = 'Sample inner radius')
-        self.declareProperty(name='SampleOuterRadius', defaultValue='',
-                             doc = 'Sample outer radius')
+        self.declareProperty(name='SampleInnerRadius', defaultValue=0.09,
+                             doc='Sample inner radius')
+        self.declareProperty(name='SampleOuterRadius', defaultValue=0.1,
+                             doc='Sample outer radius')
 
         self.declareProperty(MatrixWorkspaceProperty('CanWorkspace', '',
                              direction=Direction.Input,
-                             optional=PropertyMode.Optional),
+                             optional=PropertyMode.Optional,
+                             validator=ws_validator),
                              doc="Name for the input container workspace")
 
         self.declareProperty(name='CanChemicalFormula', defaultValue='',
@@ -54,36 +60,42 @@ class CylinderPaalmanPingsCorrection(PythonAlgorithm):
         self.declareProperty(name='CanNumberDensity', defaultValue=0.1,
                              validator=FloatBoundedValidator(0.0),
                              doc='Container number density in atoms/Angstrom3')
-        self.declareProperty(name='CanOuterRadius', defaultValue='',
-                             doc = 'Can outer radius')
+        self.declareProperty(name='CanOuterRadius', defaultValue=0.15,
+                             doc='Can outer radius')
 
-        self.declareProperty(name='BeamHeight', defaultValue='',
-                             doc = 'Height of the beam at the sample.')
-        self.declareProperty(name='BeamWidth', defaultValue='',
-                             doc = 'Width of the beam at the sample.')
+        self.declareProperty(name='BeamHeight', defaultValue=0.1,
+                             doc='Height of the beam at the sample.')
+        self.declareProperty(name='BeamWidth', defaultValue=0.1,
+                             doc='Width of the beam at the sample.')
+
+        self.declareProperty(name='StepSize', defaultValue=0.1,
+                             doc='Step size for calculation')
 
         self.declareProperty(name='NumberWavelengths', defaultValue=10,
                              validator=IntBoundedValidator(1),
                              doc='Number of wavelengths for calculation')
+        self.declareProperty(name='Interpolate', defaultValue=True,
+                             doc='Interpolate the correction workspaces to match the sample workspace')
+
         self.declareProperty(name='Emode', defaultValue='Elastic',
                              validator=StringListValidator(['Elastic', 'Indirect']),
                              doc='Emode: Elastic or Indirect')
         self.declareProperty(name='Efixed', defaultValue=1.0,
                              doc='Analyser energy')
-        self.declareProperty(name='StepSize', defaultValue='',
-                             doc = 'Step size for calculation')
 
         self.declareProperty(WorkspaceGroupProperty('OutputWorkspace', '',
                              direction=Direction.Output),
                              doc='The output corrections workspace group')
 
+
     def PyExec(self):
 
-        from IndirectImport import is_supported_f2py_platform, import_f2py, unsupported_message
+        from IndirectImport import is_supported_f2py_platform, import_f2py
+
         if is_supported_f2py_platform():
             cylabs = import_f2py("cylabs")
         else:
-            unsupported_message()
+            raise RuntimeError('This algorithm is only available on Windows')
 
         workdir = config['defaultsave.directory']
         self._setup()
@@ -125,8 +137,7 @@ class CylinderPaalmanPingsCorrection(PythonAlgorithm):
         data_acsc = []
         data_acc = []
 
-    #initially set errors to zero
-        eZero = np.zeros(len(self._waves))
+        # initially set errors to zero
         wrk = workdir + self._can_ws_name
         self._get_angles()
         number_angles = len(self._angles)
@@ -159,67 +170,89 @@ class CylinderPaalmanPingsCorrection(PythonAlgorithm):
         workspaces = [ass_ws]
 
         if self._use_can:
-            AddSampleLog(Workspace=ass_ws, LogName='can_filename', LogType='String', LogText=str(self._can_ws_name))
-    	    AddSampleLog(Workspace=ass_ws, LogName='can_outer_radius', LogType='String', LogText=str(self._can_outer_radius))
+            sample_logs['can_filename'] = self._can_ws_name
+            sample_logs['can_outer_radius'] = self._can_outer_radius
 
             assc_ws = self._output_ws_name + '_assc'
             workspaces.append(assc_ws)
             CreateWorkspace(OutputWorkspace=assc_ws, DataX=dataX, DataY=data_assc,
                             NSpec=number_angles, UnitX='Wavelength')
             self._add_sample_logs(assc_ws, sample_logs)
-     	    AddSampleLog(Workspace=assc_ws, LogName='can_filename', LogType='String', LogText=str(self._can_ws_name))
-    	    AddSampleLog(Workspace=assc_ws, LogName='can_outer_radius', LogType='String', LogText=str(self._can_outer_radius))
 
             acsc_ws = self._output_ws_name + '_acsc'
             workspaces.append(acsc_ws)
             CreateWorkspace(OutputWorkspace=acsc_ws, DataX=dataX, DataY=data_acsc,
                             NSpec=number_angles, UnitX='Wavelength')
             self._add_sample_logs(acsc_ws, sample_logs)
-    	    AddSampleLog(Workspace=acsc_ws, LogName='can_filename', LogType='String', LogText=str(self._can_ws_name))
-    	    AddSampleLog(Workspace=acsc_ws, LogName='can_outer_radius', LogType='String', LogText=str(self._can_outer_radius))
 
             acc_ws = self._output_ws_name + '_acc'
             workspaces.append(acc_ws)
             CreateWorkspace(OutputWorkspace=acc_ws, DataX=dataX, DataY=data_acc,
                             NSpec=number_angles, UnitX='Wavelength')
             self._add_sample_logs(acc_ws, sample_logs)
-    	    AddSampleLog(Workspace=acc_ws, LogName='can_filename', LogType='String', LogText=str(self._can_ws_name))
-    	    AddSampleLog(Workspace=acc_ws, LogName='can_outer_radius', LogType='String', LogText=str(self._can_outer_radius))
 
-        self._interpolate_result(workspaces)
+        if self._interpolate:
+            self._interpolate_corrections(workspaces)
+
+        try:
+            self. _copy_detector_table(workspaces)
+        except RuntimeError:
+            logger.warning('Cannot copy spectra mapping. Check input workspace instrument.')
+
         GroupWorkspaces(InputWorkspaces=','.join(workspaces), OutputWorkspace=self._output_ws_name)
         self.setPropertyValue('OutputWorkspace', self._output_ws_name)
 
+
+    def validateInputs(self):
+        self._setup()
+        issues = dict()
+
+        # Ensure there are enough steps
+        number_steps = int((self._sample_outer_radius - self._sample_inner_radius) / self._step_size)
+        if number_steps < 20:
+            issues['StepSize'] = 'Number of steps (%d) should be >= 20' % number_steps
+
+        return issues
+
+
     def _setup(self):
+        """
+        Get algorithm properties.
+        """
+
         self._sample_ws_name = self.getPropertyValue('SampleWorkspace')
+
         self._sample_chemical_formula = self.getPropertyValue('SampleChemicalFormula')
         self._sample_number_density = self.getProperty('SampleNumberDensity').value
-        self._sample_inner_radius = float(self.getProperty('SampleInnerRadius').value)
-        self._sample_outer_radius = float(self.getProperty('SampleOuterRadius').value)
+        self._sample_inner_radius = self.getProperty('SampleInnerRadius').value
+        self._sample_outer_radius = self.getProperty('SampleOuterRadius').value
 
         self._can_ws_name = self.getPropertyValue('CanWorkspace')
         self._use_can = self._can_ws_name != ''
+
         self._can_chemical_formula = self.getPropertyValue('CanChemicalFormula')
         self._can_number_density = self.getProperty('CanNumberDensity').value
         self._can_outer_radius = self.getProperty('CanOuterRadius').value
 
-        self._step_size = float(self.getProperty('StepSize').value)
-        if self._step_size < 1e-5:
-            raise ValueError('Step size is zero')
-
-        number_steps = int((self._sample_outer_radius - self._sample_inner_radius) / self._step_size)
-        if number_steps < 20:
-            raise ValueError('Number of steps ( ' + str(number_steps) + ' ) should be >= 20')
+        self._step_size = self.getProperty('StepSize').value
 
         self._beam_height = self.getProperty('BeamHeight').value
         self._beam_width = self.getProperty('BeamWidth').value
 
         self._number_wavelengths = self.getProperty('NumberWavelengths').value
+        self._interpolate = self.getProperty('Interpolate').value
+
         self._emode = self.getPropertyValue('Emode')
         self._efixed = self.getProperty('Efixed').value
+
         self._output_ws_name = self.getPropertyValue('OutputWorkspace')
 
+
     def _get_angles(self):
+        """
+        Populates the list of workspace angles.
+        """
+
         num_hist = mtd[self._sample_ws_name].getNumberHistograms()
         source_pos = mtd[self._sample_ws_name].getInstrument().getSource().getPos()
         sample_pos = mtd[self._sample_ws_name].getInstrument().getSample().getPos()
@@ -229,6 +262,7 @@ class CylinderPaalmanPingsCorrection(PythonAlgorithm):
             detector = mtd[self._sample_ws_name].getDetector(index)
             two_theta = detector.getTwoTheta(sample_pos, beam_pos) * 180.0 / math.pi  # calc angle
             self._angles.append(two_theta)
+
 
     def _wave_range(self):
         wave_range = '__WaveRange'
@@ -252,14 +286,38 @@ class CylinderPaalmanPingsCorrection(PythonAlgorithm):
         DeleteWorkspace(wave_range)
 
 
-    def _interpolate_result(self, workspaces):
-        instrument = mtd[self._sample_ws_name].getInstrument().getName()
+    def _interpolate_corrections(self, workspaces):
+        """
+        Performs interpolation on the correction workspaces such that the number of bins
+        matches that of the input sample workspace.
+
+        @param workspaces List of correction workspaces to interpolate
+        """
+
         for ws in workspaces:
-            SplineInterpolation(WorkspaceToMatch=self._sample_ws_name, WorkspaceToInterpolate=ws,
-                                OutputWorkspace=ws, OutputWorkspaceDeriv='', DerivOrder=2)
-            LoadInstrument(Workspace=ws, InstrumentName=instrument)
-            CopyDetectorMapping(WorkspaceToMatch=self._sample_ws_name, WorkspaceToRemap=ws,
+            SplineInterpolation(WorkspaceToMatch=self._sample_ws_name,
+                                WorkspaceToInterpolate=ws,
+                                OutputWorkspace=ws,
+                                OutputWorkspaceDeriv='')
+
+
+    def _copy_detector_table(self, workspaces):
+        """
+        Copy the detector table from the sample workspaces to the correction workspaces.
+
+        @param workspaces List of correction workspaces
+        """
+
+        instrument = mtd[self._sample_ws_name].getInstrument().getName()
+
+        for ws in workspaces:
+            LoadInstrument(Workspace=ws,
+                           InstrumentName=instrument)
+
+            CopyDetectorMapping(WorkspaceToMatch=self._sample_ws_name,
+                                WorkspaceToRemap=ws,
                                 IndexBySpectrumNumber=True)
+
 
     def _add_sample_logs(self, ws, sample_logs):
         """
@@ -281,6 +339,6 @@ class CylinderPaalmanPingsCorrection(PythonAlgorithm):
 
             AddSampleLog(Workspace=ws, LogName=key, LogType=log_type, LogText=str(value))
 
+
 # Register algorithm with Mantid
 AlgorithmFactory.subscribe(CylinderPaalmanPingsCorrection)
-#
