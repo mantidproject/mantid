@@ -51,7 +51,7 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
                              doc='Folds multiple framed data sets into a single workspace.')
 
         # Spectra grouping options
-        self.declareProperty(name='GroupingMethod', defaultValue='Individual',
+        self.declareProperty(name='GroupingMethod', defaultValue='IPF',
                              validator=StringListValidator(['Individual', 'All', 'File', 'Workspace', 'IPF']),
                              doc='Method used to group spectra.')
         self.declareProperty(WorkspaceProperty('GroupingWorkspace', '',
