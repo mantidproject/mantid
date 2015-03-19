@@ -66,6 +66,9 @@ protected:
   API::ITableWorkspace_sptr
   getPeakParametersFromFunction(const PawleyFunction_sptr &pawleyFn) const;
 
+  API::IFunction_sptr
+  getCompositeFunction(const PawleyFunction_sptr &pawleyFn) const;
+
   void init();
   void exec();
 

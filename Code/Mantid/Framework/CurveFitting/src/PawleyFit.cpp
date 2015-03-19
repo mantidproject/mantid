@@ -162,6 +162,24 @@ ITableWorkspace_sptr PawleyFit::getPeakParametersFromFunction(
   return peakParameterTable;
 }
 
+IFunction_sptr
+PawleyFit::getCompositeFunction(const PawleyFunction_sptr &pawleyFn) const {
+  CompositeFunction_sptr composite = boost::make_shared<CompositeFunction>();
+  composite->addFunction(pawleyFn);
+
+  bool enableChebyshev = getProperty("EnableChebyshevBackground");
+  if (enableChebyshev) {
+    int degree = getProperty("ChebyshevBackgroundDegree");
+    IFunction_sptr chebyshev =
+        FunctionFactory::Instance().createFunction("Chebyshev");
+    chebyshev->setAttributeValue("n", degree);
+
+    composite->addFunction(chebyshev);
+  }
+
+  return composite;
+}
+
 void PawleyFit::init() {
   declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace", "",
                                                          Direction::Input),
@@ -213,6 +231,14 @@ void PawleyFit::init() {
 
   declareProperty("PeakProfileFunction", "Gaussian", peakFunctionValidator,
                   "Profile function that is used for each peak.");
+
+  declareProperty("EnableChebyshevBackground", false,
+                  "If checked, a Chebyshev "
+                  "polynomial will be added "
+                  "to model the background.");
+
+  declareProperty("ChebyshevBackgroundDegree", 0,
+                  "Degree of the Chebyshev polynomial, if used as background.");
 
   declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace", "",
                                                          Direction::Output),
@@ -289,7 +315,7 @@ void PawleyFit::exec() {
 
   // Generate Fit-algorithm with required properties.
   Algorithm_sptr fit = createChildAlgorithm("Fit", -1, -1, true);
-  fit->setProperty("Function", boost::static_pointer_cast<IFunction>(pawleyFn));
+  fit->setProperty("Function", getCompositeFunction(pawleyFn));
   fit->setProperty("InputWorkspace",
                    boost::const_pointer_cast<MatrixWorkspace>(ws));
   fit->setProperty("WorkspaceIndex", wsIndex);
