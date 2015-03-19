@@ -39,7 +39,9 @@ namespace CustomInterfaces
     // Check time limits
     if (auto timeRange = m_view->timeRange()) {
 
-      if (timeRange->first >= timeRange->second){
+      double tmin = timeRange->first;
+      double tmax = timeRange->second;
+      if ( tmin >= tmax ){
         m_view->restoreCursor();
         m_view->displayError("Invalid time interval");
         return;
