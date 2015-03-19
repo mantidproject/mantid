@@ -1,9 +1,9 @@
 #pylint: disable=no-init,invalid-name
 from mantid.simpleapi import *
 from mantid.api import PythonAlgorithm, AlgorithmFactory, PropertyMode, MatrixWorkspaceProperty, \
-                       WorkspaceGroupProperty
+                       WorkspaceGroupProperty, InstrumentValidator, WorkspaceUnitValidator
 from mantid.kernel import StringListValidator, StringMandatoryValidator, IntBoundedValidator, \
-                          FloatBoundedValidator, Direction, logger
+                          FloatBoundedValidator, Direction, logger, CompositeValidator
 import math, numpy as np
 
 
@@ -39,8 +39,11 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
 
 
     def PyInit(self):
+        ws_validator = CompositeValidator([WorkspaceUnitValidator('Wavelength'), InstrumentValidator()])
+
         self.declareProperty(MatrixWorkspaceProperty('SampleWorkspace', '',
-                             direction=Direction.Input),
+                             direction=Direction.Input,
+                             validator=ws_validator),
                              doc='Name for the input sample workspace')
 
         self.declareProperty(name='SampleChemicalFormula', defaultValue='',
@@ -57,7 +60,8 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
 
         self.declareProperty(MatrixWorkspaceProperty('CanWorkspace', '',
                              direction=Direction.Input,
-                             optional=PropertyMode.Optional),
+                             optional=PropertyMode.Optional,
+                             validator=ws_validator),
                              doc="Name for the input container workspace")
 
         self.declareProperty(name='CanChemicalFormula', defaultValue='',
