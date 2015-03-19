@@ -204,8 +204,8 @@ class DirectEnergyConversion(object):
                 # data file.  SNS or 1 to 1 maps may probably avoid this
                 # stuff and can load masks directly
                 white_data = white.get_ws_clone('white_ws_clone')
-
-                diag_mask = LoadMask(Instrument=self.instr_name,InputFile=self.hard_mask_file,\
+                idf_file = api.ExperimentInfo.getInstrumentFilename(self.instr_name)
+                diag_mask = LoadMask(Instrument=idf_file,InputFile=self.hard_mask_file,\
                                  OutputWorkspace='hard_mask_ws')
                 MaskDetectors(Workspace=white_data, MaskedWorkspace=diag_mask)
                 white.add_masked_ws(white_data)
