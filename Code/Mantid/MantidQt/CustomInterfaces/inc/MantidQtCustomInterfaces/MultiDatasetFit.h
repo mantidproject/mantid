@@ -9,6 +9,8 @@
 #include "ui_AddWorkspace.h"
 #include "ui_EditLocalParameterDialog.h"
 
+#include <QStyledItemDelegate>
+
 #include <boost/shared_ptr.hpp>
 #include <QMap>
 #include <vector>
@@ -229,6 +231,36 @@ private:
 };
 
 /*==========================================================================================*/
+class LocalParameterEditor: public QWidget
+{
+  Q_OBJECT
+public:
+  LocalParameterEditor(QWidget *parent = NULL);
+  ~LocalParameterEditor();
+signals:
+  void setAllValues(double);
+private slots:
+  void buttonPressed();
+private:
+  QLineEdit* m_editor;
+};
+
+class LocalParameterItemDelegate: public QStyledItemDelegate
+{
+  Q_OBJECT
+public:
+  LocalParameterItemDelegate(QObject *parent = NULL);
+  QWidget* createEditor(QWidget * parent, const QStyleOptionViewItem & option, const QModelIndex & index) const;
+  void setEditorData(QWidget * editor, const QModelIndex & index) const;
+  void setModelData(QWidget * editor, QAbstractItemModel * model, const QModelIndex & index) const;
+signals:
+  void setAllValues(double);
+private:
+  bool eventFilter(QObject * obj, QEvent * ev);
+  mutable LocalParameterEditor* m_currentEditor;
+};
+
+/*==========================================================================================*/
 /**
   * A dialog for displaying and editing values of local parameters.
   */
@@ -238,9 +270,8 @@ class EditLocalParameterDialog: public QDialog
 public:
   EditLocalParameterDialog(MultiDatasetFit *parent, const QString &parName);
 private slots:
-  //void accept();
-  //void reject();
   void valueChanged(int,int);
+  void setAllValues(double);
 private:
   MultiDatasetFit *owner() const {return static_cast<MultiDatasetFit*>(parent());}
   Ui::EditLocalParameterDialog m_uiForm;

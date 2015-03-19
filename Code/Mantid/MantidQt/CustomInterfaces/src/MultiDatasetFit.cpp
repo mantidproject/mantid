@@ -652,6 +652,74 @@ void PlotController::updateRange(int index)
 /*                               EditLocalParameterDialog                                   */
 /*==========================================================================================*/
 
+LocalParameterEditor::LocalParameterEditor(QWidget *parent):QWidget(parent)
+{
+  auto layout = new QHBoxLayout(this);
+  layout->setMargin(0);
+  layout->setSpacing(0);
+  layout->setContentsMargins(0,0,0,0);
+
+  m_editor = new QLineEdit(parent);
+  m_editor->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Expanding);
+  auto button = new QPushButton("All");
+  button->setSizePolicy(QSizePolicy::Minimum,QSizePolicy::Expanding);
+  this->setFocusPolicy(Qt::NoFocus);
+  layout->addWidget(m_editor);
+  layout->addWidget(button);
+  layout->setStretch(0,1);
+  layout->setStretch(1,0);
+  this->setFocusProxy(m_editor);
+  this->setFocusPolicy(Qt::StrongFocus);
+  connect(button,SIGNAL(clicked()),this,SLOT(buttonPressed()));
+}
+
+LocalParameterEditor::~LocalParameterEditor()
+{
+}
+
+void LocalParameterEditor::buttonPressed()
+{
+  double value = m_editor->text().toDouble();
+  emit setAllValues(value);
+}
+
+/*==========================================================================================*/
+LocalParameterItemDelegate::LocalParameterItemDelegate(QObject *parent):
+  QStyledItemDelegate(parent),
+  m_currentEditor(NULL)
+{
+}
+
+QWidget* LocalParameterItemDelegate::createEditor(QWidget * parent, const QStyleOptionViewItem & option, const QModelIndex & index) const
+{
+  m_currentEditor = new LocalParameterEditor(parent);
+  connect(m_currentEditor,SIGNAL(setAllValues(double)),this,SIGNAL(setAllValues(double)));
+  m_currentEditor->installEventFilter(const_cast<LocalParameterItemDelegate*>(this));
+ return m_currentEditor;
+}
+
+void LocalParameterItemDelegate::setEditorData(QWidget * editor, const QModelIndex & index) const
+{
+  QStyledItemDelegate::setEditorData(editor->layout()->itemAt(0)->widget(), index);
+}
+
+void LocalParameterItemDelegate::setModelData(QWidget * editor, QAbstractItemModel * model, const QModelIndex & index) const
+{
+  QStyledItemDelegate::setModelData(editor->layout()->itemAt(0)->widget(), model, index);
+}
+
+bool LocalParameterItemDelegate::eventFilter(QObject * obj, QEvent * ev)
+{
+  if ( ev->type() == QEvent::WindowDeactivate )
+  {
+    emit commitData(m_currentEditor);
+    return true;
+  }
+  return QStyledItemDelegate::eventFilter(obj,ev);
+}
+
+/*==========================================================================================*/
+
 EditLocalParameterDialog::EditLocalParameterDialog(MultiDatasetFit *parent, const QString &parName):
   QDialog(parent),m_parName(parName)
 {
@@ -671,6 +739,9 @@ EditLocalParameterDialog::EditLocalParameterDialog(MultiDatasetFit *parent, cons
     cell = new QTableWidgetItem( QString::number(multifit->getLocalParameterValue(parName,i)) );
     m_uiForm.tableWidget->setItem( i, 1, cell );
   }
+  auto deleg = new LocalParameterItemDelegate(this);
+  m_uiForm.tableWidget->setItemDelegateForColumn(1,deleg);
+  connect(deleg,SIGNAL(setAllValues(double)),this,SLOT(setAllValues(double)));
 }
 
 /**
@@ -693,6 +764,16 @@ void EditLocalParameterDialog::valueChanged(int row, int col)
       // restore old value
       m_uiForm.tableWidget->item(row,col)->setText( QString::number(owner()->getLocalParameterValue(m_parName,row)) );
     }
+  }
+}
+
+void EditLocalParameterDialog::setAllValues(double value)
+{
+  int n = owner()->getNumberOfSpectra();
+  for(int i = 0; i < n; ++i)
+  {
+    owner()->setLocalParameterValue(m_parName,i,value);
+    m_uiForm.tableWidget->item(i,1)->setText( QString::number(value) );
   }
 }
 
