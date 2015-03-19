@@ -124,15 +124,16 @@ set_property( TARGET VatesSimpleGuiViewWidgets PROPERTY FOLDER MantidVatesSimple
 
 target_link_libraries( VatesSimpleGuiViewWidgets
 VatesSimpleGuiQtWidgets
-pqApplicationComponents
-pqComponents
-${QT_LIBRARIES}
 MantidQtAPI
 VatesAPI
 ${MANTID_SUBPROJECT_LIBS}
 MantidQtSliceViewer
 MantidQtFactory
 MantidWidgets
+SYSTEM
+pqApplicationComponents
+pqComponents
+${QT_LIBRARIES}
 )
 
 # Create test file projects

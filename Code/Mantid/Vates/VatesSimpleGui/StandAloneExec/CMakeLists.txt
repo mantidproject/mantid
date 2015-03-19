@@ -39,11 +39,12 @@ set( TEST_SUITES
 add_executable( ${PROJECT_NAME} ${INCLUDE_FILES} ${SOURCE_FILES} ${MOC_SRCS} )
 
 target_link_libraries( ${PROJECT_NAME}
+VatesSimpleGuiQtWidgets
+VatesSimpleGuiViewWidgets
+SYSTEM
 pqCore pqComponents pqApplicationComponents
 ${QT_LIBRARIES}
 ${MANTID_SUBPROJECT_LIBS}
-VatesSimpleGuiQtWidgets
-VatesSimpleGuiViewWidgets
 )
 
 if( SQUISH_FOUND )
