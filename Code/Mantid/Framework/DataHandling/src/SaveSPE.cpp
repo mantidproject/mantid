@@ -25,21 +25,22 @@ DECLARE_ALGORITHM(SaveSPE)
 *  @throws std::runtime_error :: throws when there is a problem writing to disk,
 * usually disk space or permissions based
 */
-    
-#if __clang__
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wgnu-zero-variadic-macro-arguments"
-#endif
-    
-#define FPRINTF_WITH_EXCEPTION(stream, format, ...)                            \
-  if (fprintf(stream, format, ##__VA_ARGS__) <= 0) {                           \
-    throw std::runtime_error(                                                  \
-        "Error writing to file. Check folder permissions and disk space.");    \
+
+namespace {
+
+template <typename... vargs>
+void FPRINTF_WITH_EXCEPTION(FILE *stream, const char *format, vargs... args) {
+  if (fprintf(stream, format, args...) <= 0) {
+    throw std::runtime_error(
+        "Error writing to file. Check folder permissions and disk space.");
   }
-    
-#if __clang__
-#pragma clang diagnostic pop
-#endif
+}
+
+// special case needed for case with only two arguments.
+void FPRINTF_WITH_EXCEPTION(FILE *stream, const char *format) {
+  FPRINTF_WITH_EXCEPTION(stream, format, "");
+}
+}
 
 using namespace Kernel;
 using namespace API;
