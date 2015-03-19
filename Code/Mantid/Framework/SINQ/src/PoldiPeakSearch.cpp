@@ -199,6 +199,26 @@ PoldiPeakSearch::mapPeakPositionsToCorrelationData(
   return transformedIndices;
 }
 
+/// Converts the value-parameter to d-spacing. Assumes unit to be Q if empty.
+double PoldiPeakSearch::getTransformedCenter(double value,
+                                             const Unit_sptr &unit) const {
+  if (boost::dynamic_pointer_cast<Units::dSpacing>(unit)) {
+    return value;
+  }
+
+  // This is required to preserve default behavior which assumes Q.
+  Unit_sptr transformUnit = unit;
+
+  if (!unit || boost::dynamic_pointer_cast<Units::Empty>(unit)) {
+    transformUnit = UnitFactory::Instance().create("MomentumTransfer");
+  }
+
+  // Transform value to d-spacing.
+  Unit_sptr dUnit = UnitFactory::Instance().create("dSpacing");
+  return UnitConversion::run((*transformUnit), (*dUnit), value, 0, 0, 0,
+                             DeltaEMode::Elastic, 0.0);
+}
+
 /** Creates PoldiPeak-objects from peak position iterators
   *
   * In this method, PoldiPeak objects are created from the raw peak position
@@ -225,14 +245,7 @@ PoldiPeakSearch::getPeaks(const MantidVec::const_iterator &baseListStart,
        peak != peakPositions.end(); ++peak) {
     size_t index = std::distance(baseListStart, *peak);
 
-    double xDataD = 0.0;
-    if (boost::dynamic_pointer_cast<Units::dSpacing>(unit)) {
-      xDataD = xData[index];
-    } else {
-      Unit_sptr dUnit = UnitFactory::Instance().create("dSpacing");
-      xDataD = UnitConversion::run((*unit), (*dUnit), xData[index], 0, 0, 0,
-                                   DeltaEMode::Elastic, 0.0);
-    }
+    double xDataD = getTransformedCenter(xData[index], unit);
 
     double fwhmEstimate =
         getFWHMEstimate(baseListStart, baseListEnd, *peak, xData);

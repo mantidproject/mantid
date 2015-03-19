@@ -94,11 +94,15 @@ protected:
 
   double
   minimumPeakHeightFromBackground(UncertainValue backgroundWithSigma) const;
+
+  double getTransformedCenter(double value,
+                              const Kernel::Unit_sptr &unit) const;
   std::vector<PoldiPeak_sptr>
   getPeaks(const MantidVec::const_iterator &baseListStart,
            const MantidVec::const_iterator &baseListEnd,
            std::list<MantidVec::const_iterator> peakPositions,
            const MantidVec &xData, const Kernel::Unit_sptr &unit) const;
+
   double getFWHMEstimate(const MantidVec::const_iterator &baseListStart,
                          const MantidVec::const_iterator &baseListEnd,
                          MantidVec::const_iterator peakPosition,
