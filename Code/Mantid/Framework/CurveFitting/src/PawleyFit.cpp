@@ -20,26 +20,16 @@ using namespace Geometry;
 
 DECLARE_ALGORITHM(PawleyFit);
 
+/// Default constructor
 PawleyFit::PawleyFit() : Algorithm(), m_dUnit() {}
 
+/// Returns the summary
 const std::string PawleyFit::summary() const {
   return "This algorithm performs a Pawley-fit on the supplied workspace.";
 }
 
-std::vector<V3D> PawleyFit::hklsFromString(const std::string &hklString) const {
-  std::vector<std::string> hklStrings;
-  boost::split(hklStrings, hklString, boost::is_any_of(";"));
-
-  std::vector<V3D> hkls(hklStrings.size());
-  for (size_t i = 0; i < hkls.size(); ++i) {
-    std::istringstream strm(hklStrings[i]);
-    strm >> hkls[i];
-  }
-
-  return hkls;
-}
-
-double PawleyFit::getTransformedCenter(const Unit_sptr &unit, double d) const {
+/// Transforms the specified value from d-spacing to the supplied unit.
+double PawleyFit::getTransformedCenter(double d, const Unit_sptr &unit) const {
   if (boost::dynamic_pointer_cast<Units::Empty>(unit) ||
       boost::dynamic_pointer_cast<Units::dSpacing>(unit)) {
     return d;
@@ -49,9 +39,32 @@ double PawleyFit::getTransformedCenter(const Unit_sptr &unit, double d) const {
                              0);
 }
 
+/**
+ * Add HKLs from a TableWorkspace to the PawleyFunction.
+ *
+ * This method tries to extract reflections from the specified TableWorkspace.
+ * For the extraction to work properly it needs to have columns with the
+ * following labels:
+ *  HKL, d, Intensity, FWHM (rel.)
+ *
+ * The latter three must be convertible to double, otherwise the there will be
+ * no peaks in the function. The value of d is converted to the unit of the
+ * workspace to obtain an absolute FWHM-value, since FWHM (rel.) is defined
+ * as FWHM / center.
+ *
+ * The HKLs can either be a column of V3D or a string column that contains 3
+ * numbers separated by space, comma, semi-colon, or [ ]
+ *
+ * @param pawleyFn :: PawleyFunction which the HKLs should be added to.
+ * @param tableWs :: TableWorkspace that contains the reflection information.
+ * @param unit :: Unit of the workspace.
+ * @param startX :: Lowest allowed x-value for reflection position.
+ * @param endX :: Highest allowed x-value for reflection position.
+ */
 void PawleyFit::addHKLsToFunction(PawleyFunction_sptr &pawleyFn,
                                   const ITableWorkspace_sptr &tableWs,
-                                  const Unit_sptr &unit) const {
+                                  const Unit_sptr &unit, double startX,
+                                  double endX) const {
   if (!tableWs || !pawleyFn) {
     throw std::invalid_argument("Can only process non-null function & table.");
   }
@@ -66,16 +79,18 @@ void PawleyFit::addHKLsToFunction(PawleyFunction_sptr &pawleyFn,
 
     for (size_t i = 0; i < tableWs->rowCount(); ++i) {
       try {
-        V3D hkl = getHkl(hklColumn->cell<std::string>(i));
+        V3D hkl = getHKLFromColumn(i, hklColumn);
 
         double d = (*dColumn)[i];
-        double center = getTransformedCenter(unit, d);
+        double center = getTransformedCenter(d, unit);
         double fwhm = (*fwhmColumn)[i] * center;
         double height = (*intensityColumn)[i];
 
-        pawleyFn->addPeak(hkl, fwhm, height);
+        if (center > startX && center < endX) {
+          pawleyFn->addPeak(hkl, fwhm, height);
+        }
       }
-      catch (...) {
+      catch (std::bad_alloc) {
         // do nothing.
       }
     }
@@ -87,9 +102,23 @@ void PawleyFit::addHKLsToFunction(PawleyFunction_sptr &pawleyFn,
   }
 }
 
+/// Tries to extract Miller indices as V3D from column.
+V3D PawleyFit::getHKLFromColumn(size_t i,
+                                const Column_const_sptr &hklColumn) const {
+  if (hklColumn->type() == "V3D") {
+    return hklColumn->cell<V3D>(i);
+  }
+
+  return getHkl(hklColumn->cell<std::string>(i));
+}
+
+/// Try to extract a V3D from the given string with different separators.
 V3D PawleyFit::getHkl(const std::string &hklString) const {
+  auto delimiters = boost::is_any_of(" ,[];");
+
+  std::string workingCopy = boost::trim_copy_if(hklString, delimiters);
   std::vector<std::string> indicesStr;
-  boost::split(indicesStr, hklString, boost::is_any_of(" "));
+  boost::split(indicesStr, workingCopy, delimiters);
 
   if (indicesStr.size() != 3) {
     throw std::invalid_argument("Input string cannot be parsed as HKL.");
@@ -103,6 +132,8 @@ V3D PawleyFit::getHkl(const std::string &hklString) const {
   return hkl;
 }
 
+/// Creates a table containing the cell parameters stored in the supplied
+/// function.
 ITableWorkspace_sptr
 PawleyFit::getLatticeFromFunction(const PawleyFunction_sptr &pawleyFn) const {
   if (!pawleyFn) {
@@ -129,6 +160,7 @@ PawleyFit::getLatticeFromFunction(const PawleyFunction_sptr &pawleyFn) const {
   return latticeParameterTable;
 }
 
+/// Extracts all profile parameters from the supplied function.
 ITableWorkspace_sptr PawleyFit::getPeakParametersFromFunction(
     const PawleyFunction_sptr &pawleyFn) const {
   if (!pawleyFn) {
@@ -162,6 +194,8 @@ ITableWorkspace_sptr PawleyFit::getPeakParametersFromFunction(
   return peakParameterTable;
 }
 
+/// Returns a composite function consisting of the Pawley function and Chebyshev
+/// background if enabled in the algorithm.
 IFunction_sptr
 PawleyFit::getCompositeFunction(const PawleyFunction_sptr &pawleyFn) const {
   CompositeFunction_sptr composite = boost::make_shared<CompositeFunction>();
@@ -180,6 +214,7 @@ PawleyFit::getCompositeFunction(const PawleyFunction_sptr &pawleyFn) const {
   return composite;
 }
 
+/// Initialization of properties.
 void PawleyFit::init() {
   declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace", "",
                                                          Direction::Input),
@@ -189,8 +224,8 @@ void PawleyFit::init() {
   declareProperty("WorkspaceIndex", 0,
                   "Spectrum on which the fit should be performed.");
 
-  declareProperty("StartX", 0, "Lower border of fitted data range.");
-  declareProperty("EndX", 0, "Upper border of fitted data range.");
+  declareProperty("StartX", 0.0, "Lower border of fitted data range.");
+  declareProperty("EndX", 0.0, "Upper border of fitted data range.");
 
   std::vector<std::string> crystalSystems;
   crystalSystems.push_back("Cubic");
@@ -212,13 +247,8 @@ void PawleyFit::init() {
                   "Specification of initial unit cell, given as 'a, b, c, "
                   "alpha, beta, gamma'.");
 
-  declareProperty("MillerIndices", "[1,0,0];[1,1,0]",
-                  "Semi-colon separated list of Miller indices given in the "
-                  "format '[h,k,l]'.");
-
   declareProperty(
-      new WorkspaceProperty<ITableWorkspace>("PeakTable", "", Direction::Input,
-                                             PropertyMode::Optional),
+      new WorkspaceProperty<ITableWorkspace>("PeakTable", "", Direction::Input),
       "Table with peak information. Can be used instead of "
       "supplying a list of indices for better starting parameters.");
 
@@ -258,6 +288,7 @@ void PawleyFit::init() {
   m_dUnit = UnitFactory::Instance().create("dSpacing");
 }
 
+/// Execution of algorithm.
 void PawleyFit::exec() {
   // Setup PawleyFunction with cell from input parameters
   PawleyFunction_sptr pawleyFn = boost::dynamic_pointer_cast<PawleyFunction>(
@@ -270,29 +301,6 @@ void PawleyFit::exec() {
   // Get the input workspace with the data
   MatrixWorkspace_const_sptr ws = getProperty("InputWorkspace");
   int wsIndex = getProperty("WorkspaceIndex");
-
-  // and also the peak table, if there is one
-  Property *peakTableProperty = getPointerToProperty("PeakTable");
-  if (!peakTableProperty->isDefault()) {
-    ITableWorkspace_sptr peakTable = getProperty("PeakTable");
-
-    Axis *xAxis = ws->getAxis(0);
-    Unit_sptr xUnit = xAxis->unit();
-
-    addHKLsToFunction(pawleyFn, peakTable, xUnit);
-  } else {
-    std::vector<V3D> hkls = hklsFromString(getProperty("MillerIndices"));
-
-    const MantidVec &data = ws->readY(static_cast<size_t>(wsIndex));
-    pawleyFn->setPeaks(hkls, 0.005,
-                       *(std::max_element(data.begin(), data.end())));
-  }
-
-  // Determine if zero-shift should be refined
-  bool refineZeroShift = getProperty("RefineZeroShift");
-  if (!refineZeroShift) {
-    pawleyFn->fix(pawleyFn->parameterIndex("f0.ZeroShift"));
-  }
 
   // Get x-range start and end values, depending on user input
   const MantidVec &xData = ws->readX(static_cast<size_t>(wsIndex));
@@ -308,7 +316,19 @@ void PawleyFit::exec() {
   Property *endXProperty = getPointerToProperty("EndX");
   if (!endXProperty->isDefault()) {
     double endXInput = getProperty("EndX");
-    endX = std::max(endX, endXInput);
+    endX = std::min(endX, endXInput);
+  }
+
+  // Get HKLs from TableWorkspace
+  ITableWorkspace_sptr peakTable = getProperty("PeakTable");
+  Axis *xAxis = ws->getAxis(0);
+  Unit_sptr xUnit = xAxis->unit();
+  addHKLsToFunction(pawleyFn, peakTable, xUnit, startX, endX);
+
+  // Determine if zero-shift should be refined
+  bool refineZeroShift = getProperty("RefineZeroShift");
+  if (!refineZeroShift) {
+    pawleyFn->fix(pawleyFn->parameterIndex("f0.ZeroShift"));
   }
 
   pawleyFn->setMatrixWorkspace(ws, static_cast<size_t>(wsIndex), startX, endX);
@@ -318,8 +338,11 @@ void PawleyFit::exec() {
   fit->setProperty("Function", getCompositeFunction(pawleyFn));
   fit->setProperty("InputWorkspace",
                    boost::const_pointer_cast<MatrixWorkspace>(ws));
+  fit->setProperty("StartX", startX);
+  fit->setProperty("EndX", endX);
   fit->setProperty("WorkspaceIndex", wsIndex);
   fit->setProperty("CreateOutput", true);
+
   fit->execute();
 
   // Create output

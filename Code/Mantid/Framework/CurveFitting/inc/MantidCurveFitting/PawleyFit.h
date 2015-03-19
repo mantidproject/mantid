@@ -51,14 +51,16 @@ public:
   const std::string summary() const;
   const std::string category() const { return "Diffraction"; }
 
-  double getTransformedCenter(const Kernel::Unit_sptr &unit, double d) const;
-
 protected:
-  std::vector<Kernel::V3D> hklsFromString(const std::string &hklString) const;
+  double getTransformedCenter(double d, const Kernel::Unit_sptr &unit) const;
+
   void addHKLsToFunction(PawleyFunction_sptr &pawleyFn,
                          const API::ITableWorkspace_sptr &tableWs,
-                         const Kernel::Unit_sptr &unit) const;
+                         const Kernel::Unit_sptr &unit, double startX,
+                         double endX) const;
 
+  Kernel::V3D getHKLFromColumn(size_t i,
+                               const API::Column_const_sptr &hklColumn) const;
   Kernel::V3D getHkl(const std::string &hklString) const;
 
   API::ITableWorkspace_sptr
