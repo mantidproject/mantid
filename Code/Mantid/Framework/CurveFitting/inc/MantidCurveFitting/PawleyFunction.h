@@ -143,6 +143,8 @@ public:
   PawleyParameterFunction_sptr getPawleyParameterFunction() const;
 
 protected:
+  double getTransformedCenter(double d) const;
+
   void init();
   void beforeDecoratedFunctionSet(const API::IFunction_sptr &fn);
 

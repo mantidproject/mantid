@@ -275,15 +275,19 @@ void PawleyFunction::setMatrixWorkspace(
     boost::shared_ptr<const MatrixWorkspace> workspace, size_t wi,
     double startX, double endX) {
   if (workspace) {
-    Axis *xAxis = workspace->getAxis(0);
-
+    Axis *xAxis = workspace->getAxis(wi);
     Kernel::Unit_sptr wsUnit = xAxis->unit();
 
-    double factor, power;
-    if (wsUnit->quickConversion(*m_dUnit, factor, power)) {
-      m_wsUnit = wsUnit;
+    if (boost::dynamic_pointer_cast<Units::Empty>(wsUnit) ||
+        boost::dynamic_pointer_cast<Units::dSpacing>(wsUnit)) {
+      m_wsUnit = m_dUnit;
     } else {
-      throw std::invalid_argument("Can not use quick conversion for unit.");
+      double factor, power;
+      if (wsUnit->quickConversion(*m_dUnit, factor, power)) {
+        m_wsUnit = wsUnit;
+      } else {
+        throw std::invalid_argument("Can not use quick conversion for unit.");
+      }
     }
   }
 
@@ -336,6 +340,15 @@ void PawleyFunction::setUnitCell(const std::string &unitCellString) {
       strToUnitCell(unitCellString));
 }
 
+double PawleyFunction::getTransformedCenter(double d) const {
+  if ((m_dUnit && m_wsUnit) && m_dUnit != m_wsUnit) {
+    return UnitConversion::run(*m_dUnit, *m_wsUnit, d, 0, 0, 0,
+                               DeltaEMode::Elastic, 0);
+  }
+
+  return d;
+}
+
 /**
  * Calculates the function values on the supplied domain
  *
@@ -354,10 +367,7 @@ void PawleyFunction::function(const FunctionDomain &domain,
   double zeroShift = m_pawleyParameterFunction->getParameter("ZeroShift");
 
   for (size_t i = 0; i < m_hkls.size(); ++i) {
-    double d = cell.d(m_hkls[i]);
-
-    double centre = UnitConversion::run(*m_dUnit, *m_wsUnit, d, 0, 0, 0,
-                                        DeltaEMode::Elastic, 0);
+    double centre = getTransformedCenter(cell.d(m_hkls[i]));
 
     m_peakProfileComposite->getFunction(i)->setParameter(
         m_pawleyParameterFunction->getProfileFunctionCenterParameterName(),
