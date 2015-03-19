@@ -46,7 +46,8 @@ createDiffractionEventWorkspace(int numEvents, int numPixels = 400,
  * @return MDEW sptr
  */
 MDEventWorkspace3Lean::sptr
-makeFakeMDEventWorkspace(const std::string & wsName, long numEvents = 10000);
+makeFakeMDEventWorkspace(const std::string & wsName, long numEvents = 10000,
+                         Kernel::SpecialCoordinateSystem coord = Kernel::None);
 
 /// Make a fake n-dimensional MDHistoWorkspace
 MDHistoWorkspace_sptr

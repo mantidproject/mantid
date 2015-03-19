@@ -19,6 +19,7 @@ vtkScaleWorkspace::vtkScaleWorkspace() :
   m_xScaling(1),
   m_yScaling(1),
   m_zScaling(1),
+  m_specialCoordinates(-1),
   m_metadataJsonManager(new MetadataJsonManager()),
   m_vatesConfigurations(new VatesConfigurations())
 {
@@ -62,6 +63,7 @@ int vtkScaleWorkspace::RequestInformation(vtkInformation*, vtkInformationVector*
   m_minValue = m_metadataJsonManager->getMinValue();
   m_maxValue = m_metadataJsonManager->getMaxValue();
   m_instrument = m_metadataJsonManager->getInstrument();
+  m_specialCoordinates = m_metadataJsonManager->getSpecialCoordinates();
 
   return 1;
 }
@@ -137,4 +139,9 @@ double vtkScaleWorkspace::GetMaxValue()
 const char* vtkScaleWorkspace::GetInstrument()
 {
   return m_instrument.c_str();
+}
+
+int vtkScaleWorkspace::GetSpecialCoordinates()
+{
+  return m_specialCoordinates;
 }

@@ -14,6 +14,8 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include <hdf5.h>
+
 using namespace Mantid;
 using namespace Mantid::DataObjects;
 using namespace Mantid::MDAlgorithms;
@@ -523,44 +525,122 @@ public:
   }
 
   /// More of an integration test as it uses both load and save.
-  void test_save_and_load_special_coordinates()
-  {
-    MDEventWorkspace1Lean::sptr ws = MDEventsTestHelper::makeMDEW<1>(10, 0.0, 10.0, 2);
-    // Set the special coordinate system
+  void test_save_and_load_special_coordinates_MDEventWorkspace() {
+    MDEventWorkspace1Lean::sptr mdeventWS =
+        MDEventsTestHelper::makeMDEW<1>(10, 0.0, 10.0, 2);
     const SpecialCoordinateSystem appliedCoordinateSystem = QSample;
-    ws->setCoordinateSystem(appliedCoordinateSystem);
+    mdeventWS->setCoordinateSystem(appliedCoordinateSystem);
 
-    const std::string inputWSName = "SaveMDSpecialCoordinatesTest";
-    const std::string fileName = inputWSName + ".nxs";
-    AnalysisDataService::Instance().addOrReplace(inputWSName, ws);
+    auto loadedWS = testSaveAndLoadWorkspace(mdeventWS, "MDEventWorkspace");
+    // Check that the special coordinate system is the same before the save-load
+    // cycle.
+    TS_ASSERT_EQUALS(appliedCoordinateSystem,
+                     loadedWS->getSpecialCoordinateSystem());
+  }
 
+  // backwards-compatability check for coordinate in log
+  void test_load_coordinate_system_MDEventWorkspace_from_experiment_info() {
+    MDEventWorkspace1Lean::sptr mdeventWS =
+        MDEventsTestHelper::makeMDEW<1>(10, 0.0, 10.0, 2);
+    const SpecialCoordinateSystem appliedCoordinateSystem = QSample;
+    mdeventWS->setCoordinateSystem(appliedCoordinateSystem);
+
+    // Create a log in the first experiment info to simulated an old version of
+    // the file
+    auto expt0 = mdeventWS->getExperimentInfo(0);
+    expt0->mutableRun().addProperty("CoordinateSystem",
+                                    static_cast<int>(appliedCoordinateSystem));
+
+    const bool rmCoordField(true);
+    auto loadedWS =
+        testSaveAndLoadWorkspace(mdeventWS, "MDEventWorkspace", rmCoordField);
+    // Check that the special coordinate system is the same before the save-load
+    // cycle.
+    TS_ASSERT_EQUALS(appliedCoordinateSystem,
+                     loadedWS->getSpecialCoordinateSystem());
+  }
+
+  void test_save_and_load_special_coordinates_MDHistoWorkspace() {
+    auto mdhistoWS = MDEventsTestHelper::makeFakeMDHistoWorkspace(
+        2.5, 2, 10, 10.0, 3.5, "", 4.5);
+    const SpecialCoordinateSystem appliedCoordinateSystem = QSample;
+    mdhistoWS->setCoordinateSystem(appliedCoordinateSystem);
+
+    auto loadedWS = testSaveAndLoadWorkspace(mdhistoWS, "MDHistoWorkspace");
+    // Check that the special coordinate system is the same before the save-load
+    // cycle.
+    TS_ASSERT_EQUALS(appliedCoordinateSystem,
+                     loadedWS->getSpecialCoordinateSystem());
+  }
+
+  // backwards-compatability check for coordinate in log
+  void test_load_coordinate_system_MDHistoWorkspace_from_experiment_info() {
+    auto mdhistoWS = MDEventsTestHelper::makeFakeMDHistoWorkspace(
+        2.5, 2, 10, 10.0, 3.5, "", 4.5);
+    const SpecialCoordinateSystem appliedCoordinateSystem = QSample;
+    mdhistoWS->setCoordinateSystem(appliedCoordinateSystem);
+
+    // Create a log in the first experiment info to simulated an old version of
+    // the file
+    auto expt0 = mdhistoWS->getExperimentInfo(0);
+    expt0->mutableRun().addProperty("CoordinateSystem",
+                                    static_cast<int>(appliedCoordinateSystem));
+
+    const bool rmCoordField(true);
+    auto loadedWS =
+        testSaveAndLoadWorkspace(mdhistoWS, "MDHistoWorkspace", rmCoordField);
+    // Check that the special coordinate system is the same before the save-load
+    // cycle.
+    TS_ASSERT_EQUALS(appliedCoordinateSystem,
+                     loadedWS->getSpecialCoordinateSystem());
+  }
+
+  Mantid::API::IMDWorkspace_sptr
+  testSaveAndLoadWorkspace(Mantid::API::IMDWorkspace_sptr inputWS,
+                           const char *rootGroup,
+                           const bool rmCoordField = false) {
+    const std::string fileName = "SaveMDSpecialCoordinatesTest.nxs";
     SaveMD saveAlg;
+    saveAlg.setChild(true);
     saveAlg.initialize();
-    saveAlg.isInitialized();
-    saveAlg.setPropertyValue("InputWorkspace", inputWSName);
+    saveAlg.setProperty("InputWorkspace", inputWS);
     saveAlg.setPropertyValue("Filename", fileName);
     saveAlg.execute();
     TS_ASSERT( saveAlg.isExecuted() );
     std::string this_fileName = saveAlg.getProperty("Filename");
 
+    if (rmCoordField) {
+      // Remove the coordinate_system entry so it falls back on the log. NeXus
+      // can't do this
+      // so use the HDF5 API directly
+      auto fid = H5Fopen(fileName.c_str(), H5F_ACC_RDWR, H5P_DEFAULT);
+      auto gid = H5Gopen(fid, rootGroup, H5P_DEFAULT);
+      if (gid > 0) {
+        H5Ldelete(gid, "coordinate_system", H5P_DEFAULT);
+        H5Gclose(gid);
+      } else {
+        TS_FAIL("Cannot open MDEventWorkspace group. Test file has unexpected "
+                "structure.");
+      }
+      H5Fclose(fid);
+    }
+
     LoadMD loadAlg;
+    loadAlg.setChild(true);
     loadAlg.initialize();
     loadAlg.isInitialized();
     loadAlg.setPropertyValue("Filename", fileName);
     loadAlg.setProperty("FileBackEnd", false);
-    loadAlg.setPropertyValue("OutputWorkspace", "reloaded_again");
+    loadAlg.setPropertyValue("OutputWorkspace", "_unused_for_child");
     loadAlg.execute(); 
     TS_ASSERT( loadAlg.isExecuted() );
-
-    // Check that the special coordinate system is the same before the save-load cycle.
-    TS_ASSERT_EQUALS(appliedCoordinateSystem, ws->getSpecialCoordinateSystem());
 
     if (Poco::File(this_fileName).exists())
     {
       Poco::File(this_fileName).remove();
     }
-    AnalysisDataService::Instance().remove(inputWSName);
-    AnalysisDataService::Instance().remove("OutputWorkspace");
+
+    return loadAlg.getProperty("OutputWorkspace");
   }
 
   void test_loadAffine()

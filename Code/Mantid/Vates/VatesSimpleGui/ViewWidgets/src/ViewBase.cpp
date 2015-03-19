@@ -1,4 +1,5 @@
 #include "MantidVatesSimpleGuiViewWidgets/ViewBase.h"
+#include "MantidVatesSimpleGuiViewWidgets/BackgroundRgbProvider.h"
 
 #if defined(__INTEL_COMPILER)
   #pragma warning disable 1170
@@ -11,6 +12,7 @@
 #include <pqDataRepresentation.h>
 #include <pqObjectBuilder.h>
 #include <pqPipelineSource.h>
+#include <pqPipelineFilter.h>
 #include <pqPipelineRepresentation.h>
 #include <pqPVApplicationCore.h>
 #include <pqRenderView.h>
@@ -45,7 +47,7 @@ namespace SimpleGui
  * Default constructor.
  * @param parent the parent widget for the view
  */
-ViewBase::ViewBase(QWidget *parent) : QWidget(parent)
+ViewBase::ViewBase(QWidget *parent) : QWidget(parent), m_currentColorMapModel(NULL), m_temporaryWorkspaceIdentifier("tempvsi")
 {
 }
 
@@ -170,6 +172,14 @@ void ViewBase::onColorMapChange(const pqColorMapModel *model)
     this->colorUpdater.logScale(true);
   }
   rep->renderViewEventually();
+
+  if (this->colorUpdater.isAutoScale())
+  {
+    setAutoColorScale();
+  }
+
+  // Workaround for colormap but when changing the visbility of a source
+  this->m_currentColorMapModel = model;
 }
 
 /**
@@ -240,7 +250,7 @@ bool ViewBase::isPeaksWorkspace(pqPipelineSource *src)
   }
   QString wsType(vtkSMPropertyHelper(src->getProxy(),
                                      "WorkspaceTypeName", true).GetAsString());
-  // This must be a Mantid rebinner filter if the property is empty.
+
   if (wsType.isEmpty())
   {
     wsType = src->getSMName();
@@ -265,7 +275,7 @@ pqPipelineRepresentation *ViewBase::getPvActiveRep()
  * @param pluginName name of the ParaView plugin
  * @param wsName name of the Mantid workspace to pass to the plugin
  */
-void ViewBase::setPluginSource(QString pluginName, QString wsName)
+pqPipelineSource* ViewBase::setPluginSource(QString pluginName, QString wsName)
 {
   // Create the source from the plugin
   pqObjectBuilder* builder = pqApplicationCore::instance()->getObjectBuilder();
@@ -281,6 +291,8 @@ void ViewBase::setPluginSource(QString pluginName, QString wsName)
   srcProxy->Modified();
   srcProxy->UpdatePipelineInformation();
   src->updatePipeline();
+
+  return src;
 }
 
 /**
@@ -317,13 +329,30 @@ void ViewBase::checkView(ModeControlWidget::Views initialView)
 }
 
 /**
+ * This metod sets the status of the splatterplot button explictly to a desired value
+ * @param visibility The state of the the splatterplot view button.
+ */
+void ViewBase::setSplatterplot(bool visibility)
+{
+    emit this->setViewStatus(ModeControlWidget::SPLATTERPLOT, visibility);
+}
+
+/**
+ * This metod sets the status of the standard view button explictly to a desired value
+ * @param visibility The state of the the standard view button.
+ */
+void ViewBase::setStandard(bool visibility)
+{
+    emit this->setViewStatus(ModeControlWidget::STANDARD, visibility);
+}
+
+/**
  * This function sets the status for the view mode control buttons when the
  * view switches.
  */
 void ViewBase::checkViewOnSwitch()
 {
-  if (this->hasWorkspaceType("MDHistoWorkspace") ||
-      this->hasFilter("MantidRebinning"))
+  if (this->hasWorkspaceType("MDHistoWorkspace"))
   {
     emit this->setViewStatus(ModeControlWidget::SPLATTERPLOT, false);
   }
@@ -581,12 +610,45 @@ bool ViewBase::isMDHistoWorkspace(pqPipelineSource *src)
   }
   QString wsType(vtkSMPropertyHelper(src->getProxy(),
                                      "WorkspaceTypeName", true).GetAsString());
-  // This must be a Mantid rebinner filter if the property is empty.
+
   if (wsType.isEmpty())
   {
     wsType = src->getSMName();
   }
   return wsType.contains("MDHistoWorkspace");
+}
+
+/**
+ * This function checks if a pqPipelineSource is a temporary workspace.
+ * @return true if the source is a temporary workspace;
+ */
+bool ViewBase::isTemporaryWorkspace(pqPipelineSource *src)
+{
+  if (NULL == src)
+  {
+    return false;
+  }
+
+  QString wsType(vtkSMPropertyHelper(src->getProxy(),
+                                     "WorkspaceTypeName", true).GetAsString());
+
+  if (wsType.isEmpty())
+  {
+    wsType = src->getSMName();
+  }
+  
+
+  QString wsName(vtkSMPropertyHelper(src->getProxy(),
+                                    "WorkspaceName", true).GetAsString());
+
+  if (wsName.contains(m_temporaryWorkspaceIdentifier))
+  {
+    return true;
+  }
+  else
+  {
+    return false;
+  }
 }
 
 /**
@@ -603,6 +665,13 @@ void ViewBase::updateUI()
 void ViewBase::updateView()
 {
 }
+
+/// This function is used to update settings, such as background color etc.
+void ViewBase::updateSettings()
+{
+  this->backgroundRgbProvider.update();
+}
+
 
 /**
  * This function checks the current pipeline for a filter with the specified
@@ -674,7 +743,7 @@ bool ViewBase::hasWorkspaceType(const QString &wsTypeName)
   {
     QString wsType(vtkSMPropertyHelper((*source)->getProxy(),
                                        "WorkspaceTypeName", true).GetAsString());
-    // This must be a Mantid rebinner filter if the property is empty.
+
     if (wsType.isEmpty())
     {
       wsType = (*source)->getSMName();
@@ -689,6 +758,16 @@ bool ViewBase::hasWorkspaceType(const QString &wsTypeName)
 }
 
 /**
+ * This function sets the default colors for the background and connects a tracker for changes of the background color by the user.
+ * @param viewSwitched If the view was switched or created.
+ */
+void ViewBase::setColorForBackground(bool viewSwitched)
+{
+  backgroundRgbProvider.setBackgroundColor(this->getView(), viewSwitched);
+  backgroundRgbProvider.observe(this->getView());
+}
+
+/**
  * React to a change of the visibility of a representation of a source.
  * This can be a change of the status if the "eye" symbol in the PipelineBrowserWidget
  * as well as the addition or removal of a representation. 
@@ -700,6 +779,10 @@ void ViewBase::onVisibilityChanged(pqPipelineSource*, pqDataRepresentation*)
   // Reset the colorscale if it is set to autoscale
   if (colorUpdater.isAutoScale())
   {
+    // Workaround: A ParaView bug requires us to reload the ColorMap when the visibility changes.
+    if (m_currentColorMapModel) {
+      onColorMapChange(m_currentColorMapModel);
+    }
     this->setAutoColorScale();
   }
 }
@@ -711,6 +794,103 @@ void ViewBase::initializeColorScale()
 {
   colorUpdater.initializeColorScale();
 }
+
+/**
+ * This function reacts to a destroyed source.
+ */
+void ViewBase::onSourceDestroyed()
+{
+}
+
+/**
+ * Destroy all sources in the view.
+ */
+void ViewBase::destroyAllSourcesInView() {
+  pqServer *server = pqActiveObjects::instance().activeServer();
+  pqServerManagerModel *smModel = pqApplicationCore::instance()->getServerManagerModel();
+  QList<pqPipelineSource *> sources = smModel->findItems<pqPipelineSource *>(server);
+
+  // Out of all pqPipelineSources, find the "true" sources, which were
+  // created by a Source Plugin, i.e. MDEW Source, MDHW Source, PeakSource
+  QList<pqPipelineSource*> trueSources;
+  for (QList<pqPipelineSource *>::iterator source = sources.begin(); source != sources.end(); ++source) {
+    if (!qobject_cast<pqPipelineFilter*>(*source)) {
+      trueSources.push_back(*source);
+    }
+  }
+
+  // For each true source, go to the end of the pipeline and destroy it on the way back
+  // to the start. This assumes linear pipelines.
+  for (QList<pqPipelineSource *>::iterator trueSource = trueSources.begin(); trueSource != trueSources.end(); ++trueSource) {
+    destroySinglePipeline(*trueSource);
+  }
+}
+
+
+/**
+ * Destroy a single, linear pipeline
+ * @param source A true pqPiplineSource, i.e. not a filter.
+ */
+void ViewBase::destroySinglePipeline(pqPipelineSource * source) {
+
+    pqObjectBuilder* builder = pqApplicationCore::instance()->getObjectBuilder();
+
+    // Move to the end of the pipeline
+    pqPipelineSource *sourceBuffer = source;
+    while(sourceBuffer->getNumberOfConsumers() > 0) {
+      sourceBuffer = sourceBuffer->getConsumer(0);
+    }
+
+    // Now destroy the pipeline coming back again
+    pqPipelineFilter* filter = qobject_cast<pqPipelineFilter*>(sourceBuffer);
+    while(filter) {
+      sourceBuffer = filter->getInput(0);
+      builder->destroy(filter);
+      filter = qobject_cast<pqPipelineFilter*>(sourceBuffer);
+    }
+
+    builder->destroy(sourceBuffer);
+}
+
+/**
+ * Set the listener for the visibility of the representations
+ */
+void ViewBase::setVisibilityListener()
+{
+  // Set the connection to listen to a visibility change of the representation.
+  pqServer *server = pqActiveObjects::instance().activeServer();
+  pqServerManagerModel *smModel = pqApplicationCore::instance()->getServerManagerModel();
+  QList<pqPipelineSource *> sources;
+  sources = smModel->findItems<pqPipelineSource *>(server);
+
+  // Attach the visibilityChanged signal for all sources.
+  for (QList<pqPipelineSource *>::iterator source = sources.begin(); source != sources.end(); ++source)
+  {
+    QObject::connect((*source), SIGNAL(visibilityChanged(pqPipelineSource*, pqDataRepresentation*)),
+                     this, SLOT(onVisibilityChanged(pqPipelineSource*, pqDataRepresentation*)),
+                     Qt::UniqueConnection);
+  }
+}
+
+/**
+ * Disconnects the visibility listener connection for all sources
+ */
+void ViewBase::removeVisibilityListener() {
+    // Set the connection to listen to a visibility change of the representation.
+  pqServer *server = pqActiveObjects::instance().activeServer();
+  pqServerManagerModel *smModel = pqApplicationCore::instance()->getServerManagerModel();
+  QList<pqPipelineSource *> sources;
+  sources = smModel->findItems<pqPipelineSource *>(server);
+
+  // Attach the visibilityChanged signal for all sources.
+  for (QList<pqPipelineSource *>::iterator source = sources.begin(); source != sources.end(); ++source)
+  {
+    QObject::disconnect((*source), SIGNAL(visibilityChanged(pqPipelineSource*, pqDataRepresentation*)),
+                         this, SLOT(onVisibilityChanged(pqPipelineSource*, pqDataRepresentation*)));
+  }
+}
+
+
 
 } // namespace SimpleGui
 } // namespace Vates

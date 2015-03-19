@@ -1,6 +1,7 @@
 #include "MantidVatesAPI/vtkMDHistoLineFactory.h"
 #include "MantidVatesAPI/Common.h"
 #include "MantidVatesAPI/ProgressAction.h"
+#include "MantidVatesAPI/vtkNullUnstructuredGrid.h"
 #include "vtkCellArray.h"
 #include "vtkCellData.h"
 #include "vtkFloatArray.h"
@@ -150,6 +151,15 @@ namespace Mantid
         points->Delete();
         signal->Delete();
         visualDataSet->Squeeze();
+
+        // Hedge against empty data sets
+        if (visualDataSet->GetNumberOfPoints() <= 0)
+        {
+          visualDataSet->Delete();
+          vtkNullUnstructuredGrid nullGrid;
+          visualDataSet = nullGrid.createNullData();
+        }
+
         return visualDataSet;
       }
     }

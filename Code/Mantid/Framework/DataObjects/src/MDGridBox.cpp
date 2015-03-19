@@ -70,6 +70,7 @@ template <typename MDE, size_t nd> void MDGridBox<MDE, nd>::initGridBox() {
   for (size_t d = 0; d < nd; d++)
     split[d] = this->m_BoxController->getSplitInto(d);
 
+
   // Compute sizes etc.
   size_t tot = computeSizesFromSplit();
   if (tot == 0)

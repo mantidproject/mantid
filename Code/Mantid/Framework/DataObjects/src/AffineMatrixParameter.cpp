@@ -28,11 +28,12 @@ AffineMatrixParameter::AffineMatrixParameter(size_t outD, size_t inD)
 //----------------------------------------------------------------------------------------------
 /// Destructor
 AffineMatrixParameter::~AffineMatrixParameter() {
-  if (m_rawMatrix) {
-    delete[] * m_rawMatrix;
-    delete[] m_rawMatrix;
-  }
+  // delete array of pointers to rows
+  delete[] m_rawMatrix;
   m_rawMatrix = NULL;
+
+  // delete large mem block holding the matrix
+  delete[] m_rawMem;
   m_rawMem = NULL;
 }
 

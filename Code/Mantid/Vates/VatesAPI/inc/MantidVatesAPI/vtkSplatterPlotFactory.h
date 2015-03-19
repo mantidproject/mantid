@@ -9,6 +9,9 @@
 #include "MantidDataObjects/MDEventWorkspace.h"
 #include "MantidVatesAPI/ThresholdRange.h"
 #include "MantidVatesAPI/vtkDataSetFactory.h"
+#include "MantidVatesAPI/MetaDataExtractorUtils.h"
+#include "MantidVatesAPI/MetadataJsonManager.h"
+#include "MantidVatesAPI/VatesConfigurations.h"
 #include <vtkPoints.h>
 #include <boost/shared_ptr.hpp>
 #include <boost/scoped_ptr.hpp>
@@ -91,6 +94,9 @@ public:
   /// Getter for the instrument
   virtual const std::string& getInstrument();
 
+  /// Set the appropriate field data
+  virtual void setMetadata(vtkFieldData* fieldData, vtkDataSet* dataSet);
+
 private:
 
   template<typename MDE, size_t nd>
@@ -107,6 +113,9 @@ private:
 
   /// Template Method pattern to validate the factory before use.
   virtual void validate() const;
+
+  /// Add metadata
+  void addMetadata() const;
 
   /// Threshold range strategy.
   ThresholdRange_scptr m_thresholdRange;
@@ -158,6 +167,12 @@ private:
 
   /// Meta data extractor
   boost::scoped_ptr<MetaDataExtractorUtils> m_metaDataExtractor;
+
+  /// Meata data json manager
+  boost::scoped_ptr<MetadataJsonManager> m_metadataJsonManager;
+
+  /// Vates configuration
+  boost::scoped_ptr<VatesConfigurations> m_vatesConfigurations;
 };
 
 }

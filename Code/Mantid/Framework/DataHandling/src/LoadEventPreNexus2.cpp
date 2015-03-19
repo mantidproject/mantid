@@ -228,10 +228,13 @@ LoadEventPreNexus2::LoadEventPreNexus2()
   prog(NULL), spectra_list(), pulsetimes(), event_indices(), proton_charge(),
   proton_charge_tot(0), pixel_to_wkspindex(), pixelmap(), detid_max(),
   eventfile(NULL), num_events(0), num_pulses(0), numpixel(0),
-  num_good_events(0), num_error_events(0), num_ignored_events(0),
+  num_good_events(0), num_error_events(0), num_bad_events(0),
+  num_wrongdetid_events(0), num_ignored_events(0),
   first_event(0), max_events(0), using_mapping_file(false),
   loadOnlySomeSpectra(false), spectraLoadMap(), longest_tof(0),
-  shortest_tof(0), parallelProcessing(false) {
+  shortest_tof(0), parallelProcessing(false), pulsetimesincreasing(false),
+  m_dbOutput(false), m_dbOpBlockNumber(0), m_dbOpNumEvents(0),
+  m_dbOpNumPulses(0) {
 }
 
 //----------------------------------------------------------------------------------------------

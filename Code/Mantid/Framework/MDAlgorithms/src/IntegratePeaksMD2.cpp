@@ -166,15 +166,16 @@ void IntegratePeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
     peakWS = inPeakWS->clone();
   // This only fails in the unit tests which say that MaskBTP is not registered
   try {
-    runMaskDetectors(peakWS, "Tube", "edges");
-    runMaskDetectors(peakWS, "Pixel", "edges");
+    runMaskDetectors(inPeakWS, "Tube", "edges");
+    runMaskDetectors(inPeakWS, "Pixel", "edges");
   } catch (...) {
     g_log.error("Can't execute MaskBTP algorithm for this instrument to set "
                 "edge for IntegrateIfOnEdge option");
   }
 
   // Get the instrument and its detectors
-  inst = peakWS->getInstrument();
+  Geometry::Instrument_const_sptr inst = inPeakWS->getInstrument();
+  calculateE1(inst);  //fill E1Vec for use in detectorQ
   Mantid::Kernel::SpecialCoordinateSystem CoordinatesToUse = ws->getSpecialCoordinateSystem();
 
   /// Radius to use around peaks
@@ -638,7 +639,7 @@ void IntegratePeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
   setProperty("OutputWorkspace", peakWS);
 }
 
-/** Calculate if this Q is on a detector
+/*
  * Define edges for each instrument by masking. For CORELLI, tubes 1 and 16, and
  *pixels 0 and 255.
  * Get Q in the lab frame for every peak, call it C
@@ -647,16 +648,10 @@ void IntegratePeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
  * Calculate a point at a fixed momentum, say k=1. Q in the lab frame
  *E=V3D(-k*sin(tt)*cos(ph),-k*sin(tt)*sin(ph),k-k*cos(ph)).
  * Normalize E to 1: E=E*(1./E.norm())
- * The distance from C to OE is given by dv=C-E*(C.scalar_prod(E))
- * If dv.norm<integration_radius, one of the detector trajectories on the edge
- *is too close to the peak
- * This method is applied to all masked pixels. If there are masked pixels
- *trajectories inside an integration volume, the peak must be rejected.
  *
- * @param QLabFrame: The Peak center.
- * @param r: Peak radius.
+ * @param inst: instrument
  */
-bool IntegratePeaksMD2::detectorQ(Mantid::Kernel::V3D QLabFrame, double r) {
+void IntegratePeaksMD2::calculateE1(Geometry::Instrument_const_sptr inst) {
   std::vector<detid_t> detectorIDs = inst->getDetectorIDs();
 
   for (auto detID = detectorIDs.begin(); detID != detectorIDs.end(); ++detID) {
@@ -670,14 +665,28 @@ bool IntegratePeaksMD2::detectorQ(Mantid::Kernel::V3D QLabFrame, double r) {
     V3D E1 = V3D(-std::sin(tt1) * std::cos(ph1), -std::sin(tt1) * std::sin(ph1),
                  1. - std::cos(tt1)); // end of trajectory
     E1 = E1 * (1. / E1.norm());       // normalize
-    V3D distv = QLabFrame -
-                E1 * (QLabFrame.scalar_prod(
-                         E1)); // distance to the trajectory as a vector
-    if (distv.norm() < r) {
-      return false;
+    E1Vec.push_back(E1);
     }
   }
 
+  /** Calculate if this Q is on a detector
+   * The distance from C to OE is given by dv=C-E*(C.scalar_prod(E))
+   * If dv.norm<integration_radius, one of the detector trajectories on the edge
+   *is too close to the peak
+   * This method is applied to all masked pixels. If there are masked pixels
+   *trajectories inside an integration volume, the peak must be rejected.
+   *
+   * @param QLabFrame: The Peak center.
+   * @param r: Peak radius.
+   */
+  bool IntegratePeaksMD2::detectorQ(Mantid::Kernel::V3D QLabFrame, double r) {
+
+    for (auto E1 = E1Vec.begin(); E1 != E1Vec.end(); ++E1) {
+      V3D distv = QLabFrame - *E1 * (QLabFrame.scalar_prod(*E1)); // distance to the trajectory as a vector
+      if (distv.norm() < r) {
+        return false;
+      }
+    }
   return true;
 }
 void IntegratePeaksMD2::runMaskDetectors(

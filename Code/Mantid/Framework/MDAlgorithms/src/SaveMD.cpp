@@ -235,6 +235,10 @@ void SaveMD::doSaveHisto(Mantid::DataObjects::MDHistoWorkspace_sptr ws) {
   // The base entry. Named so as to distinguish from other workspace types.
   file->makeGroup("MDHistoWorkspace", "NXentry", true);
 
+  // Write out the coordinate system
+  file->writeData("coordinate_system",
+                  static_cast<uint32_t>(ws->getSpecialCoordinateSystem()));
+
   // Save the algorithm history under "process"
   ws->getHistory().saveNexus(file);
 

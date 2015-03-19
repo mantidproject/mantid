@@ -247,6 +247,7 @@ private:
   /// Map detector IDs to event lists.
   template <class T> void makeMapToEventLists(std::vector<T> &vectors);
 
+  void createWorkspaceIndexMaps(const bool monitors, const std::vector<std::string> &bankNames);
   void loadEvents(API::Progress *const prog, const bool monitors);
   void createSpectraMapping(
       const std::string &nxsfile, const bool monitorsOnly,

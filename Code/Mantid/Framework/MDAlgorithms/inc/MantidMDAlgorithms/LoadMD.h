@@ -75,6 +75,8 @@ private:
 
   void loadDimensions();
 
+  void loadCoordinateSystem();
+
   /// Load all the affine matricies
   void loadAffineMatricies(API::IMDWorkspace_sptr ws);
   /// Load a given affine matrix
@@ -91,6 +93,8 @@ private:
 
   /// Each dimension object loaded.
   std::vector<Mantid::Geometry::IMDDimension_sptr> m_dims;
+  /// Coordinate system
+  Kernel::SpecialCoordinateSystem m_coordSystem;
   /// load only the box structure with empty boxes but do not tload boxes events
   bool m_BoxStructureAndMethadata;
 };

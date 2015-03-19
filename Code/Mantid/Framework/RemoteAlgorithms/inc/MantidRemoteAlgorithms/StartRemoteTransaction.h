@@ -6,7 +6,7 @@
 namespace Mantid {
 namespace RemoteAlgorithms {
 
-class StartRemoteTransaction : public Mantid::API::Algorithm {
+class DLLExport StartRemoteTransaction : public Mantid::API::Algorithm {
 public:
   /// (Empty) Constructor
   StartRemoteTransaction() : Mantid::API::Algorithm() {}

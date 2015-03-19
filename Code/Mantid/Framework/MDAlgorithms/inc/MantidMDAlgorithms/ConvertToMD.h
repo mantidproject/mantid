@@ -113,6 +113,9 @@ protected: // for testing, otherwise private:
                   const std::string &QFrame, const std::string &ConvertTo,
                   const std::vector<std::string> &otherDim,
                   std::vector<double> &minVal, std::vector<double> &maxVal);
+
+  /// Splits the initial box at level 0 into a defined number of subboxes for the the first level.
+  void performInitialSplitting(API::IMDEventWorkspace_sptr spws, Mantid::API::BoxController_sptr bc);
 };
 
 } // namespace Mantid

@@ -59,7 +59,7 @@ private:
   {
     auto ws = boost::make_shared<Mantid::DataObjects::Workspace2D>();
     ws->initialize(1, 2, 1);
-    ws->setInstrument(ComponentCreationHelper::createTestInstrumentRectangular(6, 1, 0));
+    ws->setInstrument(ComponentCreationHelper::createTestInstrumentRectangular(6, 1, 0.0));
     const std::string instrumentName = ws->getInstrument()->getName();
 
     // Create a parameter file, with a root equation that will apply to all detectors.

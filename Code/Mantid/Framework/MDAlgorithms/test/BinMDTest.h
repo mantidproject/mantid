@@ -123,8 +123,10 @@ public:
     TS_ASSERT( alg.isInitialized() )
 
     IMDEventWorkspace_sptr in_ws = MDEventsTestHelper::makeMDEW<3>(10, 0.0, 10.0, numEventsPerBox);
-    in_ws->addExperimentInfo(ExperimentInfo_sptr(new ExperimentInfo));
+    Mantid::Kernel::SpecialCoordinateSystem appliedCoord = Mantid::Kernel::QSample;
+    in_ws->setCoordinateSystem(appliedCoord);
     AnalysisDataService::Instance().addOrReplace("BinMDTest_ws", in_ws);
+    
     // 1000 boxes with 1 event each
     TS_ASSERT_EQUALS( in_ws->getNPoints(), 1000*numEventsPerBox);
 
@@ -147,6 +149,7 @@ public:
     TS_ASSERT(out);
     if(!out) return;
 
+    TS_ASSERT_EQUALS(appliedCoord, out->getSpecialCoordinateSystem());
     // Took 6x6x6 bins in the middle of the box
     TS_ASSERT_EQUALS(out->getNPoints(), expected_numBins);
     // Every box has a single event summed into it, so 1.0 weight

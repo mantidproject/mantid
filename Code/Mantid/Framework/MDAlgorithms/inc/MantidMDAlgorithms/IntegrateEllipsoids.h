@@ -2,7 +2,7 @@
 #define MANTID_MDALGORITHMS_INTEGRATE_ELLIPSOIDS_H_
 
 #include "MantidAPI/Algorithm.h"
-#include "MantidDataObjects/EventWorkspace.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataObjects/MDWSDescription.h"
 
 namespace Mantid {
@@ -29,7 +29,7 @@ private:
 
   MDWSDescription m_targWSDescr;
 
-  void initTargetWSDescr(DataObjects::EventWorkspace_sptr wksp);
+  void initTargetWSDescr(API::MatrixWorkspace_sptr& wksp);
 };
 
 } // namespace MDAlgorithms

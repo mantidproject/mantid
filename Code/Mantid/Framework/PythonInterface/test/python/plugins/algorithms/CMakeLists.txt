@@ -15,6 +15,7 @@ set ( TEST_PY_FILES
   DSFinterpTest.py
   FilterLogByTimeTest.py
   FindReflectometryLinesTest.py
+  FlatPlatePaalmanPingsCorrectionTest.py
   GetEiT0atSNSTest.py
   IndirectILLReductionTest.py
   InelasticIndirectReductionTest.py
@@ -30,6 +31,7 @@ set ( TEST_PY_FILES
   MeanTest.py
   MergeCalFilesTest.py
   MolDynTest.py
+  MSDFitTest.py
   PDDetermineCharacterizationsTest.py
   RetrieveRunInfoTest.py
   SANSWideAngleCorrectionTest.py

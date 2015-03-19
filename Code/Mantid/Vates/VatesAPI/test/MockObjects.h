@@ -13,14 +13,11 @@
 #include "MantidKernel/UnitLabel.h"
 #include "MantidDataObjects/MDHistoWorkspace.h"
 #include "MantidVatesAPI/MDLoadingView.h"
-#include "MantidVatesAPI/Clipper.h"
 #include "MantidVatesAPI/Common.h"
-#include "MantidVatesAPI/MDRebinningView.h"
 #include "MantidVatesAPI/vtkDataSetFactory.h"
 #include "MantidVatesAPI/MDLoadingView.h"
 #include "MantidVatesAPI/ProgressAction.h"
-#include "MantidVatesAPI/RebinningActionManager.h"
-#include "MantidVatesAPI/RebinningCutterXMLDefinitions.h"
+#include "MantidVatesAPI/VatesXMLDefinitions.h"
 #include "MantidVatesAPI/WorkspaceProvider.h"
 #include "MantidAPI/NullCoordTransform.h"
 #include "MantidAPI/FrameworkManager.h"
@@ -29,7 +26,6 @@
 #include <vtkCharArray.h>
 #include <vtkStringArray.h>
 
-using Mantid::VATES::MDRebinningView;
 using Mantid::Geometry::MDHistoDimension;
 using Mantid::Geometry::MDHistoDimension_sptr;
 using Mantid::coord_t;
@@ -146,56 +142,6 @@ public:
   MOCK_METHOD2(updateAlgorithmProgress, void(double, const std::string&));
   ~MockMDLoadingView(){}
 };
-
-class MockMDRebinningView : public MDRebinningView 
-{
-public:
-  MOCK_CONST_METHOD0(getMaxThreshold,
-    double());
-  MOCK_CONST_METHOD0(getMinThreshold,
-    double());
-  MOCK_CONST_METHOD0(getApplyClip,
-    bool());
-  MOCK_CONST_METHOD0(getTimeStep,
-    double());
-  MOCK_CONST_METHOD0(getAppliedGeometryXML,
-    const char*());
-  MOCK_METHOD2(updateAlgorithmProgress,
-    void(double, const std::string&));
-  MOCK_CONST_METHOD0(getOrigin, Mantid::Kernel::V3D());
-  MOCK_CONST_METHOD0(getB1, Mantid::Kernel::V3D());
-  MOCK_CONST_METHOD0(getB2, Mantid::Kernel::V3D());
-  MOCK_CONST_METHOD0(getLengthB1, double());
-  MOCK_CONST_METHOD0(getLengthB2, double());
-  MOCK_CONST_METHOD0(getLengthB3, double());
-  MOCK_CONST_METHOD0(getForceOrthogonal, bool());
-  MOCK_CONST_METHOD0(getOutputHistogramWS, bool());
-};
-
-class MockClipper: public Mantid::VATES::Clipper
-{
-public:
-  MOCK_METHOD1(SetInput, void(vtkDataSet* in_ds));
-  MOCK_METHOD1(SetClipFunction, void(vtkImplicitFunction* func));
-  MOCK_METHOD1(SetInsideOut, void(bool insideout));
-  MOCK_METHOD1(SetRemoveWholeCells, void(bool removeWholeCells));
-  MOCK_METHOD1(SetOutput, void(vtkUnstructuredGrid* out_ds));
-  MOCK_METHOD0(Update, void());
-  MOCK_METHOD0(Delete,void());
-  MOCK_METHOD0(GetOutput, vtkDataSet*());
-  MOCK_METHOD0(die, void());
-  virtual ~MockClipper(){}
-};
-
-class MockRebinningActionManager : public Mantid::VATES::RebinningActionManager
-{
-public:
-  MOCK_METHOD1(ask, void(Mantid::VATES::RebinningIterationAction));
-  MOCK_CONST_METHOD0(action, Mantid::VATES::RebinningIterationAction());
-  MOCK_METHOD0(reset, void());
-  virtual ~MockRebinningActionManager(){}
-};
-
 
 class MockWorkspaceProvider : public Mantid::VATES::WorkspaceProvider
 {

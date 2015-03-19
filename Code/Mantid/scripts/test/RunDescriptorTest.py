@@ -1,5 +1,5 @@
 import os,sys,inspect
-#os.environ["PATH"] = r"c:/Mantid/Code/builds/br_master/bin/Release;"+os.environ["PATH"]
+#os.environ["PATH"] =r"c:/Mantid/Code/builds/br_master/bin/Release;"+os.environ["PATH"]
 from mantid.simpleapi import *
 from mantid import api
 import unittest
@@ -53,6 +53,12 @@ class RunDescriptorTest(unittest.TestCase):
 
         self.assertEqual(rez,'Success!')
 
+        propman.sample_run='MAR11001.RAW'
+        self.assertFalse('run_ws' in mtd)
+        self.assertEqual(PropertyManager.sample_run.run_number(),11001)
+        self.assertEqual(PropertyManager.sample_run._fext,'.RAW')
+
+
 
     def test_descr_dependend(self):
         propman  = self.prop_man
@@ -84,11 +90,11 @@ class RunDescriptorTest(unittest.TestCase):
         self.assertTrue(ok)
         self.assertTrue(len(file)>0)
 
-        ext = PropertyManager.sample_run.get_file_ext()
+        ext = PropertyManager.sample_run.get_fext()
         self.assertEqual(ext,'.raw')
 
         PropertyManager.sample_run.set_file_ext('nxs')
-        ext = PropertyManager.sample_run.get_file_ext()
+        ext = PropertyManager.sample_run.get_fext()
         self.assertEqual(ext,'.nxs')
 
         test_dir = config.getString('defaultsave.directory')
@@ -126,7 +132,7 @@ class RunDescriptorTest(unittest.TestCase):
         PropertyManager.sample_run.set_file_ext('nxs')
 
         ws = PropertyManager.sample_run.get_workspace()
-        self.assertEqual(PropertyManager.sample_run.get_file_ext(),'.raw')
+        self.assertEqual(PropertyManager.sample_run.get_fext(),'.raw')
 
         self.assertTrue(isinstance(ws, api.Workspace))
 
@@ -428,11 +434,17 @@ class RunDescriptorTest(unittest.TestCase):
     def test_find_runfiles(self):
         propman = self.prop_man
         propman.sample_run = [11001,11111]
+        files = PropertyManager.sample_run.get_run_file_list()
+        self.assertEqual(len(files),2)
+
 
         nf,found=PropertyManager.sample_run._run_list.find_run_files('MAR')
         self.assertEqual(len(nf),1)
         self.assertEqual(len(found),1)
         self.assertEqual(nf[0],11111)
+
+        files = PropertyManager.sample_run.get_run_file_list()
+        self.assertEqual(len(files),2)
 
     def test_add_masks(self):
        propman  = self.prop_man
@@ -447,6 +459,16 @@ class RunDescriptorTest(unittest.TestCase):
        self.assertTrue(isinstance(masks,api.MatrixWorkspace))
        ws_name = PropertyManager.sample_run._mask_ws_name
        self.assertTrue(ws_name in mtd)
+
+       masks = PropertyManager.sample_run.get_masking()
+       self.assertTrue(isinstance(masks,api.MatrixWorkspace))
+       ws_name = masks.name()
+       self.assertTrue(ws_name in mtd)
+
+       masks1 = PropertyManager.sample_run.get_masking(1)
+       self.assertTrue(isinstance(masks1,api.MatrixWorkspace))
+
+
 
        propman.sample_run = None
        self.assertFalse(ws_name in mtd)
@@ -470,6 +492,27 @@ class RunDescriptorTest(unittest.TestCase):
         self.assertTrue(PropertyManager.wb_for_monovan_run.has_own_value())
         self.assertEqual(propman.wb_run,2000)
         self.assertEqual(propman.wb_for_monovan_run,3000)
+
+    def test_get_correct_fext(self):
+        propman  = self.prop_man
+        propman.sample_run = None
+
+        def_fext= propman.data_file_ext
+        real_fext=PropertyManager.sample_run.get_fext()
+        self.assertEqual(def_fext,real_fext)
+
+        propman.data_file_ext = '.bla_bla'
+        real_fext=PropertyManager.sample_run.get_fext()
+        self.assertEqual('.bla_bla',real_fext)
+
+        propman.sample_run = 'MAR11001.nxs'
+        real_fext=PropertyManager.sample_run.get_fext()
+        self.assertEqual('.nxs',real_fext)
+
+        propman.data_file_ext = '.raw'
+        real_fext=PropertyManager.sample_run.get_fext()
+        self.assertEqual('.nxs',real_fext)
+
 
 
 

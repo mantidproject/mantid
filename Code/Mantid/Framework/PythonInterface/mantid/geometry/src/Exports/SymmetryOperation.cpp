@@ -19,7 +19,12 @@ namespace //<unnamed>
 
   Mantid::Kernel::V3D applyToVector(SymmetryOperation & self, const object& hkl)
   {
-    return self.operator *<Mantid::Kernel::V3D>(Converters::PyObjectToV3D(hkl)());
+    return self.transformHKL(Converters::PyObjectToV3D(hkl)());
+  }
+
+  Mantid::Kernel::V3D applyToCoordinates(SymmetryOperation & self, const object& coordinates)
+  {
+    return self.operator *<Mantid::Kernel::V3D>(Converters::PyObjectToV3D(coordinates)());
   }
 }
 
@@ -30,6 +35,8 @@ void export_SymmetryOperation()
   class_<SymmetryOperation>("SymmetryOperation")
           .def("order", &SymmetryOperation::order)
           .def("identifier", &SymmetryOperation::identifier)
+          .def("transformCoordinates", &applyToCoordinates)
+          .def("transformHKL", &applyToVector)
           .def("apply", &applyToVector);
 }
 

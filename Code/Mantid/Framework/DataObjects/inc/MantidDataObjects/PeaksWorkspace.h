@@ -109,10 +109,10 @@ public:
   const Peak &getPeak(int peakNum) const;
 
   API::IPeak *createPeak(Kernel::V3D QFrame,
-                         boost::optional<double> detectorDistance = boost::optional<double>()) const;
+                         boost::optional<double> detectorDistance =
+                             boost::optional<double>()) const;
   std::vector<std::pair<std::string, std::string>>
   peakInfo(Kernel::V3D qFrame, bool labCoords) const;
-
 
   Peak *createPeakHKL(Kernel::V3D HKL) const;
 
@@ -129,12 +129,11 @@ public:
   API::ITableWorkspace_sptr createDetectorTable() const;
 
   /// Set the special coordinate system.
-  virtual void setCoordinateSystem(
-      const Mantid::Kernel::SpecialCoordinateSystem coordinateSystem);
+  virtual void
+  setCoordinateSystem(const Kernel::SpecialCoordinateSystem coordinateSystem);
 
   /// Get the special coordinate system.
-  virtual Mantid::Kernel::SpecialCoordinateSystem
-  getSpecialCoordinateSystem() const;
+  Kernel::SpecialCoordinateSystem getSpecialCoordinateSystem() const;
 
   // ====================================== ITableWorkspace Methods
   // ==================================
@@ -183,15 +182,6 @@ public:
   void saveNexus(::NeXus::File *file) const;
 
 private:
-  /** Vector of Peak contained within. */
-  std::vector<Peak> peaks;
-
-  /** Column shared pointers. */
-  std::vector<boost::shared_ptr<Mantid::DataObjects::PeakColumn>> columns;
-
-  /** Column names */
-  std::vector<std::string> columnNames;
-
   /// Initialize the table structure
   void initColumns();
   /// Adds a new PeakColumn of the given type
@@ -274,6 +264,18 @@ private:
 
   // ====================================== End ITableWorkspace Methods
   // ==================================
+
+  /** Vector of Peak contained within. */
+  std::vector<Peak> peaks;
+
+  /** Column shared pointers. */
+  std::vector<boost::shared_ptr<Mantid::DataObjects::PeakColumn>> columns;
+
+  /** Column names */
+  std::vector<std::string> columnNames;
+  
+  /// Coordinates
+  Kernel::SpecialCoordinateSystem m_coordSystem;
 
   // adapter for logs() function, which create reference to this class itself
   // and does not allow to delete the shared pointers,

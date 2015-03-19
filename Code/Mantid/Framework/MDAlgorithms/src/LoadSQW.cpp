@@ -46,7 +46,12 @@ template <typename T> T interpretAs(std::vector<char> &Buf, size_t ind = 0) {
 DECLARE_FILELOADER_ALGORITHM(LoadSQW);
 
 /// Constructor
-LoadSQW::LoadSQW() : m_prog(new Mantid::API::Progress(this, 0.05, 0.95, 100)) {}
+LoadSQW::LoadSQW() : m_fileName(""), m_fileStream(),
+    m_prog(new Mantid::API::Progress(this, 0.05, 0.95, 100)), m_outputFile(""),
+    m_dataPositions(), m_boxSizes(), m_nDataPoints(0), m_mdImageSize(0),
+    m_nDims(0), m_nBins() {
+}
+
 /**
 * Return the confidence with this algorithm can load the file
 * @param descriptor A descriptor for the file

@@ -15,6 +15,7 @@ set ( SRC_FILES
 	src/CloneMDWorkspace.cpp
 	src/CompareMDWorkspaces.cpp
 	src/ConvToMDBase.cpp
+	src/ConvertCWPDMDToSpectra.cpp
 	src/ConvToMDEventsWS.cpp
 	src/ConvToMDHistoWS.cpp
 	src/ConvToMDSelector.cpp
@@ -128,6 +129,7 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/CloneMDWorkspace.h
 	inc/MantidMDAlgorithms/CompareMDWorkspaces.h
 	inc/MantidMDAlgorithms/ConvToMDBase.h
+	inc/MantidMDAlgorithms/ConvertCWPDMDToSpectra.h
 	inc/MantidMDAlgorithms/ConvertMDHistoToMatrixWorkspace.h
 	inc/MantidMDAlgorithms/ConvertSpiceDataToRealSpace.h
 	inc/MantidMDAlgorithms/ConvertToDetectorFaceMD.h
@@ -237,6 +239,7 @@ set ( TEST_FILES
 	CentroidPeaksMDTest.h
 	CloneMDWorkspaceTest.h
 	CompareMDWorkspacesTest.h
+	ConvertCWPDMDToSpectraTest.h
 	ConvertEventsToMDTest.h
 	ConvertMDHistoToMatrixWorkspaceTest.h
 	ConvertSpiceDataToRealSpaceTest.h
@@ -346,7 +349,6 @@ endif ()
 set_property ( TARGET MDAlgorithms PROPERTY FOLDER "MantidFramework" )
 
 include_directories ( inc )
-
 target_link_libraries ( MDAlgorithms ${MANTIDLIBS} )
 
 # Add the unit tests directory

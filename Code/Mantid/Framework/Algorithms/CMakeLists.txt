@@ -21,6 +21,7 @@ set ( SRC_FILES
 	src/BinaryOperateMasks.cpp
 	src/BinaryOperation.cpp
 	src/CalMuonDeadTime.cpp
+	src/CalculateDIFC.cpp
 	src/CalculateEfficiency.cpp
 	src/CalculateFlatBackground.cpp
 	src/CalculateResolution.cpp
@@ -51,6 +52,7 @@ set ( SRC_FILES
 	src/ConvertToMatrixWorkspace.cpp
 	src/ConvertToPointData.cpp
 	src/ConvertUnits.cpp
+	src/CopyDetectorMapping.cpp
 	src/CopyInstrumentParameters.cpp
 	src/CopyLogs.cpp
 	src/CopySample.cpp
@@ -89,7 +91,7 @@ set ( SRC_FILES
 	src/EQSANSTofStructure.cpp
 	src/EditInstrumentGeometry.cpp
 	src/ElasticWindow.cpp
-	src/EstimatePDDetectorResolution.cpp
+	src/EstimateResolutionDiffraction.cpp
 	src/Exponential.cpp
 	src/ExponentialCorrection.cpp
 	src/ExportTimeSeriesLog.cpp
@@ -209,6 +211,7 @@ set ( SRC_FILES
 	src/SaveGSASInstrumentFile.cpp
 	src/Scale.cpp
 	src/ScaleX.cpp
+	src/Segfault.cpp
 	src/SetInstrumentParameter.cpp
 	src/SetUncertainties.cpp
 	src/ShiftLogTime.cpp
@@ -274,6 +277,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/BinaryOperateMasks.h
 	inc/MantidAlgorithms/BinaryOperation.h
 	inc/MantidAlgorithms/CalMuonDeadTime.h
+	inc/MantidAlgorithms/CalculateDIFC.h
 	inc/MantidAlgorithms/CalculateEfficiency.h
 	inc/MantidAlgorithms/CalculateFlatBackground.h
 	inc/MantidAlgorithms/CalculateResolution.h
@@ -304,6 +308,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/ConvertToMatrixWorkspace.h
 	inc/MantidAlgorithms/ConvertToPointData.h
 	inc/MantidAlgorithms/ConvertUnits.h
+	inc/MantidAlgorithms/CopyDetectorMapping.h
 	inc/MantidAlgorithms/CopyInstrumentParameters.h
 	inc/MantidAlgorithms/CopyLogs.h
 	inc/MantidAlgorithms/CopySample.h
@@ -342,7 +347,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/EQSANSTofStructure.h
 	inc/MantidAlgorithms/EditInstrumentGeometry.h
 	inc/MantidAlgorithms/ElasticWindow.h
-	inc/MantidAlgorithms/EstimatePDDetectorResolution.h
+	inc/MantidAlgorithms/EstimateResolutionDiffraction.h
 	inc/MantidAlgorithms/Exponential.h
 	inc/MantidAlgorithms/ExponentialCorrection.h
 	inc/MantidAlgorithms/ExportTimeSeriesLog.h
@@ -463,6 +468,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/SaveGSASInstrumentFile.h
 	inc/MantidAlgorithms/Scale.h
 	inc/MantidAlgorithms/ScaleX.h
+	inc/MantidAlgorithms/Segfault.h
 	inc/MantidAlgorithms/SetInstrumentParameter.h
 	inc/MantidAlgorithms/SetUncertainties.h
 	inc/MantidAlgorithms/ShiftLogTime.h
@@ -538,6 +544,7 @@ set ( TEST_FILES
 	BinaryOperateMasksTest.h
 	BinaryOperationTest.h
 	CalMuonDeadTimeTest.h
+	CalculateDIFCTest.h
 	CalculateEfficiencyTest.h
 	CalculateFlatBackgroundTest.h
 	CalculateResolutionTest.h
@@ -568,6 +575,7 @@ set ( TEST_FILES
 	ConvertToMatrixWorkspaceTest.h
 	ConvertToPointDataTest.h
 	ConvertUnitsTest.h
+	CopyDetectorMappingTest.h
 	CopyInstrumentParametersTest.h
 	CopyLogsTest.h
 	CopySampleTest.h
@@ -602,7 +610,7 @@ set ( TEST_FILES
 	DivideTest.h
 	EditInstrumentGeometryTest.h
 	ElasticWindowTest.h
-	EstimatePDDetectorResolutionTest.h
+	EstimateResolutionDiffractionTest.h
 	ExponentialCorrectionTest.h
 	ExponentialTest.h
 	ExportTimeSeriesLogTest.h

@@ -132,6 +132,8 @@ public:
     TS_ASSERT( alg.isInitialized() )
 
     IMDEventWorkspace_sptr in_ws = MDEventsTestHelper::makeAnyMDEW<MDE,nd>(10, 0.0, 10.0, 1);
+    Mantid::Kernel::SpecialCoordinateSystem appliedCoord = Mantid::Kernel::QSample;
+    in_ws->setCoordinateSystem(appliedCoord);
     AnalysisDataService::Instance().addOrReplace("SliceMDTest_ws", in_ws);
 
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", "SliceMDTest_ws") );
@@ -160,6 +162,8 @@ public:
     if(!out) return;
 
     TSM_ASSERT_EQUALS("Should default to TakeMaxRecursionDepthFromInput == true", in_ws->getBoxController()->getMaxDepth(), out->getBoxController()->getMaxDepth());
+
+    TS_ASSERT_EQUALS(appliedCoord, out->getSpecialCoordinateSystem());
 
     // Took this many events out with the slice
     TS_ASSERT_EQUALS(out->getNPoints(), expectedNumPoints);

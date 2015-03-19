@@ -252,10 +252,11 @@ public:
         testSymmetryOperation(twoFoldXOp,
                               2, V3D(m_h, -m_k, -m_l), "x,-y,-z");
 
-        // 2-fold rotation around [210] in hexagonal system
-        SymmetryOperation twoFold210Op("x, x-y, -z");
-        testSymmetryOperation(twoFold210Op,
-                              2, V3D(m_h, m_h-m_k, -m_l), "x,x-y,-z");
+        // 6-fold rotation around [001] in hexagonal
+        SymmetryOperation sixFoldZOp("x-y , x, z");
+        testSymmetryOperation(sixFoldZOp,
+                              6, V3D(-m_k, (m_h+m_k), m_l), "x-y,x,z");
+
     }
 
     void testPower()
@@ -317,7 +318,7 @@ private:
 
     void checkCorrectTransformationGeneralHKL(const SymmetryOperation &symOp, const V3D &expected)
     {
-        V3D transformed = symOp * m_hkl;
+        V3D transformed = symOp.transformHKL(m_hkl);
 
         TSM_ASSERT_EQUALS(symOp.identifier() + ": Transformed hkl is " + transformed.toString() + ", expected " + expected.toString(),
                           transformed, expected);

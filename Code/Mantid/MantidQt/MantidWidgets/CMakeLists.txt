@@ -139,7 +139,6 @@ find_package (Qt4 REQUIRED QtHelp QtWebKit QtNetwork QUIET)
 include(${QT_USE_FILE})
 
 include_directories ( ../../QtPropertyBrowser/src )
-
 qt4_wrap_cpp ( MOCCED_FILES ${MOC_FILES} )
 
 set ( ALL_SRC ${SRC_FILES} ${MOCCED_FILES} )

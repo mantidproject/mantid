@@ -1,7 +1,7 @@
 .. _WorkspaceGroup:
 
-WorkspaceGroup
-==============
+Workspace Group
+===============
 
 A WorkspaceGroup is a group of workspaces.
 
