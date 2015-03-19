@@ -51,7 +51,7 @@ protected:
   }
 };
 
-DECLARE_FUNCTION(SimplexGaussian);
+DECLARE_FUNCTION(SimplexGaussian)
 
 class GaussianTest : public CxxTest::TestSuite
 {

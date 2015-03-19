@@ -99,7 +99,7 @@ public:
     }
 };
 
-DECLARE_FUNCTION(ResolutionTest_Gauss);
+DECLARE_FUNCTION(ResolutionTest_Gauss)
 
 class ResolutionTest : public CxxTest::TestSuite
 {

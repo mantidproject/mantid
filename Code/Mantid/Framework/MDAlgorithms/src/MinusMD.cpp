@@ -27,10 +27,10 @@ MinusMD::~MinusMD() {}
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
-const std::string MinusMD::name() const { return "MinusMD"; };
+const std::string MinusMD::name() const { return "MinusMD"; }
 
 /// Algorithm's version for identification. @see Algorithm::version
-int MinusMD::version() const { return 1; };
+int MinusMD::version() const { return 1; }
 
 //----------------------------------------------------------------------------------------------
 

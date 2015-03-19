@@ -559,7 +559,7 @@ void FitDialog::setGraph(Graph *g)
 
 	connect (d_graph, SIGNAL(closedGraph()), this, SLOT(close()));
 	connect (d_graph, SIGNAL(dataRangeChanged()), this, SLOT(changeDataRange()));
-};
+}
 
 void FitDialog::activateCurve(const QString& curveName)
 {
@@ -573,7 +573,7 @@ void FitDialog::activateCurve(const QString& curveName)
     boxTo->setValue(QMAX(start, end));
 	//Set the same color as the data curve chosen for fit (Feature Request #4031)
 	boxColor->setColor(c->pen().color());
-};
+}
 
 void FitDialog::saveUserFunction()
 {

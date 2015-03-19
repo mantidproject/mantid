@@ -136,10 +136,10 @@ ConvertToReflectometryQ::~ConvertToReflectometryQ() {}
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string ConvertToReflectometryQ::name() const {
   return "ConvertToReflectometryQ";
-};
+}
 
 /// Algorithm's version for identification. @see Algorithm::version
-int ConvertToReflectometryQ::version() const { return 1; };
+int ConvertToReflectometryQ::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
 const std::string ConvertToReflectometryQ::category() const {

@@ -610,7 +610,7 @@ public:
 
 /// shared pointer to the function base class
 typedef boost::shared_ptr<ScriptRepository> ScriptRepository_sptr;
-};
-};
+}
+}
 
 #endif // MANTID_API_SCRIPTREPOSITORY_H_

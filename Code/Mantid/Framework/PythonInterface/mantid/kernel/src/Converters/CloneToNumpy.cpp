@@ -133,18 +133,18 @@ namespace Mantid { namespace PythonInterface
         INSTANTIATE_CLONEND(ElementType)
 
       ///@cond Doxygen doesn't seem to like this...
-      INSTANTIATE_CLONE(int);
-      INSTANTIATE_CLONE(long);
-      INSTANTIATE_CLONE(long long);
-      INSTANTIATE_CLONE(unsigned int);
-      INSTANTIATE_CLONE(unsigned long);
-      INSTANTIATE_CLONE(unsigned long long);
-      INSTANTIATE_CLONE(double);
-      INSTANTIATE_CLONE(float);
+      INSTANTIATE_CLONE(int)
+      INSTANTIATE_CLONE(long)
+      INSTANTIATE_CLONE(long long)
+      INSTANTIATE_CLONE(unsigned int)
+      INSTANTIATE_CLONE(unsigned long)
+      INSTANTIATE_CLONE(unsigned long long)
+      INSTANTIATE_CLONE(double)
+      INSTANTIATE_CLONE(float)
       // Need further 1D specialisation for string
       INSTANTIATE_CLONE1D(std::string)
       // Need further ND specialisation for bool
-      INSTANTIATE_CLONEND(bool);
+      INSTANTIATE_CLONEND(bool)
       ///@endcond
     }
   }

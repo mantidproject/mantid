@@ -257,7 +257,7 @@ private:
 
   };
 
-}; // namespace API
-};// namespace Mantid
+} // namespace API
+} // namespace Mantid
 
 #endif  /* MANTID_API_SCRIPTREPOSITORYVIEW_H_ */

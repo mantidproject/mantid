@@ -16,9 +16,9 @@ namespace CurveFitting {
 using namespace Kernel;
 using namespace API;
 
-DECLARE_FUNCTION(ElasticDiffSphere);
-DECLARE_FUNCTION(InelasticDiffSphere);
-DECLARE_FUNCTION(DiffSphere);
+DECLARE_FUNCTION(ElasticDiffSphere)
+DECLARE_FUNCTION(InelasticDiffSphere)
+DECLARE_FUNCTION(DiffSphere)
 
 ElasticDiffSphere::ElasticDiffSphere() {
   // declareParameter("Height", 1.0); //parameter "Height" already declared in

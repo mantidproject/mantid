@@ -23,7 +23,7 @@ using namespace API;
 using namespace NeXus;
 
 // Register the algorithm into the AlgorithmFactory
-DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadILLReflectometry);
+DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadILLReflectometry)
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
@@ -47,10 +47,10 @@ LoadILLReflectometry::~LoadILLReflectometry() {}
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string LoadILLReflectometry::name() const {
   return "LoadILLReflectometry";
-};
+}
 
 /// Algorithm's version for identification. @see Algorithm::version
-int LoadILLReflectometry::version() const { return 1; };
+int LoadILLReflectometry::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
 const std::string LoadILLReflectometry::category() const {

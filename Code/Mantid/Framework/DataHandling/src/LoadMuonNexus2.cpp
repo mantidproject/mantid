@@ -27,7 +27,7 @@
 namespace Mantid {
 namespace DataHandling {
 // Register the algorithm into the algorithm factory
-DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadMuonNexus2);
+DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadMuonNexus2)
 
 using namespace Kernel;
 using namespace API;

@@ -22,10 +22,10 @@ LessThanMD::~LessThanMD() {}
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
-const std::string LessThanMD::name() const { return "LessThanMD"; };
+const std::string LessThanMD::name() const { return "LessThanMD"; }
 
 /// Algorithm's version for identification. @see Algorithm::version
-int LessThanMD::version() const { return 1; };
+int LessThanMD::version() const { return 1; }
 
 //----------------------------------------------------------------------------------------------
 /// Run the algorithm with a MDHisotWorkspace as output and operand

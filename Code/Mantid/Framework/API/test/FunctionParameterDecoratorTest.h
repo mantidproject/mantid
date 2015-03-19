@@ -44,7 +44,7 @@ public:
   }
 };
 
-DECLARE_FUNCTION(TestableFunctionParameterDecorator);
+DECLARE_FUNCTION(TestableFunctionParameterDecorator)
 
 class FunctionWithParameters : public ParamFunction {
 public:
@@ -64,7 +64,7 @@ public:
     // Does nothing, not required for this test.
   }
 };
-DECLARE_FUNCTION(FunctionWithParameters);
+DECLARE_FUNCTION(FunctionWithParameters)
 
 class FunctionWithAttributes : public ParamFunction {
 public:
@@ -88,7 +88,7 @@ public:
   }
 };
 
-DECLARE_FUNCTION(FunctionWithAttributes);
+DECLARE_FUNCTION(FunctionWithAttributes)
 
 class FunctionParameterDecoratorTest : public CxxTest::TestSuite {
 public:

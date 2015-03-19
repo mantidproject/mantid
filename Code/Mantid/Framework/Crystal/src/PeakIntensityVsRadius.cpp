@@ -29,10 +29,10 @@ PeakIntensityVsRadius::~PeakIntensityVsRadius() {}
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string PeakIntensityVsRadius::name() const {
   return "PeakIntensityVsRadius";
-};
+}
 
 /// Algorithm's version for identification. @see Algorithm::version
-int PeakIntensityVsRadius::version() const { return 1; };
+int PeakIntensityVsRadius::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
 const std::string PeakIntensityVsRadius::category() const { return "Crystal"; }

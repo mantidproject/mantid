@@ -163,15 +163,15 @@ namespace Mantid
         template DLLExport struct NDArrayToVector<ElementType>;
 
       ///@cond Doxygen doesn't seem to like this...
-      INSTANTIATE_TOVECTOR(int);
-      INSTANTIATE_TOVECTOR(long);
-      INSTANTIATE_TOVECTOR(long long);
-      INSTANTIATE_TOVECTOR(unsigned int);
-      INSTANTIATE_TOVECTOR(unsigned long);
-      INSTANTIATE_TOVECTOR(unsigned long long);
-      INSTANTIATE_TOVECTOR(double);
-      INSTANTIATE_TOVECTOR(bool);
-      INSTANTIATE_TOVECTOR(std::string); 
+      INSTANTIATE_TOVECTOR(int)
+      INSTANTIATE_TOVECTOR(long)
+      INSTANTIATE_TOVECTOR(long long)
+      INSTANTIATE_TOVECTOR(unsigned int)
+      INSTANTIATE_TOVECTOR(unsigned long)
+      INSTANTIATE_TOVECTOR(unsigned long long)
+      INSTANTIATE_TOVECTOR(double)
+      INSTANTIATE_TOVECTOR(bool)
+      INSTANTIATE_TOVECTOR(std::string)
       ///@endcond
     }
   }

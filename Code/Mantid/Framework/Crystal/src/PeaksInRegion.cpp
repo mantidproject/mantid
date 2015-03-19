@@ -26,10 +26,10 @@ PeaksInRegion::~PeaksInRegion() {}
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
-const std::string PeaksInRegion::name() const { return "PeaksInRegion"; };
+const std::string PeaksInRegion::name() const { return "PeaksInRegion"; }
 
 /// Algorithm's version for identification. @see Algorithm::version
-int PeaksInRegion::version() const { return 1; };
+int PeaksInRegion::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
 const std::string PeaksInRegion::category() const { return "Crystal"; }
