@@ -30,6 +30,10 @@ class CylinderPaalmanPingsCorrection(PythonAlgorithm):
         return "Workflow\\MIDAS;PythonAlgorithms;CorrectionFunctions\\AbsorptionCorrections"
 
 
+    def summary(self):
+        return "Calculates absorption corrections for a cylindrical or annular sample using Paalman & Pings format."
+
+
     def PyInit(self):
         ws_validator = CompositeValidator([WorkspaceUnitValidator('Wavelength'), InstrumentValidator()])
 
@@ -211,6 +215,12 @@ class CylinderPaalmanPingsCorrection(PythonAlgorithm):
     def validateInputs(self):
         self._setup()
         issues = dict()
+
+        # Ensure that a can chemical formula is given when using a can workspace
+        if self._use_can:
+            can_chemical_formula = self.getPropertyValue('CanChemicalFormula')
+            if can_chemical_formula == '':
+                issues['CanChemicalFormula'] = 'Must provide a chemical foruma when providing a can workspace'
 
         # Ensure there are enough steps
         number_steps = int((self._sample_outer_radius - self._sample_inner_radius) / self._step_size)
