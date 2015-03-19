@@ -137,14 +137,14 @@ class MainWindow(QtGui.QMainWindow):
         self.connect(self.ui.actionQuit, QtCore.SIGNAL('triggered()'),
                 self.doExist)
 
+        self.connect(self.ui.pushButton_stripVanPeaks, QtCore.SIGNAL('clicked()'),
+                self.doStripVandiumPeaks)
 
-        # TODO - Add event handling
-        """
-        pushButton_stripVanPeaks
-        pushButton_saveVanRun
+        self.connect(self.ui.pushButton_saveVanRun, QtCore.SIGNAL('clicked()'),
+                self.doSaveVanRun)
 
-        """
-
+        self.connect(self.ui.pushButton_rebinD, QtCore.SIGNAL('clicked()'),
+                self.doRebinDspace)
 
         # Define signal-event handling
 
@@ -182,12 +182,28 @@ class MainWindow(QtGui.QMainWindow):
         validator7.setBottom(0)
         self.ui.lineEdit_detNo.setValidator(validator7)
 
+        validator8 = QtGui.QDoubleValidator(self.ui.lineEdit_minD)
+        validator8.setBottom(0.)
+        self.ui.lineEdit_minD.setValidator(validator8)
+
+        validator9 = QtGui.QDoubleValidator(self.ui.lineEdit_maxD)
+        validator9.setBottom(0.)
+        self.ui.lineEdit_maxD.setValidator(validator9)
+
+        validator10 = QtGui.QDoubleValidator(self.ui.lineEdit_binsizeD)
+        validator10.setBottom(0.)
+        self.ui.lineEdit_binsizeD.setValidator(validator10)
+
+        validator11 = QtGui.QIntValidator(self.ui.lineEdit_scanStart)
+        validator11.setBottom(1)
+        self.ui.lineEdit_scanStart.setValidator(validator11)
+
+        validator12 = QtGui.QIntValidator(self.ui.lineEdit_scanEnd)
+        validator12.setBottom(1)
+        self.ui.lineEdit_scanEnd.setValidator(validator12)
+
         # TODO - Add valdiators
         """ 
-        lineEdit_minD 
-        lineEdit_maxD
-        lineEdit_binsizeD 
-        pushButton_rebinD
         lineEdit_scanStart
         """
         # Get initial setup
@@ -600,6 +616,36 @@ class MainWindow(QtGui.QMainWindow):
         return
 
 
+    def doRebinD(self):
+        """
+        """
+        dminstr = str(self.ui.lineEdit_minD.text()).strip()  
+        dmaxstr = str(self.ui.lineEdit_maxD.text()).strip()     
+        dbinsizestr = str(self.ui.lineEdit_binsizeD.text()).strip()
+
+        # dmin and dmax
+        if len(dminstr) == 0 or len(dmaxstr) == 0:
+            dmin = None
+            dmax = None
+        else:
+            dmin = float(dminstr)
+            dmax = float(dmaxstr)
+
+        # bin size
+        if len(dbinsizestr) == 0:
+            self._logError("Bin size in d-spacing must be specified!")
+            return
+        else:
+            binsize = float(dbinsizestr):w
+
+        # rebin
+        self._rebin('dSpacing', dmin, binsize, dmax)
+        
+        self._plotReducedData(xlabel, 0, True)
+
+        return
+
+
     def doSaveData(self):
         """ Save data
         """
@@ -632,7 +678,29 @@ class MainWindow(QtGui.QMainWindow):
         if filetype.lower().count("gsas") == 1:
             print "going to save GSAS"
 
+        return 
+
+    
+    def doSaveVanRun(self):
+        """ Save the vanadium run with peaks removed
+        """
+        # TODO - Need to get use case from Clarina
+        raise NotImplementedError("Need use case from instrument scientist")
+
+
+
+    def doStripVandiumPeaks(self):
+        """ Strip vanadium peaks
+        """
+        inputws = self._myReducedPDWs
+        
+        api.StripVanadiumPeaks(inputws, BackgroundType="Linear",
+                WorkspaceIndex=0)
+
+        self._plotVanadiumRun(xlabel, 0, True)
+
         return
+
 
     def doUpdateWavelength(self):
         """ Update the wavelength to line edit
@@ -825,7 +893,27 @@ class MainWindow(QtGui.QMainWindow):
             xlabel=targetunit,label=str(self._myReducedPDWs))
             
         return
-        
+
+    def _plotVanadiumRun(self, spectrum):
+        """ Plot vanadium run in d-space 
+        """
+        if self._myReducedPDWS is None:
+            self._logWarning("No data to plot!")
+            return
+
+        # clear canvas
+        self.ui.graphicsView_vanPeaks.clearAlLines()
+
+        wsname = str(self._myReducedPDWS)
+        api.ConvertToPointData(InputWorkspace=self._myReducedPDWS, OutputWorkspace=wsname)
+        self._myReducedPDWS = AnalysisDataServce.retrieve(wsname)
+
+        self.ui.graphicsView_reducedData.addPlot(self._myReducedPDWs.readX(spectrum),
+            self._myReducedPDWs.readY(spectrum), marker='o', color='read',ylabel='intensity',
+            xlabel=r'd-Spacing $(\AA)$', label=str(self._myReducedPDWs))
+
+        return
+         
      
     def _uiCheckBinningParameters(self, curxmin=None, curxmax=None, curbinsize=None, curunit=None, targetunit=None):
         """ check the binning parameters including xmin, xmax, bin size and target unit
