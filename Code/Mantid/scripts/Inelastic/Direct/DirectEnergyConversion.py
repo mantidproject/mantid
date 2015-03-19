@@ -366,7 +366,7 @@ class DirectEnergyConversion(object):
         masks_done = False
         if not prop_man.run_diagnostics:
             header = "*** Diagnostics including hard masking is skipped "
-            masks_done = Treu
+            masks_done = True
         #if Reducer.save_and_reuse_masks :
         # SAVE AND REUSE MASKS
         if self.spectra_masks:
@@ -985,7 +985,7 @@ class DirectEnergyConversion(object):
 
         # check if spectra masks is defined
         if hasattr(self,'_spectra_masks'):
-            if self._spectra_masks in mtd:
+            if not self._spectra_masks is None and self._spectra_masks in mtd:
                 return mtd[self._spectra_masks]
             else:
                 self._spectra_masks = None
