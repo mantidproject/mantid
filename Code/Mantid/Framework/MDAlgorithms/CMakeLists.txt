@@ -74,6 +74,7 @@ set ( SRC_FILES
 	src/SetMDUsingMask.cpp
 	src/SliceMD.cpp
 	src/SlicingAlgorithm.cpp
+	src/SmoothMD.cpp
 	src/ThresholdMD.cpp
 	src/TransformMD.cpp
 	src/UnaryOperationMD.cpp
@@ -160,6 +161,7 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/SetMDUsingMask.h
 	inc/MantidMDAlgorithms/SliceMD.h
 	inc/MantidMDAlgorithms/SlicingAlgorithm.h
+	inc/MantidMDAlgorithms/SmoothMD.h
 	inc/MantidMDAlgorithms/ThresholdMD.h
 	inc/MantidMDAlgorithms/TransformMD.h
 	inc/MantidMDAlgorithms/UnaryOperationMD.h
@@ -235,6 +237,7 @@ set ( TEST_FILES
 	SimulateResolutionConvolvedModelTest.h
 	SliceMDTest.h
 	SlicingAlgorithmTest.h
+	SmoothMDTest.h
 	Strontium122Test.h
 	ThresholdMDTest.h
 	TobyFitBMatrixTest.h
