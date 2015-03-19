@@ -10,6 +10,7 @@ set ( TEST_PY_FILES
   CreateLeBailFitInputTest.py
   CreateCalibrationWorkspaceTest.py
   CreateWorkspaceTest.py
+  CylinderPaalmanPingsCorrectionTest.py
   DakotaChiSquaredTest.py
   DensityOfStatesTest.py
   DSFinterpTest.py

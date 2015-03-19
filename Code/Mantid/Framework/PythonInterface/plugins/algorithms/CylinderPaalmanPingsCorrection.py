@@ -44,7 +44,7 @@ class CylinderPaalmanPingsCorrection(PythonAlgorithm):
         self.declareProperty(name='SampleNumberDensity', defaultValue=0.1,
                              validator=FloatBoundedValidator(0.0),
                              doc='Sample number density in atoms/Angstrom3')
-        self.declareProperty(name='SampleInnerRadius', defaultValue=0.09,
+        self.declareProperty(name='SampleInnerRadius', defaultValue=0.05,
                              doc='Sample inner radius')
         self.declareProperty(name='SampleOuterRadius', defaultValue=0.1,
                              doc='Sample outer radius')
@@ -68,12 +68,9 @@ class CylinderPaalmanPingsCorrection(PythonAlgorithm):
         self.declareProperty(name='BeamWidth', defaultValue=0.1,
                              doc='Width of the beam at the sample.')
 
-        self.declareProperty(name='StepSize', defaultValue=0.1,
+        self.declareProperty(name='StepSize', defaultValue=0.002,
                              doc='Step size for calculation')
 
-        self.declareProperty(name='NumberWavelengths', defaultValue=10,
-                             validator=IntBoundedValidator(1),
-                             doc='Number of wavelengths for calculation')
         self.declareProperty(name='Interpolate', defaultValue=True,
                              doc='Interpolate the correction workspaces to match the sample workspace')
 
@@ -124,12 +121,20 @@ class CylinderPaalmanPingsCorrection(PythonAlgorithm):
             can_sample = mtd[self._can_ws_name].sample()
             can_material = can_sample.getMaterial()
 
-        # total scattering x-section for can
-        sigs.append(can_material.totalScatterXSection())
-        sigs.append(can_material.totalScatterXSection())
-        # absorption x-section for can
-        siga.append(can_material.absorbXSection())
-        siga.append(can_material.absorbXSection())
+            # total scattering x-section for can
+            sigs.append(can_material.totalScatterXSection())
+            sigs.append(can_material.totalScatterXSection())
+            # absorption x-section for can
+            siga.append(can_material.absorbXSection())
+            siga.append(can_material.absorbXSection())
+
+        else:
+            # total scattering x-section for can
+            sigs.append(0.0)
+            sigs.append(0.0)
+            # absorption x-section for can
+            siga.append(0.0)
+            siga.append(0.0)
 
         # Holders for the corrected data
         data_ass = []
@@ -220,6 +225,9 @@ class CylinderPaalmanPingsCorrection(PythonAlgorithm):
         Get algorithm properties.
         """
 
+        # This is fixed by the Fortran code
+        self._number_wavelengths = 10
+
         self._sample_ws_name = self.getPropertyValue('SampleWorkspace')
 
         self._sample_chemical_formula = self.getPropertyValue('SampleChemicalFormula')
@@ -239,7 +247,6 @@ class CylinderPaalmanPingsCorrection(PythonAlgorithm):
         self._beam_height = self.getProperty('BeamHeight').value
         self._beam_width = self.getProperty('BeamWidth').value
 
-        self._number_wavelengths = self.getProperty('NumberWavelengths').value
         self._interpolate = self.getProperty('Interpolate').value
 
         self._emode = self.getPropertyValue('Emode')
