@@ -1526,6 +1526,11 @@ def get_failed_spectra_list_from_masks(masked_wksp):
     failed_spectra = []
     if masked_wksp is None:
        return (failed_spectra,0)
+    try:
+        name = masked_wksp.name()
+    except Exeption as ex:
+        
+        return (failed_spectra,0)
 
     masking_wksp,sp_list = ExtractMask(masked_wksp)
     DeleteWorkspace(masking_wksp)
