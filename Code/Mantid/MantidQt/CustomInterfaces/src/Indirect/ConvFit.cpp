@@ -51,13 +51,13 @@ namespace IDA
     m_cfTree->setFactoryForManager(m_dblManager, m_dblEdFac);
 
     // Create Range Selectors
-    m_rangeSelectors["ConvFitRange"] = new MantidQt::MantidWidgets::RangeSelector(m_uiForm.ppPlot);
-    m_rangeSelectors["ConvFitBackRange"] = new MantidQt::MantidWidgets::RangeSelector(m_uiForm.ppPlot,
-        MantidQt::MantidWidgets::RangeSelector::YSINGLE);
-    m_rangeSelectors["ConvFitBackRange"]->setColour(Qt::darkGreen);
-    m_rangeSelectors["ConvFitBackRange"]->setRange(0.0, 1.0);
-    m_rangeSelectors["ConvFitHWHM"] = new MantidQt::MantidWidgets::RangeSelector(m_uiForm.ppPlot);
-    m_rangeSelectors["ConvFitHWHM"]->setColour(Qt::red);
+    auto fitRangeSelector = m_uiForm.ppPlot->addRangeSelector("ConvFitRange");
+    auto backRangeSelector = m_uiForm.ppPlot->addRangeSelector("ConvFitBackRange",
+                                                               MantidWidgets::RangeSelector::YSINGLE);
+    auto hwhmRangeSelector = m_uiForm.ppPlot->addRangeSelector("ConvFitHWHM");
+    backRangeSelector->setColour(Qt::darkGreen);
+    backRangeSelector->setRange(0.0, 1.0);
+    hwhmRangeSelector->setColour(Qt::red);
 
     // Populate Property Widget
 
@@ -98,11 +98,11 @@ namespace IDA
     m_uiForm.leTempCorrection->setValidator(new QDoubleValidator(m_parentWidget));
 
     // Connections
-    connect(m_rangeSelectors["ConvFitRange"], SIGNAL(minValueChanged(double)), this, SLOT(minChanged(double)));
-    connect(m_rangeSelectors["ConvFitRange"], SIGNAL(maxValueChanged(double)), this, SLOT(maxChanged(double)));
-    connect(m_rangeSelectors["ConvFitBackRange"], SIGNAL(minValueChanged(double)), this, SLOT(backgLevel(double)));
-    connect(m_rangeSelectors["ConvFitHWHM"], SIGNAL(minValueChanged(double)), this, SLOT(hwhmChanged(double)));
-    connect(m_rangeSelectors["ConvFitHWHM"], SIGNAL(maxValueChanged(double)), this, SLOT(hwhmChanged(double)));
+    connect(fitRangeSelector, SIGNAL(minValueChanged(double)), this, SLOT(minChanged(double)));
+    connect(fitRangeSelector, SIGNAL(maxValueChanged(double)), this, SLOT(maxChanged(double)));
+    connect(backRangeSelector, SIGNAL(minValueChanged(double)), this, SLOT(backgLevel(double)));
+    connect(hwhmRangeSelector, SIGNAL(minValueChanged(double)), this, SLOT(hwhmChanged(double)));
+    connect(hwhmRangeSelector, SIGNAL(maxValueChanged(double)), this, SLOT(hwhmChanged(double)));
     connect(m_dblManager, SIGNAL(valueChanged(QtProperty*, double)), this, SLOT(updateRS(QtProperty*, double)));
     connect(m_blnManager, SIGNAL(valueChanged(QtProperty*, bool)), this, SLOT(checkBoxUpdate(QtProperty*, bool)));
     connect(m_uiForm.ckTempCorrection, SIGNAL(toggled(bool)), m_uiForm.leTempCorrection, SLOT(setEnabled(bool)));
@@ -113,15 +113,16 @@ namespace IDA
     connect(m_uiForm.ckPlotGuess, SIGNAL(stateChanged(int)), this, SLOT(plotGuess()));
 
     // Have FWHM Range linked to Fit Start/End Range
-    connect(m_rangeSelectors["ConvFitRange"], SIGNAL(rangeChanged(double, double)), m_rangeSelectors["ConvFitHWHM"], SLOT(setRange(double, double)));
-    m_rangeSelectors["ConvFitHWHM"]->setRange(-1.0,1.0);
+    connect(fitRangeSelector, SIGNAL(rangeChanged(double, double)),
+            hwhmRangeSelector, SLOT(setRange(double, double)));
+    hwhmRangeSelector->setRange(-1.0,1.0);
     hwhmUpdateRS(0.02);
 
     typeSelection(m_uiForm.cbFitType->currentIndex());
     bgTypeSelection(m_uiForm.cbBackground->currentIndex());
 
     // Replot input automatically when file / spec no changes
-    connect(m_uiForm.spPlotSpectrum, SIGNAL(valueChanged(int)), this, SLOT(plotInput()));
+    connect(m_uiForm.spPlotSpectrum, SIGNAL(valueChanged(int)), this, SLOT(updatePlot()));
     connect(m_uiForm.dsSampleInput, SIGNAL(dataReady(const QString&)), this, SLOT(newDataLoaded(const QString&)));
 
     connect(m_uiForm.spSpectraMin, SIGNAL(valueChanged(int)), this, SLOT(specMinChanged(int)));
@@ -203,6 +204,8 @@ namespace IDA
     QString inputWsName = QString::fromStdString(m_cfInputWS->getName());
     QString resultWsName = inputWsName.left(inputWsName.lastIndexOf("_")) + "_conv_" + fitType + bgType + specMin + "_to_" + specMax + "_Workspaces";
     m_pythonExportWsName = resultWsName.toStdString();
+
+    updatePlot();
   }
 
   /**
@@ -260,7 +263,7 @@ namespace IDA
     m_uiForm.spSpectraMax->setMinimum(0);
     m_uiForm.spSpectraMax->setValue(maxSpecIndex);
 
-    plotInput();
+    updatePlot();
   }
 
   namespace
@@ -641,19 +644,21 @@ namespace IDA
     m_cfTree->removeProperty(m_properties["Lorentzian1"]);
     m_cfTree->removeProperty(m_properties["Lorentzian2"]);
 
+    auto hwhmRangeSelector = m_uiForm.ppPlot->getRangeSelector("ConvFitHWHM");
+
     switch ( index )
     {
       case 0:
-        m_rangeSelectors["ConvFitHWHM"]->setVisible(false);
+        hwhmRangeSelector->setVisible(false);
         break;
       case 1:
         m_cfTree->addProperty(m_properties["Lorentzian1"]);
-        m_rangeSelectors["ConvFitHWHM"]->setVisible(true);
+        hwhmRangeSelector->setVisible(true);
         break;
       case 2:
         m_cfTree->addProperty(m_properties["Lorentzian1"]);
         m_cfTree->addProperty(m_properties["Lorentzian2"]);
-        m_rangeSelectors["ConvFitHWHM"]->setVisible(true);
+        hwhmRangeSelector->setVisible(true);
         break;
     }
   }
@@ -670,7 +675,7 @@ namespace IDA
     }
   }
 
-  void ConvFit::plotInput()
+  void ConvFit::updatePlot()
   {
     using Mantid::Kernel::Exception::NotFoundError;
 
@@ -692,7 +697,7 @@ namespace IDA
     {
       const QPair<double, double> curveRange = m_uiForm.ppPlot->getCurveRange("Sample");
       const std::pair<double, double> range(curveRange.first, curveRange.second);
-      m_rangeSelectors["ConvFitRange"]->setRange(range.first, range.second);
+      m_uiForm.ppPlot->getRangeSelector("ConvFitRange")->setRange(range.first, range.second);
       m_uiForm.ckPlotGuess->setChecked(plotGuess);
     }
     catch(std::invalid_argument & exc)
@@ -706,6 +711,17 @@ namespace IDA
     {
       m_dblManager->setValue(m_properties["Lorentzian 1.FWHM"], resolution);
       m_dblManager->setValue(m_properties["Lorentzian 2.FWHM"], resolution);
+    }
+
+    // If there is a result plot then plot it
+    if(AnalysisDataService::Instance().doesExist(m_pythonExportWsName))
+    {
+      WorkspaceGroup_sptr outputGroup = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(m_pythonExportWsName);
+      if(specNo >= static_cast<int>(outputGroup->size()))
+        return;
+      MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(outputGroup->getItem(specNo));
+      if(ws)
+        m_uiForm.ppPlot->addSpectrum("Fit", ws, 1, Qt::red);
     }
   }
 
@@ -723,7 +739,7 @@ namespace IDA
 
     if ( m_cfInputWS == NULL )
     {
-      plotInput();
+      updatePlot();
     }
 
     const size_t binIndexLow = m_cfInputWS->binIndexOf(m_dblManager->value(m_properties["StartX"]));
@@ -777,7 +793,7 @@ namespace IDA
     if(!validate())
       return;
 
-    plotInput();
+    updatePlot();
 
     m_uiForm.ckPlotGuess->setChecked(false);
 
@@ -897,6 +913,8 @@ namespace IDA
       m_dblManager->setValue(m_properties["Lorentzian 2.PeakCentre"], parameters[pref+"PeakCentre"]);
       m_dblManager->setValue(m_properties["Lorentzian 2.FWHM"], parameters[pref+"FWHM"]);
     }
+
+    m_pythonExportWsName = "";
   }
 
   /**
@@ -939,9 +957,10 @@ namespace IDA
     // Always want FWHM to display as positive.
     const double hwhm = std::fabs(val-peakCentre);
     // Update the property
-    m_rangeSelectors["ConvFitHWHM"]->blockSignals(true);
+    auto hwhmRangeSelector = m_uiForm.ppPlot->getRangeSelector("ConvFitHWHM");
+    hwhmRangeSelector->blockSignals(true);
     m_dblManager->setValue(m_properties["Lorentzian 1.FWHM"], hwhm*2);
-    m_rangeSelectors["ConvFitHWHM"]->blockSignals(false);
+    hwhmRangeSelector->blockSignals(false);
   }
 
   void ConvFit::backgLevel(double val)
@@ -951,9 +970,12 @@ namespace IDA
 
   void ConvFit::updateRS(QtProperty* prop, double val)
   {
-    if ( prop == m_properties["StartX"] ) { m_rangeSelectors["ConvFitRange"]->setMinimum(val); }
-    else if ( prop == m_properties["EndX"] ) { m_rangeSelectors["ConvFitRange"]->setMaximum(val); }
-    else if ( prop == m_properties["BGA0"] ) { m_rangeSelectors["ConvFitBackRange"]->setMinimum(val); }
+    auto fitRangeSelector = m_uiForm.ppPlot->getRangeSelector("ConvFitRange");
+    auto backRangeSelector = m_uiForm.ppPlot->getRangeSelector("ConvFitBackRange");
+
+    if ( prop == m_properties["StartX"] ) { fitRangeSelector->setMinimum(val); }
+    else if ( prop == m_properties["EndX"] ) { fitRangeSelector->setMaximum(val); }
+    else if ( prop == m_properties["BGA0"] ) { backRangeSelector->setMinimum(val); }
     else if ( prop == m_properties["Lorentzian 1.FWHM"] ) { hwhmUpdateRS(val); }
     else if ( prop == m_properties["Lorentzian 1.PeakCentre"] )
     {
@@ -964,8 +986,9 @@ namespace IDA
   void ConvFit::hwhmUpdateRS(double val)
   {
     const double peakCentre = m_dblManager->value(m_properties["Lorentzian 1.PeakCentre"]);
-    m_rangeSelectors["ConvFitHWHM"]->setMinimum(peakCentre-val/2);
-    m_rangeSelectors["ConvFitHWHM"]->setMaximum(peakCentre+val/2);
+    auto hwhmRangeSelector = m_uiForm.ppPlot->getRangeSelector("ConvFitHWHM");
+    hwhmRangeSelector->setMinimum(peakCentre-val/2);
+    hwhmRangeSelector->setMaximum(peakCentre+val/2);
   }
 
   void ConvFit::checkBoxUpdate(QtProperty* prop, bool checked)

@@ -5,13 +5,14 @@
 #include "vtkStreamingDemandDrivenPipeline.h"
 #include "vtkUnstructuredGridAlgorithm.h"
 #include "vtkUnstructuredGrid.h"
+#include "vtkFieldData.h"
 
 #include "MantidGeometry/MDGeometry/MDGeometryXMLDefinitions.h"
 #include "MantidVatesAPI/ADSWorkspaceProvider.h"
 #include "MantidVatesAPI/FieldDataToMetadata.h"
 #include "MantidVatesAPI/FilteringUpdateProgressAction.h"
 #include "MantidVatesAPI/NoThresholdRange.h"
-#include "MantidVatesAPI/RebinningCutterXMLDefinitions.h"
+#include "MantidVatesAPI/VatesXMLDefinitions.h"
 #include "MantidVatesAPI/vtkDataSetToNonOrthogonalDataSet.h"
 #include "MantidVatesAPI/vtkDataSetToWsName.h"
 #include "MantidVatesAPI/vtkSplatterPlotFactory.h"
@@ -93,8 +94,7 @@ int vtkSplatterPlot::RequestData(vtkInformation *,
   {
     // Get the info objects
     vtkInformation *outInfo = outputVector->GetInformationObject(0);
-    vtkDataSet *output = vtkDataSet::SafeDownCast(
-          outInfo->Get(vtkDataObject::DATA_OBJECT()));
+    vtkDataSet *output = vtkDataSet::SafeDownCast(outInfo->Get(vtkDataObject::DATA_OBJECT()));
 
     if (outInfo->Has(vtkStreamingDemandDrivenPipeline::UPDATE_TIME_STEP()))
     {
@@ -110,7 +110,10 @@ int vtkSplatterPlot::RequestData(vtkInformation *,
     FilterUpdateProgressAction<vtkSplatterPlot> drawUpdateProgress(this,
                                                                    "Drawing...");
     vtkDataSet* product = m_presenter->create(drawUpdateProgress);
-    product->SetFieldData(input->GetFieldData());
+
+    // Extract the relevant metadata from the underlying source
+    m_presenter->setMetadata(input->GetFieldData(), product);
+
     output->ShallowCopy(product);
 
     try

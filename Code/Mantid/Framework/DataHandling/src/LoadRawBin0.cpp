@@ -29,7 +29,10 @@ using namespace API;
 
 /// Constructor
 LoadRawBin0::LoadRawBin0()
-    : m_filename(), m_numberOfSpectra(0), m_specTimeRegimes(), m_prog(0.0) {}
+  : isisRaw(), m_filename(), m_numberOfSpectra(0), m_noTimeRegimes(0),
+    m_cache_options(), m_specTimeRegimes(), m_prog(0.0), m_lengthIn(0),
+    m_perioids(), m_total_specs(0), m_timeChannelsVec() {
+}
 
 LoadRawBin0::~LoadRawBin0() {}
 
@@ -128,10 +131,13 @@ void LoadRawBin0::exec() {
         createPeriodLogs(period_number, localWorkspace);
       }
     }
-    skipData(file, period * (m_numberOfSpectra + 1));
+
+    const int64_t periodTimesNSpectraP1 = period *
+      (static_cast<int64_t>(m_numberOfSpectra) + 1);
+    skipData(file, periodTimesNSpectraP1);
     int64_t wsIndex = 0;
     for (specid_t i = 1; i <= m_numberOfSpectra; ++i) {
-      int64_t histToRead = i + period * (m_numberOfSpectra + 1);
+      int64_t histToRead = i + periodTimesNSpectraP1;
       if ((i >= m_spec_min && i < m_spec_max) ||
           (m_list &&
            find(m_spec_list.begin(), m_spec_list.end(), i) !=

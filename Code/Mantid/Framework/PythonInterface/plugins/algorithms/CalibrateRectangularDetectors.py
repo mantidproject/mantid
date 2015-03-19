@@ -1,15 +1,42 @@
+#pylint: disable=no-init,invalid-name
 from mantid.api import *
 from mantid.kernel import *
 from mantid.simpleapi import *
 import os
-import datetime
-from time import localtime, strftime
+from time import strftime
 from mantid import config
 from mantid.kernel import Direction
 
 COMPRESS_TOL_TOF = .01
 
 class CalibrateRectangularDetectors(PythonAlgorithm):
+
+    _instrument = None
+    _filterBadPulses = None
+    _xpixelbin = None
+    _ypixelbin = None
+    _grouping = None
+    _smoothoffsets = None
+    _smoothGroups = None
+    _peakpos = None
+    _peakpos1 = None
+    _peakmin = None
+    _peakmax = None
+    _peakpos2 = None
+    _peakmin2 = None
+    _peakmax2 = None
+    _peakpos3 = None
+    _peakmin3 = None
+    _peakmax3 = None
+    _lastpixel = None
+    _lastpixel2 = None
+    _lastpixel3 = None
+    _ccnumber = None
+    _maxoffset = None
+    _diffractionfocus = None
+    _outDir = None
+    _outTypes = None
+    _binning = None
 
     def category(self):
         return "Diffraction;PythonAlgorithms"
@@ -39,7 +66,7 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
         validator.setLower(0)
         self.declareProperty(IntArrayProperty("Background", values=[0], direction=Direction.Input,
                                               validator=validator))
-        extensions = [ "_event.nxs", "_runinfo.xml"]
+        extensions = [ "_event.nxs", "_runinfo.xml", ".nxs.h5"]
         self.declareProperty("Extension", "_event.nxs",
                              StringListValidator(extensions))
         self.declareProperty("CompressOnRead", False,
@@ -60,26 +87,28 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
                              "Maximum absolute value of offsets; default is 1")
         self.declareProperty("CrossCorrelation", True,
                              "CrossCorrelation if True; minimize using many peaks if False.")
-        self.declareProperty("PeakPositions", "",
+        validator = FloatArrayBoundedValidator()
+        validator.setLower(0.)
+        self.declareProperty(FloatArrayProperty("PeakPositions", []),
                              "Comma delimited d-space positions of reference peaks.  Use 1-3 for Cross Correlation.  Unlimited for many peaks option.")
         self.declareProperty("PeakWindowMax", 0.,
                              "Maximum window around a peak to search for it. Optional.")
-        self.declareProperty(ITableWorkspaceProperty("FitwindowTableWorkspace", "", Direction.Input, PropertyMode.Optional),
+        self.declareProperty(ITableWorkspaceProperty("FitwindowTableWorkspace", "", Direction.Input, PropertyMode.Optional),\
                 "Name of input table workspace containing the fit window information for each spectrum. ")
         self.declareProperty("MinimumPeakHeight", 2., "Minimum value allowed for peak height")
-        self.declareProperty("MinimumPeakHeightObs", 0.,
+        self.declareProperty("MinimumPeakHeightObs", 0.,\
             "Minimum value of a peak's maximum observed Y value for this peak to be used to calculate offset.")
 
-        self.declareProperty(MatrixWorkspaceProperty("DetectorResolutionWorkspace", "", Direction.Input, PropertyMode.Optional),
+        self.declareProperty(MatrixWorkspaceProperty("DetectorResolutionWorkspace", "", Direction.Input, PropertyMode.Optional),\
                 "Name of optional input matrix workspace for each detector's resolution (D(d)/d).")
-        self.declareProperty(FloatArrayProperty("AllowedResRange", [0.25, 4.0], direction=Direction.Input),
+        self.declareProperty(FloatArrayProperty("AllowedResRange", [0.25, 4.0], direction=Direction.Input),\
                 "Range of allowed individual peak's resolution factor to input detector's resolution.")
 
         self.declareProperty("PeakFunction", "Gaussian", StringListValidator(["BackToBackExponential", "Gaussian", "Lorentzian"]),
                              "Type of peak to fit. Used only with CrossCorrelation=False")
         self.declareProperty("BackgroundType", "Flat", StringListValidator(['Flat', 'Linear', 'Quadratic']),
                              "Used only with CrossCorrelation=False")
-        self.declareProperty("DetectorsPeaks", "",
+        self.declareProperty(IntArrayProperty("DetectorsPeaks", []),
                              "Comma delimited numbers of detector banks for each peak if using 2-3 peaks for Cross Correlation.  Default is all.")
         self.declareProperty("PeakHalfWidth", 0.05,
                              "Half width of d-space around peaks for Cross Correlation. Default is 0.05")
@@ -107,15 +136,13 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
     def validateInputs(self):
         messages = {}
 
-        detectors = self.getProperty("DetectorsPeaks").value.strip()
+        detectors = self.getProperty("DetectorsPeaks").value
         if self.getProperty("CrossCorrelation").value:
-            positions = self.getProperty("PeakPositions").value.strip()
-            positions = positions.split(',')
-            if not bool(detectors):
+            positions = self.getProperty("PeakPositions").value
+            if len(detectors) <= 1:
                 if len(positions) != 1:
                     messages["PeakPositions"] = "Can only have one cross correlation peak without specifying 'DetectorsPeaks'"
             else:
-                detectors = detectors.split(',')
                 if len(detectors) != len(positions):
                     messages["PeakPositions"] = "Must be the same length as 'DetectorsPeaks' (%d != %d)" \
                         % (len(positions), len(detectors))
@@ -124,7 +151,6 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
                     messages["DetectorsPeaks"] = "Up to 3 peaks are supported"
         elif bool(detectors):
             messages["DetectorsPeaks"] = "Only allowed for CrossCorrelation=True"
-            prop = self.getProperty("CrossCorrelationPoints")
 
         return messages
 
@@ -148,7 +174,7 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
         wksp = LoadPreNexus(Filename=filename, OutputWorkspace=name, **mykwargs)
 
         # add the logs to it
-        if (str(self._instrument) == "SNAP"):
+        if str(self._instrument) == "SNAP":
             LoadInstrument(Workspace=wksp, InstrumentName=self._instrument, RewriteSpectraMap=False)
 
         return wksp
@@ -189,7 +215,7 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
         if  runnumber is None or runnumber <= 0:
             return None
 
-        if extension.endswith("_event.nxs"):
+        if extension.endswith("_event.nxs") or extension.endswith(".nxs.h5"):
             wksp = self._loadEventNeXusData(runnumber, extension, **filter)
         else:
             wksp = self._loadPreNeXusData(runnumber, extension, **filter)
@@ -314,7 +340,7 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
             for ws in [str(wksp)+"cc3", str(wksp)+"offset3", str(wksp)+"mask3"]:
                 if AnalysisDataService.doesExist(ws):
                     AnalysisDataService.remove(ws)
-        (temp, numGroupedSpectra, numGroups) = CreateGroupingWorkspace(InputWorkspace=wksp, GroupDetectorsBy=self._grouping,
+        (temp, numGroupedSpectra, numGroups) = CreateGroupingWorkspace(InputWorkspace=wksp, GroupDetectorsBy=self._grouping,\
                                 OutputWorkspace=str(wksp)+"group")
         if (numGroupedSpectra==0) or (numGroups==0):
             raise RuntimeError("%d spectra will be in %d groups" % (numGroupedSpectra, numGroups))
@@ -363,7 +389,7 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
         if not "histo" in self.getProperty("Extension").value:
             wksp = Rebin(InputWorkspace=wksp, OutputWorkspace=wksp.name(),
                          Params=str(self._binning[0])+","+str((self._binning[1]))+","+str(self._binning[2]))
-        (temp, numGroupedSpectra, numGroups) = CreateGroupingWorkspace(InputWorkspace=wksp, GroupDetectorsBy=self._grouping,
+        (temp, numGroupedSpectra, numGroups) = CreateGroupingWorkspace(InputWorkspace=wksp, GroupDetectorsBy=self._grouping,\
                                 OutputWorkspace=str(wksp)+"group")
         if (numGroupedSpectra==0) or (numGroups==0):
             raise RuntimeError("%d spectra will be in %d groups" % (numGroupedSpectra, numGroups))
@@ -386,7 +412,7 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
             reslowf = resrange[0]
             resupf = resrange[1]
             if reslowf >= resupf:
-                raise NotImplementedError("Allowed resolution range factor, lower boundary (%f) must be smaller than upper boundary (%f)."
+                raise NotImplementedError("Allowed resolution range factor, lower boundary (%f) must be smaller than upper boundary (%f)."\
                         % (reslowf, resupf))
         else:
             reslowf = 0.0
@@ -436,7 +462,7 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
         if wksp is None:
             return None
         MaskDetectors(Workspace=wksp, MaskedWorkspace=str(wksp)+"mask")
-        wksp = AlignDetectors(InputWorkspace=wksp, OutputWorkspace=wksp.name(),
+        wksp = AlignDetectors(InputWorkspace=wksp, OutputWorkspace=wksp.name(),\
                        OffsetsWorkspace=str(wksp)+"offset")
         # Diffraction focusing using new calibration file with offsets
         if self._diffractionfocus:
@@ -466,9 +492,8 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
         self._smoothoffsets = self.getProperty("SmoothSummedOffsets").value
         self._smoothGroups = self.getProperty("SmoothGroups").value
         self._peakpos = self.getProperty("PeakPositions").value
-        positions = self._peakpos.strip().split(',')
         if self.getProperty("CrossCorrelation").value:
-            self._peakpos1 = float(positions[0])
+            self._peakpos1 = self._peakpos[0]
             self._peakpos2 = 0
             self._peakpos3 = 0
             self._lastpixel = 0
@@ -477,15 +502,15 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
             peakhalfwidth = self.getProperty("PeakHalfWidth").value
             self._peakmin = self._peakpos1-peakhalfwidth
             self._peakmax = self._peakpos1+peakhalfwidth
-            if len(positions) >= 2:
-                self._peakpos2 = float(positions[1])
+            if len(self._peakpos) >= 2:
+                self._peakpos2 = self._peakpos[1]
                 self._peakmin2 = self._peakpos2-peakhalfwidth
                 self._peakmax2 = self._peakpos2+peakhalfwidth
-            if len(positions) >= 3:
-                self._peakpos3 = float(positions[1])
+            if len(self._peakpos) >= 3:
+                self._peakpos3 = self._peakpos[2]
                 self._peakmin3 = self._peakpos3-peakhalfwidth
                 self._peakmax3 = self._peakpos3+peakhalfwidth
-            detectors = self.getProperty("DetectorsPeaks").value.strip().split(',')
+            detectors = self.getProperty("DetectorsPeaks").value
             if detectors[0]:
                 self._lastpixel = int(detectors[0])
                 self._lastpixel3 = self._lastpixel
@@ -494,7 +519,6 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
                 self._lastpixel3 = self._lastpixel2
             if len(detectors) >= 3:
                 self._lastpixel3 = self._lastpixel2+int(detectors[2])
-            pixelbin2 = self._xpixelbin*self._ypixelbin
             self._ccnumber = self.getProperty("CrossCorrelationPoints").value
         self._maxoffset = self.getProperty("MaxOffset").value
         self._diffractionfocus = self.getProperty("DiffractionFocusWorkspace").value
@@ -515,7 +539,7 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
         for (samNum, backNum) in zip(samRuns, backRuns):
             # first round of processing the sample
             samRun = self._loadData(samNum, SUFFIX, filterWall)
-            if (backNum > 0):
+            if backNum > 0:
                 backRun = self._loadData(backNum, SUFFIX, filterWall)
                 samRun -= backRun
                 DeleteWorkspace(backRun)

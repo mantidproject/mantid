@@ -522,7 +522,47 @@
           <property name="currentIndex">
            <number>0</number>
           </property>
-          <widget class="QWidget" name="page">
+          <widget class="QWidget" name="pgSampleChemicalFormula">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <layout class="QVBoxLayout" name="verticalLayout_17">
+            <property name="margin">
+             <number>0</number>
+            </property>
+            <item>
+             <layout class="QGridLayout" name="gridLayout_12" columnminimumwidth="0,9">
+              <item row="0" column="0">
+               <widget class="QLineEdit" name="leSampleFormula">
+                <property name="text">
+                 <string/>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="1">
+               <widget class="QLabel" name="valSampleFormula">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="styleSheet">
+                 <string notr="true">color: rgb(255, 0, 0);</string>
+                </property>
+                <property name="text">
+                 <string>*</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+           </layout>
+          </widget>
+          <widget class="QWidget" name="pgSampleCrossSections">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
              <horstretch>0</horstretch>
@@ -599,46 +639,6 @@
             </item>
            </layout>
           </widget>
-          <widget class="QWidget" name="page_2">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <layout class="QVBoxLayout" name="verticalLayout_17">
-            <property name="margin">
-             <number>0</number>
-            </property>
-            <item>
-             <layout class="QGridLayout" name="gridLayout_12" columnminimumwidth="0,9">
-              <item row="0" column="0">
-               <widget class="QLineEdit" name="leSampleFormula">
-                <property name="text">
-                 <string/>
-                </property>
-               </widget>
-              </item>
-              <item row="0" column="1">
-               <widget class="QLabel" name="valSampleFormula">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
-                </property>
-                <property name="styleSheet">
-                 <string notr="true">color: rgb(255, 0, 0);</string>
-                </property>
-                <property name="text">
-                 <string>*</string>
-                </property>
-               </widget>
-              </item>
-             </layout>
-            </item>
-           </layout>
-          </widget>
          </widget>
         </item>
         <item row="0" column="5">
@@ -674,12 +674,12 @@
           </property>
           <item>
            <property name="text">
-            <string>Input</string>
+            <string>Formula</string>
            </property>
           </item>
           <item>
            <property name="text">
-            <string>Formula</string>
+            <string>Input</string>
            </property>
           </item>
          </widget>
@@ -746,7 +746,43 @@
           <property name="currentIndex">
            <number>0</number>
           </property>
-          <widget class="QWidget" name="page_3">
+          <widget class="QWidget" name="pgCanChemicalFormula">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <layout class="QVBoxLayout" name="verticalLayout_15">
+            <property name="margin">
+             <number>0</number>
+            </property>
+            <item>
+             <layout class="QGridLayout" name="gridLayout_10" columnminimumwidth="0,9">
+              <item row="0" column="0">
+               <widget class="QLineEdit" name="leCanFormula"/>
+              </item>
+              <item row="0" column="1">
+               <widget class="QLabel" name="valCanFormula">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="styleSheet">
+                 <string notr="true">color: rgb(255, 0, 0);</string>
+                </property>
+                <property name="text">
+                 <string>*</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+           </layout>
+          </widget>
+          <widget class="QWidget" name="pgCanCrossSections">
            <property name="enabled">
             <bool>true</bool>
            </property>
@@ -850,42 +886,6 @@
             </item>
            </layout>
           </widget>
-          <widget class="QWidget" name="page_4">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <layout class="QVBoxLayout" name="verticalLayout_15">
-            <property name="margin">
-             <number>0</number>
-            </property>
-            <item>
-             <layout class="QGridLayout" name="gridLayout_10" columnminimumwidth="0,9">
-              <item row="0" column="0">
-               <widget class="QLineEdit" name="leCanFormula"/>
-              </item>
-              <item row="0" column="1">
-               <widget class="QLabel" name="valCanFormula">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
-                </property>
-                <property name="styleSheet">
-                 <string notr="true">color: rgb(255, 0, 0);</string>
-                </property>
-                <property name="text">
-                 <string>*</string>
-                </property>
-               </widget>
-              </item>
-             </layout>
-            </item>
-           </layout>
-          </widget>
          </widget>
         </item>
         <item row="0" column="4">
@@ -924,12 +924,12 @@
           </property>
           <item>
            <property name="text">
-            <string>Input</string>
+            <string>Formula</string>
            </property>
           </item>
           <item>
            <property name="text">
-            <string>Formula</string>
+            <string>Input</string>
            </property>
           </item>
          </widget>
@@ -1024,6 +1024,63 @@
    <header>MantidQtMantidWidgets/DataSelector.h</header>
   </customwidget>
  </customwidgets>
+ <tabstops>
+  <tabstop>ckUseCan</tabstop>
+  <tabstop>cbShape</tabstop>
+  <tabstop>lets</tabstop>
+  <tabstop>letc1</tabstop>
+  <tabstop>letc2</tabstop>
+  <tabstop>ler1</tabstop>
+  <tabstop>ler2</tabstop>
+  <tabstop>ler3</tabstop>
+  <tabstop>leavar</tabstop>
+  <tabstop>lewidth</tabstop>
+  <tabstop>lesamden</tabstop>
+  <tabstop>cbSampleInputType</tabstop>
+  <tabstop>lesamsigs</tabstop>
+  <tabstop>lesamsiga</tabstop>
+  <tabstop>leSampleFormula</tabstop>
+  <tabstop>lecanden</tabstop>
+  <tabstop>cbCanInputType</tabstop>
+  <tabstop>lecansigs</tabstop>
+  <tabstop>lecansiga</tabstop>
+  <tabstop>leCanFormula</tabstop>
+  <tabstop>cbPlotOutput</tabstop>
+  <tabstop>ckSave</tabstop>
+ </tabstops>
  <resources/>
- <connections/>
+ <connections>
+  <connection>
+   <sender>cbCanInputType</sender>
+   <signal>currentIndexChanged(int)</signal>
+   <receiver>swCanInputType</receiver>
+   <slot>setCurrentIndex(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>193</x>
+     <y>405</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>440</x>
+     <y>405</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>cbSampleInputType</sender>
+   <signal>currentIndexChanged(int)</signal>
+   <receiver>swSampleInputType</receiver>
+   <slot>setCurrentIndex(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>193</x>
+     <y>310</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>440</x>
+     <y>310</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
 </ui>

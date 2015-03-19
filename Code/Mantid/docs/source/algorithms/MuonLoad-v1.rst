@@ -24,7 +24,7 @@ Specifically:
 Workflow
 ########
 
-.. image:: ../images/MuonWorkflow.png
+.. diagram:: MuonLoad-v1_wkflw.dot
 
 Usage
 -----

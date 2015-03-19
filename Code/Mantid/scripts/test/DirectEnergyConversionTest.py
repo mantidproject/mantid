@@ -1,5 +1,5 @@
 import os, sys
-#os.environ["PATH"] = r"c:/Mantid/Code/builds/br_master/bin/Release;"+os.environ["PATH"]
+#os.environ["PATH"] = r"c:\Mantid\Code\builds\br_master\bin\Release;"+os.environ["PATH"]
 from mantid.simpleapi import *
 from mantid import api
 import unittest
@@ -7,7 +7,6 @@ import inspect
 from Direct.DirectEnergyConversion import DirectEnergyConversion
 from Direct.PropertyManager  import PropertyManager
 import Direct.dgreduce as dgreduce
-
 
 #-----------------------------------------------------------------------------------------------------------------------------------------
 #-----------------------------------------------------------------------------------------------------------------------------------------
@@ -24,9 +23,6 @@ class DirectEnergyConversionTest(unittest.TestCase):
     def tearDown(self):
         api.AnalysisDataService.clear()
         pass
-
-   #def test_build_coupled_keys_dict_simple(self):
-   #    params = ["]
 
     def test_init_reducer(self):
         tReducer = self.reducer
@@ -62,7 +58,8 @@ class DirectEnergyConversionTest(unittest.TestCase):
         clean_up(files)
         tReducer.prop_man.save_format=''
 
-        tws =CreateSampleWorkspace(Function='Flat background', NumBanks=1, BankPixelWidth=1, NumEvents=10, XUnit='DeltaE', XMin=-10, XMax=10, BinWidth=0.1)
+        tws =CreateSampleWorkspace(Function='Flat background', NumBanks=1, BankPixelWidth=1,\
+                NumEvents=10, XUnit='DeltaE', XMin=-10, XMax=10, BinWidth=0.1)
 
 
         self.assertTrue(len(tReducer.prop_man.save_format) ==0)
@@ -73,10 +70,8 @@ class DirectEnergyConversionTest(unittest.TestCase):
 
 
 
-        # redefine test save methors to produce test ouptut
-
+        # redefine test save methods to produce test output
         tReducer.prop_man.save_format=['spe','nxspe','nxs']
-
         tReducer.save_results(tws,'save_formats_test_file.tt')
 
         files = ['save_formats_test_file.spe','save_formats_test_file.nxspe','save_formats_test_file.nxs']
@@ -128,7 +123,7 @@ class DirectEnergyConversionTest(unittest.TestCase):
 
         white_ws = tReducer.do_white(wb_ws, None, None)
         self.assertTrue(white_ws)
- 
+
 
     def test_get_set_attributes(self):
         tReducer = self.reducer
@@ -162,20 +157,22 @@ class DirectEnergyConversionTest(unittest.TestCase):
         tReducer = DirectEnergyConversion(mono_ws.getInstrument())
         tReducer.prop_man.incident_energy = 5.
         tReducer.prop_man.monovan_integr_range=[-10,10]
+        tReducer.wb_run = mono_ws
 
-        (nf1,nf2,nf3,nf4) = tReducer.get_abs_normalization_factor(mono_ws.getName(),5.)        
+        (nf1,nf2,nf3,nf4) = tReducer.get_abs_normalization_factor(PropertyManager.wb_run,5.)
         self.assertAlmostEqual(nf1,0.58561121802167193,7)
         self.assertAlmostEqual(nf1,nf2)
         self.assertAlmostEqual(nf2,nf3)
         self.assertAlmostEqual(nf3,nf4)
 
-        # check warning. WB spectra with 0 signal indicate troubles. 
+        # check warning. WB spectra with 0 signal indicate troubles.
         mono_ws = CreateSampleWorkspace(NumBanks=1, BankPixelWidth=4, NumEvents=10000,XUnit='DeltaE',XMin=-5,XMax=15,BinWidth=0.1,function='Flat background')
         LoadInstrument(mono_ws,InstrumentName='MARI')
         sig = mono_ws.dataY(0)
-        sig[:]=0          
+        sig[:]=0
 
-        (nf1,nf2,nf3,nf4) = tReducer.get_abs_normalization_factor(mono_ws.getName(),5.)
+        tReducer.wb_run = mono_ws
+        (nf1,nf2,nf3,nf4) = tReducer.get_abs_normalization_factor(PropertyManager.wb_run,5.)
         self.assertAlmostEqual(nf1,0.585611218022,7)
         self.assertAlmostEqual(nf1,nf2)
         self.assertAlmostEqual(nf2,nf3)
@@ -186,12 +183,11 @@ class DirectEnergyConversionTest(unittest.TestCase):
         """ Test for old interface """
         run_ws = CreateSampleWorkspace( Function='Multiple Peaks', NumBanks=1, BankPixelWidth=4, NumEvents=10000)
         LoadInstrument(run_ws,InstrumentName='MARI')
+
         #mono_ws = CloneWorkspace(run_ws)
         wb_ws   = CloneWorkspace(run_ws)
+        AddSampleLog(wb_ws,LogName='run_number',LogText='300',LogType='Number')
         #wb_ws=CreateSampleWorkspace( Function='Multiple Peaks', NumBanks=1, BankPixelWidth=4, NumEvents=10000)
-
-
-
 
         dgreduce.setup('MAR')
         par = {}
@@ -204,18 +200,36 @@ class DirectEnergyConversionTest(unittest.TestCase):
         #abs_units(wb_for_run,sample_run,monovan_run,wb_for_monovanadium,samp_rmm,samp_mass,ei_guess,rebin,map_file='default',monovan_mapfile='default',**kwargs):
         ws = dgreduce.abs_units(wb_ws,run_ws,None,wb_ws,10,100,8.8,[-10,0.1,7],None,None,**par)
         self.assertTrue(isinstance(ws,api.MatrixWorkspace))
-    
-  
-    ##def test_diag_call(self):
-    ##    tReducer = self.reducer
-    ##    # should do nothing as already initialized above, but if not will initiate the instrument
-    ##    tReducer.initialise("MAP")
+
+    def test_dgreduce_works_with_name(self):
+        """ Test for old interface """
+        run_ws = CreateSampleWorkspace( Function='Multiple Peaks', NumBanks=1, BankPixelWidth=4, NumEvents=10000)
+        LoadInstrument(run_ws,InstrumentName='MARI')
+        AddSampleLog(run_ws,LogName='run_number',LogText='200',LogType='Number')
+        #mono_ws = CloneWorkspace(run_ws)
+        wb_ws   = CloneWorkspace(run_ws)
+        AddSampleLog(wb_ws,LogName='run_number',LogText='100',LogType='Number')
+        #wb_ws=CreateSampleWorkspace( Function='Multiple Peaks', NumBanks=1, BankPixelWidth=4, NumEvents=10000)
+
+        dgreduce.setup('MAR')
+        par = {}
+        par['ei_mon_spectra']=[4,5]
+        par['abs_units_van_range']=[-4000,8000]
+        # overwrite parameters, which are necessary from command line, but we want them to have test values
+        dgreduce.getReducer().map_file=None
+        dgreduce.getReducer().monovan_mapfile=None
+        dgreduce.getReducer().mono_correction_factor = 1
+        #abs_units(wb_for_run,sample_run,monovan_run,wb_for_monovanadium,samp_rmm,samp_mass,ei_guess,rebin,map_file='default',monovan_mapfile='default',**kwargs):
+        ws = dgreduce.abs_units('wb_ws','run_ws',None,wb_ws,10,100,8.8,[-10,0.1,7],None,None,**par)
+        self.assertTrue(isinstance(ws,api.MatrixWorkspace))
+
+
 
     ##    tReducet.di
     def test_energy_to_TOF_range(self):
 
         ws = Load(Filename='MAR11001.raw',LoadMonitors='Include')
-        
+
         en_range = [0.8*13,13,1.2*13]
         detIDs=[1,2,3,10]
         red = DirectEnergyConversion()
@@ -273,7 +287,7 @@ class DirectEnergyConversionTest(unittest.TestCase):
         # References used to test against ordinary reduction
         ref_ws = Rebin(run,Params=[tMin,1,tMax],PreserveEvents=False)
         ref_ws_monitors = CloneWorkspace('run_monitors')
-        # just in case, wb should work without clone too. 
+        # just in case, wb should work without clone too.
         wb_clone = CloneWorkspace(wb_ws)
 
         # Run Mono
@@ -292,8 +306,8 @@ class DirectEnergyConversionTest(unittest.TestCase):
 
     def test_tof_range(self):
 
-        run=CreateSampleWorkspace(Function='Multiple Peaks', NumBanks=6, BankPixelWidth=1, NumEvents=10, XUnit='DeltaE',
-                                                     XMin=-20, XMax=65, BinWidth=0.2)
+        run=CreateSampleWorkspace(Function='Multiple Peaks', NumBanks=6, BankPixelWidth=1, NumEvents=10,\
+                                  XUnit='DeltaE', XMin=-20, XMax=65, BinWidth=0.2)
         LoadInstrument(run,InstrumentName='MARI')
 
         red = DirectEnergyConversion(run.getInstrument())
@@ -327,19 +341,19 @@ class DirectEnergyConversionTest(unittest.TestCase):
 
     def test_multirep_mode(self):
         # create test workspace
-        run_monitors=CreateSampleWorkspace(Function='Multiple Peaks', NumBanks=4, BankPixelWidth=1, NumEvents=100000, XUnit='Energy',
-                                                     XMin=3, XMax=200, BinWidth=0.1)
+        run_monitors=CreateSampleWorkspace(Function='Multiple Peaks', NumBanks=4, BankPixelWidth=1,\
+                                           NumEvents=100000,XUnit='Energy', XMin=3, XMax=200, BinWidth=0.1)
         LoadInstrument(run_monitors,InstrumentName='MARI')
         ConvertUnits(InputWorkspace='run_monitors', OutputWorkspace='run_monitors', Target='TOF')
         run_monitors = mtd['run_monitors']
         tof = run_monitors.dataX(3)
         tMin = tof[0]
         tMax = tof[-1]
-        run = CreateSampleWorkspace( Function='Multiple Peaks',WorkspaceType='Event',NumBanks=8, BankPixelWidth=1, NumEvents=100000,
-                                    XUnit='TOF',xMin=tMin,xMax=tMax)
+        run = CreateSampleWorkspace( Function='Multiple Peaks',WorkspaceType='Event',NumBanks=8, BankPixelWidth=1,\
+                                     NumEvents=100000, XUnit='TOF',xMin=tMin,xMax=tMax)
         LoadInstrument(run,InstrumentName='MARI')
 
-        # do second 
+        # do second
         run2 = CloneWorkspace(run)
         run2_monitors = CloneWorkspace(run_monitors)
 
@@ -347,7 +361,7 @@ class DirectEnergyConversionTest(unittest.TestCase):
 
         # Run multirep
         tReducer = DirectEnergyConversion(run.getInstrument())
-        tReducer.prop_man.run_diagnostics=False
+        tReducer.prop_man.run_diagnostics=True
         tReducer.hard_mask_file=None
         tReducer.map_file=None
         tReducer.save_format=None
@@ -372,7 +386,7 @@ class DirectEnergyConversionTest(unittest.TestCase):
         # rename samples from previous workspace to avoid deleting them on current run
         for ind,item in enumerate(result):
             result[ind]=RenameWorkspace(item,OutputWorkspace='SampleRez#'+str(ind))
-        # 
+        #
         result2 = tReducer.convert_to_energy(None,run2,[67.,122.],[-2,0.02,0.8])
 
         rez = CheckWorkspacesMatch(result[0],result2[0])
@@ -383,16 +397,16 @@ class DirectEnergyConversionTest(unittest.TestCase):
 
     def test_multirep_abs_units_mode(self):
         # create test workspace
-        run_monitors=CreateSampleWorkspace(Function='Multiple Peaks', NumBanks=4, BankPixelWidth=1, NumEvents=100000, XUnit='Energy',
-                                                     XMin=3, XMax=200, BinWidth=0.1)
+        run_monitors=CreateSampleWorkspace(Function='Multiple Peaks', NumBanks=4, BankPixelWidth=1,\
+                                            NumEvents=100000, XUnit='Energy', XMin=3, XMax=200, BinWidth=0.1)
         LoadInstrument(run_monitors,InstrumentName='MARI')
         ConvertUnits(InputWorkspace='run_monitors', OutputWorkspace='run_monitors', Target='TOF')
         run_monitors = mtd['run_monitors']
         tof = run_monitors.dataX(3)
         tMin = tof[0]
         tMax = tof[-1]
-        run = CreateSampleWorkspace( Function='Multiple Peaks',WorkspaceType='Event',NumBanks=8, BankPixelWidth=1, NumEvents=100000,
-                                    XUnit='TOF',xMin=tMin,xMax=tMax)
+        run = CreateSampleWorkspace( Function='Multiple Peaks',WorkspaceType='Event',NumBanks=8, BankPixelWidth=1,\
+                                     NumEvents=100000, XUnit='TOF',xMin=tMin,xMax=tMax)
         LoadInstrument(run,InstrumentName='MARI')
 
         # build "monovanadium"
@@ -408,7 +422,7 @@ class DirectEnergyConversionTest(unittest.TestCase):
 
         # Run multirep
         tReducer = DirectEnergyConversion(run.getInstrument())
-        tReducer.prop_man.run_diagnostics=False # temporary
+        tReducer.prop_man.run_diagnostics=True 
         tReducer.hard_mask_file=None
         tReducer.map_file=None
         tReducer.prop_man.background_range=[0.99*tMax,tMax]
@@ -416,7 +430,6 @@ class DirectEnergyConversionTest(unittest.TestCase):
         tReducer.save_format=None
         tReducer.prop_man.normalise_method='monitor-1'
         tReducer.norm_mon_integration_range=[tMin,tMax]
-        #tReducer.prop_man.
 
         result = tReducer.convert_to_energy(wb_ws,run,[67.,122.],[-2,0.02,0.8],None,mono)
 
@@ -438,7 +451,7 @@ class DirectEnergyConversionTest(unittest.TestCase):
         # rename samples from previous workspace to avoid deleting them on current run
         for ind,item in enumerate(result):
             result[ind]=RenameWorkspace(item,OutputWorkspace='SampleRez#'+str(ind))
-        # 
+        #
         result2 = tReducer.convert_to_energy(None,run2)
 
         rez = CheckWorkspacesMatch(result[0],result2[0])
@@ -447,9 +460,5 @@ class DirectEnergyConversionTest(unittest.TestCase):
         self.assertEqual(rez,'Success!')
 
 
-
-
-
-
 if __name__=="__main__":
-        unittest.main()
+   unittest.main()

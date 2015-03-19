@@ -194,7 +194,7 @@ QPair<double, double> PreviewPlot::getCurveRange(const Mantid::API::MatrixWorksp
 /**
  * Gets the X range of a curve given its name.
  *
- * @param wsName Name of curve
+ * @param curveName Name of curve
  */
 QPair<double, double> PreviewPlot::getCurveRange(const QString & curveName)
 {
@@ -217,7 +217,7 @@ QPair<double, double> PreviewPlot::getCurveRange(const QString & curveName)
  * Adds a workspace to the preview plot given a pointer to it.
  *
  * @param curveName Name of curve
- * @param wsName Name of workspace in ADS
+ * @param ws Pointer to the workspace
  * @param specIndex Spectrum index to plot
  * @param curveColour Colour of curve to plot
  */
@@ -274,9 +274,9 @@ void PreviewPlot::addSpectrum(const QString & curveName, const QString & wsName,
 
 
 /**
- * Removes spectra from a gievn workspace from the plot given a pointer to it.
+ * Removes spectra from a given workspace from the plot given a pointer to it.
  *
- * If multiple curves are plotted form the smae workspace then all wil lbe removed.
+ * If multiple curves are plotted form the same workspace then all will be removed.
  *
  * @param ws Pointer to workspace
  */
@@ -290,9 +290,9 @@ void PreviewPlot::removeSpectrum(const MatrixWorkspace_sptr ws)
 
 
 /**
- * Removes spectra from a gievn workspace from the plot given its name.
+ * Removes spectra from a given workspace from the plot given its name.
  *
- * @param wsName Name of curve
+ * @param curveName Name of curve
  */
 void PreviewPlot::removeSpectrum(const QString & curveName)
 {
@@ -316,7 +316,7 @@ void PreviewPlot::removeSpectrum(const QString & curveName)
 
 
 /**
- * Checks to see if a given curne name is present on the plot.
+ * Checks to see if a given curve name is present on the plot.
  *
  * @param curveName Curve name
  * @return True if curve is on plot
@@ -324,6 +324,70 @@ void PreviewPlot::removeSpectrum(const QString & curveName)
 bool PreviewPlot::hasCurve(const QString & curveName)
 {
   return m_curves.contains(curveName);
+}
+
+
+/**
+ * Attaches a RangeSelector to the plot and stores it.
+ *
+ * @param rsName Name of range selector
+ * @return RangeSelector object
+ */
+RangeSelector * PreviewPlot::addRangeSelector(const QString & rsName,
+                                              RangeSelector::SelectType type)
+{
+  if(hasRangeSelector(rsName))
+    throw std::runtime_error("RangeSelector already exists on PreviewPlot");
+
+  m_rangeSelectors[rsName] = new MantidWidgets::RangeSelector(m_uiForm.plot, type);
+  m_rsVisibility[rsName] = m_rangeSelectors[rsName]->isVisible();
+
+  return m_rangeSelectors[rsName];
+}
+
+
+/**
+ * Gets a RangeSelector.
+ *
+ * @param rsName Name of range selector
+ * @return RangeSelector object
+ */
+RangeSelector * PreviewPlot::getRangeSelector(const QString & rsName)
+{
+  if(!hasRangeSelector(rsName))
+    throw std::runtime_error("RangeSelector not found on PreviewPlot");
+
+  return m_rangeSelectors[rsName];
+}
+
+
+/**
+ * Removes a RangeSelector from the plot.
+ *
+ * @param rsName Name of range selector
+ * @param del If the object should be deleted
+ */
+void PreviewPlot::removeRangeSelector(const QString & rsName, bool del = true)
+{
+  if(!hasRangeSelector(rsName))
+    return;
+
+  if(del)
+    delete m_rangeSelectors[rsName];
+
+  m_rangeSelectors.remove(rsName);
+}
+
+
+/**
+ * Checks to see if a range selector with a given name is on the plot.
+ *
+ * @param rsName Name of range selector
+ * @return True if the plot has a range selector with the given name
+ */
+bool PreviewPlot::hasRangeSelector(const QString & rsName)
+{
+  return m_rangeSelectors.contains(rsName);
 }
 
 
@@ -460,7 +524,7 @@ void PreviewPlot::hardReplot()
  *
  * Removes it from the plot (via removeSpectrum).
  *
- * @param pNF Poco notification
+ * @param pNf Poco notification
  */
 void PreviewPlot::handleRemoveEvent(WorkspacePreDeleteNotification_ptr pNf)
 {
@@ -564,7 +628,7 @@ void PreviewPlot::removeCurve(QwtPlotCurve * curve)
 
 
 /**
- * Helper function for adding a set of items to an exclusive menu oon the context menu.
+ * Helper function for adding a set of items to an exclusive menu on the context menu.
  *
  * @param menuName Name of sub menu
  * @param group Pointer to ActionGroup
@@ -598,7 +662,7 @@ QList<QAction *> PreviewPlot::addOptionsToMenus(QString menuName, QActionGroup *
 
 
 /**
- * Returns the type of axis scale specified for a giev axis.
+ * Returns the type of axis scale specified for a given axis.
  *
  * @param axisID ID of axis
  * @return Axis type as string
@@ -625,7 +689,7 @@ QString PreviewPlot::getAxisType(int axisID)
 /**
  * Gets a list of curve names that are plotted form the given workspace.
  *
- * @param Pointer to workspace
+ * @param ws Pointer to workspace
  * @return List of curve names
  */
 QStringList PreviewPlot::getCurvesForWorkspace(const MatrixWorkspace_sptr ws)
@@ -722,6 +786,31 @@ void PreviewPlot::handleAxisTypeSelect()
 
   if(yEngine)
     m_uiForm.plot->setAxisScaleEngine(QwtPlot::yLeft, yEngine);
+
+  emit axisScaleChanged();
+
+  // Hide range selectors on X axis when X axis scale is X^2
+  bool xIsSquared = xAxisType == "Squared";
+  for(auto it = m_rangeSelectors.begin(); it != m_rangeSelectors.end(); ++it)
+  {
+    QString rsName = it.key();
+    RangeSelector * rs = it.value();
+    RangeSelector::SelectType type = rs->getType();
+
+    if(type == RangeSelector:: XMINMAX || type == RangeSelector::XSINGLE)
+    {
+      // When setting to invisible save the last visibility setting
+      if(xIsSquared)
+      {
+        m_rsVisibility[rsName] = rs->isVisible();
+        rs->setVisible(false);
+      }
+      else
+      {
+        rs->setVisible(m_rsVisibility[rsName]);
+      }
+    }
+  }
 
   // Update the plot
   emit needToHardReplot();

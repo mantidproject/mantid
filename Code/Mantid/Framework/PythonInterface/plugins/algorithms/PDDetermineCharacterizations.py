@@ -1,4 +1,4 @@
-import mantid.simpleapi as api
+#pylint: disable=no-init
 from mantid.api import *
 from mantid.kernel import *
 
@@ -61,12 +61,12 @@ class PDDetermineCharacterizations(PythonAlgorithm):
         self.declareProperty("NormBackRun", 0,
                              doc="The background" + defaultMsg)
 
-        self.declareProperty(StringArrayProperty("FrequencyLogNames", ["SpeedRequest1", "Speed1", "frequency"],
-            direction=Direction.Input),
+        self.declareProperty(StringArrayProperty("FrequencyLogNames", ["SpeedRequest1", "Speed1", "frequency"],\
+            direction=Direction.Input),\
             "Possible log names for frequency.")
 
-        self.declareProperty(StringArrayProperty("WaveLengthLogNames", ["LambdaRequest", "lambda"],
-            direction=Direction.Input),
+        self.declareProperty(StringArrayProperty("WaveLengthLogNames", ["LambdaRequest", "lambda"],\
+            direction=Direction.Input),\
             "Candidate log names for wave length.")
 
         return
@@ -216,7 +216,7 @@ class PDDetermineCharacterizations(PythonAlgorithm):
                                % wkspName)
         return None
 
-    def getWavelength(self, logs, wkspName):
+    def getWavelength(self, logs, dummy_wkspName):
         """ Get wave length
         Wavelength can be given by 2 sample logs, either LambdaRequest or lambda.
         And its unit can be either Angstrom or A.
@@ -246,7 +246,7 @@ class PDDetermineCharacterizations(PythonAlgorithm):
 
             else:
                 if wavelength.units != "Angstrom" and wavelength.units != "A":
-                    msg = "Only know how to deal with %s in Angstrom (A) but not %s" % (name,
+                    msg = "Only know how to deal with %s in Angstrom (A) but not %s" % (name,\
                             wavelength.units)
                     self.log().warning(msg)
                     break

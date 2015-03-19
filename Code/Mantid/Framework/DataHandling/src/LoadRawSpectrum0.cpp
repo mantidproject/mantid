@@ -27,7 +27,9 @@ using namespace API;
 
 /// Constructor
 LoadRawSpectrum0::LoadRawSpectrum0()
-    : m_filename(), m_numberOfSpectra(0), m_specTimeRegimes(), m_prog(0.0) {}
+  : isisRaw(), m_filename(), m_numberOfSpectra(0), m_cache_options(),
+    m_specTimeRegimes(), m_prog(0.0), m_lengthIn(0), m_noTimeRegimes(0) {
+}
 
 LoadRawSpectrum0::~LoadRawSpectrum0() {}
 
@@ -119,7 +121,8 @@ void LoadRawSpectrum0::exec() {
 
     int64_t wsIndex = 0;
     // for each period read first spectrum
-    int64_t histToRead = period * (m_numberOfSpectra + 1);
+    int64_t histToRead = period *
+      (static_cast<int64_t>(m_numberOfSpectra) + 1);
 
     progress(m_prog, "Reading raw file data...");
     // isisRaw->readData(file, histToRead);

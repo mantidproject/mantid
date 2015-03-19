@@ -9,7 +9,6 @@ using namespace Mantid::Kernel;
 namespace Mantid {
 namespace Kernel {
 
-#define DISK_BUFFER_SIZE_TO_REPORT_WRITE 10000
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
@@ -101,8 +100,6 @@ void DiskBuffer::objectDeleted(ISaveable *item) {
   // indicate to the object that it is not stored in memory any more
   item->clearBufferState();
   m_mutex.unlock();
-  // std::cout << "DiskBuffer deleting ID " << item->getId() << "; new size " <<
-  // m_writeBuffer.size() << std::endl;
 
   // Mark the amount of space used on disk as free
   if (item->wasSaved())
@@ -114,9 +111,6 @@ void DiskBuffer::objectDeleted(ISaveable *item) {
  * stored in the "toWrite" buffer.
  */
 void DiskBuffer::writeOldObjects() {
-  if (m_writeBufferUsed > DISK_BUFFER_SIZE_TO_REPORT_WRITE)
-    std::cout << "DiskBuffer:: Writing out " << m_writeBufferUsed
-              << " events in " << m_nObjectsToWrite << " objects." << std::endl;
 
   Poco::ScopedLock<Kernel::Mutex> _lock(m_mutex);
   // Holder for any objects that you were NOT able to write.

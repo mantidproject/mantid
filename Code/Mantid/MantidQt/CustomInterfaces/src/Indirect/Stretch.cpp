@@ -17,9 +17,9 @@ namespace MantidQt
 
 
       // Create range selector
-      m_rangeSelectors["StretchERange"] = new MantidWidgets::RangeSelector(m_uiForm.ppPlot);
-      connect(m_rangeSelectors["StretchERange"], SIGNAL(minValueChanged(double)), this, SLOT(minValueChanged(double)));
-      connect(m_rangeSelectors["StretchERange"], SIGNAL(maxValueChanged(double)), this, SLOT(maxValueChanged(double)));
+      auto eRangeSelector = m_uiForm.ppPlot->addRangeSelector("StretchERange");
+      connect(eRangeSelector, SIGNAL(minValueChanged(double)), this, SLOT(minValueChanged(double)));
+      connect(eRangeSelector, SIGNAL(maxValueChanged(double)), this, SLOT(maxValueChanged(double)));
 
 			// Add the properties browser to the ui form
 			m_uiForm.treeSpace->addWidget(m_propTree);
@@ -126,7 +126,7 @@ namespace MantidQt
 			QString plot = m_uiForm.cbPlot->currentText();
 
 			pyInput += "QuestRun('"+sampleName+"','"+resName+"',"+betaSig+","+eRange+","+nBins+","+fitOps+","+sequence+","
-										" Save="+save+", Plot='"+plot+"', Verbose=True)\n";
+										" Save="+save+", Plot='"+plot+"')\n";
 
 			runPythonScript(pyInput);
 		}
@@ -153,8 +153,9 @@ namespace MantidQt
 		{
 			m_uiForm.ppPlot->addSpectrum("Sample", filename, 0);
 			QPair<double, double> range = m_uiForm.ppPlot->getCurveRange("Sample");
-			setRangeSelector("StretchERange", m_properties["EMin"], m_properties["EMax"], range);
-			setPlotPropertyRange("StretchERange", m_properties["EMin"], m_properties["EMax"], range);
+      auto eRangeSelector = m_uiForm.ppPlot->getRangeSelector("StretchERange");
+			setRangeSelector(eRangeSelector, m_properties["EMin"], m_properties["EMax"], range);
+			setPlotPropertyRange(eRangeSelector, m_properties["EMin"], m_properties["EMax"], range);
 		}
 
 		/**
@@ -185,13 +186,15 @@ namespace MantidQt
 		 */
     void Stretch::updateProperties(QtProperty* prop, double val)
     {
+      auto eRangeSelector = m_uiForm.ppPlot->getRangeSelector("StretchERange");
+
     	if(prop == m_properties["EMin"])
     	{
-    		updateLowerGuide(m_rangeSelectors["StretchERange"], m_properties["EMin"], m_properties["EMax"], val);
+    		updateLowerGuide(eRangeSelector, m_properties["EMin"], m_properties["EMax"], val);
     	}
     	else if (prop == m_properties["EMax"])
     	{
-				updateUpperGuide(m_rangeSelectors["StretchERange"], m_properties["EMin"], m_properties["EMax"], val);
+				updateUpperGuide(eRangeSelector, m_properties["EMin"], m_properties["EMax"], val);
     	}
     }
 

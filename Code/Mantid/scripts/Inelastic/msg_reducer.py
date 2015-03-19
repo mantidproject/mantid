@@ -26,6 +26,8 @@ class MSGReducer(reducer.Reducer):
     _save_formats = []
     _info_table_props = None
     _extra_load_opts = {}
+    _reduction_steps = None
+    _data_files = None
 
     def __init__(self):
         super(MSGReducer, self).__init__()
@@ -37,7 +39,7 @@ class MSGReducer(reducer.Reducer):
         loadData.set_ws_list(self._data_files)
         loadData.set_sum(self._sum)
         loadData.set_load_logs(self._load_logs)
-        loadData.set_detector_range(self._detector_range[0],
+        loadData.set_detector_range(self._detector_range[0],\
             self._detector_range[1])
         loadData.set_parameter_file(self._parameter_file)
         loadData.set_extra_load_opts(self._extra_load_opts)
@@ -48,7 +50,7 @@ class MSGReducer(reducer.Reducer):
 
         self._multiple_frames = loadData.is_multiple_frames()
 
-        if( self._info_table_props is not None ):
+        if  self._info_table_props is not None :
             wsNames = loadData.get_ws_list().keys()
             wsNameList = ", ".join(wsNames)
             propsList = ", ".join(self._info_table_props)
@@ -58,7 +60,7 @@ class MSGReducer(reducer.Reducer):
                 LogPropertyNames=propsList,
                 GroupPolicy="First")
 
-        if ( self._sum ):
+        if  self._sum :
             self._data_files = loadData.get_ws_list()
 
         self._setup_steps()
@@ -178,7 +180,7 @@ class MSGReducer(reducer.Reducer):
             except AttributeError:
                 pass
             except IndexError:
-                raise RuntimeError("None of the reduction steps implement "
+                raise RuntimeError("None of the reduction steps implement "\
                     "the get_result_workspaces() method.")
 
     def _get_monitor_index(self, workspace):

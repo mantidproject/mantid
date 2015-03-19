@@ -1,3 +1,4 @@
+#pylint: disable=no-init,invalid-name
 '''
 @author Jose Borreguero, NScD
 @date October 06, 2013
@@ -30,6 +31,20 @@ import numpy
 from scipy.interpolate import interp1d
 
 class DSFinterp1DFit(IFunction1D):
+
+    _RegressionTypes = None
+    _minWindow = None
+    _InputWorkspaces = None
+    _LoadErrors = None
+    _WorkspaceIndex = None
+    _ParameterValues = None
+    _fmin = None
+    _fmax = None
+    _LocalRegression = None
+    _RegressionType = None
+    _RegressionWindow = None
+    _xvalues = None
+    _channelgroup = None
 
     def category(self):
         return 'QuasiElastic'
@@ -161,9 +176,9 @@ class DSFinterp1DFit(IFunction1D):
         return intensities_interpolator(xvals)  # can we pass by reference?
 
 # Required to have Mantid recognize the new function
+#pylint: disable=unused-import
 try:
     import dsfinterp
     FunctionFactory.subscribe(DSFinterp1DFit)
 except:
     logger.debug('Failed to subscribe fit function DSFinterp1DFit; Python package dsfinterp may be missing (https://pypi.python.org/pypi/dsfinterp)')
-    pass

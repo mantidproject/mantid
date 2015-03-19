@@ -41,7 +41,7 @@ set ( TESTING_TIMEOUT 300 CACHE INTEGER
       "Timeout in seconds for each test (default 300=5minutes)")
 
 ###########################################################################
-# Look for dependencies - bail out if any not found
+# Look for dependencies
 ###########################################################################
 
 set ( Boost_NO_BOOST_CMAKE TRUE )
@@ -70,6 +70,14 @@ set ( MAIN_CMAKE_INCLUDE_PATH ${CMAKE_INCLUDE_PATH} )
 set ( CMAKE_INCLUDE_PATH ${CMAKE_INCLUDE_PATH}/zlib123 )
 find_package ( ZLIB REQUIRED )
 set ( CMAKE_INCLUDE_PATH ${MAIN_CMAKE_INCLUDE_PATH} )
+
+if (${CMAKE_SYSTEM_NAME} MATCHES "Windows" OR OSX_VERSION VERSION_LESS 10.9)
+  set (HDF5_DIR "${CMAKE_MODULE_PATH}")
+  find_package ( HDF5 COMPONENTS HL REQUIRED
+    CONFIGS hdf5-config.cmake )
+else()
+  find_package ( HDF5 COMPONENTS HL REQUIRED )
+endif()
 
 find_package ( PythonInterp )
 
@@ -305,29 +313,7 @@ endif()
 # External Data for testing
 ###########################################################################
 if ( CXXTEST_FOUND OR PYUNITTEST_FOUND )
- include ( MantidExternalData )
-
-# None of our tests reference files directly as arguments so we have to manually
-# call ExternalData_Expand_Arguments to register the files with the ExternalData
-# mechanism
-get_filename_component ( EXTERNALDATATEST_SOURCE_DIR ${PROJECT_SOURCE_DIR} ABSOLUTE )
-file( GLOB_RECURSE doctest_content_links
-  RELATIVE "${EXTERNALDATATEST_SOURCE_DIR}" "Testing/Data/DocTest/*.md5" )
-file( GLOB_RECURSE unittest_content_links
-  RELATIVE "${EXTERNALDATATEST_SOURCE_DIR}" "Testing/Data/UnitTest/*.md5" )
-set ( content_links "${doctest_content_links};${unittest_content_links}" )
-foreach(link ${content_links})
-  string( REGEX REPLACE "\\.md5$" "" link ${link} )
-  ExternalData_Expand_Arguments( StandardTestData
-    link_location
-    DATA{${link}}
-    )
-endforeach()
-
-# Create target to download data from the StandardTestData group.  This must come after
-# all tests have been added that reference the group, so we put it last.
-ExternalData_Add_Target(StandardTestData)
-set_target_properties(StandardTestData PROPERTIES EXCLUDE_FROM_ALL TRUE)
+  include( SetupDataTargets )
 endif()
 
 ###########################################################################

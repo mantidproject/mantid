@@ -74,6 +74,12 @@ void ColorUpdater::colorMapChange(pqPipelineRepresentation *repr,
                                   const pqColorMapModel *model)
 {
   pqScalarsToColors *lut = repr->getLookupTable();
+    if (NULL == lut)
+  {
+    // Got a bad proxy, so just return
+    return;
+  }
+
   // Need the scalar bounds to calculate the color point settings
   QPair<double, double> bounds = lut->getScalarRange();
 

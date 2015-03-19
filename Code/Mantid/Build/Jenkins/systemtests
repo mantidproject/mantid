@@ -1,0 +1,73 @@
+#!/bin/bash -ex
+###############################################################################
+# LINUX/MAC SCRIPT TO DRIVE THE SYSTEM TESTS OF MANTID
+#
+# Notes:
+#
+# WORKSPACE, JOB_NAME, NODE_LABEL GIT_COMMIT are environment variables that 
+# are set by Jenkins. The last one corresponds to any labels set on a slave.
+###############################################################################
+
+###############################################################################
+# Print out the versions of things we are using
+###############################################################################
+cmake --version
+echo "SHA1=${sha1}"
+
+###############################################################################
+# Set up the location for the local object store outside of the build and
+# source tree, which can be shared by multiple builds.
+# It defaults to a MantidExternalData directory within the HOME directory.
+# It can be overridden by setting the MANTID_DATA_STORE environment variable.
+###############################################################################
+if [ -z "$MANTID_DATA_STORE" ]; then
+  export MANTID_DATA_STORE=$HOME/MantidExternalData
+fi
+
+###############################################################################
+# RHEL6 setup steps - nodes must have a "rhel6" label set (in lowercase)
+###############################################################################
+if [[ ${NODE_LABELS} == *rhel6* ]]; then
+  SCL_ON_RHEL6="scl enable mantidlibs"
+  ON_RHEL6=true
+else
+  SCL_ON_RHEL6="eval"
+fi
+
+###############################################################################
+# Create the build directory if it doesn't exist
+###############################################################################
+[ -d $WORKSPACE/build ] || mkdir $WORKSPACE/build
+cd $WORKSPACE/build
+
+###############################################################################
+# CMake configuration if it has not already been configured.
+# We use the special flag that only creates the targets for the data
+###############################################################################
+if [[ ! -e $WORKSPACE/build/CMakeCache.txt ]]; then
+  $SCL_ON_RHEL6 "cmake -DMANTID_DATA_STORE=${MANTID_DATA_STORE} -DDATA_TARGETS_ONLY=ON ../Code/Mantid"
+else
+  $SCL_ON_RHEL6 "cmake ."
+fi
+
+###############################################################################
+# Build step
+###############################################################################
+$SCL_ON_RHEL6 "cmake --build . -- StandardTestData"
+$SCL_ON_RHEL6 "cmake --build . -- SystemTestData"
+
+###############################################################################
+# Run the tests
+###############################################################################
+# Remove any Mantid.user.properties file
+userprops=~/.mantid/Mantid.user.properties
+rm -f $userprops
+# Turn off usage reports and instrument downloading for the mantid call
+# that creates the properties file
+echo "UpdateInstrumentDefinitions.OnStartup = 0" > $userprops
+echo "usagereports.enabled = 0" >> $userprops
+
+# Run
+PKGDIR=${WORKSPACE}/build
+python $WORKSPACE/Code/Mantid/Testing/SystemTests/scripts/InstallerTests.py -o -d $PKGDIR
+

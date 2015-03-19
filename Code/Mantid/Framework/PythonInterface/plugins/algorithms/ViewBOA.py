@@ -1,11 +1,10 @@
+#pylint: disable=no-init,invalid-name
 from mantid.api import AlgorithmFactory
-from mantid.api import PythonAlgorithm, WorkspaceFactory, FileProperty, FileAction, WorkspaceProperty
-from mantid.kernel import Direction, StringListValidator, ConfigServiceImpl
+from mantid.api import PythonAlgorithm
+from mantid.kernel import Direction
 import mantid.simpleapi
 from mantid.simpleapi import mtd
 import datetime
-import math
-import os.path
 
 class ViewBOA(PythonAlgorithm):
     def category(self):

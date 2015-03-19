@@ -1,13 +1,18 @@
-from mantid.api import PythonAlgorithm, AlgorithmFactory, ITableWorkspaceProperty, WorkspaceFactory, FileProperty, FileAction, MatrixWorkspaceProperty, WorkspaceProperty
-from mantid.kernel import Direction, StringListValidator
+#pylint: disable=no-init,invalid-name
+from mantid.api import PythonAlgorithm, AlgorithmFactory, ITableWorkspaceProperty, WorkspaceFactory,\
+    FileProperty, FileAction, MatrixWorkspaceProperty
+from mantid.kernel import Direction
 
-import mantid.simpleapi as api
 
 _OUTPUTLEVEL = "NOOUTPUT"
 
 class LoadFullprofFile(PythonAlgorithm):
     """ Create the input TableWorkspaces for LeBail Fitting
     """
+
+    _tableWS = None
+    _dataWS = None
+
     def category(self):
         """
         """
@@ -26,15 +31,15 @@ class LoadFullprofFile(PythonAlgorithm):
     def PyInit(self):
         """ Declare properties
         """
-        self.declareProperty(FileProperty("Filename","", FileAction.Load, ['.hkl', '.prf', '.dat']),
+        self.declareProperty(FileProperty("Filename","", FileAction.Load, ['.hkl', '.prf', '.dat']),\
                 "Name of [http://www.ill.eu/sites/fullprof/ Fullprof] .hkl or .prf file.")
 
         #self.declareProperty("Bank", 1, "Bank ID for output if there are more than one bank in .irf file.")
 
-        self.declareProperty(ITableWorkspaceProperty("PeakParameterWorkspace", "", Direction.Output),
+        self.declareProperty(ITableWorkspaceProperty("PeakParameterWorkspace", "", Direction.Output),\
                 "Name of table workspace containing peak parameters from .hkl file.")
 
-        self.declareProperty(MatrixWorkspaceProperty("OutputWorkspace", "", Direction.Output),
+        self.declareProperty(MatrixWorkspaceProperty("OutputWorkspace", "", Direction.Output),\
                 "Name of data workspace containing the diffraction pattern in .prf file. ")
 
         return
@@ -132,7 +137,7 @@ class LoadFullprofFile(PythonAlgorithm):
 
             if hkldict.has_key(dkey):
                 if _OUTPUTLEVEL == "INFORMATION":
-                    self.warning("Warning! Duplicate HKL %d, %d, %d" (h, k, l))
+                    self.warning("Warning! Duplicate HKL %d, %d, %d" % (h, k, l))
                 continue
 
             if fwhm < 1.0E-5:

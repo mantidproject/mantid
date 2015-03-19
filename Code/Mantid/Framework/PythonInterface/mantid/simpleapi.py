@@ -86,7 +86,15 @@ def Load(*args, **kwargs):
     # Create and execute
     algm = _create_algorithm_object('Load')
     _set_logging_option(algm, kwargs)
-    algm.setProperty('Filename', filename) # Must be set first
+    try:
+        algm.setProperty('Filename', filename) # Must be set first
+    except ValueError as ve:
+        raise ValueError('Problem when setting Filename. This is the detailed error '
+                         'description: ' + str(ve) + '\nIf the file has been found '
+                         'but you got this error, you might not have read permissions '
+                         'or the file might be corrupted.\nIf the file has not been found, '
+                         'you might have forgotten to add its location in the data search '
+                         'directories.')
     # Remove from keywords so it is not set twice
     try:
         del kwargs['Filename']
@@ -248,6 +256,23 @@ def FitDialog(*args, **kwargs):
     return algm
 
 #--------------------------------------------------- --------------------------
+
+#This dictionary maps algorithm names to functions that preprocess their inputs
+#in the simpleapi. The functions take args and kwargs as regular arguments and
+#modify them as required.
+
+_algorithm_preprocessors = dict()
+
+def _pp_cutmd(args, kwargs):
+  if "PBins" in kwargs:
+    bins = kwargs["PBins"]
+    del kwargs["PBins"]
+    if isinstance(bins, tuple) or isinstance(bins, list):
+      #PBin has been provided, we need to split it out into P1Bin, P2Bin, etc.
+      for bin in range(len(bins)):
+        kwargs["P{0}Bin".format(bin+1)] = bins[bin]
+
+_algorithm_preprocessors["CutMD"] = _pp_cutmd
 
 def _get_function_spec(func):
     """Get the python function signature for the given function object
@@ -542,6 +567,11 @@ def _create_algorithm_function(algorithm, version, _algm_object):
             Note that if the Version parameter is passed, we will create
             the proper version of the algorithm without failing.
         """
+
+        # If needed, preprocess this algorithm's input
+        if algorithm in _algorithm_preprocessors:
+          _algorithm_preprocessors[algorithm](args, kwargs)
+
         _version = version
         if "Version" in kwargs:
             _version = kwargs["Version"]

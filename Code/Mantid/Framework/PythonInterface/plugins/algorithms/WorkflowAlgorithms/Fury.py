@@ -1,3 +1,4 @@
+#pylint: disable=no-init
 from mantid.simpleapi import *
 from mantid.api import PythonAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty, PropertyMode
 from mantid.kernel import Direction, logger
@@ -8,15 +9,27 @@ import os
 
 class Fury(PythonAlgorithm):
 
+    _sample = None
+    _resolution = None
+    _e_min = None
+    _e_max = None
+    _e_width = None
+    _number_points_per_bin = None
+    _parameter_table = None
+    _output_workspace = None
+    _plot = None
+    _save = None
+    _dry_run = None
+
     def category(self):
         return "Workflow\\MIDAS;PythonAlgorithms"
 
     def PyInit(self):
-        self.declareProperty(MatrixWorkspaceProperty('Sample', '',
+        self.declareProperty(MatrixWorkspaceProperty('Sample', '',\
                              optional=PropertyMode.Mandatory, direction=Direction.Input),
                              doc="Name for the Sample workspace.")
 
-        self.declareProperty(MatrixWorkspaceProperty('Resolution', '',
+        self.declareProperty(MatrixWorkspaceProperty('Resolution', '',\
                              optional=PropertyMode.Mandatory, direction=Direction.Input),
                              doc="Name for the Resolution workspace.")
 
@@ -25,13 +38,14 @@ class Fury(PythonAlgorithm):
         self.declareProperty(name='EnergyMax', defaultValue=0.5,
                              doc='Maximum energy for fit. Default=0.5')
         self.declareProperty(name='NumBins', defaultValue=1,
-                             doc='Decrease total number of spectrum points by this ratio through merging of intensities from neighbouring bins. Default=1')
+                             doc='Decrease total number of spectrum points by this ratio through merging of '
+                                 'intensities from neighbouring bins. Default=1')
 
-        self.declareProperty(MatrixWorkspaceProperty('ParameterWorkspace', '',
+        self.declareProperty(MatrixWorkspaceProperty('ParameterWorkspace', '',\
                              direction=Direction.Output, optional=PropertyMode.Optional),
                              doc='Table workspace for saving Fury properties')
 
-        self.declareProperty(MatrixWorkspaceProperty('OutputWorkspace', '',
+        self.declareProperty(MatrixWorkspaceProperty('OutputWorkspace', '',\
                              direction=Direction.Output, optional=PropertyMode.Optional),
                              doc='Output workspace')
 

@@ -932,13 +932,19 @@ private:
 //----------------------------------------------------------------------------------------------
 /** Empty default constructor
 */
-LoadEventNexus::LoadEventNexus()
-    : IFileLoader<Kernel::NexusDescriptor>(),
-    discarded_events(0),
-    m_file(NULL),
-    m_instrument_loaded_correctly(false),
-    m_logs_loaded_correctly(false),
-    event_id_is_spec(false) {}
+LoadEventNexus::LoadEventNexus() : IFileLoader<Kernel::NexusDescriptor>(),
+  m_filename(), filter_tof_min(0), filter_tof_max(0), m_specList(),
+  m_specMin(0), m_specMax(0), filter_time_start(), filter_time_stop(),
+  chunk(0), totalChunks(0), firstChunkForBank(0), eventsPerChunk(0),
+  m_tofMutex(), longest_tof(0), shortest_tof(0), bad_tofs(0),
+  discarded_events(0), precount(0), compressTolerance(0), eventVectors(),
+  m_eventVectorMutex(), eventid_max(0), pixelID_to_wi_vector(),
+  pixelID_to_wi_offset(), m_bankPulseTimes(), m_allBanksPulseTimes(),
+  m_top_entry_name(), m_file(NULL), splitProcessing(false),
+  m_haveWeights(false), weightedEventVectors(),
+  m_instrument_loaded_correctly(false), loadlogs(false),
+  m_logs_loaded_correctly(false), event_id_is_spec(false) {
+}
 
 //----------------------------------------------------------------------------------------------
 /** Destructor */
@@ -1345,6 +1351,21 @@ std::size_t numEvents(::NeXus::File &file, bool &hasTotalCounts,
   return numEvents;
 }
 
+void LoadEventNexus::createWorkspaceIndexMaps(const bool monitors,
+                                         const std::vector<std::string> &bankNames) {
+  // Create the required spectra mapping so that the workspace knows what to pad
+  // to
+  createSpectraMapping(m_filename, monitors, bankNames);
+
+  // This map will be used to find the workspace index
+  if (this->event_id_is_spec)
+    WS->getSpectrumToWorkspaceIndexVector(pixelID_to_wi_vector,
+                                          pixelID_to_wi_offset);
+  else
+    WS->getDetectorIDToWorkspaceIndexVector(pixelID_to_wi_vector,
+                                            pixelID_to_wi_offset, true);
+}
+
 //-----------------------------------------------------------------------------
 /**
 * Load events from the file.
@@ -1520,6 +1541,9 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
     xRef[1] = 1;
     // Set the binning axis using this.
     WS->setAllX(axis);
+
+    createWorkspaceIndexMaps(monitors, std::vector<std::string>());
+
     return;
   }
 
@@ -1573,17 +1597,7 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
     }
   }
   //----------------- Pad Empty Pixels -------------------------------
-  // Create the required spectra mapping so that the workspace knows what to pad
-  // to
-  createSpectraMapping(m_filename, monitors, someBanks);
-
-  // This map will be used to find the workspace index
-  if (this->event_id_is_spec)
-    WS->getSpectrumToWorkspaceIndexVector(pixelID_to_wi_vector,
-                                          pixelID_to_wi_offset);
-  else
-    WS->getDetectorIDToWorkspaceIndexVector(pixelID_to_wi_vector,
-                                            pixelID_to_wi_offset, true);
+  createWorkspaceIndexMaps(monitors, someBanks);
 
   // Cache a map for speed.
   if (!m_haveWeights) {

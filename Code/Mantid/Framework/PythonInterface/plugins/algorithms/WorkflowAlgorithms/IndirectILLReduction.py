@@ -1,3 +1,4 @@
+#pylint: disable=no-init,invalid-name
 from mantid.simpleapi import *
 from mantid.kernel import StringListValidator, Direction
 from mantid.api import DataProcessorAlgorithm, PropertyMode, AlgorithmFactory, \
@@ -10,38 +11,57 @@ import os.path
 
 class IndirectILLReduction(DataProcessorAlgorithm):
 
+    _raw_workspace = None
+    _red_workspace = None
+    _red_left_workspace = None
+    _red_right_workspace = None
+    _map_file = None
+    _use_mirror_mode = None
+    _save = None
+    _plot = None
+    _instrument_name = None
+    _run_number = None
+    _analyser = None
+    _reflection = None
+    _run_name = None
+
+
     def category(self):
         return "Workflow\\MIDAS;Inelastic;PythonAlgorithms"
 
 
+    def summary(self):
+        return 'Performs an energy transfer reduction for ILL indirect inelastic data.'
+
+
     def PyInit(self):
-        #input options
+        # Input options
         self.declareProperty(FileProperty('Run', '', action=FileAction.Load, extensions=["nxs"]),
                              doc='File path of run.')
 
         self.declareProperty(name='Analyser', defaultValue='silicon',
                              validator=StringListValidator(['silicon']),
-                             doc='Analyser crystal')
+                             doc='Analyser crystal.')
 
         self.declareProperty(name='Reflection', defaultValue='111',
                              validator=StringListValidator(['111']),
-                             doc='Analyser reflection')
+                             doc='Analyser reflection.')
 
         self.declareProperty(FileProperty('MapFile', '',
                              action=FileAction.OptionalLoad, extensions=["xml"]),
                              doc='Filename of the map file to use. If left blank the default will be used.')
 
         self.declareProperty(name='MirrorMode', defaultValue=False,
-                             doc='Whether to use mirror mode')
+                             doc='Whether to use mirror mode.')
 
-        #Output workspace properties
+        # Output workspace properties
         self.declareProperty(MatrixWorkspaceProperty("RawWorkspace", "",
                              direction=Direction.Output),
                              doc="Name for the output raw workspace created.")
 
         self.declareProperty(MatrixWorkspaceProperty("ReducedWorkspace", "",
                              direction=Direction.Output),
-                             doc="Name for the output reduced workspace created. If mirror mode is used this will be the sum of both"
+                             doc="Name for the output reduced workspace created. If mirror mode is used this will be the sum of both "
                              "the left and right hand workspaces.")
 
         self.declareProperty(MatrixWorkspaceProperty("LeftWorkspace", "",
@@ -52,11 +72,29 @@ class IndirectILLReduction(DataProcessorAlgorithm):
                              optional=PropertyMode.Optional, direction=Direction.Output),
                              doc="Name for the right workspace if mirror mode is used.")
 
-        # output options
+        # Output options
         self.declareProperty(name='Save', defaultValue=False,
-                             doc='Switch Save result to nxs file Off/On')
+                             doc='Switch Save result to nxs file Off/On.')
         self.declareProperty(name='Plot', defaultValue=False,
                              doc='Whether to plot the output workspace.')
+
+
+    def validateInputs(self):
+        issues = dict()
+
+        red_left_workspace = self.getPropertyValue('LeftWorkspace')
+        red_right_workspace = self.getPropertyValue('RightWorkspace')
+        use_mirror_mode = self.getProperty('MirrorMode').value
+
+        # Need the right and left workspaces for mirror mode
+        if use_mirror_mode:
+            if red_left_workspace == '':
+                issues['LeftWorkspace'] = 'Mirror Mode requires this workspace to be set'
+
+            if red_right_workspace == '':
+                issues['RightWorkspace'] = 'Mirror Mode requires this workspace to be set'
+
+        return issues
 
 
     def PyExec(self):
@@ -72,13 +110,6 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         self._use_mirror_mode = self.getProperty('MirrorMode').value
         self._save = self.getProperty('Save').value
         self._plot = self.getProperty('Plot').value
-
-        if self._use_mirror_mode:
-            if self._red_left_workspace == '':
-                raise ValueError("Mirror Mode requires the LeftWorkspace property to be set to a value")
-
-            if self._red_right_workspace == '':
-                raise ValueError("Mirror Mode requires the RightWorkspace property to be set to a value")
 
         LoadILLIndirect(FileName=run_path, OutputWorkspace=self._raw_workspace)
 

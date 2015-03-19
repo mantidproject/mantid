@@ -50,8 +50,11 @@ public:
     vtkUnstructuredGrid* aboveProduct = dynamic_cast<vtkUnstructuredGrid*>(above.create(progressAction));
 
     TS_ASSERT_EQUALS((10*10*10), insideProduct->GetNumberOfCells());
-    TS_ASSERT_EQUALS(0, belowProduct->GetNumberOfCells());
-    TS_ASSERT_EQUALS(0, aboveProduct->GetNumberOfCells());
+
+    // This has changed, in order to ensure that we do not pass on empty 
+    // workspaces. A single point is created in the center by the vtkNullUnstructuredGrid
+    TS_ASSERT_EQUALS(1, belowProduct->GetNumberOfCells());
+    TS_ASSERT_EQUALS(1, aboveProduct->GetNumberOfCells());
   }
 
   void testProgressUpdating()

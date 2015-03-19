@@ -1,3 +1,4 @@
+#pylint: disable=invalid-name
 from mantid import config
 import os
 
@@ -49,6 +50,20 @@ class ComplexProperty(object):
         return len(self._other_prop)
 #end ComplexProperty
 
+def findFile(fileName):
+    """ Simple search within Mantid data search directories for
+        a file which is not a run file
+    """
+
+    if os.path.exists(fileName):
+        return os.path.abspath(fileName)
+    fbase = os.path.basename(fileName)
+    search_path = config.getDataSearchDirs()
+    for path in search_path:
+        fname = os.path.join(path,fbase)
+        if os.path.exists(fname):
+            return fname
+    return ''
 
 
 def get_default_parameter(instrument, name):
@@ -211,9 +226,9 @@ def gen_getter(keyval_dict,key):
         gen_getter(keyval_dict,A) == 10;  gen_getter(keyval_dict,B) == 20;
         and gen_getter(keyval_dict,C) == [10,20];
     """
-    if not(key in keyval_dict):
+    if not key in keyval_dict:
         name = '_'+key
-        if not(name in keyval_dict):
+        if not name in keyval_dict:
             raise KeyError('Property with name: {0} is not among the class properties '.format(key))
     else:
         name = key
@@ -238,9 +253,9 @@ def gen_setter(keyval_dict,key,val):
         and gen_getter(keyval_dict,C,[1,2]) causes keyval_dict[A] == 1 and keyval_dict[B] == 2
     """
 
-    if not(key in keyval_dict):
+    if not key in keyval_dict:
         name = '_'+key
-        if not(name in keyval_dict):
+        if not name in keyval_dict:
             raise KeyError(' Property name: {0} is not defined'.format(key))
     else:
         name = key
@@ -249,8 +264,7 @@ def gen_setter(keyval_dict,key,val):
     if isinstance(test_val,ComplexProperty):
         if not isinstance(val,list):
             raise KeyError(' You can not assign non-list value to complex property {0}'.format(key))
-        pass
-            # Assigning values for composite function to the function components
+        # Assigning values for composite function to the function components
         test_val.__set__(keyval_dict,val)
         return None
     else:
@@ -263,7 +277,7 @@ def check_instrument_name(old_name,new_name):
 
 
     if new_name is None:
-        if not(old_name is None):
+        if not old_name is None:
             return (None,None,str(config.getFacility()))
         else:
             raise KeyError("No instrument name is defined")
@@ -362,6 +376,3 @@ def parse_run_file_name(run_string):
         fext     = fext[0]
     # extensions should be either all the same or all defined
     return (filepath,filenum,fext)
-
-
-

@@ -11,6 +11,7 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/VMD.h"
 #include "MantidQtAPI/MantidColorMap.h"
+#include "MantidQtAPI/MdSettings.h"
 #include "MantidQtMantidWidgets/SafeQwtPlot.h"
 #include "MantidQtAPI/SyncedCheckboxes.h"
 #include "MantidQtSliceViewer/LineOverlay.h"
@@ -318,6 +319,9 @@ private:
 
   /// If true, the rebinned overlayWS is locked until refreshed.
   bool m_rebinLocked;
+
+  /// Md Settings for color maps 
+  boost::shared_ptr<MantidQt::API::MdSettings>  m_mdSettings;
 
   /// Logger
   Mantid::Kernel::Logger m_logger;

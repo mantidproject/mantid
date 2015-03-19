@@ -238,9 +238,12 @@ void Graph::deselectMarker()
   cp->disableEditing();
 
   QObjectList lst = d_plot->children();
-  foreach(QObject *o, lst){
-    if (o->inherits("LegendWidget"))
-      dynamic_cast<LegendWidget *>(o)->setSelected(false);
+  foreach(QObject *o, lst) {
+    if (o->inherits("LegendWidget")) {
+      LegendWidget *lw = dynamic_cast<LegendWidget *>(o);
+      if (lw)
+        lw->setSelected(false);
+    }
   }
 }
 
@@ -302,19 +305,33 @@ void Graph::setSelectedMarker(int _mrk, bool add)
   selectedMarker = mrk;
   if (add) {
     if (d_markers_selector) {
-      if (d_lines.contains(mrk))
-        d_markers_selector->add(dynamic_cast<ArrowMarker *>(d_plot->marker(mrk)));
-      else if (d_images.contains(mrk))
-        d_markers_selector->add(dynamic_cast<ImageMarker *>(d_plot->marker(mrk)));
-      else
+      if (d_lines.contains(mrk)) {
+        ArrowMarker *am = dynamic_cast<ArrowMarker *>(d_plot->marker(mrk));
+        if (!am)
+          return;
+        d_markers_selector->add(am);
+      } else if (d_images.contains(mrk)) {
+        ImageMarker *im = dynamic_cast<ImageMarker *>(d_plot->marker(mrk));
+        if (!im)
+          return;
+        d_markers_selector->add(im);
+      } else {
         return;
+      }
     } else {
-      if (d_lines.contains(mrk))
-        d_markers_selector = new SelectionMoveResizer(dynamic_cast<ArrowMarker *>(d_plot->marker(mrk)));
-      else if (d_images.contains(mrk))
-        d_markers_selector = new SelectionMoveResizer(dynamic_cast<ImageMarker *>(d_plot->marker(mrk)));
-      else
+      if (d_lines.contains(mrk)) {
+        ArrowMarker *am = dynamic_cast<ArrowMarker *>(d_plot->marker(mrk));
+        if (!am)
+          return;
+        d_markers_selector = new SelectionMoveResizer(am);
+      } else if (d_images.contains(mrk)) {
+        ImageMarker *im = dynamic_cast<ImageMarker *>(d_plot->marker(mrk));
+        if (!im)
+          return;
+        d_markers_selector = new SelectionMoveResizer(im);
+      } else {
         return;
+      }
 
       connect(d_markers_selector, SIGNAL(targetsChanged()), this, SIGNAL(modifiedGraph()));
     }
@@ -325,14 +342,20 @@ void Graph::setSelectedMarker(int _mrk, bool add)
           return;
         delete d_markers_selector;
       }
-      d_markers_selector = new SelectionMoveResizer(dynamic_cast<ArrowMarker *>(d_plot->marker(mrk)));
+      ArrowMarker *am = dynamic_cast<ArrowMarker *>(d_plot->marker(mrk));
+      if (!am)
+        return;
+      d_markers_selector = new SelectionMoveResizer(am);
     } else if (d_images.contains(mrk)) {
       if (d_markers_selector) {
         if (d_markers_selector->contains(dynamic_cast<ImageMarker *>(d_plot->marker(mrk))))
           return;
         delete d_markers_selector;
       }
-      d_markers_selector = new SelectionMoveResizer(dynamic_cast<ImageMarker *>(d_plot->marker(mrk)));
+      ImageMarker *im = dynamic_cast<ImageMarker *>(d_plot->marker(mrk));
+      if (!im)
+        return;
+      d_markers_selector = new SelectionMoveResizer(im);
     } else
       return;
 
@@ -404,7 +427,11 @@ ScaleDraw::ScaleType Graph::axisType(int axis)
   if (!d_plot->axisEnabled(axis))
     return ScaleDraw::Numeric;
 
-  return dynamic_cast<ScaleDraw *>(d_plot->axisScaleDraw(axis))->scaleType();
+  ScaleDraw *sd = dynamic_cast<ScaleDraw *>(d_plot->axisScaleDraw(axis));
+  if (sd)
+    return sd->scaleType();
+  else // assuming this is a good default
+    return ScaleDraw::Numeric;
 }
 
 void Graph::setLabelsNumericFormat(int axis, int format, int prec, const QString& formula)
@@ -445,14 +472,17 @@ void Graph::setMajorTicksType(const QList<int>& lst)
   for (int i=0;i<(int)lst.count();i++)
   {
     ScaleDraw *sd = dynamic_cast<ScaleDraw *>(d_plot->axisScaleDraw (i));
+    if (!sd)
+      continue;
+
     if (lst[i]==ScaleDraw::None || lst[i]==ScaleDraw::In)
       sd->enableComponent (QwtAbstractScaleDraw::Ticks, false);
     else
     {
-      sd->enableComponent (QwtAbstractScaleDraw::Ticks);
-      sd->setTickLength  	(QwtScaleDiv::MinorTick, d_plot->minorTickLength());
-      sd->setTickLength  	(QwtScaleDiv::MediumTick, d_plot->minorTickLength());
-      sd->setTickLength  	(QwtScaleDiv::MajorTick, d_plot->majorTickLength());
+      sd->enableComponent(QwtAbstractScaleDraw::Ticks);
+      sd->setTickLength(QwtScaleDiv::MinorTick, d_plot->minorTickLength());
+      sd->setTickLength(QwtScaleDiv::MediumTick, d_plot->minorTickLength());
+      sd->setTickLength(QwtScaleDiv::MajorTick, d_plot->majorTickLength());
     }
     sd->setMajorTicksStyle((ScaleDraw::TicksStyle)lst[i]);
   }
@@ -499,6 +529,9 @@ void Graph::setAxisTicksLength(int axis, int majTicksType, int minTicksType,
   d_plot->setTickLength(minLength, majLength);
 
   ScaleDraw *sd = dynamic_cast<ScaleDraw *>(d_plot->axisScaleDraw(axis));
+  if (!sd)
+    return;
+
   sd->setMajorTicksStyle((ScaleDraw::TicksStyle)majTicksType);
   sd->setMinorTicksStyle((ScaleDraw::TicksStyle)minTicksType);
 
@@ -558,11 +591,16 @@ void Graph::showAxis(int axis, int type, const QString& formatInfo, Table *table
   if (!axisOn)
     return;
 
+  QwtScaleWidget *scale = dynamic_cast<QwtScaleWidget *>(d_plot->axisWidget(axis));
+  if (!scale)
+    return;
+
+  ScaleDraw *sd = dynamic_cast<ScaleDraw *>(d_plot->axisScaleDraw(axis));
+  if (!sd)
+    return;
+
   QList<int> majTicksTypeList = d_plot->getMajorTicksType();
   QList<int> minTicksTypeList = d_plot->getMinorTicksType();
-
-  QwtScaleWidget *scale = dynamic_cast<QwtScaleWidget *>(d_plot->axisWidget(axis));
-  ScaleDraw *sd = dynamic_cast<ScaleDraw *>(d_plot->axisScaleDraw(axis));
 
   if (d_plot->axisEnabled (axis) == axisOn &&
       majTicksTypeList[axis] == majTicksType &&
@@ -928,7 +966,7 @@ void Graph::updateSecondaryAxis(int axis)
 
     if (it->rtti() == QwtPlotItem::Rtti_PlotSpectrogram){
       Spectrogram *sp = dynamic_cast<Spectrogram *>(it);
-      if (sp->colorScaleAxis() == axis)
+      if (!sp || sp->colorScaleAxis() == axis)
         return;
     }
 
@@ -945,7 +983,10 @@ void Graph::updateSecondaryAxis(int axis)
     return;
 
   ScaleEngine *sc_engine = dynamic_cast<ScaleEngine *>(d_plot->axisScaleEngine(axis));
-  sc_engine->clone(dynamic_cast<ScaleEngine *>(d_plot->axisScaleEngine(a)));
+  if (sc_engine) {
+    ScaleEngine *a_engine = dynamic_cast<ScaleEngine *>(d_plot->axisScaleEngine(a));
+    sc_engine->clone(a_engine);
+  }
 
   /*QwtScaleEngine *qwtsc_engine = d_plot->axisScaleEngine(axis);
 	ScaleEngine *sc_engine=dynamic_cast<ScaleEngine*>(qwtsc_engine);
@@ -1074,17 +1115,23 @@ void Graph::niceLogScales(QwtPlot::Axis axis)
   double start = QMIN(scDiv->lBound(), scDiv->hBound());
   double end = QMAX(scDiv->lBound(), scDiv->hBound());
 
-  // log scales can't represent zero or negative values, 1e-10 as a low range is enough to display all data but still be plottable on a log scale
+  // log scales can't represent zero or negative values, 1e-10 as a
+  // low range is enough to display all data but still be plottable on
+  // a log scale
   start = start < 1e-90 ? 1e-10 : start;
-  // improve the scale labelling by ensuring that the graph starts and ends on numbers that can have major ticks e.g. 0.1 or 1 or 100
+  // improve the scale labelling by ensuring that the graph starts and
+  // ends on numbers that can have major ticks e.g. 0.1 or 1 or 100
   const double exponent = floor(log10(start));
   start = pow(10.0, exponent);
   end = ceil(log10(end));
   end = pow(10.0, end);
 
   ScaleEngine *scaleEng = dynamic_cast<ScaleEngine *>(d_plot->axisScaleEngine(axis));
+  if (!scaleEng)
+    return;
 
-  // call the QTiPlot function set scale which takes many arguments, fill the arguments with the same settings the plot already has
+  // call the QTiPlot function set scale which takes many arguments,
+  // fill the arguments with the same settings the plot already has
   setScale(axis, start, end, axisStep(axis),
       scDiv->ticks(QwtScaleDiv::MajorTick).count(),
       d_plot->axisMaxMinor(axis),
@@ -1140,6 +1187,9 @@ void Graph::setScale(QwtPlot::Axis axis, QwtScaleTransformation::Type scaleType)
 {
   //check if the scale is already of the desired type, 
   ScaleEngine *sc_engine = dynamic_cast<ScaleEngine *>(d_plot->axisScaleEngine(axis));
+  if (!sc_engine)
+    return;
+
   QwtScaleTransformation::Type type = sc_engine->type();
   if ( scaleType == QwtScaleTransformation::Log10 )
   {
@@ -1158,8 +1208,11 @@ void Graph::setScale(QwtPlot::Axis axis, QwtScaleTransformation::Type scaleType)
   double end = QMAX(scDiv->lBound(), scDiv->hBound());
 
   ScaleEngine *scaleEng = dynamic_cast<ScaleEngine *>(d_plot->axisScaleEngine(axis));
+  if (!scaleEng)
+    return;
 
-  // call the QTiPlot function set scale which takes many arguments, fill the arguments with the same settings the plot already has
+  // call the QTiPlot function set scale which takes many arguments,
+  // fill the arguments with the same settings the plot already has
   setScale(axis, start, end, axisStep(axis),
       scDiv->ticks(QwtScaleDiv::MajorTick).count(),
       d_plot->axisMaxMinor(axis), scaleType,
@@ -1669,11 +1722,13 @@ void Graph::deselectCurves()
   foreach(QwtPlotItem *i, curves){
     PlotCurve *c = dynamic_cast<PlotCurve *>(i);
     DataCurve *dc = dynamic_cast<DataCurve *>(i);
-    if(dc && i->rtti() != QwtPlotItem::Rtti_PlotSpectrogram &&
-        c->type() != Graph::Function &&  dc->hasSelectedLabels()  ){
-      dc->setLabelsSelected(false);
-      return;
-    }
+    if(c && dc &&
+       i->rtti() != QwtPlotItem::Rtti_PlotSpectrogram &&
+       c->type() != Graph::Function &&  dc->hasSelectedLabels()  )
+      {
+        dc->setLabelsSelected(false);
+        return;
+      }
   }
 }
 
@@ -1683,8 +1738,9 @@ DataCurve* Graph::selectedCurveLabels()
   foreach(QwtPlotItem *i, curves){
     PlotCurve *c = dynamic_cast<PlotCurve *>(i);
     DataCurve *dc = dynamic_cast<DataCurve *>(i);
-    if(dc && i->rtti() != QwtPlotItem::Rtti_PlotSpectrogram &&
-        c->type() != Graph::Function && dc->hasSelectedLabels())
+    if(dc && c &&
+       i->rtti() != QwtPlotItem::Rtti_PlotSpectrogram &&
+       c->type() != Graph::Function && dc->hasSelectedLabels())
       return dc;
   }
   return NULL;
@@ -1752,6 +1808,9 @@ void Graph::removeLegend()
 void Graph::updateImageMarker(int x, int y, int w, int h)
 {
   ImageMarker* mrk = dynamic_cast<ImageMarker *>(d_plot->marker(selectedMarker));
+  if (!mrk)
+    return;
+
   mrk->setRect(x, y, w, h);
   d_plot->replot();
   emit modifiedGraph();
@@ -1932,6 +1991,9 @@ QString Graph::savePieCurveLayout()
   QString s="PieCurve\t";
 
   QwtPieCurve *pie = dynamic_cast<QwtPieCurve*>(curve(0));
+  if (!pie)
+    return s;
+
   s+= pie->title().text()+"\t";
   QPen pen = pie->pen();
   s+=QString::number(pen.widthF())+"\t";
@@ -1995,43 +2057,51 @@ QString Graph::saveCurveLayout(int index)
 
   if(style == VerticalBars || style == HorizontalBars || style == Histogram){
     QwtBarCurve *b = dynamic_cast<QwtBarCurve *>(c);
-    s+=QString::number(b->gap())+"\t";
-    s+=QString::number(b->offset())+"\t";
+    if (b) {
+      s+=QString::number(b->gap())+"\t";
+      s+=QString::number(b->offset())+"\t";
+    }
   }
 
   if (style == Histogram){
     QwtHistogram *h = dynamic_cast<QwtHistogram *>(c);
-    s+=QString::number(h->autoBinning())+"\t";
-    s+=QString::number(h->binSize())+"\t";
-    s+=QString::number(h->begin())+"\t";
-    s+=QString::number(h->end())+"\t";
+    if (h) {
+      s+=QString::number(h->autoBinning())+"\t";
+      s+=QString::number(h->binSize())+"\t";
+      s+=QString::number(h->begin())+"\t";
+      s+=QString::number(h->end())+"\t";
+    }
   } else if(style == VectXYXY || style == VectXYAM){
     VectorCurve *v = dynamic_cast<VectorCurve *>(c);
-    s+=v->color().name()+"\t";
-    s+=QString::number(v->width())+"\t";
-    s+=QString::number(v->headLength())+"\t";
-    s+=QString::number(v->headAngle())+"\t";
-    s+=QString::number(v->filledArrowHead())+"\t";
+    if (v) {
+      s+=v->color().name()+"\t";
+      s+=QString::number(v->width())+"\t";
+      s+=QString::number(v->headLength())+"\t";
+      s+=QString::number(v->headAngle())+"\t";
+      s+=QString::number(v->filledArrowHead())+"\t";
 
-    QStringList colsList = v->plotAssociation().split(",", QString::SkipEmptyParts);
-    s+=colsList[2].remove("(X)").remove("(A)")+"\t";
-    s+=colsList[3].remove("(Y)").remove("(M)");
-    if (style == VectXYAM)
-      s+="\t"+QString::number(v->position());
-    s+="\t";
+      QStringList colsList = v->plotAssociation().split(",", QString::SkipEmptyParts);
+      s+=colsList[2].remove("(X)").remove("(A)")+"\t";
+      s+=colsList[3].remove("(Y)").remove("(M)");
+      if (style == VectXYAM)
+        s+="\t"+QString::number(v->position());
+      s+="\t";
+    }
   } else if(style == Box){
     BoxCurve *b = static_cast<BoxCurve*>(c);
-    s+=QString::number(SymbolBox::symbolIndex(b->maxStyle()))+"\t";
-    s+=QString::number(SymbolBox::symbolIndex(b->p99Style()))+"\t";
-    s+=QString::number(SymbolBox::symbolIndex(b->meanStyle()))+"\t";
-    s+=QString::number(SymbolBox::symbolIndex(b->p1Style()))+"\t";
-    s+=QString::number(SymbolBox::symbolIndex(b->minStyle()))+"\t";
-    s+=QString::number(b->boxStyle())+"\t";
-    s+=QString::number(b->boxWidth())+"\t";
-    s+=QString::number(b->boxRangeType())+"\t";
-    s+=QString::number(b->boxRange())+"\t";
-    s+=QString::number(b->whiskersRangeType())+"\t";
-    s+=QString::number(b->whiskersRange())+"\t";
+    if (b) {
+      s+=QString::number(SymbolBox::symbolIndex(b->maxStyle()))+"\t";
+      s+=QString::number(SymbolBox::symbolIndex(b->p99Style()))+"\t";
+      s+=QString::number(SymbolBox::symbolIndex(b->meanStyle()))+"\t";
+      s+=QString::number(SymbolBox::symbolIndex(b->p1Style()))+"\t";
+      s+=QString::number(SymbolBox::symbolIndex(b->minStyle()))+"\t";
+      s+=QString::number(b->boxStyle())+"\t";
+      s+=QString::number(b->boxWidth())+"\t";
+      s+=QString::number(b->boxRangeType())+"\t";
+      s+=QString::number(b->boxRange())+"\t";
+      s+=QString::number(b->whiskersRangeType())+"\t";
+      s+=QString::number(b->whiskersRange())+"\t";
+    }
   }
   return s;
 }
@@ -2780,7 +2850,9 @@ PlotCurve* Graph::insertCurve(Table* w, const QString& xColName, const QString& 
     c = new QwtBarCurve(QwtBarCurve::Horizontal, w, xColName, yColName, startRow, endRow);
   } else if (style == Histogram){
     c = new QwtHistogram(w, xColName, yColName, startRow, endRow);
-    dynamic_cast<QwtHistogram *>(c)->initData(Y.data(), size);
+    QwtHistogram *histo = dynamic_cast<QwtHistogram *>(c);
+    if (histo)
+      histo->initData(Y.data(), size);
   } else
     c = new DataCurve(w, xColName, yColName, startRow, endRow);
 
@@ -3024,9 +3096,13 @@ void Graph::removePie()
   if (d_legend)
     d_legend->setText(QString::null);
 
-  QList <PieLabel *> labels = dynamic_cast<QwtPieCurve *>(curve(0))->labelsList();
+  QwtPieCurve *pieCurve = dynamic_cast<QwtPieCurve *>(curve(0));
+  if (!pieCurve)
+    return;
+
+  QList <PieLabel *> labels = pieCurve->labelsList();
   foreach(PieLabel *l, labels)
-  l->setPieCurve(0);
+    l->setPieCurve(0);
 
   d_plot->removeCurve(c_keys[0]);
   d_plot->replot();
@@ -3054,7 +3130,9 @@ void Graph::removeCurves(const QString& s)
 
     if (it->rtti() != QwtPlotItem::Rtti_PlotCurve)
       continue;
-    if (dynamic_cast<PlotCurve *>(it)->type() == Function)
+
+    PlotCurve *pc = dynamic_cast<PlotCurve *>(it);
+    if (!pc || pc->type() == Function)
       continue;
 
     DataCurve * dc = dynamic_cast<DataCurve *>(it);
@@ -3091,9 +3169,10 @@ void Graph::removeCurve(int index)
 
     if (it->rtti() != QwtPlotItem::Rtti_PlotSpectrogram)
     {
-      if (dynamic_cast<PlotCurve *>(it)->type() == ErrorBars)
-        dynamic_cast<QwtErrorPlotCurve *>(it)->detachFromMasterCurve();
-      else if (c->type() != Function && dc){
+      if (c->type() == ErrorBars) {
+        QwtErrorPlotCurve *epc = dynamic_cast<QwtErrorPlotCurve *>(it);
+        epc->detachFromMasterCurve();
+      } else if (c->type() != Function && dc) {
         dc->clearErrorBars();
         dc->clearLabels();
       }
@@ -3576,7 +3655,7 @@ void Graph::restoreFunction(const QStringList& lst)
   double start = 0.0, end = 0.0;
 
   QStringList::const_iterator line = lst.begin();
-  for (line++; line != lst.end(); ++line){
+  for (++line; line != lst.end(); ++line){
     QString s = *line;
     if (s.contains("<Type>"))
       type = (FunctionCurve::FunctionType)s.remove("<Type>").remove("</Type>").stripWhiteSpace().toInt();
@@ -3612,7 +3691,7 @@ void Graph::restoreFunction(const QStringList& lst)
   c_keys[n_curves-1] = d_plot->insertCurve(c);
 
   QStringList l;
-  for (line++; line != lst.end(); ++line)
+  for (++line; line != lst.end(); ++line)
     l << *line;
   c->restoreCurveLayout(l);
 
@@ -3685,9 +3764,13 @@ void Graph::scaleFonts(double factor)
   QObjectList lst = d_plot->children();
   foreach(QObject *o, lst){
     if (o->inherits("LegendWidget")){
-      QFont font = dynamic_cast<LegendWidget *>(o)->font();
+      LegendWidget *lw = dynamic_cast<LegendWidget *>(o);
+      if (!lw)
+        continue;
+
+      QFont font = lw->font();
       font.setPointSizeFloat(factor*font.pointSizeFloat());
-      dynamic_cast<LegendWidget *>(o)->setFont(font);
+      lw->setFont(font);
     }
   }
 
@@ -4033,15 +4116,22 @@ void Graph::copy(Graph* g)
     QwtPlotItem *it = (QwtPlotItem *)g->plotItem(i);
     if (it->rtti() == QwtPlotItem::Rtti_PlotCurve){
       DataCurve *cv = dynamic_cast<DataCurve *>(it);
-      if (!cv) continue;
+      if (!cv)
+        continue;
+
+      PlotCurve *pc = dynamic_cast<PlotCurve *>(it);
+      if (!pc)
+        continue;
+
       int n = cv->dataSize();
-      int style = dynamic_cast<PlotCurve *>(it)->type();
       QVector<double> x(n);
       QVector<double> y(n);
       for (int j=0; j<n; j++){
         x[j]=cv->x(j);
         y[j]=cv->y(j);
       }
+
+      int style = pc->type();
 
       PlotCurve *c = 0;
       c_keys.resize(++n_curves);
@@ -4054,43 +4144,73 @@ void Graph::copy(Graph* g)
       } else if (style == Function) {
         c = new FunctionCurve(cv->title().text());
         c_keys[i] = d_plot->insertCurve(c);
-        dynamic_cast<FunctionCurve*>(c)->copy(dynamic_cast<FunctionCurve*>(cv));
+        FunctionCurve *fc = dynamic_cast<FunctionCurve*>(c);
+        if (fc) {
+          FunctionCurve *fcCV = dynamic_cast<FunctionCurve*>(cv);
+          if (fcCV)
+            fc->copy(fcCV);
+        }
       } else if (style == VerticalBars || style == HorizontalBars) {
-        c = new QwtBarCurve(dynamic_cast<QwtBarCurve *>(cv)->orientation(), cv->table(), cv->xColumnName(),
-            cv->title().text(), cv->startRow(), cv->endRow());
-        c_keys[i] = d_plot->insertCurve(c);
-        (dynamic_cast<QwtBarCurve *>(c))->copy(dynamic_cast<const QwtBarCurve *>(cv));
+        QwtBarCurve *bc = dynamic_cast<QwtBarCurve *>(c);
+        if (bc) {
+          c = new QwtBarCurve(bc->orientation(), cv->table(), cv->xColumnName(),
+                              cv->title().text(), cv->startRow(), cv->endRow());
+          c_keys[i] = d_plot->insertCurve(c);
+
+          const QwtBarCurve *cvBC = dynamic_cast<const QwtBarCurve *>(cv);
+          if (cvBC)
+            bc->copy(cvBC);
+        }
       } else if (style == ErrorBars) {
         QwtErrorPlotCurve *er = dynamic_cast<QwtErrorPlotCurve*>(cv);
-        DataCurve *master_curve = masterCurve(er);
-        if (master_curve) {
-          c = new QwtErrorPlotCurve(cv->table(), cv->title().text());
-          c_keys[i] = d_plot->insertCurve(c);
-          dynamic_cast<QwtErrorPlotCurve*>(c)->copy(er);
-          dynamic_cast<QwtErrorPlotCurve*>(c)->setMasterCurve(master_curve);
+        if (er) {
+          DataCurve *master_curve = masterCurve(er);
+          if (master_curve) {
+            c = new QwtErrorPlotCurve(cv->table(), cv->title().text());
+            c_keys[i] = d_plot->insertCurve(c);
+            QwtErrorPlotCurve *epc = dynamic_cast<QwtErrorPlotCurve*>(c);
+            if (epc) {
+              epc->copy(er);
+              epc->setMasterCurve(master_curve);
+            }
+          }
         }
       } else if (style == Histogram) {
         QwtHistogram *h = dynamic_cast<QwtHistogram *>(cv);
-        if (h->matrix())
+        if (h && h->matrix())
           c = new QwtHistogram(h->matrix());
         else
           c = new QwtHistogram(cv->table(), cv->xColumnName(), cv->title().text(), cv->startRow(), cv->endRow());
         c_keys[i] = d_plot->insertCurve(c);
-        dynamic_cast<QwtHistogram*>(c)->copy(h);
+
+        QwtHistogram *cQH = dynamic_cast<QwtHistogram*>(c);
+        if (cQH)
+          cQH->copy(h);
       } else if (style == VectXYXY || style == VectXYAM) {
         VectorCurve::VectorStyle vs = VectorCurve::XYXY;
         if (style == VectXYAM)
           vs = VectorCurve::XYAM;
-        c = new VectorCurve(vs, cv->table(), cv->xColumnName(), cv->title().text(),
-            dynamic_cast<VectorCurve*>(cv)->vectorEndXAColName(),
-            dynamic_cast<VectorCurve*>(cv)->vectorEndYMColName(),
-            cv->startRow(), cv->endRow());
-        c_keys[i] = d_plot->insertCurve(c);
-        dynamic_cast<VectorCurve*>(c)->copy(dynamic_cast<const VectorCurve *>(cv));
+        VectorCurve *cvVC = dynamic_cast<VectorCurve *>(cv);
+        if (cvVC) {
+          c = new VectorCurve(vs, cv->table(), cv->xColumnName(), cv->title().text(),
+                              cvVC->vectorEndXAColName(),
+                              cvVC->vectorEndYMColName(),
+                              cv->startRow(), cv->endRow());
+          c_keys[i] = d_plot->insertCurve(c);
+
+          VectorCurve *cVC = dynamic_cast<VectorCurve *>(c);
+          if (cVC) // it really should be, just did 'c = new VectorCurve(...'
+            cVC->copy(cvVC);
+        }
       } else if (style == Box) {
         c = new BoxCurve(cv->table(), cv->title().text(), cv->startRow(), cv->endRow());
         c_keys[i] = d_plot->insertCurve(c);
-        dynamic_cast<BoxCurve*>(c)->copy(dynamic_cast<const BoxCurve *>(cv));
+        BoxCurve *bc = dynamic_cast<BoxCurve*>(c);
+        if (bc) {
+          const BoxCurve *cvBC = dynamic_cast<const BoxCurve *>(cv);
+          if (cvBC)
+            bc->copy(cvBC);
+        }
         QwtSingleArrayData dat(x[0], y, n);
         c->setData(dat);
       } else {
@@ -4099,12 +4219,25 @@ void Graph::copy(Graph* g)
       }
 
       if (c_type[i] != Box && c_type[i] != ErrorBars){
-        c->setData(x.data(), y.data(), n);
-        if (c->type() != Function && c->type() != Pie)
-          dynamic_cast<DataCurve*>(c)->clone(cv);
-        else if (c->type() == Pie)
-          dynamic_cast<QwtPieCurve*>(c)->clone(dynamic_cast<QwtPieCurve*>(cv));
+        if (c) {
+          c->setData(x.data(), y.data(), n);
+          if (c->type() != Function && c->type() != Pie) {
+            DataCurve *dc = dynamic_cast<DataCurve*>(c);
+            if (dc)
+              dc->clone(cv);
+          } else if (c->type() == Pie) {
+            QwtPieCurve *cPie = dynamic_cast<QwtPieCurve*>(c);
+            if (cPie) {
+              QwtPieCurve *cvPie = dynamic_cast<QwtPieCurve*>(cv);
+              if (cvPie)
+                cPie->clone(cvPie);
+            }
+          }
+        }
       }
+
+      if (!c)
+        continue;
 
       c->setPen(cv->pen());
       c->setBrush(cv->brush());
@@ -4122,8 +4255,11 @@ void Graph::copy(Graph* g)
       QList<QwtPlotCurve *>lst = g->fitCurvesList();
       if (lst.contains(dynamic_cast<QwtPlotCurve *>(it)))
         d_fit_curves << c;
-    }else if (it->rtti() == QwtPlotItem::Rtti_PlotSpectrogram){
-      Spectrogram *sp = (dynamic_cast<Spectrogram *>(it))->copy();
+    } else if (it->rtti() == QwtPlotItem::Rtti_PlotSpectrogram){
+      Spectrogram *spc = (dynamic_cast<Spectrogram *>(it));
+      if (!spc)
+        continue;
+      Spectrogram *sp = spc->copy();
       c_keys.resize(++n_curves);
       c_keys[i] = d_plot->insertCurve(sp);
 
@@ -4157,7 +4293,7 @@ void Graph::copy(Graph* g)
       continue;
 
     ScaleDraw *sdg = dynamic_cast<ScaleDraw *>(g->plotWidget()->axisScaleDraw (i));
-    if (sdg->hasComponent(QwtAbstractScaleDraw::Labels))
+    if (sdg && sdg->hasComponent(QwtAbstractScaleDraw::Labels))
     {
       ScaleDraw::ScaleType type = sdg->scaleType();
       if (type == ScaleDraw::Numeric)
@@ -4168,9 +4304,10 @@ void Graph::copy(Graph* g)
         setLabelsMonthFormat(i, sdg->nameFormat());
       else if (type == ScaleDraw::Time || type == ScaleDraw::Date)
         setLabelsDateTimeFormat(i, type, sdg->formatString());
-      else{
+      else {
         ScaleDraw *sd = dynamic_cast<ScaleDraw *>(plot->axisScaleDraw(i));
-        d_plot->setAxisScaleDraw(i, new ScaleDraw(d_plot, sd->labelsList(), sd->formatString(), sd->scaleType()));
+        if (sd)
+          d_plot->setAxisScaleDraw(i, new ScaleDraw(d_plot, sd->labelsList(), sd->formatString(), sd->scaleType()));
       }
     } else {
       ScaleDraw *sd = dynamic_cast<ScaleDraw *>(d_plot->axisScaleDraw (i));
@@ -4182,9 +4319,6 @@ void Graph::copy(Graph* g)
     if (!se)
       continue;
 
-    ScaleEngine *sc_engine = dynamic_cast<ScaleEngine *>(d_plot->axisScaleEngine(i));
-    sc_engine->clone(se);
-
     int majorTicks = plot->axisMaxMajor(i);
     int minorTicks = plot->axisMaxMinor(i);
     d_plot->setAxisMaxMajor (i, majorTicks);
@@ -4192,6 +4326,12 @@ void Graph::copy(Graph* g)
 
     double step = g->axisStep(i);
     d_user_step[i] = step;
+
+    ScaleEngine *sc_engine = dynamic_cast<ScaleEngine *>(d_plot->axisScaleEngine(i));
+    if (!sc_engine)
+      continue;
+
+    sc_engine->clone(se);
     const QwtScaleDiv *sd = plot->axisScaleDiv(i);
     QwtScaleDiv div = sc_engine->divideScale (QMIN(sd->lBound(), sd->hBound()),
         QMAX(sd->lBound(), sd->hBound()), majorTicks, minorTicks, step);
@@ -4434,6 +4574,9 @@ void Graph::guessUniqueCurveLayout(int& colorIndex, int& symbolIndex)
   if (curve_index >= 0 && c_type[curve_index] == ErrorBars)
   {// find out the pen color of the master curve
     QwtErrorPlotCurve *er = dynamic_cast<QwtErrorPlotCurve *>(d_plot->curve(c_keys[curve_index]));
+    if (!er)
+      return;
+
     DataCurve *master_curve = er->masterCurve();
     if (master_curve){
       colorIndex = ColorBox::colorIndex(master_curve->pen().color());
@@ -4610,7 +4753,7 @@ void Graph::restoreCurveLabels(int curveID, const QStringList& lst)
   if (s.contains("<column>"))
     labelsColumn = s.remove("<column>").remove("</column>").trimmed();
 
-  for (line++; line != lst.end(); ++line){
+  for (++line; line != lst.end(); ++line){
     s = *line;
     if (s.contains("<color>"))
       c->setLabelsColor(QColor(s.remove("<color>").remove("</color>").trimmed()));
@@ -4739,7 +4882,11 @@ QString Graph::axisFormatInfo(int axis)
   if (axis < 0 || axis > QwtPlot::axisCnt)
     return QString();
 
-  return dynamic_cast<ScaleDraw *>(d_plot->axisScaleDraw(axis))->formatString();
+  ScaleDraw *sd = dynamic_cast<ScaleDraw *>(d_plot->axisScaleDraw(axis));
+  if (sd)
+    return sd->formatString();
+  else
+    return "Not available!";
 }
 
 void Graph::updateCurveNames(const QString& oldName, const QString& newName, bool updateTableName)
@@ -4834,12 +4981,14 @@ void Graph::setGrayScale()
     QwtPlotItem * it = plotItem(i);
     if (it->rtti() == QwtPlotItem::Rtti_PlotSpectrogram)
     {
-      dynamic_cast<Spectrogram*>(it)->setGrayScale();
+      Spectrogram *spec = dynamic_cast<Spectrogram*>(it);
+      if (spec)
+        spec->setGrayScale();
       continue;
     }
 
     PlotCurve *c = dynamic_cast<PlotCurve*>(it);
-    if (c->type() == ErrorBars)
+    if (!c || c->type() == ErrorBars)
       continue;
 
     QPen pen = c->pen();
@@ -4877,9 +5026,12 @@ void Graph::setGrayScale()
       continue;
 
     PlotCurve *c = dynamic_cast<PlotCurve*>(it);
-    if (c->type() == ErrorBars)
+    if (c && c->type() == ErrorBars)
     {
-      QwtErrorPlotCurve *er = dynamic_cast<QwtErrorPlotCurve*>(it); // QtiPlot: ErrorBarsCurve *er = (ErrorBarsCurve *) it;
+      // QtiPlot: ErrorBarsCurve *er = (ErrorBarsCurve *) it;
+      QwtErrorPlotCurve *er = dynamic_cast<QwtErrorPlotCurve*>(it);
+      if (!er)
+        continue;
       DataCurve* mc = er->masterCurve();
       if (mc)
         er->setColor(mc->pen().color());
@@ -4909,7 +5061,7 @@ void Graph::setIndexedColors()
       continue;
 
     PlotCurve *c = dynamic_cast<PlotCurve*>(it);
-    if (c->type() == ErrorBars)
+    if (!c || c->type() == ErrorBars)
       continue;
 
     QPen pen = c->pen();
@@ -4941,9 +5093,13 @@ void Graph::setIndexedColors()
       continue;
 
     PlotCurve *c = dynamic_cast<PlotCurve*>(it);
-    if (c->type() == ErrorBars)
+    if (c && c->type() == ErrorBars)
     {
-      QwtErrorPlotCurve *er = dynamic_cast<QwtErrorPlotCurve*>(it); // QtiPlot: ErrorBarsCurve *er = (ErrorBarsCurve *) it;
+      // QtiPlot: ErrorBarsCurve *er = (ErrorBarsCurve *) it;
+      QwtErrorPlotCurve *er = dynamic_cast<QwtErrorPlotCurve*>(it);
+      if (!er)
+        continue;
+
       DataCurve* mc = er->masterCurve();
       if (mc)
         er->setColor(mc->pen().color());
@@ -4964,7 +5120,8 @@ DataCurve* Graph::masterCurve(QwtErrorPlotCurve *er)
       continue;
     if (it->rtti() == QwtPlotItem::Rtti_PlotSpectrogram)
       continue;
-    if (dynamic_cast<PlotCurve *>(it)->type() == Function)
+    PlotCurve *pc = dynamic_cast<PlotCurve *>(it);
+    if (!pc || pc->type() == Function)
       continue;
 
     DataCurve* dc = dynamic_cast<DataCurve *>(it);
@@ -4986,7 +5143,8 @@ DataCurve* Graph::masterCurve(const QString& xColName, const QString& yColName)
       continue;
     if (it->rtti() == QwtPlotItem::Rtti_PlotSpectrogram)
       continue;
-    if (dynamic_cast<PlotCurve *>(it)->type() == Function)
+    PlotCurve *pc = dynamic_cast<PlotCurve *>(it);
+    if (!pc || pc->type() == Function)
       continue;
 
     DataCurve* dc = dynamic_cast<DataCurve *>(it);
@@ -5139,8 +5297,10 @@ void Graph::setCurrentFont(const QFont& f)
     QList<QwtPlotItem *> curves = d_plot->curvesList();
     foreach(QwtPlotItem *i, curves){
       DataCurve* dc = dynamic_cast<DataCurve *>(i);
-      if(dc && i->rtti() != QwtPlotItem::Rtti_PlotSpectrogram &&
-          dynamic_cast<PlotCurve*>(i)->type() != Graph::Function){
+      PlotCurve* pc = dynamic_cast<PlotCurve*>(i);
+      if(pc && dc
+         && i->rtti() != QwtPlotItem::Rtti_PlotSpectrogram &&
+         pc->type() != Graph::Function){
         if(dc->hasSelectedLabels()){
           dc->setLabelsFont(f);
           d_plot->replot();
@@ -5921,8 +6081,13 @@ void Graph::loadFromProject(const std::string& lines, ApplicationWindow* app, co
         if(plotType == Graph::Histogram)
         {
           QwtHistogram* h = dynamic_cast<QwtHistogram*>(curve(curveID));
-          h->setBinning(curveValues[17].toInt(),curveValues[18].toDouble(),curveValues[19].toDouble(),curveValues[20].toDouble());
-          h->loadData();
+          if (h) {
+            h->setBinning(curveValues[17].toInt(),
+                          curveValues[18].toDouble(),
+                          curveValues[19].toDouble(),
+                          curveValues[20].toDouble());
+            h->loadData();
+          }
         }
 
         if(plotType == Graph::VerticalBars

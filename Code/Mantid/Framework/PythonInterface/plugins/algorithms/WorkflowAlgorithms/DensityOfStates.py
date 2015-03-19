@@ -1,3 +1,4 @@
+#pylint: disable=no-init,invalid-name
 from mantid.kernel import *
 from mantid.api import *
 from mantid.simpleapi import *
@@ -9,49 +10,67 @@ import math
 
 class DensityOfStates(PythonAlgorithm):
 
+    _float_regex = None
+    _temperature = None
+    _bin_width = None
+    _spec_type = None
+    _peak_func = None
+    _ws_name = None
+    _peak_width = None
+    _scale = None
+    _zero_threshold = None
+    _ions = None
+    _sum_contributions = None
+    _scale_by_cross_section = None
+    _calc_partial = None
+    _ion_dict = None
+    _partial_ion_numbers = None
+    _num_ions = None
+    _num_branches = None
+
     def summary(self):
         return "Calculates phonon densities of states, Raman and IR spectrum."
 
     def PyInit(self):
         # Declare properties
-        self.declareProperty(FileProperty('File', '', action=FileAction.Load,
-            extensions = ["phonon", "castep"]),
+        self.declareProperty(FileProperty('File', '', action=FileAction.Load,\
+            extensions = ["phonon", "castep"]),\
             doc='Filename of the file.')
 
-        self.declareProperty(name='Function',defaultValue='Gaussian',
-            validator=StringListValidator(['Gaussian', 'Lorentzian']),
+        self.declareProperty(name='Function',defaultValue='Gaussian',\
+            validator=StringListValidator(['Gaussian', 'Lorentzian']),\
             doc="Type of function to fit to peaks.")
 
-        self.declareProperty(name='PeakWidth', defaultValue=10.0,
+        self.declareProperty(name='PeakWidth', defaultValue=10.0,\
             doc='Set Gaussian/Lorentzian FWHM for broadening. Default is 10')
 
-        self.declareProperty(name='SpectrumType',defaultValue='DOS',
-            validator=StringListValidator(['IonTable', 'DOS', 'IR_Active', 'Raman_Active']),
+        self.declareProperty(name='SpectrumType',defaultValue='DOS',\
+            validator=StringListValidator(['IonTable', 'DOS', 'IR_Active', 'Raman_Active']),\
             doc="Type of intensities to extract and model (fundamentals-only) from .phonon.")
 
-        self.declareProperty(name='Scale', defaultValue=1.0,
+        self.declareProperty(name='Scale', defaultValue=1.0,\
             doc='Scale the intesity by the given factor. Default is no scaling.')
 
-        self.declareProperty(name='BinWidth', defaultValue=1.0,
+        self.declareProperty(name='BinWidth', defaultValue=1.0,\
             doc='Set histogram resolution for binning (eV or cm**-1). Default is 1')
 
-        self.declareProperty(name='Temperature', defaultValue=300.0,
+        self.declareProperty(name='Temperature', defaultValue=300.0,\
             doc='Temperature to use (in raman spectrum modelling). Default is 300')
 
-        self.declareProperty(name='ZeroThreshold', defaultValue=3.0,
+        self.declareProperty(name='ZeroThreshold', defaultValue=3.0,\
             doc='Ignore frequencies below the this threshold. Default is 3.0')
 
-        self.declareProperty(StringArrayProperty('Ions', Direction.Input),
+        self.declareProperty(StringArrayProperty('Ions', Direction.Input),\
             doc="List of Ions to use to calculate partial density of states. If left blank, total density of states will be calculated")
 
-        self.declareProperty(name='SumContributions', defaultValue=False,
+        self.declareProperty(name='SumContributions', defaultValue=False,\
             doc="Sum the partial density of states into a single workspace.")
 
-        self.declareProperty(name='ScaleByCrossSection', defaultValue='None',
-            validator=StringListValidator(['None', 'Total', 'Incoherent', 'Coherent']),
+        self.declareProperty(name='ScaleByCrossSection', defaultValue='None',\
+            validator=StringListValidator(['None', 'Total', 'Incoherent', 'Coherent']),\
             doc="Sum the partial density of states by the scattering cross section.")
 
-        self.declareProperty(WorkspaceProperty('OutputWorkspace', '', Direction.Output),
+        self.declareProperty(WorkspaceProperty('OutputWorkspace', '', Direction.Output),\
             doc="Name to give the output workspace.")
 
         # Regex pattern for a floating point number

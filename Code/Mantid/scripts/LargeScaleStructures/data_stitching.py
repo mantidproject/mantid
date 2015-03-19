@@ -1,13 +1,12 @@
+#pylint: disable=invalid-name
 import os
-import copy
-import math
 from mantid.simpleapi import *
 from mantid.kernel import Logger
 
 IS_IN_MANTIDPLOT = True
 try:
     import mantidplot
-    from PyQt4 import QtGui, QtCore
+    from PyQt4 import QtCore
 except:
     IS_IN_MANTIDPLOT = False
 
@@ -16,18 +15,19 @@ class RangeSelector(object):
         Brings up range selector window and connects the user selection to
         a call-back function.
     """
-    __instance=None
+    __instance = None
 
     class _Selector(object):
 
         def __init__(self):
             self._call_back = None
+            self._ws_output_base = None
             self._graph = "Range Selector"
 
         def disconnect(self):
             if IS_IN_MANTIDPLOT:
-                mantidplot.app.disconnect(mantidplot.app.mantidUI,
-                                    QtCore.SIGNAL("x_range_update(double,double)"),
+                mantidplot.app.disconnect(mantidplot.app.mantidUI,\
+                                    QtCore.SIGNAL("x_range_update(double,double)"),\
                                     self._call_back)
 
         def connect(self, ws, call_back, xmin=None, xmax=None,
@@ -41,8 +41,8 @@ class RangeSelector(object):
             self._call_back = call_back
             self._ws_output_base = ws_output_base
 
-            mantidplot.app.connect(mantidplot.app.mantidUI,
-                             QtCore.SIGNAL("x_range_update(double,double)"),
+            mantidplot.app.connect(mantidplot.app.mantidUI,\
+                             QtCore.SIGNAL("x_range_update(double,double)"),\
                              self._call_back)
             g = mantidplot.graph(self._graph)
 
@@ -226,9 +226,9 @@ class DataSet(object):
                     y_trim.append(y[i])
                     e_trim.append(e[i])
 
-            CreateWorkspace(DataX=x_trim, DataY=y_trim, DataE=e_trim,
-                           OutputWorkspace=self._ws_scaled,
-                           UnitX="MomentumTransfer",
+            CreateWorkspace(DataX=x_trim, DataY=y_trim, DataE=e_trim,\
+                           OutputWorkspace=self._ws_scaled,\
+                           UnitX="MomentumTransfer",\
                            ParentWorkspace=self._ws_name)
 
             dq_scaled = mtd[self._ws_scaled].dataDx(0)
@@ -525,9 +525,9 @@ class Stitcher(object):
         combined = sorted(zipped, cmp)
         x,y,e,dx = zip(*combined)
 
-        CreateWorkspace(DataX=x, DataY=y, DataE=e,
-                       OutputWorkspace=ws_combined,
-                       UnitX="MomentumTransfer",
+        CreateWorkspace(DataX=x, DataY=y, DataE=e,\
+                       OutputWorkspace=ws_combined,\
+                       UnitX="MomentumTransfer",\
                        ParentWorkspace=first_ws)
 
         dxtmp = mtd[ws_combined].dataDx(0)

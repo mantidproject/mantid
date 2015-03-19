@@ -7,6 +7,16 @@
 namespace Mantid {
 namespace API {
 
+/// Convert to a vector
+std::vector<double> FunctionDomain1D::toVector() const 
+{
+  std::vector<double> res;
+  if ( m_n > 0 ){
+    res.assign(m_data, m_data+m_n);
+  }
+  return res;
+}
+
 /**
   * Create a domain from a vector.
   * @param xvalues :: Vector with function arguments to be copied from.

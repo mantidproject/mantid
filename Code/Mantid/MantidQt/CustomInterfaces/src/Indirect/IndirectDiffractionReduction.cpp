@@ -97,10 +97,13 @@ void IndirectDiffractionReduction::initLayout()
 
   // Update invalid rebinning markers
   validateRebin();
+
+  // Update instrument dependant widgets
+  m_uiForm.iicInstrumentConfiguration->newInstrumentConfiguration();
 }
 
 /**
- * Runs a diffraction reduction when the user clieks Run.
+ * Runs a diffraction reduction when the user clicks Run.
  */
 void IndirectDiffractionReduction::demonRun()
 {

@@ -1,7 +1,7 @@
+#pylint: disable=invalid-name
 """
     Inelastic specific implementation of the Reducer.
 """
-import mantid
 from reduction import Reducer
 # Validate_step is a decorator that allows both Python algorithms and
 # ReductionStep objects to be passed to the Reducer.

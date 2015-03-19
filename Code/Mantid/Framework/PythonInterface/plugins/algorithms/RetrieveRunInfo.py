@@ -1,3 +1,4 @@
+#pylint: disable=invalid-name,no-init
 from mantid.api import PythonAlgorithm, AlgorithmFactory, ITableWorkspaceProperty
 from mantid.simpleapi import *
 from mantid.kernel import StringMandatoryValidator, Direction
@@ -5,7 +6,7 @@ from mantid import logger, config
 import os
 from itertools import ifilterfalse
 
-class Intervals:
+class Intervals(object):
     # Having "*intervals" as a parameter instead of "intervals" allows us
     # to type "Intervals( (0,3), (6, 8) )" instead of "Intervals( ( (0,3), (6, 8) ) )"
     def __init__(self, *intervals):
@@ -51,9 +52,9 @@ class Intervals:
         return self._intervals
 
     # So that "2 in Intervals( (0, 3) )" returns True.
-    def __contains__(self, id):
+    def __contains__(self, ids):
         for interval in self._intervals:
-            if interval[0] <= id <= interval[1]:
+            if interval[0] <= ids <= interval[1]:
                 return True
         return False
 
@@ -91,21 +92,21 @@ def sumWsList(wsList, summedWsName = None):
             return mtd[summedWsName]
         return wsList[0]
 
-    sum = wsList[0] + wsList[1]
+    sumws = wsList[0] + wsList[1]
 
     if len(wsList) > 2:
         for i in range(2, len(wsList) - 1):
-            sum += wsList[i]
+            sumws += wsList[i]
 
     if summedWsName is None:
         summedWsName = "_PLUS_".join([ws.getName() for ws in wsList])
 
-    RenameWorkspace(InputWorkspace=sum.getName(), OutputWorkspace=summedWsName)
+    RenameWorkspace(InputWorkspace=sumws.getName(), OutputWorkspace=summedWsName)
 
     return mtd[summedWsName]
 
 
-class FileBackedWsIterator:
+class FileBackedWsIterator(object):
     ''' An iterator to iterate over workspaces.  Each filename in the list
     provided is loaded into a workspace, validated by the given ws_validator,
     yielded, and then deleted from memory. '''
@@ -125,7 +126,7 @@ class FileBackedWsIterator:
         # any are missing.
         missing_files = list(ifilterfalse(os.path.exists, filenames))
         if len(missing_files) > 0:
-            raise ValueError("One or more files are missing: " +
+            raise ValueError("One or more files are missing: " +\
                 str(missing_files))
 
         self._filenames = filenames
@@ -139,7 +140,7 @@ class FileBackedWsIterator:
             self._delete_loaded_ws()
             try:
                 self._load_into_ws(filename)
-            except RuntimeError as re:
+            except RuntimeError:
                 raise RuntimeError("Problem loading file \"" + filename + "\"")
 
             # Yield the newly loaded ws.
@@ -157,7 +158,7 @@ class FileBackedWsIterator:
         so we can turn LoadLogFiles off. '''
         wsName = "__temp_" + filename
 
-        base, ext = os.path.splitext(filename)
+        dummy_base, ext = os.path.splitext(filename)
         if ext == ".raw":
             # Loading log files is extremely slow on archive
             LoadRaw(Filename = filename,
@@ -188,11 +189,11 @@ class RetrieveRunInfo(PythonAlgorithm):
             '',
             StringMandatoryValidator(),
             doc='The range of runs to retrieve the run info for. E.g. "100-105".')
-        self.declareProperty(ITableWorkspaceProperty("OutputWorkspace", "", Direction.Output),
+        self.declareProperty(ITableWorkspaceProperty("OutputWorkspace", "", Direction.Output),\
             doc= """The name of the TableWorkspace that will be created. '''You must specify a name that does not already exist.''' """)
 
     def PyExec(self):
-        PROP_NAMES = ["inst_abrv", "run_number", "user_name", "run_title",
+        PROP_NAMES = ["inst_abrv", "run_number", "user_name", "run_title",\
             "hd_dur"]
 
         # Not all ISIS run files have the relevant prop_names, but we may as
@@ -203,7 +204,7 @@ class RetrieveRunInfo(PythonAlgorithm):
         # Ensure workspace does not already exist.
         output_ws_name = self.getPropertyValue("OutputWorkspace")
         if mtd.doesExist(output_ws_name):
-            raise ValueError("Workspace \"" + output_ws_name + "\" already "
+            raise ValueError("Workspace \"" + output_ws_name + "\" already "\
                 "exists. Either delete it, or choose another workspace name.")
 
         # Check that all run files are available.

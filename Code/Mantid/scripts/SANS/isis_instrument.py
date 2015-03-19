@@ -1,3 +1,4 @@
+#pylint: disable=invalid-name
 import datetime
 import math
 import os
@@ -87,8 +88,8 @@ class BaseInstrument(object):
         return workspace_name
 
 
-class DetectorBank:
-    class _DectShape:
+class DetectorBank(object):
+    class _DectShape(object):
         """
             Stores the dimensions of the detector, normally this is a square
             which is easy, but it can have a hole in it which is harder!
@@ -127,7 +128,7 @@ class DetectorBank:
         def n_pixels(self):
             return self._n_pixels
 
-    class _RescaleAndShift:
+    class _RescaleAndShift(object):
         """
             Stores property about the detector which is used to rescale and shift
             data in the bank after data have been reduced. The scale attempts to
@@ -159,12 +160,15 @@ class DetectorBank:
             else:
                 self.qRangeUserSelected = True
 
+    _first_spec_num = None
+    last_spec_num = None
+
 
     def __init__(self, instr, det_type):
         #detectors are known by many names, the 'uni' name is an instrument independent alias the 'long' name is the instrument view name and 'short' name often used for convenience
-        self._names = {
-          'uni' : det_type,
-          'long': instr.getStringParameter(det_type+'-detector-name')[0],
+        self._names = {\
+          'uni' : det_type,\
+          'long': instr.getStringParameter(det_type+'-detector-name')[0],\
           'short': instr.getStringParameter(det_type+'-detector-short-name')[0]}
         #the bank is often also referred to by its location, as seen by the sample
         if det_type.startswith('low'):
@@ -398,7 +402,7 @@ class DetectorBank:
         try:
             wki = mtd[input_name]
             #Is it really necessary to crop?
-            if (wki.getNumberHistograms() != self.last_spec_num - self.get_first_spec_num() + 1):
+            if wki.getNumberHistograms() != self.last_spec_num - self.get_first_spec_num() + 1:
                 CropWorkspace(InputWorkspace=input_name,OutputWorkspace= output_name,
                               StartWorkspaceIndex = self.get_first_spec_num() - 1,
                               EndWorkspaceIndex = self.last_spec_num - 1)
@@ -408,6 +412,8 @@ class DetectorBank:
                              + str(sys.exc_info()))
 
 class ISISInstrument(BaseInstrument):
+    lowAngDetSet = None
+
     def __init__(self, filename=None):
         """
             Reads the instrument definition xml file
@@ -698,7 +704,7 @@ class ISISInstrument(BaseInstrument):
         CopyInstrumentParameters(calib, ws_name)
 
     def setCalibrationWorkspace(self, ws_reference):
-        assert(isinstance(ws_reference, Workspace))
+        assert isinstance(ws_reference, Workspace)
         # we do deep copy of singleton - to be removed in 8470
         # this forces us to have 'copyable' objects.
         self._newCalibrationWS = str(ws_reference)
@@ -822,7 +828,7 @@ class SANS2D(ISISInstrument):
                 first.set_first_spec_num(1)
                 first.set_orien('Vertical')
                 second.set_orien('Vertical')
-            elif (base_runno >= 568 and base_runno < 684):
+            elif base_runno >= 568 and base_runno < 684:
                 first.set_first_spec_num(9)
                 first.set_orien('Rotated')
                 second.set_orien('Rotated')
@@ -1178,6 +1184,7 @@ class LARMOR(ISISInstrument):
 
         return [-pos.getX(), -pos.getY()]
 
+
 class LARMOR(ISISInstrument):
     _NAME = 'LARMOR'
     WAV_RANGE_MIN = 2.2
@@ -1229,7 +1236,6 @@ class LARMOR(ISISInstrument):
         pos = ws.getInstrument().getComponentByName(self.cur_detector().name()).getPos()
 
         return [-pos.getX(), -pos.getY()]
-
 
 
 if __name__ == '__main__':

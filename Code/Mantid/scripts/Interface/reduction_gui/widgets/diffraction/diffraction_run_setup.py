@@ -1,3 +1,4 @@
+#pylint: disable=invalid-name
 ################################################################################
 # This is my first attempt to make a tab from quasi-scratch
 ################################################################################
@@ -111,15 +112,15 @@ class RunSetupWidget(BaseWidget):
         # self._handle_tzero_guess(self._content.use_ei_guess_chkbox.isChecked())
 
         # Connections from action/event to function to handle
-        self.connect(self._content.calfile_browse, QtCore.SIGNAL("clicked()"),
+        self.connect(self._content.calfile_browse, QtCore.SIGNAL("clicked()"),\
                 self._calfile_browse)
-        self.connect(self._content.charfile_browse, QtCore.SIGNAL("clicked()"),
+        self.connect(self._content.charfile_browse, QtCore.SIGNAL("clicked()"),\
                 self._charfile_browse)
-        self.connect(self._content.outputdir_browse, QtCore.SIGNAL("clicked()"),
+        self.connect(self._content.outputdir_browse, QtCore.SIGNAL("clicked()"),\
                 self._outputdir_browse)
-        self.connect(self._content.binning_edit, QtCore.SIGNAL("valueChanged"),
+        self.connect(self._content.binning_edit, QtCore.SIGNAL("valueChanged"),\
                 self._binvalue_edit)
-        self.connect(self._content.bintype_combo, QtCore.SIGNAL("currentIndexChanged(QString)"),
+        self.connect(self._content.bintype_combo, QtCore.SIGNAL("currentIndexChanged(QString)"),\
                 self._bintype_process)
 
         #self.connect(self._content.override_emptyrun_checkBox, QtCore.SIGNAL("clicked()"),
@@ -129,19 +130,19 @@ class RunSetupWidget(BaseWidget):
         #self.connect(self._content.override_vanbkgdrun_checkBox, QtCore.SIGNAL("clicked()"),
         #        self._overridevanbkgdrun_clicked)
 
-        self.connect(self._content.disablebkgdcorr_chkbox, QtCore.SIGNAL("clicked()"),
+        self.connect(self._content.disablebkgdcorr_chkbox, QtCore.SIGNAL("clicked()"),\
                 self._disablebkgdcorr_clicked)
-        self.connect(self._content.disablevancorr_chkbox, QtCore.SIGNAL("clicked()"),
+        self.connect(self._content.disablevancorr_chkbox, QtCore.SIGNAL("clicked()"),\
                 self._disablevancorr_clicked)
-        self.connect(self._content.disablevanbkgdcorr_chkbox, QtCore.SIGNAL("clicked()"),
+        self.connect(self._content.disablevanbkgdcorr_chkbox, QtCore.SIGNAL("clicked()"),\
                 self._disablevanbkgdcorr_clicked)
 
-        self.connect(self._content.usebin_button, QtCore.SIGNAL("clicked()"),
+        self.connect(self._content.usebin_button, QtCore.SIGNAL("clicked()"),\
                 self._usebin_clicked)
-        self.connect(self._content.resamplex_button, QtCore.SIGNAL("clicked()"),
+        self.connect(self._content.resamplex_button, QtCore.SIGNAL("clicked()"),\
                 self._resamplex_clicked)
 
-        self.connect(self._content.help_button, QtCore.SIGNAL("clicked()"),
+        self.connect(self._content.help_button, QtCore.SIGNAL("clicked()"),\
                 self._show_help)
 
         # Validated widgets
