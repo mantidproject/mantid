@@ -45,19 +45,79 @@ public:
       TSM_ASSERT_THROWS("Empty WidthVector", alg.setProperty("WidthVector", std::vector<int>()), std::invalid_argument&);
   }
 
-  void test_smooth_hat_function()
+  void test_simple_smooth_hat_function()
   {
       auto toSmooth = MDEventsTestHelper::makeFakeMDHistoWorkspace(1 /*signal*/, 2 /*numDims*/, 3 /*numBins in each dimension*/);
+
+      /*
+       2D MDHistoWorkspace Input
+
+       1 - 1 - 1
+       1 - 1 - 1
+       1 - 1 - 1
+      */
 
       SmoothMD alg;
       alg.setChild(true);
       alg.initialize();
-      std::vector<int> widthVector(1, 1);
+      std::vector<int> widthVector(1, 3);
       alg.setProperty("WidthVector", widthVector);
       alg.setProperty("InputWorkspace", toSmooth);
       alg.setPropertyValue("OutputWorkspace", "dummy");
       alg.execute();
       IMDHistoWorkspace_sptr out = alg.getProperty("OutputWorkspace");
+
+      /*
+       2D MDHistoWorkspace Expected
+
+       1 - 1 - 1
+       1 - 1 - 1
+       1 - 1 - 1
+      */
+      for(size_t i = 0; i < out->getNPoints(); ++i)
+      {
+          TS_ASSERT_EQUALS(1, out->getSignalAt(i));
+          TS_ASSERT_EQUALS(1, out->getErrorAt(i));
+      }
+
+  }
+
+  void test_smooth_hat_function()
+  {
+      auto toSmooth = MDEventsTestHelper::makeFakeMDHistoWorkspace(1 /*signal*/, 2 /*numDims*/, 3 /*numBins in each dimension*/);
+      toSmooth->setSignalAt(4, 2.0);
+
+      /*
+       2D MDHistoWorkspace Input
+
+       1 - 1 - 1
+       1 - 2 - 1
+       1 - 1 - 1
+      */
+
+      SmoothMD alg;
+      alg.setChild(true);
+      alg.initialize();
+      std::vector<int> widthVector(1, 3);
+      alg.setProperty("WidthVector", widthVector);
+      alg.setProperty("InputWorkspace", toSmooth);
+      alg.setPropertyValue("OutputWorkspace", "dummy");
+      alg.execute();
+      IMDHistoWorkspace_sptr out = alg.getProperty("OutputWorkspace");
+
+      /*
+       2D MDHistoWorkspace Expected
+
+       5/4 -  7/6 - 5/4
+       7/6 - 10/9 - 7/6
+       5/4 -  7/6 - 5/4
+      */
+
+      TS_ASSERT_EQUALS(5.0/4, out->getSignalAt(0));
+      TS_ASSERT_EQUALS(7.0/6, out->getSignalAt(1));
+      TS_ASSERT_EQUALS(10.0/9, out->getSignalAt(4));
+
+
   }
 
 

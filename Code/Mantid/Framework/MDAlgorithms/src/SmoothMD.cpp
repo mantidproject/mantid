@@ -1,5 +1,6 @@
 #include "MantidMDAlgorithms/SmoothMD.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
+#include "MantidAPI/IMDIterator.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ArrayBoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
@@ -13,12 +14,14 @@
 #include <sstream>
 #include <utility>
 #include <boost/function.hpp>
+#include <boost/scoped_ptr.hpp>
+#include <boost/tuple/tuple.hpp>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 
 typedef std::vector<int> WidthVector;
-typedef boost::function<IMDHistoWorkspace_sptr(IMDHistoWorkspace_sptr, WidthVector)> SmoothFunction;
+typedef boost::function<IMDHistoWorkspace_sptr(IMDHistoWorkspace_const_sptr, const WidthVector&)> SmoothFunction;
 typedef std::map<std::string, SmoothFunction> SmoothFunctionMap;
 
 namespace {
@@ -34,9 +37,31 @@ std::vector<std::string> functions() {
   return propOptions;
 }
 
-IMDHistoWorkspace_sptr hatSmooth(IMDHistoWorkspace_sptr toSmooth, WidthVector widthVector)
+IMDHistoWorkspace_sptr hatSmooth(IMDHistoWorkspace_const_sptr toSmooth, const WidthVector& widthVector)
 {
-    return toSmooth->clone(); // TODO
+    IMDHistoWorkspace_sptr outWS = toSmooth->clone();
+    boost::scoped_ptr<IMDIterator> iterator(toSmooth->createIterator(NULL)); // TODO should be multi-threaded
+    do
+    {
+        // Gets all vertex-touching neighbours
+        std::vector<size_t> neighbourIndexes = iterator->findNeighbourIndexes();
+        const size_t nNeighbours = neighbourIndexes.size();
+        double sumSignal = iterator->getSignal();
+        double sumSqError = iterator->getError();
+        for(size_t i = 0; i < neighbourIndexes.size(); ++i)
+        {
+            sumSignal += toSmooth->getSignalAt(neighbourIndexes[i]);
+            double error = toSmooth->getErrorAt(neighbourIndexes[i]);
+            sumSqError += (error * error);
+        }
+
+        // Calculate the mean
+        outWS->setSignalAt(iterator->getLinearIndex(), sumSignal/(nNeighbours + 1 ) );
+        // Calculate the sample variance
+        outWS->setErrorSquaredAt(iterator->getLinearIndex(), sumSqError / (nNeighbours + 1) );
+    }
+    while(iterator->next());
+    return outWS;
 }
 
 SmoothFunctionMap makeFunctionMap()
