@@ -5,12 +5,12 @@ set( SRC_FILES
   src/QueryAllRemoteJobs.cpp
   src/QueryRemoteFile.cpp
   src/QueryRemoteJob.cpp
+  src/SCARFTomoReconstruction.cpp
   src/SimpleJSON.cpp
   src/StartRemoteTransaction.cpp
   src/StopRemoteTransaction.cpp
   src/SubmitRemoteJob.cpp
   src/UploadRemoteFile.cpp
-  src/SCARFTomoReconstruction.cpp
 )
 
 set( INC_FILES
@@ -20,16 +20,27 @@ set( INC_FILES
   inc/MantidRemoteAlgorithms/QueryAllRemoteJobs.h
   inc/MantidRemoteAlgorithms/QueryRemoteJob.h
   inc/MantidRemoteAlgorithms/QueryRemoteFile.h
+  inc/MantidRemoteAlgorithms/SCARFTomoReconstruction.h
   inc/MantidRemoteAlgorithms/SimpleJSON.h
   inc/MantidRemoteAlgorithms/StartRemoteTransaction.h
   inc/MantidRemoteAlgorithms/StopRemoteTransaction.h
   inc/MantidRemoteAlgorithms/SubmitRemoteJob.h
   inc/MantidRemoteAlgorithms/UploadRemoteFile.h
-  inc/MantidRemoteAlgorithms/SCARFTomoReconstruction.h
 )
 
 set ( TEST_FILES
+  AbortRemoteJobTest.h
+  AuthenticateTest.h
+  DownloadRemoteFileTest.h
+  QueryAllRemoteJobsTest.h
+  QueryRemoteJobTest.h
+  QueryRemoteFileTest.h
   SCARFTomoReconstructionTest.h
+  SimpleJSONTest.h
+  StartRemoteTransactionTest.h
+  StopRemoteTransactionTest.h
+  SubmitRemoteJobTest.h
+  UploadRemoteFileTest.h
 )
 
 #set ( TEST_PY_FILES

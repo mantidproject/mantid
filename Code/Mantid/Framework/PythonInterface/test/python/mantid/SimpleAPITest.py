@@ -4,36 +4,6 @@ from mantid.api import (AlgorithmFactory, AlgorithmProxy, IAlgorithm, IEventWork
 import mantid.simpleapi as simpleapi
 import numpy
 
-import os
-import sys
-
-#======================================================================================================================
-# Helper class for test
-class TemporaryPythonAlgorithm(object):
-    """
-    Dumps the given code to a file in the Python algorithm directory
-    an removes the file in the del method
-    """
-    def __init__(self, name, code):
-        from mantid import config
-        
-        plugin_dirs = config['python.plugins.directories'].split(";")
-        if len(plugin_dirs) == 0:
-            raise RuntimeError("No Python algorithm directories defined")
-        
-        self._pyfile = os.path.join(plugin_dirs[0], name + ".py")
-        alg_file = open(self._pyfile, "w")
-        alg_file.write(code)
-        alg_file.close()
-        
-    def __del__(self):
-        try:
-            os.remove(self._pyfile)
-            pycfile = self._pyfile.replace(".py",".pyc")
-            os.remove(pycfile)
-        except OSError:
-            pass
-
 #======================================================================================================================
 
 class SimpleAPITest(unittest.TestCase):
@@ -218,42 +188,34 @@ FullBinsOnly(Input) *boolean*       Omit the final bin if it's width is smaller 
         self.assertTrue('raw' in mtd)
 
     def test_python_alg_can_use_other_python_alg_through_simple_api(self):
-        """
-        Runs a test in a separate process as it requires a reload of the
-        whole mantid module 
-        """
-        src = """
-from mantid.api import PythonAlgorithm, AlgorithmFactory
-import mantid.simpleapi as api
-from mantid.simpleapi import *
+        class SimpleAPIPythonAlgorithm1(PythonAlgorithm):
+            def PyInit(self):
+                pass
+            def PyExec(self):
+                from mantid.simpleapi import SimpleAPIPythonAlgorithm2
+                SimpleAPIPythonAlgorithm2()
+        class SimpleAPIPythonAlgorithm2(PythonAlgorithm):
+            def PyInit(self):
+                pass
+            def PyExec(self):
+                pass
 
-class %(name)s(PythonAlgorithm):
-
-    def PyInit(self):
-        pass
-    def PyExec(self):
-        %(execline1)s
-        %(execline2)s
-        
-AlgorithmFactory.subscribe(%(name)s)
-"""
-        name1 = "SimpleAPIPythonAlgorithm1"
-        name2 = "SimpleAPIPythonAlgorithm2"
-        src1 = src % {"name":name1,"execline1":name2+"()","execline2":"api."+name2+"()"}
-        src2 = src % {"name":name2,"execline1":"pass","execline2":"pass"}
-        a = TemporaryPythonAlgorithm(name1,src1)
-        b = TemporaryPythonAlgorithm(name2,src2)
-        import subprocess
-        # Try to use algorithm 1 to run algorithm 2
-        cmd = sys.executable + ' -c "from mantid.simpleapi import %(name)s;%(name)s()"' % {'name':name1}
+        AlgorithmFactory.subscribe(SimpleAPIPythonAlgorithm1)
+        AlgorithmFactory.subscribe(SimpleAPIPythonAlgorithm2)
+        # ---------------------------------------------------------
+        alg1 = SimpleAPIPythonAlgorithm1()
+        alg1.initialize()
+        # Puts function in simpleapi globals
+        simpleapi_alg1_func = simpleapi._create_algorithm_function("SimpleAPIPythonAlgorithm1", 1, alg1)
+        alg2 = SimpleAPIPythonAlgorithm1()
+        alg2.initialize()
+        # Puts function in simpleapi globals
+        simpleapi._create_algorithm_function("SimpleAPIPythonAlgorithm2", 1, alg2)
         try:
-            subprocess.check_call(cmd,shell=True)
-        except subprocess.CalledProcessError, exc:
-            self.fail("Error occurred running one Python algorithm from another: %s" % str(exc))
-        
-        # Ensure the files are removed promptly
-        del a,b
-        
+            simpleapi_alg1_func()
+        except RuntimeError, exc:
+            self.fail("Running algorithm 2 from 1 failed: " + str(exc))
+
     def test_optional_workspaces_are_ignored_if_not_present_in_output_even_if_given_as_input(self):
         # Test algorithm
         from mantid.api import AlgorithmManager,PropertyMode,PythonAlgorithm,MatrixWorkspaceProperty,WorkspaceFactory
@@ -320,6 +282,24 @@ AlgorithmFactory.subscribe(%(name)s)
         self.assertEquals(expected_child,alg.isChild())
         self.assertEquals(alg.version(), version)
         self.assertTrue(isinstance(alg, expected_class))
+
+    def test_validate_inputs_with_errors_stops_algorithm(self):
+        class ValidateInputsTest(PythonAlgorithm):
+            def PyInit(self):
+                self.declareProperty("Prop1", 1.0)
+                self.declareProperty("Prop2", 2.0)
+            def validateInputs(self):
+                return {"Prop1":"Value is less than Prop2"}
+            def PyExec(self):
+                pass
+        AlgorithmFactory.subscribe(ValidateInputsTest)
+        # ---------------------------------------------------------
+        alg_obj = ValidateInputsTest()
+        alg_obj.initialize()
+        
+        simpleapi_func = simpleapi._create_algorithm_function("ValidateInputsTest", 1, alg_obj)
+        # call
+        self.assertRaises(RuntimeError, simpleapi_func, Prop1=2.5, Prop2=3.5)
 
 if __name__ == '__main__':
     unittest.main()

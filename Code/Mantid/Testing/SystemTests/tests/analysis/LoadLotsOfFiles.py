@@ -7,6 +7,7 @@ import re
 import stresstesting
 
 BANNED_FILES = ['992 Descriptions.txt',
+                'directBeamDatabaseFall2014_IPTS_11601_2.cfg',
                 'BASIS_AutoReduction_Mask.xml',
                 'BioSANS_dark_current.xml',
                 'BioSANS_empty_cell.xml',

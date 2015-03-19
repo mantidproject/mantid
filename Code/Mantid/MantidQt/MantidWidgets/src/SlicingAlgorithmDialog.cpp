@@ -459,7 +459,7 @@ namespace MantidQt
 
     /**
      * Resets the axis dimensions externally.
-     * @param propertyName The name of the axis dimension.
+     * @param index The property index.
      * @param propertyValue The new value of the axis dimension.
      */
     void SlicingAlgorithmDialog::resestAlignedDimProperty(size_t index, QString propertyValue)

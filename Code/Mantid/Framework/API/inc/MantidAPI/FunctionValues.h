@@ -103,6 +103,9 @@ public:
   /// instance.
   void setFitDataFromCalculated(const FunctionValues &values);
 
+  /// Return the calculated values as a vector
+  std::vector<double> toVector() const {return m_calculated;}
+
 protected:
   /// Copy calculated values to a buffer
   /// @param to :: Pointer to the buffer

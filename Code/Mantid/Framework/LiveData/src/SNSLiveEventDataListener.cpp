@@ -56,9 +56,8 @@ namespace Mantid {
 namespace LiveData {
 DECLARE_LISTENER(SNSLiveEventDataListener);
 // The DECLARE_LISTENER macro seems to confuse some editors' syntax checking.
-// The
-// semi-colon limits the complaints to one line.  It has no actual effect on the
-// code.
+// The semi-colon limits the complaints to one line.  It has no actual effect
+// on the code.
 
 namespace {
 /// static logger
@@ -72,8 +71,7 @@ SNSLiveEventDataListener::SNSLiveEventDataListener()
       m_pauseNetRead(false), m_stopThread(false), m_runPaused(false),
       m_ignorePackets(true), m_filterUntilRunStart(false)
 // ADARA::Parser() will accept values for buffer size and max packet size, but
-// the
-// defaults will work fine
+// the defaults will work fine
 {
 
   // Perform all the workspace initialization steps (including actually creating
@@ -82,8 +80,7 @@ SNSLiveEventDataListener::SNSLiveEventDataListener()
 
   // Initialize m_keepPausedEvents from the config file.
   // NOTE: To the best of my knowledge, the existence of this property is not
-  // documented
-  // anywhere and this lack of documentation is deliberate.
+  // documented anywhere and this lack of documentation is deliberate.
   if (!ConfigService::Instance().getValue("livelistener.keeppausedevents",
                                           m_keepPausedEvents)) {
     // If the property hasn't been set, assume false
@@ -109,9 +106,8 @@ SNSLiveEventDataListener::~SNSLiveEventDataListener() {
       // a buffer that's going to be deleted.
       // Chose segfault - at least that's obvious.
       g_log.fatal() << "SNSLiveEventDataListener failed to shut down its "
-                       "background thread! "
-                    << "This should never happen and Mantid is pretty much "
-                       "guaranteed to crash shortly.  "
+                    << "background thread!  This should never happen and "
+                    << "Mantid is pretty much guaranteed to crash shortly.  "
                     << "Talk to the Mantid developer team." << std::endl;
     }
   }
@@ -175,11 +171,10 @@ bool SNSLiveEventDataListener::isConnected() { return m_isConnected; }
 /// Start the background thread
 
 /// Starts the background thread which reads data from the network, parses it
-/// and
-/// stores the resulting events in a temporary workspace.
+/// and stores the resulting events in a temporary workspace.
 /// @param startTime Specifies how much historical data the SMS should send
-/// before continuing
-/// the current 'live' data.  Use 0 to indicate no historical data.
+/// before continuing the current 'live' data.  Use 0 to indicate no
+/// historical data.
 void SNSLiveEventDataListener::start(Kernel::DateAndTime startTime) {
   // Save the startTime and kick off the background thread
   // (Can't really do anything else until we send the hello packet and the SMS
@@ -193,11 +188,9 @@ void SNSLiveEventDataListener::start(Kernel::DateAndTime startTime) {
     // at the start of the previous run (and it doesn't know when the previous
     // run started).  This value for a start time will cause the SMS to replay
     // all of its historical data and it will be up to us to filter out
-    // everything
-    // before the start of the previous run.
+    // everything before the start of the previous run.
     // See the description of the 'Client Hello' packet in the SNS DAS design
-    // doc
-    // for more details
+    // doc for more details
     m_filterUntilRunStart = true;
   }
   m_thread.start(*this);
@@ -206,10 +199,8 @@ void SNSLiveEventDataListener::start(Kernel::DateAndTime startTime) {
 /// The main function for the background thread
 
 /// Loops until the forground thread requests it to stop.  Reads data from the
-/// network,
-/// parses it and stores the resulting events (and other metadata) in a
-/// temporary
-/// workspace.
+/// network, parses it and stores the resulting events (and other metadata) in
+/// a temporary workspace.
 void SNSLiveEventDataListener::run() {
   try {
     if (m_isConnected == false) // sanity check
@@ -286,12 +277,10 @@ void SNSLiveEventDataListener::run() {
     // uncaught exception.  In such a case, the thread will exit and there's
     // nothing we can do about that.  We'll log an error and save a copy of the
     // exception object so that we can re-throw it from the foreground thread
-    // (which
-    // will cause the algorithm to exit).
+    // (which will cause the algorithm to exit).
     // NOTE: For the default exception handler, we actually create a new
-    // runtime_error
-    // object and throw that, since there's no exception object passed in to the
-    // handler.
+    // runtime_error object and throw that, since there's no exception object
+    // passed in to the handler.
   } catch (ADARA::invalid_packet &e) { // exception handler for invalid packets
     // For now, log it and let the thread exit.  In the future, we might
     // try to recover from this.  (A bad event packet could probably just
@@ -1369,8 +1358,7 @@ boost::shared_ptr<Workspace> SNSLiveEventDataListener::extractData() {
   // (Which won't happen until the SMS sends it the packet with the geometry
   // information in it.)
   // First wait up to 10 seconds, then if it's still not initialized throw a
-  // NotYet
-  // exception so that the user has the opportunity to cancel.
+  // NotYet exception so that the user has the opportunity to cancel.
   static const double maxBlockTime = 10.0;
   const DateAndTime endTime = DateAndTime::getCurrentTime() + maxBlockTime;
   while ((!m_workspaceInitialized) &&

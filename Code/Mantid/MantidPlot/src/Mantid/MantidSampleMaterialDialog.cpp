@@ -40,6 +40,9 @@ MantidSampleMaterialDialog::MantidSampleMaterialDialog(const QString & wsName, M
 void MantidSampleMaterialDialog::updateMaterial()
 {
   MatrixWorkspace_sptr ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(m_wsName.toStdString());
+  if(!ws)
+    return;
+
   const Material material = ws->sample().getMaterial();
 
   m_uiForm.treeMaterialProperties->clear();

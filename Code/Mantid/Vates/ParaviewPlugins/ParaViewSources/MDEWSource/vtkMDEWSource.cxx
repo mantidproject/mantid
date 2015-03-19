@@ -181,6 +181,7 @@ int vtkMDEWSource::RequestData(vtkInformation *, vtkInformationVector **, vtkInf
       // data set. We therefore feed m_time the first time step of this source at 
       // start up.
       m_time = m_startupTimeValue;
+      m_isStartup = false;
     }
     else if (outInfo->Has(vtkStreamingDemandDrivenPipeline::UPDATE_TIME_STEP()))
     {

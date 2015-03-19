@@ -41,7 +41,7 @@ set ( TESTING_TIMEOUT 300 CACHE INTEGER
       "Timeout in seconds for each test (default 300=5minutes)")
 
 ###########################################################################
-# Look for dependencies - bail out if any not found
+# Look for dependencies
 ###########################################################################
 
 set ( Boost_NO_BOOST_CMAKE TRUE )
@@ -70,6 +70,14 @@ set ( MAIN_CMAKE_INCLUDE_PATH ${CMAKE_INCLUDE_PATH} )
 set ( CMAKE_INCLUDE_PATH ${CMAKE_INCLUDE_PATH}/zlib123 )
 find_package ( ZLIB REQUIRED )
 set ( CMAKE_INCLUDE_PATH ${MAIN_CMAKE_INCLUDE_PATH} )
+
+if (${CMAKE_SYSTEM_NAME} MATCHES "Windows" OR OSX_VERSION VERSION_LESS 10.9)
+  set (HDF5_DIR "${CMAKE_MODULE_PATH}")
+  find_package ( HDF5 COMPONENTS HL REQUIRED
+    CONFIGS hdf5-config.cmake )
+else()
+  find_package ( HDF5 COMPONENTS HL REQUIRED )
+endif()
 
 find_package ( PythonInterp )
 

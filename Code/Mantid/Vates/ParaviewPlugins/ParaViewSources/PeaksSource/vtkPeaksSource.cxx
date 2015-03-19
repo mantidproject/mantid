@@ -84,48 +84,7 @@ int vtkPeaksSource::RequestData(vtkInformation *, vtkInformationVector **,
                                                                    m_dimToShow);
 
     p_peakFactory->initialize(m_PeakWS);
-    vtkDataSet *structuredMesh = p_peakFactory->create(drawingProgressUpdate);
-
-    // Pick the radius up from the factory if possible, otherwise use the user-provided value.
-    vtkPolyDataAlgorithm* shapeMarker = NULL;
-    if(p_peakFactory->isPeaksWorkspaceIntegrated())
-    {
-      double peakRadius = p_peakFactory->getIntegrationRadius(); 
-      const int resolution = 6;
-      vtkSphereSource *sphere = vtkSphereSource::New();
-      sphere->SetRadius(peakRadius);
-      sphere->SetPhiResolution(resolution);
-      sphere->SetThetaResolution(resolution);
-      shapeMarker = sphere;
-    }
-    else
-    {
-      vtkAxes* axis = vtkAxes::New();
-      axis->SymmetricOn();
-      axis->SetScaleFactor(m_uintPeakMarkerSize);
-
-      vtkTransform* transform = vtkTransform::New();
-      const double rotationDegrees = 45;
-      transform->RotateX(rotationDegrees);
-      transform->RotateY(rotationDegrees);
-      transform->RotateZ(rotationDegrees);
-
-      vtkTransformPolyDataFilter* transformFilter = vtkTransformPolyDataFilter::New();
-      transformFilter->SetTransform(transform);
-      transformFilter->SetInputConnection(axis->GetOutputPort());
-      transformFilter->Update();
-      shapeMarker = transformFilter;
-    }
-
-    vtkPVGlyphFilter *glyphFilter = vtkPVGlyphFilter::New();
-    glyphFilter->SetInputData(structuredMesh);
-    glyphFilter->SetSourceConnection(shapeMarker->GetOutputPort());
-    glyphFilter->Update();
-    vtkPolyData *glyphed = glyphFilter->GetOutput();
-
-    output->ShallowCopy(glyphed);
-
-    glyphFilter->Delete();
+    output->ShallowCopy(p_peakFactory->create(drawingProgressUpdate));
   }
   return 1;
 }

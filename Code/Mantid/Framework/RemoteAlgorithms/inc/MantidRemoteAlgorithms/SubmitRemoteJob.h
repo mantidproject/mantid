@@ -54,7 +54,7 @@ namespace RemoteAlgorithms {
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
 
-class SubmitRemoteJob : public Mantid::API::Algorithm {
+class DLLExport SubmitRemoteJob : public Mantid::API::Algorithm {
 public:
   /// (Empty) Constructor
   SubmitRemoteJob() : Mantid::API::Algorithm() {}

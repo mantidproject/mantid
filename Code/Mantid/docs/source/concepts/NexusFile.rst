@@ -1,6 +1,6 @@
 .. _Nexus file:
 
-Nexus_file
+Nexus File
 ==========
 
 A **Nexus file** is a type of data file used by ISIS traget station 2
