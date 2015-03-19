@@ -20,25 +20,26 @@ of 4 models (the fit function used is given in brackets):
 Usage
 -----
 
-**Example - Chudley-Elliott fit**
+**Example - Chudley-Elliot fit**
 
-.. testcode:: exChudleyElliottFit
+.. testcode:: exChudleyElliotFit
 
     data = Load(Filename='irs26176_graphite002_conv_2LFixF_s0_to_9_Result.nxs')
 
     JumpFit(InputWorkspace=data,
+            FUnction='ChudleyElliot',
             QMin=0.6,
             QMax=1.8)
 
-    fit = mtd['irs26176_graphite002_conv_2LFixF_s0_to_9_ChudleyElliot_fit_Workspace']
-    params = mtd['irs26176_graphite002_conv_2LFixF_s0_to_9_ChudleyElliot_fit_Parameters']
+    fit = mtd['data_ChudleyElliot_fit_Workspace']
+    params = mtd['data_ChudleyElliot_fit_Parameters']
 
-    print 'Fit parameters: %s' % params.column(0)
+    print 'Fit parameters: %s' % ', '.join(params.column(0))
 
 **Output:**
 
-.. testoutput:: exChudleyElliottFit
+.. testoutput:: exChudleyElliotFit
 
-    Tau, L, Cost function value
+    Fit parameters: Tau, L, Cost function value
 
 .. categories::

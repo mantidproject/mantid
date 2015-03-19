@@ -108,7 +108,13 @@ class JumpFit(PythonAlgorithm):
 
         # Run fit function
         if self._out_name is "":
+            # Find the last underscore
             ws_suffix_index = self._in_ws.rfind('_')
+
+            if ws_suffix_index == -1:
+                # Use the entire string if underscore not found
+                ws_suffix_index = len(self._in_ws)
+
             self._out_name = self._in_ws[:ws_suffix_index] + '_' + self._jump_function + '_fit'
 
         Fit(Function=function, InputWorkspace=spectrum_ws, CreateOutput=True, Output=self._out_name,
