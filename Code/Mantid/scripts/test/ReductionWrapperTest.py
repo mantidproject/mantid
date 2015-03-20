@@ -39,7 +39,7 @@ class test_helper(ReductionWrapper):
         # Uncomment this to use custom filename function
         # Note: the properties are stored in prop_man class accessed as
         # below.
-        return custom_name(self.reducer.prop_man)
+        return lambda: custom_name(self.reducer.prop_man)
         # use this method to use standard file name generating function
         #return None
     @iliad
@@ -167,6 +167,12 @@ class ReductionWrapperTest(unittest.TestCase):
 
         save_file = th.reducer.prop_man.save_file_name
         self.assertEqual(save_file,'SOMETHING100_10.01meV_rings')
+
+        th.reducer.prop_man.sample_run = 200
+        PropertyManager.incident_energy.next()
+        save_file = th.reducer.prop_man.save_file_name
+        self.assertEqual(save_file,'SOMETHING200_20.00meV_rings')
+
 
 
 

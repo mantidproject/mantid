@@ -425,7 +425,7 @@ def iliad(reduce):
         else:
             pass # we should set already set up variables using
 
-        custom_print_function = host.set_custom_output_filename
+        custom_print_function = host.set_custom_output_filename()
         if not custom_print_function is None:
             PropertyManager.save_file_name.set_custom_print(custom_print_function)
         #
