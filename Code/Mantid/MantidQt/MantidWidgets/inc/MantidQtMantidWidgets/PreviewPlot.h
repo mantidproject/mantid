@@ -4,6 +4,7 @@
 #include "ui_PreviewPlot.h"
 
 #include "WidgetDllOption.h"
+#include "MantidQtMantidWidgets/RangeSelector.h"
 #include "MantidQtAPI/MantidWidget.h"
 
 #include "MantidAPI/MatrixWorkspace.h"
@@ -11,6 +12,7 @@
 #include <QActionGroup>
 #include <QHBoxLayout>
 #include <QLabel>
+#include <QMap>
 #include <QMenu>
 
 #include <qwt_plot.h>
@@ -81,10 +83,21 @@ namespace MantidWidgets
 
     bool hasCurve(const QString & curveName);
 
+    RangeSelector * addRangeSelector(const QString & rsName,
+                                     RangeSelector::SelectType type = RangeSelector::XMINMAX);
+    RangeSelector * getRangeSelector(const QString & rsName);
+    void removeRangeSelector(const QString & rsName, bool del);
+
+    bool hasRangeSelector(const QString & rsName);
+
+    QString getAxisType(int axisID);
+
   signals:
     /// Signals that the plot should be refreshed
     void needToReplot();
     void needToHardReplot();
+    /// Signals that the axis scale has been changed
+    void axisScaleChanged();
 
   public slots:
     void showLegend(bool show);
@@ -118,7 +131,6 @@ namespace MantidWidgets
 
     QList<QAction *> addOptionsToMenus(QString menuName, QActionGroup *group, QStringList items, QString defaultItem);
 
-    QString getAxisType(int axisID);
     QStringList getCurvesForWorkspace(const Mantid::API::MatrixWorkspace_sptr ws);
 
   private slots:
@@ -129,6 +141,11 @@ namespace MantidWidgets
   private:
     Ui::PreviewPlot m_uiForm;
 
+    /// Range selector widget for mini plot
+    QMap<QString, MantidQt::MantidWidgets::RangeSelector *> m_rangeSelectors;
+    /// Cache of range selector visibility
+    QMap<QString, bool> m_rsVisibility;
+
     /// Poco Observers for ADS Notifications
     Poco::NObserver<PreviewPlot, Mantid::API::WorkspacePreDeleteNotification> m_removeObserver;
     Poco::NObserver<PreviewPlot, Mantid::API::WorkspaceAfterReplaceNotification> m_replaceObserver;
@@ -136,7 +153,6 @@ namespace MantidWidgets
     /// If the widget was initialised
     bool m_init;
 
-    /// The plot its self
     friend class RangeSelector;
 
     /// Map of curve key to plot info

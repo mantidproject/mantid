@@ -7,7 +7,7 @@
 
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
-#include <jsoncpp/json/json.h>
+#include <json/json.h>
 
 #include "MantidDataObjects/PeakShapeSphericalFactory.h"
 #include "MantidDataObjects/PeakShapeSpherical.h"

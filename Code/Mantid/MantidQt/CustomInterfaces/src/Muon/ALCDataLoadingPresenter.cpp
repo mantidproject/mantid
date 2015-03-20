@@ -9,6 +9,7 @@
 #include <QApplication>
 #include <QFileInfo>
 #include <QDir>
+#include <sstream>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -139,7 +140,9 @@ namespace CustomInterfaces
     std::vector<std::string> periods;
     for (size_t i=0; i<numPeriods; i++)
     {
-      periods.push_back(std::to_string(static_cast<long long int>(i)+1));
+      std::stringstream buffer;
+      buffer << i + 1;
+      periods.push_back(buffer.str());
     }
     m_view->setAvailablePeriods(periods);
   }

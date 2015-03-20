@@ -1,6 +1,6 @@
 .. _RAW File:
 
-RAW_File
+RAW File
 ========
 
 The RAW file format has been for many years the primary data format of
