@@ -3,6 +3,7 @@
 ##
 
 set ( TEST_PY_FILES
+  AddSampleLogMultipleTest.py
   CalculateSampleTransmissionTest.py
   CheckForSampleLogsTest.py
   ConjoinSpectraTest.py
