@@ -7,16 +7,6 @@ try:
 except ImportError:
     QString = type("")
 
-class V3DValidator(QtGui.QValidator):
-    def __init__(self, parent):
-        super(V3DValidator,self).__init__()
-    def validate(self,string, pos):
-        d=numpy.fromstring(string,dtype=float,sep=',')
-        if len(d)==3 and numpy.alltrue(numpy.isfinite(d)):
-            return (QtGui.QValidator.Acceptable,pos)
-        else:
-            return (QtGui.QValidator.Invalid,pos)
-
 class EmptyOrDoubleValidator(QtGui.QValidator):
     def __init__(self, parent):
         super(EmptyOrDoubleValidator,self).__init__()
@@ -56,11 +46,8 @@ class DimensionSelectorWidget(QtGui.QWidget):
         self._labelStep=QtGui.QLabel('Step')
         #lineedits
         self._editBasis1=QtGui.QLineEdit()
-        self._editBasis1.setValidator(self.V3DValidator)
         self._editBasis2=QtGui.QLineEdit()
-        self._editBasis2.setValidator(self.V3DValidator)
         self._editBasis3=QtGui.QLineEdit()
-        self._editBasis3.setValidator(self.V3DValidator)
         self._editMin1=QtGui.QLineEdit()
         self._editMin1.setValidator(self.doubleValidator)
         self._editMin2=QtGui.QLineEdit()
@@ -120,7 +107,23 @@ class DimensionSelectorWidget(QtGui.QWidget):
         grid.addWidget(self._editMin4,4,1)
         grid.addWidget(self._editMax4,4,2)
         self.updateGui()
+        #connections
+        self._editBasis1.textEdited.connect(self.basisChanged)
+        self._editBasis2.textEdited.connect(self.basisChanged)
+        self._editBasis3.textEdited.connect(self.basisChanged)
     
+    def basisChanged(self):
+        sender = self.sender()
+        validator = sender.validator()
+        state = validator.validate(sender.text(), 0)[0]
+        if state == QtGui.QValidator.Acceptable:
+            color = '#ffffff'
+        else:
+            color = '#ff0000'
+        sender.setStyleSheet('QLineEdit { background-color: %s }' % color)
+        #if state == QtGui.QValidator.Acceptable:
+        #    self.validateAll()
+        
     def updateGui(self):
         self._editBasis1.setText(QString(self.basis[0]))
         self._editBasis2.setText(QString(self.basis[1]))

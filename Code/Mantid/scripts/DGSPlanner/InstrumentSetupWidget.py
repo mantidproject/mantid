@@ -181,7 +181,7 @@ class InstrumentSetupWidget(QtGui.QWidget):
         self.tableViewGon.setModel(self.goniomodel)
         self.tableViewGon.update()
         #goniometer figure
-        self.figure=Figure(figsize=(2,4))
+        self.figure=Figure(figsize=(2,2))
         self.figure.patch.set_facecolor('white')
         self.canvas=FigureCanvas(self.figure)
         self.gonfig=None

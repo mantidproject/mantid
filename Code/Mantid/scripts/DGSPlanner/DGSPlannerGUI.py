@@ -1,9 +1,9 @@
 #pylint: disable=invalid-name
-from . import InstrumentSetupWidget,ClassicUBInputWidget,MatrixUBInputWidget,DimensionSelectorWidget
+import InstrumentSetupWidget,ClassicUBInputWidget,MatrixUBInputWidget,DimensionSelectorWidget
 from PyQt4 import QtCore, QtGui
 import sys
 import mantid
-from .ValidateOL import ValidateOL
+from ValidateOL import ValidateOL
 
 class DGSPlannerGUI(QtGui.QWidget):
     def __init__(self,ol=None,parent=None):
