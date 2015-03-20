@@ -1,8 +1,8 @@
 .. _func-PawleyFunction:
 
-===========
+==============
 PawleyFunction
-===========
+==============
 
 .. index:: PawleyFunction
 
