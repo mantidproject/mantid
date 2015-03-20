@@ -406,8 +406,8 @@ namespace CustomInterfaces
     loadAlg->initialize();
     loadAlg->setProperty("Filename", rawFile.toStdString());
     loadAlg->setProperty("OutputWorkspace", name);
-    loadAlg->setProperty("SpectrumMin", static_cast<long>(detectorRange[0]));
-    loadAlg->setProperty("SpectrumMax", static_cast<long>(detectorRange[1]));
+    loadAlg->setProperty("SpectrumMin", detectorRange[0]);
+    loadAlg->setProperty("SpectrumMax", detectorRange[1]);
     m_batchAlgoRunner->addAlgorithm(loadAlg);
 
     BatchAlgorithmRunner::AlgorithmRuntimeProps inputFromLoad;
