@@ -49,10 +49,15 @@ class AddSampleLogMultiple(PythonAlgorithm):
                     pass
 
             # Add the log
-            AddSampleLog(Workspace=workspace,
-                         LogType=value_type,
-                         LogName=name,
-                         LogText=value)
+            alg = AlgorithmManager.create('AddSampleLog')
+            alg.initialize()
+            alg.setChild(True)
+            alg.setLogging(False)
+            alg.setProperty('Workspace', workspace)
+            alg.setProperty('LogType', value_type)
+            alg.setProperty('LogName', name)
+            alg.setProperty('LogText', value)
+            alg.execute()
 
 
     def validateInputs(self):
