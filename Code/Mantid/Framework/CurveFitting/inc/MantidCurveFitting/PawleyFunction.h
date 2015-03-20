@@ -106,7 +106,7 @@ typedef boost::shared_ptr<PawleyParameterFunction> PawleyParameterFunction_sptr;
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class PawleyFunction : public API::FunctionParameterDecorator {
+class DLLExport PawleyFunction : public API::FunctionParameterDecorator {
 public:
   PawleyFunction();
   virtual ~PawleyFunction() {}
