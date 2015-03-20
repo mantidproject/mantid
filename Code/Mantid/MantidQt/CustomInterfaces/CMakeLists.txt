@@ -291,6 +291,10 @@ set ( UI_FILES inc/MantidQtCustomInterfaces/AddWorkspace.ui
                inc/MantidQtCustomInterfaces/SANSEventSlicing.ui
                inc/MantidQtCustomInterfaces/StepScan.ui
                inc/MantidQtCustomInterfaces/TomoReconstruction.ui
+               inc/MantidQtCustomInterfaces/TomoToolConfigAstra.ui
+               inc/MantidQtCustomInterfaces/TomoToolConfigCustom.ui
+               inc/MantidQtCustomInterfaces/TomoToolConfigSavu.ui
+               inc/MantidQtCustomInterfaces/TomoToolConfigTomoPy.ui
 )
 
 set ( TEST_FILES

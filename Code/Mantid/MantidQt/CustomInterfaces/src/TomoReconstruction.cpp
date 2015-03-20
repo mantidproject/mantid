@@ -109,11 +109,11 @@ void TomoReconstruction::doSetupSectionParameters() {
   QList<int> sizes;
   sizes.push_back(100);
   sizes.push_back(200);
-  m_ui.splitterPlugins->setSizes(sizes);
+  m_uiSavu.splitterPlugins->setSizes(sizes);
 
   // Setup Parameter editor tab
   loadAvailablePlugins();
-  m_ui.treeCurrentPlugins->setHeaderHidden(true);
+  m_uiSavu.treeCurrentPlugins->setHeaderHidden(true);
 
   // Connect slots
   // Menu Items
@@ -123,18 +123,18 @@ void TomoReconstruction::doSetupSectionParameters() {
           SLOT(menuSaveAsClicked()));
 
   // Lists/trees
-  connect(m_ui.listAvailablePlugins, SIGNAL(itemSelectionChanged()), this,
+  connect(m_uiSavu.listAvailablePlugins, SIGNAL(itemSelectionChanged()), this,
           SLOT(availablePluginSelected()));
-  connect(m_ui.treeCurrentPlugins, SIGNAL(itemSelectionChanged()), this,
+  connect(m_uiSavu.treeCurrentPlugins, SIGNAL(itemSelectionChanged()), this,
           SLOT(currentPluginSelected()));
-  connect(m_ui.treeCurrentPlugins, SIGNAL(itemExpanded(QTreeWidgetItem *)),
+  connect(m_uiSavu.treeCurrentPlugins, SIGNAL(itemExpanded(QTreeWidgetItem *)),
           this, SLOT(expandedItem(QTreeWidgetItem *)));
 
   // Buttons
-  connect(m_ui.btnTransfer, SIGNAL(released()), this, SLOT(transferClicked()));
-  connect(m_ui.btnMoveUp, SIGNAL(released()), this, SLOT(moveUpClicked()));
-  connect(m_ui.btnMoveDown, SIGNAL(released()), this, SLOT(moveDownClicked()));
-  connect(m_ui.btnRemove, SIGNAL(released()), this, SLOT(removeClicked()));
+  connect(m_uiSavu.btnTransfer, SIGNAL(released()), this, SLOT(transferClicked()));
+  connect(m_uiSavu.btnMoveUp, SIGNAL(released()), this, SLOT(moveUpClicked()));
+  connect(m_uiSavu.btnMoveDown, SIGNAL(released()), this, SLOT(moveDownClicked()));
+  connect(m_uiSavu.btnRemove, SIGNAL(released()), this, SLOT(removeClicked()));
 }
 
 void TomoReconstruction::doSetupSectionSetup() {
@@ -462,7 +462,7 @@ void TomoReconstruction::runToolIndexChanged(int i) {
 
   std::string tool = rt->currentText().toStdString();
   // disallow reconstruct on tools that don't run yet: Savu and CCPi
-  if (m_CCPiTool == tool || m_savuTool == tool) {
+  if (m_CCPiTool == tool || m_SavuTool == tool) {
     m_ui.pushButton_reconstruct->setEnabled(false);
   } else {
     m_ui.pushButton_reconstruct->setEnabled(true);
@@ -656,20 +656,24 @@ void TomoReconstruction::toolSetupClicked() {
   }
 }
 
-void TomoReconstruction::showToolConfigTomoPy(const std::string &name) {
+void TomoReconstruction::showToolConfig(const std::string &name) {
   if (m_TomoPyTool == name) {
-    // TomoToolSetupDialog d;
-    // d.show();
+    TomoToolConfigTomoPy tomopy;
+    m_uiTomoPy.setupUi(&tomopy);
+    tomopy.show();
   } else if (m_AstraTool == name) {
-    // TomoToolSetupDialog d;
-    // d.show();
+    TomoToolConfigAstra astra;
+    m_uiAstra.setupUi(&astra);
+    astra.show();
   } else if (m_SavuTool == name) {
-    // TomoToolSetupDialog d;
-    // d.show();
-  } else if (m_CustomTool == name) {
-    // TomoToolSetupDialog d;
-    // d.show();
-  } 
+    TomoToolConfigSavu savu;
+    m_uiSavu.setupUi(&savu);
+    savu.show();
+  } else if (m_CustomCmdTool == name) {
+    TomoToolConfigCustom cmd;
+    m_uiCustom.setupUi(&cmd);
+    cmd.show();
+  }
 }
 
 void TomoReconstruction::reconstructClicked() {
@@ -896,11 +900,11 @@ void TomoReconstruction::loadAvailablePlugins() {
 // Populating only through this ensures correct indexing.
 void TomoReconstruction::refreshAvailablePluginListUI() {
   // Table WS structure, id/params/name/cite
-  m_ui.listAvailablePlugins->clear();
+  m_uiSavu.listAvailablePlugins->clear();
   for (size_t i = 0; i < m_availPlugins->rowCount(); ++i) {
     QString str =
         QString::fromStdString(m_availPlugins->cell<std::string>(i, 2));
-    m_ui.listAvailablePlugins->addItem(str);
+    m_uiSavu.listAvailablePlugins->addItem(str);
   }
 }
 
@@ -908,17 +912,17 @@ void TomoReconstruction::refreshAvailablePluginListUI() {
 // Populating only through this ensures correct indexing.
 void TomoReconstruction::refreshCurrentPluginListUI() {
   // Table WS structure, id/params/name/cite
-  m_ui.treeCurrentPlugins->clear();
+  m_uiSavu.treeCurrentPlugins->clear();
   createPluginTreeEntries(m_currPlugins);
 }
 
 // Updates the selected plugin info from Available plugins list.
 void TomoReconstruction::availablePluginSelected() {
-  if (m_ui.listAvailablePlugins->selectedItems().count() != 0) {
+  if (m_uiSavu.listAvailablePlugins->selectedItems().count() != 0) {
     size_t idx =
-        static_cast<size_t>(m_ui.listAvailablePlugins->currentIndex().row());
+        static_cast<size_t>(m_uiSavu.listAvailablePlugins->currentIndex().row());
     if (idx < m_availPlugins->rowCount()) {
-      m_ui.availablePluginDesc->setText(
+      m_uiSavu.availablePluginDesc->setText(
           tableWSRowToString(m_availPlugins, idx));
     }
   }
@@ -926,15 +930,16 @@ void TomoReconstruction::availablePluginSelected() {
 
 // Updates the selected plugin info from Current plugins list.
 void TomoReconstruction::currentPluginSelected() {
-  if (m_ui.treeCurrentPlugins->selectedItems().count() != 0) {
-    auto currItem = m_ui.treeCurrentPlugins->selectedItems()[0];
+  if (m_uiSavu.treeCurrentPlugins->selectedItems().count() != 0) {
+    auto currItem = m_uiSavu.treeCurrentPlugins->selectedItems()[0];
 
     while (currItem->parent() != NULL)
       currItem = currItem->parent();
 
-    int topLevelIndex = m_ui.treeCurrentPlugins->indexOfTopLevelItem(currItem);
+    int topLevelIndex =
+        m_uiSavu.treeCurrentPlugins->indexOfTopLevelItem(currItem);
 
-    m_ui.currentPluginDesc->setText(
+    m_uiSavu.currentPluginDesc->setText(
         tableWSRowToString(m_currPlugins, topLevelIndex));
   }
 }
@@ -946,8 +951,8 @@ void TomoReconstruction::paramValModified(QTreeWidgetItem *item,
   int topLevelIndex = -1;
 
   if (ownItem->getRootParent() != NULL) {
-    topLevelIndex =
-        m_ui.treeCurrentPlugins->indexOfTopLevelItem(ownItem->getRootParent());
+    topLevelIndex = m_uiSavu.treeCurrentPlugins->indexOfTopLevelItem(
+        ownItem->getRootParent());
   }
 
   if (topLevelIndex != -1) {
@@ -984,8 +989,8 @@ void TomoReconstruction::expandedItem(QTreeWidgetItem *item) {
 // Adds one plugin from the available plugins list into the list of
 // current plugins
 void TomoReconstruction::transferClicked() {
-  if (m_ui.listAvailablePlugins->selectedItems().count() != 0) {
-    int idx = m_ui.listAvailablePlugins->currentIndex().row();
+  if (m_uiSavu.listAvailablePlugins->selectedItems().count() != 0) {
+    int idx = m_uiSavu.listAvailablePlugins->currentIndex().row();
     Mantid::API::TableRow row = m_currPlugins->appendRow();
     for (size_t j = 0; j < m_currPlugins->columnCount(); ++j) {
       row << m_availPlugins->cell<std::string>(idx, j);
@@ -995,9 +1000,9 @@ void TomoReconstruction::transferClicked() {
 }
 
 void TomoReconstruction::moveUpClicked() {
-  if (m_ui.treeCurrentPlugins->selectedItems().count() != 0) {
+  if (m_uiSavu.treeCurrentPlugins->selectedItems().count() != 0) {
     size_t idx =
-        static_cast<size_t>(m_ui.treeCurrentPlugins->currentIndex().row());
+        static_cast<size_t>(m_uiSavu.treeCurrentPlugins->currentIndex().row());
     if (idx > 0 && idx < m_currPlugins->rowCount()) {
       // swap row, all columns
       for (size_t j = 0; j < m_currPlugins->columnCount(); ++j) {
@@ -1013,9 +1018,9 @@ void TomoReconstruction::moveUpClicked() {
 
 void TomoReconstruction::moveDownClicked() {
   // TODO: this can be done with the same function as above...
-  if (m_ui.treeCurrentPlugins->selectedItems().count() != 0) {
+  if (m_uiSavu.treeCurrentPlugins->selectedItems().count() != 0) {
     size_t idx =
-        static_cast<size_t>(m_ui.treeCurrentPlugins->currentIndex().row());
+        static_cast<size_t>(m_uiSavu.treeCurrentPlugins->currentIndex().row());
     if (idx < m_currPlugins->rowCount() - 1) {
       // swap all columns
       for (size_t j = 0; j < m_currPlugins->columnCount(); ++j) {
@@ -1031,8 +1036,8 @@ void TomoReconstruction::moveDownClicked() {
 
 void TomoReconstruction::removeClicked() {
   // Also clear ADS entries
-  if (m_ui.treeCurrentPlugins->selectedItems().count() != 0) {
-    int idx = m_ui.treeCurrentPlugins->currentIndex().row();
+  if (m_uiSavu.treeCurrentPlugins->selectedItems().count() != 0) {
+    int idx = m_uiSavu.treeCurrentPlugins->currentIndex().row();
     m_currPlugins->removeRow(idx);
 
     refreshCurrentPluginListUI();
@@ -1188,12 +1193,12 @@ void TomoReconstruction::createPluginTreeEntry(TableRow &row) {
       layout->addWidget(paramContainerTree);
 
       pluginParamsItem->addChild(container);
-      m_ui.treeCurrentPlugins->setItemWidget(container, 0, w);
+      m_uiSavu.treeCurrentPlugins->setItemWidget(container, 0, w);
     }
   }
 
   pluginBaseItem->addChildren(items);
-  m_ui.treeCurrentPlugins->addTopLevelItem(pluginBaseItem);
+  m_uiSavu.treeCurrentPlugins->addTopLevelItem(pluginBaseItem);
 }
 
 /**

@@ -2,6 +2,10 @@
 #define MANTIDQTCUSTOMINTERFACES_TOMORECONSTRUCTION_H_
 
 #include "ui_TomoReconstruction.h"
+#include "ui_TomoToolConfigAstra.h"
+#include "ui_TomoToolConfigCustom.h"
+#include "ui_TomoToolConfigSavu.h"
+#include "ui_TomoToolConfigTomoPy.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidQtAPI/UserSubWindow.h"
@@ -165,6 +169,10 @@ private:
 
   /// Main interface window
   Ui::TomoReconstruction m_ui;
+  Ui::TomoToolConfigAstra m_uiAstra;
+  Ui::TomoToolConfigCustom m_uiCustom;
+  Ui::TomoToolConfigSavu m_uiSavu;
+  Ui::TomoToolConfigTomoPy m_uiTomoPy;
 
   /// login status (from local perspective)
   bool m_loggedIn;
@@ -207,6 +215,31 @@ private:
   std::string m_currentParamPath;
   static size_t m_nameSeqNo;
 };
+
+class TomoToolConfigTomoPy: public QDialog {
+   Q_OBJECT
+public:
+   TomoToolConfigTomoPy(QWidget *parent = 0);
+};
+
+class TomoToolConfigSavu: public QMainWindow {
+   Q_OBJECT
+public:
+   TomoToolConfigSavu(QWidget *parent = 0);
+};
+
+class TomoToolConfigAstra: public QDialog {
+   Q_OBJECT
+public:
+   TomoToolConfigAstra(QWidget *parent = 0);
+};
+
+class TomoToolConfigCustom: public QDialog {
+   Q_OBJECT
+public:
+   TomoToolConfigCustom(QWidget *parent = 0);
+};
+
 
 class TomoToolSetupDialog: public QDialog {
   Q_OBJECT
