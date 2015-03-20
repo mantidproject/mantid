@@ -2,7 +2,6 @@
 #define MANTIDQT_MANTIDWIDGET_POSHPLOTTING_H
 
 #include "WidgetDllOption.h"
-#include "PreviewPlot.h"
 
 #include <qwt_plot_picker.h>
 #include <qwt_plot.h>
@@ -14,6 +13,8 @@ namespace MantidQt
 {
 namespace MantidWidgets
 {
+  class PreviewPlot;
+
   /**
   * Allows for simpler (in a way) selection of a range on a QwtPlot in MantidQt.
   * @author Michael Whitty, RAL ISIS
@@ -34,6 +35,9 @@ namespace MantidWidgets
 
     double getMinimum() { return m_min; } ///< Returns current min value
     double getMaximum() { return m_max; } ///< Reutnrs current max value
+
+    SelectType getType() { return m_type; }
+    bool isVisible() { return m_visible; }
 
   signals:
     void minValueChanged(double);
