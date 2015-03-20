@@ -4,6 +4,7 @@
 #include "MantidKernel/Utils.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include <algorithm>
+#include <utility>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -470,15 +471,29 @@ MDHistoWorkspaceIterator::findNeighbourIndexesFaceTouching() const {
  iterator.
  */
 bool MDHistoWorkspaceIterator::isWithinBounds(size_t index) const {
-    return index >= m_begin && index < m_max;
+  return index >= m_begin && index < m_max;
 }
 
+/**
+ * This is to create the permutations needed to operate find neighbours in the
+ *vertex-touching schenarios
+ * Rather than having to fabricate what the possible permutations are each time
+ *the iterator is moved and the method is called,
+ * we can cache the results, and re-use them as the only factors are the and the
+ *dimensionality, the width (n-neighbours).
+ *
+ * @return
+ */
+std::vector<int64_t>
+MDHistoWorkspaceIterator::createPermutations(const int width) const {
+  // look-up
+  PermutationsMap::iterator it = m_permutationsVertexTouchingMap.find(width);
+  if (it == m_permutationsVertexTouchingMap.end()) {
 
-std::vector<size_t> MDHistoWorkspaceIterator::findNeighbourIndexesByWidth(const int width) const
-{
-    if( width % 2 == 0 )
-    {
-        throw std::invalid_argument("MDHistoWorkspaceIterator::findNeighbourIndexesByWidth, width must always be an even number");
+    if (width % 2 == 0) {
+      throw std::invalid_argument("MDHistoWorkspaceIterator::"
+                                  "findNeighbourIndexesByWidth, width must "
+                                  "always be an even number");
     }
 
     int64_t offset = 1;
@@ -487,56 +502,83 @@ std::vector<size_t> MDHistoWorkspaceIterator::findNeighbourIndexesByWidth(const 
     std::vector<int64_t> permutationsVertexTouching;
     permutationsVertexTouching.reserve(integerPower(width, m_nd));
 
-    int centreIndex = (width)/2; // Deliberately truncate to get centre index
+    int centreIndex = (width) / 2; // Deliberately truncate to get centre index
 
-    for(int i = 0; i < width; ++i)
-    {
-        // for width = 3 : -1, 0, 1
-        // for width = 5 : -2, -1, 0, 1, 2
-        permutationsVertexTouching.push_back(centreIndex - i);
+    for (int i = 0; i < width; ++i) {
+      // for width = 3 : -1, 0, 1
+      // for width = 5 : -2, -1, 0, 1, 2
+      permutationsVertexTouching.push_back(centreIndex - i);
     }
 
     // Figure out what possible indexes deltas to generate indexes that are next
     // to the current one.
     for (size_t j = 1; j < m_nd; ++j) {
-      offset =  offset * static_cast<int64_t>(m_ws->getDimension(j - 1)->getNBins());
+      offset =
+          offset * static_cast<int64_t>(m_ws->getDimension(j - 1)->getNBins());
 
-
-          size_t nEntries = permutationsVertexTouching.size();
-          for(size_t k = 1; k <= width/2 ; ++k)
-          {
-               for(size_t m = 0; m < nEntries ; m++ )
-               {
-                  permutationsVertexTouching.push_back( (offset * k) + permutationsVertexTouching[m] );
-                  permutationsVertexTouching.push_back( (offset * k * (-1)) + permutationsVertexTouching[m] );
-               }
-          }
-    }
-
-
-    Utils::NestedForLoop::GetIndicesFromLinearIndex(m_nd, m_pos, m_indexMaker,
-                                                    m_indexMax, m_index);
-
-    // Filter out indexes that are are not actually neighbours.
-     // Accumulate neighbour indexes.
-    std::vector<size_t> neighbourIndexes;
-    for (size_t i = 0; i < permutationsVertexTouching.size(); ++i) {
-      if (permutationsVertexTouching[i] == 0) {
-        continue;
-      }
-
-      size_t neighbour_index = m_pos + permutationsVertexTouching[i];
-      if (neighbour_index < m_ws->getNPoints() &&
-          Utils::isNeighbourOfSubject(m_nd, neighbour_index, m_index,
-                                      m_indexMaker, m_indexMax, width/2)) {
-        neighbourIndexes.push_back(neighbour_index);
+      size_t nEntries = permutationsVertexTouching.size();
+      for (size_t k = 1; k <= width / 2; ++k) {
+        for (size_t m = 0; m < nEntries; m++) {
+          permutationsVertexTouching.push_back((offset * k) +
+                                               permutationsVertexTouching[m]);
+          permutationsVertexTouching.push_back((offset * k * (-1)) +
+                                               permutationsVertexTouching[m]);
+        }
       }
     }
 
-    // Remove duplicates
-    std::sort( neighbourIndexes.begin(), neighbourIndexes.end() );
-    neighbourIndexes.erase( std::unique( neighbourIndexes.begin(), neighbourIndexes.end() ), neighbourIndexes.end() );
-    return neighbourIndexes;
+    m_permutationsVertexTouchingMap.insert(std::make_pair(width, permutationsVertexTouching));
+  }
+
+  // In either case, get the result.
+  return m_permutationsVertexTouchingMap[width];
+}
+
+/**
+ * Find vertex-touching neighbours.
+ * @param width : Odd number of pixels for all dimensions.
+ * @return collection of indexes.
+ */
+std::vector<size_t>
+MDHistoWorkspaceIterator::findNeighbourIndexesByWidth(const int width) const {
+
+  // Find existing or create required index permutations.
+  std::vector<int64_t> permutationsVertexTouching = createPermutations(width);
+
+  Utils::NestedForLoop::GetIndicesFromLinearIndex(m_nd, m_pos, m_indexMaker,
+                                                  m_indexMax, m_index);
+
+  // Filter out indexes that are are not actually neighbours.
+  // Accumulate neighbour indexes.
+  std::vector<size_t> neighbourIndexes;
+  for (size_t i = 0; i < permutationsVertexTouching.size(); ++i) {
+    if (permutationsVertexTouching[i] == 0) {
+      continue;
+    }
+
+    size_t neighbour_index = m_pos + permutationsVertexTouching[i];
+    if (neighbour_index < m_ws->getNPoints() &&
+        Utils::isNeighbourOfSubject(m_nd, neighbour_index, m_index,
+                                    m_indexMaker, m_indexMax, width / 2)) {
+      neighbourIndexes.push_back(neighbour_index);
+    }
+  }
+
+  // Remove duplicates
+  std::sort(neighbourIndexes.begin(), neighbourIndexes.end());
+  neighbourIndexes.erase(
+      std::unique(neighbourIndexes.begin(), neighbourIndexes.end()),
+      neighbourIndexes.end());
+  return neighbourIndexes;
+}
+
+/**
+ *
+ * @return The size of the permutation cache.
+ */
+size_t Mantid::MDEvents::MDHistoWorkspaceIterator::permutationCacheSize() const
+{
+    return m_permutationsVertexTouchingMap.size();
 }
 
 } // namespace Mantid

@@ -864,6 +864,28 @@ public:
     TS_ASSERT(doesContainIndex(neighbourIndexes, 26));
   }
 
+  void test_cache()
+  {
+      const size_t nd = 1;
+      MDHistoWorkspace_sptr ws = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, nd, 10);
+      /*
+       1D MDHistoWorkspace
+
+       0 - 1 - 2 - 3 - 4 - 5 - 6 - 7 - 8 - 9
+
+       */
+
+      MDHistoWorkspaceIterator * it = new MDHistoWorkspaceIterator(ws);
+      TSM_ASSERT_EQUALS("Empty cache expected", 0, it->permutationCacheSize());
+      it->findNeighbourIndexesByWidth(3);
+      TSM_ASSERT_EQUALS("One cache item expected", 1, it->permutationCacheSize());
+      it->findNeighbourIndexesByWidth(3);
+      TSM_ASSERT_EQUALS("One cache item expected", 1, it->permutationCacheSize()); // Same item, no change to cache
+      it->findNeighbourIndexesByWidth(5);
+      TSM_ASSERT_EQUALS("Two cache entries expected", 2, it->permutationCacheSize());
+  }
+
+
 };
 
 class MDHistoWorkspaceIteratorTestPerformance: public CxxTest::TestSuite
