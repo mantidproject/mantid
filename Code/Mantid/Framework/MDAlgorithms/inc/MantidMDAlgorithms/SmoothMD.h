@@ -41,11 +41,11 @@ namespace MDAlgorithms
     virtual int version() const;
     virtual const std::string category() const;
     virtual const std::string summary() const;
+    std::map<std::string, std::string> validateInputs();
 
   private:
     void init();
     void exec();
-
 
   };
 

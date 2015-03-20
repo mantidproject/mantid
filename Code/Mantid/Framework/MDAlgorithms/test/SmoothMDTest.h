@@ -45,6 +45,27 @@ public:
       TSM_ASSERT_THROWS("Empty WidthVector", alg.setProperty("WidthVector", std::vector<int>()), std::invalid_argument&);
   }
 
+  void test_width_entry_must_be_odd()
+  {
+      auto toSmooth = MDEventsTestHelper::makeFakeMDHistoWorkspace(1 /*signal*/, 1 /*numDims*/, 4 /*numBins in each dimension*/);
+
+      SmoothMD alg;
+      alg.setChild(true);
+      alg.initialize();
+      alg.setPropertyValue("OutputWorkspace", "dummy");
+      alg.setProperty("InputWorkspace", toSmooth);
+      alg.setProperty("WidthVector", std::vector<int>(1, 4)); // Width vector contains even number == 4
+      TSM_ASSERT_THROWS("One bad entry. Should throw.", alg.execute(), std::runtime_error&);
+
+      std::vector<int> widthVector;
+      widthVector.push_back(3); // OK
+      widthVector.push_back(5); // OK
+      widthVector.push_back(2); // Not OK
+
+      alg.setProperty("WidthVector", widthVector); // Width vector contains even number
+      TSM_ASSERT_THROWS("Some good entries, but should still throw", alg.execute(), std::runtime_error&);
+  }
+
   void test_simple_smooth_hat_function()
   {
       auto toSmooth = MDEventsTestHelper::makeFakeMDHistoWorkspace(1 /*signal*/, 2 /*numDims*/, 3 /*numBins in each dimension*/);
