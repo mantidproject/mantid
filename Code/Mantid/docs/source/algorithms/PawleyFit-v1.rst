@@ -20,7 +20,7 @@ Usage
 
 .. include:: ../usagedata-note.txt
 
-For the usage example there is a calculated, theoretical diffraction pattern (including a bit of noise) for Silicon, which crystallizes in space group :math:`Fd\overline{3}m` and has a cubic cell with lattice parameter :math:`a=5.43119246\,\mathrm{\AA{}}`.
+For the usage example there is a calculated, theoretical diffraction pattern (including a bit of noise) for Silicon, which crystallizes in space group :math:`Fd\overline{3}m` and has a cubic cell with lattice parameter :math:`a=5.4311946\,\mathrm{\AA{}}`.
 
 .. testcode:: ExPawleySilicon
 
@@ -58,10 +58,10 @@ For the usage example there is a calculated, theoretical diffraction pattern (in
 
     a = np.round(si_cell.cell(0, 1), 6)
     a_err = np.round(si_cell.cell(0, 2), 6)
-    a_diff = np.round(np.fabs(a - 5.43119246), 6)
+    a_diff = np.round(np.fabs(a - 5.4311946), 6)
 
     print "The lattice parameter was refined to a =", a, "+/-", a_err
-    print "The deviation from the actual parameter (a=5.43119246) is:", a_diff
+    print "The deviation from the actual parameter (a=5.4311946) is:", a_diff
     print "This difference corresponds to", np.round(a_diff / a_err, 2), "standard deviations."
 
 Running this script will generate a bit of output about the results of the different steps. At the end the lattice parameter differs less than one standard deviation from the actual value.
@@ -71,8 +71,8 @@ Running this script will generate a bit of output about the results of the diffe
     Silicon has 18 unique reflections with d > 0.7.
     The number of peaks that were indexed: 15
     The lattice parameter was refined to a = 5.431205 +/- 1.6e-05
-    The deviation from the actual parameter (a=5.43119246) is: 1.3e-05
-    This difference corresponds to 0.81 standard deviations.
+    The deviation from the actual parameter (a=5.4311946) is: 1e-05
+    This difference corresponds to 0.63 standard deviations.
 
 .. testcleanup:: ExPawleySilicon
 
