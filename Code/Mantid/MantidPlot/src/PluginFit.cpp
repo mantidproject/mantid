@@ -67,8 +67,8 @@ void PluginFit::init()
 
 namespace{
 typedef union {
-    double (*func)(const gsl_vector *, void *);
-    void* ptr;
+  double (*func)(const gsl_vector *, void *);
+  void* ptr;
 } simplex_union;
 
 typedef union {

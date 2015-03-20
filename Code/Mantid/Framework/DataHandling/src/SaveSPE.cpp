@@ -26,6 +26,16 @@ DECLARE_ALGORITHM(SaveSPE)
 * usually disk space or permissions based
 */
 
+// use macro on platforms without variadic templates.
+#if defined(__INTEL_COMPILER) ||  ( defined(_MSC_VER) && _MSC_VER < 1800 )
+
+#define FPRINTF_WITH_EXCEPTION(stream, format, ...)                            \
+  if (fprintf(stream, format, ##__VA_ARGS__) <= 0) {                           \
+    throw std::runtime_error(                                                  \
+        "Error writing to file. Check folder permissions and disk space.");    \
+  }
+
+#else
 namespace {
 
 template <typename... vargs>
@@ -41,6 +51,7 @@ void FPRINTF_WITH_EXCEPTION(FILE *stream, const char *format) {
   FPRINTF_WITH_EXCEPTION(stream, format, "");
 }
 }
+#endif
 
 using namespace Kernel;
 using namespace API;
