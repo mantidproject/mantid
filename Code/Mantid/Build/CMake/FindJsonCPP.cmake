@@ -9,8 +9,14 @@
 #  JSONCPP_LIBRARY_DEBUG  - library files for linking (debug version)
 #  JSONCPP_LIBRARIES      - All required libraries, including the configuration type
 
+# Using unset here is a temporary hack to force FindJson to find the correct
+# path in an incremental build. It should be removed a day or two after the
+# branch introducing this is merged.
+unset ( JSONCPP_INCLUDE_DIR CACHE )
+
 # Headers
-find_path ( JSONCPP_INCLUDE_DIR jsoncpp/json/json.h )
+find_path ( JSONCPP_INCLUDE_DIR json/reader.h
+            PATH_SUFFIXES jsoncpp )
 
 # Libraries
 find_library ( JSONCPP_LIBRARY NAMES jsoncpp ) # optimized

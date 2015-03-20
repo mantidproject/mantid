@@ -27,21 +27,6 @@ set ( CMAKE_INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/${LIB_DIR};${CMAKE_INSTALL_PRE
 set ( CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST_ADDITION /opt /usr/share/applications /usr/share/pixmaps )
 
 ###########################################################################
-# LD_PRELOAD TCMalloc
-###########################################################################
-# User systems will only have the libraries and not the symbolic link
-# so we must set the preload to the versioned library. We will assume it is
-# in the same location as the system that the package was built on
-if ( TCMALLOC_LIBRARIES )
-  execute_process ( COMMAND readlink --no-newline --canonicalize-existing ${TCMALLOC_LIBRARIES}
-                    OUTPUT_VARIABLE TCMALLOC_PRELOAD
-                    RESULT_VARIABLE READLINK_RESULT )
-  if ( READLINK_RESULT EQUAL 1 )
-    message ( FATAL_ERROR "Unable to find real file that tcmalloc symlink, ${TCMALLOC_LIBRARIES}, points to." )
-  endif()
-endif()
-
-###########################################################################
 # Environment scripts (profile.d)
 ###########################################################################
 # default shell (bash-like)
@@ -151,12 +136,26 @@ configure_file ( ${CMAKE_MODULE_PATH}/Packaging/launch_mantidplot.sh.in
 # Needs to be executable
 execute_process ( COMMAND "chmod" "+x" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/launch_mantidplot.sh"
                   OUTPUT_QUIET ERROR_QUIET )
+configure_file ( ${CMAKE_MODULE_PATH}/Packaging/mantidpython.in 
+                 ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/mantidpython @ONLY )
+# Needs to be executable
+execute_process ( COMMAND "chmod" "+x" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/mantidpython"
+                  OUTPUT_QUIET ERROR_QUIET )
+
 # Package version
 set ( MANTIDPLOT_EXEC MantidPlot_exe )
 configure_file ( ${CMAKE_MODULE_PATH}/Packaging/launch_mantidplot.sh.in 
                  ${CMAKE_CURRENT_BINARY_DIR}/launch_mantidplot.sh.install @ONLY )
 install ( FILES ${CMAKE_CURRENT_BINARY_DIR}/launch_mantidplot.sh.install
           DESTINATION ${BIN_DIR} RENAME launch_mantidplot.sh
+          PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ
+          GROUP_EXECUTE GROUP_READ
+          WORLD_EXECUTE WORLD_READ
+)
+configure_file ( ${CMAKE_MODULE_PATH}/Packaging/mantidpython.in 
+                 ${CMAKE_CURRENT_BINARY_DIR}/mantidpython.install @ONLY )
+install ( FILES ${CMAKE_CURRENT_BINARY_DIR}/mantidpython.install
+          DESTINATION ${BIN_DIR} RENAME mantidpython
           PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ
           GROUP_EXECUTE GROUP_READ
           WORLD_EXECUTE WORLD_READ

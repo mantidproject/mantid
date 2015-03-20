@@ -312,6 +312,7 @@ void export_ialgorithm()
     .def("setLogging", &IAlgorithm::setLogging, "Toggle logging on/off.")
     .def("setRethrows", &IAlgorithm::setRethrows)
     .def("initialize", &IAlgorithm::initialize, "Initializes the algorithm")
+    .def("validateInputs", &IAlgorithm::validateInputs, "Cross-check all inputs and return any errors as a dictionary")
     .def("execute", &executeWhileReleasingGIL, "Runs the algorithm and returns whether it has been successful")
     // Special methods
     .def("__str__", &IAlgorithm::toString)

@@ -1,7 +1,7 @@
 #ifndef METADATA_JSON_MANAGER_H
 #define METADATA_JSON_MANAGER_H
 
-#include <jsoncpp/json/json.h>
+#include <json/json.h>
 #include "MantidKernel/System.h"
 #include <string>
 namespace Mantid
@@ -54,12 +54,16 @@ namespace Mantid
       void setMaxValue(double maxValue);
       double getMaxValue();
 
+      void setSpecialCoordinates(int specialCoordinates);
+      int getSpecialCoordinates();
+
     private:
       Json::Value metadataContainer;
 
       std::string instrument;
       double minValue;
       double maxValue;
+      int specialCoordinates;
   };
   }
 }

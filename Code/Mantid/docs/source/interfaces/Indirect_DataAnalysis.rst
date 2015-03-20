@@ -92,9 +92,9 @@ MSD Fit
   :widget: tabMSD
 
 Given either a saved NeXus file or workspace generated using the ElWin tab, this
-tab fits :math:`log(intensity)` vs. :math:`Q2` with a straight line for each run
-specified to give the Mean Square Displacement (MSD). It then plots the MSD as
-function of run number.
+tab fits :math:`log(intensity)` vs. :math:`Q^{2}` with a straight line for each
+run specified to give the Mean Square Displacement (MSD). It then plots the MSD
+as function of run number.
 
 MSDFit searches for the log files named <runnumber>_sample.txt in your chosen
 raw file directory (the name ‘sample’ is for OSIRIS). If they exist the
@@ -103,7 +103,7 @@ exist the MSD is plotted versus run number (last 3 digits).
 
 The fitted parameters for all runs are in _msd_Table and the <u2> in _msd. To
 run the Sequential fit a workspace named <inst><first-run>_to_<last-run>_lnI is
-created of :math:`ln(I)` v. :math:`Q2` for all runs. A contour or 3D plot of
+created of :math:`ln(I)` v. :math:`Q^{2}` for all runs. A contour or 3D plot of
 this may be of interest.
 
 A sequential fit is run by clicking the Run button at the bottom of the tab, a
