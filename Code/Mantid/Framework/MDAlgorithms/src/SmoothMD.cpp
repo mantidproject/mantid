@@ -7,6 +7,7 @@
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/PropertyWithValue.h"
+#include "MantidMDEvents/MDHistoWorkspaceIterator.h"
 #include <boost/make_shared.hpp>
 #include <vector>
 #include <map>
@@ -19,6 +20,7 @@
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
+using namespace Mantid::MDEvents;
 
 typedef std::vector<int> WidthVector;
 typedef boost::function<IMDHistoWorkspace_sptr(IMDHistoWorkspace_const_sptr, const WidthVector&)> SmoothFunction;
@@ -40,11 +42,12 @@ std::vector<std::string> functions() {
 IMDHistoWorkspace_sptr hatSmooth(IMDHistoWorkspace_const_sptr toSmooth, const WidthVector& widthVector)
 {
     IMDHistoWorkspace_sptr outWS = toSmooth->clone();
-    boost::scoped_ptr<IMDIterator> iterator(toSmooth->createIterator(NULL)); // TODO should be multi-threaded
+    boost::scoped_ptr<MDHistoWorkspaceIterator> iterator(dynamic_cast<MDHistoWorkspaceIterator*>(toSmooth->createIterator(NULL))); // TODO should be multi-threaded
     do
     {
         // Gets all vertex-touching neighbours
-        std::vector<size_t> neighbourIndexes = iterator->findNeighbourIndexes();
+
+        std::vector<size_t> neighbourIndexes = iterator->findNeighbourIndexesByWidth(widthVector.front()); // TODO we should use the whole width vector not just the first element.
         const size_t nNeighbours = neighbourIndexes.size();
         double sumSignal = iterator->getSignal();
         double sumSqError = iterator->getError();

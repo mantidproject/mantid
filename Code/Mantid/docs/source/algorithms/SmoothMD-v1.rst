@@ -10,7 +10,7 @@
 Description
 -----------
 
-TODO: Enter a full rst-markup description of your algorithm here.
+Provides smoothing of :ref:`MDHistoWorkspaces <MDHistoWorkspace>`__ in n-dimensions. The WidthVector relates to the number of pixels to include in the width for each dimension. *WidthVector* **must contain entries that are odd numbers**.
 
 
 Usage
