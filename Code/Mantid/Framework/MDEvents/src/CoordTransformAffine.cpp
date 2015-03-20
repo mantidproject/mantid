@@ -41,6 +41,20 @@ CoordTransformAffine::CoordTransformAffine(const size_t inD, const size_t outD)
   // Copy into the raw matrix (for speed)
   copyRawMatrix();
 }
+
+//----------------------------------------------------------------------------------------------
+/** Destructor
+ */
+CoordTransformAffine::~CoordTransformAffine() {
+  // delete array of pointers to rows
+  delete[] m_rawMatrix;
+  m_rawMatrix = NULL;
+
+  // delete large mem block holding the matrix
+  delete[] m_rawMemory;
+  m_rawMemory = NULL;
+}
+
 //----------------------------------------------------------------------------------------------
 /** Copies the affine matrix into a local raw pointer, for speed.
  * Call this after any change to affineMatrix
@@ -58,18 +72,6 @@ CoordTransform *CoordTransformAffine::clone() const {
   CoordTransformAffine *out = new CoordTransformAffine(inD, outD);
   out->setMatrix(this->getMatrix());
   return out;
-}
-
-//----------------------------------------------------------------------------------------------
-/** Destructor
- */
-CoordTransformAffine::~CoordTransformAffine() {
-  if (m_rawMatrix) {
-    delete[] * m_rawMatrix;
-    delete[] m_rawMatrix;
-  }
-  m_rawMatrix = NULL;
-  m_rawMemory = NULL;
 }
 
 //----------------------------------------------------------------------------------------------

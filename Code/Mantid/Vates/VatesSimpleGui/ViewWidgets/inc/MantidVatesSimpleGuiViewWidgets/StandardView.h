@@ -91,8 +91,6 @@ protected slots:
   void onBinMD();
   /// On SliceMD button clicked
   void onSliceMD();
-  /// On CutMD button clicked
-  void onCutMD();
 
 private:
   Q_DISABLE_COPY(StandardView)
@@ -109,7 +107,6 @@ private:
 
   QAction* m_binMDAction;
   QAction* m_sliceMDAction;
-  QAction* m_cutMDAction;
   QAction* m_unbinAction;
 };
 

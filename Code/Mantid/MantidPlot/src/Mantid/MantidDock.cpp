@@ -582,7 +582,6 @@ void MantidDockWidget::addMDEventWorkspaceMenuItems(QMenu *menu, const Mantid::A
   menu->addAction(m_showHist);  // Algorithm history
   menu->addAction(m_showListData); // Show data in table
   menu->addAction(m_showLogs);
-  menu->addAction(m_showSampleMaterial); //TODO
 }
 
 void MantidDockWidget::addMDHistoWorkspaceMenuItems(QMenu *menu, const Mantid::API::IMDWorkspace_const_sptr &WS) const
@@ -604,7 +603,6 @@ void MantidDockWidget::addMDHistoWorkspaceMenuItems(QMenu *menu, const Mantid::A
   menu->addAction(m_showListData); // Show data in table
   menu->addAction(m_convertMDHistoToMatrixWorkspace);
   menu->addAction(m_showLogs);
-  menu->addAction(m_showSampleMaterial); //TODO
 }
 
 

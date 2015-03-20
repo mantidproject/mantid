@@ -46,7 +46,7 @@ namespace RemoteAlgorithms {
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
 
-class Authenticate : public Mantid::API::Algorithm {
+class DLLExport Authenticate : public Mantid::API::Algorithm {
 public:
   /// (Empty) Constructor
   Authenticate() : Mantid::API::Algorithm() {}

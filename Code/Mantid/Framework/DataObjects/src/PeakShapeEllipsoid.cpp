@@ -72,6 +72,22 @@ std::vector<Kernel::V3D> PeakShapeEllipsoid::directions() const {
   return m_directions;
 }
 
+std::vector<Kernel::V3D> PeakShapeEllipsoid::getDirectionInSpecificFrame(Kernel::Matrix<double>& invertedGoniometerMatrix) const{
+  std::vector<Kernel::V3D> directionsInFrame;
+
+  if ((invertedGoniometerMatrix.numCols() != m_directions.size())||
+      (invertedGoniometerMatrix.numRows() != m_directions.size())){
+    throw std::invalid_argument("The inverted goniometer matrix is not compatible with the direction vector");
+  }
+
+  for (std::vector<Kernel::V3D>::const_iterator it = m_directions.begin(); it != m_directions.end(); ++it){
+    directionsInFrame.push_back(invertedGoniometerMatrix*(*it));
+    Mantid::Kernel::V3D d = invertedGoniometerMatrix*(*it);
+  }
+
+  return directionsInFrame;
+}
+
 std::string PeakShapeEllipsoid::toJSON() const {
   Json::Value root;
   PeakShapeBase::buildCommon(root);

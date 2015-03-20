@@ -4409,21 +4409,25 @@ void ApplicationWindow::importASCII(const QStringList& files, int import_mode, c
 
     if (w->inherits("Table")){
       Table *t = dynamic_cast<Table*>(w);
-      for (int i=0; i<files.size(); i++)
-        t->importASCII(files[i], local_column_separator, local_ignored_lines, local_rename_columns,
-            local_strip_spaces, local_simplify_spaces, local_import_comments,
-            local_comment_string, import_read_only, (Table::ImportMode)(import_mode - 2), endLineChar);
+      if (t) {
+        for (int i=0; i<files.size(); i++)
+          t->importASCII(files[i], local_column_separator, local_ignored_lines, local_rename_columns,
+              local_strip_spaces, local_simplify_spaces, local_import_comments,
+              local_comment_string, import_read_only, (Table::ImportMode)(import_mode - 2), endLineChar);
 
-      if (update_dec_separators)
-        t->updateDecimalSeparators(local_separators);
-      t->notifyChanges();
-      emit modifiedProject(t);
+        if (update_dec_separators)
+          t->updateDecimalSeparators(local_separators);
+        t->notifyChanges();
+        emit modifiedProject(t);
+      }
     } else if (w->isA("Matrix")){
       Matrix *m = dynamic_cast<Matrix*>(w);
-      for (int i=0; i<files.size(); i++){
-        m->importASCII(files[i], local_column_separator, local_ignored_lines,
-            local_strip_spaces, local_simplify_spaces, local_comment_string,
-            (Matrix::ImportMode)(import_mode - 2), local_separators, endLineChar);
+      if (m) {
+        for (int i=0; i<files.size(); i++){
+          m->importASCII(files[i], local_column_separator, local_ignored_lines,
+              local_strip_spaces, local_simplify_spaces, local_comment_string,
+              (Matrix::ImportMode)(import_mode - 2), local_separators, endLineChar);
+        }
       }
     }
     w->setWindowLabel(files.join("; "));
@@ -8651,8 +8655,11 @@ void ApplicationWindow::pasteSelection()
         return;
 
       if (g->activeTool()){
-        if (g->activeTool()->rtti() == PlotToolInterface::Rtti_RangeSelector)
-          dynamic_cast<RangeSelectorTool*>(g->activeTool())->pasteSelection();
+        if (g->activeTool()->rtti() == PlotToolInterface::Rtti_RangeSelector){
+          auto rst = dynamic_cast<RangeSelectorTool*>(g->activeTool());
+          if (rst)
+            rst->pasteSelection();
+        }
       } else if (d_text_copy){
         LegendWidget *t = g->insertText(d_text_copy);
         t->move(g->mapFromGlobal(QCursor::pos()));
@@ -9128,7 +9135,7 @@ void ApplicationWindow::minimizeWindow(MdiSubWindow *w)
 {
   auto wli = dynamic_cast<WindowListItem*>(lv->currentItem());
 
-  if (!w)
+  if (!wli)
     w = wli->window();
 
   if (!w)
@@ -10140,7 +10147,7 @@ QStringList ApplicationWindow::dependingPlots(const QString& name)
       foreach(Graph *g, layers){
         onPlot = g->curvesList();
         onPlot = onPlot.grep (name,TRUE);
-        if (static_cast<int>(onPlot.count()) && plots.contains(w->objectName())<=0)
+        if (static_cast<int>(onPlot.count()) && !plots.contains(w->objectName()))
           plots << w->objectName();
       }
     }else if (w->isA("Graph3D")){
@@ -14726,7 +14733,10 @@ void ApplicationWindow::showAllFolderWindows()
       break;
     lst = fld->windowsList();
     foreach(MdiSubWindow *w, lst){
-      if (w && show_windows_policy == SubFolders){
+      if(!w)
+        continue;
+
+      if (show_windows_policy == SubFolders) {
         updateWindowLists(w);
         switch (w->status())
         {

@@ -5,6 +5,8 @@
 #include <QEvent>
 #include <QMouseEvent>
 
+#include "MantidQtMantidWidgets/PreviewPlot.h"
+
 using namespace MantidQt::MantidWidgets;
 
 RangeSelector::RangeSelector(QwtPlot* plot, SelectType type, bool visible, bool infoOnly)

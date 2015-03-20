@@ -65,7 +65,7 @@ namespace MantidQt
 
         /** 
           * Set the LastSession color map
-          * @param colormap The colormap for the VSI.
+          * @param colorMap The colormap for the VSI.
           */
         void setLastSessionColorMap(QString colorMap);
 

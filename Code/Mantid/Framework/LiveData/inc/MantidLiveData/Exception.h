@@ -10,18 +10,15 @@ namespace Mantid {
 namespace LiveData {
 namespace Exception {
 
-/** An exception that can be thrown by an ILiveListener implementation to notify
-   LoadLiveData
-    that it is not yet ready to return data. This could be, for example, because
-   it has not
-    yet completed its initialisation step or if the instrument from which data
-   is being read
-    is not in a run. LoadLiveData will ask for data again after a short delay.
-    Other exceptions thrown by the listener will have the effect of stopping the
-   algorithm.
+/** An exception that can be thrown by an ILiveListener implementation to
+    notify LoadLiveData that it is not yet ready to return data. This could
+    be, for example, because it has not yet completed its initialisation step
+    or if the instrument from which data is being read is not in a run.
+    LoadLiveData will ask for data again after a short delay.  Other exceptions
+    thrown by the listener will have the effect of stopping the algorithm.
 
     Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-   National Laboratory & European Spallation Source
+    National Laboratory & European Spallation Source
 
     This file is part of Mantid.
 
