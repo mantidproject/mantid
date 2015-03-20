@@ -355,6 +355,10 @@ def CutMD(*args, **kwargs):
         algm.setProperty('OutputWorkspace', out_names[i])
         algm.execute()
 
+    #Get the workspace objects so we can return them
+    for i in range(len(out_names)):
+        out_names[i] = _api.AnalysisDataService[out_names[i]]
+
     #We should only return a list if we're handling multiple workspaces
     if handling_multiple_workspaces:
         return out_names
