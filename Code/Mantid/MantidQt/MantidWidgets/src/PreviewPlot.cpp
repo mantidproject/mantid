@@ -26,7 +26,6 @@ using namespace Mantid::API;
 namespace
 {
   Mantid::Kernel::Logger g_log("PreviewPlot");
-  bool isNegative(double value) { return value < 0.0; }
 }
 
 
@@ -602,7 +601,18 @@ QwtPlotCurve * PreviewPlot::addCurve(MatrixWorkspace_sptr ws, const size_t specI
   // If using log scale need to remove all negative Y values
   bool logYScale = getAxisType(QwtPlot::yLeft) == "Logarithmic";
   if(logYScale)
-    std::replace_if(wsDataY.begin(), wsDataY.end(), isNegative, DBL_EPSILON);
+  {
+    // Remove negative data in order to search for minimum positive value
+    std::vector<double> validData(wsDataY.size());
+    auto it = std::remove_copy_if(wsDataY.begin(), wsDataY.end(), validData.begin(), [](double v){ return v<= 0.0; } );
+    validData.resize(std::distance(validData.begin(), it));
+
+    // Get minimum positive value
+    double minY = *std::min_element(validData.begin(), validData.end());
+
+    // Set all negative values to minimum positive value
+    std::replace_if(wsDataY.begin(), wsDataY.end(), [](double v){return v <= 0.0; }, minY);
+  }
 
   // Create the Qwt data
   QwtArray<double> dataX = QVector<double>::fromStdVector(ws->readX(specIndex));
