@@ -149,12 +149,9 @@ std::string FileFinderImpl::getFullPath(const std::string &filename, const bool 
     } else {
       Poco::Path path(*it, fName);
       Poco::File file(path);
-      if(ignoreDirs && file.isDirectory()) {
-        continue;
-      }
-      if (file.exists()) {
+	  if (file.exists() && !(ignoreDirs && file.isDirectory())) {
         return path.toString();
-      }
+	  }
     }
 #endif
   }
