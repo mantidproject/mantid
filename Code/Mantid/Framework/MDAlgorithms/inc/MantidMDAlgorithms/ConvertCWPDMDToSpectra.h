@@ -108,8 +108,12 @@ public:
 
   /// Summary of algorithms purpose
   virtual const std::string summary() const {
-    return "Binning the constant wavelength powder diffracton data stored in "
-           "MDWorkspaces to single spectrum.";
+    return "Convert constant wavelength (CW) powder diffraction (PD) data in "
+           "MDEventWorksapces "
+           " to a single-spectrum MatrixWorkspace, i.e., binning the "
+           "diffraction data "
+           " to single spectrum according to neutron's scattering angle, "
+           "d-spacing or Q. ";
   }
 
   /// Algorithm's version
@@ -133,6 +137,12 @@ private:
       API::IMDEventWorkspace_const_sptr monitorws, const std::string targetunit,
       const std::map<int, double> &map_runwavelength, const double xmin,
       const double xmax, const double binsize, bool dolinearinterpolation);
+
+  /// Find the binning boundary according to detectors' positions
+  void findXBoundary(API::IMDEventWorkspace_const_sptr dataws,
+                     const std::string &targetunit,
+                     const std::map<int, double> &map_runwavelength,
+                     double &xmin, double &xmax);
 
   /// Bin signals to its 2theta position
   void binMD(API::IMDEventWorkspace_const_sptr mdws, const char &unitbit,
