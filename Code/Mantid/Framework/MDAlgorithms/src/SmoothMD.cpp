@@ -1,12 +1,15 @@
 #include "MantidMDAlgorithms/SmoothMD.h"
+#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/IMDIterator.h"
+#include "MantidAPI/Progress.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ArrayBoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/PropertyWithValue.h"
+#include "MantidKernel/MultiThreaded.h"
 #include "MantidMDEvents/MDHistoWorkspaceIterator.h"
 #include <boost/make_shared.hpp>
 #include <vector>
@@ -24,7 +27,7 @@ using namespace Mantid::MDEvents;
 
 typedef std::vector<int> WidthVector;
 typedef boost::function<IMDHistoWorkspace_sptr(
-    IMDHistoWorkspace_const_sptr, const WidthVector &)> SmoothFunction;
+    IMDHistoWorkspace_const_sptr, const WidthVector &, Progress& )> SmoothFunction;
 typedef std::map<std::string, SmoothFunction> SmoothFunctionMap;
 
 namespace {
@@ -36,42 +39,69 @@ namespace {
 std::vector<std::string> functions() {
   std::vector<std::string> propOptions;
   propOptions.push_back("Hat");
-  //propOptions.push_back("Gaussian");
+  // propOptions.push_back("Gaussian");
   return propOptions;
 }
 
+/**
+ * Hat function smoothing. All weights even. Hat function boundaries beyond
+ * width.
+ * @param toSmooth : Workspace to smooth
+ * @param widthVector : Width vector
+ * @param progress : progress object
+ * @return Smoothed MDHistoWorkspace
+ */
 IMDHistoWorkspace_sptr hatSmooth(IMDHistoWorkspace_const_sptr toSmooth,
-                                 const WidthVector &widthVector) {
+                                 const WidthVector &widthVector, Progress& progress) {
+
+  // Create the output workspace.
   IMDHistoWorkspace_sptr outWS = toSmooth->clone();
-  boost::scoped_ptr<MDHistoWorkspaceIterator> iterator(
-      dynamic_cast<MDHistoWorkspaceIterator *>(
-          toSmooth->createIterator(NULL))); // TODO should be multi-threaded
-  do {
-    // Gets all vertex-touching neighbours
 
-    std::vector<size_t> neighbourIndexes =
-        iterator->findNeighbourIndexesByWidth(
-            widthVector.front()); // TODO we should use the whole width vector
-                                  // not just the first element.
-    const size_t nNeighbours = neighbourIndexes.size();
-    double sumSignal = iterator->getSignal();
-    double sumSqError = iterator->getError();
-    for (size_t i = 0; i < neighbourIndexes.size(); ++i) {
-      sumSignal += toSmooth->getSignalAt(neighbourIndexes[i]);
-      double error = toSmooth->getErrorAt(neighbourIndexes[i]);
-      sumSqError += (error * error);
-    }
+  const int nThreads = Mantid::API::FrameworkManager::Instance()
+                           .getNumOMPThreads(); // NThreads to Request
 
-    // Calculate the mean
-    outWS->setSignalAt(iterator->getLinearIndex(),
-                       sumSignal / (nNeighbours + 1));
-    // Calculate the sample variance
-    outWS->setErrorSquaredAt(iterator->getLinearIndex(),
-                             sumSqError / (nNeighbours + 1));
-  } while (iterator->next());
+  auto iterators = toSmooth->createIterators(nThreads, NULL);
+
+  PRAGMA_OMP( parallel for schedule(dynamic, 1))
+  for (int it = 0; it < iterators.size(); ++it) {
+
+    boost::scoped_ptr<MDHistoWorkspaceIterator> iterator(
+        dynamic_cast<MDHistoWorkspaceIterator *>(iterators[it]));
+    do {
+      // Gets all vertex-touching neighbours
+
+      std::vector<size_t> neighbourIndexes =
+          iterator->findNeighbourIndexesByWidth(
+              widthVector.front()); // TODO we should use the whole width vector
+                                    // not just the first element.
+      const size_t nNeighbours = neighbourIndexes.size();
+      double sumSignal = iterator->getSignal();
+      double sumSqError = iterator->getError();
+      for (size_t i = 0; i < neighbourIndexes.size(); ++i) {
+        sumSignal += toSmooth->getSignalAt(neighbourIndexes[i]);
+        double error = toSmooth->getErrorAt(neighbourIndexes[i]);
+        sumSqError += (error * error);
+      }
+
+      // Calculate the mean
+      outWS->setSignalAt(iterator->getLinearIndex(),
+                         sumSignal / (nNeighbours + 1));
+      // Calculate the sample variance
+      outWS->setErrorSquaredAt(iterator->getLinearIndex(),
+                               sumSqError / (nNeighbours + 1));
+
+      progress.report();
+
+    } while (iterator->next());
+  }
+
   return outWS;
 }
 
+/**
+ * Maps a function name to a smoothing function
+ * @return function map
+ */
 SmoothFunctionMap makeFunctionMap() {
   SmoothFunctionMap map;
   map.insert(std::make_pair("Hat", hatSmooth));
@@ -163,8 +193,10 @@ void SmoothMD::exec() {
   const std::string smoothFunctionName = this->getProperty("Function");
   SmoothFunctionMap functionMap = makeFunctionMap();
   SmoothFunction smoothFunction = functionMap[smoothFunctionName];
+
+  Progress progress(this, 0, 1, size_t(toSmooth->getNPoints() ) );
   // invoke the smoothing operation
-  auto smoothed = smoothFunction(toSmooth, widthVector);
+  auto smoothed = smoothFunction(toSmooth, widthVector, progress);
 
   setProperty("OutputWorkspace", smoothed);
 }
