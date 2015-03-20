@@ -1,7 +1,7 @@
 import unittest
 from mantid.kernel import *
 from mantid.api import *
-from mantid.simpleapi import CreateSampleWorkspace, Scale, DeleteWorkspace, FlatPlatePaalmanPingsCorrection
+from mantid.simpleapi import CreateSampleWorkspace, Scale, DeleteWorkspace, FlatPlatePaalmanPingsCorrection, CreateSimulationWorkspace
 
 
 class FlatPlatePaalmanPingsCorrectionTest(unittest.TestCase):
@@ -11,12 +11,13 @@ class FlatPlatePaalmanPingsCorrectionTest(unittest.TestCase):
         Create sample workspaces.
         """
 
-        sample = CreateSampleWorkspace(NumBanks=5,
-                                       BankPixelWidth=2,
-                                       XUnit='Wavelength',
-                                       XMin=6.8,
-                                       XMax=7.9,
-                                       BinWidth=0.1)
+        # Create some test data
+        sample = CreateSampleWorkspace(NumBanks=1,
+                                            BankPixelWidth=1,
+                                            XUnit='Wavelength',
+                                            XMin=6.8,
+                                            XMax=7.9,
+                                            BinWidth=0.1)
         self._sample_ws = sample
 
         can = Scale(InputWorkspace=sample, Factor=1.2)
@@ -59,8 +60,8 @@ class FlatPlatePaalmanPingsCorrectionTest(unittest.TestCase):
         self.assertEqual(test_ws.getNumberHistograms(),
                          self._sample_ws.getNumberHistograms())
 
-        # Check it has X binning matching NumWavelengths
-        self.assertEqual(test_ws.blocksize(), 10)
+        # Check it has X binning matching sample workspace
+        self.assertEqual(test_ws.blocksize(), self._sample_ws.blocksize())
 
 
     def _verify_workspaces_for_can(self):
@@ -130,6 +131,27 @@ class FlatPlatePaalmanPingsCorrectionTest(unittest.TestCase):
                                         CanChemicalFormula='V')
 
         self._verify_workspaces_for_can()
+
+
+    def test_InterpolateDisabled(self):
+        """
+        Tests that a workspace with a bin count equal to NumberWavelengths is created
+        when interpolation is disabled.
+        """
+
+        FlatPlatePaalmanPingsCorrection(OutputWorkspace=self._corrections_ws_name,
+                                        SampleWorkspace=self._sample_ws,
+                                        SampleChemicalFormula='H2-O',
+                                        CanWorkspace=self._can_ws,
+                                        CanChemicalFormula='V',
+                                        NumberWavelengths=20,
+                                        Interpolate=False)
+
+        corrections_ws = mtd[self._corrections_ws_name]
+
+        # Check each correction workspace has X binning matching NumberWavelengths
+        for workspace in corrections_ws:
+            self.assertEqual(workspace.blocksize(), 20)
 
 
     def test_validationNoCanFormula(self):

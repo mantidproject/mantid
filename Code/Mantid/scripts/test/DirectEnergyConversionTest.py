@@ -183,8 +183,10 @@ class DirectEnergyConversionTest(unittest.TestCase):
         """ Test for old interface """
         run_ws = CreateSampleWorkspace( Function='Multiple Peaks', NumBanks=1, BankPixelWidth=4, NumEvents=10000)
         LoadInstrument(run_ws,InstrumentName='MARI')
+
         #mono_ws = CloneWorkspace(run_ws)
         wb_ws   = CloneWorkspace(run_ws)
+        AddSampleLog(wb_ws,LogName='run_number',LogText='300',LogType='Number')
         #wb_ws=CreateSampleWorkspace( Function='Multiple Peaks', NumBanks=1, BankPixelWidth=4, NumEvents=10000)
 
         dgreduce.setup('MAR')
@@ -198,6 +200,30 @@ class DirectEnergyConversionTest(unittest.TestCase):
         #abs_units(wb_for_run,sample_run,monovan_run,wb_for_monovanadium,samp_rmm,samp_mass,ei_guess,rebin,map_file='default',monovan_mapfile='default',**kwargs):
         ws = dgreduce.abs_units(wb_ws,run_ws,None,wb_ws,10,100,8.8,[-10,0.1,7],None,None,**par)
         self.assertTrue(isinstance(ws,api.MatrixWorkspace))
+
+    def test_dgreduce_works_with_name(self):
+        """ Test for old interface """
+        run_ws = CreateSampleWorkspace( Function='Multiple Peaks', NumBanks=1, BankPixelWidth=4, NumEvents=10000)
+        LoadInstrument(run_ws,InstrumentName='MARI')
+        AddSampleLog(run_ws,LogName='run_number',LogText='200',LogType='Number')
+        #mono_ws = CloneWorkspace(run_ws)
+        wb_ws   = CloneWorkspace(run_ws)
+        AddSampleLog(wb_ws,LogName='run_number',LogText='100',LogType='Number')
+        #wb_ws=CreateSampleWorkspace( Function='Multiple Peaks', NumBanks=1, BankPixelWidth=4, NumEvents=10000)
+
+        dgreduce.setup('MAR')
+        par = {}
+        par['ei_mon_spectra']=[4,5]
+        par['abs_units_van_range']=[-4000,8000]
+        # overwrite parameters, which are necessary from command line, but we want them to have test values
+        dgreduce.getReducer().map_file=None
+        dgreduce.getReducer().monovan_mapfile=None
+        dgreduce.getReducer().mono_correction_factor = 1
+        #abs_units(wb_for_run,sample_run,monovan_run,wb_for_monovanadium,samp_rmm,samp_mass,ei_guess,rebin,map_file='default',monovan_mapfile='default',**kwargs):
+        ws = dgreduce.abs_units('wb_ws','run_ws',None,wb_ws,10,100,8.8,[-10,0.1,7],None,None,**par)
+        self.assertTrue(isinstance(ws,api.MatrixWorkspace))
+
+
 
     ##    tReducet.di
     def test_energy_to_TOF_range(self):

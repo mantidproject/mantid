@@ -34,9 +34,8 @@ class REFLReduction(stresstesting.MantidStressTest):
                       OutputWorkspace='reflectivity_119814')
 
     def validate(self):
-        # Be more tolerant with the output, mainly because of the errors.
-        # The following tolerance check the errors up to the third digit.
-        self.tolerance = 0.25
+        # Be more tolerant with the output.
+        self.tolerance = 0.0001
         self.disableChecking.append('Instrument')
         self.disableChecking.append('Sample')
         self.disableChecking.append('SpectraMap')
