@@ -1014,6 +1014,15 @@ public:
     } while (iterator.next());
   }
 
+  void test_findNeighboursByWidth()
+  {
+      MDHistoWorkspaceIterator iterator(small_ws, new SkipNothing());
+      do
+      {
+        iterator.findNeighbourIndexesByWidth(5);
+      } while (iterator.next());
+  }
+
 };
 
 #endif /* MANTID_MDEVENTS_MDHISTOWORKSPACEITERATORTEST_H_ */

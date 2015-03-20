@@ -161,39 +161,24 @@ MDHistoWorkspaceIterator::init(const MDHistoWorkspace *workspace,
       next();
   }
 
-  // --- Calculate index permutations for neighbour finding vertex touching ---
-  auto temp = std::vector<int64_t>(integerPower(3, m_nd), 0);
-  m_permutationsVertexTouching.swap(temp);
-
   // --- Calculate index permutations for neighbour finding face touching ---
-  temp = std::vector<int64_t>(2 * m_nd);
+  auto temp = std::vector<int64_t>(2 * m_nd);
   m_permutationsFaceTouching.swap(temp);
 
   int64_t offset = 1;
-  m_permutationsVertexTouching[0] = 0;
-  m_permutationsVertexTouching[1] = 1;
-  m_permutationsVertexTouching[2] = -1;
 
   m_permutationsFaceTouching[0] = -1;
   m_permutationsFaceTouching[1] = 1;
 
   // Figure out what possible indexes deltas to generate indexes that are next
   // to the current one.
-  size_t nVertexTouchingPermutations = 3;
   for (size_t j = 1; j < m_nd; ++j) {
     offset =
         offset * static_cast<int64_t>(m_ws->getDimension(j - 1)->getNBins());
-    size_t counter = nVertexTouchingPermutations;
-    for (size_t k = 0; k < nVertexTouchingPermutations; k += 1, counter += 2) {
-      int64_t newVariant = m_permutationsVertexTouching[k] + offset;
-      m_permutationsVertexTouching[counter] = newVariant;
-      m_permutationsVertexTouching[counter + 1] = (-1 * newVariant);
-    }
 
     m_permutationsFaceTouching[j * 2] = offset;
     m_permutationsFaceTouching[(j * 2) + 1] = -offset;
 
-    nVertexTouchingPermutations *= 3;
   }
 }
 
@@ -414,24 +399,7 @@ size_t MDHistoWorkspaceIterator::getLinearIndex() const { return m_pos; }
  */
 std::vector<size_t> MDHistoWorkspaceIterator::findNeighbourIndexes() const {
 
-  Utils::NestedForLoop::GetIndicesFromLinearIndex(m_nd, m_pos, m_indexMaker,
-                                                  m_indexMax, m_index);
-
-  // Filter out indexes that are are not actually neighbours.
-  std::vector<size_t> neighbourIndexes; // Accumulate neighbour indexes.
-  for (size_t i = 0; i < m_permutationsVertexTouching.size(); ++i) {
-    if (m_permutationsVertexTouching[i] == 0) {
-      continue;
-    }
-
-    size_t neighbour_index = m_pos + m_permutationsVertexTouching[i];
-    if (neighbour_index < m_ws->getNPoints() &&
-        Utils::isNeighbourOfSubject(m_nd, neighbour_index, m_index,
-                                    m_indexMaker, m_indexMax)) {
-      neighbourIndexes.push_back(neighbour_index);
-    }
-  }
-  return neighbourIndexes;
+  return this->findNeighbourIndexesByWidth(3 /*immediate neighbours only*/);
 }
 
 /**

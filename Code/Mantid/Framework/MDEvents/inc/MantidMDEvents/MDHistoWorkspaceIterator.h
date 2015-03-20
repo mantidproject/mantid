@@ -156,8 +156,6 @@ protected:
   /// Array to find indices from linear indices
   size_t *m_indexMaker;
 
-  /// Neighbour finding permutations.
-  mutable std::vector<int64_t> m_permutationsVertexTouching;
   /// Neigbour finding permutations for face touching neighbours (3 by 3 width).
   mutable std::vector<int64_t> m_permutationsFaceTouching;
 
