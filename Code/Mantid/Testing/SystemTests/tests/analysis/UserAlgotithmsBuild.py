@@ -1,3 +1,4 @@
+#pylint: disable=no-init
 import stresstesting
 import sys
 import os
@@ -9,9 +10,9 @@ class UserAlgorithmsBuild(stresstesting.MantidStressTest):
     def skipTests(self):
         " We skip this test if the system is not Windows."
         if sys.platform.startswith('win'):
-          return False
+            return False
         else:
-          return True
+            return True
 
     def runTest(self):
         """
@@ -21,9 +22,9 @@ class UserAlgorithmsBuild(stresstesting.MantidStressTest):
         import subprocess
         retcode = subprocess.call(["C:\\MantidInstall\\UserAlgorithms\\build.bat","--quiet"])
         if retcode == 0:
-          self.build_success = True
+            self.build_success = True
         else:
-          self.build_success = False        
+            self.build_success = False
 
     def cleanup(self):
         # Remove build files as they will be loaded by the next
@@ -36,6 +37,6 @@ class UserAlgorithmsBuild(stresstesting.MantidStressTest):
                 os.remove(os.path.join(install_dir, lib_name + ext))
             except OSError:
                 pass
-                
+
     def validate(self):
         return self.build_success

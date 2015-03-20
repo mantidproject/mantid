@@ -1,3 +1,4 @@
+#pylint: disable=no-init
 """
     Verifies that a calibration file can be loaded once and reused to apply, using CopyInstrumentParameters, the same calibration
     in successive reductions.

@@ -10,7 +10,7 @@ void export_PointGroupFactory()
 {
 
     class_<PointGroupFactoryImpl,boost::noncopyable>("PointGroupFactoryImpl", no_init)
-            .def("exists", &PointGroupFactoryImpl::exists)
+            .def("exists", &PointGroupFactoryImpl::isSubscribed)
             .def("createPointGroup", &PointGroupFactoryImpl::createPointGroup)
             .def("createPointGroupFromSpaceGroupSymbol", &PointGroupFactoryImpl::createPointGroupFromSpaceGroupSymbol)
             .def("getAllPointGroupSymbols", &PointGroupFactoryImpl::getAllPointGroupSymbols)

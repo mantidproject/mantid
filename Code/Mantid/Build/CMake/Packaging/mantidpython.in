@@ -1,0 +1,34 @@
+#!/bin/sh
+#
+# Launch Mantidplot using any necessary LD_PRELOAD or software collection behaviour
+#
+# Script is configured by CMake
+
+# Find out where we are
+SCRIPTFILE=$(readlink -f "$0")
+INSTALLDIR=$(echo $SCRIPTFILE | sed -r -e 's|^(.*)/(.*)$|\1|g') #.* is greedy and eats up until the final slash
+IPYTHON=$(command -v ipython)
+
+# Define extra libraries and load paths
+LOCAL_PRELOAD=`readlink --no-newline --canonicalize-existing @TCMALLOC_LIBRARIES@`
+if [ -n "${LD_PRELOAD}" ]; then
+    LOCAL_PRELOAD=${LOCAL_PRELOAD}:${LD_PRELOAD}
+fi
+LOCAL_LDPATH=@EXTRA_LDPATH@:${LD_LIBRARY_PATH}
+if [ -z "${TCMALLOC_RELEASE_RATE}" ]; then
+    TCM_RELEASE=10000
+else
+    TCM_RELEASE=${TCMALLOC_RELEASE_RATE}
+fi
+
+# Define extra libraries for python
+LOCAL_PYTHONPATH=@WRAPPER_PREFIX@$INSTALLDIR
+if [ -n "${PYTHONPATH}" ]; then
+    LOCAL_PYTHONPATH=${LOCAL_PYTHONPATH}:${PYTHONPATH}
+fi
+
+# Launch
+LD_PRELOAD=${LOCAL_PRELOAD} TCMALLOC_RELEASE_RATE=${TCM_RELEASE} \
+    LD_LIBRARY_PATH=${LOCAL_LDPATH} QT_API=pyqt \
+    PYTHONPATH=${LOCAL_PYTHONPATH} \
+    ${IPYTHON} $*@WRAPPER_POSTFIX@

@@ -102,6 +102,7 @@ set ( SRC_FILES
 	src/PeakTransformQSample.cpp
 	src/PeakTransformSelector.cpp
 	src/Progress.cpp
+	src/Projection.cpp
 	src/PropertyManagerDataService.cpp
 	src/PropertyNexus.cpp
 	src/RefAxis.cpp
@@ -265,6 +266,7 @@ set ( INC_FILES
 	inc/MantidAPI/PeakTransformQSample.h
 	inc/MantidAPI/PeakTransformSelector.h
 	inc/MantidAPI/Progress.h
+	inc/MantidAPI/Projection.h
 	inc/MantidAPI/PropertyManagerDataService.h
 	inc/MantidAPI/PropertyNexus.h
 	inc/MantidAPI/RefAxis.h
@@ -361,6 +363,7 @@ set ( TEST_FILES
 	PeakTransformQLabTest.h
 	PeakTransformQSampleTest.h
 	PeakTransformSelectorTest.h
+	ProjectionTest.h
 	PropertyManagerDataServiceTest.h
 	PropertyNexusTest.h
 	RunTest.h

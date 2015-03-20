@@ -1,3 +1,4 @@
+#pylint: disable=no-init,invalid-name
 """
    Extends the basic test of the Load algorithm done by the LoadLotsOfFiles
    test to encompass the complex multi-file loading that the Load
@@ -25,7 +26,7 @@ class LoadTest(stresstesting.MantidStressTest):
         # Run using either runner
         res = runner.run(suite)
         if res.wasSuccessful():
-            self._success = True 
+            self._success = True
         else:
             self._success = False
 

@@ -3,6 +3,7 @@
 
 #include "MantidKernel/System.h"
 #include "MantidKernel/V3D.h"
+#include "MantidKernel/Matrix.h"
 #include "MantidDataObjects/PeakShapeBase.h"
 
 
@@ -56,7 +57,9 @@ namespace DataObjects
     std::vector<double> abcRadiiBackgroundOuter() const;
     /// Get ellipsoid directions
     std::vector<Mantid::Kernel::V3D> directions() const;
-    
+    /// Get ellipsoid directions in a specified frame
+    std::vector<Kernel::V3D> getDirectionInSpecificFrame(Kernel::Matrix<double>& invertedGoniometerMatrix) const;
+
     /// PeakShape interface
     std::string toJSON() const;
     /// Clone ellipsoid

@@ -416,7 +416,7 @@ int InternetHelper::downloadFile(const std::string &urlFile,
 void InternetHelper::setTimeout(int seconds) { m_timeout = seconds; }
 
 /// Checks the HTTP status to decide if this is a relocation
-/// @response the HTTP status
+/// @param response the HTTP status
 /// @returns true if the return code is considered a relocation
 bool InternetHelper::isRelocated(const int response) {
   return ((response == HTTP_FOUND) ||

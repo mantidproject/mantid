@@ -1,3 +1,4 @@
+#pylint: disable=no-init
 import stresstesting
 import mantid
 from mantid.api import FileFinder
@@ -121,7 +122,7 @@ class HFIRTransmissionDirectBeamCenter(stresstesting.MantidStressTest):
         self.disableChecking.append('SpectraMap')
         self.disableChecking.append('Axes')
         return "BioSANS_test_data_Iq", 'HFIRTransmissionDirectBeamCenter.nxs'
-    
+
 class HFIRTransmissionBeamCenter(stresstesting.MantidStressTest):
 
     def cleanup(self):
@@ -136,7 +137,7 @@ class HFIRTransmissionBeamCenter(stresstesting.MantidStressTest):
         TimeNormalization()
         DirectBeamTransmission(sample_file="BioSANS_sample_trans.xml",
                                empty_file="BioSANS_empty_trans.xml")
-        SetTransmissionBeamCenter(16.389123399465063, 
+        SetTransmissionBeamCenter(16.389123399465063,
                                   95.530251864359087)
         AzimuthalAverage(binning="0.01,0.001,0.11")
         AppendDataFile("BioSANS_test_data.xml")
@@ -149,7 +150,7 @@ class HFIRTransmissionBeamCenter(stresstesting.MantidStressTest):
         self.disableChecking.append('SpectraMap')
         self.disableChecking.append('Axes')
         return "BioSANS_test_data_Iq", 'HFIRTransmissionDirectBeamCenter.nxs'
-    
+
 class HFIRTransmissionBeamSpreader(stresstesting.MantidStressTest):
 
     def cleanup(self):
@@ -162,11 +163,11 @@ class HFIRTransmissionBeamSpreader(stresstesting.MantidStressTest):
         GPSANS()
         DirectBeamCenter("BioSANS_empty_cell.xml")
         TimeNormalization()
-        BeamSpreaderTransmission(sample_spreader="BioSANS_test_data.xml", 
+        BeamSpreaderTransmission(sample_spreader="BioSANS_test_data.xml",
                                  direct_spreader="BioSANS_empty_cell.xml",
-                                 sample_scattering="BioSANS_test_data.xml", 
+                                 sample_scattering="BioSANS_test_data.xml",
                                  direct_scattering="BioSANS_empty_cell.xml",
-                                 spreader_transmission=0.5, 
+                                 spreader_transmission=0.5,
                                  spreader_transmission_err=0.1)
         AzimuthalAverage(binning="0.01,0.001,0.11")
         AppendDataFile("BioSANS_test_data.xml")
@@ -192,11 +193,11 @@ class HFIRTransmissionBeamSpreaderDC(stresstesting.MantidStressTest):
         GPSANS()
         DirectBeamCenter("BioSANS_empty_cell.xml")
         TimeNormalization()
-        BeamSpreaderTransmission(sample_spreader="BioSANS_test_data.xml", 
+        BeamSpreaderTransmission(sample_spreader="BioSANS_test_data.xml",
                                  direct_spreader="BioSANS_empty_cell.xml",
-                                 sample_scattering="BioSANS_test_data.xml", 
+                                 sample_scattering="BioSANS_test_data.xml",
                                  direct_scattering="BioSANS_empty_cell.xml",
-                                 spreader_transmission=0.5, 
+                                 spreader_transmission=0.5,
                                  spreader_transmission_err=0.1)
         TransmissionDarkCurrent("BioSANS_dark_current.xml")
         AzimuthalAverage(binning="0.01,0.001,0.11")
@@ -223,11 +224,11 @@ class HFIRTransmissionBeamSpreaderDBC(stresstesting.MantidStressTest):
         GPSANS()
         DirectBeamCenter("BioSANS_empty_cell.xml")
         TimeNormalization()
-        BeamSpreaderTransmission(sample_spreader="BioSANS_test_data.xml", 
+        BeamSpreaderTransmission(sample_spreader="BioSANS_test_data.xml",
                                  direct_spreader="BioSANS_empty_cell.xml",
-                                 sample_scattering="BioSANS_test_data.xml", 
+                                 sample_scattering="BioSANS_test_data.xml",
                                  direct_scattering="BioSANS_empty_cell.xml",
-                                 spreader_transmission=0.5, 
+                                 spreader_transmission=0.5,
                                  spreader_transmission_err=0.1)
         TransmissionDirectBeamCenter("BioSANS_empty_trans.xml")
         AzimuthalAverage(binning="0.01,0.001,0.11")
@@ -254,13 +255,13 @@ class HFIRTransmissionBeamSpreaderBC(stresstesting.MantidStressTest):
         GPSANS()
         DirectBeamCenter("BioSANS_empty_cell.xml")
         TimeNormalization()
-        BeamSpreaderTransmission(sample_spreader="BioSANS_test_data.xml", 
+        BeamSpreaderTransmission(sample_spreader="BioSANS_test_data.xml",
                                  direct_spreader="BioSANS_empty_cell.xml",
-                                 sample_scattering="BioSANS_test_data.xml", 
+                                 sample_scattering="BioSANS_test_data.xml",
                                  direct_scattering="BioSANS_empty_cell.xml",
-                                 spreader_transmission=0.5, 
+                                 spreader_transmission=0.5,
                                  spreader_transmission_err=0.1)
-        SetTransmissionBeamCenter(16.389123399465063, 
+        SetTransmissionBeamCenter(16.389123399465063,
                                   95.530251864359087)
         AzimuthalAverage(binning="0.01,0.001,0.11")
         AppendDataFile("BioSANS_test_data.xml")
