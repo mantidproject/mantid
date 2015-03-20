@@ -149,9 +149,9 @@ void RefRoi::extract2D() {
     XOut0 = inputWS->readX(0);
   }
 
-  PARALLEL_FOR2(outputWS, inputWS)
+  //PARALLEL_FOR2(outputWS, inputWS)
   for (int i = xmin; i <= xmax; i++) {
-    PARALLEL_START_INTERUPT_REGION
+    //PARALLEL_START_INTERUPT_REGION
     for (int j = ymin; j <= ymax; j++) {
       int index = m_nYPixel * i + j;
       const MantidVec &YIn = inputWS->readY(index);
@@ -170,9 +170,9 @@ void RefRoi::extract2D() {
         EOut[t] += EIn[t_index] * EIn[t_index];
       }
     }
-    PARALLEL_END_INTERUPT_REGION
+    //PARALLEL_END_INTERUPT_REGION
   }
-  PARALLEL_CHECK_INTERUPT_REGION
+  //PARALLEL_CHECK_INTERUPT_REGION
 
   const int n_pixels = (xmax - xmin + 1) * (ymax - ymin + 1);
 
