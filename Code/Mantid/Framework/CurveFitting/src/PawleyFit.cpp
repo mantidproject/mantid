@@ -270,6 +270,10 @@ void PawleyFit::init() {
   declareProperty("ChebyshevBackgroundDegree", 0,
                   "Degree of the Chebyshev polynomial, if used as background.");
 
+  declareProperty("CalculationOnly", false, "If enabled, no fit is performed, "
+                                            "the function is only evaluated "
+                                            "and output is generated.");
+
   declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace", "",
                                                          Direction::Output),
                   "Workspace that contains measured spectrum, calculated "
@@ -341,6 +345,12 @@ void PawleyFit::exec() {
   fit->setProperty("StartX", startX);
   fit->setProperty("EndX", endX);
   fit->setProperty("WorkspaceIndex", wsIndex);
+
+  bool calculationOnly = getProperty("CalculationOnly");
+  if (calculationOnly) {
+    fit->setProperty("MaxIterations", 0);
+  }
+
   fit->setProperty("CreateOutput", true);
 
   fit->execute();

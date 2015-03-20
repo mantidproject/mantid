@@ -103,6 +103,8 @@ public:
     pFit->setProperty("CrystalSystem", "Orthorhombic");
     pFit->setProperty("InitialCell", "2.44 3.13 4.07 90 90 90");
     pFit->setProperty("PeakTable", hkls);
+    pFit->setProperty("EnableChebyshevBackground", true);
+    pFit->setProperty("ChebyshevBackgroundDegree", 0);
     pFit->setProperty("OutputWorkspace", "OP_output");
     pFit->setProperty("RefinedPeakParameterTable", "OP_peaks");
     pFit->setProperty("RefinedCellTable", "OP_cell");
