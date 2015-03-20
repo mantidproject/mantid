@@ -25,7 +25,7 @@
 #endif
 
 // jsoncpp
-#include <jsoncpp/json/json.h>
+#include <json/json.h>
 
 // std
 #include <fstream>

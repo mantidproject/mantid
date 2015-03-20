@@ -2,7 +2,7 @@
 #include "MantidDataObjects/PeakShapeEllipsoid.h"
 #include "MantidKernel/SpecialCoordinateSystem.h"
 
-#include <jsoncpp/json/json.h>
+#include <json/json.h>
 #include <stdexcept>
 
 using namespace Mantid::Kernel;

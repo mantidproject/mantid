@@ -100,7 +100,7 @@ if not "%JOB_NAME%"=="%JOB_NAME:relwithdbg=%" (
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Update the PATH so that we can find everything
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-set PATH=%WORKSPACE%\Code\Third_Party\lib\win64;%WORKSPACE%\Code\Third_Party\lib\win64\Python27;%PARAVIEW_DIR%\bin\%BUILD_CONFIG%;%PATH%
+set PATH=%WORKSPACE%\Code\Third_Party\lib\win64;%WORKSPACE%\Code\Third_Party\lib\win64\Python27;%WORKSPACE%\Code\Third_Party\lib\win64\mingw;%PARAVIEW_DIR%\bin\%BUILD_CONFIG%;%PATH%
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: CMake configuration
