@@ -297,10 +297,25 @@ void PawleyFit::exec() {
   // Setup PawleyFunction with cell from input parameters
   PawleyFunction_sptr pawleyFn = boost::dynamic_pointer_cast<PawleyFunction>(
       FunctionFactory::Instance().createFunction("PawleyFunction"));
+  g_log.information() << "Setting up Pawley function..." << std::endl;
 
-  pawleyFn->setProfileFunction(getProperty("PeakProfileFunction"));
-  pawleyFn->setCrystalSystem(getProperty("CrystalSystem"));
+  std::string profileFunction = getProperty("PeakProfileFunction");
+  pawleyFn->setProfileFunction(profileFunction);
+  g_log.information() << "  Selected profile function: " << profileFunction
+                      << std::endl;
+
+  std::string crystalSystem = getProperty("CrystalSystem");
+  pawleyFn->setCrystalSystem(crystalSystem);
+  g_log.information() << "  Selected crystal system: " << crystalSystem
+                      << std::endl;
+
   pawleyFn->setUnitCell(getProperty("InitialCell"));
+  PawleyParameterFunction_sptr pawleyParameterFunction =
+      pawleyFn->getPawleyParameterFunction();
+  g_log.information()
+      << "  Initial unit cell: "
+      << unitCellToStr(pawleyParameterFunction->getUnitCellFromParameters())
+      << std::endl;
 
   // Get the input workspace with the data
   MatrixWorkspace_const_sptr ws = getProperty("InputWorkspace");
@@ -323,19 +338,29 @@ void PawleyFit::exec() {
     endX = std::min(endX, endXInput);
   }
 
+  g_log.information() << "  Refined range: " << startX << " - " << endX
+                      << std::endl;
+
   // Get HKLs from TableWorkspace
   ITableWorkspace_sptr peakTable = getProperty("PeakTable");
   Axis *xAxis = ws->getAxis(0);
   Unit_sptr xUnit = xAxis->unit();
   addHKLsToFunction(pawleyFn, peakTable, xUnit, startX, endX);
 
+  g_log.information() << "  Peaks in PawleyFunction: "
+                      << pawleyFn->getPeakCount() << std::endl;
+
   // Determine if zero-shift should be refined
   bool refineZeroShift = getProperty("RefineZeroShift");
   if (!refineZeroShift) {
     pawleyFn->fix(pawleyFn->parameterIndex("f0.ZeroShift"));
+  } else {
+    g_log.information() << "  Refining ZeroShift." << std::endl;
   }
 
   pawleyFn->setMatrixWorkspace(ws, static_cast<size_t>(wsIndex), startX, endX);
+
+  g_log.information() << "Setting up Fit..." << std::endl;
 
   // Generate Fit-algorithm with required properties.
   Algorithm_sptr fit = createChildAlgorithm("Fit", -1, -1, true);
@@ -354,6 +379,8 @@ void PawleyFit::exec() {
   fit->setProperty("CreateOutput", true);
 
   fit->execute();
+
+  g_log.information() << "Generating output..." << std::endl;
 
   // Create output
   MatrixWorkspace_sptr output = fit->getProperty("OutputWorkspace");
