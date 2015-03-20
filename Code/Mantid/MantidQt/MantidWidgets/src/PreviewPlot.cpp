@@ -5,7 +5,6 @@
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/AlgorithmManager.h"
-#include "MantidQtAPI/QwtWorkspaceSpectrumData.h"
 
 #include <Poco/Notification.h>
 #include <Poco/NotificationCenter.h>
@@ -17,6 +16,8 @@
 #include <QPalette>
 #include <QVBoxLayout>
 
+#include <qwt_array.h>
+#include <qwt_data.h>
 #include <qwt_scale_engine.h>
 
 using namespace MantidQt::MantidWidgets;
@@ -25,6 +26,7 @@ using namespace Mantid::API;
 namespace
 {
   Mantid::Kernel::Logger g_log("PreviewPlot");
+  bool isNegative(double value) { return value < 0.0; }
 }
 
 
@@ -595,9 +597,17 @@ QwtPlotCurve * PreviewPlot::addCurve(MatrixWorkspace_sptr ws, const size_t specI
     ws = convertXAlg->getProperty("OutputWorkspace");
   }
 
-  // Create the plot data
+  std::vector<double> wsDataY = ws->readY(specIndex);
+
+  // If using log scale need to remove all negative Y values
   bool logYScale = getAxisType(QwtPlot::yLeft) == "Logarithmic";
-  QwtWorkspaceSpectrumData wsData(*ws, static_cast<int>(specIndex), logYScale, false);
+  if(logYScale)
+    std::replace_if(wsDataY.begin(), wsDataY.end(), isNegative, DBL_EPSILON);
+
+  // Create the Qwt data
+  QwtArray<double> dataX = QVector<double>::fromStdVector(ws->readX(specIndex));
+  QwtArray<double> dataY = QVector<double>::fromStdVector(wsDataY);
+  QwtArrayData wsData(dataX, dataY);
 
   // Create the new curve
   QwtPlotCurve * curve = new QwtPlotCurve();
