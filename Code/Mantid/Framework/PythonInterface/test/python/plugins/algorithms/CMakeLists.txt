@@ -17,6 +17,9 @@ set ( TEST_PY_FILES
   FindReflectometryLinesTest.py
   FlatPlatePaalmanPingsCorrectionTest.py
   GetEiT0atSNSTest.py
+  IndirectAnnulusAbsorptionTest.py
+  IndirectCylinderAbsorptionTest.py
+  IndirectFlatPlateAbsorptionTest.py
   IndirectILLReductionTest.py
   InelasticIndirectReductionTest.py
   IndirectTransmissionTest.py

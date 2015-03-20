@@ -42,7 +42,9 @@ namespace MantidQt
 {
 namespace CustomInterfaces
 {
-  /** IndirectTab : TODO: DESCRIPTION
+  /** IndirectTab
+
+    Provided common functionality of all indirect interface tabs.
 
     @author Dan Nixon
     @date 08/10/2014
@@ -90,9 +92,13 @@ namespace CustomInterfaces
     bool loadFile(const QString& filename, const QString& outputName, const int specMin = -1, const int specMax = -1);
 
     /// Function to set the range limits of the plot
-    void setPlotPropertyRange(const QString& rsID, QtProperty* min, QtProperty* max, const QPair<double, double> & bounds);
+    void setPlotPropertyRange(MantidQt::MantidWidgets::RangeSelector * rs,
+                              QtProperty* min, QtProperty* max,
+                              const QPair<double, double> & bounds);
     /// Function to set the range selector on the mini plot
-    void setRangeSelector(const QString& rsID, QtProperty* lower, QtProperty* upper, const QPair<double, double> & bounds);
+    void setRangeSelector(MantidQt::MantidWidgets::RangeSelector * rs,
+                          QtProperty* lower, QtProperty* upper,
+                          const QPair<double, double> & bounds);
 
     /// Function to run an algorithm on a seperate thread
     void runAlgorithm(const Mantid::API::IAlgorithm_sptr algorithm);
@@ -102,8 +108,6 @@ namespace CustomInterfaces
     /// Parent QWidget (if applicable)
     QWidget *m_parentWidget;
 
-    /// Range selector widget for mini plot
-    std::map<QString, MantidQt::MantidWidgets::RangeSelector *> m_rangeSelectors;
     /// Tree of the properties
     std::map<QString, QtTreePropertyBrowser *> m_propTrees;
 
