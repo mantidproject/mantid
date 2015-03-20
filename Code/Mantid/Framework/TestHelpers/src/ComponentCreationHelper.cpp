@@ -439,9 +439,10 @@ createCylInstrumentWithDetInGivenPosisions(const std::vector<double> &L2,
  * @param num_banks :: number of rectangular banks to create
  * @param pixels :: number of pixels in each direction.
  * @param pixelSpacing :: padding between pixels
+ * @param bankDistanceFromSample :: How far the bank is from the sample
  */
 Instrument_sptr createTestInstrumentRectangular(int num_banks, int pixels,
-                                                double pixelSpacing) {
+                                                double pixelSpacing, double bankDistanceFromSample) {
   boost::shared_ptr<Instrument> testInst(new Instrument("basic_rect"));
 
   const double cylRadius(pixelSpacing / 2);
@@ -470,12 +471,12 @@ Instrument_sptr createTestInstrumentRectangular(int num_banks, int pixels,
       }
 
     testInst->add(bank);
-    bank->setPos(V3D(0.0, 0.0, 5.0 * banknum));
+    bank->setPos(V3D(0.0, 0.0, bankDistanceFromSample * banknum));
   }
 
   // Define a source component
   ObjComponent *source =
-      new ObjComponent("moderator", Object_sptr(new Object), testInst.get());
+      new ObjComponent("source", createSphere(0.01 /*1cm*/, V3D(0,0,0), "1"), testInst.get());
   source->setPos(V3D(0.0, 0.0, -10.));
   testInst->add(source);
   testInst->markAsSource(source);

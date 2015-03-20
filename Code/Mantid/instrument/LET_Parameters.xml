@@ -26,7 +26,7 @@
      files with the same name and different extension are found
  -->
 <parameter name="data_file_ext" type="string">
-   <value val=".nxs"/>
+   <value val=".raw"/>
 </parameter>
 <!-- The name of the hard mask file to use together with diag masking -->
 <parameter name="hard_mask_file" type="string">
@@ -61,7 +61,7 @@
 </parameter>
 
 <!-- Monitor used to estimate total current on the sample  while normalizing by monitor 1.  -->
-<parameter name="norm-mon1-spec" >
+<parameter name="norm-mon1-spec">
   <value val="40961"/>
 </parameter>
   

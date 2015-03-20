@@ -616,11 +616,17 @@ protected:
 class MANTID_KERNEL_DLL Degrees : public Empty {
 public:
   Degrees();
-  const std::string unitID() const { return ""; }
-  virtual const std::string caption() const { return "Scattering angle"; }
+  const std::string unitID() const; /// < Degrees
+  const std::string caption() const { return "Scattering angle"; }
   const UnitLabel label() const;
 
-  virtual Unit *clone() const { return new Degrees(*this); }
+  virtual void init();
+  virtual Unit *clone() const;
+
+  virtual double singleToTOF(const double x) const;
+  virtual double singleFromTOF(const double tof) const;
+  virtual double conversionTOFMin() const;
+  virtual double conversionTOFMax() const;
 
 private:
   UnitLabel m_label;

@@ -2089,17 +2089,19 @@ QString Graph::saveCurveLayout(int index)
     }
   } else if(style == Box){
     BoxCurve *b = static_cast<BoxCurve*>(c);
-    s+=QString::number(SymbolBox::symbolIndex(b->maxStyle()))+"\t";
-    s+=QString::number(SymbolBox::symbolIndex(b->p99Style()))+"\t";
-    s+=QString::number(SymbolBox::symbolIndex(b->meanStyle()))+"\t";
-    s+=QString::number(SymbolBox::symbolIndex(b->p1Style()))+"\t";
-    s+=QString::number(SymbolBox::symbolIndex(b->minStyle()))+"\t";
-    s+=QString::number(b->boxStyle())+"\t";
-    s+=QString::number(b->boxWidth())+"\t";
-    s+=QString::number(b->boxRangeType())+"\t";
-    s+=QString::number(b->boxRange())+"\t";
-    s+=QString::number(b->whiskersRangeType())+"\t";
-    s+=QString::number(b->whiskersRange())+"\t";
+    if (b) {
+      s+=QString::number(SymbolBox::symbolIndex(b->maxStyle()))+"\t";
+      s+=QString::number(SymbolBox::symbolIndex(b->p99Style()))+"\t";
+      s+=QString::number(SymbolBox::symbolIndex(b->meanStyle()))+"\t";
+      s+=QString::number(SymbolBox::symbolIndex(b->p1Style()))+"\t";
+      s+=QString::number(SymbolBox::symbolIndex(b->minStyle()))+"\t";
+      s+=QString::number(b->boxStyle())+"\t";
+      s+=QString::number(b->boxWidth())+"\t";
+      s+=QString::number(b->boxRangeType())+"\t";
+      s+=QString::number(b->boxRange())+"\t";
+      s+=QString::number(b->whiskersRangeType())+"\t";
+      s+=QString::number(b->whiskersRange())+"\t";
+    }
   }
   return s;
 }
@@ -3653,7 +3655,7 @@ void Graph::restoreFunction(const QStringList& lst)
   double start = 0.0, end = 0.0;
 
   QStringList::const_iterator line = lst.begin();
-  for (line++; line != lst.end(); ++line){
+  for (++line; line != lst.end(); ++line){
     QString s = *line;
     if (s.contains("<Type>"))
       type = (FunctionCurve::FunctionType)s.remove("<Type>").remove("</Type>").stripWhiteSpace().toInt();
@@ -3689,7 +3691,7 @@ void Graph::restoreFunction(const QStringList& lst)
   c_keys[n_curves-1] = d_plot->insertCurve(c);
 
   QStringList l;
-  for (line++; line != lst.end(); ++line)
+  for (++line; line != lst.end(); ++line)
     l << *line;
   c->restoreCurveLayout(l);
 
@@ -4217,17 +4219,19 @@ void Graph::copy(Graph* g)
       }
 
       if (c_type[i] != Box && c_type[i] != ErrorBars){
-        c->setData(x.data(), y.data(), n);
-        if (c->type() != Function && c->type() != Pie) {
-          DataCurve *dc = dynamic_cast<DataCurve*>(c);
-          if (dc)
-            dc->clone(cv);
-        } else if (c->type() == Pie) {
-          QwtPieCurve *cPie = dynamic_cast<QwtPieCurve*>(c);
-          if (cPie) {
-            QwtPieCurve *cvPie = dynamic_cast<QwtPieCurve*>(cv);
-            if (cvPie)
-              cPie->clone(cvPie);
+        if (c) {
+          c->setData(x.data(), y.data(), n);
+          if (c->type() != Function && c->type() != Pie) {
+            DataCurve *dc = dynamic_cast<DataCurve*>(c);
+            if (dc)
+              dc->clone(cv);
+          } else if (c->type() == Pie) {
+            QwtPieCurve *cPie = dynamic_cast<QwtPieCurve*>(c);
+            if (cPie) {
+              QwtPieCurve *cvPie = dynamic_cast<QwtPieCurve*>(cv);
+              if (cvPie)
+                cPie->clone(cvPie);
+            }
           }
         }
       }
@@ -4749,7 +4753,7 @@ void Graph::restoreCurveLabels(int curveID, const QStringList& lst)
   if (s.contains("<column>"))
     labelsColumn = s.remove("<column>").remove("</column>").trimmed();
 
-  for (line++; line != lst.end(); ++line){
+  for (++line; line != lst.end(); ++line){
     s = *line;
     if (s.contains("<color>"))
       c->setLabelsColor(QColor(s.remove("<color>").remove("</color>").trimmed()));
@@ -5089,7 +5093,7 @@ void Graph::setIndexedColors()
       continue;
 
     PlotCurve *c = dynamic_cast<PlotCurve*>(it);
-    if (c->type() == ErrorBars)
+    if (c && c->type() == ErrorBars)
     {
       // QtiPlot: ErrorBarsCurve *er = (ErrorBarsCurve *) it;
       QwtErrorPlotCurve *er = dynamic_cast<QwtErrorPlotCurve*>(it);

@@ -1,3 +1,4 @@
+#pylint: disable=invalid-name,no-init
 """
 Check the loaders of ISIS SANS reduction. It is created as systemtest because it does
 take considerable time because it involves loading data. Besides, it uses data that is
@@ -9,7 +10,7 @@ import stresstesting
 from mantid.simpleapi import *
 import isis_reduction_steps as steps
 import ISISCommandInterface as ici
-import isis_reducer 
+import isis_reducer
 
 class LoadRunTest(unittest.TestCase):
     def setUp(self):
@@ -33,7 +34,7 @@ class LoadRunTest(unittest.TestCase):
         self.assertEqual(loadRun.periods_in_file, periods_in_file)
         self.assertEqual(loadRun.wksp_name, ws_name)
         self.assertEqual(loadRun.shortrun_no, runnum)
-    
+
         if periods_in_file == 1:
             self.assertEqual(loadRun._wksp_name, ws_name)
             self.assertTrue(not loadRun.move2ws(0))
@@ -41,7 +42,7 @@ class LoadRunTest(unittest.TestCase):
         else:
             self.assertTrue(loadRun.move2ws(0))
             self.assertEqual(loadRun.wksp_name, ws_name)
-        
+
 
 
     def test_single_period_nxs_file(self):
@@ -67,7 +68,7 @@ class LoadRunTest(unittest.TestCase):
         self.basicChecks(loadRun, 'SANS2D00022048.nxs', runnum, 1, '22048_sans_nxs')
 
         self.assertEqual(loadRun._period, -1)
-        self.assertEqual(loadRun.ext, 'nxs')        
+        self.assertEqual(loadRun.ext, 'nxs')
 
     def test_single_period_from_workspace_reload_false(self):
         runnum = 22048
@@ -76,15 +77,15 @@ class LoadRunTest(unittest.TestCase):
         self.basicChecks(loadRun, 'SANS2D00022048.nxs', runnum, 1, ws22048.name())
 
         self.assertEqual(loadRun._period, -1)
-        self.assertEqual(loadRun.ext, 'nxs')        
-   
+        self.assertEqual(loadRun.ext, 'nxs')
+
     def test_single_period_trans_raw(self):
         runnum = 988
         loadRun = self.loadAndAssign(runnum, {'trans':True})
         self.basicChecks(loadRun, 'SANS2D00000988.raw', runnum, 1, '988_trans_raw')
         self.assertEqual(loadRun._period, -1)
         self.assertEqual(loadRun.ext, 'raw')
-        
+
     def test_multiperiod_nxs_file(self):
         runnum = 5512
         loadRun = self.loadAndAssign(runnum)
@@ -115,7 +116,7 @@ class LoadSampleTest(unittest.TestCase):
     """LoadSample extends LoadRun in order to move the workspaces to the defined centre"""
     def setUp(self):
         config['default.instrument'] = 'SANS2D'
-        ici.SANS2D() 
+        ici.SANS2D()
 
     def test_single_period_nxs_file(self):
         ici.SetCentre(1,-2)
@@ -143,7 +144,7 @@ class LoadSampleTest(unittest.TestCase):
 
 class LoadSampleTestStressTest(stresstesting.MantidStressTest):
     def runTest(self):
-        self._success = False        
+        self._success = False
         suite = unittest.TestSuite()
         suite.addTest(unittest.makeSuite(LoadRunTest, 'test'))
         suite.addTest(unittest.makeSuite(LoadSampleTest, 'test'))
@@ -157,7 +158,7 @@ class LoadSampleTestStressTest(stresstesting.MantidStressTest):
 
     def validate(self):
         return self._success
-                      
+
 
 
 if __name__ == '__main__':

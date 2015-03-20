@@ -410,11 +410,15 @@ void BinMD::exec() {
 
   CALL_MDEVENT_FUNCTION(this->binByIterating, m_inWS);
 
-  // Copy the experiment infos to the output
+  // Copy the
+
+  // Copy the coordinate system & experiment infos to the output
   IMDEventWorkspace_sptr inEWS =
       boost::dynamic_pointer_cast<IMDEventWorkspace>(m_inWS);
-  if (inEWS)
+  if (inEWS) {
+    outWS->setCoordinateSystem(inEWS->getSpecialCoordinateSystem());
     outWS->copyExperimentInfos(*inEWS);
+  }
 
   outWS->updateSum();
   // Save the output

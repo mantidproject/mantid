@@ -5,7 +5,7 @@ from mantid.kernel import V3D
 class PointGroupTest(unittest.TestCase):
 
     def test_creation(self):
-        self.assertRaises(RuntimeError, PointGroupFactory.createPointGroup, "none")
+        self.assertRaises(ValueError, PointGroupFactory.createPointGroup, "none")
 
         PointGroupFactory.createPointGroup("m-3m")
 

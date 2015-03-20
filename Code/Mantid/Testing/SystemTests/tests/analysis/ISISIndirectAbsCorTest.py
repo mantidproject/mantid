@@ -1,3 +1,4 @@
+#pylint: disable=no-init
 import stresstesting
 from mantid.simpleapi import *
 from IndirectImport import is_supported_f2py_platform

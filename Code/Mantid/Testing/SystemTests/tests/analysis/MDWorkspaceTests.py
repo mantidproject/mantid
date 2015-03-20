@@ -1,5 +1,6 @@
+#pylint: disable=no-init,invalid-name
 """
-Test some features of MDWorkspaces, such as 
+Test some features of MDWorkspaces, such as
 file-backed MDWorkspaces.
 """
 
@@ -11,7 +12,7 @@ from mantid.kernel import *
 
 ###############################################################################
 class PlusMDTest(stresstesting.MantidStressTest):
-    
+
     _saved_filename = None
 
     def compare_binned(self, wsname):
@@ -23,7 +24,7 @@ class PlusMDTest(stresstesting.MantidStressTest):
         for i in xrange(comparison.getNPoints()):
             if not comparison.signalAt(i):
                 raise Exception("Difference in workspace %s vs original_binned at index %d" % (wsname, i))
-    
+
     def runTest(self):
         # Some platforms can't clean up the open file handle on cncs.nxs from the last test, so run cleanup here as well
         barefilename = "cncs.nxs"
@@ -42,7 +43,7 @@ class PlusMDTest(stresstesting.MantidStressTest):
         # Scale by 2 to account for summing
         self.original_binned = mtd['cncs_original_binned']
         self.original_binned *= 2
-        
+
         # Load into memory
         LoadMD(Filename='cncs.nxs',FileBackEnd='0',Memory='100',OutputWorkspace='cncs_mem')
 
@@ -64,19 +65,19 @@ class PlusMDTest(stresstesting.MantidStressTest):
 
         # Refresh the original file
         SaveMD(InputWorkspace='cncs_original', Filename='cncs.nxs')
-        
-        # ======== File + mem, with a small write buffer (only 1MB) ======== 
+
+        # ======== File + mem, with a small write buffer (only 1MB) ========
         LoadMD(Filename='cncs.nxs',FileBackEnd='1',Memory='1',OutputWorkspace='cncs_file_small_buffer')
         PlusMD(LHSWorkspace="cncs_file_small_buffer", RHSWorkspace="cncs_mem", OutputWorkspace="cncs_file_small_buffer")
         SaveMD("cncs_file_small_buffer", UpdateFileBackEnd="1")
         self.assertDelta( mtd['cncs_file_small_buffer'].getNPoints(), 112266*2, 1)
         self.compare_binned('cncs_file_small_buffer')
         DeleteWorkspace('cncs_file_small_buffer')
-                
+
         # Refresh the original file
         SaveMD(InputWorkspace='cncs_original', Filename='cncs.nxs')
 
-        # ========  File + mem, without a write buffer ======== 
+        # ========  File + mem, without a write buffer ========
         LoadMD(Filename='cncs.nxs',FileBackEnd='1',Memory='0',OutputWorkspace='cncs_file_nobuffer')
         PlusMD(LHSWorkspace="cncs_file_nobuffer", RHSWorkspace="cncs_mem", OutputWorkspace="cncs_file_nobuffer")
         SaveMD("cncs_file_nobuffer", UpdateFileBackEnd="1")
@@ -86,8 +87,8 @@ class PlusMDTest(stresstesting.MantidStressTest):
 
         # Refresh the original file
         SaveMD(InputWorkspace='cncs_original', Filename='cncs.nxs')
-        
-        # ======== File + mem to a new (cloned) file ========  
+
+        # ======== File + mem to a new (cloned) file ========
         LoadMD(Filename='cncs.nxs',FileBackEnd='1',Memory='100',OutputWorkspace='cncs_file')
         PlusMD(LHSWorkspace="cncs_file", RHSWorkspace="cncs_mem", OutputWorkspace="cncs_added")
         SaveMD("cncs_added", UpdateFileBackEnd="1")
@@ -125,11 +126,11 @@ class PlusMDTest(stresstesting.MantidStressTest):
 
 ###############################################################################
 class MergeMDTest(stresstesting.MantidStressTest):
-    
+
     _saved_filenames = []
 
     def make_files_to_merge_string(self):
-        filenames_string = ''        
+        filenames_string = ''
 
         for filename in self._saved_filenames:
             filenames_string += filename + ','
@@ -143,12 +144,12 @@ class MergeMDTest(stresstesting.MantidStressTest):
 
         LoadEventNexus(Filename='CNCS_7860_event.nxs',
         OutputWorkspace='CNCS_7860_event_NXS',CompressTolerance=0.1)
-        
+
         for omega in xrange(0, 5):
             print "Starting omega %03d degrees" % omega
             CreateMDWorkspace(Dimensions='3',Extents='-5,5,-5,5,-5,5',Names='Q_sample_x,Q_sample_y,Q__sample_z',Units='A,A,A',SplitInto='3',SplitThreshold='200',MaxRecursionDepth='3',
             MinRecursionDepth='3', OutputWorkspace='CNCS_7860_event_MD')
-            
+
             # Convert events to MD events
             AddSampleLog("CNCS_7860_event_NXS", "omega", "%s.0" % omega, "Number Series")
             AddSampleLog("CNCS_7860_event_NXS", "chi", "%s" % 0.0, "Number Series")
@@ -156,7 +157,7 @@ class MergeMDTest(stresstesting.MantidStressTest):
             # V2 of ConvertToDiffractionMD needs Goniometer to be set on workspace.
             SetGoniometer(Workspace='CNCS_7860_event_NXS',Axis0='omega,0,0,1,1',Axis1='chi,1,0,0,1',Axis2='phi,0,1,0,1')
 
-            ConvertToDiffractionMDWorkspace(InputWorkspace='CNCS_7860_event_NXS',OutputWorkspace='CNCS_7860_event_MD',OutputDimensions='Q (sample frame)',LorentzCorrection='1', Append=True)            
+            ConvertToDiffractionMDWorkspace(InputWorkspace='CNCS_7860_event_NXS',OutputWorkspace='CNCS_7860_event_MD',OutputDimensions='Q (sample frame)',LorentzCorrection='1', Append=True)
 
             barefilename = "CNCS_7860_event_rotated_%03d.nxs" % omega
             filename = os.path.join(config["defaultsave.directory"], barefilename)
@@ -181,4 +182,4 @@ class MergeMDTest(stresstesting.MantidStressTest):
                 Logger.get("MDWorkspaceTests").notice("Removed %s" % filename)
             except OSError:
                 Logger.get("MDWorkspaceTests").notice("Failed to remove %s" % filename)
-            
+

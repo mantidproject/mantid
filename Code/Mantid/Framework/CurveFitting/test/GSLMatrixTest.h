@@ -173,6 +173,33 @@ public:
     TS_ASSERT_EQUALS(m.get(1,1), 0.5);
   }
 
+  void test_subMatrix()
+  {
+    GSLMatrix m(4,4);
+    m.set(0,0,0); m.set(0,1,1); m.set(0,2,2); m.set(0,3,3);
+    m.set(1,0,10);m.set(1,1,11);m.set(1,2,12);m.set(1,3,13);
+    m.set(2,0,20);m.set(2,1,21);m.set(2,2,22);m.set(2,3,23);
+    m.set(3,0,30);m.set(3,1,31);m.set(3,2,32);m.set(3,3,33);
+
+    GSLMatrix subm(m, 1,1,2,2 );
+    TS_ASSERT_EQUALS(subm.get(0,0), 11);
+    TS_ASSERT_EQUALS(subm.get(0,1), 12);
+    TS_ASSERT_EQUALS(subm.get(1,0), 21);
+    TS_ASSERT_EQUALS(subm.get(1,1), 22);
+  }
+
+  void test_subMatrix_fail()
+  {
+    GSLMatrix m(4,4);
+    m.set(0,0,0); m.set(0,1,1); m.set(0,2,2); m.set(0,3,3);
+    m.set(1,0,10);m.set(1,1,11);m.set(1,2,12);m.set(1,3,13);
+    m.set(2,0,20);m.set(2,1,21);m.set(2,2,22);m.set(2,3,23);
+    m.set(3,0,30);m.set(3,1,31);m.set(3,2,32);m.set(3,3,33);
+
+    TS_ASSERT_THROWS(
+    GSLMatrix subm(m, 2,2,3,3 ), std::runtime_error);
+  }
+
 };
 
 #endif /*GSLMATRIXTEST_H_*/
