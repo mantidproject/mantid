@@ -129,8 +129,16 @@ void LoadSpiceAscii::init() {
                   "Otherwise, any log name is not listed will be treated as "
                   "string property.");
 
-  declareProperty(new ArrayProperty<std::string>("DateAndTimeLog"),
-                  "Name and format for date and time");
+  // date: MM/DD/YYYY,time: HH:MM:SS AM is the standard SPICE date time log name
+  // and format
+  std::vector<std::string> defaultlogformat(4);
+  defaultlogformat[0] = "date";
+  defaultlogformat[1] = "MM/DD/YYYY";
+  defaultlogformat[2] = "time";
+  defaultlogformat[3] = "HH:MM:SS AM";
+  declareProperty(
+      new ArrayProperty<std::string>("DateAndTimeLog", defaultlogformat),
+      "Name and format for date and time");
 
   // Output
   declareProperty(new WorkspaceProperty<ITableWorkspace>("OutputWorkspace", "",
@@ -461,8 +469,10 @@ void LoadSpiceAscii::setupRunStartTime(
         runinfows->run().hasProperty(timelogname))) {
     std::stringstream errss;
     errss << "Unable to locate user specified date and time sample logs "
-          << datelogname << " and " << timelogname << ".";
-    throw std::runtime_error(errss.str());
+          << datelogname << " and " << timelogname << "."
+          << "run_start will not be set up.";
+    g_log.error(errss.str());
+    return;
   }
 
   const std::string &rawdatestring =

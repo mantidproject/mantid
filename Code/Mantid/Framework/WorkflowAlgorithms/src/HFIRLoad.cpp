@@ -167,10 +167,15 @@ void HFIRLoad::exec() {
   if (!isEmpty(sample_det_dist)) {
     sdd = sample_det_dist;
   } else {
+    const std::string sddName = "sample-detector-distance";
     Mantid::Kernel::Property *prop =
-        dataWS->run().getProperty("sample-detector-distance");
+        dataWS->run().getProperty(sddName);
     Mantid::Kernel::PropertyWithValue<double> *dp =
         dynamic_cast<Mantid::Kernel::PropertyWithValue<double> *>(prop);
+    if (!dp) {
+      throw std::runtime_error("Could not cast (interpret) the property " +
+                               sddName + " as a floating point numeric value.");
+    }
     sdd = *dp;
 
     // Modify SDD according to offset if given
@@ -215,14 +220,24 @@ void HFIRLoad::exec() {
         Poco::NumberFormatter::format(src_to_sample / 1000.0, 3) + " \n";
   };
 
+  const std::string sampleADName = "sample-aperture-diameter";
   Mantid::Kernel::Property *prop =
-      dataWS->run().getProperty("sample-aperture-diameter");
+      dataWS->run().getProperty(sampleADName);
   Mantid::Kernel::PropertyWithValue<double> *dp =
       dynamic_cast<Mantid::Kernel::PropertyWithValue<double> *>(prop);
+  if (!dp) {
+    throw std::runtime_error("Could not cast (interpret) the property " +
+                             sampleADName + " as a floating point numeric value.");
+  }
   double sample_apert = *dp;
 
-  prop = dataWS->run().getProperty("source-aperture-diameter");
+  const std::string sourceADName = "source-aperture-diameter";
+  prop = dataWS->run().getProperty(sourceADName);
   dp = dynamic_cast<Mantid::Kernel::PropertyWithValue<double> *>(prop);
+  if (!dp) {
+    throw std::runtime_error("Could not cast (interpret) the property " +
+                             sourceADName + " as a floating point numeric value.");
+  }
   double source_apert = *dp;
 
   const double beam_diameter =
