@@ -1999,15 +1999,12 @@ void MuonAnalysis::plotSpectrum(const QString& wsName, bool logScale)
     {
       QStringList& s = acquireWindowScript; // To keep short
 
-      s << "w = graph('%WSNAME%-1')";
-      s << "if w == None:";
-      s << "  pw = newGraph('%WSNAME%', 0)";
-      s << "  w = plotSpectrum('%WSNAME%', 0, %ERRORS%, %CONNECT%, window = pw)";
-      s << "  w.setObjectName('%WSNAME%')";
-      s << "else:";
-      s << "  plotSpectrum('%WSNAME%', 0, %ERRORS%, %CONNECT%, window = w, clearWindow = True)";
-      s << "  w.show()";
-      s << "  w.setFocus()";
+      s << "pw = newGraph('%WSNAME%-1', 0)";
+      s << "w = plotSpectrum('%WSNAME%', 0, %ERRORS%, %CONNECT%, window = pw, clearWindow = True)";
+      s << "w.setName('%WSNAME%-1')";
+      s << "w.setObjectName('%WSNAME%')";
+      s << "w.show()";
+      s << "w.setFocus()";
     }
 
     QString pyS;
