@@ -85,6 +85,37 @@ namespace CustomInterfaces
     }
   }
 
+  std::string ALCDataLoadingView::detectorGroupingType() const
+  {
+    std::string checkedButton = m_ui.detectorGroupingType->checkedButton()->text().toStdString();
+    return checkedButton;
+  }
+
+  std::string ALCDataLoadingView::getForwardGrouping() const
+  {
+    return m_ui.forwardEdit->text().toStdString();
+  }
+
+  std::string ALCDataLoadingView::getBackwardGrouping() const
+  {
+    return m_ui.backwardEdit->text().toStdString();
+  }
+
+  std::string ALCDataLoadingView::redPeriod() const
+  {
+    return m_ui.redPeriod->currentText().toStdString();
+  }
+
+  std::string ALCDataLoadingView::greenPeriod() const
+  {
+    return m_ui.greenPeriod->currentText().toStdString();
+  }
+
+  bool ALCDataLoadingView::subtractIsChecked() const
+  {
+    return m_ui.subtractCheckbox->isChecked();
+  }
+
   boost::optional< std::pair<double,double> > ALCDataLoadingView::timeRange() const
   {
     if (m_ui.timeLimit->isChecked())
@@ -118,6 +149,20 @@ namespace CustomInterfaces
     for (auto it = logs.begin(); it != logs.end(); ++it)
     {
       m_ui.log->addItem(QString::fromStdString(*it));
+    }
+  }
+
+  void ALCDataLoadingView::setAvailablePeriods(const std::vector<std::string>& periods)
+  {
+    // Clear previous list
+    m_ui.redPeriod->clear();
+    m_ui.greenPeriod->clear();
+
+    // Add new items
+    for (auto it=periods.begin(); it!=periods.end(); ++it)
+    {
+      m_ui.redPeriod->addItem(QString::fromStdString(*it));
+      m_ui.greenPeriod->addItem(QString::fromStdString(*it));
     }
   }
 

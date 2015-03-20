@@ -309,6 +309,7 @@ public:
     LoadMuonNexus1 alg2;
 
     const std::string deadTimeWSName = "LoadMuonNexus1Test_DeadTimes";
+    const std::string groupingWSName = "LoadMuonNexus1Test_Grouping";
 
     // Execute alg1
     // It will only load some spectra
@@ -320,6 +321,7 @@ public:
     alg1.setPropertyValue("SpectrumMin", "5");
     alg1.setPropertyValue("SpectrumMax", "10");
     alg1.setPropertyValue("DeadTimeTable", deadTimeWSName);
+    alg1.setPropertyValue("DetectorGroupingTable", groupingWSName);
     TS_ASSERT_THROWS_NOTHING(alg1.execute());    
     TS_ASSERT( alg1.isExecuted() );    
     // Get back the saved workspace
@@ -376,7 +378,24 @@ public:
     TS_ASSERT_DELTA( deadTimeTable->Double(6,1), 0.00254914, 0.00000001 );
     AnalysisDataService::Instance().remove(deadTimeWSName);
 
-
+    // Check detector grouping table
+    TableWorkspace_sptr groupingTable;
+    TS_ASSERT_THROWS_NOTHING( groupingTable =
+      AnalysisDataService::Instance().retrieveWS<TableWorkspace>( groupingWSName ) );
+    TS_ASSERT( groupingTable );
+    // Check number of rows and columns
+    TS_ASSERT_EQUALS( groupingTable->columnCount(), 1);
+    TS_ASSERT_EQUALS( groupingTable->rowCount(), 2);
+    // Check grouping
+    std::vector<int> testVec;
+    for (int i=5; i<11; i++)
+      testVec.push_back(i);
+    TS_ASSERT_EQUALS( groupingTable->cell<std::vector<int>>(0,0), testVec );
+    testVec.clear();
+    testVec.push_back(29);
+    testVec.push_back(31);
+    TS_ASSERT_EQUALS( groupingTable->cell<std::vector<int>>(1,0), testVec );
+    AnalysisDataService::Instance().remove(groupingWSName);
   }
 
   void test_loadingDeadTimes_singlePeriod()

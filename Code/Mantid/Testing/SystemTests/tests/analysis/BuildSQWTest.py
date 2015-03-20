@@ -1,7 +1,8 @@
+#pylint: disable=invalid-name
 """
     Defines a system test for converting a set of reduced direct inelastic data
     to a single SQW file.
-    
+
     The test requires as input the set of reduced files, which are ~16Gb along with
     the result file that is ~30Gb. The files are not included with the standard
     repository & required to be accessible from any machine that wishes to run the test.
@@ -102,14 +103,14 @@ class BuildSQWTest(stresstesting.MantidStressTest):
                 os.remove(filename)
             except OSError,exc:
                 mantid.logger.warning("Unable to remove created file '%s'" % filename)
-                
+
 class LoadSQW_FileBasedTest(BuildSQWTest):
     """ The test checks loading MD workspace from SQW file when target file is file based"""
-    
+
     def __init__(self):
 
         self._input_data = ["Test22meV2f.sqw","Test22meVMD.nxs"]
-    
+
     def runTest(self):
 
         MDws_file = os.path.join(config["defaultsave.directory"],"LoadSQWTestFileBased.nxs")
@@ -117,41 +118,41 @@ class LoadSQW_FileBasedTest(BuildSQWTest):
 
         wsMD=LoadSQW(Filename=sqw_file, OutputFilename=MDws_file)
 
-        self._created_files=MDws_file;
+        self._created_files=MDws_file
 
 
     def validate(self):
-      """Compare file-based MD files """
-      ref_file = os.path.join(self._input_location, self._input_data[1])
-      Reference=LoadMD(Filename=ref_file, FileBackEnd=True, Memory=100)
-      rez = CompareMDWorkspaces(Workspace1="wsMD",Workspace2=Reference,Tolerance=1.e-5,CheckEvents=False,IgnoreBoxID=False)
+        """Compare file-based MD files """
+        ref_file = os.path.join(self._input_location, self._input_data[1])
+        Reference=LoadMD(Filename=ref_file, FileBackEnd=True, Memory=100)
+        rez = CompareMDWorkspaces(Workspace1="wsMD",Workspace2=Reference,Tolerance=1.e-5,CheckEvents=False,IgnoreBoxID=False)
 
-      DeleteWorkspace("wsMD");
+        DeleteWorkspace("wsMD")
 
-      return rez[0];
+        return rez[0]
 
 class LoadSQW_MemBasedTest(BuildSQWTest):
     """ The test checks loading MD workspace from SQW file when target file is file based"""
-    
+
     def __init__(self):
 
         self._input_data = ["Test22meV2f.sqw","Test22meVMD.nxs"]
-    
+
     def runTest(self):
 
         sqw_file = os.path.join(self._input_location,self._input_data[0])
 
         wsMD=LoadSQW(Filename=sqw_file)
 
-        self._created_files=[];
+        self._created_files=[]
 
 
     def validate(self):
-      """Compare memory-based vs file based MD workspaces """
-      ref_file = os.path.join(self._input_location, self._input_data[1])
-      Reference=LoadMD(Filename=ref_file, FileBackEnd=True, Memory=100)
-      rez = CompareMDWorkspaces(Workspace1="wsMD",Workspace2=Reference,Tolerance=1.e-5,CheckEvents=False,IgnoreBoxID=False)
+        """Compare memory-based vs file based MD workspaces """
+        ref_file = os.path.join(self._input_location, self._input_data[1])
+        Reference=LoadMD(Filename=ref_file, FileBackEnd=True, Memory=100)
+        rez = CompareMDWorkspaces(Workspace1="wsMD",Workspace2=Reference,Tolerance=1.e-5,CheckEvents=False,IgnoreBoxID=False)
 
-      DeleteWorkspace("wsMD");
+        DeleteWorkspace("wsMD")
 
-      return rez[0];
+        return rez[0];

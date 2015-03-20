@@ -124,7 +124,7 @@ public:
   double getValueByColName(const std::string &name) const;
 
   /// Get the peak shape.
-  const Mantid::Geometry::PeakShape& getPeakShape();
+  const Mantid::Geometry::PeakShape& getPeakShape() const;
 
   /// Set the PeakShape
   void setPeakShape(Mantid::Geometry::PeakShape* shape);

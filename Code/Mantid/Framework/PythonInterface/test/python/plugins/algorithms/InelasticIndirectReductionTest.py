@@ -11,8 +11,7 @@ class InelasticIndirectReductionTest(unittest.TestCase):
                                    Instrument='IRIS',
                                    Analyser='graphite',
                                    Reflection='002',
-                                   DetectorRange=[3, 53],
-                                   SaveFormats=['nxs'])
+                                   DetectorRange=[3, 53])
 
         reduction_workspace = mtd['IndirectReductions'].getItem(0)
         self.assertEquals(reduction_workspace.getName(), 'irs26176_graphite002_red')

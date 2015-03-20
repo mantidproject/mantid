@@ -220,7 +220,7 @@ namespace
     bpl::ssize_t nitems = boost::python::len(rowItems);
     if( nitems != static_cast<bpl::ssize_t>(self.columnCount()) )
     {
-      throw std::invalid_argument("Number of values given does not match the number of columns.");
+      throw std::invalid_argument("Number of values given does not match the number of columns. Expected: " + boost::lexical_cast<std::string>(self.columnCount()));
     }
     const int rowIndex = static_cast<int>(self.rowCount());
     TableRow newRow = self.appendRow();
@@ -264,7 +264,7 @@ namespace
     bpl::ssize_t nitems = boost::python::len(rowItems);
     if( nitems != static_cast<bpl::ssize_t>(self.columnCount()) )
     {
-      throw std::invalid_argument("Number of values given does not match the number of columns.");
+      throw std::invalid_argument("Number of values given does not match the number of columns. Expected: " + boost::lexical_cast<std::string>(self.columnCount()));
     }
     const int rowIndex = static_cast<int>(self.rowCount());
     TableRow newRow = self.appendRow();

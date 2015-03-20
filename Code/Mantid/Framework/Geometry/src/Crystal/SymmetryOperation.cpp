@@ -9,7 +9,8 @@ namespace Geometry {
 
 /// Default constructor, results in identity.
 SymmetryOperation::SymmetryOperation()
-    : m_order(1), m_matrix(Kernel::IntMatrix(3, 3, true)), m_vector(),
+    : m_order(1), m_matrix(Kernel::IntMatrix(3, 3, true)),
+      m_inverseMatrix(Kernel::IntMatrix(3, 3, true)), m_vector(),
       m_identifier() {
   m_identifier = SymmetryOperationSymbolParser::getNormalizedIdentifier(
       m_matrix, m_vector);
@@ -42,13 +43,15 @@ SymmetryOperation::SymmetryOperation(const Kernel::IntMatrix &matrix,
 /// Copy-constructor
 SymmetryOperation::SymmetryOperation(const SymmetryOperation &other)
     : m_order(other.m_order), m_matrix(other.m_matrix),
-      m_vector(other.m_vector), m_identifier(other.m_identifier) {}
+      m_inverseMatrix(other.m_inverseMatrix), m_vector(other.m_vector),
+      m_identifier(other.m_identifier) {}
 
 /// Assignment operator
 SymmetryOperation &SymmetryOperation::
 operator=(const SymmetryOperation &other) {
   m_order = other.m_order;
   m_matrix = other.m_matrix;
+  m_inverseMatrix = other.m_inverseMatrix;
   m_vector = other.m_vector;
   m_identifier = other.m_identifier;
 
@@ -59,6 +62,12 @@ operator=(const SymmetryOperation &other) {
 void SymmetryOperation::init(const Kernel::IntMatrix &matrix,
                              const V3R &vector) {
   m_matrix = matrix;
+
+  // Inverse matrix for HKL operations.
+  m_inverseMatrix = Kernel::IntMatrix(matrix);
+  m_inverseMatrix.Invert();
+  m_inverseMatrix = m_inverseMatrix.Transpose();
+
   m_vector = getWrappedVector(vector);
 
   m_order = getOrderFromMatrix(m_matrix);
@@ -93,6 +102,20 @@ bool SymmetryOperation::isIdentity() const {
 
 /// Returns true if the operation has a translational component.
 bool SymmetryOperation::hasTranslation() const { return m_vector != 0; }
+
+/**
+ * Transforms an index triplet hkl
+ *
+ * Unlike coordinates, hkls are transformed using the inverse transformation
+ * matrix, as detailed in the footnote on ITA, page 766.
+ * This method performs the multiplication with the transposed matrix.
+ *
+ * @param hkl :: HKL index triplet to transform
+ * @return :: Transformed index triplet.
+ */
+Kernel::V3D SymmetryOperation::transformHKL(const Kernel::V3D &hkl) const {
+  return m_inverseMatrix * hkl;
+}
 
 /**
  * Multiplication operator for combining symmetry operations

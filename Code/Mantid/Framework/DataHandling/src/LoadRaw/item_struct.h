@@ -20,6 +20,8 @@ public:
         : value(v), det_average(da), dim0(d0), dim1(d1) {}
   };
 
+  item_struct() : m_items(), m_spec_array(NULL), m_ndet(0) {};
+  
 private:
   typedef std::map<std::string, item_t>
       items_map_t;             ///<Type def of internal map of named items
@@ -68,8 +70,7 @@ public:
               T *lVal);
   int getArrayItemSize(const std::string &item_name, int *dims_array,
                        int &ndims);
-  int getArrayItem(const std::string &item_name, long *spec_array, int nspec,
-                   T *larray);
+  int getArrayItem(const std::string &item_name, int nspec, T *larray);
   int getArrayItem(const std::string &item_name, T *larray);
 };
 
