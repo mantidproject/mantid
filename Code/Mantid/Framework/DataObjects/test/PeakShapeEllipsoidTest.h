@@ -9,7 +9,7 @@
 #include "MantidKernel/Matrix.h"
 #include <vector>
 #include <boost/assign/list_of.hpp>
-#include <jsoncpp/json/json.h>
+#include <json/json.h>
 
 using Mantid::DataObjects::PeakShapeEllipsoid;
 using Mantid::Kernel::SpecialCoordinateSystem;
