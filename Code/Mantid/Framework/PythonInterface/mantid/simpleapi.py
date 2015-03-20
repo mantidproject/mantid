@@ -263,13 +263,46 @@ def CutMD(*args, **kwargs):
     Description TODO
     """
     (in_wss,) = _get_mandatory_args('CutMD', ["InputWorkspace"], *args, **kwargs)
+
+    # If the input isn't a list, wrap it in one so we can iterate easily
+    if isinstance(in_wss, list):
+        in_list = in_wss
+        handling_multiple_workspaces = True
+    else:
+        in_list = [in_wss]
+        handling_multiple_workspaces = False
+
     # Remove from keywords so it is not set twice
     if "InputWorkspace" in kwargs:
         del kwargs['InputWorkspace']
 
-    # Create and execute
-    algm = _create_algorithm_object('CutMD')
-    _set_logging_option(algm, kwargs)
+    #Make sure we were given some output workspace names
+    lhs = _kernel.funcreturns.lhs_info()
+    if lhs[0] == 0 and 'OutputWorkspace' not in kwargs:
+        raise RuntimeError("Unable to set output workspace name. Please either assign the output of "
+                           "CutMD to a variable or use the OutputWorkspace keyword.")
+
+    #Take what we were given
+    if "OutputWorkspace" in kwargs:
+        out_names = kwargs["OutputWorkspace"]
+        print "taking from kwargs"
+    else:
+        out_names = list(lhs[1])
+        print "taking from lhs: " + str(out_names)
+
+    #Ensure the output names we were given are valid
+    if handling_multiple_workspaces:
+        if not isinstance(out_names, list):
+            raise RuntimeError("Multiple OutputWorkspaces must be given as a list when processing multiple InputWorkspaces.")
+    else:
+        #We wrap in a list for our convenience. The user musn't pass us one though.
+        if not isinstance(out_names, list):
+            out_names = [out_names]
+        elif len(out_names) != 1:
+            raise RuntimeError("Only one OutputWorkspace required")
+
+    if len(out_names) != len(in_list):
+        raise RuntimeError("Different number of input and output workspaces given.")
 
     # Split PBins up into P1Bin, P2Bin, etc.
     if "PBins" in kwargs:
@@ -279,44 +312,29 @@ def CutMD(*args, **kwargs):
             for bin in range(len(bins)):
                 kwargs["P{0}Bin".format(bin+1)] = bins[bin]
 
+    # Create and execute
+    algm = _create_algorithm_object('CutMD')
+    _set_logging_option(algm, kwargs)
 
-    # If it's not a list, wrap it in one to allow simple iteration anyway
-    if isinstance(in_wss, list):
-        in_list = in_wss
-        output_list = True
-    else:
-        in_list = [in_wss]
-        output_list = False
+    # Now check that all the kwargs we've got are correct
+    for key in kwargs.keys():
+        if key not in algm:
+            raise RuntimeError("Unknown property: {0}".format(key))
 
-    lhs = _kernel.funcreturns.lhs_info()
-    if lhs[0] == 0 and 'OutputWorkspace' not in kwargs:
-        raise RuntimeError("Unable to set output workspace name. Please either assign the output of "
-                           "CutMD to a variable or use the OutputWorkspace keyword.")
-
-    to_process = list() #List of workspaces to process
-    out_names = list() #List of what to call the output workspaces
+    # We're now going to build to_process, which is the list of workspaces we want to process.
+    to_process = list()
     for i in range(len(in_list)):
         ws = in_list[i]
-        #Get the lhs variable name if we can
-        if i + 1 <= lhs[0]:
-            lhs_name = lhs[1][i]
-        else:
-            lhs_name = None
 
         if isinstance(ws, _api.Workspace):
+            #It's a workspace, do nothing to it
             to_process.append(ws)
-            if lhs_name:
-                out_names.append(lhs_name)
-            else:
-                out_names.append(ws.name() + "_cut")
         elif isinstance(ws, str):
             if ws in mtd:
+                #It's a name of something in the ads, just take it from the ads
                 to_process.append(_api.AnalysisDataService[ws])
-                if lhs_name:
-                    out_names.append(lhs_name)
-                else:
-                    out_names.append(ws + "_cut")
             else:
+                #Let's try treating it as a filename
                 load_alg = AlgorithmManager.create("Load")
                 load_alg.setLogging(True)
                 load_alg.setAlwaysStoreInADS(False)
@@ -327,41 +345,21 @@ def CutMD(*args, **kwargs):
                     raise TypeError("Failed to load " + ws)
                 wsn = load_alg.getProperty("OutputWorkspace").valueAsStr
                 to_process.append(_api.AnalysisDataService[wsn])
-                if lhs_name:
-                    out_names.append(lhs_name)
-                else:
-                    #Figure out a name for this loaded workspace
-                    out_name = os.path.basename(ws) #remove any path elements
-                    out_name = os.path.splitext(out_name)[0] #remove extension
-                    allowed_chars = string.letters + string.digits + "_"
-                    out_name = ''.join(c for c in out_name if c in allowed_chars) #remove disallowed characters
-                    out_names.append(out_name)
         else:
             raise TypeError("Unexpected type: " + type(ws))
 
-    for key in kwargs.keys():
-        if key.startswith('InputWorkspace_'):
-            algm.setProperty(key, kwargs[key])
-            del kwargs[key]
-
-    lhs_args = _get_args_from_lhs(lhs, algm)
-    final_keywords = _merge_keywords_with_lhs(kwargs, lhs_args)
-
-    for key in final_keywords.keys():
-        if key not in algm:
-            raise RuntimeError("Unknown property: {0}".format(key))
-
+    #Run the algorithm across the inputs and outputs
     for i in range(len(to_process)):
-        _set_properties(algm, **final_keywords)
+        _set_properties(algm, **kwargs)
         algm.setProperty('InputWorkspace', to_process[i])
         algm.setProperty('OutputWorkspace', out_names[i])
         algm.execute()
 
-    #If we only returned one workspace, don't bother wrapping it in a list
-    if output_list:
+    #We should only return a list if we're handling multiple workspaces
+    if handling_multiple_workspaces:
         return out_names
     else:
-        return algm.getProperty("OutputWorkspace")
+        return out_names[0]
 
 # Have a better load signature for autocomplete
 _signature = "\bInputWorkspace"
