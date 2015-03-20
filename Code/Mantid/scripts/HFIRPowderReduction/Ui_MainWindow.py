@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file 'Ui_MainWindow.ui'
 #
-# Created: Wed Mar 18 16:45:01 2015
-#      by: PyQt4 UI code generator 4.11.2
+# Created: Fri Mar 20 14:22:40 2015
+#      by: PyQt4 UI code generator 4.10.4
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -23,6 +23,7 @@ except AttributeError:
     def _translate(context, text, disambig):
         return QtGui.QApplication.translate(context, text, disambig)
 
+from MplFigureCanvas import *
 from MplFigureCanvas import *
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
@@ -221,7 +222,7 @@ class Ui_MainWindow(object):
         self.checkBox_clearPrevious = QtGui.QCheckBox(self.tab)
         self.checkBox_clearPrevious.setObjectName(_fromUtf8("checkBox_clearPrevious"))
         self.horizontalLayout_3.addWidget(self.checkBox_clearPrevious)
-        spacerItem7 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Preferred, QtGui.QSizePolicy.Minimum)
+        spacerItem7 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
         self.horizontalLayout_3.addItem(spacerItem7)
         self.verticalLayout_2.addLayout(self.horizontalLayout_3)
         self.horizontalLayout_6 = QtGui.QHBoxLayout()
@@ -244,7 +245,7 @@ class Ui_MainWindow(object):
         self.lineEdit_detExcluded.setMinimumSize(QtCore.QSize(300, 0))
         self.lineEdit_detExcluded.setObjectName(_fromUtf8("lineEdit_detExcluded"))
         self.horizontalLayout_6.addWidget(self.lineEdit_detExcluded)
-        spacerItem8 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Preferred, QtGui.QSizePolicy.Minimum)
+        spacerItem8 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
         self.horizontalLayout_6.addItem(spacerItem8)
         self.verticalLayout_2.addLayout(self.horizontalLayout_6)
         self.horizontalLayout_5 = QtGui.QHBoxLayout()
@@ -369,12 +370,12 @@ class Ui_MainWindow(object):
         self.label_10 = QtGui.QLabel(self.tab_merge)
         self.label_10.setObjectName(_fromUtf8("label_10"))
         self.horizontalLayout_19.addWidget(self.label_10)
-        self.lineEdit_3 = QtGui.QLineEdit(self.tab_merge)
-        self.lineEdit_3.setObjectName(_fromUtf8("lineEdit_3"))
-        self.horizontalLayout_19.addWidget(self.lineEdit_3)
-        self.pushButton = QtGui.QPushButton(self.tab_merge)
-        self.pushButton.setObjectName(_fromUtf8("pushButton"))
-        self.horizontalLayout_19.addWidget(self.pushButton)
+        self.lineEdit_exclScans = QtGui.QLineEdit(self.tab_merge)
+        self.lineEdit_exclScans.setObjectName(_fromUtf8("lineEdit_exclScans"))
+        self.horizontalLayout_19.addWidget(self.lineEdit_exclScans)
+        self.pushButton_mergeScans = QtGui.QPushButton(self.tab_merge)
+        self.pushButton_mergeScans.setObjectName(_fromUtf8("pushButton_mergeScans"))
+        self.horizontalLayout_19.addWidget(self.pushButton_mergeScans)
         spacerItem12 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
         self.horizontalLayout_19.addItem(spacerItem12)
         self.verticalLayout_merge.addLayout(self.horizontalLayout_19)
@@ -644,7 +645,7 @@ class Ui_MainWindow(object):
         self.gridLayout.addLayout(self.verticalLayout, 0, 0, 1, 1)
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtGui.QMenuBar(MainWindow)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 1115, 25))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 1115, 22))
         self.menubar.setObjectName(_fromUtf8("menubar"))
         self.menuFile = QtGui.QMenu(self.menubar)
         self.menuFile.setObjectName(_fromUtf8("menuFile"))
@@ -700,6 +701,7 @@ class Ui_MainWindow(object):
         self.comboBox_wavelength.setItemText(3, _translate("MainWindow", "User Specified", None))
         self.label_outputFormat.setText(_translate("MainWindow", "Save As", None))
         self.pushButton_saveData.setText(_translate("MainWindow", "Save", None))
+        self.tabWidget.setToolTip(_translate("MainWindow", "<html><head/><body><p>Question about use case of tab\'Raw Detectors\': What do you want to see?</p><p>1. single detector\'s counts in all Pt.? </p><p>&gt; what is the X-axis? Pt. or 2theta? </p><p>2. all detectors\' counts in one Pt.?</p><p>&gt; what is the X-axis? Det no or 2theta? </p></body></html>", None))
         self.label_ptNo.setText(_translate("MainWindow", "Pt.", None))
         self.label_detNo.setText(_translate("MainWindow", "Detector ", None))
         self.pushButton_plotRaw.setText(_translate("MainWindow", "Plot Raw Detector", None))
@@ -720,10 +722,13 @@ class Ui_MainWindow(object):
         self.pushButton_unitD.setText(_translate("MainWindow", "dSpacing", None))
         self.pushButton_unitQ.setText(_translate("MainWindow", "Q", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab), _translate("MainWindow", "Normalized", None))
+        self.label_8.setToolTip(_translate("MainWindow", "<html><head/><body><p>Starting scan number</p></body></html>", None))
         self.label_8.setText(_translate("MainWindow", "From", None))
+        self.label_9.setToolTip(_translate("MainWindow", "<html><head/><body><p>Last scan number included </p></body></html>", None))
         self.label_9.setText(_translate("MainWindow", "To", None))
+        self.label_10.setToolTip(_translate("MainWindow", "<html><head/><body><p>Scan numbers that are excluded from merging beween \'from\' and \'to\'</p></body></html>", None))
         self.label_10.setText(_translate("MainWindow", "Excluded Scans", None))
-        self.pushButton.setText(_translate("MainWindow", "Merge", None))
+        self.pushButton_mergeScans.setText(_translate("MainWindow", "Merge", None))
         self.label_6.setText(_translate("MainWindow", "Message", None))
         self.pushButton_viewMerge.setText(_translate("MainWindow", "View Merged", None))
         self.pushButton_view2D.setText(_translate("MainWindow", "View 2D", None))

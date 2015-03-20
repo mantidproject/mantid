@@ -15,6 +15,8 @@ def main(argv):
 
     # import 
     pfilename = argv[1]
+    if pfilename.endswith('.') is True:
+        pfilename += "py"
     try:
         pfile = open(pfilename, 'r')
         lines = pfile.readlines()

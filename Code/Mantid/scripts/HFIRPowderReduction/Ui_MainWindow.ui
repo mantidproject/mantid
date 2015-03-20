@@ -149,6 +149,9 @@
             <verstretch>0</verstretch>
            </sizepolicy>
           </property>
+          <property name="toolTip">
+           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Question about use case of tab'Raw Detectors': What do you want to see?&lt;/p&gt;&lt;p&gt;1. single detector's counts in all Pt.? &lt;/p&gt;&lt;p&gt;&amp;gt; what is the X-axis? Pt. or 2theta? &lt;/p&gt;&lt;p&gt;2. all detectors' counts in one Pt.?&lt;/p&gt;&lt;p&gt;&amp;gt; what is the X-axis? Det no or 2theta? &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          </property>
           <property name="currentIndex">
            <number>2</number>
           </property>
@@ -429,7 +432,7 @@
                    <enum>Qt::Horizontal</enum>
                   </property>
                   <property name="sizeType">
-                   <enum>QSizePolicy::Preferred</enum>
+                   <enum>QSizePolicy::Expanding</enum>
                   </property>
                   <property name="sizeHint" stdset="0">
                    <size>
@@ -484,7 +487,7 @@
                    <enum>Qt::Horizontal</enum>
                   </property>
                   <property name="sizeType">
-                   <enum>QSizePolicy::Preferred</enum>
+                   <enum>QSizePolicy::Expanding</enum>
                   </property>
                   <property name="sizeHint" stdset="0">
                    <size>
@@ -685,6 +688,9 @@
                <layout class="QHBoxLayout" name="horizontalLayout_19">
                 <item>
                  <widget class="QLabel" name="label_8">
+                  <property name="toolTip">
+                   <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Starting scan number&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                  </property>
                   <property name="text">
                    <string>From</string>
                   </property>
@@ -702,6 +708,9 @@
                 </item>
                 <item>
                  <widget class="QLabel" name="label_9">
+                  <property name="toolTip">
+                   <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Last scan number included &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                  </property>
                   <property name="text">
                    <string>To</string>
                   </property>
@@ -719,16 +728,19 @@
                 </item>
                 <item>
                  <widget class="QLabel" name="label_10">
+                  <property name="toolTip">
+                   <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Scan numbers that are excluded from merging beween 'from' and 'to'&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+                  </property>
                   <property name="text">
                    <string>Excluded Scans</string>
                   </property>
                  </widget>
                 </item>
                 <item>
-                 <widget class="QLineEdit" name="lineEdit_3"/>
+                 <widget class="QLineEdit" name="lineEdit_exclScans"/>
                 </item>
                 <item>
-                 <widget class="QPushButton" name="pushButton">
+                 <widget class="QPushButton" name="pushButton_mergeScans">
                   <property name="text">
                    <string>Merge</string>
                   </property>
@@ -1352,7 +1364,7 @@
      <x>0</x>
      <y>0</y>
      <width>1115</width>
-     <height>25</height>
+     <height>22</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">

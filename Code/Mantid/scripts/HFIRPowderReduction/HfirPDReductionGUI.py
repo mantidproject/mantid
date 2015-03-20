@@ -144,7 +144,10 @@ class MainWindow(QtGui.QMainWindow):
                 self.doSaveVanRun)
 
         self.connect(self.ui.pushButton_rebinD, QtCore.SIGNAL('clicked()'),
-                self.doRebinDspace)
+                self.doRebinD)
+                
+        self.connect(self.ui.pushButton_mergeScans, QtCore.SIGNAL('clicked()'),
+                self.doMergeScans)
 
         # Define signal-event handling
 
@@ -203,9 +206,7 @@ class MainWindow(QtGui.QMainWindow):
         self.ui.lineEdit_scanEnd.setValidator(validator12)
 
         # TODO - Add valdiators
-        """ 
-        lineEdit_scanStart
-        """
+
         # Get initial setup
         self._initSetup()
 
@@ -431,6 +432,35 @@ class MainWindow(QtGui.QMainWindow):
         self.close()
 
         return
+        
+        
+    def doMergeScans(self):
+        """ Merge several scans 
+        for tab 'merge'
+        """
+        # get inputs
+        try:
+            startscan = int(self.ui.lineEdit_scanStart.text())
+            endscan = int(self.ui.lineEdit_scanEnd.text())
+        except ValueError as e:
+            self._logError("For merging scans, both starting scan number and \
+                end scan number must be given.")
+            return
+        
+        excludedlist = self._getIntArray(str(self.ui.lineEdit_exclScans.text()))
+        if isinstance(excludedlist, str):
+            self._logError(excludedlist)
+            return
+            
+        scanslist = range(startscan, endscan+1)
+        for scan in excludedlist:
+            scanslist.remove(scan)
+        
+        mergedws, wsgroup = self._mergeReduceScans(scanslist)
+        
+        self._plotMergeReductionScans(ws=mergedws, view='merge')
+        
+        return
 
 
     def doPlot2Theta(self):
@@ -496,6 +526,7 @@ class MainWindow(QtGui.QMainWindow):
     def doPlotCurrentRawDet(self):
         """ Plot current raw detector signals
         """
+        # Plot specified raw detectors
         ptstr = str(self.ui.lineEdit_ptNo.text())
         detstr = str(self.ui.lineEdit_detNo.text())
         if len(ptstr) == 0 or len(detstr) == 0:
@@ -617,7 +648,8 @@ class MainWindow(QtGui.QMainWindow):
 
 
     def doRebinD(self):
-        """
+        """ Rebin MDEventWorkspaces in d-Spacing. for pushButton_rebinD
+        in vanadium peak strip tab
         """
         dminstr = str(self.ui.lineEdit_minD.text()).strip()  
         dmaxstr = str(self.ui.lineEdit_maxD.text()).strip()     
@@ -636,7 +668,7 @@ class MainWindow(QtGui.QMainWindow):
             self._logError("Bin size in d-spacing must be specified!")
             return
         else:
-            binsize = float(dbinsizestr):w
+            binsize = float(dbinsizestr)
 
         # rebin
         self._rebin('dSpacing', dmin, binsize, dmax)
@@ -858,6 +890,15 @@ class MainWindow(QtGui.QMainWindow):
         self._myCurrentUnit = unit
         
         return True
+        
+                
+    def _PlotRawDet(self):
+        """ Plot the counts of one detector of a certain Pt. in an experiment
+        """
+        # FIXME - The use case is not determined.  Take a look at the help hint of this tab
+        
+        vecx, vecy = self._getDetCounts()
+
 
 
     def _plotReducedData(self, targetunit, spectrum, clearcanvas):
@@ -1044,8 +1085,57 @@ class MainWindow(QtGui.QMainWindow):
         return (True, "")
 
 
-    def _plotRawDetSignal(self, ptno, detno):
-        """ Retrieve and plot raw detector signal 
+    def _getIntArray(self, intliststring):
+        """ Validate whether the string can be divided into integer strings.
+        Allowed: a, b, c-d, e, f
         """
-        # TODO - Implement ASAP
+        intliststring = str(intliststring)
+        if intliststring == "":
+            return (True, "")
 
+        # Split by ","
+        termlevel0s = intliststring.split(",")
+        
+        intlist = []
+
+        # For each term
+        for level0term in termlevel0s:
+            level0term = level0term.strip()
+            
+            # split upon dash -
+            numdashes = level0term.count("-")
+            if numdashes == 0:
+                # one integer
+                valuestr = level0term
+                try:
+                    intvalue = int(valuestr)
+                    if str(intvalue) != valuestr:
+                        return "Contains non-integer string %s." % (valuestr)
+                except ValueError:
+                    return "String %s is not an integer." % (valuestr)
+                else:
+                    intlist.append(intvalue)
+
+            elif numdashes == 1:
+                # Integer range
+                twoterms = level0term.split("-")
+                templist = []
+                for i in xrange(2):
+                    valuestr = twoterms[i] 
+                    try:
+                        intvalue = int(valuestr)
+                        if str(intvalue) != valuestr:
+                            return "Contains non-integer string %s." % (valuestr)
+                    except ValueError:
+                        return "String %s is not an integer." % (valuestr)
+                    else:
+                        templist.append(intvalue)
+                # ENDFOR
+                intlist.extend(range(templist[0], templist[1]+1))
+
+            else:
+                # Undefined siutation
+                return "Term %s contains more than 1 dash." % (level0terms)
+        # ENDFOR
+
+        return intlist
