@@ -6,6 +6,7 @@
 #include "MantidMDEvents/MDHistoWorkspace.h"
 #include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
 #include "MantidMDEvents/SkippingPolicy.h"
+#include <set>
 
 namespace Mantid {
 namespace MDEvents {
@@ -108,6 +109,8 @@ public:
   std::vector<size_t> findNeighbourIndexes() const;
 
   std::vector<size_t> findNeighbourIndexesFaceTouching() const;
+
+  std::vector<size_t> findNeighbourIndexesByWidth(const int width) const;
 
   virtual bool isWithinBounds(size_t index) const;
 
