@@ -26,6 +26,7 @@ using namespace Mantid::API;
 namespace
 {
   Mantid::Kernel::Logger g_log("PreviewPlot");
+  bool isNegative(double v) { return v <= 0.0; }
 }
 
 
@@ -604,14 +605,14 @@ QwtPlotCurve * PreviewPlot::addCurve(MatrixWorkspace_sptr ws, const size_t specI
   {
     // Remove negative data in order to search for minimum positive value
     std::vector<double> validData(wsDataY.size());
-    auto it = std::remove_copy_if(wsDataY.begin(), wsDataY.end(), validData.begin(), [](double v){ return v<= 0.0; } );
+    auto it = std::remove_copy_if(wsDataY.begin(), wsDataY.end(), validData.begin(), isNegative);
     validData.resize(std::distance(validData.begin(), it));
 
     // Get minimum positive value
     double minY = *std::min_element(validData.begin(), validData.end());
 
     // Set all negative values to minimum positive value
-    std::replace_if(wsDataY.begin(), wsDataY.end(), [](double v){return v <= 0.0; }, minY);
+    std::replace_if(wsDataY.begin(), wsDataY.end(), isNegative, minY);
   }
 
   // Create the Qwt data
