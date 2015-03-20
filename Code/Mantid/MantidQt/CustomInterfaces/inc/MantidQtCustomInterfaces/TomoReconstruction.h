@@ -88,6 +88,7 @@ protected:
 
 private slots:
   void compResourceIndexChanged(int);
+  void runToolIndexChanged(int);
   void SCARFLoginClicked();
   void SCARFLogoutClicked();
 
@@ -122,6 +123,9 @@ private:
   void updateCompResourceStatus(bool online);
 
   void processPathBrowseClick(QLineEdit *le, std::string &data);
+
+  /// Show a tool specific configuration dialog
+  void showToolConfig(const std::string &name);
 
   /// Load default interface settings for each tab
   void loadSettings();
