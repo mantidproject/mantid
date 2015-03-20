@@ -23,6 +23,7 @@ set ( SRC_FILES
 	src/ConvertToMDParent.cpp
 	src/CreateMDHistoWorkspace.cpp
 	src/CreateMDWorkspace.cpp
+	src/CutMD.cpp
 	src/DivideMD.cpp
 	src/EqualToMD.cpp
 	src/EvaluateMDFunction.cpp
@@ -107,6 +108,7 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/ConvertToMDParent.h
 	inc/MantidMDAlgorithms/CreateMDHistoWorkspace.h
 	inc/MantidMDAlgorithms/CreateMDWorkspace.h
+	inc/MantidMDAlgorithms/CutMD.h
 	inc/MantidMDAlgorithms/DivideMD.h
 	inc/MantidMDAlgorithms/DllConfig.h
 	inc/MantidMDAlgorithms/EqualToMD.h
