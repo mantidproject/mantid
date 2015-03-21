@@ -351,7 +351,7 @@ V3D Matrix<T>::operator*(const V3D &Vx) const
   @return Matrix(This * A)
 */
 {
-  if (ny != 3)
+  if (ny != 3 || nx > 3)
     throw Kernel::Exception::MisMatch<size_t>(ny, 3, "Matrix::operator*(V3D)");
 
   V3D v;
