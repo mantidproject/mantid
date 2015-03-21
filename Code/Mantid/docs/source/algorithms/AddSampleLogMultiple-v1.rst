@@ -9,7 +9,7 @@
 Description
 -----------
 
-This algorithm provides a way of adding multiple sample log enteries to a
+This algorithm provides a way of adding multiple sample log entries to a
 workspace at once by making multiple calls to the :ref:`algm-AddSampleLog`
 algorithm.
 
