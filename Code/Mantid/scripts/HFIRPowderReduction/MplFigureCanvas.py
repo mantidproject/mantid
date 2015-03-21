@@ -63,6 +63,11 @@ class Qt4MplPlotView(QtGui.QWidget):
         self.vbox.addWidget(self.canvas)
         self.vbox.addWidget(self.toolbar)
         
+        # auto line's maker+color list
+        self._myLineMarkerColorList = []
+        self._myLineMarkerColorIndex = 0
+        self.setAutoLineMarkerColorCombo()
+        
         return
         
     def addPlot(self, x, y, color=None, label="", xlabel=None, ylabel=None, marker=None, linestyle=None, linewidth=1):
@@ -124,6 +129,35 @@ class Qt4MplPlotView(QtGui.QWidget):
         as default to add more and more line to plot
         """
         return self.canvas.getDefaultColorMarkerComboList()
+        
+    def getNextLineMarkerColorCombo(self):
+        """ As auto line's marker and color combo list is used,
+        get the NEXT marker/color combo
+        """
+        # get from list
+        marker, color = self._myLineMarkerColorList[self._myLineMarkerColorIndex]
+        # process marker if it has information
+        if marker.count(' (') > 0:
+            marker = marker.split(' (')[0]
+        print "[DB] Print line %d: marker = %s, color = %s" % (self._myLineMarkerColorIndex, marker, color)
+        
+        # update the index
+        self._myLineMarkerColorIndex += 1
+        if self._myLineMarkerColorIndex == len(self._myLineMarkerColorList):
+            self._myLineMarkerColorIndex = 0
+            
+        return (marker, color)
+        
+    def setAutoLineMarkerColorCombo(self):
+        """
+        """
+        self._myLineMarkerColorList = []
+        for marker in MplLineMarkers:
+            for color in MplBasicColors:
+                self._myLineMarkerColorList.append( (marker, color) )
+                
+        return
+
 
 
 class Qt4MplCanvas(FigureCanvas):
