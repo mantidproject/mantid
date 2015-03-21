@@ -438,6 +438,9 @@ public:
        TS_ASSERT_DELTA(nv.X(), -0.403000000000000, 1e-15);
        TS_ASSERT_DELTA(nv.Y(), 25.663000000000000, 1e-15);
        TS_ASSERT_EQUALS(nv.Z(), 0);
+
+       DblMatrix M43 = boost::lexical_cast<DblMatrix>("Matrix(4,3)-0.23,0.55,5.22,2.96,4.2,0.1,-0.23,0.55,5.22,2.96,4.2,0.1");
+       TS_ASSERT_THROWS(M43.operator *(v), Mantid::Kernel::Exception::MisMatch<size_t>);
    }
 
 private:
