@@ -1,10 +1,10 @@
 #ifndef MANTID_KERNEL_IREMOTEJOBMANAGER_H
 #define MANTID_KERNEL_IREMOTEJOBMANAGER_H
 
-#include "MantidKernel/DllConfig.h"
+#include "MantidAPI/DllConfig.h"
 
 namespace Mantid {
-namespace Kernel {
+namespace API {
 /**
 Common interface to different remote job managers (job schedulers, web
 services, etc. such as MOAB, Platform LSF, or SLURM).
@@ -63,7 +63,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class MANTID_KERNEL_DLL IRemoteJobManager {
+class MANTID_API_DLL IRemoteJobManager {
 public:
   virtual ~IRemoteJobManager(){};
 
@@ -271,7 +271,7 @@ public:
 // shared pointer type for the IRemoteJobManager
 typedef boost::shared_ptr<IRemoteJobManager> IRemoteJobManager_sptr;
 
-} // namespace Kernel
+} // namespace API
 } // namespace Mantid
 
 #endif // MANTID_KERNEL_IREMOTEJOBMANAGER_H
