@@ -1,6 +1,6 @@
 .. _Unit Factory:
 
-Unit_Factory
+Unit Factory
 ============
 
 What is it?
