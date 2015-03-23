@@ -338,11 +338,15 @@ class ReductionWrapper(object):
                 nruns = len(runfiles)
                 for num,file in enumerate(runfiles):
                     red_ws = self.reduce(file)
-                    if nruns > 1:
-                        out_name = out_ws_name + '#{0}of{1}'.format(num + 1,nruns)
-                        RenameWorkspace(InputWorkspace=red_ws,OutputWorkspace=out_name)
-                        red_ws = mtd[out_name]
-                    results.append(red_ws)
+                    if isinstance(red_ws,list):
+                        for ws in red_ws:
+                            results.append(ws)
+                    else:
+                        if nruns == 1:
+                            RenameWorkspace(InputWorkspace=red_ws,OutputWorkspace=out_ws_name)
+                            results.append(mtd[out_ws_name])
+                        else:
+                            results.append(red_ws)
                 #end
                 if len(results) == 1:
                     return results[0]
