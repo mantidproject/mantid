@@ -420,7 +420,9 @@ class DirectEnergyConversion(object):
             num_ei_cuts = len(self.incident_energy)
             if self.check_background:
                 # find the count rate seen in the regions of the histograms defined
-                # as the background regions, if the user defined such region
+                # as the background regions, if the user defined such region.
+                # This has to be done here, as workspace will be cut in chunks and bg regions --
+                # removed
                 ws_base = PropertyManager.sample_run.get_workspace()
                 bkgd_range = self.bkgd_range
                 bkgr_ws = self._find_or_build_bkgr_ws(ws_base,bkgd_range[0],bkgd_range[1])
@@ -838,7 +840,10 @@ class DirectEnergyConversion(object):
            workspace = PropertyManager.sample_run.get_workspace()
 
         spectra_id = self.prop_man.multirep_tof_specta_list
-        if not spectra_id:
+        if not spectra_id or len(spectra_id) == 0:
+            self.prop_man.log("*** WARNING! no mulitrep spectra found in IDF! using first existing spectra number\n"\
+                              "             This is wrong unless sample-detector distances of the instrument are all equal",\
+                              'warning')
             spectra_id = [1]
 
         eMin,dE,eMax = PropertyManager.energy_bins.get_abs_range(self.prop_man)
@@ -875,7 +880,7 @@ class DirectEnergyConversion(object):
            for given workspace and detectors.
 
            Input:
-           workspace    pointer to workspace with instrument attached.
+           workspace    handler for the workspace with instrument attached.
            energy_list  the list of input energies to process
            detID_list   list of detectors to find
            ei           incident energy. If present, TOF range is calculated in direct mode,
