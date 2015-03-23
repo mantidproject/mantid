@@ -71,8 +71,8 @@ std::vector<std::string> unitsFromProjection(ITableWorkspace_sptr projection) {
 }
 
 DblMatrix scaleProjection(const DblMatrix &inMatrix,
-                          std::vector<std::string> inUnits,
-                          std::vector<std::string> outUnits,
+                          const std::vector<std::string> &inUnits,
+                          const std::vector<std::string> &outUnits,
                           IMDEventWorkspace_sptr inWS) {
   DblMatrix ret(inMatrix);
   // Check if we actually need to do anything
@@ -108,7 +108,7 @@ DblMatrix scaleProjection(const DblMatrix &inMatrix,
 }
 
 std::vector<MinMax> calculateExtents(const DblMatrix &inMatrix,
-                                     std::vector<MinMax> limits) {
+                                     const std::vector<MinMax> &limits) {
   DblMatrix invMat(inMatrix);
   invMat.Invert();
 
