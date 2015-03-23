@@ -222,6 +222,10 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
                 CloneWorkspace(InputWorkspace=input_name,
                                OutputWorkspace=output_name)
 
+        # Group the temporary factor workspaces (for easy removal later)
+        GroupWorkspaces(InputWorkspaces=[self._corrections + '_' + f_type for f_type in factor_types],
+                        OutputWorkspace=self._corrections)
+
 
     def _subtract(self):
         """
