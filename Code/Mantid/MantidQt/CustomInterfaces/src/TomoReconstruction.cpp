@@ -17,8 +17,6 @@ using namespace Mantid::API;
 namespace MantidQt {
 namespace CustomInterfaces {
 DECLARE_SUBWINDOW(TomoReconstruction);
-} // namespace CustomInterfaces
-} // namespace MantidQt
 
 namespace {
 Mantid::Kernel::Logger g_log("TomoReconstruction");
@@ -49,6 +47,14 @@ private:
   QTreeWidgetItem *m_rootParent;
   std::string m_key;
 };
+
+TomoToolConfigTomoPy::TomoToolConfigTomoPy(QWidget *parent) : QDialog(parent) {}
+
+TomoToolConfigSavu::TomoToolConfigSavu(QWidget *parent) : QMainWindow(parent) {}
+
+TomoToolConfigAstra::TomoToolConfigAstra(QWidget *parent) : QDialog(parent) {}
+
+TomoToolConfigCustom::TomoToolConfigCustom(QWidget *parent) : QDialog(parent) {}
 
 using namespace MantidQt::CustomInterfaces;
 
@@ -115,13 +121,6 @@ void TomoReconstruction::doSetupSectionParameters() {
   loadAvailablePlugins();
   m_uiSavu.treeCurrentPlugins->setHeaderHidden(true);
 
-  // Connect slots
-  // Menu Items
-  connect(m_ui.actionOpen, SIGNAL(triggered()), this, SLOT(menuOpenClicked()));
-  connect(m_ui.actionSave, SIGNAL(triggered()), this, SLOT(menuSaveClicked()));
-  connect(m_ui.actionSaveAs, SIGNAL(triggered()), this,
-          SLOT(menuSaveAsClicked()));
-
   // Lists/trees
   connect(m_uiSavu.listAvailablePlugins, SIGNAL(itemSelectionChanged()), this,
           SLOT(availablePluginSelected()));
@@ -131,10 +130,19 @@ void TomoReconstruction::doSetupSectionParameters() {
           this, SLOT(expandedItem(QTreeWidgetItem *)));
 
   // Buttons
-  connect(m_uiSavu.btnTransfer, SIGNAL(released()), this, SLOT(transferClicked()));
+  connect(m_uiSavu.btnTransfer, SIGNAL(released()), this,
+          SLOT(transferClicked()));
   connect(m_uiSavu.btnMoveUp, SIGNAL(released()), this, SLOT(moveUpClicked()));
-  connect(m_uiSavu.btnMoveDown, SIGNAL(released()), this, SLOT(moveDownClicked()));
+  connect(m_uiSavu.btnMoveDown, SIGNAL(released()), this,
+          SLOT(moveDownClicked()));
   connect(m_uiSavu.btnRemove, SIGNAL(released()), this, SLOT(removeClicked()));
+
+  // Connect slots
+  // Menu Items
+  connect(m_ui.actionOpen, SIGNAL(triggered()), this, SLOT(menuOpenClicked()));
+  connect(m_ui.actionSave, SIGNAL(triggered()), this, SLOT(menuSaveClicked()));
+  connect(m_ui.actionSaveAs, SIGNAL(triggered()), this,
+          SLOT(menuSaveAsClicked()));
 }
 
 void TomoReconstruction::doSetupSectionSetup() {
@@ -217,7 +225,6 @@ void TomoReconstruction::initLayout() {
 
   loadSettings();
 
-  doSetupSectionParameters();
   doSetupSectionSetup();
   doSetupSectionRun();
 }
@@ -325,7 +332,7 @@ void TomoReconstruction::loadSavuTomoConfig(
     alg->execute();
   } catch (std::runtime_error &e) {
     throw std::runtime_error(
-        std::string("Error when trying to load tomography reconstruction "
+        std::string("Error when trying to load tomographic reconstruction "
                     "parameter file: ") +
         e.what());
   }
@@ -668,6 +675,7 @@ void TomoReconstruction::showToolConfig(const std::string &name) {
   } else if (m_SavuTool == name) {
     TomoToolConfigSavu savu;
     m_uiSavu.setupUi(&savu);
+    doSetupSectionParameters();
     savu.show();
   } else if (m_CustomCmdTool == name) {
     TomoToolConfigCustom cmd;
@@ -793,8 +801,15 @@ void TomoReconstruction::jobTableRefreshClicked() {
 
 void TomoReconstruction::browseImageClicked() {
   // get path
-  QString fitsStr = QString("FITS, Flexible Image Transport System images "
-                            "(*.fits *.fit);;Other extensions/all files (*.*)");
+  QString fitsStr = QString("Supported formats: FITS, TIFF and PNG "
+                            "(*.fits *.fit *.tiff *.tif *.png);;"
+                            "FITS, Flexible Image Transport System images "
+                            "(*.fits *.fit);;"
+                            "TIFF, Tagged Image File Format "
+                            "(*.tif *.tiff);;"
+                            "PNG, Portable Network Graphics "
+                            "(*.png);;"
+                            "Other extensions/all files (*.*)");
   // Note that this could be done using UserSubWindow::openFileDialog(),
   // but that method doesn't give much control over the text used for the
   // allowed extensions.
@@ -809,10 +824,67 @@ void TomoReconstruction::browseImageClicked() {
     return;
   }
 
+  QString suf = QFileInfo(path).suffix();
+  bool loaded = false;
+  // This is not so great, as we check extensions and not really file
+  // content/headers, as it should be.
+  if ((0 == QString::compare(suf, "fit", Qt::CaseInsensitive)) ||
+      (0 == QString::compare(suf, "fits", Qt::CaseInsensitive))) {
+    WorkspaceGroup_sptr wsg = loadFITSImage(path.toStdString());
+    if (!wsg)
+      return;
+    MatrixWorkspace_sptr ws =
+        boost::dynamic_pointer_cast<MatrixWorkspace>(wsg->getItem(0));
+    if (!ws)
+      return;
+    drawImage(ws);
+    loaded = true;
+    // clean-up container group workspace
+    if (wsg)
+      AnalysisDataService::Instance().remove(wsg->getName());
+  } else if ((0 == QString::compare(suf, "tif", Qt::CaseInsensitive)) ||
+             (0 == QString::compare(suf, "tiff", Qt::CaseInsensitive)) ||
+             (0 == QString::compare(suf, "png", Qt::CaseInsensitive))) {
+    QImage rawImg(path);
+    QPainter painter;
+    QPixmap pix(rawImg.width(), rawImg.height());
+    painter.begin(&pix);
+    painter.drawImage(0, 0, rawImg);
+    painter.end();
+    m_ui.label_image->setPixmap(pix);
+    m_ui.label_image->show();
+    loaded = true;
+  } else {
+    userWarning("Failed to load image - format issue",
+                "Could not load image because the extension of the file " +
+                    path.toStdString() + ", suffix: " + suf.toStdString() +
+                    " does not correspond to FITS or TIFF files.");
+  }
+
+  if (loaded)
+    m_ui.label_image_name->setText(path);
+}
+
+/**
+ * Helper to get a FITS image into a workspace. Uses the LoadFITS
+ * algorithm. If the algorithm throws, this method shows user (pop-up)
+ * warning/error messages but does not throw.
+ *
+ * This method returns a workspace group which most probably you want
+ * to delete after using the image to draw it.
+ *
+ * @param path Path to a FITS image
+ *
+ * @return Group Workspace containing a Matrix workspace with a FITS
+ * image, one pixel per histogram, as loaded by LoadFITS (can be empty
+ * if the load goes wrong and the workspace is not available from the
+ * ADS).
+ */
+WorkspaceGroup_sptr TomoReconstruction::loadFITSImage(const std::string &path) {
   // get fits file into workspace and retrieve it from the ADS
   auto alg = Algorithm::fromString("LoadFITS");
   alg->initialize();
-  alg->setPropertyValue("Filename", path.toStdString());
+  alg->setPropertyValue("Filename", path);
   alg->setProperty("ImageKey", "0");
   std::string wsName = "__fits_ws_imat_tomography_gui";
   alg->setProperty("OutputWorkspace", wsName);
@@ -822,7 +894,7 @@ void TomoReconstruction::browseImageClicked() {
     userWarning("Failed to load image", "Could not load this file as a "
                                         "FITS image: " +
                                             std::string(e.what()));
-    return;
+    return WorkspaceGroup_sptr();
   }
   if (!alg->isExecuted()) {
     userWarning("Failed to load image correctly",
@@ -842,16 +914,16 @@ void TomoReconstruction::browseImageClicked() {
                 "happened when trying to load the image contents. Cannot "
                 "display it. Error details: " +
                     std::string(e.what()));
-    return;
+    return WorkspaceGroup_sptr();
   }
 
   // draw image from workspace
   if (wsg && ws &&
       Mantid::API::AnalysisDataService::Instance().doesExist(ws->name())) {
-    drawImage(ws);
-    m_ui.label_image_name->setText(path);
+    return wsg;
+  } else {
+    return WorkspaceGroup_sptr();
   }
-  AnalysisDataService::Instance().remove(wsg->getName());
 }
 
 void TomoReconstruction::loadAvailablePlugins() {
@@ -919,8 +991,8 @@ void TomoReconstruction::refreshCurrentPluginListUI() {
 // Updates the selected plugin info from Available plugins list.
 void TomoReconstruction::availablePluginSelected() {
   if (m_uiSavu.listAvailablePlugins->selectedItems().count() != 0) {
-    size_t idx =
-        static_cast<size_t>(m_uiSavu.listAvailablePlugins->currentIndex().row());
+    size_t idx = static_cast<size_t>(
+        m_uiSavu.listAvailablePlugins->currentIndex().row());
     if (idx < m_availPlugins->rowCount()) {
       m_uiSavu.availablePluginDesc->setText(
           tableWSRowToString(m_availPlugins, idx));
@@ -1437,6 +1509,8 @@ std::string TomoReconstruction::getPassword() {
  * loads FITS images. Checks dimensions and workspace structure and
  * shows user warning/error messages appropriately. But in principle
  * it should not raise any exceptions under reasonable circumstances.
+ *
+ * @param ws Workspace where a FITS image has been loaded with LoadFITS
  */
 void TomoReconstruction::drawImage(const MatrixWorkspace_sptr &ws) {
   // From logs we expect a name "run_title", width "Axis1" and height "Axis2"
@@ -1548,3 +1622,6 @@ void TomoReconstruction::userError(std::string err, std::string description) {
                         QString::fromStdString(description), QMessageBox::Ok,
                         QMessageBox::Ok);
 }
+
+} // namespace CustomInterfaces
+} // namespace MantidQt

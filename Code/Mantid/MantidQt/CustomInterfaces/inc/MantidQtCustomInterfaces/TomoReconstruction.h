@@ -7,6 +7,7 @@
 #include "ui_TomoToolConfigSavu.h"
 #include "ui_TomoToolConfigTomoPy.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidQtAPI/UserSubWindow.h"
 
@@ -19,8 +20,9 @@ class QLineEdit;
 namespace MantidQt {
 namespace CustomInterfaces {
 /**
-Tomographu reconstruction GUI. Interface for editing parameters and
-running and monitoring reconstruction jobs.
+Tomographic reconstruction GUI. Interface for editing parameters,
+running and monitoring reconstruction jobs, quick image inspection,
+launching visualization windows, etc.
 
 Copyright &copy; 2014,205 ISIS Rutherford Appleton Laboratory, NScD
 Oak Ridge National Laboratory & European Spallation Source
@@ -53,7 +55,7 @@ public: // public constructor, destructor and functions
   /// Destructor
   virtual ~TomoReconstruction();
   /// Interface name
-  static std::string name() { return "Tomography Reconstruction"; }
+  static std::string name() { return "Tomographic Reconstruction"; }
   /// This interface's categories.
   static QString categoryInfo() { return "Diffraction"; }
   /// Setup tab UI
@@ -136,6 +138,8 @@ private:
 
   std::string validateCompResource(const std::string &res);
 
+  Mantid::API::WorkspaceGroup_sptr loadFITSImage(const std::string &path);
+
   void drawImage(const Mantid::API::MatrixWorkspace_sptr &ws);
 
   void userWarning(std::string err, std::string description);
@@ -161,8 +165,7 @@ private:
 
   std::string createUniqueNameHidden();
 
-  QString tableWSRowToString(Mantid::API::ITableWorkspace_sptr table,
-                             size_t i);
+  QString tableWSRowToString(Mantid::API::ITableWorkspace_sptr table, size_t i);
 
   void loadSavuTomoConfig(std::string &filePath,
                           Mantid::API::ITableWorkspace_sptr &currentPlugins);
@@ -208,40 +211,39 @@ private:
   static const std::string m_CustomCmdTool;
 
   // plugins for savu config files
-  //std::vector<Mantid::API::ITableWorkspace_sptr> m_availPlugins;
+  // std::vector<Mantid::API::ITableWorkspace_sptr> m_availPlugins;
   Mantid::API::ITableWorkspace_sptr m_availPlugins;
-  //std::vector<Mantid::API::ITableWorkspace_sptr> m_currPlugins;
+  // std::vector<Mantid::API::ITableWorkspace_sptr> m_currPlugins;
   Mantid::API::ITableWorkspace_sptr m_currPlugins;
   std::string m_currentParamPath;
   static size_t m_nameSeqNo;
 };
 
-class TomoToolConfigTomoPy: public QDialog {
-   Q_OBJECT
+class TomoToolConfigTomoPy : public QDialog {
+  Q_OBJECT
 public:
-   TomoToolConfigTomoPy(QWidget *parent = 0);
+  TomoToolConfigTomoPy(QWidget *parent = 0);
 };
 
-class TomoToolConfigSavu: public QMainWindow {
-   Q_OBJECT
+class TomoToolConfigSavu : public QMainWindow {
+  Q_OBJECT
 public:
-   TomoToolConfigSavu(QWidget *parent = 0);
+  TomoToolConfigSavu(QWidget *parent = 0);
 };
 
-class TomoToolConfigAstra: public QDialog {
-   Q_OBJECT
+class TomoToolConfigAstra : public QDialog {
+  Q_OBJECT
 public:
-   TomoToolConfigAstra(QWidget *parent = 0);
+  TomoToolConfigAstra(QWidget *parent = 0);
 };
 
-class TomoToolConfigCustom: public QDialog {
-   Q_OBJECT
+class TomoToolConfigCustom : public QDialog {
+  Q_OBJECT
 public:
-   TomoToolConfigCustom(QWidget *parent = 0);
+  TomoToolConfigCustom(QWidget *parent = 0);
 };
 
-
-class TomoToolSetupDialog: public QDialog {
+class TomoToolSetupDialog : public QDialog {
   Q_OBJECT
 
 public:
@@ -252,14 +254,12 @@ private slots:
   void cancelClicked();
 
 private:
-
   QLabel *labelRun, *labelOpt;
   QLineEdit *editRun, *editOpt;
   QHBoxLayout *hRun, *hOpt;
   QGridLayout *layout;
   QPushButton *okButton, *cancelButton;
 };
-
 }
 }
 
