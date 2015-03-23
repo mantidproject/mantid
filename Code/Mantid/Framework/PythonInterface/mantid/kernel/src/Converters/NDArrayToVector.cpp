@@ -32,21 +32,18 @@ namespace Mantid
           // and assign each value to the corresponding vector
           typedef union {
             DestElementType* output;
-            char** input;
+            void *input;
           } npy_union;
           npy_union data;
-          NpyIter *iter = NpyIter_New(arr, NPY_ITER_READONLY,
-                               NPY_KEEPORDER, NPY_SAFE_CASTING,
-                               NULL);
-          NpyIter_IterNextFunc *iternext = NpyIter_GetIterNext(iter, NULL);
+          PyObject *iter = PyArray_IterNew((PyObject *)arr);
           npy_intp index(0);
           do
           {
-            data.input = NpyIter_GetDataPtrArray(iter);
-            cvector[index] = *data.output; 
+            data.input = PyArray_ITER_DATA(iter);
+            cvector[index] = *data.output;
             ++index;
-          }
-          while(iternext(iter));
+            PyArray_ITER_NEXT(iter);
+          } while (PyArray_ITER_NOTDONE(iter));
         }
       };
 
