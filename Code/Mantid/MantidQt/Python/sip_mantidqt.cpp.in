@@ -8,6 +8,7 @@
   #pragma GCC diagnostic ignored "-Wunused-variable"
   #pragma GCC diagnostic ignored "-Wparentheses"
   #pragma GCC diagnostic ignored "-Wcast-qual"
+  #pragma GCC diagnostic ignored "-Wpedantic"
 #endif
 
 #include "sipmantidqtpythonpart0.cpp"
