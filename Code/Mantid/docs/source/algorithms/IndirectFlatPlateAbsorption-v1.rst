@@ -104,5 +104,6 @@ Usage
 
    Corrected workspace is intensity against Energy transfer
    Ass workspace is Attenuation factor against Wavelength
+   Acc workspace is Attenuation factor against Wavelength
 
 .. categories::
