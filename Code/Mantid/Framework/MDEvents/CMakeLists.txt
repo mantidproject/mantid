@@ -135,6 +135,7 @@ set ( TEST_FILES
 	CoordTransformDistanceParserTest.h
 	CoordTransformDistanceTest.h
 	FitMDTest.h
+        IntegrateEllipsoidsTest.h
 	ImportMDEventWorkspaceTest.h
 	ImportMDHistoWorkspaceTest.h
 	MDBinTest.h

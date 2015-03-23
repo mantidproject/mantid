@@ -10,6 +10,8 @@
 # slave.
 ###############################################################################
 SCRIPT_DIR=$(dirname "$0")
+# Package by default
+BUILDPKG=true
 
 ###############################################################################
 # Print out the versions of things we are using
@@ -83,12 +85,15 @@ else
   SCL_ON_RHEL6="eval"
 fi
 
+if [[ ${NODE_LABELS} == *rhel7* ]]; then
+  ON_RHEL7=true
+fi
+
 ###############################################################################
 # Check job requirements from the name
 ###############################################################################
 if [[ ${JOB_NAME} == *clean* ]]; then
   CLEANBUILD=true
-  BUILDPKG=true
 fi
 
 if [[ -e $WORKSPACE/build/CMakeCache.txt ]]; then
@@ -97,10 +102,6 @@ if [[ -e $WORKSPACE/build/CMakeCache.txt ]]; then
   if [ ! -z "$TESTINGTOOLS_DIR"  ]; then
     rm -fr $WORKSPACE/build
   fi
-fi
-
-if [[ ${JOB_NAME} == *pull_requests* ]]; then
-  BUILDPKG=true
 fi
 
 ###############################################################################
@@ -215,6 +216,6 @@ fi
 # Run the system tests on RHEL6 when doing a pull request build. Run
 # from a package to have at least one Linux checks it install okay
 ###############################################################################
-if [[ "${ON_RHEL6}" == true ]] && [[ ${JOB_NAME} == *pull_requests* ]]; then
+if [[ "${ON_RHEL7}" == true ]] && [[ ${JOB_NAME} == *pull_requests* ]]; then
   $SCRIPT_DIR/systemtests
 fi

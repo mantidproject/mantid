@@ -14,7 +14,7 @@ using namespace Mantid::Geometry;
 
 namespace MantidQt
 {
-  namespace CustomDialogs
+  namespace MantidWidgets
   {
     DECLARE_DIALOG(SliceMDDialog);
     DECLARE_DIALOG(BinMDDialog);
@@ -432,6 +432,64 @@ namespace MantidQt
     {
       return ui.ck_calculate->isChecked();
     }
+
+   /**
+     *Customise the layout for usage in the Vsi
+     */
+    void SlicingAlgorithmDialog::customiseLayoutForVsi(std::string initialWorkspace)
+    {
+      // File back-end
+      ui.file_backend_layout->setVisible(false);
+
+      // Output workspace
+      ui.lbl_workspace_output->setVisible(false);
+      ui.txt_output->setVisible(false);
+
+      // Input workspace
+      ui.workspace_selector->setVisible(false);
+      ui.lbl_workspace_input->setVisible(false);
+
+      // Reset the input workspace
+      ui.workspace_selector->clear();
+      ui.workspace_selector->addItem(initialWorkspace.c_str());
+
+      // Turn off history of the aligned dimension fields;
+      buildDimensionInputs(true);
+    }
+
+    /**
+     * Resets the axis dimensions externally.
+     * @param index The property index.
+     * @param propertyValue The new value of the axis dimension.
+     */
+    void SlicingAlgorithmDialog::resestAlignedDimProperty(size_t index, QString propertyValue)
+    {
+      QString alignedDim = "AlignedDim";
+
+      const QString propertyName = alignedDim.copy().append(QString().number(index));
+
+      if (!m_tied_properties.contains(propertyName))
+      {
+        return;
+      }
+
+      QWidget* widget = m_tied_properties[propertyName];
+
+      if (!widget)
+      {
+        return;
+      }
+
+      QLineEdit* edit = dynamic_cast<QLineEdit*>(widget);
+
+      if (!edit)
+      {
+        return;
+      }
+
+      edit->setText(propertyValue);
+    }
+
 
     /*---------------------------------------------------------------------------------------------
     SliceMDDialog Methods

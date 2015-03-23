@@ -15,9 +15,9 @@ namespace MantidQt
 			m_uiForm.setupUi(parent);
 
       // Create range selector
-      m_rangeSelectors["QuasiERange"] = new MantidWidgets::RangeSelector(m_uiForm.ppPlot);
-      connect(m_rangeSelectors["QuasiERange"], SIGNAL(minValueChanged(double)), this, SLOT(minValueChanged(double)));
-      connect(m_rangeSelectors["QuasiERange"], SIGNAL(maxValueChanged(double)), this, SLOT(maxValueChanged(double)));
+      auto eRangeSelector = m_uiForm.ppPlot->addRangeSelector("QuasiERange");
+      connect(eRangeSelector, SIGNAL(minValueChanged(double)), this, SLOT(minValueChanged(double)));
+      connect(eRangeSelector, SIGNAL(maxValueChanged(double)), this, SLOT(maxValueChanged(double)));
 
 			// Add the properties browser to the UI form
 			m_uiForm.treeSpace->addWidget(m_propTree);
@@ -243,12 +243,22 @@ namespace MantidQt
       for(size_t histIndex = 0; histIndex < outputWorkspace->getNumberHistograms(); histIndex++)
       {
         QString specName = QString::fromStdString(axis->label(histIndex));
+        QColor curveColour;
 
-        if(specName.contains("fit"))
-		  m_uiForm.ppPlot->addSpectrum(specName, outputWorkspace, histIndex, Qt::red);
+        if(specName.contains("fit.1"))
+          curveColour = Qt::red;
+        else if(specName.contains("fit.2"))
+          curveColour = Qt::magenta;
 
-        if(specName.contains("diff"))
-		  m_uiForm.ppPlot->addSpectrum(specName, outputWorkspace, histIndex, Qt::green);
+        else if(specName.contains("diff.1"))
+          curveColour = Qt::green;
+        else if(specName.contains("diff.2"))
+          curveColour = Qt::cyan;
+
+        else
+          continue;
+
+        m_uiForm.ppPlot->addSpectrum(specName, outputWorkspace, histIndex, curveColour);
       }
     }
 
@@ -266,8 +276,10 @@ namespace MantidQt
       updateMiniPlot();
 
 			QPair<double, double> range = m_uiForm.ppPlot->getCurveRange("Sample");
-			setRangeSelector("QuasiERange", m_properties["EMin"], m_properties["EMax"], range);
-			setPlotPropertyRange("QuasiERange", m_properties["EMin"], m_properties["EMax"], range);
+      auto eRangeSelector = m_uiForm.ppPlot->getRangeSelector("QuasiERange");
+
+			setRangeSelector(eRangeSelector, m_properties["EMin"], m_properties["EMax"], range);
+			setPlotPropertyRange(eRangeSelector, m_properties["EMin"], m_properties["EMax"], range);
 		}
 
 		/**
@@ -298,13 +310,15 @@ namespace MantidQt
 		 */
     void Quasi::updateProperties(QtProperty* prop, double val)
     {
+      auto eRangeSelector = m_uiForm.ppPlot->getRangeSelector("QuasiERange");
+
     	if(prop == m_properties["EMin"])
     	{
-    		updateLowerGuide(m_rangeSelectors["QuasiERange"], m_properties["EMin"], m_properties["EMax"], val);
+    		updateLowerGuide(eRangeSelector, m_properties["EMin"], m_properties["EMax"], val);
     	}
     	else if (prop == m_properties["EMax"])
     	{
-				updateUpperGuide(m_rangeSelectors["QuasiERange"], m_properties["EMin"], m_properties["EMax"], val);
+				updateUpperGuide(eRangeSelector, m_properties["EMin"], m_properties["EMax"], val);
     	}
     }
 

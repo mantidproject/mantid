@@ -1351,6 +1351,21 @@ std::size_t numEvents(::NeXus::File &file, bool &hasTotalCounts,
   return numEvents;
 }
 
+void LoadEventNexus::createWorkspaceIndexMaps(const bool monitors,
+                                         const std::vector<std::string> &bankNames) {
+  // Create the required spectra mapping so that the workspace knows what to pad
+  // to
+  createSpectraMapping(m_filename, monitors, bankNames);
+
+  // This map will be used to find the workspace index
+  if (this->event_id_is_spec)
+    WS->getSpectrumToWorkspaceIndexVector(pixelID_to_wi_vector,
+                                          pixelID_to_wi_offset);
+  else
+    WS->getDetectorIDToWorkspaceIndexVector(pixelID_to_wi_vector,
+                                            pixelID_to_wi_offset, true);
+}
+
 //-----------------------------------------------------------------------------
 /**
 * Load events from the file.
@@ -1526,6 +1541,9 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
     xRef[1] = 1;
     // Set the binning axis using this.
     WS->setAllX(axis);
+
+    createWorkspaceIndexMaps(monitors, std::vector<std::string>());
+
     return;
   }
 
@@ -1579,17 +1597,7 @@ void LoadEventNexus::loadEvents(API::Progress *const prog,
     }
   }
   //----------------- Pad Empty Pixels -------------------------------
-  // Create the required spectra mapping so that the workspace knows what to pad
-  // to
-  createSpectraMapping(m_filename, monitors, someBanks);
-
-  // This map will be used to find the workspace index
-  if (this->event_id_is_spec)
-    WS->getSpectrumToWorkspaceIndexVector(pixelID_to_wi_vector,
-                                          pixelID_to_wi_offset);
-  else
-    WS->getDetectorIDToWorkspaceIndexVector(pixelID_to_wi_vector,
-                                            pixelID_to_wi_offset, true);
+  createWorkspaceIndexMaps(monitors, someBanks);
 
   // Cache a map for speed.
   if (!m_haveWeights) {

@@ -14,6 +14,8 @@ import numpy as np
 
 class ExamplePeakFunction(IPeakFunction):
 
+    _nterms = None
+
     def category(self):
         """
         Optional method to return the category that this
@@ -115,7 +117,6 @@ class ExamplePeakFunction(IPeakFunction):
         set than that declared
         """
         param_value = value
-        explicit = False
         if index == 2:
             param_value = math.sqrt(math.fabs(1.0/value))
         else:

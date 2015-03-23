@@ -265,4 +265,6 @@ Output
 
   os.remove( calFilePath )
 
+.. seealso :: Algorithm :ref:`algm-EstimateResolutionDiffraction`
+
 .. categories::

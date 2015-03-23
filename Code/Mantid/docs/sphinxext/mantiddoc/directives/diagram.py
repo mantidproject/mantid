@@ -11,6 +11,7 @@ STYLE = dict()
 STYLE["global_style"] = """
 fontname = Helvetica
 labelloc = t
+ordering = out
 node[fontname="Helvetica", style = filled]
 edge[fontname="Helvetica"]
 """

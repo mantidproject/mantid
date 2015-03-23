@@ -47,7 +47,8 @@ createDiffractionEventWorkspace(int numEvents, int numPixels = 400,
  * @return MDEW sptr
  */
 Mantid::MDEvents::MDEventWorkspace3Lean::sptr
-makeFileBackedMDEW(std::string wsName, bool fileBacked, long numEvents = 10000);
+makeFileBackedMDEW(std::string wsName, bool fileBacked, long numEvents = 10000,
+                   Kernel::SpecialCoordinateSystem coord = Kernel::None);
 
 /// Make a fake n-dimensional MDHistoWorkspace
 Mantid::MDEvents::MDHistoWorkspace_sptr

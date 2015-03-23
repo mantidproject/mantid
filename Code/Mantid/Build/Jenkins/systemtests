@@ -17,11 +17,11 @@ echo "SHA1=${sha1}"
 ###############################################################################
 # Set up the location for the local object store outside of the build and
 # source tree, which can be shared by multiple builds.
-# It defaults to the parent directory of the workspace but can be overridden
-# by setting the MANTID_DATA_STORE environment variable.
+# It defaults to a MantidExternalData directory within the HOME directory.
+# It can be overridden by setting the MANTID_DATA_STORE environment variable.
 ###############################################################################
 if [ -z "$MANTID_DATA_STORE" ]; then
-  export MANTID_DATA_STORE=$(dirname $WORKSPACE)
+  export MANTID_DATA_STORE=$HOME/MantidExternalData
 fi
 
 ###############################################################################

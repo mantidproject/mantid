@@ -4,7 +4,7 @@
 #include "MantidDataObjects/Peak.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
-#include "MantidGeometry/Crystal/PointGroup.h"
+#include "MantidGeometry/Crystal/PointGroupFactory.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/Utils.h"
@@ -111,7 +111,8 @@ void SortHKL::exec() {
     peaks[i].setHKL(hkl1);
   }
   // Use the primitive by default
-  PointGroup_sptr pointGroup(new PointGroupLaue1());
+  PointGroup_sptr pointGroup =
+      PointGroupFactory::Instance().createPointGroup("-1");
   // Get it from the property
   std::string pointGroupName = getPropertyValue("PointGroup");
   for (size_t i = 0; i < m_pointGroups.size(); ++i)
