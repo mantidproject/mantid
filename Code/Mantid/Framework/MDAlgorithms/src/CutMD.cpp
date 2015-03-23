@@ -45,6 +45,25 @@ Matrix<double> matrixFromProjection(ITableWorkspace_sptr projection) {
   }
   return ret;
 }
+
+std::vector<std::string> unitsFromProjection(ITableWorkspace_sptr projection) {
+  std::vector<std::string> ret(3);
+  const size_t numDims = projection->rowCount();
+  for (size_t i = 0; i < numDims; i++) {
+    const std::string name =
+        projection->getColumn("name")->cell<std::string>(i);
+    const std::string unit =
+        projection->getColumn("type")->cell<std::string>(i);
+
+    if (name == "u")
+      ret[0] = unit;
+    else if (name == "v")
+      ret[1] = unit;
+    else if (name == "w")
+      ret[2] = unit;
+  }
+  return ret;
+}
 } // anonymous namespace
 
 namespace Mantid {
