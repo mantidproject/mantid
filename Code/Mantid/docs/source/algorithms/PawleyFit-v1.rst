@@ -15,6 +15,8 @@ PawleyFit requires a MatrixWorkspace with at least one spectrum in terms of eith
 
 In addition, a TableWorkspace with information about the reflections that are found in the spectrum must be passed as well. There must be four columns with the captions "HKL", "d", "FWHM (rel.)" and "Intensity". The HKL column can be supplied either as V3D or as a string with 3 numbers separated by space, comma or semi-colon and possibly surrounded by square brackets. One way to obtain such a table is to use three algorithms that are used in analysis of POLDI data, which produce tables in a suitable format. Details are given in the usage example section.
 
+Along with the workspaces containing fit results and parameter values, the algorithm also outputs the reduced :math:`\chi^2`-value, which is also written in the log.
+
 Usage
 -----
 
@@ -48,11 +50,10 @@ For the usage example there is a calculated, theoretical diffraction pattern (in
     print "The number of peaks that were indexed:", si_peaks_indexed.rowCount()
 
     # Run the actual fit with lattice parameters that are slightly off
-    si_fitted = PawleyFit(si_spectrum,
+    si_fitted, si_cell, si_params, chi_square = PawleyFit(si_spectrum,
                           CrystalSystem='Cubic',
                           InitialCell='5.436 5.436 5.436',
-                          PeakTable=si_peaks_indexed,
-                          RefinedCellTable='si_cell', RefinedPeakParameterTable='si_params')
+                          PeakTable=si_peaks_indexed)
 
     si_cell = AnalysisDataService.retrieve("si_cell")
 
@@ -63,6 +64,7 @@ For the usage example there is a calculated, theoretical diffraction pattern (in
     print "The lattice parameter was refined to a =", a, "+/-", a_err
     print "The deviation from the actual parameter (a=5.4311946) is:", a_diff
     print "This difference corresponds to", np.round(a_diff / a_err, 2), "standard deviations."
+    print "The reduced chi square of the fit is:", np.round(chi_square, 3)
 
 Running this script will generate a bit of output about the results of the different steps. At the end the lattice parameter differs less than one standard deviation from the actual value.
 
@@ -73,6 +75,7 @@ Running this script will generate a bit of output about the results of the diffe
     The lattice parameter was refined to a = 5.431205 +/- 1.6e-05
     The deviation from the actual parameter (a=5.4311946) is: 1e-05
     This difference corresponds to 0.63 standard deviations.
+    The reduced chi square of the fit is: 1.04
 
 .. testcleanup:: ExPawleySilicon
 

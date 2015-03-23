@@ -289,6 +289,11 @@ void PawleyFit::init() {
                                              Direction::Output),
       "TableWorkspace with refined peak parameters, including errors.");
 
+  declareProperty("ReducedChiSquare", 0.0, "Outputs the reduced chi square "
+                                           "value as a measure for the quality "
+                                           "of the fit.",
+                  Direction::Output);
+
   m_dUnit = UnitFactory::Instance().create("dSpacing");
 }
 
@@ -379,6 +384,10 @@ void PawleyFit::exec() {
   fit->setProperty("CreateOutput", true);
 
   fit->execute();
+  double chiSquare = fit->getProperty("OutputChi2overDoF");
+
+  g_log.information() << "Fit finished, reduced ChiSquare = " << chiSquare
+                      << std::endl;
 
   g_log.information() << "Generating output..." << std::endl;
 
@@ -388,6 +397,8 @@ void PawleyFit::exec() {
   setProperty("RefinedCellTable", getLatticeFromFunction(pawleyFn));
   setProperty("RefinedPeakParameterTable",
               getPeakParametersFromFunction(pawleyFn));
+
+  setProperty("ReducedChiSquare", chiSquare);
 }
 
 } // namespace CurveFitting
