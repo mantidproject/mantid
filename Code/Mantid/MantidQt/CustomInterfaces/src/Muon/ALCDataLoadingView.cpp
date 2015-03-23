@@ -118,15 +118,8 @@ namespace CustomInterfaces
 
   boost::optional< std::pair<double,double> > ALCDataLoadingView::timeRange() const
   {
-    if (m_ui.timeLimit->isChecked())
-    {
-      auto range = std::make_pair(m_ui.minTime->value(), m_ui.maxTime->value());
-      return boost::make_optional(range);
-    }
-    else
-    {
-      return boost::none;
-    }
+    auto range = std::make_pair(m_ui.minTime->value(), m_ui.maxTime->value());
+    return boost::make_optional(range);
   }
 
   void ALCDataLoadingView::setDataCurve(const QwtData& data)
