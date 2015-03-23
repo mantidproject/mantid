@@ -19,13 +19,13 @@ std::pair<double, double> getDimensionExtents(IMDEventWorkspace_sptr ws,
   return std::make_pair(dim->getMinimum(), dim->getMaximum());
 }
 
-Matrix<double> matrixFromProjection(ITableWorkspace_sptr projection) {
+DblMatrix matrixFromProjection(ITableWorkspace_sptr projection) {
   if (!projection) {
-    return Matrix<double>(3, 3, true /* makeIdentity */);
+    return DblMatrix(3, 3, true /* makeIdentity */);
   }
 
   const size_t numDims = projection->rowCount();
-  Matrix<double> ret(3, 3);
+  DblMatrix ret(3, 3);
   for (size_t i = 0; i < numDims; i++) {
     const std::string name =
         projection->getColumn("name")->cell<std::string>(i);
@@ -67,11 +67,11 @@ std::vector<std::string> unitsFromProjection(ITableWorkspace_sptr projection) {
   return ret;
 }
 
-Matrix<double> scaleProjection(const Matrix<double> &inMatrix,
+DblMatrix scaleProjection(const DblMatrix &inMatrix,
                                std::vector<std::string> inUnits,
                                std::vector<std::string> outUnits,
                                IMDEventWorkspace_sptr inWS) {
-  Matrix<double> ret = inMatrix;
+  DblMatrix ret(inMatrix);
   //Check if we actually need to do anything
   if (std::equal(inUnits.begin(), inUnits.end(), outUnits.begin()))
     return ret;
@@ -101,9 +101,9 @@ Matrix<double> scaleProjection(const Matrix<double> &inMatrix,
 }
 
 std::vector<std::pair<double, double>>
-calculateExtents(const Matrix<double> inMatrix,
+calculateExtents(const DblMatrix &inMatrix,
                  std::vector<std::pair<double, double>> limits) {
-  Matrix<double> invMat = Matrix<double>(inMatrix);
+  DblMatrix invMat(inMatrix);
   invMat.Invert();
 
   // iterate through min/max of each dimension, calculate dot(vert, inv_mat)
@@ -118,7 +118,7 @@ calculateExtents(const Matrix<double> inMatrix,
   lRange[1] = limits[2].second;
 
   // Calculate the minimums and maximums of transformed coordinates
-  Matrix<double> extMat(3, 8);
+  DblMatrix extMat(3, 8);
   size_t counter = 0;
   for (auto hIt = hRange.begin(); hIt != hRange.end(); ++hIt)
     for (auto kIt = kRange.begin(); kIt != kRange.end(); ++kIt)
