@@ -27,7 +27,7 @@ Usage
     peak = peaks.getPeak(0)
     print "HKL of first peak in table %d" % peak.getH(),peak.getK(),peak.getL()
     
-    pw,chi2,stats = SortHKL(InputWorkspace=peaks, PointGroup='-31m (Trigonal - Rhombohedral)')
+    pw,chi2,stats = SortHKL(InputWorkspace=peaks, PointGroup='-31m (Trigonal - Hexagonal)')
     peak = pw.getPeak(0)
     print "HKL of first peak in table %d" % peak.getH(),peak.getK(),peak.getL()
 
