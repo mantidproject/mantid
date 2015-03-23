@@ -182,8 +182,8 @@ class IndirectFlatPlateAbsorption(DataProcessorAlgorithm):
             sample_logs.append(('can_scale', self._can_scale))
             if self._use_can_corrections:
                 sample_log_workspaces.append(self._acc_ws)
-                AddSampleLog(Workspace=self._output_ws, LogName='can_thickness_1', LogType='Number', LogText=str(self._can_front_thickness))
-                AddSampleLog(Workspace=self._output_ws, LogName='can_thickness_2', LogType='Number', LogText=str(self._can_back_thickness))
+                sample_logs.append(('can_front_thickness', self. _can_front_thickness))
+                sample_logs.append(('can_back_thickness', self. _can_back_thickness))
 
         log_names = [item[0] for item in sample_logs]
         log_values = [item[1] for item in sample_logs]

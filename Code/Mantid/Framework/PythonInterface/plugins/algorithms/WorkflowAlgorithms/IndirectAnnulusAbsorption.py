@@ -69,7 +69,7 @@ class IndirectAnnulusAbsorption(DataProcessorAlgorithm):
 
 
     def PyExec(self):
-        from IndirectCommon import getEfixed, addSampleLogs
+        from IndirectCommon import getEfixed
 
         self._setup()
 
@@ -114,9 +114,9 @@ class IndirectAnnulusAbsorption(DataProcessorAlgorithm):
                 Scale(InputWorkspace=can1_wave_ws, OutputWorkspace=can1_wave_ws, Factor=self._can_scale, Operation='Multiply')
             CloneWorkspace(InputWorkspace=can1_wave_ws, OutputWorkspace=can2_wave_ws)
 
-            can_thickness1 = self._sample_inner_radius - self._can_inner_radius
-            can_thickness2 = self._can_outer_radius - self._sample_outer_radius
-            logger.information('Can thickness: ' + str(can_thickness1) + ' & ' + str(can_thickness2))
+            can_thickness_1 = self._sample_inner_radius - self._can_inner_radius
+            can_thickness_2 = self._can_outer_radius - self._sample_outer_radius
+            logger.information('Can thickness: %f & %f' % (can_thickness_1, can_thickness_2))
 
             if self._use_can_corrections:
                 prog.report('Calculating container corrections')
@@ -126,7 +126,7 @@ class IndirectAnnulusAbsorption(DataProcessorAlgorithm):
                 AnnularRingAbsorption(InputWorkspace=can1_wave_ws,
                               OutputWorkspace='__Acc1',
                               SampleHeight=3.0,
-                              SampleThickness=can_thickness1,
+                              SampleThickness=can_thickness_1,
                               CanInnerRadius=self._can_inner_radius,
                               CanOuterRadius=self._sample_outer_radius,
                               SampleChemicalFormula=self._can_chemical_formula,
@@ -138,7 +138,7 @@ class IndirectAnnulusAbsorption(DataProcessorAlgorithm):
                 AnnularRingAbsorption(InputWorkspace=can2_wave_ws,
                               OutputWorkspace='__Acc2',
                               SampleHeight=3.0,
-                              SampleThickness=can_thickness2,
+                              SampleThickness=can_thickness_2,
                               CanInnerRadius=self._sample_inner_radius,
                               CanOuterRadius=self._can_outer_radius,
                               SampleChemicalFormula=self._can_chemical_formula,
@@ -149,6 +149,7 @@ class IndirectAnnulusAbsorption(DataProcessorAlgorithm):
                 Multiply(LHSWorkspace='__Acc1', RHSWorkspace='__Acc2', OutputWorkspace=self._acc_ws)
                 DeleteWorkspace('__Acc1')
                 DeleteWorkspace('__Acc2')
+
                 Divide(LHSWorkspace=can1_wave_ws, RHSWorkspace=self._acc_ws, OutputWorkspace=can1_wave_ws)
                 Minus(LHSWorkspace=sample_wave_ws, RHSWorkspace=can1_wave_ws, OutputWorkspace=sample_wave_ws)
                 plot_corr.append(self._acc_ws)
@@ -176,24 +177,27 @@ class IndirectAnnulusAbsorption(DataProcessorAlgorithm):
         DeleteWorkspace(sample_wave_ws)
 
         prog.report('Recording sample logs')
-        sample_logs = {'sample_shape': 'annulus',
-                       'sample_filename': self._sample_ws_name,
-                       'sample_inner': self._sample_inner_radius,
-                       'sample_outer': self._sample_outer_radius,
-                       'can_inner': self._can_inner_radius,
-                       'can_outer': self._can_outer_radius}
-        addSampleLogs(self._ass_ws, sample_logs)
-        addSampleLogs(self._output_ws, sample_logs)
+        sample_log_workspaces = [self._output_ws, self._ass_ws]
+        sample_logs = [('sample_shape', 'annulus'),
+                       ('sample_filename', self._sample_ws_name),
+                       ('sample_inner', self._sample_inner_radius),
+                       ('sample_outer', self._sample_outer_radius),
+                       ('can_inner', self._can_inner_radius),
+                       ('can_outer', self._can_outer_radius)]
 
         if self._can_ws_name is not None:
-            AddSampleLog(Workspace=self._output_ws, LogName='can_filename', LogType='String', LogText=str(self._can_ws_name))
-            AddSampleLog(Workspace=self._output_ws, LogName='can_scale', LogType='String', LogText=str(self._can_scale))
+            sample_logs.append(('can_filename', self._can_ws_name))
+            sample_logs.append(('can_scale', self._can_scale))
             if self._use_can_corrections:
-                addSampleLogs(self._acc_ws, sample_logs)
-                AddSampleLog(Workspace=self._acc_ws, LogName='can_filename', LogType='String', LogText=str(self._can_ws_name))
-                AddSampleLog(Workspace=self._acc_ws, LogName='can_scale', LogType='String', LogText=str(self._can_scale))
-                AddSampleLog(Workspace=self._output_ws, LogName='can_thickness1', LogType='String', LogText=str(can_thickness1))
-                AddSampleLog(Workspace=self._output_ws, LogName='can_thickness2', LogType='String', LogText=str(can_thickness2))
+                sample_log_workspaces.append(self._acc_ws)
+                sample_logs.append(('can_thickness_1', can_thickness_1))
+                sample_logs.append(('can_thickness_2', can_thickness_2))
+
+        log_names = [item[0] for item in sample_logs]
+        log_values = [item[1] for item in sample_logs]
+
+        for ws_name in sample_log_workspaces:
+            AddSampleLogMultiple(Workspace=ws_name, LogNames=log_names, LogValues=log_values)
 
         self.setProperty('OutputWorkspace', self._output_ws)
 
@@ -257,6 +261,7 @@ class IndirectAnnulusAbsorption(DataProcessorAlgorithm):
         issues = dict()
 
         # TODO: geometry validation
+        # can inner < sample inner < sample outer < can outer
 
         if self._use_can_corrections and self._can_chemical_formula == '':
             issues['CanChemicalFormula'] = 'Must be set to use can corrections'
