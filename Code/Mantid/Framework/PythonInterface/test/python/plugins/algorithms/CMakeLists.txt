@@ -3,12 +3,13 @@
 ##
 
 set ( TEST_PY_FILES
+  AddSampleLogMultipleTest.py
   CalculateSampleTransmissionTest.py
   CheckForSampleLogsTest.py
   ConjoinSpectraTest.py
   CorrectLogTimesTest.py
   CreateLeBailFitInputTest.py
-  CreateCalibrationWorkspaceTest.py
+  IndirectCalibrationTest.py
   CreateWorkspaceTest.py
   CylinderPaalmanPingsCorrectionTest.py
   DakotaChiSquaredTest.py

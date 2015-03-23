@@ -90,7 +90,7 @@ class ReduceMAPS(ReductionWrapper):
         # Uncomment this to use custom filename function
         # Note: the properties are stored in prop_man class accessed as
         # below.
-        #return custom_name(self.reducer.prop_man)
+        #return lambda : custom_name(self.reducer.prop_man)
         # use this method to use standard file name generating function
         return None
 
