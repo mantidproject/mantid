@@ -5,6 +5,24 @@ from mantid.kernel import StringMandatoryValidator, Direction, logger, FloatBoun
 
 class IndirectCylinderAbsorption(DataProcessorAlgorithm):
 
+    _sample_ws_name = None
+    _sample_chemical_formula = None
+    _sample_number_density = None
+    _sample_radius = None
+    _can_ws_name = None
+    _use_can_corrections = None
+    _can_chemical_formula = None
+    _can_number_density = None
+    _can_radius = None
+    _can_scale = None
+    _events = None
+    _plot = None
+    _output_ws = None
+    _abs_ws = None
+    _ass_ws = None
+    _acc_ws = None
+
+
     def category(self):
         return "Workflow\\Inelastic;PythonAlgorithms;CorrectionFunctions\\AbsorptionCorrections;Workflow\\MIDAS"
 
