@@ -1,5 +1,5 @@
 from mantid.simpleapi import *
-from mantid.api import DataProcessorAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty, WorkspaceGroupProperty, PropertyMode
+from mantid.api import DataProcessorAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty, WorkspaceGroupProperty, PropertyMode, Progress
 from mantid.kernel import StringMandatoryValidator, Direction, logger, FloatBoundedValidator, IntBoundedValidator
 
 
@@ -22,7 +22,7 @@ class IndirectCylinderAbsorption(DataProcessorAlgorithm):
         self.declareProperty(name='SampleNumberDensity', defaultValue=0.1,
                              validator=FloatBoundedValidator(0.0),
                              doc='Sample number density')
-        self.declareProperty(name='SampleRadius', defaultValue=0.0,
+        self.declareProperty(name='SampleRadius', defaultValue=0.1,
                              validator=FloatBoundedValidator(0.0),
                              doc='Sample radius')
 
@@ -37,7 +37,7 @@ class IndirectCylinderAbsorption(DataProcessorAlgorithm):
         self.declareProperty(name='CanNumberDensity', defaultValue=0.1,
                              validator=FloatBoundedValidator(0.0),
                              doc='Can number density')
-        self.declareProperty(name='CanRadius', defaultValue=0.0,
+        self.declareProperty(name='CanRadius', defaultValue=0.2,
                              validator=FloatBoundedValidator(0.0),
                              doc='Can radius')
         self.declareProperty(name='CanScaleFactor', defaultValue=1.0,
@@ -61,9 +61,16 @@ class IndirectCylinderAbsorption(DataProcessorAlgorithm):
 
 
     def PyExec(self):
-        from IndirectCommon import getEfixed, addSampleLogs
+        from IndirectCommon import getEfixed
 
         self._setup()
+
+        # Set up progress reporting
+        n_prog_reports = 2
+        if self._can_ws_name is not None:
+            n_prog_reports += 1
+        prog = Progress(self, 0.0, 1.0, n_prog_reports)
+
         efixed = getEfixed(self._sample_ws_name)
 
         sample_wave_ws = '__sam_wave'
@@ -72,6 +79,7 @@ class IndirectCylinderAbsorption(DataProcessorAlgorithm):
 
         SetSampleMaterial(sample_wave_ws, ChemicalFormula=self._sample_chemical_formula, SampleNumberDensity=self._sample_number_density)
 
+        prog.report('Calculating sample corrections')
         CylinderAbsorption(InputWorkspace=sample_wave_ws,
                            OutputWorkspace=self._ass_ws,
                            SampleNumberDensity=self._sample_number_density,
@@ -97,6 +105,8 @@ class IndirectCylinderAbsorption(DataProcessorAlgorithm):
             logger.information('Can thickness: ' + str(can_thickness))
 
             if self._use_can_corrections:
+                # Doing can corrections
+                prog.report('Calculating can corrections')
                 Divide(LHSWorkspace=sample_wave_ws, RHSWorkspace=self._ass_ws, OutputWorkspace=sample_wave_ws)
 
                 SetSampleMaterial(can_wave_ws, ChemicalFormula=self._can_chemical_formula, SampleNumberDensity=self._can_number_density)
@@ -117,6 +127,8 @@ class IndirectCylinderAbsorption(DataProcessorAlgorithm):
                 group += ',' + self._acc_ws
 
             else:
+                # Doing simple can subtraction
+                prog.report('Calculating can scaling')
                 Minus(LHSWorkspace=sample_wave_ws, RHSWorkspace=can_wave_ws, OutputWorkspace=sample_wave_ws)
                 Divide(LHSWorkspace=sample_wave_ws, RHSWorkspace=self._ass_ws, OutputWorkspace=sample_wave_ws)
 
@@ -130,20 +142,25 @@ class IndirectCylinderAbsorption(DataProcessorAlgorithm):
                      Target='DeltaE', EMode='Indirect', EFixed=efixed)
         DeleteWorkspace(sample_wave_ws)
 
-        sample_logs = {'sample_shape': 'cylinder',
-                       'sample_filename': self._sample_ws_name,
-                       'sample_radius': self._sample_radius}
-        addSampleLogs(self._ass_ws, sample_logs)
-        addSampleLogs(self._output_ws, sample_logs)
+        # Record sample logs
+        prog.report('Recording logs')
+        sample_log_workspaces = [self._output_ws, self._ass_ws]
+        sample_logs = [('sample_shape', 'cylinder'),
+                       ('sample_filename', self._sample_ws_name),
+                       ('sample_radius', self._sample_radius)]
 
         if self._can_ws_name is not None:
-            AddSampleLog(Workspace=self._output_ws, LogName='can_filename', LogType='String', LogText=str(self._can_ws_name))
-            AddSampleLog(Workspace=self._output_ws, LogName='can_scale', LogType='String', LogText=str(self._can_scale))
+            sample_logs.append(('can_filename', self._can_ws_name))
+            sample_logs.append(('can_scale', self._can_scale))
             if self._use_can_corrections:
-                addSampleLogs(self._acc_ws, sample_logs)
-                AddSampleLog(Workspace=self._acc_ws, LogName='can_filename', LogType='String', LogText=str(self._can_ws_name))
-                AddSampleLog(Workspace=self._acc_ws, LogName='can_scale', LogType='String', LogText=str(self._can_scale))
+                sample_log_workspaces.append(self._acc_ws)
                 AddSampleLog(Workspace=self._output_ws, LogName='can_thickness', LogType='String', LogText=str(can_thickness))
+
+        log_names = [item[0] for item in sample_logs]
+        log_values = [item[1] for item in sample_logs]
+
+        for ws_name in sample_log_workspaces:
+            AddSampleLogMultiple(Workspace=ws_name, LogNames=log_names, LogValues=log_values)
 
         self.setProperty('OutputWorkspace', self._output_ws)
 
@@ -184,9 +201,10 @@ class IndirectCylinderAbsorption(DataProcessorAlgorithm):
         self._can_number_density = self.getProperty('CanNumberDensity').value
         self._can_radius = self.getProperty('CanRadius').value
         self._can_scale = self.getProperty('CanScaleFactor').value
-        self._events = self.getPropertyValue('Events')
 
+        self._events = self.getPropertyValue('Events')
         self._plot = self.getProperty('Plot').value
+
         self._output_ws = self.getPropertyValue('OutputWorkspace')
 
         self._abs_ws = self.getPropertyValue('CorrectionsWorkspace')
