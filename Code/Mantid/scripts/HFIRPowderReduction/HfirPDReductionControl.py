@@ -144,16 +144,16 @@ class HFIRPDRedControl:
         if wsmanager.datamdws is None or wsmanager.monitormdws is None:
             self._logError("Unable to rebin the data for exp=%d, scan=%d because either data MD workspace and \
                 monitor MD workspace is not present."  % (exp, scan))
-            return
+            return False
 
         if xmin is None or xmax is None:
             binpar = "%.7f" % (binsize)
         else:
             binpar = "%.7f, %.7f, %.7f" % (xmin, binsize, xmax)
 
-        reducedwsname = datamdws.name() + "_" + unit
-        api.ConvertCWPDMDToSpectra(InputWorkspace=datamdws,
-            InputMonitorWorkspace=monitormdws,
+        reducedwsname = wsmanager.datamdws.name() + "_" + unit
+        api.ConvertCWPDMDToSpectra(InputWorkspace=wsmanager.datamdws,
+            InputMonitorWorkspace=wsmanager.monitormdws,
             OutputWorkspace=reducedwsname,
             UnitOutput=unit,
             BinningParams = binpar,
@@ -165,7 +165,7 @@ class HFIRPDRedControl:
         else:
             raise NotImplementedError("Failed to convert unit to %s." % (unit))
         
-        return 
+        return True
 
 
     def reduceSpicePDData(self, exp, scan, datafilename, unit, xmin, xmax, binsize, wavelength):
@@ -222,7 +222,36 @@ class HFIRPDRedControl:
         self._myWorkspaceDict[(exp, scan)] = wsmanager
         
         return True
-       
+      
+    def savePDFile(self, exp, scao, filetype, sfilename):
+        """ Save a reduced workspace to gsas/fullprof/topaz data file
+        """
+        # get workspace
+        wsmanager = self.getWorkspace(exp, scan, raiseexception=True)
+        if wsmanager.reducedws is None:
+            raise NotImplementedError("Unable to rebin the data for exp=%d, scan=%d because either data MD workspace and \
+                monitor MD workspace is not present."  % (exp, scan))
+        else:
+            wksp = wsmanager.reducedws
+   
+        # save
+        filetypes = filetypes.lower()
+        if "gsas" in filetype:
+            api.SaveGSS(InputWorkspace=wksp, Filename=sfilename, \
+                SplitFiles=False, Append=False,\
+                MultiplyByBinWidth=normalized, Bank=1, Format="SLOG",\
+                 ExtendedHeader=True)
+                 
+        if "fullprof" in filetype:
+            api.SaveFocusedXYE(InputWorkspace=wksp, StartAtBankNumber=1, 
+                Filename=sfilename)
+
+        if "topas" in self._outTypes:
+            api.SaveFocusedXYE(InputWorkspace=wksp, StartAtBankNumber=info["bank"],\
+                Filename=filename+".xye", Format="TOPAS")
+                
+        return 
+
 
 """ External Methods """
 def downloadFile(url, localfilepath):

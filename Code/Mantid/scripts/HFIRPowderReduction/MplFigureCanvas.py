@@ -148,6 +148,16 @@ class Qt4MplPlotView(QtGui.QWidget):
             
         return (marker, color)
         
+    def setXYLimit(self, xmin, xmax, ymin, ymax):
+        """ Set X-Y limit automatically
+        """
+        self.canvas.axes.set_xlim([xmin, xmax])
+        self.canvas.axes.set_ylim([ymin, ymax])
+        
+        self.canvas.draw()
+        
+        return
+        
     def setAutoLineMarkerColorCombo(self):
         """
         """
@@ -158,7 +168,12 @@ class Qt4MplPlotView(QtGui.QWidget):
                 
         return
 
-
+    def setLineMarkerColorIndex(self, newindex):
+        """
+        """
+        self._myLineMarkerColorIndex = newindex
+        
+        return
 
 class Qt4MplCanvas(FigureCanvas):
     """  A customized Qt widget for matplotlib figure.

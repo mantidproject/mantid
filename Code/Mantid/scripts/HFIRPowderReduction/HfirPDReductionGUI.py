@@ -352,9 +352,16 @@ class MainWindow(QtGui.QMainWindow):
         datafilename = self._uiLoadDataFile(exp=expno, scan=scanno)
 
         # Get other information
+        try:
+            xmin, binsize, xmax = self._uiGetBinningParams()
+        except Exception as e:
+            self._logError(str(e))
+            return
+        """
         xmin, xmax, binsize = self._getBinningParams()
         if binsize is None:
             self._logError("Bin size must be specified.")
+        """
 
         unit = self._currUnit
         wavelength = float(self.ui.lineEdit_wavelength.text())
@@ -471,29 +478,8 @@ class MainWindow(QtGui.QMainWindow):
     def doPlot2Theta(self):
         """ Rebin the data and plot in 2theta
         """
-        # check binning parameters and target unit
-        change, xmin, xmax, binsize = self._uiCheckBinningParameters(self._myMinX, self._myMaxX, 
-            self._myBinSize, self._myCurrentUnit, "2theta")
+        self._uiRebinPlot('2theta')
         
-        # no change,  return with a notice
-        if change is False:
-            self._logDebug("All binning parameters and target unit are same as current values. No need to plot again.")
-            return
-            
-        # get wavelength
-        try: 
-            wavelength = float(self.ui.lineEdit_wavelength.text())
-        except ValueError as e:
-            print e
-            return       
-            
-        # Rebin
-        unit = '2theta'
-        self._myControl.rebin(exp, scan, unit, wavelength, xmin, binsize, xmax)
-        
-        xlabel = self._getXLabelFromUnit(unit)
-        self._plotReducedData(xlabel, 0, True)
-
         return
 
     def doPlotDspacing(self):
@@ -502,41 +488,18 @@ class MainWindow(QtGui.QMainWindow):
         # new unit and information
         newunit = "dSpacing"
         
-        try:
-            expno, scanno = self._uiGetExpScanNumbers()
-        except NotImplementedError as e:
-            self._logError(str(e))
-            return
-            
-        xmin, xmax, binsize = self._uiGetBinningParameters()
-        if binsize is None:
-            self._logError("Bin size must be given for binning.")
-            return
-            
-        # get wavelength
-        try: 
-            wavelength = float(self.ui.lineEdit_wavelength.text())
-        except ValueError as e:
-            self._logError(str(e))
-            return  
+        self._uiRebinPlot(newunit)
         
-        # rebinned
-        try:
-            rebinned = self._myControl.rebin(expno, scanno, newunit, wavelength, xmin, binsize, xmax)
-        except NotImplementedError as e:
-            self._logError(str(e))
-            return
-        else:
-            if rebinned:
-                # plot if rebinned
-                xlabel = self._getXLabelFromUnit(unit)
-                self._plotReducedData(xlabel, 0, True)
-
         return
+    
 
     def doPlotQ(self):
         """ Rebin the data and plot in momentum transfer Q
         """
+        self._uiRebinPlot(unit = 'Momentum Transfer (Q)')
+        
+        return
+        
         # check binning parameters and target unit
         change, xmin, xmax, binsize = self._uiCheckBinningParameters(self._myMinX, self._myMaxX, 
             self._myBinSize, self._myCurrentUnit, "Momentum Transfer (Q)")
@@ -552,6 +515,7 @@ class MainWindow(QtGui.QMainWindow):
         self._plotReducedData(xlabel, 0, True)  
 
         return
+        
 
     def doPlotCurrentRawDet(self):
         """ Plot current raw detector signals
@@ -681,6 +645,12 @@ class MainWindow(QtGui.QMainWindow):
         """ Rebin MDEventWorkspaces in d-Spacing. for pushButton_rebinD
         in vanadium peak strip tab
         """
+        self._uiRebinPlot(unit='dSpacing', xmin=self.ui.lineEdit_minD.text(),
+            binsize=self.ui.lineEdit_binsizeD.text(), 
+            xmax=self.ui.lineEdit_maxD.text(),
+            canvas=self.ui.graphicsView_vanPeaks)
+        return
+        
         dminstr = str(self.ui.lineEdit_minD.text()).strip()  
         dmaxstr = str(self.ui.lineEdit_maxD.text()).strip()     
         dbinsizestr = str(self.ui.lineEdit_binsizeD.text()).strip()
@@ -711,37 +681,28 @@ class MainWindow(QtGui.QMainWindow):
     def doSaveData(self):
         """ Save data
         """
-        # check whether it is fine to save 
-        if self._myReducedPDWs is None:
-            self._logError("No reduced diffraction data to save.")
-            #return
-
-        # file type
-        filetype = str(self.ui.comboBox_outputFormat.currentText())
-
-        # get line edit for save data location
-        savedatadir = str(self.ui.lineEdit_outputFileName.text()).strip()
-        if savedatadir != None and os.path.exists(savedatadir) is True:
-            homedir = savedatadir
+        # get exp number and scan number
+        try:
+            # exp and scan
+            expno, scanno = self._uiGetExpScanNumbers()
+            # file type
+            filetype = str(self.ui.comboBox_outputFormat.currentText())
+            # file name
+            savedatadir = str(self.ui.lineEdit_outputFileName.text()).strip()
+            if savedatadir != None and os.path.exists(savedatadir) is True:
+                homedir = savedatadir
+            else:
+                homedir = os.getcwd()
+            # launch a dialog to get data
+            filter = "All files (*.*);;Fullprof (*.dat);;GSAS (*.gsa)"
+            sfilename = str(QtGui.QFileDialog.getSaveFileName(self, 'Save File', 
+                homedir, filter))
+        except NotImplementedError as e:
+            self._logError(str(e))
         else:
-            homedir = os.getcwd()
-
-        # launch a dialog to get data
-        filter = "All files (*.*);;Fullprof (*.dat);;GSAS (*.gsa)"
-        sfilename = str(QtGui.QFileDialog.getSaveFileName(self, 'Save File', homedir, filter))
-
-        print "Get file name: ", sfilename
-   
-        # save
-        # FIXME - ASAP
-        if filetype.lower().count("fullprof") == 1:
-            print "going to save for Fullprof"
-
-        if filetype.lower().count("gsas") == 1:
-            print "going to save GSAS"
-
-        return 
-
+            self._myControl.savePDFile(expno, scanno, filetype, sfilename)
+            
+        return
     
     def doSaveVanRun(self):
         """ Save the vanadium run with peaks removed
@@ -788,31 +749,6 @@ class MainWindow(QtGui.QMainWindow):
     #--------------------------------------------------------
     #
     #--------------------------------------------------------
-
-    def _getBinningParams(self):
-        """ Get binning parameters
-        """
-        xminstr = str(self.ui.lineEdit_xmin.text()).strip()
-        if len(xminstr) == 0:
-            xmin = None
-        else:
-            xmin = float(xminstr)
-
-        xmaxstr = str(self.ui.lineEdit_xmax.text()).strip()
-        if len(xmaxstr) == 0:
-            xmax = None
-        else:
-            xmax = float(xmaxstr)
-
-        binsizestr = str(self.ui.lineEdit_binsize.text()).strip()
-        if len(binsizestr) == 0:
-            binsize = None
-        else:
-            binsize = float(binsizestr)
-
-        return xmin, xmax, binsize
-        
-            
     def _getXLabelFromUnit(self, unit):
         """ Get X-label from unit
         """
@@ -953,6 +889,7 @@ class MainWindow(QtGui.QMainWindow):
         """ Plot reduced data for exp and scan
          self._plotReducedData(exp, scan, self.ui.canvas1, clearcanvas, xlabel=self._currUnit, 0, clearcanvas)
         """
+        # FIXME - NEED TO REFACTOR TOO!
         # print "[DB] Plot reduced data!", "_inPlotState = ", str(self._inPlotState)
 
         # whether the data is load
@@ -980,34 +917,20 @@ class MainWindow(QtGui.QMainWindow):
             
         canvas.addPlot(vecx, vecy, marker=marker, color=color, 
             xlabel=xlabel, ylabel='intensity',label=label)
-        """
-        self.ui.graphicsView_reducedData.addPlot(self._myReducedPDWs.readX(spectrum),
-            self._myReducedPDWs.readY(spectrum), marker=marker, color=color,ylabel='intensity',
-            xlabel=targetunit,label=str(self._myReducedPDWs))
-        """
+            
+        if clearcanvas is True:
+            xmax = max(vecx)
+            xmin = min(vecx)
+            dx = xmax-xmin
+            
+            ymax = max(vecy)
+            ymin = min(vecy)
+            dy = ymax-ymin
+            
+            canvas.setXYLimit(xmin-dx*0.1, xmax+dx*0.1, ymin-dy*0.1, ymax+dy*0.1)
             
         return
 
-    def _plotVanadiumRun(self, spectrum):
-        """ Plot vanadium run in d-space 
-        """
-        if self._myReducedPDWS is None:
-            self._logWarning("No data to plot!")
-            return
-
-        # clear canvas
-        self.ui.graphicsView_vanPeaks.clearAlLines()
-
-        wsname = str(self._myReducedPDWS)
-        api.ConvertToPointData(InputWorkspace=self._myReducedPDWS, OutputWorkspace=wsname)
-        self._myReducedPDWS = AnalysisDataServce.retrieve(wsname)
-
-        self.ui.graphicsView_reducedData.addPlot(self._myReducedPDWs.readX(spectrum),
-            self._myReducedPDWs.readY(spectrum), marker='o', color='read',ylabel='intensity',
-            xlabel=r'd-Spacing $(\AA)$', label=str(self._myReducedPDWs))
-
-        return
-         
      
     def _uiCheckBinningParameters(self, curxmin=None, curxmax=None, curbinsize=None, curunit=None, targetunit=None):
         """ check the binning parameters including xmin, xmax, bin size and target unit
@@ -1052,14 +975,21 @@ class MainWindow(QtGui.QMainWindow):
             
         return (change, xmin, xmax, binsize)
         
-    def _getBinningParams(self):
-        """ Get and check binning parameters
+    def _uiGetBinningParams(self, xmin_w=None, binsize_w=None, xmax_w=None):
+        """ Get binning parameters
+        
+        Return: 
+         - xmin, binsize, xmax
         """
         # get value
-        xmin = str(self.ui.lineEdit_xmin.text())
-        xmax = str(self.ui.lineEdit_xmax.text())
-        binsize = str(self.ui.lineEdit_binsize.text())
-        
+        if xmin_w is None:
+            xmin = str(self.ui.lineEdit_xmin.text())
+            xmax = str(self.ui.lineEdit_xmax.text())
+            binsize = str(self.ui.lineEdit_binsize.text())
+        else:
+            xmin = str(xmin_w)
+            xmax = str(xmax_w)
+            binsize = str(binsize_w)
         
         # set data
         try:
@@ -1076,35 +1006,9 @@ class MainWindow(QtGui.QMainWindow):
         try:
             binsize = float(binsize)
         except ValueError as e:
-            raise NotImplementedError("Error bins ize. 
-
-
-        change = False        
-        # check x-min
-        if len(xmin) > 0:
-            xmin = float(xmin)
-            if ( (self._myMinX is None) or (self._myMinX is not None and abs(xmin-self._myMinX) > 1.0E-5) ):
-                change = True
-        else:
-            xmin = None
-
-        # check x-max
-        if len(xmax) > 0: 
-            xmax = float(xmax)
-            if ( (self._myMaxX is None) or (self._myMaxX is not None and 
-                abs(xmax-self._myMaxX) > 1.0E-5) ):
-                change = True
-        else:
-            xmax = None
-        
-        # check binsize
-        if len(binsize) > 0: 
-            binsize = float(binsize)
-            if ( (self._myBinSize is None) or (self._myBinSize is not None and 
-                abs(binsize-self._myBinSize) > 1.0E-5) ):
-                change = True
-        else:
-            binsize = None
+            raise NotImplementedError("Error bins size cannot be left blank.")
+            
+        return (xmin, binsize, xmax)
         
     def _uiGetExpScanNumbers(self):
         """ Get experiment number and scan number from widgets
@@ -1119,39 +1023,55 @@ class MainWindow(QtGui.QMainWindow):
                 is not set up right as integer." % ())
         
         return (expno, scanno)
-
-
-    def _rebin(self, unit, xmin, binsize, xmax):
-        raise NotImplemented("Removed")
-        """ Rebin the data MD workspace and monitor MD workspace for new bin parameter and/or 
-        units
+        
+    def _uiRebinPlot(self, unit, xmin=None, binsize=None, xmax=None, canvas=None):
+        """ Rebin and plot by reading GUI widgets' value
         """
-        if self._myDataMDWS is None or self._myMonitorMDWS is None:
-            self._logError("Unable to rebin the data because either data MD workspace and \
-                monitor MD workspace is not present.")
+        # experiment number and scan number
+        try:
+            expno, scanno = self._uiGetExpScanNumbers()
+        except NotImplementedError as e:
+            self._logError(str(e))
             return
-
+        
+        # binning parameters
+        if binsize is None:
+            try:    
+                xmin, binsize, xmax = self._uiGetBinningParams()
+            except NotImplementedError as e:
+                self._logError(str(e))
+                return
+        else:
+            xmin, binsize, xmax = self._uiGetBinningParams(xmin, binsize, xmax)
+            
+        # wavelength
         try: 
             wavelength = float(self.ui.lineEdit_wavelength.text())
         except ValueError as e:
-            print e
-            return
-       
-        reducedwsname = self._myDataMDWS.name() + "_" + unit
-        api.ConvertCWPDMDToSpectra(InputWorkspace=self._myDataMDWS,
-            InputMonitorWorkspace=self._myMonitorMDWS,
-            OutputWorkspace=reducedwsname,
-            UnitOutput=unit,
-            BinningParams = "%f, %f, %f" % (xmin, binsize, xmax),
-            NeutronWaveLength=wavelength)
-        outws = AnalysisDataService.retrieve(reducedwsname)
-        if outws is not None: 
-            self._myReducedPDWs = outws
-        else:
-            raise NotImplementedError("Failed to convert unit to %s." % (unit))
+            self._logError(str(e))
+            return  
         
-        return 
+        # rebin
+        try:
+            rebinned = self._myControl.rebin(expno, scanno, unit, wavelength, xmin, binsize, xmax)
+        except NotImplementedError as e:
+            self._logError(str(e))
+            return
+        else:
+            if rebinned:
+                # plot if rebinned
+                xlabel = self._getXLabelFromUnit(unit)
+                
+                # set up default canvas
+                if canvas is None:
+                    canvas = self.ui.graphicsView_reducedData
+                    
+                self._plotReducedData(expno, scanno, canvas, xlabel, 
+                    label=None, clearcanvas=True)
+            else:
+                print "Rebinned = ", str(rebinned)
 
+        return
 
     def _excludeDetectors(self, detids):
         """
