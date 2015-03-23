@@ -1,7 +1,7 @@
 import unittest
 from mantid.kernel import *
 from mantid.api import *
-from mantid.simpleapi import Load, ConvertUnits, CreateSimulationWorkspace, RebinToWorkspace, Scale, DeleteWorkspace
+from mantid.simpleapi import Load, ConvertUnits, SplineInterpolation, ApplyPaalmanPingsCorrection, DeleteWorkspace
 
 
 class ApplyPaalmanPingsCorrectionTest(unittest.TestCase):
@@ -28,44 +28,19 @@ class ApplyPaalmanPingsCorrectionTest(unittest.TestCase):
         self._sample_ws = sample_ws
         self._can_ws = can_ws
 
-        # Create a dummy correction workspace roughtly similar to the sample
-        ws = CreateSimulationWorkspace(Instrument='IRIS',
-                                       BinParams='6,0.1,8',
-                                       UnitX='Wavelength')
+        # Load the corrections workspace
+        corrections = Load('irs26176_graphite002_cyl_Abs.nxs')
 
-        # Rebin the dummy workspace to match the smaple
-        ws = RebinToWorkspace(WorkspaceToRebin=ws,
-                              WorkspaceToMatch=sample_ws)
+        # Interpolate each of the correction factor workspaces
+        # Required to use corrections from the old indirect calculate
+        # corrections routines
+        for factor_ws in corrections:
+            SplineInterpolation(WorkspaceToMatch=sample_ws,
+                                WorkspaceToInterpolate=factor_ws,
+                                OutputWorkspace=factor_ws,
+                                OutputWorkspaceDeriv='')
 
-        # Test correction workspace names
-        self._ass_ws_name = '__ApplyPaalmanPingsCorrection_ass'
-        self._acc_ws_name = '__ApplyPaalmanPingsCorrection_acc'
-        self._acsc_ws_name = '__ApplyPaalmanPingsCorrection_acsc'
-        self._assc_ws_name = '__ApplyPaalmanPingsCorrection_assc'
-
-        # Scale them to make them look like correction factors
-        Scale(InputWorkspace=ws,
-              Factor=0.54,
-              Operation='Multiply',
-              OutputWorkspace=self._ass_ws_name)
-
-        Scale(InputWorkspace=ws,
-              Factor=0.9,
-              Operation='Multiply',
-              OutputWorkspace=self._acc_ws_name)
-
-        Scale(InputWorkspace=ws,
-              Factor=0.54,
-              Operation='Multiply',
-              OutputWorkspace=self._acsc_ws_name)
-
-        Scale(InputWorkspace=ws,
-              Factor=0.56,
-              Operation='Multiply',
-              OutputWorkspace=self._assc_ws_name)
-
-        # Delete the dummy workspace
-        DeleteWorkspace(ws)
+        self._corrections_ws = corrections
 
 
     def tearDown(self):
@@ -73,32 +48,70 @@ class ApplyPaalmanPingsCorrectionTest(unittest.TestCase):
         Remove workspaces from ADS.
         """
 
-        # Sample and can
         DeleteWorkspace(self._sample_ws)
         DeleteWorkspace(self._can_ws)
-
-        # Simulated corrections
-        DeleteWorkspace(self._ass_ws_name)
-        DeleteWorkspace(self._acc_ws_name)
-        DeleteWorkspace(self._acsc_ws_name)
-        DeleteWorkspace(self._assc_ws_name)
+        DeleteWorkspace(self._corrections_ws)
 
 
-    def _verify_workspace(self, ws_name):
+    def _verify_workspace(self, ws, correction_type):
         """
         Do validation on a correction workspace.
 
-        @param ws_name Name of workspace to validate
+        @param ws Workspace to validate
+        @param correction_type Type of correction that should hav ebeen applied
         """
 
-        pass  # TODO
+        # X axis should be in wavelength
+        x_unit = ws.getAxis(0).getUnit().unitID()
+        self.assertEquals(x_unit, 'Wavelength')
+
+        # Sample logs should contain correction type
+        logs = ws.getSampleDetails()
+        self.assertTrue('corrections_type' in logs)
+
+        # Ensure value from sample log is correct
+        if 'corrections_type' in logs:
+            log_correction_type = logs['corrections_type'].value
+            self.assertEqual(log_correction_type, correction_type)
 
 
-    def test(self):
-        """
-        """
+    def test_can_subtraction(self):
+        corr = ApplyPaalmanPingsCorrection(SampleWorkspace=self._sample_ws,
+                                           CanWorkspace=self._can_ws)
 
-        pass  # TODO
+        self._verify_workspace(corr, 'can_subtraction')
+
+
+    def test_can_subtraction_with_can_scale(self):
+        corr = ApplyPaalmanPingsCorrection(SampleWorkspace=self._sample_ws,
+                                           CanWorkspace=self._can_ws,
+                                           CanScaleFactor=0.9)
+
+        self._verify_workspace(corr, 'can_subtraction')
+
+
+    def test_sample_corrections_only(self):
+        corr = ApplyPaalmanPingsCorrection(SampleWorkspace=self._sample_ws,
+                                           CorrectionsWorkspace=self._corrections_ws)
+
+        self._verify_workspace(corr, 'sample_corrections_only')
+
+
+    def test_sample_and_can_corrections(self):
+        corr = ApplyPaalmanPingsCorrection(SampleWorkspace=self._sample_ws,
+                                           CorrectionsWorkspace=self._corrections_ws,
+                                           CanWorkspace=self._can_ws)
+
+        self._verify_workspace(corr, 'sample_and_can_corrections')
+
+
+    def test_sample_and_can_corrections_with_can_scale(self):
+        corr = ApplyPaalmanPingsCorrection(SampleWorkspace=self._sample_ws,
+                                           CorrectionsWorkspace=self._corrections_ws,
+                                           CanWorkspace=self._can_ws,
+                                           CanScaleFactor=0.9)
+
+        self._verify_workspace(corr, 'sample_and_can_corrections')
 
 
 if __name__=="__main__":

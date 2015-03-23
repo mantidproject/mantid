@@ -74,13 +74,16 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
             if self._use_can:
                 # Use container factors
                 self._correct_sample_can()
+                correction_type = 'sample_and_can_corrections'
             else:
                 # Use sample factor only
                 self._correct_sample()
+                correction_type = 'sample_corrections_only'
 
         else:
             # Do simple subtraction
             self._subtract()
+            correction_type = 'can_subtraction'
 
         # Record the container scale factor
         if self._use_can and self._scale_can:
@@ -89,7 +92,19 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
                          LogType='Number',
                          LogText=str(self._can_scale_factor))
 
+        # Record the type of corrections applied
+        AddSampleLog(Workspace=self._output_ws_name,
+                     LogName='corrections_type',
+                     LogType='String',
+                     LogText=correction_type)
+
         self.setPropertyValue('OutputWorkspace', self._output_ws_name)
+
+        # Remove temporary workspaces
+        if self._corrections in mtd:
+            DeleteWorkspace(self._corrections)
+        if self._scaled_container in mtd:
+            DeleteWorkspace(self._scaled_container)
 
 
     def validateInputs(self):
@@ -258,6 +273,8 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
         Divide(LHSWorkspace=self._output_ws_name,
                RHSWorkspace=self._corrections + '_assc',
                OutputWorkspace=self._output_ws_name)
+
+        DeleteWorkspace(corrected_can_ws)
 
 
 # Register algorithm with Mantid
