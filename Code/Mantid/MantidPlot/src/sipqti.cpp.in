@@ -3,11 +3,7 @@
 // that we can't control
 //------------------------------------------------------------------------------
 #if defined(__GNUC__) && !(defined(__INTEL_COMPILER))
-  #pragma GCC diagnostic ignored "-Wuninitialized"
-  #pragma GCC diagnostic ignored "-Wconversion"
-  #pragma GCC diagnostic ignored "-Wunused-variable"
-  #pragma GCC diagnostic ignored "-Wparentheses"
-  #pragma GCC diagnostic ignored "-Wcast-qual"
+  #pragma GCC system_header
 #endif
 
 #include "sip_qtipart0.cpp"
