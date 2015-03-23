@@ -1,10 +1,12 @@
 #include "MantidMDAlgorithms/CutMD.h"
 #include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/Matrix.h"
 #include "MantidKernel/System.h"
 
 using namespace Mantid::API;
+using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
 
 namespace {
@@ -64,6 +66,40 @@ std::vector<std::string> unitsFromProjection(ITableWorkspace_sptr projection) {
   }
   return ret;
 }
+
+Matrix<double> scaleProjection(const Matrix<double> &inMatrix,
+                               std::vector<std::string> inUnits,
+                               std::vector<std::string> outUnits,
+                               IMDEventWorkspace_sptr inWS) {
+  Matrix<double> ret = inMatrix;
+  //Check if we actually need to do anything
+  if (std::equal(inUnits.begin(), inUnits.end(), outUnits.begin()))
+    return ret;
+
+  if(inUnits.size() != outUnits.size())
+    throw std::runtime_error("scaleProjection given different quantity of input and output units");
+
+  const OrientedLattice& orientedLattice = inWS->getExperimentInfo(0)->sample().getOrientedLattice();
+
+  const size_t numDims = inUnits.size();
+  for(size_t i = 0; i < numDims; ++i) {
+    const double dStar = 2 * M_PI * orientedLattice.dstar(inMatrix[i][0], inMatrix[i][1], inMatrix[i][2]);
+    if(inUnits[i] == outUnits[i])
+      continue;
+    else if (inUnits[i] == "a") {
+      //inv angstroms to rlu
+      for(size_t j = 0; j < numDims; ++j)
+        ret[i][j] *= dStar;
+    } else {
+      //rlu to inv angstroms
+      for(size_t j = 0; j < numDims; ++j)
+        ret[i][j] /= dStar;
+    }
+  }
+
+  return ret;
+}
+
 } // anonymous namespace
 
 namespace Mantid {
