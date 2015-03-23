@@ -100,6 +100,58 @@ Matrix<double> scaleProjection(const Matrix<double> &inMatrix,
   return ret;
 }
 
+std::vector<std::pair<double, double>>
+calculateExtents(const Matrix<double> inMatrix,
+                 std::vector<std::pair<double, double>> limits) {
+  Matrix<double> invMat = Matrix<double>(inMatrix);
+  invMat.Invert();
+
+  // iterate through min/max of each dimension, calculate dot(vert, inv_mat)
+  // and store min/max value for each dimension
+  std::vector<double> hRange(2), kRange(2), lRange(2);
+
+  hRange[0] = limits[0].first;
+  hRange[1] = limits[0].second;
+  kRange[0] = limits[1].first;
+  kRange[1] = limits[1].second;
+  lRange[0] = limits[2].first;
+  lRange[1] = limits[2].second;
+
+  // Calculate the minimums and maximums of transformed coordinates
+  Matrix<double> extMat(3, 8);
+  size_t counter = 0;
+  for (auto hIt = hRange.begin(); hIt != hRange.end(); ++hIt)
+    for (auto kIt = kRange.begin(); kIt != kRange.end(); ++kIt)
+      for (auto lIt = lRange.begin(); lIt != lRange.end(); ++lIt) {
+        V3D origPos(*hIt, *kIt, *lIt);
+        for (size_t i = 0; i < 3; ++i) {
+          const V3D other(invMat[i][0], invMat[i][1], invMat[i][2]);
+          extMat[i][counter++] = origPos.scalar_prod(other);
+        }
+      }
+
+  // Reduce down to the minimum and maximum vertices
+  V3D min(extMat[0][0], extMat[1][0], extMat[2][0]);
+  V3D max(extMat[0][0], extMat[1][0], extMat[2][0]);
+
+  for (size_t i = 1; i < 8; ++i) {
+    for (size_t j = 0; j < 3; ++j) {
+      if (extMat[j][i] < min[j])
+        min[j] = extMat[j][i];
+      if (extMat[j][i] > max[j])
+        max[j] = extMat[j][i];
+    }
+  }
+
+  std::vector<std::pair<double, double>> extents(3);
+  for (size_t i = 0; i < 3; ++i) {
+    extents[i].first = min[i];
+    extents[i].second = max[i];
+  }
+
+  return extents;
+}
+
 } // anonymous namespace
 
 namespace Mantid {
