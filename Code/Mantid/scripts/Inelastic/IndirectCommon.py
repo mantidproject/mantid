@@ -545,23 +545,3 @@ def convertParametersToWorkspace(params_table, x_column, param_names, output_nam
         axis.setLabel(i, name)
     mtd[output_name].replaceAxis(1, axis)
 
-
-def addSampleLogs(ws, sample_logs):
-    """
-    Add a dictionary of logs to a workspace.
-
-    The type of the log is inferred by the type of the value passed to the log.
-
-    @param ws - workspace to add logs too.
-    @param sample_logs - dictionary of logs to append to the workspace.
-    """
-
-    for key, value in sample_logs.iteritems():
-        if isinstance(value, bool):
-            log_type = 'String'
-        elif isinstance(value, (int, long, float)):
-            log_type = 'Number'
-        else:
-            log_type = 'String'
-
-        AddSampleLog(Workspace=ws, LogName=key, LogType=log_type, LogText=str(value))
