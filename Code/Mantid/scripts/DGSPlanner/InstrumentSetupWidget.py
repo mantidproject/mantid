@@ -71,7 +71,7 @@ class GonioTableModel(QtCore.QAbstractTableModel):
                 return QtGui.QBrush(QtCore.Qt.white)
             elif (column==3 or column==4) and self.minvalues[row]<=self.maxvalues[row]:
                 return QtGui.QBrush(QtCore.Qt.white)
-            elif column==5 and self.steps[row]>0:
+            elif column==5 and self.steps[row]>0.1:
                 return QtGui.QBrush(QtCore.Qt.white)
             else:
                 return QtGui.QBrush(QtCore.Qt.red)
@@ -131,10 +131,13 @@ class GonioTableModel(QtCore.QAbstractTableModel):
         return True
 
 class InstrumentSetupWidget(QtGui.QWidget):
+    #signal when things change and valid
+    changed=QtCore.pyqtSignal(dict)
     def __init__(self,parent=None):
         # pylint: disable=unused-argument,super-on-old-class
         super(InstrumentSetupWidget,self).__init__()
         metrics=QtGui.QFontMetrics(self.font())
+        self.signaldict=dict()
         #instrument selector
         self.instrumentList=['ARCS','CNCS','HYSPEC','SEQUOIA']
         self.combo = QtGui.QComboBox(self)
@@ -147,10 +150,13 @@ class InstrumentSetupWidget(QtGui.QWidget):
         else:
             self.instrument=self.InstrumentList[0]
             self.combo.setCurrentIndex(0)
+        self.signaldict['instrument']=self.instrument
         self.labelInst=QtGui.QLabel('Instrument')
         #S2 and Ei edits
         self.S2=0.0
         self.Ei=10.0
+        self.signaldict['S2']=self.S2
+        self.signaldict['Ei']=self.Ei
         self.validatorS2=QtGui.QDoubleValidator(-90.,90.,5,self)
         self.validatorEi=QtGui.QDoubleValidator(1.,10000.,5,self)
         self.labelS2=QtGui.QLabel('HYSPEC S2')
@@ -180,6 +186,7 @@ class InstrumentSetupWidget(QtGui.QWidget):
         self.goniomodel = GonioTableModel(values,self)
         self.tableViewGon.setModel(self.goniomodel)
         self.tableViewGon.update()
+        self.signaldict.update(values)
         #goniometer figure
         self.figure=Figure(figsize=(2,2))
         self.figure.patch.set_facecolor('white')
@@ -205,8 +212,8 @@ class InstrumentSetupWidget(QtGui.QWidget):
         self.editS2.textEdited.connect(self.checkValidInputs)
         self.editEi.textEdited.connect(self.checkValidInputs)
         self.combo.activated[str].connect(self.instrumentSelected)
-        #call instrumentSelected once. this will update everything else
-        self.instrumentSelected(self.instrument)
+        #call instrumentSelected once
+        self.instrumentSelected(self.instrument)    
         #connect goniometer change with figure
         self.goniomodel.changed.connect(self.updateFigure)
 
@@ -270,39 +277,42 @@ class InstrumentSetupWidget(QtGui.QWidget):
         self.updateAll()
 
     def instrumentSelected(self,text):
+        d=dict()
         self.instrument=text
+        d['instrument']=str(self.instrument)
         if self.instrument=="HYSPEC":
             self.labelS2.show()
             self.editS2.show()
         else:
             self.labelS2.hide()
             self.editS2.hide()
-        self.updateAll()
+        self.updateAll(**d)
 
     def checkValidInputs(self, *dummy_args, **dummy_kwargs):
         sender = self.sender()
         state = sender.validator().validate(sender.text(), 0)[0]
+        d=dict()
         if state == QtGui.QValidator.Acceptable:
             color = '#ffffff'
             if sender==self.editS2:
                 self.S2=float(sender.text())
+                d['S2']=self.S2
             if sender==self.editEi:
                 self.Ei=float(sender.text())
+                d['Ei']=self.Ei
         else:
             color = '#ff0000'
         sender.setStyleSheet('QLineEdit { background-color: %s }' % color)
         if state == QtGui.QValidator.Acceptable:
-            self.updateAll()
+            self.updateAll(**d)
 
-    def updateAll(self):
-        pass
-        #if mantid.mtd.doesExist("__InstrumentSetupWidgetWorkspace"):
-        #    __w=mantid.mtd["__InstrumentSetupWidgetWorkspace"]
-        #else:
-        #    __w=mantid.simpleapi.CreateSingleValuedWorkspace(0., OutputWorkspace="__InstrumentSetupWidgetWorkspace")
-        #mantid.simpleapi.AddSampleLog(__w,LogName="Ei",LogText=str(self.Ei), LogType="Number Series")
-        #mantid.simpleapi.AddSampleLog(__w,LogName="s2",LogText=str(self.S2), LogType="Number Series")
-        #mantid.simpleapi.LoadInstrument(__w,InstrumentName=str(self.instrument))
+    def updateAll(self,*args,**kwargs):
+        if len(args)>0:
+            self.signaldict.update(args[0])
+        if kwargs!={}:
+            self.signaldict.update(kwargs)
+        self.changed.emit(self.signaldict)
+        print self.signaldict
 
 if __name__=='__main__':
     app=QtGui.QApplication(sys.argv)

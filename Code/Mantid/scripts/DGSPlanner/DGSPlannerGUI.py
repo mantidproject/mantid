@@ -24,12 +24,13 @@ class DGSPlannerGUI(QtGui.QWidget):
         self.matrix=MatrixUBInputWidget.MatrixUBInputWidget(self.ol)
         self.ublayout.addStretch(1)
         self.ublayout.addWidget(self.matrix)
-        self.matrix.UBmodel.changed.connect(self.printUB)
-        self.matrix.UBmodel.changed.connect(self.classic.updateOL)
-        self.classic.changed.connect(self.matrix.UBmodel.updateOL)
         self.layout().addLayout(self.ublayout)
         self.dimensionWidget=DimensionSelectorWidget.DimensionSelectorWidget(self)
         self.layout().addWidget(self.dimensionWidget)
+        #connections        
+        self.matrix.UBmodel.changed.connect(self.printUB)
+        self.matrix.UBmodel.changed.connect(self.classic.updateOL)
+        self.classic.changed.connect(self.matrix.UBmodel.updateOL)
 
     @QtCore.pyqtSlot(mantid.geometry.OrientedLattice)
     def printUB(self,ol):
@@ -38,6 +39,6 @@ class DGSPlannerGUI(QtGui.QWidget):
 if __name__=='__main__':
     app=QtGui.QApplication(sys.argv)
     orl=mantid.geometry.OrientedLattice(2,3,4,90,90,90)
-    mainForm=DGSPlannerGUI(orl)
+    mainForm=DGSPlannerGUI()
     mainForm.show()
     sys.exit(app.exec_())

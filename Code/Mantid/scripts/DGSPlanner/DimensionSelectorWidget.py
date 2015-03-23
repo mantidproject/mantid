@@ -7,19 +7,57 @@ try:
 except ImportError:
     QString = type("")
 
+
+def returnValid(validity,teststring,pos):
+    if QString==str:
+        return (validity,teststring,pos)
+    else:
+        return (validity,pos)
+
+
 class EmptyOrDoubleValidator(QtGui.QValidator):
     def __init__(self, parent):
         super(EmptyOrDoubleValidator,self).__init__()
-    def validate(self,string, pos):
-        if len(string)==0:
-            return (QtGui.QValidator.Acceptable,pos)
+    def validate(self,teststring, pos):
+        if len(str(teststring))==0:
+            return returnValid(QtGui.QValidator.Acceptable,teststring,pos)
         else:
             try:
-                dummy=float(string)
-                return (QtGui.QValidator.Acceptable,pos)
+                dummy=float(str(teststring))
+                return returnValid(QtGui.QValidator.Acceptable,teststring,pos)
             except ValueError:
-                return (QtGui.QValidator.Invalid,pos)
+                try:
+                    #this is the case when you start typing - or 1e or 1e- and putting 1 at the end would make it a float
+                    dummy=float(str(teststring)+'1')
+                    return returnValid(QtGui.QValidator.Intermediate,teststring,pos)
+                except ValueError:
+                    return returnValid(QtGui.QValidator.Invalid,teststring,pos)
 
+class V3DValidator(QtGui.QValidator):
+    def __init__(self, parent):
+        super(V3DValidator,self).__init__()
+    
+    
+    def validate(self,teststring, pos):
+        parts=str(teststring).split(',')
+        if len(parts)>3:
+            return returnValid(QtGui.QValidator.Invalid,teststring,pos)
+        if len(parts)==3:
+            try:
+                dummy_0=float(parts[0])
+                dummy_1=float(parts[1])
+                dummy_2=float(parts[2])
+                return returnValid(QtGui.QValidator.Acceptable,teststring,pos)
+            except ValueError:  
+                try:
+                    dummy_0=float(parts[0]+'1')
+                    dummy_1=float(parts[1]+'1')
+                    dummy_2=float(parts[2]+'1')
+                    return returnValid(QtGui.QValidator.Intermediate,teststring,pos)
+                except ValueError:
+                    return returnValid(QtGui.QValidator.Invalid,teststring,pos)
+        return returnValid(QtGui.QValidator.Intermediate,teststring,pos)          
+                     
 def FloatToQString(value):
     if numpy.isfinite(value):
         return QString(format(value,'.3f'))
@@ -46,8 +84,11 @@ class DimensionSelectorWidget(QtGui.QWidget):
         self._labelStep=QtGui.QLabel('Step')
         #lineedits
         self._editBasis1=QtGui.QLineEdit()
+        self._editBasis1.setValidator(self.V3DValidator)
         self._editBasis2=QtGui.QLineEdit()
+        self._editBasis2.setValidator(self.V3DValidator)
         self._editBasis3=QtGui.QLineEdit()
+        self._editBasis3.setValidator(self.V3DValidator)
         self._editMin1=QtGui.QLineEdit()
         self._editMin1.setValidator(self.doubleValidator)
         self._editMin2=QtGui.QLineEdit()
@@ -118,11 +159,28 @@ class DimensionSelectorWidget(QtGui.QWidget):
         state = validator.validate(sender.text(), 0)[0]
         if state == QtGui.QValidator.Acceptable:
             color = '#ffffff'
+        elif state == QtGui.QValidator.Intermediate:
+            color = '#ffaaaa'
         else:
             color = '#ff0000'
         sender.setStyleSheet('QLineEdit { background-color: %s }' % color)
-        #if state == QtGui.QValidator.Acceptable:
-        #    self.validateAll()
+        if state == QtGui.QValidator.Acceptable:
+            self.validateBasis()
+    
+    def validateBasis(self):
+        color = '#ff0000'
+        if self._editBasis1.validator().validate(self._editBasis1.text(), 0)[0]==QtGui.QValidator.Acceptable and \
+           self._editBasis2.validator().validate(self._editBasis2.text(), 0)[0]==QtGui.QValidator.Acceptable and \
+           self._editBasis3.validator().validate(self._editBasis3.text(), 0)[0]==QtGui.QValidator.Acceptable:
+            b1=numpy.fromstring(str(self._editBasis1.text()), sep=',')
+            b2=numpy.fromstring(str(self._editBasis2.text()), sep=',')
+            b3=numpy.fromstring(str(self._editBasis3.text()), sep=',')
+            print b1,b2,b3, self._editBasis1.text(),self._editBasis2.text(),self._editBasis3.text(),type(self._editBasis2.text())
+            if numpy.abs(numpy.inner(b1,numpy.cross(b2,b3)))>1e-5:
+                color='#ffffff'
+        self._editBasis1.setStyleSheet('QLineEdit { background-color: %s }' % color)
+        self._editBasis2.setStyleSheet('QLineEdit { background-color: %s }' % color)    
+        self._editBasis3.setStyleSheet('QLineEdit { background-color: %s }' % color)
         
     def updateGui(self):
         self._editBasis1.setText(QString(self.basis[0]))
