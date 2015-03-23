@@ -161,7 +161,7 @@ class IndirectCylinderAbsorption(DataProcessorAlgorithm):
         DeleteWorkspace(sample_wave_ws)
 
         # Record sample logs
-        prog.report('Recording logs')
+        prog.report('Recording sample logs')
         sample_log_workspaces = [self._output_ws, self._ass_ws]
         sample_logs = [('sample_shape', 'cylinder'),
                        ('sample_filename', self._sample_ws_name),
@@ -172,7 +172,7 @@ class IndirectCylinderAbsorption(DataProcessorAlgorithm):
             sample_logs.append(('can_scale', self._can_scale))
             if self._use_can_corrections:
                 sample_log_workspaces.append(self._acc_ws)
-                AddSampleLog(Workspace=self._output_ws, LogName='can_thickness', LogType='String', LogText=str(can_thickness))
+                AddSampleLog(Workspace=self._output_ws, LogName='can_thickness', LogType='Number', LogText=str(can_thickness))
 
         log_names = [item[0] for item in sample_logs]
         log_values = [item[1] for item in sample_logs]
@@ -236,7 +236,7 @@ class IndirectCylinderAbsorption(DataProcessorAlgorithm):
 
     def validateInputs(self):
         """
-        Validate options
+        Validate algorithm options.
         """
 
         self._setup()

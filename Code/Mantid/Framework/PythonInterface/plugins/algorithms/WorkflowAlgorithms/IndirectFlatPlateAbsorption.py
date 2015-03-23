@@ -92,7 +92,7 @@ class IndirectFlatPlateAbsorption(DataProcessorAlgorithm):
 
 
     def PyExec(self):
-        from IndirectCommon import getEfixed, addSampleLogs
+        from IndirectCommon import getEfixed
 
         self._setup()
 
@@ -169,24 +169,27 @@ class IndirectFlatPlateAbsorption(DataProcessorAlgorithm):
         DeleteWorkspace(sample_wave_ws)
 
         prog.report('Recording samle logs')
-        sample_logs = {'sample_shape': 'flatplate',
-                       'sample_filename': self._sample_ws,
-                       'sample_height': self._sample_height,
-                       'sample_width': self._sample_width,
-                       'sample_thickness': self._sample_thickness,
-                       'element_size': self._element_size}
-        addSampleLogs(self._ass_ws, sample_logs)
-        addSampleLogs(self._output_ws, sample_logs)
+        sample_log_workspaces = [self._output_ws, self._ass_ws]
+        sample_logs = [('sample_shape', 'flatplate'),
+                       ('sample_filename', self._sample_ws),
+                       ('sample_height', self._sample_height),
+                       ('sample_width', self._sample_width),
+                       ('sample_thickness', self._sample_thickness),
+                       ('element_size', self._element_size)]
 
         if self._can_ws_name is not None:
-            AddSampleLog(Workspace=self._output_ws, LogName='can_filename', LogType='String', LogText=str(self._can_ws_name))
-            AddSampleLog(Workspace=self._output_ws, LogName='can_scale', LogType='String', LogText=str(self._can_scale))
+            sample_logs.append(('can_filename', self._can_ws_name))
+            sample_logs.append(('can_scale', self._can_scale))
             if self._use_can_corrections:
-                addSampleLogs(self._acc_ws, sample_logs)
-                AddSampleLog(Workspace=self._acc_ws, LogName='can_filename', LogType='String', LogText=str(self._can_ws_name))
-                AddSampleLog(Workspace=self._acc_ws, LogName='can_scale', LogType='String', LogText=str(self._can_scale))
-                AddSampleLog(Workspace=self._output_ws, LogName='can_thickness1', LogType='String', LogText=str(self._can_front_thickness))
-                AddSampleLog(Workspace=self._output_ws, LogName='can_thickness2', LogType='String', LogText=str(self._can_back_thickness))
+                sample_log_workspaces.append(self._acc_ws)
+                AddSampleLog(Workspace=self._output_ws, LogName='can_thickness_1', LogType='Number', LogText=str(self._can_front_thickness))
+                AddSampleLog(Workspace=self._output_ws, LogName='can_thickness_2', LogType='Number', LogText=str(self._can_back_thickness))
+
+        log_names = [item[0] for item in sample_logs]
+        log_values = [item[1] for item in sample_logs]
+
+        for ws_name in sample_log_workspaces:
+            AddSampleLogMultiple(Workspace=ws_name, LogNames=log_names, LogValues=log_values)
 
         self.setProperty('OutputWorkspace', self._output_ws)
 
@@ -250,7 +253,11 @@ class IndirectFlatPlateAbsorption(DataProcessorAlgorithm):
         self._setup()
         issues = dict()
 
-        # TODO
+        if self._use_can_corrections and self._can_chemical_formula == '':
+            issues['CanChemicalFormula'] = 'Must be set to use can corrections'
+
+        if self._use_can_corrections and self._can_ws_name is None:
+            issues['UseCanCorrections'] = 'Must specify a can workspace to use can corections'
 
         return issues
 
