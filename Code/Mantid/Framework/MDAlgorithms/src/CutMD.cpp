@@ -1,9 +1,21 @@
 #include "MantidMDAlgorithms/CutMD.h"
+#include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/System.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
+
+namespace {
+std::pair<double, double> getDimensionExtents(IMDEventWorkspace_sptr ws,
+                                              size_t index) {
+  if (!ws)
+    throw std::runtime_error(
+        "Invalid workspace passed to getDimensionExtents.");
+  auto dim = ws->getDimension(index);
+  return std::make_pair(dim->getMinimum(), dim->getMaximum());
+}
+} // anonymous namespace
 
 namespace Mantid {
 namespace MDAlgorithms {
