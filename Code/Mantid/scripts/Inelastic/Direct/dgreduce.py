@@ -3,7 +3,7 @@
 import Direct.DirectEnergyConversion as DRC
 from mantid.simpleapi import *
 from mantid.kernel import funcreturns
-
+from mantid import api
 
 # the class which is responsible for data reduction
 global Reducer
@@ -134,6 +134,7 @@ def arb_units(wb_run,sample_run,ei_guess,rebin,map_file='default',monovan_run=No
 # --------------------------------------------------------------------------------------------------------
     if sample_run:
         Reducer.sample_run = sample_run
+        sample_run = None
     try:
         n,r=funcreturns.lhs_info('both')
         wksp_out=r[0]
@@ -149,7 +150,37 @@ def arb_units(wb_run,sample_run,ei_guess,rebin,map_file='default',monovan_run=No
 
     return res
 
-
+def runs_are_equal(ws1,ws2):
+    """Compare two run numbers, provided either as run numbers, 
+       or as workspaces or as ws names"""
+    if ws1 == ws2:
+        return True
+    #-----------------------------------------------
+    def get_run_num(name_or_ws):
+        err = None
+        try:
+            if isinstance(name_or_ws,api.MatrixWorkspace):
+                run_num = name_or_ws.getRunNumber()
+            elif name_or_ws in mtd: # this is also throw Boost.Python.ArgumentError error if mtd not accepts it
+                ws = mtd[name_or_ws]
+                run_num = ws.getRunNumber()
+            else:
+                raise AttributeError
+        except Exception as err:
+            pass
+        if not err is None:
+            raise AttributeError("Input parameter is neither workspace nor ws name")
+        return run_num
+    #-----------------------------------------------
+    try:
+        run_num1 = get_run_num(ws1)
+    except AttributeError:
+        return False
+    try:
+        run_num2 = get_run_num(ws2)
+    except AttributeError:
+        return False
+    return run_num1==run_num2
 
 def abs_units(wb_for_run,sample_run,monovan_run,wb_for_monovanadium,samp_rmm,samp_mass,ei_guess,rebin,map_file='default',monovan_mapfile='default',**kwargs):
     """
@@ -240,13 +271,14 @@ def abs_units(wb_for_run,sample_run,monovan_run,wb_for_monovanadium,samp_rmm,sam
 
     if sample_run:
         Reducer.sample_run = sample_run
+        sample_run = None
+
     try:
         n,r=funcreturns.lhs_info('both')
         results_name=r[0]
-
     except:
         results_name = Reducer.prop_man.get_sample_ws_name()
-    if wb_for_run == wb_for_monovanadium: # wb_for_monovanadium property does not accept duplicated workspace
+    if runs_are_equal(wb_for_run,wb_for_monovanadium):# wb_for_monovanadium property does not accept duplicated workspace
         wb_for_monovanadium = None        # if this value is none, it is constructed to be equal to wb_for_run
 
     wksp_out = arb_units(wb_for_run,sample_run,ei_guess,rebin,map_file,monovan_run,wb_for_monovanadium,**kwargs)

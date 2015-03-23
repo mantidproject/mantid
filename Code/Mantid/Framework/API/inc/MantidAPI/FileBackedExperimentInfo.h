@@ -37,7 +37,7 @@ namespace API {
 class MANTID_API_DLL FileBackedExperimentInfo : public ExperimentInfo {
 public:
   /// Constructor
-  FileBackedExperimentInfo(::NeXus::File *file, const std::string &path);
+  FileBackedExperimentInfo(const std::string & filename, const std::string &path);
 
   ExperimentInfo *cloneExperimentInfo() const;
 
@@ -99,8 +99,8 @@ private:
   void populateFromFile() const;
 
   mutable bool m_loaded;
-  ::NeXus::File *m_file;
-  std::string m_path;
+  std::string m_filename;
+  std::string m_nxpath;
 };
 
 } // namespace API

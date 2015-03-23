@@ -24,15 +24,19 @@ using namespace Mantid::API;
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
-LoadLogsForSNSPulsedMagnet::LoadLogsForSNSPulsedMagnet() {
-  // TODO Auto-generated constructor stub
+LoadLogsForSNSPulsedMagnet::LoadLogsForSNSPulsedMagnet(): m_delaytimefilename(""),
+     m_pulseidfilename(""), m_delayfileinoldformat(false), m_numpulses(0),
+     m_numchoppers(0), m_delaytimes(NULL),  m_pulseidseconds(),
+     m_pulseidnanoseconds(), WS() {
 }
 
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
 LoadLogsForSNSPulsedMagnet::~LoadLogsForSNSPulsedMagnet() {
-  // TODO Auto-generated destructor stub
+  for (unsigned int i = 0; i < m_numpulses; i++)
+    delete[] m_delaytimes[i];
+  delete[] m_delaytimes;
 }
 
 //----------------------------------------------------------------------------------------------

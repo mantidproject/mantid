@@ -1,4 +1,4 @@
-setlocal enbaleextensions enabledelayedexpansion
+setlocal enableextensions enabledelayedexpansion
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: WINDOWS SCRIPT TO DRIVE THE SYSTEM TESTS OF MANTID
 ::
@@ -46,8 +46,8 @@ if not EXIST %WORKSPACE%\build\CMakeCache.txt (
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Build step
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-"%CMAKE_BIN_DIR%\cmake" --build . -- StandardTestData
-"%CMAKE_BIN_DIR%\cmake" --build . -- SystemTestData
+msbuild /nologo /nr:false /p:Configuration=Release StandardTestData.vcxproj
+msbuild /nologo /nr:false /p:Configuration=Release SystemTestData.vcxproj
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Run the tests

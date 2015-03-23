@@ -4,6 +4,7 @@
 #if defined(__INTEL_COMPILER)
   #pragma warning disable 1170
 #endif
+
 #include <pqServer.h>
 #include <pqActiveObjects.h>
 #include <pqServerManagerModel.h>
@@ -16,6 +17,10 @@
 #include <vtkSMPropertyHelper.h>
 #include <vtkSMProxy.h>
 #include <vtkSMDoubleVectorProperty.h>
+
+#if defined(__INTEL_COMPILER)
+  #pragma warning enable 1170
+#endif
 
 #include <cfloat>
 #include <QPair>
@@ -160,6 +165,13 @@ namespace SimpleGui
     // Set the color scale output
     VsiColorScale vsiColorScale;
 
+    // If either the min or max value are at the end of the double spectrum, we might only have a peak Ws visible, 
+    // we need to hedge for that
+    if (minValue == DBL_MAX || maxValue == -DBL_MAX) {
+      minValue = defaultValue;
+      maxValue = defaultValue;
+    }
+
     // Account for possible negative data. If min value is negative and max value is larger than 100, then set to default
     // else set to three orders of magnitude smaller than the max value
     if (minValue < 0 && maxValue > 100)
@@ -196,7 +208,9 @@ namespace SimpleGui
     // Check if source is custom filter
     if (QString(proxy->GetXMLName()).contains("MantidParaViewScaleWorkspace") ||
         QString(proxy->GetXMLName()).contains("MDEWRebinningCutter") ||
-        QString(proxy->GetXMLName()).contains("MantidParaViewSplatterPlot"))
+        QString(proxy->GetXMLName()).contains("MantidParaViewSplatterPlot") ||
+        QString(proxy->GetXMLName()).contains("MantidParaViewPeaksFilter"))
+
     {
       minValue = vtkSMPropertyHelper(proxy,"MinValue").GetAsDouble();
       maxValue = vtkSMPropertyHelper(proxy,"MaxValue").GetAsDouble();
@@ -215,7 +229,8 @@ namespace SimpleGui
     }
 
     // Check if Peak Workspace. This workspace should not contribute to colorscale
-    if (QString(proxy->GetXMLName()).contains("Peaks Source"))
+    if (QString(proxy->GetXMLName()).contains("Peaks Source") ||
+        QString(proxy->GetXMLName()).contains("SinglePeakMarkerSource"))
     {
       minValue = DBL_MAX;
       maxValue = -DBL_MAX;

@@ -217,6 +217,8 @@ class BaseRefWidget(BaseWidget):
         _full_file_name = file
         tmpWks = LoadEventNexus(Filename=_full_file_name,MetaDataOnly='1')
 
+        isSi = False
+
         #mt1 = mtd['tmpWks']
         #mt_run = mt1.getRun()
         mt_run = tmpWks.getRun()
@@ -232,14 +234,20 @@ class BaseRefWidget(BaseWidget):
 
         #s1h, s2h, s1w and s2w
         s1h = mt_run.getProperty('S1VHeight').value[0]
-        s2h = mt_run.getProperty('S2VHeight').value[0]
-        try:
-            s1w = mt_run.getProperty('S1HWidth').value[0]
-        except:
-            s1w = 'N/A'
-        s2w = mt_run.getProperty('S2HWidth').value[0]
+        s1w = mt_run.getProperty('S1HWidth').value[0]
 
-        return [tthd,ths, lambda_requested, s1h, s2h, s1w, s2w]
+        try:
+            s2h = mt_run.getProperty('SiVHeight').value[0]
+            isSi = True
+        except:
+            s2h = mt_run.getProperty('S2VHeight').value[0]
+
+        try:
+            s2w = mt_run.getProperty('SiHWidth').value[0]
+        except:
+            s2w = mt_run.getProperty('S2HWidth').value[0]
+
+        return [tthd,ths, lambda_requested, s1h, s2h, s1w, s2w, isSi]
 
     def data_run_number_validated(self):
         """
@@ -291,6 +299,14 @@ class BaseRefWidget(BaseWidget):
             s2w_value_string = '{0:.2f}'.format(s2w_value)
             self._summary.s2w.setText(s2w_value_string)
 
+            isSi = metadata[7]
+            print isSi
+            if isSi:
+                self._summary.label_25.setText("Si height:")
+                self._summary.label_27.setText("Si width:")
+            else:
+                self._summary.label25.setText("S2 height:")
+                self._summary.label27.setText("S2 width:")
 #            self._summary.data_run_number_processing.hide()
         except:
             pass

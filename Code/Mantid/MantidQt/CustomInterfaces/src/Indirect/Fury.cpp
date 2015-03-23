@@ -68,10 +68,10 @@ namespace IDA
 
     m_furTree->setFactoryForManager(m_dblManager, m_dblEdFac);
 
-    m_rangeSelectors["FuryRange"] = new MantidQt::MantidWidgets::RangeSelector(m_uiForm.ppPlot);
+    auto xRangeSelector = m_uiForm.ppPlot->addRangeSelector("FuryRange");
 
     // signals / slots & validators
-    connect(m_rangeSelectors["FuryRange"], SIGNAL(selectionChangedLazy(double, double)), this, SLOT(rsRangeChangedLazy(double, double)));
+    connect(xRangeSelector, SIGNAL(selectionChangedLazy(double, double)), this, SLOT(rsRangeChangedLazy(double, double)));
     connect(m_dblManager, SIGNAL(valueChanged(QtProperty*, double)), this, SLOT(updateRS(QtProperty*, double)));
     connect(m_dblManager, SIGNAL(valueChanged(QtProperty*, double)), this, SLOT(updatePropertyValues(QtProperty*, double)));
     connect(m_uiForm.dsInput, SIGNAL(dataReady(const QString&)), this, SLOT(plotInput(const QString&)));
@@ -252,6 +252,8 @@ namespace IDA
     m_uiForm.ppPlot->clear();
     m_uiForm.ppPlot->addSpectrum("Sample", workspace, 0);
 
+    auto xRangeSelector = m_uiForm.ppPlot->getRangeSelector("FuryRange");
+
     try
     {
       QPair<double, double> range = m_uiForm.ppPlot->getCurveRange("Sample");
@@ -260,7 +262,7 @@ namespace IDA
       const std::string instrName(workspace->getInstrument()->getName());
       if(instrName == "BASIS")
       {
-        m_rangeSelectors["FuryRange"]->setRange(range.first, range.second);
+        xRangeSelector->setRange(range.first, range.second);
         m_dblManager->setValue(m_properties["ELow"], rounded_min);
         m_dblManager->setValue(m_properties["EHigh"], rounded_max);
         m_dblManager->setValue(m_properties["EWidth"], 0.0004);
@@ -285,13 +287,13 @@ namespace IDA
         //check incase we have a really small range
         if (fabs(rounded_min) > 0 && fabs(rounded_max) > 0)
         {
-          m_rangeSelectors["FuryRange"]->setRange(rounded_min, rounded_max);
+          xRangeSelector->setRange(rounded_min, rounded_max);
           m_dblManager->setValue(m_properties["ELow"], rounded_min);
           m_dblManager->setValue(m_properties["EHigh"], rounded_max);
         }
         else
         {
-          m_rangeSelectors["FuryRange"]->setRange(range.first, range.second);
+          xRangeSelector->setRange(range.first, range.second);
           m_dblManager->setValue(m_properties["ELow"], range.first);
           m_dblManager->setValue(m_properties["EHigh"], range.second);
         }
@@ -327,10 +329,12 @@ namespace IDA
 
   void Fury::updateRS(QtProperty* prop, double val)
   {
+    auto xRangeSelector = m_uiForm.ppPlot->getRangeSelector("FuryRange");
+
     if(prop == m_properties["ELow"])
-      m_rangeSelectors["FuryRange"]->setMinimum(val);
+      xRangeSelector->setMinimum(val);
     else if(prop == m_properties["EHigh"])
-      m_rangeSelectors["FuryRange"]->setMaximum(val);
+      xRangeSelector->setMaximum(val);
   }
 
 } // namespace IDA

@@ -221,9 +221,9 @@ void Stitch1DMany::exec() {
         outName += wsName;
       }
 
-      IAlgorithm_sptr stitchAlg =
-          AlgorithmManager::Instance().create("Stitch1DMany");
+      IAlgorithm_sptr stitchAlg = createChildAlgorithm("Stitch1DMany");
       stitchAlg->initialize();
+      stitchAlg->setAlwaysStoreInADS(true);
       stitchAlg->setProperty("InputWorkspaces", toProcess);
       stitchAlg->setProperty("OutputWorkspace", outName);
       stitchAlg->setProperty("StartOverlaps", m_startOverlaps);
@@ -247,9 +247,9 @@ void Stitch1DMany::exec() {
 
     const std::string groupName = this->getProperty("OutputWorkspace");
 
-    IAlgorithm_sptr groupAlg =
-        AlgorithmManager::Instance().create("GroupWorkspaces");
+    IAlgorithm_sptr groupAlg = createChildAlgorithm("GroupWorkspaces");
     groupAlg->initialize();
+    groupAlg->setAlwaysStoreInADS(true);
     groupAlg->setProperty("InputWorkspaces", toGroup);
     groupAlg->setProperty("OutputWorkspace", groupName);
     groupAlg->execute();

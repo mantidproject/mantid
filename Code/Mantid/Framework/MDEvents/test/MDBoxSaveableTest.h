@@ -717,7 +717,9 @@ static void destroySuite(MDBoxSaveableTest * suite) { delete suite; }
 
     bc->getFileIO()->closeFile();    
     do_deleteNexusFile("MDBoxBinningxest.nxs");
-  }
+    //suppress unused variable when built without openmp 
+    UNUSED_ARG(parallel) 
+ }
 
   void test_fileBackEnd_binningOperations()
   {

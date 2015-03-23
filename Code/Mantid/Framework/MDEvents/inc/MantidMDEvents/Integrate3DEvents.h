@@ -54,24 +54,23 @@ namespace MDEvents {
                  <http://doxygen.mantidproject.org>
  */
 
-typedef Mantid::Kernel::V3D V3D;
 typedef Mantid::Kernel::Matrix<double> DblMatrix;
-typedef boost::unordered_map<int64_t, std::vector<V3D>> EventListMap;
-typedef boost::unordered_map<int64_t, V3D> PeakQMap;
+typedef boost::unordered_map<int64_t, std::vector<std::pair<double, Mantid::Kernel::V3D> > > EventListMap;
+typedef boost::unordered_map<int64_t, Mantid::Kernel::V3D> PeakQMap;
 
 class DLLExport Integrate3DEvents {
 public:
   /// Construct object to store events around peaks and integrate peaks
-  Integrate3DEvents(std::vector<V3D> const &peak_q_list, DblMatrix const &UBinv,
+  Integrate3DEvents(std::vector<std::pair<double, Mantid::Kernel::V3D> > const &peak_q_list, DblMatrix const &UBinv,
                     double radius);
 
   ~Integrate3DEvents();
 
   /// Add event Q's to lists of events near peaks
-  void addEvents(std::vector<V3D> const &event_qs);
+  void addEvents(std::vector<std::pair<double, Mantid::Kernel::V3D> > const &event_qs);
 
   /// Find the net integrated intensity of a peak, using ellipsoidal volumes
-  boost::shared_ptr<const Mantid::Geometry::PeakShape> ellipseIntegrateEvents(V3D const &peak_q, bool specify_size,
+  boost::shared_ptr<const Mantid::Geometry::PeakShape> ellipseIntegrateEvents(Mantid::Kernel::V3D const &peak_q, bool specify_size,
                               double peak_radius, double back_inner_radius,
                               double back_outer_radius,
                               std::vector<double> &axes_radii, double &inti,
@@ -79,34 +78,34 @@ public:
 
 private:
   /// Calculate the number of events in an ellipsoid centered at 0,0,0
-  static int numInEllipsoid(std::vector<V3D> const &events,
-                            std::vector<V3D> const &directions,
+  static double numInEllipsoid(std::vector<std::pair<double, Mantid::Kernel::V3D> > const &events,
+                            std::vector<Mantid::Kernel::V3D> const &directions,
                             std::vector<double> const &sizes);
 
   /// Calculate the 3x3 covariance matrix of a list of Q-vectors at 0,0,0
-  static void makeCovarianceMatrix(std::vector<V3D> const &events,
+  static void makeCovarianceMatrix(std::vector<std::pair<double, Mantid::Kernel::V3D> > const &events,
                                    DblMatrix &matrix, double radius);
 
   /// Calculate the eigen vectors of a 3x3 real symmetric matrix
   static void getEigenVectors(DblMatrix const &cov_matrix,
-                              std::vector<V3D> &eigen_vectors);
+                              std::vector<Mantid::Kernel::V3D> &eigen_vectors);
 
   /// Calculate the standard deviation of 3D events in a specified direction
-  static double stdDev(std::vector<V3D> const &events, V3D const &direction,
+  static double stdDev(std::vector<std::pair<double, Mantid::Kernel::V3D> > const &events, Mantid::Kernel::V3D const &direction,
                        double radius);
 
   /// Form a map key as 10^12*h + 10^6*k + l from the integers h, k, l
   static int64_t getHklKey(int h, int k, int l);
 
   /// Form a map key for the specified q_vector.
-  int64_t getHklKey(V3D const &q_vector);
+  int64_t getHklKey(Mantid::Kernel::V3D const &q_vector);
 
   /// Add an event to the vector of events for the closest h,k,l
-  void addEvent(V3D event_Q);
+  void addEvent(std::pair<double, Mantid::Kernel::V3D> event_Q);
 
   /// Find the net integrated intensity of a list of Q's using ellipsoids
   boost::shared_ptr<const Mantid::DataObjects::PeakShapeEllipsoid> ellipseIntegrateEvents(
-      std::vector<V3D> const &ev_list, std::vector<V3D> const &directions,
+      std::vector<std::pair<double, Mantid::Kernel::V3D> > const &ev_list, std::vector<Mantid::Kernel::V3D> const &directions,
       std::vector<double> const &sigmas, bool specify_size, double peak_radius,
       double back_inner_radius, double back_outer_radius,
       std::vector<double> &axes_radii, double &inti, double &sigi);

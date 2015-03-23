@@ -3,7 +3,7 @@
 #include "MantidMDEvents/MDEvent.h"
 #include "MantidMDEvents/MDLeanEvent.h"
 #include "MantidAPI/BoxController.h"
-#include "MantidAPI/ExperimentInfo.h"
+#include "MantidAPI/FileBackedExperimentInfo.h"
 #include "MantidMDEvents/MDEventFactory.h"
 #include <Poco/File.h>
 
@@ -285,7 +285,7 @@ void MDBoxFlatTree::loadBoxStructure(const std::string &fileName, int &nDim,
       m_mEI = boost::make_shared<Mantid::API::MultipleExperimentInfos>(
           Mantid::API::MultipleExperimentInfos());
 
-    loadExperimentInfos(hFile.get(), m_mEI);
+    loadExperimentInfos(hFile.get(), fileName, m_mEI);
   }
 
   // close workspace group
@@ -395,12 +395,15 @@ void MDBoxFlatTree::saveExperimentInfos(::NeXus::File *const file,
 *
 * @param file :: the pointer to the properly opened nexus data file where the
 *experiment info groups can be found.
+* @param filename :: the filename of the opened NeXus file. Use for the file-backed case
 * @param mei :: MDEventWorkspace/MDHisto to load experiment infos to or rather
 *pointer to the base class of this workspaces (which is an experimentInfo)
+* @param lazy :: If true, use the FileBackedExperimentInfo class to only load
+* the data from the file when it is requested
 */
-void MDBoxFlatTree::loadExperimentInfos(
-    ::NeXus::File *const file,
-    boost::shared_ptr<Mantid::API::MultipleExperimentInfos> mei) {
+void MDBoxFlatTree::loadExperimentInfos(::NeXus::File *const file, const std::string &filename,
+    boost::shared_ptr<Mantid::API::MultipleExperimentInfos> mei,
+    bool lazy) {
   // First, find how many experimentX blocks there are
   std::map<std::string, std::string> entries;
   file->getEntries(entries);
@@ -443,25 +446,31 @@ void MDBoxFlatTree::loadExperimentInfos(
   // Now go through in order, loading and adding
   itr = ExperimentBlockNum.begin();
   for (; itr != ExperimentBlockNum.end(); itr++) {
-
     std::string groupName = "experiment" + Kernel::Strings::toString(*itr);
-
-    file->openGroup(groupName, "NXgroup");
-    API::ExperimentInfo_sptr ei(new API::ExperimentInfo);
-    std::string parameterStr;
-    try {
-      // Get the sample, logs, instrument
-      ei->loadExperimentInfoNexus(file, parameterStr);
-      // Now do the parameter map
-      ei->readParameterMap(parameterStr);
+    if (lazy) {
+      auto ei = boost::make_shared<API::FileBackedExperimentInfo>(
+        filename, file->getPath() + "/" + groupName);
       // And add it to the mutliple experiment info.
       mei->addExperimentInfo(ei);
-    } catch (std::exception &e) {
-      g_log.information("Error loading section '" + groupName +
-                        "' of nxs file.");
-      g_log.information(e.what());
+     }
+    else {
+      auto ei = boost::make_shared<API::ExperimentInfo>();
+      file->openGroup(groupName, "NXgroup");
+      std::string parameterStr;
+      try {
+        // Get the sample, logs, instrument
+        ei->loadExperimentInfoNexus(file, parameterStr);
+        // Now do the parameter map
+        ei->readParameterMap(parameterStr);
+        // And add it to the mutliple experiment info.
+        mei->addExperimentInfo(ei);
+      } catch (std::exception &e) {
+        g_log.information("Error loading section '" + groupName +
+                          "' of nxs file.");
+        g_log.information(e.what());
+      }
+      file->closeGroup();
     }
-    file->closeGroup();
   }
 }
 /**Export existing experiment info defined in the box structure to target
@@ -736,6 +745,9 @@ MDBoxFlatTree::createOrOpenMDWSgroup(const std::string &fileName, int &nDims,
  * dimensions etc.*/
 void MDBoxFlatTree::saveWSGenericInfo(::NeXus::File *const file,
                                       API::IMDWorkspace_const_sptr ws) {
+  // Write out the coordinate system
+  file->writeData("coordinate_system",
+                  static_cast<uint32_t>(ws->getSpecialCoordinateSystem()));
 
   // Save the algorithm history under "process"
   ws->getHistory().saveNexus(file);

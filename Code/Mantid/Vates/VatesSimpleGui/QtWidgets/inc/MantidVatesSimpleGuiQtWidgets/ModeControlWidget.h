@@ -6,6 +6,7 @@
 
 #include <map>
 #include <QWidget>
+#include <QString>
 
 namespace Mantid
 {
@@ -74,7 +75,7 @@ public slots:
   void setToSelectedView(ModeControlWidget::Views view);
 
   /// Convert a string into an enum
-  ModeControlWidget::Views getViewFromString(std::string view);
+  ModeControlWidget::Views getViewFromString(QString view);
 
 signals:
   /**
@@ -107,7 +108,7 @@ protected slots:
 
 private:
   Ui::ModeControlWidgetClass ui; ///< The mode control widget's UI form
-  std::map<std::string, Views> mapFromStringToView; //< Holds the mapping from the a string to an associated enum
+  std::map<QString, Views> mapFromStringToView; //< Holds the mapping from the a string to an associated enum
 };
 
 }

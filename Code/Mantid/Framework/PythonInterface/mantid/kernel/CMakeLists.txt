@@ -57,6 +57,7 @@ set ( SRC_FILES
   src/Converters/PyArrayType.cpp
   src/Converters/PyObjectToMatrix.cpp
   src/Converters/PyObjectToV3D.cpp
+  src/Converters/PyObjectToVMD.cpp
   src/Converters/WrapWithNumpy.cpp
   src/Registry/PropertyWithValueFactory.cpp
   src/Registry/SequenceTypeHandler.cpp
@@ -77,6 +78,7 @@ set ( INC_FILES
   ${HEADER_DIR}/kernel/Converters/PyArrayType.h
   ${HEADER_DIR}/kernel/Converters/PyObjectToMatrix.h
   ${HEADER_DIR}/kernel/Converters/PyObjectToV3D.h
+  ${HEADER_DIR}/kernel/Converters/PyObjectToVMD.h
   ${HEADER_DIR}/kernel/Converters/PySequenceToVector.h
   ${HEADER_DIR}/kernel/Environment/CallMethod.h
   ${HEADER_DIR}/kernel/Environment/ErrorHandling.h

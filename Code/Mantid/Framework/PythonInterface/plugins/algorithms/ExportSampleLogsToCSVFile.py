@@ -58,11 +58,14 @@ class ExportSampleLogsToCSVFile(PythonAlgorithm):
         timezones = ["UTC", "America/New_York", "Asia/Shanghai", "Australia/Sydney", "Europe/London", "GMT+0",\
                 "Europe/Paris", "Europe/Copenhagen"]
 
-        self.declareProperty("TimeZone", "America/New_York", StringListValidator(timezones))
+        description = "Sample logs recorded in NeXus files (in SNS) are in UTC time.  TimeZone " + \
+            "can allow the algorithm to output the log with local time."
+        self.declareProperty("TimeZone", "America/New_York", StringListValidator(timezones), description)
 
         # Log time tolerance
         self.declareProperty("TimeTolerance", 0.01,
-                             "If any 2 log entries with log times within the time tolerance, they will be recorded in one line. Unit is second. ")
+                             "If any 2 log entries with log times within the time tolerance, " + \
+                             "they will be recorded in one line. Unit is second. ")
 
         return
 

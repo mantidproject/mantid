@@ -28,12 +28,12 @@
 #include <vtkSMInputProperty.h>
 #include <vtkSMProxyProperty.h>
 #include <vtkSMProxyListDomain.h>
-#include <QList>
+
 
 #if defined(__INTEL_COMPILER)
   #pragma warning enable 1170
 #endif
-
+#include <QList>
 #include "boost/shared_ptr.hpp"
 #include <Poco/ActiveResult.h>
 
@@ -94,7 +94,6 @@ namespace Mantid
       /**
        * Catch the deletion of either the rebinned or the original workspace.
        * @param wsName The name of the workspace.
-       * @param ws The handle to the workspace
        */
       void RebinnedSourcesManager::preDeleteHandle(const std::string &wsName, const boost::shared_ptr<Mantid::API::Workspace>)
       {
@@ -153,6 +152,7 @@ namespace Mantid
 
       /**
        * Get workspace name and type
+       * @param source The pipeline source.
        * @param workspaceName Reference to workspace name.
        * @param workspaceType Reference to workspace type.
        */
@@ -382,7 +382,7 @@ namespace Mantid
 
       /**
        * Stop keeping tabs on the specific workspace pair
-       * @param rebinnedWorspace The name of the rebinned workspace.
+       * @param rebinnedWorkspace The name of the rebinned workspace.
        */
       void RebinnedSourcesManager::untrackWorkspaces(std::string rebinnedWorkspace)
       {
@@ -504,16 +504,14 @@ namespace Mantid
         pqObjectBuilder* builder = pqApplicationCore::instance()->getObjectBuilder();
         pqPipelineFilter* filter1 = qobject_cast<pqPipelineFilter*>(source1->getConsumer(0));
 
-        vtkSMProxy* proxy1 = NULL;
-        pqPipelineSource* newPipelineElement = NULL;
-        pqPipelineFilter* newFilter = NULL;
-
         pqPipelineSource* endOfSource2Pipeline = source2;
 
         while(filter1)
         {
+          vtkSMProxy* proxy1 = NULL;
           proxy1 = filter1->getProxy();
-
+          pqPipelineSource* newPipelineElement = NULL;
+          pqPipelineFilter* newFilter = NULL;
           // Move source2 to its end.
           while (endOfSource2Pipeline->getNumberOfConsumers() > 0)
           {

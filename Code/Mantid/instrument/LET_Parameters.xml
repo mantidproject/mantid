@@ -26,7 +26,7 @@
      files with the same name and different extension are found
  -->
 <parameter name="data_file_ext" type="string">
-   <value val=".nxs"/>
+   <value val=".raw"/>
 </parameter>
 <!-- The name of the hard mask file to use together with diag masking -->
 <parameter name="hard_mask_file" type="string">
@@ -61,7 +61,7 @@
 </parameter>
 
 <!-- Monitor used to estimate total current on the sample  while normalizing by monitor 1.  -->
-<parameter name="norm-mon1-spec" >
+<parameter name="norm-mon1-spec">
   <value val="40961"/>
 </parameter>
   
@@ -390,6 +390,17 @@
      Hard Mask file, provided separately or as additional hard mask file is ignored in this case -->
 <parameter name="save_and_reuse_masks"  type="bool">
    <value val="False"/>
+</parameter>
+
+<!-- The semicolon separated list of possible log names, containing information on crystl rotation.
+     First found log will be used togethere with motor_offset to identify crystal rotation 
+     (psi in Horace) -->
+<parameter name="motor_log_names"  type="string">
+   <value val="CCR_ROT;wccr"/>
+</parameter>
+<!-- Initial value used to identify crytsal rotation angle psi=motor_offset+wccr.timeAverageValue()  -->
+<parameter name="motor_offset">
+   <value val="None"/>
 </parameter>
 
 

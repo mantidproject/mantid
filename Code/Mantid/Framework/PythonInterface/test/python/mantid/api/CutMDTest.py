@@ -58,18 +58,17 @@ class CutMDTest(unittest.TestCase):
         
     def test_wrong_projection_workspace_format_wrong_column_numbers(self):
         projection = CreateEmptyTableWorkspace()
-        projection.addColumn("double", "u")
+        projection.addColumn("str", "name")
         # missing other columns
         self.assertRaises(RuntimeError, CutMD, InputWorkspace=self.__in_md, Projection=projection, OutputWorkspace="out_ws", P1Bin=[0.1], P2Bin=[0.1], P3Bin=[0.1], CheckAxes=False)
         
     def test_wrong_table_workspace_format_wrong_row_numbers(self):
         projection = CreateEmptyTableWorkspace()
         # Correct number of columns, and names
-        projection.addColumn("double", "u")
-        projection.addColumn("double", "v")
-        projection.addColumn("double", "w")
+        projection.addColumn("str", "name")
+        projection.addColumn("str", "value")
         projection.addColumn("double", "offset")
-        projection.addColumn("string", "type")
+        projection.addColumn("str", "type")
         # Incorrect number of rows i.e. zero in this case as none added.
         self.assertRaises(RuntimeError, CutMD, InputWorkspace=self.__in_md, Projection=projection, OutputWorkspace="out_ws", P1Bin=[0.1], P2Bin=[0.1], P3Bin=[0.1], CheckAxes=False)
         
@@ -86,16 +85,21 @@ class CutMDTest(unittest.TestCase):
                     
         projection = CreateEmptyTableWorkspace()
         # Correct number of columns, and names
-        projection.addColumn("double", "u")
-        projection.addColumn("double", "v")
+        projection.addColumn("str", "name")
+        projection.addColumn("str", "value")
+        projection.addColumn("double", "offset")
         projection.addColumn("str", "type")
-        projection.addRow([scale_x,0,"r"])
-        projection.addRow([0,scale_y,"r"])  
-        projection.addRow([0,0,"r"])   
+
+        projection.addRow(["u", "%s,0,0" % scale_x, 0, "r"])
+        projection.addRow(["v", "0,%s,0" % scale_y, 0, "r"])
+
+        u = map(float,projection.cell(0,1).split(","))
+        v = map(float,projection.cell(1,1).split(","))
+        scale_z = np.cross(v,u)[-1]
+        projection.addRow(["w", "0,0,%s" % scale_z, 0, "r"])
                     
         out_md = CutMD(to_cut, Projection=projection, P1Bin=[0.1], P2Bin=[0.1], P3Bin=[0.1])
         
-        scale_z = np.cross(projection.column(1), projection.column(0))[-1]
         '''
         Here we check that the corners in HKL end up in the expected positions when transformed into the new scaled basis
         provided by the W transform (projection table)
@@ -120,14 +124,14 @@ class CutMDTest(unittest.TestCase):
         
         projection = CreateEmptyTableWorkspace()
         # Correct number of columns, and names
-        projection.addColumn("double", "u")
-        projection.addColumn("double", "v")
-        projection.addColumn("double", "w")
-        projection.addColumn("double", "offsets")
+        projection.addColumn("str", "name")
+        projection.addColumn("str", "value")
+        projection.addColumn("double", "offset")
         projection.addColumn("str", "type")
-        projection.addRow([1,-1, 0, 0, "r"])
-        projection.addRow([1, 1, 0, 0, "r"])  
-        projection.addRow([0, 0, 1, 0, "r"])  
+
+        projection.addRow(["u", "1,1,0", 0.0, "r"])
+        projection.addRow(["v","-1,1,0", 0.0, "r"])
+        projection.addRow(["w", "0,0,1", 0.0, "r"])
                     
         out_md = CutMD(to_cut, Projection=projection, P1Bin=[0.1], P2Bin=[0.1], P3Bin=[0.1], NoPix=True)
         
@@ -147,11 +151,6 @@ class CutMDTest(unittest.TestCase):
         
         self.assertTrue(isinstance(out_md, IMDHistoWorkspace), "Expect that the output was an IMDHistoWorkspace given the NoPix flag.")
         
-        run = out_md.getExperimentInfo(0).run()
-        w_matrix = run.getLogData("W_MATRIX").value
-        w_matrix = list(w_matrix)
-        self.assertEquals([1,1,0,-1,1,0,0,0,1], w_matrix, "W-matrix should have been set, but should be an identity matrix")
-        
     def test_orthogonal_slice_with_cropping(self):
          # We create a fake workspace and check to see that using bin inputs for cropping works
         to_cut = CreateMDWorkspace(Dimensions=3, Extents=[-1,1,-1,1,-1,1], Names='H,K,L', Units='U,U,U')
@@ -161,14 +160,14 @@ class CutMDTest(unittest.TestCase):
         
         projection = CreateEmptyTableWorkspace()
         # Correct number of columns, and names
-        projection.addColumn("double", "u")
-        projection.addColumn("double", "v")
-        projection.addColumn("double", "w")
-        projection.addColumn("double", "offsets")
+        projection.addColumn("str", "name")
+        projection.addColumn("str", "value")
+        projection.addColumn("double", "offset")
         projection.addColumn("str", "type")
-        projection.addRow([1, 0, 0, 0, "r"])
-        projection.addRow([0, 1, 0, 0, "r"])  
-        projection.addRow([0, 0, 1, 0, "r"])  
+
+        projection.addRow(["u", "1,0,0", 0, "r"])
+        projection.addRow(["v", "0,1,0", 0, "r"])
+        projection.addRow(["w", "0,0,1", 0, "r"])
                     
         '''
         Specify the cropping boundaries as part of the bin inputs.
