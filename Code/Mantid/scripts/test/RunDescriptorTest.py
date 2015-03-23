@@ -90,11 +90,11 @@ class RunDescriptorTest(unittest.TestCase):
         self.assertTrue(ok)
         self.assertTrue(len(file)>0)
 
-        ext = PropertyManager.sample_run.get_file_ext()
+        ext = PropertyManager.sample_run.get_fext()
         self.assertEqual(ext,'.raw')
 
         PropertyManager.sample_run.set_file_ext('nxs')
-        ext = PropertyManager.sample_run.get_file_ext()
+        ext = PropertyManager.sample_run.get_fext()
         self.assertEqual(ext,'.nxs')
 
         test_dir = config.getString('defaultsave.directory')
@@ -132,7 +132,7 @@ class RunDescriptorTest(unittest.TestCase):
         PropertyManager.sample_run.set_file_ext('nxs')
 
         ws = PropertyManager.sample_run.get_workspace()
-        self.assertEqual(PropertyManager.sample_run.get_file_ext(),'.raw')
+        self.assertEqual(PropertyManager.sample_run.get_fext(),'.raw')
 
         self.assertTrue(isinstance(ws, api.Workspace))
 
@@ -154,6 +154,34 @@ class RunDescriptorTest(unittest.TestCase):
         self.assertTrue(isinstance(mon_ws, api.Workspace))
         self.assertEqual(mon_ws.getNumberHistograms(),3)
         self.assertEqual(mon_ws.getIndexFromSpectrumNumber(3),2)
+
+    def test_copy_spectra2monitors_heterogen(self):
+        propman  = self.prop_man
+        run_ws = CreateSampleWorkspace( Function='Multiple Peaks', WorkspaceType = 'Event',NumBanks=1, BankPixelWidth=5, NumEvents=100)
+        run_ws_monitors = CreateSampleWorkspace( Function='Multiple Peaks', WorkspaceType = 'Histogram',NumBanks=2, BankPixelWidth=1, NumEvents=100)
+
+        run_ws_monitors = Rebin(run_ws_monitors,Params='1,-0.01,20000')
+        x=run_ws_monitors.readX(0)
+        dx = x[1:]-x[:-1]
+        min_step0 = min(dx)
+
+        propman.monovan_run = run_ws
+        propman.spectra_to_monitors_list = 3
+
+        mon_ws = PropertyManager.monovan_run.get_monitors_ws()
+        self.assertTrue(isinstance(mon_ws, api.Workspace))
+        self.assertEqual(mon_ws.getNumberHistograms(),3)
+        self.assertEqual(mon_ws.getIndexFromSpectrumNumber(3),2)
+
+        x=mon_ws.readX(0)
+        dx = x[1:]-x[:-1]
+        min_step1 = min(dx)
+        max_step1 = max(dx)
+
+        self.assertAlmostEqual(min_step0,min_step1,5)
+        self.assertAlmostEqual(max_step1,min_step1,5)
+
+
 
     def test_ws_name(self):
         run_ws = CreateSampleWorkspace( Function='Multiple Peaks', NumBanks=1, BankPixelWidth=4, NumEvents=100)
@@ -492,6 +520,27 @@ class RunDescriptorTest(unittest.TestCase):
         self.assertTrue(PropertyManager.wb_for_monovan_run.has_own_value())
         self.assertEqual(propman.wb_run,2000)
         self.assertEqual(propman.wb_for_monovan_run,3000)
+
+    def test_get_correct_fext(self):
+        propman  = self.prop_man
+        propman.sample_run = None
+
+        def_fext= propman.data_file_ext
+        real_fext=PropertyManager.sample_run.get_fext()
+        self.assertEqual(def_fext,real_fext)
+
+        propman.data_file_ext = '.bla_bla'
+        real_fext=PropertyManager.sample_run.get_fext()
+        self.assertEqual('.bla_bla',real_fext)
+
+        propman.sample_run = 'MAR11001.nxs'
+        real_fext=PropertyManager.sample_run.get_fext()
+        self.assertEqual('.nxs',real_fext)
+
+        propman.data_file_ext = '.raw'
+        real_fext=PropertyManager.sample_run.get_fext()
+        self.assertEqual('.nxs',real_fext)
+
 
 
 

@@ -13,6 +13,11 @@ This algorithms is to collect the all the counts on the detectors among
 a set of measurements, which belong to a same experiment run,
 and bin them according to detector's position, i.e., :math:`2\theta`. 
 
+In this algorithm's name, ConvertCWPDMDToSpectra, *CW* stands for constant wave 
+(reactor-source instrument); *PD* stands for powder diffraction; and *MD* 
+stands for MDEventWorkspace because the input of this algorithms are two 
+MDEventWorkspaces. 
+
 This algorithm takes 2 MDEventWorkspaces as inputs.  
 One stores the detectors' counts;
 and the other stores the monitors' counts. 

@@ -31,7 +31,7 @@ void CacheGeometryGenerator::Generate() {
   if (mNoOfVertices <=
       0) // There are no triangles defined to use OpenCascade handler
   {
-#ifndef NO_OPENCASCADE
+#ifdef ENABLE_OPENCASCADE
     OCGeometryHandler h(Obj);
     mNoOfVertices = h.NumberOfPoints();
     mNoOfTriangles = h.NumberOfTriangles();

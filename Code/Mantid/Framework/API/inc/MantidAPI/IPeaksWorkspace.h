@@ -55,10 +55,6 @@ public:
   /// Destructor
   virtual ~IPeaksWorkspace();
 
-  // boost::shared_ptr<IPeaksWorkspace> clone() = 0;
-  // void appendFile( std::string filename, Mantid::Geometry::Instrument_sptr
-  // inst) = 0;
-
   //---------------------------------------------------------------------------------------------
   /** @return the number of peaks
    */
@@ -99,13 +95,14 @@ public:
 
   //---------------------------------------------------------------------------------------------
   /** Create an instance of a Peak
-   * @param QLabFrame :: Q of the center of the peak in the lab frame, in reciprocal space
-   * @param detectorDistance :: Optional distance between the sample and the detector. Calculated if not provided.
+   * @param QLabFrame :: Q of the center of the peak in the lab frame, in
+   * reciprocal space
+   * @param detectorDistance :: Optional distance between the sample and the
+   * detector. Calculated if not provided.
    * @return a pointer to a new Peak object.
    */
   virtual IPeak *createPeak(Mantid::Kernel::V3D QLabFrame,
                             boost::optional<double> detectorDistance) const = 0;
-
 
   /**
    * Create an instance of a peak using a V3D
@@ -136,16 +133,16 @@ public:
    * @param coordinateSystem : Special Q3D coordinate system to use.
    */
   virtual void setCoordinateSystem(
-      const Mantid::Kernel::SpecialCoordinateSystem coordinateSystem) = 0;
-
+      const Kernel::SpecialCoordinateSystem coordinateSystem) = 0;
   //---------------------------------------------------------------------------------------------
   /**
    * Get the special coordinate system.
    * @returns special Q3D coordinate system to use being used by this
    * PeaksWorkspace object. Probably the one the workspace was generated with.
    */
-  virtual Mantid::Kernel::SpecialCoordinateSystem
+  virtual Kernel::SpecialCoordinateSystem
   getSpecialCoordinateSystem() const = 0;
+
   virtual std::vector<std::pair<std::string, std::string>>
   peakInfo(Kernel::V3D QFrame, bool labCoords) const = 0;
   virtual int peakInfoNumber(Kernel::V3D qLabFrame, bool labCoords) const = 0;

@@ -350,12 +350,11 @@ if ( NOT OPENGL_FOUND )
 endif ()
 
 # ===================== Open Cascade ===================
-if (NOT NO_OPENCASCADE)
+if (ENABLE_OPENCASCADE)
   find_package ( OpenCascade REQUIRED )
   include_directories ( system ${OPENCASCADE_INCLUDE_DIR} )
   set (SRC_FILES ${SRC_FILES} ${OPENCASCADE_SRC} )
-else ()
-  add_definitions ( -DNO_OPENCASCADE )
+  add_definitions ( -DENABLE_OPENCASCADE )
 endif ()
 
 # A few defines needed for OpenCascade on the Mac

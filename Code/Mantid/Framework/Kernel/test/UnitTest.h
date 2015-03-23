@@ -1325,6 +1325,11 @@ public:
 
   }
 
+  /// Test unit Degress
+  void testDegress() {
+    TS_ASSERT_EQUALS(degrees.caption(), "Scattering angle");
+    TS_ASSERT_EQUALS(degrees.unitID(), "Degrees");
+  }
 
 private:
   Units::Label label;
@@ -1340,6 +1345,7 @@ private:
   Units::Momentum k_i;
   Units::SpinEchoLength delta;
   Units::SpinEchoTime tau;
+  Units::Degrees degrees;
 };
 
 #endif /*UNITTEST_H_*/
