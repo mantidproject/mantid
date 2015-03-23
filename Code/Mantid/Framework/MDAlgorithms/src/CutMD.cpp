@@ -1,6 +1,7 @@
 #include "MantidMDAlgorithms/CutMD.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/Matrix.h"
 #include "MantidKernel/System.h"
 
 using namespace Mantid::API;
@@ -14,6 +15,35 @@ std::pair<double, double> getDimensionExtents(IMDEventWorkspace_sptr ws,
         "Invalid workspace passed to getDimensionExtents.");
   auto dim = ws->getDimension(index);
   return std::make_pair(dim->getMinimum(), dim->getMaximum());
+}
+
+Matrix<double> matrixFromProjection(ITableWorkspace_sptr projection) {
+  if (!projection) {
+    return Matrix<double>(3, 3, true /* makeIdentity */);
+  }
+
+  const size_t numDims = projection->rowCount();
+  Matrix<double> ret(3, 3);
+  for (size_t i = 0; i < numDims; i++) {
+    const std::string name =
+        projection->getColumn("name")->cell<std::string>(i);
+    const std::string valueStr =
+        projection->getColumn("value")->cell<std::string>(i);
+    std::vector<std::string> valueStrVec;
+    boost::split(valueStrVec, valueStr, boost::is_any_of(","));
+
+    std::vector<double> valueDblVec;
+    for (auto it = valueStrVec.begin(); it != valueStrVec.end(); ++it)
+      valueDblVec.push_back(boost::lexical_cast<double>(*it));
+
+    if (name == "u")
+      ret.setRow(0, valueDblVec);
+    else if (name == "v")
+      ret.setRow(1, valueDblVec);
+    else if (name == "w")
+      ret.setRow(2, valueDblVec);
+  }
+  return ret;
 }
 } // anonymous namespace
 
