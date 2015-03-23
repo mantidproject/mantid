@@ -45,7 +45,7 @@ Kernel::Property *LogParser::createLogProperty(const std::string &logFName,
   }
 
   // Change times and new values read from file
-  std::map<std::string, std::string> change_times;
+  std::multimap<std::string, std::string> change_times;
 
   // Read in the data and determin if it is numeric
   std::string str, old_data;
@@ -61,18 +61,18 @@ Kernel::Property *LogParser::createLogProperty(const std::string &logFName,
       continue;
     }
 
-    if (!Kernel::TimeSeriesProperty<double>::isTimeString(str)) {
-      // if the line doesn't start with a time treat it as a continuation of the
-      // previous data
-      if (change_times.empty() || isNumeric) { // if there are no previous data
-        std::string mess =
-            "Cannot parse log file " + logFName + ". Line:" + str;
-        g_log.error(mess);
-        throw std::logic_error(mess);
-      }
-      change_times[stime] += std::string(" ") + str;
-      continue;
-    }
+    //if (!Kernel::TimeSeriesProperty<double>::isTimeString(str)) {
+    //  // if the line doesn't start with a time treat it as a continuation of the
+    //  // previous data
+    //  if (change_times.empty() || isNumeric) { // if there are no previous data
+    //    std::string mess =
+    //        "Cannot parse log file " + logFName + ". Line:" + str;
+    //    g_log.error(mess);
+    //    throw std::logic_error(mess);
+    //  }
+    //  change_times[stime] += std::string(" ") + str;
+    //  continue;
+    //}
     stime = str.substr(0, 19);
     sdata = str.substr(19);
 
@@ -86,12 +86,7 @@ Kernel::Property *LogParser::createLogProperty(const std::string &logFName,
     isNumeric = !istr.fail();
     old_data = sdata;
 
-    // if time is repeated and the data aren't numeric append the new string to
-    // the old one
-    if (!isNumeric && change_times[stime].size() > 0)
-      change_times[stime] += std::string(" ") + sdata;
-    else
-      change_times[stime] = sdata;
+    change_times.insert( std::make_pair(stime,sdata) );
   }
 
   if (change_times.empty())
@@ -100,7 +95,7 @@ Kernel::Property *LogParser::createLogProperty(const std::string &logFName,
   if (isNumeric) {
     Kernel::TimeSeriesProperty<double> *logv =
         new Kernel::TimeSeriesProperty<double>(name);
-    std::map<std::string, std::string>::iterator it = change_times.begin();
+    auto it = change_times.begin();
     for (; it != change_times.end(); ++it) {
       std::istringstream istr(it->second);
       double d;
@@ -111,7 +106,7 @@ Kernel::Property *LogParser::createLogProperty(const std::string &logFName,
   } else {
     Kernel::TimeSeriesProperty<std::string> *logv =
         new Kernel::TimeSeriesProperty<std::string>(name);
-    std::map<std::string, std::string>::iterator it = change_times.begin();
+    auto it = change_times.begin();
     for (; it != change_times.end(); ++it) {
       logv->addValue(it->first, it->second);
     }
@@ -218,7 +213,7 @@ LogParser::LogParser(const Kernel::Property *log) : m_nOfPeriods(1) {
 
   m_nOfPeriods = 1;
 
-  std::map<Kernel::DateAndTime, std::string>::const_iterator it = logm.begin();
+  auto it = logm.begin();
 
   for (; it != logm.end(); ++it) {
     std::string scom;
@@ -253,7 +248,7 @@ Kernel::TimeSeriesProperty<bool> *LogParser::createPeriodLog(int period) const {
   Kernel::TimeSeriesProperty<bool> *p =
       new Kernel::TimeSeriesProperty<bool>("period " + ostr.str());
   std::map<Kernel::DateAndTime, int> pMap = periods->valueAsMap();
-  std::map<Kernel::DateAndTime, int>::const_iterator it = pMap.begin();
+  auto it = pMap.begin();
   if (it->second != period)
     p->addValue(it->first, false);
   for (; it != pMap.end(); ++it)
