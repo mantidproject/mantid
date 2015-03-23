@@ -260,7 +260,7 @@ def FitDialog(*args, **kwargs):
 
 def CutMD(*args, **kwargs):
     """
-    Description TODO
+    Slices multidimensional workspaces using input projection information and binning limits.
     """
     (in_wss,) = _get_mandatory_args('CutMD', ["InputWorkspace"], *args, **kwargs)
 
@@ -285,10 +285,8 @@ def CutMD(*args, **kwargs):
     #Take what we were given
     if "OutputWorkspace" in kwargs:
         out_names = kwargs["OutputWorkspace"]
-        print "taking from kwargs"
     else:
         out_names = list(lhs[1])
-        print "taking from lhs: " + str(out_names)
 
     #Ensure the output names we were given are valid
     if handling_multiple_workspaces:
