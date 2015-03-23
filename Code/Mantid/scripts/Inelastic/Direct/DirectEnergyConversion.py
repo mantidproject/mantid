@@ -841,15 +841,15 @@ class DirectEnergyConversion(object):
 
         spectra_id = self.prop_man.multirep_tof_specta_list
         if not spectra_id or len(spectra_id) == 0:
-            self.prop_man.log("*** WARNING! no mulitrep spectra found in IDF! using first existing spectra number\n"\
-                              "             This is wrong unless sample-detector distances of the instrument are all equal",\
+            self.prop_man.log("*** WARNING! no multirep spectra found in IDF! using first existing spectra number\n"\
+                              "             This is wrong unless sample-detector distances of the instrument are all equal.",\
                               'warning')
             spectra_id = [1]
 
         eMin,dE,eMax = PropertyManager.energy_bins.get_abs_range(self.prop_man)
         ei = PropertyManager.incident_energy.get_current()
         en_list = [eMin,eMin + dE,eMax - dE,eMax]
-        TOF_range = DirectEnergyConversion.get_TOF_for_energies(workspace,en_list,spectra_id,ei)
+        TOF_range = self.get_TOF_for_energies(workspace,en_list,spectra_id,ei)
 
 
         def process_block(tof_range):
@@ -872,10 +872,11 @@ class DirectEnergyConversion(object):
         else:
                tof_min,t_step,tof_max = process_block(TOF_range)
         #end
-        return (tof_min,t_step,tof_max)
+        # add 5% for detectors positions in IDF not corresponding to shifted positions
+        return (0.95*tof_min,t_step,1.05*tof_max)
+        #return (tof_min,t_step,tof_max)
     #
-    @staticmethod
-    def get_TOF_for_energies(workspace,energy_list,specID_list,ei=None,debug_mode=False):
+    def get_TOF_for_energies(self,workspace,energy_list,specID_list,ei=None,debug_mode=False):
         """ Method to find what TOF range corresponds to given energy range
            for given workspace and detectors.
 
@@ -889,6 +890,36 @@ class DirectEnergyConversion(object):
            Returns:
            list of TOF corresponding to input energies list.
         """
+        if ei:
+            ei_guess = PropertyManager.incident_energy.get_current()
+            fix_ei = self.fix_ei
+            ei_mon_spectra = self.ei_mon_spectra
+            monitor_ws = PropertyManager.sample_run.get_monitors_ws(ei_mon_spectra,workspace)
+            if monitor_ws is None: # no shifting to monitor position
+                src_name = None
+                mon1_peak = 0
+            else:
+                mon_2_spec_ID = int(ei_mon_spectra[0])
+                # Calculate the incident energy and TOF when the particles access Monitor1
+                try:
+                    ei,mon1_peak,mon1_index,tzero = \
+                    GetEi(InputWorkspace=monitor_ws, Monitor1Spec=mon_2_spec_ID,
+                        Monitor2Spec=int(ei_mon_spectra[1]),
+                        EnergyEstimate=ei_guess,FixEi=fix_ei)
+                    mon1_det = monitor_ws.getDetector(mon1_index)
+                    mon1_pos = mon1_det.getPos()
+                    src_name = monitor_ws.getInstrument().getSource().getName()
+                except :
+                    src_name = None
+                    mon1_peak = 0
+                    self.prop_man.log("*** WARNING: not able to identify energy peak "\
+                                      "while looking for TOF range corresponding to energy range: {0}\n"\
+                                      "    Using assumption that IDF starts counting at moderator T=0".\
+                                       format(energy_list),'warning')
+        else:
+            mon1_peak = 0
+        #end if
+
         template_ws_name = '_energy_range_ws'
         range_ws_name = '_TOF_range_ws'
         y = [1] * (len(energy_list) - 1)
@@ -898,11 +929,14 @@ class DirectEnergyConversion(object):
             ExtractSingleSpectrum(InputWorkspace=workspace, OutputWorkspace=template_ws_name, WorkspaceIndex=ind)
             if ei:
                 CreateWorkspace(OutputWorkspace=range_ws_name,NSpec = 1,DataX=energy_list,DataY=y,UnitX='DeltaE',ParentWorkspace=template_ws_name)
+                if src_name:
+                    MoveInstrumentComponent(Workspace=range_ws_name,ComponentName= src_name, X=mon1_pos.getX(),
+                                        Y=mon1_pos.getY(), Z=mon1_pos.getZ(), RelativePosition=False)
                 range_ws = ConvertUnits(InputWorkspace=range_ws_name,OutputWorkspace=range_ws_name,Target='TOF',EMode='Direct',EFixed=ei)
             else:
                 CreateWorkspace(OutputWorkspace=range_ws_name,NSpec = 1,DataX=energy_list,DataY=y,UnitX='Energy',ParentWorkspace=template_ws_name)
                 range_ws = ConvertUnits(InputWorkspace=range_ws_name,OutputWorkspace=range_ws_name,Target='TOF',EMode='Elastic')
-            x = range_ws.dataX(0)
+            x = range_ws.dataX(0)+mon1_peak
             TOF_range.append(x.tolist())
 
         if not debug_mode:

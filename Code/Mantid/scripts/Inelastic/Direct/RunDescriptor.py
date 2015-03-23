@@ -775,13 +775,16 @@ class RunDescriptor(PropDescriptor):
             return origin
 
 #--------------------------------------------------------------------------------------------------------------------
-    def get_monitors_ws(self,monitor_ID=None):
+    def get_monitors_ws(self,monitors_ID=None,otherWS=None):
         """Get pointer to a workspace containing monitors.
 
            Explores different ways of finding monitor workspace in Mantid and returns the python pointer to the
            workspace which contains monitors.
         """
-        data_ws = self.get_workspace()
+        if otherWS:
+            data_ws  = otherWS
+        else:
+            data_ws = self.get_workspace()
         if not data_ws:
             return None
 
@@ -798,25 +801,26 @@ class RunDescriptor(PropDescriptor):
             for specID in spec_to_mon:
                 mon_ws = self.copy_spectrum2monitors(data_ws,mon_ws,specID)
 
-        if monitor_ID:
-            try:
-                ws_index = mon_ws.getIndexFromSpectrumNumber(monitor_ID)
-            except: #
-                mon_ws = None
+        if monitors_ID:
+            if isinstance(monitors_ID,list):
+                mon_list = monitors_ID
+            else:
+                mon_list = [monitors_ID]
         else:
             mon_list = self._holder.get_used_monitors_list()
-            for monID in mon_list:
+        #
+        for monID in mon_list:
+            try:
+                ws_ind = mon_ws.getIndexFromSpectrumNumber(int(monID))
+            except:
                 try:
-                    ws_ind = mon_ws.getIndexFromSpectrumNumber(int(monID))
-                except:
-                    try:
-                        monws_name = mon_ws.name()
-                    except: 
-                        monws_name = 'None'
-                    RunDescriptor._logger('*** Monitor workspace {0} does not have monitor with ID {1}. Monitor workspace set to None'.\
+                    monws_name = mon_ws.name()
+                except: 
+                    monws_name = 'None'
+                RunDescriptor._logger('*** Monitor workspace {0} does not have monitor with ID {1}. Monitor workspace set to None'.\
                                           format(monws_name,monID),'warning')
-                    mon_ws = None
-                    break
+                mon_ws = None
+                break
         return mon_ws
 #--------------------------------------------------------------------------------------------------------------------
     def is_existing_ws(self):
