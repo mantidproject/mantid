@@ -6,9 +6,17 @@
 #include <boost/python/extract.hpp>
 
 // See http://docs.scipy.org/doc/numpy/reference/c-api.array.html#PY_ARRAY_UNIQUE_SYMBOL
-#define PY_ARRAY_UNIQUE_SYMBOL KERNEL_ARRAY_API
-#define NO_IMPORT_ARRAY
-#include <numpy/arrayobject.h>
+//#define PY_ARRAY_UNIQUE_SYMBOL KERNEL_ARRAY_API
+//#define NO_IMPORT_ARRAY
+//#include <numpy/arrayobject.h>
+
+#include "MantidPythonInterface/kernel/Converters/NumpyFunctions.h"
+/*namespace{
+PyObject* function_PyArray_IterNew(PyArrayObject *arr)
+{
+  return PyArray_IterNew((PyObject *)arr);
+}
+}*/
 
 namespace Mantid
 {
@@ -35,7 +43,7 @@ namespace Mantid
             void *input;
           } npy_union;
           npy_union data;
-          PyObject *iter = PyArray_IterNew((PyObject *)arr);
+          PyObject *iter = Converters::Impl::func_PyArray_IterNew(arr);
           npy_intp index(0);
           do
           {
