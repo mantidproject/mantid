@@ -96,7 +96,6 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
                 bin_counts = [mtd[ws].blocksize() for ws in mtd[c_ws_name].getNames()]
                 num_bins = np.amax(bin_counts)
 
-            # TODO: Should this be done per workspace?
             masked_detectors = self._identify_bad_detectors(workspaces[0])
 
             # Process workspaces
@@ -170,13 +169,13 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
                 # Group spectra
                 self._group_spectra(ws_name, masked_detectors)
 
-                # Convert to output units if needed
-                if self._output_x_units != 'DeltaE':
-                    ConvertUnits(InputWorkspace=ws_name, OutputWorkspace=ws_name,
-                                 EMode='Indirect', Target=self._output_x_units)
-
             if self._fold_multiple_frames and is_multi_frame:
                 self._fold_chopped(c_ws_name)
+
+            # Convert to output units if needed
+            if self._output_x_units != 'DeltaE':
+                ConvertUnits(InputWorkspace=c_ws_name, OutputWorkspace=c_ws_name,
+                             EMode='Indirect', Target=self._output_x_units)
 
         # Rename output workspaces
         output_workspace_names = [self._rename_workspace(ws_name) for ws_name in self._workspace_names]
