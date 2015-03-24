@@ -249,8 +249,8 @@ CutMD::~CutMD() {}
 //----------------------------------------------------------------------------------------------
 
 void CutMD::init() {
-  declareProperty(new WorkspaceProperty<IMDWorkspace>("InputWorkspace", "",
-                                                      Direction::Input),
+  declareProperty(new WorkspaceProperty<IMDEventWorkspace>("InputWorkspace", "",
+                                                           Direction::Input),
                   "MDWorkspace to slice");
 
   declareProperty(
@@ -272,7 +272,185 @@ void CutMD::init() {
                                   "MDHistoWorkspace as output. This is DND "
                                   "only in Horace terminology.");
 }
-void CutMD::exec() {}
+void CutMD::exec() {
+  g_log.warning("CutMD is in the beta stage of development. Its properties and "
+                "behaviour may change without warning.");
+
+  g_log.warning("point 0");
+  // Collect input properties
+  const IMDEventWorkspace_sptr inWS = getProperty("InputWorkspace");
+  g_log.warning("point 0.5");
+  const size_t numDims = inWS->getNumDims();
+  const ITableWorkspace_sptr projection = getProperty("Projection");
+  const bool haveProjection = !(*getProperty("Projection")).isDefault();
+  std::vector<std::vector<double>> pbins(5);
+  pbins[0] = getProperty("P1Bin");
+  pbins[1] = getProperty("P2Bin");
+  pbins[2] = getProperty("P3Bin");
+  pbins[3] = getProperty("P4Bin");
+  pbins[4] = getProperty("P5Bin");
+  const bool noPix = getProperty("NoPix");
+
+  // Check Projection format
+  if (haveProjection) {
+    auto colNames = projection->getColumnNames();
+    if (colNames.size() != 4 || colNames[0] != "name" ||
+        colNames[1] != "value" || colNames[2] != "type" ||
+        colNames[3] != "offset")
+      throw std::runtime_error(
+          "Invalid Projection supplied. Please check column names.");
+    if (projection->rowCount() < 3)
+      throw std::runtime_error(
+          "Insufficient rows in projection table. Must be 3 or more.");
+  }
+  g_log.warning("point 1");
+  // Check PBin properties
+  for (size_t i = 0; i < 5; ++i) {
+    if (i < numDims && pbins[i].empty())
+      throw std::runtime_error(
+          "P" + boost::lexical_cast<std::string>(i + 1) +
+          "Bin must be set when processing a workspace with " +
+          boost::lexical_cast<std::string>(numDims) + " dimensions.");
+    if (i >= numDims && !pbins[i].empty())
+      throw std::runtime_error(
+          "P" + boost::lexical_cast<std::string>(i + 1) +
+          "Bin must NOT be set when processing a workspace with " +
+          boost::lexical_cast<std::string>(numDims) + " dimensions.");
+  }
+
+  // Get extents in projection
+  std::vector<MinMax> extentLimits;
+  extentLimits.push_back(getDimensionExtents(inWS, 0));
+  extentLimits.push_back(getDimensionExtents(inWS, 1));
+  extentLimits.push_back(getDimensionExtents(inWS, 2));
+
+  // Scale projection
+  DblMatrix projectionMatrix = matrixFromProjection(projection);
+  std::vector<std::string> targetUnits = unitsFromProjection(projection);
+  std::vector<std::string> originUnits(3); // TODO. This is a hack!
+  originUnits[0] = "r";
+  originUnits[1] = "r";
+  originUnits[2] = "r";
+
+  DblMatrix scaledProjectionMatrix =
+      scaleProjection(projectionMatrix, originUnits, targetUnits, inWS);
+
+  // Calculate extents for the first 3 dimensions
+  std::vector<MinMax> scaledExtents =
+      calculateExtents(scaledProjectionMatrix, extentLimits);
+  auto stepPair = calculateSteps(scaledExtents, pbins);
+  std::vector<MinMax> steppedExtents = stepPair.first;
+  std::vector<size_t> steppedBins = stepPair.second;
+
+  g_log.warning("point 2");
+  // Calculate extents for additional dimensions
+  for (size_t i = 3; i < numDims; ++i) {
+    const size_t nArgs = pbins[i].size();
+    const MinMax extentLimit = getDimensionExtents(inWS, i);
+    const double dimRange = extentLimit.second - extentLimit.first;
+
+    if (nArgs == 1) {
+      steppedExtents.push_back(extentLimit);
+      steppedBins.push_back(static_cast<size_t>(dimRange / pbins[i][0]));
+    } else if (nArgs == 2) {
+      steppedExtents.push_back(std::make_pair(pbins[i][0], pbins[i][1]));
+      steppedBins.push_back(1);
+    } else if (nArgs == 3) {
+      steppedExtents.push_back(std::make_pair(pbins[i][0], pbins[i][2]));
+      double stepSize = pbins[i][1];
+      double dimRange = extentLimit.second - extentLimit.first;
+      if (stepSize > dimRange)
+        stepSize = dimRange;
+      steppedBins.push_back(static_cast<size_t>(dimRange / stepSize));
+    }
+
+    // and double targetUnits' length by appending itself to itself
+    size_t preSize = targetUnits.size();
+    targetUnits.resize(preSize * 2);
+    for (size_t i = 0; i < preSize; ++i)
+      targetUnits[preSize + i] = targetUnits[i];
+  }
+
+  // Make labels
+  /* Matrix<std::string> labels = labelProjection(projectionMatrix); */
+  std::vector<std::vector<std::string>> labels =
+      labelProjection(projectionMatrix);
+
+  g_log.warning("point 3");
+  // Either run RebinMD or SliceMD
+  const std::string cutAlgName = noPix ? "BinMD" : "SliceMD";
+  IAlgorithm_sptr cutAlg = createChildAlgorithm(cutAlgName, 0.0, 1.0);
+  cutAlg->initialize();
+  g_log.warning("point 4");
+  cutAlg->setProperty("InputWorkspace", inWS);
+  g_log.warning("point 5");
+  cutAlg->setProperty("OutputWorkspace", "sliced");
+  cutAlg->setProperty("NormalizeBasisVectors", false);
+  cutAlg->setProperty("AxisAligned", false);
+
+  for (size_t i = 0; i < numDims; ++i) {
+    std::string label;
+    std::string unit;
+    std::string vecStr;
+
+    if (i < 3) {
+      // Slicing algorithms accept name as [x,y,z]
+      label = "['" + labels[i][0] + "','" + labels[i][1] + "','" +
+              labels[i][2] + "']";
+      unit = targetUnits[i];
+
+      std::vector<std::string> vec(numDims, "0");
+      for (size_t j = 0; j < 3; ++j)
+        vec[j] = boost::lexical_cast<std::string>(projectionMatrix[i][j]);
+      vecStr = boost::algorithm::join(vec, ", ");
+    } else {
+      // Always orthogonal
+      auto dim = inWS->getDimension(i);
+      label = dim->getName();
+      unit = dim->getUnits();
+      std::vector<std::string> vec(numDims, "0");
+      vec[i] = "1";
+      vecStr = boost::algorithm::join(vec, ", ");
+    }
+
+    const std::string value = label + ", " + unit + ", " + vecStr;
+    cutAlg->setProperty("BasisVector" + boost::lexical_cast<std::string>(i),
+                        value);
+  }
+
+  // Translate extents into a single vector
+  std::vector<double> outExtents(steppedExtents.size() * 2);
+  for (size_t i = 0; i < steppedExtents.size(); ++i) {
+    outExtents[2 * i] = steppedExtents[i].first;
+    outExtents[2 * i + 1] = steppedExtents[i].second;
+  }
+
+  g_log.warning("point 6");
+  cutAlg->setProperty("OutputExtents", outExtents);
+  cutAlg->setProperty("OutputBins", steppedBins);
+
+  g_log.warning("point 7");
+  cutAlg->execute();
+  g_log.warning("point 8");
+  Workspace_sptr sliceWS = cutAlg->getProperty("OutputWorkspace");
+  IMDEventWorkspace_sptr slice =
+      boost::dynamic_pointer_cast<IMDEventWorkspace>(sliceWS);
+
+  g_log.warning("point 9");
+  if (!slice)
+    throw std::runtime_error(
+        "Child algorithm did not produce IMDEventWorkspace");
+
+  // Attach projection matrix to output
+  if (slice->getNumExperimentInfo() > 0) {
+    ExperimentInfo_sptr info = slice->getExperimentInfo(0);
+    info->mutableRun().addProperty("W_MATRIX", projectionMatrix.getVector(),
+                                   true);
+  }
+
+  // Done!
+  setProperty("OutputWorkspace", slice);
+}
 
 } // namespace Mantid
 } // namespace MDAlgorithms
