@@ -61,18 +61,26 @@ Kernel::Property *LogParser::createLogProperty(const std::string &logFName,
       continue;
     }
 
-    //if (!Kernel::TimeSeriesProperty<double>::isTimeString(str)) {
-    //  // if the line doesn't start with a time treat it as a continuation of the
-    //  // previous data
-    //  if (change_times.empty() || isNumeric) { // if there are no previous data
-    //    std::string mess =
-    //        "Cannot parse log file " + logFName + ". Line:" + str;
-    //    g_log.error(mess);
-    //    throw std::logic_error(mess);
-    //  }
-    //  change_times[stime] += std::string(" ") + str;
-    //  continue;
-    //}
+    if (!Kernel::TimeSeriesProperty<double>::isTimeString(str)) {
+      // if the line doesn't start with a time treat it as a continuation of the
+      // previous data
+      if (change_times.empty() || isNumeric) { // if there are no previous data
+        std::string mess =
+            "Cannot parse log file " + logFName + ". Line:" + str;
+        g_log.error(mess);
+        throw std::logic_error(mess);
+      }
+      auto range = change_times.equal_range(stime);
+      if ( range.first != range.second ){
+        auto last = range.first;
+        for(auto it = last; it != range.second; ++it){
+          last = it;
+        }
+        last->second += std::string(" ") + str;
+        old_data = last->second;
+        continue;
+      }
+    }
     stime = str.substr(0, 19);
     sdata = str.substr(19);
 
