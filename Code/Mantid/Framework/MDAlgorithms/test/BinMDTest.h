@@ -14,6 +14,8 @@
 #include "MantidMDAlgorithms/FakeMDEventData.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 
+#include <boost/math/special_functions/math_fwd.hpp>
+
 #include <cxxtest/TestSuite.h>
 
 #include <gmock/gmock.h>
