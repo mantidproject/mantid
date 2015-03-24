@@ -1,9 +1,8 @@
 //------------------------------------------------------------------------------
 // A wrapper for the auto-generated sipqtipart?.cpp files to disable warnings
-// that we can't control
+// that we can't control. The warnings are actually suppressed in qti.sip
+// with '#pragma GCC system_header' but that pragma only works if it occurs
+// in a file that has been included with '#include'
 //------------------------------------------------------------------------------
-#if defined(__GNUC__) && !(defined(__INTEL_COMPILER))
-  #pragma GCC system_header
-#endif
 
 #include "sip_qtipart0.cpp"
