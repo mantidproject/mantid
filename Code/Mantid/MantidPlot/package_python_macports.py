@@ -18,6 +18,8 @@ PYTHON_LIBRARIES = ['sphinx', 'sphinx_bootstrap_theme', 'IPython', 'zmq', 'pygme
 # by default the nexus library installs it here
 sys.path.append('/opt/local/lib/python2.7/site-packages/')
 
+# names of the nexus libraries for symlinks
+NEXUSLIBS = {"libNeXus.0.dylib": "libNeXus.dylib", "libNeXusCPP.0.dylib": "libNeXusCPP.dylib"}
 
 def copy_directory(src, dest):
     """
@@ -60,6 +62,12 @@ if __name__ == '__main__':
             print "Reason: ", detail
         else:
             copy_directory(module[0].__path__[0], os.path.join(OUTPUT_PATH, lib))
+
+    # create symlinks for NEXUSLIBS
+    for nlib in NEXUSLIBS.keys():
+        libnexus_src = os.path.join(OUTPUT_PATH, nlib)
+        libnexus_dst = os.path.join(OUTPUT_PATH, NEXUSLIBS[nlib])
+        os.symlink(libnexus_src, libnexus_dst)
 
     # copy ipython (although I do not understand why)
     # find ipython executable
