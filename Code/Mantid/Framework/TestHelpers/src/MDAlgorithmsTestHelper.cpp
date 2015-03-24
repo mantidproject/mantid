@@ -29,15 +29,18 @@ namespace MDAlgorithmsTestHelper {
  * @param fileBacked :: true for file-backed
  * @param numEvents :: number of events in the target workspace distributed
  *randomly if numEvents>0 or regularly & homogeneously if numEvents<0
+ * coord :: Required coordinate system
  * @return MDEW sptr
  */
 DataObjects::MDEventWorkspace3Lean::sptr
-makeFileBackedMDEW(const std::string & wsName, bool fileBacked, long numEvents) {
+makeFileBackedMDEW(const std::string &wsName, bool fileBacked, long numEvents,
+                   Kernel::SpecialCoordinateSystem coord) {
   // ---------- Make a file-backed MDEventWorkspace -----------------------
   std::string snEvents = boost::lexical_cast<std::string>(numEvents);
   MDEventWorkspace3Lean::sptr ws1 =
       MDEventsTestHelper::makeMDEW<3>(10, 0.0, 10.0, 0);
   ws1->getBoxController()->setSplitThreshold(100);
+  ws1->setCoordinateSystem(coord);
   Mantid::API::AnalysisDataService::Instance().addOrReplace(
       wsName, boost::dynamic_pointer_cast<Mantid::API::IMDEventWorkspace>(ws1));
   FrameworkManager::Instance().exec("FakeMDEventData", 6, "InputWorkspace",

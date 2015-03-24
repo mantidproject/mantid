@@ -52,7 +52,8 @@ public:
     {
       std::ostringstream mess;
       mess << "MergeMDFilesTestInput" << i;
-      MDEventWorkspace3Lean::sptr ws = MDAlgorithmsTestHelper::makeFileBackedMDEW(mess.str(), true,-nFileEvents);
+      MDEventWorkspace3Lean::sptr ws = 
+          MDAlgorithmsTestHelper::makeFileBackedMDEW(mess.str(), true,-nFileEvents,appliedCoord);
       inWorkspaces.push_back(ws);
       filenames.push_back(std::vector<std::string>(1,ws->getBoxController()->getFilename()));
     }

@@ -117,13 +117,12 @@ createDiffractionEventWorkspace(int numEvents, int numPixels, int numBins) {
 }
 
 //=====================================================================================
-/** Make a (optionally) file backed MDEventWorkspace with nEvents fake data
+/** Make an MDEventWorkspace with nEvents fake data
  *points
  * the points are randomly distributed within the box (nEvents>0) or
  *homoheneously and regularly spread through the box (nEvents<0)
  *
  * @param wsName :: name of the workspace in ADS
- * @param fileBacked :: true for file-backed
  * @param numEvents :: number of events in the target workspace distributed
  *randomly if numEvents>0 or regularly & homogeneously if numEvents<0
  * coord :: Required coordinate system

@@ -15,7 +15,7 @@ namespace MDAlgorithmsTestHelper {
 
 DataObjects::MDEventWorkspace3Lean::sptr
 makeFileBackedMDEW(const std::string &wsName, bool fileBacked,
-                   long numEvents = 10000);
+                   long numEvents = 10000, Kernel::SpecialCoordinateSystem coord = Kernel::None);
 
 } // namespace
 }
