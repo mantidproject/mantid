@@ -22,7 +22,9 @@
   File change history is stored at: <https://github.com/mantidproject/mantid>.
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
+#ifdef __GNUC__
 #pragma GCC system_header
+#endif
 
 #include <boost/python/list.hpp>
 #include "MantidKernel/WarningSuppressions.h"
