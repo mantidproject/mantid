@@ -61,7 +61,7 @@ Usage
 
 **Example - Sample and container corrections for IRIS:**
 
-.. testcode:: SampleCorrectionsWithCanCorrections
+.. testcode:: SampleAndCanCorrections
 
   red_ws = LoadNexusProcessed(Filename='irs26176_graphite002_red.nxs')
   can_ws = LoadNexusProcessed(Filename='irs26173_graphite002_red.nxs')
@@ -88,7 +88,7 @@ Usage
   print ('Acc workspace is %s against %s'
         % (acc.YUnitLabel(), acc.getAxis(0).getUnit().caption()))
 
-.. testcleanup:: SampleCorrectionsWithCanCorrections
+.. testcleanup:: SampleAndCanCorrections
 
    DeleteWorkspace(red_ws)
    DeleteWorkspace(can_ws)
@@ -97,7 +97,7 @@ Usage
 
 **Output:**
 
-.. testoutput:: SampleCorrectionsWithCanCorrections
+.. testoutput:: SampleAndCanCorrections
 
    Corrected workspace is intensity against Energy transfer
    Ass workspace is Attenuation factor against Wavelength
