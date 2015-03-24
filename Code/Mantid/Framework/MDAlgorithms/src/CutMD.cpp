@@ -124,35 +124,26 @@ std::vector<MinMax> calculateExtents(const DblMatrix &inMatrix,
   lRange[1] = limits[2].second;
 
   // Calculate the minimums and maximums of transformed coordinates
-  DblMatrix extMat(3, 8);
-  size_t counter = 0;
-  for (auto hIt = hRange.begin(); hIt != hRange.end(); ++hIt)
-    for (auto kIt = kRange.begin(); kIt != kRange.end(); ++kIt)
+  // Use maxDbl as a "not-yet-set" placeholder
+  const double maxDbl = std::numeric_limits<double>::max();
+  std::vector<MinMax> extents(3, std::make_pair(maxDbl, maxDbl));
+
+  for (auto hIt = hRange.begin(); hIt != hRange.end(); ++hIt) {
+    for (auto kIt = kRange.begin(); kIt != kRange.end(); ++kIt) {
       for (auto lIt = lRange.begin(); lIt != lRange.end(); ++lIt) {
         V3D origPos(*hIt, *kIt, *lIt);
         for (size_t i = 0; i < 3; ++i) {
           const V3D other(invMat[i][0], invMat[i][1], invMat[i][2]);
-          extMat[i][counter++] = origPos.scalar_prod(other);
+          double val = origPos.scalar_prod(other);
+          // Check if min needs updating
+          if (extents[i].first == maxDbl || extents[i].first > val)
+            extents[i].first = val;
+          // Check if max needs updating
+          if (extents[i].second == maxDbl || extents[i].second < val)
+            extents[i].second = val;
         }
       }
-
-  // Reduce down to the minimum and maximum vertices
-  V3D min(extMat[0][0], extMat[1][0], extMat[2][0]);
-  V3D max(extMat[0][0], extMat[1][0], extMat[2][0]);
-
-  for (size_t i = 1; i < 8; ++i) {
-    for (size_t j = 0; j < 3; ++j) {
-      if (extMat[j][i] < min[j])
-        min[j] = extMat[j][i];
-      if (extMat[j][i] > max[j])
-        max[j] = extMat[j][i];
     }
-  }
-
-  std::vector<MinMax> extents(3);
-  for (size_t i = 0; i < 3; ++i) {
-    extents[i].first = min[i];
-    extents[i].second = max[i];
   }
 
   return extents;
