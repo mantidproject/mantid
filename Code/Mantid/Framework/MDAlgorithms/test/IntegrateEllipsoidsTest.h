@@ -1,5 +1,5 @@
 #include <cxxtest/TestSuite.h>
-#include "MantidMDEvents/IntegrateEllipsoids.h"
+#include "MantidMDAlgorithms/IntegrateEllipsoids.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
@@ -12,7 +12,7 @@
 #include <boost/tuple/tuple.hpp>
 
 using namespace Mantid;
-using namespace Mantid::MDEvents;
+using namespace Mantid::MDAlgorithms;
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
 using namespace Mantid::DataObjects;
@@ -184,7 +184,7 @@ public:
   }
 
   void test_init() {
-    Mantid::MDEvents::IntegrateEllipsoids alg;
+    Mantid::MDAlgorithms::IntegrateEllipsoids alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
   }
 

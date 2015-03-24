@@ -1,6 +1,5 @@
-#include <iostream>
-#include <fstream>
-#include <boost/math/special_functions/round.hpp>
+#include "MantidMDAlgorithms/IntegrateEllipsoids.h"
+
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidDataObjects/EventWorkspace.h"
@@ -12,12 +11,12 @@
 #include "MantidGeometry/Crystal/IndexingUtils.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
-#include "MantidDataObjects/MDTransfFactory.h"
-#include "MantidDataObjects/UnitsConversionHelper.h"
-#include "MantidDataObjects/Integrate3DEvents.h"
-#include "MantidMDAlgorithms/IntegrateEllipsoids.h"
-#include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/Statistics.h"
+#include "MantidMDAlgorithms/MDTransfFactory.h"
+#include "MantidMDAlgorithms/UnitsConversionHelper.h"
+#include "MantidMDAlgorithms/Integrate3DEvents.h"
+
+#include <boost/math/special_functions/round.hpp>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -26,6 +25,8 @@ using namespace Mantid::DataObjects;
 
 namespace Mantid {
 namespace MDAlgorithms {
+
+namespace {
 /// This only works for diffraction.
 const std::string ELASTIC("Elastic");
 
@@ -34,8 +35,6 @@ const std::string Q3D("Q3D");
 
 /// Q-vector is always three dimensional.
 const std::size_t DIMS(3);
-
-namespace {
 
 /**
  * @brief qListFromEventWS creates qlist from events
@@ -75,7 +74,7 @@ void qListFromEventWS(Integrate3DEvents &integrator, Progress &prog,
     double errorSq(1.); // ignorable garbage
     const std::vector<WeightedEventNoTime> &raw_events =
         events.getWeightedEventsNoTime();
-    std::vector<std::pair<double, V3D> > qList;
+    std::vector<std::pair<double, V3D>> qList;
     for (auto event = raw_events.begin(); event != raw_events.end(); ++event) {
       double val = unitConverter.convertUnits(event->tof());
       qConverter->calcMatrixCoord(val, locCoord, signal, errorSq);
@@ -93,7 +92,8 @@ void qListFromEventWS(Integrate3DEvents &integrator, Progress &prog,
 }
 
 /**
- * @brief qListFromHistoWS creates qlist from input workspaces of type Workspace2D
+ * @brief qListFromHistoWS creates qlist from input workspaces of type
+ * Workspace2D
  * @param integrator : itegrator object on which qlists are accumulated
  * @param prog : progress object
  * @param wksp : input Workspace2D
@@ -124,7 +124,7 @@ void qListFromHistoWS(Integrate3DEvents &integrator, Progress &prog,
     double signal(1.);  // ignorable garbage
     double errorSq(1.); // ignorable garbage
 
-    std::vector<std::pair<double, V3D> > qList;
+    std::vector<std::pair<double, V3D>> qList;
 
     // TODO. we should be able to do this in an OMP loop.
     for (size_t j = 0; j < yVals.size(); ++j) {
@@ -149,7 +149,8 @@ void qListFromHistoWS(Integrate3DEvents &integrator, Progress &prog,
         int yValCounts = int(yVal); // we deliberately truncate.
         // Account for counts in histograms by increasing the qList with the
         // same q-point
-          qList.push_back(std::make_pair(yValCounts,qVec)); // Not ideal to control the size dynamically?
+        qList.push_back(std::make_pair(
+            yValCounts, qVec)); // Not ideal to control the size dynamically?
       }
       integrator.addEvents(qList); // We would have to put a lock around this.
       prog.report();
@@ -160,10 +161,7 @@ void qListFromHistoWS(Integrate3DEvents &integrator, Progress &prog,
     prog.report();
   }
 }
-}
-
-namespace Mantid {
-namespace MDAlgorithms {
+} // end anonymous namespace
 /** NOTE: This has been adapted from the SaveIsawQvector algorithm.
  */
 
@@ -296,7 +294,7 @@ void IntegrateEllipsoids::exec() {
   size_t n_peaks = peak_ws->getNumberPeaks();
   size_t indexed_count = 0;
   std::vector<V3D> peak_q_list;
-  std::vector<std::pair<double, V3D> > qList;
+  std::vector<std::pair<double, V3D>> qList;
   std::vector<V3D> hkl_vectors;
   for (size_t i = 0; i < n_peaks; i++) // Note: we skip un-indexed peaks
   {
@@ -374,7 +372,7 @@ void IntegrateEllipsoids::exec() {
 
   double inti;
   double sigi;
-  std::vector<double> principalaxis1,principalaxis2,principalaxis3;
+  std::vector<double> principalaxis1, principalaxis2, principalaxis3;
   V3D peak_q;
   for (size_t i = 0; i < n_peaks; i++) {
     V3D hkl(peaks[i].getH(), peaks[i].getK(), peaks[i].getL());
@@ -389,7 +387,7 @@ void IntegrateEllipsoids::exec() {
       peaks[i].setSigmaIntensity(sigi);
       peaks[i].setPeakShape(shape);
       if (axes_radii.size() == 3) {
-        if (inti/sigi > cutoffIsigI || cutoffIsigI == EMPTY_DBL()){
+        if (inti / sigi > cutoffIsigI || cutoffIsigI == EMPTY_DBL()) {
           principalaxis1.push_back(axes_radii[0]);
           principalaxis2.push_back(axes_radii[1]);
           principalaxis3.push_back(axes_radii[2]);
@@ -400,11 +398,13 @@ void IntegrateEllipsoids::exec() {
       peaks[i].setSigmaIntensity(0.0);
     }
   }
-  if (principalaxis1.size() > 1 ){
+  if (principalaxis1.size() > 1) {
     size_t histogramNumber = 3;
     Workspace_sptr wsProfile = WorkspaceFactory::Instance().create(
-        "Workspace2D", histogramNumber, principalaxis1.size(), principalaxis1.size());
-    Workspace2D_sptr wsProfile2D = boost::dynamic_pointer_cast<Workspace2D>(wsProfile);
+        "Workspace2D", histogramNumber, principalaxis1.size(),
+        principalaxis1.size());
+    Workspace2D_sptr wsProfile2D =
+        boost::dynamic_pointer_cast<Workspace2D>(wsProfile);
     AnalysisDataService::Instance().addOrReplace("EllipsoidAxes", wsProfile2D);
     for (size_t j = 0; j < principalaxis1.size(); j++) {
       wsProfile2D->dataX(0)[j] = static_cast<double>(j);
@@ -419,34 +419,35 @@ void IntegrateEllipsoids::exec() {
     }
     Statistics stats1 = getStatistics(principalaxis1);
     g_log.notice() << "principalaxis1: "
-        << " mean " << stats1.mean
-        << " standard_deviation " << stats1.standard_deviation
-        << " minimum " << stats1.minimum
-        << " maximum " << stats1.maximum
-        << " median " << stats1.median << "\n";
+                   << " mean " << stats1.mean << " standard_deviation "
+                   << stats1.standard_deviation << " minimum " << stats1.minimum
+                   << " maximum " << stats1.maximum << " median "
+                   << stats1.median << "\n";
     Statistics stats2 = getStatistics(principalaxis2);
     g_log.notice() << "principalaxis2: "
-        << " mean " << stats2.mean
-        << " standard_deviation " << stats2.standard_deviation
-        << " minimum " << stats2.minimum
-        << " maximum " << stats2.maximum
-        << " median " << stats2.median << "\n";
+                   << " mean " << stats2.mean << " standard_deviation "
+                   << stats2.standard_deviation << " minimum " << stats2.minimum
+                   << " maximum " << stats2.maximum << " median "
+                   << stats2.median << "\n";
     Statistics stats3 = getStatistics(principalaxis3);
     g_log.notice() << "principalaxis3: "
-        << " mean " << stats3.mean
-        << " standard_deviation " << stats3.standard_deviation
-        << " minimum " << stats3.minimum
-        << " maximum " << stats3.maximum
-        << " median " << stats3.median << "\n";
-    if (cutoffIsigI != EMPTY_DBL()){
+                   << " mean " << stats3.mean << " standard_deviation "
+                   << stats3.standard_deviation << " minimum " << stats3.minimum
+                   << " maximum " << stats3.maximum << " median "
+                   << stats3.median << "\n";
+    if (cutoffIsigI != EMPTY_DBL()) {
       principalaxis1.clear();
       principalaxis2.clear();
       principalaxis3.clear();
-      specify_size=true;
-      peak_radius = std::max(std::max(stats1.mean,stats2.mean),stats3.mean) + numSigmas *
-        std::max(std::max(stats1.standard_deviation,stats2.standard_deviation),stats3.standard_deviation);
+      specify_size = true;
+      peak_radius = std::max(std::max(stats1.mean, stats2.mean), stats3.mean) +
+                    numSigmas * std::max(std::max(stats1.standard_deviation,
+                                                  stats2.standard_deviation),
+                                         stats3.standard_deviation);
       back_inner_radius = peak_radius;
-      back_outer_radius = peak_radius * 1.25992105; // A factor of 2 ^ (1/3) will make the background
+      back_outer_radius =
+          peak_radius *
+          1.25992105; // A factor of 2 ^ (1/3) will make the background
       // shell volume equal to the peak region volume.
       V3D peak_q;
       for (size_t i = 0; i < n_peaks; i++) {
@@ -454,12 +455,12 @@ void IntegrateEllipsoids::exec() {
         if (Geometry::IndexingUtils::ValidIndex(hkl, 1.0)) {
           peak_q = peaks[i].getQLabFrame();
           std::vector<double> axes_radii;
-          integrator.ellipseIntegrateEvents(peak_q, specify_size, peak_radius,
-                                            back_inner_radius, back_outer_radius,
-                                            axes_radii, inti, sigi);
+          integrator.ellipseIntegrateEvents(
+              peak_q, specify_size, peak_radius, back_inner_radius,
+              back_outer_radius, axes_radii, inti, sigi);
           peaks[i].setIntensity(inti);
           peaks[i].setSigmaIntensity(sigi);
-          if (axes_radii.size() == 3){
+          if (axes_radii.size() == 3) {
             principalaxis1.push_back(axes_radii[0]);
             principalaxis2.push_back(axes_radii[1]);
             principalaxis3.push_back(axes_radii[2]);
@@ -469,12 +470,15 @@ void IntegrateEllipsoids::exec() {
           peaks[i].setSigmaIntensity(0.0);
         }
       }
-      if (principalaxis1.size() > 1 ){
+      if (principalaxis1.size() > 1) {
         size_t histogramNumber = 3;
         Workspace_sptr wsProfile2 = WorkspaceFactory::Instance().create(
-            "Workspace2D", histogramNumber, principalaxis1.size(), principalaxis1.size());
-        Workspace2D_sptr wsProfile2D2 = boost::dynamic_pointer_cast<Workspace2D>(wsProfile2);
-        AnalysisDataService::Instance().addOrReplace("EllipsoidAxes_2ndPass", wsProfile2D2);
+            "Workspace2D", histogramNumber, principalaxis1.size(),
+            principalaxis1.size());
+        Workspace2D_sptr wsProfile2D2 =
+            boost::dynamic_pointer_cast<Workspace2D>(wsProfile2);
+        AnalysisDataService::Instance().addOrReplace("EllipsoidAxes_2ndPass",
+                                                     wsProfile2D2);
         for (size_t j = 0; j < principalaxis1.size(); j++) {
           wsProfile2D2->dataX(0)[j] = static_cast<double>(j);
           wsProfile2D2->dataY(0)[j] = principalaxis1[j];

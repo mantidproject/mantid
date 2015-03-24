@@ -3,7 +3,7 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidDataObjects/MDWSDescription.h"
+#include "MantidMDAlgorithms/MDWSDescription.h"
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -29,7 +29,7 @@ private:
 
   MDWSDescription m_targWSDescr;
 
-  void initTargetWSDescr(API::MatrixWorkspace_sptr& wksp);
+  void initTargetWSDescr(API::MatrixWorkspace_sptr &wksp);
 };
 
 } // namespace MDAlgorithms
