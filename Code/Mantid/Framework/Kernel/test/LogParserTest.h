@@ -13,20 +13,6 @@
 
 #include <Poco/File.h>
 
-namespace{
-
-class TmpFile{
-  Poco::File m_file;
-public:
-  TmpFile(const std::string& fname):m_file(fname){}
-  ~TmpFile(){remove();}
-  const std::string& path() const {return m_file.path();}
-  bool exists() const {return m_file.exists();}
-  void remove() {if (m_file.exists()) m_file.remove();}
-};
-
-}
-
 using namespace Mantid::Kernel;
 
 class LogParserTest : public CxxTest::TestSuite
@@ -35,6 +21,17 @@ public:
   static LogParserTest *createSuite() { return new LogParserTest(); }
   static void destroySuite(LogParserTest *suite) { delete suite; }
   
+
+  class TmpFile{
+    Poco::File m_file;
+  public:
+    TmpFile(const std::string& fname):m_file(fname){}
+    ~TmpFile(){remove();}
+    const std::string& path() const {return m_file.path();}
+    bool exists() const {return m_file.exists();}
+    void remove() {if (m_file.exists()) m_file.remove();}
+  };
+
   LogParserTest()
         :log_num_good("TST000000_good.txt"),
          log_num_late("TST000000_late.txt"),
