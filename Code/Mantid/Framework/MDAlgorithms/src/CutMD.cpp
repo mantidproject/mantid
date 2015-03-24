@@ -200,6 +200,32 @@ calculateSteps(std::vector<MinMax> inExtents,
   return std::make_pair(outExtents, outBins);
 }
 
+Matrix<std::string> labelProjection(const DblMatrix &projection) {
+  Matrix<std::string> ret(3,3);
+
+  const char* replacements[] = {"zeta", "eta", "xi"};
+
+  for(size_t i = 0; i < 3; ++i) {
+    for(size_t j = 0; j < 3; ++j) {
+      const double in = projection[i][j];
+      std::string out;
+
+      if (std::abs(in) == 1)
+        if (in > 0)
+          out = replacements[i];
+        else
+          out = std::string("-") + replacements[i];
+      else if (in == 0)
+        out = "0";
+      else
+        out = boost::lexical_cast<std::string>(in) + replacements[i];
+
+      ret[i][j] = out;
+    }
+  }
+
+  return ret;
+}
 } // anonymous namespace
 
 namespace Mantid {
