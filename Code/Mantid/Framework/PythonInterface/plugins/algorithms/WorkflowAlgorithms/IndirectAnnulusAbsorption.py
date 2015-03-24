@@ -214,7 +214,7 @@ class IndirectAnnulusAbsorption(DataProcessorAlgorithm):
             from IndirectImport import import_mantidplot
             mantid_plot = import_mantidplot()
             mantid_plot.plotSpectrum(plot_data, 0)
-            if self._abs_ws == '':
+            if self._abs_ws != '':
                 mantid_plot.plotSpectrum(plot_corr, 0)
 
 
@@ -260,14 +260,21 @@ class IndirectAnnulusAbsorption(DataProcessorAlgorithm):
         self._setup()
         issues = dict()
 
-        # TODO: geometry validation
-        # can inner < sample inner < sample outer < can outer
-
         if self._use_can_corrections and self._can_chemical_formula == '':
             issues['CanChemicalFormula'] = 'Must be set to use can corrections'
 
         if self._use_can_corrections and self._can_ws_name is None:
             issues['UseCanCorrections'] = 'Must specify a can workspace to use can corections'
+
+        # Geometry validation: can inner < sample inner < sample outer < can outer
+        if self._sample_inner_radius < self._can_inner_radius:
+            issues['SampleInnerRadius'] = 'Must be greater than CanInnerRadius'
+
+        if self._sample_outer_radius < self._sample_inner_radius:
+            issues['SampleOuterRadius'] = 'Must be greater than SampleInnerRadius'
+
+        if self._can_outer_radius < self._sample_outer_radius:
+            issues['CanOuterRadius'] = 'Must be greater than SampleOuterRadius'
 
         return issues
 
