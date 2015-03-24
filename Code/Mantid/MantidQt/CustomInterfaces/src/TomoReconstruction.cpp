@@ -173,16 +173,16 @@ void TomoReconstruction::doSetupSectionRun() {
   // geometry, etc. niceties
   // on the left (just plugin names) 1/2, right: 2/3
   QList<int> sizes;
-  sizes.push_back(460);
-  sizes.push_back(40);
+  sizes.push_back(420);
+  sizes.push_back(80);
   m_ui.splitter_run_main_vertical->setSizes(sizes);
 
-  sizes[0] = 460;
-  sizes[1] = 40;
+  sizes[0] = 470;
+  sizes[1] = 30;
   m_ui.splitter_image_resource->setSizes(sizes);
 
-  sizes[0] = 420;
-  sizes[1] = 80;
+  sizes[0] = 400;
+  sizes[1] = 100;
   m_ui.splitter_run_jobs->setSizes(sizes);
 
   setupComputeResource();
