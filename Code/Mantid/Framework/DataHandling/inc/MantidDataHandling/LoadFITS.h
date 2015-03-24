@@ -15,7 +15,7 @@ using namespace std;
 
 struct FITSInfo {
   vector<string> headerItems;
-  map<string, string> headerKeys;
+  std::map<string, string> headerKeys;
   int bitsPerPixel;
   int numberOfAxis;
   int offset;
@@ -24,56 +24,54 @@ struct FITSInfo {
   double tof;
   double timeBin;
   double scale;
-  int imageKey;
+  std::string imageKey;
   long int countsInImage;
   long int numberOfTriggers;
-  string extension;
-  string filePath;
+  std::string extension;
+  std::string filePath;
   bool isFloat;
-  // TODO: move inside class
-  // TODO: add key (above), rotation and intensity
 };
 
 namespace Mantid {
 namespace DataHandling {
 /**
-  LoadFITS : Load a number of FITS files into a histogram Workspace
+LoadFITS : Load a number of FITS files into a histogram Workspace
 
-  File format is described here: http://www.fileformat.info/format/fits/egff.htm
-  This loader doesn't support the full specification, caveats are:
+The FITS format is described for example here:
+http://www.fileformat.info/format/fits/egff.htm
+
+This loader doesn't support the full specification, caveats are:
     Support for unsigned 8, 16, 32 bit values only
     Support only for 2 data axis
-    No support for format extensions
 
-  Loader is designed to work with multiple files, loading into a single
-  workspace.
-  At points there are assumptions that all files in a batch use the same number
-  of bits per pixel,
-  and that the number of spectra in each file are the same.
+Loader is designed to work with multiple files, loading into a single
+workspace.  At points there are assumptions that all files in a batch
+use the same number of bits per pixel, and that the number of spectra
+in each file are the same.
 
   @author John R Hill, RAL
   @date 29/08/2014
 
-  Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
-  National Laboratory & European Spallation Source
+Copyright &copy; 2014,2015 ISIS Rutherford Appleton Laboratory, NScD
+Oak Ridge National Laboratory & European Spallation Source
 
-  This file is part of Mantid.
+This file is part of Mantid.
 
-  Mantid is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License as published by
-  the Free Software Foundation; either version 3 of the License, or
-  (at your option) any later version.
+Mantid is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 3 of the License, or
+(at your option) any later version.
 
-  Mantid is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
+Mantid is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
 
-  You should have received a copy of the GNU General Public License
-  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-  File change history is stored at: <https://github.com/mantidproject/mantid>
-  Code Documentation is available at: <http://doxygen.mantidproject.org>
+File change history is stored at: <https://github.com/mantidproject/mantid>
+Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
 class DLLExport LoadFITS : public API::IFileLoader<Kernel::FileDescriptor> {
@@ -110,6 +108,8 @@ private:
   /// Parses the header values for the FITS file
   bool parseHeader(FITSInfo &headerInfo);
 
+  void setupDefaultKeywordNames();
+
   /// Creates a vector of all rotations from a file
   std::vector<double> readRotations(std::string rotFilePath, size_t fileCount);
 
@@ -135,16 +135,20 @@ private:
   // Maps the header keys to specified values
   void mapHeaderKeys();
 
+  static bool IsNotFits(const std::string &s);
+
   // Strings used to map header keys
-  string m_headerScaleKey;
-  string m_headerOffsetKey;
-  string m_headerBitDepthKey;
-  string m_headerRotationKey;
-  string m_headerImageKeyKey;
-  string m_mapFile;
+  std::string m_headerScaleKey;
+  std::string m_headerOffsetKey;
+  std::string m_headerBitDepthKey;
+  std::string m_headerRotationKey;
+  std::string m_headerImageKeyKey;
+  std::string m_mapFile;
   std::vector<std::string> m_headerAxisNameKeys;
 
-  string m_baseName;
+  static const std::string m_defaultImgType;
+
+  std::string m_baseName;
   size_t m_spectraCount;
   API::Progress *m_progress;
 
@@ -152,6 +156,14 @@ private:
   // workspace_0001
   static const size_t DIGIT_SIZE_APPEND = 4;
   static const int BASE_HEADER_SIZE = 2880;
+
+  // names for several options that can be given in a "FITS" header
+  // setup file
+  static const std::string m_BIT_DEPTH_NAME;
+  static const std::string m_AXIS_NAMES_NAME;
+  static const std::string m_ROTATION_NAME;
+  static const std::string m_IMAGE_KEY_NAME;
+  static const std::string m_HEADER_MAP_NAME;
 };
 
 } // namespace DataHandling

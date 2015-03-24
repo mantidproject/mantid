@@ -14,41 +14,30 @@ using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace std;
 using namespace boost;
-using Poco::BinaryReader;
 
-namespace {
-static const std::string BIT_DEPTH_NAME = "BitDepthName";
-static const std::string ROTATION_NAME = "RotationName";
-static const std::string AXIS_NAMES_NAME = "AxisNames";
-static const std::string IMAGE_KEY_NAME = "ImageKeyName";
-static const std::string HEADER_MAP_NAME = "HeaderMapFile";
-
-/**
-* Used with find_if to check a string isn't a fits file (by checking extension)
-* @param s string to check for extension
-* @returns bool Value indicating if the string ends with .fits or not
-*/
-bool IsNotFits(std::string s) {
-  std::string tmp = s;
-  to_lower(tmp);
-  return !ends_with(tmp, ".fits");
-}
-}
+namespace {}
 
 namespace Mantid {
 namespace DataHandling {
 // Register the algorithm into the AlgorithmFactory
 DECLARE_FILELOADER_ALGORITHM(LoadFITS);
 
+const std::string LoadFITS::m_BIT_DEPTH_NAME = "BitDepthName";
+const std::string LoadFITS::m_ROTATION_NAME = "RotationName";
+const std::string LoadFITS::m_AXIS_NAMES_NAME = "AxisNames";
+const std::string LoadFITS::m_IMAGE_KEY_NAME = "ImageKeyName";
+const std::string LoadFITS::m_HEADER_MAP_NAME = "HeaderMapFile";
+
+const std::string LoadFITS::m_defaultImgType = "SAMPLE";
+
 /**
  * Constructor. Just initialize everything to prevent issues.
  */
-LoadFITS::LoadFITS(): m_headerScaleKey(), m_headerOffsetKey(),
-                      m_headerBitDepthKey(), m_headerRotationKey(),
-                      m_headerImageKeyKey(), m_mapFile(),
-                      m_headerAxisNameKeys(),  m_baseName(),
-                      m_spectraCount(0), m_progress(NULL) {
-}
+LoadFITS::LoadFITS()
+    : m_headerScaleKey(), m_headerOffsetKey(), m_headerBitDepthKey(),
+      m_headerRotationKey(), m_headerImageKeyKey(), m_mapFile(),
+      m_headerAxisNameKeys(), m_baseName(), m_spectraCount(0),
+      m_progress(NULL) {}
 
 /**
 * Return the confidence with with this algorithm can load the file
@@ -87,28 +76,38 @@ void LoadFITS::init() {
   declareProperty(new API::WorkspaceProperty<API::Workspace>(
       "OutputWorkspace", "", Kernel::Direction::Output));
 
+  /*
   declareProperty(
       new PropertyWithValue<int>("ImageKey", -1, Kernel::Direction::Input),
       "Image type to set these files as. 0=data image, 1=flat field, 2=open "
       "field, -1=use the value from FITS header.");
-
-  declareProperty(new PropertyWithValue<string>(BIT_DEPTH_NAME, "BITPIX",
+  */
+  /*
+  declareProperty(new PropertyWithValue<string>(m_BIT_DEPTH_NAME, "BITPIX",
                                                 Kernel::Direction::Input),
                   "Name for the pixel bit depth header key.");
-  declareProperty(new PropertyWithValue<string>(ROTATION_NAME, "ROTATION",
+  */
+
+  /*
+  declareProperty(new PropertyWithValue<string>(m_ROTATION_NAME, "ROTATION",
                                                 Kernel::Direction::Input),
-                  "Name for the rotation header key.");
-  declareProperty(
-      new PropertyWithValue<string>(AXIS_NAMES_NAME, "NAXIS1,NAXIS2",
-                                    Kernel::Direction::Input),
-      "Names for the axis header keys, comma separated string of all axis.");
-  declareProperty(new PropertyWithValue<string>(IMAGE_KEY_NAME, "IMAGEKEY",
+  */
+
+  /*
+"Name for the rotation header key.");
+declareProperty(
+new PropertyWithValue<string>(m_AXIS_NAMES_NAME, "NAXIS1,NAXIS2",
+                    Kernel::Direction::Input),
+"Names for the axis header keys, comma separated string of all axis.");
+  */
+  /*
+  declareProperty(new PropertyWithValue<string>(m_IMAGE_KEY_NAME, "IMAGEKEY",
                                                 Kernel::Direction::Input),
                   "Names for the image type, key.");
-
+  */
   declareProperty(
-      new FileProperty(HEADER_MAP_NAME, "", FileProperty::OptionalDirectory, "",
-                       Kernel::Direction::Input),
+      new FileProperty(m_HEADER_MAP_NAME, "", FileProperty::OptionalDirectory,
+                       "", Kernel::Direction::Input),
       "A file mapping header keys to the ones used by ISIS [line separated "
       "values in the format KEY=VALUE, e.g. BitDepthName=BITPIX ");
 }
@@ -117,15 +116,7 @@ void LoadFITS::init() {
 * Execute the algorithm.
 */
 void LoadFITS::exec() {
-  // Init header info - setup some defaults just in case
-  m_headerScaleKey = "BSCALE";
-  m_headerOffsetKey = "BZERO";
-  m_headerBitDepthKey = "BITPIX";
-  m_headerImageKeyKey = "IMAGEKEY";
-  m_headerRotationKey = "ROTATION";
-  m_mapFile = "";
-  m_headerAxisNameKeys.push_back("NAXIS1");
-  m_headerAxisNameKeys.push_back("NAXIS2");
+  setupDefaultKeywordNames();
 
   mapHeaderKeys();
 
@@ -155,90 +146,93 @@ void LoadFITS::exec() {
     allHeaderInfo[i].filePath = paths[i];
     // Get various pieces of information from the file header which are used to
     // create the workspace
-    if (parseHeader(allHeaderInfo[i])) {
-      // Get and convert specific standard header values which will help when
-      // parsing the data
-      // BITPIX, NAXIS, NAXISi (where i = 1..NAXIS, e.g. NAXIS2 for two axis),
-      // TOF, TIMEBIN, N_COUNTS, N_TRIGS
-      try {
-        string tmpBitPix = allHeaderInfo[i].headerKeys[m_headerBitDepthKey];
-        if (boost::contains(tmpBitPix, "-")) {
-          boost::erase_all(tmpBitPix, "-");
-          allHeaderInfo[i].isFloat = true;
-        } else {
-          allHeaderInfo[i].isFloat = false;
-        }
+    if (!parseHeader(allHeaderInfo[i])) {
+      // Unable to parse the header, throw.
+      throw std::runtime_error(
+          "Severe problem found while parsing the header of "
+          "this FITS file (" +
+          fName + "). This file may not "
+                  "be standard FITS.");
+    }
 
-        // Add the image key, use the property if it's not -1, otherwise use the
-        // header value
-        allHeaderInfo[i].imageKey =
-            boost::lexical_cast<int>(getPropertyValue("ImageKey"));
-        if (allHeaderInfo[i].imageKey == -1) {
-          allHeaderInfo[i].imageKey = boost::lexical_cast<int>(
-              allHeaderInfo[i].headerKeys[m_headerImageKeyKey]);
-        }
-
-        allHeaderInfo[i].bitsPerPixel = lexical_cast<int>(tmpBitPix);
-        allHeaderInfo[i].numberOfAxis =
-            static_cast<int>(m_headerAxisNameKeys.size());
-
-        for (int j = 0;
-             allHeaderInfo.size() > i && j < allHeaderInfo[i].numberOfAxis;
-             ++j) {
-          allHeaderInfo[i].axisPixelLengths.push_back(lexical_cast<size_t>(
-              allHeaderInfo[i].headerKeys[m_headerAxisNameKeys[j]]));
-        }
-
-        // m_allHeaderInfo[i].tof =
-        // lexical_cast<double>(m_allHeaderInfo[i].headerKeys["TOF"]);
-        // m_allHeaderInfo[i].timeBin =
-        // lexical_cast<double>(m_allHeaderInfo[i].headerKeys["TIMEBIN"]);
-        // m_allHeaderInfo[i].countsInImage = lexical_cast<long
-        // int>(m_allHeaderInfo[i].headerKeys["N_COUNTS"]);
-        // m_allHeaderInfo[i].numberOfTriggers = lexical_cast<long
-        // int>(m_allHeaderInfo[i].headerKeys["N_TRIGS"]);
-        allHeaderInfo[i].extension =
-            allHeaderInfo[i].headerKeys["XTENSION"]; // Various extensions are
-                                                     // available to the FITS
-                                                     // format, and must be
-                                                     // parsed differently if
-                                                     // this is present. Loader
-                                                     // doesn't support this.
-
-      } catch (std::exception &) {
-        // todo write error and fail this load with invalid data in file.
-        throw std::runtime_error("Unable to locate one or more valid BITPIX, "
-                                 "NAXIS or IMAGEKEY values in the FITS file "
-                                 "header.");
+    // Get and convert specific standard header values which will help when
+    // parsing the data
+    // BITPIX, NAXIS, NAXISi (where i = 1..NAXIS, e.g. NAXIS2 for two axis),
+    // TOF, TIMEBIN, N_COUNTS, N_TRIGS
+    try {
+      string tmpBitPix = allHeaderInfo[i].headerKeys[m_headerBitDepthKey];
+      if (boost::contains(tmpBitPix, "-")) {
+        boost::erase_all(tmpBitPix, "-");
+        allHeaderInfo[i].isFloat = true;
+      } else {
+        allHeaderInfo[i].isFloat = false;
       }
 
-      allHeaderInfo[i].scale =
-          (allHeaderInfo[i].headerKeys[m_headerScaleKey] == "")
-              ? 1
-              : lexical_cast<double>(
-                    allHeaderInfo[i].headerKeys[m_headerScaleKey]);
-      allHeaderInfo[i].offset =
-          (allHeaderInfo[i].headerKeys[m_headerOffsetKey] == "")
-              ? 0
-              : lexical_cast<int>(
-                    allHeaderInfo[i].headerKeys[m_headerOffsetKey]);
+      // Add the image key, use the value in the FITS header if found,
+      // otherwise default (to SAMPLE).
+      auto it = allHeaderInfo[i].headerKeys.find(m_headerImageKeyKey);
+      if (allHeaderInfo[i].headerKeys.end() != it) {
+        allHeaderInfo[i].imageKey = it->second;
+      } else {
+        allHeaderInfo[i].imageKey = m_defaultImgType;
+      }
 
-      if (allHeaderInfo[i].extension != "")
-        headerValid = false;
-      if (allHeaderInfo[i].numberOfAxis != 2)
-        headerValid = false;
+      allHeaderInfo[i].bitsPerPixel = lexical_cast<int>(tmpBitPix);
+      allHeaderInfo[i].numberOfAxis =
+          static_cast<int>(m_headerAxisNameKeys.size());
 
-      // Test current item has same axis values as first item.
-      if (allHeaderInfo[0].axisPixelLengths[0] !=
-          allHeaderInfo[i].axisPixelLengths[0])
-        headerValid = false;
-      if (allHeaderInfo[0].axisPixelLengths[1] !=
-          allHeaderInfo[i].axisPixelLengths[1])
-        headerValid = false;
-    } else {
-      // Unable to parse the header, throw.
-      throw std::runtime_error("Unable to open the FITS file.");
+      for (int j = 0;
+           allHeaderInfo.size() > i && j < allHeaderInfo[i].numberOfAxis; ++j) {
+        allHeaderInfo[i].axisPixelLengths.push_back(lexical_cast<size_t>(
+            allHeaderInfo[i].headerKeys[m_headerAxisNameKeys[j]]));
+      }
+
+      // m_allHeaderInfo[i].tof =
+      // lexical_cast<double>(m_allHeaderInfo[i].headerKeys["TOF"]);
+      // m_allHeaderInfo[i].timeBin =
+      // lexical_cast<double>(m_allHeaderInfo[i].headerKeys["TIMEBIN"]);
+      // m_allHeaderInfo[i].countsInImage = lexical_cast<long
+      // int>(m_allHeaderInfo[i].headerKeys["N_COUNTS"]);
+      // m_allHeaderInfo[i].numberOfTriggers = lexical_cast<long
+      // int>(m_allHeaderInfo[i].headerKeys["N_TRIGS"]);
+      allHeaderInfo[i].extension =
+          allHeaderInfo[i].headerKeys["XTENSION"]; // Various extensions are
+                                                   // available to the FITS
+                                                   // format, and must be
+                                                   // parsed differently if
+                                                   // this is present. Loader
+                                                   // doesn't support this.
+
+    } catch (std::exception &) {
+      // TODO: be more specific, say which ones are missing!
+      // todo write error and fail this load with invalid data in file.
+      throw std::runtime_error("Unable to locate one or more valid BITPIX, "
+                               "NAXIS or IMAGEKEY values in the FITS file "
+                               "header.");
     }
+
+    allHeaderInfo[i].scale =
+        (allHeaderInfo[i].headerKeys[m_headerScaleKey] == "")
+            ? 1
+            : lexical_cast<double>(
+                  allHeaderInfo[i].headerKeys[m_headerScaleKey]);
+    allHeaderInfo[i].offset =
+        (allHeaderInfo[i].headerKeys[m_headerOffsetKey] == "")
+            ? 0
+            : lexical_cast<int>(allHeaderInfo[i].headerKeys[m_headerOffsetKey]);
+
+    if (allHeaderInfo[i].extension != "")
+      headerValid = false;
+    if (allHeaderInfo[i].numberOfAxis != 2)
+      headerValid = false;
+
+    // Test current item has same axis values as first item.
+    if (allHeaderInfo[0].axisPixelLengths[0] !=
+        allHeaderInfo[i].axisPixelLengths[0])
+      headerValid = false;
+    if (allHeaderInfo[0].axisPixelLengths[1] !=
+        allHeaderInfo[i].axisPixelLengths[1])
+      headerValid = false;
   }
 
   // Check that the files use bit depths of either 8, 16 or 32
@@ -266,7 +260,6 @@ void LoadFITS::exec() {
                        vector<double>(allHeaderInfo[0].axisPixelLengths[1]));
     MantidImage imageE(allHeaderInfo[0].axisPixelLengths[0],
                        vector<double>(allHeaderInfo[0].axisPixelLengths[1]));
-    ;
 
     void *bufferAny = NULL;
     bufferAny = malloc((allHeaderInfo[0].bitsPerPixel / 8) * m_spectraCount);
@@ -358,6 +351,24 @@ void LoadFITS::exec() {
 }
 
 /**
+ * Sets several keyword names with default (and standard) values. You
+ * don't want to change these unless you want to break compatibility
+ * with the FITS standard.
+ *
+ */
+void LoadFITS::setupDefaultKeywordNames() {
+  // Inits all the absolutely necessary keywords
+  m_headerScaleKey = "BSCALE";
+  m_headerOffsetKey = "BZERO";
+  m_headerBitDepthKey = "BITPIX";
+  m_headerImageKeyKey = "IMAGE_TYPE"; // This is a "HIERARCH Image_Type= "
+  m_headerRotationKey = "ROTATION";
+  m_mapFile = "";
+  m_headerAxisNameKeys.push_back("NAXIS1");
+  m_headerAxisNameKeys.push_back("NAXIS2");
+}
+
+/**
  * Initialises a workspace with IDF and fills it with data
  * @param fileInfo information for the current file
  * @param newFileNumber number for the new file when added into ws group
@@ -393,13 +404,12 @@ Workspace2D_sptr LoadFITS::addWorkspace(const FITSInfo &fileInfo,
   // set data
   readFileToWorkspace(ws, fileInfo, imageY, imageE, bufferAny);
 
-  // Add all header info to log. The important entries (BITPIX, etc.) have
-  // already been processed as they require.
+  // Add all header info to log.
   for (auto it = fileInfo.headerKeys.begin(); it != fileInfo.headerKeys.end();
        ++it) {
-    ws->mutableRun().removeLogData("_FITS:" + it->first, true);
+    ws->mutableRun().removeLogData("_" + it->first, true);
     ws->mutableRun().addLogData(
-        new PropertyWithValue<string>("_FITS:" + it->first, it->second));
+        new PropertyWithValue<string>("_" + it->first, it->second));
   }
 
   // Add rotational data to log. Clear first from copied WS
@@ -418,8 +428,8 @@ Workspace2D_sptr LoadFITS::addWorkspace(const FITSInfo &fileInfo,
 
   // Add image key data to log. Clear first from copied WS
   ws->mutableRun().removeLogData("ImageKey", true);
-  ws->mutableRun().addLogData(new PropertyWithValue<int>(
-      "ImageKey", static_cast<int>(fileInfo.imageKey)));
+  ws->mutableRun().addLogData(
+      new PropertyWithValue<std::string>("ImageKey", fileInfo.imageKey));
 
   m_progress->report();
 
@@ -492,19 +502,25 @@ void LoadFITS::readFileToWorkspace(Workspace2D_sptr ws,
     throw std::runtime_error("Error reading file; possibly invalid data.");
 
   std::vector<char> buf(fileInfo.bitsPerPixel / 8);
-  char* tmp = &buf.front();
+  char *tmp = &buf.front();
 
+  size_t start = 0;
+  int bytespp = fileInfo.bitsPerPixel / 8;
   for (size_t i = 0; i < fileInfo.axisPixelLengths[0]; ++i) {
     for (size_t j = 0; j < fileInfo.axisPixelLengths[1]; ++j) {
-      double val = 0;
-      size_t start =
-          ((i * (fileInfo.bitsPerPixel / 8)) * fileInfo.axisPixelLengths[1]) +
-          (j * (fileInfo.bitsPerPixel / 8));
+      // If you wanted to PARALLEL_...ize these loops (which doesn't
+      // seem to provide any speed up, you cannot use the
+      // start+=bytespp at the end of this loop. You'd need something
+      // like this:
+      //
+      // size_t start =
+      //   ((i * (bytespp)) * fileInfo.axisPixelLengths[1]) +
+      //  (j * (bytespp));
 
       // Reverse byte order of current value
-      std::reverse_copy(buffer8 + start,
-                        buffer8 + start + (fileInfo.bitsPerPixel / 8), tmp);
+      std::reverse_copy(buffer8 + start, buffer8 + start + bytespp, tmp);
 
+      double val = 0;
       if (fileInfo.bitsPerPixel == 8)
         val = static_cast<double>(*reinterpret_cast<uint8_t *>(tmp));
       if (fileInfo.bitsPerPixel == 16)
@@ -528,6 +544,8 @@ void LoadFITS::readFileToWorkspace(Workspace2D_sptr ws,
 
       imageY[i][j] = val;
       imageE[i][j] = sqrt(val);
+
+      start += bytespp;
     }
   }
 
@@ -649,66 +667,61 @@ std::vector<double> LoadFITS::readRotations(std::string rotFilePath,
  *  Maps the header keys to specified values
  */
 void LoadFITS::mapHeaderKeys() {
-  bool useProperties = true;
+
+  if ("" == getPropertyValue(m_HEADER_MAP_NAME))
+    return;
 
   // If a map file is selected, use that.
-  if (getPropertyValue(HEADER_MAP_NAME) != "") {
-    // std::vector<double> allRotations;
-    ifstream fStream(getPropertyValue(HEADER_MAP_NAME).c_str());
+  ifstream fStream(getPropertyValue(m_HEADER_MAP_NAME).c_str());
 
-    try {
-      // Ensure valid file
-      if (fStream.good()) {
-        // Get lines, split words, verify and add to map.
-        string line;
-        vector<string> lineSplit;
-        while (getline(fStream, line)) {
-          boost::split(lineSplit, line, boost::is_any_of("="));
+  try {
+    // Ensure valid file
+    if (fStream.good()) {
+      // Get lines, split words, verify and add to map.
+      std::string line;
+      vector<std::string> lineSplit;
+      while (getline(fStream, line)) {
+        boost::split(lineSplit, line, boost::is_any_of("="));
 
-          if (lineSplit[0] == ROTATION_NAME && lineSplit[1] != "")
-            m_headerRotationKey = lineSplit[1];
+        if (lineSplit[0] == m_ROTATION_NAME && lineSplit[1] != "")
+          m_headerRotationKey = lineSplit[1];
 
-          if (lineSplit[0] == BIT_DEPTH_NAME && lineSplit[1] != "")
-            m_headerBitDepthKey = lineSplit[1];
+        if (lineSplit[0] == m_BIT_DEPTH_NAME && lineSplit[1] != "")
+          m_headerBitDepthKey = lineSplit[1];
 
-          if (lineSplit[0] == AXIS_NAMES_NAME && lineSplit[1] != "") {
-            m_headerAxisNameKeys.clear();
-            std::string propVal = getProperty(AXIS_NAMES_NAME);
-            boost::split(m_headerAxisNameKeys, propVal, boost::is_any_of(","));
-          }
-
-          if (lineSplit[0] == IMAGE_KEY_NAME && lineSplit[1] != "") {
-            m_headerImageKeyKey = lineSplit[1];
-          }
+        if (lineSplit[0] == m_AXIS_NAMES_NAME && lineSplit[1] != "") {
+          m_headerAxisNameKeys.clear();
+          boost::split(m_headerAxisNameKeys, lineSplit[1],
+                       boost::is_any_of(","));
         }
 
-        fStream.close();
-        useProperties = false;
-      } else {
-        throw std::runtime_error("File error, throw higher up.");
+        if (lineSplit[0] == m_IMAGE_KEY_NAME && lineSplit[1] != "") {
+          m_headerImageKeyKey = lineSplit[1];
+        }
       }
-    } catch (...) {
-      g_log.information("Cannot load specified map file, using property values "
-                        "and/or defaults.");
-      useProperties = true;
-    }
-  }
 
-  if (useProperties) {
-    // Try and set from the loader properties if present and didn't load map
-    // file
-    if (getPropertyValue(BIT_DEPTH_NAME) != "")
-      m_headerBitDepthKey = getPropertyValue(BIT_DEPTH_NAME);
-    if (getPropertyValue(ROTATION_NAME) != "")
-      m_headerRotationKey = getPropertyValue(ROTATION_NAME);
-    if (getPropertyValue(AXIS_NAMES_NAME) != "") {
-      m_headerAxisNameKeys.clear();
-      std::string propVal = getProperty(AXIS_NAMES_NAME);
-      boost::split(m_headerAxisNameKeys, propVal, boost::is_any_of(","));
+      fStream.close();
+    } else {
+      throw std::runtime_error("File error, throw higher up.");
     }
-    if (getPropertyValue(IMAGE_KEY_NAME) != "")
-      m_headerImageKeyKey = getPropertyValue(IMAGE_KEY_NAME);
+  } catch (...) {
+    g_log.error("Cannot load specified map file, using property values "
+                "and/or defaults.");
   }
 }
+
+/**
+ * Used with find_if to check a string isn't a fits file (by checking extension)
+ *
+ * @param s string to check for extension
+ *
+ * @returns bool Value indicating if the string ends with .fits or not
+ */
+bool LoadFITS::IsNotFits(const std::string &s) {
+  std::string tmp = s;
+  to_lower(tmp);
+  return !ends_with(tmp, ".fits");
 }
-}
+
+} // namespace DataHandling
+} // namespace Mantid
