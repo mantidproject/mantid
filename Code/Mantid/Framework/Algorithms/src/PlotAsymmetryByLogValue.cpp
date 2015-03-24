@@ -20,6 +20,7 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
+#include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "Poco/File.h"
@@ -177,8 +178,8 @@ void PlotAsymmetryByLogValue::exec() {
 
   // Parse run names and get the number of runs
   parseRunNames( firstFN, lastFN, m_filenameBase, m_filenameExt, m_filenameZeros);
-  size_t is = atoi(firstFN.c_str()); // starting run number
-  size_t ie = atoi(lastFN.c_str());  // last run number
+  int64_t is = atoi(firstFN.c_str()); // starting run number
+  int64_t ie = atoi(lastFN.c_str());  // last run number
 
   // Resize vectors that will store results
   resizeVectors(ie-is+1);
@@ -186,7 +187,9 @@ void PlotAsymmetryByLogValue::exec() {
   Progress progress(this, 0, 1, ie - is + 2);
 
   // Loop through runs
-  for (size_t i = is; i <= ie; i++) {
+  PARALLEL_FOR_NO_WSP_CHECK()
+  for (int64_t i = is; i <= ie; i++) {
+    PARALLEL_START_INTERUPT_REGION
 
     // Load run, apply dead time corrections and detector grouping
     Workspace_sptr loadedWs = doLoad(i);
@@ -195,8 +198,9 @@ void PlotAsymmetryByLogValue::exec() {
     doAnalysis (loadedWs, i-is);
 
     progress.report();
+    PARALLEL_END_INTERUPT_REGION
   }
-
+  PARALLEL_CHECK_INTERUPT_REGION
 
   // Create the 2D workspace for the output
   int nplots = (m_green!= EMPTY_INT()) ? 4 : 1;
