@@ -1,9 +1,9 @@
 .. _MDHistoWorkspace:
 
-MDHistoWorkspace
-================
+MD Histogram Workspace
+======================
 
-The MDHistoWorkspace is a simple multi-dimensional workspace. In
+The MD Histogram Workspace[MDHistoWorkspace] is a simple multi-dimensional workspace. In
 contrast to the :ref:`MDWorkspace <MDWorkspace>`, which contains
 points in space, the MDHistoWorkspace consists of a signal and error
 spread around space on a regular grid.

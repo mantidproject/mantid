@@ -271,9 +271,8 @@ endif ()
 # Add to the 'Framework' group in VS
 set_property ( TARGET MDAlgorithms PROPERTY FOLDER "MantidFramework" )
 
-include_directories ( inc ../MDEvents/inc)
-
-target_link_libraries ( MDAlgorithms ${MANTIDLIBS} MDEvents)
+include_directories ( inc ../MDEvents/inc )
+target_link_libraries ( MDAlgorithms ${MANTIDLIBS} MDEvents )
 
 # Add the unit tests directory
 add_subdirectory ( test )

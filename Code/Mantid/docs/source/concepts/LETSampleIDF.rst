@@ -3,7 +3,7 @@
 .. role:: xml(literal)
    :class: highlight
    
-IDF-ISIS-SANS2D-annotated
+IDF ISIS LET annotated
 =========================
 
 This page annotates the direct inelastic instrument LET, with the purpose of (hopefully) quickly learn the basis of creating a similar IDF. 

@@ -9,7 +9,7 @@
 find_path ( QWT_INCLUDE_DIR qwt.h 
             PATHS /opt/include /usr/local/include /usr/include ${CMAKE_INCLUDE_PATH}
             PATH_SUFFIXES qwt5 qwt5-qt4 qwt-qt4 qwt )
-find_library ( QWT_LIBRARY NAMES qwt5-qt4 qwt-qt4 qwt )
+find_library ( QWT_LIBRARY NAMES qwt5-qt4 qwt-qt4 qwt5 qwt )
 find_library ( QWT_LIBRARY_DEBUG qwtd )
 
 # in REQUIRED mode: terminate if one of the above find commands failed

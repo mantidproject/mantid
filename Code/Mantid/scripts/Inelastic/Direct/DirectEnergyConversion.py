@@ -204,8 +204,8 @@ class DirectEnergyConversion(object):
                 # data file.  SNS or 1 to 1 maps may probably avoid this
                 # stuff and can load masks directly
                 white_data = white.get_ws_clone('white_ws_clone')
-
-                diag_mask = LoadMask(Instrument=self.instr_name,InputFile=self.hard_mask_file,\
+                idf_file = api.ExperimentInfo.getInstrumentFilename(self.instr_name)
+                diag_mask = LoadMask(Instrument=idf_file,InputFile=self.hard_mask_file,\
                                  OutputWorkspace='hard_mask_ws')
                 MaskDetectors(Workspace=white_data, MaskedWorkspace=diag_mask)
                 white.add_masked_ws(white_data)
@@ -366,7 +366,7 @@ class DirectEnergyConversion(object):
         masks_done = False
         if not prop_man.run_diagnostics:
             header = "*** Diagnostics including hard masking is skipped "
-            masks_done = Treu
+            masks_done = True
         #if Reducer.save_and_reuse_masks :
         # SAVE AND REUSE MASKS
         if self.spectra_masks:
@@ -383,7 +383,7 @@ class DirectEnergyConversion(object):
             masking = self.spectra_masks
 
         # estimate and report the number of failing detectors
-        nMaskedSpectra = get_failed_spectra_list_from_masks(masking)
+        nMaskedSpectra = get_failed_spectra_list_from_masks(masking,prop_man)
         if masking:
             nSpectra = masking.getNumberHistograms()
         else:
@@ -492,8 +492,6 @@ class DirectEnergyConversion(object):
         #prop_man.wb_run = None
         # clear combined mask
         self.spectra_masks = None
-        if 'masking' in mtd:
-            DeleteWorkspace(masking)
         return result
 
     def _do_abs_corrections(self,deltaE_ws_sample,cashed_mono_int,ei_guess,\
@@ -982,18 +980,37 @@ class DirectEnergyConversion(object):
     #########
     @property
     def spectra_masks(self):
-        """ The property keeps a workspace with masks, stored for further usage """
+        """ The property keeps a workspace with masks workspace name,
+            stored for further usage"""
 
         # check if spectra masks is defined
         if hasattr(self,'_spectra_masks'):
-            return self._spectra_masks
+            if not self._spectra_masks is None and self._spectra_masks in mtd:
+                return mtd[self._spectra_masks]
+            else:
+                self._spectra_masks = None
+            return None
         else:
             return None
 
     @spectra_masks.setter
     def spectra_masks(self,value):
         """ set up spectra masks """
-        self._spectra_masks = value
+        if value is None:
+            if hasattr(self,'_spectra_masks') and not self._spectra_masks is None:
+                if self._spectra_masks in mtd:
+                    DeleteWorkspace(self._spectra_masks)
+            self._spectra_masks=None
+        elif isinstance(value,api.Workspace):
+            self._spectra_masks = value.name()
+        elif isinstance(value,str):
+            if value in mtd:
+                self._spectra_masks = value
+            else:
+                self._spectra_masks = None
+        else:
+            self._spectra_masks = None
+        return
 #-------------------------------------------------------------------------------
     def apply_absolute_normalization(self,sample_ws,monovan_run=None,ei_guess=None,wb_mono=None,abs_norm_factor_is=None):
         """  Function applies absolute normalization factor to the target workspace
@@ -1515,7 +1532,7 @@ class DirectEnergyConversion(object):
         white_tag = 'NormBy:{0}_IntergatedIn:{1:0>10.2f}:{2:0>10.2f}'.format(self.normalise_method,low,upp)
         return white_tag
 
-def get_failed_spectra_list_from_masks(masked_wksp):
+def get_failed_spectra_list_from_masks(masked_wksp,prop_man):
     """Compile a list of spectra numbers that are marked as
        masked in the masking workspace
 
@@ -1526,6 +1543,11 @@ def get_failed_spectra_list_from_masks(masked_wksp):
     failed_spectra = []
     if masked_wksp is None:
        return (failed_spectra,0)
+    try:
+        name = masked_wksp.name()
+    except Exeption as ex:
+        prop_man.log("***WARNING: cached mask workspace invalidated. Incorrect masking reported")
+        return (failed_spectra,0)
 
     masking_wksp,sp_list = ExtractMask(masked_wksp)
     DeleteWorkspace(masking_wksp)
