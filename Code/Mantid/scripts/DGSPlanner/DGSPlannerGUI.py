@@ -15,26 +15,53 @@ class DGSPlannerGUI(QtGui.QWidget):
         else:
             self.ol=mantid.geometry.OrientedLattice()
         self.instrumentWidget=InstrumentSetupWidget.InstrumentSetupWidget(self)
-        self.setLayout(QtGui.QVBoxLayout())
-        self.layout().addWidget(self.instrumentWidget)
+        self.setLayout(QtGui.QHBoxLayout())
+        controlLayout=QtGui.QVBoxLayout()
+        controlLayout.addWidget(self.instrumentWidget)
         self.ublayout=QtGui.QHBoxLayout()
         self.classic=ClassicUBInputWidget.ClassicUBInputWidget(self.ol)
         self.ublayout.addWidget(self.classic)
-        self.classic.changed.connect(self.printUB)
         self.matrix=MatrixUBInputWidget.MatrixUBInputWidget(self.ol)
         self.ublayout.addStretch(1)
         self.ublayout.addWidget(self.matrix)
-        self.layout().addLayout(self.ublayout)
+        controlLayout.addLayout(self.ublayout)
         self.dimensionWidget=DimensionSelectorWidget.DimensionSelectorWidget(self)
-        self.layout().addWidget(self.dimensionWidget)
+        controlLayout.addWidget(self.dimensionWidget)
+        plotControlLayout=QtGui.QGridLayout()
+        self.plotButton=QtGui.QPushButton("Plot",self)
+        self.oplotButton=QtGui.QPushButton("Overplot",self)
+        self.helpButton=QtGui.QPushButton("?",self)
+        self.colorLabel=QtGui.QLabel('Color by angle',self)
+        self.colorButton=QtGui.QCheckBox(self)
+        plotControlLayout.addWidget(self.plotButton,0,0)
+        plotControlLayout.addWidget(self.oplotButton,0,1)
+        plotControlLayout.addWidget(self.colorLabel,0,2,QtCore.Qt.AlignRight)
+        plotControlLayout.addWidget(self.colorButton,0,3)
+        plotControlLayout.addWidget(self.helpButton,0,4)
+        controlLayout.addLayout(plotControlLayout)
+        self.layout.addLayout(controlLayout)
+        
+        #temp instead of figure
+        self.dummyButton=QtGui.QPushButton("Plot",self)
+        self.layout.addWidget(self.dummyButton)
         #connections        
-        self.matrix.UBmodel.changed.connect(self.printUB)
+        self.matrix.UBmodel.changed.connect(self.updateUB)
         self.matrix.UBmodel.changed.connect(self.classic.updateOL)
         self.classic.changed.connect(self.matrix.UBmodel.updateOL)
+        self.classic.changed.connect(self.updateUB)
+        self.instrumentWidget.changed.connect(self.updateParams)
+        self.dimensionWidget.changed.connect(self.updateParams)
+        #force an update of values
+        self.instrumentWidget.updateAll()
+        self.dimensionWidget.updateChanges()
 
     @QtCore.pyqtSlot(mantid.geometry.OrientedLattice)
-    def printUB(self,ol):
+    def updateUB(self,ol):
         print ol.getUB()
+        
+    @QtCore.pyqtSlot(dict)
+    def updateParams(self,d):
+        print d
 
 if __name__=='__main__':
     app=QtGui.QApplication(sys.argv)

@@ -20,12 +20,12 @@ class GonioTableModel(QtCore.QAbstractTableModel):
     changed=QtCore.pyqtSignal(dict) #each value is a list
     def __init__(self, axes, parent = None):
         QtCore.QAbstractTableModel.__init__(self, parent)
-        self.labels = axes['labels']
-        self.dirstrings = axes['dirs']
-        self.senses = axes['senses']
-        self.minvalues = axes['minvals']
-        self.maxvalues = axes['maxvals']
-        self.steps = axes['steps']
+        self.labels = axes['gonioLabels']
+        self.dirstrings = axes['gonioDirs']
+        self.senses = axes['gonioSenses']
+        self.minvalues = axes['gonioMinvals']
+        self.maxvalues = axes['gonioMaxvals']
+        self.steps = axes['gonioSteps']
         self.gonioColumns=['Name','Direction','Sense','Minimum','Maximum','Step']
         self.gonioRows=['Axis0','Axis1','Axis2']
 
@@ -181,14 +181,14 @@ class InstrumentSetupWidget(QtGui.QWidget):
         self.goniometerMin=[0.,0.,0.]
         self.goniometerMax=[0.,0.,0.]
         self.goniometerStep=[1.,1.,1.]
-        values={'labels':self.goniometerNames,'dirs':self.goniometerDirections,'senses':self.goniometerRotationSense,
-                'minvals':self.goniometerMin,'maxvals':self.goniometerMax,'steps':self.goniometerStep}
+        values={'gonioLabels':self.goniometerNames,'gonioDirs':self.goniometerDirections,'gonioSenses':self.goniometerRotationSense,
+                'gonioMinvals':self.goniometerMin,'gonioMaxvals':self.goniometerMax,'gonioSteps':self.goniometerStep}
         self.goniomodel = GonioTableModel(values,self)
         self.tableViewGon.setModel(self.goniomodel)
         self.tableViewGon.update()
         self.signaldict.update(values)
         #goniometer figure
-        self.figure=Figure(figsize=(2,2))
+        self.figure=Figure(figsize=(2,3))
         self.figure.patch.set_facecolor('white')
         self.canvas=FigureCanvas(self.figure)
         self.gonfig=None
@@ -216,6 +216,7 @@ class InstrumentSetupWidget(QtGui.QWidget):
         self.instrumentSelected(self.instrument)    
         #connect goniometer change with figure
         self.goniomodel.changed.connect(self.updateFigure)
+        self.updateAll()
 
     def updateFigure(self):
         #plot directions
@@ -312,7 +313,6 @@ class InstrumentSetupWidget(QtGui.QWidget):
         if kwargs!={}:
             self.signaldict.update(kwargs)
         self.changed.emit(self.signaldict)
-        print self.signaldict
 
 if __name__=='__main__':
     app=QtGui.QApplication(sys.argv)

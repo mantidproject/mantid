@@ -64,6 +64,16 @@ def FloatToQString(value):
     else:
         return QString("")
 
+def translation(number,character):
+    if number==0:
+        return '0'
+    if number==1:
+        return character
+    if number==-1:
+        return '-'+character
+    return str(number)+character    
+    
+    
 class DimensionSelectorWidget(QtGui.QWidget):
     changed=QtCore.pyqtSignal(dict)
     def __init__(self,parent=None):
@@ -106,13 +116,14 @@ class DimensionSelectorWidget(QtGui.QWidget):
         self._editMax4=QtGui.QLineEdit()
         self._editMax4.setValidator(self.doubleValidator)
         self._editStep1=QtGui.QLineEdit()
-        self._editStep1.setValidator(self.doubleValidator)
+        self._editStep1.setValidator(self.positiveDoubleValidator)
         self._editStep2=QtGui.QLineEdit()
-        self._editStep2.setValidator(self.doubleValidator)
+        self._editStep2.setValidator(self.positiveDoubleValidator)
         self._comboDim1=QtGui.QComboBox(self)
         self._comboDim2=QtGui.QComboBox(self)
         self._comboDim3=QtGui.QComboBox(self)
         self._comboDim4=QtGui.QComboBox(self)
+        self._comboDim4.setMinimumContentsLength(12)
         #basis
         self.basis=['1,0,0','0,1,0','0,0,1']
         #default values
@@ -147,12 +158,99 @@ class DimensionSelectorWidget(QtGui.QWidget):
         grid.addWidget(self._comboDim4,4,0)
         grid.addWidget(self._editMin4,4,1)
         grid.addWidget(self._editMax4,4,2)
+        
+        self._editBasis1.setText(QString(self.basis[0]))
+        self._editBasis2.setText(QString(self.basis[1]))
+        self._editBasis3.setText(QString(self.basis[2]))
+        self.updateCombo()
         self.updateGui()
         #connections
         self._editBasis1.textEdited.connect(self.basisChanged)
         self._editBasis2.textEdited.connect(self.basisChanged)
         self._editBasis3.textEdited.connect(self.basisChanged)
-    
+        self._editMin1.textEdited.connect(self.limitsChanged)
+        self._editMin2.textEdited.connect(self.limitsChanged)
+        self._editMin3.textEdited.connect(self.limitsChanged)
+        self._editMin4.textEdited.connect(self.limitsChanged)
+        self._editMax1.textEdited.connect(self.limitsChanged)
+        self._editMax2.textEdited.connect(self.limitsChanged)
+        self._editMax3.textEdited.connect(self.limitsChanged)
+        self._editMax4.textEdited.connect(self.limitsChanged)
+        self._editStep1.textEdited.connect(self.stepChanged)
+        self._editStep2.textEdited.connect(self.stepChanged)
+        self._comboDim1.currentIndexChanged.connect(self.comboChanged)
+        self._comboDim2.currentIndexChanged.connect(self.comboChanged)
+        self._comboDim3.currentIndexChanged.connect(self.comboChanged)
+        self._comboDim4.currentIndexChanged.connect(self.comboChanged)
+        self.inhibitSignal=False
+        self.updateChanges()
+        
+    def comboChanged(self,idx):
+        if self.inhibitSignal:
+            return
+        senderList=[self._comboDim1,self._comboDim2,self._comboDim3,self._comboDim4]
+        senderIndex=senderList.index(self.sender())
+        #swap names, mins, maxes and steps
+        self.dimNames[idx],self.dimNames[senderIndex]=self.dimNames[senderIndex],self.dimNames[idx]
+        self.dimMin[idx],self.dimMin[senderIndex]=self.dimMin[senderIndex],self.dimMin[idx]
+        self.dimMax[idx],self.dimMax[senderIndex]=self.dimMax[senderIndex],self.dimMax[idx]
+        self.dimStep[idx],self.dimStep[senderIndex]=self.dimStep[senderIndex],self.dimStep[idx]
+        self.inhibitSignal=True
+        self.updateCombo()
+        self.updateGui()
+        self.inhibitSignal=False
+        self.updateChanges()
+        
+    def stepChanged(self):
+        sender = self.sender()
+        validator = sender.validator()
+        state = validator.validate(sender.text(), 0)[0]
+        if state == QtGui.QValidator.Acceptable:
+            color = '#ffffff'
+        else:
+            color = '#ff0000'
+        sender.setStyleSheet('QLineEdit { background-color: %s }' % color)
+        if state == QtGui.QValidator.Acceptable:
+            if sender==self._editStep1:
+                self.dimStep[0]=float(sender.text())
+            else:
+                self.dimStep[1]=float(sender.text())
+            self.updateChanges()
+        
+        
+    def limitsChanged(self):
+        minSenders=[self._editMin1,self._editMin2,self._editMin3,self._editMin4]
+        maxSenders=[self._editMax1,self._editMax2,self._editMax3,self._editMax4]
+        sender=self.sender()
+        if sender in minSenders:
+            senderIndex=minSenders.index(sender)
+            if len(str(sender.text()).strip())==0:
+                self.dimMin[senderIndex]=-numpy.inf
+                color = '#ffffff'
+            else:
+                tempvalue=float(sender.text())
+                if tempvalue<self.dimMax[senderIndex]:
+                    self.dimMin[senderIndex]=tempvalue
+                    color = '#ffffff'
+                else:
+                    color = '#ff0000'
+        if sender in maxSenders:
+            senderIndex=maxSenders.index(sender)
+            if len(str(sender.text()).strip())==0:
+                self.dimMax[senderIndex]=numpy.inf
+                color = '#ffffff'
+            else:
+                tempvalue=float(sender.text())
+                if tempvalue>self.dimMin[senderIndex]:
+                    self.dimMax[senderIndex]=tempvalue
+                    color = '#ffffff'
+                else:
+                    color = '#ff0000'
+        minSenders[senderIndex].setStyleSheet('QLineEdit { background-color: %s }' % color)
+        maxSenders[senderIndex].setStyleSheet('QLineEdit { background-color: %s }' % color)
+        if color=='#ffffff':
+            self.updateChanges()
+        
     def basisChanged(self):
         sender = self.sender()
         validator = sender.validator()
@@ -175,17 +273,28 @@ class DimensionSelectorWidget(QtGui.QWidget):
             b1=numpy.fromstring(str(self._editBasis1.text()), sep=',')
             b2=numpy.fromstring(str(self._editBasis2.text()), sep=',')
             b3=numpy.fromstring(str(self._editBasis3.text()), sep=',')
-            print b1,b2,b3, self._editBasis1.text(),self._editBasis2.text(),self._editBasis3.text(),type(self._editBasis2.text())
             if numpy.abs(numpy.inner(b1,numpy.cross(b2,b3)))>1e-5:
                 color='#ffffff'
+                self.basis=[str(self._editBasis1.text()),str(self._editBasis2.text()),str(self._editBasis3.text())]
+                self.updateNames([b1,b2,b3])
         self._editBasis1.setStyleSheet('QLineEdit { background-color: %s }' % color)
         self._editBasis2.setStyleSheet('QLineEdit { background-color: %s }' % color)    
         self._editBasis3.setStyleSheet('QLineEdit { background-color: %s }' % color)
         
+    def updateNames(self,basis):
+        chars=['H','K','L']
+        for i in range(3):
+            indexMax=numpy.argmax(numpy.abs(basis[i]))
+            self.dimNames[i]='['+','.join([translation(x,chars[indexMax]) for x in basis[i]])+']'
+        self.dimNames[3]='DeltaE'
+        self.updateCombo()
+        self.dimMin=[-numpy.inf,-numpy.inf,-numpy.inf,-numpy.inf]
+        self.dimMax=[numpy.inf,numpy.inf,numpy.inf,numpy.inf]
+        self.dimStep=[0.05,0.05,0.05,1]
+        self.updateGui()
+        self.updateChanges()
+        
     def updateGui(self):
-        self._editBasis1.setText(QString(self.basis[0]))
-        self._editBasis2.setText(QString(self.basis[1]))
-        self._editBasis3.setText(QString(self.basis[2]))
         self._editMin1.setText(FloatToQString(self.dimMin[0]))
         self._editMin2.setText(FloatToQString(self.dimMin[1]))
         self._editMin3.setText(FloatToQString(self.dimMin[2]))
@@ -196,7 +305,13 @@ class DimensionSelectorWidget(QtGui.QWidget):
         self._editMax4.setText(FloatToQString(self.dimMax[3]))
         self._editStep1.setText(QString(format(self.dimStep[0],'.3f')))
         self._editStep2.setText(QString(format(self.dimStep[1],'.3f')))
-        
+
+    def updateCombo(self):
+        self.inhibitSignal=True     
+        self._comboDim1.clear()
+        self._comboDim2.clear()
+        self._comboDim3.clear()
+        self._comboDim4.clear()
         for name in self.dimNames:
             self._comboDim1.addItem(name)
             self._comboDim2.addItem(name)
@@ -206,6 +321,17 @@ class DimensionSelectorWidget(QtGui.QWidget):
         self._comboDim2.setCurrentIndex(1)
         self._comboDim3.setCurrentIndex(2)
         self._comboDim4.setCurrentIndex(3)
+        self.inhibitSignal=False
+
+
+    def updateChanges(self):
+        d=dict()
+        d['dimBasis']=self.basis
+        d['dimNames']=self.dimNames
+        d['dimMin']=self.dimMin
+        d['dimMax']=self.dimMax
+        d['dimStep']=self.dimStep
+        self.changed.emit(d)
 
 if __name__=='__main__':
     app=QtGui.QApplication(sys.argv)
