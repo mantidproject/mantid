@@ -9,40 +9,34 @@ import os
 
 
 class PoldiCompound(object):
-    def __init__(self, name, content, tolerance, elements):
+    _name = ""
+    _spacegroup = ""
+    _atomString = ""
+    _cellDict = ""
+
+    def __init__(self, name, elements):
         self._name = name
-        self._content = content
-        self._tolerance = tolerance
-        self._spacegroup = ""
-        self._atomString = ""
-        self._latticeDict = ""
 
         self.assign(elements)
 
     def assign(self, elements):
         for c in elements:
             if c[0] == "atoms":
-                self._atomString = c[1][0]
+                self._atomString = ';'.join(c[1])
             elif c[0] == "lattice":
-                pNames = ['a', 'b', 'c', 'alpha', 'beta', 'gamma']
-                self._latticeDict = dict(zip(pNames, c[1:]))
+                cellNames = ['a', 'b', 'c', 'alpha', 'beta', 'gamma']
+                self._cellDict = dict(zip(cellNames, c[1:]))
             elif c[0] == "spacegroup":
                 self._spacegroup = c[1]
 
-    def getAtoms(self):
+    def getAtomString(self):
         return self._atomString
 
-    def getLatticeDict(self):
-        return self._latticeDict
+    def getCellParameters(self):
+        return self._cellDict
 
     def getSpaceGroup(self):
         return self._spacegroup
-
-    def getContent(self):
-        return self._content
-
-    def getTolerance(self):
-        return self._tolerance
 
     def getName(self):
         return self._name
@@ -81,9 +75,7 @@ class PoldiCrystalFileParser(object):
 
     compoundName = Word(alphanums)
 
-    compound = Group(Suppress(CaselessLiteral("compound")) + Suppress(White()) + \
-                     compoundName + Suppress(White()) + floatNumber + \
-                     Suppress(White()) + floatNumber + \
+    compound = Group(compoundName + Optional(Suppress(White())) + \
                      nestedExpr(opener='{', closer='}', content=compoundContent))
 
     comment = Suppress(Literal('#') + restOfLine)
@@ -98,7 +90,7 @@ class PoldiCrystalFileParser(object):
         else:
             parsedContent = self._parseString(contentString)
 
-        return [PoldiCompound(*x[:3]) for x in parsedContent]
+        return [PoldiCompound(*x[:4]) for x in parsedContent]
 
     def _parseFile(self, filename):
         return self.compounds.parseFile(filename)
@@ -143,6 +135,27 @@ class PoldiLoadCrystalData(PythonAlgorithm):
 
 
     def PyExec(self):
-        pass
+        crystalFileName = self.getProperty("InputFile").value
+        compounds = self._parser(crystalFileName)
+
+        dMin = self.getProperty("LatticeSpacingMin").value
+        dMax = self.getProperty("LatticeSpacingMax").value
+
+        workspaces = []
+
+        for compound in compounds:
+            workspaces.append(self._createPeaksFromCell(compound, dMin, dMax))
+
+        self.setProperty("OutputWorkspace", GroupWorkspaces(workspaces))
+
+    def _createPeaksFromCell(self, compound, dMin, dMax):
+        PoldiCreatePeaksFromCell(SpaceGroup=compound.getSpaceGroup(),
+                                 Atoms=compound.getAtomString(),
+                                 LatticeSpacingMin=dMin,
+                                 LatticeSpacingMax=dMax,
+                                 OutputWorkspace=compound.getName(),
+                                 **compound.getCellParameters())
+
+        return compound.getName()
 
 AlgorithmFactory.subscribe(PoldiLoadCrystalData)
