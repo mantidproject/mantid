@@ -194,12 +194,10 @@ private:
   std::string m_pathSCARFbase;
   /// path to fits file (sample data)
   std::string m_pathFITS;
-  /// path to flat/bright image
+  /// path to flat/open beam/bright image
   std::string m_pathFlat;
   /// path to dark image
   std::string m_pathDark;
-  /// path to an tomography config file (savu NX format)
-  std::string m_pathSavuConfigFile;
 
   static const std::string m_SCARFName;
 

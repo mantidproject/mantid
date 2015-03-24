@@ -85,7 +85,7 @@ TomoReconstruction::TomoReconstruction(QWidget *parent)
       m_pathFITS(m_pathSCARFbase + "data/fits"),
       m_pathFlat(m_pathSCARFbase + "data/flat"),
       m_pathDark(m_pathSCARFbase + "data/dark"),
-      m_pathSavuConfigFile(m_pathSCARFbase), m_currentParamPath() {
+      m_currentParamPath() {
 
   m_computeRes.push_back(m_SCARFName);
 
@@ -149,8 +149,6 @@ void TomoReconstruction::doSetupSectionSetup() {
   // disable 'local' for now
   m_ui.tabWidget_comp_resource->setTabEnabled(false, 1);
 
-  m_ui.groupBox_saved_savu_config->setChecked(false);
-  m_ui.groupBox_saved_savu_config->setEnabled(false);
   m_ui.groupBox_run_config->setEnabled(false);
 
   connect(m_ui.pushButton_SCARF_login, SIGNAL(released()), this,
@@ -165,8 +163,6 @@ void TomoReconstruction::doSetupSectionSetup() {
           SLOT(flatPathBrowseClicked()));
   connect(m_ui.pushButton_dark_dir, SIGNAL(released()), this,
           SLOT(darkPathBrowseClicked()));
-  connect(m_ui.pushButton_savu_config_file, SIGNAL(released()), this,
-          SLOT(savuConfigFileBrowseClicked()));
 }
 
 void TomoReconstruction::doSetupSectionRun() {
@@ -1394,10 +1390,6 @@ void TomoReconstruction::darkPathBrowseClicked() {
   processPathBrowseClick(m_ui.lineEdit_path_dark, m_pathDark);
 }
 
-void TomoReconstruction::savuConfigFileBrowseClicked() {
-  processPathBrowseClick(m_ui.lineEdit_savu_config_file, m_pathSavuConfigFile);
-}
-
 /**
  * Check that the selected compute resource is listed as supported and
  * usable for the remote manager (if it is not local). Local jobs are
@@ -1484,10 +1476,6 @@ std::string TomoReconstruction::currentPathFlat() {
 
 std::string TomoReconstruction::currentPathDark() {
   return m_ui.lineEdit_path_dark->text().toStdString();
-}
-
-std::string TomoReconstruction::currentPathSavuConfig() {
-  return m_ui.lineEdit_savu_config_file->text().toStdString();
 }
 
 /**
