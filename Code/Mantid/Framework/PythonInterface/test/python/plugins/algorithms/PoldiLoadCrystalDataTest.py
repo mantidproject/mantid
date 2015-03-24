@@ -1,4 +1,5 @@
 import unittest
+from testhelpers import assertRaisesNothing
 
 from mantid.kernel import *
 from mantid.api import *
@@ -10,8 +11,7 @@ class PoldiLoadCrystalDataTest(unittest.TestCase):
         unittest.TestCase.__init__(self, *args)
 
     def test_Init(self):
-        self.assertTrue(False)
-
+        assertRaisesNothing(self, AlgorithmManager.create, ("PoldiLoadCrystalData"))
 
 if __name__ == '__main__':
     unittest.main()
