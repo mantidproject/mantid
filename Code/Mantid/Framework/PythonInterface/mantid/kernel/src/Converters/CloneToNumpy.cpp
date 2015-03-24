@@ -3,29 +3,9 @@
 //-----------------------------------------------------------------------------
 #include "MantidPythonInterface/kernel/Converters/CloneToNumpy.h"
 #include "MantidPythonInterface/kernel/Converters/NDArrayTypeIndex.h"
-//#include "MantidKernel/WarningSuppressions.h"
-#include <boost/python/list.hpp>
-
-// GCC_DIAG_OFF(cast-qual)
-//#define PY_ARRAY_UNIQUE_SYMBOL KERNEL_ARRAY_API
-//#define NO_IMPORT_ARRAY
-//#include <numpy/arrayobject.h>
-// GCC_DIAG_ON(cast-qual)
-
 #include "MantidPythonInterface/kernel/Converters/NumpyFunctions.h"
 
 #include <string>
-
-/*PyArrayObject* function_PyArray_NewFromDescr(int datatype, const int ndims,
-Py_intptr_t *dims)
-{
-  return (PyArrayObject*)PyArray_NewFromDescr(&PyArray_Type,
-                     PyArray_DescrFromType(datatype),
-                     ndims, // rank
-                     dims, // Length in each dimension
-                     NULL, NULL,
-                     0, NULL);
-}*/
 
 namespace Mantid { namespace PythonInterface
   {
@@ -57,13 +37,6 @@ namespace Mantid { namespace PythonInterface
       {
         Py_intptr_t dims[1] = { static_cast<int>(cvector.size()) };
         int datatype = NDArrayTypeIndex<bool>::typenum;
-        /*PyArrayObject *nparray = (PyArrayObject*)
-          PyArray_NewFromDescr(&PyArray_Type,
-                               PyArray_DescrFromType(datatype),
-                               1, // rank
-                               dims, // Length in each dimension
-                               NULL, NULL,
-                               0, NULL);*/
         PyArrayObject *nparray =
             func_PyArray_NewFromDescr(datatype, 1, &dims[0]);
 
@@ -87,13 +60,6 @@ namespace Mantid { namespace PythonInterface
       PyObject *cloneND(const ElementType * carray, const int ndims, Py_intptr_t *dims)
       {
         int datatype = NDArrayTypeIndex<ElementType>::typenum;
-        /*PyArrayObject *nparray = (PyArrayObject*)
-          PyArray_NewFromDescr(&PyArray_Type,
-                               PyArray_DescrFromType(datatype),
-                               ndims, // rank
-                               dims, // Length in each dimension
-                               NULL, NULL,
-                               0, NULL);*/
         PyArrayObject *nparray =
             func_PyArray_NewFromDescr(datatype, ndims, &dims[0]);
         // Compute total number of elements
