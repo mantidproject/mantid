@@ -365,16 +365,9 @@
                     <item>
                       <layout class="QHBoxLayout" name="horizontalLayout_2">
                         <item>
-                          <widget class="QCheckBox" name="timeLimit">
-                            <property name="text">
-                              <string>Time limit:</string>
-                            </property>
-                          </widget>
-                        </item>
-                        <item>
                           <widget class="QWidget" name="timeLimits" native="true">
                             <property name="enabled">
-                              <bool>false</bool>
+                              <bool>true</bool>
                             </property>
                             <property name="minimumSize">
                               <size>
@@ -503,29 +496,12 @@
     <tabstop>log</tabstop>
     <tabstop>integral</tabstop>
     <tabstop>differential</tabstop>
-    <tabstop>timeLimit</tabstop>
     <tabstop>minTime</tabstop>
     <tabstop>maxTime</tabstop>
     <tabstop>load</tabstop>
   </tabstops>
   <resources/>
   <connections>
-    <connection>
-      <sender>timeLimit</sender>
-      <signal>toggled(bool)</signal>
-      <receiver>timeLimits</receiver>
-      <slot>setEnabled(bool)</slot>
-      <hints>
-        <hint type="sourcelabel">
-          <x>94</x>
-          <y>193</y>
-        </hint>
-        <hint type="destinationlabel">
-          <x>264</x>
-          <y>205</y>
-        </hint>
-      </hints>
-    </connection>
     <connection>
       <sender>fromCustomFile</sender>
       <signal>toggled(bool)</signal>

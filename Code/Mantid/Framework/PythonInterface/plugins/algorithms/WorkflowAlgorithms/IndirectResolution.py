@@ -61,9 +61,8 @@ class IndirectResolution(DataProcessorAlgorithm):
 
 
     def PyExec(self):
-        from IndirectCommon import StartTime, EndTime, getWSprefix
+        from IndirectCommon import getWSprefix
 
-        StartTime('IndirectResolution')
         self._setup()
 
         InelasticIndirectReduction(Instrument=self._instrument,
@@ -91,8 +90,6 @@ class IndirectResolution(DataProcessorAlgorithm):
 
         self._post_process()
         self.setProperty('OutputWorkspace', self._out_ws)
-
-        EndTime('IndirectResolution')
 
 
     def _setup(self):

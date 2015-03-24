@@ -138,7 +138,7 @@ public:
   static void loadExperimentInfos(
       ::NeXus::File *const file,
       const std::string & filename,
-      boost::shared_ptr<API::MultipleExperimentInfos> ei,
+      boost::shared_ptr<API::MultipleExperimentInfos> mei,
       bool lazy = false);
 
   static void saveAffineTransformMatricies(::NeXus::File *const file,

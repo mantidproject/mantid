@@ -159,16 +159,6 @@ MDWSDescription::buildFromMDWS(const API::IMDEventWorkspace_const_sptr &pWS) {
     m_DimMax[i] = pDim->getMaximum();
   }
   m_Wtransf = Kernel::DblMatrix(pWS->getWTransf());
-  // deal with the case when source MD workspace does not have any experiment
-  // infos
-  if (pWS->getNumExperimentInfo() != 0) {
-    this->addProperty(
-        "W_MATRIX",
-        pWS->getExperimentInfo(0)
-            ->run()
-            .getPropertyValueAsType<std::vector<double>>("W_MATRIX"),
-        true);
-  }
 }
 /** When the workspace has been build from existing MDWrokspace, some target
 *workspace parameters can not be defined,

@@ -85,8 +85,9 @@ void ConvertToMD::init() {
   setPropertyGroup("MinRecursionDepth", getBoxSettingsGroupName());
 
   declareProperty(
-       new PropertyWithValue<bool>("InitialSplitting", 0, Direction::Input),
-       "This option causes an initial split of 50 for the first four dimensions at level 0.");
+      new PropertyWithValue<bool>("InitialSplitting", 0, Direction::Input),
+      "This option causes an initial split of 50 for the first four dimensions "
+      "at level 0.");
 }
 //----------------------------------------------------------------------------------------------
 /** Destructor
@@ -324,9 +325,13 @@ void ConvertToMD::copyMetaData(API::IMDEventWorkspace_sptr &mdEventWS) const {
     }
   }
 
+  // The last experiment info should always be the one that refers
+  // to latest converting workspace. All others should have had this
+  // information set already
   uint16_t nexpts = mdEventWS->getNumExperimentInfo();
-  for (uint16_t i = 0; i < nexpts; ++i) {
-    ExperimentInfo_sptr expt = mdEventWS->getExperimentInfo(i);
+  if (nexpts > 0) {
+    ExperimentInfo_sptr expt =
+        mdEventWS->getExperimentInfo(static_cast<uint16_t>(nexpts - 1));
     expt->mutableRun().storeHistogramBinBoundaries(binBoundaries);
     expt->cacheDetectorGroupings(*mapping);
   }
@@ -469,13 +474,10 @@ API::IMDEventWorkspace_sptr ConvertToMD::createNewMDWorkspace(
   // Check if the user want sto force an initial split or not
   bool initialSplittingChecked = this->getProperty("InitialSplitting");
 
-  if (!initialSplittingChecked)
-  {
+  if (!initialSplittingChecked) {
     // split boxes;
     spws->splitBox();
-  }
-  else
-  {
+  } else {
     // Perform initial split with the forced settings
     performInitialSplitting(spws, bc);
   }
@@ -492,26 +494,27 @@ API::IMDEventWorkspace_sptr ConvertToMD::createNewMDWorkspace(
 }
 
 /**
- * Splits the initial box at level 0 into a defined number of subboxes for the the first level.
+ * Splits the initial box at level 0 into a defined number of subboxes for the
+ * the first level.
  * @param spws A pointer to the newly created event workspace.
  * @param bc A pointer to the box controller.
  */
-void ConvertToMD::performInitialSplitting(API::IMDEventWorkspace_sptr spws, Mantid::API::BoxController_sptr bc)
-{
+void ConvertToMD::performInitialSplitting(API::IMDEventWorkspace_sptr spws,
+                                          Mantid::API::BoxController_sptr bc) {
   const size_t initialSplitSetting = 50;
   const size_t dimCutoff = 4;
 
-  // Record the split settings of the box controller in a buffer and set the new value
+  // Record the split settings of the box controller in a buffer and set the new
+  // value
   std::vector<size_t> splitBuffer;
-  
-  for (size_t dim = 0; dim < bc->getNDims(); dim++)
-  {
+
+  for (size_t dim = 0; dim < bc->getNDims(); dim++) {
     splitBuffer.push_back(bc->getSplitInto(dim));
 
-    // Replace the box controller setting only for a max of the first three dimensions
-    if (dim < dimCutoff)
-    {
-       bc->setSplitInto(dim, initialSplitSetting);
+    // Replace the box controller setting only for a max of the first three
+    // dimensions
+    if (dim < dimCutoff) {
+      bc->setSplitInto(dim, initialSplitSetting);
     }
   }
 
@@ -519,8 +522,7 @@ void ConvertToMD::performInitialSplitting(API::IMDEventWorkspace_sptr spws, Mant
   spws->splitBox();
 
   // Revert changes on the box controller
-  for (size_t dim = 0; dim < bc->getNDims(); ++dim)
-  {
+  for (size_t dim = 0; dim < bc->getNDims(); ++dim) {
     bc->setSplitInto(dim, splitBuffer[dim]);
   }
 }
