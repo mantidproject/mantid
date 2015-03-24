@@ -42,6 +42,35 @@ class PoldiLoadCrystalDataTest(unittest.TestCase):
         # Clean up
         self._cleanWorkspaces([ws, ws_expected])
 
+    def test_FileFaultyLatticeStrings(self):
+        fhLatticeMissing = TemporaryFileHelper("""Silicon {
+                                                    Spacegroup: F d -3 m
+                                                    Atoms: {
+                                                        Si 0 0 0 1.0 0.05
+                                                    }
+                                                  }""")
+
+        fhNoLattice = TemporaryFileHelper("""Silicon {
+                                                Lattice:
+                                                Spacegroup: F d -3 m
+                                                Atoms: {
+                                                    Si 0 0 0 1.0 0.05
+                                                }
+                                             }""")
+
+        fhInvalidLattice = TemporaryFileHelper("""Silicon {
+                                                    Lattice: invalid
+                                                    Spacegroup: F d -3 m
+                                                    Atoms: {
+                                                        Si 0 0 0 1.0 0.05
+                                                    }
+                                                  }""")
+
+        self.assertRaises(RuntimeError, PoldiLoadCrystalData, *(fhLatticeMissing.getName(), 0.7, 10.0, 'ws'))
+        self.assertRaises(RuntimeError, PoldiLoadCrystalData, *(fhNoLattice.getName(), 0.7, 10.0, 'ws'))
+        self.assertRaises(RuntimeError, PoldiLoadCrystalData, *(fhInvalidLattice.getName(), 0.7, 10.0, 'ws'))
+
+
     def _tablesAreEqual(self, lhs, rhs):
         self.assertEquals(lhs.rowCount(), rhs.rowCount(), msg="Row count of tables is different")
 

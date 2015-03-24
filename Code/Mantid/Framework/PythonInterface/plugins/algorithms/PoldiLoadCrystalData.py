@@ -61,9 +61,7 @@ class PoldiCrystalFileParser(object):
 
     atomsGroup = Group(CaselessLiteral("atoms") + keyValueSeparator + nestedExpr(
         opener="{", closer="}",
-        content=Combine(
-            delimitedList(atomLine, delim='\n'),
-            joinString=";")))
+        content=delimitedList(atomLine, delim='\n')))
 
     unitCell = Group(CaselessLiteral("lattice") + keyValueSeparator + delimitedList(
         floatNumber, delim=White()))
@@ -136,17 +134,24 @@ class PoldiLoadCrystalData(PythonAlgorithm):
 
     def PyExec(self):
         crystalFileName = self.getProperty("InputFile").value
-        compounds = self._parser(crystalFileName)
+        try:
+            compounds = self._parser(crystalFileName)
 
-        dMin = self.getProperty("LatticeSpacingMin").value
-        dMax = self.getProperty("LatticeSpacingMax").value
+            dMin = self.getProperty("LatticeSpacingMin").value
+            dMax = self.getProperty("LatticeSpacingMax").value
 
-        workspaces = []
+            workspaces = []
 
-        for compound in compounds:
-            workspaces.append(self._createPeaksFromCell(compound, dMin, dMax))
+            for compound in compounds:
+                workspaces.append(self._createPeaksFromCell(compound, dMin, dMax))
 
-        self.setProperty("OutputWorkspace", GroupWorkspaces(workspaces))
+            self.setProperty("OutputWorkspace", GroupWorkspaces(workspaces))
+        except ParseException as error:
+            errorString = "Could not parse input file '" + crystalFileName + "'.\n"
+            errorString += "The parser reported the following error:\n\t" + str(error)
+
+            self.log().error(errorString)
+
 
     def _createPeaksFromCell(self, compound, dMin, dMax):
         PoldiCreatePeaksFromCell(SpaceGroup=compound.getSpaceGroup(),
@@ -157,5 +162,6 @@ class PoldiLoadCrystalData(PythonAlgorithm):
                                  **compound.getCellParameters())
 
         return compound.getName()
+
 
 AlgorithmFactory.subscribe(PoldiLoadCrystalData)
