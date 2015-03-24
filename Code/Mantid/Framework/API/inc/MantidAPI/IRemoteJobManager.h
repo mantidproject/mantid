@@ -2,6 +2,7 @@
 #define MANTID_KERNEL_IREMOTEJOBMANAGER_H
 
 #include "MantidAPI/DllConfig.h"
+#include "MantidKernel/DateAndTime.h"
 
 namespace Mantid {
 namespace API {
@@ -89,13 +90,14 @@ public:
     /// ID of the transaction where this job is included
     std::string transactionID;
     /// Date-time of submission. No particular format can be assumed
-    std::string submitDate;
+    /// from the specific remote job managers
+    Mantid::Kernel::DateAndTime submitDate;
     /// Date-time the job actually started running.  No particular
     /// format can be assumed
-    std::string startDate;
+    Mantid::Kernel::DateAndTime startDate;
     /// Date-time the job finished. No particular format can be
     /// assumed
-    std::string completionTime;
+    Mantid::Kernel::DateAndTime completionTime;
   };
 
   /**
