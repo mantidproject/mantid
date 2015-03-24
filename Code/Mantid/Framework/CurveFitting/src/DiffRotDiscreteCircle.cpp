@@ -168,6 +168,7 @@ void DiffRotDiscreteCircle::init() {
   setAlias("f1.Intensity", "Intensity");
   setAlias("f1.Radius", "Radius");
   setAlias("f1.Decay", "Decay");
+  setAlias("f1.Shift", "Shift");
 
   // Set the ties between Elastic and Inelastic parameters
   addDefaultTies("f0.Height=f1.Intensity,f0.Radius=f1.Radius");
