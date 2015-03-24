@@ -15,7 +15,7 @@ elseif ( "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" )
 endif()
 
 # Global warning flags.
-set( GNUFLAGS "-Wall -Wextra -Wpedantic -Wconversion -Winit-self -Wpointer-arith -Wcast-qual -Wcast-align -fno-common" )
+set( GNUFLAGS "-Wall -Wextra -pedantic -Wconversion -Winit-self -Wpointer-arith -Wcast-qual -Wcast-align -fno-common" )
 # Disable some warnings about deprecated headers and type conversions that
 # we can't do anything about
 # -Wno-deprecated: Do not warn about use of deprecated headers.
