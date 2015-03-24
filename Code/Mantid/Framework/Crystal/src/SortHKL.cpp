@@ -255,7 +255,7 @@ void SortHKL::exec() {
   Statistics statsMult = getStatistics(multiplicity);
   multiplicity.clear();
   // statistics to output table workspace
-  g_log.notice() << "Rmerge:" << rSum << "  "  << f2Sum << "\n";
+
   newrow << statsMult.mean << statsIsigI.mean << 100.0 * rSum / f2Sum
          << 100.0 * rpSum / f2Sum
          << 100.0 * double(unique) / double(predictedPeaks);

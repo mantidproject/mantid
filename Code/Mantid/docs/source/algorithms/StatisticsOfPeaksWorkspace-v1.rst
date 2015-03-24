@@ -47,7 +47,7 @@ Output:
 
     HKL of first peak in table 1 4.0 -9.0
     HKL of first peak in table -10 3.0 -40.0
-    {'Data Completeness': inf, 'Rmerge': 0.031365010345900619, 'Multiplicity': 1.0124378109452736, 'Resolution Min': 0.29574100000000003, 'No. of Unique Reflections': 403, 'Mean ((I)/sd(I))': 27.50726166791943, 'Resolution Max': 3.1660760000000003, 'Resolution Shell': 'Overall', 'Rpim': 0.031365010345900619}
+    {'Data Completeness': inf, 'Rmerge': 0.03136501034590062, 'Multiplicity': 1.0124378109452736, 'Resolution Min': 0.29574100000000003, 'No. of Unique Reflections': 403, 'Mean ((I)/sd(I))': 27.50726166791943, 'Resolution Max': 3.1660760000000003, 'Resolution Shell': 'Overall', 'Rpim': 0.03136501034590062}
 
 
 .. categories::
