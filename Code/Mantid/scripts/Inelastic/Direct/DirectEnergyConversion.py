@@ -914,7 +914,7 @@ class DirectEnergyConversion(object):
                     mon1_peak = 0
                     self.prop_man.log("*** WARNING: not able to identify energy peak "\
                                       "while looking for TOF range corresponding to energy range: {0}\n"\
-                                      "    Using assumption that IDF starts counting at moderator T=0".\
+                                      "    Continuing under assumption that time=0 when incident neutrons arrive at source".\
                                        format(energy_list),'warning')
         else:
             mon1_peak = 0
