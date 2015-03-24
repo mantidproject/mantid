@@ -175,7 +175,8 @@ calculateSteps(std::vector<MinMax> inExtents,
       double stepSize = binning[i][0];
       if (stepSize > dimRange)
         stepSize = dimRange;
-      outExtents[i].second = inExtents[i].first + static_cast<double>(numBins) * stepSize;
+      outExtents[i].second =
+          inExtents[i].first + static_cast<double>(numBins) * stepSize;
       outBins.push_back(static_cast<size_t>(dimRange / stepSize));
     } else if (nArgs == 2) {
       outExtents[i].first = binning[i][0];
@@ -190,23 +191,24 @@ calculateSteps(std::vector<MinMax> inExtents,
         stepSize = dimRange;
       outExtents[i].second = dimMin + static_cast<double>(numBins) * stepSize;
       outExtents[i].first = dimMin;
-      outBins.push_back(static_cast<size_t>(dimRange/stepSize));
+      outBins.push_back(static_cast<size_t>(dimRange / stepSize));
     } else {
       throw std::runtime_error("Cannot handle " +
-                                 boost::lexical_cast<std::string>(nArgs) +
-                                 " bins.");
+                               boost::lexical_cast<std::string>(nArgs) +
+                               " bins.");
     }
   }
   return std::make_pair(outExtents, outBins);
 }
 
-std::vector<std::vector<std::string> > labelProjection(const DblMatrix &projection) {
-  std::vector<std::vector<std::string> > ret(3, std::vector<std::string>(3));
+std::vector<std::vector<std::string>>
+labelProjection(const DblMatrix &projection) {
+  std::vector<std::vector<std::string>> ret(3, std::vector<std::string>(3));
 
-  const char* replacements[] = {"zeta", "eta", "xi"};
+  const char *replacements[] = {"zeta", "eta", "xi"};
 
-  for(size_t i = 0; i < 3; ++i) {
-    for(size_t j = 0; j < 3; ++j) {
+  for (size_t i = 0; i < 3; ++i) {
+    for (size_t j = 0; j < 3; ++j) {
       const double in = projection[i][j];
       std::string out;
 
