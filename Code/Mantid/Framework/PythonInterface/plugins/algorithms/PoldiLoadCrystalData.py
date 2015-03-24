@@ -1,4 +1,4 @@
-# pylint: disable=no-init,invalid-name,bare-except
+# pylint: disable=no-init,invalid-name,too-few-public-methods
 from mantid.kernel import *
 from mantid.simpleapi import *
 from mantid.api import *
