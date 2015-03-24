@@ -2,6 +2,7 @@
 from mantid.kernel import *
 from mantid.simpleapi import *
 from mantid.api import *
+from mantid.geometry import *
 
 from pyparsing import *
 
@@ -22,7 +23,7 @@ class PoldiCompound(object):
     def assign(self, elements):
         for c in elements:
             if c[0] == "atoms":
-                self._atomString = ';'.join(c[1])
+                self._atomString = ';'.join(c[1:])
             elif c[0] == "lattice":
                 cellNames = ['a', 'b', 'c', 'alpha', 'beta', 'gamma']
                 self._cellDict = dict(zip(cellNames, c[1:]))
@@ -42,6 +43,10 @@ class PoldiCompound(object):
         return self._name
 
 
+def raiseParseErrorException(message):
+    raise ParseException(message)
+
+
 class PoldiCrystalFileParser(object):
     elementSymbol = Word(alphas, exact=2)
     integerNumber = Word(nums)
@@ -51,17 +56,21 @@ class PoldiCrystalFileParser(object):
         Optional(decimalSeparator + Optional(integerNumber))
     )
 
+    whiteSpace = Suppress(White())
+
     atomLine = Combine(
-        elementSymbol + Suppress(White()) +
+        elementSymbol + whiteSpace +
         delimitedList(floatNumber, delim=White()),
         joinString=' '
     )
 
     keyValueSeparator = Suppress(Literal(":"))
 
-    atomsGroup = Group(CaselessLiteral("atoms") + keyValueSeparator + nestedExpr(
-        opener="{", closer="}",
-        content=delimitedList(atomLine, delim='\n')))
+    groupOpener = Suppress(Literal('{'))
+    groupCloser = Suppress(Literal('}'))
+
+    atomsGroup = Group(CaselessLiteral("atoms") + keyValueSeparator +
+                       groupOpener + delimitedList(atomLine, delim=lineEnd) + groupCloser)
 
     unitCell = Group(CaselessLiteral("lattice") + keyValueSeparator + delimitedList(
         floatNumber, delim=White()))
@@ -69,12 +78,13 @@ class PoldiCrystalFileParser(object):
     spaceGroup = Group(CaselessLiteral("spacegroup") + keyValueSeparator + Word(
         alphanums + "-" + ' '))
 
-    compoundContent = Each([atomsGroup, unitCell, spaceGroup])
+    compoundContent = Each([atomsGroup, unitCell, spaceGroup]).setFailAction(
+        lambda o, s, loc, token: raiseParseErrorException("Missing one of 'Lattice', 'SpaceGroup', 'Atoms'."))
 
-    compoundName = Word(alphanums)
+    compoundName = Word(alphanums + '_')
 
-    compound = Group(compoundName + Optional(Suppress(White())) + \
-                     nestedExpr(opener='{', closer='}', content=compoundContent))
+    compound = Group(compoundName + Optional(whiteSpace) + \
+                     groupOpener + compoundContent + groupCloser)
 
     comment = Suppress(Literal('#') + restOfLine)
 
@@ -88,7 +98,7 @@ class PoldiCrystalFileParser(object):
         else:
             parsedContent = self._parseString(contentString)
 
-        return [PoldiCompound(*x[:4]) for x in parsedContent]
+        return [PoldiCompound(x[0], x[1:]) for x in parsedContent]
 
     def _parseFile(self, filename):
         return self.compounds.parseFile(filename)
@@ -154,6 +164,9 @@ class PoldiLoadCrystalData(PythonAlgorithm):
 
 
     def _createPeaksFromCell(self, compound, dMin, dMax):
+        if not SpaceGroupFactory.isSubscribedSymbol(compound.getSpaceGroup()):
+            raise RuntimeError("SpaceGroup '" + compound.getSpaceGroup() + "' is not registered.")
+
         PoldiCreatePeaksFromCell(SpaceGroup=compound.getSpaceGroup(),
                                  Atoms=compound.getAtomString(),
                                  LatticeSpacingMin=dMin,
