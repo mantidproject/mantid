@@ -328,9 +328,10 @@ bool PreviewPlot::hasCurve(const QString & curveName)
 
 
 /**
- * Attaches a RangeSelector to the plot and stores it.
+ * Creates a RangeSelector, adds it to the plot and stores it.
  *
  * @param rsName Name of range selector
+ * @param type Type of range selector to add
  * @return RangeSelector object
  */
 RangeSelector * PreviewPlot::addRangeSelector(const QString & rsName,
