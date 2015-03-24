@@ -90,7 +90,8 @@ public:
     /// ID of the transaction where this job is included
     std::string transactionID;
     /// Date-time of submission. No particular format can be assumed
-    /// from the specific remote job managers
+    /// from the specific remote job managers, and some of them may
+    /// not provide this info
     Mantid::Kernel::DateAndTime submitDate;
     /// Date-time the job actually started running.  No particular
     /// format can be assumed
@@ -276,4 +277,4 @@ typedef boost::shared_ptr<IRemoteJobManager> IRemoteJobManager_sptr;
 } // namespace API
 } // namespace Mantid
 
-#endif // MANTID_KERNEL_IREMOTEJOBMANAGER_H
+#endif // MANTID_API_IREMOTEJOBMANAGER_H
