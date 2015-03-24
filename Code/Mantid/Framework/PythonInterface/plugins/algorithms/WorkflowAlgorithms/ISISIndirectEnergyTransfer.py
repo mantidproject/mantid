@@ -96,6 +96,7 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
                 bin_counts = [mtd[ws].blocksize() for ws in mtd[c_ws_name].getNames()]
                 num_bins = np.amax(bin_counts)
 
+            # TODO: Should this be done per workspace?
             masked_detectors = self._identify_bad_detectors(workspaces[0])
 
             # Process workspaces
@@ -137,22 +138,23 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
                 ConvertUnits(InputWorkspace=ws_name, OutputWorkspace=ws_name, Target='DeltaE', EMode='Indirect')
                 CorrectKiKf(InputWorkspace=ws_name, OutputWorkspace=ws_name, EMode='Indirect')
 
-                # Handle rebinning of regular data
+                # Handle rebinning
                 if self._rebin_string is not None:
-                    if not is_multi_frame:
+                    if is_multi_frame:
+                        # Mulit frame data
+                        if mtd[ws_name].blocksize() == num_bins:
+                            Rebin(InputWorkspace=ws_name, OutputWorkspace=ws_name, Params=self._rebin_string)
+                        else:
+                            Rebin(InputWorkspace=ws_name, OutputWorkspace=ws_name, Params=rebin_string_2)
+                    else:
+                        # Regular data
                         Rebin(InputWorkspace=ws_name, OutputWorkspace=ws_name, Params=self._rebin_string)
                 else:
                     try:
+                        # If user does not want to rebin then just ensure uniform binning across spectra
                         RebinToWorkspace(WorkspaceToRebin=ws_name, WorkspaceToMatch=ws_name, OutputWorkspace=ws_name)
                     except RuntimeError:
                         logger.warning('Rebinning failed, will try to continue anyway.')
-
-                # Handle rebinning of multiple framed data
-                if self._rebin_string is not None and is_multi_frame:
-                    if mtd[ws_name].blocksize() == num_bins:
-                        Rebin(InputWorkspace=ws_name, OutputWorkspace=ws_name, Params=self._rebin_string)
-                    else:
-                        Rebin(InputWorkspace=ws_name, OutputWorkspace=ws_name, Params=rebin_string_2)
 
                 # Detailed balance
                 if self._detailed_balance is not None:

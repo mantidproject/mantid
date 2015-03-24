@@ -222,7 +222,7 @@ class TOSCAMultiFileReduction(ISISIndirectInelasticReduction):
         ISISIndirectInelasticReduction.__init__(self)
         self.instr_name = 'TOSCA'
         self.detector_range = [1, 140]
-        self.data_files = ['TSC15352.raw', 'TSC15353.raw','TSC15354.raw']
+        self.data_files = ['TSC15352.raw', 'TSC15353.raw', 'TSC15354.raw']
         self.rebin_string = '-2.5,0.015,3,-0.005,1000'
 
     def get_reference_files(self):
