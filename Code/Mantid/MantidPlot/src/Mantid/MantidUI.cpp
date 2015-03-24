@@ -2634,9 +2634,6 @@ void MantidUI::importNumSeriesLog(const QString &wsName, const QString &logName,
         }
       }
 
-      iValueCurve = 1;
-      iFilterCurve = 0;
-
     } //end (valid filter exists)
 
   }
