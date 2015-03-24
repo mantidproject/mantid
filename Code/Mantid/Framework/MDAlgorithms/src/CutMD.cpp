@@ -269,8 +269,6 @@ void CutMD::init() {
                                   "as output. True to create an "
                                   "MDHistoWorkspace as output. This is DND "
                                   "only in Horace terminology.");
-  declareProperty("CheckAxes", true,
-                  "Check that the axis look to be correct, and abort if not.");
 }
 void CutMD::exec() {}
 
