@@ -13,21 +13,16 @@ try:
     import mantid
     IMPORT_MANTID = True
 except ImportError as e:
-    sys.path.append('/home/wzz/Mantid_Project/Mantid2/Code/release/bin')
+    #sys.path.append('/home/wzz/Mantid_Project/Mantid2/Code/release/bin')
+    sys.path.append('/home/wzz/Mantid/Code/debug/bin')
     sys.path.append('/Users/wzz/Mantid/Code/debug/bin')
     try:
         import mantid
     except ImportError as e2:
-        if NOMANTID is False: 
-            print "Unable to import Mantid: %s." % (str(e))
-            raise e
-        else:
-            print "NO MANTID IS USED FOR DEBUGGING PURPOSE."
-            print sys.path
-            IMPORT_MANTID = False
+        print "Unable to import Mantid: %s." % (str(e))
+        raise e
     else:
         IMPORT_MANTID = True
-        NOMANTID = True
 finally:
     if IMPORT_MANTID is True:
         import mantid.simpleapi as api
@@ -109,6 +104,26 @@ class HFIRPDRedControl:
         return outws.readX(0), outws.readY(0)
 
 
+    def getMergedVector(self, mkey):
+        """
+        """
+        if self._myMergedWSDict.has_key(mkey) is True:
+            ws = self._myMergedWSDict[mkey]
+        
+            # convert to point data if necessary
+            if len(ws.readX(0)) != len(ws.readY(0)):
+                wsname = ws.name() + "_pd"
+                api.ConvertToPointData(InputWorkspace=ws, OutputWorkspace=wsname)
+                ws = AnalysisDataService.retrieve(wsname)
+            
+            vecx = ws.readX(0)
+            vecy = ws.readY(0)
+        else:
+            raise NotImplementedError("No merged workspace for key = %s." % (str(mkey)))
+
+        return (vecx, vecy)
+
+
     def getWorkspace(self, exp, scan, raiseexception):
         """
         """
@@ -134,11 +149,89 @@ class HFIRPDRedControl:
             return False
 
         return True
+        
+    def loadDataFile(self, expno, scanlist):
+        """       
+        Return :: datafilename (None for failed)
+        """
+
+    #---------------------------------------------------------------------------
+        
+    def mergeReduceSpiceData(self, expscanfilelist, unit, xmin, xmax, binsize, 
+            wavelength):
+        """ Merge and reduce SPICE data files
+        Arguements:
+         - expscanfilelist: list of 3 tuples: expnumber, scannumber and file name
+        """
+        # data structure initialization
+        datamdwslist = []
+        monitormdwslist = []
+
+        # reduce individual data 
+        scanlist = []
+        for tuple3 in expscanfilelist:
+            # get input tuple
+            try:
+                exp   = int(tuple3[0])
+                scan  = int(tuple3[1])
+                fname = tuple3[2]
+                if os.path.exists(fname) is False:
+                    raise NotImplementedError("Spice file %s cannot be found. " % (fname))
+            except Exception as e:
+                raise NotImplementedError("Invalid exp-scan-file list tuple. \
+                        Reason: %s." % (str(e)))
+
+            # reduce data
+            rebingood = self.reduceSpicePDData(exp, scan, fname, unit, xmin, xmax, 
+                    binsize, wavelength)
+
+            if rebingood is True:
+                wsmanager = self.getWorkspace(exp, scan, True)
+                datamdwslist.append(wsmanager.datamdws)
+                monitormdwslist.append(wsmanager.monitormdws)
+            
+                scanlist.append(scan)
+        # ENDFOR
+
+        # merge and rebin
+        if len(datamdwslist) > 1: 
+            mg_datamdws = datamdwslist[0] +  datamdwslist[1]
+            mg_monitormdws = monitormdwslist[0] + monitormdwslist[1]
+        else:
+            mg_datamdws = datamdwslist[0] 
+            mg_monitormdws = monitormdwslist[0] 
+        for iw in xrange(2, len(datamdwslist)):
+            mg_datamdws += datamdwslist[iw] 
+            mg_monitormdws += monitormdwslist[iw]
+
+        if xmin is None or xmax is None:
+            binpar = "%.7f" % (binsize)
+        else:
+            binpar = "%.7f, %.7f, %.7f" % (xmin, binsize, xmax)
+
+        exp = int(expscanfilelist[0][0])
+        outwsname = "Merged_Exp%d_Scan%s_%s" % (exp,
+                str(expscanfilelist[0][1]), str(expscanfilelist[-1][1]))
+        api.ConvertCWPDMDToSpectra(InputWorkspace=mg_datamdws,
+                InputMonitorWorkspace=mg_monitormdws,
+                OutputWorkspace=outwsname,
+                BinningParams=binpar,
+                UnitOutput=unit, 
+                NeutronWaveLength=wavelength)
+        moutws = AnalysisDataService.retrieve(outwsname)
+        if moutws is None:
+            raise NotImplementedError("Merge failed.")
+
+        key = (exp, str(scanlist))
+        self._myMergedWSDict[key] = moutws
+        
+        return key
 
 
     def rebin(self, exp, scan, unit, wavelength, xmin, binsize, xmax):
         """ Rebin the data MD workspace and monitor MD workspace for new bin parameter and/or 
         units
+        Return - Boolean as successful or not
         """
         wsmanager = self.getWorkspace(exp, scan, raiseexception=True)
         if wsmanager.datamdws is None or wsmanager.monitormdws is None:
@@ -170,10 +263,14 @@ class HFIRPDRedControl:
 
     def reduceSpicePDData(self, exp, scan, datafilename, unit, xmin, xmax, binsize, wavelength):
         """ Reduce SPICE powder diffraction data. 
+        Return - Boolean as reduction is successful or not
         """
         # base workspace name
         # print "base workspace name: ", datafilename
-        basewsname = os.path.basename(datafilename).split(".")[0]
+        try:
+            basewsname = os.path.basename(datafilename).split(".")[0]
+        except AttributeError as e:
+            raise NotImplementedError("Unable to parse data file name due to %s." % (str(e)))
 
         # load SPICE
         tablewsname = basewsname + "_RawTable"
@@ -223,7 +320,7 @@ class HFIRPDRedControl:
         
         return True
       
-    def savePDFile(self, exp, scao, filetype, sfilename):
+    def savePDFile(self, exp, scan, filetype, sfilename):
         """ Save a reduced workspace to gsas/fullprof/topaz data file
         """
         # get workspace
