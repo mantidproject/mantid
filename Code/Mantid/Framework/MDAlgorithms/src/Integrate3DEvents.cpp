@@ -20,6 +20,7 @@ namespace Mantid {
 namespace MDAlgorithms {
 
 using namespace std;
+using Mantid::Kernel::DblMatrix;
 using Mantid::Kernel::V3D;
 
 /**

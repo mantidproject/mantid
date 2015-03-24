@@ -54,14 +54,13 @@ namespace MDAlgorithms {
                  <http://doxygen.mantidproject.org>
  */
 
-typedef Mantid::Kernel::Matrix<double> DblMatrix;
 typedef boost::unordered_map<int64_t, std::vector<std::pair<double, Mantid::Kernel::V3D> > > EventListMap;
 typedef boost::unordered_map<int64_t, Mantid::Kernel::V3D> PeakQMap;
 
 class DLLExport Integrate3DEvents {
 public:
   /// Construct object to store events around peaks and integrate peaks
-  Integrate3DEvents(std::vector<std::pair<double, Mantid::Kernel::V3D> > const &peak_q_list, DblMatrix const &UBinv,
+  Integrate3DEvents(std::vector<std::pair<double, Mantid::Kernel::V3D> > const &peak_q_list, Kernel::DblMatrix const &UBinv,
                     double radius);
 
   ~Integrate3DEvents();
@@ -84,10 +83,10 @@ private:
 
   /// Calculate the 3x3 covariance matrix of a list of Q-vectors at 0,0,0
   static void makeCovarianceMatrix(std::vector<std::pair<double, Mantid::Kernel::V3D> > const &events,
-                                   DblMatrix &matrix, double radius);
+                                   Kernel::DblMatrix &matrix, double radius);
 
   /// Calculate the eigen vectors of a 3x3 real symmetric matrix
-  static void getEigenVectors(DblMatrix const &cov_matrix,
+  static void getEigenVectors(Kernel::DblMatrix const &cov_matrix,
                               std::vector<Mantid::Kernel::V3D> &eigen_vectors);
 
   /// Calculate the standard deviation of 3D events in a specified direction
@@ -113,7 +112,7 @@ private:
   // Private data members
   PeakQMap peak_qs;         // hashtable with peak Q-vectors
   EventListMap event_lists; // hashtable with lists of events for each peak
-  DblMatrix UBinv;          // matrix mapping from Q to h,k,l
+  Kernel::DblMatrix UBinv;          // matrix mapping from Q to h,k,l
   double radius;            // size of sphere to use for events around a peak
 };
 
