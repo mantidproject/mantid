@@ -4,5 +4,4 @@
 // with '#pragma GCC system_header' but that pragma only works if it occurs
 // in a file that has been included with '#include'
 //------------------------------------------------------------------------------
-
 #include "sip_qtipart0.cpp"
