@@ -389,20 +389,36 @@ void PlotAsymmetryByLogValue::parseRunNames (std::string& firstFN, std::string& 
 */
 void PlotAsymmetryByLogValue::applyDeadtimeCorr (Workspace_sptr &loadedWs, Workspace_sptr deadTimes)
 {
-  ScopedWorkspace ws(loadedWs);
-  ScopedWorkspace dt(deadTimes);
+  std::stringstream wsName, deadName;
+  wsName << "__input" << omp_get_thread_num();
+  deadName << "__dead" << omp_get_thread_num();
 
-  IAlgorithm_sptr applyCorr = AlgorithmManager::Instance().create("ApplyDeadTimeCorr");
+  // Could be groups of workspaces, so need to work with ADS
+  AnalysisDataService::Instance().add(wsName.str(),loadedWs);
+  AnalysisDataService::Instance().add(deadName.str(),deadTimes);
+
+  IAlgorithm_sptr applyCorr = createChildAlgorithm("ApplyDeadTimeCorr");
   applyCorr->setLogging(false);
   applyCorr->setRethrows(true);
-  applyCorr->setPropertyValue("InputWorkspace", ws.name());
-  applyCorr->setPropertyValue("OutputWorkspace", ws.name());
-  applyCorr->setProperty("DeadTimeTable", dt.name());
+  applyCorr->setPropertyValue("InputWorkspace", wsName.str());
+  applyCorr->setPropertyValue("OutputWorkspace", wsName.str());
+  applyCorr->setPropertyValue("DeadTimeTable", deadName.str());
   applyCorr->execute();
   // Workspace should've been replaced in the ADS by ApplyDeadTimeCorr, so
-  // need to
-  // re-assign it
-  loadedWs = ws.retrieve();
+  // need to re-assign it
+  loadedWs = AnalysisDataService::Instance().retrieve(wsName.str());
+
+  // Remove workspaces from ADS
+  if ( boost::dynamic_pointer_cast<WorkspaceGroup>(loadedWs) ) {
+    AnalysisDataService::Instance().deepRemoveGroup(wsName.str());
+  } else {
+    AnalysisDataService::Instance().remove(wsName.str());
+  }
+  if ( boost::dynamic_pointer_cast<WorkspaceGroup>(deadTimes) ) {
+    AnalysisDataService::Instance().deepRemoveGroup(deadName.str());
+  } else {
+    AnalysisDataService::Instance().remove(deadName.str());
+  }
 }
 
 /**  Group detectors from specified file
@@ -411,22 +427,35 @@ void PlotAsymmetryByLogValue::applyDeadtimeCorr (Workspace_sptr &loadedWs, Works
 */
 void PlotAsymmetryByLogValue::groupDetectors (Workspace_sptr &loadedWs, Workspace_sptr loadedDetGrouping)
 {
+  std::stringstream wsName, groupName;
+  wsName << "__input" << omp_get_thread_num();
+  groupName << "__group" << omp_get_thread_num();
 
   // Could be groups of workspaces, so need to work with ADS
-  ScopedWorkspace inWS(loadedWs);
-  ScopedWorkspace grouping(loadedDetGrouping);
-  ScopedWorkspace outWS;
+  AnalysisDataService::Instance().add(wsName.str(),loadedWs);
+  AnalysisDataService::Instance().add(groupName.str(),loadedDetGrouping);
 
-  IAlgorithm_sptr applyGrouping = AlgorithmManager::Instance().create("MuonGroupDetectors");
+  IAlgorithm_sptr applyGrouping = createChildAlgorithm("MuonGroupDetectors");
   applyGrouping->setLogging(false);
   applyGrouping->setRethrows(true);
-
-  applyGrouping->setPropertyValue("InputWorkspace", inWS.name());
-  applyGrouping->setPropertyValue("DetectorGroupingTable", grouping.name());
-  applyGrouping->setPropertyValue("OutputWorkspace", outWS.name());
+  applyGrouping->setPropertyValue("InputWorkspace", wsName.str());
+  applyGrouping->setPropertyValue("DetectorGroupingTable", groupName.str());
+  applyGrouping->setPropertyValue("OutputWorkspace", wsName.str());
   applyGrouping->execute();
 
-  loadedWs = outWS.retrieve();
+  loadedWs = AnalysisDataService::Instance().retrieve(wsName.str());
+
+  // Remove workspaces from ADS
+  if ( boost::dynamic_pointer_cast<WorkspaceGroup>(loadedWs) ) {
+    AnalysisDataService::Instance().deepRemoveGroup(wsName.str());
+  } else {
+    AnalysisDataService::Instance().remove(wsName.str());
+  }
+  if ( boost::dynamic_pointer_cast<WorkspaceGroup>(loadedDetGrouping) ) {
+    AnalysisDataService::Instance().deepRemoveGroup(groupName.str());
+  } else {
+    AnalysisDataService::Instance().remove(groupName.str());
+  }
 }
 
 /**  Performs asymmetry analysis on a loaded workspace
