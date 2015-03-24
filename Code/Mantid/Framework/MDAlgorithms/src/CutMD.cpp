@@ -200,8 +200,8 @@ calculateSteps(std::vector<MinMax> inExtents,
   return std::make_pair(outExtents, outBins);
 }
 
-Matrix<std::string> labelProjection(const DblMatrix &projection) {
-  Matrix<std::string> ret(3,3);
+std::vector<std::vector<std::string> > labelProjection(const DblMatrix &projection) {
+  std::vector<std::vector<std::string> > ret(3, std::vector<std::string>(3));
 
   const char* replacements[] = {"zeta", "eta", "xi"};
 
