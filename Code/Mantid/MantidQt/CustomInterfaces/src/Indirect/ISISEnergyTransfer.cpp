@@ -1,5 +1,6 @@
 #include "MantidQtCustomInterfaces/Indirect/ISISEnergyTransfer.h"
 
+#include "MantidGeometry/IDTypes.h"
 #include "MantidQtCustomInterfaces/Background.h"
 #include "MantidQtCustomInterfaces/UserInputValidator.h"
 
@@ -406,8 +407,8 @@ namespace CustomInterfaces
     loadAlg->initialize();
     loadAlg->setProperty("Filename", rawFile.toStdString());
     loadAlg->setProperty("OutputWorkspace", name);
-    loadAlg->setProperty("SpectrumMin", static_cast<long>(detectorRange[0]));
-    loadAlg->setProperty("SpectrumMax", static_cast<long>(detectorRange[1]));
+    loadAlg->setProperty("SpectrumMin", static_cast<Mantid::specid_t>(detectorRange[0]));
+    loadAlg->setProperty("SpectrumMax", static_cast<Mantid::specid_t>(detectorRange[1]));
     m_batchAlgoRunner->addAlgorithm(loadAlg);
 
     BatchAlgorithmRunner::AlgorithmRuntimeProps inputFromLoad;
