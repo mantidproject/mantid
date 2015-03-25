@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>594</width>
-    <height>697</height>
+    <height>622</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -170,6 +170,13 @@
            </widget>
           </item>
           <item row="3" column="0">
+           <widget class="QLabel" name="lbFlatCanFrontThickness">
+            <property name="text">
+             <string>Container Front Thickness:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="5" column="0">
            <widget class="QLabel" name="lbFlatElementSize">
             <property name="text">
              <string>Element Size:</string>
@@ -206,8 +213,35 @@
             </property>
            </widget>
           </item>
-          <item row="3" column="1">
+          <item row="5" column="1">
            <widget class="QDoubleSpinBox" name="spFlatElementSize">
+            <property name="singleStep">
+             <double>0.100000000000000</double>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="0">
+           <widget class="QLabel" name="lbFlatCanBackThickness">
+            <property name="text">
+             <string>Container Back Thickness:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="1">
+           <widget class="QDoubleSpinBox" name="spFlatCanFrontThickness">
+            <property name="suffix">
+             <string> cm</string>
+            </property>
+            <property name="singleStep">
+             <double>0.100000000000000</double>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="1">
+           <widget class="QDoubleSpinBox" name="spFlatCanBackThickness">
+            <property name="suffix">
+             <string> cm</string>
+            </property>
             <property name="singleStep">
              <double>0.100000000000000</double>
             </property>
@@ -312,6 +346,23 @@
             </property>
            </widget>
           </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="lbCylCanRadius">
+            <property name="text">
+             <string>Container Radius:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QDoubleSpinBox" name="spCylCanRadius">
+            <property name="suffix">
+             <string> cm</string>
+            </property>
+            <property name="singleStep">
+             <double>0.100000000000000</double>
+            </property>
+           </widget>
+          </item>
          </layout>
         </widget>
        </widget>
@@ -374,7 +425,14 @@
       <string>Container Details</string>
      </property>
      <layout class="QGridLayout" name="gridLayout_2">
-      <item row="2" column="1">
+      <item row="3" column="0">
+       <widget class="QLabel" name="lbCanChemicalFormula">
+        <property name="text">
+         <string>Chemical Formula:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="1">
        <widget class="QLineEdit" name="leCanChemicalFormula">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
@@ -384,14 +442,7 @@
         </property>
        </widget>
       </item>
-      <item row="2" column="0">
-       <widget class="QLabel" name="lbCanChemicalFormula">
-        <property name="text">
-         <string>Chemical Formula:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="1">
+      <item row="2" column="1">
        <widget class="QDoubleSpinBox" name="spCanNumberDensity">
         <property name="suffix">
          <string> A^-3</string>
@@ -404,27 +455,34 @@
         </property>
        </widget>
       </item>
-      <item row="1" column="0">
+      <item row="2" column="0">
        <widget class="QLabel" name="lbCanNumberDensity">
         <property name="text">
          <string>Number Density:</string>
         </property>
        </widget>
       </item>
-      <item row="0" column="0">
+      <item row="1" column="0">
        <widget class="QCheckBox" name="ckScaleCan">
         <property name="text">
          <string>Scale:</string>
         </property>
        </widget>
       </item>
-      <item row="0" column="1">
+      <item row="1" column="1">
        <widget class="QDoubleSpinBox" name="spCanScale">
         <property name="enabled">
          <bool>false</bool>
         </property>
         <property name="singleStep">
          <double>0.100000000000000</double>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="0">
+       <widget class="QCheckBox" name="cbUseContainerCorrections">
+        <property name="text">
+         <string>Use Container Corrections</string>
         </property>
        </widget>
       </item>
@@ -443,6 +501,26 @@
       <string>Output Options</string>
      </property>
      <layout class="QHBoxLayout" name="horizontalLayout_2">
+      <item>
+       <widget class="QCheckBox" name="cbKeepFactors">
+        <property name="text">
+         <string>Keep Correction Factors</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="horizontalSpacer">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
       <item>
        <widget class="QCheckBox" name="ckPlot">
         <property name="text">
