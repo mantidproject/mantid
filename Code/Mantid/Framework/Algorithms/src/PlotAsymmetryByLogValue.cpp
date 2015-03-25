@@ -421,8 +421,8 @@ void PlotAsymmetryByLogValue::parseRunNames (std::string& firstFN, std::string& 
 void PlotAsymmetryByLogValue::applyDeadtimeCorr (Workspace_sptr &loadedWs, Workspace_sptr deadTimes)
 {
   std::stringstream wsName, deadName;
-  wsName << "__input" << omp_get_thread_num();
-  deadName << "__dead" << omp_get_thread_num();
+  wsName << "__input" << PARALLEL_THREAD_NUMBER;
+  deadName << "__dead" << PARALLEL_THREAD_NUMBER;
 
   // Could be groups of workspaces, so need to work with ADS
   AnalysisDataService::Instance().add(wsName.str(),loadedWs);
@@ -459,8 +459,8 @@ void PlotAsymmetryByLogValue::applyDeadtimeCorr (Workspace_sptr &loadedWs, Works
 void PlotAsymmetryByLogValue::groupDetectors (Workspace_sptr &loadedWs, Workspace_sptr loadedDetGrouping)
 {
   std::stringstream wsName, groupName;
-  wsName << "__input" << omp_get_thread_num();
-  groupName << "__group" << omp_get_thread_num();
+  wsName << "__input" << PARALLEL_THREAD_NUMBER;
+  groupName << "__group" << PARALLEL_THREAD_NUMBER;
 
   // Could be groups of workspaces, so need to work with ADS
   AnalysisDataService::Instance().add(wsName.str(),loadedWs);
