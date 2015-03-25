@@ -52,7 +52,10 @@ DblMatrix matrixFromProjection(ITableWorkspace_sptr projection) {
 }
 
 std::vector<std::string> unitsFromProjection(ITableWorkspace_sptr projection) {
-  std::vector<std::string> ret(3);
+  std::vector<std::string> ret(3, "r");
+  if (!projection)
+    return ret;
+
   const size_t numDims = projection->rowCount();
   for (size_t i = 0; i < numDims; i++) {
     const std::string name =
@@ -200,7 +203,7 @@ std::vector<std::vector<std::string>>
 labelProjection(const DblMatrix &projection) {
   std::vector<std::vector<std::string>> ret(3, std::vector<std::string>(3));
 
-  const char *replacements[] = {"zeta", "eta", "xi"};
+  const std::string replacements[] = {"zeta", "eta", "xi"};
 
   for (size_t i = 0; i < 3; ++i) {
     for (size_t j = 0; j < 3; ++j) {
@@ -209,13 +212,19 @@ labelProjection(const DblMatrix &projection) {
 
       if (std::abs(in) == 1)
         if (in > 0)
-          out = replacements[i];
+          out = "'" + replacements[i] + "'";
         else
-          out = std::string("-") + replacements[i];
+          out = "'-" + replacements[i] + "'";
       else if (in == 0)
         out = "0";
-      else
-        out = boost::lexical_cast<std::string>(in) + replacements[i];
+      else {
+        // We have to be explicit about precision, so lexical cast won't work
+        std::stringstream s;
+        s.precision(2);
+        s.setf(std::ios::fixed, std::ios::floatfield);
+        s << "'" << in << replacements[i] << "'";
+        out = s.str();
+      }
 
       ret[i][j] = out;
     }
@@ -385,9 +394,9 @@ void CutMD::exec() {
     std::string vecStr;
 
     if (i < 3) {
-      // Slicing algorithms accept name as [x,y,z]
-      label = "['" + labels[i][0] + "','" + labels[i][1] + "','" +
-              labels[i][2] + "']";
+      // Slicing algorithms accept name as [x, y, z]
+      label =
+          "[" + labels[i][0] + ", " + labels[i][1] + ", " + labels[i][2] + "]";
       unit = targetUnits[i];
 
       std::vector<std::string> vec(numDims, "0");
