@@ -11,7 +11,7 @@ namespace MantidQt
 {
   namespace CustomDialogs
   {
-    DECLARE_DIALOG(LoadInstrumentDialog);
+    DECLARE_DIALOG(LoadInstrumentDialog)
 
     /**
     Constructor

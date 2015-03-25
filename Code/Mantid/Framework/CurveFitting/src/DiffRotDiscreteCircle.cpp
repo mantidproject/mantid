@@ -11,9 +11,9 @@
 namespace Mantid {
 namespace CurveFitting {
 
-DECLARE_FUNCTION(ElasticDiffRotDiscreteCircle);
-DECLARE_FUNCTION(InelasticDiffRotDiscreteCircle);
-DECLARE_FUNCTION(DiffRotDiscreteCircle);
+DECLARE_FUNCTION(ElasticDiffRotDiscreteCircle)
+DECLARE_FUNCTION(InelasticDiffRotDiscreteCircle)
+DECLARE_FUNCTION(DiffRotDiscreteCircle)
 
 ElasticDiffRotDiscreteCircle::ElasticDiffRotDiscreteCircle() {
   // declareParameter("Height", 1.0); //parameter "Height" already declared in

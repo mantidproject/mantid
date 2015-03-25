@@ -701,7 +701,7 @@ void EditLocalParameterDialog::valueChanged(int row, int col)
 /*==========================================================================================*/
 
 //Register the class with the factory
-DECLARE_SUBWINDOW(MultiDatasetFit);
+DECLARE_SUBWINDOW(MultiDatasetFit)
 
 /**
  * Constructor

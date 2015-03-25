@@ -46,7 +46,7 @@ public:
   }
 };
 
-DECLARE_FUNCTION(TestableFunctionParameterDecorator);
+DECLARE_FUNCTION(TestableFunctionParameterDecorator)
 
 class FunctionWithParameters : public ParamFunction {
 public:
@@ -73,7 +73,7 @@ public:
 private:
   Workspace_const_sptr m_workspace;
 };
-DECLARE_FUNCTION(FunctionWithParameters);
+DECLARE_FUNCTION(FunctionWithParameters)
 
 class FunctionWithAttributes : public ParamFunction {
 public:
@@ -97,7 +97,7 @@ public:
   }
 };
 
-DECLARE_FUNCTION(FunctionWithAttributes);
+DECLARE_FUNCTION(FunctionWithAttributes)
 
 class FunctionParameterDecoratorTest : public CxxTest::TestSuite {
 public:

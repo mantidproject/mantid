@@ -2310,7 +2310,7 @@ MultiLayer* MantidUI::mergePlots(MultiLayer* mlayer_1, MultiLayer* mlayer_2)
   mlayer_2->close();
 
   return mlayer_1;
-};
+}
 
 MantidMatrix* MantidUI::getMantidMatrix(const QString& wsName)
 {

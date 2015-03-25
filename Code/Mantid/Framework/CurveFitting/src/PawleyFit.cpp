@@ -18,7 +18,7 @@ using namespace API;
 using namespace Kernel;
 using namespace Geometry;
 
-DECLARE_ALGORITHM(PawleyFit);
+DECLARE_ALGORITHM(PawleyFit)
 
 /// Default constructor
 PawleyFit::PawleyFit() : Algorithm(), m_dUnit() {}

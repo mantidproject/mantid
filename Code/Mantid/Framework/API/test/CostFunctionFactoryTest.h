@@ -38,7 +38,7 @@ public:
 
 };
 
-DECLARE_COSTFUNCTION(CostFunctionFactoryTest_A, nedtur);
+DECLARE_COSTFUNCTION(CostFunctionFactoryTest_A, nedtur)
 
 
 class CostFunctionFactoryTest : public CxxTest::TestSuite

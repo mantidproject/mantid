@@ -43,10 +43,10 @@ CompareMDWorkspaces::~CompareMDWorkspaces() {}
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string CompareMDWorkspaces::name() const {
   return "CompareMDWorkspaces";
-};
+}
 
 /// Algorithm's version for identification. @see Algorithm::version
-int CompareMDWorkspaces::version() const { return 1; };
+int CompareMDWorkspaces::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
 const std::string CompareMDWorkspaces::category() const {

@@ -54,7 +54,7 @@ Mantid::Kernel::DateAndTime timeFromPacket(const ADARA::PacketHeader &hdr) {
 
 namespace Mantid {
 namespace LiveData {
-DECLARE_LISTENER(SNSLiveEventDataListener);
+DECLARE_LISTENER(SNSLiveEventDataListener)
 // The DECLARE_LISTENER macro seems to confuse some editors' syntax checking.
 // The semi-colon limits the complaints to one line.  It has no actual effect
 // on the code.

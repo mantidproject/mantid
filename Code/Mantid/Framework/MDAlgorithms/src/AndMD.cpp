@@ -22,10 +22,10 @@ AndMD::~AndMD() {}
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
-const std::string AndMD::name() const { return "AndMD"; };
+const std::string AndMD::name() const { return "AndMD"; }
 
 /// Algorithm's version for identification. @see Algorithm::version
-int AndMD::version() const { return 1; };
+int AndMD::version() const { return 1; }
 
 //----------------------------------------------------------------------------------------------
 /// Run the algorithm with a MDHisotWorkspace as output and operand

@@ -13,7 +13,7 @@
 namespace Mantid {
 namespace DataHandling {
 // Register the algorithm into the algorithm factory
-DECLARE_ALGORITHM(DeleteTableRows);
+DECLARE_ALGORITHM(DeleteTableRows)
 
 using namespace Kernel;
 using namespace API;
