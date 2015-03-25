@@ -156,7 +156,7 @@ class PoldiCreatePeaksFromFile(PythonAlgorithm):
                          extensions=["dat"]),
             doc="A file with POLDI crystal data.")
 
-        self.declareProperty("LatticeSpacingMin", 0.0,
+        self.declareProperty("LatticeSpacingMin", 0.5,
                              direction=Direction.Input,
                              doc="Lowest allowed lattice spacing.")
 
@@ -173,6 +173,7 @@ class PoldiCreatePeaksFromFile(PythonAlgorithm):
     def PyExec(self):
         crystalFileName = self.getProperty("InputFile").value
         try:
+            # Try parsing the supplied file using PoldiCrystalFileParser
             compounds = self._parser(crystalFileName)
 
             dMin = self.getProperty("LatticeSpacingMin").value
@@ -180,6 +181,8 @@ class PoldiCreatePeaksFromFile(PythonAlgorithm):
 
             workspaces = []
 
+            # Go through found compounds and run "_createPeaksFromCell" for each of them
+            # If two compounds have the same name, a warning is written to the log.
             for compound in compounds:
                 if compound.getName() in workspaces:
                     self.log().warning("A compound with the name '" + compound.getName() + \
@@ -189,6 +192,7 @@ class PoldiCreatePeaksFromFile(PythonAlgorithm):
 
             self.setProperty("OutputWorkspace", GroupWorkspaces(workspaces))
 
+        # All parse errors are caught here and logged as errors
         except ParseException as error:
             errorString = "Could not parse input file '" + crystalFileName + "'.\n"
             errorString += "The parser reported the following error:\n\t" + str(error)
