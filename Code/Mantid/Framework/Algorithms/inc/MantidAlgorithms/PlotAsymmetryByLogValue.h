@@ -79,7 +79,7 @@ private:
   void init();
   void exec();
   // Load run, apply dead time corrections and detector grouping
-  void PlotAsymmetryByLogValue::doLoad (int64_t runNumber, API::Workspace_sptr& loadedWs, API::Workspace_sptr& loadedDt, API::Workspace_sptr& loadedDg);
+  void doLoad (int64_t runNumber, API::Workspace_sptr& loadedWs, API::Workspace_sptr& loadedDt, API::Workspace_sptr& loadedDg);
   // Analyse loaded run
   void doAnalysis (API::Workspace_sptr loadedWs, int64_t index);
   // Parse run names
