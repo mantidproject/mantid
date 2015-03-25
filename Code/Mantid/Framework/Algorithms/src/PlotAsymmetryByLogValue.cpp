@@ -207,6 +207,19 @@ void PlotAsymmetryByLogValue::exec() {
 
     int64_t runIndex = i - is;
 
+    Workspace_sptr loadedWs = loadedWorkspace.at(runIndex);
+    Workspace_sptr loadedDt = loadedDeadTimeTable.at(runIndex);
+    Workspace_sptr loadedDg = loadedDetGroupingTable.at(runIndex);
+
+    // Apply dead time corrections if requested
+    if ( m_dtcType != "None" ) {
+      applyDeadtimeCorr (loadedWs,loadedDt);
+    }
+    // Apply grouping if requested
+    if ( m_autogroup ) {
+      groupDetectors (loadedWs,loadedDg);
+    }
+
     // Analyse loadedWs
     doAnalysis (loadedWorkspace.at(runIndex), runIndex);
 
