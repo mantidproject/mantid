@@ -202,11 +202,13 @@ class LiquidsReflectometryReduction(PythonAlgorithm):
             if low_q is not None and high_q is not None:
                 break
             
-        data_x = q_rebin.readX(0)
-        q_rebin = CropWorkspace(InputWorkspace=q_rebin,
-                                OutputWorkspace=str(q_rebin),
-                                XMin=data_x[low_q+1], XMax=data_x[high_q-1])
-
+        if low_q is not None and high_q is not None:
+            data_x = q_rebin.readX(0)
+            q_rebin = CropWorkspace(InputWorkspace=q_rebin,
+                                    OutputWorkspace=str(q_rebin),
+                                    XMin=data_x[low_q+1], XMax=data_x[high_q-1])
+        else:
+            logger.error("Data is all zeros. Check your TOF ranges.")
 
         #TODO: why do we need this cleanup?
         # Cleanup data turns values < 1e-12 and values where the error is greater than the value
@@ -497,12 +499,10 @@ class LiquidsReflectometryReduction(PythonAlgorithm):
             workspace = Divide(LHSWorkspace=workspace,
                                RHSWorkspace=normalization,
                                OutputWorkspace=str(workspace))
+            # Avoid leaving trash behind
+            AnalysisDataService.remove(str(normalization))
         else:
             logger.error("Could not find scaling factor")
-            
-        # Avoid leaving trash behind
-        AnalysisDataService.remove(str(normalization))
-
         return workspace
 
 
