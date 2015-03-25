@@ -1,18 +1,10 @@
 #pylint: disable=no-init,invalid-name
-from mantid.api import *
-from mantid.simpleapi import *
 import time
 import math
 import os
 import numpy
-
-# import sfCalculator
-#TODO: Not sure what this is for. Remove.
-import sys
-sys.path.insert(0, os.path.dirname(__file__))
-import sfCalculator
-sys.path.pop(0)
-
+from mantid.api import *
+from mantid.simpleapi import *
 from mantid.kernel import *
 
 class LiquidsReflectometryReduction(PythonAlgorithm):
@@ -72,15 +64,19 @@ class LiquidsReflectometryReduction(PythonAlgorithm):
                              doc="Looking for perfect match of slits width when using Scaling Factor file")
         self.declareProperty("IncidentMediumSelected", "", doc="Incident medium used for those runs")
         self.declareProperty("GeometryCorrectionFlag", False, doc="Use or not the geometry correction")
-        self.declareProperty("FrontSlitName", "Si", doc="Name of the front slit")
-        self.declareProperty("BackSlitName", "S2", doc="Name of the back slit")
+        self.declareProperty("FrontSlitName", "S1", doc="Name of the front slit")
+        self.declareProperty("BackSlitName", "Si", doc="Name of the back slit")
 
     def PyExec(self):
         # The old reflectivity reduction has an offset between the input
         # pixel numbers and what it actually uses. Set the offset to zero
         # to turn it off.
         self.LEGACY_OFFSET = -1
-        from reduction.instruments.reflectometer import wks_utility
+
+        # The old reduction code had a tolerance value for matching the
+        # slit parameters to get the scaling factors
+        self.TOLERANCE = 0.020
+
         # DATA
         dataRunNumbers = self.getProperty("RunNumbers").value
         dataPeakRange = self.getProperty("SignalPeakPixelRange").value
@@ -98,24 +94,11 @@ class LiquidsReflectometryReduction(PythonAlgorithm):
             TOFrange = self.getProperty("TOFRange").value  #microS
         else:
             TOFrange = [0, 200000]
-        # TOF binning parameters
-        binTOFrange = [0, 200000]
-        binTOFsteps = 40
-
-        # geometry correction
-        geometryCorrectionFlag = self.getProperty("GeometryCorrectionFlag").value
 
         qMin = self.getProperty("QMin").value
         qStep = self.getProperty("QStep").value
         if qStep > 0:  #force logarithmic binning
             qStep = -qStep
-
-        # sfCalculator settings
-        slitsValuePrecision = sfCalculator.PRECISION
-        sfFile = self.getProperty("ScalingFactorFile").value
-
-        incidentMedium = self.getProperty("IncidentMediumSelected").value
-        slitsWidthFlag = self.getProperty("SlitsWidthFlag").value
 
         # If we have multiple files, add them
         file_list = []
@@ -125,42 +108,22 @@ class LiquidsReflectometryReduction(PythonAlgorithm):
         runs = reduce((lambda x, y: '%s+%s' % (x, y)), file_list)
         ws_event_data = Load(Filename=runs)
 
-        # Calculate the central pixel (using weighted average)
-        ws_integrated = Integration(InputWorkspace=ws_event_data)
-
         # Number of pixels in each direction
         #TODO: revisit this when we update the IDF
         self.number_of_pixels_x = int(ws_event_data.getInstrument().getNumberParameter("number-of-x-pixels")[0])
         self.number_of_pixels_y = int(ws_event_data.getInstrument().getNumberParameter("number-of-y-pixels")[0])
-        ws_roi = RefRoi(InputWorkspace=ws_integrated, IntegrateY=False,
-                        NXPixel=self.number_of_pixels_x, NYPixel=self.number_of_pixels_y,
-                        ConvertToQ=False)
-        ws_center_peak = Transpose(InputWorkspace=ws_roi)
-        counts = ws_center_peak.readY(0)
-        bins = numpy.arange(len(counts))
-        summed = bins * counts
-        data_central_pixel = sum(summed) / sum(counts)
 
         # get the distance moderator-detector and sample-detector
         #TODO: get rid of this
-        [dMD, dSD] = wks_utility.getDistances(ws_event_data)
+        sample = ws_event_data.getInstrument().getSample()
+        source = ws_event_data.getInstrument().getSource()
+        source_sample_distance = sample.getDistance(source)
+        detector = ws_event_data.getDetector(0)
+        sample_detector_distance = detector.getPos().getZ()
+        source_detector_distance = source_sample_distance + sample_detector_distance
 
         # Get scattering angle theta
         theta = self.calculate_scattering_angle(ws_event_data)
-
-        # Slit size
-        front_slit = self.getProperty("FrontSlitName").value
-        back_slit = self.getProperty("BackSlitName").value
-
-        first_slit_size = ws_event_data.getRun().getProperty("%sVHeight" % front_slit).value
-        last_slit_size = ws_event_data.getRun().getProperty("%sVHeight" % back_slit).value
-
-        # Q range
-        # Use the TOF range to pick the maximum Q, and give it a little extra room.
-        h = 6.626e-34  # m^2 kg s^-1
-        m = 1.675e-27  # kg
-        constant = 4e-4 * math.pi * m * dMD / h * math.sin(theta)
-        q_range = [qMin, qStep, constant / TOFrange[0] * 1.2]
 
         # ----- Process Sample Data -------------------------------------------
         crop_request = self.getProperty("LowResDataAxisPixelRangeFlag")
@@ -169,7 +132,6 @@ class LiquidsReflectometryReduction(PythonAlgorithm):
         data_cropped = self.process_data(ws_event_data, TOFrange,
                                          crop_request, low_res_range,
                                          dataPeakRange, bck_request, dataBackRange)
-        tof_axis_full = data_cropped.readX(0)
 
         # ----- Normalization -------------------------------------------------
         # Load normalization
@@ -193,76 +155,63 @@ class LiquidsReflectometryReduction(PythonAlgorithm):
         AnalysisDataService.remove(str(data_cropped))
         AnalysisDataService.remove(str(norm_summed))
 
+        # Apply scaling factors
+        self.apply_scaling_factor(normalized_data)
 
-        # Checkpoint: Extract the data so we can continue with the legacy version
-        final_data_y_axis = normalized_data.extractY()
-        final_data_y_error_axis = normalized_data.extractE()
+        q_workspace = SumSpectra(InputWorkspace = normalized_data)
+        q_workspace.getAxis(0).setUnit("MomentumTransfer")
 
-        # apply Scaling factor
-        [tof_axis_full, y_axis, y_error_axis, isSFfound] = wks_utility.applyScalingFactor(tof_axis_full,
-                                                                               final_data_y_axis,
-                                                                               final_data_y_error_axis,
-                                                                               incidentMedium,
-                                                                               sfFile,
-                                                                               slitsValuePrecision,
-                                                                               slitsWidthFlag)
-
-
-        if geometryCorrectionFlag:  # convert To Q with correction
-            [q_axis, y_axis, y_error_axis] = wks_utility.convertToQ(tof_axis_full,
-                                                                    y_axis,
-                                                                    y_error_axis,
-                                                                    peak_range=dataPeakRange,
-                                                                    central_pixel=data_central_pixel,
-                                                                    source_to_detector_distance=dMD,
-                                                                    sample_to_detector_distance=dSD,
-                                                                    theta=theta,
-                                                                    first_slit_size=first_slit_size,
-                                                                    last_slit_size=last_slit_size)
-
-        else:  # convert to Q without correction
-
-            [q_axis, y_axis, y_error_axis] = wks_utility.convertToQWithoutCorrection(tof_axis_full,
-                                                                                     y_axis,
-                                                                                     y_error_axis,
-                                                                                     peak_range=dataPeakRange,
-                                                                                     source_to_detector_distance=dMD,
-                                                                                     sample_to_detector_distance=dSD,
-                                                                                     theta=theta,
-                                                                                     first_slit_size=first_slit_size,
-                                                                                     last_slit_size=last_slit_size)
-
+        # Geometry correction to convert To Q with correction
+        geometryCorrectionFlag = self.getProperty("GeometryCorrectionFlag").value
+        if geometryCorrectionFlag:
+            logger.error("The geometry correction for the Q conversion has not been implemented.")
 
         # create workspace
-        q_workspace = wks_utility.createQworkspace(q_axis, y_axis, y_error_axis)
+        # Q range
+        # Use the TOF range to pick the maximum Q, and give it a little extra room.
+        h = 6.626e-34  # m^2 kg s^-1
+        m = 1.675e-27  # kg
+        constant = 4e-4 * math.pi * m * source_detector_distance / h * math.sin(theta)
+        q_range = [qMin, qStep, constant / TOFrange[0] * 1.2]
 
-        q_rebin = Rebin(InputWorkspace=q_workspace, Params=q_range, PreserveEvents=True)
-
-        # keep only the q values that have non zero counts
-        nonzero_q_rebin_wks = wks_utility.cropAxisToOnlyNonzeroElements(q_rebin,
-                                                                        dataPeakRange)
-
-        # integrate spectra (normal mean) and remove first and last Q value
-        [final_x_axis, final_y_axis, final_error_axis] = wks_utility.integrateOverPeakRange(nonzero_q_rebin_wks, dataPeakRange)
-
-
-        # cleanup data
-        [final_y_axis, final_y_error_axis] = wks_utility.cleanupData1D(final_y_axis, final_error_axis)
-
-
-        # create final workspace
+        data_x = q_workspace.dataX(0)
+        for i in range(len(data_x)):
+            data_x[i] = constant / data_x[i]
+        q_workspace = SortXAxis(InputWorkspace=q_workspace, OutputWorkspace=str(q_workspace))
+            
+        
         _time = int(time.time())
         name_output_ws = self.getPropertyValue("OutputWorkspace")
         name_output_ws = name_output_ws + '_#' + str(_time) + 'ts'
-        final_workspace = wks_utility.createFinalWorkspace(final_x_axis,
-                                                           final_y_axis,
-                                                           final_y_error_axis,
-                                                           name_output_ws,
-                                                           ws_event_data)
-        AddSampleLog(Workspace=name_output_ws,
-                     LogName='isSFfound',
-                     LogText=str(isSFfound))
 
+        q_rebin = Rebin(InputWorkspace=q_workspace, Params=q_range,
+                        OutputWorkspace=name_output_ws)
+        q_rebin = ConvertToPointData(InputWorkspace=q_rebin,
+                                     OutputWorkspace=name_output_ws)
+
+        # Crop to non-zero values
+        # Get rid of first and last Q points to avoid edge effects
+        data_y = q_rebin.readY(0)
+        low_q = None
+        high_q = None
+        for i in range(len(data_y)):
+            if low_q is None and abs(data_y[i])>0:
+                low_q = i
+            if high_q is None and abs(data_y[len(data_y)-1-i])>0:
+                high_q = len(data_y)-1-i
+            if low_q is not None and high_q is not None:
+                break
+            
+        data_x = q_rebin.readX(0)
+        q_rebin = CropWorkspace(InputWorkspace=q_rebin,
+                                OutputWorkspace=str(q_rebin),
+                                XMin=data_x[low_q+1], XMax=data_x[high_q-1])
+
+
+        #TODO: why do we need this cleanup?
+        # Cleanup data turns values < 1e-12 and values where the error is greater than the value
+        # to 0 +- 1
+        #[final_y_axis, final_y_error_axis] = wks_utility.cleanupData1D(final_y_axis, final_error_axis)
 
         #TODO: remove this, which we use during development to make sure we don't leave trash
         logger.information(str(AnalysisDataService.getObjectNames()))
@@ -379,6 +328,7 @@ class LiquidsReflectometryReduction(PythonAlgorithm):
             Common processing for both sample data and normalization.
         """
         # Rebin normalization
+        #TODO: Check why they chose those hard-coded values
         workspace = Rebin(InputWorkspace=workspace, Params=[0, 40, 200000], 
                           PreserveEvents=False, OutputWorkspace="%s_histo" % str(workspace))
 
@@ -425,5 +375,135 @@ class LiquidsReflectometryReduction(PythonAlgorithm):
         AnalysisDataService.remove(str(workspace))
 
         return cropped
+
+    def apply_scaling_factor(self, workspace):
+        """
+            Apply scaling factor from reference scaling data
+            @param workspace: Mantid workspace
+        """
+        scaling_factor_file = self.getProperty("ScalingFactorFile").value
+        if not os.path.isfile(scaling_factor_file):
+            scaling_factor_files = FileFinder.findRuns(scaling_factor_file)
+            if len(scaling_factor_files)>0:
+                scaling_factor_file = scaling_factor_files[0]
+                if not os.path.isfile(scaling_factor_file):
+                    logger.error("Could not find scaling factor file %s" % scaling_factor_file)
+                    return
+            else:
+                logger.error("Could not find scaling factor file %s" % scaling_factor_file)
+                return
+
+        # Get the incident medium
+        incident_medium = self.getProperty("IncidentMediumSelected").value
+        
+        # Get the wavelength
+        lr = workspace.getRun().getProperty('LambdaRequest').value[0]
+        lr_value = float("{0:.2f}".format(lr))
+
+        # Get the slit information
+        front_slit = self.getProperty("FrontSlitName").value
+        back_slit = self.getProperty("BackSlitName").value
+
+        # Option to match slit widths or not
+        match_slit_width = self.getProperty("SlitsWidthFlag").value
+
+        s1h = abs(workspace.getRun().getProperty("%sVHeight" % front_slit).value[0])
+        s1w = abs(workspace.getRun().getProperty("%sHWidth" % front_slit).value[0])
+        try:
+            s2h = abs(workspace.getRun().getProperty("%sVHeight" % back_slit).value[0])
+            s2w = abs(workspace.getRun().getProperty("%sHWidth" % back_slit).value[0])
+        except:
+            # For backward compatibility with old code
+            logger.error("Specified slit could not be found: %s  Trying S2" % back_slit)
+            s2h = abs(workspace.getRun().getProperty("S2VHeight").value[0])
+            s2w = abs(workspace.getRun().getProperty("S2HWidth").value[0])
+
+        scaling_info = "Scaling settings: %s wl=%s S1H=%s S2H=%s" % (incident_medium,
+                                                                     lr_value, s1h, s2h)
+        if match_slit_width:
+            scaling_info += " S1W=%s S2W=%s" % (s1w, s2w)
+        logger.information(scaling_info)
+
+        def _reduce(accumulation, item):
+            """
+                Reduce function that accumulates values in a dictionary
+            """
+            toks_item = item.split('=')
+            if len(toks_item)!=2:
+                return accumulation
+            if type(accumulation)==dict:
+                accumulation[toks_item[0].strip()] = toks_item[1].strip()
+            else:
+                toks_accum = accumulation.split('=')
+                accumulation = {toks_item[0].strip(): toks_item[1].strip(),
+                                toks_accum[0].strip(): toks_accum[1].strip()}
+            return accumulation
+
+        def _value_check(key, data, reference):
+            """
+                Check an entry against a reference value
+                #TODO: get rid of sfCalculator reference
+            """
+            if key in data:
+                return abs(abs(float(data[key])) - abs(float(reference))) <= self.TOLERANCE
+            return False
+
+        scaling_data = open(scaling_factor_file, 'r')
+        file_content = scaling_data.read()
+        scaling_data.close()
+        
+        data_found = None
+        for line in file_content.split('\n'):
+            if line.startswith('#'):
+                continue
+
+            # Parse the line of data and produce a dict
+            toks = line.split()
+            data_dict = reduce(_reduce, toks, {})
+
+            if 'IncidentMedium' in data_dict \
+                and data_dict['IncidentMedium'] == incident_medium.strip() \
+                and _value_check('LambdaRequested', data_dict, lr_value) \
+                and _value_check('S1H', data_dict, s1h) \
+                and _value_check('S2H', data_dict, s2h):
+
+                if not match_slit_width or (_value_check('S1W', data_dict, s1w) \
+                        and _value_check('S2W', data_dict, s2w)):
+                    data_found = data_dict
+                    break
+
+        AddSampleLog(Workspace=workspace, LogName='isSFfound', LogText=str(data_found is not None))
+        if data_found is not None:
+            a = float(data_found['a'])
+            b = float(data_found['b'])
+            a_error = float(data_found['error_a'])
+            b_error = float(data_found['error_b'])
+
+            # Extract a single spectrum, just so we have the TOF axis
+            # to create a normalization workspace
+            normalization = ExtractSingleSpectrum(InputWorkspace=workspace,
+                                                  OutputWorkspace="normalization",
+                                                  WorkspaceIndex=0)
+            norm_tof = normalization.dataX(0)
+            norm_value = normalization.dataY(0)
+            norm_error = normalization.dataE(0)
+            #TODO: The following is done on the bin edges.
+            # Should it not be done for the center of the bin?
+            for i in range(len(norm_value)):
+                norm_value[i] = norm_tof[i] * b + a
+                #TODO: Verify with REFL team that they really meant the following line
+                norm_error[i] = norm_tof[i] * b_error + a_error
+
+            workspace = Divide(LHSWorkspace=workspace,
+                               RHSWorkspace=normalization,
+                               OutputWorkspace=str(workspace))
+        else:
+            logger.error("Could not find scaling factor")
+            
+        # Avoid leaving trash behind
+        AnalysisDataService.remove(str(normalization))
+
+        return workspace
+
 
 AlgorithmFactory.subscribe(LiquidsReflectometryReduction)
