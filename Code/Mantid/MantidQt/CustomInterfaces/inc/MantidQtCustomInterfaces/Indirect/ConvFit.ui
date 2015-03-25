@@ -141,6 +141,11 @@
                <string>Two Lorentzians</string>
               </property>
              </item>
+             <item>
+              <property name="text">
+               <string>Diffusion Sphere</string>
+              </property>
+             </item>
             </widget>
            </item>
           </layout>

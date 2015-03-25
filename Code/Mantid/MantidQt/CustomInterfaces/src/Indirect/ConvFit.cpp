@@ -94,6 +94,7 @@ namespace IDA
 
     m_properties["Lorentzian1"] = createLorentzian("Lorentzian 1");
     m_properties["Lorentzian2"] = createLorentzian("Lorentzian 2");
+    m_properties["DiffSphere"] = createDiffSphere("Diffusion Sphere");
 
     m_uiForm.leTempCorrection->setValidator(new QDoubleValidator(m_parentWidget));
 
@@ -425,7 +426,7 @@ namespace IDA
     int fitTypeIndex = m_uiForm.cbFitType->currentIndex();
 
     // Add 1st Lorentzian
-    if(fitTypeIndex > 0)
+    if(fitTypeIndex == 1 || fitTypeIndex == 2)
     {
       //if temperature not included then product is lorentzian * 1
       //create product function for temp * lorentzian
@@ -462,6 +463,28 @@ namespace IDA
       prefix2 = createParName(index, subIndex);
 
       populateFunction(func, model, m_properties["Lorentzian2"], prefix2, false);
+    }
+
+    // ----------------------------------------------------
+    // --- Composite / Convolution / Model / DiffSphere ---
+    // ----------------------------------------------------
+    if ( fitTypeIndex == 3 )
+    {
+      //if temperature not included then product is lorentzian * 1
+      //create product function for temp * lorentzian
+      auto product = boost::dynamic_pointer_cast<CompositeFunction>(FunctionFactory::Instance().createFunction("ProductFunction"));
+
+      if(useTempCorrection)
+      {
+        createTemperatureCorrection(product);
+      }
+
+      func = FunctionFactory::Instance().createFunction("InelasticDiffSphere");
+      subIndex = product->addFunction(func);
+      index = model->addFunction(product);
+      prefix2 = createParName(index, subIndex);
+
+      populateFunction(func, model, m_properties["DiffSphere"], prefix2, false);
     }
 
     conv->addFunction(model);
@@ -547,18 +570,44 @@ namespace IDA
   QtProperty* ConvFit::createLorentzian(const QString & name)
   {
     QtProperty* lorentzGroup = m_grpManager->addProperty(name);
+
     m_properties[name+".Amplitude"] = m_dblManager->addProperty("Amplitude");
     // m_dblManager->setRange(m_properties[name+".Amplitude"], 0.0, 1.0); // 0 < Amplitude < 1
     m_properties[name+".PeakCentre"] = m_dblManager->addProperty("PeakCentre");
     m_properties[name+".FWHM"] = m_dblManager->addProperty("FWHM");
+
     m_dblManager->setDecimals(m_properties[name+".Amplitude"], NUM_DECIMALS);
     m_dblManager->setDecimals(m_properties[name+".PeakCentre"], NUM_DECIMALS);
     m_dblManager->setDecimals(m_properties[name+".FWHM"], NUM_DECIMALS);
     m_dblManager->setValue(m_properties[name+".FWHM"], 0.02);
+
     lorentzGroup->addSubProperty(m_properties[name+".Amplitude"]);
     lorentzGroup->addSubProperty(m_properties[name+".PeakCentre"]);
     lorentzGroup->addSubProperty(m_properties[name+".FWHM"]);
+
     return lorentzGroup;
+  }
+
+  QtProperty* ConvFit::createDiffSphere(const QString & name)
+  {
+    QtProperty* diffSphereGroup = m_grpManager->addProperty(name);
+
+    m_properties[name+".Intensity"] = m_dblManager->addProperty("Intensity");
+    m_properties[name+".Radius"] = m_dblManager->addProperty("Radius");
+    m_properties[name+".Diffusion"] = m_dblManager->addProperty("Diffusion");
+    /* m_properties[name+".Shift"] = m_dblManager->addProperty("Shift"); */
+
+    m_dblManager->setDecimals(m_properties[name+".Intensity"], NUM_DECIMALS);
+    m_dblManager->setDecimals(m_properties[name+".Radius"], NUM_DECIMALS);
+    m_dblManager->setDecimals(m_properties[name+".Diffusion"], NUM_DECIMALS);
+    /* m_dblManager->setDecimals(m_properties[name+".Shift"], NUM_DECIMALS); */
+
+    diffSphereGroup->addSubProperty(m_properties[name+".Intensity"]);
+    diffSphereGroup->addSubProperty(m_properties[name+".Radius"]);
+    diffSphereGroup->addSubProperty(m_properties[name+".Diffusion"]);
+    /* diffSphereGroup->addSubProperty(m_properties[name+".Shift"]); */
+
+    return diffSphereGroup;
   }
 
   void ConvFit::populateFunction(IFunction_sptr func, IFunction_sptr comp, QtProperty* group, const std::string & pref, bool tie)
@@ -610,6 +659,8 @@ namespace IDA
         fitType += "1L"; break;
       case 2:
         fitType += "2L"; break;
+      case 3:
+        fitType += "DS"; break;
     }
 
     return fitType;
@@ -643,6 +694,7 @@ namespace IDA
   {
     m_cfTree->removeProperty(m_properties["Lorentzian1"]);
     m_cfTree->removeProperty(m_properties["Lorentzian2"]);
+    m_cfTree->removeProperty(m_properties["DiffSphere"]);
 
     auto hwhmRangeSelector = m_uiForm.ppPlot->getRangeSelector("ConvFitHWHM");
 
@@ -659,6 +711,10 @@ namespace IDA
         m_cfTree->addProperty(m_properties["Lorentzian1"]);
         m_cfTree->addProperty(m_properties["Lorentzian2"]);
         hwhmRangeSelector->setVisible(true);
+        break;
+      case 3:
+        m_cfTree->addProperty(m_properties["DiffSphere"]);
+        hwhmRangeSelector->setVisible(false);
         break;
     }
   }
@@ -853,7 +909,7 @@ namespace IDA
     m_dblManager->setValue(m_properties["BGA0"], parameters["f0.A0"]);
     m_dblManager->setValue(m_properties["BGA1"], parameters["f0.A1"]);
 
-    int noLorentz = m_uiForm.cbFitType->currentIndex();
+    int fitTypeIndex = m_uiForm.cbFitType->currentIndex();
 
     int funcIndex = 0;
     int subIndex = 0;
@@ -866,7 +922,10 @@ namespace IDA
     }
 
     bool usingDeltaFunc = m_blnManager->value(m_properties["UseDeltaFunc"]);
-    bool usingCompositeFunc = ((usingDeltaFunc && noLorentz > 0) || noLorentz > 1);
+
+    // If using a delta function with any fit type or using two Lorentzians
+    bool usingCompositeFunc = ((usingDeltaFunc && fitTypeIndex > 0) || fitTypeIndex == 2);
+
     QString prefBase = "f1.f1.";
 
     if ( usingDeltaFunc )
@@ -883,7 +942,7 @@ namespace IDA
       funcIndex++;
     }
 
-    if ( noLorentz > 0 )
+    if ( fitTypeIndex == 1 || fitTypeIndex == 2 )
     {
       // One Lorentz
       QString pref = prefBase;
@@ -903,7 +962,7 @@ namespace IDA
       funcIndex++;
     }
 
-    if ( noLorentz > 1 )
+    if ( fitTypeIndex == 2 )
     {
       // Two Lorentz
       QString pref = prefBase;
@@ -912,6 +971,26 @@ namespace IDA
       m_dblManager->setValue(m_properties["Lorentzian 2.Amplitude"], parameters[pref+"Amplitude"]);
       m_dblManager->setValue(m_properties["Lorentzian 2.PeakCentre"], parameters[pref+"PeakCentre"]);
       m_dblManager->setValue(m_properties["Lorentzian 2.FWHM"], parameters[pref+"FWHM"]);
+    }
+
+    if ( fitTypeIndex == 3 )
+    {
+      // DiffSphere
+      QString pref = prefBase;
+
+      if ( usingCompositeFunc )
+      {
+        pref += "f" + QString::number(funcIndex) + ".f" + QString::number(subIndex) + ".";
+      }
+      else
+      {
+        pref += "f" + QString::number(subIndex) + ".";
+      }
+
+      m_dblManager->setValue(m_properties["Diffusion Sphere.Intensity"], parameters[pref+"Intensity"]);
+      m_dblManager->setValue(m_properties["Diffusion Sphere.Radius"], parameters[pref+"Radius"]);
+      m_dblManager->setValue(m_properties["Diffusion Sphere.Diffusion"], parameters[pref+"Diffusion"]);
+      /* m_dblManager->setValue(m_properties["Diffusion Sphere.Shift"], parameters[pref+"Shift"]); */
     }
 
     m_pythonExportWsName = "";

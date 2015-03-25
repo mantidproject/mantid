@@ -48,7 +48,6 @@ def calculateEISF(params_table):
             mtd[params_table].setCell(col_name, i, value)
             mtd[params_table].setCell(error_col_name, i, error)
 
-##############################################################################
 
 def confitSeq(inputWS, func, startX, endX, ftype, bgd, temperature=None, specMin=0, specMax=None, convolve=True, Plot='None', Save=False):
     StartTime('ConvFit')
@@ -112,13 +111,6 @@ def confitSeq(inputWS, func, startX, endX, ftype, bgd, temperature=None, specMin
 
     CopyLogs(InputWorkspace=wsname, OutputWorkspace=output_workspace + "_Workspaces")
 
-    temp_correction = temperature is not None
-    AddSampleLog(Workspace=wsname, LogName='temperature_correction',
-                 LogType='String', LogText=str(temp_correction))
-    if temp_correction:
-        AddSampleLog(Workspace=wsname, LogName='temperature_value',
-                     LogType='String', LogText=str(temperature))
-
     RenameWorkspace(InputWorkspace=output_workspace,
                     OutputWorkspace=output_workspace + "_Parameters")
     fit_workspaces = mtd[output_workspace + '_Workspaces'].getNames()
@@ -139,6 +131,7 @@ def confitSeq(inputWS, func, startX, endX, ftype, bgd, temperature=None, specMin
         plotParameters(wsname, Plot)
 
     EndTime('ConvFit')
+
 
 ##############################################################################
 # FuryFit
