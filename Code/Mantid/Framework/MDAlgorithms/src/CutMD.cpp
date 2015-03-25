@@ -150,44 +150,48 @@ std::vector<MinMax> calculateExtents(const DblMatrix &inMatrix,
 }
 
 std::pair<std::vector<MinMax>, std::vector<size_t>>
-calculateSteps(std::vector<MinMax> inExtents,
-               std::vector<std::vector<double>> binning) {
+calculateSteps(const std::vector<MinMax> &inExtents,
+               const std::vector<std::vector<double>> &binning) {
   std::vector<MinMax> outExtents(inExtents);
   std::vector<size_t> outBins;
 
-  const size_t numBins = binning.size();
-
-  for (size_t i = 0; i < numBins; ++i) {
+  for (size_t i = 0; i < inExtents.size(); ++i) {
     const size_t nArgs = binning[i].size();
+    int outBin = -1;
+
     if (nArgs == 0) {
       throw std::runtime_error("Binning parameter cannot be empty");
+
     } else if (nArgs == 1) {
       const double dimRange = inExtents[i].second - inExtents[i].first;
-      double stepSize = binning[i][0];
-      if (stepSize > dimRange)
-        stepSize = dimRange;
-      outExtents[i].second =
-          inExtents[i].first + static_cast<double>(numBins) * stepSize;
-      outBins.push_back(static_cast<size_t>(dimRange / stepSize));
+      const double stepSize =
+          binning[i][1] < dimRange ? binning[i][0] : dimRange;
+      outBin = static_cast<int>(dimRange / stepSize);
+      outExtents[i].second = inExtents[i].first + outBin * stepSize;
+
     } else if (nArgs == 2) {
       outExtents[i].first = binning[i][0];
       outExtents[i].second = binning[i][1];
-      outBins.push_back(1);
+      outBin = 1;
+
     } else if (nArgs == 3) {
       const double dimMin = binning[i][0];
       const double dimMax = binning[i][2];
       const double dimRange = dimMax - dimMin;
-      double stepSize = binning[i][i];
-      if (stepSize > dimRange)
-        stepSize = dimRange;
-      outExtents[i].second = dimMin + static_cast<double>(numBins) * stepSize;
+      const double stepSize =
+          binning[i][1] < dimRange ? binning[i][1] : dimRange;
+      outBin = static_cast<int>(dimRange / stepSize);
+      outExtents[i].second = dimMin + outBin * stepSize;
       outExtents[i].first = dimMin;
-      outBins.push_back(static_cast<size_t>(dimRange / stepSize));
+
     } else {
       throw std::runtime_error("Cannot handle " +
                                boost::lexical_cast<std::string>(nArgs) +
                                " bins.");
     }
+    if (outBin < 0)
+      throw std::runtime_error("output bin calculated to be less than 0");
+    outBins.push_back(static_cast<size_t>(outBin));
   }
   return std::make_pair(outExtents, outBins);
 }
