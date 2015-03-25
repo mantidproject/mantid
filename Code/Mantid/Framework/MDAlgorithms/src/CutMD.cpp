@@ -149,11 +149,11 @@ std::vector<MinMax> calculateExtents(const DblMatrix &inMatrix,
   return extents;
 }
 
-std::pair<std::vector<MinMax>, std::vector<size_t>>
+std::pair<std::vector<MinMax>, std::vector<int>>
 calculateSteps(const std::vector<MinMax> &inExtents,
                const std::vector<std::vector<double>> &binning) {
   std::vector<MinMax> outExtents(inExtents);
-  std::vector<size_t> outBins;
+  std::vector<int> outBins;
 
   for (size_t i = 0; i < inExtents.size(); ++i) {
     const size_t nArgs = binning[i].size();
@@ -191,7 +191,7 @@ calculateSteps(const std::vector<MinMax> &inExtents,
     }
     if (outBin < 0)
       throw std::runtime_error("output bin calculated to be less than 0");
-    outBins.push_back(static_cast<size_t>(outBin));
+    outBins.push_back(outBin);
   }
   return std::make_pair(outExtents, outBins);
 }
@@ -332,7 +332,7 @@ void CutMD::exec() {
       calculateExtents(scaledProjectionMatrix, extentLimits);
   auto stepPair = calculateSteps(scaledExtents, pbins);
   std::vector<MinMax> steppedExtents = stepPair.first;
-  std::vector<size_t> steppedBins = stepPair.second;
+  std::vector<int> steppedBins = stepPair.second;
 
   // Calculate extents for additional dimensions
   for (size_t i = 3; i < numDims; ++i) {
@@ -342,7 +342,7 @@ void CutMD::exec() {
 
     if (nArgs == 1) {
       steppedExtents.push_back(extentLimit);
-      steppedBins.push_back(static_cast<size_t>(dimRange / pbins[i][0]));
+      steppedBins.push_back(static_cast<int>(dimRange / pbins[i][0]));
     } else if (nArgs == 2) {
       steppedExtents.push_back(std::make_pair(pbins[i][0], pbins[i][1]));
       steppedBins.push_back(1);
@@ -352,7 +352,7 @@ void CutMD::exec() {
       double dimRange = extentLimit.second - extentLimit.first;
       if (stepSize > dimRange)
         stepSize = dimRange;
-      steppedBins.push_back(static_cast<size_t>(dimRange / stepSize));
+      steppedBins.push_back(static_cast<int>(dimRange / stepSize));
     }
 
     // and double targetUnits' length by appending itself to itself
