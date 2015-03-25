@@ -271,10 +271,8 @@ void CutMD::exec() {
   g_log.warning("CutMD is in the beta stage of development. Its properties and "
                 "behaviour may change without warning.");
 
-  g_log.warning("point 0");
   // Collect input properties
   const IMDEventWorkspace_sptr inWS = getProperty("InputWorkspace");
-  g_log.warning("point 0.5");
   const size_t numDims = inWS->getNumDims();
   const ITableWorkspace_sptr projection = getProperty("Projection");
   const bool haveProjection = !(*getProperty("Projection")).isDefault();
@@ -298,7 +296,6 @@ void CutMD::exec() {
       throw std::runtime_error(
           "Insufficient rows in projection table. Must be 3 or more.");
   }
-  g_log.warning("point 1");
   // Check PBin properties
   for (size_t i = 0; i < 5; ++i) {
     if (i < numDims && pbins[i].empty())
@@ -337,7 +334,6 @@ void CutMD::exec() {
   std::vector<MinMax> steppedExtents = stepPair.first;
   std::vector<size_t> steppedBins = stepPair.second;
 
-  g_log.warning("point 2");
   // Calculate extents for additional dimensions
   for (size_t i = 3; i < numDims; ++i) {
     const size_t nArgs = pbins[i].size();
@@ -371,14 +367,11 @@ void CutMD::exec() {
   std::vector<std::vector<std::string>> labels =
       labelProjection(projectionMatrix);
 
-  g_log.warning("point 3");
   // Either run RebinMD or SliceMD
   const std::string cutAlgName = noPix ? "BinMD" : "SliceMD";
   IAlgorithm_sptr cutAlg = createChildAlgorithm(cutAlgName, 0.0, 1.0);
   cutAlg->initialize();
-  g_log.warning("point 4");
   cutAlg->setProperty("InputWorkspace", inWS);
-  g_log.warning("point 5");
   cutAlg->setProperty("OutputWorkspace", "sliced");
   cutAlg->setProperty("NormalizeBasisVectors", false);
   cutAlg->setProperty("AxisAligned", false);
@@ -420,18 +413,14 @@ void CutMD::exec() {
     outExtents[2 * i + 1] = steppedExtents[i].second;
   }
 
-  g_log.warning("point 6");
   cutAlg->setProperty("OutputExtents", outExtents);
   cutAlg->setProperty("OutputBins", steppedBins);
 
-  g_log.warning("point 7");
   cutAlg->execute();
-  g_log.warning("point 8");
   Workspace_sptr sliceWS = cutAlg->getProperty("OutputWorkspace");
   IMDEventWorkspace_sptr slice =
       boost::dynamic_pointer_cast<IMDEventWorkspace>(sliceWS);
 
-  g_log.warning("point 9");
   if (!slice)
     throw std::runtime_error(
         "Child algorithm did not produce IMDEventWorkspace");
