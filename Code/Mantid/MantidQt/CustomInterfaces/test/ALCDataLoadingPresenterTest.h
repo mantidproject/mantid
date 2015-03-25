@@ -50,6 +50,7 @@ public:
   MOCK_METHOD1(setAvailablePeriods, void(const std::vector<std::string>&));
   MOCK_METHOD0(setWaitingCursor, void());
   MOCK_METHOD0(restoreCursor, void());
+  MOCK_METHOD0(help, void());
 
   void requestLoading() { emit loadRequested(); }
   void selectFirstRun() { emit firstRunSelected(); }

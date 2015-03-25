@@ -50,6 +50,7 @@ public:
   MOCK_METHOD1(setPeakPicker, void(const IPeakFunction_const_sptr&));
   MOCK_METHOD1(setFunction, void(const IFunction_const_sptr&));
   MOCK_METHOD3(setParameter, void(const QString&, const QString&, double));
+  MOCK_METHOD0(help, void());
 };
 
 class MockALCPeakFittingModel : public IALCPeakFittingModel
