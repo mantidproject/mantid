@@ -199,6 +199,8 @@ void PlotAsymmetryByLogValue::exec() {
     loadedWorkspace.push_back(loadedWs);
     loadedDeadTimeTable.push_back(loadedDt);
     loadedDetGroupingTable.push_back(loadedDg);
+
+    progress.report();
   }
 
   PARALLEL_FOR_NO_WSP_CHECK()
@@ -223,7 +225,6 @@ void PlotAsymmetryByLogValue::exec() {
     // Analyse loadedWs
     doAnalysis (loadedWs, runIndex);
 
-    progress.report();
     PARALLEL_END_INTERUPT_REGION
   }
   PARALLEL_CHECK_INTERUPT_REGION
