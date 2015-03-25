@@ -221,12 +221,17 @@ void PlotAsymmetryByLogValue::exec() {
     }
 
     // Analyse loadedWs
-    doAnalysis (loadedWorkspace.at(runIndex), runIndex);
+    doAnalysis (loadedWs, runIndex);
 
     progress.report();
     PARALLEL_END_INTERUPT_REGION
   }
   PARALLEL_CHECK_INTERUPT_REGION
+
+  // Clear vectors
+  loadedWorkspace.clear();
+  loadedDeadTimeTable.clear();
+  loadedDetGroupingTable.clear();
 
   // Create the 2D workspace for the output
   int nplots = (m_green!= EMPTY_INT()) ? 4 : 1;
