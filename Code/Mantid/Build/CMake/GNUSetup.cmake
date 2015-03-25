@@ -15,7 +15,7 @@ elseif ( "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" )
 endif()
 
 # Global warning flags.
-set( GNUFLAGS "-Wall -Wextra -pedantic -Wconversion -Winit-self -Wpointer-arith -Wcast-qual -Wcast-align -fno-common" )
+set( GNUFLAGS "-Wall -Wextra -Wconversion -Winit-self -Wpointer-arith -Wcast-qual -Wcast-align -fno-common" )
 # Disable some warnings about deprecated headers and type conversions that
 # we can't do anything about
 # -Wno-deprecated: Do not warn about use of deprecated headers.
@@ -24,9 +24,10 @@ set( GNUFLAGS "-Wall -Wextra -pedantic -Wconversion -Winit-self -Wpointer-arith 
 set( GNUFLAGS "${GNUFLAGS} -Wno-deprecated -Wno-write-strings")
 
 # Check if we have a new enough version for this flag
+# some -pedantic warnings remain with gcc 4.4.7
 if ( CMAKE_COMPILER_IS_GNUCXX )
-  if (GCC_COMPILER_VERSION VERSION_GREATER "4.3")
-    set(GNUFLAGS "${GNUFLAGS} -Wno-unused-result")
+  if (GCC_COMPILER_VERSION VERSION_GREATER "4.4")
+    set(GNUFLAGS "${GNUFLAGS} -Wno-unused-result -pedantic")
   endif ()
 elseif ( "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" )
     set(GNUFLAGS "${GNUFLAGS} -Wno-sign-conversion")
