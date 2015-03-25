@@ -12,7 +12,7 @@ Kernel::Logger g_log("RemoteJobManagerFactory");
 
 /// Private constructor, singleton class
 RemoteJobManagerFactoryImpl::RemoteJobManagerFactoryImpl()
-    : Mantid::Kernel::DynamicFactory<Mantid::Kernel::IRemoteJobManager>() {
+    : Mantid::Kernel::DynamicFactory<IRemoteJobManager>() {
   g_log.debug() << "RemoteJobManager factory created." << std::endl;
 }
 
@@ -31,9 +31,9 @@ RemoteJobManagerFactoryImpl::~RemoteJobManagerFactoryImpl() {}
  * given (compute resources are looked up in the facilities definition
  * (XML) file for the current facility.
  */
-Mantid::Kernel::IRemoteJobManager_sptr RemoteJobManagerFactoryImpl::create(
+IRemoteJobManager_sptr RemoteJobManagerFactoryImpl::create(
     const std::string &computeResourceName) const {
-  Mantid::Kernel::IRemoteJobManager_sptr jm;
+  IRemoteJobManager_sptr jm;
 
   if (computeResourceName.empty())
     return jm;
@@ -64,10 +64,10 @@ Mantid::Kernel::IRemoteJobManager_sptr RemoteJobManagerFactoryImpl::create(
  * @throw std::invalid_argument If there is an issue with the URL or
  * the type (for example the type is not recognized).
  */
-Mantid::Kernel::IRemoteJobManager_sptr
+Mantid::API::IRemoteJobManager_sptr
 RemoteJobManagerFactoryImpl::create(const std::string baseURL,
                                     const std::string jobManagerType) const {
-  Mantid::Kernel::IRemoteJobManager_sptr jm;
+  Mantid::API::IRemoteJobManager_sptr jm;
 
   // use the inherited/generic create method
   try {

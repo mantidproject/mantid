@@ -1,9 +1,9 @@
-#ifndef MANTID_KERNEL_REMOTEJOBMANAGERFACTORY_H_
-#define MANTID_KERNEL_REMOTEJOBMANAGERFACTORY_H_
+#ifndef MANTID_API_REMOTEJOBMANAGERFACTORY_H_
+#define MANTID_API_REMOTEJOBMANAGERFACTORY_H_
 
 #include "MantidAPI/DllConfig.h"
+#include "MantidAPI/IRemoteJobManager.h"
 #include "MantidKernel/DynamicFactory.h"
-#include "MantidKernel/IRemoteJobManager.h"
 #include "MantidKernel/SingletonHolder.h"
 
 namespace Mantid {
@@ -27,10 +27,13 @@ macro DECLARE_REMOTEJOBMANAGER (the same way you use DECLARE_ALGORITHM
 for algorithms and remote algorithms).
 
 As the algorithm, workspace and other factories in Mantid, this
-factory is implemented as a singleton class. Typical usage:
+factory is implemented as a singleton class. Typical usages:
 
-Mantid::Kernel::IRemoteJob|Manager_sptr jobManager =
-    Mantid::API::IRemoteJobManager_sptr::Instance().create("Fermi");
+Mantid::API::IRemoteJob|Manager_sptr jobManager =
+    Mantid::API::RemoteJobManagerFactory::Instance().create("Fermi");
+
+Mantid::API::IRemoteJob|Manager_sptr jobManager =
+    Mantid::API::RemoteJobManagerFactory::Instance().create("SCARF@STFC");
 
 
 Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
@@ -55,17 +58,16 @@ File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class MANTID_API_DLL RemoteJobManagerFactoryImpl
-    : public Kernel::DynamicFactory<Mantid::Kernel::IRemoteJobManager> {
+    : public Kernel::DynamicFactory<IRemoteJobManager> {
 public:
   /// Create a remote job manager that will know how to use the
   /// underlying mechanism that suits the compute resource passed
-  Mantid::Kernel::IRemoteJobManager_sptr
-  create(const std::string &computeResourceName) const;
+  IRemoteJobManager_sptr create(const std::string &computeResourceName) const;
 
   /// alternative (lower level) create where the specific type of
   /// manager and base URL are directly given
-  Mantid::Kernel::IRemoteJobManager_sptr
-  create(const std::string baseURL, const std::string jobManagerType) const;
+  IRemoteJobManager_sptr create(const std::string baseURL,
+                                const std::string jobManagerType) const;
 
 private:
   /// So that the singleton can be created (cons/destructor are private)
@@ -82,7 +84,7 @@ private:
   virtual ~RemoteJobManagerFactoryImpl();
 
   // Unhide the inherited create method but make it private
-  using Kernel::DynamicFactory<Mantid::Kernel::IRemoteJobManager>::create;
+  using Kernel::DynamicFactory<IRemoteJobManager>::create;
 };
 
 /// Forward declaration of a specialisation of SingletonHolder for
@@ -119,4 +121,4 @@ typedef MANTID_API_DLL Mantid::Kernel::SingletonHolder<
        0));                                                                    \
   }
 
-#endif // MANTID_KERNEL_REMOTEJOBMANAGERFACTORY_H_
+#endif // MANTID_API_REMOTEJOBMANAGERFACTORY_H_

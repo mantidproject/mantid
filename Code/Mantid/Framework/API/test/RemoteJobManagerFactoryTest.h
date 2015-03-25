@@ -6,13 +6,13 @@
 #include "MantidKernel/FacilityInfo.h"
 
 using namespace Mantid::API;
-using namespace Mantid::Kernel;
 
 // Just a minimal implementation of IRemoteJobManager, sufficient for the
 // factory
-class TestJM : public Mantid::Kernel::IRemoteJobManager {
+class TestJM : public IRemoteJobManager {
 public:
-  virtual void authenticate(std::string &username, std::string &password) {
+  virtual void authenticate(const std::string &username,
+                            const std::string &password) {
     UNUSED_ARG(username);
     UNUSED_ARG(password);
   }
@@ -106,7 +106,7 @@ public:
 
     Mantid::Kernel::ConfigService::Instance().setFacility("SNS");
     TS_ASSERT_THROWS(
-        Mantid::Kernel::IRemoteJobManager_sptr jobManager =
+        Mantid::API::IRemoteJobManager_sptr jobManager =
             Mantid::API::RemoteJobManagerFactory::Instance().create(
                 "SCARF@STFC"),
         Mantid::Kernel::Exception::NotFoundError);
@@ -127,13 +127,13 @@ public:
     // done a DECLARE_REMOTEJOBMANAGER. Change this test when that is
     // done (ticket #11126 etc.)
     TS_ASSERT_THROWS(
-        Mantid::Kernel::IRemoteJobManager_sptr jobManager =
+        Mantid::API::IRemoteJobManager_sptr jobManager =
             Mantid::API::RemoteJobManagerFactory::Instance().create("Fermi"),
         Mantid::Kernel::Exception::NotFoundError);
 
     Mantid::Kernel::ConfigService::Instance().setFacility("ISIS");
     TS_ASSERT_THROWS(
-        Mantid::Kernel::IRemoteJobManager_sptr jobManager =
+        Mantid::API::IRemoteJobManager_sptr jobManager =
             Mantid::API::RemoteJobManagerFactory::Instance().create(
                 "SCARF@STFC"),
         Mantid::Kernel::Exception::NotFoundError);
@@ -143,7 +143,7 @@ public:
   }
 
 private:
-  Mantid::Kernel::IRemoteJobManager_sptr jm;
+  Mantid::API::IRemoteJobManager_sptr jm;
 };
 
 #endif /* REMOTEJOBMANAGERFACTORYTEST_H_ */
