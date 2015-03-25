@@ -418,22 +418,22 @@ void CutMD::exec() {
 
   cutAlg->execute();
   Workspace_sptr sliceWS = cutAlg->getProperty("OutputWorkspace");
-  IMDEventWorkspace_sptr slice =
-      boost::dynamic_pointer_cast<IMDEventWorkspace>(sliceWS);
+  MultipleExperimentInfos_sptr sliceInfo =
+      boost::dynamic_pointer_cast<MultipleExperimentInfos>(sliceWS);
 
-  if (!slice)
+  if (!sliceInfo)
     throw std::runtime_error(
-        "Child algorithm did not produce IMDEventWorkspace");
+        "Could not extract experiment info from child's OutputWorkspace");
 
   // Attach projection matrix to output
-  if (slice->getNumExperimentInfo() > 0) {
-    ExperimentInfo_sptr info = slice->getExperimentInfo(0);
+  if (sliceInfo->getNumExperimentInfo() > 0) {
+    ExperimentInfo_sptr info = sliceInfo->getExperimentInfo(0);
     info->mutableRun().addProperty("W_MATRIX", projectionMatrix.getVector(),
                                    true);
   }
 
   // Done!
-  setProperty("OutputWorkspace", slice);
+  setProperty("OutputWorkspace", sliceWS);
 }
 
 } // namespace Mantid
