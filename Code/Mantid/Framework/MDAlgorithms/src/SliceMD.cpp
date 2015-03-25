@@ -44,8 +44,8 @@ void SliceMD::init() {
   // Properties for specifying the slice to perform.
   this->initSlicingProps();
 
-  declareProperty(new WorkspaceProperty<IMDEventWorkspace>(
-                      "OutputWorkspace", "", Direction::Output),
+  declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace", "",
+                                                   Direction::Output),
                   "Name of the output MDEventWorkspace.");
 
   std::vector<std::string> exts;
