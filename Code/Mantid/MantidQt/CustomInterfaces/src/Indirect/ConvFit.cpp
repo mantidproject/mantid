@@ -595,17 +595,17 @@ namespace IDA
     m_properties[name+".Intensity"] = m_dblManager->addProperty("Intensity");
     m_properties[name+".Radius"] = m_dblManager->addProperty("Radius");
     m_properties[name+".Diffusion"] = m_dblManager->addProperty("Diffusion");
-    /* m_properties[name+".Shift"] = m_dblManager->addProperty("Shift"); */
+    m_properties[name+".Shift"] = m_dblManager->addProperty("Shift");
 
     m_dblManager->setDecimals(m_properties[name+".Intensity"], NUM_DECIMALS);
     m_dblManager->setDecimals(m_properties[name+".Radius"], NUM_DECIMALS);
     m_dblManager->setDecimals(m_properties[name+".Diffusion"], NUM_DECIMALS);
-    /* m_dblManager->setDecimals(m_properties[name+".Shift"], NUM_DECIMALS); */
+    m_dblManager->setDecimals(m_properties[name+".Shift"], NUM_DECIMALS);
 
     diffSphereGroup->addSubProperty(m_properties[name+".Intensity"]);
     diffSphereGroup->addSubProperty(m_properties[name+".Radius"]);
     diffSphereGroup->addSubProperty(m_properties[name+".Diffusion"]);
-    /* diffSphereGroup->addSubProperty(m_properties[name+".Shift"]); */
+    diffSphereGroup->addSubProperty(m_properties[name+".Shift"]);
 
     return diffSphereGroup;
   }
@@ -990,7 +990,7 @@ namespace IDA
       m_dblManager->setValue(m_properties["Diffusion Sphere.Intensity"], parameters[pref+"Intensity"]);
       m_dblManager->setValue(m_properties["Diffusion Sphere.Radius"], parameters[pref+"Radius"]);
       m_dblManager->setValue(m_properties["Diffusion Sphere.Diffusion"], parameters[pref+"Diffusion"]);
-      /* m_dblManager->setValue(m_properties["Diffusion Sphere.Shift"], parameters[pref+"Shift"]); */
+      m_dblManager->setValue(m_properties["Diffusion Sphere.Shift"], parameters[pref+"Shift"]);
     }
 
     m_pythonExportWsName = "";
