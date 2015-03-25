@@ -21,7 +21,7 @@ PoldiCreatePeaksFromFile reads a text file which contains one or more crystal st
 analysis requires information mainly about the lattice and the symmetry, the format is very simple. The following
 block shows how such a file would look when there are two compounds:
 
-.. code-block::
+.. code-block:: none
 
     # The name may contain letters, numbers and _
     Iron_FCC {
@@ -83,3 +83,5 @@ The script produces a WorkspaceGroup which contains a table with reflections for
 .. testcleanup::
 
     DeleteWorkspace('compounds')
+
+.. categories::
