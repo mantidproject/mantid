@@ -186,16 +186,25 @@ void PlotAsymmetryByLogValue::exec() {
 
   Progress progress(this, 0, 1, ie - is + 2);
 
-  // Loop through runs
+  // Load in serial
+  // We need to store the loaded ws, dead times and grouping in vectors
+  std::vector<Workspace_sptr> loadedWorkspace;
+  std::vector<Workspace_sptr> loadedDeadTimeTable;
+  std::vector<Workspace_sptr> loadedDetGroupingTable;
+  for (int64_t i = is; i <= ie; i++) {
+
+    Workspace_sptr loadedWs, loadedDt, loadedDg;
+    doLoad( i, loadedWs, loadedDt, loadedDg );
+  }
+
   PARALLEL_FOR_NO_WSP_CHECK()
   for (int64_t i = is; i <= ie; i++) {
     PARALLEL_START_INTERUPT_REGION
 
-    // Load run, apply dead time corrections and detector grouping
-    Workspace_sptr loadedWs = doLoad(i);
+    int64_t runIndex = i - is;
 
     // Analyse loadedWs
-    doAnalysis (loadedWs, i-is);
+    doAnalysis (loadedWorkspace.at(runIndex), runIndex);
 
     progress.report();
     PARALLEL_END_INTERUPT_REGION
@@ -219,8 +228,11 @@ void PlotAsymmetryByLogValue::exec() {
 
 /**  Loads one run and applies dead-time corrections and detector grouping if required
 *   @param runNumber :: [input] Run number specifying run to load
+*   @param loadedWs :: [output] Workspace loaded from nexus file
+*   @param loadedDt :: [output] Dead time table loaded from nexus file or specified file
+*   @param loadedDg :: [output] Detector grouping table loaded from nexus file
 */
-Workspace_sptr PlotAsymmetryByLogValue::doLoad (int64_t runNumber ) {
+void PlotAsymmetryByLogValue::doLoad (int64_t runNumber, Workspace_sptr& loadedWs, Workspace_sptr& loadedDt, Workspace_sptr& loadedDg) {
 
   // Get complete run name
   std::ostringstream fn, fnn;
@@ -231,33 +243,27 @@ Workspace_sptr PlotAsymmetryByLogValue::doLoad (int64_t runNumber ) {
   IAlgorithm_sptr load = createChildAlgorithm("LoadMuonNexus");
   load->setPropertyValue("Filename", fn.str());
   load->execute();
-  Workspace_sptr loadedWs = load->getProperty("OutputWorkspace");
+  loadedWs = load->getProperty("OutputWorkspace");
 
   // Check if dead-time corrections have to be applied
   if (m_dtcType != "None") {
     if (m_dtcType == "FromSpecifiedFile") {
-
-      // If user specifies a file, load corrections now
-      Workspace_sptr customDeadTimes;
-      loadCorrectionsFromFile (customDeadTimes, getPropertyValue("DeadTimeCorrFile"));
-      applyDeadtimeCorr (loadedWs, customDeadTimes);
+      // If user specifies a file, load corrections from file
+      loadCorrectionsFromFile (loadedDt, getPropertyValue("DeadTimeCorrFile"));
     } else {
       // Load corrections from run
-      Workspace_sptr deadTimes = load->getProperty("DeadTimeTable");
-      applyDeadtimeCorr (loadedWs, deadTimes);
+      loadedDt = load->getProperty("DeadTimeTable");
     }
   }
 
-  // If m_autogroup, group detectors
+  // If m_autogroup load detector grouping table
   if (m_autogroup) {
-    Workspace_sptr loadedDetGrouping = load->getProperty("DetectorGroupingTable");
-    if (!loadedDetGrouping)
+    loadedDg = load->getProperty("DetectorGroupingTable");
+    if (!loadedDg)
       throw std::runtime_error("No grouping info in the file.\n\nPlease "
       "specify grouping manually");
-    groupDetectors(loadedWs,loadedDetGrouping);
   }
 
-  return loadedWs;
 }
 
 /**  Load dead-time corrections from specified file
