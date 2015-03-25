@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- For help on the notation used to specify an Instrument Definition File see http://www.mantidproject.org/IDF -->
-<instrument name="DNS" valid-from="1900-01-31 23:59:59" valid-to="2100-01-31 23:59:59" last-modified="2015-01-22 09:17:17">
+<instrument name="DNS" valid-from="1900-01-31 23:59:59" valid-to="2100-01-31 23:59:59" last-modified="2015-03-25 10:17:17">
   <!-- Author: m.ganeva@fz-juelich.de -->
   <defaults>
     <length unit="meter" />
@@ -13,10 +13,19 @@
       <handedness val="right" />
     </reference-frame>
   </defaults>
+  <!-- moderator -->
   <component type="moderator">
     <location z="-2.27" />
   </component>
   <type name="moderator" is="Source"></type>
+  <!-- monitor -->
+  <component type="monitor" idlist="monitor">
+    <location z="-0.229" />
+  </component>
+  <type name="monitor" is="monitor"></type>
+  <idlist idname="monitor">
+    <id val="-1"/>
+  </idlist>
   <!-- Sample position -->
   <component type="sample-position">
     <location y="0.0" x="0.0" z="0.0" />
@@ -32,40 +41,36 @@
   <!-- Detector Banks -->
   <type name="detectors">
     <component type="bank0">
-      <location />
+      <location>
+        <parameter name="r-position">
+            <value val="0"/>
+        </parameter>
+        <parameter name="t-position">
+            <logfile id="deterota"  eq="0.0+value"/>
+        </parameter>
+        <parameter name="p-position">
+            <value val="0"/>
+        </parameter>
+        <parameter name="rotx">
+            <value val="0"/>
+        </parameter>
+        <parameter name="roty">
+            <logfile id="deterota"  eq="0.0+value"/>
+        </parameter>
+        <parameter name="rotz">
+            <value val="0"/>
+        </parameter>
+      </location>
     </component>
   </type>
   <!-- Definition of the PA detector bank (made of 24 tubes) -->
   <type name="bank0">
     <component type="standard_tube">
-      <location r="0.800000" t="0.000000"   p="0.0" rot="90.0" axis-x="0.0" axis-y="0.0" axis-z="1.0" name="tube_1" />
-      <location r="0.800000" t="-5.000000"  p="0.0" rot="90.0" axis-x="0.0" axis-y="0.0" axis-z="1.0" name="tube_2" />
-      <location r="0.800000" t="-10.000000" p="0.0" rot="90.0" axis-x="0.0" axis-y="0.0" axis-z="1.0" name="tube_3" />
-      <location r="0.800000" t="-15.000000" p="0.0" rot="90.0" axis-x="0.0" axis-y="0.0" axis-z="1.0" name="tube_4" />
-      <location r="0.800000" t="-20.000000" p="0.0" rot="90.0" axis-x="0.0" axis-y="0.0" axis-z="1.0" name="tube_5" />
-      <location r="0.800000" t="-25.000000" p="0.0" rot="90.0" axis-x="0.0" axis-y="0.0" axis-z="1.0" name="tube_6" />
-      <location r="0.800000" t="-30.000000" p="0.0" rot="90.0" axis-x="0.0" axis-y="0.0" axis-z="1.0" name="tube_7" />
-      <location r="0.800000" t="-35.000000" p="0.0" rot="90.0" axis-x="0.0" axis-y="0.0" axis-z="1.0" name="tube_8" />
-      <location r="0.800000" t="-40.000000" p="0.0" rot="90.0" axis-x="0.0" axis-y="0.0" axis-z="1.0" name="tube_9" />
-      <location r="0.800000" t="-45.000000" p="0.0" rot="90.0" axis-x="0.0" axis-y="0.0" axis-z="1.0" name="tube_10" />
-      <location r="0.800000" t="-50.000000" p="0.0" rot="90.0" axis-x="0.0" axis-y="0.0" axis-z="1.0" name="tube_11" />
-      <location r="0.800000" t="-55.000000" p="0.0" rot="90.0" axis-x="0.0" axis-y="0.0" axis-z="1.0" name="tube_12" />
-      <location r="0.800000" t="-60.000000" p="0.0" rot="90.0" axis-x="0.0" axis-y="0.0" axis-z="1.0" name="tube_13" />
-      <location r="0.800000" t="-65.000000" p="0.0" rot="90.0" axis-x="0.0" axis-y="0.0" axis-z="1.0" name="tube_14" />
-      <location r="0.800000" t="-70.000000" p="0.0" rot="90.0" axis-x="0.0" axis-y="0.0" axis-z="1.0" name="tube_15" />
-      <location r="0.800000" t="-75.000000" p="0.0" rot="90.0" axis-x="0.0" axis-y="0.0" axis-z="1.0" name="tube_16" />
-      <location r="0.800000" t="-80.000000" p="0.0" rot="90.0" axis-x="0.0" axis-y="0.0" axis-z="1.0" name="tube_17" />
-      <location r="0.800000" t="-85.000000" p="0.0" rot="90.0" axis-x="0.0" axis-y="0.0" axis-z="1.0" name="tube_18" />
-      <location r="0.800000" t="-90.000000" p="0.0" rot="90.0" axis-x="0.0" axis-y="0.0" axis-z="1.0" name="tube_19" />
-      <location r="0.800000" t="-95.000000" p="0.0" rot="90.0" axis-x="0.0" axis-y="0.0" axis-z="1.0" name="tube_20" />
-      <location r="0.800000" t="-100.000000" p="0.0" rot="90.0" axis-x="0.0" axis-y="0.0" axis-z="1.0" name="tube_21" />
-      <location r="0.800000" t="-105.000000" p="0.0" rot="90.0" axis-x="0.0" axis-y="0.0" axis-z="1.0" name="tube_22" />
-      <location r="0.800000" t="-110.000000" p="0.0" rot="90.0" axis-x="0.0" axis-y="0.0" axis-z="1.0" name="tube_23" />
-      <location r="0.800000" t="-115.000000" p="0.0" rot="90.0" axis-x="0.0" axis-y="0.0" axis-z="1.0" name="tube_24" />
+      <locations r="0.800000" t="0.000000" t-end="-115.0" p="0.0" name="tube_" n-elements="24" />
     </component>
   </type>
   <!-- Definition of standard_tube -->
-  <type name="standard_tube" outline="yes">
+  <type name="standard_tube">
     <component type="standard_pixel">
       <location y="0.0" />
     </component>
