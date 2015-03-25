@@ -4,6 +4,10 @@ from PyQt4 import QtCore, QtGui
 import sys
 import mantid
 from ValidateOL import ValidateOL
+from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
+from matplotlib.figure import Figure
+import matplotlib.pyplot
+import numpy
 
 class DGSPlannerGUI(QtGui.QWidget):
     def __init__(self,ol=None,parent=None):
@@ -14,6 +18,7 @@ class DGSPlannerGUI(QtGui.QWidget):
             self.ol=ol
         else:
             self.ol=mantid.geometry.OrientedLattice()
+        self.masterDict=dict() #holds info about instrument and ranges
         self.instrumentWidget=InstrumentSetupWidget.InstrumentSetupWidget(self)
         self.setLayout(QtGui.QHBoxLayout())
         controlLayout=QtGui.QVBoxLayout()
@@ -39,11 +44,16 @@ class DGSPlannerGUI(QtGui.QWidget):
         plotControlLayout.addWidget(self.colorButton,0,3)
         plotControlLayout.addWidget(self.helpButton,0,4)
         controlLayout.addLayout(plotControlLayout)
-        self.layout.addLayout(controlLayout)
+        self.layout().addLayout(controlLayout)
         
-        #temp instead of figure
-        self.dummyButton=QtGui.QPushButton("Plot",self)
-        self.layout.addWidget(self.dummyButton)
+        #figure
+        self.figure=Figure()
+        self.figure.patch.set_facecolor('white')
+        self.canvas=FigureCanvas(self.figure)
+        self.trajfig=self.figure.add_subplot(111)
+        self.layout().addWidget(self.canvas)
+        #self.updateFigure()
+        
         #connections        
         self.matrix.UBmodel.changed.connect(self.updateUB)
         self.matrix.UBmodel.changed.connect(self.classic.updateOL)
@@ -51,6 +61,9 @@ class DGSPlannerGUI(QtGui.QWidget):
         self.classic.changed.connect(self.updateUB)
         self.instrumentWidget.changed.connect(self.updateParams)
         self.dimensionWidget.changed.connect(self.updateParams)
+        self.plotButton.clicked.connect(self.updateFigure)
+        self.oplotButton.clicked.connect(self.updateFigure)
+        self.helpButton.clicked.connect(self.help)
         #force an update of values
         self.instrumentWidget.updateAll()
         self.dimensionWidget.updateChanges()
@@ -61,8 +74,26 @@ class DGSPlannerGUI(QtGui.QWidget):
         
     @QtCore.pyqtSlot(dict)
     def updateParams(self,d):
-        print d
-
+        #print d
+        self.masterDict.update(d)
+    
+    def help(self):
+        #TODO: put the correct url. Check for assistant and try to use that first
+        QtGui.QDesktopServices.openUrl(QtCore.QUrl("http://docs.mantidproject.org/nightly/concepts/Lattice.html"))
+        
+    def updateFigure(self):
+        #print self.sender(),type(self.masterDict['dimStep'][0]),
+        if self.sender() is self.plotButton:
+            self.trajfig.clear()
+        self.trajfig=self.figure.add_subplot(111)
+        self.trajfig.hold(True)
+        t=numpy.arange(0,3,0.01)
+        s=numpy.sin(2*numpy.pi*t+self.masterDict['dimStep'][0])
+        if self.colorButton.isChecked():
+            s+=0.1
+        self.trajfig.plot(t,s)    
+        self.canvas.draw()   
+            
 if __name__=='__main__':
     app=QtGui.QApplication(sys.argv)
     orl=mantid.geometry.OrientedLattice(2,3,4,90,90,90)
