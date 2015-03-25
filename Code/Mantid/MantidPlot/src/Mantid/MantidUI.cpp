@@ -2530,7 +2530,6 @@ void MantidUI::importNumSeriesLog(const QString &wsName, const QString &logName,
   t->setColName(1, column1);
 
   int iValueCurve = 0;
-  int iFilterCurve = 1;
 
   // Applying filters
   if (filter > 0)
@@ -2731,6 +2730,7 @@ void MantidUI::importNumSeriesLog(const QString &wsName, const QString &logName,
 
   if (filter && flt.filter())
   {
+    int iFilterCurve = 1;
     QwtPlotCurve *c = g->curve(iFilterCurve);
     if ( c )
     {
