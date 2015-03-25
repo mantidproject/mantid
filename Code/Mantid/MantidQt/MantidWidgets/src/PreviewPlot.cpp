@@ -5,7 +5,6 @@
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/AlgorithmManager.h"
-#include "MantidQtAPI/QwtWorkspaceSpectrumData.h"
 
 #include <Poco/Notification.h>
 #include <Poco/NotificationCenter.h>
@@ -17,6 +16,8 @@
 #include <QPalette>
 #include <QVBoxLayout>
 
+#include <qwt_array.h>
+#include <qwt_data.h>
 #include <qwt_scale_engine.h>
 
 using namespace MantidQt::MantidWidgets;
@@ -25,6 +26,7 @@ using namespace Mantid::API;
 namespace
 {
   Mantid::Kernel::Logger g_log("PreviewPlot");
+  bool isNegative(double v) { return v <= 0.0; }
 }
 
 
@@ -596,11 +598,31 @@ QwtPlotCurve * PreviewPlot::addCurve(MatrixWorkspace_sptr ws, const size_t specI
     ws = convertXAlg->getProperty("OutputWorkspace");
   }
 
-  // Create the plot data
-  QwtWorkspaceSpectrumData wsData(*ws, static_cast<int>(specIndex), false, false);
+  std::vector<double> wsDataY = ws->readY(specIndex);
+
+  // If using log scale need to remove all negative Y values
+  bool logYScale = getAxisType(QwtPlot::yLeft) == "Logarithmic";
+  if(logYScale)
+  {
+    // Remove negative data in order to search for minimum positive value
+    std::vector<double> validData(wsDataY.size());
+    auto it = std::remove_copy_if(wsDataY.begin(), wsDataY.end(), validData.begin(), isNegative);
+    validData.resize(std::distance(validData.begin(), it));
+
+    // Get minimum positive value
+    double minY = *std::min_element(validData.begin(), validData.end());
+
+    // Set all negative values to minimum positive value
+    std::replace_if(wsDataY.begin(), wsDataY.end(), isNegative, minY);
+  }
+
+  // Create the Qwt data
+  QwtArray<double> dataX = QVector<double>::fromStdVector(ws->readX(specIndex));
+  QwtArray<double> dataY = QVector<double>::fromStdVector(wsDataY);
+  QwtArrayData wsData(dataX, dataY);
 
   // Create the new curve
-  QwtPlotCurve *curve = new QwtPlotCurve();
+  QwtPlotCurve * curve = new QwtPlotCurve();
   curve->setData(wsData);
   curve->setPen(curveColour);
   curve->attach(m_uiForm.plot);
