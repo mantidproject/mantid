@@ -203,6 +203,8 @@ void PlotAsymmetryByLogValue::exec() {
     progress.report();
   }
 
+  // Analyse in parallel
+  // Use previously loaded ws, dead times and grouping
   PARALLEL_FOR_NO_WSP_CHECK()
   for (int64_t i = is; i <= ie; i++) {
     PARALLEL_START_INTERUPT_REGION
