@@ -421,8 +421,8 @@ class DirectEnergyConversion(object):
             if self.check_background:
                 # find the count rate seen in the regions of the histograms defined
                 # as the background regions, if the user defined such region.
-                # This has to be done here, as workspace will be cut in chunks and bg regions --
-                # removed
+                # In multirep mode this has to be done here, as workspace
+                # will be cut in chunks and bg regions -- removed
                 ws_base = PropertyManager.sample_run.get_workspace()
                 bkgd_range = self.bkgd_range
                 bkgr_ws = self._find_or_build_bkgr_ws(ws_base,bkgd_range[0],bkgd_range[1])
@@ -432,7 +432,9 @@ class DirectEnergyConversion(object):
         else:
             self._multirep_mode = False
             num_ei_cuts = 0
-
+#------------------------------------------------------------------------------------------
+# Main loop over incident energies
+#------------------------------------------------------------------------------------------
         cut_ind = 0 # do not do enumerate if it generates all sequence at once
         #  -- code below uses current energy state from PropertyManager.incident_energy
         for ei_guess in PropertyManager.incident_energy:
@@ -485,6 +487,9 @@ class DirectEnergyConversion(object):
             else: # delete workspace if no output is requested
                 self.sample_run = None
         #end_for
+#------------------------------------------------------------------------------------------
+# END Main loop over incident energies
+#------------------------------------------------------------------------------------------
 
         end_time = time.time()
         prop_man.log("*** Elapsed time = {0} sec".format(end_time - start_time),'notice')
@@ -872,7 +877,7 @@ class DirectEnergyConversion(object):
         else:
                tof_min,t_step,tof_max = process_block(TOF_range)
         #end
-        # add 5% for detectors positions in IDF not corresponding to shifted positions
+        # add 5% for detectors specified in Par file are shifted a bit and not min-max det any more
         return (0.95*tof_min,t_step,1.05*tof_max)
         #return (tof_min,t_step,tof_max)
     #
