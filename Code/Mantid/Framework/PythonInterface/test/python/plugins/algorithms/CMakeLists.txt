@@ -4,6 +4,7 @@
 
 set ( TEST_PY_FILES
   AddSampleLogMultipleTest.py
+  ApplyPaalmanPingsCorrectionTest.py
   CalculateSampleTransmissionTest.py
   CheckForSampleLogsTest.py
   ConjoinSpectraTest.py
