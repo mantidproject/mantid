@@ -11,14 +11,14 @@ from mantid.simpleapi import *
 import os
 
 
-class PoldiLoadCrystalDataTest(unittest.TestCase):
+class PoldiCreatePeaksFromFileTest(unittest.TestCase):
     testname = None
 
     def __init__(self, *args):
         unittest.TestCase.__init__(self, *args)
 
     def test_Init(self):
-        assertRaisesNothing(self, AlgorithmManager.create, ("PoldiLoadCrystalData"))
+        assertRaisesNothing(self, AlgorithmManager.create, ("PoldiCreatePeaksFromFile"))
 
     def test_FileOneCompoundOneAtom(self):
         fileHelper = TemporaryFileHelper("""Silicon {
@@ -28,7 +28,7 @@ class PoldiLoadCrystalDataTest(unittest.TestCase):
                                                     Si 0 0 0 1.0 0.05
                                                 }
                                             }""")
-        ws = PoldiLoadCrystalData(fileHelper.getName(), 0.7, 10.0)
+        ws = PoldiCreatePeaksFromFile(fileHelper.getName(), 0.7, 10.0)
 
         # Check output GroupWorkspace
         self.assertEquals(ws.getNumberOfEntries(), 1)
@@ -52,7 +52,7 @@ class PoldiLoadCrystalDataTest(unittest.TestCase):
                                                     C 0 0 0 0.1 0.05
                                                 }
                                             }""")
-        ws = PoldiLoadCrystalData(fileHelper.getName(), 0.7, 10.0)
+        ws = PoldiCreatePeaksFromFile(fileHelper.getName(), 0.7, 10.0)
 
         self.assertEquals(ws.getNumberOfEntries(), 1)
         self.assertTrue(ws.contains("SiliconCarbon"))
@@ -82,7 +82,7 @@ class PoldiLoadCrystalDataTest(unittest.TestCase):
                                                     Si 0 0 0 1.0 0.05
                                                 }
                                             }""")
-        ws = PoldiLoadCrystalData(fileHelper.getName(), 0.7, 10.0)
+        ws = PoldiCreatePeaksFromFile(fileHelper.getName(), 0.7, 10.0)
 
         self.assertEquals(ws.getNumberOfEntries(), 2)
         self.assertTrue(ws.contains("SiliconCarbon"))
@@ -114,9 +114,9 @@ class PoldiLoadCrystalDataTest(unittest.TestCase):
                                                     }
                                                   }""")
 
-        self.assertRaises(RuntimeError, PoldiLoadCrystalData, *(fhLatticeMissing.getName(), 0.7, 10.0, 'ws'))
-        self.assertRaises(RuntimeError, PoldiLoadCrystalData, *(fhNoLattice.getName(), 0.7, 10.0, 'ws'))
-        self.assertRaises(RuntimeError, PoldiLoadCrystalData, *(fhInvalidLattice.getName(), 0.7, 10.0, 'ws'))
+        self.assertRaises(RuntimeError, PoldiCreatePeaksFromFile, *(fhLatticeMissing.getName(), 0.7, 10.0, 'ws'))
+        self.assertRaises(RuntimeError, PoldiCreatePeaksFromFile, *(fhNoLattice.getName(), 0.7, 10.0, 'ws'))
+        self.assertRaises(RuntimeError, PoldiCreatePeaksFromFile, *(fhInvalidLattice.getName(), 0.7, 10.0, 'ws'))
 
 
     def test_FileFaultySpaceGroupStrings(self):
@@ -135,8 +135,8 @@ class PoldiLoadCrystalDataTest(unittest.TestCase):
                                                     }
                                                   }""")
 
-        self.assertRaises(RuntimeError, PoldiLoadCrystalData, *(fhSgMissing.getName(), 0.7, 10.0, 'ws'))
-        self.assertRaises(RuntimeError, PoldiLoadCrystalData, *(fhSgInvalid.getName(), 0.7, 10.0, 'ws'))
+        self.assertRaises(RuntimeError, PoldiCreatePeaksFromFile, *(fhSgMissing.getName(), 0.7, 10.0, 'ws'))
+        self.assertRaises(RuntimeError, PoldiCreatePeaksFromFile, *(fhSgInvalid.getName(), 0.7, 10.0, 'ws'))
 
     def test_FileFaultyAtomStrings(self):
         fhAtomsMissing = TemporaryFileHelper("""Silicon {
@@ -156,9 +156,9 @@ class PoldiLoadCrystalDataTest(unittest.TestCase):
                                                     Atoms: { }
                                                   }""")
 
-        self.assertRaises(RuntimeError, PoldiLoadCrystalData, *(fhAtomsMissing.getName(), 0.7, 10.0, 'ws'))
-        self.assertRaises(RuntimeError, PoldiLoadCrystalData, *(fhAtomsNoBraces.getName(), 0.7, 10.0, 'ws'))
-        self.assertRaises(RuntimeError, PoldiLoadCrystalData, *(fhAtomsEmpty.getName(), 0.7, 10.0, 'ws'))
+        self.assertRaises(RuntimeError, PoldiCreatePeaksFromFile, *(fhAtomsMissing.getName(), 0.7, 10.0, 'ws'))
+        self.assertRaises(RuntimeError, PoldiCreatePeaksFromFile, *(fhAtomsNoBraces.getName(), 0.7, 10.0, 'ws'))
+        self.assertRaises(RuntimeError, PoldiCreatePeaksFromFile, *(fhAtomsEmpty.getName(), 0.7, 10.0, 'ws'))
 
 
     def _tablesAreEqual(self, lhs, rhs):

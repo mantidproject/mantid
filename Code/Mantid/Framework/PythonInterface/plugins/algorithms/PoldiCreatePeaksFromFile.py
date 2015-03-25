@@ -10,6 +10,7 @@ import os
 
 
 class PoldiCompound(object):
+    """Small helper class to handle the results from PoldiCrystalFileParser."""
     _name = ""
     _spacegroup = ""
     _atomString = ""
@@ -48,6 +49,31 @@ def raiseParseErrorException(message):
 
 
 class PoldiCrystalFileParser(object):
+    """Small parser for crystal structure files used at POLDI
+
+    This class encapsulates a small parser for crystal structure files that are used at
+    POLDI. The files contains information about the lattice, the space group and the basis (atoms
+    in the asymmetric unit).
+
+    The file format is defined as follows:
+
+        Compound_1 {
+            Lattice: [1 - 6 floats] => a, b, c, alpha, beta, gamma
+            Spacegroup: [valid space group symbol]
+            Atoms; {
+                Element x y z [occupancy [U_eq]]
+                Element x y z [occupancy [U_eq]]
+            }
+        }
+
+        Compound_2 {
+            ...
+        }
+
+    The parser returns a list of PoldiCompound objects with the compounds that were found
+    in the file. These are then processed by PoldiCreatePeaksFromFile to generate arguments
+    for calling PoldiCreatePeaksFromCell.
+    """
     elementSymbol = Word(alphas, min=1, max=2).setFailAction(
         lambda o, s, loc, token: raiseParseErrorException("Element symbol must be one or two characters."))
     integerNumber = Word(nums)
@@ -109,7 +135,7 @@ class PoldiCrystalFileParser(object):
         return self.compounds.parseString(stringContent)
 
 
-class PoldiLoadCrystalData(PythonAlgorithm):
+class PoldiCreatePeaksFromFile(PythonAlgorithm):
     _parser = PoldiCrystalFileParser()
 
     def category(self):
@@ -184,4 +210,4 @@ class PoldiLoadCrystalData(PythonAlgorithm):
         return compound.getName()
 
 
-AlgorithmFactory.subscribe(PoldiLoadCrystalData)
+AlgorithmFactory.subscribe(PoldiCreatePeaksFromFile)
