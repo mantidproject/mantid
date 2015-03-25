@@ -269,6 +269,7 @@ void CutMD::init() {
   declareProperty("CheckAxes", true,
                   "Check that the axis look to be correct, and abort if not.");
 }
+
 void CutMD::exec() {
   g_log.warning("CutMD is in the beta stage of development. Its properties and "
                 "behaviour may change without warning.");
@@ -290,8 +291,8 @@ void CutMD::exec() {
   if (haveProjection) {
     auto colNames = projection->getColumnNames();
     if (colNames.size() != 4 || colNames[0] != "name" ||
-        colNames[1] != "value" || colNames[2] != "type" ||
-        colNames[3] != "offset")
+        colNames[1] != "value" || colNames[2] != "offset" ||
+        colNames[3] != "type")
       throw std::runtime_error(
           "Invalid Projection supplied. Please check column names.");
     if (projection->rowCount() < 3)
