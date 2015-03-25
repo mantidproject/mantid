@@ -259,6 +259,12 @@ public:
 
     m_view->changeParameter(QString("f1"), QString("A0"));
   }
+
+  void test_helpPage ()
+  {
+    EXPECT_CALL(*m_view, help()).Times(1);
+    m_view->help();
+  }
 };
 
 

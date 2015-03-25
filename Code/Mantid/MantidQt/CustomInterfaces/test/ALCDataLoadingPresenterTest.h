@@ -261,6 +261,12 @@ public:
                            QwtDataY(2, 0.038717, 1E-6))));
     m_view->requestLoading();
   }
+
+  void test_helpPage ()
+  {
+    EXPECT_CALL(*m_view, help()).Times(1);
+    m_view->help();
+  }
 };
 
 

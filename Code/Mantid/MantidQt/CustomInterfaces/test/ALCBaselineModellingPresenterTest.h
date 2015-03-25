@@ -340,6 +340,12 @@ public:
 
     m_view->requestFit();
   }
+
+  void test_helpPage ()
+  {
+    EXPECT_CALL(*m_view, help()).Times(1);
+    m_view->help();
+  }
 };
 
 
