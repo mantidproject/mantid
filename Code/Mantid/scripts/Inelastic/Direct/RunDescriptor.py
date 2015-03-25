@@ -455,7 +455,10 @@ class RunDescriptor(PropDescriptor):
             self._run_list.set_last_ind2sum(ind)
             self._run_number = run_num
             self._run_file_path = file_path
-            self._fext = main_fext
+            if fext is None:
+                self._fext = None
+            else:
+                self._fext = main_fext
             self._ws_name = self._build_ws_name()
 
     def run_number(self):

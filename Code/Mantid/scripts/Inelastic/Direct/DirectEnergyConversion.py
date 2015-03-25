@@ -342,7 +342,9 @@ class DirectEnergyConversion(object):
         # inform user on what parameters have changed from script or gui
         # if monovan present, check if abs_norm_ parameters are set
         self.prop_man.log_changed_values('notice')
-
+        # before trying to process new results, let's remove from memory old results
+        # if any present and they are not needed any more (user have not renamed them)
+        self._clear_old_results()
 
         start_time = time.time()
 
@@ -479,6 +481,7 @@ class DirectEnergyConversion(object):
             if out_ws_name:
                 if self._multirep_mode:
                     result.append(deltaE_ws_sample)
+                    self._old_runs_list.append(deltaE_ws_sample.name())
                 else:
                     results_name = deltaE_ws_sample.name()
                     if results_name != out_ws_name:
@@ -1268,10 +1271,14 @@ class DirectEnergyConversion(object):
         # workspace
         # processed
         object.__setattr__(self,'_multirep_mode',False)
+        # list of workspace names, processed earlier
+        object.__setattr__(self,'_old_runs_list',[])
+
 
         all_methods = dir(self)
         # define list of all existing properties, which have descriptors
         object.__setattr__(self,'_descriptors',extract_non_system_names(all_methods))
+
 
         if instr_name:
             self.initialise(instr_name,reload_instrument)
@@ -1512,7 +1519,7 @@ class DirectEnergyConversion(object):
 #-------------------------------------------------------------------------------
     def _get_wb_inegrals(self,run):
         """Obtain white bean vanadium integrals either by integrating
-           workspace in question or cashed value
+           workspace in question or using cashed value
         """
         run = self.get_run_descriptor(run)
         white_ws = run.get_workspace()
@@ -1575,7 +1582,15 @@ class DirectEnergyConversion(object):
         low,upp = self.wb_integr_range
         white_tag = 'NormBy:{0}_IntergatedIn:{1:0>10.2f}:{2:0>10.2f}'.format(self.normalise_method,low,upp)
         return white_tag
-
+    #
+    def _clear_old_results(self):
+        """Remove workspaces, processed earlier and not used any more"""
+        ws_list = self._old_runs_list
+        for ws_name in ws_list:
+            if ws_name in mtd:
+                DeleteWorkspace(ws_name)
+        object.__setattr__(self,'_old_runs_list',[])
+    #
 def get_failed_spectra_list_from_masks(masked_wksp,prop_man):
     """Compile a list of spectra numbers that are marked as
        masked in the masking workspace
