@@ -46,7 +46,7 @@ public:
     fit.setProperty("WorkspaceIndex",0);
     fit.setProperty("CreateOutput",true);
     fit.setProperty("MaxIterations",100000);
-    fit.setProperty("Minimizer", "FABADA,ChainLength=5000,ConvergenceCriteria = 0.1, OutputWorkspaceConverged=conv");
+    fit.setProperty("Minimizer", "FABADA,ChainLength=5000,StepsBetweenValues=10,ConvergenceCriteria = 0.1");
 
     TS_ASSERT_THROWS_NOTHING( fit.execute() );
 
@@ -59,40 +59,40 @@ public:
 
     size_t n = fun -> nParams();
 
-    TS_ASSERT( AnalysisDataService::Instance().doesExist("pdf") );
+    TS_ASSERT( AnalysisDataService::Instance().doesExist("PDF") );
     MatrixWorkspace_sptr wsPDF = boost::dynamic_pointer_cast<MatrixWorkspace>(
-      API::AnalysisDataService::Instance().retrieve("pdf"));
+      API::AnalysisDataService::Instance().retrieve("PDF"));
     TS_ASSERT(wsPDF);
     TS_ASSERT_EQUALS(wsPDF->getNumberHistograms(),n);
 
     const Mantid::MantidVec& X = wsPDF->dataX(0);
     const Mantid::MantidVec& Y = wsPDF->dataY(0);
-    TS_ASSERT_EQUALS(X.size(), 51);
-    TS_ASSERT_EQUALS(Y.size(), 50);
+    TS_ASSERT_EQUALS(X.size(), 21);
+    TS_ASSERT_EQUALS(Y.size(), 20);
 
-    TS_ASSERT( AnalysisDataService::Instance().doesExist("chi2") );
-    ITableWorkspace_sptr chi2table = boost::dynamic_pointer_cast<ITableWorkspace>(
-      API::AnalysisDataService::Instance().retrieve("chi2"));
+    TS_ASSERT( AnalysisDataService::Instance().doesExist("CostFunction") );
+    ITableWorkspace_sptr CostFunctionTable = boost::dynamic_pointer_cast<ITableWorkspace>(
+      API::AnalysisDataService::Instance().retrieve("CostFunction"));
 
-    TS_ASSERT(chi2table);
-    TS_ASSERT_EQUALS(chi2table->columnCount(), 4);
-    TS_ASSERT_EQUALS(chi2table->rowCount(), 1);
-    TS_ASSERT_EQUALS(chi2table->getColumn(0)->type(), "double");
-    TS_ASSERT_EQUALS(chi2table->getColumn(0)->name(), "Chi2min");
-    TS_ASSERT_EQUALS(chi2table->getColumn(1)->type(), "double");
-    TS_ASSERT_EQUALS(chi2table->getColumn(1)->name(), "Chi2MP");
-    TS_ASSERT_EQUALS(chi2table->getColumn(2)->type(), "double");
-    TS_ASSERT_EQUALS(chi2table->getColumn(2)->name(), "Chi2min_red");
-    TS_ASSERT_EQUALS(chi2table->getColumn(3)->type(), "double");
-    TS_ASSERT_EQUALS(chi2table->getColumn(3)->name(), "Chi2MP_red");
-    TS_ASSERT(chi2table->Double(0,0) <= chi2table->Double(0,1));
-    TS_ASSERT(chi2table->Double(0,2) <= chi2table->Double(0,3));
-    TS_ASSERT_DELTA(chi2table->Double(0,0), chi2table->Double(0,1), 1);
-    TS_ASSERT_DELTA(chi2table->Double(0,0), 0.0, 1.0);
+    TS_ASSERT(CostFunctionTable);
+    TS_ASSERT_EQUALS(CostFunctionTable->columnCount(), 4);
+    TS_ASSERT_EQUALS(CostFunctionTable->rowCount(), 1);
+    TS_ASSERT_EQUALS(CostFunctionTable->getColumn(0)->type(), "double");
+    TS_ASSERT_EQUALS(CostFunctionTable->getColumn(0)->name(), "Chi2min");
+    TS_ASSERT_EQUALS(CostFunctionTable->getColumn(1)->type(), "double");
+    TS_ASSERT_EQUALS(CostFunctionTable->getColumn(1)->name(), "Chi2MP");
+    TS_ASSERT_EQUALS(CostFunctionTable->getColumn(2)->type(), "double");
+    TS_ASSERT_EQUALS(CostFunctionTable->getColumn(2)->name(), "Chi2min_red");
+    TS_ASSERT_EQUALS(CostFunctionTable->getColumn(3)->type(), "double");
+    TS_ASSERT_EQUALS(CostFunctionTable->getColumn(3)->name(), "Chi2MP_red");
+    TS_ASSERT(CostFunctionTable->Double(0,0) <= CostFunctionTable->Double(0,1));
+    TS_ASSERT(CostFunctionTable->Double(0,2) <= CostFunctionTable->Double(0,3));
+    TS_ASSERT_DELTA(CostFunctionTable->Double(0,0), CostFunctionTable->Double(0,1), 1);
+    TS_ASSERT_DELTA(CostFunctionTable->Double(0,0), 0.0, 1.0);
 
-    TS_ASSERT( AnalysisDataService::Instance().doesExist("conv") );
+    TS_ASSERT( AnalysisDataService::Instance().doesExist("ConvergedChain") );
     MatrixWorkspace_sptr wsConv = boost::dynamic_pointer_cast<MatrixWorkspace>(
-      API::AnalysisDataService::Instance().retrieve("conv"));
+      API::AnalysisDataService::Instance().retrieve("ConvergedChain"));
     TS_ASSERT(wsConv);
     TS_ASSERT_EQUALS(wsConv->getNumberHistograms(),n+1);
 
@@ -107,28 +107,27 @@ public:
     TS_ASSERT_EQUALS(wsChain->getNumberHistograms(),n+1);
 
     const Mantid::MantidVec& Xchain = wsChain->dataX(0);
-    TS_ASSERT_EQUALS(Xchain.size(), 6881);
     TS_ASSERT_EQUALS(Xchain[5000], 5000);
 
     TS_ASSERT(Xconv.size() < Xchain.size());
 
-    TS_ASSERT( AnalysisDataService::Instance().doesExist("pdfE") );
-    ITableWorkspace_sptr Etable = boost::dynamic_pointer_cast<ITableWorkspace>(
-      API::AnalysisDataService::Instance().retrieve("pdfE"));
+    TS_ASSERT( AnalysisDataService::Instance().doesExist("Parameters") );
+    ITableWorkspace_sptr Ptable = boost::dynamic_pointer_cast<ITableWorkspace>(
+      API::AnalysisDataService::Instance().retrieve("Parameters"));
 
-    TS_ASSERT(Etable);
-    TS_ASSERT_EQUALS(Etable->columnCount(), 4);
-    TS_ASSERT_EQUALS(Etable->rowCount(), n);
-    TS_ASSERT_EQUALS(Etable->getColumn(0)->type(), "str");
-    TS_ASSERT_EQUALS(Etable->getColumn(0)->name(), "Name");
-    TS_ASSERT_EQUALS(Etable->getColumn(1)->type(), "double");
-    TS_ASSERT_EQUALS(Etable->getColumn(1)->name(), "Value");
-    TS_ASSERT_EQUALS(Etable->getColumn(2)->type(), "double");
-    TS_ASSERT_EQUALS(Etable->getColumn(2)->name(), "Left's error");
-    TS_ASSERT_EQUALS(Etable->getColumn(3)->type(), "double");
-    TS_ASSERT_EQUALS(Etable->getColumn(3)->name(), "Rigth's error");
-    TS_ASSERT(Etable->Double(0,1) == fun->getParameter("Height"));
-    TS_ASSERT(Etable->Double(1,1) == fun->getParameter("Lifetime"));
+    TS_ASSERT(Ptable);
+    TS_ASSERT_EQUALS(Ptable->columnCount(), 4);
+    TS_ASSERT_EQUALS(Ptable->rowCount(), n);
+    TS_ASSERT_EQUALS(Ptable->getColumn(0)->type(), "str");
+    TS_ASSERT_EQUALS(Ptable->getColumn(0)->name(), "Name");
+    TS_ASSERT_EQUALS(Ptable->getColumn(1)->type(), "double");
+    TS_ASSERT_EQUALS(Ptable->getColumn(1)->name(), "Value");
+    TS_ASSERT_EQUALS(Ptable->getColumn(2)->type(), "double");
+    TS_ASSERT_EQUALS(Ptable->getColumn(2)->name(), "Left's error");
+    TS_ASSERT_EQUALS(Ptable->getColumn(3)->type(), "double");
+    TS_ASSERT_EQUALS(Ptable->getColumn(3)->name(), "Rigth's error");
+    TS_ASSERT(Ptable->Double(0,1) == fun->getParameter("Height"));
+    TS_ASSERT(Ptable->Double(1,1) == fun->getParameter("Lifetime"));
 
   }
 
@@ -150,7 +149,7 @@ public:
     fit.setProperty("WorkspaceIndex",0);
     fit.setProperty("CreateOutput",true);
     fit.setProperty("MaxIterations",10);
-    fit.setProperty("Minimizer", "FABADA,ChainLength=5000,ConvergenceCriteria = 0.01, OutputWorkspaceConverged=conv");
+    fit.setProperty("Minimizer", "FABADA,ChainLength=5000,StepsBetweenValues=10,ConvergenceCriteria = 0.01");
 
     TS_ASSERT_THROWS( fit.execute(), std::runtime_error );
 
