@@ -162,7 +162,7 @@ class PoldiCreatePeaksFromFile(PythonAlgorithm):
 
         self.declareProperty("LatticeSpacingMax", 0.0,
                              direction=Direction.Input,
-                             doc="Lowest allowed lattice spacing.")
+                             doc="Largest allowed lattice spacing.")
 
         self.declareProperty(
             WorkspaceProperty(name="OutputWorkspace",

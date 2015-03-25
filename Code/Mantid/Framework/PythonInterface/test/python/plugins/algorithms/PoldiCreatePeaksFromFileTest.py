@@ -1,15 +1,11 @@
+# pylint: disable=no-init,invalid-name,too-many-public-methods
 import unittest
 from testhelpers import assertRaisesNothing
 from testhelpers.tempfile_wrapper import TemporaryFileHelper
 
-from tempfile import NamedTemporaryFile
-
 from mantid.kernel import *
 from mantid.api import *
 from mantid.simpleapi import *
-
-import os
-
 
 class PoldiCreatePeaksFromFileTest(unittest.TestCase):
     testname = None
@@ -51,6 +47,7 @@ class PoldiCreatePeaksFromFileTest(unittest.TestCase):
                                                     Si 0 0 0 0.9 0.05
                                                     C 0 0 0 0.1 0.05
                                                 }
+                                                # Comment
                                             }""")
         ws = PoldiCreatePeaksFromFile(fileHelper.getName(), 0.7, 10.0)
 
