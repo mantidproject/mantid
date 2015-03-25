@@ -22,12 +22,12 @@ class PoldiLoadCrystalDataTest(unittest.TestCase):
 
     def test_FileOneCompoundOneAtom(self):
         fileHelper = TemporaryFileHelper("""Silicon {
-    Lattice: 5.43 5.43 5.43 90.0 90.0 90.0
-    Spacegroup: F d -3 m
-    Atoms: {
-        Si 0 0 0 1.0 0.05
-    }
-}""")
+                                                Lattice: 5.43 5.43 5.43 90.0 90.0 90.0
+                                                Spacegroup: F d -3 m
+                                                Atoms: {
+                                                    Si 0 0 0 1.0 0.05
+                                                }
+                                            }""")
         ws = PoldiLoadCrystalData(fileHelper.getName(), 0.7, 10.0)
 
         # Check output GroupWorkspace
@@ -41,6 +41,54 @@ class PoldiLoadCrystalDataTest(unittest.TestCase):
 
         # Clean up
         self._cleanWorkspaces([ws, ws_expected])
+
+    def test_FileOneCompoundTwoAtoms(self):
+        # It's the same structure and the same reflections, just the structure factors are different
+        fileHelper = TemporaryFileHelper("""SiliconCarbon {
+                                                Lattice: 5.43 5.43 5.43 90.0 90.0 90.0
+                                                Spacegroup: F d -3 m
+                                                Atoms: {
+                                                    Si 0 0 0 0.9 0.05
+                                                    C 0 0 0 0.1 0.05
+                                                }
+                                            }""")
+        ws = PoldiLoadCrystalData(fileHelper.getName(), 0.7, 10.0)
+
+        self.assertEquals(ws.getNumberOfEntries(), 1)
+        self.assertTrue(ws.contains("SiliconCarbon"))
+
+        ws_expected = PoldiCreatePeaksFromCell("F d -3 m", "Si 0 0 0 0.9 0.05; C 0 0 0 0.1 0.05", a=5.43,
+                                               LatticeSpacingMin=0.7)
+        si_ws = AnalysisDataService.retrieve("SiliconCarbon")
+        self._tablesAreEqual(si_ws, ws_expected)
+
+        # Clean up
+        self._cleanWorkspaces([ws, ws_expected])
+
+    def test_FileTwoCompounds(self):
+        # It's the same structure and the same reflections, just the structure factors are different
+        fileHelper = TemporaryFileHelper("""SiliconCarbon {
+                                                Lattice: 5.43 5.43 5.43 90.0 90.0 90.0
+                                                Spacegroup: F d -3 m
+                                                Atoms: {
+                                                    Si 0 0 0 0.9 0.05
+                                                    C 0 0 0 0.1 0.05
+                                                }
+                                            }
+                                            Silicon {
+                                                Lattice: 5.43 5.43 5.43 90.0 90.0 90.0
+                                                Spacegroup: F d -3 m
+                                                Atoms: {
+                                                    Si 0 0 0 1.0 0.05
+                                                }
+                                            }""")
+        ws = PoldiLoadCrystalData(fileHelper.getName(), 0.7, 10.0)
+
+        self.assertEquals(ws.getNumberOfEntries(), 2)
+        self.assertTrue(ws.contains("SiliconCarbon"))
+        self.assertTrue(ws.contains("Silicon"))
+
+        self._cleanWorkspaces([ws])
 
     def test_FileFaultyLatticeStrings(self):
         fhLatticeMissing = TemporaryFileHelper("""Silicon {
@@ -89,6 +137,28 @@ class PoldiLoadCrystalDataTest(unittest.TestCase):
 
         self.assertRaises(RuntimeError, PoldiLoadCrystalData, *(fhSgMissing.getName(), 0.7, 10.0, 'ws'))
         self.assertRaises(RuntimeError, PoldiLoadCrystalData, *(fhSgInvalid.getName(), 0.7, 10.0, 'ws'))
+
+    def test_FileFaultyAtomStrings(self):
+        fhAtomsMissing = TemporaryFileHelper("""Silicon {
+                                                Lattice: 5.43 5.43 5.43 90.0 90.0 90.0
+                                                Spacegroup: F d -3 m
+                                             }""")
+
+        fhAtomsNoBraces = TemporaryFileHelper("""Silicon {
+                                                    Lattice: 5.43 5.43 5.43 90.0 90.0 90.0
+                                                    Spacegroup: invalid
+                                                    Atoms:
+                                                        Sis 0 0 0 1.0 0.05
+                                                  }""")
+        fhAtomsEmpty = TemporaryFileHelper("""Silicon {
+                                                    Lattice: 5.43 5.43 5.43 90.0 90.0 90.0
+                                                    Spacegroup: invalid
+                                                    Atoms: { }
+                                                  }""")
+
+        self.assertRaises(RuntimeError, PoldiLoadCrystalData, *(fhAtomsMissing.getName(), 0.7, 10.0, 'ws'))
+        self.assertRaises(RuntimeError, PoldiLoadCrystalData, *(fhAtomsNoBraces.getName(), 0.7, 10.0, 'ws'))
+        self.assertRaises(RuntimeError, PoldiLoadCrystalData, *(fhAtomsEmpty.getName(), 0.7, 10.0, 'ws'))
 
 
     def _tablesAreEqual(self, lhs, rhs):

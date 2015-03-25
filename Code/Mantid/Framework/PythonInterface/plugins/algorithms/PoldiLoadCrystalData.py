@@ -48,7 +48,8 @@ def raiseParseErrorException(message):
 
 
 class PoldiCrystalFileParser(object):
-    elementSymbol = Word(alphas, exact=2)
+    elementSymbol = Word(alphas, min=1, max=2).setFailAction(
+        lambda o, s, loc, token: raiseParseErrorException("Element symbol must be one or two characters."))
     integerNumber = Word(nums)
     decimalSeparator = Literal('.')
     floatNumber = Combine(
@@ -79,7 +80,8 @@ class PoldiCrystalFileParser(object):
         alphanums + "-" + ' '))
 
     compoundContent = Each([atomsGroup, unitCell, spaceGroup]).setFailAction(
-        lambda o, s, loc, token: raiseParseErrorException("Missing one of 'Lattice', 'SpaceGroup', 'Atoms'."))
+        lambda o, s, loc, token: raiseParseErrorException(
+            "One of 'Lattice', 'SpaceGroup', 'Atoms' is missing or contains errors."))
 
     compoundName = Word(alphanums + '_')
 
@@ -88,7 +90,7 @@ class PoldiCrystalFileParser(object):
 
     comment = Suppress(Literal('#') + restOfLine)
 
-    compounds = OneOrMore(compound).ignore(comment)
+    compounds = OneOrMore(compound).ignore(comment) + stringEnd
 
     def __call__(self, contentString):
         parsedContent = None
@@ -153,9 +155,14 @@ class PoldiLoadCrystalData(PythonAlgorithm):
             workspaces = []
 
             for compound in compounds:
-                workspaces.append(self._createPeaksFromCell(compound, dMin, dMax))
+                if compound.getName() in workspaces:
+                    self.log().warning("A compound with the name '" + compound.getName() + \
+                                       "' has already been created. Please check the file '" + crystalFileName + "'")
+                else:
+                    workspaces.append(self._createPeaksFromCell(compound, dMin, dMax))
 
             self.setProperty("OutputWorkspace", GroupWorkspaces(workspaces))
+
         except ParseException as error:
             errorString = "Could not parse input file '" + crystalFileName + "'.\n"
             errorString += "The parser reported the following error:\n\t" + str(error)
