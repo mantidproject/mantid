@@ -195,6 +195,10 @@ void PlotAsymmetryByLogValue::exec() {
 
     Workspace_sptr loadedWs, loadedDt, loadedDg;
     doLoad( i, loadedWs, loadedDt, loadedDg );
+
+    loadedWorkspace.push_back(loadedWs);
+    loadedDeadTimeTable.push_back(loadedDt);
+    loadedDetGroupingTable.push_back(loadedDg);
   }
 
   PARALLEL_FOR_NO_WSP_CHECK()
