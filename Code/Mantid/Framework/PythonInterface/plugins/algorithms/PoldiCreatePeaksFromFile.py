@@ -116,7 +116,7 @@ class PoldiCrystalFileParser(object):
 
     comment = Suppress(Literal('#') + restOfLine)
 
-    compounds = OneOrMore(compound).ignore(comment) + stringEnd
+    compounds = Optional(comment) + OneOrMore(compound).ignore(comment) + stringEnd
 
     def __call__(self, contentString):
         parsedContent = None
