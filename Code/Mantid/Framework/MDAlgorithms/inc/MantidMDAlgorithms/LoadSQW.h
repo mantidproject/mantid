@@ -51,9 +51,10 @@ struct dataPositions {
   /// Default Constructor
   dataPositions()
       : if_sqw_start(18), n_dims_start(22), sqw_header_start(26),
-        detectors_start(0), data_start(0), geom_start(0),
-        s_start(0), // the following values have to be identified from the file
-                    // itself
+        component_headers_starts(), detectors_start(0), data_start(0),
+        geom_start(0), npax_start(0), s_start(0),
+        // the following values have to be identified from the file
+        // itself
         err_start(0), n_cell_pix_start(0), min_max_start(0), pix_start(0),
         mdImageSize(0){}; // the following values have to be identified from the
                           // file itself

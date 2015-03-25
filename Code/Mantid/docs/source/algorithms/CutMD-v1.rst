@@ -22,7 +22,6 @@ Usage
 .. testcode:: Example4D
 
    from mantid.api import Projection
-   from mantid.kernel import VMD
 
    to_cut = CreateMDWorkspace(Dimensions=4, Extents=[-1,1,-1,1,-1,1,-10,10], Names="H,K,L,E", Units="U,U,U,V")
    # Add two fake peaks so that we can see the effect of the basis transformation
@@ -36,9 +35,10 @@ Usage
 
    #Since we only specify u and v, w is automatically calculated to be the cross product of u and v
    projection = Projection([1,1,0], [-1,1,0])
+   proj_ws = projection.createWorkspace()
    
-   # Apply the cut
-   out_md = CutMD(to_cut, Projection=projection.toWorkspace(), P1Bin=[0.1], P2Bin=[0.1], P3Bin=[0.1], P4Bin=[-5,5], NoPix=True)
+   # Apply the cut (PBins property sets the P1Bin, P2Bin, etc. properties for you)
+   out_md = CutMD(to_cut, Projection=proj_ws, PBins=([0.1], [0.1], [0.1], [-5,5]), NoPix=True)
    print 'number of dimensions', out_md.getNumDims()
    print 'number of dimensions not integrated', len(out_md.getNonIntegratedDimensions())
    dim_dE = out_md.getDimension(3)

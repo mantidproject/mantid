@@ -7,6 +7,8 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/python/class.hpp>
 #include <boost/python/copy_non_const_reference.hpp>
+#include <boost/python/exec.hpp>
+#include <boost/python/import.hpp>
 #include <boost/python/make_constructor.hpp>
 
 using namespace Mantid::API;
@@ -16,19 +18,6 @@ using namespace boost::python;
 GCC_DIAG_OFF(strict-aliasing)
 
 namespace {
-std::string indexToName(size_t i) {
-  switch (i) {
-  case 0:
-    return "u";
-  case 1:
-    return "v";
-  case 2:
-    return "w";
-  default:
-    return "d" + boost::lexical_cast<std::string>(i);
-  }
-}
-
 std::string getUnit(Projection &p, size_t nd) {
   return (p.getUnit(nd) == RLU ? "r" : "a");
 }
@@ -42,20 +31,46 @@ void setUnit(Projection &p, size_t nd, std::string unit) {
     throw std::runtime_error("Invalid unit");
 }
 
-ITableWorkspace_sptr toWorkspace(Projection &p) {
-  ITableWorkspace_sptr ws = WorkspaceFactory::Instance().createTable();
-  auto colName = ws->addColumn("str", "name");
-  auto colValue = ws->addColumn("str", "value");
-  auto colType = ws->addColumn("str", "type");
-  auto colOffset = ws->addColumn("double", "offset");
+//This is a bit strange, but it works. The users want x = proj.createWorkspace()
+//to behave like the simpleapi, i.e. put a workspace named 'x' into the ADS for
+//them. To do that kind of black magic we have to introspect from the Python
+//side, so that's what we do.
+object createWorkspace() {
+  //Create a namespace for us to add a function to
+  object main = import("__main__");
+  object global(main.attr("__dict__"));
+  //Add a function to the namespace
+  object result = exec(
+   "def createWorkspace(proj, OutputWorkspace=None):\n"
+   "  '''Create a TableWorkspace using this projection'''\n"
+   "  import inspect\n"
+   "  from mantid import api, kernel\n"
+   "  ws = api.WorkspaceFactory.createTable('TableWorkspace')\n"
+   "  ws.addColumn('str', 'name')\n"
+   "  ws.addColumn('str', 'value')\n"
+   "  ws.addColumn('str', 'type')\n"
+   "  ws.addColumn('double', 'offset')\n"
+   "  for (name, i) in zip('uvw', range(3)):\n"
+   "    ws.addRow({\n"
+   "              'name': name,\n"
+   "              'value': str(proj.getAxis(i)).lstrip('[').rstrip(']'),\n"
+   "              'type': proj.getType(i),\n"
+   "              'offset': proj.getOffset(i)\n"
+   "              })\n"
 
-  for (size_t i = 0; i < 3; ++i) {
-    TableRow row = ws->appendRow();
-    row << indexToName(i) << p.getAxis(i).toString() << getUnit(p, i)
-        << p.getOffset(i);
-  }
+   "  if OutputWorkspace is None:\n"
+   "    lhs = kernel.funcreturns.process_frame(inspect.currentframe().f_back)\n"
+   "    if lhs[0] > 0:\n"
+   "      OutputWorkspace = lhs[1][0]\n"
 
-  return ws;
+   "  if OutputWorkspace:\n"
+   "    mtd[OutputWorkspace] = ws\n"
+
+   "  return ws\n"
+   "\n", global, global);
+  //extract the function object from the namespace and return it so it can be
+  //bound by Boost::Python.
+  return global["createWorkspace"];
 }
 
 void projSetAxis(Projection &self, size_t nd, const object& data) {
@@ -210,8 +225,8 @@ void export_Projection()
     )
   )
   .def(
-    "toWorkspace",
-    toWorkspace,
+    "createWorkspace",
+    createWorkspace(),
     "Create a TableWorkspace representing the projection"
   )
   ;

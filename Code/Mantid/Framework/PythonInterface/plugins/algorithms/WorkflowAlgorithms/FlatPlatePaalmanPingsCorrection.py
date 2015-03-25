@@ -1,9 +1,9 @@
 #pylint: disable=no-init,invalid-name
 from mantid.simpleapi import *
 from mantid.api import PythonAlgorithm, AlgorithmFactory, PropertyMode, MatrixWorkspaceProperty, \
-                       WorkspaceGroupProperty
+                       WorkspaceGroupProperty, InstrumentValidator, WorkspaceUnitValidator
 from mantid.kernel import StringListValidator, StringMandatoryValidator, IntBoundedValidator, \
-                          FloatBoundedValidator, Direction, logger
+                          FloatBoundedValidator, Direction, logger, CompositeValidator
 import math, numpy as np
 
 
@@ -20,7 +20,6 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
     _can_number_density = None
     _can_front_thickness = None
     _can_back_thickness = None
-    _can_scale = 1.0
     _number_wavelengths = 10
     _emode = None
     _efixed = 0.0
@@ -39,8 +38,11 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
 
 
     def PyInit(self):
+        ws_validator = CompositeValidator([WorkspaceUnitValidator('Wavelength'), InstrumentValidator()])
+
         self.declareProperty(MatrixWorkspaceProperty('SampleWorkspace', '',
-                             direction=Direction.Input),
+                             direction=Direction.Input,
+                             validator=ws_validator),
                              doc='Name for the input sample workspace')
 
         self.declareProperty(name='SampleChemicalFormula', defaultValue='',
@@ -57,7 +59,8 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
 
         self.declareProperty(MatrixWorkspaceProperty('CanWorkspace', '',
                              direction=Direction.Input,
-                             optional=PropertyMode.Optional),
+                             optional=PropertyMode.Optional,
+                             validator=ws_validator),
                              doc="Name for the input container workspace")
 
         self.declareProperty(name='CanChemicalFormula', defaultValue='',
@@ -73,12 +76,12 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
                              validator=FloatBoundedValidator(0.0),
                              doc='Container back thickness in cm')
 
-        self.declareProperty(name='CanScaleFactor', defaultValue=1.0,
-                             doc='Scale factor to multiply can data')
-
         self.declareProperty(name='NumberWavelengths', defaultValue=10,
                              validator=IntBoundedValidator(1),
                              doc='Number of wavelengths for calculation')
+        self.declareProperty(name='Interpolate', defaultValue=True,
+                             doc='Interpolate the correction workspaces to match the sample workspace')
+
         self.declareProperty(name='Emode', defaultValue='Elastic',
                              validator=StringListValidator(['Elastic', 'Indirect']),
                              doc='Emode: Elastic or Indirect')
@@ -174,6 +177,14 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
             self._add_sample_logs(acc_ws, sample_logs)
             AddSampleLog(Workspace=acc_ws, LogName='can_filename', LogType='String', LogText=str(self._can_ws_name))
 
+        if self._interpolate:
+            self._interpolate_corrections(workspaces)
+
+        try:
+            self. _copy_detector_table(workspaces)
+        except RuntimeError:
+            logger.warning('Cannot copy spectra mapping. Check input workspace instrument.')
+
         GroupWorkspaces(InputWorkspaces=','.join(workspaces), OutputWorkspace=self._output_ws_name)
         self.setPropertyValue('OutputWorkspace', self._output_ws_name)
 
@@ -192,11 +203,13 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
         self._can_number_density = self.getProperty('CanNumberDensity').value
         self._can_front_thickness = self.getProperty('CanFrontThickness').value
         self._can_back_thickness = self.getProperty('CanBackThickness').value
-        self._can_scale = self.getProperty('CanScaleFactor').value
 
         self._number_wavelengths = self.getProperty('NumberWavelengths').value
+        self._interpolate = self.getProperty('Interpolate').value
+
         self._emode = self.getPropertyValue('Emode')
         self._efixed = self.getProperty('Efixed').value
+
         self._output_ws_name = self.getPropertyValue('OutputWorkspace')
 
 
@@ -232,6 +245,39 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
 
         logger.information('Elastic lambda %f' % self._elastic)
         DeleteWorkspace(wave_range)
+
+
+    def _interpolate_corrections(self, workspaces):
+        """
+        Performs interpolation on the correction workspaces such that the number of bins
+        matches that of the input sample workspace.
+
+        @param workspaces List of correction workspaces to interpolate
+        """
+
+        for ws in workspaces:
+            SplineInterpolation(WorkspaceToMatch=self._sample_ws_name,
+                                WorkspaceToInterpolate=ws,
+                                OutputWorkspace=ws,
+                                OutputWorkspaceDeriv='')
+
+
+    def _copy_detector_table(self, workspaces):
+        """
+        Copy the detector table from the sample workspaces to the correction workspaces.
+
+        @param workspaces List of correction workspaces
+        """
+
+        instrument = mtd[self._sample_ws_name].getInstrument().getName()
+
+        for ws in workspaces:
+            LoadInstrument(Workspace=ws,
+                           InstrumentName=instrument)
+
+            CopyDetectorMapping(WorkspaceToMatch=self._sample_ws_name,
+                                WorkspaceToRemap=ws,
+                                IndexBySpectrumNumber=True)
 
 
     def _add_sample_logs(self, ws, sample_logs):

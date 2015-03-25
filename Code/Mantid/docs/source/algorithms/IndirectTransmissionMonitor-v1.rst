@@ -9,11 +9,15 @@
 Description
 -----------
 
-Calculates the sample transmission using the raw data files of the sample and its background or container.
+Calculates the sample transmission using the raw data files of the sample and
+its background or container by dividing the monitor spectrum of the sample
+workspace by that of the container.
 
-For more details, see `Indirect:Transmission <http://www.mantidproject.org/Indirect:Transmission>`_.
+If the instrument has both incident and transmission monitors then the incident
+monitor is first divided by the transmission monitor.
 
-Output workspace will default to [instument][run number]_[analyser][reflection]_Transmission if not set.
+It is assumed that the name of the incident monitor is *monitor2* and the name
+of the transmission monitor is *monitor1*.
 
 Usage
 -----
@@ -22,20 +26,17 @@ Usage
 
 .. testcode:: exIRISTransmission
 
-   sample_file = 'IRS26176.RAW'
-   can_file = 'IRS26173.RAW'
-
-   sample_ws = Load(sample_file)
-   can_ws = Load(can_file)
+   sample_ws = Load('IRS26176.raw')
+   can_ws = Load('IRS26173.raw')
 
    transmission_ws = IndirectTransmissionMonitor(SampleWorkspace=sample_ws, CanWorkspace=can_ws)
 
-   print transmission_ws.getNames()
+   print ', '.join(transmission_ws.getNames())
 
 **Output:**
 
 .. testoutput:: exIRISTransmission
 
-   ['sample_ws_Sam','sample_ws_Can','sample_ws_Trans']
+   sample_ws_Sam, sample_ws_Can, sample_ws_Trans
 
 .. categories::

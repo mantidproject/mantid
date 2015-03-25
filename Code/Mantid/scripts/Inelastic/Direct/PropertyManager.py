@@ -538,8 +538,11 @@ class PropertyManager(NonIDF_Properties):
             if not ok:
                 file_errors[prop_name]=file
 
-        if self.sum_runs :
+        if self.sum_runs:
+            missing=[]; found=[]
             ok,missing,found=self.find_files_to_sum()
+            #Presence of Cashe sum ws assumes that you sum files to workspace as they appear
+            # This mean, that we should not expect all files to be there at the begining
             if not ok and not self.cashe_sum_ws:
                 file_errors['missing_runs_toSum']=str(missing)
 

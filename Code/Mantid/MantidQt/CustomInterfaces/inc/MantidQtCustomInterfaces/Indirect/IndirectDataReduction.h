@@ -122,7 +122,6 @@ namespace MantidQt
        * THis method is used to ensure that the tabs are always loaded and their
        * layouts setup for the sake of screenshoting them for documentation.
        *
-       * @param T Tab type, must be subclass of IndirectDataReductionTab
        * @param name Name to be displayed on tab
        */
       template <typename T>

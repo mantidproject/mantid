@@ -76,7 +76,7 @@ void qListFromEventWS(Integrate3DEvents &integrator, Progress &prog,
     double errorSq(1.); // ignorable garbage
     const std::vector<WeightedEventNoTime> &raw_events =
         events.getWeightedEventsNoTime();
-    std::vector<Mantid::Kernel::V3D> qList;
+    std::vector<std::pair<double, V3D> > qList;
     for (auto event = raw_events.begin(); event != raw_events.end(); ++event) {
       double val = unitConverter.convertUnits(event->tof());
       qConverter->calcMatrixCoord(val, locCoord, signal, errorSq);
@@ -84,7 +84,7 @@ void qListFromEventWS(Integrate3DEvents &integrator, Progress &prog,
         buffer[dim] = locCoord[dim];
       }
       V3D qVec(buffer[0], buffer[1], buffer[2]);
-      qList.push_back(qVec);
+      qList.push_back(std::make_pair(event->m_weight, qVec));
     } // end of loop over events in list
 
     integrator.addEvents(qList);
@@ -125,7 +125,7 @@ void qListFromHistoWS(Integrate3DEvents &integrator, Progress &prog,
     double signal(1.);  // ignorable garbage
     double errorSq(1.); // ignorable garbage
 
-    std::vector<V3D> qList;
+    std::vector<std::pair<double, V3D> > qList;
 
     // TODO. we should be able to do this in an OMP loop.
     for (size_t j = 0; j < yVals.size(); ++j) {
@@ -149,10 +149,8 @@ void qListFromHistoWS(Integrate3DEvents &integrator, Progress &prog,
         V3D qVec(buffer[0], buffer[1], buffer[2]);
         int yValCounts = int(yVal); // we deliberately truncate.
         // Account for counts in histograms by increasing the qList with the
-        // same q-poin
-        for (int k = 0; k < yValCounts; ++k) {
-          qList.push_back(qVec); // Not ideal to control the size dynamically?
-        }
+        // same q-point
+          qList.push_back(std::make_pair(yValCounts,qVec)); // Not ideal to control the size dynamically?
       }
       integrator.addEvents(qList); // We would have to put a lock around this.
       prog.report();
@@ -299,6 +297,7 @@ void IntegrateEllipsoids::exec() {
   size_t n_peaks = peak_ws->getNumberPeaks();
   size_t indexed_count = 0;
   std::vector<V3D> peak_q_list;
+  std::vector<std::pair<double, V3D> > qList;
   std::vector<V3D> hkl_vectors;
   for (size_t i = 0; i < n_peaks; i++) // Note: we skip un-indexed peaks
   {
@@ -307,6 +306,7 @@ void IntegrateEllipsoids::exec() {
                                                        // just check for (0,0,0)
     {
       peak_q_list.push_back(V3D(peaks[i].getQLabFrame()));
+      qList.push_back(std::make_pair(1., V3D(peaks[i].getQLabFrame())));
       V3D miller_ind((double)boost::math::iround<double>(hkl[0]),
                      (double)boost::math::iround<double>(hkl[1]),
                      (double)boost::math::iround<double>(hkl[2]));
@@ -345,7 +345,7 @@ void IntegrateEllipsoids::exec() {
   }
 
   // make the integrator
-  Integrate3DEvents integrator(peak_q_list, UBinv, radius);
+  Integrate3DEvents integrator(qList, UBinv, radius);
 
   // get the events and add
   // them to the inegrator
@@ -365,9 +365,6 @@ void IntegrateEllipsoids::exec() {
   const size_t numSpectra = wksp->getNumberHistograms();
   Progress prog(this, 0.5, 1.0, numSpectra);
 
-  // loop through the eventlists
-  std::vector<double> buffer(DIMS);
-
   if (eventWS) {
     // process as EventWorkspace
     qListFromEventWS(integrator, prog, eventWS, unitConv, qConverter);
@@ -379,10 +376,11 @@ void IntegrateEllipsoids::exec() {
   double inti;
   double sigi;
   std::vector<double> principalaxis1,principalaxis2,principalaxis3;
+  V3D peak_q;
   for (size_t i = 0; i < n_peaks; i++) {
     V3D hkl(peaks[i].getH(), peaks[i].getK(), peaks[i].getL());
     if (Geometry::IndexingUtils::ValidIndex(hkl, 1.0)) {
-      V3D peak_q(peaks[i].getQLabFrame());
+      peak_q = peaks[i].getQLabFrame();
       std::vector<double> axes_radii;
       Mantid::Geometry::PeakShape_const_sptr shape =
           integrator.ellipseIntegrateEvents(
@@ -451,10 +449,11 @@ void IntegrateEllipsoids::exec() {
       back_inner_radius = peak_radius;
       back_outer_radius = peak_radius * 1.25992105; // A factor of 2 ^ (1/3) will make the background
       // shell volume equal to the peak region volume.
+      V3D peak_q;
       for (size_t i = 0; i < n_peaks; i++) {
         V3D hkl(peaks[i].getH(), peaks[i].getK(), peaks[i].getL());
         if (Geometry::IndexingUtils::ValidIndex(hkl, 1.0)) {
-          V3D peak_q(peaks[i].getQLabFrame());
+          peak_q = peaks[i].getQLabFrame();
           std::vector<double> axes_radii;
           integrator.ellipseIntegrateEvents(peak_q, specify_size, peak_radius,
                                             back_inner_radius, back_outer_radius,
