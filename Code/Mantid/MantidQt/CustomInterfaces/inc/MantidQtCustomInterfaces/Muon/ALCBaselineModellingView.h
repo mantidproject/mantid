@@ -67,6 +67,7 @@ namespace CustomInterfaces
     void deleteSectionSelector(int index);
     void updateSectionSelector(int index, SectionSelector values);
     void displayError(const QString& message);
+    void help();
   // -- End of IALCBaselineModellingView interface -------------------------------------------------
 
   private slots:

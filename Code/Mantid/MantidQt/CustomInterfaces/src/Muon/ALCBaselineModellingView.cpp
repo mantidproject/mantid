@@ -6,9 +6,11 @@
 
 #include <boost/scoped_array.hpp>
 
+#include <QDesktopServices>
 #include <QMessageBox>
 #include <QMenu>
 #include <QSignalMapper>
+#include <QUrl>
 
 #include <qwt_symbol.h>
 
@@ -63,6 +65,8 @@ namespace CustomInterfaces
     connect(m_ui.sections, SIGNAL(cellChanged(int,int)), SIGNAL(sectionRowModified(int)));
 
     connect(m_selectorModifiedMapper, SIGNAL(mapped(int)), SIGNAL(sectionSelectorModified(int)));
+
+    connect(m_ui.help, SIGNAL(clicked()), this, SLOT(help()));
   }
 
   QString ALCBaselineModellingView::function() const
@@ -199,6 +203,11 @@ namespace CustomInterfaces
 
     selector->setMinimum(values.first);
     selector->setMaximum(values.second);
+  }
+
+  void ALCBaselineModellingView::help() {
+    QDesktopServices::openUrl(QUrl(QString("http://www.mantidproject.org/") +
+            "Muon_ALC:_Baseline_Modelling"));
   }
 
 } // namespace CustomInterfaces

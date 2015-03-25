@@ -70,6 +70,7 @@ namespace CustomInterfaces
     void setAvailablePeriods(const std::vector<std::string> &periods);
     void setWaitingCursor();
     void restoreCursor();
+    void help();
 
     // -- End of IALCDataLoadingView interface -----------------------------------------------------
 
