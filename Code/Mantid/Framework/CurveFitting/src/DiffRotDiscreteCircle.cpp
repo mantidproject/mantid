@@ -54,6 +54,7 @@ InelasticDiffRotDiscreteCircle::InelasticDiffRotDiscreteCircle()
   declareParameter("Decay", 1.0, "Inverse of transition rate, in nanoseconds "
                                  "if energy in micro-ev, or picoseconds if "
                                  "energy in mili-eV");
+  declareParameter("Shift", 0.0, "Shift in domain");
 
   declareAttribute("Q", API::IFunction::Attribute(0.5));
   declareAttribute("N", API::IFunction::Attribute(3));
@@ -82,6 +83,7 @@ void InelasticDiffRotDiscreteCircle::function1D(double *out,
   const double rate = m_hbar / getParameter("Decay"); // micro-eV or mili-eV
   const double Q = getAttribute("Q").asDouble();
   const int N = getAttribute("N").asInt();
+  const double S = getParameter("Shift");
 
   std::vector<double> sph(N);
   for (int k = 1; k < N; k++) {
@@ -97,7 +99,7 @@ void InelasticDiffRotDiscreteCircle::function1D(double *out,
   }
 
   for (size_t i = 0; i < nData; i++) {
-    double w = xValues[i];
+    double w = xValues[i] - S;
     double S = 0.0;
     for (int l = 1; l < N; l++) // l goes up to N-1
     {
@@ -166,6 +168,7 @@ void DiffRotDiscreteCircle::init() {
   setAlias("f1.Intensity", "Intensity");
   setAlias("f1.Radius", "Radius");
   setAlias("f1.Decay", "Decay");
+  setAlias("f1.Shift", "Shift");
 
   // Set the ties between Elastic and Inelastic parameters
   addDefaultTies("f0.Height=f1.Intensity,f0.Radius=f1.Radius");
