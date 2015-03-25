@@ -87,7 +87,10 @@ Background Removal
 
 Plot Time
   Creates a time of flight plot of the grouping of the spectra in the range
-  defined in the Plot Time section.
+  defined in the Plot Time section, to include a single spectrum set the Spectra
+  Min and Spectra Max selectors to the same value. Note that this first rebins
+  the sample input to ensure that each detector spectrum has the same binning in
+  order to be grouped into a single spectrum.
 
 Detailed Balance
   Gives the option to perform an exponential correction on the data once it has
