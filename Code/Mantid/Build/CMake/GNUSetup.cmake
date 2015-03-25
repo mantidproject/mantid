@@ -26,7 +26,7 @@ set( GNUFLAGS "${GNUFLAGS} -Wno-deprecated -Wno-write-strings")
 # Check if we have a new enough version for this flag
 # some -pedantic warnings remain with gcc 4.4.7
 if ( CMAKE_COMPILER_IS_GNUCXX )
-  if (GCC_COMPILER_VERSION VERSION_GREATER "4.4")
+  if (NOT (GCC_COMPILER_VERSION VERSION_LESS "4.5"))
     set(GNUFLAGS "${GNUFLAGS} -Wno-unused-result -pedantic")
   endif ()
 elseif ( "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" )
