@@ -28,7 +28,7 @@ namespace CustomInterfaces
 namespace IDA
 {
   // Add this class to the list of specialised dialogs in this namespace
-  DECLARE_SUBWINDOW(IndirectDataAnalysis);
+  DECLARE_SUBWINDOW(IndirectDataAnalysis)
 
   /**
    * Constructor.

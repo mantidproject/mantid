@@ -17,7 +17,7 @@ using namespace Kernel;
 using namespace std;
 
 // Subscription
-DECLARE_ALGORITHM(EstimatePeakErrors);
+DECLARE_ALGORITHM(EstimatePeakErrors)
 
 //--------------------------------------------------------------------------------------------------------
 // Public members

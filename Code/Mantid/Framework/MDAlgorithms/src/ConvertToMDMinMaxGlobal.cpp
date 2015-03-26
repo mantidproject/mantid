@@ -34,10 +34,10 @@ ConvertToMDMinMaxGlobal::~ConvertToMDMinMaxGlobal() {}
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string ConvertToMDMinMaxGlobal::name() const {
   return "ConvertToMDMinMaxGlobal";
-};
+}
 
 /// Algorithm's version for identification. @see Algorithm::version
-int ConvertToMDMinMaxGlobal::version() const { return 1; };
+int ConvertToMDMinMaxGlobal::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
 const std::string ConvertToMDMinMaxGlobal::category() const {

@@ -7,7 +7,7 @@
 namespace Mantid {
 namespace Algorithms {
 
-DECLARE_ALGORITHM(ConvertToPointData);
+DECLARE_ALGORITHM(ConvertToPointData)
 
 using API::MatrixWorkspace_sptr;
 using Mantid::MantidVec;

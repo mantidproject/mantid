@@ -7,7 +7,7 @@
 namespace Mantid {
 namespace Algorithms {
 
-DECLARE_ALGORITHM(GroupWorkspaces);
+DECLARE_ALGORITHM(GroupWorkspaces)
 
 using namespace Kernel;
 using namespace API;

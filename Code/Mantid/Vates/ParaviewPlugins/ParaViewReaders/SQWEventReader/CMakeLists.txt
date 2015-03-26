@@ -1,5 +1,5 @@
 project( MantidParaViewSQWEventReader )
-
+include_directories( SYSTEM ${PARAVIEW_INCLUDE_DIRS} )
 add_paraview_plugin( MantidParaViewSQWEventReaderSMPlugin "1.0"
 	SERVER_MANAGER_XML SQWEventReader.xml
 	SERVER_MANAGER_SOURCES vtkSQWEventReader.cxx

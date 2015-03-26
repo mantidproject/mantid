@@ -17,7 +17,7 @@ const double STDDEV_TO_HWHM = std::sqrt(std::log(4.0));
 }
 
 // Register into factory
-DECLARE_FUNCTION(VesuvioResolution);
+DECLARE_FUNCTION(VesuvioResolution)
 
 //---------------------------------------------------------------------------
 // Static functions

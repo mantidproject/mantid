@@ -109,12 +109,16 @@ namespace CustomInterfaces
     /// Restore the original cursor
     virtual void restoreCursor() = 0;
 
+    /// Opens the Mantid Wiki web page
+    virtual void help() = 0;
+
   signals:
     /// Request to load data
     void loadRequested();
 
     /// User has selected the first run
     void firstRunSelected();
+
   };
 
 } // namespace CustomInterfaces

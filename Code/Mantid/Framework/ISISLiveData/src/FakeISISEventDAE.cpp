@@ -19,7 +19,7 @@
 namespace Mantid {
 namespace ISISLiveData {
 // Register the algorithm into the algorithm factory
-DECLARE_ALGORITHM(FakeISISEventDAE);
+DECLARE_ALGORITHM(FakeISISEventDAE)
 
 using namespace Kernel;
 using namespace API;
