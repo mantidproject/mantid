@@ -49,7 +49,8 @@ public:
   virtual bool iterate(size_t iter);
   /// Return current value of the cost function
   virtual double costFunctionVal();
-  void finalize();
+  /// Finalize minimization, eg store additional outputs
+  virtual void finalize();
 
 private:
   /// Pointer to the cost function. Must be the least squares.

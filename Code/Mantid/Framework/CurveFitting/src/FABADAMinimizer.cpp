@@ -39,6 +39,12 @@ Kernel::Logger g_log("FABADAMinimizer");
 const size_t convergenceMaxIterations = 50000;
 // number of iterations when convergence isn't expected
 const size_t lowerIterationLimit = 350;
+// very large number
+const double largeNumber = 1e100;
+// jump checking rate
+const size_t jumpCheckingRate = 200;
+// low jump limit
+const double lowJumpLimit = 1e-25;
 }
 
 DECLARE_FUNCMINIMIZER(FABADAMinimizer, FABADA)
@@ -118,12 +124,12 @@ void FABADAMinimizer::initialize(API::ICostFunction_sptr function,
         if (bcon->hasLower()) {
           m_lower.push_back(bcon->lower());
         } else {
-          m_lower.push_back(-10e100);
+          m_lower.push_back(-largeNumber);
         }
         if (bcon->hasUpper()) {
           m_upper.push_back(bcon->upper());
         } else {
-          m_upper.push_back(10e100);
+          m_upper.push_back(largeNumber);
         }
         if (p < m_lower[i]) {
           p = m_lower[i];
@@ -135,8 +141,8 @@ void FABADAMinimizer::initialize(API::ICostFunction_sptr function,
         }
       }
     } else {
-      m_lower.push_back(-10e100);
-      m_upper.push_back(10e100);
+      m_lower.push_back(-largeNumber);
+      m_upper.push_back(largeNumber);
     }
     std::vector<double> v;
     v.push_back(p);
@@ -161,7 +167,7 @@ void FABADAMinimizer::initialize(API::ICostFunction_sptr function,
 
 /// Do one iteration. Returns true if iterations to be continued, false if they
 /// must stop.
-bool FABADAMinimizer::iterate(size_t iter) {
+bool FABADAMinimizer::iterate(size_t) {
 
   if (!m_leastSquares) {
     throw std::runtime_error("Cost function isn't set up.");
@@ -270,8 +276,6 @@ bool FABADAMinimizer::iterate(size_t iter) {
       }
     }
 
-    const size_t jumpCheckingRate = 200;
-    const double lowJumpLimit = 1e-25;
     const double jumpAR = getProperty("JumpAcceptanceRate");
 
     // Update the jump once each jumpCheckingRate iterations
@@ -314,8 +318,8 @@ bool FABADAMinimizer::iterate(size_t iter) {
     }
   } // for i
 
-  m_counter +=
-      1; // Update the counter, after finishing the iteration for each parameter
+  // Update the counter, after finishing the iteration for each parameter
+  m_counter += 1; 
 
   // Check if Chi square has converged for all the parameters.
   if (m_counter > lowerIterationLimit && !m_converged) {
@@ -362,9 +366,7 @@ bool FABADAMinimizer::iterate(size_t iter) {
           " iterations.\n   Try to set better initial values for parameters: " +
           failed);
     }
-  }
-
-  else {
+  } else {
     // If convergence has been reached, continue untill complete the chain
     // length.
     if (m_counter <= m_numberIterations) {
@@ -376,22 +378,18 @@ bool FABADAMinimizer::iterate(size_t iter) {
       throw std::length_error("Convegence reached but Max Iterations parameter "
                               "insufficient for creating the whole chain.\n "
                               "Increase Max Iterations");
-      return false;
     }
-
-    // When the all the iterations have been done, calculate and show all the
-    // results.
-    else {
-      finalize();
-      return false;
-    }
+    // nothing else to do, stop interations
+    return false;
   }
-
+  // can we even get here?
   return true;
 }
 
 double FABADAMinimizer::costFunctionVal() { return m_chi2; }
 
+/// When the all the iterations have been done, calculate and show all the
+/// results.
 void FABADAMinimizer::finalize() {
   // Creating the reduced chain (considering only one each "Steps between
   // values" values)
@@ -452,9 +450,9 @@ void FABADAMinimizer::finalize() {
     error_rigth[j] = *pos_right - *pos_par;
   }
 
-  const bool cond1 = !getPropertyValue("Parameters").empty();
+  const bool outputParametersTable = !getPropertyValue("Parameters").empty();
 
-  if (cond1) {
+  if (outputParametersTable) {
 
     // Create the workspace for the parameters' value and errors.
     API::ITableWorkspace_sptr wsPdfE =
@@ -546,9 +544,9 @@ void FABADAMinimizer::finalize() {
   // Set and name the PDF workspace.
   setProperty("PDF", ws);
 
-  const bool cond3 = !getPropertyValue("Chains").empty();
+  const bool outputChains = !getPropertyValue("Chains").empty();
 
-  if (cond3) {
+  if (outputChains) {
 
     // Create the workspace for the complete parameters' chain (the last
     // histogram is for the Chi square).
@@ -572,9 +570,9 @@ void FABADAMinimizer::finalize() {
 
   // Read if necessary to show the workspace for the converged part of the
   // chain.
-  const bool cond4 = !getPropertyValue("ConvergedChain").empty();
+  const bool outputConvergedChains = !getPropertyValue("ConvergedChain").empty();
 
-  if (cond4) {
+  if (outputConvergedChains) {
     // Create the workspace for the converged part of the chain.
     API::MatrixWorkspace_sptr wsConv = API::WorkspaceFactory::Instance().create(
         "Workspace2D", nParams + 1, conv_length, conv_length);
@@ -598,9 +596,9 @@ void FABADAMinimizer::finalize() {
   }
 
   // Read if necessary to show the workspace for the Chi square values.
-  const bool cond5 = !getPropertyValue("CostFunctionTable").empty();
+  const bool outputCostFunctionTable = !getPropertyValue("CostFunctionTable").empty();
 
-  if (cond5) {
+  if (outputCostFunctionTable) {
 
     // Create the workspace for the Chi square values.
     API::ITableWorkspace_sptr wsChi2 =
