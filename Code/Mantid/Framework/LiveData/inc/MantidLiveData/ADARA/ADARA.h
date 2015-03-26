@@ -29,7 +29,7 @@ enum Enum {
   DEVICE_DESC_V0 = ADARA_PKT_TYPE(0x8000, 0),
   VAR_VALUE_U32_V0 = ADARA_PKT_TYPE(0x8001, 0),
   VAR_VALUE_DOUBLE_V0 = ADARA_PKT_TYPE(0x8002, 0),
-  VAR_VALUE_STRING_V0 = ADARA_PKT_TYPE(0x8003, 0),
+  VAR_VALUE_STRING_V0 = ADARA_PKT_TYPE(0x8003, 0)
 };
 }
 
@@ -57,7 +57,7 @@ enum Enum {
   RUN_EOF = 2,
   RUN_BOF = 3,
   END_RUN = 4,
-  STATE = 5,
+  STATE = 5
 };
 }
 
@@ -86,7 +86,7 @@ enum Enum {
   READ_PERMISSION = 20,
   WRITE_PERMISSION = 21,
   UPSTREAM_DISCONNECTED = 0xfffe,
-  NOT_REPORTED = 0xffff,
+  NOT_REPORTED = 0xffff
 };
 }
 
@@ -96,7 +96,7 @@ enum Enum {
   MINOR_ALARM = 1,
   MAJOR_ALARM = 2,
   INVALID = 3,
-  NOT_REPORTED = 0xffff,
+  NOT_REPORTED = 0xffff
 };
 }
 
@@ -107,7 +107,7 @@ enum Enum {
   SCAN_STOP,
   PAUSE,
   RESUME,
-  OVERALL_RUN_COMMENT,
+  OVERALL_RUN_COMMENT
 };
 }
 

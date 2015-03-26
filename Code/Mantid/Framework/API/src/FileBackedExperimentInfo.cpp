@@ -28,11 +28,12 @@ FileBackedExperimentInfo::FileBackedExperimentInfo(const std::string &filename,
     : ExperimentInfo(), m_loaded(false), m_filename(filename), m_nxpath(nxpath) {}
 
 /**
- * @return A clone of the object
+ * This clones the FileBackedExperimentInfo and will not cause a load 
+ * of the information.
+ * @return A clone of the object.
  */
 ExperimentInfo *FileBackedExperimentInfo::cloneExperimentInfo() const {
-  populateIfNotLoaded();
-  return ExperimentInfo::cloneExperimentInfo();
+  return new FileBackedExperimentInfo(*this);
 }
 
 /// @returns A human-readable description of the object

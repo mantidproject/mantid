@@ -9,7 +9,7 @@
 namespace Mantid {
 namespace API {
 
-DECLARE_TRANSFORMSCALE(LinearScale);
+DECLARE_TRANSFORMSCALE(LinearScale)
 
 /* Transform the grid to adopt a linear scale
  * @param gd a grid object

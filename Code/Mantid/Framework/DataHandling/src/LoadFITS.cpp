@@ -38,7 +38,7 @@ bool IsNotFits(std::string s) {
 namespace Mantid {
 namespace DataHandling {
 // Register the algorithm into the AlgorithmFactory
-DECLARE_FILELOADER_ALGORITHM(LoadFITS);
+DECLARE_FILELOADER_ALGORITHM(LoadFITS)
 
 /**
  * Constructor. Just initialize everything to prevent issues.

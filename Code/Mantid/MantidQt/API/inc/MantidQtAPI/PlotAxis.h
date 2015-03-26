@@ -50,7 +50,7 @@ namespace MantidQt
       QString title() const;
 
     private:
-      DISABLE_DEFAULT_CONSTRUCT(PlotAxis);
+      DISABLE_DEFAULT_CONSTRUCT(PlotAxis)
 
       /// Creates a title suitable for an axis attached to the given index
       void titleFromIndex(const Mantid::API::IMDWorkspace & workspace,

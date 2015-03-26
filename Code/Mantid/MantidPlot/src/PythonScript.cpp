@@ -686,7 +686,7 @@ namespace
     }
   private:
     InstallTrace();
-    Q_DISABLE_COPY(InstallTrace);
+    Q_DISABLE_COPY(InstallTrace)
     PyObject *m_sipWrappedScript;
   };
 }

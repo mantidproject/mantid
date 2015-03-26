@@ -15,10 +15,10 @@ namespace Algorithms {
 Constructor
 @param cutOff : radius cutoff
 */
-WeightingStrategy::WeightingStrategy(const double cutOff) : m_cutOff(cutOff){};
+WeightingStrategy::WeightingStrategy(const double cutOff) : m_cutOff(cutOff){}
 
 /// Constructor
-WeightingStrategy::WeightingStrategy() : m_cutOff(0){};
+WeightingStrategy::WeightingStrategy() : m_cutOff(0){}
 
 /// Destructor
 WeightingStrategy::~WeightingStrategy() {}

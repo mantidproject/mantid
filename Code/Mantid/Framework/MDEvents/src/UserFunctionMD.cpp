@@ -11,7 +11,7 @@ namespace Mantid {
 namespace MDEvents {
 
 // Subscribe the function into the factory.
-DECLARE_FUNCTION(UserFunctionMD);
+DECLARE_FUNCTION(UserFunctionMD)
 
 /// Default constructor
 UserFunctionMD::UserFunctionMD() {

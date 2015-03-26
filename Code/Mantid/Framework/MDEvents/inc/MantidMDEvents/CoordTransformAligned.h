@@ -9,13 +9,13 @@ namespace Mantid {
 namespace MDEvents {
 
 /// Unique type declaration for which dimensions are used in the input workspace
-DECLARE_VECTOR_PARAMETER(DimensionsToBinFromParam, size_t);
+DECLARE_VECTOR_PARAMETER(DimensionsToBinFromParam, size_t)
 
 /// Unique type declaration for the offset of coordinates
-DECLARE_VECTOR_PARAMETER(OriginOffsetParam, coord_t);
+DECLARE_VECTOR_PARAMETER(OriginOffsetParam, coord_t)
 
 /// Unique type declaration for the step size in transformation
-DECLARE_VECTOR_PARAMETER(ScalingParam, coord_t);
+DECLARE_VECTOR_PARAMETER(ScalingParam, coord_t)
 
 /** A restricted version of CoordTransform which transforms
   from one set of dimensions to another, allowing:

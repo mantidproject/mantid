@@ -77,7 +77,7 @@ public:
                         const size_t eventIndex) const;
 
 private:
-  DISABLE_COPY_AND_ASSIGN(TobyFitResolutionModel);
+  DISABLE_COPY_AND_ASSIGN(TobyFitResolutionModel)
 
   friend class TobyFitYVector;
 

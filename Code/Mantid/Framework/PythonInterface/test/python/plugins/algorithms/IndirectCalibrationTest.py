@@ -1,12 +1,12 @@
 import unittest
 import mantid
-from mantid.simpleapi import CreateCalibrationWorkspace
+from mantid.simpleapi import IndirectCalibration
 
 
-class CreateCalibrationWorkspaceTest(unittest.TestCase):
+class IndirectCalibrationTest(unittest.TestCase):
 
     def test_simple(self):
-        cal_ws = CreateCalibrationWorkspace(InputFiles='IRS38633.raw',
+        cal_ws = IndirectCalibration(InputFiles='IRS38633.raw',
                                             DetectorRange=[3,53],
                                             PeakRange=[62000,65000],
                                             BackgroundRange=[59000,61000])

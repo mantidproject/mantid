@@ -32,7 +32,7 @@ const std::string
     BASE_URL("http://icat.sns.gov:2080/icat-rest-ws/datafile/filename/");
 }
 
-DECLARE_ARCHIVESEARCH(SNSDataArchive, SNSDataSearch);
+DECLARE_ARCHIVESEARCH(SNSDataArchive, SNSDataSearch)
 
 /**
  * @param filenames : List of files to search

@@ -198,10 +198,10 @@ void toValue(const std::string &strvalue, std::vector<std::vector<T>> &value,
     }                                                                          \
   }
 
-PROPERTYWITHVALUE_TOVALUE(int);
-PROPERTYWITHVALUE_TOVALUE(long);
-PROPERTYWITHVALUE_TOVALUE(uint32_t);
-PROPERTYWITHVALUE_TOVALUE(uint64_t);
+PROPERTYWITHVALUE_TOVALUE(int)
+PROPERTYWITHVALUE_TOVALUE(long)
+PROPERTYWITHVALUE_TOVALUE(uint32_t)
+PROPERTYWITHVALUE_TOVALUE(uint64_t)
 #if defined(__APPLE__)
 PROPERTYWITHVALUE_TOVALUE(unsigned long);
 #endif

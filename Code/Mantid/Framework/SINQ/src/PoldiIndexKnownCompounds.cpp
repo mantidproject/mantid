@@ -201,19 +201,25 @@ std::vector<Workspace_sptr> PoldiIndexKnownCompounds::getWorkspaces(
   std::vector<Workspace_sptr> workspaces;
 
   for (auto it = workspaceNames.begin(); it != workspaceNames.end(); ++it) {
-    Workspace_sptr currentWorkspace =
-        AnalysisDataService::Instance().retrieveWS<Workspace>(*it);
+    try {
+      Workspace_sptr currentWorkspace =
+          AnalysisDataService::Instance().retrieveWS<Workspace>(*it);
 
-    WorkspaceGroup_sptr groupTest =
-        boost::dynamic_pointer_cast<WorkspaceGroup>(currentWorkspace);
-    if (groupTest) {
-      std::vector<Workspace_sptr> workspacesNextLevel =
-          getWorkspaces(groupTest->getNames());
+      WorkspaceGroup_sptr groupTest =
+          boost::dynamic_pointer_cast<WorkspaceGroup>(currentWorkspace);
+      if (groupTest) {
+        std::vector<Workspace_sptr> workspacesNextLevel =
+            getWorkspaces(groupTest->getNames());
 
-      workspaces.insert(workspaces.end(), workspacesNextLevel.begin(),
-                        workspacesNextLevel.end());
-    } else {
-      workspaces.insert(workspaces.end(), currentWorkspace);
+        workspaces.insert(workspaces.end(), workspacesNextLevel.begin(),
+                          workspacesNextLevel.end());
+      } else {
+        workspaces.insert(workspaces.end(), currentWorkspace);
+      }
+    }
+    catch (Kernel::Exception::NotFoundError) {
+      Workspace_sptr invalid;
+      workspaces.insert(workspaces.end(), invalid);
     }
   }
 
@@ -719,8 +725,8 @@ void
 PoldiIndexKnownCompounds::assignPeakIndex(const IndexCandidatePair &candidate) {
   candidate.observed->setHKL(candidate.candidate->hkl());
 
-  m_indexedPeaks[candidate.candidateCollectionIndex]->addPeak(
-      candidate.observed);
+  m_indexedPeaks[candidate.candidateCollectionIndex]
+      ->addPeak(candidate.observed);
 }
 
 PoldiPeakCollection_sptr
