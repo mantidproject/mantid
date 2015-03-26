@@ -46,7 +46,7 @@ public:
   }
 };
 
-DECLARE_FUNCTION(SimpleFunctionParameterDecorator);
+DECLARE_FUNCTION(SimpleFunctionParameterDecorator)
 
 class FunctionParameterDecoratorFitTest : public CxxTest::TestSuite {
 public:

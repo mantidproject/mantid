@@ -14,7 +14,7 @@
 namespace Mantid {
 namespace DataHandling {
 // register the algorithm into the AlgorithmFactory
-DECLARE_FILELOADER_ALGORITHM(LoadBBY);
+DECLARE_FILELOADER_ALGORITHM(LoadBBY)
 
 // consts
 static const size_t HISTO_BINS_X = 240;

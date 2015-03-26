@@ -20,7 +20,7 @@ namespace {}
 namespace Mantid {
 namespace DataHandling {
 // Register the algorithm into the AlgorithmFactory
-DECLARE_FILELOADER_ALGORITHM(LoadFITS);
+DECLARE_FILELOADER_ALGORITHM(LoadFITS)
 
 const std::string LoadFITS::m_BIT_DEPTH_NAME = "BitDepthName";
 const std::string LoadFITS::m_ROTATION_NAME = "RotationName";

@@ -162,7 +162,7 @@ public:
     PULSE_VETO = 0x0004,
     MISSING_RTDL = 0x0008,
     MAPPING_ERROR = 0x0010,
-    DUPLICATE_PULSE = 0x0020,
+    DUPLICATE_PULSE = 0x0020
   };
 
   uint32_t pulseCharge(void) const { return m_fields[0]; }

@@ -36,7 +36,7 @@
 namespace Mantid {
 namespace DataHandling {
 
-DECLARE_FILELOADER_ALGORITHM(LoadEventPreNexus);
+DECLARE_FILELOADER_ALGORITHM(LoadEventPreNexus)
 
 using namespace Kernel;
 using namespace API;

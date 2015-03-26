@@ -171,7 +171,7 @@ private:
   std::string getParentFolder(const std::string &entry);
 };
 
-}; // namespace API
-}; // namespace Mantid
+} // namespace API
+} // namespace Mantid
 
 #endif // _MANTIDSCRIPTREPOSITORY_SCRIPTREPOSITORYIMPL_H_

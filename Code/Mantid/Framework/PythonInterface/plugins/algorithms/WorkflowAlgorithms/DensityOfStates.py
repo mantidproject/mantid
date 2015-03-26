@@ -28,8 +28,14 @@ class DensityOfStates(PythonAlgorithm):
     _num_ions = None
     _num_branches = None
 
+
+    def category(self):
+        return "Simulation"
+
+
     def summary(self):
         return "Calculates phonon densities of states, Raman and IR spectrum."
+
 
     def PyInit(self):
         # Declare properties

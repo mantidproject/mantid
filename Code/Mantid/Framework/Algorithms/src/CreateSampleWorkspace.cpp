@@ -47,10 +47,10 @@ CreateSampleWorkspace::~CreateSampleWorkspace() { delete m_randGen; }
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string CreateSampleWorkspace::name() const {
   return "CreateSampleWorkspace";
-};
+}
 
 /// Algorithm's version for identification. @see Algorithm::version
-int CreateSampleWorkspace::version() const { return 1; };
+int CreateSampleWorkspace::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
 const std::string CreateSampleWorkspace::category() const {
