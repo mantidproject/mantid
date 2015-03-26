@@ -25,20 +25,20 @@ namespace IDA
     void newData(const QString &dataName);
     /// Updates the preview mini plot
     void plotPreview(int specIndex);
+    /// Handle algorithm completion
+    void algorithmComplete(bool error);
 
   private:
     virtual void setup();
     virtual void run();
     virtual bool validate();
     virtual void loadSettings(const QSettings & settings);
-    /// ask the user if they wish to rebin the can
-    bool requireCanRebin();
 
     Ui::ApplyCorr m_uiForm;
     /// Pointer to the result workspace (for plotting)
     Mantid::API::MatrixWorkspace_sptr m_outputWs;
-
   };
+
 } // namespace IDA
 } // namespace CustomInterfaces
 } // namespace MantidQt

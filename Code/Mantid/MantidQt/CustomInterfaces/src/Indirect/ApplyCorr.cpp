@@ -1,4 +1,5 @@
 #include "MantidQtCustomInterfaces/Indirect/ApplyCorr.h"
+#include "MantidQtCustomInterfaces/UserInputValidator.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/TextAxis.h"
 
@@ -21,10 +22,8 @@ namespace IDA
     IDATab(parent)
   {
     m_uiForm.setupUi(parent);
-  }
 
-  void ApplyCorr::setup()
-  {
+    connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(algorithmComplete(bool)));
     connect(m_uiForm.cbGeometry, SIGNAL(currentIndexChanged(int)), this, SLOT(handleGeometryChange(int)));
     connect(m_uiForm.dsSample, SIGNAL(dataReady(const QString&)), this, SLOT(newData(const QString&)));
     connect(m_uiForm.spPreviewSpec, SIGNAL(valueChanged(int)), this, SLOT(plotPreview(int)));
@@ -32,6 +31,12 @@ namespace IDA
     m_uiForm.spPreviewSpec->setMinimum(0);
     m_uiForm.spPreviewSpec->setMaximum(0);
   }
+
+
+  void ApplyCorr::setup()
+  {
+  }
+
 
   /**
    * Disables corrections when using S(Q, w) as input data.
@@ -48,154 +53,111 @@ namespace IDA
     m_uiForm.ppPreview->addSpectrum("Sample", sampleWs, 0, Qt::black);
   }
 
+
   void ApplyCorr::run()
   {
-    QString geom = m_uiForm.cbGeometry->currentText();
-    if ( geom == "Flat" )
-    {
-      geom = "flt";
-    }
-    else if ( geom == "Cylinder" )
-    {
-      geom = "cyl";
-    }
+    //TODO: Convert input workspaces to wavelength
+    //TODO: Interpolate correction workspaces if binning does not match
 
-    QString pyInput = "from IndirectDataAnalysis import abscorFeeder\n";
+    QString sampleWsName = m_uiForm.dsSample->getCurrentDataName();
 
-    QString sample = m_uiForm.dsSample->getCurrentDataName();
-    MatrixWorkspace_const_sptr sampleWs =  AnalysisDataService::Instance().retrieveWS<const MatrixWorkspace>(sample.toStdString());
+    IAlgorithm_sptr applyCorrAlg = AlgorithmManager::Instance().create("ApplyPaalmanPingsCorrection");
+    applyCorrAlg->initialize();
 
-    pyInput += "sample = '"+sample+"'\n";
-    pyInput += "rebin_can = False\n";
-    bool noContainer = false;
+    applyCorrAlg->setProperty("SampleWorkspace", sampleWsName.toStdString());
 
     bool useCan = m_uiForm.ckUseCan->isChecked();
     if(useCan)
     {
-      QString container = m_uiForm.dsContainer->getCurrentDataName();
-      MatrixWorkspace_const_sptr canWs =  AnalysisDataService::Instance().retrieveWS<const MatrixWorkspace>(container.toStdString());
+      QString canWsName = m_uiForm.dsContainer->getCurrentDataName();
+      applyCorrAlg->setProperty("CanWorkspace", canWsName.toStdString());
 
-      if (!checkWorkspaceBinningMatches(sampleWs, canWs))
+      bool useCanScale = m_uiForm.ckScaleCan->isChecked();
+      if(useCanScale)
       {
-        if (requireCanRebin())
-        {
-          pyInput += "rebin_can = True\n";
-        }
-        else
-        {
-          //user clicked cancel and didn't want to rebin, so just do nothing.
-          return;
-        }
-      }
-
-      pyInput += "container = '" + container + "'\n";
-    }
-    else
-    {
-      pyInput += "container = ''\n";
-      noContainer = true;
-    }
-
-    pyInput += "geom = '" + geom + "'\n";
-
-    if( m_uiForm.ckUseCorrections->isChecked() )
-    {
-      pyInput += "useCor = True\n";
-      QString corrections = m_uiForm.dsCorrections->getCurrentDataName();
-      pyInput += "corrections = '" + corrections + "'\n";
-    }
-    else
-    {
-      pyInput += "useCor = False\n";
-      pyInput += "corrections = ''\n";
-
-      // if we have no container and no corrections then abort
-      if(noContainer)
-      {
-        showMessageBox("Apply Corrections requires either a can file or a corrections file.");
-        return;
+        double canScaleFactor = m_uiForm.spCanScale->value();
+        applyCorrAlg->setProperty("CanScaleFactor", canScaleFactor);
       }
     }
 
-    QString ScalingFactor = "1.0\n";
-    QString ScaleOrNot = "False\n";
-
-    pyInput += m_uiForm.ckScaleCan->isChecked() ? "True\n" : "False\n";
-
-    if ( m_uiForm.ckScaleCan->isChecked() )
+    bool useCorrections = m_uiForm.ckUseCorrections->isChecked();
+    if(useCorrections)
     {
-      ScalingFactor = m_uiForm.spCanScale->text();
-      ScaleOrNot = "True\n";
+      QString correctionsWsName = m_uiForm.dsCorrections->getCurrentDataName();
+      applyCorrAlg->setProperty("CorrectionsWorkspace", correctionsWsName.toStdString());
     }
 
-    pyInput += "scale = " + ScaleOrNot + "\n";
-    pyInput += "scaleFactor = " + ScalingFactor + "\n";
+    // Generate output workspace name
+    int nameCutIndex = sampleWsName.lastIndexOf("_");
+    if(nameCutIndex == -1)
+      nameCutIndex = sampleWsName.length();
 
-    if ( m_uiForm.ckSave->isChecked() ) pyInput += "save = True\n";
-    else pyInput += "save = False\n";
-
-    QString plotResult = m_uiForm.cbPlotOutput->currentText();
-    if ( plotResult == "Contour" )
+    QString correctionType;
+    switch(m_uiForm.cbGeometry->currentIndex())
     {
-      plotResult = "Contour";
+      case 0:
+        correctionType = "flt";
+        break;
+      case 1:
+        correctionType = "cyl";
+        break;
     }
-    else if ( plotResult == "Spectra" )
-    {
-      plotResult = "Spectrum";
-    }
-    else if ( plotResult == "Both" )
-    {
-      plotResult = "Both";
-    }
+    QString outputWsName = sampleWsName.left(nameCutIndex) + + "_" + correctionType + "_Corrected";
 
-    pyInput += "plotResult = '" + plotResult + "'\n";
-    pyInput += "print abscorFeeder(sample, container, geom, useCor, corrections, RebinCan=rebin_can, ScaleOrNotToScale=scale, factor=scaleFactor, Save=save, PlotResult=plotResult)\n";
+    applyCorrAlg->setProperty("OutputWorkspace", outputWsName.toStdString());
 
-    QString pyOutput = runPythonCode(pyInput).trimmed();
-
-    m_outputWs = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(pyOutput.toStdString());
-    plotPreview(m_uiForm.spPreviewSpec->value());
+    // Run the corrections algorithm
+    m_batchAlgoRunner->addAlgorithm(applyCorrAlg);
+    m_batchAlgoRunner->executeBatchAsync();
 
     // Set the result workspace for Python script export
-    m_pythonExportWsName = pyOutput.toStdString();
+    m_pythonExportWsName = outputWsName.toStdString();
   }
 
+
   /**
-   * Ask the user is they wish to rebin the can to the sample.
-   * @return whether a rebin of the can workspace is required.
+   * Handles completion of the algorithm.
+   *
+   * @param error True if algorithm failed.
    */
-  bool ApplyCorr::requireCanRebin()
+  void ApplyCorr::algorithmComplete(bool error)
   {
-    QString message = "The sample and can energy ranges do not match, this is not recommended."
-      "\n\n Click OK to rebin the can to match the sample and continue or Cancel to abort applying corrections.";
-    QMessageBox::StandardButton reply = QMessageBox::warning(m_parentWidget, "Energy Ranges Do Not Match",
-        message, QMessageBox::Ok|QMessageBox::Cancel);
-    return (reply == QMessageBox::Ok);
+    if(error)
+    {
+      emit showMessageBox("Unable to apply corrections.\nSee Results Log for more details.");
+      return;
+    }
+
+    m_outputWs = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(m_pythonExportWsName);
+    plotPreview(m_uiForm.spPreviewSpec->value());
   }
+
 
   bool ApplyCorr::validate()
   {
+    UserInputValidator uiv;
+
+    uiv.checkDataSelectorIsValid("Sample", m_uiForm.dsSample);
+
     bool useCan = m_uiForm.ckUseCan->isChecked();
+    bool useCorrections = m_uiForm.ckUseCorrections->isChecked();
+
+    if(!(useCan || useCorrections))
+      uiv.addErrorMessage("Must use either container subtraction or corrections");
 
     if(useCan)
-    {
-      QString sample = m_uiForm.dsSample->getCurrentDataName();
-      QString sampleType = sample.right(sample.length() - sample.lastIndexOf("_"));
-      QString container = m_uiForm.dsContainer->getCurrentDataName();
-      QString containerType = container.right(container.length() - container.lastIndexOf("_"));
+      uiv.checkDataSelectorIsValid("Container", m_uiForm.dsContainer);
 
-      g_log.debug() << "Sample type is: " << sampleType.toStdString() << std::endl;
-      g_log.debug() << "Container type is: " << containerType.toStdString() << std::endl;
+    if(useCorrections)
+      uiv.checkDataSelectorIsValid("Corrections", m_uiForm.dsCorrections);
 
-      if(containerType != sampleType)
-      {
-        g_log.error("Must use the same type of files for sample and container inputs.");
-        return false;
-      }
-    }
+    // Show errors if there are any
+    if(!uiv.isAllInputValid())
+      emit showMessageBox(uiv.generateErrorMessage());
 
-    return true;
+    return uiv.isAllInputValid();
   }
+
 
   void ApplyCorr::loadSettings(const QSettings & settings)
   {
@@ -203,6 +165,7 @@ namespace IDA
     m_uiForm.dsContainer->readSettings(settings.group());
     m_uiForm.dsSample->readSettings(settings.group());
   }
+
 
   /**
    * Handles when the type of geometry changes
@@ -228,6 +191,7 @@ namespace IDA
         break;
     }
   }
+
 
   /**
    * Replots the preview plot.
