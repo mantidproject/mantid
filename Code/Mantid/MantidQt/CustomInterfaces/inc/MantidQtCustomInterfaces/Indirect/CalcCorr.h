@@ -23,6 +23,8 @@ namespace IDA
     virtual bool validate();
     virtual void loadSettings(const QSettings & settings);
 
+    bool doValidation(bool silent = false);
+
   private slots:
     void algorithmComplete(bool error);
     void getBeamWidthFromWorkspace(const QString& wsName);

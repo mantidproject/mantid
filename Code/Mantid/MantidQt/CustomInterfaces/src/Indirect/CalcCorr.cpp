@@ -39,19 +39,91 @@ namespace IDA
 
   void CalcCorr::setup()
   {
+    doValidation(true);
   }
 
 
+  //TODO
   void CalcCorr::run()
   {
-    //TODO
+    // Get correct corrections algorithm
+    QString sampleShape = m_uiForm.cbSampleShape->currentText();
+    QString algorithmName = sampleShape.replace(" ", "") + "PaalmanPingsCorrection";
+
+    IAlgorithm_sptr absCorAlgo = AlgorithmManager::Instance().create(algorithmName.toStdString());
+    absCorAlgo->initialize();
+
+    // Sample details
+    QString sampleWsName = m_uiForm.dsSample->getCurrentDataName();
+    absCorAlgo->setProperty("SampleWorkspace", sampleWsName.toStdString());
+
+    double sampleNumberDensity = m_uiForm.spSampleNumberDensity->value();
+    absCorAlgo->setProperty("SampleNumberDensity", sampleNumberDensity);
+
+    QString sampleChemicalFormula = m_uiForm.leSampleChemicalFormula->text();
+    absCorAlgo->setProperty("SampleChemicalFormula", sampleChemicalFormula.toStdString());
+
+    //TODO: sample options
+
+    // Can details
+    bool useCan = m_uiForm.ckUseCan->isChecked();
+    if(useCan)
+    {
+      QString canWsName = m_uiForm.dsContainer->getCurrentDataName();
+      absCorAlgo->setProperty("CanWorkspace", canWsName.toStdString());
+
+      double canNumberDensity = m_uiForm.spCanNumberDensity->value();
+      absCorAlgo->setProperty("CanNumberDensity", canNumberDensity);
+
+      QString canChemicalFormula = m_uiForm.leCanChemicalFormula->text();
+      absCorAlgo->setProperty("CanChemicalFormula", canChemicalFormula.toStdString());
+
+      //TODO: can options
+    }
+
+    //TODO: emode, efixed
+
+    // Generate workspace names
+    int nameCutIndex = sampleWsName.lastIndexOf("_");
+    if(nameCutIndex == -1)
+      nameCutIndex = sampleWsName.length();
+
+    QString correctionType;
+    switch(m_uiForm.cbSampleShape->currentIndex())
+    {
+      case 0:
+        correctionType = "flt";
+        break;
+      case 1:
+        correctionType = "cyl";
+        break;
+    }
+
+    QString outputWsName = sampleWsName.left(nameCutIndex) + "_" + correctionType + "_abs";
+    absCorAlgo->setProperty("OutputWorkspace", outputWsName.toStdString());
+
+    // Run corrections algorithm
+    m_batchAlgoRunner->addAlgorithm(absCorAlgo);
+    m_batchAlgoRunner->executeBatchAsync();
 
     // Set the result workspace for Python script export
-    m_pythonExportWsName = "";
+    m_pythonExportWsName = outputWsName.toStdString();
   }
 
 
   bool CalcCorr::validate()
+  {
+    return doValidation();
+  }
+
+
+  /**
+   * Does validation on the user input.
+   *
+   * @param silent Set to true to avoid creating an error message
+   * @return True if all user input is valid
+   */
+  bool CalcCorr::doValidation(bool silent)
   {
     UserInputValidator uiv;
 
@@ -61,7 +133,7 @@ namespace IDA
       uiv.checkFieldIsValid("Sample Chemical Formula", m_uiForm.leSampleChemicalFormula, m_uiForm.valSampleChemicalFormula);
 
     bool useCan = m_uiForm.ckUseCan->isChecked();
-    if (useCan)
+    if(useCan)
     {
       uiv.checkDataSelectorIsValid("Can", m_uiForm.dsContainer);
 
@@ -81,7 +153,7 @@ namespace IDA
     }
 
     // Show error mssage if needed
-    if(!uiv.isAllInputValid())
+    if(!uiv.isAllInputValid() && !silent)
       emit showMessageBox(uiv.generateErrorMessage());
 
     return uiv.isAllInputValid();
@@ -99,6 +171,8 @@ namespace IDA
     {
       emit showMessageBox("Absorption correction calculation failed.\nSee Results Log for more details.");
     }
+
+    //TODO: plot
   }
 
 
@@ -121,10 +195,13 @@ namespace IDA
 
     std::string paramName = "Workflow.beam-width";
     auto instrument = ws->getInstrument();
+
     if(instrument->hasParameter(paramName))
     {
-      std::string beamWidth = instrument->getStringParameter(paramName)[0];
-      //TODO
+      QString beamWidth = QString::fromStdString(instrument->getStringParameter(paramName)[0]);
+      double beamWidthValue = beamWidth.toDouble();
+      m_uiForm.spCylBeamWidth->setValue(beamWidthValue);
+      m_uiForm.spCylBeamHeight->setValue(beamWidthValue);
     }
   }
 
