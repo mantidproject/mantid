@@ -183,12 +183,12 @@ UnitCell PoldiCreatePeaksFromCell::getUnitCellFromProperties() const {
 }
 
 /** Returns a new UnitCell-object with crystal system constraints taken into
- *account
+ *  account
  *
  *  This method constructs a new UnitCell-object based on the values of the
- *supplied cell,
+ *  supplied cell,
  *  but takes into account the constraints of the crystal system. For
- *monoclinic, a unique b-axis is assumed.
+ *  monoclinic, a unique b-axis is assumed.
  *
  *  It's useful for "cleaning" user input.
  *
@@ -197,8 +197,8 @@ UnitCell PoldiCreatePeaksFromCell::getUnitCellFromProperties() const {
  * @return UnitCell-object with applied constraints
  */
 UnitCell PoldiCreatePeaksFromCell::getConstrainedUnitCell(
-    const UnitCell &unitCell,
-    const PointGroup::CrystalSystem &crystalSystem) const {
+    const UnitCell &unitCell, const PointGroup::CrystalSystem &crystalSystem,
+    const Group::CoordinateSystem &coordinateSystem) const {
   switch (crystalSystem) {
   case PointGroup::Cubic:
     return UnitCell(unitCell.a(), unitCell.a(), unitCell.a());
@@ -209,12 +209,15 @@ UnitCell PoldiCreatePeaksFromCell::getConstrainedUnitCell(
   case PointGroup::Monoclinic:
     return UnitCell(unitCell.a(), unitCell.b(), unitCell.c(), 90.0,
                     unitCell.beta(), 90.0);
+  case PointGroup::Trigonal:
+    if (coordinateSystem == Group::Orthogonal) {
+      return UnitCell(unitCell.a(), unitCell.a(), unitCell.a(),
+                      unitCell.alpha(), unitCell.alpha(), unitCell.alpha());
+    }
+  // fall through to hexagonal.
   case PointGroup::Hexagonal:
     return UnitCell(unitCell.a(), unitCell.a(), unitCell.c(), 90.0, 90.0,
                     120.0);
-  case PointGroup::Trigonal:
-    return UnitCell(unitCell.a(), unitCell.a(), unitCell.a(), unitCell.alpha(),
-                    unitCell.alpha(), unitCell.alpha());
   default:
     return UnitCell(unitCell);
   }
@@ -274,7 +277,12 @@ void PoldiCreatePeaksFromCell::exec() {
   PointGroup_sptr pointGroup =
       PointGroupFactory::Instance().createPointGroupFromSpaceGroup(spaceGroup);
   UnitCell unitCell = getConstrainedUnitCell(getUnitCellFromProperties(),
-                                             pointGroup->crystalSystem());
+                                             pointGroup->crystalSystem(),
+                                             pointGroup->getCoordinateSystem());
+
+  g_log.information() << "Constrained unit cell is: " << unitCellToStr(unitCell)
+                      << std::endl;
+
   CompositeBraggScatterer_sptr scatterers = getScatterers(getProperty("Atoms"));
 
   // Create a CrystalStructure-object for use with PoldiPeakCollection
