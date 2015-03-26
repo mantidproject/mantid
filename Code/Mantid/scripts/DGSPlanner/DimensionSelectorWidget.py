@@ -131,6 +131,7 @@ class DimensionSelectorWidget(QtGui.QWidget):
         self.dimMin=[-numpy.inf,-numpy.inf,-numpy.inf,-numpy.inf]
         self.dimMax=[numpy.inf,numpy.inf,numpy.inf,numpy.inf]
         self.dimStep=[0.05,0.05,0.05,1]
+        self.dimIndex=[0,1,2,3]
         #layout
         grid = QtGui.QGridLayout()
         self.setLayout(grid)
@@ -195,6 +196,7 @@ class DimensionSelectorWidget(QtGui.QWidget):
         self.dimMin[idx],self.dimMin[senderIndex]=self.dimMin[senderIndex],self.dimMin[idx]
         self.dimMax[idx],self.dimMax[senderIndex]=self.dimMax[senderIndex],self.dimMax[idx]
         self.dimStep[idx],self.dimStep[senderIndex]=self.dimStep[senderIndex],self.dimStep[idx]
+        self.dimIndex[idx],self.dimIndex[senderIndex]=self.dimIndex[senderIndex],self.dimIndex[idx]
         self.inhibitSignal=True
         self.updateCombo()
         self.updateGui()
@@ -291,6 +293,7 @@ class DimensionSelectorWidget(QtGui.QWidget):
         self.dimMin=[-numpy.inf,-numpy.inf,-numpy.inf,-numpy.inf]
         self.dimMax=[numpy.inf,numpy.inf,numpy.inf,numpy.inf]
         self.dimStep=[0.05,0.05,0.05,1]
+        self.dimIndex=[0,1,2,3]
         self.updateGui()
         self.updateChanges()
         
@@ -331,6 +334,7 @@ class DimensionSelectorWidget(QtGui.QWidget):
         d['dimMin']=self.dimMin
         d['dimMax']=self.dimMax
         d['dimStep']=self.dimStep
+        d['dimIndex']=self.dimIndex
         self.changed.emit(d)
 
 if __name__=='__main__':

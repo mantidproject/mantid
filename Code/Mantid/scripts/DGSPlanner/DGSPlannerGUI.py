@@ -6,6 +6,8 @@ import mantid
 from ValidateOL import ValidateOL
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
+from  mpl_toolkits.axisartist.grid_helper_curvelinear import GridHelperCurveLinear
+from mpl_toolkits.axisartist import Subplot
 import matplotlib.pyplot
 import numpy
 
@@ -50,7 +52,10 @@ class DGSPlannerGUI(QtGui.QWidget):
         self.figure=Figure()
         self.figure.patch.set_facecolor('white')
         self.canvas=FigureCanvas(self.figure)
-        self.trajfig=self.figure.add_subplot(111)
+        self.grid_helper = GridHelperCurveLinear((self.tr, self.inv_tr))
+        self.trajfig = Subplot(self.figure, 1, 1, 1, grid_helper=self.grid_helper)
+        self.trajfig.hold(True)
+        self.figure.add_subplot(self.trajfig)
         self.layout().addWidget(self.canvas)
         #self.updateFigure()
         
@@ -70,11 +75,12 @@ class DGSPlannerGUI(QtGui.QWidget):
 
     @QtCore.pyqtSlot(mantid.geometry.OrientedLattice)
     def updateUB(self,ol):
-        print ol.getUB()
+        self.ol=ol
+        self.trajfig.clear()
+        
         
     @QtCore.pyqtSlot(dict)
     def updateParams(self,d):
-        #print d
         self.masterDict.update(d)
     
     def help(self):
@@ -82,18 +88,55 @@ class DGSPlannerGUI(QtGui.QWidget):
         QtGui.QDesktopServices.openUrl(QtCore.QUrl("http://docs.mantidproject.org/nightly/concepts/Lattice.html"))
         
     def updateFigure(self):
-        #print self.sender(),type(self.masterDict['dimStep'][0]),
         if self.sender() is self.plotButton:
             self.trajfig.clear()
-        self.trajfig=self.figure.add_subplot(111)
-        self.trajfig.hold(True)
-        t=numpy.arange(0,3,0.01)
-        s=numpy.sin(2*numpy.pi*t+self.masterDict['dimStep'][0])
+        
+        t=numpy.array([0,1,1,0.])+self.masterDict['dimStep'][0]
+        s=numpy.array([0.,0,1,1])
         if self.colorButton.isChecked():
             s+=0.1
-        self.trajfig.plot(t,s)    
-        self.canvas.draw()   
-            
+
+        x = numpy.arange(0, numpy.pi, 0.1)
+        y = numpy.arange(0, 2*numpy.pi, 0.1)
+        X, Y = numpy.meshgrid(x,y)
+        Z = numpy.cos(X) * numpy.sin(Y) * 10
+        Z = Z[:-1, :-1]
+        xx, yy = self.tr(X, Y)
+        self.trajfig.pcolorfast(xx,yy,Z)
+
+        #ax1.set_aspect(1.)
+        #ax1.set_xlim(-10, 10.)
+        #ax1.set_ylim(-10, 10.)
+
+        #self.trajfig.axis["t"]=self.trajfig.new_floating_axis(0, 0.)
+        #self.trajfig.axis["t2"]=self.trajfig.new_floating_axis(1, 0.)
+        
+        self.trajfig.set_xlabel(self.masterDict['dimNames'][0])
+        self.trajfig.set_ylabel(self.masterDict['dimNames'][1])
+        self.trajfig.grid(True)   
+        self.canvas.draw()
+        
+    def tr(self,x, y):
+        x, y = numpy.asarray(x), numpy.asarray(y)
+        #one of the axes is energy
+        if self.masterDict['dimIndex'][0]==3 or self.masterDict['dimIndex'][1]==3:
+            return x,y
+        else:
+            h1,k1,l1=(float(temp) for temp in self.masterDict['dimBasis'][self.masterDict['dimIndex'][0]].split(','))
+            h2,k2,l2=(float(temp) for temp in self.masterDict['dimBasis'][self.masterDict['dimIndex'][1]].split(','))
+            angle=numpy.radians(self.ol.recAngle(h1,k1,l1,h2,k2,l2))
+            return 1.*x+numpy.cos(angle)*y,  numpy.sin(angle)*y
+    def inv_tr(self,x,y):
+        x, y = numpy.asarray(x), numpy.asarray(y)
+        #one of the axes is energy
+        if self.masterDict['dimIndex'][0]==3 or self.masterDict['dimIndex'][1]==3:
+            return x,y
+        else:
+            h1,k1,l1=(float(temp) for temp in self.masterDict['dimBasis'][self.masterDict['dimIndex'][0]].split(','))
+            h2,k2,l2=(float(temp) for temp in self.masterDict['dimBasis'][self.masterDict['dimIndex'][1]].split(','))
+            angle=numpy.radians(self.ol.recAngle(h1,k1,l1,h2,k2,l2))
+            return 1.*x-y/numpy.tan(angle),  y/numpy.sin(angle)
+      
 if __name__=='__main__':
     app=QtGui.QApplication(sys.argv)
     orl=mantid.geometry.OrientedLattice(2,3,4,90,90,90)
