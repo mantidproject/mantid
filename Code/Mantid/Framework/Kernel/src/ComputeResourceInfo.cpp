@@ -18,7 +18,7 @@ Logger g_log("ComputeResourceInfo");
  * Construct a compute resource from information found in a facilities
  * definition file.
  *
- * @param f Facility where this (remote) compute resource is available
+ * @param fac Facility where this (remote) compute resource is available
  * @param elem A (Poco::XML::) Element to read the data from
  *
  * @throw std::runtime_error if name or required attributes are not
@@ -37,6 +37,8 @@ ComputeResourceInfo::ComputeResourceInfo(const FacilityInfo *fac,
         "The compute resource name is not defined, at element: " + elemStr);
   }
 
+  // default: Mantid web service API:
+  // http://www.mantidproject.org/Remote_Job_Submission_API
   m_managerType = "MantidWebServiceAPIJobManager";
   std::string type = elem->getAttribute("JobManagerType");
   if (!type.empty()) {

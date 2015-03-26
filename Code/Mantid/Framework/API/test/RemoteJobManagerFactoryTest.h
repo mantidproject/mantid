@@ -122,7 +122,7 @@ public:
         Mantid::Kernel::ConfigService::Instance().getFacility();
 
     Mantid::Kernel::ConfigService::Instance().setFacility("SNS");
-    // TODO: at the moemnt these two create throw a NotFoundError
+    // TODO: at the moment these two create throw a NotFoundError
     // because the RemoteJobManager classes are missing and have not
     // done a DECLARE_REMOTEJOBMANAGER. Change this test when that is
     // done (ticket #11126 etc.)
