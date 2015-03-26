@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>594</width>
+    <width>575</width>
     <height>488</height>
    </rect>
   </property>
@@ -143,7 +143,7 @@
         <property name="currentIndex">
          <number>0</number>
         </property>
-        <widget class="QWidget" name="pgFlatPlate">
+        <widget class="QWidget" name="pgAbsCorFlatPlate">
          <layout class="QGridLayout" name="loFlatPlate">
           <property name="margin">
            <number>0</number>
@@ -252,7 +252,7 @@
           </item>
          </layout>
         </widget>
-        <widget class="QWidget" name="pgAnnulus">
+        <widget class="QWidget" name="pgAbsCorAnnulus">
          <layout class="QGridLayout" name="loAnnulus">
           <property name="margin">
            <number>0</number>
@@ -324,7 +324,7 @@
           <item row="3" column="2">
            <widget class="QLabel" name="lbAnnCanOuterRadius">
             <property name="text">
-             <string>Can Outer Radius:</string>
+             <string>Container Outer Radius:</string>
             </property>
            </widget>
           </item>
@@ -341,13 +341,13 @@
           <item row="3" column="0">
            <widget class="QLabel" name="lbAnnCanInnerRadius">
             <property name="text">
-             <string>Can Inner Radius:</string>
+             <string>Container Inner Radius:</string>
             </property>
            </widget>
           </item>
          </layout>
         </widget>
-        <widget class="QWidget" name="pgCylinder">
+        <widget class="QWidget" name="pgAbsCorCylinder">
          <layout class="QGridLayout" name="loCylinder">
           <property name="margin">
            <number>0</number>

@@ -618,7 +618,6 @@ References:
 2. A K Soper, W S Howells & A C Hannon, RAL Report RAL-89-046 (1989)
 3. H H Paalman & C J Pings, J Appl Phys 33 2635 (1962)
 
-
 Apply Corrections
 -----------------
 
@@ -665,5 +664,89 @@ Plot Output
 Save Result
   If enabled the result will be saved as a NeXus file in the default save
   directory.
+
+Absorption Corrections
+----------------------
+
+.. interface:: Data Analysis
+  :widget: tabAbsorptionCorrections
+
+The Absorption Corrections tab provides a cross platform alternative to the
+previous Calculate and Apply Corrections tabs.
+
+Flat Plate
+~~~~~~~~~~
+
+.. interface:: Data Analysis
+  :widget: pgAbsCorFlatPlate
+
+Flat plate calculations are provided by the
+:ref:`<algm-IndirectFlatPlateAbsorption>` algorithm.
+
+Sample Width
+  Width of the sample in :math:`cm`.
+
+Sample Height
+  Height of the sample in :math:`cm`.
+
+Sample Thickness
+  Thickness of the sample in :math:`cm`.
+
+Container Front Thickness
+  Thickness of the front of the container in :math:`cm`.
+
+Container Back Thickness
+  Thickness of the back of the container in :math:`cm`.
+
+Element Size
+  Size of the square "chunks" to divide the frontal area of the sample into to
+  calculate corrections in :math:`cm`.
+
+Annulus
+~~~~~~~
+
+.. interface:: Data Analysis
+  :widget: pgAbsCorAnnulus
+
+Annulus calculations are provided by the :ref:`<algm-IndirectAnnulusAbsorption>`
+algorithm.
+
+Sample Inner Radius
+  Radius of the inner wall of the sample in :math:`cm`.
+
+Sample Outer Radius
+  Radius of the outer wall of the sample in :math:`cm`.
+
+Container Inner Radius
+  Radius of the inner wall of the container in :math:`cm`.
+
+Container Outer Radius
+  Radius of the outer wall of the container in :math:`cm`.
+
+Neutron Events
+  Number of events to use in the Monte Carlo simulation.
+
+Cylinder
+~~~~~~~~
+
+.. interface:: Data Analysis
+  :widget: pgAbsCorCylinder
+
+Cylinder calculations are provided by the
+:ref:`<algm-IndirectCylinderAbsorption>` algorithm.
+
+Sample Radius
+  Radius of the outer wall of the sample in :math:`cm`.
+
+Container Radius
+  Radius of the outer wall of the container in :math:`cm`.
+
+Neutron Events
+  Number of events to use in the Monte Carlo simulation.
+
+Common Options
+~~~~~~~~~~~~~~
+
+TODO
 
 .. categories:: Interfaces Indirect
