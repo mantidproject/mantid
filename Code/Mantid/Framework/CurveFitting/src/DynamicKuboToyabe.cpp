@@ -83,8 +83,7 @@ void polint (double xa[], double ya[], int n, double x, double& y, double& dy) {
 			hp=xa[i+m]-x;
 			w=c[i+1]-d[i];
 			if((den=ho-hp)==0.0){ //error message!!!
-        std::cout << "Error in routine polint\n" << std::endl;
-        exit(1);
+        throw std::runtime_error("Error in routin polint");
       }
 			den=w/den;
 			d[i]=hp*den;
@@ -117,7 +116,7 @@ double integral (double func(const double, const double, const double),
 		}
 		h[j+1]=h[j]/9.0;
 	}
-  std::cout << "integrate(): Too many steps in routine integrate\n" << std::endl;
+  throw std::runtime_error("Too many steps in routine integrate");
 	return 0.0;
 }
 
