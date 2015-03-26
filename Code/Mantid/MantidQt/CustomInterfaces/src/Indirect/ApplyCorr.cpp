@@ -146,7 +146,20 @@ namespace IDA
       uiv.addErrorMessage("Must use either container subtraction or corrections");
 
     if(useCan)
+    {
       uiv.checkDataSelectorIsValid("Container", m_uiForm.dsContainer);
+
+      QString sample = m_uiForm.dsSample->getCurrentDataName();
+      QString sampleType = sample.right(sample.length() - sample.lastIndexOf("_"));
+      QString container = m_uiForm.dsContainer->getCurrentDataName();
+      QString containerType = container.right(container.length() - container.lastIndexOf("_"));
+
+      g_log.debug() << "Sample type is: " << sampleType.toStdString() << std::endl;
+      g_log.debug() << "Can type is: " << containerType.toStdString() << std::endl;
+
+      if(containerType != sampleType)
+        uiv.addErrorMessage("Sample and can workspaces must contain the same type of data.");
+    }
 
     if(useCorrections)
       uiv.checkDataSelectorIsValid("Corrections", m_uiForm.dsCorrections);

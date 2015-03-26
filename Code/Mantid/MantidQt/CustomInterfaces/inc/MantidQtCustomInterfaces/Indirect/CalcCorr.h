@@ -24,17 +24,14 @@ namespace IDA
     virtual void loadSettings(const QSettings & settings);
 
   private slots:
-    void shape(int index);
-    void useCanChecked(bool checked);
-    void tcSync();
-    void getBeamWidthFromWorkspace(const QString& wsname);
+    void algorithmComplete(bool error);
+    void getBeamWidthFromWorkspace(const QString& wsName);
 
   private:
     Ui::CalcCorr m_uiForm;
-    QDoubleValidator * m_dblVal;
-    QDoubleValidator * m_posDblVal;
 
   };
+
 } // namespace IDA
 } // namespace CustomInterfaces
 } // namespace MantidQt
