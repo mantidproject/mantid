@@ -76,35 +76,6 @@ void LoadFITS::init() {
   declareProperty(new API::WorkspaceProperty<API::Workspace>(
       "OutputWorkspace", "", Kernel::Direction::Output));
 
-  /*
-  declareProperty(
-      new PropertyWithValue<int>("ImageKey", -1, Kernel::Direction::Input),
-      "Image type to set these files as. 0=data image, 1=flat field, 2=open "
-      "field, -1=use the value from FITS header.");
-  */
-  /*
-  declareProperty(new PropertyWithValue<string>(m_BIT_DEPTH_NAME, "BITPIX",
-                                                Kernel::Direction::Input),
-                  "Name for the pixel bit depth header key.");
-  */
-
-  /*
-  declareProperty(new PropertyWithValue<string>(m_ROTATION_NAME, "ROTATION",
-                                                Kernel::Direction::Input),
-  */
-
-  /*
-"Name for the rotation header key.");
-declareProperty(
-new PropertyWithValue<string>(m_AXIS_NAMES_NAME, "NAXIS1,NAXIS2",
-                    Kernel::Direction::Input),
-"Names for the axis header keys, comma separated string of all axis.");
-  */
-  /*
-  declareProperty(new PropertyWithValue<string>(m_IMAGE_KEY_NAME, "IMAGEKEY",
-                                                Kernel::Direction::Input),
-                  "Names for the image type, key.");
-  */
   declareProperty(
       new FileProperty(m_HEADER_MAP_NAME, "", FileProperty::OptionalDirectory,
                        "", Kernel::Direction::Input),
