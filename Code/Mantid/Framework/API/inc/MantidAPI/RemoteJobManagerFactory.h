@@ -92,7 +92,7 @@ private:
 #ifdef _WIN32
 // this breaks new namespace declaraion rules; need to find a better fix
 template class MANTID_API_DLL
-    Mantid::Kernel::SingletonHolder<FunctionFactoryImpl>;
+    Mantid::Kernel::SingletonHolder<RemoteJobManagerFactoryImpl>;
 #endif /* _WIN32 */
 
 // The factory is just a specialisation of SingletonHolder
