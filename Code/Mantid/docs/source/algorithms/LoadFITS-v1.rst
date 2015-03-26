@@ -9,22 +9,24 @@
 Description
 -----------
 
-Load data (typically images) from FITS files (where FITS stands for
-Flexible Image Transport System, see
-http://en.wikipedia.org/wiki/FITS). A new workspace (of type
+Load FITS files, which typically contain images, into workspaces. FITS
+stands for Flexible Image Transport System, see
+http://en.wikipedia.org/wiki/FITS. A new workspace (of type
 :ref:`Workspace2D <Workspace2D>`) is created for every FITS file
 loaded with this algorithm, and these workspaces are added into a
 group workspace. The group workspace is named as indicated in the
 OutputWorkspace input property. The workspaces included in the group
-are named with the same name and an appendix _1, _2, etc.
-
-The workspaces created by this algorithm contain one spectrum per
-pixel. The first spectrum correspond to the top-left corner and the
-last spectrum to the bottom-right corner.
+are named with the same name and an appendix _1, _2, etc., incremented
+sequentially as new files are loaded with the same OutputWorkspace
+property.
 
 The current implementation of this algorithm only supports 2D files
 (FITS images with two axes), and it should in principle be able to
 load FITS files from different sources.
+
+The workspaces created by this algorithm contain one spectrum per
+pixel. The first spectrum correspond to the top-left corner and the
+last spectrum to the bottom-right corner.
 
 FITS header entries
 ###################
@@ -72,7 +74,7 @@ Usage
         log1 = ws.getRun().getLogData(axis1_log)
         log2 = ws.getRun().getLogData(axis2_log)
         print "FITS image size: %d x %d pixels" % (log1, log2)
-        print "Number of spectra in output workspace: %d" % FITSws.getNumberHistograms()
+        print "Number of spectra in the output workspace: %d" % FITSws.getNumberHistograms()
     except RuntimeError:
         print "Could not find the keywords '%s' and '%s' in this FITS file" % (axis1_log, axis2_log)
 
@@ -86,7 +88,6 @@ Output:
 
    Bits per pixel: 16
    FITS image size: 512 x 512 pixels
-   Number of spectra in output workspace: 262144
-   Could not find the keywords 'NAXIS1' and 'NAXIS2' in this FITS file
+   Number of spectra in the output workspace: 262144
 
 .. categories::
