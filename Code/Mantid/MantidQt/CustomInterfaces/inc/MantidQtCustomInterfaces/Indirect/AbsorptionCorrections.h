@@ -23,7 +23,13 @@ namespace IDA
     virtual bool validate();
     virtual void loadSettings(const QSettings & settings);
 
+  private slots:
+    virtual void algorithmComplete(bool error);
+
   private:
+    void addShapeSpecificSampleOptions(Mantid::API::IAlgorithm_sptr alg, QString shape);
+    void addShapeSpecificCanOptions(Mantid::API::IAlgorithm_sptr alg, QString shape);
+
     Ui::AbsorptionCorrections m_uiForm;
 
   };

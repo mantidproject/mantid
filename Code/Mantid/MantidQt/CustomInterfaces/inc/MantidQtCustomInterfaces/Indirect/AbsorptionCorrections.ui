@@ -322,6 +322,23 @@
             </property>
            </widget>
           </item>
+          <item row="4" column="0">
+           <widget class="QLabel" name="lbCylEvents">
+            <property name="text">
+             <string>Neutron Events:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="1">
+           <widget class="QSpinBox" name="spAnnEvents">
+            <property name="maximum">
+             <number>1000000</number>
+            </property>
+            <property name="singleStep">
+             <number>10</number>
+            </property>
+           </widget>
+          </item>
          </layout>
         </widget>
         <widget class="QWidget" name="pgCylinder">
@@ -360,6 +377,23 @@
             </property>
             <property name="singleStep">
              <double>0.100000000000000</double>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="1">
+           <widget class="QSpinBox" name="spCylEvents">
+            <property name="maximum">
+             <number>1000000</number>
+            </property>
+            <property name="singleStep">
+             <number>10</number>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="0">
+           <widget class="QLabel" name="lbAnnEvents">
+            <property name="text">
+             <string>Neutron Events:</string>
             </property>
            </widget>
           </item>
@@ -425,15 +459,18 @@
       <string>Container Details</string>
      </property>
      <layout class="QGridLayout" name="gridLayout_2">
-      <item row="3" column="0">
+      <item row="4" column="0">
        <widget class="QLabel" name="lbCanChemicalFormula">
         <property name="text">
          <string>Chemical Formula:</string>
         </property>
        </widget>
       </item>
-      <item row="3" column="1">
+      <item row="4" column="1">
        <widget class="QLineEdit" name="leCanChemicalFormula">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
         <property name="sizePolicy">
          <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
           <horstretch>0</horstretch>
@@ -442,8 +479,11 @@
         </property>
        </widget>
       </item>
-      <item row="2" column="1">
+      <item row="3" column="1">
        <widget class="QDoubleSpinBox" name="spCanNumberDensity">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
         <property name="suffix">
          <string> A^-3</string>
         </property>
@@ -455,7 +495,7 @@
         </property>
        </widget>
       </item>
-      <item row="2" column="0">
+      <item row="3" column="0">
        <widget class="QLabel" name="lbCanNumberDensity">
         <property name="text">
          <string>Number Density:</string>
@@ -479,8 +519,8 @@
         </property>
        </widget>
       </item>
-      <item row="0" column="0">
-       <widget class="QCheckBox" name="cbUseContainerCorrections">
+      <item row="2" column="0">
+       <widget class="QCheckBox" name="ckUseCanCorrections">
         <property name="text">
          <string>Use Container Corrections</string>
         </property>
@@ -502,7 +542,7 @@
      </property>
      <layout class="QHBoxLayout" name="horizontalLayout_2">
       <item>
-       <widget class="QCheckBox" name="cbKeepFactors">
+       <widget class="QCheckBox" name="ckKeepFactors">
         <property name="text">
          <string>Keep Correction Factors</string>
         </property>
@@ -562,6 +602,31 @@
  </customwidgets>
  <tabstops>
   <tabstop>ckUseCan</tabstop>
+  <tabstop>cbShape</tabstop>
+  <tabstop>spFlatSampleHeight</tabstop>
+  <tabstop>spFlatSampleWidth</tabstop>
+  <tabstop>spFlatSampleThickness</tabstop>
+  <tabstop>spFlatCanFrontThickness</tabstop>
+  <tabstop>spFlatCanBackThickness</tabstop>
+  <tabstop>spFlatElementSize</tabstop>
+  <tabstop>spAnnCanInnerRadius</tabstop>
+  <tabstop>spAnnSampleInnerRadius</tabstop>
+  <tabstop>spAnnSampleOuterRadius</tabstop>
+  <tabstop>spAnnCanOuterRadius</tabstop>
+  <tabstop>spAnnEvents</tabstop>
+  <tabstop>spCylSampleRadius</tabstop>
+  <tabstop>spCylCanRadius</tabstop>
+  <tabstop>spCylEvents</tabstop>
+  <tabstop>spSampleNumberDensity</tabstop>
+  <tabstop>leSampleChemicalFormula</tabstop>
+  <tabstop>ckScaleCan</tabstop>
+  <tabstop>spCanScale</tabstop>
+  <tabstop>ckUseCanCorrections</tabstop>
+  <tabstop>spCanNumberDensity</tabstop>
+  <tabstop>leCanChemicalFormula</tabstop>
+  <tabstop>ckKeepFactors</tabstop>
+  <tabstop>ckPlot</tabstop>
+  <tabstop>ckSave</tabstop>
  </tabstops>
  <resources/>
  <connections>
@@ -626,6 +691,38 @@
     <hint type="destinationlabel">
      <x>296</x>
      <y>327</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ckUseCanCorrections</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>leCanChemicalFormula</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>156</x>
+     <y>447</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>436</x>
+     <y>528</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ckUseCanCorrections</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>spCanNumberDensity</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>156</x>
+     <y>447</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>436</x>
+     <y>501</y>
     </hint>
    </hints>
   </connection>
