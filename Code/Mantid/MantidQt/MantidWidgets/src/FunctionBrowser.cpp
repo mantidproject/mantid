@@ -1833,14 +1833,14 @@ bool FunctionBrowser::hasFunction() const
 }
 
 /// Get the number of datasets
-size_t FunctionBrowser::getNumberOfDatasets() const
+int FunctionBrowser::getNumberOfDatasets() const
 {
   return m_numberOfDatasets;
 }
 
 /// Set new number of the datasets
 /// @param n :: New value for the number of datasets.
-void FunctionBrowser::setNumberOfDatasets(size_t n)
+void FunctionBrowser::setNumberOfDatasets(int n)
 {
   if ( !m_multiDataset )
   {
@@ -1905,6 +1905,27 @@ void FunctionBrowser::setCurrentDataset(int i)
   {
     setParameter( par, getLocalParameterValue( par, m_currentDataset ) );
   }
+}
+
+/// Remove local parameter values for a number of datasets.
+/// @param indices :: A list of indices of datasets to remove.
+void FunctionBrowser::removeDatasets(QList<int> indices)
+{
+  int newSize = m_numberOfDatasets;
+  qSort(indices);
+  for(auto par = m_localParameterValues.begin(); par != m_localParameterValues.end(); ++par)
+  {
+    for(int i = indices.size() - 1; i >= 0; --i)
+    {
+      int index = indices[i];
+      if ( index < m_numberOfDatasets )
+      {
+        par.value().remove(index);
+      }
+    }
+    newSize = par.value().size();
+  }
+  setNumberOfDatasets( newSize );
 }
 
 } // MantidWidgets

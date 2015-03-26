@@ -118,7 +118,7 @@ public:
   /// Get a list of names of local parameters
   QStringList getLocalParameters() const;
   /// Get the number of datasets
-  size_t getNumberOfDatasets() const;
+  int getNumberOfDatasets() const;
   /// Get value of a local parameter
   double getLocalParameterValue(const QString& parName, int i) const;
 
@@ -138,10 +138,11 @@ signals:
 
 public slots:
 
-  void setNumberOfDatasets(size_t n);
+  void setNumberOfDatasets(int n);
   void setLocalParameterValue(const QString& parName, int i, double value);
   void resetLocalParameters();
   void setCurrentDataset(int i);
+  void removeDatasets(QList<int> indices);
 
 protected:
   /// Create the Qt property browser
@@ -334,7 +335,7 @@ protected:
   /// Set true if the constructed function is intended to be used in a multi-dataset fit
   bool m_multiDataset;
   /// Number of datasets this function is used for
-  size_t m_numberOfDatasets;
+  int m_numberOfDatasets;
   /// Storage for local paramtere values
   mutable QMap<QString,QVector<double>> m_localParameterValues;
   /// Index of a dataset for which the parameters are currently displayed

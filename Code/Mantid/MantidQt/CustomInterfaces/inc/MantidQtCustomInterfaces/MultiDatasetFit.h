@@ -87,7 +87,7 @@ public:
   /// Display info about the plot.
   void showPlotInfo();
   /// Check that the data sets in the table are valid
-  void checkDataSets();
+  void checkSpectra();
   /// Get value of a local parameter
   double getLocalParameterValue(const QString& parName, int i) const;
 
@@ -116,7 +116,7 @@ private:
   void showFunctionBrowserInfo();
   void showFitOptionsBrowserInfo();
   void showTableInfo();
-  void removeDataSets(std::vector<int>& rows);
+  void removeSpectra(QList<int> rows);
   void loadSettings();
   void saveSettings() const;
 
@@ -286,13 +286,14 @@ public:
   std::string getWorkspaceName(int i) const;
   int getWorkspaceIndex(int i) const;
   int getNumberOfSpectra() const;
-  void checkDataSets();
+  void checkSpectra();
   std::pair<double,double> getFittingRange(int i) const;
 
 signals:
   void dataTableUpdated();
   void dataSetUpdated(int i);
   void hasSelection(bool);
+  void spectraRemoved(QList<int>);
 
 public slots:
   void setFittingRangeGlobal(bool);
@@ -307,7 +308,7 @@ private slots:
 private:
   MultiDatasetFit *owner() const {return static_cast<MultiDatasetFit*>(parent());}
   void addWorkspaceSpectrum(const QString &wsName, int wsIndex, const Mantid::API::MatrixWorkspace& ws);
-  void removeDataSets(std::vector<int>& rows);
+  void removeSpectra(QList<int> rows);
 
   /// Table with data set names and other data.
   QTableWidget *m_dataTable;

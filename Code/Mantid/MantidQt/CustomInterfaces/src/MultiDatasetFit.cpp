@@ -468,7 +468,7 @@ boost::shared_ptr<DatasetPlotData> PlotController::getData(int index)
     {
       QMessageBox::critical(owner(),"MantidPlot - Error",e.what());
       clear();
-      owner()->checkDataSets();
+      owner()->checkSpectra();
       m_plot->replot();
       return boost::shared_ptr<DatasetPlotData>();
     }
@@ -486,7 +486,7 @@ void PlotController::plotDataSet(int index)
   if ( index < 0 || index >= m_table->rowCount() )
   {
     clear();
-    owner()->checkDataSets();
+    owner()->checkSpectra();
     m_plot->replot();
     return;
   }
@@ -842,6 +842,7 @@ void MultiDatasetFit::initLayout()
   connect(m_functionBrowser,SIGNAL(localParameterButtonClicked(const QString&)),this,SLOT(editLocalParameterValues(const QString&)));
   connect(m_functionBrowser,SIGNAL(functionStructureChanged()),this,SLOT(reset()));
   connect(m_plotController,SIGNAL(currentIndexChanged(int)),m_functionBrowser,SLOT(setCurrentDataset(int)));
+  connect(m_dataController,SIGNAL(spectraRemoved(QList<int>)),m_functionBrowser,SLOT(removeDatasets(QList<int>)));
 
   m_fitOptionsBrowser = new MantidQt::MantidWidgets::FitOptionsBrowser(NULL);
   splitter->addWidget( m_fitOptionsBrowser );
@@ -1259,9 +1260,9 @@ void MultiDatasetFit::showTableInfo()
 /**
  * Check that the data sets in the table are valid and remove invalid ones.
  */
-void MultiDatasetFit::checkDataSets()
+void MultiDatasetFit::checkSpectra()
 {
-  m_dataController->checkDataSets();
+  m_dataController->checkSpectra();
 }
 
 void MultiDatasetFit::enableZoom()
@@ -1392,7 +1393,7 @@ void DataController::removeSelectedSpectra()
 {
   auto ranges = m_dataTable->selectedRanges();
   if ( ranges.isEmpty() ) return;
-  std::vector<int> rows;
+  QList<int> rows;
   for(auto range = ranges.begin(); range != ranges.end(); ++range)
   {
     for(int row = range->topRow(); row <= range->bottomRow(); ++row)
@@ -1400,26 +1401,26 @@ void DataController::removeSelectedSpectra()
       rows.push_back( row );
     }
   }
-  removeDataSets( rows );
+  removeSpectra( rows );
 }
 
-void DataController::removeDataSets( std::vector<int>& rows )
+void DataController::removeSpectra( QList<int> rows )
 {
-  if ( rows.empty() ) return;
-  std::sort( rows.begin(), rows.end() );
-  for(auto row = rows.rbegin(); row != rows.rend(); ++row)
+  if ( rows.isEmpty() ) return;
+  qSort(rows);
+  for(int i = rows.size() - 1; i >= 0; --i)
   {
-    m_dataTable->removeRow( *row );
+    m_dataTable->removeRow( rows[i] );
   }
-  emit dataTableUpdated();
+  emit spectraRemoved(rows);
 }
 
 /**
  * Check that the data sets in the table are valid and remove invalid ones.
  */
-void DataController::checkDataSets()
+void DataController::checkSpectra()
 {
-  std::vector<int> rows;
+  QList<int> rows;
   int nrows = getNumberOfSpectra();
   auto& ADS = Mantid::API::AnalysisDataService::Instance();
   for( int row = 0; row < nrows; ++row)
@@ -1439,7 +1440,7 @@ void DataController::checkDataSets()
     }
   }
 
-  removeDataSets( rows );
+  removeSpectra( rows );
 }
 
 /**
