@@ -4,6 +4,7 @@
 #include <QSettings>
 #include <QDesktopServices>
 #include <QDesktopWidget>
+#include <Poco/Path.h>
 
 #include "MantidQtCustomInterfaces/MantidEV.h"
 #include "MantidAPI/AlgorithmManager.h"
@@ -318,6 +319,12 @@ void MantidEV::initLayout()
 
    QObject::connect( m_uiForm.actionLoad_Isaw_Peaks, SIGNAL(triggered()),
                      this, SLOT(loadIsawPeaks_slot()) );
+
+   QObject::connect( m_uiForm.actionSave_Nexus_Peaks, SIGNAL(triggered()),
+                     this, SLOT(saveNexusPeaks_slot()) );
+
+   QObject::connect( m_uiForm.actionLoad_Nexus_Peaks, SIGNAL(triggered()),
+                     this, SLOT(loadNexusPeaks_slot()) );
 
    QObject::connect( m_uiForm.actionShow_UB, SIGNAL(triggered()),
                      this, SLOT(showUB_slot()) );
@@ -765,15 +772,22 @@ void MantidEV::findPeaks_slot()
    else if ( load_peaks )
    {
      std::string file_name = m_uiForm.SelectPeaksFile_ledt->text().trimmed().toStdString();
+     std::string extension = Poco::Path(file_name).getExtension();
      if ( file_name.length() == 0 )
      {
        errorMessage("Specify a peaks file with the peaks to be loaded.");
        return;
      }
- 
-     if ( !worker->loadIsawPeaks( peaks_ws_name, file_name ) )
-     {
-       errorMessage("Could not load requested peaks file");
+     if (extension.compare("nxs") == 0 || extension.compare("h5") == 0){
+       if ( !worker->loadNexusPeaks( peaks_ws_name, file_name ) ){
+         errorMessage("Could not load requested peaks file");
+       }
+     }
+     else {
+       if ( !worker->loadIsawPeaks( peaks_ws_name, file_name ) )
+       {
+         errorMessage("Could not load requested NeXus file");
+       }
      }
    }
 }
@@ -788,7 +802,7 @@ void MantidEV::getLoadPeaksFileName_slot()
   QString Qfile_name = QFileDialog::getOpenFileName( this,
                          tr("Load peaks file"),
                          file_path,
-                         tr("Peaks Files (*.peaks *.integrate);; All files(*.*)"));
+                         tr("Peaks Files (*.peaks *.integrate *.nxs *.h5);; All files(*.*)"));
 
   if ( Qfile_name.length()> 0 )
   {
@@ -808,7 +822,7 @@ void MantidEV::getSavePeaksFileName()
   QString Qfile_name = QFileDialog::getSaveFileName( this,
                           tr("Save peaks file"),
                           file_path,
-                          tr("Peaks Files (*.peaks *.integrate);; All files(*.*) "),
+                          tr("Peaks Files (*.peaks *.integrate *.nxs *.h5);; All files(*.*)"),
                           0, QFileDialog::DontConfirmOverwrite );
 
   if ( Qfile_name.length() > 0 )
@@ -1495,6 +1509,67 @@ void MantidEV::saveIsawPeaks_slot()
   }
 }
 
+/**
+ *  Slot called when the Save Nexus Peaks action is selected from the File menu.
+ */
+void MantidEV::saveNexusPeaks_slot()
+{
+  std::string peaks_ws_name  = m_uiForm.PeaksWorkspace_ledt->text().trimmed().toStdString();
+  if ( peaks_ws_name.length() == 0 )
+  {
+    errorMessage("Specify a peaks workspace name on the Find Peaks tab.");
+    return;
+  }
+
+  getSavePeaksFileName();
+
+  std::string file_name = m_uiForm.SelectPeaksFile_ledt->text().trimmed().toStdString();
+  if ( file_name.length() == 0 )
+  {
+     errorMessage("Specify a peaks file name for saving the peaks workspace.");
+     return;
+  }
+  else
+  {
+                              // if the file exists, check for overwrite or append
+    bool append = false;
+    QFile peaks_file( QString::fromStdString( file_name ) );
+    if ( peaks_file.exists() )
+    {
+      QMessageBox message_box( this->window() );
+      message_box.setText( tr("File Exists") );
+      message_box.setInformativeText("Replace file, or append peaks to file?");
+      QAbstractButton *replace_btn = message_box.addButton( tr("Replace"), QMessageBox::NoRole );
+      QAbstractButton *append_btn  = message_box.addButton( tr("Append"),  QMessageBox::YesRole );
+      message_box.setIcon( QMessageBox::Question );
+                                                   // it should not be necessary to do the next
+                                                   // four lines, but without them the message box
+                                                   // appears at random locations on RHEL 6
+      message_box.show();
+      QSize box_size = message_box.sizeHint();
+      QRect screen_rect = QDesktopWidget().screen()->rect();
+      message_box.move( QPoint( screen_rect.width()/2 - box_size.width()/2,
+                                screen_rect.height()/2 - box_size.height()/2 ) );
+      message_box.exec();
+
+      if ( message_box.clickedButton() == append_btn )
+      {
+        append = true;
+      }
+      else if ( message_box.clickedButton() == replace_btn )  // no strictly needed, but clearer
+      {
+        append = false;
+      }
+    }
+
+    if ( !worker->saveNexusPeaks( peaks_ws_name, file_name, append ) )
+    {
+      errorMessage( "Failed to save peaks to file" );
+      return;
+    }
+  }
+}
+
 
 /**
  *  Slot called when the Load Isaw Peaks action is selected from the File menu.
@@ -1519,6 +1594,36 @@ void MantidEV::loadIsawPeaks_slot()
   else
   {
     if ( !worker->loadIsawPeaks( peaks_ws_name, file_name ) )
+    {
+      errorMessage( "Failed to Load Peaks File" );
+      return;
+    }
+  }
+}
+
+/**
+ *  Slot called when the Load Nexus Peaks action is selected from the File menu.
+ */
+void MantidEV::loadNexusPeaks_slot()
+{
+  std::string peaks_ws_name  = m_uiForm.PeaksWorkspace_ledt->text().trimmed().toStdString();
+  if ( peaks_ws_name.length() == 0 )
+  {
+    errorMessage("Specify a peaks workspace name on the Find Peaks tab.");
+    return;
+  }
+
+  getLoadPeaksFileName_slot();
+
+  std::string file_name = m_uiForm.SelectPeaksFile_ledt->text().trimmed().toStdString();
+  if ( file_name.length() == 0 )
+  {
+     errorMessage("Select a peaks file to be loaded.");
+     return;
+  }
+  else
+  {
+    if ( !worker->loadNexusPeaks( peaks_ws_name, file_name ) )
     {
       errorMessage( "Failed to Load Peaks File" );
       return;
