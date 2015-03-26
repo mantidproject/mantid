@@ -47,6 +47,7 @@ namespace //<unnamed>
 
 void export_SpaceGroup()
 {
+  register_ptr_to_python<boost::shared_ptr<SpaceGroup> >();
   register_ptr_to_python<boost::shared_ptr<const SpaceGroup> >();
 
   class_<SpaceGroup, boost::noncopyable, bases<Group> >("SpaceGroup", no_init)

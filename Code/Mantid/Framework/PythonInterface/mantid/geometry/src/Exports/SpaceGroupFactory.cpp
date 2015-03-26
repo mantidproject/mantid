@@ -30,9 +30,10 @@ namespace
         return self.isSubscribed(number);
     }
 
-    SpaceGroup_const_sptr createSpaceGroup(SpaceGroupFactoryImpl &self, const std::string &symbol)
+    SpaceGroup_sptr createSpaceGroup(SpaceGroupFactoryImpl &self, const std::string &symbol)
     {
-        return self.createSpaceGroup(symbol);
+        SpaceGroup_const_sptr spaceGroup = self.createSpaceGroup(symbol);
+        return boost::const_pointer_cast<SpaceGroup>(spaceGroup);
     }
 
 }
