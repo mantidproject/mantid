@@ -613,16 +613,26 @@
   <tabstop>ckUseCan</tabstop>
   <tabstop>cbShape</tabstop>
   <tabstop>spFlatSampleWidth</tabstop>
+  <tabstop>spFlatSampleHeight</tabstop>
   <tabstop>spFlatSampleThickness</tabstop>
   <tabstop>spFlatCanFrontThickness</tabstop>
+  <tabstop>spFlatCanBackThickness</tabstop>
   <tabstop>spFlatElementSize</tabstop>
   <tabstop>spAnnSampleInnerRadius</tabstop>
+  <tabstop>spAnnSampleOuterRadius</tabstop>
+  <tabstop>spAnnCanInnerRadius</tabstop>
+  <tabstop>spAnnCanOuterRadius</tabstop>
   <tabstop>spAnnEvents</tabstop>
   <tabstop>spCylSampleRadius</tabstop>
+  <tabstop>spCylCanRadius</tabstop>
   <tabstop>spCylEvents</tabstop>
   <tabstop>spSampleNumberDensity</tabstop>
+  <tabstop>leSampleChemicalFormula</tabstop>
   <tabstop>ckUseCanCorrections</tabstop>
+  <tabstop>ckScaleCan</tabstop>
+  <tabstop>spCanScale</tabstop>
   <tabstop>spCanNumberDensity</tabstop>
+  <tabstop>leCanChemicalFormula</tabstop>
   <tabstop>ckKeepFactors</tabstop>
   <tabstop>ckPlot</tabstop>
   <tabstop>ckSave</tabstop>
