@@ -351,11 +351,15 @@ V3D Matrix<T>::operator*(const V3D &Vx) const
   @return Matrix(This * A)
 */
 {
-  if (ny != 3 || nx != 3)
+  if (ny != 3 || nx > 3)
     throw Kernel::Exception::MisMatch<size_t>(ny, 3, "Matrix::operator*(V3D)");
-  return V3D(V[0][0] * Vx.X() + V[0][1] * Vx.Y() + V[0][2] * Vx.Z(),
-             V[1][0] * Vx.X() + V[1][1] * Vx.Y() + V[1][2] * Vx.Z(),
-             V[2][0] * Vx.X() + V[2][1] * Vx.Y() + V[2][2] * Vx.Z());
+
+  V3D v;
+  for(size_t i = 0; i < nx; ++i) {
+      v[i] = V[i][0] * Vx.X() + V[i][1] * Vx.Y() + V[i][2] * Vx.Z();
+  }
+
+  return v;
 }
 
 template <typename T>

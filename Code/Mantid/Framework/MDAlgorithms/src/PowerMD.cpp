@@ -22,10 +22,10 @@ PowerMD::~PowerMD() {}
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
-const std::string PowerMD::name() const { return "PowerMD"; };
+const std::string PowerMD::name() const { return "PowerMD"; }
 
 /// Algorithm's version for identification. @see Algorithm::version
-int PowerMD::version() const { return 1; };
+int PowerMD::version() const { return 1; }
 
 //----------------------------------------------------------------------------------------------
 

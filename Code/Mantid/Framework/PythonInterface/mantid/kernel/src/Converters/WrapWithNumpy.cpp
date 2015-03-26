@@ -65,14 +65,14 @@ namespace Mantid { namespace PythonInterface
         template DLLExport PyObject *wrapWithNDArray<ElementType>(const ElementType*, const int ndims, Py_intptr_t *dims, const NumpyWrapMode);
 
       ///@cond Doxygen doesn't seem to like this...
-      INSTANTIATE_WRAPNUMPY(int);
-      INSTANTIATE_WRAPNUMPY(long);
-      INSTANTIATE_WRAPNUMPY(long long);
-      INSTANTIATE_WRAPNUMPY(unsigned int);
-      INSTANTIATE_WRAPNUMPY(unsigned long);
-      INSTANTIATE_WRAPNUMPY(unsigned long long);
-      INSTANTIATE_WRAPNUMPY(double);
-      INSTANTIATE_WRAPNUMPY(float);
+      INSTANTIATE_WRAPNUMPY(int)
+      INSTANTIATE_WRAPNUMPY(long)
+      INSTANTIATE_WRAPNUMPY(long long)
+      INSTANTIATE_WRAPNUMPY(unsigned int)
+      INSTANTIATE_WRAPNUMPY(unsigned long)
+      INSTANTIATE_WRAPNUMPY(unsigned long long)
+      INSTANTIATE_WRAPNUMPY(double)
+      INSTANTIATE_WRAPNUMPY(float)
       ///@endcond
     }
   }

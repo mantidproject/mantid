@@ -1197,13 +1197,15 @@ LoadRawHelper::searchForLogFiles(const std::string &pathToRawFile) {
 
       try {
         Kernel::Glob::glob(Poco::Path(dir).resolve(pattern), potentialLogFiles);
-        // push potential log files from set to list.
-        potentialLogFilesList.insert(potentialLogFilesList.begin(),
-                                     potentialLogFiles.begin(),
-                                     potentialLogFiles.end());
       } catch (std::exception &) {
       }
     }
+
+    // push potential log files from set to list.
+    potentialLogFilesList.insert(potentialLogFilesList.begin(),
+                                  potentialLogFiles.begin(),
+                                  potentialLogFiles.end());
+
     // Remove extension from path, and append .log to path.
     std::string logName =
         pathToRawFile.substr(0, pathToRawFile.rfind('.')) + ".log";

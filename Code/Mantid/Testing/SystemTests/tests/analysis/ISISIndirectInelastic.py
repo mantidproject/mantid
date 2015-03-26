@@ -11,7 +11,6 @@ from mantid.api import FileFinder
 
 # Import our workflows.
 from inelastic_indirect_reducer import IndirectReducer
-from inelastic_indirect_reduction_steps import CreateCalibrationWorkspace
 from IndirectDataAnalysis import furyfitSeq, furyfitMult, confitSeq, abscorFeeder
 
 '''
@@ -468,11 +467,11 @@ class ISISIndirectInelasticCalibration(ISISIndirectInelasticBase):
 
         self.result_names = ['IndirectCalibration_Output']
 
-        CreateCalibrationWorkspace(InputFiles=self.data_file,
-                                   OutputWorkspace='IndirectCalibration_Output',
-                                   DetectorRange=self.detector_range,
-                                   PeakRange=self.peak,
-                                   BackgroundRange=self.back)
+        IndirectCalibration(InputFiles=self.data_file,
+                            OutputWorkspace='IndirectCalibration_Output',
+                            DetectorRange=self.detector_range,
+                            PeakRange=self.peak,
+                            BackgroundRange=self.back)
 
     def _validate_properties(self):
         '''Check the object properties are in an expected state to continue'''

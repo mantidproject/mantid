@@ -50,6 +50,11 @@ public:
 
   IFunction_sptr clone() const;
 
+  virtual void setWorkspace(boost::shared_ptr<const Workspace> ws);
+  virtual void
+  setMatrixWorkspace(boost::shared_ptr<const MatrixWorkspace> workspace,
+                     size_t wi, double startX, double endX);
+
   /// Set i-th parameter of decorated function.
   virtual void setParameter(size_t i, const double &value,
                             bool explicitlySet = true);

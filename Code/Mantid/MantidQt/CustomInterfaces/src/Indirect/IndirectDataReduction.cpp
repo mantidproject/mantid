@@ -29,7 +29,7 @@ namespace MantidQt
 {
   namespace CustomInterfaces
   {
-    DECLARE_SUBWINDOW(IndirectDataReduction);
+    DECLARE_SUBWINDOW(IndirectDataReduction)
   }
 }
 

@@ -185,11 +185,12 @@ namespace IDA
       auto groupWsNames = groupWs->getNames();
 
       // Find the correct fit workspace and plot it
-      std::string searchString = "_" + std::to_string(static_cast<long long int>(specNo)) + "_Workspace";
+      std::stringstream searchString;
+      searchString << "_" << specNo << "_Workspace";
       for(auto it = groupWsNames.begin(); it != groupWsNames.end(); ++it)
       {
         std::string wsName = *it;
-        if(wsName.find(searchString) != std::string::npos)
+        if(wsName.find(searchString.str()) != std::string::npos)
         {
           // Get the fit workspace
           auto ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName);

@@ -21,7 +21,7 @@ using namespace Kernel;
 using namespace std;
 
 // Subscription
-DECLARE_ALGORITHM(CalculateGammaBackground);
+DECLARE_ALGORITHM(CalculateGammaBackground)
 
 namespace {
 /// Number of elements in theta direction integration

@@ -34,7 +34,7 @@ class ShapeDetails;
  */
 class PointGroupBox : public QGroupBox
 {
-  Q_OBJECT;
+  Q_OBJECT
 
 public:
   //Default constructor

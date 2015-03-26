@@ -94,7 +94,7 @@ size_t ConvToMDBase::initialize(
   m_coordinateSystem = WSD.getCoordinateSystem();
 
   return n_spectra;
-};
+}
 
 /** empty default constructor */
 ConvToMDBase::ConvToMDBase()

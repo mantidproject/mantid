@@ -21,7 +21,7 @@
 
 #include <QtDebug>
 
-vtkStandardNewMacro(vtkMDEWNexusReader);
+vtkStandardNewMacro(vtkMDEWNexusReader)
 
 using namespace Mantid::VATES;
 using Mantid::Geometry::IMDDimension_sptr;

@@ -35,10 +35,10 @@ SpecularReflectionCalculateTheta::~SpecularReflectionCalculateTheta() {}
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string SpecularReflectionCalculateTheta::name() const {
   return "SpecularReflectionCalculateTheta";
-};
+}
 
 /// Algorithm's version for identification. @see Algorithm::version
-int SpecularReflectionCalculateTheta::version() const { return 1; };
+int SpecularReflectionCalculateTheta::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
 const std::string SpecularReflectionCalculateTheta::category() const {
