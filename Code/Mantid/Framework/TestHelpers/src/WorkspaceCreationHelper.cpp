@@ -84,7 +84,7 @@ Workspace2D_sptr Create1DWorkspaceConstant(int size, double value,
   y1.access().resize(size);
   std::fill(y1.access().begin(), y1.access().end(), value);
   e1.access().resize(size);
-  std::fill(y1.access().begin(), y1.access().end(), error);
+  std::fill(e1.access().begin(), e1.access().end(), error);
   Workspace2D_sptr retVal(new Workspace2D);
   retVal->initialize(1, size, size);
   retVal->setX(0, x1);
