@@ -1,6 +1,8 @@
 #include "MantidQtCustomInterfaces/Indirect/AbsorptionCorrections.h"
 #include "MantidQtCustomInterfaces/UserInputValidator.h"
 
+#include <QRegExpValidator>
+
 using namespace Mantid::API;
 
 namespace
@@ -18,6 +20,11 @@ namespace IDA
     IDATab(parent)
   {
     m_uiForm.setupUi(parent);
+
+    QRegExp regex("[A-Za-z0-9\\-\\(\\)]*");
+    QValidator *formulaValidator = new QRegExpValidator(regex, this);
+    m_uiForm.leSampleChemicalFormula->setValidator(formulaValidator);
+    m_uiForm.leCanChemicalFormula->setValidator(formulaValidator);
 
     // Handle algorithm completion
     connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)),
@@ -182,8 +189,24 @@ namespace IDA
   {
     UserInputValidator uiv;
 
-    //TODO
+    uiv.checkDataSelectorIsValid("Sample", m_uiForm.dsSampleInput);
 
+    if(uiv.checkFieldIsNotEmpty("Sample Chemical Formula", m_uiForm.leSampleChemicalFormula))
+      uiv.checkFieldIsValid("Sample Chamical Formula", m_uiForm.leSampleChemicalFormula);
+
+    bool useCan = m_uiForm.ckUseCan->isChecked();
+    if(useCan)
+    {
+      uiv.checkDataSelectorIsValid("Container", m_uiForm.dsCanInput);
+      bool useCanCorrections = m_uiForm.ckUseCanCorrections->isChecked();
+      if(useCanCorrections)
+      {
+        if(uiv.checkFieldIsNotEmpty("Container Chamical Formula", m_uiForm.leCanChemicalFormula))
+          uiv.checkFieldIsValid("Container Chamical Formula", m_uiForm.leCanChemicalFormula);
+      }
+    }
+
+    // Give error for failed validation
     if(!uiv.isAllInputValid())
     {
       QString error = uiv.generateErrorMessage();
