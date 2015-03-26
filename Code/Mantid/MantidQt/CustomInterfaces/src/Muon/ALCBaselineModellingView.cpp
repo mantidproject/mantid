@@ -3,14 +3,13 @@
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/FunctionDomain1D.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidQtAPI/HelpWindow.h"
 
 #include <boost/scoped_array.hpp>
 
-#include <QDesktopServices>
 #include <QMessageBox>
 #include <QMenu>
 #include <QSignalMapper>
-#include <QUrl>
 
 #include <qwt_symbol.h>
 
@@ -206,8 +205,7 @@ namespace CustomInterfaces
   }
 
   void ALCBaselineModellingView::help() {
-    QDesktopServices::openUrl(QUrl(QString("http://www.mantidproject.org/") +
-            "Muon_ALC:_Baseline_Modelling"));
+    MantidQt::API::HelpWindow::showCustomInterface(NULL, QString("Muon_ALC"));
   }
 
 } // namespace CustomInterfaces
