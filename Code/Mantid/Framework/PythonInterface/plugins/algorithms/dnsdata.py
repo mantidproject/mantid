@@ -1,14 +1,10 @@
-import os, sys, re
-import numpy as np
+import sys, re
 import datetime
-
-sys.path.append('/Users/ganeva/build/parse/parse-1.6.6')
-from parse import *
 
 class DNSdata:
     """
     class which describes the DNS data structure
-    will be used for data read-in and write-out routines 
+    will be used for data read-in and write-out routines
     """
     def __init__(self):
         self.title = ""
@@ -65,15 +61,15 @@ class DNSdata:
         """
         with open(filename, 'r') as fhandler:
             # read file content and split it into blocks
-            splitsymbol = '#--------------------------------------------------------------------------'
+            splitsymbol = \
+                    '#--------------------------------------------------------------------------'
             unparsed = fhandler.read()
             blocks = unparsed.split(splitsymbol)
 
-            # parse each block 
+            # parse each block
             # parse block 0 (header)
             res = parse_header(blocks[0])
-            #[TODO:]
-            #if not res: raise Exception "wrong file format" else 
+            #if not res: raise Exception "wrong file format" else
             try:
                 self.run_number = res['file']
                 self.experiment_number = res['exp']
@@ -81,30 +77,32 @@ class DNSdata:
                 self.userid = res['userid']
             except:
                 raise ValueError("The file %s does not contain valid DNS data format." % filename)
-            
             # parse block 1 (general information)
             b1splitted = map(str.strip, blocks[1].split('#'))
-            b1rest = [el for el in b1splitted] # otherwise unexpected behaviour due to the removed lines
-            #[TODO:] get rid of parse 
+            b1rest = [el for el in b1splitted]
+            r_user = re.compile("User:\s*(?P<name>.*?$)")
+            r_sample = re.compile("Sample:\s*(?P<sample>.*?$)")
+            r_coil = re.compile("^(?P<coil>.*?)\s*xyz-coil.*")
+            r_filter = re.compile("^(?P<filter>.*?)\s*Be-filter.*")
             for line in b1splitted:
-                res = parse('User: {user_name}', line)
+                res = r_user.match(line)
                 if res:
-                    self.user_name = res['user_name']
+                    self.user_name = res.group("name")
                     b1rest.remove(line)
-                res = parse('Sample: {sample_descr}', line)
+                res = r_sample.match(line)
                 if res:
-                    self.sample_description = res['sample_descr']
+                    self.sample_description = res.group("sample")
                     b1rest.remove(line)
-                res = parse('{coil_status} xyz-coil,', line)
+                res = r_coil.match(line)
                 if res:
-                    self.coil_status = res['coil_status']
+                    self.coil_status = res.group("coil")
                     b1rest.remove(line)
-                res = parse('{filter_status} Be-filter', line)
+                res = r_filter.match(line)
                 if res:
-                    self.befilter_status = res['filter_status']
+                    self.befilter_status = res.group("filter")
                     b1rest.remove(line)
                 # the rest unparsed lines go to notes for the moment
-                # [TODO]: parse more information about the sample, e.g. space group etc.
+                # [TODO]: parse more information about the sample
                 self.notes = ' '.join(b1rest)
 
             # parse block 2 (wavelength and mochromator angle)
@@ -113,7 +111,7 @@ class DNSdata:
             # assume that theta and lambda are always on the fixed positions
             # assume theta is give in degree, lambda in nm
             line = b2splitted[2].split()
-            self.monochromator_angle = float(line[2]) 
+            self.monochromator_angle = float(line[2])
             self.wavelength = float(line[3])*10.0
 
             # parse block 3 (motors position)
@@ -126,17 +124,25 @@ class DNSdata:
             self.cradle_lower = float(b3splitted[6].split()[1])
             self.cradle_upper = float(b3splitted[7].split()[1])
             # Slit_i, convert mm to meter
-            self.slit_i_upper_blade_position = 0.001*float(b3splitted[9].split()[2])
-            self.slit_i_lower_blade_position = 0.001*float(b3splitted[10].split()[1])
-            self.slit_i_left_blade_position = 0.001*float(b3splitted[11].split()[2])
-            self.slit_i_right_blade_position = 0.001*float(b3splitted[12].split()[1])
+            self.slit_i_upper_blade_position = \
+                    0.001*float(b3splitted[9].split()[2])
+            self.slit_i_lower_blade_position = \
+                    0.001*float(b3splitted[10].split()[1])
+            self.slit_i_left_blade_position = \
+                    0.001*float(b3splitted[11].split()[2])
+            self.slit_i_right_blade_position = \
+                    0.001*float(b3splitted[12].split()[1])
             # Slit_f
-            self.slit_f_upper_blade_position = 0.001*float(b3splitted[14].split()[1])
-            self.slit_f_lower_blade_position = 0.001*float(b3splitted[15].split()[1])
+            self.slit_f_upper_blade_position = \
+                    0.001*float(b3splitted[14].split()[1])
+            self.slit_f_lower_blade_position = \
+                    0.001*float(b3splitted[15].split()[1])
             # Detector_position vertical
-            self.detector_position_vertical = 0.001*float(b3splitted[16].split()[1])
+            self.detector_position_vertical = \
+                    0.001*float(b3splitted[16].split()[1])
             # Polarizer
-            self.polarizer_translation = 0.001*float(b3splitted[19].split()[1])
+            self.polarizer_translation = \
+                    0.001*float(b3splitted[19].split()[1])
             self.polarizer_rotation = float(b3splitted[20].split()[1])
 
             # parse block 4 (B-fields), only currents in A are taken
@@ -152,8 +158,8 @@ class DNSdata:
             # parse block 5 (Temperatures)
             # assume: T1=cold_head_temperature, T2=sample_temperature
             b5splitted = map(str.strip, blocks[5].split('#'))
-            self.t1 = float(b5splitted[2].split()[1]) 
-            self.t2 = float(b5splitted[3].split()[1]) 
+            self.t1 = float(b5splitted[2].split()[1])
+            self.t2 = float(b5splitted[3].split()[1])
             self.tsp = float(b5splitted[4].split()[1])
 
             # parse block 6 (TOF parameters)
@@ -188,18 +194,18 @@ def parse_header(h):
     parses the header string and returns the parsed dictionary
     """
     d = {}
-    regexp=re.compile("(\w+)=(\w+)")
-    result=regexp.finditer(h)
+    regexp = re.compile("(\w+)=(\w+)")
+    result = regexp.finditer(h)
     for r in result:
         d[r.groups()[0]] = r.groups()[1]
     return d
 
 
-if __name__== '__main__':
+if __name__ == '__main__':
     fname = sys.argv[1]
-    d = DNSdata()
-    d.read_legacy(fname)
-    print d.__dict__
+    dns_data = DNSdata()
+    dns_data.read_legacy(fname)
+    print dns_data.__dict__
 
 
 
