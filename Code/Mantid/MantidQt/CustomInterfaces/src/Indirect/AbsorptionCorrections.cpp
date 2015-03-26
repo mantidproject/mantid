@@ -219,7 +219,8 @@ namespace IDA
 
   void AbsorptionCorrections::loadSettings(const QSettings & settings)
   {
-    UNUSED_ARG(settings);
+    m_uiForm.dsSampleInput->readSettings(settings.group());
+    m_uiForm.dsCanInput->readSettings(settings.group());
   }
 
 
