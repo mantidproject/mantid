@@ -72,7 +72,8 @@ protected:
                            PoldiPeakCollection_sptr &to) const;
 
   PoldiPeakCollection_sptr
-  getPeakCollectionFromFunction(const API::IFunction_sptr &fitFunction) const;
+  getPeakCollectionFromFunction(const API::IFunction_sptr &fitFunction,
+                                const API::IAlgorithm_sptr &errorAlg) const;
   Poldi2DFunction_sptr getFunctionFromPeakCollection(
       const PoldiPeakCollection_sptr &peakCollection) const;
   void addBackgroundTerms(Poldi2DFunction_sptr poldi2DFunction) const;

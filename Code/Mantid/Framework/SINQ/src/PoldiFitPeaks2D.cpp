@@ -50,9 +50,7 @@ const std::string PoldiFitPeaks2D::name() const { return "PoldiFitPeaks2D"; }
 int PoldiFitPeaks2D::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string PoldiFitPeaks2D::category() const {
-  return "SINQ\\Poldi";
-}
+const std::string PoldiFitPeaks2D::category() const { return "SINQ\\Poldi"; }
 
 /// Very short algorithm summary. @see Algorith::summary
 const std::string PoldiFitPeaks2D::summary() const {
@@ -114,7 +112,7 @@ void PoldiFitPeaks2D::init() {
  * @return PoldiPeakCollection containing peaks with normalized intensities
  */
 PoldiPeakCollection_sptr PoldiFitPeaks2D::getPeakCollectionFromFunction(
-    const IFunction_sptr &fitFunction) const {
+    const IFunction_sptr &fitFunction, const IAlgorithm_sptr &errorAlg) const {
   Poldi2DFunction_sptr poldi2DFunction =
       boost::dynamic_pointer_cast<Poldi2DFunction>(fitFunction);
 
@@ -126,6 +124,9 @@ PoldiPeakCollection_sptr PoldiFitPeaks2D::getPeakCollectionFromFunction(
   PoldiPeakCollection_sptr normalizedPeaks =
       boost::make_shared<PoldiPeakCollection>(PoldiPeakCollection::Integral);
 
+  boost::shared_ptr<const Kernel::DblMatrix> covarianceMatrix =
+      poldi2DFunction->getCovarianceMatrix();
+
   for (size_t i = 0; i < poldi2DFunction->nFunctions(); ++i) {
     boost::shared_ptr<PoldiSpectrumDomainFunction> peakFunction =
         boost::dynamic_pointer_cast<PoldiSpectrumDomainFunction>(
@@ -135,6 +136,21 @@ PoldiPeakCollection_sptr PoldiFitPeaks2D::getPeakCollectionFromFunction(
       IPeakFunction_sptr profileFunction =
           boost::dynamic_pointer_cast<IPeakFunction>(
               peakFunction->getProfileFunction());
+
+      size_t nParams = profileFunction->nParams();
+      boost::shared_ptr<Kernel::DblMatrix> localCov =
+          boost::make_shared<Kernel::DblMatrix>(nParams, nParams, false);
+      for (size_t j = 0; j < nParams; ++j) {
+        for (size_t k = 0; k < nParams; ++k) {
+          (*localCov)[j][k] = (*covarianceMatrix)[i + j][i + k];
+        }
+      }
+
+      profileFunction->setCovarianceMatrix(localCov);
+
+      errorAlg->setProperty("Function", profileFunction);
+      errorAlg->setPropertyValue("OutputWorkspace", "Errors");
+      errorAlg->execute();
 
       double centre = profileFunction->centre();
       double height = profileFunction->height();
@@ -253,8 +269,10 @@ void PoldiFitPeaks2D::exec() {
 
   MatrixWorkspace_sptr outWs1D = get1DSpectrum(fitFunction, ws);
 
+  IAlgorithm_sptr errorAlg = createChildAlgorithm("EstimatePeakErrors");
+
   PoldiPeakCollection_sptr normalizedPeaks =
-      getPeakCollectionFromFunction(fitFunction);
+      getPeakCollectionFromFunction(fitFunction, errorAlg);
   PoldiPeakCollection_sptr integralPeaks =
       getCountPeakCollection(normalizedPeaks);
 
