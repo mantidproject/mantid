@@ -193,15 +193,6 @@ namespace IDA
 
     uiv.checkDataSelectorIsValid("Sample", m_uiForm.dsSampleInput);
 
-    if(m_uiForm.dsSampleInput->isValid())
-    {
-      std::string sampleWsName = m_uiForm.dsSampleInput->getCurrentDataName().toStdString();
-      MatrixWorkspace_sptr sampleWs = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(sampleWsName);
-      Mantid::Kernel::Unit_sptr sampleXUnit = sampleWs->getAxis(0)->unit();
-      if(sampleXUnit->caption() != "Wavelength")
-        uiv.addErrorMessage("Sample workspace must have an X axis in wavelength.");
-    }
-
     if(uiv.checkFieldIsNotEmpty("Sample Chemical Formula", m_uiForm.leSampleChemicalFormula))
       uiv.checkFieldIsValid("Sample Chamical Formula", m_uiForm.leSampleChemicalFormula);
 
@@ -209,15 +200,6 @@ namespace IDA
     if(useCan)
     {
       uiv.checkDataSelectorIsValid("Container", m_uiForm.dsCanInput);
-
-      if(m_uiForm.dsCanInput->isValid())
-      {
-        std::string canWsName = m_uiForm.dsCanInput->getCurrentDataName().toStdString();
-        MatrixWorkspace_sptr canWs = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(canWsName);
-        Mantid::Kernel::Unit_sptr canXUnit = canWs->getAxis(0)->unit();
-        if(canXUnit->caption() != "Wavelength")
-          uiv.addErrorMessage("Container workspace must have an X axis in wavelength.");
-      }
 
       bool useCanCorrections = m_uiForm.ckUseCanCorrections->isChecked();
       if(useCanCorrections)
