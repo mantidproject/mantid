@@ -9,16 +9,16 @@
 Description
 -----------
 
-Load FITS files, which typically contain images, into workspaces. FITS
-stands for Flexible Image Transport System, see
-http://en.wikipedia.org/wiki/FITS. A new workspace (of type
-:ref:`Workspace2D <Workspace2D>`) is created for every FITS file
-loaded with this algorithm, and these workspaces are added into a
-group workspace. The group workspace is named as indicated in the
-OutputWorkspace input property. The workspaces included in the group
-are named with the same name and an appendix _1, _2, etc., incremented
-sequentially as new files are loaded with the same OutputWorkspace
-property.
+Load FITS files, which typically contain images, into a
+:ref:`WorkspaceGroup <WorkspaceGroup>`. FITS stands for Flexible Image
+Transport System, see http://en.wikipedia.org/wiki/FITS. A new
+workspace (of type :ref:`Workspace2D <Workspace2D>`) is created for
+every FITS file loaded with this algorithm, and these workspaces are
+added into a :ref:`WorkspaceGroup <WorkspaceGroup>`. The group
+workspace is named as indicated in the OutputWorkspace input
+property. The workspaces included in the group are named with the same
+name and an appendix _1, _2, etc., incremented sequentially as new
+files are loaded with the same OutputWorkspace property.
 
 The current implementation of this algorithm only supports 2D files
 (FITS images with two axes), and it should in principle be able to
@@ -58,7 +58,8 @@ Usage
 .. testcode:: LoadFITS
 
     ws_name = 'FITSws'
-    ws = LoadFITS(Filename='FITS_small_01.fits', OutputWorkspace=ws_name)
+    wsg = LoadFITS(Filename='FITS_small_01.fits', OutputWorkspace=ws_name)
+    ws = wsg.getItem(0)
 
     # A couple of standard FITS header entries
     bpp_log = 'BITPIX'
