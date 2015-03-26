@@ -9,25 +9,34 @@
 Description
 -----------
 
-Load data from FITS files. A new workspace (of type :ref:`Workspace2D
-<Workspace2D>`) is created for every FITS file loaded with this
-algorithm, and these workspaces are added into a group workspace. The
-group workspace is named as indicated in the OutputWorkspace input
-property. The workspaces included in the group are named with the same
-name and an appendix _1, _2, etc.
+Load data (typically images) from FITS files (where FITS stands for
+Flexible Image Transport System, see
+http://en.wikipedia.org/wiki/FITS). A new workspace (of type
+:ref:`Workspace2D <Workspace2D>`) is created for every FITS file
+loaded with this algorithm, and these workspaces are added into a
+group workspace. The group workspace is named as indicated in the
+OutputWorkspace input property. The workspaces included in the group
+are named with the same name and an appendix _1, _2, etc.
 
 The workspaces created by this algorithm contain one spectrum per
 pixel. The first spectrum correspond to the top-left corner and the
 last spectrum to the bottom-right corner.
 
+The current implementation of this algorithm only supports 2D files
+(FITS images with two axes), and it should in principle be able to
+load FITS files from different sources.
+
 FITS header entries
 ###################
 
+At a very minimum, the standard header entries SIMPLE, BITPIX, NAXIS,
+NAXIS1, and NAXIS2 must be present in the file.
+
 This algorithm interprets extension headers defined for the IMAT
-instrument (ISIS facility). At a very minimum, the standard header
-entries SIMPLE, BITPIX, NAXIS, NAXIS1, and NAXIS2 must be present in
-the file. The current implementation only supports 2D files (FITS
-images with two axes).
+instrument (ISIS facility). The set of extension headers for the IMAT
+instrument is being defined as of this writing and specific support
+and/or functionality related to additional headers might be added in
+this algorithm.
 
 Child algorithms used
 #####################
@@ -79,4 +88,5 @@ Output:
    FITS image size: 512 x 512 pixels
    Number of spectra in output workspace: 262144
    Could not find the keywords 'NAXIS1' and 'NAXIS2' in this FITS file
+
 .. categories::
