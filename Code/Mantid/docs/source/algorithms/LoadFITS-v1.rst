@@ -58,7 +58,7 @@ Usage
 .. testcode:: LoadFITS
 
     ws_name = 'FITSws'
-    FITSws = LoadFITS(Filename='FITS_small_01.fits', OutputWorkspace=ws_name)
+    ws = LoadFITS(Filename='FITS_small_01.fits', OutputWorkspace=ws_name)
 
     # A couple of standard FITS header entries
     bpp_log = 'BITPIX'
@@ -74,7 +74,7 @@ Usage
         log1 = ws.getRun().getLogData(axis1_log)
         log2 = ws.getRun().getLogData(axis2_log)
         print "FITS image size: %d x %d pixels" % (log1, log2)
-        print "Number of spectra in the output workspace: %d" % FITSws.getNumberHistograms()
+        print "Number of spectra in the output workspace: %d" % ws.getNumberHistograms()
     except RuntimeError:
         print "Could not find the keywords '%s' and '%s' in this FITS file" % (axis1_log, axis2_log)
 
