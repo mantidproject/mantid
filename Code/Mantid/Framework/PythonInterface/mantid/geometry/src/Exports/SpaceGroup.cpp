@@ -1,4 +1,5 @@
 
+#include "MantidGeometry/Crystal/Group.h"
 #include "MantidGeometry/Crystal/SpaceGroup.h"
 #include "MantidPythonInterface/kernel/Converters/PyObjectToV3D.h"
 
@@ -8,6 +9,7 @@
 #include <boost/python/list.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
 
+using Mantid::Geometry::Group;
 using Mantid::Geometry::SpaceGroup;
 using Mantid::Geometry::SymmetryOperation;
 
@@ -45,9 +47,9 @@ namespace //<unnamed>
 
 void export_SpaceGroup()
 {
-  register_ptr_to_python<boost::shared_ptr<SpaceGroup> >();
+  register_ptr_to_python<boost::shared_ptr<const SpaceGroup> >();
 
-  class_<SpaceGroup, boost::noncopyable>("SpaceGroup", no_init)
+  class_<SpaceGroup, boost::noncopyable, bases<Group> >("SpaceGroup", no_init)
           .def("order", &SpaceGroup::order)
           .def("getSymmetryOperationStrings", &getSymmetryOperationStrings)
           .def("number", &SpaceGroup::number)
