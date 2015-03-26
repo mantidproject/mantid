@@ -6,10 +6,6 @@
 #include "MantidAPI/FunctionFactory.h"
 #include <vector>
 
-#define JMAX 14
-#define JMAXP (JMAX+1)
-#define K 5
-
 namespace Mantid
 {
 namespace CurveFitting
@@ -102,9 +98,14 @@ void polint (double xa[], double ya[], int n, double x, double& y, double& dy) {
 
 // Integration
 double integral (double func(const double, const double, const double),
-				const double a, const double b, const double g, const double w0) {
-	int j;
-	double ss,dss;
+                 const double a, const double b, const double g, const double w0) {
+
+  const int JMAX = 14;
+  const int JMAXP = JMAX + 1;
+  const int K = 5;
+
+  int j;
+  double ss,dss;
 	double h[JMAXP+1], s[JMAXP];
 
 	h[1] = 1.0;
