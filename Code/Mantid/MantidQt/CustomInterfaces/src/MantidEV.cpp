@@ -16,7 +16,7 @@ namespace CustomInterfaces
 {
 
 //Register the class with the factory
-DECLARE_SUBWINDOW(MantidEV);
+DECLARE_SUBWINDOW(MantidEV)
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;

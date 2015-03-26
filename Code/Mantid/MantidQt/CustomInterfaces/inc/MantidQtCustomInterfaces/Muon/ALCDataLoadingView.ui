@@ -436,6 +436,19 @@
               <item>
                 <layout class="QHBoxLayout" name="horizontalLayout_3">
                   <item>
+                    <widget class="QPushButton" name="help">
+                      <property name="maximumSize">
+                        <size>
+                          <width>25</width>
+                          <height>25</height>
+                        </size>
+                      </property>
+                      <property name="text">
+                        <string>?</string>
+                      </property>
+                    </widget>
+                  </item>
+                  <item>
                     <spacer name="horizontalSpacer">
                       <property name="orientation">
                         <enum>Qt::Horizontal</enum>
@@ -498,6 +511,7 @@
     <tabstop>differential</tabstop>
     <tabstop>minTime</tabstop>
     <tabstop>maxTime</tabstop>
+    <tabstop>help</tabstop>
     <tabstop>load</tabstop>
   </tabstops>
   <resources/>

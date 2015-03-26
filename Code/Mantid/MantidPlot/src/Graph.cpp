@@ -5360,9 +5360,11 @@ void Graph::enablePanningMagnifier(bool on)
     delete d_panner;
 
   QwtPlotCanvas *cnvs =d_plot->canvas(); //canvas();
-  if (on){
+  if (on) {
     cnvs->setCursor(Qt::pointingHandCursor);
     d_magnifier = new QwtPlotMagnifier(cnvs);
+    // Disable the mouse button as it causes issues with the context menu
+    d_magnifier->setMouseButton(Qt::NoButton);
     d_magnifier->setAxisEnabled(QwtPlot::yRight,false);
     d_magnifier->setZoomInKey(Qt::Key_Plus, Qt::ShiftModifier);
 

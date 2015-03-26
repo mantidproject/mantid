@@ -27,7 +27,7 @@ namespace
 
   //------------------------------- Overload macros ---------------------------
   // Overloads for operator() function which has 1 optional argument
-  BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Axis_getValue, Axis::getValue, 1, 2);
+  BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Axis_getValue, Axis::getValue, 1, 2)
 
   /**
    * Extract the axis values as a sequence. A numpy array is used if the

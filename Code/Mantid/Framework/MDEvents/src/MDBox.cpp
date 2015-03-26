@@ -296,7 +296,7 @@ TMDE(void MDBox)::getEventsData(std::vector<coord_t> &coordTable,
 #ifdef MDBOX_TRACK_CENTROID
   this->calculateCentroid(this->m_centroid);
 #endif
-};
+}
 /** The method to convert the table of data into vector of events
  *   Used to load events from plain binary file
  *   @param coordTable -- vector of events parameters, which will be converted
@@ -305,7 +305,7 @@ TMDE(void MDBox)::getEventsData(std::vector<coord_t> &coordTable,
  */
 TMDE(void MDBox)::setEventsData(const std::vector<coord_t> &coordTable) {
   MDE::dataToEvents(coordTable, this->data);
-};
+}
 
 //-----------------------------------------------------------------------------------------------
 /** Allocate and return a vector with a copy of all events contained

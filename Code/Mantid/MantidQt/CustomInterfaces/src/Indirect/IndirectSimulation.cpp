@@ -14,7 +14,7 @@ namespace MantidQt
 {
   namespace CustomInterfaces
   {
-    DECLARE_SUBWINDOW(IndirectSimulation);
+    DECLARE_SUBWINDOW(IndirectSimulation)
   }
 }
 

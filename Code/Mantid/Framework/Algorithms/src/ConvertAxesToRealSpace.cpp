@@ -35,7 +35,7 @@ const std::string ConvertAxesToRealSpace::name() const {
 }
 
 /// Algorithm's version for identification. @see Algorithm::version
-int ConvertAxesToRealSpace::version() const { return 1; };
+int ConvertAxesToRealSpace::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
 const std::string ConvertAxesToRealSpace::category() const {
@@ -46,7 +46,7 @@ const std::string ConvertAxesToRealSpace::category() const {
 const std::string ConvertAxesToRealSpace::summary() const {
   return "Converts the spectrum and TOF axes to real space values, integrating "
          "the data in the process";
-};
+}
 
 //----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.

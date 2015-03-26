@@ -50,7 +50,7 @@
 
 namespace Mantid {
 namespace MDAlgorithms {
-DECLARE_FUNCTION(ResolutionConvolvedCrossSection);
+DECLARE_FUNCTION(ResolutionConvolvedCrossSection)
 
 namespace {
 // Attribute names

@@ -23,7 +23,7 @@
 
 namespace Mantid {
 namespace MDEvents {
-DECLARE_DOMAINCREATOR(FitMD);
+DECLARE_DOMAINCREATOR(FitMD)
 
 using namespace API;
 using namespace Kernel;

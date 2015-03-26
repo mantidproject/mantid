@@ -50,6 +50,7 @@ public:
   MOCK_METHOD1(setAvailablePeriods, void(const std::vector<std::string>&));
   MOCK_METHOD0(setWaitingCursor, void());
   MOCK_METHOD0(restoreCursor, void());
+  MOCK_METHOD0(help, void());
 
   void requestLoading() { emit loadRequested(); }
   void selectFirstRun() { emit firstRunSelected(); }
@@ -259,6 +260,12 @@ public:
                            QwtDataY(0, 0.012884, 1E-6), QwtDataY(1, 0.022489, 1E-6),
                            QwtDataY(2, 0.038717, 1E-6))));
     m_view->requestLoading();
+  }
+
+  void test_helpPage ()
+  {
+    EXPECT_CALL(*m_view, help()).Times(1);
+    m_view->help();
   }
 };
 
