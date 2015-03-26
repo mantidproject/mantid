@@ -82,7 +82,10 @@ namespace MantidWidgets
  * @param multi  :: Option to use the browser for multi-dataset fitting.
  */
 FunctionBrowser::FunctionBrowser(QWidget *parent, bool multi)
-  :QWidget(parent),m_multiDataset(multi)
+  :QWidget(parent),m_multiDataset(multi),
+  m_numberOfDatasets(0),
+  m_currentDataset(0)
+
 {
   // create m_browser
   createBrowser();
@@ -1827,6 +1830,81 @@ void FunctionBrowser::parameterButtonClicked(QtProperty *prop)
 bool FunctionBrowser::hasFunction() const
 {
   return ! m_functionManager->properties().isEmpty();
+}
+
+/// Get the number of datasets
+size_t FunctionBrowser::getNumberOfDatasets() const
+{
+  return m_numberOfDatasets;
+}
+
+/// Set new number of the datasets
+/// @param n :: New value for the number of datasets.
+void FunctionBrowser::setNumberOfDatasets(size_t n)
+{
+  if ( !m_multiDataset )
+  {
+    throw std::runtime_error("Function browser wasn't set up for multi-dataset fitting.");
+  }
+  m_numberOfDatasets = n;
+}
+
+/**
+ * Get value of a local parameter
+ * @param parName :: Name of a parameter.
+ * @param i :: Data set index.
+ */
+double FunctionBrowser::getLocalParameterValue(const QString& parName, int i) const
+{
+  if ( !m_localParameterValues.contains(parName) || m_localParameterValues[parName].size() != getNumberOfDatasets() )
+  {
+    initLocalParameter(parName);
+  }
+  return m_localParameterValues[parName][i];
+}
+
+void FunctionBrowser::setLocalParameterValue(const QString& parName, int i, double value)
+{
+  if ( !m_localParameterValues.contains(parName) || m_localParameterValues[parName].size() != getNumberOfDatasets() )
+  {
+    initLocalParameter(parName);
+  }
+  m_localParameterValues[parName][i] = value;
+  if ( i == m_currentDataset )
+  {
+    setParameter( parName, value );
+  }
+}
+
+/**
+ * Init a local parameter. Define initial values for all datasets.
+ * @param parName :: Name of parametere to init.
+ */
+void FunctionBrowser::initLocalParameter(const QString& parName)const
+{
+  double value = getParameter(parName);
+  QVector<double> values( static_cast<int>(getNumberOfDatasets()), value );
+  m_localParameterValues[parName] = values;
+}
+
+void FunctionBrowser::resetLocalParameters()
+{
+  m_localParameterValues.clear();
+}
+
+/// Set current dataset.
+void FunctionBrowser::setCurrentDataset(int i)
+{
+  m_currentDataset = i;
+  if ( m_currentDataset >= m_numberOfDatasets )
+  {
+    throw std::runtime_error("Dataset index is outside the range");
+  }
+  auto localParameters = getLocalParameters();
+  foreach(QString par, localParameters)
+  {
+    setParameter( par, getLocalParameterValue( par, m_currentDataset ) );
+  }
 }
 
 } // MantidWidgets

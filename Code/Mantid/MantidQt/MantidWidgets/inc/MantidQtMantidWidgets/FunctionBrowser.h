@@ -95,10 +95,6 @@ public:
   Mantid::API::IFunction_sptr getFunction(QtProperty* prop = NULL, bool attributesOnly = false);
   /// Check if a function is set
   bool hasFunction() const;
-  /// Get a list of names of global parameters
-  QStringList getGlobalParameters() const;
-  /// Get a list of names of local parameters
-  QStringList getLocalParameters() const;
 
   /// Return a function with specified index
   Mantid::API::IFunction_sptr getFunctionByIndex(const QString& index);
@@ -117,6 +113,15 @@ public:
   /// Update parameter values in the browser to match those of a function.
   void updateParameters(const Mantid::API::IFunction& fun);
 
+  /// Get a list of names of global parameters
+  QStringList getGlobalParameters() const;
+  /// Get a list of names of local parameters
+  QStringList getLocalParameters() const;
+  /// Get the number of datasets
+  size_t getNumberOfDatasets() const;
+  /// Get value of a local parameter
+  double getLocalParameterValue(const QString& parName, int i) const;
+
 signals:
   /// User selects a different function (or one of it's sub-properties)
   void currentFunctionChanged();
@@ -130,6 +135,13 @@ signals:
   void localParameterButtonClicked(const QString& parName);
 
   void functionStructureChanged();
+
+public slots:
+
+  void setNumberOfDatasets(size_t n);
+  void setLocalParameterValue(const QString& parName, int i, double value);
+  void resetLocalParameters();
+  void setCurrentDataset(int i);
 
 protected:
   /// Create the Qt property browser
@@ -204,6 +216,8 @@ protected:
   bool hasLowerBound(QtProperty* prop) const;
   /// Check if a parameter property has a upper bound
   bool hasUpperBound(QtProperty* prop) const;
+
+  void initLocalParameter(const QString& parName)const;
 
 protected slots:
   /// Show the context menu
@@ -319,6 +333,12 @@ protected:
 
   /// Set true if the constructed function is intended to be used in a multi-dataset fit
   bool m_multiDataset;
+  /// Number of datasets this function is used for
+  size_t m_numberOfDatasets;
+  /// Storage for local paramtere values
+  mutable QMap<QString,QVector<double>> m_localParameterValues;
+  /// Index of a dataset for which the parameters are currently displayed
+  int m_currentDataset;
 
   friend class CreateAttributePropertyForFunctionBrowser;
   friend class SetAttributeFromProperty;

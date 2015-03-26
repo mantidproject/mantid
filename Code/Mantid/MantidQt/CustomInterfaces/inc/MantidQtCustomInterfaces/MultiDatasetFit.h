@@ -84,12 +84,12 @@ public:
   std::pair<double,double> getFittingRange(int i) const;
   /// Total number of spectra (datasets).
   int getNumberOfSpectra() const;
-  /// Get value of a local parameter
-  double getLocalParameterValue(const QString& parName, int i) const;
   /// Display info about the plot.
   void showPlotInfo();
   /// Check that the data sets in the table are valid
   void checkDataSets();
+  /// Get value of a local parameter
+  double getLocalParameterValue(const QString& parName, int i) const;
 
 public slots:
   void setLocalParameterValue(const QString& parName, int i, double value);
@@ -99,7 +99,6 @@ private slots:
   void fit();
   void editLocalParameterValues(const QString& parName);
   void finishFit(bool);
-  void updateLocalParameters(int index);
   void enableZoom();
   void enablePan();
   void enableRange();
@@ -111,7 +110,6 @@ protected:
 private:
   void createPlotToolbar();
   boost::shared_ptr<Mantid::API::IFunction> createFunction() const;
-  void initLocalParameter(const QString& parName)const;
   void updateParameters(const Mantid::API::IFunction& fun);
   void showInfo(const QString& text);
   bool eventFilter(QObject *widget, QEvent *evn);
@@ -134,8 +132,6 @@ private:
   MantidWidgets::FitOptionsBrowser *m_fitOptionsBrowser;
   /// Name of the output workspace
   std::string m_outputWorkspaceName;
-  /// Storage for local paramtere values
-  mutable QMap<QString,QVector<double>> m_localParameterValues;
   /// Fit algorithm runner
   boost::shared_ptr<API::AlgorithmRunner> m_fitRunner;
 };

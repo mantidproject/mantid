@@ -834,7 +834,6 @@ void MultiDatasetFit::initLayout()
   connect(m_dataController,SIGNAL(dataTableUpdated()),m_plotController,SLOT(tableUpdated()));
   connect(m_dataController,SIGNAL(dataSetUpdated(int)),m_plotController,SLOT(updateRange(int)));
   connect(m_plotController,SIGNAL(fittingRangeChanged(int, double, double)),m_dataController,SLOT(setFittingRange(int, double, double)));
-  connect(m_plotController,SIGNAL(currentIndexChanged(int)),this,SLOT(updateLocalParameters(int)));
 
   QSplitter* splitter = new QSplitter(Qt::Vertical,this);
 
@@ -842,6 +841,7 @@ void MultiDatasetFit::initLayout()
   splitter->addWidget( m_functionBrowser );
   connect(m_functionBrowser,SIGNAL(localParameterButtonClicked(const QString&)),this,SLOT(editLocalParameterValues(const QString&)));
   connect(m_functionBrowser,SIGNAL(functionStructureChanged()),this,SLOT(reset()));
+  connect(m_plotController,SIGNAL(currentIndexChanged(int)),m_functionBrowser,SLOT(setCurrentDataset(int)));
 
   m_fitOptionsBrowser = new MantidQt::MantidWidgets::FitOptionsBrowser(NULL);
   splitter->addWidget( m_fitOptionsBrowser );
@@ -1113,45 +1113,6 @@ void MultiDatasetFit::editLocalParameterValues(const QString& parName)
 }
 
 /**
- * Get value of a local parameter
- * @param parName :: Name of a parameter.
- * @param i :: Data set index.
- */
-double MultiDatasetFit::getLocalParameterValue(const QString& parName, int i) const
-{
-  if ( !m_localParameterValues.contains(parName) || m_localParameterValues[parName].size() != getNumberOfSpectra() )
-  {
-    initLocalParameter(parName);
-  }
-  return m_localParameterValues[parName][i];
-}
-
-void MultiDatasetFit::setLocalParameterValue(const QString& parName, int i, double value)
-{
-  if ( !m_localParameterValues.contains(parName) || m_localParameterValues[parName].size() != getNumberOfSpectra() )
-  {
-    initLocalParameter(parName);
-  }
-  m_localParameterValues[parName][i] = value;
-}
-
-/**
- * Init a local parameter. Define initial values for all datasets.
- * @param parName :: Name of parametere to init.
- */
-void MultiDatasetFit::initLocalParameter(const QString& parName)const
-{
-  double value = m_functionBrowser->getParameter(parName);
-  QVector<double> values( static_cast<int>(getNumberOfSpectra()), value );
-  m_localParameterValues[parName] = values;
-}
-
-void MultiDatasetFit::reset()
-{
-  m_localParameterValues.clear();
-}
-
-/**
  * Slot called on completion of the Fit algorithm.
  * @param error :: Set to true if Fit finishes with an error.
  */
@@ -1171,7 +1132,7 @@ void MultiDatasetFit::finishFit(bool error)
  */
 void MultiDatasetFit::updateParameters(const Mantid::API::IFunction& fun)
 {
-  m_localParameterValues.clear();
+  m_functionBrowser->resetLocalParameters();
   auto cfun = dynamic_cast<const Mantid::API::CompositeFunction*>( &fun );
   if ( cfun && cfun->nFunctions() > 0 )
   {
@@ -1191,27 +1152,13 @@ void MultiDatasetFit::updateParameters(const Mantid::API::IFunction& fun)
       }
       for(int j = 0; j < qLocalParameters.size(); ++j)
       {
-        setLocalParameterValue( qLocalParameters[j], static_cast<int>(i), sfun->getParameter(localParameters[j]) );
+        m_functionBrowser->setLocalParameterValue( qLocalParameters[j], static_cast<int>(i), sfun->getParameter(localParameters[j]) );
       }
     }
   }
   else
   {
     m_functionBrowser->updateParameters( fun );
-  }
-}
-
-/**
- * Update the local parameters in the function browser to show values corresponding
- * to a particular dataset.
- * @param index :: Index of a dataset.
- */
-void MultiDatasetFit::updateLocalParameters(int index)
-{
-  auto localParameters = m_functionBrowser->getLocalParameters();
-  foreach(QString par, localParameters)
-  {
-    m_functionBrowser->setParameter( par, getLocalParameterValue( par, index ) );
   }
 }
 
@@ -1333,6 +1280,23 @@ void MultiDatasetFit::enableRange()
 {
   m_plotController->enableRange();
   m_uiForm.toolOptions->setCurrentIndex(rangeToolPage);
+}
+
+void MultiDatasetFit::setLocalParameterValue(const QString& parName, int i, double value)
+{
+  m_functionBrowser->setLocalParameterValue(parName, i, value);
+}
+
+/// Get value of a local parameter
+double MultiDatasetFit::getLocalParameterValue(const QString& parName, int i) const
+{
+  return m_functionBrowser->getLocalParameterValue(parName, i);
+}
+
+void MultiDatasetFit::reset()
+{
+  m_functionBrowser->resetLocalParameters();
+  m_functionBrowser->setNumberOfDatasets( getNumberOfSpectra() );
 }
 
 /*==========================================================================================*/
