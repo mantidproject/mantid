@@ -199,37 +199,32 @@ calculateSteps(const std::vector<MinMax> &inExtents,
   return std::make_pair(outExtents, outBins);
 }
 
-std::vector<std::vector<std::string>>
-labelProjection(const DblMatrix &projection) {
-  std::vector<std::vector<std::string>> ret(3, std::vector<std::string>(3));
-
+std::vector<std::string> labelProjection(const DblMatrix &projection) {
   const std::string replacements[] = {"zeta", "eta", "xi"};
+  std::vector<std::string> ret(3);
+  std::vector<std::string> labels(3);
 
   for (size_t i = 0; i < 3; ++i) {
     for (size_t j = 0; j < 3; ++j) {
       const double in = projection[i][j];
-      std::string out;
-
       if (std::abs(in) == 1)
         if (in > 0)
-          out = "'" + replacements[i] + "'";
+          labels[j] = "'" + replacements[i] + "'";
         else
-          out = "'-" + replacements[i] + "'";
+          labels[j] = "'-" + replacements[i] + "'";
       else if (in == 0)
-        out = "0";
+        labels[j] = "0";
       else {
         // We have to be explicit about precision, so lexical cast won't work
         std::stringstream s;
         s.precision(2);
         s.setf(std::ios::fixed, std::ios::floatfield);
         s << "'" << in << replacements[i] << "'";
-        out = s.str();
+        labels[j] = s.str();
       }
-
-      ret[i][j] = out;
     }
+    ret[i] = "[" + boost::algorithm::join(labels, ", ") + "]";
   }
-
   return ret;
 }
 } // anonymous namespace
@@ -375,9 +370,7 @@ void CutMD::exec() {
   }
 
   // Make labels
-  /* Matrix<std::string> labels = labelProjection(projectionMatrix); */
-  std::vector<std::vector<std::string>> labels =
-      labelProjection(projectionMatrix);
+  std::vector<std::string> labels = labelProjection(projectionMatrix);
 
   // Either run RebinMD or SliceMD
   const std::string cutAlgName = noPix ? "BinMD" : "SliceMD";
@@ -395,8 +388,7 @@ void CutMD::exec() {
 
     if (i < 3) {
       // Slicing algorithms accept name as [x, y, z]
-      label =
-          "[" + labels[i][0] + ", " + labels[i][1] + ", " + labels[i][2] + "]";
+      label = labels[i];
       unit = targetUnits[i];
 
       std::vector<std::string> vec(numDims, "0");
