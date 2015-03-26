@@ -1,7 +1,7 @@
 #include "MantidQtCustomInterfaces/Muon/ALCPeakFittingView.h"
 
-#include <QDesktopServices>
-#include <QUrl>
+#include "MantidQtAPI/HelpWindow.h"
+
 #include <qwt_symbol.h>
 
 namespace MantidQt
@@ -106,8 +106,7 @@ void ALCPeakFittingView::setPeakPicker(const IPeakFunction_const_sptr& peak)
 
 void ALCPeakFittingView::help()
 {
-  QDesktopServices::openUrl(QUrl(QString("http://www.mantidproject.org/") +
-    "Muon_ALC:_Peak_Fitting"));
+  MantidQt::API::HelpWindow::showCustomInterface(NULL, QString("Muon_ALC"));
 }
 
 } // namespace CustomInterfaces
