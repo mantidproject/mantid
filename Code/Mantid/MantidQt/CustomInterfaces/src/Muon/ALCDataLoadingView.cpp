@@ -1,8 +1,8 @@
 #include "MantidQtCustomInterfaces/Muon/ALCDataLoadingView.h"
 
-#include <QDesktopServices>
+#include "MantidQtAPI/HelpWindow.h"
+
 #include <QMessageBox>
-#include <QUrl>
 
 #include <qwt_symbol.h>
 
@@ -165,8 +165,7 @@ namespace CustomInterfaces
 
   void ALCDataLoadingView::help()
   {
-    QDesktopServices::openUrl(QUrl(QString("http://www.mantidproject.org/") +
-            "Muon_ALC:_Data_Loading"));
+    MantidQt::API::HelpWindow::showCustomInterface(NULL, QString("Muon_ALC"));
   }
 
   void ALCDataLoadingView::setWaitingCursor()
