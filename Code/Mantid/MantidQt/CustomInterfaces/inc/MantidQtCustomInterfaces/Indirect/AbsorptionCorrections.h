@@ -27,6 +27,7 @@ namespace IDA
     virtual void algorithmComplete(bool error);
 
   private:
+    void addSaveWorkspace(QString wsName);
     void addShapeSpecificSampleOptions(Mantid::API::IAlgorithm_sptr alg, QString shape);
     void addShapeSpecificCanOptions(Mantid::API::IAlgorithm_sptr alg, QString shape);
 

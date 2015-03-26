@@ -42,8 +42,8 @@ namespace IDA
   void AbsorptionCorrections::run()
   {
     // Get correct corrections algorithm
-    QString sampleShape = m_uiForm.cbShape->currentText();
-    QString algorithmName = "Indirect" + sampleShape.replace(" ", "") + "Absorption";
+    QString sampleShape = m_uiForm.cbShape->currentText().replace(" ", "");
+    QString algorithmName = "Indirect" + sampleShape + "Absorption";
 
     IAlgorithm_sptr absCorAlgo = AlgorithmManager::Instance().create(algorithmName.toStdString());
     absCorAlgo->initialize();
@@ -92,22 +92,56 @@ namespace IDA
 
     QString outputBaseName = sampleWsName.left(nameCutIndex);
 
-    QString outputWsName = outputBaseName + "_Corrected";
+    QString outputWsName = outputBaseName + "_" + sampleShape + "_Corrected";
     absCorAlgo->setProperty("OutputWorkspace", outputWsName.toStdString());
 
+    // Set the correction workspace to keep the factors if desired
     bool keepCorrectionFactors = m_uiForm.ckKeepFactors->isChecked();
+    QString outputFactorsWsName = outputBaseName + "_" + sampleShape + "_Factors";
     if(keepCorrectionFactors)
-    {
-      QString outputFactorsWsName = outputBaseName + "_Factors";
       absCorAlgo->setProperty("CorrectionsWorkspace", outputFactorsWsName.toStdString());
+
+    // Add correction algorithm to batch
+    m_batchAlgoRunner->addAlgorithm(absCorAlgo);
+
+    // Add save algorithms if needed
+    bool save = m_uiForm.ckSave->isChecked();
+    if(save)
+    {
+      addSaveWorkspace(outputWsName);
+      if(keepCorrectionFactors)
+        addSaveWorkspace(outputFactorsWsName);
     }
 
-    // Run corrections algorithm
-    m_batchAlgoRunner->addAlgorithm(absCorAlgo);
+    // Run algorithm batch
     m_batchAlgoRunner->executeBatchAsync();
 
     // Set the result workspace for Python script export
     m_pythonExportWsName = outputWsName.toStdString();
+  }
+
+
+  /**
+   * Configures the SaveNexusProcessed algorithm to save a workspace in the default
+   * save directory and adds the algorithm to the batch queue.
+   *
+   * @param wsName Name of workspace to save
+   */
+  void AbsorptionCorrections::addSaveWorkspace(QString wsName)
+  {
+    QString filename = wsName + ".nxs";
+
+    // Setup the input workspace property
+    API::BatchAlgorithmRunner::AlgorithmRuntimeProps saveProps;
+    saveProps["InputWorkspace"] = wsName.toStdString();
+
+    // Setup the algorithm
+    IAlgorithm_sptr saveAlgo = AlgorithmManager::Instance().create("SaveNexusProcessed");
+    saveAlgo->initialize();
+    saveAlgo->setProperty("Filename", filename.toStdString());
+
+    // Add the save algorithm to the batch
+    m_batchAlgoRunner->addAlgorithm(saveAlgo, saveProps);
   }
 
 
@@ -119,7 +153,7 @@ namespace IDA
    */
   void AbsorptionCorrections::addShapeSpecificSampleOptions(IAlgorithm_sptr alg, QString shape)
   {
-    if(shape == "Flat Plate")
+    if(shape == "FlatPlate")
     {
       double sampleHeight = m_uiForm.spFlatSampleHeight->value();
       alg->setProperty("SampleHeight", sampleHeight);
@@ -171,7 +205,7 @@ namespace IDA
    */
   void AbsorptionCorrections::addShapeSpecificCanOptions(IAlgorithm_sptr alg, QString shape)
   {
-    if(shape == "Flat Plate")
+    if(shape == "FlatPlate")
     {
       double canFrontThickness = m_uiForm.spFlatCanFrontThickness->value();
       alg->setProperty("CanFrontThickness", canFrontThickness);
