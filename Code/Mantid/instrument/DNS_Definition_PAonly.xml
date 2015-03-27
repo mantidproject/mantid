@@ -46,7 +46,7 @@
             <value val="0"/>
         </parameter>
         <parameter name="t-position">
-            <logfile id="deterota" extract-single-value-as="first_value"/>
+            <logfile id="deterota" eq="0.0+value" extract-single-value-as="first_value"/>
         </parameter>
         <parameter name="p-position">
             <value val="0"/>
