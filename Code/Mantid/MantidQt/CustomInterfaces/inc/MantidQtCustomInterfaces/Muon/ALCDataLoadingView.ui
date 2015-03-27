@@ -387,7 +387,14 @@
                                 </widget>
                               </item>
                               <item>
-                                <widget class="QDoubleSpinBox" name="minTime"/>
+                                <widget class="QDoubleSpinBox" name="minTime">
+                                  <property name="minimum">
+                                    <double>-6</double>
+                                  </property>
+                                  <property name="maximum">
+                                    <double>32</double>
+                                  </property>
+                                </widget>
                               </item>
                               <item>
                                 <widget class="QLabel" name="label_5">
@@ -397,7 +404,14 @@
                                 </widget>
                               </item>
                               <item>
-                                <widget class="QDoubleSpinBox" name="maxTime"/>
+                                <widget class="QDoubleSpinBox" name="maxTime">
+                                  <property name="minimum">
+                                    <double>-6</double>
+                                  </property>
+                                  <property name="maximum">
+                                    <double>32</double>
+                                  </property>
+                                </widget>
                               </item>
                             </layout>
                           </widget>
