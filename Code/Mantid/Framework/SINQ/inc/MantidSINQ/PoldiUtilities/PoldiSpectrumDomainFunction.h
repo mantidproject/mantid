@@ -239,7 +239,6 @@ protected:
       const PoldiInstrumentAdapter_sptr &poldiInstrument);
 
   void beforeDecoratedFunctionSet(const API::IFunction_sptr &fn);
-  void setProfileFunction(const std::string &profileFunctionName);
 
   std::vector<double>
   getChopperSlitOffsets(const PoldiAbstractChopper_sptr &chopper);
