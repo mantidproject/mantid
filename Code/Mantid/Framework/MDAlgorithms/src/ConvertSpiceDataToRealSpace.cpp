@@ -10,6 +10,7 @@
 #include "MantidMDEvents/MDEventFactory.h"
 #include "MantidMDEvents/MDEventInserter.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
+#include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidMDEvents/MDEventWorkspace.h"
 #include "MantidMDEvents/MDEvent.h"
 // #include "MantidMDEvents/ImportMDEventWorkspace.h"
@@ -151,7 +152,7 @@ void ConvertSpiceDataToRealSpace::exec() {
 
   // Convert to MD workspaces
   g_log.debug("About to converting to workspaces done!");
-  IMDEventWorkspace_sptr m_mdEventWS = convertToMDEventWS(vec_ws2d);
+  IMDEventWorkspace_sptr m_mdEventWS = convertToMDEventWS2(vec_ws2d);
   std::string monitorlogname = getProperty("MonitorCountsLogName");
   IMDEventWorkspace_sptr mdMonitorWS =
       createMonitorMDWorkspace(vec_ws2d, logvecmap[monitorlogname]);
@@ -305,6 +306,7 @@ MatrixWorkspace_sptr ConvertSpiceDataToRealSpace::loadRunToMatrixWS(
 
   // Import data
   for (size_t i = 0; i < m_numSpec; ++i) {
+    // get detector
     Geometry::IDetector_const_sptr tmpdet = tempws->getDetector(i);
     tempws->dataX(i)[0] = tmpdet->getPos().X();
     tempws->dataX(i)[0] = tmpdet->getPos().X() + 0.01;
@@ -314,6 +316,8 @@ MatrixWorkspace_sptr ConvertSpiceDataToRealSpace::loadRunToMatrixWS(
       tempws->dataE(i)[0] = sqrt(yvalue);
     else
       tempws->dataE(i)[0] = 1;
+    // TODO/FIXME : update X-range, Y-range and Z-range
+    g_log.error("Should find X-range, Y-range and Z-range!");
   }
 
   // Return duration
@@ -411,6 +415,10 @@ void ConvertSpiceDataToRealSpace::readTableInfo(
  */
 IMDEventWorkspace_sptr ConvertSpiceDataToRealSpace::convertToMDEventWS(
     const std::vector<MatrixWorkspace_sptr> &vec_ws2d) {
+
+  // FIXME - This should be deleted!
+  throw std::runtime_error("Remove it! Replaced!");
+
   // Write the lsit of workspacs to a file to be loaded to an MD workspace
   Poco::TemporaryFile tmpFile;
   std::string tempFileName = tmpFile.path();

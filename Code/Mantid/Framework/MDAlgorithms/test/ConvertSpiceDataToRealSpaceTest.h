@@ -149,9 +149,9 @@ public:
     Mantid::detid_t detid43 = mditer->getInnerDetectorID(43);
     TS_ASSERT_EQUALS(detid43, 44);
     Mantid::detid_t detid44 = mditer->getInnerDetectorID(44);
-    TS_ASSERT_EQUALS(detid44, 45);
+    TS_ASSERT_EQUALS(detid44, 1);
     Mantid::detid_t detid61 = mditer->getInnerDetectorID(61);
-    TS_ASSERT_EQUALS(detid61, 62);
+    TS_ASSERT_EQUALS(detid61, 18);
 
     // Run index
     uint16_t run0 = mditer->getInnerRunIndex(0);
