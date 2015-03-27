@@ -2,7 +2,29 @@ import unittest
 from mantid.simpleapi import *
 from mantid.api import *
 
+
 class TransformToIqtTest(unittest.TestCase):
+
+
+    def setUp(self):
+        """
+        Generate reference result param table.
+        """
+
+        CreateEmptyTableWorkspace(OutputWorkspace='__TransformToIqtTest_param')
+        self._param_table = mtd['__TransformToIqtTest_param']
+
+        self._param_table.addColumn('int', 'SampleInputBins')
+        self._param_table.addColumn('float', 'BinReductionFactor')
+        self._param_table.addColumn('int', 'SampleOutputBins')
+        self._param_table.addColumn('float', 'EnergyMin')
+        self._param_table.addColumn('float', 'EnergyMax')
+        self._param_table.addColumn('float', 'EnergyWidth')
+        self._param_table.addColumn('float', 'Resolution')
+        self._param_table.addColumn('int', 'ResolutionBins')
+
+        self._param_table.addRow([1725, 10.0, 172, -0.5, 0.5, 0.00581395, 0.0175, 6])
+
 
     def test_with_can_reduction(self):
         """
@@ -16,6 +38,8 @@ class TransformToIqtTest(unittest.TestCase):
                                      ResolutionWorkspace=can,
                                      BinReductionFactor=10)
 
+        self.assertEqual(CheckWorkspacesMatch(params, self._param_table), "Success!")
+
 
     def test_with_resolution_reduction(self):
         """
@@ -28,6 +52,8 @@ class TransformToIqtTest(unittest.TestCase):
         params, iqt = TransformToIqt(SampleWorkspace=sample,
                                      ResolutionWorkspace=resolution,
                                      BinReductionFactor=10)
+
+        self.assertEqual(CheckWorkspacesMatch(params, self._param_table), "Success!")
 
 
 if __name__ == '__main__':
