@@ -112,7 +112,7 @@ void PoldiFitPeaks2D::init() {
  * @return PoldiPeakCollection containing peaks with normalized intensities
  */
 PoldiPeakCollection_sptr PoldiFitPeaks2D::getPeakCollectionFromFunction(
-    const IFunction_sptr &fitFunction, const IAlgorithm_sptr &errorAlg) const {
+    const IFunction_sptr &fitFunction) {
   Poldi2DFunction_sptr poldi2DFunction =
       boost::dynamic_pointer_cast<Poldi2DFunction>(fitFunction);
 
@@ -148,7 +148,9 @@ PoldiPeakCollection_sptr PoldiFitPeaks2D::getPeakCollectionFromFunction(
 
       profileFunction->setCovarianceMatrix(localCov);
 
-      errorAlg->setProperty("Function", profileFunction);
+      IAlgorithm_sptr errorAlg = createChildAlgorithm("EstimatePeakErrors");
+      errorAlg->setProperty(
+          "Function", boost::dynamic_pointer_cast<IFunction>(profileFunction));
       errorAlg->setPropertyValue("OutputWorkspace", "Errors");
       errorAlg->execute();
 
@@ -269,10 +271,8 @@ void PoldiFitPeaks2D::exec() {
 
   MatrixWorkspace_sptr outWs1D = get1DSpectrum(fitFunction, ws);
 
-  IAlgorithm_sptr errorAlg = createChildAlgorithm("EstimatePeakErrors");
-
   PoldiPeakCollection_sptr normalizedPeaks =
-      getPeakCollectionFromFunction(fitFunction, errorAlg);
+      getPeakCollectionFromFunction(fitFunction);
   PoldiPeakCollection_sptr integralPeaks =
       getCountPeakCollection(normalizedPeaks);
 
