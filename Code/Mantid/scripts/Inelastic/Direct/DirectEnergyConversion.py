@@ -920,10 +920,11 @@ class DirectEnergyConversion(object):
                 except :
                     src_name = None
                     mon1_peak = 0
-                    self.prop_man.log("*** WARNING: not able to identify energy peak "\
-                                      "while looking for TOF range corresponding to energy range: {0}\n"\
-                                      "    Continuing under assumption that time=0 when incident neutrons arrive at source".\
-                                       format(energy_list),'warning')
+                    en_bin  = [energy_list[0],energy_list[1]-energy_list[0],energy_list[3]]
+                    self.prop_man.log("*** WARNING: message from multirep chunking procedure: get_TOF_for_energies:\n"\
+                                      "    not able to identify energy peak looking for TOF range for incident energy: {0}meV, binning: {1}\n"\
+                                      "    Continuing under assumption that incident neutrons arrive at source at time=0".\
+                                       format(ei_guess,en_bin),'warning')
         else:
             mon1_peak = 0
         #end if
