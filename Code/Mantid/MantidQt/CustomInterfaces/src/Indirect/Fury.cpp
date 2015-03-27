@@ -94,7 +94,7 @@ namespace IDA
     bool plot = m_uiForm.ckPlot->isChecked();
     bool save = m_uiForm.ckSave->isChecked();
 
-    IAlgorithm_sptr furyAlg = AlgorithmManager::Instance().create("Fury", -1);
+    IAlgorithm_sptr furyAlg = AlgorithmManager::Instance().create("TransformToIqt", -1);
     furyAlg->initialize();
 
     furyAlg->setProperty("Sample", wsName.toStdString());
@@ -192,7 +192,7 @@ namespace IDA
     if(numBins == 0)
       return;
 
-    IAlgorithm_sptr furyAlg = AlgorithmManager::Instance().create("Fury");
+    IAlgorithm_sptr furyAlg = AlgorithmManager::Instance().create("TransformToIqt");
     furyAlg->initialize();
 
     furyAlg->setProperty("Sample", wsName.toStdString());

@@ -682,7 +682,7 @@ class OSIRISDiagnostics(ISISIndirectInelasticDiagnostics):
 
 #==============================================================================
 class ISISIndirectInelasticMoments(ISISIndirectInelasticBase):
-    '''A base class for the ISIS indirect inelastic Fury/FuryFit tests
+    '''A base class for the ISIS indirect inelastic TransformToIqt/TransformToIqtFit tests
 
     The output of Elwin is usually used with MSDFit and so we plug one into
     the other in this test.
@@ -865,7 +865,7 @@ class ISISIndirectInelasticFuryAndFuryFit(ISISIndirectInelasticBase):
             LoadNexus(sample, OutputWorkspace=sample)
         LoadNexus(self.resolution, OutputWorkspace=self.resolution)
 
-        fury_props, fury_ws = Fury(Sample=self.samples[0],
+        fury_props, fury_ws = TransformToIqt(Sample=self.samples[0],
                                    Resolution=self.resolution,
                                    EnergyMin=self.e_min,
                                    EnergyMax=self.e_max,
@@ -922,7 +922,7 @@ class OSIRISFuryAndFuryFit(ISISIndirectInelasticFuryAndFuryFit):
     def __init__(self):
         ISISIndirectInelasticFuryAndFuryFit.__init__(self)
 
-        # Fury
+        # TransformToIqt
         self.samples = ['osi97935_graphite002_red.nxs']
         self.resolution = 'osi97935_graphite002_res.nxs'
         self.e_min = -0.4
@@ -947,7 +947,7 @@ class IRISFuryAndFuryFit(ISISIndirectInelasticFuryAndFuryFit):
     def __init__(self):
         ISISIndirectInelasticFuryAndFuryFit.__init__(self)
 
-        # Fury
+        # TransformToIqt
         self.samples = ['irs53664_graphite002_red.nxs']
         self.resolution = 'irs53664_graphite002_res.nxs'
         self.e_min = -0.4
@@ -1045,7 +1045,7 @@ class OSIRISFuryAndFuryFitMulti(ISISIndirectInelasticFuryAndFuryFitMulti):
     def __init__(self):
         ISISIndirectInelasticFuryAndFuryFitMulti.__init__(self)
 
-        # Fury
+        # TransformToIqt
         self.samples = ['osi97935_graphite002_red.nxs']
         self.resolution = 'osi97935_graphite002_res.nxs'
         self.e_min = -0.4
@@ -1070,7 +1070,7 @@ class IRISFuryAndFuryFitMulti(ISISIndirectInelasticFuryAndFuryFitMulti):
     def __init__(self):
         ISISIndirectInelasticFuryAndFuryFitMulti.__init__(self)
 
-        # Fury
+        # TransformToIqt
         self.samples = ['irs53664_graphite002_red.nxs']
         self.resolution = 'irs53664_graphite002_res.nxs'
         self.e_min = -0.4

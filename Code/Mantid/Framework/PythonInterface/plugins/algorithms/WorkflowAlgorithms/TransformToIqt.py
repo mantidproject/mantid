@@ -7,7 +7,7 @@ import math
 import os
 
 
-class Fury(PythonAlgorithm):
+class TransformToIqt(PythonAlgorithm):
 
     _sample = None
     _resolution = None
@@ -43,7 +43,7 @@ class Fury(PythonAlgorithm):
 
         self.declareProperty(MatrixWorkspaceProperty('ParameterWorkspace', '',\
                              direction=Direction.Output, optional=PropertyMode.Optional),
-                             doc='Table workspace for saving Fury properties')
+                             doc='Table workspace for saving TransformToIqt properties')
 
         self.declareProperty(MatrixWorkspaceProperty('OutputWorkspace', '',\
                              direction=Direction.Output, optional=PropertyMode.Optional),
@@ -76,7 +76,7 @@ class Fury(PythonAlgorithm):
             if self._plot:
                 self._plot_output()
         else:
-            logger.information('Dry run, will not run Fury')
+            logger.information('Dry run, will not run TransformToIqt')
 
         self.setProperty('ParameterWorkspace', self._parameter_table)
         self.setProperty('OutputWorkspace', self._output_workspace)
@@ -97,7 +97,7 @@ class Fury(PythonAlgorithm):
 
         self._parameter_table = self.getPropertyValue('ParameterWorkspace')
         if self._parameter_table == '':
-            self._parameter_table = getWSprefix(self._sample) + 'FuryParameters'
+            self._parameter_table = getWSprefix(self._sample) + 'TransformToIqtParameters'
 
         self._output_workspace = self.getPropertyValue('OutputWorkspace')
         if self._output_workspace == '':
@@ -128,11 +128,11 @@ class Fury(PythonAlgorithm):
 
     def _calculate_parameters(self):
         """
-        Calculates the Fury parameters and saves in a table workspace.
+        Calculates the TransformToIqt parameters and saves in a table workspace.
         """
-        CropWorkspace(InputWorkspace=self._sample, OutputWorkspace='__Fury_sample_cropped',
+        CropWorkspace(InputWorkspace=self._sample, OutputWorkspace='__TransformToIqt_sample_cropped',
                       Xmin=self._e_min, Xmax=self._e_max)
-        x_data = mtd['__Fury_sample_cropped'].readX(0)
+        x_data = mtd['__TransformToIqt_sample_cropped'].readX(0)
         number_input_points = len(x_data) - 1
         num_bins = number_input_points / self._number_points_per_bin
         self._e_width = (abs(self._e_min) + abs(self._e_max)) / num_bins
@@ -179,7 +179,7 @@ class Fury(PythonAlgorithm):
                             self._e_min, self._e_max, self._e_width,
                             resolution, resolution_bins])
 
-        DeleteWorkspace('__Fury_sample_cropped')
+        DeleteWorkspace('__TransformToIqt_sample_cropped')
 
         self.setProperty('ParameterWorkspace', param_table)
 
@@ -212,7 +212,7 @@ class Fury(PythonAlgorithm):
 
     def _fury(self):
         """
-        Run Fury.
+        Run TransformToIqt.
         """
         from IndirectCommon import CheckHistZero, CheckHistSame, CheckAnalysers
 
@@ -261,4 +261,4 @@ class Fury(PythonAlgorithm):
 
 
 # Register algorithm with Mantid
-AlgorithmFactory.subscribe(Fury)
+AlgorithmFactory.subscribe(TransformToIqt)
