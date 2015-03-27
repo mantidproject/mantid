@@ -258,8 +258,8 @@ public:
 
             TS_ASSERT_EQUALS(functionPeak->d().value(), referencePeak->d().value());
             TS_ASSERT_EQUALS(functionPeak->fwhm().value(), referencePeak->fwhm().value());
-            TS_ASSERT_EQUALS(functionPeak->d().error(), sqrt(0.05));
-            TS_ASSERT_EQUALS(functionPeak->fwhm(PoldiPeak::AbsoluteD).error(), sqrt(0.05) * (2.0 * sqrt(2.0 * log(2.0))));
+            TS_ASSERT_DELTA(functionPeak->d().error(), sqrt(0.05), 1e-6);
+            TS_ASSERT_DELTA(functionPeak->fwhm(PoldiPeak::AbsoluteD).error(), sqrt(0.05) * (2.0 * sqrt(2.0 * log(2.0))), 1e-6);
 
         }
     }

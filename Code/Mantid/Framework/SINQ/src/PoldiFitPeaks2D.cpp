@@ -156,34 +156,24 @@ PoldiPeakCollection_sptr PoldiFitPeaks2D::getPeakCollectionFromFunction(
 
       double centre = profileFunction->centre();
       double height = profileFunction->height();
+      double fwhmValue = profileFunction->fwhm();
 
-      size_t dIndex = 0;
-      size_t iIndex = 0;
-      size_t fIndex = 0;
+      ITableWorkspace_sptr errorTable =
+          errorAlg->getProperty("OutputWorkspace");
 
-      for (size_t j = 0; j < profileFunction->nParams(); ++j) {
-        if (profileFunction->getParameter(j) == centre) {
-          dIndex = j;
-        } else if (profileFunction->getParameter(j) == height) {
-          iIndex = j;
-        } else {
-          fIndex = j;
-        }
-      }
+      double centreError = errorTable->cell<double>(0, 2);
+      double heightError = errorTable->cell<double>(1, 2);
+      double fwhmError = errorTable->cell<double>(2, 2);
+
 
       // size_t dIndex = peakFunction->parameterIndex("Centre");
-      UncertainValue d(peakFunction->getParameter(dIndex),
-                       peakFunction->getError(dIndex));
+      UncertainValue d(centre, centreError);
 
       // size_t iIndex = peakFunction->parameterIndex("Area");
-      UncertainValue intensity(peakFunction->getParameter(iIndex),
-                               peakFunction->getError(iIndex));
+      UncertainValue intensity(height, heightError);
 
       // size_t fIndex = peakFunction->parameterIndex("Sigma");
-      double fwhmValue = profileFunction->fwhm();
-      UncertainValue fwhm(fwhmValue, fwhmValue /
-                                         peakFunction->getParameter(fIndex) *
-                                         peakFunction->getError(fIndex));
+      UncertainValue fwhm(fwhmValue, fwhmError);
 
       PoldiPeak_sptr peak =
           PoldiPeak::create(MillerIndices(), d, intensity, UncertainValue(1.0));
