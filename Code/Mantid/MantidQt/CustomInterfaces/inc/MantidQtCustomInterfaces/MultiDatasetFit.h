@@ -294,6 +294,7 @@ signals:
   void dataSetUpdated(int i);
   void hasSelection(bool);
   void spectraRemoved(QList<int>);
+  void spectraAdded(int n);
 
 public slots:
   void setFittingRangeGlobal(bool);

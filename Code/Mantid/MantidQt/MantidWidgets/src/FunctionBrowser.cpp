@@ -1928,5 +1928,25 @@ void FunctionBrowser::removeDatasets(QList<int> indices)
   setNumberOfDatasets( newSize );
 }
 
+/// Add local parameters for additional datasets.
+/// @param n :: Number of datasets added.
+void FunctionBrowser::addDatasets(int n)
+{
+  if ( getNumberOfDatasets() == 0 )
+  {
+    setNumberOfDatasets( n );
+    return;
+  }
+  int newSize = m_numberOfDatasets;
+  for(auto par = m_localParameterValues.begin(); par != m_localParameterValues.end(); ++par)
+  {
+    auto &values = par.value();
+    double value = values.back();
+    values.insert(values.end(),n,value);
+    newSize = values.size();
+  }
+  setNumberOfDatasets(newSize);
+}
+
 } // MantidWidgets
 } // MantidQt

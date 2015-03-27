@@ -138,11 +138,13 @@ signals:
 
 public slots:
 
+  // Handling of multiple datasets
   void setNumberOfDatasets(int n);
   void setLocalParameterValue(const QString& parName, int i, double value);
   void resetLocalParameters();
   void setCurrentDataset(int i);
   void removeDatasets(QList<int> indices);
+  void addDatasets(int n);
 
 protected:
   /// Create the Qt property browser
@@ -218,6 +220,7 @@ protected:
   /// Check if a parameter property has a upper bound
   bool hasUpperBound(QtProperty* prop) const;
 
+  /// Initialize storage and values for local parameters
   void initLocalParameter(const QString& parName)const;
 
 protected slots:

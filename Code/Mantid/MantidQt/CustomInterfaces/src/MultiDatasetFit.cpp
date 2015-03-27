@@ -843,6 +843,7 @@ void MultiDatasetFit::initLayout()
   connect(m_functionBrowser,SIGNAL(functionStructureChanged()),this,SLOT(reset()));
   connect(m_plotController,SIGNAL(currentIndexChanged(int)),m_functionBrowser,SLOT(setCurrentDataset(int)));
   connect(m_dataController,SIGNAL(spectraRemoved(QList<int>)),m_functionBrowser,SLOT(removeDatasets(QList<int>)));
+  connect(m_dataController,SIGNAL(spectraAdded(int)),m_functionBrowser,SLOT(addDatasets(int)));
 
   m_fitOptionsBrowser = new MantidQt::MantidWidgets::FitOptionsBrowser(NULL);
   splitter->addWidget( m_fitOptionsBrowser );
@@ -1330,7 +1331,7 @@ void DataController::addWorkspace()
       {
         addWorkspaceSpectrum( wsName, *i, *ws );
       }
-      emit dataTableUpdated();
+      emit spectraAdded(static_cast<int>(indices.size()));
     }
     else
     {
