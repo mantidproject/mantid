@@ -95,19 +95,44 @@ class DGSPlannerGUI(QtGui.QWidget):
     def updateFigure(self):
         if self.updatedInstrument:
             #get goniometer settings first
-            
-            reply = QtGui.QMessageBox.warning(self, 'Goniometer',"More than 50 goniometer settings. This might be long.\n"
-                                              "Are you sure you want to proceed?", QtGui.QMessageBox.Yes | QtGui.QMessageBox.No,
-                                              QtGui.QMessageBox.No)
-            if reply==QtGui.QMessageBox.No:
-                return
+            gonioAxis0values=numpy.arange(self.masterDict['gonioMinvals'][0],self.masterDict['gonioMaxvals'][0]
+                                          +0.1*self.masterDict['gonioSteps'][0],self.masterDict['gonioSteps'][0])
+            gonioAxis1values=numpy.arange(self.masterDict['gonioMinvals'][1],self.masterDict['gonioMaxvals'][1]
+                                          +0.1*self.masterDict['gonioSteps'][1],self.masterDict['gonioSteps'][1])
+            gonioAxis2values=numpy.arange(self.masterDict['gonioMinvals'][2],self.masterDict['gonioMaxvals'][2]
+                                          +0.1*self.masterDict['gonioSteps'][2],self.masterDict['gonioSteps'][2])
+            if len(gonioAxis0values)*len(gonioAxis1values)*len(gonioAxis2values)>20:
+                reply = QtGui.QMessageBox.warning(self, 'Goniometer',"More than 50 goniometer settings. This might be long.\n"
+                                                  "Are you sure you want to proceed?", QtGui.QMessageBox.Yes | QtGui.QMessageBox.No,
+                                                  QtGui.QMessageBox.No)
+                if reply==QtGui.QMessageBox.No:
+                    return
             if self.wg!=None:
                 mantid.simpleapi.DeleteWorkspace(self.wg)
+            mantid.simpleapi.LoadEmptyInstrument(mantid.api.ExperimentInfo.getInstrumentFilename(self.masterDict['instrument']),
+                                                 OutputWorkspace="__temp_instrument")
+            i=0
+            groupingStrings=[]
+            for g0 in gonioAxis0values:
+                for g1 in gonioAxis1values:
+                    for g2 in gonioAxis2values:
+                        name="__temp_instrument"+str(i)
+                        i+=1
+                        groupingStrings.append(name)
+                        mantid.simpleapi.CloneWorkspace("__temp_instrument",OutputWorkspace=name)
+                        mantid.simpleapi.SetGoniometer(Workspace=name,
+                                                       Axis0=str(g0)+","+self.masterDict['gonioDirs'][0]+","+str(self.masterDict['gonioSenses'][0]),
+                                                       Axis1=str(g1)+","+self.masterDict['gonioDirs'][1]+","+str(self.masterDict['gonioSenses'][1]),
+                                                       Axis2=str(g2)+","+self.masterDict['gonioDirs'][2]+","+str(self.masterDict['gonioSenses'][2]))
+            mantid.simpleapi.DeleteWorkspace("__temp_instrument")
+            self.wg=mantid.simpleapi.GroupWorkspaces(groupingStrings,OutputWorkspace="__temp_instrument")
             self.updatedInstrument=False
+        #set the UB
         if self.updatedOL or not self.wg[0].sample().hasOrientedLattice():
-            SetUB(self.wg,UB=self.ol.getUB())
+            mantid.simpleapi.SetUB(self.wg,UB=self.ol.getUB())
             self.updatedOL=False
-        
+        #calculate coverage
+        #plotting
         if self.sender() is self.plotButton:
             self.trajfig.clear()
         
