@@ -267,7 +267,7 @@ DECLARE_FUNCTION(PawleyFunction)
 
 /// Constructor
 PawleyFunction::PawleyFunction()
-    : FunctionParameterDecorator(), m_compositeFunction(),
+    : IPawleyFunction(), m_compositeFunction(),
       m_pawleyParameterFunction(), m_peakProfileComposite(), m_hkls(),
       m_dUnit(), m_wsUnit() {}
 

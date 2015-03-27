@@ -3,7 +3,7 @@
 
 #include "MantidKernel/System.h"
 #include "MantidAPI/CompositeFunction.h"
-#include "MantidAPI/FunctionParameterDecorator.h"
+#include "MantidAPI/IPawleyFunction.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/IPeakFunction.h"
 #include "MantidAPI/ParamFunction.h"
@@ -106,7 +106,7 @@ typedef boost::shared_ptr<PawleyParameterFunction> PawleyParameterFunction_sptr;
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport PawleyFunction : public API::FunctionParameterDecorator {
+class DLLExport PawleyFunction : public API::IPawleyFunction {
 public:
   PawleyFunction();
   virtual ~PawleyFunction() {}
