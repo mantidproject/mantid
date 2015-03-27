@@ -1,12 +1,14 @@
-#include "MantidDataHandling/LoadFITS.h"
 #include "MantidAPI/MultipleFileProperty.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/RegisterFileLoader.h"
+#include "MantidDataHandling/LoadFITS.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/UnitFactory.h"
+
 #include <boost/algorithm/string.hpp>
 #include <Poco/BinaryReader.h>
-#include <fstream>
+#include <Poco/FileStream.h>
+
 
 using namespace Mantid::DataHandling;
 using namespace Mantid::DataObjects;
@@ -479,29 +481,25 @@ void LoadFITS::readDataToWorkspace2D(Workspace2D_sptr ws,
                                      const FITSInfo &fileInfo,
                                      MantidImage &imageY, MantidImage &imageE,
                                      std::vector<char> &buffer) {
-  // create pointer of correct data type to void pointer of the buffer:
-  uint8_t *buffer8 = reinterpret_cast<uint8_t *>(&buffer[0]);
-
-  // Read Data
   std::string filename = fileInfo.filePath;
-  FILE *currFile = fopen(filename.c_str(), "rb");
-  if (currFile == NULL)
-    throw std::runtime_error("Error opening file to read: " + filename);
+  Poco::FileStream file(filename, std::ios::in);
 
-  size_t bytesRead = 0;
   size_t bytespp = (fileInfo.bitsPerPixel / 8);
   size_t len = m_spectraCount * bytespp;
-  if (fseek(currFile, BASE_HEADER_SIZE * fileInfo.headerSizeMultiplier,
-            SEEK_CUR) == 0) {
-    bytesRead = fread(buffer8, 1, len, currFile);
-  }
-  if (bytesRead != len) {
+  file.seekg(BASE_HEADER_SIZE * fileInfo.headerSizeMultiplier);
+  file.read(&buffer[0], len);
+  if (!file) {
     throw std::runtime_error(
         "Error while reading file: " + filename + ". Tried to read " +
         boost::lexical_cast<std::string>(len) + " bytes but got " +
-        boost::lexical_cast<std::string>(bytesRead) +
+        boost::lexical_cast<std::string>(file.gcount()) +
         " bytes. The file and/or its headers may be wrong.");
   }
+  // all is loaded
+  file.close();
+
+  // create pointer of correct data type to void pointer of the buffer:
+  uint8_t *buffer8 = reinterpret_cast<uint8_t *>(&buffer[0]);
 
   std::vector<char> buf(bytespp);
   char *tmp = &buf.front();
@@ -551,9 +549,6 @@ void LoadFITS::readDataToWorkspace2D(Workspace2D_sptr ws,
 
   // Set in WS
   ws->setImageYAndE(imageY, imageE, 0, false);
-
-  // Clear memory associated with the file load
-  fclose(currFile);
 }
 
 /**
