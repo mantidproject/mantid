@@ -43,7 +43,7 @@ class TransformToIqt(PythonAlgorithm):
                              doc='Minimum energy for fit. Default=-0.5')
         self.declareProperty(name='EnergyMax', defaultValue=0.5,
                              doc='Maximum energy for fit. Default=0.5')
-        self.declareProperty(name='NumBins', defaultValue=1,
+        self.declareProperty(name='BinReductionFactor', defaultValue=10.0,
                              doc='Decrease total number of spectrum points by this ratio through merging of '
                                  'intensities from neighbouring bins. Default=1')
 
@@ -99,7 +99,7 @@ class TransformToIqt(PythonAlgorithm):
 
         self._e_min = self.getProperty('EnergyMin').value
         self._e_max = self.getProperty('EnergyMax').value
-        self._number_points_per_bin = self.getProperty('NumBins').value
+        self._number_points_per_bin = self.getProperty('BinReductionFactor').value
 
         self._parameter_table = self.getPropertyValue('ParameterWorkspace')
         if self._parameter_table == '':
@@ -140,7 +140,7 @@ class TransformToIqt(PythonAlgorithm):
                       Xmin=self._e_min, Xmax=self._e_max)
         x_data = mtd['__TransformToIqt_sample_cropped'].readX(0)
         number_input_points = len(x_data) - 1
-        num_bins = number_input_points / self._number_points_per_bin
+        num_bins = int(number_input_points / self._number_points_per_bin)
         self._e_width = (abs(self._e_min) + abs(self._e_max)) / num_bins
 
         try:
@@ -173,7 +173,7 @@ class TransformToIqt(PythonAlgorithm):
         param_table = CreateEmptyTableWorkspace(OutputWorkspace=self._parameter_table)
 
         param_table.addColumn('int', 'SampleInputBins')
-        param_table.addColumn('int', 'NumberBins')
+        param_table.addColumn('float', 'BinReductionFactor')
         param_table.addColumn('int', 'SampleOutputBins')
         param_table.addColumn('float', 'EnergyMin')
         param_table.addColumn('float', 'EnergyMax')

@@ -97,7 +97,7 @@ Usage
                                  ResolutionWorkspace=can,
                                  EnergyMin=-0.5,
                                  EnergyMax=0.5,
-                                 NumBins=10)
+                                 BinReductionFactor=10)
 
     print 'Number of output bins: %d' % (params.cell('SampleOutputBins', 0))
     print 'Resolution bins: %d' % (params.cell('ResolutionBins', 0))
