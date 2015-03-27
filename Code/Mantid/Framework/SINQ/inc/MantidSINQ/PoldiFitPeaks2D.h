@@ -5,6 +5,7 @@
 #include "MantidSINQ/DllConfig.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/IFunction.h"
+#include "MantidAPI/IPeakFunction.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidSINQ/PoldiUtilities/PoldiPeakCollection.h"
 #include "MantidSINQ/PoldiUtilities/PoldiTimeTransformer.h"
@@ -57,6 +58,18 @@ public:
   virtual const std::string category() const;
 
   virtual const std::string summary() const;
+
+  Poldi2DFunction_sptr getFunctionIndividualPeaks(
+      std::string profileFunctionName,
+      const PoldiPeakCollection_sptr &peakCollection) const;
+
+  Poldi2DFunction_sptr
+  getFunctionPawley(std::string profileFunctionName,
+                    const PoldiPeakCollection_sptr &peakCollection) const;
+
+  PoldiPeak_sptr
+  getPeakFromPeakFunction(API::IPeakFunction_sptr profileFunction,
+                          const Kernel::V3D &hkl) const;
 
 protected:
   PoldiPeakCollection_sptr

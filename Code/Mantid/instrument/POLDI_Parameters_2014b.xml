@@ -3,22 +3,22 @@
     
     <component-link name="chopper">
         <parameter name="t0" type="number">
-            <value val="-0.00801" />
+            <value val="-0.0069" />
         </parameter>
         <parameter name="t0_const" type="number">
-            <value val="-18.3" />
+            <value val="-6.9" />
         </parameter>
     </component-link>
     
     <component-link name="detector">
         <parameter name="two_theta" type="number">
-            <value val="90.95" />
+            <value val="91.12" />
         </parameter>
         <parameter name="x">
-            <value val="-1.000" />
+            <value val="-0.8322" />
         </parameter>
         <parameter name="y">
-            <value val="-0.900" />
+            <value val="-0.910" />
         </parameter>
     </component-link>
     

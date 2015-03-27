@@ -5,7 +5,7 @@
 
 #include "MantidSINQ/PoldiUtilities/PoldiSpectrumPawleyFunction.h"
 
-using Mantid::SINQ::PoldiSpectrumPawleyFunction;
+using namespace Mantid::Poldi;
 using namespace Mantid::API;
 
 class PoldiSpectrumPawleyFunctionTest : public CxxTest::TestSuite

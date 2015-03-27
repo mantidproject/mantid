@@ -267,9 +267,8 @@ DECLARE_FUNCTION(PawleyFunction)
 
 /// Constructor
 PawleyFunction::PawleyFunction()
-    : IPawleyFunction(), m_compositeFunction(),
-      m_pawleyParameterFunction(), m_peakProfileComposite(), m_hkls(),
-      m_dUnit(), m_wsUnit() {}
+    : IPawleyFunction(), m_compositeFunction(), m_pawleyParameterFunction(),
+      m_peakProfileComposite(), m_hkls(), m_dUnit(), m_wsUnit() {}
 
 void PawleyFunction::setMatrixWorkspace(
     boost::shared_ptr<const MatrixWorkspace> workspace, size_t wi,
@@ -366,16 +365,24 @@ void PawleyFunction::function(const FunctionDomain &domain,
                               FunctionValues &values) const {
   UnitCell cell = m_pawleyParameterFunction->getUnitCellFromParameters();
   double zeroShift = m_pawleyParameterFunction->getParameter("ZeroShift");
+  std::string centreName =
+      m_pawleyParameterFunction->getProfileFunctionCenterParameterName();
 
   for (size_t i = 0; i < m_hkls.size(); ++i) {
     double centre = getTransformedCenter(cell.d(m_hkls[i]));
 
-    m_peakProfileComposite->getFunction(i)->setParameter(
-        m_pawleyParameterFunction->getProfileFunctionCenterParameterName(),
-        centre + zeroShift);
+    m_peakProfileComposite->getFunction(i)
+        ->setParameter(centreName, centre + zeroShift);
   }
 
   m_peakProfileComposite->function(domain, values);
+
+  for (size_t i = 0; i < m_hkls.size(); ++i) {
+    m_peakProfileComposite->getFunction(i)
+        ->setParameter(centreName, m_peakProfileComposite->getFunction(i)
+                                           ->getParameter(centreName) -
+                                       zeroShift);
+  }
 }
 
 /// Removes all peaks from the function.

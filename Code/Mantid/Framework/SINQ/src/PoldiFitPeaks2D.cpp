@@ -12,6 +12,7 @@ use the Build/wiki_maker.py script to generate your full wiki page.
 #include "MantidAPI/MultiDomainFunction.h"
 #include "MantidSINQ/PoldiUtilities/PoldiSpectrumDomainFunction.h"
 #include "MantidSINQ/PoldiUtilities/PoldiSpectrumLinearBackground.h"
+#include "MantidSINQ/PoldiUtilities/PoldiSpectrumPawleyFunction.h"
 #include "MantidAPI/FunctionDomain1D.h"
 
 #include "MantidSINQ/PoldiUtilities/IPoldiFunction1D.h"
@@ -19,6 +20,7 @@ use the Build/wiki_maker.py script to generate your full wiki page.
 #include "MantidSINQ/PoldiUtilities/PoldiInstrumentAdapter.h"
 #include "MantidSINQ/PoldiUtilities/PoldiDeadWireDecorator.h"
 #include "MantidAPI/IPeakFunction.h"
+#include "MantidAPI/IPawleyFunction.h"
 
 #include "MantidSINQ/PoldiUtilities/Poldi2DFunction.h"
 
@@ -50,9 +52,7 @@ const std::string PoldiFitPeaks2D::name() const { return "PoldiFitPeaks2D"; }
 int PoldiFitPeaks2D::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string PoldiFitPeaks2D::category() const {
-  return "SINQ\\Poldi";
-}
+const std::string PoldiFitPeaks2D::category() const { return "SINQ\\Poldi"; }
 
 /// Very short algorithm summary. @see Algorith::summary
 const std::string PoldiFitPeaks2D::summary() const {
@@ -70,6 +70,17 @@ void PoldiFitPeaks2D::init() {
   declareProperty("PeakProfileFunction", "Gaussian",
                   "Profile function to use for integrating the peak profiles "
                   "before calculating the spectrum.");
+
+  declareProperty("PawleyFit", false, "Instead of refining individual peaks, "
+                                      "refine a unit cell. Peaks must be "
+                                      "indexed, an initial cell must be "
+                                      "provided, as well as a crystal system.");
+  declareProperty("InitialCell", "", "Initial unit cell parameters as 6 "
+                                     "space-separated numbers. Only used when "
+                                     "PawleyFit is checked.");
+  declareProperty("CrystalSystem", "", "Crystal system to use for constraining "
+                                       "unit cell parameters. Only used when "
+                                       "PawleyFit is checked.");
 
   declareProperty("FitConstantBackground", true,
                   "Add a constant background term to the fit.");
@@ -102,6 +113,47 @@ void PoldiFitPeaks2D::init() {
                   "Table workspace with fitted peaks.");
 }
 
+PoldiPeak_sptr
+PoldiFitPeaks2D::getPeakFromPeakFunction(IPeakFunction_sptr profileFunction,
+                                         const V3D &hkl) const {
+  double centre = profileFunction->centre();
+  double height = profileFunction->height();
+
+  size_t dIndex = 0;
+  size_t iIndex = 0;
+  size_t fIndex = 0;
+
+  for (size_t j = 0; j < profileFunction->nParams(); ++j) {
+    if (profileFunction->getParameter(j) == centre) {
+      dIndex = j;
+    } else if (profileFunction->getParameter(j) == height) {
+      iIndex = j;
+    } else {
+      fIndex = j;
+    }
+  }
+
+  // size_t dIndex = peakFunction->parameterIndex("Centre");
+  UncertainValue d(profileFunction->getParameter(dIndex),
+                   profileFunction->getError(dIndex));
+
+  // size_t iIndex = peakFunction->parameterIndex("Area");
+  UncertainValue intensity(profileFunction->getParameter(iIndex),
+                           profileFunction->getError(iIndex));
+
+  // size_t fIndex = peakFunction->parameterIndex("Sigma");
+  double fwhmValue = profileFunction->fwhm();
+  UncertainValue fwhm(fwhmValue, fwhmValue /
+                                     profileFunction->getParameter(fIndex) *
+                                     profileFunction->getError(fIndex));
+
+  PoldiPeak_sptr peak =
+      PoldiPeak::create(MillerIndices(hkl), d, intensity, UncertainValue(1.0));
+  peak->setFwhm(fwhm, PoldiPeak::FwhmRelation::AbsoluteD);
+
+  return peak;
+}
+
 /**
  * Construct a PoldiPeakCollection from a Poldi2DFunction
  *
@@ -127,6 +179,44 @@ PoldiPeakCollection_sptr PoldiFitPeaks2D::getPeakCollectionFromFunction(
       boost::make_shared<PoldiPeakCollection>(PoldiPeakCollection::Integral);
 
   for (size_t i = 0; i < poldi2DFunction->nFunctions(); ++i) {
+    boost::shared_ptr<PoldiSpectrumPawleyFunction> poldiPawleyFunction =
+        boost::dynamic_pointer_cast<PoldiSpectrumPawleyFunction>(
+            poldi2DFunction->getFunction(i));
+
+    if (poldiPawleyFunction) {
+      IPawleyFunction_sptr pawleyFunction =
+          poldiPawleyFunction->getPawleyFunction();
+      if (pawleyFunction) {
+        CompositeFunction_sptr wrappedFn =
+            boost::dynamic_pointer_cast<CompositeFunction>(
+                pawleyFunction->getDecoratedFunction());
+        IFunction_sptr pawleyParamFn = wrappedFn->getFunction(0);
+        for (size_t j = 0; j < pawleyParamFn->nParams(); ++j) {
+          std::cout << j << " " << pawleyParamFn->parameterName(j) << " "
+                    << pawleyParamFn->getParameter(j) << " "
+                    << pawleyParamFn->getError(j) << std::endl;
+        }
+
+        for (size_t j = 0; j < pawleyFunction->getPeakCount(); ++j) {
+          IPeakFunction_sptr profileFunction =
+              pawleyFunction->getPeakFunction(j);
+          V3D peakHKL = pawleyFunction->getPeakHKL(j);
+
+          PoldiPeak_sptr peak =
+              getPeakFromPeakFunction(profileFunction, peakHKL);
+
+          normalizedPeaks->addPeak(peak);
+
+          for (size_t p = 0; p < profileFunction->nParams(); ++p) {
+            std::cout << j << " " << p << " "
+                      << profileFunction->parameterName(p) << " "
+                      << profileFunction->getParameter(p) << std::endl;
+          }
+        }
+      }
+      break;
+    }
+
     boost::shared_ptr<PoldiSpectrumDomainFunction> peakFunction =
         boost::dynamic_pointer_cast<PoldiSpectrumDomainFunction>(
             poldi2DFunction->getFunction(i));
@@ -136,67 +226,24 @@ PoldiPeakCollection_sptr PoldiFitPeaks2D::getPeakCollectionFromFunction(
           boost::dynamic_pointer_cast<IPeakFunction>(
               peakFunction->getProfileFunction());
 
-      double centre = profileFunction->centre();
-      double height = profileFunction->height();
-
-      size_t dIndex = 0;
-      size_t iIndex = 0;
-      size_t fIndex = 0;
-
-      for (size_t j = 0; j < profileFunction->nParams(); ++j) {
-        if (profileFunction->getParameter(j) == centre) {
-          dIndex = j;
-        } else if (profileFunction->getParameter(j) == height) {
-          iIndex = j;
-        } else {
-          fIndex = j;
-        }
-      }
-
-      // size_t dIndex = peakFunction->parameterIndex("Centre");
-      UncertainValue d(peakFunction->getParameter(dIndex),
-                       peakFunction->getError(dIndex));
-
-      // size_t iIndex = peakFunction->parameterIndex("Area");
-      UncertainValue intensity(peakFunction->getParameter(iIndex),
-                               peakFunction->getError(iIndex));
-
-      // size_t fIndex = peakFunction->parameterIndex("Sigma");
-      double fwhmValue = profileFunction->fwhm();
-      UncertainValue fwhm(fwhmValue, fwhmValue /
-                                         peakFunction->getParameter(fIndex) *
-                                         peakFunction->getError(fIndex));
-
       PoldiPeak_sptr peak =
-          PoldiPeak::create(MillerIndices(), d, intensity, UncertainValue(1.0));
-      peak->setFwhm(fwhm, PoldiPeak::FwhmRelation::AbsoluteD);
+          getPeakFromPeakFunction(profileFunction, V3D(0, 0, 0));
 
       normalizedPeaks->addPeak(peak);
+      continue;
     }
   }
 
   return normalizedPeaks;
 }
 
-/**
- * Constructs a proper function from a peak collection
- *
- * This method constructs a Poldi2DFunction and assigns one
- *PoldiSpectrumDomainFunction to it for
- * each peak contained in the peak collection.
- *
- * @param peakCollection :: PoldiPeakCollection containing peaks with integral
- *intensities
- * @return Poldi2DFunction with one PoldiSpectrumDomainFunction per peak
- */
-Poldi2DFunction_sptr PoldiFitPeaks2D::getFunctionFromPeakCollection(
+Poldi2DFunction_sptr PoldiFitPeaks2D::getFunctionIndividualPeaks(
+    std::string profileFunctionName,
     const PoldiPeakCollection_sptr &peakCollection) const {
   Poldi2DFunction_sptr mdFunction(new Poldi2DFunction);
 
   for (size_t i = 0; i < peakCollection->peakCount(); ++i) {
     PoldiPeak_sptr peak = peakCollection->peak(i);
-
-    std::string profileFunctionName = getProperty("PeakProfileFunction");
 
     boost::shared_ptr<PoldiSpectrumDomainFunction> peakFunction =
         boost::dynamic_pointer_cast<PoldiSpectrumDomainFunction>(
@@ -224,6 +271,86 @@ Poldi2DFunction_sptr PoldiFitPeaks2D::getFunctionFromPeakCollection(
   }
 
   return mdFunction;
+}
+
+Poldi2DFunction_sptr PoldiFitPeaks2D::getFunctionPawley(
+    std::string profileFunctionName,
+    const PoldiPeakCollection_sptr &peakCollection) const {
+  Poldi2DFunction_sptr mdFunction(new Poldi2DFunction);
+
+  boost::shared_ptr<PoldiSpectrumPawleyFunction> poldiPawleyFunction =
+      boost::dynamic_pointer_cast<PoldiSpectrumPawleyFunction>(
+          FunctionFactory::Instance().createFunction(
+              "PoldiSpectrumPawleyFunction"));
+
+  if (!poldiPawleyFunction) {
+    throw std::invalid_argument("Could not create pawley function.");
+  }
+
+  poldiPawleyFunction->setDecoratedFunction("PawleyFunction");
+
+  IPawleyFunction_sptr pawleyFunction =
+      poldiPawleyFunction->getPawleyFunction();
+  pawleyFunction->setProfileFunction(profileFunctionName);
+
+  std::string crystalSystem = getProperty("CrystalSystem");
+  pawleyFunction->setCrystalSystem(crystalSystem);
+
+  std::string initialCell = getProperty("InitialCell");
+  pawleyFunction->setUnitCell(initialCell);
+
+  IPeakFunction_sptr pFun = boost::dynamic_pointer_cast<IPeakFunction>(
+      FunctionFactory::Instance().createFunction(profileFunctionName));
+
+  for (size_t i = 0; i < peakCollection->peakCount(); ++i) {
+    PoldiPeak_sptr peak = peakCollection->peak(i);
+
+    pFun->setCentre(peak->d());
+    pFun->setFwhm(peak->fwhm(PoldiPeak::AbsoluteD));
+    pFun->setIntensity(peak->intensity());
+
+    pawleyFunction->addPeak(peak->hkl().asV3D(),
+                            peak->fwhm(PoldiPeak::AbsoluteD),
+                            pFun->height());
+
+    IPeakFunction_sptr p = pawleyFunction->getPeakFunction(i);
+    V3D h = pawleyFunction->getPeakHKL(i);
+    std::cout << p->centre() << " " << p->fwhm() << " " << h << std::endl;
+  }
+
+  pawleyFunction->fix(pawleyFunction->parameterIndex("f0.ZeroShift"));
+
+  mdFunction->addFunction(poldiPawleyFunction);
+
+  for (size_t i = 0; i < mdFunction->nParams(); ++i) {
+    std::cout << i << " " << mdFunction->parameterName(i) << " "
+              << mdFunction->getParameter(i) << std::endl;
+  }
+
+  return mdFunction;
+}
+
+/**
+ * Constructs a proper function from a peak collection
+ *
+ * This method constructs a Poldi2DFunction and assigns one
+ *PoldiSpectrumDomainFunction to it for
+ * each peak contained in the peak collection.
+ *
+ * @param peakCollection :: PoldiPeakCollection containing peaks with integral
+ *intensities
+ * @return Poldi2DFunction with one PoldiSpectrumDomainFunction per peak
+ */
+Poldi2DFunction_sptr PoldiFitPeaks2D::getFunctionFromPeakCollection(
+    const PoldiPeakCollection_sptr &peakCollection) const {
+  std::string profileFunctionName = getProperty("PeakProfileFunction");
+
+  bool pawleyFit = getProperty("PawleyFit");
+  if (pawleyFit) {
+    return getFunctionPawley(profileFunctionName, peakCollection);
+  }
+
+  return getFunctionIndividualPeaks(profileFunctionName, peakCollection);
 }
 
 /// Executes the algorithm
