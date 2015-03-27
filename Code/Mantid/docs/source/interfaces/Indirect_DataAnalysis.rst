@@ -674,6 +674,46 @@ Absorption Corrections
 The Absorption Corrections tab provides a cross platform alternative to the
 previous Calculate and Apply Corrections tabs.
 
+Common Options
+~~~~~~~~~~~~~~
+
+Sample Input
+  Used to select the sample from either a file or a workspace already loaded
+  into Mantid.
+
+Use Container
+  Used to enable or disable use of a container and selects one from either a
+  file or loaded workspace.
+
+Shape
+  Select the shape of the sample (see specific geometry options below).
+
+Number Density
+  Number density for either the sample or container.
+
+Chemical Formula
+  Chemical formula for either the sample or container in the format expected by
+  :ref:`SetSampleMaterial <algm-SetSampleMaterial>`.
+
+Use Container Corrections
+  Enables full container corrections, if disabled only a can subtraction will be
+  performed.
+
+Scale
+  Scale factor to scale container input by.
+
+Keep Correction Factors
+  If checked a :ref:`WorkspaceGroup` containing the correction factors will also
+  be created, this will have the suffix *_Factors*.
+
+Plot Result
+  If checked the corrected workspace and correction factors will be plotted.
+
+Save Result
+  If checked the corrected workspace and (if *Keep Correction Factors* is
+  checked) the correction factor workspace will be saved as a NeXus file in the
+  default save directory.
+
 Flat Plate
 ~~~~~~~~~~
 
@@ -681,7 +721,7 @@ Flat Plate
   :widget: pgAbsCorFlatPlate
 
 Flat plate calculations are provided by the
-:ref:`<algm-IndirectFlatPlateAbsorption>` algorithm.
+:ref:`IndirectFlatPlateAbsorption <algm-IndirectFlatPlateAbsorption>` algorithm.
 
 Sample Width
   Width of the sample in :math:`cm`.
@@ -708,8 +748,8 @@ Annulus
 .. interface:: Data Analysis
   :widget: pgAbsCorAnnulus
 
-Annulus calculations are provided by the :ref:`<algm-IndirectAnnulusAbsorption>`
-algorithm.
+Annulus calculations are provided by the :ref:`IndirectAnnulusAbsorption
+<algm-IndirectAnnulusAbsorption>` algorithm.
 
 Sample Inner Radius
   Radius of the inner wall of the sample in :math:`cm`.
@@ -733,7 +773,7 @@ Cylinder
   :widget: pgAbsCorCylinder
 
 Cylinder calculations are provided by the
-:ref:`<algm-IndirectCylinderAbsorption>` algorithm.
+:ref:`IndirectCylinderAbsorption <algm-IndirectCylinderAbsorption>` algorithm.
 
 Sample Radius
   Radius of the outer wall of the sample in :math:`cm`.
@@ -743,10 +783,5 @@ Container Radius
 
 Neutron Events
   Number of events to use in the Monte Carlo simulation.
-
-Common Options
-~~~~~~~~~~~~~~
-
-TODO
 
 .. categories:: Interfaces Indirect
