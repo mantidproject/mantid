@@ -633,7 +633,7 @@ public:
     AnalysisDataService::Instance().remove("outWS");
   }
 
-  void testExecMonExcludedInTheEnd()
+  void xestExecMonExcludedInTheEnd()
   {
     Mantid::API::FrameworkManager::Instance();
     LoadISISNexus2 ld;
