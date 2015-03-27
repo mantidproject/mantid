@@ -43,9 +43,10 @@ namespace IDA
   }
 
 
-  //TODO
   void CalcCorr::run()
   {
+    //TODO: check sample binning matches can binning, ask if should rebin to match
+
     // Get correct corrections algorithm
     QString sampleShape = m_uiForm.cbSampleShape->currentText();
     QString algorithmName = sampleShape.replace(" ", "") + "PaalmanPingsCorrection";

@@ -100,6 +100,12 @@ namespace CustomInterfaces
                           QtProperty* lower, QtProperty* upper,
                           const QPair<double, double> & bounds);
 
+    /// Function to get energy mode from a workspace
+    std::string getEMode(Mantid::API::MatrixWorkspace_sptr ws);
+
+    /// Function to get eFixed from a workspace
+    double getEFixed(Mantid::API::MatrixWorkspace_sptr ws);
+
     /// Function to run an algorithm on a seperate thread
     void runAlgorithm(const Mantid::API::IAlgorithm_sptr algorithm);
 

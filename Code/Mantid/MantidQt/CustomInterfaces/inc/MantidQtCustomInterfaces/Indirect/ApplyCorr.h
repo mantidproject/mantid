@@ -34,9 +34,13 @@ namespace IDA
     virtual bool validate();
     virtual void loadSettings(const QSettings & settings);
 
+    std::string addUnitConversionStep(Mantid::API::MatrixWorkspace_sptr ws);
+
     Ui::ApplyCorr m_uiForm;
+
     /// Pointer to the result workspace (for plotting)
     Mantid::API::MatrixWorkspace_sptr m_outputWs;
+
   };
 
 } // namespace IDA

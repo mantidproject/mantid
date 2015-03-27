@@ -44,12 +44,14 @@ namespace CustomInterfaces
     connect(&m_pythonRunner, SIGNAL(runAsPythonScript(const QString&, bool)), this, SIGNAL(runAsPythonScript(const QString&, bool)));
   }
 
+
   //----------------------------------------------------------------------------------------------
   /** Destructor
    */
   IndirectTab::~IndirectTab()
   {
   }
+
 
   void IndirectTab::runTab()
   {
@@ -64,15 +66,18 @@ namespace CustomInterfaces
     }
   }
 
+
   void IndirectTab::setupTab()
   {
     setup();
   }
 
+
   bool IndirectTab::validateTab()
   {
     return validate();
   }
+
 
   /**
    * Handles generating a Python script for the algorithms run on the current tab.
@@ -114,6 +119,7 @@ namespace CustomInterfaces
     dlg->activateWindow();
   }
 
+
   /**
    * Run the load algorithm with the supplied filename and spectrum range
    *
@@ -144,6 +150,7 @@ namespace CustomInterfaces
     return load->isExecuted();
   }
 
+
   /**
    * Sets the edge bounds of plot to prevent the user inputting invalid values
    * Also sets limits for range selector movement
@@ -163,6 +170,7 @@ namespace CustomInterfaces
     rs->setRange(bounds.first, bounds.second);
   }
 
+
   /**
    * Set the position of the range selectors on the mini plot
    *
@@ -179,6 +187,45 @@ namespace CustomInterfaces
     rs->setMinimum(bounds.first);
     rs->setMaximum(bounds.second);
   }
+
+
+  /**
+   * Gets the energy mode from a workspace based on the X unit.
+   *
+   * Units of dSpacing typically denote diffraction, hence Elastic.
+   * All other units default to spectroscopy, therefore Indirect.
+   *
+   * @param ws Pointer to the workspace
+   * @return Energy mode
+   */
+  std::string IndirectTab::getEMode(Mantid::API::MatrixWorkspace_sptr ws)
+  {
+    Mantid::Kernel::Unit_sptr xUnit = ws->getAxis(0)->unit();
+    if(xUnit->caption() == "dSpacing")
+      return "Elastic";
+
+    return "Indirect";
+  }
+
+
+  /**
+   * Gets the eFixed value from the workspace using the instrument parameters.
+   *
+   * @param ws Pointer to the workspace
+   * @return eFixed value
+   */
+  double IndirectTab::getEFixed(Mantid::API::MatrixWorkspace_sptr ws)
+  {
+    Mantid::Geometry::Instrument_const_sptr inst = ws->getInstrument();
+    if(!inst)
+      throw std::runtime_error("No instrument on workspace");
+
+    if(!inst->hasParameter("efixed-val"))
+      throw std::runtime_error("Instrument has no efixed parameter");
+
+    return inst->getNumberParameter("efixed-val")[0];
+  }
+
 
   /**
    * Runs an algorithm async
@@ -198,6 +245,7 @@ namespace CustomInterfaces
     m_batchAlgoRunner->executeBatchAsync();
   }
 
+
   /**
    * Handles getting the results of an algorithm running async
    *
@@ -212,6 +260,7 @@ namespace CustomInterfaces
       emit showMessageBox("Error running algorithm. \nSee results log for details.");
     }
   }
+
 
   /**
    * Run Python code and return anything printed to stdout.

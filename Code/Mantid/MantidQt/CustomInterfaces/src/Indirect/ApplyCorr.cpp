@@ -56,21 +56,44 @@ namespace IDA
 
   void ApplyCorr::run()
   {
-    //TODO: Convert input workspaces to wavelength
     //TODO: Interpolate correction workspaces if binning does not match
 
-    QString sampleWsName = m_uiForm.dsSample->getCurrentDataName();
-
+    API::BatchAlgorithmRunner::AlgorithmRuntimeProps absCorProps;
     IAlgorithm_sptr applyCorrAlg = AlgorithmManager::Instance().create("ApplyPaalmanPingsCorrection");
     applyCorrAlg->initialize();
 
-    applyCorrAlg->setProperty("SampleWorkspace", sampleWsName.toStdString());
+    QString sampleWsName = m_uiForm.dsSample->getCurrentDataName();
+    MatrixWorkspace_sptr sampleWs = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(sampleWsName.toStdString());
+    Mantid::Kernel::Unit_sptr sampleXUnit = sampleWs->getAxis(0)->unit();
+
+    // If not in wavelength then do conversion
+    if(sampleXUnit->caption() != "Wavelength")
+    {
+      g_log.information("Sample workspace not in wavelength, need to convert to continue.");
+      absCorProps["SampleWorkspace"] = addUnitConversionStep(sampleWs);
+    }
+    else
+    {
+      absCorProps["SampleWorkspace"] = sampleWsName.toStdString();
+    }
 
     bool useCan = m_uiForm.ckUseCan->isChecked();
     if(useCan)
     {
       QString canWsName = m_uiForm.dsContainer->getCurrentDataName();
-      applyCorrAlg->setProperty("CanWorkspace", canWsName.toStdString());
+      MatrixWorkspace_sptr canWs = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(canWsName.toStdString());
+
+      // If not in wavelength then do conversion
+      Mantid::Kernel::Unit_sptr canXUnit = canWs->getAxis(0)->unit();
+      if(canXUnit->caption() != "Wavelength")
+      {
+        g_log.information("Container workspace not in wavelength, need to convert to continue.");
+        absCorProps["CanWorkspace"] = addUnitConversionStep(canWs);
+      }
+      else
+      {
+        absCorProps["CanWorkspace"] = canWsName.toStdString();
+      }
 
       bool useCanScale = m_uiForm.ckScaleCan->isChecked();
       if(useCanScale)
@@ -107,11 +130,36 @@ namespace IDA
     applyCorrAlg->setProperty("OutputWorkspace", outputWsName.toStdString());
 
     // Run the corrections algorithm
-    m_batchAlgoRunner->addAlgorithm(applyCorrAlg);
+    m_batchAlgoRunner->addAlgorithm(applyCorrAlg, absCorProps);
     m_batchAlgoRunner->executeBatchAsync();
 
     // Set the result workspace for Python script export
     m_pythonExportWsName = outputWsName.toStdString();
+  }
+
+
+  /**
+   * Adds a unit converstion step to the batch algorithm queue.
+   *
+   * @param ws Pointer to the workspace to convert
+   * @return Name of output workspace
+   */
+  std::string ApplyCorr::addUnitConversionStep(MatrixWorkspace_sptr ws)
+  {
+    std::string outputName = ws->name() + "_inWavelength";
+
+    IAlgorithm_sptr convertAlg = AlgorithmManager::Instance().create("ConvertUnits");
+    convertAlg->initialize();
+
+    convertAlg->setProperty("InputWorkspace", ws->name());
+    convertAlg->setProperty("OutputWorkspace", outputName);
+    convertAlg->setProperty("Target", "Wavelength");
+    convertAlg->setProperty("EMode", getEMode(ws));
+    convertAlg->setProperty("EFixed", getEFixed(ws));
+
+    m_batchAlgoRunner->addAlgorithm(convertAlg);
+
+    return outputName;
   }
 
 
@@ -149,6 +197,7 @@ namespace IDA
     {
       uiv.checkDataSelectorIsValid("Container", m_uiForm.dsContainer);
 
+      // Check can and sample workspaces are the same "type" (reduced or S(Q, w))
       QString sample = m_uiForm.dsSample->getCurrentDataName();
       QString sampleType = sample.right(sample.length() - sample.lastIndexOf("_"));
       QString container = m_uiForm.dsContainer->getCurrentDataName();
@@ -162,7 +211,33 @@ namespace IDA
     }
 
     if(useCorrections)
+    {
       uiv.checkDataSelectorIsValid("Corrections", m_uiForm.dsCorrections);
+
+      // Check that all correction workspaces have X usints of Wavelength
+      QString correctionsWSName = m_uiForm.dsCorrections->getCurrentDataName();
+      WorkspaceGroup_sptr corrections = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(correctionsWSName.toStdString());
+      for(size_t i = 0; i < corrections->size(); i++)
+      {
+        MatrixWorkspace_sptr factorWs = boost::dynamic_pointer_cast<MatrixWorkspace>(corrections->getItem(i));
+        if(!factorWs)
+        {
+          QString msg = "Correction factor workspace "
+                      + QString::number(i)
+                      + " is not a MatrixWorkspace";
+          uiv.addErrorMessage(msg);
+          continue;
+        }
+        Mantid::Kernel::Unit_sptr xUnit = factorWs->getAxis(0)->unit();
+        if(xUnit->caption() != "Wavelength")
+        {
+          QString msg = "Correction factor workspace "
+                      + QString::fromStdString(factorWs->name())
+                      + " is not in wavelength";
+          uiv.addErrorMessage(msg);
+        }
+      }
+    }
 
     // Show errors if there are any
     if(!uiv.isAllInputValid())
