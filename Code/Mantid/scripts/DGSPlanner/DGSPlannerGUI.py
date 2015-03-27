@@ -11,6 +11,12 @@ from mpl_toolkits.axisartist import Subplot
 import matplotlib.pyplot
 import numpy
 
+def float2Input(x):
+    if numpy.isfinite(x):
+        return x
+    else:
+        return ""
+
 class DGSPlannerGUI(QtGui.QWidget):
     def __init__(self,ol=None,parent=None):
         # pylint: disable=unused-argument
@@ -111,6 +117,11 @@ class DGSPlannerGUI(QtGui.QWidget):
                 mantid.simpleapi.DeleteWorkspace(self.wg)
             mantid.simpleapi.LoadEmptyInstrument(mantid.api.ExperimentInfo.getInstrumentFilename(self.masterDict['instrument']),
                                                  OutputWorkspace="__temp_instrument")
+            if self.masterDict['instrument']=='HYSPEC':
+                mantid.simpleapi.AddSampleLog(Workspace="__temp_instrument",LogName='msd',LogText='1798.5',LogType='Number Series')
+                mantid.simpleapi.AddSampleLog(Workspace="__temp_instrument",LogName='s2',
+                                              LogText=self.masterDict['S2'],LogType='Number Series')
+                mantid.simpleapi.LoadInstrument(Workspace="__temp_instrument",Instrument="HYSPEC")
             i=0
             groupingStrings=[]
             for g0 in gonioAxis0values:
@@ -132,6 +143,37 @@ class DGSPlannerGUI(QtGui.QWidget):
             mantid.simpleapi.SetUB(self.wg,UB=self.ol.getUB())
             self.updatedOL=False
         #calculate coverage
+        dimensions=['Q1','Q2','Q3','DeltaE']
+        mdws=mantid.simpleapi.CalculateCoiverageDGS(self.wg,
+                                                    Q1Basis=self.masterDict['dimBasis'][0],
+                                                    Q1Basis=self.masterDict['dimBasis'][1],
+                                                    Q1Basis=self.masterDict['dimBasis'][2],
+                                                    IncidentEnergy=self.masterDict['Ei']
+                                                    Dimension1=dimensions[self.masterDict['dimIndex'][0]],
+                                                    Dimension1Min=float2Input(self.masterDict['dimMin'][0]), 
+                                                    Dimension1Max=float2Input(self.masterDict['dimMax'][0]), 
+                                                    Dimension1Step=float2Input(self.masterDict['dimStep'][0]),
+                                                    Dimension2=dimensions[self.masterDict['dimIndex'][1]],
+                                                    Dimension2Min=float2Input(self.masterDict['dimMin'][1]), 
+                                                    Dimension2Max=float2Input(self.masterDict['dimMax'][1]),
+                                                    Dimension2Step=float2Input(self.masterDict['dimStep'][1]),
+                                                    Dimension3=dimensions[self.masterDict['dimIndex'][2]],
+                                                    Dimension3Min=float2Input(self.masterDict['dimMin'][2]), 
+                                                    Dimension3Max=float2Input(self.masterDict['dimMax'][2]),
+                                                    Dimension4=dimensions[self.masterDict['dimIndex'][3]],
+                                                    Dimension4Min=float2Input(self.masterDict['dimMin'][3]), 
+                                                    Dimension4Max=float2Input(self.masterDict['dimMax'][3]))
+        intensity=mdws[0].getSignalArray()
+        if self.colorButton.isChecked():
+            for i in range(mdws.getNumberOfEntries())[1:]:
+                tempintensity=  mdws[i].getSignalArray()
+                intensity[numpy.where( tempintensity>0)]=i+1.
+        else:
+            for i in range(mdws.getNumberOfEntries())[1:]:
+                tempintensity=  mdws[i].getSignalArray()
+                intensity[numpy.where( tempintensity>0)]=1.
+        #TODO: get dimensions, transpose array and plot        
+        
         #plotting
         if self.sender() is self.plotButton:
             self.trajfig.clear()
@@ -149,13 +191,10 @@ class DGSPlannerGUI(QtGui.QWidget):
         xx, yy = self.tr(X, Y)
         self.trajfig.pcolorfast(xx,yy,Z)
 
-        self.trajfig.set_aspect(1.)
-        #ax1.set_xlim(-10, 10.)
-        #ax1.set_ylim(-10, 10.)
 
+        self.trajfig.set_aspect(1.)
         #self.trajfig.axis["t"]=self.trajfig.new_floating_axis(0, 0.)
         #self.trajfig.axis["t2"]=self.trajfig.new_floating_axis(1, 0.)
-        
         self.trajfig.set_xlabel(self.masterDict['dimNames'][0])
         self.trajfig.set_ylabel(self.masterDict['dimNames'][1])
         self.trajfig.grid(True)   
