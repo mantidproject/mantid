@@ -5,12 +5,14 @@
 
 #include <QStringList>
 
+
 using namespace Mantid::API;
 
 namespace
 {
   Mantid::Kernel::Logger g_log("ApplyCorr");
 }
+
 
 namespace MantidQt
 {
@@ -56,8 +58,6 @@ namespace IDA
 
   void ApplyCorr::run()
   {
-    //TODO: Interpolate correction workspaces if binning does not match
-
     API::BatchAlgorithmRunner::AlgorithmRuntimeProps absCorProps;
     IAlgorithm_sptr applyCorrAlg = AlgorithmManager::Instance().create("ApplyPaalmanPingsCorrection");
     applyCorrAlg->initialize();
@@ -107,6 +107,20 @@ namespace IDA
     if(useCorrections)
     {
       QString correctionsWsName = m_uiForm.dsCorrections->getCurrentDataName();
+
+      WorkspaceGroup_sptr corrections = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(correctionsWsName.toStdString());
+      for(size_t i = 0; i < corrections->size(); i++)
+      {
+        MatrixWorkspace_sptr factorWs = boost::dynamic_pointer_cast<MatrixWorkspace>(corrections->getItem(i));
+
+        // Check for matching binning
+        if(sampleWs && !checkWorkspaceBinningMatches(sampleWs, factorWs))
+        {
+          //TODO
+          throw std::runtime_error("Binning");
+        }
+      }
+
       applyCorrAlg->setProperty("CorrectionsWorkspace", correctionsWsName.toStdString());
     }
 
@@ -187,6 +201,8 @@ namespace IDA
 
     uiv.checkDataSelectorIsValid("Sample", m_uiForm.dsSample);
 
+    MatrixWorkspace_sptr sampleWs;
+
     bool useCan = m_uiForm.ckUseCan->isChecked();
     bool useCorrections = m_uiForm.ckUseCorrections->isChecked();
 
@@ -214,11 +230,11 @@ namespace IDA
     {
       uiv.checkDataSelectorIsValid("Corrections", m_uiForm.dsCorrections);
 
-      // Check that all correction workspaces have X usints of Wavelength
-      QString correctionsWSName = m_uiForm.dsCorrections->getCurrentDataName();
-      WorkspaceGroup_sptr corrections = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(correctionsWSName.toStdString());
+      QString correctionsWsName = m_uiForm.dsCorrections->getCurrentDataName();
+      WorkspaceGroup_sptr corrections = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(correctionsWsName.toStdString());
       for(size_t i = 0; i < corrections->size(); i++)
       {
+        // Check it is a MatrixWorkspace
         MatrixWorkspace_sptr factorWs = boost::dynamic_pointer_cast<MatrixWorkspace>(corrections->getItem(i));
         if(!factorWs)
         {
@@ -228,6 +244,8 @@ namespace IDA
           uiv.addErrorMessage(msg);
           continue;
         }
+
+        // Check X unit is wavelength
         Mantid::Kernel::Unit_sptr xUnit = factorWs->getAxis(0)->unit();
         if(xUnit->caption() != "Wavelength")
         {
