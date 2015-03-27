@@ -10,7 +10,8 @@
 namespace Mantid {
 namespace MDAlgorithms {
 
-/** LoadHFIRPDD : TODO: DESCRIPTION
+/** ConvertSpiceDataToRealSpace : Convert data from SPICE file to singals
+  in real space contained in MDEventWrokspaces
 
   Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
@@ -60,6 +61,9 @@ public:
   // virtual int confidence(Kernel::FileDescriptor &descriptor) const;
 
 private:
+  /// Typdef for the white-space separated file data type.
+  typedef std::deque<std::string> DataCollectionType;
+
   /// Initialisation code
   void init();
 
