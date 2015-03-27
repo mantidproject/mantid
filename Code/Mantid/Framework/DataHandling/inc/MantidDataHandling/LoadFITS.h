@@ -35,22 +35,12 @@ struct FITSInfo {
 namespace Mantid {
 namespace DataHandling {
 /**
-LoadFITS : Load a number of FITS files into a histogram Workspace
-
-The FITS format is described for example here:
+LoadFITS: Load one or more of FITS files into a Workspace2D. The FITS
+format, normally used for images, is described for example here:
 http://www.fileformat.info/format/fits/egff.htm
 
-This loader doesn't support the full specification, caveats are:
-    Support for unsigned 8, 16, 32 bit values only
-    Support only for 2 data axis
-
-Loader is designed to work with multiple files, loading into a single
-workspace.  At points there are assumptions that all files in a batch
-use the same number of bits per pixel, and that the number of spectra
-in each file are the same.
-
-  @author John R Hill, RAL
-  @date 29/08/2014
+At the moment this algorithm only supports 2 data axis and the
+following data types: unsigned 8, 16, 32 bits per pixel.
 
 Copyright &copy; 2014,2015 ISIS Rutherford Appleton Laboratory, NScD
 Oak Ridge National Laboratory & European Spallation Source
@@ -84,7 +74,7 @@ public:
 
   /// Summary of algorithms purpose
   virtual const std::string summary() const {
-    return "Load data from FITS files.";
+    return "Load FITS files into workspaces of type Workspace2D.";
   }
 
   /// Algorithm's version for identification overriding a virtual method
@@ -105,37 +95,44 @@ private:
   void init();
   /// Execution code
   void exec();
+
+  /// Loads files into workspace(s)
+  void doLoadFiles(const std::vector<std::string> &paths);
+
+  /// Loads the FITS header(s) into a struct
+  void doLoadHeaders(const std::vector<std::string> &paths,
+                     std::vector<FITSInfo> &headers);
+
   /// Parses the header values for the FITS file
-  bool parseHeader(FITSInfo &headerInfo);
-
-  void setupDefaultKeywordNames();
-
-  /// Creates a vector of all rotations from a file
-  std::vector<double> readRotations(std::string rotFilePath, size_t fileCount);
+  void parseHeader(FITSInfo &headerInfo);
 
   /// Initialises a workspace with IDF and fills it with data
   DataObjects::Workspace2D_sptr
-  addWorkspace(const FITSInfo &fileInfo, size_t &newFileNumber,
-               void *&bufferAny, API::MantidImage &imageY,
-               API::MantidImage &imageE, double rotation,
-               const DataObjects::Workspace2D_sptr parent);
+  makeWorkspace(const FITSInfo &fileInfo, size_t &newFileNumber,
+                std::vector<char> &buffer, API::MantidImage &imageY,
+                API::MantidImage &imageE,
+                const DataObjects::Workspace2D_sptr parent);
+
+  // Reads the data from a single FITS file into a workspace
+  void readDataToWorkspace2D(DataObjects::Workspace2D_sptr ws,
+                             const FITSInfo &fileInfo, API::MantidImage &imageY,
+                             API::MantidImage &imageE,
+                             std::vector<char> &buffer);
+
+  /// Once loaded, check against standard and limitations of this algorithm
+  void headerSanityCheck(const FITSInfo &hdr, const FITSInfo &hdrFirst);
+
+  void setupDefaultKeywordNames();
 
   /// Returns the trailing number from a string minus leading 0's (so 25 from
   /// workspace_00025)
-  size_t fetchNumber(std::string name);
+  size_t fetchNumber(const std::string &name);
 
   // Adds a number of leading 0's to another number up to the totalDigitCount.
-  std::string padZeros(size_t number, size_t totalDigitCount);
-
-  // Reads the data from a single FITS file into a workspace
-  void readFileToWorkspace(DataObjects::Workspace2D_sptr ws,
-                           const FITSInfo &fileInfo, API::MantidImage &imageY,
-                           API::MantidImage &imageE, void *&bufferAny);
+  std::string padZeros(const size_t number, const size_t totalDigitCount);
 
   // Maps the header keys to specified values
   void mapHeaderKeys();
-
-  static bool IsNotFits(const std::string &s);
 
   // Strings used to map header keys
   std::string m_headerScaleKey;
@@ -143,18 +140,26 @@ private:
   std::string m_headerBitDepthKey;
   std::string m_headerRotationKey;
   std::string m_headerImageKeyKey;
-  std::string m_mapFile;
+  std::string m_headerNAxisNameKey;
   std::vector<std::string> m_headerAxisNameKeys;
+  std::string m_mapFile;
 
   static const std::string m_defaultImgType;
+
+  // names of extension headers
+  std::string m_sampleRotation;
+  std::string m_imageType;
 
   std::string m_baseName;
   size_t m_spectraCount;
   API::Progress *m_progress;
 
-  // Number of digits which will be appended to a workspace name, i.e. 4 =
-  // workspace_0001
-  static const size_t DIGIT_SIZE_APPEND = 4;
+  // Number of digits for the fixed width appendix number added to
+  // workspace names, i.e. 3=> workspace_001; 5 => workspace_00001
+  static const size_t DIGIT_SIZE_APPEND = 5;
+  /// size of a FITS header block (room for 36 entries, of 80
+  /// characters each), in bytes. A FITS header always comes in
+  /// multiples of this block.
   static const int BASE_HEADER_SIZE = 2880;
 
   // names for several options that can be given in a "FITS" header
