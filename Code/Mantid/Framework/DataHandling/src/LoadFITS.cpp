@@ -71,7 +71,8 @@ void LoadFITS::init() {
   exts2.push_back(".*");
 
   declareProperty(new MultipleFileProperty("Filename", exts),
-                  "The input filename of the stored data");
+                  "The name of the input file (you can give "
+                  "multiple file names separated by commas).");
 
   declareProperty(new API::WorkspaceProperty<API::Workspace>(
       "OutputWorkspace", "", Kernel::Direction::Output));
@@ -79,8 +80,9 @@ void LoadFITS::init() {
   declareProperty(
       new FileProperty(m_HEADER_MAP_NAME, "", FileProperty::OptionalDirectory,
                        "", Kernel::Direction::Input),
-      "A file mapping header keys to the ones used by ISIS [line separated "
-      "values in the format KEY=VALUE, e.g. BitDepthName=BITPIX ");
+      "A file mapping header key names to non-standard names [line separated "
+      "values in the format KEY=VALUE, e.g. BitDepthName=BITPIX] - do not use "
+      "this if you want to keep compatibility with standard FITS files.");
 }
 
 /**
@@ -378,9 +380,9 @@ Workspace2D_sptr LoadFITS::addWorkspace(const FITSInfo &fileInfo,
   // Add all header info to log.
   for (auto it = fileInfo.headerKeys.begin(); it != fileInfo.headerKeys.end();
        ++it) {
-    ws->mutableRun().removeLogData("_" + it->first, true);
+    ws->mutableRun().removeLogData(it->first, true);
     ws->mutableRun().addLogData(
-        new PropertyWithValue<string>("_" + it->first, it->second));
+        new PropertyWithValue<string>(it->first, it->second));
   }
 
   // Add rotational data to log. Clear first from copied WS
