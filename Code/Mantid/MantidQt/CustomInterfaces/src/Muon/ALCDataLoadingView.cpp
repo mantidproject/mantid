@@ -172,9 +172,10 @@ namespace CustomInterfaces
 
   void ALCDataLoadingView::setTimeRange(double tMin, double tMax)
   {
-    // Set initial values
+    // Set range for minTime
     m_ui.minTime->setMinimum(tMin);
     m_ui.minTime->setMaximum(tMax);
+    // Set range for maxTime
     m_ui.maxTime->setMinimum(tMin);
     m_ui.maxTime->setMaximum(tMax);
   }
