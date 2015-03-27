@@ -70,7 +70,7 @@ public:
 
   void testFit() {
     Workspace2D_sptr ws =
-        WorkspaceCreationHelper::Create1DWorkspaceConstant(20, 1.5, 1.5);
+        WorkspaceCreationHelper::Create1DWorkspaceConstant(20, 1.5, 0.5);
 
     FunctionParameterDecorator_sptr fn =
         boost::make_shared<SimpleFunctionParameterDecorator>();
