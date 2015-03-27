@@ -21,17 +21,23 @@ class TransformToIqt(PythonAlgorithm):
     _save = None
     _dry_run = None
 
+
     def category(self):
-        return "Workflow\\MIDAS;PythonAlgorithms"
+        return "Workflow\\Inelastic;PythonAlgorithms"
+
+
+    def summary(self):
+        return 'Transforms an inelastic reduction to I(Q, t)'
+
 
     def PyInit(self):
-        self.declareProperty(MatrixWorkspaceProperty('Sample', '',\
+        self.declareProperty(MatrixWorkspaceProperty('SampleWorkspace', '',\
                              optional=PropertyMode.Mandatory, direction=Direction.Input),
-                             doc="Name for the Sample workspace.")
+                             doc="Name for the sample workspace.")
 
-        self.declareProperty(MatrixWorkspaceProperty('Resolution', '',\
+        self.declareProperty(MatrixWorkspaceProperty('ResolutionWorkspace', '',\
                              optional=PropertyMode.Mandatory, direction=Direction.Input),
-                             doc="Name for the Resolution workspace.")
+                             doc="Name for the resolution workspace.")
 
         self.declareProperty(name='EnergyMin', defaultValue=-0.5,
                              doc='Minimum energy for fit. Default=-0.5')
@@ -88,8 +94,8 @@ class TransformToIqt(PythonAlgorithm):
         """
         from IndirectCommon import getWSprefix
 
-        self._sample = self.getPropertyValue('Sample')
-        self._resolution = self.getPropertyValue('Resolution')
+        self._sample = self.getPropertyValue('SampleWorkspace')
+        self._resolution = self.getPropertyValue('ResolutionWorkspace')
 
         self._e_min = self.getProperty('EnergyMin').value
         self._e_max = self.getProperty('EnergyMax').value

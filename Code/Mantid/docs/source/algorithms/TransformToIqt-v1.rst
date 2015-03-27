@@ -9,6 +9,12 @@
 Description
 -----------
 
+This algorithm transforms either a reduced (*_red*) or S(Q, w) (*_sqw*)
+workspace to a I(Q, t) workspace.
+
+Theory
+------
+
 The measured spectrum :math:`I(Q, \omega)` is proportional to the four
 dimensional convolution of the scattering law :math:`S(Q, \omega)` with the
 resolution function :math:`R(Q, \omega)` of the spectrometer via :math:`I(Q,
@@ -72,8 +78,35 @@ would be truncated to remove this poor region before back transforming. If the
 truncation is severe the back transform may contain added ripples, so an
 automatic back transform is not provided.
 
-References:
+References
+----------
 
 1. U P Wild, R Holzwarth & H P Good, Rev Sci Instr 48 1621 (1977)
+
+Usage
+-----
+
+**Example - TransformToIqt with IRIS data.**
+
+.. testcode:: exTransformToIqtIRIS
+
+    sample = Load('irs26176_graphite002_red.nxs')
+    can = Load('irs26173_graphite002_red.nxs')
+
+    params, iqt = TransformToIqt(SampleWorkspace=sample,
+                                 ResolutionWorkspace=can,
+                                 EnergyMin=-0.5,
+                                 EnergyMax=0.5,
+                                 NumBins=10)
+
+    print 'Number of output bins: %d' % (params.cell('SampleOutputBins', 0))
+    print 'Resolution bins: %d' % (params.cell('ResolutionBins', 0))
+
+Output:
+
+.. testoutput:: exTransformToIqtIRIS
+
+    Number of output bins: 172
+    Resolution bins: 6
 
 .. categories::

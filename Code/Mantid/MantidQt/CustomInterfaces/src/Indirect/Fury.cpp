@@ -97,8 +97,8 @@ namespace IDA
     IAlgorithm_sptr furyAlg = AlgorithmManager::Instance().create("TransformToIqt", -1);
     furyAlg->initialize();
 
-    furyAlg->setProperty("Sample", wsName.toStdString());
-    furyAlg->setProperty("Resolution", resName.toStdString());
+    furyAlg->setProperty("SampleWorkspace", wsName.toStdString());
+    furyAlg->setProperty("ResolutionWorkspace", resName.toStdString());
 
     furyAlg->setProperty("EnergyMin", energyMin);
     furyAlg->setProperty("EnergyMax", energyMax);
@@ -195,8 +195,8 @@ namespace IDA
     IAlgorithm_sptr furyAlg = AlgorithmManager::Instance().create("TransformToIqt");
     furyAlg->initialize();
 
-    furyAlg->setProperty("Sample", wsName.toStdString());
-    furyAlg->setProperty("Resolution", resName.toStdString());
+    furyAlg->setProperty("SampleWorkspace", wsName.toStdString());
+    furyAlg->setProperty("ResolutionWorkspace", resName.toStdString());
     furyAlg->setProperty("ParameterWorkspace", "__FuryProperties_temp");
 
     furyAlg->setProperty("EnergyMin", energyMin);
