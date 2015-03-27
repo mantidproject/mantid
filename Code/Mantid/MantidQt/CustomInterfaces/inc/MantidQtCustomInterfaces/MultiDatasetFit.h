@@ -265,13 +265,14 @@ class EditLocalParameterDialog: public QDialog
   Q_OBJECT
 public:
   EditLocalParameterDialog(MultiDatasetFit *parent, const QString &parName);
+  QList<double> getValues() const;
 private slots:
   void valueChanged(int,int);
   void setAllValues(double);
 private:
-  MultiDatasetFit *owner() const {return static_cast<MultiDatasetFit*>(parent());}
   Ui::EditLocalParameterDialog m_uiForm;
   QString m_parName;
+  QList<double> m_values;
 };
 
 /*==========================================================================================*/

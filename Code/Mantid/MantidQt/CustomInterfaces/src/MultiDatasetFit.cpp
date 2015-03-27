@@ -720,8 +720,8 @@ bool LocalParameterItemDelegate::eventFilter(QObject * obj, QEvent * ev)
 
 /*==========================================================================================*/
 
-EditLocalParameterDialog::EditLocalParameterDialog(MultiDatasetFit *parent, const QString &parName):
-  QDialog(parent),m_parName(parName)
+EditLocalParameterDialog::EditLocalParameterDialog(MultiDatasetFit *multifit, const QString &parName):
+  QDialog(multifit),m_parName(parName)
 {
   m_uiForm.setupUi(this);
   QHeaderView *header = m_uiForm.tableWidget->horizontalHeader();
@@ -729,14 +729,15 @@ EditLocalParameterDialog::EditLocalParameterDialog(MultiDatasetFit *parent, cons
   header->setResizeMode(1,QHeaderView::Stretch);
   connect(m_uiForm.tableWidget,SIGNAL(cellChanged(int,int)),this,SLOT(valueChanged(int,int)));
 
-  auto multifit = owner();
-  auto n = static_cast<int>( multifit->getNumberOfSpectra() );
+  auto n = multifit->getNumberOfSpectra();
   for(int i = 0; i < n; ++i)
   {
+    double value = multifit->getLocalParameterValue(parName,i);
+    m_values.push_back(value);
     m_uiForm.tableWidget->insertRow(i);
     auto cell = new QTableWidgetItem( QString("f%1.").arg(i) + parName );
     m_uiForm.tableWidget->setItem( i, 0, cell );
-    cell = new QTableWidgetItem( QString::number(multifit->getLocalParameterValue(parName,i)) );
+    cell = new QTableWidgetItem( QString::number(value) );
     m_uiForm.tableWidget->setItem( i, 1, cell );
   }
   auto deleg = new LocalParameterItemDelegate(this);
@@ -756,25 +757,29 @@ void EditLocalParameterDialog::valueChanged(int row, int col)
     QString text = m_uiForm.tableWidget->item(row,col)->text();
     try
     {
-      double value = text.toDouble();
-      owner()->setLocalParameterValue(m_parName,row,value);
+      m_values[row] = text.toDouble();
     }
     catch(std::exception&)
     {
       // restore old value
-      m_uiForm.tableWidget->item(row,col)->setText( QString::number(owner()->getLocalParameterValue(m_parName,row)) );
+      m_uiForm.tableWidget->item(row,col)->setText( QString::number(m_values[row]) );
     }
   }
 }
 
 void EditLocalParameterDialog::setAllValues(double value)
 {
-  int n = owner()->getNumberOfSpectra();
+  int n = m_values.size();
   for(int i = 0; i < n; ++i)
   {
-    owner()->setLocalParameterValue(m_parName,i,value);
+    m_values[i] = value;
     m_uiForm.tableWidget->item(i,1)->setText( QString::number(value) );
   }
+}
+
+QList<double> EditLocalParameterDialog::getValues() const
+{
+  return m_values;
 }
 
 /*==========================================================================================*/
@@ -819,7 +824,6 @@ void MultiDatasetFit::initLayout()
   connect(m_uiForm.btnFit,SIGNAL(clicked()),this,SLOT(fit()));
 
   m_dataController = new DataController(this, m_uiForm.dataTable);
-  connect(m_dataController,SIGNAL(dataTableUpdated()),this,SLOT(reset()));
   connect(m_dataController,SIGNAL(hasSelection(bool)),  m_uiForm.btnRemove, SLOT(setEnabled(bool)));
   connect(m_uiForm.btnAddWorkspace,SIGNAL(clicked()),m_dataController,SLOT(addWorkspace()));
   connect(m_uiForm.btnRemove,SIGNAL(clicked()),m_dataController,SLOT(removeSelectedSpectra()));
@@ -1111,7 +1115,15 @@ int MultiDatasetFit::getNumberOfSpectra() const
 void MultiDatasetFit::editLocalParameterValues(const QString& parName)
 {
   EditLocalParameterDialog dialog(this,parName);
-  dialog.exec();
+  if ( dialog.exec() == QDialog::Accepted )
+  {
+    auto values = dialog.getValues();
+    assert( values.size() == getNumberOfSpectra() );
+    for(int i = 0; i < values.size(); ++i)
+    {
+      setLocalParameterValue(parName, i, values[i]);
+    }
+  }
 }
 
 /**
@@ -1332,6 +1344,7 @@ void DataController::addWorkspace()
         addWorkspaceSpectrum( wsName, *i, *ws );
       }
       emit spectraAdded(static_cast<int>(indices.size()));
+      emit dataTableUpdated();
     }
     else
     {
@@ -1414,6 +1427,7 @@ void DataController::removeSpectra( QList<int> rows )
     m_dataTable->removeRow( rows[i] );
   }
   emit spectraRemoved(rows);
+  emit dataTableUpdated();
 }
 
 /**
