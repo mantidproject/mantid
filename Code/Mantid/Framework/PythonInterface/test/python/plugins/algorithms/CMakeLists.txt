@@ -3,13 +3,16 @@
 ##
 
 set ( TEST_PY_FILES
+  AddSampleLogMultipleTest.py
+  ApplyPaalmanPingsCorrectionTest.py
   CalculateSampleTransmissionTest.py
   CheckForSampleLogsTest.py
   ConjoinSpectraTest.py
   CorrectLogTimesTest.py
   CreateLeBailFitInputTest.py
-  CreateCalibrationWorkspaceTest.py
+  IndirectCalibrationTest.py
   CreateWorkspaceTest.py
+  CylinderPaalmanPingsCorrectionTest.py
   DakotaChiSquaredTest.py
   DensityOfStatesTest.py
   DSFinterpTest.py
@@ -17,6 +20,9 @@ set ( TEST_PY_FILES
   FindReflectometryLinesTest.py
   FlatPlatePaalmanPingsCorrectionTest.py
   GetEiT0atSNSTest.py
+  IndirectAnnulusAbsorptionTest.py
+  IndirectCylinderAbsorptionTest.py
+  IndirectFlatPlateAbsorptionTest.py
   IndirectILLReductionTest.py
   InelasticIndirectReductionTest.py
   IndirectTransmissionTest.py
@@ -31,6 +37,7 @@ set ( TEST_PY_FILES
   MeanTest.py
   MergeCalFilesTest.py
   MolDynTest.py
+  MSDFitTest.py
   PDDetermineCharacterizationsTest.py
   RetrieveRunInfoTest.py
   SANSWideAngleCorrectionTest.py

@@ -221,6 +221,7 @@ set ( INC_FILES
 	inc/MantidAPI/IPeakFunction.h
 	inc/MantidAPI/IPeaksWorkspace.h
 	inc/MantidAPI/IPowderDiffPeakFunction.h
+	inc/MantidAPI/IRemoteJobManager.h
 	inc/MantidAPI/ISpectrum.h
 	inc/MantidAPI/ISplittersWorkspace.h
 	inc/MantidAPI/ITableWorkspace.h

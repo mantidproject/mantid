@@ -23,7 +23,7 @@
 
 namespace Mantid {
 namespace MDEvents {
-DECLARE_DOMAINCREATOR(FitMD);
+DECLARE_DOMAINCREATOR(FitMD)
 
 using namespace API;
 using namespace Kernel;
@@ -211,6 +211,8 @@ boost::shared_ptr<API::Workspace> FitMD::createEventOutputWorkspace(
 
   // Run information
   outputWS->copyExperimentInfos(inputWorkspace);
+  // Coordinates
+  outputWS->setCoordinateSystem(inputWorkspace.getSpecialCoordinateSystem());
   // Set sensible defaults for splitting behaviour
   BoxController_sptr bc = outputWS->getBoxController();
   bc->setSplitInto(3);

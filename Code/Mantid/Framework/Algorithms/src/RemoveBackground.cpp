@@ -150,7 +150,7 @@ void RemoveBackground::exec() {
 BackgroundHelper::BackgroundHelper()
     : m_WSUnit(), m_bgWs(), m_wkWS(), m_pgLog(NULL), m_inPlace(true),
       m_singleValueBackground(false), m_NBg(0), m_dtBg(1), // m_ErrSq(0),
-      m_Emode(0), m_L1(0), m_Efix(0), m_Sample(){};
+      m_Emode(0), m_L1(0), m_Efix(0), m_Sample(){}
 /// Destructor
 BackgroundHelper::~BackgroundHelper() { this->deleteUnitsConverters(); }
 

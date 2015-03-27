@@ -6,7 +6,7 @@ from mantid.simpleapi import *
 import os.path
 
 
-class CreateCalibrationWorkspace(DataProcessorAlgorithm):
+class IndirectCalibration(DataProcessorAlgorithm):
 
     _input_files = None
     _out_ws = None
@@ -16,11 +16,14 @@ class CreateCalibrationWorkspace(DataProcessorAlgorithm):
     _intensity_scale = None
     _plot = None
 
+
     def category(self):
         return 'Workflow\\Inelastic;PythonAlgorithms;Inelastic'
 
+
     def summary(self):
         return 'Creates a calibration workspace from a White-Beam Vanadium run.'
+
 
     def PyInit(self):
         self.declareProperty(StringArrayProperty(name='InputFiles'),
@@ -47,6 +50,7 @@ class CreateCalibrationWorkspace(DataProcessorAlgorithm):
 
         self.declareProperty(name='Plot', defaultValue=False, doc='Plot the calibration data')
 
+
     def validateInputs(self):
         """
         Validates input ranges.
@@ -58,6 +62,7 @@ class CreateCalibrationWorkspace(DataProcessorAlgorithm):
         issues['BackgroundRange'] = self._validate_range('BackgroundRange')
 
         return issues
+
 
     def _validate_range(self, property_name):
         """
@@ -76,12 +81,11 @@ class CreateCalibrationWorkspace(DataProcessorAlgorithm):
 
         return None
 
+
     def PyExec(self):
         from mantid import logger
-        from IndirectCommon import StartTime, EndTime
 
         self._setup()
-        StartTime('CreateCalibrationWorkspace')
 
         runs = []
         for in_file in self._input_files:
@@ -122,7 +126,6 @@ class CreateCalibrationWorkspace(DataProcessorAlgorithm):
         self.setProperty('OutputWorkspace', self._out_ws)
         self._post_process()
 
-        EndTime('CreateCalibrationWorkspace')
 
     def _setup(self):
         """
@@ -142,6 +145,7 @@ class CreateCalibrationWorkspace(DataProcessorAlgorithm):
 
         self._plot = self.getProperty('Plot').value
 
+
     def _post_process(self):
         """
         Handles adding logs and plotting.
@@ -159,5 +163,6 @@ class CreateCalibrationWorkspace(DataProcessorAlgorithm):
             from mantidplot import plotBin
             plotBin(mtd[self._out_ws], 0)
 
+
 # Register algorithm with Mantid
-AlgorithmFactory.subscribe(CreateCalibrationWorkspace)
+AlgorithmFactory.subscribe(IndirectCalibration)

@@ -266,7 +266,7 @@ signals:
 	void clicked(LayerButton*);
 };
 
-Q_DECLARE_METATYPE(MultiLayer*);
+Q_DECLARE_METATYPE(MultiLayer*)
 
 
 class WaterfallFillDialog : QDialog

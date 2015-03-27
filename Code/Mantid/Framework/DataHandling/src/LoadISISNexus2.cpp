@@ -9,7 +9,7 @@
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/ListValidator.h"
-#include "MantidKernel/LogParser.h"
+//#include "MantidKernel/LogParser.h"
 #include "MantidKernel/LogFilter.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/UnitFactory.h"
@@ -38,7 +38,7 @@
 
 namespace Mantid {
 namespace DataHandling {
-DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadISISNexus2);
+DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadISISNexus2)
 
 using namespace Kernel;
 using namespace API;

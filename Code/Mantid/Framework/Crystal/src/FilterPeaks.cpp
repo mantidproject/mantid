@@ -40,9 +40,9 @@ FilterPeaks::FilterPeaks() {}
 FilterPeaks::~FilterPeaks() {}
 
 /// Algorithm's name for identification. @see Algorithm::name
-const std::string FilterPeaks::name() const { return "FilterPeaks"; };
+const std::string FilterPeaks::name() const { return "FilterPeaks"; }
 /// Algorithm's version for identification. @see Algorithm::version
-int FilterPeaks::version() const { return 1; };
+int FilterPeaks::version() const { return 1; }
 /// Algorithm's category for identification. @see Algorithm::category
 const std::string FilterPeaks::category() const { return "Crystal"; }
 

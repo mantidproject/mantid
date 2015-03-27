@@ -73,7 +73,7 @@ class MolDyn(PythonAlgorithm):
     _mtd_plot = None
 
     def category(self):
-        return 'Workflow\\Inelastic;PythonAlgorithms;Inelastic'
+        return 'Workflow\\Inelastic;PythonAlgorithms;Inelastic;Simulation'
 
     def summary(self):
         return 'Imports nMOLDYN simulations from CDL and ASCII files.'

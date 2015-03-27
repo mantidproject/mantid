@@ -17,9 +17,9 @@ FilterByXValue::FilterByXValue() {}
 FilterByXValue::~FilterByXValue() {}
 
 /// Algorithm's name for identification. @see Algorithm::name
-const std::string FilterByXValue::name() const { return "FilterByXValue"; };
+const std::string FilterByXValue::name() const { return "FilterByXValue"; }
 /// Algorithm's version for identification. @see Algorithm::version
-int FilterByXValue::version() const { return 1; };
+int FilterByXValue::version() const { return 1; }
 /// Algorithm's category for identification. @see Algorithm::category
 const std::string FilterByXValue::category() const {
   return "Events\\EventFiltering";

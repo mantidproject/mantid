@@ -29,13 +29,13 @@ namespace Mantid
 
       BackgroundRgbProvider::BackgroundRgbProvider()
       {
-      };
+      }
 
       BackgroundRgbProvider::~BackgroundRgbProvider()
       {
          // Need to record the background color
          update();
-      };
+      }
 
       std::vector<double> BackgroundRgbProvider::getRgb(bool viewSwitched)
       {

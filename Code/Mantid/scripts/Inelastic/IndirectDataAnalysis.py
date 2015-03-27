@@ -98,26 +98,28 @@ def confitSeq(inputWS, func, startX, endX, ftype, bgd, temperature=None, specMin
     axis = mtd[wsname].getAxis(0)
     axis.setUnit("MomentumTransfer")
 
+    # Handle sample logs
+    temp_correction = temperature is not None
+
     CopyLogs(InputWorkspace=inputWS, OutputWorkspace=wsname)
-    AddSampleLog(Workspace=wsname, LogName='convolve_members',
-                 LogType='String', LogText=str(convolve))
-    AddSampleLog(Workspace=wsname, LogName="fit_program",
-                 LogType="String", LogText='ConvFit')
-    AddSampleLog(Workspace=wsname, LogName='background',
-                 LogType='String', LogText=str(bgd))
-    AddSampleLog(Workspace=wsname, LogName='delta_function',
-                 LogType='String', LogText=str(using_delta_func))
-    AddSampleLog(Workspace=wsname, LogName='lorentzians',
-                 LogType='String', LogText=str(lorentzians))
+
+    sample_logs = [('convolve_members', convolve),
+                   ('fit_program', 'ConvFit'),
+                   ('background', bgd),
+                   ('delta_function', using_delta_func),
+                   ('lorentzians', lorentzians),
+                   ('temperature_correction', temp_correction)]
+
+    if temp_correction:
+        sample_logs.append(('temperature_value', temperature))
+
+    log_names = [log[0] for log in sample_logs]
+    log_values = [log[1] for log in sample_logs]
+    AddSampleLogMultiple(Workspace=wsname,
+                         LogNames=log_names,
+                         LogValues=log_values)
 
     CopyLogs(InputWorkspace=wsname, OutputWorkspace=output_workspace + "_Workspaces")
-
-    temp_correction = temperature is not None
-    AddSampleLog(Workspace=wsname, LogName='temperature_correction',
-                 LogType='String', LogText=str(temp_correction))
-    if temp_correction:
-        AddSampleLog(Workspace=wsname, LogName='temperature_value',
-                     LogType='String', LogText=str(temperature))
 
     RenameWorkspace(InputWorkspace=output_workspace,
                     OutputWorkspace=output_workspace + "_Parameters")
@@ -200,8 +202,10 @@ def furyfitSeq(inputWS, func, ftype, startx, endx, spec_min=0, spec_max=None, in
     CopyLogs(InputWorkspace=inputWS, OutputWorkspace=fit_group)
     CopyLogs(InputWorkspace=inputWS, OutputWorkspace=result_workspace)
 
-    addSampleLogs(fit_group, sample_logs)
-    addSampleLogs(result_workspace, sample_logs)
+    log_names = [item[0] for item in sample_logs]
+    log_values = [item[1] for item in sample_logs]
+    AddSampleLogMultiple(Workspace=result_workspace, LogNames=log_names, LogValues=log_values)
+    AddSampleLogMultiple(Workspace=fit_group, LogNames=log_names, LogValues=log_values)
 
     if Save:
         save_workspaces = [result_workspace, fit_group]
@@ -270,8 +274,10 @@ def furyfitMult(inputWS, function, ftype, startx, endx, spec_min=0, spec_max=Non
     CopyLogs(InputWorkspace=inputWS, OutputWorkspace=result_workspace)
     CopyLogs(InputWorkspace=inputWS, OutputWorkspace=fit_group)
 
-    addSampleLogs(result_workspace, sample_logs)
-    addSampleLogs(fit_group, sample_logs)
+    log_names = [item[0] for item in sample_logs]
+    log_values = [item[1] for item in sample_logs]
+    AddSampleLogMultiple(Workspace=result_workspace, LogNames=log_names, LogValues=log_values)
+    AddSampleLogMultiple(Workspace=fit_group, LogNames=log_names, LogValues=log_values)
 
     DeleteWorkspace(tmp_fit_workspace)
 
@@ -327,111 +333,6 @@ def furyfitPlotSeq(ws, plot):
 
     plotParameters(ws, *param_names)
 
-
-##############################################################################
-# MSDFit
-##############################################################################
-
-def msdfitPlotSeq(inputWS, xlabel):
-    workspace = mtd[inputWS + '_A1']
-    if len(workspace.readX(0)) > 1:
-        msd_plot = MTD_PLOT.plotSpectrum(inputWS+'_A1',0,True)
-        msd_layer = msd_plot.activeLayer()
-        msd_layer.setAxisTitle(MTD_PLOT.Layer.Bottom,xlabel)
-        msd_layer.setAxisTitle(MTD_PLOT.Layer.Left,'<u2>')
-
-def msdfit(ws, startX, endX, spec_min=0, spec_max=None, Save=False, Plot=True):
-    StartTime('msdFit')
-    workdir = getDefaultWorkingDirectory()
-
-    num_spectra = mtd[ws].getNumberHistograms()
-    if spec_max is None:
-        spec_max = num_spectra - 1
-
-    if spec_min < 0 or spec_max >= num_spectra:
-        raise ValueError("Invalid spectrum range: %d - %d" % (spec_min, spec_max))
-
-    xlabel = ''
-    ws_run = mtd[ws].getRun()
-
-    if 'vert_axis' in ws_run:
-        xlabel = ws_run.getLogData('vert_axis').value
-
-    mname = ws[:-4]
-    msdWS = mname+'_msd'
-
-    #fit line to each of the spectra
-    function = 'name=LinearBackground, A0=0, A1=0'
-    input_params = [ ws+',i%d' % i for i in xrange(spec_min, spec_max+1)]
-    input_params = ';'.join(input_params)
-    PlotPeakByLogValue(Input=input_params, OutputWorkspace=msdWS, Function=function,
-                       StartX=startX, EndX=endX, FitType='Sequential', CreateOutput=True)
-
-    DeleteWorkspace(msdWS + '_NormalisedCovarianceMatrices')
-    DeleteWorkspace(msdWS + '_Parameters')
-    msd_parameters = msdWS+'_Parameters'
-    RenameWorkspace(msdWS, OutputWorkspace=msd_parameters)
-
-    params_table = mtd[msd_parameters]
-
-    #msd value should be positive, but the fit output is negative
-    msd = params_table.column('A1')
-    for i, value in enumerate(msd):
-        params_table.setCell('A1', i, value * -1)
-
-    #create workspaces for each of the parameters
-    group = []
-
-    ws_name = msdWS + '_A0'
-    group.append(ws_name)
-    ConvertTableToMatrixWorkspace(msd_parameters, OutputWorkspace=ws_name,
-                                  ColumnX='axis-1', ColumnY='A0', ColumnE='A0_Err')
-    xunit = mtd[ws_name].getAxis(0).setUnit('Label')
-    xunit.setLabel('Temperature', 'K')
-
-    ws_name = msdWS + '_A1'
-    group.append(ws_name)
-    ConvertTableToMatrixWorkspace(msd_parameters, OutputWorkspace=ws_name,
-                                  ColumnX='axis-1', ColumnY='A1', ColumnE='A1_Err')
-
-    SortXAxis(ws_name, OutputWorkspace=ws_name)
-
-    xunit = mtd[ws_name].getAxis(0).setUnit('Label')
-    xunit.setLabel('Temperature', 'K')
-
-    GroupWorkspaces(InputWorkspaces=','.join(group),OutputWorkspace=msdWS)
-
-    #add sample logs to output workspace
-    fit_workspaces = msdWS + '_Workspaces'
-    CopyLogs(InputWorkspace=ws, OutputWorkspace=msdWS)
-    AddSampleLog(Workspace=msdWS, LogName="start_x", LogType="Number", LogText=str(startX))
-    AddSampleLog(Workspace=msdWS, LogName="end_x", LogType="Number", LogText=str(endX))
-    CopyLogs(InputWorkspace=msdWS + '_A0', OutputWorkspace=fit_workspaces)
-
-    if Plot:
-        msdfitPlotSeq(msdWS, xlabel)
-    if Save:
-        msd_path = os.path.join(workdir, msdWS+'.nxs')                  # path name for nxs file
-        SaveNexusProcessed(InputWorkspace=msdWS, Filename=msd_path, Title=msdWS)
-        logger.information('Output msd file : '+msd_path)
-
-    EndTime('msdFit')
-    return fit_workspaces
-
-def plotInput(inputfiles,spectra=[]):
-    OneSpectra = False
-    if len(spectra) != 2:
-        spectra = [spectra[0], spectra[0]]
-        OneSpectra = True
-    workspaces = []
-    for in_file in inputfiles:
-        root = LoadNexus(Filename=in_file)
-        if not OneSpectra:
-            GroupDetectors(root, root, DetectorList=range(spectra[0],spectra[1]+1) )
-        workspaces.append(root)
-    if len(workspaces) > 0:
-        graph = MTD_PLOT.plotSpectrum(workspaces,0)
-        graph.activeLayer().setTitle(", ".join(workspaces))
 
 ##############################################################################
 # Corrections

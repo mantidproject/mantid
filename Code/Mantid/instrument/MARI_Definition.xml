@@ -45,6 +45,12 @@
   
   <component type="fermi-chopper">
     <location y="-0.1" z="-1.689" />
+    <parameter name="Speed (Hz)">
+      <logfile id="fermi_speed" extract-single-value-as="last_value" />
+    </parameter>
+    <parameter name="Delay (us)">
+      <logfile id="fermi_delay" extract-single-value-as="last_value" />
+    </parameter>
   </component>
   <type name="fermi-chopper" is="chopper">
     <cylinder id="body">
@@ -57,6 +63,9 @@
   
   <component type="disc-chopper">
     <location y="-0.18" z="-3.0" />
+    <parameter name="Speed (Hz)">
+      <logfile id="diskchopper" extract-single-value-as="last_value" />
+    </parameter>
   </component>
   <type name="disc-chopper" is="chopper">
     <cylinder id="body">

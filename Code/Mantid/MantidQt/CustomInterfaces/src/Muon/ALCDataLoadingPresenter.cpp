@@ -9,6 +9,7 @@
 #include <QApplication>
 #include <QFileInfo>
 #include <QDir>
+#include <sstream>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -34,6 +35,22 @@ namespace CustomInterfaces
   void ALCDataLoadingPresenter::load()
   {
     m_view->setWaitingCursor();
+
+    // Check time limits
+    if (auto timeRange = m_view->timeRange()) {
+
+      double tmin = (*timeRange).first;
+      double tmax = (*timeRange).second;
+      if ( tmin >= tmax ){
+        m_view->restoreCursor();
+        m_view->displayError("Invalid time interval");
+        return;
+      }
+    } else {
+      m_view->restoreCursor();
+      m_view->displayError("No time interval");
+      return;
+    }
 
     try
     {
@@ -139,7 +156,9 @@ namespace CustomInterfaces
     std::vector<std::string> periods;
     for (size_t i=0; i<numPeriods; i++)
     {
-      periods.push_back(std::to_string(static_cast<long long int>(i)+1));
+      std::stringstream buffer;
+      buffer << i + 1;
+      periods.push_back(buffer.str());
     }
     m_view->setAvailablePeriods(periods);
   }
