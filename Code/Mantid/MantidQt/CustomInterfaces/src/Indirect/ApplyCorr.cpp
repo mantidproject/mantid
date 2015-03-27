@@ -109,15 +109,42 @@ namespace IDA
       QString correctionsWsName = m_uiForm.dsCorrections->getCurrentDataName();
 
       WorkspaceGroup_sptr corrections = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(correctionsWsName.toStdString());
+      bool interpolateAll = false;
       for(size_t i = 0; i < corrections->size(); i++)
       {
         MatrixWorkspace_sptr factorWs = boost::dynamic_pointer_cast<MatrixWorkspace>(corrections->getItem(i));
 
         // Check for matching binning
-        if(sampleWs && !checkWorkspaceBinningMatches(sampleWs, factorWs))
+        if(sampleWs && (sampleWs->blocksize() != factorWs->blocksize()))
         {
-          //TODO
-          throw std::runtime_error("Binning");
+          int result;
+          if(interpolateAll)
+          {
+            result = QMessageBox::Yes;
+          }
+          else
+          {
+            QString text = "Number of bins on sample and "
+                         + QString::fromStdString(factorWs->name())
+                         + " workspace does not match.\n"
+                         + "Would you like to interpolate this workspace to match the sample?";
+
+            result = QMessageBox::question(NULL, tr("Interpolate corrections?"), tr(text),
+                                           QMessageBox::YesToAll, QMessageBox::Yes, QMessageBox::No);
+          }
+
+          switch(result)
+          {
+            case QMessageBox::YesToAll:
+              interpolateAll = true;
+            case QMessageBox::Yes:
+              addInterpolationStep(factorWs, absCorProps["SampleWorkspace"]);
+              break;
+            default:
+              m_batchAlgoRunner->clearQueue();
+              g_log.error("ApplyCorr cannot run with corrections that do not match sample binning.");
+              return;
+          }
         }
       }
 
@@ -174,6 +201,28 @@ namespace IDA
     m_batchAlgoRunner->addAlgorithm(convertAlg);
 
     return outputName;
+  }
+
+
+  /**
+   * Adds a spline interpolation as a step in the calculation for using legacy correction factor
+   * workspaces.
+   *
+   * @param toInterpolate Pointer to the workspace to interpolate
+   * @param toMatch Name of the workspace to match
+   */
+  void ApplyCorr::addInterpolationStep(MatrixWorkspace_sptr toInterpolate, std::string toMatch)
+  {
+    API::BatchAlgorithmRunner::AlgorithmRuntimeProps interpolationProps;
+    interpolationProps["WorkspaceToMatch"] = toMatch;
+
+    IAlgorithm_sptr interpolationAlg = AlgorithmManager::Instance().create("SplineInterpolation");
+    interpolationAlg->initialize();
+
+    interpolationAlg->setProperty("WorkspaceToInterpolate", toInterpolate->name());
+    interpolationAlg->setProperty("OutputWorkspace", toInterpolate->name());
+
+    m_batchAlgoRunner->addAlgorithm(interpolationAlg, interpolationProps);
   }
 
 

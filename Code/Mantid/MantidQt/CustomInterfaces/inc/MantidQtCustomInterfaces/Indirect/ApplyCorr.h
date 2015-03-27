@@ -35,6 +35,7 @@ namespace IDA
     virtual void loadSettings(const QSettings & settings);
 
     std::string addUnitConversionStep(Mantid::API::MatrixWorkspace_sptr ws);
+    void addInterpolationStep(Mantid::API::MatrixWorkspace_sptr toInterpolate, std::string toMatch);
 
     Ui::ApplyCorr m_uiForm;
 
