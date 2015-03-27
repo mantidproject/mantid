@@ -5,6 +5,10 @@
 #include "MantidSINQ/DllConfig.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/IFunction.h"
+#include "MantidAPI/IPeakFunction.h"
+
+#include "MantidKernel/Matrix.h"
+
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidSINQ/PoldiUtilities/PoldiPeakCollection.h"
 #include "MantidSINQ/PoldiUtilities/PoldiTimeTransformer.h"
@@ -57,6 +61,11 @@ public:
   virtual const std::string category() const;
 
   virtual const std::string summary() const;
+
+  boost::shared_ptr<Kernel::DblMatrix> getLocalCovarianceMatrix(
+      const boost::shared_ptr<const Kernel::DblMatrix> &covarianceMatrix,
+      size_t parameterOffset,
+      const API::IPeakFunction_sptr &profileFunction);
 
 protected:
   PoldiPeakCollection_sptr
