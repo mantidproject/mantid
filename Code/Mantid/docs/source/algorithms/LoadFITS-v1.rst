@@ -62,19 +62,19 @@ Usage
     ws = wsg.getItem(0)
 
     # A couple of standard FITS header entries
-    bpp_log = 'BITPIX'
+    bpp_log = '_BITPIX'
     try:
-        log = ws.getRun().getLogData(bpp_log)
-        print "Bits per pixel: %d" % bpp_log
+        log = ws.getRun().getLogData(bpp_log).value
+        print "Bits per pixel: %s" % int(log)
     except RuntimeError:
         print "Could not find the keyword '%s' in this FITS file" % bpp_log
 
-    axis1_log = 'NAXIS1'
-    axis2_log = 'NAXIS2'
+    axis1_log = '_NAXIS1'
+    axis2_log = '_NAXIS2'
     try:
-        log1 = ws.getRun().getLogData(axis1_log)
-        log2 = ws.getRun().getLogData(axis2_log)
-        print "FITS image size: %d x %d pixels" % (log1, log2)
+        log1 = ws.getRun().getLogData(axis1_log).value
+        log2 = ws.getRun().getLogData(axis2_log).value
+        print "FITS image size: %s x %s pixels" % (int(log1), int(log2))
         print "Number of spectra in the output workspace: %d" % ws.getNumberHistograms()
     except RuntimeError:
         print "Could not find the keywords '%s' and '%s' in this FITS file" % (axis1_log, axis2_log)
