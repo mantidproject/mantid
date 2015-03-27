@@ -103,20 +103,18 @@ void PoldiFitPeaks2D::init() {
 /**
  * Extracts the covariance matrix for the supplied function
  *
- * This method extracts the covariance matrix for the supplied function from
+ * This method extracts the covariance matrix for a sub-function from
  * the global covariance matrix. If no matrix is given, a zero-matrix is
  * returned.
  *
  * @param covarianceMatrix :: Global covariance matrix.
  * @param parameterOffset :: Offset for the parameters of profileFunction.
- * @param profileFunction :: Function for to extract the covariance matrix.
+ * @param nParams :: Number of parameters of the local function.
  * @return
  */
 boost::shared_ptr<DblMatrix> PoldiFitPeaks2D::getLocalCovarianceMatrix(
     const boost::shared_ptr<const Kernel::DblMatrix> &covarianceMatrix,
-    size_t parameterOffset, const IPeakFunction_sptr &profileFunction) {
-  size_t nParams = profileFunction->nParams();
-
+    size_t parameterOffset, size_t nParams) const {
   if (covarianceMatrix) {
     boost::shared_ptr<Kernel::DblMatrix> localCov =
         boost::make_shared<Kernel::DblMatrix>(nParams, nParams, false);
@@ -160,6 +158,8 @@ PoldiPeakCollection_sptr PoldiFitPeaks2D::getPeakCollectionFromFunction(
   boost::shared_ptr<const Kernel::DblMatrix> covarianceMatrix =
       poldi2DFunction->getCovarianceMatrix();
 
+  size_t offset = 0;
+
   for (size_t i = 0; i < poldi2DFunction->nFunctions(); ++i) {
     boost::shared_ptr<PoldiSpectrumDomainFunction> peakFunction =
         boost::dynamic_pointer_cast<PoldiSpectrumDomainFunction>(
@@ -170,9 +170,14 @@ PoldiPeakCollection_sptr PoldiFitPeaks2D::getPeakCollectionFromFunction(
           boost::dynamic_pointer_cast<IPeakFunction>(
               peakFunction->getProfileFunction());
 
+      // Get local covariance matrix
+      size_t nLocalParams = profileFunction->nParams();
       boost::shared_ptr<Kernel::DblMatrix> localCov =
-          getLocalCovarianceMatrix(covarianceMatrix, i, profileFunction);
+          getLocalCovarianceMatrix(covarianceMatrix, offset, nLocalParams);
       profileFunction->setCovarianceMatrix(localCov);
+
+      // Increment offset for next function
+      offset += nLocalParams;
 
       IAlgorithm_sptr errorAlg = createChildAlgorithm("EstimatePeakErrors");
       errorAlg->setProperty(
@@ -191,13 +196,8 @@ PoldiPeakCollection_sptr PoldiFitPeaks2D::getPeakCollectionFromFunction(
       double heightError = errorTable->cell<double>(1, 2);
       double fwhmError = errorTable->cell<double>(2, 2);
 
-      // size_t dIndex = peakFunction->parameterIndex("Centre");
       UncertainValue d(centre, centreError);
-
-      // size_t iIndex = peakFunction->parameterIndex("Area");
       UncertainValue intensity(height, heightError);
-
-      // size_t fIndex = peakFunction->parameterIndex("Sigma");
       UncertainValue fwhm(fwhmValue, fwhmError);
 
       PoldiPeak_sptr peak =
