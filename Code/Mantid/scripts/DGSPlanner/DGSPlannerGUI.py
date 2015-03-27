@@ -21,6 +21,9 @@ class DGSPlannerGUI(QtGui.QWidget):
         else:
             self.ol=mantid.geometry.OrientedLattice()
         self.masterDict=dict() #holds info about instrument and ranges
+        self.updatedInstrument=False
+        self.updatedOL=False
+        self.wg=None #workspace group
         self.instrumentWidget=InstrumentSetupWidget.InstrumentSetupWidget(self)
         self.setLayout(QtGui.QHBoxLayout())
         controlLayout=QtGui.QVBoxLayout()
@@ -57,7 +60,6 @@ class DGSPlannerGUI(QtGui.QWidget):
         self.trajfig.hold(True)
         self.figure.add_subplot(self.trajfig)
         self.layout().addWidget(self.canvas)
-        #self.updateFigure()
         
         #connections        
         self.matrix.UBmodel.changed.connect(self.updateUB)
@@ -76,11 +78,14 @@ class DGSPlannerGUI(QtGui.QWidget):
     @QtCore.pyqtSlot(mantid.geometry.OrientedLattice)
     def updateUB(self,ol):
         self.ol=ol
+        self.updatedOL=True
         self.trajfig.clear()
         
         
     @QtCore.pyqtSlot(dict)
     def updateParams(self,d):
+        if self.sender() is self.instrumentWidget:
+            self.updatedInstrument=True
         self.masterDict.update(d)
     
     def help(self):
@@ -88,6 +93,21 @@ class DGSPlannerGUI(QtGui.QWidget):
         QtGui.QDesktopServices.openUrl(QtCore.QUrl("http://docs.mantidproject.org/nightly/concepts/Lattice.html"))
         
     def updateFigure(self):
+        if self.updatedInstrument:
+            #get goniometer settings first
+            
+            reply = QtGui.QMessageBox.warning(self, 'Goniometer',"More than 50 goniometer settings. This might be long.\n"
+                                              "Are you sure you want to proceed?", QtGui.QMessageBox.Yes | QtGui.QMessageBox.No,
+                                              QtGui.QMessageBox.No)
+            if reply==QtGui.QMessageBox.No:
+                return
+            if self.wg!=None:
+                mantid.simpleapi.DeleteWorkspace(self.wg)
+            self.updatedInstrument=False
+        if self.updatedOL or not self.wg[0].sample().hasOrientedLattice():
+            SetUB(self.wg,UB=self.ol.getUB())
+            self.updatedOL=False
+        
         if self.sender() is self.plotButton:
             self.trajfig.clear()
         
@@ -104,7 +124,7 @@ class DGSPlannerGUI(QtGui.QWidget):
         xx, yy = self.tr(X, Y)
         self.trajfig.pcolorfast(xx,yy,Z)
 
-        #ax1.set_aspect(1.)
+        self.trajfig.set_aspect(1.)
         #ax1.set_xlim(-10, 10.)
         #ax1.set_ylim(-10, 10.)
 

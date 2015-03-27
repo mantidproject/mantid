@@ -108,8 +108,8 @@ class GonioTableModel(QtCore.QAbstractTableModel):
                     self.steps[row]=val
             self.dataChanged.emit(index, index)
             if self.validateGon():
-                values={'labels':self.labels,'dirs':self.dirstrings,'senses':self.senses,
-                        'minvals':self.minvalues,'maxvals':self.maxvalues,'steps':self.steps}
+                values={'gonioLabels':self.labels,'gonioDirs':self.dirstrings,'gonioSenses':self.senses,
+                        'gonioMinvals':self.minvalues,'gonioMaxvals':self.maxvalues,'gonioSteps':self.steps}
                 self.changed.emit(values)
                 return True
         return False
