@@ -54,34 +54,18 @@ void PoldiSpectrumPawleyFunction::function1DSpectrum(
 
 void PoldiSpectrumPawleyFunction::functionDeriv1DSpectrum(
     const FunctionDomain1DSpectrum &domain, Jacobian &jacobian) {
-  size_t domainSize = domain.size();
   size_t index = domain.getWorkspaceIndex();
   Poldi2DHelper_sptr helper = m_2dHelpers[index];
 
-  size_t ny = helper->domain->size();
-  size_t nParams = m_pawleyFunction->nParams();
-
   if (helper) {
+    WrapAroundJacobian localJacobian(jacobian, helper->minTOFN, helper->factors,
+                                     0, domain.size());
     for (size_t i = 0; i < helper->dOffsets.size(); ++i) {
       double newDOffset =
           helper->dOffsets[i] * helper->deltaD + helper->dFractionalOffsets[i];
       m_pawleyFunction->setParameter("f0.ZeroShift", newDOffset);
 
-      size_t baseOffset = helper->minTOFN;
-
-      LocalJacobian localJacobian(ny, nParams);
       m_pawleyFunction->functionDeriv(*(helper->domain), localJacobian);
-
-      for (size_t j = 0; j < ny; ++j) {
-        size_t wrapped = (j + baseOffset) % domainSize;
-        for (size_t p = 0; p < nParams; ++p) {
-          if (m_pawleyFunction->isActive(p)) {
-            jacobian.set(wrapped, p,
-                         jacobian.get(wrapped, p) +
-                             localJacobian.getRaw(j, p) * helper->factors[j]);
-          }
-        }
-      }
     }
 
     m_pawleyFunction->setParameter("f0.ZeroShift", 0.0);

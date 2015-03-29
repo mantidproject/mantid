@@ -98,6 +98,30 @@ struct MANTID_SINQ_DLL Poldi2DHelper {
 
 typedef boost::shared_ptr<Poldi2DHelper> Poldi2DHelper_sptr;
 
+class WrapAroundJacobian : public API::Jacobian {
+public:
+  WrapAroundJacobian(API::Jacobian &jacobian, size_t offset,
+                     const std::vector<double> &factors, size_t factorOffset,
+                     size_t domainSize)
+      : m_jacobian(jacobian), m_offset(offset), m_factors(factors),
+        m_factorOffset(factorOffset), m_domainSize(domainSize) {}
+
+  double get(size_t iY, size_t iP) { return m_jacobian.get(iY, iP); }
+
+  void set(size_t iY, size_t iP, double value) {
+    size_t realY = (m_offset + iY) % m_domainSize;
+    m_jacobian.set(realY, iP, m_jacobian.get(realY, iP) +
+                                  value * m_factors[m_factorOffset + iY]);
+  }
+
+protected:
+  API::Jacobian &m_jacobian;
+  size_t m_offset;
+  const std::vector<double> &m_factors;
+  size_t m_factorOffset;
+  size_t m_domainSize;
+};
+
 /**
  * @brief The LocalJacobian class
  *
