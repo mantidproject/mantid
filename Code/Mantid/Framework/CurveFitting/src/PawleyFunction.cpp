@@ -268,7 +268,14 @@ DECLARE_FUNCTION(PawleyFunction)
 /// Constructor
 PawleyFunction::PawleyFunction()
     : IPawleyFunction(), m_compositeFunction(), m_pawleyParameterFunction(),
-      m_peakProfileComposite(), m_hkls(), m_dUnit(), m_wsUnit() {}
+      m_peakProfileComposite(), m_hkls(), m_dUnit(), m_wsUnit(),
+      m_peakRadius(5) {
+  int peakRadius;
+  if (Kernel::ConfigService::Instance().getValue("curvefitting.peakRadius",
+                                                 peakRadius)) {
+    m_peakRadius = peakRadius;
+  }
+}
 
 void PawleyFunction::setMatrixWorkspace(
     boost::shared_ptr<const MatrixWorkspace> workspace, size_t wi,
@@ -349,6 +356,44 @@ double PawleyFunction::getTransformedCenter(double d) const {
   return d;
 }
 
+void PawleyFunction::setPeakPositions(std::string centreName, double zeroShift,
+                                      const UnitCell &cell) const {
+  for (size_t i = 0; i < m_hkls.size(); ++i) {
+    double centre = getTransformedCenter(cell.d(m_hkls[i]));
+
+    m_peakProfileComposite->getFunction(i)
+        ->setParameter(centreName, centre + zeroShift);
+  }
+}
+
+size_t PawleyFunction::calculateFunctionValues(
+    const API::IPeakFunction_sptr &peak, const API::FunctionDomain1D &domain,
+    API::FunctionValues &localValues) const {
+  size_t domainSize = domain.size();
+  const double *domainBegin = domain.getPointerAt(0);
+  const double *domainEnd = domain.getPointerAt(domainSize);
+
+  double centre = peak->centre();
+  double dx = m_peakRadius * peak->fwhm();
+
+  auto lb = std::lower_bound(domainBegin, domainEnd, centre - dx);
+  auto ub = std::upper_bound(lb, domainEnd, centre + dx);
+
+  size_t n = std::distance(lb, ub);
+
+  if (n == 0) {
+    throw std::invalid_argument("Null-domain");
+  }
+
+  FunctionDomain1DView localDomain(lb, n);
+  localValues.reset(localDomain);
+
+  peak->functionLocal(localValues.getPointerToCalculated(0),
+                      localDomain.getPointerAt(0), n);
+
+  return std::distance(domainBegin, lb);
+}
+
 /**
  * Calculates the function values on the supplied domain
  *
@@ -363,25 +408,37 @@ double PawleyFunction::getTransformedCenter(double d) const {
  */
 void PawleyFunction::function(const FunctionDomain &domain,
                               FunctionValues &values) const {
-  UnitCell cell = m_pawleyParameterFunction->getUnitCellFromParameters();
-  double zeroShift = m_pawleyParameterFunction->getParameter("ZeroShift");
-  std::string centreName =
-      m_pawleyParameterFunction->getProfileFunctionCenterParameterName();
+  values.zeroCalculated();
+  try {
+    const FunctionDomain1D &domain1D =
+        dynamic_cast<const FunctionDomain1D &>(domain);
 
-  for (size_t i = 0; i < m_hkls.size(); ++i) {
-    double centre = getTransformedCenter(cell.d(m_hkls[i]));
+    UnitCell cell = m_pawleyParameterFunction->getUnitCellFromParameters();
+    double zeroShift = m_pawleyParameterFunction->getParameter("ZeroShift");
+    std::string centreName =
+        m_pawleyParameterFunction->getProfileFunctionCenterParameterName();
 
-    m_peakProfileComposite->getFunction(i)
-        ->setParameter(centreName, centre + zeroShift);
+    setPeakPositions(centreName, zeroShift, cell);
+
+    FunctionValues localValues;
+
+    for (size_t i = 0; i < m_peakProfileComposite->nFunctions(); ++i) {
+      IPeakFunction_sptr peak = boost::dynamic_pointer_cast<IPeakFunction>(
+          m_peakProfileComposite->getFunction(i));
+
+      try {
+        size_t offset = calculateFunctionValues(peak, domain1D, localValues);
+        values.addToCalculated(offset, localValues);
+      }
+      catch (std::invalid_argument) {
+        // do nothing
+      }
+    }
+
+    setPeakPositions(centreName, 0.0, cell);
   }
-
-  m_peakProfileComposite->function(domain, values);
-
-  for (size_t i = 0; i < m_hkls.size(); ++i) {
-    m_peakProfileComposite->getFunction(i)
-        ->setParameter(centreName, m_peakProfileComposite->getFunction(i)
-                                           ->getParameter(centreName) -
-                                       zeroShift);
+  catch (std::bad_cast) {
+    // do nothing
   }
 }
 

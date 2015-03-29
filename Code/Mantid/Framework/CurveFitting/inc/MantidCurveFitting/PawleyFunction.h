@@ -143,6 +143,13 @@ public:
   PawleyParameterFunction_sptr getPawleyParameterFunction() const;
 
 protected:
+  void setPeakPositions(std::string centreName, double zeroShift,
+                        const Geometry::UnitCell &cell) const;
+
+  size_t calculateFunctionValues(const API::IPeakFunction_sptr &peak,
+                                 const API::FunctionDomain1D &domain,
+                                 API::FunctionValues &localValues) const;
+
   double getTransformedCenter(double d) const;
 
   void init();
@@ -156,6 +163,8 @@ protected:
 
   Kernel::Unit_sptr m_dUnit;
   Kernel::Unit_sptr m_wsUnit;
+
+  int m_peakRadius;
 };
 
 typedef boost::shared_ptr<PawleyFunction> PawleyFunction_sptr;
