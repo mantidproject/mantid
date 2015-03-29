@@ -41,7 +41,7 @@ namespace Poldi {
 struct MANTID_SINQ_DLL Poldi2DHelper {
   /// Default constructor
   Poldi2DHelper()
-      : dFractionalOffsets(), dOffsets(), domain(), factors(), deltaD(),
+      : dFractionalOffsets(), dOffsets(), domain(), values(), factors(), deltaD(),
         minTOFN() {}
 
   /// Transforms the chopper slit offsets for a given 2theta/distance pair.
@@ -71,6 +71,7 @@ struct MANTID_SINQ_DLL Poldi2DHelper {
     }
 
     domain = boost::make_shared<API::FunctionDomain1DVector>(current);
+    values.reset(*domain);
   }
 
   /// Calculates intensity factors for each point in the spectrum domain.
@@ -90,6 +91,7 @@ struct MANTID_SINQ_DLL Poldi2DHelper {
   std::vector<int> dOffsets;
 
   API::FunctionDomain1D_sptr domain;
+  API::FunctionValues values;
   std::vector<double> factors;
 
   double deltaD;

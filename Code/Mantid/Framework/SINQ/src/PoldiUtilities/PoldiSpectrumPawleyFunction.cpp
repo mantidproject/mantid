@@ -31,8 +31,6 @@ void PoldiSpectrumPawleyFunction::function1DSpectrum(
   Poldi2DHelper_sptr helper = m_2dHelpers[index];
 
   if (helper) {
-    FunctionValues localValues(*helper->domain);
-
     for (size_t i = 0; i < helper->dOffsets.size(); ++i) {
       double newDOffset =
           helper->dOffsets[i] * helper->deltaD + helper->dFractionalOffsets[i];
@@ -40,11 +38,11 @@ void PoldiSpectrumPawleyFunction::function1DSpectrum(
 
       size_t baseOffset = helper->minTOFN;
 
-      m_pawleyFunction->function(*(helper->domain), localValues);
+      m_pawleyFunction->function(*(helper->domain), helper->values);
 
-      for (size_t j = 0; j < localValues.size(); ++j) {
+      for (size_t j = 0; j < helper->values.size(); ++j) {
         values.addToCalculated((j + baseOffset) % domainSize,
-                               localValues[j] * helper->factors[j]);
+                               helper->values[j] * helper->factors[j]);
       }
     }
 
@@ -60,7 +58,24 @@ void PoldiSpectrumPawleyFunction::functionDeriv1DSpectrum(
 void
 PoldiSpectrumPawleyFunction::poldiFunction1D(const std::vector<int> &indices,
                                              const FunctionDomain1D &domain,
-                                             FunctionValues &values) const {}
+                                             FunctionValues &values) const {
+  FunctionValues localValues(domain);
+
+  m_pawleyFunction->function(domain, localValues);
+
+  double chopperSlitCount = static_cast<double>(m_chopperSlitOffsets.size());
+
+  for (auto index = indices.begin(); index != indices.end(); ++index) {
+    std::vector<double> factors(domain.size());
+
+    for (size_t i = 0; i < factors.size(); ++i) {
+      values.addToCalculated(i,
+                             chopperSlitCount * localValues[i] *
+                                 m_timeTransformer->detectorElementIntensity(
+                                     domain[i], static_cast<size_t>(*index)));
+    }
+  }
+}
 
 IPawleyFunction_sptr PoldiSpectrumPawleyFunction::getPawleyFunction() const {
   return m_pawleyFunction;
