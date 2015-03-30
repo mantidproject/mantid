@@ -163,6 +163,32 @@ public:
 
     AnalysisDataService::Instance().remove(wsName);
   }
+
+  void test_truncate_extents() {
+    const std::string wsName = "__CutMDTest_truncate_extents";
+
+    auto algCutMD = FrameworkManager::Instance().createAlgorithm("CutMD");
+    algCutMD->initialize();
+    algCutMD->setRethrows(true);
+    algCutMD->setProperty("InputWorkspace", sharedWSName);
+    algCutMD->setProperty("OutputWorkspace", wsName);
+    algCutMD->setProperty("P1Bin", "0,1.1,1");
+    algCutMD->setProperty("P2Bin", "21");
+    algCutMD->setProperty("P3Bin", "0.1");
+    algCutMD->setProperty("CheckAxes", false);
+    algCutMD->setProperty("NoPix", true);
+    algCutMD->execute();
+    TS_ASSERT(algCutMD->isExecuted());
+
+    IMDWorkspace_sptr outWS =
+      AnalysisDataService::Instance().retrieveWS<IMDWorkspace>(wsName);
+    TS_ASSERT(outWS.get());
+
+    TS_ASSERT_EQUALS(outWS->getDimension(0)->getNBins(), 1);
+    TS_ASSERT_EQUALS(outWS->getDimension(1)->getNBins(), 1);
+
+    AnalysisDataService::Instance().remove(wsName);
+  }
 };
 
 #endif /* MANTID_MDALGORITHMS_CUTMDTEST_H_ */
