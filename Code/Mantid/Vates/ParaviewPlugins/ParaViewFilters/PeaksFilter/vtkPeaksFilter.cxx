@@ -17,7 +17,7 @@
 #include <vtkUnstructuredGrid.h>
 #include <vtkFieldData.h>
 
-vtkStandardNewMacro(vtkPeaksFilter);
+vtkStandardNewMacro(vtkPeaksFilter)
 
 using namespace Mantid::VATES;
 

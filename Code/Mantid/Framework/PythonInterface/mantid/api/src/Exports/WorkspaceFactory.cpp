@@ -34,9 +34,9 @@ namespace
   }
 
   /// Overload generator for create
-  BOOST_PYTHON_FUNCTION_OVERLOADS(createFromParent_Overload, createFromParentPtr, 2, 5);
-  BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(createTable_Overload, createTable, 0, 1);
-  BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(createPeaks_Overload, createPeaks, 0, 1);
+  BOOST_PYTHON_FUNCTION_OVERLOADS(createFromParent_Overload, createFromParentPtr, 2, 5)
+  BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(createTable_Overload, createTable, 0, 1)
+  BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(createPeaks_Overload, createPeaks, 0, 1)
 }
 
 void export_WorkspaceFactory()

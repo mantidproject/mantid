@@ -48,8 +48,11 @@ public:
   MOCK_METHOD1(displayError, void(const std::string&));
   MOCK_METHOD1(setAvailableLogs, void(const std::vector<std::string>&));
   MOCK_METHOD1(setAvailablePeriods, void(const std::vector<std::string>&));
+  MOCK_METHOD2(setTimeLimits, void(double,double));
+  MOCK_METHOD2(setTimeRange, void(double,double));
   MOCK_METHOD0(setWaitingCursor, void());
   MOCK_METHOD0(restoreCursor, void());
+  MOCK_METHOD0(help, void());
 
   void requestLoading() { emit loadRequested(); }
   void selectFirstRun() { emit firstRunSelected(); }
@@ -85,7 +88,7 @@ public:
     ON_CALL(*m_view, lastRun()).WillByDefault(Return("MUSR00015191.nxs"));
     ON_CALL(*m_view, calculationType()).WillByDefault(Return("Integral"));
     ON_CALL(*m_view, log()).WillByDefault(Return("sample_magn_field"));
-    ON_CALL(*m_view, timeRange()).WillByDefault(Return(boost::none));
+    ON_CALL(*m_view, timeRange()).WillByDefault(Return(boost::make_optional(std::make_pair(-6.0,32.0))));
     ON_CALL(*m_view, deadTimeType()).WillByDefault(Return("None"));
     ON_CALL(*m_view, detectorGroupingType()).WillByDefault(Return("Auto"));
     ON_CALL(*m_view, redPeriod()).WillByDefault(Return("1"));
@@ -259,6 +262,12 @@ public:
                            QwtDataY(0, 0.012884, 1E-6), QwtDataY(1, 0.022489, 1E-6),
                            QwtDataY(2, 0.038717, 1E-6))));
     m_view->requestLoading();
+  }
+
+  void test_helpPage ()
+  {
+    EXPECT_CALL(*m_view, help()).Times(1);
+    m_view->help();
   }
 };
 

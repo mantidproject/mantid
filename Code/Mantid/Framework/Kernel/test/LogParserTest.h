@@ -21,24 +21,28 @@ public:
   static LogParserTest *createSuite() { return new LogParserTest(); }
   static void destroySuite(LogParserTest *suite) { delete suite; }
   
+
+  class TmpFile{
+    Poco::File m_file;
+  public:
+    TmpFile(const std::string& fname):m_file(fname){}
+    ~TmpFile(){remove();}
+    const std::string& path() const {return m_file.path();}
+    bool exists() const {return m_file.exists();}
+    void remove() {if (m_file.exists()) m_file.remove();}
+  };
+
   LogParserTest()
         :log_num_good("TST000000_good.txt"),
          log_num_late("TST000000_late.txt"),
          log_num_early("TST000000_early.txt"),
          log_num_single("TST000000_single.txt"),
          log_str("TST000000_str.txt"),
-         icp_file("TST000000_icpevent.txt")
+         icp_file("TST000000_icpevent.txt"),
+         log_str_repeat("TST000000_repeat.txt"),
+         log_num_repeat("TST000000_num_repeat.txt"),
+         log_str_continuations("TST000000_str_continue.txt")
     {
-    }
-  
-  ~LogParserTest()
-    {
-      if ( log_num_good.exists() ) log_num_good.remove();
-      if ( log_num_late.exists() ) log_num_late.remove();
-      if ( log_num_early.exists() ) log_num_early.remove();
-      if ( log_num_single.exists() ) log_num_single.remove();
-      if ( log_str.exists() ) log_str.remove();
-      if ( icp_file.exists() ) icp_file.remove();
     }
   
     void testGood()
@@ -515,7 +519,67 @@ public:
         delete log;
     }
 
-//*/
+    void test_str_repeat()
+    {
+      mkStrRepeat();
+      Property *prop = LogParser::createLogProperty(log_str_repeat.path(),"log");
+      const auto *log = dynamic_cast<const TimeSeriesProperty<std::string>*>(prop);
+      TS_ASSERT(log);
+      auto logm = log->valueAsMultiMap();
+      auto it = logm.begin();
+      TS_ASSERT_EQUALS( it->first.toISO8601String(), "2000-09-05T12:22:34");
+      TS_ASSERT_EQUALS( it->second, "   First line"); ++it;
+      TS_ASSERT_EQUALS( it->first.toISO8601String(), "2000-09-05T12:22:34");
+      TS_ASSERT_EQUALS( it->second, "   Second line"); ++it;
+      TS_ASSERT_EQUALS( it->first.toISO8601String(), "2000-09-05T12:23:33");
+      TS_ASSERT_EQUALS( it->second, "   First line"); ++it;
+      TS_ASSERT_EQUALS( it->first.toISO8601String(), "2000-09-05T12:23:33");
+      TS_ASSERT_EQUALS( it->second, "   Second line"); ++it;
+      TS_ASSERT_EQUALS( it->first.toISO8601String(), "2000-09-05T12:23:33");
+      TS_ASSERT_EQUALS( it->second, "   Third line"); ++it;
+      TS_ASSERT_EQUALS( it->first.toISO8601String(), "2000-09-05T12:23:33");
+      TS_ASSERT_EQUALS( it->second, "   Fourth line"); ++it;
+    }
+
+    void test_num_repeat()
+    {
+      mkNumRepeat();
+      Property *prop = LogParser::createLogProperty(log_str_repeat.path(),"log");
+      const auto *log = dynamic_cast<const TimeSeriesProperty<double>*>(prop);
+      TS_ASSERT(log);
+      auto logm = log->valueAsMultiMap();
+      auto it = logm.begin();
+      TS_ASSERT_EQUALS( it->first.toISO8601String(), "2000-09-05T12:22:34");
+      TS_ASSERT_EQUALS( it->second, 1); ++it;
+      TS_ASSERT_EQUALS( it->first.toISO8601String(), "2000-09-05T12:22:34");
+      TS_ASSERT_EQUALS( it->second, 2); ++it;
+      TS_ASSERT_EQUALS( it->first.toISO8601String(), "2000-09-05T12:23:33");
+      TS_ASSERT_EQUALS( it->second, 3); ++it;
+      TS_ASSERT_EQUALS( it->first.toISO8601String(), "2000-09-05T12:23:33");
+      TS_ASSERT_EQUALS( it->second, 4); ++it;
+      TS_ASSERT_EQUALS( it->first.toISO8601String(), "2000-09-05T12:23:33");
+      TS_ASSERT_EQUALS( it->second, 5); ++it;
+      TS_ASSERT_EQUALS( it->first.toISO8601String(), "2000-09-05T12:23:33");
+      TS_ASSERT_EQUALS( it->second, 6); ++it;
+    }
+
+    void test_str_continuation()
+    {
+      mkStrContinuations();
+      Property *prop = LogParser::createLogProperty(log_str_continuations.path(),"log");
+      const auto *log = dynamic_cast<const TimeSeriesProperty<std::string>*>(prop);
+      TS_ASSERT(log);
+      auto logm = log->valueAsMultiMap();
+      auto it = logm.begin();
+      TS_ASSERT_EQUALS( it->first.toISO8601String(), "2000-09-05T12:22:31");
+      TS_ASSERT_EQUALS( it->second, "   First line Second line"); ++it;
+      TS_ASSERT_EQUALS( it->first.toISO8601String(), "2000-09-05T12:22:34");
+      TS_ASSERT_EQUALS( it->second, "   First line"); ++it;
+      TS_ASSERT_EQUALS( it->first.toISO8601String(), "2000-09-05T12:22:34");
+      TS_ASSERT_EQUALS( it->second, "   Second line Third line"); ++it;
+    }
+
+
 private:
 
     /// Helper method to run common test code for checking period logs.
@@ -646,13 +710,52 @@ private:
         f << "2000-09-05T14:03:56   line "<<9<<'\n';
         f.close();
     }
-//*/
-    Poco::File log_num_good;// run time interval is within first - last times of the log
-    Poco::File log_num_late;// first time is later than run start
-    Poco::File log_num_early;// last time is earlier than run ends
-    Poco::File log_num_single;// single value
-    Poco::File log_str;// file of strings
-    Poco::File icp_file;// icpevent file
+
+    void mkStrContinuations()
+    {
+      std::ofstream f( log_str_continuations.path().c_str() );
+      f << "2000-09-05T12:22:31   First line" << std::endl;
+      f << "Second line" << std::endl;
+      f << "2000-09-05T12:22:34   First line" << std::endl;
+      f << "2000-09-05T12:22:34   Second line" << std::endl;
+      f << "Third line" << std::endl;
+      f.close();
+    }
+
+    void mkStrRepeat()
+    {
+      std::ofstream f( log_str_repeat.path().c_str() );
+      f << "2000-09-05T12:22:34   First line" << std::endl;
+      f << "2000-09-05T12:22:34   Second line" << std::endl;
+      f << "2000-09-05T12:23:33   First line" << std::endl;
+      f << "2000-09-05T12:23:33   Second line" << std::endl;
+      f << "2000-09-05T12:23:33   Third line" << std::endl;
+      f << "2000-09-05T12:23:33   Fourth line" << std::endl;
+      f.close();
+    }
+
+    void mkNumRepeat()
+    {
+      std::ofstream f( log_str_repeat.path().c_str() );
+      f << "2000-09-05T12:22:34   1" << std::endl;
+      f << "2000-09-05T12:22:34   2" << std::endl;
+      f << "2000-09-05T12:23:33   3" << std::endl;
+      f << "2000-09-05T12:23:33   4" << std::endl;
+      f << "2000-09-05T12:23:33   5" << std::endl;
+      f << "2000-09-05T12:23:33   6" << std::endl;
+      f.close();
+    }
+
+    TmpFile log_num_good;// run time interval is within first - last times of the log
+    TmpFile log_num_late;// first time is later than run start
+    TmpFile log_num_early;// last time is earlier than run ends
+    TmpFile log_num_single;// single value
+    TmpFile log_str;// file of strings
+    TmpFile icp_file;// icpevent file
+    TmpFile log_str_repeat;// string log with repeating lines
+    TmpFile log_num_repeat;// num log with repeating lines
+    TmpFile log_str_continuations;// string log with continuation lines
+
     tm ti_data;
     tm * ti;
 

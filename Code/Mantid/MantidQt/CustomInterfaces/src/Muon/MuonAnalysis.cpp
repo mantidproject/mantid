@@ -63,7 +63,7 @@ namespace MantidQt
 {
 namespace CustomInterfaces
 {
-  DECLARE_SUBWINDOW(MuonAnalysis);
+  DECLARE_SUBWINDOW(MuonAnalysis)
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;

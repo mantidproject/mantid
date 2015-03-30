@@ -316,7 +316,7 @@ class SaveFileName(PropDescriptor):
         if instance is None:
             return self
         if not self._custom_print is None:
-            return self._custom_print(instance,owner)
+            return self._custom_print()
 
         if self._file_name:
             return self._file_name

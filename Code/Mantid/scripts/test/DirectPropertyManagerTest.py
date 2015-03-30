@@ -1088,14 +1088,14 @@ class DirectPropertyManagerTest(unittest.TestCase):
        propman.sample_run = 1000
        propman.incident_energy = 20.
 
-       def custom_print(propman,PropertyManager):
+       def custom_print(propman):
 
            ei = propman.incident_energy
            run_n = PropertyManager.sample_run.run_number()
            name = "RUN{0}atEi{1:<4.1f}meV_One2One".format(run_n,ei)
            return name
 
-       PropertyManager.save_file_name.set_custom_print(custom_print)
+       PropertyManager.save_file_name.set_custom_print(lambda : custom_print(self.prop_man))
 
                                                
        self.assertEqual(propman.save_file_name,'RUN1000atEi20.0meV_One2One')

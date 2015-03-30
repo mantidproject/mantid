@@ -881,7 +881,7 @@ private:
 
 };
 
-Q_DECLARE_METATYPE(Graph::CurveType);
+Q_DECLARE_METATYPE(Graph::CurveType)
 
 
 #endif // GRAPH_H

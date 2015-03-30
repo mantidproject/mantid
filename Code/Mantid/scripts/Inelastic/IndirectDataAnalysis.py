@@ -98,26 +98,28 @@ def confitSeq(inputWS, func, startX, endX, ftype, bgd, temperature=None, specMin
     axis = mtd[wsname].getAxis(0)
     axis.setUnit("MomentumTransfer")
 
+    # Handle sample logs
+    temp_correction = temperature is not None
+
     CopyLogs(InputWorkspace=inputWS, OutputWorkspace=wsname)
-    AddSampleLog(Workspace=wsname, LogName='convolve_members',
-                 LogType='String', LogText=str(convolve))
-    AddSampleLog(Workspace=wsname, LogName="fit_program",
-                 LogType="String", LogText='ConvFit')
-    AddSampleLog(Workspace=wsname, LogName='background',
-                 LogType='String', LogText=str(bgd))
-    AddSampleLog(Workspace=wsname, LogName='delta_function',
-                 LogType='String', LogText=str(using_delta_func))
-    AddSampleLog(Workspace=wsname, LogName='lorentzians',
-                 LogType='String', LogText=str(lorentzians))
+
+    sample_logs = [('convolve_members', convolve),
+                   ('fit_program', 'ConvFit'),
+                   ('background', bgd),
+                   ('delta_function', using_delta_func),
+                   ('lorentzians', lorentzians),
+                   ('temperature_correction', temp_correction)]
+
+    if temp_correction:
+        sample_logs.append(('temperature_value', temperature))
+
+    log_names = [log[0] for log in sample_logs]
+    log_values = [log[1] for log in sample_logs]
+    AddSampleLogMultiple(Workspace=wsname,
+                         LogNames=log_names,
+                         LogValues=log_values)
 
     CopyLogs(InputWorkspace=wsname, OutputWorkspace=output_workspace + "_Workspaces")
-
-    temp_correction = temperature is not None
-    AddSampleLog(Workspace=wsname, LogName='temperature_correction',
-                 LogType='String', LogText=str(temp_correction))
-    if temp_correction:
-        AddSampleLog(Workspace=wsname, LogName='temperature_value',
-                     LogType='String', LogText=str(temperature))
 
     RenameWorkspace(InputWorkspace=output_workspace,
                     OutputWorkspace=output_workspace + "_Parameters")
@@ -200,8 +202,10 @@ def furyfitSeq(inputWS, func, ftype, startx, endx, spec_min=0, spec_max=None, in
     CopyLogs(InputWorkspace=inputWS, OutputWorkspace=fit_group)
     CopyLogs(InputWorkspace=inputWS, OutputWorkspace=result_workspace)
 
-    addSampleLogs(fit_group, sample_logs)
-    addSampleLogs(result_workspace, sample_logs)
+    log_names = [item[0] for item in sample_logs]
+    log_values = [item[1] for item in sample_logs]
+    AddSampleLogMultiple(Workspace=result_workspace, LogNames=log_names, LogValues=log_values)
+    AddSampleLogMultiple(Workspace=fit_group, LogNames=log_names, LogValues=log_values)
 
     if Save:
         save_workspaces = [result_workspace, fit_group]
@@ -270,8 +274,10 @@ def furyfitMult(inputWS, function, ftype, startx, endx, spec_min=0, spec_max=Non
     CopyLogs(InputWorkspace=inputWS, OutputWorkspace=result_workspace)
     CopyLogs(InputWorkspace=inputWS, OutputWorkspace=fit_group)
 
-    addSampleLogs(result_workspace, sample_logs)
-    addSampleLogs(fit_group, sample_logs)
+    log_names = [item[0] for item in sample_logs]
+    log_values = [item[1] for item in sample_logs]
+    AddSampleLogMultiple(Workspace=result_workspace, LogNames=log_names, LogValues=log_values)
+    AddSampleLogMultiple(Workspace=fit_group, LogNames=log_names, LogValues=log_values)
 
     DeleteWorkspace(tmp_fit_workspace)
 
