@@ -106,6 +106,7 @@ set ( SRC_FILES
 	src/PropertyManagerDataService.cpp
 	src/PropertyNexus.cpp
 	src/RefAxis.cpp
+	src/RemoteJobManagerFactory.cpp
 	src/Run.cpp
 	src/Sample.cpp
 	src/SampleEnvironment.cpp
@@ -271,6 +272,7 @@ set ( INC_FILES
 	inc/MantidAPI/PropertyManagerDataService.h
 	inc/MantidAPI/PropertyNexus.h
 	inc/MantidAPI/RefAxis.h
+	inc/MantidAPI/RemoteJobManagerFactory.h
 	inc/MantidAPI/Run.h
 	inc/MantidAPI/Sample.h
 	inc/MantidAPI/SampleEnvironment.h
@@ -367,6 +369,7 @@ set ( TEST_FILES
 	ProjectionTest.h
 	PropertyManagerDataServiceTest.h
 	PropertyNexusTest.h
+	RemoteJobManagerFactoryTest.h
 	RunTest.h
 	SampleEnvironmentTest.h
 	SampleShapeValidatorTest.h
