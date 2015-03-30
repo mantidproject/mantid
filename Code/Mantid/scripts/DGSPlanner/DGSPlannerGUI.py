@@ -10,12 +10,14 @@ from  mpl_toolkits.axisartist.grid_helper_curvelinear import GridHelperCurveLine
 from mpl_toolkits.axisartist import Subplot
 import matplotlib.pyplot
 import numpy
+import copy
+import os
 
 def float2Input(x):
     if numpy.isfinite(x):
         return x
     else:
-        return ""
+        return None
 
 class DGSPlannerGUI(QtGui.QWidget):
     def __init__(self,ol=None,parent=None):
@@ -49,11 +51,18 @@ class DGSPlannerGUI(QtGui.QWidget):
         self.helpButton=QtGui.QPushButton("?",self)
         self.colorLabel=QtGui.QLabel('Color by angle',self)
         self.colorButton=QtGui.QCheckBox(self)
+        self.colorButton.toggle()
+        self.aspectLabel=QtGui.QLabel('Aspect ratio 1:1',self)
+        self.aspectButton=QtGui.QCheckBox(self)
+        self.saveButton=QtGui.QPushButton("Save Figure",self)
         plotControlLayout.addWidget(self.plotButton,0,0)
         plotControlLayout.addWidget(self.oplotButton,0,1)
         plotControlLayout.addWidget(self.colorLabel,0,2,QtCore.Qt.AlignRight)
         plotControlLayout.addWidget(self.colorButton,0,3)
-        plotControlLayout.addWidget(self.helpButton,0,4)
+        plotControlLayout.addWidget(self.aspectLabel,0,4,QtCore.Qt.AlignRight)
+        plotControlLayout.addWidget(self.aspectButton,0,5)
+        plotControlLayout.addWidget(self.helpButton,0,6)
+        plotControlLayout.addWidget(self.saveButton,0,7)
         controlLayout.addLayout(plotControlLayout)
         self.layout().addLayout(controlLayout)
         
@@ -66,6 +75,8 @@ class DGSPlannerGUI(QtGui.QWidget):
         self.trajfig.hold(True)
         self.figure.add_subplot(self.trajfig)
         self.layout().addWidget(self.canvas)
+        self.needToClear=False
+        self.saveDir=''
         
         #connections        
         self.matrix.UBmodel.changed.connect(self.updateUB)
@@ -77,6 +88,7 @@ class DGSPlannerGUI(QtGui.QWidget):
         self.plotButton.clicked.connect(self.updateFigure)
         self.oplotButton.clicked.connect(self.updateFigure)
         self.helpButton.clicked.connect(self.help)
+        self.saveButton.clicked.connect(self.save)
         #force an update of values
         self.instrumentWidget.updateAll()
         self.dimensionWidget.updateChanges()
@@ -86,13 +98,16 @@ class DGSPlannerGUI(QtGui.QWidget):
         self.ol=ol
         self.updatedOL=True
         self.trajfig.clear()
-        
-        
+
     @QtCore.pyqtSlot(dict)
     def updateParams(self,d):
         if self.sender() is self.instrumentWidget:
             self.updatedInstrument=True
-        self.masterDict.update(d)
+        if d.has_key('dimBasis') and self.masterDict.has_key('dimBasis') and d['dimBasis']!=self.masterDict['dimBasis']:
+            self.needToClear=True
+        if d.has_key('dimIndex') and self.masterDict.has_key('dimIndex')and d['dimIndex']!=self.masterDict['dimIndex']:
+            self.needToClear=True
+        self.masterDict.update(copy.deepcopy(d))
     
     def help(self):
         #TODO: put the correct url. Check for assistant and try to use that first
@@ -107,8 +122,8 @@ class DGSPlannerGUI(QtGui.QWidget):
                                           +0.1*self.masterDict['gonioSteps'][1],self.masterDict['gonioSteps'][1])
             gonioAxis2values=numpy.arange(self.masterDict['gonioMinvals'][2],self.masterDict['gonioMaxvals'][2]
                                           +0.1*self.masterDict['gonioSteps'][2],self.masterDict['gonioSteps'][2])
-            if len(gonioAxis0values)*len(gonioAxis1values)*len(gonioAxis2values)>20:
-                reply = QtGui.QMessageBox.warning(self, 'Goniometer',"More than 50 goniometer settings. This might be long.\n"
+            if len(gonioAxis0values)*len(gonioAxis1values)*len(gonioAxis2values)>10:
+                reply = QtGui.QMessageBox.warning(self, 'Goniometer',"More than 10 goniometer settings. This might be long.\n"
                                                   "Are you sure you want to proceed?", QtGui.QMessageBox.Yes | QtGui.QMessageBox.No,
                                                   QtGui.QMessageBox.No)
                 if reply==QtGui.QMessageBox.No:
@@ -122,6 +137,11 @@ class DGSPlannerGUI(QtGui.QWidget):
                 mantid.simpleapi.AddSampleLog(Workspace="__temp_instrument",LogName='s2',
                                               LogText=self.masterDict['S2'],LogType='Number Series')
                 mantid.simpleapi.LoadInstrument(Workspace="__temp_instrument",Instrument="HYSPEC")
+            #masking
+            if self.masterDict['makeFast']:
+                sp=range(mantid.mtd["__temp_instrument"].getNumberHistograms())
+                tomask=sp[::4]+sp[1::4]+sp[2::4]
+                mantid.simpleapi.MaskDetectors("__temp_instrument",SpectraList=tomask)
             i=0
             groupingStrings=[]
             for g0 in gonioAxis0values:
@@ -144,11 +164,11 @@ class DGSPlannerGUI(QtGui.QWidget):
             self.updatedOL=False
         #calculate coverage
         dimensions=['Q1','Q2','Q3','DeltaE']
-        mdws=mantid.simpleapi.CalculateCoiverageDGS(self.wg,
+        __mdws=mantid.simpleapi.CalculateCoverageDGS(self.wg,
                                                     Q1Basis=self.masterDict['dimBasis'][0],
-                                                    Q1Basis=self.masterDict['dimBasis'][1],
-                                                    Q1Basis=self.masterDict['dimBasis'][2],
-                                                    IncidentEnergy=self.masterDict['Ei']
+                                                    Q2Basis=self.masterDict['dimBasis'][1],
+                                                    Q3Basis=self.masterDict['dimBasis'][2],
+                                                    IncidentEnergy=self.masterDict['Ei'],
                                                     Dimension1=dimensions[self.masterDict['dimIndex'][0]],
                                                     Dimension1Min=float2Input(self.masterDict['dimMin'][0]), 
                                                     Dimension1Max=float2Input(self.masterDict['dimMax'][0]), 
@@ -163,43 +183,43 @@ class DGSPlannerGUI(QtGui.QWidget):
                                                     Dimension4=dimensions[self.masterDict['dimIndex'][3]],
                                                     Dimension4Min=float2Input(self.masterDict['dimMin'][3]), 
                                                     Dimension4Max=float2Input(self.masterDict['dimMax'][3]))
-        intensity=mdws[0].getSignalArray()
+        intensity=__mdws[0].getSignalArray()*1. #to make it writeable
         if self.colorButton.isChecked():
-            for i in range(mdws.getNumberOfEntries())[1:]:
-                tempintensity=  mdws[i].getSignalArray()
+            for i in range(__mdws.getNumberOfEntries())[1:]:
+                tempintensity=  __mdws[i].getSignalArray()
                 intensity[numpy.where( tempintensity>0)]=i+1.
         else:
-            for i in range(mdws.getNumberOfEntries())[1:]:
-                tempintensity=  mdws[i].getSignalArray()
-                intensity[numpy.where( tempintensity>0)]=1.
-        #TODO: get dimensions, transpose array and plot        
-        
-        #plotting
-        if self.sender() is self.plotButton:
-            self.trajfig.clear()
-        
-        t=numpy.array([0,1,1,0.])+self.masterDict['dimStep'][0]
-        s=numpy.array([0.,0,1,1])
-        if self.colorButton.isChecked():
-            s+=0.1
-
-        x = numpy.arange(0, numpy.pi, 0.1)
-        y = numpy.arange(0, 2*numpy.pi, 0.1)
-        X, Y = numpy.meshgrid(x,y)
-        Z = numpy.cos(X) * numpy.sin(Y) * 10
-        Z = Z[:-1, :-1]
+            for i in range(__mdws.getNumberOfEntries())[1:]:
+                tempintensity=  __mdws[i].getSignalArray()
+                intensity[numpy.where( tempintensity>0)]=1.      
+        Z = numpy.transpose(intensity)
+        x = numpy.linspace(__mdws[0].getDimension(0).getMinimum(), __mdws[0].getDimension(0).getMaximum(),intensity.shape[1] )
+        y = numpy.linspace(__mdws[0].getDimension(1).getMinimum(), __mdws[0].getDimension(1).getMaximum(),intensity.shape[0] )
+        X,Y = numpy.meshgrid(x,y,indexing='ij')
         xx, yy = self.tr(X, Y)
+        Z=numpy.ma.masked_array(Z,Z==0)
+        Z = Z[:-1, :-1]
+        #plotting
+        if self.sender() is self.plotButton or self.needToClear:
+            self.trajfig.clear()
+            self.needToClear=False
         self.trajfig.pcolorfast(xx,yy,Z)
 
-
-        self.trajfig.set_aspect(1.)
-        #self.trajfig.axis["t"]=self.trajfig.new_floating_axis(0, 0.)
-        #self.trajfig.axis["t2"]=self.trajfig.new_floating_axis(1, 0.)
+        if self.aspectButton.isChecked():
+            self.trajfig.set_aspect(1.)
+        else:
+            self.trajfig.set_aspect('auto')
         self.trajfig.set_xlabel(self.masterDict['dimNames'][0])
         self.trajfig.set_ylabel(self.masterDict['dimNames'][1])
         self.trajfig.grid(True)   
         self.canvas.draw()
-        
+        mantid.simpleapi.DeleteWorkspace(__mdws)
+
+    def save(self):
+        fileName = str(QtGui.QFileDialog.getSaveFileName(self, 'Save Plot', self.saveDir,'*.png'))
+        self.figure.savefig(fileName)
+        self.saveDir=os.path.dirname(fileName)
+
     def tr(self,x, y):
         x, y = numpy.asarray(x), numpy.asarray(y)
         #one of the axes is energy

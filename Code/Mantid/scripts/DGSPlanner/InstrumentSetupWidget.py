@@ -26,7 +26,7 @@ class GonioTableModel(QtCore.QAbstractTableModel):
         self.minvalues = axes['gonioMinvals']
         self.maxvalues = axes['gonioMaxvals']
         self.steps = axes['gonioSteps']
-        self.gonioColumns=['Name','Direction','Sense','Minimum','Maximum','Step']
+        self.gonioColumns=['Name','Direction','Sense (+/-1)','Minim(deg)','Maxim(deg)','Step(deg)']
         self.gonioRows=['Axis0','Axis1','Axis2']
 
     def rowCount(self, dummy_parent):
@@ -139,7 +139,7 @@ class InstrumentSetupWidget(QtGui.QWidget):
         metrics=QtGui.QFontMetrics(self.font())
         self.signaldict=dict()
         #instrument selector
-        self.instrumentList=['ARCS','CNCS','HYSPEC','SEQUOIA']
+        self.instrumentList=['ARCS','CNCS','DNS','FOCUS','HET','HYSPEC','LET','MAPS','MARI','MERLIN','SEQUOIA']
         self.combo = QtGui.QComboBox(self)
         for inst in self.instrumentList:
             self.combo.addItem(inst)
@@ -169,10 +169,14 @@ class InstrumentSetupWidget(QtGui.QWidget):
         self.editEi.setText(QString(format(self.Ei,'.1f')))
         self.editEi.setFixedWidth(metrics.width("8888.88"))
         self.editS2.setFixedWidth(metrics.width("888.88"))
+        #fast checkbox
+        self.fast=QtGui.QCheckBox("Fast",self)
+        self.fast.toggle()
+        self.updateFast()
         #goniometer settings
         self.labelGon=QtGui.QLabel('Goniometer')
         self.tableViewGon = QtGui.QTableView(self)
-        self.tableViewGon.setMinimumWidth(metrics.width("Minimum ")*7)
+        self.tableViewGon.setMinimumWidth(metrics.width("Minimum ")*8)
         self.tableViewGon.horizontalHeader().setResizeMode(QtGui.QHeaderView.Stretch)
         self.tableViewGon.verticalHeader().setResizeMode(QtGui.QHeaderView.Stretch)
         self.goniometerNames=['psi','gl','gs']
@@ -201,6 +205,7 @@ class InstrumentSetupWidget(QtGui.QWidget):
         self.gridI.addWidget(self.editEi,0,3)
         self.gridI.addWidget(self.labelS2,0,4)
         self.gridI.addWidget(self.editS2,0,5)
+        self.gridI.addWidget(self.fast,0,6)
         self.setLayout(QtGui.QHBoxLayout())
         self.rightside=QtGui.QVBoxLayout()
         self.layout().addLayout(self.rightside)
@@ -212,6 +217,7 @@ class InstrumentSetupWidget(QtGui.QWidget):
         self.editS2.textEdited.connect(self.checkValidInputs)
         self.editEi.textEdited.connect(self.checkValidInputs)
         self.combo.activated[str].connect(self.instrumentSelected)
+        self.fast.stateChanged.connect(self.updateFast)
         #call instrumentSelected once
         self.instrumentSelected(self.instrument)    
         #connect goniometer change with figure
@@ -234,6 +240,8 @@ class InstrumentSetupWidget(QtGui.QWidget):
         self.gonfig.plot([0,0],[-3,-3],[0,1],zdir='y',color='black')
         self.gonfig.text(0,1,-2.5,'Z',zdir=None,color='black')
         self.gonfig.text(1,0,-2.5,'X',zdir=None,color='black')
+        self.gonfig.plot([0,0],[-3,-3],[-2,-0.5],zdir='y',color='black',linewidth=3)
+        self.gonfig.text(0,-1,-2.5,'Beam',zdir=None,color='black')
         
         matplotlib.pyplot.gca().set_aspect('equal', adjustable='datalim')
         self.gonfig.view_init(10,45)
@@ -289,6 +297,11 @@ class InstrumentSetupWidget(QtGui.QWidget):
             self.editS2.hide()
         self.updateAll(**d)
 
+    def updateFast(self,*dummy_args):
+        d=dict()
+        d['makeFast']=self.fast.isChecked()
+        self.updateAll(**d)
+        
     def checkValidInputs(self, *dummy_args, **dummy_kwargs):
         sender = self.sender()
         state = sender.validator().validate(sender.text(), 0)[0]

@@ -230,11 +230,14 @@ class DimensionSelectorWidget(QtGui.QWidget):
                 self.dimMin[senderIndex]=-numpy.inf
                 color = '#ffffff'
             else:
-                tempvalue=float(sender.text())
-                if tempvalue<self.dimMax[senderIndex]:
-                    self.dimMin[senderIndex]=tempvalue
-                    color = '#ffffff'
-                else:
+                try:
+                    tempvalue=float(sender.text())
+                    if tempvalue<self.dimMax[senderIndex]:
+                        self.dimMin[senderIndex]=tempvalue
+                        color = '#ffffff'
+                    else:
+                        color = '#ff0000'
+                except ValueError:
                     color = '#ff0000'
         if sender in maxSenders:
             senderIndex=maxSenders.index(sender)
