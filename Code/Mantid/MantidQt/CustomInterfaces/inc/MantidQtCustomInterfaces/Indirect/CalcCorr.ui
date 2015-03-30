@@ -121,7 +121,7 @@
          <widget class="QComboBox" name="cbSampleShape">
           <item>
            <property name="text">
-            <string>Flat</string>
+            <string>Flat Plate</string>
            </property>
           </item>
           <item>
@@ -224,13 +224,6 @@
           <property name="margin">
            <number>0</number>
           </property>
-          <item row="1" column="2">
-           <widget class="QLabel" name="lbCylCanOuterRadius">
-            <property name="text">
-             <string>Container Outer Radius:</string>
-            </property>
-           </widget>
-          </item>
           <item row="5" column="3">
            <widget class="QDoubleSpinBox" name="spCylBeamWidth">
             <property name="decimals">
@@ -248,13 +241,6 @@
             </property>
            </widget>
           </item>
-          <item row="1" column="0">
-           <widget class="QLabel" name="lbCylCanInnerRadius">
-            <property name="text">
-             <string>Container Inner Radius:</string>
-            </property>
-           </widget>
-          </item>
           <item row="5" column="0">
            <widget class="QLabel" name="lbCylBeamHeight">
             <property name="text">
@@ -262,36 +248,10 @@
             </property>
            </widget>
           </item>
-          <item row="1" column="1">
-           <widget class="QDoubleSpinBox" name="spCylCanInnerRadius">
-            <property name="decimals">
-             <number>3</number>
-            </property>
-            <property name="maximum">
-             <double>9999.989999999999782</double>
-            </property>
-            <property name="singleStep">
-             <double>0.100000000000000</double>
-            </property>
-           </widget>
-          </item>
           <item row="5" column="1">
            <widget class="QDoubleSpinBox" name="spCylBeamHeight">
             <property name="decimals">
              <number>3</number>
-            </property>
-            <property name="singleStep">
-             <double>0.100000000000000</double>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="3">
-           <widget class="QDoubleSpinBox" name="spCylCanOuterRadius">
-            <property name="decimals">
-             <number>3</number>
-            </property>
-            <property name="maximum">
-             <double>9999.989999999999782</double>
             </property>
             <property name="singleStep">
              <double>0.100000000000000</double>
@@ -355,6 +315,26 @@
            <widget class="QLabel" name="lbCylSampleOuterRadius">
             <property name="text">
              <string>Sample Outer Radius:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="lbCylCanOuterRadius">
+            <property name="text">
+             <string>Container Outer Radius:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QDoubleSpinBox" name="spCylCanOuterRadius">
+            <property name="decimals">
+             <number>3</number>
+            </property>
+            <property name="maximum">
+             <double>9999.989999999999782</double>
+            </property>
+            <property name="singleStep">
+             <double>0.100000000000000</double>
             </property>
            </widget>
           </item>
@@ -579,6 +559,22 @@
  <tabstops>
   <tabstop>ckUseCan</tabstop>
   <tabstop>cbSampleShape</tabstop>
+  <tabstop>spFlatSampleThickness</tabstop>
+  <tabstop>spFlatSampleAngle</tabstop>
+  <tabstop>spFlatCanFrontThickness</tabstop>
+  <tabstop>spFlatCanBackThickness</tabstop>
+  <tabstop>spCylSampleInnerRadius</tabstop>
+  <tabstop>spCylSampleOuterRadius</tabstop>
+  <tabstop>spCylCanOuterRadius</tabstop>
+  <tabstop>spCylBeamHeight</tabstop>
+  <tabstop>spCylBeamWidth</tabstop>
+  <tabstop>spCylStepSize</tabstop>
+  <tabstop>spSampleNumberDensity</tabstop>
+  <tabstop>leSampleChemicalFormula</tabstop>
+  <tabstop>spCanNumberDensity</tabstop>
+  <tabstop>leCanChemicalFormula</tabstop>
+  <tabstop>cbPlotOutput</tabstop>
+  <tabstop>ckSave</tabstop>
  </tabstops>
  <resources/>
  <connections>
@@ -611,6 +607,22 @@
     <hint type="destinationlabel">
      <x>330</x>
      <y>481</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ckUseCan</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>dsContainer</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>173</x>
+     <y>65</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>487</x>
+     <y>65</y>
     </hint>
    </hints>
   </connection>

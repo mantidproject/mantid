@@ -56,6 +56,7 @@ namespace IDA
 
     // Sample details
     QString sampleWsName = m_uiForm.dsSample->getCurrentDataName();
+    MatrixWorkspace_sptr sampleWs = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(sampleWsName.toStdString());
     absCorAlgo->setProperty("SampleWorkspace", sampleWsName.toStdString());
 
     double sampleNumberDensity = m_uiForm.spSampleNumberDensity->value();
@@ -64,7 +65,7 @@ namespace IDA
     QString sampleChemicalFormula = m_uiForm.leSampleChemicalFormula->text();
     absCorAlgo->setProperty("SampleChemicalFormula", sampleChemicalFormula.toStdString());
 
-    //TODO: sample options
+    addShapeSpecificSampleOptions(absCorAlgo, sampleShape);
 
     // Can details
     bool useCan = m_uiForm.ckUseCan->isChecked();
@@ -79,10 +80,11 @@ namespace IDA
       QString canChemicalFormula = m_uiForm.leCanChemicalFormula->text();
       absCorAlgo->setProperty("CanChemicalFormula", canChemicalFormula.toStdString());
 
-      //TODO: can options
+      addShapeSpecificCanOptions(absCorAlgo, sampleShape);
     }
 
-    //TODO: emode, efixed
+    absCorAlgo->setProperty("EMode", getEMode(sampleWs));
+    absCorAlgo->setProperty("EFixed", getEFixed(sampleWs));
 
     // Generate workspace names
     int nameCutIndex = sampleWsName.lastIndexOf("_");
@@ -130,6 +132,7 @@ namespace IDA
 
     uiv.checkDataSelectorIsValid("Sample", m_uiForm.dsSample);
 
+    // Validate chemical formula
     if(uiv.checkFieldIsNotEmpty("Sample Chemical Formula", m_uiForm.leSampleChemicalFormula, m_uiForm.valSampleChemicalFormula))
       uiv.checkFieldIsValid("Sample Chemical Formula", m_uiForm.leSampleChemicalFormula, m_uiForm.valSampleChemicalFormula);
 
@@ -138,13 +141,15 @@ namespace IDA
     {
       uiv.checkDataSelectorIsValid("Can", m_uiForm.dsContainer);
 
+      // Validate chemical formula
       if(uiv.checkFieldIsNotEmpty("Can Chemical Formula", m_uiForm.leCanChemicalFormula, m_uiForm.valCanChemicalFormula))
         uiv.checkFieldIsValid("Can Chemical Formula", m_uiForm.leCanChemicalFormula, m_uiForm.valCanChemicalFormula);
 
-      QString sample = m_uiForm.dsSample->getCurrentDataName();
-      QString sampleType = sample.right(sample.length() - sample.lastIndexOf("_"));
-      QString container = m_uiForm.dsContainer->getCurrentDataName();
-      QString containerType = container.right(container.length() - container.lastIndexOf("_"));
+      // Ensure sample and container are the same kind of data
+      QString sampleWsName = m_uiForm.dsSample->getCurrentDataName();
+      QString sampleType = sampleWsName.right(sampleWsName.length() - sampleWsName.lastIndexOf("_"));
+      QString containerWsName = m_uiForm.dsContainer->getCurrentDataName();
+      QString containerType = containerWsName.right(containerWsName.length() - containerWsName.lastIndexOf("_"));
 
       g_log.debug() << "Sample type is: " << sampleType.toStdString() << std::endl;
       g_log.debug() << "Can type is: " << containerType.toStdString() << std::endl;
@@ -172,8 +177,10 @@ namespace IDA
     {
       emit showMessageBox("Absorption correction calculation failed.\nSee Results Log for more details.");
     }
-
-    //TODO: plot
+    else
+    {
+      //TODO: plot correction factors (m_pythonExportWsName (all spectra))
+    }
   }
 
 
@@ -184,6 +191,12 @@ namespace IDA
   }
 
 
+  /**
+   * Gets the beam width from the instrument parameters on a given workspace
+   * and update the relevant options on the UI.
+   *
+   * @param wsName Name of the workspace
+   */
   void CalcCorr::getBeamWidthFromWorkspace(const QString& wsName)
   {
     auto ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName.toStdString());
@@ -205,6 +218,67 @@ namespace IDA
       m_uiForm.spCylBeamHeight->setValue(beamWidthValue);
     }
   }
+
+
+  /**
+   * Sets algorithm properties specific to the sample for a given shape.
+   *
+   * @param alg Algorithm to set properties of
+   * @param shape Sample shape
+   */
+  void CalcCorr::addShapeSpecificSampleOptions(IAlgorithm_sptr alg, QString shape)
+  {
+    if(shape == "FlatPlate")
+    {
+      double sampleThickness = m_uiForm.spFlatSampleThickness->value();
+      alg->setProperty("SampleThickness", sampleThickness);
+
+      double sampleAngle = m_uiForm.spFlatSampleAngle->value();
+      alg->setProperty("SampleAngle", sampleAngle);
+    }
+    else if(shape == "Cylinder")
+    {
+      double sampleInnerRadius = m_uiForm.spCylSampleInnerRadius->value();
+      alg->setProperty("SampleInnerRadius", sampleInnerRadius);
+
+      double sampleOuterRadius = m_uiForm.spCylSampleOuterRadius->value();
+      alg->setProperty("SampleOuterRadius", sampleOuterRadius);
+
+      double beamWidth = m_uiForm.spCylBeamWidth->value();
+      alg->setProperty("BeamWidth", beamWidth);
+
+      double beamHeight = m_uiForm.spCylBeamHeight->value();
+      alg->setProperty("BeamHeight", beamHeight);
+
+      double stepSize = m_uiForm.spCylStepSize->value();
+      alg->setProperty("StepSize", stepSize);
+    }
+  }
+
+
+  /**
+   * Sets algorithm properties specific to the container for a given shape.
+   *
+   * @param alg Algorithm to set properties of
+   * @param shape Sample shape
+   */
+  void CalcCorr::addShapeSpecificCanOptions(IAlgorithm_sptr alg, QString shape)
+  {
+    if(shape == "FlatPlate")
+    {
+      double canFrontThickness = m_uiForm.spFlatCanFrontThickness->value();
+      alg->setProperty("CanFrontThickness", canFrontThickness);
+
+      double canBackThickness = m_uiForm.spFlatCanBackThickness->value();
+      alg->setProperty("SampleThickness", canBackThickness);
+    }
+    else if(shape == "Cylinder")
+    {
+      double canOuterRadius = m_uiForm.spCylCanOuterRadius->value();
+      alg->setProperty("CanOuterRadius", canOuterRadius);
+    }
+  }
+
 
 } // namespace IDA
 } // namespace CustomInterfaces

@@ -30,6 +30,9 @@ namespace IDA
     void getBeamWidthFromWorkspace(const QString& wsName);
 
   private:
+    void addShapeSpecificSampleOptions(Mantid::API::IAlgorithm_sptr alg, QString shape);
+    void addShapeSpecificCanOptions(Mantid::API::IAlgorithm_sptr alg, QString shape);
+
     Ui::CalcCorr m_uiForm;
 
   };

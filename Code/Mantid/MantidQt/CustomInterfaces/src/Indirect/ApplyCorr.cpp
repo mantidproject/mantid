@@ -13,6 +13,7 @@ namespace
   Mantid::Kernel::Logger g_log("ApplyCorr");
 }
 
+//TODO: Preview plot is not happy when an input workspace is not in wavelength
 
 namespace MantidQt
 {
@@ -100,6 +101,27 @@ namespace IDA
       {
         double canScaleFactor = m_uiForm.spCanScale->value();
         applyCorrAlg->setProperty("CanScaleFactor", canScaleFactor);
+      }
+
+      // Check for same binning across sample and container
+      if(!checkWorkspaceBinningMatches(sampleWs, canWs))
+      {
+        QString text = "Binning on sample and container does not match."
+                       "Would you like to rebin the sample to match the container?";
+
+        int result = QMessageBox::question(NULL, tr("Rebin sample?"), tr(text),
+                                           QMessageBox::Yes, QMessageBox::No, QMessageBox::NoButton);
+
+        if(result == QMessageBox::Yes)
+        {
+          addRebinStep(sampleWsName, canWsName);
+        }
+        else
+        {
+          m_batchAlgoRunner->clearQueue();
+          g_log.error("Cannot apply absorption corrections using a sample and container with different binning.");
+          return;
+        }
       }
     }
 
@@ -201,6 +223,28 @@ namespace IDA
     m_batchAlgoRunner->addAlgorithm(convertAlg);
 
     return outputName;
+  }
+
+
+  /**
+   * Adds a rebin to workspace step to the calculation for when using a sample and container that
+   * have different binning.
+   *
+   * @param toRebin
+   * @param toMatch
+   */
+  void ApplyCorr::addRebinStep(QString toRebin, QString toMatch)
+  {
+    API::BatchAlgorithmRunner::AlgorithmRuntimeProps rebinProps;
+    rebinProps["WorkspaceToMatch"] = toMatch.toStdString();
+
+    IAlgorithm_sptr rebinAlg = AlgorithmManager::Instance().create("RebinToWorkspace");
+    rebinAlg->initialize();
+
+    rebinAlg->setProperty("WorkspaceToRebin", toRebin.toStdString());
+    rebinAlg->setProperty("OutputWorkspace", toRebin.toStdString());
+
+    m_batchAlgoRunner->addAlgorithm(rebinAlg, rebinProps);
   }
 
 
