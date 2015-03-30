@@ -486,7 +486,7 @@ MDHistoWorkspaceIterator::createPermutations(const int width) const {
 
       size_t nEntries = permutationsVertexTouching.size();
       for (int k = 1; k <= width / 2; ++k) {
-        for (int m = 0; m < nEntries; m++) {
+        for (size_t m = 0; m < nEntries; m++) {
           permutationsVertexTouching.push_back((offset * k) +
                                                permutationsVertexTouching[m]);
           permutationsVertexTouching.push_back((offset * k * (-1)) +
