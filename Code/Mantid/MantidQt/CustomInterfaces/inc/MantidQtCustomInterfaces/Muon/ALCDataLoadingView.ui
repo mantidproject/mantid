@@ -392,7 +392,7 @@
                                     <double>-6</double>
                                   </property>
                                   <property name="maximum">
-                                    <double>32</double>
+                                    <double>33</double>
                                   </property>
                                   <property name="decimals">
                                     <number>3</number>
@@ -412,7 +412,7 @@
                                     <double>-6</double>
                                   </property>
                                   <property name="maximum">
-                                    <double>32</double>
+                                    <double>33</double>
                                   </property>
                                   <property name="decimals">
                                     <number>3</number>
