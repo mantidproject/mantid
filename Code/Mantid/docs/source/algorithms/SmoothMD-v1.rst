@@ -15,14 +15,14 @@ Provides smoothing of :ref:`MDHistoWorkspace <MDHistoWorkspace>` in n-dimensions
 .. figure:: /images/PreSmooth.png
    :alt: PreSmooth.png
    :width: 400px
-   :align: left
+   :align: center
    
    No smoothing
    
 .. figure:: /images/Smoothed.png
    :alt: PreSmooth.png
    :width: 400px
-   :align: left
+   :align: center
    
    Smooth with WidthVector=5
 
