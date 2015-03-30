@@ -19,7 +19,7 @@ from Direct.ReductionHelpers import extract_non_system_names
 def setup_reducer(inst_name,reload_instrument=False):
     """
     Given an instrument name or prefix this sets up a converter
-    object for the reduction
+    object for the reduction. Deprecated method
     """
     try:
         return DirectEnergyConversion(inst_name,reload_instrument)
@@ -839,6 +839,10 @@ class DirectEnergyConversion(object):
 
         spectra_id = self.prop_man.multirep_tof_specta_list
         if not spectra_id:
+            self.prop_man.log("*** WARNING! Multirep mode used but no closest and furthest spectra numbers defined in IDF (multirep_tof_specta_list)\n"\
+                              "    Using first spectra to identify TOF range for the energy range requested.\n"\
+                              "    This is correct only if all detectors are equidistant from the sample",\
+                              'warning')
             spectra_id = [1]
 
         eMin,dE,eMax = PropertyManager.energy_bins.get_abs_range(self.prop_man)
