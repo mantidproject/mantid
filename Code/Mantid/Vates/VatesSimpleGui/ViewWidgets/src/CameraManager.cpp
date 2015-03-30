@@ -26,14 +26,9 @@ namespace Mantid
       CameraManager::~CameraManager()
       {
       }
+
       /**
        * Get the plane equation for the view frustum.
-       * @param left The left plane.
-       * @param right The right plane.
-       * @param bottom The bottom plane.
-       * @param top The top plane.
-       * @param far The far plane.
-       * @param near The near plane.
        */
       Mantid::VATES::ViewFrustum CameraManager::getCurrentViewFrustum()
       {

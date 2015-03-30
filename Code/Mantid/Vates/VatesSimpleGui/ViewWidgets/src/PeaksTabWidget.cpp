@@ -110,7 +110,7 @@ void PeaksTabWidget::updateTabs(
 
 /**
  * Update the tab
- * @param visbiblePeaks Vector which determines which peaks are visible.
+ * @param visiblePeaks Vector which determines which peaks are visible.
  * @param index The tab index.
  */
 void PeaksTabWidget::updateTab(std::vector<bool> visiblePeaks, QColor color, int index) {
@@ -123,6 +123,7 @@ void PeaksTabWidget::updateTab(std::vector<bool> visiblePeaks, QColor color, int
 /**
  * Add a new tabs widget
  * @param peaksWorkspace A pointer to a peaksWorkspace
+ * @param visiblePeaks Vector which determines which peaks are visible.
  */
 void PeaksTabWidget::addNewPeaksWorkspace(
     Mantid::API::IPeaksWorkspace_sptr peaksWorkspace,

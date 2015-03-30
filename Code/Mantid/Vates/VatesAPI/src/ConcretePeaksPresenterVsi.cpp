@@ -133,7 +133,7 @@ void ConcretePeaksPresenterVsi::getPeaksInfo(
 /**
  * Get the maximal radius
  * @param shape The shape of a peak.
- * @param The maximal radius of the peak.
+ * @returns The maximal radius of the peak.
  */
 double ConcretePeaksPresenterVsi::getMaxRadius(
     Mantid::Geometry::PeakShape_sptr shape) {

@@ -27,7 +27,7 @@ void CompositePeaksPresenterVsi::updateViewFrustum(ViewFrustum frustum) {
 
 /**
 *Get the viewable peaks. Essentially copied from the slice viewer.
-*@retruns A vector indicating which of the peaks are viewable.
+*@returns A vector indicating which of the peaks are viewable.
 */
 std::vector<bool> CompositePeaksPresenterVsi::getViewablePeaks() {
   return std::vector<bool>();
@@ -50,6 +50,7 @@ std::vector<std::string> CompositePeaksPresenterVsi::getPeaksWorkspaceNames() {
 /**
  * Extract the peak information regarding position and radius of the peak.
  * @param peaksWorkspace A pointer to the peaks workspace
+ * @param row The selected row.
  * @param position A reference to extract the position.
  * @param radius A reference to extract the radius.
  */
