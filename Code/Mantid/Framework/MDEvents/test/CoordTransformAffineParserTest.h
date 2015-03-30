@@ -1,19 +1,15 @@
 #ifndef MANTID_MDEVENTS_COORDTRANSFORMPARSERTEST_H_
 #define MANTID_MDEVENTS_COORDTRANSFORMPARSERTEST_H_
 
-#include "MantidMDEvents/CoordTransformAffineParser.h"
 #include "MantidAPI/CoordTransform.h"
+#include "MantidMDEvents/CoordTransformAffine.h"
+#include "MantidMDEvents/CoordTransformAffineParser.h"
+
 #include <cxxtest/TestSuite.h>
 
 #include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/Document.h>
 #include <Poco/DOM/Element.h>
-#include <Poco/DOM/NodeList.h>
-#include <Poco/DOM/NodeIterator.h>
-#include <Poco/DOM/NodeFilter.h>
-#include <Poco/File.h>
-#include <Poco/Path.h>
-#include "MantidMDEvents/CoordTransformAffine.h"
 
 using namespace Mantid::MDEvents;
 

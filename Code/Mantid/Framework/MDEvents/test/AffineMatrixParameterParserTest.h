@@ -1,7 +1,7 @@
 #ifndef AFFINE_MATRIX_PARAMETER_PARSER_TEST_H
 #define AFFINE_MATRIX_PARAMETER_PARSER_TEST_H
 
-#include <Poco/DOM/AutoPtr.h>
+#include <Poco/AutoPtr.h>
 #include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/Document.h>
 #include <Poco/DOM/Element.h>

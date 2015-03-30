@@ -1,7 +1,6 @@
+#include "MantidAPI/CoordTransform.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/System.h"
-#include "MantidKernel/System.h"
-#include "MantidAPI/CoordTransform.h"
 #include "MantidMDEvents/CoordTransformDistance.h"
 
 #include <boost/algorithm/string.hpp>

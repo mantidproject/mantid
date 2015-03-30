@@ -3,17 +3,13 @@
 
 #include "MantidMDEvents/CoordTransformDistanceParser.h"
 #include "MantidMDEvents/CoordTransformDistance.h"
+#include "MantidMDEvents/CoordTransformAffine.h"
+
 #include <cxxtest/TestSuite.h>
 
-#include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/Document.h>
+#include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/Element.h>
-#include <Poco/DOM/NodeList.h>
-#include <Poco/DOM/NodeIterator.h>
-#include <Poco/DOM/NodeFilter.h>
-#include <Poco/File.h>
-#include <Poco/Path.h>
-#include "MantidMDEvents/CoordTransformAffine.h"
 
 using namespace Mantid::MDEvents;
 
@@ -45,7 +41,7 @@ public:
       "</CoordTransform>";
 
    Poco::XML::DOMParser pParser;
-   Poco::XML::Document* pDoc = pParser.parseString(xmlToParse);
+   Poco::AutoPtr<Poco::XML::Document> pDoc = pParser.parseString(xmlToParse);
    Poco::XML::Element* pRootElem = pDoc->documentElement();
 
    CoordTransformDistanceParser parser;
@@ -63,7 +59,7 @@ public:
    std::string xmlToParse = std::string("<OTHER></OTHER>");
 
    Poco::XML::DOMParser pParser;
-   Poco::XML::Document* pDoc = pParser.parseString(xmlToParse);
+   Poco::AutoPtr<Poco::XML::Document> pDoc = pParser.parseString(xmlToParse);
    Poco::XML::Element* pRootElem = pDoc->documentElement();
 
    CoordTransformDistanceParser parser;
@@ -75,7 +71,7 @@ public:
    std::string xmlToParse = "<CoordTransform><Type>OTHER</Type></CoordTransform>"; //type is not a coordinate transform, so should try to use it's successor
 
    Poco::XML::DOMParser pParser;
-   Poco::XML::Document* pDoc = pParser.parseString(xmlToParse);
+   Poco::AutoPtr<Poco::XML::Document> pDoc = pParser.parseString(xmlToParse);
    Poco::XML::Element* pRootElem = pDoc->documentElement();
 
    CoordTransformDistanceParser parser;
@@ -87,7 +83,7 @@ public:
    std::string xmlToParse = "<CoordTransform><Type>OTHER</Type></CoordTransform>"; //type is not a coordinate transform, so should try to use it's successor
 
    Poco::XML::DOMParser pParser;
-   Poco::XML::Document* pDoc = pParser.parseString(xmlToParse);
+   Poco::AutoPtr<Poco::XML::Document> pDoc = pParser.parseString(xmlToParse);
    Poco::XML::Element* pRootElem = pDoc->documentElement();
 
    CoordTransformDistanceParser parser;
