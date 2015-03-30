@@ -472,8 +472,7 @@ namespace CustomInterfaces
     QFileInfo rawFileInfo(rawFile);
     std::string name = rawFileInfo.baseName().toStdString();
 
-    std::string pyInput = "from mantidplot import plotSpectrum\nplotSpectrum('" + name + "_grp', 0)\n";
-    m_pythonRunner.runPythonCode(QString::fromStdString(pyInput));
+    plotSpectrum(QString::fromStdString(name) + "_grp");
   }
 
   /**

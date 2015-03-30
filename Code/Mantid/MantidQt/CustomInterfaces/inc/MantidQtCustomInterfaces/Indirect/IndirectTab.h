@@ -99,7 +99,7 @@ namespace CustomInterfaces
     void plotSpectrum(const QString & workspaceName, int specIndex = 0);
 
     /// Plot a contour plot of a given workspace
-    void plotContour(const QString & workspaceName);
+    void plot2D(const QString & workspaceName);
 
     /// Function to set the range limits of the plot
     void setPlotPropertyRange(MantidQt::MantidWidgets::RangeSelector * rs,

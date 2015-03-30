@@ -164,12 +164,11 @@ namespace CustomInterfaces
     QString plotType = m_uiForm.cbPlotType->currentText();
 
     if(plotType == "Contour")
-    {
-      pyInput += "plot2D(sqw_ws)\n";
-    }
+      plot2D(sqwWsName);
 
     else if(plotType == "Spectra")
     {
+      //TODO
       pyInput +=
         "n_spec = mtd[sqw_ws].getNumberHistograms()\n"
         "plotSpectrum(sqw_ws, range(0, n_spec))\n";

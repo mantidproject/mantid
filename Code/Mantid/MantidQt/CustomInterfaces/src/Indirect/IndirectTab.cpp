@@ -227,7 +227,7 @@ namespace CustomInterfaces
    *
    * @param workspaceName Name of workspace to plot
    */
-  void IndirectTab::plotContour(const QString & workspaceName)
+  void IndirectTab::plot2D(const QString & workspaceName)
   {
     QString pyInput = "from mantidplot import plot2D\n";
 
