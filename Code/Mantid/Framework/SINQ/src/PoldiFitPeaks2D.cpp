@@ -187,16 +187,6 @@ PoldiPeakCollection_sptr PoldiFitPeaks2D::getPeakCollectionFromFunction(
       IPawleyFunction_sptr pawleyFunction =
           poldiPawleyFunction->getPawleyFunction();
       if (pawleyFunction) {
-        CompositeFunction_sptr wrappedFn =
-            boost::dynamic_pointer_cast<CompositeFunction>(
-                pawleyFunction->getDecoratedFunction());
-        IFunction_sptr pawleyParamFn = wrappedFn->getFunction(0);
-        for (size_t j = 0; j < pawleyParamFn->nParams(); ++j) {
-          std::cout << j << " " << pawleyParamFn->parameterName(j) << " "
-                    << pawleyParamFn->getParameter(j) << " "
-                    << pawleyParamFn->getError(j) << std::endl;
-        }
-
         for (size_t j = 0; j < pawleyFunction->getPeakCount(); ++j) {
           IPeakFunction_sptr profileFunction =
               pawleyFunction->getPeakFunction(j);
@@ -206,12 +196,6 @@ PoldiPeakCollection_sptr PoldiFitPeaks2D::getPeakCollectionFromFunction(
               getPeakFromPeakFunction(profileFunction, peakHKL);
 
           normalizedPeaks->addPeak(peak);
-
-          for (size_t p = 0; p < profileFunction->nParams(); ++p) {
-            std::cout << j << " " << p << " "
-                      << profileFunction->parameterName(p) << " "
-                      << profileFunction->getParameter(p) << std::endl;
-          }
         }
       }
       break;
@@ -310,22 +294,11 @@ Poldi2DFunction_sptr PoldiFitPeaks2D::getFunctionPawley(
     pFun->setIntensity(peak->intensity());
 
     pawleyFunction->addPeak(peak->hkl().asV3D(),
-                            peak->fwhm(PoldiPeak::AbsoluteD),
-                            pFun->height());
-
-    IPeakFunction_sptr p = pawleyFunction->getPeakFunction(i);
-    V3D h = pawleyFunction->getPeakHKL(i);
-    std::cout << p->centre() << " " << p->fwhm() << " " << h << std::endl;
+                            peak->fwhm(PoldiPeak::AbsoluteD), pFun->height());
   }
 
   pawleyFunction->fix(pawleyFunction->parameterIndex("f0.ZeroShift"));
-
   mdFunction->addFunction(poldiPawleyFunction);
-
-  for (size_t i = 0; i < mdFunction->nParams(); ++i) {
-    std::cout << i << " " << mdFunction->parameterName(i) << " "
-              << mdFunction->getParameter(i) << std::endl;
-  }
 
   return mdFunction;
 }
