@@ -22,49 +22,6 @@ class CutMDTest(unittest.TestCase):
     def tearDown(self):
         DeleteWorkspace(self.__in_md )
         
-    def test_orthogonal_slice_with_scaling(self):
-        # We create a fake workspace and check to see that the extents get scaled with the new coordinate system when sliced
-        to_cut = CreateMDWorkspace(Dimensions=3, Extents=[-1,1,-1,1,-1,1], Names='H,K,L', Units='U,U,U')
-        # Set the UB
-        SetUB(Workspace=to_cut, a = 1, b = 1, c = 1, alpha =90, beta=90, gamma = 90)
-        
-        SetSpecialCoordinates(InputWorkspace=to_cut, SpecialCoordinates='HKL')
-        
-        scale_x = 2.0
-        scale_y = 2.0
-                    
-        projection = CreateEmptyTableWorkspace()
-        # Correct number of columns, and names
-        projection.addColumn("str", "name")
-        projection.addColumn("str", "value")
-        projection.addColumn("double", "offset")
-        projection.addColumn("str", "type")
-
-        projection.addRow(["u", "%s,0,0" % scale_x, 0, "r"])
-        projection.addRow(["v", "0,%s,0" % scale_y, 0, "r"])
-
-        u = map(float,projection.cell(0,1).split(","))
-        v = map(float,projection.cell(1,1).split(","))
-        scale_z = np.cross(v,u)[-1]
-        projection.addRow(["w", "0,0,%s" % scale_z, 0, "r"])
-                    
-        out_md = CutMD(to_cut, Projection=projection, P1Bin=[0.1], P2Bin=[0.1], P3Bin=[0.1])
-        
-        '''
-        Here we check that the corners in HKL end up in the expected positions when transformed into the new scaled basis
-        provided by the W transform (projection table)
-        '''
-        self.assertEquals(-(1/scale_x), out_md.getDimension(0).getMinimum()) 
-        self.assertEquals((1/scale_x), out_md.getDimension(0).getMaximum())
-        self.assertEquals(-(1/scale_y), out_md.getDimension(1).getMinimum())
-        self.assertEquals((1/scale_y), out_md.getDimension(1).getMaximum())
-        self.assertEquals((1/scale_z), out_md.getDimension(2).getMinimum())
-        self.assertEquals(-(1/scale_z), out_md.getDimension(2).getMaximum())
-        self.assertEquals("['2.00zeta', 0, 0]",  out_md.getDimension(0).getName() )
-        self.assertEquals("[0, '2.00eta', 0]",  out_md.getDimension(1).getName() )
-        self.assertEquals("[0, 0, '-4.00xi']",  out_md.getDimension(2).getName() )
-        
-        
     def test_non_orthogonal_slice(self):
          # We create a fake workspace and check to see that the extents get transformed to the new coordinate system.
         to_cut = CreateMDWorkspace(Dimensions=3, Extents=[-1,1,-1,1,-1,1], Names='H,K,L', Units='U,U,U')
