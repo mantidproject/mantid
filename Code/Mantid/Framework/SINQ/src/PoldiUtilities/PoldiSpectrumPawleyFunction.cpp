@@ -91,7 +91,6 @@ void PoldiSpectrumPawleyFunction::beforeDecoratedFunctionSet(
   }
 
   m_pawleyFunction = pawleyFunction;
-  m_pawleyFunction->fix(m_pawleyFunction->parameterIndex("f0.ZeroShift"));
 }
 
 DECLARE_FUNCTION(PoldiSpectrumPawleyFunction)
