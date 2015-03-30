@@ -8,6 +8,7 @@
 #include "MantidAPI/PeakTransformSelector.h"
 #include "MantidGeometry/Crystal/PeakShape.h"
 #include "MantidQtSliceViewer/PeakPalette.h"
+#include "MantidKernel/SpecialCoordinateSystem.h"
 
 #include <map>
 #include <QWidget>
@@ -68,6 +69,7 @@ private:
   Mantid::API::PeakTransformSelector m_peakTransformSelector;
   PeaksTabWidget *m_peaksTabWidget;
   pqPipelineSource *m_peakMarker;
+  Mantid::Kernel::SpecialCoordinateSystem m_coordinateSystem;
 };
 }
 }

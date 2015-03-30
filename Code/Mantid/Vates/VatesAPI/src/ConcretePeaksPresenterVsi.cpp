@@ -102,15 +102,14 @@ std::string ConcretePeaksPresenterVsi::getPeaksWorkspaceName() {
  * @param row The row in the peaks table.
  * @param position A reference which holds the position of the peak.
  * @param radius A reference which holds the radius of the peak.
+ * @param specialCoordinateSystem The coordinate system.
  */
 void ConcretePeaksPresenterVsi::getPeaksInfo(
     Mantid::API::IPeaksWorkspace_sptr peaksWorkspace, int row,
-    Mantid::Kernel::V3D &position, double &radius) {
-  // Extract the position
-  Mantid::Kernel::SpecialCoordinateSystem coordinateSystem =
-      peaksWorkspace->getSpecialCoordinateSystem();
+    Mantid::Kernel::V3D &position, double &radius,
+    Mantid::Kernel::SpecialCoordinateSystem specialCoordinateSystem) {
 
-  switch (coordinateSystem) {
+  switch (specialCoordinateSystem) {
   case (Mantid::Kernel::SpecialCoordinateSystem::QLab):
     position = peaksWorkspace->getPeak(row).getQLabFrame();
     break;

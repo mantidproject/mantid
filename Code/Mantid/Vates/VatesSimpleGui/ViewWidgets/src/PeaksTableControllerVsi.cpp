@@ -9,6 +9,8 @@
 #include "MantidAPI/PeakTransformQSample.h"
 #include "MantidAPI/PeakTransformQLab.h"
 #include "MantidKernel/V3D.h"
+#include "MantidKernel/SpecialCoordinateSystem.h"
+#include "MantidKernel/Logger.h"
 #include "MantidVatesAPI/PeaksPresenterVsi.h"
 #include "MantidVatesAPI/NullPeaksPresenterVsi.h"
 #include "MantidVatesAPI/ConcretePeaksPresenterVsi.h"
@@ -16,7 +18,6 @@
 #include "MantidQtSliceViewer/PeakPalette.h"
 #include "MantidQtAPI/PlotAxis.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
-#include "MantidKernel/Logger.h"
 
 // Have to deal with ParaView warnings and Intel compiler the hard way.
 #if defined(__INTEL_COMPILER)
@@ -306,6 +307,9 @@ std::vector<std::string> PeaksTableControllerVsi::extractFrameFromSource(
             .toStdString());
   }
 
+  // Update the current coordiate system
+  m_coordinateSystem = eventWorkspace->getSpecialCoordinateSystem();
+
   return dimensionInfo;
 }
 
@@ -415,7 +419,8 @@ void PeaksTableControllerVsi::onZoomToPeak(
   try {
     double radius;
     Mantid::Kernel::V3D position;
-    m_presenter->getPeaksInfo(peaksWorkspace, row, position, radius);
+
+    m_presenter->getPeaksInfo(peaksWorkspace, row, position, radius, m_coordinateSystem);
 
     // Reset camera
     m_cameraManager->setCameraToPeak(position[0], position[1], position[2],

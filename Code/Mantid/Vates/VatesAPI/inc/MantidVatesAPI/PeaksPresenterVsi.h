@@ -4,6 +4,7 @@
 #include "MantidKernel/System.h"
 #include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidKernel/V3D.h"
+#include "MantidKernel/SpecialCoordinateSystem.h"
 #include <vector>
 #include <string>
 
@@ -21,7 +22,7 @@ public:
   virtual std::string getPeaksWorkspaceName() = 0;
   virtual void getPeaksInfo(Mantid::API::IPeaksWorkspace_sptr peaksWorkspace,
                             int row, Mantid::Kernel::V3D &position,
-                            double &radius) = 0;
+                            double &radius, Mantid::Kernel::SpecialCoordinateSystem specialCoordinateSystem) = 0;
   virtual void sortPeaksWorkspace(const std::string &byColumnName,
                                   const bool ascending) = 0;
 };

@@ -5,6 +5,8 @@
 #include "MantidVatesAPI/PeaksPresenterVsi.h"
 #include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidVatesAPI/ViewFrustum.h"
+#include "MantidKernel/SpecialCoordinateSystem.h"
+
 #include <vector>
 
 namespace Mantid {
@@ -31,7 +33,7 @@ public:
         "NullPeaksPresenterVsi does not implement this method. Misused");
   }
   virtual void getPeaksInfo(Mantid::API::IPeaksWorkspace_sptr, int,
-                            Mantid::Kernel::V3D &, double &) {
+                            Mantid::Kernel::V3D &, double &, Mantid::Kernel::SpecialCoordinateSystem) {
     throw std::runtime_error(
         "NullPeaksPresenterVsi does not implement this method. Misused");
   }

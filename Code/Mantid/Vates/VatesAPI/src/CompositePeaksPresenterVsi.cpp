@@ -2,7 +2,7 @@
 #include "MantidVatesAPI/PeaksPresenterVsi.h"
 #include "MantidVatesAPI/ViewFrustum.h"
 #include "MantidAPI/IPeaksWorkspace.h"
-
+#include "MantidKernel/SpecialCoordinateSystem.h"
 #include <vector>
 #include <map>
 namespace Mantid {
@@ -53,15 +53,18 @@ std::vector<std::string> CompositePeaksPresenterVsi::getPeaksWorkspaceNames() {
  * @param row The selected row.
  * @param position A reference to extract the position.
  * @param radius A reference to extract the radius.
+ * @param specialCoordinateSystem The coordinate system
  */
 void CompositePeaksPresenterVsi::getPeaksInfo(
     Mantid::API::IPeaksWorkspace_sptr peaksWorkspace, int row,
-    Mantid::Kernel::V3D &position, double &radius) {
+    Mantid::Kernel::V3D &position, double &radius,
+    Mantid::Kernel::SpecialCoordinateSystem specialCoordinateSystem) {
   for (std::vector<PeaksPresenterVsi_sptr>::iterator it =
            m_peaksPresenters.begin();
        it != m_peaksPresenters.end(); ++it) {
     if ((*it)->getPeaksWorkspace() == peaksWorkspace) {
-      (*it)->getPeaksInfo(peaksWorkspace, row, position, radius);
+      (*it)->getPeaksInfo(peaksWorkspace, row, position, radius,
+                          specialCoordinateSystem);
     }
   }
 }

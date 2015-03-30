@@ -7,6 +7,7 @@
 #include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidVatesAPI/ViewFrustum.h"
 #include "MantidGeometry/Crystal/PeakShape.h"
+#include "MantidKernel/SpecialCoordinateSystem.h"
 #include <vector>
 #include <string>
 
@@ -29,9 +30,10 @@ public:
         "The composite peaks presenter has no peaks workspace");
   }
   std::vector<std::string> getPeaksWorkspaceNames();
-  virtual void getPeaksInfo(Mantid::API::IPeaksWorkspace_sptr peaksWorkspace,
-                            int row, Mantid::Kernel::V3D &position,
-                            double &radius);
+  virtual void
+  getPeaksInfo(Mantid::API::IPeaksWorkspace_sptr peaksWorkspace, int row,
+               Mantid::Kernel::V3D &position, double &radius,
+               Mantid::Kernel::SpecialCoordinateSystem specialCoordinateSystem);
   void addPresenter(PeaksPresenterVsi_sptr presenter);
   std::map<std::string, std::vector<bool>> getInitializedViewablePeaks();
   void removePresenter(std::string peaksWorkspaceName);

@@ -7,6 +7,7 @@
 #include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidVatesAPI/ViewFrustum.h"
 #include "MantidGeometry/Crystal/PeakShape.h"
+#include "MantidKernel/SpecialCoordinateSystem.h"
 #include <vector>
 
 namespace Mantid {
@@ -21,9 +22,10 @@ public:
   virtual void updateViewFrustum(ViewFrustum frustum);
   virtual std::string getFrame();
   virtual std::string getPeaksWorkspaceName();
-  virtual void getPeaksInfo(Mantid::API::IPeaksWorkspace_sptr peaksWorkspace,
-                            int row, Mantid::Kernel::V3D &position,
-                            double &radius);
+  virtual void
+  getPeaksInfo(Mantid::API::IPeaksWorkspace_sptr peaksWorkspace, int row,
+               Mantid::Kernel::V3D &position, double &radius,
+               Mantid::Kernel::SpecialCoordinateSystem specialCoordinateSystem);
   virtual void sortPeaksWorkspace(const std::string &byColumnName,
                                   const bool ascending);
 
