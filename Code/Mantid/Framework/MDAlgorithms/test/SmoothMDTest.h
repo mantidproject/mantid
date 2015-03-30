@@ -199,9 +199,39 @@ public:
       double z = 28.0/25;
       TS_ASSERT_EQUALS(z, out->getSignalAt(12));
   }
-
-
-
 };
+
+
+class SmoothMDTestPerformance : public CxxTest::TestSuite {
+private:
+
+    IMDHistoWorkspace_sptr m_toSmooth;
+
+public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static SmoothMDTestPerformance *createSuite() { return new SmoothMDTestPerformance(); }
+  static void destroySuite(SmoothMDTestPerformance *suite) { delete suite; }
+
+  SmoothMDTestPerformance()
+  {
+      m_toSmooth = MDEventsTestHelper::makeFakeMDHistoWorkspace(1 /*signal*/, 2 /*numDims*/, 500 /*numBins in each dimension*/);
+  }
+
+  void test_execute_hat_function() {
+    SmoothMD alg;
+    alg.setChild(true);
+    alg.initialize();
+    std::vector<int> widthVector(1, 5); // Smooth with width == 5
+    alg.setProperty("WidthVector", widthVector);
+    alg.setProperty("InputWorkspace", m_toSmooth);
+    alg.setPropertyValue("OutputWorkspace", "dummy");
+    alg.execute();
+    IMDHistoWorkspace_sptr out = alg.getProperty("OutputWorkspace");
+    TS_ASSERT(out);
+  }
+};
+
+
 
 #endif /* MANTID_MDALGORITHMS_SMOOTHMDTEST_H_ */
