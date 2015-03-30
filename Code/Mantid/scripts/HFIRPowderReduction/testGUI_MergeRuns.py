@@ -29,23 +29,27 @@
 # (20) Tab-Advanced Setup: Auto fill Server Address
 # (21) Test using Local Data Storage
 #
+# Use cases to test in this script 
+# 1. Load a set of scans in an experiment;
+#  > plot merged result as default.
+# 2. PushButton 'View 2D': color fill plot on all individual experiments;
+# 3. PushButton 'View Merged': 1D plot for previously merged;
+# 4. Mode 'Show scan number' alog with 'View 2D';   
+#  > Show to user which scan is at the mouse;
+# 5. Right click mouse to get a submenu for 'include/exclude' (disable one)
+# 6. Select or deselect a run from GUI and re-merge;
+#
+# Note: step 4, 5 and 6 should be referred to PlotData.MainAppNDim.py
 #
 ###############################################################################
-
-""" Test main """
 import sys
 
 import HfirPDReductionGUI
 from PyQt4 import QtGui
 
-
 # Globals
 LINUX = 1
 OSX   = 2
-
-
-
-##########
 
 def qapp():
     if QtGui.QApplication.instance():
@@ -55,7 +59,14 @@ def qapp():
     return _app
 
 app = qapp()
+reducer = HfirPDReductionGUI.MainWindow() #the main ui class in this file is called MainWindow
+reducer.show()
 
+""" END OF COMMON CODES """
+
+
+#-------------------------------------------------------------------------------
+""" Determine OS """
 
 import sys
 osname = sys.platform
@@ -68,10 +79,12 @@ elif osname.count('darwin') > 0:
 else:
     raise NotImplementedError("OS %s is not supported." % (osname))
 
-reducer = HfirPDReductionGUI.MainWindow() #the main ui class in this file is called MainWindow
-reducer.show()
+#-------------------------------------------------------------------------------
 
 # example: 'http://neutron.ornl.gov/user_data/hb2a/exp400/Datafiles/HB2A_exp0400_scan0001.dat'
+#
+# Test case: Experiment 231, Scan 1 to 10
+#
 print "Set to exp 231, scan 1"
 reducer.ui.lineEdit_expNo.setText('231')
 reducer.ui.lineEdit_scanStart.setText('1')
@@ -92,22 +105,8 @@ reducer.ui.lineEdit_binsize.setText('0.1')
 # load and reduce data 
 reducer.doMergeScans()
 
-# try:
-#     reducer.doLoadData()
-# except Exception as e:
-#     print e
-#     raise e
-# 
-# try: 
-#     reducer.doPlotDspacing()
-# except Exception as e:
-#     print e
-# 
-# try: 
-#     reducer.doPlotQ()
-# except Exception as e:
-#     print e
-# 
-# Skip if there is something wrong
+
+#-------------------------------------------------------------------------------
+""" Common Codes """
 app.exec_()
 

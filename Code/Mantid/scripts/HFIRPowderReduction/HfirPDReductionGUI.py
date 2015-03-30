@@ -120,6 +120,9 @@ class MainWindow(QtGui.QMainWindow):
         self.connect(self.ui.pushButton_mergeScans, QtCore.SIGNAL('clicked()'),
                 self.doMergeScans)
 
+        self.connect(self.ui.pushButton_view2D, QtCore.SIGNAL('clicked()'), 
+                self.doMergeScanView2D)
+
         # Define signal-event handling
 
 
@@ -462,7 +465,21 @@ class MainWindow(QtGui.QMainWindow):
         self._plotMergedReducedData(mindex, label)
         
         return
-    
+
+    def doMergeScanView2D(self):
+        """
+        """
+        # TODO : ASAP
+
+        # Highlight button color
+        self.ui.pushButton_view2D.setStyleSheet('QPushButton {background-color: #A3C1DA; color: red;}')
+
+        # Plot 2D
+
+
+        return
+
+
 
     def doPlot2Theta(self):
         """ Rebin the data and plot in 2theta

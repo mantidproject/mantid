@@ -13,8 +13,8 @@ try:
     import mantid
     IMPORT_MANTID = True
 except ImportError as e:
-    #sys.path.append('/home/wzz/Mantid_Project/Mantid2/Code/release/bin')
-    sys.path.append('/home/wzz/Mantid/Code/debug/bin')
+    sys.path.append('/home/wzz/Mantid_Project/Mantid2/Code/release/bin')
+    #sys.path.append('/home/wzz/Mantid/Code/debug/bin')
     sys.path.append('/Users/wzz/Mantid/Code/debug/bin')
     try:
         import mantid
