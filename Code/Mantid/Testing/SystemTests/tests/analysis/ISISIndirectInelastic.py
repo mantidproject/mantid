@@ -849,7 +849,7 @@ class ISISIndirectInelasticFuryAndFuryFit(ISISIndirectInelasticBase):
     '''
     A base class for the ISIS indirect inelastic Fury/FuryFit tests
 
-    The output of Fury is usually used with FuryFit and so we plug one into
+    The output of TransformToIqt is usually used with FuryFit and so we plug one into
     the other in this test.
     '''
 
@@ -865,14 +865,14 @@ class ISISIndirectInelasticFuryAndFuryFit(ISISIndirectInelasticBase):
             LoadNexus(sample, OutputWorkspace=sample)
         LoadNexus(self.resolution, OutputWorkspace=self.resolution)
 
-        fury_props, fury_ws = TransformToIqt(Sample=self.samples[0],
-                                   Resolution=self.resolution,
-                                   EnergyMin=self.e_min,
-                                   EnergyMax=self.e_max,
-                                   NumBins=self.num_bins,
-                                   DryRun=False,
-                                   Save=False,
-                                   Plot=False)
+        fury_props, fury_ws = TransformToIqt(SampleWorkspace=self.samples[0],
+                                             ResolutionWorkspace=self.resolution,
+                                             EnergyMin=self.e_min,
+                                             EnergyMax=self.e_max,
+                                             BinReductionFactor=self.num_bins,
+                                             DryRun=False,
+                                             Save=False,
+                                             Plot=False)
 
         # Test FuryFit Sequential
         furyfitSeq_ws = furyfitSeq(fury_ws.getName(),
@@ -986,14 +986,14 @@ class ISISIndirectInelasticFuryAndFuryFitMulti(ISISIndirectInelasticBase):
             LoadNexus(sample, OutputWorkspace=sample)
         LoadNexus(self.resolution, OutputWorkspace=self.resolution)
 
-        fury_props, fury_ws = Fury(Sample=self.samples[0],
-                                   Resolution=self.resolution,
-                                   EnergyMin=self.e_min,
-                                   EnergyMax=self.e_max,
-                                   NumBins=self.num_bins,
-                                   DryRun=False,
-                                   Save=False,
-                                   Plot=False)
+        fury_props, fury_ws = TransformToIqt(SampleWorkspace=self.samples[0],
+                                             ResolutionWorkspace=self.resolution,
+                                             EnergyMin=self.e_min,
+                                             EnergyMax=self.e_max,
+                                             BinReductionFactor=self.num_bins,
+                                             DryRun=False,
+                                             Save=False,
+                                             Plot=False)
 
         # Test FuryFit Sequential
         furyfitSeq_ws = furyfitMult(fury_ws.getName(),
