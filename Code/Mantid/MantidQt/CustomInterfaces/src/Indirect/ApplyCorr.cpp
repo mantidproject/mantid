@@ -13,8 +13,6 @@ namespace
   Mantid::Kernel::Logger g_log("ApplyCorr");
 }
 
-//TODO: Preview plot is not happy when an input workspace is not in wavelength
-
 namespace MantidQt
 {
 namespace CustomInterfaces
@@ -193,6 +191,8 @@ namespace IDA
     applyCorrAlg->setProperty("OutputWorkspace", outputWsName.toStdString());
 
     // Add corrections algorithm to queue
+    m_sampleWsName = absCorProps["SampleWorkspace"];
+    m_canWsName = absCorProps["CanWorkspace"];
     m_batchAlgoRunner->addAlgorithm(applyCorrAlg, absCorProps);
 
     // Add save algorithms if required
@@ -266,7 +266,6 @@ namespace IDA
     }
 
     // Handle preview plot
-    m_outputWs = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(m_pythonExportWsName);
     plotPreview(m_uiForm.spPreviewSpec->value());
 
     // Handle Mantid plotting
@@ -396,25 +395,19 @@ namespace IDA
     m_uiForm.ppPreview->clear();
 
     // Plot sample
-    const QString sample = m_uiForm.dsSample->getCurrentDataName();
-    if(AnalysisDataService::Instance().doesExist(sample.toStdString()))
-    {
-      m_uiForm.ppPreview->addSpectrum("Sample", sample, specIndex, Qt::black);
-    }
+    if(AnalysisDataService::Instance().doesExist(m_sampleWsName))
+      m_uiForm.ppPreview->addSpectrum("Sample", QString::fromStdString(m_sampleWsName),
+                                      specIndex, Qt::black);
 
     // Plot result
-    if(m_outputWs)
-    {
-      m_uiForm.ppPreview->addSpectrum("Corrected", m_outputWs, specIndex, Qt::green);
-    }
+    if(!m_pythonExportWsName.empty())
+      m_uiForm.ppPreview->addSpectrum("Corrected", QString::fromStdString(m_pythonExportWsName),
+                                      specIndex, Qt::green);
 
     // Plot can
-    if(useCan)
-    {
-      QString container = m_uiForm.dsContainer->getCurrentDataName();
-      const MatrixWorkspace_sptr canWs =  AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(container.toStdString());
-      m_uiForm.ppPreview->addSpectrum("Can", canWs, specIndex, Qt::red);
-    }
+    if(useCan && AnalysisDataService::Instance().doesExist(m_canWsName))
+      m_uiForm.ppPreview->addSpectrum("Can", QString::fromStdString(m_canWsName),
+                                      specIndex, Qt::red);
   }
 
 } // namespace IDA

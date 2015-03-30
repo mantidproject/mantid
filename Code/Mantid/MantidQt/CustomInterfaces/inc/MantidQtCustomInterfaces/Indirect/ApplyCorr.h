@@ -39,8 +39,10 @@ namespace IDA
 
     Ui::ApplyCorr m_uiForm;
 
-    /// Pointer to the result workspace (for plotting)
-    Mantid::API::MatrixWorkspace_sptr m_outputWs;
+    /// Name of sample workspace (for plotting)
+    std::string m_sampleWsName;
+    /// Name of container workspace (for plotting)
+    std::string m_canWsName;
 
   };
 
