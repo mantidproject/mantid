@@ -22,6 +22,7 @@ void PoldiSpectrumPawleyFunction::setMatrixWorkspace(
   UNUSED_ARG(endX);
 }
 
+/// Implementation of function1DSpectrum that transforms PawleyFunction output.
 void PoldiSpectrumPawleyFunction::function1DSpectrum(
     const FunctionDomain1DSpectrum &domain, FunctionValues &values) const {
   values.zeroCalculated();
@@ -50,11 +51,13 @@ void PoldiSpectrumPawleyFunction::function1DSpectrum(
   }
 }
 
+/// Using numerical derivatives turned out to be faster for this case.
 void PoldiSpectrumPawleyFunction::functionDeriv1DSpectrum(
     const FunctionDomain1DSpectrum &domain, Jacobian &jacobian) {
   calNumericalDeriv(domain, jacobian);
 }
 
+/// Calculate 1D function by adding the functions calculated for each index.
 void
 PoldiSpectrumPawleyFunction::poldiFunction1D(const std::vector<int> &indices,
                                              const FunctionDomain1D &domain,
@@ -77,10 +80,12 @@ PoldiSpectrumPawleyFunction::poldiFunction1D(const std::vector<int> &indices,
   }
 }
 
+/// Returns the internally stored Pawley function.
 IPawleyFunction_sptr PoldiSpectrumPawleyFunction::getPawleyFunction() const {
   return m_pawleyFunction;
 }
 
+/// Makes sure that the decorated function is of the right type.
 void PoldiSpectrumPawleyFunction::beforeDecoratedFunctionSet(
     const IFunction_sptr &fn) {
   IPawleyFunction_sptr pawleyFunction =

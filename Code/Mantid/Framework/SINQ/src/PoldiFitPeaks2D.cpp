@@ -191,6 +191,7 @@ PoldiFitPeaks2D::getPeakFromPeakFunction(IPeakFunction_sptr profileFunction,
   return peak;
 }
 
+/// Returns a TableWorkspace with refined cell parameters and error.
 ITableWorkspace_sptr PoldiFitPeaks2D::getRefinedCellParameters(
     const IFunction_sptr &fitFunction) const {
   Poldi2DFunction_sptr poldi2DFunction =
