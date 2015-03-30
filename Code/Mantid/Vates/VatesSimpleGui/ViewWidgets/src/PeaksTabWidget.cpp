@@ -26,6 +26,10 @@ PeaksTabWidget::PeaksTabWidget(
     const std::string &coordinateSystem, QWidget *parent)
     : QWidget(parent), m_ws(ws), m_coordinateSystem(coordinateSystem) {
   ui.setupUi(this);
+
+  // Add the tab widget
+  m_tabWidget = new PeakCustomTabWidget();
+  ui.tabLayout->addWidget(m_tabWidget);
 }
 
 /// Destructor
@@ -70,7 +74,7 @@ void PeaksTabWidget::addNewTab(Mantid::API::IPeaksWorkspace_sptr peaksWorkspace,
                                          Mantid::API::IPeaksWorkspace_sptr)));
 
   // Add as a new tab
-  this->ui.tabWidget->addTab(widget, QString(tabName.c_str()));
+  m_tabWidget->addTab(widget, QString(tabName.c_str()));
 }
 
 /**
@@ -86,19 +90,20 @@ void PeaksTabWidget::onZoomToPeak(Mantid::API::IPeaksWorkspace_sptr ws,
 /**
  * Update the models and remove the model if it is not required anymore.
  * @param visiblePeaks A map with visible peaks for each workspace.
+ * @param colors The color of the tabs
  */
 void PeaksTabWidget::updateTabs(
-    std::map<std::string, std::vector<bool>> visiblePeaks) {
+    std::map<std::string, std::vector<bool>> visiblePeaks, std::map<std::string, QColor> colors) {
   // Iterate over all tabs
-  for (int i = 0; i < this->ui.tabWidget->count(); i++) {
-    QString label = this->ui.tabWidget->label(i);
+  for (int i = 0; i < m_tabWidget->count(); i++) {
+    QString label = m_tabWidget->label(i);
 
     // Check if the peaks workspace still exists, if it does update, else delete
     // the tab.
-    if (visiblePeaks.count(label.toStdString()) > 0) {
-      updateTab(visiblePeaks[label.toStdString()], i);
+    if (visiblePeaks.count(label.toStdString()) > 0 && colors.count(label.toStdString()) > 0) {
+      updateTab(visiblePeaks[label.toStdString()], colors[label.toStdString()], i);
     } else {
-      this->ui.tabWidget->removeTab(i);
+      m_tabWidget->removeTab(i);
     }
   }
 }
@@ -108,10 +113,11 @@ void PeaksTabWidget::updateTabs(
  * @param visbiblePeaks Vector which determines which peaks are visible.
  * @param index The tab index.
  */
-void PeaksTabWidget::updateTab(std::vector<bool> visiblePeaks, int index) {
+void PeaksTabWidget::updateTab(std::vector<bool> visiblePeaks, QColor color, int index) {
   PeaksWidget *widget =
-      qobject_cast<PeaksWidget *>(this->ui.tabWidget->widget(index));
+      qobject_cast<PeaksWidget *>(m_tabWidget->widget(index));
   widget->updateModel(visiblePeaks);
+  m_tabWidget->tabBar()->setTabTextColor(index, color);
 }
 
 /**

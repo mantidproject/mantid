@@ -94,7 +94,7 @@ void PeaksWidget::updateModel(std::vector<bool> visiblePeaks) {
 }
 
 /**
- * Sort the peak workspace according to the a selected colom
+ * Sort the peak workspace according to the a selected column
  * @param columnToSortBy The column by which to sort.
  * @param sortAscending If sort ascending or descending.
  */

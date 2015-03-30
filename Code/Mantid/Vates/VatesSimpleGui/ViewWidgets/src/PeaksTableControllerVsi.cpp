@@ -13,6 +13,7 @@
 #include "MantidVatesAPI/NullPeaksPresenterVsi.h"
 #include "MantidVatesAPI/ConcretePeaksPresenterVsi.h"
 #include "MantidVatesAPI/CompositePeaksPresenterVsi.h"
+#include "MantidQtSliceViewer/PeakPalette.h"
 #include "MantidQtAPI/PlotAxis.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidKernel/Logger.h"
@@ -26,10 +27,14 @@
 #include <pqObjectBuilder.h>
 #include <pqPipelineSource.h>
 #include <pqPipelineFilter.h>
+#include <pqPipelineRepresentation.h>
+#include <pqRenderView.h>
 #include <pqServer.h>
+#include <pqServerManagerModel.h>
 #include <vtkSMSourceProxy.h>
 #include <vtkSMPropertyHelper.h>
 #include <vtkSMProxy.h>
+#include <vtkSMDoubleVectorProperty.h>
 
 #if defined(__INTEL_COMPILER)
 #pragma warning enable 1170
@@ -40,6 +45,7 @@
 #include <QVBoxLayout>
 #include <QLayout>
 #include <QLayoutItem>
+#include <QColor>
 
 #include <boost/make_shared.hpp>
 #include <boost/shared_ptr.hpp>
@@ -156,7 +162,8 @@ void PeaksTableControllerVsi::addWorkspace(
           m_presenter->getInitializedViewablePeaks();
       m_peaksTabWidget->addNewPeaksWorkspace(
           peaksWorkspace, viewablePeaks[peaksWorkspace->getName()]);
-      m_peaksTabWidget->updateTabs(viewablePeaks);
+      m_peaksTabWidget->updateTabs(viewablePeaks, getColors());
+      updatePeakWorkspaceColor();
     }
   } catch (Mantid::Kernel::Exception::NotFoundError &) {
     g_log.warning() << "Could not retrieve the peaks workspace.\n";
@@ -167,6 +174,90 @@ void PeaksTableControllerVsi::addWorkspace(
   } catch (std::runtime_error &ex) {
     g_log.warning() << ex.what();
     throw;
+  }
+}
+
+/**
+ * Get the colors for the tabs
+ * @returns A map of peak workspace names and colors
+ */
+std::map<std::string, QColor> PeaksTableControllerVsi::getColors() {
+
+  std::map<std::string, QColor> colors;
+
+  std::vector<Mantid::API::IPeaksWorkspace_sptr> peakWs =
+      m_presenter->getPeaksWorkspaces();
+  for (std::vector<Mantid::API::IPeaksWorkspace_sptr>::iterator it =
+           peakWs.begin();
+       it != peakWs.end(); ++it) {
+    const int pos = static_cast<int>(std::distance(peakWs.begin(), it));
+    QColor color = m_peakPalette.foregroundIndexToColour(pos);
+    const std::string name = (*it)->getName();
+    colors.insert(std::pair<std::string, QColor>(name, color));
+  }
+
+  return colors;
+}
+
+/**
+ * Update the color of the peak workspace representation.
+ */
+void PeaksTableControllerVsi::updatePeakWorkspaceColor() {
+  std::vector<Mantid::API::IPeaksWorkspace_sptr> peakWs =
+      m_presenter->getPeaksWorkspaces();
+  for (std::vector<Mantid::API::IPeaksWorkspace_sptr>::iterator it =
+           peakWs.begin();
+       it != peakWs.end(); ++it) {
+    const int pos = static_cast<int>(std::distance(peakWs.begin(), it));
+    QColor color = m_peakPalette.foregroundIndexToColour(pos);
+    const std::string name = (*it)->getName();
+
+    // Find the source whcih is associated with the peak workspace and change
+    // its representation
+    pqServer *server = pqActiveObjects::instance().activeServer();
+    pqServerManagerModel *smModel =
+        pqApplicationCore::instance()->getServerManagerModel();
+    QList<pqPipelineSource *> sources =
+        smModel->findItems<pqPipelineSource *>(server);
+    for (QList<pqPipelineSource *>::iterator src = sources.begin();
+         src != sources.end(); ++src) {
+      // Make sure that the source is a peak workspace
+
+      std::string xmlName((*src)->getProxy()->GetXMLName());
+      if ((xmlName.find("Peaks Source") != std::string::npos)) {
+        std::string workspaceName(
+            vtkSMPropertyHelper((*src)->getProxy(), "WorkspaceName")
+                .GetAsString());
+        if (workspaceName == name) {
+          int r = color.red();
+          int g = color.green();
+          int b = color.blue();
+
+          double red = static_cast<double>(r) / 255.0;
+          double green = static_cast<double>(g) / 255.0;
+          double blue = static_cast<double>(b) / 255.0;
+
+          pqDataRepresentation *rep =
+              (*src)
+                  ->getRepresentation(pqActiveObjects::instance().activeView());
+           pqPipelineRepresentation *pipelineRepresentation =
+               qobject_cast<pqPipelineRepresentation *>(rep);
+          pipelineRepresentation->getProxy()->UpdatePropertyInformation();
+
+          vtkSMDoubleVectorProperty *prop =
+              vtkSMDoubleVectorProperty::SafeDownCast(
+                  pipelineRepresentation->getProxy()->GetProperty(
+                      "DiffuseColor"));
+          prop->SetElement(0, red);
+          prop->SetElement(1, green);
+          prop->SetElement(2, blue);
+          pipelineRepresentation->getProxy()->UpdateVTKObjects();
+          pipelineRepresentation->updateHelperProxies();
+          pqActiveObjects::instance().activeView()->forceRender();
+          break;
+        }
+      }
+    }
   }
 }
 
@@ -273,6 +364,9 @@ void PeaksTableControllerVsi::createTable(bool full) {
       widget->setupMvc(viewablePeaks);
       layout()->addWidget(widget);
       m_peaksTabWidget = widget;
+      // Set the color
+      m_peaksTabWidget->updateTabs(viewablePeaks, getColors());
+      updatePeakWorkspaceColor();
     } catch (std::runtime_error &ex) {
       g_log.warning()
           << "Could not setup the the peaks widget for the splatterplot: "
@@ -458,7 +552,7 @@ PeaksTableControllerVsi::getConcatenatedWorkspaceNames(std::string delimiter) {
 void PeaksTableControllerVsi::updatePeaksWorkspaces(
     QList<QPointer<pqPipelineSource>> peakSources,
     pqPipelineSource *splatSource) {
-  // Check if the which presenters exist and which need to be added
+  // Check if the presenters exist and which need to be added
   std::vector<std::string> peaksWorkspaceNames;
 
   std::vector<pqPipelineSource *> nonTrackedWorkspaces;
@@ -492,7 +586,9 @@ void PeaksTableControllerVsi::updatePeaksWorkspaces(
   // Now update all the presenter
   m_presenter->updateWorkspaces(peaksWorkspaceNames);
   if (!peakSources.empty() && m_peaksTabWidget) {
-    m_peaksTabWidget->updateTabs(m_presenter->getInitializedViewablePeaks());
+    m_peaksTabWidget->updateTabs(m_presenter->getInitializedViewablePeaks(),
+                                 getColors());
+    updatePeakWorkspaceColor();
   }
 
   // If there are no presenters left, we want to destroy the table

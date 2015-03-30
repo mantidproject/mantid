@@ -6,6 +6,8 @@
 #include "MantidAPI/IPeaksWorkspace.h"
 
 #include <QWidget>
+#include <QTabWidget>
+#include <QTabBar>
 #include <string>
 #include <vector>
 #include <map>
@@ -13,6 +15,23 @@
 namespace Mantid {
 namespace Vates {
 namespace SimpleGui {
+
+// Need this class to access color of tabBar
+class EXPORT_OPT_MANTIDVATES_SIMPLEGUI_VIEWWIDGETS PeakCustomTabWidget:public QTabWidget
+{
+public:
+    PeakCustomTabWidget(QWidget* parent = 0)
+    {
+      setParent(parent);
+    }
+    
+    //Overridden method from QTabWidget
+    QTabBar* tabBar()
+    {
+      return QTabWidget::tabBar();
+    }
+};
+
 class EXPORT_OPT_MANTIDVATES_SIMPLEGUI_VIEWWIDGETS PeaksTabWidget
     : public QWidget {
   Q_OBJECT
@@ -23,7 +42,7 @@ public:
   void setupMvc(std::map<std::string, std::vector<bool>> visiblePeaks);
   void addNewPeaksWorkspace(Mantid::API::IPeaksWorkspace_sptr peaksWorkspace,
                             std::vector<bool> visiblePeaks);
-  void updateTabs(std::map<std::string, std::vector<bool>> visiblePeaks);
+  void updateTabs(std::map<std::string, std::vector<bool>> visiblePeaks, std::map<std::string, QColor> colors);
 signals:
   void zoomToPeak(Mantid::API::IPeaksWorkspace_sptr ws, int row);
   void sortPeaks(const std::string &columnToSortBy, const bool sortAscending,
@@ -33,7 +52,7 @@ public slots:
 
 private:
   /// Update a certain tab.
-  void updateTab(std::vector<bool> visiblePeaks, int index);
+  void updateTab(std::vector<bool> visiblePeaks, QColor color, int index);
   /// Adds a new tab to the tab widget.
   void addNewTab(Mantid::API::IPeaksWorkspace_sptr peaksWorkspace,
                  std::string tabName, std::vector<bool> visiblePeaks);
@@ -43,6 +62,8 @@ private:
   std::vector<Mantid::API::IPeaksWorkspace_sptr> m_ws;
   /// Coordinate system.
   const std::string m_coordinateSystem;
+  /// Custom peaks tab widget
+  PeakCustomTabWidget* m_tabWidget;
 };
 } // namespace
 }

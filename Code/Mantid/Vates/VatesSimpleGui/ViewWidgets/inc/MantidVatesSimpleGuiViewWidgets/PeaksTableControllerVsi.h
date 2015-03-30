@@ -7,8 +7,11 @@
 #include "MantidVatesAPI/CompositePeaksPresenterVsi.h"
 #include "MantidAPI/PeakTransformSelector.h"
 #include "MantidGeometry/Crystal/PeakShape.h"
+#include "MantidQtSliceViewer/PeakPalette.h"
 
+#include <map>
 #include <QWidget>
+#include <qcolor.h>
 #include <QPointer>
 #include <boost/shared_ptr.hpp>
 
@@ -56,6 +59,9 @@ private:
   double getMaxRadius(Mantid::Geometry::PeakShape_sptr shape);
   void removeLayout(QWidget *widget);
   void createTable(bool full);
+  void updatePeakWorkspaceColor();
+  std::map<std::string, QColor> getColors();
+  MantidQt::SliceViewer::PeakPalette m_peakPalette;
   boost::shared_ptr<CameraManager> m_cameraManager;
   boost::shared_ptr<Mantid::VATES::CompositePeaksPresenterVsi> m_presenter;
   /// Object for choosing a PeakTransformFactory based on the workspace type.
