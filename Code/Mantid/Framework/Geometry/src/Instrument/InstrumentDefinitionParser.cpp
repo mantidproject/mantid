@@ -1,3 +1,6 @@
+#include <fstream>
+#include <sstream>
+
 #include "MantidGeometry/Instrument/InstrumentDefinitionParser.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/ObjCompAssembly.h"
@@ -12,9 +15,6 @@
 #include "MantidKernel/ProgressBase.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/Strings.h"
-
-#include <fstream>
-#include <sstream>
 
 #include <Poco/DOM/Document.h>
 #include <Poco/DOM/DOMParser.h>
