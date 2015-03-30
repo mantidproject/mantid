@@ -59,6 +59,8 @@ public:
 
   virtual const std::string summary() const;
 
+  std::map<std::string, std::string> validateInputs();
+
 protected:
   Poldi2DFunction_sptr getFunctionIndividualPeaks(
       std::string profileFunctionName,
@@ -71,6 +73,9 @@ protected:
   PoldiPeak_sptr
   getPeakFromPeakFunction(API::IPeakFunction_sptr profileFunction,
                           const Kernel::V3D &hkl) const;
+
+  API::ITableWorkspace_sptr
+  getRefinedCellParameters(const API::IFunction_sptr &fitFunction) const;
 
   PoldiPeakCollection_sptr
   getPeakCollection(const DataObjects::TableWorkspace_sptr &peakTable) const;
