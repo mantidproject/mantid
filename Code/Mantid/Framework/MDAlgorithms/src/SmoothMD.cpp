@@ -78,7 +78,7 @@ SmoothMD::~SmoothMD() {}
 const std::string SmoothMD::name() const { return "SmoothMD"; }
 
 /// Algorithm's version for identification. @see Algorithm::version
-int SmoothMD::version() const { return 1; };
+int SmoothMD::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
 const std::string SmoothMD::category() const { return "MDAlgorithms"; }
@@ -86,7 +86,7 @@ const std::string SmoothMD::category() const { return "MDAlgorithms"; }
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
 const std::string SmoothMD::summary() const {
   return "Smooth an MDHistoWorkspace according to a weight function";
-};
+}
 
 /**
  * Hat function smoothing. All weights even. Hat function boundaries beyond
@@ -99,10 +99,10 @@ IMDHistoWorkspace_sptr SmoothMD::hatSmooth(IMDHistoWorkspace_const_sptr toSmooth
                                  const WidthVector &widthVector) {
 
   uint64_t nPoints = toSmooth->getNPoints();
-  Progress progress(this, 0, 1, size_t( nPoints * 1.1 ) );
+  Progress progress(this, 0, 1, size_t( double(nPoints) * 1.1 ) );
   // Create the output workspace.
   IMDHistoWorkspace_sptr outWS = toSmooth->clone();
-  progress.reportIncrement(size_t(nPoints * 0.1)); // Report ~10% progress
+  progress.reportIncrement(size_t(double(nPoints) * 0.1)); // Report ~10% progress
 
   const int nThreads = Mantid::API::FrameworkManager::Instance()
                            .getNumOMPThreads(); // NThreads to Request
@@ -116,7 +116,6 @@ IMDHistoWorkspace_sptr SmoothMD::hatSmooth(IMDHistoWorkspace_const_sptr toSmooth
     boost::scoped_ptr<MDHistoWorkspaceIterator> iterator(
         dynamic_cast<MDHistoWorkspaceIterator *>(iterators[it]));
 
-    size_t counter = 0;
     do {
       // Gets all vertex-touching neighbours
 
@@ -135,10 +134,10 @@ IMDHistoWorkspace_sptr SmoothMD::hatSmooth(IMDHistoWorkspace_const_sptr toSmooth
 
       // Calculate the mean
       outWS->setSignalAt(iterator->getLinearIndex(),
-                         sumSignal / (nNeighbours + 1));
+                         sumSignal / double(nNeighbours + 1));
       // Calculate the sample variance
       outWS->setErrorSquaredAt(iterator->getLinearIndex(),
-                               sumSqError / (nNeighbours + 1));
+                               sumSqError / double(nNeighbours + 1));
 
 
       progress.report();
