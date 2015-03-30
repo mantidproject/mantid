@@ -91,6 +91,51 @@ public:
 
     AnalysisDataService::Instance().remove(wsName);
   }
+
+  void test_slice_to_original() {
+    const std::string wsName = "__CutMDTest_slice_to_original";
+
+    auto algCutMD = FrameworkManager::Instance().createAlgorithm("CutMD");
+    algCutMD->initialize();
+    algCutMD->setRethrows(true);
+    algCutMD->setProperty("InputWorkspace", sharedWSName);
+    algCutMD->setProperty("OutputWorkspace", wsName);
+    algCutMD->setProperty("P1Bin", "0.1");
+    algCutMD->setProperty("P2Bin", "0.1");
+    algCutMD->setProperty("P3Bin", "0.1");
+    algCutMD->setProperty("CheckAxes", false);
+    algCutMD->execute();
+    TS_ASSERT(algCutMD->isExecuted());
+
+    IMDEventWorkspace_sptr outWS = 
+      AnalysisDataService::Instance().retrieveWS<IMDEventWorkspace>(wsName);
+    TS_ASSERT(outWS.get());
+
+    TS_ASSERT_EQUALS(
+        outWS->getDimension(0)->getMinimum(),
+        m_inWS->getDimension(0)->getMinimum());
+    TS_ASSERT_EQUALS(
+        outWS->getDimension(0)->getMaximum(),
+        m_inWS->getDimension(0)->getMaximum());
+    TS_ASSERT_EQUALS(
+        outWS->getDimension(1)->getMinimum(),
+        m_inWS->getDimension(1)->getMinimum());
+    TS_ASSERT_EQUALS(
+        outWS->getDimension(1)->getMaximum(),
+        m_inWS->getDimension(1)->getMaximum());
+    TS_ASSERT_EQUALS(
+        outWS->getDimension(2)->getMinimum(),
+        m_inWS->getDimension(2)->getMinimum());
+    TS_ASSERT_EQUALS(
+        outWS->getDimension(2)->getMaximum(),
+        m_inWS->getDimension(2)->getMaximum());
+
+    TS_ASSERT_EQUALS("['zeta', 0, 0]", outWS->getDimension(0)->getName());
+    TS_ASSERT_EQUALS("[0, 'eta', 0]", outWS->getDimension(1)->getName());
+    TS_ASSERT_EQUALS("[0, 0, 'xi']", outWS->getDimension(2)->getName());
+
+    AnalysisDataService::Instance().remove(wsName);
+  }
 };
 
 #endif /* MANTID_MDALGORITHMS_CUTMDTEST_H_ */

@@ -22,21 +22,6 @@ class CutMDTest(unittest.TestCase):
     def tearDown(self):
         DeleteWorkspace(self.__in_md )
 
-    def test_slice_to_original(self):
-        out_md = CutMD(self.__in_md, P1Bin=[0.1], P2Bin=[0.1], P3Bin=[0.1], CheckAxes=False)
-        self.assertTrue(isinstance(out_md, IMDEventWorkspace), "Should default to producing an IMDEventWorkspace.")
-        # No rotation. Basis vectors should have been left the same, so no extent changes.
-        self.assertEquals(self.__in_md.getDimension(0).getMinimum(), out_md.getDimension(0).getMinimum())
-        self.assertEquals(self.__in_md.getDimension(0).getMaximum(), out_md.getDimension(0).getMaximum())
-        self.assertEquals(self.__in_md.getDimension(1).getMinimum(), out_md.getDimension(1).getMinimum())
-        self.assertEquals(self.__in_md.getDimension(1).getMaximum(), out_md.getDimension(1).getMaximum())
-        self.assertEquals(self.__in_md.getDimension(2).getMinimum(), out_md.getDimension(2).getMinimum())
-        self.assertEquals(self.__in_md.getDimension(2).getMaximum(), out_md.getDimension(2).getMaximum())
-        self.assertEquals("['zeta', 0, 0]",  out_md.getDimension(0).getName() )
-        self.assertEquals("[0, 'eta', 0]",  out_md.getDimension(1).getName() )
-        self.assertEquals("[0, 0, 'xi']",  out_md.getDimension(2).getName() )
-        self.assertTrue(isinstance(out_md, IMDEventWorkspace), "nopix defaults to True. Should get an IMDEventWorkspace")
-        
     def test_recalculate_extents_with_3_bin_arguments(self):
         out_md = CutMD(self.__in_md, P1Bin=[0, 0.3, 0.8], P2Bin=[0.1], P3Bin=[0.1], CheckAxes=False, NoPix=True)
         dim = out_md.getDimension(0)
