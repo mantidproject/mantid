@@ -91,6 +91,9 @@ namespace CustomInterfaces
     /// Run the load algorithm with the given file name, output name and spectrum range
     bool loadFile(const QString& filename, const QString& outputName, const int specMin = -1, const int specMax = -1);
 
+    /// Add a SaveNexusProcessed step to the batch queue
+    void addSaveWorkspaceToQueue(const QString & wsName, const QString & filename = "");
+
     /// Function to set the range limits of the plot
     void setPlotPropertyRange(MantidQt::MantidWidgets::RangeSelector * rs,
                               QtProperty* min, QtProperty* max,

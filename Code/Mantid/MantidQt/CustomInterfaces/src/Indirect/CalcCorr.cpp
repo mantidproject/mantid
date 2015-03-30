@@ -102,11 +102,18 @@ namespace IDA
         break;
     }
 
-    QString outputWsName = sampleWsName.left(nameCutIndex) + "_" + correctionType + "_abs";
+    const QString outputWsName = sampleWsName.left(nameCutIndex) + "_" + correctionType + "_abs";
     absCorAlgo->setProperty("OutputWorkspace", outputWsName.toStdString());
 
-    // Run corrections algorithm
+    // Add corrections algorithm to queue
     m_batchAlgoRunner->addAlgorithm(absCorAlgo);
+
+    // Add save algorithms if required
+    bool save = m_uiForm.ckSave->isChecked();
+    if(save)
+      addSaveWorkspaceToQueue(outputWsName);
+
+    // Run algorithm queue
     m_batchAlgoRunner->executeBatchAsync();
 
     // Set the result workspace for Python script export

@@ -152,6 +152,33 @@ namespace CustomInterfaces
 
 
   /**
+   * Configures the SaveNexusProcessed algorithm to save a workspace in the default
+   * save directory and adds the algorithm to the batch queue.
+   *
+   * @param wsName Name of workspace to save
+   * @param filename Name of file to save as (including extension)
+   */
+  void IndirectTab::addSaveWorkspaceToQueue(const QString & wsName, const QString & filename)
+  {
+    // Setup the input workspace property
+    API::BatchAlgorithmRunner::AlgorithmRuntimeProps saveProps;
+    saveProps["InputWorkspace"] = wsName.toStdString();
+
+    // Setup the algorithm
+    IAlgorithm_sptr saveAlgo = AlgorithmManager::Instance().create("SaveNexusProcessed");
+    saveAlgo->initialize();
+
+    if(filename.isEmpty())
+      saveAlgo->setProperty("Filename", wsName.toStdString() + ".nxs");
+    else
+      saveAlgo->setProperty("Filename", filename.toStdString());
+
+    // Add the save algorithm to the batch
+    m_batchAlgoRunner->addAlgorithm(saveAlgo, saveProps);
+  }
+
+
+  /**
    * Sets the edge bounds of plot to prevent the user inputting invalid values
    * Also sets limits for range selector movement
    *
