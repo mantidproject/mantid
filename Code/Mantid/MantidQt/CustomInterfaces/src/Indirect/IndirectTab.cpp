@@ -221,6 +221,50 @@ namespace CustomInterfaces
 
 
   /**
+   * Creates a spectrum plot of one or more workspaces with the range of
+   * spectra [specStart, specEnd)
+   *
+   * This uses the plotSpectrum function from the Python API.
+   *
+   * @param workspaceNames List of names of workspaces to plot
+   * @param specStart Range start index
+   * @param specEnd Range end index
+   */
+  void IndirectTab::plotSpectrum(const QStringList & workspaceNames, int specStart, int specEnd)
+  {
+    QString pyInput = "from mantidplot import plotSpectrum\n";
+
+    pyInput += "plotSpectrum('";
+    pyInput += workspaceNames.join("','");
+    pyInput += "', range(";
+    pyInput += QString::number(specStart);
+    pyInput += ",";
+    pyInput += QString::number(specEnd);
+    pyInput += "))\n";
+
+    m_pythonRunner.runPythonCode(pyInput);
+  }
+
+
+  /**
+   * Creates a spectrum plot of a single workspace with the range of
+   * spectra [specStart, specEnd)
+   *
+   * This uses the plotSpectrum function from the Python API.
+   *
+   * @param workspaceName Names of workspace to plot
+   * @param specStart Range start index
+   * @param specEnd Range end index
+   */
+  void IndirectTab::plotSpectrum(const QString & workspaceName, int specStart, int specEnd)
+  {
+    QStringList workspaceNames;
+    workspaceNames << workspaceName;
+    plotSpectrum(workspaceNames, specStart, specEnd);
+  }
+
+
+  /**
    * Plots a contour (2D) plot of a given workspace.
    *
    * This uses the plot2D function from the Python API.
