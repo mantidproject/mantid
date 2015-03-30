@@ -52,7 +52,7 @@ const std::string CalculateCoverageDGS::name() const {
 }
 
 /// Algorithm's version for identification. @see Algorithm::version
-int CalculateCoverageDGS::version() const { return 1; };
+int CalculateCoverageDGS::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
 const std::string CalculateCoverageDGS::category() const {
@@ -63,7 +63,7 @@ const std::string CalculateCoverageDGS::category() const {
 const std::string CalculateCoverageDGS::summary() const {
   return "Calculate the reciprocal space coverage for direct geometry "
          "spectrometers";
-};
+}
 
 /**
 *Stores the X values from each H,K,L dimension as member variables

@@ -29,10 +29,10 @@ TransformMD::~TransformMD() {}
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
-const std::string TransformMD::name() const { return "TransformMD"; };
+const std::string TransformMD::name() const { return "TransformMD"; }
 
 /// Algorithm's version for identification. @see Algorithm::version
-int TransformMD::version() const { return 1; };
+int TransformMD::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
 const std::string TransformMD::category() const { return "MDAlgorithms"; }

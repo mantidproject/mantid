@@ -131,7 +131,7 @@ Kernel::Matrix<double> MDWSDescription::getGoniometerMatr() const {
     return m_InWS->run().getGoniometer().getR();
   else
     return Kernel::Matrix<double>(3, 3, true);
-};
+}
 
 /** the function builds MD event WS description from existing workspace.
 * Primary used to obtain existing ws parameters

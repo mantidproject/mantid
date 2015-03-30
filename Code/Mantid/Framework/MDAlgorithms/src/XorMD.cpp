@@ -22,10 +22,10 @@ XorMD::~XorMD() {}
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
-const std::string XorMD::name() const { return "XorMD"; };
+const std::string XorMD::name() const { return "XorMD"; }
 
 /// Algorithm's version for identification. @see Algorithm::version
-int XorMD::version() const { return 1; };
+int XorMD::version() const { return 1; }
 
 //----------------------------------------------------------------------------------------------
 /// Run the algorithm with a MDHisotWorkspace as output and operand

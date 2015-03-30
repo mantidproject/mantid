@@ -12,11 +12,11 @@ namespace Mantid {
 namespace DataObjects {
 /// Unique CoordCenterVectorParam type declaration for ndimensional coordinate
 /// centers
-DECLARE_VECTOR_PARAMETER(CoordCenterVectorParam, coord_t);
+DECLARE_VECTOR_PARAMETER(CoordCenterVectorParam, coord_t)
 
 /// Unique DimensionsUsedVectorParam type declaration for boolean masks over
 /// dimensions
-DECLARE_VECTOR_PARAMETER(DimensionsUsedVectorParam, bool);
+DECLARE_VECTOR_PARAMETER(DimensionsUsedVectorParam, bool)
 
 /** A non-linear coordinate transform that takes
  * a point from nd dimensions and converts it to a

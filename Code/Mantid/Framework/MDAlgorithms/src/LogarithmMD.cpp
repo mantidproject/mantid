@@ -22,10 +22,10 @@ LogarithmMD::~LogarithmMD() {}
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
-const std::string LogarithmMD::name() const { return "LogarithmMD"; };
+const std::string LogarithmMD::name() const { return "LogarithmMD"; }
 
 /// Algorithm's version for identification. @see Algorithm::version
-int LogarithmMD::version() const { return 1; };
+int LogarithmMD::version() const { return 1; }
 
 //----------------------------------------------------------------------------------------------
 

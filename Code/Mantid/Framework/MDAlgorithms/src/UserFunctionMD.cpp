@@ -11,7 +11,7 @@ namespace Mantid {
 namespace MDAlgorithms {
 
 // Subscribe the function into the factory.
-DECLARE_FUNCTION(UserFunctionMD);
+DECLARE_FUNCTION(UserFunctionMD)
 
 /// Default constructor
 UserFunctionMD::UserFunctionMD() {

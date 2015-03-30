@@ -27,10 +27,10 @@ MultiplyMD::~MultiplyMD() {}
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
-const std::string MultiplyMD::name() const { return "MultiplyMD"; };
+const std::string MultiplyMD::name() const { return "MultiplyMD"; }
 
 /// Algorithm's version for identification. @see Algorithm::version
-int MultiplyMD::version() const { return 1; };
+int MultiplyMD::version() const { return 1; }
 
 //----------------------------------------------------------------------------------------------
 

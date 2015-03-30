@@ -16,11 +16,11 @@
 using namespace WorkspaceCreationHelper;
 using namespace Mantid::DataObjects::MDEventsTestHelper;
 
-BOOST_PYTHON_FUNCTION_OVERLOADS(create2DWorkspaceWithFullInstrument_overloads, create2DWorkspaceWithFullInstrument, 2, 4);
+BOOST_PYTHON_FUNCTION_OVERLOADS(create2DWorkspaceWithFullInstrument_overloads, create2DWorkspaceWithFullInstrument, 2, 4)
 
-BOOST_PYTHON_FUNCTION_OVERLOADS(makeFakeMDHistoWorkspace_overloads, makeFakeMDHistoWorkspace, 2, 7);
+BOOST_PYTHON_FUNCTION_OVERLOADS(makeFakeMDHistoWorkspace_overloads, makeFakeMDHistoWorkspace, 2, 7)
 
-BOOST_PYTHON_FUNCTION_OVERLOADS(create2DWorkspaceWithRectangularInstrument_overloads, create2DWorkspaceWithRectangularInstrument, 3, 3);
+BOOST_PYTHON_FUNCTION_OVERLOADS(create2DWorkspaceWithRectangularInstrument_overloads, create2DWorkspaceWithRectangularInstrument, 3, 3)
 
 namespace
 {

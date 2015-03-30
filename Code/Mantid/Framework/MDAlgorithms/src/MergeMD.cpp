@@ -31,10 +31,10 @@ MergeMD::~MergeMD() {}
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
-const std::string MergeMD::name() const { return "MergeMD"; };
+const std::string MergeMD::name() const { return "MergeMD"; }
 
 /// Algorithm's version for identification. @see Algorithm::version
-int MergeMD::version() const { return 1; };
+int MergeMD::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
 const std::string MergeMD::category() const { return "MDAlgorithms"; }

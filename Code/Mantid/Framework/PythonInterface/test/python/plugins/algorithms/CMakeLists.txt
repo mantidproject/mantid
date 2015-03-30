@@ -4,6 +4,7 @@
 
 set ( TEST_PY_FILES
   AddSampleLogMultipleTest.py
+  ApplyPaalmanPingsCorrectionTest.py
   CalculateSampleTransmissionTest.py
   CheckForSampleLogsTest.py
   ConjoinSpectraTest.py
@@ -26,6 +27,7 @@ set ( TEST_PY_FILES
   InelasticIndirectReductionTest.py
   IndirectTransmissionTest.py
   IndirectTransmissionMonitorTest.py
+  LoadDNSLegacyTest.py
   LoadFullprofFileTest.py
   LoadLiveDataTest.py
   LoadLogPropertyTableTest.py
@@ -57,6 +59,7 @@ set ( TEST_PY_FILES
   ExportExperimentLogTest.py
   PoldiMergeTest.py
   VesuvioResolutionTest.py
+  PoldiCreatePeaksFromFileTest.py
 )
 
 check_tests_valid ( ${CMAKE_CURRENT_SOURCE_DIR} ${TEST_PY_FILES} )

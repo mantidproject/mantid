@@ -24,7 +24,7 @@
 
 namespace Mantid {
 namespace DataHandling {
-DECLARE_FILELOADER_ALGORITHM(LoadRaw3);
+DECLARE_FILELOADER_ALGORITHM(LoadRaw3)
 
 using namespace Kernel;
 using namespace API;

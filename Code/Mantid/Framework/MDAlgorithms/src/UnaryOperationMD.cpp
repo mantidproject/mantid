@@ -25,10 +25,10 @@ UnaryOperationMD::~UnaryOperationMD() {}
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
-const std::string UnaryOperationMD::name() const { return "UnaryOperationMD"; };
+const std::string UnaryOperationMD::name() const { return "UnaryOperationMD"; }
 
 /// Algorithm's version for identification. @see Algorithm::version
-int UnaryOperationMD::version() const { return 1; };
+int UnaryOperationMD::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
 const std::string UnaryOperationMD::category() const {

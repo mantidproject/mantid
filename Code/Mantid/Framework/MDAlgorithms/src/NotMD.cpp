@@ -22,10 +22,10 @@ NotMD::~NotMD() {}
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
-const std::string NotMD::name() const { return "NotMD"; };
+const std::string NotMD::name() const { return "NotMD"; }
 
 /// Algorithm's version for identification. @see Algorithm::version
-int NotMD::version() const { return 1; };
+int NotMD::version() const { return 1; }
 
 //----------------------------------------------------------------------------------------------
 

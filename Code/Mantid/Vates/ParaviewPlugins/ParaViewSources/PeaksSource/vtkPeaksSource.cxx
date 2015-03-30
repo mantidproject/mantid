@@ -16,7 +16,7 @@
 #include "MantidAPI/AnalysisDataService.h"
 
 
-vtkStandardNewMacro(vtkPeaksSource);
+vtkStandardNewMacro(vtkPeaksSource)
 
 using namespace Mantid::VATES;
 using Mantid::Geometry::IMDDimension_sptr;

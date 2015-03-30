@@ -34,10 +34,10 @@ ThresholdMD::~ThresholdMD() {}
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
-const std::string ThresholdMD::name() const { return "ThresholdMD"; };
+const std::string ThresholdMD::name() const { return "ThresholdMD"; }
 
 /// Algorithm's version for identification. @see Algorithm::version
-int ThresholdMD::version() const { return 1; };
+int ThresholdMD::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
 const std::string ThresholdMD::category() const { return "MDAlgorithms"; }

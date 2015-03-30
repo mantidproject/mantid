@@ -13,7 +13,7 @@
 
 namespace Mantid {
 namespace DataHandling {
-DECLARE_FILELOADER_ALGORITHM(LoadSNSspec);
+DECLARE_FILELOADER_ALGORITHM(LoadSNSspec)
 
 /**
  * Return the confidence with with this algorithm can load the file

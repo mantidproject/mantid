@@ -387,7 +387,17 @@
                                 </widget>
                               </item>
                               <item>
-                                <widget class="QDoubleSpinBox" name="minTime"/>
+                                <widget class="QDoubleSpinBox" name="minTime">
+                                  <property name="minimum">
+                                    <double>-6</double>
+                                  </property>
+                                  <property name="maximum">
+                                    <double>33</double>
+                                  </property>
+                                  <property name="decimals">
+                                    <number>3</number>
+                                  </property>
+                                </widget>
                               </item>
                               <item>
                                 <widget class="QLabel" name="label_5">
@@ -397,7 +407,17 @@
                                 </widget>
                               </item>
                               <item>
-                                <widget class="QDoubleSpinBox" name="maxTime"/>
+                                <widget class="QDoubleSpinBox" name="maxTime">
+                                  <property name="minimum">
+                                    <double>-6</double>
+                                  </property>
+                                  <property name="maximum">
+                                    <double>33</double>
+                                  </property>
+                                  <property name="decimals">
+                                    <number>3</number>
+                                  </property>
+                                </widget>
                               </item>
                             </layout>
                           </widget>
@@ -435,6 +455,19 @@
               </item>
               <item>
                 <layout class="QHBoxLayout" name="horizontalLayout_3">
+                  <item>
+                    <widget class="QPushButton" name="help">
+                      <property name="maximumSize">
+                        <size>
+                          <width>25</width>
+                          <height>25</height>
+                        </size>
+                      </property>
+                      <property name="text">
+                        <string>?</string>
+                      </property>
+                    </widget>
+                  </item>
                   <item>
                     <spacer name="horizontalSpacer">
                       <property name="orientation">
@@ -498,6 +531,7 @@
     <tabstop>differential</tabstop>
     <tabstop>minTime</tabstop>
     <tabstop>maxTime</tabstop>
+    <tabstop>help</tabstop>
     <tabstop>load</tabstop>
   </tabstops>
   <resources/>

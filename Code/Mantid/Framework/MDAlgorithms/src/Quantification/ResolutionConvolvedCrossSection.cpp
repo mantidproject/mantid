@@ -52,8 +52,6 @@ namespace MDAlgorithms {
 using namespace DataObjects;
 using namespace Kernel;
 
-DECLARE_FUNCTION(ResolutionConvolvedCrossSection);
-
 namespace {
 // Attribute names
 const char *RESOLUTION_ATTR = "ResolutionFunction";

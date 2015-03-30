@@ -85,10 +85,10 @@ ImportMDEventWorkspace::~ImportMDEventWorkspace() {}
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string ImportMDEventWorkspace::name() const {
   return "ImportMDEventWorkspace";
-};
+}
 
 /// Algorithm's version for identification. @see Algorithm::version
-int ImportMDEventWorkspace::version() const { return 1; };
+int ImportMDEventWorkspace::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
 const std::string ImportMDEventWorkspace::category() const {

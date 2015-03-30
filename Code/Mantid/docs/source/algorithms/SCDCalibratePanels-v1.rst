@@ -95,4 +95,17 @@ algorithm. To do so select the workspace, which you have calibrated as
 the InputWorkspace and the workspace you want to copy the calibration
 to, the OutputWorkspace.
 
+Usage
+------
+
+**Example - SCDCalibratePanels:**
+
+	LoadIsawPeaks(Filename='MANDI_801.peaks', OutputWorkspace='peaks')
+	SCDCalibratePanels(PeakWorkspace='peaks',DetCalFilename='mandi_801.DetCal',XmlFilename='mandi_801.xml',a=74,b=74.5,c=99.9,alpha=90,beta=90,gamma=60)
+	Load(Filename='MANDI_801_event.nxs', OutputWorkspace='MANDI_801_event')
+	CloneWorkspace(InputWorkspace='MANDI_801_event', OutputWorkspace='MANDI_801_event_xml')
+	LoadParameterFile(Workspace='MANDI_801_event_xml', Filename='mandi_801.xml')
+	RenameWorkspace(InputWorkspace='MANDI_801_event_xml', OutputWorkspace='MANDI_801_event_DetCal')
+	LoadIsawDetCal(InputWorkspace='MANDI_801_event_DetCal', Filename='mandi_801.DetCal')
+	
 .. categories::

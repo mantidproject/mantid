@@ -43,7 +43,7 @@ template <typename T> T interpretAs(std::vector<char> &Buf, size_t ind = 0) {
 }
 }
 
-DECLARE_FILELOADER_ALGORITHM(LoadSQW);
+DECLARE_FILELOADER_ALGORITHM(LoadSQW)
 
 /// Constructor
 LoadSQW::LoadSQW() : m_fileName(""), m_fileStream(),

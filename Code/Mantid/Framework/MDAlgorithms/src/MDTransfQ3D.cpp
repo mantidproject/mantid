@@ -4,7 +4,7 @@
 namespace Mantid {
 namespace MDAlgorithms {
 // register the class, whith conversion factory under Q3D name
-DECLARE_MD_TRANSFID(MDTransfQ3D, Q3D);
+DECLARE_MD_TRANSFID(MDTransfQ3D, Q3D)
 
 /** method returns number of matrix dimensions calculated by this class
 * as function of energy analysis mode   */

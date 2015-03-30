@@ -13,7 +13,7 @@
 namespace Mantid {
 namespace DataHandling {
 
-DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadTOFRawNexus);
+DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadTOFRawNexus)
 
 using namespace Kernel;
 using namespace API;

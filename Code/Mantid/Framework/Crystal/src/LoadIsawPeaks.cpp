@@ -28,7 +28,7 @@ using Mantid::Kernel::Units::Wavelength;
 namespace Mantid {
 namespace Crystal {
 
-DECLARE_FILELOADER_ALGORITHM(LoadIsawPeaks);
+DECLARE_FILELOADER_ALGORITHM(LoadIsawPeaks)
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;

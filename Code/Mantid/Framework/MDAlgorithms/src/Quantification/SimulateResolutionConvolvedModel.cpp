@@ -17,7 +17,7 @@
 namespace Mantid {
 namespace MDAlgorithms {
 // Register the algorithm into the AlgorithmFactory
-DECLARE_ALGORITHM(SimulateResolutionConvolvedModel);
+DECLARE_ALGORITHM(SimulateResolutionConvolvedModel)
 
 using namespace API;
 using namespace DataObjects;
