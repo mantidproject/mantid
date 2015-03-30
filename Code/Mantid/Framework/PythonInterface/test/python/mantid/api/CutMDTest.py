@@ -22,45 +22,6 @@ class CutMDTest(unittest.TestCase):
     def tearDown(self):
         DeleteWorkspace(self.__in_md )
         
-    def test_orthogonal_slice_with_cropping(self):
-         # We create a fake workspace and check to see that using bin inputs for cropping works
-        to_cut = CreateMDWorkspace(Dimensions=3, Extents=[-1,1,-1,1,-1,1], Names='H,K,L', Units='U,U,U')
-        # Set the UB
-        SetUB(Workspace=to_cut, a = 1, b = 1, c = 1, alpha =90, beta=90, gamma = 90)
-        SetSpecialCoordinates(InputWorkspace=to_cut, SpecialCoordinates='HKL')
-        
-        projection = CreateEmptyTableWorkspace()
-        # Correct number of columns, and names
-        projection.addColumn("str", "name")
-        projection.addColumn("str", "value")
-        projection.addColumn("double", "offset")
-        projection.addColumn("str", "type")
-
-        projection.addRow(["u", "1,0,0", 0, "r"])
-        projection.addRow(["v", "0,1,0", 0, "r"])
-        projection.addRow(["w", "0,0,1", 0, "r"])
-                    
-        '''
-        Specify the cropping boundaries as part of the bin inputs.
-        '''
-        out_md = CutMD(to_cut, Projection=projection, P1Bin=[-0.5,0.5], P2Bin=[-0.1,0.1], P3Bin=[-0.3,0.3], NoPix=True)
-        
-        '''
-        Here we check that the corners in HKL end up in the expected positions when transformed into the new scaled basis
-        provided by the W transform (projection table)
-        '''
-        self.assertAlmostEqual(-0.5, out_md.getDimension(0).getMinimum(), 6) 
-        self.assertAlmostEqual(0.5, out_md.getDimension(0).getMaximum(), 6) 
-        self.assertAlmostEqual(-0.1, out_md.getDimension(1).getMinimum(), 6) 
-        self.assertAlmostEqual(0.1, out_md.getDimension(1).getMaximum(), 6) 
-        self.assertAlmostEqual(-0.3, out_md.getDimension(2).getMinimum(), 6) 
-        self.assertAlmostEqual(0.3, out_md.getDimension(2).getMaximum(), 6) 
-        self.assertEquals("['zeta', 0, 0]",  out_md.getDimension(0).getName() )
-        self.assertEquals("[0, 'eta', 0]",  out_md.getDimension(1).getName() )
-        self.assertEquals("[0, 0, 'xi']",  out_md.getDimension(2).getName() )
-        
-        self.assertTrue(isinstance(out_md, IMDHistoWorkspace), "Expect that the output was an IMDHistoWorkspace given the NoPix flag.")
-        
     def test_orthogonal_slice_4D(self):
          # We create a fake 4-D workspace and check to see that using bin inputs for cropping works
         to_cut = CreateMDWorkspace(Dimensions=4, Extents=[-1,1,-1,1,-1,1,-10,10], Names='H,K,L,E', Units='U,U,U,V')
