@@ -132,7 +132,8 @@ namespace Mantid
         camera->SetFocalPoint(xpos, ypos, zpos);
 
         // Setup the position of the camera. We want this to be 
-        double zposCamera = zpos + peakRadius*3;
+        const double cameraDistance = 12;
+        double zposCamera = zpos + peakRadius*cameraDistance;
         camera->SetPosition(xpos, ypos, zposCamera);
         camera->SetViewUp(0.0, 1.0, 0.0);
 

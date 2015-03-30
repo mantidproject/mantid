@@ -7,23 +7,37 @@
 #include "MantidVatesAPI/ViewFrustum.h"
 #include <vector>
 
-namespace Mantid
-{
-namespace VATES
-{
-  class DLLExport NullPeaksPresenterVsi : public PeaksPresenterVsi
-  {
-    public:
-    NullPeaksPresenterVsi(){}
-    virtual ~NullPeaksPresenterVsi(){}
-    virtual Mantid::API::IPeaksWorkspace_sptr getPeaksWorkspace(){throw std::runtime_error("NullPeaksPresenterVsi does not implement this method. Misused");}
-    virtual std::vector<bool> getViewablePeaks() {throw std::runtime_error("NullPeaksPresenterVsi does not implement this method. Misused");}
-    virtual void updateViewFrustum(ViewFrustum ) {}
-    virtual std::string getFrame(){throw std::runtime_error("NullPeaksPresenterVsi does not implement this method. Misused");}
-    virtual std::string getPeaksWorkspaceName(){throw std::runtime_error("NullPeaksPresenterVsi does not implement this method. Misused");}
-    virtual void getPeaksInfo(Mantid::API::IPeaksWorkspace_sptr , int ,
-                              Mantid::Kernel::V3D& , double& ){throw std::runtime_error("NullPeaksPresenterVsi does not implement this method. Misused");}
-  };
+namespace Mantid {
+namespace VATES {
+class DLLExport NullPeaksPresenterVsi : public PeaksPresenterVsi {
+public:
+  NullPeaksPresenterVsi() {}
+  virtual ~NullPeaksPresenterVsi() {}
+  virtual Mantid::API::IPeaksWorkspace_sptr getPeaksWorkspace() {
+    throw std::runtime_error(
+        "NullPeaksPresenterVsi does not implement this method. Misused");
+  }
+  virtual std::vector<bool> getViewablePeaks() {
+    throw std::runtime_error(
+        "NullPeaksPresenterVsi does not implement this method. Misused");
+  }
+  virtual void updateViewFrustum(ViewFrustum) {}
+  virtual std::string getFrame() {
+    throw std::runtime_error(
+        "NullPeaksPresenterVsi does not implement this method. Misused");
+  }
+  virtual std::string getPeaksWorkspaceName() {
+    throw std::runtime_error(
+        "NullPeaksPresenterVsi does not implement this method. Misused");
+  }
+  virtual void getPeaksInfo(Mantid::API::IPeaksWorkspace_sptr, int,
+                            Mantid::Kernel::V3D &, double &) {
+    throw std::runtime_error(
+        "NullPeaksPresenterVsi does not implement this method. Misused");
+  }
+  virtual void sortPeaksWorkspace(const std::string &byColumnName,
+                                  const bool ascending) {}
+};
 }
 }
 

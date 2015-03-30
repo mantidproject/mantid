@@ -7,24 +7,23 @@
 #include <vector>
 #include <string>
 
-
-namespace Mantid
-{
-namespace VATES
-{
+namespace Mantid {
+namespace VATES {
 class ViewFrustum;
 
-class DLLExport PeaksPresenterVsi
-{
-  public:
-    virtual ~PeaksPresenterVsi(){};
-    virtual std::vector<bool> getViewablePeaks() = 0;
-    virtual Mantid::API::IPeaksWorkspace_sptr getPeaksWorkspace() = 0;
-    virtual void updateViewFrustum(ViewFrustum frustum) = 0;
-    virtual std::string getFrame() = 0;
-    virtual std::string getPeaksWorkspaceName() = 0;
-    virtual void getPeaksInfo(Mantid::API::IPeaksWorkspace_sptr peaksWorkspace, int row,
-                              Mantid::Kernel::V3D& position, double& radius) = 0;
+class DLLExport PeaksPresenterVsi {
+public:
+  virtual ~PeaksPresenterVsi(){};
+  virtual std::vector<bool> getViewablePeaks() = 0;
+  virtual Mantid::API::IPeaksWorkspace_sptr getPeaksWorkspace() = 0;
+  virtual void updateViewFrustum(ViewFrustum frustum) = 0;
+  virtual std::string getFrame() = 0;
+  virtual std::string getPeaksWorkspaceName() = 0;
+  virtual void getPeaksInfo(Mantid::API::IPeaksWorkspace_sptr peaksWorkspace,
+                            int row, Mantid::Kernel::V3D &position,
+                            double &radius) = 0;
+  virtual void sortPeaksWorkspace(const std::string &byColumnName,
+                                  const bool ascending) = 0;
 };
 
 typedef boost::shared_ptr<PeaksPresenterVsi> PeaksPresenterVsi_sptr;
