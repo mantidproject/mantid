@@ -168,7 +168,7 @@ calculateSteps(const std::vector<MinMax> &inExtents,
     } else if (nArgs == 1) {
       const double dimRange = inExtents[i].second - inExtents[i].first;
       const double stepSize =
-          binning[i][1] < dimRange ? binning[i][0] : dimRange;
+          binning[i][0] < dimRange ? binning[i][0] : dimRange;
       outBin = static_cast<int>(dimRange / stepSize);
       outExtents[i].second = inExtents[i].first + outBin * stepSize;
 
