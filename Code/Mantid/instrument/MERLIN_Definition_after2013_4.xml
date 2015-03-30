@@ -6,7 +6,7 @@
             xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 http://schema.mantidproject.org/IDF/1.0/IDFSchema.xsd"
  name="MERLIN" valid-from   ="2014-02-10 00:00:01"
                valid-to     ="2100-01-31 23:59:59"
-		       last-modified="2012-03-19 12:00:05">
+               last-modified="2015-03-01 12:00:05">
 
   <defaults>
     <length unit="meter"/>
@@ -27,7 +27,7 @@
     The data for Merlin was obtained from Robert Bewley.
     
     2012-05-17 - added names to tubes
-	2013-11-14 - use locations tag in tube definitions
+    2013-11-14 - use locations tag in tube definitions
   
   -->
 
