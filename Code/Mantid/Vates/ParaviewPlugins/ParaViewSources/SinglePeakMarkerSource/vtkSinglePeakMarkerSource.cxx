@@ -6,7 +6,7 @@
 
 #include "MantidVatesAPI/vtkSinglePeakMarker.h"
 
-vtkStandardNewMacro(vtkSinglePeakMarkerSource);
+vtkStandardNewMacro(vtkSinglePeakMarkerSource)
 
 using namespace Mantid::VATES;
 

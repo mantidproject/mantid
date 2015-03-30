@@ -34,7 +34,7 @@ using namespace Mantid::MDEvents;
 namespace Mantid {
 namespace MDAlgorithms {
 
-DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadMD);
+DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadMD)
 
 //----------------------------------------------------------------------------------------------
 /** Constructor

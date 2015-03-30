@@ -405,14 +405,14 @@ std::vector<double> getMomentsAboutMean(const std::vector<TYPE> &x,
 
 // --------------------------- Concrete instantiations
 // ---------------------------------------------
-INSTANTIATE(float);
-INSTANTIATE(double);
-INSTANTIATE(int);
-INSTANTIATE(long);
-INSTANTIATE(long long);
-INSTANTIATE(unsigned int);
-INSTANTIATE(unsigned long);
-INSTANTIATE(unsigned long long);
+INSTANTIATE(float)
+INSTANTIATE(double)
+INSTANTIATE(int)
+INSTANTIATE(long)
+INSTANTIATE(long long)
+INSTANTIATE(unsigned int)
+INSTANTIATE(unsigned long)
+INSTANTIATE(unsigned long long)
 
 } // namespace Kernel
 } // namespace Mantid

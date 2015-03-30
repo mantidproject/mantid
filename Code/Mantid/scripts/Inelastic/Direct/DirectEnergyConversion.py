@@ -204,8 +204,8 @@ class DirectEnergyConversion(object):
                 # data file.  SNS or 1 to 1 maps may probably avoid this
                 # stuff and can load masks directly
                 white_data = white.get_ws_clone('white_ws_clone')
-
-                diag_mask = LoadMask(Instrument=self.instr_name,InputFile=self.hard_mask_file,\
+                idf_file = api.ExperimentInfo.getInstrumentFilename(self.instr_name)
+                diag_mask = LoadMask(Instrument=idf_file,InputFile=self.hard_mask_file,\
                                  OutputWorkspace='hard_mask_ws')
                 MaskDetectors(Workspace=white_data, MaskedWorkspace=diag_mask)
                 white.add_masked_ws(white_data)
@@ -342,7 +342,9 @@ class DirectEnergyConversion(object):
         # inform user on what parameters have changed from script or gui
         # if monovan present, check if abs_norm_ parameters are set
         self.prop_man.log_changed_values('notice')
-
+        # before trying to process new results, let's remove from memory old results
+        # if any present and they are not needed any more (user have not renamed them)
+        self._clear_old_results()
 
         start_time = time.time()
 
@@ -366,7 +368,7 @@ class DirectEnergyConversion(object):
         masks_done = False
         if not prop_man.run_diagnostics:
             header = "*** Diagnostics including hard masking is skipped "
-            masks_done = Treu
+            masks_done = True
         #if Reducer.save_and_reuse_masks :
         # SAVE AND REUSE MASKS
         if self.spectra_masks:
@@ -383,7 +385,7 @@ class DirectEnergyConversion(object):
             masking = self.spectra_masks
 
         # estimate and report the number of failing detectors
-        nMaskedSpectra = get_failed_spectra_list_from_masks(masking)
+        nMaskedSpectra = get_failed_spectra_list_from_masks(masking,prop_man)
         if masking:
             nSpectra = masking.getNumberHistograms()
         else:
@@ -420,7 +422,9 @@ class DirectEnergyConversion(object):
             num_ei_cuts = len(self.incident_energy)
             if self.check_background:
                 # find the count rate seen in the regions of the histograms defined
-                # as the background regions, if the user defined such region
+                # as the background regions, if the user defined such region.
+                # In multirep mode this has to be done here, as workspace
+                # will be cut in chunks and bg regions -- removed
                 ws_base = PropertyManager.sample_run.get_workspace()
                 bkgd_range = self.bkgd_range
                 bkgr_ws = self._find_or_build_bkgr_ws(ws_base,bkgd_range[0],bkgd_range[1])
@@ -430,7 +434,9 @@ class DirectEnergyConversion(object):
         else:
             self._multirep_mode = False
             num_ei_cuts = 0
-
+#------------------------------------------------------------------------------------------
+# Main loop over incident energies
+#------------------------------------------------------------------------------------------
         cut_ind = 0 # do not do enumerate if it generates all sequence at once
         #  -- code below uses current energy state from PropertyManager.incident_energy
         for ei_guess in PropertyManager.incident_energy:
@@ -475,6 +481,7 @@ class DirectEnergyConversion(object):
             if out_ws_name:
                 if self._multirep_mode:
                     result.append(deltaE_ws_sample)
+                    self._old_runs_list.append(deltaE_ws_sample.name())
                 else:
                     results_name = deltaE_ws_sample.name()
                     if results_name != out_ws_name:
@@ -483,6 +490,9 @@ class DirectEnergyConversion(object):
             else: # delete workspace if no output is requested
                 self.sample_run = None
         #end_for
+#------------------------------------------------------------------------------------------
+# END Main loop over incident energies
+#------------------------------------------------------------------------------------------
 
         end_time = time.time()
         prop_man.log("*** Elapsed time = {0} sec".format(end_time - start_time),'notice')
@@ -492,8 +502,6 @@ class DirectEnergyConversion(object):
         #prop_man.wb_run = None
         # clear combined mask
         self.spectra_masks = None
-        if 'masking' in mtd:
-            DeleteWorkspace(masking)
         return result
 
     def _do_abs_corrections(self,deltaE_ws_sample,cashed_mono_int,ei_guess,\
@@ -840,13 +848,16 @@ class DirectEnergyConversion(object):
            workspace = PropertyManager.sample_run.get_workspace()
 
         spectra_id = self.prop_man.multirep_tof_specta_list
-        if not spectra_id:
+        if not spectra_id or len(spectra_id) == 0:
+            self.prop_man.log("*** WARNING! no multirep spectra found in IDF! using first existing spectra number\n"\
+                              "             This is wrong unless sample-detector distances of the instrument are all equal.",\
+                              'warning')
             spectra_id = [1]
 
         eMin,dE,eMax = PropertyManager.energy_bins.get_abs_range(self.prop_man)
         ei = PropertyManager.incident_energy.get_current()
         en_list = [eMin,eMin + dE,eMax - dE,eMax]
-        TOF_range = DirectEnergyConversion.get_TOF_for_energies(workspace,en_list,spectra_id,ei)
+        TOF_range = self.get_TOF_for_energies(workspace,en_list,spectra_id,ei)
 
 
         def process_block(tof_range):
@@ -869,15 +880,16 @@ class DirectEnergyConversion(object):
         else:
                tof_min,t_step,tof_max = process_block(TOF_range)
         #end
-        return (tof_min,t_step,tof_max)
+        # add 5% for detectors specified in Par file are shifted a bit and not min-max det any more
+        return (0.95*tof_min,t_step,1.05*tof_max)
+        #return (tof_min,t_step,tof_max)
     #
-    @staticmethod
-    def get_TOF_for_energies(workspace,energy_list,specID_list,ei=None,debug_mode=False):
+    def get_TOF_for_energies(self,workspace,energy_list,specID_list,ei=None,debug_mode=False):
         """ Method to find what TOF range corresponds to given energy range
            for given workspace and detectors.
 
            Input:
-           workspace    pointer to workspace with instrument attached.
+           workspace    handler for the workspace with instrument attached.
            energy_list  the list of input energies to process
            detID_list   list of detectors to find
            ei           incident energy. If present, TOF range is calculated in direct mode,
@@ -886,6 +898,37 @@ class DirectEnergyConversion(object):
            Returns:
            list of TOF corresponding to input energies list.
         """
+        if ei:
+            ei_guess = PropertyManager.incident_energy.get_current()
+            fix_ei = self.fix_ei
+            ei_mon_spectra = self.ei_mon_spectra
+            monitor_ws = PropertyManager.sample_run.get_monitors_ws(ei_mon_spectra,workspace)
+            if monitor_ws is None: # no shifting to monitor position
+                src_name = None
+                mon1_peak = 0
+            else:
+                mon_2_spec_ID = int(ei_mon_spectra[0])
+                # Calculate the incident energy and TOF when the particles access Monitor1
+                try:
+                    ei,mon1_peak,mon1_index,tzero = \
+                    GetEi(InputWorkspace=monitor_ws, Monitor1Spec=mon_2_spec_ID,
+                        Monitor2Spec=int(ei_mon_spectra[1]),
+                        EnergyEstimate=ei_guess,FixEi=fix_ei)
+                    mon1_det = monitor_ws.getDetector(mon1_index)
+                    mon1_pos = mon1_det.getPos()
+                    src_name = monitor_ws.getInstrument().getSource().getName()
+                except :
+                    src_name = None
+                    mon1_peak = 0
+                    en_bin  = [energy_list[0],energy_list[1]-energy_list[0],energy_list[3]]
+                    self.prop_man.log("*** WARNING: message from multirep chunking procedure: get_TOF_for_energies:\n"\
+                                      "    not able to identify energy peak looking for TOF range for incident energy: {0}meV, binning: {1}\n"\
+                                      "    Continuing under assumption that incident neutrons arrive at source at time=0".\
+                                       format(ei_guess,en_bin),'warning')
+        else:
+            mon1_peak = 0
+        #end if
+
         template_ws_name = '_energy_range_ws'
         range_ws_name = '_TOF_range_ws'
         y = [1] * (len(energy_list) - 1)
@@ -895,11 +938,14 @@ class DirectEnergyConversion(object):
             ExtractSingleSpectrum(InputWorkspace=workspace, OutputWorkspace=template_ws_name, WorkspaceIndex=ind)
             if ei:
                 CreateWorkspace(OutputWorkspace=range_ws_name,NSpec = 1,DataX=energy_list,DataY=y,UnitX='DeltaE',ParentWorkspace=template_ws_name)
+                if src_name:
+                    MoveInstrumentComponent(Workspace=range_ws_name,ComponentName= src_name, X=mon1_pos.getX(),
+                                        Y=mon1_pos.getY(), Z=mon1_pos.getZ(), RelativePosition=False)
                 range_ws = ConvertUnits(InputWorkspace=range_ws_name,OutputWorkspace=range_ws_name,Target='TOF',EMode='Direct',EFixed=ei)
             else:
                 CreateWorkspace(OutputWorkspace=range_ws_name,NSpec = 1,DataX=energy_list,DataY=y,UnitX='Energy',ParentWorkspace=template_ws_name)
                 range_ws = ConvertUnits(InputWorkspace=range_ws_name,OutputWorkspace=range_ws_name,Target='TOF',EMode='Elastic')
-            x = range_ws.dataX(0)
+            x = range_ws.dataX(0)+mon1_peak
             TOF_range.append(x.tolist())
 
         if not debug_mode:
@@ -982,18 +1028,37 @@ class DirectEnergyConversion(object):
     #########
     @property
     def spectra_masks(self):
-        """ The property keeps a workspace with masks, stored for further usage """
+        """ The property keeps a workspace with masks workspace name,
+            stored for further usage"""
 
         # check if spectra masks is defined
         if hasattr(self,'_spectra_masks'):
-            return self._spectra_masks
+            if not self._spectra_masks is None and self._spectra_masks in mtd:
+                return mtd[self._spectra_masks]
+            else:
+                self._spectra_masks = None
+            return None
         else:
             return None
 
     @spectra_masks.setter
     def spectra_masks(self,value):
         """ set up spectra masks """
-        self._spectra_masks = value
+        if value is None:
+            if hasattr(self,'_spectra_masks') and not self._spectra_masks is None:
+                if self._spectra_masks in mtd:
+                    DeleteWorkspace(self._spectra_masks)
+            self._spectra_masks=None
+        elif isinstance(value,api.Workspace):
+            self._spectra_masks = value.name()
+        elif isinstance(value,str):
+            if value in mtd:
+                self._spectra_masks = value
+            else:
+                self._spectra_masks = None
+        else:
+            self._spectra_masks = None
+        return
 #-------------------------------------------------------------------------------
     def apply_absolute_normalization(self,sample_ws,monovan_run=None,ei_guess=None,wb_mono=None,abs_norm_factor_is=None):
         """  Function applies absolute normalization factor to the target workspace
@@ -1207,10 +1272,14 @@ class DirectEnergyConversion(object):
         # workspace
         # processed
         object.__setattr__(self,'_multirep_mode',False)
+        # list of workspace names, processed earlier
+        object.__setattr__(self,'_old_runs_list',[])
+
 
         all_methods = dir(self)
         # define list of all existing properties, which have descriptors
         object.__setattr__(self,'_descriptors',extract_non_system_names(all_methods))
+
 
         if instr_name:
             self.initialise(instr_name,reload_instrument)
@@ -1451,7 +1520,7 @@ class DirectEnergyConversion(object):
 #-------------------------------------------------------------------------------
     def _get_wb_inegrals(self,run):
         """Obtain white bean vanadium integrals either by integrating
-           workspace in question or cashed value
+           workspace in question or using cashed value
         """
         run = self.get_run_descriptor(run)
         white_ws = run.get_workspace()
@@ -1514,8 +1583,16 @@ class DirectEnergyConversion(object):
         low,upp = self.wb_integr_range
         white_tag = 'NormBy:{0}_IntergatedIn:{1:0>10.2f}:{2:0>10.2f}'.format(self.normalise_method,low,upp)
         return white_tag
-
-def get_failed_spectra_list_from_masks(masked_wksp):
+    #
+    def _clear_old_results(self):
+        """Remove workspaces, processed earlier and not used any more"""
+        ws_list = self._old_runs_list
+        for ws_name in ws_list:
+            if ws_name in mtd:
+                DeleteWorkspace(ws_name)
+        object.__setattr__(self,'_old_runs_list',[])
+    #
+def get_failed_spectra_list_from_masks(masked_wksp,prop_man):
     """Compile a list of spectra numbers that are marked as
        masked in the masking workspace
 
@@ -1526,6 +1603,11 @@ def get_failed_spectra_list_from_masks(masked_wksp):
     failed_spectra = []
     if masked_wksp is None:
        return (failed_spectra,0)
+    try:
+        name = masked_wksp.name()
+    except Exeption as ex:
+        prop_man.log("***WARNING: cached mask workspace invalidated. Incorrect masking reported")
+        return (failed_spectra,0)
 
     masking_wksp,sp_list = ExtractMask(masked_wksp)
     DeleteWorkspace(masking_wksp)

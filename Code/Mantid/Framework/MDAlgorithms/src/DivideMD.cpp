@@ -27,10 +27,10 @@ DivideMD::~DivideMD() {}
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
-const std::string DivideMD::name() const { return "DivideMD"; };
+const std::string DivideMD::name() const { return "DivideMD"; }
 
 /// Algorithm's version for identification. @see Algorithm::version
-int DivideMD::version() const { return 1; };
+int DivideMD::version() const { return 1; }
 
 //----------------------------------------------------------------------------------------------
 

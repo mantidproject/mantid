@@ -365,9 +365,6 @@ void IntegrateEllipsoids::exec() {
   const size_t numSpectra = wksp->getNumberHistograms();
   Progress prog(this, 0.5, 1.0, numSpectra);
 
-  // loop through the eventlists
-  std::vector<double> buffer(DIMS);
-
   if (eventWS) {
     // process as EventWorkspace
     qListFromEventWS(integrator, prog, eventWS, unitConv, qConverter);

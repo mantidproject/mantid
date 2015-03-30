@@ -22,10 +22,10 @@ OrMD::~OrMD() {}
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
-const std::string OrMD::name() const { return "OrMD"; };
+const std::string OrMD::name() const { return "OrMD"; }
 
 /// Algorithm's version for identification. @see Algorithm::version
-int OrMD::version() const { return 1; };
+int OrMD::version() const { return 1; }
 
 //----------------------------------------------------------------------------------------------
 /// Run the algorithm with a MDHisotWorkspace as output and operand

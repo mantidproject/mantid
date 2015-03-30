@@ -38,7 +38,6 @@ namespace
       .def("getStatistics", &TimeSeriesProperty<TYPE>::getStatistics) \
       .def("timeAverageValue", &TimeSeriesProperty<TYPE>::timeAverageValue) \
       ;
-  ;
 }
 
 void export_TimeSeriesProperty_Double()

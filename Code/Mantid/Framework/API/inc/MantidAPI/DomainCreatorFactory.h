@@ -59,7 +59,7 @@ private:
   /// Private Constructor for singleton class
   DomainCreatorFactoryImpl();
   /// No copying
-  DISABLE_COPY_AND_ASSIGN(DomainCreatorFactoryImpl);
+  DISABLE_COPY_AND_ASSIGN(DomainCreatorFactoryImpl)
   /// Private Destructor for singleton
   virtual ~DomainCreatorFactoryImpl();
 

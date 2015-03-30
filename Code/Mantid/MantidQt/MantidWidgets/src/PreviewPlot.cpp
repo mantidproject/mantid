@@ -5,7 +5,6 @@
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/AlgorithmManager.h"
-#include "MantidQtAPI/QwtWorkspaceSpectrumData.h"
 
 #include <Poco/Notification.h>
 #include <Poco/NotificationCenter.h>
@@ -17,6 +16,8 @@
 #include <QPalette>
 #include <QVBoxLayout>
 
+#include <qwt_array.h>
+#include <qwt_data.h>
 #include <qwt_scale_engine.h>
 
 using namespace MantidQt::MantidWidgets;
@@ -25,6 +26,7 @@ using namespace Mantid::API;
 namespace
 {
   Mantid::Kernel::Logger g_log("PreviewPlot");
+  bool isNegative(double v) { return v <= 0.0; }
 }
 
 
@@ -328,6 +330,71 @@ bool PreviewPlot::hasCurve(const QString & curveName)
 
 
 /**
+ * Creates a RangeSelector, adds it to the plot and stores it.
+ *
+ * @param rsName Name of range selector
+ * @param type Type of range selector to add
+ * @return RangeSelector object
+ */
+RangeSelector * PreviewPlot::addRangeSelector(const QString & rsName,
+                                              RangeSelector::SelectType type)
+{
+  if(hasRangeSelector(rsName))
+    throw std::runtime_error("RangeSelector already exists on PreviewPlot");
+
+  m_rangeSelectors[rsName] = new MantidWidgets::RangeSelector(m_uiForm.plot, type);
+  m_rsVisibility[rsName] = m_rangeSelectors[rsName]->isVisible();
+
+  return m_rangeSelectors[rsName];
+}
+
+
+/**
+ * Gets a RangeSelector.
+ *
+ * @param rsName Name of range selector
+ * @return RangeSelector object
+ */
+RangeSelector * PreviewPlot::getRangeSelector(const QString & rsName)
+{
+  if(!hasRangeSelector(rsName))
+    throw std::runtime_error("RangeSelector not found on PreviewPlot");
+
+  return m_rangeSelectors[rsName];
+}
+
+
+/**
+ * Removes a RangeSelector from the plot.
+ *
+ * @param rsName Name of range selector
+ * @param del If the object should be deleted
+ */
+void PreviewPlot::removeRangeSelector(const QString & rsName, bool del = true)
+{
+  if(!hasRangeSelector(rsName))
+    return;
+
+  if(del)
+    delete m_rangeSelectors[rsName];
+
+  m_rangeSelectors.remove(rsName);
+}
+
+
+/**
+ * Checks to see if a range selector with a given name is on the plot.
+ *
+ * @param rsName Name of range selector
+ * @return True if the plot has a range selector with the given name
+ */
+bool PreviewPlot::hasRangeSelector(const QString & rsName)
+{
+  return m_rangeSelectors.contains(rsName);
+}
+
+
+/**
  * Shows or hides the plot legend.
  *
  * @param show If the legend should be shown
@@ -531,11 +598,31 @@ QwtPlotCurve * PreviewPlot::addCurve(MatrixWorkspace_sptr ws, const size_t specI
     ws = convertXAlg->getProperty("OutputWorkspace");
   }
 
-  // Create the plot data
-  QwtWorkspaceSpectrumData wsData(*ws, static_cast<int>(specIndex), false, false);
+  std::vector<double> wsDataY = ws->readY(specIndex);
+
+  // If using log scale need to remove all negative Y values
+  bool logYScale = getAxisType(QwtPlot::yLeft) == "Logarithmic";
+  if(logYScale)
+  {
+    // Remove negative data in order to search for minimum positive value
+    std::vector<double> validData(wsDataY.size());
+    auto it = std::remove_copy_if(wsDataY.begin(), wsDataY.end(), validData.begin(), isNegative);
+    validData.resize(std::distance(validData.begin(), it));
+
+    // Get minimum positive value
+    double minY = *std::min_element(validData.begin(), validData.end());
+
+    // Set all negative values to minimum positive value
+    std::replace_if(wsDataY.begin(), wsDataY.end(), isNegative, minY);
+  }
+
+  // Create the Qwt data
+  QwtArray<double> dataX = QVector<double>::fromStdVector(ws->readX(specIndex));
+  QwtArray<double> dataY = QVector<double>::fromStdVector(wsDataY);
+  QwtArrayData wsData(dataX, dataY);
 
   // Create the new curve
-  QwtPlotCurve *curve = new QwtPlotCurve();
+  QwtPlotCurve * curve = new QwtPlotCurve();
   curve->setData(wsData);
   curve->setPen(curveColour);
   curve->attach(m_uiForm.plot);
@@ -722,6 +809,31 @@ void PreviewPlot::handleAxisTypeSelect()
 
   if(yEngine)
     m_uiForm.plot->setAxisScaleEngine(QwtPlot::yLeft, yEngine);
+
+  emit axisScaleChanged();
+
+  // Hide range selectors on X axis when X axis scale is X^2
+  bool xIsSquared = xAxisType == "Squared";
+  for(auto it = m_rangeSelectors.begin(); it != m_rangeSelectors.end(); ++it)
+  {
+    QString rsName = it.key();
+    RangeSelector * rs = it.value();
+    RangeSelector::SelectType type = rs->getType();
+
+    if(type == RangeSelector:: XMINMAX || type == RangeSelector::XSINGLE)
+    {
+      // When setting to invisible save the last visibility setting
+      if(xIsSquared)
+      {
+        m_rsVisibility[rsName] = rs->isVisible();
+        rs->setVisible(false);
+      }
+      else
+      {
+        rs->setVisible(m_rsVisibility[rsName]);
+      }
+    }
+  }
 
   // Update the plot
   emit needToHardReplot();

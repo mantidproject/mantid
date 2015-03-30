@@ -4,7 +4,7 @@
 namespace Mantid {
 namespace MDEvents {
 // register the class, whith conversion factory under ModQ name
-DECLARE_MD_TRANSFID(MDTransfModQ, |Q|);
+DECLARE_MD_TRANSFID(MDTransfModQ, |Q|)
 
 /**method calculates the units, the transformation expects the input ws to be
 in. If the input ws is in different units,
