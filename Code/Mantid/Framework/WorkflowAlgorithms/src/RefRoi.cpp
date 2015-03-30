@@ -46,7 +46,14 @@ void RefRoi::init() {
   declareProperty(
       "NormalizeSum", false,
       "If true, and SumPixels is true, the"
-      "resulting histogram will be divided by the number of pixels in the ROI");
+      " resulting histogram will be divided by the number of pixels in the ROI");
+  declareProperty(
+      "AverageOverIntegratedAxis", false,
+      "If true, and SumPixels and NormalizeSum are true, the"
+      " resulting histogram will also be divided by the number of pixels integrated over");
+  declareProperty(
+      "ErrorWeighting", false,
+      "If true, error weighting will be used when normalizing");
   declareProperty(
       "IntegrateY", true,
       "If true, the Y direction will be"
@@ -102,6 +109,7 @@ void RefRoi::extract2D() {
   bool integrate_y = getProperty("IntegrateY");
   bool sum_pixels = getProperty("SumPixels");
   bool normalize = getProperty("NormalizeSum");
+  bool error_weighting = getProperty("ErrorWeighting");
 
   int nHisto = integrate_y ? m_nXPixel : m_nYPixel;
   int xmin = integrate_y ? 0 : m_xMin;
@@ -149,44 +157,74 @@ void RefRoi::extract2D() {
     XOut0 = inputWS->readX(0);
   }
 
-  //PARALLEL_FOR2(outputWS, inputWS)
-  for (int i = xmin; i <= xmax; i++) {
-    //PARALLEL_START_INTERUPT_REGION
-    for (int j = ymin; j <= ymax; j++) {
-      int index = m_nYPixel * i + j;
+  // Make sure the inner loop is always the one we integrate over
+  int main_axis_min = integrate_y ? xmin : ymin;
+  int main_axis_max = integrate_y ? xmax : ymax;
+  int integrated_axis_min = integrate_y ? ymin : xmin;
+  int integrated_axis_max = integrate_y ? ymax : xmax;
+
+  for (int i = main_axis_min; i <= main_axis_max; i++) {
+    size_t output_index = i;
+    if (sum_pixels)
+      output_index = 0;
+
+    MantidVec &YOut = outputWS->dataY(output_index);
+    MantidVec &EOut = outputWS->dataE(output_index);
+    MantidVec signal_vector(YOut.size(), 0.0);
+    MantidVec error_vector(YOut.size(), 0.0);
+
+    for (int j = integrated_axis_min; j <= integrated_axis_max; j++) {
+      int index = integrate_y ? m_nYPixel * i + j : m_nYPixel * j + i;
       const MantidVec &YIn = inputWS->readY(index);
       const MantidVec &EIn = inputWS->readE(index);
 
-      size_t output_index = integrate_y ? i : j;
-      if (sum_pixels)
-        output_index = 0;
-
-      MantidVec &YOut = outputWS->dataY(output_index);
-      MantidVec &EOut = outputWS->dataE(output_index);
-
       for (size_t t = 0; t < YOut.size(); t++) {
         size_t t_index = convert_to_q ? YOut.size() - 1 - t : t;
-        YOut[t] += YIn[t_index];
-        EOut[t] += EIn[t_index] * EIn[t_index];
+        if (sum_pixels && normalize && error_weighting) {
+          signal_vector[t] += YIn[t_index];
+          error_vector[t] += EIn[t_index] * EIn[t_index];
+        } else {
+          YOut[t] += YIn[t_index];
+          EOut[t] += EIn[t_index] * EIn[t_index];
+        }
       }
     }
-    //PARALLEL_END_INTERUPT_REGION
-  }
-  //PARALLEL_CHECK_INTERUPT_REGION
 
-  const int n_pixels = (xmax - xmin + 1) * (ymax - ymin + 1);
+    if (sum_pixels && normalize && error_weighting) {
+      for (size_t t = 0; t < YOut.size(); t++) {
+        size_t t_index = convert_to_q ? YOut.size() - 1 - t : t;
+        double error_squared = error_vector[t_index] == 0 ? 1 : error_vector[t_index];
+        YOut[t] += signal_vector[t_index] / error_squared;
+        EOut[t] += 1.0 / error_squared;
+      }
+    }
+  }
+
+  // Check whether we want to divide by the number of pixels along
+  // the axis we integrated over.
+  bool average_integrated = getProperty("AverageOverIntegratedAxis");
+  double n_integrated = 1.0;
+  if (sum_pixels && normalize && average_integrated) {
+    n_integrated = integrated_axis_max - integrated_axis_min + 1;
+  }
 
   for (int i = 0; i < nHisto; i++) {
     outputWS->dataX(i) = XOut0;
     MantidVec &YOut = outputWS->dataY(i);
     MantidVec &EOut = outputWS->dataE(i);
     for (size_t t = 0; t < EOut.size(); t++) {
-      EOut[t] = sqrt(EOut[t]);
-
       if (sum_pixels && normalize) {
-        YOut[t] = YOut[t] / n_pixels;
-        EOut[t] = EOut[t] / n_pixels;
-      }
+        if (error_weighting) {
+          YOut[t] = YOut[t] / EOut[t] / n_integrated;
+          EOut[t] = sqrt(1.0/EOut[t]) / n_integrated;
+        } else {
+          EOut[t] = sqrt(EOut[t]);
+          YOut[t] = YOut[t] / (main_axis_max - main_axis_min + 1) / n_integrated;
+          EOut[t] = EOut[t] / (main_axis_max - main_axis_min + 1) / n_integrated;
+        }
+      } else {
+        EOut[t] = sqrt(EOut[t]);
+      };
     }
   }
 

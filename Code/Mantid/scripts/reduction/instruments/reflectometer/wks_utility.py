@@ -1167,8 +1167,6 @@ def substractBackground(tof_axis, y_axis, y_error_axis,
     return [final_y_axis, final_y_error_axis]
 
 def weightedMean(data_array, error_array, error_0):
-    import numpy
-    return [numpy.average(data_array)/len(data_array), numpy.average(error_array)/len(error_array)]
 
     sz = len(data_array)
 

@@ -2,7 +2,6 @@
 import time
 import math
 import os
-import numpy
 from mantid.api import *
 from mantid.simpleapi import *
 from mantid.kernel import *
@@ -54,7 +53,7 @@ class LiquidsReflectometryReduction(PythonAlgorithm):
                                                 "TOF range to use")
         self.declareProperty("TofRangeFlag", True,
                              doc="If true, the TOF will be cropped according to the TOF range property")
-        self.declareProperty("QMin", 0.05, doc="Mnimum Q-value")
+        self.declareProperty("QMin", 0.05, doc="Minimum Q-value")
         self.declareProperty("QStep", 0.02, doc="Step size in Q. Enter a negative value to get a log scale")
         self.declareProperty("AngleOffset", 0.0, doc="angle offset (degrees)")
         self.declareProperty("AngleOffsetError", 0.0, doc="Angle offset error (degrees)")
@@ -66,6 +65,8 @@ class LiquidsReflectometryReduction(PythonAlgorithm):
         self.declareProperty("GeometryCorrectionFlag", False, doc="Use or not the geometry correction")
         self.declareProperty("FrontSlitName", "S1", doc="Name of the front slit")
         self.declareProperty("BackSlitName", "Si", doc="Name of the back slit")
+        self.declareProperty("TOFSteps", 40.0, doc="TOF step size")
+        self.declareProperty("CropFirstAndLastPoints", True, doc="If true, we crop the first and last points")
 
     def PyExec(self):
         # The old reflectivity reduction has an offset between the input
@@ -87,14 +88,7 @@ class LiquidsReflectometryReduction(PythonAlgorithm):
         normBackRange = self.getProperty("NormBackgroundPixelRange").value
         normPeakRange = self.getProperty("NormPeakPixelRange").value
 
-        #GENERAL
-        #TODO: Why are there two versions of this?
-        TOFrangeFlag = self.getProperty("TofRangeFlag")
-        if TOFrangeFlag:
-            TOFrange = self.getProperty("TOFRange").value  #microS
-        else:
-            TOFrange = [0, 200000]
-
+        # Get Q range
         qMin = self.getProperty("QMin").value
         qStep = self.getProperty("QStep").value
         if qStep > 0:  #force logarithmic binning
@@ -108,19 +102,18 @@ class LiquidsReflectometryReduction(PythonAlgorithm):
         runs = reduce((lambda x, y: '%s+%s' % (x, y)), file_list)
         ws_event_data = Load(Filename=runs)
 
+        # Get the TOF range
+        TOFrangeFlag = self.getProperty("TofRangeFlag")
+        if TOFrangeFlag:
+            TOFrange = self.getProperty("TOFRange").value  #microS
+        else:
+            tof_max = ws_event_data.getTofMax()
+            TOFrange = [0, tof_max]
+
         # Number of pixels in each direction
         #TODO: revisit this when we update the IDF
         self.number_of_pixels_x = int(ws_event_data.getInstrument().getNumberParameter("number-of-x-pixels")[0])
         self.number_of_pixels_y = int(ws_event_data.getInstrument().getNumberParameter("number-of-y-pixels")[0])
-
-        # get the distance moderator-detector and sample-detector
-        #TODO: get rid of this
-        sample = ws_event_data.getInstrument().getSample()
-        source = ws_event_data.getInstrument().getSource()
-        source_sample_distance = sample.getDistance(source)
-        detector = ws_event_data.getDetector(0)
-        sample_detector_distance = detector.getPos().getZ()
-        source_detector_distance = source_sample_distance + sample_detector_distance
 
         # Get scattering angle theta
         theta = self.calculate_scattering_angle(ws_event_data)
@@ -155,8 +148,11 @@ class LiquidsReflectometryReduction(PythonAlgorithm):
         AnalysisDataService.remove(str(data_cropped))
         AnalysisDataService.remove(str(norm_summed))
 
+        normalized_data = ConvertToPointData(InputWorkspace=normalized_data,
+                                             OutputWorkspace=str(normalized_data))
+
         # Apply scaling factors
-        self.apply_scaling_factor(normalized_data)
+        normalized_data = self.apply_scaling_factor(normalized_data)
 
         q_workspace = SumSpectra(InputWorkspace = normalized_data)
         q_workspace.getAxis(0).setUnit("MomentumTransfer")
@@ -166,8 +162,15 @@ class LiquidsReflectometryReduction(PythonAlgorithm):
         if geometryCorrectionFlag:
             logger.error("The geometry correction for the Q conversion has not been implemented.")
 
-        # create workspace
-        # Q range
+        # Get the distance fromthe moderator to the detector
+        sample = ws_event_data.getInstrument().getSample()
+        source = ws_event_data.getInstrument().getSource()
+        source_sample_distance = sample.getDistance(source)
+        detector = ws_event_data.getDetector(0)
+        sample_detector_distance = detector.getPos().getZ()
+        source_detector_distance = source_sample_distance + sample_detector_distance
+
+        # Convert to Q
         # Use the TOF range to pick the maximum Q, and give it a little extra room.
         h = 6.626e-34  # m^2 kg s^-1
         m = 1.675e-27  # kg
@@ -178,19 +181,16 @@ class LiquidsReflectometryReduction(PythonAlgorithm):
         for i in range(len(data_x)):
             data_x[i] = constant / data_x[i]
         q_workspace = SortXAxis(InputWorkspace=q_workspace, OutputWorkspace=str(q_workspace))
-            
-        
+
+        # Cook up a name compatible with the UI for backward compatibility
         _time = int(time.time())
         name_output_ws = self.getPropertyValue("OutputWorkspace")
         name_output_ws = name_output_ws + '_#' + str(_time) + 'ts'
 
         q_rebin = Rebin(InputWorkspace=q_workspace, Params=q_range,
                         OutputWorkspace=name_output_ws)
-        q_rebin = ConvertToPointData(InputWorkspace=q_rebin,
-                                     OutputWorkspace=name_output_ws)
 
         # Crop to non-zero values
-        # Get rid of first and last Q points to avoid edge effects
         data_y = q_rebin.readY(0)
         low_q = None
         high_q = None
@@ -201,19 +201,35 @@ class LiquidsReflectometryReduction(PythonAlgorithm):
                 high_q = len(data_y)-1-i
             if low_q is not None and high_q is not None:
                 break
-            
+
+        crop = self.getProperty("CropFirstAndLastPoints").value
         if low_q is not None and high_q is not None:
+            # Get rid of first and last Q points to avoid edge effects
+            if crop:
+                low_q += 1
+                high_q -= 1
             data_x = q_rebin.readX(0)
             q_rebin = CropWorkspace(InputWorkspace=q_rebin,
                                     OutputWorkspace=str(q_rebin),
-                                    XMin=data_x[low_q+1], XMax=data_x[high_q-1])
+                                    XMin=data_x[low_q], XMax=data_x[high_q])
         else:
             logger.error("Data is all zeros. Check your TOF ranges.")
 
-        #TODO: why do we need this cleanup?
-        # Cleanup data turns values < 1e-12 and values where the error is greater than the value
-        # to 0 +- 1
-        #[final_y_axis, final_y_error_axis] = wks_utility.cleanupData1D(final_y_axis, final_error_axis)
+        # Clean up the workspace for backward compatibility
+        data_y = q_rebin.dataY(0)
+        data_e = q_rebin.dataE(0)
+        # Again for backward compatibility, the first and last points of the 
+        # raw output when not cropping was simply set to 0 += 1.
+        if crop is False:
+            data_y[0] = 0
+            data_e[0] = 1
+            data_y[len(data_y)-1] = 0
+            data_e[len(data_y)-1] = 1
+        # Values < 1e-12 and values where the error is greater than the value are replaced by 0+-1
+        for i in range(len(data_y)):
+            if data_y[i] < 1e-12 or data_e[i]>data_y[i]:
+                data_y[i]=0.0
+                data_e[i]=1.0
 
         #TODO: remove this, which we use during development to make sure we don't leave trash
         logger.information(str(AnalysisDataService.getObjectNames()))
@@ -275,7 +291,8 @@ class LiquidsReflectometryReduction(PythonAlgorithm):
         x_min = int(low_res_range[0]) + offset
         x_max = int(low_res_range[1]) + offset
 
-        if peak_range[0] > background_range[0] and peak_range[1] < background_range[1]:
+        left_bck = None
+        if peak_min > bck_min:
             left_bck = RefRoi(InputWorkspace=workspace, IntegrateY=False,
                               NXPixel=self.number_of_pixels_x,
                               NYPixel=self.number_of_pixels_y,
@@ -284,8 +301,11 @@ class LiquidsReflectometryReduction(PythonAlgorithm):
                               XPixelMax=x_max,
                               YPixelMin=bck_min,
                               YPixelMax=peak_min - 1,
+                              ErrorWeighting = True,
                               SumPixels=True, NormalizeSum=True)
 
+        right_bck = None
+        if peak_max < bck_max:
             right_bck = RefRoi(InputWorkspace=workspace, IntegrateY=False,
                                NXPixel=self.number_of_pixels_x,
                                NYPixel=self.number_of_pixels_y,
@@ -294,11 +314,15 @@ class LiquidsReflectometryReduction(PythonAlgorithm):
                                XPixelMax=x_max,
                                YPixelMin=peak_max + 1,
                                YPixelMax=bck_max,
+                               ErrorWeighting = True,
                                SumPixels=True, NormalizeSum=True)
+            
+        if right_bck is not None and left_bck is not None:
             average = (left_bck + right_bck) / 2.0
-            # Avoid leaving trash behind
-            AnalysisDataService.remove(str(left_bck))
-            AnalysisDataService.remove(str(right_bck))
+        elif right_bck is not None:
+            average = right_bck
+        elif left_bck is not None:
+            average = left_bck
         else:
             average = RefRoi(InputWorkspace=workspace, IntegrateY=False,
                              NXPixel=self.number_of_pixels_x,
@@ -308,6 +332,7 @@ class LiquidsReflectometryReduction(PythonAlgorithm):
                              XPixelMax=x_max,
                              YPixelMin=bck_min,
                              YPixelMax=bck_max,
+                             ErrorWeighting = True,
                              SumPixels=True, NormalizeSum=True)
         # Integrate over the low-res direction
         workspace = RefRoi(InputWorkspace=workspace, IntegrateY=False,
@@ -318,10 +343,18 @@ class LiquidsReflectometryReduction(PythonAlgorithm):
                            ConvertToQ=False,
                            SumPixels=sum_peak,
                            OutputWorkspace=str(workspace))
+        #TODO Check whether we should multiply by the number of pixels
+        # in the low-res direction
         workspace = Minus(LHSWorkspace=workspace, RHSWorkspace=average,
                           OutputWorkspace=str(workspace))
         # Avoid leaving trash behind
-        AnalysisDataService.remove(str(average))
+        average_name = str(average)
+        if AnalysisDataService.doesExist(str(left_bck)):
+            AnalysisDataService.remove(str(left_bck))
+        if AnalysisDataService.doesExist(str(right_bck)):
+            AnalysisDataService.remove(str(right_bck))
+        if AnalysisDataService.doesExist(average_name):
+            AnalysisDataService.remove(average_name)
         return workspace
 
     def process_data(self, workspace, tof_range, crop_low_res, low_res_range,
@@ -329,9 +362,10 @@ class LiquidsReflectometryReduction(PythonAlgorithm):
         """
             Common processing for both sample data and normalization.
         """
-        # Rebin normalization
-        #TODO: Check why they chose those hard-coded values
-        workspace = Rebin(InputWorkspace=workspace, Params=[0, 40, 200000], 
+        # Rebin TOF axis
+        tof_max = workspace.getTofMax()
+        tof_step = self.getProperty("TOFSteps").value
+        workspace = Rebin(InputWorkspace=workspace, Params=[0, tof_step, tof_max], 
                           PreserveEvents=False, OutputWorkspace="%s_histo" % str(workspace))
 
         # Crop TOF range
@@ -493,8 +527,7 @@ class LiquidsReflectometryReduction(PythonAlgorithm):
             # Should it not be done for the center of the bin?
             for i in range(len(norm_value)):
                 norm_value[i] = norm_tof[i] * b + a
-                #TODO: Verify with REFL team that they really meant the following line
-                norm_error[i] = norm_tof[i] * b_error + a_error
+                norm_error[i] = math.sqrt(a_error*a_error + norm_tof[i] * norm_tof[i] * b_error * b_error)
 
             workspace = Divide(LHSWorkspace=workspace,
                                RHSWorkspace=normalization,
