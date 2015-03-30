@@ -354,11 +354,9 @@ void CutMD::exec() {
       steppedExtents.push_back(std::make_pair(pbins[i][0], pbins[i][1]));
       steppedBins.push_back(1);
     } else if (nArgs == 3) {
+      const double dimRange = pbins[i][2] - pbins[i][0];
+      const double stepSize = pbins[i][1] < dimRange ? pbins[i][1] : dimRange;
       steppedExtents.push_back(std::make_pair(pbins[i][0], pbins[i][2]));
-      double stepSize = pbins[i][1];
-      double dimRange = extentLimit.second - extentLimit.first;
-      if (stepSize > dimRange)
-        stepSize = dimRange;
       steppedBins.push_back(static_cast<int>(dimRange / stepSize));
     }
 
