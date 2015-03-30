@@ -45,19 +45,29 @@ namespace IDA
 
   void CalcCorr::run()
   {
-    //TODO: check sample binning matches can binning, ask if should rebin to match
-
     // Get correct corrections algorithm
     QString sampleShape = m_uiForm.cbSampleShape->currentText();
     QString algorithmName = sampleShape.replace(" ", "") + "PaalmanPingsCorrection";
 
+    API::BatchAlgorithmRunner::AlgorithmRuntimeProps absCorProps;
     IAlgorithm_sptr absCorAlgo = AlgorithmManager::Instance().create(algorithmName.toStdString());
     absCorAlgo->initialize();
 
     // Sample details
     QString sampleWsName = m_uiForm.dsSample->getCurrentDataName();
     MatrixWorkspace_sptr sampleWs = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(sampleWsName.toStdString());
-    absCorAlgo->setProperty("SampleWorkspace", sampleWsName.toStdString());
+
+    // If not in wavelength then do conversion
+    Mantid::Kernel::Unit_sptr sampleXUnit = sampleWs->getAxis(0)->unit();
+    if(sampleXUnit->caption() != "Wavelength")
+    {
+      g_log.information("Sample workspace not in wavelength, need to convert to continue.");
+      absCorProps["SampleWorkspace"] = addConvertToWavelengthStep(sampleWs);
+    }
+    else
+    {
+      absCorProps["SampleWorkspace"] = sampleWsName.toStdString();
+    }
 
     double sampleNumberDensity = m_uiForm.spSampleNumberDensity->value();
     absCorAlgo->setProperty("SampleNumberDensity", sampleNumberDensity);
@@ -72,7 +82,19 @@ namespace IDA
     if(useCan)
     {
       QString canWsName = m_uiForm.dsContainer->getCurrentDataName();
-      absCorAlgo->setProperty("CanWorkspace", canWsName.toStdString());
+      MatrixWorkspace_sptr canWs = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(canWsName.toStdString());
+
+      // If not in wavelength then do conversion
+      Mantid::Kernel::Unit_sptr canXUnit = canWs->getAxis(0)->unit();
+      if(canXUnit->caption() != "Wavelength")
+      {
+        g_log.information("Container workspace not in wavelength, need to convert to continue.");
+        absCorProps["CanWorkspace"] = addConvertToWavelengthStep(canWs);
+      }
+      else
+      {
+        absCorProps["CanWorkspace"] = canWsName.toStdString();
+      }
 
       double canNumberDensity = m_uiForm.spCanNumberDensity->value();
       absCorAlgo->setProperty("CanNumberDensity", canNumberDensity);
@@ -106,7 +128,7 @@ namespace IDA
     absCorAlgo->setProperty("OutputWorkspace", outputWsName.toStdString());
 
     // Add corrections algorithm to queue
-    m_batchAlgoRunner->addAlgorithm(absCorAlgo);
+    m_batchAlgoRunner->addAlgorithm(absCorAlgo, absCorProps);
 
     // Add save algorithms if required
     bool save = m_uiForm.ckSave->isChecked();

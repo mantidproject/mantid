@@ -71,7 +71,7 @@ namespace IDA
     if(sampleXUnit->caption() != "Wavelength")
     {
       g_log.information("Sample workspace not in wavelength, need to convert to continue.");
-      absCorProps["SampleWorkspace"] = addUnitConversionStep(sampleWs);
+      absCorProps["SampleWorkspace"] = addConvertToWavelengthStep(sampleWs);
     }
     else
     {
@@ -89,7 +89,7 @@ namespace IDA
       if(canXUnit->caption() != "Wavelength")
       {
         g_log.information("Container workspace not in wavelength, need to convert to continue.");
-        absCorProps["CanWorkspace"] = addUnitConversionStep(canWs);
+        absCorProps["CanWorkspace"] = addConvertToWavelengthStep(canWs);
       }
       else
       {
@@ -205,31 +205,6 @@ namespace IDA
 
     // Set the result workspace for Python script export
     m_pythonExportWsName = outputWsName.toStdString();
-  }
-
-
-  /**
-   * Adds a unit converstion step to the batch algorithm queue.
-   *
-   * @param ws Pointer to the workspace to convert
-   * @return Name of output workspace
-   */
-  std::string ApplyCorr::addUnitConversionStep(MatrixWorkspace_sptr ws)
-  {
-    std::string outputName = ws->name() + "_inWavelength";
-
-    IAlgorithm_sptr convertAlg = AlgorithmManager::Instance().create("ConvertUnits");
-    convertAlg->initialize();
-
-    convertAlg->setProperty("InputWorkspace", ws->name());
-    convertAlg->setProperty("OutputWorkspace", outputName);
-    convertAlg->setProperty("Target", "Wavelength");
-    convertAlg->setProperty("EMode", getEMode(ws));
-    convertAlg->setProperty("EFixed", getEFixed(ws));
-
-    m_batchAlgoRunner->addAlgorithm(convertAlg);
-
-    return outputName;
   }
 
 
