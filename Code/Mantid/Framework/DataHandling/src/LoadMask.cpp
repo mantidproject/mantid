@@ -20,10 +20,7 @@
 #include <Poco/DOM/NodeFilter.h>
 #include <Poco/DOM/NodeIterator.h>
 #include <Poco/DOM/NodeList.h>
-#include <Poco/DOM/NamedNodeMap.h>
 #include <Poco/Exception.h>
-#include <Poco/File.h>
-#include <Poco/Path.h>
 
 #include <boost/algorithm/string.hpp>
 
@@ -55,7 +52,8 @@ LoadMask::LoadMask(): m_maskWS(), m_instrumentPropValue(""), m_pDoc(NULL),
 /** Destructor
  */
 LoadMask::~LoadMask() {
-  // Auto-generated destructor stub
+  m_pDoc->release();
+  m_pRootElem->release();
 }
 
 /// Initialise the properties
@@ -464,7 +462,7 @@ void LoadMask::parseXML() {
       tomask = true;
       /*
       // get type
-      Poco::XML::NamedNodeMap* att = pNode->attributes();
+      Poco::AutoPtr<Poco::XML::NamedNodeMap> att = pNode->attributes();
       Poco::XML::Node* cNode = att->item(0);
       if (cNode->getNodeValue().compare("mask") == 0 ||
       cNode->getNodeValue().compare("notuse") == 0){
@@ -512,7 +510,7 @@ void LoadMask::parseXML() {
       // Node "detector-masking".  Check default value
       m_defaultToUse = true;
       /*
-      Poco::XML::NamedNodeMap* att = pNode->attributes();
+      Poco::AutoPtr<Poco::XML::NamedNodeMap> att = pNode->attributes();
       if (att->length() > 0){
         Poco::XML::Node* cNode = att->item(0);
         m_defaultToUse = true;
