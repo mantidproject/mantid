@@ -290,8 +290,18 @@ namespace IDA
       return;
     }
 
+    // Handle preview plot
     m_outputWs = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(m_pythonExportWsName);
     plotPreview(m_uiForm.spPreviewSpec->value());
+
+    // Handle Mantid plotting
+    QString plotType = m_uiForm.cbPlotOutput->currentText();
+
+    if(plotType == "Spectra" || plotType == "Both")
+      plotSpectrum(QString::fromStdString(m_pythonExportWsName));
+
+    if(plotType == "Contour" || plotType == "Both")
+      plotContour(QString::fromStdString(m_pythonExportWsName));
   }
 
 

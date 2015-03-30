@@ -183,11 +183,13 @@ namespace IDA
     if(error)
     {
       emit showMessageBox("Absorption correction calculation failed.\nSee Results Log for more details.");
+      return;
     }
-    else
-    {
-      //TODO: plot correction factors (m_pythonExportWsName (all spectra))
-    }
+
+    // Handle Mantid plotting
+    bool plot = m_uiForm.ckPlotOutput->isChecked();
+    if(plot)
+      plotSpectrum(QString::fromStdString(m_pythonExportWsName));
   }
 
 

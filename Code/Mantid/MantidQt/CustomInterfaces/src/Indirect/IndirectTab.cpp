@@ -146,7 +146,7 @@ namespace CustomInterfaces
 
     load->execute();
 
-    //If reloading fails we're out of options
+    // If reloading fails we're out of options
     return load->isExecuted();
   }
 
@@ -154,6 +154,8 @@ namespace CustomInterfaces
   /**
    * Configures the SaveNexusProcessed algorithm to save a workspace in the default
    * save directory and adds the algorithm to the batch queue.
+   *
+   * This uses the plotSpectrum function from the Python API.
    *
    * @param wsName Name of workspace to save
    * @param filename Name of file to save as (including extension)
@@ -175,6 +177,63 @@ namespace CustomInterfaces
 
     // Add the save algorithm to the batch
     m_batchAlgoRunner->addAlgorithm(saveAlgo, saveProps);
+  }
+
+
+  /**
+   * Creates a spectrum plot of one or more workspaces at a given spectrum
+   * index.
+   *
+   * This uses the plotSpectrum function from the Python API.
+   *
+   * @param workspaceNames List of names of workspaces to plot
+   * @param specIndex Index of spectrum from each workspace to plot
+   */
+  void IndirectTab::plotSpectrum(const QStringList & workspaceNames, int specIndex)
+  {
+    QString pyInput = "from mantidplot import plotSpectrum\n";
+
+    pyInput += "plotSpectrum('";
+    pyInput += workspaceNames.join("','");
+    pyInput += "', ";
+    pyInput += QString::number(specIndex);
+    pyInput += ")\n";
+
+    m_pythonRunner.runPythonCode(pyInput);
+  }
+
+
+  /**
+   * Creates a spectrum plot of a single workspace at a given spectrum
+   * index.
+   *
+   * @param workspaceName Names of workspace to plot
+   * @param specIndex Index of spectrum to plot
+   */
+  void IndirectTab::plotSpectrum(const QString & workspaceName, int specIndex)
+  {
+    QStringList workspaceNames;
+    workspaceNames << workspaceName;
+    plotSpectrum(workspaceNames, specIndex);
+  }
+
+
+  /**
+   * Plots a contour (2D) plot of a given workspace.
+   *
+   * This uses the plot2D function from the Python API.
+   *
+   * @param workspaceName Name of workspace to plot
+   */
+  void IndirectTab::plotContour(const QString & workspaceName)
+  {
+    QString pyInput = "from mantidplot import plot2D\n";
+
+    pyInput += "plot2D('";
+    pyInput += workspaceName;
+    pyInput += "')\n";
+
+    m_pythonRunner.runPythonCode(pyInput);
   }
 
 
