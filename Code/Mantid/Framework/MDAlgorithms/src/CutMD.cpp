@@ -294,9 +294,13 @@ void CutMD::exec() {
   // Check Projection format
   if (haveProjection) {
     auto colNames = projection->getColumnNames();
-    if (colNames.size() != 4 || colNames[0] != "name" ||
-        colNames[1] != "value" || colNames[2] != "offset" ||
-        colNames[3] != "type")
+    if (colNames.size() != 4 ||
+        std::find(colNames.begin(), colNames.end(), "name") == colNames.end() ||
+        std::find(colNames.begin(), colNames.end(), "value") ==
+            colNames.end() ||
+        std::find(colNames.begin(), colNames.end(), "offset") ==
+            colNames.end() ||
+        std::find(colNames.begin(), colNames.end(), "type") == colNames.end())
       throw std::runtime_error(
           "Invalid Projection supplied. Please check column names.");
     if (projection->rowCount() < 3)
