@@ -18,16 +18,36 @@ class ReductionWrapper(object):
     """
     class var_holder(object):
         """ A simple wrapper class to keep web variables"""
-        def __init__(self):
-            self.standard_vars = None
-            self.advanced_vars = None
+        def __init__(self,Web_vars=None):
+            if Web_vars:
+                self.standard_vars = Web_vars.standard_vars
+                self.advanced_vars = Web_vars.advanced_vars
+            else:
+                self.standard_vars = None
+                self.advanced_vars = None
+        #
+        def get_all_vars(self):
+            """Return dictionary with all defined variables"""
+            web_vars = None
+            if self.advanced_vars:
+                web_vars = self.advanced_vars
+            if self.standard_vars:
+                if web_vars:
+                    web_vars.update(self.standard_vars)
+                else:
+                    web_vars = self.standard_vars
+            return web_vars
+
 
     def __init__(self,instrumentName,web_var=None):
         """ sets properties defaults for the instrument with Name
           and define if wrapper runs from web services or not
-      """
-      # internal variable, indicating if we should try to wait for input files to appear
+        """
+        # internal variable, indicating if we should try to wait for input files to appear
         self._wait_for_file = False
+        #The property defines the run number, to validate. If defined, switches reduction wrapper from
+        #reduction to validation mode
+        self._run_number_to_validate=None
       # internal variable, used in system tests to validate workflow,
       # with waiting for files.  It is the holder to the function
       # used during debugging "wait for files" workflow
@@ -38,12 +58,15 @@ class ReductionWrapper(object):
       # web interface
         if web_var:
             self._run_from_web = True
-            self._wvs = web_var
         else:
             self._run_from_web = False
-            self._wvs = ReductionWrapper.var_holder()
+        self._wvs = ReductionWrapper.var_holder(web_var)
       # Initialize reduced for given instrument
         self.reducer = DirectEnergyConversion(instrumentName)
+        web_vars = self._wvs.get_all_vars()
+        if web_vars :
+            self.reducer.prop_man.set_input_parameters(**web_vars)
+
 
 
 
@@ -100,24 +123,66 @@ class ReductionWrapper(object):
         f.write("\n}\n")
         f.close()
 
+    @property
+    def validate_run_number(self):
+        """The property defines the run number to validate. If defined, switches reduction wrapper from
+           reduction to validation mode, where reduction tries to load result, previously calculated, 
+           for this run and then compare this result with the result, defined earlier"""
+        return self._run_number_to_validate
+    @validate_run_number.setter
+    def validate_run_number(self,val):
+        if val is None:
+            self._run_number_to_validate = None
+        else:
+            self._run_number_to_validate = int(val)
+
     def validate_settings(self):
         """ method validates initial parameters, provided for reduction """
-
         self.def_advanced_properties()
         self.def_main_properties()
         if self._run_from_web:
             web_vars = dict(self._wvs.standard_vars.items() + self._wvs.advanced_vars.items())
             self.reducer.prop_man.set_input_parameters(**web_vars)
         else:
-            pass # we should set already set up variables using
-
+            pass # we should already set up these variables using
+            # def_main_properties & def_advanced_properties
         # validate properties and report result
         return self.reducer.prop_man.validate_properties(False)
 #
+    def validation_file_name(self):
+        """ the name of the file, used as reference to
+            validate the run, specified as the class property"""
+
+        instr = self.reducer.prop_man.instr_name
+        run_n = self.validate_run_number
+        ei    = PropertyManager.incident_energy.get_current()
+        file_name = '{0}{1}_{2:<3.2f}meV_VALIDATION_file.nxs'.format(instr,run_n,ei)
+        run_dir = self.validation_file_place()
+        full_name = os.path.join(run_dir,file_name)
+        return full_name;
+
+    def validation_file_place(self):
+        """Redefine this to the place, where validation file, used in conjunction with
+           'validate_run' property, located. Here it defines the place to this script folder.
+           By default it looks for/places it in a default save directory"""
+        return config['defaultsave.directory']
+
 #
-    def validate_result(self,build_validation=False,Error=1.e-3,ToleranceRelErr=True):
-        """ Overload this using build_or_validate_result to have possibility to run or validate result """
-        return True
+    def validate_result(self,Error=1.e-6,ToleranceRelErr=True):
+      """ Change this method to verify different results     """
+      # here we have: 
+      #  22413                  run number with known reduction result
+      # MER22413Ei81meV_Abs.nxs workspace for run above reduced earlier and we now 
+      # validate against
+
+      # this row defines location of the validation file in this script folder
+      validation_file = self.validation_file_name()
+
+      rez,message = ReductionWrapper.build_or_validate_result(self,22413,
+                                     validation_file,build_validation,
+                                     Error,ToleranceRelErr)
+      return rez,message
+   #
 
     def set_custom_output_filename(self):
         """ define custom name of output files if standard one is not satisfactory
@@ -420,7 +485,7 @@ def iliad(reduce):
             config['defaultsave.directory'] = str(output_directory)
 
         if host._run_from_web:
-            web_vars = dict(host._wvs.standard_vars.items() + host._wvs.advanced_vars.items())
+            web_vars = host._wvs.get_all_vars()
             host.reducer.prop_man.set_input_parameters(**web_vars)
         else:
             pass # we should set already set up variables using
