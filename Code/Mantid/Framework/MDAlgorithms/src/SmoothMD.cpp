@@ -98,9 +98,11 @@ const std::string SmoothMD::summary() const {
 IMDHistoWorkspace_sptr SmoothMD::hatSmooth(IMDHistoWorkspace_const_sptr toSmooth,
                                  const WidthVector &widthVector) {
 
-  Progress progress(this, 0, 1, size_t( toSmooth->getNPoints() ) );
+  uint64_t nPoints = toSmooth->getNPoints();
+  Progress progress(this, 0, 1, size_t( nPoints * 1.1 ) );
   // Create the output workspace.
   IMDHistoWorkspace_sptr outWS = toSmooth->clone();
+  progress.reportIncrement(size_t(nPoints * 0.1)); // Report ~10% progress
 
   const int nThreads = Mantid::API::FrameworkManager::Instance()
                            .getNumOMPThreads(); // NThreads to Request
@@ -138,10 +140,8 @@ IMDHistoWorkspace_sptr SmoothMD::hatSmooth(IMDHistoWorkspace_const_sptr toSmooth
       outWS->setErrorSquaredAt(iterator->getLinearIndex(),
                                sumSqError / (nNeighbours + 1));
 
-      if(counter % 1000 == 0) {
-          progress.report();
-      }
-      ++counter;
+
+      progress.report();
 
 
     } while (iterator->next());
