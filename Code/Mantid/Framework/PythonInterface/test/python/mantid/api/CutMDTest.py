@@ -21,12 +21,6 @@ class CutMDTest(unittest.TestCase):
         
     def tearDown(self):
         DeleteWorkspace(self.__in_md )
-
-    def test_wrong_projection_workspace_format_wrong_column_numbers(self):
-        projection = CreateEmptyTableWorkspace()
-        projection.addColumn("str", "name")
-        # missing other columns
-        self.assertRaises(RuntimeError, CutMD, InputWorkspace=self.__in_md, Projection=projection, OutputWorkspace="out_ws", P1Bin=[0.1], P2Bin=[0.1], P3Bin=[0.1], CheckAxes=False)
         
     def test_wrong_table_workspace_format_wrong_row_numbers(self):
         projection = CreateEmptyTableWorkspace()
