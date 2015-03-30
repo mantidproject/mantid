@@ -2519,8 +2519,8 @@ void MantidUI::importNumSeriesLog(const QString &wsName, const QString &logName,
   {
     //Seconds offset
     t->setColName(0, "Time (sec)");
-    t->setColumnType(0, Table::Numeric); //six digits after 0
-    t->setNumericPrecision(6); //six digits after 0
+    t->setColumnType(0, Table::Numeric);
+    t->setNumericPrecision(16);   //it's the number of all digits
   }
 
   //Make the column header with the units, if any
