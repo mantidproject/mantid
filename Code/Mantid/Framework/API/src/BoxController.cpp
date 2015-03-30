@@ -1,10 +1,13 @@
+#include <sstream>
+
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/VectorHelper.h"
 #include "MantidAPI/BoxController.h"
+
 #include <boost/algorithm/string.hpp>
 #include <boost/format.hpp>
-#include <Poco/File.h>
+
 #include <Poco/DOM/Attr.h>
 #include <Poco/DOM/AutoPtr.h>
 #include <Poco/DOM/Document.h>
@@ -12,8 +15,6 @@
 #include <Poco/DOM/DOMWriter.h>
 #include <Poco/DOM/Element.h>
 #include <Poco/DOM/Text.h>
-
-#include <sstream>
 
 using namespace Mantid::Kernel;
 using Mantid::Kernel::Strings::convert;
