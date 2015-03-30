@@ -22,16 +22,6 @@ class CutMDTest(unittest.TestCase):
     def tearDown(self):
         DeleteWorkspace(self.__in_md )
         
-    def test_wrong_table_workspace_format_wrong_row_numbers(self):
-        projection = CreateEmptyTableWorkspace()
-        # Correct number of columns, and names
-        projection.addColumn("str", "name")
-        projection.addColumn("str", "value")
-        projection.addColumn("double", "offset")
-        projection.addColumn("str", "type")
-        # Incorrect number of rows i.e. zero in this case as none added.
-        self.assertRaises(RuntimeError, CutMD, InputWorkspace=self.__in_md, Projection=projection, OutputWorkspace="out_ws", P1Bin=[0.1], P2Bin=[0.1], P3Bin=[0.1], CheckAxes=False)
-        
     def test_orthogonal_slice_with_scaling(self):
         # We create a fake workspace and check to see that the extents get scaled with the new coordinate system when sliced
         to_cut = CreateMDWorkspace(Dimensions=3, Extents=[-1,1,-1,1,-1,1], Names='H,K,L', Units='U,U,U')
