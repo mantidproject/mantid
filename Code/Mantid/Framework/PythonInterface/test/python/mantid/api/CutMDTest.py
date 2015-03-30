@@ -22,13 +22,6 @@ class CutMDTest(unittest.TestCase):
     def tearDown(self):
         DeleteWorkspace(self.__in_md )
 
-    def test_recalculate_extents_with_3_bin_arguments(self):
-        out_md = CutMD(self.__in_md, P1Bin=[0, 0.3, 0.8], P2Bin=[0.1], P3Bin=[0.1], CheckAxes=False, NoPix=True)
-        dim = out_md.getDimension(0)
-        self.assertAlmostEqual(0, dim.getMinimum(), 6, "Wrong minimum")
-        self.assertEqual(2, dim.getNBins(), "Wrong calculated number of bins")
-        self.assertAlmostEqual(0.6, dim.getMaximum(), 6, "Wrong calculated maximum")
-        
     def test_truncate_extents(self):
         out_md = CutMD(self.__in_md, P1Bin=[0, 1.1, 1], P2Bin=[21], P3Bin=[0.1], CheckAxes=False, NoPix=True)
   
