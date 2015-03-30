@@ -3,9 +3,14 @@
 
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
+#include <boost/shared_ptr.hpp>
 
 namespace Mantid
 {
+ namespace API
+ {
+ class IMDHistoWorkspace;
+ }
 namespace MDAlgorithms
 {
 
@@ -43,7 +48,11 @@ namespace MDAlgorithms
     virtual const std::string summary() const;
     std::map<std::string, std::string> validateInputs();
 
+    boost::shared_ptr<Mantid::API::IMDHistoWorkspace> hatSmooth(boost::shared_ptr<const Mantid::API::IMDHistoWorkspace> toSmooth,
+                                     const std::vector<int> &widthVector);
+
   private:
+
     void init();
     void exec();
 
