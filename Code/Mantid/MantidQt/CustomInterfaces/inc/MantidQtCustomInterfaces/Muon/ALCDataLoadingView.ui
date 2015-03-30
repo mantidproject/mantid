@@ -394,6 +394,9 @@
                                   <property name="maximum">
                                     <double>32</double>
                                   </property>
+                                  <property name="decimals">
+                                    <number>3</number>
+                                  </property>
                                 </widget>
                               </item>
                               <item>
@@ -410,6 +413,9 @@
                                   </property>
                                   <property name="maximum">
                                     <double>32</double>
+                                  </property>
+                                  <property name="decimals">
+                                    <number>3</number>
                                   </property>
                                 </widget>
                               </item>
