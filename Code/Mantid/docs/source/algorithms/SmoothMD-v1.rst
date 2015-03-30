@@ -15,14 +15,19 @@ Provides smoothing of :ref:`MDHistoWorkspaces <MDHistoWorkspace>`__ in n-dimensi
 
 Usage
 -----
-..  Try not to use files in your examples,
-    but if you cannot avoid it then the (small) files must be added to
-    autotestdata\UsageData and the following tag unindented
-    .. include:: ../usagedata-note.txt
 
 **Example - SmoothMD**
 
 .. testcode:: SmoothMDExample
+
+
+   ws = CreateMDWorkspace(Dimensions=2, Extents=[-10,10,-10,10], Names='A,B', Units='U,U')
+   FakeMDEventData(InputWorkspace=ws, PeakParams='100000,-5,0,1')
+   FakeMDEventData(InputWorkspace=ws, PeakParams='100000,5,0,1')
+   histogram = BinMD(InputWorkspace='a', AlignedDim0='A,-10,10,100', AlignedDim1='B,-10,10,100', OutputExtents='-10,10,-10,10,-10,10', OutputBins='10,10,10')
+   #plotSlice(histogram)
+   smoothed = SmoothMD(InputWorkspace=histogram, WidthVector=5, Function='Hat')
+   #plotSlice(smoothed)
 
    # Create a host workspace
    ws = CreateWorkspace(DataX=range(0,3), DataY=(0,2))
@@ -31,14 +36,14 @@ Usage
 
    wsOut = SmoothMD()
 
-   # Print the result
-   print "The output workspace has %i spectra" % wsOut.getNumberHistograms()
+   # Print the result. Displaying in the SliceViewer would be best
+   print "The output workspace has %i points" % smoothed.getNPoints()
 
 Output:
 
 .. testoutput:: SmoothMDExample
 
-  The output workspace has ?? spectra
+  The output workspace has ?? points
 
 .. categories::
 
