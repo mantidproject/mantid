@@ -420,6 +420,71 @@ public:
 
     AnalysisDataService::Instance().remove(wsName);
   }
+
+  void test_orthogonal_slice_4d() {
+    const std::string wsName = "__CutMDTest_orthog_slice_4d";
+    const std::string wsOutName = "__CutMDTest_orthog_slice_4d_out";
+
+    FrameworkManager::Instance().exec("CreateMDWorkspace", 10,
+        "OutputWorkspace", wsName.c_str(),
+        "Dimensions", "4",
+        "Extents", "-1,1,-1,1,-1,1,-10,10",
+        "Names", "H,K,L,E",
+        "Units", "U,U,U,V");
+
+    FrameworkManager::Instance().exec("SetUB", 14,
+        "Workspace", wsName.c_str(),
+        "a", "1", "b", "1", "c", "1",
+        "alpha", "90", "beta", "90", "gamma", "90");
+
+    FrameworkManager::Instance().exec("SetSpecialCoordinates", 4,
+        "InputWorkspace", wsName.c_str(),
+        "SpecialCoordinates", "HKL");
+
+    auto algCutMD = FrameworkManager::Instance().createAlgorithm("CutMD");
+    algCutMD->initialize();
+    algCutMD->setRethrows(true);
+    algCutMD->setProperty("InputWorkspace", wsName);
+    algCutMD->setProperty("OutputWorkspace", wsOutName);
+    algCutMD->setProperty("P1Bin", "-0.5,0.5");
+    algCutMD->setProperty("P2Bin", "-0.1,0.1");
+    algCutMD->setProperty("P3Bin", "-0.3,0.3");
+    algCutMD->setProperty("P4Bin", "1");
+    algCutMD->setProperty("NoPix", true);
+    algCutMD->execute();
+    TS_ASSERT(algCutMD->isExecuted());
+
+    IMDHistoWorkspace_sptr outWS =
+      AnalysisDataService::Instance().retrieveWS<IMDHistoWorkspace>(wsOutName);
+    TS_ASSERT(outWS.get());
+
+    TS_ASSERT_DELTA(outWS->getDimension(0)->getMinimum(), -0.5, 1E-6);
+    TS_ASSERT_DELTA(outWS->getDimension(0)->getMaximum(), 0.5, 1E-6);
+    TS_ASSERT_DELTA(outWS->getDimension(1)->getMinimum(), -0.1, 1E-6);
+    TS_ASSERT_DELTA(outWS->getDimension(1)->getMaximum(), 0.1, 1E-6);
+    TS_ASSERT_DELTA(outWS->getDimension(2)->getMinimum(), -0.3, 1E-6);
+    TS_ASSERT_DELTA(outWS->getDimension(2)->getMaximum(), 0.3, 1E-6);
+    TS_ASSERT_DELTA(outWS->getDimension(3)->getMinimum(), -10, 1E-6);
+    TS_ASSERT_DELTA(outWS->getDimension(3)->getMaximum(), 10, 1E-6);
+    TS_ASSERT_EQUALS(20, outWS->getDimension(3)->getNBins());
+    TS_ASSERT_EQUALS("['zeta', 0, 0]", outWS->getDimension(0)->getName());
+    TS_ASSERT_EQUALS("[0, 'eta', 0]", outWS->getDimension(1)->getName());
+    TS_ASSERT_EQUALS("[0, 0, 'xi']", outWS->getDimension(2)->getName());
+    TS_ASSERT_EQUALS("E", outWS->getDimension(3)->getName());
+
+    // Process again with a different binning
+    algCutMD->setProperty("P4Bin", "-8,1,8");
+    algCutMD->setProperty("InputWorkspace", wsName);
+    algCutMD->setProperty("OutputWorkspace", wsOutName);
+    algCutMD->execute();
+    TS_ASSERT(algCutMD->isExecuted());
+    outWS =
+      AnalysisDataService::Instance().retrieveWS<IMDHistoWorkspace>(wsOutName);
+    TS_ASSERT_EQUALS(16, outWS->getDimension(3)->getNBins());
+
+    AnalysisDataService::Instance().remove(wsName);
+    AnalysisDataService::Instance().remove(wsOutName);
+  }
 };
 
 #endif /* MANTID_MDALGORITHMS_CUTMDTEST_H_ */
