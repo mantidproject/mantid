@@ -146,6 +146,7 @@ class LiquidsReflectometryReduction(PythonAlgorithm):
         normalized_data = data_cropped / norm_summed
         # Avoid leaving trash behind
         AnalysisDataService.remove(str(data_cropped))
+        AnalysisDataService.remove(str(norm_cropped))
         AnalysisDataService.remove(str(norm_summed))
 
         normalized_data = ConvertToPointData(InputWorkspace=normalized_data,
@@ -233,6 +234,11 @@ class LiquidsReflectometryReduction(PythonAlgorithm):
 
         #TODO: remove this, which we use during development to make sure we don't leave trash
         logger.information(str(AnalysisDataService.getObjectNames()))
+
+        # Avoid leaving trash behind
+        for ws in ['ws_event_data', 'normalized_data', 'q_workspace']:
+            if AnalysisDataService.doesExist(ws):
+                AnalysisDataService.remove(ws)
 
         self.setProperty('OutputWorkspace', mtd[name_output_ws])
 
@@ -478,7 +484,6 @@ class LiquidsReflectometryReduction(PythonAlgorithm):
         def _value_check(key, data, reference):
             """
                 Check an entry against a reference value
-                #TODO: get rid of sfCalculator reference
             """
             if key in data:
                 return abs(abs(float(data[key])) - abs(float(reference))) <= self.TOLERANCE
@@ -496,12 +501,26 @@ class LiquidsReflectometryReduction(PythonAlgorithm):
             # Parse the line of data and produce a dict
             toks = line.split()
             data_dict = reduce(_reduce, toks, {})
+            
+            # Get ordered list of keys
+            keys = []
+            for token in toks:
+                key_value = token.split('=')
+                if len(key_value)==2:
+                    keys.append(key_value[0].strip())
 
+            # Sanity check
+            if keys[0] != 'IncidentMedium' and keys[1] != 'LambdaRequested' \
+                and keys[2] != 'S1H':
+                logger.error("The scaling factor file isn't standard: bad keywords")
+            # The S2H key has been changing in the earlier version of REFL reduction.
+            # Get the key from the data to make sure we are backward compatible.
+            s2h_key = keys[3]
             if 'IncidentMedium' in data_dict \
                 and data_dict['IncidentMedium'] == incident_medium.strip() \
                 and _value_check('LambdaRequested', data_dict, lr_value) \
                 and _value_check('S1H', data_dict, s1h) \
-                and _value_check('S2H', data_dict, s2h):
+                and _value_check(s2h_key, data_dict, s2h):
 
                 if not match_slit_width or (_value_check('S1W', data_dict, s1w) \
                         and _value_check('S2W', data_dict, s2w)):
