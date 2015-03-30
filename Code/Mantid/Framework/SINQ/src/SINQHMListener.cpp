@@ -4,19 +4,20 @@
  *  Created on: Nov 14, 2012
  *      Author: mark.koennecke@psi.ch
  */
-#include "MantidSINQ/SINQHMListener.h"
+#include <iostream>
+#include <sstream>
+
 #include "MantidAPI/LiveListenerFactory.h"
 #include "MantidMDEvents/MDHistoWorkspace.h"
+#include "MantidSINQ/SINQHMListener.h"
 
-#include <Poco/Net/HTTPRequest.h>
-#include <Poco/Net/HTTPBasicCredentials.h>
-#include <Poco/StreamCopier.h>
+#include <Poco/AutoPtr.h>
 #include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/Document.h>
 #include <Poco/DOM/NodeList.h>
-#include <Poco/AutoPtr.h>
-#include <iostream>
-#include <sstream>
+#include <Poco/Net/HTTPRequest.h>
+#include <Poco/Net/HTTPBasicCredentials.h>
+#include <Poco/StreamCopier.h>
 
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
