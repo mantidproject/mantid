@@ -6,6 +6,8 @@
 #include "MantidQtAPI/InterfaceManager.h"
 #include "MantidQtMantidWidgets/RangeSelector.h"
 
+#include <boost/algorithm/string/find.hpp>
+
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
@@ -287,7 +289,11 @@ namespace CustomInterfaces
   std::string IndirectTab::getEMode(Mantid::API::MatrixWorkspace_sptr ws)
   {
     Mantid::Kernel::Unit_sptr xUnit = ws->getAxis(0)->unit();
-    if(xUnit->caption() == "dSpacing")
+    std::string xUnitName = xUnit->caption();
+
+    g_log.debug() << "X unit name is: " << xUnitName << std::endl;
+
+    if(boost::algorithm::find_first(xUnitName, "d-Spacing"))
       return "Elastic";
 
     return "Indirect";

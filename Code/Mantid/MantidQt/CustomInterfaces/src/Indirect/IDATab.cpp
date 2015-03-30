@@ -94,8 +94,12 @@ namespace IDA
     convertAlg->setProperty("InputWorkspace", ws->name());
     convertAlg->setProperty("OutputWorkspace", outputName);
     convertAlg->setProperty("Target", "Wavelength");
-    convertAlg->setProperty("EMode", getEMode(ws));
-    convertAlg->setProperty("EFixed", getEFixed(ws));
+
+    std::string eMode = getEMode(ws);
+    convertAlg->setProperty("EMode", eMode);
+
+    if(eMode == "Indirect")
+      convertAlg->setProperty("EFixed", getEFixed(ws));
 
     m_batchAlgoRunner->addAlgorithm(convertAlg);
 

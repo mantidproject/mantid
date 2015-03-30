@@ -105,8 +105,10 @@ namespace IDA
       addShapeSpecificCanOptions(absCorAlgo, sampleShape);
     }
 
-    absCorAlgo->setProperty("EMode", getEMode(sampleWs));
-    absCorAlgo->setProperty("EFixed", getEFixed(sampleWs));
+    std::string eMode = getEMode(sampleWs);
+    absCorAlgo->setProperty("EMode", eMode);
+    if(eMode == "Indirect")
+      absCorAlgo->setProperty("EFixed", getEFixed(sampleWs));
 
     // Generate workspace names
     int nameCutIndex = sampleWsName.lastIndexOf("_");
