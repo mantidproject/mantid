@@ -22,12 +22,6 @@ class CutMDTest(unittest.TestCase):
     def tearDown(self):
         DeleteWorkspace(self.__in_md )
 
-    def test_exec_throws_if_giving_4th_binning_parameter_when_workspace_is_3D(self):
-        test_md = CreateMDWorkspace(Dimensions=3, Extents=[-10,10,-10,10,-10,10], Names="H,K,L", Units="U,U,U")
-        # Explicitly set the coordinate system to lab Q.
-        SetSpecialCoordinates(InputWorkspace=test_md, SpecialCoordinates='HKL')
-        self.assertRaises(RuntimeError, CutMD, InputWorkspace=test_md, OutputWorkspace="out_ws", P1Bin=[0.1], P2Bin=[0.1], P3Bin=[0.1], P4Bin=[0.1])
-        
     def test_slice_to_original(self):
         out_md = CutMD(self.__in_md, P1Bin=[0.1], P2Bin=[0.1], P3Bin=[0.1], CheckAxes=False)
         self.assertTrue(isinstance(out_md, IMDEventWorkspace), "Should default to producing an IMDEventWorkspace.")

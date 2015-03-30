@@ -63,6 +63,34 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
   }
+
+  void test_exec_throws_if_giving_4th_binning_param_when_workspace_is_3d() {
+    const std::string wsName = "__CutMDTest_4thbinon3dthrows";
+
+    FrameworkManager::Instance().exec("CreateMDWorkspace", 10,
+        "OutputWorkspace", wsName.c_str(),
+        "Dimensions", "3",
+        "Extents", "-10,10,-10,10,-10,10",
+        "Names", "H,K,L",
+        "Units", "U,U,U");
+
+    FrameworkManager::Instance().exec("SetSpecialCoordinates", 4,
+        "InputWorkspace", wsName.c_str(),
+        "SpecialCoordinates", "HKL");
+
+    auto algCutMD = FrameworkManager::Instance().createAlgorithm("CutMD");
+    algCutMD->initialize();
+    algCutMD->setRethrows(true);
+    algCutMD->setProperty("InputWorkspace", wsName);
+    algCutMD->setProperty("OutputWorkspace", wsName);
+    algCutMD->setProperty("P1Bin", "0.1");
+    algCutMD->setProperty("P2Bin", "0.1");
+    algCutMD->setProperty("P3Bin", "0.1");
+    algCutMD->setProperty("P4Bin", "0.1");
+    TS_ASSERT_THROWS(algCutMD->execute(), std::runtime_error)
+
+    AnalysisDataService::Instance().remove(wsName);
+  }
 };
 
 #endif /* MANTID_MDALGORITHMS_CUTMDTEST_H_ */
