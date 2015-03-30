@@ -42,7 +42,7 @@ public:
     "</ParameterList></CoordTransform>";
 
    Poco::XML::DOMParser pParser;
-   Poco::XML::Document* pDoc = pParser.parseString(xmlToParse);
+   Poco::AutoPtr<Poco::XML::Document> pDoc = pParser.parseString(xmlToParse);
    Poco::XML::Element* pRootElem = pDoc->documentElement();
 
    CoordTransformAffineParser parser;
@@ -73,7 +73,7 @@ public:
    std::string xmlToParse = std::string("<OTHER></OTHER>");
 
    Poco::XML::DOMParser pParser;
-   Poco::XML::Document* pDoc = pParser.parseString(xmlToParse);
+   Poco::AutoPtr<Poco::XML::Document> pDoc = pParser.parseString(xmlToParse);
    Poco::XML::Element* pRootElem = pDoc->documentElement();
 
    CoordTransformAffineParser parser;
@@ -85,7 +85,7 @@ public:
    std::string xmlToParse = "<CoordTransform><Type>OTHER</Type></CoordTransform>"; //type is not a coordinate transform, so should try to use it's successor
 
    Poco::XML::DOMParser pParser;
-   Poco::XML::Document* pDoc = pParser.parseString(xmlToParse);
+   Poco::AutoPtr<Poco::XML::Document> pDoc = pParser.parseString(xmlToParse);
    Poco::XML::Element* pRootElem = pDoc->documentElement();
 
    CoordTransformAffineParser parser;
@@ -97,7 +97,7 @@ public:
    std::string xmlToParse = "<CoordTransform><Type>OTHER</Type></CoordTransform>"; //type is not a coordinate transform, so should try to use it's successor
 
    Poco::XML::DOMParser pParser;
-   Poco::XML::Document* pDoc = pParser.parseString(xmlToParse);
+   Poco::AutoPtr<Poco::XML::Document> pDoc = pParser.parseString(xmlToParse);
    Poco::XML::Element* pRootElem = pDoc->documentElement();
 
    CoordTransformAffineParser parser;
