@@ -52,8 +52,11 @@ LoadMask::LoadMask(): m_maskWS(), m_instrumentPropValue(""), m_pDoc(NULL),
 /** Destructor
  */
 LoadMask::~LoadMask() {
-  m_pDoc->release();
-  m_pRootElem->release();
+  // note Poco::XML::Document and Poco::XML::Element declare their constructors as protected
+  if (m_pDoc)
+    m_pDoc->release();
+  if (m_pRootElem)
+    m_pRootElem->release();
 }
 
 /// Initialise the properties
