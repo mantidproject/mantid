@@ -103,6 +103,16 @@ namespace CustomInterfaces
     /// @param periods :: New list of periods
     virtual void setAvailablePeriods(const std::vector<std::string>& periods) = 0;
 
+    /// Update the time limits
+    /// @param tMin :: Minimum X value available
+    /// @param tMax :: Maximum X value available
+    virtual void setTimeLimits(double tMin, double tMax) = 0;
+
+    /// Update the time limits
+    /// @param tMin :: Minimum X value available
+    /// @param tMax :: Maximum X value available
+    virtual void setTimeRange(double tMin, double tMax) = 0;
+
     /// Set waiting cursor for long operation
     virtual void setWaitingCursor() = 0;
 
