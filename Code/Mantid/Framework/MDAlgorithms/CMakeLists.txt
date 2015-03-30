@@ -197,6 +197,7 @@ set ( TEST_FILES
 	ConvertToQ3DdETest.h
 	CreateMDHistoWorkspaceTest.h
 	CreateMDWorkspaceTest.h
+	CutMDTest.h
 	DivideMDTest.h
 	EqualToMDTest.h
 	EvaluateMDFunctionTest.h
