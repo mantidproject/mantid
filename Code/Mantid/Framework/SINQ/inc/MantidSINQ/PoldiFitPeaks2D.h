@@ -59,6 +59,7 @@ public:
 
   virtual const std::string summary() const;
 
+protected:
   Poldi2DFunction_sptr getFunctionIndividualPeaks(
       std::string profileFunctionName,
       const PoldiPeakCollection_sptr &peakCollection) const;
@@ -71,7 +72,6 @@ public:
   getPeakFromPeakFunction(API::IPeakFunction_sptr profileFunction,
                           const Kernel::V3D &hkl) const;
 
-protected:
   PoldiPeakCollection_sptr
   getPeakCollection(const DataObjects::TableWorkspace_sptr &peakTable) const;
   PoldiPeakCollection_sptr getIntegratedPeakCollection(

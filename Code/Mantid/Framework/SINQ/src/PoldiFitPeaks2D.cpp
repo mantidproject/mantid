@@ -111,8 +111,13 @@ void PoldiFitPeaks2D::init() {
   declareProperty(new WorkspaceProperty<TableWorkspace>(
                       "RefinedPoldiPeakWorkspace", "", Direction::Output),
                   "Table workspace with fitted peaks.");
+
+  declareProperty(new WorkspaceProperty<TableWorkspace>(
+      "RefinedCellParameters", "", Direction::Output, PropertyMode::Optional));
 }
 
+
+/// Creates a PoldiPeak from the given profile function/hkl pair.
 PoldiPeak_sptr
 PoldiFitPeaks2D::getPeakFromPeakFunction(IPeakFunction_sptr profileFunction,
                                          const V3D &hkl) const {
@@ -133,15 +138,12 @@ PoldiFitPeaks2D::getPeakFromPeakFunction(IPeakFunction_sptr profileFunction,
     }
   }
 
-  // size_t dIndex = peakFunction->parameterIndex("Centre");
   UncertainValue d(profileFunction->getParameter(dIndex),
                    profileFunction->getError(dIndex));
 
-  // size_t iIndex = peakFunction->parameterIndex("Area");
   UncertainValue intensity(profileFunction->getParameter(iIndex),
                            profileFunction->getError(iIndex));
 
-  // size_t fIndex = peakFunction->parameterIndex("Sigma");
   double fwhmValue = profileFunction->fwhm();
   UncertainValue fwhm(fwhmValue, fwhmValue /
                                      profileFunction->getParameter(fIndex) *
@@ -214,13 +216,23 @@ PoldiPeakCollection_sptr PoldiFitPeaks2D::getPeakCollectionFromFunction(
           getPeakFromPeakFunction(profileFunction, V3D(0, 0, 0));
 
       normalizedPeaks->addPeak(peak);
-      continue;
     }
   }
 
   return normalizedPeaks;
 }
 
+/**
+ * Returns a Poldi2DFunction that encapsulates individual peaks
+ *
+ * This function takes all peaks from the supplied peak collection and generates
+ * an IPeakFunction of the type given in the name parameter, wraps them
+ * in a Poldi2DFunction and returns it.
+ *
+ * @param profileFunctionName :: Profile function name.
+ * @param peakCollection :: Peak collection with peaks to be used in the fit.
+ * @return :: A Poldi2DFunction with peak profile functions.
+ */
 Poldi2DFunction_sptr PoldiFitPeaks2D::getFunctionIndividualPeaks(
     std::string profileFunctionName,
     const PoldiPeakCollection_sptr &peakCollection) const {
@@ -257,6 +269,21 @@ Poldi2DFunction_sptr PoldiFitPeaks2D::getFunctionIndividualPeaks(
   return mdFunction;
 }
 
+/**
+ * Returns a Poldi2DFunction that encapsulates a PawleyFunction
+ *
+ * This function creates a PawleyFunction using the supplied profile function
+ * name and the crystal system as well as initial cell from the input properties
+ * of the algorithm and wraps it in a Poldi2DFunction.
+ *
+ * Because the peak intensities are integral at this step but PawleyFunction
+ * expects peak heights, a profile function is created and setIntensity/height-
+ * methods are used to convert.
+ *
+ * @param profileFunctionName :: Profile function name for PawleyFunction.
+ * @param peakCollection :: Peak collection with peaks to be used in the fit.
+ * @return :: A Poldi2DFunction with a PawleyFunction.
+ */
 Poldi2DFunction_sptr PoldiFitPeaks2D::getFunctionPawley(
     std::string profileFunctionName,
     const PoldiPeakCollection_sptr &peakCollection) const {
@@ -306,9 +333,8 @@ Poldi2DFunction_sptr PoldiFitPeaks2D::getFunctionPawley(
 /**
  * Constructs a proper function from a peak collection
  *
- * This method constructs a Poldi2DFunction and assigns one
- *PoldiSpectrumDomainFunction to it for
- * each peak contained in the peak collection.
+ * This method constructs a Poldi2DFunction depending on whether or not a
+ * Pawley fit is performed each peak contained in the peak collection.
  *
  * @param peakCollection :: PoldiPeakCollection containing peaks with integral
  *intensities
