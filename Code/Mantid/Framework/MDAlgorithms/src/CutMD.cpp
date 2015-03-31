@@ -282,7 +282,6 @@ void CutMD::exec() {
   const IMDEventWorkspace_sptr inWS = getProperty("InputWorkspace");
   const size_t numDims = inWS->getNumDims();
   const ITableWorkspace_sptr projection = getProperty("Projection");
-  const bool haveProjection = !(*getProperty("Projection")).isDefault();
   std::vector<std::vector<double>> pbins(5);
   pbins[0] = getProperty("P1Bin");
   pbins[1] = getProperty("P2Bin");
@@ -292,7 +291,7 @@ void CutMD::exec() {
   const bool noPix = getProperty("NoPix");
 
   // Check Projection format
-  if (haveProjection) {
+  if (projection) {
     auto colNames = projection->getColumnNames();
     if (colNames.size() != 4 ||
         std::find(colNames.begin(), colNames.end(), "name") == colNames.end() ||
