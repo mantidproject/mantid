@@ -14,15 +14,6 @@ using Mantid::Geometry::IMDDimension_const_sptr;
 
 namespace Mantid {
 namespace MDEvents {
-namespace {
-size_t integerPower(const size_t base, const size_t pow) {
-  size_t result = 1;
-  for (size_t i = 0; i < pow; ++i) {
-    result *= base;
-  }
-  return result;
-}
-}
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
