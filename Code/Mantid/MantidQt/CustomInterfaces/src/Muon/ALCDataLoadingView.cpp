@@ -163,6 +163,23 @@ namespace CustomInterfaces
     }
   }
 
+  void ALCDataLoadingView::setTimeLimits(double tMin, double tMax)
+  {
+    // Set initial values
+    m_ui.minTime->setValue(tMin);
+    m_ui.maxTime->setValue(tMax);
+  }
+
+  void ALCDataLoadingView::setTimeRange(double tMin, double tMax)
+  {
+    // Set range for minTime
+    m_ui.minTime->setMinimum(tMin);
+    m_ui.minTime->setMaximum(tMax);
+    // Set range for maxTime
+    m_ui.maxTime->setMinimum(tMin);
+    m_ui.maxTime->setMaximum(tMax);
+  }
+
   void ALCDataLoadingView::help()
   {
     MantidQt::API::HelpWindow::showCustomInterface(NULL, QString("Muon_ALC"));
