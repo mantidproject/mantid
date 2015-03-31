@@ -181,7 +181,7 @@ private:
   ColorMapEditor *colorMapEditor;
   QPushButton* mSelectColormap;
   QString mCurrentColorMap;
-  QWidget *curvePlotTypeBox, *layerPage, *layerGeometryPage, *piePage, *fontsPage, *printPage, *contourLinesPage;;
+  QWidget *curvePlotTypeBox, *layerPage, *layerGeometryPage, *piePage, *fontsPage, *printPage, *contourLinesPage;
   QTreeWidget* listBox;
   QCheckBox *boxAntialiasing, *boxAll, *boxScaleLayers, *boxPrintCrops;
   ColorButton *boxBorderColor, *boxBackgroundColor, *boxCanvasColor, *boxCanvasFrameColor;
@@ -236,7 +236,7 @@ private:
   QLabel *boxRangeLabel, *whiskerCntLabel, *boxCntLabel;
   QGroupBox *GroupBoxVectEnd;
   QComboBox *vectPosBox, *boxXAxis, *boxYAxis, *colorScaleBox;//, *boxContourStyle;
-  PenStyleBox	*penContourStyle,*boxContourStyle;;
+  PenStyleBox	*penContourStyle,*boxContourStyle;
   QSpinBox *levelsBox, *colorScaleWidthBox;
   DoubleSpinBox *contourWidthBox;
   QGroupBox *levelsGroupBox, *axisScaleBox, *imageGroupBox;

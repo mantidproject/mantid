@@ -865,7 +865,7 @@ void ApplicationWindow::initGlobalConstants()
     d_locale.setNumberOptions(QLocale::OmitGroupSeparator);
 
   d_decimal_digits = 13;
-  d_graphing_digits = 3;
+  d_graphing_digits = 13;
 
   d_extended_open_dialog = true;
   d_extended_export_dialog = true;

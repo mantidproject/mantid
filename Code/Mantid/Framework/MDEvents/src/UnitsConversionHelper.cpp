@@ -366,7 +366,7 @@ UnitsConversionHelper::UnitsConversionHelper()
     : m_UnitCnvrsn(CnvrtToMD::ConvertNo), m_Factor(1), m_Power(1),
       m_Emode(-1), // undefined
       m_L1(1), m_Efix(1), m_TwoTheta(0), m_L2(1), m_pTwoThetas(NULL),
-      m_pL2s(NULL), m_pEfixedArray(NULL){};
+      m_pL2s(NULL), m_pEfixedArray(NULL){}
 
 } // endNamespace MDEvents
 } // endNamespace Mantid

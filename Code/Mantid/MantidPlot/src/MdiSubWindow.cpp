@@ -98,7 +98,7 @@ void MdiSubWindow::updateCaption()
     wrapper->setWindowTitle(windowTitle());
   }
   emit captionChanged(objectName(), d_label);
-};
+}
 
 void MdiSubWindow::resizeEvent( QResizeEvent* e )
 {

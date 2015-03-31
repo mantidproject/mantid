@@ -1,5 +1,5 @@
 project( MantidParaViewMDHWNexusReader )
-
+include_directories( SYSTEM ${PARAVIEW_INCLUDE_DIRS} )
 add_paraview_plugin( MantidParaViewMDHWNexusReaderSMPlugin "1.0"
 	SERVER_MANAGER_XML MDHWNexusReader.xml
 	SERVER_MANAGER_SOURCES vtkMDHWNexusReader.cxx

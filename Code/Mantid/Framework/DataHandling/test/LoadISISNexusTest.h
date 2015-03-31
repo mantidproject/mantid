@@ -633,7 +633,39 @@ public:
     AnalysisDataService::Instance().remove("outWS");
   }
 
+  void xestExecMonExcludedInTheEnd()
+  {
+    Mantid::API::FrameworkManager::Instance();
+    LoadISISNexus2 ld;
+    ld.initialize();
+    ld.setPropertyValue("Filename","MAPS00018314.nxs");
+    ld.setPropertyValue("SpectrumMin","2");
+    ld.setPropertyValue("SpectrumMax","10");
+    ld.setPropertyValue("OutputWorkspace","outWS");
+    ld.setPropertyValue("LoadMonitors","Separate"); //
+    TS_ASSERT_THROWS_NOTHING(ld.execute());
+    TS_ASSERT(ld.isExecuted());
 
+
+    MatrixWorkspace_sptr ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("outWS");
+    TS_ASSERT_EQUALS(ws->blocksize(),2000);
+    TS_ASSERT_EQUALS(ws->getNumberHistograms(),9);
+
+    MatrixWorkspace_sptr ws_mon = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("outWS_monitors");
+    TS_ASSERT(ws_mon)
+
+    TS_ASSERT_EQUALS(ws_mon->blocksize(),2000);
+    TS_ASSERT_EQUALS(ws_mon->getNumberHistograms(),4);
+    TS_ASSERT_DELTA(ws_mon->readX(0)[0],10,1.e-8);
+
+
+    TS_ASSERT_EQUALS(ws_mon->getSpectrum(0)->getSpectrumNo(),41473);
+    TS_ASSERT_EQUALS(ws_mon->getSpectrum(3)->getSpectrumNo(),41476);
+
+
+    AnalysisDataService::Instance().remove("outWS");
+    AnalysisDataService::Instance().remove("outWS_monitors");
+  }
 
 };
 

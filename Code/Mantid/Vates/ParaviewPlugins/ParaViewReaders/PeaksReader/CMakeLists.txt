@@ -1,5 +1,5 @@
 project( MantidParaViewPeaksReader )
-
+include_directories( SYSTEM ${PARAVIEW_INCLUDE_DIRS} )
 add_paraview_plugin( MantidParaViewPeaksReaderSMPlugin "1.0"
 	SERVER_MANAGER_XML PeaksReader.xml
 	SERVER_MANAGER_SOURCES vtkPeaksReader.cxx

@@ -45,8 +45,8 @@ public:
   double value(const double qsqr) const;
 
 private:
-  DISABLE_DEFAULT_CONSTRUCT(MagneticFormFactorTable);
-  DISABLE_COPY_AND_ASSIGN(MagneticFormFactorTable);
+  DISABLE_DEFAULT_CONSTRUCT(MagneticFormFactorTable)
+  DISABLE_COPY_AND_ASSIGN(MagneticFormFactorTable)
 
   /// Setup the table with the values
   void setup(const MagneticIon &ion, const uint16_t j, const uint16_t l);

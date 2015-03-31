@@ -1,5 +1,5 @@
 PROJECT(MantidParaViewPeaksSource)
-
+include_directories( SYSTEM ${PARAVIEW_INCLUDE_DIRS} )
 ADD_PARAVIEW_PLUGIN(MantidParaViewPeaksSourceSMPlugin "1.0"
 	SERVER_MANAGER_XML PeaksSource.xml
 	SERVER_MANAGER_SOURCES vtkPeaksSource.cxx)

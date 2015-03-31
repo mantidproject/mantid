@@ -127,14 +127,17 @@ set_target_properties( VatesSimpleGuiViewWidgets PROPERTIES OUTPUT_NAME MantidVa
 # Add to the 'VatesSimpleGui' group in VS
 set_property( TARGET VatesSimpleGuiViewWidgets PROPERTY FOLDER MantidVatesSimpleGui )
 
+
+include_directories( SYSTEM ${PARAVIEW_INCLUDE_DIRS} )
+
 target_link_libraries( VatesSimpleGuiViewWidgets
-VatesSimpleGuiQtWidgets
 pqApplicationComponents
 pqComponents
 vtkPVServerManagerRendering
 vtkRenderingFreeType
 vtkRenderingFreeTypeOpenGL
 ${QT_LIBRARIES}
+VatesSimpleGuiQtWidgets
 MantidQtAPI
 VatesAPI
 ${MANTID_SUBPROJECT_LIBS}

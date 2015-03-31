@@ -1200,7 +1200,7 @@ void ScriptRepositoryImpl::setIgnorePatterns(const std::string &patterns) {
     boost::replace_all(newignore, "*", ".*");
     ignoreregex = std::string("(").append(newignore).append(")");
   }
-};
+}
 /**
  @todo describe
  */

@@ -20,7 +20,7 @@
 #include "MantidVatesAPI/FilteringUpdateProgressAction.h"
 #include "MantidVatesAPI/MDLoadingViewAdapter.h"
 
-vtkStandardNewMacro(vtkSQWEventReader);
+vtkStandardNewMacro(vtkSQWEventReader)
 
 using namespace Mantid::VATES;
 using Mantid::Geometry::IMDDimension_sptr;

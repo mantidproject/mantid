@@ -1108,10 +1108,10 @@ double Time::singleFromTOF(const double tof) const {
 
 double Time::conversionTOFMax() const {
   return std::numeric_limits<double>::quiet_NaN();
-};
+}
 double Time::conversionTOFMin() const {
   return std::numeric_limits<double>::quiet_NaN();
-};
+}
 
 Unit *Time::clone() const { return new Time(*this); }
 

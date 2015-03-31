@@ -54,6 +54,7 @@ set ( SRC_FILES
   src/Converters/CloneToNumpy.cpp
   src/Converters/NDArrayToVector.cpp
   src/Converters/NDArrayTypeIndex.cpp
+  src/Converters/NumpyFunctions.cpp
   src/Converters/PyArrayType.cpp
   src/Converters/PyObjectToMatrix.cpp
   src/Converters/PyObjectToV3D.cpp
@@ -71,6 +72,7 @@ set ( SRC_FILES
 set ( INC_FILES
   ${HEADER_DIR}/kernel/Converters/CArrayToNDArray.h
   ${HEADER_DIR}/kernel/Converters/MatrixToNDArray.h
+  ${HEADER_DIR}/kernel/Converters/NumpyFunctions.h
   ${HEADER_DIR}/kernel/Converters/NDArrayToVector.h
   ${HEADER_DIR}/kernel/Converters/NDArrayTypeIndex.h
   ${HEADER_DIR}/kernel/Converters/WrapWithNumpy.h

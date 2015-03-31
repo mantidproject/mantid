@@ -38,10 +38,10 @@ DgsPreprocessData::~DgsPreprocessData() {}
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string DgsPreprocessData::name() const {
   return "DgsPreprocessData";
-};
+}
 
 /// Algorithm's version for identification. @see Algorithm::version
-int DgsPreprocessData::version() const { return 1; };
+int DgsPreprocessData::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
 const std::string DgsPreprocessData::category() const {

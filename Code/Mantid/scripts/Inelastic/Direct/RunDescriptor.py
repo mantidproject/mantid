@@ -455,7 +455,10 @@ class RunDescriptor(PropDescriptor):
             self._run_list.set_last_ind2sum(ind)
             self._run_number = run_num
             self._run_file_path = file_path
-            self._fext = main_fext
+            if fext is None:
+                self._fext = None
+            else:
+                self._fext = main_fext
             self._ws_name = self._build_ws_name()
 
     def run_number(self):
@@ -775,13 +778,16 @@ class RunDescriptor(PropDescriptor):
             return origin
 
 #--------------------------------------------------------------------------------------------------------------------
-    def get_monitors_ws(self,monitor_ID=None):
+    def get_monitors_ws(self,monitors_ID=None,otherWS=None):
         """Get pointer to a workspace containing monitors.
 
            Explores different ways of finding monitor workspace in Mantid and returns the python pointer to the
            workspace which contains monitors.
         """
-        data_ws = self.get_workspace()
+        if otherWS:
+            data_ws  = otherWS
+        else:
+            data_ws = self.get_workspace()
         if not data_ws:
             return None
 
@@ -798,25 +804,26 @@ class RunDescriptor(PropDescriptor):
             for specID in spec_to_mon:
                 mon_ws = self.copy_spectrum2monitors(data_ws,mon_ws,specID)
 
-        if monitor_ID:
-            try:
-                ws_index = mon_ws.getIndexFromSpectrumNumber(monitor_ID)
-            except: #
-                mon_ws = None
+        if monitors_ID:
+            if isinstance(monitors_ID,list):
+                mon_list = monitors_ID
+            else:
+                mon_list = [monitors_ID]
         else:
             mon_list = self._holder.get_used_monitors_list()
-            for monID in mon_list:
+        #
+        for monID in mon_list:
+            try:
+                ws_ind = mon_ws.getIndexFromSpectrumNumber(int(monID))
+            except:
                 try:
-                    ws_ind = mon_ws.getIndexFromSpectrumNumber(int(monID))
-                except:
-                    try:
-                        monws_name = mon_ws.name()
-                    except: 
-                        monws_name = 'None'
-                    RunDescriptor._logger('*** Monitor workspace {0} does not have monitor with ID {1}. Monitor workspace set to None'.\
+                    monws_name = mon_ws.name()
+                except: 
+                    monws_name = 'None'
+                RunDescriptor._logger('*** Monitor workspace {0} does not have monitor with ID {1}. Monitor workspace set to None'.\
                                           format(monws_name,monID),'warning')
-                    mon_ws = None
-                    break
+                mon_ws = None
+                break
         return mon_ws
 #--------------------------------------------------------------------------------------------------------------------
     def is_existing_ws(self):
@@ -1023,19 +1030,31 @@ class RunDescriptor(PropDescriptor):
 
         #
         x_param = mon_ws.readX(0)
-        bins = [x_param[0],x_param[1] - x_param[0],x_param[-1]]
+        homo_binning,dx_min=RunDescriptor._is_binning_homogeneous(x_param)
+        bins = [x_param[0],dx_min,x_param[-1]]
         ExtractSingleSpectrum(InputWorkspace=data_ws,OutputWorkspace='tmp_mon',WorkspaceIndex=ws_index)
         Rebin(InputWorkspace='tmp_mon',OutputWorkspace='tmp_mon',Params=bins,PreserveEvents='0')
-        # should be vice versa but Conjoin invalidate ws pointers and hopefully
-        # nothing could happen with workspace during conjoining
-        #AddSampleLog(Workspace=monWS,LogName=done_log_name,LogText=str(ws_index),LogType='Number')
         mon_ws_name = mon_ws.getName()
-        ConjoinWorkspaces(InputWorkspace1=mon_ws,InputWorkspace2='tmp_mon')
+        if not homo_binning:
+            Rebin(InputWorkspace=mon_ws_name,OutputWorkspace=mon_ws_name,Params=bins,PreserveEvents='0')
+        ConjoinWorkspaces(InputWorkspace1=mon_ws_name,InputWorkspace2='tmp_mon')
         mon_ws = mtd[mon_ws_name]
 
         if 'tmp_mon' in mtd:
             DeleteWorkspace(WorkspaceName='tmp_mon')
         return mon_ws
+    #
+    @staticmethod
+    def _is_binning_homogeneous(x_param):
+        """Verify if binning in monitor workspace is homogeneous"""
+        dx=x_param[1:]-x_param[0:-1]
+        dx_min=min(dx)
+        dx_max=max(dx)
+        if dx_max-dx_min>1.e-9:
+            return False,dx_min
+        else:
+            return True,dx_min
+
 #--------------------------------------------------------------------------------------------------------------------
     def clear_monitors(self):
         """ method removes monitor workspace form analysis data service if it is there

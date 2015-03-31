@@ -1,5 +1,7 @@
 #include "MantidQtCustomInterfaces/Muon/ALCDataLoadingView.h"
 
+#include "MantidQtAPI/HelpWindow.h"
+
 #include <QMessageBox>
 
 #include <qwt_symbol.h>
@@ -17,6 +19,8 @@ namespace CustomInterfaces
     m_ui.setupUi(m_widget);
     connect(m_ui.load, SIGNAL(clicked()), SIGNAL(loadRequested()));
     connect(m_ui.firstRun, SIGNAL(fileFindingFinished()), SIGNAL(firstRunSelected()));
+
+    connect(m_ui.help, SIGNAL(clicked()), this, SLOT(help()));
 
     m_ui.dataPlot->setCanvasBackground(Qt::white);
     m_ui.dataPlot->setAxisFont(QwtPlot::xBottom, m_widget->font());
@@ -157,6 +161,28 @@ namespace CustomInterfaces
       m_ui.redPeriod->addItem(QString::fromStdString(*it));
       m_ui.greenPeriod->addItem(QString::fromStdString(*it));
     }
+  }
+
+  void ALCDataLoadingView::setTimeLimits(double tMin, double tMax)
+  {
+    // Set initial values
+    m_ui.minTime->setValue(tMin);
+    m_ui.maxTime->setValue(tMax);
+  }
+
+  void ALCDataLoadingView::setTimeRange(double tMin, double tMax)
+  {
+    // Set range for minTime
+    m_ui.minTime->setMinimum(tMin);
+    m_ui.minTime->setMaximum(tMax);
+    // Set range for maxTime
+    m_ui.maxTime->setMinimum(tMin);
+    m_ui.maxTime->setMaximum(tMax);
+  }
+
+  void ALCDataLoadingView::help()
+  {
+    MantidQt::API::HelpWindow::showCustomInterface(NULL, QString("Muon_ALC"));
   }
 
   void ALCDataLoadingView::setWaitingCursor()

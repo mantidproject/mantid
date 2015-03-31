@@ -28,10 +28,10 @@ WeightedMeanOfWorkspace::~WeightedMeanOfWorkspace() {}
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string WeightedMeanOfWorkspace::name() const {
   return "WeightedMeanOfWorkspace";
-};
+}
 
 /// Algorithm's version for identification. @see Algorithm::version
-int WeightedMeanOfWorkspace::version() const { return 1; };
+int WeightedMeanOfWorkspace::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
 const std::string WeightedMeanOfWorkspace::category() const {
