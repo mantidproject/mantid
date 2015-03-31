@@ -584,7 +584,7 @@ class PropertyManager(NonIDF_Properties):
 
         ok,mess= self._check_ouptut_dir()
         if not ok:
-            mess = '*** WARNING: saving results: --> {1}'.format(mess)
+            mess = '*** WARNING: saving results: --> {0}'.format(mess)
 
             if fail_on_errors:
                 self.log(mess,'warning')

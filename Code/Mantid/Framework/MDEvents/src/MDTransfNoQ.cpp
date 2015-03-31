@@ -4,7 +4,7 @@ namespace Mantid {
 namespace MDEvents {
 
 // register the class, whith conversion factory under NoQ name
-DECLARE_MD_TRANSFID(MDTransfNoQ, CopyToMD);
+DECLARE_MD_TRANSFID(MDTransfNoQ, CopyToMD)
 
 /** Method fills-in all additional properties requested by user and not defined
 *by matrix workspace itselt.
@@ -177,7 +177,7 @@ MDTransfNoQ::inputUnitID(Kernel::DeltaEMode::Type mode,
   return pXAxis->unit()->unitID();
 }
 
-MDTransfNoQ::MDTransfNoQ() : m_NMatrixDim(0), m_YAxis(NULL), m_Det(NULL){};
+MDTransfNoQ::MDTransfNoQ() : m_NMatrixDim(0), m_YAxis(NULL), m_Det(NULL){}
 
 } // End MDAlgorighms namespace
 } // End Mantid namespace

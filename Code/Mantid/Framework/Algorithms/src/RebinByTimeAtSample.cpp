@@ -28,7 +28,7 @@ RebinByTimeAtSample::~RebinByTimeAtSample() {}
 //----------------------------------------------------------------------------------------------
 
 /// Algorithm's version for identification. @see Algorithm::version
-int RebinByTimeAtSample::version() const { return 1; };
+int RebinByTimeAtSample::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
 const std::string RebinByTimeAtSample::category() const {

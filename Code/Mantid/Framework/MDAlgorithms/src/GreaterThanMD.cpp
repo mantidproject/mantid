@@ -22,10 +22,10 @@ GreaterThanMD::~GreaterThanMD() {}
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
-const std::string GreaterThanMD::name() const { return "GreaterThanMD"; };
+const std::string GreaterThanMD::name() const { return "GreaterThanMD"; }
 
 /// Algorithm's version for identification. @see Algorithm::version
-int GreaterThanMD::version() const { return 1; };
+int GreaterThanMD::version() const { return 1; }
 
 //----------------------------------------------------------------------------------------------
 /// Run the algorithm with a MDHisotWorkspace as output and operand

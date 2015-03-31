@@ -22,10 +22,10 @@ EqualToMD::~EqualToMD() {}
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
-const std::string EqualToMD::name() const { return "EqualToMD"; };
+const std::string EqualToMD::name() const { return "EqualToMD"; }
 
 /// Algorithm's version for identification. @see Algorithm::version
-int EqualToMD::version() const { return 1; };
+int EqualToMD::version() const { return 1; }
 
 //----------------------------------------------------------------------------------------------
 /// Extra properties

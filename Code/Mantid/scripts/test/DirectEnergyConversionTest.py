@@ -307,37 +307,48 @@ class DirectEnergyConversionTest(unittest.TestCase):
     def test_tof_range(self):
 
         run=CreateSampleWorkspace(Function='Multiple Peaks', NumBanks=6, BankPixelWidth=1, NumEvents=10,\
-                                  XUnit='DeltaE', XMin=-20, XMax=65, BinWidth=0.2)
+                                  XUnit='Energy', XMin=5, XMax=75, BinWidth=0.2)
         LoadInstrument(run,InstrumentName='MARI')
 
         red = DirectEnergyConversion(run.getInstrument())
 
-        red.prop_man.incident_energy = 67
-        red.prop_man.energy_bins =  [-20,0.2,65]
-        red.prop_man.multirep_tof_specta_list = [5,5]
+        red.prop_man.incident_energy = 26.2
+        red.prop_man.energy_bins =  [-20,0.1,20]
+        red.prop_man.multirep_tof_specta_list = [4,5,6]
+        MoveInstrumentComponent(Workspace='run', ComponentName='Detector', DetectorID=1102, Z=3)
+        MoveInstrumentComponent(Workspace='run', ComponentName='Detector', DetectorID=1103,Z=6)
 
-        tof_range = red.find_tof_range_for_multirep(run)
+        run_tof = ConvertUnits(run,Target='TOF',EMode='Elastic')
+
+        tof_range = red.find_tof_range_for_multirep(run_tof)
 
         self.assertEqual(len(tof_range),3)
 
-        run_tof = ConvertUnits(run,Target='TOF',EMode='Direct',EFixed=67.)
-        x = run_tof.readX(4)
+        x = run_tof.readX(3)
         dx=abs(x[1:]-x[:-1])
         xMin = min(x)
-        xMax = max(x)
         dt   = min(dx)
+        x = run_tof.readX(5)
+        xMax = max(x)
 
-        self.assertAlmostEqual(tof_range[0],xMin)
-        self.assertAlmostEqual(tof_range[1],dt)
-        self.assertAlmostEqual(tof_range[2],xMax)
+
+        self.assertTrue(tof_range[0]>xMin)
+        #self.assertAlmostEqual(tof_range[1],dt)
+        self.assertTrue(tof_range[2]<xMax)
 
         # check another working mode
-        red.prop_man.multirep_tof_specta_list = 5
-        tof_range1 = red.find_tof_range_for_multirep(run)
+        red.prop_man.multirep_tof_specta_list = 4
+        red.prop_man.incident_energy = 47.505
+        red.prop_man.energy_bins =  [-20,0.1,45]
+  
+        tof_range1 = red.find_tof_range_for_multirep(run_tof)
 
-        self.assertAlmostEqual(tof_range[0],tof_range1[0])
-        self.assertAlmostEqual(tof_range[1],tof_range1[1])
-        self.assertAlmostEqual(tof_range[2],tof_range1[2])
+        self.assertTrue(tof_range1[0]>xMin)
+        self.assertTrue(tof_range1[2]<xMax)
+
+        self.assertTrue(tof_range1[2]<tof_range[2])
+        self.assertTrue(tof_range1[0]<tof_range[0])
+        self.assertTrue(tof_range1[1]<tof_range[1])
 
     def test_multirep_mode(self):
         # create test workspace
@@ -352,6 +363,9 @@ class DirectEnergyConversionTest(unittest.TestCase):
         run = CreateSampleWorkspace( Function='Multiple Peaks',WorkspaceType='Event',NumBanks=8, BankPixelWidth=1,\
                                      NumEvents=100000, XUnit='TOF',xMin=tMin,xMax=tMax)
         LoadInstrument(run,InstrumentName='MARI')
+        MoveInstrumentComponent(Workspace='run', ComponentName='Detector', DetectorID=1102,Z=1)
+       # MoveInstrumentComponent(Workspace='run', ComponentName='Detector', DetectorID=1103,Z=4)
+       # MoveInstrumentComponent(Workspace='run', ComponentName='Detector', DetectorID=1104,Z=5)
 
         # do second
         run2 = CloneWorkspace(run)
@@ -365,6 +379,7 @@ class DirectEnergyConversionTest(unittest.TestCase):
         tReducer.hard_mask_file=None
         tReducer.map_file=None
         tReducer.save_format=None
+        tReducer.multirep_tof_specta_list = [4,5]
 
         result = tReducer.convert_to_energy(wb_ws,run,[67.,122.],[-2,0.02,0.8])
 
@@ -430,6 +445,7 @@ class DirectEnergyConversionTest(unittest.TestCase):
         tReducer.save_format=None
         tReducer.prop_man.normalise_method='monitor-1'
         tReducer.norm_mon_integration_range=[tMin,tMax]
+
 
         result = tReducer.convert_to_energy(wb_ws,run,[67.,122.],[-2,0.02,0.8],None,mono)
 

@@ -24,7 +24,7 @@ namespace DataHandling {
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 
-DECLARE_FILELOADER_ALGORITHM(LoadRKH);
+DECLARE_FILELOADER_ALGORITHM(LoadRKH)
 
 /**
  * Return the confidence with with this algorithm can load the file

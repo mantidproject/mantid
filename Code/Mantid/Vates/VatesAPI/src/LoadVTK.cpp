@@ -66,7 +66,7 @@ namespace Mantid
 {
   namespace VATES
   {
-    DECLARE_FILELOADER_ALGORITHM(LoadVTK);
+    DECLARE_FILELOADER_ALGORITHM(LoadVTK)
 
     /**
      * Return the confidence with with this algorithm can load the file

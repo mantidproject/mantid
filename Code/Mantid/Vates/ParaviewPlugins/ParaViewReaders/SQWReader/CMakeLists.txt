@@ -1,5 +1,5 @@
 project( MantidParaViewSQWReader )
-
+include_directories( SYSTEM ${PARAVIEW_INCLUDE_DIRS} )
 add_paraview_plugin( MantidParaViewSQWReaderSMPlugin "1.0"
 	SERVER_MANAGER_XML SQWReader.xml
 	SERVER_MANAGER_SOURCES vtkSQWReader.cxx

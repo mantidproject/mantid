@@ -18,7 +18,7 @@ using namespace Kernel;
 using namespace API;
 using namespace NeXus;
 
-DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadSINQFocus);
+DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadSINQFocus)
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
@@ -38,10 +38,10 @@ LoadSINQFocus::~LoadSINQFocus() {}
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
-const std::string LoadSINQFocus::name() const { return "LoadSINQFocus"; };
+const std::string LoadSINQFocus::name() const { return "LoadSINQFocus"; }
 
 /// Algorithm's version for identification. @see Algorithm::version
-int LoadSINQFocus::version() const { return 1; };
+int LoadSINQFocus::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
 const std::string LoadSINQFocus::category() const { return "DataHandling"; }

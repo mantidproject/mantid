@@ -18,7 +18,7 @@ using namespace Kernel;
 using namespace API;
 using namespace NeXus;
 
-DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadLLB);
+DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadLLB)
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
@@ -36,10 +36,10 @@ LoadLLB::~LoadLLB() {}
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
-const std::string LoadLLB::name() const { return "LoadLLB"; };
+const std::string LoadLLB::name() const { return "LoadLLB"; }
 
 /// Algorithm's version for identification. @see Algorithm::version
-int LoadLLB::version() const { return 1; };
+int LoadLLB::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
 const std::string LoadLLB::category() const { return "DataHandling"; }
