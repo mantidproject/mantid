@@ -711,7 +711,7 @@ IMDEventWorkspace_sptr ConvertSpiceDataToRealSpace::createMonitorMDWorkspace(
     float signal = static_cast<float>(vecmonitor[iws]);
     float error = 1;
     if (signal > 1)
-      error = sqrt(signal);
+      error = std::sqrt(signal);
 
     size_t nHist = thisWorkspace->getNumberHistograms();
     for (std::size_t i = 0; i < nHist; ++i) {
