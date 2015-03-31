@@ -627,8 +627,8 @@ IMDEventWorkspace_sptr ConvertSpiceDataToRealSpace::createDataMDWorkspace(
       Geometry::IDetector_const_sptr det = thisWorkspace->getDetector(i);
       const MantidVec &vecsignal = thisWorkspace->readY(i);
       const MantidVec &vecerror = thisWorkspace->readE(i);
-      double signal = vecsignal[0];
-      double error = vecerror[0];
+      float signal = static_cast<float>(vecsignal[0]);
+      float error = static_cast<float>(vecerror[0]);
       detid_t detid = det->getID() + detindex;
       Kernel::V3D detPos = det->getPos();
       double x = detPos.X();
@@ -708,8 +708,10 @@ IMDEventWorkspace_sptr ConvertSpiceDataToRealSpace::createMonitorMDWorkspace(
         atoi(thisWorkspace->run().getProperty("run_number")->value().c_str()));
 
     detid_t detindex = 0;
-    double signal = vecmonitor[iws];
-    double error = sqrt(signal);
+    double signal = static_cast<float>(vecmonitor[iws]);
+    float error = 1;
+    if (signal > 1)
+      error = sqrt(signal);
 
     size_t nHist = thisWorkspace->getNumberHistograms();
     for (std::size_t i = 0; i < nHist; ++i) {
