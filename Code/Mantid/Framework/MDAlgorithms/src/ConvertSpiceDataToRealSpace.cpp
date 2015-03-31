@@ -708,7 +708,7 @@ IMDEventWorkspace_sptr ConvertSpiceDataToRealSpace::createMonitorMDWorkspace(
         atoi(thisWorkspace->run().getProperty("run_number")->value().c_str()));
 
     detid_t detindex = 0;
-    double signal = static_cast<float>(vecmonitor[iws]);
+    float signal = static_cast<float>(vecmonitor[iws]);
     float error = 1;
     if (signal > 1)
       error = sqrt(signal);
