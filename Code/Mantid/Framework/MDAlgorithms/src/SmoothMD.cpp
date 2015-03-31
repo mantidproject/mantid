@@ -31,11 +31,13 @@ using namespace Mantid::MDEvents;
 typedef std::vector<int> WidthVector;
 
 // Typedef for an optional md histo workspace
-typedef boost::optional<IMDHistoWorkspace_const_sptr> OptionalIMDHistoWorkspace_const_sptr;
+typedef boost::optional<IMDHistoWorkspace_const_sptr>
+    OptionalIMDHistoWorkspace_const_sptr;
 
 // Typedef for a smoothing function
 typedef boost::function<IMDHistoWorkspace_sptr(
-    IMDHistoWorkspace_const_sptr, const WidthVector &, OptionalIMDHistoWorkspace_const_sptr)> SmoothFunction;
+    IMDHistoWorkspace_const_sptr, const WidthVector &,
+    OptionalIMDHistoWorkspace_const_sptr)> SmoothFunction;
 
 // Typedef for a smoothing function map keyed by name.
 typedef std::map<std::string, SmoothFunction> SmoothFunctionMap;
@@ -57,12 +59,13 @@ std::vector<std::string> functions() {
  * Maps a function name to a smoothing function
  * @return function map
  */
-SmoothFunctionMap makeFunctionMap(Mantid::MDAlgorithms::SmoothMD * instance) {
+SmoothFunctionMap makeFunctionMap(Mantid::MDAlgorithms::SmoothMD *instance) {
   SmoothFunctionMap map;
-  map.insert(std::make_pair("Hat",  boost::bind( &Mantid::MDAlgorithms::SmoothMD::hatSmooth, instance, _1, _2, _3 )));
+  map.insert(std::make_pair(
+      "Hat", boost::bind(&Mantid::MDAlgorithms::SmoothMD::hatSmooth, instance,
+                         _1, _2, _3)));
   return map;
 }
-
 }
 
 namespace Mantid {
@@ -105,15 +108,18 @@ const std::string SmoothMD::summary() const {
  * @param weightingWS : Weighting workspace (optional)
  * @return Smoothed MDHistoWorkspace
  */
-IMDHistoWorkspace_sptr SmoothMD::hatSmooth(IMDHistoWorkspace_const_sptr toSmooth,
-                                 const WidthVector &widthVector, OptionalIMDHistoWorkspace_const_sptr weightingWS) {
+IMDHistoWorkspace_sptr
+SmoothMD::hatSmooth(IMDHistoWorkspace_const_sptr toSmooth,
+                    const WidthVector &widthVector,
+                    OptionalIMDHistoWorkspace_const_sptr weightingWS) {
 
   const bool useWeights = weightingWS.is_initialized();
   uint64_t nPoints = toSmooth->getNPoints();
-  Progress progress(this, 0, 1, size_t( double(nPoints) * 1.1 ) );
+  Progress progress(this, 0, 1, size_t(double(nPoints) * 1.1));
   // Create the output workspace.
   IMDHistoWorkspace_sptr outWS = toSmooth->clone();
-  progress.reportIncrement(size_t(double(nPoints) * 0.1)); // Report ~10% progress
+  progress.reportIncrement(
+      size_t(double(nPoints) * 0.1)); // Report ~10% progress
 
   const int nThreads = Mantid::API::FrameworkManager::Instance()
                            .getNumOMPThreads(); // NThreads to Request
@@ -129,50 +135,47 @@ IMDHistoWorkspace_sptr SmoothMD::hatSmooth(IMDHistoWorkspace_const_sptr toSmooth
 
     do {
       // Gets all vertex-touching neighbours
-        size_t iteratorIndex = iterator->getLinearIndex();
+      size_t iteratorIndex = iterator->getLinearIndex();
 
-      if(useWeights) {
+      if (useWeights) {
 
-          // Check that we could measuer here.
-          if ( (*weightingWS)->getSignalAt(iteratorIndex) == 0 ) {
+        // Check that we could measuer here.
+        if ((*weightingWS)->getSignalAt(iteratorIndex) == 0) {
 
-              outWS->setSignalAt(iteratorIndex, std::numeric_limits<double>::quiet_NaN());
+          outWS->setSignalAt(iteratorIndex,
+                             std::numeric_limits<double>::quiet_NaN());
 
-              outWS->setErrorSquaredAt(iteratorIndex, std::numeric_limits<double>::quiet_NaN());
+          outWS->setErrorSquaredAt(iteratorIndex,
+                                   std::numeric_limits<double>::quiet_NaN());
 
-              continue; // Skip we couldn't measure here.
-          }
+          continue; // Skip we couldn't measure here.
+        }
       }
 
       std::vector<size_t> neighbourIndexes =
-          iterator->findNeighbourIndexesByWidth(
-              widthVector.front()); // TODO we should use the whole width vector
-                                    // not just the first element.
+          iterator->findNeighbourIndexesByWidth(widthVector);
+
       size_t nNeighbours = neighbourIndexes.size();
       double sumSignal = iterator->getSignal();
       double sumSqError = iterator->getError();
       for (size_t i = 0; i < neighbourIndexes.size(); ++i) {
-        if(useWeights) {
-            if ( (*weightingWS)->getSignalAt(neighbourIndexes[i]) == 0 )
-            {
-                // Nothing measured here. We cannot use that neighbouring point.
-                nNeighbours -= 1;
-                continue;
-            }
+        if (useWeights) {
+          if ((*weightingWS)->getSignalAt(neighbourIndexes[i]) == 0) {
+            // Nothing measured here. We cannot use that neighbouring point.
+            nNeighbours -= 1;
+            continue;
+          }
         }
         sumSignal += toSmooth->getSignalAt(neighbourIndexes[i]);
         double error = toSmooth->getErrorAt(neighbourIndexes[i]);
         sumSqError += (error * error);
-
       }
 
       // Calculate the mean
-      outWS->setSignalAt(iteratorIndex,
-                         sumSignal / double(nNeighbours + 1));
+      outWS->setSignalAt(iteratorIndex, sumSignal / double(nNeighbours + 1));
       // Calculate the sample variance
       outWS->setErrorSquaredAt(iteratorIndex,
                                sumSqError / double(nNeighbours + 1));
-
 
       progress.report();
 
@@ -183,7 +186,6 @@ IMDHistoWorkspace_sptr SmoothMD::hatSmooth(IMDHistoWorkspace_const_sptr toSmooth
 
   return outWS;
 }
-
 
 //----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
@@ -219,7 +221,8 @@ void SmoothMD::init() {
       docBuffer.str());
 
   declareProperty(new WorkspaceProperty<API::IMDHistoWorkspace>(
-                      "InputNormalizationWorkspace", "", Direction::Input, PropertyMode::Optional),
+                      "InputNormalizationWorkspace", "", Direction::Input,
+                      PropertyMode::Optional),
                   "Multidimensional weighting workspace. Optional.");
 
   declareProperty(new WorkspaceProperty<API::IMDHistoWorkspace>(
@@ -236,15 +239,21 @@ void SmoothMD::exec() {
   IMDHistoWorkspace_sptr toSmooth = this->getProperty("InputWorkspace");
 
   // Get the input weighting workspace
-  IMDHistoWorkspace_sptr weightingWS = this->getProperty("InputNormalizationWorkspace");
+  IMDHistoWorkspace_sptr weightingWS =
+      this->getProperty("InputNormalizationWorkspace");
   OptionalIMDHistoWorkspace_const_sptr optionalWeightingWS;
-  if(weightingWS)
-  {
-      optionalWeightingWS = weightingWS;
+  if (weightingWS) {
+    optionalWeightingWS = weightingWS;
   }
 
   // Get the width vector
-  const std::vector<int> widthVector = this->getProperty("WidthVector");
+  std::vector<int> widthVector = this->getProperty("WidthVector");
+  if (widthVector.size() == 1) {
+    // Pad the width vector out to the right size if only one entry has been
+    // provided.
+    widthVector =
+        std::vector<int>(toSmooth->getNumDims(), widthVector.front());
+  }
 
   // Find the choosen smooth operation
   const std::string smoothFunctionName = this->getProperty("Function");
@@ -264,54 +273,66 @@ std::map<std::string, std::string> SmoothMD::validateInputs() {
 
   std::map<std::string, std::string> product;
 
+  IMDHistoWorkspace_sptr toSmoothWs = this->getProperty("InputWorkspace");
+
   // Check the width vector
   const std::string widthVectorPropertyName = "WidthVector";
   std::vector<int> widthVector = this->getProperty(widthVectorPropertyName);
-  for (auto it = widthVector.begin(); it != widthVector.end(); ++it) {
-    const int widthEntry = *it;
-    if (widthEntry % 2 == 0) {
-      std::stringstream message;
-      message << widthVectorPropertyName
-              << " entries must be odd numbers. Bad entry is " << widthEntry;
-      product.insert(std::make_pair(widthVectorPropertyName, message.str()));
+
+  if (widthVector.size() != 1 && widthVector.size() != toSmoothWs->getNumDims()) {
+    product.insert(std::make_pair(widthVectorPropertyName,
+                                  widthVectorPropertyName +
+                                      " can either have one entry or needs to "
+                                      "have entries for each dimension of the "
+                                      "InputWorkspace."));
+  } else {
+    for (auto it = widthVector.begin(); it != widthVector.end(); ++it) {
+      const int widthEntry = *it;
+      if (widthEntry % 2 == 0) {
+        std::stringstream message;
+        message << widthVectorPropertyName
+                << " entries must be odd numbers. Bad entry is " << widthEntry;
+        product.insert(std::make_pair(widthVectorPropertyName, message.str()));
+      }
     }
   }
 
   // Check the dimensionality of the normalization workspace
-  const std::string normalisationWorkspacePropertyName = "InputNormalizationWorkspace";
-  IMDHistoWorkspace_sptr toSmoothWs = this->getProperty("InputWorkspace");
-  IMDHistoWorkspace_sptr normWs = this->getProperty(normalisationWorkspacePropertyName);
-  if(normWs)
-  {
-      const size_t nDimsNorm = normWs->getNumDims();
-      const size_t nDimsSmooth = toSmoothWs->getNumDims();
-      if(nDimsNorm != nDimsSmooth) {
+  const std::string normalisationWorkspacePropertyName =
+      "InputNormalizationWorkspace";
+
+  IMDHistoWorkspace_sptr normWs =
+      this->getProperty(normalisationWorkspacePropertyName);
+  if (normWs) {
+    const size_t nDimsNorm = normWs->getNumDims();
+    const size_t nDimsSmooth = toSmoothWs->getNumDims();
+    if (nDimsNorm != nDimsSmooth) {
+      std::stringstream message;
+      message << normalisationWorkspacePropertyName
+              << " has a different number of dimensions than InputWorkspace. "
+                 "Shapes of inputs must be the same. Cannot continue "
+                 "smoothing.";
+      product.insert(
+          std::make_pair(normalisationWorkspacePropertyName, message.str()));
+    } else {
+      // Loop over dimensions and check nbins.
+      for (size_t i = 0; i < nDimsNorm; ++i) {
+        const size_t nBinsNorm = normWs->getDimension(i)->getNBins();
+        const size_t nBinsSmooth = toSmoothWs->getDimension(i)->getNBins();
+        if (nBinsNorm != nBinsSmooth) {
           std::stringstream message;
           message << normalisationWorkspacePropertyName
-                  << " has a different number of dimensions than InputWorkspace. Shapes of inputs must be the same. Cannot continue smoothing.";
-          product.insert(std::make_pair(normalisationWorkspacePropertyName, message.str()));
+                  << ". Number of bins from dimension with index " << i
+                  << " do not match. " << nBinsSmooth << " expected. Got "
+                  << nBinsNorm << ". Shapes of inputs must be the same. Cannot "
+                                  "continue smoothing.";
+          product.insert(std::make_pair(normalisationWorkspacePropertyName,
+                                        message.str()));
+          break;
+        }
       }
-      else
-      {
-          // Loop over dimensions and check nbins.
-          for(size_t i = 0; i < nDimsNorm; ++i)
-          {
-              const size_t nBinsNorm = normWs->getDimension(i)->getNBins();
-              const size_t nBinsSmooth = toSmoothWs->getDimension(i)->getNBins();
-              if(nBinsNorm != nBinsSmooth)
-              {
-                  std::stringstream message;
-                  message << normalisationWorkspacePropertyName
-                          << ". Number of bins from dimension with index "<< i << " do not match. "
-                          << nBinsSmooth << " expected. Got " << nBinsNorm
-                          << ". Shapes of inputs must be the same. Cannot continue smoothing.";
-                  product.insert(std::make_pair(normalisationWorkspacePropertyName, message.str()));
-                  break;
-              }
-          }
-      }
+    }
   }
-
 
   return product;
 }

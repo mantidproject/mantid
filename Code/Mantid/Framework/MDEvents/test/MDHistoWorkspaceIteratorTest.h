@@ -800,15 +800,92 @@ public:
     neighbourIndexes = it->findNeighbourIndexesByWidth(width);
     TS_ASSERT_EQUALS(8, neighbourIndexes.size());
     // Is on an edge
-    TSM_ASSERT( "Neighbour at index 0 is 5", doesContainIndex(neighbourIndexes, 5));
-    TSM_ASSERT( "Neighbour at index 0 is 6", doesContainIndex(neighbourIndexes, 6));
-    TSM_ASSERT( "Neighbour at index 0 is 7", doesContainIndex(neighbourIndexes, 7));
-    TSM_ASSERT( "Neighbour at index 0 is 9", doesContainIndex(neighbourIndexes, 9));
-    TSM_ASSERT( "Neighbour at index 0 is 10", doesContainIndex(neighbourIndexes, 10));
-    TSM_ASSERT( "Neighbour at index 0 is 11", doesContainIndex(neighbourIndexes, 11));
-    TSM_ASSERT( "Neighbour at index 0 is 13", doesContainIndex(neighbourIndexes, 13));
-    TSM_ASSERT( "Neighbour at index 0 is 14", doesContainIndex(neighbourIndexes, 14));
+    TSM_ASSERT( "Neighbour at index is 5", doesContainIndex(neighbourIndexes, 5));
+    TSM_ASSERT( "Neighbour at index is 6", doesContainIndex(neighbourIndexes, 6));
+    TSM_ASSERT( "Neighbour at index is 7", doesContainIndex(neighbourIndexes, 7));
+    TSM_ASSERT( "Neighbour at index is 9", doesContainIndex(neighbourIndexes, 9));
+    TSM_ASSERT( "Neighbour at index is 10", doesContainIndex(neighbourIndexes, 10));
+    TSM_ASSERT( "Neighbour at index is 11", doesContainIndex(neighbourIndexes, 11));
+    TSM_ASSERT( "Neighbour at index is 13", doesContainIndex(neighbourIndexes, 13));
+    TSM_ASSERT( "Neighbour at index is 14", doesContainIndex(neighbourIndexes, 14));
   }
+
+  void test_neighbours_2d_vertex_touching_by_width_vector()
+  {
+    const size_t nd = 2;
+    std::vector<int> widthVector;
+    widthVector.push_back(5);
+    widthVector.push_back(3);
+
+    MDHistoWorkspace_sptr ws = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, nd, 4);
+    /*
+     2D MDHistoWorkspace
+
+     0 - 1 - 2 - 3
+     4 - 5 - 6 - 7
+     8 - 9 -10 -11
+     12-13 -14 -15
+     */
+    MDHistoWorkspaceIterator * it = new MDHistoWorkspaceIterator(ws);
+
+    // At initial position
+    /*
+     |0| - 1 - 2 - 3
+     4 - 5 - 6 - 7
+     8 - 9 -10 -11
+     12-13 -14 -15
+     */
+    std::vector<size_t> neighbourIndexes = it->findNeighbourIndexesByWidth(widthVector);
+    TS_ASSERT_EQUALS(5, neighbourIndexes.size());
+    // Is on an edge
+    TSM_ASSERT( "Neighbour at index is 1", doesContainIndex(neighbourIndexes, 1));
+    TSM_ASSERT( "Neighbour at index is 2", doesContainIndex(neighbourIndexes, 2));
+    TSM_ASSERT( "Neighbour at index is 4", doesContainIndex(neighbourIndexes, 4));
+    TSM_ASSERT( "Neighbour at index is 5", doesContainIndex(neighbourIndexes, 5));
+    TSM_ASSERT( "Neighbour at index is 6", doesContainIndex(neighbourIndexes, 6));
+
+
+
+    // At centreish position
+    /*
+     0 - 1 - 2 - 3
+     4 - |5| - 6 - 7
+     8 - 9 -10 -11
+     12-13 -14 -15
+     */
+    it->jumpTo(5);
+    neighbourIndexes = it->findNeighbourIndexesByWidth(widthVector);
+    TS_ASSERT_EQUALS(11, neighbourIndexes.size());
+    // Is on an edge
+    for(int i = 0; i < 12; ++i)
+    {
+        if(i == 5)
+        {
+            continue; // skip over the current index of the iterator.
+        }
+        std::stringstream buffer;
+        buffer << "Neighbour at index 5 should include " << i;
+        TSM_ASSERT( buffer.str(), doesContainIndex(neighbourIndexes, i));
+    }
+
+    // At end position
+    /*
+     0 - 1 - 2 - 3
+     4 - 5 - 6 - 7
+     8 - 9 -10 -11
+     12-13 -14 -|15|
+     */
+    it->jumpTo(15);
+    neighbourIndexes = it->findNeighbourIndexesByWidth(widthVector);
+    TS_ASSERT_EQUALS(5, neighbourIndexes.size());
+    // Is on an edge
+    TSM_ASSERT( "Neighbour at index is 9", doesContainIndex(neighbourIndexes, 9));
+    TSM_ASSERT( "Neighbour at index is 10", doesContainIndex(neighbourIndexes, 10));
+    TSM_ASSERT( "Neighbour at index is 11", doesContainIndex(neighbourIndexes, 11));
+    TSM_ASSERT( "Neighbour at index is 13", doesContainIndex(neighbourIndexes, 13));
+    TSM_ASSERT( "Neighbour at index is 14", doesContainIndex(neighbourIndexes, 14));
+  }
+
 
   void test_neighbours_3d_vertex_touching_width()
   {

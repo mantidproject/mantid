@@ -7,12 +7,13 @@
 #include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
 #include "MantidMDEvents/SkippingPolicy.h"
 #include <map>
+#include <vector>
 
 namespace Mantid {
 namespace MDEvents {
 
 // Typdef for a map for mapping width of neighbours (key) to permutations needed in the calcualtion.
-typedef std::map<size_t, std::vector<int64_t> > PermutationsMap;
+typedef std::map<std::vector<int>, std::vector<int64_t> > PermutationsMap;
 
 /** An implementation of IMDIterator that iterates through
   a MDHistoWorkspace. It treats the bin in the workspace as
@@ -113,7 +114,9 @@ public:
 
   std::vector<size_t> findNeighbourIndexesFaceTouching() const;
 
-  std::vector<size_t> findNeighbourIndexesByWidth(const int width) const;
+  std::vector<size_t> findNeighbourIndexesByWidth(const int& width) const;
+
+  std::vector<size_t> findNeighbourIndexesByWidth(const std::vector<int>& widths) const;
 
   virtual bool isWithinBounds(size_t index) const;
 
@@ -166,7 +169,7 @@ protected:
   SkippingPolicy_scptr m_skippingPolicy;
 
   /// Create or fetch permutations relating to a given neighbour width.
-  std::vector<int64_t> createPermutations(const int width) const;
+  std::vector<int64_t> createPermutations(const std::vector<int>& widths) const;
 };
 
 } // namespace MDEvents

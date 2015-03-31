@@ -5,6 +5,8 @@
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include <algorithm>
 #include <utility>
+#include <functional>
+#include <numeric>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -418,6 +420,7 @@ MDHistoWorkspaceIterator::findNeighbourIndexesFaceTouching() const {
                                                   m_indexMax, m_index);
 
   std::vector<size_t> neighbourIndexes; // Accumulate neighbour indexes.
+  std::vector<int> widths(m_nd, 3); // Face touching width is always 3 in each dimension
   for (size_t i = 0; i < m_permutationsFaceTouching.size(); ++i) {
     if (m_permutationsFaceTouching[i] == 0) {
       continue;
@@ -426,7 +429,7 @@ MDHistoWorkspaceIterator::findNeighbourIndexesFaceTouching() const {
     size_t neighbour_index = m_pos + m_permutationsFaceTouching[i];
     if (neighbour_index < m_ws->getNPoints() &&
         Utils::isNeighbourOfSubject(m_nd, neighbour_index, m_index,
-                                    m_indexMaker, m_indexMax)) {
+                                    m_indexMaker, m_indexMax, widths)) {
       neighbourIndexes.push_back(neighbour_index);
     }
   }
@@ -449,30 +452,36 @@ bool MDHistoWorkspaceIterator::isWithinBounds(size_t index) const {
  *the iterator is moved and the method is called,
  * we can cache the results, and re-use them as the only factors are the and the
  *dimensionality, the width (n-neighbours).
- *
- * @return
+ * @param widths : vector of integer widths.
+ * @return index permutations
  */
 std::vector<int64_t>
-MDHistoWorkspaceIterator::createPermutations(const int width) const {
+MDHistoWorkspaceIterator::createPermutations(const std::vector<int>& widths) const {
   // look-up
-  PermutationsMap::iterator it = m_permutationsVertexTouchingMap.find(width);
+  PermutationsMap::iterator it = m_permutationsVertexTouchingMap.find(widths);
   if (it == m_permutationsVertexTouchingMap.end()) {
 
-    if (width % 2 == 0) {
+    if (widths[0] % 2 == 0) {
       throw std::invalid_argument("MDHistoWorkspaceIterator::"
                                   "findNeighbourIndexesByWidth, width must "
                                   "always be an even number");
+    }
+    if (widths.size() != m_nd) {
+        throw std::invalid_argument("MDHistoWorkspaceIterator::"
+                                    "findNeighbourIndexesByWidth, size of widths must be the same as the number of dimensions.");
     }
 
     int64_t offset = 1;
 
     // Size of block will be width ^ nd
     std::vector<int64_t> permutationsVertexTouching;
-    permutationsVertexTouching.reserve(integerPower(width, m_nd));
+    // Calculate maximum permutations size.
+    int product = std::accumulate(widths.begin(), widths.end(), 1, std::multiplies<int>());
+    permutationsVertexTouching.reserve(product);
 
-    int centreIndex = (width) / 2; // Deliberately truncate to get centre index
+    int centreIndex = widths[0] / 2; // Deliberately truncate to get centre index
 
-    for (int i = 0; i < width; ++i) {
+    for (int i = 0; i < widths[0]; ++i) {
       // for width = 3 : -1, 0, 1
       // for width = 5 : -2, -1, 0, 1, 2
       permutationsVertexTouching.push_back(centreIndex - i);
@@ -485,7 +494,7 @@ MDHistoWorkspaceIterator::createPermutations(const int width) const {
           offset * static_cast<int64_t>(m_ws->getDimension(j - 1)->getNBins());
 
       size_t nEntries = permutationsVertexTouching.size();
-      for (int k = 1; k <= width / 2; ++k) {
+      for (int k = 1; k <= widths[j] / 2; ++k) {
         for (size_t m = 0; m < nEntries; m++) {
           permutationsVertexTouching.push_back((offset * k) +
                                                permutationsVertexTouching[m]);
@@ -495,23 +504,38 @@ MDHistoWorkspaceIterator::createPermutations(const int width) const {
       }
     }
 
-    m_permutationsVertexTouchingMap.insert(std::make_pair(width, permutationsVertexTouching));
+    m_permutationsVertexTouchingMap.insert(std::make_pair(widths, permutationsVertexTouching));
   }
 
   // In either case, get the result.
-  return m_permutationsVertexTouchingMap[width];
+  return m_permutationsVertexTouchingMap[widths];
 }
 
 /**
  * Find vertex-touching neighbours.
+ *
+ * Expands out the width to make a n-dimensional vector filled with the requested width.
+ *
  * @param width : Odd number of pixels for all dimensions.
  * @return collection of indexes.
  */
 std::vector<size_t>
-MDHistoWorkspaceIterator::findNeighbourIndexesByWidth(const int width) const {
+MDHistoWorkspaceIterator::findNeighbourIndexesByWidth(const int & width) const {
+
+    return this->findNeighbourIndexesByWidth(std::vector<int>(m_nd, width));
+}
+
+
+/**
+ * Find vertex-touching neighbours.
+ * @param widths : Vector containing odd number of pixels per dimension. Entries match dimensions of iterator.
+ * @return collection of indexes.
+ */
+std::vector<size_t>
+MDHistoWorkspaceIterator::findNeighbourIndexesByWidth(const std::vector<int>& widths) const {
 
   // Find existing or create required index permutations.
-  std::vector<int64_t> permutationsVertexTouching = createPermutations(width);
+  std::vector<int64_t> permutationsVertexTouching = createPermutations(widths);
 
   Utils::NestedForLoop::GetIndicesFromLinearIndex(m_nd, m_pos, m_indexMaker,
                                                   m_indexMax, m_index);
@@ -527,7 +551,7 @@ MDHistoWorkspaceIterator::findNeighbourIndexesByWidth(const int width) const {
     size_t neighbour_index = m_pos + permutationsVertexTouching[i];
     if (neighbour_index < m_ws->getNPoints() &&
         Utils::isNeighbourOfSubject(m_nd, neighbour_index, m_index,
-                                    m_indexMaker, m_indexMax, width / 2)) {
+                                    m_indexMaker, m_indexMax, widths) ) {
       neighbourIndexes.push_back(neighbour_index);
     }
   }

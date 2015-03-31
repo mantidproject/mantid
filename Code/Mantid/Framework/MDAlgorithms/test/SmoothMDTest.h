@@ -75,6 +75,24 @@ public:
                       alg.execute(), std::runtime_error &);
   }
 
+  void test_width_vector_must_not_be_arbitrary_size() {
+      auto toSmooth = MDEventsTestHelper::makeFakeMDHistoWorkspace(
+          1 /*signal*/, 2 /*numDims*/, 3 /*numBins in each dimension*/);
+
+      std::vector<int> badWidths(11, 3); // odd number value = 3, but size of 11 has no meaning
+
+      SmoothMD alg;
+      alg.setChild(true);
+      alg.initialize();
+      alg.setPropertyValue("OutputWorkspace", "dummy");
+      alg.setProperty("InputWorkspace", toSmooth);
+      alg.setProperty(
+          "WidthVector",
+          badWidths); // Width vector is the wrong size
+      TSM_ASSERT_THROWS("Size of with vector is wrong should throw.", alg.execute(),
+                        std::runtime_error &);
+  }
+
   void test_simple_smooth_hat_function() {
     auto toSmooth = MDEventsTestHelper::makeFakeMDHistoWorkspace(
         1 /*signal*/, 2 /*numDims*/, 3 /*numBins in each dimension*/);
@@ -206,6 +224,59 @@ public:
     double z = 28.0 / 25;
     TS_ASSERT_EQUALS(z, out->getSignalAt(12));
   }
+
+
+  void test_smooth_hat_function_mixed_widths() {
+
+    auto toSmooth = MDEventsTestHelper::makeFakeMDHistoWorkspace(
+        2 /*signal*/, 2 /*numDims*/, 5 /*numBins in each dimension*/);
+    toSmooth->setSignalAt(2, 1.0);
+    toSmooth->setSignalAt(22, 1.0);
+
+    /*
+     2D MDHistoWorkspace Input
+
+     2 - 2 - 1 - 2 - 2
+     2 - 2 - 2 - 2 - 2
+     2 - 2 - 2 - 2 - 2
+     2 - 2 - 2 - 2 - 2
+     2 - 2 - 1 - 2 - 2
+
+    */
+
+    SmoothMD alg;
+    alg.setChild(true);
+    alg.initialize();
+    std::vector<int> widthVector;
+    widthVector.push_back(3); // 3 = width in zeroth dimension
+    widthVector.push_back(5); // 5 = width in first dimension
+    alg.setProperty("WidthVector", widthVector);
+    alg.setProperty("InputWorkspace", toSmooth);
+    alg.setPropertyValue("OutputWorkspace", "dummy");
+    alg.execute();
+    IMDHistoWorkspace_sptr out = alg.getProperty("OutputWorkspace");
+
+    /*
+     Smoothing region for centre point
+
+     2 - |2 - 1 - 2| - 2
+     2 - |2 - 2 - 2| - 2
+     2 - |2 -|2|- 2| - 2
+     2 - |2 - 2 - 2| - 2
+     2 - |2 - 1 - 2| - 2
+
+     3 by 5 with.
+
+     average for centre point should be [ (3 * 5) - 2 ] * 2 / (3 * 5) = 28 / 15
+
+    */
+
+    // Check vertexes
+    double expectedSmoothedValue  = 28.0 / 15;
+
+    TS_ASSERT_EQUALS(expectedSmoothedValue, out->getSignalAt(12));
+  }
+
 
   void test_dimensional_check_of_weight_ws() {
 
