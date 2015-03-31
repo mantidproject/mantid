@@ -102,7 +102,6 @@ class POLDIFitPeaks2DPawleyTest(stresstesting.MantidStressTest):
         cell_a = cell.cell(0, 1)
         cell_a_err = cell.cell(0, 2)
 
-        print cell_a, cell_a_err
         self.assertLessThan(np.abs(cell_a_err), 5.0e-5)
         self.assertLessThan(np.abs(cell_a - 5.4311946) / cell_a_err, 1.5)
 
