@@ -1,16 +1,19 @@
 #ifndef BOXCONTROLLER_NEXUS_IO_TEST_H
 #define BOXCONTROLLER_NEXUS_IO_TEST_H
 
+#include "MantidAPI/FileFinder.h"
+#include "MantidDataObjects/BoxControllerNeXusIO.h"
+#include "MantidTestHelpers/MDEventsTestHelper.h"
+
 #include <map>
 #include <memory>
 
 #include <cxxtest/TestSuite.h>
+
 #include <nexus/NeXusFile.hpp>
+
 #include <Poco/File.h>
 
-#include "MantidAPI/FileFinder.h"
-#include "MantidDataObjects/BoxControllerNeXusIO.h"
-#include "MantidTestHelpers/MDEventsTestHelper.h"
 
 class BoxControllerNeXusIOTest : public CxxTest::TestSuite
 {
