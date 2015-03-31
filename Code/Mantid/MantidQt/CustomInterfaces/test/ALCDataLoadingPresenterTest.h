@@ -48,6 +48,8 @@ public:
   MOCK_METHOD1(displayError, void(const std::string&));
   MOCK_METHOD1(setAvailableLogs, void(const std::vector<std::string>&));
   MOCK_METHOD1(setAvailablePeriods, void(const std::vector<std::string>&));
+  MOCK_METHOD2(setTimeLimits, void(double,double));
+  MOCK_METHOD2(setTimeRange, void(double,double));
   MOCK_METHOD0(setWaitingCursor, void());
   MOCK_METHOD0(restoreCursor, void());
   MOCK_METHOD0(help, void());

@@ -202,8 +202,10 @@ def furyfitSeq(inputWS, func, ftype, startx, endx, spec_min=0, spec_max=None, in
     CopyLogs(InputWorkspace=inputWS, OutputWorkspace=fit_group)
     CopyLogs(InputWorkspace=inputWS, OutputWorkspace=result_workspace)
 
-    addSampleLogs(fit_group, sample_logs)
-    addSampleLogs(result_workspace, sample_logs)
+    log_names = [item[0] for item in sample_logs]
+    log_values = [item[1] for item in sample_logs]
+    AddSampleLogMultiple(Workspace=result_workspace, LogNames=log_names, LogValues=log_values)
+    AddSampleLogMultiple(Workspace=fit_group, LogNames=log_names, LogValues=log_values)
 
     if Save:
         save_workspaces = [result_workspace, fit_group]
@@ -272,8 +274,10 @@ def furyfitMult(inputWS, function, ftype, startx, endx, spec_min=0, spec_max=Non
     CopyLogs(InputWorkspace=inputWS, OutputWorkspace=result_workspace)
     CopyLogs(InputWorkspace=inputWS, OutputWorkspace=fit_group)
 
-    addSampleLogs(result_workspace, sample_logs)
-    addSampleLogs(fit_group, sample_logs)
+    log_names = [item[0] for item in sample_logs]
+    log_values = [item[1] for item in sample_logs]
+    AddSampleLogMultiple(Workspace=result_workspace, LogNames=log_names, LogValues=log_values)
+    AddSampleLogMultiple(Workspace=fit_group, LogNames=log_names, LogValues=log_values)
 
     DeleteWorkspace(tmp_fit_workspace)
 

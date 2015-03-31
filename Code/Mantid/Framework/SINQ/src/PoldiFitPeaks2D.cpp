@@ -155,34 +155,27 @@ void PoldiFitPeaks2D::init() {
 /// Creates a PoldiPeak from the given profile function/hkl pair.
 PoldiPeak_sptr
 PoldiFitPeaks2D::getPeakFromPeakFunction(IPeakFunction_sptr profileFunction,
-                                         const V3D &hkl) const {
+                                         const V3D &hkl) {
+
+  IAlgorithm_sptr errorAlg = createChildAlgorithm("EstimatePeakErrors");
+  errorAlg->setProperty(
+      "Function", boost::dynamic_pointer_cast<IFunction>(profileFunction));
+  errorAlg->setPropertyValue("OutputWorkspace", "Errors");
+  errorAlg->execute();
+
   double centre = profileFunction->centre();
   double height = profileFunction->height();
-
-  size_t dIndex = 0;
-  size_t iIndex = 0;
-  size_t fIndex = 0;
-
-  for (size_t j = 0; j < profileFunction->nParams(); ++j) {
-    if (profileFunction->getParameter(j) == centre) {
-      dIndex = j;
-    } else if (profileFunction->getParameter(j) == height) {
-      iIndex = j;
-    } else {
-      fIndex = j;
-    }
-  }
-
-  UncertainValue d(profileFunction->getParameter(dIndex),
-                   profileFunction->getError(dIndex));
-
-  UncertainValue intensity(profileFunction->getParameter(iIndex),
-                           profileFunction->getError(iIndex));
-
   double fwhmValue = profileFunction->fwhm();
-  UncertainValue fwhm(fwhmValue, fwhmValue /
-                                     profileFunction->getParameter(fIndex) *
-                                     profileFunction->getError(fIndex));
+
+  ITableWorkspace_sptr errorTable = errorAlg->getProperty("OutputWorkspace");
+
+  double centreError = errorTable->cell<double>(0, 2);
+  double heightError = errorTable->cell<double>(1, 2);
+  double fwhmError = errorTable->cell<double>(2, 2);
+
+  UncertainValue d(centre, centreError);
+  UncertainValue intensity(height, heightError);
+  UncertainValue fwhm(fwhmValue, fwhmError);
 
   PoldiPeak_sptr peak =
       PoldiPeak::create(MillerIndices(hkl), d, intensity, UncertainValue(1.0));
@@ -242,6 +235,37 @@ ITableWorkspace_sptr PoldiFitPeaks2D::getRefinedCellParameters(
 }
 
 /**
+ * Extracts the covariance matrix for the supplied function
+ *
+ * This method extracts the covariance matrix for a sub-function from
+ * the global covariance matrix. If no matrix is given, a zero-matrix is
+ * returned.
+ *
+ * @param covarianceMatrix :: Global covariance matrix.
+ * @param parameterOffset :: Offset for the parameters of profileFunction.
+ * @param nParams :: Number of parameters of the local function.
+ * @return
+ */
+boost::shared_ptr<DblMatrix> PoldiFitPeaks2D::getLocalCovarianceMatrix(
+    const boost::shared_ptr<const Kernel::DblMatrix> &covarianceMatrix,
+    size_t parameterOffset, size_t nParams) const {
+  if (covarianceMatrix) {
+    boost::shared_ptr<Kernel::DblMatrix> localCov =
+        boost::make_shared<Kernel::DblMatrix>(nParams, nParams, false);
+    for (size_t j = 0; j < nParams; ++j) {
+      for (size_t k = 0; k < nParams; ++k) {
+        (*localCov)[j][k] =
+            (*covarianceMatrix)[parameterOffset + j][parameterOffset + k];
+      }
+    }
+
+    return localCov;
+  }
+
+  return boost::make_shared<Kernel::DblMatrix>(nParams, nParams, false);
+}
+
+/**
  * Construct a PoldiPeakCollection from a Poldi2DFunction
  *
  * This method performs the opposite operation of
@@ -254,7 +278,7 @@ ITableWorkspace_sptr PoldiFitPeaks2D::getRefinedCellParameters(
  * @return PoldiPeakCollection containing peaks with normalized intensities
  */
 PoldiPeakCollection_sptr PoldiFitPeaks2D::getPeakCollectionFromFunction(
-    const IFunction_sptr &fitFunction) const {
+    const IFunction_sptr &fitFunction) {
   Poldi2DFunction_sptr poldi2DFunction =
       boost::dynamic_pointer_cast<Poldi2DFunction>(fitFunction);
 
@@ -266,6 +290,11 @@ PoldiPeakCollection_sptr PoldiFitPeaks2D::getPeakCollectionFromFunction(
   PoldiPeakCollection_sptr normalizedPeaks =
       boost::make_shared<PoldiPeakCollection>(PoldiPeakCollection::Integral);
 
+  boost::shared_ptr<const Kernel::DblMatrix> covarianceMatrix =
+      poldi2DFunction->getCovarianceMatrix();
+
+  size_t offset = 0;
+
   for (size_t i = 0; i < poldi2DFunction->nFunctions(); ++i) {
     boost::shared_ptr<PoldiSpectrumPawleyFunction> poldiPawleyFunction =
         boost::dynamic_pointer_cast<PoldiSpectrumPawleyFunction>(
@@ -274,10 +303,26 @@ PoldiPeakCollection_sptr PoldiFitPeaks2D::getPeakCollectionFromFunction(
     if (poldiPawleyFunction) {
       IPawleyFunction_sptr pawleyFunction =
           poldiPawleyFunction->getPawleyFunction();
+
       if (pawleyFunction) {
+        CompositeFunction_sptr decoratedFunction =
+            boost::dynamic_pointer_cast<CompositeFunction>(
+                pawleyFunction->getDecoratedFunction());
+
+        offset = decoratedFunction->getFunction(0)->nParams();
+
         for (size_t j = 0; j < pawleyFunction->getPeakCount(); ++j) {
           IPeakFunction_sptr profileFunction =
               pawleyFunction->getPeakFunction(j);
+
+          size_t nLocalParams = profileFunction->nParams();
+          boost::shared_ptr<Kernel::DblMatrix> localCov =
+              getLocalCovarianceMatrix(covarianceMatrix, offset, nLocalParams);
+          profileFunction->setCovarianceMatrix(localCov);
+
+          // Increment offset for next function
+          offset += nLocalParams;
+
           V3D peakHKL = pawleyFunction->getPeakHKL(j);
 
           PoldiPeak_sptr peak =
@@ -297,6 +342,15 @@ PoldiPeakCollection_sptr PoldiFitPeaks2D::getPeakCollectionFromFunction(
       IPeakFunction_sptr profileFunction =
           boost::dynamic_pointer_cast<IPeakFunction>(
               peakFunction->getProfileFunction());
+
+      // Get local covariance matrix
+      size_t nLocalParams = profileFunction->nParams();
+      boost::shared_ptr<Kernel::DblMatrix> localCov =
+          getLocalCovarianceMatrix(covarianceMatrix, offset, nLocalParams);
+      profileFunction->setCovarianceMatrix(localCov);
+
+      // Increment offset for next function
+      offset += nLocalParams;
 
       PoldiPeak_sptr peak =
           getPeakFromPeakFunction(profileFunction, V3D(0, 0, 0));

@@ -42,7 +42,7 @@ As mentioned before, point groups can describe the symmetry of a lattice, includ
 To describe the rotational and translational components of the symmetry operation, a matrix :math:`\mathbf{W}_i` and a vector :math:`\mathbf{w}_i` are used. In three dimensions :math:`\mathbf{h}` has three elements, so :math:`\mathbf{W}_i` is a :math:`3\times3`-matrix and the symmetry operation is applied like this:
 
 .. math::
-    \mathbf{h}' = \mathbf{W}_i^{-1T} \cdot \mathbf{h}
+    \mathbf{h}' = {\mathbf{W}_i^{-1}}^T \cdot \mathbf{h}
 
 Note that the translational component is not used for transforming HKLs and :math:`\mathbf{W}_i` is inverted and transposed. Coordinates :math:`\mathbf{x}` are transformed differently, they are affected by the translational component:
 
@@ -170,9 +170,11 @@ Which results in the following output:
 
 .. testoutput :: ExQueryPointGroups
 
-    All point groups: ['-1','-3','-3 h','-31m','-3m','-3m1','-4','-42m','-43m','-4m2','-6','-62m','-6m2','1','112/m','2','2/m','222','23','3','3 h','312','31m','32','321','3m','3m1','4','4/m','4/mmm','422','432','4mm','6','6/m','6/mmm','622','6mm','m','m-3','m-3m','mm2','mmm']
+    All point groups: ['-1','-3','-3 r','-31m','-3m r','-3m1','-4','-42m','-43m','-4m2','-6','-62m','-6m2','1','112/m','2','2/m','222','23','3','3 r','312','31m','32 r','321','3m r','3m1','4','4/m','4/mmm','422','432','4mm','6','6/m','6/mmm','622','6mm','m','m-3','m-3m','mm2','mmm']
     Cubic point groups: ['-43m','23','432','m-3','m-3m']
     Tetragonal point groups: ['-4','-42m','-4m2','4','4/m','4/mmm','422','4mm']
+
+The point groups with an extra ``r`` at the end are trigonal point groups with rhombohedral axes. Trigonal point groups without that additional letter use the hexagonal coordinate system.
 
 After having obtained a ``PointGroup``-object, it can be used for working with reflection data, more specifically :math:`hkl`-indices. It's possible to check whether two reflections are equivalent in a certain point group:
 

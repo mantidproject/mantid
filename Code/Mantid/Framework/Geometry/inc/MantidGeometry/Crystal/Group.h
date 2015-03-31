@@ -109,6 +109,11 @@ namespace Geometry {
   */
 class MANTID_GEOMETRY_DLL Group {
 public:
+  enum CoordinateSystem {
+    Orthogonal,
+    Hexagonal
+  };
+
   Group();
   Group(const std::string &symmetryOperationString);
   Group(const std::vector<SymmetryOperation> &symmetryOperations);
@@ -118,6 +123,7 @@ public:
   virtual ~Group() {}
 
   size_t order() const;
+  CoordinateSystem getCoordinateSystem() const;
   std::vector<SymmetryOperation> getSymmetryOperations() const;
 
   Group operator*(const Group &other) const;
@@ -131,8 +137,12 @@ protected:
   void setSymmetryOperations(
       const std::vector<SymmetryOperation> &symmetryOperations);
 
+  CoordinateSystem getCoordinateSystemFromOperations(
+      const std::vector<SymmetryOperation> &symmetryOperations) const;
+
   std::vector<SymmetryOperation> m_allOperations;
   std::set<SymmetryOperation> m_operationSet;
+  CoordinateSystem m_axisSystem;
 };
 
 typedef boost::shared_ptr<Group> Group_sptr;
