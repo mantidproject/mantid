@@ -11,6 +11,7 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Component.h"
 #include "MantidGeometry/Instrument/FitParameter.h"
+#include "MantidAlgorithms/Pause.h"
 #include <fstream>
 #include <Poco/File.h>
 
@@ -21,6 +22,7 @@ using namespace Mantid::DataHandling;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
+using namespace Mantid::Algorithms;
 
 using namespace std;
 
@@ -331,6 +333,13 @@ public:
     string filename("TestWorskpace.irf");
     generate1BankIrfFile(filename);
 
+    //test randomly failing because file is not found
+    //adding a short pause between when the file is written and read
+    Pause pause;
+    pause.initialize();
+    pause.setProperty("Duration",0.5);
+    pause.execute();
+      
     // Load workspace group wsName with one workspace
     load_GEM(1,"LoadFullprofResolutionWorkspace");
 
