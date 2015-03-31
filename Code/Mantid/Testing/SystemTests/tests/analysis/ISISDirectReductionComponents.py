@@ -81,13 +81,40 @@ class ISIS_ReductionWrapperValidate(stresstesting.MantidStressTest):
 
     def runTest(self):
        # prepare reduction variable
+        # At the moment MARI reduction differs from it original by 
+        # less then 1% due to changes in the procedure. At the moment 
+        # we have to account for this but when we make it the same,
+        # the code below should be commented. Meanwhile it tests workspace
+        # workflow
+        #------------------------------------------------------
+        #ref_file = 'MARIReduction.nxs'
+        #file = FileFinder.getFullPath(ref_file)
+        #etalon_ws = Load(file)
+        #etalon_ws/=0.997979227566217
+        #------------------------------------------------------
         rd = mr.ReduceMARIFromFile()
         rd.def_main_properties()
         rd.def_advanced_properties()
+        # this is correct workflow for the ref file
+        #rd.reducer.prop_man.save_file_name = ref_file
+        # temporary workflow, until we fix workspace adjustment
+        rd._tolerr =3.e-3
+        rd.reducer.prop_man.save_file_name = 'MARIReduction.nxs'
+        rd.validate_run_number=11001
+        try:
+            rez,mess = rd.run_reduction()
+            self.result=rez
+            if not rez:
+                print "*** Validation failed: {0}".format(mess)
+            if mess.find('Created')>-1: # validation still failed due to missing validation file
+                print "*** Validation failed: {0}".format(mess)
+                self.result=False
+        except RuntimeError as err:
+            print "*** Validation failed with error: {0}".format(err.message)
+            self.result=False
+        rd.reducer.prop_man.save_file_name = None
 
-        self.result,message = rd.validate_result()
-        if not self.result:
-            print "*** Validation failed: {0}".format(message)
+
 
 
 

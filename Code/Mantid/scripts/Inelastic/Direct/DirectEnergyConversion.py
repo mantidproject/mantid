@@ -971,14 +971,18 @@ class DirectEnergyConversion(object):
         formats = self.prop_man.save_format
 
         if save_file:
-           save_file,ext = os.path.splitext(save_file)
-           if len(ext) > 1:
+            save_file,ext = os.path.splitext(save_file)
+            if len(ext) > 1:
                formats.add(ext[1:])
         else:
-           save_file = self.prop_man.save_file_name
+            save_file = self.prop_man.save_file_name
 
         if save_file is None:
-            save_file = workspace.getName()
+            if workspace is None:
+                prop_man.log("DirectEnergyConversion:save_results: Nothing to do",'warning')
+                return
+            else:
+                save_file = workspace.getName()
         elif os.path.isdir(save_file):
             save_file = os.path.join(save_file, workspace.getName())
         elif save_file == '':

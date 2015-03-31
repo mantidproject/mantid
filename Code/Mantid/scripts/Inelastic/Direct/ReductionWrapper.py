@@ -27,12 +27,14 @@ class ReductionWrapper(object):
                 self.advanced_vars = None
         #
         def get_all_vars(self):
-            """Return dictionary with all defined variables"""
-            web_vars = None
+            """Return dictionary with all defined variables
+               combined together
+            """
+            web_vars = {}
             if self.advanced_vars:
                 web_vars = self.advanced_vars
             if self.standard_vars:
-                if web_vars:
+                if len(web_vars)>0:
                     web_vars.update(self.standard_vars)
                 else:
                     web_vars = self.standard_vars
@@ -53,6 +55,8 @@ class ReductionWrapper(object):
       # used during debugging "wait for files" workflow
       # instead of Pause algorithm
         self._debug_wait_for_files_operation = None
+        # tolerance to change in some tests if default is not working well
+        self._tolerr=None
 
       # The variables which are set up from web interface or to be exported to
       # web interface
@@ -153,17 +157,21 @@ class ReductionWrapper(object):
         """ the name of the file, used as reference to
             validate the run, specified as the class property
 
-            It can also be overloaded to return a workspace
-            or workspace name to validate results against
+            The method can be overloaded to return a workspace
+            or workspace name to validate results against.
         """
-
-        instr = self.reducer.prop_man.instr_name
-        run_n = self.validate_run_number
-        ei    = PropertyManager.incident_energy.get_current()
-        file_name = '{0}{1}_{2:<3.2f}meV_VALIDATION_file.nxs'.format(instr,run_n,ei)
+        if self.reducer.prop_man.save_file_name:
+            file_name = self.reducer.prop_man.save_file_name
+            if isinstance(file_name,api.Workspace):
+                return file_name
+        else:
+            instr = self.reducer.prop_man.instr_name
+            run_n = self.validate_run_number
+            ei    = PropertyManager.incident_energy.get_current()
+            file_name = '{0}{1}_{2:<3.2f}meV_VALIDATION_file.nxs'.format(instr,run_n,ei)
         run_dir = self.validation_file_place()
         full_name = os.path.join(run_dir,file_name)
-        return full_name;
+        return full_name
 
     def validation_file_place(self):
         """Redefine this to the place, where validation file, used in conjunction with
@@ -176,7 +184,7 @@ class ReductionWrapper(object):
       """Method to validate result against existing validation file
          or workspace
 
-         Change this method to verify different results"""
+         Change this method to verify different results or validate results differently"""
       rez,message = ReductionWrapper.build_or_validate_result(self,
                                      Error,ToleranceRelErr)
       return rez,message
@@ -206,32 +214,46 @@ class ReductionWrapper(object):
                   file and returns True if the reduction and saving of this file is successful
 
         """
-        # this row defines location of the validation file in this script folder
+        # this row defines location of the validation file
         validation_file = self.validation_file_name()
         sample_run = self.validate_run_number
-        if os.path.isfile(validation_file):
-            build_validation = False
-            try:
-                sample = Load(validation_file)
-            except:
-                build_validation = True
-        elif isinstance(vaildation_file,api.Workspace) or (isinstance(vaildation_file,str) and vaildation_file in mtd):
-        # its workspace: 
-            if isinstance(vaildation_file,api.Workspace):
-                sample_run = vaildation_file
+        if isinstance(validation_file,str):
+            path,name = os.path.split(validation_file)
+            if name in mtd:
+                reference_ws = mtd[name]
+                build_validation = False
+                fileName = "workspace:"+reference_ws.name()
             else:
-                sample_run = mtd[vaildation_file]
+                if len(path)>0:
+                    config.appendDataSearchDir(path)
+                # it there bug in getFullPath? It returns the same string if given full path 
+                # but file has not been found
+                fileName = FileFinder.getFullPath(name)
+                if len(fileName)>0:
+                    build_validation = False
+                    try:
+                        reference_ws = Load(fileName)
+                    except:
+                        build_validation = True
+                else:
+                    build_validation = True
+        elif isinstance(validation_file,api.Workspace):
+        # its workspace: 
+            reference_ws = validation_file
+            build_validation = False
+            fileName = "workspace:"+reference_ws.name()
         else:
             build_validation = True
+        #--------------------------------------------------------
         if build_validation:
             self.reducer.prop_man.save_file_name = validation_file
             self.reducer.prop_man.log\
-                 ("*** FOUND VALIDATION FILE: {0}\n"\
-                  "    Validating run {1} against this file".format(validation_file,sample_run),'warning')
+                 ("*** WARNING:can not find or load validation file {0}\n"\
+                  "    Building validation file for run N:{1}".format(validation_file,sample_run),'warning')
         else:
             self.reducer.prop_man.log\
-                 ("*** WARNING:can not find (load?) validation file {0}\n"\
-                  "    Building validation file for run{1}".format(validation_file,sample_run),'warning')
+                 ("*** FOUND VALIDATION FILE: {0}\n"\
+                  "    Validating run {1} against this file".format(fileName,sample_run),'warning')
 
         # just in case, to be sure
         current_web_state = self._run_from_web
@@ -249,16 +271,21 @@ class ReductionWrapper(object):
         reduced = self.reduce()
 
         if build_validation:
+            self.reducer.prop_man.save_file_name = None
             result_name = os.path.splitext(validation_file)[0]
             self.reducer.prop_man.log("*** Saving validation file with name: {0}.nxs".format(result_name),'notice')
             SaveNexus(reduced,Filename=result_name + '.nxs')
-            self.reducer.prop_man.save_file_name = None
             return True,'Created validation file {0}.nxs'.format(result_name)
         else:
             if isinstance(reduced,list): # check only first result in multirep
                 reduced = reduced[0]
-            result = CheckWorkspacesMatch(Workspace1=sample,Workspace2=reduced,\
-                                      Tolerance=Error,CheckSample=False,\
+            # Cheat! Counterintuitive!
+            if self._tolerr:
+                TOLL=self._tolerr
+            else:
+                TOLL = Error
+            result = CheckWorkspacesMatch(Workspace1=reference_ws,Workspace2=reduced,\
+                                      Tolerance=TOLL,CheckSample=False,\
                                       CheckInstrument=False,ToleranceRelErr=ToleranceRelErr)
 
         self.wait_for_file = current_wait_state
@@ -266,6 +293,11 @@ class ReductionWrapper(object):
         if result == 'Success!':
             return True,'Reference file and reduced workspace are equivalent'
         else:
+            fname,ext = os.path.splitext(fileName)
+            filename = fname+'-mismatch.nxs'
+            self.reducer.prop_man.log("***WARNING: can not get results matching the reference file.\n"\
+                                      "   Saving new results to file {0}".format(filename),'warning')
+            SaveNexus(reduced,Filename=filename)
             return False,result
 
     @abstractmethod
@@ -322,12 +354,12 @@ class ReductionWrapper(object):
 
                 self._run_pause(timeToWait)
                 Found,input_file = PropertyManager.sample_run.find_file(file_hint=file_hint,be_quet=True)
-            ws = self.reducer.convert_to_energy(None,input_file)
+            converted_to_energy_transfer_ws = self.reducer.convert_to_energy(None,input_file)
 
         else:
-            ws = self.reducer.convert_to_energy(None,input_file)
+            converted_to_energy_transfer_ws = self.reducer.convert_to_energy(None,input_file)
 
-        return ws
+        return converted_to_energy_transfer_ws
     #
     def sum_and_reduce(self):
         """ procedure used to sum and reduce runs in case when not all files
@@ -404,7 +436,8 @@ class ReductionWrapper(object):
                 self.reducer.prop_man.log\
                ("**************************************************************************************",'warning')
                 raise RuntimeError("Validation against old data file failed")
-            return
+            self.validate_run_number=None
+            return rez,mess
 
         if self.reducer.sum_runs:
 # --------### sum runs provided ------------------------------------###

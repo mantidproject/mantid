@@ -47,15 +47,9 @@ class ReduceMARIFromFile(ReductionWrapper):
         """Method executes reduction over single file
          Overload only if custom reduction is needed
         """
-        outWS = ReductionWrapper.reduce(self,input_file,output_directory)
+        converted_to_energy_transfer_ws = ReductionWrapper.reduce(self,input_file,output_directory)
         #SaveNexus(outWS,Filename = 'MARNewReduction.nxs')
-        return outWS
-
-    def validate_result(self,build_validation=False):
-        """Change this method to verify different results     """
-        # build_validation -- if true, build and save new workspace rather then validating the old one
-        rez,message = ReductionWrapper.build_or_validate_result(self,11001,"MARIReduction.nxs",build_validation,1.e-2)
-        return rez,message
+        return converted_to_energy_transfer_ws
 
     def set_custom_output_filename(self):
         """ define custom name of output files if standard one is not satisfactory
