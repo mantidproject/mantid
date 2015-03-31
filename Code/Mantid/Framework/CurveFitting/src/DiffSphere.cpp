@@ -8,6 +8,7 @@
 #include "MantidAPI/ParameterTie.h"
 #include "MantidCurveFitting/BoundaryConstraint.h"
 #include "MantidGeometry/IDetector.h"
+#include "MantidKernel/Exception.h"
 #include "MantidKernel/UnitConversion.h"
 
 #include <boost/math/special_functions/bessel.hpp>
@@ -207,7 +208,7 @@ void InelasticDiffSphere::function1D(double *out, const double *xValues,
   const double S = getParameter("Shift");
 
   double Q;
-  if (getAttribute("Q").value() == "") {
+  if (getAttribute("Q").value() == "" && m_qValueCache.size() > 0) {
     const int specIdx = getAttribute("WorkspaceIndex").asInt();
     Q = m_qValueCache[specIdx];
 
@@ -215,6 +216,8 @@ void InelasticDiffSphere::function1D(double *out, const double *xValues,
                   << std::endl;
   } else {
     Q = boost::lexical_cast<double>(getAttribute("Q").value());
+
+    g_log.debug() << "Using Q attribute: " << Q << std::endl;
   }
 
   // // Penalize negative parameters
@@ -266,7 +269,14 @@ InelasticDiffSphere::setWorkspace(boost::shared_ptr<const API::Workspace> ws) {
 
   size_t numHist = workspace->getNumberHistograms();
   for (size_t idx = 0; idx < numHist; idx++) {
-    IDetector_const_sptr det = workspace->getDetector(idx);
+    IDetector_const_sptr det;
+    try {
+      det = workspace->getDetector(idx);
+    } catch(Exception::NotFoundError &) {
+      m_qValueCache.clear();
+      g_log.information("Cannot populate Q values from workspace");
+      break;
+    }
 
     double efixed = workspace->getEFixed(det);
     double usignTheta = workspace->detectorTwoTheta(det) / 2.0;
