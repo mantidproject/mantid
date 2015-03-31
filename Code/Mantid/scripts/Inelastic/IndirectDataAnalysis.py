@@ -81,7 +81,8 @@ def confitSeq(inputWS, func, startX, endX, ftype, bgd, temperature=None, specMin
                        OutputWorkspace=output_workspace, Function=func,
                        StartX=startX, EndX=endX, FitType='Sequential',
                        CreateOutput=True, OutputCompositeMembers=True,
-                       ConvolveMembers=convolve)
+                       ConvolveMembers=convolve,
+                       PassWSIndexToFunction=True)
 
     DeleteWorkspace(output_workspace + '_NormalisedCovarianceMatrices')
     DeleteWorkspace(output_workspace + '_Parameters')

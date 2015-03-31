@@ -328,6 +328,10 @@ namespace IDA
    *							|
    *							+-- Lorentzian 2 (yes/no)
    *							+-- Temperature Correction (yes/no)
+   *					+-- ProductFunction
+   *							|
+   *							+-- InelasticDiffSphere (yes/no)
+   *							+-- Temperature Correction (yes/no)
    *
    * @param tieCentres :: whether to tie centres of the two lorentzians.
    *
@@ -465,10 +469,10 @@ namespace IDA
       populateFunction(func, model, m_properties["Lorentzian2"], prefix2, false);
     }
 
-    // ----------------------------------------------------
-    // --- Composite / Convolution / Model / DiffSphere ---
-    // ----------------------------------------------------
-    if ( fitTypeIndex == 3 )
+    // -------------------------------------------------------------
+    // --- Composite / Convolution / Model / InelasticDiffSphere ---
+    // -------------------------------------------------------------
+    if(fitTypeIndex == 3)
     {
       //if temperature not included then product is lorentzian * 1
       //create product function for temp * lorentzian
