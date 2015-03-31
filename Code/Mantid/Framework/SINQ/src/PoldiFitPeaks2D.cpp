@@ -564,7 +564,11 @@ IAlgorithm_sptr PoldiFitPeaks2D::calculateSpectrum(
 
   fit->setProperty("Minimizer", "Levenberg-MarquardtMD");
 
+  // Setting the level to Notice to avoid problems with Levenberg-MarquardtMD.
+  int oldLogLevel = g_log.getLevel();
+  g_log.setLevelForAll(Poco::Message::PRIO_NOTICE);
   fit->execute();
+  g_log.setLevelForAll(oldLogLevel);
 
   return fit;
 }
