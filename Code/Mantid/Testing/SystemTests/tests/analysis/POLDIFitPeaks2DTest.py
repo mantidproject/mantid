@@ -1,11 +1,11 @@
-#pylint: disable=no-init,invalid-name
+#pylint: disable=no-init,invalid-name,too-many-locals
 import stresstesting
 from mantid.simpleapi import *
 import numpy as np
 
-'''The system test currently checks that the calculation of 2D spectra
-works correctly.'''
 class POLDIFitPeaks2DTest(stresstesting.MantidStressTest):
+    """The system test currently checks that the calculation of 2D spectra
+works correctly."""
     def runTest(self):
         dataFiles = ["poldi2013n006904"]
 
@@ -81,3 +81,28 @@ class POLDIFitPeaks2DTest(stresstesting.MantidStressTest):
 
                 self.assertTrue(np.all(xDataCalc == xDataRef))
                 self.assertLessThan(maxDifference, 0.07)
+
+class POLDIFitPeaks2DPawleyTest(stresstesting.MantidStressTest):
+    def runTest(self):
+        si = PoldiLoadRuns(2013, 6903, 6904, 2)
+        corr = PoldiAutoCorrelation('si_data_6904')
+        peaks = PoldiPeakSearch(corr)
+        peaks_ref, fit_plots = PoldiFitPeaks1D(corr, PoldiPeakTable='peaks')
+        si_refs = PoldiCreatePeaksFromCell("F d -3 m", "Si 0 0 0", a=5.431, LatticeSpacingMin=0.7)
+        indexed = PoldiIndexKnownCompounds(peaks_ref, "si_refs")
+
+        DeleteTableRows("indexed_si_refs", "10-30")
+
+        fit2d, fit1d, peaks_ref_2d, cell = PoldiFitPeaks2D('si_data_6904', 'indexed_si_refs',
+                                                           PawleyFit=True,
+                                                           InitialCell="5.431 5.431 5.431 90 90 90",
+                                                           CrystalSystem="Cubic",
+                                                           MaximumIterations=100)
+
+        cell_a = cell.cell(0, 1)
+        cell_a_err = cell.cell(0, 2)
+
+        print cell_a, cell_a_err
+        self.assertLessThan(np.abs(cell_a_err), 5.0e-5)
+        self.assertLessThan(np.abs(cell_a - 5.4311946) / cell_a_err, 1.5)
+
