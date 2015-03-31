@@ -48,7 +48,7 @@ protected:
   void init() { setDecoratedFunction("Gaussian"); }
 };
 
-DECLARE_FUNCTION(MockPawleyFunction);
+DECLARE_FUNCTION(MockPawleyFunction)
 
 class PoldiSpectrumPawleyFunctionTest : public CxxTest::TestSuite {
 public:
