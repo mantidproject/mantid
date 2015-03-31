@@ -42,10 +42,10 @@ DgsConvertToEnergyTransfer::~DgsConvertToEnergyTransfer() {}
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string DgsConvertToEnergyTransfer::name() const {
   return "DgsConvertToEnergyTransfer";
-};
+}
 
 /// Algorithm's version for identification. @see Algorithm::version
-int DgsConvertToEnergyTransfer::version() const { return 1; };
+int DgsConvertToEnergyTransfer::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
 const std::string DgsConvertToEnergyTransfer::category() const {

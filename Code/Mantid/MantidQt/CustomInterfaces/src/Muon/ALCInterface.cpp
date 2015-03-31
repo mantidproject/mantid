@@ -15,7 +15,7 @@ namespace MantidQt
 {
 namespace CustomInterfaces
 {
-  DECLARE_SUBWINDOW(ALCInterface);
+  DECLARE_SUBWINDOW(ALCInterface)
 
   const QStringList ALCInterface::STEP_NAMES =
       QStringList() << "Data loading" << "Baseline modelling" << "Peak fitting";

@@ -1,5 +1,5 @@
 PROJECT(SplatterPlot)
-
+include_directories( SYSTEM ${PARAVIEW_INCLUDE_DIRS} )
 ADD_PARAVIEW_PLUGIN(MantidParaViewSplatterPlotSMPlugin "1.0"
 	SERVER_MANAGER_XML SplatterPlot.xml
 	SERVER_MANAGER_SOURCES vtkSplatterPlot.cxx

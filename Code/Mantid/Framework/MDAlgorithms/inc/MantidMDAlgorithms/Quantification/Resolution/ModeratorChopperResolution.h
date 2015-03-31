@@ -57,8 +57,8 @@ public:
   double energyWidth(const double deltaE) const;
 
 private:
-  DISABLE_DEFAULT_CONSTRUCT(ModeratorChopperResolution);
-  DISABLE_COPY_AND_ASSIGN(ModeratorChopperResolution);
+  DISABLE_DEFAULT_CONSTRUCT(ModeratorChopperResolution)
+  DISABLE_COPY_AND_ASSIGN(ModeratorChopperResolution)
 
   /// Store required cached variables
   void initCaches();

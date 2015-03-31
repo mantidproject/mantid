@@ -21,7 +21,7 @@ namespace {
 Kernel::Logger g_log("ISISDataArchive");
 }
 
-DECLARE_ARCHIVESEARCH(ISISDataArchive, ISISDataSearch);
+DECLARE_ARCHIVESEARCH(ISISDataArchive, ISISDataSearch)
 
 namespace {
 #ifdef _WIN32

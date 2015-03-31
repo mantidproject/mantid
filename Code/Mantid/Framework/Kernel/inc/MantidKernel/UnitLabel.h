@@ -80,7 +80,7 @@ public:
   operator std::string() const;
 
 private:
-  DISABLE_DEFAULT_CONSTRUCT(UnitLabel);
+  DISABLE_DEFAULT_CONSTRUCT(UnitLabel)
 
   /// Value of plain-text label
   std::string m_ascii;

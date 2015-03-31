@@ -37,10 +37,10 @@ ConvertToDetectorFaceMD::~ConvertToDetectorFaceMD() {}
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string ConvertToDetectorFaceMD::name() const {
   return "ConvertToDetectorFaceMD";
-};
+}
 
 /// Algorithm's version for identification. @see Algorithm::version
-int ConvertToDetectorFaceMD::version() const { return 1; };
+int ConvertToDetectorFaceMD::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
 const std::string ConvertToDetectorFaceMD::category() const {

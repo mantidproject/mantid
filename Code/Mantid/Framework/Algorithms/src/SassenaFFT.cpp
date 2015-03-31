@@ -13,7 +13,7 @@ namespace Mantid {
 namespace Algorithms {
 
 // Register the class into the algorithm factory
-DECLARE_ALGORITHM(SassenaFFT);
+DECLARE_ALGORITHM(SassenaFFT)
 
 /// Override Algorithm::checkGroups
 bool SassenaFFT::checkGroups() { return false; }

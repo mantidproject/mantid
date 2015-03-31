@@ -1,8 +1,8 @@
 #include "MantidQtCustomInterfaces/Muon/ALCDataLoadingView.h"
 
-#include <QDesktopServices>
+#include "MantidQtAPI/HelpWindow.h"
+
 #include <QMessageBox>
-#include <QUrl>
 
 #include <qwt_symbol.h>
 
@@ -163,10 +163,26 @@ namespace CustomInterfaces
     }
   }
 
+  void ALCDataLoadingView::setTimeLimits(double tMin, double tMax)
+  {
+    // Set initial values
+    m_ui.minTime->setValue(tMin);
+    m_ui.maxTime->setValue(tMax);
+  }
+
+  void ALCDataLoadingView::setTimeRange(double tMin, double tMax)
+  {
+    // Set range for minTime
+    m_ui.minTime->setMinimum(tMin);
+    m_ui.minTime->setMaximum(tMax);
+    // Set range for maxTime
+    m_ui.maxTime->setMinimum(tMin);
+    m_ui.maxTime->setMaximum(tMax);
+  }
+
   void ALCDataLoadingView::help()
   {
-    QDesktopServices::openUrl(QUrl(QString("http://www.mantidproject.org/") +
-            "Muon_ALC:_Data_Loading"));
+    MantidQt::API::HelpWindow::showCustomInterface(NULL, QString("Muon_ALC"));
   }
 
   void ALCDataLoadingView::setWaitingCursor()

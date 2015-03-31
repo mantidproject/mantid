@@ -26,10 +26,10 @@ MuonGroupDetectors::~MuonGroupDetectors() {}
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string MuonGroupDetectors::name() const {
   return "MuonGroupDetectors";
-};
+}
 
 /// Algorithm's version for identification. @see Algorithm::version
-int MuonGroupDetectors::version() const { return 1; };
+int MuonGroupDetectors::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
 const std::string MuonGroupDetectors::category() const { return "Muon"; }

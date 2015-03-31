@@ -21,7 +21,7 @@ namespace CustomInterfaces
 {
 
 //Register the class with the factory
-DECLARE_SUBWINDOW(StepScan);
+DECLARE_SUBWINDOW(StepScan)
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
