@@ -14,7 +14,7 @@
 #include "MantidMDAlgorithms/FakeMDEventData.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 
-#include <boost/math/special_functions/math_fwd.hpp>
+#include <boost/math/special_functions/fpclassify.hpp>
 
 #include <cxxtest/TestSuite.h>
 

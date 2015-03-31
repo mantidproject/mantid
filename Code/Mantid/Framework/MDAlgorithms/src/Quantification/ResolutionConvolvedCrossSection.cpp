@@ -48,6 +48,7 @@
 
 namespace Mantid {
 namespace MDAlgorithms {
+DECLARE_FUNCTION(ResolutionConvolvedCrossSection)
 
 using namespace DataObjects;
 using namespace Kernel;

@@ -2,6 +2,7 @@
 #define INTEGRATE_3D_EVENTS_H
 
 #include <vector>
+#include <boost/shared_ptr.hpp>
 #include <boost/unordered_map.hpp>
 #include "MantidKernel/V3D.h"
 #include "MantidKernel/Matrix.h"
