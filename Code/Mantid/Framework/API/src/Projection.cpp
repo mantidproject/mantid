@@ -1,5 +1,7 @@
 #include "MantidAPI/Projection.h"
 
+#include <boost/algorithm/string.hpp>
+
 namespace Mantid {
 namespace API {
 
@@ -35,6 +37,61 @@ Projection::Projection(const V3D &u, const V3D &v, const V3D &w) {
   for (size_t i = 0; i < 3; ++i) {
     m_offsets[i] = 0.0;
     m_units[i] = RLU;
+  }
+}
+
+Projection::Projection(ITableWorkspace_const_sptr ws) {
+  if (!ws) {
+    throw std::runtime_error(
+        "Null ITableWorkspace given to Projection constructor");
+  }
+
+  const size_t numRows = ws->rowCount();
+  if (numRows != 3) {
+    throw std::runtime_error("3 rows must be provided to create a projection");
+  }
+  for (size_t i = 0; i < numRows; i++) {
+    const std::string name = ws->getColumn("name")->cell<std::string>(i);
+    const std::string valueStr = ws->getColumn("value")->cell<std::string>(i);
+    const std::string offsetStr = ws->getColumn("offset")->cell<std::string>(i);
+    const std::string unitStr = ws->getColumn("unit")->cell<std::string>(i);
+
+    //Check the name
+    size_t index;
+    if (name == "u") {
+      index = 0;
+    } else if (name == "v") {
+      index = 1;
+    } else if (name == "w") {
+      index = 2;
+    } else {
+      throw std::runtime_error("Invalid dimension name: " + name);
+    }
+
+    // Check the values
+    std::vector<std::string> valueStrVec;
+    boost::split(valueStrVec, valueStr, boost::is_any_of(","));
+    std::vector<double> valueDblVec;
+    for (auto it = valueStrVec.begin(); it != valueStrVec.end(); ++it)
+      valueDblVec.push_back(boost::lexical_cast<double>(*it));
+    if (valueDblVec.size() != 3) {
+      throw std::runtime_error("Dimension " + name + " must contain 3 values");
+    }
+
+    // Check the unit
+    ProjectionUnit unit;
+    if (unitStr == "r") {
+      unit = RLU;
+    } else if (unitStr == "a") {
+      unit = INV_ANG;
+    } else {
+      throw std::runtime_error("Unknown type: " + unitStr);
+    }
+
+    // Apply the data
+    m_dimensions[index] = V3D(valueDblVec[0], valueDblVec[1], valueDblVec[2]);
+    m_offsets[index] = boost::lexical_cast<double>(offsetStr);
+    m_units[index] = unit;
   }
 }
 
