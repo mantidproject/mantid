@@ -284,8 +284,11 @@ FacilityInfo::computeResource(const std::string &name) const {
 
   g_log.debug() << "Could not find requested compute resource: " << name
                 << " in facility " << this->name() << "." << std::endl;
-  throw Exception::NotFoundError("FacilityInfo, missing compute resource",
-                                 name);
+  throw Exception::NotFoundError(
+      "FacilityInfo, missing compute resource, it does not seem to be defined "
+      "in the facility '" +
+          this->name() + "' - ",
+      name);
 }
 
 /**
