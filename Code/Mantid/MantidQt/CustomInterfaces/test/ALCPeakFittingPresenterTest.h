@@ -50,6 +50,7 @@ public:
   MOCK_METHOD1(setPeakPicker, void(const IPeakFunction_const_sptr&));
   MOCK_METHOD1(setFunction, void(const IFunction_const_sptr&));
   MOCK_METHOD3(setParameter, void(const QString&, const QString&, double));
+  MOCK_METHOD0(help, void());
 };
 
 class MockALCPeakFittingModel : public IALCPeakFittingModel
@@ -257,6 +258,12 @@ public:
     EXPECT_CALL(*m_view, setPeakPicker(_)).Times(0);
 
     m_view->changeParameter(QString("f1"), QString("A0"));
+  }
+
+  void test_helpPage ()
+  {
+    EXPECT_CALL(*m_view, help()).Times(1);
+    m_view->help();
   }
 };
 

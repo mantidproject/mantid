@@ -30,6 +30,7 @@ class SphinxWarnings(stresstesting.MantidStressTest):
                         'Reflectometry',
                         'Remote',
                         'SANS',
+                        'Simulation',
                         'SINQ',
                         'Sample',
                         'Transforms',

@@ -10,7 +10,8 @@
 #  JSONCPP_LIBRARIES      - All required libraries, including the configuration type
 
 # Headers
-find_path ( JSONCPP_INCLUDE_DIR jsoncpp/json/json.h )
+find_path ( JSONCPP_INCLUDE_DIR json/reader.h
+            PATH_SUFFIXES jsoncpp )
 
 # Libraries
 find_library ( JSONCPP_LIBRARY NAMES jsoncpp ) # optimized

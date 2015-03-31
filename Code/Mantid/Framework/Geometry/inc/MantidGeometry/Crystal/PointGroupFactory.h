@@ -4,6 +4,7 @@
 #include "MantidGeometry/DllConfig.h"
 #include "MantidKernel/SingletonHolder.h"
 #include "MantidGeometry/Crystal/PointGroup.h"
+#include "MantidGeometry/Crystal/SpaceGroup.h"
 #include "MantidKernel/RegistrationHelper.h"
 
 #include <boost/regex.hpp>
@@ -81,7 +82,9 @@ class MANTID_GEOMETRY_DLL PointGroupFactoryImpl {
 public:
   PointGroup_sptr createPointGroup(const std::string &hmSymbol);
   PointGroup_sptr
-  createPointGroupFromSpaceGroupSymbol(const std::string &spaceGroupSymbol);
+  createPointGroupFromSpaceGroup(const SpaceGroup_const_sptr &spaceGroup);
+  PointGroup_sptr
+  createPointGroupFromSpaceGroup(const SpaceGroup &spaceGroup);
 
   bool isSubscribed(const std::string &hmSymbol) const;
 

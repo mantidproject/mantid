@@ -22,10 +22,10 @@ BooleanBinaryOperationMD::~BooleanBinaryOperationMD() {}
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string BooleanBinaryOperationMD::name() const {
   return "BooleanBinaryOperationMD";
-};
+}
 
 /// Algorithm's version for identification. @see Algorithm::version
-int BooleanBinaryOperationMD::version() const { return 1; };
+int BooleanBinaryOperationMD::version() const { return 1; }
 
 //----------------------------------------------------------------------------------------------
 ///

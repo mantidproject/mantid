@@ -4,7 +4,7 @@
 #include "MantidDataHandling/LoadNexusLogs.h"
 #include <nexus/NeXusException.hpp>
 #include "MantidKernel/TimeSeriesProperty.h"
-#include "MantidKernel/LogParser.h"
+//#include "MantidKernel/LogParser.h"
 #include "MantidAPI/FileProperty.h"
 #include <cctype>
 

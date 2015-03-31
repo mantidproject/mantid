@@ -36,7 +36,6 @@ class NonIDF_Properties(object):
         object.__setattr__(self,'_log_to_mantid',False)
 
         object.__setattr__(self,'_current_log_level',3)
-        object.__setattr__(self,'_save_file_name',None)
 
         self._set_instrument_and_facility(Instrument,run_workspace)
 

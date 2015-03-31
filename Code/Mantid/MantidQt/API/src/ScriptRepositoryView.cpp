@@ -377,7 +377,7 @@ bool  ScriptRepositoryView::RepoDelegate::editorEvent(QEvent *event,
 QSize ScriptRepositoryView::RepoDelegate::sizeHint(const QStyleOptionViewItem & /*option*/, const QModelIndex & /*index*/ ) const{
   return QSize(35,35);
 
-} ;
+}
 
 
 //////////////////////////////////////////////////

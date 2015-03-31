@@ -57,7 +57,7 @@ private:
   friend struct Kernel::CreateUsingNew<ForegroundModelFactoryImpl>;
   /// Default constructor
   ForegroundModelFactoryImpl();
-  DISABLE_COPY_AND_ASSIGN(ForegroundModelFactoryImpl);
+  DISABLE_COPY_AND_ASSIGN(ForegroundModelFactoryImpl)
 
   // Do not allow the default create & createUnwrapped to be called
   using BaseClass::create;

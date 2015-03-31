@@ -15,10 +15,10 @@ ExtractMonitorWorkspace::~ExtractMonitorWorkspace() {}
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string ExtractMonitorWorkspace::name() const {
   return "ExtractMonitorWorkspace";
-};
+}
 
 /// Algorithm's version for identification. @see Algorithm::version
-int ExtractMonitorWorkspace::version() const { return 1; };
+int ExtractMonitorWorkspace::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
 const std::string ExtractMonitorWorkspace::category() const {

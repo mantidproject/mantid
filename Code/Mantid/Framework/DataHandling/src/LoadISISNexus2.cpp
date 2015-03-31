@@ -9,7 +9,7 @@
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/ListValidator.h"
-#include "MantidKernel/LogParser.h"
+//#include "MantidKernel/LogParser.h"
 #include "MantidKernel/LogFilter.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/UnitFactory.h"
@@ -38,7 +38,7 @@
 
 namespace Mantid {
 namespace DataHandling {
-DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadISISNexus2);
+DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadISISNexus2)
 
 using namespace Kernel;
 using namespace API;
@@ -232,8 +232,13 @@ void LoadISISNexus2::exec() {
   if (m_load_selected_spectra)
     m_spec2det_map = SpectrumDetectorMapping(spec(), udet(), udet.dim0());
   else
-    local_workspace->updateSpectraUsing(
+    if (bseparateMonitors) {
+      m_spec2det_map = SpectrumDetectorMapping(spec(), udet(), udet.dim0());
+      local_workspace->updateSpectraUsing(m_spec2det_map);
+    }else{
+      local_workspace->updateSpectraUsing(
         SpectrumDetectorMapping(spec(), udet(), udet.dim0()));
+    }
 
   if (!foundInstrument) {
     runLoadInstrument(local_workspace);
@@ -258,7 +263,7 @@ void LoadISISNexus2::exec() {
     m_tof_data.reset(new MantidVec(timeBins(), timeBins() + x_length));
   }
   int64_t firstentry = (m_entrynumber > 0) ? m_entrynumber : 1;
-  loadPeriodData(firstentry, entry, local_workspace);
+  loadPeriodData(firstentry, entry, local_workspace,m_load_selected_spectra);
 
   // Clone the workspace at this point to provide a base object for future
   // workspace generation.
@@ -284,7 +289,7 @@ void LoadISISNexus2::exec() {
       if (p > 1) {
         local_workspace = boost::dynamic_pointer_cast<DataObjects::Workspace2D>(
             WorkspaceFactory::Instance().create(period_free_workspace));
-        loadPeriodData(p, entry, local_workspace);
+        loadPeriodData(p, entry, local_workspace,m_load_selected_spectra);
         createPeriodLogs(p, local_workspace);
         // Check consistency of logs data for multi-period workspaces and raise
         // warnings where necessary.
@@ -345,7 +350,7 @@ void LoadISISNexus2::exec() {
         prepareSpectraBlocks(m_monitors, m_specInd2specNum_map, m_monBlockInfo);
 
         int64_t firstentry = (m_entrynumber > 0) ? m_entrynumber : 1;
-        loadPeriodData(firstentry, entry, monitor_workspace);
+        loadPeriodData(firstentry, entry, monitor_workspace,true);
 
         std::string monitorwsName = wsName + "_monitors";
         declareProperty(new WorkspaceProperty<Workspace>(
@@ -690,10 +695,13 @@ size_t LoadISISNexus2::prepareSpectraBlocks(
 * @param entry :: The opened root entry node for accessing the monitor and data
 * nodes
 * @param local_workspace :: The workspace to place the data in
+* @param update_spectra_det_map :: reset spectra-detector map to the one
+* calculated earlier. (Warning! -- this map has to be calculated correctly!)
 */
 void
 LoadISISNexus2::loadPeriodData(int64_t period, NXEntry &entry,
-                               DataObjects::Workspace2D_sptr &local_workspace) {
+                               DataObjects::Workspace2D_sptr &local_workspace,
+                               bool update_spectra2det_mapping) {
   int64_t hist_index = 0;
   int64_t period_index(period - 1);
   // int64_t first_monitor_spectrum = 0;
@@ -710,7 +718,7 @@ LoadISISNexus2::loadPeriodData(int64_t period, NXEntry &entry,
       MantidVec &E = local_workspace->dataE(hist_index);
       std::transform(Y.begin(), Y.end(), E.begin(), dblSqrt);
 
-      if (m_load_selected_spectra) {
+      if (update_spectra2det_mapping) {
         // local_workspace->getAxis(1)->setValue(hist_index,
         // static_cast<specid_t>(it->first));
         auto spec = local_workspace->getSpectrum(hist_index);

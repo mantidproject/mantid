@@ -30,7 +30,7 @@ namespace DataHandling {
 using namespace DataObjects;
 
 // Register the algorithm into the algorithm factory
-DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadMuonNexus1);
+DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadMuonNexus1)
 
 using namespace Kernel;
 using namespace API;

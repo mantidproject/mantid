@@ -37,6 +37,21 @@ IFunction_sptr FunctionParameterDecorator::clone() const {
   return cloned;
 }
 
+void FunctionParameterDecorator::setWorkspace(
+    boost::shared_ptr<const Workspace> ws) {
+  throwIfNoFunctionSet();
+
+  m_wrappedFunction->setWorkspace(ws);
+}
+
+void FunctionParameterDecorator::setMatrixWorkspace(
+    boost::shared_ptr<const MatrixWorkspace> workspace, size_t wi,
+    double startX, double endX) {
+  throwIfNoFunctionSet();
+
+  m_wrappedFunction->setMatrixWorkspace(workspace, wi, startX, endX);
+}
+
 void FunctionParameterDecorator::setParameter(size_t i, const double &value,
                                               bool explicitlySet) {
   throwIfNoFunctionSet();
@@ -91,8 +106,8 @@ double FunctionParameterDecorator::getParameter(const std::string &name) const {
 }
 
 size_t FunctionParameterDecorator::nParams() const {
-  if(!m_wrappedFunction) {
-      return 0;
+  if (!m_wrappedFunction) {
+    return 0;
   }
 
   return m_wrappedFunction->nParams();
@@ -161,8 +176,8 @@ size_t FunctionParameterDecorator::getParameterIndex(
 }
 
 size_t FunctionParameterDecorator::nAttributes() const {
-  if(!m_wrappedFunction) {
-      return 0;
+  if (!m_wrappedFunction) {
+    return 0;
   }
 
   return m_wrappedFunction->nAttributes();

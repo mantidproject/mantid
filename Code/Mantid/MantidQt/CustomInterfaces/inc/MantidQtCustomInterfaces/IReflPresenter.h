@@ -64,7 +64,7 @@ namespace MantidQt
         ImportTableFlag,
         ExportTableFlag,
         PlotRowFlag,
-        PlotGroupFlag,
+        PlotGroupFlag
       };
 
       //Tell the presenter something happened

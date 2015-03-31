@@ -3,13 +3,16 @@
 ##
 
 set ( TEST_PY_FILES
+  AddSampleLogMultipleTest.py
+  ApplyPaalmanPingsCorrectionTest.py
   CalculateSampleTransmissionTest.py
   CheckForSampleLogsTest.py
   ConjoinSpectraTest.py
   CorrectLogTimesTest.py
   CreateLeBailFitInputTest.py
-  CreateCalibrationWorkspaceTest.py
+  IndirectCalibrationTest.py
   CreateWorkspaceTest.py
+  CylinderPaalmanPingsCorrectionTest.py
   DakotaChiSquaredTest.py
   DensityOfStatesTest.py
   DSFinterpTest.py
@@ -17,10 +20,14 @@ set ( TEST_PY_FILES
   FindReflectometryLinesTest.py
   FlatPlatePaalmanPingsCorrectionTest.py
   GetEiT0atSNSTest.py
+  IndirectAnnulusAbsorptionTest.py
+  IndirectCylinderAbsorptionTest.py
+  IndirectFlatPlateAbsorptionTest.py
   IndirectILLReductionTest.py
   InelasticIndirectReductionTest.py
   IndirectTransmissionTest.py
   IndirectTransmissionMonitorTest.py
+  LoadDNSLegacyTest.py
   LoadFullprofFileTest.py
   LoadLiveDataTest.py
   LoadLogPropertyTableTest.py
@@ -52,6 +59,7 @@ set ( TEST_PY_FILES
   ExportExperimentLogTest.py
   PoldiMergeTest.py
   VesuvioResolutionTest.py
+  PoldiCreatePeaksFromFileTest.py
 )
 
 check_tests_valid ( ${CMAKE_CURRENT_SOURCE_DIR} ${TEST_PY_FILES} )
