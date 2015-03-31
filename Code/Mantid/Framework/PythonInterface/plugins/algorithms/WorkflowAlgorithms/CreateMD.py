@@ -48,11 +48,10 @@ class CreateMD(DataProcessorAlgorithm):
     def _convert_to_md(self, workspace, analysis_mode):
 
         # Find the Min Max extents
-        min_max_alg = self.createChildAlgorithm('ConvertToMDMinMaxLocal')
+        min_max_alg = self.createChildAlgorithm('ConvertToMDMinMaxGlobal')
         min_max_alg.setProperty('InputWorkspace', workspace)
         min_max_alg.setProperty('QDimensions', 'Q3D')
         min_max_alg.setProperty('dEAnalysisMode', analysis_mode)
-        min_max_alg.setProperty('QConversionScales', 'HKL')
         min_max_alg.execute()
         min_values = min_max_alg.getProperty('MinValues').value
         max_values = min_max_alg.getProperty('MaxValues').value
