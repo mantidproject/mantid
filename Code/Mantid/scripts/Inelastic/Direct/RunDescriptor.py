@@ -294,6 +294,11 @@ class RunDescriptor(PropDescriptor):
     _holder = None
     _logger = None
     _sum_log_name = 'SumRuns'
+    # Should not fileFinder do that?
+    fext_equivalents={'.raw':['.s10','.s09','.s08','.s07','.s06','.s05','.s04','.s03','.s02','.s01'],
+                      '.nxs':['.n10','.n09','.n08','.n07','.n06','.n05','.n04','.n03','.n02','.n01']}
+    # class sets it to true if a file with previous extension is found 
+    prefile_found = False
 #--------------------------------------------------------------------------------------------------------------------
     def __init__(self,prop_name,DocString=None):
         """ """
@@ -353,6 +358,7 @@ class RunDescriptor(PropDescriptor):
             if self._mask_ws_name in mtd:
                 DeleteWorkspace(self._mask_ws_name)
             self._mask_ws_name = None
+        RunDescriptor.prefile_found = False
 
 #--------------------------------------------------------------------------------------------------------------------
     def __get__(self,instance,owner):
@@ -911,10 +917,22 @@ class RunDescriptor(PropDescriptor):
     def load_file(self,inst_name,ws_name,run_number=None,load_mon_with_workspace=False,filePath=None,fileExt=None,**kwargs):
         """Load run for the instrument name provided. If run_numner is None, look for the current run"""
 
-        ok,data_file = self.find_file(None,filePath,fileExt,**kwargs)
+        ok,data_file = self.find_file(None,run_number,filePath,fileExt,**kwargs)
         if not ok:
-            self._ws_name = None
-            raise IOError(data_file)
+            key = self.get_fext().lower()
+            if key in RunDescriptor.fext_equivalents:
+                equivalents = RunDescriptor.fext_equivalents[key]
+                found = False
+                for ext in equivalents:
+                    ok,data_file = self.find_file(None,run_number,filePath,ext)
+                    if ok:
+                        found=True
+                        break
+                if found:
+                    RunDescriptor.prefile_found = True
+                else:
+                    self._ws_name = None
+                    raise IOError(data_file)
 
         if load_mon_with_workspace:
             mon_load_option = 'Include'
