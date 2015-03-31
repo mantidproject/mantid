@@ -4,6 +4,7 @@
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
 #include <boost/shared_ptr.hpp>
+#include <boost/optional.hpp>
 
 namespace Mantid
 {
@@ -49,7 +50,7 @@ namespace MDAlgorithms
     std::map<std::string, std::string> validateInputs();
 
     boost::shared_ptr<Mantid::API::IMDHistoWorkspace> hatSmooth(boost::shared_ptr<const Mantid::API::IMDHistoWorkspace> toSmooth,
-                                     const std::vector<int> &widthVector);
+                                     const std::vector<int> &widthVector, boost::optional<boost::shared_ptr<const Mantid::API::IMDHistoWorkspace> > weighting);
 
   private:
 
