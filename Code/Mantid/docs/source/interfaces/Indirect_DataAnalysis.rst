@@ -127,9 +127,6 @@ Plot Spectrum
 Spectra Range
   The spectra range over which to perform sequential fitting.
 
-Verbose
-  Enables outputting additional information to the Results Log.
-
 Plot Result
   If enabled will plot the result as a spectra plot.
 
@@ -163,9 +160,6 @@ ELow, EHigh
 SampleBinning
   The ratio at which to decrease the number of bins by through merging of
   intensities from neighbouring bins.
-
-Verbose
-  Enables outputting additional information to the Results Log.
 
 Plot Result
   If enabled will plot the result as a spectra plot.
@@ -256,9 +250,6 @@ Plot Spectrum
 Spectra Range
   The spectra range over which to perform sequential fitting.
 
-Verbose
-  Enables outputting additional information to the Results Log.
-
 Plot Output
   Allows plotting spectra plots of fitting parameters, the options available
   will depend on the type of fit chosen.
@@ -330,9 +321,6 @@ Plot Spectrum
 
 Spectra Range
   The spectra range over which to perform sequential fitting.
-
-Verbose
-  Enables outputting additional information to the Results Log.
 
 Plot Output
   Allows plotting spectra plots of fitting parameters, the options available
@@ -436,13 +424,12 @@ References:
 Calculate Corrections
 ---------------------
 
-.. warning:: This interface is only available on Windows
-
 .. interface:: Data Analysis
   :widget: tabCalcCorr
 
-Calculates absorption corrections that could be applied to the data when given
-information about the sample (and optionally can) geometry.
+Calculates absorption corrections in the Paalman & Pings absorption factors that
+could be applied to the data when given information about the sample (and
+optionally can) geometry.
 
 Options
 ~~~~~~~
@@ -457,16 +444,18 @@ Use Can
   \omega)` file (*_sqw.nxs*) or workspace (*_sqw*).
 
 Sample Shape
-  Sets the shape of the sample, this affects the options for the sample details,
-  see below.
+  Sets the shape of the sample, this affects the options for the shape details
+  (see below).
 
-Beam Width
-  Width of the incident beam.
+Sample/Can Number Density
+  Density of the sample or container.
 
-Verbose
-  Enables outputting additional information to the Results Log.
+Sample/Can Chemical Formula
+  Chemical formula of the sample or can material. This must be provided in the
+  format expected by the :ref:`SetSampleMaterial <algm-SetSampleMaterial>`
+  algorithm.
 
-Plot Result
+Plot Output
   Plots the :math:`A_{s,s}`, :math:`A_{s,sc}`, :math:`A_{c,sc}` and
   :math:`A_{c,c}` workspaces as spectra plots.
 
@@ -474,20 +463,27 @@ Save Result
   If enabled the result will be saved as a NeXus file in the default save
   directory.
 
-Sample Details
-~~~~~~~~~~~~~~
+Shape Details
+~~~~~~~~~~~~~
 
 Depending on the shape of the sample different parameters for the sample
 dimension are required and are detailed below.
 
-Flat
-####
+Flat Plate
+##########
 
 .. interface:: Data Analysis
-  :widget: pageFlat
+  :widget: pgFlatPlate
 
-Thickness
+The calculation for a flat plate geometry is performed by the
+:ref:`FlatPlatePaalmanPingsCorrection <algm-FlatPlatePaalmanPingsCorrection>`
+algorithm.
+
+Sample Thickness
   Thickness of sample (cm).
+
+Sample Angle
+  Sample angle (degrees).
 
 Can Front Thickness
   Thickness of front container (cm).
@@ -495,39 +491,46 @@ Can Front Thickness
 Can Back Thickness
   Thickness of back container (cm).
 
-Sample Angle
-  Sample angle (degrees).
-
 Cylinder
 ########
 
+.. warning:: This mode is only available on Windows
+
 .. interface:: Data Analysis
-  :widget: pageCylinder
+  :widget: pgCylinder
 
-Radius 1
-  Sample radius 1 (cm).
+The calculation for a cylindrical geometry is performed by the
+:ref:`CylinderPaalmanPingsCorrection <algm-CylinderPaalmanPingsCorrection>`
+algorithm, this algorithm is currently only available on Windows as it uses
+FORTRAN code dependant of F2Py.
 
-Radius 2
-  Sample radius 2 (cm).
+Sample Inner Radius
+  Radius of the inner wall of the sample (cm).
 
-Can Radius
-  Radius of inside of the container (cm).
+Sample Outer Radius
+  Radius of the outer wall of the sample (cm).
+
+Container Outer Radius
+  Radius of outer wall of the container (cm).
+
+Beam Height
+  Height of incident beam (cm).
+
+Beam Width
+  Width of incident beam (cm).
 
 Step Size
   Step size used in calculation.
 
-Theory
-~~~~~~
+Background
+~~~~~~~~~~
 
 The main correction to be applied to neutron scattering data is that for
 absorption both in the sample and its container, when present. For flat plate
 geometry, the corrections can be analytical and have been discussed for example
 by Carlile [1]. The situation for cylindrical geometry is more complex and
 requires numerical integration. These techniques are well known and used in
-liquid and amorphous diffraction, and are described in the ATLAS manual [2]. The
-routines used here have been developed from the corrections programs in the
-ATLAS suite and take into account the wavelength variation of both the
-absorption and the scattering cross-sections for the inelastic flight paths.
+liquid and amorphous diffraction, and are described in the ATLAS manual [2].
 
 The absorption corrections use the formulism of Paalman and Pings [3] and
 involve the attenuation factors :math:`A_{i,j}` where :math:`i` refers to
@@ -538,9 +541,7 @@ plus container. If the scattering cross sections for sample and container are
 scattering from the empty container is :math:`I_{c} = \Sigma_{c}A_{c,c}` and
 that from the sample plus container is :math:`I_{sc} = \Sigma_{s}A_{s,sc} +
 \Sigma_{c}A_{c,sc}`, thus :math:`\Sigma_{s} = (I_{sc} - I_{c}A_{c,sc}/A_{c,c}) /
-A_{s,sc}`.  In the package, the program Acorn calculates the attenuation
-coefficients :math:`A_{i,j}` and the routine Analyse uses them to calculate Σs
-which we identify with :math:`S(Q, \omega)`.
+A_{s,sc}`.
 
 References:
 
@@ -558,12 +559,29 @@ Apply Corrections
 The Apply Corrections tab applies the corrections calculated in the Calculate
 Corrections tab of the Indirect Data Analysis interface.
 
-This tab will expect to find the ass file generated in the previous tab. If Use
-Can is selected, it will also expect the assc, acsc and acc files. It will take
-the run number from the sample file, and geometry from the option you select.
+This uses the :ref:`ApplyPaalmanPingsCorrection
+<algm-ApplyPaalmanPingsCorrection>` algorithm to apply absorption corrections in
+the form of the Paalman & Pings correction factors. When *Use Can* is disabled
+only the :math:`A_{s,s}` factor must be provided, when using a container the
+additional factors must be provided: :math:`A_{c,sc}`, :math:`A_{s,sc}` and
+:math:`A_{c,c}`.
 
 Once run the corrected output and can correction is shown in the preview plot,
-the Spectrum spin box can be used to scroll through each spectrum.
+the Spectrum spin box can be used to scroll through each spectrum. Note that
+when this plot shows the result of a calculation the X axis is always in
+wavelength, however when data is initially selected the X axis unit matches that
+of the sample workspace.
+
+The input and container workspaces will be converted to wavelength (using
+:ref:`ConvertUnits <algm-ConvertUnits>`) if they do not already have wavelength
+as their X unit.
+
+The binning of the sample, container and corrections factor workspace must all
+match, if the sample and container do not match you will be given the option to
+rebin (using :ref:`RebinToWorkspace <algm-RebinToWorkspace>`) the sample to
+match the container, if the correction factors do not match you will be given
+the option to interpolate (:ref:`SplineInterpolation
+<algm-SplineInterpolation>`) the correction factor to match the sample.
 
 Options
 ~~~~~~~
@@ -581,12 +599,14 @@ Use Can
   either a reduced file (*_red.nxs*) or workspace (*_red*) or an :math:`S(Q,
   \omega)` file (*_sqw.nxs*) or workspace (*_sqw*).
 
-Corrections File
-  The output file (_Abs.nxs) or workspace group (_Abs) generated by Calculate
-  Corrections.
+Scale Can by factor
+  Allows the container intensity to be scaled by a given scale factor before
+  being used in the corrections calculation.
 
-Verbose
-  Enables outputting additional information to the Results Log.
+Use Corrections
+  The Paalman & Pings correction factors to use in the calculation, note that
+  the file or workspace name must end in either *_flt_abs* or *_cyl_abs* for the
+  flat plate and cylinder geometries respectively.
 
 Plot Output
   Gives the option to create either a spectra or contour plot (or both) of the
