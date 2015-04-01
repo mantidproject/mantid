@@ -139,59 +139,63 @@ public:
   }
 
   void test_construct_null_workspace() {
-    TS_ASSERT_THROWS(new Projection(ITableWorkspace_sptr()), std::runtime_error)
+    try {
+      auto p = boost::make_shared<Projection>(ITableWorkspace_sptr());
+      TS_FAIL("Projection constructor should have thrown exception");
+    } catch(std::runtime_error& e) {
+      TS_ASSERT_EQUALS(e.what(),
+          std::string("Null ITableWorkspace given to Projection constructor"))
+    } catch(...) {
+      TS_FAIL("Projection constructor threw unexpected exception");
+    }
   }
 
   void test_construct_bad_workspace_columns() {
-    auto proj = ITableWorkspace_sptr(new TableWorkspace());
-    TS_ASSERT_THROWS(new Projection(proj), std::runtime_error)
+    auto proj = ITableWorkspace_sptr(new DimensionedTable(0,0));
+    try {
+      auto p = boost::make_shared<Projection>(proj);
+      TS_FAIL("Projection constructor should have thrown exception");
+    } catch(std::runtime_error& e) {
+      TS_ASSERT_EQUALS(e.what(),
+          std::string("4 columns must be provided to create a projection"))
+    } catch(...) {
+      TS_FAIL("Projection constructor threw unexpected exception");
+    }
   }
 
   void test_construct_bad_workspace_no_rows() {
-    auto proj = ITableWorkspace_sptr(new TableWorkspace());
-    proj->addColumn("str", "name");
-    proj->addColumn("str", "value");
-    proj->addColumn("double", "offset");
-    proj->addColumn("str", "type");
-
-    TS_ASSERT_THROWS(new Projection(proj), std::runtime_error)
+    auto proj = ITableWorkspace_sptr(new DimensionedTable(4,0));
+    try {
+      auto p = boost::make_shared<Projection>(proj);
+      TS_FAIL("Projection constructor should have thrown exception");
+    } catch(std::runtime_error& e) {
+      TS_ASSERT_EQUALS(e.what(),
+          std::string("3 rows must be provided to create a projection"))
+    } catch(...) {
+      TS_FAIL("Projection constructor threw unexpected exception");
+    }
   }
 
   void test_construct_bad_workspace_too_many_rows() {
-    auto proj = ITableWorkspace_sptr(new TableWorkspace());
-    proj->addColumn("str", "name");
-    proj->addColumn("str", "value");
-    proj->addColumn("double", "offset");
-    proj->addColumn("str", "type");
-
-    proj->appendRow();
-    proj->appendRow();
-    proj->appendRow();
-    proj->appendRow();
-
-    TS_ASSERT_THROWS(new Projection(proj), std::runtime_error)
+    auto proj = ITableWorkspace_sptr(new DimensionedTable(4,4));
+    try {
+      auto p = boost::make_shared<Projection>(proj);
+      TS_FAIL("Projection constructor should have thrown exception");
+    } catch(std::runtime_error& e) {
+      TS_ASSERT_EQUALS(e.what(),
+          std::string("3 rows must be provided to create a projection"))
+    } catch(...) {
+      TS_FAIL("Projection constructor threw unexpected exception");
+    }
   }
 
   void test_construct_good_workspace() {
-    auto proj = ITableWorkspace_sptr(new TableWorkspace());
-    proj->addColumn("str", "name");
-    proj->addColumn("str", "value");
-    proj->addColumn("double", "offset");
-    proj->addColumn("str", "type");
+    auto proj = ITableWorkspace_sptr(new GoodTable());
+    Projection_sptr p;
+    TS_ASSERT_THROWS_NOTHING(p = boost::make_shared<Projection>(proj));
 
-    TableRow u = proj->appendRow();
-    TableRow v = proj->appendRow();
-    TableRow w = proj->appendRow();
-
-    u << "u" << "1,0,0" << 0.5 << "r";
-    v << "v" << "0,1,0" << 1.25 << "a";
-    w << "w" << "0,0,1" << -10.0 << "r";
-
-    boost::shared_ptr<Projection> p;
-    TS_ASSERT_THROWS_NOTHING(p.reset(new Projection(proj)))
-
-    TS_ASSERT_EQUALS(p->U(), V3D(1, 0, 0));
-    TS_ASSERT_EQUALS(p->V(), V3D(0, 1, 0));
+    TS_ASSERT_EQUALS(p->U(), V3D(1, 1, 0));
+    TS_ASSERT_EQUALS(p->V(), V3D(-1, 1, 0));
     TS_ASSERT_EQUALS(p->W(), V3D(0, 0, 1));
     TS_ASSERT_EQUALS(p->getOffset(0), 0.5);
     TS_ASSERT_EQUALS(p->getOffset(1), 1.25);
