@@ -78,13 +78,16 @@ Group Group::operator*(const Group &other) const {
 /// Returns a unique set of Kernel::V3D resulting from applying all symmetry
 /// operations, vectors are wrapped to [0, 1).
 std::vector<Kernel::V3D> Group::operator*(const Kernel::V3D &vector) const {
-  std::set<Kernel::V3D> result;
+  std::vector<Kernel::V3D> result;
 
   for (auto op = m_allOperations.begin(); op != m_allOperations.end(); ++op) {
-    result.insert(Geometry::getWrappedVector((*op) * vector));
+    result.push_back(Geometry::getWrappedVector((*op) * vector));
   }
 
-  return std::vector<Kernel::V3D>(result.begin(), result.end());
+  std::sort(result.begin(), result.end());
+  result.erase(std::unique(result.begin(), result.end()), result.end());
+
+  return result;
 }
 
 /// Returns true if both groups contain the same set of symmetry operations.
