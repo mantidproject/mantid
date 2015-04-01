@@ -78,8 +78,8 @@ SpaceGroup_const_sptr PoldiCreatePeaksFromCell::getSpaceGroup(
 CompositeBraggScatterer_sptr PoldiCreatePeaksFromCell::getScatterers(
     const std::string &scattererString) const {
   boost::char_separator<char> atomSep(";");
-  boost::tokenizer<boost::char_separator<char>> tokens(scattererString,
-                                                       atomSep);
+  boost::tokenizer<boost::char_separator<char> > tokens(scattererString,
+                                                        atomSep);
 
   std::vector<BraggScatterer_sptr> scatterers;
 
@@ -104,7 +104,7 @@ BraggScatterer_sptr PoldiCreatePeaksFromCell::getScatterer(
       getCleanScattererTokens(tokens);
   std::vector<std::string> properties =
       boost::assign::list_of("Element")("Position")("Occupancy")("U")
-          .convert_to_container<std::vector<std::string>>();
+          .convert_to_container<std::vector<std::string> >();
 
   std::string initString;
   for (size_t i = 0; i < cleanScattererTokens.size(); ++i) {
@@ -183,12 +183,12 @@ UnitCell PoldiCreatePeaksFromCell::getUnitCellFromProperties() const {
 }
 
 /** Returns a new UnitCell-object with crystal system constraints taken into
- *account
+ *  account
  *
  *  This method constructs a new UnitCell-object based on the values of the
- *supplied cell,
+ *  supplied cell,
  *  but takes into account the constraints of the crystal system. For
- *monoclinic, a unique b-axis is assumed.
+ *  monoclinic, a unique b-axis is assumed.
  *
  *  It's useful for "cleaning" user input.
  *
@@ -197,8 +197,8 @@ UnitCell PoldiCreatePeaksFromCell::getUnitCellFromProperties() const {
  * @return UnitCell-object with applied constraints
  */
 UnitCell PoldiCreatePeaksFromCell::getConstrainedUnitCell(
-    const UnitCell &unitCell,
-    const PointGroup::CrystalSystem &crystalSystem) const {
+    const UnitCell &unitCell, const PointGroup::CrystalSystem &crystalSystem,
+    const Group::CoordinateSystem &coordinateSystem) const {
   switch (crystalSystem) {
   case PointGroup::Cubic:
     return UnitCell(unitCell.a(), unitCell.a(), unitCell.a());
@@ -209,12 +209,15 @@ UnitCell PoldiCreatePeaksFromCell::getConstrainedUnitCell(
   case PointGroup::Monoclinic:
     return UnitCell(unitCell.a(), unitCell.b(), unitCell.c(), 90.0,
                     unitCell.beta(), 90.0);
+  case PointGroup::Trigonal:
+    if (coordinateSystem == Group::Orthogonal) {
+      return UnitCell(unitCell.a(), unitCell.a(), unitCell.a(),
+                      unitCell.alpha(), unitCell.alpha(), unitCell.alpha());
+    }
+  // fall through to hexagonal.
   case PointGroup::Hexagonal:
     return UnitCell(unitCell.a(), unitCell.a(), unitCell.c(), 90.0, 90.0,
                     120.0);
-  case PointGroup::Trigonal:
-    return UnitCell(unitCell.a(), unitCell.a(), unitCell.a(), unitCell.alpha(),
-                    unitCell.alpha(), unitCell.alpha());
   default:
     return UnitCell(unitCell);
   }
@@ -233,8 +236,8 @@ void PoldiCreatePeaksFromCell::init() {
   declareProperty("Atoms", "", "Atoms in the asymmetric unit. Format: \n"
                                "Element x y z Occupancy U; ... ");
 
-  boost::shared_ptr<BoundedValidator<double>> latticeParameterEdgeValidator =
-      boost::make_shared<BoundedValidator<double>>(0.0, 0.0);
+  boost::shared_ptr<BoundedValidator<double> > latticeParameterEdgeValidator =
+      boost::make_shared<BoundedValidator<double> >(0.0, 0.0);
   latticeParameterEdgeValidator->clearUpper();
   declareProperty("a", 1.0, latticeParameterEdgeValidator,
                   "Lattice parameter a");
@@ -243,8 +246,8 @@ void PoldiCreatePeaksFromCell::init() {
   declareProperty("c", 1.0, latticeParameterEdgeValidator->clone(),
                   "Lattice parameter c");
 
-  boost::shared_ptr<BoundedValidator<double>> latticeParameterAngleValidator =
-      boost::make_shared<BoundedValidator<double>>(0.0, 180.0);
+  boost::shared_ptr<BoundedValidator<double> > latticeParameterAngleValidator =
+      boost::make_shared<BoundedValidator<double> >(0.0, 180.0);
   declareProperty("alpha", 90.0, latticeParameterAngleValidator,
                   "Lattice parameter alpha");
   declareProperty("beta", 90.0, latticeParameterAngleValidator->clone(),
@@ -252,8 +255,8 @@ void PoldiCreatePeaksFromCell::init() {
   declareProperty("gamma", 90.0, latticeParameterAngleValidator->clone(),
                   "Lattice parameter gamma");
 
-  boost::shared_ptr<BoundedValidator<double>> dValidator =
-      boost::make_shared<BoundedValidator<double>>(0.01, 0.0);
+  boost::shared_ptr<BoundedValidator<double> > dValidator =
+      boost::make_shared<BoundedValidator<double> >(0.01, 0.0);
   dValidator->clearUpper();
 
   declareProperty("LatticeSpacingMin", 0.5, dValidator,
@@ -272,10 +275,14 @@ void PoldiCreatePeaksFromCell::exec() {
   // Get all user input regarding the unit cell
   SpaceGroup_const_sptr spaceGroup = getSpaceGroup(getProperty("SpaceGroup"));
   PointGroup_sptr pointGroup =
-      PointGroupFactory::Instance().createPointGroupFromSpaceGroupSymbol(
-          spaceGroup->hmSymbol());
+      PointGroupFactory::Instance().createPointGroupFromSpaceGroup(spaceGroup);
   UnitCell unitCell = getConstrainedUnitCell(getUnitCellFromProperties(),
-                                             pointGroup->crystalSystem());
+                                             pointGroup->crystalSystem(),
+                                             pointGroup->getCoordinateSystem());
+
+  g_log.information() << "Constrained unit cell is: " << unitCellToStr(unitCell)
+                      << std::endl;
+
   CompositeBraggScatterer_sptr scatterers = getScatterers(getProperty("Atoms"));
 
   // Create a CrystalStructure-object for use with PoldiPeakCollection

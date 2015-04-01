@@ -539,6 +539,7 @@ public:
       TS_ASSERT_EQUALS( it->second, "   Third line"); ++it;
       TS_ASSERT_EQUALS( it->first.toISO8601String(), "2000-09-05T12:23:33");
       TS_ASSERT_EQUALS( it->second, "   Fourth line"); ++it;
+      delete prop;
     }
 
     void test_num_repeat()
@@ -561,6 +562,7 @@ public:
       TS_ASSERT_EQUALS( it->second, 5); ++it;
       TS_ASSERT_EQUALS( it->first.toISO8601String(), "2000-09-05T12:23:33");
       TS_ASSERT_EQUALS( it->second, 6); ++it;
+      delete prop;
     }
 
     void test_str_continuation()
@@ -577,6 +579,7 @@ public:
       TS_ASSERT_EQUALS( it->second, "   First line"); ++it;
       TS_ASSERT_EQUALS( it->first.toISO8601String(), "2000-09-05T12:22:34");
       TS_ASSERT_EQUALS( it->second, "   Second line Third line"); ++it;
+      delete prop;
     }
 
 

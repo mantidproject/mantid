@@ -1,19 +1,19 @@
 #ifndef MANTID_MDAGORITHMS_MDEWPEAKINTEGRATION2TEST_H_
 #define MANTID_MDAGORITHMS_MDEWPEAKINTEGRATION2TEST_H_
 
+
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidDataObjects/MDEventFactory.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidDataObjects/PeakShapeSpherical.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
-#include "MantidKernel/System.h"
-#include "MantidKernel/Timer.h"
-#include "MantidMDEvents/MDEventFactory.h"
-#include "MantidMDAlgorithms/IntegratePeaksMD2.h"
 #include "MantidMDAlgorithms/CreateMDWorkspace.h"
 #include "MantidMDAlgorithms/FakeMDEventData.h"
+#include "MantidMDAlgorithms/IntegratePeaksMD2.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
+
 #include <boost/math/distributions/normal.hpp>
 #include <boost/math/special_functions/fpclassify.hpp>
 #include <boost/math/special_functions/pow.hpp>
@@ -22,18 +22,16 @@
 #include <boost/random/uniform_int.hpp>
 #include <boost/random/uniform_real.hpp>
 #include <boost/random/variate_generator.hpp>
-#include <cxxtest/TestSuite.h>
-#include <Poco/File.h>
-#include <iomanip>
-#include <iostream>
 
+#include <cxxtest/TestSuite.h>
+
+#include <Poco/File.h>
 
 using Mantid::API::AnalysisDataService;
 using Mantid::Geometry::MDHistoDimension;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
-using namespace Mantid::MDEvents;
 using namespace Mantid::MDAlgorithms;
 using Mantid::Kernel::V3D;
 
@@ -62,7 +60,7 @@ public:
   /** Run the IntegratePeaksMD2 with the given peak radius integration param */
   static void doRun(double PeakRadius, double BackgroundRadius,
       std::string OutputWorkspace = "IntegratePeaksMD2Test_peaks",
-      double BackgroundStartRadius = 0.0, bool edge = true, bool cyl = false, std::string fnct = "NoFit")
+      double BackgroundStartRadius = 0.0, bool edge = true, bool cyl = false, std::string fnct = "NoFit", double adaptive = 0.0)
   {
     IntegratePeaksMD2 alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
@@ -79,6 +77,8 @@ public:
     TS_ASSERT_THROWS_NOTHING( alg.setProperty("PercentBackground", 20.0 ) );
     TS_ASSERT_THROWS_NOTHING( alg.setProperty("ProfileFunction", fnct ) );
     TS_ASSERT_THROWS_NOTHING( alg.setProperty("IntegrationOption", "Sum" ) );
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("AdaptiveQMultiplier", adaptive ) );
+    if (adaptive > 0.0) TS_ASSERT_THROWS_NOTHING( alg.setProperty("AdaptiveQBackground", true ) );
     TS_ASSERT_THROWS_NOTHING( alg.execute() );
     TS_ASSERT( alg.isExecuted() );
   }
@@ -180,6 +180,15 @@ public:
 
     // Error is also calculated
     TS_ASSERT_DELTA( peakWS0->getPeak(0).getSigmaIntensity(), sqrt(2.0), 1e-2);*/
+
+    // ------------- Adaptive Integration r=MQ+b where b is PeakRadius and m is 0.01 ------------------------
+    peakWS0->addPeak( Peak(inst, 15050, 1.0, V3D(2., 3., 4.) ) );
+    doRun(0.1,0.0,"IntegratePeaksMD2Test_peaks",0.0,true,false,"NoFit",0.01);
+    TS_ASSERT_DELTA( peakWS0->getPeak(1).getIntensity(), 29.0, 1e-2);
+
+    // Error is also calculated
+    TS_ASSERT_DELTA( peakWS0->getPeak(1).getSigmaIntensity(), sqrt(29.0), 1e-2);
+
     // ------------- Integrate with 0.1 radius but IntegrateIfOnEdge false------------------------
     doRun(0.1,0.0,"IntegratePeaksMD2Test_peaks",0.0,false);
 

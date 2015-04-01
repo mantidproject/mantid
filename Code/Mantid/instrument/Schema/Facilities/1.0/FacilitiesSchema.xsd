@@ -27,7 +27,7 @@
                     <xs:element name="pythonExecutable" type="xs:string" />
                   </xs:choice>
                   <xs:attribute name="name"/>
-                  <xs:attribute name="type"/>
+                  <xs:attribute name="jobmanagertype"/>
                 </xs:complexType>
               </xs:element>
               <xs:element name="catalog">

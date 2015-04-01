@@ -136,6 +136,8 @@ class ISISLoadFilesRAW(stresstesting.MantidStressTest):
         self.assertTrue(isinstance(ws,Workspace))
         self.assertEqual(ws.getNumberHistograms(),41472)
         self.assertEqual(mon_ws.getNumberHistograms(),4)
+
+        
         #
         self.valid = True
 
@@ -180,26 +182,36 @@ class ISISLoadFilesMER(stresstesting.MantidStressTest):
         propman.sample_run = 18492 # (histogram nxs file )
         propman.det_cal_file = None
         mon_ws = PropertyManager.sample_run.get_monitors_ws()
+        self.assertTrue('SR_MER018492' in mtd)
         self.assertTrue(not mon_ws is None)
         ws = PropertyManager.sample_run.get_workspace()
         self.assertTrue(isinstance(ws,Workspace))
         self.assertEqual(ws.getNumberHistograms(),69641)
         self.assertEqual(mon_ws.getNumberHistograms(),69641)
+        self.assertEqual(mon_ws.getIndexFromSpectrumNumber(69638),69637)
+        det = mon_ws.getDetector(69632)
+        self.assertTrue(det.isMonitor())
+        det = mon_ws.getDetector(69631)
+        self.assertFalse(det.isMonitor())
 
 
-        self.valid = True
-        return
         #  enable when bug #10980 is fixed
+        propman.sample_run = None # delete all
+        self.assertFalse('SR_MER018492' in mtd)
         propman.sample_run = 18492 # (histogram nxs file )
+        propman.load_monitors_with_workspace = False
         propman.det_cal_file = None
         mon_ws = PropertyManager.sample_run.get_monitors_ws()
         self.assertTrue(not mon_ws is None)
+        self.assertTrue('SR_MER018492_monitors' in mtd)
 
         ws = PropertyManager.sample_run.get_workspace()
         self.assertTrue(isinstance(ws,Workspace))
         self.assertEqual(ws.getNumberHistograms(),69632)
         self.assertEqual(mon_ws.getNumberHistograms(),9)
-
+        self.assertEqual(mon_ws.getIndexFromSpectrumNumber(69633),0)
+        det = mon_ws.getDetector(0)
+        self.assertTrue(det.isMonitor())
 
         self.valid = True
 

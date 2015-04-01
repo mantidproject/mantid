@@ -52,13 +52,13 @@ protected:
   void checkInputs();
   void execEvent();
   virtual void
-  execHistoScalar(Mantid::MDEvents::MDHistoWorkspace_sptr out,
+  execHistoScalar(Mantid::DataObjects::MDHistoWorkspace_sptr out,
                   Mantid::DataObjects::WorkspaceSingleValue_const_sptr scalar);
 
   /// Run the algorithm with a MDHisotWorkspace as output and operand
   virtual void
-  execHistoHisto(Mantid::MDEvents::MDHistoWorkspace_sptr out,
-                 Mantid::MDEvents::MDHistoWorkspace_const_sptr operand) = 0;
+  execHistoHisto(Mantid::DataObjects::MDHistoWorkspace_sptr out,
+                 Mantid::DataObjects::MDHistoWorkspace_const_sptr operand) = 0;
 };
 
 } // namespace MDAlgorithms
