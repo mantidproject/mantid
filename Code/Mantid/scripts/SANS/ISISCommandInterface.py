@@ -316,9 +316,12 @@ def SetCentre(xcoord, ycoord, bank = 'rear'):
     Introduced #5942
     """
     _printMessage('SetCentre(' + str(xcoord) + ', ' + str(ycoord) + ')')
+    # use the scale factors from the parameter file to scale correctly
+    XSF = ReductionSingleton().inst.beam_centre_scale_factor1
+    YSF = ReductionSingleton().inst.beam_centre_scale_factor2
 
     ReductionSingleton().set_beam_finder(isis_reduction_steps.BaseBeamFinder(\
-                                float(xcoord)/1000.0, float(ycoord)/1000.0), bank)
+                                float(xcoord)/XSF, float(ycoord)/YSF), bank)
 
 def GetMismatchedDetList():
     """
@@ -561,56 +564,56 @@ def _fitRescaleAndShift(rAnds, frontData, rearData):
         Fit rear data to FRONTnew(Q) = ( FRONT(Q) + SHIFT )xRESCALE,
         FRONT(Q) is the frontData argument. Returns scale and shift
 
-        Note SHIFT is shift of a constant back, not the Shift parameter in
-        TabulatedFunction.
-
         @param rAnds: A DetectorBank -> _RescaleAndShift structure
         @param frontData: Reduced front data
         @param rearData: Reduced rear data
     """
     if rAnds.fitScale==False and rAnds.fitShift==False:
         return rAnds.scale, rAnds.shift
-
+    #TODO: we should allow the user to add constraints?
     if rAnds.fitScale==False:
         if rAnds.qRangeUserSelected:
             Fit(InputWorkspace=rearData,
                 Function='name=TabulatedFunction, Workspace="'+str(frontData)+'"'
-                +";name=FlatBackground",
-                Ties='f0.Scaling='+str(rAnds.scale)+',f0.Shift=0.0',
+                +";name=FlatBackground", Ties='f0.Scaling='+str(rAnds.scale),
                 Output="__fitRescaleAndShift", StartX=rAnds.qMin, EndX=rAnds.qMax)
         else:
             Fit(InputWorkspace=rearData,
                 Function='name=TabulatedFunction, Workspace="'+str(frontData)+'"'
-                +";name=FlatBackground",
-                Ties='f0.Scaling='+str(rAnds.scale)+',f0.Shift=0.0',
+                +";name=FlatBackground", Ties='f0.Scaling='+str(rAnds.scale),
                 Output="__fitRescaleAndShift")
     elif rAnds.fitShift==False:
         if rAnds.qRangeUserSelected:
+            function_input = 'name=TabulatedFunction, Workspace="'+str(frontData)+'"' +";name=FlatBackground"
+            ties = 'f1.A0='+str(rAnds.shift*rAnds.scale)
+            logger.warning('function input ' + str(function_input))
+
             Fit(InputWorkspace=rearData,
                 Function='name=TabulatedFunction, Workspace="'+str(frontData)+'"'
-                +";name=FlatBackground",
-                Ties='f1.A0='+str(rAnds.shift*rAnds.scale)+',f0.Shift=0.0',
+                +";name=FlatBackground", Ties='f1.A0='+str(rAnds.shift*rAnds.scale),
                 Output="__fitRescaleAndShift", StartX=rAnds.qMin, EndX=rAnds.qMax)
         else:
             Fit(InputWorkspace=rearData,
                 Function='name=TabulatedFunction, Workspace="'+str(frontData)+'"'
-                +";name=FlatBackground",
-                Ties='f1.A0='+str(rAnds.shift*rAnds.scale)+',f0.Shift=0.0',
+                +";name=FlatBackground", Ties='f1.A0='+str(rAnds.shift*rAnds.scale),
                 Output="__fitRescaleAndShift")
     else:
         if rAnds.qRangeUserSelected:
             Fit(InputWorkspace=rearData,
                 Function='name=TabulatedFunction, Workspace="'+str(frontData)+'"'
-                +";name=FlatBackground", Ties=',f0.Shift=0.0',
+                +";name=FlatBackground",
                 Output="__fitRescaleAndShift", StartX=rAnds.qMin, EndX=rAnds.qMax)
         else:
             Fit(InputWorkspace=rearData, Function='name=TabulatedFunction, Workspace="'+str(frontData)+'"'
-                +";name=FlatBackground", Ties=',f0.Shift=0.0', Output="__fitRescaleAndShift")
+                +";name=FlatBackground",Output="__fitRescaleAndShift")
 
     param = mtd['__fitRescaleAndShift_Parameters']
 
-    scale = param.row(0).items()[1][1]
-    chiSquared = param.row(3).items()[1][1]
+    row1 = param.row(0).items()
+    row2 = param.row(1).items()
+    row3 = param.row(2).items()
+    scale = row1[1][1]
+    chiSquared = row3[1][1]
 
     fitSuccess = True
     if not chiSquared > 0:
@@ -623,7 +626,7 @@ def _fitRescaleAndShift(rAnds, frontData, rearData):
     if fitSuccess == False:
         return rAnds.scale, rAnds.shift
 
-    shift =  param.row(2).items()[1][1] / scale
+    shift = row2[1][1] / scale
 
     delete_workspaces('__fitRescaleAndShift_Parameters')
     delete_workspaces('__fitRescaleAndShift_NormalisedCovarianceMatrix')
@@ -823,7 +826,8 @@ def SetPhiLimit(phimin, phimax, use_mirror=True):
     #a beam centre of [0,0,0] makes sense if the detector has been moved such that beam centre is at [0,0,0]
     ReductionSingleton().mask.set_phi_limit(phimin, phimax, use_mirror)
 
-def SetDetectorOffsets(bank, x, y, z, rot, radius, side):
+def SetDetectorOffsets(bank, x, y, z, rot, radius, side, xtilt=0.0, ytilt=0.0 ):
+    # 10/03/15 RKH added 2 more parameters - xtilt & ytilt
     """
         Adjust detector position away from position defined in IDF. On SANS2D the detector
         banks can be moved around. This method allows fine adjustments of detector bank position
@@ -841,10 +845,12 @@ def SetDetectorOffsets(bank, x, y, z, rot, radius, side):
         @param rot: shift in degrees
         @param radius: shift in mm
         @param side: shift in mm
+        @param side: xtilt in degrees
+        @param side: ytilt in degrees
     """
     _printMessage("SetDetectorOffsets(" + str(bank) + ', ' + str(x)
                   + ','+str(y) + ',' + str(z) + ',' + str(rot)
-                  + ',' + str(radius) + ',' + str(side) + ')')
+                  + ',' + str(radius) + ',' + str(side) + ',' + str(xtilt)+ ',' + str(ytilt) +')')
 
     detector = ReductionSingleton().instrument.getDetector(bank)
     detector.x_corr = x
@@ -853,7 +859,24 @@ def SetDetectorOffsets(bank, x, y, z, rot, radius, side):
     detector.rot_corr = rot
     detector.radius_corr = radius
     detector.side_corr = side
+	# 10/03/15 RKH add 2 more
+    detector.x_tilt = xtilt
+    detector.y_tilt = ytilt
 
+def SetCorrectionFile(bank, filename):
+    # 10/03/15 RKH, create a new routine that allows change of "direct beam file" = correction file, for a given 
+    # detector, this simplify the iterative process used to adjust it. Will still have to keep changing the name of the file
+    # for each iteratiom to avoid Mantid using a cached version, but can then use only a single user (=mask) file for each set of iterations.
+    # Modelled this on SetDetectorOffsets above ...
+    """
+        @param bank: Must be either 'front' or 'rear' (not case sensitive)
+        @param filename: self explanatory
+    """
+    _printMessage("SetCorrectionFile(" + str(bank) + ', ' + filename +')')
+
+    detector = ReductionSingleton().instrument.getDetector(bank)
+    detector.correction_file = filename
+    
 def LimitsR(rmin, rmax, quiet=False, reducer=None):
     if reducer == None:
         reducer = ReductionSingleton().reference()
@@ -1038,7 +1061,10 @@ def FindBeamCentre(rlow, rupp, MaxIter = 10, xstart = None, ystart = None, toler
         @return: the best guess for the beam centre point
     """
     XSTEP = ReductionSingleton().inst.cen_find_step
-    YSTEP = ReductionSingleton().inst.cen_find_step
+    YSTEP = ReductionSingleton().inst.cen_find_step2
+
+    XSF = ReductionSingleton().inst.beam_centre_scale_factor1
+    YSF = ReductionSingleton().inst.beam_centre_scale_factor2
 
     original = ReductionSingleton().get_instrument().cur_detector_position(ReductionSingleton().get_sample().get_wksp_name())
 
@@ -1077,6 +1103,7 @@ def FindBeamCentre(rlow, rupp, MaxIter = 10, xstart = None, ystart = None, toler
     XNEW = xstart + XSTEP
     YNEW = ystart + YSTEP
     graph_handle = None
+    it = 0
     for i in range(1, MaxIter+1):
         it = i
 
@@ -1123,7 +1150,7 @@ def FindBeamCentre(rlow, rupp, MaxIter = 10, xstart = None, ystart = None, toler
 
     ReductionSingleton().set_beam_finder(
         isis_reduction_steps.BaseBeamFinder(XNEW, YNEW), det_bank)
-    centre.logger.notice("Centre coordinates updated: [" + str(XNEW)+ ", "+ str(YNEW) + ']')
+    centre.logger.notice("Centre coordinates updated: [" + str(XNEW*XSF) + ", " + str(YNEW*YSF) + ']')
 
     return XNEW, YNEW
 

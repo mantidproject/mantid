@@ -63,7 +63,7 @@ public:
     { V3D equiv[] = {V3D(1,2,3),V3D(-1,-2,3), V3D(-2,1,3), V3D(2,-1,3), V3D(-1,2,-3), V3D(1,-2,-3), V3D(2,1,-3), V3D(-2,-1,-3), V3D(-1,-2,-3), V3D(1,2,-3), V3D(2,-1,-3), V3D(-2,1,-3), V3D(1,-2,3), V3D(-1,2,3),V3D(-2,-1,3), V3D(2,1,3)};
     check_point_group("4/mmm", V3D(1,2,3), 16, equiv); }
     { V3D equiv[] = {V3D(1,2,3),V3D(2,-3,3),V3D(-3,1,3), V3D(-1,-2,-3),V3D(-2,3,-3),V3D(3,-1,-3)};
-    check_point_group("-3 h", V3D(1,2,3), 6, equiv); }
+    check_point_group("-3", V3D(1,2,3), 6, equiv); }
     { V3D equiv[] = {V3D(1,2,3),V3D(2,-3,3),V3D(-3,1,3),V3D(2,1,-3),V3D(1,-3,-3),V3D(-3,2,-3),V3D(-1,-2,-3),V3D(-2,3,-3),V3D(3,-1,-3),V3D(-2,-1,3),V3D(-1,3,3),V3D(3,-2,3)};
     check_point_group("-3m1", V3D(1,2,3), 12, equiv); }
     { V3D equiv[] = {V3D(1,2,3),V3D(2,-3,3),V3D(-3,1,3),V3D(-2,-1,-3),V3D(-1,3,-3),V3D(3,-2,-3),V3D(-1,-2,-3),V3D(-2,3,-3),V3D(3,-1,-3),V3D(2,1,3),V3D(1,-3,3),V3D(-3,2,3),};
@@ -128,19 +128,19 @@ public:
       crystalSystemsMap["-4m2"] = PointGroup::Tetragonal;
       crystalSystemsMap["4/mmm"] = PointGroup::Tetragonal;
 
-      crystalSystemsMap["3 h"] = PointGroup::Trigonal;
-      crystalSystemsMap["-3 h"] = PointGroup::Trigonal;
+      crystalSystemsMap["3"] = PointGroup::Trigonal;
+      crystalSystemsMap["-3"] = PointGroup::Trigonal;
       crystalSystemsMap["321"] = PointGroup::Trigonal;
       crystalSystemsMap["312"] = PointGroup::Trigonal;
       crystalSystemsMap["3m1"] = PointGroup::Trigonal;
       crystalSystemsMap["31m"] = PointGroup::Trigonal;
       crystalSystemsMap["-3m1"] = PointGroup::Trigonal;
       crystalSystemsMap["-31m"] = PointGroup::Trigonal;
-      crystalSystemsMap["3"] = PointGroup::Trigonal;
-      crystalSystemsMap["-3"] = PointGroup::Trigonal;
-      crystalSystemsMap["32"] = PointGroup::Trigonal;
-      crystalSystemsMap["3m"] = PointGroup::Trigonal;
-      crystalSystemsMap["-3m"] = PointGroup::Trigonal;
+      crystalSystemsMap["3 r"] = PointGroup::Trigonal;
+      crystalSystemsMap["-3 r"] = PointGroup::Trigonal;
+      crystalSystemsMap["32 r"] = PointGroup::Trigonal;
+      crystalSystemsMap["3m r"] = PointGroup::Trigonal;
+      crystalSystemsMap["-3m r"] = PointGroup::Trigonal;
 
       crystalSystemsMap["6"] = PointGroup::Hexagonal;
       crystalSystemsMap["-6"] = PointGroup::Hexagonal;

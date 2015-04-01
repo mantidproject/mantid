@@ -54,7 +54,7 @@ public:
   void addPeriodLogs(const int period, API::Run &exptRun);
 
 private:
-  DISABLE_DEFAULT_CONSTRUCT(ISISRunLogs);
+  DISABLE_DEFAULT_CONSTRUCT(ISISRunLogs)
 
   /// A LogParser object
   boost::scoped_ptr<Kernel::LogParser> m_logParser;

@@ -67,7 +67,7 @@ public:
   std::string name()const {return "ImmutableCompositeFunctionTest_Function";}
 };
 
-DECLARE_FUNCTION(ImmutableCompositeFunctionTest_Function);
+DECLARE_FUNCTION(ImmutableCompositeFunctionTest_Function)
 
 //---------------------------------------------------------------------------------
 class ImmutableCompositeFunctionTest_FunctionWithTies: public ImmutableCompositeFunction
@@ -95,7 +95,7 @@ public:
   std::string name()const {return "ImmutableCompositeFunctionTest_FunctionWithTies";}
 };
 
-DECLARE_FUNCTION(ImmutableCompositeFunctionTest_FunctionWithTies);
+DECLARE_FUNCTION(ImmutableCompositeFunctionTest_FunctionWithTies)
 
 //---------------------------------------------------------------------------------
 class ImmutableCompositeFunctionTest_FunctionThrow: public ImmutableCompositeFunction

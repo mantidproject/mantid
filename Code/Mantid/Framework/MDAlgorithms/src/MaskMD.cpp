@@ -41,10 +41,10 @@ MaskMD::~MaskMD() {}
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
-const std::string MaskMD::name() const { return "MaskMD"; };
+const std::string MaskMD::name() const { return "MaskMD"; }
 
 /// Algorithm's version for identification. @see Algorithm::version
-int MaskMD::version() const { return 1; };
+int MaskMD::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
 const std::string MaskMD::category() const { return "MDAlgorithms"; }

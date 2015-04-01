@@ -25,7 +25,7 @@ using namespace boost;
 namespace Mantid {
 namespace DataHandling {
 
-DECLARE_FILELOADER_ALGORITHM(LoadPDFgetNFile);
+DECLARE_FILELOADER_ALGORITHM(LoadPDFgetNFile)
 
 //----------------------------------------------------------------------------------------------
 /** Constructor

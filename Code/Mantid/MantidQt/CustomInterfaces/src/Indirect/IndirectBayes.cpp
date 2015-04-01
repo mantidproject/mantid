@@ -14,7 +14,7 @@ namespace MantidQt
 {
   namespace CustomInterfaces
   {
-    DECLARE_SUBWINDOW(IndirectBayes);
+    DECLARE_SUBWINDOW(IndirectBayes)
   }
 }
 

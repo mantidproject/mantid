@@ -36,7 +36,7 @@ using namespace Mantid::Geometry;
 namespace Mantid {
 namespace DataObjects {
 /// Register the workspace as a type
-DECLARE_WORKSPACE(PeaksWorkspace);
+DECLARE_WORKSPACE(PeaksWorkspace)
 
 //---------------------------------------------------------------------------------------------
 /** Constructor. Create a table with all the required columns.

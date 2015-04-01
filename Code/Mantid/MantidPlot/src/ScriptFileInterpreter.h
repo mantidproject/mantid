@@ -123,7 +123,7 @@ private slots:
   void setStoppedStatus();
 
 private:
-  Q_DISABLE_COPY(ScriptFileInterpreter);
+  Q_DISABLE_COPY(ScriptFileInterpreter)
   void setupChildWidgets();
 
   void setupEditor(const ScriptingEnv & environ, const QString & identifier);

@@ -2,42 +2,30 @@
 #define MANTID_MDEVENTS_BINTOMDHISTOWORKSPACETEST_H_
 
 #include "MantidAPI/IMDEventWorkspace.h"
-#include "MantidAPI/ImplicitFunctionFactory.h"
-#include "MantidAPI/ImplicitFunctionParameter.h"
-#include "MantidAPI/ImplicitFunctionParameterParserFactory.h"
-#include "MantidAPI/ImplicitFunctionParameterParserFactory.h"
-#include "MantidAPI/ImplicitFunctionParserFactory.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/ImplicitFunctionBuilder.h"
+#include "MantidAPI/ImplicitFunctionFactory.h"
+#include "MantidAPI/ImplicitFunctionParser.h"
+#include "MantidAPI/ImplicitFunctionParameterParserFactory.h"
 #include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
 #include "MantidGeometry/MDGeometry/MDTypes.h"
-#include "MantidKernel/ConfigService.h"
-#include "MantidKernel/CPUTimer.h"
-#include "MantidKernel/System.h"
-#include "MantidKernel/Timer.h"
 #include "MantidMDAlgorithms/BinMD.h"
+#include "MantidMDAlgorithms/CreateMDWorkspace.h"
 #include "MantidMDAlgorithms/FakeMDEventData.h"
-#include "MantidMDEvents/CoordTransformAffine.h"
-#include "MantidMDEvents/MDEventFactory.h"
-#include "MantidMDEvents/MDEventWorkspace.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
+
 #include <boost/math/special_functions/fpclassify.hpp>
+
 #include <cxxtest/TestSuite.h>
+
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
-#include <iomanip>
-#include <iostream>
-#include "MantidKernel/Strings.h"
-#include "MantidKernel/VMD.h"
-#include "MantidKernel/Utils.h"
-#include "MantidMDEvents/MDHistoWorkspace.h"
-#include "MantidMDAlgorithms/CreateMDWorkspace.h"
 
-using namespace Mantid::MDEvents;
-using namespace Mantid::MDAlgorithms;
 using namespace Mantid::API;
+using namespace Mantid::DataObjects;
 using namespace Mantid::Kernel;
+using namespace Mantid::MDAlgorithms;
 using Mantid::coord_t;
-
 
 class BinMDTest : public CxxTest::TestSuite
 {
@@ -88,16 +76,16 @@ private:
   {
     using namespace Mantid::API;
     AnalysisDataService::Instance().remove("3D_Workspace");
-    IAlgorithm* create = FrameworkManager::Instance().createAlgorithm("CreateMDWorkspace");
+    CreateMDWorkspace create;
 
-    create->initialize();
-    create->setProperty("Dimensions", 3);
-    create->setPropertyValue("Extents","0,10,0,10,0,10");
-    create->setPropertyValue("Names","x,y,z");
-    create->setPropertyValue("Units","m,m,m");
-    create->setPropertyValue("SplitInto","10");
-    create->setPropertyValue("OutputWorkspace", "3D_Workspace");
-    create->execute();
+    create.initialize();
+    create.setProperty("Dimensions", 3);
+    create.setPropertyValue("Extents","0,10,0,10,0,10");
+    create.setPropertyValue("Names","x,y,z");
+    create.setPropertyValue("Units","m,m,m");
+    create.setPropertyValue("SplitInto","10");
+    create.setPropertyValue("OutputWorkspace", "3D_Workspace");
+    create.execute();
     return AnalysisDataService::Instance().retrieve("3D_Workspace");
   }
 
@@ -1071,5 +1059,5 @@ private:
 };
 
 
-#endif /* MANTID_MDEVENTS_BINTOMDHISTOWORKSPACETEST_H_ */
+#endif /* MANTID_MDALGORITHMS_BINTOMDHISTOWORKSPACETEST_H_ */
 

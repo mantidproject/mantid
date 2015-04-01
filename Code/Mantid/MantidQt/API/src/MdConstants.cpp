@@ -12,9 +12,9 @@ namespace MantidQt
     {
       initializeSettingsConstants();
       initializeViewConstants();
-    };
+    }
 
-    MdConstants::~MdConstants(){};
+    MdConstants::~MdConstants(){}
 
     void MdConstants::initializeSettingsConstants()
     {

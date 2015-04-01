@@ -7,10 +7,10 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/Strings.h"
 
+#include <Poco/DOM/AutoPtr.h>
 #include <Poco/DOM/Element.h>
 #include <Poco/DOM/NodeList.h>
 #include <Poco/DOM/Text.h>
-#include <Poco/DOM/AutoPtr.h>
 
 #include <boost/lexical_cast.hpp>
 

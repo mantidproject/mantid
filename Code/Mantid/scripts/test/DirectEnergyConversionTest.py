@@ -307,23 +307,23 @@ class DirectEnergyConversionTest(unittest.TestCase):
     def test_tof_range(self):
 
         run=CreateSampleWorkspace(Function='Multiple Peaks', NumBanks=6, BankPixelWidth=1, NumEvents=10,\
-                                  XUnit='DeltaE', XMin=-20, XMax=65, BinWidth=0.2)
+                                  XUnit='Energy', XMin=5, XMax=75, BinWidth=0.2)
         LoadInstrument(run,InstrumentName='MARI')
 
         red = DirectEnergyConversion(run.getInstrument())
 
-        red.prop_man.incident_energy = 67
-        red.prop_man.energy_bins =  [-20,0.2,65]
+        red.prop_man.incident_energy = 26.2
+        red.prop_man.energy_bins =  [-20,0.1,20]
         red.prop_man.multirep_tof_specta_list = [4,5,6]
         MoveInstrumentComponent(Workspace='run', ComponentName='Detector', DetectorID=1102, Z=3)
         MoveInstrumentComponent(Workspace='run', ComponentName='Detector', DetectorID=1103,Z=6)
 
+        run_tof = ConvertUnits(run,Target='TOF',EMode='Elastic')
 
-        tof_range = red.find_tof_range_for_multirep(run)
+        tof_range = red.find_tof_range_for_multirep(run_tof)
 
         self.assertEqual(len(tof_range),3)
 
-        run_tof = ConvertUnits(run,Target='TOF',EMode='Direct',EFixed=67.)
         x = run_tof.readX(3)
         dx=abs(x[1:]-x[:-1])
         xMin = min(x)
@@ -332,17 +332,23 @@ class DirectEnergyConversionTest(unittest.TestCase):
         xMax = max(x)
 
 
-        self.assertAlmostEqual(tof_range[0],xMin)
-        self.assertAlmostEqual(tof_range[1],dt)
-        self.assertAlmostEqual(tof_range[2],xMax)
+        self.assertTrue(tof_range[0]>xMin)
+        #self.assertAlmostEqual(tof_range[1],dt)
+        self.assertTrue(tof_range[2]<xMax)
 
         # check another working mode
         red.prop_man.multirep_tof_specta_list = 4
-        tof_range1 = red.find_tof_range_for_multirep(run)
+        red.prop_man.incident_energy = 47.505
+        red.prop_man.energy_bins =  [-20,0.1,45]
+  
+        tof_range1 = red.find_tof_range_for_multirep(run_tof)
 
-        self.assertAlmostEqual(tof_range[0],tof_range1[0])
-        self.assertAlmostEqual(tof_range[1],tof_range1[1])
-        #self.assertAlmostEqual(tof_range[2],tof_range1[2])
+        self.assertTrue(tof_range1[0]>xMin)
+        self.assertTrue(tof_range1[2]<xMax)
+
+        self.assertTrue(tof_range1[2]<tof_range[2])
+        self.assertTrue(tof_range1[0]<tof_range[0])
+        self.assertTrue(tof_range1[1]<tof_range[1])
 
     def test_multirep_mode(self):
         # create test workspace

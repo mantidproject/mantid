@@ -22,10 +22,10 @@ LogarithmMD::~LogarithmMD() {}
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
-const std::string LogarithmMD::name() const { return "LogarithmMD"; };
+const std::string LogarithmMD::name() const { return "LogarithmMD"; }
 
 /// Algorithm's version for identification. @see Algorithm::version
-int LogarithmMD::version() const { return 1; };
+int LogarithmMD::version() const { return 1; }
 
 //----------------------------------------------------------------------------------------------
 
@@ -60,7 +60,7 @@ void LogarithmMD::execEvent(Mantid::API::IMDEventWorkspace_sptr /*out*/) {
 
 //----------------------------------------------------------------------------------------------
 /// LogarithmMD::Run the algorithm with a MDHistoWorkspace
-void LogarithmMD::execHisto(Mantid::MDEvents::MDHistoWorkspace_sptr out) {
+void LogarithmMD::execHisto(Mantid::DataObjects::MDHistoWorkspace_sptr out) {
   bool natural = getProperty("Natural");
   double filler = getProperty("Filler");
   if (natural)
