@@ -898,7 +898,7 @@ std::string LSFJobManager::buildSubmitBody(
     // <AppParam><id>JOB_NAME</id><value>foo</value><type></type></AppParam>
     std::string name;
     if (jobName.empty()) {
-      "Mantid_job_" + boost::lexical_cast<std::string>(seqNo());
+      name = "Mantid_job_" + boost::lexical_cast<std::string>(seqNo());
     } else {
       name = jobName;
     }
