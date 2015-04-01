@@ -485,20 +485,22 @@ class RunDescriptor(PropDescriptor):
                 noutputs=0
 
         if self._mask_ws_name:
-            mask_ws = mtd[self._mask_ws_name]
-            #TODO: need normal exposure of getNumberMasked() method of masks workspace
-            if noutputs>1:
-                __tmp_masks,spectra = ExtractMask(self._mask_ws_name)
-                num_masked = len(spectra)
-                DeleteWorkspace(__tmp_masks)
-                return (mask_ws,num_masked)
+            if self._mask_ws_name in mtd:
+                mask_ws = mtd[self._mask_ws_name]
+                #TODO: need normal exposure of getNumberMasked() method of masks workspace
+                if noutputs>1:
+                    __tmp_masks,spectra = ExtractMask(self._mask_ws_name)
+                    num_masked = len(spectra)
+                    DeleteWorkspace(__tmp_masks)
+                    return (mask_ws,num_masked)
+                else:
+                    return mask_ws
             else:
-                return mask_ws
+                self._mask_ws_name = None
+        if noutputs>1:
+            return (None,0)
         else:
-            if noutputs>1:
-                return (None,0)
-            else:
-                return None
+            return None
 #--------------------------------------------------------------------------------------------------------------------
     def add_masked_ws(self,masked_ws):
         """Extract masking from the workspace provided and store masks

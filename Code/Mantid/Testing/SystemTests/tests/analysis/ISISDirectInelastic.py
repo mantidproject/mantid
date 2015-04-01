@@ -87,6 +87,7 @@ class MARIReductionFromFile(ISISDirectInelasticReduction):
         self.scale_to_fix_abf = 0.997979227566217
 
     def runTest(self):
+        #self.red.run_reduction()
         outWS = self.red.reduce()
         outWS*=self.scale_to_fix_abf
 
