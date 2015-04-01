@@ -480,16 +480,16 @@ The calculation for a flat plate geometry is performed by the
 algorithm.
 
 Sample Thickness
-  Thickness of sample (cm).
+  Thickness of sample in :math:`cm`.
 
 Sample Angle
-  Sample angle (degrees).
+  Sample angle in degrees.
 
 Can Front Thickness
-  Thickness of front container (cm).
+  Thickness of front container in :math:`cm`.
 
 Can Back Thickness
-  Thickness of back container (cm).
+  Thickness of back container in :math:`cm`.
 
 Cylinder
 ########
@@ -505,19 +505,19 @@ algorithm, this algorithm is currently only available on Windows as it uses
 FORTRAN code dependant of F2Py.
 
 Sample Inner Radius
-  Radius of the inner wall of the sample (cm).
+  Radius of the inner wall of the sample in :math:`cm`.
 
 Sample Outer Radius
-  Radius of the outer wall of the sample (cm).
+  Radius of the outer wall of the sample in :math:`cm`.
 
 Container Outer Radius
-  Radius of outer wall of the container (cm).
+  Radius of outer wall of the container in :math:`cm`.
 
 Beam Height
-  Height of incident beam (cm).
+  Height of incident beam :math:`cm`.
 
 Beam Width
-  Width of incident beam (cm).
+  Width of incident beam in :math:`cm`.
 
 Step Size
   Step size used in calculation.
