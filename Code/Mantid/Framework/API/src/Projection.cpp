@@ -47,14 +47,23 @@ Projection::Projection(ITableWorkspace_const_sptr ws) {
   }
 
   const size_t numRows = ws->rowCount();
-  if (numRows != 3) {
+  if (numRows != 3)
     throw std::runtime_error("3 rows must be provided to create a projection");
-  }
+
+  if (ws->getColumn("name")->size() != numRows)
+    throw std::runtime_error("Insufficient values in 'name' column.");
+  if (ws->getColumn("value")->size() != numRows)
+    throw std::runtime_error("Insufficient values in 'value' column.");
+  if (ws->getColumn("offset")->size() != numRows)
+    throw std::runtime_error("Insufficient values in 'offset' column.");
+  if (ws->getColumn("type")->size() != numRows)
+    throw std::runtime_error("Insufficient values in 'unit' column.");
+
   for (size_t i = 0; i < numRows; i++) {
     const std::string name = ws->getColumn("name")->cell<std::string>(i);
     const std::string valueStr = ws->getColumn("value")->cell<std::string>(i);
-    const std::string offsetStr = ws->getColumn("offset")->cell<std::string>(i);
-    const std::string unitStr = ws->getColumn("unit")->cell<std::string>(i);
+    const double offset = ws->getColumn("offset")->cell<double>(i);
+    const std::string unitStr = ws->getColumn("type")->cell<std::string>(i);
 
     //Check the name
     size_t index;
@@ -90,7 +99,7 @@ Projection::Projection(ITableWorkspace_const_sptr ws) {
 
     // Apply the data
     m_dimensions[index] = V3D(valueDblVec[0], valueDblVec[1], valueDblVec[2]);
-    m_offsets[index] = boost::lexical_cast<double>(offsetStr);
+    m_offsets[index] = offset;
     m_units[index] = unit;
   }
 }
