@@ -6,6 +6,7 @@
 
 #include "MantidAlgorithms/StripPeaks.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/FrameworkManager.h"
 #include "MantidKernel/UnitFactory.h"
 
 using namespace Mantid::API;
@@ -20,6 +21,7 @@ public:
 
   StripPeaksTest()
   {
+    FrameworkManager::Instance();
     MatrixWorkspace_sptr WS = WorkspaceCreationHelper::Create2DWorkspaceBinned(2,200,0.5,0.02);
     WS->getAxis(0)->unit() = Mantid::Kernel::UnitFactory::Instance().create("dSpacing");
 

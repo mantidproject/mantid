@@ -13,7 +13,7 @@
 #include "MantidVatesAPI/vtkStructuredGrid_Silent.h"
 
 using namespace Mantid;
-using namespace Mantid::MDEvents;
+using namespace Mantid::DataObjects;
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using namespace Mantid::VATES;

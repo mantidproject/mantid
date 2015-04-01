@@ -62,15 +62,15 @@ Usage
     ws = wsg.getItem(0)
 
     # A couple of standard FITS header entries
-    bpp_log = '_BITPIX'
+    bpp_log = 'BITPIX'
     try:
         log = ws.getRun().getLogData(bpp_log).value
         print "Bits per pixel: %s" % int(log)
     except RuntimeError:
         print "Could not find the keyword '%s' in this FITS file" % bpp_log
 
-    axis1_log = '_NAXIS1'
-    axis2_log = '_NAXIS2'
+    axis1_log = 'NAXIS1'
+    axis2_log = 'NAXIS2'
     try:
         log1 = ws.getRun().getLogData(axis1_log).value
         log2 = ws.getRun().getLogData(axis2_log).value

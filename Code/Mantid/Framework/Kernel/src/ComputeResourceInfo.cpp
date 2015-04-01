@@ -40,7 +40,7 @@ ComputeResourceInfo::ComputeResourceInfo(const FacilityInfo *fac,
   // default: Mantid web service API:
   // http://www.mantidproject.org/Remote_Job_Submission_API
   m_managerType = "MantidWebServiceAPIJobManager";
-  std::string type = elem->getAttribute("JobManagerType");
+  std::string type = elem->getAttribute("jobmanagertype");
   if (!type.empty()) {
     m_managerType = type;
   }

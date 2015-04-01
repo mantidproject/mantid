@@ -1,13 +1,12 @@
 #ifndef MANTID_MDALGORITHMS_CONVERTTODETECTORFACEMD_H_
 #define MANTID_MDALGORITHMS_CONVERTTODETECTORFACEMD_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/MDEventWorkspace.h"
+#include "MantidDataObjects/MDLeanEvent.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
-#include "MantidMDEvents/BoxControllerSettingsAlgorithm.h"
-#include "MantidMDEvents/MDEventWorkspace.h"
-#include "MantidMDEvents/MDLeanEvent.h"
+#include "MantidMDAlgorithms/BoxControllerSettingsAlgorithm.h"
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -39,7 +38,7 @@ namespace MDAlgorithms {
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class DLLExport ConvertToDetectorFaceMD
-    : public Mantid::MDEvents::BoxControllerSettingsAlgorithm {
+    : public MDAlgorithms::BoxControllerSettingsAlgorithm {
 public:
   ConvertToDetectorFaceMD();
   virtual ~ConvertToDetectorFaceMD();
@@ -62,7 +61,7 @@ private:
 
   template <class T, class MDE, size_t nd>
   void convertEventList(
-      boost::shared_ptr<Mantid::MDEvents::MDEventWorkspace<MDE, nd>> outWS,
+      boost::shared_ptr<Mantid::DataObjects::MDEventWorkspace<MDE, nd>> outWS,
       size_t workspaceIndex, coord_t x, coord_t y, coord_t bankNum,
       uint16_t runIndex, int32_t detectorID);
 

@@ -5,7 +5,7 @@
  * Mark Koennecke, November 2012
  */
 #include "MantidSINQ/SliceMDHisto.h"
-#include "MantidMDEvents/MDHistoWorkspace.h"
+#include "MantidDataObjects/MDHistoWorkspace.h"
 #include "MantidGeometry/MDGeometry/MDTypes.h"
 #include "MantidKernel/ArrayProperty.h"
 
@@ -15,7 +15,7 @@ DECLARE_ALGORITHM(SliceMDHisto)
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
-using namespace Mantid::MDEvents;
+using namespace Mantid::DataObjects;
 using namespace Mantid;
 
 // A reference to the logger is provided by the base class, it is called g_log.

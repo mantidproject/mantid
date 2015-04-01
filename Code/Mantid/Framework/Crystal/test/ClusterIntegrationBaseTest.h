@@ -12,7 +12,6 @@
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
-#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Workspace.h"
 #include "MantidKernel/V3D.h"
@@ -24,9 +23,8 @@
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
-using namespace Mantid::MDEvents;
-using namespace Mantid::Geometry;
 using namespace Mantid::DataObjects;
+using namespace Mantid::Geometry;
 
 // Helper typedef
 typedef boost::tuple<IMDHistoWorkspace_sptr, IPeaksWorkspace_sptr> MDHistoPeaksWSTuple;

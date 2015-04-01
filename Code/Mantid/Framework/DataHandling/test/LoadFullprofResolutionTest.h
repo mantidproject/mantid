@@ -328,7 +328,7 @@ public:
   void test_workspace()
   {
     // Generate file
-    string filename("TestWorskpace.irf");
+    string filename("FullprofResolutionTest_TestWorkspace.irf");
     generate1BankIrfFile(filename);
 
     // Load workspace group wsName with one workspace
@@ -412,7 +412,7 @@ public:
     }
 
     // Clean
-    Poco::File("TestWorskpace.irf").remove();
+    Poco::File(filename).remove();
   }
 
  //----------------------------------------------------------------------------------------------

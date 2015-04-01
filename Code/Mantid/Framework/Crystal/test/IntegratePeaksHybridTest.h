@@ -4,6 +4,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "ClusterIntegrationBaseTest.h"
+#include "MantidAPI/FrameworkManager.h"
 #include "MantidCrystal/IntegratePeaksHybrid.h"
 
 #include "MantidTestHelpers/MDEventsTestHelper.h"
@@ -14,7 +15,7 @@
 #include <boost/tuple/tuple.hpp>
 
 using namespace Mantid::Crystal;
-using namespace Mantid::MDEvents;
+using namespace Mantid::DataObjects;
 using namespace Mantid::API;
 
 namespace
