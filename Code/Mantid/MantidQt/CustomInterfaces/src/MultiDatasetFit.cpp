@@ -25,6 +25,7 @@
 #include <QActionGroup>
 #include <QSplitter>
 #include <QSettings>
+#include <QMenu>
 
 #include <boost/make_shared.hpp>
 #include <qwt_plot_curve.h>
@@ -652,7 +653,12 @@ void PlotController::updateRange(int index)
 /*                               EditLocalParameterDialog                                   */
 /*==========================================================================================*/
 
-LocalParameterEditor::LocalParameterEditor(QWidget *parent):QWidget(parent)
+/// Constructor
+/// @param parent :: Parent widget.
+/// @param index :: Index of the spectrum which parameter is edited.
+/// @param fixed :: Is the parameter fixed initially?
+LocalParameterEditor::LocalParameterEditor(QWidget *parent, int index, bool fixed):
+  QWidget(parent), m_index(index),m_fixed(fixed)
 {
   auto layout = new QHBoxLayout(this);
   layout->setMargin(0);
@@ -661,7 +667,7 @@ LocalParameterEditor::LocalParameterEditor(QWidget *parent):QWidget(parent)
 
   m_editor = new QLineEdit(parent);
   m_editor->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Expanding);
-  auto button = new QPushButton("All");
+  auto button = new QPushButton("Set");
   button->setSizePolicy(QSizePolicy::Minimum,QSizePolicy::Expanding);
   this->setFocusPolicy(Qt::NoFocus);
   layout->addWidget(m_editor);
@@ -670,11 +676,21 @@ LocalParameterEditor::LocalParameterEditor(QWidget *parent):QWidget(parent)
   layout->setStretch(1,0);
   this->setFocusProxy(m_editor);
   this->setFocusPolicy(Qt::StrongFocus);
-  connect(button,SIGNAL(clicked()),this,SLOT(buttonPressed()));
-}
 
-LocalParameterEditor::~LocalParameterEditor()
-{
+  auto setMenu = new QMenu(this);
+
+  QAction *action = new QAction("Set to all",this);
+  action->setToolTip("Set all parameters to this value");
+  connect(action,SIGNAL(activated()),this,SLOT(buttonPressed()));
+  setMenu->addAction(action);
+
+  m_fixAction = new QAction(m_fixed? "Unfix" : "Fix", this);
+  m_fixAction->setToolTip("Fix value of this parameter");
+  connect(m_fixAction,SIGNAL(activated()),this,SLOT(fixParameter()));
+  setMenu->addAction(m_fixAction);
+
+  button->setMenu(setMenu);
+
 }
 
 void LocalParameterEditor::buttonPressed()
@@ -683,8 +699,15 @@ void LocalParameterEditor::buttonPressed()
   emit setAllValues(value);
 }
 
+void LocalParameterEditor::fixParameter()
+{
+  m_fixed = !m_fixed;
+  m_fixAction->setText( m_fixed? "Unfix" : "Fix" );
+  emit fixParameter(m_index, m_fixed);
+}
+
 /*==========================================================================================*/
-LocalParameterItemDelegate::LocalParameterItemDelegate(QObject *parent):
+LocalParameterItemDelegate::LocalParameterItemDelegate(EditLocalParameterDialog *parent):
   QStyledItemDelegate(parent),
   m_currentEditor(NULL)
 {
@@ -692,8 +715,9 @@ LocalParameterItemDelegate::LocalParameterItemDelegate(QObject *parent):
 
 QWidget* LocalParameterItemDelegate::createEditor(QWidget * parent, const QStyleOptionViewItem & option, const QModelIndex & index) const
 {
-  m_currentEditor = new LocalParameterEditor(parent);
+  m_currentEditor = new LocalParameterEditor(parent,index.row(), owner()->isFixed(index.row()));
   connect(m_currentEditor,SIGNAL(setAllValues(double)),this,SIGNAL(setAllValues(double)));
+  connect(m_currentEditor,SIGNAL(fixParameter(int,bool)),this,SIGNAL(fixParameter(int,bool)));
   m_currentEditor->installEventFilter(const_cast<LocalParameterItemDelegate*>(this));
  return m_currentEditor;
 }
@@ -734,6 +758,8 @@ EditLocalParameterDialog::EditLocalParameterDialog(MultiDatasetFit *multifit, co
   {
     double value = multifit->getLocalParameterValue(parName,i);
     m_values.push_back(value);
+    bool fixed = multifit->isLocalParameterFixed(parName,i);
+    m_fixes.push_back(fixed);
     m_uiForm.tableWidget->insertRow(i);
     auto cell = new QTableWidgetItem( QString("f%1.").arg(i) + parName );
     m_uiForm.tableWidget->setItem( i, 0, cell );
@@ -743,6 +769,7 @@ EditLocalParameterDialog::EditLocalParameterDialog(MultiDatasetFit *multifit, co
   auto deleg = new LocalParameterItemDelegate(this);
   m_uiForm.tableWidget->setItemDelegateForColumn(1,deleg);
   connect(deleg,SIGNAL(setAllValues(double)),this,SLOT(setAllValues(double)));
+  connect(deleg,SIGNAL(fixParameter(int,bool)),this,SLOT(fixParameter(int,bool)));
 }
 
 /**
@@ -780,6 +807,16 @@ void EditLocalParameterDialog::setAllValues(double value)
 QList<double> EditLocalParameterDialog::getValues() const
 {
   return m_values;
+}
+
+QList<bool> EditLocalParameterDialog::getFixes() const
+{
+  return m_fixes;
+}
+
+void EditLocalParameterDialog::fixParameter(int index, bool fix)
+{
+  m_fixes[index] = fix;
 }
 
 /*==========================================================================================*/
@@ -908,107 +945,7 @@ void MultiDatasetFit::createPlotToolbar()
  */
 boost::shared_ptr<Mantid::API::IFunction> MultiDatasetFit::createFunction() const
 {
-  // number of spectra to fit == size of the multi-domain function
-  size_t nOfDataSets = getNumberOfSpectra();
-  if ( nOfDataSets == 0 )
-  {
-    throw std::runtime_error("There are no data sets specified.");
-  }
-
-  // description of a single function
-  QString funStr = m_functionBrowser->getFunctionString();
-
-  if ( nOfDataSets == 1 )
-  {
-    return Mantid::API::FunctionFactory::Instance().createInitialized( funStr.toStdString() );
-  }
-
-  bool isComposite = (std::find(funStr.begin(),funStr.end(),';') != funStr.end());
-  if ( isComposite )
-  {
-    funStr = ";(" + funStr + ")";
-  }
-  else
-  {
-    funStr = ";" + funStr;
-  }
-
-  QString multiFunStr = "composite=MultiDomainFunction,NumDeriv=1";
-  for(size_t i = 0; i < nOfDataSets; ++i)
-  {
-    multiFunStr += funStr;
-  }
-
-  // add the global ties
-  QStringList globals = m_functionBrowser->getGlobalParameters();
-  QString globalTies;
-  if ( !globals.isEmpty() )
-  {
-    globalTies = "ties=(";
-    bool isFirst = true;
-    foreach(QString par, globals)
-    {
-      if ( !isFirst ) globalTies += ",";
-      else
-        isFirst = false;
-
-      for(size_t i = 1; i < nOfDataSets; ++i)
-      {
-        globalTies += QString("f%1.").arg(i) + par + "=";
-      }
-      globalTies += QString("f0.%1").arg(par);
-    }
-    globalTies += ")";
-    multiFunStr += ";" + globalTies;
-  }
-
-  // create the multi-domain function
-  std::string tmpStr = multiFunStr.toStdString();
-  auto fun = Mantid::API::FunctionFactory::Instance().createInitialized( tmpStr );
-  boost::shared_ptr<Mantid::API::MultiDomainFunction> multiFun = boost::dynamic_pointer_cast<Mantid::API::MultiDomainFunction>( fun );
-  if ( !multiFun )
-  {
-    throw std::runtime_error("Failed to create the MultiDomainFunction");
-  }
-  
-  auto globalParams = m_functionBrowser->getGlobalParameters();
-
-  // set the domain indices, initial local parameter values and ties
-  for(size_t i = 0; i < nOfDataSets; ++i)
-  {
-    multiFun->setDomainIndex(i,i);
-    auto fun1 = multiFun->getFunction(i);
-    for(size_t j = 0; j < fun1->nParams(); ++j)
-    {
-      auto tie = fun1->getTie(j);
-      if ( tie )
-      {
-        // if a local parameter has a constant tie (is fixed) set tie's value to 
-        // the value of the local parameter
-        if ( tie->isConstant() )
-        {
-          QString parName = QString::fromStdString(fun1->parameterName(j));
-          if ( !globalParams.contains(parName) )
-          {
-            std::string expr = boost::lexical_cast<std::string>( getLocalParameterValue(parName,static_cast<int>(i)) );
-            tie->set( expr );
-          }
-        }
-      }
-      else
-      {
-        // if local parameter isn't tied set its local value
-        QString parName = QString::fromStdString(fun1->parameterName(j));
-        if ( !globalParams.contains(parName) )
-        {
-          fun1->setParameter(j, getLocalParameterValue(parName,static_cast<int>(i)));
-        }
-      }
-    }
-  }
-  assert( multiFun->nFunctions() == nOfDataSets );
-
-  return fun;
+  return m_functionBrowser->getGlobalFunction();
 }
 
 /**
@@ -1118,10 +1055,12 @@ void MultiDatasetFit::editLocalParameterValues(const QString& parName)
   if ( dialog.exec() == QDialog::Accepted )
   {
     auto values = dialog.getValues();
+    auto fixes = dialog.getFixes();
     assert( values.size() == getNumberOfSpectra() );
     for(int i = 0; i < values.size(); ++i)
     {
       setLocalParameterValue(parName, i, values[i]);
+      setLocalParameterFixed(parName, i, fixes[i]);
     }
   }
 }
@@ -1311,6 +1250,18 @@ void MultiDatasetFit::reset()
 {
   m_functionBrowser->resetLocalParameters();
   m_functionBrowser->setNumberOfDatasets( getNumberOfSpectra() );
+}
+
+/// Check if a local parameter is fixed
+bool MultiDatasetFit::isLocalParameterFixed(const QString& parName, int i) const
+{
+  return m_functionBrowser->isLocalParameterFixed(parName, i);
+}
+
+/// Fix/unfix local parameter
+void MultiDatasetFit::setLocalParameterFixed(const QString& parName, int i, bool fixed)
+{
+  m_functionBrowser->setLocalParameterFixed(parName, i, fixed);
 }
 
 /*==========================================================================================*/

@@ -23,6 +23,7 @@ class QwtPlotMagnifier;
 class QTableWidget;
 class QComboBox;
 class QPushButton;
+class QAction;
 
 namespace Mantid
 {
@@ -90,9 +91,14 @@ public:
   void checkSpectra();
   /// Get value of a local parameter
   double getLocalParameterValue(const QString& parName, int i) const;
+  /// Set value of a local parameter
+  void setLocalParameterValue(const QString& parName, int i, double value);
+  /// Check if a local parameter is fixed
+  bool isLocalParameterFixed(const QString& parName, int i) const;
+  /// Fix/unfix local parameter
+  void setLocalParameterFixed(const QString& parName, int i, bool fixed);
 
 public slots:
-  void setLocalParameterValue(const QString& parName, int i, double value);
   void reset();
 
 private slots:
@@ -227,36 +233,6 @@ private:
 };
 
 /*==========================================================================================*/
-class LocalParameterEditor: public QWidget
-{
-  Q_OBJECT
-public:
-  LocalParameterEditor(QWidget *parent = NULL);
-  ~LocalParameterEditor();
-signals:
-  void setAllValues(double);
-private slots:
-  void buttonPressed();
-private:
-  QLineEdit* m_editor;
-};
-
-class LocalParameterItemDelegate: public QStyledItemDelegate
-{
-  Q_OBJECT
-public:
-  LocalParameterItemDelegate(QObject *parent = NULL);
-  QWidget* createEditor(QWidget * parent, const QStyleOptionViewItem & option, const QModelIndex & index) const;
-  void setEditorData(QWidget * editor, const QModelIndex & index) const;
-  void setModelData(QWidget * editor, QAbstractItemModel * model, const QModelIndex & index) const;
-signals:
-  void setAllValues(double);
-private:
-  bool eventFilter(QObject * obj, QEvent * ev);
-  mutable LocalParameterEditor* m_currentEditor;
-};
-
-/*==========================================================================================*/
 /**
   * A dialog for displaying and editing values of local parameters.
   */
@@ -266,13 +242,53 @@ class EditLocalParameterDialog: public QDialog
 public:
   EditLocalParameterDialog(MultiDatasetFit *parent, const QString &parName);
   QList<double> getValues() const;
+  QList<bool> getFixes() const;
+  bool isFixed(int i) const {return m_fixes[i];}
 private slots:
   void valueChanged(int,int);
   void setAllValues(double);
+  void fixParameter(int,bool);
 private:
   Ui::EditLocalParameterDialog m_uiForm;
   QString m_parName;
   QList<double> m_values;
+  QList<bool> m_fixes;
+};
+
+/*==========================================================================================*/
+class LocalParameterEditor: public QWidget
+{
+  Q_OBJECT
+public:
+  LocalParameterEditor(QWidget *parent, int index, bool fixed);
+signals:
+  void setAllValues(double);
+  void fixParameter(int,bool);
+private slots:
+  void buttonPressed();
+  void fixParameter();
+private:
+  QLineEdit* m_editor;
+  QAction *m_fixAction;
+  int m_index;
+  bool m_fixed;
+};
+
+class LocalParameterItemDelegate: public QStyledItemDelegate
+{
+  Q_OBJECT
+public:
+  LocalParameterItemDelegate(EditLocalParameterDialog *parent = NULL);
+  QWidget* createEditor(QWidget * parent, const QStyleOptionViewItem & option, const QModelIndex & index) const;
+  void setEditorData(QWidget * editor, const QModelIndex & index) const;
+  void setModelData(QWidget * editor, QAbstractItemModel * model, const QModelIndex & index) const;
+signals:
+  void setAllValues(double);
+  void fixParameter(int,bool);
+private:
+  bool eventFilter(QObject * obj, QEvent * ev);
+  EditLocalParameterDialog *owner() const {return static_cast<EditLocalParameterDialog*>(parent());}
+  mutable LocalParameterEditor* m_currentEditor;
 };
 
 /*==========================================================================================*/

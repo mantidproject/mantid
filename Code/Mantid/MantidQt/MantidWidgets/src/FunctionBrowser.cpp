@@ -1,30 +1,18 @@
 #include "MantidQtMantidWidgets/FunctionBrowser.h"
-#include "MantidQtMantidWidgets/SelectFunctionDialog.h"
-//#include "MantidQtMantidWidgets/MultifitSetupDialog.h"
 
-#include "MantidAPI/FunctionFactory.h"
-#include "MantidAPI/ITableWorkspace.h"
-#include "MantidAPI/IPeakFunction.h"
-#include "MantidAPI/IBackgroundFunction.h"
 #include "MantidAPI/CompositeFunction.h"
-#include "MantidAPI/AlgorithmManager.h"
-#include "MantidAPI/FrameworkManager.h"
-#include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/WorkspaceGroup.h"
-#include "MantidAPI/TableRow.h"
-#include "MantidAPI/ParameterTie.h"
-#include "MantidAPI/IConstraint.h"
-#include "MantidAPI/ConstraintFactory.h"
 #include "MantidAPI/Expression.h"
-#include "MantidKernel/ConfigService.h"
-#include "MantidKernel/LibraryManager.h"
+#include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/IConstraint.h"
+#include "MantidAPI/MultiDomainFunction.h"
+#include "MantidAPI/ParameterTie.h"
 
-#include "MantidAPI/CostFunctionFactory.h"
-#include "MantidAPI/ICostFunction.h"
+#include "MantidKernel/Logger.h"
 
-#include "MantidQtMantidWidgets/UserFunctionDialog.h"
 #include "MantidQtMantidWidgets/FilenameDialogEditor.h"
 #include "MantidQtMantidWidgets/FormulaDialogEditor.h"
+#include "MantidQtMantidWidgets/SelectFunctionDialog.h"
+#include "MantidQtMantidWidgets/UserFunctionDialog.h"
 #include "MantidQtMantidWidgets/WorkspaceEditorFactory.h"
 
 #include "qttreepropertybrowser.h"
@@ -69,6 +57,7 @@
 
 namespace{
   const char * globalOptionName = "Global";
+  Mantid::Kernel::Logger g_log("Function Browser");
 }
 
 namespace MantidQt
@@ -1500,18 +1489,8 @@ Mantid::API::IFunction_sptr FunctionBrowser::getFunctionByIndex(const QString& i
  */
 void FunctionBrowser::setParameter(const QString& funcIndex, const QString& paramName, double value)
 {
-  if (auto prop = getFunctionProperty(funcIndex))
-  {
-    auto children = prop->subProperties();
-    foreach(QtProperty* child, children)
-    {
-      if (isParameter(child) && child->propertyName() == paramName)
-      {
-        m_parameterManager->setValue(child, value);
-        break;
-      }
-    }
-  }
+  auto prop = getParameterProperty(funcIndex, paramName);
+  m_parameterManager->setValue(prop,value);
 }
 
 /**
@@ -1521,18 +1500,8 @@ void FunctionBrowser::setParameter(const QString& funcIndex, const QString& para
  */
 double FunctionBrowser::getParameter(const QString& funcIndex, const QString& paramName) const
 {
-  if (auto prop = getFunctionProperty(funcIndex))
-  {
-    auto children = prop->subProperties();
-    foreach(QtProperty* child, children)
-    {
-      if (isParameter(child) && child->propertyName() == paramName)
-      {
-        return m_parameterManager->value(child);
-      }
-    }
-  }
-  throw std::runtime_error("Unknown function parameter " + (funcIndex + paramName).toStdString());
+  auto prop = getParameterProperty(funcIndex, paramName);
+  return m_parameterManager->value(prop);
 }
 
 /**
@@ -1576,6 +1545,30 @@ double FunctionBrowser::getParameter(const QString& paramName) const
 {
   QStringList name = splitParameterName(paramName);
   return getParameter(name[0],name[1]);
+}
+
+/// Get a property for a parameter
+QtProperty* FunctionBrowser::getParameterProperty(const QString& paramName) const
+{
+  QStringList name = splitParameterName(paramName);
+  return getParameterProperty(name[0],name[1]);
+}
+
+/// Get a property for a parameter
+QtProperty* FunctionBrowser::getParameterProperty(const QString& funcIndex, const QString& paramName) const
+{
+  if (auto prop = getFunctionProperty(funcIndex))
+  {
+    auto children = prop->subProperties();
+    foreach(QtProperty* child, children)
+    {
+      if (isParameter(child) && child->propertyName() == paramName)
+      {
+        return child;
+      }
+    }
+  }
+  throw std::runtime_error("Unknown function parameter " + (funcIndex + paramName).toStdString());
 }
 
 /**
@@ -1633,6 +1626,20 @@ void FunctionBrowser::fixParameter()
   }
 }
 
+/// Get a tie property attached to a parameter property
+QtProperty* FunctionBrowser::getTieProperty(QtProperty* prop) const
+{
+  auto children = prop->subProperties();
+  foreach(QtProperty* child, children)
+  {
+    if ( child->propertyName() == "Tie" )
+    {
+      return child; 
+    }
+  }
+  return NULL;
+}
+
 /**
  * Unfix currently selected parameter
  */
@@ -1642,14 +1649,10 @@ void FunctionBrowser::removeTie()
   if ( !item ) return;
   QtProperty* prop = item->property();
   if (!isParameter(prop)) return;
-  auto children = prop->subProperties();
-  foreach(QtProperty* child, children)
+  auto tieProp = getTieProperty(prop);
+  if ( tieProp )
   {
-    if ( child->propertyName() == "Tie" )
-    {
-      removeProperty(child);
-      return;
-    }
+    removeProperty(tieProp);
   }
 }
 
@@ -1856,20 +1859,14 @@ void FunctionBrowser::setNumberOfDatasets(int n)
  */
 double FunctionBrowser::getLocalParameterValue(const QString& parName, int i) const
 {
-  if ( !m_localParameterValues.contains(parName) || m_localParameterValues[parName].size() != getNumberOfDatasets() )
-  {
-    initLocalParameter(parName);
-  }
-  return m_localParameterValues[parName][i];
+  checkLocalParameter(parName);
+  return m_localParameterValues[parName][i].value;
 }
 
 void FunctionBrowser::setLocalParameterValue(const QString& parName, int i, double value)
 {
-  if ( !m_localParameterValues.contains(parName) || m_localParameterValues[parName].size() != getNumberOfDatasets() )
-  {
-    initLocalParameter(parName);
-  }
-  m_localParameterValues[parName][i] = value;
+  checkLocalParameter(parName);
+  m_localParameterValues[parName][i].value = value;
   if ( i == m_currentDataset )
   {
     setParameter( parName, value );
@@ -1883,8 +1880,18 @@ void FunctionBrowser::setLocalParameterValue(const QString& parName, int i, doub
 void FunctionBrowser::initLocalParameter(const QString& parName)const
 {
   double value = getParameter(parName);
-  QVector<double> values( static_cast<int>(getNumberOfDatasets()), value );
+  QVector<LocalParameterData> values( getNumberOfDatasets(), LocalParameterData(value) );
   m_localParameterValues[parName] = values;
+}
+
+/// Make sure that the parameter is initialized
+/// @param parName :: Name of a parameter to check
+void FunctionBrowser::checkLocalParameter(const QString& parName)const
+{
+  if ( !m_localParameterValues.contains(parName) || m_localParameterValues[parName].size() != getNumberOfDatasets() )
+  {
+    initLocalParameter(parName);
+  }
 }
 
 void FunctionBrowser::resetLocalParameters()
@@ -1904,6 +1911,7 @@ void FunctionBrowser::setCurrentDataset(int i)
   foreach(QString par, localParameters)
   {
     setParameter( par, getLocalParameterValue( par, m_currentDataset ) );
+    updateLocalTie(par);
   }
 }
 
@@ -1941,11 +1949,162 @@ void FunctionBrowser::addDatasets(int n)
   for(auto par = m_localParameterValues.begin(); par != m_localParameterValues.end(); ++par)
   {
     auto &values = par.value();
-    double value = values.back();
-    values.insert(values.end(),n,value);
+    double value = values.back().value;
+    values.insert(values.end(),n,LocalParameterData(value));
     newSize = values.size();
   }
   setNumberOfDatasets(newSize);
+}
+
+/// Return the multidomain function for multi-dataset fitting
+Mantid::API::IFunction_sptr FunctionBrowser::getGlobalFunction()
+{
+  if ( !m_multiDataset )
+  {
+    throw std::runtime_error("Function browser wasn't set up for multi-dataset fitting.");
+  }
+  // number of spectra to fit == size of the multi-domain function
+  int nOfDataSets = getNumberOfDatasets();
+  if ( nOfDataSets == 0 )
+  {
+    throw std::runtime_error("There are no data sets specified.");
+  }
+
+  // description of a single function
+  QString funStr = getFunctionString();
+
+  if ( nOfDataSets == 1 )
+  {
+    return Mantid::API::FunctionFactory::Instance().createInitialized( funStr.toStdString() );
+  }
+
+  bool isComposite = (std::find(funStr.begin(),funStr.end(),';') != funStr.end());
+  if ( isComposite )
+  {
+    funStr = ";(" + funStr + ")";
+  }
+  else
+  {
+    funStr = ";" + funStr;
+  }
+
+  QString multiFunStr = "composite=MultiDomainFunction,NumDeriv=1";
+  for(int i = 0; i < nOfDataSets; ++i)
+  {
+    multiFunStr += funStr;
+  }
+
+  // add the global ties
+  QStringList globals = getGlobalParameters();
+  QString globalTies;
+  if ( !globals.isEmpty() )
+  {
+    globalTies = "ties=(";
+    bool isFirst = true;
+    foreach(QString par, globals)
+    {
+      if ( !isFirst ) globalTies += ",";
+      else
+        isFirst = false;
+
+      for(int i = 1; i < nOfDataSets; ++i)
+      {
+        globalTies += QString("f%1.").arg(i) + par + "=";
+      }
+      globalTies += QString("f0.%1").arg(par);
+    }
+    globalTies += ")";
+    multiFunStr += ";" + globalTies;
+  }
+
+  // create the multi-domain function
+  std::string tmpStr = multiFunStr.toStdString();
+  auto fun = Mantid::API::FunctionFactory::Instance().createInitialized( tmpStr );
+  boost::shared_ptr<Mantid::API::MultiDomainFunction> multiFun = boost::dynamic_pointer_cast<Mantid::API::MultiDomainFunction>( fun );
+  if ( !multiFun )
+  {
+    throw std::runtime_error("Failed to create the MultiDomainFunction");
+  }
+  
+  auto globalParams = getGlobalParameters();
+
+  // set the domain indices, initial local parameter values and ties
+  for(int i = 0; i < nOfDataSets; ++i)
+  {
+    multiFun->setDomainIndex(i,i);
+    auto fun1 = multiFun->getFunction(i);
+    for(size_t j = 0; j < fun1->nParams(); ++j)
+    {
+      QString parName = QString::fromStdString(fun1->parameterName(j));
+      if ( globalParams.contains(parName) ) continue;
+      auto tie = fun1->getTie(j);
+      if ( tie )
+      {
+        // if a local parameter has a constant tie (is fixed) set tie's value to 
+        // the value of the local parameter
+        if ( tie->isConstant() )
+        {
+          std::string expr = boost::lexical_cast<std::string>( getLocalParameterValue(parName,i) );
+          tie->set( expr );
+        }
+        else
+        {
+          g_log.error() << "Complex ties are not implemented yet in multi-dataset fitting." << std::endl;
+        }
+      }
+      else if ( isLocalParameterFixed(parName,i) )
+      {
+        fun1->tie(parName.toStdString(),boost::lexical_cast<std::string>( getLocalParameterValue(parName,i) ));
+      }
+      else
+      {
+        fun1->setParameter(j, getLocalParameterValue(parName,i));
+      }
+    }
+  }
+  assert( multiFun->nFunctions() == static_cast<size_t>(nOfDataSets) );
+
+  return fun;
+}
+
+/// Make sure that properties are in sync with the cached ties
+/// @param parName :: A parameter to check.
+void FunctionBrowser::updateLocalTie(const QString& parName)
+{
+    auto prop = getParameterProperty(parName);
+    if ( hasTie(prop) )
+    {
+      auto tieProp = getTieProperty(prop);
+      removeProperty(tieProp);
+    }
+    if ( m_localParameterValues[parName][m_currentDataset].fixed )
+    {
+      addTieProperty(prop, QString::number(m_localParameterValues[parName][m_currentDataset].value));
+    }
+}
+
+
+/// Fix/unfix a local parameter
+/// @param parName :: Parameter name
+/// @param i :: Index of a dataset.
+/// @param fixed :: Make it fixed (true) or free (false)
+void FunctionBrowser::setLocalParameterFixed(const QString& parName, int i, bool fixed)
+{
+  checkLocalParameter(parName);
+  m_localParameterValues[parName][i].fixed = fixed;
+  if ( i == m_currentDataset )
+  {
+    updateLocalTie(parName);
+  }
+}
+
+/// Check if a local parameter is fixed
+/// @param parName :: Parameter name
+/// @param i :: Index of a dataset.
+bool FunctionBrowser::isLocalParameterFixed(const QString& parName, int i) const
+{
+  checkLocalParameter(parName);
+  return m_localParameterValues[parName][i].fixed;
 }
 
 } // MantidWidgets
