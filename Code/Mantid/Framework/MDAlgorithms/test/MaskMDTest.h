@@ -1,20 +1,14 @@
 #ifndef MANTID_MDALGORITHMS_MASKMDTEST_H_
 #define MANTID_MDALGORITHMS_MASKMDTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidKernel/Timer.h"
-#include "MantidKernel/System.h"
-#include "MantidTestHelpers/MDEventsTestHelper.h"
-#include <iostream>
-#include <iomanip>
-
 #include "MantidMDAlgorithms/MaskMD.h"
+#include "MantidTestHelpers/MDEventsTestHelper.h"
 
-using namespace Mantid;
-using namespace Mantid::MDAlgorithms;
+#include <cxxtest/TestSuite.h>
+
 using namespace Mantid::API;
-using namespace Mantid::MDEvents;
-using namespace Mantid::MDEvents::MDEventsTestHelper;
+using namespace Mantid::DataObjects;
+using namespace Mantid::MDAlgorithms;
 
 class MaskMDTest : public CxxTest::TestSuite
 {
@@ -23,7 +17,7 @@ private:
   void do_exec(const std::string& dimensionString, const std::string& extentsString, size_t expectedNMasked)
   {
     std::string wsName = "test_workspace";
-    makeAnyMDEW<MDEvent<3>, 3>(10, 0, 10, 1, wsName);
+    MDEventsTestHelper::makeAnyMDEW<MDEvent<3>, 3>(10, 0, 10, 1, wsName);
    
     MaskMD alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
@@ -91,7 +85,7 @@ public:
   void test_throw_if_dimension_cardinality_wrong()
   {
     std::string wsName = "test_workspace";
-    makeAnyMDEW<MDEvent<3>, 3>(10, 0, 10, 1, wsName);
+    MDEventsTestHelper::makeAnyMDEW<MDEvent<3>, 3>(10, 0, 10, 1, wsName);
    
     MaskMD alg;
     alg.initialize();
@@ -105,7 +99,7 @@ public:
   void test_throw_if_extent_cardinality_wrong()
   {
     std::string wsName = "test_workspace";
-    makeAnyMDEW<MDEvent<3>, 3>(10, 0, 10, 1, wsName);
+    MDEventsTestHelper::makeAnyMDEW<MDEvent<3>, 3>(10, 0, 10, 1, wsName);
    
     MaskMD alg;
     alg.setRethrows(true);
@@ -119,7 +113,7 @@ public:
   void test_throw_if_min_greater_than_max_anywhere()
   {
     std::string wsName = "test_workspace";
-    makeAnyMDEW<MDEvent<3>, 3>(10, 0, 10, 1, wsName);
+    MDEventsTestHelper::makeAnyMDEW<MDEvent<3>, 3>(10, 0, 10, 1, wsName);
    
     MaskMD alg;
     alg.setRethrows(true);
@@ -133,7 +127,7 @@ public:
   void test_fall_back_to_dimension_names()
   {
     std::string wsName = "test_workspace";
-    makeAnyMDEW<MDEvent<3>, 3>(10, 0, 10, 1, wsName, "AxisName%d"); //Dimension names = AxisName%d, default dimension ids are AxisId%d
+    MDEventsTestHelper::makeAnyMDEW<MDEvent<3>, 3>(10, 0, 10, 1, wsName, "AxisName%d"); //Dimension names = AxisName%d, default dimension ids are AxisId%d
    
     MaskMD alg;
     alg.setRethrows(true);
@@ -147,7 +141,7 @@ public:
   void test_throws_if_unknown_dimension_names()
   {
     std::string wsName = "test_workspace";
-    makeAnyMDEW<MDEvent<3>, 3>(10, 0, 10, 1, wsName);
+    MDEventsTestHelper::makeAnyMDEW<MDEvent<3>, 3>(10, 0, 10, 1, wsName);
    
     MaskMD alg;
     alg.setRethrows(true);

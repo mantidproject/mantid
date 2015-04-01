@@ -5,7 +5,7 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
-#include "MantidMDEvents/MDEventWorkspace.h"
+#include "MantidDataObjects/MDEventWorkspace.h"
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -41,13 +41,13 @@ private:
   void exec();
 
   template <typename MDE, size_t nd>
-  void integrate(typename MDEvents::MDEventWorkspace<MDE, nd>::sptr ws);
+  void integrate(typename DataObjects::MDEventWorkspace<MDE, nd>::sptr ws);
 
   /// Input MDEventWorkspace
   Mantid::API::IMDEventWorkspace_sptr inWS;
 };
 
 } // namespace Mantid
-} // namespace MDEvents
+} // namespace DataObjects
 
-#endif /* MANTID_MDEVENTS_CENTROIDPEAKSMD2_H_ */
+#endif /* MANTID_MDALGORITHMS_CENTROIDPEAKSMD2_H_ */

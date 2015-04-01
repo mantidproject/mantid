@@ -1,7 +1,7 @@
 #ifndef VTK_MD_HISTO_HEX_FACTORY_TEST_H_
 #define VTK_MD_HISTO_HEX_FACTORY_TEST_H_
 
-#include "MantidMDEvents/MDHistoWorkspace.h"
+#include "MantidDataObjects/MDHistoWorkspace.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 #include "MantidVatesAPI/UserDefinedThresholdRange.h"
 #include "MantidVatesAPI/NoThresholdRange.h"
@@ -15,7 +15,7 @@
 
 using namespace Mantid;
 using namespace Mantid::API;
-using namespace Mantid::MDEvents;
+using namespace Mantid::DataObjects;
 using namespace Mantid::VATES;
 using namespace Mantid::Geometry;
 using namespace testing;

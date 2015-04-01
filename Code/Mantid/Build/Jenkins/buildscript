@@ -27,6 +27,46 @@ cmake --version
 echo "SHA1=${sha1}"
 
 ###############################################################################
+# Check job requirements from the name
+###############################################################################
+if [[ ${JOB_NAME} == *clean* ]]; then
+  CLEANBUILD=true
+fi
+
+if [[ ${JOB_NAME} == *debug* ]]; then
+  BUILD_CONFIG="Debug"
+elif [[ ${JOB_NAME} == *relwithdbg* ]]; then
+  BUILD_CONFIG="RelWithDbg"
+else
+  BUILD_CONFIG="Release"
+fi
+
+###############################################################################
+# Setup the build directory
+# For a clean build the entire thing is removed to guarantee it is clean. All
+# other build types are assumed to be incremental and the following items
+# are removed to ensure stale build objects don't interfere with each other:
+#   - build/bin/**: if libraries are removed from cmake they are not deleted
+#                   from bin and can cause random failures
+#   - build/ExternalData/**: data files will change over time and removing
+#                            the links helps keep it fresh
+###############################################################################
+BUILD_DIR=$WORKSPACE/build
+if [ -z "$BUILD_DIR" ]; then
+  echo "Build directory not set. Cannot continue"
+  exit 1
+fi
+
+if [[ "$CLEANBUILD" == true ]]; then
+  rm -rf $BUILD_DIR
+fi
+if [ -d $BUILD_DIR ]; then
+  rm -rf $BUILD_DIR/bin $BUILD_DIR/ExternalData
+else
+  mkdir $BUILD_DIR
+fi
+
+###############################################################################
 # Setup clang
 ###############################################################################
 if [[ ${JOB_NAME} == *clang* ]]; then
@@ -45,11 +85,11 @@ if [[ $USE_CLANG ]]; then
   export CXX=clang++
   #check if CMakeCache.txt exists and if so that the cxx compiler is clang++
   #only needed with incremental builds. Clean builds delete this directory in a later step. 
-  if [[ -e $WORKSPACE/build/CMakeCache.txt ]] && [[ ${JOB_NAME} != *clean* ]]; then
-    COMPILERFILEPATH=`grep 'CMAKE_CXX_COMPILER:FILEPATH' $WORKSPACE/build/CMakeCache.txt` 
+  if [[ -e $BUILD_DIR/CMakeCache.txt ]] && [[ ${JOB_NAME} != *clean* ]]; then
+    COMPILERFILEPATH=`grep 'CMAKE_CXX_COMPILER:FILEPATH' $BUILD_DIR/CMakeCache.txt` 
     if [[ $COMPILERFILEPATH != *clang++* ]]; then 
       # Removing the build directory entirely guarantees clang is used.
-      rm -rf $WORKSPACE/build
+      rm -rf $BUILD_DIR
     fi
   fi 
 fi
@@ -97,21 +137,6 @@ if [[ ${NODE_LABELS} == *rhel7* ]]; then
 fi
 
 ###############################################################################
-# Check job requirements from the name
-###############################################################################
-if [[ ${JOB_NAME} == *clean* ]]; then
-  CLEANBUILD=true
-fi
-
-if [[ -e $WORKSPACE/build/CMakeCache.txt ]]; then
-  # Temporary while the builds flick between old & new TestingTools locations
-  TESTINGTOOLS_DIR=$(grep 'Code/Mantid/TestingTools/cxxtest' $WORKSPACE/build/CMakeCache.txt || true)
-  if [ ! -z "$TESTINGTOOLS_DIR"  ]; then
-    rm -fr $WORKSPACE/build
-  fi
-fi
-
-###############################################################################
 # Packaging options
 ###############################################################################
 if [[ "$BUILDPKG" == true ]]; then
@@ -134,30 +159,15 @@ if [[ "$BUILDPKG" == true ]]; then
 fi
 
 ###############################################################################
-# Setup the build directory
+# Work in the build directory
 ###############################################################################
-if [[ "$CLEANBUILD" == true ]]; then
-  rm -rf $WORKSPACE/build
-fi
-[ -d $WORKSPACE/build ] || mkdir $WORKSPACE/build
-cd $WORKSPACE/build
+cd $BUILD_DIR
 
 ###############################################################################
 # Clean up any artifacts from last build so that if it fails
 # they don't get archived again
 ###############################################################################
 rm -f *.dmg *.rpm *.deb *.tar.gz
-
-###############################################################################
-## Check the required build configuration
-###############################################################################
-if [[ ${JOB_NAME} == *debug* ]]; then
-  BUILD_CONFIG="Debug"
-elif [[ ${JOB_NAME} == *relwithdbg* ]]; then
-  BUILD_CONFIG="RelWithDbg"
-else
-  BUILD_CONFIG="Release"
-fi
 
 ###############################################################################
 # CMake configuration

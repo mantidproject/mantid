@@ -1,6 +1,6 @@
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidKernel/CPUTimer.h"
-#include "MantidMDEvents/MDEventFactory.h"
+#include "MantidDataObjects/MDEventFactory.h"
 #include "MantidVatesAPI/vtkMDHexFactory.h"
 #include "MantidVatesAPI/Common.h"
 #include "MantidVatesAPI/ProgressAction.h"
@@ -14,7 +14,7 @@
 #include "MantidKernel/ReadLock.h"
 
 using namespace Mantid::API;
-using namespace Mantid::MDEvents;
+using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
 using Mantid::Kernel::CPUTimer;
 using Mantid::Kernel::ReadLock;

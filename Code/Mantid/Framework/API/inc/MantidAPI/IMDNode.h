@@ -53,7 +53,7 @@ class IMDNode {
   */
 
 public:
-  virtual ~IMDNode(){};
+  virtual ~IMDNode(){}
   //---------------- ISAVABLE
   /**Return the pointer to the structure responsible for saving the box on disk
    * if the workspace occupies too much memory */

@@ -52,14 +52,29 @@ if not "%JOB_NAME%" == "%JOB_NAME:clean=%" (
   set BUILDPKG=yes
 )
 
-if EXIST %WORKSPACE%\build\CMakeCache.txt (
-  FINDSTR "Code/Mantid/TestingTools/cxxtest" %WORKSPACE%\build\CMakeCache.txt && (
-    rmdir /S /Q %WORKSPACE%\build
-  )
-)
-
 if not "%JOB_NAME%" == "%JOB_NAME:pull_requests=%" (
   set BUILDPKG=yes
+)
+
+:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+:: Setup the build directory
+:: For a clean build the entire thing is removed to guarantee it is clean. All
+:: other build types are assumed to be incremental and the following items
+:: are removed to ensure stale build objects don't interfere with each other:
+::   - build/bin: if libraries are removed from cmake they are not deleted
+::                   from bin and can cause random failures
+::   - build/ExternalData/**: data files will change over time and removing
+::                            the links helps keep it fresh
+:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+set BUILD_DIR=%WORKSPACE%\build
+if "%CLEANBUILD%" == "yes" (
+  rmdir /S /Q %BUILD_DIR%
+)
+
+if EXIST %BUILD_DIR% (
+  rmdir /S /Q %BUILD_DIR%\bin %BUILD_DIR%\ExternalData
+) else (
+  md %BUILD_DIR%
 )
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
@@ -70,14 +85,7 @@ if "%BUILDPKG%" == "yes" (
   set PACKAGE_DOCS=-DPACKAGE_DOCS=ON
 )
 
-:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-:: Setup the build directory
-:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-if "%CLEANBUILD%" == "yes" (
-  rmdir /S /Q %WORKSPACE%\build
-)
-md %WORKSPACE%\build
-cd %WORKSPACE%\build
+cd %BUILD_DIR%
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 :: Clean up any artifacts from last build so that if it fails
@@ -145,7 +153,7 @@ if "%BUILDPKG%" == "yes" (
 if not "%JOB_NAME%"=="%JOB_NAME:pull_requests=%" (
   :: Install package
   set SYSTEMTESTS_DIR=%WORKSPACE%\Code\Mantid\Testing\SystemTests
-  python !SYSTEMTESTS_DIR!\scripts\mantidinstaller.py install %WORKSPACE%\build
+  python !SYSTEMTESTS_DIR!\scripts\mantidinstaller.py install %BUILD_DIR%
 
   ::Remove user properties, disable instrument updating & usage reports and add data paths
   del /Q C:\MantidInstall\bin\Mantid.user.properties
@@ -157,13 +165,13 @@ if not "%JOB_NAME%"=="%JOB_NAME:pull_requests=%" (
   echo datasearch.directories = !DATA_ROOT!/UnitTest;!DATA_ROOT!/DocTest;!WORKSPACE_UNIX_STYLE!/Code/Mantid/instrument >> C:\MantidInstall\bin\Mantid.user.properties
 
   :: Run tests
-  cd %WORKSPACE%\build\docs
+  cd %BUILD_DIR%\docs
   C:\MantidInstall\bin\MantidPlot.exe -xq runsphinx_doctest.py
   set RETCODE=!ERRORLEVEL!
 
   :: Remove Mantid
-  cd %WORKSPACE%\build
-  python !SYSTEMTESTS_DIR!\scripts\mantidinstaller.py uninstall %WORKSPACE%\build
+  cd %BUILD_DIR%
+  python !SYSTEMTESTS_DIR!\scripts\mantidinstaller.py uninstall %BUILD_DIR%
   if !RETCODE! NEQ 0 exit /B 1
 )
 
