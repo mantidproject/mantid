@@ -84,7 +84,7 @@ class CreateMD(DataProcessorAlgorithm):
             raise ValueError("Either specify all of alatt, angledeg, u, v or none of them")
         elif all(ub_params):
             if input_workspace.sample().hasOrientedLattice():
-                logger.warning("Sample already has a UB. This will not be overwritten by %s. Use ClearUB and re-run.", self.name())
+                logger.warning("Sample already has a UB. This will not be overwritten by %s. Use ClearUB and re-run."%self.name())
             else:
                 self._set_ub(workspace=input_workspace, a=alatt[0], b=alatt[1], c=alatt[2], alpha=angdeg[0], beta=angdeg[1], gamma=angdeg[2], u=u, v=v)
 
