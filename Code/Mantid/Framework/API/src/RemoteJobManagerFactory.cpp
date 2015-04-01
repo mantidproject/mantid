@@ -71,13 +71,15 @@ RemoteJobManagerFactoryImpl::create(const std::string baseURL,
 
   // use the inherited/generic create method
   try {
-    jm = DynamicFactory<IRemoteJobManager>::create(jobManagerType);
+    jm = Mantid::Kernel::DynamicFactory<IRemoteJobManager>::create(
+        jobManagerType);
   } catch (Kernel::Exception::NotFoundError &e) {
     throw Kernel::Exception::NotFoundError(
         "RemoteJobManagerFactory: failed to create a remote job manager of "
         "type (class) '" +
             jobManagerType + "' with base URL " + baseURL +
-            ". Error description: ", jobManagerType);
+            ". Error description: ",
+        jobManagerType);
   }
 
   return jm;
