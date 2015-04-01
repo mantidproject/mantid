@@ -900,6 +900,8 @@ class RunDescriptor(PropDescriptor):
                           '    Found file {1} instead'.format(old_ext,file)
                 RunDescriptor._logger(message,'notice')
             self._run_file_path = os.path.dirname(fname)
+            self._fext = fex
+
         #------------------------------------------------
         try:
             file = FileFinder.findRuns(file_hint)[0]
@@ -910,7 +912,6 @@ class RunDescriptor(PropDescriptor):
                 file_hint,oext = os.path.splitext(file_hint)
                 file = FileFinder.findRuns(file_hint)[0]
                 _check_ext(file)
-                self._fext = fex
                 return (True,file)
             except RuntimeError:
                 message = '*** Cannot find file matching hint {0} on Mantid search paths '.\
