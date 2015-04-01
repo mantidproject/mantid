@@ -5,7 +5,7 @@
 
 namespace Mantid {
 namespace MDAlgorithms {
-DECLARE_FOREGROUNDMODEL(Strontium122);
+DECLARE_FOREGROUNDMODEL(Strontium122)
 
 using Kernel::Math::BoseEinsteinDistribution;
 

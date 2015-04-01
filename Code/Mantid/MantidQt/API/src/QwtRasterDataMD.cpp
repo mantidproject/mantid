@@ -200,6 +200,14 @@ void QwtRasterDataMD::setWorkspace(IMDWorkspace_const_sptr ws)
 }
 
 //------------------------------------------------------------------------------------------------------
+/** Gets the workspace being displayed
+ */
+Mantid::API::IMDWorkspace_const_sptr QwtRasterDataMD::getWorkspace() const
+{
+  return m_ws;
+}
+
+//------------------------------------------------------------------------------------------------------
 /** Sets the workspace that will be displayed ON TOP of the original workspace.
  * For dynamic rebinning.
  *

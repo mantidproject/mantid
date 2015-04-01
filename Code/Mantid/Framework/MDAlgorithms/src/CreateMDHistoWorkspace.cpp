@@ -4,7 +4,7 @@
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
-using namespace Mantid::MDEvents;
+using namespace Mantid::DataObjects;
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -32,10 +32,10 @@ CreateMDHistoWorkspace::~CreateMDHistoWorkspace() {}
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string CreateMDHistoWorkspace::name() const {
   return "CreateMDHistoWorkspace";
-};
+}
 
 /// Algorithm's version for identification. @see Algorithm::version
-int CreateMDHistoWorkspace::version() const { return 1; };
+int CreateMDHistoWorkspace::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
 const std::string CreateMDHistoWorkspace::category() const {
@@ -98,4 +98,4 @@ void CreateMDHistoWorkspace::exec() {
 }
 
 } // namespace Mantid
-} // namespace MDEvents
+} // namespace DataObjects

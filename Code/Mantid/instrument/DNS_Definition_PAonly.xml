@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- For help on the notation used to specify an Instrument Definition File see http://www.mantidproject.org/IDF -->
+<instrument xmlns="http://www.mantidproject.org/IDF/1.0"
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 http://schema.mantidproject.org/IDF/1.0/IDFSchema.xsd"
+	    name="DNS" valid-from="1900-01-31 23:59:59" valid-to="2100-01-31 23:59:59" last-modified="2015-03-25 10:17:17">
+  <!-- Author: m.ganeva@fz-juelich.de -->
+  <defaults>
+    <length unit="meter" />
+    <angle unit="degree" />
+    <reference-frame>
+      <!-- The z-axis is set parallel to and in the direction of the beam. the 
+             y-axis points up and the coordinate system is right handed. -->
+      <along-beam axis="z" />
+      <pointing-up axis="y" />
+      <handedness val="right" />
+    </reference-frame>
+  </defaults>
+  <!-- moderator -->
+  <component type="moderator">
+    <location z="-2.27" />
+  </component>
+  <type name="moderator" is="Source"></type>
+  <!-- monitor -->
+  <component type="monitor" idlist="monitor">
+    <location z="-0.229" />
+  </component>
+  <type name="monitor" is="monitor"></type>
+  <idlist idname="monitor">
+    <id val="-1"/>
+  </idlist>
+  <!-- Sample position -->
+  <component type="sample-position">
+    <location y="0.0" x="0.0" z="0.0" />
+  </component>
+  <type name="sample-position" is="SamplePos" />
+  <idlist idname="detectors">
+    <id start="1" end="24" />
+  </idlist>
+  <!-- Detector list def -->
+  <component type="detectors" idlist="detectors">
+    <location />
+  </component>
+  <!-- Detector Banks -->
+  <type name="detectors">
+    <component type="bank0">
+      <location>
+        <parameter name="r-position">
+            <value val="0"/>
+        </parameter>
+        <parameter name="t-position">
+            <logfile id="deterota" eq="0.0+value" extract-single-value-as="first_value"/>
+        </parameter>
+        <parameter name="p-position">
+            <value val="0"/>
+        </parameter>
+        <parameter name="rotx">
+            <value val="0"/>
+        </parameter>
+        <parameter name="roty">
+            <logfile id="deterota"  eq="0.0+value" extract-single-value-as="first_value"/>
+        </parameter>
+        <parameter name="rotz">
+            <value val="0"/>
+        </parameter> 
+      </location>
+    </component>
+  </type>
+  <!-- Definition of the PA detector bank (made of 24 tubes) -->
+  <type name="bank0">
+    <component type="standard_tube">
+      <locations r="0.800000" t="0.000000" t-end="-115.0" p="0.0" name="tube_" n-elements="24" />
+    </component>
+  </type>
+  <!-- Definition of standard_tube -->
+  <type name="standard_tube">
+    <component type="standard_pixel">
+      <location y="0.0" />
+    </component>
+  </type>
+  <type name="standard_pixel" is="detector">
+    <cylinder id="shape">
+      <centre-of-bottom-base x="0.0" y="-0.075" z="0.0" />
+      <axis x="0.0" y="1.0" z="0.0" />
+      <radius val="0.0127" />
+      <height val=".15" />
+    </cylinder>
+    <algebra val="shape" />
+  </type>
+</instrument>

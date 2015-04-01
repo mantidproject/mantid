@@ -19,7 +19,7 @@
 
 using namespace Mantid::VATES;
 
-vtkStandardNewMacro(vtkMDHWSource);
+vtkStandardNewMacro(vtkMDHWSource)
 
 /// Constructor
 vtkMDHWSource::vtkMDHWSource() :  m_wsName(""), m_time(0), m_presenter(NULL)

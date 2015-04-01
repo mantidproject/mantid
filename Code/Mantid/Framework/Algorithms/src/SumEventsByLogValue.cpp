@@ -10,7 +10,7 @@
 namespace Mantid {
 namespace Algorithms {
 // Register the class into the algorithm factory
-DECLARE_ALGORITHM(SumEventsByLogValue);
+DECLARE_ALGORITHM(SumEventsByLogValue)
 
 using namespace Kernel;
 using namespace API;

@@ -207,23 +207,25 @@ void Stitch1DMany::exec() {
     // List of workspaces to be grouped
     std::vector<std::string> toGroup;
 
+    const std::string groupName = this->getProperty("OutputWorkspace");
+
     size_t numWSPerGroup = groupWorkspaces[0]->size();
 
     for (size_t i = 0; i < numWSPerGroup; ++i) {
       // List of workspaces to stitch
       std::vector<std::string> toProcess;
       // The name of the resulting workspace
-      std::string outName;
+      std::string outName = groupName;
 
       for (size_t j = 0; j < groupWorkspaces.size(); ++j) {
         const std::string wsName = groupWorkspaces[j]->getItem(i)->name();
         toProcess.push_back(wsName);
-        outName += wsName;
+        outName += "_" + wsName;
       }
 
-      IAlgorithm_sptr stitchAlg =
-          AlgorithmManager::Instance().create("Stitch1DMany");
+      IAlgorithm_sptr stitchAlg = createChildAlgorithm("Stitch1DMany");
       stitchAlg->initialize();
+      stitchAlg->setAlwaysStoreInADS(true);
       stitchAlg->setProperty("InputWorkspaces", toProcess);
       stitchAlg->setProperty("OutputWorkspace", outName);
       stitchAlg->setProperty("StartOverlaps", m_startOverlaps);
@@ -245,11 +247,9 @@ void Stitch1DMany::exec() {
                             scaleFactors.end());
     }
 
-    const std::string groupName = this->getProperty("OutputWorkspace");
-
-    IAlgorithm_sptr groupAlg =
-        AlgorithmManager::Instance().create("GroupWorkspaces");
+    IAlgorithm_sptr groupAlg = createChildAlgorithm("GroupWorkspaces");
     groupAlg->initialize();
+    groupAlg->setAlwaysStoreInADS(true);
     groupAlg->setProperty("InputWorkspaces", toGroup);
     groupAlg->setProperty("OutputWorkspace", groupName);
     groupAlg->execute();

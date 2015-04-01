@@ -22,10 +22,10 @@ PowerMD::~PowerMD() {}
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
-const std::string PowerMD::name() const { return "PowerMD"; };
+const std::string PowerMD::name() const { return "PowerMD"; }
 
 /// Algorithm's version for identification. @see Algorithm::version
-int PowerMD::version() const { return 1; };
+int PowerMD::version() const { return 1; }
 
 //----------------------------------------------------------------------------------------------
 
@@ -53,7 +53,7 @@ void PowerMD::execEvent(Mantid::API::IMDEventWorkspace_sptr /*out*/) {
 
 //----------------------------------------------------------------------------------------------
 /// PowerMD::Run the algorithm with a MDHistoWorkspace
-void PowerMD::execHisto(Mantid::MDEvents::MDHistoWorkspace_sptr out) {
+void PowerMD::execHisto(Mantid::DataObjects::MDHistoWorkspace_sptr out) {
   double exponent = getProperty("Exponent");
   out->power(exponent);
 }

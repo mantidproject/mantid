@@ -19,7 +19,7 @@
 
 using namespace Mantid::VATES;
 
-vtkStandardNewMacro(vtkMDEWSource);
+vtkStandardNewMacro(vtkMDEWSource)
 
 /// Constructor
 vtkMDEWSource::vtkMDEWSource() :  m_wsName(""), m_depth(1000), m_time(0), m_presenter(NULL), m_isStartup(true), m_startupTimeValue(0)
@@ -181,6 +181,7 @@ int vtkMDEWSource::RequestData(vtkInformation *, vtkInformationVector **, vtkInf
       // data set. We therefore feed m_time the first time step of this source at 
       // start up.
       m_time = m_startupTimeValue;
+      m_isStartup = false;
     }
     else if (outInfo->Has(vtkStreamingDemandDrivenPipeline::UPDATE_TIME_STEP()))
     {

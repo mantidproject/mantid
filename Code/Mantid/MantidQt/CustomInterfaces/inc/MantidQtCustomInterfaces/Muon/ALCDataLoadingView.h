@@ -55,14 +55,24 @@ namespace CustomInterfaces
     std::string log() const;
     std::string deadTimeType() const;
     std::string deadTimeFile() const;
+    std::string detectorGroupingType() const;
+    std::string getForwardGrouping() const;
+    std::string getBackwardGrouping() const;
+    std::string redPeriod() const;
+    std::string greenPeriod() const;
+    bool subtractIsChecked() const;
     std::string calculationType() const;
     boost::optional< std::pair<double,double> > timeRange() const;
 
     void setDataCurve(const QwtData& data);
     void displayError(const std::string &error);
     void setAvailableLogs(const std::vector<std::string> &logs);
+    void setAvailablePeriods(const std::vector<std::string> &periods);
+    void setTimeLimits(double tMin, double tMax);
+    void setTimeRange (double tMin, double tMax);
     void setWaitingCursor();
     void restoreCursor();
+    void help();
 
     // -- End of IALCDataLoadingView interface -----------------------------------------------------
 

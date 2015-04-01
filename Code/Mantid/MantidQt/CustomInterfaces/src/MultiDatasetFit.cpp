@@ -1,16 +1,20 @@
 #include "MantidQtCustomInterfaces/MultiDatasetFit.h"
-#include "MantidQtMantidWidgets/FunctionBrowser.h"
-#include "MantidQtMantidWidgets/FitOptionsBrowser.h"
-#include "MantidQtAPI/AlgorithmRunner.h"
 
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/MultiDomainFunction.h"
-#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/ParameterTie.h"
+
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ArrayBoundedValidator.h"
 #include "MantidKernel/Exception.h"
+
+#include "MantidQtAPI/AlgorithmRunner.h"
+#include "MantidQtMantidWidgets/FitOptionsBrowser.h"
+#include "MantidQtMantidWidgets/FunctionBrowser.h"
+#include "MantidQtMantidWidgets/RangeSelector.h"
 
 #include "qtpropertybrowser.h"
 
@@ -27,14 +31,25 @@
 #include <qwt_plot_zoomer.h>
 #include <qwt_plot_panner.h>
 #include <qwt_plot_magnifier.h>
+#include <qwt_scale_div.h>
 #include <Poco/ActiveResult.h>
 
 #include <vector>
 #include <algorithm>
 
 namespace{
-  const int wsColumn = 0;
+  // columns in the data table
+  const int wsColumn      = 0;
   const int wsIndexColumn = 1;
+  const int startXColumn  = 2;
+  const int endXColumn    = 3;
+  // tool options pages
+  const int zoomToolPage  = 0;
+  const int panToolPage   = 1;
+  const int rangeToolPage = 2;
+  // colours of the fitting range selector
+  QColor rangeSelectorDisabledColor(Qt::darkGray);
+  QColor rangeSelectorEnabledColor(Qt::blue);
 }
 
 namespace MantidQt
@@ -249,6 +264,7 @@ DatasetPlotData::~DatasetPlotData()
  */
 void DatasetPlotData::setData(const Mantid::API::MatrixWorkspace *ws, int wsIndex, const Mantid::API::MatrixWorkspace *outputWS)
 {
+  bool haveFitCurves = outputWS && outputWS->getNumberHistograms() >= 3;
   std::vector<double> xValues = ws->readX(wsIndex);
   if ( ws->isHistogramData() )
   {
@@ -261,14 +277,19 @@ void DatasetPlotData::setData(const Mantid::API::MatrixWorkspace *ws, int wsInde
   }
   m_dataCurve->setData( xValues.data(), ws->readY(wsIndex).data(), static_cast<int>(xValues.size()) );
 
-  if ( outputWS && outputWS->getNumberHistograms() >= 3 )
+  if ( haveFitCurves )
   {
+    auto xBegin = std::lower_bound(xValues.begin(),xValues.end(), outputWS->readX(1).front());
+    if ( xBegin == xValues.end() ) return;
+    int i0 = static_cast<int>(std::distance(xValues.begin(),xBegin));
+    int n = static_cast<int>(outputWS->readY(1).size());
+    if ( i0 + n > static_cast<int>(xValues.size()) ) return;
     m_calcCurve = new QwtPlotCurve("calc");
-    m_calcCurve->setData( xValues.data(), outputWS->readY(1).data(), static_cast<int>(xValues.size()) );
+    m_calcCurve->setData( xValues.data() + i0, outputWS->readY(1).data(), n );
     QPen penCalc("red");
     m_calcCurve->setPen(penCalc);
     m_diffCurve = new QwtPlotCurve("diff");
-    m_diffCurve->setData( xValues.data(), outputWS->readY(2).data(), static_cast<int>(xValues.size()) );
+    m_diffCurve->setData( xValues.data() + i0, outputWS->readY(2).data(), n );
     QPen penDiff("green");
     m_diffCurve->setPen(penDiff);
   }
@@ -327,10 +348,14 @@ QwtDoubleRect DatasetPlotData::boundingRect() const
 /*                                PlotController                                            */
 /*==========================================================================================*/
 
-PlotController::PlotController(MultiDatasetFit *parent,QwtPlot *plot, QTableWidget *table, QComboBox *plotSelector, QPushButton *prev, QPushButton *next):
+PlotController::PlotController(MultiDatasetFit *parent, 
+                               QwtPlot *plot, 
+                               QTableWidget *table, 
+                               QComboBox *plotSelector, 
+                               QPushButton *prev, 
+                               QPushButton *next):
   QObject(parent),m_plot(plot),m_table(table),m_plotSelector(plotSelector),m_prevPlot(prev),m_nextPlot(next),m_currentIndex(-1)
 {
-  connect(parent,SIGNAL(dataTableUpdated()),this,SLOT(tableUpdated()));
   connect(prev,SIGNAL(clicked()),this,SLOT(prevPlot()));
   connect(next,SIGNAL(clicked()),this,SLOT(nextPlot()));
   connect(plotSelector,SIGNAL(currentIndexChanged(int)),this,SLOT(plotDataSet(int)));
@@ -339,15 +364,40 @@ PlotController::PlotController(MultiDatasetFit *parent,QwtPlot *plot, QTableWidg
       QwtPicker::DragSelection | QwtPicker::CornerToCorner, QwtPicker::AlwaysOff, plot->canvas());
 
   m_panner = new QwtPlotPanner( plot->canvas() );
-  m_panner->setEnabled(false);
 
   m_magnifier = new QwtPlotMagnifier( plot->canvas() );
-  m_magnifier->setEnabled( false );
+
+  m_rangeSelector = new MantidWidgets::RangeSelector(m_plot);
+  m_rangeSelector->setRange( -1e30, 1e30 );
+  m_rangeSelector->setMinimum(10);
+  m_rangeSelector->setMaximum(990);
+  connect(m_rangeSelector,SIGNAL(selectionChanged(double, double)),this,SLOT(updateFittingRange(double, double)));
+
+  disableAllTools();
+
+  m_plot->canvas()->installEventFilter(this);
+  
 }
 
 PlotController::~PlotController()
 {
   m_plotData.clear();
+}
+
+bool PlotController::eventFilter(QObject *, QEvent *evn)
+{
+  if ( evn->type() == QEvent::MouseButtonDblClick )
+  {
+    if ( isRangeSelectorEnabled() )
+    {
+      resetRange();
+    }
+    else if ( isZoomEnabled() )
+    {
+      zoomToRange();
+    }
+  }
+  return false;
 }
 
 /**
@@ -395,6 +445,38 @@ void PlotController::nextPlot()
   }
 }
 
+/// Get a pointer to a dataset data.
+/// @param index :: Index of a dataset.
+boost::shared_ptr<DatasetPlotData> PlotController::getData(int index)
+{
+  if ( !m_plotData.contains(index) )
+  {
+    QString wsName = m_table->item( index, wsColumn )->text();
+    int wsIndex = m_table->item( index, wsIndexColumn )->text().toInt();
+    QString outputWorkspaceName = owner()->getOutputWorkspaceName();
+    if ( !outputWorkspaceName.isEmpty() )
+    {
+      outputWorkspaceName += QString("_%1").arg(index);
+    }
+    try
+    {
+      auto value = boost::make_shared<DatasetPlotData>( wsName, wsIndex, outputWorkspaceName );
+      m_plotData.insert(index, value );
+      return value;
+    }
+    catch(std::exception& e)
+    {
+      QMessageBox::critical(owner(),"MantidPlot - Error",e.what());
+      clear();
+      owner()->checkDataSets();
+      m_plot->replot();
+      return boost::shared_ptr<DatasetPlotData>();
+    }
+  }
+
+  return m_plotData[index];
+}
+
 /**
  * Plot a data set.
  * @param index :: Index (row) of the data set in the table.
@@ -411,30 +493,7 @@ void PlotController::plotDataSet(int index)
 
   bool resetZoom = m_plotData.isEmpty();
 
-  // create data if index is displayed for the first time
-  if ( !m_plotData.contains(index) )
-  {
-    QString wsName = m_table->item( index, wsColumn )->text();
-    int wsIndex = m_table->item( index, wsIndexColumn )->text().toInt();
-    QString outputWorkspaceName = owner()->getOutputWorkspaceName();
-    if ( !outputWorkspaceName.isEmpty() )
-    {
-      outputWorkspaceName += QString("_%1").arg(index);
-    }
-    try
-    {
-      auto value = boost::make_shared<DatasetPlotData>( wsName, wsIndex, outputWorkspaceName );
-      m_plotData.insert(index, value );
-    }
-    catch(std::exception& e)
-    {
-      QMessageBox::critical(owner(),"MantidPlot - Error",e.what());
-      clear();
-      owner()->checkDataSets();
-      m_plot->replot();
-      return;
-    }
-  }
+  auto plotData = getData(index);
 
   // hide the previously shown data
   if ( m_currentIndex > -1 ) 
@@ -451,9 +510,12 @@ void PlotController::plotDataSet(int index)
     m_plot->setAxisAutoScale(QwtPlot::xBottom);
     m_plot->setAxisAutoScale(QwtPlot::yLeft);
   }
-
+  // change the current data set index
+  m_currentIndex = index;
+  updateRange(index);
+  
   // show the new data
-  m_plotData[index]->show( m_plot );
+  plotData->show( m_plot );
   m_plot->replot();
   // the idea is to set the zoom base (the largest view) to the data's bounding rect
   // but it looks like the base is set to the union of dataRect and current zoomRect
@@ -464,8 +526,6 @@ void PlotController::plotDataSet(int index)
   {
     m_zoomer->setZoomBase(true);
   }
-  // change the current data set index
-  m_currentIndex = index;
   emit currentIndexChanged( index );
 }
 
@@ -479,22 +539,78 @@ void PlotController::update()
   plotDataSet( m_currentIndex );
 }
 
-void PlotController::enableZoom()
+/**
+ * Reset the fitting range to the current limits on the x axis.
+ */
+void PlotController::resetRange()
 {
-  m_zoomer->setEnabled(true);
+  QwtScaleMap xMap = m_plot->canvasMap(QwtPlot::xBottom);
+  double startX = xMap.s1();
+  double endX = xMap.s2();
+  m_rangeSelector->setMinimum( startX );
+  m_rangeSelector->setMaximum( endX );
+}
+
+/**
+ * Set zooming to the current fitting range.
+ */
+void PlotController::zoomToRange()
+{
+  QwtDoubleRect rect = m_zoomer->zoomRect();
+  rect.setX( m_rangeSelector->getMinimum() );
+  rect.setRight( m_rangeSelector->getMaximum() );
+  m_zoomer->zoom( rect );
+}
+
+/**
+ * Disable all plot tools. It is a helper method 
+ * to simplify switchig between tools.
+ */
+void PlotController::disableAllTools()
+{
+  m_zoomer->setEnabled(false);
   m_panner->setEnabled(false);
   m_magnifier->setEnabled(false);
-  m_plot->canvas()->setCursor(QCursor(Qt::CrossCursor));
+  m_rangeSelector->setEnabled(false);
+  m_rangeSelector->setColour(rangeSelectorDisabledColor);
+}
+
+template<class Tool>
+void PlotController::enableTool(Tool* tool, int cursor)
+{
+  disableAllTools();
+  tool->setEnabled(true);
+  m_plot->canvas()->setCursor(QCursor(static_cast<Qt::CursorShape>(cursor)));
+  m_plot->replot();
   owner()->showPlotInfo();
 }
 
+
+/**
+ * Enable zooming tool.
+ */
+void PlotController::enableZoom()
+{
+  enableTool(m_zoomer,Qt::CrossCursor);
+}
+
+/**
+ * Enable panning tool.
+ */
 void PlotController::enablePan()
 {
-  m_zoomer->setEnabled(false);
-  m_panner->setEnabled(true);
+  enableTool(m_panner,Qt::pointingHandCursor);
   m_magnifier->setEnabled(true);
-  m_plot->canvas()->setCursor(Qt::pointingHandCursor);
-  owner()->showPlotInfo();
+}
+
+/**
+ * Enable range selector tool.
+ */
+void PlotController::enableRange()
+{
+  enableTool(m_rangeSelector,Qt::pointingHandCursor);
+  m_rangeSelector->setColour(rangeSelectorEnabledColor);
+  m_plot->replot();
 }
 
 bool PlotController::isZoomEnabled() const
@@ -506,6 +622,31 @@ bool PlotController::isPanEnabled() const
 {
   return m_panner->isEnabled();
 }
+
+bool PlotController::isRangeSelectorEnabled() const
+{
+  return m_rangeSelector->isEnabled();
+}
+
+/// Signal others that fitting range has been updated.
+void PlotController::updateFittingRange(double startX, double endX)
+{
+  emit fittingRangeChanged(m_currentIndex, startX, endX);
+}
+
+void PlotController::updateRange(int index)
+{
+  if ( index >= 0 && index == m_currentIndex )
+  {
+    const double startX = m_table->item(index,startXColumn)->text().toDouble();
+    const double endX = m_table->item(index,endXColumn)->text().toDouble();
+    m_rangeSelector->blockSignals(true);
+    m_rangeSelector->setMinimum(startX);
+    m_rangeSelector->setMaximum(endX);
+    m_rangeSelector->blockSignals(false);
+  }
+}
+
 
 /*==========================================================================================*/
 /*                               EditLocalParameterDialog                                   */
@@ -560,7 +701,7 @@ void EditLocalParameterDialog::valueChanged(int row, int col)
 /*==========================================================================================*/
 
 //Register the class with the factory
-DECLARE_SUBWINDOW(MultiDatasetFit);
+DECLARE_SUBWINDOW(MultiDatasetFit)
 
 /**
  * Constructor
@@ -594,11 +735,14 @@ void MultiDatasetFit::initLayout()
 
   m_uiForm.btnRemove->setEnabled( false );
 
-  connect(m_uiForm.btnAddWorkspace,SIGNAL(clicked()),this,SLOT(addWorkspace()));
-  connect(m_uiForm.btnRemove,SIGNAL(clicked()),this,SLOT(removeSelectedSpectra()));
-  connect(m_uiForm.dataTable,SIGNAL(itemSelectionChanged()), this,SLOT(workspaceSelectionChanged()));
   connect(m_uiForm.btnFit,SIGNAL(clicked()),this,SLOT(fit()));
-  connect(this,SIGNAL(dataTableUpdated()),this,SLOT(reset()));
+
+  m_dataController = new DataController(this, m_uiForm.dataTable);
+  connect(m_dataController,SIGNAL(dataTableUpdated()),this,SLOT(reset()));
+  connect(m_dataController,SIGNAL(hasSelection(bool)),  m_uiForm.btnRemove, SLOT(setEnabled(bool)));
+  connect(m_uiForm.btnAddWorkspace,SIGNAL(clicked()),m_dataController,SLOT(addWorkspace()));
+  connect(m_uiForm.btnRemove,SIGNAL(clicked()),m_dataController,SLOT(removeSelectedSpectra()));
+  connect(m_uiForm.cb_applyRangeToAll,SIGNAL(toggled(bool)),m_dataController,SLOT(setFittingRangeGlobal(bool)));
 
   m_plotController = new PlotController(this,
                                         m_uiForm.plot,
@@ -606,6 +750,9 @@ void MultiDatasetFit::initLayout()
                                         m_uiForm.cbPlotSelector,
                                         m_uiForm.btnPrev,
                                         m_uiForm.btnNext);
+  connect(m_dataController,SIGNAL(dataTableUpdated()),m_plotController,SLOT(tableUpdated()));
+  connect(m_dataController,SIGNAL(dataSetUpdated(int)),m_plotController,SLOT(updateRange(int)));
+  connect(m_plotController,SIGNAL(fittingRangeChanged(int, double, double)),m_dataController,SLOT(setFittingRange(int, double, double)));
   connect(m_plotController,SIGNAL(currentIndexChanged(int)),this,SLOT(updateLocalParameters(int)));
 
   QSplitter* splitter = new QSplitter(Qt::Vertical,this);
@@ -628,6 +775,7 @@ void MultiDatasetFit::initLayout()
   m_uiForm.plot->installEventFilter( this );
   m_uiForm.dataTable->installEventFilter( this );
 
+  m_plotController->enableZoom();
   showInfo( "Add some data, define fitting function" );
 
   loadSettings();
@@ -635,7 +783,9 @@ void MultiDatasetFit::initLayout()
 
 void MultiDatasetFit::createPlotToolbar()
 {
+  // ----- Main tool bar --------
   auto toolBar = new QToolBar(this);
+  toolBar->setIconSize(QSize(16,16));
   auto group = new QActionGroup(this);
  
   auto action = new QAction(this);
@@ -643,95 +793,27 @@ void MultiDatasetFit::createPlotToolbar()
   action->setCheckable(true);
   action->setChecked(true);
   action->setToolTip("Zooming tool");
-  connect(action,SIGNAL(triggered()),m_plotController,SLOT(enableZoom()));
+  connect(action,SIGNAL(triggered()),this,SLOT(enableZoom()));
   group->addAction(action);
 
   action = new QAction(this);
   action->setIcon(QIcon(":/MultiDatasetFit/icons/panning.png"));
   action->setCheckable(true);
   action->setToolTip("Panning tool");
-  connect(action,SIGNAL(triggered()),m_plotController,SLOT(enablePan()));
+  connect(action,SIGNAL(triggered()),this,SLOT(enablePan()));
+  group->addAction(action);
+
+  action = new QAction(this);
+  action->setIcon(QIcon(":/MultiDatasetFit/icons/range.png"));
+  action->setCheckable(true);
+  action->setToolTip("Set fitting range");
+  connect(action,SIGNAL(triggered()),this,SLOT(enableRange()));
   group->addAction(action);
 
   toolBar->addActions(group->actions());
 
   m_uiForm.horizontalLayout->insertWidget(3,toolBar);
-}
 
-/**
- * Show a dialog to select a workspace.
- */
-void MultiDatasetFit::addWorkspace()
-{
-  AddWorkspaceDialog dialog(this);
-  if ( dialog.exec() == QDialog::Accepted )
-  {
-    QString wsName = dialog.workspaceName().stripWhiteSpace();
-    // if name is empty assume that there are no workspaces in the ADS
-    if ( wsName.isEmpty() ) return;
-    if ( Mantid::API::AnalysisDataService::Instance().doesExist( wsName.toStdString()) )
-    {
-      auto indices = dialog.workspaceIndices();
-      for(auto i = indices.begin(); i != indices.end(); ++i)
-      {
-        addWorkspaceSpectrum( wsName, *i );
-      }
-      emit dataTableUpdated();
-    }
-    else
-    {
-      QMessageBox::warning(this,"MantidPlot - Warning",QString("Workspace \"%1\" doesn't exist.").arg(wsName));
-    }
-  }
-}
-
-/**
- * Add a spectrum from a workspace to the table.
- * @param wsName :: Name of a workspace.
- * @param wsIndex :: Index of a spectrum in the workspace (workspace index).
- */
-void MultiDatasetFit::addWorkspaceSpectrum(const QString &wsName, int wsIndex)
-{
-  int row = m_uiForm.dataTable->rowCount();
-  m_uiForm.dataTable->insertRow(row);
-
-  auto cell = new QTableWidgetItem( wsName );
-  m_uiForm.dataTable->setItem( row, wsColumn, cell );
-  cell = new QTableWidgetItem( QString::number(wsIndex) );
-  m_uiForm.dataTable->setItem( row, wsIndexColumn, cell );
-}
-
-/**
- * Slot. Called when selection in the data table changes.
- */
-void MultiDatasetFit::workspaceSelectionChanged()
-{
-  auto selection = m_uiForm.dataTable->selectionModel();
-  bool enableRemoveButton = selection->hasSelection();
-  if ( enableRemoveButton )
-  {
-    enableRemoveButton = selection->selectedRows().size() > 0;
-  }
-
-  m_uiForm.btnRemove->setEnabled( enableRemoveButton );
-}
-
-/**
- * Slot. Called when "Remove" button is pressed.
- */
-void MultiDatasetFit::removeSelectedSpectra()
-{
-  auto ranges = m_uiForm.dataTable->selectedRanges();
-  if ( ranges.isEmpty() ) return;
-  std::vector<int> rows;
-  for(auto range = ranges.begin(); range != ranges.end(); ++range)
-  {
-    for(int row = range->topRow(); row <= range->bottomRow(); ++row)
-    {
-      rows.push_back( row );
-    }
-  }
-  removeDataSets( rows );
 }
 
 /**
@@ -861,6 +943,9 @@ void MultiDatasetFit::fit()
     fit->setProperty("Function", fun );
     fit->setPropertyValue("InputWorkspace", getWorkspaceName(0));
     fit->setProperty("WorkspaceIndex", getWorkspaceIndex(0));
+    auto range = getFittingRange(0);
+    fit->setProperty( "StartX", range.first );
+    fit->setProperty( "EndX", range.second );
 
     int n = getNumberOfSpectra();
     for(int ispec = 1; ispec < n; ++ispec)
@@ -868,6 +953,9 @@ void MultiDatasetFit::fit()
       std::string suffix = boost::lexical_cast<std::string>(ispec);
       fit->setPropertyValue( "InputWorkspace_" + suffix, getWorkspaceName(ispec) );
       fit->setProperty( "WorkspaceIndex_" + suffix, getWorkspaceIndex(ispec) );
+      auto range = getFittingRange(ispec);
+      fit->setProperty( "StartX_" + suffix, range.first );
+      fit->setProperty( "EndX_" + suffix, range.second );
     }
 
     m_fitOptionsBrowser->copyPropertiesToAlgorithm(*fit);
@@ -906,7 +994,7 @@ void MultiDatasetFit::fit()
  */
 std::string MultiDatasetFit::getWorkspaceName(int i) const
 {
-  return m_uiForm.dataTable->item(i, wsColumn)->text().toStdString();
+  return m_dataController->getWorkspaceName(i);
 }
 
 /**
@@ -915,7 +1003,14 @@ std::string MultiDatasetFit::getWorkspaceName(int i) const
  */
 int MultiDatasetFit::getWorkspaceIndex(int i) const
 {
-  return m_uiForm.dataTable->item(i, wsIndexColumn)->text().toInt();
+  return m_dataController->getWorkspaceIndex(i);
+}
+
+/// Get the fitting range for the i-th spectrum
+/// @param i :: Index of a spectrum in the data table.
+std::pair<double,double> MultiDatasetFit::getFittingRange(int i) const
+{
+  return m_dataController->getFittingRange(i);
 }
 
 /**
@@ -923,7 +1018,7 @@ int MultiDatasetFit::getWorkspaceIndex(int i) const
  */
 int MultiDatasetFit::getNumberOfSpectra() const
 {
-  return m_uiForm.dataTable->rowCount();
+  return m_dataController->getNumberOfSpectra();
 }
 
 /**
@@ -1113,6 +1208,10 @@ void MultiDatasetFit::showPlotInfo()
   {
     text += "Click and drag to move. Use mouse wheel to zoom in and out.";
   }
+  else if ( m_plotController->isRangeSelectorEnabled() )
+  {
+    text += "Drag the vertical dashed lines to adjust the fitting range.";
+  }
   
   showInfo( text );
 }
@@ -1133,6 +1232,147 @@ void MultiDatasetFit::showTableInfo()
  * Check that the data sets in the table are valid and remove invalid ones.
  */
 void MultiDatasetFit::checkDataSets()
+{
+  m_dataController->checkDataSets();
+}
+
+void MultiDatasetFit::enableZoom()
+{
+  m_plotController->enableZoom();
+  m_uiForm.toolOptions->setCurrentIndex(zoomToolPage);
+}
+
+void MultiDatasetFit::enablePan()
+{
+  m_plotController->enablePan();
+  m_uiForm.toolOptions->setCurrentIndex(panToolPage);
+}
+
+void MultiDatasetFit::enableRange()
+{
+  m_plotController->enableRange();
+  m_uiForm.toolOptions->setCurrentIndex(rangeToolPage);
+}
+
+/*==========================================================================================*/
+/*                                    DataController                                        */
+/*==========================================================================================*/
+
+DataController::DataController(MultiDatasetFit *parent, QTableWidget *dataTable):
+  QObject(parent),m_dataTable(dataTable),m_isFittingRangeGlobal(false)
+{
+  connect(dataTable,SIGNAL(itemSelectionChanged()), this,SLOT(workspaceSelectionChanged()));
+  connect(dataTable,SIGNAL(cellChanged(int,int)),this,SLOT(updateDataset(int,int)));
+}
+
+/**
+ * Show a dialog to select a workspace from the ADS.
+ */
+void DataController::addWorkspace()
+{
+  AddWorkspaceDialog dialog(owner());
+  if ( dialog.exec() == QDialog::Accepted )
+  {
+    QString wsName = dialog.workspaceName().stripWhiteSpace();
+    // if name is empty assume that there are no workspaces in the ADS
+    if ( wsName.isEmpty() ) return;
+    if ( Mantid::API::AnalysisDataService::Instance().doesExist( wsName.toStdString()) )
+    {
+      auto ws = Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::API::MatrixWorkspace>( wsName.toStdString() );
+      auto indices = dialog.workspaceIndices();
+      for(auto i = indices.begin(); i != indices.end(); ++i)
+      {
+        addWorkspaceSpectrum( wsName, *i, *ws );
+      }
+      emit dataTableUpdated();
+    }
+    else
+    {
+      QMessageBox::warning(owner(),"MantidPlot - Warning",QString("Workspace \"%1\" doesn't exist.").arg(wsName));
+    }
+  }
+}
+
+/**
+ * Add a spectrum from a workspace to the table.
+ * @param wsName :: Name of a workspace.
+ * @param wsIndex :: Index of a spectrum in the workspace (workspace index).
+ * @param ws :: The workspace.
+ */
+void DataController::addWorkspaceSpectrum(const QString &wsName, int wsIndex, const Mantid::API::MatrixWorkspace& ws)
+{
+  int row = m_dataTable->rowCount();
+  m_dataTable->insertRow(row);
+
+  auto cell = new QTableWidgetItem( wsName );
+  m_dataTable->setItem( row, wsColumn, cell );
+  auto flags = cell->flags();
+  flags ^= Qt::ItemIsEditable;
+  cell->setFlags(flags);
+
+  cell = new QTableWidgetItem( QString::number(wsIndex) );
+  m_dataTable->setItem( row, wsIndexColumn, cell );
+  flags = cell->flags();
+  flags ^= Qt::ItemIsEditable;
+  cell->setFlags(flags);
+
+  const double startX = ws.readX(wsIndex).front();
+  cell = new QTableWidgetItem( QString::number(startX) );
+  m_dataTable->setItem( row, startXColumn, cell );
+
+  const double endX = ws.readX(wsIndex).back();
+  cell = new QTableWidgetItem( QString::number(endX) );
+  m_dataTable->setItem( row, endXColumn, cell );
+}
+
+/**
+ * Slot. Called when selection in the data table changes.
+ */
+void DataController::workspaceSelectionChanged()
+{
+  auto selection = m_dataTable->selectionModel();
+  bool enableRemoveButton = selection->hasSelection();
+  if ( enableRemoveButton )
+  {
+    enableRemoveButton = selection->selectedRows().size() > 0;
+  }
+
+  emit hasSelection(enableRemoveButton);
+}
+
+/**
+ * Slot. Called when "Remove" button is pressed.
+ */
+void DataController::removeSelectedSpectra()
+{
+  auto ranges = m_dataTable->selectedRanges();
+  if ( ranges.isEmpty() ) return;
+  std::vector<int> rows;
+  for(auto range = ranges.begin(); range != ranges.end(); ++range)
+  {
+    for(int row = range->topRow(); row <= range->bottomRow(); ++row)
+    {
+      rows.push_back( row );
+    }
+  }
+  removeDataSets( rows );
+}
+
+void DataController::removeDataSets( std::vector<int>& rows )
+{
+  if ( rows.empty() ) return;
+  std::sort( rows.begin(), rows.end() );
+  for(auto row = rows.rbegin(); row != rows.rend(); ++row)
+  {
+    m_dataTable->removeRow( *row );
+  }
+  emit dataTableUpdated();
+}
+
+/**
+ * Check that the data sets in the table are valid and remove invalid ones.
+ */
+void DataController::checkDataSets()
 {
   std::vector<int> rows;
   int nrows = getNumberOfSpectra();
@@ -1157,15 +1397,82 @@ void MultiDatasetFit::checkDataSets()
   removeDataSets( rows );
 }
 
-void MultiDatasetFit::removeDataSets( std::vector<int>& rows )
+/**
+ * Get the workspace name of the i-th spectrum.
+ * @param i :: Index of a spectrum in the data table.
+ */
+std::string DataController::getWorkspaceName(int i) const
 {
-  if ( rows.empty() ) return;
-  std::sort( rows.begin(), rows.end() );
-  for(auto row = rows.rbegin(); row != rows.rend(); ++row)
+  return m_dataTable->item(i, wsColumn)->text().toStdString();
+}
+
+/**
+ * Get the workspace index of the i-th spectrum.
+ * @param i :: Index of a spectrum in the data table.
+ */
+int DataController::getWorkspaceIndex(int i) const
+{
+  return m_dataTable->item(i, wsIndexColumn)->text().toInt();
+}
+
+/**
+ * Get the number of spectra to fit to.
+ */
+int DataController::getNumberOfSpectra() const
+{
+  return m_dataTable->rowCount();
+}
+
+/**
+ * Enable global setting of fitting range (calls to setFittingRage(...)
+ * will set ranges of all datasets.)
+ * @param on :: True for global setting, false for individual.
+ */
+void DataController::setFittingRangeGlobal(bool on)
+{
+  m_isFittingRangeGlobal = on;
+}
+
+/**
+ * Set the fitting range for a data set or all data sets.
+ * @param i :: Index of a data set (spectrum). If m_isFittingRangeGlobal == true
+ *   the index is ignored and fitting range is set for all spectra.
+ * @param startX :: Start of the fitting range.
+ * @param endX :: End of the fitting range.
+ */
+void DataController::setFittingRange(int i, double startX, double endX)
+{
+  if ( i < 0 || i >= m_dataTable->rowCount() ) return;
+  auto start = QString::number(startX);
+  auto end = QString::number(endX);
+  if ( m_isFittingRangeGlobal )
   {
-    m_uiForm.dataTable->removeRow( *row );
+    for(int k = 0; k < getNumberOfSpectra(); ++k)
+    {
+      m_dataTable->item(k, startXColumn)->setText(start);
+      m_dataTable->item(k, endXColumn)->setText(end);
+    }
   }
-  emit dataTableUpdated();
+  else
+  {
+    m_dataTable->item(i, startXColumn)->setText(start);
+    m_dataTable->item(i, endXColumn)->setText(end);
+  }
+}
+
+/// Get the fitting range for a i-th data set.
+/// @param i :: Index of a dataset.
+std::pair<double,double> DataController::getFittingRange(int i) const
+{
+  double startX = m_dataTable->item(i, startXColumn)->text().toDouble();
+  double endX = m_dataTable->item(i, endXColumn)->text().toDouble();
+  return std::make_pair(startX,endX);
+}
+
+/// Inform the others that a dataset was updated.
+void DataController::updateDataset(int row, int)
+{
+  emit dataSetUpdated(row);
 }
 
 void MultiDatasetFit::loadSettings()

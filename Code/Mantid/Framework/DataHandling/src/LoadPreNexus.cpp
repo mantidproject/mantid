@@ -31,7 +31,7 @@ using std::vector;
 namespace Mantid {
 namespace DataHandling {
 
-DECLARE_FILELOADER_ALGORITHM(LoadPreNexus);
+DECLARE_FILELOADER_ALGORITHM(LoadPreNexus)
 
 static const string RUNINFO_PARAM("Filename");
 static const string MAP_PARAM("MappingFilename");

@@ -14,7 +14,7 @@ namespace MantidQt
 {
   namespace CustomDialogs
   {
-    DECLARE_DIALOG(CatalogPublishDialog);
+    DECLARE_DIALOG(CatalogPublishDialog)
 
     /**
      * Default constructor.

@@ -8,21 +8,20 @@
 #include "MantidKernel/UnitFactory.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
-#include "MantidMDEvents/MDHistoWorkspace.h"
+#include "MantidDataObjects/MDHistoWorkspace.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidAlgorithms/CreatePeaksWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidMDEvents/MDBoxBase.h"
+#include "MantidDataObjects/MDBoxBase.h"
 #include "MantidKernel/V3D.h"
 
 using namespace Mantid::Algorithms;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
-using namespace Mantid::MDEvents;
 
 class CheckWorkspacesMatchTest : public CxxTest::TestSuite
 {
@@ -218,8 +217,8 @@ public:
   void testMDEvents_matches()
   {
     if ( !checker.isInitialized() ) checker.initialize();
-    MDEventWorkspace3Lean::sptr mdews1 = MDEventsTestHelper::makeFileBackedMDEW("mdev1", false);
-    MDEventWorkspace3Lean::sptr mdews2 = MDEventsTestHelper::makeFileBackedMDEW("mdev2", false);
+    MDEventWorkspace3Lean::sptr mdews1 = MDEventsTestHelper::makeFakeMDEventWorkspace("mdev1");
+    MDEventWorkspace3Lean::sptr mdews2 = MDEventsTestHelper::makeFakeMDEventWorkspace("mdev2");
     TS_ASSERT_THROWS_NOTHING( checker.setProperty("Workspace1", boost::dynamic_pointer_cast<IMDWorkspace>(mdews1)) );
     TS_ASSERT_THROWS_NOTHING( checker.setProperty("Workspace2", boost::dynamic_pointer_cast<IMDWorkspace>(mdews2)) );
     TS_ASSERT( checker.execute() );

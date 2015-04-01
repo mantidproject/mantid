@@ -59,7 +59,7 @@ namespace MantidQt
 {
 namespace CustomInterfaces
 {
-  DECLARE_SUBWINDOW(SANSRunWindow);
+  DECLARE_SUBWINDOW(SANSRunWindow)
 
 
 using namespace MantidQt::MantidWidgets;

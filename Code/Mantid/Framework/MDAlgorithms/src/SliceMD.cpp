@@ -1,6 +1,6 @@
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidKernel/System.h"
-#include "MantidMDEvents/MDEventFactory.h"
+#include "MantidDataObjects/MDEventFactory.h"
 #include "MantidMDAlgorithms/SliceMD.h"
 #include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
 #include "MantidKernel/ThreadScheduler.h"
@@ -13,7 +13,7 @@
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
-using namespace Mantid::MDEvents;
+using namespace Mantid::DataObjects;
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -44,8 +44,8 @@ void SliceMD::init() {
   // Properties for specifying the slice to perform.
   this->initSlicingProps();
 
-  declareProperty(new WorkspaceProperty<IMDEventWorkspace>(
-                      "OutputWorkspace", "", Direction::Output),
+  declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace", "",
+                                                   Direction::Output),
                   "Name of the output MDEventWorkspace.");
 
   std::vector<std::string> exts;
@@ -122,8 +122,10 @@ void SliceMD::slice(typename MDEventWorkspace<MDE, nd>::sptr ws) {
   // Create the ouput workspace
   typename MDEventWorkspace<OMDE, ond>::sptr outWS(
       new MDEventWorkspace<OMDE, ond>());
-  for (size_t od = 0; od < m_binDimensions.size(); od++)
+  for (size_t od = 0; od < m_binDimensions.size(); od++) {
     outWS->addDimension(m_binDimensions[od]);
+  }
+  outWS->setCoordinateSystem(ws->getSpecialCoordinateSystem());
   outWS->initialize();
   // Copy settings from the original box controller
   BoxController_sptr bc = ws->getBoxController();
@@ -337,4 +339,4 @@ void SliceMD::exec() {
 }
 
 } // namespace Mantid
-} // namespace MDEvents
+} // namespace DataObjects

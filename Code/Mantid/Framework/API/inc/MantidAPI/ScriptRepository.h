@@ -48,7 +48,7 @@ enum SCRIPTSTATUS {
   LOCAL_ONLY = (1u << 1),
   REMOTE_CHANGED = (1u << 2),
   LOCAL_CHANGED = (1u << 3),
-  BOTH_CHANGED = (REMOTE_CHANGED | LOCAL_CHANGED),
+  BOTH_CHANGED = (REMOTE_CHANGED | LOCAL_CHANGED)
 };
 
 /**
@@ -610,7 +610,7 @@ public:
 
 /// shared pointer to the function base class
 typedef boost::shared_ptr<ScriptRepository> ScriptRepository_sptr;
-};
-};
+}
+}
 
 #endif // MANTID_API_SCRIPTREPOSITORY_H_

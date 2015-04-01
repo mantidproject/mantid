@@ -1,8 +1,8 @@
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidKernel/System.h"
 #include "MantidMDAlgorithms/FindPeaksMD.h"
-#include "MantidMDEvents/MDEventFactory.h"
-#include "MantidMDEvents/MDHistoWorkspace.h"
+#include "MantidDataObjects/MDEventFactory.h"
+#include "MantidDataObjects/MDHistoWorkspace.h"
 #include "MantidKernel/VMD.h"
 
 #include <boost/math/special_functions/fpclassify.hpp>
@@ -14,7 +14,7 @@
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
-using namespace Mantid::MDEvents;
+using namespace Mantid::DataObjects;
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -30,7 +30,7 @@ template <typename MDE, size_t nd> struct IsFullEvent : boost::false_type {};
 template <size_t nd> struct IsFullEvent<MDEvent<nd>, nd> : boost::true_type {};
 
 /**
- * Specialization if isFullEvent for MDEvents
+ * Specialization if isFullEvent for DataObjects
  * to return true
  */
 template <typename MDE, size_t nd>
@@ -39,7 +39,7 @@ bool isFullMDEvent(const boost::true_type &) {
 }
 
 /**
- * Specialization if isFullEvent for MDEvents
+ * Specialization if isFullEvent for DataObjects
  * to return false
  */
 template <typename MDE, size_t nd>
@@ -426,7 +426,7 @@ void FindPeaksMD::findPeaks(typename MDEventWorkspace<MDE, nd>::sptr ws) {
  *
  * @param ws :: MDHistoWorkspace
  */
-void FindPeaksMD::findPeaksHisto(Mantid::MDEvents::MDHistoWorkspace_sptr ws) {
+void FindPeaksMD::findPeaksHisto(Mantid::DataObjects::MDHistoWorkspace_sptr ws) {
   size_t nd = ws->getNumDims();
   if (nd < 3)
     throw std::invalid_argument("Workspace must have at least 3 dimensions.");
@@ -611,4 +611,4 @@ void FindPeaksMD::exec() {
 }
 
 } // namespace Mantid
-} // namespace MDEvents
+} // namespace DataObjects

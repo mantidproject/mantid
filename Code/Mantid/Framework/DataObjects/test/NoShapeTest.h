@@ -6,7 +6,7 @@
 #endif
 
 #include <cxxtest/TestSuite.h>
-#include <jsoncpp/json/json.h>
+#include <json/json.h>
 #include "MantidDataObjects/NoShape.h"
 #include "MantidKernel/V3D.h"
 #include "MantidKernel/SpecialCoordinateSystem.h"

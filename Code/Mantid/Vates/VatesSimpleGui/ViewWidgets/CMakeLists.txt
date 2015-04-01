@@ -3,6 +3,7 @@ project( MantidVatesSimpleGuiViewWidgets )
 # These are the C++ files to be compiled.
 set( INCLUDE_FILES
   inc/MantidVatesSimpleGuiViewWidgets/AutoScaleRangeGenerator.h
+  inc/MantidVatesSimpleGuiViewWidgets/CameraManager.h
   inc/MantidVatesSimpleGuiViewWidgets/BackgroundRgbProvider.h
   inc/MantidVatesSimpleGuiViewWidgets/ColorMapManager.h
   inc/MantidVatesSimpleGuiViewWidgets/ColorSelectionWidget.h
@@ -11,6 +12,9 @@ set( INCLUDE_FILES
   inc/MantidVatesSimpleGuiViewWidgets/MdViewerWidget.h
   inc/MantidVatesSimpleGuiViewWidgets/MultisliceView.h
   inc/MantidVatesSimpleGuiViewWidgets/RebinAlgorithmDialogProvider.h
+  inc/MantidVatesSimpleGuiViewWidgets/PeaksTableControllerVsi.h
+  inc/MantidVatesSimpleGuiViewWidgets/PeaksWidget.h
+  inc/MantidVatesSimpleGuiViewWidgets/PeaksTabWidget.h
   inc/MantidVatesSimpleGuiViewWidgets/SaveScreenshotReaction.h
   inc/MantidVatesSimpleGuiViewWidgets/RebinnedSourcesManager.h
   inc/MantidVatesSimpleGuiViewWidgets/StandardView.h
@@ -23,6 +27,7 @@ set( INCLUDE_FILES
 
 set( SOURCE_FILES
   src/AutoScaleRangeGenerator.cpp
+  src/CameraManager.cpp
   src/BackgroundRgbProvider.cpp
   src/ColorMapManager.cpp
   src/ColorSelectionWidget.cpp
@@ -30,6 +35,9 @@ set( SOURCE_FILES
   src/MdViewerWidget.cpp
   src/MultisliceView.cpp
   src/RebinAlgorithmDialogProvider.cpp
+  src/PeaksTableControllerVsi.cpp
+  src/PeaksTabWidget.cpp
+  src/PeaksWidget.cpp
   src/SaveScreenshotReaction.cpp
   src/RebinnedSourcesManager.cpp
   src/StandardView.cpp
@@ -49,6 +57,9 @@ qt4_wrap_cpp( MOC_SOURCES
   inc/MantidVatesSimpleGuiViewWidgets/ColorSelectionWidget.h
   inc/MantidVatesSimpleGuiViewWidgets/MdViewerWidget.h
   inc/MantidVatesSimpleGuiViewWidgets/MultisliceView.h
+  inc/MantidVatesSimpleGuiViewWidgets/PeaksTableControllerVsi.h
+  inc/MantidVatesSimpleGuiViewWidgets/PeaksWidget.h
+  inc/MantidVatesSimpleGuiViewWidgets/PeaksTabWidget.h
   inc/MantidVatesSimpleGuiViewWidgets/SaveScreenshotReaction.h
   inc/MantidVatesSimpleGuiViewWidgets/RebinnedSourcesManager.h
   inc/MantidVatesSimpleGuiViewWidgets/StandardView.h
@@ -64,6 +75,8 @@ qt4_wrap_ui( UI_BUILT_SOURCES
   inc/MantidVatesSimpleGuiViewWidgets/ColorSelectionWidget.ui
   inc/MantidVatesSimpleGuiViewWidgets/MdViewerWidget.ui
   inc/MantidVatesSimpleGuiViewWidgets/MultisliceView.ui
+  inc/MantidVatesSimpleGuiViewWidgets/PeaksWidget.ui
+  inc/MantidVatesSimpleGuiViewWidgets/PeaksTabWidget.ui
   inc/MantidVatesSimpleGuiViewWidgets/StandardView.ui
   inc/MantidVatesSimpleGuiViewWidgets/SplatterPlotView.ui
   inc/MantidVatesSimpleGuiViewWidgets/ThreesliceView.ui
@@ -109,11 +122,14 @@ set_target_properties( VatesSimpleGuiViewWidgets PROPERTIES OUTPUT_NAME MantidVa
 # Add to the 'VatesSimpleGui' group in VS
 set_property( TARGET VatesSimpleGuiViewWidgets PROPERTY FOLDER MantidVatesSimpleGui )
 
+
+include_directories( SYSTEM ${PARAVIEW_INCLUDE_DIRS} )
+
 target_link_libraries( VatesSimpleGuiViewWidgets
-VatesSimpleGuiQtWidgets
 pqApplicationComponents
 pqComponents
 ${QT_LIBRARIES}
+VatesSimpleGuiQtWidgets
 MantidQtAPI
 VatesAPI
 ${MANTID_SUBPROJECT_LIBS}

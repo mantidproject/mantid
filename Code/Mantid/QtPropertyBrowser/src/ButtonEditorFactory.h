@@ -1,6 +1,7 @@
 #ifndef BUTTONEDITORFACTORY_H
 #define BUTTONEDITORFACTORY_H
 
+#include "ParameterPropertyManager.h"
 #include "qtpropertymanager.h"
 #include <QPushButton>
 
@@ -57,12 +58,12 @@ protected:
   }
 };
 
-class QT_QTPROPERTYBROWSER_EXPORT DoubleButtonEditorFactory: public ButtonEditorFactory<QtDoublePropertyManager>
+class QT_QTPROPERTYBROWSER_EXPORT DoubleButtonEditorFactory: public ButtonEditorFactory<ParameterPropertyManager>
 {
   Q_OBJECT
 
 public:
-  DoubleButtonEditorFactory(QObject *parent):ButtonEditorFactory<QtDoublePropertyManager>(parent){}
+  DoubleButtonEditorFactory(QObject *parent):ButtonEditorFactory<ParameterPropertyManager>(parent){}
 
 Q_SIGNALS:
   void buttonClicked(QtProperty *);

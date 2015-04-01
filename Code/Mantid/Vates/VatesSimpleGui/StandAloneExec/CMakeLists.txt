@@ -38,6 +38,8 @@ set( TEST_SUITES
 
 add_executable( ${PROJECT_NAME} ${INCLUDE_FILES} ${SOURCE_FILES} ${MOC_SRCS} )
 
+include_directories( SYSTEM ${PARAVIEW_INCLUDE_DIRS} )
+
 target_link_libraries( ${PROJECT_NAME}
 pqCore pqComponents pqApplicationComponents
 ${QT_LIBRARIES}

@@ -11,8 +11,7 @@ from mantid.api import FileFinder
 
 # Import our workflows.
 from inelastic_indirect_reducer import IndirectReducer
-from inelastic_indirect_reduction_steps import CreateCalibrationWorkspace
-from IndirectDataAnalysis import msdfit, furyfitSeq, furyfitMult, confitSeq, abscorFeeder
+from IndirectDataAnalysis import furyfitSeq, furyfitMult, confitSeq, abscorFeeder
 
 '''
 - TOSCA only supported by "Reduction" (the Energy Transfer tab of C2E).
@@ -468,11 +467,11 @@ class ISISIndirectInelasticCalibration(ISISIndirectInelasticBase):
 
         self.result_names = ['IndirectCalibration_Output']
 
-        CreateCalibrationWorkspace(InputFiles=self.data_file,
-                                   OutputWorkspace='IndirectCalibration_Output',
-                                   DetectorRange=self.detector_range,
-                                   PeakRange=self.peak,
-                                   BackgroundRange=self.back)
+        IndirectCalibration(InputFiles=self.data_file,
+                            OutputWorkspace='IndirectCalibration_Output',
+                            DetectorRange=self.detector_range,
+                            PeakRange=self.peak,
+                            BackgroundRange=self.back)
 
     def _validate_properties(self):
         '''Check the object properties are in an expected state to continue'''
@@ -683,7 +682,7 @@ class OSIRISDiagnostics(ISISIndirectInelasticDiagnostics):
 
 #==============================================================================
 class ISISIndirectInelasticMoments(ISISIndirectInelasticBase):
-    '''A base class for the ISIS indirect inelastic Fury/FuryFit tests
+    '''A base class for the ISIS indirect inelastic TransformToIqt/TransformToIqtFit tests
 
     The output of Elwin is usually used with MSDFit and so we plug one into
     the other in this test.
@@ -780,20 +779,11 @@ class ISISIndirectInelasticElwinAndMSDFit(ISISIndirectInelasticBase):
                                InputWorkspace=ws)
 
         eq2_file = elwin_results[1]
-        msdfit_result = msdfit(eq2_file,
-                               startX=self.startX,
-                               endX=self.endX,
-                               Save=False,
+        msdfit_result = MSDFit(InputWorkspace=eq2_file,
+                               XStart=self.startX,
+                               XEnd=self.endX,
+                               SpecMax=1,
                                Plot=False)
-
-        # @TODO: MSDFit has some other, as yet unfinalised, workspaces as its
-        #        output.  We need to test these too, eventually.
-
-        # Annoyingly, MSDFit eats the EQ2 workspaces we feed it, so let's
-        # reload them for checking against the reference files later.
-        for ws, filename in zip(elwin_results, int_files):
-            LoadNexusProcessed(Filename=filename,
-                               OutputWorkspace=ws)
 
         # Clean up the intermediate files.
         for filename in int_files:
@@ -803,17 +793,15 @@ class ISISIndirectInelasticElwinAndMSDFit(ISISIndirectInelasticBase):
         # final MSDFit result.
         self.result_names = [elwin_results[0],  # EQ1
                              elwin_results[1],  # EQ2
-                             msdfit_result]
+                             msdfit_result[2].name()]  # Fit workspace
 
     def _validate_properties(self):
         """Check the object properties are in an expected state to continue"""
 
         if type(self.files) != list or len(self.files) != 2:
-            raise RuntimeError("files should be a list of exactly 2 "
-                               "strings")
+            raise RuntimeError("files should be a list of exactly 2 strings")
         if type(self.eRange) != list or len(self.eRange) != 2:
-            raise RuntimeError("eRange should be a list of exactly 2 "
-                               "values")
+            raise RuntimeError("eRange should be a list of exactly 2 values")
         if type(self.startX) != float:
             raise RuntimeError("startX should be a float")
         if type(self.endX) != float:
@@ -861,7 +849,7 @@ class ISISIndirectInelasticFuryAndFuryFit(ISISIndirectInelasticBase):
     '''
     A base class for the ISIS indirect inelastic Fury/FuryFit tests
 
-    The output of Fury is usually used with FuryFit and so we plug one into
+    The output of TransformToIqt is usually used with FuryFit and so we plug one into
     the other in this test.
     '''
 
@@ -877,14 +865,14 @@ class ISISIndirectInelasticFuryAndFuryFit(ISISIndirectInelasticBase):
             LoadNexus(sample, OutputWorkspace=sample)
         LoadNexus(self.resolution, OutputWorkspace=self.resolution)
 
-        fury_props, fury_ws = Fury(Sample=self.samples[0],
-                                   Resolution=self.resolution,
-                                   EnergyMin=self.e_min,
-                                   EnergyMax=self.e_max,
-                                   NumBins=self.num_bins,
-                                   DryRun=False,
-                                   Save=False,
-                                   Plot=False)
+        fury_props, fury_ws = TransformToIqt(SampleWorkspace=self.samples[0],
+                                             ResolutionWorkspace=self.resolution,
+                                             EnergyMin=self.e_min,
+                                             EnergyMax=self.e_max,
+                                             BinReductionFactor=self.num_bins,
+                                             DryRun=False,
+                                             Save=False,
+                                             Plot=False)
 
         # Test FuryFit Sequential
         furyfitSeq_ws = furyfitSeq(fury_ws.getName(),
@@ -934,7 +922,7 @@ class OSIRISFuryAndFuryFit(ISISIndirectInelasticFuryAndFuryFit):
     def __init__(self):
         ISISIndirectInelasticFuryAndFuryFit.__init__(self)
 
-        # Fury
+        # TransformToIqt
         self.samples = ['osi97935_graphite002_red.nxs']
         self.resolution = 'osi97935_graphite002_res.nxs'
         self.e_min = -0.4
@@ -959,7 +947,7 @@ class IRISFuryAndFuryFit(ISISIndirectInelasticFuryAndFuryFit):
     def __init__(self):
         ISISIndirectInelasticFuryAndFuryFit.__init__(self)
 
-        # Fury
+        # TransformToIqt
         self.samples = ['irs53664_graphite002_red.nxs']
         self.resolution = 'irs53664_graphite002_res.nxs'
         self.e_min = -0.4
@@ -998,14 +986,14 @@ class ISISIndirectInelasticFuryAndFuryFitMulti(ISISIndirectInelasticBase):
             LoadNexus(sample, OutputWorkspace=sample)
         LoadNexus(self.resolution, OutputWorkspace=self.resolution)
 
-        fury_props, fury_ws = Fury(Sample=self.samples[0],
-                                   Resolution=self.resolution,
-                                   EnergyMin=self.e_min,
-                                   EnergyMax=self.e_max,
-                                   NumBins=self.num_bins,
-                                   DryRun=False,
-                                   Save=False,
-                                   Plot=False)
+        fury_props, fury_ws = TransformToIqt(SampleWorkspace=self.samples[0],
+                                             ResolutionWorkspace=self.resolution,
+                                             EnergyMin=self.e_min,
+                                             EnergyMax=self.e_max,
+                                             BinReductionFactor=self.num_bins,
+                                             DryRun=False,
+                                             Save=False,
+                                             Plot=False)
 
         # Test FuryFit Sequential
         furyfitSeq_ws = furyfitMult(fury_ws.getName(),
@@ -1057,7 +1045,7 @@ class OSIRISFuryAndFuryFitMulti(ISISIndirectInelasticFuryAndFuryFitMulti):
     def __init__(self):
         ISISIndirectInelasticFuryAndFuryFitMulti.__init__(self)
 
-        # Fury
+        # TransformToIqt
         self.samples = ['osi97935_graphite002_red.nxs']
         self.resolution = 'osi97935_graphite002_res.nxs'
         self.e_min = -0.4
@@ -1082,7 +1070,7 @@ class IRISFuryAndFuryFitMulti(ISISIndirectInelasticFuryAndFuryFitMulti):
     def __init__(self):
         ISISIndirectInelasticFuryAndFuryFitMulti.__init__(self)
 
-        # Fury
+        # TransformToIqt
         self.samples = ['irs53664_graphite002_red.nxs']
         self.resolution = 'irs53664_graphite002_res.nxs'
         self.e_min = -0.4

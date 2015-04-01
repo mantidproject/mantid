@@ -123,8 +123,8 @@ protected:
 
 private:
   /// The PyObject must be supplied to construct the object
-  DISABLE_DEFAULT_CONSTRUCT(AlgorithmAdapter);
-  DISABLE_COPY_AND_ASSIGN(AlgorithmAdapter);
+  DISABLE_DEFAULT_CONSTRUCT(AlgorithmAdapter)
+  DISABLE_COPY_AND_ASSIGN(AlgorithmAdapter)
 
   /// Private init for this algorithm
   virtual void init();

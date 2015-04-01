@@ -35,7 +35,7 @@ using namespace Mantid::DataObjects;
 namespace Mantid {
 namespace DataHandling {
 
-DECLARE_FILELOADER_ALGORITHM(LoadCanSAS1D);
+DECLARE_FILELOADER_ALGORITHM(LoadCanSAS1D)
 
 /// constructor
 LoadCanSAS1D::LoadCanSAS1D() : m_groupNumber(0) {}
@@ -121,7 +121,8 @@ void LoadCanSAS1D::exec() {
   std::string runName;
   switch (numEntries) {
   case 0:
-    Exception::NotFoundError("No <SASentry>s were found in the file", fileName);
+    throw Exception::NotFoundError("No <SASentry>s were found in the file", fileName);
+    break;
   case 1:
     // the value of the string runName is unused in this case
     WS = loadEntry(entryList->item(0), runName);

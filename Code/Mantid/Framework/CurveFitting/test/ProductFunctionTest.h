@@ -121,8 +121,8 @@ public:
 
 };
 
-DECLARE_FUNCTION(ProductFunctionMWTest_Gauss);
-DECLARE_FUNCTION(ProductFunctionMWTest_Linear);
+DECLARE_FUNCTION(ProductFunctionMWTest_Gauss)
+DECLARE_FUNCTION(ProductFunctionMWTest_Linear)
 
 class ProductFunctionTest : public CxxTest::TestSuite
 {

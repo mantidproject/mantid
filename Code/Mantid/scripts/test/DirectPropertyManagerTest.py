@@ -572,6 +572,7 @@ class DirectPropertyManagerTest(unittest.TestCase):
         self.assertAlmostEqual(bins[2],9.9999)
 
 
+
         ei = [20,30]
         propman.incident_energy = ei
         got_ei = propman.incident_energy
@@ -584,6 +585,26 @@ class DirectPropertyManagerTest(unittest.TestCase):
         self.assertAlmostEqual(bins[1],4 * 20 * 0.99999 / 100)
         self.assertAlmostEqual(bins[2],20 * 0.99999)
 
+        # check string work properly
+        propman.incident_energy = '20'
+        self.assertFalse(PropertyManager.incident_energy.multirep_mode())
+        propman.energy_bins = [-2,0.1,0.8]
+
+        bins = PropertyManager.energy_bins.get_abs_range(propman)
+
+        self.assertAlmostEqual(bins[0],-2)
+        self.assertAlmostEqual(bins[1], 0.1)
+        self.assertAlmostEqual(bins[2], 0.8 )
+
+        propman.incident_energy = '[20]'
+        self.assertTrue(PropertyManager.incident_energy.multirep_mode())
+        bins = PropertyManager.energy_bins.get_abs_range(propman)
+
+        self.assertAlmostEqual(bins[0],-40)
+        self.assertAlmostEqual(bins[1], 0.1*20)
+        self.assertAlmostEqual(bins[2], 0.8*20 )
+
+        #
         propman.energy_bins = [-2,0.1,0.8]
         bins = propman.energy_bins
         self.assertAlmostEqual(bins[0],-2)
@@ -602,7 +623,6 @@ class DirectPropertyManagerTest(unittest.TestCase):
         got_ei = propman.incident_energy
         for ind,en in enumerate(got_ei):
             self.assertAlmostEqual(en,ei[ind])
-
 
         propman.energy_bins = None
         self.assertFalse(propman.energy_bins)
@@ -1050,6 +1070,11 @@ class DirectPropertyManagerTest(unittest.TestCase):
         self.assertEqual(not_found[0],11111)
         self.assertEqual(found[0],11001)
 
+        ok1,not_found1,found1 = propman.find_files_to_sum()
+        self.assertEqual(len(not_found1),1)
+        self.assertEqual(len(found1),1)
+
+
 
         ok,err_list = propman._check_file_properties()
         self.assertFalse(ok)
@@ -1063,14 +1088,14 @@ class DirectPropertyManagerTest(unittest.TestCase):
        propman.sample_run = 1000
        propman.incident_energy = 20.
 
-       def custom_print(propman,PropertyManager):
+       def custom_print(propman):
 
            ei = propman.incident_energy
            run_n = PropertyManager.sample_run.run_number()
            name = "RUN{0}atEi{1:<4.1f}meV_One2One".format(run_n,ei)
            return name
 
-       PropertyManager.save_file_name.set_custom_print(custom_print)
+       PropertyManager.save_file_name.set_custom_print(lambda : custom_print(self.prop_man))
 
                                                
        self.assertEqual(propman.save_file_name,'RUN1000atEi20.0meV_One2One')

@@ -72,7 +72,6 @@ public:
   /// Set the unit for a given dimension
   void setUnit(size_t nd, ProjectionUnit unit);
 
-  // We're guaranteed to have at least 2 axes
   V3D &U() { return m_dimensions[0]; }
   V3D &V() { return m_dimensions[1]; }
   V3D &W() { return m_dimensions[2]; }

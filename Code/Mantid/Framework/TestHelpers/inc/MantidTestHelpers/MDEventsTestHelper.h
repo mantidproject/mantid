@@ -3,24 +3,23 @@
  *
  *  This header MAY NOT be included in any test from a package below the level
  *of
- *  MDEvents (e.g. Kernel, Geometry, API, DataObjects).
+ *  DataObjects (e.g. Kernel, Geometry, API).
  *********************************************************************************/
 #ifndef MDEVENTSTEST_HELPER_H
 #define MDEVENTSTEST_HELPER_H
 
-#include "MantidDataObjects/EventWorkspace.h"
-#include "MantidKernel/DateAndTime.h"
-#include "MantidKernel/Utils.h"
 #include "MantidAPI/BoxController.h"
-#include "MantidMDEvents/MDEventFactory.h"
-#include "MantidMDEvents/MDEventWorkspace.h"
-#include "MantidMDEvents/MDLeanEvent.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/IMDEventWorkspace.h"
-#include "MantidKernel/SingletonHolder.h"
+#include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/MDEventFactory.h"
+#include "MantidDataObjects/MDEventWorkspace.h"
+#include "MantidDataObjects/MDLeanEvent.h"
+#include "MantidKernel/DateAndTime.h"
+#include "MantidKernel/Utils.h"
 
 namespace Mantid {
-namespace MDEvents {
+namespace DataObjects {
 
 /** Set of helper methods for testing MDEventWorkspace things
  *
@@ -46,21 +45,22 @@ createDiffractionEventWorkspace(int numEvents, int numPixels = 400,
  * @param fileBacked :: true for file-backed
  * @return MDEW sptr
  */
-Mantid::MDEvents::MDEventWorkspace3Lean::sptr
-makeFileBackedMDEW(std::string wsName, bool fileBacked, long numEvents = 10000);
+MDEventWorkspace3Lean::sptr
+makeFakeMDEventWorkspace(const std::string & wsName, long numEvents = 10000,
+                         Kernel::SpecialCoordinateSystem coord = Kernel::None);
 
 /// Make a fake n-dimensional MDHistoWorkspace
-Mantid::MDEvents::MDHistoWorkspace_sptr
+MDHistoWorkspace_sptr
 makeFakeMDHistoWorkspace(double signal, size_t numDims, size_t numBins = 10,
                          coord_t max = 10.0, double errorSquared = 1.0,
                          std::string name = "", double numEvents = 1.0);
 
 /// More general fake n-dimensionsal MDHistoWorkspace
-Mantid::MDEvents::MDHistoWorkspace_sptr makeFakeMDHistoWorkspaceGeneral(
+Mantid::DataObjects::MDHistoWorkspace_sptr makeFakeMDHistoWorkspaceGeneral(
     size_t numDims, double signal, double errorSquared, size_t *numBins,
     coord_t *min, coord_t *max, std::string name = "");
 /// More general fake n-dimensionsal MDHistoWorkspace
-Mantid::MDEvents::MDHistoWorkspace_sptr makeFakeMDHistoWorkspaceGeneral(
+Mantid::DataObjects::MDHistoWorkspace_sptr makeFakeMDHistoWorkspaceGeneral(
     size_t numDims, double signal, double errorSquared, size_t *numBins,
     coord_t *min, coord_t *max, std::vector<std::string> names,
     std::string name = "");
@@ -81,13 +81,13 @@ Mantid::MDEvents::MDHistoWorkspace_sptr makeFakeMDHistoWorkspaceGeneral(
  * @return shared ptr to the created workspace
  */
 template <typename MDE, size_t nd>
-boost::shared_ptr<Mantid::MDEvents::MDEventWorkspace<MDE, nd>>
+boost::shared_ptr<Mantid::DataObjects::MDEventWorkspace<MDE, nd>>
 makeAnyMDEW(size_t splitInto, coord_t min, coord_t max,
             size_t numEventsPerBox = 0, std::string wsName = "",
             std::string axisNameFormat = "Axis%d",
             std::string axisIdFormat = "Axis%d") {
-  boost::shared_ptr<Mantid::MDEvents::MDEventWorkspace<MDE, nd>> out(
-      new Mantid::MDEvents::MDEventWorkspace<MDE, nd>());
+  boost::shared_ptr<Mantid::DataObjects::MDEventWorkspace<MDE, nd>> out(
+      new Mantid::DataObjects::MDEventWorkspace<MDE, nd>());
   Mantid::API::BoxController_sptr bc = out->getBoxController();
   bc->setSplitThreshold(100);
   bc->setSplitInto(splitInto);
@@ -140,22 +140,22 @@ makeAnyMDEW(size_t splitInto, coord_t min, coord_t max,
 /** Make a MDEventWorkspace with MDLeanEvents */
 template <size_t nd>
 boost::shared_ptr<
-    Mantid::MDEvents::MDEventWorkspace<Mantid::MDEvents::MDLeanEvent<nd>, nd>>
+    MDEventWorkspace<MDLeanEvent<nd>, nd>>
 makeMDEW(size_t splitInto, coord_t min, coord_t max,
          size_t numEventsPerBox = 0) {
-  return makeAnyMDEW<Mantid::MDEvents::MDLeanEvent<nd>, nd>(splitInto, min, max,
-                                                            numEventsPerBox);
+  return makeAnyMDEW<MDLeanEvent<nd>, nd>(splitInto, min, max,
+                                          numEventsPerBox);
 }
 
 /** Make a MDEventWorkspace with MDEvents  - updated to split dims by splitInto,
  * not 10 */
 template <size_t nd>
 boost::shared_ptr<
-    Mantid::MDEvents::MDEventWorkspace<Mantid::MDEvents::MDEvent<nd>, nd>>
+    MDEventWorkspace<MDEvent<nd>, nd>>
 makeMDEWFull(size_t splitInto, coord_t min, coord_t max,
              size_t numEventsPerBox = 0) {
-  return makeAnyMDEW<Mantid::MDEvents::MDEvent<nd>, nd>(splitInto, min, max,
-                                                        numEventsPerBox);
+  return makeAnyMDEW<MDEvent<nd>, nd>(splitInto, min, max,
+                                      numEventsPerBox);
 }
 
 //=====================================================================================

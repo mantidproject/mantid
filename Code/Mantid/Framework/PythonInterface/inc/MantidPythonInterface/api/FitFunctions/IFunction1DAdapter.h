@@ -62,8 +62,8 @@ public:
 
 private:
   /// The PyObject must be supplied to construct the object
-  DISABLE_DEFAULT_CONSTRUCT(IFunction1DAdapter);
-  DISABLE_COPY_AND_ASSIGN(IFunction1DAdapter);
+  DISABLE_DEFAULT_CONSTRUCT(IFunction1DAdapter)
+  DISABLE_COPY_AND_ASSIGN(IFunction1DAdapter)
 
   /// Flag if the functionDeriv1D method is overridden (avoids multiple checks)
   bool m_derivOveridden;
