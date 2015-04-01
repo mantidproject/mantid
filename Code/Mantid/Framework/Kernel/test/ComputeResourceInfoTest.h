@@ -4,6 +4,7 @@
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/FacilityInfo.h"
 
+#include <boost/make_shared.hpp>
 #include <Poco/DOM/AutoPtr.h>
 #include <Poco/DOM/Document.h>
 #include <Poco/DOM/DOMParser.h>
@@ -14,7 +15,7 @@ using namespace Mantid::Kernel;
 class ComputeResourceInfoTest : public CxxTest::TestSuite {
 public:
   void test_allMissing() {
-    FacilityInfo *fac = NULL;
+    boost::shared_ptr<FacilityInfo> fac;
     TS_ASSERT_THROWS_NOTHING(fac =
                                  createCRInfoInMinimalFacility(simpleInstStr));
     TS_ASSERT(fac);
@@ -22,13 +23,11 @@ public:
     TS_ASSERT_THROWS_NOTHING(cri = fac->computeResInfos());
     TS_ASSERT_EQUALS(cri.size(), 0);
 
-    delete fac;
     fac = NULL;
     TS_ASSERT_THROWS(fac = createCRInfoInMinimalFacility(
                          "<computeResource fooAtt=\"barVal\"/>"),
                      std::runtime_error);
     TS_ASSERT(!fac);
-    delete fac;
   }
 
   void test_noURLTag() {
@@ -36,11 +35,10 @@ public:
                               "<u>" +
                               fermiURL + "</u>"
                                          "</computeResource>";
-    FacilityInfo *fac = NULL;
+    boost::shared_ptr<FacilityInfo> fac;
     TS_ASSERT_THROWS(fac = createCRInfoInMinimalFacility(crTxt),
                      std::runtime_error);
     TS_ASSERT(!fac);
-    delete fac;
   }
 
   void test_wrongXML() {
@@ -48,11 +46,10 @@ public:
                               "<u_foo>" +
                               fermiURL + "</u_bar>"
                                          "</compResource>";
-    FacilityInfo *fac = NULL;
+    boost::shared_ptr<FacilityInfo> fac;
     TS_ASSERT_THROWS(fac = createCRInfoInMinimalFacility(crTxt),
                      Poco::XML::XMLException);
     TS_ASSERT(!fac);
-    delete fac;
   }
 
   void test_normalFermi() {
@@ -62,7 +59,7 @@ public:
                               fermiURL + "</baseURL>"
                                          "</computeResource>";
 
-    FacilityInfo *fac = NULL;
+    boost::shared_ptr<FacilityInfo> fac;
     TS_ASSERT_THROWS_NOTHING(fac = createCRInfoInMinimalFacility(fermi));
     TS_ASSERT(fac);
     TS_ASSERT_EQUALS(fac->name(), this->testFacilityName);
@@ -95,12 +92,11 @@ public:
                               fermiURL + "</URL>"
                                          "</computeResource>";
 
-    FacilityInfo *fac = NULL;
+    boost::shared_ptr<FacilityInfo> fac;
     TS_ASSERT_THROWS(fac = createCRInfoInMinimalFacility(fermi),
                      std::runtime_error);
 
     TS_ASSERT(!fac);
-    delete fac;
   }
 
   void test_normalSCARF() {
@@ -110,7 +106,7 @@ public:
                               scarfURL + "</baseURL>"
                                          "</computeResource>";
 
-    FacilityInfo *fac = NULL;
+    boost::shared_ptr<FacilityInfo> fac;
     TS_ASSERT_THROWS_NOTHING(fac = createCRInfoInMinimalFacility(scarf));
     TS_ASSERT(fac);
     TS_ASSERT_EQUALS(fac->name(), this->testFacilityName);
@@ -119,7 +115,8 @@ public:
     TS_ASSERT_EQUALS(cri.size(), 1);
 
     ComputeResourceInfo cr = fac->computeResInfos().front();
-    TS_ASSERT_THROWS(ComputeResourceInfo fail = fac->computeResource("inexistent!"),
+    TS_ASSERT_THROWS(ComputeResourceInfo fail =
+                         fac->computeResource("inexistent!"),
                      Mantid::Kernel::Exception::NotFoundError);
     ComputeResourceInfo cr2 = fac->computeResource(scarfName);
     TS_ASSERT_EQUALS(cr, cr2);
@@ -133,7 +130,6 @@ public:
     TS_ASSERT_EQUALS(scarfType, cr2.remoteJobManagerType());
     TS_ASSERT_EQUALS(fac->name(), cr.facility().name());
     TS_ASSERT_EQUALS(fac->name(), cr2.facility().name());
-    delete fac;
   }
 
   void test_brokenSCARF() {
@@ -143,11 +139,10 @@ public:
                                                             "<URL>" +
                             scarfURL + "</URL>"
                                        "</computeResource>";
-    FacilityInfo *fac = NULL;
+    boost::shared_ptr<FacilityInfo> fac;
     TS_ASSERT_THROWS(fac = createCRInfoInMinimalFacility(err),
                      std::runtime_error);
     TS_ASSERT(!fac);
-    delete fac;
   }
 
   void test_equals() {
@@ -178,7 +173,7 @@ public:
                             fermiURL + "</baseURL>"
                                        "</computeResource>";
 
-    FacilityInfo *fac = NULL;
+    boost::shared_ptr<FacilityInfo> fac;
     TS_ASSERT_THROWS_NOTHING(fac = createCRInfoInMinimalFacility(rep));
     TS_ASSERT(fac);
     TS_ASSERT_EQUALS(fac->computeResources().size(), 3);
@@ -205,13 +200,13 @@ public:
         !(fac->computeResource(fermiName) == fac->computeResource(thirdName)));
     TS_ASSERT(
         !(fac->computeResource(otherName) == fac->computeResource(thirdName)));
-    delete fac;
   }
 
 private:
   /// make a minimal facilities file/xml string includin the compute resource
   /// passed
-  FacilityInfo *createCRInfoInMinimalFacility(const std::string &crStr) {
+  boost::shared_ptr<FacilityInfo>
+  createCRInfoInMinimalFacility(const std::string &crStr) {
     const std::string xmlStr = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
                                "<facilities>"
                                "  <facility name=\"" +
@@ -223,13 +218,13 @@ private:
     return createFacility(xmlStr);
   }
 
-  FacilityInfo *createFacility(const std::string &xml) {
+  boost::shared_ptr<FacilityInfo> createFacility(const std::string &xml) {
     Poco::XML::DOMParser parser;
     Poco::AutoPtr<Poco::XML::Document> pDoc = parser.parseString(xml);
     Poco::XML::Element *pRootElem = pDoc->documentElement();
     Poco::XML::Element *elem = pRootElem->getChildElement("facility");
 
-    return new FacilityInfo(elem);
+    return boost::make_shared<FacilityInfo>(elem);
   }
 
 private:
