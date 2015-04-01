@@ -32,7 +32,7 @@ DECLARE_ALGORITHM(ConvertSpiceDataToRealSpace)
 /** Constructor
  */
 ConvertSpiceDataToRealSpace::ConvertSpiceDataToRealSpace()
-    : m_instrumentName(""), m_numSpec(0) {}
+    : m_instrumentName(""), m_numSpec(0), m_nDimensions(3) {}
 
 //------------------------------------------------------------------------------------------------
 /** Destructor
@@ -252,7 +252,7 @@ void ConvertSpiceDataToRealSpace::parseSampleLogs(
     std::string logname = indexiter->first;
     size_t icol = indexiter->second;
 
-    g_log.information() << " Parsing log " << logname << "\n";
+    g_log.debug() << " Parsing log " << logname << "\n";
 
     std::vector<double> logvec(numrows);
     for (size_t ir = 0; ir < numrows; ++ir) {
@@ -562,6 +562,7 @@ void ConvertSpiceDataToRealSpace::addExperimentInfos(
   return;
 }
 
+//-----------------------------------------------------------------------------------------------
 /** Convert to MD Event workspace
  * @brief ConvertSpiceDataToRealSpace::convertToMDEventWS
  * @param vec_ws2d
@@ -569,10 +570,8 @@ void ConvertSpiceDataToRealSpace::addExperimentInfos(
  */
 IMDEventWorkspace_sptr ConvertSpiceDataToRealSpace::createDataMDWorkspace(
     const std::vector<MatrixWorkspace_sptr> &vec_ws2d) {
-  size_t m_nDimensions = 3;
 
   // Create a target output workspace.
-  g_log.notice() << "[DB] N-dimenstion = " << m_nDimensions << "\n";
   IMDEventWorkspace_sptr outWs =
       MDEvents::MDEventFactory::CreateMDWorkspace(m_nDimensions, "MDEvent");
 
@@ -596,9 +595,8 @@ IMDEventWorkspace_sptr ConvertSpiceDataToRealSpace::createDataMDWorkspace(
     // int nbins = 100;
 
     for (size_t d = 0; d < 3; ++d)
-      g_log.notice() << "[DB] Direction " << d
-                     << ", Range = " << m_extentMins[d] << ", "
-                     << m_extentMaxs[d] << "\n";
+      g_log.debug() << "Direction " << d << ", Range = " << m_extentMins[d]
+                    << ", " << m_extentMaxs[d] << "\n";
     outWs->addDimension(
         Geometry::MDHistoDimension_sptr(new Geometry::MDHistoDimension(
             id, name, units, static_cast<coord_t>(m_extentMins[i]),
@@ -656,11 +654,7 @@ IMDEventWorkspace_sptr ConvertSpiceDataToRealSpace::createDataMDWorkspace(
 IMDEventWorkspace_sptr ConvertSpiceDataToRealSpace::createMonitorMDWorkspace(
     const std::vector<MatrixWorkspace_sptr> vec_ws2d,
     const std::vector<double> &vecmonitor) {
-
-  size_t m_nDimensions = 3;
-
   // Create a target output workspace.
-  g_log.notice() << "[DB] N-dimenstion = " << m_nDimensions << "\n";
   IMDEventWorkspace_sptr outWs =
       MDEvents::MDEventFactory::CreateMDWorkspace(m_nDimensions, "MDEvent");
 
@@ -681,12 +675,7 @@ IMDEventWorkspace_sptr ConvertSpiceDataToRealSpace::createMonitorMDWorkspace(
     std::string id = vec_ID[i];
     std::string name = vec_name[i];
     std::string units = "m";
-    // int nbins = 100;
 
-    for (size_t d = 0; d < 3; ++d)
-      g_log.notice() << "[DB] Direction " << d
-                     << ", Range = " << m_extentMins[d] << ", "
-                     << m_extentMaxs[d] << "\n";
     outWs->addDimension(
         Geometry::MDHistoDimension_sptr(new Geometry::MDHistoDimension(
             id, name, units, static_cast<coord_t>(m_extentMins[i]),

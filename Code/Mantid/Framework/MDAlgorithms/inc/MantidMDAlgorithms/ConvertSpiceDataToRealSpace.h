@@ -133,6 +133,8 @@ private:
   std::vector<double> m_extentMaxs;
   /// Number of bins
   std::vector<size_t> m_numBins;
+  /// Dimension of the output MDEventWorkspace
+  size_t m_nDimensions;
 };
 
 } // namespace DataHandling
