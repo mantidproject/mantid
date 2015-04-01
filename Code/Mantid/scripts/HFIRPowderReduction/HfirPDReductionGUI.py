@@ -122,9 +122,16 @@ class MainWindow(QtGui.QMainWindow):
 
         self.connect(self.ui.pushButton_view2D, QtCore.SIGNAL('clicked()'), 
                 self.doMergeScanView2D)
+        self.connect(self.ui.pushButton_viewMerge, QtCore.SIGNAL('clicked()'),
+                self.doMergeScanView1D)
 
         # Define signal-event handling
-
+        
+        # define event handlers for matplotlib canvas
+        self.ui.graphicsView_mergeRun.canvas.mpl_connect('button_press_event', \
+                self.on_mouseDownEvent)
+        self.ui.graphicsView_mergeRun.canvas.mpl_connect('motion_notify_event', \
+                self.on_mouseMotion)
 
         # Widget type definition
         validator0 = QtGui.QIntValidator(self.ui.lineEdit_expNo)
@@ -220,7 +227,11 @@ class MainWindow(QtGui.QMainWindow):
         self._currUnit = '2theta'
 
         # Workspaces
-        self._myControl = HFIRPDRedControl()        
+        self._myControl = HFIRPDRedControl()    
+        
+        # Interactive graphics
+        self._viewMerge_X = None   
+        self._viewMerge_Y = None   
         
         """
         self._myReducedPDWs  = None
@@ -412,7 +423,7 @@ class MainWindow(QtGui.QMainWindow):
 
         if clearcache is True:
             # TODO - Clear cache
-            print "Clear Cache!"
+            print "Clear Cache! Implement ASAP!"
 
         self.close()
 
@@ -463,19 +474,62 @@ class MainWindow(QtGui.QMainWindow):
         
         label = "Exp %d, Scan %s." % (expno, str(scanslist))
         self._plotMergedReducedData(mindex, label)
+        self._lastMergeIndex = mindex
+        self._lastMergeLabel = label
         
         return
+        
+    def doMergeScanView1D(self):
+        """ Change the merged run's view to 1D plot
+        """
+        # Highlight the button's color
+        self.ui.pushButton_view2D.setStyleSheet('QPushButton {color: black;}')
+        self.ui.pushButton_viewMerge.setStyleSheet('QPushButton {color: red;}')        
+        
+        # Clear image
+        self.ui.graphicsView_mergeRun.clearCanvas()
+        
+        # Plot
+        self._plotMergedReducedData(self._lastMergeIndex, self._lastMergeLabel)
+        
 
     def doMergeScanView2D(self):
+        """ Change the merged run's view to 2D plot
         """
-        """
-        # TODO : ASAP
+        # Highlight button color and change the color of another one
+        #self.ui.pushButton_view2D.setStyleSheet('QPushButton {background-color: #A3C1DA; color: red;}')
+        #self.ui.pushButton_viewMerge.setStyleSheet('QPushButton {background-color: #A3C1DA; color: black;}')
+        self.ui.pushButton_view2D.setStyleSheet('QPushButton {color: red;}')
+        self.ui.pushButton_viewMerge.setStyleSheet('QPushButton {color: black;}')
+        # Convert the workspaces to 2D vector
+        vecylist = []
+        yticklabels = []
+        xmin = None
+        xmax = None
+        for ws in self._myControl.getWkspToMerge(): 
+            # put y values to list for constructing 2D array
+            vecy = ws.readY(0)
+            vecylist.append(vecy)
+            yticklabels.append(ws.name())
+            
+            # set up range of x
+            if xmin is None:
+                vecx = ws.readX(0)
+                xmin = vecx[0]
+                xmax = vecx[-1]
+            
+        # ENDFOR
+        dim2array = numpy.array(vecylist)        
 
-        # Highlight button color
-        self.ui.pushButton_view2D.setStyleSheet('QPushButton {background-color: #A3C1DA; color: red;}')
-
-        # Plot 2D
-
+        print "2D vector: \n",  dim2array
+        print "x range: %f, %f" % (xmin, xmax)
+        print "y labels: ", yticklabels
+         
+        # Plot
+        holdprev=False
+        self.ui.graphicsView_mergeRun.clearAllLines()
+        self.ui.graphicsView_mergeRun.addPlot2D(dim2array, xmin=xmin, xmax=xmax, ymin=0, \
+            ymax=len(vecylist), holdprev=holdprev, yticklabels=yticklabels)
 
         return
 
@@ -737,6 +791,80 @@ class MainWindow(QtGui.QMainWindow):
             
         self.ui.lineEdit_wavelength.setText(str(wavelength))
         
+        return
+
+    def on_mouseDownEvent(self, event):
+        """ Respond to pick up a value with mouse down event
+        Definition of button_press_event is:
+          button_press_event(x, y, button, dblclick=False, guiEvent=None)
+        Thus event has x, y and button.
+
+        event.button has 3 values:
+         1: left
+         2: middle
+         3: right
+        """
+        x = event.xdata
+        y = event.ydata
+        button = event.button
+        
+
+        if x is not None and y is not None:
+
+            if button == 1:
+                msg = "You've clicked on a bar with coords:\n %f, %f\n and button %d" % (x, y, button)
+                QtGui.QMessageBox.information(self, "Click!", msg)
+
+            elif button == 3:
+                # right click of mouse will pop up a context-menu
+                self.ui.menu = QtGui.QMenu(self) 
+
+                addAction = QtGui.QAction('Add', self) 
+                addAction.triggered.connect(self.addSomething) 
+                self.ui.menu.addAction(addAction)
+
+                rmAction = QtGui.QAction('Remove', self) 
+                rmAction.triggered.connect(self.rmSomething) 
+                self.ui.menu.addAction(rmAction) 
+                
+                # add other required actions 
+                self.ui.menu.popup(QtGui.QCursor.pos())
+
+        return
+
+    def on_mouseMotion(self, event):
+        """
+        """
+        prex = self._viewMerge_X
+        prey = self._viewMerge_Y 
+        
+        curx = event.xdata
+        cury = event.ydata
+        if curx is None or cury  is None:
+            return
+        
+        self._viewMerge_X = event.xdata
+        self._viewMerge_Y = event.ydata
+        
+        if int(prey) != int(self._viewMerge_Y):
+            print "Mouse is moving to ", event.xdata, event.ydata
+
+        return
+
+
+    def addSomething(self):
+        """
+        """
+        print "Add something?"
+
+        return
+
+
+    def rmSomething(self):
+        """
+        """
+        print "Remove something?"
+
         return
 
 

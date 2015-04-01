@@ -1,5 +1,8 @@
 #pylint: disable=invalid-name
-from PyQt4 import QtGui
+import sys
+import os
+
+from PyQt4 import QtGui, QtCore
 
 import matplotlib
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
@@ -67,7 +70,7 @@ class Qt4MplPlotView(QtGui.QWidget):
         self._myLineMarkerColorList = []
         self._myLineMarkerColorIndex = 0
         self.setAutoLineMarkerColorCombo()
-        
+
         return
         
     def addPlot(self, x, y, color=None, label="", xlabel=None, ylabel=None, marker=None, linestyle=None, linewidth=1):
@@ -77,10 +80,38 @@ class Qt4MplPlotView(QtGui.QWidget):
         
         return
 
+
+    def addPlot2D(self, array2d, xmin, xmax, ymin, ymax, holdprev=True, yticklabels=None):
+        """ Plot a 2D image
+        Arguments
+         - array2d :: numpy 2D array
+        """
+        self.canvas.addPlot2D(array2d, xmin, xmax, ymin, ymax, holdprev, yticklabels)
+
+        return
+
+
+    def addImage(self, imagefilename):
+        """ Add an image by file
+        """
+        # check
+        if os.path.exists(imagefilename) is False:
+            raise NotImplementedError("Image file %s does not exist." % (imagefilename))
+
+        self.canvas.addImage(imagefilename)
+
+        return
+
+
     def clearAllLines(self):
         """
         """
         self.canvas.clearAllLines()
+
+    def clearCanvas(self):
+        """ Clear canvas
+        """
+        return self.canvas.clearCanvas()
         
     def draw(self):
         """ Draw to commit the change
@@ -101,6 +132,12 @@ class Qt4MplPlotView(QtGui.QWidget):
         """
         """
         return self.canvas.removePlot(ikey)
+
+    def setXYLimits(self, xmin=None, xmax=None, ymin=None, ymax=None):
+        """ 
+        """
+        return self.canvas.setXYLimit(xmin, xmax, ymin, ymax)
+
         
     def updateLine(self, ikey, vecx, vecy, linestyle=None, linecolor=None, marker=None, markercolor=None):
         """
@@ -129,7 +166,7 @@ class Qt4MplPlotView(QtGui.QWidget):
         as default to add more and more line to plot
         """
         return self.canvas.getDefaultColorMarkerComboList()
-        
+
     def getNextLineMarkerColorCombo(self):
         """ As auto line's marker and color combo list is used,
         get the NEXT marker/color combo
@@ -200,6 +237,8 @@ class Qt4MplCanvas(FigureCanvas):
         self._lineDict = {}
         self._lineIndex = 0
 
+        self.colorbar = None
+
         return
 
     def addPlot(self, x, y, color=None, label="", xlabel=None, ylabel=None, marker=None, linestyle=None, linewidth=1):
@@ -208,6 +247,9 @@ class Qt4MplCanvas(FigureCanvas):
         - x: numpy array X
         - y: numpy array Y
         """
+        # Test... FIXME 
+        self.axes.hold(True)
+
         # process inputs and defaults
         self.x = x
         self.y = y
@@ -222,6 +264,8 @@ class Qt4MplCanvas(FigureCanvas):
         # color must be RGBA (4-tuple)
         r = self.axes.plot(x, y, color=color, marker=marker, linestyle=linestyle,
                 label=label, linewidth=1) # return: list of matplotlib.lines.Line2D object
+
+        self.axes.set_aspect('auto')
 
         # set x-axis and y-axis label
         if xlabel is not None:
@@ -243,6 +287,64 @@ class Qt4MplCanvas(FigureCanvas):
         self.draw()
 
         return
+
+
+    def addPlot2D(self, array2d, xmin, xmax, ymin, ymax, holdprev, yticklabels=None):
+        """ Add a 2D plot
+
+        Arguments:
+         - yticklabels :: list of string for y ticks
+        """
+        # Release the current image
+        self.axes.hold(holdprev)
+
+        # Do plot
+        # y ticks will be shown on line 1, 4, 23, 24 and 30 
+        # yticks = [1, 4, 23, 24, 30]
+        # self.axes.set_yticks(yticks)
+
+        # show image
+        imgplot = self.axes.imshow(array2d, extent=[xmin,xmax,ymin,ymax], interpolation='none')
+        # set y ticks as an option: 
+        if yticklabels is not None: 
+            # it will always label the first N ticks even image is zoomed in
+            self.axes.set_yticklabels(yticklabels)
+        # explicitly set aspect ratio of the image
+        self.axes.set_aspect('auto')
+
+        # Set color bar.  plt.colorbar() does not work!
+        if self.colorbar is None:
+            # set color map type
+            imgplot.set_cmap('spectral')
+            self.colorbar = self.fig.colorbar(imgplot)
+        else:
+            self.colorbar.update_bruteforce(imgplot)
+
+        # Flush...
+        self._flush() 
+
+        return
+
+    def addImage(self, imagefilename):
+        """ Add an image by file
+        """
+        import matplotlib.image as mpimg 
+        img = mpimg.imread(str(imagefilename))
+        lum_img = img[:,:,0] 
+        imgplot = self.axes.imshow(lum_img) 
+
+        # Set color bar.  plt.colorbar() does not work!
+        if self.colorbar is None:
+            # set color map type
+            imgplot.set_cmap('spectral')
+            self.colorbar = self.fig.colorbar(imgplot)
+        else:
+            self.colorbar.update_bruteforce(imgplot)
+
+        self._flush()
+
+        return
+
         
     def clearAllLines(self):
         """ Remove all lines from the canvas
@@ -256,8 +358,24 @@ class Qt4MplCanvas(FigureCanvas):
         # ENDFOR
         
         self.draw()
-        
+
         return
+
+
+    def clearCanvas(self):
+        """ Clear data from canvas
+        """
+        # clear the image for next operation
+        self.axes.hold(False)
+
+        # clear image
+        self.axes.cla()
+
+        # flush/commit
+        self._flush()
+
+        return
+
 
     def getLastPlotIndexKey(self):
         """ Get the index/key of the last added line
@@ -269,6 +387,33 @@ class Qt4MplCanvas(FigureCanvas):
         """ reture figure's axes to expose the matplotlib figure to PyQt client
         """
         return self.axes
+
+    def setXYLimit(self, xmin, xmax, ymin, ymax):
+        """
+        """
+        # for X
+        xlims = self.axes.get_xlim() 
+        xlims = list(xlims)
+        if xmin is not None:
+            xlims[0] = xmin
+        if xmax is not None:
+            xlims[1] = xmax
+        self.axes.set_xlim(xlims)
+
+        # for Y 
+        ylims = self.axes.get_ylim() 
+        ylims = list(ylims)
+        if ymin is not None:
+            ylims[0] = ymin
+        if ymax is not None:
+            ylims[1] = ymax
+        self.axes.set_ylim(ylims)
+
+        # try draw
+        self.draw()
+
+        return
+
 
 
     def removePlot(self, ikey):
@@ -349,6 +494,14 @@ class Qt4MplCanvas(FigureCanvas):
         # ENDFOR(i)
         
         return combolist
+
+
+    def _flush(self):
+        """ A dirty hack to flush the image
+        """
+        w, h = self.get_width_height()
+        self.resize(w+1,h)
+        self.resize(w,h)
 
 
 class MyNavigationToolbar(NavigationToolbar):

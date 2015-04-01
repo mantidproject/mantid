@@ -102,7 +102,7 @@ class HFIRPDRedControl:
 
         # get vectors
         return outws.readX(0), outws.readY(0)
-
+        
 
     def getMergedVector(self, mkey):
         """
@@ -122,6 +122,19 @@ class HFIRPDRedControl:
             raise NotImplementedError("No merged workspace for key = %s." % (str(mkey)))
 
         return (vecx, vecy)
+        
+    
+    def getWkspToMerge(self):
+        """ Get the individual workspaces that are used for merging in the last
+        merging-run activities
+        """
+        wslist = []
+        for wsmanager in self._lastWkspToMerge:
+            outws = wsmanager.reducedws
+            wslist.append(outws)
+        # ENDFOR (wsmanager)
+        
+        return wslist
 
 
     def getWorkspace(self, exp, scan, raiseexception):
@@ -166,6 +179,7 @@ class HFIRPDRedControl:
         # data structure initialization
         datamdwslist = []
         monitormdwslist = []
+        self._lastWkspToMerge = []
 
         # reduce individual data 
         scanlist = []
@@ -191,6 +205,7 @@ class HFIRPDRedControl:
                 monitormdwslist.append(wsmanager.monitormdws)
             
                 scanlist.append(scan)
+                self._lastWkspToMerge.append(wsmanager)
         # ENDFOR
 
         # merge and rebin
