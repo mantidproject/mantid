@@ -1,6 +1,6 @@
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidKernel/CPUTimer.h"
-#include "MantidMDEvents/MDHistoWorkspace.h"
+#include "MantidDataObjects/MDHistoWorkspace.h"
 #include "MantidVatesAPI/vtkMDHistoHexFactory.h"
 #include "MantidVatesAPI/Common.h"
 #include "MantidVatesAPI/ProgressAction.h"
@@ -11,7 +11,7 @@
 using Mantid::API::IMDWorkspace;
 using Mantid::API::IMDHistoWorkspace;
 using Mantid::Kernel::CPUTimer;
-using namespace Mantid::MDEvents;
+using namespace Mantid::DataObjects;
 using Mantid::Kernel::ReadLock;
 
 namespace Mantid

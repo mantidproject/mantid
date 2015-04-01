@@ -1,22 +1,18 @@
 #ifndef MANTID_MDALGORITHMS_WEIGHTEDMEANMDTEST_H_
 #define MANTID_MDALGORITHMS_WEIGHTEDMEANMDTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidKernel/Timer.h"
-#include "MantidKernel/System.h"
-#include <cmath>
-#include <iostream>
-#include <iomanip>
-#include "MantidTestHelpers/MDEventsTestHelper.h"
-#include "MantidTestHelpers/BinaryOperationMDTestHelper.h"
-#include "MantidMDEvents/MDHistoWorkspace.h"
-#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidDataObjects/MDHistoWorkspace.h"
 #include "MantidMDAlgorithms/WeightedMeanMD.h"
+#include "MantidTestHelpers/BinaryOperationMDTestHelper.h"
+#include "MantidTestHelpers/MDEventsTestHelper.h"
 
-using namespace Mantid::MDAlgorithms;
-using namespace Mantid::MDEvents;
+#include <cxxtest/TestSuite.h>
+
 using namespace Mantid::API;
+using namespace Mantid::DataObjects;
+using namespace Mantid::MDAlgorithms;
 
 class WeightedMeanMDTest : public CxxTest::TestSuite
 {

@@ -4,7 +4,7 @@
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidKernel/Matrix.h"
-#include "MantidMDEvents/MDHistoWorkspace.h"
+#include "MantidDataObjects/MDHistoWorkspace.h"
 namespace Mantid {
 namespace MDAlgorithms {
 
@@ -60,7 +60,7 @@ private:
   Mantid::Kernel::DblMatrix m_rubw;
 
   /// Normalization workspace (this is the coverage workspace)
-  Mantid::MDEvents::MDHistoWorkspace_sptr m_normWS;
+  Mantid::DataObjects::MDHistoWorkspace_sptr m_normWS;
 
   std::vector<Kernel::VMD> calculateIntersections(const double theta,
                                                   const double phi);

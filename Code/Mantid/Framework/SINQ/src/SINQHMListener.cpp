@@ -6,7 +6,7 @@
  */
 #include "MantidSINQ/SINQHMListener.h"
 #include "MantidAPI/LiveListenerFactory.h"
-#include "MantidMDEvents/MDHistoWorkspace.h"
+#include "MantidDataObjects/MDHistoWorkspace.h"
 
 #include <Poco/Net/HTTPRequest.h>
 #include <Poco/Net/HTTPBasicCredentials.h>
@@ -19,9 +19,9 @@
 #include <sstream>
 
 using namespace Mantid::API;
+using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
 using namespace Mantid;
-using namespace Mantid::MDEvents;
 using namespace Poco::Net;
 using namespace Poco::XML;
 

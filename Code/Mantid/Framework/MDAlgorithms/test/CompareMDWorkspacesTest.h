@@ -1,25 +1,22 @@
 #ifndef MANTID_MDALGORITHMS_COMPAREMDWORKSPACESTEST_H_
 #define MANTID_MDALGORITHMS_COMPAREMDWORKSPACESTEST_H_
 
-#include "MantidKernel/System.h"
-#include "MantidKernel/Timer.h"
 #include "MantidAPI/FrameworkManager.h"
-#include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/IMDNode.h"
-#include "MantidMDAlgorithms/CompareMDWorkspaces.h"
+#include "MantidAPI/IMDWorkspace.h"
+#include "MantidDataObjects/MDHistoWorkspace.h"
 #include "MantidMDAlgorithms/CloneMDWorkspace.h"
+#include "MantidMDAlgorithms/CompareMDWorkspaces.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
+
 #include <cxxtest/TestSuite.h>
-#include <iomanip>
-#include <iostream>
-#include "MantidMDEvents/MDHistoWorkspace.h"
 
 using namespace Mantid;
-using namespace Mantid::MDAlgorithms;
 using namespace Mantid::API;
-using namespace Mantid::MDEvents;
-using namespace Mantid::MDEvents::MDEventsTestHelper;
-using Mantid::MDEvents::MDHistoWorkspace_sptr;
+using namespace Mantid::DataObjects;
+using namespace Mantid::MDAlgorithms;
+using namespace Mantid::DataObjects::MDEventsTestHelper;
+using Mantid::DataObjects::MDHistoWorkspace_sptr;
 
 class CompareMDWorkspacesTest : public CxxTest::TestSuite
 {

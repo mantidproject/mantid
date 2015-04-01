@@ -105,7 +105,7 @@ public:
 
   void test_normalSCARF() {
     const std::string scarf = "<computeResource name=\"" + scarfName +
-                              "\" JobManagerType=\"" + scarfType + "\">"
+                              "\" jobmanagertype=\"" + scarfType + "\">"
                                                                    "<baseURL>" +
                               scarfURL + "</baseURL>"
                                          "</computeResource>";
@@ -139,7 +139,7 @@ public:
   void test_brokenSCARF() {
     const std::string type = "SCARFLSFJobManager";
     const std::string err = "<computeResource foo=\"" + scarfName +
-                            "\" JobManagerType=\"" + type + "\">"
+                            "\" jobmanagertype=\"" + type + "\">"
                                                             "<URL>" +
                             scarfURL + "</URL>"
                                        "</computeResource>";

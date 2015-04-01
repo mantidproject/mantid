@@ -1,6 +1,6 @@
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidKernel/CPUTimer.h"
-#include "MantidMDEvents/MDHistoWorkspace.h"
+#include "MantidDataObjects/MDHistoWorkspace.h"
 #include "MantidAPI/NullCoordTransform.h"
 #include "MantidVatesAPI/vtkMDHistoQuadFactory.h"
 #include "MantidVatesAPI/Common.h"
@@ -16,7 +16,7 @@
 
 using Mantid::API::IMDWorkspace;
 using Mantid::Kernel::CPUTimer;
-using Mantid::MDEvents::MDHistoWorkspace;
+using Mantid::DataObjects::MDHistoWorkspace;
 
 namespace Mantid
 {
