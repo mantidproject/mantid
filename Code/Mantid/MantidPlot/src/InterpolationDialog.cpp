@@ -173,7 +173,7 @@ void InterpolationDialog::setGraph(Graph *g)
 
 	connect (graph, SIGNAL(closedGraph()), this, SLOT(close()));
 	connect (graph, SIGNAL(dataRangeChanged()), this, SLOT(changeDataRange()));
-};
+}
 
 void InterpolationDialog::activateCurve(const QString& curveName)
 {
@@ -189,7 +189,7 @@ void InterpolationDialog::activateCurve(const QString& curveName)
 	graph->range(graph->curveIndex(curveName), &start, &end);
 	boxStart->setText(QString::number(QMIN(start, end), 'g', app->d_decimal_digits));
 	boxEnd->setText(QString::number(QMAX(start, end), 'g', app->d_decimal_digits));
-};
+}
 
 void InterpolationDialog::changeDataRange()
 {

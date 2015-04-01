@@ -16,9 +16,9 @@ namespace CurveFitting {
 using namespace Kernel;
 using namespace API;
 
-DECLARE_FUNCTION(ElasticDiffSphere);
-DECLARE_FUNCTION(InelasticDiffSphere);
-DECLARE_FUNCTION(DiffSphere);
+DECLARE_FUNCTION(ElasticDiffSphere)
+DECLARE_FUNCTION(InelasticDiffSphere)
+DECLARE_FUNCTION(DiffSphere)
 
 ElasticDiffSphere::ElasticDiffSphere() {
   // declareParameter("Height", 1.0); //parameter "Height" already declared in
@@ -145,6 +145,7 @@ InelasticDiffSphere::InelasticDiffSphere()
   declareParameter("Diffusion", 0.05, "Diffusion coefficient, in units of "
                                       "A^2*THz, if energy in meV, or A^2*PHz "
                                       "if energy in ueV");
+  declareParameter("Shift", 0.0, "Shift in domain");
 
   declareAttribute("Q", API::IFunction::Attribute(1.0));
 }
@@ -194,6 +195,7 @@ void InelasticDiffSphere::function1D(double *out, const double *xValues,
   const double R = getParameter("Radius");
   const double D = getParameter("Diffusion");
   const double Q = getAttribute("Q").asDouble();
+  const double S = getParameter("Shift");
 
   // // Penalize negative parameters
   if (I < std::numeric_limits<double>::epsilon() ||
@@ -216,7 +218,7 @@ void InelasticDiffSphere::function1D(double *out, const double *xValues,
   std::vector<double> YJ;
   YJ = LorentzianCoefficients(Q * R); // The (2l+1)*A_{n,l}
   for (size_t i = 0; i < nData; i++) {
-    double energy = xValues[i]; // from meV to THz (or from micro-eV to PHz)
+    double energy = xValues[i] - S; // from meV to THz (or from micro-eV to PHz)
     out[i] = 0.0;
     for (size_t n = 0; n < ncoeff; n++) {
       double L = (1.0 / M_PI) * HWHM[n] /
@@ -272,6 +274,7 @@ void DiffSphere::init() {
   setAlias("f1.Intensity", "Intensity");
   setAlias("f1.Radius", "Radius");
   setAlias("f1.Diffusion", "Diffusion");
+  setAlias("f1.Shift", "Shift");
 
   // Set the ties between Elastic and Inelastic parameters
   addDefaultTies("f0.Height=f1.Intensity,f0.Radius=f1.Radius");

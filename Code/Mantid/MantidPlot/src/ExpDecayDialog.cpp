@@ -158,7 +158,7 @@ void ExpDecayDialog::setGraph(Graph *g)
 
 	connect (graph, SIGNAL(closedGraph()), this, SLOT(close()));
     connect (graph, SIGNAL(dataRangeChanged()), this, SLOT(changeDataRange()));
-};
+}
 
 void ExpDecayDialog::activateCurve(const QString& curveName)
 {
@@ -178,7 +178,7 @@ void ExpDecayDialog::activateCurve(const QString& curveName)
 	if (slopes < 2)
         boxAmplitude->setText(QString::number(c->maxYValue() - c->minYValue(), 'g', precision));
 
-};
+}
 
 void ExpDecayDialog::changeDataRange()
 {

@@ -97,7 +97,7 @@ GCC_DIAG_OFF(cast-qual)
     FileLoaderRegistry::Instance().unsubscribe(descr.first, descr.second);
   }
 
-  BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(existsOverloader, exists, 1, 2);
+  BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(existsOverloader, exists, 1, 2)
 
   ///@endcond
 }

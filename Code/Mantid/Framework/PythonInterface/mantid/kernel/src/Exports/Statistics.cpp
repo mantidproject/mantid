@@ -94,7 +94,7 @@ namespace
     }
   }
   // Define an overload to handle the default argument
-  BOOST_PYTHON_FUNCTION_OVERLOADS(getStatisticsOverloads, getStatisticsNumpy, 1, 2);
+  BOOST_PYTHON_FUNCTION_OVERLOADS(getStatisticsOverloads, getStatisticsNumpy, 1, 2)
 
   //============================ Z score ============================================
   // Function pointer to real implementation of Zscore functions
@@ -132,7 +132,7 @@ namespace
     return getZScoreNumpyImpl(&getZscore, data, sorted);
   }
   // Define an overload to handle the default argument
-  BOOST_PYTHON_FUNCTION_OVERLOADS(getZscoreOverloads, getZscoreNumpy, 1, 2);
+  BOOST_PYTHON_FUNCTION_OVERLOADS(getZscoreOverloads, getZscoreNumpy, 1, 2)
 
   /**
    * Proxy for @see Mantid::Kernel::getModifiedZscore so that it can accept numpy arrays,
@@ -143,7 +143,7 @@ namespace
     return getZScoreNumpyImpl(&getModifiedZscore, data, sorted);
   }
   // Define an overload to handle the default argument
-  BOOST_PYTHON_FUNCTION_OVERLOADS(getModifiedZscoreOverloads, getModifiedZscoreNumpy, 1, 2);
+  BOOST_PYTHON_FUNCTION_OVERLOADS(getModifiedZscoreOverloads, getModifiedZscoreNumpy, 1, 2)
 
 
   //============================ getMoments ============================================
@@ -194,7 +194,7 @@ namespace
   }
 
   // Define an overload to handle the default argument
-  BOOST_PYTHON_FUNCTION_OVERLOADS(getMomentsAboutOriginOverloads, getMomentsAboutOriginNumpy, 2, 3);
+  BOOST_PYTHON_FUNCTION_OVERLOADS(getMomentsAboutOriginOverloads, getMomentsAboutOriginNumpy, 2, 3)
 
   /**
    * Proxy for @see Mantid::Kernel::getMomentsAboutMean so that it can accept numpy arrays
@@ -207,7 +207,7 @@ namespace
   }
 
   // Define an overload to handle the default argument
-  BOOST_PYTHON_FUNCTION_OVERLOADS(getMomentsAboutMeanOverloads, getMomentsAboutMeanNumpy, 2, 3);
+  BOOST_PYTHON_FUNCTION_OVERLOADS(getMomentsAboutMeanOverloads, getMomentsAboutMeanNumpy, 2, 3)
   ///@endcond
 }
 

@@ -23,10 +23,10 @@ CopyLogs::~CopyLogs() {}
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
-const std::string CopyLogs::name() const { return "CopyLogs"; };
+const std::string CopyLogs::name() const { return "CopyLogs"; }
 
 /// Algorithm's version for identification. @see Algorithm::version
-int CopyLogs::version() const { return 1; };
+int CopyLogs::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
 const std::string CopyLogs::category() const { return "Utility\\Workspaces"; }

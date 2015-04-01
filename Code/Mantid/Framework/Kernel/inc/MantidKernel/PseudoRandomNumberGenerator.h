@@ -51,7 +51,7 @@ public:
   virtual void generateNextPoint();
 
 private:
-  DISABLE_COPY_AND_ASSIGN(PseudoRandomNumberGenerator);
+  DISABLE_COPY_AND_ASSIGN(PseudoRandomNumberGenerator)
 };
 }
 }

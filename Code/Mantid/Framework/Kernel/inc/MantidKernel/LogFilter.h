@@ -68,8 +68,8 @@ public:
   void clear();
 
 private:
-  DISABLE_DEFAULT_CONSTRUCT(LogFilter);
-  DISABLE_COPY_AND_ASSIGN(LogFilter);
+  DISABLE_DEFAULT_CONSTRUCT(LogFilter)
+  DISABLE_COPY_AND_ASSIGN(LogFilter)
 
   /// Converts the given property to a TimeSeriesProperty<double>, throws if
   /// invalid.

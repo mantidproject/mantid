@@ -1,7 +1,7 @@
-#include "MantidMDEvents/MDTransfDEHelper.h"
+#include "MantidDataObjects/MDTransfDEHelper.h"
 
 namespace Mantid {
-namespace MDEvents {
+namespace DataObjects {
 
 MDTransfDEHelper::MDTransfDEHelper() EmodesList(ConvertToMD::No_DE, "") {
   EmodesList[ConvertToMD::Elastic] = "Elastic";
@@ -12,5 +12,5 @@ ConvertToMD::Emodes getEmode(const std::string &Mode) const {
   return ConvertToMD::No_DE;
 }
 
-} // endnamespace MDEvents
+} // endnamespace DataObjects
 } // endnamespace Mantid

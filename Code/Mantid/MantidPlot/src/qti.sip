@@ -31,6 +31,12 @@
 
 %Module _qti
 
+%UnitCode
+  #if defined(__GNUC__) && !(defined(__INTEL_COMPILER))
+    #pragma GCC system_header
+  #endif
+%End
+
 %Import QtCore/QtCoremod.sip
 %Import QtGui/QtGuimod.sip
 %Import mantidqt.sip

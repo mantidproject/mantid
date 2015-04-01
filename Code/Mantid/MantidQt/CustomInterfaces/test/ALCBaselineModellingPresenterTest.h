@@ -49,6 +49,8 @@ public:
   MOCK_METHOD3(updateSectionSelector, void(size_t, double, double));
 
   MOCK_METHOD1(displayError, void(const QString&));
+
+  MOCK_METHOD0(help, void());
 };
 
 class MockALCBaselineModellingModel : public IALCBaselineModellingModel
@@ -337,6 +339,12 @@ public:
     EXPECT_CALL(*m_view, displayError(_));
 
     m_view->requestFit();
+  }
+
+  void test_helpPage ()
+  {
+    EXPECT_CALL(*m_view, help()).Times(1);
+    m_view->help();
   }
 };
 

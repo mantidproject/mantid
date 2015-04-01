@@ -8,7 +8,7 @@ using Mantid::API::FileFinderImpl;
 using namespace boost::python;
 
 namespace {
-  BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(getFullPathOverloader, getFullPath, 1, 2);
+  BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(getFullPathOverloader, getFullPath, 1, 2)
 }
 
 void export_FileFinder()

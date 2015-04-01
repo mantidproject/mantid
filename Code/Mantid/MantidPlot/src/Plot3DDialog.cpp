@@ -594,7 +594,7 @@ void Plot3DDialog::setPlot(Graph3D *g)
 	connect( boxLegend, SIGNAL(toggled(bool)), d_plot, SLOT(showColorLegend(bool)));
     connect( boxResolution, SIGNAL(valueChanged(int)), d_plot, SLOT(setResolution(int)));
 	connect( boxDistance, SIGNAL(valueChanged(int)), d_plot, SLOT(setLabelsDistance(int)));
-};
+}
 
 void Plot3DDialog::worksheet()
 {

@@ -8,6 +8,7 @@
  * Mark Koennecke, Dezember 2012
  */
 #include "MantidSINQ/InvertMDDim.h"
+#include "MantidDataObjects/MDHistoWorkspace.h"
 #include "MantidGeometry/MDGeometry/MDTypes.h"
 
 // Register the algorithm into the AlgorithmFactory
@@ -16,7 +17,7 @@ DECLARE_ALGORITHM(InvertMDDim)
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
-using namespace Mantid::MDEvents;
+using namespace Mantid::DataObjects;
 using namespace Mantid;
 
 // A reference to the logger is provided by the base class, it is called g_log.

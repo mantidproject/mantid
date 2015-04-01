@@ -79,7 +79,7 @@ public:
     TS_ASSERT_DELTA( y[4], 0.323394, 0.000001);
   }
 
-  void xtestZNDKTFunction()
+  void testZNDKTFunction()
   {
     // Test Dynamic Kubo Toyabe (DKT) for non-zero Field and Zero Nu (ZN)
     const double asym = 1.0;
@@ -107,7 +107,7 @@ public:
     TS_ASSERT_DELTA( y[4], 0.055052, 0.000001);
   }
 
-  void xtestDKTFunction()
+  void testDKTFunction()
   {
     // Test Dynamic Kubo Toyabe (DKT) (non-zero Field, non-zero Nu)
     const double asym = 1.0;
@@ -129,10 +129,10 @@ public:
     TS_ASSERT_THROWS_NOTHING(dkt.function(x,y));
 
     TS_ASSERT_DELTA( y[0], 1.000000, 0.000001);
-    TS_ASSERT_DELTA( y[1], 0.822498, 0.000001);
-    TS_ASSERT_DELTA( y[2], 0.518536, 0.000001);
-    TS_ASSERT_DELTA( y[3], 0.295988, 0.000001);
-    TS_ASSERT_DELTA( y[4], 0.175489, 0.000001);
+    TS_ASSERT_DELTA( y[1], 0.821663, 0.000001);
+    TS_ASSERT_DELTA( y[2], 0.518974, 0.000001);
+    TS_ASSERT_DELTA( y[3], 0.297548, 0.000001);
+    TS_ASSERT_DELTA( y[4], 0.177036, 0.000001);
   }
 
 

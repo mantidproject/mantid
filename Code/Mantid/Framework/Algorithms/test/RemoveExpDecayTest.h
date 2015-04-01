@@ -2,7 +2,7 @@
 #define MUONREMOVEEXPDECAYTEST_H_
 
 #include <cxxtest/TestSuite.h>
-
+#include "MantidAPI/FrameworkManager.h"
 #include "MantidAlgorithms/RemoveExpDecay.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
@@ -14,6 +14,15 @@ const std::string outputName = "MuonRemoveExpDecay_Output";
 class RemoveExpDecayTest : public CxxTest::TestSuite
 {
 public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static RemoveExpDecayTest *createSuite() { return new RemoveExpDecayTest(); }
+  static void destroySuite( RemoveExpDecayTest *suite ) { delete suite; }
+
+  RemoveExpDecayTest() {
+    FrameworkManager::Instance();
+  }
+
 
   void testInit()
   {
