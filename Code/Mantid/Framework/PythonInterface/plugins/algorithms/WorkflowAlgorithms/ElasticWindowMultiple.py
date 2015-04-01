@@ -150,6 +150,9 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
             temp = self._get_temperature(input_ws)
             if temp is not None:
                 temperatures.append(temp)
+            else:
+                # No need to output a tmperature workspace if there are no temperatures
+                self._elt_workspace = ''
 
         logger.information('Creating Q and Q^2 workspaces')
 
