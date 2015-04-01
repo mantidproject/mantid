@@ -294,11 +294,6 @@ class RunDescriptor(PropDescriptor):
     _holder = None
     _logger = None
     _sum_log_name = 'SumRuns'
-    # Should not fileFinder do that?
-    fext_equivalents={'.raw':['.s10','.s09','.s08','.s07','.s06','.s05','.s04','.s03','.s02','.s01'],
-                      '.nxs':['.n10','.n09','.n08','.n07','.n06','.n05','.n04','.n03','.n02','.n01']}
-    # class sets it to true if a file with previous extension is found 
-    prefile_found = False
 #--------------------------------------------------------------------------------------------------------------------
     def __init__(self,prop_name,DocString=None):
         """ """
@@ -358,7 +353,6 @@ class RunDescriptor(PropDescriptor):
             if self._mask_ws_name in mtd:
                 DeleteWorkspace(self._mask_ws_name)
             self._mask_ws_name = None
-        RunDescriptor.prefile_found = False
 
 #--------------------------------------------------------------------------------------------------------------------
     def __get__(self,instance,owner):
@@ -710,7 +704,7 @@ class RunDescriptor(PropDescriptor):
                 self.apply_calibration(ws,RunDescriptor._holder.det_cal_file,prefer_ws_calibration)
                 return ws
         else:
-            if self._run_number:
+            if not self._run_number is None:
                 prefer_ws_calibration = self._check_calibration_source()
                 inst_name = RunDescriptor._holder.short_inst_name
                 calibration = RunDescriptor._holder.det_cal_file
@@ -919,20 +913,24 @@ class RunDescriptor(PropDescriptor):
 
         ok,data_file = self.find_file(None,run_number,filePath,fileExt,**kwargs)
         if not ok:
-            key = self.get_fext().lower()
-            if key in RunDescriptor.fext_equivalents:
-                equivalents = RunDescriptor.fext_equivalents[key]
-                found = False
-                for ext in equivalents:
-                    ok,data_file = self.find_file(None,run_number,filePath,ext)
-                    if ok:
-                        found=True
-                        break
-                if found:
-                    RunDescriptor.prefile_found = True
-                else:
-                    self._ws_name = None
-                    raise IOError(data_file)
+            self._ws_name = None
+            raise IOError(data_file)
+        # This is may be for a future
+        #if not ok:
+        #    key = self.get_fext().lower()
+        #    if key in RunDescriptor.fext_equivalents:
+        #        equivalents = RunDescriptor.fext_equivalents[key]
+        #        found = False
+        #        for ext in equivalents:
+        #            ok,data_file = self.find_file(None,run_number,filePath,ext)
+        #            if ok:
+        #                found=True
+        #                break
+        #        if found:
+        #            RunDescriptor.prefile_found = True
+        #        else:
+        #            self._ws_name = None
+        #            raise IOError(data_file)
 
         if load_mon_with_workspace:
             mon_load_option = 'Include'
