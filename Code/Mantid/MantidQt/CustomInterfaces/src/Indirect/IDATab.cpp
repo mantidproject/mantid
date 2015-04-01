@@ -32,6 +32,7 @@ namespace IDA
     m_blnEdFac = new QtCheckBoxFactory(this);
   }
 
+
   /**
    * Loads the tab's settings.
    *
@@ -44,6 +45,7 @@ namespace IDA
     loadSettings(settings);
   }
 
+
   /**
    * Slot that can be called when a user edits an input.
    */
@@ -51,6 +53,7 @@ namespace IDA
   {
     validate();
   }
+
 
   /**
   * Check that the binning between two workspaces matches.
@@ -72,6 +75,35 @@ namespace IDA
     {
       throw std::runtime_error("IDATab: One of the operands is an invalid MatrixWorkspace pointer");
     }
+  }
+
+
+  /**
+   * Adds a unit converstion into wavelength step to the batch algorithm queue.
+   *
+   * @param ws Pointer to the workspace to convert
+   * @return Name of output workspace
+   */
+  std::string IDATab::addConvertToWavelengthStep(MatrixWorkspace_sptr ws)
+  {
+    std::string outputName = ws->name() + "_inWavelength";
+
+    IAlgorithm_sptr convertAlg = AlgorithmManager::Instance().create("ConvertUnits");
+    convertAlg->initialize();
+
+    convertAlg->setProperty("InputWorkspace", ws->name());
+    convertAlg->setProperty("OutputWorkspace", outputName);
+    convertAlg->setProperty("Target", "Wavelength");
+
+    std::string eMode = getEMode(ws);
+    convertAlg->setProperty("EMode", eMode);
+
+    if(eMode == "Indirect")
+      convertAlg->setProperty("EFixed", getEFixed(ws));
+
+    m_batchAlgoRunner->addAlgorithm(convertAlg);
+
+    return outputName;
   }
 
 } // namespace IDA
