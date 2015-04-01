@@ -1,5 +1,6 @@
 #include <sstream>
 
+#include "MantidAPI/RemoteJobManagerFactory.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/InternetHelper.h"
 #include "MantidKernel/Logger.h"
@@ -11,8 +12,7 @@ namespace Mantid {
 namespace RemoteJobManagers {
 
 // Register the manager into the RemoteJobManagerFactory
-// TODO Factory TODO
-// DECLARE_REMOTEJOBMANAGER(SCARFLSFJobManager);
+DECLARE_REMOTEJOBMANAGER(SCARFLSFJobManager)
 
 namespace {
 // static logger object
@@ -22,7 +22,14 @@ Mantid::Kernel::Logger g_log("SCARFLSFJobManager");
 std::string LSFJobManager::m_loginBaseURL = "https://portal.scarf.rl.ac.uk/";
 std::string LSFJobManager::m_loginPath = "/cgi-bin/token.py";
 
-std::map<std::string, Token> SCARFLSFJobManager::m_tokenStash;
+std::string SCARFLSFJobManager::m_logoutPath = "webservice/pacclient/logout/";
+std::string SCARFLSFJobManager::m_pingPath =
+    "platform/webservice/pacclient/ping/";
+// This could be passed here from facilities or similar
+// (like loginBaseURL above) - but note that in principle
+// the port number is known only after logging in
+std::string SCARFLSFJobManager::m_pingBaseURL =
+    "https://portal.scarf.rl.ac.uk:8443/";
 
 /**
  * Log into SCARF. If it goes well, it will produce a token that can
@@ -33,8 +40,8 @@ std::map<std::string, Token> SCARFLSFJobManager::m_tokenStash;
  * @param username normally an STFC federal ID
  * @param password user password
  */
-void SCARFLSFJobManager::authenticate(std::string &username,
-                                      std::string &password) {
+void SCARFLSFJobManager::authenticate(const std::string &username,
+                                      const std::string &password) {
   // base LSFJobManager class only supports a single user presently
   m_tokenStash.clear();
   m_transactions.clear();
@@ -73,8 +80,125 @@ void SCARFLSFJobManager::authenticate(std::string &username,
                    << std::endl;
   } else {
     throw std::runtime_error("Login failed. Please check your username and "
-                             "password. Got this response: " +
-                             resp);
+                             "password. Got status code " +
+                             boost::lexical_cast<std::string>(code) +
+                             ", with this response: " + resp);
+  }
+}
+
+/**
+ * Ping the server to see if the web service is active/available.
+ * Note that this method does not need the user to be logged in.
+ *
+ * For now this ping method sits here as specific to SCARF.  It is not
+ * clear at the moment if it is general to LSF. It could well be
+ * possible to pull this into LSFJobManager.
+ *
+ * @return true if the web service responds.
+ */
+bool SCARFLSFJobManager::ping() {
+  // Job ping, needs these headers:
+  // headers = {'Content-Type': 'application/xml', 'Accept': ACCEPT_TYPE}
+  std::string httpsURL = m_pingBaseURL + m_pingPath;
+  StringToStringMap headers;
+  headers.insert(
+      std::pair<std::string, std::string>("Content-Type", "application/xml"));
+  headers.insert(std::pair<std::string, std::string>("Accept", m_acceptType));
+  int code;
+  std::stringstream ss;
+  try {
+    code = doSendRequestGetResponse(httpsURL, ss, headers);
+  } catch (Kernel::Exception::InternetError &ie) {
+    throw std::runtime_error("Error while sending HTTP request to ping the "
+                             "server " +
+                             std::string(ie.what()));
+  }
+  bool ok = false;
+  if (Mantid::Kernel::InternetHelper::HTTP_OK == code) {
+    std::string resp = ss.str();
+    if (std::string::npos != resp.find("Web Services are ready")) {
+      g_log.notice()
+          << "Pinged compute resource with apparently good response: " << resp
+          << std::endl;
+      ok = true;
+    } else {
+      g_log.warning() << "Pinged compute resource but got what looks like an "
+                         "error message: " << resp << std::endl;
+    }
+  } else {
+    throw std::runtime_error(
+        "Failed to ping the web service at:" + httpsURL +
+        ". Please check your parameters, software version, "
+        "etc.");
+  }
+
+  return ok;
+}
+
+/**
+ * Log out from SCARF. In practice, it trashes the cookie (if we were
+ * successfully logged in).
+ *
+ * As the authentication method is specific to SCARF, this logout
+ * method has been placed here as specific to SCARF too. Probably it
+ * is general to other LSF systems without any/much changes.
+ *
+ * @param username Username to use (should have authenticated
+ * before). Leave it empty to log out the last (maybe only) user that
+ * logged in with authenticate().
+ */
+void SCARFLSFJobManager::logout(const std::string &username) {
+  if (0 == m_tokenStash.size()) {
+    throw std::runtime_error("Logout failed. No one is currenlty logged in.");
+  }
+
+  std::map<std::string, Token>::iterator it;
+  if (!username.empty()) {
+    it = m_tokenStash.find(username);
+    if (m_tokenStash.end() == it) {
+      throw std::invalid_argument(
+          "Logout failed. The username given is not logged in: " + username);
+    }
+  }
+  // only support for single-user
+  Token tok = m_tokenStash.begin()->second;
+
+  // logout query, needs headers = {'Content-Type': 'text/plain', 'Cookie':
+  // token,
+  //    'Accept': 'text/plain,application/xml,text/xml'}
+  const std::string baseURL = tok.m_url;
+  const std::string token = tok.m_token_str;
+
+  std::string httpsURL = baseURL + m_logoutPath;
+  StringToStringMap headers;
+  headers.insert(
+      std::pair<std::string, std::string>("Content-Type", "text/plain"));
+  headers.insert(std::pair<std::string, std::string>("Cookie", token));
+  headers.insert(std::pair<std::string, std::string>("Accept", m_acceptType));
+  int code;
+  std::stringstream ss;
+  try {
+    code = doSendRequestGetResponse(httpsURL, ss, headers);
+  } catch (Kernel::Exception::InternetError &ie) {
+    throw std::runtime_error("Error while sending HTTP request to log out: " +
+                             std::string(ie.what()));
+  }
+  if (Mantid::Kernel::InternetHelper::HTTP_OK == code) {
+    g_log.notice() << "Logged out." << std::endl;
+    g_log.debug() << "Response from server: " << ss.str() << std::endl;
+  } else {
+    throw std::runtime_error("Failed to logout from the web service at: " +
+                             httpsURL + ". Please check your username.");
+  }
+
+  // successfully logged out, forget the token
+  if (username.empty()) {
+    // delete first one
+    m_tokenStash.erase(m_tokenStash.begin());
+  } else {
+    // delete requested one
+    if (m_tokenStash.end() != it)
+      m_tokenStash.erase(it);
   }
 }
 

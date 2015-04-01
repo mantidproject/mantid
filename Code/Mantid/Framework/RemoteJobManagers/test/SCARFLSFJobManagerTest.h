@@ -1,28 +1,34 @@
-#ifndef MANTID_REMOTEALGORITHMS_SCARFTOMORECONSTRUCTION_H_
-#define MANTID_REMOTEALGORITHMS_SCARFTOMORECONSTRUCTION_H_
+#ifndef MANTID_REMOTEJOBMANAGERS_SCARFLSFJOBMANAGERTEST_H_
+#define MANTID_REMOTEJOBMANAGERS_SCARFLSFJOBMANAGERTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAPI/ITableWorkspace.h"
-#include "MantidRemoteAlgorithms/SCARFTomoReconstruction.h"
+#include "MantidAPI/RemoteJobManagerFactory.h"
+#include "MantidKernel/ConfigService.h"
+#include "MantidKernel/Exception.h"
+#include "MantidKernel/FacilityInfo.h"
+#include "MantidRemoteJobManagers/SCARFLSFJobManager.h"
 
-using namespace Mantid::RemoteAlgorithms;
+#include <boost/make_shared.hpp>
+#include <Poco/File.h>
+
+using namespace Mantid::API;
+using namespace Mantid::RemoteJobManagers;
 
 /**
- * Very crude mock up for the interaction with the remote compute
- * resource (in real life, through the PAC web service of the LSF job
- * scheduler on SCARF). This one returns 200 OK and a simple response
+ * Too simple mock up for the SCARF job manager. It will run any
+ * method without any real communication with the remote compute
+ * resource (in real life, the PAC web service of the LSF job
+ * scheduler on SCARF). It simply returns 200 OK and a response
  * string.
  */
-class MockedSCARFTomo: public SCARFTomoReconstruction
-{
+class MockedSCARFLSFJM : public SCARFLSFJobManager {
 protected:
-  virtual int doSendRequestGetResponse(const std::string &url,
-                                       std::ostream &response,
-                                       const StringToStringMap &headers =
-                                       StringToStringMap(),
-                                       const std::string &method = std::string(),
-                                       const std::string &body = "") {
+  virtual int doSendRequestGetResponse(
+      const std::string &url, std::ostream &response,
+      const StringToStringMap &headers = StringToStringMap(),
+      const std::string &method = std::string(),
+      const std::string &body = "") const {
     UNUSED_ARG(url);
     UNUSED_ARG(headers);
     UNUSED_ARG(method);
@@ -34,20 +40,17 @@ protected:
 };
 
 /**
- * One more crude mock up for the interaction with the remote compute
- * resource. This one returns an error (the connection is fine, but
- * the response from the server is an error; example: wrong path,
- * server bug, etc.).
+ * One more crude mock up for the interaction with SCARF. This one
+ * returns an error (the connection is fine, but the response from the
+ * server is an error; example: wrong path, server bug, etc.).
  */
-class MockedErrorResponse_SCARFTomo: public SCARFTomoReconstruction
-{
+class MockedErrorResponse_SCARFLSFJM : public SCARFLSFJobManager {
 protected:
-  virtual int doSendRequestGetResponse(const std::string &url,
-                                       std::ostream &response,
-                                       const StringToStringMap &headers =
-                                       StringToStringMap(),
-                                       const std::string &method = std::string(),
-                                       const std::string &body = "") {
+  virtual int doSendRequestGetResponse(
+      const std::string &url, std::ostream &response,
+      const StringToStringMap &headers = StringToStringMap(),
+      const std::string &method = std::string(),
+      const std::string &body = "") const {
     UNUSED_ARG(url);
     UNUSED_ARG(response);
     UNUSED_ARG(headers);
@@ -60,19 +63,17 @@ protected:
 };
 
 /**
- * One more crude mock up for the interaction with the remote compute
- * resource. This one raises an exception as if the (underlying)
- * InternetHelper had found a connection issue.
+ * One more crude mock up for the interaction with SCARF. This one
+ * raises an exception as if the (underlying) InternetHelper had found
+ * a connection issue.
  */
-class MockedConnectionError_SCARFTomo: public SCARFTomoReconstruction
-{
+class MockedConnectionError_SCARFLSFJM : public SCARFLSFJobManager {
 protected:
-  virtual int doSendRequestGetResponse(const std::string &url,
-                                       std::ostream &response,
-                                       const StringToStringMap &headers =
-                                       StringToStringMap(),
-                                       const std::string &method = std::string(),
-                                       const std::string &body = "") {
+  virtual int doSendRequestGetResponse(
+      const std::string &url, std::ostream &response,
+      const StringToStringMap &headers = StringToStringMap(),
+      const std::string &method = std::string(),
+      const std::string &body = "") const {
     UNUSED_ARG(url);
     UNUSED_ARG(response);
     UNUSED_ARG(headers);
@@ -80,505 +81,461 @@ protected:
     UNUSED_ARG(body);
 
     // throw as if there was a connection error
-    throw Mantid::Kernel::Exception::InternetError("Mocked up exception - connection error");
+    throw Mantid::Kernel::Exception::InternetError(
+        "Mocked up exception - connection error");
+
+    return 400;
   }
 };
 
 /**
- * One more crude mock up for the interaction with the remote compute
- * resource. This one returns an OK code and a string that reads like
- * what we expect when doing a successful login request.
+ * One more crude mock up for the interaction with SCARF. This one
+ * returns an OK code and a string that reads like what we expect when
+ * doing a successful login request. That response only makes sense
+ * for login calls.
  */
-class MockedGoodLoginResponse_SCARFTomo: public SCARFTomoReconstruction
-{
+class MockedGoodLoginResponse_SCARFLSFJM : public SCARFLSFJobManager {
 protected:
-  virtual int doSendRequestGetResponse(const std::string &url,
-                                       std::ostream &response,
-                                       const StringToStringMap &headers =
-                                       StringToStringMap(),
-                                       const std::string &method = std::string(),
-                                       const std::string &body = "") {
+  virtual int doSendRequestGetResponse(
+      const std::string &url, std::ostream &response,
+      const StringToStringMap &headers = StringToStringMap(),
+      const std::string &method = std::string(),
+      const std::string &body = "") const {
     UNUSED_ARG(url);
-    UNUSED_ARG(response);
     UNUSED_ARG(headers);
     UNUSED_ARG(method);
     UNUSED_ARG(body);
 
-    response << "https://portal.scarf.rl.ac.uk - response OK and login successful - mocked up";
+    response << makeGoodLoginResponse();
     return 200;
+  }
+
+  std::string makeGoodLoginResponse() const {
+    return "https://portal.scarf.rl.ac.uk/platf\n"
+           "scarf9999\"2011-02-10T18:50:"
+           "00Z\"cT6jHNOxZ0TpH0lZHxMyXNVCMv2ncX8b7u\n"
+           "- response OK and login successful - mocked up";
+    // this last line is not very orthodox, watch out if it
+    // creates issues in the future
   }
 };
 
 /**
- * One more crude mock up for the interaction with the remote compute
- * resource. This one returns an OK code and a string that reads like
- * a response with basic job status information.
+ * One more crude mock up for the interaction with SCARF. This one
+ * derives from the "Login OK" mockup. It returns an OK code and
+ * produces a response that: 1) looks like a succesful login when
+ * authenticating, or 2) reads like a response with basic job status
+ * information.
  */
-class MockedGoodJobStatus_SCARFTomo: public SCARFTomoReconstruction
-{
+class MockedGoodJobStatus_SCARFLSFJM
+    : public MockedGoodLoginResponse_SCARFLSFJM {
 public:
- MockedGoodJobStatus_SCARFTomo(const std::string &id): SCARFTomoReconstruction(),
-  jobID(id)
-  {};
+  MockedGoodJobStatus_SCARFLSFJM(const std::string &id, const std::string &name)
+      : MockedGoodLoginResponse_SCARFLSFJM(), jobID(id), jobName(name){};
 
 protected:
-  virtual int doSendRequestGetResponse(const std::string &url,
-                                       std::ostream &response,
-                                       const StringToStringMap &headers =
-                                       StringToStringMap(),
-                                       const std::string &method = std::string(),
-                                       const std::string &body = "") {
+  virtual int doSendRequestGetResponse(
+      const std::string &url, std::ostream &response,
+      const StringToStringMap &headers = StringToStringMap(),
+      const std::string &method = std::string(),
+      const std::string &body = "") const {
     UNUSED_ARG(url);
-    UNUSED_ARG(response);
     UNUSED_ARG(headers);
     UNUSED_ARG(method);
     UNUSED_ARG(body);
 
-    response << "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>"
-      "<Jobs><Job><cmd>python /work/imat/webservice_test/test.py.py "
-      "/work/imat/webservice_test/test_out/</cmd><extStatus>-</extStatus>"
-      "<id>" << jobID << "</id><name>Mantid_tomography_1</name><status>Running</status>"
-      "</Job></Jobs>";
+    if (url.find("cgi-bin/token.py")) {
+      response << makeGoodLoginResponse();
+    } else {
+      response
+          << "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>"
+             "<Jobs><Job><cmd>python /work/imat/webservice_test/test.py.py "
+             "/work/imat/webservice_test/test_out/</cmd><extStatus>-</"
+             "extStatus>"
+             "<id>" << jobID << "</id><name>" << jobName
+          << "</name><status>Running</status>"
+             "</Job></Jobs>";
+    }
     return 200;
   }
+
 private:
   std::string jobID;
+  std::string jobName;
 };
 
-class SCARFTomoReconstructionTest: public CxxTest::TestSuite
-{
+/**
+ * One more crude mock up for the interaction with SCARF. This one
+ * returns an OK code and a string that reads like what we expect when
+ * doing ping. This response only makes sense for ping calls.
+ */
+class MockedGoodPingResponse_SCARFLSFJM : public SCARFLSFJobManager {
+protected:
+  virtual int doSendRequestGetResponse(
+      const std::string &url, std::ostream &response,
+      const StringToStringMap &headers = StringToStringMap(),
+      const std::string &method = std::string(),
+      const std::string &body = "") const {
+    UNUSED_ARG(url);
+    UNUSED_ARG(response);
+    UNUSED_ARG(headers);
+    UNUSED_ARG(method);
+    UNUSED_ARG(body);
+
+    response << "Web Services are ready:  mocked up";
+    return 200;
+  }
+};
+
+class SCARFLSFJobManagerTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static SCARFTomoReconstructionTest *createSuite() { return new SCARFTomoReconstructionTest(); }
-  static void destroySuite(SCARFTomoReconstructionTest *suite) { delete suite; }
+  static SCARFLSFJobManagerTest *createSuite() {
+    return new SCARFLSFJobManagerTest();
+  }
+  static void destroySuite(SCARFLSFJobManagerTest *suite) { delete suite; }
 
-  void test_castAlgorithm()
-  {
+  void test_createWithFactory() {
+    // The factory is tested in its own unit test, but here we can specifically
+    // test the creation of SCARFLSFJobManager objects.
+
+    // save facility before test
+    const Mantid::Kernel::FacilityInfo &prevFac =
+        Mantid::Kernel::ConfigService::Instance().getFacility();
+
+    Mantid::Kernel::ConfigService::Instance().setFacility("ISIS");
+    TS_ASSERT_THROWS_NOTHING(
+        IRemoteJobManager_sptr jobManager =
+            RemoteJobManagerFactory::Instance().create(SCARFName));
+    // Important: don't feel tempted to use this job manager, it will
+    // interact/send jobs to the actual cluster and will only work
+    // within ISIS.
+
+    // it should not be available here...
+    Mantid::Kernel::ConfigService::Instance().setFacility("SNS");
+    TS_ASSERT_THROWS(IRemoteJobManager_sptr jobManager =
+                         RemoteJobManagerFactory::Instance().create(SCARFName),
+                     std::runtime_error);
+
+    // restore facility to what it was before test
+    Mantid::Kernel::ConfigService::Instance().setFacility(prevFac.name());
+  }
+
+  void test_construct() {
     // can create
-    boost::shared_ptr<MockedSCARFTomo> a;
-    TS_ASSERT(a = boost::make_shared<MockedSCARFTomo>());
-    // can cast to inherited interfaces and base classes
+    boost::shared_ptr<SCARFLSFJobManager> jm;
+    TS_ASSERT(jm = boost::make_shared<SCARFLSFJobManager>());
+    SCARFLSFJobManager jm2;
+    // do not use / call methods on these two
 
-    MockedSCARFTomo alg;
-    TS_ASSERT( dynamic_cast<Mantid::RemoteAlgorithms::SCARFTomoReconstruction*>(&alg) );
-    TS_ASSERT( dynamic_cast<Mantid::API::Algorithm*>(&alg) );
-    TS_ASSERT( dynamic_cast<Mantid::Kernel::PropertyManagerOwner*>(&alg) );
-    TS_ASSERT( dynamic_cast<Mantid::API::IAlgorithm*>(&alg) );
-    TS_ASSERT( dynamic_cast<Mantid::Kernel::IPropertyManager*>(&alg) );
+    TS_ASSERT(dynamic_cast<Mantid::RemoteJobManagers::LSFJobManager *>(&jm2));
+    TS_ASSERT(dynamic_cast<Mantid::API::IRemoteJobManager *>(&jm2));
+    TS_ASSERT(
+        dynamic_cast<Mantid::RemoteJobManagers::LSFJobManager *>(jm.get()));
+    TS_ASSERT(dynamic_cast<Mantid::API::IRemoteJobManager *>(jm.get()));
   }
 
-  void test_initAlgorithm()
-  {
-    MockedSCARFTomo tomo;
-    TS_ASSERT_THROWS_NOTHING( tomo.initialize() );
+  void test_missingOrWrongParamsWithoutLogin() {
+    MockedSCARFLSFJM jm;
+
+    TS_ASSERT_THROWS(jm.abortRemoteJob(""), std::runtime_error);
+    TS_ASSERT_THROWS(jm.abortRemoteJob("anything_wrong"), std::runtime_error);
+
+    TS_ASSERT_THROWS(jm.downloadRemoteFile("any_wrong_transID", "remote_fname",
+                                           "local_fname"),
+                     std::invalid_argument);
+
+    std::vector<IRemoteJobManager::RemoteJobInfo> infos;
+    TS_ASSERT_THROWS(infos = jm.queryAllRemoteJobs(), std::runtime_error);
+    TS_ASSERT_EQUALS(infos.size(), 0);
+
+    std::vector<std::string> files;
+    TS_ASSERT_THROWS(files = jm.queryRemoteFile("any_wrong_transID"),
+                     std::invalid_argument);
+    TS_ASSERT_EQUALS(files.size(), 0);
+
+    IRemoteJobManager::RemoteJobInfo info;
+    TS_ASSERT_THROWS(info = jm.queryRemoteJob("any_wrong_jobID"),
+                     std::runtime_error);
+
+    // not logged in so it should throw
+    std::string id;
+    TS_ASSERT_THROWS(id = jm.startRemoteTransaction(), std::runtime_error);
+    TS_ASSERT_EQUALS(id, "");
+
+    // should fail with runtime_error (not logged in)
+    TS_ASSERT_THROWS(jm.stopRemoteTransaction("a_wrong_transID"),
+                     std::runtime_error);
+
+    std::string jobID;
+    TS_ASSERT_THROWS(id = jm.submitRemoteJob("a_wrong_transID", "executable",
+                                             "--params 0", "name_for_job"),
+                     std::runtime_error);
+    TS_ASSERT_EQUALS(jobID, "");
+
+    TS_ASSERT_THROWS(
+        jm.uploadRemoteFile("wrong_transID", "remote_fname", "local_fname"),
+        std::runtime_error);
+
+    // and failed login at the end
+    TS_ASSERT_THROWS(jm.authenticate("", ""), std::runtime_error);
+    TS_ASSERT_THROWS(jm.authenticate("wrong_user", "no_pass"),
+                     std::runtime_error);
   }
 
-  void test_propertiesMissing()
-  {
-    MockedSCARFTomo alg1;
-    TS_ASSERT_THROWS_NOTHING( alg1.initialize() );
-    // password missing
-    TS_ASSERT_THROWS_NOTHING( alg1.setPropertyValue("UserName", "anything") );
-    TS_ASSERT_THROWS_NOTHING( alg1.setPropertyValue("Action","LogIn") );
+  void test_missingOrWrongParamsFakeLogin() {}
 
-    TS_ASSERT_THROWS_NOTHING( alg1.execute() );
-    TS_ASSERT( !alg1.isExecuted() );
-
-    MockedSCARFTomo alg2;
-    TS_ASSERT_THROWS_NOTHING( alg2.initialize() );
-    // username missing
-    TS_ASSERT_THROWS_NOTHING( alg2.setPropertyValue("Password", "whatever") );
-    TS_ASSERT_THROWS_NOTHING( alg2.setPropertyValue("Action","LogIn") );
-
-    TS_ASSERT_THROWS( alg2.execute(), std::runtime_error );
-    TS_ASSERT( !alg2.isExecuted() );
-
-    MockedSCARFTomo alg3;
-    TS_ASSERT_THROWS_NOTHING( alg3.initialize() );
-    // mispellings...
-    // these try to set inexistent propeties => runtime_error
-    TS_ASSERT_THROWS( alg3.setPropertyValue("sername", "anything"), std::runtime_error );
-    TS_ASSERT_THROWS( alg3.setPropertyValue("Passw", "anything"), std::runtime_error );
-    // these try to set wrong values for valid properties => invalid_argument
-    TS_ASSERT_THROWS( alg3.setPropertyValue("Action","Loggin"), std::invalid_argument );
-    TS_ASSERT_THROWS( alg3.setProperty("Action", "unknown_opt"), std::invalid_argument );
-    TS_ASSERT_THROWS( alg3.setPropertyValue("JobID","strings_not_allowed"), std::invalid_argument );
-  }
-
-  void test_actionWithoutUsernameBeforeLogin()
-  {
-    MockedSCARFTomo alg;
-    TS_ASSERT_THROWS_NOTHING( alg.initialize() );
-
-    // Forget the username and you should get an exception
-    // alg.setProperty("UserName", "foo_user"));
-    TS_ASSERT_THROWS_NOTHING( alg.setProperty("Action", "JobStatus") );
-
-    TS_ASSERT_THROWS( alg.execute(), std::runtime_error );
-    TS_ASSERT( !alg.isExecuted() );
-
-    MockedSCARFTomo tomo;
-    TS_ASSERT_THROWS_NOTHING( tomo.initialize() );
-    TS_ASSERT_THROWS_NOTHING( tomo.setProperty("Action", "SubmitJob") );
-
-    TS_ASSERT_THROWS( tomo.execute(), std::runtime_error );
-    TS_ASSERT( !tomo.isExecuted() );
-  }
-
-  void test_actionWithoutLogin()
-  {
-    MockedSCARFTomo alg;
-
-    // Even if you provide all required params, you should get an exception
-    // if not logged in
-    TS_ASSERT_THROWS_NOTHING( alg.initialize() );
-    TS_ASSERT_THROWS_NOTHING( alg.setProperty("Action", "JobStatus") );
-
-    TS_ASSERT_THROWS(alg.execute(), std::runtime_error );
-    TS_ASSERT( !alg.isExecuted() );
-
-    MockedSCARFTomo tomo;
-    TS_ASSERT_THROWS_NOTHING( tomo.initialize() );
-    TS_ASSERT_THROWS_NOTHING( tomo.setProperty("UserName", "anyone") );
-    TS_ASSERT_THROWS_NOTHING( tomo.setProperty("Action", "SubmitJob") );
-    TS_ASSERT_THROWS_NOTHING( tomo.setProperty("RunnablePath", "/foo/bar.sh") );
-    TS_ASSERT_THROWS_NOTHING( tomo.setProperty("JobOptions", "--test --baz") );
-
-    TS_ASSERT_THROWS_NOTHING( tomo.execute() );
-    TS_ASSERT( !tomo.isExecuted() );
-  }
-
-  /// Login is required before running the other actions (except ping)
-  // The good username is: foo_user
-  void test_login()
-  {
+  /// Login is required before running any other command with SCARF (except
+  /// ping)
+  void test_auth() {
     goodUsername = "foo_user";
     goodPassword = "foo_password";
 
     // severe (connection) error
-    MockedConnectionError_SCARFTomo err;
-    TS_ASSERT_THROWS_NOTHING( err.initialize() );
-    TS_ASSERT_THROWS_NOTHING( err.setProperty("UserName", goodUsername) );
-    TS_ASSERT_THROWS_NOTHING( err.setProperty("Password", goodPassword) );
-    TS_ASSERT_THROWS_NOTHING( err.setProperty("Action", "LogIn") );
-
-    TS_ASSERT_THROWS_NOTHING( err.execute() );
-    TS_ASSERT( !err.isExecuted() );
+    MockedConnectionError_SCARFLSFJM err;
+    TS_ASSERT_THROWS(err.authenticate(goodUsername, goodPassword),
+                     std::runtime_error);
 
     // standard mocked response: looks like an unsuccessful login attempt
-    MockedSCARFTomo tomo;
-    TS_ASSERT_THROWS_NOTHING( tomo.initialize() );
-    TS_ASSERT_THROWS_NOTHING( tomo.setProperty("UserName", goodUsername) );
-    TS_ASSERT_THROWS_NOTHING( tomo.setProperty("Password", goodPassword) );
-    TS_ASSERT_THROWS_NOTHING( tomo.setProperty("Action", "LogIn") );
-
-    TS_ASSERT_THROWS_NOTHING( tomo.execute() );
-    TS_ASSERT( !tomo.isExecuted() );
+    MockedSCARFLSFJM loginFails;
+    TS_ASSERT_THROWS(loginFails.authenticate(goodUsername, goodPassword),
+                     std::runtime_error);
 
     // successful login attempt
-    MockedGoodLoginResponse_SCARFTomo login;
-    TS_ASSERT_THROWS_NOTHING( login.initialize() );
-    TS_ASSERT_THROWS_NOTHING( login.setProperty("UserName", goodUsername) );
-    TS_ASSERT_THROWS_NOTHING( login.setProperty("Password", goodPassword) );
-    TS_ASSERT_THROWS_NOTHING( login.setProperty("Action", "LogIn") );
-
-    TS_ASSERT_THROWS_NOTHING( login.execute() );
-    TS_ASSERT( login.isExecuted() );
+    MockedGoodLoginResponse_SCARFLSFJM login;
+    TS_ASSERT_THROWS_NOTHING(login.authenticate(goodUsername, goodPassword));
   }
 
-  void test_actionWithoutUsernameAfterLogin()
-  {
-    MockedSCARFTomo alg;
-    TS_ASSERT_THROWS_NOTHING( alg.initialize() );
+  void test_startRemoteTransaction() {
+    boost::shared_ptr<MockedGoodLoginResponse_SCARFLSFJM> jm;
+    TS_ASSERT(jm = boost::make_shared<MockedGoodLoginResponse_SCARFLSFJM>());
 
-    TS_ASSERT_THROWS_NOTHING( alg.setProperty("Action", "JobStatus") );
-
-    TS_ASSERT_THROWS( alg.execute(), std::runtime_error );
-    TS_ASSERT( !alg.isExecuted() );
-
-    MockedSCARFTomo tomo;
-    TS_ASSERT_THROWS_NOTHING( tomo.initialize() );
-    // Forget this and you should get an exception
-    // tomo.setProperty("UserName", 3));
-    TS_ASSERT_THROWS_NOTHING( tomo.setProperty("Action", "SubmitJob") );
-
-    TS_ASSERT_THROWS( tomo.execute(), std::runtime_error );
-    TS_ASSERT( !tomo.isExecuted() );
+    TS_ASSERT_THROWS_NOTHING(jm->authenticate("user", "pass"));
+    std::string tid;
+    TS_ASSERT_THROWS_NOTHING(tid = jm->startRemoteTransaction());
+    TS_ASSERT(tid != "");
   }
 
-  void test_actionWrongUsername()
-  {
-    // Once you log out all actions should produce an exception
-    MockedSCARFTomo tomo;
-    TS_ASSERT_THROWS_NOTHING( tomo.initialize() );
-    TS_ASSERT_THROWS_NOTHING( tomo.setProperty("UserName", "fail_" + goodUsername) );
-    TS_ASSERT_THROWS_NOTHING( tomo.setProperty("Action", "JobStatus") );
-    TS_ASSERT_THROWS_NOTHING( tomo.setProperty("RunnablePath", "/foo/bar.sh") );
-    TS_ASSERT_THROWS_NOTHING( tomo.setProperty("JobOptions", "--test --baz") );
+  void test_stopRemoteTransaction() {
+    boost::shared_ptr<MockedGoodLoginResponse_SCARFLSFJM> jm;
+    TS_ASSERT(jm = boost::make_shared<MockedGoodLoginResponse_SCARFLSFJM>());
 
-    TS_ASSERT_THROWS_NOTHING( tomo.execute() );
-    TS_ASSERT( !tomo.isExecuted() );
+    TS_ASSERT_THROWS_NOTHING(jm->authenticate("user", "pass"));
+    std::string tid;
+    TS_ASSERT_THROWS_NOTHING(tid = jm->startRemoteTransaction());
+    TS_ASSERT(tid != "");
+
+    TS_ASSERT_THROWS(jm->stopRemoteTransaction("wrong_stop_id"),
+                     std::invalid_argument);
+
+    // positive at last:
+    TS_ASSERT_THROWS_NOTHING(jm->stopRemoteTransaction(tid));
+    TS_ASSERT_THROWS(jm->stopRemoteTransaction(tid), std::invalid_argument);
   }
 
-  void test_wrongExec()
-  {
-    MockedSCARFTomo alg;
-    TS_ASSERT_THROWS_NOTHING( alg.initialize() );
-    TS_ASSERT_THROWS( alg.setProperty("RandomName", 32), std::runtime_error );
+  void test_submit() {
+    boost::shared_ptr<MockedSCARFLSFJM> jm;
+    TS_ASSERT(jm = boost::make_shared<MockedSCARFLSFJM>());
 
-    TS_ASSERT_THROWS( alg.execute(), std::runtime_error );
-    TS_ASSERT( !alg.isExecuted() );
+    std::string id;
+    TS_ASSERT_THROWS(id = jm->submitRemoteJob("a_wrong_transID", "executable",
+                                              "--params 0", "name_for_job"),
+                     std::runtime_error);
+    TS_ASSERT_EQUALS(id, "");
+
+    MockedErrorResponse_SCARFLSFJM err;
+    TS_ASSERT_THROWS(id = err.submitRemoteJob("a_wrong_transID", "executable",
+                                              "--params 1", "name_for_job"),
+                     std::runtime_error);
+    TS_ASSERT_EQUALS(id, "");
   }
 
-  void test_ping()
-  {
-    MockedSCARFTomo alg;
-    TS_ASSERT_THROWS_NOTHING( alg.initialize() );
-    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("Action", "Ping") );
-    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("Username", goodUsername) );
-
-    TS_ASSERT_THROWS_NOTHING( alg.execute() );
-    TS_ASSERT( alg.isExecuted() );
+  void test_download() {
+    MockedGoodLoginResponse_SCARFLSFJM jm;
+    TS_ASSERT_THROWS_NOTHING(jm.authenticate("user", "pass"));
+    std::string tid;
+    TS_ASSERT_THROWS_NOTHING(tid = jm.startRemoteTransaction());
+    TS_ASSERT(tid != "");
+    std::string localName = "local_name";
+    // no job submitted - cannot get files
+    TS_ASSERT_THROWS(jm.downloadRemoteFile(tid, "remote_name", localName),
+                     std::runtime_error);
+    // submit one job and it should be possible to download files
+    TS_ASSERT_THROWS_NOTHING(
+        jm.submitRemoteJob(tid, "executable", "--params 1", "name_for_job"));
+    TS_ASSERT_THROWS_NOTHING(
+        jm.downloadRemoteFile(tid, "remote_name", localName));
+    // but being a fake, the file is not there:
+    TS_ASSERT(!Poco::File(localName).exists());
   }
 
-  void test_submit()
-  {
-    MockedSCARFTomo alg;
-    TS_ASSERT_THROWS_NOTHING( alg.initialize() );
-    TS_ASSERT_THROWS_NOTHING( alg.setProperty("UserName", goodUsername) );
-    TS_ASSERT_THROWS_NOTHING( alg.setProperty("Action", "SubmitJob") );
-    TS_ASSERT_THROWS_NOTHING( alg.setProperty("RunnablePath", "/foo/bar.sh") );
-    TS_ASSERT_THROWS_NOTHING( alg.setProperty("JobOptions", "--test --baz") );
+  void test_queryStatus() {
+    // this one is the basic mock up which doesn't provide the response content
+    // that we need
+    MockedSCARFLSFJM jm0;
 
-    TS_ASSERT_THROWS_NOTHING( alg.execute() );
-    TS_ASSERT( alg.isExecuted() );
+    std::vector<IRemoteJobManager::RemoteJobInfo> infos;
+    TS_ASSERT_THROWS(infos = jm0.queryAllRemoteJobs(), std::runtime_error);
+    TS_ASSERT_EQUALS(infos.size(), 0);
 
-    // second submit in a row
-    MockedSCARFTomo tomo;
-    TS_ASSERT_THROWS_NOTHING( tomo.initialize() );
-    TS_ASSERT_THROWS_NOTHING( tomo.setProperty("UserName", goodUsername) );
-    TS_ASSERT_THROWS_NOTHING( tomo.setProperty("Action", "SubmitJob") );
-    TS_ASSERT_THROWS_NOTHING( tomo.setProperty("RunnablePath", "/foo/bar.sh") );
-    TS_ASSERT_THROWS_NOTHING( tomo.setProperty("JobOptions", "--random --baz") );
+    MockedErrorResponse_SCARFLSFJM err;
+    TS_ASSERT_THROWS(infos = err.queryAllRemoteJobs(), std::runtime_error);
+    TS_ASSERT_EQUALS(infos.size(), 0);
 
-    TS_ASSERT_THROWS_NOTHING( tomo.execute() );
-    TS_ASSERT( tomo.isExecuted() );
+    std::string id("id0001");
+    std::string name("name1");
+    MockedGoodJobStatus_SCARFLSFJM jm(id, name);
+    TS_ASSERT_THROWS_NOTHING(jm.authenticate("user", "password"));
+    TS_ASSERT_THROWS_NOTHING(infos = jm.queryAllRemoteJobs());
+    std::string tid;
+    TS_ASSERT_THROWS_NOTHING(tid = jm.startRemoteTransaction());
+    TS_ASSERT_THROWS_NOTHING(
+        jm.submitRemoteJob(tid, "executable", "--params 1", "name_for_job"));
+    TS_ASSERT_EQUALS(infos.size(), 0);
+    if (infos.size() > 0) {
+      TS_ASSERT_EQUALS(infos[0].id, id);
+      TS_ASSERT_EQUALS(infos[0].name, name);
+    }
   }
 
-  void test_queryStatus()
-  {
-    // this one is the basic mock up which doesn't provide the response content that we need
-    MockedSCARFTomo err;
-    TS_ASSERT_THROWS_NOTHING( err.initialize() );
-    TS_ASSERT_THROWS_NOTHING( err.setProperty("UserName", goodUsername) );
-    TS_ASSERT_THROWS_NOTHING( err.setProperty("Action", "JobStatus") );
+  void test_queryRemoteFile() {
+    MockedGoodLoginResponse_SCARFLSFJM jm;
+    TS_ASSERT_THROWS_NOTHING(jm.authenticate("user", "pass"));
+    std::string tid;
+    TS_ASSERT_THROWS_NOTHING(tid = jm.startRemoteTransaction());
+    TS_ASSERT(tid != "");
+    // should get a bad/unrecognized response
+    TS_ASSERT_THROWS(jm.queryRemoteFile(tid), std::runtime_error);
 
-    TS_ASSERT_THROWS_NOTHING( err.execute() );
-    TS_ASSERT( err.isExecuted()) ;
-
-    std::vector<std::string> vec;
-    TS_ASSERT_THROWS_NOTHING(vec = err.getProperty("RemoteJobsID"));
-    TS_ASSERT_EQUALS( vec.size(), 0 );
-    TS_ASSERT_THROWS_NOTHING(vec = err.getProperty("RemoteJobsNames"));
-    TS_ASSERT_EQUALS( vec.size(), 0 );
-    TS_ASSERT_THROWS_NOTHING(vec = err.getProperty("RemoteJobsStatus"));
-    TS_ASSERT_EQUALS( vec.size(), 0 );
-    TS_ASSERT_THROWS_NOTHING(vec = err.getProperty("RemoteJobsCommands"));
-    TS_ASSERT_EQUALS( vec.size(), 0 );
-
-    // this one gives a basic/sufficient response with job status information
-    MockedGoodJobStatus_SCARFTomo alg("wrong id");
-    TS_ASSERT_THROWS_NOTHING( alg.initialize() );
-    TS_ASSERT_THROWS_NOTHING( alg.setProperty("UserName", goodUsername) );
-    TS_ASSERT_THROWS_NOTHING( alg.setProperty("Action", "JobStatus") );
-
-    TS_ASSERT_THROWS_NOTHING( alg.execute() );
-    TS_ASSERT( alg.isExecuted()) ;
-
-    // the mock produces info on one job
-    TS_ASSERT_THROWS_NOTHING(vec = alg.getProperty("RemoteJobsID"));
-    TS_ASSERT_EQUALS( vec.size(), 1 );
-    TS_ASSERT( vec.size()>0 && !vec.front().empty() );
-    TS_ASSERT_THROWS_NOTHING(vec = alg.getProperty("RemoteJobsNames"));
-    TS_ASSERT_EQUALS( vec.size(), 1 );
-    TS_ASSERT( vec.size()>0 && !vec.front().empty() );
-    TS_ASSERT_THROWS_NOTHING(vec = alg.getProperty("RemoteJobsStatus"));
-    TS_ASSERT_EQUALS( vec.size(), 1 );
-    TS_ASSERT( vec.size()>0 && !vec.front().empty() );
-    TS_ASSERT_THROWS_NOTHING(vec = alg.getProperty("RemoteJobsCommands"));
-    TS_ASSERT_EQUALS( vec.size(), 1 );
-    TS_ASSERT( vec.size()>0 && !vec.front().empty() );
+    TS_ASSERT_THROWS_NOTHING(
+        jm.submitRemoteJob(tid, "executable", "--params 1", "name_for_job"));
+    TS_ASSERT_THROWS_NOTHING(jm.queryRemoteFile(tid));
   }
 
-  void test_queryStatusByID()
-  {
-    // this one is the basic mockup: doesn't provide the response content that we need
-    MockedSCARFTomo err;
-    TS_ASSERT_THROWS_NOTHING( err.initialize() );
-    TS_ASSERT_THROWS_NOTHING( err.setProperty("UserName", goodUsername) );
-    TS_ASSERT_THROWS_NOTHING( err.setProperty("Action", "JobStatusByID") );
-    TS_ASSERT_THROWS_NOTHING( err.setProperty("JobID", 123456789) );
+  void test_queryStatusByID() {
+    MockedSCARFLSFJM jmFail;
 
-    TS_ASSERT_THROWS_NOTHING( err.execute() );
-    TS_ASSERT( err.isExecuted()) ;
+    std::string id("id001");
+    IRemoteJobManager::RemoteJobInfo info;
+    TS_ASSERT_THROWS(info = jmFail.queryRemoteJob(id), std::runtime_error);
+    TS_ASSERT_THROWS(jmFail.authenticate("user", "pass"), std::runtime_error);
+    TS_ASSERT_THROWS(info = jmFail.queryRemoteJob(id), std::runtime_error);
 
-    std::string tmp;
-    TS_ASSERT_THROWS_NOTHING( tmp = err.getPropertyValue("RemoteJobName") );
-    TS_ASSERT( tmp.empty() );
-    TS_ASSERT_THROWS_NOTHING( tmp = err.getPropertyValue("RemoteJobStatus") );
-    TS_ASSERT( tmp.empty() );
-    TS_ASSERT_THROWS_NOTHING( tmp = err.getPropertyValue("RemoteJobsCommands") );
-    TS_ASSERT( tmp.empty() );
+    MockedErrorResponse_SCARFLSFJM err;
+    TS_ASSERT_THROWS(info = err.queryRemoteJob(id), std::runtime_error);
+    TS_ASSERT_EQUALS(info.id, "");
+    TS_ASSERT_EQUALS(info.name, "");
 
-    // this one gives a basic/sufficient response with job status information
-    std::string jobID = "444449";
-    MockedGoodJobStatus_SCARFTomo alg(jobID);
-    TS_ASSERT_THROWS_NOTHING( alg.initialize() );
-    TS_ASSERT_THROWS_NOTHING( alg.setProperty("UserName", goodUsername) );
-    TS_ASSERT_THROWS_NOTHING( alg.setProperty("Action", "JobStatusByID") );
-    TS_ASSERT_THROWS_NOTHING( alg.setProperty("JobID", jobID) );
+    std::string name("name01");
+    MockedGoodJobStatus_SCARFLSFJM jm(id, name);
+    TS_ASSERT_THROWS_NOTHING(jm.authenticate("user", "password"));
+    TS_ASSERT_THROWS(info = jm.queryRemoteJob(id), std::runtime_error);
 
-    TS_ASSERT_THROWS_NOTHING( alg.execute() );
-    TS_ASSERT( alg.isExecuted()) ;
-
-    // It could also check that it gets the names, etc. that the mock-up produces
-    TS_ASSERT_THROWS_NOTHING( tmp = alg.getPropertyValue("RemoteJobName") );
-    TS_ASSERT( !tmp.empty() );
-    TS_ASSERT_THROWS_NOTHING( tmp = alg.getPropertyValue("RemoteJobStatus") );
-    TS_ASSERT( !tmp.empty() );
-    TS_ASSERT_THROWS_NOTHING( tmp = alg.getPropertyValue("RemoteJobCommand") );
-    TS_ASSERT( !tmp.empty() );
+    std::string tid;
+    TS_ASSERT_THROWS_NOTHING(tid = jm.startRemoteTransaction());
+    TS_ASSERT_THROWS_NOTHING(
+        id = jm.submitRemoteJob(tid, "exec", "--p 1", "job_name"));
+    TS_ASSERT_THROWS(info = jm.queryRemoteJob(id), std::runtime_error);
   }
 
-  void test_cancel()
-  {
-    MockedSCARFTomo alg;
-    TS_ASSERT_THROWS_NOTHING( alg.initialize() );
-    TS_ASSERT_THROWS_NOTHING( alg.setProperty("UserName", goodUsername) );
-    TS_ASSERT_THROWS_NOTHING( alg.setProperty("Action", "CancelJob") );
-    TS_ASSERT_THROWS_NOTHING( alg.setProperty("CancelJobID", 123456789) );
+  void test_cancel() {
+    MockedSCARFLSFJM jmFail;
+    std::string tid("trans001");
+    TS_ASSERT_THROWS(jmFail.stopRemoteTransaction(tid), std::runtime_error);
 
-    TS_ASSERT_THROWS_NOTHING( alg.execute() );
-    TS_ASSERT( alg.isExecuted()) ;
+    MockedErrorResponse_SCARFLSFJM err;
+    TS_ASSERT_THROWS(err.stopRemoteTransaction(tid), std::runtime_error);
+    TS_ASSERT_THROWS(err.authenticate("user", "pass"), std::runtime_error);
+    IRemoteJobManager::RemoteJobInfo info;
+    TS_ASSERT_THROWS(info = err.queryRemoteJob("012"), std::runtime_error);
+
+    std::string name("name01");
+    MockedGoodLoginResponse_SCARFLSFJM jm;
+    std::string newID;
+    TS_ASSERT_THROWS_NOTHING(jm.authenticate("user", "pass"));
+    TS_ASSERT_THROWS_NOTHING(newID = jm.startRemoteTransaction());
+    TS_ASSERT_THROWS(jm.stopRemoteTransaction(tid), std::invalid_argument);
+    TS_ASSERT_THROWS_NOTHING(jm.stopRemoteTransaction(newID));
   }
 
-  void test_upload()
-  {
-    MockedSCARFTomo alg;
-    TS_ASSERT_THROWS_NOTHING( alg.initialize() );
-    TS_ASSERT_THROWS_NOTHING( alg.setProperty("Username", goodUsername) );
-    TS_ASSERT_THROWS_NOTHING( alg.setProperty("Action", "Upload") );
-    TS_ASSERT_THROWS_NOTHING( alg.setProperty("FileToUpload", "random_file") );
-    TS_ASSERT_THROWS_NOTHING( alg.setProperty("DestinationDirectory", "random_path/") );
-
-    TS_ASSERT_THROWS_NOTHING( alg.execute() );
-    TS_ASSERT( alg.isExecuted()) ;
+  void test_upload() {
+    MockedGoodLoginResponse_SCARFLSFJM jm;
+    TS_ASSERT_THROWS_NOTHING(jm.authenticate("userid", "pass"));
+    std::string tid;
+    TS_ASSERT_THROWS_NOTHING(tid = jm.startRemoteTransaction());
+    TS_ASSERT(tid != "");
+    /// fails - missing file
+    TS_ASSERT_THROWS_NOTHING(
+        jm.uploadRemoteFile(tid, "remote_name", "local_name"));
   }
 
-  void test_download()
-  {
-    MockedSCARFTomo alg;
-    TS_ASSERT_THROWS_NOTHING( alg.initialize() );
-
-    // Download with empty filename (get all files)
-    TS_ASSERT_THROWS_NOTHING( alg.setProperty("UserName", goodUsername) );
-    TS_ASSERT_THROWS_NOTHING( alg.setProperty("Action", "Download") );
-    TS_ASSERT_THROWS_NOTHING( alg.setProperty("DownloadJobID", 12345) );
-    TS_ASSERT_THROWS_NOTHING( alg.setProperty("RemoteJobFilename", "") );
-    TS_ASSERT_THROWS_NOTHING( alg.setProperty("LocalDirectory", "/tmp/foo") );
-    TS_ASSERT_THROWS_NOTHING( alg.execute() );
-    TS_ASSERT( alg.isExecuted() );
-
-    MockedSCARFTomo alg2;
-    TS_ASSERT_THROWS_NOTHING( alg2.initialize() );
-
-    // Download a single file (giving its name)
-    TS_ASSERT_THROWS_NOTHING( alg2.setProperty("UserName", goodUsername) );
-    TS_ASSERT_THROWS_NOTHING( alg2.setProperty("Action", "Download") );
-    TS_ASSERT_THROWS_NOTHING( alg2.setProperty("DownloadJobID", 12345) );
-    TS_ASSERT_THROWS_NOTHING( alg2.setProperty("RemoteJobFilename", "inexistent_test_name.nxs.foo") );
-    TS_ASSERT_THROWS_NOTHING( alg2.setProperty("LocalDirectory", "/tmp/foo") );
-    TS_ASSERT_THROWS_NOTHING( alg2.execute() );
-    TS_ASSERT( !alg2.isExecuted() );
-  }
-
-  void test_errorResponseFromServer()
-  {
-    MockedErrorResponse_SCARFTomo err;
-    TS_ASSERT_THROWS_NOTHING( err.initialize() );
-    TS_ASSERT_THROWS_NOTHING( err.setPropertyValue("Username", goodUsername) );
-    TS_ASSERT_THROWS_NOTHING( err.setPropertyValue("Action","JobStatus") );
-
-    TS_ASSERT_THROWS_NOTHING( err.execute() );
-    TS_ASSERT( !err.isExecuted() );
+  void test_errorResponseFromServer() {
+    MockedErrorResponse_SCARFLSFJM err;
+    TS_ASSERT_THROWS(err.authenticate("whoami", "pass"), std::runtime_error);
+    TS_ASSERT_THROWS(err.ping(), std::runtime_error);
   }
 
   // logout must run after all the (positive) tests
-  void test_logout()
-  {
-    MockedSCARFTomo alg;
-    TS_ASSERT_THROWS_NOTHING( alg.initialize() );
-    TS_ASSERT_THROWS_NOTHING( alg.setProperty("UserName", goodUsername));
-    TS_ASSERT_THROWS_NOTHING( alg.setProperty("Action", "LogOut") );
-
-    TS_ASSERT_THROWS_NOTHING( alg.execute() );
-    TS_ASSERT( alg.isExecuted() );
+  void test_logout() {
+    MockedGoodLoginResponse_SCARFLSFJM jm;
+    TS_ASSERT_THROWS_NOTHING(jm.authenticate("user", "pass"));
+    std::string tid;
+    TS_ASSERT_THROWS_NOTHING(tid = jm.startRemoteTransaction());
+    TS_ASSERT_THROWS_NOTHING(jm.stopRemoteTransaction(tid));
+    TS_ASSERT_THROWS_NOTHING(jm.logout());
   }
 
-  void test_actionAfterLogout()
-  {
-    MockedSCARFTomo alg;
-    // Once you log out all actions should produce an exception, regardless of the username given
-    TS_ASSERT_THROWS_NOTHING( alg.initialize() );
-    TS_ASSERT_THROWS_NOTHING( alg.setProperty("UserName", "fail_" + goodUsername) );
-    TS_ASSERT_THROWS_NOTHING( alg.setProperty("Action", "JobStatus") );
-    TS_ASSERT_THROWS_NOTHING( alg.setProperty("RunnablePath", "/foo/bar.sh") );
-    TS_ASSERT_THROWS_NOTHING( alg.setProperty("JobOptions", "--test --baz") );
+  void test_ping() {
+    MockedConnectionError_SCARFLSFJM err;
+    bool res = false;
+    TS_ASSERT_THROWS(res = err.ping(), std::runtime_error);
+    TS_ASSERT(!res);
 
-    TS_ASSERT_THROWS_NOTHING(alg.execute() );
-    TS_ASSERT( !alg.isExecuted() );
+    MockedErrorResponse_SCARFLSFJM errResp;
+    TS_ASSERT_THROWS(res = errResp.ping(), std::runtime_error);
+    TS_ASSERT(!res);
 
-    MockedSCARFTomo alg2;
-    TS_ASSERT_THROWS_NOTHING( alg2.initialize() );
-    TS_ASSERT_THROWS_NOTHING( alg2.setProperty("UserName", goodUsername) );
-    TS_ASSERT_THROWS_NOTHING( alg2.setProperty("Action", "JobStatus") );
-    TS_ASSERT_THROWS_NOTHING( alg2.setProperty("RunnablePath", "/foo/bar.sh") );
-    TS_ASSERT_THROWS_NOTHING( alg2.setProperty("JobOptions", "--test --baz") );
-
-    TS_ASSERT_THROWS_NOTHING(alg2.execute() );
-    TS_ASSERT( !alg2.isExecuted() );
+    /// ping is fine without logging in
+    MockedGoodPingResponse_SCARFLSFJM good;
+    TS_ASSERT_THROWS_NOTHING(res = good.ping());
+    TS_ASSERT(res);
   }
 
-  void test_failConnect()
-  {
-    MockedConnectionError_SCARFTomo fail;
-    TS_ASSERT_THROWS_NOTHING( fail.initialize() );
-    TS_ASSERT_THROWS_NOTHING( fail.setPropertyValue("Action", "Ping") );
-
-    TS_ASSERT_THROWS( fail.execute(), std::runtime_error );
-    TS_ASSERT( !fail.isExecuted() );
-
-    MockedConnectionError_SCARFTomo fail2;
-    TS_ASSERT_THROWS_NOTHING( fail2.initialize() );
-    // username missing
-    TS_ASSERT_THROWS_NOTHING( fail2.setPropertyValue("Username", "uname") );
-    TS_ASSERT_THROWS_NOTHING( fail2.setPropertyValue("Password", "whatever") );
-    TS_ASSERT_THROWS_NOTHING( fail2.setPropertyValue("Action","LogIn") );
-
-    TS_ASSERT_THROWS_NOTHING( fail2.execute() );
-    TS_ASSERT( !fail2.isExecuted() );
+  void test_failConnect() {
+    MockedConnectionError_SCARFLSFJM fail;
+    TS_ASSERT_THROWS(fail.authenticate("userlogin", "pass"),
+                     std::runtime_error);
+    TS_ASSERT_THROWS(fail.downloadRemoteFile("any_wrong_transID",
+                                             "remote_fname", "local_fname"),
+                     std::invalid_argument);
+    TS_ASSERT_THROWS(fail.ping(), std::runtime_error);
   }
 
-  void test_errorResponseFromServerAfterLogout()
-  {
-    MockedErrorResponse_SCARFTomo err;
-    TS_ASSERT_THROWS_NOTHING( err.initialize() );
-    TS_ASSERT_THROWS_NOTHING( err.setPropertyValue("Username", "foo") );
-    TS_ASSERT_THROWS_NOTHING( err.setPropertyValue("Action", "Ping") );
+  void test_commandAfterLogout() {
+    MockedGoodLoginResponse_SCARFLSFJM jm;
+    TS_ASSERT_THROWS_NOTHING(jm.authenticate("username", "pass"));
+    TS_ASSERT_THROWS_NOTHING(jm.logout());
 
-    TS_ASSERT_THROWS_NOTHING( err.execute() );
-    TS_ASSERT( !err.isExecuted() );
+    // Once you log out all actions should produce an exception
+    std::string tid, jid;
+    TS_ASSERT_THROWS(tid = jm.startRemoteTransaction(), std::runtime_error);
+
+    TS_ASSERT_THROWS(jid = jm.submitRemoteJob("a_wrong_transID", "executable",
+                                              "--params 1", "name_for_job"),
+                     std::runtime_error);
+
+    // log in again, back to normal
+    TS_ASSERT_THROWS_NOTHING(jm.authenticate("user", "pass"));
+    TS_ASSERT_THROWS_NOTHING(tid = jm.startRemoteTransaction());
+    TS_ASSERT("" != tid);
+
+    TS_ASSERT_THROWS(
+        jid = jm.submitRemoteJob("no_no_wrong_ID", "executable", "--params 1"),
+        std::invalid_argument);
+    TS_ASSERT_THROWS_NOTHING(
+        jid = jm.submitRemoteJob(tid, "executable", "--params 1"));
+    TS_ASSERT("" != jid);
   }
 
 private:
@@ -587,6 +544,6 @@ private:
   static const std::string SCARFName;
 };
 
-const std::string SCARFTomoReconstructionTest::SCARFName = "SCARF@STFC";
+const std::string SCARFLSFJobManagerTest::SCARFName = "SCARF@STFC";
 
-#endif // MANTID_REMOTEALGORITHMS_SCARFTOMORECONSTRUCTION_H_
+#endif // MANTID_REMOTEJOBMANAGERS_SCARFLSFJOBMANAGERTEST_H_

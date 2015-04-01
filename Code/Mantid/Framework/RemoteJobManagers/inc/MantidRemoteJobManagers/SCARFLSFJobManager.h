@@ -8,7 +8,7 @@ namespace Mantid {
 namespace RemoteJobManagers {
 /**
 SCARFLSFJobManager implements a remote job manager that knows how to
-talk to Platform LSF web service at the SCARF cluster. This is in
+talk to the Platform LSF web service at the SCARF cluster. This is in
 principle a generic Platform LSF web service, except for the
 authentication mechanism.
 
@@ -36,9 +36,18 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 class DLLExport SCARFLSFJobManager
     : public Mantid::RemoteJobManagers::LSFJobManager {
 public:
-  void authenticate(std::string &username, std::string &password);
+  virtual void authenticate(const std::string &username,
+                            const std::string &password);
 
-  void logout(std::string &username = std::string());
+  /// Ping the server to see if it is alive and responding.
+  virtual bool ping();
+
+  virtual void logout(const std::string &username = std::string());
+
+private:
+  static std::string m_pingPath;
+  static std::string m_logoutPath;
+  static std::string m_pingBaseURL;
 };
 
 } // namespace RemoteJobManagers
