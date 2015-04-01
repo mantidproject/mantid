@@ -6,7 +6,7 @@
 namespace Mantid {
 namespace RemoteAlgorithms {
 
-class QueryRemoteJob : public Mantid::API::Algorithm {
+class DLLExport QueryRemoteJob : public Mantid::API::Algorithm {
 public:
   /// (Empty) Constructor
   QueryRemoteJob() : Mantid::API::Algorithm() {}

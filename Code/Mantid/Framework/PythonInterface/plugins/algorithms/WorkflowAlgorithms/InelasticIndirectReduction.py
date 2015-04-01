@@ -77,12 +77,9 @@ class InelasticIndirectReduction(DataProcessorAlgorithm):
 
     def PyExec(self):
         from mantid import config, logger
-        from IndirectCommon import StartTime, EndTime
         import inelastic_indirect_reducer
 
         self._setup()
-
-        StartTime('InelasticIndirectReduction')
 
         # Setup reducer
         reducer = inelastic_indirect_reducer.IndirectReducer()
@@ -156,8 +153,6 @@ class InelasticIndirectReduction(DataProcessorAlgorithm):
         # Do plotting
         if self._plot_type != 'none':
             self._plot()
-
-        EndTime('InelasticIndirectReduction')
 
 
     def validateInputs(self):

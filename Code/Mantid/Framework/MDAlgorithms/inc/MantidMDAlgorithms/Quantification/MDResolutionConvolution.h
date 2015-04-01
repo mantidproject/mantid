@@ -117,7 +117,7 @@ protected:
   const API::IFunctionMD &getFittingFunction() const;
 
 private:
-  DISABLE_COPY_AND_ASSIGN(MDResolutionConvolution);
+  DISABLE_COPY_AND_ASSIGN(MDResolutionConvolution)
 
   /// Required for function interface
   void function(const Mantid::API::FunctionDomain &,

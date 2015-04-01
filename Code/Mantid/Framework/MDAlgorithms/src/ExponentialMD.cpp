@@ -22,10 +22,10 @@ ExponentialMD::~ExponentialMD() {}
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
-const std::string ExponentialMD::name() const { return "ExponentialMD"; };
+const std::string ExponentialMD::name() const { return "ExponentialMD"; }
 
 /// Algorithm's version for identification. @see Algorithm::version
-int ExponentialMD::version() const { return 1; };
+int ExponentialMD::version() const { return 1; }
 
 //----------------------------------------------------------------------------------------------
 

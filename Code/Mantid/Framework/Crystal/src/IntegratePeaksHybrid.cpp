@@ -101,10 +101,10 @@ IntegratePeaksHybrid::~IntegratePeaksHybrid() {}
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string IntegratePeaksHybrid::name() const {
   return "IntegratePeaksHybrid";
-};
+}
 
 /// Algorithm's version for identification. @see Algorithm::version
-int IntegratePeaksHybrid::version() const { return 1; };
+int IntegratePeaksHybrid::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
 const std::string IntegratePeaksHybrid::category() const {

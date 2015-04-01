@@ -12,6 +12,7 @@
 #include <pqDataRepresentation.h>
 #include <pqObjectBuilder.h>
 #include <pqPipelineSource.h>
+#include <pqPipelineFilter.h>
 #include <pqPipelineRepresentation.h>
 #include <pqPVApplicationCore.h>
 #include <pqRenderView.h>
@@ -329,7 +330,7 @@ void ViewBase::checkView(ModeControlWidget::Views initialView)
 
 /**
  * This metod sets the status of the splatterplot button explictly to a desired value
- * @param visiblity The state of the the splatterplot view button.
+ * @param visibility The state of the the splatterplot view button.
  */
 void ViewBase::setSplatterplot(bool visibility)
 {
@@ -338,7 +339,7 @@ void ViewBase::setSplatterplot(bool visibility)
 
 /**
  * This metod sets the status of the standard view button explictly to a desired value
- * @param visiblity The state of the the standard view button.
+ * @param visibility The state of the the standard view button.
  */
 void ViewBase::setStandard(bool visibility)
 {
@@ -800,6 +801,96 @@ void ViewBase::initializeColorScale()
 void ViewBase::onSourceDestroyed()
 {
 }
+
+/**
+ * Destroy all sources in the view.
+ */
+void ViewBase::destroyAllSourcesInView() {
+  pqServer *server = pqActiveObjects::instance().activeServer();
+  pqServerManagerModel *smModel = pqApplicationCore::instance()->getServerManagerModel();
+  QList<pqPipelineSource *> sources = smModel->findItems<pqPipelineSource *>(server);
+
+  // Out of all pqPipelineSources, find the "true" sources, which were
+  // created by a Source Plugin, i.e. MDEW Source, MDHW Source, PeakSource
+  QList<pqPipelineSource*> trueSources;
+  for (QList<pqPipelineSource *>::iterator source = sources.begin(); source != sources.end(); ++source) {
+    if (!qobject_cast<pqPipelineFilter*>(*source)) {
+      trueSources.push_back(*source);
+    }
+  }
+
+  // For each true source, go to the end of the pipeline and destroy it on the way back
+  // to the start. This assumes linear pipelines.
+  for (QList<pqPipelineSource *>::iterator trueSource = trueSources.begin(); trueSource != trueSources.end(); ++trueSource) {
+    destroySinglePipeline(*trueSource);
+  }
+}
+
+
+/**
+ * Destroy a single, linear pipeline
+ * @param source A true pqPiplineSource, i.e. not a filter.
+ */
+void ViewBase::destroySinglePipeline(pqPipelineSource * source) {
+
+    pqObjectBuilder* builder = pqApplicationCore::instance()->getObjectBuilder();
+
+    // Move to the end of the pipeline
+    pqPipelineSource *sourceBuffer = source;
+    while(sourceBuffer->getNumberOfConsumers() > 0) {
+      sourceBuffer = sourceBuffer->getConsumer(0);
+    }
+
+    // Now destroy the pipeline coming back again
+    pqPipelineFilter* filter = qobject_cast<pqPipelineFilter*>(sourceBuffer);
+    while(filter) {
+      sourceBuffer = filter->getInput(0);
+      builder->destroy(filter);
+      filter = qobject_cast<pqPipelineFilter*>(sourceBuffer);
+    }
+
+    builder->destroy(sourceBuffer);
+}
+
+/**
+ * Set the listener for the visibility of the representations
+ */
+void ViewBase::setVisibilityListener()
+{
+  // Set the connection to listen to a visibility change of the representation.
+  pqServer *server = pqActiveObjects::instance().activeServer();
+  pqServerManagerModel *smModel = pqApplicationCore::instance()->getServerManagerModel();
+  QList<pqPipelineSource *> sources;
+  sources = smModel->findItems<pqPipelineSource *>(server);
+
+  // Attach the visibilityChanged signal for all sources.
+  for (QList<pqPipelineSource *>::iterator source = sources.begin(); source != sources.end(); ++source)
+  {
+    QObject::connect((*source), SIGNAL(visibilityChanged(pqPipelineSource*, pqDataRepresentation*)),
+                     this, SLOT(onVisibilityChanged(pqPipelineSource*, pqDataRepresentation*)),
+                     Qt::UniqueConnection);
+  }
+}
+
+/**
+ * Disconnects the visibility listener connection for all sources
+ */
+void ViewBase::removeVisibilityListener() {
+    // Set the connection to listen to a visibility change of the representation.
+  pqServer *server = pqActiveObjects::instance().activeServer();
+  pqServerManagerModel *smModel = pqApplicationCore::instance()->getServerManagerModel();
+  QList<pqPipelineSource *> sources;
+  sources = smModel->findItems<pqPipelineSource *>(server);
+
+  // Attach the visibilityChanged signal for all sources.
+  for (QList<pqPipelineSource *>::iterator source = sources.begin(); source != sources.end(); ++source)
+  {
+    QObject::disconnect((*source), SIGNAL(visibilityChanged(pqPipelineSource*, pqDataRepresentation*)),
+                         this, SLOT(onVisibilityChanged(pqPipelineSource*, pqDataRepresentation*)));
+  }
+}
+
+
 
 } // namespace SimpleGui
 } // namespace Vates

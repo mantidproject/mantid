@@ -18,7 +18,7 @@
 namespace Mantid {
 namespace MDAlgorithms {
 // Register the algorithm into the AlgorithmFactory
-DECLARE_ALGORITHM(SimulateResolutionConvolvedModel);
+DECLARE_ALGORITHM(SimulateResolutionConvolvedModel)
 
 using namespace API;
 using namespace Kernel;
@@ -176,6 +176,8 @@ void SimulateResolutionConvolvedModel::createOutputWorkspace() {
   }
   // Run information
   m_outputWS->copyExperimentInfos(*m_inputWS);
+  // Coordinates
+  m_outputWS->setCoordinateSystem(m_inputWS->getSpecialCoordinateSystem());
 
   m_outputWS->initialize();
   m_outputWS->splitBox(); // Make grid box

@@ -1596,15 +1596,14 @@ void PlotDialog::updateTabWindow(QTreeWidgetItem *currentItem, QTreeWidgetItem *
   if (currentItem->type() == CurveTreeItem::PlotCurveTreeItem)
   {
     CurveTreeItem *curveItem = dynamic_cast<CurveTreeItem *>(currentItem);
-    if (!curveItem)
+    if (!curveItem) {
+      boxPlotType->blockSignals(false);
       return;
+    }
 
     CurveTreeItem *pi = dynamic_cast<CurveTreeItem *>(previousItem);
-    if (!pi)
-      return;
-
     if (previousItem->type() != CurveTreeItem::PlotCurveTreeItem
-        || pi->plotItemType() != curveItem->plotItemType()
+        || (pi && pi->plotItemType() != curveItem->plotItemType())
         || forceClearTabs)
     {
       clearTabWidget();

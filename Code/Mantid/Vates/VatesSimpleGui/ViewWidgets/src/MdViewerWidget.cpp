@@ -975,7 +975,7 @@ void MdViewerWidget::renderAndFinalSetup()
   this->currentView->checkView(this->initialView);
   this->currentView->updateAnimationControls();
   this->setDestroyedListener();
-  this->setVisibilityListener();
+  this->currentView->setVisibilityListener();
   this->currentView->onAutoScale(this->ui.colorSelectionWidget);
 }
 
@@ -1056,7 +1056,7 @@ void MdViewerWidget::switchViews(ModeControlWidget::Views v)
   this->updateAppState();
   this->initialView = v; 
   this->setDestroyedListener();
-  this->setVisibilityListener();
+  this->currentView->setVisibilityListener();
 }
 
 /**
@@ -1093,10 +1093,7 @@ bool MdViewerWidget::eventFilter(QObject *obj, QEvent *ev)
 
       this->ui.colorSelectionWidget->reset();
       this->currentView->setColorScaleState(this->ui.colorSelectionWidget);
-
-      pqObjectBuilder* builder = pqApplicationCore::instance()->getObjectBuilder();
-      builder->destroySources();
-
+      this->currentView ->destroyAllSourcesInView();
       this->currentView->updateSettings();
       this->currentView->hide();
 
@@ -1381,6 +1378,9 @@ void MdViewerWidget::preDeleteHandle(const std::string &wsName,
       removeRebinning(src, true);
       return;
     }
+    
+    // Remove all visibility listeners
+    this->currentView->removeVisibilityListener();
 
     emit this->requestClose();
   }
@@ -1437,29 +1437,12 @@ void MdViewerWidget::setDestroyedListener()
   }
 }
 
-/**
- * Set the listener for the visibility of the representations
- */
-void MdViewerWidget::setVisibilityListener()
-{
-  // Set the connection to listen to a visibility change of the representation.
-  pqServer *server = pqActiveObjects::instance().activeServer();
-  pqServerManagerModel *smModel = pqApplicationCore::instance()->getServerManagerModel();
-  QList<pqPipelineSource *> sources;
-  sources = smModel->findItems<pqPipelineSource *>(server);
 
-  // Attach the visibilityChanged signal for all sources.
-  for (QList<pqPipelineSource *>::iterator source = sources.begin(); source != sources.end(); ++source)
-  {
-    QObject::connect((*source), SIGNAL(visibilityChanged(pqPipelineSource*, pqDataRepresentation*)),
-                     this->currentView, SLOT(onVisibilityChanged(pqPipelineSource*, pqDataRepresentation*)),
-                     Qt::UniqueConnection);
-  }
-}
+
 
 /**
  * Dectect when a PeaksWorkspace is dragged into the VSI.
- * @param A drag event.
+ * @param e A drag event.
  */
 void MdViewerWidget::dragEnterEvent(QDragEnterEvent *e) {
   QString name = e->mimeData()->objectName();
@@ -1475,7 +1458,7 @@ void MdViewerWidget::dragEnterEvent(QDragEnterEvent *e) {
 
 /**
  * React to dropping a PeaksWorkspace ontot the VSI.
- * @param e A drop event.
+ * @param e Drop event.
  */
 void MdViewerWidget::dropEvent(QDropEvent *e) {
   QString name = e->mimeData()->objectName();
@@ -1494,7 +1477,7 @@ void MdViewerWidget::dropEvent(QDropEvent *e) {
   * Handle the drag and drop events of peaks workspaces.
   * @param e The event.
   * @param text String containing information regarding the workspace name.
-  * @param wsNames A reference to a list of workspaces names, which are being extracted.
+  * @param wsNames  Reference to a list of workspaces names, which are being extracted.
   */
  void MdViewerWidget::handleDragAndDropPeaksWorkspaces(QEvent* e, QString text, QStringList& wsNames)
  {

@@ -20,6 +20,7 @@
 
 """
 from __future__ import absolute_import
+import os, string
 
 import mantid.api as _api
 import mantid.kernel as _kernel
@@ -31,7 +32,7 @@ from mantid.api._aliases import *
 
 #------------------------ Specialized function calls --------------------------
 # List of specialized algorithms
-__SPECIALIZED_FUNCTIONS__ = ["Load", "Fit"]
+__SPECIALIZED_FUNCTIONS__ = ["Load", "Fit", "CutMD"]
 # List of specialized algorithms
 __MDCOORD_FUNCTIONS__ = ["PeakIntensityVsRadius", "CentroidPeaksMD","IntegratePeaksMD"]
 # The "magic" keyword to enable/disable logging
@@ -254,6 +255,125 @@ def FitDialog(*args, **kwargs):
     _set_properties_dialog(algm,**arguments)
     algm.execute()
     return algm
+
+#--------------------------------------------------- --------------------------
+
+def CutMD(*args, **kwargs):
+    """
+    Slices multidimensional workspaces using input projection information and binning limits.
+    """
+    (in_wss,) = _get_mandatory_args('CutMD', ["InputWorkspace"], *args, **kwargs)
+
+    # If the input isn't a list, wrap it in one so we can iterate easily
+    if isinstance(in_wss, list):
+        in_list = in_wss
+        handling_multiple_workspaces = True
+    else:
+        in_list = [in_wss]
+        handling_multiple_workspaces = False
+
+    # Remove from keywords so it is not set twice
+    if "InputWorkspace" in kwargs:
+        del kwargs['InputWorkspace']
+
+    #Make sure we were given some output workspace names
+    lhs = _kernel.funcreturns.lhs_info()
+    if lhs[0] == 0 and 'OutputWorkspace' not in kwargs:
+        raise RuntimeError("Unable to set output workspace name. Please either assign the output of "
+                           "CutMD to a variable or use the OutputWorkspace keyword.")
+
+    #Take what we were given
+    if "OutputWorkspace" in kwargs:
+        out_names = kwargs["OutputWorkspace"]
+    else:
+        out_names = list(lhs[1])
+
+    #Ensure the output names we were given are valid
+    if handling_multiple_workspaces:
+        if not isinstance(out_names, list):
+            raise RuntimeError("Multiple OutputWorkspaces must be given as a list when processing multiple InputWorkspaces.")
+    else:
+        #We wrap in a list for our convenience. The user musn't pass us one though.
+        if not isinstance(out_names, list):
+            out_names = [out_names]
+        elif len(out_names) != 1:
+            raise RuntimeError("Only one OutputWorkspace required")
+
+    if len(out_names) != len(in_list):
+        raise RuntimeError("Different number of input and output workspaces given.")
+
+    # Split PBins up into P1Bin, P2Bin, etc.
+    if "PBins" in kwargs:
+        bins = kwargs["PBins"]
+        del kwargs["PBins"]
+        if isinstance(bins, tuple) or isinstance(bins, list):
+            for bin in range(len(bins)):
+                kwargs["P{0}Bin".format(bin+1)] = bins[bin]
+
+    # Create and execute
+    algm = _create_algorithm_object('CutMD')
+    _set_logging_option(algm, kwargs)
+
+    # Now check that all the kwargs we've got are correct
+    for key in kwargs.keys():
+        if key not in algm:
+            raise RuntimeError("Unknown property: {0}".format(key))
+
+    # We're now going to build to_process, which is the list of workspaces we want to process.
+    to_process = list()
+    for i in range(len(in_list)):
+        ws = in_list[i]
+
+        if isinstance(ws, _api.Workspace):
+            #It's a workspace, do nothing to it
+            to_process.append(ws)
+        elif isinstance(ws, str):
+            if ws in mtd:
+                #It's a name of something in the ads, just take it from the ads
+                to_process.append(_api.AnalysisDataService[ws])
+            else:
+                #Let's try treating it as a filename
+                load_alg = AlgorithmManager.create("Load")
+                load_alg.setLogging(True)
+                load_alg.setAlwaysStoreInADS(False)
+                load_alg.setProperty("Filename", ws)
+                load_alg.setProperty("OutputWorkspace", "__loaded_by_cutmd_{0}".format(i+1))
+                load_alg.execute()
+                if not load_alg.isExecuted():
+                    raise TypeError("Failed to load " + ws)
+                wsn = load_alg.getProperty("OutputWorkspace").valueAsStr
+                to_process.append(_api.AnalysisDataService[wsn])
+        else:
+            raise TypeError("Unexpected type: " + type(ws))
+
+    #Run the algorithm across the inputs and outputs
+    for i in range(len(to_process)):
+        _set_properties(algm, **kwargs)
+        algm.setProperty('InputWorkspace', to_process[i])
+        algm.setProperty('OutputWorkspace', out_names[i])
+        algm.execute()
+
+    #Get the workspace objects so we can return them
+    for i in range(len(out_names)):
+        out_names[i] = _api.AnalysisDataService[out_names[i]]
+
+    #We should only return a list if we're handling multiple workspaces
+    if handling_multiple_workspaces:
+        return out_names
+    else:
+        return out_names[0]
+
+# Have a better load signature for autocomplete
+_signature = "\bInputWorkspace"
+# Getting the code object for Load
+_f = CutMD.func_code
+# Creating a new code object nearly identical, but with the two variable names replaced
+# by the property list.
+_c = _f.__new__(_f.__class__, _f.co_argcount, _f.co_nlocals, _f.co_stacksize, _f.co_flags, _f.co_code, _f.co_consts, _f.co_names,\
+       (_signature, "kwargs"), _f.co_filename, _f.co_name, _f.co_firstlineno, _f.co_lnotab, _f.co_freevars)
+
+# Replace the code object of the wrapper function
+CutMD.func_code = _c
 
 #--------------------------------------------------- --------------------------
 
@@ -550,6 +670,7 @@ def _create_algorithm_function(algorithm, version, _algm_object):
             Note that if the Version parameter is passed, we will create
             the proper version of the algorithm without failing.
         """
+
         _version = version
         if "Version" in kwargs:
             _version = kwargs["Version"]

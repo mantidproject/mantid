@@ -7,7 +7,7 @@ namespace Mantid {
 namespace CurveFitting {
 
 // Register the algorithm into the AlgorithmFactory
-DECLARE_ALGORITHM(SplineInterpolation);
+DECLARE_ALGORITHM(SplineInterpolation)
 
 using namespace API;
 using namespace Kernel;

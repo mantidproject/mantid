@@ -56,7 +56,7 @@ private:
   friend struct Kernel::CreateUsingNew<MDResolutionConvolutionFactoryImpl>;
   /// Default constructor. Private for singleton holder
   MDResolutionConvolutionFactoryImpl();
-  DISABLE_COPY_AND_ASSIGN(MDResolutionConvolutionFactoryImpl);
+  DISABLE_COPY_AND_ASSIGN(MDResolutionConvolutionFactoryImpl)
 
   // Do not allow the default create & createUnwrapped to be called
   using BaseClass::create;

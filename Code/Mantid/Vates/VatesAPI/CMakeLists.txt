@@ -6,6 +6,8 @@ project( VatesAPI )
 set( SRC_FILES 
 src/ADSWorkspaceProvider.cpp
 src/Common.cpp
+src/CompositePeaksPresenterVsi.cpp
+src/ConcretePeaksPresenterVsi.cpp
 src/DimensionPresenter.cpp
 src/EventNexusLoadingPresenter.cpp
 src/FieldDataToMetadata.cpp
@@ -13,12 +15,13 @@ src/IgnoreZerosThresholdRange.cpp
 src/IMDDimensionComparitor.cpp
 src/LoadVTK.cpp
 src/MDEWEventNexusLoadingPresenter.cpp
-src/MDEWInMemoryLoadingPresenter.cpp
 src/MDEWLoadingPresenter.cpp
+src/MDEWInMemoryLoadingPresenter.cpp
 src/MDHWInMemoryLoadingPresenter.cpp
 src/MDHWLoadingPresenter.cpp
 src/MDHWNexusLoadingPresenter.cpp
 src/MedianAndBelowThresholdRange.cpp
+src/MetadataToFieldData.cpp
 src/MetadataToFieldData.cpp
 src/MetaDataExtractorUtils.cpp
 src/MetadataJsonManager.cpp
@@ -30,14 +33,17 @@ src/TimeToTimeStep.cpp
 src/UserDefinedThresholdRange.cpp
 src/VatesXMLDefinitions.cpp
 src/VatesConfigurations.cpp
+src/ViewFrustum.cpp
 src/VatesKnowledgeSerializer.cpp
 src/vtkDataSetFactory.cpp
 src/vtkDataSetToGeometry.cpp
 src/vtkDataSetToImplicitFunction.cpp
 src/vtkDataSetToNonOrthogonalDataSet.cpp
+src/vtkDataSetToPeaksFilteredDataSet.cpp
 src/vtkDataSetToScaledDataSet.cpp
 src/vtkDataSetToWsName.cpp
 src/vtkDataSetToWsLocation.cpp
+src/vtkEllipsoidTransformer.cpp
 src/vtkMDLineFactory.cpp
 src/vtkMDQuadFactory.cpp
 src/vtkNullUnstructuredGrid.cpp
@@ -48,12 +54,15 @@ src/vtkMDHistoHexFactory.cpp
 src/vtkMDHistoLineFactory.cpp
 src/vtkMDHistoQuadFactory.cpp
 src/vtkMDHistoHex4DFactory.cpp
+src/vtkSinglePeakMarker.cpp
 src/SQWLoadingPresenter.cpp
 )
 
 set( INC_FILES 
 inc/MantidVatesAPI/ADSWorkspaceProvider.h
 inc/MantidVatesAPI/Common.h
+inc/MantidVatesAPI/CompositePeaksPresenterVsi.h
+inc/MantidVatesAPI/ConcretePeaksPresenterVsi.h
 inc/MantidVatesAPI/DimensionPresenter.h
 inc/MantidVatesAPI/DimensionView.h
 inc/MantidVatesAPI/DimensionViewFactory.h
@@ -79,6 +88,8 @@ inc/MantidVatesAPI/IgnoreZerosThresholdRange.h
 inc/MantidVatesAPI/IMDDimensionComparitor.h
 inc/MantidVatesAPI/MetadataToFieldData.h
 inc/MantidVatesAPI/NoThresholdRange.h
+inc/MantidVatesAPI/NullPeaksPresenterVsi.h
+inc/MantidVatesAPI/PeaksPresenterVsi.h
 inc/MantidVatesAPI/ProgressAction.h
 inc/MantidVatesAPI/SQWLoadingPresenter.h
 inc/MantidVatesAPI/SynchronisingGeometryPresenter.h
@@ -89,13 +100,16 @@ inc/MantidVatesAPI/UserDefinedThresholdRange.h
 inc/MantidVatesAPI/VatesXMLDefinitions.h
 inc/MantidVatesAPI/VatesConfigurations.h
 inc/MantidVatesAPI/VatesKnowledgeSerializer.h
+inc/MantidVatesAPI/ViewFrustum.h
 inc/MantidVatesAPI/vtkDataSetFactory.h
 inc/MantidVatesAPI/vtkDataSetToGeometry.h
 inc/MantidVatesAPI/vtkDataSetToImplicitFunction.h
 inc/MantidVatesAPI/vtkDataSetToNonOrthogonalDataSet.h
+inc/MantidVatesAPI/vtkDataSetToPeaksFilteredDataSet.h
 inc/MantidVatesAPI/vtkDataSetToScaledDataSet.h
 inc/MantidVatesAPI/vtkDataSetToWsName.h
 inc/MantidVatesAPI/vtkDataSetToWsLocation.h
+inc/MantidVatesAPI/vtkEllipsoidTransformer.h
 inc/MantidVatesAPI/vtkMDLineFactory.h
 inc/MantidVatesAPI/vtkMDQuadFactory.h
 inc/MantidVatesAPI/vtkMDHexFactory.h
@@ -106,6 +120,7 @@ inc/MantidVatesAPI/vtkMDHistoHexFactory.h
 inc/MantidVatesAPI/vtkMDHistoLineFactory.h
 inc/MantidVatesAPI/vtkMDHistoQuadFactory.h
 inc/MantidVatesAPI/vtkMDHistoHex4DFactory.h
+inc/MantidVatesAPI/vtkSinglePeakMarker.h
 inc/MantidVatesAPI/WorkspaceProvider.h
 )
 
@@ -149,9 +164,15 @@ test/MedianAndBelowThresholdRangeTest.h
 test/NoThresholdRangeTest.h
 test/IgnoreZerosThresholdRangeTest.h
 test/VatesKnowledgeSerializerTest.h
+test/ViewFrustumTest.h
 test/vtkDataSetToScaledDataSetTest.h
+test/vtkDataSetToPeaksFilteredDataSetTest.h
 test/vtkDataSetToNonOrthogonalDataSetTest.h
 test/vtkNullUnstructuredGridTest.h
+test/vtkEllipsoidTransformerTest.h
+test/NullPeaksPresenterVsiTest.h
+test/ConcretePeaksPresenterVsiTest.h
+test/CompositePeaksPresenterVsiTest.h
 )
 
 include_directories( inc )
@@ -180,6 +201,9 @@ ${MANTID_SUBPROJECT_LIBS}
 vtkCommonCore
 vtkCommonDataModel
 vtkIOLegacy
+vtkFiltersExtraction
+vtkFiltersSources
+vtkPVVTKExtensionsDefault
 ${QWT_LIBRARIES}
 )
 

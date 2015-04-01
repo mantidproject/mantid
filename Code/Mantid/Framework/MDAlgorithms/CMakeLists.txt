@@ -23,6 +23,7 @@ set ( SRC_FILES
 	src/ConvertToMDParent.cpp
 	src/CreateMDHistoWorkspace.cpp
 	src/CreateMDWorkspace.cpp
+	src/CutMD.cpp
 	src/DivideMD.cpp
 	src/EqualToMD.cpp
 	src/EvaluateMDFunction.cpp
@@ -107,6 +108,7 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/ConvertToMDParent.h
 	inc/MantidMDAlgorithms/CreateMDHistoWorkspace.h
 	inc/MantidMDAlgorithms/CreateMDWorkspace.h
+	inc/MantidMDAlgorithms/CutMD.h
 	inc/MantidMDAlgorithms/DivideMD.h
 	inc/MantidMDAlgorithms/DllConfig.h
 	inc/MantidMDAlgorithms/EqualToMD.h
@@ -195,6 +197,7 @@ set ( TEST_FILES
 	ConvertToQ3DdETest.h
 	CreateMDHistoWorkspaceTest.h
 	CreateMDWorkspaceTest.h
+	CutMDTest.h
 	DivideMDTest.h
 	EqualToMDTest.h
 	EvaluateMDFunctionTest.h
@@ -271,9 +274,8 @@ endif ()
 # Add to the 'Framework' group in VS
 set_property ( TARGET MDAlgorithms PROPERTY FOLDER "MantidFramework" )
 
-include_directories ( inc ../MDEvents/inc)
-
-target_link_libraries ( MDAlgorithms ${MANTIDLIBS} MDEvents)
+include_directories ( inc ../MDEvents/inc )
+target_link_libraries ( MDAlgorithms ${MANTIDLIBS} MDEvents )
 
 # Add the unit tests directory
 add_subdirectory ( test )

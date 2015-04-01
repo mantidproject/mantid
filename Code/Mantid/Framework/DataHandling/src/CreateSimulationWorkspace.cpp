@@ -19,7 +19,7 @@ namespace Mantid {
 namespace DataHandling {
 
 // Register the algorithm into the AlgorithmFactory
-DECLARE_ALGORITHM(CreateSimulationWorkspace);
+DECLARE_ALGORITHM(CreateSimulationWorkspace)
 
 using namespace API;
 
@@ -27,10 +27,10 @@ using namespace API;
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string CreateSimulationWorkspace::name() const {
   return "CreateSimulationWorkspace";
-};
+}
 
 /// Algorithm's version for identification. @see Algorithm::version
-int CreateSimulationWorkspace::version() const { return 1; };
+int CreateSimulationWorkspace::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
 const std::string CreateSimulationWorkspace::category() const {
