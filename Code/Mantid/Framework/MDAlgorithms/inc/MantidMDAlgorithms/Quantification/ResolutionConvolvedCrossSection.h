@@ -23,9 +23,9 @@
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 #include "MantidAPI/IFunctionMD.h"
-#include "MantidAPI/ParamFunction.h"
 #include "MantidAPI/IMDEventWorkspace.h"
-#include "MantidMDEvents/MDEvent.h"
+#include "MantidAPI/ParamFunction.h"
+#include "MantidDataObjects/MDEvent.h"
 
 namespace Mantid {
 namespace API {
@@ -100,7 +100,7 @@ private:
   API::IMDEventWorkspace_const_sptr m_inputWS;
 
   /// Output events. Need to find a better way to handle other dimensions
-  mutable std::list<MDEvents::MDEvent<4>> m_simulatedEvents;
+  mutable std::list<DataObjects::MDEvent<4>> m_simulatedEvents;
 };
 }
 }
