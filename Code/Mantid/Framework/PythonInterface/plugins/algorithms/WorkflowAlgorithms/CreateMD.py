@@ -114,9 +114,9 @@ class CreateMD(DataProcessorAlgorithm):
 
         self.declareProperty(FloatArrayProperty('Angdeg', values=[], validator=FloatArrayMandatoryValidator(), direction=Direction.Input ), doc='Lattice angles' )
 
-        self.declareProperty(FloatArrayProperty('u', values=[], validator=FloatArrayMandatoryValidator(), direction=Direction.Input ), doc='Lattice vector parallel to neutron beam' )
+        self.declareProperty(FloatArrayProperty('U', values=[], validator=FloatArrayMandatoryValidator(), direction=Direction.Input ), doc='Lattice vector parallel to neutron beam' )
 
-        self.declareProperty(FloatArrayProperty('v', values=[], validator=FloatArrayMandatoryValidator(), direction=Direction.Input ), doc='Lattice vector perpendicular to neutron beam in the horizontal plane' )
+        self.declareProperty(FloatArrayProperty('V', values=[], validator=FloatArrayMandatoryValidator(), direction=Direction.Input ), doc='Lattice vector perpendicular to neutron beam in the horizontal plane' )
 
         self.declareProperty(FloatArrayProperty('Psi', values=[], direction=Direction.Input), doc='Psi rotation in degrees. Optional or one entry per run.' )
 
@@ -131,8 +131,8 @@ class CreateMD(DataProcessorAlgorithm):
         emode = self.getProperty('Emode').value
         alatt = self.getProperty('Alatt').value
         angdeg = self.getProperty('Angdeg').value
-        u = self.getProperty('u').value
-        v = self.getProperty('v').value
+        u = self.getProperty('U').value
+        v = self.getProperty('V').value
         psi = self.getProperty('Psi').value
         gl = self.getProperty('Gl').value
         gs = self.getProperty('Gs').value        
@@ -176,8 +176,8 @@ class CreateMD(DataProcessorAlgorithm):
         emode = self.getProperty('Emode').value
         alatt = self.getProperty('Alatt').value
         angdeg = self.getProperty('Angdeg').value
-        u = self.getProperty('u').value
-        v = self.getProperty('v').value
+        u = self.getProperty('U').value
+        v = self.getProperty('V').value
         psi = self.getProperty('Psi').value
         gl = self.getProperty('Gl').value
         gs = self.getProperty('Gs').value        

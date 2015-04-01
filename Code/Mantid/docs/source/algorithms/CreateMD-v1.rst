@@ -47,7 +47,7 @@ CreateMD steps use :ref:`algm-ConvertToMDMinMaxGlobal` to determine the min and 
    AddSampleLog(Workspace=current_ws,LogName='Ei',LogText='3.0',LogType='Number')
 
    # Execute CreateMD
-   new_mdew = CreateMD(current_ws, Emode='Direct', Alatt=[1.4165, 1.4165,1.4165], Angdeg=[ 90, 90, 90], u=[1, 0, 0,], v=[0,1,0], Psi=6, Gs=0, Gl=[0])
+   new_mdew = CreateMD(current_ws, Emode='Direct', Alatt=[1.4165, 1.4165,1.4165], Angdeg=[ 90, 90, 90], U=[1, 0, 0,], V=[0,1,0], Psi=6, Gs=0, Gl=[0])
 
    # Show dimensionality and dimension names
    ndims = new_mdew.getNumDims()
@@ -84,7 +84,7 @@ Output
        gs.append(0.0)
     
    # Convert and merge
-   new_merged = CreateMD(input_runs, Emode='Direct', Alatt=[1.4165, 1.4165,1.4165], Angdeg=[ 90, 90, 90], u=[1, 0, 0,], v=[0,1,0], Psi=psi, Gl=gl, Gs=gs)
+   new_merged = CreateMD(input_runs, Emode='Direct', Alatt=[1.4165, 1.4165,1.4165], Angdeg=[ 90, 90, 90], U=[1, 0, 0,], V=[0,1,0], Psi=psi, Gl=gl, Gs=gs)
 
    # Show dimensionality and dimension names
    ndims = new_merged.getNumDims()
