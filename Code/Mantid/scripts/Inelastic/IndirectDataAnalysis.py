@@ -88,10 +88,18 @@ def confitSeq(inputWS, func, startX, endX, ftype, bgd, temperature=None, specMin
     DeleteWorkspace(output_workspace + '_Parameters')
     DeleteWorkspace(temp_fit_workspace)
 
-    wsname = output_workspace + "_Result"
-    parameter_names = ['Height', 'Amplitude', 'FWHM', 'EISF']
+    wsname = output_workspace + '_Result'
+
+    if 'DS' in ftype:
+        parameter_names = ['Height', 'Intensity', 'Radius', 'Diffusion', 'Shift']
+    elif 'DC' in ftype:
+        parameter_names = ['Height', 'Intensity', 'Radius', 'Decay', 'Shift']
+    else:
+        parameter_names = ['Height', 'Amplitude', 'FWHM', 'EISF']
+
     if using_delta_func:
         calculateEISF(output_workspace)
+
     convertParametersToWorkspace(output_workspace, "axis-1", parameter_names, wsname)
 
     #set x units to be momentum transfer
