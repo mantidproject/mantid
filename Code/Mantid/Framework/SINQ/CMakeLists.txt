@@ -143,9 +143,9 @@ endif ()
 # Add to the 'Framework' group in VS
 set_property ( TARGET SINQ PROPERTY FOLDER "MantidFramework" )
 
-include_directories ( inc ../MDEvents/inc )
+include_directories ( inc )
 
-target_link_libraries ( SINQ ${MANTIDLIBS} MDEvents )
+target_link_libraries ( SINQ ${MANTIDLIBS} )
 
 # Add the unit tests directory
 add_subdirectory ( test )

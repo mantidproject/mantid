@@ -1,15 +1,15 @@
 #include "MantidMDAlgorithms/TransformMD.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/ArrayProperty.h"
-#include "MantidMDEvents/MDHistoWorkspace.h"
+#include "MantidDataObjects/MDHistoWorkspace.h"
 #include "MantidAPI/IMDEventWorkspace.h"
-#include "MantidMDEvents/MDEventWorkspace.h"
-#include "MantidMDEvents/MDEventFactory.h"
+#include "MantidDataObjects/MDEventWorkspace.h"
+#include "MantidDataObjects/MDEventFactory.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
-using namespace Mantid::MDEvents;
-using Mantid::MDEvents::MDHistoWorkspace_sptr;
+using namespace Mantid::DataObjects;
+using Mantid::DataObjects::MDHistoWorkspace_sptr;
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -69,7 +69,7 @@ void TransformMD::init() {
  */
 template <typename MDE, size_t nd>
 void TransformMD::doTransform(
-    typename Mantid::MDEvents::MDEventWorkspace<MDE, nd>::sptr ws) {
+    typename Mantid::DataObjects::MDEventWorkspace<MDE, nd>::sptr ws) {
   std::vector<API::IMDNode *> boxes;
   // Get ALL the boxes, including MDGridBoxes.
   ws->getBox()->getBoxes(boxes, 1000, false);

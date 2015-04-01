@@ -8,7 +8,7 @@
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidKernel/Matrix.h"
 #include "MantidKernel/PropertyWithValue.h"
-#include "MantidMDEvents/CoordTransformAffine.h"
+#include "MantidDataObjects/CoordTransformAffine.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 
 #include <vtkDataArray.h>
@@ -20,8 +20,8 @@
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
-using namespace Mantid::MDEvents;
-using namespace Mantid::MDEvents::MDEventsTestHelper;
+using namespace Mantid::DataObjects;
+using namespace Mantid::DataObjects::MDEventsTestHelper;
 using namespace Mantid::VATES;
 
 class vtkDataSetToNonOrthogonalDataSetTest : public CxxTest::TestSuite

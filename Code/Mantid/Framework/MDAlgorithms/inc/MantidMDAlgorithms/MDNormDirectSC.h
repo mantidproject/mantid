@@ -49,8 +49,8 @@ private:
   void cacheInputs();
   std::string inputEnergyMode() const;
 
-  MDEvents::MDHistoWorkspace_sptr binInputWS();
-  void createNormalizationWS(const MDEvents::MDHistoWorkspace &dataWS);
+  DataObjects::MDHistoWorkspace_sptr binInputWS();
+  void createNormalizationWS(const DataObjects::MDHistoWorkspace &dataWS);
   std::vector<coord_t>
   getValuesFromOtherDimensions(bool &skipNormalization) const;
   Kernel::Matrix<coord_t>
@@ -69,7 +69,7 @@ private:
                                                   const double phi);
 
   /// Normalization workspace
-  MDEvents::MDHistoWorkspace_sptr m_normWS;
+  DataObjects::MDHistoWorkspace_sptr m_normWS;
   /// Input workspace
   API::IMDEventWorkspace_sptr m_inputWS;
   /// limits for h,k,l, dE dimensions
