@@ -45,6 +45,7 @@ namespace IDA
     void fixItem();
     void unFixItem();
     void showTieCheckbox(QString);
+    void updatePlotOptions();
 
   private:
     boost::shared_ptr<Mantid::API::CompositeFunction> createFunction(bool tieCentres=false);

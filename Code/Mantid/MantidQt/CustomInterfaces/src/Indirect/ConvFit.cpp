@@ -141,6 +141,8 @@ namespace IDA
     // Tie
     connect(m_uiForm.cbFitType,SIGNAL(currentIndexChanged(QString)),SLOT(showTieCheckbox(QString)));
     showTieCheckbox( m_uiForm.cbFitType->currentText() );
+
+    updatePlotOptions();
   }
 
   void ConvFit::run()
@@ -764,6 +766,8 @@ namespace IDA
         hwhmRangeSelector->setVisible(false);
         break;
     }
+
+    updatePlotOptions();
   }
 
   void ConvFit::bgTypeSelection(int index)
@@ -1139,22 +1143,10 @@ namespace IDA
 
   void ConvFit::checkBoxUpdate(QtProperty* prop, bool checked)
   {
-    // Add/remove some properties to display only relevant options
-    if ( prop == m_properties["UseDeltaFunc"] )
-    {
-      if ( checked )
-      {
-        m_properties["DeltaFunction"]->addSubProperty(m_properties["DeltaHeight"]);
-        m_uiForm.cbPlotType->addItem("Height");
-        m_uiForm.cbPlotType->addItem("EISF");
-      }
-      else
-      {
-        m_properties["DeltaFunction"]->removeSubProperty(m_properties["DeltaHeight"]);
-        m_uiForm.cbPlotType->removeItem(m_uiForm.cbPlotType->count()-1);
-        m_uiForm.cbPlotType->removeItem(m_uiForm.cbPlotType->count()-1);
-      }
-    }
+    UNUSED_ARG(checked);
+
+    if(prop == m_properties["UseDeltaFunc"])
+      updatePlotOptions();
   }
 
   void ConvFit::fitContextMenu(const QPoint &)
@@ -1239,6 +1231,46 @@ namespace IDA
   void ConvFit::showTieCheckbox(QString fitType)
   {
     m_uiForm.ckTieCentres->setVisible( fitType == "Two Lorentzians" );
+  }
+
+  void ConvFit::updatePlotOptions()
+  {
+    m_uiForm.cbPlotType->clear();
+
+    bool deltaFunction = m_blnManager->value(m_properties["UseDeltaFunc"]);
+
+    QStringList plotOptions;
+    plotOptions << "None";
+
+    if(deltaFunction)
+      plotOptions << "Height";
+
+    switch(m_uiForm.cbFitType->currentIndex())
+    {
+      // Lorentzians
+      case 1:
+      case 2:
+        plotOptions << "Amplitude" << "FWHM";
+        if(deltaFunction)
+          plotOptions << "EISF";
+        break;
+
+      // DiffSphere
+      case 3:
+        plotOptions << "Intensity" << "Radius" << "Diffusion" << "Shift";
+        break;
+
+      // DiffRotDiscreteCircle
+      case 4:
+        plotOptions << "Intensity" << "Radius" << "Decay" << "Shift";
+        break;
+
+      default:
+        break;
+    }
+
+    plotOptions << "All";
+    m_uiForm.cbPlotType->addItems(plotOptions);
   }
 
 } // namespace IDA
