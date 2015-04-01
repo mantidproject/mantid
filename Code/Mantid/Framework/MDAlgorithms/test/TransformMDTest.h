@@ -1,20 +1,18 @@
 #ifndef MANTID_MDALGORITHMS_TRANSFORMMDTEST_H_
 #define MANTID_MDALGORITHMS_TRANSFORMMDTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidKernel/Timer.h"
-#include "MantidKernel/System.h"
-#include <iostream>
-#include <iomanip>
-
+#include "MantidDataObjects/MDEventFactory.h"
 #include "MantidMDAlgorithms/TransformMD.h"
-#include "MantidMDEvents/MDEventFactory.h"
+#include "MantidTestHelpers/MDAlgorithmsTestHelper.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 
+#include <cxxtest/TestSuite.h>
+
 using namespace Mantid;
-using namespace Mantid::MDAlgorithms;
 using namespace Mantid::API;
-using namespace Mantid::MDEvents;
+using namespace Mantid::DataObjects;
+using namespace Mantid::MDAlgorithms;
+
 
 class TransformMDTest : public CxxTest::TestSuite
 {
@@ -51,7 +49,7 @@ public:
     if (inPlace) outWSName = inWSName;
 
     // Make a fake file-backed (or not) MDEW
-    MDEventWorkspace3Lean::sptr ws1 = MDEventsTestHelper::makeFileBackedMDEW(inWSName, fileBacked);
+    MDEventWorkspace3Lean::sptr ws1 = MDAlgorithmsTestHelper::makeFileBackedMDEW(inWSName, fileBacked);
   
     TransformMD alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )

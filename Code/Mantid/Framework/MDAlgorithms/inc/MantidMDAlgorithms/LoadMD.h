@@ -1,10 +1,10 @@
-#ifndef MANTID_MDEVENTS_LOADMD_H_
-#define MANTID_MDEVENTS_LOADMD_H_
+#ifndef MANTID_MDALGORITHMS_LOADMD_H_
+#define MANTID_MDALGORITHMS_LOADMD_H_
 
 #include "MantidAPI/IFileLoader.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidKernel/System.h"
-#include "MantidMDEvents/MDEventWorkspace.h"
+#include "MantidDataObjects/MDEventWorkspace.h"
 #include <boost/scoped_ptr.hpp>
 
 namespace Mantid {
@@ -64,13 +64,13 @@ private:
 
   /// Helper method
   template <typename MDE, size_t nd>
-  void doLoad(typename MDEvents::MDEventWorkspace<MDE, nd>::sptr ws);
+  void doLoad(typename DataObjects::MDEventWorkspace<MDE, nd>::sptr ws);
 
   void loadExperimentInfos(
       boost::shared_ptr<Mantid::API::MultipleExperimentInfos> ws);
 
   void loadSlab(std::string name, void *data,
-                MDEvents::MDHistoWorkspace_sptr ws, NeXus::NXnumtype dataType);
+                DataObjects::MDHistoWorkspace_sptr ws, NeXus::NXnumtype dataType);
   void loadHisto();
 
   void loadDimensions();
@@ -99,7 +99,7 @@ private:
   bool m_BoxStructureAndMethadata;
 };
 
-} // namespace MDEvents
+} // namespace DataObjects
 } // namespace Mantid
 
-#endif /* MANTID_MDEVENTS_LOADMD_H_ */
+#endif /* MANTID_MDALGORITHMS_LOADMD_H_ */
