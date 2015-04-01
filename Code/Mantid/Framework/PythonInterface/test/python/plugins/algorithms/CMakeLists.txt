@@ -9,6 +9,7 @@ set ( TEST_PY_FILES
   CorrectLogTimesTest.py
   CreateLeBailFitInputTest.py
   CreateCalibrationWorkspaceTest.py
+  CreateMDTest.py
   CreateWorkspaceTest.py
   DakotaChiSquaredTest.py
   DensityOfStatesTest.py

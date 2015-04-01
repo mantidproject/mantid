@@ -79,7 +79,7 @@ class CreateMD(DataProcessorAlgorithm):
     def _single_run(self, input_workspace, emode,  psi, gl, gs, alatt=None, angdeg=None, u=None, v=None,):
         import numpy as np
         ub_params = map(any, [alatt, angdeg, u, v])
-        goniometer_params = map(lambda x : x != None, [psi, gl, gs])
+        goniometer_params = [psi, gl, gs]
         if any(ub_params) and not all(ub_params):
             raise ValueError("Either specify all of alatt, angledeg, u, v or none of them")
         elif all(ub_params):
@@ -96,6 +96,7 @@ class CreateMD(DataProcessorAlgorithm):
         
         output_run = self._convert_to_md(workspace=input_workspace, analysis_mode=emode)
         return output_run
+    
 
     def category(self):
         return 'MDAlgorithms'
@@ -180,22 +181,22 @@ class CreateMD(DataProcessorAlgorithm):
         psi = self.getProperty('Psi').value
         gl = self.getProperty('Gl').value
         gs = self.getProperty('Gs').value        
-
+        
         input_workspaces = self.getProperty("InputWorkspaces").value
         
         ws_entries = len(input_workspaces)
         
         self._validate_inputs()
             
-        if not psi:
+        if len(psi) == 0:
             psi = [None] * ws_entries
             
-        if not gl:
+        if len(gl) == 0:
             gl = [None] * ws_entries
             
-        if not gs:
+        if len(gs) == 0:
             gs = [None] * ws_entries
-    
+        
         output_workspace = None
         run_md = None
 
