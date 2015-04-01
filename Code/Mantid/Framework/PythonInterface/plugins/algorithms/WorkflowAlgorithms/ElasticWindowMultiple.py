@@ -328,16 +328,19 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
                 # Get temperature from log file
                 LoadLog(Workspace=ws_name, Filename=log_path)
                 run_logs = mtd[ws_name].getRun()
-                tmp = run_logs[self._sample_log_name].value
-                temp = tmp[len(tmp) - 1]
-                logger.debug('Temperature %d K found for run: %s' % (temp, run_name))
-                return temp
-
+                if self._sample_log_name in run_logs:
+                    tmp = run_logs[self._sample_log_name].value
+                    temp = tmp[len(tmp) - 1]
+                    logger.debug('Temperature %d K found for run: %s' % (temp, run_name))
+                    return temp
+                else:
+                    logger.warning('Log entry %s for run %s not found' % (self._sample_log_name, run_name))
             else:
-                # Can't find log file
                 logger.warning('Log file for run %s not found' % run_name)
-                logger.warning('No temperature found for run: %s' % run_name)
-                return None
+
+        # Can't find log file
+        logger.warning('No temperature found for run: %s' % run_name)
+        return None
 
 
 # Register algorithm with Mantid
