@@ -3,7 +3,7 @@
 
 #include <map>
 
-#include "MantidKernel/IRemoteJobManager.h"
+#include "MantidAPI/IRemoteJobManager.h"
 
 namespace Mantid {
 namespace RemoteJobManagers {
@@ -40,18 +40,19 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport LSFJobManager : public Mantid::Kernel::IRemoteJobManager {
+class DLLExport LSFJobManager : public Mantid::API::IRemoteJobManager {
 public:
   /// We currently do not have a (tested) implementation of authenticate for LSF
   /// Platform
-  virtual void authenticate(std::string &username, std::string &password) = 0;
+  virtual void authenticate(const std::string &username,
+                            const std::string &password) = 0;
 
   virtual void abortRemoteJob(const std::string &jobID);
 
   virtual std::string
   submitRemoteJob(const std::string &transactionID, const std::string &runnable,
                   const std::string &param, const std::string &taskName = "",
-                  const int numNodes = 1, const int coresPerNode = 1);
+                  const int numNodes = 0, const int coresPerNode = 0);
 
   virtual void downloadRemoteFile(const std::string &transactionID,
                                   const std::string &remoteFileName,
@@ -73,24 +74,6 @@ public:
                                 const std::string &localFileName);
 
 protected:
-  /// to login
-  static std::string m_loginBaseURL;
-  static std::string m_loginPath;
-  /// to abort/kill/cancel a job identified by id
-  static std::string m_killPathBase;
-  /// to query the status of all (available) jobs
-  static std::string m_allJobsStatusPath;
-  /// to query status of jobs by id
-  static std::string m_jobIdStatusPath;
-  /// to upload files to the remote compute resource
-  static std::string m_uploadPath;
-  /// to submit jobs
-  static std::string m_submitPath;
-  /// to download one file (by name)
-  static std::string m_downloadOneBasePath;
-  /// to download all job files (normally the job id is appended)
-  static std::string m_downloadAllJobFilesBasePath;
-
   typedef std::map<std::string, std::string> StringToStringMap;
 
   /// method that deals with the actual HTTP(S) connection (convenient to
@@ -115,7 +98,7 @@ protected:
   typedef std::pair<std::string, Token> UsernameToken;
 
   // store for username-token pairs
-  static std::map<std::string, Token> m_tokenStash;
+  std::map<std::string, Token> m_tokenStash;
 
   /// Minimal representation of a transaction: an ID and a list of job IDs
   struct Transaction {
@@ -129,6 +112,24 @@ protected:
 
   // HTTP specifics for SCARF (IBM LSF PAC)
   static std::string m_acceptType;
+
+  /// to login
+  static std::string m_loginBaseURL;
+  static std::string m_loginPath;
+  /// to abort/kill/cancel a job identified by id
+  static std::string m_killPathBase;
+  /// to query the status of all (available) jobs
+  static std::string m_allJobsStatusPath;
+  /// to query status of jobs by id
+  static std::string m_jobIdStatusPath;
+  /// to upload files to the remote compute resource
+  static std::string m_uploadPath;
+  /// to submit jobs
+  static std::string m_submitPath;
+  /// to download one file (by name)
+  static std::string m_downloadOneBasePath;
+  /// to download all job files (normally the job id is appended)
+  static std::string m_downloadAllJobFilesBasePath;
 
 private:
   /// TODO: this could well go to an LSFHelper class
@@ -154,7 +155,9 @@ private:
                               const std::string &boundary,
                               const std::string &inputFile,
                               const std::string &inputArgs,
-                              const std::string &jobName = std::string());
+                              const std::string &jobName = std::string(),
+                              const int numNodes = 0,
+                              const int coresPerNode = 0);
 
   std::string buildUploadBody(const std::string &boundary,
                               const std::string &destDir,
