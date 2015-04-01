@@ -22,6 +22,7 @@
                 <xs:complexType>
                   <xs:choice maxOccurs="unbounded">
                     <xs:element name="baseURL" type="xs:string" />
+                    <xs:element name="JobManagerType" type="xs:string" />
                     <xs:element name="configFileURL" type="xs:string" />
                     <xs:element name="mpirunExecutable" type="xs:string" />
                     <xs:element name="pythonExecutable" type="xs:string" />
