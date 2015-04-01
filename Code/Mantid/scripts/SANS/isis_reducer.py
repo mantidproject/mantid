@@ -622,6 +622,18 @@ class ISISReducer(Reducer):
             else:
                 return self._beam_finder.get_beam_center()
 
+    def get_beam_center_scale_factor1(self):
+        """
+        Return the beam center scale factor 1 defined in the parameter file.
+        """
+        return self.instrument.beam_centre_scale_factor1
+
+    def get_beam_center_scale_factor2(self):
+        """
+        Return the beam center scale factor 2 defined in the parameter file.
+        """
+        return self.instrument.beam_centre_scale_factor2
+
     def getCurrSliceLimit(self):
         if not self._slices_def:
             self._slices_def = su.sliceParser("")

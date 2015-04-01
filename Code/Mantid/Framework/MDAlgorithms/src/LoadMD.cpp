@@ -11,11 +11,11 @@
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/System.h"
 #include "MantidMDAlgorithms/LoadMD.h"
-#include "MantidMDEvents/MDEventFactory.h"
-#include "MantidMDEvents/MDBoxFlatTree.h"
-#include "MantidMDEvents/MDHistoWorkspace.h"
-#include "MantidMDEvents/BoxControllerNeXusIO.h"
-#include "MantidMDEvents/CoordTransformAffine.h"
+#include "MantidDataObjects/MDEventFactory.h"
+#include "MantidDataObjects/MDBoxFlatTree.h"
+#include "MantidDataObjects/MDHistoWorkspace.h"
+#include "MantidDataObjects/BoxControllerNeXusIO.h"
+#include "MantidDataObjects/CoordTransformAffine.h"
 #include <nexus/NeXusException.hpp>
 #include <boost/algorithm/string.hpp>
 #include <vector>
@@ -29,7 +29,7 @@ typedef std::auto_ptr<Mantid::API::IBoxControllerIO> file_holder_type;
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
-using namespace Mantid::MDEvents;
+using namespace Mantid::DataObjects;
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -355,7 +355,7 @@ void LoadMD::doLoad(typename MDEventWorkspace<MDE, nd>::sptr ws) {
   // ------------------------------------
   if (fileBackEnd) { // TODO:: call to the file format factory
     auto loader = boost::shared_ptr<API::IBoxControllerIO>(
-        new MDEvents::BoxControllerNeXusIO(bc.get()));
+        new DataObjects::BoxControllerNeXusIO(bc.get()));
     loader->setDataType(sizeof(coord_t), MDE::getTypeName());
     bc->setFileBacked(loader, m_filename);
     // boxes have been already made file-backed when restoring the boxTree;
@@ -387,7 +387,7 @@ void LoadMD::doLoad(typename MDEventWorkspace<MDE, nd>::sptr ws) {
     // ------------------------------------
     // TODO:: call to the file format factory
     auto loader =
-        file_holder_type(new MDEvents::BoxControllerNeXusIO(bc.get()));
+        file_holder_type(new DataObjects::BoxControllerNeXusIO(bc.get()));
     loader->setDataType(sizeof(coord_t), MDE::getTypeName());
 
     loader->openFile(m_filename, "r");
@@ -487,4 +487,4 @@ CoordTransform *LoadMD::loadAffineMatrix(std::string entry_name) {
 }
 
 } // namespace Mantid
-} // namespace MDEvents
+} // namespace DataObjects

@@ -8,7 +8,7 @@
 
 using Mantid::Crystal::Cluster;
 using namespace Mantid::API;
-using namespace Mantid::MDEvents;
+using namespace Mantid::DataObjects;
 
 class ClusterTest : public CxxTest::TestSuite
 {

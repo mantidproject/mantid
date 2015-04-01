@@ -125,7 +125,6 @@ if ( CXXTEST_FOUND )
 endif ()
 
 add_subdirectory (MDAlgorithms)
-add_subdirectory (MDEvents)
 add_subdirectory (Doxygen)
 add_subdirectory (ScriptRepository)
 add_subdirectory (ISISLiveData)
@@ -137,7 +136,7 @@ add_subdirectory (ISISLiveData)
 set ( FRAMEWORK_LIBS Kernel Geometry API PythonKernelModule
                      PythonGeometryModule PythonAPIModule DataObjects
                      DataHandling Nexus Algorithms CurveFitting ICat
-                     Crystal MDAlgorithms MDEvents WorkflowAlgorithms
+                     Crystal MDAlgorithms WorkflowAlgorithms
                      LiveData ISISLiveData RemoteAlgorithms SINQ
 )
 
