@@ -1,7 +1,7 @@
 #ifndef MANTID_REMOTEJOBMANAGERS_MANTIDWEBSERVICEAPIJOBMANAGER_H
 #define MANTID_REMOTEJOBMANAGERS_MANTIDWEBSERVICEAPIJOBMANAGER_H
 
-#include "MantidKernel/IRemoteJobManager.h"
+#include "MantidAPI/IRemoteJobManager.h"
 #include "MantidRemoteJobManagers/MantidWebServiceAPIHelper.h"
 
 namespace Mantid {
@@ -34,9 +34,9 @@ File change history is stored at: <https://github.com/mantidproject/mantid>.
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class DLLExport MantidWebServiceAPIJobManager
-    : public Mantid::Kernel::IRemoteJobManager {
+    : public Mantid::API::IRemoteJobManager {
 public:
-  void authenticate(std::string &username, std::string &password);
+  void authenticate(const std::string &username, const std::string &password);
 
   std::string
   submitRemoteJob(const std::string &transactionID, const std::string &runnable,
@@ -47,13 +47,13 @@ public:
                           const std::string &remoteFileName,
                           const std::string &localFileName);
 
-  std::vector<Mantid::Kernel::IRemoteJobManager::RemoteJobInfo>
+  std::vector<Mantid::API::IRemoteJobManager::RemoteJobInfo>
   queryAllRemoteJobs() const;
 
   std::vector<std::string>
   queryRemoteFile(const std::string &transactionID) const;
 
-  Mantid::Kernel::IRemoteJobManager::RemoteJobInfo
+  Mantid::API::IRemoteJobManager::RemoteJobInfo
   queryRemoteJob(const std::string &jobID) const;
 
   std::string startRemoteTransaction();
