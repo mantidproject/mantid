@@ -59,6 +59,7 @@ namespace CustomInterfaces
     void setParameter(const QString& funcIndex, const QString& paramName, double value);
     void setPeakPickerEnabled(bool enabled);
     void setPeakPicker(const IPeakFunction_const_sptr& peak);
+    void help();
 
     // -- End of IALCPeakFitting interface ---------------------------------------------------------
 

@@ -1,19 +1,7 @@
-#ifndef MANTID_MDEVENTS_CONVERTTODIFFRACTIONMDWORKSPACE2_H_
-#define MANTID_MDEVENTS_CONVERTTODIFFRACTIONMDWORKSPACE2_H_
+#ifndef MANTID_MDALGORITHMS_CONVERTTODIFFRACTIONMDWORKSPACE2_H_
+#define MANTID_MDALGORITHMS_CONVERTTODIFFRACTIONMDWORKSPACE2_H_
 
-#include "MantidAPI/Algorithm.h"
-#include "MantidAPI/IMDEventWorkspace.h"
-#include "MantidAPI/Progress.h"
-#include "MantidDataObjects/EventWorkspace.h"
-#include "MantidKernel/PhysicalConstants.h"
-#include "MantidKernel/ProgressBase.h"
-#include "MantidKernel/ProgressText.h"
-#include "MantidKernel/System.h"
-#include "MantidKernel/V3D.h"
-#include "MantidMDEvents/BoxControllerSettingsAlgorithm.h"
-#include "MantidMDAlgorithms/ConvertToMD.h"
-#include "MantidMDEvents/MDEventFactory.h"
-#include "MantidMDEvents/MDEventWorkspace.h"
+#include "MantidMDAlgorithms/BoxControllerSettingsAlgorithm.h"
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -29,17 +17,17 @@ namespace MDAlgorithms {
  * @date 2013-05-20
  */
 class DLLExport ConvertToDiffractionMDWorkspace2
-    : public MDEvents::BoxControllerSettingsAlgorithm {
+    : public MDAlgorithms::BoxControllerSettingsAlgorithm {
 public:
   /** Constructor   */
-  ConvertToDiffractionMDWorkspace2(){};
+  ConvertToDiffractionMDWorkspace2(){}
   /** Destructor   */
-  virtual ~ConvertToDiffractionMDWorkspace2(){};
+  virtual ~ConvertToDiffractionMDWorkspace2(){}
 
   /// Algorithm's name for identification
   virtual const std::string name() const {
     return "ConvertToDiffractionMDWorkspace";
-  };
+  }
   /// Summary of algorithms purpose
   virtual const std::string summary() const {
     return "Create a MDEventWorkspace with events in reciprocal space (Qx, Qy, "
@@ -47,7 +35,7 @@ public:
   }
 
   /// Algorithm's version for identification
-  virtual int version() const { return 2; };
+  virtual int version() const { return 2; }
   /// Algorithm's category for identification
   virtual const std::string category() const { return "MDAlgorithms"; }
 
@@ -75,6 +63,6 @@ protected: // for testing
 };
 
 } // namespace Mantid
-} // namespace MDEvents
+} // namespace DataObjects
 
-#endif /* MANTID_MDEVENTS_CONVERTTODIFFRACTIONMDWORKSPACE_H_ */
+#endif /* MANTID_MDALGORITHMS_CONVERTTODIFFRACTIONMDWORKSPACE_H_ */

@@ -3,7 +3,7 @@
 
 #include "MantidKernel/System.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
-#include "MantidMDEvents/MDEventWorkspace.h"
+#include "MantidDataObjects/MDEventWorkspace.h"
 #include "MantidAPI/IFileLoader.h"
 
 class vtkUnsignedShortArray;

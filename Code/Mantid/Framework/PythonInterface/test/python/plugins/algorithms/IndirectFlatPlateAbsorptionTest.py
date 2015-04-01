@@ -17,22 +17,25 @@ class IndirectFlatPlateAbsorptionTest(unittest.TestCase):
         self._red_ws = red_ws
 
 
-    def _test_workspaces(self, corrected, ass):
+    def _test_workspaces(self, corrected, factor_group):
         """
         Checks the units of the Ass and corrected workspaces.
 
         @param corrected Corrected workspace
-        @param ass Assc corrections workspace
+        @param factor_group WorkspaceGroup containing factors
         """
 
+        # Test units of corrected workspace
         corrected_x_unit = corrected.getAxis(0).getUnit().unitID()
         self.assertEqual(corrected_x_unit, 'DeltaE')
 
-        ass_x_unit = ass.getAxis(0).getUnit().unitID()
-        self.assertEquals(ass_x_unit, 'Wavelength')
+        # Test units of factor workspaces
+        for ws in factor_group:
+            x_unit = ws.getAxis(0).getUnit().unitID()
+            self.assertEquals(x_unit, 'Wavelength')
 
-        ass_y_unit = ass.YUnitLabel()
-        self.assertEqual(ass_y_unit, 'Attenuation factor')
+            y_unit = ws.YUnitLabel()
+            self.assertEqual(y_unit, 'Attenuation factor')
 
 
     def test_sample_corrections_only(self):
@@ -40,14 +43,12 @@ class IndirectFlatPlateAbsorptionTest(unittest.TestCase):
         Tests corrections for the sample only.
         """
 
-        corrected, ass = IndirectFlatPlateAbsorption(SampleWorkspace=self._red_ws,
-                                                     ChemicalFormula='H2-O',
-                                                     SampleHeight=1,
-                                                     SampleWidth=1,
-                                                     SampleThickness=1,
-                                                     ElementSize=1)
+        corrected, fact = IndirectFlatPlateAbsorption(SampleWorkspace=self._red_ws,
+                                                      SampleChemicalFormula='H2-O',
+                                                      ElementSize=1)
 
-        self._test_workspaces(corrected, ass)
+        self.assertEqual(fact.size(), 1)
+        self._test_workspaces(corrected, fact)
 
 
     def test_sample_and_can_subtraction(self):
@@ -55,15 +56,14 @@ class IndirectFlatPlateAbsorptionTest(unittest.TestCase):
         Tests corrections for the sample and simple container subtraction.
         """
 
-        corrected, ass = IndirectFlatPlateAbsorption(SampleWorkspace=self._red_ws,
-                                                     CanWorkspace=self._can_ws,
-                                                     ChemicalFormula='H2-O',
-                                                     SampleHeight=1,
-                                                     SampleWidth=1,
-                                                     SampleThickness=1,
-                                                     ElementSize=1)
+        corrected, fact = IndirectFlatPlateAbsorption(SampleWorkspace=self._red_ws,
+                                                      SampleChemicalFormula='H2-O',
+                                                      CanWorkspace=self._can_ws,
+                                                      ElementSize=1,
+                                                      UseCanCorrections=False)
 
-        self._test_workspaces(corrected, ass)
+        self.assertEqual(fact.size(), 1)
+        self._test_workspaces(corrected, fact)
 
 
     def test_sample_and_can_subtraction_with_scale(self):
@@ -72,16 +72,31 @@ class IndirectFlatPlateAbsorptionTest(unittest.TestCase):
         with can scale.
         """
 
-        corrected, ass = IndirectFlatPlateAbsorption(SampleWorkspace=self._red_ws,
-                                                     CanWorkspace=self._can_ws,
-                                                     CanScaleFactor=0.8,
-                                                     ChemicalFormula='H2-O',
-                                                     SampleHeight=1,
-                                                     SampleWidth=1,
-                                                     SampleThickness=1,
-                                                     ElementSize=1)
+        corrected, fact = IndirectFlatPlateAbsorption(SampleWorkspace=self._red_ws,
+                                                      SampleChemicalFormula='H2-O',
+                                                      CanWorkspace=self._can_ws,
+                                                      CanScaleFactor=0.8,
+                                                      ElementSize=1,
+                                                      UseCanCorrections=False)
 
-        self._test_workspaces(corrected, ass)
+        self.assertEqual(fact.size(), 1)
+        self._test_workspaces(corrected, fact)
+
+
+    def test_sample_and_can_correction(self):
+        """
+        Tests corrections for the sample and container.
+        """
+
+        corrected, fact = IndirectFlatPlateAbsorption(SampleWorkspace=self._red_ws,
+                                                      SampleChemicalFormula='H2-O',
+                                                      CanWorkspace=self._can_ws,
+                                                      CanChemicalFormula='V',
+                                                      ElementSize=1,
+                                                      UseCanCorrections=True)
+
+        self.assertEqual(fact.size(), 2)
+        self._test_workspaces(corrected, fact)
 
 
 if __name__ == '__main__':

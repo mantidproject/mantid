@@ -425,11 +425,11 @@ void SymmetryElementFactoryImpl::insertPrototype(
   m_prototypes.insert(std::make_pair(identifier, prototype));
 }
 
-DECLARE_SYMMETRY_ELEMENT_GENERATOR(SymmetryElementIdentityGenerator);
-DECLARE_SYMMETRY_ELEMENT_GENERATOR(SymmetryElementTranslationGenerator);
-DECLARE_SYMMETRY_ELEMENT_GENERATOR(SymmetryElementInversionGenerator);
-DECLARE_SYMMETRY_ELEMENT_GENERATOR(SymmetryElementRotationGenerator);
-DECLARE_SYMMETRY_ELEMENT_GENERATOR(SymmetryElementMirrorGenerator);
+DECLARE_SYMMETRY_ELEMENT_GENERATOR(SymmetryElementIdentityGenerator)
+DECLARE_SYMMETRY_ELEMENT_GENERATOR(SymmetryElementTranslationGenerator)
+DECLARE_SYMMETRY_ELEMENT_GENERATOR(SymmetryElementInversionGenerator)
+DECLARE_SYMMETRY_ELEMENT_GENERATOR(SymmetryElementRotationGenerator)
+DECLARE_SYMMETRY_ELEMENT_GENERATOR(SymmetryElementMirrorGenerator)
 
 } // namespace Geometry
 } // namespace Mantid

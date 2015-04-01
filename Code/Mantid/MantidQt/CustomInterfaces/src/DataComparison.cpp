@@ -17,7 +17,7 @@ namespace MantidQt
 {
 namespace CustomInterfaces
 {
-  DECLARE_SUBWINDOW(DataComparison);
+  DECLARE_SUBWINDOW(DataComparison)
 }
 }
 

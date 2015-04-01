@@ -1,18 +1,20 @@
 #ifndef MANTID_MDALGORITHMS_THRESHOLDMDTEST_H_
 #define MANTID_MDALGORITHMS_THRESHOLDMDTEST_H_
 
-#include <cxxtest/TestSuite.h>
-
-#include "MantidMDAlgorithms/ThresholdMD.h"
-#include "MantidMDEvents/MDHistoWorkspace.h"
+#include "MantidDataObjects/MDHistoWorkspace.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidGeometry/MDGeometry/MDTypes.h"
+#include "MantidMDAlgorithms/ThresholdMD.h"
 
-using namespace Mantid;
+#include <cxxtest/TestSuite.h>
+
 using namespace Mantid::API;
-using namespace Mantid::MDEvents;
+using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
-using Mantid::MDAlgorithms::ThresholdMD;
+using namespace Mantid::MDAlgorithms;
+
+using Mantid::coord_t;
+using Mantid::signal_t;
 
 class ThresholdMDTest : public CxxTest::TestSuite
 {

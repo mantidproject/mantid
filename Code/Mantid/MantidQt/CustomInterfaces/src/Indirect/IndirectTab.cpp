@@ -6,6 +6,8 @@
 #include "MantidQtAPI/InterfaceManager.h"
 #include "MantidQtMantidWidgets/RangeSelector.h"
 
+#include <boost/algorithm/string/find.hpp>
+
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
@@ -44,12 +46,14 @@ namespace CustomInterfaces
     connect(&m_pythonRunner, SIGNAL(runAsPythonScript(const QString&, bool)), this, SIGNAL(runAsPythonScript(const QString&, bool)));
   }
 
+
   //----------------------------------------------------------------------------------------------
   /** Destructor
    */
   IndirectTab::~IndirectTab()
   {
   }
+
 
   void IndirectTab::runTab()
   {
@@ -64,15 +68,18 @@ namespace CustomInterfaces
     }
   }
 
+
   void IndirectTab::setupTab()
   {
     setup();
   }
 
+
   bool IndirectTab::validateTab()
   {
     return validate();
   }
+
 
   /**
    * Handles generating a Python script for the algorithms run on the current tab.
@@ -114,6 +121,7 @@ namespace CustomInterfaces
     dlg->activateWindow();
   }
 
+
   /**
    * Run the load algorithm with the supplied filename and spectrum range
    *
@@ -140,9 +148,96 @@ namespace CustomInterfaces
 
     load->execute();
 
-    //If reloading fails we're out of options
+    // If reloading fails we're out of options
     return load->isExecuted();
   }
+
+
+  /**
+   * Configures the SaveNexusProcessed algorithm to save a workspace in the default
+   * save directory and adds the algorithm to the batch queue.
+   *
+   * This uses the plotSpectrum function from the Python API.
+   *
+   * @param wsName Name of workspace to save
+   * @param filename Name of file to save as (including extension)
+   */
+  void IndirectTab::addSaveWorkspaceToQueue(const QString & wsName, const QString & filename)
+  {
+    // Setup the input workspace property
+    API::BatchAlgorithmRunner::AlgorithmRuntimeProps saveProps;
+    saveProps["InputWorkspace"] = wsName.toStdString();
+
+    // Setup the algorithm
+    IAlgorithm_sptr saveAlgo = AlgorithmManager::Instance().create("SaveNexusProcessed");
+    saveAlgo->initialize();
+
+    if(filename.isEmpty())
+      saveAlgo->setProperty("Filename", wsName.toStdString() + ".nxs");
+    else
+      saveAlgo->setProperty("Filename", filename.toStdString());
+
+    // Add the save algorithm to the batch
+    m_batchAlgoRunner->addAlgorithm(saveAlgo, saveProps);
+  }
+
+
+  /**
+   * Creates a spectrum plot of one or more workspaces at a given spectrum
+   * index.
+   *
+   * This uses the plotSpectrum function from the Python API.
+   *
+   * @param workspaceNames List of names of workspaces to plot
+   * @param specIndex Index of spectrum from each workspace to plot
+   */
+  void IndirectTab::plotSpectrum(const QStringList & workspaceNames, int specIndex)
+  {
+    QString pyInput = "from mantidplot import plotSpectrum\n";
+
+    pyInput += "plotSpectrum('";
+    pyInput += workspaceNames.join("','");
+    pyInput += "', ";
+    pyInput += QString::number(specIndex);
+    pyInput += ")\n";
+
+    m_pythonRunner.runPythonCode(pyInput);
+  }
+
+
+  /**
+   * Creates a spectrum plot of a single workspace at a given spectrum
+   * index.
+   *
+   * @param workspaceName Names of workspace to plot
+   * @param specIndex Index of spectrum to plot
+   */
+  void IndirectTab::plotSpectrum(const QString & workspaceName, int specIndex)
+  {
+    QStringList workspaceNames;
+    workspaceNames << workspaceName;
+    plotSpectrum(workspaceNames, specIndex);
+  }
+
+
+  /**
+   * Plots a contour (2D) plot of a given workspace.
+   *
+   * This uses the plot2D function from the Python API.
+   *
+   * @param workspaceName Name of workspace to plot
+   */
+  void IndirectTab::plotContour(const QString & workspaceName)
+  {
+    QString pyInput = "from mantidplot import plot2D\n";
+
+    pyInput += "plot2D('";
+    pyInput += workspaceName;
+    pyInput += "')\n";
+
+    m_pythonRunner.runPythonCode(pyInput);
+  }
+
 
   /**
    * Sets the edge bounds of plot to prevent the user inputting invalid values
@@ -163,6 +258,7 @@ namespace CustomInterfaces
     rs->setRange(bounds.first, bounds.second);
   }
 
+
   /**
    * Set the position of the range selectors on the mini plot
    *
@@ -179,6 +275,49 @@ namespace CustomInterfaces
     rs->setMinimum(bounds.first);
     rs->setMaximum(bounds.second);
   }
+
+
+  /**
+   * Gets the energy mode from a workspace based on the X unit.
+   *
+   * Units of dSpacing typically denote diffraction, hence Elastic.
+   * All other units default to spectroscopy, therefore Indirect.
+   *
+   * @param ws Pointer to the workspace
+   * @return Energy mode
+   */
+  std::string IndirectTab::getEMode(Mantid::API::MatrixWorkspace_sptr ws)
+  {
+    Mantid::Kernel::Unit_sptr xUnit = ws->getAxis(0)->unit();
+    std::string xUnitName = xUnit->caption();
+
+    g_log.debug() << "X unit name is: " << xUnitName << std::endl;
+
+    if(boost::algorithm::find_first(xUnitName, "d-Spacing"))
+      return "Elastic";
+
+    return "Indirect";
+  }
+
+
+  /**
+   * Gets the eFixed value from the workspace using the instrument parameters.
+   *
+   * @param ws Pointer to the workspace
+   * @return eFixed value
+   */
+  double IndirectTab::getEFixed(Mantid::API::MatrixWorkspace_sptr ws)
+  {
+    Mantid::Geometry::Instrument_const_sptr inst = ws->getInstrument();
+    if(!inst)
+      throw std::runtime_error("No instrument on workspace");
+
+    if(!inst->hasParameter("efixed-val"))
+      throw std::runtime_error("Instrument has no efixed parameter");
+
+    return inst->getNumberParameter("efixed-val")[0];
+  }
+
 
   /**
    * Runs an algorithm async
@@ -198,6 +337,7 @@ namespace CustomInterfaces
     m_batchAlgoRunner->executeBatchAsync();
   }
 
+
   /**
    * Handles getting the results of an algorithm running async
    *
@@ -212,6 +352,7 @@ namespace CustomInterfaces
       emit showMessageBox("Error running algorithm. \nSee results log for details.");
     }
   }
+
 
   /**
    * Run Python code and return anything printed to stdout.

@@ -20,7 +20,7 @@
 using namespace Mantid::API;
 using namespace Mantid::VATES;
 
-vtkStandardNewMacro(vtkSplatterPlot);
+vtkStandardNewMacro(vtkSplatterPlot)
 
 /// Constructor
 vtkSplatterPlot::vtkSplatterPlot() : m_numberPoints(0), m_topPercentile(0.0),

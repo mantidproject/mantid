@@ -1,7 +1,7 @@
 #include "MantidVatesAPI/MetadataJsonManager.h"
-#include <jsoncpp/json/json.h>
-#include <jsoncpp/json/writer.h>
-#include <jsoncpp/json/reader.h>
+#include <json/json.h>
+#include <json/writer.h>
+#include <json/reader.h>
 
 namespace Mantid
 {
