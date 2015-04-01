@@ -7,12 +7,12 @@
 #include "MantidGeometry/IDetector.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/ListValidator.h"
-#include "MantidMDEvents/MDEventFactory.h"
-#include "MantidMDEvents/MDEventInserter.h"
+#include "MantidDataObjects/MDEventFactory.h"
+#include "MantidDataObjects/MDEventInserter.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
-#include "MantidMDEvents/MDEventWorkspace.h"
-#include "MantidMDEvents/MDEvent.h"
+#include "MantidDataObjects/MDEventWorkspace.h"
+#include "MantidDataObjects/MDEvent.h"
 
 #include <boost/algorithm/string/predicate.hpp>
 #include <Poco/TemporaryFile.h>
@@ -24,7 +24,7 @@ using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
-using namespace Mantid::MDEvents;
+using namespace Mantid::DataObjects;
 
 DECLARE_ALGORITHM(ConvertSpiceDataToRealSpace)
 
@@ -39,7 +39,7 @@ ConvertSpiceDataToRealSpace::ConvertSpiceDataToRealSpace()
  */
 ConvertSpiceDataToRealSpace::~ConvertSpiceDataToRealSpace() {}
 
-//----------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------------------------
 /** Init
  */
 void ConvertSpiceDataToRealSpace::init() {
@@ -92,7 +92,7 @@ void ConvertSpiceDataToRealSpace::init() {
                   "Name to use for the output workspace.");
 }
 
-//----------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------------------------
 /** Exec
  */
 void ConvertSpiceDataToRealSpace::exec() {
@@ -189,7 +189,7 @@ void ConvertSpiceDataToRealSpace::exec() {
   setProperty("OutputMonitorWorkspace", mdMonitorWS);
 }
 
-//----------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------------------------
 /** Convert runs/pts from table workspace to a list of workspace 2D
  * @brief ConvertSpiceDataToRealSpace::convertToWorkspaces
  * @param tablews
@@ -266,7 +266,7 @@ void ConvertSpiceDataToRealSpace::parseSampleLogs(
   return;
 }
 
-//----------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------------------------
 /** Load one run of data to a new workspace
  * @brief ConvertSpiceDataToRealSpace::loadRunToMatrixWS
  * @param tablews
@@ -356,7 +356,7 @@ MatrixWorkspace_sptr ConvertSpiceDataToRealSpace::loadRunToMatrixWS(
   return tempws;
 }
 
-//----------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------------------------
 /** Read table workspace's column information
  * @brief ConvertSpiceDataToRealSpace::readTableInfo
  * @param tablews
@@ -436,11 +436,7 @@ void ConvertSpiceDataToRealSpace::readTableInfo(
   return;
 }
 
-//----------------------------------------------------------------------------------------------
-
-//-----------------------------------------------------------------------------------------------
-
-//-----------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------------------------
 /** Create sample logs for MD workspace
  * @brief LoadHFIRPDD::appendSampleLogs
  * @param mdws
@@ -528,7 +524,7 @@ void ConvertSpiceDataToRealSpace::appendSampleLogs(
   return;
 }
 
-//---------------------------------------------------------------------------------
+//------------------------------------------------------------------------------------------------
 /** Add Experiment Info to the MDWorkspace.  Add 1+N ExperimentInfo
  * @brief ConvertSpiceDataToRealSpace::addExperimentInfos
  * @param mdws
@@ -562,7 +558,7 @@ void ConvertSpiceDataToRealSpace::addExperimentInfos(
   return;
 }
 
-//-----------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------------------------
 /** Convert to MD Event workspace
  * @brief ConvertSpiceDataToRealSpace::convertToMDEventWS
  * @param vec_ws2d
@@ -573,7 +569,7 @@ IMDEventWorkspace_sptr ConvertSpiceDataToRealSpace::createDataMDWorkspace(
 
   // Create a target output workspace.
   IMDEventWorkspace_sptr outWs =
-      MDEvents::MDEventFactory::CreateMDWorkspace(m_nDimensions, "MDEvent");
+      MDEventFactory::CreateMDWorkspace(m_nDimensions, "MDEvent");
 
   // Extract Dimensions and add to the output workspace.
 
@@ -605,12 +601,11 @@ IMDEventWorkspace_sptr ConvertSpiceDataToRealSpace::createDataMDWorkspace(
 
   // Add events
   // Creates a new instance of the MDEventInserter.
-  MDEvents::MDEventWorkspace<MDEvents::MDEvent<3>, 3>::sptr MDEW_MDEVENT_3 =
-      boost::dynamic_pointer_cast<
-          MDEvents::MDEventWorkspace<MDEvents::MDEvent<3>, 3> >(outWs);
+  MDEventWorkspace<MDEvent<3>, 3>::sptr MDEW_MDEVENT_3 =
+      boost::dynamic_pointer_cast<MDEventWorkspace<MDEvent<3>, 3> >(outWs);
 
-  MDEvents::MDEventInserter<MDEvents::MDEventWorkspace<
-      MDEvents::MDEvent<3>, 3>::sptr> inserter(MDEW_MDEVENT_3);
+  MDEventInserter<MDEventWorkspace<MDEvent<3>, 3>::sptr> inserter(
+      MDEW_MDEVENT_3);
 
   for (size_t iws = 0; iws < vec_ws2d.size(); ++iws) {
     API::MatrixWorkspace_sptr thisWorkspace = vec_ws2d[iws];
@@ -644,7 +639,7 @@ IMDEventWorkspace_sptr ConvertSpiceDataToRealSpace::createDataMDWorkspace(
   return outWs;
 }
 
-//-----------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------------------------
 /** Create an MDWorkspace for monitoring counts.
  * @brief LoadHFIRPDD::createMonitorMDWorkspace
  * @param vec_ws2d
@@ -656,7 +651,7 @@ IMDEventWorkspace_sptr ConvertSpiceDataToRealSpace::createMonitorMDWorkspace(
     const std::vector<double> &vecmonitor) {
   // Create a target output workspace.
   IMDEventWorkspace_sptr outWs =
-      MDEvents::MDEventFactory::CreateMDWorkspace(m_nDimensions, "MDEvent");
+      MDEventFactory::CreateMDWorkspace(m_nDimensions, "MDEvent");
 
   // Extract Dimensions and add to the output workspace.
 
@@ -684,12 +679,11 @@ IMDEventWorkspace_sptr ConvertSpiceDataToRealSpace::createMonitorMDWorkspace(
 
   // Add events
   // Creates a new instance of the MDEventInserter.
-  MDEvents::MDEventWorkspace<MDEvents::MDEvent<3>, 3>::sptr MDEW_MDEVENT_3 =
-      boost::dynamic_pointer_cast<
-          MDEvents::MDEventWorkspace<MDEvents::MDEvent<3>, 3> >(outWs);
+  MDEventWorkspace<MDEvent<3>, 3>::sptr MDEW_MDEVENT_3 =
+      boost::dynamic_pointer_cast<MDEventWorkspace<MDEvent<3>, 3> >(outWs);
 
-  MDEvents::MDEventInserter<MDEvents::MDEventWorkspace<
-      MDEvents::MDEvent<3>, 3>::sptr> inserter(MDEW_MDEVENT_3);
+  MDEventInserter<MDEventWorkspace<MDEvent<3>, 3>::sptr> inserter(
+      MDEW_MDEVENT_3);
 
   for (size_t iws = 0; iws < vec_ws2d.size(); ++iws) {
     API::MatrixWorkspace_sptr thisWorkspace = vec_ws2d[iws];
