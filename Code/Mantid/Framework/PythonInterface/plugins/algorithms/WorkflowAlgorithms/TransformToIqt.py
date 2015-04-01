@@ -7,7 +7,7 @@ import math
 import os
 
 
-class Fury(PythonAlgorithm):
+class TransformToIqt(PythonAlgorithm):
 
     _sample = None
     _resolution = None
@@ -21,29 +21,35 @@ class Fury(PythonAlgorithm):
     _save = None
     _dry_run = None
 
+
     def category(self):
-        return "Workflow\\MIDAS;PythonAlgorithms"
+        return "Workflow\\Inelastic;PythonAlgorithms"
+
+
+    def summary(self):
+        return 'Transforms an inelastic reduction to I(Q, t)'
+
 
     def PyInit(self):
-        self.declareProperty(MatrixWorkspaceProperty('Sample', '',\
+        self.declareProperty(MatrixWorkspaceProperty('SampleWorkspace', '',\
                              optional=PropertyMode.Mandatory, direction=Direction.Input),
-                             doc="Name for the Sample workspace.")
+                             doc="Name for the sample workspace.")
 
-        self.declareProperty(MatrixWorkspaceProperty('Resolution', '',\
+        self.declareProperty(MatrixWorkspaceProperty('ResolutionWorkspace', '',\
                              optional=PropertyMode.Mandatory, direction=Direction.Input),
-                             doc="Name for the Resolution workspace.")
+                             doc="Name for the resolution workspace.")
 
         self.declareProperty(name='EnergyMin', defaultValue=-0.5,
                              doc='Minimum energy for fit. Default=-0.5')
         self.declareProperty(name='EnergyMax', defaultValue=0.5,
                              doc='Maximum energy for fit. Default=0.5')
-        self.declareProperty(name='NumBins', defaultValue=1,
+        self.declareProperty(name='BinReductionFactor', defaultValue=10.0,
                              doc='Decrease total number of spectrum points by this ratio through merging of '
                                  'intensities from neighbouring bins. Default=1')
 
         self.declareProperty(MatrixWorkspaceProperty('ParameterWorkspace', '',\
                              direction=Direction.Output, optional=PropertyMode.Optional),
-                             doc='Table workspace for saving Fury properties')
+                             doc='Table workspace for saving TransformToIqt properties')
 
         self.declareProperty(MatrixWorkspaceProperty('OutputWorkspace', '',\
                              direction=Direction.Output, optional=PropertyMode.Optional),
@@ -76,7 +82,7 @@ class Fury(PythonAlgorithm):
             if self._plot:
                 self._plot_output()
         else:
-            logger.information('Dry run, will not run Fury')
+            logger.information('Dry run, will not run TransformToIqt')
 
         self.setProperty('ParameterWorkspace', self._parameter_table)
         self.setProperty('OutputWorkspace', self._output_workspace)
@@ -88,16 +94,16 @@ class Fury(PythonAlgorithm):
         """
         from IndirectCommon import getWSprefix
 
-        self._sample = self.getPropertyValue('Sample')
-        self._resolution = self.getPropertyValue('Resolution')
+        self._sample = self.getPropertyValue('SampleWorkspace')
+        self._resolution = self.getPropertyValue('ResolutionWorkspace')
 
         self._e_min = self.getProperty('EnergyMin').value
         self._e_max = self.getProperty('EnergyMax').value
-        self._number_points_per_bin = self.getProperty('NumBins').value
+        self._number_points_per_bin = self.getProperty('BinReductionFactor').value
 
         self._parameter_table = self.getPropertyValue('ParameterWorkspace')
         if self._parameter_table == '':
-            self._parameter_table = getWSprefix(self._sample) + 'FuryParameters'
+            self._parameter_table = getWSprefix(self._sample) + 'TransformToIqtParameters'
 
         self._output_workspace = self.getPropertyValue('OutputWorkspace')
         if self._output_workspace == '':
@@ -128,13 +134,13 @@ class Fury(PythonAlgorithm):
 
     def _calculate_parameters(self):
         """
-        Calculates the Fury parameters and saves in a table workspace.
+        Calculates the TransformToIqt parameters and saves in a table workspace.
         """
-        CropWorkspace(InputWorkspace=self._sample, OutputWorkspace='__Fury_sample_cropped',
+        CropWorkspace(InputWorkspace=self._sample, OutputWorkspace='__TransformToIqt_sample_cropped',
                       Xmin=self._e_min, Xmax=self._e_max)
-        x_data = mtd['__Fury_sample_cropped'].readX(0)
+        x_data = mtd['__TransformToIqt_sample_cropped'].readX(0)
         number_input_points = len(x_data) - 1
-        num_bins = number_input_points / self._number_points_per_bin
+        num_bins = int(number_input_points / self._number_points_per_bin)
         self._e_width = (abs(self._e_min) + abs(self._e_max)) / num_bins
 
         try:
@@ -167,7 +173,7 @@ class Fury(PythonAlgorithm):
         param_table = CreateEmptyTableWorkspace(OutputWorkspace=self._parameter_table)
 
         param_table.addColumn('int', 'SampleInputBins')
-        param_table.addColumn('int', 'NumberBins')
+        param_table.addColumn('float', 'BinReductionFactor')
         param_table.addColumn('int', 'SampleOutputBins')
         param_table.addColumn('float', 'EnergyMin')
         param_table.addColumn('float', 'EnergyMax')
@@ -179,7 +185,7 @@ class Fury(PythonAlgorithm):
                             self._e_min, self._e_max, self._e_width,
                             resolution, resolution_bins])
 
-        DeleteWorkspace('__Fury_sample_cropped')
+        DeleteWorkspace('__TransformToIqt_sample_cropped')
 
         self.setProperty('ParameterWorkspace', param_table)
 
@@ -212,7 +218,7 @@ class Fury(PythonAlgorithm):
 
     def _fury(self):
         """
-        Run Fury.
+        Run TransformToIqt.
         """
         from IndirectCommon import CheckHistZero, CheckHistSame, CheckAnalysers
 
@@ -261,4 +267,4 @@ class Fury(PythonAlgorithm):
 
 
 # Register algorithm with Mantid
-AlgorithmFactory.subscribe(Fury)
+AlgorithmFactory.subscribe(TransformToIqt)
