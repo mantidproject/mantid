@@ -289,7 +289,7 @@ def furyfitMult(inputWS, function, ftype, startx, endx, spec_min=0, spec_max=Non
     if Plot != 'None':
         furyfitPlotSeq(result_workspace, Plot)
 
-    EndTime('FuryFit Multi')
+    EndTime('TransformToIqtFit Multi')
     return result_workspace
 
 

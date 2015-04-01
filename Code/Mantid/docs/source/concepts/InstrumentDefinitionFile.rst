@@ -162,18 +162,23 @@ For information on how to define geometric shapes see
 Top level <instrument>
 ~~~~~~~~~~~~~~~~~~~~~~
 
-<instrument> is the top level XML element of an IDF. It takes attributes, two of
+<instrument> is the top level XML element of an IDF. It takes attributes, three of
 which must be included. An example is
 
 .. code-block:: xml
 
-      <instrument name="ARCS"
+      <instrument xmlns="http://www.mantidproject.org/IDF/1.0"
+                  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                  xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 http://schema.mantidproject.org/IDF/1.0/IDFSchema.xsd"
+                  name="ARCS"
                   valid-from="1900-01-31 23:59:59"
                   valid-to="2100-01-31 23:59:59"
                   last-modified="2010-10-12 08:54:07.279621">
 
 Of the four attributes in the example above
 
+-  xmlns, xmlns:xsi, xsi:schemaLocation are required attributes that can
+   be copied verbatim as above
 -  name is (at present) optional, although it is recommended to specify
    something sensible
 -  valid-from is compulsory and is the date from which the IDF is valid

@@ -1,6 +1,6 @@
 #include "MantidMDAlgorithms/CalculateCoverageDGS.h"
 #include "MantidAPI/WorkspaceValidators.h"
-#include "MantidMDEvents/MDHistoWorkspace.h"
+#include "MantidDataObjects/MDHistoWorkspace.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ArrayLengthValidator.h"
 #include "MantidKernel/BoundedValidator.h"
@@ -15,7 +15,7 @@ namespace MDAlgorithms {
 using namespace Mantid::Kernel;
 using Mantid::API::WorkspaceProperty;
 using namespace Mantid::API;
-using namespace Mantid::MDEvents;
+using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
 
 namespace {

@@ -4,8 +4,8 @@
 #include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/System.h"
-#include "MantidMDEvents/CoordTransformAffine.h"
-#include "MantidMDEvents/CoordTransformAligned.h"
+#include "MantidDataObjects/CoordTransformAffine.h"
+#include "MantidDataObjects/CoordTransformAligned.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/VisibleWhenProperty.h"
 #include "MantidKernel/ArrayLengthValidator.h"
@@ -390,16 +390,16 @@ void SlicingAlgorithm::createGeneralTransform() {
   // std::cout << m_inputMinPoint << " m_inputMinPoint " << std::endl;
 
   // Create the CoordTransformAffine for BINNING with these basis vectors
-  MDEvents::CoordTransformAffine *ct =
-      new MDEvents::CoordTransformAffine(inD, m_outD);
+  DataObjects::CoordTransformAffine *ct =
+      new DataObjects::CoordTransformAffine(inD, m_outD);
   // Note: the scaling makes the coordinate correspond to a bin index
   ct->buildOrthogonal(m_inputMinPoint, this->m_bases,
                       VMD(this->m_binningScaling));
   this->m_transform = ct;
 
   // Transformation original->binned
-  MDEvents::CoordTransformAffine *ctFrom =
-      new MDEvents::CoordTransformAffine(inD, m_outD);
+  DataObjects::CoordTransformAffine *ctFrom =
+      new DataObjects::CoordTransformAffine(inD, m_outD);
   ctFrom->buildOrthogonal(m_translation, this->m_bases,
                           VMD(m_transformScaling));
   m_transformFromOriginal = ctFrom;
@@ -420,8 +420,8 @@ void SlicingAlgorithm::createGeneralTransform() {
   m_transformToOriginal = NULL;
   if (m_outD == inD) {
     // Can't reverse transform if you lost dimensions.
-    MDEvents::CoordTransformAffine *ctTo =
-        new MDEvents::CoordTransformAffine(inD, m_outD);
+    DataObjects::CoordTransformAffine *ctTo =
+        new DataObjects::CoordTransformAffine(inD, m_outD);
     Matrix<coord_t> fromMatrix = ctFrom->getMatrix();
     Matrix<coord_t> toMatrix = fromMatrix;
     // Invert the affine matrix to get the reverse transformation
@@ -573,13 +573,13 @@ void SlicingAlgorithm::createAlignedTransform() {
   }
 
   // Transform for binning
-  m_transform = new MDEvents::CoordTransformAligned(
+  m_transform = new DataObjects::CoordTransformAligned(
       m_inWS->getNumDims(), m_outD, m_dimensionToBinFrom, origin, scaling);
 
   // Transformation original->binned. There is no offset or scaling!
   std::vector<coord_t> unitScaling(m_outD, 1.0);
   std::vector<coord_t> zeroOrigin(m_outD, 0.0);
-  m_transformFromOriginal = new MDEvents::CoordTransformAligned(
+  m_transformFromOriginal = new DataObjects::CoordTransformAligned(
       inD, m_outD, m_dimensionToBinFrom, zeroOrigin, unitScaling);
 
   // Now the reverse transformation.
@@ -588,8 +588,8 @@ void SlicingAlgorithm::createAlignedTransform() {
     // dimension index is that?
     Matrix<coord_t> mat = m_transformFromOriginal->makeAffineMatrix();
     mat.Invert();
-    MDEvents::CoordTransformAffine *tmp =
-        new MDEvents::CoordTransformAffine(inD, m_outD);
+    DataObjects::CoordTransformAffine *tmp =
+        new DataObjects::CoordTransformAffine(inD, m_outD);
     tmp->setMatrix(mat);
     m_transformToOriginal = tmp;
   } else
@@ -642,8 +642,8 @@ void SlicingAlgorithm::createTransform() {
           m_inWS->getName() + " back to " + m_originalWS->getName() + ".");
 
     // Fail if the MDHistoWorkspace was modified by binary operation
-    MDEvents::MDHistoWorkspace_sptr inHisto =
-        boost::dynamic_pointer_cast<MDEvents::MDHistoWorkspace>(m_inWS);
+    DataObjects::MDHistoWorkspace_sptr inHisto =
+        boost::dynamic_pointer_cast<DataObjects::MDHistoWorkspace>(m_inWS);
     if (inHisto) {
       if (inHisto->getNumExperimentInfo() > 0) {
         const Run &run = inHisto->getExperimentInfo(0)->run();
@@ -701,12 +701,12 @@ void SlicingAlgorithm::createTransform() {
         Matrix<coord_t> matToIntermediate =
             matOriginalToIntermediate * matToOriginal;
 
-        m_transformToIntermediate = new MDEvents::CoordTransformAffine(
+        m_transformToIntermediate = new DataObjects::CoordTransformAffine(
             m_originalWS->getNumDims(), m_intermediateWS->getNumDims());
         m_transformToIntermediate->setMatrix(matToIntermediate);
         // And now the reverse
         matToIntermediate.Invert();
-        m_transformFromIntermediate = new MDEvents::CoordTransformAffine(
+        m_transformFromIntermediate = new DataObjects::CoordTransformAffine(
             m_intermediateWS->getNumDims(), m_originalWS->getNumDims());
         m_transformFromIntermediate->setMatrix(matToIntermediate);
       } catch (std::runtime_error &) {
@@ -995,4 +995,4 @@ SlicingAlgorithm::getImplicitFunctionForChunk(const size_t *const chunkMin,
 }
 
 } // namespace Mantid
-} // namespace MDEvents
+} // namespace DataObjects
