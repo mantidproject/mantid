@@ -5,6 +5,7 @@
 #include <algorithm>
 #include "MantidAlgorithms/ReflectometryReductionOne.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
@@ -36,6 +37,7 @@ public:
 
   ReflectometryReductionOneTest()
   {
+    FrameworkManager::Instance();
     m_tinyReflWS = create2DWorkspaceWithReflectometryInstrument();
   }
 

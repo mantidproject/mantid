@@ -1,20 +1,18 @@
 #ifndef MANTID_MDALGORITHMS_SAVEZODSTEST_H_
 #define MANTID_MDALGORITHMS_SAVEZODSTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidKernel/Timer.h"
-#include "MantidKernel/System.h"
-#include <iostream>
-#include <iomanip>
-
 #include "MantidMDAlgorithms/SaveZODS.h"
-#include <Poco/File.h>
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 
-using namespace Mantid;
-using namespace Mantid::MDAlgorithms;
+#include <cxxtest/TestSuite.h>
+
+#include <Poco/File.h>
+
 using namespace Mantid::API;
-using namespace Mantid::MDEvents;
+using namespace Mantid::DataObjects;
+using namespace Mantid::MDAlgorithms;
+
+using Mantid::coord_t;
 
 class SaveZODSTest : public CxxTest::TestSuite
 {

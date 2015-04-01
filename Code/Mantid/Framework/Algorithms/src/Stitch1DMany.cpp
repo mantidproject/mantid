@@ -207,18 +207,20 @@ void Stitch1DMany::exec() {
     // List of workspaces to be grouped
     std::vector<std::string> toGroup;
 
+    const std::string groupName = this->getProperty("OutputWorkspace");
+
     size_t numWSPerGroup = groupWorkspaces[0]->size();
 
     for (size_t i = 0; i < numWSPerGroup; ++i) {
       // List of workspaces to stitch
       std::vector<std::string> toProcess;
       // The name of the resulting workspace
-      std::string outName;
+      std::string outName = groupName;
 
       for (size_t j = 0; j < groupWorkspaces.size(); ++j) {
         const std::string wsName = groupWorkspaces[j]->getItem(i)->name();
         toProcess.push_back(wsName);
-        outName += wsName;
+        outName += "_" + wsName;
       }
 
       IAlgorithm_sptr stitchAlg = createChildAlgorithm("Stitch1DMany");
@@ -244,8 +246,6 @@ void Stitch1DMany::exec() {
       m_scaleFactors.insert(m_scaleFactors.end(), scaleFactors.begin(),
                             scaleFactors.end());
     }
-
-    const std::string groupName = this->getProperty("OutputWorkspace");
 
     IAlgorithm_sptr groupAlg = createChildAlgorithm("GroupWorkspaces");
     groupAlg->initialize();

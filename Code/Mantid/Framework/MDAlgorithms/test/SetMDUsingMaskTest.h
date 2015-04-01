@@ -3,19 +3,15 @@
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
-#include "MantidKernel/System.h"
-#include "MantidKernel/Timer.h"
+#include "MantidDataObjects/MDHistoWorkspace.h"
 #include "MantidMDAlgorithms/SetMDUsingMask.h"
-#include "MantidMDEvents/MDHistoWorkspace.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
-#include <cxxtest/TestSuite.h>
-#include <iomanip>
-#include <iostream>
 
-using namespace Mantid;
-using namespace Mantid::MDAlgorithms;
+#include <cxxtest/TestSuite.h>
+
 using namespace Mantid::API;
-using namespace Mantid::MDEvents;
+using namespace Mantid::DataObjects;
+using namespace Mantid::MDAlgorithms;
 
 class SetMDUsingMaskTest : public CxxTest::TestSuite
 {

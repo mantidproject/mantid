@@ -1,19 +1,16 @@
 #ifndef MANTID_MD_CONVERT2_QxyzDE_TEST_H_
 #define MANTID_MD_CONVERT2_QxyzDE_TEST_H_
 
+#include "MantidAPI/FrameworkManager.h"
 #include "MantidDataObjects/EventWorkspace.h"
-#include "MantidKernel/System.h"
-#include "MantidKernel/Timer.h"
-#include "MantidMDAlgorithms/ConvertToMD.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
+#include "MantidMDAlgorithms/ConvertToMD.h"
+#include "MantidMDAlgorithms/MDWSDescription.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidMDEvents/MDWSDescription.h"
-#include "MantidAPI/FrameworkManager.h"
+
 #include <cxxtest/TestSuite.h>
-#include <iomanip>
-#include <iostream>
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
@@ -21,12 +18,11 @@ using Mantid::Geometry::OrientedLattice;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::MDAlgorithms;
-using namespace Mantid::MDEvents;
 
 class ConvertTo3DdETestHelper: public ConvertToMD
 {
 public:
-    ConvertTo3DdETestHelper(){};
+    ConvertTo3DdETestHelper(){}
 };
 
 // Test is transformed from ConvetToQ3DdE but actually tests some aspects of ConvertToMD algorithm. 

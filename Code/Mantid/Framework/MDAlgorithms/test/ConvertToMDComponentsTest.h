@@ -2,28 +2,20 @@
 #define MANTID_MDALGORITHM_CONVERT2MD_COMPONENTS_TEST_H
 // tests for different parts of ConvertToMD exec functions
 
-#include "MantidDataObjects/EventWorkspace.h"
 #include "MantidAPI/FrameworkManager.h"
-#include "MantidKernel/System.h"
-#include "MantidKernel/Timer.h"
-#include "MantidAPI/TextAxis.h"
 #include "MantidMDAlgorithms/ConvertToMD.h"
+#include "MantidMDAlgorithms/MDWSTransform.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidKernel/UnitFactory.h"
-#include "MantidKernel/LibraryWrapper.h"
-#include "MantidMDEvents/MDWSTransform.h"
+
 #include <cxxtest/TestSuite.h>
-#include <iomanip>
-#include <iostream>
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::MDAlgorithms;
-using namespace Mantid::MDEvents;
 
 class Convert2MDComponentsTestHelper: public ConvertToMD
 {
@@ -37,14 +29,14 @@ public:
   {
     this->m_InWS2D = InWS2D;
     // and create the class, which will deal with the target workspace
-    if(!this->m_OutWSWrapper) this->m_OutWSWrapper = boost::shared_ptr<MDEvents::MDEventWSWrapper>(new MDEvents::MDEventWSWrapper());
+    if(!this->m_OutWSWrapper) this->m_OutWSWrapper = boost::shared_ptr<MDAlgorithms::MDEventWSWrapper>(new MDAlgorithms::MDEventWSWrapper());
   }
   Convert2MDComponentsTestHelper()
   {
     ConvertToMD::initialize();
   }
   bool buildTargetWSDescription(API::IMDEventWorkspace_sptr spws,const std::string &Q_mod_req,const std::string &dEModeRequested,const std::vector<std::string> &other_dim_names,
-    const std::string &QFrame,const std::string &convert_to_,MDEvents::MDWSDescription &targWSDescr)
+    const std::string &QFrame,const std::string &convert_to_,MDAlgorithms::MDWSDescription &targWSDescr)
   {
     std::vector<double> dimMin = this->getProperty("MinValues");
     std::vector<double> dimMax = this->getProperty("MaxValues");
@@ -54,14 +46,14 @@ public:
   {
     ConvertToMD::copyMetaData(mdEventWS);
   }
-  void addExperimentInfo(API::IMDEventWorkspace_sptr mdEventWS, MDEvents::MDWSDescription &targWSDescr) const
+  void addExperimentInfo(API::IMDEventWorkspace_sptr mdEventWS, MDAlgorithms::MDWSDescription &targWSDescr) const
   {
      ConvertToMD::addExperimentInfo(mdEventWS,targWSDescr);
 
   };
 
 
-  API::IMDEventWorkspace_sptr createNewMDWorkspace(const MDEvents::MDWSDescription &NewMDWSDescription)
+  API::IMDEventWorkspace_sptr createNewMDWorkspace(const MDAlgorithms::MDWSDescription &NewMDWSDescription)
   {
     return ConvertToMD::createNewMDWorkspace(NewMDWSDescription);
   }
@@ -231,13 +223,13 @@ public:
     subAlgo.setPropertyValue("MaxValues","10");
 
     bool createNewTargetWs(false);
-    std::vector<std::string> Q_modes = MDEvents::MDTransfFactory::Instance().getKeys();
+    std::vector<std::string> Q_modes = MDAlgorithms::MDTransfFactory::Instance().getKeys();
     std::string dE_mode = Kernel::DeltaEMode().asString(Kernel::DeltaEMode::Elastic);
     MDWSTransform QScl;
     std::vector<std::string> QScales = QScl.getQScalings();
     std::vector<std::string> Frames = QScl.getTargetFrames();
 
-    MDEvents::MDWSDescription targWSDescr;
+    MDAlgorithms::MDWSDescription targWSDescr;
     TS_ASSERT_THROWS_NOTHING(createNewTargetWs=subAlgo.buildTargetWSDescription(spws,Q_modes[0],dE_mode,std::vector<std::string>(),
       Frames[CnvrtToMD::AutoSelect],QScales[CnvrtToMD::NoScaling],targWSDescr));
 

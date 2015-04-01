@@ -89,20 +89,20 @@ namespace IDA
 
     double energyMin = m_dblManager->value(m_properties["ELow"]);
     double energyMax = m_dblManager->value(m_properties["EHigh"]);
-    long numBins = static_cast<long>(m_dblManager->value(m_properties["SampleBinning"]));
+    double numBins = m_dblManager->value(m_properties["SampleBinning"]);
 
     bool plot = m_uiForm.ckPlot->isChecked();
     bool save = m_uiForm.ckSave->isChecked();
 
-    IAlgorithm_sptr furyAlg = AlgorithmManager::Instance().create("Fury", -1);
+    IAlgorithm_sptr furyAlg = AlgorithmManager::Instance().create("TransformToIqt", -1);
     furyAlg->initialize();
 
-    furyAlg->setProperty("Sample", wsName.toStdString());
-    furyAlg->setProperty("Resolution", resName.toStdString());
+    furyAlg->setProperty("SampleWorkspace", wsName.toStdString());
+    furyAlg->setProperty("ResolutionWorkspace", resName.toStdString());
 
     furyAlg->setProperty("EnergyMin", energyMin);
     furyAlg->setProperty("EnergyMax", energyMax);
-    furyAlg->setProperty("NumBins", numBins);
+    furyAlg->setProperty("BinReductionFactor", numBins);
 
     furyAlg->setProperty("Plot", plot);
     furyAlg->setProperty("Save", save);
@@ -188,20 +188,20 @@ namespace IDA
 
     double energyMin = m_dblManager->value(m_properties["ELow"]);
     double energyMax = m_dblManager->value(m_properties["EHigh"]);
-    long numBins = static_cast<long>(m_dblManager->value(m_properties["SampleBinning"])); // Default value
+    double numBins = m_dblManager->value(m_properties["SampleBinning"]);
     if(numBins == 0)
       return;
 
-    IAlgorithm_sptr furyAlg = AlgorithmManager::Instance().create("Fury");
+    IAlgorithm_sptr furyAlg = AlgorithmManager::Instance().create("TransformToIqt");
     furyAlg->initialize();
 
-    furyAlg->setProperty("Sample", wsName.toStdString());
-    furyAlg->setProperty("Resolution", resName.toStdString());
+    furyAlg->setProperty("SampleWorkspace", wsName.toStdString());
+    furyAlg->setProperty("ResolutionWorkspace", resName.toStdString());
     furyAlg->setProperty("ParameterWorkspace", "__FuryProperties_temp");
 
     furyAlg->setProperty("EnergyMin", energyMin);
     furyAlg->setProperty("EnergyMax", energyMax);
-    furyAlg->setProperty("NumBins", numBins);
+    furyAlg->setProperty("BinReductionFactor", numBins);
 
     furyAlg->setProperty("Plot", false);
     furyAlg->setProperty("Save", false);
