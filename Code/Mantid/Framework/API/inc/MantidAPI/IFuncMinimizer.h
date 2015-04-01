@@ -69,6 +69,10 @@ public:
   /// Get value of cost function
   virtual double costFunctionVal() = 0;
 
+  /// Finalize minimization, eg store additional outputs
+  virtual void finalize() {}
+
+
 protected:
   /// Error string.
   std::string m_errorString;

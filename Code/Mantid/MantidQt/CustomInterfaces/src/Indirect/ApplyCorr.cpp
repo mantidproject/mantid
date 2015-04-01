@@ -1,8 +1,10 @@
 #include "MantidQtCustomInterfaces/Indirect/ApplyCorr.h"
+#include "MantidQtCustomInterfaces/UserInputValidator.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/TextAxis.h"
 
 #include <QStringList>
+
 
 using namespace Mantid::API;
 
@@ -21,10 +23,8 @@ namespace IDA
     IDATab(parent)
   {
     m_uiForm.setupUi(parent);
-  }
 
-  void ApplyCorr::setup()
-  {
+    connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(algorithmComplete(bool)));
     connect(m_uiForm.cbGeometry, SIGNAL(currentIndexChanged(int)), this, SLOT(handleGeometryChange(int)));
     connect(m_uiForm.dsSample, SIGNAL(dataReady(const QString&)), this, SLOT(newData(const QString&)));
     connect(m_uiForm.spPreviewSpec, SIGNAL(valueChanged(int)), this, SLOT(plotPreview(int)));
@@ -32,6 +32,12 @@ namespace IDA
     m_uiForm.spPreviewSpec->setMinimum(0);
     m_uiForm.spPreviewSpec->setMaximum(0);
   }
+
+
+  void ApplyCorr::setup()
+  {
+  }
+
 
   /**
    * Disables corrections when using S(Q, w) as input data.
@@ -48,154 +54,300 @@ namespace IDA
     m_uiForm.ppPreview->addSpectrum("Sample", sampleWs, 0, Qt::black);
   }
 
+
   void ApplyCorr::run()
   {
-    QString geom = m_uiForm.cbGeometry->currentText();
-    if ( geom == "Flat" )
+    API::BatchAlgorithmRunner::AlgorithmRuntimeProps absCorProps;
+    IAlgorithm_sptr applyCorrAlg = AlgorithmManager::Instance().create("ApplyPaalmanPingsCorrection");
+    applyCorrAlg->initialize();
+
+    QString sampleWsName = m_uiForm.dsSample->getCurrentDataName();
+    MatrixWorkspace_sptr sampleWs = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(sampleWsName.toStdString());
+    Mantid::Kernel::Unit_sptr sampleXUnit = sampleWs->getAxis(0)->unit();
+
+    // If not in wavelength then do conversion
+    if(sampleXUnit->caption() != "Wavelength")
     {
-      geom = "flt";
+      g_log.information("Sample workspace not in wavelength, need to convert to continue.");
+      absCorProps["SampleWorkspace"] = addConvertToWavelengthStep(sampleWs);
     }
-    else if ( geom == "Cylinder" )
+    else
     {
-      geom = "cyl";
+      absCorProps["SampleWorkspace"] = sampleWsName.toStdString();
     }
-
-    QString pyInput = "from IndirectDataAnalysis import abscorFeeder\n";
-
-    QString sample = m_uiForm.dsSample->getCurrentDataName();
-    MatrixWorkspace_const_sptr sampleWs =  AnalysisDataService::Instance().retrieveWS<const MatrixWorkspace>(sample.toStdString());
-
-    pyInput += "sample = '"+sample+"'\n";
-    pyInput += "rebin_can = False\n";
-    bool noContainer = false;
 
     bool useCan = m_uiForm.ckUseCan->isChecked();
     if(useCan)
     {
-      QString container = m_uiForm.dsContainer->getCurrentDataName();
-      MatrixWorkspace_const_sptr canWs =  AnalysisDataService::Instance().retrieveWS<const MatrixWorkspace>(container.toStdString());
+      QString canWsName = m_uiForm.dsContainer->getCurrentDataName();
+      MatrixWorkspace_sptr canWs = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(canWsName.toStdString());
 
-      if (!checkWorkspaceBinningMatches(sampleWs, canWs))
+      // If not in wavelength then do conversion
+      Mantid::Kernel::Unit_sptr canXUnit = canWs->getAxis(0)->unit();
+      if(canXUnit->caption() != "Wavelength")
       {
-        if (requireCanRebin())
+        g_log.information("Container workspace not in wavelength, need to convert to continue.");
+        absCorProps["CanWorkspace"] = addConvertToWavelengthStep(canWs);
+      }
+      else
+      {
+        absCorProps["CanWorkspace"] = canWsName.toStdString();
+      }
+
+      bool useCanScale = m_uiForm.ckScaleCan->isChecked();
+      if(useCanScale)
+      {
+        double canScaleFactor = m_uiForm.spCanScale->value();
+        applyCorrAlg->setProperty("CanScaleFactor", canScaleFactor);
+      }
+
+      // Check for same binning across sample and container
+      if(!checkWorkspaceBinningMatches(sampleWs, canWs))
+      {
+        QString text = "Binning on sample and container does not match."
+                       "Would you like to rebin the sample to match the container?";
+
+        int result = QMessageBox::question(NULL, tr("Rebin sample?"), tr(text),
+                                           QMessageBox::Yes, QMessageBox::No, QMessageBox::NoButton);
+
+        if(result == QMessageBox::Yes)
         {
-          pyInput += "rebin_can = True\n";
+          addRebinStep(sampleWsName, canWsName);
         }
         else
         {
-          //user clicked cancel and didn't want to rebin, so just do nothing.
+          m_batchAlgoRunner->clearQueue();
+          g_log.error("Cannot apply absorption corrections using a sample and container with different binning.");
           return;
         }
       }
-
-      pyInput += "container = '" + container + "'\n";
-    }
-    else
-    {
-      pyInput += "container = ''\n";
-      noContainer = true;
     }
 
-    pyInput += "geom = '" + geom + "'\n";
-
-    if( m_uiForm.ckUseCorrections->isChecked() )
+    bool useCorrections = m_uiForm.ckUseCorrections->isChecked();
+    if(useCorrections)
     {
-      pyInput += "useCor = True\n";
-      QString corrections = m_uiForm.dsCorrections->getCurrentDataName();
-      pyInput += "corrections = '" + corrections + "'\n";
-    }
-    else
-    {
-      pyInput += "useCor = False\n";
-      pyInput += "corrections = ''\n";
+      QString correctionsWsName = m_uiForm.dsCorrections->getCurrentDataName();
 
-      // if we have no container and no corrections then abort
-      if(noContainer)
+      WorkspaceGroup_sptr corrections = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(correctionsWsName.toStdString());
+      bool interpolateAll = false;
+      for(size_t i = 0; i < corrections->size(); i++)
       {
-        showMessageBox("Apply Corrections requires either a can file or a corrections file.");
-        return;
+        MatrixWorkspace_sptr factorWs = boost::dynamic_pointer_cast<MatrixWorkspace>(corrections->getItem(i));
+
+        // Check for matching binning
+        if(sampleWs && (sampleWs->blocksize() != factorWs->blocksize()))
+        {
+          int result;
+          if(interpolateAll)
+          {
+            result = QMessageBox::Yes;
+          }
+          else
+          {
+            QString text = "Number of bins on sample and "
+                         + QString::fromStdString(factorWs->name())
+                         + " workspace does not match.\n"
+                         + "Would you like to interpolate this workspace to match the sample?";
+
+            result = QMessageBox::question(NULL, tr("Interpolate corrections?"), tr(text),
+                                           QMessageBox::YesToAll, QMessageBox::Yes, QMessageBox::No);
+          }
+
+          switch(result)
+          {
+            case QMessageBox::YesToAll:
+              interpolateAll = true;
+            case QMessageBox::Yes:
+              addInterpolationStep(factorWs, absCorProps["SampleWorkspace"]);
+              break;
+            default:
+              m_batchAlgoRunner->clearQueue();
+              g_log.error("ApplyCorr cannot run with corrections that do not match sample binning.");
+              return;
+          }
+        }
       }
+
+      applyCorrAlg->setProperty("CorrectionsWorkspace", correctionsWsName.toStdString());
     }
 
-    QString ScalingFactor = "1.0\n";
-    QString ScaleOrNot = "False\n";
+    // Generate output workspace name
+    int nameCutIndex = sampleWsName.lastIndexOf("_");
+    if(nameCutIndex == -1)
+      nameCutIndex = sampleWsName.length();
 
-    pyInput += m_uiForm.ckScaleCan->isChecked() ? "True\n" : "False\n";
-
-    if ( m_uiForm.ckScaleCan->isChecked() )
+    QString correctionType;
+    switch(m_uiForm.cbGeometry->currentIndex())
     {
-      ScalingFactor = m_uiForm.spCanScale->text();
-      ScaleOrNot = "True\n";
+      case 0:
+        correctionType = "flt";
+        break;
+      case 1:
+        correctionType = "cyl";
+        break;
     }
+    const QString outputWsName = sampleWsName.left(nameCutIndex) + + "_" + correctionType + "_Corrected";
 
-    pyInput += "scale = " + ScaleOrNot + "\n";
-    pyInput += "scaleFactor = " + ScalingFactor + "\n";
+    applyCorrAlg->setProperty("OutputWorkspace", outputWsName.toStdString());
 
-    if ( m_uiForm.ckSave->isChecked() ) pyInput += "save = True\n";
-    else pyInput += "save = False\n";
+    // Add corrections algorithm to queue
+    m_sampleWsName = absCorProps["SampleWorkspace"];
+    m_canWsName = absCorProps["CanWorkspace"];
+    m_batchAlgoRunner->addAlgorithm(applyCorrAlg, absCorProps);
 
-    QString plotResult = m_uiForm.cbPlotOutput->currentText();
-    if ( plotResult == "Contour" )
-    {
-      plotResult = "Contour";
-    }
-    else if ( plotResult == "Spectra" )
-    {
-      plotResult = "Spectrum";
-    }
-    else if ( plotResult == "Both" )
-    {
-      plotResult = "Both";
-    }
+    // Add save algorithms if required
+    bool save = m_uiForm.ckSave->isChecked();
+    if(save)
+      addSaveWorkspaceToQueue(outputWsName);
 
-    pyInput += "plotResult = '" + plotResult + "'\n";
-    pyInput += "print abscorFeeder(sample, container, geom, useCor, corrections, RebinCan=rebin_can, ScaleOrNotToScale=scale, factor=scaleFactor, Save=save, PlotResult=plotResult)\n";
-
-    QString pyOutput = runPythonCode(pyInput).trimmed();
-
-    m_outputWs = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(pyOutput.toStdString());
-    plotPreview(m_uiForm.spPreviewSpec->value());
+    // Run algorithm queue
+    m_batchAlgoRunner->executeBatchAsync();
 
     // Set the result workspace for Python script export
-    m_pythonExportWsName = pyOutput.toStdString();
+    m_pythonExportWsName = outputWsName.toStdString();
   }
 
+
   /**
-   * Ask the user is they wish to rebin the can to the sample.
-   * @return whether a rebin of the can workspace is required.
+   * Adds a rebin to workspace step to the calculation for when using a sample and container that
+   * have different binning.
+   *
+   * @param toRebin
+   * @param toMatch
    */
-  bool ApplyCorr::requireCanRebin()
+  void ApplyCorr::addRebinStep(QString toRebin, QString toMatch)
   {
-    QString message = "The sample and can energy ranges do not match, this is not recommended."
-      "\n\n Click OK to rebin the can to match the sample and continue or Cancel to abort applying corrections.";
-    QMessageBox::StandardButton reply = QMessageBox::warning(m_parentWidget, "Energy Ranges Do Not Match",
-        message, QMessageBox::Ok|QMessageBox::Cancel);
-    return (reply == QMessageBox::Ok);
+    API::BatchAlgorithmRunner::AlgorithmRuntimeProps rebinProps;
+    rebinProps["WorkspaceToMatch"] = toMatch.toStdString();
+
+    IAlgorithm_sptr rebinAlg = AlgorithmManager::Instance().create("RebinToWorkspace");
+    rebinAlg->initialize();
+
+    rebinAlg->setProperty("WorkspaceToRebin", toRebin.toStdString());
+    rebinAlg->setProperty("OutputWorkspace", toRebin.toStdString());
+
+    m_batchAlgoRunner->addAlgorithm(rebinAlg, rebinProps);
   }
+
+
+  /**
+   * Adds a spline interpolation as a step in the calculation for using legacy correction factor
+   * workspaces.
+   *
+   * @param toInterpolate Pointer to the workspace to interpolate
+   * @param toMatch Name of the workspace to match
+   */
+  void ApplyCorr::addInterpolationStep(MatrixWorkspace_sptr toInterpolate, std::string toMatch)
+  {
+    API::BatchAlgorithmRunner::AlgorithmRuntimeProps interpolationProps;
+    interpolationProps["WorkspaceToMatch"] = toMatch;
+
+    IAlgorithm_sptr interpolationAlg = AlgorithmManager::Instance().create("SplineInterpolation");
+    interpolationAlg->initialize();
+
+    interpolationAlg->setProperty("WorkspaceToInterpolate", toInterpolate->name());
+    interpolationAlg->setProperty("OutputWorkspace", toInterpolate->name());
+
+    m_batchAlgoRunner->addAlgorithm(interpolationAlg, interpolationProps);
+  }
+
+
+  /**
+   * Handles completion of the algorithm.
+   *
+   * @param error True if algorithm failed.
+   */
+  void ApplyCorr::algorithmComplete(bool error)
+  {
+    if(error)
+    {
+      emit showMessageBox("Unable to apply corrections.\nSee Results Log for more details.");
+      return;
+    }
+
+    // Handle preview plot
+    plotPreview(m_uiForm.spPreviewSpec->value());
+
+    // Handle Mantid plotting
+    QString plotType = m_uiForm.cbPlotOutput->currentText();
+
+    if(plotType == "Spectra" || plotType == "Both")
+      plotSpectrum(QString::fromStdString(m_pythonExportWsName));
+
+    if(plotType == "Contour" || plotType == "Both")
+      plotContour(QString::fromStdString(m_pythonExportWsName));
+  }
+
 
   bool ApplyCorr::validate()
   {
+    UserInputValidator uiv;
+
+    uiv.checkDataSelectorIsValid("Sample", m_uiForm.dsSample);
+
+    MatrixWorkspace_sptr sampleWs;
+
     bool useCan = m_uiForm.ckUseCan->isChecked();
+    bool useCorrections = m_uiForm.ckUseCorrections->isChecked();
+
+    if(!(useCan || useCorrections))
+      uiv.addErrorMessage("Must use either container subtraction or corrections");
 
     if(useCan)
     {
+      uiv.checkDataSelectorIsValid("Container", m_uiForm.dsContainer);
+
+      // Check can and sample workspaces are the same "type" (reduced or S(Q, w))
       QString sample = m_uiForm.dsSample->getCurrentDataName();
       QString sampleType = sample.right(sample.length() - sample.lastIndexOf("_"));
       QString container = m_uiForm.dsContainer->getCurrentDataName();
       QString containerType = container.right(container.length() - container.lastIndexOf("_"));
 
       g_log.debug() << "Sample type is: " << sampleType.toStdString() << std::endl;
-      g_log.debug() << "Container type is: " << containerType.toStdString() << std::endl;
+      g_log.debug() << "Can type is: " << containerType.toStdString() << std::endl;
 
       if(containerType != sampleType)
+        uiv.addErrorMessage("Sample and can workspaces must contain the same type of data.");
+    }
+
+    if(useCorrections)
+    {
+      uiv.checkDataSelectorIsValid("Corrections", m_uiForm.dsCorrections);
+
+      QString correctionsWsName = m_uiForm.dsCorrections->getCurrentDataName();
+      WorkspaceGroup_sptr corrections = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(correctionsWsName.toStdString());
+      for(size_t i = 0; i < corrections->size(); i++)
       {
-        g_log.error("Must use the same type of files for sample and container inputs.");
-        return false;
+        // Check it is a MatrixWorkspace
+        MatrixWorkspace_sptr factorWs = boost::dynamic_pointer_cast<MatrixWorkspace>(corrections->getItem(i));
+        if(!factorWs)
+        {
+          QString msg = "Correction factor workspace "
+                      + QString::number(i)
+                      + " is not a MatrixWorkspace";
+          uiv.addErrorMessage(msg);
+          continue;
+        }
+
+        // Check X unit is wavelength
+        Mantid::Kernel::Unit_sptr xUnit = factorWs->getAxis(0)->unit();
+        if(xUnit->caption() != "Wavelength")
+        {
+          QString msg = "Correction factor workspace "
+                      + QString::fromStdString(factorWs->name())
+                      + " is not in wavelength";
+          uiv.addErrorMessage(msg);
+        }
       }
     }
 
-    return true;
+    // Show errors if there are any
+    if(!uiv.isAllInputValid())
+      emit showMessageBox(uiv.generateErrorMessage());
+
+    return uiv.isAllInputValid();
   }
+
 
   void ApplyCorr::loadSettings(const QSettings & settings)
   {
@@ -203,6 +355,7 @@ namespace IDA
     m_uiForm.dsContainer->readSettings(settings.group());
     m_uiForm.dsSample->readSettings(settings.group());
   }
+
 
   /**
    * Handles when the type of geometry changes
@@ -229,6 +382,7 @@ namespace IDA
     }
   }
 
+
   /**
    * Replots the preview plot.
    *
@@ -241,25 +395,19 @@ namespace IDA
     m_uiForm.ppPreview->clear();
 
     // Plot sample
-    const QString sample = m_uiForm.dsSample->getCurrentDataName();
-    if(AnalysisDataService::Instance().doesExist(sample.toStdString()))
-    {
-      m_uiForm.ppPreview->addSpectrum("Sample", sample, specIndex, Qt::black);
-    }
+    if(AnalysisDataService::Instance().doesExist(m_sampleWsName))
+      m_uiForm.ppPreview->addSpectrum("Sample", QString::fromStdString(m_sampleWsName),
+                                      specIndex, Qt::black);
 
     // Plot result
-    if(m_outputWs)
-    {
-      m_uiForm.ppPreview->addSpectrum("Corrected", m_outputWs, specIndex, Qt::green);
-    }
+    if(!m_pythonExportWsName.empty())
+      m_uiForm.ppPreview->addSpectrum("Corrected", QString::fromStdString(m_pythonExportWsName),
+                                      specIndex, Qt::green);
 
     // Plot can
-    if(useCan)
-    {
-      QString container = m_uiForm.dsContainer->getCurrentDataName();
-      const MatrixWorkspace_sptr canWs =  AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(container.toStdString());
-      m_uiForm.ppPreview->addSpectrum("Can", canWs, specIndex, Qt::red);
-    }
+    if(useCan && AnalysisDataService::Instance().doesExist(m_canWsName))
+      m_uiForm.ppPreview->addSpectrum("Can", QString::fromStdString(m_canWsName),
+                                      specIndex, Qt::red);
   }
 
 } // namespace IDA

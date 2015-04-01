@@ -1,11 +1,10 @@
 #ifndef MANTID_MDALGORITHMS_MERGEMD_H_
 #define MANTID_MDALGORITHMS_MERGEMD_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
-#include "MantidMDEvents/BoxControllerSettingsAlgorithm.h"
 #include "MantidAPI/IMDEventWorkspace.h"
-#include "MantidMDEvents/MDEventWorkspace.h"
+#include "MantidDataObjects/MDEventWorkspace.h"
+#include "MantidMDAlgorithms/BoxControllerSettingsAlgorithm.h"
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -36,7 +35,7 @@ namespace MDAlgorithms {
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class DLLExport MergeMD
-    : public Mantid::MDEvents::BoxControllerSettingsAlgorithm {
+    : public BoxControllerSettingsAlgorithm {
 public:
   MergeMD();
   virtual ~MergeMD();
@@ -56,7 +55,7 @@ private:
   void createOutputWorkspace(std::vector<std::string> &inputs);
 
   template <typename MDE, size_t nd>
-  void doPlus(typename Mantid::MDEvents::MDEventWorkspace<MDE, nd>::sptr ws);
+  void doPlus(typename Mantid::DataObjects::MDEventWorkspace<MDE, nd>::sptr ws);
 
   /// Vector of input MDWorkspaces
   std::vector<Mantid::API::IMDEventWorkspace_sptr> m_workspaces;

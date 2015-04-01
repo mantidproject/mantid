@@ -7,12 +7,19 @@ set ( SRC_FILES
 	src/BinMD.cpp
 	src/BinaryOperationMD.cpp
 	src/BooleanBinaryOperationMD.cpp
+	src/BoxControllerSettingsAlgorithm.cpp
 	src/CalculateCoverageDGS.cpp
+	src/CalculateReflectometryQBase.cpp
 	src/CentroidPeaksMD.cpp
 	src/CentroidPeaksMD2.cpp
 	src/CloneMDWorkspace.cpp
 	src/CompareMDWorkspaces.cpp
+	src/ConvToMDBase.cpp
 	src/ConvertCWPDMDToSpectra.cpp
+	src/ConvToMDEventsWS.cpp
+	src/ConvToMDHistoWS.cpp
+	src/ConvToMDSelector.cpp
+	src/ConvertMDHistoToMatrixWorkspace.cpp
 	src/ConvertSpiceDataToRealSpace.cpp
 	src/ConvertToDetectorFaceMD.cpp
 	src/ConvertToDiffractionMDWorkspace.cpp
@@ -21,16 +28,24 @@ set ( SRC_FILES
 	src/ConvertToMDMinMaxGlobal.cpp
 	src/ConvertToMDMinMaxLocal.cpp
 	src/ConvertToMDParent.cpp
+	src/ConvertToReflectometryQ.cpp
 	src/CreateMDHistoWorkspace.cpp
 	src/CreateMDWorkspace.cpp
+	src/CutMD.cpp
 	src/DivideMD.cpp
 	src/EqualToMD.cpp
 	src/EvaluateMDFunction.cpp
 	src/ExponentialMD.cpp
 	src/FakeMDEventData.cpp
 	src/FindPeaksMD.cpp
+	src/FitMD.cpp
 	src/GreaterThanMD.cpp
 	src/IDynamicRebinning.cpp
+	src/ImportMDEventWorkspace.cpp
+	src/ImportMDHistoWorkspace.cpp
+	src/ImportMDHistoWorkspaceBase.cpp
+	src/Integrate3DEvents.cpp
+	src/IntegrateEllipsoids.cpp
 	src/IntegrateFlux.cpp
 	src/IntegratePeaksMD.cpp
 	src/IntegratePeaksMD2.cpp
@@ -42,14 +57,23 @@ set ( SRC_FILES
 	src/LoadMD.cpp
 	src/LoadSQW.cpp
 	src/LogarithmMD.cpp
+	src/MDEventWSWrapper.cpp
 	src/MDNormDirectSC.cpp
 	src/MDNormSCD.cpp
+	src/MDTransfAxisNames.cpp
+	src/MDTransfFactory.cpp
+	src/MDTransfModQ.cpp
+	src/MDTransfNoQ.cpp
+	src/MDTransfQ3D.cpp
+	src/MDWSDescription.cpp
+	src/MDWSTransform.cpp
 	src/MaskMD.cpp
 	src/MergeMD.cpp
 	src/MergeMDFiles.cpp
 	src/MinusMD.cpp
 	src/MultiplyMD.cpp
 	src/NotMD.cpp
+	src/OneStepMDEW.cpp
 	src/OrMD.cpp
 	src/PlusMD.cpp
 	src/PowerMD.cpp
@@ -69,6 +93,12 @@ set ( SRC_FILES
 	src/Quantification/Resolution/TobyFitYVector.cpp
 	src/Quantification/ResolutionConvolvedCrossSection.cpp
 	src/Quantification/SimulateResolutionConvolvedModel.cpp
+	src/QueryMDWorkspace.cpp
+	src/ReflectometryTransform.cpp
+	src/ReflectometryTransformKiKf.cpp
+	src/ReflectometryTransformP.cpp
+	src/ReflectometryTransformQxQz.cpp
+	src/SaveIsawQvector.cpp
 	src/SaveMD.cpp
 	src/SaveZODS.cpp
 	src/SetMDUsingMask.cpp
@@ -78,6 +108,8 @@ set ( SRC_FILES
 	src/ThresholdMD.cpp
 	src/TransformMD.cpp
 	src/UnaryOperationMD.cpp
+	src/UnitsConversionHelper.cpp
+	src/UserFunctionMD.cpp
 	src/Vector3DParameterParser.cpp
 	src/WeightedMeanMD.cpp
 	src/XorMD.cpp
@@ -92,12 +124,16 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/BinMD.h
 	inc/MantidMDAlgorithms/BinaryOperationMD.h
 	inc/MantidMDAlgorithms/BooleanBinaryOperationMD.h
+	inc/MantidMDAlgorithms/BoxControllerSettingsAlgorithm.h
 	inc/MantidMDAlgorithms/CalculateCoverageDGS.h
+	inc/MantidMDAlgorithms/CalculateReflectometryQBase.h
 	inc/MantidMDAlgorithms/CentroidPeaksMD.h
 	inc/MantidMDAlgorithms/CentroidPeaksMD2.h
 	inc/MantidMDAlgorithms/CloneMDWorkspace.h
 	inc/MantidMDAlgorithms/CompareMDWorkspaces.h
+	inc/MantidMDAlgorithms/ConvToMDBase.h
 	inc/MantidMDAlgorithms/ConvertCWPDMDToSpectra.h
+	inc/MantidMDAlgorithms/ConvertMDHistoToMatrixWorkspace.h
 	inc/MantidMDAlgorithms/ConvertSpiceDataToRealSpace.h
 	inc/MantidMDAlgorithms/ConvertToDetectorFaceMD.h
 	inc/MantidMDAlgorithms/ConvertToDiffractionMDWorkspace.h
@@ -106,8 +142,10 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/ConvertToMDMinMaxGlobal.h
 	inc/MantidMDAlgorithms/ConvertToMDMinMaxLocal.h
 	inc/MantidMDAlgorithms/ConvertToMDParent.h
+	inc/MantidMDAlgorithms/ConvertToReflectometryQ.h
 	inc/MantidMDAlgorithms/CreateMDHistoWorkspace.h
 	inc/MantidMDAlgorithms/CreateMDWorkspace.h
+	inc/MantidMDAlgorithms/CutMD.h
 	inc/MantidMDAlgorithms/DivideMD.h
 	inc/MantidMDAlgorithms/DllConfig.h
 	inc/MantidMDAlgorithms/EqualToMD.h
@@ -115,9 +153,15 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/ExponentialMD.h
 	inc/MantidMDAlgorithms/FakeMDEventData.h
 	inc/MantidMDAlgorithms/FindPeaksMD.h
+	inc/MantidMDAlgorithms/FitMD.h
 	inc/MantidMDAlgorithms/GSLFunctions.h
 	inc/MantidMDAlgorithms/GreaterThanMD.h
 	inc/MantidMDAlgorithms/IDynamicRebinning.h
+	inc/MantidMDAlgorithms/ImportMDEventWorkspace.h
+	inc/MantidMDAlgorithms/ImportMDHistoWorkspace.h
+	inc/MantidMDAlgorithms/ImportMDHistoWorkspaceBase.h
+	inc/MantidMDAlgorithms/Integrate3DEvents.h
+	inc/MantidMDAlgorithms/IntegrateEllipsoids.h
 	inc/MantidMDAlgorithms/IntegrateFlux.h
 	inc/MantidMDAlgorithms/IntegratePeaksMD.h
 	inc/MantidMDAlgorithms/IntegratePeaksMD2.h
@@ -129,14 +173,23 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/LoadMD.h
 	inc/MantidMDAlgorithms/LoadSQW.h
 	inc/MantidMDAlgorithms/LogarithmMD.h
+	inc/MantidMDAlgorithms/MDEventWSWrapper.h
 	inc/MantidMDAlgorithms/MDNormDirectSC.h
 	inc/MantidMDAlgorithms/MDNormSCD.h
+	inc/MantidMDAlgorithms/MDTransfAxisNames.h
+	inc/MantidMDAlgorithms/MDTransfFactory.h
+	inc/MantidMDAlgorithms/MDTransfModQ.h
+	inc/MantidMDAlgorithms/MDTransfNoQ.h
+	inc/MantidMDAlgorithms/MDTransfQ3D.h
+	inc/MantidMDAlgorithms/MDWSDescription.h
+	inc/MantidMDAlgorithms/MDWSTransform.h
 	inc/MantidMDAlgorithms/MaskMD.h
 	inc/MantidMDAlgorithms/MergeMD.h
 	inc/MantidMDAlgorithms/MergeMDFiles.h
 	inc/MantidMDAlgorithms/MinusMD.h
 	inc/MantidMDAlgorithms/MultiplyMD.h
 	inc/MantidMDAlgorithms/NotMD.h
+	inc/MantidMDAlgorithms/OneStepMDEW.h
 	inc/MantidMDAlgorithms/OrMD.h
 	inc/MantidMDAlgorithms/PlusMD.h
 	inc/MantidMDAlgorithms/PowerMD.h
@@ -156,6 +209,12 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/Quantification/Resolution/TobyFitYVector.h
 	inc/MantidMDAlgorithms/Quantification/ResolutionConvolvedCrossSection.h
 	inc/MantidMDAlgorithms/Quantification/SimulateResolutionConvolvedModel.h
+	inc/MantidMDAlgorithms/QueryMDWorkspace.h
+	inc/MantidMDAlgorithms/ReflectometryTransform.h
+	inc/MantidMDAlgorithms/ReflectometryTransformKiKf.h
+	inc/MantidMDAlgorithms/ReflectometryTransformP.h
+	inc/MantidMDAlgorithms/ReflectometryTransformQxQz.h
+	inc/MantidMDAlgorithms/SaveIsawQvector.h
 	inc/MantidMDAlgorithms/SaveMD.h
 	inc/MantidMDAlgorithms/SaveZODS.h
 	inc/MantidMDAlgorithms/SetMDUsingMask.h
@@ -165,6 +224,7 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/ThresholdMD.h
 	inc/MantidMDAlgorithms/TransformMD.h
 	inc/MantidMDAlgorithms/UnaryOperationMD.h
+	inc/MantidMDAlgorithms/UnitsConversionHelper.h
 	inc/MantidMDAlgorithms/Vector3DParameter.h
 	inc/MantidMDAlgorithms/Vector3DParameterParser.h
 	inc/MantidMDAlgorithms/WeightedMeanMD.h
@@ -178,6 +238,7 @@ set ( TEST_FILES
 	#CreateMDFitWorkspaceTest.h
 	AndMDTest.h
 	BooleanBinaryOperationMDTest.h
+	BoxControllerSettingsAlgorithmTest.h
 	CachedExperimentInfoTest.h
 	CalculateCoverageDGSTest.h
 	CentroidPeaksMD2Test.h
@@ -186,6 +247,7 @@ set ( TEST_FILES
 	CompareMDWorkspacesTest.h
 	ConvertCWPDMDToSpectraTest.h
 	ConvertEventsToMDTest.h
+	ConvertMDHistoToMatrixWorkspaceTest.h
 	ConvertSpiceDataToRealSpaceTest.h
 	ConvertToDetectorFaceMDTest.h
 	ConvertToDiffractionMDWorkspace2Test.h
@@ -195,17 +257,24 @@ set ( TEST_FILES
 	ConvertToMDMinMaxLocalTest.h
 	ConvertToMDTest.h
 	ConvertToQ3DdETest.h
+	ConvertToReflectometryQTest.h
 	CreateMDHistoWorkspaceTest.h
 	CreateMDWorkspaceTest.h
+	CutMDTest.h
 	DivideMDTest.h
 	EqualToMDTest.h
 	EvaluateMDFunctionTest.h
 	ExponentialMDTest.h
 	FakeMDEventDataTest.h
 	FindPeaksMDTest.h
+	FitMDTest.h
 	FitResolutionConvolvedModelTest.h
 	ForegroundModelTest.h
 	GreaterThanMDTest.h
+	ImportMDEventWorkspaceTest.h
+	ImportMDHistoWorkspaceTest.h
+	Integrate3DEventsTest.h
+	IntegrateEllipsoidsTest.h
 	IntegrateFluxTest.h
 	IntegratePeaksMD2Test.h
 	IntegratePeaksMDTest.h
@@ -215,9 +284,16 @@ set ( TEST_FILES
 	LoadMDTest.h
 	LoadSQWTest.h
 	LogarithmMDTest.h
+	MDEventWSWrapperTest.h
 	MDNormDirectSCTest.h
 	MDNormSCDTest.h
 	MDResolutionConvolutionFactoryTest.h
+	MDTransfAxisNamesTest.h
+	MDTransfFactoryTest.h
+	MDTransfModQTest.h
+	MDTransfQ3DTest.h
+	MDWSDescriptionTest.h
+	MDWSTransfTest.h
 	MaskMDTest.h
 	MergeMDFilesTest.h
 	MergeMDTest.h
@@ -226,11 +302,17 @@ set ( TEST_FILES
 	MullerAnsatzTest.h
 	MultiplyMDTest.h
 	NotMDTest.h
+	OneStepMDEWTest.h
 	OrMDTest.h
 	PlusMDTest.h
 	PowerMDTest.h
 	PreprocessDetectorsToMDTest.h
+	QueryMDWorkspaceTest.h
+	ReflectometryTransformKiKfTest.h
+	ReflectometryTransformPTest.h
+	ReflectometryTransformQxQzTest.h
 	ResolutionConvolvedCrossSectionTest.h
+	SaveIsawQvectorTest.h
 	SaveMDTest.h
 	SaveZODSTest.h
 	SetMDUsingMaskTest.h
@@ -245,6 +327,7 @@ set ( TEST_FILES
 	TobyFitYVectorTest.h
 	TransformMDTest.h
 	UnaryOperationMDTest.h
+	UnitsConversionHelperTest.h
 	WeightedMeanMDTest.h
 	XorMDTest.h
 )
@@ -274,8 +357,8 @@ endif ()
 # Add to the 'Framework' group in VS
 set_property ( TARGET MDAlgorithms PROPERTY FOLDER "MantidFramework" )
 
-include_directories ( inc ../MDEvents/inc )
-target_link_libraries ( MDAlgorithms ${MANTIDLIBS} MDEvents )
+include_directories ( inc )
+target_link_libraries ( MDAlgorithms ${MANTIDLIBS} )
 
 # Add the unit tests directory
 add_subdirectory ( test )

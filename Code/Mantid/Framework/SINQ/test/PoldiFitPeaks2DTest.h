@@ -6,6 +6,8 @@
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/AlgorithmManager.h"
 
+#include "MantidKernel/Matrix.h"
+
 #include "MantidSINQ/PoldiFitPeaks2D.h"
 #include "MantidSINQ/PoldiUtilities/PoldiSpectrumDomainFunction.h"
 #include "MantidSINQ/PoldiUtilities/PoldiMockInstrumentHelpers.h"
@@ -14,6 +16,7 @@
 using namespace Mantid::Poldi;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
+using namespace Mantid::Kernel;
 
 class PoldiFitPeaks2DTest : public CxxTest::TestSuite
 {
@@ -234,6 +237,18 @@ public:
         PoldiPeakCollection_sptr peaks = PoldiPeakCollectionHelpers::createPoldiPeakCollectionNormalized();
         IFunction_sptr poldi2DFunction = spectrumCalculator.getFunctionFromPeakCollection(peaks);
 
+        size_t nParams = poldi2DFunction->nParams();
+
+        // Make a matrix with diagonal elements = 0.05 and set as covariance matrix
+        boost::shared_ptr<DblMatrix> matrix = boost::make_shared<DblMatrix>(nParams, nParams, true);
+        matrix->operator *=(0.05);
+        poldi2DFunction->setCovarianceMatrix(matrix);
+
+        // Also set errors for old behavior
+        for(size_t i = 0; i < nParams; ++i) {
+            poldi2DFunction->setError(i, sqrt(0.05));
+        }
+
         PoldiPeakCollection_sptr peaksFromFunction = spectrumCalculator.getPeakCollectionFromFunction(poldi2DFunction);
 
         TS_ASSERT_EQUALS(peaksFromFunction->peakCount(), peaks->peakCount());
@@ -241,8 +256,11 @@ public:
             PoldiPeak_sptr functionPeak = peaksFromFunction->peak(i);
             PoldiPeak_sptr referencePeak = peaks->peak(i);
 
-            TS_ASSERT_EQUALS(functionPeak->d(), referencePeak->d());
-            TS_ASSERT_EQUALS(functionPeak->fwhm(), referencePeak->fwhm());
+            TS_ASSERT_EQUALS(functionPeak->d().value(), referencePeak->d().value());
+            TS_ASSERT_EQUALS(functionPeak->fwhm().value(), referencePeak->fwhm().value());
+            TS_ASSERT_DELTA(functionPeak->d().error(), sqrt(0.05), 1e-6);
+            TS_ASSERT_DELTA(functionPeak->fwhm(PoldiPeak::AbsoluteD).error(), sqrt(0.05) * (2.0 * sqrt(2.0 * log(2.0))), 1e-6);
+
         }
     }
 
