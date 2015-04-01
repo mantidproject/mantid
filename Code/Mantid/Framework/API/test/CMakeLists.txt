@@ -17,7 +17,6 @@ if ( CXXTEST_FOUND )
     cxxtest_add_test ( APITest ${TEST_FILES} )
     target_link_libraries( APITest API  )
   endif()
-  target_link_libraries( APITest )
   add_dependencies ( FrameworkTests APITest )
   # Test data
   add_dependencies ( APITest StandardTestData )
