@@ -23,11 +23,11 @@ public:
     TS_ASSERT_THROWS_NOTHING(cri = fac->computeResInfos());
     TS_ASSERT_EQUALS(cri.size(), 0);
 
-    fac = NULL;
-    TS_ASSERT_THROWS(fac = createCRInfoInMinimalFacility(
+    boost::shared_ptr<FacilityInfo> another;
+    TS_ASSERT_THROWS(another = createCRInfoInMinimalFacility(
                          "<computeResource fooAtt=\"barVal\"/>"),
                      std::runtime_error);
-    TS_ASSERT(!fac);
+    TS_ASSERT(!another);
   }
 
   void test_noURLTag() {
