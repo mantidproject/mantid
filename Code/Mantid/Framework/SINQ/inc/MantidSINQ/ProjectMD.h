@@ -30,7 +30,7 @@
 
 #include "MantidSINQ/DllConfig.h"
 #include "MantidAPI/Algorithm.h"
-#include "MantidMDEvents/MDHistoWorkspace.h"
+#include "MantidAPI/IMDHistoWorkspace.h"
 
 class MANTID_SINQ_DLL ProjectMD : public Mantid::API::Algorithm {
 public:

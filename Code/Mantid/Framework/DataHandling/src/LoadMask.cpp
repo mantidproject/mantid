@@ -833,8 +833,9 @@ void LoadMask::parseISISStringToVector(string ins,
 /** Initialize the Mask Workspace with instrument
  */
 void LoadMask::intializeMaskWorkspace() {
+  const bool ignoreDirs(true);
   const std::string idfPath =
-      API::FileFinder::Instance().getFullPath(m_instrumentPropValue);
+    API::FileFinder::Instance().getFullPath(m_instrumentPropValue, ignoreDirs);
 
   MatrixWorkspace_sptr tempWs(new DataObjects::Workspace2D());
 

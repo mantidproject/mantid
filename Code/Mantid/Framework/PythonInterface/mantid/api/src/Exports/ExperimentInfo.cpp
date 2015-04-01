@@ -11,7 +11,7 @@ using Mantid::PythonInterface::Policies::RemoveConstSharedPtr;
 using namespace boost::python;
 
 /// Overload generator for getInstrumentFilename
-BOOST_PYTHON_FUNCTION_OVERLOADS(getInstrumentFilename_Overload, ExperimentInfo::getInstrumentFilename, 1, 2);
+BOOST_PYTHON_FUNCTION_OVERLOADS(getInstrumentFilename_Overload, ExperimentInfo::getInstrumentFilename, 1, 2)
 
 void export_ExperimentInfo()
 {

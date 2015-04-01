@@ -1,5 +1,5 @@
 #include "MantidMDAlgorithms/WeightedMeanMD.h"
-#include "MantidMDEvents/MDHistoWorkspaceIterator.h"
+#include "MantidDataObjects/MDHistoWorkspaceIterator.h"
 #include "MantidKernel/System.h"
 
 using namespace Mantid::Kernel;
@@ -37,9 +37,9 @@ void WeightedMeanMD::checkInputs() {
 //----------------------------------------------------------------------------------------------
 /// Run the algorithm with a MDHisotWorkspace as output and operand
 void WeightedMeanMD::execHistoHisto(
-    Mantid::MDEvents::MDHistoWorkspace_sptr out,
-    Mantid::MDEvents::MDHistoWorkspace_const_sptr operand) {
-  using MDEvents::MDHistoWorkspaceIterator;
+    Mantid::DataObjects::MDHistoWorkspace_sptr out,
+    Mantid::DataObjects::MDHistoWorkspace_const_sptr operand) {
+  using DataObjects::MDHistoWorkspaceIterator;
   MDHistoWorkspaceIterator *lhs_it =
       dynamic_cast<MDHistoWorkspaceIterator *>(out->createIterator());
   MDHistoWorkspaceIterator *rhs_it =
@@ -79,7 +79,7 @@ void WeightedMeanMD::execHistoHisto(
 //----------------------------------------------------------------------------------------------
 /// Run the algorithm with a MDHisotWorkspace as output, scalar and operand
 void WeightedMeanMD::execHistoScalar(
-    Mantid::MDEvents::MDHistoWorkspace_sptr,
+    Mantid::DataObjects::MDHistoWorkspace_sptr,
     Mantid::DataObjects::WorkspaceSingleValue_const_sptr) {
   throw std::runtime_error(
       this->name() + " can only be run with two MDHistoWorkspaces as inputs");

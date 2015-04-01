@@ -33,7 +33,7 @@ using namespace Mantid::DataObjects;
 namespace Mantid {
 namespace DataHandling {
 
-DECLARE_FILELOADER_ALGORITHM(LoadCanSAS1D2);
+DECLARE_FILELOADER_ALGORITHM(LoadCanSAS1D2)
 
 /// constructor
 LoadCanSAS1D2::LoadCanSAS1D2() : LoadCanSAS1D() {}

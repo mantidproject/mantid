@@ -1,26 +1,20 @@
 #ifndef MANTID_MDEVENTS_SAVEMDEWTEST_H_
 #define MANTID_MDEVENTS_SAVEMDEWTEST_H_
 
-#include "MantidKernel/System.h"
-#include "MantidKernel/Timer.h"
-#include "MantidMDEvents/MDEventFactory.h"
+#include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidAPI/FrameworkManager.h"
+#include "MantidDataObjects/MDEventFactory.h"
 #include "MantidMDAlgorithms/BinMD.h"
 #include "MantidMDAlgorithms/SaveMD.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
-#include "MantidAPI/FrameworkManager.h"
-#include "MantidAPI/IMDEventWorkspace.h"
 
 #include <cxxtest/TestSuite.h>
-#include <iomanip>
-#include <iostream>
-#include "MantidKernel/CPUTimer.h"
+
 #include <Poco/File.h>
 
-
-using namespace Mantid::MDEvents;
-using namespace Mantid::MDAlgorithms;
 using namespace Mantid::API;
-using Mantid::Kernel::CPUTimer;
+using namespace Mantid::DataObjects;
+using namespace Mantid::MDAlgorithms;
 
 class SaveMDTester: public SaveMD
 {
@@ -85,8 +79,6 @@ public:
 
     IMDEventWorkspace_sptr iws = ws;
 
-    CPUTimer tim;
-
     SaveMD alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
     TS_ASSERT( alg.isInitialized() )
@@ -101,8 +93,6 @@ public:
 
     alg.execute();
     TS_ASSERT( alg.isExecuted() );
-
-    std::cout << tim << " to save " << ws->getBoxController()->getMaxId() << " boxes." << std::endl;
 
     std::string this_filename = alg.getProperty("Filename");
     TSM_ASSERT( "File was indeed created", Poco::File(this_filename).exists());
@@ -193,8 +183,6 @@ public:
 
     IMDEventWorkspace_sptr iws = ws;
 
-    CPUTimer tim;
-
     SaveMD alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
     TS_ASSERT( alg.isInitialized() )
@@ -268,8 +256,6 @@ public:
     doTestHisto(ws);
   }
 
-
-
 };
 
 
@@ -280,8 +266,6 @@ public:
   MDEventWorkspace3Lean::sptr  ws;
   void setUp()
   {
-    CPUTimer tim;
-
     // Make a 1D MDEventWorkspace
     ws = MDEventsTestHelper::makeMDEW<3>(10, 0.0, 10.0, 0);
     ws->getBoxController()->setSplitInto(5);
@@ -292,19 +276,11 @@ public:
     FrameworkManager::Instance().exec("FakeMDEventData", 4,
         "InputWorkspace", "SaveMDTestPerformance_ws", "UniformParams", "10000000");
 
-    std::cout << tim << " to fake the data." << std::endl;
     ws->refreshCache();
-    std::cout << tim << " to refresh cache." << std::endl;
-
-//    // There are this many boxes, so this is the max ID.
-//    TS_ASSERT_EQUALS( ws->getBoxController()->getMaxId(), 11111);
-
   }
 
   void test_exec_3D()
   {
-    CPUTimer tim;
-
     SaveMD alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
     TS_ASSERT( alg.isInitialized() )
@@ -312,8 +288,6 @@ public:
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("Filename", "SaveMDTestPerformance.nxs") );
     alg.execute();
     TS_ASSERT( alg.isExecuted() );
-
-    std::cout << tim << " to save " << ws->getBoxController()->getMaxId() << " boxes with " << double(ws->getNPoints())/1e6 << " million events." << std::endl;
   }
 
 

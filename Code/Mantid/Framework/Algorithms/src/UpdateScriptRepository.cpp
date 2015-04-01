@@ -22,10 +22,10 @@ UpdateScriptRepository::~UpdateScriptRepository() {}
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string UpdateScriptRepository::name() const {
   return "UpdateScriptRepository";
-};
+}
 
 /// Algorithm's version for identification. @see Algorithm::version
-int UpdateScriptRepository::version() const { return 1; };
+int UpdateScriptRepository::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
 const std::string UpdateScriptRepository::category() const { return "Utility"; }

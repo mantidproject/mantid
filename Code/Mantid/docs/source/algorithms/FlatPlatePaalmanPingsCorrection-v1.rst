@@ -23,7 +23,8 @@ available in `RAL Technical Report 74-103
 Restrictions on the input workspace
 ###################################
 
-The input workspace must have units of wavelength.
+The input workspace must have a fully defined instrument that has X axis units
+of wavelength.
 
 Usage
 -----

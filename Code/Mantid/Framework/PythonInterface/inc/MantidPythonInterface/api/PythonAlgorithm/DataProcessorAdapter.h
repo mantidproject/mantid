@@ -100,8 +100,8 @@ public:
 
 private:
   /// The PyObject must be supplied to construct the object
-  DISABLE_DEFAULT_CONSTRUCT(DataProcessorAdapter);
-  DISABLE_COPY_AND_ASSIGN(DataProcessorAdapter);
+  DISABLE_DEFAULT_CONSTRUCT(DataProcessorAdapter)
+  DISABLE_COPY_AND_ASSIGN(DataProcessorAdapter)
 };
 }
 }

@@ -18,7 +18,7 @@ struct GlobalInterpreterLock
     PyGILState_Release(m_state);
   }
 private:
-  Q_DISABLE_COPY(GlobalInterpreterLock);
+  Q_DISABLE_COPY(GlobalInterpreterLock)
   /// Current GIL state
   PyGILState_STATE m_state;
 };
