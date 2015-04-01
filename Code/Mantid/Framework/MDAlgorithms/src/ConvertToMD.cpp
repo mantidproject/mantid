@@ -515,6 +515,11 @@ void ConvertToMD::performInitialSplitting(API::IMDEventWorkspace_sptr spws,
     // dimensions
     if (dim < dimCutoff) {
       bc->setSplitInto(dim, initialSplitSetting);
+      bc->setSplitTopInto(dim, initialSplitSetting);
+    }
+    else
+    {
+      bc->setSplitTopInto(dim, bc->getSplitInto(dim));
     }
   }
 

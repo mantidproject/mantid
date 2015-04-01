@@ -7,8 +7,11 @@
 #include "MantidTestHelpers/BoxControllerDummyIO.h"
 #include <cxxtest/TestSuite.h>
 #include <map>
+#include <vector>
 #include <memory>
+#include <stdexcept>
 #include <boost/make_shared.hpp>
+#include <boost/optional.hpp>
 
 using namespace Mantid;
 using namespace Mantid::API;
@@ -101,7 +104,26 @@ public:
     }
   }
 
+  void test_setSplitTopIntoWorksCorrectly() 
+  {
+    BoxController sc(3);
+    sc.setSplitTopInto(0,10);
+    sc.setSplitTopInto(1,20);
+    sc.setSplitTopInto(2,30);
 
+    boost::optional<std::vector<size_t>> splitTopInto = sc.getSplitTopInto();
+
+    TSM_ASSERT_EQUALS("Should have three dimensions", splitTopInto.get().size(), 3);
+    TSM_ASSERT_EQUALS("Should have a value of 10 in the first dimension", splitTopInto.get()[0], 10);
+    TSM_ASSERT_EQUALS("Should have a value of 20 in the second dimension", splitTopInto.get()[1], 20);
+    TSM_ASSERT_EQUALS("Should have a value of 30 in the third dimension", splitTopInto.get()[2], 30);
+  }
+
+  void test_setSplitTopIntoThrowsForWrongDimension()
+  {
+    BoxController sc(1);
+    TSM_ASSERT_THROWS("Should throw for setting a wrong dimension", sc.setSplitTopInto(1,10), std::invalid_argument);
+  }
 
   void doTest_numBoxes(BoxController & bc, size_t expectedNumEntries)
   {
@@ -167,6 +189,18 @@ public:
     {
         TS_ASSERT_DIFFERS(a.getFileIO(),b.getFileIO());
     }
+
+    if (a.getSplitTopInto() && b.getSplitTopInto())
+    {
+      for (size_t d=0; d < a.getNDims(); d++)
+      {
+        TS_ASSERT_EQUALS(a.getSplitTopInto().get()[d], b.getSplitTopInto().get()[d]);
+      }
+    }
+    else
+    {
+      TS_ASSERT_EQUALS(a.getSplitTopInto(), b.getSplitTopInto());
+    }
   }
 
   /// Generate XML and read it back
@@ -188,6 +222,26 @@ public:
     compareBoxControllers(a, b);
   }
 
+  void test_xmlWithSplitTopIntoBeingSet()
+  {
+    BoxController a(2);
+    a.setMaxDepth(4);
+    a.setSplitInto(10);
+    a.setMaxDepth(10);
+    a.setMaxId(123456);
+    TSM_ASSERT_THROWS_NOTHING("Should add the first dimension", a.setSplitTopInto(0,10));
+    TSM_ASSERT_THROWS_NOTHING("Should add the second dimension", a.setSplitTopInto(1,20));
+
+    std::string xml = a.toXMLString();
+    TS_ASSERT(!xml.empty());
+
+    // Read it back
+    BoxController b(1);
+    b.fromXMLString(xml);
+    // Check that it is the same
+    compareBoxControllers(a, b);
+  }
+
   void test_Clone()
   {
     BoxController a(2);
@@ -195,6 +249,21 @@ public:
     a.setSplitInto(10);
     a.setMaxDepth(10);
     a.setMaxId(123456);
+    auto b  = BoxController_sptr(a.clone());
+    // Check that settings are the same but BC are different
+    compareBoxControllers(a, *b);
+  }
+
+  void test_CloneWithSplitTopIntoBeingSet() 
+  {
+    BoxController a(2);
+    a.setMaxDepth(4);
+    a.setSplitInto(10);
+    a.setMaxDepth(10);
+    a.setMaxId(123456);
+    TSM_ASSERT_THROWS_NOTHING("Should add the first dimension", a.setSplitTopInto(0,10));
+    TSM_ASSERT_THROWS_NOTHING("Should add the second dimension", a.setSplitTopInto(1,20));
+
     auto b  = BoxController_sptr(a.clone());
     // Check that settings are the same but BC are different
     compareBoxControllers(a, *b);
@@ -243,6 +312,9 @@ public:
   {
     // Check the constructor defaults.
     BoxController box_controller(2);
+
+    boost::optional<std::vector<size_t>> splitTopInto = box_controller.getSplitTopInto();
+    TS_ASSERT(!splitTopInto)
     TS_ASSERT_EQUALS(2, box_controller.getNDims());
     TS_ASSERT_EQUALS(1, box_controller.getNumSplit());
     TS_ASSERT_EQUALS(0, box_controller.getMaxId());
