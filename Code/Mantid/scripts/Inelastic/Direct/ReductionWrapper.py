@@ -346,6 +346,7 @@ class ReductionWrapper(object):
             config['defaultsave.directory'] = str(output_directory)
 
         timeToWait = self._wait_for_file
+        wait_counter=0
         if timeToWait > 0:
             Found,input_file = PropertyManager.sample_run.find_file(be_quet=True)
             while not Found:
@@ -355,6 +356,21 @@ class ReductionWrapper(object):
 
                 self._run_pause(timeToWait)
                 Found,input_file = PropertyManager.sample_run.find_file(file_hint=file_hint,be_quet=True)
+                if Found:
+                    file,found_ext=os.path.splitext(input_file)
+                    if found_ext != fext:
+                        wait_counter+=1
+                        if wait_counter<2:
+                            timeToWait =60
+                            self.reducer.prop_man.log(\
+                            "*** Requested file with extension {0} but found one with extension {1}\n"\
+                            "    The target may not have been delivered from the DAE machine\n".format(fext,found_ext))
+                            Found = False
+                        else:
+                            wait_counter = 0
+                else:
+                    pass # not found, wait more
+            #endWhile
             converted_to_energy_transfer_ws = self.reducer.convert_to_energy(None,input_file)
 
         else:

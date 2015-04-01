@@ -891,20 +891,24 @@ class RunDescriptor(PropDescriptor):
         #
         file_hint,old_ext = self.file_hint(run_num_str,filePath,fileExt,**kwargs)
 
+        def _check_ext(file):
+            fname,fex = os.path.splitext(file)
+            if old_ext != fex:
+                message = '*** Cannot find run-file with extension {0}.\n'\
+                          '    Found file {1} instead'.format(old_ext,file)
+                RunDescriptor._logger(message,'notice')
+            self._run_file_path = os.path.dirname(fname)
+        #------------------------------------------------
         try:
             file = FileFinder.findRuns(file_hint)[0]
+            _check_ext(file)
             return (True,file)
         except RuntimeError:
             try:
                 file_hint,oext = os.path.splitext(file_hint)
                 file = FileFinder.findRuns(file_hint)[0]
-                fname,fex = os.path.splitext(file)
+                _check_ext(file)
                 self._fext = fex
-                if old_ext != fex:
-                    message = '*** Cannot find run-file with extension {0}.\n'\
-                              '    Found file {1} instead'.format(old_ext,file)
-                    RunDescriptor._logger(message,'notice')
-                self._run_file_path = os.path.dirname(fname)
                 return (True,file)
             except RuntimeError:
                 message = '*** Cannot find file matching hint {0} on Mantid search paths '.\
