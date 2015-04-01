@@ -170,11 +170,11 @@ Which results in the following output:
 
 .. testoutput :: ExQueryPointGroups
 
-    All point groups: ['-1','-3','-3 r','-31m','-3m r','-3m1','-4','-42m','-43m','-4m2','-6','-62m','-6m2','1','112/m','2','2/m','222','23','3','3 r','312','31m','32 r','321','3m r','3m1','4','4/m','4/mmm','422','432','4mm','6','6/m','6/mmm','622','6mm','m','m-3','m-3m','mm2','mmm']
+    All point groups: ['-1','-3','-3 r','-31m','-3m','-3m r','-3m1','-4','-42m','-43m','-4m2','-6','-62m','-6m2','1','112/m','2','2/m','222','23','3','3 r','312','31m','32','32 r','321','3m','3m r','3m1','4','4/m','4/mmm','422','432','4mm','6','6/m','6/mmm','622','6mm','m','m-3','m-3m','mm2','mmm']
     Cubic point groups: ['-43m','23','432','m-3','m-3m']
     Tetragonal point groups: ['-4','-42m','-4m2','4','4/m','4/mmm','422','4mm']
 
-The point groups with an extra ``r`` at the end are trigonal point groups with rhombohedral axes. Trigonal point groups without that additional letter use the hexagonal coordinate system.
+The point groups with an extra ``r`` at the end are trigonal point groups with rhombohedral axes. Trigonal point groups without that additional letter use the hexagonal coordinate system. For some of them there are two different axis choices, for example :math:`\bar{3}m`, which can be defined as :math:`\bar{3}m1` or :math:`\bar{3}1m`. Creating it by the symbol ``-3m`` defaults to :math:`\bar{3}m1`.
 
 After having obtained a ``PointGroup``-object, it can be used for working with reflection data, more specifically :math:`hkl`-indices. It's possible to check whether two reflections are equivalent in a certain point group:
 
