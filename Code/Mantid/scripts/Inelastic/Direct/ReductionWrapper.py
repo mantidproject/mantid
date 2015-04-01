@@ -160,8 +160,8 @@ class ReductionWrapper(object):
             The method can be overloaded to return a workspace
             or workspace name to validate results against.
         """
-        if self.reducer.prop_man.save_file_name:
-            file_name = self.reducer.prop_man.save_file_name
+        if not PropertyManager.save_file_name._file_name is None:
+            file_name = self.reducer.prop_man._file_name
             if isinstance(file_name,api.Workspace):
                 return file_name
         else:
@@ -228,7 +228,8 @@ class ReductionWrapper(object):
                     config.appendDataSearchDir(path)
                 # it there bug in getFullPath? It returns the same string if given full path 
                 # but file has not been found
-                fileName = FileFinder.getFullPath(name)
+                name,fext=os.path.splitext(name)
+                fileName = FileFinder.getFullPath(name+'.nxs')
                 if len(fileName)>0:
                     build_validation = False
                     try:

@@ -862,6 +862,7 @@ class RunDescriptor(PropDescriptor):
             fname,old_ext = os.path.splitext(hint)
             if len(old_ext) == 0:
                 old_ext = self.get_fext()
+            fname = hint
         else:
             old_ext = self.get_fext()
             if fileExt is None:
@@ -892,20 +893,25 @@ class RunDescriptor(PropDescriptor):
 
         try:
             file = FileFinder.findRuns(file_hint)[0]
-            fname,fex = os.path.splitext(file)
-            self._fext = fex
-            if old_ext != fex:
-                message = '*** Cannot find run-file with extension {0}.\n'\
-                          '    Found file {1} instead'.format(old_ext,file)
-                RunDescriptor._logger(message,'notice')
-            self._run_file_path = os.path.dirname(fname)
             return (True,file)
         except RuntimeError:
-            message = '*** Cannot find file matching hint {0} on Mantid search paths '.\
-                       format(file_hint)
-            if not 'be_quet' in kwargs:
-                RunDescriptor._logger(message,'warning')
-            return (False,message)
+            try:
+                file_hint,oext = os.path.splitext(file_hint)
+                file = FileFinder.findRuns(file_hint)[0]
+                fname,fex = os.path.splitext(file)
+                self._fext = fex
+                if old_ext != fex:
+                    message = '*** Cannot find run-file with extension {0}.\n'\
+                              '    Found file {1} instead'.format(old_ext,file)
+                    RunDescriptor._logger(message,'notice')
+                self._run_file_path = os.path.dirname(fname)
+                return (True,file)
+            except RuntimeError:
+                message = '*** Cannot find file matching hint {0} on Mantid search paths '.\
+                        format(file_hint)
+                if not 'be_quet' in kwargs:
+                    RunDescriptor._logger(message,'warning')
+                return (False,message)
 #--------------------------------------------------------------------------------------------------------------------
 
     def load_file(self,inst_name,ws_name,run_number=None,load_mon_with_workspace=False,filePath=None,fileExt=None,**kwargs):
@@ -1439,7 +1445,9 @@ def build_run_file_name(run_num,inst,file_path='',fext=''):
     """Build the full name of a runfile from all possible components"""
     if fext is None:
         fext = ''
-    fname = '{0}{1}{2}'.format(inst,run_num,fext)
+    #HACK: current ISIS File format consist of 5 digit. It is defined somewhere in Mantid
+    # but redefined here. Should pick things up from MANTID
+    fname = '{0}{1:0>5}{2}'.format(inst,run_num,fext)
     if not file_path is None:
         if os.path.exists(file_path):
             fname = os.path.join(file_path,fname)
