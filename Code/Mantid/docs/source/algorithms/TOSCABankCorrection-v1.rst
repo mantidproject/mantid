@@ -41,4 +41,9 @@ The corrected spectra are then rebinned to the input workspace (using
 :ref:`RebinToWorkspace <algm-RebinToWorkspace>`) to preserve the X range and to
 maintain bin alignment.
 
+The sum spectra (containing both forward and back scattering detectors) is then
+recalculated by averaging the intensities of the two corrected spectra, this
+compensates for the broader peaks seen on the original sum spectra due to the
+misalignment of the peaks.
+
 .. categories::

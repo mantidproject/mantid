@@ -183,50 +183,45 @@ class TOSCABankCorrection(DataProcessorAlgorithm):
         @param bank_2_sf Bank 2 scale factor
         """
 
-        # Get the spectra for each bank plus sum of all banks
-        ExtractSingleSpectrum(InputWorkspace=self._input_ws,
-                              OutputWorkspace='__bank_1',
-                              WorkspaceIndex=0)
+        # Create a copy of the workspace with just bank spectra
+        CropWorkspace(InputWorkspace=self._input_ws,
+                      OutputWorkspace=self._output_ws,
+                      StartWorkspaceIndex=0,
+                      EndWorkspaceIndex=1)
 
-        ExtractSingleSpectrum(InputWorkspace=self._input_ws,
-                              OutputWorkspace='__bank_2',
-                              WorkspaceIndex=1)
+        # Scale bank 1 X axis
+        ScaleX(InputWorkspace=self._output_ws,
+               OutputWorkspace=self._output_ws,
+               Operation='Multiply',
+               Factor=bank_1_sf,
+               IndexMin=0,
+               IndexMax=0)
 
-        ExtractSingleSpectrum(InputWorkspace=self._input_ws,
-                              OutputWorkspace='__summed',
-                              WorkspaceIndex=2)
+        # Scale bank 2 X axis
+        ScaleX(InputWorkspace=self._output_ws,
+               OutputWorkspace=self._output_ws,
+               Operation='Multiply',
+               Factor=bank_2_sf,
+               IndexMin=1,
+               IndexMax=1)
 
-        # Correct with shift in X
-        ConvertAxisByFormula(InputWorkspace='__bank_1',
-                             OutputWorkspace='__bank_1',
-                             Axis='X', Formula='x=x*%f' % bank_1_sf)
+        # Rebin the corrected workspace to match the input
+        RebinToWorkspace(WorkspaceToRebin=self._output_ws,
+                         WorkspaceToMatch=self._input_ws,
+                         OutputWorkspace=self._output_ws)
 
-        ConvertAxisByFormula(InputWorkspace='__bank_2',
-                             OutputWorkspace='__bank_2',
-                             Axis='X', Formula='x=x*%f' % bank_2_sf)
+        # Recalculate the sum spectra from corrected banks
+        GroupDetectors(InputWorkspace=self._output_ws,
+                       OutputWorkspace='__sum',
+                       SpectraList=[0,1],
+                       Behaviour='Average')
 
-        # Rebin the two corrected spectra to the original workspace binning
-        RebinToWorkspace(WorkspaceToRebin='__bank_1',
-                         WorkspaceToMatch='__summed',
-                         OutputWorkspace='__bank_1')
-
-        RebinToWorkspace(WorkspaceToRebin='__bank_2',
-                         WorkspaceToMatch='__summed',
-                         OutputWorkspace='__bank_2')
-
-        # Append spectra to get output workspace
-        AppendSpectra(InputWorkspace1='__bank_1',
-                      InputWorkspace2='__bank_2',
-                      OutputWorkspace=self._output_ws)
-
+        # Add the new sum spectra to the output workspace
         AppendSpectra(InputWorkspace1=self._output_ws,
-                      InputWorkspace2='__summed',
+                      InputWorkspace2='__sum',
                       OutputWorkspace=self._output_ws)
 
-        # Remove temporary workspaces
-        DeleteWorkspace('__bank_1')
-        DeleteWorkspace('__bank_2')
-        DeleteWorkspace('__summed')
+        DeleteWorkspace('__sum')
 
 
 AlgorithmFactory.subscribe(TOSCABankCorrection)
