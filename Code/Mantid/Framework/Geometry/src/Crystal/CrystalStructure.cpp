@@ -247,9 +247,10 @@ void CrystalStructure::setPointGroupFromSpaceGroup(
   if (spaceGroup) {
     try {
       m_pointGroup =
-          PointGroupFactory::Instance().createPointGroupFromSpaceGroupSymbol(
-              spaceGroup->hmSymbol());
-    } catch (...) {
+          PointGroupFactory::Instance().createPointGroupFromSpaceGroup(
+              spaceGroup);
+    }
+    catch (...) {
       // do nothing - point group will be null
     }
   }

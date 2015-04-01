@@ -445,6 +445,8 @@ void Fit::exec() {
   }
   g_log.debug() << "Number of minimizer iterations=" << iter << "\n";
 
+  minimizer->finalize();
+
   if (iter >= maxIterations) {
     if (!errorString.empty()) {
       errorString += '\n';

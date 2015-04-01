@@ -9,12 +9,12 @@
 
 #include "MantidMDAlgorithms/DivideMD.h"
 #include "MantidTestHelpers/BinaryOperationMDTestHelper.h"
-#include "MantidMDEvents/MDHistoWorkspace.h"
+#include "MantidDataObjects/MDHistoWorkspace.h"
 
 using namespace Mantid;
 using namespace Mantid::MDAlgorithms;
 using namespace Mantid::API;
-using Mantid::MDEvents::MDHistoWorkspace_sptr;
+using Mantid::DataObjects::MDHistoWorkspace_sptr;
 
 /** Note: More detailed tests for the underlying
  * operations are in BinaryOperationMDTest and

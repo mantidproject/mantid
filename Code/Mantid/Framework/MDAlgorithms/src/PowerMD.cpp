@@ -53,7 +53,7 @@ void PowerMD::execEvent(Mantid::API::IMDEventWorkspace_sptr /*out*/) {
 
 //----------------------------------------------------------------------------------------------
 /// PowerMD::Run the algorithm with a MDHistoWorkspace
-void PowerMD::execHisto(Mantid::MDEvents::MDHistoWorkspace_sptr out) {
+void PowerMD::execHisto(Mantid::DataObjects::MDHistoWorkspace_sptr out) {
   double exponent = getProperty("Exponent");
   out->power(exponent);
 }

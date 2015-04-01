@@ -137,7 +137,7 @@ public:
    * @param numNodes number of nodes to use (optional and dependent on
    * implementation and compute resource)
    *
-   * @parm coresPerNode number of cores to use in each node (optional
+   * @param coresPerNode number of cores to use in each node (optional
    * and dependent on implemenation and compute resource)
    *
    * @return jobID string for the job started (if successful).
