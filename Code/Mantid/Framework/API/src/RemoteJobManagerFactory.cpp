@@ -78,7 +78,7 @@ RemoteJobManagerFactoryImpl::create(const std::string baseURL,
         "RemoteJobManagerFactory: failed to create a remote job manager of "
         "type (class) '" +
             jobManagerType + "' with base URL " + baseURL +
-            ". Error description: ",
+            ". Error description: " + e.what(),
         jobManagerType);
   }
 
