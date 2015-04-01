@@ -161,7 +161,7 @@ class ReductionWrapper(object):
             or workspace name to validate results against.
         """
         if not PropertyManager.save_file_name._file_name is None:
-            file_name = self.reducer.prop_man._file_name
+            file_name = PropertyManager.save_file_name._file_name
             if isinstance(file_name,api.Workspace):
                 return file_name
         else:
@@ -292,7 +292,8 @@ class ReductionWrapper(object):
         self.wait_for_file = current_wait_state
         self._run_from_web = current_web_state
         if result == 'Success!':
-            return True,'Reference file and reduced workspace are equivalent'
+            return True,'Reference file and reduced workspace are equal with accuracy {0:<3.2f}'\
+                        .format(TOLL)
         else:
             fname,ext = os.path.splitext(fileName)
             filename = fname+'-mismatch.nxs'
