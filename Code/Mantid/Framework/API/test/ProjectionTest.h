@@ -6,11 +6,113 @@
 #include "MantidAPI/Projection.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/TableRow.h"
-#include "MantidDataObjects/TableWorkspace.h"
+#include "MantidTestHelpers/FakeObjects.h"
 
 using namespace Mantid;
 using namespace Mantid::API;
-using namespace Mantid::DataObjects;
+
+namespace {
+// Provides a table that claims to have the given number of rows and columns.
+class DimensionedTable : public TableWorkspaceTester {
+public:
+  DimensionedTable(size_t cols, size_t rows)
+      : m_numColumns(cols), m_numRows(rows) {}
+  size_t columnCount() const { return m_numColumns; }
+  size_t rowCount() const { return m_numRows; }
+private:
+  size_t m_numColumns;
+  size_t m_numRows;
+};
+
+// Provides an example table that's properly formatted
+
+class NameColumn : public ColumnTester {
+public:
+  NameColumn() {
+    m_names[0] = "u";
+    m_names[1] = "v";
+    m_names[2] = "w";
+  }
+  size_t size() const { return 3; }
+
+  using ColumnTester::void_pointer;
+  const void* void_pointer(size_t index) const {
+    return &m_names[index];
+  }
+private:
+  std::string m_names[3];
+};
+
+class ValueColumn : public ColumnTester {
+public:
+  ValueColumn() {
+    m_values[0] = "1,1,0";
+    m_values[1] = "-1,1,0";
+    m_values[2] = "0,0,1";
+  }
+  size_t size() const { return 3; }
+
+  using ColumnTester::void_pointer;
+  const void* void_pointer(size_t index) const {
+    return &m_values[index];
+  }
+private:
+  std::string m_values[3];
+};
+
+class OffsetColumn : public ColumnTester {
+public:
+  OffsetColumn() {
+    m_offsets[0] = 0.5;
+    m_offsets[1] = 1.25;
+    m_offsets[2] = -10.0;
+  }
+  size_t size() const { return 3; }
+
+  using ColumnTester::void_pointer;
+  const void* void_pointer(size_t index) const {
+    return &m_offsets[index];
+  }
+private:
+  double m_offsets[3];
+};
+
+class UnitColumn : public ColumnTester {
+public:
+  UnitColumn() {
+    m_units[0] = "r";
+    m_units[1] = "a";
+    m_units[2] = "r";
+  }
+  size_t size() const { return 3; }
+
+  using ColumnTester::void_pointer;
+  const void* void_pointer(size_t index) const {
+    return &m_units[index];
+  }
+private:
+  std::string m_units[3];
+};
+
+class GoodTable : public TableWorkspaceTester {
+  size_t columnCount() const { return 4; }
+  size_t rowCount() const { return 3; }
+
+  using TableWorkspaceTester::getColumn;
+  Column_const_sptr getColumn(const std::string& name) const {
+    if (name == "name")
+      return Column_const_sptr(new NameColumn());
+    else if (name == "value")
+      return Column_const_sptr(new ValueColumn());
+    else if (name == "offset")
+      return Column_const_sptr(new OffsetColumn());
+    else if (name == "type")
+      return Column_const_sptr(new UnitColumn());
+    else
+      throw std::runtime_error("unknown column: " + name);
+  }
+};
+}
 
 class ProjectionTest : public CxxTest::TestSuite {
 public:
