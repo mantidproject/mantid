@@ -20,7 +20,7 @@
 
 using namespace Mantid::Crystal;
 using namespace Mantid::API;
-using namespace Mantid::MDEvents;
+using namespace Mantid::DataObjects;
 using namespace testing;
 
 namespace

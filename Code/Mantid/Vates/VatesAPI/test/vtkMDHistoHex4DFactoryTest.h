@@ -2,7 +2,7 @@
 #define VTK_MD_HEX_4D_FACTORY_TEST_H_
 
 #include "MantidAPI/IMDWorkspace.h"
-#include "MantidMDEvents/MDHistoWorkspace.h"
+#include "MantidDataObjects/MDHistoWorkspace.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 #include "MantidVatesAPI/TimeStepToTimeStep.h"
 #include "MantidVatesAPI/UserDefinedThresholdRange.h"
@@ -13,7 +13,7 @@
 #include "MantidVatesAPI/vtkStructuredGrid_Silent.h"
 
 using namespace Mantid;
-using namespace Mantid::MDEvents;
+using namespace Mantid::DataObjects;
 using namespace Mantid::VATES;
 using namespace Mantid::API;
 using namespace Mantid::Geometry;

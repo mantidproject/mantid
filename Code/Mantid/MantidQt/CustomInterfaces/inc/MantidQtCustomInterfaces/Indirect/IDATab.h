@@ -67,6 +67,8 @@ namespace IDA
     /// Check the binning between two workspaces match
     bool checkWorkspaceBinningMatches(Mantid::API::MatrixWorkspace_const_sptr left,
                                       Mantid::API::MatrixWorkspace_const_sptr right);
+    /// Adds a conversion to wavelength step to the algorithm queue
+    std::string addConvertToWavelengthStep(Mantid::API::MatrixWorkspace_sptr ws);
 
     /// DoubleEditorFactory
     DoubleEditorFactory* m_dblEdFac;

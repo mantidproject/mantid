@@ -8,8 +8,8 @@
 
 using namespace Mantid::Crystal;
 using namespace Mantid::API;
-using namespace Mantid::MDEvents;
-using namespace Mantid::MDEvents::MDEventsTestHelper;
+using namespace Mantid::DataObjects;
+using namespace Mantid::DataObjects::MDEventsTestHelper;
 
 class HardThresholdBackgroundTest : public CxxTest::TestSuite
 {

@@ -5,7 +5,7 @@
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidKernel/CPUTimer.h"
 #include "MantidKernel/ReadLock.h"
-#include "MantidMDEvents/MDEventFactory.h"
+#include "MantidDataObjects/MDEventFactory.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidVatesAPI/ProgressAction.h"
 #include "MantidVatesAPI/Common.h"
@@ -30,7 +30,7 @@
 #include <qwt_double_interval.h>
 
 using namespace Mantid::API;
-using namespace Mantid::MDEvents;
+using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
 using Mantid::Kernel::CPUTimer;
 using Mantid::Kernel::ReadLock;

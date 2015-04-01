@@ -4,8 +4,8 @@
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/IMDWorkspace.h"
-#include "MantidMDEvents/MDHistoWorkspace.h"
-#include "MantidMDEvents/MDEventWorkspace.h"
+#include "MantidDataObjects/MDHistoWorkspace.h"
+#include "MantidDataObjects/MDEventWorkspace.h"
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -55,12 +55,12 @@ private:
   void doComparison();
   void compareMDGeometry(Mantid::API::IMDWorkspace_sptr ws1,
                          Mantid::API::IMDWorkspace_sptr ws2);
-  void compareMDHistoWorkspaces(Mantid::MDEvents::MDHistoWorkspace_sptr ws1,
-                                Mantid::MDEvents::MDHistoWorkspace_sptr ws2);
+  void compareMDHistoWorkspaces(Mantid::DataObjects::MDHistoWorkspace_sptr ws1,
+                                Mantid::DataObjects::MDHistoWorkspace_sptr ws2);
 
   template <typename MDE, size_t nd>
   void compareMDWorkspaces(
-      typename Mantid::MDEvents::MDEventWorkspace<MDE, nd>::sptr ws);
+      typename Mantid::DataObjects::MDEventWorkspace<MDE, nd>::sptr ws);
 
   template <typename T> void compare(T a, T b, const std::string &message);
 

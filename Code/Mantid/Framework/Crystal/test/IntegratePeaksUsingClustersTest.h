@@ -3,6 +3,7 @@
 
 #include <cxxtest/TestSuite.h>
 #include "ClusterIntegrationBaseTest.h"
+#include "MantidAPI/FrameworkManager.h"
 #include "MantidCrystal/IntegratePeaksUsingClusters.h"
 
 using namespace Mantid::Crystal;

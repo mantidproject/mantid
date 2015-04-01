@@ -1,21 +1,17 @@
 #ifndef MANTID_MDEVENTS_MDEWFINDPEAKSTEST_H_
 #define MANTID_MDEVENTS_MDEWFINDPEAKSTEST_H_
 
+#include "MantidAPI/FrameworkManager.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
-#include "MantidKernel/System.h"
-#include "MantidKernel/Timer.h"
+#include "MantidKernel/PropertyWithValue.h"
 #include "MantidMDAlgorithms/FindPeaksMD.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidAPI/FrameworkManager.h"
-#include <cxxtest/TestSuite.h>
-#include <iomanip>
-#include <iostream>
-#include "MantidKernel/PropertyWithValue.h"
 
-using namespace Mantid::MDEvents;
-using namespace Mantid::MDAlgorithms;
+#include <cxxtest/TestSuite.h>
+
 using namespace Mantid::API;
+using namespace Mantid::MDAlgorithms;
 using namespace Mantid::DataObjects;
 using Mantid::Geometry::Instrument_sptr;
 using Mantid::Kernel::PropertyWithValue;
