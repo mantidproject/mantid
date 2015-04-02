@@ -728,6 +728,7 @@ class LoadVesuvio(PythonAlgorithm):
         # foil_out has all spectra in order specified by input
         foil_start = 0
         for idx_out in range(len(self._spectra)):
+            ws_out.setX(idx_out, self.foil_out.readX(idx_out))
             summed_set = self._spectra[idx_out]
             nsummed = len(summed_set)
             y_out, e_out = ws_out.dataY(idx_out), ws_out.dataE(idx_out)
