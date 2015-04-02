@@ -25,10 +25,34 @@ class RunList(object):
         if not isinstance(runs_to_add,list):
             raise KeyError('Can only set list of run numbers to add')
         runs = []
+        if fnames or len(fnames)>0:
+            fnames_given=True
+            local_fnames=fnames
+        else:
+            fnames_given=False
+            local_fnames=[]
+        if fext:
+            fext_given=True
+            local_fext=fext
+        else:
+            fext_given=False
+            local_fext=[]
+
         for item in runs_to_add:
-            runs.append(int(item))
+            if isinstance(item,str):
+                file_path,run_num,fext = prop_helpers.parse_run_file_name(item)
+                runs.append(run_num)
+                if not fnames_given:
+                    local_fnames.append(file_path)
+                if not fext_given:
+                    if not fext is None:
+                        if len(fext)==0:
+                            fext=None
+                    local_fext.append(fext)
+            else:
+                runs.append(int(item))
         self._run_numbers = runs
-        self._set_fnames(fnames,fext)
+        self._set_fnames(local_fnames,local_fext)
 #--------------------------------------------------------------------------------------------------
     def set_cashed_sum_ws(self,ws,new_ws_name=None):
         """Store the name of a workspace in the class

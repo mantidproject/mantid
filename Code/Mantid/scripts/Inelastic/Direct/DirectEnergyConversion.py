@@ -487,8 +487,11 @@ class DirectEnergyConversion(object):
                     if results_name != out_ws_name:
                         RenameWorkspace(InputWorkspace=results_name,OutputWorkspace=out_ws_name)
                         result = mtd[out_ws_name]
+                    else:
+                        result = deltaE_ws_sample
             else: # delete workspace if no output is requested
                 self.sample_run = None
+                result = None
         #end_for
 #------------------------------------------------------------------------------------------
 # END Main loop over incident energies
