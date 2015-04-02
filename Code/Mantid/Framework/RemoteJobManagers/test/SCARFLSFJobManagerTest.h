@@ -316,9 +316,8 @@ public:
                jm = boost::make_shared<MockedGoodLoginResponse_SCARFLSFJM>());
 
     std::string tid;
-    TSM_ASSERT_THROWS_NOTHING(
-        "start transaction should throw when not logged in",
-        tid = jm->startRemoteTransaction());
+    TSM_ASSERT_THROWS("start transaction should throw when not logged in",
+                      tid = jm->startRemoteTransaction(), std::runtime_error);
 
     TSM_ASSERT_THROWS_NOTHING("successful authentication should not throw",
                               jm->authenticate("user", "pass"));
@@ -577,8 +576,8 @@ public:
     MockedErrorResponse_SCARFLSFJM err;
     TSM_ASSERT_THROWS("authenticate with empty credentials should throw",
                       err.authenticate("", ""), std::runtime_error);
-    TSM_ASSERT_THROWS_NOTHING(
-        "logout with error response from server should throw", err.logout());
+    TSM_ASSERT_THROWS("logout with error response from server should throw",
+                      err.logout(), std::runtime_error);
 
     MockedGoodLoginResponse_SCARFLSFJM jm;
     TSM_ASSERT_THROWS_NOTHING("successful authentication should not throw",
