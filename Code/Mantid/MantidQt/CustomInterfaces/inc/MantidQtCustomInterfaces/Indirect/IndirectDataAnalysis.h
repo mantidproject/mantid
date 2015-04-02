@@ -31,7 +31,8 @@ namespace IDA
     FURY_FIT,
     CONV_FIT,
     CALC_CORR,
-    APPLY_CORR
+    APPLY_CORR,
+    ABSORPTION_CORRECTIONS
   };
 
   // Number of decimal places in property browsers.

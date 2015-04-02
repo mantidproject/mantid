@@ -1,25 +1,21 @@
 #ifndef MANTID_MDALGORITHMS_BOOLEANBINARYOPERATIONMDTEST_H_
 #define MANTID_MDALGORITHMS_BOOLEANBINARYOPERATIONMDTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidKernel/Timer.h"
-#include "MantidKernel/System.h"
-#include <iostream>
-#include <iomanip>
-#include <gmock/gmock.h>
-#include <gtest/gtest.h>
 #include "MantidMDAlgorithms/BooleanBinaryOperationMD.h"
 
-using namespace Mantid;
+#include <cxxtest/TestSuite.h>
+#include <gmock/gmock.h>
+#include <gtest/gtest.h>
+
+
 using namespace Mantid::MDAlgorithms;
-using namespace Mantid::API;
 using namespace testing;
 
 class MockBooleanBinaryOperationMD : public BooleanBinaryOperationMD
 {
 public:
   MOCK_METHOD0(initExtraProperties, void());
-  MOCK_METHOD2(execHistoHisto, void(Mantid::MDEvents::MDHistoWorkspace_sptr, Mantid::MDEvents::MDHistoWorkspace_const_sptr));
+  MOCK_METHOD2(execHistoHisto, void(Mantid::DataObjects::MDHistoWorkspace_sptr, Mantid::DataObjects::MDHistoWorkspace_const_sptr));
 };
 
 

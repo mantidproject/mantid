@@ -62,7 +62,10 @@ object createWorkspace() {
    "    lhs = kernel.funcreturns.process_frame(inspect.currentframe().f_back)\n"
    "    if lhs[0] > 0:\n"
    "      OutputWorkspace = lhs[1][0]\n"
-
+   "    else:\n"
+   "      raise RuntimeError('createWorkspace failed to infer a name for its"
+                             " output projection workspace. Please pass an"
+                             " OutputWorkspace parameter to it.')\n"
    "  if OutputWorkspace:\n"
    "    mtd[OutputWorkspace] = ws\n"
 
