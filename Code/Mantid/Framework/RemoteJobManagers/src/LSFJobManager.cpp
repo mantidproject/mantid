@@ -754,7 +754,7 @@ LSFJobManager::genOutputStatusInfo(const std::string &resp,
 
     Poco::XML::Element *id = el->getChildElement("id");
     if (id) {
-      const std::string &IdStr = id->innerText().c_str();
+      const std::string &IdStr = id->innerText();
       if (!jobIDFilter.empty() && IdStr != jobIDFilter)
         continue;
 
@@ -763,21 +763,21 @@ LSFJobManager::genOutputStatusInfo(const std::string &resp,
 
     Poco::XML::Element *name = el->getChildElement("name");
     if (name) {
-      info.back().name = name->innerText().c_str();
+      info.back().name = name->innerText();
     } else {
       info.back().name = "Unknown!";
     }
 
     Poco::XML::Element *status = el->getChildElement("status");
     if (status) {
-      info.back().status = status->innerText().c_str();
+      info.back().status = status->innerText();
     } else {
       info.back().status = "Unknown!";
     }
 
     Poco::XML::Element *cmd = el->getChildElement("cmd");
     if (cmd) {
-      info.back().runnableName = cmd->innerText().c_str();
+      info.back().runnableName = cmd->innerText();
     } else {
       info.back().runnableName = "Unknown!";
     }
