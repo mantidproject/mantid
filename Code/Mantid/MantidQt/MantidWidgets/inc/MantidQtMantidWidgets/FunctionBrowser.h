@@ -134,6 +134,8 @@ public:
   void setLocalParameterFixed(const QString& parName, int i, bool fixed);
   /// Return the multidomain function if number of datasets is greater than 1
   Mantid::API::IFunction_sptr getGlobalFunction();
+  /// Update parameter values in the browser to match those of a function.
+  void updateMultiDatasetParameters(const Mantid::API::IFunction& fun);
 
 signals:
   /// User selects a different function (or one of it's sub-properties)

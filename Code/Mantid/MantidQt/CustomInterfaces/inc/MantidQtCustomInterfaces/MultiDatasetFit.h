@@ -285,6 +285,8 @@ public:
 signals:
   void setAllValues(double);
   void fixParameter(int,bool);
+protected:
+  void paint(QPainter * painter, const QStyleOptionViewItem & option, const QModelIndex & index) const;
 private:
   bool eventFilter(QObject * obj, QEvent * ev);
   EditLocalParameterDialog *owner() const {return static_cast<EditLocalParameterDialog*>(parent());}

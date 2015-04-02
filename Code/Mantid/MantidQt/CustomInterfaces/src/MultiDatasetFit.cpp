@@ -742,6 +742,13 @@ bool LocalParameterItemDelegate::eventFilter(QObject * obj, QEvent * ev)
   return QStyledItemDelegate::eventFilter(obj,ev);
 }
 
+void LocalParameterItemDelegate::paint(QPainter * painter, const QStyleOptionViewItem & option, const QModelIndex & index) const
+{
+  auto newOption = option;
+  //newOption.rect.adjust(10,-1,0,-1);
+  QStyledItemDelegate::paint(painter, newOption, index);
+}
+
 /*==========================================================================================*/
 
 EditLocalParameterDialog::EditLocalParameterDialog(MultiDatasetFit *multifit, const QString &parName):
@@ -962,6 +969,7 @@ void MultiDatasetFit::fit()
   try
   {
     auto fun = createFunction();
+    std::cerr << fun->asString() << std::endl;
     auto fit = Mantid::API::AlgorithmManager::Instance().create("Fit");
     fit->initialize();
     fit->setProperty("Function", fun );
@@ -1081,38 +1089,11 @@ void MultiDatasetFit::finishFit(bool error)
 }
 
 /**
- * Update the interface to have the sametparameter values as in a function.
+ * Update the interface to have the same parameter values as in a function.
  */
 void MultiDatasetFit::updateParameters(const Mantid::API::IFunction& fun)
 {
-  m_functionBrowser->resetLocalParameters();
-  auto cfun = dynamic_cast<const Mantid::API::CompositeFunction*>( &fun );
-  if ( cfun && cfun->nFunctions() > 0 )
-  {
-    auto qLocalParameters = m_functionBrowser->getLocalParameters();
-    std::vector<std::string> localParameters;
-    foreach(QString par, qLocalParameters)
-    {
-      localParameters.push_back( par.toStdString() );
-    }
-    size_t currentIndex = static_cast<size_t>( m_plotController->getCurrentIndex() );
-    for(size_t i = 0; i < cfun->nFunctions(); ++i)
-    {
-      auto sfun = cfun->getFunction(i);
-      if ( i == currentIndex )
-      {
-        m_functionBrowser->updateParameters( *sfun );
-      }
-      for(int j = 0; j < qLocalParameters.size(); ++j)
-      {
-        m_functionBrowser->setLocalParameterValue( qLocalParameters[j], static_cast<int>(i), sfun->getParameter(localParameters[j]) );
-      }
-    }
-  }
-  else
-  {
-    m_functionBrowser->updateParameters( fun );
-  }
+  m_functionBrowser->updateMultiDatasetParameters( fun );
 }
 
 /**

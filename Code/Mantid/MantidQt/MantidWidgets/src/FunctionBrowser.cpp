@@ -1627,6 +1627,7 @@ void FunctionBrowser::updateParameters(const Mantid::API::IFunction& fun)
   }
 }
 
+
 /**
  * Return FunctionFactory function string
  */
@@ -2060,8 +2061,7 @@ Mantid::API::IFunction_sptr FunctionBrowser::getGlobalFunction()
   }
 
   // create the multi-domain function
-  std::string tmpStr = multiFunStr.toStdString();
-  auto fun = Mantid::API::FunctionFactory::Instance().createInitialized( tmpStr );
+  auto fun = Mantid::API::FunctionFactory::Instance().createInitialized( multiFunStr.toStdString() );
   boost::shared_ptr<Mantid::API::MultiDomainFunction> multiFun = boost::dynamic_pointer_cast<Mantid::API::MultiDomainFunction>( fun );
   if ( !multiFun )
   {
@@ -2082,20 +2082,14 @@ Mantid::API::IFunction_sptr FunctionBrowser::getGlobalFunction()
       auto tie = fun1->getTie(j);
       if ( tie )
       {
-        // if a local parameter has a constant tie (is fixed) set tie's value to 
-        // the value of the local parameter
-        if ( tie->isConstant() )
-        {
-          std::string expr = boost::lexical_cast<std::string>( getLocalParameterValue(parName,i) );
-          tie->set( expr );
-        }
-        else
-        {
-          g_log.error() << "Complex ties are not implemented yet in multi-dataset fitting." << std::endl;
-        }
+        // If parameter has a tie at this stage then it gets it form the currently
+        // displayed function. But the i-th local parameters may not have this tie,
+        // so remove it
+        fun1->removeTie(j);
       }
-      else if ( isLocalParameterFixed(parName,i) )
+      if ( isLocalParameterFixed(parName,i) )
       {
+        // Fix this particular local parameter
         fun1->tie(parName.toStdString(),boost::lexical_cast<std::string>( getLocalParameterValue(parName,i) ));
       }
       else
@@ -2147,6 +2141,39 @@ bool FunctionBrowser::isLocalParameterFixed(const QString& parName, int i) const
 {
   checkLocalParameter(parName);
   return m_localParameterValues[parName][i].fixed;
+}
+
+/// Update the interface to have the same parameter values as in a function.
+/// @param fun :: A function to get parameter values from.
+void FunctionBrowser::updateMultiDatasetParameters(const Mantid::API::IFunction& fun)
+{
+  auto cfun = dynamic_cast<const Mantid::API::CompositeFunction*>( &fun );
+  if ( cfun && cfun->nFunctions() > 0 )
+  {
+    auto qLocalParameters = getLocalParameters();
+    std::vector<std::string> localParameters;
+    foreach(QString par, qLocalParameters)
+    {
+      localParameters.push_back( par.toStdString() );
+    }
+    size_t currentIndex = static_cast<size_t>( m_currentDataset );
+    for(size_t i = 0; i < cfun->nFunctions(); ++i)
+    {
+      auto sfun = cfun->getFunction(i);
+      if ( i == currentIndex )
+      {
+        updateParameters( *sfun );
+      }
+      for(int j = 0; j < qLocalParameters.size(); ++j)
+      {
+        setLocalParameterValue( qLocalParameters[j], static_cast<int>(i), sfun->getParameter(localParameters[j]) );
+      }
+    }
+  }
+  else
+  {
+    updateParameters( fun );
+  }
 }
 
 } // MantidWidgets
