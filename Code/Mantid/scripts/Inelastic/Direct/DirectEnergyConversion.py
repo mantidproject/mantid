@@ -478,20 +478,20 @@ class DirectEnergyConversion(object):
             self.save_results(deltaE_ws_sample)
 
             # prepare output workspace
+            results_name = deltaE_ws_sample.name()
             if out_ws_name:
                 if self._multirep_mode:
                     result.append(deltaE_ws_sample)
-                    self._old_runs_list.append(deltaE_ws_sample.name())
                 else:
-                    results_name = deltaE_ws_sample.name()
                     if results_name != out_ws_name:
                         RenameWorkspace(InputWorkspace=results_name,OutputWorkspace=out_ws_name)
                         result = mtd[out_ws_name]
                     else:
                         result = deltaE_ws_sample
             else: # delete workspace if no output is requested
-                self.sample_run = None
                 result = None
+            self._old_runs_list.append(results_name)
+
         #end_for
 #------------------------------------------------------------------------------------------
 # END Main loop over incident energies
