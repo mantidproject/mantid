@@ -36,7 +36,7 @@ class IndirectTransmission(PythonAlgorithm):
 
     def PyInit(self):
         self.declareProperty(name='Instrument', defaultValue='IRIS',
-                             validator=StringListValidator(['IRIS', 'OSIRIS', 'BASIS', 'VISION']),
+                             validator=StringListValidator(['IRIS', 'OSIRIS', 'TOSCA', 'BASIS', 'VISION']),
                              doc='Instrument')
 
         self.declareProperty(name='Analyser', defaultValue='graphite',
@@ -69,7 +69,10 @@ class IndirectTransmission(PythonAlgorithm):
         thickness = self.getPropertyValue('Thickness')
 
         # Create an empty instrument workspace
-        workspace = self._create_instrument_workspace(instrument_name)
+        workspace = '__empty_' + instrument_name
+        CreateSimulationWorkspace(OutputWorkspace=workspace,
+                                  Instrument=instrument_name,
+                                  BinParams='0,0.5,1')
 
         # Do some validation on the analyser and reflection
         instrument = mtd[workspace].getInstrument()
@@ -100,8 +103,7 @@ class IndirectTransmission(PythonAlgorithm):
         LoadParameterFile(Workspace=workspace, Filename=ipf_filename)
 
         # Get efixed value
-        instrument = mtd[workspace].getInstrument()
-        efixed = instrument.getNumberParameter('efixed-val')[0]
+        efixed = self._get_efixed(workspace)
 
         logger.notice('Analyser : ' + analyser + reflection + ' with energy = ' + str(efixed))
 
@@ -148,24 +150,34 @@ class IndirectTransmission(PythonAlgorithm):
         self.setProperty("OutputWorkspace", table_ws)
 
 
-    def _create_instrument_workspace(self, instrument_name):
+    def _get_efixed(self, workspace):
         """
-        Creates a workspace with the most recent version of the given instrument attached to it.
+        Gets an efixed value form a workspace.
 
-        @param instrument_name Name of the instrument to load
-        @return Name of the created workspace
+        @param workspace Name of workspace to extract from
+        @return Fixed energy value
         """
 
-        # Get the filename for the most recent instrument defintion
-        CreateSampleWorkspace(OutputWorkspace='__temp')
-        idf_filename = mtd['__temp'].getInstrumentFilename(instrument_name)
-        DeleteWorkspace('__temp')
+        ws = mtd[workspace]
 
-        # Load instrument defintion file
-        workspace = '__empty_' + instrument_name
-        LoadEmptyInstrument(OutputWorkspace=workspace, Filename=idf_filename)
+        # Try to get efixed from the parameters first
+        try:
+            instrument = ws.getInstrument()
+            efixed = instrument.getNumberParameter('efixed-val')[0]
+        except IndexError:
+            efixed = 0.0
 
-        return workspace
+        # If that fails then get it by taking from group of all detectors
+        if efixed == 0.0:
+            spectra_list = range(0, ws.getNumberHistograms())
+            GroupDetectors(InputWorkspace=workspace,
+                           OutputWorkspace=workspace,
+                           SpectraList=spectra_list)
+            ws = mtd[workspace]
+            det = ws.getDetector(0)
+            efixed = mtd[workspace].getEFixed(det.getID())
+
+        return efixed
 
 
 # Register algorithm with Mantid
