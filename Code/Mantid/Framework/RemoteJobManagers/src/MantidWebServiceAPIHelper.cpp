@@ -23,10 +23,13 @@ MantidWebServiceAPIHelper::MantidWebServiceAPIHelper()
     : m_session(
           NULL) // Make sure this is always either NULL or a valid pointer.
 {
-  // TODO: factory or someone MUST SET THIS:
+  // TODO: the job manager factory or someone else should set this, and then
+  // this class would be usable with any other compute resource that implements
+  // the Mantid job submission API (web service).
+  // this is the name of the compute resource in the facilities file
   m_displayName = "Fermi";
+  // this is the baseURL from the facilities file - take it from there
   m_serviceBaseUrl = "https://fermi.ornl.gov/MantidRemote";
-  // TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
 }
 
 MantidWebServiceAPIHelper::~MantidWebServiceAPIHelper() { delete m_session; }
