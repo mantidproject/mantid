@@ -135,8 +135,8 @@ public:
 
 };
 
-DECLARE_FUNCTION(CurveFittingLinear);
-DECLARE_FUNCTION(CurveFittingGauss);
+DECLARE_FUNCTION(CurveFittingLinear)
+DECLARE_FUNCTION(CurveFittingGauss)
 
 class CompositeFunctionTest : public CxxTest::TestSuite
 {

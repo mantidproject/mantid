@@ -21,10 +21,10 @@ HasUB::~HasUB() {}
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
-const std::string HasUB::name() const { return "HasUB"; };
+const std::string HasUB::name() const { return "HasUB"; }
 
 /// Algorithm's version for identification. @see Algorithm::version
-int HasUB::version() const { return 1; };
+int HasUB::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
 const std::string HasUB::category() const { return "Crystal"; }

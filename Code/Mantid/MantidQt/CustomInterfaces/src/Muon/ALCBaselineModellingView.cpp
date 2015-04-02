@@ -3,6 +3,7 @@
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/FunctionDomain1D.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidQtAPI/HelpWindow.h"
 
 #include <boost/scoped_array.hpp>
 
@@ -63,6 +64,8 @@ namespace CustomInterfaces
     connect(m_ui.sections, SIGNAL(cellChanged(int,int)), SIGNAL(sectionRowModified(int)));
 
     connect(m_selectorModifiedMapper, SIGNAL(mapped(int)), SIGNAL(sectionSelectorModified(int)));
+
+    connect(m_ui.help, SIGNAL(clicked()), this, SLOT(help()));
   }
 
   QString ALCBaselineModellingView::function() const
@@ -199,6 +202,10 @@ namespace CustomInterfaces
 
     selector->setMinimum(values.first);
     selector->setMaximum(values.second);
+  }
+
+  void ALCBaselineModellingView::help() {
+    MantidQt::API::HelpWindow::showCustomInterface(NULL, QString("Muon_ALC"));
   }
 
 } // namespace CustomInterfaces

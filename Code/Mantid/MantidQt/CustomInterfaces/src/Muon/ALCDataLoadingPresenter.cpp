@@ -137,6 +137,7 @@ namespace CustomInterfaces
     {
       m_view->setAvailableLogs(std::vector<std::string>()); // Empty logs list
       m_view->setAvailablePeriods(std::vector<std::string>()); // Empty period list
+      m_view->setTimeLimits(0,0); // "Empty" time limits
       return;
     }
 
@@ -161,6 +162,11 @@ namespace CustomInterfaces
       periods.push_back(buffer.str());
     }
     m_view->setAvailablePeriods(periods);
+
+    // Set time limits
+    m_view->setTimeLimits(ws->readX(0).front(),ws->readX(0).back());
+    // Set allowed time range
+    m_view->setTimeRange (ws->readX(0).front(),ws->readX(0).back());
   }
 
 } // namespace CustomInterfaces

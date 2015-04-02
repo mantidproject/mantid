@@ -20,7 +20,7 @@ Chebyshev::Chebyshev() : m_n(0), m_StartX(-1.), m_EndX(1.) {
   declareAttribute("n", Attribute(m_n));
   declareAttribute("StartX", Attribute(m_StartX));
   declareAttribute("EndX", Attribute(m_EndX));
-};
+}
 
 void Chebyshev::function1D(double *out, const double *xValues,
                            const size_t nData) const {

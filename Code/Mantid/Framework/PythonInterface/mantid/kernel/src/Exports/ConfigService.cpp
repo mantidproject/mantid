@@ -31,9 +31,9 @@ namespace
    }
 
   /// Overload generator for getInstrument
-  BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(getInstrument_Overload, getInstrument, 0, 1);
+  BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(getInstrument_Overload, getInstrument, 0, 1)
   /// Overload generator for getString
-  BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(getString_Overload, getString, 1, 2);
+  BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(getString_Overload, getString, 1, 2)
 }
 
 void export_ConfigService()

@@ -397,9 +397,31 @@ bool MantidEVWorker::loadIsawPeaks( const std::string & peaks_ws_name,
   return false;
 }
 
+/**
+ *  Load the specified peaks workspace from the specified NeXus file.
+ *
+ *  @param peaks_ws_name   The name of the peaks workspace to load/create.
+ *  @param file_name       The name of the NeXus file to load.
+ *
+ *  @return true if LoadNexusPeaks completed successfully.
+ */
+bool MantidEVWorker::loadNexusPeaks( const std::string & peaks_ws_name,
+                                    const std::string & file_name )
+{
+
+  IAlgorithm_sptr alg = AlgorithmManager::Instance().create("Load");
+  alg->setProperty("Filename",file_name );
+
+  alg->setProperty("OutputWorkspace", peaks_ws_name );
+
+  if ( alg->execute() )
+    return true;
+
+  return false;
+}
 
 /**
- *  Load the specified peaks workspace to the specified peaks file.
+ *  Save the specified peaks workspace to the specified peaks file.
  *
  *  @param peaks_ws_name   The name of the peaks workspace to save.
  *  @param file_name       The name of the peaks file to write to.
@@ -419,6 +441,43 @@ bool MantidEVWorker::saveIsawPeaks( const std::string & peaks_ws_name,
   alg->setProperty("AppendFile", append );
   alg->setProperty("Filename",file_name );
   
+  if ( alg->execute() )
+    return true;
+
+  return false;
+}
+
+/**
+ *  Save the specified peaks workspace to the specified peaks file.
+ *
+ *  @param peaks_ws_name   The name of the peaks workspace to save.
+ *  @param file_name       The name of the NeXus file to write to.
+ *
+ *  @return true if SaveNexusPeaks completed successfully.
+ */
+bool MantidEVWorker::saveNexusPeaks( const std::string & peaks_ws_name,
+                                    const std::string & file_name,
+                                    bool          append )
+{
+  if (append){
+    std::string temp_peaks_ws_name = "__MantidEVWorker_peaks_ws";
+    IAlgorithm_sptr load = AlgorithmManager::Instance().create("Load");
+    load->setProperty("OutputWorkspace", temp_peaks_ws_name );
+    load->setProperty("Filename",file_name );
+
+    load->execute();
+
+    IAlgorithm_sptr combine = AlgorithmManager::Instance().create("CombinePeaksWorkspaces");
+    combine->setProperty("LHSWorkspace", temp_peaks_ws_name );
+    combine->setProperty("RHSWorkspace", peaks_ws_name );
+    combine->setProperty("OutputWorkspace", peaks_ws_name );
+
+    combine->execute();
+  }
+  IAlgorithm_sptr alg = AlgorithmManager::Instance().create("SaveNexus");
+  alg->setProperty("InputWorkspace", peaks_ws_name );
+  alg->setProperty("Filename",file_name );
+
   if ( alg->execute() )
     return true;
 

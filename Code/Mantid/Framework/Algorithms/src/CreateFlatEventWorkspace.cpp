@@ -25,10 +25,10 @@ CreateFlatEventWorkspace::~CreateFlatEventWorkspace() {}
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string CreateFlatEventWorkspace::name() const {
   return "CreateFlatEventWorkspace";
-};
+}
 
 /// Algorithm's version for identification. @see Algorithm::version
-int CreateFlatEventWorkspace::version() const { return 1; };
+int CreateFlatEventWorkspace::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
 const std::string CreateFlatEventWorkspace::category() const {

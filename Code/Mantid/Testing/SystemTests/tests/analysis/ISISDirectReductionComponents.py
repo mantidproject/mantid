@@ -81,13 +81,40 @@ class ISIS_ReductionWrapperValidate(stresstesting.MantidStressTest):
 
     def runTest(self):
        # prepare reduction variable
+        # At the moment MARI reduction differs from it original by 
+        # less then 1% due to changes in the procedure. At the moment 
+        # we have to account for this but when we make it the same,
+        # the code below should be commented. Meanwhile it tests workspace
+        # workflow
+        #------------------------------------------------------
+        #ref_file = 'MARIReduction.nxs'
+        #file = FileFinder.getFullPath(ref_file)
+        #etalon_ws = Load(file)
+        #etalon_ws/=0.997979227566217
+        #------------------------------------------------------
         rd = mr.ReduceMARIFromFile()
         rd.def_main_properties()
         rd.def_advanced_properties()
+        # this is correct workflow for the ref file
+        #rd.reducer.prop_man.save_file_name = ref_file
+        # temporary workflow, until we fix workspace adjustment
+        rd._tolerr =3.e-3
+        rd.reducer.prop_man.save_file_name = 'MARIReduction.nxs'
+        rd.validate_run_number=11001
+        try:
+            rez,mess = rd.run_reduction()
+            self.result=rez
+            if not rez:
+                print "*** Validation failed: {0}".format(mess)
+            if mess.find('Created')>-1: # validation still failed due to missing validation file
+                print "*** Validation failed: {0}".format(mess)
+                self.result=False
+        except RuntimeError as err:
+            print "*** Validation failed with error: {0}".format(err.message)
+            self.result=False
+        rd.reducer.prop_man.save_file_name = None
 
-        self.result,message = rd.validate_result()
-        if not self.result:
-            print "*** Validation failed: {0}".format(message)
+
 
 
 
@@ -136,6 +163,8 @@ class ISISLoadFilesRAW(stresstesting.MantidStressTest):
         self.assertTrue(isinstance(ws,Workspace))
         self.assertEqual(ws.getNumberHistograms(),41472)
         self.assertEqual(mon_ws.getNumberHistograms(),4)
+
+        
         #
         self.valid = True
 
@@ -180,26 +209,36 @@ class ISISLoadFilesMER(stresstesting.MantidStressTest):
         propman.sample_run = 18492 # (histogram nxs file )
         propman.det_cal_file = None
         mon_ws = PropertyManager.sample_run.get_monitors_ws()
+        self.assertTrue('SR_MER018492' in mtd)
         self.assertTrue(not mon_ws is None)
         ws = PropertyManager.sample_run.get_workspace()
         self.assertTrue(isinstance(ws,Workspace))
         self.assertEqual(ws.getNumberHistograms(),69641)
         self.assertEqual(mon_ws.getNumberHistograms(),69641)
+        self.assertEqual(mon_ws.getIndexFromSpectrumNumber(69638),69637)
+        det = mon_ws.getDetector(69632)
+        self.assertTrue(det.isMonitor())
+        det = mon_ws.getDetector(69631)
+        self.assertFalse(det.isMonitor())
 
 
-        self.valid = True
-        return
         #  enable when bug #10980 is fixed
+        propman.sample_run = None # delete all
+        self.assertFalse('SR_MER018492' in mtd)
         propman.sample_run = 18492 # (histogram nxs file )
+        propman.load_monitors_with_workspace = False
         propman.det_cal_file = None
         mon_ws = PropertyManager.sample_run.get_monitors_ws()
         self.assertTrue(not mon_ws is None)
+        self.assertTrue('SR_MER018492_monitors' in mtd)
 
         ws = PropertyManager.sample_run.get_workspace()
         self.assertTrue(isinstance(ws,Workspace))
         self.assertEqual(ws.getNumberHistograms(),69632)
         self.assertEqual(mon_ws.getNumberHistograms(),9)
-
+        self.assertEqual(mon_ws.getIndexFromSpectrumNumber(69633),0)
+        det = mon_ws.getDetector(0)
+        self.assertTrue(det.isMonitor())
 
         self.valid = True
 

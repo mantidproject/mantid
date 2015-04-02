@@ -1,23 +1,22 @@
 #ifndef MANTID_MDALGORITHMS_MERGEMDTEST_H_
 #define MANTID_MDALGORITHMS_MERGEMDTEST_H_
 
-#include "MantidKernel/System.h"
-#include "MantidKernel/Timer.h"
 #include "MantidMDAlgorithms/MergeMD.h"
-#include "MantidMDEvents/MDEventFactory.h"
-#include "MantidTestHelpers/MDEventsTestHelper.h"
-#include <cxxtest/TestSuite.h>
-#include <iomanip>
-#include <iostream>
-#include <Poco/File.h>
+#include "MantidDataObjects/MDEventFactory.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
+#include "MantidTestHelpers/MDEventsTestHelper.h"
+
+#include <cxxtest/TestSuite.h>
+
+#include <Poco/File.h>
 
 using namespace Mantid;
-using namespace Mantid::MDEvents;
+using namespace Mantid::API;
+using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
 using namespace Mantid::MDAlgorithms;
-using namespace Mantid::API;
-using Mantid::MDEvents::MDEventsTestHelper::makeAnyMDEW;
+
+using Mantid::DataObjects::MDEventsTestHelper::makeAnyMDEW;
 
 class MergeMDTest : public CxxTest::TestSuite
 {

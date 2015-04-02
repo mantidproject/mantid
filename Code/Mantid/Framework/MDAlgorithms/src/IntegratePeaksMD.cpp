@@ -3,9 +3,9 @@
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidDataObjects/PeakShapeSpherical.h"
 #include "MantidKernel/System.h"
-#include "MantidMDEvents/MDEventFactory.h"
+#include "MantidDataObjects/MDEventFactory.h"
 #include "MantidMDAlgorithms/IntegratePeaksMD.h"
-#include "MantidMDEvents/CoordTransformDistance.h"
+#include "MantidDataObjects/CoordTransformDistance.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/Workspace2D.h"
@@ -31,7 +31,7 @@ DECLARE_ALGORITHM(IntegratePeaksMD)
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
-using namespace Mantid::MDEvents;
+using namespace Mantid::DataObjects;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
 
@@ -689,4 +689,4 @@ double f_eval(double x, void *params) {
 }
 
 } // namespace Mantid
-} // namespace MDEvents
+} // namespace DataObjects
