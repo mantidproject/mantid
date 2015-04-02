@@ -210,7 +210,8 @@ void InelasticDiffSphere::function1D(double *out, const double *xValues,
   double Q;
   if (getAttribute("Q").asDouble() == EMPTY_DBL()) {
     if (m_qValueCache.size() == 0) {
-      throw std::runtime_error("No Q attribute provided and cannot retrieve from worksapce.");
+      throw std::runtime_error(
+          "No Q attribute provided and cannot retrieve from worksapce.");
     }
 
     const int specIdx = getAttribute("WorkspaceIndex").asInt();
@@ -276,14 +277,14 @@ InelasticDiffSphere::setWorkspace(boost::shared_ptr<const API::Workspace> ws) {
     IDetector_const_sptr det;
     try {
       det = workspace->getDetector(idx);
-    } catch(Exception::NotFoundError &) {
+    }
+    catch (Exception::NotFoundError &) {
       m_qValueCache.clear();
       g_log.information("Cannot populate Q values from workspace");
       break;
     }
 
-    try
-    {
+    try {
       double efixed = workspace->getEFixed(det);
       double usignTheta = workspace->detectorTwoTheta(det) / 2.0;
 
@@ -291,8 +292,7 @@ InelasticDiffSphere::setWorkspace(boost::shared_ptr<const API::Workspace> ws) {
 
       m_qValueCache.push_back(q);
     }
-    catch(std::runtime_error &)
-    {
+    catch (std::runtime_error &) {
       m_qValueCache.clear();
       g_log.information("Cannot populate Q values from workspace");
       return;
