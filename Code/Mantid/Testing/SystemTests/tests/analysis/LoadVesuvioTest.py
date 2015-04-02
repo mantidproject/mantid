@@ -140,6 +140,12 @@ class VesuvioTests(unittest.TestCase):
         self.assertAlmostEqual(0.6219299465, evs_raw.readE(0)[0], places=DIFF_PLACES)
         self.assertAlmostEqual(0.676913729914, evs_raw.readE(1)[0], places=DIFF_PLACES)
 
+        # Spectrum numbers
+        self._verify_spectra_numbering(evs_raw.getSpectrum(0), 135,
+                                       range(3101,3115))
+        self._verify_spectra_numbering(evs_raw.getSpectrum(1), 152,
+                                       range(3118,3132))
+
     def test_sumspectra_set_to_true_gives_single_spectra_summed_over_all_inputs_with_foil_in(self):
         self._run_load("14188", "3-15", "FoilIn", "IP0005.dat", sum=True)
         evs_raw = mtd[self.ws_name]
@@ -152,6 +158,10 @@ class VesuvioTests(unittest.TestCase):
         self.assertAlmostEqual(2072.0, evs_raw.readY(0)[-1], places=DIFF_PLACES)
         self.assertAlmostEqual(705.49415305869115, evs_raw.readE(0)[0], places=DIFF_PLACES)
         self.assertAlmostEqual(45.519226706964169, evs_raw.readE(0)[-1], places=DIFF_PLACES)
+
+        self._verify_spectra_numbering(evs_raw.getSpectrum(0), 3,
+                                       range(2101,2114))
+
 
     def test_sumspectra_with_multiple_groups_gives_number_output_spectra_as_input_groups_with_foil_in(self):
         self._run_load("14188", "3-15;30-50", "FoilIn", "IP0005.dat", sum=True)
@@ -167,6 +177,17 @@ class VesuvioTests(unittest.TestCase):
         self.assertAlmostEqual(1332812.0, evs_raw.readY(1)[0], places=DIFF_PLACES)
         self.assertAlmostEqual(705.49415305869115, evs_raw.readE(0)[0], places=DIFF_PLACES)
         self.assertAlmostEqual(1154.4747723532116, evs_raw.readE(1)[0], places=DIFF_PLACES)
+        
+        self._verify_spectra_numbering(evs_raw.getSpectrum(0), 3,
+                                       range(2101,2114))
+        self._verify_spectra_numbering(evs_raw.getSpectrum(1), 30,
+                                       range(2128,2145) + range(2201,2205))
+
+    def _verify_spectra_numbering(self, spectrum, expected_no, expected_ids):
+        self.assertEquals(expected_no, spectrum.getSpectrumNo())
+        det_ids = spectrum.getDetectorIDs()
+        for expected_id, det_id in zip(expected_ids, det_ids):
+            self.assertEqual(expected_id, det_id)
 
     def _run_load(self, runs, spectra, diff_opt, ip_file="", sum=False):
         LoadVesuvio(Filename=runs,OutputWorkspace=self.ws_name,

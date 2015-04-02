@@ -732,14 +732,20 @@ class LoadVesuvio(PythonAlgorithm):
         # foil_out has all spectra in order specified by input
         foil_start = 0
         for idx_out in range(len(self._spectra)):
-            ws_out.setX(idx_out, self.foil_out.readX(idx_out))
+            ws_out.setX(idx_out, self.foil_out.readX(foil_start))
             summed_set = self._spectra[idx_out]
             nsummed = len(summed_set)
             y_out, e_out = ws_out.dataY(idx_out), ws_out.dataE(idx_out)
+            spec_out = ws_out.getSpectrum(idx_out)
+            spec_out.setSpectrumNo(self.foil_out.getSpectrum(foil_start).getSpectrumNo())
+            spec_out.clearDetectorIDs()
             for foil_idx in range(foil_start, foil_start+nsummed):
                 y_out += self.foil_out.readY(foil_idx)
                 foil_err = self.foil_out.readE(foil_idx)
                 e_out += foil_err*foil_err # gaussian errors
+                in_ids = self.foil_out.getSpectrum(foil_idx).getDetectorIDs()
+                for det_id in in_ids:
+                    spec_out.addDetectorID(det_id)
             #endfor
             np.sqrt(e_out, e_out)
             foil_start += nsummed
