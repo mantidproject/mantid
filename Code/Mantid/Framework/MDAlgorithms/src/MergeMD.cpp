@@ -1,17 +1,17 @@
 #include "MantidMDAlgorithms/MergeMD.h"
 #include "MantidKernel/Strings.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
-#include "MantidMDEvents/MDEventFactory.h"
+#include "MantidDataObjects/MDEventFactory.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidKernel/ArrayProperty.h"
-#include "MantidMDEvents/MDBoxIterator.h"
+#include "MantidDataObjects/MDBoxIterator.h"
 #include "MantidKernel/CPUTimer.h"
 #include "MantidKernel/MandatoryValidator.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
-using namespace Mantid::MDEvents;
+using namespace Mantid::DataObjects;
 
 namespace Mantid {
 namespace MDAlgorithms {

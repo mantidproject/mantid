@@ -1,14 +1,14 @@
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidKernel/System.h"
-#include "MantidMDEvents/MDBoxBase.h"
-#include "MantidMDEvents/MDBoxIterator.h"
-#include "MantidMDEvents/MDEventFactory.h"
+#include "MantidDataObjects/MDBoxBase.h"
+#include "MantidDataObjects/MDBoxIterator.h"
+#include "MantidDataObjects/MDEventFactory.h"
 #include "MantidMDAlgorithms/PlusMD.h"
 #include "MantidKernel/ThreadScheduler.h"
 #include "MantidKernel/ThreadPool.h"
 
 using namespace Mantid::Kernel;
-using namespace Mantid::MDEvents;
+using namespace Mantid::DataObjects;
 using namespace Mantid::API;
 
 namespace Mantid {
@@ -150,15 +150,15 @@ void PlusMD::checkInputs() {
 //----------------------------------------------------------------------------------------------
 /// Run the algorithm with a MDHisotWorkspace as output and operand
 void
-PlusMD::execHistoHisto(Mantid::MDEvents::MDHistoWorkspace_sptr out,
-                       Mantid::MDEvents::MDHistoWorkspace_const_sptr operand) {
+PlusMD::execHistoHisto(Mantid::DataObjects::MDHistoWorkspace_sptr out,
+                       Mantid::DataObjects::MDHistoWorkspace_const_sptr operand) {
   out->add(*operand);
 }
 
 //----------------------------------------------------------------------------------------------
 /// Run the algorithm with a MDHisotWorkspace as output, scalar and operand
 void PlusMD::execHistoScalar(
-    Mantid::MDEvents::MDHistoWorkspace_sptr out,
+    Mantid::DataObjects::MDHistoWorkspace_sptr out,
     Mantid::DataObjects::WorkspaceSingleValue_const_sptr scalar) {
   out->add(scalar->dataY(0)[0], scalar->dataE(0)[0]);
 }
