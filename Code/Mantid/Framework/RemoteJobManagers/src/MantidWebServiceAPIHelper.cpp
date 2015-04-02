@@ -25,7 +25,8 @@ MantidWebServiceAPIHelper::MantidWebServiceAPIHelper()
 {
   // TODO: the job manager factory or someone else should set this, and then
   // this class would be usable with any other compute resource that implements
-  // the Mantid job submission API (web service).
+  // the Mantid job submission API (web service). This could be done as part of
+  // ticket #11373
   // this is the name of the compute resource in the facilities file
   m_displayName = "Fermi";
   // this is the baseURL from the facilities file - take it from there
