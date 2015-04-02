@@ -147,10 +147,6 @@ public:
         PoldiPeakCollection_sptr noProfilePeaks(new PoldiPeakCollection);
         TS_ASSERT_THROWS_NOTHING(spectrumCalculator.getIntegratedPeakCollection(noProfilePeaks));
 
-        // While setting an invalid function name throws.
-        spectrumCalculator.setProperty("PeakProfileFunction", "InvalidFunctionName");
-        TS_ASSERT_THROWS(spectrumCalculator.getIntegratedPeakCollection(noProfilePeaks), std::runtime_error);
-
         // When there is no valid PoldiPeakCollection, the method also throws
         PoldiPeakCollection_sptr invalidPeakCollection;
         TS_ASSERT_THROWS(spectrumCalculator.getIntegratedPeakCollection(invalidPeakCollection), std::invalid_argument);
