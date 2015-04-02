@@ -10,8 +10,8 @@ class SpaceGroupTest(unittest.TestCase):
 
     def test_interface(self):
         spaceGroup = SpaceGroupFactory.createSpaceGroup("P -1")
-        self.assertEquals(spaceGroup.hmSymbol(), "P -1")
-        self.assertEquals(spaceGroup.order(), 2)
+        self.assertEquals(spaceGroup.getHMSymbol(), "P -1")
+        self.assertEquals(spaceGroup.getOrder(), 2)
 
         symOpStrings = spaceGroup.getSymmetryOperationStrings()
 

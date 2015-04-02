@@ -47,7 +47,7 @@ To describe the rotational and translational components of the symmetry operatio
 Note that the translational component is not used for transforming HKLs and :math:`\mathbf{W}_i` is inverted and transposed. Coordinates :math:`\mathbf{x}` are transformed differently, they are affected by the translational component:
 
 .. math::
-    \mathbf{x}' = \mathbf{W}_i \cdot \mathbf{h} + \mathbf{w}_i
+    \mathbf{x}' = \mathbf{W}_i \cdot \mathbf{x} + \mathbf{w}_i
 
 A point group is an ensemble of symmetry operations. The number of operations present in this collection is the so called order :math:`N` of the corresponding point group. Applying all symmetry operations of a point group to a given vector :math:`\mathbf{h}` results in :math:`N` new vectors :math:`\mathbf{h}'`, some of which may be identical (this depends on the symmetry and also on the vectors, e.g. if one or more index is 0). This means that the symmetry operations of a point group generate a set of :math:`N'` (where :math:`N' < N`) non-identical vectors :math:`\mathbf{h}'` for a given vector :math:`\mathbf{h}` - these vectors are called symmetry equivalents.
 
@@ -119,7 +119,7 @@ Sometimes it is easier to think about symmetry in terms of the elements that cau
     symOp = SymmetryOperationFactory.createSymOp("x,y,-z")
     element = SymmetryElementFactory.createSymElement(symOp)
 
-    print "The element corresponding to 'x,y,-z' has the following symbol:", element.hmSymbol()
+    print "The element corresponding to 'x,y,-z' has the following symbol:", element.getHMSymbol()
     print "The mirror plane is perpendicular to:", element.getAxis()
 
 Executing this code yields the following output:
@@ -145,8 +145,8 @@ Point groups are represented in Mantid by the ``PointGroup``-interface, which is
     pg = PointGroupFactory.createPointGroup("-1")
     
     print "Name:", pg.getName()
-    print "Hermann-Mauguin symbol:", pg.getSymbol()
-    print "Crystal system:", pg.crystalSystem()
+    print "Hermann-Mauguin symbol:", pg.getHMSymbol()
+    print "Crystal system:", pg.getCrystalSystem()
     
 When this code is executed, some information about the point group is printed:
     
