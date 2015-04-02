@@ -9,6 +9,7 @@
 
 #include "MantidAPI/LiveListenerFactory.h"
 #include "MantidDataObjects/MDHistoWorkspace.h"
+#include "MantidSINQ/SINQHMListener.h"
 
 #include <Poco/AutoPtr.h>
 #include <Poco/DOM/DOMParser.h>

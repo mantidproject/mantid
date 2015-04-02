@@ -9,10 +9,6 @@
 #include "MantidKernel/System.h"
 #include "MantidKernel/VectorHelper.h"
 
-#include "MantidKernel/VectorHelper.h"
-#include "MantidMDEvents/CoordTransformAffine.h"
-#include "MantidMDEvents/CoordTransformAligned.h"
-
 #include <boost/algorithm/string.hpp>
 #include <boost/format.hpp>
 
