@@ -27,8 +27,8 @@ class CreateMDTest(unittest.TestCase):
         alg.setProperty("Emode", "Direct")
         alg.setProperty("Alatt", [1,1,1])
         alg.setProperty("Angdeg", [90,90,90])
-        alg.setProperty("U", [0,0,1])
-        alg.setProperty("V", [1,0,0])
+        alg.setProperty("u", [0,0,1])
+        alg.setProperty("v", [1,0,0])
         
     def test_psi_right_size(self):
     
@@ -43,8 +43,8 @@ class CreateMDTest(unittest.TestCase):
         alg.setProperty("Emode", "Direct")
         alg.setProperty("Alatt", [1,1,1])
         alg.setProperty("Angdeg", [90,90,90])
-        alg.setProperty("U", [0,0,1])
-        alg.setProperty("V", [1,0,0])
+        alg.setProperty("u", [0,0,1])
+        alg.setProperty("v", [1,0,0])
         alg.setProperty("Psi", [0, 0, 0]) # Too large
         alg.setProperty("Gl", [0]) # Right size
         alg.setProperty("Gs", [0]) # Right size
@@ -64,8 +64,8 @@ class CreateMDTest(unittest.TestCase):
         alg.setProperty("Emode", "Direct")
         alg.setProperty("Alatt", [1,1,1])
         alg.setProperty("Angdeg", [90,90,90])
-        alg.setProperty("U", [0,0,1])
-        alg.setProperty("V", [1,0,0])
+        alg.setProperty("u", [0,0,1])
+        alg.setProperty("v", [1,0,0])
         alg.setProperty("Psi", [0]) # Right size
         alg.setProperty("Gl", [0, 0]) # Too many
         alg.setProperty("Gs", [0]) # Right size
@@ -85,8 +85,8 @@ class CreateMDTest(unittest.TestCase):
         alg.setProperty("Emode", "Direct")
         alg.setProperty("Alatt", [1,1,1])
         alg.setProperty("Angdeg", [90,90,90])
-        alg.setProperty("U", [0,0,1])
-        alg.setProperty("V", [1,0,0])
+        alg.setProperty("u", [0,0,1])
+        alg.setProperty("v", [1,0,0])
         alg.setProperty("Psi", [0]) # Right size
         alg.setProperty("Gl", [0]) # Right size
         alg.setProperty("Gs", [0,0]) # Too large
@@ -106,8 +106,8 @@ class CreateMDTest(unittest.TestCase):
         alg.setProperty("InputWorkspaces", ['input_workspace'])
         alg.setProperty("Alatt", [1,1,1])
         alg.setProperty("Angdeg", [90,90,90])
-        alg.setProperty("U", [0,0,1])
-        alg.setProperty("V", [1,0,0])
+        alg.setProperty("u", [0,0,1])
+        alg.setProperty("v", [1,0,0])
         alg.execute()
         out_ws = AnalysisDataService.retrieve("mdworkspace")
 
