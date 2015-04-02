@@ -118,6 +118,8 @@ class VesuvioTests(unittest.TestCase):
 
         # Verify
         self.assertEquals(1, evs_raw.getNumberHistograms())
+        self.assertAlmostEqual(5.0, evs_raw.readX(0)[0], places=DIFF_PLACES)
+        self.assertAlmostEqual(599.5, evs_raw.readX(0)[-1], places=DIFF_PLACES)
         self.assertAlmostEqual(-1.5288171762918328, evs_raw.readY(0)[0], places=DIFF_PLACES)
         self.assertAlmostEqual(-0.079412793053402098, evs_raw.readY(0)[-1], places=DIFF_PLACES)
         self.assertAlmostEqual(0.52109203357613976, evs_raw.readE(0)[0], places=DIFF_PLACES)
@@ -130,6 +132,10 @@ class VesuvioTests(unittest.TestCase):
 
         # Verify
         self.assertEquals(2, evs_raw.getNumberHistograms())
+        self.assertAlmostEqual(5.0, evs_raw.readX(0)[0], places=DIFF_PLACES)
+        self.assertAlmostEqual(5.0, evs_raw.readX(1)[0], places=DIFF_PLACES)
+        self.assertAlmostEqual(599.5, evs_raw.readX(0)[-1], places=DIFF_PLACES)
+        self.assertAlmostEqual(599.5, evs_raw.readX(1)[-1], places=DIFF_PLACES)
         self.assertAlmostEqual(-0.713877795283, evs_raw.readY(0)[0], places=DIFF_PLACES)
         self.assertAlmostEqual(-3.00125465604, evs_raw.readY(1)[0], places=DIFF_PLACES)
         self.assertAlmostEqual(0.6219299465, evs_raw.readE(0)[0], places=DIFF_PLACES)
