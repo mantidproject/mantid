@@ -11,7 +11,7 @@
 
 using Mantid::MDAlgorithms::SmoothMD;
 using namespace Mantid::API;
-using namespace Mantid::MDEvents;
+using namespace Mantid::DataObjects;
 
 class SmoothMDTest : public CxxTest::TestSuite {
 public:
