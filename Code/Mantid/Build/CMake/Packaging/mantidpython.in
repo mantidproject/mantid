@@ -21,6 +21,9 @@ else
     TCM_RELEASE=${TCMALLOC_RELEASE_RATE}
 fi
 
+# Define paraview information
+PV_PLUGIN_PATH="${INSTALLDIR}/pvplugins/pvplugins"
+
 # Define extra libraries for python
 LOCAL_PYTHONPATH=@WRAPPER_PREFIX@$INSTALLDIR
 if [ -n "${PYTHONPATH}" ]; then
@@ -30,5 +33,6 @@ fi
 # Launch
 LD_PRELOAD=${LOCAL_PRELOAD} TCMALLOC_RELEASE_RATE=${TCM_RELEASE} \
     LD_LIBRARY_PATH=${LOCAL_LDPATH} QT_API=pyqt \
+    PV_PLUGIN_PATH=${PV_PLUGIN_PATH} \
     PYTHONPATH=${LOCAL_PYTHONPATH} \
     ${IPYTHON} $*@WRAPPER_POSTFIX@

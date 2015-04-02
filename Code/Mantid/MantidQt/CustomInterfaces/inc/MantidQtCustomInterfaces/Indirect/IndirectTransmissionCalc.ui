@@ -37,7 +37,6 @@
           </property>
           <property name="disabledInstruments" stdset="0">
            <stringlist>
-            <string>TOSCA</string>
             <string>TFXA</string>
            </stringlist>
           </property>
