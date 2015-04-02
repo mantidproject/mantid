@@ -3,25 +3,25 @@ import stresstesting
 from mantid import *
 from mantid.simpleapi import *
 
-class REFLReduction(stresstesting.MantidStressTest):
+class REFLWithBackground(stresstesting.MantidStressTest):
     def runTest(self):
         #TODO: The reduction algorithm should not require an absolute path
         scaling_factor_file = FileFinder.getFullPath("directBeamDatabaseFall2014_IPTS_11601_2.cfg")
         
-        RefLReduction(RunNumbers=[119814],
-                      NormalizationRunNumber=119690,
-                      SignalPeakPixelRange=[154, 166],
+        RefLReduction(RunNumbers=[119816],
+                      NormalizationRunNumber=119692,
+                      SignalPeakPixelRange=[155, 165],
                       SubtractSignalBackground=True,
-                      SignalBackgroundPixelRange=[151, 169],
+                      SignalBackgroundPixelRange=[146, 165],
                       NormFlag=True,
-                      NormPeakPixelRange=[154, 160],
-                      NormBackgroundPixelRange=[151, 163],
+                      NormPeakPixelRange=[154, 162],
+                      NormBackgroundPixelRange=[151, 165],
                       SubtractNormBackground=True,
                       LowResDataAxisPixelRangeFlag=True,
                       LowResDataAxisPixelRange=[99, 158],
                       LowResNormAxisPixelRangeFlag=True,
-                      LowResNormAxisPixelRange=[98, 158],
-                      TOFRange=[29623.0, 42438.0],
+                      LowResNormAxisPixelRange=[118, 137],
+                      TOFRange=[9610, 22425],
                       IncidentMediumSelected='2InDiamSi',
                       GeometryCorrectionFlag=False,
                       QMin=0.005,
@@ -30,7 +30,7 @@ class REFLReduction(stresstesting.MantidStressTest):
                       AngleOffsetError=0.001,
                       ScalingFactorFile=scaling_factor_file,
                       SlitsWidthFlag=True,
-                      OutputWorkspace='reflectivity_119814')
+                      OutputWorkspace='reflectivity_119816')
 
     def validate(self):
         # Be more tolerant with the output.
@@ -40,4 +40,5 @@ class REFLReduction(stresstesting.MantidStressTest):
         self.disableChecking.append('Sample')
         self.disableChecking.append('SpectraMap')
         self.disableChecking.append('Axes')
-        return "reflectivity_119814", 'REFL_119814_combined_data.nxs'
+        return "reflectivity_119816", 'REFL_119816.nxs'
+
