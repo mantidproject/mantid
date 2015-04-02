@@ -29,9 +29,9 @@ using namespace Mantid::Kernel;
  */
 void MantidWebServiceAPIJobManager::abortRemoteJob(const std::string &jobID) {
   std::istream &respStream =
-      m_helper.httpGet("/abort", std::string("JobID=") + jobID);
+    httpGet("/abort", std::string("JobID=") + jobID);
 
-  if (m_helper.lastStatus() != Poco::Net::HTTPResponse::HTTP_OK) {
+  if (lastStatus() != Poco::Net::HTTPResponse::HTTP_OK) {
     JSONObject resp;
     initFromStream(resp, respStream);
     std::string errMsg;
@@ -54,8 +54,8 @@ void MantidWebServiceAPIJobManager::authenticate(const std::string &username,
   MantidWebServiceAPIHelper helper;
 
   std::istream &respStream =
-      m_helper.httpGet("/authenticate", "", username, password);
-  if (m_helper.lastStatus() != Poco::Net::HTTPResponse::HTTP_OK) {
+      httpGet("/authenticate", "", username, password);
+  if (lastStatus() != Poco::Net::HTTPResponse::HTTP_OK) {
     JSONObject resp;
     initFromStream(resp, respStream);
     std::string errMsg;
@@ -83,10 +83,10 @@ void MantidWebServiceAPIJobManager::downloadRemoteFile(
     const std::string &localFileName) {
 
   std::istream &respStream =
-      m_helper.httpGet("/download", std::string("TransID=") + transactionID +
+      httpGet("/download", std::string("TransID=") + transactionID +
                                         "&File=" + remoteFileName);
 
-  if (m_helper.lastStatus() == Poco::Net::HTTPResponse::HTTP_OK) {
+  if (lastStatus() == Poco::Net::HTTPResponse::HTTP_OK) {
 
     std::ofstream outfile(localFileName.c_str());
     if (outfile.good()) {
@@ -119,7 +119,7 @@ void MantidWebServiceAPIJobManager::downloadRemoteFile(
 std::vector<Mantid::API::IRemoteJobManager::RemoteJobInfo>
 MantidWebServiceAPIJobManager::queryAllRemoteJobs() const {
 
-  std::istream &respStream = m_helper.httpGet(std::string("/query"));
+  std::istream &respStream = httpGet(std::string("/query"));
   JSONObject resp;
   try {
     initFromStream(resp, respStream);
@@ -131,7 +131,7 @@ MantidWebServiceAPIJobManager::queryAllRemoteJobs() const {
                              "some kind."));
   }
 
-  if (Poco::Net::HTTPResponse::HTTP_OK != m_helper.lastStatus()) {
+  if (Poco::Net::HTTPResponse::HTTP_OK != lastStatus()) {
     std::string errMsg;
     resp["Err_Msg"].getValue(errMsg);
     throw(std::runtime_error(errMsg));
@@ -225,11 +225,11 @@ std::vector<std::string> MantidWebServiceAPIJobManager::queryRemoteFile(
     const std::string &transactionID) const {
 
   std::istream &respStream =
-      m_helper.httpGet("/files", std::string("TransID=") + transactionID);
+      httpGet("/files", std::string("TransID=") + transactionID);
   JSONObject resp;
   initFromStream(resp, respStream);
   std::vector<std::string> filenames;
-  if (m_helper.lastStatus() == Poco::Net::HTTPResponse::HTTP_OK) {
+  if (lastStatus() == Poco::Net::HTTPResponse::HTTP_OK) {
 
     JSONArray files;
     std::string oneFile;
@@ -260,11 +260,11 @@ std::vector<std::string> MantidWebServiceAPIJobManager::queryRemoteFile(
 Mantid::API::IRemoteJobManager::RemoteJobInfo
 MantidWebServiceAPIJobManager::queryRemoteJob(const std::string &jobID) const {
   std::istream &respStream =
-      m_helper.httpGet("/query", std::string("JobID=") + jobID);
+      httpGet("/query", std::string("JobID=") + jobID);
   JSONObject resp;
   initFromStream(resp, respStream);
 
-  if (Poco::Net::HTTPResponse::HTTP_OK != m_helper.lastStatus()) {
+  if (Poco::Net::HTTPResponse::HTTP_OK != lastStatus()) {
     std::string errMsg;
     resp["Err_Msg"].getValue(errMsg);
     throw(std::runtime_error(errMsg));
@@ -320,11 +320,11 @@ MantidWebServiceAPIJobManager::queryRemoteJob(const std::string &jobID) const {
  * (remote) compute resource.
  */
 std::string MantidWebServiceAPIJobManager::startRemoteTransaction() {
-  std::istream &respStream = m_helper.httpGet("/transaction", "Action=Start");
+  std::istream &respStream = httpGet("/transaction", "Action=Start");
   JSONObject resp;
   initFromStream(resp, respStream);
 
-  if (Poco::Net::HTTPResponse::HTTP_OK != m_helper.lastStatus()) {
+  if (Poco::Net::HTTPResponse::HTTP_OK != lastStatus()) {
     std::string errMsg;
     resp["Err_Msg"].getValue(errMsg);
     throw(std::runtime_error(errMsg));
@@ -349,10 +349,10 @@ std::string MantidWebServiceAPIJobManager::startRemoteTransaction() {
 void MantidWebServiceAPIJobManager::stopRemoteTransaction(
     const std::string &transactionID) {
   std::string transId = transactionID;
-  std::istream &respStream = m_helper.httpGet(
+  std::istream &respStream = httpGet(
       "/transaction", std::string("Action=Stop&TransID=") + transId);
 
-  if (m_helper.lastStatus() == Poco::Net::HTTPResponse::HTTP_OK) {
+  if (lastStatus() == Poco::Net::HTTPResponse::HTTP_OK) {
     g_log.information() << "Transaction ID " << transId << " stopped."
                         << std::endl;
   } else {
@@ -404,10 +404,10 @@ std::string MantidWebServiceAPIJobManager::submitRemoteJob(
     postData["JobName"] = jobName;
   }
 
-  std::istream &respStream = m_helper.httpPost("/submit", postData);
+  std::istream &respStream = httpPost("/submit", postData);
   JSONObject resp;
   initFromStream(resp, respStream);
-  if (Poco::Net::HTTPResponse::HTTP_CREATED != m_helper.lastStatus()) {
+  if (Poco::Net::HTTPResponse::HTTP_CREATED != lastStatus()) {
     std::string errMsg;
     resp["Err_Msg"].getValue(errMsg);
     throw(std::runtime_error(errMsg));
@@ -451,8 +451,8 @@ void MantidWebServiceAPIJobManager::uploadRemoteFile(
                     std::istreambuf_iterator<char>());
     infile.close();
 
-    std::istream &respStream = m_helper.httpPost("/upload", postData, fileData);
-    if (m_helper.lastStatus() ==
+    std::istream &respStream = httpPost("/upload", postData, fileData);
+    if (lastStatus() ==
         Poco::Net::HTTPResponse::HTTP_CREATED) // Upload returns a "201 -
                                                // Created" code on success
     {

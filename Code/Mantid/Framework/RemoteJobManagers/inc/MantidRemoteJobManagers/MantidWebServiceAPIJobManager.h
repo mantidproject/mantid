@@ -66,6 +66,29 @@ public:
                         const std::string &remoteFileName,
                         const std::string &localFileName);
 
+protected:
+  /// Use the helper for these operations
+  std::istream &httpGet(const std::string &path,
+                        const std::string &query_str = "",
+                        const std::string &username = "",
+                        const std::string &password = "") const {
+    return m_helper.httpGet(path, query_str, username, password);
+  }
+
+  std::istream &
+  httpPost(const std::string &path,
+           const MantidWebServiceAPIHelper::PostDataMap &postData,
+           const MantidWebServiceAPIHelper::PostDataMap &fileData =
+               MantidWebServiceAPIHelper::PostDataMap(),
+           const std::string &username = "",
+           const std::string &password = "") const {
+    return m_helper.httpPost(path, postData, fileData, username, password);
+  }
+
+  Poco::Net::HTTPResponse::HTTPStatus lastStatus() const {
+    return m_helper.lastStatus();
+  }
+
 private:
   MantidWebServiceAPIHelper m_helper;
 };
