@@ -74,16 +74,16 @@ public:
   std::istream &httpGet(const std::string &path,
                         const std::string &query_str = "",
                         const std::string &username = "",
-                        const std::string &password = "");
+                        const std::string &password = "") const;
 
   // Perform an HTTP POST request
   std::istream &httpPost(const std::string &path, const PostDataMap &postData,
                          const PostDataMap &fileData = PostDataMap(),
                          const std::string &username = "",
-                         const std::string &password = "");
+                         const std::string &password = "") const;
 
   // Return the status code (200, 404, etc..) from the most recent request
-  Poco::Net::HTTPResponse::HTTPStatus lastStatus() {
+  Poco::Net::HTTPResponse::HTTPStatus lastStatus() const {
     return m_response.getStatus();
   }
   const std::string &lastStatusReason() {
@@ -96,10 +96,12 @@ private:
   // Wraps up some of the boilerplate code needed to execute HTTP GET and POST
   // requests
   void initGetRequest(Poco::Net::HTTPRequest &req, std::string extraPath,
-                      std::string queryString);
-  void initPostRequest(Poco::Net::HTTPRequest &req, std::string extraPath);
+                      std::string queryString) const;
+  void initPostRequest(Poco::Net::HTTPRequest &req,
+                       std::string extraPath) const;
   void initHTTPRequest(Poco::Net::HTTPRequest &req, const std::string &method,
-                       std::string extraPath, std::string queryString = "");
+                       std::string extraPath,
+                       std::string queryString = "") const;
 
   std::string m_displayName;
   std::string
@@ -119,9 +121,9 @@ private:
   // takes a NameValueCollection object, so we have to convert.  (WTF Poco
   // devs?!?)
   static std::vector<Poco::Net::HTTPCookie> m_cookies;
-  Poco::Net::NameValueCollection getCookies();
+  Poco::Net::NameValueCollection getCookies() const;
 
-  Poco::Net::HTTPClientSession *
+  mutable Poco::Net::HTTPClientSession *
       m_session; // Pointer to session object for all our HTTP requests
                  // (Has to be a pointer because we allocate and delete
                  // it multiple times)

@@ -31,10 +31,9 @@ MantidWebServiceAPIHelper::MantidWebServiceAPIHelper()
 
 MantidWebServiceAPIHelper::~MantidWebServiceAPIHelper() { delete m_session; }
 
-std::istream &MantidWebServiceAPIHelper::httpGet(const std::string &path,
-                                                 const std::string &query_str,
-                                                 const std::string &username,
-                                                 const std::string &password) {
+std::istream &MantidWebServiceAPIHelper::httpGet(
+    const std::string &path, const std::string &query_str,
+    const std::string &username, const std::string &password) const {
   Poco::Net::HTTPRequest req;
   initGetRequest(req, path, query_str);
 
@@ -49,7 +48,8 @@ std::istream &MantidWebServiceAPIHelper::httpGet(const std::string &path,
 
   m_session->sendRequest(req);
 
-  std::istream &respStream = m_session->receiveResponse(m_response);
+  std::istream &respStream = m_session->receiveResponse(
+      const_cast<Poco::Net::HTTPResponse &>(m_response));
 
   // For as yet unknown reasons, we don't always get a session cookie back from
   // the
@@ -66,11 +66,10 @@ std::istream &MantidWebServiceAPIHelper::httpGet(const std::string &path,
   return respStream;
 }
 
-std::istream &MantidWebServiceAPIHelper::httpPost(const std::string &path,
-                                                  const PostDataMap &postData,
-                                                  const PostDataMap &fileData,
-                                                  const std::string &username,
-                                                  const std::string &password) {
+std::istream &MantidWebServiceAPIHelper::httpPost(
+    const std::string &path, const PostDataMap &postData,
+    const PostDataMap &fileData, const std::string &username,
+    const std::string &password) const {
   Poco::Net::HTTPRequest req;
   initPostRequest(req, path);
 
@@ -138,7 +137,8 @@ std::istream &MantidWebServiceAPIHelper::httpPost(const std::string &path,
   // upload the actual HTTP body
   postStream << postBody.str() << std::flush;
 
-  std::istream &respStream = m_session->receiveResponse(m_response);
+  std::istream &respStream = m_session->receiveResponse(
+      const_cast<Poco::Net::HTTPResponse &>(m_response));
 
   // For as yet unknown reasons, we don't always get a session cookie back from
   // the
@@ -159,20 +159,20 @@ std::istream &MantidWebServiceAPIHelper::httpPost(const std::string &path,
 // POST
 void MantidWebServiceAPIHelper::initGetRequest(Poco::Net::HTTPRequest &req,
                                                std::string extraPath,
-                                               std::string queryString) {
+                                               std::string queryString) const {
   return initHTTPRequest(req, Poco::Net::HTTPRequest::HTTP_GET, extraPath,
                          queryString);
 }
 
 void MantidWebServiceAPIHelper::initPostRequest(Poco::Net::HTTPRequest &req,
-                                                std::string extraPath) {
+                                                std::string extraPath) const {
   return initHTTPRequest(req, Poco::Net::HTTPRequest::HTTP_POST, extraPath);
 }
 
 void MantidWebServiceAPIHelper::initHTTPRequest(Poco::Net::HTTPRequest &req,
                                                 const std::string &method,
                                                 std::string extraPath,
-                                                std::string queryString) {
+                                                std::string queryString) const {
   // Set up the session object
   if (m_session) {
     delete m_session;
@@ -220,7 +220,7 @@ void MantidWebServiceAPIHelper::initHTTPRequest(Poco::Net::HTTPRequest &req,
 }
 
 // Converts the vector of HTTPCookie objects into a NameValueCollection
-Poco::Net::NameValueCollection MantidWebServiceAPIHelper::getCookies() {
+Poco::Net::NameValueCollection MantidWebServiceAPIHelper::getCookies() const {
   Poco::Net::NameValueCollection nvc;
   std::vector<Poco::Net::HTTPCookie>::const_iterator it = m_cookies.begin();
   while (it != m_cookies.end()) {
