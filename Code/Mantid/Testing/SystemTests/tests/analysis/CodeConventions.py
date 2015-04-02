@@ -33,6 +33,7 @@ ALG_BAD_PARAMS = {
                           "usePanelHeight", "usePanelPosition",
                           "usePanelOrientation", "tolerance",
                           "MaxPositionChange_meters"),
+    "SetSampleMaterial(v1)":("bAverage", "bSquaredAverage"),
     "SetUB(v1)":("a", "b", "c", "alpha", "beta", "gamma", "u", "v"),
     "ViewBOA(v1)":("CD-Distance"),
     "PoldiCreatePeaksFromCell(v1)":("a", "b", "c", "alpha", "beta", "gamma"),
