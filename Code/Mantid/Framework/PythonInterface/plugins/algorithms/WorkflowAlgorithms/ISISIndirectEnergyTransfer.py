@@ -1,6 +1,7 @@
 from mantid.kernel import *
 from mantid.api import *
 from mantid.simpleapi import *
+import mantid
 import os
 import string
 import numpy as np
@@ -64,6 +65,7 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
         # Output properties
         self.declareProperty(name='UnitX', defaultValue='DeltaE', doc='X axis units for the result workspace.',
                              validator=StringListValidator(['DeltaE', 'DeltaE_inWavenumber']))
+        self.declareProperty(StringArrayProperty(name='SaveFormats'), doc='Comma seperated list of save formats')
         self.declareProperty(name='Plot', defaultValue='None', doc='Type of plot to output after reduction.',
                              validator=StringListValidator(['None', 'Spectra', 'Contour', 'Both']))
 
@@ -180,6 +182,10 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
         # Rename output workspaces
         output_workspace_names = [self._rename_workspace(ws_name) for ws_name in self._workspace_names]
 
+        # Save result workspaces
+        if self._save_formats is not None:
+            self._save(output_workspace_names)
+
         # Group result workspaces
         GroupWorkspaces(InputWorkspaces=output_workspace_names, OutputWorkspace=self._output_ws)
 
@@ -233,6 +239,14 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
         if grouping_method == 'Workspace' and grouping_ws is None:
             issues['GroupingWorkspace'] = 'Must select a grouping workspace for current GroupingWorkspace'
 
+        # Validate save formats
+        save_formats = self.getProperty('SaveFormats').value
+        valid_formats = ['nxs', 'ascii', 'spe', 'nxspe', 'aclimax', 'davegrp']
+        for format_name in save_formats:
+            if format_name not in valid_formats:
+                issues['SaveFormats'] = '%s is not a valid save format' % format_name
+                break
+
         return issues
 
 
@@ -263,6 +277,8 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
 
         self._output_x_units = self.getPropertyValue('UnitX')
         self._plot_type = self.getPropertyValue('Plot')
+        self._save_formats = _elems_or_none(self.getProperty('SaveFormats').value)
+
         self._output_ws = self.getPropertyValue('OutputWorkspace')
 
         # Disable sum files if there is only one file
@@ -778,6 +794,48 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
             from mantidplot import importMatrixWorkspace
             plot_workspace = importMatrixWorkspace(ws_name)
             plot_workspace.plotGraph2D()
+
+
+    def _save(self, worksspace_names):
+        """
+        Saves the workspaces to the default save directory.
+
+        @param worksspace_names List of workspace names to save
+        """
+
+        for ws_name in worksspace_names:
+            if 'spe' in self._save_formats:
+                SaveSPE(InputWorkspace=ws_name, Filename=ws_name + '.spe')
+
+            if 'nxs' in self._save_formats:
+                SaveNexusProcessed(InputWorkspace=ws_name, Filename=ws_name + '.nxs')
+
+            if 'nxspe' in self._save_formats:
+                SaveNXSPE(InputWorkspace=ws_name, Filename=ws_name + '.nxspe')
+
+            if 'ascii' in self._save_formats:
+                # Version 1 of SaveASCII produces output that works better with excel/origin
+                # For some reason this has to be done with an algorithm object, using the function
+                # wrapper with Version did not change the version that was run
+                saveAsciiAlg = mantid.api.AlgorithmManager.createUnmanaged('SaveAscii', 1)
+                saveAsciiAlg.initialize()
+                saveAsciiAlg.setProperty('InputWorkspace', ws_name)
+                saveAsciiAlg.setProperty('Filename', ws_name + '.dat')
+                saveAsciiAlg.execute()
+
+            if 'aclimax' in self._save_formats:
+                if self._output_x_units == 'DeltaE_inWavenumber':
+                    bins = '24, -0.005, 4000' #cm-1
+                else:
+                    bins = '3, -0.005, 500' #meV
+                Rebin(InputWorkspace=ws_name,OutputWorkspace= ws_name + '_aclimax_save_temp', Params=bins)
+                SaveAscii(InputWorkspace=ws_name + '_aclimax_save_temp', Filename=ws_name + '_aclimax.dat', Separator='Tab')
+                DeleteWorkspace(Workspace=ws_name + '_aclimax_save_temp')
+
+            if 'davegrp' in self._save_formats:
+                ConvertSpectrumAxis(InputWorkspace=ws_name, OutputWorkspace=ws_name + '_davegrp_save_temp', Target='ElasticQ', EMode='Indirect')
+                SaveDaveGrp(InputWorkspace=ws_name + '_davegrp_save_temp', Filename=ws_name + '.grp')
+                DeleteWorkspace(Workspace=ws_name + '_davegrp_save_temp')
 
 
 # Register algorithm with Mantid

@@ -167,6 +167,7 @@ namespace CustomInterfaces
 
     reductionAlg->setProperty("FoldMultipleFrames", m_uiForm.ckFold->isChecked());
     reductionAlg->setProperty("Plot", m_uiForm.cbPlotType->currentText().toStdString());
+    reductionAlg->setProperty("SaveFormats", getSaveFormats());
     reductionAlg->setProperty("OutputWorkspace", "IndirectEnergyTransfer_Workspaces");
 
     m_batchAlgoRunner->addAlgorithm(reductionAlg, reductionRuntimeProps);
