@@ -62,12 +62,13 @@ std::map<std::string, std::string> PoldiFitPeaks2D::validateInputs() {
   bool isPawleyFit = getProperty("PawleyFit");
 
   if (isPawleyFit) {
-    Property *cellProperty = getProperty("InitialCell");
+    Property *cellProperty = getPointerToProperty("InitialCell");
     if (cellProperty->isDefault()) {
       errorMap["InitialCell"] = "Initial cell must be given for PawleyFit.";
     }
 
-    Property *refinedCellParameters = getProperty("RefinedCellParameters");
+    Property *refinedCellParameters =
+        getPointerToProperty("RefinedCellParameters");
     if (refinedCellParameters->isDefault()) {
       errorMap["RefinedCellParameters"] = "Workspace name for refined cell "
                                           "parameters must be supplied for "
