@@ -289,7 +289,19 @@ public:
       m_numMDBoxes[depth]--;
     }
     m_numMDGridBoxes[depth]++;
+
+    // We need to account for optional top level splitting
+    if (depth == 0 && m_splitTopInto) {
+      
+      size_t numSplitTop = 1;
+      for (size_t d = 0; d < m_splitTopInto.get().size(); d++)
+        numSplitTop *= m_splitTopInto.get()[d];
+
+      m_numMDBoxes[depth + 1] += numSplitTop;
+    }
+    else {
       m_numMDBoxes[depth + 1] += m_numSplit;
+    }
     m_mutexNumMDBoxes.unlock();
   }
 

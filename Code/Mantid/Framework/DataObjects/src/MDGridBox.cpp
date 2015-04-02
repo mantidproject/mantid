@@ -10,6 +10,7 @@
 #include "MantidDataObjects/MDEvent.h"
 #include "MantidDataObjects/MDGridBox.h"
 #include <boost/math/special_functions/round.hpp>
+#include <boost/optional.hpp>
 #include <ostream>
 #include "MantidKernel/Strings.h"
 
@@ -67,9 +68,18 @@ template <typename MDE, size_t nd> void MDGridBox<MDE, nd>::initGridBox() {
         "MDGridBox::ctor(): No BoxController specified in box.");
 
   // How many is it split?
-  for (size_t d = 0; d < nd; d++)
+  // If we are at the top level and we have a specific top level split, then set it.
+  boost::optional<std::vector<size_t>> splitTopInto = this->m_BoxController->getSplitTopInto();
+  if (this->getDepth() == 0 && splitTopInto)
+  {
+    for (size_t d = 0; d < nd; d++)
+      split[d] = splitTopInto.get()[d];
+  }
+  else
+  {
+   for (size_t d = 0; d < nd; d++)
     split[d] = this->m_BoxController->getSplitInto(d);
-
+  }
 
   // Compute sizes etc.
   size_t tot = computeSizesFromSplit();
@@ -92,8 +102,19 @@ TMDE(MDGridBox)::MDGridBox(MDBox<MDE, nd> *box)
   //    box->getNPoints() << " events into MDGridBox" << std::endl;
 
   // How many is it split?
-  for (size_t d = 0; d < nd; d++)
+  // If we are at the top level and we have a specific top level split, then set it.
+  boost::optional<std::vector<size_t>> splitTopInto = this->m_BoxController->getSplitTopInto();
+  std::vector<size_t> splitIntoBuffer;
+  if (this->getDepth() == 0 && splitTopInto)
+  {
+    for (size_t d = 0; d < nd; d++)
+      split[d] = splitTopInto.get()[d];
+  }
+  else
+  {
+   for (size_t d = 0; d < nd; d++)
     split[d] = this->m_BoxController->getSplitInto(d);
+  }
 
   // Compute sizes etc.
   size_t tot = computeSizesFromSplit();
@@ -192,7 +213,8 @@ TMDE(MDGridBox)::MDGridBox(const MDGridBox<MDE, nd> &other,
                            Mantid::API::BoxController *const otherBC)
     : MDBoxBase<MDE, nd>(other, otherBC), numBoxes(other.numBoxes),
       diagonalSquared(other.diagonalSquared), nPoints(other.nPoints) {
-  for (size_t d = 0; d < nd; d++) {
+  for (size_t d = 0; d < nd; d++) 
+  {
     split[d] = other.split[d];
     splitCumul[d] = other.splitCumul[d];
     m_SubBoxSize[d] = other.m_SubBoxSize[d];

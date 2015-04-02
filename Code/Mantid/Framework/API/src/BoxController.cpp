@@ -13,6 +13,7 @@
 #include <Poco/DOM/DOMWriter.h>
 #include <Poco/DOM/Element.h>
 #include <Poco/DOM/Text.h>
+#include <Poco/DOM/NodeList.h>
 
 #include <sstream>
 
@@ -248,14 +249,24 @@ void BoxController::fromXMLString(const std::string &xml) {
   s = pBoxElement->getChildElement("SplitInto")->innerText();
   this->m_splitInto = splitStringIntoVector<size_t>(s);
 
-  s = pBoxElement->getChildElement("SplitTopInto")->innerText();
-  if (s.empty())
+  // Need to make sure that we handle box controllers which did not have the SplitTopInto 
+  // attribute 
+  Poco::XML::NodeList* nodes = pBoxElement->getElementsByTagName("SplitTopInto");
+  if (nodes->length() > 0)
   {
-    this->m_splitTopInto = boost::none;
+    s = pBoxElement->getChildElement("SplitTopInto")->innerText();
+    if (s.empty())
+    {
+      this->m_splitTopInto = boost::none;
+    }
+    else
+    {
+      this->m_splitTopInto = splitStringIntoVector<size_t>(s);
+    }
   }
   else
   {
-    this->m_splitTopInto = splitStringIntoVector<size_t>(s);
+    this->m_splitTopInto = boost::none;
   }
 
   s = pBoxElement->getChildElement("NumMDBoxes")->innerText();
