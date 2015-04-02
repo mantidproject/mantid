@@ -53,15 +53,6 @@ Projection::Projection(ITableWorkspace_const_sptr ws) {
   if (numRows != 3)
     throw std::runtime_error("3 rows must be provided to create a projection");
 
-  if (ws->getColumn("name")->size() != numRows)
-    throw std::runtime_error("Insufficient values in 'name' column.");
-  if (ws->getColumn("value")->size() != numRows)
-    throw std::runtime_error("Insufficient values in 'value' column.");
-  if (ws->getColumn("offset")->size() != numRows)
-    throw std::runtime_error("Insufficient values in 'offset' column.");
-  if (ws->getColumn("type")->size() != numRows)
-    throw std::runtime_error("Insufficient values in 'unit' column.");
-
   for (size_t i = 0; i < numRows; i++) {
     const std::string name = ws->getColumn("name")->cell<std::string>(i);
     const std::string valueStr = ws->getColumn("value")->cell<std::string>(i);
