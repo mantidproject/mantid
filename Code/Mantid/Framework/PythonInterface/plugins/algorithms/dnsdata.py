@@ -15,6 +15,7 @@ class DNSdata:
         self.duration = None
         self.deterota = 0
         self.wavelength = None          # Angstrom
+        self.incident_energy = None     # meV
         self.ndet = 24
         self.sample_name = ""
         self.userid = ""
@@ -113,6 +114,7 @@ class DNSdata:
             line = b2splitted[2].split()
             self.monochromator_angle = float(line[2])
             self.wavelength = float(line[3])*10.0
+            self.incident_energy = float(line[4])
 
             # parse block 3 (motors position)
             b3splitted = map(str.strip, blocks[3].split('#'))
