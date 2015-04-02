@@ -69,7 +69,7 @@ InelasticDiffRotDiscreteCircle::InelasticDiffRotDiscreteCircle()
                                  "energy in mili-eV");
   declareParameter("Shift", 0.0, "Shift in domain");
 
-  declareAttribute("Q", API::IFunction::Attribute());
+  declareAttribute("Q", API::IFunction::Attribute(EMPTY_DBL()));
   declareAttribute("WorkspaceIndex", API::IFunction::Attribute(0));
   declareAttribute("N", API::IFunction::Attribute(3));
 }
@@ -99,14 +99,14 @@ void InelasticDiffRotDiscreteCircle::function1D(double *out,
   const double S = getParameter("Shift");
 
   double Q;
-  if (getAttribute("Q").value() == "" && m_qValueCache.size() > 0) {
+  if (getAttribute("Q").asDouble() == EMPTY_DBL() && m_qValueCache.size() > 0) {
     const int specIdx = getAttribute("WorkspaceIndex").asInt();
     Q = m_qValueCache[specIdx];
 
     g_log.debug() << "Get Q value for workspace index " << specIdx << ": " << Q
                   << std::endl;
   } else {
-    Q = boost::lexical_cast<double>(getAttribute("Q").value());
+    Q = getAttribute("Q").asDouble();
 
     g_log.debug() << "Using Q attribute: " << Q << std::endl;
   }
