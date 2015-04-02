@@ -35,7 +35,8 @@ ALG_BAD_PARAMS = {
                           "MaxPositionChange_meters"),
     "SetUB(v1)":("a", "b", "c", "alpha", "beta", "gamma", "u", "v"),
     "ViewBOA(v1)":("CD-Distance"),
-    "PoldiCreatePeaksFromCell(v1)":("a", "b", "c", "alpha", "beta", "gamma")
+    "PoldiCreatePeaksFromCell(v1)":("a", "b", "c", "alpha", "beta", "gamma"),
+    "CreateMD" : ("u", "v")
     }
 
 # TODO this list should be empty
