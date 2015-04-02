@@ -10,7 +10,7 @@
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/MultiThreaded.h"
-#include "MantidMDEvents/MDHistoWorkspaceIterator.h"
+#include "MantidDataObjects/MDHistoWorkspaceIterator.h"
 #include <boost/make_shared.hpp>
 #include <vector>
 #include <map>
