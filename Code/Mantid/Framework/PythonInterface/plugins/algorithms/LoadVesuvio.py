@@ -153,6 +153,7 @@ class LoadVesuvio(PythonAlgorithm):
             ip_file = self.getPropertyValue(INST_PAR_PROP)
             if len(ip_file) > 0:
                 self._load_ip_file(ip_file)
+
             if self._sumspectra:
                 self._sum_all_spectra()
 
@@ -212,6 +213,9 @@ class LoadVesuvio(PythonAlgorithm):
                 dataE += np.square(raw_group[group_index].readE(ws_index))
             np.sqrt(dataE, dataE)
             foil_out.setX(ws_index, x_values)
+
+        if self._sumspectra:
+            self._sum_all_spectra()
 
         DeleteWorkspace(Workspace=SUMMED_WS)
         self._store_results()

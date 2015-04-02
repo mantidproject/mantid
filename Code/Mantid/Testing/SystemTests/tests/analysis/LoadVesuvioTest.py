@@ -127,7 +127,6 @@ class VesuvioTests(unittest.TestCase):
 
     def test_sumspectra_with_multiple_groups_gives_number_output_spectra_as_input_groups(self):
         self._run_load("14188", "135-148;152-165", "SingleDifference","IP0005.dat",sum=True)
-
         evs_raw = mtd[self.ws_name]
 
         # Verify
@@ -140,6 +139,34 @@ class VesuvioTests(unittest.TestCase):
         self.assertAlmostEqual(-3.00125465604, evs_raw.readY(1)[0], places=DIFF_PLACES)
         self.assertAlmostEqual(0.6219299465, evs_raw.readE(0)[0], places=DIFF_PLACES)
         self.assertAlmostEqual(0.676913729914, evs_raw.readE(1)[0], places=DIFF_PLACES)
+
+    def test_sumspectra_set_to_true_gives_single_spectra_summed_over_all_inputs_with_foil_in(self):
+        self._run_load("14188", "3-15", "FoilIn", "IP0005.dat", sum=True)
+        evs_raw = mtd[self.ws_name]
+
+        # Verify
+        self.assertEquals(1, evs_raw.getNumberHistograms())
+        self.assertAlmostEqual(5.0, evs_raw.readX(0)[0], places=DIFF_PLACES)
+        self.assertAlmostEqual(19990.0, evs_raw.readX(0)[-1], places=DIFF_PLACES)
+        self.assertAlmostEqual(497722.0, evs_raw.readY(0)[0], places=DIFF_PLACES)
+        self.assertAlmostEqual(2072.0, evs_raw.readY(0)[-1], places=DIFF_PLACES)
+        self.assertAlmostEqual(705.49415305869115, evs_raw.readE(0)[0], places=DIFF_PLACES)
+        self.assertAlmostEqual(45.519226706964169, evs_raw.readE(0)[-1], places=DIFF_PLACES)
+
+    def test_sumspectra_with_multiple_groups_gives_number_output_spectra_as_input_groups_with_foil_in(self):
+        self._run_load("14188", "3-15;30-50", "FoilIn", "IP0005.dat", sum=True)
+        evs_raw = mtd[self.ws_name]
+
+        # Verify
+        self.assertEquals(2, evs_raw.getNumberHistograms())
+        self.assertAlmostEqual(5.0, evs_raw.readX(0)[0], places=DIFF_PLACES)
+        self.assertAlmostEqual(5.0, evs_raw.readX(1)[0], places=DIFF_PLACES)
+        self.assertAlmostEqual(19990.0, evs_raw.readX(0)[-1], places=DIFF_PLACES)
+        self.assertAlmostEqual(19990.0, evs_raw.readX(1)[-1], places=DIFF_PLACES)
+        self.assertAlmostEqual(497722.0, evs_raw.readY(0)[0], places=DIFF_PLACES)
+        self.assertAlmostEqual(1332812.0, evs_raw.readY(1)[0], places=DIFF_PLACES)
+        self.assertAlmostEqual(705.49415305869115, evs_raw.readE(0)[0], places=DIFF_PLACES)
+        self.assertAlmostEqual(1154.4747723532116, evs_raw.readE(1)[0], places=DIFF_PLACES)
 
     def _run_load(self, runs, spectra, diff_opt, ip_file="", sum=False):
         LoadVesuvio(Filename=runs,OutputWorkspace=self.ws_name,
