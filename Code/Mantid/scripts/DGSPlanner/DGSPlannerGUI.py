@@ -135,8 +135,8 @@ class DGSPlannerGUI(QtGui.QWidget):
             if self.masterDict['instrument']=='HYSPEC':
                 mantid.simpleapi.AddSampleLog(Workspace="__temp_instrument",LogName='msd',LogText='1798.5',LogType='Number Series')
                 mantid.simpleapi.AddSampleLog(Workspace="__temp_instrument",LogName='s2',
-                                              LogText=self.masterDict['S2'],LogType='Number Series')
-                mantid.simpleapi.LoadInstrument(Workspace="__temp_instrument",Instrument="HYSPEC")
+                                              LogText=str(self.masterDict['S2']),LogType='Number Series')
+                mantid.simpleapi.LoadInstrument(Workspace="__temp_instrument",InstrumentName="HYSPEC")
             #masking
             if self.masterDict['makeFast']:
                 sp=range(mantid.mtd["__temp_instrument"].getNumberHistograms())
@@ -217,7 +217,32 @@ class DGSPlannerGUI(QtGui.QWidget):
 
     def save(self):
         fileName = str(QtGui.QFileDialog.getSaveFileName(self, 'Save Plot', self.saveDir,'*.png'))
-        self.figure.savefig(fileName)
+        data = "Instrument "+self.masterDict['instrument']+'\n'
+        if self.masterDict['instrument']=='HYSPEC':
+            data+= "S2 = "+str(self.masterDict['S2'])+'\n'
+        data+= "Ei = "+str(self.masterDict['Ei'])+' meV\n'
+        data+= "Goniometer values:\n"
+        gonioAxis0values=numpy.arange(self.masterDict['gonioMinvals'][0],self.masterDict['gonioMaxvals'][0]
+                                      +0.1*self.masterDict['gonioSteps'][0],self.masterDict['gonioSteps'][0])
+        gonioAxis1values=numpy.arange(self.masterDict['gonioMinvals'][1],self.masterDict['gonioMaxvals'][1]
+                                      +0.1*self.masterDict['gonioSteps'][1],self.masterDict['gonioSteps'][1])
+        gonioAxis2values=numpy.arange(self.masterDict['gonioMinvals'][2],self.masterDict['gonioMaxvals'][2]
+                                      +0.1*self.masterDict['gonioSteps'][2],self.masterDict['gonioSteps'][2])
+        for g0 in gonioAxis0values:
+                for g1 in gonioAxis1values:
+                    for g2 in gonioAxis2values:
+                        data+="    "+self.masterDict['gonioLabels'][0]+" = "+str(g0)
+                        data+="    "+self.masterDict['gonioLabels'][1]+" = "+str(g1)
+                        data+="    "+self.masterDict['gonioLabels'][2]+" = "+str(g2)+'\n'
+        data+= "Lattice parameters:\n"
+        data+="    a = "+str(self.ol.a())+"    b = "+str(self.ol.b())+"    c = "+str(self.ol.c())+'\n'
+        data+="    alpha = "+str(self.ol.alpha())+"    beta = "+str(self.ol.beta())+"    gamma = "+str(self.ol.gamma())+'\n'
+        data+= "Orientation vectors:\n"
+        data+="    u = "+str(self.ol.getuVector())+'\n'
+        data+="    v = "+str(self.ol.getvVector())+'\n'
+        
+        info=self.figure.text(0.2,0,data,verticalalignment='top')
+        self.figure.savefig(fileName,bbox_inches='tight',additional_artists=info)
         self.saveDir=os.path.dirname(fileName)
 
     def tr(self,x, y):

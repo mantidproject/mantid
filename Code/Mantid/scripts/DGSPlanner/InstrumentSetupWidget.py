@@ -148,7 +148,7 @@ class InstrumentSetupWidget(QtGui.QWidget):
             self.instrument=defaultInstrument
             self.combo.setCurrentIndex(self.instrumentList.index(defaultInstrument))
         else:
-            self.instrument=self.InstrumentList[0]
+            self.instrument=self.instrumentList[0]
             self.combo.setCurrentIndex(0)
         self.signaldict['instrument']=self.instrument
         self.labelInst=QtGui.QLabel('Instrument')
