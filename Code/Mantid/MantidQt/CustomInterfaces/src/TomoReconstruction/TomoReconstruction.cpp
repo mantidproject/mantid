@@ -4,7 +4,7 @@
 #include "MantidKernel/RemoteJobManager.h"
 #include "MantidQtAPI/AlgorithmRunner.h"
 #include "MantidQtAPI/AlgorithmInputHistory.h"
-#include "MantidQtCustomInterfaces/TomoReconstruction.h"
+#include "MantidQtCustomInterfaces/TomoReconstruction/TomoReconstruction.h"
 
 #include <boost/lexical_cast.hpp>
 #include <QFileDialog>
@@ -16,7 +16,7 @@ using namespace Mantid::API;
 // Add this class to the list of specialised dialogs in this namespace
 namespace MantidQt {
 namespace CustomInterfaces {
-DECLARE_SUBWINDOW(TomoReconstruction);
+DECLARE_SUBWINDOW(TomoReconstruction)
 
 namespace {
 Mantid::Kernel::Logger g_log("TomoReconstruction");

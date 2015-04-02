@@ -103,7 +103,6 @@ private slots:
   void fitsPathBrowseClicked();
   void flatPathBrowseClicked();
   void darkPathBrowseClicked();
-  void savuConfigFileBrowseClicked();
 
   void menuSaveClicked();
   void menuSaveAsClicked();

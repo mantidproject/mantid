@@ -73,7 +73,7 @@ set ( SRC_FILES
 	src/SANSPlotSpecial.cpp
 	src/SANSRunWindow.cpp
 	src/StepScan.cpp
-	src/TomoReconstruction.cpp
+	src/TomoReconstruction/TomoReconstruction.cpp
 	src/UserInputValidator.cpp
 )
 
@@ -163,7 +163,7 @@ set ( INC_FILES
 	inc/MantidQtCustomInterfaces/SANSPlotSpecial.h
 	inc/MantidQtCustomInterfaces/SANSRunWindow.h
 	inc/MantidQtCustomInterfaces/StepScan.h
-	inc/MantidQtCustomInterfaces/TomoReconstruction.h
+	inc/MantidQtCustomInterfaces/TomoReconstruction/TomoReconstruction.h
 	inc/MantidQtCustomInterfaces/Updateable.h
 	inc/MantidQtCustomInterfaces/UserInputValidator.h
 )
@@ -238,7 +238,7 @@ set ( MOC_FILES inc/MantidQtCustomInterfaces/Background.h
                 inc/MantidQtCustomInterfaces/SANSEventSlicing.h              
                 inc/MantidQtCustomInterfaces/SANSDiagnostics.h
                 inc/MantidQtCustomInterfaces/StepScan.h
-                inc/MantidQtCustomInterfaces/TomoReconstruction.h
+                inc/MantidQtCustomInterfaces/TomoReconstruction/TomoReconstruction.h
 )
 
 set ( UI_FILES inc/MantidQtCustomInterfaces/AddWorkspace.ui
@@ -290,11 +290,11 @@ set ( UI_FILES inc/MantidQtCustomInterfaces/AddWorkspace.ui
                inc/MantidQtCustomInterfaces/SANSRunWindow.ui  
                inc/MantidQtCustomInterfaces/SANSEventSlicing.ui
                inc/MantidQtCustomInterfaces/StepScan.ui
-               inc/MantidQtCustomInterfaces/TomoReconstruction.ui
-               inc/MantidQtCustomInterfaces/TomoToolConfigAstra.ui
-               inc/MantidQtCustomInterfaces/TomoToolConfigCustom.ui
-               inc/MantidQtCustomInterfaces/TomoToolConfigSavu.ui
-               inc/MantidQtCustomInterfaces/TomoToolConfigTomoPy.ui
+               inc/MantidQtCustomInterfaces/TomoReconstruction/TomoReconstruction.ui
+               inc/MantidQtCustomInterfaces/TomoReconstruction/TomoToolConfigAstra.ui
+               inc/MantidQtCustomInterfaces/TomoReconstruction/TomoToolConfigCustom.ui
+               inc/MantidQtCustomInterfaces/TomoReconstruction/TomoToolConfigSavu.ui
+               inc/MantidQtCustomInterfaces/TomoReconstruction/TomoToolConfigTomoPy.ui
 )
 
 set ( TEST_FILES
