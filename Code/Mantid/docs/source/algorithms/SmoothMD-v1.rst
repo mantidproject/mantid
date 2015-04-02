@@ -13,6 +13,7 @@ Description
 Provides smoothing of :ref:`MDHistoWorkspace <MDHistoWorkspace>` in n-dimensions. The WidthVector relates to the number of pixels to include in the width for each dimension. *WidthVector* **must contain entries that are odd numbers**.
 
 A *InputNormalizationWorkspace* may optionally be provided. Such workspaces must have exactly the same shape as the *InputWorkspace*. Where the signal values from this workspace are zero, the corresponding smoothed value will be NaN. Any un-smoothed values from the *InputWorkspace* corresponding to zero in the *InputNormalizationWorkspace* will be ignored during neighbour calculations, so effectively omitted from the smoothing altogether.
+Note that the NormalizationWorkspace is not changed, and needs to be smoothed as well, using the same parameters and *InputNormalizationWorkspace* as the original data.
 
 .. figure:: /images/PreSmooth.png
    :alt: PreSmooth.png
