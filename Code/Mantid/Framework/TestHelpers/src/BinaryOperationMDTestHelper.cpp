@@ -3,25 +3,21 @@
  *
  *  These functions MAY ONLY be used in a test in the MDAlgorithms package.
  *********************************************************************************/
+#include "MantidTestHelpers/BinaryOperationMDTestHelper.h"
+
 #include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidAPI/FrameworkManager.h"
+#include "MantidDataObjects/MDHistoWorkspace.h"
 #include "MantidDataObjects/WorkspaceSingleValue.h"
-#include "MantidKernel/System.h"
-#include "MantidKernel/Timer.h"
 #include "MantidMDAlgorithms/BinaryOperationMD.h"
-#include "MantidMDEvents/MDHistoWorkspace.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidTestHelpers/BinaryOperationMDTestHelper.h"
-#include "MantidAPI/FrameworkManager.h"
-#include <cxxtest/TestSuite.h>
-#include <iomanip>
-#include <iostream>
+
 
 using namespace Mantid;
 using namespace Mantid::MDAlgorithms;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
-using namespace Mantid::MDEvents;
 
 namespace BinaryOperationMDTestHelper {
 

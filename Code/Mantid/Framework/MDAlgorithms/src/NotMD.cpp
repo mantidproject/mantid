@@ -46,7 +46,7 @@ void NotMD::execEvent(Mantid::API::IMDEventWorkspace_sptr /*out*/) {
 
 //----------------------------------------------------------------------------------------------
 /// NotMD::Run the algorithm with a MDHistoWorkspace
-void NotMD::execHisto(Mantid::MDEvents::MDHistoWorkspace_sptr out) {
+void NotMD::execHisto(Mantid::DataObjects::MDHistoWorkspace_sptr out) {
   out->operatorNot();
 }
 

@@ -4,6 +4,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAlgorithms/WienerSmooth.h"
+#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/WorkspaceFactory.h"
 
 #include <algorithm>
@@ -18,6 +19,10 @@ public:
   // This means the constructor isn't called when running other tests
   static WienerSmoothTest *createSuite() { return new WienerSmoothTest(); }
   static void destroySuite( WienerSmoothTest *suite ) { delete suite; }
+
+  WienerSmoothTest() {
+    FrameworkManager::Instance();
+  }
 
 
   void test_Init()

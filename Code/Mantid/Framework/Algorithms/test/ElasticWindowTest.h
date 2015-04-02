@@ -5,7 +5,7 @@
 
 #include <iostream>
 #include <iomanip>
-
+#include "MantidAPI/FrameworkManager.h"
 #include "MantidKernel/System.h"
 
 #include "MantidAlgorithms/ConvertUnits.h"
@@ -24,6 +24,14 @@ using namespace Mantid::Kernel::Units;
 class ElasticWindowTest : public CxxTest::TestSuite
 {
 public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static ElasticWindowTest *createSuite() { return new ElasticWindowTest(); }
+  static void destroySuite( ElasticWindowTest *suite ) { delete suite; }
+
+  ElasticWindowTest() {
+    FrameworkManager::Instance();
+  }
 
   void setUp()
   {

@@ -5,18 +5,17 @@
 
 #include "MantidCrystal/FindClusterFaces.h"
 
-#include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
-#include "MantidTestHelpers/MDEventsTestHelper.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidTestHelpers/ComponentCreationHelper.h"
+#include "MantidTestHelpers/MDEventsTestHelper.h"
 #include <boost/assign/list_of.hpp>
 
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using namespace Mantid::DataObjects;
-using namespace Mantid::MDEvents;
 using Mantid::Crystal::FindClusterFaces;
 
 namespace
@@ -145,11 +144,6 @@ public:
     FindClusterFaces alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize())
     TS_ASSERT( alg.isInitialized())
-  }
-
-  FindClusterFacesTest()
-  {
-    Mantid::API::FrameworkManager::Instance();
   }
 
   void test_throws_with_non_cluster_mdhistoworkspace()

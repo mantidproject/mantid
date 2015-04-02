@@ -115,7 +115,7 @@ void FunctionBrowser::createBrowser()
 
   /* Create property managers: they create, own properties, get and set values  */
   m_functionManager = new QtGroupPropertyManager(this);
-  m_parameterManager = new QtDoublePropertyManager(this);
+  m_parameterManager = new ParameterPropertyManager(this);
   m_attributeStringManager = new QtStringPropertyManager(this);
   m_attributeDoubleManager = new QtDoublePropertyManager(this);
   m_attributeIntManager = new QtIntPropertyManager(this);
@@ -133,19 +133,20 @@ void FunctionBrowser::createBrowser()
   // create editor factories
   QtSpinBoxFactory *spinBoxFactory = new QtSpinBoxFactory(this);
   DoubleEditorFactory *doubleEditorFactory = new DoubleEditorFactory(this);
+  ParameterEditorFactory *paramEditorFactory = new ParameterEditorFactory(this);
 
-  QtAbstractEditorFactory<QtDoublePropertyManager> *parameterEditorFactory(NULL);
+  QtAbstractEditorFactory<ParameterPropertyManager> *parameterEditorFactory(NULL);
   if ( m_multiDataset )
   {
     auto buttonFactory = new DoubleButtonEditorFactory(this);
-    auto compositeFactory = new CompositeEditorFactory<QtDoublePropertyManager>(this,buttonFactory);
-    compositeFactory->setSecondaryFactory(globalOptionName, doubleEditorFactory);
+    auto compositeFactory = new CompositeEditorFactory<ParameterPropertyManager>(this,buttonFactory);
+    compositeFactory->setSecondaryFactory(globalOptionName, paramEditorFactory);
     parameterEditorFactory = compositeFactory;
     connect(buttonFactory,SIGNAL(buttonClicked(QtProperty*)), this,SLOT(parameterButtonClicked(QtProperty*)));
   }
   else
   {
-    parameterEditorFactory = doubleEditorFactory;
+    parameterEditorFactory = paramEditorFactory;
   }
   
   QtLineEditFactory *lineEditFactory = new QtLineEditFactory(this);
@@ -185,6 +186,7 @@ void FunctionBrowser::createBrowser()
           SLOT(parameterChanged(QtProperty*)));
 
   connect(m_browser, SIGNAL(currentItemChanged(QtBrowserItem*)), SLOT(updateCurrentFunctionIndex()));
+
 }
 
 /**
@@ -227,6 +229,8 @@ void FunctionBrowser::createActions()
 
   m_actionRemoveConstraint = new QAction("Remove",this);
   connect(m_actionRemoveConstraint,SIGNAL(triggered()),this,SLOT(removeConstraint()));
+
+  m_parameterManager->setErrorsEnabled(true);
 }
 
 /**
@@ -396,9 +400,10 @@ FunctionBrowser::AProperty FunctionBrowser::addFunctionProperty(QtProperty* pare
  * Add a parameter property
  * @param parent :: Parent function property
  * @param paramName :: Parameter name
+ * @param paramDesc :: Parameter description
  * @param paramValue :: Parameter value
  */
-FunctionBrowser::AProperty FunctionBrowser::addParameterProperty(QtProperty* parent, QString paramName, double paramValue)
+FunctionBrowser::AProperty FunctionBrowser::addParameterProperty(QtProperty* parent, QString paramName, QString paramDesc, double paramValue)
 {
   // check that parent is a function property
   if (!parent || dynamic_cast<QtAbstractPropertyManager*>(m_functionManager) != parent->propertyManager())
@@ -408,6 +413,8 @@ FunctionBrowser::AProperty FunctionBrowser::addParameterProperty(QtProperty* par
   QtProperty* prop = m_parameterManager->addProperty(paramName);
   m_parameterManager->setDecimals(prop,6);
   m_parameterManager->setValue(prop,paramValue);
+  m_parameterManager->setDescription(prop,paramDesc.toStdString());
+
   if ( m_multiDataset )
   {
     prop->setOption(globalOptionName,false);
@@ -667,8 +674,9 @@ void FunctionBrowser::addAttributeAndParameterProperties(QtProperty* prop, Manti
     for(size_t i = 0; i < fun->nParams(); ++i)
     {
       QString name = QString::fromStdString(fun->parameterName(i));
+      QString desc = QString::fromStdString(fun->parameterDescription(i));
       double value = fun->getParameter(i);
-      AProperty ap = addParameterProperty(prop, name, value);
+      AProperty ap = addParameterProperty(prop, name, desc, value);
       // if parameter has a tie
       if (fun->isFixed(i))
       {
@@ -1512,6 +1520,29 @@ void FunctionBrowser::setParameter(const QString& funcIndex, const QString& para
 }
 
 /**
+ * Updates the function parameter error
+ * @param funcIndex :: Index of the function
+ * @param paramName :: Parameter name
+ * @param error :: New error
+ */
+void FunctionBrowser::setParamError(const QString& funcIndex, const QString& paramName, double error)
+{
+  if (auto prop = getFunctionProperty(funcIndex))
+  {
+    auto children = prop->subProperties();
+    foreach(QtProperty* child, children)
+    {
+      if (isParameter(child) && child->propertyName() == paramName)
+      {
+//        m_parameterManager->setDescription(child,"");
+        m_parameterManager->setError(child, error);
+        break;
+      }
+    }
+  }
+}
+
+/**
  * Get a value of a parameter
  * @param funcIndex :: Index of the function
  * @param paramName :: Parameter name
@@ -1563,6 +1594,17 @@ void FunctionBrowser::setParameter(const QString& paramName, double value)
 {
   QStringList name = splitParameterName(paramName);
   setParameter(name[0],name[1],value);
+}
+
+/**
+ * Updates the function parameter error
+ * @param paramName :: Fully qualified parameter name (includes function index)
+ * @param error :: New error
+ */
+void FunctionBrowser::setParamError(const QString& paramName, double error)
+{
+  QStringList name = splitParameterName(paramName);
+  setParamError(name[0],name[1],error);
 }
 
 /**
