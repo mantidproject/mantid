@@ -189,13 +189,13 @@ class CreateMD(DataProcessorAlgorithm):
         self._validate_inputs()
             
         if len(psi) == 0:
-            psi = [None] * ws_entries
+            psi = [0.0] * ws_entries
             
         if len(gl) == 0:
-            gl = [None] * ws_entries
+            gl = [0.0] * ws_entries
             
         if len(gs) == 0:
-            gs = [None] * ws_entries
+            gs = [0.0] * ws_entries
         
         output_workspace = None
         run_md = None
