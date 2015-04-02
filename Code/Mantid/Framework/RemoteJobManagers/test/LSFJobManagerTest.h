@@ -8,12 +8,11 @@
 
 #include <boost/make_shared.hpp>
 
+// TODO: use gmock
 class MockedLSFJobManager : public Mantid::RemoteJobManagers::LSFJobManager {
   /// needs to define this pure virtual method
-  void authenticate(const std::string &username, const std::string &password) {
-    UNUSED_ARG(username);
-    UNUSED_ARG(password);
-  }
+  void authenticate(const std::string & /*username*/,
+                    const std::string & /*password*/) {}
 };
 
 /// This just checks basic cast/interface properties of a virtual
@@ -43,11 +42,18 @@ public:
     // can cast to inherited interfaces and base classes
 
     MockedLSFJobManager lsf;
-    TS_ASSERT(
+    TSM_ASSERT(
+        "Job manager constructed dynamically should cast to LSFJobManager",
         dynamic_cast<Mantid::RemoteJobManagers::LSFJobManager *>(jm.get()));
-    TS_ASSERT(dynamic_cast<Mantid::RemoteJobManagers::LSFJobManager *>(&lsf));
-    TS_ASSERT(dynamic_cast<Mantid::API::IRemoteJobManager *>(jm.get()));
-    TS_ASSERT(dynamic_cast<Mantid::API::IRemoteJobManager *>(&lsf));
+    TSM_ASSERT(
+        "Job manager constructed statically should cast to LSFJobManager",
+        dynamic_cast<Mantid::RemoteJobManagers::LSFJobManager *>(&lsf));
+    TSM_ASSERT(
+        "Job manager constructed dynamically should cast to IRemoteJobManager",
+        dynamic_cast<Mantid::API::IRemoteJobManager *>(jm.get()));
+    TSM_ASSERT(
+        "Job manager constructed statically should cast to IRemoteJobManger",
+        dynamic_cast<Mantid::API::IRemoteJobManager *>(&lsf));
   }
 };
 

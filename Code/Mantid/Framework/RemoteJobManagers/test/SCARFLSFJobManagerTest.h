@@ -25,14 +25,10 @@ using namespace Mantid::RemoteJobManagers;
 class MockedSCARFLSFJM : public SCARFLSFJobManager {
 protected:
   virtual int doSendRequestGetResponse(
-      const std::string &url, std::ostream &response,
-      const StringToStringMap &headers = StringToStringMap(),
-      const std::string &method = std::string(),
-      const std::string &body = "") const {
-    UNUSED_ARG(url);
-    UNUSED_ARG(headers);
-    UNUSED_ARG(method);
-    UNUSED_ARG(body);
+      const std::string & /*url*/, std::ostream &response,
+      const StringToStringMap & /*headers*/ = StringToStringMap(),
+      const std::string & /*method*/ = std::string(),
+      const std::string & /*body*/ = "") const {
 
     response << "response OK - mocked up";
     return 200;
@@ -47,15 +43,10 @@ protected:
 class MockedErrorResponse_SCARFLSFJM : public SCARFLSFJobManager {
 protected:
   virtual int doSendRequestGetResponse(
-      const std::string &url, std::ostream &response,
-      const StringToStringMap &headers = StringToStringMap(),
-      const std::string &method = std::string(),
-      const std::string &body = "") const {
-    UNUSED_ARG(url);
-    UNUSED_ARG(response);
-    UNUSED_ARG(headers);
-    UNUSED_ARG(method);
-    UNUSED_ARG(body);
+      const std::string & /*url*/, std::ostream &response,
+      const StringToStringMap & /*headers*/ = StringToStringMap(),
+      const std::string & /*method*/ = std::string(),
+      const std::string & /*body*/ = "") const {
 
     response << "Error response - mocked up";
     return 404;
@@ -70,15 +61,10 @@ protected:
 class MockedConnectionError_SCARFLSFJM : public SCARFLSFJobManager {
 protected:
   virtual int doSendRequestGetResponse(
-      const std::string &url, std::ostream &response,
-      const StringToStringMap &headers = StringToStringMap(),
-      const std::string &method = std::string(),
-      const std::string &body = "") const {
-    UNUSED_ARG(url);
-    UNUSED_ARG(response);
-    UNUSED_ARG(headers);
-    UNUSED_ARG(method);
-    UNUSED_ARG(body);
+      const std::string & /*url*/, std::ostream & /*response*/,
+      const StringToStringMap & /*headers*/ = StringToStringMap(),
+      const std::string & /*method*/ = std::string(),
+      const std::string & /*body*/ = "") const {
 
     // throw as if there was a connection error
     throw Mantid::Kernel::Exception::InternetError(
@@ -97,14 +83,10 @@ protected:
 class MockedGoodLoginResponse_SCARFLSFJM : public SCARFLSFJobManager {
 protected:
   virtual int doSendRequestGetResponse(
-      const std::string &url, std::ostream &response,
-      const StringToStringMap &headers = StringToStringMap(),
-      const std::string &method = std::string(),
-      const std::string &body = "") const {
-    UNUSED_ARG(url);
-    UNUSED_ARG(headers);
-    UNUSED_ARG(method);
-    UNUSED_ARG(body);
+      const std::string & /*url*/, std::ostream &response,
+      const StringToStringMap & /*headers*/ = StringToStringMap(),
+      const std::string & /*method*/ = std::string(),
+      const std::string & /*body*/ = "") const {
 
     response << makeGoodLoginResponse();
     return 200;
@@ -136,13 +118,9 @@ public:
 protected:
   virtual int doSendRequestGetResponse(
       const std::string &url, std::ostream &response,
-      const StringToStringMap &headers = StringToStringMap(),
-      const std::string &method = std::string(),
-      const std::string &body = "") const {
-    UNUSED_ARG(url);
-    UNUSED_ARG(headers);
-    UNUSED_ARG(method);
-    UNUSED_ARG(body);
+      const StringToStringMap & /*headers*/ = StringToStringMap(),
+      const std::string & /*method*/ = std::string(),
+      const std::string & /*body*/ = "") const {
 
     if (url.find("cgi-bin/token.py")) {
       response << makeGoodLoginResponse();
@@ -172,15 +150,10 @@ private:
 class MockedGoodPingResponse_SCARFLSFJM : public SCARFLSFJobManager {
 protected:
   virtual int doSendRequestGetResponse(
-      const std::string &url, std::ostream &response,
-      const StringToStringMap &headers = StringToStringMap(),
-      const std::string &method = std::string(),
-      const std::string &body = "") const {
-    UNUSED_ARG(url);
-    UNUSED_ARG(response);
-    UNUSED_ARG(headers);
-    UNUSED_ARG(method);
-    UNUSED_ARG(body);
+      const std::string & /*url*/, std::ostream &response,
+      const StringToStringMap & /*headers*/ = StringToStringMap(),
+      const std::string & /*method*/ = std::string(),
+      const std::string & /*body*/ = "") const {
 
     response << "Web Services are ready:  mocked up";
     return 200;
@@ -205,7 +178,8 @@ public:
         Mantid::Kernel::ConfigService::Instance().getFacility();
 
     Mantid::Kernel::ConfigService::Instance().setFacility("ISIS");
-    TS_ASSERT_THROWS_NOTHING(
+    TSM_ASSERT_THROWS_NOTHING(
+        "The factory should create " + SCARFName + " without throwing",
         IRemoteJobManager_sptr jobManager =
             RemoteJobManagerFactory::Instance().create(SCARFName));
     // Important: don't feel tempted to use this job manager, it will
@@ -214,9 +188,11 @@ public:
 
     // it should not be available here...
     Mantid::Kernel::ConfigService::Instance().setFacility("SNS");
-    TS_ASSERT_THROWS(IRemoteJobManager_sptr jobManager =
-                         RemoteJobManagerFactory::Instance().create(SCARFName),
-                     std::runtime_error);
+    TSM_ASSERT_THROWS("The factory should throw when creating " + SCARFName +
+                          " in a wrong facility",
+                      IRemoteJobManager_sptr jobManager =
+                          RemoteJobManagerFactory::Instance().create(SCARFName),
+                      std::runtime_error);
 
     // restore facility to what it was before test
     Mantid::Kernel::ConfigService::Instance().setFacility(prevFac.name());
@@ -225,63 +201,86 @@ public:
   void test_construct() {
     // can create
     boost::shared_ptr<SCARFLSFJobManager> jm;
-    TS_ASSERT(jm = boost::make_shared<SCARFLSFJobManager>());
+    TSM_ASSERT("Dynamic allocation of SCARFLSF job managers",
+               jm = boost::make_shared<SCARFLSFJobManager>());
     SCARFLSFJobManager jm2;
     // do not use / call methods on these two
 
-    TS_ASSERT(dynamic_cast<Mantid::RemoteJobManagers::LSFJobManager *>(&jm2));
-    TS_ASSERT(dynamic_cast<Mantid::API::IRemoteJobManager *>(&jm2));
-    TS_ASSERT(
+    TSM_ASSERT("SCARFLSF job managers allocated statically should cast to LSF "
+               "job managers",
+               dynamic_cast<Mantid::RemoteJobManagers::LSFJobManager *>(&jm2));
+    TSM_ASSERT("SCARFLSF job managers allocated statically should cast to "
+               "IRemoteJobManager",
+               dynamic_cast<Mantid::API::IRemoteJobManager *>(&jm2));
+    TSM_ASSERT(
+        "SCARFLSF job managers allocated dynamically should cast to LSF job "
+        "managers",
         dynamic_cast<Mantid::RemoteJobManagers::LSFJobManager *>(jm.get()));
-    TS_ASSERT(dynamic_cast<Mantid::API::IRemoteJobManager *>(jm.get()));
+    TSM_ASSERT("SCARFLSF job managers allocated dynamically should cast to "
+               "IRemoteJobManager",
+               dynamic_cast<Mantid::API::IRemoteJobManager *>(jm.get()));
   }
 
   void test_missingOrWrongParamsWithoutLogin() {
     MockedSCARFLSFJM jm;
 
-    TS_ASSERT_THROWS(jm.abortRemoteJob(""), std::runtime_error);
-    TS_ASSERT_THROWS(jm.abortRemoteJob("anything_wrong"), std::runtime_error);
+    TSM_ASSERT_THROWS("abort job without job ID should throw",
+                      jm.abortRemoteJob(""), std::runtime_error);
+    TSM_ASSERT_THROWS("abort job with wrong job ID should throw",
+                      jm.abortRemoteJob("anything_wrong"), std::runtime_error);
 
-    TS_ASSERT_THROWS(jm.downloadRemoteFile("any_wrong_transID", "remote_fname",
-                                           "local_fname"),
-                     std::invalid_argument);
+    TSM_ASSERT_THROWS("download with wrong transaction ID should throw",
+                      jm.downloadRemoteFile("any_wrong_transID", "remote_fname",
+                                            "local_fname"),
+                      std::invalid_argument);
 
     std::vector<IRemoteJobManager::RemoteJobInfo> infos;
-    TS_ASSERT_THROWS(infos = jm.queryAllRemoteJobs(), std::runtime_error);
-    TS_ASSERT_EQUALS(infos.size(), 0);
+    TSM_ASSERT_THROWS("query all jobs without logging in should throw",
+                      infos = jm.queryAllRemoteJobs(), std::runtime_error);
+    TSM_ASSERT_EQUALS(
+        "there should not be any job information returned from the remote",
+        infos.size(), 0);
 
     std::vector<std::string> files;
-    TS_ASSERT_THROWS(files = jm.queryRemoteFile("any_wrong_transID"),
-                     std::invalid_argument);
-    TS_ASSERT_EQUALS(files.size(), 0);
+    TSM_ASSERT_THROWS(
+        "query remote files with wrong transaction ID should throw",
+        files = jm.queryRemoteFile("any_wrong_transID"), std::invalid_argument);
+    TSM_ASSERT_EQUALS("The file list for a wrong transaction should be empty",
+                      files.size(), 0);
 
     IRemoteJobManager::RemoteJobInfo info;
-    TS_ASSERT_THROWS(info = jm.queryRemoteJob("any_wrong_jobID"),
-                     std::runtime_error);
+    TSM_ASSERT_THROWS("query job info should throw for wrong job ID",
+                      info = jm.queryRemoteJob("any_wrong_jobID"),
+                      std::runtime_error);
 
-    // not logged in so it should throw
     std::string id;
-    TS_ASSERT_THROWS(id = jm.startRemoteTransaction(), std::runtime_error);
-    TS_ASSERT_EQUALS(id, "");
+    TSM_ASSERT_THROWS("start transaction without logging in should throw",
+                      id = jm.startRemoteTransaction(), std::runtime_error);
+    TSM_ASSERT_EQUALS("failed start transaction should not return any ID", id,
+                      "");
 
-    // should fail with runtime_error (not logged in)
-    TS_ASSERT_THROWS(jm.stopRemoteTransaction("a_wrong_transID"),
-                     std::runtime_error);
+    TSM_ASSERT_THROWS("stop transaction without logging in should throw",
+                      jm.stopRemoteTransaction("a_wrong_transID"),
+                      std::runtime_error);
 
     std::string jobID;
-    TS_ASSERT_THROWS(id = jm.submitRemoteJob("a_wrong_transID", "executable",
-                                             "--params 0", "name_for_job"),
-                     std::runtime_error);
-    TS_ASSERT_EQUALS(jobID, "");
+    TSM_ASSERT_THROWS("submit job without logging in should throw",
+                      id = jm.submitRemoteJob("a_wrong_transID", "executable",
+                                              "--params 0", "name_for_job"),
+                      std::runtime_error);
+    TSM_ASSERT_EQUALS("failed submit job should not return any ID", jobID, "");
 
-    TS_ASSERT_THROWS(
+    TSM_ASSERT_THROWS(
+        "upload file without logging in should throw",
         jm.uploadRemoteFile("wrong_transID", "remote_fname", "local_fname"),
         std::runtime_error);
 
     // and failed login at the end
-    TS_ASSERT_THROWS(jm.authenticate("", ""), std::runtime_error);
-    TS_ASSERT_THROWS(jm.authenticate("wrong_user", "no_pass"),
-                     std::runtime_error);
+    TSM_ASSERT_THROWS("authenticate with empty credentials should throw",
+                      jm.authenticate("", ""), std::runtime_error);
+    TSM_ASSERT_THROWS("mocked authenticate should throw",
+                      jm.authenticate("wrong_user", "no_pass"),
+                      std::runtime_error);
   }
 
   void test_missingOrWrongParamsFakeLogin() {}
@@ -294,80 +293,116 @@ public:
 
     // severe (connection) error
     MockedConnectionError_SCARFLSFJM err;
-    TS_ASSERT_THROWS(err.authenticate(goodUsername, goodPassword),
-                     std::runtime_error);
+    TSM_ASSERT_THROWS(
+        "authentication should throw if there is a connection error",
+        err.authenticate(goodUsername, goodPassword), std::runtime_error);
 
     // standard mocked response: looks like an unsuccessful login attempt
     MockedSCARFLSFJM loginFails;
-    TS_ASSERT_THROWS(loginFails.authenticate(goodUsername, goodPassword),
-                     std::runtime_error);
+    TSM_ASSERT_THROWS(
+        "authentication should throw if the server response looks wrong",
+        loginFails.authenticate(goodUsername, goodPassword),
+        std::runtime_error);
 
     // successful login attempt
     MockedGoodLoginResponse_SCARFLSFJM login;
-    TS_ASSERT_THROWS_NOTHING(login.authenticate(goodUsername, goodPassword));
+    TSM_ASSERT_THROWS_NOTHING("successful authentication should not throw",
+                              login.authenticate(goodUsername, goodPassword));
   }
 
   void test_startRemoteTransaction() {
     boost::shared_ptr<MockedGoodLoginResponse_SCARFLSFJM> jm;
-    TS_ASSERT(jm = boost::make_shared<MockedGoodLoginResponse_SCARFLSFJM>());
+    TSM_ASSERT("dynamical allocation of job manager should not fail",
+               jm = boost::make_shared<MockedGoodLoginResponse_SCARFLSFJM>());
 
-    TS_ASSERT_THROWS_NOTHING(jm->authenticate("user", "pass"));
     std::string tid;
-    TS_ASSERT_THROWS_NOTHING(tid = jm->startRemoteTransaction());
-    TS_ASSERT(tid != "");
+    TSM_ASSERT_THROWS_NOTHING(
+        "start transaction should throw when not logged in",
+        tid = jm->startRemoteTransaction());
+
+    TSM_ASSERT_THROWS_NOTHING("successful authentication should not throw",
+                              jm->authenticate("user", "pass"));
+    TSM_ASSERT_THROWS_NOTHING(
+        "start transaction should not throw when logged in",
+        tid = jm->startRemoteTransaction());
+    TSM_ASSERT("a successful start transaction should not return an empty ID",
+               tid != "");
   }
 
   void test_stopRemoteTransaction() {
     boost::shared_ptr<MockedGoodLoginResponse_SCARFLSFJM> jm;
-    TS_ASSERT(jm = boost::make_shared<MockedGoodLoginResponse_SCARFLSFJM>());
+    TSM_ASSERT("dynamical allocation of job manager should not fail",
+               jm = boost::make_shared<MockedGoodLoginResponse_SCARFLSFJM>());
 
-    TS_ASSERT_THROWS_NOTHING(jm->authenticate("user", "pass"));
+    TSM_ASSERT_THROWS_NOTHING("successful authentication should not throw",
+                              jm->authenticate("user", "pass"));
     std::string tid;
-    TS_ASSERT_THROWS_NOTHING(tid = jm->startRemoteTransaction());
-    TS_ASSERT(tid != "");
+    TSM_ASSERT_THROWS_NOTHING(
+        "start remote transaction should not throw when logged in",
+        tid = jm->startRemoteTransaction());
+    TSM_ASSERT("a successful start transaction should return non-empty ID",
+               tid != "");
 
-    TS_ASSERT_THROWS(jm->stopRemoteTransaction("wrong_stop_id"),
-                     std::invalid_argument);
+    TSM_ASSERT_THROWS("stop transaction with wrong ID should throw",
+                      jm->stopRemoteTransaction("wrong_stop_id"),
+                      std::invalid_argument);
 
     // positive at last:
-    TS_ASSERT_THROWS_NOTHING(jm->stopRemoteTransaction(tid));
-    TS_ASSERT_THROWS(jm->stopRemoteTransaction(tid), std::invalid_argument);
+    TSM_ASSERT_THROWS_NOTHING(
+        "stop transaction with correct ID should not throw",
+        jm->stopRemoteTransaction(tid));
+    TSM_ASSERT_THROWS("stop transaction with an ID of a transaction already "
+                      "stopped should throw",
+                      jm->stopRemoteTransaction(tid), std::invalid_argument);
   }
 
   void test_submit() {
     boost::shared_ptr<MockedSCARFLSFJM> jm;
-    TS_ASSERT(jm = boost::make_shared<MockedSCARFLSFJM>());
+    TSM_ASSERT("dynamical allocation of job manager should throw fail",
+               jm = boost::make_shared<MockedSCARFLSFJM>());
 
     std::string id;
-    TS_ASSERT_THROWS(id = jm->submitRemoteJob("a_wrong_transID", "executable",
-                                              "--params 0", "name_for_job"),
-                     std::runtime_error);
-    TS_ASSERT_EQUALS(id, "");
+    TSM_ASSERT_THROWS("submit job wihtout logging in should throw",
+                      id = jm->submitRemoteJob("a_wrong_transID", "executable",
+                                               "--params 0", "name_for_job"),
+                      std::runtime_error);
+    TSM_ASSERT_EQUALS("faild submit job should not return non-empty ID", id,
+                      "");
 
     MockedErrorResponse_SCARFLSFJM err;
-    TS_ASSERT_THROWS(id = err.submitRemoteJob("a_wrong_transID", "executable",
-                                              "--params 1", "name_for_job"),
-                     std::runtime_error);
-    TS_ASSERT_EQUALS(id, "");
+    TSM_ASSERT_THROWS("submit job with error response from server should throw",
+                      id = err.submitRemoteJob("a_wrong_transID", "executable",
+                                               "--params 1", "name_for_job"),
+                      std::runtime_error);
+    TSM_ASSERT_EQUALS("faild submit job should not return non-empty ID", id,
+                      "");
   }
 
   void test_download() {
     MockedGoodLoginResponse_SCARFLSFJM jm;
-    TS_ASSERT_THROWS_NOTHING(jm.authenticate("user", "pass"));
+    TSM_ASSERT_THROWS_NOTHING("successful authentication should not throw",
+                              jm.authenticate("user", "pass"));
     std::string tid;
-    TS_ASSERT_THROWS_NOTHING(tid = jm.startRemoteTransaction());
-    TS_ASSERT(tid != "");
+    TSM_ASSERT_THROWS_NOTHING("successful start transaction should not throw",
+                              tid = jm.startRemoteTransaction());
+    TSM_ASSERT("successful start transaction should return non-empty ID",
+               tid != "");
     std::string localName = "local_name";
     // no job submitted - cannot get files
-    TS_ASSERT_THROWS(jm.downloadRemoteFile(tid, "remote_name", localName),
-                     std::runtime_error);
+    TSM_ASSERT_THROWS("download when no job has been submitted should throw",
+                      jm.downloadRemoteFile(tid, "remote_name", localName),
+                      std::runtime_error);
     // submit one job and it should be possible to download files
-    TS_ASSERT_THROWS_NOTHING(
+    TSM_ASSERT_THROWS_NOTHING(
+        "successful submit job should not throw",
         jm.submitRemoteJob(tid, "executable", "--params 1", "name_for_job"));
-    TS_ASSERT_THROWS_NOTHING(
+    TSM_ASSERT_THROWS_NOTHING(
+        "successful download should not throw",
         jm.downloadRemoteFile(tid, "remote_name", localName));
     // but being a fake, the file is not there:
-    TS_ASSERT(!Poco::File(localName).exists());
+    TSM_ASSERT(
+        "this fake job manager for testing should not create downloaded files",
+        !Poco::File(localName).exists());
   }
 
   void test_queryStatus() {
@@ -376,41 +411,66 @@ public:
     MockedSCARFLSFJM jm0;
 
     std::vector<IRemoteJobManager::RemoteJobInfo> infos;
-    TS_ASSERT_THROWS(infos = jm0.queryAllRemoteJobs(), std::runtime_error);
-    TS_ASSERT_EQUALS(infos.size(), 0);
+    TSM_ASSERT_THROWS("query all jobs should throw when not logged in",
+                      infos = jm0.queryAllRemoteJobs(), std::runtime_error);
+    TSM_ASSERT_EQUALS(
+        "failed query all jobs should not return non-empty information",
+        infos.size(), 0);
 
     MockedErrorResponse_SCARFLSFJM err;
-    TS_ASSERT_THROWS(infos = err.queryAllRemoteJobs(), std::runtime_error);
-    TS_ASSERT_EQUALS(infos.size(), 0);
+    TSM_ASSERT_THROWS(
+        "query all jobs should throw when the server returns an error message",
+        infos = err.queryAllRemoteJobs(), std::runtime_error);
+    TSM_ASSERT_EQUALS("failed query all jobs should not return, and even less "
+                      "return non-empty list of job info objects",
+                      infos.size(), 0);
 
     std::string id("id0001");
     std::string name("name1");
     MockedGoodJobStatus_SCARFLSFJM jm(id, name);
-    TS_ASSERT_THROWS_NOTHING(jm.authenticate("user", "password"));
-    TS_ASSERT_THROWS_NOTHING(infos = jm.queryAllRemoteJobs());
+    TSM_ASSERT_THROWS_NOTHING("successful authentication should not throw",
+                              jm.authenticate("user", "password"));
+    TSM_ASSERT_THROWS_NOTHING("successful query all jobs should not throw",
+                              infos = jm.queryAllRemoteJobs());
     std::string tid;
-    TS_ASSERT_THROWS_NOTHING(tid = jm.startRemoteTransaction());
-    TS_ASSERT_THROWS_NOTHING(
+    TSM_ASSERT_THROWS_NOTHING("successful start transaction should not throw",
+                              tid = jm.startRemoteTransaction());
+    TSM_ASSERT_THROWS_NOTHING(
+        "successful submit job should not throw",
         jm.submitRemoteJob(tid, "executable", "--params 1", "name_for_job"));
-    TS_ASSERT_EQUALS(infos.size(), 0);
+    TSM_ASSERT_EQUALS(
+        "no job information should be returned from this fake job queries",
+        infos.size(), 0);
     if (infos.size() > 0) {
-      TS_ASSERT_EQUALS(infos[0].id, id);
-      TS_ASSERT_EQUALS(infos[0].name, name);
+      TSM_ASSERT_EQUALS("the job ID provided by query all jobs should match "
+                        "the ID obtained when submitting the job",
+                        infos[0].id, id);
+      TSM_ASSERT_EQUALS("the job name provided by query all jobs should match "
+                        "the name obtained when submitting the job",
+                        infos[0].name, name);
     }
   }
 
   void test_queryRemoteFile() {
     MockedGoodLoginResponse_SCARFLSFJM jm;
-    TS_ASSERT_THROWS_NOTHING(jm.authenticate("user", "pass"));
+    TSM_ASSERT_THROWS_NOTHING("successful authentication should not throw",
+                              jm.authenticate("user", "pass"));
     std::string tid;
-    TS_ASSERT_THROWS_NOTHING(tid = jm.startRemoteTransaction());
-    TS_ASSERT(tid != "");
+    TSM_ASSERT_THROWS_NOTHING("successful start transaction should not throw",
+                              tid = jm.startRemoteTransaction());
+    TSM_ASSERT("successful start transaction should return non-empty ID",
+               tid != "");
     // should get a bad/unrecognized response
-    TS_ASSERT_THROWS(jm.queryRemoteFile(tid), std::runtime_error);
+    TSM_ASSERT_THROWS(
+        "query remote file with wrong response from server should throw",
+        jm.queryRemoteFile(tid), std::runtime_error);
 
-    TS_ASSERT_THROWS_NOTHING(
+    TSM_ASSERT_THROWS_NOTHING(
+        "successful submit job should not throw",
         jm.submitRemoteJob(tid, "executable", "--params 1", "name_for_job"));
-    TS_ASSERT_THROWS_NOTHING(jm.queryRemoteFile(tid));
+    TSM_ASSERT_THROWS_NOTHING("successful query remote file with correct "
+                              "transaction ID should not throw",
+                              jm.queryRemoteFile(tid));
   }
 
   void test_queryStatusByID() {
@@ -418,124 +478,194 @@ public:
 
     std::string id("id001");
     IRemoteJobManager::RemoteJobInfo info;
-    TS_ASSERT_THROWS(info = jmFail.queryRemoteJob(id), std::runtime_error);
-    TS_ASSERT_THROWS(jmFail.authenticate("user", "pass"), std::runtime_error);
-    TS_ASSERT_THROWS(info = jmFail.queryRemoteJob(id), std::runtime_error);
+    TSM_ASSERT_THROWS("query job status without logging in should throw",
+                      info = jmFail.queryRemoteJob(id), std::runtime_error);
+    TSM_ASSERT_THROWS(
+        "authentication with wrong response from server should throw",
+        jmFail.authenticate("user", "pass"), std::runtime_error);
+    TSM_ASSERT_THROWS(
+        "query job status without successful authentication should throw",
+        info = jmFail.queryRemoteJob(id), std::runtime_error);
 
     MockedErrorResponse_SCARFLSFJM err;
-    TS_ASSERT_THROWS(info = err.queryRemoteJob(id), std::runtime_error);
-    TS_ASSERT_EQUALS(info.id, "");
-    TS_ASSERT_EQUALS(info.name, "");
+    TSM_ASSERT_THROWS("query job status with error response should throw",
+                      info = err.queryRemoteJob(id), std::runtime_error);
+    TSM_ASSERT_EQUALS("failed query status should not return non-empty job id",
+                      info.id, "");
+    TSM_ASSERT_EQUALS(
+        "failed query status should not return non-empty job name", info.name,
+        "");
 
     std::string name("name01");
     MockedGoodJobStatus_SCARFLSFJM jm(id, name);
-    TS_ASSERT_THROWS_NOTHING(jm.authenticate("user", "password"));
-    TS_ASSERT_THROWS(info = jm.queryRemoteJob(id), std::runtime_error);
+    TSM_ASSERT_THROWS_NOTHING("successful authentication should not throw",
+                              jm.authenticate("user", "password"));
+    TSM_ASSERT_THROWS(
+        "quer job status without having submitted the job should throw",
+        info = jm.queryRemoteJob(id), std::runtime_error);
 
     std::string tid;
-    TS_ASSERT_THROWS_NOTHING(tid = jm.startRemoteTransaction());
-    TS_ASSERT_THROWS_NOTHING(
+    TSM_ASSERT_THROWS_NOTHING("successful start transaction should not throw",
+                              tid = jm.startRemoteTransaction());
+    TSM_ASSERT_THROWS_NOTHING(
+        "successful submit job with correct transaction ID should not throw",
         id = jm.submitRemoteJob(tid, "exec", "--p 1", "job_name"));
-    TS_ASSERT_THROWS(info = jm.queryRemoteJob(id), std::runtime_error);
+    TSM_ASSERT_THROWS("query job status with strange response from sever (not "
+                      "containing expected status xml tree) should fail",
+                      info = jm.queryRemoteJob(id), std::runtime_error);
   }
 
   void test_cancel() {
     MockedSCARFLSFJM jmFail;
     std::string tid("trans001");
-    TS_ASSERT_THROWS(jmFail.stopRemoteTransaction(tid), std::runtime_error);
+    TSM_ASSERT_THROWS("stop transaction without logging in should throw",
+                      jmFail.stopRemoteTransaction(tid), std::runtime_error);
 
     MockedErrorResponse_SCARFLSFJM err;
-    TS_ASSERT_THROWS(err.stopRemoteTransaction(tid), std::runtime_error);
-    TS_ASSERT_THROWS(err.authenticate("user", "pass"), std::runtime_error);
+    TSM_ASSERT_THROWS(
+        "stop transaction with error response from server should throw",
+        err.stopRemoteTransaction(tid), std::runtime_error);
+    TSM_ASSERT_THROWS(
+        "authenticate with error response from server should throw",
+        err.authenticate("user", "pass"), std::runtime_error);
     IRemoteJobManager::RemoteJobInfo info;
-    TS_ASSERT_THROWS(info = err.queryRemoteJob("012"), std::runtime_error);
+    TSM_ASSERT_THROWS("query job info with wrong job ID should throw",
+                      info = err.queryRemoteJob("012"), std::runtime_error);
 
     std::string name("name01");
     MockedGoodLoginResponse_SCARFLSFJM jm;
     std::string newID;
-    TS_ASSERT_THROWS_NOTHING(jm.authenticate("user", "pass"));
-    TS_ASSERT_THROWS_NOTHING(newID = jm.startRemoteTransaction());
-    TS_ASSERT_THROWS(jm.stopRemoteTransaction(tid), std::invalid_argument);
-    TS_ASSERT_THROWS_NOTHING(jm.stopRemoteTransaction(newID));
+    TSM_ASSERT_THROWS_NOTHING("successful authentication should not throw",
+                              jm.authenticate("user", "pass"));
+    TSM_ASSERT_THROWS_NOTHING("successful start transaction should not throw",
+                              newID = jm.startRemoteTransaction());
+    TSM_ASSERT_THROWS(
+        "stop transaction with a wrong transaction ID should throw",
+        jm.stopRemoteTransaction(tid), std::invalid_argument);
+    TSM_ASSERT_THROWS_NOTHING(
+        "stop transaction with correct ID should not throw",
+        jm.stopRemoteTransaction(newID));
   }
 
   void test_upload() {
     MockedGoodLoginResponse_SCARFLSFJM jm;
-    TS_ASSERT_THROWS_NOTHING(jm.authenticate("userid", "pass"));
+    TSM_ASSERT_THROWS_NOTHING("successful authentication should not throw",
+                              jm.authenticate("userid", "pass"));
     std::string tid;
-    TS_ASSERT_THROWS_NOTHING(tid = jm.startRemoteTransaction());
-    TS_ASSERT(tid != "");
+    TSM_ASSERT_THROWS_NOTHING("successful start transaction should not throw",
+                              tid = jm.startRemoteTransaction());
+    TSM_ASSERT(
+        "successful start transaction should return non-empty transaction ID",
+        tid != "");
     /// fails - missing file
-    TS_ASSERT_THROWS_NOTHING(
+    TSM_ASSERT_THROWS_NOTHING(
+        "successful upload should not throw",
         jm.uploadRemoteFile(tid, "remote_name", "local_name"));
   }
 
   void test_errorResponseFromServer() {
     MockedErrorResponse_SCARFLSFJM err;
-    TS_ASSERT_THROWS(err.authenticate("whoami", "pass"), std::runtime_error);
-    TS_ASSERT_THROWS(err.ping(), std::runtime_error);
+    TSM_ASSERT_THROWS(
+        "authentication with error response from server should throw",
+        err.authenticate("whoami", "pass"), std::runtime_error);
+    TSM_ASSERT_THROWS("ping with error response from server should throw",
+                      err.ping(), std::runtime_error);
   }
 
   // logout must run after all the (positive) tests
   void test_logout() {
+    MockedErrorResponse_SCARFLSFJM err;
+    TSM_ASSERT_THROWS("authenticate with empty credentials should throw",
+                      err.authenticate("", ""), std::runtime_error);
+    TSM_ASSERT_THROWS_NOTHING(
+        "logout with error response from server should throw", err.logout());
+
     MockedGoodLoginResponse_SCARFLSFJM jm;
-    TS_ASSERT_THROWS_NOTHING(jm.authenticate("user", "pass"));
+    TSM_ASSERT_THROWS_NOTHING("successful authentication should not throw",
+                              jm.authenticate("user", "pass"));
     std::string tid;
-    TS_ASSERT_THROWS_NOTHING(tid = jm.startRemoteTransaction());
-    TS_ASSERT_THROWS_NOTHING(jm.stopRemoteTransaction(tid));
-    TS_ASSERT_THROWS_NOTHING(jm.logout());
+    TSM_ASSERT_THROWS_NOTHING("successful start transaction should not throw",
+                              tid = jm.startRemoteTransaction());
+    TSM_ASSERT_THROWS_NOTHING("successful stop transaction should not throw",
+                              jm.stopRemoteTransaction(tid));
+    TSM_ASSERT_THROWS_NOTHING("logout should not throw when logged in",
+                              jm.logout());
   }
 
   void test_ping() {
     MockedConnectionError_SCARFLSFJM err;
     bool res = false;
-    TS_ASSERT_THROWS(res = err.ping(), std::runtime_error);
-    TS_ASSERT(!res);
+    TSM_ASSERT_THROWS("ping with connection error should throw",
+                      res = err.ping(), std::runtime_error);
+    TSM_ASSERT("failed ping should not return, and even less return true",
+               !res);
 
     MockedErrorResponse_SCARFLSFJM errResp;
-    TS_ASSERT_THROWS(res = errResp.ping(), std::runtime_error);
-    TS_ASSERT(!res);
+    TSM_ASSERT_THROWS("ping with error response from server should throw",
+                      res = errResp.ping(), std::runtime_error);
+    TSM_ASSERT("failed ping should not return, and even less return true",
+               !res);
 
     /// ping is fine without logging in
     MockedGoodPingResponse_SCARFLSFJM good;
-    TS_ASSERT_THROWS_NOTHING(res = good.ping());
-    TS_ASSERT(res);
+    TSM_ASSERT_THROWS_NOTHING("successful ping should not throw",
+                              res = good.ping());
+    TSM_ASSERT("successful ping should return true", res);
   }
 
   void test_failConnect() {
     MockedConnectionError_SCARFLSFJM fail;
-    TS_ASSERT_THROWS(fail.authenticate("userlogin", "pass"),
-                     std::runtime_error);
-    TS_ASSERT_THROWS(fail.downloadRemoteFile("any_wrong_transID",
-                                             "remote_fname", "local_fname"),
-                     std::invalid_argument);
-    TS_ASSERT_THROWS(fail.ping(), std::runtime_error);
+    TSM_ASSERT_THROWS("authentication with connection error should throw",
+                      fail.authenticate("userlogin", "pass"),
+                      std::runtime_error);
+    TSM_ASSERT_THROWS(
+        "download with connection error, without logging in, should throw",
+        fail.downloadRemoteFile("any_wrong_transID", "remote_fname",
+                                "local_fname"),
+        std::invalid_argument);
+    TSM_ASSERT_THROWS(
+        "ping with connection error, without logging in,  should throw",
+        fail.ping(), std::runtime_error);
   }
 
   void test_commandAfterLogout() {
     MockedGoodLoginResponse_SCARFLSFJM jm;
-    TS_ASSERT_THROWS_NOTHING(jm.authenticate("username", "pass"));
-    TS_ASSERT_THROWS_NOTHING(jm.logout());
+    TSM_ASSERT_THROWS_NOTHING("successful authentication should not throw",
+                              jm.authenticate("username", "pass"));
+    TSM_ASSERT_THROWS_NOTHING("successful logout should not throw",
+                              jm.logout());
 
     // Once you log out all actions should produce an exception
     std::string tid, jid;
-    TS_ASSERT_THROWS(tid = jm.startRemoteTransaction(), std::runtime_error);
+    TSM_ASSERT_THROWS("start transaction after logging out should throw",
+                      tid = jm.startRemoteTransaction(), std::runtime_error);
 
-    TS_ASSERT_THROWS(jid = jm.submitRemoteJob("a_wrong_transID", "executable",
-                                              "--params 1", "name_for_job"),
-                     std::runtime_error);
+    TSM_ASSERT_THROWS("submit job after logging out should throw",
+                      jid = jm.submitRemoteJob("a_wrong_transID", "executable",
+                                               "--params 1", "name_for_job"),
+                      std::runtime_error);
 
     // log in again, back to normal
-    TS_ASSERT_THROWS_NOTHING(jm.authenticate("user", "pass"));
-    TS_ASSERT_THROWS_NOTHING(tid = jm.startRemoteTransaction());
-    TS_ASSERT("" != tid);
+    TSM_ASSERT_THROWS_NOTHING(
+        "second successful authentication should not throw",
+        jm.authenticate("user", "pass"));
+    TSM_ASSERT_THROWS_NOTHING(
+        "successful start transaction after second log in should not throw",
+        tid = jm.startRemoteTransaction());
+    TSM_ASSERT("successful start transaction should return non-empty ID",
+               "" != tid);
 
-    TS_ASSERT_THROWS(
+    TSM_ASSERT_THROWS(
+        "submit job with wrong transaction ID should throw",
         jid = jm.submitRemoteJob("no_no_wrong_ID", "executable", "--params 1"),
         std::invalid_argument);
-    TS_ASSERT_THROWS_NOTHING(
+    TSM_ASSERT_THROWS_NOTHING(
+        "successful submit job (correct transaction ID, after logging in for a "
+        "second time) should not throw",
         jid = jm.submitRemoteJob(tid, "executable", "--params 1"));
-    TS_ASSERT("" != jid);
+    TSM_ASSERT("successful submit job, after logging in for a second time, "
+               "should return non-empty ID",
+               "" != jid);
   }
 
 private:
