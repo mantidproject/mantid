@@ -6,7 +6,7 @@
     <archiveSearch plugin="ISISDataSearch" />
   </archive>
   
-  <computeResource name="SCARF@STFC">
+  <computeResource name="SCARF@STFC" jobmanagertype="SCARFLSFJobManager">
     <baseURL>https://portal.scarf.rl.ac.uk</baseURL>
   </computeResource>
 

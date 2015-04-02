@@ -462,6 +462,7 @@ void MantidSampleLogDialog::init()
   m_tree->header()->resizeSection(3, 90); //units column
   m_tree->header()->setMovable(false);
   m_tree->setSortingEnabled(true);
+  m_tree->sortByColumn(0, Qt::AscendingOrder);
 }
 
 

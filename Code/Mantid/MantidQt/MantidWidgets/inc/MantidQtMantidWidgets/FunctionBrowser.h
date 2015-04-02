@@ -21,6 +21,7 @@ class QtStringPropertyManager;
 class QtEnumPropertyManager;
 class QtProperty;
 class QtBrowserItem;
+class ParameterPropertyManager;
 
 class QPushButton;
 class QLabel;
@@ -108,10 +109,14 @@ public:
 
   /// Update the function parameter value
   void setParameter(const QString& funcIndex, const QString& paramName, double value);
+  /// Update the function parameter error
+  void setParamError(const QString& funcIndex, const QString& paramName, double error);
   /// Get a value of a parameter
   double getParameter(const QString& funcIndex, const QString& paramName) const;
   /// Update the function parameter value
   void setParameter(const QString& paramName, double value);
+  /// Update the function parameter error
+  void setParamError(const QString& paramName, double error);
   /// Get a value of a parameter
   double getParameter(const QString& paramName) const;
   /// Update parameter values in the browser to match those of a function.
@@ -147,7 +152,7 @@ protected:
   /// Add a function property
   AProperty addFunctionProperty(QtProperty* parent, QString funName);
   /// Add a parameter property
-  AProperty addParameterProperty(QtProperty* parent, QString paramName, double paramValue);
+  AProperty addParameterProperty(QtProperty* parent, QString paramName, QString paramDesc, double paramValue);
   /// Add a attribute property
   AProperty addAttributeProperty(QtProperty* parent, QString attName, const Mantid::API::IFunction::Attribute& att);
   /// Add attribute and parameter properties to a function property
@@ -249,7 +254,7 @@ protected:
   /// Manager for function group properties
   QtGroupPropertyManager *m_functionManager;
   /// Manager for function parameter properties
-  QtDoublePropertyManager *m_parameterManager;
+  ParameterPropertyManager *m_parameterManager;
   /// Manager for function string attribute properties
   QtStringPropertyManager *m_attributeStringManager;
   /// Manager for function double attribute properties

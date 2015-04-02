@@ -68,8 +68,11 @@ namespace CustomInterfaces
     void displayError(const std::string &error);
     void setAvailableLogs(const std::vector<std::string> &logs);
     void setAvailablePeriods(const std::vector<std::string> &periods);
+    void setTimeLimits(double tMin, double tMax);
+    void setTimeRange (double tMin, double tMax);
     void setWaitingCursor();
     void restoreCursor();
+    void help();
 
     // -- End of IALCDataLoadingView interface -----------------------------------------------------
 

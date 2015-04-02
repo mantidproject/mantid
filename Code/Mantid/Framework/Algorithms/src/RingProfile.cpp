@@ -582,7 +582,7 @@ void RingProfile::getBinForPixel(const API::MatrixWorkspace_sptr ws,
     // call fromAngleToBin (radians)
     bins_pos[i] = fromAngleToBin(angle, false);
   }
-};
+}
 
 /* Return the bin position for a given angle.
  *
@@ -618,7 +618,7 @@ int RingProfile::fromAngleToBin(double angle, bool degree) {
 
   angle /= bin_size;
   return (int)angle;
-};
+}
 
 } // namespace Algorithms
 } // namespace Mantid

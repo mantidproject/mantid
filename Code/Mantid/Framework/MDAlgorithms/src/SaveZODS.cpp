@@ -2,13 +2,13 @@
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidKernel/System.h"
 #include "MantidMDAlgorithms/SaveZODS.h"
-#include "MantidMDEvents/MDHistoWorkspace.h"
+#include "MantidDataObjects/MDHistoWorkspace.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
-using namespace Mantid::MDEvents;
+using namespace Mantid::DataObjects;
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -28,10 +28,10 @@ SaveZODS::~SaveZODS() {}
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
-const std::string SaveZODS::name() const { return "SaveZODS"; };
+const std::string SaveZODS::name() const { return "SaveZODS"; }
 
 /// Algorithm's version for identification. @see Algorithm::version
-int SaveZODS::version() const { return 1; };
+int SaveZODS::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
 const std::string SaveZODS::category() const { return "MDAlgorithms"; }

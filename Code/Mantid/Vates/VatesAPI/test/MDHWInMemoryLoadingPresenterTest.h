@@ -13,7 +13,7 @@
 using namespace Mantid::VATES;
 using namespace Mantid::API;
 using namespace testing;
-using Mantid::MDEvents::MDEventsTestHelper::makeFakeMDHistoWorkspace;
+using Mantid::DataObjects::MDEventsTestHelper::makeFakeMDHistoWorkspace;
 
 class MDHWInMemoryLoadingPresenterTest: public CxxTest::TestSuite
 {
@@ -32,7 +32,7 @@ private:
   // Helper method. Generates and returns a valid IMDHistoWorkspace
   static Mantid::API::Workspace_sptr getGoodWorkspace()
   {
-    Mantid::MDEvents::MDHistoWorkspace_sptr ws = makeFakeMDHistoWorkspace(1.0, 4, 5, 1.0, 0.1,"MD_HISTO_WS");
+    Mantid::DataObjects::MDHistoWorkspace_sptr ws = makeFakeMDHistoWorkspace(1.0, 4, 5, 1.0, 0.1,"MD_HISTO_WS");
     return ws;
   }
 

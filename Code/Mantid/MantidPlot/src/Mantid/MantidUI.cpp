@@ -2310,7 +2310,7 @@ MultiLayer* MantidUI::mergePlots(MultiLayer* mlayer_1, MultiLayer* mlayer_2)
   mlayer_2->close();
 
   return mlayer_1;
-};
+}
 
 MantidMatrix* MantidUI::getMantidMatrix(const QString& wsName)
 {
@@ -2519,8 +2519,8 @@ void MantidUI::importNumSeriesLog(const QString &wsName, const QString &logName,
   {
     //Seconds offset
     t->setColName(0, "Time (sec)");
-    t->setColumnType(0, Table::Numeric); //six digits after 0
-    t->setNumericPrecision(6); //six digits after 0
+    t->setColumnType(0, Table::Numeric);
+    t->setNumericPrecision(16);   //it's the number of all digits
   }
 
   //Make the column header with the units, if any
@@ -2530,7 +2530,6 @@ void MantidUI::importNumSeriesLog(const QString &wsName, const QString &logName,
   t->setColName(1, column1);
 
   int iValueCurve = 0;
-  int iFilterCurve = 1;
 
   // Applying filters
   if (filter > 0)
@@ -2634,9 +2633,6 @@ void MantidUI::importNumSeriesLog(const QString &wsName, const QString &logName,
         }
       }
 
-      iValueCurve = 1;
-      iFilterCurve = 0;
-
     } //end (valid filter exists)
 
   }
@@ -2734,19 +2730,23 @@ void MantidUI::importNumSeriesLog(const QString &wsName, const QString &logName,
 
   if (filter && flt.filter())
   {
+    int iFilterCurve = 1;
     QwtPlotCurve *c = g->curve(iFilterCurve);
-    // Set the right axis as Y axis for the filter curve.
-    c->setAxis(2,1);
-    // Set style #3 (HorizontalSteps) for curve 1
-    // Set scale of right Y-axis (#3) from 0 to 1
-    g->setCurveStyle(iFilterCurve,3);
-    g->setScale(3,0,1);
-    // Fill area under the curve with a pattern
-    QBrush br = QBrush(Qt::gray, Qt::Dense5Pattern);
-    g->setCurveBrush(iFilterCurve, br);
-    // Set line colour
-    QPen pn = QPen(Qt::gray);
-    g->setCurvePen(iFilterCurve, pn);
+    if ( c )
+    {
+      // Set the right axis as Y axis for the filter curve.
+      c->setAxis(2,1);
+      // Set style #3 (HorizontalSteps) for curve 1
+      // Set scale of right Y-axis (#3) from 0 to 1
+      g->setCurveStyle(iFilterCurve,3);
+      g->setScale(3,0,1);
+      // Fill area under the curve with a pattern
+      QBrush br = QBrush(Qt::gray, Qt::Dense5Pattern);
+      g->setCurveBrush(iFilterCurve, br);
+      // Set line colour
+      QPen pn = QPen(Qt::gray);
+      g->setCurvePen(iFilterCurve, pn);
+    }
   }
   g->setXAxisTitle(t->colLabel(0));
   g->setYAxisTitle(t->colLabel(1).section(".",0,0));

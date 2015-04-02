@@ -61,8 +61,8 @@ class IndirectResolution(DataProcessorAlgorithm):
                              direction=Direction.Output),
                              doc='Output resolution workspace.')
 
-
     def PyExec(self):
+        from IndirectCommon import getWSprefix
         self._setup()
 
         ISISIndirectEnergyTransfer(Instrument=self._instrument,

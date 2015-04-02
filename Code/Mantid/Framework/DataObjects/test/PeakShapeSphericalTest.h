@@ -6,7 +6,7 @@
 #endif
 
 #include <cxxtest/TestSuite.h>
-#include <jsoncpp/json/json.h>
+#include <json/json.h>
 
 #include "MantidDataObjects/PeakShapeSpherical.h"
 #include "MantidKernel/V3D.h"

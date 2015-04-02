@@ -24,7 +24,7 @@ using namespace API;
 using namespace DataObjects;
 
 // Register the algorithm into the AlgorithmFactory
-DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadMcStas);
+DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadMcStas)
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
@@ -38,10 +38,10 @@ LoadMcStas::~LoadMcStas() {}
 
 //----------------------------------------------------------------------------------------------
 // Algorithm's name for identification. @see Algorithm::name
-const std::string LoadMcStas::name() const { return "LoadMcStas"; };
+const std::string LoadMcStas::name() const { return "LoadMcStas"; }
 
 // Algorithm's version for identification. @see Algorithm::version
-int LoadMcStas::version() const { return 1; };
+int LoadMcStas::version() const { return 1; }
 
 // Algorithm's category for identification. @see Algorithm::category
 const std::string LoadMcStas::category() const { return "DataHandling"; }

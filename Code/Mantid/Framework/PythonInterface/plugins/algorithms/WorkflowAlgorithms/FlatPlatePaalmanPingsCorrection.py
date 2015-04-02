@@ -1,9 +1,9 @@
 #pylint: disable=no-init,invalid-name
 from mantid.simpleapi import *
 from mantid.api import PythonAlgorithm, AlgorithmFactory, PropertyMode, MatrixWorkspaceProperty, \
-                       WorkspaceGroupProperty
+                       WorkspaceGroupProperty, InstrumentValidator, WorkspaceUnitValidator
 from mantid.kernel import StringListValidator, StringMandatoryValidator, IntBoundedValidator, \
-                          FloatBoundedValidator, Direction, logger
+                          FloatBoundedValidator, Direction, logger, CompositeValidator
 import math, numpy as np
 
 
@@ -20,7 +20,6 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
     _can_number_density = None
     _can_front_thickness = None
     _can_back_thickness = None
-    _can_scale = 1.0
     _number_wavelengths = 10
     _emode = None
     _efixed = 0.0
@@ -39,8 +38,11 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
 
 
     def PyInit(self):
+        ws_validator = CompositeValidator([WorkspaceUnitValidator('Wavelength'), InstrumentValidator()])
+
         self.declareProperty(MatrixWorkspaceProperty('SampleWorkspace', '',
-                             direction=Direction.Input),
+                             direction=Direction.Input,
+                             validator=ws_validator),
                              doc='Name for the input sample workspace')
 
         self.declareProperty(name='SampleChemicalFormula', defaultValue='',
@@ -57,7 +59,8 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
 
         self.declareProperty(MatrixWorkspaceProperty('CanWorkspace', '',
                              direction=Direction.Input,
-                             optional=PropertyMode.Optional),
+                             optional=PropertyMode.Optional,
+                             validator=ws_validator),
                              doc="Name for the input container workspace")
 
         self.declareProperty(name='CanChemicalFormula', defaultValue='',
@@ -72,9 +75,6 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
         self.declareProperty(name='CanBackThickness', defaultValue=0.0,
                              validator=FloatBoundedValidator(0.0),
                              doc='Container back thickness in cm')
-
-        self.declareProperty(name='CanScaleFactor', defaultValue=1.0,
-                             doc='Scale factor to multiply can data')
 
         self.declareProperty(name='NumberWavelengths', defaultValue=10,
                              validator=IntBoundedValidator(1),
@@ -203,7 +203,6 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
         self._can_number_density = self.getProperty('CanNumberDensity').value
         self._can_front_thickness = self.getProperty('CanFrontThickness').value
         self._can_back_thickness = self.getProperty('CanBackThickness').value
-        self._can_scale = self.getProperty('CanScaleFactor').value
 
         self._number_wavelengths = self.getProperty('NumberWavelengths').value
         self._interpolate = self.getProperty('Interpolate').value

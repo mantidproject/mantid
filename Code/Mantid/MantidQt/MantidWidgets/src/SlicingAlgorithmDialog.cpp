@@ -16,8 +16,8 @@ namespace MantidQt
 {
   namespace MantidWidgets
   {
-    DECLARE_DIALOG(SliceMDDialog);
-    DECLARE_DIALOG(BinMDDialog);
+    DECLARE_DIALOG(SliceMDDialog)
+    DECLARE_DIALOG(BinMDDialog)
 
     /**
     Constructor

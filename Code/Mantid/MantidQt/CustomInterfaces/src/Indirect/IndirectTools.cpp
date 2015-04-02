@@ -13,7 +13,7 @@ namespace MantidQt
 {
   namespace CustomInterfaces
   {
-    DECLARE_SUBWINDOW(IndirectTools);
+    DECLARE_SUBWINDOW(IndirectTools)
   }
 }
 

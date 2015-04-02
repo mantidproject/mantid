@@ -33,7 +33,7 @@ public:
   }
 };
 
-DECLARE_FUNCMINIMIZER(FuncMinimizerFactoryTest_A, nedtur);
+DECLARE_FUNCMINIMIZER(FuncMinimizerFactoryTest_A, nedtur)
 
 
 class FuncMinimizerFactoryTest : public CxxTest::TestSuite

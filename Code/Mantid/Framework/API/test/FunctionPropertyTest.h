@@ -23,7 +23,7 @@ public:
   virtual void function(const FunctionDomain&,FunctionValues&)const {}
 };
 
-DECLARE_FUNCTION(FunctionPropertyTest_Function);
+DECLARE_FUNCTION(FunctionPropertyTest_Function)
 
 class FunctionPropertyTest : public CxxTest::TestSuite
 {
