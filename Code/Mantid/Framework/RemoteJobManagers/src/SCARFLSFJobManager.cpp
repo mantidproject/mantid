@@ -19,16 +19,16 @@ namespace {
 Mantid::Kernel::Logger g_log("SCARFLSFJobManager");
 }
 
-std::string LSFJobManager::m_loginBaseURL = "https://portal.scarf.rl.ac.uk/";
-std::string LSFJobManager::m_loginPath = "/cgi-bin/token.py";
+std::string LSFJobManager::g_loginBaseURL = "https://portal.scarf.rl.ac.uk/";
+std::string LSFJobManager::g_loginPath = "/cgi-bin/token.py";
 
-std::string SCARFLSFJobManager::m_logoutPath = "webservice/pacclient/logout/";
-std::string SCARFLSFJobManager::m_pingPath =
+std::string SCARFLSFJobManager::g_logoutPath = "webservice/pacclient/logout/";
+std::string SCARFLSFJobManager::g_pingPath =
     "platform/webservice/pacclient/ping/";
 // This could be passed here from facilities or similar
 // (like loginBaseURL above) - but note that in principle
 // the port number is known only after logging in
-std::string SCARFLSFJobManager::m_pingBaseURL =
+std::string SCARFLSFJobManager::g_pingBaseURL =
     "https://portal.scarf.rl.ac.uk:8443/";
 
 /**
@@ -46,9 +46,9 @@ void SCARFLSFJobManager::authenticate(const std::string &username,
   m_tokenStash.clear();
   m_transactions.clear();
 
-  std::string httpsURL = m_loginBaseURL + m_loginPath + "?username=" +
+  std::string httpsURL = g_loginBaseURL + g_loginPath + "?username=" +
                          username + "&password=" + password;
-  int code;
+  int code = 0;
   std::stringstream ss;
   try {
     code = doSendRequestGetResponse(httpsURL, ss);
@@ -60,7 +60,7 @@ void SCARFLSFJobManager::authenticate(const std::string &username,
   // We would check (Poco::Net::HTTPResponse::HTTP_OK == code) but the SCARF
   // login script (token.py) seems to return 200 whatever happens, as far as the
   // request is well formed. So this is how to know if authentication succeeded:
-  const std::string expectedSubstr = m_loginBaseURL;
+  const std::string expectedSubstr = g_loginBaseURL;
   std::string resp = ss.str();
   if (Mantid::Kernel::InternetHelper::HTTP_OK == code &&
       resp.find(expectedSubstr) != std::string::npos) {
@@ -99,12 +99,11 @@ void SCARFLSFJobManager::authenticate(const std::string &username,
 bool SCARFLSFJobManager::ping() {
   // Job ping, needs these headers:
   // headers = {'Content-Type': 'application/xml', 'Accept': ACCEPT_TYPE}
-  std::string httpsURL = m_pingBaseURL + m_pingPath;
+  std::string httpsURL = g_pingBaseURL + g_pingPath;
   StringToStringMap headers;
-  headers.insert(
-      std::pair<std::string, std::string>("Content-Type", "application/xml"));
-  headers.insert(std::pair<std::string, std::string>("Accept", m_acceptType));
-  int code;
+  headers.insert(std::make_pair("Content-Type", "application/xml"));
+  headers.insert(std::make_pair("Accept", g_acceptType));
+  int code = 0;
   std::stringstream ss;
   try {
     code = doSendRequestGetResponse(httpsURL, ss, headers);
@@ -169,13 +168,13 @@ void SCARFLSFJobManager::logout(const std::string &username) {
   const std::string baseURL = tok.m_url;
   const std::string token = tok.m_token_str;
 
-  std::string httpsURL = baseURL + m_logoutPath;
+  std::string httpsURL = baseURL + g_logoutPath;
   StringToStringMap headers;
   headers.insert(
       std::pair<std::string, std::string>("Content-Type", "text/plain"));
-  headers.insert(std::pair<std::string, std::string>("Cookie", token));
-  headers.insert(std::pair<std::string, std::string>("Accept", m_acceptType));
-  int code;
+  headers.insert(std::make_pair("Cookie", token));
+  headers.insert(std::make_pair("Accept", g_acceptType));
+  int code = 0;
   std::stringstream ss;
   try {
     code = doSendRequestGetResponse(httpsURL, ss, headers);

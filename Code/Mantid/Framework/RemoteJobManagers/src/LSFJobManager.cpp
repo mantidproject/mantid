@@ -29,37 +29,37 @@ namespace {
 Mantid::Kernel::Logger g_log("LSFJobManager");
 }
 
-std::string LSFJobManager::m_killPathBase =
+std::string LSFJobManager::g_killPathBase =
     "webservice/pacclient/jobOperation/kill/";
 
-std::string LSFJobManager::m_allJobsStatusPath = "webservice/pacclient/jobs?";
+std::string LSFJobManager::g_allJobsStatusPath = "webservice/pacclient/jobs?";
 
-std::string LSFJobManager::m_jobIdStatusPath = "webservice/pacclient/jobs/";
+std::string LSFJobManager::g_jobIdStatusPath = "webservice/pacclient/jobs/";
 
 //  The 0 at the end of the upload path is 'jobId' 0, if a jobId is given the
 //  upload goes to a path relative to the job path.
-std::string LSFJobManager::m_uploadPath = "webservice/pacclient/upfile/0";
+std::string LSFJobManager::g_uploadPath = "webservice/pacclient/upfile/0";
 
-std::string LSFJobManager::m_submitPath = "webservice/pacclient/submitapp";
+std::string LSFJobManager::g_submitPath = "webservice/pacclient/submitapp";
 
-std::string LSFJobManager::m_downloadOneBasePath = "webservice/pacclient/file/";
+std::string LSFJobManager::g_downloadOneBasePath = "webservice/pacclient/file/";
 
-std::string LSFJobManager::m_downloadAllJobFilesBasePath =
+std::string LSFJobManager::g_downloadAllJobFilesBasePath =
     "webservice/pacclient/jobfiles/";
 
-std::string LSFJobManager::m_acceptType = "text/plain,application/xml,text/xml";
+std::string LSFJobManager::g_acceptType = "text/plain,application/xml,text/xml";
 
 using namespace Mantid::Kernel;
 
 void LSFJobManager::abortRemoteJob(const std::string &jobID) {
-  if (m_tokenStash.size() <= 0) {
+  if (m_tokenStash.empty()) {
     throw std::runtime_error(
         "Job status query failed. You do not seem to have logged "
         "in.");
   }
   // only support for single-user
   Token tok = m_tokenStash.begin()->second;
-  const std::string killPath = m_killPathBase + jobID;
+  const std::string killPath = g_killPathBase + jobID;
   const std::string baseURL = tok.m_url;
   const std::string token = tok.m_token_str;
 
@@ -67,9 +67,9 @@ void LSFJobManager::abortRemoteJob(const std::string &jobID) {
   StringToStringMap headers;
   headers.insert(
       std::pair<std::string, std::string>("Content-Type", "application/xml"));
-  headers.insert(std::pair<std::string, std::string>("Cookie", token));
-  headers.insert(std::pair<std::string, std::string>("Accept", m_acceptType));
-  int code;
+  headers.insert(std::make_pair("Cookie", token));
+  headers.insert(std::make_pair("Accept", g_acceptType));
+  int code = 0;
   std::stringstream ss;
   try {
     code = doSendRequestGetResponse(httpsURL, ss, headers);
@@ -121,7 +121,7 @@ void LSFJobManager::downloadRemoteFile(const std::string &transactionID,
     throw std::invalid_argument("Could not find a transaction with ID: " +
                                 transactionID);
 
-  if (m_tokenStash.size() <= 0) {
+  if (m_tokenStash.empty()) {
     throw std::runtime_error(
         "File download failed. You do not seem to have logged in.");
   }
@@ -158,7 +158,7 @@ void LSFJobManager::downloadRemoteFile(const std::string &transactionID,
  */
 std::vector<Mantid::API::IRemoteJobManager::RemoteJobInfo>
 LSFJobManager::queryAllRemoteJobs() const {
-  if (m_tokenStash.size() <= 0) {
+  if (m_tokenStash.empty()) {
     throw std::runtime_error(
         "Job status query failed. You do not seem to have logged "
         "in.");
@@ -172,13 +172,13 @@ LSFJobManager::queryAllRemoteJobs() const {
   const std::string baseURL = tok.m_url;
   const std::string token = tok.m_token_str;
 
-  std::string httpsURL = baseURL + m_allJobsStatusPath;
+  std::string httpsURL = baseURL + g_allJobsStatusPath;
   StringToStringMap headers;
   headers.insert(
       std::pair<std::string, std::string>("Content-Type", "application/xml"));
-  headers.insert(std::pair<std::string, std::string>("Accept", m_acceptType));
-  headers.insert(std::pair<std::string, std::string>("Cookie", token));
-  int code;
+  headers.insert(std::make_pair("Accept", g_acceptType));
+  headers.insert(std::make_pair("Cookie", token));
+  int code = 0;
   std::stringstream ss;
   try {
     code = doSendRequestGetResponse(httpsURL, ss, headers);
@@ -229,7 +229,7 @@ LSFJobManager::queryRemoteFile(const std::string &transactionID) const {
   if (!findTransaction(transactionID))
     throw std::invalid_argument("Could not find a transaction with ID: " +
                                 transactionID);
-  if (m_tokenStash.size() <= 0) {
+  if (m_tokenStash.empty()) {
     throw std::runtime_error(
         "Remote file names query failed. You do not seem to have logged in.");
   }
@@ -250,7 +250,7 @@ LSFJobManager::queryRemoteFile(const std::string &transactionID) const {
 
   // assume that the last job is what we want
   const std::string jobId = jobIDs.back();
-  const std::string downloadPath = m_downloadAllJobFilesBasePath + jobId;
+  const std::string downloadPath = g_downloadAllJobFilesBasePath + jobId;
   const std::string baseURL = tok.m_url;
   const std::string token = tok.m_token_str;
 
@@ -259,8 +259,8 @@ LSFJobManager::queryRemoteFile(const std::string &transactionID) const {
   headers.insert(
       std::pair<std::string, std::string>("Content-Type", "application/xml"));
   headers.insert(std::pair<std::string, std::string>("Cookie", token));
-  headers.insert(std::pair<std::string, std::string>("Accept", m_acceptType));
-  int code;
+  headers.insert(std::pair<std::string, std::string>("Accept", g_acceptType));
+  int code = 0;
   std::stringstream ss;
   try {
     code = doSendRequestGetResponse(httpsURL, ss, headers);
@@ -316,7 +316,7 @@ LSFJobManager::queryRemoteFile(const std::string &transactionID) const {
  */
 Mantid::API::IRemoteJobManager::RemoteJobInfo
 LSFJobManager::queryRemoteJob(const std::string &jobID) const {
-  if (m_tokenStash.size() <= 0) {
+  if (m_tokenStash.empty()) {
     throw std::runtime_error(
         "Job status query failed. You do not seem to have logged "
         "in.");
@@ -330,13 +330,13 @@ LSFJobManager::queryRemoteJob(const std::string &jobID) const {
   const std::string baseURL = tok.m_url;
   const std::string token = tok.m_token_str;
 
-  std::string httpsURL = baseURL + m_jobIdStatusPath;
+  std::string httpsURL = baseURL + g_jobIdStatusPath;
   StringToStringMap headers;
   headers.insert(
       std::pair<std::string, std::string>("Content-Type", "application/xml"));
-  headers.insert(std::pair<std::string, std::string>("Accept", m_acceptType));
+  headers.insert(std::pair<std::string, std::string>("Accept", g_acceptType));
   headers.insert(std::pair<std::string, std::string>("Cookie", token));
-  int code;
+  int code = 0;
   std::stringstream ss;
   try {
     code = doSendRequestGetResponse(httpsURL, ss, headers);
@@ -410,7 +410,7 @@ LSFJobManager::queryRemoteJob(const std::string &jobID) const {
  * @throw std::runtime_error if there is another issue (like not logged in)
  */
 std::string LSFJobManager::startRemoteTransaction() {
-  if (m_tokenStash.size() <= 0) {
+  if (m_tokenStash.empty()) {
     throw std::runtime_error(
         "Transaction start operation failed. You do not seem to have logged "
         "in.");
@@ -446,7 +446,7 @@ std::string LSFJobManager::startRemoteTransaction() {
  * @throw std::runtime_error if there is another issue (like not logged in)
  */
 void LSFJobManager::stopRemoteTransaction(const std::string &transactionID) {
-  if (m_tokenStash.size() <= 0) {
+  if (m_tokenStash.empty()) {
     throw std::runtime_error(
         "Transaction stop operation failed. You do not seem to have logged "
         "in.");
@@ -495,7 +495,7 @@ std::string LSFJobManager::submitRemoteJob(const std::string &transactionID,
                                            const std::string &taskName,
                                            const int numNodes,
                                            const int coresPerNode) {
-  if (m_tokenStash.size() <= 0) {
+  if (m_tokenStash.empty()) {
     throw std::runtime_error(
         "Job submission failed. You do not seem to have logged in.");
   }
@@ -526,13 +526,13 @@ std::string LSFJobManager::submitRemoteJob(const std::string &transactionID,
   const std::string baseURL = tok.m_url;
   const std::string token = tok.m_token_str;
 
-  std::string httpsURL = baseURL + m_submitPath;
+  std::string httpsURL = baseURL + g_submitPath;
   StringToStringMap headers;
   headers.insert(std::pair<std::string, std::string>(
       "Content-Type", "multipart/mixed; boundary=" + boundary));
-  headers.insert(std::pair<std::string, std::string>("Accept", m_acceptType));
+  headers.insert(std::pair<std::string, std::string>("Accept", g_acceptType));
   headers.insert(std::pair<std::string, std::string>("Cookie", token));
-  int code;
+  int code = 0;
   std::stringstream ss;
   try {
     code = doSendRequestGetResponse(httpsURL, ss, headers,
@@ -599,7 +599,7 @@ std::string LSFJobManager::submitRemoteJob(const std::string &transactionID,
 void LSFJobManager::uploadRemoteFile(const std::string &transactionID,
                                      const std::string &remoteFileName,
                                      const std::string &localFileName) {
-  if (m_tokenStash.size() <= 0) {
+  if (m_tokenStash.empty()) {
     throw std::runtime_error(
         "File upload failed. You do not seem to have logged in.");
   }
@@ -620,16 +620,16 @@ void LSFJobManager::uploadRemoteFile(const std::string &transactionID,
   const std::string token = tok.m_token_str;
 
   InternetHelper session;
-  std::string httpsURL = baseURL + m_uploadPath;
+  std::string httpsURL = baseURL + g_uploadPath;
   StringToStringMap headers;
   headers.insert(std::pair<std::string, std::string>(
       "Content-Type", "multipart/mixed; boundary=" + boundary));
-  headers.insert(std::pair<std::string, std::string>("Accept", m_acceptType));
+  headers.insert(std::pair<std::string, std::string>("Accept", g_acceptType));
   headers.insert(std::pair<std::string, std::string>("Cookie", token));
 
   const std::string &body =
       buildUploadBody(boundary, remoteFileName, localFileName);
-  int code;
+  int code = 0;
   std::stringstream ss;
   try {
     code = doSendRequestGetResponse(httpsURL, ss, headers,
@@ -655,7 +655,7 @@ void LSFJobManager::uploadRemoteFile(const std::string &transactionID,
  * Send the HHTP(S) request required to perform one of the actions.
  *
  * @param url Full URL, including request string
- * @param rss Response body stream
+ * @param rss Response body stream from the remote point
  * @param headers HTTP headers given as key-value pairs
  * @param method By default GET (Poco::Net::HTTPRequest::HTTP_POST), also
  * accepts POST (Poco::Net::HTTPRequest::HTTP_POST)
@@ -670,7 +670,7 @@ int LSFJobManager::doSendRequestGetResponse(const std::string &url,
                                             const std::string &body) const {
   InternetHelper session;
 
-  std::string ContTypeName = "Content-Type";
+  const std::string ContTypeName = "Content-Type";
   auto it = headers.find(ContTypeName);
   if (headers.end() != it) {
     session.setContentType(it->second);
@@ -1071,7 +1071,7 @@ void LSFJobManager::getOneJobFile(const std::string &jobId,
   // headers = {'Content-Type': 'text/plain', 'Cookie': token, 'Accept':
   // ACCEPT_TYPE}
   // - and as request body the name of the file
-  const std::string downloadOnePath = m_downloadOneBasePath + jobId;
+  const std::string downloadOnePath = g_downloadOneBasePath + jobId;
   const std::string baseURL = t.m_url;
   const std::string token = t.m_token_str;
 
@@ -1081,9 +1081,9 @@ void LSFJobManager::getOneJobFile(const std::string &jobId,
   headers.insert(
       std::pair<std::string, std::string>("Content-Type", "application/xml"));
   headers.insert(std::pair<std::string, std::string>("Cookie", token));
-  headers.insert(std::pair<std::string, std::string>("Accept", m_acceptType));
+  headers.insert(std::pair<std::string, std::string>("Accept", g_acceptType));
   std::string body = remotePath;
-  int code;
+  int code = 0;
   std::stringstream ss;
   try {
     code = doSendRequestGetResponse(httpsURL, ss, headers,
@@ -1144,7 +1144,7 @@ void LSFJobManager::getAllJobFiles(const std::string &jobId,
   // Job download (multiple) files, needs these headers:
   // headers = {'Content-Type': 'text/plain', 'Cookie': token, 'Accept':
   // ACCEPT_TYPE}
-  const std::string downloadPath = m_downloadAllJobFilesBasePath + jobId;
+  const std::string downloadPath = g_downloadAllJobFilesBasePath + jobId;
   const std::string baseURL = t.m_url;
   const std::string token = t.m_token_str;
 
@@ -1153,8 +1153,8 @@ void LSFJobManager::getAllJobFiles(const std::string &jobId,
   headers.insert(
       std::pair<std::string, std::string>("Content-Type", "application/xml"));
   headers.insert(std::pair<std::string, std::string>("Cookie", token));
-  headers.insert(std::pair<std::string, std::string>("Accept", m_acceptType));
-  int code;
+  headers.insert(std::pair<std::string, std::string>("Accept", g_acceptType));
+  int code = 0;
   std::stringstream ss;
   try {
     code = doSendRequestGetResponse(httpsURL, ss, headers);
@@ -1244,7 +1244,7 @@ bool LSFJobManager::findTransaction(const std::string &id) const {
 * @param id job ID as produced in submitRemobeJob()
 *
 */
-void LSFJobManager::addJobInTransaction(std::string &jobID) {
+void LSFJobManager::addJobInTransaction(const std::string &jobID) {
   if (m_transactions.size() <= 0)
     return;
   auto &jobs = m_transactions.rbegin()->second.jobIDs;

@@ -45,9 +45,9 @@ public:
   virtual void logout(const std::string &username = std::string());
 
 private:
-  static std::string m_pingPath;
-  static std::string m_logoutPath;
-  static std::string m_pingBaseURL;
+  static std::string g_pingPath;
+  static std::string g_logoutPath;
+  static std::string g_pingBaseURL;
 };
 
 } // namespace RemoteJobManagers

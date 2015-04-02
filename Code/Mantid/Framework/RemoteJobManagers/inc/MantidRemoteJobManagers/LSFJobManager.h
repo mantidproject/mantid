@@ -86,11 +86,12 @@ protected:
 
   /// has this transaction being started (and not stopped)?
   bool findTransaction(const std::string &id) const;
-  void addJobInTransaction(std::string &jobID);
+  void addJobInTransaction(const std::string &jobID);
 
   // cookie obtained after logging in
   struct Token {
-    Token(std::string &u, std::string &t) : m_url(u), m_token_str(t){};
+    Token(const std::string &u, const std::string &t)
+        : m_url(u), m_token_str(t){};
     std::string m_url;
     std::string m_token_str;
   };
@@ -111,25 +112,25 @@ protected:
   std::map<std::string, Transaction> m_transactions;
 
   // HTTP specifics for SCARF (IBM LSF PAC)
-  static std::string m_acceptType;
+  static std::string g_acceptType;
 
   /// to login
-  static std::string m_loginBaseURL;
-  static std::string m_loginPath;
+  static std::string g_loginBaseURL;
+  static std::string g_loginPath;
   /// to abort/kill/cancel a job identified by id
-  static std::string m_killPathBase;
+  static std::string g_killPathBase;
   /// to query the status of all (available) jobs
-  static std::string m_allJobsStatusPath;
+  static std::string g_allJobsStatusPath;
   /// to query status of jobs by id
-  static std::string m_jobIdStatusPath;
+  static std::string g_jobIdStatusPath;
   /// to upload files to the remote compute resource
-  static std::string m_uploadPath;
+  static std::string g_uploadPath;
   /// to submit jobs
-  static std::string m_submitPath;
+  static std::string g_submitPath;
   /// to download one file (by name)
-  static std::string m_downloadOneBasePath;
+  static std::string g_downloadOneBasePath;
   /// to download all job files (normally the job id is appended)
-  static std::string m_downloadAllJobFilesBasePath;
+  static std::string g_downloadAllJobFilesBasePath;
 
 private:
   /// TODO: this could well go to an LSFHelper class
@@ -151,13 +152,11 @@ private:
   void encodeParam(std::string &body, const std::string &boundary,
                    const std::string &paramName, const std::string &paramVal);
 
-  std::string buildSubmitBody(const std::string &appName,
-                              const std::string &boundary,
-                              const std::string &inputFile,
-                              const std::string &inputArgs,
-                              const std::string &jobName = std::string(),
-                              const int numNodes = 0,
-                              const int coresPerNode = 0);
+  std::string
+  buildSubmitBody(const std::string &appName, const std::string &boundary,
+                  const std::string &inputFile, const std::string &inputArgs,
+                  const std::string &jobName = std::string(),
+                  const int numNodes = 0, const int coresPerNode = 0);
 
   std::string buildUploadBody(const std::string &boundary,
                               const std::string &destDir,
