@@ -6,6 +6,9 @@
 #include "MantidRemoteJobManagers/MantidWebServiceAPIHelper.h"
 
 #include <boost/make_shared.hpp>
+#include <Poco/Net/HTTPResponse.h>
+
+using namespace Mantid::RemoteJobManagers;
 
 /// This is just an overly simple test that objects can be
 /// created. Not bothering to improve this, as this
@@ -24,19 +27,19 @@ class MantidWebServiceAPIHelperTest : public CxxTest::TestSuite {
     TS_ASSERT(help = boost::make_shared<MantidWebServiceAPIHelper>());
     // can cast to inherited interfaces and base classes
 
-    TS_THROWS_NOTHING(MantidWebServiceAPIHelper h);
+    MantidWebServiceAPIHelper h;
   }
 
   void test_defaultValues() {
     MantidWebServiceAPIHelper h;
 
-    std::string sts;
-    TS_THROWS_NOTHING(sts = h.lastStatus());
-    TS_ASSERT_EQUALS(lastStatus(), Poco::Net::HTTP_OK);
+    Poco::Net::HTTPResponse::HTTPStatus sts;
+    TS_ASSERT_THROWS_NOTHING(sts = h.lastStatus());
+    TS_ASSERT_EQUALS(sts, Poco::Net::HTTPResponse::HTTP_OK);
 
     std::string reason;
-    TS_THROWS_NOTHING(reason = h.lastStatusReason());
-    TS_ASSERT_EQUALS(reason, "");
+    TS_ASSERT_THROWS_NOTHING(reason = h.lastStatusReason());
+    TS_ASSERT_EQUALS(reason, h.lastStatusReason());
   }
 };
 

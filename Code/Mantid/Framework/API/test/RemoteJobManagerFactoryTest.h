@@ -122,10 +122,10 @@ public:
         Mantid::Kernel::ConfigService::Instance().getFacility();
 
     Mantid::Kernel::ConfigService::Instance().setFacility("SNS");
-    // TODO: at the moment these two create throw a NotFoundError
-    // because the RemoteJobManager classes are missing and have not
-    // done a DECLARE_REMOTEJOBMANAGER. Change this test when that is
-    // done (ticket #11126 etc.)
+    // These two create should throw a NotFoundError because the
+    // RemoteJobManager classes are missing and have not done a
+    // DECLARE_REMOTEJOBMANAGER. A positive test is done in the tests
+    // of the job managers
     TS_ASSERT_THROWS(
         Mantid::API::IRemoteJobManager_sptr jobManager =
             Mantid::API::RemoteJobManagerFactory::Instance().create("Fermi"),
