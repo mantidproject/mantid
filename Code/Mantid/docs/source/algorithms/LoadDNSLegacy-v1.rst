@@ -10,7 +10,7 @@ Description
 -----------
 
 Loads a DNS legacy .d_dat data file into a :ref:`Workspace2D <Workspace2D>` with
-the given name.
+the given name. 
 
 The loader rotates the detector bank in the position given in the data file.
 
@@ -27,7 +27,7 @@ Usage
    datafile = 'dn134011vana.d_dat'
 
    # Load dataset
-   ws = LoadDNSLegacy(datafile)
+   ws = LoadDNSLegacy(datafile, Polarisation='x')
 
    print "This workspace has", ws.getNumDims(), "dimensions and has", \
         ws.getNumberHistograms(), "histograms."

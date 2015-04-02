@@ -23,6 +23,67 @@ all then be processed sequentially with the same options. The only requirement
 is that the same number of output workspaces are also given so that CutMD knows
 what to call each output workspace created.
 
+Creating Projections
+~~~~~~~~~~~~~~~~~~~~
+
+Projections are used by CutMD to transform the multidimensional data prior to
+cutting it. Projections are provided to CutMD in the form of a :ref:`TableWorkspace <Table Workspaces>`.
+The format of these workspaces is as follows:
+
++------------+--------+-------------------------------------------------------+
+| Column     | Type   | Purpose                                               |
++============+========+=======================================================+
+| name       | string | Specifies the dimension the row controls. Can be 'u', |
+|            |        | 'v', or 'w'.                                          |
++------------+--------+-------------------------------------------------------+
+| value      | string | A 3 dimensional vector specifying the axis for the    |
+|            |        | dimension. Example: '1,-1,0'                          |
++------------+--------+-------------------------------------------------------+
+| offset     | double | The offset value to use for this dimension.           |
++------------+--------+-------------------------------------------------------+
+| type       | string | The type/unit of this dimension. 'r' is RLU, 'a' is   |
+|            |        | inverse angstroms.                                    |
++------------+--------+-------------------------------------------------------+
+
+A projection table should have three rows: one for u, one for v, and one for w.
+
+There is a helper class called Projection that can be used to construct these
+projection tables for you automatically. For example:
+
+.. code-block:: python
+
+   from mantid.api import Projection
+   # Create an identity projection
+   proj_id = Projection([1,0,0], [0,1,0], [0,0,1])
+
+   # Automatically infer third dimension as being orthogonal to the first two
+   proj_rot = Projection([1,1,0], [1,-1,0])
+
+   # Set other properties
+   proj_prop = Projection()
+   proj_prop.setOffset(0, 100) # Set u offset to 100
+   proj_prop.setOffset(1, -5.0) # Set v offset to -5
+   proj_prop.setType(1, 'a') # Set v type to be RLU
+   proj_prop.setType(2, 'a') # Set w type to be inverse angstroms
+
+   #Create table workspaces from these projections
+   ws_id = proj_id.createWorkspace() # Named ws_id
+   proj_rot.createWorkspace(OutputWorkspace="ws_rot") # Name ws_rot
+
+
+When calling createWorkspace inside of algorithms like CutMD, the
+OutputWorkspace name must be provided, or createWorkspace will not know what to
+call the created workspace:
+
+.. code-block:: python
+
+   #Good:
+   CutMD(..., Projection=proj.createWorkspace(OutputWorkspace='proj_ws'), ...)
+
+   #Bad:
+   CutMD(..., Projection=proj.createWorkspace(), ...)
+
+
 Usage
 -----
 
