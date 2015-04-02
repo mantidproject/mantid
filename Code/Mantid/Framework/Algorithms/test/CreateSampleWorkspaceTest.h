@@ -3,6 +3,7 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidAPI/FrameworkManager.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
@@ -25,6 +26,9 @@ public:
   static CreateSampleWorkspaceTest *createSuite() { return new CreateSampleWorkspaceTest(); }
   static void destroySuite( CreateSampleWorkspaceTest *suite ) { delete suite; }
 
+  CreateSampleWorkspaceTest() {
+    FrameworkManager::Instance();
+  }
 
   void test_Init()
   {

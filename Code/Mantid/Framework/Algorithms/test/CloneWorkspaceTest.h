@@ -10,7 +10,7 @@
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidMDEvents/MDEventFactory.h"
+#include "MantidDataObjects/MDEventFactory.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
@@ -19,8 +19,7 @@ using namespace Mantid;
 using namespace Mantid::Geometry;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
-using namespace Mantid::MDEvents;
-using Mantid::MDEvents::MDEventsTestHelper::makeMDEW;
+using Mantid::DataObjects::MDEventsTestHelper::makeMDEW;
 
 class CloneWorkspaceTest : public CxxTest::TestSuite
 {

@@ -14,153 +14,157 @@
    <string>Indirect Data Analysis</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-  <layout class="QVBoxLayout" name="verticalLayout">
-   <item>
-    <widget class="QTabWidget" name="twIDATabs">
-     <property name="enabled">
-      <bool>true</bool>
-     </property>
-     <property name="tabShape">
-      <enum>QTabWidget::Rounded</enum>
-     </property>
-     <property name="currentIndex">
-      <number>0</number>
-     </property>
-     <widget class="QWidget" name="tabElwin">
-      <attribute name="title">
-       <string>Elwin</string>
-      </attribute>
-     </widget>
-     <widget class="QWidget" name="tabMSD">
-      <attribute name="title">
-       <string>MSD Fit</string>
-      </attribute>
-     </widget>
-     <widget class="QWidget" name="tabFury">
-      <attribute name="title">
-       <string>Fury</string>
-      </attribute>
-     </widget>
-     <widget class="QWidget" name="tabFuryFit">
-      <attribute name="title">
-       <string>FuryFit</string>
-      </attribute>
-     </widget>
-     <widget class="QWidget" name="tabConvFit">
-      <attribute name="title">
-       <string>ConvFit</string>
-      </attribute>
-     </widget>
-     <widget class="QWidget" name="tabCalcCorr">
-      <attribute name="title">
-       <string>Calculate Corrections</string>
-      </attribute>
-     </widget>
-     <widget class="QWidget" name="tabApplyCorr">
-      <attribute name="title">
-       <string>Apply Corrections</string>
-      </attribute>
-     </widget>
-    </widget>
-   </item>
-   <item>
-    <layout class="QHBoxLayout" name="layout_bottom">
-     <item>
-      <widget class="QPushButton" name="pbHelp">
-       <property name="enabled">
-        <bool>true</bool>
-       </property>
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="toolTip">
-        <string>Open interface help page in your web browser.</string>
-       </property>
-       <property name="maximumSize">
-        <size>
-         <width>25</width>
-         <height>25</height>
-        </size>
-       </property>
-       <property name="text">
-        <string>?</string>
-       </property>
+   <layout class="QVBoxLayout" name="verticalLayout">
+    <item>
+     <widget class="QTabWidget" name="twIDATabs">
+      <property name="enabled">
+       <bool>true</bool>
+      </property>
+      <property name="tabShape">
+       <enum>QTabWidget::Rounded</enum>
+      </property>
+      <property name="currentIndex">
+       <number>0</number>
+      </property>
+      <widget class="QWidget" name="tabElwin">
+       <attribute name="title">
+        <string>Elwin</string>
+       </attribute>
       </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="pbPythonExport">
-       <property name="enabled">
-        <bool>true</bool>
-       </property>
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="toolTip">
-        <string>Export a Python script for the algorithms run on this tab.</string>
-       </property>
-       <property name="maximumSize">
-        <size>
-         <width>30</width>
-         <height>25</height>
-        </size>
-       </property>
-       <property name="text">
-        <string>Py</string>
-       </property>
+      <widget class="QWidget" name="tabMSD">
+       <attribute name="title">
+        <string>MSD Fit</string>
+       </attribute>
       </widget>
-     </item>
-     <item>
-      <spacer name="horizontalSpacer_14">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>40</width>
-         <height>20</height>
-        </size>
-       </property>
-      </spacer>
-     </item>
-     <item>
-      <widget class="QPushButton" name="pbRun">
-       <property name="text">
-        <string>Run</string>
-       </property>
+      <widget class="QWidget" name="tabFury">
+       <attribute name="title">
+        <string>Fury</string>
+       </attribute>
       </widget>
-     </item>
-     <item>
-      <spacer name="horizontalSpacer_11">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>40</width>
-         <height>20</height>
-        </size>
-       </property>
-      </spacer>
-     </item>
-     <item>
-      <widget class="QPushButton" name="pbManageDirs">
-       <property name="text">
-        <string>Manage Directories</string>
-       </property>
+      <widget class="QWidget" name="tabFuryFit">
+       <attribute name="title">
+        <string>FuryFit</string>
+       </attribute>
       </widget>
-     </item>
-    </layout>
-   </item>
-  </layout>
+      <widget class="QWidget" name="tabConvFit">
+       <attribute name="title">
+        <string>ConvFit</string>
+       </attribute>
+      </widget>
+      <widget class="QWidget" name="tabCalcCorr">
+       <attribute name="title">
+        <string>Calculate Corrections</string>
+       </attribute>
+      </widget>
+      <widget class="QWidget" name="tabApplyCorr">
+       <attribute name="title">
+        <string>Apply Corrections</string>
+       </attribute>
+      </widget>
+      <widget class="QWidget" name="tabAbsorptionCorrections">
+       <attribute name="title">
+        <string>Absorption Corrections</string>
+       </attribute>
+      </widget>
+     </widget>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="layout_bottom">
+      <item>
+       <widget class="QPushButton" name="pbHelp">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>25</width>
+          <height>25</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Open interface help page in your web browser.</string>
+        </property>
+        <property name="text">
+         <string>?</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="pbPythonExport">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>30</width>
+          <height>25</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Export a Python script for the algorithms run on this tab.</string>
+        </property>
+        <property name="text">
+         <string>Py</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="horizontalSpacer_14">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
+       <widget class="QPushButton" name="pbRun">
+        <property name="text">
+         <string>Run</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="horizontalSpacer_11">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
+       <widget class="QPushButton" name="pbManageDirs">
+        <property name="text">
+         <string>Manage Directories</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+   </layout>
   </widget>
  </widget>
- <customwidgets/>
  <tabstops>
   <tabstop>twIDATabs</tabstop>
   <tabstop>pbHelp</tabstop>

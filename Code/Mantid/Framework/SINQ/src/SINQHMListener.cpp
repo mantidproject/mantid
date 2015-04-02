@@ -8,8 +8,7 @@
 #include <sstream>
 
 #include "MantidAPI/LiveListenerFactory.h"
-#include "MantidMDEvents/MDHistoWorkspace.h"
-#include "MantidSINQ/SINQHMListener.h"
+#include "MantidDataObjects/MDHistoWorkspace.h"
 
 #include <Poco/AutoPtr.h>
 #include <Poco/DOM/DOMParser.h>
@@ -20,9 +19,9 @@
 #include <Poco/StreamCopier.h>
 
 using namespace Mantid::API;
+using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
 using namespace Mantid;
-using namespace Mantid::MDEvents;
 using namespace Poco::Net;
 using namespace Poco::XML;
 

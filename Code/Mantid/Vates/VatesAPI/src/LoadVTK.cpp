@@ -40,8 +40,8 @@ support rebinning in-situ as part of the visualisation process.
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/Progress.h"
 #include "MantidAPI/RegisterFileLoader.h"
-#include "MantidMDEvents/MDHistoWorkspace.h"
-#include "MantidMDEvents/MDEventWorkspace.h"
+#include "MantidDataObjects/MDHistoWorkspace.h"
+#include "MantidDataObjects/MDEventWorkspace.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/BoundedValidator.h"
@@ -59,7 +59,7 @@ support rebinning in-situ as part of the visualisation process.
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
-using namespace Mantid::MDEvents;
+using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
 
 namespace Mantid

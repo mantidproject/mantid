@@ -1,5 +1,5 @@
-#ifndef MANTID_MDEVENTS_BINMD_H_
-#define MANTID_MDEVENTS_BINMD_H_
+#ifndef MANTID_MDALGORITHMS_BINMD_H_
+#define MANTID_MDALGORITHMS_BINMD_H_
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/CoordTransform.h"
@@ -8,10 +8,10 @@
 #include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/VMD.h"
-#include "MantidMDEvents/MDBox.h"
-#include "MantidMDEvents/MDEventFactory.h"
-#include "MantidMDEvents/MDEventWorkspace.h"
-#include "MantidMDEvents/MDHistoWorkspace.h"
+#include "MantidDataObjects/MDBox.h"
+#include "MantidDataObjects/MDEventFactory.h"
+#include "MantidDataObjects/MDEventWorkspace.h"
+#include "MantidDataObjects/MDHistoWorkspace.h"
 #include "MantidMDAlgorithms/SlicingAlgorithm.h"
 
 namespace Mantid {
@@ -60,15 +60,15 @@ private:
 
   /// Helper method
   template <typename MDE, size_t nd>
-  void binByIterating(typename MDEvents::MDEventWorkspace<MDE, nd>::sptr ws);
+  void binByIterating(typename DataObjects::MDEventWorkspace<MDE, nd>::sptr ws);
 
   /// Method to bin a single MDBox
   template <typename MDE, size_t nd>
-  void binMDBox(MDEvents::MDBox<MDE, nd> *box, const size_t *const chunkMin,
+  void binMDBox(DataObjects::MDBox<MDE, nd> *box, const size_t *const chunkMin,
                 const size_t *const chunkMax);
 
   /// The output MDHistoWorkspace
-  Mantid::MDEvents::MDHistoWorkspace_sptr outWS;
+  Mantid::DataObjects::MDHistoWorkspace_sptr outWS;
   /// Progress reporting
   Mantid::API::Progress *prog;
   /// ImplicitFunction used
@@ -82,6 +82,6 @@ private:
 };
 
 } // namespace Mantid
-} // namespace MDEvents
+} // namespace DataObjects
 
-#endif /* MANTID_MDEVENTS_BINMD_H_ */
+#endif /* MANTID_MDALGORITHMS_BINMD_H_ */
