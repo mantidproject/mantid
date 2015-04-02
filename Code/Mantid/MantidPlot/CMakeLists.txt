@@ -1054,7 +1054,10 @@ if ( APPLE )
                    @ONLY )
         install ( SCRIPT ${CMAKE_CURRENT_BINARY_DIR}/FixMacportsBundle.cmake )
   else ()
-    install ( FILES  make_package.rb DESTINATION MantidPlot.app/ )
+    configure_file( ${CMAKE_CURRENT_SOURCE_DIR}/make_package.rb.in
+                   ${CMAKE_CURRENT_BINARY_DIR}/make_package.rb
+                   @ONLY )
+    install ( FILES  ${CMAKE_CURRENT_BINARY_DIR}/make_package.rb DESTINATION MantidPlot.app/ )
     configure_file ( ${CMAKE_CURRENT_SOURCE_DIR}/FixMavericksBundle.cmake.in
                    ${CMAKE_CURRENT_BINARY_DIR}/FixMavericksBundle.cmake
                    @ONLY )

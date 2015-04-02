@@ -2,9 +2,11 @@
 #This loop changes the linking from /usr/local/lib to @rpath
 
 require 'pathname'
+#require 'FileTest'
 
 lib_dir = Pathname.new("/usr/local/lib")
 openssl_dir = Pathname.new("/usr/local/opt/openssl/lib")
+ParaView_dir = Pathname.new("@ParaView_DIR@")
 
 #filenames with path for all shared libraries used by MantidPlot and its dependencies.
 library_filenames = ["libboost_regex-mt.dylib",
@@ -62,7 +64,7 @@ library_filenames.each do |filename|
 end
 
 #use install_name_tool to change dependencies form /usr/local to libraries in the package.
-search_patterns = ["**/*.dylib","**/*.so","**/MantidPlot"]
+search_patterns = ["**/*.dylib","**/*.so","**/MantidPlot","**/VatesSimpleGui"]
 search_patterns.each do |pattern|
     Dir[pattern].each do |library|
         dependencies = `otool -L #{library}`
@@ -81,6 +83,84 @@ search_patterns.each do |pattern|
     end
 end
 
+`mkdir Contents/Libraries`
+vatesfiles = ["Contents/MacOS/VatesSimpleGui","Contents/MacOS/libMantidParaViewQtWidgets.dylib","Contents/MacOS/libMantidVatesAPI.dylib"] 
+vatesfiles.each do |file|
+  `install_name_tool -add_rpath @loader_path/../Libraries/ #{file}` 
+  dependencies = `otool -L #{file}`
+  dependencies.split("\n").each do |dependency|
+    currentname = dependency.strip.split(" ")
+    filename = currentname[0]
+    if filename.include? "#{ParaView_dir}"
+      `cp #{filename} Contents/Libraries`
+      name_split_on_slash = filename.strip.split("/")
+      filename_no_dir = name_split_on_slash[-1]
+      `chmod +w Contents/Libraries/#{filename_no_dir}`
+      `install_name_tool -id @rpath/#{filename_no_dir} Contents/Libraries/#{filename_no_dir}`
+      `install_name_tool -change #{filename} @rpath/#{filename_no_dir} #{file}`
+    end
+  end
+end
+
+`install_name_tool -add_rpath @loader_path/../Libraries/ pvplugins/libMantidVatesSimpleGuiViewWidgets.dylib`
+dependencies = `otool -L pvplugins/libMantidVatesSimpleGuiViewWidgets.dylib`
+dependencies.split("\n").each do |dependency|
+    currentname = dependency.strip.split(" ")
+    filename = currentname[0]
+    if filename.include? "#{ParaView_dir}"
+        `cp #{filename} Contents/Libraries`
+        name_split_on_slash = filename.strip.split("/")
+        filename_no_dir = name_split_on_slash[-1]
+        `chmod +w Contents/Libraries/#{filename_no_dir}`
+        `install_name_tool -id @rpath/#{filename_no_dir} Contents/Libraries/#{filename_no_dir}`
+        `install_name_tool -change #{filename} @rpath/#{filename_no_dir} pvplugins/libMantidVatesSimpleGuiViewWidgets.dylib`
+    end
+end
+
+Dir["pvplugins/pvplugins/*.dylib"].each do |library|
+    `install_name_tool -add_rpath @loader_path/../../Libraries/ #{library}`
+    dependencies = `otool -L #{library}`
+    dependencies.split("\n").each do |dependency|
+        currentname = dependency.strip.split(" ")
+        filename = currentname[0]
+        if filename.include? "#{ParaView_dir}"
+            `cp #{filename} Contents/Libraries`
+            name_split_on_slash = filename.strip.split("/")
+            filename_no_dir = name_split_on_slash[-1]
+            `chmod +w Contents/Libraries/#{filename_no_dir}`
+            `install_name_tool -id @rpath/#{filename_no_dir} Contents/Libraries/#{filename_no_dir}`
+            `install_name_tool -change #{filename} @rpath/#{filename_no_dir} #{library}`
+        end
+    end
+end
+
+issues_found = 1
+while issues_found > 0 do
+    p "found #{issues_found} issues this iteration!"
+    issues_found = 0
+    Dir["Contents/Libraries/*.dylib"].each do |library|
+        dependencies = `otool -L #{library}`
+        dependencies.split("\n").each do |dependency|
+            currentname = dependency.strip.split(" ")
+            filename = currentname[0]
+            if filename.include? "#{ParaView_dir}"
+                #p "fixing #{library} #{filename}" 
+                issues_found = issues_found + 1
+                name_split_on_slash = filename.strip.split("/")
+                filename_no_dir = name_split_on_slash[-1]
+                if !FileTest.exist?("Contents/Libraries/#{filename_no_dir}")
+                  `cp #{filename} Contents/Libraries`
+                  `chmod +w Contents/Libraries/#{filename_no_dir}`
+                  `install_name_tool -id @rpath/#{filename_no_dir} Contents/Libraries/#{filename_no_dir}`
+                end
+                `install_name_tool -add_rpath @loader_path/../Libraries #{library} > /dev/null 2>&1`
+                `install_name_tool -change #{filename} @rpath/#{filename_no_dir} #{library}`
+            end
+        end
+    end
+end
+
+
 #We'll use macdeployqt to fix qt dependencies.
 `macdeployqt ../MantidPlot.app`
 
@@ -95,6 +175,17 @@ end
 `install_name_tool -change /usr/local/lib/QtCore.framework/Versions/4/QtCore @loader_path/../Frameworks/QtCore.framework/Versions/4/QtCore Contents/MacOS/mantidqtpython.so`
 `install_name_tool -change /usr/local/lib/QtHelp.framework/Versions/4/QtHelp @loader_path/../Frameworks/QtHelp.framework/Versions/4/QtHelp  Contents/MacOS/mantidqtpython.so`
 `install_name_tool -change /usr/local/lib/QtWebKit.framework/Versions/4/QtWebKit @loader_path/../Frameworks/QtWebKit.framework/Versions/4/QtWebKit Contents/MacOS/mantidqtpython.so`
+
+`install_name_tool -change /usr/local/lib/Qt3Support.framework/Versions/4/Qt3Support @loader_path/../Frameworks/Qt3Support.framework/Versions/4/Qt3Support Contents/MacOS/VatesSimpleGui`
+`install_name_tool -change /usr/local/lib/QtOpenGL.framework/Versions/4/QtOpenGL @loader_path/../Frameworks/QtOpenGL.framework/Versions/4/QtOpenGL Contents/MacOS/VatesSimpleGui`
+`install_name_tool -change /usr/local/lib/QtSvg.framework/Versions/4/QtSvg @loader_path/../Frameworks/QtSvg.framework/Versions/4/QtSvg Contents/MacOS/VatesSimpleGui`
+`install_name_tool -change /usr/local/lib/QtGui.framework/Versions/4/QtGui @loader_path/../Frameworks/QtGui.framework/Versions/4/QtGui Contents/MacOS/VatesSimpleGui`
+`install_name_tool -change /usr/local/lib/QtXml.framework/Versions/4/QtXml @loader_path/../Frameworks/QtXml.framework/Versions/4/QtXml Contents/MacOS/VatesSimpleGui`
+`install_name_tool -change /usr/local/lib/QtSql.framework/Versions/4/QtSql @loader_path/../Frameworks/QtSql.framework/Versions/4/QtSql Contents/MacOS/VatesSimpleGui`
+`install_name_tool -change /usr/local/lib/QtNetwork.framework/Versions/4/QtNetwork @loader_path/../Frameworks/QtNetwork.framework/Versions/4/QtNetwork Contents/MacOS/VatesSimpleGui`
+`install_name_tool -change /usr/local/lib/QtCore.framework/Versions/4/QtCore @loader_path/../Frameworks/QtCore.framework/Versions/4/QtCore Contents/MacOS/VatesSimpleGui`
+`install_name_tool -change /usr/local/lib/QtHelp.framework/Versions/4/QtHelp @loader_path/../Frameworks/QtHelp.framework/Versions/4/QtHelp  Contents/MacOS/VatesSimpleGui`
+`install_name_tool -change /usr/local/lib/QtWebKit.framework/Versions/4/QtWebKit @loader_path/../Frameworks/QtWebKit.framework/Versions/4/QtWebKit Contents/MacOS/VatesSimpleGui`
 
 `install_name_tool -change /usr/local/lib/QtOpenGL.framework/Versions/4/QtOpenGL @loader_path/../Frameworks/QtOpenGL.framework/Versions/4/QtOpenGL Contents/MacOS/libqwtplot3d.dylib`
 `install_name_tool -change /usr/local/lib/QtGui.framework/Versions/4/QtGui @loader_path/../Frameworks/QtGui.framework/Versions/4/QtGui Contents/MacOS/libqwtplot3d.dylib`
@@ -165,18 +256,11 @@ end
 `cp /Library/Python/2.7/site-packages/pyparsing.py Contents/MacOS/`
 `cp /Library/Python/2.7/site-packages/pyparsing.pyc Contents/MacOS/`
 `cp -r /Library/Python/2.7/site-packages/_markerlib/ Contents/MacOS/`
-`cp -r /Library/Python/2.7/site-packages/backports Contents/MacOS/`
-`cp -r /Library/Python/2.7/site-packages/certifi Contents/MacOS/`
-`cp -r /Library/Python/2.7/site-packages/tornado Contents/MacOS/`
 `cp -r /Library/Python/2.7/site-packages/markupsafe Contents/MacOS/`
 `cp -r /Library/Python/2.7/site-packages/jinja2 Contents/MacOS/`
-`cp -r /usr/local/lib/python2.7/site-packages/nxs Contents/MacOS/`
-`cp -r /Library/Python/2.7/site-packages/psutil Contents/MacOS/`
+`rsync -rv --exclude=.pyc /usr/local/lib/python2.7/site-packages/nxs Contents/MacOS/`
 `mkdir Contents/MacOS/bin`
 `cp /usr/local/bin/ipython Contents/MacOS/bin/`
-
-# current .pyc files have permissions issues. These files are recreated by CPack.
-`rm Contents/MacOS/nxs/*.pyc`
 
 #Lastly check for any libraries in the package linking against homebrew libraries.
 search_patterns.each do |pattern|
@@ -184,7 +268,10 @@ search_patterns.each do |pattern|
     dependencies = `otool -L #{library}`
     dependencies.split("\n").each do |dependency|
       if dependency.include? "/usr/local/"
-         p "issue with library: #{library} linked against: #{dependency}"
+        p "issue with library: #{library} linked against: #{dependency}"
+      end
+      if dependency.include? "#{ParaView_dir}"
+        p "issue with library: #{library} linking against: #{dependency}"
       end
     end
   end
