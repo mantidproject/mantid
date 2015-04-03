@@ -70,14 +70,14 @@ public:
 
 protected:
   /// Use the helper for these operations
-  std::istream &httpGet(const std::string &path,
+  virtual std::istream &httpGet(const std::string &path,
                         const std::string &query_str = "",
                         const std::string &username = "",
                         const std::string &password = "") const {
     return m_helper.httpGet(path, query_str, username, password);
   }
 
-  std::istream &
+  virtual std::istream &
   httpPost(const std::string &path,
            const MantidWebServiceAPIHelper::PostDataMap &postData,
            const MantidWebServiceAPIHelper::PostDataMap &fileData =
@@ -87,7 +87,7 @@ protected:
     return m_helper.httpPost(path, postData, fileData, username, password);
   }
 
-  Poco::Net::HTTPResponse::HTTPStatus lastStatus() const {
+  virtual Poco::Net::HTTPResponse::HTTPStatus lastStatus() const {
     return m_helper.lastStatus();
   }
 

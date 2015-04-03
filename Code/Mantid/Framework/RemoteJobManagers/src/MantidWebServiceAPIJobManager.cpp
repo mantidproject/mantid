@@ -30,7 +30,6 @@ using namespace Mantid::Kernel;
 void MantidWebServiceAPIJobManager::abortRemoteJob(const std::string &jobID) {
   std::istream &respStream =
     httpGet("/abort", std::string("JobID=") + jobID);
-
   if (lastStatus() != Poco::Net::HTTPResponse::HTTP_OK) {
     JSONObject resp;
     initFromStream(resp, respStream);
