@@ -31,6 +31,9 @@ SECRET=${2}
 SLAVE_AGENT_URL="${JENKINS_URL}/computer/${NODE_NAME}/slave-agent.jnlp"
 # name of the slave jar - full path is determined later
 JAR_FILE=slave.jar
+# Some versions of cron don't set the USER environment variable
+# required by vnc
+[ -z "$USER" ] && export USER=$(whoami)
 
 #####################################################################
 # Script
