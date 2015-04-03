@@ -54,9 +54,14 @@ using namespace Mantid::Kernel;
 void LSFJobManager::abortRemoteJob(const std::string &jobID) {
   if (m_tokenStash.empty()) {
     throw std::runtime_error(
-        "Job status query failed. You do not seem to have logged "
+        "Abort job failed because you do not seem to have logged "
         "in.");
   }
+  if (jobID.empty()) {
+    throw std::runtime_error(
+        "Abort job failed because an empty job ID was given.");
+  }
+
   // only support for single-user
   Token tok = m_tokenStash.begin()->second;
   const std::string killPath = g_killPathBase + jobID;
@@ -81,7 +86,7 @@ void LSFJobManager::abortRemoteJob(const std::string &jobID) {
   if (Mantid::Kernel::InternetHelper::HTTP_OK == code) {
     std::string resp = ss.str();
     if (std::string::npos != resp.find("<errMsg>")) {
-      g_log.warning() << "Killed job with Id" << jobID
+      g_log.warning() << "Killed job with Id " << jobID
                       << " but got what looks like an "
                          "error message as response: " << extractPACErrMsg(resp)
                       << std::endl;
@@ -321,6 +326,11 @@ LSFJobManager::queryRemoteJob(const std::string &jobID) const {
         "Job status query failed. You do not seem to have logged "
         "in.");
   }
+  if (jobID.empty()) {
+    throw std::runtime_error(
+        "Job status failed because an empty job ID was given.");
+  }
+
   // only support for single-user
   Token tok = m_tokenStash.begin()->second;
 
@@ -659,6 +669,7 @@ void LSFJobManager::uploadRemoteFile(const std::string &transactionID,
  * @param headers HTTP headers given as key-value pairs
  * @param method By default GET (Poco::Net::HTTPRequest::HTTP_POST), also
  * accepts POST (Poco::Net::HTTPRequest::HTTP_POST)
+ *
  * @param body HTTP message body
  *
  * @return HTTP(S) response code

@@ -283,7 +283,58 @@ public:
                       std::runtime_error);
   }
 
-  void test_missingOrWrongParamsFakeLogin() {}
+  void test_missingOrWrongParamsFakeLogin() {
+    goodUsername = "foo_user";
+    goodPassword = "foo_password";
+
+    // with this mock login succeeds, and otherwise the response corresponds to
+    // a job status query by id
+    MockedGoodJobStatus_SCARFLSFJM jm("job_id001", "job_name");
+    TSM_ASSERT_THROWS_NOTHING("successful authentication should not throw",
+                              jm.authenticate(goodUsername, goodPassword));
+
+    TSM_ASSERT_THROWS("abort job without job ID should throw",
+                      jm.abortRemoteJob(""), std::runtime_error);
+    TSM_ASSERT_THROWS_NOTHING(
+        "abort job with wrong job ID should not throw but show a warning",
+        jm.abortRemoteJob("anything_wrong"));
+
+    TSM_ASSERT_THROWS("download with wrong transaction ID should throw",
+                      jm.downloadRemoteFile("any_wrong_transID", "remote_fname",
+                                            "local_fname"),
+                      std::invalid_argument);
+
+    std::vector<std::string> files;
+    TSM_ASSERT_THROWS(
+        "query remote files with wrong transaction ID should throw",
+        files = jm.queryRemoteFile("any_wrong_transID"), std::invalid_argument);
+    TSM_ASSERT_EQUALS("The file list for a wrong transaction should be empty",
+                      files.size(), 0);
+
+    IRemoteJobManager::RemoteJobInfo info;
+    TSM_ASSERT_THROWS("query job info should throw for wrong job ID",
+                      info = jm.queryRemoteJob("any_wrong_jobID"),
+                      std::runtime_error);
+
+    TSM_ASSERT_THROWS(
+        "stop transaction when logged in, but with wrong transaction ID, "
+        "should throw",
+        jm.stopRemoteTransaction("a_wrong_transID"), std::invalid_argument);
+
+    std::string id;
+    std::string jobID;
+    TSM_ASSERT_THROWS(
+        "submit job when logged in, with a wrong transaction ID, should throw",
+        id = jm.submitRemoteJob("a_wrong_transID", "executable", "--params 0",
+                                "name_for_job"),
+        std::invalid_argument);
+    TSM_ASSERT_EQUALS("failed submit job should not return any ID", jobID, "");
+
+    TSM_ASSERT_THROWS(
+        "upload file when logged in, with a wrong transaction ID, should throw",
+        jm.uploadRemoteFile("wrong_transID", "remote_fname", "local_fname"),
+        std::invalid_argument);
+  }
 
   /// Login is required before running any other command with SCARF (except
   /// ping)
