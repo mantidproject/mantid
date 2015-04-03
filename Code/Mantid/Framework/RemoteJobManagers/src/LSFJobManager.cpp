@@ -15,6 +15,7 @@
 #include <Poco/DOM/Element.h>
 #include <Poco/DOM/NodeList.h>
 #include <Poco/Net/HTTPRequest.h>
+#include <Poco/Path.h>
 #include <Poco/StreamCopier.h>
 
 namespace Mantid {
@@ -69,11 +70,8 @@ void LSFJobManager::abortRemoteJob(const std::string &jobID) {
   const std::string token = tok.m_token_str;
 
   std::string httpsURL = baseURL + killPath;
-  StringToStringMap headers;
-  headers.insert(
-      std::pair<std::string, std::string>("Content-Type", "application/xml"));
-  headers.insert(std::make_pair("Cookie", token));
-  headers.insert(std::make_pair("Accept", g_acceptType));
+  StringToStringMap headers =
+      makeHeaders(std::string("application/xml"), token, g_acceptType);
   int code = 0;
   std::stringstream ss;
   try {
@@ -122,7 +120,8 @@ void LSFJobManager::abortRemoteJob(const std::string &jobID) {
 void LSFJobManager::downloadRemoteFile(const std::string &transactionID,
                                        const std::string &remoteFileName,
                                        const std::string &localFileName) {
-  if (!findTransaction(transactionID))
+  auto it = m_transactions.find(transactionID);
+  if (m_transactions.end() == it)
     throw std::invalid_argument("Could not find a transaction with ID: " +
                                 transactionID);
 
@@ -131,9 +130,8 @@ void LSFJobManager::downloadRemoteFile(const std::string &transactionID,
         "File download failed. You do not seem to have logged in.");
   }
 
-  std::vector<std::string> jobIDs =
-      m_transactions.find(transactionID)->second.jobIDs;
-  if (jobIDs.size() <= 0) {
+  std::vector<std::string> jobIDs = it->second.jobIDs;
+  if (jobIDs.empty()) {
     throw std::runtime_error("There are no jobs in this transaction and this "
                              "job manager cannot download files when no jobs "
                              "have been submitted within a transaction.");
@@ -178,11 +176,8 @@ LSFJobManager::queryAllRemoteJobs() const {
   const std::string token = tok.m_token_str;
 
   std::string httpsURL = baseURL + g_allJobsStatusPath;
-  StringToStringMap headers;
-  headers.insert(
-      std::pair<std::string, std::string>("Content-Type", "application/xml"));
-  headers.insert(std::make_pair("Accept", g_acceptType));
-  headers.insert(std::make_pair("Cookie", token));
+  StringToStringMap headers =
+      makeHeaders(std::string("application/xml"), token, g_acceptType);
   int code = 0;
   std::stringstream ss;
   try {
@@ -231,7 +226,8 @@ LSFJobManager::queryAllRemoteJobs() const {
  */
 std::vector<std::string>
 LSFJobManager::queryRemoteFile(const std::string &transactionID) const {
-  if (!findTransaction(transactionID))
+  auto it = m_transactions.find(transactionID);
+  if (m_transactions.end() == it)
     throw std::invalid_argument("Could not find a transaction with ID: " +
                                 transactionID);
   if (m_tokenStash.empty()) {
@@ -241,9 +237,8 @@ LSFJobManager::queryRemoteFile(const std::string &transactionID) const {
   // only support for single-user
   Token tok = m_tokenStash.begin()->second;
 
-  std::vector<std::string> jobIDs =
-      m_transactions.find(transactionID)->second.jobIDs;
-  if (jobIDs.size() <= 0) {
+  std::vector<std::string> jobIDs = it->second.jobIDs;
+  if (jobIDs.empty()) {
     throw std::runtime_error("There are no jobs in this transaction and this "
                              "job manager cannot query files when no jobs "
                              "have been submitted within a transaction.");
@@ -260,11 +255,8 @@ LSFJobManager::queryRemoteFile(const std::string &transactionID) const {
   const std::string token = tok.m_token_str;
 
   std::string httpsURL = baseURL + downloadPath;
-  StringToStringMap headers;
-  headers.insert(
-      std::pair<std::string, std::string>("Content-Type", "application/xml"));
-  headers.insert(std::pair<std::string, std::string>("Cookie", token));
-  headers.insert(std::pair<std::string, std::string>("Accept", g_acceptType));
+  StringToStringMap headers =
+      makeHeaders(std::string("application/xml"), token, g_acceptType);
   int code = 0;
   std::stringstream ss;
   try {
@@ -341,11 +333,8 @@ LSFJobManager::queryRemoteJob(const std::string &jobID) const {
   const std::string token = tok.m_token_str;
 
   std::string httpsURL = baseURL + g_jobIdStatusPath;
-  StringToStringMap headers;
-  headers.insert(
-      std::pair<std::string, std::string>("Content-Type", "application/xml"));
-  headers.insert(std::pair<std::string, std::string>("Accept", g_acceptType));
-  headers.insert(std::pair<std::string, std::string>("Cookie", token));
+  StringToStringMap headers =
+      makeHeaders(std::string("application/xml"), token, g_acceptType);
   int code = 0;
   std::stringstream ss;
   try {
@@ -537,11 +526,8 @@ std::string LSFJobManager::submitRemoteJob(const std::string &transactionID,
   const std::string token = tok.m_token_str;
 
   std::string httpsURL = baseURL + g_submitPath;
-  StringToStringMap headers;
-  headers.insert(std::pair<std::string, std::string>(
-      "Content-Type", "multipart/mixed; boundary=" + boundary));
-  headers.insert(std::pair<std::string, std::string>("Accept", g_acceptType));
-  headers.insert(std::pair<std::string, std::string>("Cookie", token));
+  StringToStringMap headers =
+      makeHeaders("multipart/mixed; boundary=" + boundary, token, g_acceptType);
   int code = 0;
   std::stringstream ss;
   try {
@@ -631,11 +617,8 @@ void LSFJobManager::uploadRemoteFile(const std::string &transactionID,
 
   InternetHelper session;
   std::string httpsURL = baseURL + g_uploadPath;
-  StringToStringMap headers;
-  headers.insert(std::pair<std::string, std::string>(
-      "Content-Type", "multipart/mixed; boundary=" + boundary));
-  headers.insert(std::pair<std::string, std::string>("Accept", g_acceptType));
-  headers.insert(std::pair<std::string, std::string>("Cookie", token));
+  StringToStringMap headers =
+      makeHeaders("multipart/mixed; boundary=" + boundary, token, g_acceptType);
 
   const std::string &body =
       buildUploadBody(boundary, remoteFileName, localFileName);
@@ -969,11 +952,11 @@ std::string LSFJobManager::buildSubmitBody(
 std::string LSFJobManager::buildUploadBody(const std::string &boundary,
                                            const std::string &destDir,
                                            const std::string &filename) {
-  // build file name as given in the request body
-  std::string upName = filename;
-  std::replace(upName.begin(), upName.end(), '\\', '/');
+  // build file name as given in the request body. Note that this is
+  // not building a path on the local OS / filesystem, but for the
+  // remote compute resource. Platform LSF implies a Unix filesystem.
   // discard up to last / (path)
-  upName = upName.substr(upName.rfind("/") + 1);
+  std::string upName = Poco::Path(filename).getFileName();
 
   // BLOCK: start and encode destination directory like this:
   // --4k89ogja023oh1-gkdfk903jf9wngmujfs95m
@@ -1023,9 +1006,11 @@ std::string LSFJobManager::buildUploadBody(const std::string &boundary,
 const std::string
 LSFJobManager::checkDownloadOutputFile(const std::string &localPath,
                                        const std::string &fname) const {
-  std::string outName = localPath + "/" + fname;
-  Poco::File f(outName);
+  Poco::Path path = localPath;
+  path.append(fname);
+  Poco::File f(path);
   if (f.exists()) {
+    std::string outName = path.toString();
     if (f.canWrite()) {
       g_log.notice() << "Overwriting output file: " << outName << std::endl;
     } else {
@@ -1052,7 +1037,7 @@ LSFJobManager::checkDownloadOutputFile(const std::string &localPath,
  * string if fails.
  */
 const std::string
-LSFJobManager::filterPACFilename(const std::string PACName) const {
+LSFJobManager::filterPACFilename(const std::string &PACName) const {
   // discard up to last / (path)
   std::string name = PACName.substr(PACName.rfind("/") + 1);
   // remove trailing parameters
@@ -1088,11 +1073,8 @@ void LSFJobManager::getOneJobFile(const std::string &jobId,
 
   std::string httpsURL = baseURL + downloadOnePath;
 
-  StringToStringMap headers;
-  headers.insert(
-      std::pair<std::string, std::string>("Content-Type", "application/xml"));
-  headers.insert(std::pair<std::string, std::string>("Cookie", token));
-  headers.insert(std::pair<std::string, std::string>("Accept", g_acceptType));
+  StringToStringMap headers =
+      makeHeaders(std::string("application/xml"), token, g_acceptType);
   std::string body = remotePath;
   int code = 0;
   std::stringstream ss;
@@ -1160,11 +1142,8 @@ void LSFJobManager::getAllJobFiles(const std::string &jobId,
   const std::string token = t.m_token_str;
 
   std::string httpsURL = baseURL + downloadPath;
-  StringToStringMap headers;
-  headers.insert(
-      std::pair<std::string, std::string>("Content-Type", "application/xml"));
-  headers.insert(std::pair<std::string, std::string>("Cookie", token));
-  headers.insert(std::pair<std::string, std::string>("Accept", g_acceptType));
+  StringToStringMap headers =
+      makeHeaders(std::string("application/xml"), token, g_acceptType);
   int code = 0;
   std::stringstream ss;
   try {
@@ -1233,6 +1212,38 @@ std::string LSFJobManager::extractPACErrMsg(const std::string &response) const {
   boost::replace_all(msg, "&gt;", ">");
 
   return msg;
+}
+
+/**
+ * Helper to add frequent headers to the headers map before sending
+ * HTTP requests
+ *
+ * @param contentType Type of content string, like "application/xml"
+ * or "multipart/mixed; boundary=...", as a string, as it will go in
+ * the HTTP header
+ *
+ * @param token Value for the "Cookie" header (authentication token),
+ * as a string, as it will go in the HTTP header
+ *
+ * @param acceptType Accept-Type value as a string, as it will go in
+ * the HTTP header
+ *
+ * @return headers an HTTP headers object (supposedly being
+ * constructed before submitting a request). You might want to add
+ * more haders after this.
+ */
+LSFJobManager::StringToStringMap
+LSFJobManager::makeHeaders(const std::string &contentType,
+                           const std::string &token,
+                           const std::string &acceptType) const {
+
+  StringToStringMap headers;
+  headers.insert(
+      std::pair<std::string, std::string>("Content-Type", contentType));
+  headers.insert(std::make_pair("Cookie", token));
+  headers.insert(std::make_pair("Accept", acceptType));
+
+  return headers;
 }
 
 /**
