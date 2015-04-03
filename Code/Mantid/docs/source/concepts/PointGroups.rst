@@ -108,7 +108,9 @@ The script prints the transformed coordinates:
 .. testoutput :: ExSymmetryOperationPoint
 
     Transformed coordinates: [-0.1,0.3,0.5]
-    
+
+Please note that in case of hexagonal or trigonal point groups, it is best to provide the often occuring values 1/3 and 2/3 actually as ``1./3.`` instead of ``0.33333``, as there may be problems with floating point precision in those cases.
+
 Sometimes it is easier to think about symmetry in terms of the elements that cause certain symmetry. These are commonly described with Herrman-Mauguin symbols. A symmetry element can be derived from the matrix/vector pair that described the symmetry operation, according to the International Tables for Crystallography A, section 11.2. Expanding a bit on the above example, it's possible to get information about the symmetry element associated to the operation ``x,y,-z``:
 
 .. testcode :: ExSymmetryElement

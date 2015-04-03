@@ -44,7 +44,9 @@ Group &Group::operator=(const Group &other) {
 size_t Group::order() const { return m_allOperations.size(); }
 
 /// Returns the axis system of the group (either orthogonal or hexagonal).
-Group::CoordinateSystem Group::getCoordinateSystem() const { return m_axisSystem; }
+Group::CoordinateSystem Group::getCoordinateSystem() const {
+  return m_axisSystem;
+}
 
 /// Returns a vector with all symmetry operations.
 std::vector<SymmetryOperation> Group::getSymmetryOperations() const {
@@ -84,7 +86,7 @@ std::vector<Kernel::V3D> Group::operator*(const Kernel::V3D &vector) const {
     result.push_back(Geometry::getWrappedVector((*op) * vector));
   }
 
-  std::sort(result.begin(), result.end());
+  std::sort(result.begin(), result.end(), FuzzyV3DLessThan());
   result.erase(std::unique(result.begin(), result.end()), result.end());
 
   return result;
