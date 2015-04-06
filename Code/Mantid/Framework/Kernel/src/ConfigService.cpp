@@ -1998,6 +1998,11 @@ bool ConfigServiceImpl::quickParaViewCheck() const {
     return false;
   }
 
+//If bundled, the correct version of paraview should always be present.
+#ifdef BUNDLE_PARAVIEW
+    return true;
+//Otherwise, perform runtime checks.
+#else
   g_log.debug("Checking for ParaView");
   bool isAvailable = false;
 
@@ -2046,6 +2051,7 @@ bool ConfigServiceImpl::quickParaViewCheck() const {
     g_log.information("ParaView is not available");
   }
   return isAvailable;
+#endif
 }
 
 /*

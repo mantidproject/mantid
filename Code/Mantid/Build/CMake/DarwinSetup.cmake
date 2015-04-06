@@ -109,17 +109,20 @@ set ( INBUNDLE MantidPlot.app/ )
 
 # We know exactly where this has to be on Darwin, but separate whether we have
 # kit build or a regular build.
-if ( ENABLE_CPACK )
+if ( ENABLE_CPACK AND MAKE_VATES )
   set ( PARAVIEW_APP_DIR "/Applications/${OSX_PARAVIEW_APP}" )
   set ( PARAVIEW_APP_BIN_DIR "${PARAVIEW_APP_DIR}/Contents/MacOS" )
   set ( PARAVIEW_APP_LIB_DIR "${PARAVIEW_APP_DIR}/Contents/Libraries" )
   set ( PARAVIEW_APP_PLUGIN_DIR "${PARAVIEW_APP_DIR}/Contents/Plugins" )
-else ( ENABLE_CPACK )
+  set ( BUNDLE_PARAVIEW "TRUE")
+  add_definitions(-DBUNDLE_PARAVIEW)
+else ()
+  set ( BUNDLE_PARAVIEW "FALSE")
   set ( PARAVIEW_APP_DIR "${ParaView_DIR}" )
   set ( PARAVIEW_APP_BIN_DIR "${PARAVIEW_APP_DIR}/bin" )
   set ( PARAVIEW_APP_LIB_DIR "${PARAVIEW_APP_DIR}/lib" )
   set ( PARAVIEW_APP_PLUGIN_DIR "${PARAVIEW_APP_DIR}/lib" )
-endif ( ENABLE_CPACK )
+endif ()
 
 set ( BIN_DIR MantidPlot.app/Contents/MacOS )
 set ( LIB_DIR MantidPlot.app/Contents/MacOS )

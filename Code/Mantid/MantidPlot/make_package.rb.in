@@ -102,7 +102,7 @@ vatesfiles.each do |file|
   end
 end
 
-`install_name_tool -add_rpath @loader_path/../Libraries/ pvplugins/libMantidVatesSimpleGuiViewWidgets.dylib`
+`install_name_tool -add_rpath @loader_path/../Contents/Libraries pvplugins/libMantidVatesSimpleGuiViewWidgets.dylib`
 dependencies = `otool -L pvplugins/libMantidVatesSimpleGuiViewWidgets.dylib`
 dependencies.split("\n").each do |dependency|
     currentname = dependency.strip.split(" ")
@@ -118,7 +118,7 @@ dependencies.split("\n").each do |dependency|
 end
 
 Dir["pvplugins/pvplugins/*.dylib"].each do |library|
-    `install_name_tool -add_rpath @loader_path/../../Libraries/ #{library}`
+    `install_name_tool -add_rpath @loader_path/../../Contents/Libraries/ #{library}`
     dependencies = `otool -L #{library}`
     dependencies.split("\n").each do |dependency|
         currentname = dependency.strip.split(" ")
