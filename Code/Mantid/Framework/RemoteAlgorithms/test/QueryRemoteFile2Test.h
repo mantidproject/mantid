@@ -1,38 +1,40 @@
-#ifndef MANTID_REMOTEALGORITHMS_ABORTREMOTEJOBTEST_H_
-#define MANTID_REMOTEALGORITHMS_ABORTREMOTEJOBTEST_H_
+#ifndef MANTID_REMOTEALGORITHMS_QUERYREMOTEFILE2TEST_H_
+#define MANTID_REMOTEALGORITHMS_QUERYREMOTEFILE2TEST_H_
 
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"
-#include "MantidRemoteAlgorithms/AbortRemoteJob.h"
+#include "MantidRemoteAlgorithms/QueryRemoteFile2.h"
 
 using namespace Mantid::RemoteAlgorithms;
 
-class AbortRemoteJobTest : public CxxTest::TestSuite {
+class QueryRemoteFile2Test : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static AbortRemoteJobTest *createSuite() { return new AbortRemoteJobTest(); }
-  static void destroySuite(AbortRemoteJobTest *suite) { delete suite; }
+  static QueryRemoteFile2Test *createSuite() {
+    return new QueryRemoteFile2Test();
+  }
+  static void destroySuite(QueryRemoteFile2Test *suite) { delete suite; }
 
   void test_algorithm() {
     testAlg = Mantid::API::AlgorithmManager::Instance().create(
-        "AbortRemoteJob", 1);
+        "QueryRemoteFile" /*, 2*/);
     TS_ASSERT(testAlg);
-    TS_ASSERT_EQUALS(testAlg->name(), "AbortRemoteJob");
-    TS_ASSERT_EQUALS(testAlg->version(), 1);
+    TS_ASSERT_EQUALS(testAlg->name(), "QueryRemoteFile");
+    TS_ASSERT_EQUALS(testAlg->version(), 2);
   }
 
   void test_castAlgorithm() {
     // can create
-    boost::shared_ptr<AbortRemoteJob> a;
-    TS_ASSERT(a = boost::make_shared<AbortRemoteJob>());
-    // can cast to inherited interfaces and base classes
+    boost::shared_ptr<QueryRemoteFile2> a;
+    TS_ASSERT(a = boost::make_shared<QueryRemoteFile2>());
 
+    // can cast to inherited interfaces and base classes
     TS_ASSERT(
-        dynamic_cast<Mantid::RemoteAlgorithms::AbortRemoteJob *>(a.get()));
+        dynamic_cast<Mantid::RemoteAlgorithms::QueryRemoteFile2 *>(a.get()));
     TS_ASSERT(dynamic_cast<Mantid::API::Algorithm *>(a.get()));
     TS_ASSERT(dynamic_cast<Mantid::Kernel::PropertyManagerOwner *>(a.get()));
     TS_ASSERT(dynamic_cast<Mantid::API::IAlgorithm *>(a.get()));
@@ -45,49 +47,42 @@ public:
 
     TS_ASSERT(testAlg->isInitialized());
 
-    AbortRemoteJob auth;
-    TS_ASSERT_THROWS_NOTHING(auth.initialize());
+    QueryRemoteFile2 qrf;
+    TS_ASSERT_THROWS_NOTHING(qrf.initialize());
   }
 
   // TODO: when we have a RemoteJobManager capable of creating
   // algorithms for different types of compute resources (example:
   // Fermi@SNS and SCARF@STFC), create different algorithms for them
   void test_propertiesMissing() {
-    AbortRemoteJob alg1;
+    QueryRemoteFile2 alg1;
     TS_ASSERT_THROWS_NOTHING(alg1.initialize());
-    // id missing
+    // Transaction id missing
     TS_ASSERT_THROWS(alg1.setPropertyValue("ComputeResource", "missing!"),
                      std::invalid_argument);
 
     TS_ASSERT_THROWS(alg1.execute(), std::runtime_error);
     TS_ASSERT(!alg1.isExecuted());
 
-    AbortRemoteJob alg3;
-    TS_ASSERT_THROWS_NOTHING(alg3.initialize());
+    QueryRemoteFile2 alg2;
+    TS_ASSERT_THROWS_NOTHING(alg2.initialize());
     // compute resource missing
-    TS_ASSERT_THROWS_NOTHING(alg1.setPropertyValue("JobID", "john_missing"));
+    TS_ASSERT_THROWS_NOTHING(
+        alg2.setPropertyValue("TransactionID", "trans0001"));
 
-    TS_ASSERT_THROWS(alg3.execute(), std::runtime_error);
-    TS_ASSERT(!alg3.isExecuted());
+    TS_ASSERT_THROWS(alg2.execute(), std::runtime_error);
+    TS_ASSERT(!alg2.isExecuted());
   }
 
   void test_wrongProperty() {
-    AbortRemoteJob ab;
-    TS_ASSERT_THROWS_NOTHING(ab.initialize();)
-    TS_ASSERT_THROWS(ab.setPropertyValue("ComputeRes", "anything"),
+    QueryRemoteFile2 qrf;
+    TS_ASSERT_THROWS_NOTHING(qrf.initialize();)
+    TS_ASSERT_THROWS(qrf.setPropertyValue("Compute", "anything"),
                      std::runtime_error);
-    TS_ASSERT_THROWS(ab.setPropertyValue("username", "anything"),
+    TS_ASSERT_THROWS(qrf.setPropertyValue("TransID", "anything"),
                      std::runtime_error);
-    TS_ASSERT_THROWS(ab.setPropertyValue("sername", "anything"),
+    TS_ASSERT_THROWS(qrf.setPropertyValue("ComputeResourc", "anything"),
                      std::runtime_error);
-  }
-
-  void test_wrongResource() {
-    AbortRemoteJob ab;
-    TS_ASSERT_THROWS_NOTHING(ab.initialize());
-    // the compute resource given  does not exist:
-    TS_ASSERT_THROWS(ab.setPropertyValue("ComputeResource", "missing c r!"),
-                     std::invalid_argument);
   }
 
   void test_propertiesOK() {
@@ -101,15 +96,16 @@ public:
       const std::string compName = testFacilities[fi].second;
 
       Mantid::Kernel::ConfigService::Instance().setFacility(facName);
-      AbortRemoteJob ab;
-      TS_ASSERT_THROWS_NOTHING(ab.initialize());
+      QueryRemoteFile2 qrf;
+      TS_ASSERT_THROWS_NOTHING(qrf.initialize());
       TS_ASSERT_THROWS_NOTHING(
-          ab.setPropertyValue("ComputeResource", compName));
-      TS_ASSERT_THROWS_NOTHING(ab.setPropertyValue("JobID", "000001"));
-      // TODO: this will run the algorithm and do a remote
+          qrf.setPropertyValue("ComputeResource", compName));
+      TS_ASSERT_THROWS_NOTHING(
+          qrf.setPropertyValue("TransactionID", "anything001"));
+      // TODO: this would run the algorithm and do a remote
       // connection. uncomment only when/if we have a mock up for this
-      // TS_ASSERT_THROWS(ab.execute(), std::exception);
-      TS_ASSERT(!ab.isExecuted());
+      // TS_ASSERT_THROWS(qrf.execute(), std::exception);
+      TS_ASSERT(!qrf.isExecuted());
     }
     Mantid::Kernel::ConfigService::Instance().setFacility(prevFac.name());
   }
@@ -123,4 +119,4 @@ private:
   std::vector<std::pair<std::string, std::string>> testFacilities;
 };
 
-#endif // MANTID_REMOTEALGORITHMS_ABORTREMOTEJOBTEST_H_
+#endif // MANTID_REMOTEALGORITHMS_QUERYREMOTEFILE2TEST_H_

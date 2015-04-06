@@ -1,38 +1,40 @@
-#ifndef MANTID_REMOTEALGORITHMS_ABORTREMOTEJOBTEST_H_
-#define MANTID_REMOTEALGORITHMS_ABORTREMOTEJOBTEST_H_
+#ifndef MANTID_REMOTEALGORITHMS_ABORTREMOTEJOB2TEST_H_
+#define MANTID_REMOTEALGORITHMS_ABORTREMOTEJOB2TEST_H_
 
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"
-#include "MantidRemoteAlgorithms/AbortRemoteJob.h"
+#include "MantidRemoteAlgorithms/AbortRemoteJob2.h"
 
 using namespace Mantid::RemoteAlgorithms;
 
-class AbortRemoteJobTest : public CxxTest::TestSuite {
+class AbortRemoteJob2Test : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static AbortRemoteJobTest *createSuite() { return new AbortRemoteJobTest(); }
-  static void destroySuite(AbortRemoteJobTest *suite) { delete suite; }
+  static AbortRemoteJob2Test *createSuite() {
+    return new AbortRemoteJob2Test();
+  }
+  static void destroySuite(AbortRemoteJob2Test *suite) { delete suite; }
 
   void test_algorithm() {
-    testAlg = Mantid::API::AlgorithmManager::Instance().create(
-        "AbortRemoteJob", 1);
+    testAlg = Mantid::API::AlgorithmManager::Instance().create("AbortRemoteJob"
+                                                               /*, 2*/);
     TS_ASSERT(testAlg);
     TS_ASSERT_EQUALS(testAlg->name(), "AbortRemoteJob");
-    TS_ASSERT_EQUALS(testAlg->version(), 1);
+    TS_ASSERT_EQUALS(testAlg->version(), 2);
   }
 
   void test_castAlgorithm() {
     // can create
-    boost::shared_ptr<AbortRemoteJob> a;
-    TS_ASSERT(a = boost::make_shared<AbortRemoteJob>());
+    boost::shared_ptr<AbortRemoteJob2> a;
+    TS_ASSERT(a = boost::make_shared<AbortRemoteJob2>());
     // can cast to inherited interfaces and base classes
 
     TS_ASSERT(
-        dynamic_cast<Mantid::RemoteAlgorithms::AbortRemoteJob *>(a.get()));
+        dynamic_cast<Mantid::RemoteAlgorithms::AbortRemoteJob2 *>(a.get()));
     TS_ASSERT(dynamic_cast<Mantid::API::Algorithm *>(a.get()));
     TS_ASSERT(dynamic_cast<Mantid::Kernel::PropertyManagerOwner *>(a.get()));
     TS_ASSERT(dynamic_cast<Mantid::API::IAlgorithm *>(a.get()));
@@ -45,7 +47,7 @@ public:
 
     TS_ASSERT(testAlg->isInitialized());
 
-    AbortRemoteJob auth;
+    AbortRemoteJob2 auth;
     TS_ASSERT_THROWS_NOTHING(auth.initialize());
   }
 
@@ -53,7 +55,7 @@ public:
   // algorithms for different types of compute resources (example:
   // Fermi@SNS and SCARF@STFC), create different algorithms for them
   void test_propertiesMissing() {
-    AbortRemoteJob alg1;
+    AbortRemoteJob2 alg1;
     TS_ASSERT_THROWS_NOTHING(alg1.initialize());
     // id missing
     TS_ASSERT_THROWS(alg1.setPropertyValue("ComputeResource", "missing!"),
@@ -62,7 +64,7 @@ public:
     TS_ASSERT_THROWS(alg1.execute(), std::runtime_error);
     TS_ASSERT(!alg1.isExecuted());
 
-    AbortRemoteJob alg3;
+    AbortRemoteJob2 alg3;
     TS_ASSERT_THROWS_NOTHING(alg3.initialize());
     // compute resource missing
     TS_ASSERT_THROWS_NOTHING(alg1.setPropertyValue("JobID", "john_missing"));
@@ -72,7 +74,7 @@ public:
   }
 
   void test_wrongProperty() {
-    AbortRemoteJob ab;
+    AbortRemoteJob2 ab;
     TS_ASSERT_THROWS_NOTHING(ab.initialize();)
     TS_ASSERT_THROWS(ab.setPropertyValue("ComputeRes", "anything"),
                      std::runtime_error);
@@ -83,7 +85,7 @@ public:
   }
 
   void test_wrongResource() {
-    AbortRemoteJob ab;
+    AbortRemoteJob2 ab;
     TS_ASSERT_THROWS_NOTHING(ab.initialize());
     // the compute resource given  does not exist:
     TS_ASSERT_THROWS(ab.setPropertyValue("ComputeResource", "missing c r!"),
@@ -101,7 +103,7 @@ public:
       const std::string compName = testFacilities[fi].second;
 
       Mantid::Kernel::ConfigService::Instance().setFacility(facName);
-      AbortRemoteJob ab;
+      AbortRemoteJob2 ab;
       TS_ASSERT_THROWS_NOTHING(ab.initialize());
       TS_ASSERT_THROWS_NOTHING(
           ab.setPropertyValue("ComputeResource", compName));
@@ -123,4 +125,4 @@ private:
   std::vector<std::pair<std::string, std::string>> testFacilities;
 };
 
-#endif // MANTID_REMOTEALGORITHMS_ABORTREMOTEJOBTEST_H_
+#endif // MANTID_REMOTEALGORITHMS_ABORTREMOTEJOB2TEST_H_
