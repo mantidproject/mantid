@@ -46,12 +46,13 @@ void SCARFLSFJobManager::authenticate(const std::string &username,
   m_tokenStash.clear();
   m_transactions.clear();
 
-  std::string httpsURL = g_loginBaseURL + g_loginPath + "?username=" +
-                         username + "&password=" + password;
+  const std::string params = "?username=" + username + "&password=" + password;
+  const Poco::URI fullURL =
+      makeFullURI(Poco::URI(g_loginBaseURL), g_loginPath, params);
   int code = 0;
   std::stringstream ss;
   try {
-    code = doSendRequestGetResponse(httpsURL, ss);
+    code = doSendRequestGetResponse(fullURL, ss);
   } catch (Kernel::Exception::InternetError &ie) {
     throw std::runtime_error("Error while sending HTTP request to authenticate "
                              "(log in): " +
@@ -99,14 +100,13 @@ void SCARFLSFJobManager::authenticate(const std::string &username,
 bool SCARFLSFJobManager::ping() {
   // Job ping, needs these headers:
   // headers = {'Content-Type': 'application/xml', 'Accept': ACCEPT_TYPE}
-  std::string httpsURL = g_pingBaseURL + g_pingPath;
-  StringToStringMap headers;
-  headers.insert(std::make_pair("Content-Type", "application/xml"));
-  headers.insert(std::make_pair("Accept", g_acceptType));
+  const Poco::URI fullURL = makeFullURI(Poco::URI(g_pingBaseURL), g_pingPath);
+  const StringToStringMap headers =
+      makeHeaders(std::string("text/plain"), "", g_acceptType);
   int code = 0;
   std::stringstream ss;
   try {
-    code = doSendRequestGetResponse(httpsURL, ss, headers);
+    code = doSendRequestGetResponse(fullURL, ss, headers);
   } catch (Kernel::Exception::InternetError &ie) {
     throw std::runtime_error("Error while sending HTTP request to ping the "
                              "server " +
@@ -126,7 +126,7 @@ bool SCARFLSFJobManager::ping() {
     }
   } else {
     throw std::runtime_error(
-        "Failed to ping the web service at:" + httpsURL +
+        "Failed to ping the web service at:" + fullURL.toString() +
         ". Please check your parameters, software version, "
         "etc.");
   }
@@ -165,19 +165,14 @@ void SCARFLSFJobManager::logout(const std::string &username) {
   // logout query, needs headers = {'Content-Type': 'text/plain', 'Cookie':
   // token,
   //    'Accept': 'text/plain,application/xml,text/xml'}
-  const std::string baseURL = tok.m_url;
   const std::string token = tok.m_token_str;
-
-  std::string httpsURL = baseURL + g_logoutPath;
-  StringToStringMap headers;
-  headers.insert(
-      std::pair<std::string, std::string>("Content-Type", "text/plain"));
-  headers.insert(std::make_pair("Cookie", token));
-  headers.insert(std::make_pair("Accept", g_acceptType));
+  const Poco::URI fullURL = makeFullURI(tok.m_url, g_logoutPath);
+  const StringToStringMap headers =
+      makeHeaders(std::string("text/plain"), token, g_acceptType);
   int code = 0;
   std::stringstream ss;
   try {
-    code = doSendRequestGetResponse(httpsURL, ss, headers);
+    code = doSendRequestGetResponse(fullURL, ss, headers);
   } catch (Kernel::Exception::InternetError &ie) {
     throw std::runtime_error("Error while sending HTTP request to log out: " +
                              std::string(ie.what()));
@@ -187,7 +182,8 @@ void SCARFLSFJobManager::logout(const std::string &username) {
     g_log.debug() << "Response from server: " << ss.str() << std::endl;
   } else {
     throw std::runtime_error("Failed to logout from the web service at: " +
-                             httpsURL + ". Please check your username.");
+                             fullURL.toString() +
+                             ". Please check your username.");
   }
 
   // successfully logged out, forget the token

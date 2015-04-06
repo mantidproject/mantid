@@ -5,6 +5,8 @@
 
 #include "MantidAPI/IRemoteJobManager.h"
 
+#include <Poco/URI.h>
+
 namespace Mantid {
 namespace RemoteJobManagers {
 /**
@@ -79,10 +81,19 @@ protected:
   /// method that deals with the actual HTTP(S) connection (convenient to
   /// mock up all inet messaging)
   virtual int doSendRequestGetResponse(
-      const std::string &url, std::ostream &response,
+      const Poco::URI &uri, std::ostream &response,
       const StringToStringMap &headers = StringToStringMap(),
       const std::string &method = std::string(),
       const std::string &body = "") const;
+
+  /// make a map of HTTP headers to prepare a request
+  StringToStringMap makeHeaders(const std::string &contentType = "",
+                                const std::string &token = "",
+                                const std::string &acceptType = "") const;
+
+  /// make a full URI by appending components/segments
+  Poco::URI makeFullURI(const Poco::URI &base, const std::string &path,
+                        const std::string &pathParam = "") const;
 
   /// has this transaction being started (and not stopped)?
   bool findTransaction(const std::string &id) const;
@@ -92,7 +103,7 @@ protected:
   struct Token {
     Token(const std::string &u, const std::string &t)
         : m_url(u), m_token_str(t){};
-    std::string m_url;
+    Poco::URI m_url;
     std::string m_token_str;
   };
 
@@ -162,7 +173,7 @@ private:
                               const std::string &destDir,
                               const std::string &filename);
 
-  const std::string filterPACFilename(const std::string PACName) const;
+  const std::string filterPACFilename(const std::string &PACName) const;
 
   std::string extractPACErrMsg(const std::string &response) const;
 };

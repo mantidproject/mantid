@@ -65,17 +65,15 @@ void LSFJobManager::abortRemoteJob(const std::string &jobID) {
 
   // only support for single-user
   Token tok = m_tokenStash.begin()->second;
-  const std::string killPath = g_killPathBase + jobID;
-  const std::string baseURL = tok.m_url;
-  const std::string token = tok.m_token_str;
 
-  std::string httpsURL = baseURL + killPath;
-  StringToStringMap headers =
+  const std::string token = tok.m_token_str;
+  const Poco::URI fullURL = makeFullURI(tok.m_url, g_killPathBase, jobID);
+  const StringToStringMap headers =
       makeHeaders(std::string("application/xml"), token, g_acceptType);
   int code = 0;
   std::stringstream ss;
   try {
-    code = doSendRequestGetResponse(httpsURL, ss, headers);
+    code = doSendRequestGetResponse(fullURL, ss, headers);
   } catch (Kernel::Exception::InternetError &ie) {
     throw std::runtime_error(
         "Error while sending HTTP request to cancel a job: " +
@@ -100,8 +98,8 @@ void LSFJobManager::abortRemoteJob(const std::string &jobID) {
     throw std::runtime_error(
         "Failed to kill job (Id: " + jobID + " ) through the web "
                                              "service at:" +
-        httpsURL + ". Please check your "
-                   "existing jobs, username, and parameters.");
+        fullURL.toString() + ". Please check your "
+                             "existing jobs, username, and parameters.");
   }
 }
 
@@ -172,16 +170,17 @@ LSFJobManager::queryAllRemoteJobs() const {
   // Job query status, needs these headers:
   // headers = {'Content-Type': 'application/xml', 'Cookie': token,
   //            'Accept': ACCEPT_TYPE}
-  const std::string baseURL = tok.m_url;
   const std::string token = tok.m_token_str;
 
-  std::string httpsURL = baseURL + g_allJobsStatusPath;
-  StringToStringMap headers =
+  // Note: Poco::URI will remove the trailing '?' that LSF in
+  // principle uses.  Beware of potential issues with this.
+  const Poco::URI fullURL = makeFullURI(tok.m_url, g_allJobsStatusPath);
+  const StringToStringMap headers =
       makeHeaders(std::string("application/xml"), token, g_acceptType);
   int code = 0;
   std::stringstream ss;
   try {
-    code = doSendRequestGetResponse(httpsURL, ss, headers);
+    code = doSendRequestGetResponse(fullURL, ss, headers);
   } catch (Kernel::Exception::InternetError &ie) {
     throw std::runtime_error(
         "Error while sending HTTP request to query the status "
@@ -208,8 +207,8 @@ LSFJobManager::queryAllRemoteJobs() const {
     throw std::runtime_error(
         "Failed to obtain job status information through the "
         "web service at:" +
-        httpsURL + ". Please check your "
-                   "username, credentials, and parameters.");
+        fullURL.toString() + ". Please check your "
+                             "username, credentials, and parameters.");
   }
 
   return info;
@@ -250,17 +249,16 @@ LSFJobManager::queryRemoteFile(const std::string &transactionID) const {
 
   // assume that the last job is what we want
   const std::string jobId = jobIDs.back();
-  const std::string downloadPath = g_downloadAllJobFilesBasePath + jobId;
-  const std::string baseURL = tok.m_url;
   const std::string token = tok.m_token_str;
 
-  std::string httpsURL = baseURL + downloadPath;
-  StringToStringMap headers =
+  const Poco::URI fullURL =
+      makeFullURI(tok.m_url, g_downloadAllJobFilesBasePath, jobId);
+  const StringToStringMap headers =
       makeHeaders(std::string("application/xml"), token, g_acceptType);
   int code = 0;
   std::stringstream ss;
   try {
-    code = doSendRequestGetResponse(httpsURL, ss, headers);
+    code = doSendRequestGetResponse(fullURL, ss, headers);
   } catch (Kernel::Exception::InternetError &ie) {
     throw std::runtime_error(
         "Error while sending HTTP request to download files: " +
@@ -295,8 +293,8 @@ LSFJobManager::queryRemoteFile(const std::string &transactionID) const {
         "Failed to get the list of downloadable files for job (Id:" + jobId +
         " ) through "
         "the web service at:" +
-        httpsURL + ". Please check your "
-                   "existing jobs, username, and parameters.");
+        fullURL.toString() + ". Please check your "
+                             "existing jobs, username, and parameters.");
   }
 
   return filePACNames;
@@ -329,16 +327,15 @@ LSFJobManager::queryRemoteJob(const std::string &jobID) const {
   // Job query status, needs these headers:
   // headers = {'Content-Type': 'application/xml', 'Cookie': token,
   //            'Accept': ACCEPT_TYPE}
-  const std::string baseURL = tok.m_url;
   const std::string token = tok.m_token_str;
 
-  std::string httpsURL = baseURL + g_jobIdStatusPath;
-  StringToStringMap headers =
+  const Poco::URI fullURL = makeFullURI(tok.m_url, g_jobIdStatusPath);
+  const StringToStringMap headers =
       makeHeaders(std::string("application/xml"), token, g_acceptType);
   int code = 0;
   std::stringstream ss;
   try {
-    code = doSendRequestGetResponse(httpsURL, ss, headers);
+    code = doSendRequestGetResponse(fullURL, ss, headers);
   } catch (Kernel::Exception::InternetError &ie) {
     throw std::runtime_error(
         "Error while sending HTTP request to query the status "
@@ -366,7 +363,7 @@ LSFJobManager::queryRemoteJob(const std::string &jobID) const {
     throw std::runtime_error("Failed to obtain job (Id:" + jobID +
                              " ) status "
                              "information through the web service at:" +
-                             httpsURL +
+                             fullURL.toString() +
                              ". Please check your username, credentials, and "
                              "parameters.");
   }
@@ -374,7 +371,7 @@ LSFJobManager::queryRemoteJob(const std::string &jobID) const {
     throw std::runtime_error(
         "There was an unexpected problem while retrieving status info for job "
         "with Id: " +
-        jobID + " through the web service at:" + httpsURL +
+        jobID + " through the web service at:" + fullURL.toString() +
         ". Please check your username, credentials, and parameters");
 
   return info.back();
@@ -522,16 +519,15 @@ std::string LSFJobManager::submitRemoteJob(const std::string &transactionID,
   //                 'Accept': 'text/xml,application/xml;', 'Cookie': token,
   //                 'Content-Length': str(len(body))}
   // Content-Length is added by InternetHelper/Poco HTTP request
-  const std::string baseURL = tok.m_url;
   const std::string token = tok.m_token_str;
 
-  std::string httpsURL = baseURL + g_submitPath;
-  StringToStringMap headers =
+  const Poco::URI fullURL = makeFullURI(tok.m_url, g_submitPath);
+  const StringToStringMap headers =
       makeHeaders("multipart/mixed; boundary=" + boundary, token, g_acceptType);
   int code = 0;
   std::stringstream ss;
   try {
-    code = doSendRequestGetResponse(httpsURL, ss, headers,
+    code = doSendRequestGetResponse(fullURL, ss, headers,
                                     Poco::Net::HTTPRequest::HTTP_POST, body);
   } catch (Kernel::Exception::InternetError &ie) {
     throw std::runtime_error(
@@ -559,7 +555,8 @@ std::string LSFJobManager::submitRemoteJob(const std::string &transactionID,
     }
   } else {
     throw std::runtime_error(
-        "Failed to submit a job through the web service at:" + httpsURL +
+        "Failed to submit a job through the web service at:" +
+        fullURL.toString() +
         ". Please check your username, credentials, and parameters.");
   }
 
@@ -612,12 +609,10 @@ void LSFJobManager::uploadRemoteFile(const std::string &transactionID,
   //                 'Content-Length': str(len(body))}
   // Content-Length is added by InternetHelper/Poco HTTP request
   const std::string boundary = "4k89ogja023oh1-gkdfk903jf9wngmujfs95m";
-  const std::string baseURL = tok.m_url;
   const std::string token = tok.m_token_str;
 
-  InternetHelper session;
-  std::string httpsURL = baseURL + g_uploadPath;
-  StringToStringMap headers =
+  const Poco::URI fullURL = makeFullURI(tok.m_url, g_uploadPath);
+  const StringToStringMap headers =
       makeHeaders("multipart/mixed; boundary=" + boundary, token, g_acceptType);
 
   const std::string &body =
@@ -625,7 +620,7 @@ void LSFJobManager::uploadRemoteFile(const std::string &transactionID,
   int code = 0;
   std::stringstream ss;
   try {
-    code = doSendRequestGetResponse(httpsURL, ss, headers,
+    code = doSendRequestGetResponse(fullURL, ss, headers,
                                     Poco::Net::HTTPRequest::HTTP_POST, body);
   } catch (Kernel::Exception::InternetError &ie) {
     throw std::runtime_error(
@@ -638,9 +633,9 @@ void LSFJobManager::uploadRemoteFile(const std::string &transactionID,
                    << std::endl;
   } else {
     throw std::runtime_error(
-        "Failed to upload file through the web service at:" + httpsURL +
-        ". Please check your username, credentials, "
-        "and parameters.");
+        "Failed to upload file through the web service at:" +
+        fullURL.toString() + ". Please check your username, credentials, "
+                             "and parameters.");
   }
 }
 
@@ -657,7 +652,7 @@ void LSFJobManager::uploadRemoteFile(const std::string &transactionID,
  *
  * @return HTTP(S) response code
  */
-int LSFJobManager::doSendRequestGetResponse(const std::string &url,
+int LSFJobManager::doSendRequestGetResponse(const Poco::URI &uri,
                                             std::ostream &rss,
                                             const StringToStringMap &headers,
                                             const std::string &method,
@@ -680,7 +675,7 @@ int LSFJobManager::doSendRequestGetResponse(const std::string &url,
       session.setMethod(method);
     }
   }
-  return session.sendRequest(url, rss);
+  return session.sendRequest(uri.toString(), rss);
 }
 
 /**
@@ -1067,19 +1062,16 @@ void LSFJobManager::getOneJobFile(const std::string &jobId,
   // headers = {'Content-Type': 'text/plain', 'Cookie': token, 'Accept':
   // ACCEPT_TYPE}
   // - and as request body the name of the file
-  const std::string downloadOnePath = g_downloadOneBasePath + jobId;
-  const std::string baseURL = t.m_url;
   const std::string token = t.m_token_str;
 
-  std::string httpsURL = baseURL + downloadOnePath;
-
-  StringToStringMap headers =
+  const Poco::URI fullURL = makeFullURI(t.m_url, g_downloadOneBasePath, jobId);
+  const StringToStringMap headers =
       makeHeaders(std::string("application/xml"), token, g_acceptType);
-  std::string body = remotePath;
+  const std::string body = remotePath;
   int code = 0;
   std::stringstream ss;
   try {
-    code = doSendRequestGetResponse(httpsURL, ss, headers,
+    code = doSendRequestGetResponse(fullURL, ss, headers,
                                     Poco::Net::HTTPRequest::HTTP_GET, body);
   } catch (Kernel::Exception::InternetError &ie) {
     throw std::runtime_error(
@@ -1114,7 +1106,7 @@ void LSFJobManager::getOneJobFile(const std::string &jobId,
   } else {
     throw std::runtime_error(
         "Failed to download a file for job Id:" + jobId +
-        " through the web service at:" + httpsURL +
+        " through the web service at:" + fullURL.toString() +
         ". Please "
         "check your existing jobs, username, and parameters.");
   }
@@ -1137,17 +1129,16 @@ void LSFJobManager::getAllJobFiles(const std::string &jobId,
   // Job download (multiple) files, needs these headers:
   // headers = {'Content-Type': 'text/plain', 'Cookie': token, 'Accept':
   // ACCEPT_TYPE}
-  const std::string downloadPath = g_downloadAllJobFilesBasePath + jobId;
-  const std::string baseURL = t.m_url;
   const std::string token = t.m_token_str;
 
-  std::string httpsURL = baseURL + downloadPath;
-  StringToStringMap headers =
+  const Poco::URI fullURL =
+      makeFullURI(t.m_url, g_downloadAllJobFilesBasePath, jobId);
+  const StringToStringMap headers =
       makeHeaders(std::string("application/xml"), token, g_acceptType);
   int code = 0;
   std::stringstream ss;
   try {
-    code = doSendRequestGetResponse(httpsURL, ss, headers);
+    code = doSendRequestGetResponse(fullURL, ss, headers);
   } catch (Kernel::Exception::InternetError &ie) {
     throw std::runtime_error(
         "Error while sending HTTP request to download files: " +
@@ -1180,8 +1171,8 @@ void LSFJobManager::getAllJobFiles(const std::string &jobId,
     throw std::runtime_error(
         "Failed to download job files (Id:" + jobId + " ) through "
                                                       "the web service at:" +
-        httpsURL + ". Please check your "
-                   "existing jobs, username, and parameters.");
+        fullURL.toString() + ". Please check your "
+                             "existing jobs, username, and parameters.");
   }
 }
 
@@ -1215,6 +1206,34 @@ std::string LSFJobManager::extractPACErrMsg(const std::string &response) const {
 }
 
 /**
+ * Construct a url by appending a base url (which usually is obtained
+ * when authenticating) and one or two additional path components.
+ *
+ * @param base base url (note this usually contains schema, authority
+ * and a partial path)
+ *
+ * @param path path to append to the base url to form a
+ * command/request specific url (to submit, cancel, etc.)
+ *
+ * @param additional component to append to the path. Its
+ * interpretation is usually an action specific parameger, for
+ * example: job ID of the job to cancel/kill.
+ *
+ * @return full URL ready to be used for a request to Platform LSF
+ */
+Poco::URI LSFJobManager::makeFullURI(const Poco::URI &base,
+                                     const std::string &path,
+                                     const std::string &pathParam) const {
+
+  // this could be done with Poco::URI::mergePath which is protected
+  if (pathParam.empty()) {
+    return Poco::URI(base.toString() + path);
+  } else {
+    return Poco::URI(base.toString() + path + pathParam);
+  }
+}
+
+/**
  * Helper to add frequent headers to the headers map before sending
  * HTTP requests
  *
@@ -1238,10 +1257,16 @@ LSFJobManager::makeHeaders(const std::string &contentType,
                            const std::string &acceptType) const {
 
   StringToStringMap headers;
-  headers.insert(
-      std::pair<std::string, std::string>("Content-Type", contentType));
-  headers.insert(std::make_pair("Cookie", token));
-  headers.insert(std::make_pair("Accept", acceptType));
+  if (!contentType.empty()) {
+    headers.insert(
+        std::pair<std::string, std::string>("Content-Type", contentType));
+  }
+  if (!token.empty()) {
+    headers.insert(std::make_pair("Cookie", token));
+  }
+  if (!acceptType.empty()) {
+    headers.insert(std::make_pair("Accept", acceptType));
+  }
 
   return headers;
 }

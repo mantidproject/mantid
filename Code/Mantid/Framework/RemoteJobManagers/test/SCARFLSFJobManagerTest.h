@@ -25,7 +25,7 @@ using namespace Mantid::RemoteJobManagers;
 class MockedSCARFLSFJM : public SCARFLSFJobManager {
 protected:
   virtual int doSendRequestGetResponse(
-      const std::string & /*url*/, std::ostream &response,
+      const Poco::URI & /*url*/, std::ostream &response,
       const StringToStringMap & /*headers*/ = StringToStringMap(),
       const std::string & /*method*/ = std::string(),
       const std::string & /*body*/ = "") const {
@@ -43,7 +43,7 @@ protected:
 class MockedErrorResponse_SCARFLSFJM : public SCARFLSFJobManager {
 protected:
   virtual int doSendRequestGetResponse(
-      const std::string & /*url*/, std::ostream &response,
+      const Poco::URI & /*url*/, std::ostream &response,
       const StringToStringMap & /*headers*/ = StringToStringMap(),
       const std::string & /*method*/ = std::string(),
       const std::string & /*body*/ = "") const {
@@ -61,7 +61,7 @@ protected:
 class MockedConnectionError_SCARFLSFJM : public SCARFLSFJobManager {
 protected:
   virtual int doSendRequestGetResponse(
-      const std::string & /*url*/, std::ostream & /*response*/,
+      const Poco::URI & /*url*/, std::ostream & /*response*/,
       const StringToStringMap & /*headers*/ = StringToStringMap(),
       const std::string & /*method*/ = std::string(),
       const std::string & /*body*/ = "") const {
@@ -83,7 +83,7 @@ protected:
 class MockedGoodLoginResponse_SCARFLSFJM : public SCARFLSFJobManager {
 protected:
   virtual int doSendRequestGetResponse(
-      const std::string & /*url*/, std::ostream &response,
+      const Poco::URI & /*url*/, std::ostream &response,
       const StringToStringMap & /*headers*/ = StringToStringMap(),
       const std::string & /*method*/ = std::string(),
       const std::string & /*body*/ = "") const {
@@ -93,7 +93,7 @@ protected:
   }
 
   std::string makeGoodLoginResponse() const {
-    return "https://portal.scarf.rl.ac.uk/platf\n"
+    return "https://portal.scarf.rl.ac.uk/pltf/\n"
            "scarf9999\"2011-02-10T18:50:"
            "00Z\"cT6jHNOxZ0TpH0lZHxMyXNVCMv2ncX8b7u\n"
            "- response OK and login successful - mocked up";
@@ -117,12 +117,12 @@ public:
 
 protected:
   virtual int doSendRequestGetResponse(
-      const std::string &url, std::ostream &response,
+      const Poco::URI &url, std::ostream &response,
       const StringToStringMap & /*headers*/ = StringToStringMap(),
       const std::string & /*method*/ = std::string(),
       const std::string & /*body*/ = "") const {
 
-    if (url.find("cgi-bin/token.py")) {
+    if (url.toString().find("cgi-bin/token.py")) {
       response << makeGoodLoginResponse();
     } else {
       response
@@ -150,7 +150,7 @@ private:
 class MockedGoodPingResponse_SCARFLSFJM : public SCARFLSFJobManager {
 protected:
   virtual int doSendRequestGetResponse(
-      const std::string & /*url*/, std::ostream &response,
+      const Poco::URI & /*url*/, std::ostream &response,
       const StringToStringMap & /*headers*/ = StringToStringMap(),
       const std::string & /*method*/ = std::string(),
       const std::string & /*body*/ = "") const {
