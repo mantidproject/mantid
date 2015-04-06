@@ -145,9 +145,9 @@ private:
   static const std::string SCARFName;
 };
 
-const std::string SNSFac = "SNS";
-const std::string ISISFac = "ISIS";
-const std::string FermiName = "Fermi";
-const std::string SCARFName = "SCARF@STFC";
+const std::string RemoteJobManagerFactoryTest::SNSFac = "SNS";
+const std::string RemoteJobManagerFactoryTest::ISISFac = "ISIS";
+const std::string RemoteJobManagerFactoryTest::FermiName = "Fermi";
+const std::string RemoteJobManagerFactoryTest::SCARFName = "SCARF@STFC";
 
 #endif /* REMOTEJOBMANAGERFACTORYTEST_H_ */
