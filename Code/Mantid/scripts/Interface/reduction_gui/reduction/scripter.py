@@ -528,12 +528,16 @@ class BaseReductionScripter(object):
                 if len(scripts)>1:
                     _job_name += "_%s" % i
                 # Submit the job
-                submit_cmd =  "Authenticate(ComputeResource='%s', " % resource
+                # Note: keeping version 1 for now. See comment about
+                # versions in cluster_status.py
+                submit_cmd =  "Authenticate(Version=1, ComputeResource='%s', " % resource
                 submit_cmd += "UserName='%s', Password='%s')\n" % (user, pwd)
 
                 submit_cmd += "id=StartRemoteTransaction(ComputeResource='%s')\n" % resource
 
-                submit_cmd += "SubmitRemoteJob(ComputeResource='%s', " % resource
+                # Note: keeping version 1 for now. See comment about
+                # versions in cluster_status.py
+                submit_cmd += "SubmitRemoteJob(Version=1, ComputeResource='%s', " % resource
                 submit_cmd += "TaskName='%s'," % _job_name
                 submit_cmd += "NumNodes=%s, CoresPerNode=%s, " % (nodes, cores_per_node)
                 submit_cmd += "TransactionID=id, "
