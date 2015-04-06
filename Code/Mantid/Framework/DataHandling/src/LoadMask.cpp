@@ -55,8 +55,12 @@ LoadMask::~LoadMask() {
   // note Poco::XML::Document and Poco::XML::Element declare their constructors as protected
   if (m_pDoc)
     m_pDoc->release();
-  if (m_pRootElem)
-    m_pRootElem->release();
+  // note that m_pRootElem does not need a release(), and that can
+  // actually cause a double free corruption, as
+  // Poco::DOM::Document::documentElement() does not require a
+  // release(). So just to be explicit that they're gone:
+  m_pDoct = NULL;
+  m_pRootElem = NULL;
 }
 
 /// Initialise the properties
