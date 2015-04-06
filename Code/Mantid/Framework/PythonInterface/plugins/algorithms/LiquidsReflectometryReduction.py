@@ -67,6 +67,10 @@ class LiquidsReflectometryReduction(PythonAlgorithm):
         self.declareProperty("BackSlitName", "Si", doc="Name of the back slit")
         self.declareProperty("TOFSteps", 40.0, doc="TOF step size")
         self.declareProperty("CropFirstAndLastPoints", True, doc="If true, we crop the first and last points")
+        self.declareProperty("ApplyPrimaryFraction", False, doc="If true, the primary fraction correction will be applied")
+        self.declareProperty(IntArrayProperty("PrimaryFractionRange", [117, 197],
+                                              IntArrayLengthValidator(2), direction=Direction.Input),
+                                              "Pixel range to use for calculating the primary fraction correction.")
 
     def PyExec(self):
         # The old reflectivity reduction has an offset between the input
@@ -101,6 +105,13 @@ class LiquidsReflectometryReduction(PythonAlgorithm):
             file_list.append(data_file)
         runs = reduce((lambda x, y: '%s+%s' % (x, y)), file_list)
         ws_event_data = Load(Filename=runs)
+        
+        # Compute the primary fraction using the unprocessed workspace
+        apply_primary_fraction = self.getProperty("ApplyPrimaryFraction").value
+        if apply_primary_fraction:
+            signal_range = self.getProperty("PrimaryFractionRange").value
+            primary_fraction = LRPrimaryFraction(InputWorkspace=ws_event_data,
+                                                 SignalRange=signal_range)
 
         # Get the TOF range
         TOFrangeFlag = self.getProperty("TofRangeFlag")
@@ -190,6 +201,13 @@ class LiquidsReflectometryReduction(PythonAlgorithm):
 
         q_rebin = Rebin(InputWorkspace=q_workspace, Params=q_range,
                         OutputWorkspace=name_output_ws)
+
+        # Apply the primary fraction 
+        if apply_primary_fraction:
+            ws_fraction = CreateSingleValuedWorkspace(DataValue=primary_fraction[0],
+                                                      ErrorValue=primary_fraction[1])
+            q_rebin = Multiply(LHSWorkspace=q_rebin, RHSWorkspace=ws_fraction,
+                               OutputWorkspace=name_output_ws)
 
         # Crop to non-zero values
         data_y = q_rebin.readY(0)
