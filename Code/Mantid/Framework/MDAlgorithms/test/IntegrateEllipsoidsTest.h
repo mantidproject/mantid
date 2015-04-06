@@ -254,6 +254,66 @@ public:
 
     do_test_n_peaks(integratedPeaksWS, 3 /*check first 3 peaks*/);
   }
+  void test_execution_events_hkl() {
+
+    IntegrateEllipsoids alg;
+    alg.setChild(true);
+    alg.setRethrows(true);
+    alg.initialize();
+    alg.setProperty("InputWorkspace", m_eventWS);
+    alg.setProperty("PeaksWorkspace", m_peaksWS);
+    alg.setPropertyValue("OutputWorkspace", "dummy");
+    alg.setProperty("IntegrateInHKL", true); // Check hkl option
+    alg.execute();
+    PeaksWorkspace_sptr integratedPeaksWS = alg.getProperty("OutputWorkspace");
+    TSM_ASSERT_EQUALS("Wrong number of peaks in output workspace",
+                      integratedPeaksWS->getNumberPeaks(),
+                      m_peaksWS->getNumberPeaks());
+
+    TSM_ASSERT_DELTA("Wrong intensity for peak 0",
+          integratedPeaksWS->getPeak(0).getIntensity(), -2, 0.01);
+    TSM_ASSERT_DELTA("Wrong intensity for peak 1",
+          integratedPeaksWS->getPeak(1).getIntensity(), 2, 0.01);
+    TSM_ASSERT_DELTA("Wrong intensity for peak 2",
+          integratedPeaksWS->getPeak(2).getIntensity(), -2, 0.01);
+    TSM_ASSERT_DELTA("Wrong intensity for peak 3",
+          integratedPeaksWS->getPeak(3).getIntensity(), 6, 0.01);
+    TSM_ASSERT_DELTA("Wrong intensity for peak 4",
+          integratedPeaksWS->getPeak(4).getIntensity(), 11, 0.01);
+    TSM_ASSERT_DELTA("Wrong intensity for peak 5",
+          integratedPeaksWS->getPeak(5).getIntensity(), 10, 0.01);
+
+  }
+
+  void test_execution_histograms_hkl() {
+
+    IntegrateEllipsoids alg;
+    alg.setChild(true);
+    alg.setRethrows(true);
+    alg.initialize();
+    alg.setProperty("InputWorkspace", m_histoWS);
+    alg.setProperty("PeaksWorkspace", m_peaksWS);
+    alg.setPropertyValue("OutputWorkspace", "dummy");
+    alg.setProperty("IntegrateInHKL", true); // Check hkl option
+    alg.execute();
+    PeaksWorkspace_sptr integratedPeaksWS = alg.getProperty("OutputWorkspace");
+    TSM_ASSERT_EQUALS("Wrong number of peaks in output workspace",
+                      integratedPeaksWS->getNumberPeaks(),
+                      m_peaksWS->getNumberPeaks());
+    TSM_ASSERT_DELTA("Wrong intensity for peak 0",
+          integratedPeaksWS->getPeak(0).getIntensity(), 163, 0.01);
+    TSM_ASSERT_DELTA("Wrong intensity for peak 1",
+          integratedPeaksWS->getPeak(1).getIntensity(), 0, 0.01);
+    TSM_ASSERT_DELTA("Wrong intensity for peak 2",
+          integratedPeaksWS->getPeak(2).getIntensity(), 163, 0.01);
+    TSM_ASSERT_DELTA("Wrong intensity for peak 3",
+          integratedPeaksWS->getPeak(3).getIntensity(), 711, 0.01);
+    TSM_ASSERT_DELTA("Wrong intensity for peak 4",
+          integratedPeaksWS->getPeak(4).getIntensity(), 694, 0.01);
+    TSM_ASSERT_DELTA("Wrong intensity for peak 5",
+          integratedPeaksWS->getPeak(5).getIntensity(), 218, 0.01);
+
+  }
 };
 
 class IntegrateEllipsoidsTestPerformance : public CxxTest::TestSuite {
