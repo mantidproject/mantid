@@ -108,6 +108,7 @@ class LiquidsReflectometryReduction(PythonAlgorithm):
         
         # Compute the primary fraction using the unprocessed workspace
         apply_primary_fraction = self.getProperty("ApplyPrimaryFraction").value
+        primary_fraction = [1.0, 0.0]
         if apply_primary_fraction:
             signal_range = self.getProperty("PrimaryFractionRange").value
             primary_fraction = LRPrimaryFraction(InputWorkspace=ws_event_data,
