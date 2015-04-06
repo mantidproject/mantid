@@ -139,10 +139,15 @@ public:
 private:
   Mantid::API::IRemoteJobManager_sptr jm;
 
-  const std::string SNSFac = "SNS";
-  const std::string ISISFac = "ISIS";
-  const std::string FermiName = "Fermi";
-  const std::string SCARFName = "SCARF@STFC";
+  static const std::string SNSFac;
+  static const std::string ISISFac;
+  static const std::string FermiName;
+  static const std::string SCARFName;
 };
+
+const std::string SNSFac = "SNS";
+const std::string ISISFac = "ISIS";
+const std::string FermiName = "Fermi";
+const std::string SCARFName = "SCARF@STFC";
 
 #endif /* REMOTEJOBMANAGERFACTORYTEST_H_ */
