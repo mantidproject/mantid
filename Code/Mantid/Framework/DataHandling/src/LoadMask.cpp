@@ -59,7 +59,7 @@ LoadMask::~LoadMask() {
   // actually cause a double free corruption, as
   // Poco::DOM::Document::documentElement() does not require a
   // release(). So just to be explicit that they're gone:
-  m_pDoct = NULL;
+  m_pDoc = NULL;
   m_pRootElem = NULL;
 }
 
