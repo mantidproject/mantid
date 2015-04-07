@@ -7,15 +7,24 @@ import sys
 import os
 import urllib2
 
+import numpy
+
 # Import mantid
 IMPORT_MANTID = False
 try:
     import mantid
     IMPORT_MANTID = True
 except ImportError as e:
-    sys.path.append('/home/wzz/Mantid_Project/Mantid2/Code/release/bin')
+    curdir = os.getcwd()
+    libpath = os.path.join(curdir.split('Code')[0], 'Code/debug/bin')
+    if os.path.exists(libpath) is False:
+        libpath = os.path.join(curdir.split('Code')[0], 'Code/release/bin')
+    sys.path.append(libpath)
+    #print libpath
+    #"/home/wzz/Mantid_Project/Mantid/Code/Mantid/scripts/HFIRPowderReduction"
+    ##sys.path.append('/home/wzz/Mantid_Project/Mantid2/Code/release/bin')
     #sys.path.append('/home/wzz/Mantid/Code/debug/bin')
-    sys.path.append('/Users/wzz/Mantid/Code/debug/bin')
+    #sys.path.append('/Users/wzz/Mantid/Code/debug/bin')
     try:
         import mantid
     except ImportError as e2:
@@ -52,16 +61,18 @@ class PDRManager:
 
         return
 
-    def setup(self, datamdws, monitormdws, reducedws, unit, binsize):
+    def setup(self, datamdws, monitormdws, reducedws=None, unit=None, binsize=None):
         """ Set up
         """
         self.datamdws = datamdws
         self.monitormdws = monitormdws
-        self.reducedws = reducedws
-        self.unit = unit
+        if reducedws is not None: 
+            self.reducedws = reducedws
+        if unit is not None: 
+            self.unit = unit
         try: 
             self.binsize = float(binsize)
-        except ValueError as e:
+        except TypeError as e:
             print e
             pass
 
@@ -82,6 +93,58 @@ class HFIRPDRedControl:
 
         return
 
+
+    def getRawDetectorCounts(self, exp, scan, ptnolist=None):
+        """ Return raw detector counts as a list of 3-tuples
+        """
+        # check
+        if self._myWorkspaceDict.has_key((exp, scan)) is False:
+            raise NotImplementedError("Exp %d Scan %d does not have reduced \
+                    workspace." % (exp, scan))
+
+        # get data
+        rmanager = self._myWorkspaceDict[(exp, scan)]
+        datamdws = rmanager.datamdws
+
+        # FIXME - This is a fake
+        import random
+        random.seed(1)
+        x0 = random.random()*40.
+        listx = []
+        listy = []
+        for i in xrange(44):
+            listx.append(x0+float(i))
+            listy.append(random.random()*20.)
+        vecx = numpy.array(listx)
+        vecy = numpy.array(listy)
+        ptno = random.randint(1, 45)
+
+        rlist = [(ptno, vecx, vecy)]
+        return (rlist)
+
+
+    def getSampleLogNames(self, expno, scanno):
+        """ Get the list of sample logs' names if they are 
+        of float data type
+        """
+        # check
+        if self._myWorkspaceDict.has_key((expno, scanno)) is False:
+            raise NotImplementedError("Exp %d Scan %d does not have reduced \
+                    workspace." % (exp, scan))
+
+        # get data
+        rmanager = self._myWorkspaceDict[(expno, scanno)]
+        datamdws = rmanager.datamdws
+
+        info0 = datamdws.getExperimentInfo(0)
+        run = info0.run()
+        plist = run.getProperties()
+        lognamelist = []
+        for p in plist:
+            if p.__class__.__name__.lower().count('float') == 1:
+                lognamelist.append(p.name)
+
+        return lognamelist
 
     def getVectorToPlot(self, exp, scan):
         """ Get vec x and vec y of the reduced workspace to plot
@@ -151,6 +214,16 @@ class HFIRPDRedControl:
         return self._myWorkspaceDict[(exp, scan)]
 
 
+    def hasDataLoaded(self, exp, scan):
+        """ Check whether an experiment data set (defined by exp No. and scan No.)
+        has been loaded or not.
+        """
+        if self._myWorkspaceDict.has_key((exp, scan)):
+            return True
+        else:
+            return False
+
+
     def hasReducedWS(self, exp, scan):
         """ Check whether an Exp/Scan has a reduced workspace
         """
@@ -162,11 +235,55 @@ class HFIRPDRedControl:
             return False
 
         return True
+
         
-    def loadDataFile(self, expno, scanlist):
-        """       
-        Return :: datafilename (None for failed)
+    def loadDataFile(self, expno, scanno):
+        """ Return :: datafilename (None for failed)
         """
+
+        raise NotImplementedError("Need to refactor from GUI script!")
+
+
+    def loadSpicePDData(self, expno, scanno, datafilename):
+        """ Load SPICE powder diffraction data to MDEventsWorkspaces
+        """
+        # FIXME : Think of refactoring with reduceSpicePDData
+        # base workspace name
+        try:
+            basewsname = os.path.basename(datafilename).split(".")[0]
+        except AttributeError as e:
+            raise NotImplementedError("Unable to parse data file name due to %s." % (str(e)))
+
+        # load SPICE
+        tablewsname = basewsname + "_RawTable"
+        infowsname  = basewsname + "ExpInfo"
+        api.LoadSpiceAscii(Filename=datafilename, 
+                OutputWorkspace=tablewsname, RunInfoWorkspace=infowsname)
+
+        # convert to MDWorkspace
+        datamdwsname = basewsname + "_DataMD"
+        monitorwsname = basewsname + "_MonitorMD"
+        api.ConvertSpiceDataToRealSpace(InputWorkspace=tablewsname,
+                RunInfoWorkspace=infowsname,
+                OutputWorkspace=datamdwsname,
+                OutputMonitorWorkspace=monitorwsname)
+
+        datamdws = AnalysisDataService.retrieve(datamdwsname)
+        monitormdws = AnalysisDataService.retrieve(monitorwsname)
+
+        if datamdws is None or monitormdws is None:
+            raise NotImplementedError("Failed to convert SPICE data to MDEventWorkspaces \
+                    for experiment %d and scan %d." % (expno, scanno))
+
+        # Manager:
+        wsmanager = PDRManager(expno, scanno)
+        wsmanager.setup(datamdws, monitormdws)
+        self._myWorkspaceDict[(expno, scanno)] = wsmanager
+        
+        return True
+
+
+
 
     #---------------------------------------------------------------------------
         

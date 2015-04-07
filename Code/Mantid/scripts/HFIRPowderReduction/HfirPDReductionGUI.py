@@ -27,6 +27,16 @@ DEFAULT_INSTRUMENT = 'hb2a'
 DEFAULT_WAVELENGTH = 2.4100
 #-------------------------------------------
 
+class EmptyError(Exception):    
+    """ Exception for finding empty input for integer or float
+    """
+    def __init__(self, value):         
+        self.value = value     
+        
+    def __str__(self): 
+        return repr(self.value)
+
+
 
 class MainWindow(QtGui.QMainWindow):
     """ Class of Main Window (top)
@@ -51,75 +61,68 @@ class MainWindow(QtGui.QMainWindow):
         self.ui.setupUi(self)
 
         # Define gui-event handling 
+
+        # tab 'Normalized'
         self.connect(self.ui.pushButton_loadData, QtCore.SIGNAL('clicked()'), 
                 self.doLoadData)
-
         self.connect(self.ui.pushButton_prevScan, QtCore.SIGNAL('clicked()'),
                 self.doLoadPrevScan)
-
         self.connect(self.ui.pushButton_nextScan, QtCore.SIGNAL('clicked()'),
                 self.doLoadNextScan)
-
         self.connect(self.ui.pushButton_unit2theta, QtCore.SIGNAL('clicked()'),
                 self.doPlot2Theta)
-
         self.connect(self.ui.pushButton_unitD, QtCore.SIGNAL('clicked()'),
                 self.doPlotDspacing)
-
         self.connect(self.ui.pushButton_unitQ, QtCore.SIGNAL('clicked()'),
                 self.doPlotQ)
-
         self.connect(self.ui.pushButton_saveData, QtCore.SIGNAL('clicked()'),
                 self.doSaveData)
 
+        # tab 'Advanced Setup'
         self.connect(self.ui.pushButton_browseCache, QtCore.SIGNAL('clicked()'),
                 self.doBrowseCache)
+        self.connect(self.ui.radioButton_useServer, QtCore.SIGNAL('clicked()'),
+                self.doChangeSrcLocation)
+        self.connect(self.ui.radioButton_useLocal, QtCore.SIGNAL('clicked()'),
+                self.doChangeSrcLocation)
+        self.connect(self.ui.pushButton_browseLocalSrc, QtCore.SIGNAL('clicked()'),
+                self.doBrowseLocalDataSrc)
+        self.connect(self.ui.pushButton_chkServer, QtCore.SIGNAL('clicked()'),
+                self.doCheckSrcServer)
 
+        # tab 'Raw Detectors'
         self.connect(self.ui.pushButton_plotRaw, QtCore.SIGNAL('clicked()'),
-                self.doPlotCurrentRawDet)
-
+                self.doPlotRawDet)
         self.connect(self.ui.pushButton_ptUp, QtCore.SIGNAL('clicked()'),
                 self.doPlotPrevPtRaw)
-
         self.connect(self.ui.pushButton_ptDown, QtCore.SIGNAL('clicked()'),
                 self.doPlotNextPtRaw)
 
-        self.connect(self.ui.pushButton_detUp, QtCore.SIGNAL('clicked()'),
+        # tab 'Individual Detectors'
+        self.connect(self.ui.pushButton_plotIndvDet, QtCore.SIGNAL('clicked()'),
+                self.doPlotIndvDet)
+        self.connect(self.ui.pushButton_plotPrevDet, QtCore.SIGNAL('clicked()'),
                 self.doPlotPrevDetRaw)
-
-        self.connect(self.ui.pushButton_detDown, QtCore.SIGNAL('clicked()'),
+        self.connect(self.ui.pushButton_plotNextDet, QtCore.SIGNAL('clicked()'),
                 self.doPlotNextDetRaw)
                 
-        self.connect(self.ui.radioButton_useServer, QtCore.SIGNAL('clicked()'),
-                self.doChangeSrcLocation)
-                
-        self.connect(self.ui.radioButton_useLocal, QtCore.SIGNAL('clicked()'),
-                self.doChangeSrcLocation)
-                
-        self.connect(self.ui.pushButton_browseLocalSrc, QtCore.SIGNAL('clicked()'),
-                self.doBrowseLocalDataSrc)
-                
-        self.connect(self.ui.pushButton_chkServer, QtCore.SIGNAL('clicked()'),
-                self.doCheckSrcServer)
-                
+        # main           
         self.connect(self.ui.comboBox_wavelength, QtCore.SIGNAL('currentIndexChanged(int)'),
                 self.doUpdateWavelength)
-
         self.connect(self.ui.actionQuit, QtCore.SIGNAL('triggered()'),
                 self.doExist)
 
+        # tab 'Vanadium'
         self.connect(self.ui.pushButton_stripVanPeaks, QtCore.SIGNAL('clicked()'),
                 self.doStripVandiumPeaks)
-
         self.connect(self.ui.pushButton_saveVanRun, QtCore.SIGNAL('clicked()'),
                 self.doSaveVanRun)
-
         self.connect(self.ui.pushButton_rebinD, QtCore.SIGNAL('clicked()'),
                 self.doRebinD)
-                
+
+        # tab 'Multiple Scans'
         self.connect(self.ui.pushButton_mergeScans, QtCore.SIGNAL('clicked()'),
                 self.doMergeScans)
-
         self.connect(self.ui.pushButton_view2D, QtCore.SIGNAL('clicked()'), 
                 self.doMergeScanView2D)
         self.connect(self.ui.pushButton_viewMerge, QtCore.SIGNAL('clicked()'),
@@ -162,9 +165,9 @@ class MainWindow(QtGui.QMainWindow):
         validator6.setBottom(0)
         self.ui.lineEdit_ptNo.setValidator(validator6)
 
-        validator7 = QtGui.QDoubleValidator(self.ui.lineEdit_detNo)
+        validator7 = QtGui.QDoubleValidator(self.ui.lineEdit_detID)
         validator7.setBottom(0)
-        self.ui.lineEdit_detNo.setValidator(validator7)
+        self.ui.lineEdit_detID.setValidator(validator7)
 
         validator8 = QtGui.QDoubleValidator(self.ui.lineEdit_minD)
         validator8.setBottom(0.)
@@ -200,11 +203,6 @@ class MainWindow(QtGui.QMainWindow):
         # FIXME - This part will be implemented soon as default configuration is made
         # Mantid configuration
         self._instrument = str(self.ui.comboBox_instrument.currentText())
-        #if IMPORT_MANTID is True:
-        #    config = ConfigService.Instance()
-        #    self._instrument = config["default.instrument"]
-        #else:
-        #    self._instrument = DEFAULT_INSTRUMENT
 
         # UI widgets setup
         self.ui.comboBox_outputFormat.addItems(['Fullprof', 'GSAS', 'Fullprof+GSAS'])
@@ -233,25 +231,6 @@ class MainWindow(QtGui.QMainWindow):
         self._viewMerge_X = None   
         self._viewMerge_Y = None   
         
-        """
-        self._myReducedPDWs  = None
-        self._prevoutws = None
-
-        self._ptNo = None
-        self._detNo = None
-        
-        # set up for plotting
-        self._myLineMarkerColorList = self.ui.graphicsView_reducedData.getDefaultColorMarkerComboList()
-        self._myLineMarkerColorIndex = 0
-
-        # workspaces
-        self._myDataMDWS = None
-        self._myMonitorMDWS = None
-
-        # State machine
-        # self._inPlotState = False
-        """
-
         return
 
 
@@ -534,7 +513,6 @@ class MainWindow(QtGui.QMainWindow):
         return
 
 
-
     def doPlot2Theta(self):
         """ Rebin the data and plot in 2theta
         """
@@ -553,7 +531,36 @@ class MainWindow(QtGui.QMainWindow):
         self._currUnit = newunit
         
         return
-    
+
+
+    def doPlotIndvDet(self):
+        """ Plot individual detector
+        """
+        # get exp and scan numbers and check whether the data has been loaded
+        try:
+            expno = self.getInteger(self.ui.lineEdit_expNo)
+            scanno = self.getInteger(self.ui.lineEdit_scanNo)
+        except EmptyError as e:
+            self._logError(str(e))
+            return
+
+        # get detector ID and x-label option
+        try:
+            detid = self.getInteger(self.ui.lineEdit_detID)
+        except EmptyError:
+            self._logError("Detector ID must be specified for plotting individual detector.")
+            return
+
+        xlabel = str(self.ui.comboBox_indvDetXLabel.currentText())
+
+        # plot
+        try: 
+            self._plotIndividualDetCounts(expno, scanno, detid, xlabel)
+        except NotImplementedError as e:
+            self._logError(str(e))
+
+        return
+
 
     def doPlotQ(self):
         """ Rebin the data and plot in momentum transfer Q
@@ -565,29 +572,29 @@ class MainWindow(QtGui.QMainWindow):
         return
 
 
-    def doPlotCurrentRawDet(self):
+    def doPlotRawDet(self):
         """ Plot current raw detector signals
         """
-        # Plot specified raw detectors
-        ptstr = str(self.ui.lineEdit_ptNo.text())
-        detstr = str(self.ui.lineEdit_detNo.text())
-        if len(ptstr) == 0 or len(detstr) == 0:
-            self._logError("Neither Pt. nor detector ID can be left blank to plot raw detector signal.")
+        # get experiment number and scan number for data file
+        try: 
+            expno = self.getInteger(self.ui.lineEdit_expNo)
+            scanno = self.getInteger(self.ui.lineEdit_scanNo)
+        except EmptyError as e:
+            self._logError(str(e))
             return
 
-        ptno = int(ptstr)
-        detno = int(detstr)
+        # plot options
+        doOverPlot = bool(self.ui.checkBox_overpltRawDet.isChecked())
+        plotmode = str(self.ui.comboBox_rawDetMode.currentText())
+        try:
+            ptNo = self.getInteger(self.ui.lineEdit_ptNo)
+        except EmptyError:
+            ptNo = None
 
-        status, errmsg = self._checkValidPtDet(ptno, detno) 
-        if status is False:
-            self._logError(errmsg)
+        # plot
+        self._plotRawDetSignal(expno, scanno, plotmode, ptNo, doOverPlot)
 
-        self._ptNo = ptno
-        self._detNo = detno
 
-        self._plotRawDetSignal(self._ptNo, self._detNo)
-
-        return
 
     def doPlotPrevDetRaw(self):
         """ Plot previous raw detector
@@ -832,6 +839,22 @@ class MainWindow(QtGui.QMainWindow):
 
         return
 
+
+    def getInteger(self, lineedit):
+        """ Get integer from line edit
+        """
+        valuestr = str(lineedit.text()).strip()
+        if len(valuestr) == 0:
+            raise EmptyError("Input is empty. It cannot be converted to integer.")
+
+        try:
+            value = int(valuestr)
+        except ValueError as e:
+            raise e
+
+        return value
+
+
     def on_mouseMotion(self, event):
         """
         """
@@ -923,14 +946,141 @@ class MainWindow(QtGui.QMainWindow):
                 Nor from local drive")
 
         return (rvalue,self._srcFileName)
+
+    #--------------------------------------------------------------------------
+    # Private methods to plot data
+    #--------------------------------------------------------------------------
+
+    def _plotIndividualDetCounts(self, expno, scanno, detid, xlabel):
+        """ Plot a specific detector's counts along all experiment points (pt)
+        """
+        # load data if necessary
+        if self._myControl.hasDataLoaded(expno, scanno) is False:
+            rvalue, filename = self._uiLoadDataFile(expno, scanno)   
+            if rvalue is False:
+                self._logError("Unable to download or locate local data file for Exp %d \
+                    Scan %d." % (expno, scanno))
+                return
+            self._myControl.loadSpicePDData(expno, scanno, filename)
+
+        # pop out the xlabel list
+        floatsamplelognamelist = self._myControl.getSampleLogNames(expno, scanno)
+        self.ui.comboBox_indvDetXLabel.clear()
+        self.ui.comboBox_indvDetXLabel.addItems(floatsamplelognamelist)
+
         
                 
-    def _PlotRawDet(self):
+    def _plotRawDetSignal(self, expno, scanno, plotmode, ptno, dooverplot):
         """ Plot the counts of one detector of a certain Pt. in an experiment
         """
-        # FIXME - The use case is not determined.  Take a look at the help hint of this tab
-        
-        vecx, vecy = self._getDetCounts()
+        # load data if necessary
+        if self._myControl.hasDataLoaded(expno, scanno) is False:
+            rvalue, filename = self._uiLoadDataFile(expno, scanno)   
+            if rvalue is False:
+                self._logError("Unable to download or locate local data file for Exp %d \
+                    Scan %d." % (expno, scanno))
+                return
+            self._myControl.loadSpicePDData(expno, scanno, filename)
+
+        # get vecx and vecy
+        if plotmode == "All Pts.":
+            # Plot all Pts.
+            vecxylist = self._myControl.getRawDetectorCounts(expno, scanno)
+
+            # Clear previous
+            self.ui.graphicsView_Raw.clearAllLines()
+            self.ui.graphicsView_Raw.setLineMarkerColorIndex(0)
+
+        elif plotmode == "Single Pts.":
+            # Plot plot
+            if dooverplot is True:
+                self.ui.graphicsView_Raw.clearAllLines()
+                self.ui.graphicsView_Raw.setLineMarkerColorIndex(0)
+
+            # Plot one pts.
+            vecxylist = self._myControl.getRawDetectorCounts(expno, scanno, [ptno])
+
+        else:
+            # Raise exception
+            raise NotImplementedError("Plot mode %s is not supported." % (plotmode))
+
+        # plot
+        canvas = self.ui.graphicsView_Raw
+        unit = '$2\theta$'
+
+        # plot
+        xmin = 1.E10
+        xmax = -1.0E10
+        ymin = 1.E10
+        ymax = -1.0E10
+        for ptno, vecx, vecy in vecxylist:
+            # FIXME - Label is left blank as there can be too many labels 
+            label = str(ptno)
+            marker, color = canvas.getNextLineMarkerColorCombo()
+            canvas.addPlot(vecx, vecy, marker=marker, color=color, xlabel=unit, \
+                    ylabel='intensity',label=label)
+           
+            # auto setup for image boundary
+            tmpxmin = min(vecx)
+            tmpxmax = max(vecx)
+            if tmpxmin < xmin:
+                xmin = tmpxmin
+            if tmpxmax > xmax:
+                xmax = tmpxmax
+
+            tmpymax = max(vecy)
+            tmpymin = min(vecy)
+            if tmpymin < ymin:
+                ymin = tmpymin
+            if tmpymax > ymax:
+                ymax = tmpymax
+        # ENDFOR
+
+        # set X-Y range
+        dx = xmax-xmin
+        dy = ymax-ymin
+        canvas.setXYLimit(xmin-dx*0.1, xmax+dx*0.1, ymin-dy*0.1, ymax+dy*0.1)
+
+        return
+
+
+    def _plotMergedReducedData(self, mkey, label):
+        """ Plot the reduced data from merged ...
+        """
+        # get the data
+        try:
+            vecx, vecy = self._myControl.getMergedVector(mkey)
+        except Exception as e:
+            self._logError("Unable to retrieve merged reduced data due to %s." % (str(e)))
+            return
+
+        canvas = self.ui.graphicsView_mergeRun
+
+        # FIXME : shall be an option?
+        clearcanvas = True
+        if clearcanvas is True:
+            canvas.clearAllLines()
+            canvas.setLineMarkerColorIndex(0)
+
+        # plot
+        marker, color = canvas.getNextLineMarkerColorCombo()
+        xlabel = self._getXLabelFromUnit(self._currUnit)
+
+        canvas.addPlot(vecx, vecy, marker=marker, color=color, 
+            xlabel=xlabel, ylabel='intensity',label=label)
+            
+        if clearcanvas is True:
+            xmax = max(vecx)
+            xmin = min(vecx)
+            dx = xmax-xmin
+            
+            ymax = max(vecy)
+            ymin = min(vecy)
+            dy = ymax-ymin
+            
+            canvas.setXYLimit(xmin-dx*0.1, xmax+dx*0.1, ymin-dy*0.1, ymax+dy*0.1)
+
+        return
 
 
 
@@ -979,45 +1129,6 @@ class MainWindow(QtGui.QMainWindow):
             
             canvas.setXYLimit(xmin-dx*0.1, xmax+dx*0.1, ymin-dy*0.1, ymax+dy*0.1)
             
-        return
-
-
-    def _plotMergedReducedData(self, mkey, label):
-        """ Plot the reduced data from merged ...
-        """
-        # get the data
-        try:
-            vecx, vecy = self._myControl.getMergedVector(mkey)
-        except Exception as e:
-            self._logError("Unable to retrieve merged reduced data due to %s." % (str(e)))
-            return
-
-        canvas = self.ui.graphicsView_mergeRun
-
-        # FIXME : shall be an option?
-        clearcanvas = True
-        if clearcanvas is True:
-            canvas.clearAllLines()
-            canvas.setLineMarkerColorIndex(0)
-
-        # plot
-        marker, color = canvas.getNextLineMarkerColorCombo()
-        xlabel = self._getXLabelFromUnit(self._currUnit)
-
-        canvas.addPlot(vecx, vecy, marker=marker, color=color, 
-            xlabel=xlabel, ylabel='intensity',label=label)
-            
-        if clearcanvas is True:
-            xmax = max(vecx)
-            xmin = min(vecx)
-            dx = xmax-xmin
-            
-            ymax = max(vecy)
-            ymin = min(vecy)
-            dy = ymax-ymin
-            
-            canvas.setXYLimit(xmin-dx*0.1, xmax+dx*0.1, ymin-dy*0.1, ymax+dy*0.1)
-
         return
 
 

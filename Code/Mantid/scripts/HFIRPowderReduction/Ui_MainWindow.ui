@@ -116,7 +116,7 @@
            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Question about use case of tab'Raw Detectors': What do you want to see?&lt;/p&gt;&lt;p&gt;1. single detector's counts in all Pt.? &lt;/p&gt;&lt;p&gt;&amp;gt; what is the X-axis? Pt. or 2theta? &lt;/p&gt;&lt;p&gt;2. all detectors' counts in one Pt.?&lt;/p&gt;&lt;p&gt;&amp;gt; what is the X-axis? Det no or 2theta? &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
           </property>
           <property name="currentIndex">
-           <number>3</number>
+           <number>1</number>
           </property>
           <widget class="QWidget" name="tab_3">
            <attribute name="title">
@@ -128,22 +128,17 @@
               <item>
                <layout class="QHBoxLayout" name="horizontalLayout_13">
                 <item>
-                 <widget class="QLabel" name="label_ptNo">
-                  <property name="sizePolicy">
-                   <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-                    <horstretch>0</horstretch>
-                    <verstretch>0</verstretch>
-                   </sizepolicy>
-                  </property>
-                  <property name="minimumSize">
-                   <size>
-                    <width>50</width>
-                    <height>0</height>
-                   </size>
-                  </property>
-                  <property name="text">
-                   <string>Pt.</string>
-                  </property>
+                 <widget class="QComboBox" name="comboBox_rawDetMode">
+                  <item>
+                   <property name="text">
+                    <string>All Pts.</string>
+                   </property>
+                  </item>
+                  <item>
+                   <property name="text">
+                    <string>Single Pts.</string>
+                   </property>
+                  </item>
                  </widget>
                 </item>
                 <item>
@@ -157,47 +152,9 @@
                  </widget>
                 </item>
                 <item>
-                 <spacer name="horizontalSpacer_11">
-                  <property name="orientation">
-                   <enum>Qt::Horizontal</enum>
-                  </property>
-                  <property name="sizeType">
-                   <enum>QSizePolicy::Preferred</enum>
-                  </property>
-                  <property name="sizeHint" stdset="0">
-                   <size>
-                    <width>40</width>
-                    <height>20</height>
-                   </size>
-                  </property>
-                 </spacer>
-                </item>
-                <item>
-                 <widget class="QLabel" name="label_detNo">
-                  <property name="sizePolicy">
-                   <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-                    <horstretch>0</horstretch>
-                    <verstretch>0</verstretch>
-                   </sizepolicy>
-                  </property>
-                  <property name="minimumSize">
-                   <size>
-                    <width>50</width>
-                    <height>0</height>
-                   </size>
-                  </property>
+                 <widget class="QLabel" name="label_ptInfo">
                   <property name="text">
-                   <string>Detector </string>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QLineEdit" name="lineEdit_detNo">
-                  <property name="sizePolicy">
-                   <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                    <horstretch>0</horstretch>
-                    <verstretch>0</verstretch>
-                   </sizepolicy>
+                   <string>Pt. Number From 1 To ?</string>
                   </property>
                  </widget>
                 </item>
@@ -237,6 +194,13 @@
                    <widget class="QPushButton" name="pushButton_plotRaw">
                     <property name="text">
                      <string>Plot Raw Detector</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QCheckBox" name="checkBox_overpltRawDet">
+                    <property name="text">
+                     <string>Over Plot Previous</string>
                     </property>
                    </widget>
                   </item>
@@ -287,16 +251,9 @@
                    </spacer>
                   </item>
                   <item>
-                   <widget class="QPushButton" name="pushButton_detUp">
+                   <widget class="QPushButton" name="pushButton_clearRawDets">
                     <property name="text">
-                     <string>Previous Detector</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item>
-                   <widget class="QPushButton" name="pushButton_detDown">
-                    <property name="text">
-                     <string>Next Detector</string>
+                     <string>Clear</string>
                     </property>
                    </widget>
                   </item>
@@ -334,12 +291,39 @@
                 <item>
                  <widget class="QLabel" name="label_11">
                   <property name="text">
-                   <string>Detector</string>
+                   <string>Detector ID</string>
                   </property>
                  </widget>
                 </item>
                 <item>
-                 <widget class="QLineEdit" name="lineEdit"/>
+                 <widget class="QLineEdit" name="lineEdit_detID">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QLabel" name="label_17">
+                  <property name="text">
+                   <string>Detector IDs From 1 to 44</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <spacer name="horizontalSpacer_4">
+                  <property name="orientation">
+                   <enum>Qt::Horizontal</enum>
+                  </property>
+                  <property name="sizeHint" stdset="0">
+                   <size>
+                    <width>40</width>
+                    <height>20</height>
+                   </size>
+                  </property>
+                 </spacer>
                 </item>
                </layout>
               </item>
@@ -348,30 +332,103 @@
                 <item>
                  <layout class="QHBoxLayout" name="horizontalLayout_23">
                   <item>
-                   <widget class="QGraphicsView" name="graphicsView"/>
+                   <layout class="QVBoxLayout" name="verticalLayout_13">
+                    <item>
+                     <widget class="QGraphicsView" name="graphicsView_indvDet">
+                      <property name="sizePolicy">
+                       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                        <horstretch>0</horstretch>
+                        <verstretch>0</verstretch>
+                       </sizepolicy>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QComboBox" name="comboBox_indvDetXLabel">
+                      <item>
+                       <property name="text">
+                        <string>Pt.</string>
+                       </property>
+                      </item>
+                     </widget>
+                    </item>
+                   </layout>
                   </item>
-                 </layout>
-                </item>
-                <item>
-                 <layout class="QHBoxLayout" name="horizontalLayout_24">
                   <item>
-                   <widget class="QLineEdit" name="lineEdit_2">
-                    <property name="sizePolicy">
-                     <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-                      <horstretch>0</horstretch>
-                      <verstretch>0</verstretch>
-                     </sizepolicy>
-                    </property>
-                   </widget>
+                   <layout class="QVBoxLayout" name="verticalLayout_12">
+                    <item>
+                     <widget class="QPushButton" name="pushButton_plotIndvDet">
+                      <property name="text">
+                       <string>Plot</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <spacer name="verticalSpacer_14">
+                      <property name="orientation">
+                       <enum>Qt::Vertical</enum>
+                      </property>
+                      <property name="sizeHint" stdset="0">
+                       <size>
+                        <width>20</width>
+                        <height>40</height>
+                       </size>
+                      </property>
+                     </spacer>
+                    </item>
+                    <item>
+                     <widget class="QPushButton" name="pushButton_plotPrevDet">
+                      <property name="text">
+                       <string>Previous Detector</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QPushButton" name="pushButton_plotNextDet">
+                      <property name="text">
+                       <string>Next Detector</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <spacer name="verticalSpacer_15">
+                      <property name="orientation">
+                       <enum>Qt::Vertical</enum>
+                      </property>
+                      <property name="sizeHint" stdset="0">
+                       <size>
+                        <width>20</width>
+                        <height>40</height>
+                       </size>
+                      </property>
+                     </spacer>
+                    </item>
+                    <item>
+                     <widget class="QComboBox" name="comboBox_indvDetYLabel"/>
+                    </item>
+                    <item>
+                     <widget class="QPushButton" name="pushButton_plotLog">
+                      <property name="text">
+                       <string>Plot Sample Log</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <spacer name="verticalSpacer_16">
+                      <property name="orientation">
+                       <enum>Qt::Vertical</enum>
+                      </property>
+                      <property name="sizeHint" stdset="0">
+                       <size>
+                        <width>20</width>
+                        <height>40</height>
+                       </size>
+                      </property>
+                     </spacer>
+                    </item>
+                   </layout>
                   </item>
                  </layout>
-                </item>
-               </layout>
-              </item>
-              <item>
-               <layout class="QVBoxLayout" name="verticalLayout_10">
-                <item>
-                 <widget class="QComboBox" name="comboBox"/>
                 </item>
                </layout>
               </item>
