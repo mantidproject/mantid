@@ -342,7 +342,12 @@ class SaveFileName(PropDescriptor):
         return name
 
     def __set__(self,instance,value):
-        self._file_name = value
+
+        if value is None:
+            self._file_name = None
+        else:
+            self._file_name = str(value)
+
     def set_custom_print(self,routine):
         self._custom_print = routine
 #end SaveFileName
