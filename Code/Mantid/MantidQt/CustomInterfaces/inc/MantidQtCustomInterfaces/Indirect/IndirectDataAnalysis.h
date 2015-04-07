@@ -27,8 +27,8 @@ namespace IDA
   {
     ELWIN,
     MSD_FIT,
-    FURY,
-    FURY_FIT,
+    IQT,
+    IQT_FIT,
     CONV_FIT,
     CALC_CORR,
     APPLY_CORR,

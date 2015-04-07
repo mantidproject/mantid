@@ -1,4 +1,4 @@
-#include "MantidQtCustomInterfaces/Indirect/FuryFit.h"
+#include "MantidQtCustomInterfaces/Indirect/IqtFit.h"
 
 #include "MantidQtCustomInterfaces/UserInputValidator.h"
 #include "MantidQtMantidWidgets/RangeSelector.h"
@@ -19,7 +19,7 @@ using namespace Mantid::API;
 
 namespace
 {
-  Mantid::Kernel::Logger g_log("FuryFit");
+  Mantid::Kernel::Logger g_log("IqtFit");
 }
 
 namespace MantidQt
@@ -28,7 +28,7 @@ namespace CustomInterfaces
 {
 namespace IDA
 {
-  FuryFit::FuryFit(QWidget * parent) :
+  IqtFit::IqtFit(QWidget * parent) :
     IDATab(parent),
     m_stringManager(NULL), m_ffTree(NULL),
     m_ffRangeManager(NULL),
@@ -40,7 +40,7 @@ namespace IDA
     m_uiForm.setupUi(parent);
   }
 
-  void FuryFit::setup()
+  void IqtFit::setup()
   {
     m_stringManager = new QtStringPropertyManager(m_parentWidget);
 
@@ -115,7 +115,7 @@ namespace IDA
     connect(m_ffTree, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(fitContextMenu(const QPoint &)));
   }
 
-  void FuryFit::run()
+  void IqtFit::run()
   {
     if ( m_ffInputWS == NULL )
     {
@@ -175,7 +175,7 @@ namespace IDA
     updatePlot();
   }
 
-  bool FuryFit::validate()
+  bool IqtFit::validate()
   {
     UserInputValidator uiv;
 
@@ -190,7 +190,7 @@ namespace IDA
     return error.isEmpty();
   }
 
-  void FuryFit::loadSettings(const QSettings & settings)
+  void IqtFit::loadSettings(const QSettings & settings)
   {
     m_uiForm.dsSampleInput->readSettings(settings.group());
   }
@@ -202,7 +202,7 @@ namespace IDA
    *
    * @param wsName Name of new workspace loaded
    */
-  void FuryFit::newDataLoaded(const QString wsName)
+  void IqtFit::newDataLoaded(const QString wsName)
   {
     m_ffInputWSName = wsName;
     m_ffInputWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(m_ffInputWSName.toStdString());
@@ -223,7 +223,7 @@ namespace IDA
     updatePlot();
   }
 
-  CompositeFunction_sptr FuryFit::createFunction(bool tie)
+  CompositeFunction_sptr IqtFit::createFunction(bool tie)
   {
     CompositeFunction_sptr result( new CompositeFunction );
     QString fname;
@@ -252,7 +252,7 @@ namespace IDA
     return result;
   }
 
-  IFunction_sptr FuryFit::createUserFunction(const QString & name, bool tie)
+  IFunction_sptr IqtFit::createUserFunction(const QString & name, bool tie)
   {
     IFunction_sptr result = FunctionFactory::Instance().createFunction("UserFunction");
     std::string formula;
@@ -281,7 +281,7 @@ namespace IDA
     return result;
   }
 
-  QtProperty* FuryFit::createExponential(const QString & name)
+  QtProperty* IqtFit::createExponential(const QString & name)
   {
     QtProperty* expGroup = m_grpManager->addProperty(name);
     m_properties[name+".Intensity"] = m_dblManager->addProperty("Intensity");
@@ -293,7 +293,7 @@ namespace IDA
     return expGroup;
   }
 
-  QtProperty* FuryFit::createStretchedExp(const QString & name)
+  QtProperty* IqtFit::createStretchedExp(const QString & name)
   {
     QtProperty* prop = m_grpManager->addProperty(name);
     m_properties[name+".Intensity"] = m_dblManager->addProperty("Intensity");
@@ -309,7 +309,7 @@ namespace IDA
     return prop;
   }
 
-  QString FuryFit::fitTypeString() const
+  QString IqtFit::fitTypeString() const
   {
     switch ( m_uiForm.cbFitType->currentIndex() )
     {
@@ -326,7 +326,7 @@ namespace IDA
     };
   }
 
-  void FuryFit::typeSelection(int index)
+  void IqtFit::typeSelection(int index)
   {
     m_ffTree->clear();
 
@@ -382,7 +382,7 @@ namespace IDA
     plotGuess(NULL);
   }
 
-  void FuryFit::updatePlot()
+  void IqtFit::updatePlot()
   {
     if(!m_ffInputWS)
     {
@@ -427,7 +427,7 @@ namespace IDA
     }
   }
 
-  void FuryFit::setDefaultParameters(const QString& name)
+  void IqtFit::setDefaultParameters(const QString& name)
   {
     double background = m_dblManager->value(m_properties["BackgroundA0"]);
     //intensity is always 1-background
@@ -452,7 +452,7 @@ namespace IDA
    *
    * @param value Minimum spectrum index
    */
-  void FuryFit::specMinChanged(int value)
+  void IqtFit::specMinChanged(int value)
   {
     m_uiForm.spSpectraMax->setMinimum(value);
   }
@@ -464,22 +464,22 @@ namespace IDA
    *
    * @param value Maximum spectrum index
    */
-  void FuryFit::specMaxChanged(int value)
+  void IqtFit::specMaxChanged(int value)
   {
     m_uiForm.spSpectraMin->setMaximum(value);
   }
 
-  void FuryFit::xMinSelected(double val)
+  void IqtFit::xMinSelected(double val)
   {
     m_ffRangeManager->setValue(m_properties["StartX"], val);
   }
 
-  void FuryFit::xMaxSelected(double val)
+  void IqtFit::xMaxSelected(double val)
   {
     m_ffRangeManager->setValue(m_properties["EndX"], val);
   }
 
-  void FuryFit::backgroundSelected(double val)
+  void IqtFit::backgroundSelected(double val)
   {
     m_ffRangeManager->setValue(m_properties["BackgroundA0"], val);
     m_dblManager->setValue(m_properties["Exponential1.Intensity"], 1.0-val);
@@ -487,7 +487,7 @@ namespace IDA
     m_dblManager->setValue(m_properties["StretchedExp.Intensity"], 1.0-val);
   }
 
-  void FuryFit::propertyChanged(QtProperty* prop, double val)
+  void IqtFit::propertyChanged(QtProperty* prop, double val)
   {
     auto fitRangeSelector = m_uiForm.ppPlot->getRangeSelector("FuryFitRange");
     auto backgroundRangeSelector = m_uiForm.ppPlot->getRangeSelector("FuryFitBackground");
@@ -518,7 +518,7 @@ namespace IDA
     }
   }
 
-  void FuryFit::constrainIntensities(CompositeFunction_sptr func)
+  void IqtFit::constrainIntensities(CompositeFunction_sptr func)
   {
     std::string paramName = "f1.Intensity";
     size_t index = func->parameterIndex(paramName);
@@ -554,7 +554,7 @@ namespace IDA
     }
   }
 
-  void FuryFit::singleFit()
+  void IqtFit::singleFit()
   {
     if(!validate())
       return;
@@ -668,7 +668,7 @@ namespace IDA
     m_pythonExportWsName = "";
   }
 
-  void FuryFit::plotGuess(QtProperty*)
+  void IqtFit::plotGuess(QtProperty*)
   {
     // Do nothing if there is no sample data curve
     if(!m_uiForm.ppPlot->hasCurve("Sample"))
@@ -721,7 +721,7 @@ namespace IDA
     m_uiForm.ppPlot->addSpectrum("Guess", guessWs, 0, Qt::green);
   }
 
-  void FuryFit::fitContextMenu(const QPoint &)
+  void IqtFit::fitContextMenu(const QPoint &)
   {
     QtBrowserItem* item(NULL);
 
@@ -740,7 +740,7 @@ namespace IDA
       return;
 
     // Create the menu
-    QMenu* menu = new QMenu("FuryFit", m_ffTree);
+    QMenu* menu = new QMenu("IqtFit", m_ffTree);
     QAction* action;
 
     if ( ! fixed )
@@ -760,7 +760,7 @@ namespace IDA
     menu->popup(QCursor::pos());
   }
 
-  void FuryFit::fixItem()
+  void IqtFit::fixItem()
   {
     QtBrowserItem* item = m_ffTree->currentItem();
 
@@ -777,7 +777,7 @@ namespace IDA
     item->parent()->property()->removeSubProperty(prop);
   }
 
-  void FuryFit::unFixItem()
+  void IqtFit::unFixItem()
   {
     QtBrowserItem* item = m_ffTree->currentItem();
 
