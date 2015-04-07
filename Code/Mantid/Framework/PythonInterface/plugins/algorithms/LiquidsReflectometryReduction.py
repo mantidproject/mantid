@@ -48,7 +48,7 @@ class LiquidsReflectometryReduction(PythonAlgorithm):
         self.declareProperty(IntArrayProperty("LowResNormAxisPixelRange", [115, 210],
                                               IntArrayLengthValidator(2), direction=Direction.Input),
                                               "Pixel range to use in the low resolution direction of the normalizaion run")
-        self.declareProperty(FloatArrayProperty("TOFRange", [9000., 23600.],
+        self.declareProperty(FloatArrayProperty("TOFRange", [0., 340000.],
                                                 FloatArrayLengthValidator(2), direction=Direction.Input),
                                                 "TOF range to use")
         self.declareProperty("TofRangeFlag", True,
@@ -67,6 +67,10 @@ class LiquidsReflectometryReduction(PythonAlgorithm):
         self.declareProperty("BackSlitName", "Si", doc="Name of the back slit")
         self.declareProperty("TOFSteps", 40.0, doc="TOF step size")
         self.declareProperty("CropFirstAndLastPoints", True, doc="If true, we crop the first and last points")
+        self.declareProperty("ApplyPrimaryFraction", False, doc="If true, the primary fraction correction will be applied")
+        self.declareProperty(IntArrayProperty("PrimaryFractionRange", [117, 197],
+                                              IntArrayLengthValidator(2), direction=Direction.Input),
+                                              "Pixel range to use for calculating the primary fraction correction.")
 
     def PyExec(self):
         # The old reflectivity reduction has an offset between the input
@@ -101,6 +105,14 @@ class LiquidsReflectometryReduction(PythonAlgorithm):
             file_list.append(data_file)
         runs = reduce((lambda x, y: '%s+%s' % (x, y)), file_list)
         ws_event_data = Load(Filename=runs)
+        
+        # Compute the primary fraction using the unprocessed workspace
+        apply_primary_fraction = self.getProperty("ApplyPrimaryFraction").value
+        primary_fraction = [1.0, 0.0]
+        if apply_primary_fraction:
+            signal_range = self.getProperty("PrimaryFractionRange").value
+            primary_fraction = LRPrimaryFraction(InputWorkspace=ws_event_data,
+                                                 SignalRange=signal_range)
 
         # Get the TOF range
         TOFrangeFlag = self.getProperty("TofRangeFlag")
@@ -127,27 +139,31 @@ class LiquidsReflectometryReduction(PythonAlgorithm):
                                          dataPeakRange, bck_request, dataBackRange)
 
         # ----- Normalization -------------------------------------------------
-        # Load normalization
-        ws_event_norm = LoadEventNexus("REF_L_%s" % normalizationRunNumber,
-                                       OutputWorkspace="REF_L_%s" % normalizationRunNumber)
-        crop_request = self.getProperty("LowResNormAxisPixelRangeFlag")
-        low_res_range = self.getProperty("LowResNormAxisPixelRange").value
-        bck_request = self.getProperty("SubtractNormBackground").value
-        norm_cropped = self.process_data(ws_event_norm, TOFrange,
-                                         crop_request, low_res_range,
-                                         normPeakRange, bck_request, normBackRange)
-        # Avoid leaving trash behind
-        AnalysisDataService.remove(str(ws_event_norm))
+        perform_normalization = self.getProperty("NormFlag").value
+        if perform_normalization:
+            # Load normalization
+            ws_event_norm = LoadEventNexus("REF_L_%s" % normalizationRunNumber,
+                                           OutputWorkspace="REF_L_%s" % normalizationRunNumber)
+            crop_request = self.getProperty("LowResNormAxisPixelRangeFlag")
+            low_res_range = self.getProperty("LowResNormAxisPixelRange").value
+            bck_request = self.getProperty("SubtractNormBackground").value
+            norm_cropped = self.process_data(ws_event_norm, TOFrange,
+                                             crop_request, low_res_range,
+                                             normPeakRange, bck_request, normBackRange)
+            # Avoid leaving trash behind
+            AnalysisDataService.remove(str(ws_event_norm))
+    
+            # Sum up the normalization peak
+            norm_summed = SumSpectra(InputWorkspace = norm_cropped)
 
-        # Sum up the normalization peak
-        norm_summed = SumSpectra(InputWorkspace = norm_cropped)
-
-        # Normalize the data
-        normalized_data = data_cropped / norm_summed
-        # Avoid leaving trash behind
-        AnalysisDataService.remove(str(data_cropped))
-        AnalysisDataService.remove(str(norm_cropped))
-        AnalysisDataService.remove(str(norm_summed))
+            # Normalize the data
+            normalized_data = data_cropped / norm_summed
+            # Avoid leaving trash behind
+            AnalysisDataService.remove(str(data_cropped))
+            AnalysisDataService.remove(str(norm_cropped))
+            AnalysisDataService.remove(str(norm_summed))
+        else:
+            normalized_data = data_cropped
 
         normalized_data = ConvertToPointData(InputWorkspace=normalized_data,
                                              OutputWorkspace=str(normalized_data))
@@ -190,6 +206,13 @@ class LiquidsReflectometryReduction(PythonAlgorithm):
 
         q_rebin = Rebin(InputWorkspace=q_workspace, Params=q_range,
                         OutputWorkspace=name_output_ws)
+
+        # Apply the primary fraction 
+        if apply_primary_fraction:
+            ws_fraction = CreateSingleValuedWorkspace(DataValue=primary_fraction[0],
+                                                      ErrorValue=primary_fraction[1])
+            q_rebin = Multiply(LHSWorkspace=q_rebin, RHSWorkspace=ws_fraction,
+                               OutputWorkspace=name_output_ws)
 
         # Crop to non-zero values
         data_y = q_rebin.readY(0)
@@ -430,10 +453,10 @@ class LiquidsReflectometryReduction(PythonAlgorithm):
                 scaling_factor_file = scaling_factor_files[0]
                 if not os.path.isfile(scaling_factor_file):
                     logger.error("Could not find scaling factor file %s" % scaling_factor_file)
-                    return
+                    return workspace
             else:
                 logger.error("Could not find scaling factor file %s" % scaling_factor_file)
-                return
+                return workspace
 
         # Get the incident medium
         incident_medium = self.getProperty("IncidentMediumSelected").value

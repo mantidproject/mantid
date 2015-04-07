@@ -51,6 +51,21 @@ namespace SliceViewer
 class CompositePeaksPresenter;
 class ProxyCompositePeaksPresenter;
 
+// Static Const values
+static const std::string g_iconPathPrefix = ":/SliceViewer/icons/";
+static const std::string g_iconZoomPlus = g_iconPathPrefix + "colour zoom plus scale 32x32.png";
+static const std::string g_iconZoomMinus = g_iconPathPrefix + "colour zoom minus scale 32x32.png";
+static const std::string g_iconViewFull = g_iconPathPrefix + "view-fullscreen.png";
+static const std::string g_iconCutOn = g_iconPathPrefix + "cut on 32x32.png";
+static const std::string g_iconCut = g_iconPathPrefix + "cut 32x32.png";
+static const std::string g_iconGridOn = g_iconPathPrefix + "grid on 32x32.png";
+static const std::string g_iconGrid = g_iconPathPrefix + "grid 32x32.png";
+static const std::string g_iconRebinOn = g_iconPathPrefix + "rebin on 32x32.png";
+static const std::string g_iconRebin = g_iconPathPrefix + "rebin 32x32.png";
+static const std::string g_iconPeakListOn = g_iconPathPrefix + "Peak List on 32x32.png";
+static const std::string g_iconPeakList = g_iconPathPrefix + "Peak List 32x32.png";
+
+
 /** GUI for viewing a 2D slice out of a multi-dimensional workspace.
  * You can select which dimension to plot as X,Y, and the cut point
  * along the other dimension(s).
@@ -171,6 +186,7 @@ public slots:
   void copyImageToClipboard();
   void onPeaksViewerOverlayOptions();
 
+
   // Synced checkboxes
   void LineMode_toggled(bool);
   void SnapToGrid_toggled(bool);
@@ -216,6 +232,7 @@ private:
   QString ensurePngExtension(const QString& fname) const;
 
 private:
+  
 
   // -------------------------- Widgets ----------------------------
 

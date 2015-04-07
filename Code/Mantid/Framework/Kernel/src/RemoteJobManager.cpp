@@ -1,6 +1,14 @@
+#include <ostream>
+#include <sstream>
+
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/RemoteJobManager.h"
+
+#include <Poco/AutoPtr.h>
+#include <Poco/DOM/Element.h>
+#include <Poco/DOM/NodeList.h>
+#include <Poco/DOM/Text.h>
 
 #include <Poco/Base64Encoder.h>
 #include <Poco/Net/HTTPSClientSession.h>
@@ -9,14 +17,6 @@
 #include <Poco/Net/HTTPCookie.h>
 #include <Poco/Net/NameValueCollection.h>
 #include <Poco/URI.h>
-
-#include <Poco/AutoPtr.h>
-#include <Poco/DOM/Element.h>
-#include <Poco/DOM/NodeList.h>
-#include <Poco/DOM/Text.h>
-
-#include <ostream>
-#include <sstream>
 
 namespace Mantid {
 namespace Kernel {

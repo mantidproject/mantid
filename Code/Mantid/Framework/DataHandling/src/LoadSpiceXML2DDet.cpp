@@ -1,24 +1,23 @@
+#include <algorithm>
+#include <fstream>
+
 #include "MantidDataHandling/LoadSpiceXML2DDet.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/ArrayProperty.h"
 
-#include "Poco/SAX/InputSource.h"
-#include "Poco/DOM/Document.h"
-#include "Poco/DOM/DOMParser.h"
-#include "Poco/DOM/AutoPtr.h"
-
-#include "Poco/DOM/NodeIterator.h"
-#include "Poco/DOM/NodeFilter.h"
-
-#include "Poco/DOM/Node.h"
-#include "Poco/DOM/NodeList.h"
-#include "Poco/DOM/NamedNodeMap.h"
-
-#include <algorithm>
-#include <fstream>
 #include <boost/algorithm/string.hpp>
+
+#include <Poco/DOM/AutoPtr.h>
+#include <Poco/DOM/Document.h>
+#include <Poco/DOM/DOMParser.h>
+#include <Poco/DOM/NamedNodeMap.h>
+#include <Poco/DOM/Node.h>
+#include <Poco/DOM/NodeFilter.h>
+#include <Poco/DOM/NodeIterator.h>
+#include <Poco/DOM/NodeList.h>
+#include <Poco/SAX/InputSource.h>
 
 namespace Mantid {
 namespace DataHandling {
