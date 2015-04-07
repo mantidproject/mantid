@@ -33,7 +33,7 @@ public:
    * @return BoxController instance
    */
   BoxController(size_t nd)
-      : nd(nd), m_maxId(0), m_SplitThreshold(1024), m_numSplit(1),
+      : nd(nd), m_maxId(0), m_SplitThreshold(1024), m_numSplit(1), m_numTopSplit(1),
       m_fileIO(boost::shared_ptr<API::IBoxControllerIO>()), m_splitTopInto(boost::none) {
     // TODO: Smarter ways to determine all of these values
     m_maxDepth = 5;
@@ -170,9 +170,10 @@ public:
                                   "too high of a dimension index.");
     // If the vector is not created, then create it
     if (!m_splitTopInto) {
-      m_splitTopInto = std::vector<size_t>(nd);
+      m_splitTopInto = std::vector<size_t>(nd,1);
     }
     m_splitTopInto.get()[dim] = num;
+    calcNumTopSplit();
   }
 
   //-----------------------------------------------------------------------------------
@@ -403,13 +404,32 @@ private:
     resetMaxNumBoxes();
   }
 
+  /// When you split an MDBox by force, it becomes this many sub boxes
+  void calcNumTopSplit() {
+    m_numTopSplit = 1;
+    for (size_t d = 0; d < nd; d++) {
+      m_numTopSplit *= m_splitTopInto.get()[d];
+    }
+    /// And this changes the max # of boxes too
+    resetMaxNumBoxes();
+  }
+
   /// Calculate the vector of the max # of MDBoxes per level.
   void resetMaxNumBoxes() {
     // Now calculate the max # of boxes
     m_maxNumMDBoxes.resize(m_maxDepth + 1, 0); // Reset to 0
     m_maxNumMDBoxes[0] = 1;
     for (size_t depth = 1; depth < m_maxNumMDBoxes.size(); depth++)
-      m_maxNumMDBoxes[depth] = m_maxNumMDBoxes[depth - 1] * double(m_numSplit);
+    {
+      if (depth ==1 && m_splitTopInto)
+      {
+        m_maxNumMDBoxes[depth] = m_maxNumMDBoxes[depth - 1] * double(m_numTopSplit);
+      }
+      else 
+      {
+        m_maxNumMDBoxes[depth] = m_maxNumMDBoxes[depth - 1] * double(m_numSplit);
+      }
+    }
   }
 
 protected:
@@ -455,6 +475,9 @@ private:
 
   /// When you split a MDBox, it becomes this many sub-boxes
   size_t m_numSplit;
+
+  /// When you split a top level MDBox by force, it becomes this many sub boxes
+  size_t m_numTopSplit;
 
   /// For adding events tasks
   size_t m_addingEvents_eventsPerTask;

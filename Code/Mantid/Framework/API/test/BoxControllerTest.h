@@ -171,6 +171,58 @@ public:
     doTest_numBoxes(bc, 11);
   }
 
+  /// Make sure that the correct number of boxes are recorded when we use splitting
+  void test_trackNumBoxesWithTopLevelSplitting()
+  {
+    BoxController bc(2);
+    bc.setSplitInto(10);
+
+    bc.setSplitTopInto(0,4);
+    bc.setSplitTopInto(1,12);
+
+    // This includes a forced top level split and a subsequent split of two boxes
+    TSM_ASSERT_DELTA("The average depth should be 0", bc.getAverageDepth(), 0.0, 1e-5 );
+    bc.trackNumBoxes(0);
+    TSM_ASSERT_DELTA("The average depth should be about 1", bc.getAverageDepth(), 1.0, 1e-5 );
+   
+    bc.trackNumBoxes(1);
+    bc.trackNumBoxes(1);
+
+    const std::vector<size_t> & num = bc.getNumMDBoxes();
+    const std::vector<size_t> & numGridBoxes = bc.getNumMDGridBoxes();
+    TSM_ASSERT_EQUALS("Should be 1 MDGridBox structure at the 0th level", numGridBoxes[0], 1);
+    TSM_ASSERT_EQUALS("Should be 48 - 2 MDBox structures at the 1st level", num[1], 46);
+    TSM_ASSERT_EQUALS("Should be 2 MDGridBox structure at the 1st level", numGridBoxes[1], 2);
+    TSM_ASSERT_EQUALS("Should be 2 * 100 MDBox structures at the 2nd level.", num[2], 200);
+  }
+
+  void test_trackNumBoxesWithTopLevelSplittingAndSettingMaxDepth()
+  {
+    BoxController bc(2);
+
+    bc.setMaxDepth(4);
+    bc.setSplitInto(10);
+
+    bc.setSplitTopInto(0,4);
+    bc.setSplitTopInto(1,12);
+    bc.setMaxDepth(10);
+
+    // This includes a forced top level split and a subsequent split of two boxes
+    TSM_ASSERT_DELTA("The average depth should be 0", bc.getAverageDepth(), 0.0, 1e-5 );
+    bc.trackNumBoxes(0);
+    TSM_ASSERT_DELTA("The average depth should be about 1", bc.getAverageDepth(), 1.0, 1e-5 );
+
+    bc.trackNumBoxes(1);
+    bc.trackNumBoxes(1);
+
+    const std::vector<size_t> & num = bc.getNumMDBoxes();
+    const std::vector<size_t> & numGridBoxes = bc.getNumMDGridBoxes();
+    TSM_ASSERT_EQUALS("Should be 1 MDGridBox structure at the 0th level", numGridBoxes[0], 1);
+    TSM_ASSERT_EQUALS("Should be 48 - 2 MDBox structures at the 1st level", num[1], 46);
+    TSM_ASSERT_EQUALS("Should be 2 MDGridBox structure at the 1st level", numGridBoxes[1], 2);
+    TSM_ASSERT_EQUALS("Should be 2 * 100 MDBox structures at the 2nd level.", num[2], 200);
+  }
+
   /// Compare two box controllers and assert each part of them.
   void compareBoxControllers(BoxController & a, BoxController & b)
   {
@@ -190,6 +242,7 @@ public:
         TS_ASSERT_DIFFERS(a.getFileIO(),b.getFileIO());
     }
 
+    // Check for top level splitting
     if (a.getSplitTopInto() && b.getSplitTopInto())
     {
       for (size_t d=0; d < a.getNDims(); d++)
@@ -236,7 +289,7 @@ public:
     TS_ASSERT(!xml.empty());
 
     // Read it back
-    BoxController b(1);
+    BoxController b(2);
     b.fromXMLString(xml);
     // Check that it is the same
     compareBoxControllers(a, b);
@@ -291,9 +344,6 @@ public:
     // Check that settings are the same but BC are different
     compareBoxControllers(*a, *b);
     TS_ASSERT(b->isFileBacked());
-
-
-
   }
 
   void test_MRU_access()
@@ -337,8 +387,6 @@ public:
     TS_ASSERT(!a->isFileBacked());
     TSM_ASSERT("Box controller should now close the faked file",!pS->isOpened());
   }
-
-
 };
 
 #endif

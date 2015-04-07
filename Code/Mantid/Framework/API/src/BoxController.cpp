@@ -252,20 +252,14 @@ void BoxController::fromXMLString(const std::string &xml) {
   // Need to make sure that we handle box controllers which did not have the SplitTopInto 
   // attribute 
   Poco::XML::NodeList* nodes = pBoxElement->getElementsByTagName("SplitTopInto");
-  if (nodes->length() > 0)
-  {
+  if (nodes->length() > 0) {
     s = pBoxElement->getChildElement("SplitTopInto")->innerText();
-    if (s.empty())
-    {
+    if (s.empty()) {
       this->m_splitTopInto = boost::none;
-    }
-    else
-    {
+    } else {
       this->m_splitTopInto = splitStringIntoVector<size_t>(s);
     }
-  }
-  else
-  {
+  } else {
     this->m_splitTopInto = boost::none;
   }
 
@@ -276,6 +270,10 @@ void BoxController::fromXMLString(const std::string &xml) {
   this->m_numMDGridBoxes = splitStringIntoVector<size_t>(s);
 
   this->calcNumSplit();
+
+  if (m_splitTopInto) {
+    this->calcNumTopSplit();
+  }
 }
 /** function clears the file-backed status of the box controller */
 void BoxController::clearFileBacked() {
