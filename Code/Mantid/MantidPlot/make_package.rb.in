@@ -86,7 +86,6 @@ end
 `mkdir Contents/Libraries`
 vatesfiles = ["Contents/MacOS/VatesSimpleGui","Contents/MacOS/libMantidParaViewQtWidgets.dylib","Contents/MacOS/libMantidVatesAPI.dylib"] 
 vatesfiles.each do |file|
-  `install_name_tool -add_rpath @loader_path/../Libraries/ #{file}` 
   dependencies = `otool -L #{file}`
   dependencies.split("\n").each do |dependency|
     currentname = dependency.strip.split(" ")
@@ -102,7 +101,6 @@ vatesfiles.each do |file|
   end
 end
 
-`install_name_tool -add_rpath @loader_path/../Contents/Libraries pvplugins/libMantidVatesSimpleGuiViewWidgets.dylib`
 dependencies = `otool -L pvplugins/libMantidVatesSimpleGuiViewWidgets.dylib`
 dependencies.split("\n").each do |dependency|
     currentname = dependency.strip.split(" ")
