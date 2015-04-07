@@ -104,7 +104,6 @@ TMDE(MDGridBox)::MDGridBox(MDBox<MDE, nd> *box)
   // How many is it split?
   // If we are at the top level and we have a specific top level split, then set it.
   boost::optional<std::vector<size_t>> splitTopInto = this->m_BoxController->getSplitTopInto();
-  std::vector<size_t> splitIntoBuffer;
   if (this->getDepth() == 0 && splitTopInto)
   {
     for (size_t d = 0; d < nd; d++)
