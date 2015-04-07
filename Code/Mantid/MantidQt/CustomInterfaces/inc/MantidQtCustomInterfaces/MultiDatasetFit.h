@@ -248,7 +248,11 @@ private slots:
   void valueChanged(int,int);
   void setAllValues(double);
   void fixParameter(int,bool);
+  void setAllFixed(bool);
+  void paste();
 private:
+  bool eventFilter(QObject * obj, QEvent * ev);
+  void showContextMenu();
   Ui::EditLocalParameterDialog m_uiForm;
   QString m_parName;
   QList<double> m_values;
@@ -264,9 +268,12 @@ public:
 signals:
   void setAllValues(double);
   void fixParameter(int,bool);
+  void setAllFixed(bool);
 private slots:
   void buttonPressed();
   void fixParameter();
+  void fixAll();
+  void unfixAll();
 private:
   QLineEdit* m_editor;
   QAction *m_fixAction;
@@ -285,6 +292,7 @@ public:
 signals:
   void setAllValues(double);
   void fixParameter(int,bool);
+  void setAllFixed(bool);
 protected:
   void paint(QPainter * painter, const QStyleOptionViewItem & option, const QModelIndex & index) const;
 private:

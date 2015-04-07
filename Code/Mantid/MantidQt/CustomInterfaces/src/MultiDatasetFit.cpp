@@ -27,6 +27,7 @@
 #include <QSettings>
 #include <QMenu>
 #include <QPainter>
+#include <QClipboard>
 
 #include <boost/make_shared.hpp>
 #include <qwt_plot_curve.h>
@@ -690,6 +691,16 @@ LocalParameterEditor::LocalParameterEditor(QWidget *parent, int index, bool fixe
   connect(m_fixAction,SIGNAL(activated()),this,SLOT(fixParameter()));
   setMenu->addAction(m_fixAction);
 
+  action = new QAction("Fix all",this);
+  action->setToolTip("Fix all parameters.");
+  connect(action,SIGNAL(activated()),this,SLOT(fixAll()));
+  setMenu->addAction(action);
+
+  action = new QAction("Unix all",this);
+  action->setToolTip("Unfix all parameters.");
+  connect(action,SIGNAL(activated()),this,SLOT(unfixAll()));
+  setMenu->addAction(action);
+
   button->setMenu(setMenu);
 
 }
@@ -707,6 +718,16 @@ void LocalParameterEditor::fixParameter()
   emit fixParameter(m_index, m_fixed);
 }
 
+void LocalParameterEditor::fixAll()
+{
+  emit setAllFixed(true);
+}
+
+void LocalParameterEditor::unfixAll()
+{
+  emit setAllFixed(false);
+}
+
 /*==========================================================================================*/
 LocalParameterItemDelegate::LocalParameterItemDelegate(EditLocalParameterDialog *parent):
   QStyledItemDelegate(parent),
@@ -719,6 +740,7 @@ QWidget* LocalParameterItemDelegate::createEditor(QWidget * parent, const QStyle
   m_currentEditor = new LocalParameterEditor(parent,index.row(), owner()->isFixed(index.row()));
   connect(m_currentEditor,SIGNAL(setAllValues(double)),this,SIGNAL(setAllValues(double)));
   connect(m_currentEditor,SIGNAL(fixParameter(int,bool)),this,SIGNAL(fixParameter(int,bool)));
+  connect(m_currentEditor,SIGNAL(setAllFixed(bool)),this,SIGNAL(setAllFixed(bool)));
   m_currentEditor->installEventFilter(const_cast<LocalParameterItemDelegate*>(this));
  return m_currentEditor;
 }
@@ -796,6 +818,9 @@ EditLocalParameterDialog::EditLocalParameterDialog(MultiDatasetFit *multifit, co
   m_uiForm.tableWidget->setItemDelegateForColumn(1,deleg);
   connect(deleg,SIGNAL(setAllValues(double)),this,SLOT(setAllValues(double)));
   connect(deleg,SIGNAL(fixParameter(int,bool)),this,SLOT(fixParameter(int,bool)));
+  connect(deleg,SIGNAL(setAllFixed(bool)),this,SLOT(setAllFixed(bool)));
+
+  m_uiForm.tableWidget->installEventFilter(this);
 }
 
 /**
@@ -843,6 +868,69 @@ QList<bool> EditLocalParameterDialog::getFixes() const
 void EditLocalParameterDialog::fixParameter(int index, bool fix)
 {
   m_fixes[index] = fix;
+}
+
+void EditLocalParameterDialog::setAllFixed(bool value)
+{
+  if ( m_fixes.empty() ) return;
+  for(int i = 0; i < m_fixes.size(); ++i)
+  {
+    m_fixes[i] = value;
+    // it's the only way I am able to make the table to repaint itself
+    auto text = QString::number(m_values[i]);
+    m_uiForm.tableWidget->item(i,1)->setText( text + " " );
+    m_uiForm.tableWidget->item(i,1)->setText( text );
+  }
+}
+
+bool EditLocalParameterDialog::eventFilter(QObject * obj, QEvent * ev)
+{
+  if ( obj == m_uiForm.tableWidget && ev->type() == QEvent::ContextMenu )
+  {
+    showContextMenu();
+  }
+  return QDialog::eventFilter(obj,ev);
+}
+
+void EditLocalParameterDialog::showContextMenu()
+{
+  auto selection = m_uiForm.tableWidget->selectionModel()->selectedColumns();
+
+  bool hasSelection = false;
+
+  for(auto index = selection.begin(); index != selection.end(); ++index)
+  {
+    if ( index->column() == 1 ) hasSelection = true;
+  }
+
+  if ( !hasSelection ) return;
+
+  auto text = QApplication::clipboard()->text();
+  bool canPaste = !text.isEmpty();
+
+  QMenu *menu = new QMenu(this);
+  QAction *action = new QAction("Paste",this);
+  action->setToolTip("Paste data from clipboard.");
+  connect(action,SIGNAL(activated()),this,SLOT(paste()));
+  action->setEnabled(canPaste);
+  menu->addAction(action);
+
+  menu->exec(QCursor::pos());
+}
+
+void EditLocalParameterDialog::paste()
+{
+  auto text = QApplication::clipboard()->text();
+  auto vec = text.split(QRegExp("\\s|,"),QString::SkipEmptyParts);
+  auto n = qMin(vec.size(), m_uiForm.tableWidget->rowCount());
+  for(int i = 0; i < n; ++i)
+  {
+    auto str = vec[i];
+    bool ok;
+    m_values[i] = str.toDouble(&ok);
+    if ( !ok ) str = "0";
+    m_uiForm.tableWidget->item(i,1)->setText( str );
+  }
 }
 
 /*==========================================================================================*/
@@ -988,7 +1076,6 @@ void MultiDatasetFit::fit()
   try
   {
     auto fun = createFunction();
-    std::cerr << fun->asString() << std::endl;
     auto fit = Mantid::API::AlgorithmManager::Instance().create("Fit");
     fit->initialize();
     fit->setProperty("Function", fun );
