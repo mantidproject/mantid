@@ -230,6 +230,10 @@ class LiquidsReflectometryReduction(PythonAlgorithm):
             q_rebin = Multiply(LHSWorkspace=q_rebin, RHSWorkspace=ws_fraction,
                                OutputWorkspace=name_output_ws)
 
+        # Replace NaNs by zeros
+        q_rebin = ReplaceSpecialValues(InputWorkspace=q_rebin,
+                                       OutputWorkspace=name_output_ws,
+                                       NaNValue=0.0, NaNError=0.0)
         # Crop to non-zero values
         data_y = q_rebin.readY(0)
         low_q = None
@@ -301,15 +305,6 @@ class LiquidsReflectometryReduction(PythonAlgorithm):
         # Add the offset
         angle_offset_deg = self.getProperty("AngleOffset").value
         return theta + angle_offset_deg * math.pi / 180.0
-
-    def clocking_correction(self, workspace, pixel_range, range_width=3):
-        """
-            Applies the "clocking correction". The pixel range is
-            the range that contains the reflectivity data. Compute the
-            average noise per pixel over two small bands on each side.
-            The subtract that noise pixel-wise from the data
-        """
-        pass
 
     def subtract_background(self, workspace, peak_range, background_range,
                             low_res_range, sum_peak=False, offset=None):
