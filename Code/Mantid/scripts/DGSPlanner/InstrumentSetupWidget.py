@@ -45,10 +45,10 @@ class GonioTableModel(QtCore.QAbstractTableModel):
             return self.gonioRows[section]
 
     def data(self, index, role):
+        #pylint: disable=too-many-branches
         row = index.row()
         column = index.column()
         if role == QtCore.Qt.EditRole or role == QtCore.Qt.DisplayRole:
-            
             if column==0:
                 value=QString(self.labels[row])
             elif column==1:
@@ -63,20 +63,23 @@ class GonioTableModel(QtCore.QAbstractTableModel):
                 value=QString(str(self.steps[row]))
             return value
         elif role == QtCore.Qt.BackgroundRole:
+            brush=QtGui.QBrush(QtCore.Qt.white)
             if column==0 and len(self.labels[row])>0 and self.labels.count(self.labels[row])==1:
-                return QtGui.QBrush(QtCore.Qt.white)
+                pass
             elif column==1 and self.validDir(self.dirstrings[row]):
-                return QtGui.QBrush(QtCore.Qt.white)
+                pass
             elif column==2 and (self.senses[row]==1 or self.senses[row]==-1):
-                return QtGui.QBrush(QtCore.Qt.white)
+                pass
             elif (column==3 or column==4) and self.minvalues[row]<=self.maxvalues[row]:
-                return QtGui.QBrush(QtCore.Qt.white)
+                pass
             elif column==5 and self.steps[row]>0.1:
-                return QtGui.QBrush(QtCore.Qt.white)
+                pass
             else:
-                return QtGui.QBrush(QtCore.Qt.red)
+                brush=QtGui.QBrush(QtCore.Qt.red)
+            return brush
 
     def setData(self, index, value, role = QtCore.Qt.EditRole):
+        #pylint: disable=too-many-branches
         if role == QtCore.Qt.EditRole:
             row = index.row()
             column = index.column()
@@ -113,7 +116,7 @@ class GonioTableModel(QtCore.QAbstractTableModel):
                 self.changed.emit(values)
                 return True
         return False
-    
+
     def validDir(self,dirstring):
         d=numpy.fromstring(dirstring,dtype=float,sep=',')
         if len(d)==3:
@@ -219,7 +222,7 @@ class InstrumentSetupWidget(QtGui.QWidget):
         self.combo.activated[str].connect(self.instrumentSelected)
         self.fast.stateChanged.connect(self.updateFast)
         #call instrumentSelected once
-        self.instrumentSelected(self.instrument)    
+        self.instrumentSelected(self.instrument)
         #connect goniometer change with figure
         self.goniomodel.changed.connect(self.updateFigure)
         self.updateAll()
@@ -242,13 +245,14 @@ class InstrumentSetupWidget(QtGui.QWidget):
         self.gonfig.text(1,0,-2.5,'X',zdir=None,color='black')
         self.gonfig.plot([0,0],[-3,-3],[-2,-0.5],zdir='y',color='black',linewidth=3)
         self.gonfig.text(0,-1,-2.5,'Beam',zdir=None,color='black')
-        
+
         matplotlib.pyplot.gca().set_aspect('equal', adjustable='datalim')
         self.gonfig.view_init(10,45)
-        
+
         colors=['b','g','r']
         for i in range(3):
-            circle=numpy.array([mantid.kernel.Quat(0,0,0.5*numpy.sin(t),0.5*numpy.cos(t)) for t in numpy.arange(0,1.51*numpy.pi,0.1*numpy.pi)])
+            circle=numpy.array([mantid.kernel.Quat(0,0,0.5*numpy.sin(t),0.5*numpy.cos(t)) for t in
+                                numpy.arange(0,1.51*numpy.pi,0.1*numpy.pi)])
             if self.goniometerRotationSense[i]==1:
                 circle=numpy.append(circle,mantid.kernel.Quat(0,0,-0.45,-0.05))
                 circle=numpy.append(circle,mantid.kernel.Quat(0,0,-0.55,-0.05))
@@ -301,7 +305,7 @@ class InstrumentSetupWidget(QtGui.QWidget):
         d=dict()
         d['makeFast']=self.fast.isChecked()
         self.updateAll(**d)
-        
+
     def checkValidInputs(self, *dummy_args, **dummy_kwargs):
         sender = self.sender()
         state = sender.validator().validate(sender.text(), 0)[0]

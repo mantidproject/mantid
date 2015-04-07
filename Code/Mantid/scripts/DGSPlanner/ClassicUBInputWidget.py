@@ -88,7 +88,7 @@ class ClassicUBInputWidget(QtGui.QWidget):
         self._edituz.setFixedWidth(metrics.width("8888.88888"))
         self._editvx.setFixedWidth(metrics.width("8888.88888"))
         self._editvy.setFixedWidth(metrics.width("8888.88888"))
-        self._editvz.setFixedWidth(metrics.width("8888.88888"))       
+        self._editvz.setFixedWidth(metrics.width("8888.88888"))
         #layout
         grid = QtGui.QGridLayout()
         self.setLayout(grid)
@@ -161,14 +161,14 @@ class ClassicUBInputWidget(QtGui.QWidget):
             self.sender().setStyleSheet('QLineEdit { background-color: #ff0000 }')
 
     def check_state_latt(self, *dummy_args, **dummy_kwargs):
-        sender = self.sender()
-        validator = sender.validator()
-        state = validator.validate(sender.text(), 0)[0]
+        senderWidget = self.sender()
+        validator = senderWidget.validator()
+        state = validator.validate(senderWidget.text(), 0)[0]
         if state == QtGui.QValidator.Acceptable:
             color = '#ffffff'
         else:
             color = '#ff0000'
-        sender.setStyleSheet('QLineEdit { background-color: %s }' % color)
+        senderWidget.setStyleSheet('QLineEdit { background-color: %s }' % color)
         if state == QtGui.QValidator.Acceptable:
             self.validateAll()
 

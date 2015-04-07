@@ -1,4 +1,4 @@
-#pylint: disable=invalid-name,no-name-in-module,too-many-instance-attributes
+#pylint: disable=invalid-name,no-name-in-module,too-many-instance-attributes,super-on-old-class,too-few-public-methods
 from PyQt4 import QtGui, QtCore
 import sys
 import numpy
@@ -16,7 +16,7 @@ def returnValid(validity,teststring,pos):
 
 
 class EmptyOrDoubleValidator(QtGui.QValidator):
-    def __init__(self, parent):
+    def __init__(self, dummy_parent):
         super(EmptyOrDoubleValidator,self).__init__()
     def validate(self,teststring, pos):
         if len(str(teststring))==0:
@@ -34,10 +34,9 @@ class EmptyOrDoubleValidator(QtGui.QValidator):
                     return returnValid(QtGui.QValidator.Invalid,teststring,pos)
 
 class V3DValidator(QtGui.QValidator):
-    def __init__(self, parent):
+    def __init__(self, dummy_parent):
         super(V3DValidator,self).__init__()
-    
-    
+
     def validate(self,teststring, pos):
         parts=str(teststring).split(',')
         if len(parts)>3:
@@ -48,7 +47,7 @@ class V3DValidator(QtGui.QValidator):
                 dummy_1=float(parts[1])
                 dummy_2=float(parts[2])
                 return returnValid(QtGui.QValidator.Acceptable,teststring,pos)
-            except ValueError:  
+            except ValueError:
                 try:
                     dummy_0=float(parts[0]+'1')
                     dummy_1=float(parts[1]+'1')
@@ -56,8 +55,8 @@ class V3DValidator(QtGui.QValidator):
                     return returnValid(QtGui.QValidator.Intermediate,teststring,pos)
                 except ValueError:
                     return returnValid(QtGui.QValidator.Invalid,teststring,pos)
-        return returnValid(QtGui.QValidator.Intermediate,teststring,pos)          
-                     
+        return returnValid(QtGui.QValidator.Intermediate,teststring,pos)
+
 def FloatToQString(value):
     if numpy.isfinite(value):
         return QString(format(value,'.3f'))
@@ -71,9 +70,9 @@ def translation(number,character):
         return character
     if number==-1:
         return '-'+character
-    return str(number)+character    
-    
-    
+    return str(number)+character
+
+
 class DimensionSelectorWidget(QtGui.QWidget):
     changed=QtCore.pyqtSignal(dict)
     def __init__(self,parent=None):
@@ -159,7 +158,7 @@ class DimensionSelectorWidget(QtGui.QWidget):
         grid.addWidget(self._comboDim4,4,0)
         grid.addWidget(self._editMin4,4,1)
         grid.addWidget(self._editMax4,4,2)
-        
+
         self._editBasis1.setText(QString(self.basis[0]))
         self._editBasis2.setText(QString(self.basis[1]))
         self._editBasis3.setText(QString(self.basis[2]))
@@ -185,7 +184,7 @@ class DimensionSelectorWidget(QtGui.QWidget):
         self._comboDim4.currentIndexChanged.connect(self.comboChanged)
         self.inhibitSignal=False
         self.updateChanges()
-        
+
     def comboChanged(self,idx):
         if self.inhibitSignal:
             return
@@ -202,7 +201,7 @@ class DimensionSelectorWidget(QtGui.QWidget):
         self.updateGui()
         self.inhibitSignal=False
         self.updateChanges()
-        
+
     def stepChanged(self):
         sender = self.sender()
         validator = sender.validator()
@@ -218,8 +217,7 @@ class DimensionSelectorWidget(QtGui.QWidget):
             else:
                 self.dimStep[1]=float(sender.text())
             self.updateChanges()
-        
-        
+
     def limitsChanged(self):
         minSenders=[self._editMin1,self._editMin2,self._editMin3,self._editMin4]
         maxSenders=[self._editMax1,self._editMax2,self._editMax3,self._editMax4]
@@ -255,7 +253,7 @@ class DimensionSelectorWidget(QtGui.QWidget):
         maxSenders[senderIndex].setStyleSheet('QLineEdit { background-color: %s }' % color)
         if color=='#ffffff':
             self.updateChanges()
-        
+
     def basisChanged(self):
         sender = self.sender()
         validator = sender.validator()
@@ -269,7 +267,7 @@ class DimensionSelectorWidget(QtGui.QWidget):
         sender.setStyleSheet('QLineEdit { background-color: %s }' % color)
         if state == QtGui.QValidator.Acceptable:
             self.validateBasis()
-    
+
     def validateBasis(self):
         color = '#ff0000'
         if self._editBasis1.validator().validate(self._editBasis1.text(), 0)[0]==QtGui.QValidator.Acceptable and \
@@ -283,9 +281,9 @@ class DimensionSelectorWidget(QtGui.QWidget):
                 self.basis=[str(self._editBasis1.text()),str(self._editBasis2.text()),str(self._editBasis3.text())]
                 self.updateNames([b1,b2,b3])
         self._editBasis1.setStyleSheet('QLineEdit { background-color: %s }' % color)
-        self._editBasis2.setStyleSheet('QLineEdit { background-color: %s }' % color)    
+        self._editBasis2.setStyleSheet('QLineEdit { background-color: %s }' % color)
         self._editBasis3.setStyleSheet('QLineEdit { background-color: %s }' % color)
-        
+
     def updateNames(self,basis):
         chars=['H','K','L']
         for i in range(3):
@@ -299,7 +297,7 @@ class DimensionSelectorWidget(QtGui.QWidget):
         self.dimIndex=[0,1,2,3]
         self.updateGui()
         self.updateChanges()
-        
+
     def updateGui(self):
         self._editMin1.setText(FloatToQString(self.dimMin[0]))
         self._editMin2.setText(FloatToQString(self.dimMin[1]))
@@ -313,7 +311,7 @@ class DimensionSelectorWidget(QtGui.QWidget):
         self._editStep2.setText(QString(format(self.dimStep[1],'.3f')))
 
     def updateCombo(self):
-        self.inhibitSignal=True     
+        self.inhibitSignal=True
         self._comboDim1.clear()
         self._comboDim2.clear()
         self._comboDim3.clear()

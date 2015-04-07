@@ -1,4 +1,4 @@
-#pylint: disable=invalid-name
+#pylint: disable=invalid-name,relative-import
 import InstrumentSetupWidget,ClassicUBInputWidget,MatrixUBInputWidget,DimensionSelectorWidget
 from PyQt4 import QtCore, QtGui
 import sys
@@ -8,7 +8,6 @@ from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 from  mpl_toolkits.axisartist.grid_helper_curvelinear import GridHelperCurveLinear
 from mpl_toolkits.axisartist import Subplot
-import matplotlib.pyplot
 import numpy
 import copy
 import os
@@ -19,9 +18,10 @@ def float2Input(x):
     else:
         return None
 
+# pylint: disable=too-many-instance-attributes
 class DGSPlannerGUI(QtGui.QWidget):
     def __init__(self,ol=None,parent=None):
-        # pylint: disable=unused-argument
+        # pylint: disable=unused-argument,super-on-old-class
         super(DGSPlannerGUI,self).__init__(parent)
         #OrientedLattice
         if ValidateOL(ol):
@@ -65,7 +65,7 @@ class DGSPlannerGUI(QtGui.QWidget):
         plotControlLayout.addWidget(self.saveButton,0,7)
         controlLayout.addLayout(plotControlLayout)
         self.layout().addLayout(controlLayout)
-        
+
         #figure
         self.figure=Figure()
         self.figure.patch.set_facecolor('white')
@@ -77,8 +77,8 @@ class DGSPlannerGUI(QtGui.QWidget):
         self.layout().addWidget(self.canvas)
         self.needToClear=False
         self.saveDir=''
-        
-        #connections        
+
+        #connections
         self.matrix.UBmodel.changed.connect(self.updateUB)
         self.matrix.UBmodel.changed.connect(self.classic.updateOL)
         self.classic.changed.connect(self.matrix.UBmodel.updateOL)
@@ -92,6 +92,13 @@ class DGSPlannerGUI(QtGui.QWidget):
         #force an update of values
         self.instrumentWidget.updateAll()
         self.dimensionWidget.updateChanges()
+        #help
+        self.assistantProcess = QtCore.QProcess(self)
+        # pylint: disable=protected-access
+        self.collectionFile=os.path.join(mantid._bindir,'../docs/qthelp/MantidProject.qhc')
+        version = ".".join(mantid.__version__.split(".")[:2])
+        self.qtUrl='qthelp://org.sphinx.mantidproject.'+version+'/doc/interfaces/DGSPlanner.html'
+        self.externalUrl='http://docs.mantidproject.org/nightly/interfaces/DGSPlanner.html'
 
     @QtCore.pyqtSlot(mantid.geometry.OrientedLattice)
     def updateUB(self,ol):
@@ -108,12 +115,28 @@ class DGSPlannerGUI(QtGui.QWidget):
         if d.has_key('dimIndex') and self.masterDict.has_key('dimIndex')and d['dimIndex']!=self.masterDict['dimIndex']:
             self.needToClear=True
         self.masterDict.update(copy.deepcopy(d))
-    
+
     def help(self):
-        #TODO: put the correct url. Check for assistant and try to use that first
-        QtGui.QDesktopServices.openUrl(QtCore.QUrl("http://docs.mantidproject.org/nightly/concepts/Lattice.html"))
-        
+        #TODO: at some point use the internal mantid help, if exposed to python
+        self.assistantProcess.close()
+        self.assistantProcess.waitForFinished()
+        helpapp = QtCore.QLibraryInfo.location(QtCore.QLibraryInfo.BinariesPath) + QtCore.QDir.separator()
+        helpapp += 'assistant'
+        args = ['-enableRemoteControl', '-collectionFile',self.collectionFile,'-showUrl',self.qtUrl]
+        if os.path.isfile(helpapp):
+            self.assistantProcess.close()
+            self.assistantProcess.waitForFinished()
+            self.assistantProcess.start(helpapp, args)
+        else:
+            QtGui.QDesktopServices.openUrl(QtCore.QUrl(self.externalUrl))
+
+    def closeEvent(self,event):
+        self.assistantProcess.close()
+        self.assistantProcess.waitForFinished()
+        event.accept()
+
     def updateFigure(self):
+        # pylint: disable=too-many-branches
         if self.updatedInstrument:
             #get goniometer settings first
             gonioAxis0values=numpy.arange(self.masterDict['gonioMinvals'][0],self.masterDict['gonioMaxvals'][0]
@@ -152,9 +175,12 @@ class DGSPlannerGUI(QtGui.QWidget):
                         groupingStrings.append(name)
                         mantid.simpleapi.CloneWorkspace("__temp_instrument",OutputWorkspace=name)
                         mantid.simpleapi.SetGoniometer(Workspace=name,
-                                                       Axis0=str(g0)+","+self.masterDict['gonioDirs'][0]+","+str(self.masterDict['gonioSenses'][0]),
-                                                       Axis1=str(g1)+","+self.masterDict['gonioDirs'][1]+","+str(self.masterDict['gonioSenses'][1]),
-                                                       Axis2=str(g2)+","+self.masterDict['gonioDirs'][2]+","+str(self.masterDict['gonioSenses'][2]))
+                                                       Axis0=str(g0)+","+self.masterDict['gonioDirs'][0]+
+                                                       ","+str(self.masterDict['gonioSenses'][0]),
+                                                       Axis1=str(g1)+","+self.masterDict['gonioDirs'][1]+
+                                                       ","+str(self.masterDict['gonioSenses'][1]),
+                                                       Axis2=str(g2)+","+self.masterDict['gonioDirs'][2]+
+                                                       ","+str(self.masterDict['gonioSenses'][2]))
             mantid.simpleapi.DeleteWorkspace("__temp_instrument")
             self.wg=mantid.simpleapi.GroupWorkspaces(groupingStrings,OutputWorkspace="__temp_instrument")
             self.updatedInstrument=False
@@ -165,24 +191,24 @@ class DGSPlannerGUI(QtGui.QWidget):
         #calculate coverage
         dimensions=['Q1','Q2','Q3','DeltaE']
         __mdws=mantid.simpleapi.CalculateCoverageDGS(self.wg,
-                                                    Q1Basis=self.masterDict['dimBasis'][0],
-                                                    Q2Basis=self.masterDict['dimBasis'][1],
-                                                    Q3Basis=self.masterDict['dimBasis'][2],
-                                                    IncidentEnergy=self.masterDict['Ei'],
-                                                    Dimension1=dimensions[self.masterDict['dimIndex'][0]],
-                                                    Dimension1Min=float2Input(self.masterDict['dimMin'][0]), 
-                                                    Dimension1Max=float2Input(self.masterDict['dimMax'][0]), 
-                                                    Dimension1Step=float2Input(self.masterDict['dimStep'][0]),
-                                                    Dimension2=dimensions[self.masterDict['dimIndex'][1]],
-                                                    Dimension2Min=float2Input(self.masterDict['dimMin'][1]), 
-                                                    Dimension2Max=float2Input(self.masterDict['dimMax'][1]),
-                                                    Dimension2Step=float2Input(self.masterDict['dimStep'][1]),
-                                                    Dimension3=dimensions[self.masterDict['dimIndex'][2]],
-                                                    Dimension3Min=float2Input(self.masterDict['dimMin'][2]), 
-                                                    Dimension3Max=float2Input(self.masterDict['dimMax'][2]),
-                                                    Dimension4=dimensions[self.masterDict['dimIndex'][3]],
-                                                    Dimension4Min=float2Input(self.masterDict['dimMin'][3]), 
-                                                    Dimension4Max=float2Input(self.masterDict['dimMax'][3]))
+                                                     Q1Basis=self.masterDict['dimBasis'][0],
+                                                     Q2Basis=self.masterDict['dimBasis'][1],
+                                                     Q3Basis=self.masterDict['dimBasis'][2],
+                                                     IncidentEnergy=self.masterDict['Ei'],
+                                                     Dimension1=dimensions[self.masterDict['dimIndex'][0]],
+                                                     Dimension1Min=float2Input(self.masterDict['dimMin'][0]),
+                                                     Dimension1Max=float2Input(self.masterDict['dimMax'][0]),
+                                                     Dimension1Step=float2Input(self.masterDict['dimStep'][0]),
+                                                     Dimension2=dimensions[self.masterDict['dimIndex'][1]],
+                                                     Dimension2Min=float2Input(self.masterDict['dimMin'][1]),
+                                                     Dimension2Max=float2Input(self.masterDict['dimMax'][1]),
+                                                     Dimension2Step=float2Input(self.masterDict['dimStep'][1]),
+                                                     Dimension3=dimensions[self.masterDict['dimIndex'][2]],
+                                                     Dimension3Min=float2Input(self.masterDict['dimMin'][2]),
+                                                     Dimension3Max=float2Input(self.masterDict['dimMax'][2]),
+                                                     Dimension4=dimensions[self.masterDict['dimIndex'][3]],
+                                                     Dimension4Min=float2Input(self.masterDict['dimMin'][3]),
+                                                     Dimension4Max=float2Input(self.masterDict['dimMax'][3]))
         intensity=__mdws[0].getSignalArray()*1. #to make it writeable
         if self.colorButton.isChecked():
             for i in range(__mdws.getNumberOfEntries())[1:]:
@@ -191,7 +217,7 @@ class DGSPlannerGUI(QtGui.QWidget):
         else:
             for i in range(__mdws.getNumberOfEntries())[1:]:
                 tempintensity=  __mdws[i].getSignalArray()
-                intensity[numpy.where( tempintensity>0)]=1.      
+                intensity[numpy.where( tempintensity>0)]=1.
         Z = numpy.transpose(intensity)
         x = numpy.linspace(__mdws[0].getDimension(0).getMinimum(), __mdws[0].getDimension(0).getMaximum(),intensity.shape[1] )
         y = numpy.linspace(__mdws[0].getDimension(1).getMinimum(), __mdws[0].getDimension(1).getMaximum(),intensity.shape[0] )
@@ -201,7 +227,9 @@ class DGSPlannerGUI(QtGui.QWidget):
         Z = Z[:-1, :-1]
         #plotting
         if self.sender() is self.plotButton or self.needToClear:
+            self.figure.clear()
             self.trajfig.clear()
+            self.figure.add_subplot(self.trajfig)
             self.needToClear=False
         self.trajfig.pcolorfast(xx,yy,Z)
 
@@ -211,7 +239,7 @@ class DGSPlannerGUI(QtGui.QWidget):
             self.trajfig.set_aspect('auto')
         self.trajfig.set_xlabel(self.masterDict['dimNames'][0])
         self.trajfig.set_ylabel(self.masterDict['dimNames'][1])
-        self.trajfig.grid(True)   
+        self.trajfig.grid(True)
         self.canvas.draw()
         mantid.simpleapi.DeleteWorkspace(__mdws)
 
@@ -229,18 +257,22 @@ class DGSPlannerGUI(QtGui.QWidget):
         gonioAxis2values=numpy.arange(self.masterDict['gonioMinvals'][2],self.masterDict['gonioMaxvals'][2]
                                       +0.1*self.masterDict['gonioSteps'][2],self.masterDict['gonioSteps'][2])
         for g0 in gonioAxis0values:
-                for g1 in gonioAxis1values:
-                    for g2 in gonioAxis2values:
-                        data+="    "+self.masterDict['gonioLabels'][0]+" = "+str(g0)
-                        data+="    "+self.masterDict['gonioLabels'][1]+" = "+str(g1)
-                        data+="    "+self.masterDict['gonioLabels'][2]+" = "+str(g2)+'\n'
+            for g1 in gonioAxis1values:
+                for g2 in gonioAxis2values:
+                    data+="    "+self.masterDict['gonioLabels'][0]+" = "+str(g0)
+                    data+="    "+self.masterDict['gonioLabels'][1]+" = "+str(g1)
+                    data+="    "+self.masterDict['gonioLabels'][2]+" = "+str(g2)+'\n'
         data+= "Lattice parameters:\n"
         data+="    a = "+str(self.ol.a())+"    b = "+str(self.ol.b())+"    c = "+str(self.ol.c())+'\n'
         data+="    alpha = "+str(self.ol.alpha())+"    beta = "+str(self.ol.beta())+"    gamma = "+str(self.ol.gamma())+'\n'
         data+= "Orientation vectors:\n"
         data+="    u = "+str(self.ol.getuVector())+'\n'
         data+="    v = "+str(self.ol.getvVector())+'\n'
-        
+        data+="Integrated "+self.masterDict['dimNames'][2]+" between "+\
+              str(self.masterDict['dimMin'][2])+" and "+str(self.masterDict['dimMax'][2])+'\n'
+        data+="Integrated "+self.masterDict['dimNames'][3]+" between "+\
+              str(self.masterDict['dimMin'][3])+" and "+str(self.masterDict['dimMax'][3])+'\n'
+
         info=self.figure.text(0.2,0,data,verticalalignment='top')
         self.figure.savefig(fileName,bbox_inches='tight',additional_artists=info)
         self.saveDir=os.path.dirname(fileName)
@@ -265,7 +297,7 @@ class DGSPlannerGUI(QtGui.QWidget):
             h2,k2,l2=(float(temp) for temp in self.masterDict['dimBasis'][self.masterDict['dimIndex'][1]].split(','))
             angle=numpy.radians(self.ol.recAngle(h1,k1,l1,h2,k2,l2))
             return 1.*x-y/numpy.tan(angle),  y/numpy.sin(angle)
-      
+
 if __name__=='__main__':
     app=QtGui.QApplication(sys.argv)
     orl=mantid.geometry.OrientedLattice(2,3,4,90,90,90)
