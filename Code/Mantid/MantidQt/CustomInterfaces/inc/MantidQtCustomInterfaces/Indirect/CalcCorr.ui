@@ -618,10 +618,34 @@
      </property>
      <layout class="QHBoxLayout" name="horizontalLayout">
       <item>
-       <widget class="QCheckBox" name="ckPlotOutput">
+       <widget class="QLabel" name="lbPlotOutput">
         <property name="text">
-         <string>Plot Output</string>
+         <string>Plot Output:</string>
         </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QComboBox" name="cbPlotOutput">
+        <item>
+         <property name="text">
+          <string>None</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>All</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Wavelength</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Angle</string>
+         </property>
+        </item>
        </widget>
       </item>
       <item>
@@ -678,7 +702,6 @@
   <tabstop>leSampleChemicalFormula</tabstop>
   <tabstop>spCanNumberDensity</tabstop>
   <tabstop>leCanChemicalFormula</tabstop>
-  <tabstop>ckPlotOutput</tabstop>
   <tabstop>ckSave</tabstop>
  </tabstops>
  <resources/>

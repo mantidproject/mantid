@@ -212,9 +212,13 @@ namespace IDA
     }
 
     // Handle Mantid plotting
-    bool plot = m_uiForm.ckPlotOutput->isChecked();
-    if(plot)
+    QString plotType = m_uiForm.cbPlotOutput->currentText();
+
+    if(plotType == "All" || plotType == "Wavelength")
       plotSpectrum(QString::fromStdString(m_pythonExportWsName));
+
+    if(plotType == "All" || plotType == "Angle")
+      plotTimeBin(QString::fromStdString(m_pythonExportWsName));
   }
 
 

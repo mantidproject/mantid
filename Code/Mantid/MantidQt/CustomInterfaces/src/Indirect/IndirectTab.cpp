@@ -240,6 +240,44 @@ namespace CustomInterfaces
 
 
   /**
+   * Creates a time bin plot of one or more workspaces at a given spectrum
+   * index.
+   *
+   * This uses the plotTimeBin function from the Python API.
+   *
+   * @param workspaceNames List of names of workspaces to plot
+   * @param specIndex Index of spectrum from each workspace to plot
+   */
+  void IndirectTab::plotTimeBin(const QStringList & workspaceNames, int specIndex)
+  {
+    QString pyInput = "from mantidplot import plotTimeBin\n";
+
+    pyInput += "plotTimeBin('";
+    pyInput += workspaceNames.join("','");
+    pyInput += "', ";
+    pyInput += QString::number(specIndex);
+    pyInput += ")\n";
+
+    m_pythonRunner.runPythonCode(pyInput);
+  }
+
+
+  /**
+   * Creates a time bin plot of a single workspace at a given spectrum
+   * index.
+   *
+   * @param workspaceName Names of workspace to plot
+   * @param specIndex Index of spectrum to plot
+   */
+  void IndirectTab::plotTimeBin(const QString & workspaceName, int specIndex)
+  {
+    QStringList workspaceNames;
+    workspaceNames << workspaceName;
+    plotTimeBin(workspaceNames, specIndex);
+  }
+
+
+  /**
    * Sets the edge bounds of plot to prevent the user inputting invalid values
    * Also sets limits for range selector movement
    *

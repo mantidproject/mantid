@@ -96,7 +96,13 @@ namespace CustomInterfaces
 
     /// Plot a spectrum plot given a list of workspace names
     void plotSpectrum(const QStringList & workspaceNames, int specIndex = 0);
+    /// Plot a spectrum plot of a given workspace
     void plotSpectrum(const QString & workspaceName, int specIndex = 0);
+
+    /// Plot a time bin plot given a list of workspace names
+    void plotTimeBin(const QStringList & workspaceNames, int specIndex = 0);
+    /// Plot a time bin plot of a given workspace
+    void plotTimeBin(const QString & workspaceName, int specIndex = 0);
 
     /// Plot a contour plot of a given workspace
     void plotContour(const QString & workspaceName);
