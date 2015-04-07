@@ -156,7 +156,7 @@ if ( MAKE_VATES )
   add_subdirectory ( Vates )
 
   LIST( APPEND CPACK_INSTALL_CMAKE_PROJECTS
-        "${ParaView_DIR}" "ParaView Runtime Libs" "Runtime" "/"
+        "${ParaView_DIR}" "ParaView Runtime Libs" "Libraries" "/"
   )
   LIST( APPEND CPACK_INSTALL_CMAKE_PROJECTS
         "${ParaView_DIR}" "VTK Runtime Libs" "RuntimeLibraries" "/"
