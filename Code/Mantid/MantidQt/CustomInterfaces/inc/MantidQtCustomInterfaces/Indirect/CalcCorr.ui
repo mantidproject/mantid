@@ -710,5 +710,21 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>spFlatCanFrontThickness</sender>
+   <signal>valueChanged(double)</signal>
+   <receiver>spFlatCanBackThickness</receiver>
+   <slot>setValue(double)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>256</x>
+     <y>222</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>569</x>
+     <y>222</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
 </ui>
