@@ -63,7 +63,7 @@ namespace IDA
     if(sampleXUnit->caption() != "Wavelength")
     {
       g_log.information("Sample workspace not in wavelength, need to convert to continue.");
-      absCorProps["SampleWorkspace"] = addConvertToWavelengthStep(sampleWs);
+      absCorProps["SampleWorkspace"] = addConvertUnitsStep(sampleWs, "Wavelength");
     }
     else
     {
@@ -90,7 +90,7 @@ namespace IDA
       if(canXUnit->caption() != "Wavelength")
       {
         g_log.information("Container workspace not in wavelength, need to convert to continue.");
-        absCorProps["CanWorkspace"] = addConvertToWavelengthStep(canWs);
+        absCorProps["CanWorkspace"] = addConvertUnitsStep(canWs, "Wavelength");
       }
       else
       {
