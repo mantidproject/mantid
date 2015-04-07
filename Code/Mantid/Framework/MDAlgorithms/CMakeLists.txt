@@ -100,6 +100,7 @@ set ( SRC_FILES
 	src/ReflectometryTransformQxQz.cpp
 	src/SaveIsawQvector.cpp
 	src/SaveMD.cpp
+	src/SaveMD2.cpp
 	src/SaveZODS.cpp
 	src/SetMDUsingMask.cpp
 	src/SliceMD.cpp
@@ -216,6 +217,7 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/ReflectometryTransformQxQz.h
 	inc/MantidMDAlgorithms/SaveIsawQvector.h
 	inc/MantidMDAlgorithms/SaveMD.h
+	inc/MantidMDAlgorithms/SaveMD2.h
 	inc/MantidMDAlgorithms/SaveZODS.h
 	inc/MantidMDAlgorithms/SetMDUsingMask.h
 	inc/MantidMDAlgorithms/SliceMD.h
