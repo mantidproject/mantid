@@ -129,6 +129,8 @@ namespace CustomInterfaces
   void ALCBaselineModellingView::setSectionRow(int row, IALCBaselineModellingView::SectionRow values)
   {
     m_ui.sections->blockSignals(true); // Setting values, no need for 'modified' signals
+    m_ui.sections->setFocus();
+    m_ui.sections->selectRow(row);
     m_ui.sections->setItem(row, 0, new QTableWidgetItem(values.first));
     m_ui.sections->setItem(row, 1, new QTableWidgetItem(values.second));
     m_ui.sections->blockSignals(false);
@@ -138,6 +140,14 @@ namespace CustomInterfaces
                                                     IALCBaselineModellingView::SectionSelector values)
   {
     RangeSelector* newSelector = new RangeSelector(m_ui.dataPlot);
+
+    if (index%3==0) {
+      newSelector->setColour(Qt::blue);
+    } else if ( (index-1)%3==0 ) {
+      newSelector->setColour(Qt::red);
+    } else {
+      newSelector->setColour(Qt::green);
+    }
 
     m_selectorModifiedMapper->setMapping(newSelector,index);
     connect(newSelector, SIGNAL(selectionChanged(double,double)),
