@@ -59,31 +59,20 @@ class TOSCABankCorrection(DataProcessorAlgorithm):
                              doc='Scale factor for the second bank (histogram 1)')
 
 
-    def _validate_range(self, name):
-        """
-        Validates a range property
-
-        @param name Name of the property
-        """
-
-        range_prop = self.getProperty(name).value
-
-        if len(range_prop) != 2:
-            return 'Range must have two values'
-
-        if range_prop[0] > range_prop[1]:
-            return 'Range must be in format "low,high"'
-
-        return ''
-
-
-    def validateInput(self):
+    def validateInputs(self):
+        self._get_properties()
         issues = dict()
 
         # Validate search range
-        search_range_valid = self._validate_range('SearchRange')
-        if search_range_valid != '':
-            issues['SearchRange'] = search_range_valid
+        if len(self._search_range) != 2:
+            issues['SearchRange'] = 'Search range must have two values'
+        elif self._search_range[0] > self._search_range[1]:
+            issues['SearchRange'] = 'Search range must be in format "low,high"'
+
+        # Ensure manual peak position is inside search range
+        if 'SearchRange' not in issues and self._peak_position is not None:
+            if self._peak_position < self._search_range[0] or self._peak_position > self._search_range[1]:
+                issues['PeakPosition'] = 'Peak position must be inside SearchRange'
 
         return issues
 
@@ -133,7 +122,7 @@ class TOSCABankCorrection(DataProcessorAlgorithm):
 
         try:
             self._peak_position = float(self.getPropertyValue('PeakPosition'))
-        except:
+        except ValueError:
             self._peak_position = None
 
 
@@ -187,8 +176,12 @@ class TOSCABankCorrection(DataProcessorAlgorithm):
         DeleteWorkspace('__bank_1_peaks')
         DeleteWorkspace('__bank_2_peaks')
 
-        selected_peak = matching_peaks[0]
-        logger.debug('Found matching peak: %s' % (str(selected_peak)))
+        if len(matching_peaks) > 0:
+            selected_peak = matching_peaks[0]
+            logger.debug('Found matching peak: %s' % (str(selected_peak)))
+        else:
+            selected_peak = None
+            logger.warning('No peak found')
 
         return selected_peak
 

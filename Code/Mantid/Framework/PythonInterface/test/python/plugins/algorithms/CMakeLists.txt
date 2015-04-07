@@ -55,6 +55,7 @@ set ( TEST_PY_FILES
   UpdatePeakParameterTableValueTest.py
   SANSSubtractTest.py
   TimeSliceTest.py
+  TOSCABankCorrectionTest.py
   TransformToIqtTest.py
   ExportSampleLogsToCSVFileTest.py
   ExportExperimentLogTest.py
