@@ -606,7 +606,7 @@ class LiquidsReflectometryReduction(PythonAlgorithm):
             # Avoid leaving trash behind
             AnalysisDataService.remove(str(normalization))
         else:
-            logger.error("Could not find scaling factor")
+            logger.error("Could not find scaling factor for %s" % str(workspace))
         return workspace
 
 
