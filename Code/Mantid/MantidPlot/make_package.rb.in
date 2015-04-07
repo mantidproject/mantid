@@ -116,7 +116,6 @@ dependencies.split("\n").each do |dependency|
 end
 
 Dir["pvplugins/pvplugins/*.dylib"].each do |library|
-    `install_name_tool -add_rpath @loader_path/../../Contents/Libraries/ #{library}`
     dependencies = `otool -L #{library}`
     dependencies.split("\n").each do |dependency|
         currentname = dependency.strip.split(" ")
