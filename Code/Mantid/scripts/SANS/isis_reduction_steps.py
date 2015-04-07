@@ -146,6 +146,14 @@ class LoadRun(object):
 
         outWs = Load(self._data_file, **extra_options)
 
+        if isinstance(outWs, WorkspaceGroup) and '-add' in outWs.getName():
+            if len(outWs) != 2:
+                raise RuntimeError("Incorrect number of child workspaces. Make sure that the grouped workspace was created within the Add Runs tab.")
+            if check_child_ws_for_name_and_type_for_eventdata(outWs):
+                raise RuntimeError("Incorrect format of the group workspace. We expect an EventWorkspace for the data and a MatrixWorkspace for the monitors.")
+            if self._period != self.UNSET_PERIOD:
+                raise RuntimeError("Trying to use multiperiod and added eventdata. This is currently not supported.")
+
         monitor_ws_name = workspace + "_monitors"
 
         if isinstance(outWs, IEventWorkspace):

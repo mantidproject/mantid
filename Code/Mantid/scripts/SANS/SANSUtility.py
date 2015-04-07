@@ -4,7 +4,7 @@
 # SANS data reduction scripts
 ########################################################
 from mantid.simpleapi import *
-from mantid.api import IEventWorkspace
+from mantid.api import IEventWorkspace, Workspace2D
 import inspect
 import math
 import os
@@ -12,6 +12,9 @@ import re
 import types
 
 sanslog = Logger("SANS")
+
+REG_DATA_NAME = '-add_1$'
+REG_DATA_MONITORS_NAME = '-add_monitors_1$'
 
 def deprecated(obj):
     """
@@ -470,6 +473,47 @@ def mask_detectors_with_masking_ws(ws_name, masking_ws_name):
             masked_det_ids.append(masking_ws.getDetector(ws_index).getID())
 
     MaskDetectors(Workspace=ws, DetectorList=masked_det_ids)
+
+
+def check_child_ws_for_name_and_type_for_added_eventdata(wsGroup):
+    '''
+    Ensure that the while loading added event data, we are dealing with
+    1. The correct naming convention.
+    
+    2. The correct workspace types.
+
+    @param wsGroup ::  workspace group.
+    '''
+    hasData = False
+    hasMonitors = False
+
+    assert isinstance(wsGroup, WorkspaceGroup)
+
+    for index in range(len(wsGroup)):
+        childWorkspace = wsGroup.getItem(index)
+        if re.search(REG_DATA_NAME, childWorkspace.getName()):
+            if isinstance(childWorkspace, IEventWorkspace):
+                hasData = True
+        if re.search(REG_DATA_MONITORS_NAME, name):
+            if isinstance(childWorkspace, MatrixWorkspace):
+                hasMonitors = True
+
+    return hasData and hasMonitors
+
+def extract_child_ws_for_added_eventdata(wsGroup):
+    '''
+    Extract the the child workspaces from a workspace group which was
+    created by adding event data. The workspace group must contains a data 
+    workspace which is an EventWorkspace and a monitor workspace which is a 
+    matrix workspace. 
+    @param wsGroup :: workspace group.
+    '''
+    for index in range(len(wsGroup)):
+        name = wsGroup.getItem(index).getName()
+        assert name.endswith('_1')
+        renamed = name[:(len(name) - 2)]
+        CloneWorkspace(name, renamed)
+
 
 ###############################################################################
 ######################### Start of Deprecated Code ############################
