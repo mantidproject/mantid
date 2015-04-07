@@ -141,6 +141,14 @@ namespace CustomInterfaces
   {
     RangeSelector* newSelector = new RangeSelector(m_ui.dataPlot);
 
+    if (index%3==0) {
+      newSelector->setColour(Qt::blue);
+    } else if ( (index-1)%3==0 ) {
+      newSelector->setColour(Qt::red);
+    } else {
+      newSelector->setColour(Qt::green);
+    }
+
     m_selectorModifiedMapper->setMapping(newSelector,index);
     connect(newSelector, SIGNAL(selectionChanged(double,double)),
             m_selectorModifiedMapper, SLOT(map()));
