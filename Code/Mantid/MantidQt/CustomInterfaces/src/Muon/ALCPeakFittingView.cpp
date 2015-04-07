@@ -2,6 +2,8 @@
 
 #include "MantidQtAPI/HelpWindow.h"
 
+#include <QMessageBox>
+
 #include <qwt_symbol.h>
 
 namespace MantidQt
@@ -107,6 +109,11 @@ void ALCPeakFittingView::setPeakPicker(const IPeakFunction_const_sptr& peak)
 void ALCPeakFittingView::help()
 {
   MantidQt::API::HelpWindow::showCustomInterface(NULL, QString("Muon_ALC"));
+}
+
+void ALCPeakFittingView::displayError(const QString& message)
+{
+  QMessageBox::critical(m_widget, "Error", message);
 }
 
 } // namespace CustomInterfaces
