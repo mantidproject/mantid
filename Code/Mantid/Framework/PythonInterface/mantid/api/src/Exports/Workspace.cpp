@@ -13,7 +13,7 @@ using namespace boost::python;
 namespace
 {
   ///@cond
-  BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Workspace_isDirtyOverloads, Workspace::isDirty, 0, 1);
+  BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Workspace_isDirtyOverloads, Workspace::isDirty, 0, 1)
   ///@endcond
 }
 

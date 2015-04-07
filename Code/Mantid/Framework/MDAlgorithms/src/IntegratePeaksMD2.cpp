@@ -4,9 +4,9 @@
 #include "MantidDataObjects/Peak.h"
 #include "MantidDataObjects/PeakShapeSpherical.h"
 #include "MantidKernel/System.h"
-#include "MantidMDEvents/MDEventFactory.h"
+#include "MantidDataObjects/MDEventFactory.h"
 #include "MantidMDAlgorithms/IntegratePeaksMD2.h"
-#include "MantidMDEvents/CoordTransformDistance.h"
+#include "MantidDataObjects/CoordTransformDistance.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/Workspace2D.h"
@@ -33,7 +33,7 @@ DECLARE_ALGORITHM(IntegratePeaksMD2)
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
-using namespace Mantid::MDEvents;
+using namespace Mantid::DataObjects;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
 
@@ -103,10 +103,12 @@ void IntegratePeaksMD2::init() {
       "Only warning if all of peak outer radius is not on detector (default).\n"
       "If false, do not integrate if the outer radius is not on a detector.");
 
-  declareProperty("AdaptiveQRadius", false,
-                  "Default is false.   If true, all input radii are multiplied "
-                  "by the magnitude of Q at the peak center so each peak has a "
-                  "different integration radius.  Q includes the 2*pi factor.");
+  declareProperty("AdaptiveQBackground", false,
+      "Default is false.   If true, all background values"
+      "vary on a line so that they are"
+      "background plus AdaptiveQMultiplier multiplied"
+      "by the magnitude of Q at the peak center so each peak has a "
+      "different integration radius.  Q includes the 2*pi factor.");
 
   declareProperty("Cylinder", false,
                   "Default is sphere.  Use next five parameters for cylinder.");
@@ -142,6 +144,12 @@ void IntegratePeaksMD2::init() {
       new FileProperty("ProfilesFile", "", FileProperty::OptionalSave,
                        std::vector<std::string>(1, "profiles")),
       "Save (Optionally) as Isaw peaks file with profiles included");
+
+  declareProperty("AdaptiveQMultiplier", 0.0,
+                  "Peak integration radius varies on a line so that it is"
+                  "PeakRadius plus this value multiplied"
+                  "by the magnitude of Q at the peak center so each peak has a "
+                  "different integration radius.  Q includes the 2*pi factor.");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -191,7 +199,10 @@ void IntegratePeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
   Workspace2D_sptr wsProfile2D, wsFit2D, wsDiff2D;
   size_t numSteps = 0;
   bool cylinderBool = getProperty("Cylinder");
-  bool adaptiveQRadius = getProperty("AdaptiveQRadius");
+  bool adaptiveQBackground = getProperty("AdaptiveQBackground");
+  double adaptiveQMultiplier = getProperty("AdaptiveQMultiplier");
+  double adaptiveQBackgroundMultiplier = 0.0;
+  if (adaptiveQBackground) adaptiveQBackgroundMultiplier = adaptiveQMultiplier;
   std::vector<double> PeakRadiusVector(peakWS->getNumberPeaks(), PeakRadius);
   std::vector<double> BackgroundInnerRadiusVector(peakWS->getNumberPeaks(),
                                                   BackgroundInnerRadius);
@@ -316,8 +327,8 @@ void IntegratePeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
     double background_total = 0.0;
     if (!cylinderBool) {
       // modulus of Q
-      coord_t lenQpeak = 1.0;
-      if (adaptiveQRadius) {
+      coord_t lenQpeak = 0.0;
+      if (adaptiveQMultiplier > 0.0) {
         lenQpeak = 0.0;
         for (size_t d = 0; d < nd; d++) {
           lenQpeak += center[d] * center[d];
@@ -325,9 +336,9 @@ void IntegratePeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
         lenQpeak = std::sqrt(lenQpeak);
       }
 
-      PeakRadiusVector[i] = lenQpeak * PeakRadius;
-      BackgroundInnerRadiusVector[i] = lenQpeak * BackgroundInnerRadius;
-      BackgroundOuterRadiusVector[i] = lenQpeak * BackgroundOuterRadius;
+      PeakRadiusVector[i] = adaptiveQMultiplier * lenQpeak + PeakRadius;
+      BackgroundInnerRadiusVector[i] = adaptiveQBackgroundMultiplier * lenQpeak + BackgroundInnerRadius;
+      BackgroundOuterRadiusVector[i] = adaptiveQBackgroundMultiplier * lenQpeak + BackgroundOuterRadius;
       CoordTransformDistance sphere(nd, center, dimensionsUsed);
 
       if(Peak* shapeablePeak = dynamic_cast<Peak*>(&p)){
@@ -340,7 +351,7 @@ void IntegratePeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
       // Perform the integration into whatever box is contained within.
       ws->getBox()->integrateSphere(
           sphere,
-          static_cast<coord_t>(lenQpeak * PeakRadius * lenQpeak * PeakRadius),
+          static_cast<coord_t>((adaptiveQMultiplier * lenQpeak + PeakRadius) * (adaptiveQMultiplier * lenQpeak + PeakRadius)),
           signal, errorSquared);
 
       // Integrate around the background radius
@@ -348,8 +359,8 @@ void IntegratePeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
       if (BackgroundOuterRadius > PeakRadius) {
         // Get the total signal inside "BackgroundOuterRadius"
         ws->getBox()->integrateSphere(
-            sphere, static_cast<coord_t>(lenQpeak * BackgroundOuterRadius *
-                                         lenQpeak * BackgroundOuterRadius),
+            sphere, static_cast<coord_t>((adaptiveQBackgroundMultiplier * lenQpeak + BackgroundOuterRadius) *
+                                         (adaptiveQBackgroundMultiplier * lenQpeak + BackgroundOuterRadius)),
             bgSignal, bgErrorSquared);
 
         // Evaluate the signal inside "BackgroundInnerRadius"
@@ -359,8 +370,8 @@ void IntegratePeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
         // Integrate this 3rd radius, if needed
         if (BackgroundInnerRadius != PeakRadius) {
           ws->getBox()->integrateSphere(
-              sphere, static_cast<coord_t>(lenQpeak * BackgroundInnerRadius *
-                                           lenQpeak * BackgroundInnerRadius),
+              sphere, static_cast<coord_t>((adaptiveQBackgroundMultiplier * lenQpeak + BackgroundInnerRadius) *
+                                           (adaptiveQBackgroundMultiplier * lenQpeak + BackgroundInnerRadius)),
               interiorSignal, interiorErrorSquared);
         } else {
           // PeakRadius == BackgroundInnerRadius, so use the previous value
@@ -749,4 +760,4 @@ double f_eval2(double x, void *params) {
 }
 
 } // namespace Mantid
-} // namespace MDEvents
+} // namespace DataObjects

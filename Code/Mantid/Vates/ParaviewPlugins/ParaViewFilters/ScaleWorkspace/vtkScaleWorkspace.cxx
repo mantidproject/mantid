@@ -11,7 +11,7 @@
 #include <vtkUnstructuredGridAlgorithm.h>
 #include <vtkUnstructuredGrid.h>
 
-vtkStandardNewMacro(vtkScaleWorkspace);
+vtkStandardNewMacro(vtkScaleWorkspace)
 
 using namespace Mantid::VATES;
 

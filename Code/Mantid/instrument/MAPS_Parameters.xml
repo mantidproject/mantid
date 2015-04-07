@@ -391,7 +391,7 @@
 </parameter>
 
 <!-- The semicolon separated list of possible log names, containing information on crystl rotation.
-     First found log will be used togethere with motor_offset to identify crystal rotation 
+     First found log will be used togethere with motor_offset to identify crystal rotation
      (psi in Horace) -->
 <parameter name="motor_log_names"  type="string">
    <value val="wccr;Rot"/>

@@ -86,6 +86,9 @@ namespace CustomInterfaces
     /// @param peak :: A new peak to represent
     virtual void setPeakPicker(const IPeakFunction_const_sptr& peak) = 0;
 
+    /// Opens the Mantid Wiki web page
+    virtual void help() = 0;
+
   signals:
     /// Request to perform peak fitting
     void fitRequested();

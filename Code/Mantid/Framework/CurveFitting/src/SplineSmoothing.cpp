@@ -12,7 +12,7 @@ namespace Mantid {
 namespace CurveFitting {
 
 // Register the algorithm into the AlgorithmFactory
-DECLARE_ALGORITHM(SplineSmoothing);
+DECLARE_ALGORITHM(SplineSmoothing)
 
 using namespace API;
 using namespace Kernel;
@@ -32,10 +32,10 @@ SplineSmoothing::~SplineSmoothing() {}
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
-const std::string SplineSmoothing::name() const { return "SplineSmoothing"; };
+const std::string SplineSmoothing::name() const { return "SplineSmoothing"; }
 
 /// Algorithm's version for identification. @see Algorithm::version
-int SplineSmoothing::version() const { return 1; };
+int SplineSmoothing::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
 const std::string SplineSmoothing::category() const {

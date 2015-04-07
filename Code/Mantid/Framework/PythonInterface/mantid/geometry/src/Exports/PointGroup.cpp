@@ -1,4 +1,4 @@
-
+#include "MantidGeometry/Crystal/Group.h"
 #include "MantidGeometry/Crystal/PointGroup.h"
 #include "MantidPythonInterface/kernel/Converters/PyObjectToV3D.h"
 
@@ -8,6 +8,7 @@
 #include <boost/python/list.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
 
+using Mantid::Geometry::Group;
 using Mantid::Geometry::PointGroup;
 
 using namespace boost::python;
@@ -37,7 +38,6 @@ namespace //<unnamed>
   {
     return self.getReflectionFamily(Converters::PyObjectToV3D(hkl)());
   }
-
 }
 
 void export_PointGroup()
@@ -55,10 +55,10 @@ void export_PointGroup()
           .value("Trigonal", PointGroup::Trigonal)
           .value("Cubic", PointGroup::Cubic);
 
-  class_<PointGroup, boost::noncopyable>("PointGroup", no_init)
+  class_<PointGroup, boost::noncopyable, bases<Group> >("PointGroup", no_init)
           .def("getName", &PointGroup::getName)
-          .def("getSymbol", &PointGroup::getSymbol)
-          .def("crystalSystem", &PointGroup::crystalSystem)
+          .def("getHMSymbol", &PointGroup::getSymbol)
+          .def("getCrystalSystem", &PointGroup::crystalSystem)
           .def("isEquivalent", &isEquivalent, "Check whether the two HKLs are symmetrically equivalent.")
           .def("getEquivalents", &getEquivalents, "Returns an array with all symmetry equivalents of the supplied HKL.")
           .def("getReflectionFamily", &getReflectionFamily, "Returns the same HKL for all symmetry equivalents.");

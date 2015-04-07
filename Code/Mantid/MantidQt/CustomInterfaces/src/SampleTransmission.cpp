@@ -19,7 +19,7 @@ namespace MantidQt
 {
 namespace CustomInterfaces
 {
-  DECLARE_SUBWINDOW(SampleTransmission);
+  DECLARE_SUBWINDOW(SampleTransmission)
 }
 }
 

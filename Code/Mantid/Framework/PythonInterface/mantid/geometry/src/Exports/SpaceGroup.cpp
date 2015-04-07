@@ -1,4 +1,5 @@
 
+#include "MantidGeometry/Crystal/Group.h"
 #include "MantidGeometry/Crystal/SpaceGroup.h"
 #include "MantidPythonInterface/kernel/Converters/PyObjectToV3D.h"
 
@@ -8,6 +9,7 @@
 #include <boost/python/list.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
 
+using Mantid::Geometry::Group;
 using Mantid::Geometry::SpaceGroup;
 using Mantid::Geometry::SymmetryOperation;
 
@@ -29,29 +31,15 @@ namespace //<unnamed>
     return pythonEquivalents;
   }
 
-  std::vector<std::string> getSymmetryOperationStrings(SpaceGroup & self)
-  {
-      const std::vector<SymmetryOperation> &symOps = self.getSymmetryOperations();
-
-      std::vector<std::string> pythonSymOps;
-      for(auto it = symOps.begin(); it != symOps.end(); ++it) {
-          pythonSymOps.push_back((*it).identifier());
-      }
-
-      return pythonSymOps;
-  }
-
 }
 
 void export_SpaceGroup()
 {
   register_ptr_to_python<boost::shared_ptr<SpaceGroup> >();
 
-  class_<SpaceGroup, boost::noncopyable>("SpaceGroup", no_init)
-          .def("order", &SpaceGroup::order)
-          .def("getSymmetryOperationStrings", &getSymmetryOperationStrings)
-          .def("number", &SpaceGroup::number)
-          .def("hmSymbol", &SpaceGroup::hmSymbol)
+  class_<SpaceGroup, boost::noncopyable, bases<Group> >("SpaceGroup", no_init)
+          .def("getNumber", &SpaceGroup::number)
+          .def("getHMSymbol", &SpaceGroup::hmSymbol)
           .def("getEquivalentPositions", &getEquivalentPositions, "Returns an array with all symmetry equivalents of the supplied HKL.")
           ;
 }

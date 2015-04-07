@@ -1,14 +1,14 @@
+#include "MantidGeometry/MDGeometry/MDHistoDimension.h"
+#include "MantidGeometry/MDGeometry/IMDDimensionFactory.h"
+
+#include <boost/make_shared.hpp>
+#include <Poco/AutoPtr.h>
 #include <Poco/DOM/Element.h>
 #include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/Document.h>
 #include <Poco/DOM/NamedNodeMap.h>
-#include <Poco/XML/XMLException.h>
-#include <Poco/AutoPtr.h>
 #include <Poco/NumberParser.h>
-#include <boost/make_shared.hpp>
-
-#include "MantidGeometry/MDGeometry/MDHistoDimension.h"
-#include "MantidGeometry/MDGeometry/IMDDimensionFactory.h"
+#include <Poco/XML/XMLException.h>
 
 namespace Mantid {
 namespace Geometry {

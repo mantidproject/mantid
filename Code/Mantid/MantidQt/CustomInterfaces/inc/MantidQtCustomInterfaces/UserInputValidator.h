@@ -54,9 +54,9 @@ namespace MantidQt
       UserInputValidator();
 
       /// Check that the given QLineEdit field is not empty.
-      bool checkFieldIsNotEmpty(const QString & name, QLineEdit * field, QLabel * errorLabel);
+      bool checkFieldIsNotEmpty(const QString & name, QLineEdit * field, QLabel * errorLabel = NULL);
       /// Check that the given QLineEdit field is valid as per any validators it might have.
-      bool checkFieldIsValid(const QString & errorMessage, QLineEdit * field, QLabel * errorLabel);
+      bool checkFieldIsValid(const QString & errorMessage, QLineEdit * field, QLabel * errorLabel = NULL);
       /// Check that the given WorkspaceSelector is not empty.
       bool checkWorkspaceSelectorIsNotEmpty(const QString & name, WorkspaceSelector * workspaceSelector);
       /// Check that the given MWRunFiles widget has valid files.

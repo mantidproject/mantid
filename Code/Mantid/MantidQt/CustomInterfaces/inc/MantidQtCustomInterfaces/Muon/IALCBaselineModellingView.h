@@ -131,6 +131,9 @@ namespace CustomInterfaces
      */
     virtual void displayError(const QString& message) = 0;
 
+    /// Links help button to wiki page
+    virtual void help() = 0;
+
   signals:
     /// Fit requested
     void fitRequested();

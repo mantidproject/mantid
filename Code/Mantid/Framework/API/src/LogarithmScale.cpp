@@ -16,7 +16,7 @@ namespace {
 Kernel::Logger g_log("LogarithmScale");
 }
 
-DECLARE_TRANSFORMSCALE(LogarithmScale);
+DECLARE_TRANSFORMSCALE(LogarithmScale)
 
 void LogarithmScale::setBase(double &base) {
   if (base <= 0) {

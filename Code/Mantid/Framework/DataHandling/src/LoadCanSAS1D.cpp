@@ -10,13 +10,12 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidDataObjects/Workspace2D.h"
 
-#include <Poco/Path.h>
-#include <Poco/DOM/DOMParser.h>
+#include <Poco/AutoPtr.h>
 #include <Poco/DOM/Document.h>
+#include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/NodeList.h>
-#include <Poco/DOM/Text.h>
 #include <Poco/SAX/InputSource.h>
-#include <Poco/DOM/AutoPtr.h>
+
 
 #include <boost/lexical_cast.hpp>
 //-----------------------------------------------------------------------
@@ -26,7 +25,6 @@ using Poco::XML::Document;
 using Poco::XML::Element;
 using Poco::XML::NodeList;
 using Poco::XML::Node;
-using Poco::XML::Text;
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -35,7 +33,7 @@ using namespace Mantid::DataObjects;
 namespace Mantid {
 namespace DataHandling {
 
-DECLARE_FILELOADER_ALGORITHM(LoadCanSAS1D);
+DECLARE_FILELOADER_ALGORITHM(LoadCanSAS1D)
 
 /// constructor
 LoadCanSAS1D::LoadCanSAS1D() : m_groupNumber(0) {}

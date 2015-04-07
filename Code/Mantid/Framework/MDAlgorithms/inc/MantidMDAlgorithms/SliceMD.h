@@ -1,9 +1,9 @@
-#ifndef MANTID_MDEVENTS_SLICEMD_H_
-#define MANTID_MDEVENTS_SLICEMD_H_
+#ifndef MANTID_MDALGORITHMS_SLICEMD_H_
+#define MANTID_MDALGORITHMS_SLICEMD_H_
 
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
-#include "MantidMDEvents/MDEventWorkspace.h"
+#include "MantidDataObjects/MDEventWorkspace.h"
 #include "MantidMDAlgorithms/SlicingAlgorithm.h"
 
 namespace Mantid {
@@ -71,11 +71,11 @@ private:
 
   /// Helper method
   template <typename MDE, size_t nd>
-  void doExec(typename MDEvents::MDEventWorkspace<MDE, nd>::sptr ws);
+  void doExec(typename DataObjects::MDEventWorkspace<MDE, nd>::sptr ws);
 
   /// Method to actually do the slice
   template <typename MDE, size_t nd, typename OMDE, size_t ond>
-  void slice(typename MDEvents::MDEventWorkspace<MDE, nd>::sptr ws);
+  void slice(typename DataObjects::MDEventWorkspace<MDE, nd>::sptr ws);
 
 protected: // for testing
   /*  /// Method to slice box's events if the box itself belongs to the slice
@@ -87,7 +87,7 @@ protected: // for testing
     chunkMax);*/
 };
 
-} // namespace MDEvents
+} // namespace DataObjects
 } // namespace Mantid
 
-#endif /* MANTID_MDEVENTS_SLICEMD_H_ */
+#endif /* MANTID_MDALGORITHMS_SLICEMD_H_ */
