@@ -633,17 +633,17 @@
         </item>
         <item>
          <property name="text">
-          <string>All</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
           <string>Wavelength</string>
          </property>
         </item>
         <item>
          <property name="text">
           <string>Angle</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Both</string>
          </property>
         </item>
        </widget>
@@ -702,6 +702,7 @@
   <tabstop>leSampleChemicalFormula</tabstop>
   <tabstop>spCanNumberDensity</tabstop>
   <tabstop>leCanChemicalFormula</tabstop>
+  <tabstop>cbPlotOutput</tabstop>
   <tabstop>ckSave</tabstop>
  </tabstops>
  <resources/>

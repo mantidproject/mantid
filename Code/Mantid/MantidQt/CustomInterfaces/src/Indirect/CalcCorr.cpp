@@ -28,7 +28,6 @@ namespace IDA
     m_uiForm.setupUi(parent);
 
     connect(m_uiForm.dsSample, SIGNAL(dataReady(const QString&)), this, SLOT(getBeamWidthFromWorkspace(const QString&)));
-    connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(algorithmComplete(bool)));
 
     QRegExp regex("[A-Za-z0-9\\-\\(\\)]*");
     QValidator *formulaValidator = new QRegExpValidator(regex, this);
@@ -139,6 +138,7 @@ namespace IDA
       addSaveWorkspaceToQueue(outputWsName);
 
     // Run algorithm queue
+    connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(absCorComplete(bool)));
     m_batchAlgoRunner->executeBatchAsync();
 
     // Set the result workspace for Python script export
@@ -203,21 +203,68 @@ namespace IDA
    *
    * @param error True of the algorithm failed
    */
-  void CalcCorr::algorithmComplete(bool error)
+  void CalcCorr::absCorComplete(bool error)
   {
+    disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(absCorComplete(bool)));
+
     if(error)
     {
       emit showMessageBox("Absorption correction calculation failed.\nSee Results Log for more details.");
       return;
     }
 
+    // Convert the spectrum axis of correction factors to Q
+    WorkspaceGroup_sptr corrections = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(m_pythonExportWsName);
+    for(size_t i = 0; i < corrections->size(); i++)
+    {
+      MatrixWorkspace_sptr factorWs = boost::dynamic_pointer_cast<MatrixWorkspace>(corrections->getItem(i));
+      if(!factorWs)
+        continue;
+
+      std::string eMode = getEMode(factorWs);
+
+      API::BatchAlgorithmRunner::AlgorithmRuntimeProps convertSpecProps;
+      IAlgorithm_sptr convertSpecAlgo = AlgorithmManager::Instance().create("ConvertSpectrumAxis");
+      convertSpecAlgo->initialize();
+      convertSpecAlgo->setProperty("InputWorkspace", factorWs);
+      convertSpecAlgo->setProperty("OutputWorkspace", factorWs->name());
+      convertSpecAlgo->setProperty("Target", "ElasticQ");
+      convertSpecAlgo->setProperty("EMode", eMode);
+
+      if(eMode == "Indirect")
+        convertSpecAlgo->setProperty("EFixed", getEFixed(factorWs));
+
+      m_batchAlgoRunner->addAlgorithm(convertSpecAlgo);
+    }
+
+    // Run algorithm queue
+    connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(postProcessComplete(bool)));
+    m_batchAlgoRunner->executeBatchAsync();
+  }
+
+
+  /**
+   * Handles completion of the post processing algorithms.
+   *
+   * @param error True of the algorithm failed
+   */
+  void CalcCorr::postProcessComplete(bool error)
+  {
+    disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(postProcessComplete(bool)));
+
+    if(error)
+    {
+      emit showMessageBox("Correction factor post processing failed.\nSee Results Log for more details.");
+      return;
+    }
+
     // Handle Mantid plotting
     QString plotType = m_uiForm.cbPlotOutput->currentText();
 
-    if(plotType == "All" || plotType == "Wavelength")
+    if(plotType == "Both" || plotType == "Wavelength")
       plotSpectrum(QString::fromStdString(m_pythonExportWsName));
 
-    if(plotType == "All" || plotType == "Angle")
+    if(plotType == "Both" || plotType == "Angle")
       plotTimeBin(QString::fromStdString(m_pythonExportWsName));
   }
 
