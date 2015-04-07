@@ -26,6 +26,7 @@
 #include <QSplitter>
 #include <QSettings>
 #include <QMenu>
+#include <QPainter>
 
 #include <boost/make_shared.hpp>
 #include <qwt_plot_curve.h>
@@ -744,9 +745,27 @@ bool LocalParameterItemDelegate::eventFilter(QObject * obj, QEvent * ev)
 
 void LocalParameterItemDelegate::paint(QPainter * painter, const QStyleOptionViewItem & option, const QModelIndex & index) const
 {
-  auto newOption = option;
-  //newOption.rect.adjust(10,-1,0,-1);
-  QStyledItemDelegate::paint(painter, newOption, index);
+  QStyledItemDelegate::paint(painter, option, index);
+
+  if ( owner()->isFixed(index.row()) )
+  {
+    auto rect = option.rect;
+
+    auto text = index.model()->data(index).asString();
+    int textWidth = option.fontMetrics.width(text);
+
+    QString fixedStr(" (fixed)");
+    int fWidth = option.fontMetrics.width(fixedStr);
+    if ( textWidth + fWidth > rect.width() )
+    {
+      fixedStr = "(f)";
+      fWidth = option.fontMetrics.width(fixedStr);
+    }
+
+    double dHeight = (option.rect.height() - option.fontMetrics.height()) / 2;
+    rect.adjust(rect.width() - fWidth, dHeight, 0 ,-dHeight);
+    painter->drawText(rect,fixedStr);
+  }
 }
 
 /*==========================================================================================*/
