@@ -70,8 +70,8 @@ bool BoxController::operator==(const BoxController &other) const {
   }
 
   // Check top level splitting if they are set in both or not
-  if (m_splitTopInto && !other.m_splitTopInto ||
-      !m_splitTopInto && other.m_splitTopInto ) {
+  if ((m_splitTopInto && !other.m_splitTopInto) ||
+      (!m_splitTopInto && other.m_splitTopInto)) {
     return false;
   }
 

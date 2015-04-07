@@ -33,8 +33,8 @@ public:
    * @return BoxController instance
    */
   BoxController(size_t nd)
-      : nd(nd), m_maxId(0), m_SplitThreshold(1024), m_numSplit(1), m_numTopSplit(1),
-      m_fileIO(boost::shared_ptr<API::IBoxControllerIO>()), m_splitTopInto(boost::none) {
+      : nd(nd), m_maxId(0), m_SplitThreshold(1024), m_splitTopInto(boost::none), m_numSplit(1), m_numTopSplit(1),
+      m_fileIO(boost::shared_ptr<API::IBoxControllerIO>()) {
     // TODO: Smarter ways to determine all of these values
     m_maxDepth = 5;
     m_addingEvents_eventsPerTask = 1000;
