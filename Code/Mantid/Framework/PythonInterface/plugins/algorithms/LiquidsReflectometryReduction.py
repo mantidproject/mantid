@@ -115,9 +115,9 @@ class LiquidsReflectometryReduction(PythonAlgorithm):
                                                  SignalRange=signal_range)
 
         # Get the TOF range
-        TOFrangeFlag = self.getProperty("TofRangeFlag").value
+        crop_TOF = self.getProperty("TofRangeFlag").value
         tof_step = self.getProperty("TOFSteps").value
-        if TOFrangeFlag:
+        if crop_TOF:
             TOFrange = self.getProperty("TOFRange").value  #microS
             if TOFrange[0] <= 0:
                 TOFrange[0] = tof_step
@@ -191,8 +191,8 @@ class LiquidsReflectometryReduction(PythonAlgorithm):
         q_workspace.getAxis(0).setUnit("MomentumTransfer")
 
         # Geometry correction to convert To Q with correction
-        geometryCorrectionFlag = self.getProperty("GeometryCorrectionFlag").value
-        if geometryCorrectionFlag:
+        geometry_correction_flag = self.getProperty("GeometryCorrectionFlag").value
+        if geometry_correction_flag:
             logger.error("The geometry correction for the Q conversion has not been implemented.")
 
         # Get the distance fromthe moderator to the detector
@@ -274,6 +274,10 @@ class LiquidsReflectometryReduction(PythonAlgorithm):
             if data_y[i] < 1e-12 or data_e[i]>data_y[i]:
                 data_y[i]=0.0
                 data_e[i]=1.0
+
+        # Sanity check
+        if sum(data_y) == 0:
+            raise RuntimeError, "The reflectivity is all zeros: check your peak selection"
 
         # Avoid leaving trash behind
         for ws in ['ws_event_data', 'normalized_data', 'q_workspace']:

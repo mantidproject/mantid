@@ -287,7 +287,41 @@ class BadDataTOFRangeTest(stresstesting.MantidStressTest):
         return self.correct_exception_caught
 
 
-#TESTS to do:
-# - TOF mismatch btw data and norm
-# - Bad peak selection
+class BadPeakSelectionTest(stresstesting.MantidStressTest):
+    def runTest(self):
+        #TODO: The reduction algorithm should not require an absolute path
+        scaling_factor_file = FileFinder.getFullPath("directBeamDatabaseFall2014_IPTS_11601_2.cfg")
+        self.correct_exception_caught = False
+        try:
+            LiquidsReflectometryReduction(RunNumbers=[119816],
+                                          NormalizationRunNumber=119692,
+                                          SignalPeakPixelRange=[138, 145],
+                                          SubtractSignalBackground=True,
+                                          SignalBackgroundPixelRange=[135, 165],
+                                          NormFlag=True,
+                                          NormPeakPixelRange=[154, 162],
+                                          NormBackgroundPixelRange=[151, 165],
+                                          SubtractNormBackground=True,
+                                          LowResDataAxisPixelRangeFlag=True,
+                                          LowResDataAxisPixelRange=[99, 158],
+                                          LowResNormAxisPixelRangeFlag=True,
+                                          LowResNormAxisPixelRange=[118, 137],
+                                          TOFRange=[9610, 22425],
+                                          IncidentMediumSelected='2InDiamSi',
+                                          GeometryCorrectionFlag=False,
+                                          QMin=0.005,
+                                          QStep=0.01,
+                                          AngleOffset=0.009,
+                                          AngleOffsetError=0.001,
+                                          ScalingFactorFile=scaling_factor_file,
+                                          SlitsWidthFlag=True,
+                                          CropFirstAndLastPoints=False,
+                                          OutputWorkspace='reflectivity_119816')
+        except RuntimeError as e:
+            if str(e).startswith("The reflectivity is all zeros"):
+                self.correct_exception_caught = True
+
+    def validate(self):
+        return self.correct_exception_caught
+
 
