@@ -52,26 +52,26 @@ public:
                                 const std::string & /*localFileName*/) {}
 };
 
-class TestJMDeriv : public TestJM {};
+class FakeJMDeriv : public FakeJM {};
 
-class TestJM3 : public TestJMDeriv {};
+class FakeJM3 : public FakeJMDeriv {};
 
-DECLARE_REMOTEJOBMANAGER(TestJM)
-DECLARE_REMOTEJOBMANAGER(TestJMDeriv)
-DECLARE_REMOTEJOBMANAGER(TestJM3)
+DECLARE_REMOTEJOBMANAGER(FakeJM)
+DECLARE_REMOTEJOBMANAGER(FakeJMDeriv)
+DECLARE_REMOTEJOBMANAGER(FakeJM3)
 
 class RemoteJobManagerFactoryTest : public CxxTest::TestSuite {
 public:
   void test_unsubscribeDeclared() {
     // subscribed with DECLARE_...
     TS_ASSERT_THROWS_NOTHING(
-        Mantid::API::RemoteJobManagerFactory::Instance().unsubscribe("TestJM"));
+        Mantid::API::RemoteJobManagerFactory::Instance().unsubscribe("FakeJM"));
     TS_ASSERT_THROWS_NOTHING(
         Mantid::API::RemoteJobManagerFactory::Instance().unsubscribe(
-            "TestJMDeriv"));
+            "FakeJMDeriv"));
     TS_ASSERT_THROWS_NOTHING(
         Mantid::API::RemoteJobManagerFactory::Instance().unsubscribe(
-            "TestJM3"));
+            "FakeJM3"));
   }
 
   void test_unsubscribed() {
@@ -103,46 +103,46 @@ public:
     // a bit of stress, unsubscribe after being subscribed with DECLARE_...,
     // then subscribe and the unsubscribe again
     TS_ASSERT_THROWS_NOTHING(
-        Mantid::API::RemoteJobManagerFactory::Instance().unsubscribe("TestJM"));
+        Mantid::API::RemoteJobManagerFactory::Instance().unsubscribe("FakeJM"));
     TS_ASSERT_THROWS_NOTHING(
-        Mantid::API::RemoteJobManagerFactory::Instance().subscribe<TestJM>(
-            "TestJM"));
+        Mantid::API::RemoteJobManagerFactory::Instance().subscribe<FakeJM>(
+            "FakeJM"));
 
     std::vector<std::string> keys =
         Mantid::API::RemoteJobManagerFactory::Instance().getKeys();
     size_t count = keys.size();
 
     TS_ASSERT_THROWS(
-        Mantid::API::RemoteJobManagerFactory::Instance().subscribe<TestJM>(
-            "TestJM"),
+        Mantid::API::RemoteJobManagerFactory::Instance().subscribe<FakeJM>(
+            "FakeJM"),
         std::runtime_error);
     TS_ASSERT_THROWS_NOTHING(
-        Mantid::API::RemoteJobManagerFactory::Instance().unsubscribe("TestJM"));
+        Mantid::API::RemoteJobManagerFactory::Instance().unsubscribe("FakeJM"));
     TS_ASSERT_THROWS_NOTHING(
-        Mantid::API::RemoteJobManagerFactory::Instance().subscribe<TestJM>(
-            "TestJM"));
+        Mantid::API::RemoteJobManagerFactory::Instance().subscribe<FakeJM>(
+            "FakeJM"));
 
     TS_ASSERT_THROWS_NOTHING(
-        Mantid::API::RemoteJobManagerFactory::Instance().subscribe<TestJMDeriv>(
-            "TestJMDeriv"));
+        Mantid::API::RemoteJobManagerFactory::Instance().subscribe<FakeJMDeriv>(
+            "FakeJMDeriv"));
     TS_ASSERT_THROWS_NOTHING(
-        Mantid::API::RemoteJobManagerFactory::Instance().subscribe<TestJMDeriv>(
-            "TestJM3"));
+        Mantid::API::RemoteJobManagerFactory::Instance().subscribe<FakeJMDeriv>(
+            "FakeJM3"));
 
     TS_ASSERT(
-        Mantid::API::RemoteJobManagerFactory::Instance().exists("TestJM"));
+        Mantid::API::RemoteJobManagerFactory::Instance().exists("FakeJM"));
     TS_ASSERT(
-        Mantid::API::RemoteJobManagerFactory::Instance().exists("TestJMDeriv"));
+        Mantid::API::RemoteJobManagerFactory::Instance().exists("FakeJMDeriv"));
     TS_ASSERT(
-        Mantid::API::RemoteJobManagerFactory::Instance().exists("TestJM3"));
+        Mantid::API::RemoteJobManagerFactory::Instance().exists("FakeJM3"));
 
     // these are not in the facilities file
     TS_ASSERT_THROWS(
-        jm = Mantid::API::RemoteJobManagerFactory::Instance().create("TestJM"),
+        jm = Mantid::API::RemoteJobManagerFactory::Instance().create("FakeJM"),
         std::runtime_error);
     TS_ASSERT_THROWS(
         jm = Mantid::API::RemoteJobManagerFactory::Instance().create(
-            "TestJMDeriv"),
+            "FakeJMDeriv"),
         std::runtime_error);
 
     keys = Mantid::API::RemoteJobManagerFactory::Instance().getKeys();
@@ -151,13 +151,13 @@ public:
     TS_ASSERT_EQUALS(count + 2, after);
 
     TS_ASSERT_THROWS_NOTHING(
-        Mantid::API::RemoteJobManagerFactory::Instance().unsubscribe("TestJM"));
+        Mantid::API::RemoteJobManagerFactory::Instance().unsubscribe("FakeJM"));
     TS_ASSERT_THROWS_NOTHING(
         Mantid::API::RemoteJobManagerFactory::Instance().unsubscribe(
-            "TestJMDeriv"));
+            "FakeJMDeriv"));
     TS_ASSERT_THROWS_NOTHING(
         Mantid::API::RemoteJobManagerFactory::Instance().unsubscribe(
-            "TestJM3"));
+            "FakeJM3"));
 
     keys = Mantid::API::RemoteJobManagerFactory::Instance().getKeys();
     size_t newCount = keys.size();
