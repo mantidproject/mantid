@@ -48,6 +48,7 @@ namespace IDA
     // Get correct corrections algorithm
     QString sampleShape = m_uiForm.cbSampleShape->currentText();
     QString algorithmName = sampleShape.replace(" ", "") + "PaalmanPingsCorrection";
+    algorithmName = algorithmName.replace("Annulus", "Cylinder"); // Use the cylinder algorithm for annulus
 
     API::BatchAlgorithmRunner::AlgorithmRuntimeProps absCorProps;
     IAlgorithm_sptr absCorAlgo = AlgorithmManager::Instance().create(algorithmName.toStdString());
@@ -286,6 +287,22 @@ namespace IDA
       double stepSize = m_uiForm.spCylStepSize->value();
       alg->setProperty("StepSize", stepSize);
     }
+    else if(shape == "Annulus")
+    {
+      alg->setProperty("SampleInnerRadius", 0.0);
+
+      double sampleOuterRadius = m_uiForm.spAnnSampleOuterRadius->value();
+      alg->setProperty("SampleOuterRadius", sampleOuterRadius);
+
+      double beamWidth = m_uiForm.spAnnBeamWidth->value();
+      alg->setProperty("BeamWidth", beamWidth);
+
+      double beamHeight = m_uiForm.spAnnBeamHeight->value();
+      alg->setProperty("BeamHeight", beamHeight);
+
+      double stepSize = m_uiForm.spAnnStepSize->value();
+      alg->setProperty("StepSize", stepSize);
+    }
   }
 
 
@@ -308,6 +325,11 @@ namespace IDA
     else if(shape == "Cylinder")
     {
       double canOuterRadius = m_uiForm.spCylCanOuterRadius->value();
+      alg->setProperty("CanOuterRadius", canOuterRadius);
+    }
+    else if(shape == "Annulus")
+    {
+      double canOuterRadius = m_uiForm.spAnnCanOuterRadius->value();
       alg->setProperty("CanOuterRadius", canOuterRadius);
     }
   }

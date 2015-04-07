@@ -522,6 +522,21 @@ Beam Width
 Step Size
   Step size used in calculation.
 
+Annulus
+#######
+
+.. warning:: This mode is only available on Windows
+
+.. interface:: Data Analysis
+  :widget: pgAnnulus
+
+The calculation for an annular geometry is performed by the
+:ref:`CylinderPaalmanPingsCorrection <algm-CylinderPaalmanPingsCorrection>`
+algorithm, this algorithm is currently only available on Windows as it uses
+FORTRAN code dependant of F2Py.
+
+The options here are the same as for Cylinder.
+
 Background
 ~~~~~~~~~~
 

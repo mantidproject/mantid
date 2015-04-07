@@ -129,6 +129,11 @@
             <string>Cylinder</string>
            </property>
           </item>
+          <item>
+           <property name="text">
+            <string>Annulus</string>
+           </property>
+          </item>
          </widget>
         </item>
        </layout>
@@ -358,6 +363,113 @@
           </item>
          </layout>
         </widget>
+        <widget class="QWidget" name="pgAnnulus">
+         <layout class="QGridLayout" name="gridLayout_5">
+          <property name="margin">
+           <number>0</number>
+          </property>
+          <item row="5" column="3">
+           <widget class="QDoubleSpinBox" name="spAnnBeamWidth">
+            <property name="decimals">
+             <number>3</number>
+            </property>
+            <property name="singleStep">
+             <double>0.100000000000000</double>
+            </property>
+           </widget>
+          </item>
+          <item row="5" column="2">
+           <widget class="QLabel" name="lbAnnBeamWidth">
+            <property name="text">
+             <string>Beam Width:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="5" column="0">
+           <widget class="QLabel" name="lbAnnBeamHeight">
+            <property name="text">
+             <string>Beam Height:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="5" column="1">
+           <widget class="QDoubleSpinBox" name="spAnnBeamHeight">
+            <property name="decimals">
+             <number>3</number>
+            </property>
+            <property name="singleStep">
+             <double>0.100000000000000</double>
+            </property>
+           </widget>
+          </item>
+          <item row="7" column="0">
+           <widget class="QLabel" name="lbAnnStepSize">
+            <property name="text">
+             <string>Step Size:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="7" column="1">
+           <widget class="QDoubleSpinBox" name="spAnnStepSize">
+            <property name="decimals">
+             <number>4</number>
+            </property>
+            <property name="singleStep">
+             <double>0.001000000000000</double>
+            </property>
+            <property name="value">
+             <double>0.002000000000000</double>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="0">
+           <widget class="QLabel" name="lbAnnSampleOuterRadius">
+            <property name="text">
+             <string>Sample Outer Radius:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QDoubleSpinBox" name="spAnnSampleOuterRadius">
+            <property name="decimals">
+             <number>3</number>
+            </property>
+            <property name="maximum">
+             <double>9999.989999999999782</double>
+            </property>
+            <property name="singleStep">
+             <double>0.100000000000000</double>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="3">
+           <widget class="QDoubleSpinBox" name="spAnnCanOuterRadius">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="decimals">
+             <number>3</number>
+            </property>
+            <property name="maximum">
+             <double>9999.989999999999782</double>
+            </property>
+            <property name="singleStep">
+             <double>0.100000000000000</double>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="2">
+           <widget class="QLabel" name="lbAnnCanOuterRadius">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="text">
+             <string>Container Outer Radius:</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
        </widget>
       </item>
      </layout>
@@ -557,6 +669,11 @@
   <tabstop>spCylBeamHeight</tabstop>
   <tabstop>spCylBeamWidth</tabstop>
   <tabstop>spCylStepSize</tabstop>
+  <tabstop>spAnnSampleOuterRadius</tabstop>
+  <tabstop>spAnnCanOuterRadius</tabstop>
+  <tabstop>spAnnBeamHeight</tabstop>
+  <tabstop>spAnnBeamWidth</tabstop>
+  <tabstop>spAnnStepSize</tabstop>
   <tabstop>spSampleNumberDensity</tabstop>
   <tabstop>leSampleChemicalFormula</tabstop>
   <tabstop>spCanNumberDensity</tabstop>
@@ -593,8 +710,8 @@
      <y>65</y>
     </hint>
     <hint type="destinationlabel">
-     <x>330</x>
-     <y>481</y>
+     <x>339</x>
+     <y>389</y>
     </hint>
    </hints>
   </connection>
@@ -609,7 +726,7 @@
      <y>65</y>
     </hint>
     <hint type="destinationlabel">
-     <x>487</x>
+     <x>640</x>
      <y>65</y>
     </hint>
    </hints>
@@ -689,8 +806,8 @@
      <y>65</y>
     </hint>
     <hint type="destinationlabel">
-     <x>95</x>
-     <y>186</y>
+     <x>115</x>
+     <y>178</y>
     </hint>
    </hints>
   </connection>
@@ -705,8 +822,8 @@
      <y>65</y>
     </hint>
     <hint type="destinationlabel">
-     <x>252</x>
-     <y>186</y>
+     <x>119</x>
+     <y>178</y>
     </hint>
    </hints>
   </connection>
@@ -723,6 +840,38 @@
     <hint type="destinationlabel">
      <x>569</x>
      <y>222</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ckUseCan</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>lbAnnCanOuterRadius</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>173</x>
+     <y>65</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>119</x>
+     <y>178</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ckUseCan</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>spAnnCanOuterRadius</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>173</x>
+     <y>65</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>119</x>
+     <y>178</y>
     </hint>
    </hints>
   </connection>
