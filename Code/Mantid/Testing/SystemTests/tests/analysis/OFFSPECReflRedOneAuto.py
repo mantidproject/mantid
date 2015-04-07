@@ -9,10 +9,10 @@ from mantid.simpleapi import *
 
 class OFFSPECReflRedOneAuto(stresstesting.MantidStressTest):
     def runTest(self):
-        offspec75 = Load("OFFSPEC00027575.nxs") #th=0.35
-        offspec76 = Load("OFFSPEC00027576.nxs") #th=1.00
-        offspec78 = Load("OFFSPEC00027578.nxs") #th=1.70
-        offspec85 = Load("OFFSPEC00027585.nxs") #transmission run
+        offspec75 = Load("OFFSPEC00027575.raw") #th=0.35
+        offspec76 = Load("OFFSPEC00027576.raw") #th=1.00
+        offspec78 = Load("OFFSPEC00027578.raw") #th=1.70
+        offspec85 = Load("OFFSPEC00027585.raw") #transmission run
 
         #Process using ReflectometryReductionOneAuto
         ivq_75, __, __ = ReflectometryReductionOneAuto(
@@ -38,8 +38,8 @@ class OFFSPECReflRedOneAuto(stresstesting.MantidStressTest):
         return ("ivq_75_76_78","OFFSPECReflRedOneAuto_good.nxs")
 
     def requiredFiles(self):
-        return ["OFFSPEC00027575.nxs",
-                "OFFSPEC00027576.nxs",
-                "OFFSPEC00027578.nxs",
-                "OFFSPEC00027585.nxs",
+        return ["OFFSPEC00027575.raw",
+                "OFFSPEC00027576.raw",
+                "OFFSPEC00027578.raw",
+                "OFFSPEC00027585.raw",
                 "OFFSPECReflRedOneAuto_good.nxs"]
