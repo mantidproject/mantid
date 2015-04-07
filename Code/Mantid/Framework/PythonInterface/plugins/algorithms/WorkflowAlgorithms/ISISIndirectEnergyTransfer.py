@@ -349,8 +349,8 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
 
                 # Crop to the detectors required
                 CropWorkspace(InputWorkspace=chop_ws_name, OutputWorkspace=chop_ws_name,
-                              StartWorkspaceIndex=self._spectra_range[0] - 1,
-                              EndWorkspaceIndex=self._spectra_range[1] - 1)
+                              StartWorkspaceIndex=int(self._spectra_range[0]) - 1,
+                              EndWorkspaceIndex=int(self._spectra_range[1]) - 1)
 
         logger.information('Loaded workspace names: %s' % (str(self._workspace_names)))
         logger.information('Chopped data: %s' % (str(self._chopped_data)))
