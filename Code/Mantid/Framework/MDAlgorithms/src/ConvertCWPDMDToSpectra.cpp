@@ -73,6 +73,10 @@ void ConvertCWPDMDToSpectra::init() {
   declareProperty("ScaleFactor", 1.0,
                   "Scaling factor on the normalized counts.");
 
+  declareProperty(new ArrayProperty<int>("ExcludedDetectorIDs"),
+                  "A comma separated list of integers to indicate the IDs of "
+                  "the detectors that will be excluded from binning.")
+
   declareProperty("LinearInterpolateZeroCounts", true,
                   "If set to true and if a bin has zero count, a linear "
                   "interpolation will be made to set the value of this bin. It "

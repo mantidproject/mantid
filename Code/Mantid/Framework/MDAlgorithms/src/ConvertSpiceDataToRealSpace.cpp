@@ -90,6 +90,11 @@ void ConvertSpiceDataToRealSpace::init() {
   declareProperty(new WorkspaceProperty<IMDEventWorkspace>(
                       "OutputMonitorWorkspace", "", Direction::Output),
                   "Name to use for the output workspace.");
+
+  declareProperty(
+      new WorkspaceProperty<TableWorkspace>("DetectorEfficiencyTableWorkspace",
+                                            "", Direction::Input, Optional),
+      "Name of a table workspace containing the detectors' efficiency.")
 }
 
 //------------------------------------------------------------------------------------------------
