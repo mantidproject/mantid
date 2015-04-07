@@ -1,4 +1,4 @@
-#include "MantidQtCustomInterfaces/Indirect/Fury.h"
+#include "MantidQtCustomInterfaces/Indirect/Iqt.h"
 
 #include "MantidQtCustomInterfaces/UserInputValidator.h"
 #include "MantidQtMantidWidgets/RangeSelector.h"
@@ -12,7 +12,7 @@
 
 namespace
 {
-  Mantid::Kernel::Logger g_log("Fury");
+  Mantid::Kernel::Logger g_log("Iqt");
 }
 
 using namespace Mantid::API;
@@ -23,14 +23,14 @@ namespace CustomInterfaces
 {
 namespace IDA
 {
-  Fury::Fury(QWidget * parent) : IDATab(parent),
+  Iqt::Iqt(QWidget * parent) : IDATab(parent),
     m_furTree(NULL),
     m_furyResFileType()
   {
     m_uiForm.setupUi(parent);
   }
 
-  void Fury::setup()
+  void Iqt::setup()
   {
     m_furTree = new QtTreePropertyBrowser();
     m_uiForm.properties->addWidget(m_furTree);
@@ -78,7 +78,7 @@ namespace IDA
     connect(m_uiForm.dsResolution, SIGNAL(dataReady(const QString&)), this, SLOT(calculateBinning()));
   }
 
-  void Fury::run()
+  void Iqt::run()
   {
     using namespace Mantid::API;
 
@@ -118,10 +118,10 @@ namespace IDA
   /**
    * Ensure we have present and valid file/ws inputs.
    *
-   * The underlying Fourier transform of Fury
+   * The underlying Fourier transform of Iqt
    * also means we must enforce several rules on the parameters.
    */
-  bool Fury::validate()
+  bool Iqt::validate()
   {
     UserInputValidator uiv;
 
@@ -140,7 +140,7 @@ namespace IDA
    * @param prop Qt property that was changed
    * @param val New value of that property
    */
-  void Fury::updatePropertyValues(QtProperty *prop, double val)
+  void Iqt::updatePropertyValues(QtProperty *prop, double val)
   {
     disconnect(m_dblManager, SIGNAL(valueChanged(QtProperty*, double)), this, SLOT(updatePropertyValues(QtProperty*, double)));
 
@@ -175,7 +175,7 @@ namespace IDA
   /**
    * Calculates binning parameters.
    */
-  void Fury::calculateBinning()
+  void Iqt::calculateBinning()
   {
     using namespace Mantid::API;
 
@@ -230,13 +230,13 @@ namespace IDA
       showMessageBox("Number of resolution bins is less than 5.\nResults may be inaccurate.");
   }
 
-  void Fury::loadSettings(const QSettings & settings)
+  void Iqt::loadSettings(const QSettings & settings)
   {
     m_uiForm.dsInput->readSettings(settings.group());
     m_uiForm.dsResolution->readSettings(settings.group());
   }
 
-  void Fury::plotInput(const QString& wsname)
+  void Iqt::plotInput(const QString& wsname)
   {
     MatrixWorkspace_sptr workspace;
     try
@@ -315,7 +315,7 @@ namespace IDA
    * @param min Range selector min value
    * @param max Range selector amx value
    */
-  void Fury::rsRangeChangedLazy(double min, double max)
+  void Iqt::rsRangeChangedLazy(double min, double max)
   {
     double oldMin = m_dblManager->value(m_properties["ELow"]);
     double oldMax = m_dblManager->value(m_properties["EHigh"]);
@@ -327,7 +327,7 @@ namespace IDA
       m_dblManager->setValue(m_properties["EHigh"], max);
   }
 
-  void Fury::updateRS(QtProperty* prop, double val)
+  void Iqt::updateRS(QtProperty* prop, double val)
   {
     auto xRangeSelector = m_uiForm.ppPlot->getRangeSelector("FuryRange");
 
