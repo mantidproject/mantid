@@ -25,12 +25,14 @@ class ISISIndirectEnergyTransferTest(unittest.TestCase):
         Tests that an invalid instrument configuration causes the validation to fail.
         """
 
-        with self.assertRaises(RuntimeError):
-            ws = ISISIndirectEnergyTransfer(InputFiles=['IRS26176.RAW'],
-                                            Instrument='IRIS',
-                                            Analyser='graphite',
-                                            Reflection='006',
-                                            SpectraRange=[3, 53])
+        self.assertRaises(RuntimeError,
+                          ISISIndirectEnergyTransfer,
+                          OutputWorkspace='__ISISIndirectEnergyTransferTest_ws',
+                          InputFiles=['IRS26176.RAW'],
+                          Instrument='IRIS',
+                          Analyser='graphite',
+                          Reflection='006',
+                          SpectraRange=[3, 53])
 
 
     def test_group_workspace_validation_failure(self):
@@ -39,13 +41,15 @@ class ISISIndirectEnergyTransferTest(unittest.TestCase):
         but no workspace is provided.
         """
 
-        with self.assertRaises(RuntimeError):
-            ws = ISISIndirectEnergyTransfer(InputFiles=['IRS26176.RAW'],
-                                            Instrument='IRIS',
-                                            Analyser='graphite',
-                                            Reflection='002',
-                                            SpectraRange=[3, 53],
-                                            GroupingMethod='Workspace')
+        self.assertRaises(RuntimeError,
+                          ISISIndirectEnergyTransfer,
+                          OutputWorkspace='__ISISIndirectEnergyTransferTest_ws',
+                          InputFiles=['IRS26176.RAW'],
+                          Instrument='IRIS',
+                          Analyser='graphite',
+                          Reflection='002',
+                          SpectraRange=[3, 53],
+                          GroupingMethod='Workspace')
 
 
 if __name__ == '__main__':
