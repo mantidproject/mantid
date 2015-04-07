@@ -104,7 +104,7 @@ class LiquidsReflectometryReduction(PythonAlgorithm):
             data_file = FileFinder.findRuns("REF_L%d" % item)[0]
             file_list.append(data_file)
         runs = reduce((lambda x, y: '%s+%s' % (x, y)), file_list)
-        ws_event_data = Load(Filename=runs)
+        ws_event_data = Load(Filename=runs, OutputWorkspace="REF_L_%s" % dataRunNumbers[0])
         
         # Compute the primary fraction using the unprocessed workspace
         apply_primary_fraction = self.getProperty("ApplyPrimaryFraction").value
@@ -400,9 +400,16 @@ class LiquidsReflectometryReduction(PythonAlgorithm):
         """
         #TODO: The rebin and crop approach is used to be consistent with the old code.
         #      This should be replaced in the future.
-        
+
         # Rebin TOF axis
         tof_max = workspace.getTofMax()
+        tof_min = workspace.getTofMin()
+        if tof_min > tof_range[1] or tof_max < tof_range[0]:
+            error_msg = "Requested TOF range does not match data for %s: " % str(workspace)
+            error_msg += "[%g, %g] found [%g, %g]" % (tof_range[0], tof_range[1],
+                                                      tof_min, tof_max)
+            raise RuntimeError, error_msg
+        
         tof_step = self.getProperty("TOFSteps").value
         workspace = Rebin(InputWorkspace=workspace, Params=[0, tof_step, tof_max], 
                           PreserveEvents=False, OutputWorkspace="%s_histo" % str(workspace))
