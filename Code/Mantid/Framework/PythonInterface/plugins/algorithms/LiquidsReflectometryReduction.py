@@ -115,12 +115,22 @@ class LiquidsReflectometryReduction(PythonAlgorithm):
                                                  SignalRange=signal_range)
 
         # Get the TOF range
-        TOFrangeFlag = self.getProperty("TofRangeFlag")
+        TOFrangeFlag = self.getProperty("TofRangeFlag").value
+        tof_step = self.getProperty("TOFSteps").value
         if TOFrangeFlag:
             TOFrange = self.getProperty("TOFRange").value  #microS
+            if TOFrange[0] <= 0:
+                TOFrange[0] = tof_step
+                logger.error("Lower bound of TOF range cannot be zero: using %s" % tof_step)
         else:
+            # If the TOF range option is turned off, use the full range
+            # Protect against TOF=0, which will crash when going to Q.
+            tof_min = ws_event_data.getTofMin()
+            if tof_min <= 0:
+                tof_min = tof_step
             tof_max = ws_event_data.getTofMax()
-            TOFrange = [0, tof_max]
+            TOFrange = [tof_min, tof_max]
+            logger.information("Using TOF range: %g %g" % (tof_min, tof_max))
 
         # Number of pixels in each direction
         #TODO: revisit this when we update the IDF
@@ -131,7 +141,7 @@ class LiquidsReflectometryReduction(PythonAlgorithm):
         theta = self.calculate_scattering_angle(ws_event_data)
 
         # ----- Process Sample Data -------------------------------------------
-        crop_request = self.getProperty("LowResDataAxisPixelRangeFlag")
+        crop_request = self.getProperty("LowResDataAxisPixelRangeFlag").value
         low_res_range = self.getProperty("LowResDataAxisPixelRange").value
         bck_request = self.getProperty("SubtractSignalBackground").value
         data_cropped = self.process_data(ws_event_data, TOFrange,
@@ -144,7 +154,7 @@ class LiquidsReflectometryReduction(PythonAlgorithm):
             # Load normalization
             ws_event_norm = LoadEventNexus("REF_L_%s" % normalizationRunNumber,
                                            OutputWorkspace="REF_L_%s" % normalizationRunNumber)
-            crop_request = self.getProperty("LowResNormAxisPixelRangeFlag")
+            crop_request = self.getProperty("LowResNormAxisPixelRangeFlag").value
             low_res_range = self.getProperty("LowResNormAxisPixelRange").value
             bck_request = self.getProperty("SubtractNormBackground").value
             norm_cropped = self.process_data(ws_event_norm, TOFrange,
@@ -153,6 +163,12 @@ class LiquidsReflectometryReduction(PythonAlgorithm):
             # Avoid leaving trash behind
             AnalysisDataService.remove(str(ws_event_norm))
     
+            # Sum up the normalization peak
+            norm_summed = SumSpectra(InputWorkspace = norm_cropped)
+            norm_summed = RebinToWorkspace(WorkspaceToRebin=norm_summed,
+                                           WorkspaceToMatch=data_cropped,
+                                           OutputWorkspace=str(norm_summed))
+
             # Sum up the normalization peak
             norm_summed = SumSpectra(InputWorkspace = norm_cropped)
 
@@ -255,9 +271,6 @@ class LiquidsReflectometryReduction(PythonAlgorithm):
                 data_y[i]=0.0
                 data_e[i]=1.0
 
-        #TODO: remove this, which we use during development to make sure we don't leave trash
-        logger.information(str(AnalysisDataService.getObjectNames()))
-
         # Avoid leaving trash behind
         for ws in ['ws_event_data', 'normalized_data', 'q_workspace']:
             if AnalysisDataService.doesExist(ws):
@@ -302,7 +315,6 @@ class LiquidsReflectometryReduction(PythonAlgorithm):
                             low_res_range, sum_peak=False, offset=None):
         """
             Subtract background in place
-            #TODO: RefRoi needs to do error weighting and deal with zeros
             @param workspace: Mantid workspace
             @param peak_range: range of pixels defining the peak [min, max]
             @param background_range: range of pixels defining the background [min, max]
@@ -391,6 +403,9 @@ class LiquidsReflectometryReduction(PythonAlgorithm):
         """
             Common processing for both sample data and normalization.
         """
+        #TODO: The rebin and crop approach is used to be consistent with the old code.
+        #      This should be replaced in the future.
+        
         # Rebin TOF axis
         tof_max = workspace.getTofMax()
         tof_step = self.getProperty("TOFSteps").value
