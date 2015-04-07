@@ -152,6 +152,9 @@
           </item>
           <item row="3" column="0">
            <widget class="QLabel" name="lbFlatCanFrontThickness">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
             <property name="text">
              <string>Container Front Thickness:</string>
             </property>
@@ -159,6 +162,9 @@
           </item>
           <item row="3" column="2">
            <widget class="QLabel" name="lbFlatCanBackThickness">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
             <property name="text">
              <string>Container Back Thickness:</string>
             </property>
@@ -166,6 +172,9 @@
           </item>
           <item row="3" column="3">
            <widget class="QDoubleSpinBox" name="spFlatCanBackThickness">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
             <property name="suffix">
              <string> cm</string>
             </property>
@@ -186,6 +195,9 @@
           </item>
           <item row="3" column="1">
            <widget class="QDoubleSpinBox" name="spFlatCanFrontThickness">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
             <property name="suffix">
              <string> cm</string>
             </property>
@@ -320,6 +332,9 @@
           </item>
           <item row="1" column="0">
            <widget class="QLabel" name="lbCylCanOuterRadius">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
             <property name="text">
              <string>Container Outer Radius:</string>
             </property>
@@ -327,6 +342,9 @@
           </item>
           <item row="1" column="1">
            <widget class="QDoubleSpinBox" name="spCylCanOuterRadius">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
             <property name="decimals">
              <number>3</number>
             </property>
@@ -593,6 +611,102 @@
     <hint type="destinationlabel">
      <x>487</x>
      <y>65</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ckUseCan</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>lbFlatCanFrontThickness</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>173</x>
+     <y>65</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>99</x>
+     <y>222</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ckUseCan</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>lbFlatCanBackThickness</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>173</x>
+     <y>65</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>413</x>
+     <y>222</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ckUseCan</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>spFlatCanFrontThickness</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>173</x>
+     <y>65</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>256</x>
+     <y>222</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ckUseCan</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>spFlatCanBackThickness</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>173</x>
+     <y>65</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>569</x>
+     <y>222</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ckUseCan</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>lbCylCanOuterRadius</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>173</x>
+     <y>65</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>95</x>
+     <y>186</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ckUseCan</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>spCylCanOuterRadius</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>173</x>
+     <y>65</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>252</x>
+     <y>186</y>
     </hint>
    </hints>
   </connection>
