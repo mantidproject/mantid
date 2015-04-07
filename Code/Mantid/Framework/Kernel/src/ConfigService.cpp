@@ -24,7 +24,6 @@
 #include <Poco/DOM/Document.h>
 #include <Poco/DOM/Element.h>
 #include <Poco/DOM/NodeList.h>
-#include <Poco/Notification.h>
 #include <Poco/Environment.h>
 #include <Poco/File.h>
 #include <Poco/Process.h>

@@ -1,3 +1,5 @@
+#include <sstream>
+
 #include "MantidDataHandling/LoadDetectorsGroupingFile.h"
 #include "MantidKernel/System.h"
 #include "MantidAPI/FileProperty.h"
@@ -17,11 +19,8 @@
 #include <Poco/DOM/NodeList.h>
 #include <Poco/DOM/NamedNodeMap.h>
 #include <Poco/Exception.h>
-#include <Poco/File.h>
 #include <Poco/Path.h>
 #include <Poco/String.h>
-
-#include <sstream>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -609,7 +608,7 @@ std::string LoadGroupXMLFile::getAttributeValueByName(Poco::XML::Node *pNode,
                                                       std::string attributename,
                                                       bool &found) {
   // 1. Init
-  Poco::XML::NamedNodeMap *att = pNode->attributes();
+  Poco::AutoPtr<Poco::XML::NamedNodeMap> att = pNode->attributes();
   found = false;
   std::string value = "";
 
