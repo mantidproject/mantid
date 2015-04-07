@@ -10,7 +10,7 @@ class ISISIndirectEnergyTransferTest(unittest.TestCase):
         Sanity test to ensure the most basic reduction actually completes.
         """
 
-        ws = ISISIndirectEnergyTransfer(InputFiles=['IRS26176.raw'],
+        ws = ISISIndirectEnergyTransfer(InputFiles=['IRS26176.RAW'],
                                         Instrument='IRIS',
                                         Analyser='graphite',
                                         Reflection='002',
@@ -26,7 +26,7 @@ class ISISIndirectEnergyTransferTest(unittest.TestCase):
         """
 
         with self.assertRaises(RuntimeError):
-            ws = ISISIndirectEnergyTransfer(InputFiles=['IRS26176.raw'],
+            ws = ISISIndirectEnergyTransfer(InputFiles=['IRS26176.RAW'],
                                             Instrument='IRIS',
                                             Analyser='graphite',
                                             Reflection='006',
@@ -40,7 +40,7 @@ class ISISIndirectEnergyTransferTest(unittest.TestCase):
         """
 
         with self.assertRaises(RuntimeError):
-            ws = ISISIndirectEnergyTransfer(InputFiles=['IRS26176.raw'],
+            ws = ISISIndirectEnergyTransfer(InputFiles=['IRS26176.RAW'],
                                             Instrument='IRIS',
                                             Analyser='graphite',
                                             Reflection='002',
