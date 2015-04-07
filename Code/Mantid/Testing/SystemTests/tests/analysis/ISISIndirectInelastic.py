@@ -17,11 +17,10 @@ from IndirectDataAnalysis import furyfitSeq, furyfitMult, confitSeq, abscorFeede
 - OSIRIS/IRIS supported by all tabs / interfaces.
 - VESUVIO is not supported by any interface as of yet.
 
-For diagrams on the intended work flow of the IDA and Indirect parts of the
-C2E interface, please see:
+For diagrams on the intended work flow of the IDR and IDA interfaces see:
 
-- http://www.mantidproject.org/IDA
-- http://www.mantidproject.org/Indirect
+- Indirect_DataReduction.rst
+- Indirect_DataAnalysis.rst
 
 System test class hierarchy as shown below:
 
@@ -79,7 +78,8 @@ stresstesting.MantidStressTest
 
 
 class ISISIndirectInelasticBase(stresstesting.MantidStressTest):
-    '''A common base class for the ISISIndirectInelastic* base classes.
+    '''
+    A common base class for the ISISIndirectInelastic* base classes.
     '''
 
     __metaclass__ = ABCMeta  # Mark as an abstract class
@@ -149,8 +149,8 @@ class ISISIndirectInelasticBase(stresstesting.MantidStressTest):
         and returns the full path.'''
         return os.path.join(config['defaultsave.directory'], filename)
 
-
 #==============================================================================
+
 class ISISIndirectInelasticReduction(ISISIndirectInelasticBase):
     '''A base class for the ISIS indirect inelastic reduction tests
 
@@ -203,7 +203,6 @@ class ISISIndirectInelasticReduction(ISISIndirectInelasticBase):
 
 #------------------------- TOSCA tests ----------------------------------------
 
-
 class TOSCAReduction(ISISIndirectInelasticReduction):
 
     def __init__(self):
@@ -243,9 +242,7 @@ class TOSCAMultiFileSummedReduction(ISISIndirectInelasticReduction):
     def get_reference_files(self):
         return ['II.TOSCAMultiFileSummedReduction.nxs']
 
-
 #------------------------- OSIRIS tests ---------------------------------------
-
 
 class OSIRISReduction(ISISIndirectInelasticReduction):
 
@@ -329,8 +326,108 @@ class IRISMultiFileSummedReduction(ISISIndirectInelasticReduction):
         #as they should be the same
         return ['II.IRISMultiFileSummedReduction.nxs']
 
+#==============================================================================
+
+class ISISIndirectInelasticReductionOutput(stresstesting.MantidStressTest):
+
+    def runTest(self):
+        self.file_formats = ['nxs', 'spe', 'nxspe', 'ascii', 'aclimax']
+        self.file_extensions = ['.nxs', '.spe', '.nxspe', '.dat', '_aclimax.dat']
+
+        self.instr_name = 'TOSCA'
+        self.detector_range = [1, 140]
+        self.data_files = ['TSC15352.raw']
+        self.rebin_string = '-2.5,0.015,3,-0.005,1000'
+
+        reductions = ISISIndirectEnergyTransfer(Instrument=self.instr_name,
+                                                Analyser='graphite',
+                                                Reflection='002',
+                                                InputFiles=self.data_files,
+                                                SpectraRange=self.detector_range,
+                                                RebinString=self.rebin_string,
+                                                SaveFormats=self.file_formats)
+
+        self.result_name = reductions[0].getName()
+
+    def validate(self):
+        self.output_file_names = self._get_file_names()
+        self.assert_reduction_output_exists(self.output_file_names)
+        self.assert_ascii_file_matches()
+        self.assert_aclimax_file_matches()
+        self.assert_spe_file_matches()
+
+    def cleanup(self):
+        mtd.clear()
+
+        for file_path in self.output_file_names.itervalues():
+            if os.path.isfile(file_path):
+                os.remove(file_path)
+
+    def assert_ascii_file_matches(self):
+        expected_result = [
+            'X , Y0 , E0 , Y1 , E1 , Y2 , E2',
+            '-2.4925,0,0,0.617579,0.362534,0.270868,0.159006',
+            '-2.4775,0.375037,0.273017,0,0,0.210547,0.153272'
+        ]
+        self.assert_file_format_matches_expected(expected_result, self.output_file_names['ascii'],
+                                                 "Output of ASCII format did not match expected result.")
+
+    def assert_aclimax_file_matches(self):
+        expected_result = [
+            '# X \t Y \t E',
+            '0',
+            '3.0075\t0.175435\t0.115017'
+        ]
+        self.assert_file_format_matches_expected(expected_result, self.output_file_names['aclimax'],
+                                                 "Output of aclimax format did not match expected result.")
+
+    def assert_spe_file_matches(self):
+        #Old SPE format:
+        #   '       3    1532',
+        #   '### Phi Grid',
+        #   ' 5.000E-01 1.500E+00 2.500E+00 3.500E+00',
+        #   '### Energy Grid',
+        #   '-2.500E+00-2.485E+00-2.470E+00-2.455E+00-2.440E+00-2.425E+00-2.410E+00-2.395E+00'
+        #
+        # New SPE format:
+        expected_result = [
+            '       3    1532',
+            '### Phi Grid',
+            '0.5       1.5       2.5       3.5',
+            '### Energy Grid',
+            '-2.5      -2.485    -2.47     -2.455    -2.44     -2.425    -2.41     -2.395'
+        ]
+        self.assert_file_format_matches_expected(expected_result, self.output_file_names['spe'],
+                                                 "Output of SPE format did not match expected result.")
+
+    def assert_reduction_output_exists(self, output_file_names):
+        for file_path in output_file_names.itervalues():
+            self.assertTrue(os.path.exists(file_path), "File does not exist in the default save directory")
+            self.assertTrue(os.path.isfile(file_path), "Output file of reduction output is not a file.")
+
+    def assert_file_format_matches_expected(self, expected_result, file_path, msg=""):
+        num_lines = len(expected_result)
+        actual_result = self._read_ascii_file(file_path, num_lines)
+        self.assertTrue(actual_result == expected_result, msg + " (%s != %s)" % (actual_result, expected_result))
+
+    def _read_ascii_file(self, path, num_lines):
+        with open(path,'rb') as file_handle:
+            lines = [file_handle.readline().rstrip() for _ in xrange(num_lines)]
+            return lines
+
+    def _get_file_names(self):
+        working_directory = config['defaultsave.directory']
+
+        output_names = {}
+        for format, ext in zip(self.file_formats, self.file_extensions):
+            output_file_name = self.result_name + ext
+            output_file_name = os.path.join(working_directory, output_file_name)
+            output_names[format] = output_file_name
+
+        return output_names
 
 #==============================================================================
+
 class ISISIndirectInelasticCalibration(ISISIndirectInelasticBase):
     '''A base class for the ISIS indirect inelastic calibration tests
 
@@ -373,7 +470,6 @@ class ISISIndirectInelasticCalibration(ISISIndirectInelasticBase):
 
 #------------------------- OSIRIS tests ---------------------------------------
 
-
 class OSIRISCalibration(ISISIndirectInelasticCalibration):
 
     def __init__(self):
@@ -388,7 +484,6 @@ class OSIRISCalibration(ISISIndirectInelasticCalibration):
 
 #------------------------- IRIS tests ---------------------------------------
 
-
 class IRISCalibration(ISISIndirectInelasticCalibration):
 
     def __init__(self):
@@ -401,8 +496,8 @@ class IRISCalibration(ISISIndirectInelasticCalibration):
     def get_reference_files(self):
         return ["II.IRISCalibration.nxs"]
 
-
 #==============================================================================
+
 class ISISIndirectInelasticResolution(ISISIndirectInelasticBase):
     '''A base class for the ISIS indirect inelastic resolution tests
 
@@ -457,7 +552,6 @@ class ISISIndirectInelasticResolution(ISISIndirectInelasticBase):
 
 #------------------------- OSIRIS tests ---------------------------------------
 
-
 class OSIRISResolution(ISISIndirectInelasticResolution):
 
     def __init__(self):
@@ -475,7 +569,6 @@ class OSIRISResolution(ISISIndirectInelasticResolution):
 
 #------------------------- IRIS tests -----------------------------------------
 
-
 class IRISResolution(ISISIndirectInelasticResolution):
 
     def __init__(self):
@@ -491,8 +584,8 @@ class IRISResolution(ISISIndirectInelasticResolution):
     def get_reference_files(self):
         return ["II.IRISResolution.nxs"]
 
-
 #==============================================================================
+
 class ISISIndirectInelasticDiagnostics(ISISIndirectInelasticBase):
     '''A base class for the ISIS indirect inelastic diagnostic tests
 
@@ -531,9 +624,7 @@ class ISISIndirectInelasticDiagnostics(ISISIndirectInelasticBase):
         if type(self.suffix) != str:
             raise RuntimeError("suffix property should be a string")
 
-
 #------------------------- IRIS tests -----------------------------------------
-
 
 class IRISDiagnostics(ISISIndirectInelasticDiagnostics):
 
@@ -548,9 +639,7 @@ class IRISDiagnostics(ISISIndirectInelasticDiagnostics):
     def get_reference_files(self):
         return ["II.IRISDiagnostics.nxs"]
 
-
 #------------------------- OSIRIS tests ---------------------------------------
-
 
 class OSIRISDiagnostics(ISISIndirectInelasticDiagnostics):
 
@@ -565,8 +654,8 @@ class OSIRISDiagnostics(ISISIndirectInelasticDiagnostics):
     def get_reference_files(self):
         return ["II.OSIRISDiagnostics.nxs"]
 
-
 #==============================================================================
+
 class ISISIndirectInelasticMoments(ISISIndirectInelasticBase):
     '''A base class for the ISIS indirect inelastic TransformToIqt/TransformToIqtFit tests
 
@@ -600,8 +689,8 @@ class ISISIndirectInelasticMoments(ISISIndirectInelasticBase):
         if type(self.scale) != float:
             raise RuntimeError("Scale should be a float")
 
-
 #------------------------- OSIRIS tests ---------------------------------------
+
 class OSIRISMoments(ISISIndirectInelasticMoments):
 
     def __init__(self):
@@ -614,8 +703,8 @@ class OSIRISMoments(ISISIndirectInelasticMoments):
     def get_reference_files(self):
         return ['II.OSIRISMoments.nxs']
 
-
 #------------------------- IRIS tests -----------------------------------------
+
 class IRISMoments(ISISIndirectInelasticMoments):
 
     def __init__(self):
@@ -628,8 +717,8 @@ class IRISMoments(ISISIndirectInelasticMoments):
     def get_reference_files(self):
         return ['II.IRISMoments.nxs']
 
-
 #==============================================================================
+
 class ISISIndirectInelasticElwinAndMSDFit(ISISIndirectInelasticBase):
     '''A base class for the ISIS indirect inelastic Elwin/MSD Fit tests
 
@@ -695,7 +784,6 @@ class ISISIndirectInelasticElwinAndMSDFit(ISISIndirectInelasticBase):
 
 #------------------------- OSIRIS tests ---------------------------------------
 
-
 class OSIRISElwinAndMSDFit(ISISIndirectInelasticElwinAndMSDFit):
 
     def __init__(self):
@@ -713,7 +801,6 @@ class OSIRISElwinAndMSDFit(ISISIndirectInelasticElwinAndMSDFit):
 
 #------------------------- IRIS tests -----------------------------------------
 
-
 class IRISElwinAndMSDFit(ISISIndirectInelasticElwinAndMSDFit):
 
     def __init__(self):
@@ -729,8 +816,8 @@ class IRISElwinAndMSDFit(ISISIndirectInelasticElwinAndMSDFit):
                 'II.IRISElwinEQ2.nxs',
                 'II.IRISMSDFit.nxs']
 
-
 #==============================================================================
+
 class ISISIndirectInelasticFuryAndFuryFit(ISISIndirectInelasticBase):
     '''
     A base class for the ISIS indirect inelastic Fury/FuryFit tests
@@ -802,7 +889,6 @@ class ISISIndirectInelasticFuryAndFuryFit(ISISIndirectInelasticBase):
 
 #------------------------- OSIRIS tests ---------------------------------------
 
-
 class OSIRISFuryAndFuryFit(ISISIndirectInelasticFuryAndFuryFit):
 
     def __init__(self):
@@ -827,7 +913,6 @@ class OSIRISFuryAndFuryFit(ISISIndirectInelasticFuryAndFuryFit):
 
 #------------------------- IRIS tests -----------------------------------------
 
-
 class IRISFuryAndFuryFit(ISISIndirectInelasticFuryAndFuryFit):
 
     def __init__(self):
@@ -851,7 +936,6 @@ class IRISFuryAndFuryFit(ISISIndirectInelasticFuryAndFuryFit):
                 'II.IRISFuryFitSeq.nxs']
 
 #==============================================================================
-
 
 class ISISIndirectInelasticFuryAndFuryFitMulti(ISISIndirectInelasticBase):
     '''A base class for the ISIS indirect inelastic Fury/FuryFit tests
@@ -922,7 +1006,6 @@ class ISISIndirectInelasticFuryAndFuryFitMulti(ISISIndirectInelasticBase):
 
 #------------------------- OSIRIS tests ---------------------------------------
 
-
 class OSIRISFuryAndFuryFitMulti(ISISIndirectInelasticFuryAndFuryFitMulti):
 
     def skipTests(self):
@@ -950,7 +1033,6 @@ class OSIRISFuryAndFuryFitMulti(ISISIndirectInelasticFuryAndFuryFitMulti):
 
 #------------------------- IRIS tests -----------------------------------------
 
-
 class IRISFuryAndFuryFitMulti(ISISIndirectInelasticFuryAndFuryFitMulti):
 
     def __init__(self):
@@ -974,7 +1056,6 @@ class IRISFuryAndFuryFitMulti(ISISIndirectInelasticFuryAndFuryFitMulti):
                 'II.IRISFuryFitMulti.nxs']
 
 #==============================================================================
-
 
 class ISISIndirectInelasticConvFit(ISISIndirectInelasticBase):
     '''A base class for the ISIS indirect inelastic ConvFit tests
@@ -1031,7 +1112,6 @@ class ISISIndirectInelasticConvFit(ISISIndirectInelasticBase):
 
 #------------------------- OSIRIS tests ---------------------------------------
 
-
 class OSIRISConvFit(ISISIndirectInelasticConvFit):
 
     def __init__(self):
@@ -1053,8 +1133,8 @@ class OSIRISConvFit(ISISIndirectInelasticConvFit):
     def get_reference_files(self):
         return ['II.OSIRISConvFitSeq.nxs']
 
-
 #------------------------- IRIS tests -----------------------------------------
+
 class IRISConvFit(ISISIndirectInelasticConvFit):
 
     def __init__(self):
@@ -1077,7 +1157,6 @@ class IRISConvFit(ISISIndirectInelasticConvFit):
         return ['II.IRISConvFitSeq.nxs']
 
 #==============================================================================
-
 
 class ISISIndirectInelasticApplyCorrections(ISISIndirectInelasticBase):
     '''A base class for the ISIS indirect inelastic Apply Corrections tests
@@ -1161,7 +1240,6 @@ class IRISApplyCorrectionsWithCan(ISISIndirectInelasticApplyCorrections):
     def get_reference_files(self):
         return ['II.IRISApplyCorrectionsWithCan.nxs']
 
-
 class IRISApplyCorrectionsWithCorrectionsWS(ISISIndirectInelasticApplyCorrections):
     """ Test applying corrections with a corrections workspace """
 
@@ -1202,9 +1280,6 @@ class IRISApplyCorrectionsWithBoth(ISISIndirectInelasticApplyCorrections):
 # Transmission Monitor Test
 
 class ISISIndirectInelasticTransmissionMonitor(ISISIndirectInelasticBase):
-    '''
-    '''
-
     # Mark as an abstract class
     __metaclass__ = ABCMeta
 
@@ -1226,8 +1301,8 @@ class ISISIndirectInelasticTransmissionMonitor(ISISIndirectInelasticBase):
         if type(self.can) != str:
             raise RuntimeError("Can should be a string.")
 
-
 #------------------------- IRIS tests -----------------------------------------
+
 class IRISTransmissionMonitor(ISISIndirectInelasticTransmissionMonitor):
 
     def __init__(self):
