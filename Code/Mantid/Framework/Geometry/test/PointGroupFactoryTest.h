@@ -120,6 +120,11 @@ public:
     TS_ASSERT_EQUALS(pointGroup->getCoordinateSystem(),
                      Group::CoordinateSystem::Hexagonal);
     TS_ASSERT_EQUALS(pointGroup->getSymbol(), "3");
+
+    PointGroup_sptr pointGroupAl2O3 = checkSpaceGroupSymbol("R -3 c");
+    TS_ASSERT_EQUALS(pointGroupAl2O3->getCoordinateSystem(),
+                     Group::CoordinateSystem::Hexagonal);
+    TS_ASSERT_EQUALS(pointGroupAl2O3->getSymbol(), "-3m");
   }
 
 private:

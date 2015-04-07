@@ -115,7 +115,7 @@ typedef MANTID_API_DLL Mantid::Kernel::SingletonHolder<
  */
 #define DECLARE_REMOTEJOBMANAGER(classname)                                    \
   namespace {                                                                  \
-  Mantid::Kernel::RegistrationHelper register_ws_##classname(                  \
+  Mantid::Kernel::RegistrationHelper register_job_manger_##classname(          \
       ((Mantid::API::RemoteJobManagerFactory::Instance().subscribe<classname>( \
            #classname)),                                                       \
        0));                                                                    \

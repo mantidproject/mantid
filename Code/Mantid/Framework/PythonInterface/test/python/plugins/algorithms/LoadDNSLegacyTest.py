@@ -12,7 +12,7 @@ class LoadDNSLegacyTest(unittest.TestCase):
         outputWorkspaceName = "LoadDNSLegacyTest_Test1"
         filename = "dn134011vana.d_dat"
         alg_test = run_algorithm("LoadDNSLegacy", Filename = filename, \
-                OutputWorkspace = outputWorkspaceName)
+                OutputWorkspace = outputWorkspaceName, Polarisation='y')
                 
         self.assertTrue(alg_test.isExecuted())
         
@@ -25,14 +25,13 @@ class LoadDNSLegacyTest(unittest.TestCase):
         self.assertEqual(31461, ws.readY(1))
         self.assertEqual(13340, ws.readY(23))
         # sample logs
-        logs = ws.getRun().getLogData()
-        self.assertEqual('deterota', logs[4].name)
-        self.assertEqual(-8.54, logs[4].value)
+        run = ws.getRun()
+        self.assertEqual(-8.54, run.getProperty('deterota').value)
+        self.assertEqual(8332872, run.getProperty('mon_sum').value)
+        self.assertEqual('y', run.getProperty('polarisation').value)
         # check whether detector bank is rotated
-        samplePos = ws.getInstrument().getSample().getPos()
-        beamDirection = V3D(0,0,1)
         det = ws.getDetector(1)
-        self.assertAlmostEqual(8.54, det.getTwoTheta(samplePos, beamDirection)*180/pi)
+        self.assertAlmostEqual(8.54, ws.detectorSignedTwoTheta(det)*180/pi)
         run_algorithm("DeleteWorkspace", Workspace = outputWorkspaceName)
         return
 

@@ -116,7 +116,7 @@ void PoldiSpectrumDomainFunction::functionDeriv1DSpectrum(
   Poldi2DHelper_sptr helper = m_2dHelpers[index];
 
   if (helper) {
-    int domainSize = static_cast<int>(domain.size());
+    size_t domainSize = domain.size();
 
     double fwhm = m_profileFunction->fwhm();
     double centre = m_profileFunction->centre();
@@ -135,29 +135,18 @@ void PoldiSpectrumDomainFunction::functionDeriv1DSpectrum(
       }
     }
 
-    size_t np = m_profileFunction->nParams();
-
     size_t baseOffset = static_cast<size_t>(pos + helper->minTOFN);
 
     for (size_t i = 0; i < helper->dOffsets.size(); ++i) {
-      LocalJacobian smallJ(dWidthN, np);
-
       double newD = centre + helper->dFractionalOffsets[i];
       size_t offset = static_cast<size_t>(helper->dOffsets[i]) + baseOffset;
+      WrapAroundJacobian smallJ(jacobian, offset, helper->factors, pos,
+                                domainSize);
 
       m_profileFunction->setCentre(newD);
 
       m_profileFunction->functionDerivLocal(
           &smallJ, helper->domain->getPointerAt(pos), dWidthN);
-
-      for (size_t j = 0; j < dWidthN; ++j) {
-        size_t off = (offset + j) % domainSize;
-        for (size_t p = 0; p < np; ++p) {
-          jacobian.set(off, p,
-                       jacobian.get(off, p) +
-                           smallJ.getRaw(j, p) * helper->factors[pos + j]);
-        }
-      }
     }
 
     m_profileFunction->setCentre(centre);

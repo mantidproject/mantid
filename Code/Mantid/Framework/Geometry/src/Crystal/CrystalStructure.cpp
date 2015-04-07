@@ -265,6 +265,10 @@ void CrystalStructure::setReflectionConditionFromSpaceGroup(
   // First letter is centering
   std::string centering = spaceGroup->hmSymbol().substr(0, 1);
 
+  if(centering == "R") {
+      centering = "Robv";
+  }
+
   std::vector<ReflectionCondition_sptr> reflectionConditions =
       getAllReflectionConditions();
   for (auto it = reflectionConditions.begin(); it != reflectionConditions.end();

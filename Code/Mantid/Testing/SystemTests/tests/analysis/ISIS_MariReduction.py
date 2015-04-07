@@ -47,15 +47,9 @@ class ReduceMARIFromFile(ReductionWrapper):
         """Method executes reduction over single file
          Overload only if custom reduction is needed
         """
-        outWS = ReductionWrapper.reduce(self,input_file,output_directory)
+        converted_to_energy_transfer_ws = ReductionWrapper.reduce(self,input_file,output_directory)
         #SaveNexus(outWS,Filename = 'MARNewReduction.nxs')
-        return outWS
-
-    def validate_result(self,build_validation=False):
-        """Change this method to verify different results     """
-        # build_validation -- if true, build and save new workspace rather then validating the old one
-        rez,message = ReductionWrapper.build_or_validate_result(self,11001,"MARIReduction.nxs",build_validation,1.e-2)
-        return rez,message
+        return converted_to_energy_transfer_ws
 
     def set_custom_output_filename(self):
         """ define custom name of output files if standard one is not satisfactory
@@ -334,6 +328,19 @@ if __name__ == "__main__":
     #  search path checking after time specified below.
     rd.wait_for_file = 0  # waiting time interval
 
+### Define a run number to validate reduction against future changes    #############
+    # Take a run number with good reduced results and build validation run
+    # for this result. Then place the validation run together with the reduction script.
+    # Next time, the script will run reduction and compare the reduction results against
+    # the results obtained earlier.
+    #rd.validate_run_number = 21968  # Enabling this property disables normal reduction
+    # and forces reduction to reduce run specified here and compares results against
+    # validation file, processed earlier or calculate this file if run for the first time.
+    #This would ensure that reduction script have not changed,
+    #allow to identify reason of changes if it was and would allow to recover the script,
+    #used to produce initial reduction if changes are unacceptable.
+
+
 ####get reduction parameters from properties above, override what you want locally ###
    # and run reduction.  Overriding would have form:
    # rd.reducer.property_name (from the dictionary above) = new value e.g.
@@ -351,10 +358,3 @@ if __name__ == "__main__":
     # usual way to go is to reduce workspace and save it internally
     rd.run_reduction()
 
-
-#### Validate reduction result against known result, obtained earlier  ###
-    #rez,mess=rd.validate_result()
-    #if not rez:
-    #   raise RuntimeError("validation failed with error: {0}".format(mess))
-    #else:
-    #   print "ALL Fine"

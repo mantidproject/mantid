@@ -1,16 +1,17 @@
-#include "MantidQtAPI/MdPlottingCmapsProvider.h"
-#include "MantidKernel/ConfigService.h"
-#include "MantidKernel/Logger.h"
 #include <QStringList>
 #include <QDir>
 #include <fstream>
 #include <vector>
 
-#include <Poco/DOM/DOMParser.h>
+#include "MantidQtAPI/MdPlottingCmapsProvider.h"
+#include "MantidKernel/ConfigService.h"
+#include "MantidKernel/Logger.h"
+
+#include <Poco/DOM/AutoPtr.h>
 #include <Poco/DOM/Document.h>
+#include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/Node.h>
 #include <Poco/DOM/NodeList.h>
-#include <Poco/DOM/AutoPtr.h>
 #include <Poco/SAX/InputSource.h>
 #include <Poco/Exception.h>
 
@@ -95,7 +96,7 @@ namespace MantidQt{
         Poco::XML::Element* root = doc->documentElement();
 
         // Get all color maps
-        Poco::XML::NodeList* nodes = root->getElementsByTagName("ColorMap");
+        Poco::AutoPtr<Poco::XML::NodeList> nodes = root->getElementsByTagName("ColorMap");
 
         for (unsigned long i = 0; i < nodes->length(); ++i)
         {

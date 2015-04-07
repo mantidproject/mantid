@@ -10,7 +10,8 @@
 namespace Mantid {
 namespace MDAlgorithms {
 
-/** LoadHFIRPDD : TODO: DESCRIPTION
+/** ConvertSpiceDataToRealSpace : Convert data from SPICE file to singals
+  in real space contained in MDEventWrokspaces
 
   Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
@@ -60,6 +61,9 @@ public:
   // virtual int confidence(Kernel::FileDescriptor &descriptor) const;
 
 private:
+  /// Typdef for the white-space separated file data type.
+  typedef std::deque<std::string> DataCollectionType;
+
   /// Initialisation code
   void init();
 
@@ -70,17 +74,21 @@ private:
   DataObjects::TableWorkspace_sptr
   loadSpiceData(const std::string &spicefilename);
 
-  /// Convert to MD workspaces
-  API::IMDEventWorkspace_sptr
-  convertToMDEventWS(const std::vector<API::MatrixWorkspace_sptr> &vec_ws2d);
-
   /// Parse data table workspace to a vector of matrix workspaces
-  std::vector<API::MatrixWorkspace_sptr>
-  convertToWorkspaces(DataObjects::TableWorkspace_sptr tablews,
-                      API::MatrixWorkspace_const_sptr parentws,
-                      Kernel::DateAndTime runstart,
-                      std::map<std::string, std::vector<double> > &logvecmap,
-                      std::vector<Kernel::DateAndTime> &vectimes);
+  std::vector<API::MatrixWorkspace_sptr> convertToMatrixWorkspace(
+      DataObjects::TableWorkspace_sptr tablews,
+      API::MatrixWorkspace_const_sptr parentws, Kernel::DateAndTime runstart,
+      std::map<std::string, std::vector<double> > &logvecmap,
+      std::vector<Kernel::DateAndTime> &vectimes);
+
+  /// Create an MDEventWorspace by converting vector of matrix workspace data
+  API::IMDEventWorkspace_sptr
+  createDataMDWorkspace(const std::vector<API::MatrixWorkspace_sptr> &vec_ws2d);
+
+  /// Create an MDWorkspace for monitor counts
+  API::IMDEventWorkspace_sptr createMonitorMDWorkspace(
+      const std::vector<API::MatrixWorkspace_sptr> vec_ws2d,
+      const std::vector<double> &vecmonitor);
 
   /// Read parameter information from table workspace
   void readTableInfo(DataObjects::TableWorkspace_const_sptr tablews,
@@ -113,16 +121,20 @@ private:
                    const std::map<std::string, std::vector<double> > &logvecmap,
                    const std::vector<Kernel::DateAndTime> &vectimes);
 
-  /// Create an MDWorkspace for monitor counts
-  API::IMDEventWorkspace_sptr createMonitorMDWorkspace(
-      const std::vector<API::MatrixWorkspace_sptr> vec_ws2d,
-      const std::vector<double> &vecmonitor);
-
   /// Name of instrument
   std::string m_instrumentName;
 
   /// Number of detectors
   size_t m_numSpec;
+
+  /// x-y-z-value minimum
+  std::vector<double> m_extentMins;
+  /// x-y-z value maximum
+  std::vector<double> m_extentMaxs;
+  /// Number of bins
+  std::vector<size_t> m_numBins;
+  /// Dimension of the output MDEventWorkspace
+  size_t m_nDimensions;
 };
 
 } // namespace DataHandling

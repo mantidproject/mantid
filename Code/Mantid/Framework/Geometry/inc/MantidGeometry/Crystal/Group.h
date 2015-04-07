@@ -3,6 +3,7 @@
 
 #include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/Crystal/SymmetryOperation.h"
+#include "MantidKernel/Tolerance.h"
 
 #include <vector>
 #include <set>
@@ -12,6 +13,25 @@
 
 namespace Mantid {
 namespace Geometry {
+
+/// Functor for fuzzy comparison of V3D-objects using Kernel::Tolerance
+struct MANTID_GEOMETRY_DLL FuzzyV3DLessThan {
+  bool operator()(const Kernel::V3D &lhs, const Kernel::V3D &rhs) {
+    if (fabs(lhs.X() - rhs.X()) > Kernel::Tolerance) {
+      return lhs.X() < rhs.X();
+    }
+
+    if (fabs(lhs.Y() - rhs.Y()) > Kernel::Tolerance) {
+      return lhs.Y() < rhs.Y();
+    }
+
+    if (fabs(lhs.Z() - rhs.Z()) > Kernel::Tolerance) {
+      return lhs.Z() < rhs.Z();
+    }
+
+    return false;
+  }
+};
 
 /**
     @class Group
