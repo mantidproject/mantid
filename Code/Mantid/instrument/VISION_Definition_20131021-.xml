@@ -1,5 +1,8 @@
 <?xml version='1.0' encoding='ASCII'?>
-<instrument xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.mantidproject.org/IDF/1.0" last-modified="2015-03-27 07:40:58.108508" name="VISION" valid-from="2013-10-21 00:00:01" valid-to="2100-01-31 23:59:59" xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 Schema/IDFSchema.xsd">
+<instrument xmlns="http://www.mantidproject.org/IDF/1.0" 
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 http://schema.mantidproject.org/IDF/1.0/IDFSchema.xsd"
+ last-modified="2013-10-24 18:11:53.506758" valid-to="2100-01-31 23:59:59" name="VISION" valid-from="2013-10-21 00:00:01">
   <!-- Created by Stuart Campbell -->
   <defaults>
     <length unit="metre"/>
