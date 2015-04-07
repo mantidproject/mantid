@@ -14,6 +14,8 @@ The generic routine used to reduce diffraction runs from indirect inelastic geom
 Usage
 -----
 
+.. include:: ../usagedata-note.txt
+
 **Example - Running MSGDiffractionReduction.**
 
 .. testcode:: ExMSGDiffractionReductionSimple

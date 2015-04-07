@@ -45,6 +45,19 @@ class TOSCABankCorrection(DataProcessorAlgorithm):
                              direction=Direction.Output),
                              doc='Output corrected workspace')
 
+        self.declareProperty(name='TargetPeakCentre', defaultValue=0.0,
+                             direction=Direction.Output,
+                             doc='X position between the centres of the two ' \
+                                 'selected peaks')
+
+        self.declareProperty(name='ScaleFactor1', defaultValue=1.0,
+                             direction=Direction.Output,
+                             doc='Scale factor for the first bank (histogram 0)')
+
+        self.declareProperty(name='ScaleFactor2', defaultValue=1.0,
+                             direction=Direction.Output,
+                             doc='Scale factor for the second bank (histogram 1)')
+
 
     def _validate_range(self, name):
         """
@@ -102,6 +115,11 @@ class TOSCABankCorrection(DataProcessorAlgorithm):
         self._apply_correction(bank_1_scale_factor, bank_2_scale_factor)
 
         self.setPropertyValue('OutputWorkspace', self._output_ws)
+
+        self.setProperty('TargetPeakCentre', target_centre)
+
+        self.setProperty('ScaleFactor1', bank_1_scale_factor)
+        self.setProperty('ScaleFactor2', bank_2_scale_factor)
 
 
     def _get_properties(self):

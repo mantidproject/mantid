@@ -18,6 +18,8 @@ Rebinning and intensity scaling can optionally be applied to the result.
 Usage
 -----
 
+.. include:: ../usagedata-note.txt
+
 **Example - Running IndirectResolution.**
 
 .. testcode:: ExIndirectResolutionSimple

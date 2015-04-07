@@ -46,4 +46,44 @@ recalculated by averaging the intensities of the two corrected spectra, this
 compensates for the broader peaks seen on the original sum spectra due to the
 misalignment of the peaks.
 
+Usage
+-----
+
+.. include:: ../usagedata-note.txt
+
+**Example - Automatic peak selection.**
+
+.. testcode:: ExTOSCABankCorrectionAutomatic
+
+    original_reduction = Load('TSC14007_graphite002_red.nxs')
+
+    corrected_reduction, peak_position, scale_factor_1, scale_factor_2 = \
+      TOSCABankCorrection(InputWorkspace=original_reduction)
+
+    print 'Target peak centre: %.f' % peak_position
+
+Output:
+
+.. testoutput:: ExTOSCABankCorrectionAutomatic
+
+    Target peak centre: 1077
+
+**Example - Manual peak selection.**
+
+.. testcode:: ExTOSCABankCorrectionManual
+
+    original_reduction = Load('TSC14007_graphite002_red.nxs')
+
+    corrected_reduction, peak_position, scale_factor_1, scale_factor_2 = \
+      TOSCABankCorrection(InputWorkspace=original_reduction,
+                          PeakPosition='715')
+
+    print 'Target peak centre: %.f' % peak_position
+
+Output:
+
+.. testoutput:: ExTOSCABankCorrectionManual
+
+    Target peak centre: 713
+
 .. categories::
