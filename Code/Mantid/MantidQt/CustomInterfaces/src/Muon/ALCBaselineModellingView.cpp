@@ -129,10 +129,10 @@ namespace CustomInterfaces
   void ALCBaselineModellingView::setSectionRow(int row, IALCBaselineModellingView::SectionRow values)
   {
     m_ui.sections->blockSignals(true); // Setting values, no need for 'modified' signals
-    m_ui.sections->setItem(row, 0, new QTableWidgetItem(values.first));
-    m_ui.sections->setItem(row, 1, new QTableWidgetItem(values.second));
     m_ui.sections->setFocus();
     m_ui.sections->selectRow(row);
+    m_ui.sections->setItem(row, 0, new QTableWidgetItem(values.first));
+    m_ui.sections->setItem(row, 1, new QTableWidgetItem(values.second));
     m_ui.sections->blockSignals(false);
   }
 
