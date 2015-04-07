@@ -1,7 +1,7 @@
-#ifndef MANTIDQTCUSTOMINTERFACESIDA_FURY_H_
-#define MANTIDQTCUSTOMINTERFACESIDA_FURY_H_
+#ifndef MANTIDQTCUSTOMINTERFACESIDA_IQT_H_
+#define MANTIDQTCUSTOMINTERFACESIDA_IQT_H_
 
-#include "ui_Fury.h"
+#include "ui_Iqt.h"
 #include "IDATab.h"
 
 namespace MantidQt
@@ -10,12 +10,12 @@ namespace CustomInterfaces
 {
 namespace IDA
 {
-  class DLLExport Fury : public IDATab
+  class DLLExport Iqt : public IDATab
   {
     Q_OBJECT
 
   public:
-    Fury(QWidget * parent = 0);
+    Iqt(QWidget * parent = 0);
 
   private:
     virtual void setup();
@@ -31,7 +31,7 @@ namespace IDA
     void calculateBinning();
 
   private:
-    Ui::Fury m_uiForm;
+    Ui::Iqt m_uiForm;
     QtTreePropertyBrowser* m_furTree;
     bool m_furyResFileType;
 
@@ -40,4 +40,4 @@ namespace IDA
 } // namespace CustomInterfaces
 } // namespace MantidQt
 
-#endif /* MANTIDQTCUSTOMINTERFACESIDA_FURY_H_ */
+#endif /* MANTIDQTCUSTOMINTERFACESIDA_IQT_H_ */
