@@ -1,12 +1,9 @@
+#include "MantidAPI/ImplicitFunctionParserFactory.h"
+
 #include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/Document.h>
 #include <Poco/DOM/Element.h>
 #include <Poco/DOM/NodeList.h>
-#include <Poco/DOM/NodeIterator.h>
-#include <Poco/DOM/NodeFilter.h>
-#include <Poco/File.h>
-#include <Poco/Path.h>
-#include "MantidAPI/ImplicitFunctionParserFactory.h"
 
 namespace Mantid {
 namespace API {

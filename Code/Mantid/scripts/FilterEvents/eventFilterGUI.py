@@ -19,7 +19,7 @@ import os
 
 HUGE_FAST = 10000
 HUGE_PARALLEL = 100000
-MAXTIMEBINSIZE = 20000
+MAXTIMEBINSIZE = 3000
 
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
@@ -957,10 +957,10 @@ class MainWindow(QtGui.QMainWindow):
 
             sumwsname = "_Summed_%s"%(str(wksp))
             if AnalysisDataService.doesExist(sumwsname) is False:
-                sumws = api.RebinByPulseTimes(InputWorkspace=wksp, OutputWorkspace = sumwsname,\
-                    Params="0, %f, %d"%(timeres, timeduration))
-                sumws = api.SumSpectra(InputWorkspace=sumws, OutputWorkspace=str(sumws))
-                sumws = api.ConvertToPointData(InputWorkspace=sumws, OutputWorkspace=str(sumws))
+                sumws = api.SumSpectra(InputWorkspace=wksp, OutputWorkspace=sumwsname)
+                sumws = api.RebinByPulseTimes(InputWorkspace=sumws, OutputWorkspace = sumwsname,\
+                    Params="%f"%(timeres))
+                sumws = api.ConvertToPointData(InputWorkspace=sumws, OutputWorkspace=sumwsname)
             else:
                 sumws = AnalysisDataService.retrieve(sumwsname)
         except Exception as e:

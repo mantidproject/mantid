@@ -1,20 +1,21 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
+#include <algorithm>
+#include <iostream>
+
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/Strings.h"
 
-#include <Poco/DOM/Element.h>
-#include <Poco/DOM/NodeList.h>
-#include <Poco/StringTokenizer.h>
 #include <boost/algorithm/string.hpp>
 #include <boost/shared_ptr.hpp>
 
-#include <algorithm>
-#include <iostream>
+#include <Poco/DOM/Element.h>
+#include <Poco/DOM/NodeList.h>
+#include <Poco/StringTokenizer.h>
 
 using Poco::XML::Element;
 
@@ -284,8 +285,11 @@ FacilityInfo::computeResource(const std::string &name) const {
 
   g_log.debug() << "Could not find requested compute resource: " << name
                 << " in facility " << this->name() << "." << std::endl;
-  throw Exception::NotFoundError("FacilityInfo, missing compute resource",
-                                 name);
+  throw Exception::NotFoundError(
+      "FacilityInfo, missing compute resource, it does not seem to be defined "
+      "in the facility '" +
+          this->name() + "' - ",
+      name);
 }
 
 /**

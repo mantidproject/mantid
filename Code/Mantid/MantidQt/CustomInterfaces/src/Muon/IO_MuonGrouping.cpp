@@ -1,15 +1,23 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
+#include <fstream>
+
 #include "MantidQtCustomInterfaces/Muon/MuonAnalysis.h"
 #include "MantidQtCustomInterfaces/Muon/IO_MuonGrouping.h"
 
 #include "MantidAPI/TableRow.h"
 #include "MantidQtAPI/UserSubWindow.h"
 
+#include <boost/shared_ptr.hpp>
+#include <boost/bind.hpp>
+
 #include <Poco/DOM/Document.h>
+#include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/DOMWriter.h>
+#include <Poco/DOM/NodeList.h>
 #include <Poco/DOM/Text.h>
+
 #ifdef _MSC_VER
 // Disable a flood of warnings from Poco about inheriting from std::basic_istream
   // See http://connect.microsoft.com/VisualStudio/feedback/details/733720/inheriting-from-std-fstream-produces-c4250-warning
@@ -19,12 +27,6 @@
   #pragma warning( pop ) 
 #endif
 
-#include <Poco/DOM/DOMParser.h>
-#include <Poco/DOM/Document.h>
-#include <Poco/DOM/NodeList.h>
-#include <boost/shared_ptr.hpp>
-#include <boost/bind.hpp>
-#include <fstream>  
 //-----------------------------------------------------------------------------
 using namespace Poco::XML;
 

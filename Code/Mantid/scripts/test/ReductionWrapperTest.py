@@ -190,6 +190,38 @@ class ReductionWrapperTest(unittest.TestCase):
         self.assertFalse(ok)
         self.assertEqual(level,1)
         self.assertEqual(len(errors),1)
+    #
+    def test_set_from_constructor(self):
+
+        red = mr.ReduceMARI()
+
+        main_prop=red.def_main_properties()
+        adv_prop=red.def_advanced_properties()
+        adv_prop['map_file'] = 'some_map'
+        adv_prop['data_file_ext']='.nxs'
+        main_prop['sample_run'] = 10000
+
+        class ww(object):
+            def __init__(self):
+                self.standard_vars=None
+                self.advanced_vars=None
+        web_var = ww
+        web_var.standard_vars=main_prop
+        web_var.advanced_vars=adv_prop
+
+        red1=mr.ReduceMARI(web_var)
+
+        self.assertTrue(red1._run_from_web)
+        self.assertEqual(red1.reducer.prop_man.map_file,'some_map.map')
+        self.assertEqual(red1.reducer.prop_man.data_file_ext,'.nxs')
+        self.assertEqual(red1.reducer.prop_man.sample_run,10000)
+
+        web_var.advanced_vars = None
+        web_var.standard_vars['sample_run'] = 2000
+
+        red2=mr.ReduceMARI(web_var)
+        self.assertTrue(red2._run_from_web)
+        self.assertEqual(red2.reducer.prop_man.sample_run,2000)
 
     def test_custom_print_name(self):
         th=test_helper()

@@ -1,6 +1,7 @@
 //--------------------------------
 // Includes
 //--------------------------------
+#include <math.h>
 #include "MantidDataHandling/SetSampleMaterial.h"
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/Workspace.h"
@@ -128,6 +129,17 @@ void SetSampleMaterial::init() {
                   "The provided or calculated Absorption cross-section for the "
                   "sample material in barns.",
                   Direction::Output);
+  declareProperty("bAverage", EMPTY_DBL(),
+                  "The calculated average scattering length, <b>, for the "
+                  "sample material in barns.",
+                  Direction::Output);
+  declareProperty("bSquaredAverage", EMPTY_DBL(),
+                  "The calculated average scattering length squared, <b^2>, "
+                  "for the sample material in barns.",
+                  Direction::Output);
+  declareProperty("NormalizedLaue", EMPTY_DBL(),
+                  "The (unitless) normalized Laue diffuse scattering, L.",
+                  Direction::Output);
 }
 
 std::map<std::string, std::string> SetSampleMaterial::validateInputs() {
@@ -216,6 +228,9 @@ void SetSampleMaterial::exec() {
   const int z_number = getProperty("AtomicNumber");
   const int a_number = getProperty("MassNumber");
 
+  double b_avg = 0.; // to accumulate <b>
+  double b_sq_avg = 0.; // to accumulate <b^2>
+
   boost::scoped_ptr<Material> mat;
   if (!chemicalSymbol.empty()) {
     // Use chemical formula if given by user
@@ -237,10 +252,19 @@ void SetSampleMaterial::exec() {
     if (CF.atoms.size() == 1 && isEmpty(zParameter) && isEmpty(rho)) {
       mat.reset(new Material(chemicalSymbol, CF.atoms[0]->neutron,
                              CF.atoms[0]->number_density));
+      // can be directly calculated from the one atom
+      b_sq_avg = (CF.atoms[0]->neutron.coh_scatt_length_real*CF.atoms[0]->neutron.coh_scatt_length_real)
+              + (CF.atoms[0]->neutron.coh_scatt_length_img*CF.atoms[0]->neutron.coh_scatt_length_img);
+      b_avg = sqrt(b_sq_avg);
     } else {
       double numAtoms = 0.; // number of atoms in formula
       for (size_t i = 0; i < CF.atoms.size(); i++) {
         neutron = neutron + CF.numberAtoms[i] * CF.atoms[i]->neutron;
+
+        double b_magnitude_sqrd = (CF.atoms[i]->neutron.coh_scatt_length_real*CF.atoms[i]->neutron.coh_scatt_length_real)
+                + (CF.atoms[i]->neutron.coh_scatt_length_img*CF.atoms[i]->neutron.coh_scatt_length_img);
+        b_sq_avg += b_magnitude_sqrd;
+        b_avg += sqrt(b_magnitude_sqrd);
 
         g_log.information() << CF.atoms[i] << ": " << CF.atoms[i]->neutron
                             << "\n";
@@ -249,6 +273,8 @@ void SetSampleMaterial::exec() {
       // normalize the accumulated number by the number of atoms
       neutron = (1. / numAtoms) *
                 neutron; // funny syntax b/c of operators in neutron atom
+      b_avg = b_avg / numAtoms;
+      b_sq_avg = b_sq_avg / numAtoms;
 
       fixNeutron(neutron, coh_xs, inc_xs, sigma_atten, sigma_s);
 
@@ -265,6 +291,9 @@ void SetSampleMaterial::exec() {
     // create the material
     mat.reset(new Material(chemicalSymbol, neutron, rho));
   }
+
+  double normalizedLaue = (b_sq_avg-b_avg*b_avg)/(b_avg*b_avg);
+  if (b_sq_avg == b_avg*b_avg) normalizedLaue = 0.;
 
   // set the material but leave the geometry unchanged
   auto shapeObject = expInfo->sample().getShape(); // copy
@@ -284,7 +313,11 @@ void SetSampleMaterial::exec() {
                  << "    Incoherent " << mat->incohScatterXSection()
                  << " barns\n"
                  << "    Total " << mat->totalScatterXSection() << " barns\n"
-                 << "    Absorption " << mat->absorbXSection() << " barns\n";
+                 << "    Absorption " << mat->absorbXSection() << " barns\n"
+                 << "PDF terms\n"
+                 << "    <b>^2 = " << (b_avg*b_avg) << "\n"
+                 << "    <b^2> = " << b_sq_avg << "\n"
+                 << "    L     = " << normalizedLaue << "\n";
   setProperty("CoherentXSectionResult", mat->cohScatterXSection()); // in barns
   setProperty("IncoherentXSectionResult",
               mat->incohScatterXSection());                        // in barns
@@ -292,6 +325,9 @@ void SetSampleMaterial::exec() {
   setProperty("AbsorptionXSectionResult", mat->absorbXSection());  // in barns
   setProperty("ReferenceWavelength",
               NeutronAtom::ReferenceLambda); // in Angstroms
+  setProperty("bAverage", b_avg);
+  setProperty("bSquaredAverage", b_sq_avg);
+  setProperty("NormalizedLaue", normalizedLaue);
 
   if (isEmpty(rho)) {
     g_log.notice("Unknown value for number density");

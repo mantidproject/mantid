@@ -52,10 +52,29 @@ public:
                                 const std::string & /*localFileName*/) {}
 };
 
+class TestJMDeriv : public TestJM {};
+
+class TestJM3 : public TestJMDeriv {};
+
+DECLARE_REMOTEJOBMANAGER(TestJM)
+DECLARE_REMOTEJOBMANAGER(TestJMDeriv)
+DECLARE_REMOTEJOBMANAGER(TestJM3)
+
 class RemoteJobManagerFactoryTest : public CxxTest::TestSuite {
 public:
-  void test_unsubscribed() {
+  void test_unsubscribeDeclared() {
+    // subscribed with DECLARE_...
+    TS_ASSERT_THROWS_NOTHING(
+        Mantid::API::RemoteJobManagerFactory::Instance().unsubscribe("TestJM"));
+    TS_ASSERT_THROWS_NOTHING(
+        Mantid::API::RemoteJobManagerFactory::Instance().unsubscribe(
+            "TestJMDeriv"));
+    TS_ASSERT_THROWS_NOTHING(
+        Mantid::API::RemoteJobManagerFactory::Instance().unsubscribe(
+            "TestJM3"));
+  }
 
+  void test_unsubscribed() {
     IRemoteJobManager_sptr jobManager;
     TSM_ASSERT_THROWS(
         "create() with inexistent and unsubscribed class should "
@@ -78,6 +97,72 @@ public:
         "throw",
         jm = Mantid::API::RemoteJobManagerFactory::Instance().create("FakeJM"),
         Mantid::Kernel::Exception::NotFoundError);
+  }
+
+  void test_exists() {
+    // a bit of stress, unsubscribe after being subscribed with DECLARE_...,
+    // then subscribe and the unsubscribe again
+    TS_ASSERT_THROWS_NOTHING(
+        Mantid::API::RemoteJobManagerFactory::Instance().unsubscribe("TestJM"));
+    TS_ASSERT_THROWS_NOTHING(
+        Mantid::API::RemoteJobManagerFactory::Instance().subscribe<TestJM>(
+            "TestJM"));
+
+    std::vector<std::string> keys =
+        Mantid::API::RemoteJobManagerFactory::Instance().getKeys();
+    size_t count = keys.size();
+
+    TS_ASSERT_THROWS(
+        Mantid::API::RemoteJobManagerFactory::Instance().subscribe<TestJM>(
+            "TestJM"),
+        std::runtime_error);
+    TS_ASSERT_THROWS_NOTHING(
+        Mantid::API::RemoteJobManagerFactory::Instance().unsubscribe("TestJM"));
+    TS_ASSERT_THROWS_NOTHING(
+        Mantid::API::RemoteJobManagerFactory::Instance().subscribe<TestJM>(
+            "TestJM"));
+
+    TS_ASSERT_THROWS_NOTHING(
+        Mantid::API::RemoteJobManagerFactory::Instance().subscribe<TestJMDeriv>(
+            "TestJMDeriv"));
+    TS_ASSERT_THROWS_NOTHING(
+        Mantid::API::RemoteJobManagerFactory::Instance().subscribe<TestJMDeriv>(
+            "TestJM3"));
+
+    TS_ASSERT(
+        Mantid::API::RemoteJobManagerFactory::Instance().exists("TestJM"));
+    TS_ASSERT(
+        Mantid::API::RemoteJobManagerFactory::Instance().exists("TestJMDeriv"));
+    TS_ASSERT(
+        Mantid::API::RemoteJobManagerFactory::Instance().exists("TestJM3"));
+
+    // these are not in the facilities file
+    TS_ASSERT_THROWS(
+        jm = Mantid::API::RemoteJobManagerFactory::Instance().create("TestJM"),
+        std::runtime_error);
+    TS_ASSERT_THROWS(
+        jm = Mantid::API::RemoteJobManagerFactory::Instance().create(
+            "TestJMDeriv"),
+        std::runtime_error);
+
+    keys = Mantid::API::RemoteJobManagerFactory::Instance().getKeys();
+    size_t after = keys.size();
+
+    TS_ASSERT_EQUALS(count + 2, after);
+
+    TS_ASSERT_THROWS_NOTHING(
+        Mantid::API::RemoteJobManagerFactory::Instance().unsubscribe("TestJM"));
+    TS_ASSERT_THROWS_NOTHING(
+        Mantid::API::RemoteJobManagerFactory::Instance().unsubscribe(
+            "TestJMDeriv"));
+    TS_ASSERT_THROWS_NOTHING(
+        Mantid::API::RemoteJobManagerFactory::Instance().unsubscribe(
+            "TestJM3"));
+
+    keys = Mantid::API::RemoteJobManagerFactory::Instance().getKeys();
+    size_t newCount = keys.size();
+
+    TS_ASSERT_EQUALS(after - 3, newCount);
   }
 
   // this must fail, resource not found in the current facility
@@ -105,13 +190,15 @@ public:
     Mantid::Kernel::ConfigService::Instance().setFacility(prevFac.name());
   }
 
-  // a simple positive test
+  // a simple positive test, meant to be moved to the job managers tests as
+  // these are added
   void test_createRemoteManagers() {
     // save facility, do this before any changes
     const Mantid::Kernel::FacilityInfo &prevFac =
         Mantid::Kernel::ConfigService::Instance().getFacility();
 
     Mantid::Kernel::ConfigService::Instance().setFacility("SNS");
+
     // These two create should throw a NotFoundError because the
     // RemoteJobManager classes are missing and have not done a
     // DECLARE_REMOTEJOBMANAGER. A positive test is done in the tests

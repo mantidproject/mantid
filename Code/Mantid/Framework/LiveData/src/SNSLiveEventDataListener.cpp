@@ -1,34 +1,34 @@
+#include <time.h>
+#include <sstream> // for ostringstream
+#include <string>
+#include <exception>
+
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/LiveListenerFactory.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidLiveData/SNSLiveEventDataListener.h"
-#include "MantidLiveData/Exception.h"
 #include "MantidDataObjects/Events.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/WriteLock.h"
+#include "MantidLiveData/SNSLiveEventDataListener.h"
+#include "MantidLiveData/Exception.h"
+
+// Includes for parsing the XML device descriptions
+#include <Poco/DOM/AutoPtr.h>
+#include <Poco/DOM/Document.h>
+#include <Poco/DOM/DOMParser.h>
+#include <Poco/DOM/NamedNodeMap.h>
+#include <Poco/DOM/NodeList.h>
 
 #include <Poco/Net/NetException.h>
 #include <Poco/Net/StreamSocket.h>
 #include <Poco/Net/SocketStream.h>
 #include <Poco/Timestamp.h>
 
-// Includes for parsing the XML device descriptions
-#include "Poco/DOM/DOMParser.h"
-#include "Poco/DOM/Document.h"
-#include "Poco/DOM/AutoPtr.h"
-#include "Poco/DOM/NodeList.h"
-#include "Poco/DOM/NamedNodeMap.h"
-
 #include <Poco/Thread.h>
 #include <Poco/Runnable.h>
-
-#include <time.h>
-#include <sstream> // for ostringstream
-#include <string>
-#include <exception>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;

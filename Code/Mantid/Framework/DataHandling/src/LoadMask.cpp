@@ -20,10 +20,7 @@
 #include <Poco/DOM/NodeFilter.h>
 #include <Poco/DOM/NodeIterator.h>
 #include <Poco/DOM/NodeList.h>
-#include <Poco/DOM/NamedNodeMap.h>
 #include <Poco/Exception.h>
-#include <Poco/File.h>
-#include <Poco/Path.h>
 
 #include <boost/algorithm/string.hpp>
 
@@ -55,7 +52,15 @@ LoadMask::LoadMask(): m_maskWS(), m_instrumentPropValue(""), m_pDoc(NULL),
 /** Destructor
  */
 LoadMask::~LoadMask() {
-  // Auto-generated destructor stub
+  // note Poco::XML::Document and Poco::XML::Element declare their constructors as protected
+  if (m_pDoc)
+    m_pDoc->release();
+  // note that m_pRootElem does not need a release(), and that can
+  // actually cause a double free corruption, as
+  // Poco::DOM::Document::documentElement() does not require a
+  // release(). So just to be explicit that they're gone:
+  m_pDoc = NULL;
+  m_pRootElem = NULL;
 }
 
 /// Initialise the properties
@@ -464,7 +469,7 @@ void LoadMask::parseXML() {
       tomask = true;
       /*
       // get type
-      Poco::XML::NamedNodeMap* att = pNode->attributes();
+      Poco::AutoPtr<Poco::XML::NamedNodeMap> att = pNode->attributes();
       Poco::XML::Node* cNode = att->item(0);
       if (cNode->getNodeValue().compare("mask") == 0 ||
       cNode->getNodeValue().compare("notuse") == 0){
@@ -512,7 +517,7 @@ void LoadMask::parseXML() {
       // Node "detector-masking".  Check default value
       m_defaultToUse = true;
       /*
-      Poco::XML::NamedNodeMap* att = pNode->attributes();
+      Poco::AutoPtr<Poco::XML::NamedNodeMap> att = pNode->attributes();
       if (att->length() > 0){
         Poco::XML::Node* cNode = att->item(0);
         m_defaultToUse = true;
