@@ -147,6 +147,10 @@ ${PYTHON_LIBRARIES}
 MantidWidgets
 )
 
+if (OSX_VERSION VERSION_GREATER 10.8)
+  set_target_properties ( VatesSimpleGuiViewWidgets PROPERTIES INSTALL_RPATH "@loader_path/../Contents/MacOS;@loader_path/../Contents/Libraries")
+endif ()
+
 # Create test file projects
 if( CXXTEST_FOUND AND GMOCK_FOUND AND GTEST_FOUND )
   include_directories ( SYSTEM ${CXXTEST_INCLUDE_DIR} ${GMOCK_INCLUDE_DIR} ${GTEST_INCLUDE_DIR})
