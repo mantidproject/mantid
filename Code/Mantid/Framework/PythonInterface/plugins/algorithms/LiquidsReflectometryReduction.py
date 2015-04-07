@@ -547,6 +547,14 @@ class LiquidsReflectometryReduction(PythonAlgorithm):
                 if len(key_value)==2:
                     keys.append(key_value[0].strip())
 
+            # Skip empty lines
+            if len(keys)==0:
+                continue
+            # Complain if the format is non-standard
+            elif len(keys)<10:
+                logger.error("Bad scaling factor entry\n  %s" % line)
+                continue
+                
             # Sanity check
             if keys[0] != 'IncidentMedium' and keys[1] != 'LambdaRequested' \
                 and keys[2] != 'S1H':
