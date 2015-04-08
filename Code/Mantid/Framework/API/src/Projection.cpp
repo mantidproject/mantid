@@ -49,11 +49,16 @@ Projection::Projection(const ITableWorkspace &ws) {
   if (numRows != 3)
     throw std::runtime_error("3 rows must be provided to create a projection");
 
+  Column_const_sptr nameCol = ws.getColumn("name");
+  Column_const_sptr valueCol = ws.getColumn("value");
+  Column_const_sptr offsetCol = ws.getColumn("offset");
+  Column_const_sptr unitCol = ws.getColumn("type");
+
   for (size_t i = 0; i < numRows; i++) {
-    const std::string name = ws.getColumn("name")->cell<std::string>(i);
-    const std::string valueStr = ws.getColumn("value")->cell<std::string>(i);
-    const double offset = ws.getColumn("offset")->cell<double>(i);
-    const std::string unitStr = ws.getColumn("type")->cell<std::string>(i);
+    const std::string name = nameCol->cell<std::string>(i);
+    const std::string valueStr = valueCol->cell<std::string>(i);
+    const double offset = offsetCol->cell<double>(i);
+    const std::string unitStr = unitCol->cell<std::string>(i);
 
     //Check the name
     size_t index;
