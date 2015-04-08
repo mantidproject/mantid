@@ -483,11 +483,13 @@ class ReductionWrapper(object):
                             results.append(ws)
                     else:
                         if nruns == 1:
-                            RenameWorkspace(InputWorkspace=red_ws,OutputWorkspace=out_ws_name)
+                            if red_ws.name() != out_ws_name:
+                                RenameWorkspace(InputWorkspace=red_ws,OutputWorkspace=out_ws_name)
                             results.append(mtd[out_ws_name])
                         else:
                             OutWSName = '{0}#{1}of{2}'.format(out_ws_name,num+1,nruns)
-                            RenameWorkspace(InputWorkspace=red_ws,OutputWorkspace=OutWSName)
+                            if red_ws.name() != out_ws_name:
+                                RenameWorkspace(InputWorkspace=red_ws,OutputWorkspace=OutWSName)
                             results.append(mtd[OutWSName])
                 #end
                 if len(results) == 1:
