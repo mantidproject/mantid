@@ -1,14 +1,22 @@
 set( SRC_FILES
+  src/MantidWebServiceAPIHelper.cpp
+  src/MantidWebServiceAPIJobManager.cpp
   src/LSFJobManager.cpp
   src/SCARFLSFJobManager.cpp
+  src/SimpleJSON.cpp
 )
 
 set( INC_FILES
+  inc/MantidRemoteJobManagers/MantidWebServiceAPIHelper.h
+  inc/MantidRemoteJobManagers/MantidWebServiceAPIJobManager.h
   inc/MantidRemoteJobManagers/LSFJobManager.h
   inc/MantidRemoteJobManagers/SCARFLSFJobManager.h
+  inc/MantidRemoteJobManagers/SimpleJSON.h
 )
 
 set ( TEST_FILES
+  MantidWebServiceAPIHelperTest.h
+  MantidWebServiceAPIJobManagerTest.h
   LSFJobManagerTest.h
   SCARFLSFJobManagerTest.h
 )
