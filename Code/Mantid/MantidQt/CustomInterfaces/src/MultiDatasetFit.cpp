@@ -53,6 +53,8 @@ namespace{
   // colours of the fitting range selector
   QColor rangeSelectorDisabledColor(Qt::darkGray);
   QColor rangeSelectorEnabledColor(Qt::blue);
+
+  QString makeNumber(double d) {return QString::number(d,'g',16);}
 }
 
 namespace MantidQt
@@ -811,7 +813,7 @@ EditLocalParameterDialog::EditLocalParameterDialog(MultiDatasetFit *multifit, co
     m_uiForm.tableWidget->insertRow(i);
     auto cell = new QTableWidgetItem( QString("f%1.").arg(i) + parName );
     m_uiForm.tableWidget->setItem( i, 0, cell );
-    cell = new QTableWidgetItem( QString::number(value) );
+    cell = new QTableWidgetItem( makeNumber(value) );
     m_uiForm.tableWidget->setItem( i, 1, cell );
   }
   auto deleg = new LocalParameterItemDelegate(this);
@@ -840,7 +842,7 @@ void EditLocalParameterDialog::valueChanged(int row, int col)
     catch(std::exception&)
     {
       // restore old value
-      m_uiForm.tableWidget->item(row,col)->setText( QString::number(m_values[row]) );
+      m_uiForm.tableWidget->item(row,col)->setText( makeNumber(m_values[row]) );
     }
   }
 }
@@ -851,7 +853,7 @@ void EditLocalParameterDialog::setAllValues(double value)
   for(int i = 0; i < n; ++i)
   {
     m_values[i] = value;
-    m_uiForm.tableWidget->item(i,1)->setText( QString::number(value) );
+    m_uiForm.tableWidget->item(i,1)->setText( makeNumber(value) );
   }
 }
 
@@ -877,7 +879,7 @@ void EditLocalParameterDialog::setAllFixed(bool value)
   {
     m_fixes[i] = value;
     // it's the only way I am able to make the table to repaint itself
-    auto text = QString::number(m_values[i]);
+    auto text = makeNumber(m_values[i]);
     m_uiForm.tableWidget->item(i,1)->setText( text + " " );
     m_uiForm.tableWidget->item(i,1)->setText( text );
   }
@@ -905,17 +907,34 @@ void EditLocalParameterDialog::showContextMenu()
 
   if ( !hasSelection ) return;
 
-  auto text = QApplication::clipboard()->text();
-  bool canPaste = !text.isEmpty();
-
   QMenu *menu = new QMenu(this);
-  QAction *action = new QAction("Paste",this);
-  action->setToolTip("Paste data from clipboard.");
-  connect(action,SIGNAL(activated()),this,SLOT(paste()));
-  action->setEnabled(canPaste);
-  menu->addAction(action);
+  {
+    QAction *action = new QAction("Copy",this);
+    action->setToolTip("Copy data to clipboard.");
+    connect(action,SIGNAL(activated()),this,SLOT(copy()));
+    menu->addAction(action);
+  }
+  {
+    QAction *action = new QAction("Paste",this);
+    action->setToolTip("Paste data from clipboard.");
+    connect(action,SIGNAL(activated()),this,SLOT(paste()));
+    auto text = QApplication::clipboard()->text();
+    action->setEnabled(!text.isEmpty());
+    menu->addAction(action);
+  }
 
   menu->exec(QCursor::pos());
+}
+
+void EditLocalParameterDialog::copy()
+{
+  QStringList text;
+  auto n = m_values.size();
+  for(int i = 0; i < n; ++i)
+  {
+    text << makeNumber(m_values[i]);
+  }
+  QApplication::clipboard()->setText( text.join("\n") );
 }
 
 void EditLocalParameterDialog::paste()
@@ -1415,11 +1434,11 @@ void DataController::addWorkspaceSpectrum(const QString &wsName, int wsIndex, co
   cell->setFlags(flags);
 
   const double startX = ws.readX(wsIndex).front();
-  cell = new QTableWidgetItem( QString::number(startX) );
+  cell = new QTableWidgetItem( makeNumber(startX) );
   m_dataTable->setItem( row, startXColumn, cell );
 
   const double endX = ws.readX(wsIndex).back();
-  cell = new QTableWidgetItem( QString::number(endX) );
+  cell = new QTableWidgetItem( makeNumber(endX) );
   m_dataTable->setItem( row, endXColumn, cell );
 }
 
@@ -1542,8 +1561,8 @@ void DataController::setFittingRangeGlobal(bool on)
 void DataController::setFittingRange(int i, double startX, double endX)
 {
   if ( i < 0 || i >= m_dataTable->rowCount() ) return;
-  auto start = QString::number(startX);
-  auto end = QString::number(endX);
+  auto start = makeNumber(startX);
+  auto end = makeNumber(endX);
   if ( m_isFittingRangeGlobal )
   {
     for(int k = 0; k < getNumberOfSpectra(); ++k)

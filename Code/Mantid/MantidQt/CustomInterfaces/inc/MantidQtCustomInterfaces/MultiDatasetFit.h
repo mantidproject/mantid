@@ -249,6 +249,7 @@ private slots:
   void setAllValues(double);
   void fixParameter(int,bool);
   void setAllFixed(bool);
+  void copy();
   void paste();
 private:
   bool eventFilter(QObject * obj, QEvent * ev);
