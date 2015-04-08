@@ -172,7 +172,7 @@ void ConvertSpiceDataToRealSpace::exec() {
       dataTableWS, parentWS, runstart, logvecmap, vectimes);
 
   // Apply detector e(fficiency
-  if (detEffMap.size() > 0) {
+  if (!detEffMap.empty()){
     correctByDetectorEfficiency(vec_ws2d,
                                 detEffMap); // std::vector<MatrixWorkspace_sptr>
   }
