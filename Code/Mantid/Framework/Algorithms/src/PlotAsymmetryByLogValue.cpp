@@ -20,7 +20,6 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
-#include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "Poco/File.h"
@@ -178,63 +177,26 @@ void PlotAsymmetryByLogValue::exec() {
 
   // Parse run names and get the number of runs
   parseRunNames( firstFN, lastFN, m_filenameBase, m_filenameExt, m_filenameZeros);
-  int64_t is = atoi(firstFN.c_str()); // starting run number
-  int64_t ie = atoi(lastFN.c_str());  // last run number
+  size_t is = atoi(firstFN.c_str()); // starting run number
+  size_t ie = atoi(lastFN.c_str());  // last run number
 
   // Resize vectors that will store results
   resizeVectors(ie-is+1);
 
   Progress progress(this, 0, 1, ie - is + 2);
 
-  // Load in serial
-  // We need to store the loaded ws, dead times and grouping in vectors
-  std::vector<Workspace_sptr> loadedWorkspace;
-  std::vector<Workspace_sptr> loadedDeadTimeTable;
-  std::vector<Workspace_sptr> loadedDetGroupingTable;
-  for (int64_t i = is; i <= ie; i++) {
+  // Loop through runs
+  for (size_t i = is; i <= ie; i++) {
 
-    Workspace_sptr loadedWs, loadedDt, loadedDg;
-    doLoad( i, loadedWs, loadedDt, loadedDg );
+    // Load run, apply dead time corrections and detector grouping
+    Workspace_sptr loadedWs = doLoad(i);
 
-    loadedWorkspace.push_back(loadedWs);
-    loadedDeadTimeTable.push_back(loadedDt);
-    loadedDetGroupingTable.push_back(loadedDg);
+    // Analyse loadedWs
+    doAnalysis (loadedWs, i-is);
 
     progress.report();
   }
 
-  // Analyse in parallel
-  // Use previously loaded ws, dead times and grouping
-  PARALLEL_FOR_NO_WSP_CHECK()
-  for (int64_t i = is; i <= ie; i++) {
-    PARALLEL_START_INTERUPT_REGION
-
-    int64_t runIndex = i - is;
-
-    Workspace_sptr loadedWs = loadedWorkspace.at(runIndex);
-    Workspace_sptr loadedDt = loadedDeadTimeTable.at(runIndex);
-    Workspace_sptr loadedDg = loadedDetGroupingTable.at(runIndex);
-
-    // Apply dead time corrections if requested
-    if ( m_dtcType != "None" ) {
-      applyDeadtimeCorr (loadedWs,loadedDt);
-    }
-    // Apply grouping if requested
-    if ( m_autogroup ) {
-      groupDetectors (loadedWs,loadedDg);
-    }
-
-    // Analyse loadedWs
-    doAnalysis (loadedWs, runIndex);
-
-    PARALLEL_END_INTERUPT_REGION
-  }
-  PARALLEL_CHECK_INTERUPT_REGION
-
-  // Clear vectors
-  loadedWorkspace.clear();
-  loadedDeadTimeTable.clear();
-  loadedDetGroupingTable.clear();
 
   // Create the 2D workspace for the output
   int nplots = (m_green!= EMPTY_INT()) ? 4 : 1;
@@ -253,11 +215,8 @@ void PlotAsymmetryByLogValue::exec() {
 
 /**  Loads one run and applies dead-time corrections and detector grouping if required
 *   @param runNumber :: [input] Run number specifying run to load
-*   @param loadedWs :: [output] Workspace loaded from nexus file
-*   @param loadedDt :: [output] Dead time table loaded from nexus file or specified file
-*   @param loadedDg :: [output] Detector grouping table loaded from nexus file
 */
-void PlotAsymmetryByLogValue::doLoad (int64_t runNumber, Workspace_sptr& loadedWs, Workspace_sptr& loadedDt, Workspace_sptr& loadedDg) {
+Workspace_sptr PlotAsymmetryByLogValue::doLoad (int64_t runNumber ) {
 
   // Get complete run name
   std::ostringstream fn, fnn;
@@ -268,27 +227,33 @@ void PlotAsymmetryByLogValue::doLoad (int64_t runNumber, Workspace_sptr& loadedW
   IAlgorithm_sptr load = createChildAlgorithm("LoadMuonNexus");
   load->setPropertyValue("Filename", fn.str());
   load->execute();
-  loadedWs = load->getProperty("OutputWorkspace");
+  Workspace_sptr loadedWs = load->getProperty("OutputWorkspace");
 
   // Check if dead-time corrections have to be applied
   if (m_dtcType != "None") {
     if (m_dtcType == "FromSpecifiedFile") {
-      // If user specifies a file, load corrections from file
-      loadCorrectionsFromFile (loadedDt, getPropertyValue("DeadTimeCorrFile"));
+
+      // If user specifies a file, load corrections now
+      Workspace_sptr customDeadTimes;
+      loadCorrectionsFromFile (customDeadTimes, getPropertyValue("DeadTimeCorrFile"));
+      applyDeadtimeCorr (loadedWs, customDeadTimes);
     } else {
       // Load corrections from run
-      loadedDt = load->getProperty("DeadTimeTable");
+      Workspace_sptr deadTimes = load->getProperty("DeadTimeTable");
+      applyDeadtimeCorr (loadedWs, deadTimes);
     }
   }
 
-  // If m_autogroup load detector grouping table
+  // If m_autogroup, group detectors
   if (m_autogroup) {
-    loadedDg = load->getProperty("DetectorGroupingTable");
-    if (!loadedDg)
+    Workspace_sptr loadedDetGrouping = load->getProperty("DetectorGroupingTable");
+    if (!loadedDetGrouping)
       throw std::runtime_error("No grouping info in the file.\n\nPlease "
       "specify grouping manually");
+    groupDetectors(loadedWs,loadedDetGrouping);
   }
 
+  return loadedWs;
 }
 
 /**  Load dead-time corrections from specified file
@@ -420,36 +385,20 @@ void PlotAsymmetryByLogValue::parseRunNames (std::string& firstFN, std::string& 
 */
 void PlotAsymmetryByLogValue::applyDeadtimeCorr (Workspace_sptr &loadedWs, Workspace_sptr deadTimes)
 {
-  std::stringstream wsName, deadName;
-  wsName << "__input" << PARALLEL_THREAD_NUMBER;
-  deadName << "__dead" << PARALLEL_THREAD_NUMBER;
+  ScopedWorkspace ws(loadedWs);
+  ScopedWorkspace dt(deadTimes);
 
-  // Could be groups of workspaces, so need to work with ADS
-  AnalysisDataService::Instance().add(wsName.str(),loadedWs);
-  AnalysisDataService::Instance().add(deadName.str(),deadTimes);
-
-  IAlgorithm_sptr applyCorr = createChildAlgorithm("ApplyDeadTimeCorr");
+  IAlgorithm_sptr applyCorr = AlgorithmManager::Instance().create("ApplyDeadTimeCorr");
   applyCorr->setLogging(false);
   applyCorr->setRethrows(true);
-  applyCorr->setPropertyValue("InputWorkspace", wsName.str());
-  applyCorr->setPropertyValue("OutputWorkspace", wsName.str());
-  applyCorr->setPropertyValue("DeadTimeTable", deadName.str());
+  applyCorr->setPropertyValue("InputWorkspace", ws.name());
+  applyCorr->setPropertyValue("OutputWorkspace", ws.name());
+  applyCorr->setProperty("DeadTimeTable", dt.name());
   applyCorr->execute();
   // Workspace should've been replaced in the ADS by ApplyDeadTimeCorr, so
-  // need to re-assign it
-  loadedWs = AnalysisDataService::Instance().retrieve(wsName.str());
-
-  // Remove workspaces from ADS
-  if ( boost::dynamic_pointer_cast<WorkspaceGroup>(loadedWs) ) {
-    AnalysisDataService::Instance().deepRemoveGroup(wsName.str());
-  } else {
-    AnalysisDataService::Instance().remove(wsName.str());
-  }
-  if ( boost::dynamic_pointer_cast<WorkspaceGroup>(deadTimes) ) {
-    AnalysisDataService::Instance().deepRemoveGroup(deadName.str());
-  } else {
-    AnalysisDataService::Instance().remove(deadName.str());
-  }
+  // need to
+  // re-assign it
+  loadedWs = ws.retrieve();
 }
 
 /**  Group detectors from specified file
@@ -458,35 +407,22 @@ void PlotAsymmetryByLogValue::applyDeadtimeCorr (Workspace_sptr &loadedWs, Works
 */
 void PlotAsymmetryByLogValue::groupDetectors (Workspace_sptr &loadedWs, Workspace_sptr loadedDetGrouping)
 {
-  std::stringstream wsName, groupName;
-  wsName << "__input" << PARALLEL_THREAD_NUMBER;
-  groupName << "__group" << PARALLEL_THREAD_NUMBER;
 
   // Could be groups of workspaces, so need to work with ADS
-  AnalysisDataService::Instance().add(wsName.str(),loadedWs);
-  AnalysisDataService::Instance().add(groupName.str(),loadedDetGrouping);
+  ScopedWorkspace inWS(loadedWs);
+  ScopedWorkspace grouping(loadedDetGrouping);
+  ScopedWorkspace outWS;
 
-  IAlgorithm_sptr applyGrouping = createChildAlgorithm("MuonGroupDetectors");
+  IAlgorithm_sptr applyGrouping = AlgorithmManager::Instance().create("MuonGroupDetectors");
   applyGrouping->setLogging(false);
   applyGrouping->setRethrows(true);
-  applyGrouping->setPropertyValue("InputWorkspace", wsName.str());
-  applyGrouping->setPropertyValue("DetectorGroupingTable", groupName.str());
-  applyGrouping->setPropertyValue("OutputWorkspace", wsName.str());
+
+  applyGrouping->setPropertyValue("InputWorkspace", inWS.name());
+  applyGrouping->setPropertyValue("DetectorGroupingTable", grouping.name());
+  applyGrouping->setPropertyValue("OutputWorkspace", outWS.name());
   applyGrouping->execute();
 
-  loadedWs = AnalysisDataService::Instance().retrieve(wsName.str());
-
-  // Remove workspaces from ADS
-  if ( boost::dynamic_pointer_cast<WorkspaceGroup>(loadedWs) ) {
-    AnalysisDataService::Instance().deepRemoveGroup(wsName.str());
-  } else {
-    AnalysisDataService::Instance().remove(wsName.str());
-  }
-  if ( boost::dynamic_pointer_cast<WorkspaceGroup>(loadedDetGrouping) ) {
-    AnalysisDataService::Instance().deepRemoveGroup(groupName.str());
-  } else {
-    AnalysisDataService::Instance().remove(groupName.str());
-  }
+  loadedWs = outWS.retrieve();
 }
 
 /**  Performs asymmetry analysis on a loaded workspace
