@@ -242,6 +242,9 @@
         <property name="suffix">
          <string> K</string>
         </property>
+        <property name="decimals">
+         <number>3</number>
+        </property>
         <property name="maximum">
          <double>999.990000000000009</double>
         </property>
@@ -270,6 +273,9 @@
        <widget class="QDoubleSpinBox" name="spScaleMultiplier">
         <property name="enabled">
          <bool>false</bool>
+        </property>
+        <property name="decimals">
+         <number>5</number>
         </property>
         <property name="maximum">
          <double>99.989999999999995</double>
@@ -481,11 +487,17 @@
                 <property name="enabled">
                  <bool>false</bool>
                 </property>
+                <property name="decimals">
+                 <number>5</number>
+                </property>
                 <property name="minimum">
                  <double>-999.990000000000009</double>
                 </property>
                 <property name="maximum">
                  <double>999.990000000000009</double>
+                </property>
+                <property name="singleStep">
+                 <double>0.100000000000000</double>
                 </property>
                </widget>
               </item>
@@ -524,11 +536,17 @@
                 <property name="enabled">
                  <bool>false</bool>
                 </property>
+                <property name="decimals">
+                 <number>5</number>
+                </property>
                 <property name="minimum">
                  <double>-999.990000000000009</double>
                 </property>
                 <property name="maximum">
                  <double>999.990000000000009</double>
+                </property>
+                <property name="singleStep">
+                 <double>0.100000000000000</double>
                 </property>
                </widget>
               </item>
@@ -567,11 +585,17 @@
                 <property name="enabled">
                  <bool>false</bool>
                 </property>
+                <property name="decimals">
+                 <number>5</number>
+                </property>
                 <property name="minimum">
                  <double>-999.990000000000009</double>
                 </property>
                 <property name="maximum">
                  <double>999.990000000000009</double>
+                </property>
+                <property name="singleStep">
+                 <double>0.100000000000000</double>
                 </property>
                </widget>
               </item>
