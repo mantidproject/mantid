@@ -172,6 +172,7 @@ void ConvertCWPDMDToSpectra::exec() {
   }
 
   // Rebin
+  std::sort(excluded_detids.begin(), excluded_detids.end());
   API::MatrixWorkspace_sptr outws = reducePowderData(
       inputDataWS, inputMonitorWS, outputunit, map_runWavelength, xmin, xmax,
       binsize, doLinearInterpolation, excluded_detids);
@@ -479,8 +480,11 @@ void ConvertCWPDMDToSpectra::binMD(API::IMDEventWorkspace_const_sptr mdws,
     for (size_t iev = 0; iev < numev2; ++iev) {
       // get detector position for 2theta
       detid_t detid = mditer->getInnerDetectorID(iev);
-      if (isExcluded(vec_excludedet, detid))
+      if (isExcluded(vec_excludedet, detid)) {
+        g_log.debug() << "Detector " << detid << " is excluded.  Signal = "
+                      << mditer->getInnerSignal(iev) << "\n";
         continue;
+      }
 
       double tempx = mditer->getInnerPosition(iev, 0);
       double tempy = mditer->getInnerPosition(iev, 1);
@@ -744,10 +748,19 @@ ConvertCWPDMDToSpectra::scaleMatrixWorkspace(API::MatrixWorkspace_sptr matrixws,
   return;
 }
 
+//----------------------------------------------------------------------------------------------
+/** Check whether a detector is excluded
+ * @brief ConvertCWPDMDToSpectra::isExcluded
+ * @param vec_excludedet :: a sorted vector
+ * @param detid
+ * @return
+ */
 bool
 ConvertCWPDMDToSpectra::isExcluded(const std::vector<detid_t> &vec_excludedet,
                                    const detid_t detid) {
-  return true;
+
+  return std::find(vec_excludedet.begin(), vec_excludedet.end(), detid) !=
+         vec_excludedet.end();
 }
 
 } // namespace MDAlgorithms
