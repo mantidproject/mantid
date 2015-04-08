@@ -1104,6 +1104,7 @@ class ISISIndirectInelasticConvFit(ISISIndirectInelasticBase):
         '''Defines the workflow for the test'''
         self.tolerance = 1e-4
         LoadNexus(self.sample, OutputWorkspace=self.sample)
+        LoadNexus(self.resolution, OutputWorkspace=self.resolution)
 
         confitSeq(
             self.sample,
@@ -1124,8 +1125,6 @@ class ISISIndirectInelasticConvFit(ISISIndirectInelasticBase):
             raise RuntimeError("Sample should be a string.")
         if type(self.resolution) != str:
             raise RuntimeError("Resolution should be a string.")
-        if not os.path.isfile(self.resolution):
-            raise RuntimeError("Resolution must be a file that exists.")
         if type(self.func) != str:
             raise RuntimeError("Function should be a string.")
         if type(self.bg) != str:
