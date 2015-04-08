@@ -157,7 +157,7 @@ InelasticDiffSphere::InelasticDiffSphere()
                                       "if energy in ueV");
   declareParameter("Shift", 0.0, "Shift in domain");
 
-  declareAttribute("Q", API::IFunction::Attribute());
+  declareAttribute("Q", API::IFunction::Attribute(EMPTY_DBL()));
   declareAttribute("WorkspaceIndex", API::IFunction::Attribute(0));
 }
 
@@ -208,14 +208,19 @@ void InelasticDiffSphere::function1D(double *out, const double *xValues,
   const double S = getParameter("Shift");
 
   double Q;
-  if (getAttribute("Q").value() == "" && m_qValueCache.size() > 0) {
+  if (getAttribute("Q").asDouble() == EMPTY_DBL()) {
+    if (m_qValueCache.size() == 0) {
+      throw std::runtime_error(
+          "No Q attribute provided and cannot retrieve from worksapce.");
+    }
+
     const int specIdx = getAttribute("WorkspaceIndex").asInt();
     Q = m_qValueCache[specIdx];
 
     g_log.debug() << "Get Q value for workspace index " << specIdx << ": " << Q
                   << std::endl;
   } else {
-    Q = boost::lexical_cast<double>(getAttribute("Q").value());
+    Q = getAttribute("Q").asDouble();
 
     g_log.debug() << "Using Q attribute: " << Q << std::endl;
   }
@@ -272,18 +277,26 @@ InelasticDiffSphere::setWorkspace(boost::shared_ptr<const API::Workspace> ws) {
     IDetector_const_sptr det;
     try {
       det = workspace->getDetector(idx);
-    } catch(Exception::NotFoundError &) {
+    }
+    catch (Exception::NotFoundError &) {
       m_qValueCache.clear();
       g_log.information("Cannot populate Q values from workspace");
       break;
     }
 
-    double efixed = workspace->getEFixed(det);
-    double usignTheta = workspace->detectorTwoTheta(det) / 2.0;
+    try {
+      double efixed = workspace->getEFixed(det);
+      double usignTheta = workspace->detectorTwoTheta(det) / 2.0;
 
-    double q = Mantid::Kernel::UnitConversion::run(usignTheta, efixed);
+      double q = Mantid::Kernel::UnitConversion::run(usignTheta, efixed);
 
-    m_qValueCache.push_back(q);
+      m_qValueCache.push_back(q);
+    }
+    catch (std::runtime_error &) {
+      m_qValueCache.clear();
+      g_log.information("Cannot populate Q values from workspace");
+      return;
+    }
   }
 }
 

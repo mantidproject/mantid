@@ -1,14 +1,10 @@
 #ifndef AFFINE_MATRIX_PARAMETER_PARSER_TEST_H
 #define AFFINE_MATRIX_PARAMETER_PARSER_TEST_H
 
+#include <Poco/AutoPtr.h>
 #include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/Document.h>
 #include <Poco/DOM/Element.h>
-#include <Poco/DOM/NodeList.h>
-#include <Poco/DOM/NodeIterator.h>
-#include <Poco/DOM/NodeFilter.h>
-#include <Poco/File.h>
-#include <Poco/Path.h>
 
 #include <cxxtest/TestSuite.h>
 #include "MantidDataObjects/AffineMatrixParameterParser.h"
@@ -23,7 +19,7 @@ public:
  {
    Poco::XML::DOMParser pParser;
    std::string xmlToParse = "<?xml version=\"1.0\" encoding=\"utf-8\"?><Parameter><Type>AffineMatrixParameter</Type><Value>1,2;3,4;5,6</Value></Parameter>";
-   Poco::XML::Document* pDoc = pParser.parseString(xmlToParse);
+   Poco::AutoPtr<Poco::XML::Document> pDoc = pParser.parseString(xmlToParse);
    Poco::XML::Element* pRootElem = pDoc->documentElement();
 
    AffineMatrixParameterParser parser;
@@ -46,7 +42,7 @@ public:
  {
    Poco::XML::DOMParser pParser;
    std::string xmlToParse = "<?xml version=\"1.0\" encoding=\"utf-8\"?><Parameter><Type>AffineMatrixParameter</Type><Value>1,2,3;4,5,6;7,8,9</Value></Parameter>";
-   Poco::XML::Document* pDoc = pParser.parseString(xmlToParse);
+   Poco::AutoPtr<Poco::XML::Document> pDoc = pParser.parseString(xmlToParse);
    Poco::XML::Element* pRootElem = pDoc->documentElement();
 
    AffineMatrixParameterParser parser;
@@ -72,7 +68,7 @@ public:
  {
    Poco::XML::DOMParser pParser;
    std::string xmlToParse = "<?xml version=\"1.0\" encoding=\"utf-8\"?><Parameter><Type>AffineMatrixParameter</Type><Value>1,2,3,4;5,6,7,8;9,10,11,12</Value></Parameter>";
-   Poco::XML::Document* pDoc = pParser.parseString(xmlToParse);
+   Poco::AutoPtr<Poco::XML::Document> pDoc = pParser.parseString(xmlToParse);
    Poco::XML::Element* pRootElem = pDoc->documentElement();
 
    AffineMatrixParameterParser parser;
@@ -108,7 +104,7 @@ public:
  {
    Poco::XML::DOMParser pParser;
    std::string xmlToParse = "<?xml version=\"1.0\" encoding=\"utf-8\"?><Parameter><Type>SOME_OTHER_PARAMETER_TYPE</Type><Value></Value></Parameter>";
-   Poco::XML::Document* pDoc = pParser.parseString(xmlToParse);
+   Poco::AutoPtr<Poco::XML::Document> pDoc = pParser.parseString(xmlToParse);
    Poco::XML::Element* pRootElem = pDoc->documentElement();
 
    AffineMatrixParameterParser parser;

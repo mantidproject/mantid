@@ -189,7 +189,13 @@ set_target_properties ( DataObjects PROPERTIES OUTPUT_NAME MantidDataObjects
 if (OSX_VERSION VERSION_GREATER 10.8)
   set_target_properties ( DataObjects PROPERTIES INSTALL_RPATH "@loader_path/../MacOS")
 endif ()
-                                               
+
+# Intensive use of templated libaries can cause large objects to be generated. These require
+# an additional flag in MSVC.
+if ( MSVC )
+  set_target_properties ( DataObjects PROPERTIES COMPILE_FLAGS "/bigobj" )
+endif ()
+
 # Add to the 'Framework' group in VS
 set_property ( TARGET DataObjects PROPERTY FOLDER "MantidFramework" )
 

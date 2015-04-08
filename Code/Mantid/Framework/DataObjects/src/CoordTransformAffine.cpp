@@ -1,14 +1,16 @@
+#include <iostream>
+
+#include "MantidAPI/CoordTransform.h"
+#include "MantidDataObjects/CoordTransformAffine.h"
+#include "MantidDataObjects/CoordTransformAligned.h"
 #include "MantidGeometry/MDGeometry/MDTypes.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Matrix.h"
 #include "MantidKernel/System.h"
-#include "MantidDataObjects/CoordTransformAffine.h"
+#include "MantidKernel/VectorHelper.h"
+
 #include <boost/algorithm/string.hpp>
 #include <boost/format.hpp>
-#include "MantidKernel/VectorHelper.h"
-#include "MantidDataObjects/CoordTransformAligned.h"
-#include "MantidAPI/CoordTransform.h"
-#include <iostream>
 
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;

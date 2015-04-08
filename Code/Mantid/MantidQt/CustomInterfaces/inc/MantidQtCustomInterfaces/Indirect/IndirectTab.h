@@ -94,12 +94,16 @@ namespace CustomInterfaces
     /// Add a SaveNexusProcessed step to the batch queue
     void addSaveWorkspaceToQueue(const QString & wsName, const QString & filename = "");
 
-    /// Plot a spectrum plot given a list of workspace names
+    /// Plot a spectrum plot with a given spectrum index
     void plotSpectrum(const QStringList & workspaceNames, int specIndex = 0);
     void plotSpectrum(const QString & workspaceName, int specIndex = 0);
 
+    /// Plot a spectrum plot with a given spectra range
+    void plotSpectrum(const QStringList & workspaceNames, int specStart, int specEnd);
+    void plotSpectrum(const QString & workspaceName, int specStart, int specEnd);
+
     /// Plot a contour plot of a given workspace
-    void plotContour(const QString & workspaceName);
+    void plot2D(const QString & workspaceName);
 
     /// Function to set the range limits of the plot
     void setPlotPropertyRange(MantidQt::MantidWidgets::RangeSelector * rs,
