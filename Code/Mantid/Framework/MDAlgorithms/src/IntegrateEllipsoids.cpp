@@ -26,7 +26,6 @@ using namespace Mantid::DataObjects;
 namespace Mantid {
 namespace MDAlgorithms {
 
-namespace {
 /// This only works for diffraction.
 const std::string ELASTIC("Elastic");
 
@@ -44,15 +43,17 @@ const std::size_t DIMS(3);
  * @param unitConverter : Unit converter
  * @param qConverter : Q converter
  */
-void qListFromEventWS(Integrate3DEvents &integrator, Progress &prog,
+void IntegrateEllipsoids::qListFromEventWS(Integrate3DEvents &integrator, Progress &prog,
                       EventWorkspace_sptr &wksp,
                       UnitsConversionHelper &unitConverter,
                       MDTransf_sptr &qConverter, DblMatrix const &UBinv, bool hkl_integ) {
   // loop through the eventlists
-  std::vector<double> buffer(DIMS);
 
   size_t numSpectra = wksp->getNumberHistograms();
+  PARALLEL_FOR1(wksp)
   for (std::size_t i = 0; i < numSpectra; ++i) {
+    PARALLEL_START_INTERUPT_REGION
+    std::vector<double> buffer(DIMS);
     // get a reference to the event list
     EventList &events = wksp->getEventList(i);
 
@@ -85,11 +86,14 @@ void qListFromEventWS(Integrate3DEvents &integrator, Progress &prog,
       if (hkl_integ) qVec = UBinv * qVec;
       qList.push_back(std::make_pair(event->m_weight, qVec));
     } // end of loop over events in list
-
-    integrator.addEvents(qList, hkl_integ);
+    PARALLEL_CRITICAL(addEvents) {
+      integrator.addEvents(qList, hkl_integ);
+    }
 
     prog.report();
+    PARALLEL_END_INTERUPT_REGION
   } // end of loop over spectra
+  PARALLEL_CHECK_INTERUPT_REGION
 }
 
 /**
@@ -101,17 +105,19 @@ void qListFromEventWS(Integrate3DEvents &integrator, Progress &prog,
  * @param unitConverter : Unit converter
  * @param qConverter : Q converter
  */
-void qListFromHistoWS(Integrate3DEvents &integrator, Progress &prog,
+void IntegrateEllipsoids::qListFromHistoWS(Integrate3DEvents &integrator, Progress &prog,
                       Workspace2D_sptr &wksp,
                       UnitsConversionHelper &unitConverter,
                       MDTransf_sptr &qConverter, DblMatrix const &UBinv, bool hkl_integ) {
 
   // loop through the eventlists
-  std::vector<double> buffer(DIMS);
 
   size_t numSpectra = wksp->getNumberHistograms();
   const bool histogramForm = wksp->isHistogramData();
+  PARALLEL_FOR1(wksp)
   for (std::size_t i = 0; i < numSpectra; ++i) {
+    PARALLEL_START_INTERUPT_REGION
+    std::vector<double> buffer(DIMS);
     // get tof and counts
     const Mantid::MantidVec &xVals = wksp->readX(i);
     const Mantid::MantidVec &yVals = wksp->readY(i);
@@ -154,16 +160,20 @@ void qListFromHistoWS(Integrate3DEvents &integrator, Progress &prog,
         qList.push_back(std::make_pair(
             yValCounts, qVec)); // Not ideal to control the size dynamically?
       }
-      integrator.addEvents(qList, hkl_integ); // We would have to put a lock around this.
+      PARALLEL_CRITICAL(addHistoj) {
+        integrator.addEvents(qList, hkl_integ); // We would have to put a lock around this.
+      }
       prog.report();
     }
-
-    integrator.addEvents(qList, hkl_integ);
-
+    PARALLEL_CRITICAL(addHistoj) {
+      integrator.addEvents(qList, hkl_integ);
+    }
     prog.report();
-  }
+    PARALLEL_END_INTERUPT_REGION
+  } // end of loop over spectra
+  PARALLEL_CHECK_INTERUPT_REGION
 }
-} // end anonymous namespace
+
 /** NOTE: This has been adapted from the SaveIsawQvector algorithm.
  */
 
