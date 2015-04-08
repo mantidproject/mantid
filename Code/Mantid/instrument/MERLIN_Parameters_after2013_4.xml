@@ -296,7 +296,7 @@
 <!-- This property is the part of the composite definition for abs_units_van_range
  It specifies the relative to incident energy higher integration limit for monochromatic vanadium in the mono-vanadium integration -->
 <parameter name="monovan_hi_frac">
-  <value val="0.7"/>
+  <value val="0.6"/>
 </parameter>
 <!-- This property is the part of the composite definition for abs_units_van_range
  It specifies the the higher limit of energy range in the monochromatic-vanadium integration 
@@ -409,6 +409,7 @@
        fix_ei=fixei;
        sum_runs=sum;
        wb_integr_range=detector_van_range;
+       motor_log_names = motor_name;       
        van_mass=vanadium-mass;
        check_background = background;
        mon1_norm_spec=norm-mon1-spec;
