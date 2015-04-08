@@ -396,18 +396,20 @@ namespace IDA
     switch(index)
     {
       case 0:
-        // Geomtry is flat
+        // Geometry is flat
         ext = "_flt_abs";
-        m_uiForm.dsCorrections->setWSSuffixes(QStringList(ext));
-        m_uiForm.dsCorrections->setFBSuffixes(QStringList(ext + ".nxs"));
         break;
       case 1:
-        // Geomtry is cylinder
+        // Geometry is cylinder
         ext = "_cyl_abs";
-        m_uiForm.dsCorrections->setWSSuffixes(QStringList(ext));
-        m_uiForm.dsCorrections->setFBSuffixes(QStringList(ext + ".nxs"));
+        break;
+      case 2:
+        // Geometry is annulus
+        ext = "_ann_abs";
         break;
     }
+    m_uiForm.dsCorrections->setWSSuffixes(QStringList(ext));
+    m_uiForm.dsCorrections->setFBSuffixes(QStringList(ext + ".nxs"));
   }
 
 

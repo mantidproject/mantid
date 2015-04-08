@@ -124,6 +124,9 @@ namespace IDA
       case 1:
         correctionType = "cyl";
         break;
+      case 2:
+        correctionType = "ann";
+        break;
     }
 
     const QString outputWsName = sampleWsName.left(nameCutIndex) + "_" + correctionType + "_abs";
