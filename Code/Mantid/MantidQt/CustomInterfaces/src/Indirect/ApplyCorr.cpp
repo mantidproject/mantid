@@ -24,7 +24,6 @@ namespace IDA
   {
     m_uiForm.setupUi(parent);
 
-    connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(algorithmComplete(bool)));
     connect(m_uiForm.cbGeometry, SIGNAL(currentIndexChanged(int)), this, SLOT(handleGeometryChange(int)));
     connect(m_uiForm.dsSample, SIGNAL(dataReady(const QString&)), this, SLOT(newData(const QString&)));
     connect(m_uiForm.spPreviewSpec, SIGNAL(valueChanged(int)), this, SLOT(plotPreview(int)));
@@ -63,13 +62,13 @@ namespace IDA
 
     QString sampleWsName = m_uiForm.dsSample->getCurrentDataName();
     MatrixWorkspace_sptr sampleWs = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(sampleWsName.toStdString());
-    Mantid::Kernel::Unit_sptr sampleXUnit = sampleWs->getAxis(0)->unit();
+    m_originalSampleUnits = sampleWs->getAxis(0)->unit()->unitID();
 
     // If not in wavelength then do conversion
-    if(sampleXUnit->caption() != "Wavelength")
+    if(m_originalSampleUnits != "Wavelength")
     {
       g_log.information("Sample workspace not in wavelength, need to convert to continue.");
-      absCorProps["SampleWorkspace"] = addConvertToWavelengthStep(sampleWs);
+      absCorProps["SampleWorkspace"] = addConvertUnitsStep(sampleWs, "Wavelength");
     }
     else
     {
@@ -83,11 +82,11 @@ namespace IDA
       MatrixWorkspace_sptr canWs = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(canWsName.toStdString());
 
       // If not in wavelength then do conversion
-      Mantid::Kernel::Unit_sptr canXUnit = canWs->getAxis(0)->unit();
-      if(canXUnit->caption() != "Wavelength")
+      std::string originalCanUnits = canWs->getAxis(0)->unit()->unitID();
+      if(originalCanUnits != "Wavelength")
       {
         g_log.information("Container workspace not in wavelength, need to convert to continue.");
-        absCorProps["CanWorkspace"] = addConvertToWavelengthStep(canWs);
+        absCorProps["CanWorkspace"] = addConvertUnitsStep(canWs, "Wavelength");
       }
       else
       {
@@ -191,16 +190,10 @@ namespace IDA
     applyCorrAlg->setProperty("OutputWorkspace", outputWsName.toStdString());
 
     // Add corrections algorithm to queue
-    m_sampleWsName = absCorProps["SampleWorkspace"];
-    m_canWsName = absCorProps["CanWorkspace"];
     m_batchAlgoRunner->addAlgorithm(applyCorrAlg, absCorProps);
 
-    // Add save algorithms if required
-    bool save = m_uiForm.ckSave->isChecked();
-    if(save)
-      addSaveWorkspaceToQueue(outputWsName);
-
     // Run algorithm queue
+    connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(absCorComplete(bool)));
     m_batchAlgoRunner->executeBatchAsync();
 
     // Set the result workspace for Python script export
@@ -253,15 +246,50 @@ namespace IDA
 
 
   /**
-   * Handles completion of the algorithm.
+   * Handles completion of the abs. correction algorithm.
    *
    * @param error True if algorithm failed.
    */
-  void ApplyCorr::algorithmComplete(bool error)
+  void ApplyCorr::absCorComplete(bool error)
   {
+    disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(absCorComplete(bool)));
+
     if(error)
     {
       emit showMessageBox("Unable to apply corrections.\nSee Results Log for more details.");
+      return;
+    }
+
+    // Convert back to original sample units
+    if(m_originalSampleUnits != "Wavelength")
+    {
+      auto ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(m_pythonExportWsName);
+      addConvertUnitsStep(ws, m_originalSampleUnits, "");
+    }
+
+    // Add save algorithms if required
+    bool save = m_uiForm.ckSave->isChecked();
+    if(save)
+      addSaveWorkspaceToQueue(QString::fromStdString(m_pythonExportWsName));
+
+    // Run algorithm queue
+    connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(postProcessComplete(bool)));
+    m_batchAlgoRunner->executeBatchAsync();
+  }
+
+
+  /**
+   * Handles completion of the unit conversion and saving algorithm.
+   *
+   * @param error True if algorithm failed.
+   */
+  void ApplyCorr::postProcessComplete(bool error)
+  {
+    disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(postProcessComplete(bool)));
+
+    if(error)
+    {
+      emit showMessageBox("Unable to process corrected workspace.\nSee Results Log for more details.");
       return;
     }
 
@@ -368,18 +396,20 @@ namespace IDA
     switch(index)
     {
       case 0:
-        // Geomtry is flat
+        // Geometry is flat
         ext = "_flt_abs";
-        m_uiForm.dsCorrections->setWSSuffixes(QStringList(ext));
-        m_uiForm.dsCorrections->setFBSuffixes(QStringList(ext + ".nxs"));
         break;
       case 1:
-        // Geomtry is cylinder
+        // Geometry is cylinder
         ext = "_cyl_abs";
-        m_uiForm.dsCorrections->setWSSuffixes(QStringList(ext));
-        m_uiForm.dsCorrections->setFBSuffixes(QStringList(ext + ".nxs"));
+        break;
+      case 2:
+        // Geometry is annulus
+        ext = "_ann_abs";
         break;
     }
+    m_uiForm.dsCorrections->setWSSuffixes(QStringList(ext));
+    m_uiForm.dsCorrections->setFBSuffixes(QStringList(ext + ".nxs"));
   }
 
 
@@ -395,9 +425,8 @@ namespace IDA
     m_uiForm.ppPreview->clear();
 
     // Plot sample
-    if(AnalysisDataService::Instance().doesExist(m_sampleWsName))
-      m_uiForm.ppPreview->addSpectrum("Sample", QString::fromStdString(m_sampleWsName),
-                                      specIndex, Qt::black);
+    m_uiForm.ppPreview->addSpectrum("Sample", m_uiForm.dsSample->getCurrentDataName(),
+                                    specIndex, Qt::black);
 
     // Plot result
     if(!m_pythonExportWsName.empty())
@@ -405,8 +434,8 @@ namespace IDA
                                       specIndex, Qt::green);
 
     // Plot can
-    if(useCan && AnalysisDataService::Instance().doesExist(m_canWsName))
-      m_uiForm.ppPreview->addSpectrum("Can", QString::fromStdString(m_canWsName),
+    if(useCan)
+      m_uiForm.ppPreview->addSpectrum("Can", m_uiForm.dsContainer->getCurrentDataName(),
                                       specIndex, Qt::red);
   }
 

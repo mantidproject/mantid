@@ -96,11 +96,18 @@ namespace CustomInterfaces
 
     /// Plot a spectrum plot with a given spectrum index
     void plotSpectrum(const QStringList & workspaceNames, int specIndex = 0);
+    /// Plot a spectrum plot of a given workspace
     void plotSpectrum(const QString & workspaceName, int specIndex = 0);
 
     /// Plot a spectrum plot with a given spectra range
     void plotSpectrum(const QStringList & workspaceNames, int specStart, int specEnd);
+    /// Plot a spectrum plot with a given spectra range of a given workspace
     void plotSpectrum(const QString & workspaceName, int specStart, int specEnd);
+
+    /// Plot a time bin plot given a list of workspace names
+    void plotTimeBin(const QStringList & workspaceNames, int specIndex = 0);
+    /// Plot a time bin plot of a given workspace
+    void plotTimeBin(const QString & workspaceName, int specIndex = 0);
 
     /// Plot a contour plot of a given workspace
     void plot2D(const QString & workspaceName);
