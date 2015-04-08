@@ -3,8 +3,7 @@ include_directories( SYSTEM ${PARAVIEW_INCLUDE_DIRS} )
 ADD_PARAVIEW_PLUGIN(MantidParaViewSplatterPlotSMPlugin "1.0"
 	SERVER_MANAGER_XML SplatterPlot.xml
 	SERVER_MANAGER_SOURCES vtkSplatterPlot.cxx
-	GUI_RESOURCES SplatterPlot.qrc
-	GUI_RESOURCE_FILES SplatterPlotGUI.xml)
+	GUI_RESOURCES SplatterPlot.qrc)
 	
 # Add to the 'VatesParaViewPlugins' group in VS
 set_property( TARGET MantidParaViewSplatterPlotSMPlugin PROPERTY FOLDER "MantidVatesParaViewPlugins" )

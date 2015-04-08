@@ -2,8 +2,7 @@ PROJECT(PeaksFilter)
 include_directories( SYSTEM ${PARAVIEW_INCLUDE_DIRS} )
 ADD_PARAVIEW_PLUGIN(MantidParaViewPeaksFilterSMPlugin "1.0"
 SERVER_MANAGER_XML PeaksFilter.xml
-SERVER_MANAGER_SOURCES vtkPeaksFilter.cxx
-GUI_RESOURCE_FILES PeaksFilterGUI.xml)
+SERVER_MANAGER_SOURCES vtkPeaksFilter.cxx)
 # Add to the 'VatesParaViewPlugins' group in VS
 set_property( TARGET MantidParaViewPeaksFilterSMPlugin PROPERTY FOLDER "MantidVatesParaViewPlugins")
 
