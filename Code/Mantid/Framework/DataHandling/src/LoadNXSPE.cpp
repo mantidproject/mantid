@@ -18,7 +18,7 @@
 #include <string>
 #include <vector>
 #include <boost/regex.hpp>
-#include <cmath>
+#include <boost/math/special_functions/fpclassify.hpp>
 
 namespace Mantid {
 namespace DataHandling {
@@ -297,9 +297,7 @@ void LoadNXSPE::exec() {
     itdataend = itdata + numBins;
     iterrorend = iterror + numBins;
     outputWS->dataX(i) = energies;
-    if ((std::isnan(*itdata)) ||
-        ((*itdata) == std::numeric_limits<double>::infinity())  ||
-        ((*itdata) == -std::numeric_limits<double>::infinity()) ||
+    if ((!boost::math::isfinite(*itdata))||
         (*itdata <= -1e10)) // masked bin
     {
       outputWS->dataY(i) = std::vector<double>(numBins, 0);
