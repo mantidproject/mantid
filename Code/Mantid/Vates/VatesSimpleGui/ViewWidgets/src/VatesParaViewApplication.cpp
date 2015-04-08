@@ -39,23 +39,23 @@ namespace Mantid
       {
         GlobalInterpreterLock gil;
         Q_ASSERT(pqApplicationCore::instance()==NULL);
-        
+
         // Provide ParaView's application core with a path to ParaView
         int argc = 1;
-        
-        std::string paraviewPath = Mantid::Kernel::ConfigService::Instance().getParaViewPath();
-        std::vector<char> argvConversion(paraviewPath.begin(), paraviewPath.end());
+
+        std::string exePath = Kernel::ConfigService::Instance().getDirectoryOfExecutable();
+        std::vector<char> argvConversion(exePath.begin(), exePath.end());
         argvConversion.push_back('\0');
-        
+
         char *argv[] = {&argvConversion[0]};
 
         m_logger.debug() << "Intialize pqApplicationCore with " << argv << "\n";
-        
+
         // Get the plugin path that we set in the ConfigService.
         QString pv_plugin_path = QString::fromStdString(Poco::Environment::get("PV_PLUGIN_PATH"));
-        
+
         // We need to manually set the PV_PLUGIN_PATH because it's not going to be picked up from the paraview/vtk side otherwise.
-        vtksys::SystemTools::PutEnv((std::string("PV_PLUGIN_PATH=")+pv_plugin_path.toStdString()).c_str()); 
+        vtksys::SystemTools::PutEnv((std::string("PV_PLUGIN_PATH=")+pv_plugin_path.toStdString()).c_str());
 
         if (pv_plugin_path.isEmpty())
         {
@@ -63,12 +63,10 @@ namespace Mantid
                                    "Further use will cause the program to crash.\nPlease exit and "
                                    "set this variable.");
         }
-        
+
         new pqPVApplicationCore(argc, argv);
-        
-        //this->setupParaViewBehaviors();
       }
-      
+
       /**
        * This function duplicates the nearly identical call in ParaView for their
        * main program setup. This is necessary for the plugin mode since it does
@@ -83,15 +81,15 @@ namespace Mantid
         this->m_behaviorsSetup = true;
         // Register ParaView interfaces.
         pqInterfaceTracker* pgm = pqApplicationCore::instance()->interfaceTracker();
-        
+
         // * adds support for standard paraview views.
         pgm->addInterface(new pqStandardPropertyWidgetInterface(pgm));
-        
+
         pgm->addInterface(new pqStandardViewFrameActionsImplementation(pgm));
-        
+
         // Load plugins distributed with application.
         pqApplicationCore::instance()->loadDistributedPlugins();
-        
+
         // Define application behaviors.
         new pqQtMessageHandlerBehavior(this);
         new pqDataTimeStepBehavior(this);
@@ -113,12 +111,12 @@ namespace Mantid
         new pqViewStreamingBehavior(this);
         new pqPluginSettingsBehavior(this);
       }
-      
+
       VatesParaViewApplication::~VatesParaViewApplication()
       {
-        
+
       }
-      
+
       VatesParaViewApplication* VatesParaViewApplication::instance()
       {
         static QPointer<VatesParaViewApplication> arg;
