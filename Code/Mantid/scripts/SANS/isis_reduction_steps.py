@@ -21,7 +21,8 @@ from mantid.api import WorkspaceGroup, Workspace, IEventWorkspace
 from SANSUtility import (GetInstrumentDetails, MaskByBinRange,
                          isEventWorkspace, getFilePathFromWorkspace,
                          getWorkspaceReference, slice2histogram, getFileAndName,
-                         mask_detectors_with_masking_ws)
+                         mask_detectors_with_masking_ws, check_child_ws_for_name_and_type_for_added_eventdata,
+                         extract_child_ws_for_added_eventdata)
 import isis_instrument
 import isis_reducer
 from reducer_singleton import ReductionStep
@@ -153,6 +154,8 @@ class LoadRun(object):
                 raise RuntimeError("Incorrect format of the group workspace. We expect an EventWorkspace for the data and a MatrixWorkspace for the monitors.")
             if self._period != self.UNSET_PERIOD:
                 raise RuntimeError("Trying to use multiperiod and added eventdata. This is currently not supported.")
+
+
 
         monitor_ws_name = workspace + "_monitors"
 

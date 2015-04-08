@@ -4,7 +4,7 @@
 # SANS data reduction scripts
 ########################################################
 from mantid.simpleapi import *
-from mantid.api import IEventWorkspace, Workspace2D
+from mantid.api import IEventWorkspace, MatrixWorkspace, WorkspaceGroup
 import inspect
 import math
 import os
@@ -478,10 +478,8 @@ def mask_detectors_with_masking_ws(ws_name, masking_ws_name):
 def check_child_ws_for_name_and_type_for_added_eventdata(wsGroup):
     '''
     Ensure that the while loading added event data, we are dealing with
-    1. The correct naming convention.
-    
+    1. The correct naming convention.  
     2. The correct workspace types.
-
     @param wsGroup ::  workspace group.
     '''
     hasData = False
@@ -494,7 +492,7 @@ def check_child_ws_for_name_and_type_for_added_eventdata(wsGroup):
         if re.search(REG_DATA_NAME, childWorkspace.getName()):
             if isinstance(childWorkspace, IEventWorkspace):
                 hasData = True
-        if re.search(REG_DATA_MONITORS_NAME, name):
+        if re.search(REG_DATA_MONITORS_NAME, childWorkspace.getName()):
             if isinstance(childWorkspace, MatrixWorkspace):
                 hasMonitors = True
 
@@ -512,7 +510,7 @@ def extract_child_ws_for_added_eventdata(wsGroup):
         name = wsGroup.getItem(index).getName()
         assert name.endswith('_1')
         renamed = name[:(len(name) - 2)]
-        CloneWorkspace(name, renamed)
+        CloneWorkspace(InputWorkspace = name, OutputWorkspace = renamed)
 
 
 ###############################################################################

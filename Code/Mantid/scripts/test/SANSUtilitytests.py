@@ -6,14 +6,18 @@ for item in sys.path:
 
 import unittest
 import re
+# Need to import mantid before we import SANSUtility
+import mantid
+from mantid.simpleapi import CreateWorkspace, CreateSampleWorkspace, GroupWorkspaces, DeleteWorkspace
+from mantid.api import mtd
 import SANSUtility as su
 
 TEST_STRING = 'SANS2D0003434-add_monitors_1'
 TEST_STRING2 = 'SANS2D0003434-add_1'
 
 def provide_group_workspace_for_added_event_data(event_ws_name, monitor_ws_name, out_ws_name):
-    CreateWorkspace(DataX = [1,2,3], DataY = [2,3,4], OutputWorkspace = event_ws_name)
     CreateWorkspace(DataX = [1,2,3], DataY = [2,3,4], OutputWorkspace = monitor_ws_name)
+    CreateSampleWorkspace(WorkspaceType= 'Event', OutputWorkspace = event_ws_name)
     GroupWorkspaces(InputWorkspaces = [event_ws_name, monitor_ws_name ], OutputWorkspace = out_ws_name)
 
 
@@ -68,18 +72,23 @@ class TestSliceStringParser(unittest.TestCase):
 class TestLoadingAddedEventWorkspaceNameParsing(unittest.TestCase):
 
     def test_check_regex_for_data(self):
-        self.assertIsNotNone(re.search(REG_DATA, TEST_STRING2))
+        self.assertIsNotNone(re.search(su.REG_DATA_NAME, TEST_STRING2))
 
     def test_check_regex_for_data_monitors(self):
-        self.assertIsNotNone(re.search(REG_DATA_MONITORS, TEST_STRING))
+        self.assertIsNotNone(re.search(su.REG_DATA_MONITORS_NAME, TEST_STRING))
 
     def test_regexes_do_not_clash(self):
-        self.assertIsNone(re.search(REG_DATA, TEST_STRING)) 
-        self.assertIsNone(re.search(REG_DATA_MONITORS, TEST_STRING2))
+        self.assertIsNone(re.search(su.REG_DATA_NAME, TEST_STRING)) 
+        self.assertIsNone(re.search(su.REG_DATA_MONITORS_NAME, TEST_STRING2))
     
     def test_check_child_file_names_for_valid_names(self):
-        
-        self.assertTrue(check_child_file_names(names))
+        event_name = TEST_STRING2
+        monitor_name = TEST_STRING
+        out_name = 'out_ws'
+        provide_group_workspace_for_added_event_data(event_ws_name = event_name, monitor_ws_name = monitor_name, out_ws_name = out_name)
+        out_ws = mtd[out_name]
+        self.assertTrue(su.check_child_ws_for_name_and_type_for_added_eventdata(out_ws))
+        DeleteWorkspace(out_ws)
 
 
 class TestLoadingAddedEventWorkspaceExtraction(unittest.TestCase):
@@ -95,7 +104,7 @@ class TestLoadingAddedEventWorkspaceExtraction(unittest.TestCase):
         out_ws_group = mtd[out_ws_name]
 
         # Act
-        extract_child_ws_for_added_eventdata(out_ws_group)
+        su.extract_child_ws_for_added_eventdata(out_ws_group)
 
         # Assert
         # Make sure that two files exist with a truncated name
