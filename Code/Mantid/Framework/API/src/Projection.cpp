@@ -40,24 +40,20 @@ Projection::Projection(const V3D &u, const V3D &v, const V3D &w) {
   }
 }
 
-Projection::Projection(ITableWorkspace_const_sptr ws) {
-  if (!ws)
-    throw std::runtime_error(
-        "Null ITableWorkspace given to Projection constructor");
-
-  if (ws->columnCount() != 4)
+Projection::Projection(const ITableWorkspace &ws) {
+  if (ws.columnCount() != 4)
     throw std::runtime_error(
         "4 columns must be provided to create a projection");
 
-  const size_t numRows = ws->rowCount();
+  const size_t numRows = ws.rowCount();
   if (numRows != 3)
     throw std::runtime_error("3 rows must be provided to create a projection");
 
   for (size_t i = 0; i < numRows; i++) {
-    const std::string name = ws->getColumn("name")->cell<std::string>(i);
-    const std::string valueStr = ws->getColumn("value")->cell<std::string>(i);
-    const double offset = ws->getColumn("offset")->cell<double>(i);
-    const std::string unitStr = ws->getColumn("type")->cell<std::string>(i);
+    const std::string name = ws.getColumn("name")->cell<std::string>(i);
+    const std::string valueStr = ws.getColumn("value")->cell<std::string>(i);
+    const double offset = ws.getColumn("offset")->cell<double>(i);
+    const std::string unitStr = ws.getColumn("type")->cell<std::string>(i);
 
     //Check the name
     size_t index;

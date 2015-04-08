@@ -55,7 +55,7 @@ public:
   /// Three dimensional value constructor
   Projection(const V3D &u, const V3D &v, const V3D &w);
   /// Construct from an ITableWorkspace
-  Projection(ITableWorkspace_const_sptr ws);
+  Projection(const ITableWorkspace &ws);
   /// Copy constructor
   Projection(const Projection &other);
   /// Assignment operator

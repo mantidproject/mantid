@@ -243,7 +243,7 @@ void CutMD::exec() {
   // Check Projection format
   Projection projection;
   if (projectionWS)
-    projection = Projection(projectionWS);
+    projection = Projection(*projectionWS);
 
   // Check PBin properties
   for (size_t i = 0; i < 5; ++i) {

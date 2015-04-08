@@ -138,22 +138,10 @@ public:
     TS_ASSERT_EQUALS(p.W(), w);
   }
 
-  void test_construct_null_workspace() {
-    try {
-      auto p = boost::make_shared<Projection>(ITableWorkspace_sptr());
-      TS_FAIL("Projection constructor should have thrown exception");
-    } catch(std::runtime_error& e) {
-      TS_ASSERT_EQUALS(e.what(),
-          std::string("Null ITableWorkspace given to Projection constructor"))
-    } catch(...) {
-      TS_FAIL("Projection constructor threw unexpected exception");
-    }
-  }
-
   void test_construct_bad_workspace_columns() {
-    auto proj = ITableWorkspace_sptr(new DimensionedTable(0,0));
+    const DimensionedTable table(0,0);
     try {
-      auto p = boost::make_shared<Projection>(proj);
+      auto p = boost::make_shared<Projection>(table);
       TS_FAIL("Projection constructor should have thrown exception");
     } catch(std::runtime_error& e) {
       TS_ASSERT_EQUALS(e.what(),
@@ -164,9 +152,9 @@ public:
   }
 
   void test_construct_bad_workspace_no_rows() {
-    auto proj = ITableWorkspace_sptr(new DimensionedTable(4,0));
+    const DimensionedTable table(4,0);
     try {
-      auto p = boost::make_shared<Projection>(proj);
+      auto p = boost::make_shared<Projection>(table);
       TS_FAIL("Projection constructor should have thrown exception");
     } catch(std::runtime_error& e) {
       TS_ASSERT_EQUALS(e.what(),
@@ -177,9 +165,9 @@ public:
   }
 
   void test_construct_bad_workspace_too_many_rows() {
-    auto proj = ITableWorkspace_sptr(new DimensionedTable(4,4));
+    const DimensionedTable table(4,4);
     try {
-      auto p = boost::make_shared<Projection>(proj);
+      auto p = boost::make_shared<Projection>(table);
       TS_FAIL("Projection constructor should have thrown exception");
     } catch(std::runtime_error& e) {
       TS_ASSERT_EQUALS(e.what(),
@@ -190,9 +178,9 @@ public:
   }
 
   void test_construct_good_workspace() {
-    auto proj = ITableWorkspace_sptr(new GoodTable());
+    const GoodTable table;
     Projection_sptr p;
-    TS_ASSERT_THROWS_NOTHING(p = boost::make_shared<Projection>(proj));
+    TS_ASSERT_THROWS_NOTHING(p = boost::make_shared<Projection>(table));
 
     TS_ASSERT_EQUALS(p->U(), V3D(1, 1, 0));
     TS_ASSERT_EQUALS(p->V(), V3D(-1, 1, 0));
