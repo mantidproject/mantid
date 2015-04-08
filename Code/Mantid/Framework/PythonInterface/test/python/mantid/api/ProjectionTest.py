@@ -67,9 +67,9 @@ class ProjectionTest(unittest.TestCase):
         self.assertTrue('proj_test_ads' in mtd, msg='Workspace not added to ADS successfully')
         self.assertTrue('proj_test_ads2' in mtd, msg='Workspace not added to ADS successfully')
 
-        self.assertEqual(proj_test_ads.row(0), {'name':'u', 'value':'0,1,2', 'type':'r', 'offset':0.0})
-        self.assertEqual(proj_test_ads.row(1), {'name':'v', 'value':'3,-4,5', 'type':'r', 'offset':0.15})
-        self.assertEqual(proj_test_ads.row(2), {'name':'w', 'value':'6,7,8.5', 'type':'a', 'offset':0.0})
+        self.assertEqual(proj_test_ads.row(0), {'name':'u', 'value':V3D(0,1,2), 'type':'r', 'offset':0.0})
+        self.assertEqual(proj_test_ads.row(1), {'name':'v', 'value':V3D(3,-4,5), 'type':'r', 'offset':0.15})
+        self.assertEqual(proj_test_ads.row(2), {'name':'w', 'value':V3D(6,7,8.5), 'type':'a', 'offset':0.0})
 
 if __name__ == '__main__':
     unittest.main()
