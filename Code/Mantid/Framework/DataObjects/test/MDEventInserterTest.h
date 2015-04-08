@@ -1,9 +1,7 @@
 #ifndef MANTID_DATAOBJECTS_MDEVENTINSERTERTEST_H_
 #define MANTID_DATAOBJECTS_MDEVENTINSERTERTEST_H_
 
-#include <cxxtest/TestSuite.h>
 #include "MantidKernel/Timer.h"
-#include "MantidKernel/System.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -11,10 +9,13 @@
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidDataObjects/MDEventWorkspace.h"
 #include "MantidDataObjects/MDEvent.h"
-#include <iostream>
-#include <iomanip>
-
+#include "MantidDataObjects/MDEventFactory.h"
 #include "MantidDataObjects/MDEventInserter.h"
+#include "MantidGeometry/MDGeometry/MDHistoDimension.h"
+
+#include <boost/shared_ptr.hpp>
+
+#include <cxxtest/TestSuite.h>
 
 
 using namespace Mantid;
@@ -29,19 +30,18 @@ private:
   /// Test helper method. Creates an empty 2D MDEventWorkspace, with the specified event type.
   IMDEventWorkspace_sptr createInputWorkspace(const std::string& eventType)
   {
-    IAlgorithm_sptr createAlg = AlgorithmManager::Instance().createUnmanaged("CreateMDWorkspace");
-    createAlg->initialize();
-    createAlg->setChild(true);
-    createAlg->setProperty("Dimensions", 2);
-    createAlg->setPropertyValue("Extents", "-10,10,-10,10");
-    createAlg->setPropertyValue("Names", "A, B");
-    createAlg->setPropertyValue("Units", "m, m");
-    createAlg->setPropertyValue("EventType", eventType);
-    createAlg->setPropertyValue("OutputWorkspace", "out_ws");
-    createAlg->execute();
-    Workspace_sptr temp = createAlg->getProperty("OutputWorkspace");
-    IMDEventWorkspace_sptr outWS = boost::dynamic_pointer_cast<IMDEventWorkspace>(temp);
-    return outWS;
+    using Mantid::Geometry::MDHistoDimension;
+
+    IMDEventWorkspace_sptr ws =
+        MDEventFactory::CreateMDWorkspace(2, eventType);
+    coord_t min(-10.0f), max(10.0f);
+    ws->addDimension(boost::make_shared<MDHistoDimension>("A", "A", "m", min, max, 1));
+    ws->addDimension(boost::make_shared<MDHistoDimension>("B", "B", "m", min, max, 1));
+    ws->initialize();
+    // Split to level 1
+    ws->splitBox();
+    ws->setMinRecursionDepth(0);
+    return ws;
   }
 
 public:
