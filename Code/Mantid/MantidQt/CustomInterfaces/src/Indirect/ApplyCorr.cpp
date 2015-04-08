@@ -303,7 +303,7 @@ namespace IDA
       plotSpectrum(QString::fromStdString(m_pythonExportWsName));
 
     if(plotType == "Contour" || plotType == "Both")
-      plotContour(QString::fromStdString(m_pythonExportWsName));
+      plot2D(QString::fromStdString(m_pythonExportWsName));
   }
 
 

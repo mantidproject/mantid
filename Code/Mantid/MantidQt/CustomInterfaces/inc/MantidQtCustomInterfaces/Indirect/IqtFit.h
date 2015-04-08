@@ -1,7 +1,7 @@
-#ifndef MANTIDQTCUSTOMINTERFACESIDA_FURYFIT_H_
-#define MANTIDQTCUSTOMINTERFACESIDA_FURYFIT_H_
+#ifndef MANTIDQTCUSTOMINTERFACESIDA_IQTFIT_H_
+#define MANTIDQTCUSTOMINTERFACESIDA_IQTFIT_H_
 
-#include "ui_FuryFit.h"
+#include "ui_IqtFit.h"
 #include "IDATab.h"
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -21,12 +21,12 @@ namespace CustomInterfaces
 {
 namespace IDA
 {
-  class DLLExport FuryFit : public IDATab
+  class DLLExport IqtFit : public IDATab
   {
     Q_OBJECT
 
   public:
-    FuryFit(QWidget * parent = 0);
+    IqtFit(QWidget * parent = 0);
 
   private:
     virtual void setup();
@@ -59,10 +59,10 @@ namespace IDA
     QString fitTypeString() const;
     void constrainIntensities(Mantid::API::CompositeFunction_sptr func);
 
-    Ui::FuryFit m_uiForm;
+    Ui::IqtFit m_uiForm;
     QtStringPropertyManager* m_stringManager;
-    QtTreePropertyBrowser* m_ffTree; ///< FuryFit Property Browser
-    QtDoublePropertyManager* m_ffRangeManager; ///< StartX and EndX for FuryFit
+    QtTreePropertyBrowser* m_ffTree; ///< IqtFit Property Browser
+    QtDoublePropertyManager* m_ffRangeManager; ///< StartX and EndX for IqtFit
     QMap<QtProperty*, QtProperty*> m_fixedProps;
     Mantid::API::MatrixWorkspace_sptr m_ffInputWS;
     Mantid::API::MatrixWorkspace_sptr m_ffOutputWS;
@@ -74,4 +74,4 @@ namespace IDA
 } // namespace CustomInterfaces
 } // namespace MantidQt
 
-#endif /* MANTIDQTCUSTOMINTERFACESIDA_FURYFIT_H_ */
+#endif /* MANTIDQTCUSTOMINTERFACESIDA_IQTFIT_H_ */

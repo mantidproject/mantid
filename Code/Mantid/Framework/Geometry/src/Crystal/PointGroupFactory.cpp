@@ -21,7 +21,7 @@ PointGroupFactoryImpl::createPointGroup(const std::string &hmSymbol) {
 
 PointGroup_sptr PointGroupFactoryImpl::createPointGroupFromSpaceGroup(
     const SpaceGroup_const_sptr &spaceGroup) {
-    return createPointGroupFromSpaceGroup(*spaceGroup);
+  return createPointGroupFromSpaceGroup(*spaceGroup);
 }
 
 PointGroup_sptr PointGroupFactoryImpl::createPointGroupFromSpaceGroup(
@@ -216,10 +216,13 @@ DECLARE_POINTGROUP("4/mmm", "-y,x,z; x,y,-z; x,-y,-z", "Tetragonal")
 DECLARE_POINTGROUP("3", "-y,x-y,z", "Trigonal - Hexagonal")
 DECLARE_POINTGROUP("-3", "y,y-x,-z", "Trigonal - Hexagonal")
 DECLARE_POINTGROUP("321", "-y,x-y,z; x-y,-y,-z", "Trigonal - Hexagonal")
+DECLARE_POINTGROUP("32", "-y,x-y,z; x-y,-y,-z", "Trigonal - Hexagonal")
 DECLARE_POINTGROUP("312", "-y,x-y,z; x,x-y,-z", "Trigonal - Hexagonal")
 DECLARE_POINTGROUP("3m1", "-y,x-y,z; y-x,y,z", "Trigonal - Hexagonal")
+DECLARE_POINTGROUP("3m", "-y,x-y,z; y-x,y,z", "Trigonal - Hexagonal")
 DECLARE_POINTGROUP("31m", "-y,x-y,z; -x,y-x,z", "Trigonal - Hexagonal")
 DECLARE_POINTGROUP("-3m1", "y,y-x,-z; x-y,-y,-z", "Trigonal - Hexagonal")
+DECLARE_POINTGROUP("-3m", "y,y-x,-z; x-y,-y,-z", "Trigonal - Hexagonal")
 DECLARE_POINTGROUP("-31m", "y,y-x,-z; x,x-y,-z", "Trigonal - Hexagonal")
 
 DECLARE_POINTGROUP("3 r", "z,x,y", "Trigonal - Rhombohedral")

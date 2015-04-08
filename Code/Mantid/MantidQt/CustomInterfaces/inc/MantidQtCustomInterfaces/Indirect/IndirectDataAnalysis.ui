@@ -36,14 +36,14 @@
         <string>MSD Fit</string>
        </attribute>
       </widget>
-      <widget class="QWidget" name="tabFury">
+      <widget class="QWidget" name="tabIqt">
        <attribute name="title">
-        <string>Fury</string>
+        <string>I(Q, t)</string>
        </attribute>
       </widget>
-      <widget class="QWidget" name="tabFuryFit">
+      <widget class="QWidget" name="tabIqtFit">
        <attribute name="title">
-        <string>FuryFit</string>
+        <string>I(Q, t) Fit</string>
        </attribute>
       </widget>
       <widget class="QWidget" name="tabConvFit">

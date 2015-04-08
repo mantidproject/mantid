@@ -57,8 +57,8 @@ void export_PointGroup()
 
   class_<PointGroup, boost::noncopyable, bases<Group> >("PointGroup", no_init)
           .def("getName", &PointGroup::getName)
-          .def("getSymbol", &PointGroup::getSymbol)
-          .def("crystalSystem", &PointGroup::crystalSystem)
+          .def("getHMSymbol", &PointGroup::getSymbol)
+          .def("getCrystalSystem", &PointGroup::crystalSystem)
           .def("isEquivalent", &isEquivalent, "Check whether the two HKLs are symmetrically equivalent.")
           .def("getEquivalents", &getEquivalents, "Returns an array with all symmetry equivalents of the supplied HKL.")
           .def("getReflectionFamily", &getReflectionFamily, "Returns the same HKL for all symmetry equivalents.");
