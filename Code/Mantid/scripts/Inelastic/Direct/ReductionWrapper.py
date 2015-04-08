@@ -32,12 +32,12 @@ class ReductionWrapper(object):
             """
             web_vars = {}
             if self.advanced_vars:
-                web_vars = self.advanced_vars
+                web_vars = self.advanced_vars.copy()
             if self.standard_vars:
                 if len(web_vars)>0:
                     web_vars.update(self.standard_vars)
                 else:
-                    web_vars = self.standard_vars
+                    web_vars = self.standard_vars.copy()
             return web_vars
 
 
@@ -114,7 +114,7 @@ class ReductionWrapper(object):
             f.write(row)
             str_wrapper = ',\n         '
         f.write("\n}\nadvanced_vars={\n")
-
+        #print advances variables
         str_wrapper = '         '
         for key,val in self._wvs.advanced_vars.iteritems():
             if isinstance(val,str):
@@ -123,8 +123,29 @@ class ReductionWrapper(object):
                 row = "{0}\'{1}\':{2}".format(str_wrapper,key,val)
             f.write(row)
             str_wrapper = ',\n        '
+        f.write("\n}\nvariable_help={\n")
+        all_var = self._wvs.get_all_vars()
+        #print help strings
+        str_wrapper = '         '
+        for key in all_var:
+            try:
+                prop = getattr(PropertyManager,key)
+                docstring = prop.__doc__
+                if not docstring:
+                    continue
+                contents = self._do_format(docstring)
+                row = "{0}\'{1}\':\'{2}\'".format(str_wrapper,key,contents)
+            except:
+                continue
+            f.write(row)
+            str_wrapper = ',\n        '
         f.write("\n}\n")
         f.close()
+    def _do_format(self,docstring):
+        """Format docstring to write it as string in the reduce_var file"""
+        contents = docstring.split('\n')
+        contents = '\\n'.join(contents)
+        return contents
 
     @property
     def validate_run_number(self):

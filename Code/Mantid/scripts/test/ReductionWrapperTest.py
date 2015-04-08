@@ -1,5 +1,5 @@
 import os,sys
-#os.environ["PATH"] = r"c:/Mantid/Code/builds/br_master/bin/Release;"+os.environ["PATH"]
+os.environ["PATH"] = r"c:/Mantid/Code/builds/br_master/bin/Release;"+os.environ["PATH"]
 
 from mantid.simpleapi import *
 from mantid import api,config
@@ -114,7 +114,7 @@ class ReductionWrapperTest(unittest.TestCase):
         fcomp = fbase+'.pyc'
         if os.path.isfile(fcomp):
             os.remove(fcomp)
-        # save wen variables
+        # save web variables
         red.save_web_variables(file)
         self.assertTrue(os.path.isfile(file))
 
