@@ -40,7 +40,14 @@ set ( SRC_FILES
 	src/Indirect/Stretch.cpp
 	src/MantidEV.cpp
 	src/MantidEVWorker.cpp
-    src/MultiDatasetFit.cpp
+    src/MultiDatasetFit/MultiDatasetFit.cpp
+    src/MultiDatasetFit/MDFAddWorkspaceDialog.cpp
+    src/MultiDatasetFit/MDFDataController.cpp
+    src/MultiDatasetFit/MDFPlotController.cpp
+    src/MultiDatasetFit/MDFDatasetPlotData.cpp
+    src/MultiDatasetFit/MDFLocalParameterEditor.cpp
+    src/MultiDatasetFit/MDFLocalParameterItemDelegate.cpp
+    src/MultiDatasetFit/MDFEditLocalParameterDialog.cpp
 	src/Muon/ALCBaselineModellingModel.cpp
 	src/Muon/ALCBaselineModellingPresenter.cpp
 	src/Muon/ALCBaselineModellingView.cpp
@@ -123,7 +130,14 @@ set ( INC_FILES
 	inc/MantidQtCustomInterfaces/IReflSearcher.h
 	inc/MantidQtCustomInterfaces/MantidEV.h
 	inc/MantidQtCustomInterfaces/MantidEVWorker.h
-	inc/MantidQtCustomInterfaces/MultiDatasetFit.h
+	inc/MantidQtCustomInterfaces/MultiDatasetFit/MultiDatasetFit.h
+	inc/MantidQtCustomInterfaces/MultiDatasetFit/MDFAddWorkspaceDialog.h
+	inc/MantidQtCustomInterfaces/MultiDatasetFit/MDFDataController.h
+	inc/MantidQtCustomInterfaces/MultiDatasetFit/MDFPlotController.h
+	inc/MantidQtCustomInterfaces/MultiDatasetFit/MDFDatasetPlotData.h
+    inc/MantidQtCustomInterfaces/MultiDatasetFit/MDFLocalParameterEditor.h
+    inc/MantidQtCustomInterfaces/MultiDatasetFit/MDFLocalParameterItemDelegate.h
+    inc/MantidQtCustomInterfaces/MultiDatasetFit/MDFEditLocalParameterDialog.h
 	inc/MantidQtCustomInterfaces/Muon/ALCBaselineModellingModel.h
 	inc/MantidQtCustomInterfaces/Muon/ALCBaselineModellingPresenter.h
 	inc/MantidQtCustomInterfaces/Muon/ALCBaselineModellingView.h
@@ -208,7 +222,13 @@ set ( MOC_FILES inc/MantidQtCustomInterfaces/Background.h
                 inc/MantidQtCustomInterfaces/Indirect/ISISCalibration.h
                 inc/MantidQtCustomInterfaces/Indirect/ISISDiagnostics.h
                 inc/MantidQtCustomInterfaces/Indirect/ISISEnergyTransfer.h
-                inc/MantidQtCustomInterfaces/MultiDatasetFit.h
+                inc/MantidQtCustomInterfaces/MultiDatasetFit/MultiDatasetFit.h
+				inc/MantidQtCustomInterfaces/MultiDatasetFit/MDFAddWorkspaceDialog.h
+				inc/MantidQtCustomInterfaces/MultiDatasetFit/MDFDataController.h
+				inc/MantidQtCustomInterfaces/MultiDatasetFit/MDFPlotController.h
+				inc/MantidQtCustomInterfaces/MultiDatasetFit/MDFLocalParameterEditor.h
+				inc/MantidQtCustomInterfaces/MultiDatasetFit/MDFLocalParameterItemDelegate.h
+				inc/MantidQtCustomInterfaces/MultiDatasetFit/MDFEditLocalParameterDialog.h
                 inc/MantidQtCustomInterfaces/Muon/ALCBaselineModellingPresenter.h
                 inc/MantidQtCustomInterfaces/Muon/ALCBaselineModellingView.h
                 inc/MantidQtCustomInterfaces/Muon/ALCDataLoadingPresenter.h
@@ -238,8 +258,7 @@ set ( MOC_FILES inc/MantidQtCustomInterfaces/Background.h
                 inc/MantidQtCustomInterfaces/StepScan.h
 )
 
-set ( UI_FILES inc/MantidQtCustomInterfaces/AddWorkspace.ui
-               inc/MantidQtCustomInterfaces/DataComparison.ui
+set ( UI_FILES inc/MantidQtCustomInterfaces/DataComparison.ui
                inc/MantidQtCustomInterfaces/DirectConvertToEnergy.ui
                inc/MantidQtCustomInterfaces/Indirect/ApplyCorr.ui
                inc/MantidQtCustomInterfaces/Indirect/CalcCorr.ui
@@ -271,7 +290,9 @@ set ( UI_FILES inc/MantidQtCustomInterfaces/AddWorkspace.ui
                inc/MantidQtCustomInterfaces/Indirect/ISISCalibration.ui
                inc/MantidQtCustomInterfaces/Indirect/ISISDiagnostics.ui
                inc/MantidQtCustomInterfaces/Indirect/ISISEnergyTransfer.ui
-               inc/MantidQtCustomInterfaces/MultiDatasetFit.ui
+               inc/MantidQtCustomInterfaces/MultiDatasetFit/MultiDatasetFit.ui
+			   inc/MantidQtCustomInterfaces/MultiDatasetFit/MDFAddWorkspaceDialog.ui
+			   inc/MantidQtCustomInterfaces/MultiDatasetFit/EditLocalParameterDialog.ui
                inc/MantidQtCustomInterfaces/Muon/ALCBaselineModellingView.ui
                inc/MantidQtCustomInterfaces/Muon/ALCDataLoadingView.ui
                inc/MantidQtCustomInterfaces/Muon/ALCInterface.ui
@@ -286,7 +307,6 @@ set ( UI_FILES inc/MantidQtCustomInterfaces/AddWorkspace.ui
                inc/MantidQtCustomInterfaces/SANSEventSlicing.ui
                inc/MantidQtCustomInterfaces/MantidEV.ui
                inc/MantidQtCustomInterfaces/StepScan.ui
-			   inc/MantidQtCustomInterfaces/EditLocalParameterDialog.ui
 )
 
 set ( TEST_FILES
