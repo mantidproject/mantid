@@ -50,12 +50,6 @@ public:
   static MDEventInserterTest *createSuite() { return new MDEventInserterTest(); }
   static void destroySuite( MDEventInserterTest *suite ) { delete suite; }
 
-  MDEventInserterTest()
-  {
-    FrameworkManager::Instance();
-  }
-
-
   void test_add_md_lean_events()
   {
     typedef MDEventWorkspace<MDLeanEvent<2>, 2> MDEW_LEAN_2D; 
