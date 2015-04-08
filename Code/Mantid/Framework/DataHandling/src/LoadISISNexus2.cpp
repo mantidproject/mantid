@@ -314,14 +314,15 @@ void LoadISISNexus2::exec() {
     std::string wsName = getPropertyValue("OutputWorkspace");
     if (m_monBlockInfo.numberOfSpectra > 0) {
       x_length = m_monBlockInfo.numberOfChannels + 1;
-      auto monitor_workspace =
+      // reset the size of the period free workspace to the monitor size
+      period_free_workspace =
           boost::dynamic_pointer_cast<DataObjects::Workspace2D>(
               WorkspaceFactory::Instance().create(
-                  period_free_workspace, m_monBlockInfo.numberOfSpectra, x_length,
-                  m_monBlockInfo.numberOfChannels));
-
-      ISISRunLogs monLogCreator(monitor_workspace->run(),
-                                m_detBlockInfo.numberOfPeriods);
+                  period_free_workspace, m_monBlockInfo.numberOfSpectra,
+                  x_length, m_monBlockInfo.numberOfChannels));
+      auto monitor_workspace =
+          boost::dynamic_pointer_cast<DataObjects::Workspace2D>(
+              WorkspaceFactory::Instance().create(period_free_workspace));
 
       m_spectraBlocks.clear();
       m_specInd2specNum_map.clear();
@@ -340,11 +341,14 @@ void LoadISISNexus2::exec() {
       int64_t firstentry = (m_entrynumber > 0) ? m_entrynumber : 1;
       loadPeriodData(firstentry, entry, monitor_workspace, true);
       local_workspace->setMonitorWorkspace(monitor_workspace);
+
+      ISISRunLogs monLogCreator(monitor_workspace->run(),
+                                m_detBlockInfo.numberOfPeriods);
       monLogCreator.addPeriodLogs(1, monitor_workspace->mutableRun());
 
       const std::string monitorPropBase = "MonitorWorkspace";
       const std::string monitorWsNameBase = wsName + "_monitors";
-      if(m_detBlockInfo.numberOfPeriods > 1 && m_entrynumber == 0) {
+      if (m_detBlockInfo.numberOfPeriods > 1 && m_entrynumber == 0) {
         WorkspaceGroup_sptr monitor_group(new WorkspaceGroup);
         monitor_group->setTitle(monitor_workspace->getTitle());
 
@@ -353,18 +357,23 @@ void LoadISISNexus2::exec() {
           os << "_" << p;
           m_progress->report("Loading period " + os.str());
           if (p > 1) {
-            monitor_workspace = boost::dynamic_pointer_cast<DataObjects::Workspace2D>(
-                WorkspaceFactory::Instance().create(period_free_workspace));
-            loadPeriodData(p, entry, monitor_workspace, m_load_selected_spectra);
+            monitor_workspace =
+                boost::dynamic_pointer_cast<DataObjects::Workspace2D>(
+                    WorkspaceFactory::Instance().create(period_free_workspace));
+            loadPeriodData(p, entry, monitor_workspace,
+                           m_load_selected_spectra);
             monLogCreator.addPeriodLogs(p, monitor_workspace->mutableRun());
-            // Check consistency of logs data for multi-period workspaces and raise
+            // Check consistency of logs data for multi-period workspaces and
+            // raise
             // warnings where necessary.
             validateMultiPeriodLogs(monitor_workspace);
-            auto data_ws = boost::static_pointer_cast<API::MatrixWorkspace>(wksp_group->getItem(p-1));
+            auto data_ws = boost::static_pointer_cast<API::MatrixWorkspace>(
+                wksp_group->getItem(p - 1));
             data_ws->setMonitorWorkspace(monitor_workspace);
           }
           declareProperty(new WorkspaceProperty<Workspace>(
-              monitorPropBase + os.str(), monitorWsNameBase + os.str(), Direction::Output));
+              monitorPropBase + os.str(), monitorWsNameBase + os.str(),
+              Direction::Output));
           monitor_group->addWorkspace(monitor_workspace);
           setProperty(monitorPropBase + os.str(),
                       boost::static_pointer_cast<Workspace>(monitor_workspace));

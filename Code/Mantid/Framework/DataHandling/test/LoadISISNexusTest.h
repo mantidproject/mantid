@@ -673,6 +673,24 @@ public:
     TS_ASSERT_DELTA(12563.0, monWS0->readY(0)[1], 1e-08);
     TS_ASSERT_DELTA(std::sqrt(12563.0), monWS0->readE(0)[1], 1e-08);
     TS_ASSERT_EQUALS(monWS0->getSpectrum(0)->getSpectrumNo(),1);
+    TS_ASSERT_EQUALS(monWS0->getSpectrum(2)->getSpectrumNo(),3);
+
+    auto monWS1 = boost::dynamic_pointer_cast<MatrixWorkspace>(monGroup->getItem(1));
+    TS_ASSERT_EQUALS(1000, monWS1->blocksize());
+    TS_ASSERT_EQUALS(3, monWS1->getNumberHistograms());
+    TS_ASSERT_DELTA(105, monWS1->readX(1)[1], 1e-08);
+    TS_ASSERT_DELTA(12595.0, monWS1->readY(0)[1], 1e-08);
+    TS_ASSERT_DELTA(std::sqrt(12595.0), monWS1->readE(0)[1], 1e-08);
+    TS_ASSERT_EQUALS(monWS1->getSpectrum(0)->getSpectrumNo(),1);
+    TS_ASSERT_EQUALS(monWS1->getSpectrum(2)->getSpectrumNo(),3);
+  
+    // Same number of logs
+    const auto & monPeriod1Run = monWS0->run();
+    const auto & monPeriod2Run = monWS1->run();
+    TS_ASSERT_EQUALS(monPeriod1Run.getLogData().size(), monPeriod2Run.getLogData().size() );
+    TS_ASSERT(monPeriod1Run.hasProperty("period 1"))
+    TS_ASSERT(monPeriod2Run.hasProperty("period 2"))
+    
   }
 
 };
