@@ -563,12 +563,11 @@ void TOPAZLiveEventDataListener::appendEvent(
         Mantid::DataObjects::TofEvent event(tof, pulseTime);
         m_eventBuffer->getEventList(workspaceIndex).addEventQuickly(event);
     } else {
-// HACK!! Disabled for the moment because we were getting *WAY* t0o many
-// warnings.  Suspect it's an issue with the config files for
-// event_generator and event_catcher.  Did confirm that we're getting
-// lots of valid pixels, though.
-//        g_log.warning() << "Invalid pixel ID: " << pixelId << " (TofF: "
-//                        << tof << " microseconds)" << std::endl;
+        // TODO: do we want to disable this warning?  Most of the time, we
+        // shouldn't have any invalid ID's, but if we do, we'll probably 
+        // get a lot and flood the log with messages...
+        //g_log.warning() << "Invalid pixel ID: " << pixelId << " (TofF: "
+        //                << tof << " microseconds)" << std::endl;
     }
 }
 
