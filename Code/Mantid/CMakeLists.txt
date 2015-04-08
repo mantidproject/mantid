@@ -164,6 +164,10 @@ if ( MAKE_VATES )
   LIST( APPEND CPACK_INSTALL_CMAKE_PROJECTS
         "${ParaView_DIR}" "HDF5 Core Library" "libraries" "${INBUNDLE}/"
   )
+  LIST( APPEND CPACK_INSTALL_CMAKE_PROJECTS
+        "${ParaView_DIR}" "HDF5 HL Library" "hllibraries" "${INBUNDLE}/"
+  )
+
 endif ( MAKE_VATES )
 
 add_subdirectory ( MantidPlot )
