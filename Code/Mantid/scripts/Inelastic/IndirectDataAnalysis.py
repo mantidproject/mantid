@@ -77,12 +77,16 @@ def confitSeq(inputWS, func, startX, endX, ftype, bgd, temperature=None, specMin
     input_params = [temp_fit_workspace+',i%d' % i
                     for i in xrange(specMin, specMax+1)]
 
+    fit_args = dict()
+    if 'DS' in ftype or 'DC' in ftype:
+        fit_args['PassWSIndexToFunction'] = True
+
     PlotPeakByLogValue(Input=';'.join(input_params),
                        OutputWorkspace=output_workspace, Function=func,
                        StartX=startX, EndX=endX, FitType='Sequential',
                        CreateOutput=True, OutputCompositeMembers=True,
                        ConvolveMembers=convolve,
-                       PassWSIndexToFunction=True)
+                       **fit_args)
 
     DeleteWorkspace(output_workspace + '_NormalisedCovarianceMatrices')
     DeleteWorkspace(output_workspace + '_Parameters')
