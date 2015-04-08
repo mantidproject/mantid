@@ -7,7 +7,7 @@
 
 #include <boost/algorithm/string.hpp>
 #include <boost/format.hpp>
-
+#include <boost/optional.hpp>
 #include <Poco/DOM/Attr.h>
 #include <Poco/DOM/AutoPtr.h>
 #include <Poco/DOM/Document.h>
@@ -15,6 +15,7 @@
 #include <Poco/DOM/DOMWriter.h>
 #include <Poco/DOM/Element.h>
 #include <Poco/DOM/Text.h>
+#include <Poco/DOM/NodeList.h>
 
 using namespace Mantid::Kernel;
 using Mantid::Kernel::Strings::convert;
@@ -36,7 +37,7 @@ BoxController *BoxController::clone() const {
 BoxController::BoxController(const BoxController &other)
     : nd(other.nd), m_maxId(other.m_maxId),
       m_SplitThreshold(other.m_SplitThreshold), m_maxDepth(other.m_maxDepth),
-      m_splitInto(other.m_splitInto), m_numSplit(other.m_numSplit),
+      m_splitInto(other.m_splitInto), m_splitTopInto(other.m_splitTopInto), m_numSplit(other.m_numSplit),
       m_addingEvents_eventsPerTask(other.m_addingEvents_eventsPerTask),
       m_addingEvents_numTasksPerBlock(other.m_addingEvents_numTasksPerBlock),
       m_numMDBoxes(other.m_numMDBoxes),
@@ -67,6 +68,24 @@ bool BoxController::operator==(const BoxController &other) const {
     if (m_maxNumMDBoxes[i] != other.m_maxNumMDBoxes[i])
       return false;
   }
+
+  // Check top level splitting if they are set in both or not
+  if ((m_splitTopInto && !other.m_splitTopInto) ||
+      (!m_splitTopInto && other.m_splitTopInto)) {
+    return false;
+  }
+
+  if (m_splitTopInto && other.m_splitTopInto) {
+    if (m_splitTopInto.get().size() != other.m_splitTopInto.get().size()) {
+      return false;
+    } else {
+      for (size_t i = 0; i < m_splitTopInto.get().size(); i++) {
+        if (m_splitTopInto.get()[i] != other.m_splitTopInto.get()[i])
+          return false;
+      }
+    }
+  }
+
   // There are number of variables which are
   // 1) derived:
   // Number of events sitting in the boxes which should be split but are already
@@ -146,6 +165,20 @@ std::string BoxController::toXMLString() const {
   element->appendChild(text);
   pBoxElement->appendChild(element);
 
+  element = pDoc->createElement("SplitTopInto");
+  if (m_splitTopInto)
+  {
+    vecStr = Kernel::Strings::join(this->m_splitTopInto.get().begin(),
+                                   this->m_splitTopInto.get().end(), ",");
+  }
+  else
+  {
+    vecStr = "";
+  }
+  text = pDoc->createTextNode(vecStr);
+  element->appendChild(text);
+  pBoxElement->appendChild(element);
+
   element = pDoc->createElement("NumMDBoxes");
   vecStr = Kernel::Strings::join(this->m_numMDBoxes.begin(),
                                  this->m_numMDBoxes.end(), ",");
@@ -216,6 +249,20 @@ void BoxController::fromXMLString(const std::string &xml) {
   s = pBoxElement->getChildElement("SplitInto")->innerText();
   this->m_splitInto = splitStringIntoVector<size_t>(s);
 
+  // Need to make sure that we handle box controllers which did not have the SplitTopInto 
+  // attribute 
+  Poco::XML::NodeList* nodes = pBoxElement->getElementsByTagName("SplitTopInto");
+  if (nodes->length() > 0) {
+    s = pBoxElement->getChildElement("SplitTopInto")->innerText();
+    if (s.empty()) {
+      this->m_splitTopInto = boost::none;
+    } else {
+      this->m_splitTopInto = splitStringIntoVector<size_t>(s);
+    }
+  } else {
+    this->m_splitTopInto = boost::none;
+  }
+
   s = pBoxElement->getChildElement("NumMDBoxes")->innerText();
   this->m_numMDBoxes = splitStringIntoVector<size_t>(s);
 
@@ -223,6 +270,10 @@ void BoxController::fromXMLString(const std::string &xml) {
   this->m_numMDGridBoxes = splitStringIntoVector<size_t>(s);
 
   this->calcNumSplit();
+
+  if (m_splitTopInto) {
+    this->calcNumTopSplit();
+  }
 }
 /** function clears the file-backed status of the box controller */
 void BoxController::clearFileBacked() {
