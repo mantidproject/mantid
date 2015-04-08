@@ -68,9 +68,9 @@ Integrate3DEvents::~Integrate3DEvents() {}
  * @param event_qs   List of event Q vectors to add to lists of Q's associated
  *                   with peaks.
  */
-void Integrate3DEvents::addEvents(std::vector<std::pair<double, V3D> > const &event_qs) {
+void Integrate3DEvents::addEvents(std::vector<std::pair<double, V3D> > const &event_qs, bool hkl_integ) {
   for (size_t i = 0; i < event_qs.size(); i++) {
-    addEvent(event_qs[i]);
+    addEvent(event_qs[i], hkl_integ);
   }
 }
 
@@ -123,7 +123,7 @@ Mantid::Geometry::PeakShape_const_sptr Integrate3DEvents::ellipseIntegrateEvents
 
   std::vector<std::pair<double, V3D> > &some_events = event_lists[hkl_key];
   for (size_t it = 0; it != some_events.size(); ++it) {
-    hkl_key = getHklKey(some_events[it].second);
+    hkl_key = getHklKey2(some_events[it].second);
     if (hkl_key != 0) // only save if hkl != (0,0,0)
       peak_qs[hkl_key] = some_events[it].second;
   }
@@ -323,7 +323,19 @@ int64_t Integrate3DEvents::getHklKey(int h, int k, int l) {
 
   return key;
 }
-
+/**
+ *  Form a map key for the specified q_vector.  The q_vector is mapped to
+ *  h,k,l by UBinv and the map key is then formed from those rounded h,k,l
+ *  values.
+ *
+ *  @param q_vector  The q_vector to be mapped to h,k,l
+ */
+int64_t Integrate3DEvents::getHklKey2(V3D const &hkl) {
+  int h = boost::math::iround<double>(hkl[0]);
+  int k = boost::math::iround<double>(hkl[1]);
+  int l = boost::math::iround<double>(hkl[2]);
+  return getHklKey(h, k, l);
+}
 /**
  *  Form a map key for the specified q_vector.  The q_vector is mapped to
  *  h,k,l by UBinv and the map key is then formed from those rounded h,k,l
@@ -352,8 +364,10 @@ int64_t Integrate3DEvents::getHklKey(V3D const &q_vector) {
  * @param event_Q      The Q-vector for the event that may be added to the
  *                     event_lists map, if it is close enough to some peak
  */
-void Integrate3DEvents::addEvent(std::pair<double, V3D> event_Q) {
-  int64_t hkl_key = getHklKey(event_Q.second);
+void Integrate3DEvents::addEvent(std::pair<double, V3D> event_Q, bool hkl_integ) {
+  int64_t hkl_key;
+  if (hkl_integ) hkl_key = getHklKey2(event_Q.second);
+  else hkl_key = getHklKey(event_Q.second);
 
   if (hkl_key == 0) // don't keep events associated with 0,0,0
     return;
@@ -362,7 +376,8 @@ void Integrate3DEvents::addEvent(std::pair<double, V3D> event_Q) {
   if (peak_it != peak_qs.end())
   {
     if (!peak_it->second.nullVector()) {
-      event_Q.second = event_Q.second - peak_it->second;
+      if (hkl_integ) event_Q.second = event_Q.second - UBinv * peak_it->second;
+      else event_Q.second = event_Q.second - peak_it->second;
       if (event_Q.second.norm() < radius) {
         event_lists[hkl_key].push_back(event_Q);
       }
