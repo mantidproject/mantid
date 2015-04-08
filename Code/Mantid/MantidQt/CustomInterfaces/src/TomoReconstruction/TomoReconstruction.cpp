@@ -84,8 +84,7 @@ TomoReconstruction::TomoReconstruction(QWidget *parent)
       m_pathSCARFbase("/work/imat/recon/"),
       m_pathFITS(m_pathSCARFbase + "data/fits"),
       m_pathFlat(m_pathSCARFbase + "data/flat"),
-      m_pathDark(m_pathSCARFbase + "data/dark"),
-      m_currentParamPath() {
+      m_pathDark(m_pathSCARFbase + "data/dark"), m_currentParamPath() {
 
   m_computeRes.push_back(m_SCARFName);
 
@@ -278,7 +277,8 @@ void TomoReconstruction::SCARFLoginClicked() {
   try {
     doLogin(getPassword());
   } catch (std::exception &e) {
-    throw e;
+    throw(std::string("Problem when logging in. Error description: ") +
+          e.what());
   }
 
   enableLoggedActions(true);
@@ -293,7 +293,8 @@ void TomoReconstruction::SCARFLogoutClicked() {
   try {
     doLogout();
   } catch (std::exception &e) {
-    throw e;
+    throw(std::string("Problem when logging out. Error description: ") +
+          e.what());
   }
 
   enableLoggedActions(false);
@@ -652,7 +653,6 @@ void TomoReconstruction::toolSetupClicked() {
   if (!rt)
     return;
 
-  const std::string res = getComputeResource();
   const std::string tool = rt->currentText().toStdString();
   if (m_CCPiTool != tool) {
     showToolConfig(tool);
@@ -691,8 +691,6 @@ void TomoReconstruction::reconstructClicked() {
 }
 
 void TomoReconstruction::runVisualizeClicked() {
-  const std::string &resource = getComputeResource();
-
   QTableWidget *tbl = m_ui.tableWidget_run_jobs;
   const int idCol = 1;
   QTableWidgetItem *hdr = tbl->horizontalHeaderItem(idCol);
@@ -1308,7 +1306,8 @@ TomoReconstruction::paramValStringFromArray(const Json::Value &jsonVal,
       }
     }
   }
-  s.back() = ']'; // and last comma becomes closing ]
+  // this could be s.back() with C++11
+  s[s.length()-1] = ']'; // and last comma becomes closing ]
   return s;
 }
 
@@ -1520,9 +1519,9 @@ void TomoReconstruction::drawImage(const MatrixWorkspace_sptr &ws) {
                                        std::string(e.what()));
     return;
   }
-  std::string name;
   try {
-    name = ws->run().getLogData("run_title")->value();
+    std::string name = ws->run().getLogData("run_title")->value();
+    g_log.information() << " Visualizing image: " << name << std::endl;
   } catch (std::exception &e) {
     userWarning("Cannot load image information",
                 "There was a problem while "
