@@ -46,9 +46,9 @@ private:
 class ValueColumn : public ColumnTester {
 public:
   ValueColumn() {
-    m_values[0] = "1,1,0";
-    m_values[1] = "-1,1,0";
-    m_values[2] = "0,0,1";
+    m_values[0] = V3D(1,1,0);
+    m_values[1] = V3D(-1,1,0);
+    m_values[2] = V3D(0,0,1);
   }
   size_t size() const { return 3; }
 
@@ -57,7 +57,7 @@ public:
     return &m_values[index];
   }
 private:
-  std::string m_values[3];
+  V3D m_values[3];
 };
 
 class OffsetColumn : public ColumnTester {

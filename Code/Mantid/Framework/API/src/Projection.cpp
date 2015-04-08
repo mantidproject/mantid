@@ -1,7 +1,5 @@
 #include "MantidAPI/Projection.h"
 
-#include <boost/algorithm/string.hpp>
-
 namespace Mantid {
 namespace API {
 
@@ -56,7 +54,7 @@ Projection::Projection(const ITableWorkspace &ws) {
 
   for (size_t i = 0; i < numRows; i++) {
     const std::string name = nameCol->cell<std::string>(i);
-    const std::string valueStr = valueCol->cell<std::string>(i);
+    const V3D value = valueCol->cell<V3D>(i);
     const double offset = offsetCol->cell<double>(i);
     const std::string unitStr = unitCol->cell<std::string>(i);
 
@@ -72,16 +70,6 @@ Projection::Projection(const ITableWorkspace &ws) {
       throw std::runtime_error("Invalid dimension name: " + name);
     }
 
-    // Check the values
-    std::vector<std::string> valueStrVec;
-    boost::split(valueStrVec, valueStr, boost::is_any_of(","));
-    std::vector<double> valueDblVec;
-    for (auto it = valueStrVec.begin(); it != valueStrVec.end(); ++it)
-      valueDblVec.push_back(boost::lexical_cast<double>(*it));
-    if (valueDblVec.size() != 3) {
-      throw std::runtime_error("Dimension " + name + " must contain 3 values");
-    }
-
     // Check the unit
     ProjectionUnit unit;
     if (unitStr == "r") {
@@ -93,7 +81,7 @@ Projection::Projection(const ITableWorkspace &ws) {
     }
 
     // Apply the data
-    m_dimensions[index] = V3D(valueDblVec[0], valueDblVec[1], valueDblVec[2]);
+    m_dimensions[index] = value;
     m_offsets[index] = offset;
     m_units[index] = unit;
   }

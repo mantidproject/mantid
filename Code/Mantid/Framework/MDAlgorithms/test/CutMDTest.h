@@ -213,16 +213,16 @@ public:
 
     ITableWorkspace_sptr proj = WorkspaceFactory::Instance().createTable();
     proj->addColumn("str", "name");
-    proj->addColumn("str", "value");
+    proj->addColumn("V3D", "value");
     proj->addColumn("double", "offset");
     proj->addColumn("str", "type");
 
     TableRow uRow = proj->appendRow();
     TableRow vRow = proj->appendRow();
     TableRow wRow = proj->appendRow();
-    uRow << "u" << "1,0,0" << 0.0 << "r";
-    vRow << "v" << "0,1,0" << 0.0 << "r";
-    wRow << "w" << "0,0,1" << 0.0 << "r";
+    uRow << "u" << V3D(1,0,0) << 0.0 << "r";
+    vRow << "v" << V3D(0,1,0) << 0.0 << "r";
+    wRow << "w" << V3D(0,0,1) << 0.0 << "r";
 
     auto algCutMD = FrameworkManager::Instance().createAlgorithm("CutMD");
     algCutMD->initialize();
@@ -275,16 +275,16 @@ public:
 
     ITableWorkspace_sptr proj = WorkspaceFactory::Instance().createTable();
     proj->addColumn("str", "name");
-    proj->addColumn("str", "value");
+    proj->addColumn("V3D", "value");
     proj->addColumn("double", "offset");
     proj->addColumn("str", "type");
 
     TableRow uRow = proj->appendRow();
     TableRow vRow = proj->appendRow();
     TableRow wRow = proj->appendRow();
-    uRow << "u" << "1,1,0" << 0.0 << "r";
-    vRow << "v" << "-1,1,0" << 0.0 << "r";
-    wRow << "w" << "0,0,1" << 0.0 << "r";
+    uRow << "u" << V3D(1,1,0) << 0.0 << "r";
+    vRow << "v" << V3D(-1,1,0) << 0.0 << "r";
+    wRow << "w" << V3D(0,0,1) << 0.0 << "r";
 
     auto algCutMD = FrameworkManager::Instance().createAlgorithm("CutMD");
     algCutMD->initialize();
@@ -337,16 +337,16 @@ public:
 
     ITableWorkspace_sptr proj = WorkspaceFactory::Instance().createTable();
     proj->addColumn("str", "name");
-    proj->addColumn("str", "value");
+    proj->addColumn("V3D", "value");
     proj->addColumn("double", "offset");
     proj->addColumn("str", "type");
 
     TableRow uRow = proj->appendRow();
     TableRow vRow = proj->appendRow();
     TableRow wRow = proj->appendRow();
-    uRow << "u" << "1,0,0" << 0.0 << "r";
-    vRow << "v" << "0,1,0" << 0.0 << "r";
-    wRow << "w" << "0,0,1" << 0.0 << "r";
+    uRow << "u" << V3D(1,0,0) << 0.0 << "r";
+    vRow << "v" << V3D(0,1,0) << 0.0 << "r";
+    wRow << "w" << V3D(0,0,1) << 0.0 << "r";
 
     auto algCutMD = FrameworkManager::Instance().createAlgorithm("CutMD");
     algCutMD->initialize();

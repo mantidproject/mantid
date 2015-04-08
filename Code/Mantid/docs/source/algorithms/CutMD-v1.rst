@@ -36,8 +36,8 @@ The format of these workspaces is as follows:
 | name       | string | Specifies the dimension the row controls. Can be 'u', |
 |            |        | 'v', or 'w'.                                          |
 +------------+--------+-------------------------------------------------------+
-| value      | string | A 3 dimensional vector specifying the axis for the    |
-|            |        | dimension. Example: '1,-1,0'                          |
+| value      | V3D    | A 3 dimensional vector specifying the axis for the    |
+|            |        | dimension. Example: [1,-1,0]                          |
 +------------+--------+-------------------------------------------------------+
 | offset     | double | The offset value to use for this dimension.           |
 +------------+--------+-------------------------------------------------------+
