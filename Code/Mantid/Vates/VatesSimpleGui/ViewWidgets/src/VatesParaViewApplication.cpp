@@ -27,6 +27,7 @@
 #include <string>
 #include <iostream>
 #include "vtksys/SystemTools.hxx"
+#include <Poco/Environment.h>
 
 namespace Mantid
 {
@@ -48,18 +49,22 @@ namespace Mantid
         
         char *argv[] = {&argvConversion[0]};
 
-        
         m_logger.debug() << "Intialize pqApplicationCore with " << argv << "\n";
         
-        new pqPVApplicationCore(argc, argv);
-      
-        QString pv_plugin_path = vtksys::SystemTools::GetEnv("PV_PLUGIN_PATH");
+        // Get the plugin path that we set in the ConfigService.
+        QString pv_plugin_path = QString::fromStdString(Poco::Environment::get("PV_PLUGIN_PATH"));
+        
+        // We need to manually set the PV_PLUGIN_PATH because it's not going to be picked up from the paraview/vtk side otherwise.
+        vtksys::SystemTools::PutEnv((std::string("PV_PLUGIN_PATH=")+pv_plugin_path.toStdString()).c_str()); 
+
         if (pv_plugin_path.isEmpty())
         {
           throw std::runtime_error("PV_PLUGIN_PATH not setup.\nVates plugins will not be available.\n"
                                    "Further use will cause the program to crash.\nPlease exit and "
                                    "set this variable.");
         }
+        
+        new pqPVApplicationCore(argc, argv);
         
         //this->setupParaViewBehaviors();
       }

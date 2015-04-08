@@ -2020,7 +2020,7 @@ bool ConfigServiceImpl::quickParaViewCheck() const {
         Poco::Process::launch(cmd, args, 0, &outPipe, &errorPipe);
     const int rc = ph.wait();
     // Only if the paraview query returned successfully.
-    if (rc == 1) {
+    if (rc == 0) {
       // Check the actual version numbers against what we expect they should be.
       const std::string givenVersionNumber =
           extractVersionNumberFromPipe(errorPipe);
