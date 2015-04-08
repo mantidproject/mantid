@@ -79,21 +79,29 @@ namespace IDA
 
 
   /**
-   * Adds a unit converstion into wavelength step to the batch algorithm queue.
+   * Adds a unit converstion step to the batch algorithm queue.
    *
    * @param ws Pointer to the workspace to convert
+   * @param unitID ID of unit to convert to
+   * @param suffix Suffix to append to output workspace name
    * @return Name of output workspace
    */
-  std::string IDATab::addConvertToWavelengthStep(MatrixWorkspace_sptr ws)
+  std::string IDATab::addConvertUnitsStep(MatrixWorkspace_sptr ws, const std::string & unitID, const std::string & suffix)
   {
-    std::string outputName = ws->name() + "_inWavelength";
+    std::string outputName = ws->name();
+
+    if(suffix != "UNIT")
+      outputName += suffix;
+    else
+      outputName += "_" + unitID;
+
 
     IAlgorithm_sptr convertAlg = AlgorithmManager::Instance().create("ConvertUnits");
     convertAlg->initialize();
 
     convertAlg->setProperty("InputWorkspace", ws->name());
     convertAlg->setProperty("OutputWorkspace", outputName);
-    convertAlg->setProperty("Target", "Wavelength");
+    convertAlg->setProperty("Target", unitID);
 
     std::string eMode = getEMode(ws);
     convertAlg->setProperty("EMode", eMode);

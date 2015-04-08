@@ -241,6 +241,19 @@ from the length of the line being drawn</string>
           </widget>
          </item>
          <item>
+          <widget class="QCheckBox" name="ckOverWrite">
+           <property name="toolTip">
+            <string>Overwrite any existing line cuts from the same MDWorkspace</string>
+           </property>
+           <property name="text">
+            <string>Overwrite lines</string>
+           </property>
+           <property name="checked">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item>
           <spacer name="horizontalSpacer_4">
            <property name="orientation">
             <enum>Qt::Horizontal</enum>
@@ -268,7 +281,16 @@ from the length of the line being drawn</string>
        <property name="spacing">
         <number>4</number>
        </property>
-       <property name="margin">
+       <property name="leftMargin">
+        <number>2</number>
+       </property>
+       <property name="topMargin">
+        <number>2</number>
+       </property>
+       <property name="rightMargin">
+        <number>2</number>
+       </property>
+       <property name="bottomMargin">
         <number>2</number>
        </property>
        <item>

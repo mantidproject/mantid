@@ -18,33 +18,59 @@ class ReductionWrapper(object):
     """
     class var_holder(object):
         """ A simple wrapper class to keep web variables"""
-        def __init__(self):
-            self.standard_vars = None
-            self.advanced_vars = None
+        def __init__(self,Web_vars=None):
+            if Web_vars:
+                self.standard_vars = Web_vars.standard_vars
+                self.advanced_vars = Web_vars.advanced_vars
+            else:
+                self.standard_vars = None
+                self.advanced_vars = None
+        #
+        def get_all_vars(self):
+            """Return dictionary with all defined variables
+               combined together
+            """
+            web_vars = {}
+            if self.advanced_vars:
+                web_vars = self.advanced_vars
+            if self.standard_vars:
+                if len(web_vars)>0:
+                    web_vars.update(self.standard_vars)
+                else:
+                    web_vars = self.standard_vars
+            return web_vars
+
 
     def __init__(self,instrumentName,web_var=None):
         """ sets properties defaults for the instrument with Name
           and define if wrapper runs from web services or not
-      """
-      # internal variable, indicating if we should try to wait for input files to appear
+        """
+        # internal variable, indicating if we should try to wait for input files to appear
         self._wait_for_file = False
+        #The property defines the run number, to validate. If defined, switches reduction wrapper from
+        #reduction to validation mode
+        self._run_number_to_validate=None
       # internal variable, used in system tests to validate workflow,
       # with waiting for files.  It is the holder to the function
       # used during debugging "wait for files" workflow
       # instead of Pause algorithm
         self._debug_wait_for_files_operation = None
+        # tolerance to change in some tests if default is not working well
+        self._tolerr=None
 
       # The variables which are set up from web interface or to be exported to
       # web interface
         if web_var:
             self._run_from_web = True
-            self._wvs = web_var
         else:
             self._run_from_web = False
-            self._wvs = ReductionWrapper.var_holder()
+        self._wvs = ReductionWrapper.var_holder(web_var)
       # Initialize reduced for given instrument
         self.reducer = DirectEnergyConversion(instrumentName)
-
+        # 
+        web_vars = self._wvs.get_all_vars()
+        if web_vars :
+            self.reducer.prop_man.set_input_parameters(**web_vars)
 
 
     @property
@@ -100,24 +126,69 @@ class ReductionWrapper(object):
         f.write("\n}\n")
         f.close()
 
-    def validate_settings(self):
-        """ method validates initial parameters, provided for reduction """
+    @property
+    def validate_run_number(self):
+        """The property defines the run number to validate. If defined, switches reduction wrapper from
+           reduction to validation mode, where reduction tries to load result, previously calculated, 
+           for this run and then compare this result with the result, defined earlier"""
+        return self._run_number_to_validate
 
+    @validate_run_number.setter
+    def validate_run_number(self,val):
+        if val is None:
+            self._run_number_to_validate = None
+        else:
+            self._run_number_to_validate = int(val)
+
+    def validate_settings(self):
+        """ method validates initial parameters, provided for reduction"""
         self.def_advanced_properties()
         self.def_main_properties()
         if self._run_from_web:
-            web_vars = dict(self._wvs.standard_vars.items() + self._wvs.advanced_vars.items())
+            web_vars = self._wvs.get_all_vars()
             self.reducer.prop_man.set_input_parameters(**web_vars)
         else:
-            pass # we should set already set up variables using
-
+            pass # we should already set up these variables using
+            # def_main_properties & def_advanced_properties
         # validate properties and report result
         return self.reducer.prop_man.validate_properties(False)
 #
+    def validation_file_name(self):
+        """ the name of the file, used as reference to
+            validate the run, specified as the class property
+
+            The method can be overloaded to return a workspace
+            or workspace name to validate results against.
+        """
+        if not PropertyManager.save_file_name._file_name is None:
+            file_name = PropertyManager.save_file_name._file_name
+            if isinstance(file_name,api.Workspace):
+                return file_name
+        else:
+            instr = self.reducer.prop_man.instr_name
+            run_n = self.validate_run_number
+            ei    = PropertyManager.incident_energy.get_current()
+            file_name = '{0}{1}_{2:<3.2f}meV_VALIDATION_file.nxs'.format(instr,run_n,ei)
+        run_dir = self.validation_file_place()
+        full_name = os.path.join(run_dir,file_name)
+        return full_name
+
+    def validation_file_place(self):
+        """Redefine this to the place, where validation file, used in conjunction with
+           'validate_run' property, located. Here it defines the place to this script folder.
+           By default it looks for/places it in a default save directory"""
+        return config['defaultsave.directory']
+
 #
-    def validate_result(self,build_validation=False,Error=1.e-3,ToleranceRelErr=True):
-        """ Overload this using build_or_validate_result to have possibility to run or validate result """
-        return True
+    def validate_result(self,Error=1.e-6,ToleranceRelErr=True):
+      """Method to validate result against existing validation file
+         or workspace
+
+         Change this method to verify different results or validate results differently"""
+      rez,message = ReductionWrapper.build_or_validate_result(self,
+                                     Error,ToleranceRelErr)
+      return rez,message
+   #
 
     def set_custom_output_filename(self):
         """ define custom name of output files if standard one is not satisfactory
@@ -125,7 +196,7 @@ class ReductionWrapper(object):
         return None
 
 
-    def build_or_validate_result(self,sample_run,validation_file,build_validation=False,Error=1.e-3,ToleranceRelErr=True):
+    def build_or_validate_result(self,Error=1.e-6,ToleranceRelErr=True):
         """ Method validates results of the reduction against reference file or workspace.
 
             Inputs:
@@ -143,23 +214,47 @@ class ReductionWrapper(object):
                   file and returns True if the reduction and saving of this file is successful
 
         """
-
-        if not build_validation:
-            if validation_file:
-                if isinstance(validation_file,api.Workspace):
-                    sample = validation_file
-                    validation_file = sample.name()
-                else:
-                    try:
-                        sample = Load(validation_file)
-                    except:
-                        self.reducer.prop_man.log\
-                        ("*** WARNING:can not load (find?) validation file {0}\n"\
-                         "    Building validation".format(validation_file),'warning')
-                        build_validation = True
+        # this row defines location of the validation file
+        validation_file = self.validation_file_name()
+        sample_run = self.validate_run_number
+        if isinstance(validation_file,str):
+            path,name = os.path.split(validation_file)
+            if name in mtd:
+                reference_ws = mtd[name]
+                build_validation = False
+                fileName = "workspace:"+reference_ws.name()
             else:
-                build_validation = True
-
+                if len(path)>0:
+                    config.appendDataSearchDir(path)
+                # it there bug in getFullPath? It returns the same string if given full path 
+                # but file has not been found
+                name,fext=os.path.splitext(name)
+                fileName = FileFinder.getFullPath(name+'.nxs')
+                if len(fileName)>0:
+                    build_validation = False
+                    try:
+                        reference_ws = Load(fileName)
+                    except:
+                        build_validation = True
+                else:
+                    build_validation = True
+        elif isinstance(validation_file,api.Workspace):
+        # its workspace: 
+            reference_ws = validation_file
+            build_validation = False
+            fileName = "workspace:"+reference_ws.name()
+        else:
+            build_validation = True
+        #--------------------------------------------------------
+        if build_validation:
+            self.reducer.prop_man.save_file_name = validation_file
+            self.reducer.prop_man.log\
+                 ("*** WARNING:can not find or load validation file {0}\n"\
+                  "    Building validation file for run N:{1}".format(validation_file,sample_run),'warning')
+        else:
+            self.reducer.prop_man.log\
+                 ("*** FOUND VALIDATION FILE: {0}\n"\
+                  "    Validating run {1} against this file".format(fileName,sample_run),'warning')
 
         # just in case, to be sure
         current_web_state = self._run_from_web
@@ -177,25 +272,34 @@ class ReductionWrapper(object):
         reduced = self.reduce()
 
         if build_validation:
-            if validation_file:
-                result_name = os.path.splitext(validation_file)[0]
-            else:
-                result_name = self.reducer.prop_man.save_file_name
+            self.reducer.prop_man.save_file_name = None
+            result_name = os.path.splitext(validation_file)[0]
             self.reducer.prop_man.log("*** Saving validation file with name: {0}.nxs".format(result_name),'notice')
             SaveNexus(reduced,Filename=result_name + '.nxs')
             return True,'Created validation file {0}.nxs'.format(result_name)
         else:
             if isinstance(reduced,list): # check only first result in multirep
                 reduced = reduced[0]
-            result = CheckWorkspacesMatch(Workspace1=sample,Workspace2=reduced,\
-                                      Tolerance=Error,CheckSample=False,\
+            # Cheat! Counterintuitive!
+            if self._tolerr:
+                TOLL=self._tolerr
+            else:
+                TOLL = Error
+            result = CheckWorkspacesMatch(Workspace1=reference_ws,Workspace2=reduced,\
+                                      Tolerance=TOLL,CheckSample=False,\
                                       CheckInstrument=False,ToleranceRelErr=ToleranceRelErr)
 
         self.wait_for_file = current_wait_state
         self._run_from_web = current_web_state
         if result == 'Success!':
-            return True,'Reference file and reduced workspace are equivalent'
+            return True,'Reference file and reduced workspace are equal with accuracy {0:<3.2f}'\
+                        .format(TOLL)
         else:
+            fname,ext = os.path.splitext(fileName)
+            filename = fname+'-mismatch.nxs'
+            self.reducer.prop_man.log("***WARNING: can not get results matching the reference file.\n"\
+                                      "   Saving new results to file {0}".format(filename),'warning')
+            SaveNexus(reduced,Filename=filename)
             return False,result
 
     @abstractmethod
@@ -243,6 +347,7 @@ class ReductionWrapper(object):
             config['defaultsave.directory'] = str(output_directory)
 
         timeToWait = self._wait_for_file
+        wait_counter=0
         if timeToWait > 0:
             Found,input_file = PropertyManager.sample_run.find_file(be_quet=True)
             while not Found:
@@ -252,12 +357,27 @@ class ReductionWrapper(object):
 
                 self._run_pause(timeToWait)
                 Found,input_file = PropertyManager.sample_run.find_file(file_hint=file_hint,be_quet=True)
-            ws = self.reducer.convert_to_energy(None,input_file)
+                if Found:
+                    file,found_ext=os.path.splitext(input_file)
+                    if found_ext != fext:
+                        wait_counter+=1
+                        if wait_counter<2:
+                            timeToWait =60
+                            self.reducer.prop_man.log(\
+                            "*** Requested file with extension {0} but found one with extension {1}\n"\
+                            "    The target may not have been delivered from the DAE machine\n".format(fext,found_ext))
+                            Found = False
+                        else:
+                            wait_counter = 0
+                else:
+                    pass # not found, wait more
+            #endWhile
+            converted_to_energy_transfer_ws = self.reducer.convert_to_energy(None,input_file)
 
         else:
-            ws = self.reducer.convert_to_energy(None,input_file)
+            converted_to_energy_transfer_ws = self.reducer.convert_to_energy(None,input_file)
 
-        return ws
+        return converted_to_energy_transfer_ws
     #
     def sum_and_reduce(self):
         """ procedure used to sum and reduce runs in case when not all files
@@ -316,6 +436,26 @@ class ReductionWrapper(object):
             out_ws_name = r[0]
         except:
             out_ws_name = None
+
+        # if this is not None, we want to run validation not reduction
+        if self.validate_run_number:
+            self.reducer.prop_man.log\
+            ("**************************************************************************************",'warning')
+            self.reducer.prop_man.log\
+            ("**************************************************************************************",'warning')
+            rez,mess=self.build_or_validate_result()
+            if rez:
+                self.reducer.prop_man.log("*** SUCCESS! {0}".format(mess))
+                self.reducer.prop_man.log\
+               ("**************************************************************************************",'warning')
+
+            else:
+                self.reducer.prop_man.log("*** VALIDATION FAILED! {0}".format(mess))
+                self.reducer.prop_man.log\
+               ("**************************************************************************************",'warning')
+                raise RuntimeError("Validation against old data file failed")
+            self.validate_run_number=None
+            return rez,mess
 
         if self.reducer.sum_runs:
 # --------### sum runs provided ------------------------------------###
@@ -426,7 +566,7 @@ def iliad(reduce):
             config['defaultsave.directory'] = str(output_directory)
 
         if host._run_from_web:
-            web_vars = dict(host._wvs.standard_vars.items() + host._wvs.advanced_vars.items())
+            web_vars = host._wvs.get_all_vars()
             host.reducer.prop_man.set_input_parameters(**web_vars)
         else:
             pass # we should set already set up variables using

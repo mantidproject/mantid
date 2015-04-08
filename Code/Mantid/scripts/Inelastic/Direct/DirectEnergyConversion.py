@@ -19,7 +19,7 @@ from Direct.ReductionHelpers import extract_non_system_names
 def setup_reducer(inst_name,reload_instrument=False):
     """
     Given an instrument name or prefix this sets up a converter
-    object for the reduction
+    object for the reduction. Deprecated method
     """
     try:
         return DirectEnergyConversion(inst_name,reload_instrument)
@@ -478,17 +478,20 @@ class DirectEnergyConversion(object):
             self.save_results(deltaE_ws_sample)
 
             # prepare output workspace
+            results_name = deltaE_ws_sample.name()
             if out_ws_name:
                 if self._multirep_mode:
                     result.append(deltaE_ws_sample)
-                    self._old_runs_list.append(deltaE_ws_sample.name())
                 else:
-                    results_name = deltaE_ws_sample.name()
                     if results_name != out_ws_name:
                         RenameWorkspace(InputWorkspace=results_name,OutputWorkspace=out_ws_name)
                         result = mtd[out_ws_name]
+                    else:
+                        result = deltaE_ws_sample
             else: # delete workspace if no output is requested
-                self.sample_run = None
+                result = None
+            self._old_runs_list.append(results_name)
+
         #end_for
 #------------------------------------------------------------------------------------------
 # END Main loop over incident energies
@@ -849,8 +852,9 @@ class DirectEnergyConversion(object):
 
         spectra_id = self.prop_man.multirep_tof_specta_list
         if not spectra_id or len(spectra_id) == 0:
-            self.prop_man.log("*** WARNING! no multirep spectra found in IDF! using first existing spectra number\n"\
-                              "             This is wrong unless sample-detector distances of the instrument are all equal.",\
+            self.prop_man.log("*** WARNING! Multirep mode used but no closest and furthest spectra numbers defined in IDF (multirep_tof_specta_list)\n"\
+                              "    Using first spectra to identify TOF range for the energy range requested.\n"\
+                              "    This is correct only if all detectors are equidistant from the sample",\
                               'warning')
             spectra_id = [1]
 
@@ -970,14 +974,18 @@ class DirectEnergyConversion(object):
         formats = self.prop_man.save_format
 
         if save_file:
-           save_file,ext = os.path.splitext(save_file)
-           if len(ext) > 1:
+            save_file,ext = os.path.splitext(save_file)
+            if len(ext) > 1:
                formats.add(ext[1:])
         else:
-           save_file = self.prop_man.save_file_name
+            save_file = self.prop_man.save_file_name
 
         if save_file is None:
-            save_file = workspace.getName()
+            if workspace is None:
+                prop_man.log("DirectEnergyConversion:save_results: Nothing to do",'warning')
+                return
+            else:
+                save_file = workspace.getName()
         elif os.path.isdir(save_file):
             save_file = os.path.join(save_file, workspace.getName())
         elif save_file == '':

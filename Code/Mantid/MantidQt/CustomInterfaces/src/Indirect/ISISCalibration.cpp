@@ -290,8 +290,10 @@ namespace CustomInterfaces
     // Plot the smoothed workspace if required
     if(m_uiForm.ckSmoothResolution->isChecked() && m_uiForm.ckPlot->isChecked())
     {
-      std::string pyInput = "from mantidplot import plotSpectrum\nplotSpectrum(['" + m_pythonExportWsName + "', '" + m_pythonExportWsName + "_pre_smooth'], 0)\n";
-      m_pythonRunner.runPythonCode(QString::fromStdString(pyInput));
+      QStringList plotWorkspaces;
+      plotWorkspaces << QString::fromStdString(m_pythonExportWsName)
+                     << QString::fromStdString(m_pythonExportWsName) + "_pre_smooth";
+      plotSpectrum(plotWorkspaces);
     }
   }
 

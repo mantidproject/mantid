@@ -344,6 +344,27 @@ public:
 
   }
 
+  void testTrigonal()
+  {
+      UnitCell cellAl2O3(4.759355, 4.759355, 12.99231, 90.0, 90.0, 120.0);
+      CompositeBraggScatterer_sptr scatterers = CompositeBraggScatterer::create();
+      scatterers->addScatterer(BraggScattererFactory::Instance().createScatterer("IsotropicAtomBraggScatterer", "Element=Al;Position=[0,0,0.35217];U=0.005"));
+      scatterers->addScatterer(BraggScattererFactory::Instance().createScatterer("IsotropicAtomBraggScatterer", "Element=O;Position=[0.69365,0,0.25];U=0.005"));
+      SpaceGroup_const_sptr sgAl2O3 = SpaceGroupFactory::Instance().createSpaceGroup("R -3 c");
+
+      std::cout << sgAl2O3->order() << std::endl;
+
+      // O is on the 18e wyckoff position
+      std::vector<V3D> positions = sgAl2O3 * V3D(0.69365000,0,0.25000);
+      TS_ASSERT_EQUALS(positions.size(), 18);
+
+      CrystalStructure mg(cellAl2O3, sgAl2O3, scatterers);
+
+      std::vector<V3D> hkls = mg.getUniqueHKLs(0.885, 10.0, CrystalStructure::UseStructureFactor);
+
+      TS_ASSERT_EQUALS(hkls.size(), 44);
+  }
+
 private:
     UnitCell m_CsCl;
     PointGroup_sptr m_pg;

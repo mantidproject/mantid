@@ -1,17 +1,14 @@
-/*WIKI*
-TODO: Enter a full wiki-markup description of your algorithm here. You can then
-use the Build/wiki_maker.py script to generate your full wiki page.
-*WIKI*/
-
 #include "MantidSINQ/PoldiFitPeaks2D.h"
 
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/TableWorkspace.h"
+#include "MantidKernel/ListValidator.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/MultiDomainFunction.h"
 #include "MantidSINQ/PoldiUtilities/PoldiSpectrumDomainFunction.h"
 #include "MantidSINQ/PoldiUtilities/PoldiSpectrumLinearBackground.h"
+#include "MantidSINQ/PoldiUtilities/PoldiSpectrumPawleyFunction.h"
 #include "MantidAPI/FunctionDomain1D.h"
 
 #include "MantidSINQ/PoldiUtilities/IPoldiFunction1D.h"
@@ -19,6 +16,7 @@ use the Build/wiki_maker.py script to generate your full wiki page.
 #include "MantidSINQ/PoldiUtilities/PoldiInstrumentAdapter.h"
 #include "MantidSINQ/PoldiUtilities/PoldiDeadWireDecorator.h"
 #include "MantidAPI/IPeakFunction.h"
+#include "MantidAPI/IPawleyFunction.h"
 
 #include "MantidSINQ/PoldiUtilities/Poldi2DFunction.h"
 
@@ -57,6 +55,30 @@ const std::string PoldiFitPeaks2D::summary() const {
   return "Calculates a POLDI 2D-spectrum.";
 }
 
+/// Validate inputs for algorithm in case PawleyFit is used.
+std::map<std::string, std::string> PoldiFitPeaks2D::validateInputs() {
+  std::map<std::string, std::string> errorMap;
+
+  bool isPawleyFit = getProperty("PawleyFit");
+
+  if (isPawleyFit) {
+    Property *cellProperty = getPointerToProperty("InitialCell");
+    if (cellProperty->isDefault()) {
+      errorMap["InitialCell"] = "Initial cell must be given for PawleyFit.";
+    }
+
+    Property *refinedCellParameters =
+        getPointerToProperty("RefinedCellParameters");
+    if (refinedCellParameters->isDefault()) {
+      errorMap["RefinedCellParameters"] = "Workspace name for refined cell "
+                                          "parameters must be supplied for "
+                                          "PawleyFit.";
+    }
+  }
+
+  return errorMap;
+}
+
 /// Initialization of algorithm properties.
 void PoldiFitPeaks2D::init() {
   declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace", "",
@@ -65,9 +87,37 @@ void PoldiFitPeaks2D::init() {
   declareProperty(new WorkspaceProperty<TableWorkspace>("PoldiPeakWorkspace",
                                                         "", Direction::Input),
                   "Table workspace with peak information.");
-  declareProperty("PeakProfileFunction", "Gaussian",
+
+  auto peakFunctionValidator = boost::make_shared<StringListValidator>(
+      FunctionFactory::Instance().getFunctionNames<IPeakFunction>());
+  declareProperty("PeakProfileFunction", "Gaussian", peakFunctionValidator,
                   "Profile function to use for integrating the peak profiles "
                   "before calculating the spectrum.");
+
+  declareProperty("PawleyFit", false, "Instead of refining individual peaks, "
+                                      "refine a unit cell. Peaks must be "
+                                      "indexed, an initial cell must be "
+                                      "provided, as well as a crystal system.");
+  declareProperty("InitialCell", "", "Initial unit cell parameters as 6 "
+                                     "space-separated numbers. Only used when "
+                                     "PawleyFit is checked.");
+
+  std::vector<std::string> crystalSystems;
+  crystalSystems.push_back("Cubic");
+  crystalSystems.push_back("Tetragonal");
+  crystalSystems.push_back("Hexagonal");
+  crystalSystems.push_back("Trigonal");
+  crystalSystems.push_back("Orthorhombic");
+  crystalSystems.push_back("Monoclinic");
+  crystalSystems.push_back("Triclinic");
+
+  auto crystalSystemValidator =
+      boost::make_shared<StringListValidator>(crystalSystems);
+
+  declareProperty("CrystalSystem", "Cubic", crystalSystemValidator,
+                  "Crystal system to use for constraining "
+                  "unit cell parameters. Only used when "
+                  "PawleyFit is checked.");
 
   declareProperty("FitConstantBackground", true,
                   "Add a constant background term to the fit.");
@@ -98,6 +148,91 @@ void PoldiFitPeaks2D::init() {
   declareProperty(new WorkspaceProperty<TableWorkspace>(
                       "RefinedPoldiPeakWorkspace", "", Direction::Output),
                   "Table workspace with fitted peaks.");
+
+  declareProperty(new WorkspaceProperty<ITableWorkspace>(
+      "RefinedCellParameters", "", Direction::Output, PropertyMode::Optional));
+}
+
+/// Creates a PoldiPeak from the given profile function/hkl pair.
+PoldiPeak_sptr
+PoldiFitPeaks2D::getPeakFromPeakFunction(IPeakFunction_sptr profileFunction,
+                                         const V3D &hkl) {
+
+  IAlgorithm_sptr errorAlg = createChildAlgorithm("EstimatePeakErrors");
+  errorAlg->setProperty(
+      "Function", boost::dynamic_pointer_cast<IFunction>(profileFunction));
+  errorAlg->setPropertyValue("OutputWorkspace", "Errors");
+  errorAlg->execute();
+
+  double centre = profileFunction->centre();
+  double height = profileFunction->height();
+  double fwhmValue = profileFunction->fwhm();
+
+  ITableWorkspace_sptr errorTable = errorAlg->getProperty("OutputWorkspace");
+
+  double centreError = errorTable->cell<double>(0, 2);
+  double heightError = errorTable->cell<double>(1, 2);
+  double fwhmError = errorTable->cell<double>(2, 2);
+
+  UncertainValue d(centre, centreError);
+  UncertainValue intensity(height, heightError);
+  UncertainValue fwhm(fwhmValue, fwhmError);
+
+  PoldiPeak_sptr peak =
+      PoldiPeak::create(MillerIndices(hkl), d, intensity, UncertainValue(1.0));
+  peak->setFwhm(fwhm, PoldiPeak::FwhmRelation::AbsoluteD);
+
+  return peak;
+}
+
+/// Returns a TableWorkspace with refined cell parameters and error.
+ITableWorkspace_sptr PoldiFitPeaks2D::getRefinedCellParameters(
+    const IFunction_sptr &fitFunction) const {
+  Poldi2DFunction_sptr poldi2DFunction =
+      boost::dynamic_pointer_cast<Poldi2DFunction>(fitFunction);
+
+  if (!poldi2DFunction || poldi2DFunction->nFunctions() < 1) {
+    throw std::invalid_argument(
+        "Cannot process function that is not a Poldi2DFunction.");
+  }
+
+  ITableWorkspace_sptr latticeParameterTable =
+      WorkspaceFactory::Instance().createTable();
+
+  latticeParameterTable->addColumn("str", "Parameter");
+  latticeParameterTable->addColumn("double", "Value");
+  latticeParameterTable->addColumn("double", "Error");
+
+  // The first function should be PoldiSpectrumPawleyFunction
+  boost::shared_ptr<PoldiSpectrumPawleyFunction> poldiPawleyFunction =
+      boost::dynamic_pointer_cast<PoldiSpectrumPawleyFunction>(
+          poldi2DFunction->getFunction(0));
+
+  if (!poldiPawleyFunction) {
+    throw std::invalid_argument("First function in Poldi2DFunction is not "
+                                "PoldiSpectrumPawleyFunction.");
+  }
+
+  IPawleyFunction_sptr pawleyFunction =
+      boost::dynamic_pointer_cast<IPawleyFunction>(
+          poldiPawleyFunction->getDecoratedFunction());
+
+  if (pawleyFunction) {
+    CompositeFunction_sptr pawleyParts =
+        boost::dynamic_pointer_cast<CompositeFunction>(
+            pawleyFunction->getDecoratedFunction());
+
+    IFunction_sptr pawleyParameters = pawleyParts->getFunction(0);
+
+    for (size_t i = 0; i < pawleyParameters->nParams(); ++i) {
+      TableRow newRow = latticeParameterTable->appendRow();
+      newRow << pawleyParameters->parameterName(i)
+             << pawleyParameters->getParameter(i)
+             << pawleyParameters->getError(i);
+    }
+  }
+
+  return latticeParameterTable;
 }
 
 /**
@@ -134,7 +269,8 @@ boost::shared_ptr<DblMatrix> PoldiFitPeaks2D::getLocalCovarianceMatrix(
 /**
  * Construct a PoldiPeakCollection from a Poldi2DFunction
  *
- * This method performs the opposite operation of getFunctionFromPeakCollection.
+ * This method performs the opposite operation of
+ *getFunctionFromPeakCollection.
  * It takes a function, checks if it's of the proper type and turns the
  *information
  * into a PoldiPeakCollection.
@@ -161,6 +297,44 @@ PoldiPeakCollection_sptr PoldiFitPeaks2D::getPeakCollectionFromFunction(
   size_t offset = 0;
 
   for (size_t i = 0; i < poldi2DFunction->nFunctions(); ++i) {
+    boost::shared_ptr<PoldiSpectrumPawleyFunction> poldiPawleyFunction =
+        boost::dynamic_pointer_cast<PoldiSpectrumPawleyFunction>(
+            poldi2DFunction->getFunction(i));
+
+    if (poldiPawleyFunction) {
+      IPawleyFunction_sptr pawleyFunction =
+          poldiPawleyFunction->getPawleyFunction();
+
+      if (pawleyFunction) {
+        CompositeFunction_sptr decoratedFunction =
+            boost::dynamic_pointer_cast<CompositeFunction>(
+                pawleyFunction->getDecoratedFunction());
+
+        offset = decoratedFunction->getFunction(0)->nParams();
+
+        for (size_t j = 0; j < pawleyFunction->getPeakCount(); ++j) {
+          IPeakFunction_sptr profileFunction =
+              pawleyFunction->getPeakFunction(j);
+
+          size_t nLocalParams = profileFunction->nParams();
+          boost::shared_ptr<Kernel::DblMatrix> localCov =
+              getLocalCovarianceMatrix(covarianceMatrix, offset, nLocalParams);
+          profileFunction->setCovarianceMatrix(localCov);
+
+          // Increment offset for next function
+          offset += nLocalParams;
+
+          V3D peakHKL = pawleyFunction->getPeakHKL(j);
+
+          PoldiPeak_sptr peak =
+              getPeakFromPeakFunction(profileFunction, peakHKL);
+
+          normalizedPeaks->addPeak(peak);
+        }
+      }
+      break;
+    }
+
     boost::shared_ptr<PoldiSpectrumDomainFunction> peakFunction =
         boost::dynamic_pointer_cast<PoldiSpectrumDomainFunction>(
             poldi2DFunction->getFunction(i));
@@ -179,30 +353,8 @@ PoldiPeakCollection_sptr PoldiFitPeaks2D::getPeakCollectionFromFunction(
       // Increment offset for next function
       offset += nLocalParams;
 
-      IAlgorithm_sptr errorAlg = createChildAlgorithm("EstimatePeakErrors");
-      errorAlg->setProperty(
-          "Function", boost::dynamic_pointer_cast<IFunction>(profileFunction));
-      errorAlg->setPropertyValue("OutputWorkspace", "Errors");
-      errorAlg->execute();
-
-      double centre = profileFunction->centre();
-      double height = profileFunction->height();
-      double fwhmValue = profileFunction->fwhm();
-
-      ITableWorkspace_sptr errorTable =
-          errorAlg->getProperty("OutputWorkspace");
-
-      double centreError = errorTable->cell<double>(0, 2);
-      double heightError = errorTable->cell<double>(1, 2);
-      double fwhmError = errorTable->cell<double>(2, 2);
-
-      UncertainValue d(centre, centreError);
-      UncertainValue intensity(height, heightError);
-      UncertainValue fwhm(fwhmValue, fwhmError);
-
       PoldiPeak_sptr peak =
-          PoldiPeak::create(MillerIndices(), d, intensity, UncertainValue(1.0));
-      peak->setFwhm(fwhm, PoldiPeak::FwhmRelation::AbsoluteD);
+          getPeakFromPeakFunction(profileFunction, V3D(0, 0, 0));
 
       normalizedPeaks->addPeak(peak);
     }
@@ -212,24 +364,24 @@ PoldiPeakCollection_sptr PoldiFitPeaks2D::getPeakCollectionFromFunction(
 }
 
 /**
- * Constructs a proper function from a peak collection
+ * Returns a Poldi2DFunction that encapsulates individual peaks
  *
- * This method constructs a Poldi2DFunction and assigns one
- *PoldiSpectrumDomainFunction to it for
- * each peak contained in the peak collection.
+ * This function takes all peaks from the supplied peak collection and
+ *generates
+ * an IPeakFunction of the type given in the name parameter, wraps them
+ * in a Poldi2DFunction and returns it.
  *
- * @param peakCollection :: PoldiPeakCollection containing peaks with integral
- *intensities
- * @return Poldi2DFunction with one PoldiSpectrumDomainFunction per peak
+ * @param profileFunctionName :: Profile function name.
+ * @param peakCollection :: Peak collection with peaks to be used in the fit.
+ * @return :: A Poldi2DFunction with peak profile functions.
  */
-Poldi2DFunction_sptr PoldiFitPeaks2D::getFunctionFromPeakCollection(
+Poldi2DFunction_sptr PoldiFitPeaks2D::getFunctionIndividualPeaks(
+    std::string profileFunctionName,
     const PoldiPeakCollection_sptr &peakCollection) const {
   Poldi2DFunction_sptr mdFunction(new Poldi2DFunction);
 
   for (size_t i = 0; i < peakCollection->peakCount(); ++i) {
     PoldiPeak_sptr peak = peakCollection->peak(i);
-
-    std::string profileFunctionName = getProperty("PeakProfileFunction");
 
     boost::shared_ptr<PoldiSpectrumDomainFunction> peakFunction =
         boost::dynamic_pointer_cast<PoldiSpectrumDomainFunction>(
@@ -257,6 +409,91 @@ Poldi2DFunction_sptr PoldiFitPeaks2D::getFunctionFromPeakCollection(
   }
 
   return mdFunction;
+}
+
+/**
+ * Returns a Poldi2DFunction that encapsulates a PawleyFunction
+ *
+ * This function creates a PawleyFunction using the supplied profile function
+ * name and the crystal system as well as initial cell from the input
+ *properties
+ * of the algorithm and wraps it in a Poldi2DFunction.
+ *
+ * Because the peak intensities are integral at this step but PawleyFunction
+ * expects peak heights, a profile function is created and
+ *setIntensity/height-
+ * methods are used to convert.
+ *
+ * @param profileFunctionName :: Profile function name for PawleyFunction.
+ * @param peakCollection :: Peak collection with peaks to be used in the fit.
+ * @return :: A Poldi2DFunction with a PawleyFunction.
+ */
+Poldi2DFunction_sptr PoldiFitPeaks2D::getFunctionPawley(
+    std::string profileFunctionName,
+    const PoldiPeakCollection_sptr &peakCollection) const {
+  Poldi2DFunction_sptr mdFunction(new Poldi2DFunction);
+
+  boost::shared_ptr<PoldiSpectrumPawleyFunction> poldiPawleyFunction =
+      boost::dynamic_pointer_cast<PoldiSpectrumPawleyFunction>(
+          FunctionFactory::Instance().createFunction(
+              "PoldiSpectrumPawleyFunction"));
+
+  if (!poldiPawleyFunction) {
+    throw std::invalid_argument("Could not create pawley function.");
+  }
+
+  poldiPawleyFunction->setDecoratedFunction("PawleyFunction");
+
+  IPawleyFunction_sptr pawleyFunction =
+      poldiPawleyFunction->getPawleyFunction();
+  pawleyFunction->setProfileFunction(profileFunctionName);
+
+  std::string crystalSystem = getProperty("CrystalSystem");
+  pawleyFunction->setCrystalSystem(crystalSystem);
+
+  std::string initialCell = getProperty("InitialCell");
+  pawleyFunction->setUnitCell(initialCell);
+
+  IPeakFunction_sptr pFun = boost::dynamic_pointer_cast<IPeakFunction>(
+      FunctionFactory::Instance().createFunction(profileFunctionName));
+
+  for (size_t i = 0; i < peakCollection->peakCount(); ++i) {
+    PoldiPeak_sptr peak = peakCollection->peak(i);
+
+    pFun->setCentre(peak->d());
+    pFun->setFwhm(peak->fwhm(PoldiPeak::AbsoluteD));
+    pFun->setIntensity(peak->intensity());
+
+    pawleyFunction->addPeak(peak->hkl().asV3D(),
+                            peak->fwhm(PoldiPeak::AbsoluteD), pFun->height());
+  }
+
+  pawleyFunction->fix(pawleyFunction->parameterIndex("f0.ZeroShift"));
+  mdFunction->addFunction(poldiPawleyFunction);
+
+  return mdFunction;
+}
+
+/**
+ * Constructs a proper function from a peak collection
+ *
+ * This method constructs a Poldi2DFunction depending on whether or not a
+ * Pawley fit is performed each peak contained in the peak collection.
+ *
+ * @param peakCollection :: PoldiPeakCollection containing peaks with integral
+ *intensities
+ * @return Poldi2DFunction with one PoldiSpectrumDomainFunction per peak
+ */
+Poldi2DFunction_sptr PoldiFitPeaks2D::getFunctionFromPeakCollection(
+    const PoldiPeakCollection_sptr &peakCollection) const {
+  std::string profileFunctionName = getProperty("PeakProfileFunction");
+
+  bool pawleyFit = getProperty("PawleyFit");
+  if (pawleyFit) {
+    return getFunctionPawley(profileFunctionName, peakCollection);
+  }
+
+  return getFunctionIndividualPeaks(profileFunctionName, peakCollection);
 }
 
 /// Executes the algorithm
@@ -296,6 +533,18 @@ void PoldiFitPeaks2D::exec() {
   setProperty("OutputWorkspace", getWorkspace(fitAlgorithm));
   setProperty("RefinedPoldiPeakWorkspace", integralPeaks->asTableWorkspace());
   setProperty("Calculated1DSpectrum", outWs1D);
+
+  bool isPawleyFit = getProperty("PawleyFit");
+  if (isPawleyFit) {
+    ITableWorkspace_sptr cellParameters = getRefinedCellParameters(fitFunction);
+
+    if (cellParameters->rowCount() > 0) {
+      setProperty("RefinedCellParameters",
+                  getRefinedCellParameters(fitFunction));
+    } else {
+      g_log.warning() << "Warning: Cell parameter table is empty.";
+    }
+  }
 }
 
 /**
@@ -370,7 +619,11 @@ IAlgorithm_sptr PoldiFitPeaks2D::calculateSpectrum(
 
   fit->setProperty("Minimizer", "Levenberg-MarquardtMD");
 
+  // Setting the level to Notice to avoid problems with Levenberg-MarquardtMD.
+  int oldLogLevel = g_log.getLevel();
+  g_log.setLevelForAll(Poco::Message::PRIO_NOTICE);
   fit->execute();
+  g_log.setLevelForAll(oldLogLevel);
 
   return fit;
 }
@@ -497,14 +750,17 @@ void PoldiFitPeaks2D::setTimeTransformer(
 /**
  * Extracts time bin width from workspace parameter
  *
- * The method uses the difference between first and second x-value of the first
+ * The method uses the difference between first and second x-value of the
+ *first
  *spectrum as
  * time bin width. If the workspace does not contain proper data (0 spectra or
  *less than
- * 2 x-values), the method throws an std::invalid_argument-exception. Otherwise
+ * 2 x-values), the method throws an std::invalid_argument-exception.
+ *Otherwise
  *it calls setDeltaT.
  *
- * @param matrixWorkspace :: MatrixWorkspace with at least one spectrum with at
+ * @param matrixWorkspace :: MatrixWorkspace with at least one spectrum with
+ *at
  *least two x-values.
  */
 void PoldiFitPeaks2D::setDeltaTFromWorkspace(
@@ -520,12 +776,14 @@ void PoldiFitPeaks2D::setDeltaTFromWorkspace(
         "Cannot process MatrixWorkspace with less than 2 x-values.");
   }
 
-  // difference between first and second x-value is assumed to be the bin width.
+  // difference between first and second x-value is assumed to be the bin
+  // width.
   setDeltaT(matrixWorkspace->readX(0)[1] - matrixWorkspace->readX(0)[0]);
 }
 
 /**
- * Assigns delta t, throws std::invalid_argument on invalid value (determined by
+ * Assigns delta t, throws std::invalid_argument on invalid value (determined
+ *by
  *isValidDeltaT).
  *
  * @param newDeltaT :: Value to be used as delta t for calculations.
@@ -567,7 +825,8 @@ PoldiFitPeaks2D::getPeakCollection(const TableWorkspace_sptr &peakTable) const {
 /**
  * Return peak collection with integrated peaks
  *
- * This method takes a PoldiPeakCollection where the intensity is represented by
+ * This method takes a PoldiPeakCollection where the intensity is represented
+ *by
  *the maximum. Then
  * it takes the profile function stored in the peak collection, which must be
  *the name of a registered
@@ -607,7 +866,8 @@ PoldiPeakCollection_sptr PoldiFitPeaks2D::getIntegratedPeakCollection(
   }
 
   /* If no profile function is specified, it's not possible to get integrated
-   * intensities at all and we try to use the one specified by the user instead.
+   * intensities at all and we try to use the one specified by the user
+   * instead.
    */
   std::string profileFunctionName = rawPeakCollection->getProfileFunctionName();
 
@@ -688,7 +948,8 @@ PoldiPeakCollection_sptr PoldiFitPeaks2D::getNormalizedPeakCollection(
 /**
  * Converts normalized peak intensities to count based integral intensities
  *
- * This operation is the opposite of getNormalizedPeakCollection and is used to
+ * This operation is the opposite of getNormalizedPeakCollection and is used
+ *to
  *convert
  * the intensities back to integral intensities.
  *

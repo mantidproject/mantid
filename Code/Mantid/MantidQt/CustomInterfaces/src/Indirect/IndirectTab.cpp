@@ -221,13 +221,57 @@ namespace CustomInterfaces
 
 
   /**
+   * Creates a spectrum plot of one or more workspaces with the range of
+   * spectra [specStart, specEnd)
+   *
+   * This uses the plotSpectrum function from the Python API.
+   *
+   * @param workspaceNames List of names of workspaces to plot
+   * @param specStart Range start index
+   * @param specEnd Range end index
+   */
+  void IndirectTab::plotSpectrum(const QStringList & workspaceNames, int specStart, int specEnd)
+  {
+    QString pyInput = "from mantidplot import plotSpectrum\n";
+
+    pyInput += "plotSpectrum('";
+    pyInput += workspaceNames.join("','");
+    pyInput += "', range(";
+    pyInput += QString::number(specStart);
+    pyInput += ",";
+    pyInput += QString::number(specEnd);
+    pyInput += "))\n";
+
+    m_pythonRunner.runPythonCode(pyInput);
+  }
+
+
+  /**
+   * Creates a spectrum plot of a single workspace with the range of
+   * spectra [specStart, specEnd)
+   *
+   * This uses the plotSpectrum function from the Python API.
+   *
+   * @param workspaceName Names of workspace to plot
+   * @param specStart Range start index
+   * @param specEnd Range end index
+   */
+  void IndirectTab::plotSpectrum(const QString & workspaceName, int specStart, int specEnd)
+  {
+    QStringList workspaceNames;
+    workspaceNames << workspaceName;
+    plotSpectrum(workspaceNames, specStart, specEnd);
+  }
+
+
+  /**
    * Plots a contour (2D) plot of a given workspace.
    *
    * This uses the plot2D function from the Python API.
    *
    * @param workspaceName Name of workspace to plot
    */
-  void IndirectTab::plotContour(const QString & workspaceName)
+  void IndirectTab::plot2D(const QString & workspaceName)
   {
     QString pyInput = "from mantidplot import plot2D\n";
 
@@ -236,6 +280,44 @@ namespace CustomInterfaces
     pyInput += "')\n";
 
     m_pythonRunner.runPythonCode(pyInput);
+  }
+
+
+  /**
+   * Creates a time bin plot of one or more workspaces at a given spectrum
+   * index.
+   *
+   * This uses the plotTimeBin function from the Python API.
+   *
+   * @param workspaceNames List of names of workspaces to plot
+   * @param specIndex Index of spectrum from each workspace to plot
+   */
+  void IndirectTab::plotTimeBin(const QStringList & workspaceNames, int specIndex)
+  {
+    QString pyInput = "from mantidplot import plotTimeBin\n";
+
+    pyInput += "plotTimeBin('";
+    pyInput += workspaceNames.join("','");
+    pyInput += "', ";
+    pyInput += QString::number(specIndex);
+    pyInput += ")\n";
+
+    m_pythonRunner.runPythonCode(pyInput);
+  }
+
+
+  /**
+   * Creates a time bin plot of a single workspace at a given spectrum
+   * index.
+   *
+   * @param workspaceName Names of workspace to plot
+   * @param specIndex Index of spectrum to plot
+   */
+  void IndirectTab::plotTimeBin(const QString & workspaceName, int specIndex)
+  {
+    QStringList workspaceNames;
+    workspaceNames << workspaceName;
+    plotTimeBin(workspaceNames, specIndex);
   }
 
 
