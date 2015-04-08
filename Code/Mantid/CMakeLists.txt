@@ -156,13 +156,13 @@ if ( MAKE_VATES )
   add_subdirectory ( Vates )
 
   LIST( APPEND CPACK_INSTALL_CMAKE_PROJECTS
-        "${ParaView_DIR}" "ParaView Runtime Libs" "Libraries" "/"
+        "${ParaView_DIR}" "ParaView Runtime Libs" "Runtime" "${INBUNDLE}/"
   )
   LIST( APPEND CPACK_INSTALL_CMAKE_PROJECTS
-        "${ParaView_DIR}" "VTK Runtime Libs" "RuntimeLibraries" "/"
+        "${ParaView_DIR}" "VTK Runtime Libs" "RuntimeLibraries" "${INBUNDLE}/"
   )
   LIST( APPEND CPACK_INSTALL_CMAKE_PROJECTS
-        "${ParaView_DIR}" "HDF5 Core Library" "libraries" "/"
+        "${ParaView_DIR}" "HDF5 Core Library" "libraries" "${INBUNDLE}/"
   )
 endif ( MAKE_VATES )
 
