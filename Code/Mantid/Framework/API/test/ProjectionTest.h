@@ -95,6 +95,10 @@ private:
 };
 
 class GoodTable : public TableWorkspaceTester {
+public:
+  GoodTable() {};
+  virtual ~GoodTable() {};
+
   size_t columnCount() const { return 4; }
   size_t rowCount() const { return 3; }
 
