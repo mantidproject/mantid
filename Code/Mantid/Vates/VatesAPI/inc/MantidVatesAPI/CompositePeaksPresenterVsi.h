@@ -38,8 +38,8 @@ public:
   std::map<std::string, std::vector<bool>> getInitializedViewablePeaks();
   void removePresenter(std::string peaksWorkspaceName);
   void updateWorkspaces(std::vector<std::string> peaksWorkspaceNames);
-  virtual void sortPeaksWorkspace(const std::string &byColumnName,
-                                  const bool ascending) {}
+  virtual void sortPeaksWorkspace(const std::string &,
+                                  const bool) {}
   void sortPeaksWorkspace(
       const std::string &columnToSortBy, const bool sortedAscending,
       boost::shared_ptr<const Mantid::API::IPeaksWorkspace> peaksWS);

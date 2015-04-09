@@ -37,8 +37,8 @@ public:
     throw std::runtime_error(
         "NullPeaksPresenterVsi does not implement this method. Misused");
   }
-  virtual void sortPeaksWorkspace(const std::string &byColumnName,
-                                  const bool ascending) {}
+  virtual void sortPeaksWorkspace(const std::string &,
+                                  const bool ) {}
 };
 }
 }
