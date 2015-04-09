@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>611</width>
-    <height>629</height>
+    <height>670</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -109,32 +109,71 @@
         </item>
        </layout>
       </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="gbPlotTime">
+     <property name="title">
+      <string>Plot Time</string>
+     </property>
+     <layout class="QHBoxLayout" name="horizontalLayout_6">
       <item>
-       <layout class="QHBoxLayout" name="loInputActionButtons">
-        <item>
-         <spacer name="horizontalSpacer_4">
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>40</width>
-            <height>20</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
-        <item>
-         <widget class="QPushButton" name="pbPlotTime">
-          <property name="toolTip">
-           <string>Plot raw time values.</string>
-          </property>
-          <property name="text">
-           <string>Plot Time</string>
-          </property>
-         </widget>
-        </item>
-       </layout>
+       <widget class="QLabel" name="lbPlotTimeSpecMin">
+        <property name="text">
+         <string>Spectra Min:</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QSpinBox" name="spPlotTimeSpecMin">
+        <property name="minimum">
+         <number>1</number>
+        </property>
+        <property name="maximum">
+         <number>1200</number>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="lbPlotTimeSpecMax">
+        <property name="text">
+         <string>Spectra Max:</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QSpinBox" name="spPlotTimeSpecMax">
+        <property name="minimum">
+         <number>1</number>
+        </property>
+        <property name="maximum">
+         <number>1200</number>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="space_plotTime">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
+       <widget class="QPushButton" name="pbPlotTime">
+        <property name="toolTip">
+         <string>Plot raw time values.</string>
+        </property>
+        <property name="text">
+         <string>Plot</string>
+        </property>
+       </widget>
       </item>
      </layout>
     </widget>
@@ -451,7 +490,7 @@
         <item>
          <widget class="QStackedWidget" name="swRebin">
           <property name="currentIndex">
-           <number>0</number>
+           <number>1</number>
           </property>
           <widget class="QWidget" name="pgSingleRebin">
            <layout class="QVBoxLayout" name="verticalLayout_16">
@@ -687,7 +726,7 @@
          <number>0</number>
         </property>
         <property name="currentIndex">
-         <number>2</number>
+         <number>0</number>
         </property>
         <widget class="QWidget" name="pgMapFile">
          <layout class="QHBoxLayout" name="horizontalLayout_5">

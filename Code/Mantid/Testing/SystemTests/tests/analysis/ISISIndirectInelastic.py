@@ -1109,6 +1109,7 @@ class ISISIndirectInelasticConvFit(ISISIndirectInelasticBase):
         '''Defines the workflow for the test'''
         self.tolerance = 1e-4
         LoadNexus(self.sample, OutputWorkspace=self.sample)
+        LoadNexus(self.resolution, OutputWorkspace=self.resolution)
 
         confitSeq(
             self.sample,
@@ -1129,8 +1130,6 @@ class ISISIndirectInelasticConvFit(ISISIndirectInelasticBase):
             raise RuntimeError("Sample should be a string.")
         if type(self.resolution) != str:
             raise RuntimeError("Resolution should be a string.")
-        if not os.path.isfile(self.resolution):
-            raise RuntimeError("Resolution must be a file that exists.")
         if type(self.func) != str:
             raise RuntimeError("Function should be a string.")
         if type(self.bg) != str:
@@ -1159,7 +1158,7 @@ class OSIRISConvFit(ISISIndirectInelasticConvFit):
         self.resolution = FileFinder.getFullPath('osi97935_graphite002_res.nxs')
         #ConvFit fit function
         self.func = 'name=LinearBackground,A0=0,A1=0;(composite=Convolution,FixResolution=true,NumDeriv=true;'\
-                    'name=Resolution,FileName=\"%s\";name=Lorentzian,Amplitude=2,PeakCentre=0,FWHM=0.05)' % self.resolution
+                    'name=Resolution,Workspace=\"%s\";name=Lorentzian,Amplitude=2,PeakCentre=0,FWHM=0.05)' % self.resolution
         self.ftype = '1L'
         self.startx = -0.2
         self.endx = 0.2
@@ -1183,7 +1182,7 @@ class IRISConvFit(ISISIndirectInelasticConvFit):
         self.resolution = FileFinder.getFullPath('irs53664_graphite002_res.nxs')
         #ConvFit fit function
         self.func = 'name=LinearBackground,A0=0.060623,A1=0.001343;(composite=Convolution,FixResolution=true,NumDeriv=true;'\
-                    'name=Resolution,FileName=\"%s\";name=Lorentzian,Amplitude=1.033150,PeakCentre=-0.000841,FWHM=0.001576)' % (
+                    'name=Resolution,Workspace=\"%s\";name=Lorentzian,Amplitude=1.033150,PeakCentre=-0.000841,FWHM=0.001576)' % (
                     self.resolution)
         self.ftype = '1L'
         self.startx = -0.2
