@@ -133,7 +133,6 @@ void IntegrateEllipsoids::qListFromHistoWS(Integrate3DEvents &integrator, Progre
 
     std::vector<std::pair<double, V3D>> qList;
 
-    // TODO. we should be able to do this in an OMP loop.
     for (size_t j = 0; j < yVals.size(); ++j) {
       const double &yVal = yVals[j];
       if (yVal > 0) // TODO, is this condition right?
@@ -160,12 +159,8 @@ void IntegrateEllipsoids::qListFromHistoWS(Integrate3DEvents &integrator, Progre
         qList.push_back(std::make_pair(
             yValCounts, qVec)); // Not ideal to control the size dynamically?
       }
-      PARALLEL_CRITICAL(addHistoj) {
-        integrator.addEvents(qList, hkl_integ); // We would have to put a lock around this.
-      }
-      prog.report();
     }
-    PARALLEL_CRITICAL(addHistoj) {
+    PARALLEL_CRITICAL(addHisto) {
       integrator.addEvents(qList, hkl_integ);
     }
     prog.report();
