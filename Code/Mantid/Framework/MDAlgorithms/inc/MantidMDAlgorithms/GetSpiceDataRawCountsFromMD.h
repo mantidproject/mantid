@@ -2,7 +2,9 @@
 #define MANTID_MDALGORITHMS_GETSPICEDATARAWCOUNTSFROMMD_H_
 
 #include "MantidKernel/System.h"
-
+#include "MantidAPI/Algorithm.h"
+#include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidAPI/MatrixWorkspace.h"
 
 namespace Mantid
 {
@@ -31,16 +33,78 @@ namespace MDAlgorithms
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-  class DLLExport GetSpiceDataRawCountsFromMD 
-  {
+class DLLExport GetSpiceDataRawCountsFromMD : public API::Algorithm {
   public:
+    /// Creator
     GetSpiceDataRawCountsFromMD();
+
+    /// Destructor
     virtual ~GetSpiceDataRawCountsFromMD();
-    
+
+    /// Algorithm's name
+    virtual const std::string name() const {
+      return "GetSpiceDataRawCountsFromMD";
+    }
+
+    /// Summary of algorithms purpose
+    virtual const std::string summary() const {
+      return "Get detectors' raw counts or sample environment log values from "
+             "IMDEventWorkspace created from SPICE data file.";
+    }
+
+    /// Algorithm's version
+    virtual int version() const { return (1); }
+
+    /// Algorithm's category for identification
+    virtual const std::string category() const {
+      return "Diffraction;DataHandling";
+    }
+
+  private:
+    /// Initialisation code
+    void init();
+
+    /// Execution code
+    void exec();
+
+    /// Export all detectors' counts for a run
+    void exportDetCountsOfRun(API::IMDEventWorkspace_const_sptr datamdws,
+                              API::IMDEventWorkspace_const_sptr monitormdws,
+                              const int runnumber, std::vector<double> &vecX,
+                              std::vector<double> &vecY, std::string &xlabel,
+                              std::string &ylabel, bool donormalize);
+
+    void getDetCounts(API::IMDEventWorkspace_const_sptr mdws,
+                      const int &runnumber, const int &detid,
+                      std::vector<double> &vecX, std::vector<double> &vecY,
+                      bool formX);
+
+    API::MatrixWorkspace_sptr
+    createOutputWorkspace(const std::vector<double> &vecX,
+                          const std::vector<double> &vecY,
+                          const std::string &xlabel, const std::string &ylabel);
+
+    void
+    exportIndividualDetCounts(API::IMDEventWorkspace_const_sptr datamdws,
+                              API::IMDEventWorkspace_const_sptr monitormdws,
+                              const int detid, std::vector<double> &vecX,
+                              std::vector<double> &vecY, std::string &xlabel,
+                              std::string &ylabel, const bool &donormalize);
+
+    void exportSampleLogValue(API::IMDEventWorkspace_const_sptr datamdws,
+                              const std::string &samplelogname,
+                              std::vector<double> &vecX,
+                              std::vector<double> &vecY, std::string &xlabel,
+                              std::string &ylabel);
+
+    void getSampleLogValues(API::IMDEventWorkspace_const_sptr mdws,
+                            const std::string &samplelogname,
+                            const int runnumber,
+                            std::vector<double> &vecSampleLog);
   };
 
 
 } // namespace MDAlgorithms
 } // namespace Mantid
 
-#endif  /* MANTID_MDALGORITHMS_GETSPICEDATARAWCOUNTSFROMMD_H_ */
+#endif /* MANTID_MDALGORITHMS_GETSPICEDATARAWCOUNTSFROMMD_H_ */
