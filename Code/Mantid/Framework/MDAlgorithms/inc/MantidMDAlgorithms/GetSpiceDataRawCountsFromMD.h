@@ -11,7 +11,8 @@ namespace Mantid
 namespace MDAlgorithms
 {
 
-  /** GetSpiceDataRawCountsFromMD : TODO: DESCRIPTION
+  /** GetSpiceDataRawCountsFromMD : Export raw detectors' counts or sample log values from
+      IMDEventWorkspaces from the output of algorithm ConvertSpiceDataToRealSpace.
 
     Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge National Laboratory & European Spallation Source
 
