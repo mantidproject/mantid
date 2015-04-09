@@ -6,6 +6,15 @@
 // Forward declaration
 class QTableWidget;
 
+// Forward declaration
+namespace Mantid
+{
+namespace API
+{
+class MatrixWorkspace;
+}
+}
+
 namespace MantidQt
 {
 

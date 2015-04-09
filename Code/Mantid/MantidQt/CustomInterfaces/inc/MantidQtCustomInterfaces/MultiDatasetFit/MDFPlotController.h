@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QMap>
+#include <boost/shared_ptr.hpp>
 
 // Forward declarations
 class QwtPlot;
@@ -15,10 +16,10 @@ class QPushButton;
 
 namespace MantidQt
 {
-  namespace MantidWidgets
-  {
-    class RangeSelector;
-  }
+namespace MantidWidgets
+{
+class RangeSelector;
+}
 
 namespace CustomInterfaces
 {
