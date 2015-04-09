@@ -234,7 +234,7 @@ int vtkMDHWSource::RequestInformation(vtkInformation *vtkNotUsed(request), vtkIn
   m_presenter->executeLoadMetadata();
   setTimeRange(outputVector);
   std::vector<int> extents = dynamic_cast<MDHWInMemoryLoadingPresenter*>(m_presenter)->getExtents();
-  outputVector->GetInformationObject(0)->Set(vtkStreamingDemandDrivenPipeline::WHOLE_EXTENT(),&extents[0],extents.size());
+  outputVector->GetInformationObject(0)->Set(vtkStreamingDemandDrivenPipeline::WHOLE_EXTENT(),&extents[0],static_cast<int>(extents.size()));
 
   return 1;
 }

@@ -158,9 +158,9 @@ namespace Mantid
       Workspace_sptr ws = m_repository->fetchWorkspace(m_wsName);
       IMDHistoWorkspace_sptr histoWs = boost::dynamic_pointer_cast<Mantid::API::IMDHistoWorkspace>(ws);
       std::vector<int> extents(6, 0);
-      extents[1] = histoWs->getDimension(0)->getNBins();
-      extents[3] = histoWs->getDimension(1)->getNBins();
-      extents[5] = histoWs->getDimension(2)->getNBins();
+      extents[1] = static_cast<int>(histoWs->getDimension(0)->getNBins());
+      extents[3] = static_cast<int>(histoWs->getDimension(1)->getNBins());
+      extents[5] = static_cast<int>(histoWs->getDimension(2)->getNBins());
       
       return extents;
     }
