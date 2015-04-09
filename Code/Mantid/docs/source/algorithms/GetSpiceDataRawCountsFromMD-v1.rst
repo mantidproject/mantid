@@ -27,11 +27,11 @@ Inputs
 
 Two input MDEventWorkspaces that are required. 
 
-{\it InputWorkspace} is an MDEventWorkspace stores detectors counts and sample logs. 
+**InputWorkspace** is an MDEventWorkspace that stores detectors counts and sample logs. 
 Each run in this MDEventWorkspace corresponds to an individual measurement point in experiment run. 
 Each run has its own instrument object. 
 
-The other input MDEventWorkspace, i.e., {\it InputMonitorWorkspace} contains the monitor counts of each measurement point.  
+The other input MDEventWorkspace, i.e., **MonitorWorkspace** contains the monitor counts of each measurement point.  
 The signal value of each MDEvent in this workspace is the monitor counts
 corresponding to an individual detector. 
 
@@ -62,7 +62,7 @@ Mode *Sample Log*
 +++++++++++++++++
 
 The x-values can be any sample log's values of all experiment measuring points (i.e., *Pt.*).
-The y-values is the values of a specified sample log among all *Pt.*.  
+The y-values are the values of a specified sample log among all *Pt.*.  
 
 
 Usage
