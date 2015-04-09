@@ -14,10 +14,12 @@ from mantid.kernel import *
 class PlusMDTest(stresstesting.MantidStressTest):
 
     _saved_filename = None
+    original_binned = None
 
     def compare_binned(self, wsname):
         """ Compare the given workspace to the previously-binned original """
-        BinMD(InputWorkspace=wsname,AlignedDim0='Q_lab_x, -3, 3, 100',AlignedDim1='Q_lab_y, -3, 3, 100',AlignedDim2='Q_lab_z, -3, 3, 100',ForceOrthogonal='1',OutputWorkspace="test_binned")
+        BinMD(InputWorkspace=wsname,AlignedDim0='Q_lab_x, -3, 3, 100',AlignedDim1='Q_lab_y, -3, 3, 100',
+              AlignedDim2='Q_lab_z, -3, 3, 100',ForceOrthogonal='1',OutputWorkspace="test_binned")
         ws = mtd["test_binned"]
         EqualToMD(LHSWorkspace=ws, RHSWorkspace=self.original_binned, OutputWorkspace='comparison')
         comparison = mtd['comparison']
@@ -39,7 +41,8 @@ class PlusMDTest(stresstesting.MantidStressTest):
         alg = SaveMD(InputWorkspace='cncs_original', Filename=barefilename)
 
         self.assertDelta( mtd['cncs_original'].getNPoints(), 112266, 1)
-        BinMD(InputWorkspace='cncs_original',AlignedDim0='Q_lab_x, -3, 3, 100',AlignedDim1='Q_lab_y, -3, 3, 100',AlignedDim2='Q_lab_z, -3, 3, 100',ForceOrthogonal='1',OutputWorkspace='cncs_original_binned')
+        BinMD(InputWorkspace='cncs_original',AlignedDim0='Q_lab_x, -3, 3, 100',AlignedDim1='Q_lab_y, -3, 3, 100',
+              AlignedDim2='Q_lab_z, -3, 3, 100',ForceOrthogonal='1',OutputWorkspace='cncs_original_binned')
         # Scale by 2 to account for summing
         self.original_binned = mtd['cncs_original_binned']
         self.original_binned *= 2
@@ -147,7 +150,8 @@ class MergeMDTest(stresstesting.MantidStressTest):
 
         for omega in xrange(0, 5):
             print "Starting omega %03d degrees" % omega
-            CreateMDWorkspace(Dimensions='3',Extents='-5,5,-5,5,-5,5',Names='Q_sample_x,Q_sample_y,Q__sample_z',Units='A,A,A',SplitInto='3',SplitThreshold='200',MaxRecursionDepth='3',
+            CreateMDWorkspace(Dimensions='3',Extents='-5,5,-5,5,-5,5',Names='Q_sample_x,Q_sample_y,Q__sample_z',
+                              Units='A,A,A',SplitInto='3',SplitThreshold='200',MaxRecursionDepth='3',
             MinRecursionDepth='3', OutputWorkspace='CNCS_7860_event_MD')
 
             # Convert events to MD events
@@ -157,7 +161,8 @@ class MergeMDTest(stresstesting.MantidStressTest):
             # V2 of ConvertToDiffractionMD needs Goniometer to be set on workspace.
             SetGoniometer(Workspace='CNCS_7860_event_NXS',Axis0='omega,0,0,1,1',Axis1='chi,1,0,0,1',Axis2='phi,0,1,0,1')
 
-            ConvertToDiffractionMDWorkspace(InputWorkspace='CNCS_7860_event_NXS',OutputWorkspace='CNCS_7860_event_MD',OutputDimensions='Q (sample frame)',LorentzCorrection='1', Append=True)
+            ConvertToDiffractionMDWorkspace(InputWorkspace='CNCS_7860_event_NXS',OutputWorkspace='CNCS_7860_event_MD',
+                                            OutputDimensions='Q (sample frame)',LorentzCorrection='1', Append=True)
 
             barefilename = "CNCS_7860_event_rotated_%03d.nxs" % omega
             filename = os.path.join(config["defaultsave.directory"], barefilename)

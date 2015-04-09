@@ -6,8 +6,9 @@ import os
 import numpy as n
 from abc import ABCMeta, abstractmethod
 
-'''Test adapted from actual script used by the scientists'''
 class PEARL_Reduction(stresstesting.MantidStressTest):
+    '''Test adapted from actual script used by the scientists'''
+
     __metaclass__ = ABCMeta # Mark as an abstract class
 
     def __init__(self):
@@ -160,7 +161,8 @@ class PEARL_Reduction(stresstesting.MantidStressTest):
         self.PearlLoad(number,ext,outname)
         ConvertUnits(InputWorkspace=outname,OutputWorkspace=outname,Target="Wavelength")
         monitor=self.PEARL_getmonitor(number,ext,spline_terms=20)
-        NormaliseToMonitor(InputWorkspace=outname,OutputWorkspace=outname,MonitorWorkspace=monitor,IntegrationRangeMin=0.6,IntegrationRangeMax=5.0)
+        NormaliseToMonitor(InputWorkspace=outname,OutputWorkspace=outname,MonitorWorkspace=monitor,
+                           IntegrationRangeMin=0.6,IntegrationRangeMax=5.0)
         ConvertUnits(InputWorkspace=outname,OutputWorkspace=outname,Target="TOF")
         mtd.remove(monitor)
         return
