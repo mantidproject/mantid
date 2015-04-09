@@ -217,10 +217,15 @@
 using namespace Qwt3D;
 using namespace MantidQt::API;
 
+using Mantid::API::FrameworkManager;
+using Mantid::Kernel::ConfigService;
+using Mantid::Kernel::LibraryManager;
+using Mantid::Kernel::Logger;
+
 namespace
 {
   /// static logger
-  Mantid::Kernel::Logger g_log("ApplicationWindow");
+  Logger g_log("ApplicationWindow");
 }
 
 extern "C"
@@ -355,16 +360,18 @@ void ApplicationWindow::init(bool factorySettings, const QStringList& args)
   // splash screen after the 3D visualization dialog has closed
   qApp->processEvents();
 
-  using Mantid::Kernel::ConfigService;
   auto & config = ConfigService::Instance(); // Starts logging
   resultsLog->attachLoggingChannel(); // Must be done after logging starts
-  using Mantid::API::FrameworkManager;
-  auto & framework = FrameworkManager::Instance(); // Loads framework libraries
+  // Load Mantid core libraries by starting the framework
+  FrameworkManager::Instance();
   // Load Paraview plugin libraries if possible
   if(config.pvPluginsAvailable())
   {
     // load paraview plugins
-    framework.loadPluginsUsingKey(config.getPVPluginsPath());
+    if (g_log.getLevel() == Logger::Priority::PRIO_DEBUG) {
+      g_log.debug("Loading libraries from \"" + config.getPVPluginsPath() + "\"");
+    }
+    LibraryManager::Instance().OpenAllLibraries(config.getPVPluginsPath(), false);
   }
 
   // Create UI object

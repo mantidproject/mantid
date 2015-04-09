@@ -24,6 +24,8 @@
 #include "pqViewStreamingBehavior.h"
 #include "pqPluginSettingsBehavior.h"
 
+#include <Poco/Path.h>
+
 #include <string>
 
 #include "vtksys/SystemTools.hxx"
@@ -38,8 +40,10 @@ namespace Mantid
       {
         // Get the plugin path that we set in the ConfigService.
         auto & configSvc = Kernel::ConfigService::Instance();
-        std::string pvPluginPath = configSvc.getPVPluginsPath();
-        if (pvPluginPath.empty())
+        // This currently points at the top pvplugins directory and not the subdirectory.
+        // Needs tidying up!!
+        std::string pvPluginPathTop = configSvc.getPVPluginsPath();
+        if (pvPluginPathTop.empty())
         {
           throw std::runtime_error("pvplugins.directory key not setup.\nVates plugins will not be available.\n"
                                    "Further use will cause the program to crash.\nPlease exit and "
@@ -59,7 +63,9 @@ namespace Mantid
         m_logger.debug() << "Intialize pqApplicationCore with " << argv << "\n";
         // We need to manually set the PV_PLUGIN_PATH because it's
         // not going to be picked up from the paraview/vtk side otherwise.
-        vtksys::SystemTools::PutEnv("PV_PLUGIN_PATH=" + pvPluginPath);
+        Poco::Path pluginsDir(pvPluginPathTop, "pvplugins");
+        m_logger.debug() << "Setting PV_PLUGIN_PATH=" << pluginsDir.toString() << "\n";
+        vtksys::SystemTools::PutEnv("PV_PLUGIN_PATH=" + pluginsDir.toString());
         new pqPVApplicationCore(argc, argv);
       }
 
