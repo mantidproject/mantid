@@ -158,9 +158,11 @@ namespace CustomInterfaces
 
     for(auto it = results.begin(); it != results.end(); ++it)
     {
-      std::string wsName = groupName + "_" + it->first;
-      AnalysisDataService::Instance().addOrReplace(wsName, it->second);
-      AnalysisDataService::Instance().addToGroup(groupName, wsName);
+      if ( it->second ) {
+        std::string wsName = groupName + "_" + it->first;
+        AnalysisDataService::Instance().addOrReplace(wsName, it->second);
+        AnalysisDataService::Instance().addToGroup(groupName, wsName);
+      }
     }
   }
 
