@@ -68,9 +68,9 @@ class SumRuns(PropDescriptor):
 
 #--------------------------------------------------------------------------------------------------------------------
 class IncidentEnergy(PropDescriptor):
-    """Provide incident energy or range of incident energies to be processed
+    """Provide incident energy or range of incident energies to be processed.
 
-       Set it up to list of values (even with single value i.e. prop_man.incident_energy=[10])
+       Set it up to list of values (even with single value i.e. prop_man.incident_energy=[10]),
        if the energy_bins property value to be treated as relative energy ranges.
 
        Set it up to single value (e.g. prop_man.incident_energy=10) to treat energy_bins
@@ -199,13 +199,13 @@ class EnergyBins(PropDescriptor):
 
        Provide it in the form:
        propman.energy_bins = [min_energy,step,max_energy]
-       if energy to process (incident_energy property) has a single value
+       if energy to process (incident_energy property) has a single value,
        or
-       propman.energy_bins = [min_rel_enrgy,rel_step,max_rel_energy] 
+       propman.energy_bins = [min_rel_enrgy,rel_step,max_rel_energy]
        where all values are relative to the incident energy,
        if energy(ies) to process (incident_energy(ies)) are list of energies.
        The list of energies can contain only single value.
-       (e.g. prop_man.incident_energy=[100])
+       (e.g. prop_man.incident_energy=[100])/
     """
     def __init__(self,IncidentEnergyProp):
         self._incident_energy = IncidentEnergyProp
@@ -303,11 +303,11 @@ class EnergyBins(PropDescriptor):
 #end EnergyBins
 #-----------------------------------------------------------------------------------------
 class SaveFileName(PropDescriptor):
-    """Property defines default file name to save result to.
+    """Property defines default file name to save result.
 
-      By default its calculated from incident energy, run number and
-      other properties values but user can assign its own name, which will be
-      used if defined.
+      By default the name is calculated from incident energy, run number and
+      other properties values, but user can assign its own name, which will be
+      used instead.
     """
     def __init__(self,Name=None):
         self._file_name = Name
@@ -355,7 +355,7 @@ class SaveFileName(PropDescriptor):
 #-----------------------------------------------------------------------------------------
 class InstrumentDependentProp(PropDescriptor):
     """Generic property describing some aspects of instrument (e.g. name, short name etc),
-       which are undefined if no instrument is defined
+       which are undefined if no instrument is defined.
     """
     def __init__(self,prop_name):
         self._prop_name = prop_name
@@ -373,7 +373,7 @@ class InstrumentDependentProp(PropDescriptor):
 #end InstrumentDependentProp
 #-----------------------------------------------------------------------------------------
 class VanadiumRMM(PropDescriptor):
-    """Defines constant static rmm for vanadium"""
+    """Defines constant static rmm for vanadium."""
     def __get__(self,instance,owner=None):
         """ return rmm for vanadium """
 
@@ -390,14 +390,14 @@ class VanadiumRMM(PropDescriptor):
 # PropertyManager
 #-----------------------------------------------------------------------------------------
 class mon2NormalizationEnergyRange(PropDescriptor):
-    """Energy range to integrate signal on monitor 2 when normalized by this monitor
+    """Energy range to integrate signal on monitor 2 when normalized by this monitor.
 
        This class contains relative range of energies in which the monitor-2 signal should
        be integrated, and returns the energy range for integration according to
-       formula: range = [min_range*ei,max_range*ei] where ei is incident monitor energy
+       formula: range = [min_range*ei,max_range*ei] where ei is incident monitor energy.
 
        To find the actual integration ranges one should convert these values into TOF (or
-       convert monitor signal to energy)
+       convert monitor signal to energy).
     """
     def __init__(self):
         # default range
@@ -477,7 +477,7 @@ class mon2NormalizationEnergyRange(PropDescriptor):
 
 #-----------------------------------------------------------------------------------------
 class PropertyFromRange(PropDescriptor):
-    """Generic descriptor for property, which can have one value from a list of values """
+    """Generic descriptor for property, which can have one value from a list of values."""
     def __init__(self,availible_values,default_value):
         self._availible_values = availible_values
         self.__set__(None,default_value)
@@ -619,10 +619,11 @@ class MapMaskFile(PropDescriptor):
 
 #-----------------------------------------------------------------------------------------
 class HardMaskPlus(prop_helpers.ComplexProperty):
-    """Sets diagnostics algorithm to use hard mask file provided together with all other diagnostics routines.
+    """Sets diagnostics algorithm to use hard mask file
+       together with all other diagnostics routines.
 
        Assigning a mask file name to this property sets up hard_mask_file property
-       to the file name provided and use_hard_mask_only property to False,
+       to the file name provided, and use_hard_mask_only property to False,
        so that both hard mask file and the diagnostics procedures are used to identify
        and exclude failing detectors.
     """
@@ -650,7 +651,7 @@ class HardMaskPlus(prop_helpers.ComplexProperty):
 
 #-----------------------------------------------------------------------------------------
 class HardMaskOnly(prop_helpers.ComplexProperty):
-    """Sets diagnostics algorithm to use hard mask file provided and to disable all other diagnostics routines.
+    """Sets diagnostics algorithm to use hard mask file and to disable all other diagnostics.
 
        Assigning a mask file name to this property sets up hard_mask_file property
        to the file name provided and use_hard_mask_only property to True, so that
@@ -701,21 +702,21 @@ class MonovanIntegrationRange(prop_helpers.ComplexProperty):
 
        The calculated integral is used to estimate relative detector's efficiency.
        The range can be defined either directly or as the function of the incident energy(s).
-       (incident_energy property)
+       (incident_energy property).
 
        The default settings are the range, relative to the incident energy.
 
        To define range as relative, one needs to set this property to None.
        In this case, the actual boundaries are calculated from monovan_lo_frac, monovan_lo_frac
        and incident_energy properties values according to the expression:
-       integration_range = current_incident_energy*[monovan_lo_frac,monovan_hi_frac]
+       integration_range = current_incident_energy*[monovan_lo_frac,monovan_hi_frac].
 
-       The range should be changed by changing monovan_lo_frac, monovan_hi_frac separately
+       The range should be changed by changing monovan_lo_frac, monovan_hi_frac separately.
 
        To define range as absolute, one needs to assign this property with the range requested.
        In this case, the dependent properties monovan_lo_value,monovan_hi_value are set and the
        actual range is calculated according to the expression:
-       integration_range = [monovan_lo_value,monovan_hi_value]
+       integration_range = [monovan_lo_value,monovan_hi_value].
     """
     def __init__(self,DepType=None):
         if DepType:
@@ -792,7 +793,7 @@ class SpectraToMonitorsList(PropDescriptor):
     """Define list of spectra, with detectors used as monitors to estimate incident energy
        in a direct scattering experiment.
 
-       Necessary when a detector, especially a detector working in event, mode is used as monitor. 
+       Necessary when a detector, especially a detector working in event mode, is used as a monitor.
        Specifying this number would copy correspondent spectra to monitor workspace and rebin the spectra
        according to monitors binning.
 
@@ -842,9 +843,9 @@ class SpectraToMonitorsList(PropDescriptor):
 class SaveFormat(PropDescriptor):
     """The format to save reduced results using internal save procedure.
 
-       Can be one or list of supported format names. Currently supported formats
+       Can be one name or list of supported format names. Currently supported formats
        are: spe, nxspe and nxs data formats.
-       See mantid for detailed description of the formats.
+       See Mantid documentation for detailed description of the formats.
        If set to None, internal saving procedure is not used.
     """
    # formats available for saving the data
@@ -991,7 +992,7 @@ class BackbgroundTestRange(PropDescriptor):
 #-----------------------------------------------------------------------------------------
 class MultirepTOFSpectraList(PropDescriptor):
     """Specify list of spectra numbers used to calculate
-       TOF range corresponding to the particular energy range
+       TOF range corresponding to the particular energy range.
 
        Usually it is list of two numbers, specifying spectra with detectors placed
        closest and furthest from the sample.
@@ -1024,17 +1025,17 @@ class MultirepTOFSpectraList(PropDescriptor):
 class MonoCorrectionFactor(PropDescriptor):
     """Provide correction factor to convert
        experimental scattering cross-section into absolute
-       units ( mb/str/mev/fu)
+       units ( mb/str/mev/fu).
 
        Two independent sources for this factor can be defined:
        1) if user explicitly specifies correction value.
            This value then will be applied to all subsequent runs
            without any checks if the correction is appropriate.
-           Set to None to disable this.
+           Set to None to disable this behavior.
        2) set/get cashed value correspondent to current monovan
           run number, incident energy and integration range.
           This value is cashed at first run and reapplied if
-          no changes to the values it depends on were identified
+          no changes to the values it depends on were identified.
     """
     def __init__(self,ei_prop,monovan_run_prop):
         self._cor_factor = None
@@ -1101,7 +1102,7 @@ class MotorLogName(PropDescriptor):
     """The list of possible log names, with logs containing information
        on rotation of crystal.
 
-       First log found on current workspace is used together with motor_offset 
+       First log found on current workspace is used together with motor_offset
        property to identify crystal rotation (psi in Horace) and
        to write this psi value into nxspe file.
     """
@@ -1148,7 +1149,7 @@ class MotorOffset(PropDescriptor):
 
 class RotationAngle(PropDescriptor):
     """Property used to identify rotation angle
-       psi=motor_offset+wccr.timeAverageValue()
+       psi=motor_offset+wccr.timeAverageValue().
 
        If set to None or not set, the rotation angle
        is calculated from motor_offset and log, containing

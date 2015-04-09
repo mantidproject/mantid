@@ -83,24 +83,24 @@ class NonIDF_Properties(object):
                   containing data of scattering from a sample to convert to energy transfer.
                   Also accepts a list of the such run numbers""")
     wb_run      = RunDescriptor("WB_","""Run number, workspace or symbolic presentation of such run
-                  containing results of white beam neutron scattering from vanadium used in detectors calibration""")
+                  containing results of white beam neutron scattering from vanadium used in detectors calibration.""")
     monovan_run = RunDescriptor("MV_","""Run number, workspace or symbolic presentation of such run
-                  containing results of monochromatic neutron beam scattering from vanadium sample 
-                  used in absolute units normalization""")
+                  containing results of monochromatic neutron beam scattering from vanadium sample
+                  used in absolute units normalization.\n None disables absolute units calculations.""")
 
     mask_run    = RunDescriptorDependent(sample_run,"MSK_","""Run number, workspace or symbolic presentation of such run
-                  containing results of experiment, used to find masks.\n If not explicitly set, sample_run is used""")
+                  containing results of experiment, used to find masks.\n If not explicitly set, sample_run is used.""")
     wb_for_monovan_run = RunDescriptorDependent(wb_run,"MV_WB_","""Run number, workspace or symbolic presentation of such run
-                         containing results of white beam neutrons scattering from vanadium, used to calculate monovanadium 
-                         integrals for monochromatic vanadium\n
-                         If not explicitly set, white beam for sample run is used""")
+                         containing results of white beam neutrons scattering from vanadium, used to calculate monovanadium
+                         integrals for monochromatic vanadium.\n
+                         If not explicitly set, white beam for sample run is used.""")
     # TODO: do something about it.  Second white is explicitly used in
     # diagnostics but not accessed at all
     second_white  = RunDescriptor("""Second white beam run resutlts currently unused in the workflow 
                     despite being referred to in Diagnostics.
-                    In a future it should be enabled""")
+                    In a future it should be enabled.""")
     #
-    _tmp_run     = RunDescriptor("_TMP","Property used for storing intermediate run data during reduction")
+    _tmp_run     = RunDescriptor("_TMP","Property used for storing intermediate run data during reduction.")
     #-----------------------------------------------------------------------------------
     def getDefaultParameterValue(self,par_name):
         """method to get default parameter value, specified in IDF"""
