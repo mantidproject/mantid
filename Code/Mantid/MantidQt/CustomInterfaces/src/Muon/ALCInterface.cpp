@@ -131,13 +131,6 @@ namespace CustomInterfaces
 
   void ALCInterface::exportResults()
   {
-    // If we are able to export the results, we should be on final step, which means all the previous
-    // steps were completed succesfully
-    if (!m_peakFittingModel->fittedPeaks())
-    {
-      QMessageBox::critical(this, "Error", "Please fit some peaks first");
-      return;
-    }
 
     bool ok;
     QString label = QInputDialog::getText(this, "Results label", "Label to assign to the results: ",
