@@ -7,6 +7,7 @@ from Direct.PropertyManager import PropertyManager
 # this import is used by children
 from Direct.DirectEnergyConversion import DirectEnergyConversion
 import os
+import re
 from abc import abstractmethod
 
 
@@ -123,27 +124,35 @@ class ReductionWrapper(object):
                 row = "{0}\'{1}\':{2}".format(str_wrapper,key,val)
             f.write(row)
             str_wrapper = ',\n        '
-        f.write("\n}\nvariable_help={\n")
-        all_var = self._wvs.get_all_vars()
-        #print help strings
-        str_wrapper = '         '
-        for key in all_var:
-            try:
-                prop = getattr(PropertyManager,key)
-                docstring = prop.__doc__
-                if not docstring:
+
+        def write_help_block(fhandle,block_name,block_dict):
+            str_wrapper = '         '
+            row = "{0}\'{1}\' : {{\n".format(str_wrapper,block_name)
+            fhandle.write(row)
+            for key in block_dict:
+                try:
+                    prop = getattr(PropertyManager,key)
+                    docstring = prop.__doc__
+                    if not docstring:
+                        continue
+                except:
                     continue
                 contents = self._do_format(docstring)
                 row = "{0}\'{1}\':\'{2}\'".format(str_wrapper,key,contents)
-            except:
-                continue
-            f.write(row)
-            str_wrapper = ',\n        '
-        f.write("\n}\n")
+                fhandle.write(row)
+                str_wrapper = ',\n        '
+            fhandle.write('{0} }},\n'.format(str_wrapper))
+
+        f.write("\n}\nvariable_help={\n")
+        write_help_block(f,"standard_vars",self._wvs.standard_vars)
+        write_help_block(f,"advanced_vars",self._wvs.advanced_vars)
+        f.write("}\n")
         f.close()
+
     def _do_format(self,docstring):
         """Format docstring to write it as string in the reduce_var file"""
-        contents = docstring.split('\n')
+        contents = re.sub(" +"," ",docstring)
+        contents = contents.split('\n')
         contents = '\\n'.join(contents)
         return contents
 
