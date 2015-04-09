@@ -147,6 +147,8 @@ namespace CustomInterfaces
 
     std::map<std::string, Workspace_sptr> results;
 
+    results["Loaded_Data"] = m_dataLoading->exportWorkspace();
+
     results["Baseline_Workspace"] = m_baselineModellingModel->exportWorkspace();
     results["Baseline_Sections"] = m_baselineModellingModel->exportSections();
     results["Baseline_Model"] = m_baselineModellingModel->exportModel();
