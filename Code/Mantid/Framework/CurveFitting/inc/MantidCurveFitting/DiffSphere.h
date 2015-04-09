@@ -46,7 +46,7 @@ public:
   ElasticDiffSphere();
 
   /// Destructor
-  virtual ~ElasticDiffSphere(){};
+  virtual ~ElasticDiffSphere() {};
 
   /// overwrite IFunction base class methods
   virtual std::string name() const { return "ElasticDiffSphere"; }
@@ -111,6 +111,9 @@ private:
   /// the indeterminacy point
   void initLinJlist();
 
+  /// Cache Q values from the workspace
+  void setWorkspace(boost::shared_ptr<const API::Workspace> ws);
+
   /// xnl coefficients
   std::vector<xnlc> m_xnl;
 
@@ -129,13 +132,16 @@ private:
   /// list of linearized J values
   std::vector<linearJ> m_linearJlist;
 
+  /// list of calculated Q values
+  std::vector<double> m_qValueCache;
+
 }; // end of class InelasticDiffSphere
 
 class DLLExport DiffSphere : public API::ImmutableCompositeFunction {
 
 public:
   /// Destructor
-  ~DiffSphere(){};
+  ~DiffSphere() {};
 
   /// overwrite IFunction base class methods
   std::string name() const { return "DiffSphere"; }
@@ -161,9 +167,9 @@ public:
 
 private:
   boost::shared_ptr<ElasticDiffSphere>
-      m_elastic; // elastic intensity of the DiffSphere structure factor
+  m_elastic; // elastic intensity of the DiffSphere structure factor
   boost::shared_ptr<InelasticDiffSphere>
-      m_inelastic; // inelastic intensity of the DiffSphere structure factor
+  m_inelastic; // inelastic intensity of the DiffSphere structure factor
 };
 
 } // namespace CurveFitting

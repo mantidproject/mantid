@@ -115,7 +115,7 @@ class TimeSlice(PythonAlgorithm):
         return ''
 
 
-    def validateInput(self):
+    def validateInputs(self):
         issues = dict()
 
         issues['SpectraRange'] = self._validate_range('SpectraRange')

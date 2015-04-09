@@ -106,8 +106,22 @@ SliceViewer::SliceViewer(QWidget *parent)
   // Make the splitter use the minimum size for the controls and not stretch out
   ui.splitter->setStretchFactor(0, 0);
   ui.splitter->setStretchFactor(1, 1);
+  QSplitterHandle *handle = ui.splitter->handle(1);
+  QVBoxLayout *layout = new QVBoxLayout(handle);
+  layout->setSpacing(0);
+  layout->setMargin(0);
+
+  QFrame *line = new QFrame(handle);
+  line->setFrameShape(QFrame::HLine);
+  line->setFrameShadow(QFrame::Sunken);
+  layout->addWidget(line);
+
   initZoomer();
-  ui.btnZoom->hide();
+
+  //hide unused buttons
+  ui.btnZoom->hide();  // hidden for a long time
+  ui.btnRebinLock->hide();  // now replaced by auto rebin mode
+  //ui.btnClearLine->hide();  // turning off line mode now removes line
 
   // ----------- Toolbar button signals ----------------
   QObject::connect(ui.btnResetZoom, SIGNAL(clicked()), this, SLOT(resetZoom()));
@@ -260,9 +274,10 @@ void SliceViewer::initMenus() {
   connect(action, SIGNAL(triggered()), this, SLOT(resetZoom()));
   {
     QIcon icon;
-    icon.addFile(QString::fromUtf8(":/SliceViewer/icons/view-fullscreen.png"),
+    icon.addFile(QString::fromStdString(g_iconViewFull),
                  QSize(), QIcon::Normal, QIcon::Off);
     action->setIcon(icon);
+
   }
   m_menuView->addAction(action);
 
@@ -289,7 +304,7 @@ void SliceViewer::initMenus() {
 
   m_menuView->addSeparator();
 
-  action = new QAction(QPixmap(), "Dynamic R&ebin Mode", this);
+  action = new QAction(QPixmap(), "Enable/Disable R&ebin Mode", this);
   m_syncRebinMode = new SyncedCheckboxes(action, ui.btnRebinMode, false);
   connect(m_syncRebinMode, SIGNAL(toggled(bool)), this,
           SLOT(RebinMode_toggled(bool)));
@@ -299,9 +314,10 @@ void SliceViewer::initMenus() {
   m_syncRebinLock = new SyncedCheckboxes(action, ui.btnRebinLock, true);
   connect(m_syncRebinLock, SIGNAL(toggled(bool)), this,
           SLOT(RebinLock_toggled(bool)));
+  action->setVisible(false);  //hide this action
   m_menuView->addAction(action);
 
-  action = new QAction(QPixmap(), "Refresh Rebin", this);
+  action = new QAction(QPixmap(), "Rebin Current View", this);
   action->setShortcut(Qt::Key_R + Qt::ControlModifier);
   action->setEnabled(false);
   connect(action, SIGNAL(triggered()), this, SLOT(rebinParamsChanged()));
@@ -353,24 +369,24 @@ void SliceViewer::initMenus() {
   connect(action, SIGNAL(triggered()), this, SLOT(loadColorMapSlot()));
   m_menuColorOptions->addAction(action);
 
-  action = new QAction(QPixmap(), "&Full range", this);
-  connect(action, SIGNAL(triggered()), this, SLOT(setColorScaleAutoFull()));
-  {
-    QIcon icon;
-    icon.addFile(QString::fromUtf8(":/SliceViewer/icons/color-pallette.png"),
-                 QSize(), QIcon::Normal, QIcon::Off);
-    action->setIcon(icon);
-  }
-  m_menuColorOptions->addAction(action);
-
-  action = new QAction(QPixmap(), "&Slice range", this);
+  action = new QAction(QPixmap(), "&Current View range", this);
   connect(action, SIGNAL(triggered()), this, SLOT(setColorScaleAutoSlice()));
   action->setIconVisibleInMenu(true);
   {
     QIcon icon;
     icon.addFile(
-        QString::fromUtf8(":/SliceViewer/icons/color-pallette-part.png"),
+        QString::fromStdString(g_iconZoomPlus),
         QSize(), QIcon::Normal, QIcon::Off);
+    action->setIcon(icon);
+  }
+  m_menuColorOptions->addAction(action);
+
+  action = new QAction(QPixmap(), "&Full range", this);
+  connect(action, SIGNAL(triggered()), this, SLOT(setColorScaleAutoFull()));
+  {
+    QIcon icon;
+    icon.addFile(QString::fromStdString(g_iconZoomMinus),
+                 QSize(), QIcon::Normal, QIcon::Off);
     action->setIcon(icon);
   }
   m_menuColorOptions->addAction(action);
@@ -872,17 +888,27 @@ void SliceViewer::refreshRebin() { this->rebinParamsChanged(); }
 /// Slot called when the btnDoLine button is checked/unchecked
 void SliceViewer::LineMode_toggled(bool checked) {
   m_lineOverlay->setShown(checked);
+  
+  QIcon icon;
   if (checked) {
+    icon.addFile(QString::fromStdString(g_iconCutOn),
+              QSize(), QIcon::Normal, QIcon::On);
+    ui.btnDoLine->setIcon(icon);
     QString text;
     if (m_lineOverlay->getCreationMode())
-      text = "Click and drag to draw an integration line.\n"
+      text = "Click and drag to draw an cut line.\n"
              "Hold Shift key to limit to 45 degree angles.";
-    else
-      text = "Drag the existing line with its handles,\n"
-             "or click the red X to delete it.";
     // Show a tooltip near the button
     QToolTip::showText(ui.btnDoLine->mapToGlobal(ui.btnDoLine->pos()), text,
                        this);
+  }
+  if (!checked)
+  {
+    //clear the old line
+    clearLine();
+    icon.addFile(QString::fromStdString(g_iconCut),
+          QSize(), QIcon::Normal, QIcon::Off);
+    ui.btnDoLine->setIcon(icon);
   }
   emit showLineViewer(checked);
 }
@@ -896,6 +922,7 @@ void SliceViewer::toggleLineMode(bool lineMode) {
   // This should send events to start line mode
   m_syncLineMode->toggle(lineMode);
   m_lineOverlay->setCreationMode(false);
+
 }
 
 //------------------------------------------------------------------------------------
@@ -908,6 +935,8 @@ void SliceViewer::clearLine() {
 //------------------------------------------------------------------------------------
 /// Slot called when the snap to grid is checked
 void SliceViewer::SnapToGrid_toggled(bool checked) {
+  
+  QIcon icon;
   if (checked) {
     SnapToGridDialog *dlg = new SnapToGridDialog(this);
     dlg->setSnap(m_lineOverlay->getSnapX(), m_lineOverlay->getSnapY());
@@ -915,14 +944,22 @@ void SliceViewer::SnapToGrid_toggled(bool checked) {
       m_lineOverlay->setSnapEnabled(true);
       m_lineOverlay->setSnapX(dlg->getSnapX());
       m_lineOverlay->setSnapY(dlg->getSnapY());
+      icon.addFile(QString::fromStdString(g_iconGridOn),
+                   QSize(), QIcon::Normal, QIcon::On);
     } else {
       // Uncheck - the user clicked cancel
       ui.btnSnapToGrid->setChecked(false);
       m_lineOverlay->setSnapEnabled(false);
+      icon.addFile(QString::fromStdString(g_iconGrid),
+                   QSize(), QIcon::Normal, QIcon::Off);
     }
   } else {
     m_lineOverlay->setSnapEnabled(false);
+    icon.addFile(QString::fromStdString(g_iconGrid),
+                  QSize(), QIcon::Normal, QIcon::Off);
   }
+  ui.btnSnapToGrid->setIcon(icon);
+  
 }
 
 //------------------------------------------------------------------------------------
@@ -936,7 +973,11 @@ void SliceViewer::RebinMode_toggled(bool checked) {
   m_actionRefreshRebin->setEnabled(checked);
   m_rebinMode = checked;
 
+  QIcon icon;
   if (!m_rebinMode) {
+    icon.addFile(QString::fromStdString(g_iconRebin),
+                 QSize(), QIcon::Normal, QIcon::Off);
+    ui.btnRebinMode->setIcon(icon);
     // uncheck auto-rebin
     ui.btnAutoRebin->setChecked(false);
     // Remove the overlay WS
@@ -944,6 +985,9 @@ void SliceViewer::RebinMode_toggled(bool checked) {
     this->m_data->setOverlayWorkspace(m_overlayWS);
     this->updateDisplay();
   } else {
+    icon.addFile(QString::fromStdString(g_iconRebinOn),
+              QSize(), QIcon::Normal, QIcon::On);
+    ui.btnRebinMode->setIcon(icon);
     // Start the rebin
     this->rebinParamsChanged();
   }
@@ -1040,7 +1084,7 @@ void SliceViewer::updateDisplaySlot(int index, double value) {
   UNUSED_ARG(value)
   this->updateDisplay();
   // Trigger a rebin on each movement of the slice point
-  if (m_rebinMode && !m_rebinLocked)
+  if (m_rebinMode && ui.btnAutoRebin->isOn())
     this->rebinParamsChanged();
 }
 
@@ -2066,6 +2110,12 @@ void SliceViewer::disablePeakOverlays() {
   m_peaksPresenter->clear();
   emit showPeaksViewer(false);
   m_menuPeaks->setEnabled(false);
+  
+  QIcon icon;
+  icon.addFile(QString::fromStdString(g_iconPeakList),
+                QSize(), QIcon::Normal, QIcon::Off);
+  ui.btnPeakOverlay->setIcon(icon);
+  ui.btnPeakOverlay->setChecked(false);
 }
 
 /**
@@ -2138,6 +2188,12 @@ SliceViewer::setPeaksWorkspaces(const QStringList &list) {
   updatePeakOverlaySliderWidget();
   emit showPeaksViewer(true);
   m_menuPeaks->setEnabled(true);
+  
+  QIcon icon;
+  icon.addFile(QString::fromStdString(g_iconPeakList),
+                 QSize(), QIcon::Normal, QIcon::Off);
+  ui.btnPeakOverlay->setIcon(icon);
+  ui.btnPeakOverlay->setChecked(true);
   return m_proxyPeaksPresenter.get();
 }
 
@@ -2148,7 +2204,8 @@ Allow user to choose a suitable input peaks workspace
 
 */
 void SliceViewer::peakOverlay_clicked() {
-  MantidQt::MantidWidgets::SelectWorkspacesDialog dlg(this, "PeaksWorkspace");
+  MantidQt::MantidWidgets::SelectWorkspacesDialog dlg(this, "PeaksWorkspace", "Remove All");
+  
   int ret = dlg.exec();
   if (ret == QDialog::Accepted) {
     QStringList list = dlg.getSelectedNames();
@@ -2156,6 +2213,22 @@ void SliceViewer::peakOverlay_clicked() {
       // Fetch the correct Peak Overlay Transform Factory;
       setPeaksWorkspaces(list);
     }
+  }
+  if (ret == MantidQt::MantidWidgets::SelectWorkspacesDialog::CustomButton) {
+        disablePeakOverlays();
+  }
+  QIcon icon;
+  if (m_peaksPresenter->size()>0)  {
+    icon.addFile(QString::fromStdString(g_iconPeakListOn),
+                   QSize(), QIcon::Normal, QIcon::On);
+    ui.btnPeakOverlay->setIcon(icon);
+    ui.btnPeakOverlay->setChecked(true);
+  }  else {
+
+    icon.addFile(QString::fromStdString(g_iconPeakList),
+                   QSize(), QIcon::Normal, QIcon::Off);
+    ui.btnPeakOverlay->setIcon(icon);
+    ui.btnPeakOverlay->setChecked(false);
   }
 }
 

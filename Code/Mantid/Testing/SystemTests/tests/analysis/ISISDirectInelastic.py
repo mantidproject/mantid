@@ -87,6 +87,7 @@ class MARIReductionFromFile(ISISDirectInelasticReduction):
         self.scale_to_fix_abf = 0.997979227566217
 
     def runTest(self):
+        #self.red.run_reduction()
         outWS = self.red.reduce()
         outWS*=self.scale_to_fix_abf
 
@@ -115,7 +116,15 @@ class MARIReductionFromFileCache(ISISDirectInelasticReduction):
           appearance of this file from instrument
       """
         self._counter+=1
+        if self._counter == 2:
+            source =  FileFinder.findRuns('11001')[0]
+            targ_path = config['defaultsave.directory']
+            targ_file = os.path.join(targ_path,'MAR11002.nxs')
+            shutil.copy2(source ,targ_file )
+            self._file_to_clear = targ_file
         if self._counter>= 3:
+            if os.path.exists(self._file_to_clear):
+                os.remove(self._file_to_clear)
             source =  FileFinder.findRuns('11001')[0]
             targ_path = config['defaultsave.directory']
             targ_file = os.path.join(targ_path,'MAR11002.raw')
@@ -130,6 +139,7 @@ class MARIReductionFromFileCache(ISISDirectInelasticReduction):
         self.red.wait_for_file = 10
         self.red._debug_wait_for_files_operation = self.prepare_test_file
         self._counter=0
+        self._file_to_clear=""
 
         self.red.reducer.prop_man.sample_run = [11001,11002]
         MARreducedRuns = self.red.run_reduction()
@@ -306,6 +316,12 @@ class MARIReductionWaitAndSum(ISISDirectInelasticReduction):
       It verifies operation on summing two files on demand. with wait for
       files appearing on data search path
       """
+        targ_path = config['defaultsave.directory']
+        self._file_to_clear = os.path.join(targ_path,'MAR11002.raw')
+        if os.path.exists(self._file_to_clear):
+            os.remove(self._file_to_clear)
+            self._file_to_clear = ''
+
         self.red.wait_for_file = 100
         self.red._debug_wait_for_files_operation = self.prepare_test_file
         self._counter=0

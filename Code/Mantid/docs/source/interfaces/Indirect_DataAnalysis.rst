@@ -134,11 +134,11 @@ Save Result
   If enabled the result will be saved as a NeXus file in the default save
   directory.
 
-Fury
-----
+I(Q, t)
+-------
 
 .. interface:: Data Analysis
-  :widget: tabFury
+  :widget: tabIqt
 
 Given sample and resolution inputs, carries out a fit as per the theory detailed
 in the :ref:`TransformToIqt <algm-TransformToIqt>` algorithm.
@@ -188,13 +188,13 @@ ResolutionBins
   Number of bins in the resolution after rebinning, typically this should be at
   least 5 and a warning will be shown if it is less.
 
-Fury Fit
---------
+I(Q, t) Fit
+-----------
 
 .. interface:: Data Analysis
-  :widget: tabFuryFit
+  :widget: tabIqtFit
 
-FuryFit provides a simplified interface for controlling various fitting
+I(Q, t) Fit provides a simplified interface for controlling various fitting
 functions (see the :ref:`Fit <algm-Fit>` algorithm for more info). The functions
 are also available via the fit wizard.
 
@@ -521,6 +521,21 @@ Beam Width
 
 Step Size
   Step size used in calculation.
+
+Annulus
+#######
+
+.. warning:: This mode is only available on Windows
+
+.. interface:: Data Analysis
+  :widget: pgAnnulus
+
+The calculation for an annular geometry is performed by the
+:ref:`CylinderPaalmanPingsCorrection <algm-CylinderPaalmanPingsCorrection>`
+algorithm, this algorithm is currently only available on Windows as it uses
+FORTRAN code dependant of F2Py.
+
+The options here are the same as for Cylinder.
 
 Background
 ~~~~~~~~~~

@@ -443,7 +443,7 @@ MatrixWorkspace_sptr RefReduction::processNormalization() {
   refAlg->setProperty("ConvertToQ", false);
   refAlg->setProperty("SumPixels", true);
   refAlg->setProperty("NormalizeSum", true);
-
+  refAlg->setProperty("AverageOverIntegratedAxis", integrateY);
   refAlg->setProperty("YPixelMin", ymin);
   refAlg->setProperty("YPixelMax", ymax);
   refAlg->setProperty("XPixelMin", xmin);
@@ -712,7 +712,7 @@ MatrixWorkspace_sptr RefReduction::subtractBackground(
     leftAlg->setProperty("ConvertToQ", false);
     leftAlg->setProperty("SumPixels", true);
     leftAlg->setProperty("NormalizeSum", true);
-
+    leftAlg->setProperty("AverageOverIntegratedAxis", integrateY);
     leftAlg->setProperty("YPixelMin", ymin);
     leftAlg->setProperty("YPixelMax", ymax);
     leftAlg->setProperty("XPixelMin", xmin);
@@ -737,7 +737,7 @@ MatrixWorkspace_sptr RefReduction::subtractBackground(
     rightAlg->setProperty("ConvertToQ", false);
     rightAlg->setProperty("SumPixels", true);
     rightAlg->setProperty("NormalizeSum", true);
-
+    rightAlg->setProperty("AverageOverIntegratedAxis", integrateY);
     rightAlg->setProperty("YPixelMin", ymin);
     rightAlg->setProperty("YPixelMax", ymax);
     rightAlg->setProperty("XPixelMin", xmin);
@@ -778,7 +778,7 @@ MatrixWorkspace_sptr RefReduction::subtractBackground(
     refAlg->setProperty("ConvertToQ", false);
     refAlg->setProperty("SumPixels", true);
     refAlg->setProperty("NormalizeSum", true);
-
+    refAlg->setProperty("AverageOverIntegratedAxis", integrateY);
     refAlg->setProperty("YPixelMin", ymin);
     refAlg->setProperty("YPixelMax", ymax);
     refAlg->setProperty("XPixelMin", xmin);

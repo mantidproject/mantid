@@ -2,26 +2,23 @@
 // Includes
 //----------------------------------------------------------------------
 #include <fstream>
+
 #include "MantidAlgorithms/ReadGroupsFromFile.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/InstrumentDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceProperty.h"
+#include "MantidAPI/WorkspaceValidators.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/ListValidator.h"
 #include "MantidKernel/System.h"
 
 // Poco XML Headers for Grouping File
 #include <Poco/DOM/Document.h>
 #include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/Element.h>
-#include <Poco/DOM/NodeFilter.h>
-#include <Poco/DOM/NodeIterator.h>
 #include <Poco/DOM/NodeList.h>
-#include <Poco/File.h>
-#include <Poco/Path.h>
-#include "MantidAPI/WorkspaceValidators.h"
-#include "MantidKernel/ListValidator.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;

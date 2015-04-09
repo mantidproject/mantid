@@ -6,8 +6,8 @@
 // IDATab subclasses:
 #include "MantidQtCustomInterfaces/Indirect/Elwin.h"
 #include "MantidQtCustomInterfaces/Indirect/MSDFit.h"
-#include "MantidQtCustomInterfaces/Indirect/Fury.h"
-#include "MantidQtCustomInterfaces/Indirect/FuryFit.h"
+#include "MantidQtCustomInterfaces/Indirect/Iqt.h"
+#include "MantidQtCustomInterfaces/Indirect/IqtFit.h"
 #include "MantidQtCustomInterfaces/Indirect/ConvFit.h"
 #include "MantidQtCustomInterfaces/Indirect/CalcCorr.h"
 #include "MantidQtCustomInterfaces/Indirect/ApplyCorr.h"
@@ -47,8 +47,8 @@ namespace IDA
     // We make the assumption that each map key corresponds to the order in which the tabs appear.
     m_tabs.insert(std::make_pair(ELWIN,      new Elwin(m_uiForm.twIDATabs->widget(ELWIN))));
     m_tabs.insert(std::make_pair(MSD_FIT,    new MSDFit(m_uiForm.twIDATabs->widget(MSD_FIT))));
-    m_tabs.insert(std::make_pair(FURY,       new Fury(m_uiForm.twIDATabs->widget(FURY))));
-    m_tabs.insert(std::make_pair(FURY_FIT,   new FuryFit(m_uiForm.twIDATabs->widget(FURY_FIT))));
+    m_tabs.insert(std::make_pair(IQT,        new Iqt(m_uiForm.twIDATabs->widget(IQT))));
+    m_tabs.insert(std::make_pair(IQT_FIT,    new IqtFit(m_uiForm.twIDATabs->widget(IQT_FIT))));
     m_tabs.insert(std::make_pair(CONV_FIT,   new ConvFit(m_uiForm.twIDATabs->widget(CONV_FIT))));
     m_tabs.insert(std::make_pair(CALC_CORR,  new CalcCorr(m_uiForm.twIDATabs->widget(CALC_CORR))));
     m_tabs.insert(std::make_pair(APPLY_CORR, new ApplyCorr(m_uiForm.twIDATabs->widget(APPLY_CORR))));

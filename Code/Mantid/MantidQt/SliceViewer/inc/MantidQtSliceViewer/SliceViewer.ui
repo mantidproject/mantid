@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>834</width>
-    <height>814</height>
+    <width>931</width>
+    <height>676</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -17,16 +17,7 @@
    <property name="spacing">
     <number>3</number>
    </property>
-   <property name="leftMargin">
-    <number>0</number>
-   </property>
-   <property name="topMargin">
-    <number>0</number>
-   </property>
-   <property name="rightMargin">
-    <number>0</number>
-   </property>
-   <property name="bottomMargin">
+   <property name="margin">
     <number>0</number>
    </property>
    <item>
@@ -62,16 +53,7 @@
        <property name="sizeConstraint">
         <enum>QLayout::SetMinimumSize</enum>
        </property>
-       <property name="leftMargin">
-        <number>0</number>
-       </property>
-       <property name="topMargin">
-        <number>0</number>
-       </property>
-       <property name="rightMargin">
-        <number>0</number>
-       </property>
-       <property name="bottomMargin">
+       <property name="margin">
         <number>0</number>
        </property>
       </layout>
@@ -87,16 +69,7 @@
        <property name="spacing">
         <number>2</number>
        </property>
-       <property name="leftMargin">
-        <number>0</number>
-       </property>
-       <property name="topMargin">
-        <number>0</number>
-       </property>
-       <property name="rightMargin">
-        <number>0</number>
-       </property>
-       <property name="bottomMargin">
+       <property name="margin">
         <number>0</number>
        </property>
        <item>
@@ -116,20 +89,78 @@
           <enum>QFrame::Raised</enum>
          </property>
          <layout class="QHBoxLayout" name="horizontalLayout">
+          <property name="spacing">
+           <number>0</number>
+          </property>
+          <property name="leftMargin">
+           <number>9</number>
+          </property>
+          <property name="topMargin">
+           <number>0</number>
+          </property>
+          <property name="rightMargin">
+           <number>9</number>
+          </property>
+          <property name="bottomMargin">
+           <number>0</number>
+          </property>
           <item>
            <widget class="QToolButton" name="btnZoom">
             <property name="enabled">
              <bool>true</bool>
             </property>
+            <property name="minimumSize">
+             <size>
+              <width>45</width>
+              <height>45</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>45</width>
+              <height>45</height>
+             </size>
+            </property>
+            <property name="toolTip">
+             <string>Zoom in by dragging a box</string>
+            </property>
             <property name="text">
              <string>Zoom</string>
+            </property>
+            <property name="icon">
+             <iconset resource="../../icons/SliceViewerIcons.qrc">
+              <normaloff>:/SliceViewer/icons/zoom-in 32x32.png</normaloff>:/SliceViewer/icons/zoom-in 32x32.png</iconset>
+            </property>
+            <property name="iconSize">
+             <size>
+              <width>32</width>
+              <height>32</height>
+             </size>
+            </property>
+            <property name="checkable">
+             <bool>true</bool>
+            </property>
+            <property name="checked">
+             <bool>true</bool>
             </property>
            </widget>
           </item>
           <item>
            <widget class="QToolButton" name="btnResetZoom">
+            <property name="minimumSize">
+             <size>
+              <width>45</width>
+              <height>45</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>45</width>
+              <height>45</height>
+             </size>
+            </property>
             <property name="toolTip">
-             <string>Reset the zoom to the extents of the data</string>
+             <string>Zoom out to the extents of the data</string>
             </property>
             <property name="text">
              <string>Reset</string>
@@ -140,48 +171,72 @@
             </property>
             <property name="iconSize">
              <size>
-              <width>18</width>
-              <height>18</height>
-             </size>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QToolButton" name="btnRangeFull">
-            <property name="toolTip">
-             <string>Reset the color range to the full range of the workspace</string>
-            </property>
-            <property name="text">
-             <string>RngFull</string>
-            </property>
-            <property name="icon">
-             <iconset resource="../../icons/SliceViewerIcons.qrc">
-              <normaloff>:/SliceViewer/icons/color-pallette.png</normaloff>:/SliceViewer/icons/color-pallette.png</iconset>
-            </property>
-            <property name="iconSize">
-             <size>
-              <width>18</width>
-              <height>18</height>
+              <width>32</width>
+              <height>32</height>
              </size>
             </property>
            </widget>
           </item>
           <item>
            <widget class="QToolButton" name="btnRangeSlice">
+            <property name="minimumSize">
+             <size>
+              <width>45</width>
+              <height>45</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>45</width>
+              <height>45</height>
+             </size>
+            </property>
             <property name="toolTip">
-             <string>Reset the color scale to the range of the currently visible slice</string>
+             <string>Zooms the color scale to the range of the currently view</string>
             </property>
             <property name="text">
              <string>RngSlice</string>
             </property>
             <property name="icon">
              <iconset resource="../../icons/SliceViewerIcons.qrc">
-              <normaloff>:/SliceViewer/icons/color-pallette-part.png</normaloff>:/SliceViewer/icons/color-pallette-part.png</iconset>
+              <normaloff>:/SliceViewer/icons/colour zoom plus scale 32x32.png</normaloff>:/SliceViewer/icons/colour zoom plus scale 32x32.png</iconset>
             </property>
             <property name="iconSize">
              <size>
-              <width>18</width>
-              <height>18</height>
+              <width>32</width>
+              <height>32</height>
+             </size>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QToolButton" name="btnRangeFull">
+            <property name="minimumSize">
+             <size>
+              <width>45</width>
+              <height>45</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>45</width>
+              <height>45</height>
+             </size>
+            </property>
+            <property name="toolTip">
+             <string>Reset the color range to the full range of the data</string>
+            </property>
+            <property name="text">
+             <string>RngFull</string>
+            </property>
+            <property name="icon">
+             <iconset resource="../../icons/SliceViewerIcons.qrc">
+              <normaloff>:/SliceViewer/icons/colour zoom minus scale 32x32.png</normaloff>:/SliceViewer/icons/colour zoom minus scale 32x32.png</iconset>
+            </property>
+            <property name="iconSize">
+             <size>
+              <width>32</width>
+              <height>32</height>
              </size>
             </property>
            </widget>
@@ -204,20 +259,32 @@
           </item>
           <item>
            <widget class="QToolButton" name="btnDoLine">
+            <property name="minimumSize">
+             <size>
+              <width>45</width>
+              <height>45</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>45</width>
+              <height>45</height>
+             </size>
+            </property>
             <property name="toolTip">
-             <string>Draw a 1D integration line</string>
+             <string>Draw a 1D cut line</string>
             </property>
             <property name="text">
              <string>...</string>
             </property>
             <property name="icon">
              <iconset resource="../../icons/SliceViewerIcons.qrc">
-              <normaloff>:/SliceViewer/icons/stock-tool-pencil-16.png</normaloff>:/SliceViewer/icons/stock-tool-pencil-16.png</iconset>
+              <normaloff>:/SliceViewer/icons/cut 32x32.png</normaloff>:/SliceViewer/icons/cut 32x32.png</iconset>
             </property>
             <property name="iconSize">
              <size>
-              <width>18</width>
-              <height>18</height>
+              <width>32</width>
+              <height>32</height>
              </size>
             </property>
             <property name="checkable">
@@ -230,40 +297,64 @@
           </item>
           <item>
            <widget class="QToolButton" name="btnClearLine">
+            <property name="minimumSize">
+             <size>
+              <width>45</width>
+              <height>45</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>45</width>
+              <height>45</height>
+             </size>
+            </property>
             <property name="toolTip">
-             <string>Remove the currently drawn line</string>
+             <string>Remove the current cut line</string>
             </property>
             <property name="text">
              <string>...</string>
             </property>
             <property name="icon">
              <iconset resource="../../icons/SliceViewerIcons.qrc">
-              <normaloff>:/SliceViewer/icons/cross.png</normaloff>:/SliceViewer/icons/cross.png</iconset>
+              <normaloff>:/SliceViewer/icons/cut remove 32x32.png</normaloff>:/SliceViewer/icons/cut remove 32x32.png</iconset>
             </property>
             <property name="iconSize">
              <size>
-              <width>18</width>
-              <height>18</height>
+              <width>32</width>
+              <height>32</height>
              </size>
             </property>
            </widget>
           </item>
           <item>
            <widget class="QToolButton" name="btnSnapToGrid">
+            <property name="minimumSize">
+             <size>
+              <width>45</width>
+              <height>45</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>45</width>
+              <height>45</height>
+             </size>
+            </property>
             <property name="toolTip">
-             <string>Snap to grid when drawing line</string>
+             <string>Snap to grid when drawing cut line</string>
             </property>
             <property name="text">
              <string>...</string>
             </property>
             <property name="icon">
              <iconset resource="../../icons/SliceViewerIcons.qrc">
-              <normaloff>:/SliceViewer/icons/grid.png</normaloff>:/SliceViewer/icons/grid.png</iconset>
+              <normaloff>:/SliceViewer/icons/grid 32x32.png</normaloff>:/SliceViewer/icons/grid 32x32.png</iconset>
             </property>
             <property name="iconSize">
              <size>
-              <width>18</width>
-              <height>18</height>
+              <width>32</width>
+              <height>32</height>
              </size>
             </property>
             <property name="checkable">
@@ -289,20 +380,32 @@
           </item>
           <item>
            <widget class="QToolButton" name="btnRebinMode">
+            <property name="minimumSize">
+             <size>
+              <width>45</width>
+              <height>45</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>45</width>
+              <height>45</height>
+             </size>
+            </property>
             <property name="toolTip">
-             <string>Dynamically rebin the viewed slice</string>
+             <string>Enable/Disable Rebin Mode</string>
             </property>
             <property name="text">
              <string>...</string>
             </property>
             <property name="icon">
              <iconset resource="../../icons/SliceViewerIcons.qrc">
-              <normaloff>:/SliceViewer/icons/document-new.png</normaloff>:/SliceViewer/icons/document-new.png</iconset>
+              <normaloff>:/SliceViewer/icons/rebin 32x32.png</normaloff>:/SliceViewer/icons/rebin 32x32.png</iconset>
             </property>
             <property name="iconSize">
              <size>
-              <width>18</width>
-              <height>18</height>
+              <width>32</width>
+              <height>32</height>
              </size>
             </property>
             <property name="checkable">
@@ -315,17 +418,32 @@
             <property name="enabled">
              <bool>false</bool>
             </property>
+            <property name="minimumSize">
+             <size>
+              <width>45</width>
+              <height>45</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>45</width>
+              <height>45</height>
+             </size>
+            </property>
+            <property name="toolTip">
+             <string>Rebin the current view</string>
+            </property>
             <property name="text">
              <string>...</string>
             </property>
             <property name="icon">
              <iconset resource="../../icons/SliceViewerIcons.qrc">
-              <normaloff>:/SliceViewer/icons/refresh.png</normaloff>:/SliceViewer/icons/refresh.png</iconset>
+              <normaloff>:/SliceViewer/icons/rebin finer 32x32.png</normaloff>:/SliceViewer/icons/rebin finer 32x32.png</iconset>
             </property>
             <property name="iconSize">
              <size>
-              <width>18</width>
-              <height>18</height>
+              <width>32</width>
+              <height>32</height>
              </size>
             </property>
            </widget>
@@ -335,6 +453,18 @@
             <property name="enabled">
              <bool>false</bool>
             </property>
+            <property name="minimumSize">
+             <size>
+              <width>45</width>
+              <height>45</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>45</width>
+              <height>45</height>
+             </size>
+            </property>
             <property name="toolTip">
              <string>Auto rebin</string>
             </property>
@@ -343,12 +473,12 @@
             </property>
             <property name="icon">
              <iconset resource="../../icons/SliceViewerIcons.qrc">
-              <normaloff>:/SliceViewer/icons/auto_rebin.png</normaloff>:/SliceViewer/icons/auto_rebin.png</iconset>
+              <normaloff>:/SliceViewer/icons/rebin auto 32x32.png</normaloff>:/SliceViewer/icons/rebin auto 32x32.png</iconset>
             </property>
             <property name="iconSize">
              <size>
-              <width>18</width>
-              <height>18</height>
+              <width>32</width>
+              <height>32</height>
              </size>
             </property>
             <property name="checkable">
@@ -364,6 +494,18 @@
             <property name="enabled">
              <bool>false</bool>
             </property>
+            <property name="minimumSize">
+             <size>
+              <width>45</width>
+              <height>45</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>45</width>
+              <height>45</height>
+             </size>
+            </property>
             <property name="toolTip">
              <string>Lock the rebinned workspace in place (use the refresh button to refresh)</string>
             </property>
@@ -371,13 +513,13 @@
              <string>...</string>
             </property>
             <property name="icon">
-             <iconset resource="../../icons/SliceViewerIcons.qrc">
+             <iconset>
               <normaloff>:/SliceViewer/icons/stock-lock.png</normaloff>:/SliceViewer/icons/stock-lock.png</iconset>
             </property>
             <property name="iconSize">
              <size>
-              <width>18</width>
-              <height>18</height>
+              <width>32</width>
+              <height>32</height>
              </size>
             </property>
             <property name="checkable">
@@ -409,25 +551,36 @@
             <property name="enabled">
              <bool>true</bool>
             </property>
+            <property name="minimumSize">
+             <size>
+              <width>45</width>
+              <height>45</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>45</width>
+              <height>45</height>
+             </size>
+            </property>
             <property name="toolTip">
-             <string>Overlay PeaksWorkspaces</string>
+             <string>Overlay Peaks</string>
             </property>
             <property name="text">
              <string>...</string>
             </property>
             <property name="icon">
              <iconset resource="../../icons/SliceViewerIcons.qrc">
-              <normaloff>:/SliceViewer/icons/peak.png</normaloff>
-              <disabledoff>:/SliceViewer/icons/peak_disabled.png</disabledoff>:/SliceViewer/icons/peak.png</iconset>
+              <normaloff>:/SliceViewer/icons/Peak List 32x32.png</normaloff>:/SliceViewer/icons/Peak List 32x32.png</iconset>
             </property>
             <property name="iconSize">
              <size>
-              <width>18</width>
-              <height>18</height>
+              <width>32</width>
+              <height>32</height>
              </size>
             </property>
             <property name="checkable">
-             <bool>false</bool>
+             <bool>true</bool>
             </property>
            </widget>
           </item>
@@ -445,118 +598,128 @@
            </spacer>
           </item>
           <item>
-           <widget class="QLabel" name="label">
-            <property name="text">
-             <string>x=</string>
+           <layout class="QFormLayout" name="formLayout_3">
+            <property name="sizeConstraint">
+             <enum>QLayout::SetMinimumSize</enum>
             </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QLabel" name="lblInfoX">
-            <property name="minimumSize">
-             <size>
-              <width>55</width>
-              <height>0</height>
-             </size>
+            <property name="fieldGrowthPolicy">
+             <enum>QFormLayout::FieldsStayAtSizeHint</enum>
             </property>
-            <property name="toolTip">
-             <string>X-coordinate of point under the mouse</string>
-            </property>
-            <property name="autoFillBackground">
-             <bool>false</bool>
-            </property>
-            <property name="styleSheet">
-             <string notr="true">QLabel {
+            <item row="0" column="0">
+             <widget class="QLabel" name="label">
+              <property name="text">
+               <string>x=</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1">
+             <widget class="QLabel" name="lblInfoX">
+              <property name="minimumSize">
+               <size>
+                <width>70</width>
+                <height>0</height>
+               </size>
+              </property>
+              <property name="toolTip">
+               <string>X-coordinate of point under the mouse</string>
+              </property>
+              <property name="autoFillBackground">
+               <bool>false</bool>
+              </property>
+              <property name="styleSheet">
+               <string notr="true">QLabel {
  background-color : rgb(255, 255, 186);
  color : black; 
 }</string>
-            </property>
-            <property name="frameShape">
-             <enum>QFrame::StyledPanel</enum>
-            </property>
-            <property name="text">
-             <string>-</string>
-            </property>
-            <property name="alignment">
-             <set>Qt::AlignCenter</set>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QLabel" name="label_2">
-            <property name="text">
-             <string>y=</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QLabel" name="lblInfoY">
-            <property name="minimumSize">
-             <size>
-              <width>55</width>
-              <height>0</height>
-             </size>
-            </property>
-            <property name="toolTip">
-             <string>Y-coordinate of point under the mouse</string>
-            </property>
-            <property name="autoFillBackground">
-             <bool>false</bool>
-            </property>
-            <property name="styleSheet">
-             <string notr="true">QLabel {
+              </property>
+              <property name="frameShape">
+               <enum>QFrame::StyledPanel</enum>
+              </property>
+              <property name="text">
+               <string>-</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignCenter</set>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="0">
+             <widget class="QLabel" name="label_2">
+              <property name="text">
+               <string>y=</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="1">
+             <widget class="QLabel" name="lblInfoY">
+              <property name="minimumSize">
+               <size>
+                <width>70</width>
+                <height>0</height>
+               </size>
+              </property>
+              <property name="toolTip">
+               <string>Y-coordinate of point under the mouse</string>
+              </property>
+              <property name="autoFillBackground">
+               <bool>false</bool>
+              </property>
+              <property name="styleSheet">
+               <string notr="true">QLabel {
  background-color : rgb(255, 255, 186);
  color : black; 
 }</string>
-            </property>
-            <property name="frameShape">
-             <enum>QFrame::StyledPanel</enum>
-            </property>
-            <property name="text">
-             <string>-</string>
-            </property>
-            <property name="alignment">
-             <set>Qt::AlignCenter</set>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QLabel" name="label_3">
-            <property name="text">
-             <string>z=</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QLabel" name="lblInfoSignal">
-            <property name="minimumSize">
-             <size>
-              <width>55</width>
-              <height>0</height>
-             </size>
-            </property>
-            <property name="toolTip">
-             <string>Signal at the point under the mouse</string>
-            </property>
-            <property name="autoFillBackground">
-             <bool>false</bool>
-            </property>
-            <property name="styleSheet">
-             <string notr="true">QLabel {
+              </property>
+              <property name="frameShape">
+               <enum>QFrame::StyledPanel</enum>
+              </property>
+              <property name="text">
+               <string>-</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignCenter</set>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="0">
+             <widget class="QLabel" name="label_3">
+              <property name="text">
+               <string>z=</string>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="1">
+             <widget class="QLabel" name="lblInfoSignal">
+              <property name="minimumSize">
+               <size>
+                <width>70</width>
+                <height>0</height>
+               </size>
+              </property>
+              <property name="toolTip">
+               <string>Signal at the point under the mouse</string>
+              </property>
+              <property name="autoFillBackground">
+               <bool>false</bool>
+              </property>
+              <property name="styleSheet">
+               <string notr="true">QLabel {
  background-color : rgb(255, 255, 186);
  color : black; 
 }</string>
-            </property>
-            <property name="frameShape">
-             <enum>QFrame::StyledPanel</enum>
-            </property>
-            <property name="text">
-             <string>-</string>
-            </property>
-            <property name="alignment">
-             <set>Qt::AlignCenter</set>
-            </property>
-           </widget>
+              </property>
+              <property name="frameShape">
+               <enum>QFrame::StyledPanel</enum>
+              </property>
+              <property name="text">
+               <string>-</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignCenter</set>
+              </property>
+             </widget>
+            </item>
+           </layout>
           </item>
          </layout>
         </widget>
@@ -573,16 +736,7 @@
           <property name="spacing">
            <number>4</number>
           </property>
-          <property name="leftMargin">
-           <number>2</number>
-          </property>
-          <property name="topMargin">
-           <number>2</number>
-          </property>
-          <property name="rightMargin">
-           <number>2</number>
-          </property>
-          <property name="bottomMargin">
+          <property name="margin">
            <number>2</number>
           </property>
           <item>
