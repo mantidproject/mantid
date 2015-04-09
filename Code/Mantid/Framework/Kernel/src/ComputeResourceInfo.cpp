@@ -40,14 +40,15 @@ ComputeResourceInfo::ComputeResourceInfo(const FacilityInfo *fac,
   // default: Mantid web service API:
   // http://www.mantidproject.org/Remote_Job_Submission_API
   m_managerType = "MantidWebServiceAPIJobManager";
-  std::string type = elem->getAttribute("JobManagerType");
+  std::string type = elem->getAttribute("jobmanagertype");
   if (!type.empty()) {
     m_managerType = type;
   }
 
   const std::string baseTag = "baseURL";
   Poco::AutoPtr<Poco::XML::NodeList> nl = elem->getElementsByTagName(baseTag);
-  if (!nl || nl->length() != 1 || !nl->item(0) || !nl->item(0)->childNodes()) {
+  if (!nl || nl->length() != 1 || !nl->item(0) ||
+      !nl->item(0)->hasChildNodes()) {
     g_log.error("Failed to get base URL for remote compute resource '" +
                 m_name + "'");
     throw std::runtime_error("Remote compute resources must have exactly one "

@@ -15,6 +15,7 @@
 #include "MantidGeometry/MDGeometry/MDPlane.h"
 #include <boost/assign/list_of.hpp>
 #include <boost/function.hpp>
+#include <boost/bind.hpp>
 
 using namespace Mantid;
 using namespace Mantid::DataObjects;
@@ -279,7 +280,9 @@ public:
         histoIt->getLinearIndex());
   }
 
-  bool doesContainIndex(const std::vector<size_t>& container, const size_t element)
+  //template<typename ContainerType, typename ElementType>
+  template<class ContainerType>
+  bool doesContainIndex(const ContainerType& container, const typename ContainerType::value_type element)
   {
     return std::find(container.begin(), container.end(), element) != container.end();
   }
@@ -297,6 +300,7 @@ public:
     TS_ASSERT(iterator.isWithinBounds(end-1));
     TS_ASSERT(!iterator.isWithinBounds(end));
   }
+
 
   void do_test_neighbours_1d(
       boost::function<std::vector<size_t>(MDHistoWorkspaceIterator*)> findNeighbourMemberFunction)
@@ -321,14 +325,14 @@ public:
     std::vector<size_t> neighbourIndexes = findNeighbourMemberFunction(it);
     TS_ASSERT_EQUALS(1, neighbourIndexes.size());
     // should be on edge
-    TSM_ASSERT( "Neighbour at index 0 is 1", doesContainIndex(neighbourIndexes, 1));
+    TSM_ASSERT( "Neighbour at index 0 is 1", doesContainIndex(neighbourIndexes, size_t(1)));
 
     // Go to intermediate position
     /*
      0 - 1 - 2 - 3 - 4 - 5 - 6 - 7 - 8 - 9
-     ^
-     |
-     */
+         ^
+         |
+         */
     it->next();
     neighbourIndexes = findNeighbourMemberFunction(it);
     TS_ASSERT_EQUALS(2, neighbourIndexes.size());
@@ -339,9 +343,9 @@ public:
     // Go to last position
     /*
      0 - 1 - 2 - 3 - 4 - 5 - 6 - 7 - 8 - 9
-     ^
-     |
-     */
+                                         ^
+                                         |
+                                         */
     it->jumpTo(9);
     neighbourIndexes = findNeighbourMemberFunction(it);
     TSM_ASSERT( "Neighbour at index 9 is 8", doesContainIndex(neighbourIndexes, 8));
@@ -671,6 +675,294 @@ public:
 
   }
 
+  void test_neighbours_1d_with_width()
+  {
+
+      // This is the width to use
+      const int width = 5;
+
+      const size_t nd = 1;
+      MDHistoWorkspace_sptr ws = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, nd, 10);
+      /*
+       1D MDHistoWorkspace
+
+       0 - 1 - 2 - 3 - 4 - 5 - 6 - 7 - 8 - 9
+
+       */
+
+      MDHistoWorkspaceIterator * it = new MDHistoWorkspaceIterator(ws);
+
+      // At first position
+      /*
+       0 - 1 - 2 - 3 - 4 - 5 - 6 - 7 - 8 - 9
+       ^
+       |
+       */
+
+      std::vector<size_t> neighbourIndexes = it->findNeighbourIndexesByWidth(width);
+      TS_ASSERT_EQUALS(2, neighbourIndexes.size());
+      // should be on edge
+      TSM_ASSERT( "Neighbours at index 0 includes 1", doesContainIndex(neighbourIndexes, 1));
+      TSM_ASSERT( "Neighbours at index 0 includes 2", doesContainIndex(neighbourIndexes, 1));
+
+      // Go to intermediate position
+      /*
+       0 - 1 - 2 - 3 - 4 - 5 - 6 - 7 - 8 - 9
+           ^
+           |
+           */
+      it->next();
+      neighbourIndexes = it->findNeighbourIndexesByWidth(width);
+      TS_ASSERT_EQUALS(3, neighbourIndexes.size());
+      // should be on edge
+      TSM_ASSERT( "Neighbours at index 1 includes 0", doesContainIndex(neighbourIndexes, 0));
+      TSM_ASSERT( "Neighbours at index 1 includes 2", doesContainIndex(neighbourIndexes, 2));
+      TSM_ASSERT( "Neighbours at index 1 includes 3", doesContainIndex(neighbourIndexes, 3));
+
+      // Go to last position
+      /*
+       0 - 1 - 2 - 3 - 4 - 5 - 6 - 7 - 8 - 9
+                                           ^
+                                           |
+                                           */
+      it->jumpTo(9);
+      neighbourIndexes = it->findNeighbourIndexesByWidth(width);
+      TS_ASSERT_EQUALS(2, neighbourIndexes.size());
+      TSM_ASSERT( "Neighbours at index 9 includes 8", doesContainIndex(neighbourIndexes, 8));
+      TSM_ASSERT( "Neighbours at index 9 includes 7", doesContainIndex(neighbourIndexes, 7));
+  }
+
+  void test_neighbours_2d_vertex_touching_by_width()
+  {
+    const size_t nd = 2;
+    const int width = 5;
+    MDHistoWorkspace_sptr ws = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, nd, 4);
+    /*
+     2D MDHistoWorkspace
+
+     0 - 1 - 2 - 3
+     4 - 5 - 6 - 7
+     8 - 9 -10 -11
+     12-13 -14 -15
+     */
+    MDHistoWorkspaceIterator * it = new MDHistoWorkspaceIterator(ws);
+
+    // At initial position
+    /*
+     |0| - 1 - 2 - 3
+     4 - 5 - 6 - 7
+     8 - 9 -10 -11
+     12-13 -14 -15
+     */
+    std::vector<size_t> neighbourIndexes = it->findNeighbourIndexesByWidth(width);
+    TS_ASSERT_EQUALS(8, neighbourIndexes.size());
+    // Is on an edge
+    TSM_ASSERT( "Neighbour at index 0 is 1", doesContainIndex(neighbourIndexes, 1));
+    TSM_ASSERT( "Neighbour at index 0 is 2", doesContainIndex(neighbourIndexes, 2));
+    TSM_ASSERT( "Neighbour at index 0 is 4", doesContainIndex(neighbourIndexes, 4));
+    TSM_ASSERT( "Neighbour at index 0 is 5", doesContainIndex(neighbourIndexes, 5));
+    TSM_ASSERT( "Neighbour at index 0 is 6", doesContainIndex(neighbourIndexes, 6));
+    TSM_ASSERT( "Neighbour at index 0 is 8", doesContainIndex(neighbourIndexes, 8));
+    TSM_ASSERT( "Neighbour at index 0 is 9", doesContainIndex(neighbourIndexes, 9));
+    TSM_ASSERT( "Neighbour at index 0 is 10", doesContainIndex(neighbourIndexes, 10));
+
+
+    // At centreish position
+    /*
+     0 - 1 - 2 - 3
+     4 - |5| - 6 - 7
+     8 - 9 -10 -11
+     12-13 -14 -15
+     */
+    it->jumpTo(5);
+    neighbourIndexes = it->findNeighbourIndexesByWidth(width);
+    TS_ASSERT_EQUALS(15, neighbourIndexes.size());
+    // Is on an edge
+    for(int i = 0; i < 16; ++i)
+    {
+        if(i == 5)
+        {
+            continue; // skip over the current index of the iterator.
+        }
+        std::stringstream buffer;
+        buffer << "Neighbour at index 5 should include " << i;
+        TSM_ASSERT( buffer.str(), doesContainIndex(neighbourIndexes, i));
+    }
+
+    // At end position
+    /*
+     0 - 1 - 2 - 3
+     4 - 5 - 6 - 7
+     8 - 9 -10 -11
+     12-13 -14 -|15|
+     */
+    it->jumpTo(15);
+    neighbourIndexes = it->findNeighbourIndexesByWidth(width);
+    TS_ASSERT_EQUALS(8, neighbourIndexes.size());
+    // Is on an edge
+    TSM_ASSERT( "Neighbour at index is 5", doesContainIndex(neighbourIndexes, 5));
+    TSM_ASSERT( "Neighbour at index is 6", doesContainIndex(neighbourIndexes, 6));
+    TSM_ASSERT( "Neighbour at index is 7", doesContainIndex(neighbourIndexes, 7));
+    TSM_ASSERT( "Neighbour at index is 9", doesContainIndex(neighbourIndexes, 9));
+    TSM_ASSERT( "Neighbour at index is 10", doesContainIndex(neighbourIndexes, 10));
+    TSM_ASSERT( "Neighbour at index is 11", doesContainIndex(neighbourIndexes, 11));
+    TSM_ASSERT( "Neighbour at index is 13", doesContainIndex(neighbourIndexes, 13));
+    TSM_ASSERT( "Neighbour at index is 14", doesContainIndex(neighbourIndexes, 14));
+  }
+
+  void test_neighbours_2d_vertex_touching_by_width_vector()
+  {
+    const size_t nd = 2;
+    std::vector<int> widthVector;
+    widthVector.push_back(5);
+    widthVector.push_back(3);
+
+    MDHistoWorkspace_sptr ws = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, nd, 4);
+    /*
+     2D MDHistoWorkspace
+
+     0 - 1 - 2 - 3
+     4 - 5 - 6 - 7
+     8 - 9 -10 -11
+     12-13 -14 -15
+     */
+    MDHistoWorkspaceIterator * it = new MDHistoWorkspaceIterator(ws);
+
+    // At initial position
+    /*
+     |0| - 1 - 2 - 3
+     4 - 5 - 6 - 7
+     8 - 9 -10 -11
+     12-13 -14 -15
+     */
+    std::vector<size_t> neighbourIndexes = it->findNeighbourIndexesByWidth(widthVector);
+    TS_ASSERT_EQUALS(5, neighbourIndexes.size());
+    // Is on an edge
+    TSM_ASSERT( "Neighbour at index is 1", doesContainIndex(neighbourIndexes, 1));
+    TSM_ASSERT( "Neighbour at index is 2", doesContainIndex(neighbourIndexes, 2));
+    TSM_ASSERT( "Neighbour at index is 4", doesContainIndex(neighbourIndexes, 4));
+    TSM_ASSERT( "Neighbour at index is 5", doesContainIndex(neighbourIndexes, 5));
+    TSM_ASSERT( "Neighbour at index is 6", doesContainIndex(neighbourIndexes, 6));
+
+
+
+    // At centreish position
+    /*
+     0 - 1 - 2 - 3
+     4 - |5| - 6 - 7
+     8 - 9 -10 -11
+     12-13 -14 -15
+     */
+    it->jumpTo(5);
+    neighbourIndexes = it->findNeighbourIndexesByWidth(widthVector);
+    TS_ASSERT_EQUALS(11, neighbourIndexes.size());
+    // Is on an edge
+    for(int i = 0; i < 12; ++i)
+    {
+        if(i == 5)
+        {
+            continue; // skip over the current index of the iterator.
+        }
+        std::stringstream buffer;
+        buffer << "Neighbour at index 5 should include " << i;
+        TSM_ASSERT( buffer.str(), doesContainIndex(neighbourIndexes, i));
+    }
+
+    // At end position
+    /*
+     0 - 1 - 2 - 3
+     4 - 5 - 6 - 7
+     8 - 9 -10 -11
+     12-13 -14 -|15|
+     */
+    it->jumpTo(15);
+    neighbourIndexes = it->findNeighbourIndexesByWidth(widthVector);
+    TS_ASSERT_EQUALS(5, neighbourIndexes.size());
+    // Is on an edge
+    TSM_ASSERT( "Neighbour at index is 9", doesContainIndex(neighbourIndexes, 9));
+    TSM_ASSERT( "Neighbour at index is 10", doesContainIndex(neighbourIndexes, 10));
+    TSM_ASSERT( "Neighbour at index is 11", doesContainIndex(neighbourIndexes, 11));
+    TSM_ASSERT( "Neighbour at index is 13", doesContainIndex(neighbourIndexes, 13));
+    TSM_ASSERT( "Neighbour at index is 14", doesContainIndex(neighbourIndexes, 14));
+  }
+
+
+  void test_neighbours_3d_vertex_touching_width()
+  {
+    const size_t nd = 3;
+    const int width = 5;
+    MDHistoWorkspace_sptr ws = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, nd, 4);
+    /*
+     3D MDHistoWorkspace
+
+     [[[ 0  1  2  3]
+     [ 4  5  6  7]
+     [ 8  9 10 11]
+     [12 13 14 15]]
+
+     [[16 17 18 19]
+     [20 21 22 23]
+     [24 25 26 27]
+     [28 29 30 31]]
+
+     [[32 33 34 35]
+     [36 37 38 39]
+     [40 41 42 43]
+     [44 45 46 47]]
+
+     [[48 49 50 51]
+     [52 53 54 55]
+     [56 57 58 59]
+     [60 61 62 63]]]
+     */
+
+    MDHistoWorkspaceIterator * it = new MDHistoWorkspaceIterator(ws);
+
+    // Start at Index = 0
+    std::vector<size_t> neighbourIndexes = it->findNeighbourIndexesByWidth(width);
+    TS_ASSERT_EQUALS(26, neighbourIndexes.size());
+    // Is on an edge
+    TS_ASSERT(doesContainIndex(neighbourIndexes, 1));
+    TS_ASSERT(doesContainIndex(neighbourIndexes, 2));
+    TS_ASSERT(doesContainIndex(neighbourIndexes, 4));
+    TS_ASSERT(doesContainIndex(neighbourIndexes, 5));
+    TS_ASSERT(doesContainIndex(neighbourIndexes, 6));
+    TS_ASSERT(doesContainIndex(neighbourIndexes, 8));
+    TS_ASSERT(doesContainIndex(neighbourIndexes, 9));
+    TS_ASSERT(doesContainIndex(neighbourIndexes, 10));
+    TS_ASSERT(doesContainIndex(neighbourIndexes, 16));
+    TS_ASSERT(doesContainIndex(neighbourIndexes, 17));
+    TS_ASSERT(doesContainIndex(neighbourIndexes, 18));
+    TS_ASSERT(doesContainIndex(neighbourIndexes, 20));
+    TS_ASSERT(doesContainIndex(neighbourIndexes, 21));
+    TS_ASSERT(doesContainIndex(neighbourIndexes, 22));
+    TS_ASSERT(doesContainIndex(neighbourIndexes, 24));
+    TS_ASSERT(doesContainIndex(neighbourIndexes, 25));
+    TS_ASSERT(doesContainIndex(neighbourIndexes, 26));
+  }
+
+  void test_cache()
+  {
+      const size_t nd = 1;
+      MDHistoWorkspace_sptr ws = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, nd, 10);
+      /*
+       1D MDHistoWorkspace
+
+       0 - 1 - 2 - 3 - 4 - 5 - 6 - 7 - 8 - 9
+
+       */
+
+      MDHistoWorkspaceIterator * it = new MDHistoWorkspaceIterator(ws);
+      TSM_ASSERT_EQUALS("Empty cache expected", 0, it->permutationCacheSize());
+      it->findNeighbourIndexesByWidth(3);
+      TSM_ASSERT_EQUALS("One cache item expected", 1, it->permutationCacheSize());
+      it->findNeighbourIndexesByWidth(3);
+      TSM_ASSERT_EQUALS("One cache item expected", 1, it->permutationCacheSize()); // Same item, no change to cache
+      it->findNeighbourIndexesByWidth(5);
+      TSM_ASSERT_EQUALS("Two cache entries expected", 2, it->permutationCacheSize());
+  }
+
+
 };
 
 class MDHistoWorkspaceIteratorTestPerformance: public CxxTest::TestSuite
@@ -797,6 +1089,15 @@ public:
     {
       iterator.findNeighbourIndexesFaceTouching();
     } while (iterator.next());
+  }
+
+  void test_findNeighboursByWidth()
+  {
+      MDHistoWorkspaceIterator iterator(small_ws, new SkipNothing());
+      do
+      {
+        iterator.findNeighbourIndexesByWidth(5);
+      } while (iterator.next());
   }
 
 };

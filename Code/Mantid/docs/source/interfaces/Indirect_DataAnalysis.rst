@@ -134,11 +134,11 @@ Save Result
   If enabled the result will be saved as a NeXus file in the default save
   directory.
 
-Fury
-----
+I(Q, t)
+-------
 
 .. interface:: Data Analysis
-  :widget: tabFury
+  :widget: tabIqt
 
 Given sample and resolution inputs, carries out a fit as per the theory detailed
 in the :ref:`TransformToIqt <algm-TransformToIqt>` algorithm.
@@ -188,13 +188,13 @@ ResolutionBins
   Number of bins in the resolution after rebinning, typically this should be at
   least 5 and a warning will be shown if it is less.
 
-Fury Fit
---------
+I(Q, t) Fit
+-----------
 
 .. interface:: Data Analysis
-  :widget: tabFuryFit
+  :widget: tabIqtFit
 
-FuryFit provides a simplified interface for controlling various fitting
+I(Q, t) Fit provides a simplified interface for controlling various fitting
 functions (see the :ref:`Fit <algm-Fit>` algorithm for more info). The functions
 are also available via the fit wizard.
 
@@ -480,16 +480,16 @@ The calculation for a flat plate geometry is performed by the
 algorithm.
 
 Sample Thickness
-  Thickness of sample (cm).
+  Thickness of sample in :math:`cm`.
 
 Sample Angle
-  Sample angle (degrees).
+  Sample angle in degrees.
 
 Can Front Thickness
-  Thickness of front container (cm).
+  Thickness of front container in :math:`cm`.
 
 Can Back Thickness
-  Thickness of back container (cm).
+  Thickness of back container in :math:`cm`.
 
 Cylinder
 ########
@@ -505,22 +505,37 @@ algorithm, this algorithm is currently only available on Windows as it uses
 FORTRAN code dependant of F2Py.
 
 Sample Inner Radius
-  Radius of the inner wall of the sample (cm).
+  Radius of the inner wall of the sample in :math:`cm`.
 
 Sample Outer Radius
-  Radius of the outer wall of the sample (cm).
+  Radius of the outer wall of the sample in :math:`cm`.
 
 Container Outer Radius
-  Radius of outer wall of the container (cm).
+  Radius of outer wall of the container in :math:`cm`.
 
 Beam Height
-  Height of incident beam (cm).
+  Height of incident beam :math:`cm`.
 
 Beam Width
-  Width of incident beam (cm).
+  Width of incident beam in :math:`cm`.
 
 Step Size
   Step size used in calculation.
+
+Annulus
+#######
+
+.. warning:: This mode is only available on Windows
+
+.. interface:: Data Analysis
+  :widget: pgAnnulus
+
+The calculation for an annular geometry is performed by the
+:ref:`CylinderPaalmanPingsCorrection <algm-CylinderPaalmanPingsCorrection>`
+algorithm, this algorithm is currently only available on Windows as it uses
+FORTRAN code dependant of F2Py.
+
+The options here are the same as for Cylinder.
 
 Background
 ~~~~~~~~~~
@@ -548,7 +563,6 @@ References:
 1. C J Carlile, Rutherford Laboratory report, RL-74-103 (1974)
 2. A K Soper, W S Howells & A C Hannon, RAL Report RAL-89-046 (1989)
 3. H H Paalman & C J Pings, J Appl Phys 33 2635 (1962)
-
 
 Apply Corrections
 -----------------
@@ -615,5 +629,124 @@ Plot Output
 Save Result
   If enabled the result will be saved as a NeXus file in the default save
   directory.
+
+Absorption Corrections
+----------------------
+
+.. interface:: Data Analysis
+  :widget: tabAbsorptionCorrections
+
+The Absorption Corrections tab provides a cross platform alternative to the
+previous Calculate and Apply Corrections tabs.
+
+Common Options
+~~~~~~~~~~~~~~
+
+Sample Input
+  Used to select the sample from either a file or a workspace already loaded
+  into Mantid.
+
+Use Container
+  Used to enable or disable use of a container and selects one from either a
+  file or loaded workspace.
+
+Shape
+  Select the shape of the sample (see specific geometry options below).
+
+Number Density
+  Number density for either the sample or container.
+
+Chemical Formula
+  Chemical formula for either the sample or container in the format expected by
+  :ref:`SetSampleMaterial <algm-SetSampleMaterial>`.
+
+Use Container Corrections
+  Enables full container corrections, if disabled only a can subtraction will be
+  performed.
+
+Scale
+  Scale factor to scale container input by.
+
+Keep Correction Factors
+  If checked a :ref:`WorkspaceGroup` containing the correction factors will also
+  be created, this will have the suffix *_Factors*.
+
+Plot Result
+  If checked the corrected workspace and correction factors will be plotted.
+
+Save Result
+  If checked the corrected workspace and (if *Keep Correction Factors* is
+  checked) the correction factor workspace will be saved as a NeXus file in the
+  default save directory.
+
+Flat Plate
+~~~~~~~~~~
+
+.. interface:: Data Analysis
+  :widget: pgAbsCorFlatPlate
+
+Flat plate calculations are provided by the
+:ref:`IndirectFlatPlateAbsorption <algm-IndirectFlatPlateAbsorption>` algorithm.
+
+Sample Width
+  Width of the sample in :math:`cm`.
+
+Sample Height
+  Height of the sample in :math:`cm`.
+
+Sample Thickness
+  Thickness of the sample in :math:`cm`.
+
+Container Front Thickness
+  Thickness of the front of the container in :math:`cm`.
+
+Container Back Thickness
+  Thickness of the back of the container in :math:`cm`.
+
+Element Size
+  Size of the square "chunks" to divide the frontal area of the sample into to
+  calculate corrections in :math:`cm`.
+
+Annulus
+~~~~~~~
+
+.. interface:: Data Analysis
+  :widget: pgAbsCorAnnulus
+
+Annulus calculations are provided by the :ref:`IndirectAnnulusAbsorption
+<algm-IndirectAnnulusAbsorption>` algorithm.
+
+Sample Inner Radius
+  Radius of the inner wall of the sample in :math:`cm`.
+
+Sample Outer Radius
+  Radius of the outer wall of the sample in :math:`cm`.
+
+Container Inner Radius
+  Radius of the inner wall of the container in :math:`cm`.
+
+Container Outer Radius
+  Radius of the outer wall of the container in :math:`cm`.
+
+Neutron Events
+  Number of events to use in the Monte Carlo simulation.
+
+Cylinder
+~~~~~~~~
+
+.. interface:: Data Analysis
+  :widget: pgAbsCorCylinder
+
+Cylinder calculations are provided by the
+:ref:`IndirectCylinderAbsorption <algm-IndirectCylinderAbsorption>` algorithm.
+
+Sample Radius
+  Radius of the outer wall of the sample in :math:`cm`.
+
+Container Radius
+  Radius of the outer wall of the container in :math:`cm`.
+
+Neutron Events
+  Number of events to use in the Monte Carlo simulation.
 
 .. categories:: Interfaces Indirect

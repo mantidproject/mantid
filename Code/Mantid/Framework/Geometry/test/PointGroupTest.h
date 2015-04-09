@@ -131,10 +131,13 @@ public:
       crystalSystemsMap["3"] = PointGroup::Trigonal;
       crystalSystemsMap["-3"] = PointGroup::Trigonal;
       crystalSystemsMap["321"] = PointGroup::Trigonal;
+      crystalSystemsMap["32"] = PointGroup::Trigonal;
       crystalSystemsMap["312"] = PointGroup::Trigonal;
       crystalSystemsMap["3m1"] = PointGroup::Trigonal;
+      crystalSystemsMap["3m"] = PointGroup::Trigonal;
       crystalSystemsMap["31m"] = PointGroup::Trigonal;
       crystalSystemsMap["-3m1"] = PointGroup::Trigonal;
+      crystalSystemsMap["-3m"] = PointGroup::Trigonal;
       crystalSystemsMap["-31m"] = PointGroup::Trigonal;
       crystalSystemsMap["3 r"] = PointGroup::Trigonal;
       crystalSystemsMap["-3 r"] = PointGroup::Trigonal;
@@ -178,8 +181,8 @@ public:
       TS_ASSERT_EQUALS(pgMap.count(PointGroup::Orthorhombic), 3);
       TS_ASSERT_EQUALS(pgMap.count(PointGroup::Tetragonal), 8);
 
-      // 5 with rhombohedral axes and 8 with hexagonal
-      TS_ASSERT_EQUALS(pgMap.count(PointGroup::Trigonal), 5 + 8);
+      // 5 with rhombohedral axes and 8 with hexagonal and 3 for defaults
+      TS_ASSERT_EQUALS(pgMap.count(PointGroup::Trigonal), 5 + 8 + 3);
       TS_ASSERT_EQUALS(pgMap.count(PointGroup::Hexagonal), 8);
       TS_ASSERT_EQUALS(pgMap.count(PointGroup::Cubic), 5);
   }

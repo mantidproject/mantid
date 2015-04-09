@@ -10,11 +10,9 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidDataObjects/Workspace2D.h"
 
-#include <Poco/Path.h>
 #include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/Document.h>
 #include <Poco/DOM/NodeList.h>
-#include <Poco/DOM/Text.h>
 
 #include <boost/lexical_cast.hpp>
 //-----------------------------------------------------------------------

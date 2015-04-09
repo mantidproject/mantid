@@ -2,13 +2,12 @@ set ( SRC_FILES
   src/DataComparison.cpp
 	src/DirectConvertToEnergy.cpp
 	src/Homer.cpp
+	src/Indirect/AbsorptionCorrections.cpp
 	src/Indirect/ApplyCorr.cpp
 	src/Indirect/CalcCorr.cpp
 	src/Indirect/ConvFit.cpp
   src/Indirect/DensityOfStates.cpp
 	src/Indirect/Elwin.cpp
-	src/Indirect/Fury.cpp
-	src/Indirect/FuryFit.cpp
 	src/Indirect/IDATab.cpp
   src/Indirect/ILLEnergyTransfer.cpp
   src/Indirect/IndirectBayes.cpp
@@ -33,6 +32,8 @@ set ( SRC_FILES
   src/Indirect/ISISCalibration.cpp
   src/Indirect/ISISDiagnostics.cpp
   src/Indirect/ISISEnergyTransfer.cpp
+	src/Indirect/Iqt.cpp
+	src/Indirect/IqtFit.cpp
 	src/Indirect/JumpFit.cpp
 	src/Indirect/MSDFit.cpp
 	src/Indirect/Quasi.cpp
@@ -84,13 +85,12 @@ set ( INC_FILES
 	inc/MantidQtCustomInterfaces/DllConfig.h
 	inc/MantidQtCustomInterfaces/Homer.h
 	inc/MantidQtCustomInterfaces/Indirect/IDATab.h
+	inc/MantidQtCustomInterfaces/Indirect/AbsorptionCorrections.h
 	inc/MantidQtCustomInterfaces/Indirect/ApplyCorr.h
 	inc/MantidQtCustomInterfaces/Indirect/CalcCorr.h
 	inc/MantidQtCustomInterfaces/Indirect/ConvFit.h
   inc/MantidQtCustomInterfaces/Indirect/DensityOfStates.h
 	inc/MantidQtCustomInterfaces/Indirect/Elwin.h
-	inc/MantidQtCustomInterfaces/Indirect/Fury.h
-	inc/MantidQtCustomInterfaces/Indirect/FuryFit.h
   inc/MantidQtCustomInterfaces/Indirect/ILLEnergyTransfer.h
 	inc/MantidQtCustomInterfaces/Indirect/IndirectBayes.h
 	inc/MantidQtCustomInterfaces/Indirect/IndirectBayesTab.h
@@ -119,6 +119,8 @@ set ( INC_FILES
   inc/MantidQtCustomInterfaces/Indirect/ISISCalibration.h
   inc/MantidQtCustomInterfaces/Indirect/ISISDiagnostics.h
   inc/MantidQtCustomInterfaces/Indirect/ISISEnergyTransfer.h
+	inc/MantidQtCustomInterfaces/Indirect/Iqt.h
+	inc/MantidQtCustomInterfaces/Indirect/IqtFit.h
 	inc/MantidQtCustomInterfaces/IReflPresenter.h
 	inc/MantidQtCustomInterfaces/IReflSearcher.h
 	inc/MantidQtCustomInterfaces/MantidEV.h
@@ -173,13 +175,12 @@ set ( MOC_FILES inc/MantidQtCustomInterfaces/Background.h
                 inc/MantidQtCustomInterfaces/DirectConvertToEnergy.h
                 inc/MantidQtCustomInterfaces/Homer.h
                 inc/MantidQtCustomInterfaces/Indirect/IDATab.h
+                inc/MantidQtCustomInterfaces/Indirect/AbsorptionCorrections.h
                 inc/MantidQtCustomInterfaces/Indirect/ApplyCorr.h
                 inc/MantidQtCustomInterfaces/Indirect/CalcCorr.h
                 inc/MantidQtCustomInterfaces/Indirect/ConvFit.h
                 inc/MantidQtCustomInterfaces/Indirect/DensityOfStates.h
                 inc/MantidQtCustomInterfaces/Indirect/Elwin.h
-                inc/MantidQtCustomInterfaces/Indirect/Fury.h
-                inc/MantidQtCustomInterfaces/Indirect/FuryFit.h
                 inc/MantidQtCustomInterfaces/Indirect/ILLEnergyTransfer.h
                 inc/MantidQtCustomInterfaces/Indirect/IndirectBayes.h
                 inc/MantidQtCustomInterfaces/Indirect/IndirectBayesTab.h
@@ -200,6 +201,8 @@ set ( MOC_FILES inc/MantidQtCustomInterfaces/Background.h
                 inc/MantidQtCustomInterfaces/Indirect/IndirectTools.h
                 inc/MantidQtCustomInterfaces/Indirect/IndirectToolsTab.h
                 inc/MantidQtCustomInterfaces/Indirect/IndirectTab.h
+                inc/MantidQtCustomInterfaces/Indirect/Iqt.h
+                inc/MantidQtCustomInterfaces/Indirect/IqtFit.h
                 inc/MantidQtCustomInterfaces/Indirect/JumpFit.h
                 inc/MantidQtCustomInterfaces/Indirect/MSDFit.h
                 inc/MantidQtCustomInterfaces/Indirect/Quasi.h
@@ -241,13 +244,12 @@ set ( MOC_FILES inc/MantidQtCustomInterfaces/Background.h
 set ( UI_FILES inc/MantidQtCustomInterfaces/AddWorkspace.ui
                inc/MantidQtCustomInterfaces/DataComparison.ui
                inc/MantidQtCustomInterfaces/DirectConvertToEnergy.ui
+               inc/MantidQtCustomInterfaces/Indirect/AbsorptionCorrections.ui
                inc/MantidQtCustomInterfaces/Indirect/ApplyCorr.ui
                inc/MantidQtCustomInterfaces/Indirect/CalcCorr.ui
                inc/MantidQtCustomInterfaces/Indirect/ConvFit.ui
                inc/MantidQtCustomInterfaces/Indirect/DensityOfStates.ui
                inc/MantidQtCustomInterfaces/Indirect/Elwin.ui
-               inc/MantidQtCustomInterfaces/Indirect/Fury.ui
-               inc/MantidQtCustomInterfaces/Indirect/FuryFit.ui
                inc/MantidQtCustomInterfaces/Indirect/ILLEnergyTransfer.ui
                inc/MantidQtCustomInterfaces/Indirect/IndirectBayes.ui
                inc/MantidQtCustomInterfaces/Indirect/IndirectDataAnalysis.ui
@@ -263,6 +265,8 @@ set ( UI_FILES inc/MantidQtCustomInterfaces/AddWorkspace.ui
                inc/MantidQtCustomInterfaces/Indirect/IndirectTools.ui
                inc/MantidQtCustomInterfaces/Indirect/IndirectTransmission.ui
                inc/MantidQtCustomInterfaces/Indirect/IndirectTransmissionCalc.ui
+               inc/MantidQtCustomInterfaces/Indirect/Iqt.ui
+               inc/MantidQtCustomInterfaces/Indirect/IqtFit.ui
                inc/MantidQtCustomInterfaces/Indirect/JumpFit.ui
                inc/MantidQtCustomInterfaces/Indirect/MSDFit.ui
                inc/MantidQtCustomInterfaces/Indirect/Quasi.ui

@@ -3,7 +3,7 @@
 
 #include "MantidKernel/System.h"
 #include "MantidAPI/CompositeFunction.h"
-#include "MantidAPI/FunctionParameterDecorator.h"
+#include "MantidAPI/IPawleyFunction.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/IPeakFunction.h"
 #include "MantidAPI/ParamFunction.h"
@@ -106,7 +106,7 @@ typedef boost::shared_ptr<PawleyParameterFunction> PawleyParameterFunction_sptr;
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport PawleyFunction : public API::FunctionParameterDecorator {
+class DLLExport PawleyFunction : public API::IPawleyFunction {
 public:
   PawleyFunction();
   virtual ~PawleyFunction() {}
@@ -143,6 +143,13 @@ public:
   PawleyParameterFunction_sptr getPawleyParameterFunction() const;
 
 protected:
+  void setPeakPositions(std::string centreName, double zeroShift,
+                        const Geometry::UnitCell &cell) const;
+
+  size_t calculateFunctionValues(const API::IPeakFunction_sptr &peak,
+                                 const API::FunctionDomain1D &domain,
+                                 API::FunctionValues &localValues) const;
+
   double getTransformedCenter(double d) const;
 
   void init();
@@ -156,6 +163,8 @@ protected:
 
   Kernel::Unit_sptr m_dUnit;
   Kernel::Unit_sptr m_wsUnit;
+
+  int m_peakRadius;
 };
 
 typedef boost::shared_ptr<PawleyFunction> PawleyFunction_sptr;

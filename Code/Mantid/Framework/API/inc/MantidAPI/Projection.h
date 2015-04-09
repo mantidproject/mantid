@@ -1,6 +1,7 @@
 #ifndef MANTID_API_PROJECTION_H_
 #define MANTID_API_PROJECTION_H_
 
+#include "MantidAPI/ITableWorkspace.h"
 #include "MantidKernel/V3D.h"
 
 #include <stdexcept>
@@ -53,6 +54,8 @@ public:
   Projection(const V3D &u, const V3D &v);
   /// Three dimensional value constructor
   Projection(const V3D &u, const V3D &v, const V3D &w);
+  /// Construct from an ITableWorkspace
+  Projection(const ITableWorkspace &ws);
   /// Copy constructor
   Projection(const Projection &other);
   /// Assignment operator

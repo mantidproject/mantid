@@ -1,28 +1,27 @@
+#include <cmath>
+#include <cstdlib>
+#include <fstream>
+#include <iostream>
+#include <iterator>
+
 #include "MantidDataHandling/LoadPreNexusMonitors.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/BinaryFile.h"
 
-#include <Poco/Path.h>
-#include <Poco/File.h>
+#include <boost/lexical_cast.hpp>
+#include <boost/shared_array.hpp>
+
+#include <Poco/DOM/AutoPtr.h>
 #include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/Document.h>
 #include <Poco/DOM/Element.h>
 #include <Poco/DOM/NodeIterator.h>
 #include <Poco/DOM/NodeFilter.h>
 #include <Poco/DOM/NodeList.h>
-#include <Poco/DOM/AutoPtr.h>
+#include <Poco/Path.h>
 #include <Poco/SAX/InputSource.h>
-
-#include <boost/lexical_cast.hpp>
-#include <boost/shared_array.hpp>
-
-#include <fstream>
-#include <cmath>
-#include <iostream>
-#include <cstdlib>
-#include <iterator>
 
 namespace Mantid {
 namespace DataHandling {

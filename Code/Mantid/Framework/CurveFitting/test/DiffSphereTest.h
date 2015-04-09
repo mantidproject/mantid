@@ -19,6 +19,9 @@
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/AlgorithmFactory.h"
 
+#include "MantidGeometry/Instrument/ReferenceFrame.h"
+#include "MantidTestHelpers/ComponentCreationHelper.h"
+
 class DiffSphereTest : public CxxTest::TestSuite
 {
 public:
@@ -126,12 +129,22 @@ public:
     }
   }
 
-  void testDiffSphereInelastic()
+  void testDiffSphereInelasticWithQParam()
+  {
+    runDiffSphereInelasticTest(0.0, 0.20092);
+  }
+
+  void testDiffSphereInelasticWithWSIndex()
   {
     runDiffSphereInelasticTest(0.0);
   }
 
-  void testDiffSphereInelasticWithShift()
+  void testDiffSphereInelasticWithShiftWithQParam()
+  {
+    runDiffSphereInelasticTest(0.2, 0.20092);
+  }
+
+  void testDiffSphereInelasticWithShiftWithWSIndex()
   {
     runDiffSphereInelasticTest(0.2);
   }
@@ -223,13 +236,16 @@ public:
   }
 
 private:
-  void runDiffSphereInelasticTest(const double S)
+  void runDiffSphereInelasticTest(const double S, const double Q = Mantid::EMPTY_DBL())
   {
     // target fitting parameters
     const double I_0(47.014);
     const double R_0(2.1);
     const double D_0(0.049);
-    const double Q(0.5);
+
+    double simQ = Q;
+    if( Q == Mantid::EMPTY_DBL() )
+      simQ = 0.20092;
 
     // Initialize the fit function in the Fit algorithm
     Mantid::CurveFitting::Fit fitalg;
@@ -238,7 +254,7 @@ private:
     std::ostringstream funtion_stream;
     funtion_stream << "(composite=Convolution,FixResolution=true,NumDeriv=true;name=Gaussian,Height=1.0,"
         << "PeakCentre=0.0,Sigma=0.002,ties=(Height=1.0,PeakCentre=" << S << ",Sigma=0.002);"
-        << "name=InelasticDiffSphere,Q=" << boost::lexical_cast<std::string>( Q ) << ",Intensity="
+        << "name=InelasticDiffSphere,Q=" << boost::lexical_cast<std::string>( simQ ) << ",Intensity="
         << boost::lexical_cast<std::string>( I_0 ) << ",Radius=" << boost::lexical_cast<std::string>( R_0 )
         << ",Diffusion=" << boost::lexical_cast<std::string>( D_0 )
         << ",Shift=" << boost::lexical_cast<std::string>(S) << ")";
@@ -246,7 +262,7 @@ private:
 
     // create the data workspace by evaluating the fit function in the Fit algorithm
     auto data_workspace = generateWorkspaceFromFitAlgorithm( fitalg );
-    //saveWorkspace( data_workspace, "/tmp/junk_data.nxs" ); // for debugging purposes only
+    //saveWorkspace( data_workspace, "/home/dan/junk_data.nxs" ); // for debugging purposes only
 
     // override the function with new parameters, our initial guess.
     double I = I_0 * ( 0.75 + ( 0.5 * std::rand() ) / RAND_MAX );
@@ -256,7 +272,12 @@ private:
     funtion_stream.clear();
     funtion_stream << "(composite=Convolution,FixResolution=true,NumDeriv=true;name=Gaussian,Height=1.0,"
         << "PeakCentre=0.0,Sigma=0.002,ties=(Height=1.0,PeakCentre=" << S << ",Sigma=0.002);"
-        << "name=InelasticDiffSphere,Q=" << boost::lexical_cast<std::string>( Q ) << ",Intensity="
+        << "name=InelasticDiffSphere";
+
+    if( Q != Mantid::EMPTY_DBL() )
+      funtion_stream << ",Q=" << boost::lexical_cast<std::string>( Q );
+
+    funtion_stream << ",Intensity="
         << boost::lexical_cast<std::string>( I ) << ",Radius=" << boost::lexical_cast<std::string>( R )
         << ",Diffusion=" << boost::lexical_cast<std::string>( D )
         << ",Shift=" << boost::lexical_cast<std::string>(S) << ")";
@@ -312,6 +333,9 @@ private:
   // create a data workspace using a Fit algorithm
   Mantid::DataObjects::Workspace2D_sptr generateWorkspaceFromFitAlgorithm( Mantid::CurveFitting::Fit & fitalg )
   {
+    using namespace Mantid::Kernel;
+    using namespace Mantid::Geometry;
+
     // initialize some frequency values centered around zero. Will work as dataX
     const size_t M = 1001;
     double dataX[ M ];
@@ -324,8 +348,41 @@ private:
     Mantid::API::IFunction_sptr fitalg_function = fitalg.getProperty( "Function" );
     fitalg_function -> function( dataXview, dataYvalues );
 
-    // create the workspace
-    auto ws = WorkspaceCreationHelper::Create2DWorkspace(1, M );
+    // Create the workspace
+    auto ws = WorkspaceCreationHelper::Create2DWorkspace(1, M);
+
+    // Create the instrument
+    boost::shared_ptr<Instrument> inst(new Instrument("BASIS"));
+    inst->setReferenceFrame(boost::shared_ptr<ReferenceFrame>(new ReferenceFrame(Y, Z, Left, "")));
+
+    // Add the source position
+    ObjComponent *source = new ObjComponent("moderator", ComponentCreationHelper::createSphere(0.1, V3D(0,0,0), "1"), inst.get());
+    source->setPos(V3D(0.0, 0.0, -84.0));
+    inst->add(source);
+    inst->markAsSource(source);
+
+    // Add the sample position
+    ObjComponent *sample = new ObjComponent("samplePos", ComponentCreationHelper::createSphere(0.1, V3D(0,0,0), "1"), inst.get());
+    inst->setPos(0.0, 0.0, 0.0);
+    inst->add(sample);
+    inst->markAsSamplePos(sample);
+
+    // Add a detector
+    Object_sptr pixelShape = ComponentCreationHelper::createCappedCylinder(
+        0.05, 0.02, V3D(0.0, 0.0, 0.0), V3D(0., 1.0, 0.), "tube");
+    Detector *det = new Detector("pixel-1", 1, pixelShape, inst.get()); // ID 5 is a valid detector for BASIS
+    det->setPos(0.942677, 0.0171308, 4.63343); // Position of first detector on BASIS
+    inst->add(det);
+    inst->markAsDetector(det);
+
+    // Set the instrument and spec-det mapping
+    ws->setInstrument(inst);
+    ws->getSpectrum(0)->addDetectorID(det->getID());
+
+    // Set emergy mode and fixed energy
+    ws->mutableRun().addLogData(new Mantid::Kernel::PropertyWithValue<std::string>("deltaE-mode", "Indirect"));
+    ws->setEFixed(det->getID(), 2.08275); // EFixed of first detector on BASIS
+
     double fractional_error = 0.01; // error taken as a percent of the signal
     for( size_t i = 0;  i < M;  i++ )
     {

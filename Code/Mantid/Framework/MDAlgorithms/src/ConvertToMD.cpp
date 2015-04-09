@@ -85,9 +85,8 @@ void ConvertToMD::init() {
   setPropertyGroup("MinRecursionDepth", getBoxSettingsGroupName());
 
   declareProperty(
-      new PropertyWithValue<bool>("InitialSplitting", 0, Direction::Input),
-      "This option causes an initial split of 50 for the first four dimensions "
-      "at level 0.");
+      new PropertyWithValue<bool>("TopLevelSplitting", 0, Direction::Input),
+      "This option causes a split of the top level, i.e. level0, of 50 for the first four dimensions.");
 }
 //----------------------------------------------------------------------------------------------
 /** Destructor
@@ -471,16 +470,16 @@ API::IMDEventWorkspace_sptr ConvertToMD::createNewMDWorkspace(
   // BoxControllerSettingsAlgorithm
   this->setBoxController(bc, m_InWS2D->getInstrument());
 
-  // Check if the user want sto force an initial split or not
-  bool initialSplittingChecked = this->getProperty("InitialSplitting");
+  // Check if the user want sto force a top level split or not
+  bool topLevelSplittingChecked = this->getProperty("TopLevelSplitting");
 
-  if (!initialSplittingChecked) {
-    // split boxes;
-    spws->splitBox();
-  } else {
+  if (topLevelSplittingChecked) {
     // Perform initial split with the forced settings
-    performInitialSplitting(spws, bc);
+    setupTopLevelSplitting(bc);
   }
+
+  // split boxes;
+  spws->splitBox();
 
   // Do we split more due to MinRecursionDepth?
   int minDepth = this->getProperty("MinRecursionDepth");
@@ -494,36 +493,23 @@ API::IMDEventWorkspace_sptr ConvertToMD::createNewMDWorkspace(
 }
 
 /**
- * Splits the initial box at level 0 into a defined number of subboxes for the
+ * Splits the top level box at level 0 into a defined number of subboxes for the
  * the first level.
- * @param spws A pointer to the newly created event workspace.
  * @param bc A pointer to the box controller.
  */
-void ConvertToMD::performInitialSplitting(API::IMDEventWorkspace_sptr spws,
-                                          Mantid::API::BoxController_sptr bc) {
-  const size_t initialSplitSetting = 50;
+void ConvertToMD::setupTopLevelSplitting(Mantid::API::BoxController_sptr bc) {
+  const size_t topLevelSplitSetting = 50;
   const size_t dimCutoff = 4;
 
-  // Record the split settings of the box controller in a buffer and set the new
-  // value
-  std::vector<size_t> splitBuffer;
-
+  // Set the Top level splitting 
   for (size_t dim = 0; dim < bc->getNDims(); dim++) {
-    splitBuffer.push_back(bc->getSplitInto(dim));
-
-    // Replace the box controller setting only for a max of the first three
-    // dimensions
     if (dim < dimCutoff) {
-      bc->setSplitInto(dim, initialSplitSetting);
+      bc->setSplitTopInto(dim, topLevelSplitSetting);
     }
-  }
-
-  // Perform the initial splitting
-  spws->splitBox();
-
-  // Revert changes on the box controller
-  for (size_t dim = 0; dim < bc->getNDims(); ++dim) {
-    bc->setSplitInto(dim, splitBuffer[dim]);
+    else
+    {
+      bc->setSplitTopInto(dim, bc->getSplitInto(dim));
+    }
   }
 }
 

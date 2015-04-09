@@ -96,16 +96,38 @@ the InputWorkspace and the workspace you want to copy the calibration
 to, the OutputWorkspace.
 
 Usage
-------
+-----
 
-**Example - SCDCalibratePanels:**
+.. testcode:: SCDCalibratePanels
 
-	LoadIsawPeaks(Filename='MANDI_801.peaks', OutputWorkspace='peaks')
-	SCDCalibratePanels(PeakWorkspace='peaks',DetCalFilename='mandi_801.DetCal',XmlFilename='mandi_801.xml',a=74,b=74.5,c=99.9,alpha=90,beta=90,gamma=60)
-	Load(Filename='MANDI_801_event.nxs', OutputWorkspace='MANDI_801_event')
-	CloneWorkspace(InputWorkspace='MANDI_801_event', OutputWorkspace='MANDI_801_event_xml')
-	LoadParameterFile(Workspace='MANDI_801_event_xml', Filename='mandi_801.xml')
-	RenameWorkspace(InputWorkspace='MANDI_801_event_xml', OutputWorkspace='MANDI_801_event_DetCal')
-	LoadIsawDetCal(InputWorkspace='MANDI_801_event_DetCal', Filename='mandi_801.DetCal')
-	
+    #Calibrate peaks file and load to workspace
+    LoadIsawPeaks(Filename='MANDI_801.peaks', OutputWorkspace='peaks')
+    #TimeOffset is not stored in xml file, so use DetCal output if you need TimeOffset
+    SCDCalibratePanels(PeakWorkspace='peaks',DetCalFilename='mandi_801.DetCal',XmlFilename='mandi_801.xml',a=74,b=74.5,c=99.9,alpha=90,beta=90,gamma=60,usetimeOffset=False)
+    LoadEmptyInstrument(Filename='MANDI_Definition_2013_08_01.xml', OutputWorkspace='MANDI_801_event_DetCal')
+    CloneWorkspace(InputWorkspace='MANDI_801_event_DetCal', OutputWorkspace='MANDI_801_event_xml')
+    LoadParameterFile(Workspace='MANDI_801_event_xml', Filename='mandi_801.xml')
+    LoadIsawDetCal(InputWorkspace='MANDI_801_event_DetCal', Filename='mandi_801.DetCal')
+    det1 = mtd['MANDI_801_event_DetCal'].getInstrument().getDetector(327680)
+    det2 = mtd['MANDI_801_event_xml'].getInstrument().getDetector(327680)
+    if det1.getPos() == det2.getPos():
+        print "matches"
+    
+.. testcleanup:: SCDCalibratePanels
+
+   DeleteWorkspace('peaks')
+   DeleteWorkspace('MANDI_801_event_xml')
+   DeleteWorkspace('MANDI_801_event_DetCal')
+   import os,mantid   
+   filename=mantid.config.getString("defaultsave.directory")+"mandi_801.xml"
+   os.remove(filename)
+   filename=mantid.config.getString("defaultsave.directory")+"mandi_801.DetCal"
+   os.remove(filename)
+
+Output:
+
+.. testoutput:: SCDCalibratePanels
+
+    matches
+    	
 .. categories::

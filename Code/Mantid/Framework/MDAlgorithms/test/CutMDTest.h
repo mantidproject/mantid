@@ -192,49 +192,6 @@ public:
     AnalysisDataService::Instance().remove(wsName);
   }
 
-  void test_wrong_proj_format_columns() {
-    const std::string wsName = "__CutMDTest_wrong_proj_columns";
-
-    ITableWorkspace_sptr proj = WorkspaceFactory::Instance().createTable();
-    proj->addColumn("str", "name");
-
-    auto algCutMD = FrameworkManager::Instance().createAlgorithm("CutMD");
-    algCutMD->initialize();
-    algCutMD->setRethrows(true);
-    algCutMD->setProperty("InputWorkspace", sharedWSName);
-    algCutMD->setProperty("OutputWorkspace", wsName);
-    algCutMD->setProperty("Projection", proj);
-    algCutMD->setProperty("P1Bin", "0.1");
-    algCutMD->setProperty("P2Bin", "0.2");
-    algCutMD->setProperty("P3Bin", "0.1");
-    algCutMD->setProperty("CheckAxes", false);
-    TS_ASSERT_THROWS(algCutMD->execute(), std::runtime_error);
-  }
-
-  void test_wrong_proj_format_rows() {
-    const std::string wsName = "__CutMDTest_wrong_proj_rows";
-
-    // Correct columns
-    ITableWorkspace_sptr proj = WorkspaceFactory::Instance().createTable();
-    proj->addColumn("str", "name");
-    proj->addColumn("str", "value");
-    proj->addColumn("double", "offset");
-    proj->addColumn("str", "type");
-    // ...but no rows
-
-    auto algCutMD = FrameworkManager::Instance().createAlgorithm("CutMD");
-    algCutMD->initialize();
-    algCutMD->setRethrows(true);
-    algCutMD->setProperty("InputWorkspace", sharedWSName);
-    algCutMD->setProperty("OutputWorkspace", wsName);
-    algCutMD->setProperty("Projection", proj);
-    algCutMD->setProperty("P1Bin", "0.1");
-    algCutMD->setProperty("P2Bin", "0.2");
-    algCutMD->setProperty("P3Bin", "0.1");
-    algCutMD->setProperty("CheckAxes", false);
-    TS_ASSERT_THROWS(algCutMD->execute(), std::runtime_error);
-  }
-
   void test_orthogonal_slice_with_scaling() {
     const std::string wsName = "__CutMDTest_orthog_slice_with_scaling";
 
@@ -256,16 +213,16 @@ public:
 
     ITableWorkspace_sptr proj = WorkspaceFactory::Instance().createTable();
     proj->addColumn("str", "name");
-    proj->addColumn("str", "value");
+    proj->addColumn("V3D", "value");
     proj->addColumn("double", "offset");
     proj->addColumn("str", "type");
 
     TableRow uRow = proj->appendRow();
     TableRow vRow = proj->appendRow();
     TableRow wRow = proj->appendRow();
-    uRow << "u" << "1,0,0" << 0.0 << "r";
-    vRow << "v" << "0,1,0" << 0.0 << "r";
-    wRow << "w" << "0,0,1" << 0.0 << "r";
+    uRow << "u" << V3D(1,0,0) << 0.0 << "r";
+    vRow << "v" << V3D(0,1,0) << 0.0 << "r";
+    wRow << "w" << V3D(0,0,1) << 0.0 << "r";
 
     auto algCutMD = FrameworkManager::Instance().createAlgorithm("CutMD");
     algCutMD->initialize();
@@ -318,16 +275,16 @@ public:
 
     ITableWorkspace_sptr proj = WorkspaceFactory::Instance().createTable();
     proj->addColumn("str", "name");
-    proj->addColumn("str", "value");
+    proj->addColumn("V3D", "value");
     proj->addColumn("double", "offset");
     proj->addColumn("str", "type");
 
     TableRow uRow = proj->appendRow();
     TableRow vRow = proj->appendRow();
     TableRow wRow = proj->appendRow();
-    uRow << "u" << "1,1,0" << 0.0 << "r";
-    vRow << "v" << "-1,1,0" << 0.0 << "r";
-    wRow << "w" << "0,0,1" << 0.0 << "r";
+    uRow << "u" << V3D(1,1,0) << 0.0 << "r";
+    vRow << "v" << V3D(-1,1,0) << 0.0 << "r";
+    wRow << "w" << V3D(0,0,1) << 0.0 << "r";
 
     auto algCutMD = FrameworkManager::Instance().createAlgorithm("CutMD");
     algCutMD->initialize();
@@ -380,16 +337,16 @@ public:
 
     ITableWorkspace_sptr proj = WorkspaceFactory::Instance().createTable();
     proj->addColumn("str", "name");
-    proj->addColumn("str", "value");
+    proj->addColumn("V3D", "value");
     proj->addColumn("double", "offset");
     proj->addColumn("str", "type");
 
     TableRow uRow = proj->appendRow();
     TableRow vRow = proj->appendRow();
     TableRow wRow = proj->appendRow();
-    uRow << "u" << "1,0,0" << 0.0 << "r";
-    vRow << "v" << "0,1,0" << 0.0 << "r";
-    wRow << "w" << "0,0,1" << 0.0 << "r";
+    uRow << "u" << V3D(1,0,0) << 0.0 << "r";
+    vRow << "v" << V3D(0,1,0) << 0.0 << "r";
+    wRow << "w" << V3D(0,0,1) << 0.0 << "r";
 
     auto algCutMD = FrameworkManager::Instance().createAlgorithm("CutMD");
     algCutMD->initialize();

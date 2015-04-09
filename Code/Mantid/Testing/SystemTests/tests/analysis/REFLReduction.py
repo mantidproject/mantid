@@ -1,7 +1,6 @@
 #pylint: disable=no-init
 import stresstesting
 from mantid import *
-
 from mantid.simpleapi import *
 
 class REFLReduction(stresstesting.MantidStressTest):
@@ -36,9 +35,9 @@ class REFLReduction(stresstesting.MantidStressTest):
     def validate(self):
         # Be more tolerant with the output.
         self.tolerance = 0.0001
+
         self.disableChecking.append('Instrument')
         self.disableChecking.append('Sample')
         self.disableChecking.append('SpectraMap')
         self.disableChecking.append('Axes')
         return "reflectivity_119814", 'REFL_119814_combined_data.nxs'
-

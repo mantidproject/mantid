@@ -47,7 +47,7 @@ const std::size_t DIMS(3);
 void qListFromEventWS(Integrate3DEvents &integrator, Progress &prog,
                       EventWorkspace_sptr &wksp,
                       UnitsConversionHelper &unitConverter,
-                      MDTransf_sptr &qConverter) {
+                      MDTransf_sptr &qConverter, DblMatrix const &UBinv, bool hkl_integ) {
   // loop through the eventlists
   std::vector<double> buffer(DIMS);
 
@@ -82,10 +82,11 @@ void qListFromEventWS(Integrate3DEvents &integrator, Progress &prog,
         buffer[dim] = locCoord[dim];
       }
       V3D qVec(buffer[0], buffer[1], buffer[2]);
+      if (hkl_integ) qVec = UBinv * qVec;
       qList.push_back(std::make_pair(event->m_weight, qVec));
     } // end of loop over events in list
 
-    integrator.addEvents(qList);
+    integrator.addEvents(qList, hkl_integ);
 
     prog.report();
   } // end of loop over spectra
@@ -103,7 +104,7 @@ void qListFromEventWS(Integrate3DEvents &integrator, Progress &prog,
 void qListFromHistoWS(Integrate3DEvents &integrator, Progress &prog,
                       Workspace2D_sptr &wksp,
                       UnitsConversionHelper &unitConverter,
-                      MDTransf_sptr &qConverter) {
+                      MDTransf_sptr &qConverter, DblMatrix const &UBinv, bool hkl_integ) {
 
   // loop through the eventlists
   std::vector<double> buffer(DIMS);
@@ -146,17 +147,18 @@ void qListFromHistoWS(Integrate3DEvents &integrator, Progress &prog,
                                        // qVec
         }
         V3D qVec(buffer[0], buffer[1], buffer[2]);
+        if (hkl_integ) qVec = UBinv * qVec;
         int yValCounts = int(yVal); // we deliberately truncate.
         // Account for counts in histograms by increasing the qList with the
         // same q-point
         qList.push_back(std::make_pair(
             yValCounts, qVec)); // Not ideal to control the size dynamically?
       }
-      integrator.addEvents(qList); // We would have to put a lock around this.
+      integrator.addEvents(qList, hkl_integ); // We would have to put a lock around this.
       prog.report();
     }
 
-    integrator.addEvents(qList);
+    integrator.addEvents(qList, hkl_integ);
 
     prog.report();
   }
@@ -248,6 +250,10 @@ void IntegrateEllipsoids::init() {
   declareProperty("NumSigmas", 3,
                   "Number of sigmas to add to mean of half-length of "
                   "major radius for second pass when SpecifySize is false.");
+
+  declareProperty(
+      "IntegrateInHKL", false,
+      "If true, integrate in HKL space not Q space.");
 }
 
 //---------------------------------------------------------------------
@@ -288,6 +294,7 @@ void IntegrateEllipsoids::exec() {
   double peak_radius = getProperty("PeakSize");
   double back_inner_radius = getProperty("BackgroundInnerSize");
   double back_outer_radius = getProperty("BackgroundOuterSize");
+  bool hkl_integ = getProperty("IntegrateInHKL");
   // get UBinv and the list of
   // peak Q's for the integrator
   std::vector<Peak> &peaks = peak_ws->getPeaks();
@@ -364,10 +371,10 @@ void IntegrateEllipsoids::exec() {
 
   if (eventWS) {
     // process as EventWorkspace
-    qListFromEventWS(integrator, prog, eventWS, unitConv, qConverter);
+    qListFromEventWS(integrator, prog, eventWS, unitConv, qConverter, UBinv, hkl_integ);
   } else {
     // process as Workspace2D
-    qListFromHistoWS(integrator, prog, histoWS, unitConv, qConverter);
+    qListFromHistoWS(integrator, prog, histoWS, unitConv, qConverter, UBinv, hkl_integ);
   }
 
   double inti;
