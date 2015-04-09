@@ -155,4 +155,4 @@ class LoadSQW_MemBasedTest(BuildSQWTest):
 
         DeleteWorkspace("wsMD")
 
-        return rez[0];
+        return rez[0]

@@ -1,3 +1,4 @@
+#pylint: disable=no-init,invalid-name,attribute-defined-outside-init
 import stresstesting
 from mantid.simpleapi import *
 from mantid.api import FileFinder

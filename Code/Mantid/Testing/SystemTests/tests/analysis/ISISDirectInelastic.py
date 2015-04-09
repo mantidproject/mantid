@@ -91,8 +91,6 @@ class MARIReductionFromFile(ISISDirectInelasticReduction):
         outWS = self.red.reduce()
         outWS*=self.scale_to_fix_abf
 
-
-
     def get_result_workspace(self):
         """Returns the result workspace to be checked"""
         return "outWS"
