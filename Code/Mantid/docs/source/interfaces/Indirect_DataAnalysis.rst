@@ -127,9 +127,6 @@ Plot Spectrum
 Spectra Range
   The spectra range over which to perform sequential fitting.
 
-Verbose
-  Enables outputting additional information to the Results Log.
-
 Plot Result
   If enabled will plot the result as a spectra plot.
 
@@ -137,14 +134,14 @@ Save Result
   If enabled the result will be saved as a NeXus file in the default save
   directory.
 
-Fury
-----
+I(Q, t)
+-------
 
 .. interface:: Data Analysis
-  :widget: tabFury
+  :widget: tabIqt
 
 Given sample and resolution inputs, carries out a fit as per the theory detailed
-below.
+in the :ref:`TransformToIqt <algm-TransformToIqt>` algorithm.
 
 Options
 ~~~~~~~
@@ -163,9 +160,6 @@ ELow, EHigh
 SampleBinning
   The ratio at which to decrease the number of bins by through merging of
   intensities from neighbouring bins.
-
-Verbose
-  Enables outputting additional information to the Results Log.
 
 Plot Result
   If enabled will plot the result as a spectra plot.
@@ -194,83 +188,13 @@ ResolutionBins
   Number of bins in the resolution after rebinning, typically this should be at
   least 5 and a warning will be shown if it is less.
 
-Theory
-~~~~~~
-
-The measured spectrum :math:`I(Q, \omega)` is proportional to the four
-dimensional convolution of the scattering law :math:`S(Q, \omega)` with the
-resolution function :math:`R(Q, \omega)` of the spectrometer via :math:`I(Q,
-\omega) = S(Q, \omega) ⊗ R(Q, \omega)`, so :math:`S(Q, \omega)` can be obtained,
-in principle, by a deconvolution in :math:`Q` and :math:`\omega`. The method
-employed here is based on the Fourier Transform (FT) technique [6,7]. On Fourier
-transforming the equation becomes :math:`I(Q, t) = S(Q, t) x R(Q, t)` where the
-convolution in :math:`\omega`-space is replaced by a simple multiplication in
-:math:`t`-space. The intermediate scattering law :math:`I(Q, t)` is then
-obtained by simple division and the scattering law :math:`S(Q, \omega)` itself
-can be obtained by back transformation. The latter however is full of pitfalls
-for the unwary. The advantage of this technique over that of a fitting procedure
-such as SWIFT is that a functional form for :math:`I(Q, t)` does not have to be
-assumed. On IRIS the resolution function is close to a Lorentzian and the
-scattering law is often in the form of one or more Lorentzians. The FT of a
-Lorentzian is a decaying exponential, :math:`exp(-\alpha t)` , so that plots of
-:math:`ln(I(Q, t))` against t would be straight lines thus making interpretation
-easier.
-
-In general, the origin in energy for the sample run and the resolution run need
-not necessarily be the same or indeed be exactly zero in the conversion of the
-RAW data from time-of-flight to energy transfer. This will depend, for example,
-on the sample and vanadium shapes and positions and whether the analyser
-temperature has changed between the runs. The procedure takes this into account
-automatically, without using an arbitrary fitting procedure, in the following
-way. From the general properties of the FT, the transform of an offset
-Lorentzian has the form :math:`(cos(\omega_{0}t) + isin(\omega_{0}t))exp(-\Gamma
-t)` , thus taking the modulus produces the exponential :math:`exp(-\Gamma t)`
-which is the required function. If this is carried out for both sample and
-resolution, the difference in the energy origin is automatically removed. The
-results of this procedure should however be treated with some caution when
-applied to more complicated spectra in which it is possible for :math:`I(Q, t)`
-to become negative, for example, when inelastic side peaks are comparable in
-height to the elastic peak.
-
-The interpretation of the data must also take into account the propagation of
-statistical errors (counting statistics) in the measured data as discussed by
-Wild et al [1]. If the count in channel :math:`k` is :math:`X_{k}` , then
-:math:`X_{k}=<X_{k}>+\Delta X_{k}` where :math:`<X_{k}>` is the mean value and
-:math:`\Delta X_{k}` the error. The standard deviation for channel :math:`k` is
-:math:`\sigma k` :math:`2=<\Delta X_{k}>2` which is assumed to be given by
-:math:`\sigma k=<X_{k}>`. The FT of :math:`X_{k}` is defined by
-:math:`X_{j}=<X_{j}>+\Delta X_{j}` and the real and imaginary parts denoted by
-:math:`X_{j} I` and :math:`X_{j} I` respectively. The standard deviations on
-:math:`X_{j}` are then given by :math:`\sigma 2(X_{j} R)=1/2 X0 R + 1/2 X2j R`
-and :math:`\sigma 2(X_{j} I)=1/2 X0 I - 1/2 X2j I`.
-
-Note that :math:`\sigma 2(X_{0} R) = X_{0} R` and from the properties of FT
-:math:`X_{0} R = X_{k}`.  Thus the standard deviation of the first coefficient
-of the FT is the square root of the integrated intensity of the spectrum. In
-practice, apart from the first few coefficients, the error is nearly constant
-and close to :math:`X_{0} R`.  A further point to note is that the errors make
-the imaginary part of :math:`I(Q, t)` non-zero and that, although these will be
-distributed about zero, on taking the modulus of :math:`I(Q, t)`, they become
-positive at all times and are distributed about a non-zero positive value. When
-:math:`I(Q, t)` is plotted on a log-scale the size of the error bars increases
-with time (coefficient) and for the resolution will reach a point where the
-error on a coefficient is comparable to its value. This region must therefore be
-treated with caution. For a true deconvolution by back transforming, the data
-would be truncated to remove this poor region before back transforming. If the
-truncation is severe the back transform may contain added ripples, so an
-automatic back transform is not provided.
-
-References:
-
-1. U P Wild, R Holzwarth & H P Good, Rev Sci Instr 48 1621 (1977)
-
-Fury Fit
---------
+I(Q, t) Fit
+-----------
 
 .. interface:: Data Analysis
-  :widget: tabFuryFit
+  :widget: tabIqtFit
 
-FuryFit provides a simplified interface for controlling various fitting
+I(Q, t) Fit provides a simplified interface for controlling various fitting
 functions (see the :ref:`Fit <algm-Fit>` algorithm for more info). The functions
 are also available via the fit wizard.
 
@@ -326,9 +250,6 @@ Plot Spectrum
 Spectra Range
   The spectra range over which to perform sequential fitting.
 
-Verbose
-  Enables outputting additional information to the Results Log.
-
 Plot Output
   Allows plotting spectra plots of fitting parameters, the options available
   will depend on the type of fit chosen.
@@ -356,6 +277,57 @@ values for fitting the next. This is done by means of the
 A sequential fit is run by clicking the Run button at the bottom of the tab, a
 single fit can be done using the Fit Single Spectrum button underneath the
 preview plot.
+
+Fitting Model
+~~~~~~~~~~~~~
+
+The model used to perform fitting is described in the following tree, note that
+everything under the Model section is optional and determined by the *Fit Type*
+and *Use Delta Function* options in the interface.
+
+- :ref:`CompositeFunction <func-CompositeFunction>`
+
+  - :ref:`LinearBackground <func-LinearBackground>`
+
+  - :ref:`Convolution <func-Convolution>`
+
+    - Resolution
+
+    - Model (:ref:`CompositeFunction <func-CompositeFunction>`)
+
+      - DeltaFunction
+
+      - :ref:`ProductFunction <func-ProductFunction>`
+
+        - :ref:`Lorentzian <func-Lorentzian>`
+
+        - Temperature Correction
+
+      - :ref:`ProductFunction <func-ProductFunction>`
+
+        - :ref:`Lorentzian <func-Lorentzian>`
+
+        - Temperature Correction
+
+      - :ref:`ProductFunction <func-ProductFunction>`
+
+        - :ref:`DiffSphere <func-DiffSphere>`
+
+        - Temperature Correction
+
+      - :ref:`ProductFunction <func-ProductFunction>`
+
+        - :ref:`DiffRotDiscreteCircle <func-DiffRotDiscreteCircle>`
+
+        - Temperature Correction
+
+Note that it is the Inelastic variants of :ref:`DiffSphere <func-DiffSphere>`
+and :ref:`DiffRotDiscreteCircle <func-DiffRotDiscreteCircle>` that are used in
+this interface.
+
+The Temperature Correction is a :ref:`UserFunction <func-UserFunction>` with the
+formula :math:`((x * 11.606) / T) / (1 - exp(-((x * 11.606) / T)))` where
+:math:`T` is the temperature in Kelvin.
 
 Options
 ~~~~~~~
@@ -400,9 +372,6 @@ Plot Spectrum
 
 Spectra Range
   The spectra range over which to perform sequential fitting.
-
-Verbose
-  Enables outputting additional information to the Results Log.
 
 Plot Output
   Allows plotting spectra plots of fitting parameters, the options available
@@ -506,13 +475,12 @@ References:
 Calculate Corrections
 ---------------------
 
-.. warning:: This interface is only available on Windows
-
 .. interface:: Data Analysis
   :widget: tabCalcCorr
 
-Calculates absorption corrections that could be applied to the data when given
-information about the sample (and optionally can) geometry.
+Calculates absorption corrections in the Paalman & Pings absorption factors that
+could be applied to the data when given information about the sample (and
+optionally can) geometry.
 
 Options
 ~~~~~~~
@@ -527,16 +495,18 @@ Use Can
   \omega)` file (*_sqw.nxs*) or workspace (*_sqw*).
 
 Sample Shape
-  Sets the shape of the sample, this affects the options for the sample details,
-  see below.
+  Sets the shape of the sample, this affects the options for the shape details
+  (see below).
 
-Beam Width
-  Width of the incident beam.
+Sample/Can Number Density
+  Density of the sample or container.
 
-Verbose
-  Enables outputting additional information to the Results Log.
+Sample/Can Chemical Formula
+  Chemical formula of the sample or can material. This must be provided in the
+  format expected by the :ref:`SetSampleMaterial <algm-SetSampleMaterial>`
+  algorithm.
 
-Plot Result
+Plot Output
   Plots the :math:`A_{s,s}`, :math:`A_{s,sc}`, :math:`A_{c,sc}` and
   :math:`A_{c,c}` workspaces as spectra plots.
 
@@ -544,60 +514,89 @@ Save Result
   If enabled the result will be saved as a NeXus file in the default save
   directory.
 
-Sample Details
-~~~~~~~~~~~~~~
+Shape Details
+~~~~~~~~~~~~~
 
 Depending on the shape of the sample different parameters for the sample
 dimension are required and are detailed below.
 
-Flat
-####
+Flat Plate
+##########
 
 .. interface:: Data Analysis
-  :widget: pageFlat
+  :widget: pgFlatPlate
 
-Thickness
-  Thickness of sample (cm).
+The calculation for a flat plate geometry is performed by the
+:ref:`FlatPlatePaalmanPingsCorrection <algm-FlatPlatePaalmanPingsCorrection>`
+algorithm.
 
-Can Front Thickness
-  Thickness of front container (cm).
-
-Can Back Thickness
-  Thickness of back container (cm).
+Sample Thickness
+  Thickness of sample in :math:`cm`.
 
 Sample Angle
-  Sample angle (degrees).
+  Sample angle in degrees.
+
+Can Front Thickness
+  Thickness of front container in :math:`cm`.
+
+Can Back Thickness
+  Thickness of back container in :math:`cm`.
 
 Cylinder
 ########
 
+.. warning:: This mode is only available on Windows
+
 .. interface:: Data Analysis
-  :widget: pageCylinder
+  :widget: pgCylinder
 
-Radius 1
-  Sample radius 1 (cm).
+The calculation for a cylindrical geometry is performed by the
+:ref:`CylinderPaalmanPingsCorrection <algm-CylinderPaalmanPingsCorrection>`
+algorithm, this algorithm is currently only available on Windows as it uses
+FORTRAN code dependant of F2Py.
 
-Radius 2
-  Sample radius 2 (cm).
+Sample Inner Radius
+  Radius of the inner wall of the sample in :math:`cm`.
 
-Can Radius
-  Radius of inside of the container (cm).
+Sample Outer Radius
+  Radius of the outer wall of the sample in :math:`cm`.
+
+Container Outer Radius
+  Radius of outer wall of the container in :math:`cm`.
+
+Beam Height
+  Height of incident beam :math:`cm`.
+
+Beam Width
+  Width of incident beam in :math:`cm`.
 
 Step Size
   Step size used in calculation.
 
-Theory
-~~~~~~
+Annulus
+#######
+
+.. warning:: This mode is only available on Windows
+
+.. interface:: Data Analysis
+  :widget: pgAnnulus
+
+The calculation for an annular geometry is performed by the
+:ref:`CylinderPaalmanPingsCorrection <algm-CylinderPaalmanPingsCorrection>`
+algorithm, this algorithm is currently only available on Windows as it uses
+FORTRAN code dependant of F2Py.
+
+The options here are the same as for Cylinder.
+
+Background
+~~~~~~~~~~
 
 The main correction to be applied to neutron scattering data is that for
 absorption both in the sample and its container, when present. For flat plate
 geometry, the corrections can be analytical and have been discussed for example
 by Carlile [1]. The situation for cylindrical geometry is more complex and
 requires numerical integration. These techniques are well known and used in
-liquid and amorphous diffraction, and are described in the ATLAS manual [2]. The
-routines used here have been developed from the corrections programs in the
-ATLAS suite and take into account the wavelength variation of both the
-absorption and the scattering cross-sections for the inelastic flight paths.
+liquid and amorphous diffraction, and are described in the ATLAS manual [2].
 
 The absorption corrections use the formulism of Paalman and Pings [3] and
 involve the attenuation factors :math:`A_{i,j}` where :math:`i` refers to
@@ -608,16 +607,13 @@ plus container. If the scattering cross sections for sample and container are
 scattering from the empty container is :math:`I_{c} = \Sigma_{c}A_{c,c}` and
 that from the sample plus container is :math:`I_{sc} = \Sigma_{s}A_{s,sc} +
 \Sigma_{c}A_{c,sc}`, thus :math:`\Sigma_{s} = (I_{sc} - I_{c}A_{c,sc}/A_{c,c}) /
-A_{s,sc}`.  In the package, the program Acorn calculates the attenuation
-coefficients :math:`A_{i,j}` and the routine Analyse uses them to calculate Σs
-which we identify with :math:`S(Q, \omega)`.
+A_{s,sc}`.
 
 References:
 
 1. C J Carlile, Rutherford Laboratory report, RL-74-103 (1974)
 2. A K Soper, W S Howells & A C Hannon, RAL Report RAL-89-046 (1989)
 3. H H Paalman & C J Pings, J Appl Phys 33 2635 (1962)
-
 
 Apply Corrections
 -----------------
@@ -628,12 +624,29 @@ Apply Corrections
 The Apply Corrections tab applies the corrections calculated in the Calculate
 Corrections tab of the Indirect Data Analysis interface.
 
-This tab will expect to find the ass file generated in the previous tab. If Use
-Can is selected, it will also expect the assc, acsc and acc files. It will take
-the run number from the sample file, and geometry from the option you select.
+This uses the :ref:`ApplyPaalmanPingsCorrection
+<algm-ApplyPaalmanPingsCorrection>` algorithm to apply absorption corrections in
+the form of the Paalman & Pings correction factors. When *Use Can* is disabled
+only the :math:`A_{s,s}` factor must be provided, when using a container the
+additional factors must be provided: :math:`A_{c,sc}`, :math:`A_{s,sc}` and
+:math:`A_{c,c}`.
 
 Once run the corrected output and can correction is shown in the preview plot,
-the Spectrum spin box can be used to scroll through each spectrum.
+the Spectrum spin box can be used to scroll through each spectrum. Note that
+when this plot shows the result of a calculation the X axis is always in
+wavelength, however when data is initially selected the X axis unit matches that
+of the sample workspace.
+
+The input and container workspaces will be converted to wavelength (using
+:ref:`ConvertUnits <algm-ConvertUnits>`) if they do not already have wavelength
+as their X unit.
+
+The binning of the sample, container and corrections factor workspace must all
+match, if the sample and container do not match you will be given the option to
+rebin (using :ref:`RebinToWorkspace <algm-RebinToWorkspace>`) the sample to
+match the container, if the correction factors do not match you will be given
+the option to interpolate (:ref:`SplineInterpolation
+<algm-SplineInterpolation>`) the correction factor to match the sample.
 
 Options
 ~~~~~~~
@@ -651,12 +664,14 @@ Use Can
   either a reduced file (*_red.nxs*) or workspace (*_red*) or an :math:`S(Q,
   \omega)` file (*_sqw.nxs*) or workspace (*_sqw*).
 
-Corrections File
-  The output file (_Abs.nxs) or workspace group (_Abs) generated by Calculate
-  Corrections.
+Scale Can by factor
+  Allows the container intensity to be scaled by a given scale factor before
+  being used in the corrections calculation.
 
-Verbose
-  Enables outputting additional information to the Results Log.
+Use Corrections
+  The Paalman & Pings correction factors to use in the calculation, note that
+  the file or workspace name must end in either *_flt_abs* or *_cyl_abs* for the
+  flat plate and cylinder geometries respectively.
 
 Plot Output
   Gives the option to create either a spectra or contour plot (or both) of the
@@ -665,5 +680,124 @@ Plot Output
 Save Result
   If enabled the result will be saved as a NeXus file in the default save
   directory.
+
+Absorption Corrections
+----------------------
+
+.. interface:: Data Analysis
+  :widget: tabAbsorptionCorrections
+
+The Absorption Corrections tab provides a cross platform alternative to the
+previous Calculate and Apply Corrections tabs.
+
+Common Options
+~~~~~~~~~~~~~~
+
+Sample Input
+  Used to select the sample from either a file or a workspace already loaded
+  into Mantid.
+
+Use Container
+  Used to enable or disable use of a container and selects one from either a
+  file or loaded workspace.
+
+Shape
+  Select the shape of the sample (see specific geometry options below).
+
+Number Density
+  Number density for either the sample or container.
+
+Chemical Formula
+  Chemical formula for either the sample or container in the format expected by
+  :ref:`SetSampleMaterial <algm-SetSampleMaterial>`.
+
+Use Container Corrections
+  Enables full container corrections, if disabled only a can subtraction will be
+  performed.
+
+Scale
+  Scale factor to scale container input by.
+
+Keep Correction Factors
+  If checked a :ref:`WorkspaceGroup` containing the correction factors will also
+  be created, this will have the suffix *_Factors*.
+
+Plot Result
+  If checked the corrected workspace and correction factors will be plotted.
+
+Save Result
+  If checked the corrected workspace and (if *Keep Correction Factors* is
+  checked) the correction factor workspace will be saved as a NeXus file in the
+  default save directory.
+
+Flat Plate
+~~~~~~~~~~
+
+.. interface:: Data Analysis
+  :widget: pgAbsCorFlatPlate
+
+Flat plate calculations are provided by the
+:ref:`IndirectFlatPlateAbsorption <algm-IndirectFlatPlateAbsorption>` algorithm.
+
+Sample Width
+  Width of the sample in :math:`cm`.
+
+Sample Height
+  Height of the sample in :math:`cm`.
+
+Sample Thickness
+  Thickness of the sample in :math:`cm`.
+
+Container Front Thickness
+  Thickness of the front of the container in :math:`cm`.
+
+Container Back Thickness
+  Thickness of the back of the container in :math:`cm`.
+
+Element Size
+  Size of the square "chunks" to divide the frontal area of the sample into to
+  calculate corrections in :math:`cm`.
+
+Annulus
+~~~~~~~
+
+.. interface:: Data Analysis
+  :widget: pgAbsCorAnnulus
+
+Annulus calculations are provided by the :ref:`IndirectAnnulusAbsorption
+<algm-IndirectAnnulusAbsorption>` algorithm.
+
+Sample Inner Radius
+  Radius of the inner wall of the sample in :math:`cm`.
+
+Sample Outer Radius
+  Radius of the outer wall of the sample in :math:`cm`.
+
+Container Inner Radius
+  Radius of the inner wall of the container in :math:`cm`.
+
+Container Outer Radius
+  Radius of the outer wall of the container in :math:`cm`.
+
+Neutron Events
+  Number of events to use in the Monte Carlo simulation.
+
+Cylinder
+~~~~~~~~
+
+.. interface:: Data Analysis
+  :widget: pgAbsCorCylinder
+
+Cylinder calculations are provided by the
+:ref:`IndirectCylinderAbsorption <algm-IndirectCylinderAbsorption>` algorithm.
+
+Sample Radius
+  Radius of the outer wall of the sample in :math:`cm`.
+
+Container Radius
+  Radius of the outer wall of the container in :math:`cm`.
+
+Neutron Events
+  Number of events to use in the Monte Carlo simulation.
 
 .. categories:: Interfaces Indirect

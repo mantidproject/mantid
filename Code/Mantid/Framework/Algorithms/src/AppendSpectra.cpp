@@ -23,10 +23,10 @@ AppendSpectra::AppendSpectra() : WorkspaceJoiners() {}
 AppendSpectra::~AppendSpectra() {}
 
 /// Algorithm's name for identification. @see Algorithm::name
-const std::string AppendSpectra::name() const { return "AppendSpectra"; };
+const std::string AppendSpectra::name() const { return "AppendSpectra"; }
 
 /// Algorithm's version for identification. @see Algorithm::version
-int AppendSpectra::version() const { return 1; };
+int AppendSpectra::version() const { return 1; }
 
 /** Initialize the algorithm's properties.
  */

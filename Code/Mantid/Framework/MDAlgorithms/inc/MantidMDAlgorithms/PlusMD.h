@@ -4,7 +4,7 @@
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/IMDEventWorkspace.h"
-#include "MantidMDEvents/MDEventWorkspace.h"
+#include "MantidDataObjects/MDEventWorkspace.h"
 #include "MantidMDAlgorithms/BinaryOperationMD.h"
 
 namespace Mantid {
@@ -62,16 +62,16 @@ private:
   void execEvent();
 
   /// Run the algorithm with a MDHisotWorkspace as output and operand
-  void execHistoHisto(Mantid::MDEvents::MDHistoWorkspace_sptr out,
-                      Mantid::MDEvents::MDHistoWorkspace_const_sptr operand);
+  void execHistoHisto(Mantid::DataObjects::MDHistoWorkspace_sptr out,
+                      Mantid::DataObjects::MDHistoWorkspace_const_sptr operand);
 
   /// Run the algorithm with a MDHisotWorkspace as output, scalar and operand
   void
-  execHistoScalar(Mantid::MDEvents::MDHistoWorkspace_sptr out,
+  execHistoScalar(Mantid::DataObjects::MDHistoWorkspace_sptr out,
                   Mantid::DataObjects::WorkspaceSingleValue_const_sptr scalar);
 
   template <typename MDE, size_t nd>
-  void doPlus(typename Mantid::MDEvents::MDEventWorkspace<MDE, nd>::sptr ws);
+  void doPlus(typename Mantid::DataObjects::MDEventWorkspace<MDE, nd>::sptr ws);
 
   /// Workspace into which stuff will get added
   Mantid::API::IMDEventWorkspace_sptr iws1;

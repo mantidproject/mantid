@@ -1,20 +1,21 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
+#include <algorithm>
+#include <iostream>
+
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/Strings.h"
 
-#include <Poco/DOM/Element.h>
-#include <Poco/DOM/NodeList.h>
-#include <Poco/StringTokenizer.h>
 #include <boost/algorithm/string.hpp>
 #include <boost/shared_ptr.hpp>
 
-#include <algorithm>
-#include <iostream>
+#include <Poco/DOM/Element.h>
+#include <Poco/DOM/NodeList.h>
+#include <Poco/StringTokenizer.h>
 
 using Poco::XML::Element;
 
@@ -154,10 +155,24 @@ void FacilityInfo::fillComputeResources(const Poco::XML::Element *elem) {
   for (unsigned long i = 0; i < n; i++) {
     Poco::XML::Element *elem =
         dynamic_cast<Poco::XML::Element *>(pNL_compute->item(i));
-    std::string name = elem->getAttribute("name");
 
-    m_computeResources.insert(std::make_pair(
-        name, boost::shared_ptr<RemoteJobManager>(new RemoteJobManager(elem))));
+    if (elem) {
+      try {
+        ComputeResourceInfo cr(this, elem);
+        m_computeResInfos.push_back(cr);
+
+        g_log.debug() << "Compute resource found: " << cr << std::endl;
+      } catch (...) { // next resource...
+      }
+
+      std::string name = elem->getAttribute("name");
+      // TODO: this is a bit of duplicate effort at the moment, until
+      // RemoteJobManager goes away from here (then this would be
+      // removed), see header for details.
+      m_computeResources.insert(std::make_pair(
+          name,
+          boost::shared_ptr<RemoteJobManager>(new RemoteJobManager(elem))));
+    }
   }
 }
 
@@ -202,14 +217,22 @@ const InstrumentInfo &FacilityInfo::instrument(std::string iName) const {
 }
 
 /**
-  * Returns a list of instruments of given technique
-  * @param tech :: Technique name
-  * @return a list of instrument information objects
+  * Get the vector of available compute resources
+  * @return vector of ComputeResourInfo for the current facility
   */
+std::vector<ComputeResourceInfo> FacilityInfo::computeResInfos() const {
+  return m_computeResInfos;
+}
+
+/**
+* Returns a list of instruments of given technique
+* @param tech :: Technique name
+* @return a list of instrument information objects
+*/
 std::vector<InstrumentInfo>
 FacilityInfo::instruments(const std::string &tech) const {
   std::vector<InstrumentInfo> out;
-  std::vector<InstrumentInfo>::const_iterator it = m_instruments.begin();
+  auto it = m_instruments.begin();
   for (; it != m_instruments.end(); ++it) {
     if (it->techniques().count(tech)) {
       out.push_back(*it);
@@ -219,7 +242,7 @@ FacilityInfo::instruments(const std::string &tech) const {
 }
 
 /**
-  * Returns a vector of the available compute resources
+  * Returns a vector of the names of the available compute resources
   * @return vector of strings of the compute resource names
   */
 std::vector<std::string> FacilityInfo::computeResources() const {
@@ -231,6 +254,42 @@ std::vector<std::string> FacilityInfo::computeResources() const {
   }
 
   return names;
+}
+
+/**
+ * Get a compute resource by name
+ *
+ * @param name Name as specified in the facilities definition file
+ *
+ * @return the named compute resource
+ *
+ * @throws NotFoundError if the resource is not found/available.
+ */
+const ComputeResourceInfo &
+FacilityInfo::computeResource(const std::string &name) const {
+  if (name.empty()) {
+    g_log.debug("Cannot find a compute resource without name "
+                "(empty).");
+    throw Exception::NotFoundError("FacilityInfo, empty compute resource name",
+                                   name);
+  }
+
+  auto it = m_computeResInfos.begin();
+  for (; it != m_computeResInfos.end(); ++it) {
+    if (it->name() == name) {
+      g_log.debug() << "Compute resource '" << name << "' found at facility "
+                    << this->name() << "." << std::endl;
+      return *it;
+    }
+  }
+
+  g_log.debug() << "Could not find requested compute resource: " << name
+                << " in facility " << this->name() << "." << std::endl;
+  throw Exception::NotFoundError(
+      "FacilityInfo, missing compute resource, it does not seem to be defined "
+      "in the facility '" +
+          this->name() + "' - ",
+      name);
 }
 
 /**

@@ -38,6 +38,55 @@ Projection::Projection(const V3D &u, const V3D &v, const V3D &w) {
   }
 }
 
+Projection::Projection(const ITableWorkspace &ws) {
+  if (ws.columnCount() != 4)
+    throw std::runtime_error(
+        "4 columns must be provided to create a projection");
+
+  const size_t numRows = ws.rowCount();
+  if (numRows != 3)
+    throw std::runtime_error("3 rows must be provided to create a projection");
+
+  Column_const_sptr nameCol = ws.getColumn("name");
+  Column_const_sptr valueCol = ws.getColumn("value");
+  Column_const_sptr offsetCol = ws.getColumn("offset");
+  Column_const_sptr unitCol = ws.getColumn("type");
+
+  for (size_t i = 0; i < numRows; i++) {
+    const std::string name = nameCol->cell<std::string>(i);
+    const V3D value = valueCol->cell<V3D>(i);
+    const double offset = offsetCol->cell<double>(i);
+    const std::string unitStr = unitCol->cell<std::string>(i);
+
+    //Check the name
+    size_t index;
+    if (name == "u") {
+      index = 0;
+    } else if (name == "v") {
+      index = 1;
+    } else if (name == "w") {
+      index = 2;
+    } else {
+      throw std::runtime_error("Invalid dimension name: " + name);
+    }
+
+    // Check the unit
+    ProjectionUnit unit;
+    if (unitStr == "r") {
+      unit = RLU;
+    } else if (unitStr == "a") {
+      unit = INV_ANG;
+    } else {
+      throw std::runtime_error("Unknown type: " + unitStr);
+    }
+
+    // Apply the data
+    m_dimensions[index] = value;
+    m_offsets[index] = offset;
+    m_units[index] = unit;
+  }
+}
+
 Projection::Projection(const Projection &other) {
   for (size_t i = 0; i < 3; ++i) {
     m_dimensions[i] = other.m_dimensions[i];

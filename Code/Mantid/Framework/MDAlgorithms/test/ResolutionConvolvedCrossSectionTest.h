@@ -1,20 +1,20 @@
 #ifndef RESOLUTIONCONVOLVEDCROSSSECTIONTEST_H_
 #define RESOLUTIONCONVOLVEDCROSSSECTIONTEST_H_
 
-#include "MantidMDAlgorithms/Quantification/ResolutionConvolvedCrossSection.h"
-#include "MantidMDAlgorithms/Quantification/MDResolutionConvolution.h"
-#include "MantidMDAlgorithms/Quantification/MDResolutionConvolutionFactory.h"
-#include "MantidMDAlgorithms/Quantification/ForegroundModel.h"
-#include "MantidMDAlgorithms/Quantification/ForegroundModelFactory.h"
-#include "MDFittingTestHelpers.h"
-
 #include "MantidAPI/FunctionDomainMD.h"
 #include "MantidAPI/FunctionValues.h"
 
+#include "MantidMDAlgorithms/Quantification/ForegroundModel.h"
+#include "MantidMDAlgorithms/Quantification/ForegroundModelFactory.h"
+#include "MantidMDAlgorithms/Quantification/MDResolutionConvolution.h"
+#include "MantidMDAlgorithms/Quantification/MDResolutionConvolutionFactory.h"
+#include "MantidMDAlgorithms/Quantification/ResolutionConvolvedCrossSection.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
-#include <cxxtest/TestSuite.h>
-#include <gmock/gmock.h>
+#include "MDFittingTestHelpers.h"
 
+#include <cxxtest/TestSuite.h>
+
+#include <gmock/gmock.h>
 
 class ResolutionConvolvedCrossSectionTest : public CxxTest::TestSuite
 {
@@ -132,7 +132,7 @@ private:
    */
   Mantid::API::IMDWorkspace_sptr createTestMDWorkspace()
   {
-    using namespace Mantid::MDEvents;
+    using namespace Mantid::DataObjects;
 
     // 4 dims, 3 boxes and 1 event per box = 81 events
     boost::shared_ptr<MDEventWorkspace<MDEvent<4>,4> > testWS =

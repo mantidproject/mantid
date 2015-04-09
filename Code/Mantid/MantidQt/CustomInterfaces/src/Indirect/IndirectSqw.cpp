@@ -160,22 +160,17 @@ namespace CustomInterfaces
     QString sampleWsName = m_uiForm.dsSampleInput->getCurrentDataName();
     QString sqwWsName = sampleWsName.left(sampleWsName.length() - 4) + "_sqw";
 
-    QString pyInput = "sqw_ws = '" + sqwWsName + "'\n";
     QString plotType = m_uiForm.cbPlotType->currentText();
 
     if(plotType == "Contour")
-    {
-      pyInput += "plot2D(sqw_ws)\n";
-    }
+      plot2D(sqwWsName);
 
     else if(plotType == "Spectra")
     {
-      pyInput +=
-        "n_spec = mtd[sqw_ws].getNumberHistograms()\n"
-        "plotSpectrum(sqw_ws, range(0, n_spec))\n";
+      auto ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(sqwWsName.toStdString());
+      int numHist = static_cast<int>(ws->getNumberHistograms());
+      plotSpectrum(sqwWsName, 0, numHist);
     }
-
-    m_pythonRunner.runPythonCode(pyInput);
   }
 
   /**

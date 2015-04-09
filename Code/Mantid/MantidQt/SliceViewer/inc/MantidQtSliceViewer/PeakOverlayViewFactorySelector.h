@@ -21,7 +21,7 @@ namespace MantidQt
     private:
       typedef std::set<PeakOverlayViewFactory_sptr> PeakOverlayViewFactorySet;
       PeakOverlayViewFactorySet m_candidates;
-      DISABLE_COPY_AND_ASSIGN(PeakOverlayViewFactorySelector);
+      DISABLE_COPY_AND_ASSIGN(PeakOverlayViewFactorySelector)
     public:
       PeakOverlayViewFactorySelector();
       ~PeakOverlayViewFactorySelector();

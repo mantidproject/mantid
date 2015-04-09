@@ -20,10 +20,10 @@ AverageLogData::~AverageLogData() {}
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
-const std::string AverageLogData::name() const { return "AverageLogData"; };
+const std::string AverageLogData::name() const { return "AverageLogData"; }
 
 /// Algorithm's version for identification. @see Algorithm::version
-int AverageLogData::version() const { return 1; };
+int AverageLogData::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
 const std::string AverageLogData::category() const {

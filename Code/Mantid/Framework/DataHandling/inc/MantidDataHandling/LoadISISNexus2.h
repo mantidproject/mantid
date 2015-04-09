@@ -159,7 +159,8 @@ private:
                 Mantid::NeXus::NXEntry &entry);
   // Load a given period into the workspace
   void loadPeriodData(int64_t period, Mantid::NeXus::NXEntry &entry,
-                      DataObjects::Workspace2D_sptr &local_workspace);
+                      DataObjects::Workspace2D_sptr &local_workspace,
+                      bool update_spectra2det_mapping=false);
   // Load a data block
   void loadBlock(Mantid::NeXus::NXDataSetTyped<int> &data, int64_t blocksize,
                  int64_t period, int64_t start, int64_t &hist,

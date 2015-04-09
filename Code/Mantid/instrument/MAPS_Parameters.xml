@@ -391,9 +391,9 @@
 </parameter>
 
 <!-- The semicolon separated list of possible log names, containing information on crystl rotation.
-     First found log will be used togethere with motor_offset to identify crystal rotation 
+     First found log will be used togethere with motor_offset to identify crystal rotation
      (psi in Horace) -->
-<parameter name="motor_log_names"  type="string">
+<parameter name="motor_log_namesmotor_log_names"  type="string">
    <value val="wccr;Rot"/>
 </parameter>
 <!-- Initial value used to identify crytsal rotation angle psi=motor_offset+wccr.timeAverageValue()  -->
@@ -410,6 +410,7 @@
    <value val="normalise_method=norm_method;
        fix_ei=fixei;
        sum_runs=sum;
+       motor_log_names = motor_name;
        wb_integr_range=detector_van_range;
        van_mass=vanadium-mass;
        check_background = background;

@@ -188,7 +188,7 @@ namespace CustomInterfaces
     loadParamAlg->execute();
     energyWs = loadParamAlg->getProperty("Workspace");
 
-    double efixed = energyWs->getInstrument()->getNumberParameter("efixed-val")[0];
+    double efixed = getEFixed(energyWs);
 
     auto spectrum = energyWs->getSpectrum(0);
     spectrum->setSpectrumNo(3);

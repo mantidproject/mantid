@@ -1,29 +1,22 @@
 #ifndef MANTID_MD_CONVERT2_Q_NDANY_TEST_H_
 #define MANTID_MD_CONVERT2_Q_NDANY_TEST_H_
 
-#include "MantidDataObjects/EventWorkspace.h"
-#include "MantidKernel/System.h"
-#include "MantidKernel/Timer.h"
-#include "MantidAPI/TextAxis.h"
 #include "MantidAPI/BoxController.h"
 #include "MantidMDAlgorithms/ConvertToMD.h"
+#include "MantidMDAlgorithms/ConvToMDSelector.h"
+#include "MantidMDAlgorithms/PreprocessDetectorsToMD.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidKernel/UnitFactory.h"
-#include "MantidMDEvents/ConvToMDSelector.h"
-#include "MantidMDAlgorithms/PreprocessDetectorsToMD.h"
+
 #include "MantidAPI/AlgorithmManager.h"
 #include <cxxtest/TestSuite.h>
-#include <iomanip>
-#include <iostream>
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::MDAlgorithms;
-using namespace Mantid::MDEvents;
 
 class Convert2AnyTestHelper: public ConvertToMD
 {
@@ -198,7 +191,7 @@ void testInitialSplittingEnabled()
   convertAlg.setProperty("dEAnalysisMode", "Direct");
   convertAlg.setPropertyValue("MinValues","-10,-10,-10, 0");
   convertAlg.setPropertyValue("MaxValues"," 10, 10, 10, 1");
-  convertAlg.setPropertyValue("InitialSplitting", "1");
+  convertAlg.setPropertyValue("TopLevelSplitting", "1");
   convertAlg.execute();
 
   IMDEventWorkspace_sptr outEventWS = convertAlg.getProperty("OutputWorkspace");
@@ -238,7 +231,7 @@ void testInitialSplittingDisabled()
     TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("dEAnalysisMode", "Direct"));
     pAlg->setPropertyValue("MinValues","-10,-10,-10,  0,-10,-10");
     pAlg->setPropertyValue("MaxValues"," 10, 10, 10, 20, 40, 20");
-    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("InitialSplitting", "0"));
+    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("TopLevelSplitting", "0"));
     pAlg->setRethrows(false);
     pAlg->execute();
     TSM_ASSERT("Should finish successfully",pAlg->isExecuted());
@@ -362,7 +355,7 @@ class ConvertToMDTestPerformance : public CxxTest::TestSuite
    // pointer to mock algorithm to work with progress bar
    std::auto_ptr<WorkspaceCreationHelper::MockAlgorithm> pMockAlgorithm;
 
-    boost::shared_ptr<MDEvents::MDEventWSWrapper> pTargWS;
+    boost::shared_ptr<MDEventWSWrapper> pTargWS;
 
 public:
 static ConvertToMDTestPerformance *createSuite() { return new ConvertToMDTestPerformance(); }

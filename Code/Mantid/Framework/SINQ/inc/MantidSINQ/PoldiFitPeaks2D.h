@@ -5,6 +5,10 @@
 #include "MantidSINQ/DllConfig.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/IFunction.h"
+#include "MantidAPI/IPeakFunction.h"
+
+#include "MantidKernel/Matrix.h"
+
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidSINQ/PoldiUtilities/PoldiPeakCollection.h"
 #include "MantidSINQ/PoldiUtilities/PoldiTimeTransformer.h"
@@ -58,7 +62,28 @@ public:
 
   virtual const std::string summary() const;
 
+  std::map<std::string, std::string> validateInputs();
+
+  boost::shared_ptr<Kernel::DblMatrix> getLocalCovarianceMatrix(
+      const boost::shared_ptr<const Kernel::DblMatrix> &covarianceMatrix,
+      size_t parameterOffset, size_t nParams) const;
+
 protected:
+  Poldi2DFunction_sptr getFunctionIndividualPeaks(
+      std::string profileFunctionName,
+      const PoldiPeakCollection_sptr &peakCollection) const;
+
+  Poldi2DFunction_sptr
+  getFunctionPawley(std::string profileFunctionName,
+                    const PoldiPeakCollection_sptr &peakCollection) const;
+
+  PoldiPeak_sptr
+  getPeakFromPeakFunction(API::IPeakFunction_sptr profileFunction,
+                          const Kernel::V3D &hkl);
+
+  API::ITableWorkspace_sptr
+  getRefinedCellParameters(const API::IFunction_sptr &fitFunction) const;
+
   PoldiPeakCollection_sptr
   getPeakCollection(const DataObjects::TableWorkspace_sptr &peakTable) const;
   PoldiPeakCollection_sptr getIntegratedPeakCollection(
@@ -72,7 +97,7 @@ protected:
                            PoldiPeakCollection_sptr &to) const;
 
   PoldiPeakCollection_sptr
-  getPeakCollectionFromFunction(const API::IFunction_sptr &fitFunction) const;
+  getPeakCollectionFromFunction(const API::IFunction_sptr &fitFunction);
   Poldi2DFunction_sptr getFunctionFromPeakCollection(
       const PoldiPeakCollection_sptr &peakCollection) const;
   void addBackgroundTerms(Poldi2DFunction_sptr poldi2DFunction) const;

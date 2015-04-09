@@ -1669,7 +1669,7 @@ void SCDCalibratePanels::FixUpBankParameterMap(
 void writeXmlParameter(ofstream &ostream, const string &name,
                        const double value) {
   ostream << "  <parameter name =\"" << name << "\"><value val=\"" << value
-          << "\" />" << endl;
+     << "\" /> </parameter>" << endl;
 }
 
 void

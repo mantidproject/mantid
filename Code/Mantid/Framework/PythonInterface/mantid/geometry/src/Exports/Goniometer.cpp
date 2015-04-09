@@ -14,7 +14,7 @@ namespace //<unnamed>
 {
   ///@cond
   // define overloaded functions
-  BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(getEulerAngles_overloads, Goniometer::getEulerAngles, 0, 1);
+  BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(getEulerAngles_overloads, Goniometer::getEulerAngles, 0, 1)
   ///@endcond
 
   /// Set the U vector via a numpy array

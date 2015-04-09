@@ -25,7 +25,7 @@ using namespace Kernel;
 using namespace API;
 using namespace NeXus;
 
-DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadILL);
+DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadILL)
 
 //---------------------------------------------------
 // Private member functions

@@ -4,20 +4,22 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAPI/DllConfig.h"
-#include <Poco/DOM/Document.h>
-#include <Poco/DOM/Element.h>
-#include <Poco/DOM/Text.h>
-#include <Poco/DOM/AutoPtr.h>
-#include <Poco/DOM/DOMWriter.h>
 #include <sstream>
 #include <vector>
 #include <memory>
+
+#include "MantidAPI/DllConfig.h"
 
 #ifndef Q_MOC_RUN
 #include <boost/algorithm/string.hpp>
 #include <boost/format.hpp>
 #endif
+
+#include <Poco/DOM/AutoPtr.h>
+#include <Poco/DOM/Document.h>
+#include <Poco/DOM/DOMWriter.h>
+#include <Poco/DOM/Element.h>
+#include <Poco/DOM/Text.h>
 
 namespace Mantid {
 namespace API {

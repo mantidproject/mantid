@@ -1,6 +1,5 @@
-#pylint: disable=no-init
+#pylint: disable=no-init,attribute-defined-outside-init
 import stresstesting
-import os
 from mantid.simpleapi import *
 
 #====================================================================================================
@@ -52,7 +51,7 @@ class IN13CaFTest(stresstesting.MantidStressTest):
         ws1Match = self.checkWorkspacesMatch('IN13_16347_CaF422_q', 'ISISIndirectLoadAscii_IN13CaFTest2')
         ws2Match = self.checkWorkspacesMatch('IN13_16347_CaF422_ang', 'ISISIndirectLoadAscii_IN13CaFTest')
 
-        return  ws1Match and ws2Match 
+        return  ws1Match and ws2Match
 
     # function to check two workspaces match
     # Used when the result of a test produces more than a single workspace

@@ -202,12 +202,11 @@ namespace CustomInterfaces
   {
     if (IFunction_const_sptr fittedFunc = m_model->fittedFunction())
     {
-      QString funcString = QString::fromStdString(fittedFunc->asString());
-      m_view->setFunction(funcString);
+      m_view->setFunction(fittedFunc);
     }
     else
     {
-      m_view->setFunction(QString(""));
+      m_view->setFunction(IFunction_const_sptr());
     }
   }
 

@@ -23,8 +23,8 @@ DECLARE_ALGORITHM(FindDetectorsPar)
 using namespace Kernel;
 using namespace API;
 // nothing here according to mantid
-FindDetectorsPar::FindDetectorsPar() : m_SizesAreLinear(false){};
-FindDetectorsPar::~FindDetectorsPar(){};
+FindDetectorsPar::FindDetectorsPar() : m_SizesAreLinear(false){}
+FindDetectorsPar::~FindDetectorsPar(){}
 
 void FindDetectorsPar::init() {
   auto wsValidator = boost::make_shared<CompositeValidator>();

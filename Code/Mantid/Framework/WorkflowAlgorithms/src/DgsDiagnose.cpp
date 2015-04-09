@@ -30,10 +30,10 @@ DgsDiagnose::~DgsDiagnose() {}
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
-const std::string DgsDiagnose::name() const { return "DgsDiagnose"; };
+const std::string DgsDiagnose::name() const { return "DgsDiagnose"; }
 
 /// Algorithm's version for identification. @see Algorithm::version
-int DgsDiagnose::version() const { return 1; };
+int DgsDiagnose::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
 const std::string DgsDiagnose::category() const {

@@ -9,7 +9,7 @@ namespace CurveFitting {
 
 using namespace API;
 
-DECLARE_FUNCTION(PseudoVoigt);
+DECLARE_FUNCTION(PseudoVoigt)
 
 void PseudoVoigt::functionLocal(double *out, const double *xValues,
                                 const size_t nData) const {

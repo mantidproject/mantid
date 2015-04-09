@@ -77,10 +77,7 @@ class MSGDiffractionReduction(PythonAlgorithm):
 
 
     def PyExec(self):
-        from IndirectCommon import StartTime, EndTime
         from IndirectDiffractionReduction import MSGDiffractionReducer
-
-        StartTime('MSGDiffractionReduction')
 
         input_files = self.getProperty('InputFiles').value
         sum_files = self.getProperty('SumFiles').value
@@ -118,8 +115,6 @@ class MSGDiffractionReduction(PythonAlgorithm):
         result_ws_list = reducer.get_result_workspaces()
         GroupWorkspaces(InputWorkspaces=result_ws_list, OutputWorkspace=output_ws_group)
         self.setProperty('OutputWorkspace', output_ws_group)
-
-        EndTime('MSGDiffractionReduction')
 
 
 AlgorithmFactory.subscribe(MSGDiffractionReduction)

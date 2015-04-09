@@ -82,10 +82,10 @@ int LoadILLAscii::confidence(Kernel::FileDescriptor &descriptor) const {
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
-const std::string LoadILLAscii::name() const { return "LoadILLAscii"; };
+const std::string LoadILLAscii::name() const { return "LoadILLAscii"; }
 
 /// Algorithm's version for identification. @see Algorithm::version
-int LoadILLAscii::version() const { return 1; };
+int LoadILLAscii::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
 const std::string LoadILLAscii::category() const {

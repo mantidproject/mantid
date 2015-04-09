@@ -39,7 +39,7 @@ namespace SimpleGui
   {
     //Set the initial log scale state due to the mode
     m_mdSettings.setLastSessionLogScale(getLogScale());
-  };
+  }
 
   /**
    * Gets the log scale for the mode

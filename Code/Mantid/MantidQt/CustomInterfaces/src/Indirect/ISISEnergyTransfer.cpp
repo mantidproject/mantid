@@ -1,5 +1,6 @@
 #include "MantidQtCustomInterfaces/Indirect/ISISEnergyTransfer.h"
 
+#include "MantidGeometry/IDTypes.h"
 #include "MantidQtCustomInterfaces/Background.h"
 #include "MantidQtCustomInterfaces/UserInputValidator.h"
 
@@ -254,7 +255,7 @@ namespace CustomInterfaces
       m_uiForm.leRebinString->setText(instDetails["rebin-default"]);
       m_uiForm.ckDoNotRebin->setChecked(false);
       QStringList rbp = instDetails["rebin-default"].split(",", QString::SkipEmptyParts);
-      if ( rbp.size() == 3 )
+      if(rbp.size() == 3)
       {
         m_uiForm.spRebinLow->setValue(rbp[0].toDouble());
         m_uiForm.spRebinWidth->setValue(rbp[1].toDouble());
@@ -386,6 +387,7 @@ namespace CustomInterfaces
    */
   void ISISEnergyTransfer::plotRaw()
   {
+    using Mantid::specid_t;
     using MantidQt::API::BatchAlgorithmRunner;
 
     if(!m_uiForm.dsRunFiles->isValid())
@@ -394,9 +396,14 @@ namespace CustomInterfaces
       return;
     }
 
-    std::vector<int> detectorRange;
-    detectorRange.push_back(m_uiForm.spSpectraMin->value());
-    detectorRange.push_back(m_uiForm.spSpectraMax->value());
+    specid_t detectorMin = static_cast<specid_t>(m_uiForm.spPlotTimeSpecMin->value());
+    specid_t detectorMax = static_cast<specid_t>(m_uiForm.spPlotTimeSpecMax->value());
+
+    if(detectorMin > detectorMax)
+    {
+      emit showMessageBox("Minimum spectra must be less than or equal to maximum spectra.");
+      return;
+    }
 
     QString rawFile = m_uiForm.dsRunFiles->getFirstFilename();
     QFileInfo rawFileInfo(rawFile);
@@ -406,12 +413,26 @@ namespace CustomInterfaces
     loadAlg->initialize();
     loadAlg->setProperty("Filename", rawFile.toStdString());
     loadAlg->setProperty("OutputWorkspace", name);
-    loadAlg->setProperty("SpectrumMin", detectorRange[0]);
-    loadAlg->setProperty("SpectrumMax", detectorRange[1]);
+    loadAlg->setProperty("SpectrumMin", detectorMin);
+    loadAlg->setProperty("SpectrumMax", detectorMax);
     m_batchAlgoRunner->addAlgorithm(loadAlg);
 
-    BatchAlgorithmRunner::AlgorithmRuntimeProps inputFromLoad;
-    inputFromLoad["InputWorkspace"] = name;
+    // Rebin the workspace to its self to ensure constant binning
+    BatchAlgorithmRunner::AlgorithmRuntimeProps inputToRebin;
+    inputToRebin["WorkspaceToMatch"] = name;
+    inputToRebin["WorkspaceToRebin"] = name;
+    inputToRebin["OutputWorkspace"] = name;
+
+    IAlgorithm_sptr rebinAlg = AlgorithmManager::Instance().create("RebinToWorkspace");
+    rebinAlg->initialize();
+    m_batchAlgoRunner->addAlgorithm(rebinAlg, inputToRebin);
+
+    BatchAlgorithmRunner::AlgorithmRuntimeProps inputFromRebin;
+    inputFromRebin["InputWorkspace"] = name;
+
+    std::vector<specid_t> detectorList;
+    for(specid_t i = detectorMin; i <= detectorMax; i++)
+      detectorList.push_back(i);
 
     if(m_uiForm.ckBackgroundRemoval->isChecked())
     {
@@ -425,7 +446,7 @@ namespace CustomInterfaces
       calcBackAlg->setProperty("Mode", "Mean");
       calcBackAlg->setProperty("StartX", range[0]);
       calcBackAlg->setProperty("EndX", range[1]);
-      m_batchAlgoRunner->addAlgorithm(calcBackAlg, inputFromLoad);
+      m_batchAlgoRunner->addAlgorithm(calcBackAlg, inputFromRebin);
 
       BatchAlgorithmRunner::AlgorithmRuntimeProps inputFromCalcBG;
       inputFromCalcBG["InputWorkspace"] = name + "_bg";
@@ -433,22 +454,22 @@ namespace CustomInterfaces
       IAlgorithm_sptr groupAlg = AlgorithmManager::Instance().create("GroupDetectors");
       groupAlg->initialize();
       groupAlg->setProperty("OutputWorkspace", name + "_grp");
-      groupAlg->setProperty("DetectorList", detectorRange);
+      groupAlg->setProperty("DetectorList", detectorList);
       m_batchAlgoRunner->addAlgorithm(groupAlg, inputFromCalcBG);
 
       IAlgorithm_sptr rawGroupAlg = AlgorithmManager::Instance().create("GroupDetectors");
       rawGroupAlg->initialize();
       rawGroupAlg->setProperty("OutputWorkspace", name + "_grp_raw");
-      rawGroupAlg->setProperty("DetectorList", detectorRange);
-      m_batchAlgoRunner->addAlgorithm(rawGroupAlg, inputFromLoad);
+      rawGroupAlg->setProperty("DetectorList", detectorList);
+      m_batchAlgoRunner->addAlgorithm(rawGroupAlg, inputFromRebin);
     }
     else
     {
       IAlgorithm_sptr rawGroupAlg = AlgorithmManager::Instance().create("GroupDetectors");
       rawGroupAlg->initialize();
       rawGroupAlg->setProperty("OutputWorkspace", name + "_grp");
-      rawGroupAlg->setProperty("DetectorList", detectorRange);
-      m_batchAlgoRunner->addAlgorithm(rawGroupAlg, inputFromLoad);
+      rawGroupAlg->setProperty("DetectorList", detectorList);
+      m_batchAlgoRunner->addAlgorithm(rawGroupAlg, inputFromRebin);
     }
 
     disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(algorithmComplete(bool)));
@@ -472,8 +493,7 @@ namespace CustomInterfaces
     QFileInfo rawFileInfo(rawFile);
     std::string name = rawFileInfo.baseName().toStdString();
 
-    std::string pyInput = "from mantidplot import plotSpectrum\nplotSpectrum('" + name + "_grp', 0)\n";
-    m_pythonRunner.runPythonCode(QString::fromStdString(pyInput));
+    plotSpectrum(QString::fromStdString(name) + "_grp");
   }
 
   /**
