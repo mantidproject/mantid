@@ -83,60 +83,63 @@ search_patterns.each do |pattern|
 end
 
 
-def add_ParaView_Libraries(file)
-  dependencies = `otool -L #{file}`
-  dependencies.split("\n").each do |dependency|
-    currentname = dependency.strip.split(" ")
-    filename = currentname[0]
-    if filename.include? "#{ParaView_dir}"
-      `cp #{filename} Contents/Libraries`
-      name_split_on_slash = filename.strip.split("/")
-      filename_no_dir = name_split_on_slash[-1]
-      `chmod +w Contents/Libraries/#{filename_no_dir}`
-      `install_name_tool -id @rpath/#{filename_no_dir} Contents/Libraries/#{filename_no_dir}`
-      `install_name_tool -change #{filename} @rpath/#{filename_no_dir} #{file}`
-    end
-  end
-end
+if( "@MAKE_VATES@" == "ON" )
 
-`mkdir Contents/Libraries`
-vatesfiles = ["Contents/MacOS/VatesSimpleGui","Contents/MacOS/libMantidParaViewQtWidgets.dylib","Contents/MacOS/libMantidVatesAPI.dylib","pvplugins/libMantidVatesSimpleGuiViewWidgets.dylib"]+Dir["pvplugins/pvplugins/*.dylib"] 
-vatesfiles.each do |file|
-  add_ParaView_Libraries(file)
-end
-
-loop do
-  issues_found = 0
-  Dir["Contents/Libraries/*.dylib"].each do |library|
-    dependencies = `otool -L #{library}`
+  def add_ParaView_Libraries(file)
+    dependencies = `otool -L #{file}`
     dependencies.split("\n").each do |dependency|
       currentname = dependency.strip.split(" ")
       filename = currentname[0]
       if filename.include? "#{ParaView_dir}"
-        #p "fixing #{library} #{filename}" 
-        issues_found = issues_found + 1
+        `cp #{filename} Contents/Libraries`
         name_split_on_slash = filename.strip.split("/")
         filename_no_dir = name_split_on_slash[-1]
-        if !FileTest.exist?("Contents/Libraries/#{filename_no_dir}")
-          `cp #{filename} Contents/Libraries`
-          `chmod +w Contents/Libraries/#{filename_no_dir}`
-          `install_name_tool -id @rpath/#{filename_no_dir} Contents/Libraries/#{filename_no_dir}`
-        end
-        `install_name_tool -add_rpath @loader_path/../Libraries #{library} > /dev/null 2>&1`
-        `install_name_tool -change #{filename} @rpath/#{filename_no_dir} #{library}`
+        `chmod +w Contents/Libraries/#{filename_no_dir}`
+        `install_name_tool -id @rpath/#{filename_no_dir} Contents/Libraries/#{filename_no_dir}`
+        `install_name_tool -change #{filename} @rpath/#{filename_no_dir} #{file}`
       end
     end
   end
-  p "found #{issues_found} issues this iteration!"
-  break if issues_found == 0
+
+  `mkdir Contents/Libraries`
+  vatesfiles = ["Contents/MacOS/VatesSimpleGui","Contents/MacOS/libMantidParaViewQtWidgets.dylib","Contents/MacOS/libMantidVatesAPI.dylib","pvplugins/libMantidVatesSimpleGuiViewWidgets.dylib"]+Dir["pvplugins/pvplugins/*.dylib"] 
+  vatesfiles.each do |file|
+    add_ParaView_Libraries(file)
+  end
+
+  loop do
+    issues_found = 0
+    Dir["Contents/Libraries/*.dylib"].each do |library|
+      dependencies = `otool -L #{library}`
+      dependencies.split("\n").each do |dependency|
+        currentname = dependency.strip.split(" ")
+        filename = currentname[0]
+        if filename.include? "#{ParaView_dir}"
+          #p "fixing #{library} #{filename}" 
+          issues_found = issues_found + 1
+          name_split_on_slash = filename.strip.split("/")
+          filename_no_dir = name_split_on_slash[-1]
+          if !FileTest.exist?("Contents/Libraries/#{filename_no_dir}")
+            `cp #{filename} Contents/Libraries`
+            `chmod +w Contents/Libraries/#{filename_no_dir}`
+            `install_name_tool -id @rpath/#{filename_no_dir} Contents/Libraries/#{filename_no_dir}`
+          end
+          `install_name_tool -add_rpath @loader_path/../Libraries #{library} > /dev/null 2>&1`
+          `install_name_tool -change #{filename} @rpath/#{filename_no_dir} #{library}`
+        end
+      end
+    end
+    p "fixed #{issues_found} issues this iteration!"
+    break if issues_found == 0
+  end
 end
 
 #We'll use macdeployqt to fix qt dependencies.
-`macdeployqt ../MantidPlot.app -executable=Contents/MacOS/mantidqtpython.so \
-                               -executable=Contents/MacOS/VatesSimpleGui \
-                               -executable=Contents/MacOS/libqwtplot3d.dylib \
-                               -executable=Contents/MacOS/libqwt.dylib \
-                               -executable=Contents/MacOS/libqscintilla2.dylib`
+Qt_Executables = "-executable=Contents/MacOS/mantidqtpython.so -executable=Contents/MacOS/libqwtplot3d.dylib -executable=Contents/MacOS/libqwt.dylib -executable=Contents/MacOS/libqscintilla2.dylib"
+if( "@MAKE_VATES@" == "ON" )
+  Qt_Executables << " -executable=Contents/MacOS/VatesSimpleGui"
+end
+`macdeployqt ../MantidPlot.app #{Qt_Executables}`
 
 #Fix remaining QT-related linking issues.
 `install_name_tool -id @rpath/libqsqlite.dylib Contents/Frameworks/plugins/sqldrivers/libqsqlite.dylib`
@@ -203,7 +206,7 @@ end
 `mkdir Contents/MacOS/bin`
 `cp /usr/local/bin/ipython Contents/MacOS/bin/`
 
-#Lastly check for any libraries in the package linking against homebrew libraries.
+#Lastly check for any libraries in the package link against homebrew or paraview libraries.
 search_patterns.each do |pattern|
   Dir[pattern].each do |library|
     dependencies = `otool -L #{library}`
@@ -211,8 +214,10 @@ search_patterns.each do |pattern|
       if dependency.include? "/usr/local/"
         p "issue with library: #{library} linked against: #{dependency}"
       end
-      if dependency.include? "#{ParaView_dir}"
-        p "issue with library: #{library} linking against: #{dependency}"
+      if( "@MAKE_VATES@" == "ON" )
+        if dependency.include? "#{ParaView_dir}"
+          p "issue with library: #{library} linking against: #{dependency}"
+        end
       end
     end
   end
