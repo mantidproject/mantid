@@ -438,6 +438,9 @@ void CutMD::exec() {
   }
 
   auto geometry = boost::dynamic_pointer_cast<Mantid::API::MDGeometry>(sliceWS);
+
+  /* Original workspace and transformation information does not make sense for self-contained Horace-style
+   * cuts, so clear it out. */
   geometry->clearTransforms();
   geometry->clearOriginalWorkspaces();
 
