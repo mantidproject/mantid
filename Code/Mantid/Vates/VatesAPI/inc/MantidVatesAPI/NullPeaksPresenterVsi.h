@@ -15,25 +15,25 @@ class DLLExport NullPeaksPresenterVsi : public PeaksPresenterVsi {
 public:
   NullPeaksPresenterVsi() {}
   virtual ~NullPeaksPresenterVsi() {}
-  virtual Mantid::API::IPeaksWorkspace_sptr getPeaksWorkspace() {
+  virtual Mantid::API::IPeaksWorkspace_sptr getPeaksWorkspace() const {
     throw std::runtime_error(
         "NullPeaksPresenterVsi does not implement this method. Misused");
   }
-  virtual std::vector<bool> getViewablePeaks() {
+  virtual std::vector<bool> getViewablePeaks() const {
     throw std::runtime_error(
         "NullPeaksPresenterVsi does not implement this method. Misused");
   }
   virtual void updateViewFrustum(ViewFrustum) {}
-  virtual std::string getFrame() {
+  virtual std::string getFrame() const {
     throw std::runtime_error(
         "NullPeaksPresenterVsi does not implement this method. Misused");
   }
-  virtual std::string getPeaksWorkspaceName() {
+  virtual std::string getPeaksWorkspaceName() const {
     throw std::runtime_error(
         "NullPeaksPresenterVsi does not implement this method. Misused");
   }
   virtual void getPeaksInfo(Mantid::API::IPeaksWorkspace_sptr, int,
-                            Mantid::Kernel::V3D &, double &, Mantid::Kernel::SpecialCoordinateSystem) {
+                            Mantid::Kernel::V3D &, double &, Mantid::Kernel::SpecialCoordinateSystem) const {
     throw std::runtime_error(
         "NullPeaksPresenterVsi does not implement this method. Misused");
   }

@@ -59,7 +59,7 @@ private:
                             QPointer<pqPipelineSource> splatSource);
   double getMaxRadius(Mantid::Geometry::PeakShape_sptr shape);
   void removeLayout(QWidget *widget);
-  void createTable(bool full);
+  void createTable();
   void updatePeakWorkspaceColor();
   std::map<std::string, QColor> getColors();
   MantidQt::SliceViewer::PeakPalette m_peakPalette;

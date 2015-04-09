@@ -17,25 +17,25 @@ class DLLExport CompositePeaksPresenterVsi : public PeaksPresenterVsi {
 public:
   CompositePeaksPresenterVsi();
   ~CompositePeaksPresenterVsi();
-  virtual Mantid::API::IPeaksWorkspace_sptr getPeaksWorkspace() {
+  virtual Mantid::API::IPeaksWorkspace_sptr getPeaksWorkspace() const {
     throw std::runtime_error(
         "The composite peaks presenter has no single peaks workspace.");
   }
-  std::vector<Mantid::API::IPeaksWorkspace_sptr> getPeaksWorkspaces();
-  virtual std::vector<bool> getViewablePeaks();
+  std::vector<Mantid::API::IPeaksWorkspace_sptr> getPeaksWorkspaces() const;
+  virtual std::vector<bool> getViewablePeaks() const;
   virtual void updateViewFrustum(ViewFrustum frustum);
-  virtual std::string getFrame();
-  virtual std::string getPeaksWorkspaceName() {
+  virtual std::string getFrame() const;
+  virtual std::string getPeaksWorkspaceName() const{
     throw std::runtime_error(
         "The composite peaks presenter has no peaks workspace");
   }
-  std::vector<std::string> getPeaksWorkspaceNames();
+  std::vector<std::string> getPeaksWorkspaceNames() const;
   virtual void
   getPeaksInfo(Mantid::API::IPeaksWorkspace_sptr peaksWorkspace, int row,
                Mantid::Kernel::V3D &position, double &radius,
-               Mantid::Kernel::SpecialCoordinateSystem specialCoordinateSystem);
+               Mantid::Kernel::SpecialCoordinateSystem specialCoordinateSystem) const;
   void addPresenter(PeaksPresenterVsi_sptr presenter);
-  std::map<std::string, std::vector<bool>> getInitializedViewablePeaks();
+  std::map<std::string, std::vector<bool>> getInitializedViewablePeaks() const;
   void removePresenter(std::string peaksWorkspaceName);
   void updateWorkspaces(std::vector<std::string> peaksWorkspaceNames);
   virtual void sortPeaksWorkspace(const std::string &,

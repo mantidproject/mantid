@@ -15,14 +15,14 @@ class ViewFrustum;
 class DLLExport PeaksPresenterVsi {
 public:
   virtual ~PeaksPresenterVsi(){};
-  virtual std::vector<bool> getViewablePeaks() = 0;
-  virtual Mantid::API::IPeaksWorkspace_sptr getPeaksWorkspace() = 0;
+  virtual std::vector<bool> getViewablePeaks() const = 0;
+  virtual Mantid::API::IPeaksWorkspace_sptr getPeaksWorkspace() const = 0;
   virtual void updateViewFrustum(ViewFrustum frustum) = 0;
-  virtual std::string getFrame() = 0;
-  virtual std::string getPeaksWorkspaceName() = 0;
+  virtual std::string getFrame() const = 0;
+  virtual std::string getPeaksWorkspaceName() const = 0;
   virtual void getPeaksInfo(Mantid::API::IPeaksWorkspace_sptr peaksWorkspace,
                             int row, Mantid::Kernel::V3D &position,
-                            double &radius, Mantid::Kernel::SpecialCoordinateSystem specialCoordinateSystem) = 0;
+                            double &radius, Mantid::Kernel::SpecialCoordinateSystem specialCoordinateSystem) const = 0;
   virtual void sortPeaksWorkspace(const std::string &byColumnName,
                                   const bool ascending) = 0;
 };

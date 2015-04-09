@@ -328,13 +328,12 @@ bool PeaksTableControllerVsi::hasPeaks() {
 /**
  * Show all peaks in the table.
  */
-void PeaksTableControllerVsi::showFullTable() { createTable(true); }
+void PeaksTableControllerVsi::showFullTable() { createTable(); }
 
 /**
  * Create the table
- * @param full If the full table is to be displayed or only visible peaks.
  */
-void PeaksTableControllerVsi::createTable(bool full) {
+void PeaksTableControllerVsi::createTable() {
   // Create the table if it does not exist
   if (hasPeaks()) {
     if (layout()) {
@@ -359,11 +358,6 @@ void PeaksTableControllerVsi::createTable(bool full) {
       // Initialize the viewablePeaks to be true
       std::map<std::string, std::vector<bool>> viewablePeaks =
           m_presenter->getInitializedViewablePeaks();
-
-      if (!full) {
-        //
-        // viewablePeaks = getViewablePeaks();
-      }
 
       widget->setupMvc(viewablePeaks);
       layout()->addWidget(widget);

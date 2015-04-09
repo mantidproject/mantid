@@ -29,7 +29,7 @@ void CompositePeaksPresenterVsi::updateViewFrustum(ViewFrustum frustum) {
 *Get the viewable peaks. Essentially copied from the slice viewer.
 *@returns A vector indicating which of the peaks are viewable.
 */
-std::vector<bool> CompositePeaksPresenterVsi::getViewablePeaks() {
+std::vector<bool> CompositePeaksPresenterVsi::getViewablePeaks() const{
   return std::vector<bool>();
 }
 
@@ -37,9 +37,9 @@ std::vector<bool> CompositePeaksPresenterVsi::getViewablePeaks() {
  * Get the name of all peaks workspaces as a vector
  * @returns A vector of all peaks workspace names.
  */
-std::vector<std::string> CompositePeaksPresenterVsi::getPeaksWorkspaceNames() {
+std::vector<std::string> CompositePeaksPresenterVsi::getPeaksWorkspaceNames() const{
   std::vector<std::string> peaksWorkspaceNames;
-  for (std::vector<PeaksPresenterVsi_sptr>::iterator it =
+  for (std::vector<PeaksPresenterVsi_sptr>::const_iterator it =
            m_peaksPresenters.begin();
        it != m_peaksPresenters.end(); ++it) {
     peaksWorkspaceNames.push_back((*it)->getPeaksWorkspaceName());
@@ -55,11 +55,11 @@ std::vector<std::string> CompositePeaksPresenterVsi::getPeaksWorkspaceNames() {
  * @param radius A reference to extract the radius.
  * @param specialCoordinateSystem The coordinate system
  */
-void CompositePeaksPresenterVsi::getPeaksInfo(
+void CompositePeaksPresenterVsi::getPeaksInfo (
     Mantid::API::IPeaksWorkspace_sptr peaksWorkspace, int row,
     Mantid::Kernel::V3D &position, double &radius,
-    Mantid::Kernel::SpecialCoordinateSystem specialCoordinateSystem) {
-  for (std::vector<PeaksPresenterVsi_sptr>::iterator it =
+    Mantid::Kernel::SpecialCoordinateSystem specialCoordinateSystem) const{
+  for (std::vector<PeaksPresenterVsi_sptr>::const_iterator it =
            m_peaksPresenters.begin();
        it != m_peaksPresenters.end(); ++it) {
     if ((*it)->getPeaksWorkspace() == peaksWorkspace) {
@@ -75,9 +75,9 @@ void CompositePeaksPresenterVsi::getPeaksInfo(
  * workspace needs to be probed.
  * @returns The coordinate frame.
  */
-std::string CompositePeaksPresenterVsi::getFrame() {
+std::string CompositePeaksPresenterVsi::getFrame() const{
   std::string frame;
-  for (std::vector<PeaksPresenterVsi_sptr>::iterator it =
+  for (std::vector<PeaksPresenterVsi_sptr>::const_iterator it =
            m_peaksPresenters.begin();
        it != m_peaksPresenters.end(); ++it) {
     frame = (*it)->getFrame();
@@ -100,9 +100,9 @@ void CompositePeaksPresenterVsi::addPresenter(
  * @returns A vector with peaks workspace pointers
  */
 std::vector<Mantid::API::IPeaksWorkspace_sptr>
-CompositePeaksPresenterVsi::getPeaksWorkspaces() {
+CompositePeaksPresenterVsi::getPeaksWorkspaces() const {
   std::vector<Mantid::API::IPeaksWorkspace_sptr> peaksWorkspaces;
-  for (std::vector<PeaksPresenterVsi_sptr>::iterator it =
+  for (std::vector<PeaksPresenterVsi_sptr>::const_iterator it =
            m_peaksPresenters.begin();
        it != m_peaksPresenters.end(); ++it) {
     peaksWorkspaces.push_back((*it)->getPeaksWorkspace());
@@ -116,9 +116,9 @@ CompositePeaksPresenterVsi::getPeaksWorkspaces() {
  * @returns A vector of bool-vectors for each peaks presenter.
  */
 std::map<std::string, std::vector<bool>>
-CompositePeaksPresenterVsi::getInitializedViewablePeaks() {
+CompositePeaksPresenterVsi::getInitializedViewablePeaks() const{
   std::map<std::string, std::vector<bool>> viewablePeaks;
-  for (std::vector<PeaksPresenterVsi_sptr>::iterator it =
+  for (std::vector<PeaksPresenterVsi_sptr>::const_iterator it =
            m_peaksPresenters.begin();
        it != m_peaksPresenters.end(); ++it) {
     viewablePeaks.insert(std::pair<std::string, std::vector<bool>>(

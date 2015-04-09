@@ -37,7 +37,7 @@ void ConcretePeaksPresenterVsi::updateViewFrustum(ViewFrustum frustum) {
  * Get the viewable peaks. Essentially copied from the slice viewer.
  * @retruns A vector indicating which of the peaks are viewable.
  */
-std::vector<bool> ConcretePeaksPresenterVsi::getViewablePeaks() {
+std::vector<bool> ConcretePeaksPresenterVsi::getViewablePeaks() const{
   // Need to apply a transform.
   // Don't bother to find peaks in the region if there are no peaks to find.
   Mantid::API::ITableWorkspace_sptr outTable;
@@ -78,7 +78,7 @@ std::vector<bool> ConcretePeaksPresenterVsi::getViewablePeaks() {
  * @returns A pointer to the underlying peaks workspace.
  */
 Mantid::API::IPeaksWorkspace_sptr
-ConcretePeaksPresenterVsi::getPeaksWorkspace() {
+ConcretePeaksPresenterVsi::getPeaksWorkspace() const{
   return m_peaksWorkspace;
 }
 
@@ -86,13 +86,13 @@ ConcretePeaksPresenterVsi::getPeaksWorkspace() {
  * Get the frame
  * @returns The frame.
  */
-std::string ConcretePeaksPresenterVsi::getFrame() { return m_frame; }
+std::string ConcretePeaksPresenterVsi::getFrame() const{ return m_frame; }
 
 /**
  * Get the name of the underlying peaks workspace.
  * @returns The name of the peaks workspace.
  */
-std::string ConcretePeaksPresenterVsi::getPeaksWorkspaceName() {
+std::string ConcretePeaksPresenterVsi::getPeaksWorkspaceName() const{
   return m_peaksWorkspace->getName();
 }
 
@@ -107,7 +107,7 @@ std::string ConcretePeaksPresenterVsi::getPeaksWorkspaceName() {
 void ConcretePeaksPresenterVsi::getPeaksInfo(
     Mantid::API::IPeaksWorkspace_sptr peaksWorkspace, int row,
     Mantid::Kernel::V3D &position, double &radius,
-    Mantid::Kernel::SpecialCoordinateSystem specialCoordinateSystem) {
+    Mantid::Kernel::SpecialCoordinateSystem specialCoordinateSystem) const {
 
   switch (specialCoordinateSystem) {
   case (Mantid::Kernel::SpecialCoordinateSystem::QLab):
@@ -134,8 +134,8 @@ void ConcretePeaksPresenterVsi::getPeaksInfo(
  * @param shape The shape of a peak.
  * @returns The maximal radius of the peak.
  */
-double ConcretePeaksPresenterVsi::getMaxRadius(
-    Mantid::Geometry::PeakShape_sptr shape) {
+double ConcretePeaksPresenterVsi::getMaxRadius (
+    Mantid::Geometry::PeakShape_sptr shape) const{
   const double defaultRadius = 1.0;
   boost::shared_ptr<Mantid::DataObjects::NoShape> nullShape =
       boost::dynamic_pointer_cast<Mantid::DataObjects::NoShape>(shape);

@@ -17,23 +17,23 @@ public:
   ConcretePeaksPresenterVsi(Mantid::API::IPeaksWorkspace_sptr peaksWorkspace,
                             ViewFrustum frustum, std::string wsFrame);
   ~ConcretePeaksPresenterVsi();
-  virtual Mantid::API::IPeaksWorkspace_sptr getPeaksWorkspace();
-  virtual std::vector<bool> getViewablePeaks();
+  virtual Mantid::API::IPeaksWorkspace_sptr getPeaksWorkspace() const;
+  virtual std::vector<bool> getViewablePeaks() const;
   virtual void updateViewFrustum(ViewFrustum frustum);
-  virtual std::string getFrame();
-  virtual std::string getPeaksWorkspaceName();
+  virtual std::string getFrame() const;
+  virtual std::string getPeaksWorkspaceName() const;
   virtual void
   getPeaksInfo(Mantid::API::IPeaksWorkspace_sptr peaksWorkspace, int row,
                Mantid::Kernel::V3D &position, double &radius,
-               Mantid::Kernel::SpecialCoordinateSystem specialCoordinateSystem);
+               Mantid::Kernel::SpecialCoordinateSystem specialCoordinateSystem) const;
   virtual void sortPeaksWorkspace(const std::string &byColumnName,
                                   const bool ascending);
 
 private:
   /// Get the max radius.
-  double getMaxRadius(Mantid::Geometry::PeakShape_sptr shape);
+  double getMaxRadius(Mantid::Geometry::PeakShape_sptr shape) const;
   /// Viewable Peaks
-  std::vector<bool> m_viewablePeaks;
+  mutable std::vector<bool> m_viewablePeaks;
   /// The viewable region
   ViewFrustum m_viewableRegion;
   /// The peaks workspace
