@@ -284,9 +284,11 @@ Workspace_sptr LoadNexusProcessed::doAccelleratedMultiPeriodLoading(
     periodWorkspace->setX(i, tempMatrixWorkspace->refX(i));
   }
 
-  NXEntry mtdEntry = root.openEntry(entryName);
-  const std::string groupName = "workspace";
-  if (!mtdEntry.containsGroup(groupName)) {
+  NXEntry mtdEntry(root, entryName);
+  mtdEntry.openLocal();
+
+  NXData wsEntry(mtdEntry, "workspace");
+  if (!wsEntry.openLocal()) {
     std::stringstream buffer;
     buffer
         << "Group entry " << p - 1
@@ -295,7 +297,6 @@ Workspace_sptr LoadNexusProcessed::doAccelleratedMultiPeriodLoading(
     throw std::runtime_error(buffer.str());
   }
 
-  NXData wsEntry = mtdEntry.openNXData(groupName);
   if (wsEntry.isValid("frac_area")) {
     std::stringstream buffer;
     buffer << "Group entry " << p - 1 << " has fractional area present. Try "
@@ -304,8 +305,10 @@ Workspace_sptr LoadNexusProcessed::doAccelleratedMultiPeriodLoading(
     throw std::runtime_error(buffer.str());
   }
 
-  NXDataSetTyped<double> data = wsEntry.openDoubleData();
-  NXDataSetTyped<double> errors = wsEntry.openNXDouble("errors");
+  NXDataSetTyped<double> data(wsEntry, "values");
+  data.openLocal();
+  NXDataSetTyped<double> errors(wsEntry, "errors");
+  errors.openLocal();
 
   const int nChannels = data.dim1();
 
@@ -359,6 +362,9 @@ Workspace_sptr LoadNexusProcessed::doAccelleratedMultiPeriodLoading(
     g_log.information("Error loading Instrument section of nxs file");
     g_log.information(e.what());
   }
+
+  wsEntry.close();
+  mtdEntry.close();
 
   const double fractionComplete = double(p - 1) / double(nWorkspaceEntries);
   progress(fractionComplete, "Loading multiperiod entry");
