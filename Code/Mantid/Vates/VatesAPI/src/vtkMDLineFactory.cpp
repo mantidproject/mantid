@@ -86,7 +86,7 @@ namespace Mantid
         vtkIdList * linePointList = vtkIdList::New();
         linePointList->SetNumberOfIds(2);
 
-        Mantid::API::CoordTransform* transform = NULL;
+        Mantid::API::CoordTransform const* transform = NULL;
         if (m_useTransform)
         {
           transform = imdws->getTransformToOriginal();
