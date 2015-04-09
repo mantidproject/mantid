@@ -6,6 +6,8 @@
 
 #include "MantidQtMantidWidgets/RangeSelector.h"
 
+#include <boost/make_shared.hpp>
+
 #include <QMessageBox>
 
 #include <qwt_plot_zoomer.h>
