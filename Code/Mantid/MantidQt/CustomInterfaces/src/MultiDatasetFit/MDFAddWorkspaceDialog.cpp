@@ -1,5 +1,7 @@
 #include "MantidQtCustomInterfaces/MultiDatasetFit/MDFAddWorkspaceDialog.h"
 
+#include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ArrayBoundedValidator.h"
 

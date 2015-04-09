@@ -2,6 +2,9 @@
 #include "MantidQtCustomInterfaces/MultiDatasetFit/MultiDatasetFit.h"
 #include "MantidQtCustomInterfaces/MultiDatasetFit/MDFAddWorkspaceDialog.h"
 
+#include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/MatrixWorkspace.h"
+
 #include <QTableWidget>
 #include <QMessageBox>
 
