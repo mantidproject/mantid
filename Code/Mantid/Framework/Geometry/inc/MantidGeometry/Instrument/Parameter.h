@@ -122,8 +122,9 @@ private:
   std::string m_str_value; ///< Parameter value as a string
 };
 
+
 /// Templated class for parameters of type \c Type
-template <class Type> class DLLExport ParameterType : public Parameter {
+template <class Type> class MANTID_GEOMETRY_DLL ParameterType : public Parameter {
 public:
   /// Returns the value of the property as a string
   std::string asString() const;
@@ -152,6 +153,24 @@ protected:
 
 private:
   Type m_value; ///< Value
+};
+
+template <class Type> class MANTID_GEOMETRY_DLL ParameterWithHelp : public ParameterType<Type> {
+public:
+
+  Parameter *clone() const { return new ParameterWithHelp(*this); }
+
+protected:
+  /// Constructor
+  ParameterWithHelp() : ParameterType<Type>(){}
+
+private:
+  /// The string containing full description of the property
+  std::string m_description;
+  /// The name of the property
+  std::string m_name;
+
+
 };
 
 //--------------------------------------------------------------------------
@@ -215,7 +234,7 @@ template <class Type> void ParameterType<Type>::setValue(const Type &value) {
 }
 
 /** Set the value of the parameter via the assignment operator
- * @param value :: The vlue of the paramter
+ * @param value :: The value of the parameter
  * @returns A reference to the parameter
  */
 template <class Type>
