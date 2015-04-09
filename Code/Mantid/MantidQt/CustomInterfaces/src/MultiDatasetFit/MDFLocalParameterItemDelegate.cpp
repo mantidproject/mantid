@@ -20,7 +20,7 @@ LocalParameterItemDelegate::LocalParameterItemDelegate(EditLocalParameterDialog 
 }
 
 /// Create a custom editor LocalParameterEditor.
-QWidget* LocalParameterItemDelegate::createEditor(QWidget * parent, const QStyleOptionViewItem & option, const QModelIndex & index) const
+QWidget* LocalParameterItemDelegate::createEditor(QWidget * parent, const QStyleOptionViewItem &, const QModelIndex & index) const
 {
   m_currentEditor = new LocalParameterEditor(parent,index.row(), owner()->isFixed(index.row()));
   connect(m_currentEditor,SIGNAL(setAllValues(double)),this,SIGNAL(setAllValues(double)));
@@ -75,7 +75,7 @@ void LocalParameterItemDelegate::paint(QPainter * painter, const QStyleOptionVie
       fWidth = option.fontMetrics.width(fixedStr);
     }
 
-    double dHeight = (option.rect.height() - option.fontMetrics.height()) / 2;
+    auto dHeight = (option.rect.height() - option.fontMetrics.height()) / 2;
     rect.adjust(rect.width() - fWidth, dHeight, 0 ,-dHeight);
     painter->drawText(rect,fixedStr);
   }

@@ -100,7 +100,7 @@ void LocalParameterEditor::unfixAll()
 }
 
 /// Filter events in the line editor to emulate a shortcut (F to fix/unfix).
-bool LocalParameterEditor::eventFilter(QObject *widget, QEvent *evn)
+bool LocalParameterEditor::eventFilter(QObject *, QEvent *evn)
 {
   if ( evn->type() == QEvent::KeyPress )
   {
