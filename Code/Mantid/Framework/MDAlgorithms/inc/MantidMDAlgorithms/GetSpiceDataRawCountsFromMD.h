@@ -74,16 +74,7 @@ class DLLExport GetSpiceDataRawCountsFromMD : public API::Algorithm {
                               std::vector<double> &vecY, std::string &xlabel,
                               std::string &ylabel, bool donormalize);
 
-    void getDetCounts(API::IMDEventWorkspace_const_sptr mdws,
-                      const int &runnumber, const int &detid,
-                      std::vector<double> &vecX, std::vector<double> &vecY,
-                      bool formX);
-
-    API::MatrixWorkspace_sptr
-    createOutputWorkspace(const std::vector<double> &vecX,
-                          const std::vector<double> &vecY,
-                          const std::string &xlabel, const std::string &ylabel);
-
+    /// Export a detector's counts accross all runs
     void
     exportIndividualDetCounts(API::IMDEventWorkspace_const_sptr datamdws,
                               API::IMDEventWorkspace_const_sptr monitormdws,
@@ -91,16 +82,30 @@ class DLLExport GetSpiceDataRawCountsFromMD : public API::Algorithm {
                               std::vector<double> &vecY, std::string &xlabel,
                               std::string &ylabel, const bool &donormalize);
 
+    /// Export sample log values accross all runs
     void exportSampleLogValue(API::IMDEventWorkspace_const_sptr datamdws,
                               const std::string &samplelogname,
                               std::vector<double> &vecX,
                               std::vector<double> &vecY, std::string &xlabel,
                               std::string &ylabel);
 
+    /// Get detectors' counts
+    void getDetCounts(API::IMDEventWorkspace_const_sptr mdws,
+                      const int &runnumber, const int &detid,
+                      std::vector<double> &vecX, std::vector<double> &vecY,
+                      bool formX);
+
+    /// Get sample log values
     void getSampleLogValues(API::IMDEventWorkspace_const_sptr mdws,
                             const std::string &samplelogname,
                             const int runnumber,
                             std::vector<double> &vecSampleLog);
+
+    /// Create output workspace
+    API::MatrixWorkspace_sptr
+    createOutputWorkspace(const std::vector<double> &vecX,
+                          const std::vector<double> &vecY,
+                          const std::string &xlabel, const std::string &ylabel);
   };
 
 

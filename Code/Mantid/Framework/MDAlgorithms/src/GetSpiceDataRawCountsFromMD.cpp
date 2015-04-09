@@ -139,6 +139,17 @@ void GetSpiceDataRawCountsFromMD::exec() {
 }
 
 //----------------------------------------------------------------------------------------------
+/** Export all detectors' counts of a particular run
+ * @brief GetSpiceDataRawCountsFromMD::exportDetCountsOfRun
+ * @param datamdws
+ * @param monitormdws
+ * @param runnumber
+ * @param vecX
+ * @param vecY
+ * @param xlabel
+ * @param ylabel
+ * @param donormalize
+ */
 void GetSpiceDataRawCountsFromMD::exportDetCountsOfRun(
     API::IMDEventWorkspace_const_sptr datamdws,
     API::IMDEventWorkspace_const_sptr monitormdws, const int runnumber,
@@ -201,6 +212,17 @@ void GetSpiceDataRawCountsFromMD::exportDetCountsOfRun(
 }
 
 //----------------------------------------------------------------------------------------------
+/** Export a detector's counts accross all runs
+ * @brief GetSpiceDataRawCountsFromMD::exportIndividualDetCounts
+ * @param datamdws
+ * @param monitormdws
+ * @param detid
+ * @param vecX
+ * @param vecY
+ * @param xlabel
+ * @param ylabel
+ * @param donormalize
+ */
 void GetSpiceDataRawCountsFromMD::exportIndividualDetCounts(
     API::IMDEventWorkspace_const_sptr datamdws,
     API::IMDEventWorkspace_const_sptr monitormdws, const int detid,
@@ -273,6 +295,15 @@ void GetSpiceDataRawCountsFromMD::exportIndividualDetCounts(
 }
 
 //----------------------------------------------------------------------------------------------
+/** Export sample log values accross all runs
+ * @brief GetSpiceDataRawCountsFromMD::exportSampleLogValue
+ * @param datamdws
+ * @param samplelogname :: name of the sample log to be exported
+ * @param vecX :: output x values
+ * @param vecY :: output y values
+ * @param xlabel :: label of x-axis.  It is the name of another sample log.
+ * @param ylabel
+ */
 void GetSpiceDataRawCountsFromMD::exportSampleLogValue(
     API::IMDEventWorkspace_const_sptr datamdws,
     const std::string &samplelogname, std::vector<double> &vecX,
@@ -317,6 +348,17 @@ void GetSpiceDataRawCountsFromMD::exportSampleLogValue(
 }
 
 //----------------------------------------------------------------------------------------------
+/** Get detectors' counts
+ * @brief GetSpiceDataRawCountsFromMD::getDetCounts
+ * @param mdws
+ * @param runnumber :: run number of the detectors having for exporting; -1 for
+ * all run numbers
+ * @param detid :: detector ID for the detectors for exporting; -1 for all
+ * detectors
+ * @param vecX :: x-values as 2theta position of detectors to be exported;
+ * @param vecY :: raw detector's counts
+ * @param formX :: flag to set up vecX
+ */
 void GetSpiceDataRawCountsFromMD::getDetCounts(
     API::IMDEventWorkspace_const_sptr mdws, const int &runnumber,
     const int &detid, std::vector<double> &vecX, std::vector<double> &vecY,
@@ -406,6 +448,13 @@ void GetSpiceDataRawCountsFromMD::getDetCounts(
 }
 
 //----------------------------------------------------------------------------------------------
+/** Get sample log values
+ * @brief GetSpiceDataRawCountsFromMD::getSampleLogValues
+ * @param mdws
+ * @param samplelogname
+ * @param runnumber
+ * @param vecSampleLog
+ */
 void GetSpiceDataRawCountsFromMD::getSampleLogValues(
     IMDEventWorkspace_const_sptr mdws, const std::string &samplelogname,
     const int runnumber, std::vector<double> &vecSampleLog) {
@@ -446,6 +495,14 @@ void GetSpiceDataRawCountsFromMD::getSampleLogValues(
 }
 
 //----------------------------------------------------------------------------------------------
+/** Create output workspace
+ * @brief GetSpiceDataRawCountsFromMD::createOutputWorkspace
+ * @param vecX
+ * @param vecY
+ * @param xlabel :: only 'Degrees' can be applied to x-axis
+ * @param ylabel
+ * @return
+ */
 MatrixWorkspace_sptr GetSpiceDataRawCountsFromMD::createOutputWorkspace(
     const std::vector<double> &vecX, const std::vector<double> &vecY,
     const std::string &xlabel, const std::string &ylabel) {
