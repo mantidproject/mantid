@@ -68,7 +68,7 @@ void GetSpiceDataRawCountsFromMD::init() {
       "In the later 2 modes, XLabel can be any supported sample log's name.");
 
   declareProperty(
-      "Pt.", EMPTY_INT(),
+      "Pt", EMPTY_INT(),
       "Experiment point number (i.e., run_number in MDEventWorkspace "
       "of the detectors' counts to be exported. "
       "It is used in mode 'Pt.' only. ");
@@ -105,7 +105,7 @@ void GetSpiceDataRawCountsFromMD::exec() {
   std::string ylabel("");
   if (mode.compare("Pt.") == 0) {
     // export detector counts for one specific Pt./run number
-    int runnumber = getProperty("Pt.");
+    int runnumber = getProperty("Pt");
     if (isEmpty(runnumber))
       throw std::runtime_error("For 'Pt.', value of 'Pt.' must be specified.");
     exportDetCountsOfRun(datamdws, monitormdws, runnumber, vecX, vecY, xlabel,

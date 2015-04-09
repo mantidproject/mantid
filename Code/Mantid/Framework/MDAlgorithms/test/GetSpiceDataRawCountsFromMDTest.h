@@ -43,7 +43,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         testalg.setProperty("MonitorWorkspace", m_monitorMD));
     TS_ASSERT_THROWS_NOTHING(testalg.setProperty("Mode", "Pt."));
-    TS_ASSERT_THROWS_NOTHING(testalg.setProperty("Pt.", 30));
+    TS_ASSERT_THROWS_NOTHING(testalg.setProperty("Pt", 30));
     TS_ASSERT_THROWS_NOTHING(
         testalg.setPropertyValue("OutputWorkspace", "Run1CountsMatrixWS"));
     TS_ASSERT_THROWS_NOTHING(
@@ -160,7 +160,6 @@ public:
         testalg.setProperty("MonitorWorkspace", m_monitorMD));
     TS_ASSERT_THROWS_NOTHING(testalg.setProperty("Mode", "Sample Log"));
     TS_ASSERT_THROWS_NOTHING(testalg.setProperty("SampleLogName", "2theta"));
-    // TS_ASSERT_THROWS_NOTHING(testalg.setProperty("XLabel", "Pt."))
     TS_ASSERT_THROWS_NOTHING(
         testalg.setPropertyValue("OutputWorkspace", "Run1CountsMatrixWS"));
     TS_ASSERT_THROWS_NOTHING(
