@@ -154,15 +154,29 @@ namespace CustomInterfaces
     results["Peaks_Workspace"] = m_peakFittingModel->exportWorkspace();
     results["Peaks_FitResults"] = m_peakFittingModel->exportFittedPeaks();
 
-    AnalysisDataService::Instance().addOrReplace(groupName, boost::make_shared<WorkspaceGroup>());
-
-    for(auto it = results.begin(); it != results.end(); ++it)
-    {
+    // Check if any of the above is not empty
+    for (auto it=results.begin(); it!=results.end(); ++it) {
+    
       if ( it->second ) {
-        std::string wsName = groupName + "_" + it->first;
-        AnalysisDataService::Instance().addOrReplace(wsName, it->second);
-        AnalysisDataService::Instance().addToGroup(groupName, wsName);
+        AnalysisDataService::Instance().addOrReplace(groupName, boost::make_shared<WorkspaceGroup>());
+        break;
       }
+    }
+
+    // There is something to export
+    if (AnalysisDataService::Instance().doesExist(groupName)) {
+
+      for(auto it = results.begin(); it != results.end(); ++it)
+      {
+        if ( it->second ) {
+          std::string wsName = groupName + "_" + it->first;
+          AnalysisDataService::Instance().addOrReplace(wsName, it->second);
+          AnalysisDataService::Instance().addToGroup(groupName, wsName);
+        }
+      }
+    } else {
+      // Nothing to export, show error message
+      QMessageBox::critical(this, "Error", "Nothing to export");
     }
   }
 
