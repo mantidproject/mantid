@@ -177,7 +177,7 @@ class VesuvioTests(unittest.TestCase):
         self.assertAlmostEqual(1332812.0, evs_raw.readY(1)[0], places=DIFF_PLACES)
         self.assertAlmostEqual(705.49415305869115, evs_raw.readE(0)[0], places=DIFF_PLACES)
         self.assertAlmostEqual(1154.4747723532116, evs_raw.readE(1)[0], places=DIFF_PLACES)
-        
+
         self._verify_spectra_numbering(evs_raw.getSpectrum(0), 3,
                                        range(2101,2114))
         self._verify_spectra_numbering(evs_raw.getSpectrum(1), 30,
@@ -265,6 +265,8 @@ class VesuvioTests(unittest.TestCase):
 #====================================================================================
 
 class LoadVesuvioTest(stresstesting.MantidStressTest):
+
+    _success = False
 
     def runTest(self):
         self._success = False

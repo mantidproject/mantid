@@ -1,3 +1,4 @@
+#pylint: disable=no-init
 import stresstesting
 from mantid.simpleapi import *
 
@@ -28,13 +29,15 @@ class WishAnalysis(stresstesting.MantidStressTest):
         ConvertFromDistribution(Workspace="monitor16748")
         #normalise data to the monitor in wavelength
         NormaliseToMonitor(InputWorkspace="w16748-1",OutputWorkspace="w16748-1",MonitorWorkspace="monitor16748")
-        NormaliseToMonitor(InputWorkspace="w16748-1",OutputWorkspace="w16748-1",MonitorWorkspace="monitor16748",IntegrationRangeMin="0.6",IntegrationRangeMax="9.8")
+        NormaliseToMonitor(InputWorkspace="w16748-1",OutputWorkspace="w16748-1",MonitorWorkspace="monitor16748",
+                           IntegrationRangeMin="0.6",IntegrationRangeMax="9.8")
         #align detectors
         ConvertUnits(InputWorkspace="w16748-1",OutputWorkspace="w16748-1",Target="TOF")
         ReplaceSpecialValues(InputWorkspace="w16748-1",OutputWorkspace="w16748-1",NaNValue="0",InfinityValue="0")
         AlignDetectors(InputWorkspace="w16748-1",OutputWorkspace="w16748-1",CalibrationFile="wish_grouping_noends2_no_offsets_nov2009.cal")
         #focus data
-        DiffractionFocussing(InputWorkspace="w16748-1",OutputWorkspace="w16748-1foc",GroupingFileName="wish_grouping_noends2_no_offsets_nov2009.cal")
+        DiffractionFocussing(InputWorkspace="w16748-1",OutputWorkspace="w16748-1foc",
+                             GroupingFileName="wish_grouping_noends2_no_offsets_nov2009.cal")
         DeleteWorkspace(Workspace="w16748-1")
         CropWorkspace(InputWorkspace="w16748-1foc",OutputWorkspace="w16748-1foc",XMin="0.83",XMax="45")
         #load pre-processed empty and subtract

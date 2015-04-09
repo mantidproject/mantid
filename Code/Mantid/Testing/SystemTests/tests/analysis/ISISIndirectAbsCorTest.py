@@ -1,4 +1,4 @@
-#pylint: disable=no-init
+#pylint: disable=no-init,attribute-defined-outside-init
 import stresstesting
 from mantid.simpleapi import *
 from IndirectImport import is_supported_f2py_platform
@@ -157,7 +157,8 @@ class AbsRunFeederChemicalFormulaTest(stresstesting.MantidStressTest):
         beam_width = 4.0
         sampleFormula = 'H2-O'
         canFormula = 'V'
-        AbsRunFeeder(inputWS, canWS, geom, ncan, size, avar, density, beam_width=beam_width, sample_formula=sampleFormula, can_formula=canFormula,  sigs=[0,0,0], siga=[0,0,0])
+        AbsRunFeeder(inputWS, canWS, geom, ncan, size, avar, density, beam_width=beam_width,
+                     sample_formula=sampleFormula, can_formula=canFormula,  sigs=[0,0,0], siga=[0,0,0])
 
     def validate(self):
         self.tolerance = 1e-3
@@ -231,7 +232,8 @@ class AbsRunFeederDiffractionTest(stresstesting.MantidStressTest):
         beam_width = 4.0
         sampleFormula = 'H2-O'
         canFormula = 'V'
-        AbsRunFeeder(inputWS, canWS, geom, ncan, size, avar, density, beam_width=beam_width, sample_formula=sampleFormula, can_formula=canFormula,  sigs=[0,0,0], siga=[0,0,0])
+        AbsRunFeeder(inputWS, canWS, geom, ncan, size, avar, density, beam_width=beam_width,
+                     sample_formula=sampleFormula, can_formula=canFormula,  sigs=[0,0,0], siga=[0,0,0])
 
     def validate(self):
         self.tolerance = 1e-3
