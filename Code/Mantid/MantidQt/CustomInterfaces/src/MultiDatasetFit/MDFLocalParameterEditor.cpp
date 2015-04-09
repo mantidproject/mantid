@@ -5,6 +5,9 @@
 #include <QPushButton>
 #include <QMenu>
 #include <QAction>
+#include <QDoubleValidator>
+#include <QEvent>
+#include <QKeyEvent>
 
 namespace MantidQt
 {
@@ -26,8 +29,14 @@ LocalParameterEditor::LocalParameterEditor(QWidget *parent, int index, bool fixe
 
   m_editor = new QLineEdit(parent);
   m_editor->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Expanding);
+  auto validator = new QDoubleValidator(this);
+  validator->setDecimals(16);
+  m_editor->setValidator(validator);
+  m_editor->setToolTip("Edit local parameter value. Press F to fix/unfix it.");
+
   auto button = new QPushButton("Set");
   button->setSizePolicy(QSizePolicy::Minimum,QSizePolicy::Expanding);
+
   this->setFocusPolicy(Qt::NoFocus);
   layout->addWidget(m_editor);
   layout->addWidget(button);
@@ -60,6 +69,7 @@ LocalParameterEditor::LocalParameterEditor(QWidget *parent, int index, bool fixe
 
   button->setMenu(setMenu);
 
+  m_editor->installEventFilter(this);
 }
 
 /// Send a signal to set all parameters to the value in the editor.
@@ -87,6 +97,21 @@ void LocalParameterEditor::fixAll()
 void LocalParameterEditor::unfixAll()
 {
   emit setAllFixed(false);
+}
+
+/// Filter events in the line editor to emulate a shortcut (F to fix/unfix).
+bool LocalParameterEditor::eventFilter(QObject *widget, QEvent *evn)
+{
+  if ( evn->type() == QEvent::KeyPress )
+  {
+    auto keyEvent = static_cast<QKeyEvent*>(evn);
+    if ( keyEvent->key() == Qt::Key_F )
+    {
+      fixParameter();
+      return true;
+    }
+  }
+  return false;
 }
 
 } // MDF

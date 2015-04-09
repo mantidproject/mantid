@@ -32,6 +32,7 @@ private slots:
   void fixAll();
   void unfixAll();
 private:
+  bool eventFilter(QObject *widget, QEvent *evn);
   QLineEdit* m_editor;
   QAction *m_fixAction;
   int m_index;
