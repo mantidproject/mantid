@@ -306,6 +306,21 @@ class MainWindow(QtGui.QMainWindow):
     def doLoadData(self):
         """ Load and reduce data 
         """
+        # Kick away unsupported tabs
+        itab = self.ui.tabWidget.currentIndex()
+        tabtext = str(self.ui.tabWidget.tabText(itab))
+        print "[DB] Current active tab is No. %d as %s." % (itab, tabtext)
+
+        if itab == 3:
+            # 'multiple scans'
+            self._logNotice("Tab %s does not support 'Load Data'.  Use 'Load All' instead." % (tabtext))
+            return
+
+        elif itab == 5:
+            # 'advanced'
+            self._logNotice("Tab %s does not support 'Load Data'. Request is ambiguous." % (tabtext))
+            return
+
         # Get information
         try: 
             expno, scanno = self._uiGetExpScanNumber()
@@ -321,29 +336,62 @@ class MainWindow(QtGui.QMainWindow):
             self._logError("Unable to download or locate local data file for Exp %d \
                 Scan %d." % (expno, scanno))
 
-        # Get other information
-        try:
-            xmin, binsize, xmax = self._uiGetBinningParams()
-        except Exception as e:
-            self._logError(str(e))
-            return
+        # Now do different tasks for different tab
+        if itab == 0 or itab == 1:
+            # Load data only
+            try: 
+                execstatus = self._myControl.loadSpicePDData(expno, scanno, datafilename)
+                if execstatus is False:
+                    cause = "Load data failed."
+                else:
+                    cause = None
+            except Exception as e:
+                execstatus = False
+                cause = str(e)
+            finally:
+                if execstatus is False:
+                    self._logError(cause)
+                    return
+            # END-TRY-EXCEPT-FINALLY
+                    
+        elif itab == 2 or itab == 4:
+            # load and reduce data 
+            wavelength = float(self.ui.lineEdit_wavelength.text())
 
-        unit = self._currUnit
-        wavelength = float(self.ui.lineEdit_wavelength.text())
+            if itab == 2:
+                # Get other information
+                unit = self._currUnit
+                try:
+                    xmin, binsize, xmax = self._uiGetBinningParams()
+                except Exception as e:
+                    self._logError(str(e))
+                    return
+            else:
+                # itab = 4 
+                unit = 'dSpacing'
+                raise NotImplementedError("Need to read in values!")
 
-        # Reduce data     
-        execstatus = self._myControl.reduceSpicePDData(expno, scanno, datafilename, unit, xmin, 
-            xmax, binsize, wavelength)
-        print "[DB] reduction status = ", execstatus
+            # END-IF-ELSE
 
-        # Plot data
-        
-        clearcanvas = self.ui.checkBox_clearPrevious.isChecked() 
-        
-        xlabel = self._getXLabelFromUnit(unit)
-        if execstatus is True:
-            self._plotReducedData(expno, scanno, self.ui.graphicsView_reducedData, xlabel,
-                label="Exp %d Scan %d Bin = %.5f" % (expno, scanno, binsize), clearcanvas=clearcanvas)
+            # Reduce data     
+            execstatus = self._myControl.reduceSpicePDData(expno, scanno, \
+                    datafilename, unit, xmin, xmax, binsize, wavelength)
+            print "[DB] reduction status = ", execstatus
+
+            # Plot data
+            if execstatus is True:
+                if itab == 2:  
+                    # 
+                    clearcanvas = self.ui.checkBox_clearPrevious.isChecked() 
+                    xlabel = self._getXLabelFromUnit(unit)
+                    self._plotReducedData(expno, scanno, self.ui.graphicsView_reducedData, \
+                            xlabel, label="Exp %d Scan %d Bin = %.5f" % (expno, scanno, binsize), \
+                            clearcanvas=clearcanvas)
+                else:
+                    #
+                    raise NotImplementedError("ASAP for vanadium")
+            # ENDIF(execstatus)
+        # END-IF-ELSE (itab)
             
         return execstatus
 
@@ -899,6 +947,12 @@ class MainWindow(QtGui.QMainWindow):
         Either download the data from a server or copy the data file from local 
         disk
         """
+        # FIXME / TODO : Need to load vanadium correction data automatically!
+        print "************************************************************"
+        print "* ASAP: Load vanadium correction data!                     *"
+        print "************************************************************"
+
+
         # Get on hold of raw data file
         useserver = self.ui.radioButton_useServer.isChecked()
         uselocal = self.ui.radioButton_useLocal.isChecked()
