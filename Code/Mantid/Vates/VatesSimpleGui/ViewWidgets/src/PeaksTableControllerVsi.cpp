@@ -248,7 +248,7 @@ void PeaksTableControllerVsi::updatePeakWorkspaceColor() {
           vtkSMDoubleVectorProperty *prop =
               vtkSMDoubleVectorProperty::SafeDownCast(
                   pipelineRepresentation->getProxy()->GetProperty(
-                      "DiffuseColor"));
+                      "AmbientColor"));
           prop->SetElement(0, red);
           prop->SetElement(1, green);
           prop->SetElement(2, blue);
