@@ -113,6 +113,9 @@ curvefitting.defaultPeak=Gaussian
 curvefitting.findPeaksFWHM=7
 curvefitting.findPeaksTolerance=4
 
+# Network Timeouts (in seconds for various uses within Mantid
+network.default.timeout = 30
+network.scriptrepo.timeout = 5
 # Allows the system proxy to be overridden (leave commented out to use the system proxy
 # proxy.host = 
 # proxy.port = 8080
