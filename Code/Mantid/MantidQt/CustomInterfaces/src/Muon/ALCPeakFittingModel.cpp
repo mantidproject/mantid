@@ -21,7 +21,7 @@ namespace CustomInterfaces
 
   MatrixWorkspace_sptr ALCPeakFittingModel::exportWorkspace()
   {
-    if ( m_data ) {
+    if ( m_data && m_fittedPeaks) {
 
       // Create a new workspace by cloning data one
       IAlgorithm_sptr clone = AlgorithmManager::Instance().create("CloneWorkspace");
