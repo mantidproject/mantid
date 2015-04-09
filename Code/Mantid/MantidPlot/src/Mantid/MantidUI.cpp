@@ -3470,7 +3470,7 @@ void MantidUI::savedatainNexusFormat(const std::string& fileName,const std::stri
     Mantid::API::IAlgorithm_sptr alg = createAlgorithm(algorithm);
     alg->setPropertyValue("Filename",fileName);
     alg->setPropertyValue("InputWorkspace",wsName);
-    alg->execute();
+    executeAlgorithmAsync(alg, true /* wait for completion */);
   }
   catch(...)
   {
@@ -3489,7 +3489,7 @@ void MantidUI::loadWSFromFile(const std::string& wsName, const std::string& file
     Mantid::API::IAlgorithm_sptr alg = createAlgorithm("Load");
     alg->setPropertyValue("Filename",fileName);
     alg->setPropertyValue("OutputWorkspace",wsName);
-    alg->execute();
+    executeAlgorithmAsync(alg, true /* wait for completion */);
   }
   catch(...)
   {
