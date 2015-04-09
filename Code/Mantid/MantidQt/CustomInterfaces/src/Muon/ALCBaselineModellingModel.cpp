@@ -104,7 +104,7 @@ namespace CustomInterfaces
 
   MatrixWorkspace_sptr ALCBaselineModellingModel::exportWorkspace()
   {
-    if ( m_data ) {
+    if ( m_data && m_fittedFunction && m_correctedData ) {
 
       IAlgorithm_sptr clone = AlgorithmManager::Instance().create("CloneWorkspace");
       clone->setChild(true);
