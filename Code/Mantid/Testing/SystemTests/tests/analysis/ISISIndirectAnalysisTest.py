@@ -1,8 +1,6 @@
-#pylint: disable=no-init
+#pylint: disable=no-init,attribute-defined-outside-init
 import stresstesting
-import os
 from mantid.simpleapi import *
-from IndirectImport import is_supported_f2py_platform
 
 
 class ElasticWindowMultipleTest(stresstesting.MantidStressTest):
