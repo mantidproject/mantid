@@ -1,5 +1,5 @@
 import os,sys
-os.environ["PATH"] = r"c:/Mantid/Code/builds/br_master/bin/Release;"+os.environ["PATH"]
+#os.environ["PATH"] = r"c:/Mantid/Code/builds/br_master/bin/Release;"+os.environ["PATH"]
 
 from mantid.simpleapi import *
 from mantid import api,config
@@ -125,6 +125,7 @@ class ReductionWrapperTest(unittest.TestCase):
 
         self.assertEqual(rv.standard_vars,main_prop)
         self.assertEqual(rv.advanced_vars,adv_prop)
+        self.assertTrue(hasattr(rv,'variable_help'))
 
         reload(mr)
 

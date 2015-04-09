@@ -207,11 +207,15 @@ class PropertyManager(NonIDF_Properties):
     #
     det_cal_file    = DetCalFile()
     #
-    map_file        = MapMaskFile('map_file','.map',"Spectra to detector mapping file for the sample run")
+    map_file        = MapMaskFile('map_file','.map',"""Spectra to detector mapping file for the sample run.\n
+                                   The file used to group various spectra together.""")
     #
-    monovan_mapfile = MapMaskFile('monovan_map_file','.map',"Spectra to detector mapping file for the monovanadium integrals calculation")
+    monovan_mapfile = MapMaskFile('monovan_map_file','.map',"""Spectra to detector mapping file for the monovanadium integrals calculation.\n
+                                   The file used to group various monochromatic vanadium runs together to provide 
+                                   reasonable statistics for these groups when calculate monovanadium integrals""")
     #
-    hard_mask_file  = MapMaskFile('hard_mask_file','.msk',"Hard mask file")
+    hard_mask_file  = MapMaskFile('hard_mask_file','.msk',"""Hard mask file.\n
+                                   The file containing list of spectra to be excluded from analysis (spectra with failing detectors)""")
     #
     monovan_integr_range     = MonovanIntegrationRange()
     #
