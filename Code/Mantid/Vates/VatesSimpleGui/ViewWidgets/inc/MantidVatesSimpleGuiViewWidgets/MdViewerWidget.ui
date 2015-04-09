@@ -211,7 +211,7 @@
          <attribute name="title">
           <string>Properties</string>
          </attribute>
-         <layout class="QVBoxLayout" name="verticalLayout_3">
+         <layout class="QVBoxLayout" name="verticalLayout_31">
           <item>
            <widget class="pqPropertiesPanel" name="propertiesPanel" native="true"/>
           </item>

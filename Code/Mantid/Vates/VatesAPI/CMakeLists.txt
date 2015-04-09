@@ -176,7 +176,7 @@ test/CompositePeaksPresenterVsiTest.h
 )
 
 include_directories( inc )
-include_directories ( SYSTEM ${QWT_INCLUDE_DIR} )
+include_directories ( SYSTEM ${QWT_INCLUDE_DIR} ${PARAVIEW_INCLUDE_DIRS})
 
 set( SRC_UNITY_IGNORE_FILES )
 if( UNITY_BUILD )

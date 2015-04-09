@@ -44,7 +44,7 @@ class VTK_EXPORT vtkMDHWSource : public vtkStructuredGridAlgorithm
 {
 public:
   static vtkMDHWSource *New();
-  vtkTypeMacro(vtkMDHWSource, vtkStructuredGridAlgorithm);
+  vtkTypeMacro(vtkMDHWSource, vtkStructuredGridAlgorithm)
   void PrintSelf(ostream& os, vtkIndent indent);
   
   void SetWsName(std::string wsName);

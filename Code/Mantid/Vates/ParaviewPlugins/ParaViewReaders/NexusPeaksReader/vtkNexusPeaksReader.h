@@ -9,7 +9,7 @@ class VTK_EXPORT vtkNexusPeaksReader : public vtkPolyDataAlgorithm
 {
 public:
   static vtkNexusPeaksReader *New();
-  vtkTypeMacro(vtkNexusPeaksReader, vtkPolyDataAlgorithm);
+  vtkTypeMacro(vtkNexusPeaksReader, vtkPolyDataAlgorithm)
   void PrintSelf(ostream& os, vtkIndent indent);
   vtkSetStringMacro(FileName);
   vtkGetStringMacro(FileName);

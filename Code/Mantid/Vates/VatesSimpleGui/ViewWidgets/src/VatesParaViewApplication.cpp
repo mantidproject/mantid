@@ -60,11 +60,11 @@ namespace Mantid
         argvConversion.push_back('\0');
         char *argv[] = {&argvConversion[0]};
 
-        m_logger.debug() << "Intialize pqApplicationCore with " << argv << "\n";
+        m_logger.debug("Intialize pqApplicationCore with "+exePath+"\n");
         // We need to manually set the PV_PLUGIN_PATH because it's
         // not going to be picked up from the paraview/vtk side otherwise.
         Poco::Path pluginsDir(pvPluginPathTop, "pvplugins");
-        m_logger.debug() << "Setting PV_PLUGIN_PATH=" << pluginsDir.toString() << "\n";
+        m_logger.debug("Setting PV_PLUGIN_PATH="+pluginsDir.toString()+"\n");
         vtksys::SystemTools::PutEnv("PV_PLUGIN_PATH=" + pluginsDir.toString());
         new pqPVApplicationCore(argc, argv);
       }
