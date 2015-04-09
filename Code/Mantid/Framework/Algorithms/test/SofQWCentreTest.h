@@ -1,31 +1,39 @@
-#ifndef MANTID_ALGORITHMS_SOFQW3TEST_H_
-#define MANTID_ALGORITHMS_SOFQW3TEST_H_
+#ifndef SOFQWTEST_H_
+#define SOFQWTEST_H_
 
 #include <cxxtest/TestSuite.h>
-#include "MantidAlgorithms/SofQW3.h"
+#include "MantidAlgorithms/SofQWCentre.h"
 #include "MantidDataHandling/LoadNexusProcessed.h"
 
-#include <iomanip>
-
-using namespace Mantid::Algorithms;
 using namespace Mantid::API;
 
-class SofQW3Test : public CxxTest::TestSuite
+class SofQWCentreTest : public CxxTest::TestSuite
 {
 public:
-    
-  void test_Init()
+  void testName()
   {
-    SofQW3 alg;
-    TS_ASSERT_THROWS_NOTHING( alg.initialize() )
-    TS_ASSERT( alg.isInitialized() )
+    TS_ASSERT_EQUALS( sqw.name(), "SofQWCentre" );
   }
 
-
-  void xtest_exec()
+  void testVersion()
   {
-    SofQW3 sqw;
-    sqw.initialize();
+    TS_ASSERT_EQUALS( sqw.version(), 1 );
+  }
+
+  void testCategory()
+  {
+    TS_ASSERT_EQUALS( sqw.category(), "Inelastic" );
+  }
+  
+  void testInit()
+  {
+    TS_ASSERT_THROWS_NOTHING( sqw.initialize() );
+    TS_ASSERT( sqw.isInitialized() );
+  }
+  
+  void testExec()
+  {
+    if (!sqw.isInitialized()) sqw.initialize();
 
     Mantid::DataHandling::LoadNexusProcessed loader;
     loader.initialize();
@@ -36,7 +44,7 @@ public:
 
     Mantid::API::MatrixWorkspace_sptr inWS;
     TS_ASSERT_THROWS_NOTHING( inWS = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>
-      (Mantid::API::AnalysisDataService::Instance().retrieve(inputWS)) );
+                                (Mantid::API::AnalysisDataService::Instance().retrieve(inputWS)) );
     WorkspaceHelpers::makeDistribution(inWS);
 
     TS_ASSERT_THROWS_NOTHING( sqw.setPropertyValue("InputWorkspace",inputWS) );
@@ -45,20 +53,20 @@ public:
     TS_ASSERT_THROWS_NOTHING( sqw.setPropertyValue("QAxisBinning","0.5,0.25,2") );
     TS_ASSERT_THROWS_NOTHING( sqw.setPropertyValue("EMode","Indirect") );
     TS_ASSERT_THROWS_NOTHING( sqw.setPropertyValue("EFixed","1.84") );
-
+    
     TS_ASSERT_THROWS_NOTHING( sqw.execute() );
     TS_ASSERT( sqw.isExecuted() );
-
+    
     Mantid::API::MatrixWorkspace_sptr result;
     TS_ASSERT_THROWS_NOTHING( result = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>
-      (Mantid::API::AnalysisDataService::Instance().retrieve(outputWS)) );
+                                (Mantid::API::AnalysisDataService::Instance().retrieve(outputWS)) );
 
     TS_ASSERT_EQUALS( result->getAxis(0)->length(), 1904 );
     TS_ASSERT_EQUALS( result->getAxis(0)->unit()->unitID(), "DeltaE" );
     TS_ASSERT_DELTA( (*(result->getAxis(0)))(0), -0.5590, 0.0001 );
     TS_ASSERT_DELTA( (*(result->getAxis(0)))(999), -0.0971, 0.0001 );
     TS_ASSERT_DELTA( (*(result->getAxis(0)))(1900), 0.5728, 0.0001 );
-
+    
     TS_ASSERT_EQUALS( result->getAxis(1)->length(), 7 );
     TS_ASSERT_EQUALS( result->getAxis(1)->unit()->unitID(), "MomentumTransfer" );
     TS_ASSERT_EQUALS( (*(result->getAxis(1)))(0), 0.5 );
@@ -66,29 +74,25 @@ public:
     TS_ASSERT_EQUALS( (*(result->getAxis(1)))(6), 2.0 );
 
     const double delta(1e-08);
-    TS_ASSERT_DELTA( result->readY(0)[1160], 17.5583314826, delta);
-    TS_ASSERT_DELTA( result->readE(0)[1160], 0.197345265992, delta);
-
-    TS_ASSERT_DELTA( result->readY(1)[1145], 4.61301046588, delta);
-    TS_ASSERT_DELTA( result->readE(1)[1145], 0.0721823446635,delta);
-
-    TS_ASSERT_DELTA( result->readY(2)[1200], 1.33394133548, delta);
-    TS_ASSERT_DELTA( result->readE(2)[1200], 0.0419839252961, delta);
-
-    TS_ASSERT_DELTA( result->readY(3)[99], 0.0446085388561, delta);
-    TS_ASSERT_DELTA( result->readE(3)[99], 0.0185049423467, delta);
-
-    TS_ASSERT_DELTA( result->readY(4)[1654], 0.0171136490957 , delta);
-    TS_ASSERT_DELTA( result->readE(4)[1654], 0.005007299861, delta);
-
-    TS_ASSERT_DELTA( result->readY(5)[1025], 0.0516113202152, delta);
-    TS_ASSERT_DELTA( result->readE(5)[1025], 0.0102893133461, delta);
-
+    TS_ASSERT_DELTA( result->readY(0)[1160], 54.85624399, delta);
+    TS_ASSERT_DELTA( result->readE(0)[1160], 0.34252858, delta);
+    TS_ASSERT_DELTA( result->readY(1)[1145], 22.72491806, delta);
+    TS_ASSERT_DELTA( result->readE(1)[1145], 0.19867742, delta);
+    TS_ASSERT_DELTA( result->readY(2)[1200], 6.76047436, delta);
+    TS_ASSERT_DELTA( result->readE(2)[1200], 0.10863549, delta);
+    TS_ASSERT_DELTA( result->readY(3)[99], 0.16439574, delta);
+    TS_ASSERT_DELTA( result->readE(3)[99], 0.03414360, delta);
+    TS_ASSERT_DELTA( result->readY(4)[1654], 0.069311442, delta);
+    TS_ASSERT_DELTA( result->readE(4)[1654], 0.007573484, delta);
+    TS_ASSERT_DELTA( result->readY(5)[1025], 0.226287179, delta);
+    TS_ASSERT_DELTA( result->readE(5)[1025], 0.02148236, delta);
+      
     AnalysisDataService::Instance().remove(inputWS);
     AnalysisDataService::Instance().remove(outputWS);    
   }
+
+private:
+  Mantid::Algorithms::SofQWCentre sqw;
 };
 
-
-#endif /* MANTID_ALGORITHMS_SOFQW2TEST_H_ */
-
+#endif /*SOFQWTEST_H_*/

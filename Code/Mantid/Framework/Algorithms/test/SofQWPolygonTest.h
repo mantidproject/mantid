@@ -1,8 +1,8 @@
-#ifndef MANTID_ALGORITHMS_SOFQW2TEST_H_
-#define MANTID_ALGORITHMS_SOFQW2TEST_H_
+#ifndef MANTID_ALGORITHMS_SOFQWPOLYGONTEST_H_
+#define MANTID_ALGORITHMS_SOFQWPOLYGONTEST_H_
 
 #include <cxxtest/TestSuite.h>
-#include "MantidAlgorithms/SofQW2.h"
+#include "MantidAlgorithms/SofQWPolygon.h"
 #include "MantidDataHandling/LoadNexusProcessed.h"
 
 #include <iomanip>
@@ -10,21 +10,26 @@
 using namespace Mantid::Algorithms;
 using namespace Mantid::API;
 
-class SofQW2Test : public CxxTest::TestSuite
+class SofQWPolygonTest : public CxxTest::TestSuite
 {
 public:
-    
+
   void test_Init()
   {
-    SofQW2 alg;
+    SofQWPolygon alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
     TS_ASSERT( alg.isInitialized() )
   }
 
+  void test_Aliased_To_SofQW2()
+  {
+    SofQWPolygon alg;
+    TS_ASSERT_EQUALS("SofQW2", alg.alias())
+  }
 
   void test_exec()
   {
-    SofQW2 sqw;
+    SofQWPolygon sqw;
     sqw.initialize();
 
     Mantid::DataHandling::LoadNexusProcessed loader;
@@ -90,5 +95,5 @@ public:
 };
 
 
-#endif /* MANTID_ALGORITHMS_SOFQW2TEST_H_ */
+#endif /* MANTID_ALGORITHMS_SofQWPolygonTEST_H_ */
 

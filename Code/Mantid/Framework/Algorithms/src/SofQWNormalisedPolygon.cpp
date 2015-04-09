@@ -1,7 +1,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAlgorithms/SofQW3.h"
+#include "MantidAlgorithms/SofQWNormalisedPolygon.h"
 #include "MantidAlgorithms/SofQW.h"
 #include "MantidAPI/BinEdgeAxis.h"
 #include "MantidAPI/SpectrumDetectorMapping.h"
@@ -21,7 +21,7 @@ typedef std::map<specid_t, Mantid::Kernel::V3D> SpectraDistanceMap;
 typedef Geometry::IDetector_const_sptr DetConstPtr;
 
 // Register the algorithm into the AlgorithmFactory
-DECLARE_ALGORITHM(SofQW3)
+DECLARE_ALGORITHM(SofQWNormalisedPolygon)
 
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
@@ -35,7 +35,7 @@ using Geometry::Quadrilateral;
 using Geometry::Vertex2D;
 
 /// Default constructor
-SofQW3::SofQW3()
+SofQWNormalisedPolygon::SofQWNormalisedPolygon()
     : Rebin2D(), m_Qout(), m_thetaWidth(0.0), m_detNeighbourOffset(-1) {}
 
 //----------------------------------------------------------------------------------------------
@@ -43,27 +43,27 @@ SofQW3::SofQW3()
 /**
  * @return the name of the Algorithm
  */
-const std::string SofQW3::name() const { return "SofQW3"; }
+const std::string SofQWNormalisedPolygon::name() const { return "SofQWNormalisedPolygon"; }
 
 /**
  * @return the version number of the Algorithm
  */
-int SofQW3::version() const { return 1; }
+int SofQWNormalisedPolygon::version() const { return 1; }
 
 /**
  * @return the category list for the Algorithm
  */
-const std::string SofQW3::category() const { return "Inelastic"; }
+const std::string SofQWNormalisedPolygon::category() const { return "Inelastic"; }
 
 /**
  * Initialize the algorithm
  */
-void SofQW3::init() { SofQW::createInputProperties(*this); }
+void SofQWNormalisedPolygon::init() { SofQW::createInputProperties(*this); }
 
 /**
  * Execute the algorithm.
  */
-void SofQW3::exec() {
+void SofQWNormalisedPolygon::exec() {
   MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
   // Do the full check for common binning
   if (!WorkspaceHelpers::commonBoundaries(inputWS)) {
@@ -197,7 +197,7 @@ void SofQW3::exec() {
  * @param azimuthal :: The value of the azimuthual angle
  * @return The value of Q
  */
-double SofQW3::calculateQ(const double efixed, int emode, const double deltaE,
+double SofQWNormalisedPolygon::calculateQ(const double efixed, int emode, const double deltaE,
                           const double twoTheta, const double azimuthal) const {
   double ki = 0.0;
   double kf = 0.0;
@@ -221,7 +221,7 @@ double SofQW3::calculateQ(const double efixed, int emode, const double deltaE,
  * values are required very frequently so the total time is more than
  * offset by this precaching step
  */
-void SofQW3::initAngularCachesNonPSD(
+void SofQWNormalisedPolygon::initAngularCachesNonPSD(
     const API::MatrixWorkspace_const_sptr &workspace) {
   const size_t nhist = workspace->getNumberHistograms();
   this->m_theta = std::vector<double>(nhist);
@@ -302,7 +302,7 @@ void SofQW3::initAngularCachesNonPSD(
  * @param workspace : the workspace containing the needed detector information
  */
 void
-SofQW3::initAngularCachesPSD(const API::MatrixWorkspace_const_sptr &workspace) {
+SofQWNormalisedPolygon::initAngularCachesPSD(const API::MatrixWorkspace_const_sptr &workspace) {
   // Trigger a build of the nearst neighbors outside the OpenMP loop
   const int numNeighbours = 4;
   const size_t nHistos = workspace->getNumberHistograms();
@@ -375,7 +375,7 @@ SofQW3::initAngularCachesPSD(const API::MatrixWorkspace_const_sptr &workspace) {
  *  @return A pointer to the newly-created workspace
  */
 RebinnedOutput_sptr
-SofQW3::setUpOutputWorkspace(API::MatrixWorkspace_const_sptr inputWorkspace,
+SofQWNormalisedPolygon::setUpOutputWorkspace(API::MatrixWorkspace_const_sptr inputWorkspace,
                              const std::vector<double> &binParams,
                              std::vector<double> &newAxis) {
   // Create vector to hold the new X axis values
