@@ -241,7 +241,7 @@ void QueryMDWorkspace::exec() {
     const size_t numberOriginal = input->getNumberTransformsToOriginal();
     if (transformCoordsToOriginal && numberOriginal > 0) {
       const size_t index = numberOriginal - 1;
-      CoordTransform *transform = input->getTransformToOriginal(index);
+      CoordTransform const *transform = input->getTransformToOriginal(index);
       VMD temp = transform->applyVMD(center);
       center = temp;
     }

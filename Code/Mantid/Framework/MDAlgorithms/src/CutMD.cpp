@@ -437,7 +437,10 @@ void CutMD::exec() {
                                    true);
   }
 
-  // Done!
+  auto geometry = boost::dynamic_pointer_cast<Mantid::API::MDGeometry>(sliceWS);
+  geometry->clearTransforms();
+  geometry->clearOriginalWorkspaces();
+
   setProperty("OutputWorkspace", sliceWS);
 }
 

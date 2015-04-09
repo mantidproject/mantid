@@ -651,7 +651,7 @@ void SliceViewer::setWorkspace(Mantid::API::IMDWorkspace_sptr ws) {
   if (m_ws->hasOriginalWorkspace()) {
     IMDWorkspace_sptr origWS =
         boost::dynamic_pointer_cast<IMDWorkspace>(m_ws->getOriginalWorkspace());
-    CoordTransform *toOrig = m_ws->getTransformToOriginal();
+    auto toOrig = m_ws->getTransformToOriginal();
     if (toOrig) {
       ui.frmMouseInfo->setVisible(true);
       ui.lblOriginalWorkspace->setText(
@@ -1291,7 +1291,7 @@ void SliceViewer::showInfoAt(double x, double y) {
   if (m_ws->hasOriginalWorkspace()) {
     IMDWorkspace_sptr origWS =
         boost::dynamic_pointer_cast<IMDWorkspace>(m_ws->getOriginalWorkspace());
-    CoordTransform *toOrig = m_ws->getTransformToOriginal();
+    auto toOrig = m_ws->getTransformToOriginal();
     if (toOrig) {
       // Transform the coordinates
       VMD orig = toOrig->applyVMD(coords);
