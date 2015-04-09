@@ -25,9 +25,8 @@
 #include "pqPluginSettingsBehavior.h"
 
 #include <string>
-#include <iostream>
+
 #include "vtksys/SystemTools.hxx"
-#include <Poco/Environment.h>
 
 namespace Mantid
 {
@@ -37,33 +36,30 @@ namespace Mantid
     {
       VatesParaViewApplication::VatesParaViewApplication() : m_logger("VatesParaViewApplication"), m_behaviorsSetup(false)
       {
-        GlobalInterpreterLock gil;
-        Q_ASSERT(pqApplicationCore::instance()==NULL);
-
-        // Provide ParaView's application core with a path to ParaView
-        int argc = 1;
-
-        std::string exePath = Kernel::ConfigService::Instance().getDirectoryOfExecutable();
-        std::vector<char> argvConversion(exePath.begin(), exePath.end());
-        argvConversion.push_back('\0');
-
-        char *argv[] = {&argvConversion[0]};
-
-        m_logger.debug() << "Intialize pqApplicationCore with " << argv << "\n";
-
         // Get the plugin path that we set in the ConfigService.
-        QString pv_plugin_path = QString::fromStdString(Poco::Environment::get("PV_PLUGIN_PATH"));
-
-        // We need to manually set the PV_PLUGIN_PATH because it's not going to be picked up from the paraview/vtk side otherwise.
-        vtksys::SystemTools::PutEnv((std::string("PV_PLUGIN_PATH=")+pv_plugin_path.toStdString()).c_str());
-
-        if (pv_plugin_path.isEmpty())
+        auto & configSvc = Kernel::ConfigService::Instance();
+        std::string pvPluginPath = configSvc.getPVPluginsPath();
+        if (pvPluginPath.empty())
         {
-          throw std::runtime_error("PV_PLUGIN_PATH not setup.\nVates plugins will not be available.\n"
+          throw std::runtime_error("pvplugins.directory key not setup.\nVates plugins will not be available.\n"
                                    "Further use will cause the program to crash.\nPlease exit and "
                                    "set this variable.");
         }
 
+        GlobalInterpreterLock gil;
+        Q_ASSERT(pqApplicationCore::instance()==NULL);
+
+        // Provide ParaView's application core with a path to the running executable
+        int argc = 1;
+        std::string exePath = configSvc.getDirectoryOfExecutable();
+        std::vector<char> argvConversion(exePath.begin(), exePath.end());
+        argvConversion.push_back('\0');
+        char *argv[] = {&argvConversion[0]};
+
+        m_logger.debug() << "Intialize pqApplicationCore with " << argv << "\n";
+        // We need to manually set the PV_PLUGIN_PATH because it's
+        // not going to be picked up from the paraview/vtk side otherwise.
+        vtksys::SystemTools::PutEnv("PV_PLUGIN_PATH=" + pvPluginPath);
         new pqPVApplicationCore(argc, argv);
       }
 

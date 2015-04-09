@@ -189,7 +189,6 @@ set ( MANTID_SRCS  src/Mantid/AlgorithmMonitor.cpp
                    src/Mantid/PeakPickerTool.cpp
                    src/Mantid/Preferences.cpp
                    src/Mantid/RemoveErrorsDialog.cpp
-                   src/Mantid/SetUpParaview.cpp
                    src/Mantid/UserFitFunctionDialog.cpp
                    src/Mantid/WorkspaceIcons.cpp
                    src/Mantid/InstrumentWidget/BinDialog.cpp
@@ -427,7 +426,6 @@ set ( MANTID_HDRS  src/Mantid/AlgorithmMonitor.h
                    src/Mantid/PeakPickerTool.h
                    src/Mantid/Preferences.h
                    src/Mantid/RemoveErrorsDialog.h
-                   src/Mantid/SetUpParaview.h
                    src/Mantid/UserFitFunctionDialog.h
                    src/Mantid/WorkspaceIcons.h
                    src/Mantid/InstrumentWidget/BinDialog.h
@@ -700,7 +698,6 @@ set ( MANTID_MOC_FILES src/Mantid/AlgorithmMonitor.h
                        src/Mantid/MantidTable.h
                        src/Mantid/PeakPickerTool.h
                        src/Mantid/RemoveErrorsDialog.h
-                       src/Mantid/SetUpParaview.h
                        src/Mantid/UserFitFunctionDialog.h
                        src/Mantid/InstrumentWidget/XIntegrationControl.h
                        src/Mantid/InstrumentWidget/BinDialog.h
@@ -731,7 +728,6 @@ set ( UI_FILES src/SendToProgramDialog.ui
                src/Mantid/UserFitFunctionDialog.ui
                src/Mantid/MantidAbout.ui
                src/Mantid/RemoveErrorsDialog.ui
-               src/Mantid/SetUpParaview.ui
                src/Mantid/ManageCustomMenus.ui
                src/Mantid/ManageInterfaceCategories.ui
                src/Mantid/MantidMDCurveDialog.ui
@@ -860,7 +856,7 @@ copy_files_to_dir ( "${MTDPLOTPY_FILES}"
                             ${CMAKE_CURRENT_SOURCE_DIR}/pymantidplot
                             ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/pymantidplot
                             MTDPLOT_INSTALL_FILES )
-                            
+
 set( FUTURE_FILES
   __init__.py
   pyplot.py
