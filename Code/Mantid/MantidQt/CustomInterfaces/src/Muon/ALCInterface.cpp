@@ -115,7 +115,6 @@ namespace CustomInterfaces
 
     // On last step - hide next step button, but show "Export results..."
     m_ui.nextStep->setVisible(hasNextStep);
-    m_ui.exportResults->setVisible(!hasNextStep);
 
     if (hasPrevStep)
     {
