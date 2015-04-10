@@ -62,7 +62,7 @@ LocalParameterEditor::LocalParameterEditor(QWidget *parent, int index, bool fixe
   connect(action,SIGNAL(activated()),this,SLOT(fixAll()));
   setMenu->addAction(action);
 
-  action = new QAction("Unix all",this);
+  action = new QAction("Unfix all",this);
   action->setToolTip("Unfix all parameters.");
   connect(action,SIGNAL(activated()),this,SLOT(unfixAll()));
   setMenu->addAction(action);

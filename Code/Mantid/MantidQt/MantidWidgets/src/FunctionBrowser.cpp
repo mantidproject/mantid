@@ -2115,7 +2115,11 @@ void FunctionBrowser::updateLocalTie(const QString& parName)
     }
     if ( m_localParameterValues[parName][m_currentDataset].fixed )
     {
-      addTieProperty(prop, QString::number(m_localParameterValues[parName][m_currentDataset].value));
+      auto ap = addTieProperty(prop, QString::number(m_localParameterValues[parName][m_currentDataset].value));
+      if (ap.prop)
+      {
+        ap.prop->setEnabled(false);
+      }
     }
 }
 
