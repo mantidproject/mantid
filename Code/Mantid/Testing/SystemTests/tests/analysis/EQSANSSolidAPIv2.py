@@ -1,4 +1,4 @@
-#pylint: disable=no-init
+#pylint: disable=no-init,attribute-defined-outside-init
 import stresstesting
 from mantid.simpleapi import *
 from reduction_workflow.instruments.sans.sns_command_interface import *
@@ -20,7 +20,7 @@ class EQSANSSolid(stresstesting.MantidStressTest):
         return True
     """
         Analysis Tests for EQSANS
-        Testing that the I(Q) output of is correct 
+        Testing that the I(Q) output of is correct
     """
 
     def runTest(self):
@@ -63,7 +63,7 @@ class EQSANSSolidEvent(EQSANSSolid):
         return True
     """
         Analysis Tests for EQSANS
-        Testing that the I(Q) output of is correct 
+        Testing that the I(Q) output of is correct
     """
     def runTest(self):
         """

@@ -1,10 +1,10 @@
+#pylint: disable=no-init,attribute-defined-outside-init
 """
 System Test for BASIS autoreduction
 """
 from mantid.simpleapi import *
 
 import stresstesting
-import shutil
 import os
 
 class BASISAutoReductionTest(stresstesting.MantidStressTest):

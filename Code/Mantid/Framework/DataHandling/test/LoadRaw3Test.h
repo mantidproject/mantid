@@ -584,8 +584,13 @@ public:
     // But the data should be different
     TS_ASSERT_DIFFERS( monoutsptr1->dataY(1)[555], monoutsptr2->dataY(1)[555] )
 
-    TS_ASSERT_EQUALS( &(monoutsptr1->run()), &(monoutsptr2->run()) )
-
+    // Same number of logs
+    const auto & monPeriod1Run = monoutsptr1->run();
+    const auto & monPeriod2Run = monoutsptr2->run();
+    TS_ASSERT_EQUALS(monPeriod1Run.getLogData().size(), monPeriod2Run.getLogData().size() );
+    TS_ASSERT(monPeriod1Run.hasProperty("period 1"))
+    TS_ASSERT(monPeriod2Run.hasProperty("period 2"))
+    
     Workspace_sptr wsSptr=AnalysisDataService::Instance().retrieve("multiperiod");
     WorkspaceGroup_sptr sptrWSGrp=boost::dynamic_pointer_cast<WorkspaceGroup>(wsSptr);
 

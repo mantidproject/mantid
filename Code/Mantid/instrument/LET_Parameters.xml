@@ -414,10 +414,11 @@
        fix_ei=fixei;
        sum_runs=sum;
        wb_integr_range=detector_van_range;
+       motor_log_names = motor_name;
        van_mass=vanadium-mass;
        check_background = background;
        mon1_norm_spec=norm-mon1-spec;
-       mon2_norm_spec=norm-mon2-spec;       
+       mon2_norm_spec=norm-mon2-spec;
        scale_factor=scale-factor;
        wb_scale_factor=wb-scale-factor;
        monovan_integr_range=abs_units_van_range;

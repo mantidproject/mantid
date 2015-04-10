@@ -106,7 +106,7 @@ class CreateMD(DataProcessorAlgorithm):
 
     def PyInit(self):
         self.declareProperty(StringArrayProperty('InputWorkspaces',  values=[], direction=Direction.Input, validator=StringArrayMandatoryValidator()),
-                             doc='Matrix workspace to slice')
+                             doc='Input workspaces to process')
 
         self.declareProperty('Emode', defaultValue='Direct', validator=StringListValidator(self._possible_emodes()), direction=Direction.Input, doc='Analysis mode ' + str(self._possible_emodes()) )
 

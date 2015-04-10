@@ -16,6 +16,9 @@ HB2A will be supported in future.
 Inputs
 ######
 
+Required workspaces
++++++++++++++++++++
+
 There are two input Workspaces that are required for this algoriths.  
 Both of them stores the data from a SPICE file. 
 
@@ -27,6 +30,15 @@ that are created during the algorithm's execution.
 
 These two workspaces can be obtained by executing algorithm LoasSpiceAscii. 
 
+Optional workspaces
++++++++++++++++++++
+
+An optional TableWorkspace is for applying detectors' efficiency factor 
+to the raw detectors' counts. 
+It is required to a 2-column TableWorkspace.  Column 0 is of integer type for 
+detector IDs, while 
+Column 1 is of double type for detector efficiency factor (:math:`f`).  
+The corrected counts is equal to :math:`counts^{raw}/f`. 
 
 Outputs
 #######

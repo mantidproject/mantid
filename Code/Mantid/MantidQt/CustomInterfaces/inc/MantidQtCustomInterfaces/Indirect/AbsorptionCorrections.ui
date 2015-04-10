@@ -170,6 +170,9 @@
           </item>
           <item row="5" column="1">
            <widget class="QDoubleSpinBox" name="spFlatElementSize">
+            <property name="decimals">
+             <number>5</number>
+            </property>
             <property name="singleStep">
              <double>0.010000000000000</double>
             </property>
@@ -183,6 +186,9 @@
             <property name="suffix">
              <string> cm</string>
             </property>
+            <property name="decimals">
+             <number>5</number>
+            </property>
             <property name="singleStep">
              <double>0.100000000000000</double>
             </property>
@@ -192,6 +198,9 @@
            <widget class="QDoubleSpinBox" name="spFlatSampleHeight">
             <property name="suffix">
              <string> cm</string>
+            </property>
+            <property name="decimals">
+             <number>5</number>
             </property>
             <property name="singleStep">
              <double>0.100000000000000</double>
@@ -210,6 +219,9 @@
             <property name="suffix">
              <string> cm</string>
             </property>
+            <property name="decimals">
+             <number>5</number>
+            </property>
             <property name="singleStep">
              <double>0.100000000000000</double>
             </property>
@@ -219,6 +231,9 @@
            <widget class="QDoubleSpinBox" name="spFlatSampleThickness">
             <property name="suffix">
              <string> cm</string>
+            </property>
+            <property name="decimals">
+             <number>5</number>
             </property>
             <property name="singleStep">
              <double>0.100000000000000</double>
@@ -244,6 +259,9 @@
             <property name="suffix">
              <string> cm</string>
             </property>
+            <property name="decimals">
+             <number>5</number>
+            </property>
             <property name="singleStep">
              <double>0.100000000000000</double>
             </property>
@@ -267,6 +285,9 @@
            <widget class="QDoubleSpinBox" name="spAnnSampleInnerRadius">
             <property name="suffix">
              <string> cm</string>
+            </property>
+            <property name="decimals">
+             <number>5</number>
             </property>
             <property name="singleStep">
              <double>0.100000000000000</double>
@@ -312,6 +333,9 @@
             <property name="suffix">
              <string> cm</string>
             </property>
+            <property name="decimals">
+             <number>5</number>
+            </property>
             <property name="singleStep">
              <double>0.100000000000000</double>
             </property>
@@ -321,6 +345,9 @@
            <widget class="QDoubleSpinBox" name="spAnnCanOuterRadius">
             <property name="suffix">
              <string> cm</string>
+            </property>
+            <property name="decimals">
+             <number>5</number>
             </property>
             <property name="singleStep">
              <double>0.100000000000000</double>
@@ -338,6 +365,9 @@
            <widget class="QDoubleSpinBox" name="spAnnCanInnerRadius">
             <property name="suffix">
              <string> cm</string>
+            </property>
+            <property name="decimals">
+             <number>5</number>
             </property>
             <property name="singleStep">
              <double>0.100000000000000</double>
@@ -397,6 +427,9 @@
             <property name="suffix">
              <string> cm</string>
             </property>
+            <property name="decimals">
+             <number>5</number>
+            </property>
             <property name="singleStep">
              <double>0.100000000000000</double>
             </property>
@@ -406,6 +439,9 @@
            <widget class="QDoubleSpinBox" name="spCylCanRadius">
             <property name="suffix">
              <string> cm</string>
+            </property>
+            <property name="decimals">
+             <number>5</number>
             </property>
             <property name="singleStep">
              <double>0.100000000000000</double>
@@ -429,6 +465,9 @@
        <widget class="QDoubleSpinBox" name="spSampleNumberDensity">
         <property name="suffix">
          <string> A^-3</string>
+        </property>
+        <property name="decimals">
+         <number>5</number>
         </property>
         <property name="singleStep">
          <double>0.100000000000000</double>
@@ -474,13 +513,6 @@
       <string>Container Details</string>
      </property>
      <layout class="QGridLayout" name="gridLayout_2">
-      <item row="2" column="0">
-       <widget class="QCheckBox" name="ckUseCanCorrections">
-        <property name="text">
-         <string>Use Container Corrections</string>
-        </property>
-       </widget>
-      </item>
       <item row="3" column="2">
        <widget class="QLabel" name="lbCanChemicalFormula">
         <property name="text">
@@ -502,6 +534,9 @@
         </property>
         <property name="suffix">
          <string> A^-3</string>
+        </property>
+        <property name="decimals">
+         <number>5</number>
         </property>
         <property name="singleStep">
          <double>0.100000000000000</double>
@@ -529,6 +564,9 @@
         <property name="enabled">
          <bool>false</bool>
         </property>
+        <property name="decimals">
+         <number>5</number>
+        </property>
         <property name="singleStep">
          <double>0.100000000000000</double>
         </property>
@@ -538,6 +576,13 @@
        <widget class="QCheckBox" name="ckScaleCan">
         <property name="text">
          <string>Scale:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0" colspan="2">
+       <widget class="QCheckBox" name="ckUseCanCorrections">
+        <property name="text">
+         <string>Use Container Corrections</string>
         </property>
        </widget>
       </item>

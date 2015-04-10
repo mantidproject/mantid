@@ -86,6 +86,7 @@ namespace CustomInterfaces
     fit->setChild(true);
     fit->setProperty("Function", peaks->asString());
     fit->setProperty("InputWorkspace", boost::const_pointer_cast<MatrixWorkspace>(m_data));
+    fit->setProperty("CreateOutput", true);
     fit->execute();
 
     setFittedPeaks(static_cast<IFunction_sptr>(fit->getProperty("Function")));

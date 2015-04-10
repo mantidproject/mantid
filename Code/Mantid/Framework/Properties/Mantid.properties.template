@@ -16,7 +16,7 @@ default.facility = ISIS
 default.instrument =
 
 # Set of PyQt interfaces to add to the Interfaces menu, separated by a space.  Interfaces are seperated from their respective categories by a "/".
-mantidqt.python_interfaces = Direct/DGS_Reduction.py Direct/DGSPlanner.py SANS/ORNL_SANS.py Reflectometry/REFL_Reduction.py Reflectometry/REFL_SF_Calculator.py Reflectometry/REFM_Reduction.py Utility/TofConverter.py Reflectometry/ISIS_Reflectometry.py Diffraction/Powder_Diffraction_Reduction.py Utility/FilterEvents.py 
+mantidqt.python_interfaces = Direct/DGS_Reduction.py Direct/DGSPlanner.py SANS/ORNL_SANS.py Reflectometry/REFL_Reduction.py Reflectometry/REFL_SF_Calculator.py Reflectometry/REFM_Reduction.py Utility/TofConverter.py Reflectometry/ISIS_Reflectometry.py Diffraction/Powder_Diffraction_Reduction.py Utility/FilterEvents.py
 mantidqt.python_interfaces_directory = @MANTID_ROOT@/scripts
 
 # Where to find mantid plugin libraries
@@ -113,8 +113,11 @@ curvefitting.defaultPeak=Gaussian
 curvefitting.findPeaksFWHM=7
 curvefitting.findPeaksTolerance=4
 
-# Allows the system proxy to be overridden (leave commented out to use the system proxy
-# proxy.host = 
+# Network Timeouts (in seconds for various uses within Mantid)
+network.default.timeout = 30
+network.scriptrepo.timeout = 5
+# Allows the system proxy to be overridden (leave commented out to use the system proxy)
+# proxy.host =
 # proxy.port = 8080
 # This is to force https proxy requests to use the http proxy (current necessary)
 proxy.httpsTargetUrl = http://www.mantidproject.org
@@ -128,6 +131,12 @@ MantidOptions.InvisibleWorkspaces=0
 # This flag controls the way the "unwrapped" instrument view is rendered.
 # Change to Off to disable OpenGL and use normal windows graphics.
 MantidOptions.InstrumentView.UseOpenGL = On
+
+# Controls the default normalization mode for graph plotting
+# Allowed values are:
+#   On: Normalize to the bin width for plots
+#   Off: Do not normalize
+graph1d.autodistribution = On
 
 #Uncommenting the line below will enable algorithm chain re-running whenever a
 #workspace is replaced. Uncommenting and setting it to 0 will also turn it off

@@ -1,3 +1,4 @@
+#pylint: disable=no-init,invalid-name,attribute-defined-outside-init
 import stresstesting
 from mantid.simpleapi import *
 from mantid.api import FileFinder
@@ -13,7 +14,12 @@ def do_cleanup():
     Files = ["PG3_9829.gsa",
     "PG3_9829.py",
     "PG3_9830.gsa",
-    "PG3_9830.py"]
+    "PG3_9830.py",
+    "PG3_4844-1.dat",
+    "PG3_4844.getn",
+    "PG3_4844.gsa",
+    "PG3_4844.py",
+    "PG3_4866.gsa"]
     for file in Files:
         absfile = FileFinder.getFullPath(file)
         if os.path.exists(absfile):
