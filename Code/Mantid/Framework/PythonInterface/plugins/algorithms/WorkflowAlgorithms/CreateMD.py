@@ -53,7 +53,7 @@ class CreateMD(DataProcessorAlgorithm):
         set_ub.setProperty('v', v)
         set_ub.execute()
 
-    def _convert_to_md(self, workspace, analysis_mode):
+    def _convert_to_md(self, workspace, analysis_mode, in_place, out_mdws=None):
 
         # Find the Min Max extents
         min_max_alg = self.createChildAlgorithm('ConvertToMDMinMaxGlobal')
@@ -67,12 +67,17 @@ class CreateMD(DataProcessorAlgorithm):
         # Convert to MD
         convert_alg = self.createChildAlgorithm('ConvertToMD')
         convert_alg.setProperty('InputWorkspace', workspace)
-        convert_alg.setPropertyValue('OutputWorkspace', 'dummy')
         convert_alg.setProperty('QDimensions', 'Q3D')
         convert_alg.setProperty('QConversionScales', 'HKL')
         convert_alg.setProperty('dEAnalysisMode', analysis_mode)
         convert_alg.setProperty('MinValues', min_values)
         convert_alg.setProperty('MaxValues', max_values)
+        convert_alg.setProperty("OverwriteExisting", not in_place)
+        if in_place:
+            convert_alg.setProperty("OutputWorkspace", out_mdws)
+        else:
+            convert_alg.setPropertyValue("OutputWorkspace", 'dummy')
+
         convert_alg.execute()
         return convert_alg.getProperty('OutputWorkspace').value
 
@@ -84,7 +89,7 @@ class CreateMD(DataProcessorAlgorithm):
         merge_alg.execute()
         return merge_alg.getProperty('OutputWorkspace').value
 
-    def _single_run(self, input_workspace, emode, efix, psi, gl, gs, alatt=None, angdeg=None, u=None, v=None,):
+    def _single_run(self, input_workspace, emode, efix, psi, gl, gs, in_place, alatt=None, angdeg=None, u=None, v=None, out_mdws=None):
         ub_params = map(any, [alatt, angdeg, u, v])
         goniometer_params = [psi, gl, gs]
         if any(ub_params) and not all(ub_params):
@@ -104,7 +109,7 @@ class CreateMD(DataProcessorAlgorithm):
             self._add_sample_log(workspace=input_workspace, log_name='psi', log_number=psi)
             self._set_goniometer(workspace=input_workspace)
         
-        output_run = self._convert_to_md(workspace=input_workspace, analysis_mode=emode)
+        output_run = self._convert_to_md(workspace=input_workspace, analysis_mode=emode, in_place=in_place, out_mdws=out_mdws)
         return output_run
     
 
@@ -138,7 +143,7 @@ class CreateMD(DataProcessorAlgorithm):
 
         self.declareProperty(IMDWorkspaceProperty('OutputWorkspace', '', direction=Direction.Output ), doc='Output MDWorkspace')
 
-        self.declareProperty('FileBacked', defaultValue=False, direction=Direction.Input, doc="Execute in a file-backed mode")
+        self.declareProperty('InPlace', defaultValue=False, direction=Direction.Input, doc="Execute conversions to MD and Merge in one-step. Less memory overhead.")
 
     def _validate_inputs(self):
     
@@ -199,7 +204,8 @@ class CreateMD(DataProcessorAlgorithm):
         psi = self.getProperty('Psi').value
         gl = self.getProperty('Gl').value
         gs = self.getProperty('Gs').value   
-        efix = self.getProperty('EFix').value       
+        efix = self.getProperty('EFix').value   
+        in_place = self.getProperty('InPlace')    
         
         data_sources = self.getProperty("DataSources").value
         
@@ -229,6 +235,7 @@ class CreateMD(DataProcessorAlgorithm):
         
         run_data = zip(data_sources, psi, gl, gs, efix)
         counter = 0
+        run_md = None
         for run_entry in run_data:
                 data_source, psi_entry, gl_entry, gs_entry, efix_entry = run_entry
                 must_load = not AnalysisDataService.doesExist(data_source)
@@ -237,17 +244,22 @@ class CreateMD(DataProcessorAlgorithm):
                     ws_name = "%s_md_%i" % ( os.path.splitext(data_source)[0] , counter )  # Strip off any file extensions, and call it _md_{n} where n avoids clashes in the dictionary
                     ws = self._load_ws(data_source, ws_name)
                     to_merge_name = ws_name
-                    counter += 1
                 else:
                     ws = AnalysisDataService.retrieve(data_source)
                     to_merge_name = "%s_md" %  data_source  
-                run_md = self._single_run(input_workspace=ws, emode=emode, efix=efix_entry, alatt=alatt, angdeg=angdeg, u=u, v=v, psi=psi_entry, gl=gl_entry, gs=gs_entry)
-                
-                AnalysisDataService.addOrReplace(to_merge_name, run_md)
-                to_merge_names.append(to_merge_name)
-                
 
-        if len(to_merge_names) > 1:
+                do_in_place = in_place and counter > 0 # We cannot process in place until we have an output MDWorkspace to use.    
+                run_md = self._single_run(input_workspace=ws if in_place else ws, emode=emode, efix=efix_entry, 
+                    alatt=alatt, angdeg=angdeg, u=u, v=v, psi=psi_entry, gl=gl_entry, gs=gs_entry, in_place=do_in_place, out_mdws=run_md)
+                
+                
+                to_merge_names.append(to_merge_name)
+
+                AnalysisDataService.addOrReplace(to_merge_name, run_md)
+
+                counter += 1
+
+        if len(to_merge_names) > 1 and not in_place:
             output_workspace = self._merge_runs(to_merge_names)
         else:
             output_workspace = AnalysisDataService.retrieve(to_merge_names[0])
