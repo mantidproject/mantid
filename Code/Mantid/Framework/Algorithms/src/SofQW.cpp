@@ -35,6 +35,21 @@ using namespace Kernel;
 using namespace API;
 
 /**
+ * @return A summary of the algorithm
+ */
+const std::string SofQW::summary() const {
+  return "Computes S(Q,w) using a either centre point or parallel-piped "
+         "rebinning.\n"
+         "The output from each method is:\n"
+         "CentrePoint - centre-point rebin that takes no account of pixel "
+         "curvature or area overlap\n\n"
+         "Polygon - parallel-piped rebin, outputting a weighted-sum of "
+         "overlapping polygons\n\n"
+         "NormalisedPolygon - parallel-piped rebin, outputting a weighted-sum of "
+         "overlapping polygons normalised by the fractional area of each overlap";
+}
+
+/**
  * Create the input properties
  */
 void SofQW::init() { createInputProperties(*this); }
