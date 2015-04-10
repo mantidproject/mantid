@@ -191,7 +191,7 @@ void testInitialSplittingEnabled()
   convertAlg.setProperty("dEAnalysisMode", "Direct");
   convertAlg.setPropertyValue("MinValues","-10,-10,-10, 0");
   convertAlg.setPropertyValue("MaxValues"," 10, 10, 10, 1");
-  convertAlg.setPropertyValue("InitialSplitting", "1");
+  convertAlg.setPropertyValue("TopLevelSplitting", "1");
   convertAlg.execute();
 
   IMDEventWorkspace_sptr outEventWS = convertAlg.getProperty("OutputWorkspace");
@@ -231,7 +231,7 @@ void testInitialSplittingDisabled()
     TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("dEAnalysisMode", "Direct"));
     pAlg->setPropertyValue("MinValues","-10,-10,-10,  0,-10,-10");
     pAlg->setPropertyValue("MaxValues"," 10, 10, 10, 20, 40, 20");
-    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("InitialSplitting", "0"));
+    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("TopLevelSplitting", "0"));
     pAlg->setRethrows(false);
     pAlg->execute();
     TSM_ASSERT("Should finish successfully",pAlg->isExecuted());

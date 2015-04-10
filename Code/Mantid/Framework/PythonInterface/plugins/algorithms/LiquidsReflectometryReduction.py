@@ -104,7 +104,7 @@ class LiquidsReflectometryReduction(PythonAlgorithm):
             data_file = FileFinder.findRuns("REF_L%d" % item)[0]
             file_list.append(data_file)
         runs = reduce((lambda x, y: '%s+%s' % (x, y)), file_list)
-        ws_event_data = Load(Filename=runs)
+        ws_event_data = Load(Filename=runs, OutputWorkspace="REF_L_%s" % dataRunNumbers[0])
         
         # Compute the primary fraction using the unprocessed workspace
         apply_primary_fraction = self.getProperty("ApplyPrimaryFraction").value
@@ -115,12 +115,22 @@ class LiquidsReflectometryReduction(PythonAlgorithm):
                                                  SignalRange=signal_range)
 
         # Get the TOF range
-        TOFrangeFlag = self.getProperty("TofRangeFlag")
-        if TOFrangeFlag:
+        crop_TOF = self.getProperty("TofRangeFlag").value
+        tof_step = self.getProperty("TOFSteps").value
+        if crop_TOF:
             TOFrange = self.getProperty("TOFRange").value  #microS
+            if TOFrange[0] <= 0:
+                TOFrange[0] = tof_step
+                logger.error("Lower bound of TOF range cannot be zero: using %s" % tof_step)
         else:
+            # If the TOF range option is turned off, use the full range
+            # Protect against TOF=0, which will crash when going to Q.
+            tof_min = ws_event_data.getTofMin()
+            if tof_min <= 0:
+                tof_min = tof_step
             tof_max = ws_event_data.getTofMax()
-            TOFrange = [0, tof_max]
+            TOFrange = [tof_min, tof_max]
+            logger.information("Using TOF range: %g %g" % (tof_min, tof_max))
 
         # Number of pixels in each direction
         #TODO: revisit this when we update the IDF
@@ -131,7 +141,7 @@ class LiquidsReflectometryReduction(PythonAlgorithm):
         theta = self.calculate_scattering_angle(ws_event_data)
 
         # ----- Process Sample Data -------------------------------------------
-        crop_request = self.getProperty("LowResDataAxisPixelRangeFlag")
+        crop_request = self.getProperty("LowResDataAxisPixelRangeFlag").value
         low_res_range = self.getProperty("LowResDataAxisPixelRange").value
         bck_request = self.getProperty("SubtractSignalBackground").value
         data_cropped = self.process_data(ws_event_data, TOFrange,
@@ -144,7 +154,7 @@ class LiquidsReflectometryReduction(PythonAlgorithm):
             # Load normalization
             ws_event_norm = LoadEventNexus("REF_L_%s" % normalizationRunNumber,
                                            OutputWorkspace="REF_L_%s" % normalizationRunNumber)
-            crop_request = self.getProperty("LowResNormAxisPixelRangeFlag")
+            crop_request = self.getProperty("LowResNormAxisPixelRangeFlag").value
             low_res_range = self.getProperty("LowResNormAxisPixelRange").value
             bck_request = self.getProperty("SubtractNormBackground").value
             norm_cropped = self.process_data(ws_event_norm, TOFrange,
@@ -153,6 +163,12 @@ class LiquidsReflectometryReduction(PythonAlgorithm):
             # Avoid leaving trash behind
             AnalysisDataService.remove(str(ws_event_norm))
     
+            # Sum up the normalization peak
+            norm_summed = SumSpectra(InputWorkspace = norm_cropped)
+            norm_summed = RebinToWorkspace(WorkspaceToRebin=norm_summed,
+                                           WorkspaceToMatch=data_cropped,
+                                           OutputWorkspace=str(norm_summed))
+
             # Sum up the normalization peak
             norm_summed = SumSpectra(InputWorkspace = norm_cropped)
 
@@ -175,8 +191,8 @@ class LiquidsReflectometryReduction(PythonAlgorithm):
         q_workspace.getAxis(0).setUnit("MomentumTransfer")
 
         # Geometry correction to convert To Q with correction
-        geometryCorrectionFlag = self.getProperty("GeometryCorrectionFlag").value
-        if geometryCorrectionFlag:
+        geometry_correction_flag = self.getProperty("GeometryCorrectionFlag").value
+        if geometry_correction_flag:
             logger.error("The geometry correction for the Q conversion has not been implemented.")
 
         # Get the distance fromthe moderator to the detector
@@ -214,6 +230,10 @@ class LiquidsReflectometryReduction(PythonAlgorithm):
             q_rebin = Multiply(LHSWorkspace=q_rebin, RHSWorkspace=ws_fraction,
                                OutputWorkspace=name_output_ws)
 
+        # Replace NaNs by zeros
+        q_rebin = ReplaceSpecialValues(InputWorkspace=q_rebin,
+                                       OutputWorkspace=name_output_ws,
+                                       NaNValue=0.0, NaNError=0.0)
         # Crop to non-zero values
         data_y = q_rebin.readY(0)
         low_q = None
@@ -255,8 +275,9 @@ class LiquidsReflectometryReduction(PythonAlgorithm):
                 data_y[i]=0.0
                 data_e[i]=1.0
 
-        #TODO: remove this, which we use during development to make sure we don't leave trash
-        logger.information(str(AnalysisDataService.getObjectNames()))
+        # Sanity check
+        if sum(data_y) == 0:
+            raise RuntimeError, "The reflectivity is all zeros: check your peak selection"
 
         # Avoid leaving trash behind
         for ws in ['ws_event_data', 'normalized_data', 'q_workspace']:
@@ -289,20 +310,10 @@ class LiquidsReflectometryReduction(PythonAlgorithm):
         angle_offset_deg = self.getProperty("AngleOffset").value
         return theta + angle_offset_deg * math.pi / 180.0
 
-    def clocking_correction(self, workspace, pixel_range, range_width=3):
-        """
-            Applies the "clocking correction". The pixel range is
-            the range that contains the reflectivity data. Compute the
-            average noise per pixel over two small bands on each side.
-            The subtract that noise pixel-wise from the data
-        """
-        pass
-
     def subtract_background(self, workspace, peak_range, background_range,
                             low_res_range, sum_peak=False, offset=None):
         """
             Subtract background in place
-            #TODO: RefRoi needs to do error weighting and deal with zeros
             @param workspace: Mantid workspace
             @param peak_range: range of pixels defining the peak [min, max]
             @param background_range: range of pixels defining the background [min, max]
@@ -391,8 +402,18 @@ class LiquidsReflectometryReduction(PythonAlgorithm):
         """
             Common processing for both sample data and normalization.
         """
+        #TODO: The rebin and crop approach is used to be consistent with the old code.
+        #      This should be replaced in the future.
+
         # Rebin TOF axis
         tof_max = workspace.getTofMax()
+        tof_min = workspace.getTofMin()
+        if tof_min > tof_range[1] or tof_max < tof_range[0]:
+            error_msg = "Requested TOF range does not match data for %s: " % str(workspace)
+            error_msg += "[%g, %g] found [%g, %g]" % (tof_range[0], tof_range[1],
+                                                      tof_min, tof_max)
+            raise RuntimeError, error_msg
+        
         tof_step = self.getProperty("TOFSteps").value
         workspace = Rebin(InputWorkspace=workspace, Params=[0, tof_step, tof_max], 
                           PreserveEvents=False, OutputWorkspace="%s_histo" % str(workspace))
@@ -532,6 +553,14 @@ class LiquidsReflectometryReduction(PythonAlgorithm):
                 if len(key_value)==2:
                     keys.append(key_value[0].strip())
 
+            # Skip empty lines
+            if len(keys)==0:
+                continue
+            # Complain if the format is non-standard
+            elif len(keys)<10:
+                logger.error("Bad scaling factor entry\n  %s" % line)
+                continue
+                
             # Sanity check
             if keys[0] != 'IncidentMedium' and keys[1] != 'LambdaRequested' \
                 and keys[2] != 'S1H':
@@ -539,6 +568,7 @@ class LiquidsReflectometryReduction(PythonAlgorithm):
             # The S2H key has been changing in the earlier version of REFL reduction.
             # Get the key from the data to make sure we are backward compatible.
             s2h_key = keys[3]
+            s2w_key = keys[5]
             if 'IncidentMedium' in data_dict \
                 and data_dict['IncidentMedium'] == incident_medium.strip() \
                 and _value_check('LambdaRequested', data_dict, lr_value) \
@@ -546,7 +576,7 @@ class LiquidsReflectometryReduction(PythonAlgorithm):
                 and _value_check(s2h_key, data_dict, s2h):
 
                 if not match_slit_width or (_value_check('S1W', data_dict, s1w) \
-                        and _value_check('S2W', data_dict, s2w)):
+                        and _value_check(s2w_key, data_dict, s2w)):
                     data_found = data_dict
                     break
 
@@ -577,7 +607,7 @@ class LiquidsReflectometryReduction(PythonAlgorithm):
             # Avoid leaving trash behind
             AnalysisDataService.remove(str(normalization))
         else:
-            logger.error("Could not find scaling factor")
+            logger.error("Could not find scaling factor for %s" % str(workspace))
         return workspace
 
 

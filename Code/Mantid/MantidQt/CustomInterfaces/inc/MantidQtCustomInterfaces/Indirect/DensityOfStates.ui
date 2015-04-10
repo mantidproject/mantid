@@ -124,6 +124,9 @@
             <property name="toolTip">
              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;FWHM to broaden peaks by.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
             </property>
+            <property name="decimals">
+             <number>3</number>
+            </property>
             <property name="maximum">
              <double>1000.000000000000000</double>
             </property>
@@ -139,6 +142,9 @@
            <widget class="QDoubleSpinBox" name="spBinWidth">
             <property name="toolTip">
              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Width of bins to use for histogram rebinning (in eV or cm&lt;span style=&quot; vertical-align:super;&quot;&gt;-1&lt;/span&gt;).&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
+            <property name="decimals">
+             <number>5</number>
             </property>
             <property name="maximum">
              <double>1000.000000000000000</double>
@@ -176,6 +182,9 @@
            <widget class="QDoubleSpinBox" name="spZeroThreshold">
             <property name="toolTip">
              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Threshold intensity at below which to ignore frequencies.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
+            <property name="decimals">
+             <number>3</number>
             </property>
             <property name="maximum">
              <double>1000.000000000000000</double>
@@ -421,6 +430,9 @@
                <widget class="QDoubleSpinBox" name="spTemperature">
                 <property name="suffix">
                  <string> K</string>
+                </property>
+                <property name="decimals">
+                 <number>3</number>
                 </property>
                 <property name="maximum">
                  <double>1000.000000000000000</double>

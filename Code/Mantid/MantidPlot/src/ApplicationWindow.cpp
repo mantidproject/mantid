@@ -216,6 +216,7 @@
 
 using namespace Qwt3D;
 using namespace MantidQt::API;
+using Mantid::Kernel::ConfigService;
 
 using Mantid::API::FrameworkManager;
 using Mantid::Kernel::ConfigService;
@@ -5134,7 +5135,27 @@ void ApplicationWindow::readSettings()
 
   settings.beginGroup("/General");
   titleOn = settings.value("/Title", true).toBool();
-  autoDistribution1D = settings.value("/AutoDistribution1D", true).toBool();
+  // The setting for this was originally stored as a QSetting but then was migrated to
+  // the Mantid ConfigService and is now saved by the ConfigDialog
+  auto & cfgSvc = ConfigService::Instance();
+  if ( settings.contains("/AutoDistribution1D") ) {
+    // if the setting was false then the user changed it
+    // sync this to the new location and remove the key for the future
+    bool qsettingsFlag = settings.value("/AutoDistribution1D", true).toBool();
+    if(qsettingsFlag == false) {
+      cfgSvc.setString("graph1d.autodistribution", "Off");
+      try {
+         cfgSvc.saveConfig( cfgSvc.getUserFilename());
+      } catch(std::runtime_error&) {
+        g_log.warning("Unable to update autodistribution property from ApplicationWindow");
+      }
+    }
+    settings.remove("/AutoDistribution1D");
+  }
+  // Pull default from config service
+  const std::string propStr = cfgSvc.getString("graph1d.autodistribution");
+  autoDistribution1D = (propStr == "On");
+
   canvasFrameWidth = settings.value("/CanvasFrameWidth", 0).toInt();
   defaultPlotMargin = settings.value("/Margin", 0).toInt();
   drawBackbones = settings.value("/AxesBackbones", true).toBool();
@@ -5513,7 +5534,6 @@ void ApplicationWindow::saveSettings()
   settings.beginGroup("/2DPlots");
   settings.beginGroup("/General");
   settings.setValue("/Title", titleOn);
-  settings.setValue("/AutoDistribution1D", autoDistribution1D);
   settings.setValue("/CanvasFrameWidth", canvasFrameWidth);
   settings.setValue("/Margin", defaultPlotMargin);
   settings.setValue("/AxesBackbones", drawBackbones);

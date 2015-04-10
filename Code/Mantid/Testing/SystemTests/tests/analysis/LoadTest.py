@@ -15,6 +15,8 @@ DIFF_PLACES = 8
 
 class LoadTest(stresstesting.MantidStressTest):
 
+    _success = False
+
     def runTest(self):
         self._success = False
 

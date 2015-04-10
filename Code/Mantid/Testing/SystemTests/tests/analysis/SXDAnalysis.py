@@ -15,7 +15,9 @@ class SXDAnalysis(stresstesting.MantidStressTest):
 
         # A lower SplitThreshold, with a reasonable bound on the recursion depth, helps find weaker peaks at higher Q.
         start = clock()
-        QLab = ConvertToDiffractionMDWorkspace(InputWorkspace=ws, OutputDimensions='Q (lab frame)', SplitThreshold=50, LorentzCorrection='1',MaxRecursionDepth='13',Extents='-15,15,-15,15,-15,15',OneEventPerBin='0')
+        QLab = ConvertToDiffractionMDWorkspace(InputWorkspace=ws, OutputDimensions='Q (lab frame)',
+                                               SplitThreshold=50, LorentzCorrection='1',MaxRecursionDepth='13',
+                                               Extents='-15,15,-15,15,-15,15',OneEventPerBin='0')
         print " ConvertToMD runs for: ",clock()-start,' sec'
 
         #  NaCl has a relatively small unit cell, so the distance between peaks is relatively large.  Setting the PeakDistanceThreshold

@@ -278,6 +278,57 @@ A sequential fit is run by clicking the Run button at the bottom of the tab, a
 single fit can be done using the Fit Single Spectrum button underneath the
 preview plot.
 
+Fitting Model
+~~~~~~~~~~~~~
+
+The model used to perform fitting is described in the following tree, note that
+everything under the Model section is optional and determined by the *Fit Type*
+and *Use Delta Function* options in the interface.
+
+- :ref:`CompositeFunction <func-CompositeFunction>`
+
+  - :ref:`LinearBackground <func-LinearBackground>`
+
+  - :ref:`Convolution <func-Convolution>`
+
+    - Resolution
+
+    - Model (:ref:`CompositeFunction <func-CompositeFunction>`)
+
+      - DeltaFunction
+
+      - :ref:`ProductFunction <func-ProductFunction>`
+
+        - :ref:`Lorentzian <func-Lorentzian>`
+
+        - Temperature Correction
+
+      - :ref:`ProductFunction <func-ProductFunction>`
+
+        - :ref:`Lorentzian <func-Lorentzian>`
+
+        - Temperature Correction
+
+      - :ref:`ProductFunction <func-ProductFunction>`
+
+        - :ref:`DiffSphere <func-DiffSphere>`
+
+        - Temperature Correction
+
+      - :ref:`ProductFunction <func-ProductFunction>`
+
+        - :ref:`DiffRotDiscreteCircle <func-DiffRotDiscreteCircle>`
+
+        - Temperature Correction
+
+Note that it is the Inelastic variants of :ref:`DiffSphere <func-DiffSphere>`
+and :ref:`DiffRotDiscreteCircle <func-DiffRotDiscreteCircle>` that are used in
+this interface.
+
+The Temperature Correction is a :ref:`UserFunction <func-UserFunction>` with the
+formula :math:`((x * 11.606) / T) / (1 - exp(-((x * 11.606) / T)))` where
+:math:`T` is the temperature in Kelvin.
+
 Options
 ~~~~~~~
 
@@ -521,6 +572,21 @@ Beam Width
 
 Step Size
   Step size used in calculation.
+
+Annulus
+#######
+
+.. warning:: This mode is only available on Windows
+
+.. interface:: Data Analysis
+  :widget: pgAnnulus
+
+The calculation for an annular geometry is performed by the
+:ref:`CylinderPaalmanPingsCorrection <algm-CylinderPaalmanPingsCorrection>`
+algorithm, this algorithm is currently only available on Windows as it uses
+FORTRAN code dependant of F2Py.
+
+The options here are the same as for Cylinder.
 
 Background
 ~~~~~~~~~~

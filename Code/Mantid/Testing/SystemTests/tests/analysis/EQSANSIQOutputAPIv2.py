@@ -1,7 +1,6 @@
-#pylint: disable=no-init,invalid-name
+#pylint: disable=no-init,invalid-name,attribute-defined-outside-init
 import stresstesting
 import math
-import mantid
 from mantid.simpleapi import *
 from reduction_workflow.instruments.sans.sns_command_interface import *
 from mantid.api import *
@@ -24,7 +23,7 @@ class EQSANSIQOutput(stresstesting.MantidStressTest):
         return True
     """
         Analysis Tests for EQSANS
-        Testing that the I(Q) output of is correct 
+        Testing that the I(Q) output of is correct
     """
 
     def runTest(self):
@@ -66,7 +65,7 @@ class EQSANSBeamMonitor(stresstesting.MantidStressTest):
         return True
     """
         Analysis Tests for EQSANS
-        Testing that the I(Q) output of is correct 
+        Testing that the I(Q) output of is correct
     """
 
     def runTest(self):
@@ -96,7 +95,7 @@ class EQSANSDQPositiveOutput(stresstesting.MantidStressTest):
         return True
     """
         Analysis Tests for EQSANS
-        Testing that the Q resolution output of is correct 
+        Testing that the Q resolution output of is correct
     """
 
     def runTest(self):
@@ -133,7 +132,7 @@ class EQSANSDQOutput(stresstesting.MantidStressTest):
         return True
     """
         Analysis Tests for EQSANS
-        Testing that the Q resolution output of is correct 
+        Testing that the Q resolution output of is correct
     """
 
     def runTest(self):
@@ -199,7 +198,7 @@ class EQSANSDQOutput_FS(stresstesting.MantidStressTest):
         return True
     """
         Analysis Tests for EQSANS
-        Testing that the Q resolution output of is correct 
+        Testing that the Q resolution output of is correct
     """
 
     def runTest(self):

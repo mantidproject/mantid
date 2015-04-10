@@ -75,12 +75,17 @@
        <widget class="QComboBox" name="cbGeometry">
         <item>
          <property name="text">
-          <string>Flat</string>
+          <string>Flat Plate</string>
          </property>
         </item>
         <item>
          <property name="text">
           <string>Cylinder</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Annulus</string>
          </property>
         </item>
        </widget>
@@ -172,8 +177,14 @@
           <property name="enabled">
            <bool>false</bool>
           </property>
+          <property name="decimals">
+           <number>5</number>
+          </property>
           <property name="maximum">
            <double>999.990000000000009</double>
+          </property>
+          <property name="singleStep">
+           <double>0.100000000000000</double>
           </property>
          </widget>
         </item>

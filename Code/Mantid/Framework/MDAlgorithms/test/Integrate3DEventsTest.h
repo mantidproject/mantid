@@ -81,7 +81,7 @@ public:
     double radius = 1.3;
     Integrate3DEvents integrator( peak_q_list, UBinv, radius );
 
-    integrator.addEvents( event_Qs );
+    integrator.addEvents( event_Qs, false );
 
                                     // With fixed size ellipsoids, all the
                                     // events are counted.
