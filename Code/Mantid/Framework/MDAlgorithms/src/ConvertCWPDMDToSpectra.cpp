@@ -73,6 +73,10 @@ void ConvertCWPDMDToSpectra::init() {
   declareProperty("ScaleFactor", 1.0,
                   "Scaling factor on the normalized counts.");
 
+  declareProperty(new ArrayProperty<int>("ExcludedDetectorIDs"),
+                  "A comma separated list of integers to indicate the IDs of "
+                  "the detectors that will be excluded from binning.");
+
   declareProperty("LinearInterpolateZeroCounts", true,
                   "If set to true and if a bin has zero count, a linear "
                   "interpolation will be made to set the value of this bin. It "
@@ -95,6 +99,8 @@ void ConvertCWPDMDToSpectra::exec() {
   // unit
   std::string outputunit = getProperty("UnitOutput");
   double wavelength = getProperty("NeutronWaveLength");
+
+  std::vector<detid_t> excluded_detids = getProperty("ExcludedDetectorIDs");
 
   // Validate inputs
   // input data workspace and monitor workspace should match
@@ -166,9 +172,10 @@ void ConvertCWPDMDToSpectra::exec() {
   }
 
   // Rebin
+  std::sort(excluded_detids.begin(), excluded_detids.end());
   API::MatrixWorkspace_sptr outws = reducePowderData(
       inputDataWS, inputMonitorWS, outputunit, map_runWavelength, xmin, xmax,
-      binsize, doLinearInterpolation);
+      binsize, doLinearInterpolation, excluded_detids);
 
   // Scale
   scaleMatrixWorkspace(outws, scaleFactor, m_infitesimal);
@@ -197,13 +204,15 @@ void ConvertCWPDMDToSpectra::exec() {
  * @param xmax
  * @param binsize
  * @param dolinearinterpolation
+ * @param vec_excludeddets :: vector of IDs of detectors to be excluded
  * @return
  */
 API::MatrixWorkspace_sptr ConvertCWPDMDToSpectra::reducePowderData(
     API::IMDEventWorkspace_const_sptr dataws,
     IMDEventWorkspace_const_sptr monitorws, const std::string targetunit,
     const std::map<int, double> &map_runwavelength, const double xmin,
-    const double xmax, const double binsize, bool dolinearinterpolation) {
+    const double xmax, const double binsize, bool dolinearinterpolation,
+    const std::vector<detid_t> &vec_excludeddets) {
   // Get some information
   int64_t numevents = dataws->getNEvents();
 
@@ -249,8 +258,8 @@ API::MatrixWorkspace_sptr ConvertCWPDMDToSpectra::reducePowderData(
   else if (targetunit.compare("Momentum Transfer (Q)") == 0)
     unitchar = 'q';
 
-  binMD(dataws, unitchar, map_runwavelength, vecx, vecy);
-  binMD(monitorws, unitchar, map_runwavelength, vecx, vecm);
+  binMD(dataws, unitchar, map_runwavelength, vecx, vecy, vec_excludeddets);
+  binMD(monitorws, unitchar, map_runwavelength, vecx, vecm, vec_excludeddets);
 
   // Normalize by division
   double maxmonitorcounts = 0;
@@ -422,12 +431,14 @@ void ConvertCWPDMDToSpectra::findXBoundary(
  * @param map_runlambda
  * @param vecx
  * @param vecy
+ * @param vec_excludedet
  */
 void ConvertCWPDMDToSpectra::binMD(API::IMDEventWorkspace_const_sptr mdws,
                                    const char &unitbit,
                                    const std::map<int, double> &map_runlambda,
                                    const std::vector<double> &vecx,
-                                   std::vector<double> &vecy) {
+                                   std::vector<double> &vecy,
+                                   const std::vector<detid_t> &vec_excludedet) {
   // Check whether MD workspace has proper instrument and experiment Info
   if (mdws->getNumExperimentInfo() == 0)
     throw std::runtime_error(
@@ -468,6 +479,13 @@ void ConvertCWPDMDToSpectra::binMD(API::IMDEventWorkspace_const_sptr mdws,
     // loop over all the events in current cell
     for (size_t iev = 0; iev < numev2; ++iev) {
       // get detector position for 2theta
+      detid_t detid = mditer->getInnerDetectorID(iev);
+      if (isExcluded(vec_excludedet, detid)) {
+        g_log.debug() << "Detector " << detid << " is excluded.  Signal = "
+                      << mditer->getInnerSignal(iev) << "\n";
+        continue;
+      }
+
       double tempx = mditer->getInnerPosition(iev, 0);
       double tempy = mditer->getInnerPosition(iev, 1);
       double tempz = mditer->getInnerPosition(iev, 2);
@@ -728,6 +746,21 @@ ConvertCWPDMDToSpectra::scaleMatrixWorkspace(API::MatrixWorkspace_sptr matrixws,
   } // FOR(iws)
 
   return;
+}
+
+//----------------------------------------------------------------------------------------------
+/** Check whether a detector is excluded
+ * @brief ConvertCWPDMDToSpectra::isExcluded
+ * @param vec_excludedet :: a sorted vector
+ * @param detid
+ * @return
+ */
+bool
+ConvertCWPDMDToSpectra::isExcluded(const std::vector<detid_t> &vec_excludedet,
+                                   const detid_t detid) {
+
+  return std::find(vec_excludedet.begin(), vec_excludedet.end(), detid) !=
+         vec_excludedet.end();
 }
 
 } // namespace MDAlgorithms

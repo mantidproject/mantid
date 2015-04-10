@@ -12,7 +12,7 @@ class LiquidsReflectometryReductionWithBackgroundTest(stresstesting.MantidStress
     def runTest(self):
         #TODO: The reduction algorithm should not require an absolute path
         scaling_factor_file = FileFinder.getFullPath("directBeamDatabaseFall2014_IPTS_11601_2.cfg")
-        
+
         LiquidsReflectometryReduction(RunNumbers=[119816],
                                       NormalizationRunNumber=119692,
                                       SignalPeakPixelRange=[155, 165],
@@ -45,7 +45,7 @@ class LiquidsReflectometryReductionWithBackgroundTest(stresstesting.MantidStress
         # Skip the first point so we don't have to have a big tolerance
         data_y = mtd["reflectivity_119816"].dataY(0)
         data_y[1] = 0.00499601750282373
-        
+
         self.disableChecking.append('Instrument')
         self.disableChecking.append('Sample')
         self.disableChecking.append('SpectraMap')
@@ -61,7 +61,7 @@ class LiquidsReflectometryReductionWithBackgroundPreciseTest(stresstesting.Manti
     def runTest(self):
         #TODO: The reduction algorithm should not require an absolute path
         scaling_factor_file = FileFinder.getFullPath("directBeamDatabaseFall2014_IPTS_11601_2.cfg")
-        
+
         LiquidsReflectometryReduction(RunNumbers=[119816],
                                       NormalizationRunNumber=119692,
                                       SignalPeakPixelRange=[155, 165],
@@ -98,7 +98,7 @@ class NoNormalizationTest(stresstesting.MantidStressTest):
     def runTest(self):
         #TODO: The reduction algorithm should not require an absolute path
         scaling_factor_file = FileFinder.getFullPath("directBeamDatabaseFall2014_IPTS_11601_2.cfg")
-        
+
         LiquidsReflectometryReduction(RunNumbers=[119816],
                                       NormalizationRunNumber=119692,
                                       SignalPeakPixelRange=[155, 165],
@@ -135,7 +135,7 @@ class TOFRangeOFFTest(stresstesting.MantidStressTest):
     def runTest(self):
         #TODO: The reduction algorithm should not require an absolute path
         scaling_factor_file = FileFinder.getFullPath("directBeamDatabaseFall2014_IPTS_11601_2.cfg")
-        
+
         LiquidsReflectometryReduction(RunNumbers=[119816],
                                       NormalizationRunNumber=119692,
                                       SignalPeakPixelRange=[155, 165],

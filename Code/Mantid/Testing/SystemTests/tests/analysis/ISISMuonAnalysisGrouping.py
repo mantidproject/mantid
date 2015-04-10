@@ -1,5 +1,4 @@
-#pylint: disable=no-init
-import math
+#pylint: disable=no-init,attribute-defined-outside-init
 import stresstesting
 from mantid.simpleapi import *
 
@@ -32,7 +31,7 @@ class ISISMuonAnalysisGrouping(stresstesting.MantidStressTest):
 
     def get_result_workspace(self):
         """Returns the result workspace to be checked"""
-        return self.instr_name + str(self.sample_run) 
+        return self.instr_name + str(self.sample_run)
 
     def runTest(self):
         """Defines the workflow for the test"""
@@ -168,4 +167,4 @@ class MuSRAnalysisFromFile(ISISMuonAnalysisGrouping):
     def get_reference_file(self):
         return "MuSRAnalysisLog1.nxs"
 
- 
+
