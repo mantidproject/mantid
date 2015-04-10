@@ -3,6 +3,9 @@ from PyQt4 import QtGui, QtCore
 import sys
 import mantid
 import numpy
+import matplotlib
+matplotlib.use('Qt4Agg')
+matplotlib.rcParams['backend.qt4']='PyQt4' 
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 from mpl_toolkits.mplot3d import Axes3D

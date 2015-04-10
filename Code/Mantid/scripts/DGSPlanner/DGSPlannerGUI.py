@@ -221,7 +221,7 @@ class DGSPlannerGUI(QtGui.QWidget):
         Z = numpy.transpose(intensity)
         x = numpy.linspace(__mdws[0].getDimension(0).getMinimum(), __mdws[0].getDimension(0).getMaximum(),intensity.shape[1] )
         y = numpy.linspace(__mdws[0].getDimension(1).getMinimum(), __mdws[0].getDimension(1).getMaximum(),intensity.shape[0] )
-        X,Y = numpy.meshgrid(x,y,indexing='ij')
+        Y,X = numpy.meshgrid(y,x)
         xx, yy = self.tr(X, Y)
         Z=numpy.ma.masked_array(Z,Z==0)
         Z = Z[:-1, :-1]
