@@ -59,9 +59,9 @@ elif MOS == OSX:
     reducer.ui.lineEdit_cache.setText('/Users/wzz/Temp/')
 
 # example: 'http://neutron.ornl.gov/user_data/hb2a/exp400/Datafiles/HB2A_exp0400_scan0001.dat'
-print "Set to exp 231, scan 1"
-reducer.ui.lineEdit_expNo.setText('231')
-reducer.ui.lineEdit_scanNo.setText('1')
+print "Set to exp 457, scan 10"
+reducer.ui.lineEdit_expNo.setText('379')
+reducer.ui.lineEdit_scanNo.setText('10')
 reducer.ui.lineEdit_wavelength.setText('2.41')
 
 reducer.ui.lineEdit_minD.setText('1.0')
@@ -73,8 +73,14 @@ reducer.ui.tabWidget.setCurrentIndex(4)
 
 # load and reduce data 
 reducer.doLoadData()
+
+# rebin
+reducer.ui.lineEdit_binsizeD.setText('0.001')
+reducer.doRebinD()
+"""
 reducer.doStripVandiumPeaks()
 reducer.doSaveVanRun()
+"""
 
 # Skip if there is something wrong
 reducer.show()

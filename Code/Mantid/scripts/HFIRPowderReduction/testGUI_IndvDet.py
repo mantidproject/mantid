@@ -50,6 +50,7 @@ print "Set to exp 231, scan 1"
 reducer.ui.lineEdit_expNo.setText('231')
 reducer.ui.lineEdit_scanNo.setText('1')
 reducer.ui.lineEdit_detID.setText('21')
+reducer.ui.tabWidget.setCurrentIndex(1)
 
 if MOS == LINUX:
     reducer.ui.lineEdit_cache.setText('/home/wzz/Temp/')
@@ -57,6 +58,7 @@ elif MOS == OSX:
     reducer.ui.lineEdit_cache.setText('/Users/wzz/Temp/')
 
 # plot raw
+reducer.doLoadData()
 reducer.doPlotIndvDet()
 
 app.exec_()

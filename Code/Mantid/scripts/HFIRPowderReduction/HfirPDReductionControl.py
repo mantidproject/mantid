@@ -94,32 +94,70 @@ class HFIRPDRedControl:
         return
 
 
-    def getRawDetectorCounts(self, exp, scan, ptnolist=None):
-        """ Return raw detector counts as a list of 3-tuples
+    def getIndividualDetCounts(self, exp, scan, detid, xlabel):
+        """ Get individual detector counts
         """
-        # check
+        # check and get data
         if self._myWorkspaceDict.has_key((exp, scan)) is False:
             raise NotImplementedError("Exp %d Scan %d does not have reduced \
                     workspace." % (exp, scan))
+        else: 
+            rmanager = self._myWorkspaceDict[(exp, scan)]
+        # END-IF-ELSE
 
-        # get data
-        rmanager = self._myWorkspaceDict[(exp, scan)]
-        datamdws = rmanager.datamdws
+        # get raw counts
+        # FIXME : use **args 
+        if xlabel is None:
+            tempoutws = api.GetSpiceDataRawCountsFromMD( 
+                    InputWorkspace=rmanager.datamdws, 
+                    MonitorWorkspace=rmanager.monitormdws, 
+                    Mode='Detector',
+                    DetectorID = detid)
+        else:
+            tempoutws = api.GetSpiceDataRawCountsFromMD( 
+                    InputWorkspace=rmanager.datamdws, 
+                    MonitorWorkspace=rmanager.monitormdws, 
+                    Mode='Detector',
+                    DetectorID = detid,
+                    XLabel=xlabel)
 
-        # FIXME - This is a fake
-        import random
-        random.seed(1)
-        x0 = random.random()*40.
-        listx = []
-        listy = []
-        for i in xrange(44):
-            listx.append(x0+float(i))
-            listy.append(random.random()*20.)
-        vecx = numpy.array(listx)
-        vecy = numpy.array(listy)
-        ptno = random.randint(1, 45)
+        vecx = tempoutws.readX(0)[:]
+        vecy = tempoutws.readY(0)[:]
 
-        rlist = [(ptno, vecx, vecy)]
+        return (vecx, vecy)
+
+
+    def getRawDetectorCounts(self, exp, scan, ptnolist=None):
+        """ Return raw detector counts as a list of 3-tuples
+        """
+        # check and get data
+        if self._myWorkspaceDict.has_key((exp, scan)) is False:
+            raise NotImplementedError("Exp %d Scan %d does not have reduced \
+                    workspace." % (exp, scan))
+        else: 
+            rmanager = self._myWorkspaceDict[(exp, scan)]
+        # END-IF-ELSE
+
+        # get the complete list of Pt. number
+        if ptnolist is None:
+            ptnolist = self._getRunNumberList(datamdws=rmanager.datamdws)
+
+        rlist = []
+        # Loop over all Pt. number
+        for pt in ptnolist:
+            # get data
+            tempoutws = api.GetSpiceDataRawCountsFromMD(
+                    InputWorkspace=rmanager.datamdws,
+                    MonitorWorkspace=rmanager.monitormdws,
+                    Mode='Pt.',
+                    Pt = pt)
+
+            vecx = tempoutws.readX(0)[:]
+            vecy = tempoutws.readY(0)[:]
+
+            rlist.append((pt, vecx, vecy))
+        # ENDFOR
+
         return (rlist)
 
 
@@ -488,8 +526,11 @@ def downloadFile(url, localfilepath):
     Test: 'http://neutron.ornl.gov/user_data/hb2a/exp400/Datafiles/HB2A_exp0400_scan0001.dat'
     """
     # open URL
-    response = urllib2.urlopen(url)
-    wbuf = response.read()
+    try: 
+        response = urllib2.urlopen(url) 
+        wbuf = response.read()
+    except urllib2.HTTPError as e:
+        raise NotImplementedError("Unable to download file from %s\n\tCause: %s." % (url, str(e)))
 
     if wbuf.count('not found') > 0:
         return (False, "File cannot be found at %s." % (url))

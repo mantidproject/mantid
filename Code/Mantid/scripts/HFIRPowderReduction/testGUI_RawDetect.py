@@ -70,8 +70,8 @@ print "Set to exp 231, scan 1"
 reducer.ui.lineEdit_expNo.setText('231')
 reducer.ui.lineEdit_scanNo.setText('1')
 
-# this should be automatically setup
-# reducer.ui.lineEdit_wavelength.setText('2.41')
+reducer.ui.comboBox_rawDetMode.setCurrentIndex(1)
+reducer.ui.lineEdit_ptNo.setText('21')
 
 if MOS == LINUX:
     reducer.ui.lineEdit_cache.setText('/home/wzz/Temp/')
@@ -79,10 +79,13 @@ elif MOS == OSX:
     reducer.ui.lineEdit_cache.setText('/Users/wzz/Temp/')
 
 # plot raw
+reducer.ui.tabWidget.setCurrentIndex(0)
 reducer.doPlotRawDet()
 
-# load and reduce data 
-reducer.doLoadData()
+# FIXME - Phase 2nd
+reducer.ui.comboBox_rawDetMode.setCurrentIndex(1)
+reducer.ui.lineEdit_ptNo.setText('21')
+
 
 app.exec_()
 

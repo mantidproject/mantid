@@ -369,27 +369,40 @@ class MainWindow(QtGui.QMainWindow):
             else:
                 # itab = 4 
                 unit = 'dSpacing'
-                raise NotImplementedError("Need to read in values!")
+                try:
+                    xmin, binsize, xmax = self._uiGetBinningParams(xmin_w=self.ui.lineEdit_minD,
+                            binsize_w=self.ui.lineEdit_binsizeD,
+                            xmax_w=self.ui.lineEdit_maxD)
+                except Exception as e:
+                    self._logError(str(e))
+                    return
 
             # END-IF-ELSE
 
-            # Reduce data     
+            # Reduce data 
             execstatus = self._myControl.reduceSpicePDData(expno, scanno, \
                     datafilename, unit, xmin, xmax, binsize, wavelength)
-            print "[DB] reduction status = ", execstatus
+            print "[DB] reduction status = %s, Binning = %s, %s, %s" % (str(execstatus),
+                    str(xmin), str(binsize), str(xmax))
 
             # Plot data
             if execstatus is True:
                 if itab == 2:  
-                    # 
+                    # tab 'normalized' 
                     clearcanvas = self.ui.checkBox_clearPrevious.isChecked() 
                     xlabel = self._getXLabelFromUnit(unit)
                     self._plotReducedData(expno, scanno, self.ui.graphicsView_reducedData, \
                             xlabel, label="Exp %d Scan %d Bin = %.5f" % (expno, scanno, binsize), \
                             clearcanvas=clearcanvas)
                 else:
-                    #
-                    raise NotImplementedError("ASAP for vanadium")
+                    # tab 'vanadium'
+                    clearcanvas = True
+                    xlabel = self._getXLabelFromUnit(unit)
+                    print "[DB] Unit %s has label %s." % (unit, xlabel)
+                    canvas = self.ui.graphicsView_vanPeaks
+                    self._plotReducedData(expno, scanno, canvas, \
+                            xlabel, label="Exp %d Scan %d Bin = %.5f" % (expno, scanno, binsize), \
+                            clearcanvas=clearcanvas)
             # ENDIF(execstatus)
         # END-IF-ELSE (itab)
             
@@ -600,6 +613,8 @@ class MainWindow(QtGui.QMainWindow):
             return
 
         xlabel = str(self.ui.comboBox_indvDetXLabel.currentText())
+        if xlabel.strip() == "":
+            xlabel = None
 
         # plot
         try: 
@@ -640,8 +655,18 @@ class MainWindow(QtGui.QMainWindow):
             ptNo = None
 
         # plot
-        self._plotRawDetSignal(expno, scanno, plotmode, ptNo, doOverPlot)
+        print "[DB] Plot Raw Detector: PlotMode = %s." % (plotmode)
+        execstatus = self._plotRawDetSignal(expno, scanno, plotmode, ptNo, doOverPlot)
 
+        # set global values if good 
+        if execstatus is True: 
+            self._ptNo = ptNo 
+            self._expNo = expno 
+            self._scanNo = scanno
+        else:
+            print "[Error] Execution fails with signal %s. " % (str(execstatus))
+
+        return
 
 
     def doPlotPrevDetRaw(self):
@@ -670,17 +695,19 @@ class MainWindow(QtGui.QMainWindow):
 
 
     def doPlotNextDetRaw(self):
-        """ Plot next raw detector signals
+        """ Plot next raw detector signals for an individual detector
         """
+        raise NotImplementedError("ASAP")
+
         # check
-        if self._ptNo is not None and self._detNo is not None:
+        if self._ptNo is not None:
             detno = self._detNo + 1
         else:
             self._logError("Unable to plot previous raw detector \
                     because Pt. or Detector ID has not been set up yet.")
             return
 
-        # det number minus 1
+        # det number plus 1
         status, errmsg = self._checkValidPtDet(self._ptNo, detno)
         if status is False:
             self._logError(errmsg)
@@ -693,92 +720,97 @@ class MainWindow(QtGui.QMainWindow):
 
         return
 
+    def doPlotNextPtRaw(self):
+        """ Plot next raw detector signals
+        """
+        # check
+        if self._ptNo is not None:
+            ptno = self._ptNo + 1
+        else:
+            self._logError("Unable to plot previous raw detector \
+                    because Pt. or Detector ID has not been set up yet.")
+            return
+
+        # get plot mode and plot
+        plotmode = str(self.ui.comboBox_rawDetMode.currentText())
+        overplot = bool(self.ui.checkBox_overpltRawDet.isChecked())
+        execstatus = self._plotRawDetSignal(self._expNo, self._scanNo, plotmode, 
+                ptno, overplot)
+
+        # update if it is good to plot
+        if execstatus is True: 
+            self._ptNo = ptno
+            self.ui.lineEdit_ptNo.setText(str(self._ptNo))
+
+        return
+
 
     def doPlotPrevPtRaw(self):
         """ Plot previous raw detector
         """
         # check
-        if self._ptNo is not None and self._detNo is not None:
+        if self._ptNo is not None:
             ptno = self._ptNo - 1
         else:
             self._logError("Unable to plot previous raw detector \
                     because Pt. or Detector ID has not been set up yet.")
             return
+        
+        # get plot mode and do plt
+        plotmode = str(self.ui.comboBox_rawDetMode.currentText())
+        overplot = bool(self.ui.checkBox_overpltRawDet.isChecked())
+        execstatus = self._plotRawDetSignal(self._expNo, self._scanNo, plotmode, 
+                ptno, overplot)
 
-        # det number minus 1
-        status, errmsg = self._checkValidPtDet(self._ptNo, detno)
-        if status is False:
-            self._logError(errmsg)
-        else:
-            self._ptNo = ptno
+        # update if it is good to plot
+        if execstatus is True:
+            self._ptNo = ptno 
             self.ui.lineEdit_ptNo.setText(str(self._ptNo))
-
-        # plot
-        self._plotRawDetSignal(self._ptNo, self._detNo)
 
         return
 
-
-    def doPlotNextPtRaw(self):
-        """ Plot next raw detector signals
-        """
-        # check
-        if self._ptNo is not None and self._detNo is not None:
-            ptno = self._ptN + 1
-        else:
-            self._logError("Unable to plot previous raw detector \
-                    because Pt. or Detector ID has not been set up yet.")
-            return
-
-        # det number minus 1
-        status, errmsg = self._checkValidPtDet(self._ptNo, detno)
-        if status is False:
-            self._logError(errmsg)
-        else:
-            self._ptNo = ptno
-            self.ui.lineEdit_ptNo.setText(str(self._ptNo))
-
-        # plot
-        self._plotRawDetSignal(self._ptNo, self._detNo)
-
-        return
 
 
     def doRebinD(self):
         """ Rebin MDEventWorkspaces in d-Spacing. for pushButton_rebinD
         in vanadium peak strip tab
-        """
-        self._uiRebinPlot(unit='dSpacing', xmin=self.ui.lineEdit_minD.text(),
-            binsize=self.ui.lineEdit_binsizeD.text(), 
-            xmax=self.ui.lineEdit_maxD.text(),
-            canvas=self.ui.graphicsView_vanPeaks)
-        return
-        
-        dminstr = str(self.ui.lineEdit_minD.text()).strip()  
-        dmaxstr = str(self.ui.lineEdit_maxD.text()).strip()     
-        dbinsizestr = str(self.ui.lineEdit_binsizeD.text()).strip()
+        """ 
+        # exp number an scan number
+        try: 
+            expno, scanno = self._uiGetExpScanNumber()
+        except Exception as e:
+            self._logError("Error to get Exp and Scan due to %s." % (str(e)))
+            return False
 
-        # dmin and dmax
-        if len(dminstr) == 0 or len(dmaxstr) == 0:
-            dmin = None
-            dmax = None
-        else:
-            dmin = float(dminstr)
-            dmax = float(dmaxstr)
+        # wave length
+        wavelength = float(self.ui.lineEdit_wavelength.text())
 
-        # bin size
-        if len(dbinsizestr) == 0:
-            self._logError("Bin size in d-spacing must be specified!")
-            return
-        else:
-            binsize = float(dbinsizestr)
+        # get new binning parameters
+        unit = 'dSpacing' 
+        try: 
+            xmin, binsize, xmax = self._uiGetBinningParams(xmin_w=self.ui.lineEdit_minD, 
+                    binsize_w=self.ui.lineEdit_binsizeD, 
+                    xmax_w=self.ui.lineEdit_maxD) 
+        except Exception as e: 
+            self._logError(str(e)) 
+            return False
 
-        # rebin
-        self._rebin('dSpacing', dmin, binsize, dmax)
-        
-        self._plotReducedData(xlabel, 0, True)
+        # Reduce data 
+        execstatus = self._myControl.rebin(expno, scanno, unit, wavelength, \
+                xmin, binsize, xmax)
+        print "[DB] reduction status = %s, Binning = %s, %s, %s" % (str(execstatus),
+                str(xmin), str(binsize), str(xmax))
 
-        return
+        # Plot data
+        clearcanvas = True
+        xlabel = self._getXLabelFromUnit(unit)
+        print "[DB] Unit %s has label %s." % (unit, xlabel)
+        canvas = self.ui.graphicsView_vanPeaks
+        self._plotReducedData(expno, scanno, canvas, \
+                xlabel, label="Exp %d Scan %d Bin = %.5f" % (expno, scanno, binsize), \
+                clearcanvas=clearcanvas)
+
+        return True
 
 
     def doSaveData(self):
@@ -824,6 +856,10 @@ class MainWindow(QtGui.QMainWindow):
                 WorkspaceIndex=0)
 
         self._plotVanadiumRun(xlabel, 0, True)
+
+
+
+        raise NotImplementedError("ASAP")
 
         return
 
@@ -1018,9 +1054,36 @@ class MainWindow(QtGui.QMainWindow):
             self._myControl.loadSpicePDData(expno, scanno, filename)
 
         # pop out the xlabel list
+        # FIXME - Only need to set up once!
         floatsamplelognamelist = self._myControl.getSampleLogNames(expno, scanno)
         self.ui.comboBox_indvDetXLabel.clear()
         self.ui.comboBox_indvDetXLabel.addItems(floatsamplelognamelist)
+
+        # get data
+        vecx, vecy = self._myControl.getIndividualDetCounts(expno, scanno, detid, xlabel)
+
+        # plot to canvas
+        canvas = self.ui.graphicsView_indvDet
+        marker, color = canvas.getNextLineMarkerColorCombo()
+        if xlabel is None:
+            xlabel = r'2\theta'
+
+        label = "Detector ID: %d" % (detid)
+        canvas.addPlot(vecx, vecy, marker=marker, color=color, xlabel=xlabel, \
+                ylabel='Counts',label=label)
+        
+        # auto setup for image boundary
+        xmin = min(vecx)
+        xmax = max(vecx)
+
+        ymax = max(vecy)
+        ymin = min(vecy)
+
+        dx = xmax-xmin
+        dy = ymax-ymin
+        canvas.setXYLimit(xmin-dx*0.1, xmax+dx*0.1, ymin-dy*0.1, ymax+dy*0.1)
+
+        return True
 
         
                 
@@ -1047,7 +1110,7 @@ class MainWindow(QtGui.QMainWindow):
 
         elif plotmode == "Single Pts.":
             # Plot plot
-            if dooverplot is True:
+            if dooverplot is False:
                 self.ui.graphicsView_Raw.clearAllLines()
                 self.ui.graphicsView_Raw.setLineMarkerColorIndex(0)
 
@@ -1060,7 +1123,8 @@ class MainWindow(QtGui.QMainWindow):
 
         # plot
         canvas = self.ui.graphicsView_Raw
-        unit = '$2\theta$'
+        # FIXME
+        unit = r"$2\theta$"
 
         # plot
         xmin = 1.E10
@@ -1095,7 +1159,7 @@ class MainWindow(QtGui.QMainWindow):
         dy = ymax-ymin
         canvas.setXYLimit(xmin-dx*0.1, xmax+dx*0.1, ymin-dy*0.1, ymax+dy*0.1)
 
-        return
+        return True
 
 
     def _plotMergedReducedData(self, mkey, label):
@@ -1242,9 +1306,9 @@ class MainWindow(QtGui.QMainWindow):
             xmax = str(self.ui.lineEdit_xmax.text())
             binsize = str(self.ui.lineEdit_binsize.text())
         else:
-            xmin = str(xmin_w)
-            xmax = str(xmax_w)
-            binsize = str(binsize_w)
+            xmin = str(xmin_w.text())
+            xmax = str(xmax_w.text())
+            binsize = str(binsize_w.text())
         
         # set data
         try:
@@ -1257,11 +1321,11 @@ class MainWindow(QtGui.QMainWindow):
             if xmin >= xmax:
                 raise NotImplementedError("set minimum X = %.5f is larger than \
                     maximum X = %.5f" % (xmin, xmax))
-        
+                    
         try:
             binsize = float(binsize)
         except ValueError as e:
-            raise NotImplementedError("Error bins size cannot be left blank.")
+            raise NotImplementedError("Error:  bins size '%s' is not a float number." % (binsize))
             
         return (xmin, binsize, xmax)
         

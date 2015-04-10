@@ -1,6 +1,3 @@
-
-
-
 Use cases for tabs: 
 
   1. **Raw Detectors**: Visualize the reading of detectors directly coming out of the raw data
@@ -20,5 +17,21 @@ Use cases for tabs:
     * Reduce a set of scans and plot in 2D/water-fall mode;
     * Able to merge all the scans;
     * New from Mantid: *ConvertCWPDMDToSpectra(ExcludedDetectors=[])*
-  5. **Advanced Setup**
+  5. **Vanadium**: strip vanadium peaks
+    * Strip vanadium peak with unit 'Degrees' because of the binning (range and step size) must be respected;
+    * Peaks' position should be calculated and indicated auotmatically;
+    * *Mantid::StripPeaks()* will be called instread of *StripVadadiumPeaks()* because
+      the later one only works in d-spacing;
+  6. **Advanced Setup**
     * URL for raw data files;
+
+
+
+Tasks:
+  
+  1. Make tab *Raw Detector* work;
+  2. Make tab *Individual Detector* work;
+  3. Find out why the vanadium runs (379-10/11) look funny, i.e., oscilating curves;
+  4. Implement automatic wavelength mapping; 
+  5. Implement tab *vanadium*;
+  6. Talk with Clarina how to deal with vanadium spectrum with peaks striped; 
