@@ -67,12 +67,10 @@ namespace VATES
    * @returns The coordinate frame.
    */
   std::string CompositePeaksPresenterVsi::getFrame() {
-    std::string frame;
-    for (std::vector<PeaksPresenterVsi_sptr>::iterator it = m_peaksPresenters.begin(); it != m_peaksPresenters.end(); ++it) {
-      frame = (*it)->getFrame();
-      break;
-    }
-    return frame;
+    if (m_peaksPresenters.empty())
+      return std::string;
+    else
+      return m_peaksPresenters[0]->getFrame();
   }
 
   /**
