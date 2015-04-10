@@ -3269,9 +3269,54 @@ void MantidUI::showSequentialPlot(Ui::SequentialFitDialog* ui, MantidQt::MantidW
 */
 void MantidUI::drawColorFillPlots(const QStringList & wsNames, Graph::CurveType curveType)
 {
-  for( QStringList::const_iterator cit = wsNames.begin(); cit != wsNames.end(); ++cit )
+  int nPlots = wsNames.size();
+  if ( nPlots > 1 )
   {
-    this->drawSingleColorFillPlot(*cit, curveType);
+    int nCols = 1;
+    if ( nPlots >= 16 )
+    {
+      nCols = 4;
+    }
+    else if ( nPlots >= 9 )
+    {
+      nCols = 3;
+    }
+    else if ( nPlots >= 4 )
+    {
+      nCols = 2;
+    }
+    else
+    {
+      nCols = nPlots;
+    }
+
+    int nRows = nPlots / nCols;
+    if ( nPlots % nCols != 0 )
+    {
+      ++nRows;
+    }
+
+    auto tiledWindow = new TiledWindow(appWindow(),"",appWindow()->generateUniqueName("TiledWindow"),nRows,nCols);
+    appWindow()->addMdiSubWindow(tiledWindow);
+
+    int row = 0;
+    int col = 0;
+    for( QStringList::const_iterator cit = wsNames.begin(); cit != wsNames.end(); ++cit )
+    {
+      const bool hidden = true;
+      auto plot = this->drawSingleColorFillPlot(*cit, curveType, NULL, hidden);
+      tiledWindow->addWidget(plot,row,col);
+      ++col;
+      if (col == nCols)
+      {
+        col = 0;
+        ++row;
+      }
+    }
+  }
+  else if ( nPlots == 1 )
+  {
+    this->drawSingleColorFillPlot(wsNames.front(), curveType);
   }
 }
 
@@ -3284,7 +3329,7 @@ void MantidUI::drawColorFillPlots(const QStringList & wsNames, Graph::CurveType 
 * @returns A pointer to the created plot
 */
 MultiLayer* MantidUI::drawSingleColorFillPlot(const QString & wsName, Graph::CurveType curveType,
-                                              MultiLayer* window)
+                                              MultiLayer* window, bool hidden)
 {
   auto workspace = boost::dynamic_pointer_cast<const Mantid::API::MatrixWorkspace>(getWorkspace(wsName));
   if(!workspace) return NULL;
@@ -3298,6 +3343,10 @@ MultiLayer* MantidUI::drawSingleColorFillPlot(const QString & wsName, Graph::Cur
     try
     {
       window = appWindow()->multilayerPlot(appWindow()->generateUniqueName( wsName + "-"));
+      if (hidden)
+      {
+        window->hide();
+      }
     }
     catch(std::runtime_error& e)
     {
