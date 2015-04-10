@@ -5,7 +5,8 @@ import numpy as np
 
 class POLDIFitPeaks2DTest(stresstesting.MantidStressTest):
     """The system test currently checks that the calculation of 2D spectra
-works correctly."""
+    works correctly."""
+
     def runTest(self):
         dataFiles = ["poldi2013n006904"]
 
@@ -83,6 +84,7 @@ works correctly."""
                 self.assertLessThan(maxDifference, 0.07)
 
 class POLDIFitPeaks2DPawleyTest(stresstesting.MantidStressTest):
+
     def runTest(self):
         si = PoldiLoadRuns(2013, 6903, 6904, 2)
         corr = PoldiAutoCorrelation('si_data_6904')

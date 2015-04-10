@@ -64,8 +64,9 @@ class LoadDNSLegacy(PythonAlgorithm):
         metadata = DNSdata()
         metadata.read_legacy(filename)
         run = __temporary_workspace__.mutableRun()
-        run.setStartAndEndTime(DateAndTime(metadata.start_time), \
-                DateAndTime(metadata.end_time))
+        if metadata.start_time and metadata.end_time:
+            run.setStartAndEndTime(DateAndTime(metadata.start_time), \
+                    DateAndTime(metadata.end_time))
         # add name of file as a run title
         fname = os.path.splitext(os.path.split(filename)[1])[0]
         run.addProperty('run_title', fname, True)

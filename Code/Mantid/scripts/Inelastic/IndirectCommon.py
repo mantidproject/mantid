@@ -430,6 +430,7 @@ def convertToElasticQ(input_ws, output_ws=None):
             raise RuntimeError('Input must have axis values of Q')
 
         CloneWorkspace(input_ws, OutputWorkspace=output_ws)
+
     else:
         raise RuntimeError('Input workspace must have either spectra or numeric axis.')
 

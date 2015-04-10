@@ -2,14 +2,17 @@
 import stresstesting
 from mantid.simpleapi import *
 
-''' Sample script from Tim Charlton. Described as Mantid version of quick:lam'''
-'''
-Owen Arnold
-29/06/2012
-The analysis performed here is a subset of what is done in ReflectometryISIS.py. We may want to remove this test in the furture to avoid duplication. However,
-I'm leaving this in here for now because Tim Charlton suggests making the ReflectometryISIS.py test more generic for every reflectometry instrument.
-'''
 class PolrefExample(stresstesting.MantidStressTest):
+    ''' Sample script from Tim Charlton. Described as Mantid version of quick:lam
+
+    Owen Arnold
+    29/06/2012
+    The analysis performed here is a subset of what is done in ReflectometryISIS.py.
+    We may want to remove this test in the furture to avoid duplication. However,
+
+    I'm leaving this in here for now because Tim Charlton suggests making the ReflectometryISIS.py
+    test more generic for every reflectometry instrument.
+    '''
 
     def runTest(self):
         LoadRaw(Filename="POLREF00003014.raw",OutputWorkspace="W",SpectrumMax="4",LoadMonitors="Separate")
@@ -33,8 +36,8 @@ class PolrefExample(stresstesting.MantidStressTest):
         DeleteWorkspace(Workspace="I0")
 
     def validate(self):
-    # Need to disable checking of the Spectra-Detector map because it isn't
-    # fully saved out to the nexus file (it's limited to the spectra that
-    # are actually present in the saved workspace).
+        # Need to disable checking of the Spectra-Detector map because it isn't
+        # fully saved out to the nexus file (it's limited to the spectra that
+        # are actually present in the saved workspace).
         self.disableChecking.append('SpectraMap')
         return 'R_1','PolrefTest.nxs'

@@ -89,8 +89,6 @@ class ILLD33SANSTest(unittest.TestCase):
     # TODO
 
 
-
-
 #====================================================================================
 
 class ILLD33Test(stresstesting.MantidStressTest):
