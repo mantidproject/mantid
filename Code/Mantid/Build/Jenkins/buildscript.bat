@@ -9,16 +9,9 @@ setlocal enableextensions enabledelayedexpansion
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-:: If pvnext in JOB_NAME, use PARAVIEW_NEXT_DIR for PARAVIEW_DIR
-:: Also, occasionally pvnext needs a different build type. Get it from 
-:: PVNEXT_BUILD_TYPE
+:: All node currently have PARAVIEW_DIR=3.98.1 and PARAVIEW_NEXT_DIR=4.3.1
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
-if NOT "%JOB_NAME%"=="%JOB_NAME:pvnext=%" (
-    set PARAVIEW_DIR=%PARAVIEW_NEXT_DIR%
-    set BUILD_TYPE=%PVNEXT_BUILD_TYPE%
-) else (
-    set BUILD_TYPE=Release
-)
+set PARAVIEW_DIR=%PARAVIEW_NEXT_DIR%
 
 set CMAKE_BIN_DIR=C:\Program Files (x86)\CMake 2.8\bin
 "%CMAKE_BIN_DIR%\cmake.exe" --version
@@ -174,4 +167,3 @@ if not "%JOB_NAME%"=="%JOB_NAME:pull_requests=%" (
   python !SYSTEMTESTS_DIR!\scripts\mantidinstaller.py uninstall %BUILD_DIR%
   if !RETCODE! NEQ 0 exit /B 1
 )
-
