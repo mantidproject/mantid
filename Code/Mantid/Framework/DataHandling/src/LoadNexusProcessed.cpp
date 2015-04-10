@@ -284,6 +284,11 @@ Workspace_sptr LoadNexusProcessed::doAccelleratedMultiPeriodLoading(
     periodWorkspace->setX(i, tempMatrixWorkspace->refX(i));
   }
 
+  // We avoid using `openEntry` or similar here because they're just wrappers
+  // around `open`. `open` is slow for large multiperiod datasets, because it
+  // does a search upon the entire HDF5 tree. `openLocal` is *much* quicker, as
+  // it only searches the current group. It does, however, require that the parent
+  // group is currently open.
   NXEntry mtdEntry(root, entryName);
   mtdEntry.openLocal();
 
@@ -363,6 +368,8 @@ Workspace_sptr LoadNexusProcessed::doAccelleratedMultiPeriodLoading(
     g_log.information(e.what());
   }
 
+  // We make sure to close the current entries. Failing to do this can cause
+  // strange off-by-one errors when loading the spectra.
   wsEntry.close();
   mtdEntry.close();
 
