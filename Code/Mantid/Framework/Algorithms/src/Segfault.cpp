@@ -51,6 +51,7 @@ void Segfault::exec() {
 #if __clang__
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wc++11-compat-deprecated-writable-strings"
+#pragma clang diagnostic ignored "-Wwritable-strings"
 #endif
     // writing to read-only memory
     char *s = "hello world";
