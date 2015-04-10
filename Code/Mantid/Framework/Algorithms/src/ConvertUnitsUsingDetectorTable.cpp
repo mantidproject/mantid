@@ -134,17 +134,17 @@ namespace Algorithms
       MatrixWorkspace_sptr outputWS = this->setupOutputWorkspace(inputWS);
 
 
-      // Check whether there is a quick conversion available
-      double factor, power;
-      if ( m_inputUnit->quickConversion(*m_outputUnit,factor,power) )
-      // If test fails, could also check whether a quick conversion in the opposite direction has been entered
-      {
-        this->convertQuickly(outputWS,factor,power);
-      }
-      else
-      {
+//      // Check whether there is a quick conversion available
+//      double factor, power;
+//      if ( m_inputUnit->quickConversion(*m_outputUnit,factor,power) )
+//      // If test fails, could also check whether a quick conversion in the opposite direction has been entered
+//      {
+//        this->convertQuickly(outputWS,factor,power);
+//      }
+//      else
+//      {
         this->convertViaTOF(m_inputUnit,outputWS);
-      }
+//      }
 
       // If the units conversion has flipped the ascending direction of X, reverse all the vectors
       if (outputWS->dataX(0).size() && ( outputWS->dataX(0).front() > outputWS->dataX(0).back()
@@ -175,6 +175,126 @@ namespace Algorithms
       setProperty("OutputWorkspace",outputWS);
       return;
   }
+
+  /** Convert the workspace units using TOF as an intermediate step in the conversion
+   * @param fromUnit :: The unit of the input workspace
+   * @param outputWS :: The output workspace
+   */
+  void ConvertUnitsUsingDetectorTable::convertViaTOF(Kernel::Unit_const_sptr fromUnit, API::MatrixWorkspace_sptr outputWS)
+  {
+    using namespace Geometry;
+
+      // Let's see if we are using a TableWorkspace to override parameters
+      ITableWorkspace_sptr paramWS = getProperty("DetectorParameters");
+
+      // See if we have supplied a DetectorParameters Workspace
+      // TODO: Check if paramWS is NULL and if so throw an exception
+
+      // Some variables to hold our values
+      Column_const_sptr l1Column;
+      Column_const_sptr l2Column;
+      Column_const_sptr spectraColumn;
+      Column_const_sptr twoThetaColumn;
+      Column_const_sptr efixedColumn;
+      Column_const_sptr emodeColumn;
+
+      std::vector<std::string> columnNames = paramWS->getColumnNames();
+
+      // Now lets read the parameters
+      try {
+          l1Column = paramWS->getColumn("l1");
+          l2Column = paramWS->getColumn("l2");
+          spectraColumn = paramWS->getColumn("spectra");
+          twoThetaColumn = paramWS->getColumn("twotheta");
+          efixedColumn = paramWS->getColumn("efixed");
+          emodeColumn = paramWS->getColumn("emode");
+      } catch (...) {
+          throw Exception::InstrumentDefinitionError("DetectorParameter TableWorkspace is not defined correctly.");
+      }
+
+
+      EventWorkspace_sptr eventWS = boost::dynamic_pointer_cast<EventWorkspace>(outputWS);
+      assert ( static_cast<bool>(eventWS) == m_inputEvents ); // Sanity check
+
+      Progress prog(this,0.2,1.0,m_numberOfSpectra);
+      int64_t numberOfSpectra_i = static_cast<int64_t>(m_numberOfSpectra); // cast to make openmp happy
+
+      // Get the unit object for each workspace
+      Kernel::Unit_const_sptr outputUnit = outputWS->getAxis(0)->unit();
+
+      int emode = 0;
+      double l1, l2, twoTheta, efixed;
+
+      std::vector<double> emptyVec;
+      int failedDetectorCount = 0;
+
+      std::vector<std::string> parameters = outputWS->getInstrument()->getStringParameter("show-signed-theta");
+      bool bUseSignedVersion = (!parameters.empty()) && find(parameters.begin(), parameters.end(), "Always") != parameters.end();
+      function<double(IDetector_const_sptr)> thetaFunction = bUseSignedVersion ? bind(&MatrixWorkspace::detectorSignedTwoTheta, outputWS, _1) : bind(&MatrixWorkspace::detectorTwoTheta, outputWS, _1);
+
+
+      // Loop over the histograms (detector spectra)
+      PARALLEL_FOR1(outputWS)
+              for (int64_t i = 0; i < numberOfSpectra_i; ++i)
+      {
+          PARALLEL_START_INTERUPT_REGION
+
+          std::size_t wsid = i;
+
+          try
+          {
+              specid_t spectraNumber = static_cast<specid_t>(spectraColumn->toDouble(i));
+              wsid = outputWS->getIndexFromSpectrumNumber(spectraNumber);
+              g_log.debug() << "###### Spectra #" << spectraNumber << " ==> Workspace ID:" << wsid << std::endl;
+              l1 = l1Column->toDouble(wsid);
+              l2 = l2Column->toDouble(wsid);
+              twoTheta = twoThetaColumn->toDouble(wsid);
+              efixed = efixedColumn->toDouble(wsid);
+              emode = static_cast<int>(emodeColumn->toDouble(wsid));
+
+
+              // Make local copies of the units. This allows running the loop in parallel
+              Unit * localFromUnit = fromUnit->clone();
+              Unit * localOutputUnit = outputUnit->clone();
+
+              /// @todo Don't yet consider hold-off (delta)
+              const double delta = 0.0;
+              // Convert the input unit to time-of-flight
+              localFromUnit->toTOF(outputWS->dataX(wsid),emptyVec,l1,l2,twoTheta,emode,efixed,delta);
+              // Convert from time-of-flight to the desired unit
+              localOutputUnit->fromTOF(outputWS->dataX(wsid),emptyVec,l1,l2,twoTheta,emode,efixed,delta);
+
+              // EventWorkspace part, modifying the EventLists.
+              if ( m_inputEvents )
+              {
+                  eventWS->getEventList(wsid).convertUnitsViaTof(localFromUnit, localOutputUnit);
+              }
+              // Clear unit memory
+              delete localFromUnit;
+              delete localOutputUnit;
+
+          } catch (Exception::NotFoundError&) {
+              // Get to here if exception thrown when calculating distance to detector
+              failedDetectorCount++;
+              // Since you usually (always?) get to here when there's no attached detectors, this call is
+              // the same as just zeroing out the data (calling clearData on the spectrum)
+              outputWS->maskWorkspaceIndex(i);
+          }
+
+          prog.report("Convert to " + m_outputUnit->unitID());
+          PARALLEL_END_INTERUPT_REGION
+      } // loop over spectra
+      PARALLEL_CHECK_INTERUPT_REGION
+
+              if (failedDetectorCount != 0)
+      {
+          g_log.information() << "Unable to calculate sample-detector distance for " << failedDetectorCount << " spectra. Masking spectrum." << std::endl;
+      }
+      if (m_inputEvents)
+          eventWS->clearMRU();
+
+  }
+
 
 
   /** Divide by the bin width if workspace is a distribution
