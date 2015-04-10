@@ -33,7 +33,7 @@ SofQWPolygon::SofQWPolygon() : Rebin2D(), m_Qout(), m_thetaPts(), m_thetaWidth(0
 /**
  * Initialize the algorithm
  */
-void SofQWPolygon::init() { SofQW::createInputProperties(*this); }
+void SofQWPolygon::init() { SofQW::createCommonInputProperties(*this); }
 
 /**
  * Execute the algorithm.

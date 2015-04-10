@@ -58,7 +58,7 @@ const std::string SofQWNormalisedPolygon::category() const { return "Inelastic";
 /**
  * Initialize the algorithm
  */
-void SofQWNormalisedPolygon::init() { SofQW::createInputProperties(*this); }
+void SofQWNormalisedPolygon::init() { SofQW::createCommonInputProperties(*this); }
 
 /**
  * Execute the algorithm.

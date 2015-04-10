@@ -45,20 +45,32 @@ const std::string SofQW::summary() const {
          "curvature or area overlap\n\n"
          "Polygon - parallel-piped rebin, outputting a weighted-sum of "
          "overlapping polygons\n\n"
-         "NormalisedPolygon - parallel-piped rebin, outputting a weighted-sum of "
-         "overlapping polygons normalised by the fractional area of each overlap";
+         "NormalisedPolygon - parallel-piped rebin, outputting a weighted-sum "
+         "of "
+         "overlapping polygons normalised by the fractional area of each "
+         "overlap";
 }
 
 /**
  * Create the input properties
  */
-void SofQW::init() { createInputProperties(*this); }
+void SofQW::init() {
+  createCommonInputProperties(*this);
+
+  // Add the Method property to control which algorithm is called
+  const char *methodOptions[] = {"Centre", "Polygon", "NormalisedPolygon"};
+  this->declareProperty(
+      "Method", "Centre",
+      boost::make_shared<StringListValidator>(
+          std::vector<std::string>(methodOptions, methodOptions + 3)),
+      "Defines the method used to compute the output.");
+}
 
 /**
- * Create the given algorithm's input properties
+ * Create the common set of input properties for the given algorithm
  * @param alg An algorithm object
  */
-void SofQW::createInputProperties(API::Algorithm &alg) {
+void SofQW::createCommonInputProperties(API::Algorithm &alg) {
   auto wsValidator = boost::make_shared<CompositeValidator>();
   wsValidator->add<WorkspaceUnitValidator>("DeltaE");
   wsValidator->add<SpectraAxisValidator>();
@@ -94,176 +106,20 @@ void SofQW::createInputProperties(API::Algorithm &alg) {
 }
 
 void SofQW::exec() {
-  using namespace Geometry;
+  // Find the approopriate algorithm
+  std::string method = this->getProperty("Method");
+  std::string child = "SofQW" + method;
+  
+  // Setup and run
+  Algorithm_sptr childAlg = boost::dynamic_pointer_cast<Algorithm>(
+      createChildAlgorithm(child, 0.0, 1.0));
+  // This will add the Method property to the child algorithm but it will be
+  // ignored anyway...
+  childAlg->copyPropertiesFrom(*this);
+  childAlg->execute();
 
-  MatrixWorkspace_const_sptr inputWorkspace = getProperty("InputWorkspace");
-
-  // Do the full check for common binning
-  if (!WorkspaceHelpers::commonBoundaries(inputWorkspace)) {
-    g_log.error(
-        "The input workspace must have common binning across all spectra");
-    throw std::invalid_argument(
-        "The input workspace must have common binning across all spectra");
-  }
-
-  std::vector<double> verticalAxis;
-  MatrixWorkspace_sptr outputWorkspace = setUpOutputWorkspace(
-      inputWorkspace, getProperty("QAxisBinning"), verticalAxis);
-  setProperty("OutputWorkspace", outputWorkspace);
-
-  // Holds the spectrum-detector mapping
-  std::vector<specid_t> specNumberMapping;
-  std::vector<detid_t> detIDMapping;
-
-  m_EmodeProperties.initCachedValues(inputWorkspace, this);
-  int emode = m_EmodeProperties.m_emode;
-
-  // Get a pointer to the instrument contained in the workspace
-  Instrument_const_sptr instrument = inputWorkspace->getInstrument();
-
-  // Get the distance between the source and the sample (assume in metres)
-  IComponent_const_sptr source = instrument->getSource();
-  IComponent_const_sptr sample = instrument->getSample();
-  V3D beamDir = sample->getPos() - source->getPos();
-  beamDir.normalize();
-
-  try {
-    double l1 = source->getDistance(*sample);
-    g_log.debug() << "Source-sample distance: " << l1 << std::endl;
-  } catch (Exception::NotFoundError &) {
-    g_log.error("Unable to calculate source-sample distance");
-    throw Exception::InstrumentDefinitionError(
-        "Unable to calculate source-sample distance",
-        inputWorkspace->getTitle());
-  }
-
-  // Conversion constant for E->k. k(A^-1) = sqrt(energyToK*E(meV))
-  const double energyToK = 8.0 * M_PI * M_PI * PhysicalConstants::NeutronMass *
-                           PhysicalConstants::meV * 1e-20 /
-                           (PhysicalConstants::h * PhysicalConstants::h);
-
-  // Loop over input workspace bins, reassigning data to correct bin in output
-  // qw workspace
-  const size_t numHists = inputWorkspace->getNumberHistograms();
-  const size_t numBins = inputWorkspace->blocksize();
-  Progress prog(this, 0.0, 1.0, numHists);
-  for (int64_t i = 0; i < int64_t(numHists); ++i) {
-    try {
-      // Now get the detector object for this histogram
-      IDetector_const_sptr spectrumDet = inputWorkspace->getDetector(i);
-      if (spectrumDet->isMonitor())
-        continue;
-
-      const double efixed = m_EmodeProperties.getEFixed(spectrumDet);
-
-      // For inelastic scattering the simple relationship q=4*pi*sinTheta/lambda
-      // does not hold. In order to
-      // be completely general we must calculate the momentum transfer by
-      // calculating the incident and final
-      // wave vectors and then use |q| = sqrt[(ki - kf)*(ki - kf)]
-      DetectorGroup_const_sptr detGroup =
-          boost::dynamic_pointer_cast<const DetectorGroup>(spectrumDet);
-      std::vector<IDetector_const_sptr> detectors;
-      if (detGroup) {
-        detectors = detGroup->getDetectors();
-      } else {
-        detectors.push_back(spectrumDet);
-      }
-
-      const size_t numDets = detectors.size();
-      const double numDets_d = static_cast<double>(
-          numDets); // cache to reduce number of static casts
-      const MantidVec &Y = inputWorkspace->readY(i);
-      const MantidVec &E = inputWorkspace->readE(i);
-      const MantidVec &X = inputWorkspace->readX(i);
-
-      // Loop over the detectors and for each bin calculate Q
-      for (size_t idet = 0; idet < numDets; ++idet) {
-        IDetector_const_sptr det = detectors[idet];
-        // Calculate kf vector direction and then Q for each energy bin
-        V3D scatterDir = (det->getPos() - sample->getPos());
-        scatterDir.normalize();
-        for (size_t j = 0; j < numBins; ++j) {
-          const double deltaE = 0.5 * (X[j] + X[j + 1]);
-          // Compute ki and kf wave vectors and therefore q = ki - kf
-          double ei(0.0), ef(0.0);
-          if (emode == 1) {
-            ei = efixed;
-            ef = efixed - deltaE;
-            if (ef < 0) {
-              std::string mess =
-                  "Energy transfer requested in Direct mode exceeds incident "
-                  "energy.\n Found for det ID: " +
-                  boost::lexical_cast<std::string>(idet) + " bin No " +
-                  boost::lexical_cast<std::string>(j) + " with Ei=" +
-                  boost::lexical_cast<std::string>(efixed) +
-                  " and energy transfer: " +
-                  boost::lexical_cast<std::string>(deltaE);
-              throw std::runtime_error(mess);
-            }
-          } else {
-            ei = efixed + deltaE;
-            ef = efixed;
-            if (ef < 0) {
-              std::string mess =
-                  "Incident energy of a neutron is negative. Are you trying to "
-                  "process Direct data in Indirect mode?\n Found for det ID: " +
-                  boost::lexical_cast<std::string>(idet) + " bin No " +
-                  boost::lexical_cast<std::string>(j) + " with efied=" +
-                  boost::lexical_cast<std::string>(efixed) +
-                  " and energy transfer: " +
-                  boost::lexical_cast<std::string>(deltaE);
-              throw std::runtime_error(mess);
-            }
-          }
-
-          if (ei < 0)
-            throw std::runtime_error(
-                "Negative incident energy. Check binning.");
-
-          const V3D ki = beamDir * sqrt(energyToK * ei);
-          const V3D kf = scatterDir * (sqrt(energyToK * (ef)));
-          const double q = (ki - kf).norm();
-
-          // Test whether it's in range of the Q axis
-          if (q < verticalAxis.front() || q > verticalAxis.back())
-            continue;
-          // Find which q bin this point lies in
-          const MantidVec::difference_type qIndex =
-              std::upper_bound(verticalAxis.begin(), verticalAxis.end(), q) -
-              verticalAxis.begin() - 1;
-
-          // Add this spectra-detector pair to the mapping
-          specNumberMapping.push_back(
-              outputWorkspace->getSpectrum(qIndex)->getSpectrumNo());
-          detIDMapping.push_back(det->getID());
-
-          // And add the data and it's error to that bin, taking into account
-          // the number of detectors contributing to this bin
-          outputWorkspace->dataY(qIndex)[j] += Y[j] / numDets_d;
-          // Standard error on the average
-          outputWorkspace->dataE(qIndex)[j] =
-              sqrt((pow(outputWorkspace->readE(qIndex)[j], 2) + pow(E[j], 2)) /
-                   numDets_d);
-        }
-      }
-
-    } catch (Exception::NotFoundError &) {
-      // Get to here if exception thrown when calculating distance to detector
-      // Presumably, if we get to here the spectrum will be all zeroes anyway
-      // (from conversion to E)
-      continue;
-    }
-    prog.report();
-  }
-
-  // If the input workspace was a distribution, need to divide by q bin width
-  if (inputWorkspace->isDistribution())
-    this->makeDistribution(outputWorkspace, verticalAxis);
-
-  // Set the output spectrum-detector mapping
-  SpectrumDetectorMapping outputDetectorMap(specNumberMapping, detIDMapping);
-  outputWorkspace->updateSpectraUsing(outputDetectorMap);
+  MatrixWorkspace_sptr outputWS = childAlg->getProperty("OutputWorkspace");
+  this->setProperty("OutputWorkspace", outputWS);
 }
 
 /** Creates the output workspace, setting the axes according to the input
@@ -307,26 +163,6 @@ SofQW::setUpOutputWorkspace(API::MatrixWorkspace_const_sptr inputWorkspace,
   outputWorkspace->getAxis(0)->title() = "Energy transfer";
 
   return outputWorkspace;
-}
-
-/** Divide each bin by the width of its q bin.
- *  @param outputWS :: The output workspace
- *  @param qAxis ::    A vector of the q bin boundaries
- */
-void SofQW::makeDistribution(API::MatrixWorkspace_sptr outputWS,
-                             const std::vector<double> qAxis) {
-  std::vector<double> widths(qAxis.size());
-  std::adjacent_difference(qAxis.begin(), qAxis.end(), widths.begin());
-
-  const size_t numQBins = outputWS->getNumberHistograms();
-  for (size_t i = 0; i < numQBins; ++i) {
-    MantidVec &Y = outputWS->dataY(i);
-    MantidVec &E = outputWS->dataE(i);
-    std::transform(Y.begin(), Y.end(), Y.begin(),
-                   std::bind2nd(std::divides<double>(), widths[i + 1]));
-    std::transform(E.begin(), E.end(), E.begin(),
-                   std::bind2nd(std::divides<double>(), widths[i + 1]));
-  }
 }
 
 } // namespace Algorithms
