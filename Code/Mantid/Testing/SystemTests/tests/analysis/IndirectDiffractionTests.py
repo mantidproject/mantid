@@ -9,6 +9,7 @@ class MSGDiffractionReductionTest(stresstesting.MantidStressTest):
     """
 
     __metaclass__ = ABCMeta
+    _output_workspace = None
 
     @abstractmethod
     def get_reference_file(self):

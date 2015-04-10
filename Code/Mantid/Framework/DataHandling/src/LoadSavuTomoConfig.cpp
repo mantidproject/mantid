@@ -12,7 +12,7 @@ namespace Mantid {
 namespace DataHandling {
 
 // Register the algorithm into the algorithm factory
-DECLARE_ALGORITHM(LoadSavuTomoConfig);
+DECLARE_ALGORITHM(LoadSavuTomoConfig)
 
 using namespace Mantid::API;
 

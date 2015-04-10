@@ -45,12 +45,12 @@ public:
     TS_ASSERT_EQUALS(fileBacked->toString(), m_inMemoryExptInfo->toString());
   }
 
-  void test_cloneExperimentInfo_populates_object() {
+  void test_cloneExperimentInfo_returns_new_file_backed_object_and_does_not_touch_file() {
     auto fileBacked = createTestObject();
     auto *clonedFileBacked = fileBacked->cloneExperimentInfo();
 
-    TS_ASSERT_EQUALS(clonedFileBacked->toString(),
-                     m_inMemoryExptInfo->toString());
+    TS_ASSERT(dynamic_cast<FileBackedExperimentInfo*>(clonedFileBacked));
+
     delete clonedFileBacked;
   }
 

@@ -1,6 +1,5 @@
 #pylint: disable=invalid-name
 """ Sample LET reduction script """
-import os
 #os.environ["PATH"] = r"c:/Mantid/Code/builds/br_master/bin/Release;"+os.environ["PATH"]
 
 
@@ -190,6 +189,8 @@ class ReduceLET_MultiRep2015(ReductionWrapper):
         # Should be possibility to define spectra_to_monitors_list to just monitors list, if
         # spectra_to_monitors_list remains undefined
         prop['spectra_to_monitors_list']=5506
+        # similar to the one above. old IDF do not contain this property
+        prop['multirep_tof_specta_list']="12416,21761"
         return prop
       #
     @iliad
@@ -226,7 +227,7 @@ class ReduceLET_MultiRep2015(ReductionWrapper):
             """
             # Note -- properties have the same names  as the list of advanced and
             # main properties
-            ei = prop_man.incident_energy
+            ei = PropertyManager.incident_energy.get_current()
             # sample run is more then just list of runs, so we use
             # the formalization below to access its methods
             run_num = PropertyManager.sample_run.run_number()
@@ -236,7 +237,7 @@ class ReduceLET_MultiRep2015(ReductionWrapper):
         # Uncomment this to use custom filename function
         # Note: the properties are stored in prop_man class accessed as
         # below.
-        #return custom_name(self.reducer.prop_man)
+        #return lambda : custom_name(self.reducer.prop_man)
         # use this method to use standard file name generating function
         return None
 

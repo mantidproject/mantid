@@ -11,7 +11,6 @@
 import stresstesting
 import numpy
 from numpy import matrix
-from numpy import linalg
 import math
 import random
 import mantid

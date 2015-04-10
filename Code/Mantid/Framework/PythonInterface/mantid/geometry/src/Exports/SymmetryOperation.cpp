@@ -33,10 +33,10 @@ void export_SymmetryOperation()
   register_ptr_to_python<boost::shared_ptr<SymmetryOperation> >();
 
   class_<SymmetryOperation>("SymmetryOperation")
-          .def("order", &SymmetryOperation::order)
-          .def("identifier", &SymmetryOperation::identifier)
-          .def("transformCoordinates", &applyToCoordinates)
-          .def("transformHKL", &applyToVector)
-          .def("apply", &applyToVector);
+          .def("getOrder", &SymmetryOperation::order, "Returns the order of the symmetry operation, which indicates how often the operation needs to be applied to a point to arrive at identity.")
+          .def("getIdentifier", &SymmetryOperation::identifier, "The identifier of the operation in x,y,z-notation.")
+          .def("transformCoordinates", &applyToCoordinates, "Returns transformed coordinates. For transforming HKLs, use transformHKL.")
+          .def("transformHKL", &applyToVector, "Returns transformed HKLs. For transformation of coordinates use transformCoordinates.")
+          .def("apply", &applyToVector, "An alias for transformHKL.");
 }
 

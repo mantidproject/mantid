@@ -18,7 +18,7 @@ using namespace API;
 using namespace NeXus;
 
 // Register the algorithm into the AlgorithmFactory
-DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadILLIndirect);
+DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadILLIndirect)
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
@@ -37,10 +37,10 @@ LoadILLIndirect::~LoadILLIndirect() {}
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
-const std::string LoadILLIndirect::name() const { return "LoadILLIndirect"; };
+const std::string LoadILLIndirect::name() const { return "LoadILLIndirect"; }
 
 /// Algorithm's version for identification. @see Algorithm::version
-int LoadILLIndirect::version() const { return 1; };
+int LoadILLIndirect::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
 const std::string LoadILLIndirect::category() const { return "DataHandling"; }

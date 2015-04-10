@@ -1200,7 +1200,7 @@ void ScriptRepositoryImpl::setIgnorePatterns(const std::string &patterns) {
     boost::replace_all(newignore, "*", ".*");
     ignoreregex = std::string("(").append(newignore).append(")");
   }
-};
+}
 /**
  @todo describe
  */
@@ -1306,7 +1306,11 @@ void ScriptRepositoryImpl::doDownloadFile(const std::string &url_file,
   // Configure Poco HTTP Client Session
   try {
     Kernel::InternetHelper inetHelper;
-    inetHelper.setTimeout(3); // 3 seconds
+    int timeout;
+    if (!ConfigService::Instance().getValue("network.scriptrepo.timeout",timeout)) {
+      timeout = 5; // the default value if the key is not found
+    }
+    inetHelper.setTimeout(timeout);
     
     //std::stringstream ss;
     int status = inetHelper.downloadFile(url_file,local_file_path);

@@ -30,10 +30,10 @@ NexusTester::~NexusTester() {}
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
-const std::string NexusTester::name() const { return "NexusTester"; };
+const std::string NexusTester::name() const { return "NexusTester"; }
 
 /// Algorithm's version for identification. @see Algorithm::version
-int NexusTester::version() const { return 1; };
+int NexusTester::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
 const std::string NexusTester::category() const {

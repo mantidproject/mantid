@@ -1,4 +1,4 @@
-#pylint: disable=no-init,invalid-name
+#pylint: disable=no-init,invalid-name,attribute-defined-outside-init
 import stresstesting
 import os
 import platform
@@ -11,7 +11,6 @@ from mantid.api import FileFinder
 
 # Import our workflows.
 from inelastic_indirect_reducer import IndirectReducer
-from inelastic_indirect_reduction_steps import CreateCalibrationWorkspace
 from IndirectDataAnalysis import furyfitSeq, furyfitMult, confitSeq, abscorFeeder
 
 '''
@@ -169,8 +168,9 @@ class ISISIndirectInelasticReduction(ISISIndirectInelasticBase):
     sum_files = False
 
     def _run(self):
-        self.tolerance = 1e-7
         '''Defines the workflow for the test'''
+        self.tolerance = 1e-7
+
         reducer = IndirectReducer()
         reducer.set_instrument_name(self.instr_name)
         reducer.set_detector_range(self.detector_range[0],
@@ -468,11 +468,11 @@ class ISISIndirectInelasticCalibration(ISISIndirectInelasticBase):
 
         self.result_names = ['IndirectCalibration_Output']
 
-        CreateCalibrationWorkspace(InputFiles=self.data_file,
-                                   OutputWorkspace='IndirectCalibration_Output',
-                                   DetectorRange=self.detector_range,
-                                   PeakRange=self.peak,
-                                   BackgroundRange=self.back)
+        IndirectCalibration(InputFiles=self.data_file,
+                            OutputWorkspace='IndirectCalibration_Output',
+                            DetectorRange=self.detector_range,
+                            PeakRange=self.peak,
+                            BackgroundRange=self.back)
 
     def _validate_properties(self):
         '''Check the object properties are in an expected state to continue'''
@@ -536,8 +536,8 @@ class ISISIndirectInelasticResolution(ISISIndirectInelasticBase):
     __metaclass__ = ABCMeta  # Mark as an abstract class
 
     def _run(self):
-        self.tolerance = 1e-7
         '''Defines the workflow for the test'''
+        self.tolerance = 1e-7
 
         IndirectResolution(InputFiles=self.files,
                            OutputWorkspace='__IndirectResolution_Test',
@@ -683,7 +683,7 @@ class OSIRISDiagnostics(ISISIndirectInelasticDiagnostics):
 
 #==============================================================================
 class ISISIndirectInelasticMoments(ISISIndirectInelasticBase):
-    '''A base class for the ISIS indirect inelastic Fury/FuryFit tests
+    '''A base class for the ISIS indirect inelastic TransformToIqt/TransformToIqtFit tests
 
     The output of Elwin is usually used with MSDFit and so we plug one into
     the other in this test.
@@ -850,7 +850,7 @@ class ISISIndirectInelasticFuryAndFuryFit(ISISIndirectInelasticBase):
     '''
     A base class for the ISIS indirect inelastic Fury/FuryFit tests
 
-    The output of Fury is usually used with FuryFit and so we plug one into
+    The output of TransformToIqt is usually used with FuryFit and so we plug one into
     the other in this test.
     '''
 
@@ -866,14 +866,14 @@ class ISISIndirectInelasticFuryAndFuryFit(ISISIndirectInelasticBase):
             LoadNexus(sample, OutputWorkspace=sample)
         LoadNexus(self.resolution, OutputWorkspace=self.resolution)
 
-        fury_props, fury_ws = Fury(Sample=self.samples[0],
-                                   Resolution=self.resolution,
-                                   EnergyMin=self.e_min,
-                                   EnergyMax=self.e_max,
-                                   NumBins=self.num_bins,
-                                   DryRun=False,
-                                   Save=False,
-                                   Plot=False)
+        fury_props, fury_ws = TransformToIqt(SampleWorkspace=self.samples[0],
+                                             ResolutionWorkspace=self.resolution,
+                                             EnergyMin=self.e_min,
+                                             EnergyMax=self.e_max,
+                                             BinReductionFactor=self.num_bins,
+                                             DryRun=False,
+                                             Save=False,
+                                             Plot=False)
 
         # Test FuryFit Sequential
         furyfitSeq_ws = furyfitSeq(fury_ws.getName(),
@@ -923,7 +923,7 @@ class OSIRISFuryAndFuryFit(ISISIndirectInelasticFuryAndFuryFit):
     def __init__(self):
         ISISIndirectInelasticFuryAndFuryFit.__init__(self)
 
-        # Fury
+        # TransformToIqt
         self.samples = ['osi97935_graphite002_red.nxs']
         self.resolution = 'osi97935_graphite002_res.nxs'
         self.e_min = -0.4
@@ -931,7 +931,8 @@ class OSIRISFuryAndFuryFit(ISISIndirectInelasticFuryAndFuryFit):
         self.num_bins = 4
 
         # Fury Seq Fit
-        self.func = r'name=LinearBackground,A0=0,A1=0,ties=(A1=0);name=UserFunction,Formula=Intensity*exp(-(x/Tau)),Intensity=0.304185,Tau=100;ties=(f1.Intensity=1-f0.A0)'
+        self.func = r'name=LinearBackground,A0=0,A1=0,ties=(A1=0);name=UserFunction,Formula=Intensity*exp(-(x/Tau)),'\
+                     'Intensity=0.304185,Tau=100;ties=(f1.Intensity=1-f0.A0)'
         self.ftype = '1E_s'
         self.startx = 0.022861
         self.endx = 0.118877
@@ -948,7 +949,7 @@ class IRISFuryAndFuryFit(ISISIndirectInelasticFuryAndFuryFit):
     def __init__(self):
         ISISIndirectInelasticFuryAndFuryFit.__init__(self)
 
-        # Fury
+        # TransformToIqt
         self.samples = ['irs53664_graphite002_red.nxs']
         self.resolution = 'irs53664_graphite002_res.nxs'
         self.e_min = -0.4
@@ -956,7 +957,8 @@ class IRISFuryAndFuryFit(ISISIndirectInelasticFuryAndFuryFit):
         self.num_bins = 4
 
         # Fury Seq Fit
-        self.func = r'name=LinearBackground,A0=0,A1=0,ties=(A1=0);name=UserFunction,Formula=Intensity*exp(-(x/Tau)),Intensity=0.355286,Tau=100;ties=(f1.Intensity=1-f0.A0)'
+        self.func = r'name=LinearBackground,A0=0,A1=0,ties=(A1=0);name=UserFunction,Formula=Intensity*exp(-(x/Tau)),'\
+                     'Intensity=0.355286,Tau=100;ties=(f1.Intensity=1-f0.A0)'
         self.ftype = '1E_s'
         self.startx = 0.013717
         self.endx = 0.169171
@@ -987,14 +989,14 @@ class ISISIndirectInelasticFuryAndFuryFitMulti(ISISIndirectInelasticBase):
             LoadNexus(sample, OutputWorkspace=sample)
         LoadNexus(self.resolution, OutputWorkspace=self.resolution)
 
-        fury_props, fury_ws = Fury(Sample=self.samples[0],
-                                   Resolution=self.resolution,
-                                   EnergyMin=self.e_min,
-                                   EnergyMax=self.e_max,
-                                   NumBins=self.num_bins,
-                                   DryRun=False,
-                                   Save=False,
-                                   Plot=False)
+        fury_props, fury_ws = TransformToIqt(SampleWorkspace=self.samples[0],
+                                             ResolutionWorkspace=self.resolution,
+                                             EnergyMin=self.e_min,
+                                             EnergyMax=self.e_max,
+                                             BinReductionFactor=self.num_bins,
+                                             DryRun=False,
+                                             Save=False,
+                                             Plot=False)
 
         # Test FuryFit Sequential
         furyfitSeq_ws = furyfitMult(fury_ws.getName(),
@@ -1046,7 +1048,7 @@ class OSIRISFuryAndFuryFitMulti(ISISIndirectInelasticFuryAndFuryFitMulti):
     def __init__(self):
         ISISIndirectInelasticFuryAndFuryFitMulti.__init__(self)
 
-        # Fury
+        # TransformToIqt
         self.samples = ['osi97935_graphite002_red.nxs']
         self.resolution = 'osi97935_graphite002_res.nxs'
         self.e_min = -0.4
@@ -1054,7 +1056,8 @@ class OSIRISFuryAndFuryFitMulti(ISISIndirectInelasticFuryAndFuryFitMulti):
         self.num_bins = 4
 
         # Fury Seq Fit
-        self.func = r'name=LinearBackground,A0=0.510595,A1=0,ties=(A1=0);name=UserFunction,Formula=Intensity*exp( -(x/Tau)^Beta),Intensity=0.489405,Tau=0.105559,Beta=1.61112e-14;ties=(f1.Intensity=1-f0.A0)'
+        self.func = r'name=LinearBackground,A0=0.510595,A1=0,ties=(A1=0);name=UserFunction,Formula=Intensity*exp( -(x/Tau)^Beta),'\
+                     'Intensity=0.489405,Tau=0.105559,Beta=1.61112e-14;ties=(f1.Intensity=1-f0.A0)'
         self.ftype = '1E_s'
         self.startx = 0.0
         self.endx = 0.119681
@@ -1071,7 +1074,7 @@ class IRISFuryAndFuryFitMulti(ISISIndirectInelasticFuryAndFuryFitMulti):
     def __init__(self):
         ISISIndirectInelasticFuryAndFuryFitMulti.__init__(self)
 
-        # Fury
+        # TransformToIqt
         self.samples = ['irs53664_graphite002_red.nxs']
         self.resolution = 'irs53664_graphite002_res.nxs'
         self.e_min = -0.4
@@ -1079,7 +1082,8 @@ class IRISFuryAndFuryFitMulti(ISISIndirectInelasticFuryAndFuryFitMulti):
         self.num_bins = 4
 
         # Fury Seq Fit
-        self.func = r'name=LinearBackground,A0=0.584488,A1=0,ties=(A1=0);name=UserFunction,Formula=Intensity*exp( -(x/Tau)^Beta),Intensity=0.415512,Tau=4.848013e-14,Beta=0.022653;ties=(f1.Intensity=1-f0.A0)'
+        self.func = r'name=LinearBackground,A0=0.584488,A1=0,ties=(A1=0);name=UserFunction,Formula=Intensity*exp( -(x/Tau)^Beta),'\
+                     'Intensity=0.415512,Tau=4.848013e-14,Beta=0.022653;ties=(f1.Intensity=1-f0.A0)'
         self.ftype = '1S_s'
         self.startx = 0.0
         self.endx = 0.156250
@@ -1105,6 +1109,7 @@ class ISISIndirectInelasticConvFit(ISISIndirectInelasticBase):
         '''Defines the workflow for the test'''
         self.tolerance = 1e-4
         LoadNexus(self.sample, OutputWorkspace=self.sample)
+        LoadNexus(self.resolution, OutputWorkspace=self.resolution)
 
         confitSeq(
             self.sample,
@@ -1125,8 +1130,6 @@ class ISISIndirectInelasticConvFit(ISISIndirectInelasticBase):
             raise RuntimeError("Sample should be a string.")
         if type(self.resolution) != str:
             raise RuntimeError("Resolution should be a string.")
-        if not os.path.isfile(self.resolution):
-            raise RuntimeError("Resolution must be a file that exists.")
         if type(self.func) != str:
             raise RuntimeError("Function should be a string.")
         if type(self.bg) != str:
@@ -1154,7 +1157,8 @@ class OSIRISConvFit(ISISIndirectInelasticConvFit):
         self.sample = 'osi97935_graphite002_red.nxs'
         self.resolution = FileFinder.getFullPath('osi97935_graphite002_res.nxs')
         #ConvFit fit function
-        self.func = 'name=LinearBackground,A0=0,A1=0;(composite=Convolution,FixResolution=true,NumDeriv=true;name=Resolution,FileName=\"%s\";name=Lorentzian,Amplitude=2,PeakCentre=0,FWHM=0.05)' % self.resolution
+        self.func = 'name=LinearBackground,A0=0,A1=0;(composite=Convolution,FixResolution=true,NumDeriv=true;'\
+                    'name=Resolution,Workspace=\"%s\";name=Lorentzian,Amplitude=2,PeakCentre=0,FWHM=0.05)' % self.resolution
         self.ftype = '1L'
         self.startx = -0.2
         self.endx = 0.2
@@ -1177,7 +1181,9 @@ class IRISConvFit(ISISIndirectInelasticConvFit):
         self.sample = 'irs53664_graphite002_red.nxs'
         self.resolution = FileFinder.getFullPath('irs53664_graphite002_res.nxs')
         #ConvFit fit function
-        self.func = 'name=LinearBackground,A0=0.060623,A1=0.001343;(composite=Convolution,FixResolution=true,NumDeriv=true;name=Resolution,FileName=\"%s\";name=Lorentzian,Amplitude=1.033150,PeakCentre=-0.000841,FWHM=0.001576)' % self.resolution
+        self.func = 'name=LinearBackground,A0=0.060623,A1=0.001343;(composite=Convolution,FixResolution=true,NumDeriv=true;'\
+                    'name=Resolution,Workspace=\"%s\";name=Lorentzian,Amplitude=1.033150,PeakCentre=-0.000841,FWHM=0.001576)' % (
+                    self.resolution)
         self.ftype = '1L'
         self.startx = -0.2
         self.endx = 0.2

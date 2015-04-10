@@ -3,86 +3,13 @@
 #include "MantidQtCustomInterfaces/UserInputValidator.h"
 #include "MantidQtMantidWidgets/WorkspaceSelector.h"
 
-
 #include <QLineEdit>
 #include <QList>
 #include <QValidator>
 #include <QDoubleValidator>
 #include <QRegExpValidator>
 
-class QDoubleMultiRangeValidator : public QValidator
-{
-public:
-  /**
-   * Constructor.
-   *
-   * @param ranges :: a set of pairs of doubles representing the valid ranges of the input
-   * @param parent :: the parent QObject of this QObject.
-   */
-  QDoubleMultiRangeValidator(std::set<std::pair<double, double>> ranges, QObject * parent) :
-    QValidator(parent), m_ranges(ranges), m_slaveVal(NULL)
-  {
-    m_slaveVal = new QDoubleValidator(this);
-  }
-
-  ~QDoubleMultiRangeValidator() {}
-
-  /**
-   * Reimplemented from QValidator::validate().
-   *
-   * Returns Acceptable if the string input contains a double that is within at least one
-   * of the ranges and is in the correct format.
-   *
-   * Else returns Intermediate if input contains a double that is outside the ranges or is in
-   * the wrong format; e.g. with too many digits after the decimal point or is empty.
-   *
-   * Else returns Invalid - i.e. the input is not a double.
-   *
-   * @param input :: the input string to validate
-   * @param pos   :: not used.
-   */
-  virtual QValidator::State	validate( QString & input, int & pos ) const
-  {
-    UNUSED_ARG(pos);
-
-    if( m_ranges.empty() )
-      return Intermediate;
-
-    bool acceptable = false;
-    bool intermediate = false;
-
-    // For each range in the list, use the slave QDoubleValidator to find out the state.
-    for( auto range = m_ranges.begin(); range != m_ranges.end(); ++ range )
-    {
-      if(range->first >= range->second)
-        throw std::runtime_error("Invalid range");
-
-      m_slaveVal->setBottom(range->first);
-      m_slaveVal->setTop(range->second);
-
-      QValidator::State rangeState = m_slaveVal->validate(input, pos);
-
-      if( rangeState == Acceptable )
-        acceptable = true;
-      else if( rangeState == Intermediate )
-        intermediate = true;
-    }
-
-    if( acceptable )
-      return Acceptable;
-    if( intermediate )
-      return Intermediate;
-
-    return Invalid;
-  }
-
-private:
-  /// Disallow default constructor.
-  QDoubleMultiRangeValidator();
-
-  std::set<std::pair<double, double>> m_ranges;
-  QDoubleValidator * m_slaveVal;
-};
+using namespace Mantid::API;
 
 namespace
 {
@@ -96,419 +23,372 @@ namespace CustomInterfaces
 namespace IDA
 {
   CalcCorr::CalcCorr(QWidget * parent) :
-    IDATab(parent), m_dblVal(NULL), m_posDblVal(NULL)
+    IDATab(parent)
   {
     m_uiForm.setupUi(parent);
 
-    m_dblVal = new QDoubleValidator(this);
-    m_posDblVal = new QDoubleValidator(this);
-    m_posDblVal->setBottom(0.0);
-  }
-
-  void CalcCorr::setup()
-  {
-    // set signals and slot connections for F2Py Absorption routine
-    connect(m_uiForm.cbShape, SIGNAL(currentIndexChanged(int)), this, SLOT(shape(int)));
-    connect(m_uiForm.ckUseCan, SIGNAL(toggled(bool)), this, SLOT(useCanChecked(bool)));
-    connect(m_uiForm.letc1, SIGNAL(editingFinished()), this, SLOT(tcSync()));
-    connect(m_uiForm.dsSampleInput, SIGNAL(dataReady(const QString&)), this, SLOT(getBeamWidthFromWorkspace(const QString&)));
-
-    // Sort the fields into various lists.
-
-    QList<QLineEdit*> allFields;
-    QList<QLineEdit*> doubleFields;
-    QList<QLineEdit*> positiveDoubleFields;
-
-    positiveDoubleFields += m_uiForm.lets;  // Thickness
-    positiveDoubleFields += m_uiForm.letc1; // Front Thickness
-    positiveDoubleFields += m_uiForm.letc2; // Back Thickness
-
-    positiveDoubleFields += m_uiForm.ler1; // Radius 1
-    positiveDoubleFields += m_uiForm.ler2; // Radius 2
-    positiveDoubleFields += m_uiForm.ler3; // Radius 3
-
-    positiveDoubleFields += m_uiForm.lewidth; // Beam Width
-
-    positiveDoubleFields += m_uiForm.lesamden;  // Sample Number Density
-    positiveDoubleFields += m_uiForm.lesamsigs; // Sample Scattering Cross-Section
-    positiveDoubleFields += m_uiForm.lesamsiga; // Sample Absorption Cross-Section
-
-    positiveDoubleFields += m_uiForm.lecanden;  // Can Number Density
-    positiveDoubleFields += m_uiForm.lecansigs; // Can Scattering Cross-Section
-    positiveDoubleFields += m_uiForm.lecansiga; // Can Absorption Cross-Section
-
-    // Set appropriate validators.
-    foreach(QLineEdit * positiveDoubleField, positiveDoubleFields)
-    {
-      positiveDoubleField->setValidator(m_posDblVal);
-    }
-
-    // Deal with the slightly more complex multi-range "Can Angle to Beam" field.
-    std::set<std::pair<double, double>> angleRanges;
-    angleRanges.insert(std::make_pair(-180, -100));
-    angleRanges.insert(std::make_pair(-80, 80));
-    angleRanges.insert(std::make_pair(100, 180));
-    QDoubleMultiRangeValidator * angleValidator = new QDoubleMultiRangeValidator(angleRanges, this);
-    m_uiForm.leavar->setValidator(angleValidator); // Can Angle to Beam
-
-    allFields = positiveDoubleFields;
-    allFields += m_uiForm.leavar;
+    connect(m_uiForm.dsSample, SIGNAL(dataReady(const QString&)), this, SLOT(getBeamWidthFromWorkspace(const QString&)));
 
     QRegExp regex("[A-Za-z0-9\\-\\(\\)]*");
     QValidator *formulaValidator = new QRegExpValidator(regex, this);
-    m_uiForm.leSampleFormula->setValidator(formulaValidator);
-    m_uiForm.leCanFormula->setValidator(formulaValidator);
-
-    // "Nudge" color of title of QGroupBox to change.
-    useCanChecked(m_uiForm.ckUseCan->isChecked());
+    m_uiForm.leSampleChemicalFormula->setValidator(formulaValidator);
+    m_uiForm.leCanChemicalFormula->setValidator(formulaValidator);
   }
+
+
+  void CalcCorr::setup()
+  {
+    doValidation(true);
+  }
+
 
   void CalcCorr::run()
   {
-    QString pyInput = "import IndirectAbsCor\n";
+    // Get correct corrections algorithm
+    QString sampleShape = m_uiForm.cbSampleShape->currentText();
+    QString algorithmName = sampleShape.replace(" ", "") + "PaalmanPingsCorrection";
+    algorithmName = algorithmName.replace("Annulus", "Cylinder"); // Use the cylinder algorithm for annulus
 
-    QString geom;
-    QString size;
+    API::BatchAlgorithmRunner::AlgorithmRuntimeProps absCorProps;
+    IAlgorithm_sptr absCorAlgo = AlgorithmManager::Instance().create(algorithmName.toStdString());
+    absCorAlgo->initialize();
 
-    if ( m_uiForm.cbShape->currentText() == "Flat" )
+    // Sample details
+    QString sampleWsName = m_uiForm.dsSample->getCurrentDataName();
+    MatrixWorkspace_sptr sampleWs = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(sampleWsName.toStdString());
+
+    // If not in wavelength then do conversion
+    Mantid::Kernel::Unit_sptr sampleXUnit = sampleWs->getAxis(0)->unit();
+    if(sampleXUnit->caption() != "Wavelength")
     {
-      geom = "flt";
-      if ( m_uiForm.ckUseCan->isChecked() )
+      g_log.information("Sample workspace not in wavelength, need to convert to continue.");
+      absCorProps["SampleWorkspace"] = addConvertUnitsStep(sampleWs, "Wavelength");
+    }
+    else
+    {
+      absCorProps["SampleWorkspace"] = sampleWsName.toStdString();
+    }
+
+    double sampleNumberDensity = m_uiForm.spSampleNumberDensity->value();
+    absCorAlgo->setProperty("SampleNumberDensity", sampleNumberDensity);
+
+    QString sampleChemicalFormula = m_uiForm.leSampleChemicalFormula->text();
+    absCorAlgo->setProperty("SampleChemicalFormula", sampleChemicalFormula.toStdString());
+
+    addShapeSpecificSampleOptions(absCorAlgo, sampleShape);
+
+    // Can details
+    bool useCan = m_uiForm.ckUseCan->isChecked();
+    if(useCan)
+    {
+      QString canWsName = m_uiForm.dsContainer->getCurrentDataName();
+      MatrixWorkspace_sptr canWs = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(canWsName.toStdString());
+
+      // If not in wavelength then do conversion
+      Mantid::Kernel::Unit_sptr canXUnit = canWs->getAxis(0)->unit();
+      if(canXUnit->caption() != "Wavelength")
       {
-        size = "[" + m_uiForm.lets->text() + ", " +
-        m_uiForm.letc1->text() + ", " +
-        m_uiForm.letc2->text() + "]";
+        g_log.information("Container workspace not in wavelength, need to convert to continue.");
+        absCorProps["CanWorkspace"] = addConvertUnitsStep(canWs, "Wavelength");
       }
       else
       {
-        size = "[" + m_uiForm.lets->text() + ", 0.0, 0.0]";
+        absCorProps["CanWorkspace"] = canWsName.toStdString();
       }
+
+      double canNumberDensity = m_uiForm.spCanNumberDensity->value();
+      absCorAlgo->setProperty("CanNumberDensity", canNumberDensity);
+
+      QString canChemicalFormula = m_uiForm.leCanChemicalFormula->text();
+      absCorAlgo->setProperty("CanChemicalFormula", canChemicalFormula.toStdString());
+
+      addShapeSpecificCanOptions(absCorAlgo, sampleShape);
     }
-    else if ( m_uiForm.cbShape->currentText() == "Cylinder" )
+
+    std::string eMode = getEMode(sampleWs);
+    absCorAlgo->setProperty("EMode", eMode);
+    if(eMode == "Indirect")
+      absCorAlgo->setProperty("EFixed", getEFixed(sampleWs));
+
+    // Generate workspace names
+    int nameCutIndex = sampleWsName.lastIndexOf("_");
+    if(nameCutIndex == -1)
+      nameCutIndex = sampleWsName.length();
+
+    QString correctionType;
+    switch(m_uiForm.cbSampleShape->currentIndex())
     {
-      geom = "cyl";
-
-      // R3 only populated when using can. R4 is fixed to 0.0
-      if ( m_uiForm.ckUseCan->isChecked() )
-      {
-        size = "[" + m_uiForm.ler1->text() + ", " +
-          m_uiForm.ler2->text() + ", " +
-          m_uiForm.ler3->text() + ", 0.0 ]";
-      }
-      else
-      {
-        size = "[" + m_uiForm.ler1->text() + ", " +
-          m_uiForm.ler2->text() + ", 0.0, 0.0 ]";
-      }
+      case 0:
+        correctionType = "flt";
+        break;
+      case 1:
+        correctionType = "cyl";
+        break;
+      case 2:
+        correctionType = "ann";
+        break;
     }
 
-    //get beam width
-    QString width = m_uiForm.lewidth->text();
-    if (width.isEmpty()) { width = "None"; }
+    const QString outputWsName = sampleWsName.left(nameCutIndex) + "_" + correctionType + "_abs";
+    absCorAlgo->setProperty("OutputWorkspace", outputWsName.toStdString());
 
-    //get sample workspace. Load from if needed.
-    QString sampleWs = m_uiForm.dsSampleInput->getCurrentDataName();
-    pyInput += "inputws = '" + sampleWs + "'\n";
+    // Add corrections algorithm to queue
+    m_batchAlgoRunner->addAlgorithm(absCorAlgo, absCorProps);
 
-    //sample absorption and scattering x sections.
-    QString sampleScatteringXSec = m_uiForm.lesamsigs->text();
-    QString sampleAbsorptionXSec = m_uiForm.lesamsiga->text();
+    // Add save algorithms if required
+    bool save = m_uiForm.ckSave->isChecked();
+    if(save)
+      addSaveWorkspaceToQueue(outputWsName);
 
-    if ( sampleScatteringXSec.isEmpty() ) { sampleScatteringXSec = "0.0"; }
-    if ( sampleAbsorptionXSec.isEmpty() ) { sampleAbsorptionXSec = "0.0"; }
-
-    //can and sample formulas
-    QString sampleFormula = m_uiForm.leSampleFormula->text();
-    QString canFormula = m_uiForm.leCanFormula->text();
-
-    if ( sampleFormula.isEmpty() )
-    {
-      sampleFormula = "None";
-    }
-    else
-    {
-      sampleFormula = "'" + sampleFormula + "'";
-    }
-
-    if ( canFormula.isEmpty() )
-    {
-      canFormula = "None";
-    }
-    else
-    {
-      canFormula = "'" + canFormula + "'";
-    }
-
-    //create python string to execute
-    if ( m_uiForm.ckUseCan->isChecked() )
-    {
-      //get sample workspace. Load from if needed.
-      QString canWs = m_uiForm.dsCanInput->getCurrentDataName();
-      pyInput += "canws = '" + canWs + "'\n";
-
-      //can absoprtion and scattering x section.
-      QString canScatteringXSec = m_uiForm.lecansigs->text();
-      QString canAbsorptionXSec = m_uiForm.lecansiga->text();
-
-      if ( canScatteringXSec.isEmpty() ) { canScatteringXSec = "0.0"; }
-      if ( canAbsorptionXSec.isEmpty() ) { canAbsorptionXSec = "0.0"; }
-
-      pyInput +=
-        "ncan = 2\n"
-        "density = [" + m_uiForm.lesamden->text() + ", " + m_uiForm.lecanden->text() + ", " + m_uiForm.lecanden->text() + "]\n"
-        "sigs = [" + sampleScatteringXSec + "," + canScatteringXSec + "," + canScatteringXSec + "]\n"
-        "siga = [" + sampleAbsorptionXSec + "," + canAbsorptionXSec + "," + canAbsorptionXSec + "]\n";
-    }
-    else
-    {
-      pyInput +=
-        "ncan = 1\n"
-        "density = [" + m_uiForm.lesamden->text() + ", 0.0, 0.0 ]\n"
-        "sigs = [" + sampleScatteringXSec + ", 0.0, 0.0]\n"
-        "siga = [" + sampleAbsorptionXSec + ", 0.0, 0.0]\n"
-        "canws = None\n";
-    }
-
-    //Output options
-    if ( m_uiForm.ckSave->isChecked() ) pyInput += "save = True\n";
-    else pyInput += "save = False\n";
-
-    pyInput +=
-      "geom = '" + geom + "'\n"
-      "beam = " + width + "\n"
-      "size = " + size + "\n"
-      "avar = " + m_uiForm.leavar->text() + "\n"
-      "plotOpt = '" + m_uiForm.cbPlotOutput->currentText() + "'\n"
-      "sampleFormula = " + sampleFormula + "\n"
-      "canFormula = " + canFormula + "\n"
-      "print IndirectAbsCor.AbsRunFeeder(inputws, canws, geom, ncan, size, avar, density, beam, sampleFormula, canFormula, sigs, siga, plot_opt=plotOpt, save=save)\n";
-
-    QString pyOutput = runPythonCode(pyInput);
+    // Run algorithm queue
+    connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(absCorComplete(bool)));
+    m_batchAlgoRunner->executeBatchAsync();
 
     // Set the result workspace for Python script export
-    m_pythonExportWsName = pyOutput.trimmed().toStdString();
+    m_pythonExportWsName = outputWsName.toStdString();
   }
+
 
   bool CalcCorr::validate()
   {
+    return doValidation();
+  }
+
+
+  /**
+   * Does validation on the user input.
+   *
+   * @param silent Set to true to avoid creating an error message
+   * @return True if all user input is valid
+   */
+  bool CalcCorr::doValidation(bool silent)
+  {
     UserInputValidator uiv;
+
+    uiv.checkDataSelectorIsValid("Sample", m_uiForm.dsSample);
+
+    // Validate chemical formula
+    if(uiv.checkFieldIsNotEmpty("Sample Chemical Formula", m_uiForm.leSampleChemicalFormula, m_uiForm.valSampleChemicalFormula))
+      uiv.checkFieldIsValid("Sample Chemical Formula", m_uiForm.leSampleChemicalFormula, m_uiForm.valSampleChemicalFormula);
+
     bool useCan = m_uiForm.ckUseCan->isChecked();
-
-    // Input files/workspaces
-    uiv.checkDataSelectorIsValid("Sample", m_uiForm.dsSampleInput);
-    if (useCan)
+    if(useCan)
     {
-      uiv.checkDataSelectorIsValid("Can", m_uiForm.dsCanInput);
+      uiv.checkDataSelectorIsValid("Can", m_uiForm.dsContainer);
 
-      QString sample = m_uiForm.dsSampleInput->getCurrentDataName();
-      QString sampleType = sample.right(sample.length() - sample.lastIndexOf("_"));
-      QString container = m_uiForm.dsCanInput->getCurrentDataName();
-      QString containerType = container.right(container.length() - container.lastIndexOf("_"));
+      // Validate chemical formula
+      if(uiv.checkFieldIsNotEmpty("Can Chemical Formula", m_uiForm.leCanChemicalFormula, m_uiForm.valCanChemicalFormula))
+        uiv.checkFieldIsValid("Can Chemical Formula", m_uiForm.leCanChemicalFormula, m_uiForm.valCanChemicalFormula);
+
+      // Ensure sample and container are the same kind of data
+      QString sampleWsName = m_uiForm.dsSample->getCurrentDataName();
+      QString sampleType = sampleWsName.right(sampleWsName.length() - sampleWsName.lastIndexOf("_"));
+      QString containerWsName = m_uiForm.dsContainer->getCurrentDataName();
+      QString containerType = containerWsName.right(containerWsName.length() - containerWsName.lastIndexOf("_"));
 
       g_log.debug() << "Sample type is: " << sampleType.toStdString() << std::endl;
       g_log.debug() << "Can type is: " << containerType.toStdString() << std::endl;
 
       if(containerType != sampleType)
-      {
         uiv.addErrorMessage("Sample and can workspaces must contain the same type of data.");
-      }
     }
 
-    uiv.checkFieldIsValid("Beam Width", m_uiForm.lewidth, m_uiForm.valWidth);
+    // Show error mssage if needed
+    if(!uiv.isAllInputValid() && !silent)
+      emit showMessageBox(uiv.generateErrorMessage());
 
-    if ( m_uiForm.cbShape->currentText() == "Flat" )
-    {
-      // Flat Geometry
-      uiv.checkFieldIsValid("Thickness", m_uiForm.lets, m_uiForm.valts);
-
-      if ( useCan )
-      {
-        uiv.checkFieldIsValid("Front Thickness", m_uiForm.letc1, m_uiForm.valtc1);
-        uiv.checkFieldIsValid("Back Thickness",  m_uiForm.letc2, m_uiForm.valtc2);
-      }
-
-      uiv.checkFieldIsValid("Can Angle to Beam must be in the range [-180 to -100], [-80 to 80] or [100 to 180].", m_uiForm.leavar,  m_uiForm.valAvar);
-    }
-
-    if ( m_uiForm.cbShape->currentText() == "Cylinder" )
-    {
-      // Cylinder geometry
-      uiv.checkFieldIsValid("Radius 1", m_uiForm.ler1, m_uiForm.valR1);
-      uiv.checkFieldIsValid("Radius 2", m_uiForm.ler2, m_uiForm.valR2);
-
-      double radius1 = m_uiForm.ler1->text().toDouble();
-      double radius2 = m_uiForm.ler2->text().toDouble();
-      if( radius1 >= radius2 )
-        uiv.addErrorMessage("Radius 1 should be less than Radius 2.");
-
-      // R3 only relevant when using can
-      if ( useCan )
-      {
-        uiv.checkFieldIsValid("Radius 3", m_uiForm.ler3, m_uiForm.valR3);
-
-        double radius3 = m_uiForm.ler3->text().toDouble();
-        if( radius2 >= radius3 )
-          uiv.addErrorMessage("Radius 2 should be less than Radius 3.");
-
-      }
-
-      uiv.checkFieldIsValid("Step Size", m_uiForm.leavar,  m_uiForm.valAvar);
-
-      double stepSize = m_uiForm.leavar->text().toDouble();
-      if( stepSize >= (radius2 - radius1) )
-        uiv.addErrorMessage("Step size should be less than (Radius 2 - Radius 1).");
-    }
-
-    // Sample details
-    uiv.checkFieldIsValid("Sample Number Density", m_uiForm.lesamden, m_uiForm.valSamden);
-
-    switch(m_uiForm.cbSampleInputType->currentIndex())
-    {
-      case 0:
-        //input using formula
-        uiv.checkFieldIsValid("Sample Formula", m_uiForm.leSampleFormula, m_uiForm.valSampleFormula);
-        break;
-      case 1:
-        //using direct input
-        uiv.checkFieldIsValid("Sample Scattering Cross-Section", m_uiForm.lesamsigs, m_uiForm.valSamsigs);
-        uiv.checkFieldIsValid("Sample Absorption Cross-Section", m_uiForm.lesamsiga, m_uiForm.valSamsiga);
-        break;
-    }
-
-
-    // Can details (only test if "Use Can" is checked)
-    if ( m_uiForm.ckUseCan->isChecked() )
-    {
-      QString canFile = m_uiForm.dsCanInput->getCurrentDataName();
-      if(canFile.isEmpty())
-      {
-        uiv.addErrorMessage("You must select a Sample file or workspace.");
-      }
-
-      uiv.checkFieldIsValid("Can Number Density",m_uiForm.lecanden,m_uiForm.valCanden);
-
-      switch(m_uiForm.cbCanInputType->currentIndex())
-      {
-        case 0:
-          //input using formula
-          uiv.checkFieldIsValid("Can Formula", m_uiForm.leCanFormula, m_uiForm.valCanFormula);
-          break;
-        case 1:
-          // using direct input
-          uiv.checkFieldIsValid("Can Scattering Cross-Section", m_uiForm.lecansigs, m_uiForm.valCansigs);
-          uiv.checkFieldIsValid("Can Absorption Cross-Section", m_uiForm.lecansiga, m_uiForm.valCansiga);
-          break;
-      }
-    }
-
-    QString error = uiv.generateErrorMessage();
-    showMessageBox(error);
-
-    return error.isEmpty();
+    return uiv.isAllInputValid();
   }
+
+
+  /**
+   * Handles completion of the correction algorithm.
+   *
+   * @param error True of the algorithm failed
+   */
+  void CalcCorr::absCorComplete(bool error)
+  {
+    disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(absCorComplete(bool)));
+
+    if(error)
+    {
+      emit showMessageBox("Absorption correction calculation failed.\nSee Results Log for more details.");
+      return;
+    }
+
+    // Convert the spectrum axis of correction factors to Q
+    WorkspaceGroup_sptr corrections = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(m_pythonExportWsName);
+    for(size_t i = 0; i < corrections->size(); i++)
+    {
+      MatrixWorkspace_sptr factorWs = boost::dynamic_pointer_cast<MatrixWorkspace>(corrections->getItem(i));
+      if(!factorWs)
+        continue;
+
+      std::string eMode = getEMode(factorWs);
+
+      API::BatchAlgorithmRunner::AlgorithmRuntimeProps convertSpecProps;
+      IAlgorithm_sptr convertSpecAlgo = AlgorithmManager::Instance().create("ConvertSpectrumAxis");
+      convertSpecAlgo->initialize();
+      convertSpecAlgo->setProperty("InputWorkspace", factorWs);
+      convertSpecAlgo->setProperty("OutputWorkspace", factorWs->name());
+      convertSpecAlgo->setProperty("Target", "ElasticQ");
+      convertSpecAlgo->setProperty("EMode", eMode);
+
+      if(eMode == "Indirect")
+        convertSpecAlgo->setProperty("EFixed", getEFixed(factorWs));
+
+      m_batchAlgoRunner->addAlgorithm(convertSpecAlgo);
+    }
+
+    // Run algorithm queue
+    connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(postProcessComplete(bool)));
+    m_batchAlgoRunner->executeBatchAsync();
+  }
+
+
+  /**
+   * Handles completion of the post processing algorithms.
+   *
+   * @param error True of the algorithm failed
+   */
+  void CalcCorr::postProcessComplete(bool error)
+  {
+    disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(postProcessComplete(bool)));
+
+    if(error)
+    {
+      emit showMessageBox("Correction factor post processing failed.\nSee Results Log for more details.");
+      return;
+    }
+
+    // Handle Mantid plotting
+    QString plotType = m_uiForm.cbPlotOutput->currentText();
+
+    if(plotType == "Both" || plotType == "Wavelength")
+      plotSpectrum(QString::fromStdString(m_pythonExportWsName));
+
+    if(plotType == "Both" || plotType == "Angle")
+      plotTimeBin(QString::fromStdString(m_pythonExportWsName));
+  }
+
 
   void CalcCorr::loadSettings(const QSettings & settings)
   {
-    m_uiForm.dsSampleInput->readSettings(settings.group());
-    m_uiForm.dsCanInput->readSettings(settings.group());
+    m_uiForm.dsSample->readSettings(settings.group());
+    m_uiForm.dsContainer->readSettings(settings.group());
   }
 
-  void CalcCorr::shape(int index)
+
+  /**
+   * Gets the beam width from the instrument parameters on a given workspace
+   * and update the relevant options on the UI.
+   *
+   * @param wsName Name of the workspace
+   */
+  void CalcCorr::getBeamWidthFromWorkspace(const QString& wsName)
   {
-    m_uiForm.swShapeDetails->setCurrentIndex(index);
-    // Meaning of the "avar" variable changes depending on shape selection
-    if ( index == 0 ) { m_uiForm.lbAvar->setText("Sample Angle:"); }
-    else if ( index == 1 ) { m_uiForm.lbAvar->setText("Step Size:"); }
-  }
+    auto ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName.toStdString());
 
-  void CalcCorr::useCanChecked(bool checked)
-  {
-
-    // Disable "Can Details" group and asterisks.
-    m_uiForm.gbCan->setEnabled(checked);
-    m_uiForm.valCanden->setVisible(checked);
-    m_uiForm.lbtc1->setEnabled(checked);
-    m_uiForm.lbtc2->setEnabled(checked);
-    m_uiForm.letc1->setEnabled(checked);
-    m_uiForm.letc2->setEnabled(checked);
-    m_uiForm.lbR3->setEnabled(checked);
-    m_uiForm.ler3->setEnabled(checked);
-
-    QString value;
-    (checked ? value = "*" : value =  " ");
-
-    m_uiForm.valCansigs->setText(value);
-    m_uiForm.valCansiga->setText(value);
-    m_uiForm.valCanFormula->setText(value);
-
-    // Disable thickness fields/labels/asterisks.
-    m_uiForm.valtc1->setText(value);
-    m_uiForm.valtc2->setText(value);
-
-    // // Disable R3 field/label/asterisk.
-    m_uiForm.valR3->setText(value);
-
-    if (checked)
+    if(!ws)
     {
-      UserInputValidator uiv;
-      uiv.checkFieldIsValid("",m_uiForm.lecansigs, m_uiForm.valCansigs);
-      uiv.checkFieldIsValid("",m_uiForm.lecansiga, m_uiForm.valCansiga);
-      uiv.checkFieldIsValid("",m_uiForm.letc1, m_uiForm.valtc1);
-      uiv.checkFieldIsValid("",m_uiForm.letc2, m_uiForm.valtc2);
-      uiv.checkFieldIsValid("",m_uiForm.ler3, m_uiForm.valR3);
-    }
-
-    m_uiForm.dsCanInput->setEnabled(checked);
-
-    // Workaround for "disabling" title of the QGroupBox.
-    QPalette palette;
-    if(checked)
-      palette.setColor(
-        QPalette::Disabled,
-        QPalette::WindowText,
-        QApplication::palette().color(QPalette::Disabled, QPalette::WindowText));
-    else
-      palette.setColor(
-        QPalette::Active,
-        QPalette::WindowText,
-        QApplication::palette().color(QPalette::Active, QPalette::WindowText));
-
-    m_uiForm.gbCan->setPalette(palette);
-  }
-
-  void CalcCorr::tcSync()
-  {
-    if ( m_uiForm.letc2->text() == "" )
-    {
-      QString val = m_uiForm.letc1->text();
-      m_uiForm.letc2->setText(val);
-    }
-  }
-
-  void CalcCorr::getBeamWidthFromWorkspace(const QString& wsname)
-  {
-    using namespace Mantid::API;
-    auto ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsname.toStdString());
-
-    if (!ws)
-    {
-      showMessageBox("Failed to find workspace " + wsname);
+      g_log.warning() << "Failed to find workspace " << wsName.toStdString() << std::endl;
       return;
     }
 
     std::string paramName = "Workflow.beam-width";
     auto instrument = ws->getInstrument();
-    if (instrument->hasParameter(paramName))
-    {
-      std::string beamWidth = instrument->getStringParameter(paramName)[0];
-      m_uiForm.lewidth->setText(QString::fromUtf8(beamWidth.c_str()));
-    }
-    else
-    {
-      m_uiForm.lewidth->setText("");
-    }
 
+    if(instrument->hasParameter(paramName))
+    {
+      QString beamWidth = QString::fromStdString(instrument->getStringParameter(paramName)[0]);
+      double beamWidthValue = beamWidth.toDouble();
+      m_uiForm.spCylBeamWidth->setValue(beamWidthValue);
+      m_uiForm.spCylBeamHeight->setValue(beamWidthValue);
+    }
   }
+
+
+  /**
+   * Sets algorithm properties specific to the sample for a given shape.
+   *
+   * @param alg Algorithm to set properties of
+   * @param shape Sample shape
+   */
+  void CalcCorr::addShapeSpecificSampleOptions(IAlgorithm_sptr alg, QString shape)
+  {
+    if(shape == "FlatPlate")
+    {
+      double sampleThickness = m_uiForm.spFlatSampleThickness->value();
+      alg->setProperty("SampleThickness", sampleThickness);
+
+      double sampleAngle = m_uiForm.spFlatSampleAngle->value();
+      alg->setProperty("SampleAngle", sampleAngle);
+    }
+    else if(shape == "Cylinder")
+    {
+      double sampleInnerRadius = m_uiForm.spCylSampleInnerRadius->value();
+      alg->setProperty("SampleInnerRadius", sampleInnerRadius);
+
+      double sampleOuterRadius = m_uiForm.spCylSampleOuterRadius->value();
+      alg->setProperty("SampleOuterRadius", sampleOuterRadius);
+
+      double beamWidth = m_uiForm.spCylBeamWidth->value();
+      alg->setProperty("BeamWidth", beamWidth);
+
+      double beamHeight = m_uiForm.spCylBeamHeight->value();
+      alg->setProperty("BeamHeight", beamHeight);
+
+      double stepSize = m_uiForm.spCylStepSize->value();
+      alg->setProperty("StepSize", stepSize);
+    }
+    else if(shape == "Annulus")
+    {
+      alg->setProperty("SampleInnerRadius", 0.0);
+
+      double sampleOuterRadius = m_uiForm.spAnnSampleOuterRadius->value();
+      alg->setProperty("SampleOuterRadius", sampleOuterRadius);
+
+      double beamWidth = m_uiForm.spAnnBeamWidth->value();
+      alg->setProperty("BeamWidth", beamWidth);
+
+      double beamHeight = m_uiForm.spAnnBeamHeight->value();
+      alg->setProperty("BeamHeight", beamHeight);
+
+      double stepSize = m_uiForm.spAnnStepSize->value();
+      alg->setProperty("StepSize", stepSize);
+    }
+  }
+
+
+  /**
+   * Sets algorithm properties specific to the container for a given shape.
+   *
+   * @param alg Algorithm to set properties of
+   * @param shape Sample shape
+   */
+  void CalcCorr::addShapeSpecificCanOptions(IAlgorithm_sptr alg, QString shape)
+  {
+    if(shape == "FlatPlate")
+    {
+      double canFrontThickness = m_uiForm.spFlatCanFrontThickness->value();
+      alg->setProperty("CanFrontThickness", canFrontThickness);
+
+      double canBackThickness = m_uiForm.spFlatCanBackThickness->value();
+      alg->setProperty("SampleThickness", canBackThickness);
+    }
+    else if(shape == "Cylinder")
+    {
+      double canOuterRadius = m_uiForm.spCylCanOuterRadius->value();
+      alg->setProperty("CanOuterRadius", canOuterRadius);
+    }
+    else if(shape == "Annulus")
+    {
+      double canOuterRadius = m_uiForm.spAnnCanOuterRadius->value();
+      alg->setProperty("CanOuterRadius", canOuterRadius);
+    }
+  }
+
+
 } // namespace IDA
 } // namespace CustomInterfaces
 } // namespace MantidQt

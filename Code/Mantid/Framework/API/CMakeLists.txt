@@ -40,7 +40,7 @@ set ( SRC_FILES
 	src/FunctionDomain1D.cpp
 	src/FunctionDomainMD.cpp
 	src/FunctionFactory.cpp
-        src/FunctionParameterDecorator.cpp
+	src/FunctionParameterDecorator.cpp
 	src/FunctionProperty.cpp
 	src/FunctionValues.cpp
 	src/GridDomain.cpp
@@ -61,6 +61,7 @@ set ( SRC_FILES
 	src/IMDHistoWorkspace.cpp
 	src/IMDIterator.cpp
 	src/IMDWorkspace.cpp
+	src/IPawleyFunction.cpp
 	src/IPeak.cpp
 	src/IPeakFunction.cpp
 	src/IPeaksWorkspace.cpp
@@ -106,6 +107,7 @@ set ( SRC_FILES
 	src/PropertyManagerDataService.cpp
 	src/PropertyNexus.cpp
 	src/RefAxis.cpp
+	src/RemoteJobManagerFactory.cpp
 	src/Run.cpp
 	src/Sample.cpp
 	src/SampleEnvironment.cpp
@@ -184,7 +186,7 @@ set ( INC_FILES
 	inc/MantidAPI/FunctionDomain1D.h
 	inc/MantidAPI/FunctionDomainMD.h
 	inc/MantidAPI/FunctionFactory.h
-        inc/MantidAPI/FunctionParameterDecorator.h
+	inc/MantidAPI/FunctionParameterDecorator.h
 	inc/MantidAPI/FunctionProperty.h
 	inc/MantidAPI/FunctionValues.h
 	inc/MantidAPI/GridDomain.h
@@ -217,10 +219,12 @@ set ( INC_FILES
 	inc/MantidAPI/IMDNode.h
 	inc/MantidAPI/IMDWorkspace.h
 	inc/MantidAPI/IMaskWorkspace.h
+	inc/MantidAPI/IPawleyFunction.h
 	inc/MantidAPI/IPeak.h
 	inc/MantidAPI/IPeakFunction.h
 	inc/MantidAPI/IPeaksWorkspace.h
 	inc/MantidAPI/IPowderDiffPeakFunction.h
+	inc/MantidAPI/IRemoteJobManager.h
 	inc/MantidAPI/ISpectrum.h
 	inc/MantidAPI/ISplittersWorkspace.h
 	inc/MantidAPI/ITableWorkspace.h
@@ -270,6 +274,7 @@ set ( INC_FILES
 	inc/MantidAPI/PropertyManagerDataService.h
 	inc/MantidAPI/PropertyNexus.h
 	inc/MantidAPI/RefAxis.h
+	inc/MantidAPI/RemoteJobManagerFactory.h
 	inc/MantidAPI/Run.h
 	inc/MantidAPI/Sample.h
 	inc/MantidAPI/SampleEnvironment.h
@@ -324,8 +329,8 @@ set ( TEST_FILES
 	FuncMinimizerFactoryTest.h
 	FunctionAttributeTest.h
 	FunctionDomainTest.h
-        FunctionParameterDecoratorTest.h
 	FunctionFactoryTest.h
+	FunctionParameterDecoratorTest.h
 	FunctionPropertyTest.h
 	FunctionTest.h
 	FunctionValuesTest.h
@@ -366,6 +371,7 @@ set ( TEST_FILES
 	ProjectionTest.h
 	PropertyManagerDataServiceTest.h
 	PropertyNexusTest.h
+	RemoteJobManagerFactoryTest.h
 	RunTest.h
 	SampleEnvironmentTest.h
 	SampleShapeValidatorTest.h

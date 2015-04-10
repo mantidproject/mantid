@@ -1,19 +1,22 @@
 #ifndef DIFFROTDISCRETECIRCLETEST_H_
 #define DIFFROTDISCRETECIRCLETEST_H_
 
+#include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/AlgorithmFactory.h"
+#include "MantidCurveFitting/Convolution.h"
+#include "MantidCurveFitting/DiffRotDiscreteCircle.h"
+#include "MantidCurveFitting/Gaussian.h"
+#include "MantidCurveFitting/Fit.h"
+#include "MantidGeometry/Instrument/ReferenceFrame.h"
+#include "MantidTestHelpers/ComponentCreationHelper.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+
 #include <cmath>
+
 #include <cxxtest/TestSuite.h>
 #include <boost/random/mersenne_twister.hpp>
 #include <boost/random/uniform_real.hpp>
 #include <boost/shared_ptr.hpp>
-
-#include "MantidCurveFitting/Gaussian.h"
-#include "MantidCurveFitting/DiffRotDiscreteCircle.h"
-#include "MantidCurveFitting/Convolution.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidCurveFitting/Fit.h"
-#include "MantidAPI/FunctionFactory.h"
-#include "MantidAPI/AlgorithmFactory.h"
 
 class DiffRotDiscreteCircleTest :  public CxxTest::TestSuite
 {
@@ -24,6 +27,7 @@ public:
   // This means the constructor isn't called when running other tests
   static DiffRotDiscreteCircleTest *createSuite() { return new DiffRotDiscreteCircleTest(); }
   static void destroySuite( DiffRotDiscreteCircleTest *suite ) { delete suite; }
+
 
   // convolve the elastic part with a resolution function, here a Gaussian
   void testDiffRotDiscreteCircleElastic()
@@ -75,58 +79,29 @@ public:
   } // testDiffRotDiscreteCircleElastic
 
 
-  /// Fit the convolution of the inelastic part with a Gaussian resolution function
-  void testDiffRotDiscreteCircleInelastic()
+  void testDiffRotDiscreteCircleInelasticWithQParam()
   {
-    /* Note: it turns out that parameters Intensity and Radius are highly covariant, so that more than one minimum exists.
-     * Thus, I tied parameter Radius. This is OK since one usually knows the radius of the circle of the jumping diffusion
-     */
+    runDiffRotDiscreteCircleInelasticTest(0.0, 0.20092);
+  }
 
-    // initialize the fitting function in a Fit algorithm
-    // Parameter units are assumed in micro-eV, Angstroms, Angstroms**(-1), and nano-seconds. Intensities have arbitrary units
-    std::string funtion_string = "(composite=Convolution,FixResolution=true,NumDeriv=true;name=Gaussian,Height=1.0,PeakCentre=0.0,Sigma=20.0,ties=(Height=1.0,PeakCentre=0.0,Sigma=20.0);name=InelasticDiffRotDiscreteCircle,N=3,Q=0.5,Intensity=47.014,Radius=1.567,Decay=7.567)";
 
-    // Initialize the fit function in the Fit algorithm
-    Mantid::CurveFitting::Fit fitalg;
-    TS_ASSERT_THROWS_NOTHING( fitalg.initialize() );
-    TS_ASSERT( fitalg.isInitialized() );
-    fitalg.setProperty( "Function", funtion_string );
+  void testDiffRotDiscreteCircleInelasticWithWSIndex()
+  {
+    runDiffRotDiscreteCircleInelasticTest(0.0);
+  }
 
-    // create the data workspace by evaluating the fit function in the Fit algorithm
-    auto data_workspace = generateWorkspaceFromFitAlgorithm( fitalg );
-    //saveWorkspace( data_workspace, "/tmp/junk.nxs" ); // for debugging purposes only
 
-    //override the function with new parameters, then do the Fit
-    funtion_string = "(composite=Convolution,FixResolution=true,NumDeriv=true;name=Gaussian,Height=1.0,PeakCentre=0.0,Sigma=20.0,ties=(Height=1.0,PeakCentre=0.0,Sigma=20.0);name=InelasticDiffRotDiscreteCircle,N=3,Q=0.5,Intensity=10.0,Radius=1.567,Decay=20.0,ties=(Radius=1.567))";
-    fitalg.setProperty( "Function", funtion_string );
-    fitalg.setProperty( "InputWorkspace", data_workspace );
-    fitalg.setPropertyValue( "WorkspaceIndex", "0" );
-    TS_ASSERT_THROWS_NOTHING( TS_ASSERT( fitalg.execute() ) );
-    TS_ASSERT( fitalg.isExecuted() );
+  void testDiffRotDiscreteCircleInelasticWithShiftWithQParam()
+  {
+    runDiffRotDiscreteCircleInelasticTest(0.5, 0.20092);
+  }
 
-    // check Chi-square is small
-    const double chi_squared = fitalg.getProperty("OutputChi2overDoF");
-    TS_ASSERT_LESS_THAN( chi_squared, 0.001 );
-    //std::cout << "\nchi_squared = " << chi_squared << "\n"; // only for debugging purposes
 
-    // check the parameters of the resolution did not change
-    Mantid::API::IFunction_sptr fitalg_function = fitalg.getProperty( "Function" );
-    auto fitalg_conv = boost::dynamic_pointer_cast<Mantid::CurveFitting::Convolution>( fitalg_function ) ;
-    Mantid::API::IFunction_sptr fitalg_resolution = fitalg_conv->getFunction( 0 );
-    TS_ASSERT_DELTA( fitalg_resolution -> getParameter( "PeakCentre" ), 0.0, 0.00001 );  // allow for a small percent variation
-    TS_ASSERT_DELTA( fitalg_resolution -> getParameter( "Height" ), 1.0,  1.0 * 0.001 ); // allow for a small percent variation
-    TS_ASSERT_DELTA( fitalg_resolution -> getParameter( "Sigma" ), 20.0,  20.0* 0.001 ); // allow for a small percent variation
-    //std::cout << "\nPeakCentre = " << fitalg_resolution->getParameter("PeakCentre") << "  Height= " << fitalg_resolution->getParameter("Height") << "  Sigma=" << fitalg_resolution->getParameter("Sigma") << "\n"; // only for debugging purposes
+  void testDiffRotDiscreteCircleInelasticWithShiftWithWSIndex()
+  {
+    runDiffRotDiscreteCircleInelasticTest(0.5);
+  }
 
-    // check the parameters of the inelastic part
-    Mantid::API::IFunction_sptr fitalg_structure_factor = fitalg_conv->getFunction( 1 );
-    TS_ASSERT_DELTA( fitalg_structure_factor -> getParameter( "Intensity" ), 47.014, 47.014 * 0.05 ); // allow for a small percent variation
-    TS_ASSERT_DELTA( fitalg_structure_factor -> getParameter( "Radius" ), 1.567, 1.567 * 0.05 );      // allow for a small percent variation
-    TS_ASSERT_DELTA( fitalg_structure_factor -> getParameter( "Decay" ), 7.567, 7.567 * 0.05 );       // allow for a small percent variation
-    //std::cout << "\nGOAL: Intensity = 47.014,  Radius = 1.567,  Decay = 7.567\n"; // only for debugging purposes
-    //std::cout << "OPTIMIZED: Intensity = " << fitalg_structure_factor->getParameter("Intensity") << "  Radius = " << fitalg_structure_factor->getParameter("Radius") << "  Decay = " << fitalg_structure_factor->getParameter("Decay") << "\n"; // only for debugging purposes
-
-  } // testDiffRotDiscreteCircleElastic
 
   /* Check the particular case for N = 3
    * In this case, the inelastic part should reduce to a single Lorentzian in 'w':
@@ -176,7 +151,6 @@ public:
     const double chi_squared = fitalg.getProperty("OutputChi2overDoF");
     TS_ASSERT_LESS_THAN( chi_squared, 1e-12 );
     //std::cout << "\nchi_squared = " << chi_squared << "\n"; // only for debugging purposes
-
   }
 
 
@@ -288,11 +262,90 @@ public:
     TS_ASSERT_DELTA( fitalg_structure_factor -> getParameter( "Decay" ), 7.567, 7.567 * 0.05 );       // allow for a small percent variation
     //std::cout << "\nGOAL: Intensity = 47.014,  Radius = 1.567,  Decay = 7.567\n"; // only for debugging purposes
     //std::cout << "OPTIMIZED: Intensity = " << fitalg_structure_factor->getParameter("Intensity") << "  Radius = " << fitalg_structure_factor->getParameter("Radius") << "  Decay = " << fitalg_structure_factor->getParameter("Decay") << "\n"; // only for debugging purposes
-
   } // testDiffRotDiscreteCircle
 
 
 private:
+  /// Fit the convolution of the inelastic part with a Gaussian resolution function
+  void runDiffRotDiscreteCircleInelasticTest(const double S, const double Q = Mantid::EMPTY_DBL())
+  {
+    /* Note: it turns out that parameters Intensity and Radius are highly covariant, so that more than one minimum exists.
+     * Thus, I tied parameter Radius. This is OK since one usually knows the radius of the circle of the jumping diffusion
+     */
+    const double I(47.014);
+    const double R(1.567);
+    const double tao(7.567);
+
+    double simQ = Q;
+    if (Q == Mantid::EMPTY_DBL())
+      simQ = 0.20092;
+
+    // initialize the fitting function in a Fit algorithm
+    // Parameter units are assumed in micro-eV, Angstroms, Angstroms**(-1), and nano-seconds. Intensities have arbitrary units
+    std::ostringstream function_stream;
+    function_stream << "(composite=Convolution,FixResolution=true,NumDeriv=true;"
+                    << "name=Gaussian,Height=1.0,PeakCentre=0.0,Sigma=20.0,"
+                    << "ties=(Height=1.0,PeakCentre=0.0,Sigma=20.0);"
+                    << "name=InelasticDiffRotDiscreteCircle,N=3,Q=" << simQ
+                    << ",Intensity=" << I
+                    << ",Radius=" << R
+                    << ",Decay=" << tao
+                    << ",Shift=" << S << ")";
+
+    // Initialize the fit function in the Fit algorithm
+    Mantid::CurveFitting::Fit fitalg;
+    TS_ASSERT_THROWS_NOTHING( fitalg.initialize() );
+    TS_ASSERT( fitalg.isInitialized() );
+    fitalg.setProperty( "Function", function_stream.str() );
+
+    function_stream.str( std::string() );
+    function_stream.clear();
+
+    // create the data workspace by evaluating the fit function in the Fit algorithm
+    auto data_workspace = generateWorkspaceFromFitAlgorithm( fitalg );
+    //saveWorkspace( data_workspace, "/tmp/junk.nxs" ); // for debugging purposes only
+
+    //override the function with new parameters, then do the Fit
+    function_stream << "(composite=Convolution,FixResolution=true,NumDeriv=true;"
+                   << "name=Gaussian,Height=1.0,PeakCentre=0.0,Sigma=20.0,"
+                   << "ties=(Height=1.0,PeakCentre=0.0,Sigma=20.0);"
+                   << "name=InelasticDiffRotDiscreteCircle,N=3";
+
+    if (Q != Mantid::EMPTY_DBL())
+      function_stream << ",Q=" << Q;
+
+    function_stream << ",Intensity=10.0,Radius=1.567,Decay=20.0"
+                   << ",ties=(Radius=" << R << "))";
+    fitalg.setProperty( "Function", function_stream.str() );
+    fitalg.setProperty( "InputWorkspace", data_workspace );
+    fitalg.setPropertyValue( "WorkspaceIndex", "0" );
+    TS_ASSERT_THROWS_NOTHING( TS_ASSERT( fitalg.execute() ) );
+    TS_ASSERT( fitalg.isExecuted() );
+
+    // check Chi-square is small
+    const double chi_squared = fitalg.getProperty("OutputChi2overDoF");
+    TS_ASSERT_LESS_THAN( chi_squared, 0.001 );
+    //std::cout << "\nchi_squared = " << chi_squared << "\n"; // only for debugging purposes
+
+    // check the parameters of the resolution did not change
+    Mantid::API::IFunction_sptr fitalg_function = fitalg.getProperty( "Function" );
+    auto fitalg_conv = boost::dynamic_pointer_cast<Mantid::CurveFitting::Convolution>( fitalg_function ) ;
+    Mantid::API::IFunction_sptr fitalg_resolution = fitalg_conv->getFunction( 0 );
+    TS_ASSERT_DELTA( fitalg_resolution -> getParameter( "PeakCentre" ), 0.0, 0.00001 );  // allow for a small percent variation
+    TS_ASSERT_DELTA( fitalg_resolution -> getParameter( "Height" ), 1.0,  1.0 * 0.001 ); // allow for a small percent variation
+    TS_ASSERT_DELTA( fitalg_resolution -> getParameter( "Sigma" ), 20.0,  20.0* 0.001 ); // allow for a small percent variation
+    //std::cout << "\nPeakCentre = " << fitalg_resolution->getParameter("PeakCentre") << "  Height= " << fitalg_resolution->getParameter("Height") << "  Sigma=" << fitalg_resolution->getParameter("Sigma") << "\n"; // only for debugging purposes
+
+    // check the parameters of the inelastic part
+    Mantid::API::IFunction_sptr fitalg_structure_factor = fitalg_conv->getFunction( 1 );
+    TS_ASSERT_DELTA( fitalg_structure_factor -> getParameter( "Intensity" ), I, I * 0.05 ); // allow for a small percent variation
+    TS_ASSERT_DELTA( fitalg_structure_factor -> getParameter( "Radius" ), R, R * 0.05 );      // allow for a small percent variation
+    TS_ASSERT_DELTA( fitalg_structure_factor -> getParameter( "Decay" ), tao, tao * 0.05 );       // allow for a small percent variation
+    TS_ASSERT_DELTA( fitalg_structure_factor -> getParameter( "Shift" ), S, 0.00001 );       // allow for a small percent variation
+    //std::cout << "\nGOAL: Intensity = 47.014,  Radius = 1.567,  Decay = 7.567\n"; // only for debugging purposes
+    //std::cout << "OPTIMIZED: Intensity = " << fitalg_structure_factor->getParameter("Intensity") << "  Radius = " << fitalg_structure_factor->getParameter("Radius") << "  Decay = " << fitalg_structure_factor->getParameter("Decay") << "\n"; // only for debugging purposes
+  } // runDiffRotDiscreteCircleInelasticTest
+
 
   /// returns a real value from a uniform distribution
   double random_value(const double & a, const double & b)
@@ -329,7 +382,6 @@ private:
 
     // some cleaning
     Mantid::API::AnalysisDataService::Instance().remove( temp_ws -> getName() );
-
   }
 
 
@@ -387,6 +439,9 @@ private:
   // create a data workspace using a Fit algorithm
   Mantid::DataObjects::Workspace2D_sptr generateWorkspaceFromFitAlgorithm( Mantid::CurveFitting::Fit & fitalg )
   {
+    using namespace Mantid::Kernel;
+    using namespace Mantid::Geometry;
+
     // initialize some frequency values centered around zero. Will work as dataX
     const size_t M = 1001;
     double dataX[ M ];
@@ -399,8 +454,41 @@ private:
     Mantid::API::IFunction_sptr fitalg_function = fitalg.getProperty( "Function" );
     fitalg_function -> function( dataXview, dataYvalues );
 
-    // create the workspace
-    auto ws = WorkspaceCreationHelper::Create2DWorkspace(1, M );
+    // Create the workspace
+    auto ws = WorkspaceCreationHelper::Create2DWorkspace(1, M);
+
+    // Create the instrument
+    boost::shared_ptr<Instrument> inst(new Instrument("BASIS"));
+    inst->setReferenceFrame(boost::shared_ptr<ReferenceFrame>(new ReferenceFrame(Y, Z, Left, "")));
+
+    // Add the source position
+    ObjComponent *source = new ObjComponent("moderator", ComponentCreationHelper::createSphere(0.1, V3D(0,0,0), "1"), inst.get());
+    source->setPos(V3D(0.0, 0.0, -84.0));
+    inst->add(source);
+    inst->markAsSource(source);
+
+    // Add the sample position
+    ObjComponent *sample = new ObjComponent("samplePos", ComponentCreationHelper::createSphere(0.1, V3D(0,0,0), "1"), inst.get());
+    inst->setPos(0.0, 0.0, 0.0);
+    inst->add(sample);
+    inst->markAsSamplePos(sample);
+
+    // Add a detector
+    Object_sptr pixelShape = ComponentCreationHelper::createCappedCylinder(
+        0.05, 0.02, V3D(0.0, 0.0, 0.0), V3D(0., 1.0, 0.), "tube");
+    Detector *det = new Detector("pixel-1", 1, pixelShape, inst.get()); // ID 5 is a valid detector for BASIS
+    det->setPos(0.942677, 0.0171308, 4.63343); // Position of first detector on BASIS
+    inst->add(det);
+    inst->markAsDetector(det);
+
+    // Set the instrument and spec-det mapping
+    ws->setInstrument(inst);
+    ws->getSpectrum(0)->addDetectorID(det->getID());
+
+    // Set emergy mode and fixed energy
+    ws->mutableRun().addLogData(new Mantid::Kernel::PropertyWithValue<std::string>("deltaE-mode", "Indirect"));
+    ws->setEFixed(det->getID(), 2.08275); // EFixed of first detector on BASIS
+
     double fractional_error = 0.01; // error taken as a percent of the signal
     for( size_t i = 0;  i < M;  i++ )
     {
@@ -415,24 +503,5 @@ private:
   }
 
 };
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 #endif /* DIFFROTDISCRETECIRCLETEST_H_ */

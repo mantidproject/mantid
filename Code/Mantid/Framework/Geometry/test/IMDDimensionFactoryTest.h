@@ -2,12 +2,14 @@
 #define IMD_DIMENSIONFACTORYTEST_H_
 
 #include <cxxtest/TestSuite.h>
+
 #include "MantidGeometry/MDGeometry/IMDDimensionFactory.h"
 #include "MantidKernel/UnitLabel.h"
+
+#include <Poco/AutoPtr.h>
 #include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/Document.h>
 #include <Poco/XML/XMLException.h>
-#include <Poco/AutoPtr.h>
 
 using namespace Mantid::Geometry;
 

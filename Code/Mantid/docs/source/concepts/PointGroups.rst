@@ -42,12 +42,12 @@ As mentioned before, point groups can describe the symmetry of a lattice, includ
 To describe the rotational and translational components of the symmetry operation, a matrix :math:`\mathbf{W}_i` and a vector :math:`\mathbf{w}_i` are used. In three dimensions :math:`\mathbf{h}` has three elements, so :math:`\mathbf{W}_i` is a :math:`3\times3`-matrix and the symmetry operation is applied like this:
 
 .. math::
-    \mathbf{h}' = \mathbf{W}_i^{-1T} \cdot \mathbf{h}
+    \mathbf{h}' = {\mathbf{W}_i^{-1}}^T \cdot \mathbf{h}
 
 Note that the translational component is not used for transforming HKLs and :math:`\mathbf{W}_i` is inverted and transposed. Coordinates :math:`\mathbf{x}` are transformed differently, they are affected by the translational component:
 
 .. math::
-    \mathbf{x}' = \mathbf{W}_i \cdot \mathbf{h} + \mathbf{w}_i
+    \mathbf{x}' = \mathbf{W}_i \cdot \mathbf{x} + \mathbf{w}_i
 
 A point group is an ensemble of symmetry operations. The number of operations present in this collection is the so called order :math:`N` of the corresponding point group. Applying all symmetry operations of a point group to a given vector :math:`\mathbf{h}` results in :math:`N` new vectors :math:`\mathbf{h}'`, some of which may be identical (this depends on the symmetry and also on the vectors, e.g. if one or more index is 0). This means that the symmetry operations of a point group generate a set of :math:`N'` (where :math:`N' < N`) non-identical vectors :math:`\mathbf{h}'` for a given vector :math:`\mathbf{h}` - these vectors are called symmetry equivalents.
 
@@ -108,7 +108,9 @@ The script prints the transformed coordinates:
 .. testoutput :: ExSymmetryOperationPoint
 
     Transformed coordinates: [-0.1,0.3,0.5]
-    
+
+Please note that in case of hexagonal or trigonal point groups, it is best to provide the often occuring values 1/3 and 2/3 actually as ``1./3.`` instead of ``0.33333``, as there may be problems with floating point precision in those cases.
+
 Sometimes it is easier to think about symmetry in terms of the elements that cause certain symmetry. These are commonly described with Herrman-Mauguin symbols. A symmetry element can be derived from the matrix/vector pair that described the symmetry operation, according to the International Tables for Crystallography A, section 11.2. Expanding a bit on the above example, it's possible to get information about the symmetry element associated to the operation ``x,y,-z``:
 
 .. testcode :: ExSymmetryElement
@@ -119,7 +121,7 @@ Sometimes it is easier to think about symmetry in terms of the elements that cau
     symOp = SymmetryOperationFactory.createSymOp("x,y,-z")
     element = SymmetryElementFactory.createSymElement(symOp)
 
-    print "The element corresponding to 'x,y,-z' has the following symbol:", element.hmSymbol()
+    print "The element corresponding to 'x,y,-z' has the following symbol:", element.getHMSymbol()
     print "The mirror plane is perpendicular to:", element.getAxis()
 
 Executing this code yields the following output:
@@ -145,8 +147,8 @@ Point groups are represented in Mantid by the ``PointGroup``-interface, which is
     pg = PointGroupFactory.createPointGroup("-1")
     
     print "Name:", pg.getName()
-    print "Hermann-Mauguin symbol:", pg.getSymbol()
-    print "Crystal system:", pg.crystalSystem()
+    print "Hermann-Mauguin symbol:", pg.getHMSymbol()
+    print "Crystal system:", pg.getCrystalSystem()
     
 When this code is executed, some information about the point group is printed:
     
@@ -170,9 +172,11 @@ Which results in the following output:
 
 .. testoutput :: ExQueryPointGroups
 
-    All point groups: ['-1','-3','-3 h','-31m','-3m','-3m1','-4','-42m','-43m','-4m2','-6','-62m','-6m2','1','112/m','2','2/m','222','23','3','3 h','312','31m','32','321','3m','3m1','4','4/m','4/mmm','422','432','4mm','6','6/m','6/mmm','622','6mm','m','m-3','m-3m','mm2','mmm']
+    All point groups: ['-1','-3','-3 r','-31m','-3m','-3m r','-3m1','-4','-42m','-43m','-4m2','-6','-62m','-6m2','1','112/m','2','2/m','222','23','3','3 r','312','31m','32','32 r','321','3m','3m r','3m1','4','4/m','4/mmm','422','432','4mm','6','6/m','6/mmm','622','6mm','m','m-3','m-3m','mm2','mmm']
     Cubic point groups: ['-43m','23','432','m-3','m-3m']
     Tetragonal point groups: ['-4','-42m','-4m2','4','4/m','4/mmm','422','4mm']
+
+The point groups with an extra ``r`` at the end are trigonal point groups with rhombohedral axes. Trigonal point groups without that additional letter use the hexagonal coordinate system. For some of them there are two different axis choices, for example :math:`\bar{3}m`, which can be defined as :math:`\bar{3}m1` or :math:`\bar{3}1m`. Creating it by the symbol ``-3m`` defaults to :math:`\bar{3}m1`.
 
 After having obtained a ``PointGroup``-object, it can be used for working with reflection data, more specifically :math:`hkl`-indices. It's possible to check whether two reflections are equivalent in a certain point group:
 

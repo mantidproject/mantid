@@ -91,6 +91,27 @@ namespace CustomInterfaces
     /// Run the load algorithm with the given file name, output name and spectrum range
     bool loadFile(const QString& filename, const QString& outputName, const int specMin = -1, const int specMax = -1);
 
+    /// Add a SaveNexusProcessed step to the batch queue
+    void addSaveWorkspaceToQueue(const QString & wsName, const QString & filename = "");
+
+    /// Plot a spectrum plot with a given spectrum index
+    void plotSpectrum(const QStringList & workspaceNames, int specIndex = 0);
+    /// Plot a spectrum plot of a given workspace
+    void plotSpectrum(const QString & workspaceName, int specIndex = 0);
+
+    /// Plot a spectrum plot with a given spectra range
+    void plotSpectrum(const QStringList & workspaceNames, int specStart, int specEnd);
+    /// Plot a spectrum plot with a given spectra range of a given workspace
+    void plotSpectrum(const QString & workspaceName, int specStart, int specEnd);
+
+    /// Plot a time bin plot given a list of workspace names
+    void plotTimeBin(const QStringList & workspaceNames, int specIndex = 0);
+    /// Plot a time bin plot of a given workspace
+    void plotTimeBin(const QString & workspaceName, int specIndex = 0);
+
+    /// Plot a contour plot of a given workspace
+    void plot2D(const QString & workspaceName);
+
     /// Function to set the range limits of the plot
     void setPlotPropertyRange(MantidQt::MantidWidgets::RangeSelector * rs,
                               QtProperty* min, QtProperty* max,
@@ -99,6 +120,12 @@ namespace CustomInterfaces
     void setRangeSelector(MantidQt::MantidWidgets::RangeSelector * rs,
                           QtProperty* lower, QtProperty* upper,
                           const QPair<double, double> & bounds);
+
+    /// Function to get energy mode from a workspace
+    std::string getEMode(Mantid::API::MatrixWorkspace_sptr ws);
+
+    /// Function to get eFixed from a workspace
+    double getEFixed(Mantid::API::MatrixWorkspace_sptr ws);
 
     /// Function to run an algorithm on a seperate thread
     void runAlgorithm(const Mantid::API::IAlgorithm_sptr algorithm);

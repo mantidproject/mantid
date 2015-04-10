@@ -24,6 +24,6 @@ void export_SymmetryElement()
   register_ptr_to_python<boost::shared_ptr<SymmetryElement> >();  
   scope symmetryElementScope = class_<SymmetryElement, boost::noncopyable>("SymmetryElement", no_init);
   class_<SymmetryElement, boost::noncopyable>("SymmetryElement", no_init)
-      .def("hmSymbol", &SymmetryElement::hmSymbol)
-      .def("getAxis", &getAxis);
+      .def("getHMSymbol", &SymmetryElement::hmSymbol, "Returns the Hermann-Mauguin symbol for the element.")
+      .def("getAxis", &getAxis, "Returns the symmetry axis or [0,0,0] for identiy, inversion and translations.");
 }

@@ -15,4 +15,4 @@ class INTERLoadingTest(LoadAndCheckBase):
         return "INTER00007709Integrated.nxs"
 
     def get_expected_instrument_name(self):
-        return "INTER" 
+        return "INTER"

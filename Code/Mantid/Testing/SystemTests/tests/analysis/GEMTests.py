@@ -9,9 +9,11 @@ class GEMTest(stresstesting.MantidStressTest):
         self.gss_file = ''
         self.ref_gss_file = 'GEM58654.gss'
         self.xye_tof_files = []
-        self.ref_xye_tof_files = ['GEM58654_b1_TOF.dat','GEM58654_b2_TOF.dat','GEM58654_b3_TOF.dat','GEM58654_b4_TOF.dat','GEM58654_b5_TOF.dat','GEM58654_b6_TOF.dat']
+        self.ref_xye_tof_files = ['GEM58654_b1_TOF.dat','GEM58654_b2_TOF.dat','GEM58654_b3_TOF.dat','GEM58654_b4_TOF.dat',
+                                  'GEM58654_b5_TOF.dat','GEM58654_b6_TOF.dat']
         self.xye_d_files = []
-        self.ref_xye_d_files = ['GEM58654_b1_D.dat','GEM58654_b2_D.dat','GEM58654_b3_D.dat','GEM58654_b4_D.dat','GEM58654_b5_D.dat','GEM58654_b6_D.dat']
+        self.ref_xye_d_files = ['GEM58654_b1_D.dat','GEM58654_b2_D.dat','GEM58654_b3_D.dat','GEM58654_b4_D.dat',
+                                'GEM58654_b5_D.dat','GEM58654_b6_D.dat']
         self.file_index = 0
         self.new_cal_file = ''
 
@@ -59,7 +61,9 @@ class GEMTest(stresstesting.MantidStressTest):
         CreateSingleValuedWorkspace(OutputWorkspace='scale',DataValue='1')
         Multiply(LHSWorkspace='sample',RHSWorkspace='scale',OutputWorkspace='sample')
         ConvertUnits(InputWorkspace='sample',OutputWorkspace='sample',Target='Wavelength')
-        CylinderAbsorption(InputWorkspace='sample',OutputWorkspace='SampleTrans',AttenuationXSection='0.5',ScatteringXSection='1',SampleNumberDensity='1',NumberOfWavelengthPoints='100',CylinderSampleHeight='4',CylinderSampleRadius='0.40000000000000002',NumberOfSlices='10',NumberOfAnnuli='10')
+        CylinderAbsorption(InputWorkspace='sample',OutputWorkspace='SampleTrans',AttenuationXSection='0.5',
+                           ScatteringXSection='1',SampleNumberDensity='1',NumberOfWavelengthPoints='100',
+                           CylinderSampleHeight='4',CylinderSampleRadius='0.40000000000000002',NumberOfSlices='10',NumberOfAnnuli='10')
         Divide(LHSWorkspace='sample',RHSWorkspace='SampleTrans',OutputWorkspace='sample')
         ConvertUnits(InputWorkspace='sample',OutputWorkspace='sample',Target='dSpacing')
         DiffractionFocussing(InputWorkspace='sample',OutputWorkspace='sample',GroupingFileName=self.new_cal_file)
@@ -84,26 +88,39 @@ class GEMTest(stresstesting.MantidStressTest):
         Rebin(InputWorkspace='ResultD-5',OutputWorkspace='ResultD-5',Params='0.0818697,-0.00109142,2.82906')
         Rebin(InputWorkspace='ResultD-6',OutputWorkspace='ResultD-6',Params='0.0661098,-0.00105175,1.87008')
         ConvertUnits(InputWorkspace='ResultD-1',OutputWorkspace='ResultTOF-1',Target='TOF')
-        ReplaceSpecialValues(InputWorkspace='ResultD-1',OutputWorkspace='ResultD-1',NaNValue='0',InfinityValue='0',BigNumberThreshold='99999999.999999985')
-        ReplaceSpecialValues(InputWorkspace='ResultTOF-1',OutputWorkspace='ResultTOF-1',NaNValue='0',InfinityValue='0',BigNumberThreshold='99999999.999999985')
+        ReplaceSpecialValues(InputWorkspace='ResultD-1',OutputWorkspace='ResultD-1',NaNValue='0',
+                             InfinityValue='0',BigNumberThreshold='99999999.999999985')
+        ReplaceSpecialValues(InputWorkspace='ResultTOF-1',OutputWorkspace='ResultTOF-1',NaNValue='0',
+                             InfinityValue='0',BigNumberThreshold='99999999.999999985')
         ConvertUnits(InputWorkspace='ResultD-2',OutputWorkspace='ResultTOF-2',Target='TOF')
-        ReplaceSpecialValues(InputWorkspace='ResultD-2',OutputWorkspace='ResultD-2',NaNValue='0',InfinityValue='0',BigNumberThreshold='99999999.999999985')
-        ReplaceSpecialValues(InputWorkspace='ResultTOF-2',OutputWorkspace='ResultTOF-2',NaNValue='0',InfinityValue='0',BigNumberThreshold='99999999.999999985')
+        ReplaceSpecialValues(InputWorkspace='ResultD-2',OutputWorkspace='ResultD-2',NaNValue='0',
+                             InfinityValue='0',BigNumberThreshold='99999999.999999985')
+        ReplaceSpecialValues(InputWorkspace='ResultTOF-2',OutputWorkspace='ResultTOF-2',NaNValue='0',
+                             InfinityValue='0',BigNumberThreshold='99999999.999999985')
         ConvertUnits(InputWorkspace='ResultD-3',OutputWorkspace='ResultTOF-3',Target='TOF')
-        ReplaceSpecialValues(InputWorkspace='ResultD-3',OutputWorkspace='ResultD-3',NaNValue='0',InfinityValue='0',BigNumberThreshold='99999999.999999985')
-        ReplaceSpecialValues(InputWorkspace='ResultTOF-3',OutputWorkspace='ResultTOF-3',NaNValue='0',InfinityValue='0',BigNumberThreshold='99999999.999999985')
+        ReplaceSpecialValues(InputWorkspace='ResultD-3',OutputWorkspace='ResultD-3',NaNValue='0',
+                             InfinityValue='0',BigNumberThreshold='99999999.999999985')
+        ReplaceSpecialValues(InputWorkspace='ResultTOF-3',OutputWorkspace='ResultTOF-3',NaNValue='0',
+                             InfinityValue='0',BigNumberThreshold='99999999.999999985')
         ConvertUnits(InputWorkspace='ResultD-4',OutputWorkspace='ResultTOF-4',Target='TOF')
-        ReplaceSpecialValues(InputWorkspace='ResultD-4',OutputWorkspace='ResultD-4',NaNValue='0',InfinityValue='0',BigNumberThreshold='99999999.999999985')
-        ReplaceSpecialValues(InputWorkspace='ResultTOF-4',OutputWorkspace='ResultTOF-4',NaNValue='0',InfinityValue='0',BigNumberThreshold='99999999.999999985')
+        ReplaceSpecialValues(InputWorkspace='ResultD-4',OutputWorkspace='ResultD-4',NaNValue='0',
+                             InfinityValue='0',BigNumberThreshold='99999999.999999985')
+        ReplaceSpecialValues(InputWorkspace='ResultTOF-4',OutputWorkspace='ResultTOF-4',NaNValue='0',
+                             InfinityValue='0',BigNumberThreshold='99999999.999999985')
         ConvertUnits(InputWorkspace='ResultD-5',OutputWorkspace='ResultTOF-5',Target='TOF')
-        ReplaceSpecialValues(InputWorkspace='ResultD-5',OutputWorkspace='ResultD-5',NaNValue='0',InfinityValue='0',BigNumberThreshold='99999999.999999985')
-        ReplaceSpecialValues(InputWorkspace='ResultTOF-5',OutputWorkspace='ResultTOF-5',NaNValue='0',InfinityValue='0',BigNumberThreshold='99999999.999999985')
+        ReplaceSpecialValues(InputWorkspace='ResultD-5',OutputWorkspace='ResultD-5',NaNValue='0',
+                             InfinityValue='0',BigNumberThreshold='99999999.999999985')
+        ReplaceSpecialValues(InputWorkspace='ResultTOF-5',OutputWorkspace='ResultTOF-5',NaNValue='0',
+                             InfinityValue='0',BigNumberThreshold='99999999.999999985')
         ConvertUnits(InputWorkspace='ResultD-6',OutputWorkspace='ResultTOF-6',Target='TOF')
-        ReplaceSpecialValues(InputWorkspace='ResultD-6',OutputWorkspace='ResultD-6',NaNValue='0',InfinityValue='0',BigNumberThreshold='99999999.999999985')
-        ReplaceSpecialValues(InputWorkspace='ResultTOF-6',OutputWorkspace='ResultTOF-6',NaNValue='0',InfinityValue='0',BigNumberThreshold='99999999.999999985')
+        ReplaceSpecialValues(InputWorkspace='ResultD-6',OutputWorkspace='ResultD-6',NaNValue='0',
+                             InfinityValue='0',BigNumberThreshold='99999999.999999985')
+        ReplaceSpecialValues(InputWorkspace='ResultTOF-6',OutputWorkspace='ResultTOF-6',NaNValue='0',
+                             InfinityValue='0',BigNumberThreshold='99999999.999999985')
 
 		# group and save
-        GroupWorkspaces(InputWorkspaces='ResultTOF-1,ResultTOF-2,ResultTOF-3,ResultTOF-4,ResultTOF-5,ResultTOF-6',OutputWorkspace='ResultTOFgrp')
+        GroupWorkspaces(InputWorkspaces='ResultTOF-1,ResultTOF-2,ResultTOF-3,ResultTOF-4,ResultTOF-5,ResultTOF-6',
+                        OutputWorkspace='ResultTOFgrp')
 
         self.gss_file = os.path.join(config['defaultsave.directory'],'GEM58654_new.gss')
         append=False

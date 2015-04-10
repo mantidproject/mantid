@@ -2,21 +2,21 @@
 #define MANTID_MDEVENTS_CLONEMDEVENTWORKSPACETEST_H_
 
 #include "LoadMDTest.h"
-#include "MantidKernel/System.h"
-#include "MantidKernel/Timer.h"
-#include "MantidMDAlgorithms/CloneMDWorkspace.h"
-#include "MantidMDEvents/MDEventFactory.h"
-#include "MantidTestHelpers/MDEventsTestHelper.h"
-#include <cxxtest/TestSuite.h>
-#include <iomanip>
-#include <iostream>
-#include <Poco/File.h>
+#include "MantidDataObjects/MDEventFactory.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
+#include "MantidMDAlgorithms/CloneMDWorkspace.h"
+#include "MantidTestHelpers/MDAlgorithmsTestHelper.h"
+#include "MantidTestHelpers/MDEventsTestHelper.h"
+
+#include <cxxtest/TestSuite.h>
+
+#include <Poco/File.h>
 
 using namespace Mantid;
-using namespace Mantid::MDEvents;
 using namespace Mantid::API;
+using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
+using namespace Mantid::MDAlgorithms;
 
 class CloneMDWorkspaceTest : public CxxTest::TestSuite
 {
@@ -62,7 +62,7 @@ public:
     std::string outWSName("CloneMDWorkspaceTest_OutputWS");
 
     // Make a fake file-backed (or not) MDEW
-    MDEventWorkspace3Lean::sptr ws1 = MDEventsTestHelper::makeFileBackedMDEW("CloneMDWorkspaceTest_ws", fileBacked);
+    MDEventWorkspace3Lean::sptr ws1 = MDAlgorithmsTestHelper::makeFileBackedMDEW("CloneMDWorkspaceTest_ws", fileBacked);
     ws1->setFileNeedsUpdating( file_needs_updating );
   
     CloneMDWorkspace alg;
@@ -192,11 +192,11 @@ public:
   void test_MDHistoWorkspace_2D_uneven_bins()
   {
     // Make the number of bins uneven in both dimensions
-    Mantid::MDEvents::MDHistoWorkspace * ws = NULL;
-    ws = new Mantid::MDEvents::MDHistoWorkspace(
+    Mantid::DataObjects::MDHistoWorkspace * ws = NULL;
+    ws = new Mantid::DataObjects::MDHistoWorkspace(
           MDHistoDimension_sptr(new MDHistoDimension("x","x","m", 0.0, 10.0, 50)),
           MDHistoDimension_sptr(new MDHistoDimension("y","y","m", 0.0, 10.0, 100))  );
-    Mantid::MDEvents::MDHistoWorkspace_sptr ws1(ws);
+    Mantid::DataObjects::MDHistoWorkspace_sptr ws1(ws);
     ws1->setTo(1.234, 5.678, 1.0);
     do_test_MDHisto(ws1);
   }

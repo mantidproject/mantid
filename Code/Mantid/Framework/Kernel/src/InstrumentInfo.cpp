@@ -1,20 +1,20 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
+#include <algorithm>
+
 #include "MantidKernel/InstrumentInfo.h"
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/Strings.h"
 
+#include <boost/lexical_cast.hpp>
+
+#include <Poco/AutoPtr.h>
 #include <Poco/DOM/Element.h>
 #include <Poco/DOM/NodeList.h>
 #include <Poco/DOM/Text.h>
-#include <Poco/DOM/AutoPtr.h>
-
-#include <boost/lexical_cast.hpp>
-
-#include <algorithm>
 
 namespace Mantid {
 namespace Kernel {

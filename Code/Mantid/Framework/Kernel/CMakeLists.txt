@@ -8,6 +8,7 @@ set ( SRC_FILES
 	src/CPUTimer.cpp
 	src/CatalogInfo.cpp
 	src/CompositeValidator.cpp
+	src/ComputeResourceInfo.cpp
 	src/ConfigService.cpp
 	src/ChecksumHelper.cpp
 	src/DataItem.cpp
@@ -128,6 +129,7 @@ set ( INC_FILES
 	inc/MantidKernel/Cache.h
 	inc/MantidKernel/CatalogInfo.h
 	inc/MantidKernel/CompositeValidator.h
+	inc/MantidKernel/ComputeResourceInfo.h
 	inc/MantidKernel/ConfigService.h
 	inc/MantidKernel/ChecksumHelper.h
 	inc/MantidKernel/DataItem.h
@@ -264,6 +266,7 @@ set ( TEST_FILES
 	CacheTest.h
 	CatalogInfoTest.h
 	CompositeValidatorTest.h
+	ComputeResourceInfoTest.h
 	ConfigServiceTest.h
 	ChecksumHelperTest.h
 	DataServiceTest.h

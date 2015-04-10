@@ -103,11 +103,24 @@ namespace CustomInterfaces
     /// @param periods :: New list of periods
     virtual void setAvailablePeriods(const std::vector<std::string>& periods) = 0;
 
+    /// Update the time limits
+    /// @param tMin :: Minimum X value available
+    /// @param tMax :: Maximum X value available
+    virtual void setTimeLimits(double tMin, double tMax) = 0;
+
+    /// Update the time limits
+    /// @param tMin :: Minimum X value available
+    /// @param tMax :: Maximum X value available
+    virtual void setTimeRange(double tMin, double tMax) = 0;
+
     /// Set waiting cursor for long operation
     virtual void setWaitingCursor() = 0;
 
     /// Restore the original cursor
     virtual void restoreCursor() = 0;
+
+    /// Opens the Mantid Wiki web page
+    virtual void help() = 0;
 
   signals:
     /// Request to load data
@@ -115,6 +128,7 @@ namespace CustomInterfaces
 
     /// User has selected the first run
     void firstRunSelected();
+
   };
 
 } // namespace CustomInterfaces

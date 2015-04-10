@@ -33,7 +33,7 @@ namespace // anon
   }
 } // anon namespace
 
-DECLARE_SUBWINDOW(IndirectDiffractionReduction);
+DECLARE_SUBWINDOW(IndirectDiffractionReduction)
 
 using namespace Mantid::API;
 using namespace MantidQt::CustomInterfaces;

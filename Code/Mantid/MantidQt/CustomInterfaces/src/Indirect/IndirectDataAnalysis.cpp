@@ -6,11 +6,12 @@
 // IDATab subclasses:
 #include "MantidQtCustomInterfaces/Indirect/Elwin.h"
 #include "MantidQtCustomInterfaces/Indirect/MSDFit.h"
-#include "MantidQtCustomInterfaces/Indirect/Fury.h"
-#include "MantidQtCustomInterfaces/Indirect/FuryFit.h"
+#include "MantidQtCustomInterfaces/Indirect/Iqt.h"
+#include "MantidQtCustomInterfaces/Indirect/IqtFit.h"
 #include "MantidQtCustomInterfaces/Indirect/ConvFit.h"
 #include "MantidQtCustomInterfaces/Indirect/CalcCorr.h"
 #include "MantidQtCustomInterfaces/Indirect/ApplyCorr.h"
+#include "MantidQtCustomInterfaces/Indirect/AbsorptionCorrections.h"
 
 #include "MantidQtAPI/HelpWindow.h"
 #include "MantidQtAPI/ManageUserDirectories.h"
@@ -27,7 +28,7 @@ namespace CustomInterfaces
 namespace IDA
 {
   // Add this class to the list of specialised dialogs in this namespace
-  DECLARE_SUBWINDOW(IndirectDataAnalysis);
+  DECLARE_SUBWINDOW(IndirectDataAnalysis)
 
   /**
    * Constructor.
@@ -46,11 +47,12 @@ namespace IDA
     // We make the assumption that each map key corresponds to the order in which the tabs appear.
     m_tabs.insert(std::make_pair(ELWIN,      new Elwin(m_uiForm.twIDATabs->widget(ELWIN))));
     m_tabs.insert(std::make_pair(MSD_FIT,    new MSDFit(m_uiForm.twIDATabs->widget(MSD_FIT))));
-    m_tabs.insert(std::make_pair(FURY,       new Fury(m_uiForm.twIDATabs->widget(FURY))));
-    m_tabs.insert(std::make_pair(FURY_FIT,   new FuryFit(m_uiForm.twIDATabs->widget(FURY_FIT))));
+    m_tabs.insert(std::make_pair(IQT,        new Iqt(m_uiForm.twIDATabs->widget(IQT))));
+    m_tabs.insert(std::make_pair(IQT_FIT,    new IqtFit(m_uiForm.twIDATabs->widget(IQT_FIT))));
     m_tabs.insert(std::make_pair(CONV_FIT,   new ConvFit(m_uiForm.twIDATabs->widget(CONV_FIT))));
     m_tabs.insert(std::make_pair(CALC_CORR,  new CalcCorr(m_uiForm.twIDATabs->widget(CALC_CORR))));
     m_tabs.insert(std::make_pair(APPLY_CORR, new ApplyCorr(m_uiForm.twIDATabs->widget(APPLY_CORR))));
+    m_tabs.insert(std::make_pair(ABSORPTION_CORRECTIONS, new AbsorptionCorrections(m_uiForm.twIDATabs->widget(ABSORPTION_CORRECTIONS))));
   }
 
   /**

@@ -3,7 +3,7 @@
 
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
-#include "MantidMDEvents/MDEventWorkspace.h"
+#include "MantidDataObjects/MDEventWorkspace.h"
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -53,7 +53,7 @@ private:
 
   template <typename MDE, size_t nd>
   void
-  doTransform(typename Mantid::MDEvents::MDEventWorkspace<MDE, nd>::sptr ws);
+  doTransform(typename Mantid::DataObjects::MDEventWorkspace<MDE, nd>::sptr ws);
 
   std::vector<double> m_scaling;
   std::vector<double> m_offset;

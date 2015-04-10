@@ -16,11 +16,14 @@ class IndirectTransmissionMonitor(PythonAlgorithm):
     _plot = None
     _save = None
 
+
     def category(self):
         return "Workflow\\Inelastic;PythonAlgorithms;Inelastic"
 
+
     def summary(self):
         return "Calculates the sample transmission using the raw data files of the sample and its background or container."
+
 
     def PyInit(self):
         self.declareProperty(WorkspaceProperty('SampleWorkspace', '', direction=Direction.Input),
@@ -32,14 +35,13 @@ class IndirectTransmissionMonitor(PythonAlgorithm):
         self.declareProperty(WorkspaceProperty('OutputWorkspace', '', direction=Direction.Output),
                              doc='Output workspace group')
 
-        self.declareProperty(name='Plot', defaultValue=False, doc='Plot result workspace')
-        self.declareProperty(name='Save', defaultValue=False, doc='Save result workspace to nexus file in the default save directory')
+        self.declareProperty(name='Plot', defaultValue=False,
+                             doc='Plot result workspace')
+        self.declareProperty(name='Save', defaultValue=False,
+                             doc='Save result workspace to nexus file in the default save directory')
 
     def PyExec(self):
-        from IndirectCommon import StartTime, EndTime
         self._setup()
-
-        StartTime('IndirectTransmissionMonitor')
 
         ws_basename = str(self._sample_ws_in)
 
@@ -53,7 +55,9 @@ class IndirectTransmissionMonitor(PythonAlgorithm):
 
         # Divide sample and can workspaces
         Divide(LHSWorkspace=sam_ws, RHSWorkspace=can_ws, OutputWorkspace=trans_ws)
+
         trans = numpy.average(mtd[trans_ws].readY(0))
+        logger.information('Average Transmission: ' + str(trans))
 
         AddSampleLog(Workspace=trans_ws, LogName='can_workspace', LogType='String', LogText=self._can_ws_in)
 
@@ -62,8 +66,6 @@ class IndirectTransmissionMonitor(PythonAlgorithm):
         GroupWorkspaces(InputWorkspaces=group, OutputWorkspace=self._out_ws)
 
         self.setProperty('OutputWorkspace', self._out_ws)
-
-        logger.information('Transmission : ' + str(trans))
 
         # Save the tranmissin workspace group to a nexus file
         if self._save:
@@ -77,7 +79,6 @@ class IndirectTransmissionMonitor(PythonAlgorithm):
             mtd_plot = import_mantidplot()
             mtd_plot.plotSpectrum(self._out_ws, 0)
 
-        EndTime('IndirectTransmissionMonitor')
 
     def _setup(self):
         """
@@ -89,6 +90,7 @@ class IndirectTransmissionMonitor(PythonAlgorithm):
         self._out_ws = self.getPropertyValue('OutputWorkspace')
         self._plot = self.getProperty("Plot").value
         self._save = self.getProperty("Save").value
+
 
     def _get_spectra_index(self, input_ws):
         """
@@ -123,6 +125,7 @@ class IndirectTransmissionMonitor(PythonAlgorithm):
 
         return monitor_1_idx, monitor_2_idx, detector_1_idx
 
+
     def _get_detector_spectrum_index(self, workspace, detector_id):
         """
         Returns the spectrum index for a given detector ID in a workspace.
@@ -136,6 +139,7 @@ class IndirectTransmissionMonitor(PythonAlgorithm):
                 return spec_idx
 
         return None
+
 
     def _unwrap_mon(self, input_ws):
         out_ws = '_unwrap_mon_out'
@@ -152,13 +156,17 @@ class IndirectTransmissionMonitor(PythonAlgorithm):
 
         return out_ws
 
+
     def _trans_mon(self, ws_basename, file_type, input_ws):
         monitor_1_idx, monitor_2_idx, detector_1_idx = self._get_spectra_index(input_ws)
 
-        CropWorkspace(InputWorkspace=input_ws, OutputWorkspace='__m1', StartWorkspaceIndex=monitor_1_idx, EndWorkspaceIndex=monitor_1_idx)
+        CropWorkspace(InputWorkspace=input_ws, OutputWorkspace='__m1',
+                      StartWorkspaceIndex=monitor_1_idx, EndWorkspaceIndex=monitor_1_idx)
         if monitor_2_idx is not None:
-            CropWorkspace(InputWorkspace=input_ws, OutputWorkspace='__m2', StartWorkspaceIndex=monitor_2_idx, EndWorkspaceIndex=monitor_2_idx)
-        CropWorkspace(InputWorkspace=input_ws, OutputWorkspace='__det', StartWorkspaceIndex=detector_1_idx, EndWorkspaceIndex=detector_1_idx)
+            CropWorkspace(InputWorkspace=input_ws, OutputWorkspace='__m2',
+                          StartWorkspaceIndex=monitor_2_idx, EndWorkspaceIndex=monitor_2_idx)
+        CropWorkspace(InputWorkspace=input_ws, OutputWorkspace='__det',
+                      StartWorkspaceIndex=detector_1_idx, EndWorkspaceIndex=detector_1_idx)
 
         # Check for single or multiple time regimes
         mon_tcb_start = mtd['__m1'].readX(0)[0]

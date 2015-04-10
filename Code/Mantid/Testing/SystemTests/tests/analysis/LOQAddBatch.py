@@ -1,4 +1,4 @@
-#pylint: disable=no-init,invalid-name
+#pylint: disable=no-init,invalid-name,attribute-defined-outside-init
 import stresstesting
 from mantid.simpleapi import *
 from mantid.api import FileFinder
@@ -73,5 +73,4 @@ class SANSAddBatch(stresstesting.MantidStressTest):
                 os.remove(os.path.join(defaultsave,file_name))
             except:
                 pass
-
 

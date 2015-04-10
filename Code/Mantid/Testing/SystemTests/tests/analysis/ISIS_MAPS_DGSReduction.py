@@ -21,7 +21,8 @@ class ReduceMAPS(ReductionWrapper):
 
         # Absolute units reduction properties.
         prop['monovan_run'] = 17589
-        prop['sample_mass'] = 10 / (94.4 / 13) # -- this number allows to get approximately the same system test intensities for MAPS as the old test
+        # -- this number allows to get approximately the same system test intensities for MAPS as the old test
+        prop['sample_mass'] = 10 / (94.4 / 13)
         prop['sample_rmm'] = 435.96 #
         return prop
 
@@ -90,7 +91,7 @@ class ReduceMAPS(ReductionWrapper):
         # Uncomment this to use custom filename function
         # Note: the properties are stored in prop_man class accessed as
         # below.
-        #return custom_name(self.reducer.prop_man)
+        #return lambda : custom_name(self.reducer.prop_man)
         # use this method to use standard file name generating function
         return None
 

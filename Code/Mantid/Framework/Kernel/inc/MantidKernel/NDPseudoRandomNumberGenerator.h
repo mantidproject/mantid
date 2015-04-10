@@ -65,8 +65,8 @@ public:
   void restore();
 
 private:
-  DISABLE_DEFAULT_CONSTRUCT(NDPseudoRandomNumberGenerator);
-  DISABLE_COPY_AND_ASSIGN(NDPseudoRandomNumberGenerator);
+  DISABLE_DEFAULT_CONSTRUCT(NDPseudoRandomNumberGenerator)
+  DISABLE_COPY_AND_ASSIGN(NDPseudoRandomNumberGenerator)
 
   /// The single value generator
   SingleValueGenerator m_singleValueGen;

@@ -1,7 +1,7 @@
 #include "MantidSINQ/ProjectMD.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidGeometry/MDGeometry/MDTypes.h"
-#include "MantidMDEvents/MDHistoWorkspace.h"
+#include "MantidDataObjects/MDHistoWorkspace.h"
 
 #define MAXDIM 10
 
@@ -11,7 +11,7 @@ DECLARE_ALGORITHM(ProjectMD)
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
-using namespace Mantid::MDEvents;
+using namespace Mantid::DataObjects;
 
 // A reference to the logger is provided by the base class, it is called g_log.
 // It is used to print out information, warning and error messages

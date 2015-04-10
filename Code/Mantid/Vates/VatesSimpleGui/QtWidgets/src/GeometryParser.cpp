@@ -1,18 +1,19 @@
+#include <iostream>
+#include <sstream>
+
 #include "MantidVatesSimpleGuiQtWidgets/GeometryParser.h"
 #include "MantidVatesSimpleGuiQtWidgets/AxisInformation.h"
 
 #include "MantidGeometry/MDGeometry/MDGeometryXMLDefinitions.h"
 
+#include <Poco/AutoPtr.h>
 #include <Poco/DOM/DOMParser.h>
+#include <Poco/DOM/DOMWriter.h>
 #include <Poco/DOM/Element.h>
+#include <Poco/DOM/NamedNodeMap.h>
 #include <Poco/DOM/Node.h>
 #include <Poco/DOM/NodeList.h>
-#include <Poco/DOM/NamedNodeMap.h>
 #include <Poco/DOM/Text.h>
-#include <Poco/DOM/DOMWriter.h>
-
-#include <iostream>
-#include <sstream>
 
 namespace Mantid
 {
@@ -39,7 +40,7 @@ AxisInformation *GeometryParser::getAxisInfo(const std::string dimension)
   for (unsigned long int i = 0; i < pNodes->length(); ++i)
   {
     pNode = pNodes->item(i);
-    Poco::XML::NamedNodeMap *aMap = pNode->attributes();
+    Poco::AutoPtr<Poco::XML::NamedNodeMap> aMap = pNode->attributes();
     Poco::XML::XMLString id = aMap->getNamedItem("ID")->getNodeValue();
     if (id == label)
     {

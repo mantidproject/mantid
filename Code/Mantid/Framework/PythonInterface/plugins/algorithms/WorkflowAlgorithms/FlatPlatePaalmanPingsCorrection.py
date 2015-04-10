@@ -1,9 +1,9 @@
 #pylint: disable=no-init,invalid-name
 from mantid.simpleapi import *
 from mantid.api import PythonAlgorithm, AlgorithmFactory, PropertyMode, MatrixWorkspaceProperty, \
-                       WorkspaceGroupProperty
+                       WorkspaceGroupProperty, InstrumentValidator, WorkspaceUnitValidator
 from mantid.kernel import StringListValidator, StringMandatoryValidator, IntBoundedValidator, \
-                          FloatBoundedValidator, Direction, logger
+                          FloatBoundedValidator, Direction, logger, CompositeValidator
 import math, numpy as np
 
 
@@ -38,8 +38,11 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
 
 
     def PyInit(self):
+        ws_validator = CompositeValidator([WorkspaceUnitValidator('Wavelength'), InstrumentValidator()])
+
         self.declareProperty(MatrixWorkspaceProperty('SampleWorkspace', '',
-                             direction=Direction.Input),
+                             direction=Direction.Input,
+                             validator=ws_validator),
                              doc='Name for the input sample workspace')
 
         self.declareProperty(name='SampleChemicalFormula', defaultValue='',
@@ -56,7 +59,8 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
 
         self.declareProperty(MatrixWorkspaceProperty('CanWorkspace', '',
                              direction=Direction.Input,
-                             optional=PropertyMode.Optional),
+                             optional=PropertyMode.Optional,
+                             validator=ws_validator),
                              doc="Name for the input container workspace")
 
         self.declareProperty(name='CanChemicalFormula', defaultValue='',
@@ -144,7 +148,8 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
         # Create the output workspaces
         ass_ws = self._output_ws_name + '_ass'
         CreateWorkspace(OutputWorkspace=ass_ws, DataX=dataX, DataY=data_ass,
-                        NSpec=num_angles, UnitX='Wavelength')
+                        NSpec=num_angles, UnitX='Wavelength',
+                        VerticalAxisUnit='SpectraNumber')
         self._add_sample_logs(ass_ws, sample_logs)
 
         workspaces = [ass_ws]
@@ -155,21 +160,24 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
             assc_ws = self._output_ws_name + '_assc'
             workspaces.append(assc_ws)
             CreateWorkspace(OutputWorkspace=assc_ws, DataX=dataX, DataY=data_assc,
-                            NSpec=num_angles, UnitX='Wavelength')
+                            NSpec=num_angles, UnitX='Wavelength',
+                            VerticalAxisUnit='SpectraNumber')
             self._add_sample_logs(assc_ws, sample_logs)
             AddSampleLog(Workspace=assc_ws, LogName='can_filename', LogType='String', LogText=str(self._can_ws_name))
 
             acsc_ws = self._output_ws_name + '_acsc'
             workspaces.append(acsc_ws)
             CreateWorkspace(OutputWorkspace=acsc_ws, DataX=dataX, DataY=data_acsc,
-                            NSpec=num_angles, UnitX='Wavelength')
+                            NSpec=num_angles, UnitX='Wavelength',
+                            VerticalAxisUnit='SpectraNumber')
             self._add_sample_logs(acsc_ws, sample_logs)
             AddSampleLog(Workspace=acsc_ws, LogName='can_filename', LogType='String', LogText=str(self._can_ws_name))
 
             acc_ws = self._output_ws_name + '_acc'
             workspaces.append(acc_ws)
             CreateWorkspace(OutputWorkspace=acc_ws, DataX=dataX, DataY=data_acc,
-                            NSpec=num_angles, UnitX='Wavelength')
+                            NSpec=num_angles, UnitX='Wavelength',
+                            VerticalAxisUnit='SpectraNumber')
             self._add_sample_logs(acc_ws, sample_logs)
             AddSampleLog(Workspace=acc_ws, LogName='can_filename', LogType='String', LogText=str(self._can_ws_name))
 

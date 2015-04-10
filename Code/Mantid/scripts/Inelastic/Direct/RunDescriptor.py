@@ -25,10 +25,34 @@ class RunList(object):
         if not isinstance(runs_to_add,list):
             raise KeyError('Can only set list of run numbers to add')
         runs = []
+        if fnames or len(fnames)>0:
+            fnames_given=True
+            local_fnames=fnames
+        else:
+            fnames_given=False
+            local_fnames=[]
+        if fext:
+            fext_given=True
+            local_fext=fext
+        else:
+            fext_given=False
+            local_fext=[]
+
         for item in runs_to_add:
-            runs.append(int(item))
+            if isinstance(item,str):
+                file_path,run_num,fext = prop_helpers.parse_run_file_name(item)
+                runs.append(run_num)
+                if not fnames_given:
+                    local_fnames.append(file_path)
+                if not fext_given:
+                    if not fext is None:
+                        if len(fext)==0:
+                            fext=None
+                    local_fext.append(fext)
+            else:
+                runs.append(int(item))
         self._run_numbers = runs
-        self._set_fnames(fnames,fext)
+        self._set_fnames(local_fnames,local_fext)
 #--------------------------------------------------------------------------------------------------
     def set_cashed_sum_ws(self,ws,new_ws_name=None):
         """Store the name of a workspace in the class
@@ -455,7 +479,10 @@ class RunDescriptor(PropDescriptor):
             self._run_list.set_last_ind2sum(ind)
             self._run_number = run_num
             self._run_file_path = file_path
-            self._fext = main_fext
+            if fext is None:
+                self._fext = None
+            else:
+                self._fext = main_fext
             self._ws_name = self._build_ws_name()
 
     def run_number(self):
@@ -482,20 +509,22 @@ class RunDescriptor(PropDescriptor):
                 noutputs=0
 
         if self._mask_ws_name:
-            mask_ws = mtd[self._mask_ws_name]
-            #TODO: need normal exposure of getNumberMasked() method of masks workspace
-            if noutputs>1:
-                __tmp_masks,spectra = ExtractMask(self._mask_ws_name)
-                num_masked = len(spectra)
-                DeleteWorkspace(__tmp_masks)
-                return (mask_ws,num_masked)
+            if self._mask_ws_name in mtd:
+                mask_ws = mtd[self._mask_ws_name]
+                #TODO: need normal exposure of getNumberMasked() method of masks workspace
+                if noutputs>1:
+                    __tmp_masks,spectra = ExtractMask(self._mask_ws_name)
+                    num_masked = len(spectra)
+                    DeleteWorkspace(__tmp_masks)
+                    return (mask_ws,num_masked)
+                else:
+                    return mask_ws
             else:
-                return mask_ws
+                self._mask_ws_name = None
+        if noutputs>1:
+            return (None,0)
         else:
-            if noutputs>1:
-                return (None,0)
-            else:
-                return None
+            return None
 #--------------------------------------------------------------------------------------------------------------------
     def add_masked_ws(self,masked_ws):
         """Extract masking from the workspace provided and store masks
@@ -701,7 +730,7 @@ class RunDescriptor(PropDescriptor):
                 self.apply_calibration(ws,RunDescriptor._holder.det_cal_file,prefer_ws_calibration)
                 return ws
         else:
-            if self._run_number:
+            if not self._run_number is None:
                 prefer_ws_calibration = self._check_calibration_source()
                 inst_name = RunDescriptor._holder.short_inst_name
                 calibration = RunDescriptor._holder.det_cal_file
@@ -775,13 +804,16 @@ class RunDescriptor(PropDescriptor):
             return origin
 
 #--------------------------------------------------------------------------------------------------------------------
-    def get_monitors_ws(self,monitor_ID=None):
+    def get_monitors_ws(self,monitors_ID=None,otherWS=None):
         """Get pointer to a workspace containing monitors.
 
            Explores different ways of finding monitor workspace in Mantid and returns the python pointer to the
            workspace which contains monitors.
         """
-        data_ws = self.get_workspace()
+        if otherWS:
+            data_ws  = otherWS
+        else:
+            data_ws = self.get_workspace()
         if not data_ws:
             return None
 
@@ -798,25 +830,26 @@ class RunDescriptor(PropDescriptor):
             for specID in spec_to_mon:
                 mon_ws = self.copy_spectrum2monitors(data_ws,mon_ws,specID)
 
-        if monitor_ID:
-            try:
-                ws_index = mon_ws.getIndexFromSpectrumNumber(monitor_ID)
-            except: #
-                mon_ws = None
+        if monitors_ID:
+            if isinstance(monitors_ID,list):
+                mon_list = monitors_ID
+            else:
+                mon_list = [monitors_ID]
         else:
             mon_list = self._holder.get_used_monitors_list()
-            for monID in mon_list:
+        #
+        for monID in mon_list:
+            try:
+                ws_ind = mon_ws.getIndexFromSpectrumNumber(int(monID))
+            except:
                 try:
-                    ws_ind = mon_ws.getIndexFromSpectrumNumber(int(monID))
-                except:
-                    try:
-                        monws_name = mon_ws.name()
-                    except: 
-                        monws_name = 'None'
-                    RunDescriptor._logger('*** Monitor workspace {0} does not have monitor with ID {1}. Monitor workspace set to None'.\
+                    monws_name = mon_ws.name()
+                except: 
+                    monws_name = 'None'
+                RunDescriptor._logger('*** Monitor workspace {0} does not have monitor with ID {1}. Monitor workspace set to None'.\
                                           format(monws_name,monID),'warning')
-                    mon_ws = None
-                    break
+                mon_ws = None
+                break
         return mon_ws
 #--------------------------------------------------------------------------------------------------------------------
     def is_existing_ws(self):
@@ -855,6 +888,7 @@ class RunDescriptor(PropDescriptor):
             fname,old_ext = os.path.splitext(hint)
             if len(old_ext) == 0:
                 old_ext = self.get_fext()
+            fname = hint
         else:
             old_ext = self.get_fext()
             if fileExt is None:
@@ -883,31 +917,57 @@ class RunDescriptor(PropDescriptor):
         #
         file_hint,old_ext = self.file_hint(run_num_str,filePath,fileExt,**kwargs)
 
-        try:
-            file = FileFinder.findRuns(file_hint)[0]
+        def _check_ext(file):
             fname,fex = os.path.splitext(file)
-            self._fext = fex
             if old_ext != fex:
                 message = '*** Cannot find run-file with extension {0}.\n'\
                           '    Found file {1} instead'.format(old_ext,file)
                 RunDescriptor._logger(message,'notice')
             self._run_file_path = os.path.dirname(fname)
+            self._fext = fex
+
+        #------------------------------------------------
+        try:
+            file = FileFinder.findRuns(file_hint)[0]
+            _check_ext(file)
             return (True,file)
         except RuntimeError:
-            message = '*** Cannot find file matching hint {0} on Mantid search paths '.\
-                       format(file_hint)
-            if not 'be_quet' in kwargs:
-                RunDescriptor._logger(message,'warning')
-            return (False,message)
+            try:
+                file_hint,oext = os.path.splitext(file_hint)
+                file = FileFinder.findRuns(file_hint)[0]
+                _check_ext(file)
+                return (True,file)
+            except RuntimeError:
+                message = '*** Cannot find file matching hint {0} on Mantid search paths '.\
+                        format(file_hint)
+                if not 'be_quet' in kwargs:
+                    RunDescriptor._logger(message,'warning')
+                return (False,message)
 #--------------------------------------------------------------------------------------------------------------------
 
     def load_file(self,inst_name,ws_name,run_number=None,load_mon_with_workspace=False,filePath=None,fileExt=None,**kwargs):
         """Load run for the instrument name provided. If run_numner is None, look for the current run"""
 
-        ok,data_file = self.find_file(None,filePath,fileExt,**kwargs)
+        ok,data_file = self.find_file(None,run_number,filePath,fileExt,**kwargs)
         if not ok:
             self._ws_name = None
             raise IOError(data_file)
+        # This is may be for a future
+        #if not ok:
+        #    key = self.get_fext().lower()
+        #    if key in RunDescriptor.fext_equivalents:
+        #        equivalents = RunDescriptor.fext_equivalents[key]
+        #        found = False
+        #        for ext in equivalents:
+        #            ok,data_file = self.find_file(None,run_number,filePath,ext)
+        #            if ok:
+        #                found=True
+        #                break
+        #        if found:
+        #            RunDescriptor.prefile_found = True
+        #        else:
+        #            self._ws_name = None
+        #            raise IOError(data_file)
 
         if load_mon_with_workspace:
             mon_load_option = 'Include'
@@ -1023,19 +1083,31 @@ class RunDescriptor(PropDescriptor):
 
         #
         x_param = mon_ws.readX(0)
-        bins = [x_param[0],x_param[1] - x_param[0],x_param[-1]]
+        homo_binning,dx_min=RunDescriptor._is_binning_homogeneous(x_param)
+        bins = [x_param[0],dx_min,x_param[-1]]
         ExtractSingleSpectrum(InputWorkspace=data_ws,OutputWorkspace='tmp_mon',WorkspaceIndex=ws_index)
         Rebin(InputWorkspace='tmp_mon',OutputWorkspace='tmp_mon',Params=bins,PreserveEvents='0')
-        # should be vice versa but Conjoin invalidate ws pointers and hopefully
-        # nothing could happen with workspace during conjoining
-        #AddSampleLog(Workspace=monWS,LogName=done_log_name,LogText=str(ws_index),LogType='Number')
         mon_ws_name = mon_ws.getName()
-        ConjoinWorkspaces(InputWorkspace1=mon_ws,InputWorkspace2='tmp_mon')
+        if not homo_binning:
+            Rebin(InputWorkspace=mon_ws_name,OutputWorkspace=mon_ws_name,Params=bins,PreserveEvents='0')
+        ConjoinWorkspaces(InputWorkspace1=mon_ws_name,InputWorkspace2='tmp_mon')
         mon_ws = mtd[mon_ws_name]
 
         if 'tmp_mon' in mtd:
             DeleteWorkspace(WorkspaceName='tmp_mon')
         return mon_ws
+    #
+    @staticmethod
+    def _is_binning_homogeneous(x_param):
+        """Verify if binning in monitor workspace is homogeneous"""
+        dx=x_param[1:]-x_param[0:-1]
+        dx_min=min(dx)
+        dx_max=max(dx)
+        if dx_max-dx_min>1.e-9:
+            return False,dx_min
+        else:
+            return True,dx_min
+
 #--------------------------------------------------------------------------------------------------------------------
     def clear_monitors(self):
         """ method removes monitor workspace form analysis data service if it is there
@@ -1404,7 +1476,9 @@ def build_run_file_name(run_num,inst,file_path='',fext=''):
     """Build the full name of a runfile from all possible components"""
     if fext is None:
         fext = ''
-    fname = '{0}{1}{2}'.format(inst,run_num,fext)
+    #HACK: current ISIS File format consist of 5 digit. It is defined somewhere in Mantid
+    # but redefined here. Should pick things up from MANTID
+    fname = '{0}{1:0>5}{2}'.format(inst,run_num,fext)
     if not file_path is None:
         if os.path.exists(file_path):
             fname = os.path.join(file_path,fname)

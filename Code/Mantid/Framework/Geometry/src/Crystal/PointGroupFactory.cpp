@@ -1,4 +1,5 @@
 #include "MantidGeometry/Crystal/PointGroupFactory.h"
+#include "MantidGeometry/Crystal/SpaceGroup.h"
 
 #include "MantidKernel/LibraryManager.h"
 #include <boost/algorithm/string.hpp>
@@ -18,10 +19,35 @@ PointGroupFactoryImpl::createPointGroup(const std::string &hmSymbol) {
   return constructFromPrototype(getPrototype(hmSymbol));
 }
 
-PointGroup_sptr PointGroupFactoryImpl::createPointGroupFromSpaceGroupSymbol(
-    const std::string &spaceGroupSymbol) {
-  return createPointGroup(
-      pointGroupSymbolFromSpaceGroupSymbol(spaceGroupSymbol));
+PointGroup_sptr PointGroupFactoryImpl::createPointGroupFromSpaceGroup(
+    const SpaceGroup_const_sptr &spaceGroup) {
+  return createPointGroupFromSpaceGroup(*spaceGroup);
+}
+
+PointGroup_sptr PointGroupFactoryImpl::createPointGroupFromSpaceGroup(
+    const SpaceGroup &spaceGroup) {
+  std::string pointGroupSymbol =
+      pointGroupSymbolFromSpaceGroupSymbol(spaceGroup.hmSymbol());
+
+  try {
+    PointGroup_sptr pointGroup = createPointGroup(pointGroupSymbol);
+
+    // If the crystal system is trigonal, we need to do more.
+    if (pointGroup->crystalSystem() == PointGroup::Trigonal) {
+      throw std::invalid_argument(
+          "Trigonal space groups need to be processed differently.");
+    }
+
+    return pointGroup;
+  }
+  catch (std::invalid_argument) {
+    if (spaceGroup.getCoordinateSystem() !=
+        Group::CoordinateSystem::Hexagonal) {
+      pointGroupSymbol.append(" r");
+    }
+
+    return createPointGroup(pointGroupSymbol);
+  }
 }
 
 bool PointGroupFactoryImpl::isSubscribed(const std::string &hmSymbol) const {
@@ -187,20 +213,23 @@ DECLARE_POINTGROUP("-42m", "y,-x,-z; x,-y,-z", "Tetragonal")
 DECLARE_POINTGROUP("-4m2", "y,-x,-z; y,x,-z", "Tetragonal")
 DECLARE_POINTGROUP("4/mmm", "-y,x,z; x,y,-z; x,-y,-z", "Tetragonal")
 
-DECLARE_POINTGROUP("3 h", "-y,x-y,z", "Trigonal - Hexagonal")
-DECLARE_POINTGROUP("-3 h", "y,y-x,-z", "Trigonal - Hexagonal")
+DECLARE_POINTGROUP("3", "-y,x-y,z", "Trigonal - Hexagonal")
+DECLARE_POINTGROUP("-3", "y,y-x,-z", "Trigonal - Hexagonal")
 DECLARE_POINTGROUP("321", "-y,x-y,z; x-y,-y,-z", "Trigonal - Hexagonal")
+DECLARE_POINTGROUP("32", "-y,x-y,z; x-y,-y,-z", "Trigonal - Hexagonal")
 DECLARE_POINTGROUP("312", "-y,x-y,z; x,x-y,-z", "Trigonal - Hexagonal")
 DECLARE_POINTGROUP("3m1", "-y,x-y,z; y-x,y,z", "Trigonal - Hexagonal")
+DECLARE_POINTGROUP("3m", "-y,x-y,z; y-x,y,z", "Trigonal - Hexagonal")
 DECLARE_POINTGROUP("31m", "-y,x-y,z; -x,y-x,z", "Trigonal - Hexagonal")
 DECLARE_POINTGROUP("-3m1", "y,y-x,-z; x-y,-y,-z", "Trigonal - Hexagonal")
+DECLARE_POINTGROUP("-3m", "y,y-x,-z; x-y,-y,-z", "Trigonal - Hexagonal")
 DECLARE_POINTGROUP("-31m", "y,y-x,-z; x,x-y,-z", "Trigonal - Hexagonal")
 
-DECLARE_POINTGROUP("3", "z,x,y", "Trigonal - Rhombohedral")
-DECLARE_POINTGROUP("-3", "-z,-x,-y", "Trigonal - Rhombohedral")
-DECLARE_POINTGROUP("32", "z,x,y; -y,-x,-z", "Trigonal - Rhombohedral")
-DECLARE_POINTGROUP("3m", "z,x,y; y,x,z", "Trigonal - Rhombohedral")
-DECLARE_POINTGROUP("-3m", "-z,-x,-y; y,x,z", "Trigonal - Rhombohedral")
+DECLARE_POINTGROUP("3 r", "z,x,y", "Trigonal - Rhombohedral")
+DECLARE_POINTGROUP("-3 r", "-z,-x,-y", "Trigonal - Rhombohedral")
+DECLARE_POINTGROUP("32 r", "z,x,y; -y,-x,-z", "Trigonal - Rhombohedral")
+DECLARE_POINTGROUP("3m r", "z,x,y; y,x,z", "Trigonal - Rhombohedral")
+DECLARE_POINTGROUP("-3m r", "-z,-x,-y; y,x,z", "Trigonal - Rhombohedral")
 
 DECLARE_POINTGROUP("6", "x-y,x,z", "Hexagonal")
 DECLARE_POINTGROUP("-6", "y-x,-x,-z", "Hexagonal")
@@ -210,7 +239,6 @@ DECLARE_POINTGROUP("6mm", "x-y,x,z; y-x,y,z", "Hexagonal")
 DECLARE_POINTGROUP("-62m", "y-x,-x,-z; x-y,-y,-z", "Hexagonal")
 DECLARE_POINTGROUP("-6m2", "y-x,-x,-z; y-x,y,z", "Hexagonal")
 DECLARE_POINTGROUP("6/mmm", "x-y,x,z; x-y,-y,-z; -x,-y,-z", "Hexagonal")
-
 
 DECLARE_POINTGROUP("23", "z,x,y; -x,-y,z; x,-y,-z", "Cubic")
 DECLARE_POINTGROUP("m-3", "-z,-x,-y; -x,-y,z; x,-y,-z", "Cubic")

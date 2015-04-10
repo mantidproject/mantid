@@ -18,11 +18,12 @@
 #include <string>
 #include <vector>
 #include <boost/regex.hpp>
+#include <boost/math/special_functions/fpclassify.hpp>
 
 namespace Mantid {
 namespace DataHandling {
 
-DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadNXSPE);
+DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadNXSPE)
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -245,28 +246,6 @@ void LoadNXSPE::exec() {
   outputWS->getAxis(0)->unit() = UnitFactory::Instance().create("DeltaE");
   outputWS->setYUnit("SpectraNumber");
 
-  std::vector<double>::iterator itdata = data.begin(), iterror = error.begin(),
-                                itdataend, iterrorend;
-  API::Progress prog = API::Progress(this, 0.0, 0.9, numSpectra);
-  for (std::size_t i = 0; i < numSpectra; ++i) {
-    itdataend = itdata + numBins;
-    iterrorend = iterror + numBins;
-    outputWS->dataX(i) = energies;
-    if (((*itdata) == std::numeric_limits<double>::quiet_NaN()) ||
-        (*itdata <= -1e10)) // masked bin
-    {
-      outputWS->dataY(i) = std::vector<double>(numBins, 0);
-      outputWS->dataE(i) = std::vector<double>(numBins, 0);
-      pmap.addBool(outputWS->getDetector(i).get(), "masked", true);
-    } else {
-      outputWS->dataY(i) = std::vector<double>(itdata, itdataend);
-      outputWS->dataE(i) = std::vector<double>(iterror, iterrorend);
-    }
-    itdata = (itdataend);
-    iterror = (iterrorend);
-    prog.report();
-  }
-
   // add logs
   outputWS->mutableRun().addLogData(
       new PropertyWithValue<double>("Ei", fixed_energy));
@@ -310,6 +289,29 @@ void LoadNXSPE::exec() {
     instrument->add(det);
     instrument->markAsDetector(det);
   }
+
+  std::vector<double>::iterator itdata = data.begin(), iterror = error.begin(),
+                                itdataend, iterrorend;
+  API::Progress prog = API::Progress(this, 0.0, 0.9, numSpectra);
+  for (std::size_t i = 0; i < numSpectra; ++i) {
+    itdataend = itdata + numBins;
+    iterrorend = iterror + numBins;
+    outputWS->dataX(i) = energies;
+    if ((!boost::math::isfinite(*itdata))||
+        (*itdata <= -1e10)) // masked bin
+    {
+      outputWS->dataY(i) = std::vector<double>(numBins, 0);
+      outputWS->dataE(i) = std::vector<double>(numBins, 0);
+      pmap.addBool(outputWS->getDetector(i).get(), "masked", true);
+    } else {
+      outputWS->dataY(i) = std::vector<double>(itdata, itdataend);
+      outputWS->dataE(i) = std::vector<double>(iterror, iterrorend);
+    }
+    itdata = (itdataend);
+    iterror = (iterrorend);
+    prog.report();
+  }
+
 
   setProperty("OutputWorkspace", outputWS);
 }
