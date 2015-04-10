@@ -217,6 +217,7 @@
 
 using namespace Qwt3D;
 using namespace MantidQt::API;
+using Mantid::Kernel::ConfigService;
 
 namespace
 {
@@ -363,7 +364,6 @@ void ApplicationWindow::init(bool factorySettings, const QStringList& args)
   // splash screen after the 3D visualization dialog has closed
   qApp->processEvents();
 
-  using Mantid::Kernel::ConfigService;
   auto & config = ConfigService::Instance(); // Starts logging
   resultsLog->attachLoggingChannel(); // Must be done after logging starts
   using Mantid::API::FrameworkManager;
@@ -594,7 +594,7 @@ void ApplicationWindow::init(bool factorySettings, const QStringList& args)
   // It is raised in the about2start method as on OS X if the event loop is not running then raise()
   // does not push the dialog to the top of the stack
   d_showFirstTimeSetup = shouldWeShowFirstTimeSetup(args);
- 
+
   using namespace Mantid::API;
   // Do this as late as possible to avoid unnecessary updates
   AlgorithmFactory::Instance().enableNotifications();
@@ -627,7 +627,7 @@ bool ApplicationWindow::shouldWeShowFirstTimeSetup(const QStringList& commandArg
 
   //first check the facility and instrument
   using Mantid::Kernel::ConfigService;
-  auto & config = ConfigService::Instance(); 
+  auto & config = ConfigService::Instance();
   std::string facility = config.getString("default.facility");
   std::string instrument = config.getString("default.instrument");
   if ( facility.empty() || instrument.empty() )
@@ -641,13 +641,13 @@ bool ApplicationWindow::shouldWeShowFirstTimeSetup(const QStringList& commandArg
     {
       const Mantid::Kernel::FacilityInfo& facilityInfo = config.getFacility(facility);
       const Mantid::Kernel::InstrumentInfo& instrumentInfo = config.getInstrument(instrument);
-      g_log.information()<<"Default facility '" << facilityInfo.name() 
+      g_log.information()<<"Default facility '" << facilityInfo.name()
         << "', instrument '" << instrumentInfo.name() << "'" << std::endl;
     }
     catch (Mantid::Kernel::Exception::NotFoundError&)
     {
       //failed to find the facility or instrument
-      g_log.error()<<"Could not find your default facility '" << facility 
+      g_log.error()<<"Could not find your default facility '" << facility
         <<"' or instrument '" << instrument << "' in facilities.xml, showing please select again." << std::endl;
       return true;
     }
@@ -5221,7 +5221,27 @@ void ApplicationWindow::readSettings()
 
   settings.beginGroup("/General");
   titleOn = settings.value("/Title", true).toBool();
-  autoDistribution1D = settings.value("/AutoDistribution1D", true).toBool();
+  // The setting for this was originally stored as a QSetting but then was migrated to
+  // the Mantid ConfigService and is now saved by the ConfigDialog
+  auto & cfgSvc = ConfigService::Instance();
+  if ( settings.contains("/AutoDistribution1D") ) {
+    // if the setting was false then the user changed it
+    // sync this to the new location and remove the key for the future
+    bool qsettingsFlag = settings.value("/AutoDistribution1D", true).toBool();
+    if(qsettingsFlag == false) {
+      cfgSvc.setString("graph1d.autodistribution", "Off");
+      try {
+         cfgSvc.saveConfig( cfgSvc.getUserFilename());
+      } catch(std::runtime_error&) {
+        g_log.warning("Unable to update autodistribution property from ApplicationWindow");
+      }
+    }
+    settings.remove("/AutoDistribution1D");
+  }
+  // Pull default from config service
+  const std::string propStr = cfgSvc.getString("graph1d.autodistribution");
+  autoDistribution1D = (propStr == "On");
+
   canvasFrameWidth = settings.value("/CanvasFrameWidth", 0).toInt();
   defaultPlotMargin = settings.value("/Margin", 0).toInt();
   drawBackbones = settings.value("/AxesBackbones", true).toBool();
@@ -5600,7 +5620,6 @@ void ApplicationWindow::saveSettings()
   settings.beginGroup("/2DPlots");
   settings.beginGroup("/General");
   settings.setValue("/Title", titleOn);
-  settings.setValue("/AutoDistribution1D", autoDistribution1D);
   settings.setValue("/CanvasFrameWidth", canvasFrameWidth);
   settings.setValue("/Margin", defaultPlotMargin);
   settings.setValue("/AxesBackbones", drawBackbones);
@@ -15637,7 +15656,7 @@ ApplicationWindow::~ApplicationWindow()
   }
   delete d_current_folder;
 
-  
+
 
   btnPointer->setChecked(true);
   delete mantidUI;
