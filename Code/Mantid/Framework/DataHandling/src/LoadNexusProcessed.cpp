@@ -359,7 +359,15 @@ Workspace_sptr LoadNexusProcessed::doAccelleratedMultiPeriodLoading(
     }
   }
 
-  m_cppFile->openPath(mtdEntry.path());
+  // We always start one layer too deep
+  // go from /workspace_{n}/{something} -> /workspace_{n}
+  m_cppFile->closeGroup();
+
+  // Now move to the correct period group
+  // /workspace_{n} -> /workspace_{n+1}
+  m_cppFile->closeGroup();
+  m_cppFile->openGroup(entryName, "NXentry");
+
   try {
     // This loads logs, sample, and instrument.
     periodWorkspace->loadSampleAndLogInfoNexus(m_cppFile);
