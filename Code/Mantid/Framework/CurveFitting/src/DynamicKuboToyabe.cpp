@@ -117,7 +117,6 @@ double integral (double func(const double, const double, const double),
 		h[j+1]=h[j]/9.0;
 	}
   throw std::runtime_error("Too many steps in routine integrate");
-	return 0.0;
 }
 
 // End of Numerical Recipes routines
