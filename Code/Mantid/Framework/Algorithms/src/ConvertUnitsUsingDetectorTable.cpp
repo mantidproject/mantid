@@ -67,7 +67,7 @@ namespace Algorithms
   int ConvertUnitsUsingDetectorTable::version() const { return 1;}
 
   /// Algorithm's category for identification. @see Algorithm::category
-  const std::string ConvertUnitsUsingDetectorTable::category() const { return "Transforms\\Units";}
+  const std::string ConvertUnitsUsingDetectorTable::category() const { return "Utility\\Development";}
 
   /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
   const std::string ConvertUnitsUsingDetectorTable::summary() const { return "Performs a unit change on the X values of a workspace";}
