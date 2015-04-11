@@ -29,6 +29,7 @@ class ReflectionCheckingTest(stresstesting.MantidStressTest):
             self.assertDelta(float(currentPeak['d']), reference[1], 1e-4)
 
             fSquaredReference = reference[2] ** 2 * reference[3]
+            print fSquaredReference, float(currentPeak['Intensity'])
             self.assertDelta(float(currentPeak['Intensity']) / fSquaredReference, 1.0, structureFactorPrecision)
 
 
@@ -37,22 +38,24 @@ class POLDICreatePeaksFromCellTestSiO2(ReflectionCheckingTest):
             SiO2, 10.1107/S0108768105005240"""
 
     data = {
-        0: ([1, 0, 0], 4.25588, 16.6297, 6),
-        1: ([1, 0, -1], 3.34393, 39.2576, 6),
-        14: ([0, 0, 3], 1.80193, 9.31225, 2),
-        40: ([2, 2, 0], 1.22857, 18.8765, 3),
-        117: ([3, 1, -4], 0.88902, 6.55526, 6)
+        0: ([1, 0, 0], 4.25588, 8.27544, 6),
+        1: ([1, 0, -1], 3.34393, 22.1494, 6),
+        14: ([0, 0, 3], 1.80193, 8.70574, 2),
+        40: ([2, 2, 0], 1.22857, 14.4884, 3),
+        117: ([4, -1, 4], 0.88902, 9.14321, 6)
     }
 
     def runTest(self):
         peaks_SiO2 = PoldiCreatePeaksFromCell(
             SpaceGroup="P 32 2 1",
-            Atoms="Si 0.4723 0.0 2/3 1.0 0.0075; O 0.416 0.2658 07881 1.0 0.0175",
+            Atoms="Si 0.4723 0.0 2/3 1.0 0.0075; O 0.416 0.2658 0.7881 1.0 0.0175",
             a=4.91427, c=5.4058, LatticeSpacingMin=0.885)
 
         peaks_SiO2 = SortTableWorkspace(InputWorkspace="peaks_SiO2", Columns=["d"], Ascending=[False])
 
         self.assertEquals(peaks_SiO2.rowCount(), 118)
+
+        self.checkReflections(peaks_SiO2, self.data)
 
 
 class POLDICreatePeaksFromCellTestAl2O3(ReflectionCheckingTest):
