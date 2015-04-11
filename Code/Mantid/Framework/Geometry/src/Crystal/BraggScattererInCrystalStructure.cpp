@@ -102,22 +102,20 @@ V3D BraggScattererInCrystalStructure::getPositionFromString(
                                            boost::is_any_of("[]")),
                             positionStringClean.end());
 
-  mu::Parser parser;
-  parser.SetArgSep(',');
-  parser.SetDecSep('.');
-  parser.SetExpr(positionStringClean);
+  std::vector<std::string> numberParts;
+  boost::split(numberParts, positionStringClean, boost::is_any_of(","));
 
-  int nComponents;
-  mu::value_type *components = parser.Eval(nComponents);
-
-  if (nComponents != 3) {
+  if (numberParts.size() != 3) {
     throw std::invalid_argument("Cannot parse '" + positionString +
                                 "' as a position.");
   }
 
+  mu::Parser parser;
+
   V3D position;
-  for (size_t i = 0; i < static_cast<size_t>(nComponents); ++i) {
-    position[i] = components[i];
+  for (size_t i = 0; i < numberParts.size(); ++i) {
+    parser.SetExpr(numberParts[i]);
+    position[i] = parser.Eval();
   }
 
   return position;
