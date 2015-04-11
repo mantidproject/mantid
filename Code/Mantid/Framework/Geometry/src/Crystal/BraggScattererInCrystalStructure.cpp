@@ -7,7 +7,17 @@
 #include "MantidKernel/ListValidator.h"
 #include "MantidGeometry/Crystal/SpaceGroupFactory.h"
 
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable : 4005)
+#endif
+
 #include <muParser.h>
+
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
+
 
 namespace Mantid {
 namespace Geometry {
