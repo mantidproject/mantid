@@ -4,7 +4,6 @@
 #include <boost/regex.hpp>
 #include <boost/make_shared.hpp>
 #include <boost/algorithm/string.hpp>
-#include <boost/range/algorithm/remove_if.hpp>
 #include "MantidKernel/ListValidator.h"
 #include "MantidGeometry/Crystal/SpaceGroupFactory.h"
 
@@ -98,10 +97,10 @@ void BraggScattererInCrystalStructure::declareProperties() {
 V3D BraggScattererInCrystalStructure::getPositionFromString(
     const std::string &positionString) const {
   std::string positionStringClean = positionString;
-  positionStringClean.erase(
-      boost::remove_if(positionStringClean, boost::is_any_of("[]")),
-      positionStringClean.end());
-
+  positionStringClean.erase(std::remove_if(positionStringClean.begin(),
+                                           positionStringClean.end(),
+                                           boost::is_any_of("[]")),
+                            positionStringClean.end());
 
   mu::Parser parser;
   parser.SetArgSep(',');
