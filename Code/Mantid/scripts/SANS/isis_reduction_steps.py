@@ -54,7 +54,7 @@ class LoadRun(object):
             @param trans: set to true if the file is from a transmission run (default: False)
             @param reload: if to reload the workspace if it is already present
             @param entry: the entry number of the run, useful for multi-period files (default: load the entire file)
-    """
+        """
         super(LoadRun, self).__init__()
         self._data_file = run_spec
         self._is_trans = trans
@@ -147,15 +147,25 @@ class LoadRun(object):
 
         outWs = Load(self._data_file, **extra_options)
 
+        logger.information('====================================================')
+        logger.information('Output ws is ' + outWs.getName())
+        logger.information('Output ws type is ' + str(type(outWs)))
+        
         if isinstance(outWs, WorkspaceGroup) and '-add' in outWs.getName():
             if len(outWs) != 2:
                 raise RuntimeError("Incorrect number of child workspaces. Make sure that the grouped workspace was created within the Add Runs tab.")
-            if check_child_ws_for_name_and_type_for_eventdata(outWs):
+            if check_child_ws_for_name_and_type_for_added_eventdata(outWs):
                 raise RuntimeError("Incorrect format of the group workspace. We expect an EventWorkspace for the data and a MatrixWorkspace for the monitors.")
             if self._period != self.UNSET_PERIOD:
                 raise RuntimeError("Trying to use multiperiod and added eventdata. This is currently not supported.")
+            extract_child_ws_for_added_eventdata(outWs)
+        
+        
 
+        for ws_name in mtd.getObjectNames():
+            print ws_name
 
+        quit()
 
         monitor_ws_name = workspace + "_monitors"
 
@@ -1087,7 +1097,6 @@ class LoadSample(LoadRun):
 
     def execute(self, reducer, isSample):
         self._assignHelper(reducer)
-
         if self.wksp_name == '':
             raise RuntimeError('Unable to load SANS sample run, cannot continue.')
 

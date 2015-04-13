@@ -13,8 +13,9 @@ import types
 
 sanslog = Logger("SANS")
 
-REG_DATA_NAME = '-add_1$'
-REG_DATA_MONITORS_NAME = '-add_monitors_1$'
+REG_DATA_NAME = '-add[_1-9]*$'
+REG_BARE_MONITORS_NAME = 'monitors'
+REG_DATA_MONITORS_NAME = '-add_monitors[_1-9]*$'
 
 def deprecated(obj):
     """
@@ -260,6 +261,10 @@ def fromEvent2Histogram(ws_event, ws_monitor, binning = ""):
         aux_hist = RebinToWorkspace(ws_event, ws_monitor, False)
         ws_monitor.clone(OutputWorkspace=name)
 
+    logger.information('=========================================================================')
+    logger.information('Monitor is' + str(mtd[name].id()))
+    logger.information('Data is ' + str(aux_hist.id()))
+
     ConjoinWorkspaces(name, aux_hist, CheckOverlapping=True)
     CopyInstrumentParameters(ws_event, OutputWorkspace=name)
 
@@ -478,7 +483,8 @@ def mask_detectors_with_masking_ws(ws_name, masking_ws_name):
 def check_child_ws_for_name_and_type_for_added_eventdata(wsGroup):
     '''
     Ensure that the while loading added event data, we are dealing with
-    1. The correct naming convention.  
+    1. The correct naming convention. This is XXXXXXXX-add[_1-9]* for 
+        the event data and XXXXXXXX-add_monitors[_1-9]* for the monitor data
     2. The correct workspace types.
     @param wsGroup ::  workspace group.
     '''
@@ -492,25 +498,52 @@ def check_child_ws_for_name_and_type_for_added_eventdata(wsGroup):
         if re.search(REG_DATA_NAME, childWorkspace.getName()):
             if isinstance(childWorkspace, IEventWorkspace):
                 hasData = True
-        if re.search(REG_DATA_MONITORS_NAME, childWorkspace.getName()):
+        elif re.search(REG_DATA_MONITORS_NAME, childWorkspace.getName()):
             if isinstance(childWorkspace, MatrixWorkspace):
                 hasMonitors = True
 
     return hasData and hasMonitors
 
-def extract_child_ws_for_added_eventdata(wsGroup):
+def extract_child_ws_for_added_eventdata(ws_group):
     '''
     Extract the the child workspaces from a workspace group which was
     created by adding event data. The workspace group must contains a data 
     workspace which is an EventWorkspace and a monitor workspace which is a 
     matrix workspace. 
-    @param wsGroup :: workspace group.
+    @param ws_group :: workspace group.
     '''
-    for index in range(len(wsGroup)):
-        name = wsGroup.getItem(index).getName()
-        assert name.endswith('_1')
-        renamed = name[:(len(name) - 2)]
-        CloneWorkspace(InputWorkspace = name, OutputWorkspace = renamed)
+    # Get a handle on each child workspace
+    ws_handles = []
+    for index in range(len(ws_group)):
+        ws_handles.append(ws_group.getItem(index))
+
+    # Now ungroup the group
+    UnGroupWorkspace(ws_group)
+    logger.information('================================================================')
+    logger.information('---------------------------------------------------')
+    for ws_handle in ws_handles:
+        name = ws_handle.getName()
+        renamed = get_pruned_added_event_data_names(name)
+        sanslog.information('================================================================')
+        sanslog.information('================================================================')
+        sanslog.information('================================================================')
+        sanslog.information('Name = ' + str(name))
+        sanslog.information('Renamed = ' + str(renamed))
+        if name != renamed:
+            RenameWorkspace(InputWorkspace = name, OutputWorkspace = renamed)
+
+def get_pruned_added_event_data_names(name):
+    '''
+    Find index where  the child workspace of an added workspace group needs
+    to be split. Loading the group workspace can cause the data 
+    to have an index appended. Indices such as _1, _2, etc and no index need
+    to be accomodated for. Note that _1_1 has been observed as well is taken
+    care of. We want to get rid of the indiexes
+    @param name :: name of a a workspace
+    '''
+    assert re.search('[_1-9]*$', name)
+    pruned = re.sub(r'[_1-9]*$', '', name)
+    return pruned
 
 
 ###############################################################################

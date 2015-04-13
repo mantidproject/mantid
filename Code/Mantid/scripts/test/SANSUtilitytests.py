@@ -1,8 +1,3 @@
-import sys
-
-print sys.executable
-for item in sys.path:
-    print item
 
 import unittest
 import re
@@ -12,8 +7,18 @@ from mantid.simpleapi import CreateWorkspace, CreateSampleWorkspace, GroupWorksp
 from mantid.api import mtd
 import SANSUtility as su
 
-TEST_STRING = 'SANS2D0003434-add_monitors_1'
-TEST_STRING2 = 'SANS2D0003434-add_1'
+TEST_STRING_DATA = 'SANS2D0003434-add'
+TEST_STRING_MON = 'SANS2D0003434-add_monitors'
+
+TEST_STRING_DATA1 = 'SANS2D0003434-add_1'
+TEST_STRING_MON1 = 'SANS2D0003434-add_monitors_1'
+
+TEST_STRING_DATA2 = 'SANS2D0003434-add_2'
+TEST_STRING_MON2 = 'SANS2D0003434-add_monitors_2'
+
+TEST_STRING_DATA3 = 'SANS2D0003434-add_3'
+TEST_STRING_MON3 = 'SANS2D0003434-add_monitors_3'
+
 
 def provide_group_workspace_for_added_event_data(event_ws_name, monitor_ws_name, out_ws_name):
     CreateWorkspace(DataX = [1,2,3], DataY = [2,3,4], OutputWorkspace = monitor_ws_name)
@@ -71,36 +76,74 @@ class TestSliceStringParser(unittest.TestCase):
 
 class TestLoadingAddedEventWorkspaceNameParsing(unittest.TestCase):
 
-    def test_check_regex_for_data(self):
-        self.assertIsNotNone(re.search(su.REG_DATA_NAME, TEST_STRING2))
-
-    def test_check_regex_for_data_monitors(self):
-        self.assertIsNotNone(re.search(su.REG_DATA_MONITORS_NAME, TEST_STRING))
-
-    def test_regexes_do_not_clash(self):
-        self.assertIsNone(re.search(su.REG_DATA_NAME, TEST_STRING)) 
-        self.assertIsNone(re.search(su.REG_DATA_MONITORS_NAME, TEST_STRING2))
-    
-    def test_check_child_file_names_for_valid_names(self):
-        event_name = TEST_STRING2
-        monitor_name = TEST_STRING
+    def do_test_load_check(self, event_name, monitor_name):
         out_name = 'out_ws'
         provide_group_workspace_for_added_event_data(event_ws_name = event_name, monitor_ws_name = monitor_name, out_ws_name = out_name)
         out_ws = mtd[out_name]
         self.assertTrue(su.check_child_ws_for_name_and_type_for_added_eventdata(out_ws))
         DeleteWorkspace(out_ws)
 
+    def test_check_regex_for_data(self):
+        # Check when there is no special ending
+        self.assertIsNotNone(re.search(su.REG_DATA_NAME, TEST_STRING_DATA))
+        # Check when there is a _1 ending
+        self.assertIsNotNone(re.search(su.REG_DATA_NAME, TEST_STRING_DATA1))
+        # Check when there is a _2 ending
+        self.assertIsNotNone(re.search(su.REG_DATA_NAME, TEST_STRING_DATA2))
+        # Check when there is a multiple ending
+        self.assertIsNotNone(re.search(su.REG_DATA_NAME, TEST_STRING_DATA3))
+
+
+    def test_check_regex_for_data_monitors(self):
+        # Check when there is no special ending
+        self.assertIsNotNone(re.search(su.REG_DATA_MONITORS_NAME, TEST_STRING_MON))
+        # Check when there is a _1 ending
+        self.assertIsNotNone(re.search(su.REG_DATA_MONITORS_NAME, TEST_STRING_MON1))
+        # Check when there is a _2 ending
+        self.assertIsNotNone(re.search(su.REG_DATA_MONITORS_NAME, TEST_STRING_MON2))
+        # Check when there is a multiple ending
+        self.assertIsNotNone(re.search(su.REG_DATA_MONITORS_NAME, TEST_STRING_MON3))
+
+    def test_regexes_do_not_clash(self):
+        # Check when there is no special ending
+        self.assertIsNone(re.search(su.REG_DATA_NAME, TEST_STRING_MON)) 
+        self.assertIsNone(re.search(su.REG_DATA_MONITORS_NAME, TEST_STRING_DATA))
+        # Check when there is a _1 ending
+        self.assertIsNone(re.search(su.REG_DATA_NAME, TEST_STRING_MON1)) 
+        self.assertIsNone(re.search(su.REG_DATA_MONITORS_NAME, TEST_STRING_DATA1))
+        # Check when there is a _2 ending
+        self.assertIsNone(re.search(su.REG_DATA_NAME, TEST_STRING_MON2)) 
+        self.assertIsNone(re.search(su.REG_DATA_MONITORS_NAME, TEST_STRING_DATA2))
+        # Check when there is a multiple ending
+        self.assertIsNone(re.search(su.REG_DATA_NAME, TEST_STRING_MON3)) 
+        self.assertIsNone(re.search(su.REG_DATA_MONITORS_NAME, TEST_STRING_DATA3))
+    
+    def test_check_child_file_names_for_valid_names(self):
+        # Check when there is no special ending
+        event_name = TEST_STRING_DATA
+        monitor_name = TEST_STRING_MON
+        self.do_test_load_check(event_name = event_name, monitor_name = monitor_name)
+
+        # Check when there is a _1 ending
+        event_name1 = TEST_STRING_DATA1
+        monitor_name1 = TEST_STRING_MON1
+        self.do_test_load_check(event_name = event_name1, monitor_name = monitor_name1)
+
+        # Check when there is a _2 ending
+        event_name2 = TEST_STRING_DATA2
+        monitor_name2 = TEST_STRING_MON2
+        self.do_test_load_check(event_name = event_name2, monitor_name = monitor_name2)
+
+        # Check when there is a multiple ending
+        event_name3 = TEST_STRING_DATA3
+        monitor_name3 = TEST_STRING_MON3
+        self.do_test_load_check(event_name = event_name3, monitor_name = monitor_name3)
+
 
 class TestLoadingAddedEventWorkspaceExtraction(unittest.TestCase):
-
-    def test_extract_data_and_monitor_child_ws(self):
-        # Arrange
-        event_base_name = 'eventWsSANS'
-        monitor_base_name = 'monitorWsSANS'
-        event_ws_name = event_base_name  + '_1' 
-        monitor_ws_name = monitor_base_name  + '_1'
+    def do_test_extraction(self, event_name, monitor_name, event_name_expect, monitor_name_expect):
         out_ws_name = 'out_group'
-        provide_group_workspace_for_added_event_data(event_ws_name = event_ws_name, monitor_ws_name = monitor_ws_name, out_ws_name = out_ws_name)
+        provide_group_workspace_for_added_event_data(event_ws_name = event_name, monitor_ws_name = monitor_name, out_ws_name = out_ws_name)
         out_ws_group = mtd[out_ws_name]
 
         # Act
@@ -108,22 +151,48 @@ class TestLoadingAddedEventWorkspaceExtraction(unittest.TestCase):
 
         # Assert
         # Make sure that two files exist with a truncated name
-        self.assertTrue(event_base_name in mtd)
-        self.assertTrue(monitor_base_name in mtd)
 
-        self.assertTrue(event_ws_name in mtd)
-        self.assertTrue(monitor_ws_name in mtd)
+        self.assertTrue(event_name_expect in mtd)
+        self.assertTrue(monitor_name_expect in mtd)
 
-        # Make sure they are true copies which are present after deleting the group
-        DeleteWorkspace(out_ws_group)
-        self.assertTrue(event_base_name in mtd)
-        self.assertTrue(monitor_base_name in mtd)
+        DeleteWorkspace(event_name_expect)
+        DeleteWorkspace(monitor_name_expect)
 
-        self.assertFalse(event_ws_name in mtd)
-        self.assertFalse(monitor_ws_name in mtd)
+    def test_pruning_of_data_and_monitor_child_names(self):
+        # Check when there is no special ending
+        out = su.get_pruned_added_event_data_names(TEST_STRING_DATA)
+        self.assertTrue(TEST_STRING_DATA == out)
+        out_mon = su.get_pruned_added_event_data_names(TEST_STRING_MON)
+        self.assertTrue(TEST_STRING_MON == out_mon)
 
-        DeleteWorkspace(event_base_name)
-        DeleteWorkspace(monitor_base_name)
+        # Check when there is a _1 ending
+        out1 = su.get_pruned_added_event_data_names(TEST_STRING_DATA1)
+        self.assertTrue(TEST_STRING_DATA == out1)
+        out1_mon = su.get_pruned_added_event_data_names(TEST_STRING_MON1)
+        self.assertTrue(TEST_STRING_MON == out1_mon)
+
+        # Check when there is a _2 ending
+        out2 = su.get_pruned_added_event_data_names(TEST_STRING_DATA2)
+        self.assertTrue(TEST_STRING_DATA == out2)
+        out2_mon = su.get_pruned_added_event_data_names(TEST_STRING_MON2)
+        self.assertTrue(TEST_STRING_MON == out2_mon)
+
+        # Check when there is a multiple ending
+        out3 = su.get_pruned_added_event_data_names(TEST_STRING_DATA3)
+        self.assertTrue(TEST_STRING_DATA == out3)
+        out3_mon = su.get_pruned_added_event_data_names(TEST_STRING_MON3)
+        self.assertTrue(TEST_STRING_MON == out3_mon)
+
+    def test_extract_data_and_monitor_child_ws(self):
+        # Check when there is no special ending
+        self.do_test_extraction(TEST_STRING_DATA, TEST_STRING_MON, TEST_STRING_DATA, TEST_STRING_MON)
+        # Check when there is a _1 ending
+        self.do_test_extraction(TEST_STRING_DATA1, TEST_STRING_MON1, TEST_STRING_DATA, TEST_STRING_MON)
+        # Check when there is a _2 ending
+        self.do_test_extraction(TEST_STRING_DATA2, TEST_STRING_MON2, TEST_STRING_DATA, TEST_STRING_MON)
+        # Check when there is a multiple ending
+        self.do_test_extraction(TEST_STRING_DATA3, TEST_STRING_MON3, TEST_STRING_DATA, TEST_STRING_MON)
+
 
 if __name__ == "__main__":
     unittest.main()

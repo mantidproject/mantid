@@ -142,6 +142,7 @@ class LoadSampleTest(unittest.TestCase):
             self.assertAlmostEqual(cur_pos[1], -0.002)
 
 
+
 class LoadSampleTestStressTest(stresstesting.MantidStressTest):
     def runTest(self):
         self._success = False
@@ -159,7 +160,60 @@ class LoadSampleTestStressTest(stresstesting.MantidStressTest):
     def validate(self):
         return self._success
 
+class LoadAddedEventDataSampleTestStressTest(stresstesting.MantidStressTest):
+    def runTest(self):
+        self._success = False
+        config["default.instrument"] = "SANS2D"
+        ici.SANS2D()
+        ici.MaskFile('MaskSANS2DReductionGUI.txt')
+        #ici.SetDetectorOffsets('REAR', -16.0, 58.0, 0.0, 0.0, 0.0, 0.0)
+        #ici.SetDetectorOffsets('FRONT', -44.0, -20.0, 47.0, 0.0, 1.0, 1.0)
+        #ici.Gravity(False)
+        #ici.Set1D()
 
+        added_event_data_file = self._prepare_added_event_data('SANS2D00028051', 'SANS2D00028050')
+
+        ici.AssignSample(added_event_data_file)
+        ici.WavRangeReduction()
+        #ici.WavRangeReduction(4.6, 12.85, False)
+
+
+    def _prepare_added_event_data(self, name_first, name_second):
+        name1 = name_first
+        name2 = name_second
+        LoadEventNexus(Filename = "SANS2D00022048.nxs", OutputWorkspace = name1, LoadMonitors = 1)
+        #todo -- clone first workspace rather than load twice
+        LoadEventNexus(Filename = "SANS2D00022048.nxs", OutputWorkspace = name2, LoadMonitors = 1)
+
+        added_data_name = name1 + '-add'
+        Plus(LHSWorkspace = name1, RHSWorkspace = name2, OutputWorkspace = added_data_name)
+
+        added_monitor_name = added_data_name + '_monitors'
+        monitor_name1 = name1 + '_monitors'
+        monitor_name2 = name2 + '_monitors'
+        Plus(LHSWorkspace = monitor_name1, RHSWorkspace = monitor_name2, OutputWorkspace = added_monitor_name)
+
+        group_name = added_data_name + '_group'
+        GroupWorkspaces(InputWorkspaces = [added_data_name, added_monitor_name], OutputWorkspace = group_name)
+        DeleteWorkspace(name1)
+        DeleteWorkspace(name2)
+        DeleteWorkspace(monitor_name1)
+        DeleteWorkspace(monitor_name2)
+        #to do: Work out what actual temporary system test save directory is.
+        temp_save_dir = config['defaultsave.directory']
+        output_file = os.path.join(temp_save_dir, added_data_name + '.nxs')
+        SaveNexus(InputWorkspace = group_name, Filename = output_file)
+
+        return output_file
+
+        #'defaultsave.directory'
+        #'datasearch.directories'
+
+    def requiredMemoryMB(self):
+        return 2000
+
+    def validate(self):
+        return False
 
 if __name__ == '__main__':
     unittest.main()
