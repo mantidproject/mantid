@@ -1554,7 +1554,6 @@ std::string ScriptRepositoryImpl::printStatus(SCRIPTSTATUS st) {
   default:
     return "FAULT: INVALID STATUS";
   }
-  return "FAULT: INVALID STATUS";
 }
 /**
  @todo describe

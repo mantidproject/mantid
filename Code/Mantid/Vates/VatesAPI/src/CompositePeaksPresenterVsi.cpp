@@ -77,12 +77,8 @@ void CompositePeaksPresenterVsi::getPeaksInfo (
  */
 std::string CompositePeaksPresenterVsi::getFrame() const{
   std::string frame;
-  for (std::vector<PeaksPresenterVsi_sptr>::const_iterator it =
-           m_peaksPresenters.begin();
-       it != m_peaksPresenters.end(); ++it) {
-    frame = (*it)->getFrame();
-    break;
-  }
+  if (!m_peaksPresenters.empty())
+    frame = m_peaksPresenters[0]->getFrame();
   return frame;
 }
 
