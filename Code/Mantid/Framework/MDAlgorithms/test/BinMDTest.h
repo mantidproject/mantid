@@ -174,7 +174,7 @@ public:
     TS_ASSERT_EQUALS( out->getBasisVector(0), expectBasisX);
     if (out->getNumDims() > 1) { TS_ASSERT_EQUALS( out->getBasisVector(1), expectBasisY); }
     if (out->getNumDims() > 2) { TS_ASSERT_EQUALS( out->getBasisVector(2), expectBasisZ); }
-    const CoordTransform * ctFrom = out->getTransformFromOriginal();
+    CoordTransform const * ctFrom = out->getTransformFromOriginal();
     TS_ASSERT(ctFrom);
     // Experiment Infos were copied
     TS_ASSERT_EQUALS( out->getNumExperimentInfo(), in_ws->getNumExperimentInfo());
@@ -459,9 +459,9 @@ public:
     { TS_ASSERT_EQUALS( out->getBasisVector(1), baseY);
       TS_ASSERT_EQUALS( out->getBasisVector(2), baseZ); }
 
-    const CoordTransform * ctFrom = out->getTransformFromOriginal();
+    CoordTransform const * ctFrom = out->getTransformFromOriginal();
     TS_ASSERT(ctFrom);
-    const CoordTransform * ctTo = out->getTransformToOriginal();
+    CoordTransform const * ctTo = out->getTransformToOriginal();
     TS_ASSERT(ctTo);
     if (!ctTo) return;
 
@@ -594,8 +594,8 @@ public:
     TS_ASSERT_EQUALS( binned1->numOriginalWorkspaces(), 2);
     TS_ASSERT_EQUALS( binned1->getOriginalWorkspace(1)->name(), "binned0");
     // Transforms to/from the INTERMEDIATE workspace exist
-    CoordTransform * toIntermediate = binned1->getTransformToOriginal(1);
-    CoordTransform * fromIntermediate = binned1->getTransformFromOriginal(1);
+    CoordTransform const * toIntermediate = binned1->getTransformToOriginal(1);
+    CoordTransform const * fromIntermediate = binned1->getTransformFromOriginal(1);
     TS_ASSERT( toIntermediate);
     TS_ASSERT( fromIntermediate );
 
@@ -642,14 +642,14 @@ public:
     TS_ASSERT_EQUALS( binned1->numOriginalWorkspaces(), 2);
     TS_ASSERT_EQUALS( binned1->getOriginalWorkspace(1)->name(), "binned0");
     // Transforms to/from the INTERMEDIATE workspace exist
-    CoordTransform * toIntermediate = binned1->getTransformToOriginal(1);
-    CoordTransform * fromIntermediate = binned1->getTransformFromOriginal(1);
+    CoordTransform const * toIntermediate = binned1->getTransformToOriginal(1);
+    CoordTransform const * fromIntermediate = binned1->getTransformFromOriginal(1);
     TS_ASSERT( toIntermediate);
     TS_ASSERT( fromIntermediate );
 
     // Transforms to/from the REALLY ORIGINAL workspace exist
-    CoordTransform * toOriginal = binned1->getTransformToOriginal(0);
-    CoordTransform * fromOriginal = binned1->getTransformFromOriginal(0);
+    CoordTransform const * toOriginal = binned1->getTransformToOriginal(0);
+    CoordTransform const * fromOriginal = binned1->getTransformFromOriginal(0);
     TS_ASSERT( toOriginal);
     TS_ASSERT( fromOriginal );
 
@@ -720,14 +720,14 @@ public:
     TS_ASSERT_EQUALS( binned1->numOriginalWorkspaces(), 2);
     TS_ASSERT_EQUALS( binned1->getOriginalWorkspace(1)->name(), "binned0");
     // Transforms to/from the INTERMEDIATE workspace exist
-    CoordTransform * toIntermediate = binned1->getTransformToOriginal(1);
-    CoordTransform * fromIntermediate = binned1->getTransformFromOriginal(1);
+    CoordTransform const * toIntermediate = binned1->getTransformToOriginal(1);
+    CoordTransform const * fromIntermediate = binned1->getTransformFromOriginal(1);
     TS_ASSERT( toIntermediate);
     TS_ASSERT( fromIntermediate );
 
     // Transforms to/from the REALLY ORIGINAL workspace exist
-    CoordTransform * toOriginal = binned1->getTransformToOriginal(0);
-    CoordTransform * fromOriginal = binned1->getTransformFromOriginal(0);
+    CoordTransform const * toOriginal = binned1->getTransformToOriginal(0);
+    CoordTransform const * fromOriginal = binned1->getTransformFromOriginal(0);
     TS_ASSERT( toOriginal);
     TS_ASSERT( fromOriginal );
 
@@ -944,12 +944,12 @@ public:
 
     VMD out;
     // Check the mapping of coordinates from C to B
-    CoordTransform * transf_C_to_B = C->getTransformToOriginal(1);
+    CoordTransform const * transf_C_to_B = C->getTransformToOriginal(1);
     out = transf_C_to_B->applyVMD(VMD(-1.5, -1.5));
     TS_ASSERT_EQUALS( out, VMD(-4, -4) );
 
     // And this is the mapping to the A workspace
-    CoordTransform * transf_C_to_A = C->getTransformToOriginal(0);
+    CoordTransform const * transf_C_to_A = C->getTransformToOriginal(0);
     out = transf_C_to_A->applyVMD(VMD(-1.5, -1.5));
     TS_ASSERT_EQUALS( out, VMD(-10, -10) );
   }
@@ -988,6 +988,23 @@ public:
         "OutputBins", "10,10");
     TSM_ASSERT( "Algorithm threw an error, as expected", !alg->isExecuted())
   }
+
+  void test_throws_if_InputWorkspace_pure_IMDHistWorkspace()
+  {
+      BinMD alg;
+      alg.setChild(true);
+      alg.setRethrows(true);
+      alg.initialize();
+      // Histoworkspace with no original workspace or transforms
+      IMDHistoWorkspace_sptr inWS = MDEventsTestHelper::makeFakeMDHistoWorkspace(1 /*signal*/, 2 /*numDims*/, 10 /*numBins*/);
+
+      alg.setProperty("InputWorkspace", inWS); // Input workspace - Pure histogram
+      alg.setProperty("AlignedDim0", "x,0,10,10"); // Values not relevant to this test
+      alg.setProperty("AlignedDim1", "y,0,10,10"); // Values not relevant to this test
+      alg.setPropertyValue("OutputWorkspace", "dummy");
+      TSM_ASSERT_THROWS("Cannot allow BinMD on a pure MDHistoWorkspace. Should throw.", alg.execute(), std::runtime_error&);
+  }
+
 };
 
 
@@ -1054,7 +1071,7 @@ public:
     for (size_t i=0; i<1; i++)
       do_test("2.0,8.0, 1", true);
   }
-private: 
+
 
 };
 

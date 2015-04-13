@@ -181,7 +181,7 @@ namespace VATES
     std::cout << tim << " to check all the signal values." << std::endl;
 
     // Get the transformation that takes the points in the TRANSFORMED space back into the ORIGINAL (not-rotated) space.
-    Mantid::API::CoordTransform* transform = NULL;
+    Mantid::API::CoordTransform const * transform = NULL;
     if (m_useTransform)
       transform = m_workspace->getTransformToOriginal();
 

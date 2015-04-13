@@ -103,6 +103,8 @@ void QueryMDWorkspace::init() {
                   "  volume: Normalise by the volume.\n"
                   "  number of events: Normalise by the number of events.");
 
+  declareProperty("TransformCoordsToOriginal", true, "Output box coordinates in terms of original workspace coordinates");
+
   declareProperty(
       new WorkspaceProperty<ITableWorkspace>(
           "BoxDataTable", "", Direction::Output,
@@ -191,6 +193,9 @@ void QueryMDWorkspace::exec() {
   MDNormalization requestedNormalisation = whichNormalisation(strNormalisation);
 
   IMDWorkspace_sptr input = getProperty("InputWorkspace");
+
+  const bool transformCoordsToOriginal = getProperty("TransformCoordsToOriginal");
+
   // Define a table workspace with a specific column schema.
   ITableWorkspace_sptr output = WorkspaceFactory::Instance().createTable();
   const std::string signalColumnName = "Signal/" + strNormalisation;
@@ -234,9 +239,9 @@ void QueryMDWorkspace::exec() {
     output->cell<int>(rowCounter, cellIndex++) = int(it->getNumEvents());
     VMD center = it->getCenter();
     const size_t numberOriginal = input->getNumberTransformsToOriginal();
-    if (numberOriginal > 0) {
+    if (transformCoordsToOriginal && numberOriginal > 0) {
       const size_t index = numberOriginal - 1;
-      CoordTransform *transform = input->getTransformToOriginal(index);
+      CoordTransform const *transform = input->getTransformToOriginal(index);
       VMD temp = transform->applyVMD(center);
       center = temp;
     }
