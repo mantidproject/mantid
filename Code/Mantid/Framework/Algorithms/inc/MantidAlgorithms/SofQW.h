@@ -4,6 +4,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
+#include "MantidAPI/DataProcessorAlgorithm.h"
 #include "MantidAlgorithms/SofQCommon.h"
 
 namespace Mantid {
@@ -47,12 +48,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport SofQW : public API::Algorithm {
+class DLLExport SofQW : public API::DataProcessorAlgorithm {
 public:
-  /// (Empty) Constructor
-  SofQW() : API::Algorithm() {}
-  /// Virtual destructor
-  virtual ~SofQW() {}
   /// Algorithm's name
   virtual const std::string name() const { return "SofQW"; }
   /// Summary of algorithms purpose

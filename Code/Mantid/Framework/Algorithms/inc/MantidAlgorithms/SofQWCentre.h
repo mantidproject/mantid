@@ -4,6 +4,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
+#include "MantidAPI/Algorithm.h"
 #include "MantidAlgorithms/SofQCommon.h"
 
 namespace Mantid {
