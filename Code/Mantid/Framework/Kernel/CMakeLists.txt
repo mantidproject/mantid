@@ -448,7 +448,7 @@ endif ()
 
 set ( PLUGINS "." )
 if ( MAKE_VATES )
-  set ( PV_PLUGINS "./pvplugins" )
+  set ( PV_PLUGINS "./${PVPLUGINS_DIR}" )
 else ()
   set ( PV_PLUGINS "" )
 endif ()
