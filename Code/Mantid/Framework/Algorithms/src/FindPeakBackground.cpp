@@ -201,7 +201,7 @@ void FindPeakBackground::exec() {
       }
     }
     size_t min_peak, max_peak;
-    double a0, a1, a2;
+    double a0 = 0., a1 = 0., a2 = 0.;
     int goodfit;
     if (peaks.size() > 0) {
       g_log.debug() << "Peaks' size = " << peaks.size()
@@ -224,12 +224,19 @@ void FindPeakBackground::exec() {
       max_peak = n - 13;
       if (min_peak > sizey)
         min_peak = sizey - 1;
-      // FIXME : as it is assumed that background is 12 first and 12 last, then
-      //         why not do a simple fit here!
-      a0 = 0.0;
-      a1 = 0.0;
-      a2 = 0.0;
-      goodfit = -1;
+
+      if (min_peak > max_peak) {
+        g_log.information("failed to find peak - not estimating background");
+        goodfit = -1;
+      } else {
+        g_log.information("failed to find peak - estimating background using "
+                          "first and last 12 points");
+        // FIXME : as it is assumed that background is 12 first and 12 last,
+        // then
+        //         why not do a simple fit here!
+        estimateBackground(inpX, inpY, l0, n, min_peak, max_peak, a0, a1, a2);
+        goodfit = 2;
+      }
     }
 
     // Add a new row
@@ -337,14 +344,17 @@ void FindPeakBackground::estimateBackground(
         determinant;
   }
 
-  // calculate the chisq - not normalized by the number of points
   double chisq_flat = 0.;
   double chisq_linear = 0.;
   double chisq_quadratic = 0.;
   if (sum != 0) {
+    double num_points = 0.;
+    // calculate the chisq - not normalized by the number of points
     for (size_t i = i_min; i < i_max; ++i) {
       if (i >= p_min && i < p_max)
         continue;
+
+      num_points += 1.;
 
       // accumulate for flat
       chisq_flat += (bg0_flat - Y[i]) * (bg0_flat - Y[i]);
@@ -358,6 +368,12 @@ void FindPeakBackground::estimateBackground(
              bg2_quadratic * X[i] * X[i] - Y[i];
       chisq_quadratic += (temp * temp);
     }
+
+    // convert to <reduced chisq> = chisq / (<number points> - <number
+    // parameters>)
+    chisq_flat = chisq_flat / (num_points - 1.);
+    chisq_linear = chisq_linear / (num_points - 2.);
+    chisq_quadratic = chisq_quadratic / (num_points - 3.);
   }
   const double INVALID_CHISQ(1.e10); // big invalid value
   if (m_backgroundType == "Flat") {
@@ -366,6 +382,14 @@ void FindPeakBackground::estimateBackground(
   } else if (m_backgroundType == "Linear") {
     chisq_quadratic = INVALID_CHISQ;
   }
+
+  g_log.debug() << "flat: " << bg0_flat << " + " << 0. << "x + " << 0.
+                << "x^2 reduced chisq=" << chisq_flat << "\n";
+  g_log.debug() << "line: " << bg0_linear << " + " << bg1_linear << "x + " << 0.
+                << "x^2  reduced chisq=" << chisq_linear << "\n";
+  g_log.debug() << "quad: " << bg0_quadratic << " + " << bg1_quadratic << "x + "
+                << bg2_quadratic << "x^2  reduced chisq=" << chisq_quadratic
+                << "\n";
 
   // choose the right background function to apply
   if ((chisq_quadratic < chisq_flat) && (chisq_quadratic < chisq_linear)) {
