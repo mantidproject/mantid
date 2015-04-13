@@ -36,6 +36,10 @@ class DiffractionReductionScripter(BaseReductionScripter):
         mantidconfigdir = os.path.join(homedir, ".mantid")
         self.configDir = mantidconfigdir
 
+        # create configuratin dir if it has not been 
+        if os.path.exists(self.configDir) is False:
+            os.makedirs(self.configDir)
+
         # Information output
         print "[diffraction_reduction_script]  Facility = %s,  Instrument = %s" % (
                 self.facility_name, self.instrument_name)
