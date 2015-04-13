@@ -383,7 +383,7 @@
    
    <instrument name="USANS" shortname="USANS" beamline="1A"> 
       <technique>Small Angle Scattering</technique>
-      <livedata address="usans-sms.sns.gov:31415" />
+      <livedata address="usans-daq1.sns.gov:31415" />
    </instrument> 
    
    <instrument name="VULCAN" beamline="7"> 
