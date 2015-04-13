@@ -233,16 +233,17 @@ public:
   {
     MDHistoDimension_sptr dimX(new MDHistoDimension("X", "x", "m", -10, 10, 5));
     MDHistoWorkspace ws(dimX);
-    coord_t * v;
     size_t numVertices;
-    v = ws.getVertexesArray(0,numVertices);
+    coord_t *v1 = ws.getVertexesArray(0,numVertices);
     TS_ASSERT_EQUALS( numVertices, 2 );
-    TS_ASSERT_DELTA( v[0], -10.0, 1e-5);
-    TS_ASSERT_DELTA( v[1], -6.0, 1e-5);
-
-    v = ws.getVertexesArray(4,numVertices);
-    TS_ASSERT_DELTA( v[0], 6.0, 1e-5);
-    TS_ASSERT_DELTA( v[1], 10.0, 1e-5);
+    TS_ASSERT_DELTA( v1[0], -10.0, 1e-5);
+    TS_ASSERT_DELTA( v1[1], -6.0, 1e-5);
+    delete [] v1;
+    
+    coord_t *v2 = ws.getVertexesArray(4,numVertices);
+    TS_ASSERT_DELTA( v2[0], 6.0, 1e-5);
+    TS_ASSERT_DELTA( v2[1], 10.0, 1e-5);
+    delete [] v2;
   }
 
   //---------------------------------------------------------------------------------------------------

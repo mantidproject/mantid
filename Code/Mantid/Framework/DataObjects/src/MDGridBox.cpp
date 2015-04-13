@@ -93,7 +93,7 @@ template <typename MDE, size_t nd> void MDGridBox<MDE, nd>::initGridBox() {
  * @param box :: MDBox containing the events to split
  */
 TMDE(MDGridBox)::MDGridBox(MDBox<MDE, nd> *box)
-    : MDBoxBase<MDE, nd>(*box, box->getBoxController()), nPoints(0) {
+    : MDBoxBase<MDE, nd>(*box, box->getBoxController()), numBoxes(0), nPoints(0) {
   if (!this->m_BoxController)
     throw std::runtime_error("MDGridBox::ctor(): constructing from box:: No "
                              "BoxController specified in box.");
@@ -1660,7 +1660,7 @@ TMDE(void MDGridBox)::buildAndAddEventUnsafe(const signal_t Signal,
  * @param event :: reference to a MDLeanEvent to add.
  * */
 TMDE(inline void MDGridBox)::addEvent(const MDE &event) {
-  size_t index = 0;
+  size_t cindex = 0;
   for (size_t d = 0; d < nd; d++) {
     coord_t x = event.getCenter(d);
     int i = int((x - this->extents[d].getMin()) / m_SubBoxSize[d]);
@@ -1668,12 +1668,14 @@ TMDE(inline void MDGridBox)::addEvent(const MDE &event) {
     // if (i < 0 || i >= int(split[d])) return;
 
     // Accumulate the index
-    index += (i * splitCumul[d]);
+    cindex += (i * splitCumul[d]);
   }
 
   // Add it to the contained box
-  if (index < numBoxes) // avoid segfaults for floating point round-off errors.
-    m_Children[index]->addEvent(event);
+  // avoid segfaults for floating point round-off errors.
+  if (cindex < numBoxes) {
+    m_Children[cindex]->addEvent(event);
+  }
 }
 //-----------------------------------------------------------------------------------------------
 /** Add a single MDLeanEvent to the grid box. If the boxes
@@ -1692,18 +1694,19 @@ TMDE(inline void MDGridBox)::addEvent(const MDE &event) {
  * @param event :: reference to a MDEvent to add.
  * */
 TMDE(inline void MDGridBox)::addEventUnsafe(const MDE &event) {
-  size_t index = 0;
+  size_t cindex = 0;
   for (size_t d = 0; d < nd; d++) {
 
     coord_t x = event.getCenter(d);
     int i = int((x - this->extents[d].getMin()) / m_SubBoxSize[d]);
     // Accumulate the index
-    index += (i * splitCumul[d]);
+    cindex += (i * splitCumul[d]);
   }
 
   // Add it to the contained box
-  if (index < numBoxes) // avoid segfaults for floating point round-off errors.
-    m_Children[index]->addEventUnsafe(event);
+  if (cindex < numBoxes) {
+    m_Children[cindex]->addEventUnsafe(event);
+  }
 }
 
 /**Sets particular child MDgridBox at the index, specified by the input

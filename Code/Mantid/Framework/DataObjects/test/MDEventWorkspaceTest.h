@@ -221,10 +221,13 @@ public:
     TS_ASSERT_EQUALS(it->getDataSize(), 4*4*4);
     TS_ASSERT(it->next());
     delete it;
-    it = ew->createIterator(new MDImplicitFunction());
+    auto *mdfunction = new MDImplicitFunction();
+    it = ew->createIterator(mdfunction);
     TS_ASSERT(it);
     TS_ASSERT_EQUALS(it->getDataSize(), 4*4*4);
     TS_ASSERT(it->next());
+    delete mdfunction;
+    delete it;
     delete ew;
   }
 
@@ -242,6 +245,9 @@ public:
     TS_ASSERT_EQUALS(iterators[0]->getDataSize(), 21);
     TS_ASSERT_EQUALS(iterators[1]->getDataSize(), 21);
     TS_ASSERT_EQUALS(iterators[2]->getDataSize(), 22);
+
+    for(size_t i = 0; i < 3; ++i) delete iterators[i];
+    delete ew;
   }
 
   //-------------------------------------------------------------------------------------
