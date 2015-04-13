@@ -59,6 +59,24 @@ namespace CustomInterfaces
     /// @return dead time correction file
     virtual std::string deadTimeFile() const = 0;
 
+    /// @return detector grouping type
+    virtual std::string detectorGroupingType() const = 0;
+
+    /// @return forward grouping
+    virtual std::string getForwardGrouping() const = 0;
+
+    /// @return backward grouping
+    virtual std::string getBackwardGrouping() const = 0;
+
+    /// @return red period
+    virtual std::string redPeriod() const = 0;
+
+    /// @return green period
+    virtual std::string greenPeriod() const = 0;
+
+    /// @return subtract checkbox
+    virtual bool subtractIsChecked() const =0;
+
     /// @return Selected calculation type - "Integral" or "Differential"
     virtual std::string calculationType() const = 0;
 
@@ -81,11 +99,28 @@ namespace CustomInterfaces
     /// @param logs :: New list of log names
     virtual void setAvailableLogs(const std::vector<std::string>& logs) = 0;
 
+    /// Update the list of periods user can select
+    /// @param periods :: New list of periods
+    virtual void setAvailablePeriods(const std::vector<std::string>& periods) = 0;
+
+    /// Update the time limits
+    /// @param tMin :: Minimum X value available
+    /// @param tMax :: Maximum X value available
+    virtual void setTimeLimits(double tMin, double tMax) = 0;
+
+    /// Update the time limits
+    /// @param tMin :: Minimum X value available
+    /// @param tMax :: Maximum X value available
+    virtual void setTimeRange(double tMin, double tMax) = 0;
+
     /// Set waiting cursor for long operation
     virtual void setWaitingCursor() = 0;
 
     /// Restore the original cursor
     virtual void restoreCursor() = 0;
+
+    /// Opens the Mantid Wiki web page
+    virtual void help() = 0;
 
   signals:
     /// Request to load data
@@ -93,6 +128,7 @@ namespace CustomInterfaces
 
     /// User has selected the first run
     void firstRunSelected();
+
   };
 
 } // namespace CustomInterfaces

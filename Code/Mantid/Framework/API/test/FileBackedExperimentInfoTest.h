@@ -33,10 +33,10 @@ public:
     }
 
     m_inMemoryExptInfo = boost::make_shared<ExperimentInfo>();
-    m_nexusFile = boost::make_shared< ::NeXus::File >(m_filename, NXACC_READ);
-    m_nexusFile->openGroup("mantid_workspace_1", "NXentry");
+    ::NeXus::File nxFile(m_filename, NXACC_READ);
+    nxFile.openGroup("mantid_workspace_1", "NXentry");
     std::string paramString;
-    m_inMemoryExptInfo->loadExperimentInfoNexus(m_nexusFile.get(), paramString);
+    m_inMemoryExptInfo->loadExperimentInfoNexus(&nxFile, paramString);
     m_inMemoryExptInfo->readParameterMap(paramString);
   }
 
@@ -45,12 +45,12 @@ public:
     TS_ASSERT_EQUALS(fileBacked->toString(), m_inMemoryExptInfo->toString());
   }
 
-  void test_cloneExperimentInfo_populates_object() {
+  void test_cloneExperimentInfo_returns_new_file_backed_object_and_does_not_touch_file() {
     auto fileBacked = createTestObject();
     auto *clonedFileBacked = fileBacked->cloneExperimentInfo();
 
-    TS_ASSERT_EQUALS(clonedFileBacked->toString(),
-                     m_inMemoryExptInfo->toString());
+    TS_ASSERT(dynamic_cast<FileBackedExperimentInfo*>(clonedFileBacked));
+
     delete clonedFileBacked;
   }
 
@@ -215,27 +215,20 @@ public:
   // Failure tests
   //------------------------------------------------------------------------------------------------
   void test_runtime_error_generated_when_unable_to_load_from_file() {
-    // Load the file we want to use
-    ::NeXus::File nexusFile(m_filename, NXACC_READ);
-
     // Create the file backed experiment info, shouldn't be loaded yet
-    FileBackedExperimentInfo fileBacked(&nexusFile, "/not/right/path");
+    FileBackedExperimentInfo fileBacked(m_filename, "/not/right/path");
 
     TS_ASSERT_THROWS(fileBacked.toString(), std::runtime_error);
   }
 
 private:
   Mantid::API::ExperimentInfo_sptr createTestObject() {
-    // Load the file we want to use
-    ::NeXus::File nexusFile(m_filename, NXACC_READ);
     // Create the file backed experiment info, shouldn't be loaded yet.
-    // Manipulate it through
-    // the interface
-    return boost::make_shared<FileBackedExperimentInfo>(m_nexusFile.get(),
+    // Manipulate it through the interface
+    return boost::make_shared<FileBackedExperimentInfo>(m_filename,
                                                         "/mantid_workspace_1");
   }
 
-  boost::shared_ptr< ::NeXus::File > m_nexusFile;
   Mantid::API::ExperimentInfo_sptr m_inMemoryExptInfo;
   std::string m_filename;
 };

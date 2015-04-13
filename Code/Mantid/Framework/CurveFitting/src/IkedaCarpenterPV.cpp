@@ -49,7 +49,7 @@ void IkedaCarpenterPV::setHeight(const double h) {
 
   // The intensity is then estimated to be h/h0
   setParameter("I", h / h0);
-};
+}
 
 double IkedaCarpenterPV::height() const {
   // return the function value at centre()
@@ -59,7 +59,7 @@ double IkedaCarpenterPV::height() const {
   toCentre[0] = centre();
   constFunction(h0, toCentre, 1);
   return h0[0];
-};
+}
 
 double IkedaCarpenterPV::fwhm() const {
   double sigmaSquared = getParameter("SigmaSquared");
@@ -83,14 +83,14 @@ double IkedaCarpenterPV::fwhm() const {
     ;
   }
   return sqrt(8.0 * M_LN2 * sigmaSquared) + gamma;
-};
+}
 
 void IkedaCarpenterPV::setFwhm(const double w) {
   setParameter("SigmaSquared", w * w / (32.0 * M_LN2)); // used 4.0 * 8.0 = 32.0
   setParameter("Gamma", w / 2.0);
-};
+}
 
-void IkedaCarpenterPV::setCentre(const double c) { setParameter("X0", c); };
+void IkedaCarpenterPV::setCentre(const double c) { setParameter("X0", c); }
 
 void IkedaCarpenterPV::init() {
   declareParameter("I", 0.0, "The integrated intensity of the peak. I.e. "

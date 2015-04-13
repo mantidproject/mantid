@@ -24,7 +24,6 @@
 #include <Poco/DOM/Document.h>
 #include <Poco/DOM/Element.h>
 #include <Poco/DOM/NodeList.h>
-#include <Poco/Notification.h>
 #include <Poco/Environment.h>
 #include <Poco/File.h>
 #include <Poco/Process.h>
@@ -1949,6 +1948,7 @@ void ConfigServiceImpl::setParaviewLibraryPath(const std::string &path) {
   UNUSED_ARG(path)
   throw std::runtime_error("Cannot dynamically set the library path on Linux");
 #elif defined __APPLE__
+  UNUSED_ARG(path)
   throw std::runtime_error("Cannot dynamically set the library path on Mac");
 #else
   throw std::runtime_error("ConfigServiceImpl::setParaviewLibraryPath cannot "
@@ -2104,14 +2104,6 @@ Kernel::ProxyInfo &ConfigServiceImpl::getProxy(const std::string &url) {
  */
 const std::string ConfigServiceImpl::getParaViewPath() const {
   return getString("paraview.path");
-}
-
-/**
- * Get the user-specified initial view
- * @returns A string with the initial view or an empty string
- */
-const std::string ConfigServiceImpl::getVsiInitialView() const {
-  return getString("vsi.initialview");
 }
 
 /// \cond TEMPLATE

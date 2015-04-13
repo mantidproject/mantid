@@ -54,9 +54,11 @@ set ( SRC_FILES
   src/Converters/CloneToNumpy.cpp
   src/Converters/NDArrayToVector.cpp
   src/Converters/NDArrayTypeIndex.cpp
+  src/Converters/NumpyFunctions.cpp
   src/Converters/PyArrayType.cpp
   src/Converters/PyObjectToMatrix.cpp
   src/Converters/PyObjectToV3D.cpp
+  src/Converters/PyObjectToVMD.cpp
   src/Converters/WrapWithNumpy.cpp
   src/Registry/PropertyWithValueFactory.cpp
   src/Registry/SequenceTypeHandler.cpp
@@ -70,6 +72,7 @@ set ( SRC_FILES
 set ( INC_FILES
   ${HEADER_DIR}/kernel/Converters/CArrayToNDArray.h
   ${HEADER_DIR}/kernel/Converters/MatrixToNDArray.h
+  ${HEADER_DIR}/kernel/Converters/NumpyFunctions.h
   ${HEADER_DIR}/kernel/Converters/NDArrayToVector.h
   ${HEADER_DIR}/kernel/Converters/NDArrayTypeIndex.h
   ${HEADER_DIR}/kernel/Converters/WrapWithNumpy.h
@@ -77,6 +80,7 @@ set ( INC_FILES
   ${HEADER_DIR}/kernel/Converters/PyArrayType.h
   ${HEADER_DIR}/kernel/Converters/PyObjectToMatrix.h
   ${HEADER_DIR}/kernel/Converters/PyObjectToV3D.h
+  ${HEADER_DIR}/kernel/Converters/PyObjectToVMD.h
   ${HEADER_DIR}/kernel/Converters/PySequenceToVector.h
   ${HEADER_DIR}/kernel/Environment/CallMethod.h
   ${HEADER_DIR}/kernel/Environment/ErrorHandling.h

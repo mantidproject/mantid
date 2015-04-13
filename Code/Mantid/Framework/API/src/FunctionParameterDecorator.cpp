@@ -37,6 +37,21 @@ IFunction_sptr FunctionParameterDecorator::clone() const {
   return cloned;
 }
 
+void FunctionParameterDecorator::setWorkspace(
+    boost::shared_ptr<const Workspace> ws) {
+  throwIfNoFunctionSet();
+
+  m_wrappedFunction->setWorkspace(ws);
+}
+
+void FunctionParameterDecorator::setMatrixWorkspace(
+    boost::shared_ptr<const MatrixWorkspace> workspace, size_t wi,
+    double startX, double endX) {
+  throwIfNoFunctionSet();
+
+  m_wrappedFunction->setMatrixWorkspace(workspace, wi, startX, endX);
+}
+
 void FunctionParameterDecorator::setParameter(size_t i, const double &value,
                                               bool explicitlySet) {
   throwIfNoFunctionSet();
@@ -72,6 +87,18 @@ void FunctionParameterDecorator::setParameterDescription(
   m_wrappedFunction->setParameterDescription(name, description);
 }
 
+double FunctionParameterDecorator::activeParameter(size_t i) const {
+  throwIfNoFunctionSet();
+
+  return m_wrappedFunction->activeParameter(i);
+}
+
+void FunctionParameterDecorator::setActiveParameter(size_t i, double value) {
+  throwIfNoFunctionSet();
+
+  m_wrappedFunction->setActiveParameter(i, value);
+}
+
 double FunctionParameterDecorator::getParameter(const std::string &name) const {
   throwIfNoFunctionSet();
 
@@ -79,7 +106,9 @@ double FunctionParameterDecorator::getParameter(const std::string &name) const {
 }
 
 size_t FunctionParameterDecorator::nParams() const {
-  throwIfNoFunctionSet();
+  if (!m_wrappedFunction) {
+    return 0;
+  }
 
   return m_wrappedFunction->nParams();
 }
@@ -147,7 +176,9 @@ size_t FunctionParameterDecorator::getParameterIndex(
 }
 
 size_t FunctionParameterDecorator::nAttributes() const {
-  throwIfNoFunctionSet();
+  if (!m_wrappedFunction) {
+    return 0;
+  }
 
   return m_wrappedFunction->nAttributes();
 }

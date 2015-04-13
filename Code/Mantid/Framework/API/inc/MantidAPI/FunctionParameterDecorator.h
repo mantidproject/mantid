@@ -50,6 +50,11 @@ public:
 
   IFunction_sptr clone() const;
 
+  virtual void setWorkspace(boost::shared_ptr<const Workspace> ws);
+  virtual void
+  setMatrixWorkspace(boost::shared_ptr<const MatrixWorkspace> workspace,
+                     size_t wi, double startX, double endX);
+
   /// Set i-th parameter of decorated function.
   virtual void setParameter(size_t i, const double &value,
                             bool explicitlySet = true);
@@ -64,6 +69,12 @@ public:
   /// Set description of parameter of decorated function by name.
   virtual void setParameterDescription(const std::string &name,
                                        const std::string &description);
+
+  /// Value of i-th active parameter of the decorated function.
+  virtual double activeParameter(size_t i) const;
+  /// Set new value of i-th active parameter of the decorated function.
+  virtual void setActiveParameter(size_t i, double value);
+
   /// Get parameter of decorated function by name.
   virtual double getParameter(const std::string &name) const;
   /// Total number of parameters of decorated function.

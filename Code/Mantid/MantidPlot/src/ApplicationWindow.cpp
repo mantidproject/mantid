@@ -217,6 +217,7 @@
 
 using namespace Qwt3D;
 using namespace MantidQt::API;
+using Mantid::Kernel::ConfigService;
 
 namespace
 {
@@ -363,7 +364,6 @@ void ApplicationWindow::init(bool factorySettings, const QStringList& args)
   // splash screen after the 3D visualization dialog has closed
   qApp->processEvents();
 
-  using Mantid::Kernel::ConfigService;
   auto & config = ConfigService::Instance(); // Starts logging
   resultsLog->attachLoggingChannel(); // Must be done after logging starts
   using Mantid::API::FrameworkManager;
@@ -594,7 +594,7 @@ void ApplicationWindow::init(bool factorySettings, const QStringList& args)
   // It is raised in the about2start method as on OS X if the event loop is not running then raise()
   // does not push the dialog to the top of the stack
   d_showFirstTimeSetup = shouldWeShowFirstTimeSetup(args);
- 
+
   using namespace Mantid::API;
   // Do this as late as possible to avoid unnecessary updates
   AlgorithmFactory::Instance().enableNotifications();
@@ -627,7 +627,7 @@ bool ApplicationWindow::shouldWeShowFirstTimeSetup(const QStringList& commandArg
 
   //first check the facility and instrument
   using Mantid::Kernel::ConfigService;
-  auto & config = ConfigService::Instance(); 
+  auto & config = ConfigService::Instance();
   std::string facility = config.getString("default.facility");
   std::string instrument = config.getString("default.instrument");
   if ( facility.empty() || instrument.empty() )
@@ -641,13 +641,13 @@ bool ApplicationWindow::shouldWeShowFirstTimeSetup(const QStringList& commandArg
     {
       const Mantid::Kernel::FacilityInfo& facilityInfo = config.getFacility(facility);
       const Mantid::Kernel::InstrumentInfo& instrumentInfo = config.getInstrument(instrument);
-      g_log.information()<<"Default facility '" << facilityInfo.name() 
+      g_log.information()<<"Default facility '" << facilityInfo.name()
         << "', instrument '" << instrumentInfo.name() << "'" << std::endl;
     }
     catch (Mantid::Kernel::Exception::NotFoundError&)
     {
       //failed to find the facility or instrument
-      g_log.error()<<"Could not find your default facility '" << facility 
+      g_log.error()<<"Could not find your default facility '" << facility
         <<"' or instrument '" << instrument << "' in facilities.xml, showing please select again." << std::endl;
       return true;
     }
@@ -865,7 +865,7 @@ void ApplicationWindow::initGlobalConstants()
     d_locale.setNumberOptions(QLocale::OmitGroupSeparator);
 
   d_decimal_digits = 13;
-  d_graphing_digits = 3;
+  d_graphing_digits = 13;
 
   d_extended_open_dialog = true;
   d_extended_export_dialog = true;
@@ -4409,21 +4409,25 @@ void ApplicationWindow::importASCII(const QStringList& files, int import_mode, c
 
     if (w->inherits("Table")){
       Table *t = dynamic_cast<Table*>(w);
-      for (int i=0; i<files.size(); i++)
-        t->importASCII(files[i], local_column_separator, local_ignored_lines, local_rename_columns,
-            local_strip_spaces, local_simplify_spaces, local_import_comments,
-            local_comment_string, import_read_only, (Table::ImportMode)(import_mode - 2), endLineChar);
+      if (t) {
+        for (int i=0; i<files.size(); i++)
+          t->importASCII(files[i], local_column_separator, local_ignored_lines, local_rename_columns,
+              local_strip_spaces, local_simplify_spaces, local_import_comments,
+              local_comment_string, import_read_only, (Table::ImportMode)(import_mode - 2), endLineChar);
 
-      if (update_dec_separators)
-        t->updateDecimalSeparators(local_separators);
-      t->notifyChanges();
-      emit modifiedProject(t);
+        if (update_dec_separators)
+          t->updateDecimalSeparators(local_separators);
+        t->notifyChanges();
+        emit modifiedProject(t);
+      }
     } else if (w->isA("Matrix")){
       Matrix *m = dynamic_cast<Matrix*>(w);
-      for (int i=0; i<files.size(); i++){
-        m->importASCII(files[i], local_column_separator, local_ignored_lines,
-            local_strip_spaces, local_simplify_spaces, local_comment_string,
-            (Matrix::ImportMode)(import_mode - 2), local_separators, endLineChar);
+      if (m) {
+        for (int i=0; i<files.size(); i++){
+          m->importASCII(files[i], local_column_separator, local_ignored_lines,
+              local_strip_spaces, local_simplify_spaces, local_comment_string,
+              (Matrix::ImportMode)(import_mode - 2), local_separators, endLineChar);
+        }
       }
     }
     w->setWindowLabel(files.join("; "));
@@ -5217,7 +5221,27 @@ void ApplicationWindow::readSettings()
 
   settings.beginGroup("/General");
   titleOn = settings.value("/Title", true).toBool();
-  autoDistribution1D = settings.value("/AutoDistribution1D", true).toBool();
+  // The setting for this was originally stored as a QSetting but then was migrated to
+  // the Mantid ConfigService and is now saved by the ConfigDialog
+  auto & cfgSvc = ConfigService::Instance();
+  if ( settings.contains("/AutoDistribution1D") ) {
+    // if the setting was false then the user changed it
+    // sync this to the new location and remove the key for the future
+    bool qsettingsFlag = settings.value("/AutoDistribution1D", true).toBool();
+    if(qsettingsFlag == false) {
+      cfgSvc.setString("graph1d.autodistribution", "Off");
+      try {
+         cfgSvc.saveConfig( cfgSvc.getUserFilename());
+      } catch(std::runtime_error&) {
+        g_log.warning("Unable to update autodistribution property from ApplicationWindow");
+      }
+    }
+    settings.remove("/AutoDistribution1D");
+  }
+  // Pull default from config service
+  const std::string propStr = cfgSvc.getString("graph1d.autodistribution");
+  autoDistribution1D = (propStr == "On");
+
   canvasFrameWidth = settings.value("/CanvasFrameWidth", 0).toInt();
   defaultPlotMargin = settings.value("/Margin", 0).toInt();
   drawBackbones = settings.value("/AxesBackbones", true).toBool();
@@ -5596,7 +5620,6 @@ void ApplicationWindow::saveSettings()
   settings.beginGroup("/2DPlots");
   settings.beginGroup("/General");
   settings.setValue("/Title", titleOn);
-  settings.setValue("/AutoDistribution1D", autoDistribution1D);
   settings.setValue("/CanvasFrameWidth", canvasFrameWidth);
   settings.setValue("/Margin", defaultPlotMargin);
   settings.setValue("/AxesBackbones", drawBackbones);
@@ -8651,8 +8674,11 @@ void ApplicationWindow::pasteSelection()
         return;
 
       if (g->activeTool()){
-        if (g->activeTool()->rtti() == PlotToolInterface::Rtti_RangeSelector)
-          dynamic_cast<RangeSelectorTool*>(g->activeTool())->pasteSelection();
+        if (g->activeTool()->rtti() == PlotToolInterface::Rtti_RangeSelector){
+          auto rst = dynamic_cast<RangeSelectorTool*>(g->activeTool());
+          if (rst)
+            rst->pasteSelection();
+        }
       } else if (d_text_copy){
         LegendWidget *t = g->insertText(d_text_copy);
         t->move(g->mapFromGlobal(QCursor::pos()));
@@ -9128,7 +9154,7 @@ void ApplicationWindow::minimizeWindow(MdiSubWindow *w)
 {
   auto wli = dynamic_cast<WindowListItem*>(lv->currentItem());
 
-  if (!w)
+  if (!wli)
     w = wli->window();
 
   if (!w)
@@ -10140,7 +10166,7 @@ QStringList ApplicationWindow::dependingPlots(const QString& name)
       foreach(Graph *g, layers){
         onPlot = g->curvesList();
         onPlot = onPlot.grep (name,TRUE);
-        if (static_cast<int>(onPlot.count()) && plots.contains(w->objectName())<=0)
+        if (static_cast<int>(onPlot.count()) && !plots.contains(w->objectName()))
           plots << w->objectName();
       }
     }else if (w->isA("Graph3D")){
@@ -14726,7 +14752,10 @@ void ApplicationWindow::showAllFolderWindows()
       break;
     lst = fld->windowsList();
     foreach(MdiSubWindow *w, lst){
-      if (w && show_windows_policy == SubFolders){
+      if(!w)
+        continue;
+
+      if (show_windows_policy == SubFolders) {
         updateWindowLists(w);
         switch (w->status())
         {
@@ -15627,7 +15656,7 @@ ApplicationWindow::~ApplicationWindow()
   }
   delete d_current_folder;
 
-  
+
 
   btnPointer->setChecked(true);
   delete mantidUI;

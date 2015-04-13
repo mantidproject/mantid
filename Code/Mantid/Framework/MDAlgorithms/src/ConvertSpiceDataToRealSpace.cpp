@@ -7,6 +7,13 @@
 #include "MantidGeometry/IDetector.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidDataObjects/MDEventFactory.h"
+#include "MantidDataObjects/MDEventInserter.h"
+#include "MantidGeometry/MDGeometry/MDHistoDimension.h"
+#include "MantidGeometry/MDGeometry/IMDDimension.h"
+#include "MantidDataObjects/MDEventWorkspace.h"
+#include "MantidDataObjects/MDEvent.h"
+#include "MantidDataObjects/TableWorkspace.h"
 
 #include <boost/algorithm/string/predicate.hpp>
 #include <Poco/TemporaryFile.h>
@@ -17,6 +24,8 @@ namespace MDAlgorithms {
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::DataObjects;
+using namespace Mantid::Geometry;
+using namespace Mantid::DataObjects;
 
 DECLARE_ALGORITHM(ConvertSpiceDataToRealSpace)
 
@@ -24,14 +33,14 @@ DECLARE_ALGORITHM(ConvertSpiceDataToRealSpace)
 /** Constructor
  */
 ConvertSpiceDataToRealSpace::ConvertSpiceDataToRealSpace()
-    : m_instrumentName(""), m_numSpec(0) {}
+    : m_instrumentName(""), m_numSpec(0), m_nDimensions(3) {}
 
 //------------------------------------------------------------------------------------------------
 /** Destructor
  */
 ConvertSpiceDataToRealSpace::~ConvertSpiceDataToRealSpace() {}
 
-//----------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------------------------
 /** Init
  */
 void ConvertSpiceDataToRealSpace::init() {
@@ -82,43 +91,109 @@ void ConvertSpiceDataToRealSpace::init() {
   declareProperty(new WorkspaceProperty<IMDEventWorkspace>(
                       "OutputMonitorWorkspace", "", Direction::Output),
                   "Name to use for the output workspace.");
+
+  declareProperty(
+      new WorkspaceProperty<TableWorkspace>("DetectorEfficiencyTableWorkspace",
+                                            "", Direction::Input,
+                                            PropertyMode::Optional),
+      "Name of a table workspace containing the detectors' efficiency.");
 }
 
-//----------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------------------------
 /** Exec
  */
 void ConvertSpiceDataToRealSpace::exec() {
-
   // Process inputs
   DataObjects::TableWorkspace_sptr dataTableWS = getProperty("InputWorkspace");
   MatrixWorkspace_const_sptr parentWS = getProperty("RunInfoWorkspace");
   m_instrumentName = getPropertyValue("Instrument");
 
-  // Check whether parent workspace has run start
-  DateAndTime runstart(0);
+  DataObjects::TableWorkspace_sptr detEffTableWS =
+      getProperty("DetectorEfficiencyTableWorkspace");
+  std::map<detid_t, double> detEffMap; // map for detector efficiency
+  if (detEffTableWS) {
+    parseDetectorEfficiencyTable(detEffTableWS, detEffMap);
+  }
+
+  // Check whether parent workspace has run start: order (1) parent ws, (2) user
+  // given (3) nothing
+  DateAndTime runstart(1000000000);
+  bool hasrunstartset = false;
   if (parentWS->run().hasProperty("run_start")) {
     // Use parent workspace's first
-    runstart = parentWS->run().getProperty("run_start")->value();
-  } else {
+    std::string runstartstr = parentWS->run().getProperty("run_start")->value();
+    try {
+      DateAndTime temprunstart(runstartstr);
+      runstart = temprunstart;
+      hasrunstartset = true;
+    }
+    catch (...) {
+      g_log.warning() << "run_start from info matrix workspace is not correct. "
+                      << "It cannot be convert from '" << runstartstr << "'."
+                      << "\n";
+    }
+  }
+
+  // from properties
+  if (!hasrunstartset) {
     // Use user given
     std::string runstartstr = getProperty("RunStart");
-    // raise exception if user does not give a proper run start
-    if (runstartstr.size() == 0)
-      g_log.warning("Run-start time is not defined either in "
-                    "input parent workspace or given by user. 1990-01-01 "
-                    "00:00:00 is used");
-    runstart = DateAndTime(runstartstr);
+    try {
+      DateAndTime temprunstart(runstartstr);
+      runstart = temprunstart;
+      hasrunstartset = true;
+    }
+    catch (...) {
+      g_log.warning() << "RunStart from input property is not correct. "
+                      << "It cannot be convert from '" << runstartstr << "'."
+                      << "\n";
+    }
+  }
+
+  if (!hasrunstartset) {
+    g_log.warning("Run-start time is not defined either in "
+                  "input parent workspace or given by user. 1990-01-01 "
+                  "00:00:01 is used");
   }
 
   // Convert table workspace to a list of 2D workspaces
   std::map<std::string, std::vector<double> > logvecmap;
   std::vector<Kernel::DateAndTime> vectimes;
-  std::vector<MatrixWorkspace_sptr> vec_ws2d =
-      convertToWorkspaces(dataTableWS, parentWS, runstart, logvecmap, vectimes);
+
+  // Set up range for x/y/z
+  m_extentMins.resize(3);
+  m_extentMaxs.resize(3);
+  for (size_t i = 0; i < 3; ++i) {
+    m_extentMins[i] = DBL_MAX;
+    m_extentMaxs[i] = -DBL_MAX;
+  }
+
+  std::vector<MatrixWorkspace_sptr> vec_ws2d = convertToMatrixWorkspace(
+      dataTableWS, parentWS, runstart, logvecmap, vectimes);
+
+  // Apply detector e(fficiency
+  if (!detEffMap.empty()){
+    correctByDetectorEfficiency(vec_ws2d,
+                                detEffMap); // std::vector<MatrixWorkspace_sptr>
+  }
+
+  // check range for x/y/z
+  m_numBins.resize(3);
+  for (size_t d = 0; d < 3; ++d) {
+    if (fabs(m_extentMins[d] - m_extentMaxs[d]) < 1.0E-6) {
+      // Range is too small so treat it as 1 value
+      double mvalue = m_extentMins[d];
+      m_extentMins[d] = mvalue - 0.1;
+      m_extentMaxs[d] = mvalue + 0.1;
+      m_numBins[d] = 1;
+    } else {
+      m_numBins[d] = 100;
+    }
+  }
 
   // Convert to MD workspaces
   g_log.debug("About to converting to workspaces done!");
-  IMDEventWorkspace_sptr m_mdEventWS = convertToMDEventWS(vec_ws2d);
+  IMDEventWorkspace_sptr m_mdEventWS = createDataMDWorkspace(vec_ws2d);
   std::string monitorlogname = getProperty("MonitorCountsLogName");
   IMDEventWorkspace_sptr mdMonitorWS =
       createMonitorMDWorkspace(vec_ws2d, logvecmap[monitorlogname]);
@@ -134,7 +209,7 @@ void ConvertSpiceDataToRealSpace::exec() {
   setProperty("OutputMonitorWorkspace", mdMonitorWS);
 }
 
-//----------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------------------------
 /** Convert runs/pts from table workspace to a list of workspace 2D
  * @brief ConvertSpiceDataToRealSpace::convertToWorkspaces
  * @param tablews
@@ -145,7 +220,7 @@ void ConvertSpiceDataToRealSpace::exec() {
  * @return
  */
 std::vector<MatrixWorkspace_sptr>
-ConvertSpiceDataToRealSpace::convertToWorkspaces(
+ConvertSpiceDataToRealSpace::convertToMatrixWorkspace(
     DataObjects::TableWorkspace_sptr tablews,
     API::MatrixWorkspace_const_sptr parentws, Kernel::DateAndTime runstart,
     std::map<std::string, std::vector<double> > &logvecmap,
@@ -197,7 +272,7 @@ void ConvertSpiceDataToRealSpace::parseSampleLogs(
     std::string logname = indexiter->first;
     size_t icol = indexiter->second;
 
-    g_log.information() << " Parsing log " << logname << "\n";
+    g_log.debug() << " Parsing log " << logname << "\n";
 
     std::vector<double> logvec(numrows);
     for (size_t ir = 0; ir < numrows; ++ir) {
@@ -211,7 +286,7 @@ void ConvertSpiceDataToRealSpace::parseSampleLogs(
   return;
 }
 
-//----------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------------------------
 /** Load one run of data to a new workspace
  * @brief ConvertSpiceDataToRealSpace::loadRunToMatrixWS
  * @param tablews
@@ -271,12 +346,28 @@ MatrixWorkspace_sptr ConvertSpiceDataToRealSpace::loadRunToMatrixWS(
   tempws = instloader->getProperty("Workspace");
 
   // Import data
+  std::vector<double> pos(3);
   for (size_t i = 0; i < m_numSpec; ++i) {
+    // get detector
     Geometry::IDetector_const_sptr tmpdet = tempws->getDetector(i);
-    tempws->dataX(i)[0] = tmpdet->getPos().X();
-    tempws->dataX(i)[0] = tmpdet->getPos().X() + 0.01;
-    tempws->dataY(i)[0] = tablews->cell<double>(irow, anodelist[i].second);
-    tempws->dataE(i)[0] = 1;
+    pos[0] = tmpdet->getPos().X();
+    pos[1] = tmpdet->getPos().Y();
+    pos[2] = tmpdet->getPos().Z();
+    tempws->dataX(i)[0] = pos[0];
+    tempws->dataX(i)[0] = pos[0] + 0.01;
+    double yvalue = tablews->cell<double>(irow, anodelist[i].second);
+    tempws->dataY(i)[0] = yvalue;
+    if (yvalue >= 1)
+      tempws->dataE(i)[0] = sqrt(yvalue);
+    else
+      tempws->dataE(i)[0] = 1;
+    // update X-range, Y-range and Z-range
+    for (size_t d = 0; d < 3; ++d) {
+      if (pos[d] < m_extentMins[d])
+        m_extentMins[d] = pos[d];
+      if (pos[d] > m_extentMaxs[d])
+        m_extentMaxs[d] = pos[d];
+    }
   }
 
   // Return duration
@@ -285,7 +376,7 @@ MatrixWorkspace_sptr ConvertSpiceDataToRealSpace::loadRunToMatrixWS(
   return tempws;
 }
 
-//----------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------------------------
 /** Read table workspace's column information
  * @brief ConvertSpiceDataToRealSpace::readTableInfo
  * @param tablews
@@ -365,175 +456,7 @@ void ConvertSpiceDataToRealSpace::readTableInfo(
   return;
 }
 
-//----------------------------------------------------------------------------------------------
-
-/** Convert to MD Event workspace
- * @brief ConvertSpiceDataToRealSpace::convertToMDEventWS
- * @param vec_ws2d
- * @return
- */
-IMDEventWorkspace_sptr ConvertSpiceDataToRealSpace::convertToMDEventWS(
-    const std::vector<MatrixWorkspace_sptr> &vec_ws2d) {
-  // Write the lsit of workspacs to a file to be loaded to an MD workspace
-  Poco::TemporaryFile tmpFile;
-  std::string tempFileName = tmpFile.path();
-  g_log.debug() << "Creating temporary MD Event file = " << tempFileName
-                << "\n";
-
-  // Construct a file
-  std::ofstream myfile;
-  myfile.open(tempFileName.c_str());
-  myfile << "DIMENSIONS" << std::endl;
-  myfile << "x X m 100" << std::endl;
-  myfile << "y Y m 100" << std::endl;
-  myfile << "z Z m 100" << std::endl;
-  myfile << "# Signal, Error, RunId, DetectorId, coord1, coord2, ... to end of "
-            "coords" << std::endl;
-  myfile << "MDEVENTS" << std::endl;
-
-  if (vec_ws2d.size() > 0) {
-    Progress progress(this, 0, 1, vec_ws2d.size());
-    size_t detindex = 0;
-    for (auto it = vec_ws2d.begin(); it < vec_ws2d.end(); ++it) {
-      API::MatrixWorkspace_sptr thisWorkspace = *it;
-      int runnumber =
-          atoi(thisWorkspace->run().getProperty("run_number")->value().c_str());
-
-      std::size_t nHist = thisWorkspace->getNumberHistograms();
-      for (std::size_t i = 0; i < nHist; ++i) {
-        Geometry::IDetector_const_sptr det = thisWorkspace->getDetector(i);
-        const MantidVec &signal = thisWorkspace->readY(i);
-        const MantidVec &error = thisWorkspace->readE(i);
-        myfile << signal[0] << " ";
-        myfile << error[0] << " ";
-        myfile << runnumber << " ";
-        myfile << det->getID() + detindex << " ";
-        Kernel::V3D detPos = det->getPos();
-        myfile << detPos.X() << " ";
-        myfile << detPos.Y() << " ";
-        myfile << detPos.Z() << " ";
-        myfile << std::endl;
-      }
-
-      // Increment on detector IDs
-      detindex += nHist;
-
-      progress.report("Creating MD WS");
-    }
-    myfile.close();
-  } else {
-    throw std::runtime_error(
-        "There is no MatrixWorkspace to construct MDWorkspace.");
-  }
-
-  // Import to MD Workspace
-  IAlgorithm_sptr importMDEWS = createChildAlgorithm("ImportMDEventWorkspace");
-  // Now execute the Child Algorithm.
-  try {
-    importMDEWS->setPropertyValue("Filename", tempFileName);
-    importMDEWS->setProperty("OutputWorkspace", "Test");
-    importMDEWS->executeAsChildAlg();
-  }
-  catch (std::exception &exc) {
-    throw std::runtime_error(
-        std::string("Error running ImportMDEventWorkspace: ") + exc.what());
-  }
-  IMDEventWorkspace_sptr workspace =
-      importMDEWS->getProperty("OutputWorkspace");
-  if (!workspace)
-    throw(std::runtime_error("Can not retrieve results of child algorithm "
-                             "ImportMDEventWorkspace"));
-
-  return workspace;
-}
-
-//-----------------------------------------------------------------------------------------------
-/** Create an MDWorkspace for monitoring counts.
- * @brief LoadHFIRPDD::createMonitorMDWorkspace
- * @param vec_ws2d
- * @param vecmonitor
- * @return
- */
-IMDEventWorkspace_sptr ConvertSpiceDataToRealSpace::createMonitorMDWorkspace(
-    const std::vector<MatrixWorkspace_sptr> vec_ws2d,
-    const std::vector<double> &vecmonitor) {
-  // Write the lsit of workspacs to a file to be loaded to an MD workspace
-  Poco::TemporaryFile tmpFile;
-  std::string tempFileName = tmpFile.path();
-  g_log.debug() << "Creating temporary MD Event file for monitor counts = "
-                << tempFileName << "\n";
-
-  // Construct a file
-  std::ofstream myfile;
-  myfile.open(tempFileName.c_str());
-  myfile << "DIMENSIONS" << std::endl;
-  myfile << "x X m 100" << std::endl;
-  myfile << "y Y m 100" << std::endl;
-  myfile << "z Z m 100" << std::endl;
-  myfile << "# Signal, Error, RunId, coord1, DetectorId, coord2, ... to end of "
-            "coords" << std::endl;
-  myfile << "MDEVENTS" << std::endl;
-
-  if (vec_ws2d.size() > 0) {
-    Progress progress(this, 0, 1, vec_ws2d.size());
-    size_t detindex = 0;
-    for (auto it = vec_ws2d.begin(); it < vec_ws2d.end(); ++it) {
-      API::MatrixWorkspace_sptr thisWorkspace = *it;
-      int runnumber =
-          atoi(thisWorkspace->run().getProperty("run_number")->value().c_str());
-
-      double signal = vecmonitor[static_cast<size_t>(it - vec_ws2d.begin())];
-
-      std::size_t nHist = thisWorkspace->getNumberHistograms();
-      for (std::size_t i = 0; i < nHist; ++i) {
-        Geometry::IDetector_const_sptr det = thisWorkspace->getDetector(i);
-
-        // const MantidVec &signal = thisWorkspace->readY(i);
-        const MantidVec &error = thisWorkspace->readE(i);
-        myfile << signal << " ";
-        myfile << error[0] << " ";
-        myfile << runnumber << " ";
-        myfile << det->getID() + detindex << " ";
-        Kernel::V3D detPos = det->getPos();
-        myfile << detPos.X() << " ";
-        myfile << detPos.Y() << " ";
-        myfile << detPos.Z() << " ";
-        myfile << std::endl;
-      }
-
-      // Increment on detector IDs
-      detindex += nHist;
-
-      progress.report("Creating MD WS");
-    }
-    myfile.close();
-  } else {
-    throw std::runtime_error(
-        "There is no MatrixWorkspace to construct MDWorkspace.");
-  }
-
-  // Import to MD Workspace
-  IAlgorithm_sptr importMDEWS = createChildAlgorithm("ImportMDEventWorkspace");
-  // Now execute the Child Algorithm.
-  try {
-    importMDEWS->setPropertyValue("Filename", tempFileName);
-    importMDEWS->setProperty("OutputWorkspace", "Test");
-    importMDEWS->executeAsChildAlg();
-  }
-  catch (std::exception &exc) {
-    throw std::runtime_error(
-        std::string("Error running ImportMDEventWorkspace: ") + exc.what());
-  }
-  IMDEventWorkspace_sptr workspace =
-      importMDEWS->getProperty("OutputWorkspace");
-  if (!workspace)
-    throw(std::runtime_error("Can not retrieve results of child algorithm "
-                             "ImportMDEventWorkspace"));
-
-  return workspace;
-}
-
-//-----------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------------------------
 /** Create sample logs for MD workspace
  * @brief LoadHFIRPDD::appendSampleLogs
  * @param mdws
@@ -564,7 +487,7 @@ void ConvertSpiceDataToRealSpace::appendSampleLogs(
     throw std::runtime_error("Impossible not to find Pt. in log vec map.");
   const std::vector<double> &vecrunno = miter->second;
 
-  // Add run_start to each ExperimentInfo
+  // Add run_start and start_time to each ExperimentInfo
   for (size_t i = 0; i < vectimes.size(); ++i) {
     Kernel::DateAndTime runstart = vectimes[i];
     mdws->getExperimentInfo(static_cast<uint16_t>(i))->mutableRun().addLogData(
@@ -616,14 +539,12 @@ void ConvertSpiceDataToRealSpace::appendSampleLogs(
 
     // Add log to experiment info
     eilast->mutableRun().addLogData(templog);
-
-    // Add log value to each ExperimentInfo for the first N
   }
 
   return;
 }
 
-//---------------------------------------------------------------------------------
+//------------------------------------------------------------------------------------------------
 /** Add Experiment Info to the MDWorkspace.  Add 1+N ExperimentInfo
  * @brief ConvertSpiceDataToRealSpace::addExperimentInfos
  * @param mdws
@@ -656,5 +577,218 @@ void ConvertSpiceDataToRealSpace::addExperimentInfos(
 
   return;
 }
+
+//------------------------------------------------------------------------------------------------
+/** Convert to MD Event workspace
+ * @brief ConvertSpiceDataToRealSpace::convertToMDEventWS
+ * @param vec_ws2d
+ * @return
+ */
+IMDEventWorkspace_sptr ConvertSpiceDataToRealSpace::createDataMDWorkspace(
+    const std::vector<MatrixWorkspace_sptr> &vec_ws2d) {
+
+  // Create a target output workspace.
+  IMDEventWorkspace_sptr outWs =
+      MDEventFactory::CreateMDWorkspace(m_nDimensions, "MDEvent");
+
+  // Extract Dimensions and add to the output workspace.
+
+  std::vector<std::string> vec_ID(3);
+  vec_ID[0] = "x";
+  vec_ID[1] = "y";
+  vec_ID[2] = "z";
+
+  std::vector<std::string> vec_name(3);
+  vec_name[0] = "X";
+  vec_name[1] = "Y";
+  vec_name[2] = "Z";
+
+  // Add dimensions
+  for (size_t i = 0; i < m_nDimensions; ++i) {
+    std::string id = vec_ID[i];
+    std::string name = vec_name[i];
+    std::string units = "m";
+    // int nbins = 100;
+
+    for (size_t d = 0; d < 3; ++d)
+      g_log.debug() << "Direction " << d << ", Range = " << m_extentMins[d]
+                    << ", " << m_extentMaxs[d] << "\n";
+    outWs->addDimension(
+        Geometry::MDHistoDimension_sptr(new Geometry::MDHistoDimension(
+            id, name, units, static_cast<coord_t>(m_extentMins[i]),
+            static_cast<coord_t>(m_extentMaxs[i]), m_numBins[i])));
+  }
+
+  // Add events
+  // Creates a new instance of the MDEventInserter.
+  MDEventWorkspace<MDEvent<3>, 3>::sptr MDEW_MDEVENT_3 =
+      boost::dynamic_pointer_cast<MDEventWorkspace<MDEvent<3>, 3> >(outWs);
+
+  MDEventInserter<MDEventWorkspace<MDEvent<3>, 3>::sptr> inserter(
+      MDEW_MDEVENT_3);
+
+  for (size_t iws = 0; iws < vec_ws2d.size(); ++iws) {
+    API::MatrixWorkspace_sptr thisWorkspace = vec_ws2d[iws];
+    short unsigned int runnumber = static_cast<short unsigned int>(
+        atoi(thisWorkspace->run().getProperty("run_number")->value().c_str()));
+
+    detid_t detindex = 0;
+
+    size_t nHist = thisWorkspace->getNumberHistograms();
+    for (std::size_t i = 0; i < nHist; ++i) {
+      // For each spectrum/detector
+      Geometry::IDetector_const_sptr det = thisWorkspace->getDetector(i);
+      const MantidVec &vecsignal = thisWorkspace->readY(i);
+      const MantidVec &vecerror = thisWorkspace->readE(i);
+      float signal = static_cast<float>(vecsignal[0]);
+      float error = static_cast<float>(vecerror[0]);
+      detid_t detid = det->getID() + detindex;
+      Kernel::V3D detPos = det->getPos();
+      double x = detPos.X();
+      double y = detPos.Y();
+      double z = detPos.Z();
+      std::vector<Mantid::coord_t> data(3);
+      data[0] = static_cast<float>(x);
+      data[1] = static_cast<float>(y);
+      data[2] = static_cast<float>(z);
+      inserter.insertMDEvent(signal, error * error, runnumber, detid,
+                             data.data());
+    } // ENDFOR(spectrum)
+  }   // ENDFOR (workspace)
+
+  return outWs;
+}
+
+//------------------------------------------------------------------------------------------------
+/** Create an MDWorkspace for monitoring counts.
+ * @brief LoadHFIRPDD::createMonitorMDWorkspace
+ * @param vec_ws2d
+ * @param vecmonitor
+ * @return
+ */
+IMDEventWorkspace_sptr ConvertSpiceDataToRealSpace::createMonitorMDWorkspace(
+    const std::vector<MatrixWorkspace_sptr> vec_ws2d,
+    const std::vector<double> &vecmonitor) {
+  // Create a target output workspace.
+  IMDEventWorkspace_sptr outWs =
+      MDEventFactory::CreateMDWorkspace(m_nDimensions, "MDEvent");
+
+  // Extract Dimensions and add to the output workspace.
+
+  std::vector<std::string> vec_ID(3);
+  vec_ID[0] = "x";
+  vec_ID[1] = "y";
+  vec_ID[2] = "z";
+
+  std::vector<std::string> vec_name(3);
+  vec_name[0] = "X";
+  vec_name[1] = "Y";
+  vec_name[2] = "Z";
+
+  // Add dimensions
+  for (size_t i = 0; i < m_nDimensions; ++i) {
+    std::string id = vec_ID[i];
+    std::string name = vec_name[i];
+    std::string units = "m";
+
+    outWs->addDimension(
+        Geometry::MDHistoDimension_sptr(new Geometry::MDHistoDimension(
+            id, name, units, static_cast<coord_t>(m_extentMins[i]),
+            static_cast<coord_t>(m_extentMaxs[i]), m_numBins[i])));
+  }
+
+  // Add events
+  // Creates a new instance of the MDEventInserter.
+  MDEventWorkspace<MDEvent<3>, 3>::sptr MDEW_MDEVENT_3 =
+      boost::dynamic_pointer_cast<MDEventWorkspace<MDEvent<3>, 3> >(outWs);
+
+  MDEventInserter<MDEventWorkspace<MDEvent<3>, 3>::sptr> inserter(
+      MDEW_MDEVENT_3);
+
+  for (size_t iws = 0; iws < vec_ws2d.size(); ++iws) {
+    API::MatrixWorkspace_sptr thisWorkspace = vec_ws2d[iws];
+    short unsigned int runnumber = static_cast<short unsigned int>(
+        atoi(thisWorkspace->run().getProperty("run_number")->value().c_str()));
+
+    detid_t detindex = 0;
+    float signal = static_cast<float>(vecmonitor[iws]);
+    float error = 1;
+    if (signal > 1)
+      error = std::sqrt(signal);
+
+    size_t nHist = thisWorkspace->getNumberHistograms();
+    for (std::size_t i = 0; i < nHist; ++i) {
+      // For each spectrum/detector
+      Geometry::IDetector_const_sptr det = thisWorkspace->getDetector(i);
+      detid_t detid = det->getID() + detindex;
+      Kernel::V3D detPos = det->getPos();
+      double x = detPos.X();
+      double y = detPos.Y();
+      double z = detPos.Z();
+      std::vector<Mantid::coord_t> data(3);
+      data[0] = static_cast<float>(x);
+      data[1] = static_cast<float>(y);
+      data[2] = static_cast<float>(z);
+      inserter.insertMDEvent(signal, error * error, runnumber, detid,
+                             data.data());
+    } // ENDFOR(spectrum)
+  }   // ENDFOR (workspace)
+
+  return outWs;
+}
+
+//------------------------------------------------------------------------------------------------
+/** Parse detector efficiency from table workspace to map
+ * @brief ConvertSpiceDataToRealSpace::parseDetectorEfficiencyTable
+ * @param detefftablews
+ */
+void ConvertSpiceDataToRealSpace::parseDetectorEfficiencyTable(
+    DataObjects::TableWorkspace_sptr detefftablews,
+    std::map<detid_t, double> &deteffmap) {
+  // clear map
+  deteffmap.clear();
+
+  // check table workspace
+  size_t numcols = detefftablews->columnCount();
+  if (numcols != 2)
+    throw std::runtime_error(
+        "Input tableworkspace must have 2 and only 2 columns.");
+
+  // parse the detector
+  size_t numrows = detefftablews->rowCount();
+  for (size_t i = 0; i < numrows; ++i) {
+    detid_t detid = detefftablews->cell<detid_t>(i, 0);
+    double deteff = detefftablews->cell<double>(i, 1);
+    deteffmap.insert(std::make_pair(detid, deteff));
+  }
+
+  return;
+}
+
+//------------------------------------------------------------------------------------------------
+/** Apply the detector's efficiency correction to
+ * @brief ConvertSpiceDataToRealSpace::correctByDetectorEfficiency
+ * @param vec_ws2d
+ * @param detEffMap
+ */
+void ConvertSpiceDataToRealSpace::correctByDetectorEfficiency(
+    std::vector<MatrixWorkspace_sptr> vec_ws2d,
+    const std::map<detid_t, double> &detEffMap) {
+  std::vector<MatrixWorkspace_sptr>::iterator it;
+  std::map<detid_t, double>::const_iterator detiter;
+  for (it = vec_ws2d.begin(); it != vec_ws2d.end(); ++it) {
+    MatrixWorkspace_sptr ws = *it;
+    size_t numspec = ws->getNumberHistograms();
+    for (size_t iws = 0; iws < numspec; ++iws) {
+      detid_t detid = ws->getDetector(iws)->getID();
+      detiter = detEffMap.find(detid);
+      if (detiter != detEffMap.end())
+        ws->dataY(iws)[0] /= detiter->second;
+    }
+  }
+
+  return;
+}
+
 } // namespace DataHandling
 } // namespace Mantid

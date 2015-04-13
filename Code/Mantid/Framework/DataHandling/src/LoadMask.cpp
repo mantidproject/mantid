@@ -20,10 +20,7 @@
 #include <Poco/DOM/NodeFilter.h>
 #include <Poco/DOM/NodeIterator.h>
 #include <Poco/DOM/NodeList.h>
-#include <Poco/DOM/NamedNodeMap.h>
 #include <Poco/Exception.h>
-#include <Poco/File.h>
-#include <Poco/Path.h>
 
 #include <boost/algorithm/string.hpp>
 
@@ -47,20 +44,23 @@ DECLARE_ALGORITHM(LoadMask)
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
-LoadMask::LoadMask() {
-  // mMaskWS = NULL;
-  // mInstrumentName = "";
-  pDoc = NULL;
-  pRootElem = NULL;
-
-  return;
+LoadMask::LoadMask(): m_maskWS(), m_instrumentPropValue(""), m_pDoc(NULL),
+  m_pRootElem(NULL), m_defaultToUse(true) {
 }
 
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
 LoadMask::~LoadMask() {
-  // Auto-generated destructor stub
+  // note Poco::XML::Document and Poco::XML::Element declare their constructors as protected
+  if (m_pDoc)
+    m_pDoc->release();
+  // note that m_pRootElem does not need a release(), and that can
+  // actually cause a double free corruption, as
+  // Poco::DOM::Document::documentElement() does not require a
+  // release(). So just to be explicit that they're gone:
+  m_pDoc = NULL;
+  m_pRootElem = NULL;
 }
 
 /// Initialise the properties
@@ -92,9 +92,9 @@ void LoadMask::exec() {
   m_instrumentPropValue = instrumentname;
 
   this->intializeMaskWorkspace();
-  setProperty("OutputWorkspace", mMaskWS);
+  setProperty("OutputWorkspace", m_maskWS);
 
-  mDefaultToUse = true;
+  m_defaultToUse = true;
 
   // 2. Parse Mask File
   std::string filename = getProperty("InputFile");
@@ -107,7 +107,7 @@ void LoadMask::exec() {
              boost::ends_with(filename, "K")) {
     // 2.2 ISIS Masking file
     loadISISMaskFile(filename);
-    mDefaultToUse = true;
+    m_defaultToUse = true;
   } else {
     g_log.error() << "File " << filename << " is not in supported format. "
                   << std::endl;
@@ -151,10 +151,10 @@ void LoadMask::exec() {
 
 void LoadMask::initDetectors() {
 
-  if (!mDefaultToUse) { // Default is to use all detectors
-    size_t numHist = mMaskWS->getNumberHistograms();
+  if (!m_defaultToUse) { // Default is to use all detectors
+    size_t numHist = m_maskWS->getNumberHistograms();
     for (size_t wkspIndex = 0; wkspIndex < numHist; wkspIndex++) {
-      mMaskWS->setMaskedIndex(wkspIndex);
+      m_maskWS->setMaskedIndex(wkspIndex);
     }
   }
 
@@ -174,7 +174,7 @@ void LoadMask::processMaskOnDetectors(bool tomask,
                                       std::vector<int32_t> pairdetids_up) {
   // 1. Get index map
   const detid2index_map indexmap =
-      mMaskWS->getDetectorIDToWorkspaceIndexMap(true);
+      m_maskWS->getDetectorIDToWorkspaceIndexMap(true);
 
   // 2. Mask
   g_log.debug() << "Mask = " << tomask
@@ -188,9 +188,9 @@ void LoadMask::processMaskOnDetectors(bool tomask,
     if (it != indexmap.end()) {
       size_t index = it->second;
       if (tomask)
-        mMaskWS->dataY(index)[0] = 1;
+        m_maskWS->dataY(index)[0] = 1;
       else
-        mMaskWS->dataY(index)[0] = 0;
+        m_maskWS->dataY(index)[0] = 0;
     } else {
       g_log.error() << "Pixel w/ ID = " << detid << " Cannot Be Located"
                     << std::endl;
@@ -212,7 +212,7 @@ void LoadMask::processMaskOnDetectors(bool tomask,
  */
 void LoadMask::componentToDetectors(std::vector<std::string> componentnames,
                                     std::vector<int32_t> &detectors) {
-  Geometry::Instrument_const_sptr minstrument = mMaskWS->getInstrument();
+  Geometry::Instrument_const_sptr minstrument = m_maskWS->getInstrument();
 
   for (size_t i = 0; i < componentnames.size(); i++) {
     g_log.debug() << "Component name = " << componentnames[i] << std::endl;
@@ -280,7 +280,7 @@ void LoadMask::bankToDetectors(std::vector<std::string> singlebanks,
   }
   g_log.debug(infoss.str());
 
-  Geometry::Instrument_const_sptr minstrument = mMaskWS->getInstrument();
+  Geometry::Instrument_const_sptr minstrument = m_maskWS->getInstrument();
 
   for (size_t ib = 0; ib < singlebanks.size(); ib++) {
     std::vector<Geometry::IDetector_const_sptr> idetectors;
@@ -336,7 +336,7 @@ void LoadMask::processMaskOnWorkspaceIndex(bool mask,
   }
 
   // 2. Get Map
-  const spec2index_map s2imap = mMaskWS->getSpectrumToWorkspaceIndexMap();
+  const spec2index_map s2imap = m_maskWS->getSpectrumToWorkspaceIndexMap();
   spec2index_map::const_iterator s2iter;
 
   // 3. Set mask
@@ -356,19 +356,19 @@ void LoadMask::processMaskOnWorkspaceIndex(bool mask,
         throw std::runtime_error("Logic error");
       } else {
         size_t wsindex = s2iter->second;
-        if (wsindex >= mMaskWS->getNumberHistograms()) {
+        if (wsindex >= m_maskWS->getNumberHistograms()) {
           // workspace index is out of range.  bad branch
           g_log.error() << "Group workspace's spec2index map is set wrong: "
                         << " Found workspace index = " << wsindex
                         << " for spectrum ID " << specid
                         << " with workspace size = "
-                        << mMaskWS->getNumberHistograms() << std::endl;
+                        << m_maskWS->getNumberHistograms() << std::endl;
         } else {
           // Finally set the group workspace.  only good branch
           if (mask)
-            mMaskWS->dataY(wsindex)[0] = 1.0;
+            m_maskWS->dataY(wsindex)[0] = 1.0;
           else
-            mMaskWS->dataY(wsindex)[0] = 0.0;
+            m_maskWS->dataY(wsindex)[0] = 0.0;
         } // IF-ELSE: ws index out of range
       }   // IF-ELSE: spectrum ID has an entry
     }     // FOR EACH SpecID
@@ -427,7 +427,7 @@ void LoadMask::initializeXMLParser(const std::string &filename) {
   // Set up the DOM parser and parse xml file
   DOMParser pParser;
   try {
-    pDoc = pParser.parseString(xmlText);
+    m_pDoc = pParser.parseString(xmlText);
   } catch (Poco::Exception &exc) {
     throw Kernel::Exception::FileError(
         exc.displayText() + ". Unable to parse File:", filename);
@@ -435,8 +435,8 @@ void LoadMask::initializeXMLParser(const std::string &filename) {
     throw Kernel::Exception::FileError("Unable to parse File:", filename);
   }
   // Get pointer to root element
-  pRootElem = pDoc->documentElement();
-  if (!pRootElem->hasChildNodes()) {
+  m_pRootElem = m_pDoc->documentElement();
+  if (!m_pRootElem->hasChildNodes()) {
     g_log.error("XML file: " + filename + "contains no root element.");
     throw Kernel::Exception::InstrumentDefinitionError(
         "No root element in XML instrument file", filename);
@@ -448,14 +448,14 @@ void LoadMask::initializeXMLParser(const std::string &filename) {
  */
 void LoadMask::parseXML() {
   // 0. Check
-  if (!pDoc)
+  if (!m_pDoc)
     throw std::runtime_error("Call LoadMask::initialize() before parseXML.");
 
   // 1. Parse and create a structure
-  Poco::AutoPtr<NodeList> pNL_type = pRootElem->getElementsByTagName("type");
+  Poco::AutoPtr<NodeList> pNL_type = m_pRootElem->getElementsByTagName("type");
   g_log.information() << "Node Size = " << pNL_type->length() << std::endl;
 
-  Poco::XML::NodeIterator it(pDoc, Poco::XML::NodeFilter::SHOW_ELEMENT);
+  Poco::XML::NodeIterator it(m_pDoc, Poco::XML::NodeFilter::SHOW_ELEMENT);
   Poco::XML::Node *pNode = it.nextNode();
 
   bool tomask = true;
@@ -469,7 +469,7 @@ void LoadMask::parseXML() {
       tomask = true;
       /*
       // get type
-      Poco::XML::NamedNodeMap* att = pNode->attributes();
+      Poco::AutoPtr<Poco::XML::NamedNodeMap> att = pNode->attributes();
       Poco::XML::Node* cNode = att->item(0);
       if (cNode->getNodeValue().compare("mask") == 0 ||
       cNode->getNodeValue().compare("notuse") == 0){
@@ -515,17 +515,17 @@ void LoadMask::parseXML() {
 
     } else if (pNode->nodeName().compare("detector-masking") == 0) {
       // Node "detector-masking".  Check default value
-      mDefaultToUse = true;
+      m_defaultToUse = true;
       /*
-      Poco::XML::NamedNodeMap* att = pNode->attributes();
+      Poco::AutoPtr<Poco::XML::NamedNodeMap> att = pNode->attributes();
       if (att->length() > 0){
         Poco::XML::Node* cNode = att->item(0);
-        mDefaultToUse = true;
+        m_defaultToUse = true;
         if (cNode->localName().compare("default") == 0){
           if (cNode->getNodeValue().compare("use") == 0){
-            mDefaultToUse = true;
+            m_defaultToUse = true;
           } else {
-            mDefaultToUse = false;
+            m_defaultToUse = false;
           }
       } // if - att-length
       */
@@ -838,8 +838,9 @@ void LoadMask::parseISISStringToVector(string ins,
 /** Initialize the Mask Workspace with instrument
  */
 void LoadMask::intializeMaskWorkspace() {
+  const bool ignoreDirs(true);
   const std::string idfPath =
-      API::FileFinder::Instance().getFullPath(m_instrumentPropValue);
+    API::FileFinder::Instance().getFullPath(m_instrumentPropValue, ignoreDirs);
 
   MatrixWorkspace_sptr tempWs(new DataObjects::Workspace2D());
 
@@ -861,9 +862,9 @@ void LoadMask::intializeMaskWorkspace() {
         "Incorrect instrument name or invalid IDF given.");
   }
 
-  mMaskWS = DataObjects::MaskWorkspace_sptr(
+  m_maskWS = DataObjects::MaskWorkspace_sptr(
       new DataObjects::MaskWorkspace(tempWs->getInstrument()));
-  mMaskWS->setTitle("Mask");
+  m_maskWS->setTitle("Mask");
 }
 
 } // namespace Mantid

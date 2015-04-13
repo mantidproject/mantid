@@ -582,7 +582,6 @@ void MantidDockWidget::addMDEventWorkspaceMenuItems(QMenu *menu, const Mantid::A
   menu->addAction(m_showHist);  // Algorithm history
   menu->addAction(m_showListData); // Show data in table
   menu->addAction(m_showLogs);
-  menu->addAction(m_showSampleMaterial); //TODO
 }
 
 void MantidDockWidget::addMDHistoWorkspaceMenuItems(QMenu *menu, const Mantid::API::IMDWorkspace_const_sptr &WS) const
@@ -604,7 +603,6 @@ void MantidDockWidget::addMDHistoWorkspaceMenuItems(QMenu *menu, const Mantid::A
   menu->addAction(m_showListData); // Show data in table
   menu->addAction(m_convertMDHistoToMatrixWorkspace);
   menu->addAction(m_showLogs);
-  menu->addAction(m_showSampleMaterial); //TODO
 }
 
 
@@ -1375,7 +1373,8 @@ void MantidDockWidget::drawColorFillPlot()
   if( wsNames.empty() ) return;
 
   // Extract child workspace names from any WorkspaceGroups selected.
-  QSet<QString> allWsNames;
+  // Use a list to preserve workspace order.
+  QStringList allWsNames;
   foreach( const QString wsName, wsNames )
   {
     const auto wsGroup = boost::dynamic_pointer_cast<const WorkspaceGroup>(m_ads.retrieve(wsName.toStdString()));
@@ -1383,13 +1382,17 @@ void MantidDockWidget::drawColorFillPlot()
     {
       const auto children = wsGroup->getNames();
       for( auto childWsName = children.begin(); childWsName != children.end(); ++childWsName )
-        allWsNames.insert(QString::fromStdString(*childWsName));
+      {
+        auto name = QString::fromStdString(*childWsName);
+        if (allWsNames.contains(name)) continue;
+        allWsNames.append(name);
+      }
     }
     else
-      allWsNames.insert(wsName);
+      allWsNames.append(wsName);
   }
 
-  m_mantidUI->drawColorFillPlots(allWsNames.toList());
+  m_mantidUI->drawColorFillPlots(allWsNames);
 }
 
 void MantidDockWidget::treeSelectionChanged()

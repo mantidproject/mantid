@@ -159,10 +159,11 @@ V3R SymmetryElementWithAxisGenerator::determineAxis(
 
   gsl_eigen_genv(eigenMatrix, identityMatrix, alpha, beta, eigenVectors,
                  eigenWs);
+  gsl_eigen_genv_sort(alpha, beta, eigenVectors, GSL_EIGEN_SORT_ABS_DESC);
 
   double determinant = matrix.determinant();
 
-  std::vector<double> eigenVector(3, 0.0);
+  Kernel::V3D eigenVector;
 
   for (size_t i = 0; i < matrix.numCols(); ++i) {
     double eigenValue = GSL_REAL(gsl_complex_div_real(
@@ -177,6 +178,14 @@ V3R SymmetryElementWithAxisGenerator::determineAxis(
     }
   }
 
+  eigenVector *= determinant;
+
+  double sumOfElements = eigenVector.X() + eigenVector.Y() + eigenVector.Z();
+
+  if(sumOfElements < 0) {
+      eigenVector *= -1.0;
+  }
+
   gsl_matrix_free(eigenMatrix);
   gsl_matrix_free(identityMatrix);
   gsl_eigen_genv_free(eigenWs);
@@ -185,7 +194,7 @@ V3R SymmetryElementWithAxisGenerator::determineAxis(
   gsl_matrix_complex_free(eigenVectors);
 
   double min = 1.0;
-  for (size_t i = 0; i < eigenVector.size(); ++i) {
+  for (size_t i = 0; i < 3; ++i) {
     double absoluteValue = fabs(eigenVector[i]);
     if (absoluteValue != 0.0 &&
         (eigenVector[i] < min && (absoluteValue - fabs(min)) < 1e-9)) {
@@ -194,7 +203,7 @@ V3R SymmetryElementWithAxisGenerator::determineAxis(
   }
 
   V3R axis;
-  for (size_t i = 0; i < eigenVector.size(); ++i) {
+  for (size_t i = 0; i < 3; ++i) {
     axis[i] = static_cast<int>(boost::math::round(eigenVector[i] / min));
   }
 
@@ -416,11 +425,11 @@ void SymmetryElementFactoryImpl::insertPrototype(
   m_prototypes.insert(std::make_pair(identifier, prototype));
 }
 
-DECLARE_SYMMETRY_ELEMENT_GENERATOR(SymmetryElementIdentityGenerator);
-DECLARE_SYMMETRY_ELEMENT_GENERATOR(SymmetryElementTranslationGenerator);
-DECLARE_SYMMETRY_ELEMENT_GENERATOR(SymmetryElementInversionGenerator);
-DECLARE_SYMMETRY_ELEMENT_GENERATOR(SymmetryElementRotationGenerator);
-DECLARE_SYMMETRY_ELEMENT_GENERATOR(SymmetryElementMirrorGenerator);
+DECLARE_SYMMETRY_ELEMENT_GENERATOR(SymmetryElementIdentityGenerator)
+DECLARE_SYMMETRY_ELEMENT_GENERATOR(SymmetryElementTranslationGenerator)
+DECLARE_SYMMETRY_ELEMENT_GENERATOR(SymmetryElementInversionGenerator)
+DECLARE_SYMMETRY_ELEMENT_GENERATOR(SymmetryElementRotationGenerator)
+DECLARE_SYMMETRY_ELEMENT_GENERATOR(SymmetryElementMirrorGenerator)
 
 } // namespace Geometry
 } // namespace Mantid

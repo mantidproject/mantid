@@ -49,7 +49,7 @@ namespace CustomInterfaces
     extract->execute();
 
     setCorrectedData(extract->getProperty("OutputWorkspace"));
-    setFittedFunction(FunctionFactory::Instance().createInitialized(funcToFit->asString()));
+    setFittedFunction(funcToFit);
     m_sections = sections;
   }
 

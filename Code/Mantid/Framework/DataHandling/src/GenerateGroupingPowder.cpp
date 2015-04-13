@@ -3,11 +3,11 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidKernel/BoundedValidator.h"
 
-#include "Poco/DOM/Document.h"
-#include "Poco/DOM/Element.h"
-#include "Poco/DOM/Text.h"
-#include "Poco/DOM/AutoPtr.h"
-#include "Poco/DOM/DOMWriter.h"
+#include <Poco/DOM/AutoPtr.h>
+#include <Poco/DOM/Document.h>
+#include <Poco/DOM/DOMWriter.h>
+#include <Poco/DOM/Element.h>
+#include <Poco/DOM/Text.h>
 
 #ifdef _MSC_VER
 // Disable a flood of warnings from Poco about inheriting from

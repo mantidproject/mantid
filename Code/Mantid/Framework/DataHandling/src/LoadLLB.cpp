@@ -18,13 +18,14 @@ using namespace Kernel;
 using namespace API;
 using namespace NeXus;
 
-DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadLLB);
+DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadLLB)
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
-LoadLLB::LoadLLB() {
-  m_instrumentName = "";
+LoadLLB::LoadLLB(): m_instrumentName(""), m_instrumentPath (""), m_localWorkspace(),
+    m_numberOfTubes(0), m_numberOfPixelsPerTube(0), m_numberOfChannels(0),
+    m_numberOfHistograms(0), m_wavelength(0.0), m_channelWidth(0.0), m_loader() {
   m_supportedInstruments.push_back("MIBEMOL");
 }
 
@@ -35,10 +36,10 @@ LoadLLB::~LoadLLB() {}
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
-const std::string LoadLLB::name() const { return "LoadLLB"; };
+const std::string LoadLLB::name() const { return "LoadLLB"; }
 
 /// Algorithm's version for identification. @see Algorithm::version
-int LoadLLB::version() const { return 1; };
+int LoadLLB::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
 const std::string LoadLLB::category() const { return "DataHandling"; }

@@ -166,9 +166,13 @@ private:
   void throwNotConnected(const std::string &url,
                        const Poco::Net::HostNotFoundException &ex);
 
+  void logDebugRequestSending(const std::string &schemeName,
+                              const std::string &url) const;
+
   Kernel::ProxyInfo m_proxyInfo;
   bool m_isProxySet;
   int m_timeout;
+  bool m_isTimeoutSet;
   std::streamsize m_contentLength;
   std::string m_method;
   std::string m_contentType;

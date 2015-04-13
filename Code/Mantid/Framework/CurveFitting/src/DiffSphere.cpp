@@ -1,24 +1,35 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
+#include "MantidCurveFitting/DiffSphere.h"
+
+#include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/ParameterTie.h"
+#include "MantidCurveFitting/BoundaryConstraint.h"
+#include "MantidGeometry/IDetector.h"
+#include "MantidKernel/Exception.h"
+#include "MantidKernel/UnitConversion.h"
+
+#include <boost/math/special_functions/bessel.hpp>
+
 #include <cmath>
 #include <limits>
 
-#include "MantidCurveFitting/DiffSphere.h"
-#include "MantidCurveFitting/BoundaryConstraint.h"
-#include "MantidAPI/FunctionFactory.h"
-#include <boost/math/special_functions/bessel.hpp>
-#include "MantidAPI/ParameterTie.h"
+namespace {
+Mantid::Kernel::Logger g_log("DiffSphere");
+}
 
 namespace Mantid {
 namespace CurveFitting {
 
-using namespace Kernel;
 using namespace API;
+using namespace Geometry;
+using namespace Kernel;
 
-DECLARE_FUNCTION(ElasticDiffSphere);
-DECLARE_FUNCTION(InelasticDiffSphere);
-DECLARE_FUNCTION(DiffSphere);
+DECLARE_FUNCTION(ElasticDiffSphere)
+DECLARE_FUNCTION(InelasticDiffSphere)
+DECLARE_FUNCTION(DiffSphere)
 
 ElasticDiffSphere::ElasticDiffSphere() {
   // declareParameter("Height", 1.0); //parameter "Height" already declared in
@@ -59,37 +70,36 @@ void InelasticDiffSphere::initXnlCoeff() {
   size_t ncoeff = 98;
 
   double xvalues[] = {
-      2.081576,  3.342094,  4.493409,  4.514100,  5.646704,  5.940370,
-      6.756456,  7.289932,  7.725252,  7.851078,  8.583755,  8.934839,
-      9.205840,  9.840446,  10.010371, 10.613855, 10.904122, 11.070207,
-      11.079418, 11.972730, 12.143204, 12.279334, 12.404445, 13.202620,
-      13.295564, 13.472030, 13.846112, 14.066194, 14.258341, 14.590552,
-      14.651263, 15.244514, 15.310887, 15.579236, 15.819216, 15.863222,
-      16.360674, 16.609346, 16.977550, 17.042902, 17.117506, 17.220755,
-      17.408034, 17.947180, 18.127564, 18.356318, 18.453241, 18.468148,
-      18.742646, 19.262710, 19.270294, 19.496524, 19.581889, 19.862424,
-      20.221857, 20.371303, 20.406581, 20.538074, 20.559428, 20.795967,
-      21.231068, 21.537120, 21.578053, 21.666607, 21.840012, 21.899697,
-      21.999955, 22.578058, 22.616601, 22.662493, 23.082796, 23.106568,
-      23.194996, 23.390490, 23.519453, 23.653839, 23.783192, 23.906450,
-      24.360789, 24.382038, 24.474825, 24.689873, 24.850085, 24.899636,
-      25.052825, 25.218652, 25.561873, 25.604057, 25.724794, 25.846084,
-      26.012188, 26.283265, 26.516603, 26.552589, 26.666054, 26.735177,
-      26.758685, 26.837518};
+    2.081576,  3.342094,  4.493409,  4.514100,  5.646704,  5.940370,  6.756456,
+    7.289932,  7.725252,  7.851078,  8.583755,  8.934839,  9.205840,  9.840446,
+    10.010371, 10.613855, 10.904122, 11.070207, 11.079418, 11.972730, 12.143204,
+    12.279334, 12.404445, 13.202620, 13.295564, 13.472030, 13.846112, 14.066194,
+    14.258341, 14.590552, 14.651263, 15.244514, 15.310887, 15.579236, 15.819216,
+    15.863222, 16.360674, 16.609346, 16.977550, 17.042902, 17.117506, 17.220755,
+    17.408034, 17.947180, 18.127564, 18.356318, 18.453241, 18.468148, 18.742646,
+    19.262710, 19.270294, 19.496524, 19.581889, 19.862424, 20.221857, 20.371303,
+    20.406581, 20.538074, 20.559428, 20.795967, 21.231068, 21.537120, 21.578053,
+    21.666607, 21.840012, 21.899697, 21.999955, 22.578058, 22.616601, 22.662493,
+    23.082796, 23.106568, 23.194996, 23.390490, 23.519453, 23.653839, 23.783192,
+    23.906450, 24.360789, 24.382038, 24.474825, 24.689873, 24.850085, 24.899636,
+    25.052825, 25.218652, 25.561873, 25.604057, 25.724794, 25.846084, 26.012188,
+    26.283265, 26.516603, 26.552589, 26.666054, 26.735177, 26.758685, 26.837518
+  };
 
-  size_t lvalues[] = {1,  2,  0,  3,  4,  1,  5,  2, 0,  6,  3,  7,  1,  4,
-                      8,  2,  0,  5,  9,  3,  10, 6, 1,  11, 4,  7,  2,  0,
-                      12, 5,  8,  3,  13, 1,  9,  6, 14, 4,  10, 2,  7,  0,
-                      15, 5,  11, 8,  16, 3,  1,  6, 12, 17, 9,  4,  2,  0,
-                      13, 18, 7,  10, 5,  14, 19, 3, 8,  1,  11, 6,  20, 15,
-                      4,  9,  12, 2,  0,  21, 16, 7, 10, 13, 5,  22, 3,  17,
-                      1,  8,  14, 11, 23, 6,  18, 4, 9,  2,  0,  15, 24, 12};
+  size_t lvalues[] = { 1,  2,  0,  3,  4,  1,  5,  2, 0,  6,  3,  7,  1,  4,
+                       8,  2,  0,  5,  9,  3,  10, 6, 1,  11, 4,  7,  2,  0,
+                       12, 5,  8,  3,  13, 1,  9,  6, 14, 4,  10, 2,  7,  0,
+                       15, 5,  11, 8,  16, 3,  1,  6, 12, 17, 9,  4,  2,  0,
+                       13, 18, 7,  10, 5,  14, 19, 3, 8,  1,  11, 6,  20, 15,
+                       4,  9,  12, 2,  0,  21, 16, 7, 10, 13, 5,  22, 3,  17,
+                       1,  8,  14, 11, 23, 6,  18, 4, 9,  2,  0,  15, 24, 12 };
 
-  size_t nvalues[] = {
-      0, 0, 1, 0, 0, 1, 0, 1, 2, 0, 1, 0, 2, 1, 0, 2, 3, 1, 0, 2, 0, 1, 3, 0, 2,
-      1, 3, 4, 0, 2, 1, 3, 0, 4, 1, 2, 0, 3, 1, 4, 2, 5, 0, 3, 1, 2, 0, 4, 5, 3,
-      1, 0, 2, 4, 5, 6, 1, 0, 3, 2, 4, 1, 0, 5, 3, 6, 2, 4, 0, 1, 5, 3, 2, 6, 7,
-      0, 1, 4, 3, 2, 5, 0, 6, 1, 7, 4, 2, 3, 0, 5, 1, 6, 4, 7, 8, 2, 0, 3};
+  size_t nvalues[] = { 0, 0, 1, 0, 0, 1, 0, 1, 2, 0, 1, 0, 2, 1, 0, 2, 3,
+                       1, 0, 2, 0, 1, 3, 0, 2, 1, 3, 4, 0, 2, 1, 3, 0, 4,
+                       1, 2, 0, 3, 1, 4, 2, 5, 0, 3, 1, 2, 0, 4, 5, 3, 1,
+                       0, 2, 4, 5, 6, 1, 0, 3, 2, 4, 1, 0, 5, 3, 6, 2, 4,
+                       0, 1, 5, 3, 2, 6, 7, 0, 1, 4, 3, 2, 5, 0, 6, 1, 7,
+                       4, 2, 3, 0, 5, 1, 6, 4, 7, 8, 2, 0, 3 };
 
   for (size_t i = 0; i < ncoeff; i++) {
     xnlc coeff;
@@ -145,8 +155,10 @@ InelasticDiffSphere::InelasticDiffSphere()
   declareParameter("Diffusion", 0.05, "Diffusion coefficient, in units of "
                                       "A^2*THz, if energy in meV, or A^2*PHz "
                                       "if energy in ueV");
+  declareParameter("Shift", 0.0, "Shift in domain");
 
-  declareAttribute("Q", API::IFunction::Attribute(1.0));
+  declareAttribute("Q", API::IFunction::Attribute(EMPTY_DBL()));
+  declareAttribute("WorkspaceIndex", API::IFunction::Attribute(0));
 }
 
 /// Initialize a set of coefficients and terms that are invariant during fitting
@@ -193,7 +205,25 @@ void InelasticDiffSphere::function1D(double *out, const double *xValues,
   const double I = getParameter("Intensity");
   const double R = getParameter("Radius");
   const double D = getParameter("Diffusion");
-  const double Q = getAttribute("Q").asDouble();
+  const double S = getParameter("Shift");
+
+  double Q;
+  if (getAttribute("Q").asDouble() == EMPTY_DBL()) {
+    if (m_qValueCache.size() == 0) {
+      throw std::runtime_error(
+          "No Q attribute provided and cannot retrieve from worksapce.");
+    }
+
+    const int specIdx = getAttribute("WorkspaceIndex").asInt();
+    Q = m_qValueCache[specIdx];
+
+    g_log.debug() << "Get Q value for workspace index " << specIdx << ": " << Q
+                  << std::endl;
+  } else {
+    Q = getAttribute("Q").asDouble();
+
+    g_log.debug() << "Using Q attribute: " << Q << std::endl;
+  }
 
   // // Penalize negative parameters
   if (I < std::numeric_limits<double>::epsilon() ||
@@ -216,12 +246,56 @@ void InelasticDiffSphere::function1D(double *out, const double *xValues,
   std::vector<double> YJ;
   YJ = LorentzianCoefficients(Q * R); // The (2l+1)*A_{n,l}
   for (size_t i = 0; i < nData; i++) {
-    double energy = xValues[i]; // from meV to THz (or from micro-eV to PHz)
+    double energy = xValues[i] - S; // from meV to THz (or from micro-eV to PHz)
     out[i] = 0.0;
     for (size_t n = 0; n < ncoeff; n++) {
       double L = (1.0 / M_PI) * HWHM[n] /
                  (HWHM[n] * HWHM[n] + energy * energy); // Lorentzian
       out[i] += I * YJ[n] * L;
+    }
+  }
+}
+
+/**
+ * Handle seting fit workspace.
+ *
+ * Creates a list of Q values from each spectrum to be used with WorkspaceIndex
+ * attribute.
+ *
+ * @param ws Pointer to workspace
+ */
+void
+InelasticDiffSphere::setWorkspace(boost::shared_ptr<const API::Workspace> ws) {
+  m_qValueCache.clear();
+
+  auto workspace = boost::dynamic_pointer_cast<const MatrixWorkspace>(ws);
+  if (!workspace)
+    return;
+
+  size_t numHist = workspace->getNumberHistograms();
+  for (size_t idx = 0; idx < numHist; idx++) {
+    IDetector_const_sptr det;
+    try {
+      det = workspace->getDetector(idx);
+    }
+    catch (Exception::NotFoundError &) {
+      m_qValueCache.clear();
+      g_log.information("Cannot populate Q values from workspace");
+      break;
+    }
+
+    try {
+      double efixed = workspace->getEFixed(det);
+      double usignTheta = workspace->detectorTwoTheta(det) / 2.0;
+
+      double q = Mantid::Kernel::UnitConversion::run(usignTheta, efixed);
+
+      m_qValueCache.push_back(q);
+    }
+    catch (std::runtime_error &) {
+      m_qValueCache.clear();
+      g_log.information("Cannot populate Q values from workspace");
+      return;
     }
   }
 }
@@ -272,6 +346,7 @@ void DiffSphere::init() {
   setAlias("f1.Intensity", "Intensity");
   setAlias("f1.Radius", "Radius");
   setAlias("f1.Diffusion", "Diffusion");
+  setAlias("f1.Shift", "Shift");
 
   // Set the ties between Elastic and Inelastic parameters
   addDefaultTies("f0.Height=f1.Intensity,f0.Radius=f1.Radius");

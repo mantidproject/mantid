@@ -1,6 +1,6 @@
 #include "MantidMDAlgorithms/CalculateCoverageDGS.h"
 #include "MantidAPI/WorkspaceValidators.h"
-#include "MantidMDEvents/MDHistoWorkspace.h"
+#include "MantidDataObjects/MDHistoWorkspace.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ArrayLengthValidator.h"
 #include "MantidKernel/BoundedValidator.h"
@@ -15,7 +15,7 @@ namespace MDAlgorithms {
 using namespace Mantid::Kernel;
 using Mantid::API::WorkspaceProperty;
 using namespace Mantid::API;
-using namespace Mantid::MDEvents;
+using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
 
 namespace {
@@ -52,7 +52,7 @@ const std::string CalculateCoverageDGS::name() const {
 }
 
 /// Algorithm's version for identification. @see Algorithm::version
-int CalculateCoverageDGS::version() const { return 1; };
+int CalculateCoverageDGS::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
 const std::string CalculateCoverageDGS::category() const {
@@ -63,7 +63,7 @@ const std::string CalculateCoverageDGS::category() const {
 const std::string CalculateCoverageDGS::summary() const {
   return "Calculate the reciprocal space coverage for direct geometry "
          "spectrometers";
-};
+}
 
 /**
 *Stores the X values from each H,K,L dimension as member variables
@@ -292,7 +292,6 @@ void CalculateCoverageDGS::exec() {
   W.setRow(2, Q3Basis);
 
   m_rubw = gon * UB * W * (2.0 * M_PI);
-  m_rubw.Invert();
 
   // calculate maximum original limits
   Geometry::OrientedLattice ol;
@@ -303,7 +302,7 @@ void CalculateCoverageDGS::exec() {
   m_kmax = static_cast<coord_t>(Qmax * ol.b());
   m_lmin = static_cast<coord_t>(-Qmax * ol.c());
   m_lmax = static_cast<coord_t>(Qmax * ol.c());
-
+  m_rubw.Invert();
   // adjust Q steps/dimensions
   if (q1min == EMPTY_DBL()) {
     q1min = m_hmin;

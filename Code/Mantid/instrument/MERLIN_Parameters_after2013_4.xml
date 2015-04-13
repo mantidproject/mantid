@@ -296,7 +296,7 @@
 <!-- This property is the part of the composite definition for abs_units_van_range
  It specifies the relative to incident energy higher integration limit for monochromatic vanadium in the mono-vanadium integration -->
 <parameter name="monovan_hi_frac">
-  <value val="0.7"/>
+  <value val="0.6"/>
 </parameter>
 <!-- This property is the part of the composite definition for abs_units_van_range
  It specifies the the higher limit of energy range in the monochromatic-vanadium integration 
@@ -387,6 +387,17 @@
    <value val="False"/>
 </parameter>
 
+<!-- The semicolon separated list of possible log names, containing information on crystl rotation.
+     First found log will be used togethere with motor_offset to identify crystal rotation 
+     (psi in Horace) -->
+<parameter name="motor_log_names"  type="string">
+   <value val="CCR_ROT;wccr"/>
+</parameter>
+<!-- Initial value used to identify crytsal rotation angle psi=motor_offset+wccr.timeAverageValue()  -->
+<parameter name="motor_offset">
+   <value val="None"/>
+</parameter>
+
 
 <!-- List of the words which can be used as a command line arguments to define reducer keywords
      the form is reducer_keword1=synonim1=synonim2=synonim3;reducer_keword1=synonim1a, so, 
@@ -398,6 +409,7 @@
        fix_ei=fixei;
        sum_runs=sum;
        wb_integr_range=detector_van_range;
+       motor_log_names = motor_name;       
        van_mass=vanadium-mass;
        check_background = background;
        mon1_norm_spec=norm-mon1-spec;

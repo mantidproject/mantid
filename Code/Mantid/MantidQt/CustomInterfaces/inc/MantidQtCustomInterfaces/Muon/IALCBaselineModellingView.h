@@ -3,6 +3,7 @@
 
 #include "MantidKernel/System.h"
 
+#include "MantidAPI/IFunction.h"
 #include "MantidQtCustomInterfaces/DllConfig.h"
 
 #include <QObject>
@@ -90,7 +91,7 @@ namespace CustomInterfaces
      * Update displayed function
      * @param func :: New function
      */
-    virtual void setFunction(const QString& func) = 0;
+    virtual void setFunction(Mantid::API::IFunction_const_sptr func) = 0;
 
     /**
      * Resize sections table
@@ -130,6 +131,9 @@ namespace CustomInterfaces
      * @param message :: Error message to display
      */
     virtual void displayError(const QString& message) = 0;
+
+    /// Links help button to wiki page
+    virtual void help() = 0;
 
   signals:
     /// Fit requested

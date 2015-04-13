@@ -67,8 +67,7 @@ enum MDNormalization {
  Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
-class MANTID_API_DLL IMDWorkspace : public Workspace,
-                                    public Mantid::API::MDGeometry {
+class MANTID_API_DLL IMDWorkspace : public Workspace, public API::MDGeometry {
 public:
   IMDWorkspace();
   IMDWorkspace(const IMDWorkspace &other);
@@ -119,11 +118,11 @@ public:
   /// Clear existing masks
   virtual void clearMDMasking() = 0;
   ///
-  virtual Mantid::Kernel::SpecialCoordinateSystem
+  virtual Kernel::SpecialCoordinateSystem
   getSpecialCoordinateSystem() const = 0;
   /// if a workspace was filebacked, this should clear file-based status, delete
   /// file-based information and close related files.
-  virtual void clearFileBacked(bool /* loadFileContentsToMemory*/){};
+  virtual void clearFileBacked(bool /* loadFileContentsToMemory*/) {}
   /// this is the method to build table workspace from any workspace. It does
   /// not have much sence and may be placed here erroneously
   virtual ITableWorkspace_sptr makeBoxTable(size_t /*start*/, size_t /* num*/) {

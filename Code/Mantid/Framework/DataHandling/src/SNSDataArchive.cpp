@@ -1,25 +1,24 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
+#include <iostream>
+#include <sstream>
+
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/InternetHelper.h"
 #include "MantidKernel/Exception.h"
 #include "MantidDataHandling/SNSDataArchive.h"
 #include "MantidAPI/ArchiveSearchFactory.h"
 
-#include <Poco/File.h>
 #include <boost/algorithm/string.hpp>
+#include <boost/algorithm/string/predicate.hpp>
+
+#include <Poco/AutoPtr.h>
 #include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/Document.h>
 #include <Poco/DOM/Element.h>
-#include "Poco/SAX/InputSource.h"
+#include <Poco/SAX/InputSource.h>
 #include <Poco/DOM/NodeList.h>
-#include <Poco/DOM/NodeIterator.h>
-#include <boost/algorithm/string/predicate.hpp>
-#include "Poco/DOM/AutoPtr.h"
-
-#include <iostream>
-#include <sstream>
 
 
 namespace Mantid {
@@ -32,7 +31,7 @@ const std::string
     BASE_URL("http://icat.sns.gov:2080/icat-rest-ws/datafile/filename/");
 }
 
-DECLARE_ARCHIVESEARCH(SNSDataArchive, SNSDataSearch);
+DECLARE_ARCHIVESEARCH(SNSDataArchive, SNSDataSearch)
 
 /**
  * @param filenames : List of files to search
@@ -67,7 +66,8 @@ SNSDataArchive::getArchivePath(const std::set<std::string> &filenames,
 
   // Create a DOM document from the response.
   Poco::XML::DOMParser parser;
-  Poco::XML::InputSource source(rs.str());
+  std::istringstream istrsource(rs.str());
+  Poco::XML::InputSource source(istrsource);
   Poco::AutoPtr<Poco::XML::Document> pDoc = parser.parse(&source);
 
   std::vector<std::string> locations;

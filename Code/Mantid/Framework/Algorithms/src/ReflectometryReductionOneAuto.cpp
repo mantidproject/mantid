@@ -31,10 +31,10 @@ ReflectometryReductionOneAuto::~ReflectometryReductionOneAuto() {}
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string ReflectometryReductionOneAuto::name() const {
   return "ReflectometryReductionOneAuto";
-};
+}
 
 /// Algorithm's version for identification. @see Algorithm::version
-int ReflectometryReductionOneAuto::version() const { return 1; };
+int ReflectometryReductionOneAuto::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
 const std::string ReflectometryReductionOneAuto::category() const {
@@ -45,7 +45,7 @@ const std::string ReflectometryReductionOneAuto::category() const {
 const std::string ReflectometryReductionOneAuto::summary() const {
   return "Reduces a single TOF/Lambda reflectometry run into a mod Q vs I/I0 "
          "workspace. Performs transmission corrections.";
-};
+}
 
 //----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.

@@ -1,5 +1,5 @@
 project( MantidParaViewEventNexusReader )
-
+include_directories( SYSTEM ${PARAVIEW_INCLUDE_DIRS} )
 add_paraview_plugin( MantidParaViewEventNexusReaderSMPlugin "1.0"
 	SERVER_MANAGER_XML EventNexusReader.xml
 	SERVER_MANAGER_SOURCES vtkEventNexusReader.cxx

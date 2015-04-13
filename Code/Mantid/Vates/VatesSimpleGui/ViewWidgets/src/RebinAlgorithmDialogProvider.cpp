@@ -125,6 +125,7 @@ namespace Mantid
        * @param algorithm The algorithm which is to be used.
        * @param inputWorkspace The name of the input workspace.
        * @param outputWorkspace The name of the output workspace.
+       * @param algorithmType The algorithm type.
        * @returns The algorithm dialog
        */
       MantidQt::API::AlgorithmDialog* RebinAlgorithmDialogProvider::createDialog(Mantid::API::IAlgorithm_sptr algorithm,
@@ -139,7 +140,7 @@ namespace Mantid
 
         MantidQt::API::AlgorithmDialog* dialog = NULL;
 
-        // Set the correct algorithm dialog
+        // Set the correct algorithm dialog, Add CutMD here once it is ready.
         if (algorithmType == "BinMD")
         {
           dialog = new MantidQt::MantidWidgets::BinMDDialog(m_parent);
@@ -149,12 +150,9 @@ namespace Mantid
         {
           dialog = new MantidQt::MantidWidgets::SliceMDDialog(m_parent);
           getPresetsForSliceMDAlgorithmDialog(inputWorkspace, outputWorkspace, presets);
-        } else if (algorithmType == "CutMD")
+        }
+        else
         {
-          return dialog;
-        } else
-        {
-
           return dialog;
         }
 

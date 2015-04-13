@@ -35,11 +35,15 @@
 #include <qwt_scale_engine.h>
 #include <QPainter>
 #include <qwt_symbol.h>
+
 #include "Mantid/MantidMatrix.h"
 #include "Mantid/MantidMatrixFunction.h"
+#include "MantidAPI/IMDIterator.h"
+
+#include "MantidQtAPI/PlotAxis.h"
 #include "MantidQtAPI/QwtRasterDataMD.h"
 #include "MantidQtAPI/SignalRange.h"
-#include "MantidAPI/IMDIterator.h"
+
 #include "TSVSerialiser.h"
 
 #include <iostream>
@@ -265,6 +269,17 @@ void Spectrogram::postDataUpdate()
   }
 
   plot->setAxisScale(color_axis, data().range().minValue(), data().range().maxValue());
+
+  if ( d_wsData )
+  {
+    auto workspace = d_wsData->getWorkspace();
+    if ( workspace )
+    {
+      using MantidQt::API::PlotAxis;
+      plot->setAxisTitle(QwtPlot::xBottom,  PlotAxis(*workspace, 0).title());
+      plot->setAxisTitle(QwtPlot::yLeft, PlotAxis(*workspace, 1).title());
+    }
+  }
 
   plot->replot();
 }

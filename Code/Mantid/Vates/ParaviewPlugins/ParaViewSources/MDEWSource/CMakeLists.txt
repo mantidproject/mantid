@@ -1,5 +1,5 @@
 PROJECT(MantidParaViewMDEWSource)
-
+include_directories( SYSTEM ${PARAVIEW_INCLUDE_DIRS} )
 ADD_PARAVIEW_PLUGIN(MantidParaViewMDEWSourceSMPlugin "1.0"
 	SERVER_MANAGER_XML MDEWSource.xml
 	SERVER_MANAGER_SOURCES vtkMDEWSource.cxx)

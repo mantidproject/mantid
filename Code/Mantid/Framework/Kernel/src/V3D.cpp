@@ -265,10 +265,8 @@ V3D &V3D::operator/=(const double D) {
 */
 bool V3D::operator==(const V3D &v) const {
   using namespace std;
-  return (fabs(x - v.x) > Tolerance || fabs(y - v.y) > Tolerance ||
-          fabs(z - v.z) > Tolerance)
-             ? false
-             : true;
+  return !(fabs(x - v.x) > Tolerance || fabs(y - v.y) > Tolerance ||
+           fabs(z - v.z) > Tolerance);
 }
 
 /** Not equals operator with tolerance factor.
@@ -289,6 +287,12 @@ bool V3D::operator<(const V3D &V) const {
   if (y != V.y)
     return y < V.y;
   return z < V.z;
+}
+
+/// Comparison operator greater than.
+bool V3D::operator>(const V3D &rhs) const
+{
+    return rhs < *this;
 }
 
 /**

@@ -1,6 +1,6 @@
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidKernel/CPUTimer.h"
-#include "MantidMDEvents/MDHistoWorkspace.h"
+#include "MantidDataObjects/MDHistoWorkspace.h"
 #include "MantidVatesAPI/vtkMDHistoHexFactory.h"
 #include "MantidVatesAPI/Common.h"
 #include "MantidVatesAPI/ProgressAction.h"
@@ -11,7 +11,7 @@
 using Mantid::API::IMDWorkspace;
 using Mantid::API::IMDHistoWorkspace;
 using Mantid::Kernel::CPUTimer;
-using namespace Mantid::MDEvents;
+using namespace Mantid::DataObjects;
 using Mantid::Kernel::ReadLock;
 
 namespace Mantid
@@ -181,7 +181,7 @@ namespace VATES
     std::cout << tim << " to check all the signal values." << std::endl;
 
     // Get the transformation that takes the points in the TRANSFORMED space back into the ORIGINAL (not-rotated) space.
-    Mantid::API::CoordTransform* transform = NULL;
+    Mantid::API::CoordTransform const * transform = NULL;
     if (m_useTransform)
       transform = m_workspace->getTransformToOriginal();
 

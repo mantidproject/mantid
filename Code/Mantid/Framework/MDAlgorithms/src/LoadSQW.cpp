@@ -15,14 +15,14 @@
 #include "MantidAPI/RegisterFileLoader.h"
 #include <iostream>
 #include <cfloat>
-#include "MantidMDEvents/MDBox.h"
-#include "MantidMDEvents/BoxControllerNeXusIO.h"
+#include "MantidDataObjects/MDBox.h"
+#include "MantidDataObjects/BoxControllerNeXusIO.h"
 #include "MantidKernel/Memory.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using Mantid::Geometry::OrientedLattice;
-using namespace Mantid::MDEvents;
+using namespace Mantid::DataObjects;
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -43,10 +43,15 @@ template <typename T> T interpretAs(std::vector<char> &Buf, size_t ind = 0) {
 }
 }
 
-DECLARE_FILELOADER_ALGORITHM(LoadSQW);
+DECLARE_FILELOADER_ALGORITHM(LoadSQW)
 
 /// Constructor
-LoadSQW::LoadSQW() : m_prog(new Mantid::API::Progress(this, 0.05, 0.95, 100)) {}
+LoadSQW::LoadSQW() : m_fileName(""), m_fileStream(),
+    m_prog(new Mantid::API::Progress(this, 0.05, 0.95, 100)), m_outputFile(""),
+    m_dataPositions(), m_boxSizes(), m_nDataPoints(0), m_mdImageSize(0),
+    m_nDims(0), m_nBins() {
+}
+
 /**
 * Return the confidence with this algorithm can load the file
 * @param descriptor A descriptor for the file
@@ -152,7 +157,7 @@ void LoadSQW::exec() {
 
     // set file backed boxes
     auto Saver = boost::shared_ptr<API::IBoxControllerIO>(
-        new MDEvents::BoxControllerNeXusIO(bc.get()));
+        new DataObjects::BoxControllerNeXusIO(bc.get()));
     bc->setFileBacked(Saver, m_outputFile);
     pWs->getBox()->setFileBacked();
     bc->getFileIO()->setWriteBufferSize(1000000);
@@ -203,7 +208,7 @@ void LoadSQW::exec() {
 
 /// Add events after reading pixels/datapoints from file.
 void
-    LoadSQW::readEvents(Mantid::MDEvents::MDEventWorkspace<MDEvent<4>, 4> *ws) {
+    LoadSQW::readEvents(Mantid::DataObjects::MDEventWorkspace<MDEvent<4>, 4> *ws) {
   CPUTimer tim;
 
   size_t maxNPix = ~size_t(0);
@@ -375,7 +380,7 @@ lattice and add to workspace.
 @param ws : Workspace to modify.
 */
 void
-    LoadSQW::addLattice(Mantid::MDEvents::MDEventWorkspace<MDEvent<4>, 4> *ws) {
+    LoadSQW::addLattice(Mantid::DataObjects::MDEventWorkspace<MDEvent<4>, 4> *ws) {
   std::vector<char> buf(
       4 * (3 + 3)); // Where 4 = size_of(float) and 3 * 3 is size of b-matrix.
   this->m_fileStream.seekg(this->m_dataPositions.geom_start, std::ios::beg);
@@ -621,7 +626,7 @@ void LoadSQW::readDNDDimensions(
 }
 /// add range of dimensions to the workspace;
 void LoadSQW::addDimsToWs(
-    Mantid::MDEvents::MDEventWorkspace<MDEvents::MDEvent<4>, 4> *ws,
+    Mantid::DataObjects::MDEventWorkspace<DataObjects::MDEvent<4>, 4> *ws,
     std::vector<Mantid::Geometry::MDHistoDimensionBuilder> &DimVector) {
   // Add dimensions to the workspace by invoking the dimension builders.
   for (size_t i = 0; i < 4; i++) {

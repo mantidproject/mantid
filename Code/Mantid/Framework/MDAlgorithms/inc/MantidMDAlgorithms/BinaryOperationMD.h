@@ -1,12 +1,11 @@
 #ifndef MANTID_MDALGORITHMS_BINARYOPERATIONMD_H_
 #define MANTID_MDALGORITHMS_BINARYOPERATIONMD_H_
 
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
-#include "MantidAPI/IMDWorkspace.h"
-#include "MantidMDEvents/MDEventWorkspace.h"
-#include "MantidMDEvents/MDHistoWorkspace.h"
 #include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidAPI/IMDWorkspace.h"
+#include "MantidDataObjects/MDEventWorkspace.h"
+#include "MantidDataObjects/MDHistoWorkspace.h"
 #include "MantidDataObjects/WorkspaceSingleValue.h"
 
 namespace Mantid {
@@ -69,12 +68,12 @@ protected:
 
   /// Run the algorithm with a MDHisotWorkspace as output and operand
   virtual void
-  execHistoHisto(Mantid::MDEvents::MDHistoWorkspace_sptr out,
-                 Mantid::MDEvents::MDHistoWorkspace_const_sptr operand) = 0;
+  execHistoHisto(Mantid::DataObjects::MDHistoWorkspace_sptr out,
+                 Mantid::DataObjects::MDHistoWorkspace_const_sptr operand) = 0;
 
   /// Run the algorithm with a MDHisotWorkspace as output, scalar and operand
   virtual void execHistoScalar(
-      Mantid::MDEvents::MDHistoWorkspace_sptr out,
+      Mantid::DataObjects::MDHistoWorkspace_sptr out,
       Mantid::DataObjects::WorkspaceSingleValue_const_sptr scalar) = 0;
 
   /// The name of the first input workspace property
@@ -98,8 +97,8 @@ protected:
   /// For checkInputs
   Mantid::API::IMDEventWorkspace_sptr m_lhs_event;
   Mantid::API::IMDEventWorkspace_sptr m_rhs_event;
-  Mantid::MDEvents::MDHistoWorkspace_sptr m_lhs_histo;
-  Mantid::MDEvents::MDHistoWorkspace_sptr m_rhs_histo;
+  Mantid::DataObjects::MDHistoWorkspace_sptr m_lhs_histo;
+  Mantid::DataObjects::MDHistoWorkspace_sptr m_rhs_histo;
   Mantid::DataObjects::WorkspaceSingleValue_sptr m_lhs_scalar;
   Mantid::DataObjects::WorkspaceSingleValue_sptr m_rhs_scalar;
 
@@ -109,9 +108,9 @@ protected:
   Mantid::API::IMDEventWorkspace_sptr m_out_event;
 
   /// Operand MDHistoWorkspace
-  Mantid::MDEvents::MDHistoWorkspace_sptr m_operand_histo;
+  Mantid::DataObjects::MDHistoWorkspace_sptr m_operand_histo;
   /// Output MDHistoWorkspace
-  Mantid::MDEvents::MDHistoWorkspace_sptr m_out_histo;
+  Mantid::DataObjects::MDHistoWorkspace_sptr m_out_histo;
 
   /// Operand WorkspaceSingleValue
   Mantid::DataObjects::WorkspaceSingleValue_sptr m_operand_scalar;

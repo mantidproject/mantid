@@ -2,42 +2,30 @@
 #define MANTID_MDEVENTS_BINTOMDHISTOWORKSPACETEST_H_
 
 #include "MantidAPI/IMDEventWorkspace.h"
-#include "MantidAPI/ImplicitFunctionFactory.h"
-#include "MantidAPI/ImplicitFunctionParameter.h"
-#include "MantidAPI/ImplicitFunctionParameterParserFactory.h"
-#include "MantidAPI/ImplicitFunctionParameterParserFactory.h"
-#include "MantidAPI/ImplicitFunctionParserFactory.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/ImplicitFunctionBuilder.h"
+#include "MantidAPI/ImplicitFunctionFactory.h"
+#include "MantidAPI/ImplicitFunctionParser.h"
+#include "MantidAPI/ImplicitFunctionParameterParserFactory.h"
 #include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
 #include "MantidGeometry/MDGeometry/MDTypes.h"
-#include "MantidKernel/ConfigService.h"
-#include "MantidKernel/CPUTimer.h"
-#include "MantidKernel/System.h"
-#include "MantidKernel/Timer.h"
 #include "MantidMDAlgorithms/BinMD.h"
+#include "MantidMDAlgorithms/CreateMDWorkspace.h"
 #include "MantidMDAlgorithms/FakeMDEventData.h"
-#include "MantidMDEvents/CoordTransformAffine.h"
-#include "MantidMDEvents/MDEventFactory.h"
-#include "MantidMDEvents/MDEventWorkspace.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
+
 #include <boost/math/special_functions/fpclassify.hpp>
+
 #include <cxxtest/TestSuite.h>
+
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
-#include <iomanip>
-#include <iostream>
-#include "MantidKernel/Strings.h"
-#include "MantidKernel/VMD.h"
-#include "MantidKernel/Utils.h"
-#include "MantidMDEvents/MDHistoWorkspace.h"
-#include "MantidMDAlgorithms/CreateMDWorkspace.h"
 
-using namespace Mantid::MDEvents;
-using namespace Mantid::MDAlgorithms;
 using namespace Mantid::API;
+using namespace Mantid::DataObjects;
 using namespace Mantid::Kernel;
+using namespace Mantid::MDAlgorithms;
 using Mantid::coord_t;
-
 
 class BinMDTest : public CxxTest::TestSuite
 {
@@ -88,16 +76,16 @@ private:
   {
     using namespace Mantid::API;
     AnalysisDataService::Instance().remove("3D_Workspace");
-    IAlgorithm* create = FrameworkManager::Instance().createAlgorithm("CreateMDWorkspace");
+    CreateMDWorkspace create;
 
-    create->initialize();
-    create->setProperty("Dimensions", 3);
-    create->setPropertyValue("Extents","0,10,0,10,0,10");
-    create->setPropertyValue("Names","x,y,z");
-    create->setPropertyValue("Units","m,m,m");
-    create->setPropertyValue("SplitInto","10");
-    create->setPropertyValue("OutputWorkspace", "3D_Workspace");
-    create->execute();
+    create.initialize();
+    create.setProperty("Dimensions", 3);
+    create.setPropertyValue("Extents","0,10,0,10,0,10");
+    create.setPropertyValue("Names","x,y,z");
+    create.setPropertyValue("Units","m,m,m");
+    create.setPropertyValue("SplitInto","10");
+    create.setPropertyValue("OutputWorkspace", "3D_Workspace");
+    create.execute();
     return AnalysisDataService::Instance().retrieve("3D_Workspace");
   }
 
@@ -137,8 +125,10 @@ public:
     TS_ASSERT( alg.isInitialized() )
 
     IMDEventWorkspace_sptr in_ws = MDEventsTestHelper::makeMDEW<3>(10, 0.0, 10.0, numEventsPerBox);
-    in_ws->addExperimentInfo(ExperimentInfo_sptr(new ExperimentInfo));
+    Mantid::Kernel::SpecialCoordinateSystem appliedCoord = Mantid::Kernel::QSample;
+    in_ws->setCoordinateSystem(appliedCoord);
     AnalysisDataService::Instance().addOrReplace("BinMDTest_ws", in_ws);
+    
     // 1000 boxes with 1 event each
     TS_ASSERT_EQUALS( in_ws->getNPoints(), 1000*numEventsPerBox);
 
@@ -161,6 +151,7 @@ public:
     TS_ASSERT(out);
     if(!out) return;
 
+    TS_ASSERT_EQUALS(appliedCoord, out->getSpecialCoordinateSystem());
     // Took 6x6x6 bins in the middle of the box
     TS_ASSERT_EQUALS(out->getNPoints(), expected_numBins);
     // Every box has a single event summed into it, so 1.0 weight
@@ -183,7 +174,7 @@ public:
     TS_ASSERT_EQUALS( out->getBasisVector(0), expectBasisX);
     if (out->getNumDims() > 1) { TS_ASSERT_EQUALS( out->getBasisVector(1), expectBasisY); }
     if (out->getNumDims() > 2) { TS_ASSERT_EQUALS( out->getBasisVector(2), expectBasisZ); }
-    const CoordTransform * ctFrom = out->getTransformFromOriginal();
+    CoordTransform const * ctFrom = out->getTransformFromOriginal();
     TS_ASSERT(ctFrom);
     // Experiment Infos were copied
     TS_ASSERT_EQUALS( out->getNumExperimentInfo(), in_ws->getNumExperimentInfo());
@@ -468,9 +459,9 @@ public:
     { TS_ASSERT_EQUALS( out->getBasisVector(1), baseY);
       TS_ASSERT_EQUALS( out->getBasisVector(2), baseZ); }
 
-    const CoordTransform * ctFrom = out->getTransformFromOriginal();
+    CoordTransform const * ctFrom = out->getTransformFromOriginal();
     TS_ASSERT(ctFrom);
-    const CoordTransform * ctTo = out->getTransformToOriginal();
+    CoordTransform const * ctTo = out->getTransformToOriginal();
     TS_ASSERT(ctTo);
     if (!ctTo) return;
 
@@ -603,8 +594,8 @@ public:
     TS_ASSERT_EQUALS( binned1->numOriginalWorkspaces(), 2);
     TS_ASSERT_EQUALS( binned1->getOriginalWorkspace(1)->name(), "binned0");
     // Transforms to/from the INTERMEDIATE workspace exist
-    CoordTransform * toIntermediate = binned1->getTransformToOriginal(1);
-    CoordTransform * fromIntermediate = binned1->getTransformFromOriginal(1);
+    CoordTransform const * toIntermediate = binned1->getTransformToOriginal(1);
+    CoordTransform const * fromIntermediate = binned1->getTransformFromOriginal(1);
     TS_ASSERT( toIntermediate);
     TS_ASSERT( fromIntermediate );
 
@@ -651,14 +642,14 @@ public:
     TS_ASSERT_EQUALS( binned1->numOriginalWorkspaces(), 2);
     TS_ASSERT_EQUALS( binned1->getOriginalWorkspace(1)->name(), "binned0");
     // Transforms to/from the INTERMEDIATE workspace exist
-    CoordTransform * toIntermediate = binned1->getTransformToOriginal(1);
-    CoordTransform * fromIntermediate = binned1->getTransformFromOriginal(1);
+    CoordTransform const * toIntermediate = binned1->getTransformToOriginal(1);
+    CoordTransform const * fromIntermediate = binned1->getTransformFromOriginal(1);
     TS_ASSERT( toIntermediate);
     TS_ASSERT( fromIntermediate );
 
     // Transforms to/from the REALLY ORIGINAL workspace exist
-    CoordTransform * toOriginal = binned1->getTransformToOriginal(0);
-    CoordTransform * fromOriginal = binned1->getTransformFromOriginal(0);
+    CoordTransform const * toOriginal = binned1->getTransformToOriginal(0);
+    CoordTransform const * fromOriginal = binned1->getTransformFromOriginal(0);
     TS_ASSERT( toOriginal);
     TS_ASSERT( fromOriginal );
 
@@ -729,14 +720,14 @@ public:
     TS_ASSERT_EQUALS( binned1->numOriginalWorkspaces(), 2);
     TS_ASSERT_EQUALS( binned1->getOriginalWorkspace(1)->name(), "binned0");
     // Transforms to/from the INTERMEDIATE workspace exist
-    CoordTransform * toIntermediate = binned1->getTransformToOriginal(1);
-    CoordTransform * fromIntermediate = binned1->getTransformFromOriginal(1);
+    CoordTransform const * toIntermediate = binned1->getTransformToOriginal(1);
+    CoordTransform const * fromIntermediate = binned1->getTransformFromOriginal(1);
     TS_ASSERT( toIntermediate);
     TS_ASSERT( fromIntermediate );
 
     // Transforms to/from the REALLY ORIGINAL workspace exist
-    CoordTransform * toOriginal = binned1->getTransformToOriginal(0);
-    CoordTransform * fromOriginal = binned1->getTransformFromOriginal(0);
+    CoordTransform const * toOriginal = binned1->getTransformToOriginal(0);
+    CoordTransform const * fromOriginal = binned1->getTransformFromOriginal(0);
     TS_ASSERT( toOriginal);
     TS_ASSERT( fromOriginal );
 
@@ -953,12 +944,12 @@ public:
 
     VMD out;
     // Check the mapping of coordinates from C to B
-    CoordTransform * transf_C_to_B = C->getTransformToOriginal(1);
+    CoordTransform const * transf_C_to_B = C->getTransformToOriginal(1);
     out = transf_C_to_B->applyVMD(VMD(-1.5, -1.5));
     TS_ASSERT_EQUALS( out, VMD(-4, -4) );
 
     // And this is the mapping to the A workspace
-    CoordTransform * transf_C_to_A = C->getTransformToOriginal(0);
+    CoordTransform const * transf_C_to_A = C->getTransformToOriginal(0);
     out = transf_C_to_A->applyVMD(VMD(-1.5, -1.5));
     TS_ASSERT_EQUALS( out, VMD(-10, -10) );
   }
@@ -997,6 +988,23 @@ public:
         "OutputBins", "10,10");
     TSM_ASSERT( "Algorithm threw an error, as expected", !alg->isExecuted())
   }
+
+  void test_throws_if_InputWorkspace_pure_IMDHistWorkspace()
+  {
+      BinMD alg;
+      alg.setChild(true);
+      alg.setRethrows(true);
+      alg.initialize();
+      // Histoworkspace with no original workspace or transforms
+      IMDHistoWorkspace_sptr inWS = MDEventsTestHelper::makeFakeMDHistoWorkspace(1 /*signal*/, 2 /*numDims*/, 10 /*numBins*/);
+
+      alg.setProperty("InputWorkspace", inWS); // Input workspace - Pure histogram
+      alg.setProperty("AlignedDim0", "x,0,10,10"); // Values not relevant to this test
+      alg.setProperty("AlignedDim1", "y,0,10,10"); // Values not relevant to this test
+      alg.setPropertyValue("OutputWorkspace", "dummy");
+      TSM_ASSERT_THROWS("Cannot allow BinMD on a pure MDHistoWorkspace. Should throw.", alg.execute(), std::runtime_error&);
+  }
+
 };
 
 
@@ -1063,10 +1071,10 @@ public:
     for (size_t i=0; i<1; i++)
       do_test("2.0,8.0, 1", true);
   }
-private: 
+
 
 };
 
 
-#endif /* MANTID_MDEVENTS_BINTOMDHISTOWORKSPACETEST_H_ */
+#endif /* MANTID_MDALGORITHMS_BINTOMDHISTOWORKSPACETEST_H_ */
 

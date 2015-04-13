@@ -1,19 +1,32 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include <limits>
 #include "MantidCurveFitting/DiffRotDiscreteCircle.h"
-#include "MantidCurveFitting/BoundaryConstraint.h"
+
 #include "MantidAPI/FunctionFactory.h"
-#include <cmath>
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/ParameterTie.h"
+#include "MantidCurveFitting/BoundaryConstraint.h"
+#include "MantidGeometry/IDetector.h"
+#include "MantidKernel/Exception.h"
+#include "MantidKernel/UnitConversion.h"
+
+#include <cmath>
+#include <limits>
+
+namespace {
+Mantid::Kernel::Logger g_log("DiffSphere");
+}
 
 namespace Mantid {
 namespace CurveFitting {
 
-DECLARE_FUNCTION(ElasticDiffRotDiscreteCircle);
-DECLARE_FUNCTION(InelasticDiffRotDiscreteCircle);
-DECLARE_FUNCTION(DiffRotDiscreteCircle);
+using namespace API;
+using namespace Geometry;
+
+DECLARE_FUNCTION(ElasticDiffRotDiscreteCircle)
+DECLARE_FUNCTION(InelasticDiffRotDiscreteCircle)
+DECLARE_FUNCTION(DiffRotDiscreteCircle)
 
 ElasticDiffRotDiscreteCircle::ElasticDiffRotDiscreteCircle() {
   // declareParameter("Height", 1.0); //parameter "Height" already declared in
@@ -54,8 +67,10 @@ InelasticDiffRotDiscreteCircle::InelasticDiffRotDiscreteCircle()
   declareParameter("Decay", 1.0, "Inverse of transition rate, in nanoseconds "
                                  "if energy in micro-ev, or picoseconds if "
                                  "energy in mili-eV");
+  declareParameter("Shift", 0.0, "Shift in domain");
 
-  declareAttribute("Q", API::IFunction::Attribute(0.5));
+  declareAttribute("Q", API::IFunction::Attribute(EMPTY_DBL()));
+  declareAttribute("WorkspaceIndex", API::IFunction::Attribute(0));
   declareAttribute("N", API::IFunction::Attribute(3));
 }
 
@@ -80,8 +95,25 @@ void InelasticDiffRotDiscreteCircle::function1D(double *out,
   const double I = getParameter("Intensity");
   const double R = getParameter("Radius");
   const double rate = m_hbar / getParameter("Decay"); // micro-eV or mili-eV
-  const double Q = getAttribute("Q").asDouble();
   const int N = getAttribute("N").asInt();
+  const double S = getParameter("Shift");
+
+  double Q;
+  if (getAttribute("Q").asDouble() == EMPTY_DBL()) {
+    if (m_qValueCache.size() == 0) {
+      throw std::runtime_error(
+          "No Q attribute provided and cannot retrieve from worksapce.");
+    }
+    const int specIdx = getAttribute("WorkspaceIndex").asInt();
+    Q = m_qValueCache[specIdx];
+
+    g_log.debug() << "Get Q value for workspace index " << specIdx << ": " << Q
+                  << std::endl;
+  } else {
+    Q = getAttribute("Q").asDouble();
+
+    g_log.debug() << "Using Q attribute: " << Q << std::endl;
+  }
 
   std::vector<double> sph(N);
   for (int k = 1; k < N; k++) {
@@ -97,7 +129,7 @@ void InelasticDiffRotDiscreteCircle::function1D(double *out,
   }
 
   for (size_t i = 0; i < nData; i++) {
-    double w = xValues[i];
+    double w = xValues[i] - S;
     double S = 0.0;
     for (int l = 1; l < N; l++) // l goes up to N-1
     {
@@ -113,6 +145,50 @@ void InelasticDiffRotDiscreteCircle::function1D(double *out,
       S += al * lorentzian;
     }
     out[i] = I * S / M_PI;
+  }
+}
+
+/**
+ * Handle seting fit workspace.
+ *
+ * Creates a list of Q values from each spectrum to be used with WorkspaceIndex
+ * attribute.
+ *
+ * @param ws Pointer to workspace
+ */
+void InelasticDiffRotDiscreteCircle::setWorkspace(
+    boost::shared_ptr<const API::Workspace> ws) {
+  m_qValueCache.clear();
+
+  auto workspace = boost::dynamic_pointer_cast<const MatrixWorkspace>(ws);
+  if (!workspace)
+    return;
+
+  size_t numHist = workspace->getNumberHistograms();
+  for (size_t idx = 0; idx < numHist; idx++) {
+    IDetector_const_sptr det;
+    try {
+      det = workspace->getDetector(idx);
+    }
+    catch (Kernel::Exception::NotFoundError &) {
+      m_qValueCache.clear();
+      g_log.information("Cannot populate Q values from workspace");
+      break;
+    }
+
+    try {
+      double efixed = workspace->getEFixed(det);
+      double usignTheta = workspace->detectorTwoTheta(det) / 2.0;
+
+      double q = Mantid::Kernel::UnitConversion::run(usignTheta, efixed);
+
+      m_qValueCache.push_back(q);
+    }
+    catch (std::runtime_error &) {
+      m_qValueCache.clear();
+      g_log.information("Cannot populate Q values from workspace");
+      return;
+    }
   }
 }
 
@@ -166,6 +242,7 @@ void DiffRotDiscreteCircle::init() {
   setAlias("f1.Intensity", "Intensity");
   setAlias("f1.Radius", "Radius");
   setAlias("f1.Decay", "Decay");
+  setAlias("f1.Shift", "Shift");
 
   // Set the ties between Elastic and Inelastic parameters
   addDefaultTies("f0.Height=f1.Intensity,f0.Radius=f1.Radius");

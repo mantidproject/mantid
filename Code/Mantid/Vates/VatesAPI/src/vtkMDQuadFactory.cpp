@@ -82,7 +82,7 @@ namespace Mantid
         vtkIdList * quadPointList = vtkIdList::New();
         quadPointList->SetNumberOfIds(4);
 
-        Mantid::API::CoordTransform* transform = NULL;
+        Mantid::API::CoordTransform const* transform = NULL;
         if (m_useTransform)
         {
           transform = imdws->getTransformToOriginal();

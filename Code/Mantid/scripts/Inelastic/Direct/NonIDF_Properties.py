@@ -34,15 +34,8 @@ class NonIDF_Properties(object):
         # Helper properties, defining logging options
         object.__setattr__(self,'_log_level','notice')
         object.__setattr__(self,'_log_to_mantid',False)
+
         object.__setattr__(self,'_current_log_level',3)
-
-
-        object.__setattr__(self,'_psi',float('NaN'))
-        # SNS motor stuff which is difficult to test as I've never seen it
-        object.__setattr__(self,'_motor_name',None)
-        object.__setattr__(self,'_motor_offset',0)
-
-        object.__setattr__(self,'_save_file_name',None)
 
         self._set_instrument_and_facility(Instrument,run_workspace)
 
@@ -86,20 +79,31 @@ class NonIDF_Properties(object):
     #
     van_rmm = VanadiumRMM()
     # Run descriptors
-    sample_run  = RunDescriptor("SR_","Run ID (number) to convert to energy or list of the such run numbers")
-    wb_run      = RunDescriptor("WB_","Run ID (number) for vanadium run used in detectors calibration")
-    monovan_run = RunDescriptor("MV_","Run ID (number) for monochromatic vanadium used in absolute units normalization ")
+    sample_run  = RunDescriptor("SR_","""Run number, workspace or symbolic presentation of such run
+                  containing data of scattering from a sample to convert to energy transfer.
+                  Also accepts a list of the such run numbers""")
+    wb_run      = RunDescriptor("WB_","""Run number, workspace or symbolic presentation of such run
+                  containing results of white beam neutron scattering from vanadium used in detectors calibration.""")
+    monovan_run = RunDescriptor("MV_","""Run number, workspace or symbolic presentation of such run
+                  containing results of monochromatic neutron beam scattering from vanadium sample
+                  used in absolute units normalization.\n None disables absolute units calculations.""")
 
-    mask_run    = RunDescriptorDependent(sample_run,"MSK_"," Run used to find masks.\n If not explicitly set, sample_run is used""")
-    wb_for_monovan_run = RunDescriptorDependent(wb_run,"MV_WB_"," white beam run used to calculate monovanadium integrals.\n If not explicitly set, white beam for processing run is used")
+    mask_run    = RunDescriptorDependent(sample_run,"MSK_","""Run number, workspace or symbolic presentation of such run
+                  containing results of experiment, used to find masks.\n If not explicitly set, sample_run is used.""")
+    wb_for_monovan_run = RunDescriptorDependent(wb_run,"MV_WB_","""Run number, workspace or symbolic presentation of such run
+                         containing results of white beam neutrons scattering from vanadium, used to calculate monovanadium
+                         integrals for monochromatic vanadium.\n
+                         If not explicitly set, white beam for sample run is used.""")
     # TODO: do something about it.  Second white is explicitly used in
     # diagnostics but not accessed at all
-    second_white  = RunDescriptor("Second white beam currently unused in the  workflow despite being referred to in Diagnostics. Should it be used for Monovan Diagnostics?")
+    second_white  = RunDescriptor("""Second white beam run resutlts currently unused in the workflow 
+                    despite being referred to in Diagnostics.
+                    In a future it should be enabled.""")
     #
-    _tmp_run     = RunDescriptor("_TMP","Property used for storing intermediate run data during reduction")
+    _tmp_run     = RunDescriptor("_TMP","Property used for storing intermediate run data during reduction.")
     #-----------------------------------------------------------------------------------
     def getDefaultParameterValue(self,par_name):
-        """ method to get default parameter value, specified in IDF """
+        """method to get default parameter value, specified in IDF"""
         return prop_helpers.get_default_parameter(self.instrument,par_name)
     @property
     def instrument(self):
@@ -121,54 +125,30 @@ class NonIDF_Properties(object):
     # -----------------------------------------------------------------------------
     @property
     def cashe_sum_ws(self):
-      """ Used together with sum_runs property. If True, a workspace 
-          with partial sum is stored in ADS 
-          and used later to add more runs to it
-      """ 
-      return self._cashe_sum_ws
+        """Used together with sum_runs property. If True, a workspace
+           with partial sum is stored in ADS
+           and used later to add more runs to it
+      """
+        return self._cashe_sum_ws
     @cashe_sum_ws.setter
     def cashe_sum_ws(self,val):
         self._cashe_sum_ws = bool(val)
     # -----------------------------------------------------------------------------
     @property
     def log_to_mantid(self):
-        """ Property specify if high level log should be printed to stdout or added to common Mantid log"""
+        """Property specify if high level log should be printed to stdout or added to common Mantid log"""
         return self._log_to_mantid
 
     @log_to_mantid.setter
     def log_to_mantid(self,val):
         object.__setattr__(self,'_log_to_mantid',bool(val))
-    # -----------------------------------------------------------------------------
-    #-----------------------------------------------------------------------------------
-    @property
-    def psi(self):
-        """ rotation angle (not available from IDF)"""
-        return self._psi
-    @psi.setter
-    def psi(self,value):
-        """set rotation angle (not available from IDF). This value will be saved into NXSpe file"""
-        object.__setattr__(self,'_psi',value)
-    # -----------------------------------------------------------------------------
-    @property
-    def motor_name(self):
-        return self._motor_name
-    @motor_name.setter
-    def motor_name(self,val):
-        object.__setattr__(self,'_motor_name',val)
-    #
-    @property
-    def motor_offset(self):
-        return self._motor_offset
-    @motor_offset.setter
-    def motor_offset(self,val):
-        object.__setattr__(self,'_motor_offset',val)
 
     # -----------------------------------------------------------------------------
     # Service properties (used by class itself)
     #
 
     def _set_instrument_and_facility(self,Instrument,run_workspace=None):
-        """ simple method used to obtain default instrument for testing """
+        """simple method used to obtain default instrument for testing """
         # TODO: implement advanced instrument setter, used in DirectEnergy
         # conversion
 
@@ -204,10 +184,6 @@ class NonIDF_Properties(object):
         object.__setattr__(self,'_instr_name',full_name)
         object.__setattr__(self,'_facility',facility_)
         object.__setattr__(self,'_short_instr_name',new_name)
-
-
-
-
 
 
 if __name__ == "__main__":

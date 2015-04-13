@@ -1,24 +1,57 @@
 #include "MantidGeometry/Crystal/PointGroupFactory.h"
+#include "MantidGeometry/Crystal/SpaceGroup.h"
 
 #include "MantidKernel/LibraryManager.h"
 #include <boost/algorithm/string.hpp>
+#include "MantidGeometry/Crystal/ProductOfCyclicGroups.h"
 
 namespace Mantid {
 namespace Geometry {
 
 /// Creates a PointGroup object from its Hermann-Mauguin symbol.
 PointGroup_sptr
-PointGroupFactoryImpl::createPointGroup(const std::string &hmSymbol) const {
-  PointGroup_sptr pointGroup = create(hmSymbol);
-  pointGroup->init();
+PointGroupFactoryImpl::createPointGroup(const std::string &hmSymbol) {
+  if (!isSubscribed(hmSymbol)) {
+    throw std::invalid_argument("Point group with symbol '" + hmSymbol +
+                                "' is not registered.");
+  }
 
-  return pointGroup;
+  return constructFromPrototype(getPrototype(hmSymbol));
 }
 
-PointGroup_sptr PointGroupFactoryImpl::createPointGroupFromSpaceGroupSymbol(
-    const std::string &spaceGroupSymbol) const {
-  return createPointGroup(
-      pointGroupSymbolFromSpaceGroupSymbol(spaceGroupSymbol));
+PointGroup_sptr PointGroupFactoryImpl::createPointGroupFromSpaceGroup(
+    const SpaceGroup_const_sptr &spaceGroup) {
+  return createPointGroupFromSpaceGroup(*spaceGroup);
+}
+
+PointGroup_sptr PointGroupFactoryImpl::createPointGroupFromSpaceGroup(
+    const SpaceGroup &spaceGroup) {
+  std::string pointGroupSymbol =
+      pointGroupSymbolFromSpaceGroupSymbol(spaceGroup.hmSymbol());
+
+  try {
+    PointGroup_sptr pointGroup = createPointGroup(pointGroupSymbol);
+
+    // If the crystal system is trigonal, we need to do more.
+    if (pointGroup->crystalSystem() == PointGroup::Trigonal) {
+      throw std::invalid_argument(
+          "Trigonal space groups need to be processed differently.");
+    }
+
+    return pointGroup;
+  }
+  catch (std::invalid_argument) {
+    if (spaceGroup.getCoordinateSystem() !=
+        Group::CoordinateSystem::Hexagonal) {
+      pointGroupSymbol.append(" r");
+    }
+
+    return createPointGroup(pointGroupSymbol);
+  }
+}
+
+bool PointGroupFactoryImpl::isSubscribed(const std::string &hmSymbol) const {
+  return m_generatorMap.find(hmSymbol) != m_generatorMap.end();
 }
 
 /// Returns the Hermann-Mauguin symbols of all registered point groups.
@@ -26,8 +59,7 @@ std::vector<std::string>
 PointGroupFactoryImpl::getAllPointGroupSymbols() const {
   std::vector<std::string> pointGroups;
 
-  for (auto it = m_crystalSystemMap.begin(); it != m_crystalSystemMap.end();
-       ++it) {
+  for (auto it = m_generatorMap.begin(); it != m_generatorMap.end(); ++it) {
     pointGroups.push_back(it->first);
   }
 
@@ -37,17 +69,33 @@ PointGroupFactoryImpl::getAllPointGroupSymbols() const {
 /// Returns the Hermann-Mauguin symbols of all point groups that belong to a
 /// certain crystal system.
 std::vector<std::string> PointGroupFactoryImpl::getPointGroupSymbols(
-    const PointGroup::CrystalSystem &crystalSystem) const {
+    const PointGroup::CrystalSystem &crystalSystem) {
   std::vector<std::string> pointGroups;
 
-  for (auto it = m_crystalSystemMap.begin(); it != m_crystalSystemMap.end();
-       ++it) {
-    if (it->second == crystalSystem) {
+  for (auto it = m_generatorMap.begin(); it != m_generatorMap.end(); ++it) {
+    PointGroup_sptr pointGroup = getPrototype(it->first);
+
+    if (pointGroup->crystalSystem() == crystalSystem) {
       pointGroups.push_back(it->first);
     }
   }
 
   return pointGroups;
+}
+
+void
+PointGroupFactoryImpl::subscribePointGroup(const std::string &hmSymbol,
+                                           const std::string &generatorString,
+                                           const std::string &description) {
+  if (isSubscribed(hmSymbol)) {
+    throw std::invalid_argument(
+        "Point group with this symbol is already registered.");
+  }
+
+  PointGroupGenerator_sptr generator = boost::make_shared<PointGroupGenerator>(
+      hmSymbol, generatorString, description);
+
+  subscribe(generator);
 }
 
 /**
@@ -86,29 +134,117 @@ std::string PointGroupFactoryImpl::pointGroupSymbolFromSpaceGroupSymbol(
   return noSpaces;
 }
 
+PointGroup_sptr
+PointGroupFactoryImpl::getPrototype(const std::string &hmSymbol) {
+  PointGroupGenerator_sptr generator = m_generatorMap.find(hmSymbol)->second;
+
+  if (!generator) {
+    throw std::runtime_error("No generator for symbol '" + hmSymbol + "'");
+  }
+
+  return generator->getPrototype();
+}
+
+void
+PointGroupFactoryImpl::subscribe(const PointGroupGenerator_sptr &generator) {
+  if (!generator) {
+    throw std::runtime_error("Cannot register null-generator.");
+  }
+
+  m_generatorMap.insert(std::make_pair(generator->getHMSymbol(), generator));
+}
+
+PointGroup_sptr PointGroupFactoryImpl::constructFromPrototype(
+    const PointGroup_sptr &prototype) const {
+  return boost::make_shared<PointGroup>(*prototype);
+}
+
 /// Private default constructor.
 PointGroupFactoryImpl::PointGroupFactoryImpl()
-    : Kernel::DynamicFactory<PointGroup>(), m_crystalSystemMap(),
+    : m_generatorMap(), m_crystalSystemMap(),
       m_screwAxisRegex("(2|3|4|6)[1|2|3|5]"),
       m_glidePlaneRegex("a|b|c|d|e|g|n"), m_centeringRegex("[A-Z]"),
       m_originChoiceRegex(":(1|2)") {
   Kernel::LibraryManager::Instance();
 }
 
-/// Adds a point group to a map that stores pairs of Hermann-Mauguin symbol and
-/// crystal system.
-void PointGroupFactoryImpl::addToCrystalSystemMap(
-    const PointGroup::CrystalSystem &crystalSystem,
-    const std::string &hmSymbol) {
-  m_crystalSystemMap.insert(std::make_pair(hmSymbol, crystalSystem));
+PointGroupGenerator::PointGroupGenerator(
+    const std::string &hmSymbol, const std::string &generatorInformation,
+    const std::string &description)
+    : m_hmSymbol(hmSymbol), m_generatorString(generatorInformation),
+      m_description(description) {}
+
+PointGroup_sptr PointGroupGenerator::getPrototype() {
+  if (!hasValidPrototype()) {
+    m_prototype = generatePrototype();
+  }
+
+  return m_prototype;
 }
 
-/// Removes point group from internal crystal system map.
-void
-PointGroupFactoryImpl::removeFromCrystalSystemMap(const std::string &hmSymbol) {
-  auto it = m_crystalSystemMap.find(hmSymbol);
-  m_crystalSystemMap.erase(it);
+PointGroup_sptr PointGroupGenerator::generatePrototype() {
+  Group_const_sptr generatingGroup =
+      GroupFactory::create<ProductOfCyclicGroups>(m_generatorString);
+
+  if (!generatingGroup) {
+    throw std::runtime_error(
+        "Could not create group from supplied symmetry operations.");
+  }
+
+  return boost::make_shared<PointGroup>(m_hmSymbol, *generatingGroup,
+                                        m_description);
 }
+
+DECLARE_POINTGROUP("1", "x,y,z", "Triclinic")
+DECLARE_POINTGROUP("-1", "-x,-y,-z", "Triclinic")
+DECLARE_POINTGROUP("2", "-x,y,-z", "Monoclinic, unique axis b")
+DECLARE_POINTGROUP("m", "x,-y,z", "Monoclinic, unique axis b")
+DECLARE_POINTGROUP("2/m", "-x,y,-z; -x,-y,-z", "Monoclinic, unique axis b")
+DECLARE_POINTGROUP("112/m", "-x,-y,z; x,y,-z", "Monoclinic, unique axis c")
+DECLARE_POINTGROUP("222", "-x,-y,z; x,-y,-z", "Orthorombic")
+DECLARE_POINTGROUP("mm2", "-x,-y,z; -x,y,z", "Orthorombic")
+DECLARE_POINTGROUP("mmm", "-x,-y,-z; -x,-y,z; x,-y,-z", "Orthorombic")
+DECLARE_POINTGROUP("4", "-y,x,z", "Tetragonal")
+DECLARE_POINTGROUP("-4", "y,-x,-z", "Tetragonal")
+DECLARE_POINTGROUP("4/m", "-y,x,z; -x,-y,-z", "Tetragonal")
+DECLARE_POINTGROUP("422", "-y,x,z; x,-y,-z", "Tetragonal")
+DECLARE_POINTGROUP("4mm", "-y,x,z; -x,y,z", "Tetragonal")
+DECLARE_POINTGROUP("-42m", "y,-x,-z; x,-y,-z", "Tetragonal")
+DECLARE_POINTGROUP("-4m2", "y,-x,-z; y,x,-z", "Tetragonal")
+DECLARE_POINTGROUP("4/mmm", "-y,x,z; x,y,-z; x,-y,-z", "Tetragonal")
+
+DECLARE_POINTGROUP("3", "-y,x-y,z", "Trigonal - Hexagonal")
+DECLARE_POINTGROUP("-3", "y,y-x,-z", "Trigonal - Hexagonal")
+DECLARE_POINTGROUP("321", "-y,x-y,z; x-y,-y,-z", "Trigonal - Hexagonal")
+DECLARE_POINTGROUP("32", "-y,x-y,z; x-y,-y,-z", "Trigonal - Hexagonal")
+DECLARE_POINTGROUP("312", "-y,x-y,z; x,x-y,-z", "Trigonal - Hexagonal")
+DECLARE_POINTGROUP("3m1", "-y,x-y,z; y-x,y,z", "Trigonal - Hexagonal")
+DECLARE_POINTGROUP("3m", "-y,x-y,z; y-x,y,z", "Trigonal - Hexagonal")
+DECLARE_POINTGROUP("31m", "-y,x-y,z; -x,y-x,z", "Trigonal - Hexagonal")
+DECLARE_POINTGROUP("-3m1", "y,y-x,-z; x-y,-y,-z", "Trigonal - Hexagonal")
+DECLARE_POINTGROUP("-3m", "y,y-x,-z; x-y,-y,-z", "Trigonal - Hexagonal")
+DECLARE_POINTGROUP("-31m", "y,y-x,-z; x,x-y,-z", "Trigonal - Hexagonal")
+
+DECLARE_POINTGROUP("3 r", "z,x,y", "Trigonal - Rhombohedral")
+DECLARE_POINTGROUP("-3 r", "-z,-x,-y", "Trigonal - Rhombohedral")
+DECLARE_POINTGROUP("32 r", "z,x,y; -y,-x,-z", "Trigonal - Rhombohedral")
+DECLARE_POINTGROUP("3m r", "z,x,y; y,x,z", "Trigonal - Rhombohedral")
+DECLARE_POINTGROUP("-3m r", "-z,-x,-y; y,x,z", "Trigonal - Rhombohedral")
+
+DECLARE_POINTGROUP("6", "x-y,x,z", "Hexagonal")
+DECLARE_POINTGROUP("-6", "y-x,-x,-z", "Hexagonal")
+DECLARE_POINTGROUP("6/m", "x-y,x,z; -x,-y,-z", "Hexagonal")
+DECLARE_POINTGROUP("622", "x-y,x,z; x-y,-y,-z", "Hexagonal")
+DECLARE_POINTGROUP("6mm", "x-y,x,z; y-x,y,z", "Hexagonal")
+DECLARE_POINTGROUP("-62m", "y-x,-x,-z; x-y,-y,-z", "Hexagonal")
+DECLARE_POINTGROUP("-6m2", "y-x,-x,-z; y-x,y,z", "Hexagonal")
+DECLARE_POINTGROUP("6/mmm", "x-y,x,z; x-y,-y,-z; -x,-y,-z", "Hexagonal")
+
+DECLARE_POINTGROUP("23", "z,x,y; -x,-y,z; x,-y,-z", "Cubic")
+DECLARE_POINTGROUP("m-3", "-z,-x,-y; -x,-y,z; x,-y,-z", "Cubic")
+DECLARE_POINTGROUP("432", "z,x,y; -y,x,z; x,-y,-z", "Cubic")
+DECLARE_POINTGROUP("-43m", "z,x,y; y,-x,-z; -y,-x,z", "Cubic")
+DECLARE_POINTGROUP("m-3m", "-z,-x,-y; -y,x,z; y,x,-z", "Cubic")
 
 } // namespace Geometry
 } // namespace Mantid

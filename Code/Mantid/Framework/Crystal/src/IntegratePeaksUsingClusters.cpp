@@ -48,10 +48,10 @@ IntegratePeaksUsingClusters::~IntegratePeaksUsingClusters() {}
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string IntegratePeaksUsingClusters::name() const {
   return "IntegratePeaksUsingClusters";
-};
+}
 
 /// Algorithm's version for identification. @see Algorithm::version
-int IntegratePeaksUsingClusters::version() const { return 1; };
+int IntegratePeaksUsingClusters::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
 const std::string IntegratePeaksUsingClusters::category() const {

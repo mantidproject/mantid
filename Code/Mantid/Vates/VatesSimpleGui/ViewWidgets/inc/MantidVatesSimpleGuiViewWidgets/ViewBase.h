@@ -1,6 +1,7 @@
 #ifndef VIEWBASE_H_
 #define VIEWBASE_H_
 
+#include "MantidVatesSimpleGuiViewWidgets/BackgroundRgbProvider.h"
 #include "MantidVatesSimpleGuiViewWidgets/ColorUpdater.h"
 #include "MantidVatesSimpleGuiViewWidgets/WidgetDllOption.h"
 #include "MantidVatesSimpleGuiQtWidgets/ModeControlWidget.h"
@@ -116,15 +117,26 @@ public:
   virtual pqPipelineSource* setPluginSource(QString pluginName, QString wsName);
   /// Determines if source has timesteps (4D).
   virtual bool srcHasTimeSteps(pqPipelineSource *src);
+  /// Set the the background color for the view
+  virtual void setColorForBackground(bool viewSwitched);
   /// Sets the splatterplot button to the desired visibility.
   virtual void setSplatterplot(bool visibility);
   /// Initializes the settings of the color scale 
   virtual void initializeColorScale();
   /// Sets the standard veiw button to the desired visibility.
   virtual void setStandard(bool visibility);
-
   /// Enumeration for Cartesian coordinates
   enum Direction {X, Y, Z};
+  /// Update settings
+  virtual void updateSettings();
+  // Destroy all sources in the view.
+  virtual void destroyAllSourcesInView();
+  // Destroy all sources in a single linear pipeline.
+  virtual void destroySinglePipeline(pqPipelineSource * source);
+   /// Set visibility listener
+  void setVisibilityListener();
+  /// Undo visibiltiy listener
+  void removeVisibilityListener();
 
   QPointer<pqPipelineSource> origSrc; ///< The original source
   QPointer<pqPipelineRepresentation> origRep; ///< The original source representation
@@ -231,6 +243,8 @@ private:
   void handleTimeInfo(vtkSMDoubleVectorProperty *dvp);
 
   ColorUpdater colorUpdater; ///< Handle to the color updating delegator
+  BackgroundRgbProvider backgroundRgbProvider; /// < Holds the manager for background color related tasks.
+   const pqColorMapModel* m_currentColorMapModel;
 
   QString m_temporaryWorkspaceIdentifier;
 };

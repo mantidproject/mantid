@@ -3,17 +3,17 @@
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidKernel/Matrix.h"
 #include "MantidKernel/System.h"
-#include "MantidMDEvents/MDBoxIterator.h"
-#include "MantidMDEvents/MDEventFactory.h"
-#include "MantidMDEvents/MDEventWorkspace.h"
+#include "MantidDataObjects/MDBoxIterator.h"
+#include "MantidDataObjects/MDEventFactory.h"
+#include "MantidDataObjects/MDEventWorkspace.h"
 #include "MantidMDAlgorithms/SaveMD.h"
-#include "MantidMDEvents/MDBox.h"
+#include "MantidDataObjects/MDBox.h"
 #include "MantidAPI/Progress.h"
 #include "MantidKernel/EnabledWhenProperty.h"
 #include <Poco/File.h>
-#include "MantidMDEvents/MDHistoWorkspace.h"
-#include "MantidMDEvents/MDBoxFlatTree.h"
-#include "MantidMDEvents/BoxControllerNeXusIO.h"
+#include "MantidDataObjects/MDHistoWorkspace.h"
+#include "MantidDataObjects/MDBoxFlatTree.h"
+#include "MantidDataObjects/BoxControllerNeXusIO.h"
 
 #if defined(__GLIBCXX__) && __GLIBCXX__ >= 20100121 // libstdc++-4.4.3
 typedef std::unique_ptr< ::NeXus::File> file_holder_type;
@@ -23,7 +23,7 @@ typedef std::auto_ptr< ::NeXus::File> file_holder_type;
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
-using namespace Mantid::MDEvents;
+using namespace Mantid::DataObjects;
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -150,7 +150,7 @@ void SaveMD::doSaveEvents(typename MDEventWorkspace<MDE, nd>::sptr ws) {
     BoxFlatStruct.initFlatStructure(ws, filename);
     // create saver class
     auto Saver = boost::shared_ptr<API::IBoxControllerIO>(
-        new MDEvents::BoxControllerNeXusIO(bc.get()));
+        new DataObjects::BoxControllerNeXusIO(bc.get()));
     Saver->setDataType(sizeof(coord_t), MDE::getTypeName());
     if (MakeFileBacked) {
       // store saver with box controller
@@ -220,7 +220,7 @@ void SaveMD::doSaveEvents(typename MDEventWorkspace<MDE, nd>::sptr ws) {
  *
  * @param ws :: MDHistoWorkspace to save
  */
-void SaveMD::doSaveHisto(Mantid::MDEvents::MDHistoWorkspace_sptr ws) {
+void SaveMD::doSaveHisto(Mantid::DataObjects::MDHistoWorkspace_sptr ws) {
   std::string filename = getPropertyValue("Filename");
 
   // Erase the file if it exists
@@ -234,6 +234,10 @@ void SaveMD::doSaveHisto(Mantid::MDEvents::MDHistoWorkspace_sptr ws) {
 
   // The base entry. Named so as to distinguish from other workspace types.
   file->makeGroup("MDHistoWorkspace", "NXentry", true);
+
+  // Write out the coordinate system
+  file->writeData("coordinate_system",
+                  static_cast<uint32_t>(ws->getSpecialCoordinateSystem()));
 
   // Save the algorithm history under "process"
   ws->getHistory().saveNexus(file);
@@ -317,4 +321,4 @@ void SaveMD::exec() {
 }
 
 } // namespace Mantid
-} // namespace MDEvents
+} // namespace DataObjects

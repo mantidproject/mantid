@@ -12,7 +12,7 @@ namespace Mantid {
 namespace DataHandling {
 
 // Register the algorithm into the algorithm factory
-DECLARE_ALGORITHM(LoadSavuTomoConfig);
+DECLARE_ALGORITHM(LoadSavuTomoConfig)
 
 using namespace Mantid::API;
 
@@ -102,14 +102,16 @@ bool LoadSavuTomoConfig::checkOpenFile(std::string fname,
  * Loads a tomography parameterization file into a newly created table
  * workspace. The file must have the following syntax:
  *
- * <NXentry name="entry1">
- *   <NXprocess name="processing">
- *     <NXnote name="id">
- *       <values id="ID VALUE" params="..." name="..." cite="...">
- *       </values>
- *     </NXnote>
- *   </NXprocess>
- * </NXentry>
+ * @verbatim
+ <NXentry name="entry1">
+   <NXprocess name="processing">
+     <NXnote name="id">
+       <values id="ID VALUE" params="..." name="..." cite="...">
+       </values>
+     </NXnote>
+   </NXprocess>
+ </NXentry>
+@endverbatim
  *
  * @param fname name of the parameterization file
  * @param wsName name of workspace where to load the file data

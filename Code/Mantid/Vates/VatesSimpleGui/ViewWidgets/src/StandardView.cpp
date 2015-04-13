@@ -42,7 +42,6 @@ namespace SimpleGui
  */
   StandardView::StandardView(QWidget *parent) : ViewBase(parent),m_binMDAction(NULL),
                                                                  m_sliceMDAction(NULL),
-                                                                 m_cutMDAction(NULL),
                                                                  m_unbinAction(NULL)
 {
   this->ui.setupUi(this);
@@ -86,15 +85,12 @@ void StandardView::setupViewButtons()
   m_sliceMDAction = new QAction("SliceMD", rebinMenu);
   m_sliceMDAction->setIconVisibleInMenu(false);
 
-  m_cutMDAction = new QAction("CutMD", rebinMenu);
-  m_cutMDAction->setIconVisibleInMenu(false);
 
   m_unbinAction = new QAction("Remove Rebinning", rebinMenu);
   m_unbinAction->setIconVisibleInMenu(false);
 
   rebinMenu->addAction(m_binMDAction);
   rebinMenu->addAction(m_sliceMDAction);
-  rebinMenu->addAction(m_cutMDAction);
   rebinMenu->addAction(m_unbinAction);
 
   this->ui.rebinToolButton->setPopupMode(QToolButton::InstantPopup);
@@ -104,17 +100,10 @@ void StandardView::setupViewButtons()
                    this, SLOT(onBinMD()), Qt::QueuedConnection);
   QObject::connect(m_sliceMDAction, SIGNAL(triggered()),
                    this, SLOT(onSliceMD()), Qt::QueuedConnection);
-  QObject::connect(m_cutMDAction, SIGNAL(triggered()),
-                   this, SLOT(onCutMD()), Qt::QueuedConnection);
   // Set the unbinbutton to remove the rebinning on a workspace
   // which was binned in the VSI
   QObject::connect(m_unbinAction, SIGNAL(triggered()),
                    this, SIGNAL(unbin()), Qt::QueuedConnection);
-
-
-  // Populate the slice button
-
-  // Populate the cut button
 
 }
 
@@ -269,13 +258,11 @@ void StandardView::setRebinAndUnbinButtons()
   {
     this->m_binMDAction->setEnabled(false);
     this->m_sliceMDAction->setEnabled(false);
-    this->m_cutMDAction->setEnabled(false);
   }
   else 
   {
     this->m_binMDAction->setEnabled(true);
     this->m_sliceMDAction->setEnabled(true);
-    this->m_cutMDAction->setEnabled(false);
   }
 
   // If there are no temporary workspaces the button should be disabled.
@@ -306,13 +293,6 @@ void StandardView::onSliceMD()
   emit rebin("SliceMD");
 }
 
-/**
- * Reacts to the user selecting the CutMD algorithm
- */ 
-void StandardView::onCutMD()
-{
-  emit rebin("CutMD");
-}
 
 /**
   * Listen for a change of the active source in order to check if the the 
@@ -325,7 +305,6 @@ void StandardView::activeSourceChangeListener(pqPipelineSource* source)
   {
     this->m_binMDAction->setEnabled(false);
     this->m_sliceMDAction->setEnabled(false);
-    this->m_cutMDAction->setEnabled(false);
     this->m_unbinAction->setEnabled(false);
     return;
   }
@@ -347,21 +326,18 @@ void StandardView::activeSourceChangeListener(pqPipelineSource* source)
   {
     this->m_binMDAction->setEnabled(true);
     this->m_sliceMDAction->setEnabled(true);
-    this->m_cutMDAction->setEnabled(false);
     this->m_unbinAction->setEnabled(true);
   }
   else if (workspaceType.find("MDEW Source") != std::string::npos)
   {
     this->m_binMDAction->setEnabled(true);
     this->m_sliceMDAction->setEnabled(true);
-    this->m_cutMDAction->setEnabled(false);
     this->m_unbinAction->setEnabled(false);
   }
   else
   {
     this->m_binMDAction->setEnabled(false);
     this->m_sliceMDAction->setEnabled(false);
-    this->m_cutMDAction->setEnabled(false);
     this->m_unbinAction->setEnabled(false);
   }
 }

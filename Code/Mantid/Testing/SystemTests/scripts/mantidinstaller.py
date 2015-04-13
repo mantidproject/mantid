@@ -69,7 +69,7 @@ def get_installer(package_dir, do_install=True):
         dist = platform.dist()
         if dist[0] == 'Ubuntu':
             return DebInstaller(package_dir, do_install)
-        elif dist[0] == 'redhat':
+        elif dist[0].lower() == 'redhat' or dist[0].lower() == 'fedora':
             return RPMInstaller(package_dir, do_install)
         else:
             scriptfailure('Unknown Linux flavour: %s' % str(dist))

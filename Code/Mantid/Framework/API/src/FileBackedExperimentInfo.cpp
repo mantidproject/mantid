@@ -2,9 +2,12 @@
 // Includes
 //----------------------------------------------------------------------------------------------
 #include "MantidAPI/FileBackedExperimentInfo.h"
-#include <nexus/NeXusException.hpp>
 
 #include <sstream>
+
+#include <nexus/NeXusException.hpp>
+#include <nexus/NeXusFile.hpp>
+
 
 namespace Mantid {
 namespace API {
@@ -17,19 +20,20 @@ Kernel::Logger g_log("FileBackedExperimentInfo");
 
 /**
   * Create an object based on a NeXus file and path
-  * @param file A pointer to an open NeXus file object
-  * @param path Path to the location of the data
+  * @param filename The full path to the file
+  * @param nxpath Path to the location of the experiment information
   */
-FileBackedExperimentInfo::FileBackedExperimentInfo(::NeXus::File *file,
-                                                   const std::string &path)
-    : ExperimentInfo(), m_loaded(false), m_file(file), m_path(path) {}
+FileBackedExperimentInfo::FileBackedExperimentInfo(const std::string &filename,
+                                                   const std::string &nxpath)
+    : ExperimentInfo(), m_loaded(false), m_filename(filename), m_nxpath(nxpath) {}
 
 /**
- * @return A clone of the object
+ * This clones the FileBackedExperimentInfo and will not cause a load 
+ * of the information.
+ * @return A clone of the object.
  */
 ExperimentInfo *FileBackedExperimentInfo::cloneExperimentInfo() const {
-  populateIfNotLoaded();
-  return ExperimentInfo::cloneExperimentInfo();
+  return new FileBackedExperimentInfo(*this);
 }
 
 /// @returns A human-readable description of the object
@@ -288,7 +292,8 @@ void FileBackedExperimentInfo::populateIfNotLoaded() const {
  */
 void FileBackedExperimentInfo::populateFromFile() const {
   try {
-    m_file->openPath(m_path);
+    ::NeXus::File nxFile(m_filename);
+    nxFile.openPath(m_nxpath);
     // The loadExperimentInfo calls things such as mutableSample()
     // and if m_loaded is not true then this function is
     // will be called recursively.
@@ -296,7 +301,7 @@ void FileBackedExperimentInfo::populateFromFile() const {
 
     std::string parameterStr;
     const_cast<FileBackedExperimentInfo *>(this)
-        ->loadExperimentInfoNexus(m_file, parameterStr);
+        ->loadExperimentInfoNexus(&nxFile, parameterStr);
     const_cast<FileBackedExperimentInfo *>(this)
         ->readParameterMap(parameterStr);
   } catch (::NeXus::Exception &exc) {

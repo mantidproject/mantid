@@ -6,13 +6,17 @@
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/AlgorithmManager.h"
 
+#include "MantidKernel/Matrix.h"
+
 #include "MantidSINQ/PoldiFitPeaks2D.h"
+#include "MantidSINQ/PoldiUtilities/PoldiSpectrumDomainFunction.h"
 #include "MantidSINQ/PoldiUtilities/PoldiMockInstrumentHelpers.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid::Poldi;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
+using namespace Mantid::Kernel;
 
 class PoldiFitPeaks2DTest : public CxxTest::TestSuite
 {
@@ -95,6 +99,7 @@ public:
         PoldiPeakCollection_sptr testPeaks = PoldiPeakCollectionHelpers::createPoldiPeakCollectionMaximum();
 
         TestablePoldiFitPeaks2D spectrumCalculator;
+        spectrumCalculator.initialize();
         // deltaT is not set, so this must fail
         TS_ASSERT_THROWS(spectrumCalculator.getIntegratedPeakCollection(testPeaks), std::invalid_argument);
         spectrumCalculator.setDeltaT(3.0);
@@ -113,7 +118,17 @@ public:
         TS_ASSERT_EQUALS(integratedTestPeaks->peakCount(), testPeaks->peakCount());
 
         // checking the actual integration result agains reference.
-        PoldiPeakCollection_sptr integratedReference = PoldiPeakCollectionHelpers::createPoldiPeakCollectionIntegral();
+        PoldiPeakCollection_sptr integratedReference(new PoldiPeakCollection(PoldiPeakCollection::Integral));
+        for(size_t i = 0; i < testPeaks->peakCount(); ++i) {
+            PoldiPeak_sptr peak = testPeaks->peak(i)->clone();
+
+            double oldIntensity = peak->intensity();
+            double fwhm = peak->fwhm(PoldiPeak::AbsoluteD);
+
+            // Integral of gaussian is height * sigma * sqrt(2 * pi)
+            peak->setIntensity(UncertainValue(oldIntensity * fwhm / (2.0 * sqrt(2.0 * log(2.0))) * sqrt(2.0 * M_PI)));
+            integratedReference->addPeak(peak);
+        }
 
         // compare result to relative error of 1e-6
         compareIntensities(integratedTestPeaks, integratedReference, 1e-6);
@@ -127,9 +142,10 @@ public:
         TS_ASSERT_EQUALS(alreadyIntegratedResult->peakCount(), alreadyIntegratedPeaks->peakCount());
         TS_ASSERT_EQUALS(alreadyIntegratedResult->peak(0)->d(), alreadyIntegratedPeaks->peak(0)->d());
 
-        // Where there's no profile function specified, the integration can not be performed.
+        // Where there's no profile function in the peak collection, falling back to the property PeakProfileFunction.
+        // Default is Gaussian, so this is supposed to work.
         PoldiPeakCollection_sptr noProfilePeaks(new PoldiPeakCollection);
-        TS_ASSERT_THROWS(spectrumCalculator.getIntegratedPeakCollection(noProfilePeaks), std::runtime_error);
+        TS_ASSERT_THROWS_NOTHING(spectrumCalculator.getIntegratedPeakCollection(noProfilePeaks));
 
         // When there is no valid PoldiPeakCollection, the method also throws
         PoldiPeakCollection_sptr invalidPeakCollection;
@@ -188,6 +204,8 @@ public:
     void testGetFunctionFromPeakCollection()
     {
         TestablePoldiFitPeaks2D spectrumCalculator;
+        spectrumCalculator.initialize();
+
         PoldiPeakCollection_sptr peaks = PoldiPeakCollectionHelpers::createPoldiPeakCollectionNormalized();
 
         boost::shared_ptr<Poldi2DFunction> poldi2DFunction = spectrumCalculator.getFunctionFromPeakCollection(peaks);
@@ -196,18 +214,36 @@ public:
 
         for(size_t i = 0; i < poldi2DFunction->nFunctions(); ++i) {
             IFunction_sptr rawFunction = poldi2DFunction->getFunction(i);
-            TS_ASSERT(boost::dynamic_pointer_cast<IFunction1DSpectrum>(rawFunction));
-            TS_ASSERT_EQUALS(rawFunction->parameterName(0), "Area");
-            TS_ASSERT_EQUALS(rawFunction->getParameter(0), peaks->peak(i)->intensity());
+            boost::shared_ptr<PoldiSpectrumDomainFunction> poldiFunction =
+                boost::dynamic_pointer_cast<PoldiSpectrumDomainFunction>(rawFunction);
+
+            TS_ASSERT(poldiFunction);
+
+            IPeakFunction_sptr wrappedFunction = poldiFunction->getProfileFunction();
+
+            TS_ASSERT_DELTA(wrappedFunction->intensity(), static_cast<double>(peaks->peak(i)->intensity()), 1e-10);
         }
     }
 
     void testGetPeakCollectionFromFunction()
     {
         TestablePoldiFitPeaks2D spectrumCalculator;
-        PoldiPeakCollection_sptr peaks = PoldiPeakCollectionHelpers::createPoldiPeakCollectionNormalized();
+        spectrumCalculator.initialize();
 
+        PoldiPeakCollection_sptr peaks = PoldiPeakCollectionHelpers::createPoldiPeakCollectionNormalized();
         IFunction_sptr poldi2DFunction = spectrumCalculator.getFunctionFromPeakCollection(peaks);
+
+        size_t nParams = poldi2DFunction->nParams();
+
+        // Make a matrix with diagonal elements = 0.05 and set as covariance matrix
+        boost::shared_ptr<DblMatrix> matrix = boost::make_shared<DblMatrix>(nParams, nParams, true);
+        matrix->operator *=(0.05);
+        poldi2DFunction->setCovarianceMatrix(matrix);
+
+        // Also set errors for old behavior
+        for(size_t i = 0; i < nParams; ++i) {
+            poldi2DFunction->setError(i, sqrt(0.05));
+        }
 
         PoldiPeakCollection_sptr peaksFromFunction = spectrumCalculator.getPeakCollectionFromFunction(poldi2DFunction);
 
@@ -216,9 +252,11 @@ public:
             PoldiPeak_sptr functionPeak = peaksFromFunction->peak(i);
             PoldiPeak_sptr referencePeak = peaks->peak(i);
 
-            TS_ASSERT_EQUALS(functionPeak->d(), referencePeak->d());
-            TS_ASSERT_EQUALS(functionPeak->fwhm(), referencePeak->fwhm());
-            TS_ASSERT_EQUALS(functionPeak->intensity(), referencePeak->intensity());
+            TS_ASSERT_EQUALS(functionPeak->d().value(), referencePeak->d().value());
+            TS_ASSERT_EQUALS(functionPeak->fwhm().value(), referencePeak->fwhm().value());
+            TS_ASSERT_DELTA(functionPeak->d().error(), sqrt(0.05), 1e-6);
+            TS_ASSERT_DELTA(functionPeak->fwhm(PoldiPeak::AbsoluteD).error(), sqrt(0.05) * (2.0 * sqrt(2.0 * log(2.0))), 1e-6);
+
         }
     }
 

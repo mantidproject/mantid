@@ -18,6 +18,7 @@
 #include "MantidKernel/UnitLabelTypes.h"
 #include "MantidNexus/MuonNexusReader.h"
 #include "MantidNexus/NexusClasses.h"
+#include "MantidAPI/SpectrumDetectorMapping.h"
 
 #include <Poco/Path.h>
 #include <limits>
@@ -29,7 +30,7 @@ namespace DataHandling {
 using namespace DataObjects;
 
 // Register the algorithm into the algorithm factory
-DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadMuonNexus1);
+DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadMuonNexus1)
 
 using namespace Kernel;
 using namespace API;
@@ -122,13 +123,37 @@ void LoadMuonNexus1::exec() {
     m_numberOfPeriods = nxload.t_nper;
   }
 
-  // Try to load dead time info
-  loadDeadTimes(root);
-
   bool autoGroup = getProperty("AutoGroup");
 
   // Grouping info should be returned if user has set the property
   bool returnGrouping = !getPropertyValue("DetectorGroupingTable").empty();
+
+  // Call private method to validate the optional parameters, if set
+  checkOptionalProperties();
+  // Calculate the size of a workspace, given its number of periods & spectra to
+  // read
+  int64_t total_specs;
+  if (m_interval || m_list) {
+    // Remove from list possible duplicate specs
+    for (auto it=m_spec_list.begin(); it!=m_spec_list.end(); ) {
+      if ( (*it>=m_spec_min) && (*it<=m_spec_max) ) {
+        it = m_spec_list.erase(it);
+      } else {
+        ++it;
+      }
+    }
+    total_specs = m_spec_list.size();
+    if (m_interval) {
+      total_specs += (m_spec_max - m_spec_min + 1);
+      m_spec_max += 1;
+    }
+  } else {
+    total_specs = m_numberOfSpectra;
+    // for nexus return all spectra
+    m_spec_min = 1;
+    m_spec_max = m_numberOfSpectra+1; // Add +1 to iterate
+  }
+
 
   Workspace_sptr loadedGrouping;
 
@@ -153,37 +178,13 @@ void LoadMuonNexus1::exec() {
   boost::shared_ptr<Instrument> instrument;
   boost::shared_ptr<Sample> sample;
 
-  // Call private method to validate the optional parameters, if set
-  checkOptionalProperties();
-
   // Read the number of time channels (i.e. bins) from the Nexus file
   const int channelsPerSpectrum = nxload.t_ntc1;
   // Read in the time bin boundaries
   const int lengthIn = channelsPerSpectrum + 1;
 
-  // Calculate the size of a workspace, given its number of periods & spectra to
-  // read
-  int64_t total_specs;
-  if (m_interval || m_list) {
-    // Remove from list possible duplicate specs
-    for (auto it=m_spec_list.begin(); it!=m_spec_list.end(); ) {
-      if ( (*it>=m_spec_min) && (*it<=m_spec_max) ) {
-        it = m_spec_list.erase(it);
-      } else {
-        ++it;
-      }
-    }
-    total_specs = m_spec_list.size();
-    if (m_interval) {
-      total_specs += (m_spec_max - m_spec_min + 1);
-      m_spec_max += 1;
-    }
-  } else {
-    total_specs = m_numberOfSpectra;
-    // for nexus return all spectra
-    m_spec_min = 1;
-    m_spec_max = m_numberOfSpectra+1; // Add +1 to iterate
-  }
+  // Try to load dead time info
+  loadDeadTimes(root);
 
   // Create the 2D workspace for the output
   DataObjects::Workspace2D_sptr localWorkspace =
@@ -269,6 +270,13 @@ void LoadMuonNexus1::exec() {
         groupingTable =
             boost::dynamic_pointer_cast<TableWorkspace>(group->getItem(period));
       }
+      std::vector<int> specIDs, detecIDs;
+      for (size_t i=0; i<localWorkspace->getNumberHistograms(); i++) {
+        specIDs.push_back(localWorkspace->getSpectrum(i)->getSpectrumNo());
+        detecIDs.push_back(localWorkspace->getSpectrum(i)->getSpectrumNo());
+      }
+      API::SpectrumDetectorMapping mapping(specIDs,detecIDs);
+      localWorkspace->updateSpectraUsing(mapping);
 
       Algorithm_sptr groupDet = createChildAlgorithm("MuonGroupDetectors");
       groupDet->setProperty("InputWorkspace", localWorkspace);
@@ -317,45 +325,76 @@ void LoadMuonNexus1::loadDeadTimes(NXRoot &root) {
 
     int numDeadTimes = deadTimesData.dim0();
 
+    std::vector<int> specToLoad;
     std::vector<double> deadTimes;
-    deadTimes.reserve(numDeadTimes);
 
-    for (int i = 0; i < numDeadTimes; i++)
-      deadTimes.push_back(deadTimesData[i]);
+    // Set the spectrum list that should be loaded
+    if ( m_interval || m_list ) {
+      // Load only selected spectra
+      for (int64_t i=m_spec_min; i<m_spec_max; i++) {
+        specToLoad.push_back(static_cast<int>(i));
+      }
+      for (auto it=m_spec_list.begin(); it!=m_spec_list.end(); ++it) {
+        specToLoad.push_back(*it);
+      }
+    } else {
+      // Load all the spectra
+      // Start from 1 to N+1 to be consistent with 
+      // the case where spectra are specified
+      for (int i=1; i<numDeadTimes/m_numberOfPeriods+1; i++)
+        specToLoad.push_back(i);
+    }
+
 
     if (numDeadTimes < m_numberOfSpectra) {
+      // Check number of dead time entries match the number of 
+      // spectra in the nexus file
       throw Exception::FileError(
-          "Number of dead times specified is less than number of spectra",
-          m_filename);
-    } else if (numDeadTimes == m_numberOfSpectra) {
-      // Simpliest case - one dead time for one detector
+        "Number of dead times specified is less than number of spectra",
+        m_filename);
 
-      TableWorkspace_sptr table =
-          createDeadTimeTable(deadTimes.begin(), deadTimes.end());
-      setProperty("DeadTimeTable", table);
+    } else if (numDeadTimes % m_numberOfSpectra) {
+
+      // At least, number of dead times should cover the number of spectra
+      throw Exception::FileError(
+        "Number of dead times doesn't cover every spectrum in every period",
+        m_filename);
     } else {
-      // More complex case - different dead times for different periods
 
-      if (numDeadTimes != m_numberOfSpectra * m_numberOfPeriods) {
-        throw Exception::FileError(
-            "Number of dead times doesn't cover every spectra in every period",
-            m_filename);
+      if ( m_numberOfPeriods == 1 ) {
+        // Simpliest case - one dead time for one detector
+
+        // Populate deadTimes
+        for (auto it=specToLoad.begin(); it!=specToLoad.end(); ++it) {
+          deadTimes.push_back(deadTimesData[*it-1]);
+        }
+        // Load into table
+        TableWorkspace_sptr table = createDeadTimeTable(specToLoad, deadTimes);
+        setProperty("DeadTimeTable", table);
+
+      } else {
+        // More complex case - different dead times for different periods
+
+        WorkspaceGroup_sptr tableGroup = boost::make_shared<WorkspaceGroup>();
+
+        for (int64_t i=0; i<m_numberOfPeriods; i++) {
+
+          // Populate deadTimes
+          for (auto it=specToLoad.begin(); it!=specToLoad.end(); ++it) {
+            int index = static_cast<int>(*it -1 + i*m_numberOfSpectra);
+            deadTimes.push_back(deadTimesData[index]);
+          }
+
+          // Load into table
+          TableWorkspace_sptr table = createDeadTimeTable(specToLoad,deadTimes);
+
+          tableGroup->addWorkspace(table);
+        }
+
+        setProperty("DeadTimeTable", tableGroup);
       }
-
-      WorkspaceGroup_sptr tableGroup = boost::make_shared<WorkspaceGroup>();
-
-      for (auto it = deadTimes.begin(); it != deadTimes.end();
-           it += m_numberOfSpectra) {
-        TableWorkspace_sptr table =
-            createDeadTimeTable(it, it + m_numberOfSpectra);
-
-        tableGroup->addWorkspace(table);
-      }
-
-      setProperty("DeadTimeTable", tableGroup);
     }
   }
-
   // It is expected that file might not contain any dead times, so not finding
   // them is not an
   // error
@@ -375,66 +414,110 @@ Workspace_sptr LoadMuonNexus1::loadDetectorGrouping(NXRoot &root) {
 
     int numGroupingEntries = groupingData.dim0();
 
+    std::vector<int> specToLoad;
     std::vector<int> grouping;
-    grouping.reserve(numGroupingEntries);
 
-    for (int i = 0; i < numGroupingEntries; i++)
-      grouping.push_back(groupingData[i]);
+    // Set the spectrum list that should be loaded
+    if ( m_interval || m_list ) {
+      // Load only selected spectra
+      for (int64_t i=m_spec_min; i<m_spec_max; i++) {
+        specToLoad.push_back(static_cast<int>(i));
+      }
+      for (auto it=m_spec_list.begin(); it!=m_spec_list.end(); ++it) {
+        specToLoad.push_back(*it);
+      }
+    } else {
+      // Load all the spectra
+      // Start from 1 to N+1 to be consistent with 
+      // the case where spectra are specified
+      for (int i=1; i<m_numberOfSpectra+1; i++)
+        specToLoad.push_back(i);
+    }
 
     if (numGroupingEntries < m_numberOfSpectra) {
+      // Check number of dead time entries match the number of 
+      // spectra in the nexus file
       throw Exception::FileError(
           "Number of grouping entries is less than number of spectra",
           m_filename);
-    } else if (numGroupingEntries == m_numberOfSpectra) {
-      // Simpliest case - one grouping entry per spectra
-      TableWorkspace_sptr table =
-          createDetectorGroupingTable(grouping.begin(), grouping.end());
 
-      if (table->rowCount() != 0)
-        return table;
+    } else if (numGroupingEntries % m_numberOfSpectra) {
+      // At least the number of entries should cover all the spectra
+      throw Exception::FileError("Number of grouping entries doesn't cover "
+        "every spectrum in every period",
+        m_filename);
+
     } else {
-      // More complex case - grouping information for every period
 
-      if (numGroupingEntries != m_numberOfSpectra * m_numberOfPeriods) {
-        throw Exception::FileError("Number of grouping entries doesn't cover "
-                                   "every spectra in every period",
-                                   m_filename);
-      }
+      if ( m_numberOfPeriods==1 ) {
+        // Simpliest case - one grouping entry per spectrum
 
-      WorkspaceGroup_sptr tableGroup = boost::make_shared<WorkspaceGroup>();
+        if ( !m_entrynumber ) {
+          // m_entrynumber = 0 && m_numberOfPeriods = 1 means that user did not select 
+          // any periods but there is only one in the dataset
+          for (auto it=specToLoad.begin(); it!=specToLoad.end(); ++it) {
+            int index = *it - 1;
+            grouping.push_back(groupingData[index]);
+          }
+        } else {
+          // User selected an entry number
+          for (auto it=specToLoad.begin(); it!=specToLoad.end(); ++it) {
+            int index = *it - 1 + static_cast<int>((m_entrynumber-1) * m_numberOfSpectra);
+            grouping.push_back(groupingData[index]);
+          }
+        }
 
-      for (auto it = grouping.begin(); it != grouping.end();
-           it += m_numberOfSpectra) {
         TableWorkspace_sptr table =
-            createDetectorGroupingTable(it, it + m_numberOfSpectra);
+          createDetectorGroupingTable(specToLoad,grouping);
 
         if (table->rowCount() != 0)
-          tableGroup->addWorkspace(table);
-      }
+          return table;
 
-      if (tableGroup->size() != 0) {
-        if (tableGroup->size() != static_cast<size_t>(m_numberOfPeriods))
-          throw Exception::FileError("Zero grouping for some of the periods",
-                                     m_filename);
+      } else {
+        // More complex case - grouping information for every period
 
-        return tableGroup;
+        WorkspaceGroup_sptr tableGroup = boost::make_shared<WorkspaceGroup>();
+
+        for (int i=0; i<m_numberOfPeriods; i++) {
+
+          // Get the grouping
+          grouping.clear();
+          for (auto it=specToLoad.begin(); it!=specToLoad.end(); ++it) {
+            int index = *it - 1 + i * static_cast<int>(m_numberOfSpectra);
+            grouping.push_back(groupingData[index]);
+          }
+
+          // Set table for period i
+          TableWorkspace_sptr table =
+            createDetectorGroupingTable(specToLoad,grouping);
+
+          // Add table to group
+          if (table->rowCount() != 0)
+            tableGroup->addWorkspace(table);
+        }
+
+        if (tableGroup->size() != 0) {
+          if (tableGroup->size() != static_cast<size_t>(m_numberOfPeriods))
+            throw Exception::FileError("Zero grouping for some of the periods",
+            m_filename);
+
+          return tableGroup;
+        }
       }
     }
   }
-
   return Workspace_sptr();
 }
 
 /**
  * Creates Dead Time Table using all the data between begin and end.
- *
- * @param begin :: Iterator to the first element of the data to use
- * @param   end :: Iterator to the last element of the data to use
+ * @param specToLoad :: vector containing the spectrum numbers to load
+ * @param deadTimes :: vector containing the corresponding dead times
  * @return Dead Time Table create using the data
  */
 TableWorkspace_sptr
-LoadMuonNexus1::createDeadTimeTable(std::vector<double>::const_iterator begin,
-                                    std::vector<double>::const_iterator end) {
+LoadMuonNexus1::createDeadTimeTable(std::vector<int> specToLoad,
+                                    std::vector<double> deadTimes) {
   TableWorkspace_sptr deadTimeTable =
       boost::dynamic_pointer_cast<TableWorkspace>(
           WorkspaceFactory::Instance().createTable("TableWorkspace"));
@@ -442,11 +525,9 @@ LoadMuonNexus1::createDeadTimeTable(std::vector<double>::const_iterator begin,
   deadTimeTable->addColumn("int", "spectrum");
   deadTimeTable->addColumn("double", "dead-time");
 
-  int s = 1; // Current spectrum
-
-  for (auto it = begin; it != end; it++) {
+  for (size_t i = 0; i<specToLoad.size(); i++) {
     TableRow row = deadTimeTable->appendRow();
-    row << s++ << *it;
+    row << specToLoad[i] << deadTimes[i];
   }
 
   return deadTimeTable;
@@ -455,27 +536,27 @@ LoadMuonNexus1::createDeadTimeTable(std::vector<double>::const_iterator begin,
 /**
  * Creates Detector Grouping Table using all the data between begin and end.
  *
- * @param begin :: Iterator to the first element of the data to use
- * @param   end :: Iterator to the last element of the data to use
+ * @param specToLoad :: Vector containing the spectrum list to load
+ * @param grouping :: Vector containing corresponding grouping
  * @return Detector Grouping Table create using the data
  */
 TableWorkspace_sptr LoadMuonNexus1::createDetectorGroupingTable(
-    std::vector<int>::const_iterator begin,
-    std::vector<int>::const_iterator end) {
+    std::vector<int> specToLoad,
+    std::vector<int> grouping) {
   auto detectorGroupingTable = boost::dynamic_pointer_cast<TableWorkspace>(
       WorkspaceFactory::Instance().createTable("TableWorkspace"));
 
   detectorGroupingTable->addColumn("vector_int", "Detectors");
 
-  std::map<int, std::vector<int>> grouping;
+  std::map<int, std::vector<int>> groupingMap;
 
-  for (auto it = begin; it != end; ++it) {
+  for (size_t i=0; i<specToLoad.size(); i++) {
     // Add detector ID to the list of group detectors. Detector ID is always
     // spectra index + 1
-    grouping[*it].push_back(static_cast<int>(std::distance(begin, it)) + 1);
+    groupingMap[grouping[i]].push_back(specToLoad[i]);
   }
 
-  for (auto it = grouping.begin(); it != grouping.end(); ++it) {
+  for (auto it = groupingMap.begin(); it != groupingMap.end(); ++it) {
     if (it->first != 0) // Skip 0 group
     {
       TableRow newRow = detectorGroupingTable->appendRow();
@@ -488,7 +569,8 @@ TableWorkspace_sptr LoadMuonNexus1::createDetectorGroupingTable(
 
 /** Load in a single spectrum taken from a NeXus file
 *  @param hist ::     The workspace index
-*  @param i ::        The spectrum number
+*  @param i ::        The spectrum index
+*  @param specNo ::   The spectrum number
 *  @param nxload ::   A reference to the MuonNeXusReader object
 *  @param lengthIn :: The number of elements in a spectrum
 *  @param localWorkspace :: A pointer to the workspace in which the data will be
@@ -513,7 +595,7 @@ void LoadMuonNexus1::loadData(size_t hist, specid_t &i, specid_t specNo, MuonNex
   // Populate the workspace. Loop starts from 1, hence i-1
 
   // Create and fill another vector for the X axis  
-  float *timeChannels = new float[lengthIn+1];
+  float *timeChannels = new float[lengthIn+1]();
   nxload.getTimeChannels(timeChannels, static_cast<const int>(lengthIn+1));
   // Put the read in array into a vector (inside a shared pointer)
   boost::shared_ptr<MantidVec> timeChannelsVec(

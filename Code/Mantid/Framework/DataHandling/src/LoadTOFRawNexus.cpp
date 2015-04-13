@@ -13,13 +13,16 @@
 namespace Mantid {
 namespace DataHandling {
 
-DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadTOFRawNexus);
+DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadTOFRawNexus)
 
 using namespace Kernel;
 using namespace API;
 using namespace DataObjects;
 
-LoadTOFRawNexus::LoadTOFRawNexus() {}
+LoadTOFRawNexus::LoadTOFRawNexus(): m_numPixels(0), m_signalNo(0), pulseTimes(0),
+    m_numBins(0), m_spec_min(0), m_dataField(""), m_axisField(""), m_xUnits(""),
+    m_fileMutex(), m_assumeOldFile(false) {
+}
 
 //-------------------------------------------------------------------------------------------------
 /// Initialisation method.
@@ -89,8 +92,8 @@ int LoadTOFRawNexus::confidence(Kernel::NexusDescriptor &descriptor) const {
 void LoadTOFRawNexus::countPixels(const std::string &nexusfilename,
                                   const std::string &entry_name,
                                   std::vector<std::string> &bankNames) {
-  numPixels = 0;
-  numBins = 0;
+  m_numPixels = 0;
+  m_numBins = 0;
   m_dataField = "";
   m_axisField = "";
   bankNames.clear();
@@ -123,17 +126,17 @@ void LoadTOFRawNexus::countPixels(const std::string &nexusfilename,
               if (file->hasAttr("signal")) {
                 int signal = 0;
                 file->getAttr("signal", signal);
-                if (signal == signalNo) {
+                if (signal == m_signalNo) {
                   // That's the right signal!
                   m_dataField = it->first;
                   // Find the corresponding X axis
                   std::string axes;
                   m_assumeOldFile = false;
                   if (!file->hasAttr("axes")) {
-                    if (1 != signalNo) {
+                    if (1 != m_signalNo) {
                       throw std::runtime_error(
                           "Your chosen signal number, " +
-                          Strings::toString(signalNo) +
+                          Strings::toString(m_signalNo) +
                           ", corresponds to the data field '" + m_dataField +
                           "' has no 'axes' attribute specifying.");
                     } else {
@@ -152,14 +155,14 @@ void LoadTOFRawNexus::countPixels(const std::string &nexusfilename,
                   if (allAxes.size() != 3)
                     throw std::runtime_error(
                         "Your chosen signal number, " +
-                        Strings::toString(signalNo) +
+                        Strings::toString(m_signalNo) +
                         ", corresponds to the data field '" + m_dataField +
                         "' which has only " +
                         Strings::toString(allAxes.size()) +
                         " dimension. Expected 3 dimensions.");
 
                   m_axisField = allAxes.back();
-                  g_log.information() << "Loading signal " << signalNo << ", "
+                  g_log.information() << "Loading signal " << m_signalNo << ", "
                                       << m_dataField << " with axis "
                                       << m_axisField << std::endl;
                   file->closeData();
@@ -177,7 +180,7 @@ void LoadTOFRawNexus::countPixels(const std::string &nexusfilename,
 
   if (m_dataField.empty())
     throw std::runtime_error("Your chosen signal number, " +
-                             Strings::toString(signalNo) +
+                             Strings::toString(m_signalNo) +
                              ", was not found in any of the data fields of any "
                              "'bankX' group. Cannot load file.");
 
@@ -201,7 +204,7 @@ void LoadTOFRawNexus::countPixels(const std::string &nexusfilename,
             size_t newPixels = 1;
             for (size_t i = 0; i < dims.size(); i++)
               newPixels *= dims[i];
-            numPixels += newPixels;
+            m_numPixels += newPixels;
           }
         } else {
           bankNames.push_back(name);
@@ -216,7 +219,7 @@ void LoadTOFRawNexus::countPixels(const std::string &nexusfilename,
           file->closeData();
 
           if (!xdim.empty() && !ydim.empty()) {
-            numPixels += (xdim[0] * ydim[0]);
+            m_numPixels += (xdim[0] * ydim[0]);
           }
         }
 
@@ -231,7 +234,7 @@ void LoadTOFRawNexus::countPixels(const std::string &nexusfilename,
             m_xUnits = "microsecond"; // use default
           file->closeData();
           if (!dims.empty())
-            numBins = dims[0] - 1;
+            m_numBins = dims[0] - 1;
         }
 
         file->closeGroup();
@@ -294,14 +297,14 @@ void LoadTOFRawNexus::loadBank(const std::string &nexusfilename,
   file->openGroup("instrument", "NXinstrument");
   file->openGroup(bankName, "NXdetector");
 
-  size_t numPixels = 0;
+  size_t m_numPixels = 0;
   std::vector<uint32_t> pixel_id;
 
   if (!m_assumeOldFile) {
     // Load the pixel IDs
     file->readData("pixel_id", pixel_id);
-    numPixels = pixel_id.size();
-    if (numPixels == 0) {
+    m_numPixels = pixel_id.size();
+    if (m_numPixels == 0) {
       file->close();
       m_fileMutex.unlock();
       g_log.warning() << "Invalid pixel_id data in " << bankName << std::endl;
@@ -314,8 +317,8 @@ void LoadTOFRawNexus::loadBank(const std::string &nexusfilename,
     file->readData("x_pixel_offset", xoffsets);
     file->readData("y_pixel_offset", yoffsets);
 
-    numPixels = xoffsets.size() * yoffsets.size();
-    if (0 == numPixels) {
+    m_numPixels = xoffsets.size() * yoffsets.size();
+    if (0 == m_numPixels) {
       file->close();
       m_fileMutex.unlock();
       g_log.warning() << "Invalid (x,y) offsets in " << bankName << std::endl;
@@ -356,9 +359,9 @@ void LoadTOFRawNexus::loadBank(const std::string &nexusfilename,
     pixel_id.erase(newEnd, pixel_id.end());
     // check if beginning or end of array was erased
     if (ifirst != pixel_id[0])
-      iPart = numPixels - pixel_id.size();
-    numPixels = pixel_id.size();
-    if (numPixels == 0) {
+      iPart = m_numPixels - pixel_id.size();
+    m_numPixels = pixel_id.size();
+    if (m_numPixels == 0) {
       file->close();
       m_fileMutex.unlock();
       g_log.warning() << "No pixels from " << bankName << std::endl;
@@ -368,7 +371,7 @@ void LoadTOFRawNexus::loadBank(const std::string &nexusfilename,
   // Load the TOF vector
   std::vector<float> tof;
   file->readData(m_axisField, tof);
-  size_t numBins = tof.size() - 1;
+  size_t m_numBins = tof.size() - 1;
   if (tof.size() <= 1) {
     file->close();
     m_fileMutex.unlock();
@@ -408,10 +411,10 @@ void LoadTOFRawNexus::loadBank(const std::string &nexusfilename,
     }
   }
 
-  /*if (data.size() != numBins * numPixels)
+  /*if (data.size() != m_numBins * m_numPixels)
   { file->close(); m_fileMutex.unlock(); g_log.warning() << "Invalid size of '"
   << m_dataField << "' data in " << bankName << std::endl; return; }
-  if (hasErrors && (errors.size() != numBins * numPixels))
+  if (hasErrors && (errors.size() != m_numBins * m_numPixels))
   { file->close(); m_fileMutex.unlock(); g_log.warning() << "Invalid size of '"
   << errorsField << "' errors in " << bankName << std::endl; return; }
 */
@@ -419,7 +422,7 @@ void LoadTOFRawNexus::loadBank(const std::string &nexusfilename,
   m_fileMutex.unlock();
   file->close();
 
-  for (size_t i = iPart; i < iPart + numPixels; i++) {
+  for (size_t i = iPart; i < iPart + m_numPixels; i++) {
     // Find the workspace index for this detector
     detid_t pixelID = pixel_id[i - iPart];
     size_t wi = id_to_wi.find(pixelID)->second;
@@ -433,14 +436,14 @@ void LoadTOFRawNexus::loadBank(const std::string &nexusfilename,
 
     // Extract the Y
     MantidVec &Y = spec->dataY();
-    Y.assign(data.begin() + i * numBins, data.begin() + (i + 1) * numBins);
+    Y.assign(data.begin() + i * m_numBins, data.begin() + (i + 1) * m_numBins);
 
     MantidVec &E = spec->dataE();
 
     if (hasErrors) {
       // Copy the errors from the loaded document
-      E.assign(errors.begin() + i * numBins,
-               errors.begin() + (i + 1) * numBins);
+      E.assign(errors.begin() + i * m_numBins,
+               errors.begin() + (i + 1) * m_numBins);
     } else {
       // Now take the sqrt(Y) to give E
       E = Y;
@@ -489,7 +492,7 @@ std::string LoadTOFRawNexus::getEntryName(const std::string &filename) {
 void LoadTOFRawNexus::exec() {
   // The input properties
   std::string filename = getPropertyValue("Filename");
-  signalNo = getProperty("Signal");
+  m_signalNo = getProperty("Signal");
   m_spec_min = getProperty("SpectrumMin");
   m_spec_max = getProperty("SpectrumMax");
 
@@ -501,15 +504,15 @@ void LoadTOFRawNexus::exec() {
   prog->doReport("Counting pixels");
   std::vector<std::string> bankNames;
   countPixels(filename, entry_name, bankNames);
-  g_log.debug() << "Workspace found to have " << numPixels << " pixels and "
-                << numBins << " bins" << std::endl;
+  g_log.debug() << "Workspace found to have " << m_numPixels << " pixels and "
+                << m_numBins << " bins" << std::endl;
 
   prog->setNumSteps(bankNames.size() + 5);
 
   prog->doReport("Creating workspace");
   // Start with a dummy WS just to hold the logs and load the instrument
   MatrixWorkspace_sptr WS = WorkspaceFactory::Instance().create(
-      "Workspace2D", numPixels, numBins + 1, numBins);
+      "Workspace2D", m_numPixels, m_numBins + 1, m_numBins);
 
   // Load the logs
   prog->doReport("Loading DAS logs");

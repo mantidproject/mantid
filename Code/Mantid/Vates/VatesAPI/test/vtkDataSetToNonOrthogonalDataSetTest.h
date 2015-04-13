@@ -8,7 +8,7 @@
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidKernel/Matrix.h"
 #include "MantidKernel/PropertyWithValue.h"
-#include "MantidMDEvents/CoordTransformAffine.h"
+#include "MantidDataObjects/CoordTransformAffine.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 
 #include <vtkDataArray.h>
@@ -20,8 +20,8 @@
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
-using namespace Mantid::MDEvents;
-using namespace Mantid::MDEvents::MDEventsTestHelper;
+using namespace Mantid::DataObjects;
+using namespace Mantid::DataObjects::MDEventsTestHelper;
 using namespace Mantid::VATES;
 
 class vtkDataSetToNonOrthogonalDataSetTest : public CxxTest::TestSuite
@@ -39,7 +39,6 @@ private:
     // information necessary for the non-orthogonal axes
     std::string wsName = "simpleWS";
     IMDEventWorkspace_sptr ws = makeAnyMDEW<MDEvent<4>, 4>(1, 0.0, 1.0, 1, wsName);
-
     // Set the coordinate system
     if (!wrongCoords)
     {
@@ -51,9 +50,6 @@ private:
     }
 
     // Set the UB matrix
-    ExperimentInfo_sptr expInfo = ExperimentInfo_sptr(new ExperimentInfo());
-    ws->addExperimentInfo(expInfo);
-
     if (!forgetUB)
     {
       IAlgorithm_sptr alg = AlgorithmManager::Instance().create("SetUB");

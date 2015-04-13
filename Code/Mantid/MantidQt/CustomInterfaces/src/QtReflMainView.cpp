@@ -14,7 +14,7 @@ namespace MantidQt
   {
     using namespace Mantid::API;
 
-    DECLARE_SUBWINDOW(QtReflMainView);
+    DECLARE_SUBWINDOW(QtReflMainView)
 
     //----------------------------------------------------------------------------------------------
     /** Constructor

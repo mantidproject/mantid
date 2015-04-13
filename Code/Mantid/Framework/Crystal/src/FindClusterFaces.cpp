@@ -270,10 +270,10 @@ FindClusterFaces::~FindClusterFaces() {}
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
-const std::string FindClusterFaces::name() const { return "FindClusterFaces"; };
+const std::string FindClusterFaces::name() const { return "FindClusterFaces"; }
 
 /// Algorithm's version for identification. @see Algorithm::version
-int FindClusterFaces::version() const { return 1; };
+int FindClusterFaces::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
 const std::string FindClusterFaces::category() const { return "Crystal"; }

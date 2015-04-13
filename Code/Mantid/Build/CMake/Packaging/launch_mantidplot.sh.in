@@ -9,7 +9,7 @@ SCRIPTFILE=$(readlink -f "$0")
 INSTALLDIR=$(echo $SCRIPTFILE | sed -r -e 's|^(.*)/(.*)$|\1|g') #.* is greedy and eats up until the final slash
 
 # Define extra libraries and load paths
-LOCAL_PRELOAD=@TCMALLOC_PRELOAD@
+LOCAL_PRELOAD=`readlink --no-newline --canonicalize-existing @TCMALLOC_LIBRARIES@`
 if [ -n "${LD_PRELOAD}" ]; then
     LOCAL_PRELOAD=${LOCAL_PRELOAD}:${LD_PRELOAD}
 fi
@@ -20,5 +20,11 @@ else
     TCM_RELEASE=${TCMALLOC_RELEASE_RATE}
 fi
 
+# Define paraview information
+PV_PLUGIN_PATH="${INSTALLDIR}/pvplugins/pvplugins"
+
 # Launch
-LD_PRELOAD=${LOCAL_PRELOAD} TCMALLOC_RELEASE_RATE=${TCM_RELEASE} LD_LIBRARY_PATH=${LOCAL_LDPATH} QT_API=pyqt @WRAPPER_PREFIX@$INSTALLDIR/@MANTIDPLOT_EXEC@ $*@WRAPPER_POSTFIX@
+LD_PRELOAD=${LOCAL_PRELOAD} TCMALLOC_RELEASE_RATE=${TCM_RELEASE} \
+    LD_LIBRARY_PATH=${LOCAL_LDPATH} QT_API=pyqt \
+    PV_PLUGIN_PATH=${PV_PLUGIN_PATH} \
+    @WRAPPER_PREFIX@$INSTALLDIR/@MANTIDPLOT_EXEC@ $*@WRAPPER_POSTFIX@
