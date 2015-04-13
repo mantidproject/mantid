@@ -12,7 +12,7 @@ class SofQWTest : public CxxTest::TestSuite
 public:
 
   template <typename SQWType>
-  static Mantid::API::MatrixWorkspace_sptr runSQW() {
+  static Mantid::API::MatrixWorkspace_sptr runSQW(const std::string & method = "") {
     Mantid::DataHandling::LoadNexusProcessed loader;
     loader.initialize();
     loader.setChild(true);
@@ -32,6 +32,7 @@ public:
     TS_ASSERT_THROWS_NOTHING( sqw.setPropertyValue("QAxisBinning","0.5,0.25,2") );
     TS_ASSERT_THROWS_NOTHING( sqw.setPropertyValue("EMode","Indirect") );
     TS_ASSERT_THROWS_NOTHING( sqw.setPropertyValue("EFixed","1.84") );
+    if(!method.empty()) sqw.setPropertyValue("Method", method);
     TS_ASSERT_THROWS_NOTHING( sqw.execute() );
     TS_ASSERT( sqw.isExecuted() );
 
@@ -67,6 +68,8 @@ public:
   {
     auto result = SofQWTest::runSQW<Mantid::Algorithms::SofQW>();
 
+    TS_ASSERT(isAlgorithmInHistory(*result, "SofQWCentre"));
+
     TS_ASSERT_EQUALS( result->getAxis(0)->length(), 1904 );
     TS_ASSERT_EQUALS( result->getAxis(0)->unit()->unitID(), "DeltaE" );
     TS_ASSERT_DELTA( (*(result->getAxis(0)))(0), -0.5590, 0.0001 );
@@ -92,6 +95,22 @@ public:
     TS_ASSERT_DELTA( result->readE(4)[1654], 0.007573484, delta);
     TS_ASSERT_DELTA( result->readY(5)[1025], 0.226287179, delta);
     TS_ASSERT_DELTA( result->readE(5)[1025], 0.02148236, delta);
+  }
+
+  void testExecUsingDifferentMethodChoosesDifferentAlgorithm()
+  {
+    auto result = SofQWTest::runSQW<Mantid::Algorithms::SofQW>("Polygon");
+
+    TS_ASSERT(isAlgorithmInHistory(*result, "SofQWPolygon"));
+    // results are checked in the dedicated algorithm test
+  }
+
+private:
+
+  bool isAlgorithmInHistory(const Mantid::API::MatrixWorkspace & result, const std::string & name) {
+    const auto & lastAlg = result.getHistory().getAlgorithmHistory(0);
+    const auto child = lastAlg->getChildAlgorithmHistory(0);
+    return (child->name() == name);
   }
 
 };
