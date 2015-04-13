@@ -68,7 +68,7 @@ namespace VATES
    */
   std::string CompositePeaksPresenterVsi::getFrame() {
     if (m_peaksPresenters.empty())
-      return std::string;
+      return std::string("");
     else
       return m_peaksPresenters[0]->getFrame();
   }
