@@ -120,11 +120,13 @@ private:
   /// The name of the property
   std::string m_name;
   std::string m_str_value; ///< Parameter value as a string
+  /// property description
+  //std::string m_description;
 };
 
 
 /// Templated class for parameters of type \c Type
-template <class Type> class MANTID_GEOMETRY_DLL ParameterType : public Parameter {
+template <class Type> class DLLExport ParameterType : public Parameter {
 public:
   /// Returns the value of the property as a string
   std::string asString() const;
@@ -153,24 +155,6 @@ protected:
 
 private:
   Type m_value; ///< Value
-};
-
-template <class Type> class MANTID_GEOMETRY_DLL ParameterWithHelp : public ParameterType<Type> {
-public:
-
-  Parameter *clone() const { return new ParameterWithHelp(*this); }
-
-protected:
-  /// Constructor
-  ParameterWithHelp() : ParameterType<Type>(){}
-
-private:
-  /// The string containing full description of the property
-  std::string m_description;
-  /// The name of the property
-  std::string m_name;
-
-
 };
 
 //--------------------------------------------------------------------------
