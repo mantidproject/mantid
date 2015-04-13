@@ -7,4 +7,13 @@
    fun:_ZN6Mantid11DataObjects14parallel_sort2INS0_8TofEventEEEvRSt6vectorIT_SaIS4_EE
    ...
 }
-
+{
+   <Leak_within_nexus_library>
+   Memcheck:Leak
+   ...
+   ...
+   fun:_ZN5NeXus4File11getNextAttrEv
+   fun:_ZN5NeXus4File7hasAttrERKSs
+   fun:_ZN6Mantid11DataObjects13MDBoxFlatTree21createOrOpenMDWSgroupERKSsRiS3_bRb
+   ...
+}
