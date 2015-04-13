@@ -46,13 +46,6 @@
      <property name="spacing">
       <number>0</number>
      </property>
-     <item>
-      <widget class="QTabWidget" name="tabWidget">
-       <property name="currentIndex">
-        <number>-1</number>
-       </property>
-      </widget>
-     </item>
     </layout>
    </item>
   </layout>

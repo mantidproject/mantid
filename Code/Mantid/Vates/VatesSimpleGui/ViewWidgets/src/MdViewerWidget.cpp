@@ -866,26 +866,31 @@ QString MdViewerWidget::getViewForInstrument(const std::string& instrumentName) 
   //               2. Neutron Diffraction --> SPLATTERPLOT
   //               3. *Spectroscopy* --> MULTISLICE
   //               4. Other --> STANDARD
-  const std::set<std::string> techniques = Mantid::Kernel::ConfigService::Instance().getInstrument(instrumentName).techniques();
-
   QString associatedView;
+  try
+  {
+    const std::set<std::string> techniques = Mantid::Kernel::ConfigService::Instance().getInstrument(instrumentName).techniques();
 
-  if (techniques.count("Single Crystal Diffraction") > 0 )
-  {
-    associatedView = mdConstants.getSplatterPlotView();
+    if (techniques.count("Single Crystal Diffraction") > 0 )
+    {
+      associatedView = mdConstants.getSplatterPlotView();
+    }
+    else if (techniques.count("Neutron Diffraction") > 0 )
+    {
+      associatedView = mdConstants.getSplatterPlotView();
+    } else if (checkIfTechniqueContainsKeyword(techniques, "Spectroscopy"))
+    {
+      associatedView = mdConstants.getMultiSliceView();
+    }
+    else
+    {
+      associatedView = mdConstants.getStandardView();
+    }
   }
-  else if (techniques.count("Neutron Diffraction") > 0 )
-  {
-    associatedView = mdConstants.getSplatterPlotView();
-  } else if (checkIfTechniqueContainsKeyword(techniques, "Spectroscopy"))
-  {
-    associatedView = mdConstants.getMultiSliceView();
-  }
-  else
+  catch (...)
   {
     associatedView = mdConstants.getStandardView();
   }
-
   return associatedView;
 }
 

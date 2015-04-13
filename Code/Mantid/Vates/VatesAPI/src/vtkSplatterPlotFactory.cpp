@@ -683,6 +683,7 @@ namespace VATES
     // Create a new field data array 
     MetadataToFieldData convertMtoF;
     vtkFieldData* outputFD = vtkFieldData::New();
+    outputFD->ShallowCopy(fieldData);
     convertMtoF(outputFD, xmlString, XMLDefinitions::metaDataId().c_str());
     convertMtoF(outputFD, jsonString, m_vatesConfigurations->getMetadataIdJson().c_str());
     dataSet->SetFieldData(outputFD);
