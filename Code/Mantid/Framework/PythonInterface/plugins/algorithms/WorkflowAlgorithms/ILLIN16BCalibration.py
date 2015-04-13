@@ -4,7 +4,8 @@ from mantid.api import WorkspaceProperty, FileProperty, FileAction, \
                        DataProcessorAlgorithm, AlgorithmFactory, mtd
 from mantid.simpleapi import Load, CalculateFlatBackground, DeleteWorkspace, \
                              Integration, SumSpectra, Scale, CropWorkspace, \
-                             FindDetectorsOutsideLimits
+                             FindDetectorsOutsideLimits, Plus, ScaleX, \
+                             RebinToWorkspace
 
 
 class ILLIN16BCalibration(DataProcessorAlgorithm):
@@ -48,6 +49,9 @@ class ILLIN16BCalibration(DataProcessorAlgorithm):
         self.declareProperty(name='ScaleFactor', defaultValue=1.0,
                              doc='Intensity scaling factor')
 
+        self.declareProperty(name='MirrorMode', defaultValue=False,
+                             doc='Data uses mirror mode')
+
 
     def PyExec(self):
         self._setup()
@@ -59,6 +63,9 @@ class ILLIN16BCalibration(DataProcessorAlgorithm):
                       OutputWorkspace=self._out_ws,
                       StartWorkspaceIndex=int(self._spec_range[0]),
                       EndWorkspaceIndex=int(self._spec_range[1]))
+
+        if self._mirror_mode:
+            self._sum_mirror_mode()
 
         CalculateFlatBackground(InputWorkspace=self._out_ws,
                                 OutputWorkspace=self._out_ws,
@@ -103,6 +110,7 @@ class ILLIN16BCalibration(DataProcessorAlgorithm):
         self._peak_range = self.getProperty('PeakRange').value
         self._back_range = self.getProperty('BackgroundRange').value
         self._spec_range = self.getProperty('SpectraRange').value
+        self._mirror_mode = self.getProperty('MirrorMode').value
 
         self._intensity_scale = self.getProperty('ScaleFactor').value
         if self._intensity_scale == 1.0:
@@ -138,6 +146,52 @@ class ILLIN16BCalibration(DataProcessorAlgorithm):
             return 'Incorrect number of values (should be 2)'
 
         return None
+
+
+    def _sum_mirror_mode(self):
+        """
+        Sums both sides when using mirror mode.
+        """
+
+        # Calculate mid point
+        x = mtd[self._out_ws].readX(0)
+        mid_point = int((len(x) - 1) / 2)
+
+        # Left half
+        left_ws = '_left'
+        CropWorkspace(InputWorkspace=self._out_ws,
+                      OutputWorkspace=left_ws,
+                      XMax=x[mid_point - 1])
+
+        # Right half
+        right_ws = '_right'
+        CropWorkspace(InputWorkspace=self._out_ws,
+                      OutputWorkspace=right_ws,
+                      Xmin=x[mid_point])
+
+        # Shift X on right half workspace
+        factor = -mtd[right_ws].readX(0)[0]
+        ScaleX(InputWorkspace=right_ws,
+               OutputWorkspace=right_ws,
+               Factor=factor,
+               Operation='Add')
+
+        RebinToWorkspace(WorkspaceToRebin=right_ws,
+                         WorkspaceToMatch=left_ws,
+                         OutputWorkspace=right_ws)
+
+        # Sum both workspaces together
+        Plus(LHSWorkspace=left_ws,
+             RHSWorkspace=right_ws,
+             OutputWorkspace=self._out_ws)
+
+        Scale(InputWorkspace=self._out_ws,
+              OutputWorkspace=self._out_ws,
+              Factor=0.5,
+              Operation='Multiply')
+
+        DeleteWorkspace(left_ws)
+        DeleteWorkspace(right_ws)
 
 
 # Register algorithm with Mantid
