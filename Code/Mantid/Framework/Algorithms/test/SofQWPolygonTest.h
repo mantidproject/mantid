@@ -3,9 +3,8 @@
 
 #include <cxxtest/TestSuite.h>
 #include "MantidAlgorithms/SofQWPolygon.h"
-#include "MantidDataHandling/LoadNexusProcessed.h"
 
-#include <iomanip>
+#include "SofQWTest.h"
 
 using namespace Mantid::Algorithms;
 using namespace Mantid::API;
@@ -29,34 +28,7 @@ public:
 
   void test_exec()
   {
-    SofQWPolygon sqw;
-    sqw.initialize();
-
-    Mantid::DataHandling::LoadNexusProcessed loader;
-    loader.initialize();
-    loader.setProperty("Filename","IRS26173_ipg.nxs");
-    const std::string inputWS = "inputWS";
-    loader.setPropertyValue("OutputWorkspace",inputWS);
-    loader.execute();
-
-    Mantid::API::MatrixWorkspace_sptr inWS;
-    TS_ASSERT_THROWS_NOTHING( inWS = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>
-      (Mantid::API::AnalysisDataService::Instance().retrieve(inputWS)) );
-    WorkspaceHelpers::makeDistribution(inWS);
-
-    TS_ASSERT_THROWS_NOTHING( sqw.setPropertyValue("InputWorkspace",inputWS) );
-    const std::string outputWS = "result";
-    TS_ASSERT_THROWS_NOTHING( sqw.setPropertyValue("OutputWorkspace",outputWS) );
-    TS_ASSERT_THROWS_NOTHING( sqw.setPropertyValue("QAxisBinning","0.5,0.25,2") );
-    TS_ASSERT_THROWS_NOTHING( sqw.setPropertyValue("EMode","Indirect") );
-    TS_ASSERT_THROWS_NOTHING( sqw.setPropertyValue("EFixed","1.84") );
-
-    TS_ASSERT_THROWS_NOTHING( sqw.execute() );
-    TS_ASSERT( sqw.isExecuted() );
-
-    Mantid::API::MatrixWorkspace_sptr result;
-    TS_ASSERT_THROWS_NOTHING( result = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>
-      (Mantid::API::AnalysisDataService::Instance().retrieve(outputWS)) );
+    auto result = SofQWTest::runSQW<Mantid::Algorithms::SofQWPolygon>();
 
     TS_ASSERT_EQUALS( result->getAxis(0)->length(), 1904 );
     TS_ASSERT_EQUALS( result->getAxis(0)->unit()->unitID(), "DeltaE" );
@@ -89,11 +61,8 @@ public:
     TS_ASSERT_DELTA( result->readY(5)[1025], 0.0516113202152, delta);
     TS_ASSERT_DELTA( result->readE(5)[1025], 0.0102893133461, delta);
 
-    AnalysisDataService::Instance().remove(inputWS);
-    AnalysisDataService::Instance().remove(outputWS);    
   }
 };
 
 
 #endif /* MANTID_ALGORITHMS_SofQWPolygonTEST_H_ */
-
