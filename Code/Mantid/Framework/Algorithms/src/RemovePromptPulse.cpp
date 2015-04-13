@@ -71,9 +71,7 @@ double getMedian(const API::Run &run, const std::string &name) {
 void getTofRange(MatrixWorkspace_const_sptr wksp, double &tmin, double &tmax) {
   DataObjects::EventWorkspace_const_sptr eventWksp =
       boost::dynamic_pointer_cast<const DataObjects::EventWorkspace>(wksp);
-
-  bool isEvent = false;
-  if (isEvent) {
+  if (eventWksp) {
     eventWksp->getEventXMinMax(tmin, tmax);
   } else {
     wksp->getXMinMax(tmin, tmax);
