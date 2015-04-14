@@ -1,0 +1,70 @@
+digraph ReflectometryReductionOne {
+  label = "ReflectometryReductionOne Flowchart"
+  $global_style
+
+  subgraph params {
+    $param_style
+    inputWorkspace     [label="InputWorkspace"]
+    hardMaskWorkspace  [label="HardMaskWorkspace"]
+    outputWorkspace    [label="OutputWorkspace"]
+    detVanCompare      [label="DetVanCompare"]
+    sampleTotWorkspace [label="SampleTotalCountsWorkspace"]
+    sampleBkgWorkspace [label="SampleBackgroundWorkspace"]
+    sampleWorkspace    [label="SampleWorkspace"]
+	numberOfFailures   [label="NumberOfFailures"]
+  }
+
+  subgraph decisions {
+    $decision_style
+    checkHardMask   [label="HardMaskWorkspace?"]
+    checkDetVanComp [label="DetVanCompare?"]
+    checkSampleTot  [label="SampleTotalCountsWorkspace?"]
+    checkSampleBkg  [label="SampleBackgroundWorkspace?"]
+    checkSample     [label="SampleWorkspace?"]
+  }
+
+  subgraph algorithms {
+    $algorithm_style
+    useHardMask     [label="MaskDetectors"]
+    detEfficVar     [label="DetectorEfficiencyVariation"]
+	findDetsOutLims [label="FindDetectorsOutsideLimits"]
+	medianDetTest   [label="MedianDetectorTest"]
+	createPSDBMask  [label="CreatePSDBleedMask"]
+	extractMask     [label="ExtractMask"]
+  }
+
+  subgraph processes {
+    $process_style
+    doDetVanTest2I  [label="Do Detector\n Beam Vanadium Tests"]
+	doDetVanTest2DV [label="Do Detector\n Beam Vanadium Tests"]
+  }
+
+  subgraph values {
+    $value_style
+    valTest         [label="test"]
+  }
+
+  inputWorkspace     -> checkHardMask
+  hardMaskWorkspace  -> checkHardMask
+  checkHardMask      -> useHardMask      [label="Yes"]
+  checkHardMask      -> doDetVanTest2I   [label="No"]
+  useHardMask        -> doDetVanTest2I
+  doDetVanTest2I     -> checkDetVanComp
+  detVanCompare      -> checkDetVanComp
+  checkDetVanComp    -> doDetVanTest2DV  [label="Yes"]
+  checkDetVanComp    -> checkSampleTot   [label="No"]
+  doDetVanTest2DV    -> detEfficVar
+  detEfficVar        -> checkSampleTot
+  sampleTotWorkspace -> checkSampleTot
+  checkSampleTot     -> findDetsOutLims  [label="Yes"]
+  checkSampleTot     -> checkSampleBkg   [label="No"]
+  findDetsOutLims    -> checkSampleBkg
+  checkSampleBkg     -> medianDetTest    [label="Yes"]
+  checkSampleBkg     -> checkSample      [label="No"]
+  medianDetTest      -> checkSample
+  sampleWorkspace    -> checkSample
+  checkSample        -> createPSDBMask  [label="Yes"]
+  checkSample        -> ExtractMask     [label="No"]   
+  createPSDBMask     -> ExtractMask
+  ExtractMask        -> OutputWorkspace
+}
