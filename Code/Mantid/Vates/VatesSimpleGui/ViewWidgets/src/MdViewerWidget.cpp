@@ -915,7 +915,11 @@ void MdViewerWidget::renderAndFinalSetup()
   this->currentView->checkView(this->initialView);
   this->currentView->updateAnimationControls();
   pqPipelineSource *source = this->currentView->origSrc;
+  //suppress unused variable;
+  (void)source;
   pqPipelineRepresentation *repr = this->currentView->origRep;
+  //suppress unused variable;
+  (void)repr;
   //this->ui.proxiesPanel->clear();
   //this->ui.proxiesPanel->addProxy(source->getProxy(),"datasource",QStringList(),true);
   //this->ui.proxiesPanel->addProxy(repr->getProxy(),"display",QStringList("CubeAxesVisibility"),true);
