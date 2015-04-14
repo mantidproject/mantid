@@ -104,7 +104,7 @@ public:
     TS_ASSERT_DELTA( result->readE(5)[1025], 0.02148236, delta);
   }
 
-  void xtestExecUsingDifferentMethodChoosesDifferentAlgorithm()
+  void testExecUsingDifferentMethodChoosesDifferentAlgorithm()
   {
     auto result = SofQWTest::runSQW<Mantid::Algorithms::SofQW>("Polygon");
 
