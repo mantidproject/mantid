@@ -197,16 +197,6 @@
        <property name="currentIndex">
         <number>0</number>
        </property>
-        <widget class="QWidget" name="properties2">
-         <attribute name="title">
-          <string>Properties</string>
-         </attribute>
-         <layout class="QVBoxLayout" name="verticalLayout_3">
-          <item>
-           <widget class="pqProxiesWidget" name="proxiesPanel" native="true"/>
-          </item>
-        </layout>
-        </widget>
         <widget class="QWidget" name="properties">
          <attribute name="title">
           <string>Properties</string>

@@ -216,7 +216,7 @@ void MdViewerWidget::setupUiAndConnections()
   pqApplicationCore::instance()->registerManager(
     "COLOR_EDITOR_PANEL", this->ui.colorMapEditorDock);
   this->ui.colorMapEditorDock->hide();
-  this->connect(this->ui.proxiesPanel,SIGNAL(changeFinished(vtkSMProxy*)),SLOT(panelChanged()));
+  //this->connect(this->ui.proxiesPanel,SIGNAL(changeFinished(vtkSMProxy*)),SLOT(panelChanged()));
   QAction* temp = new QAction(this);
   pqDeleteReaction* deleteHandler = new pqDeleteReaction(temp);
   deleteHandler->connect(this->ui.propertiesPanel,SIGNAL(deleteRequested(pqPipelineSource*)),SLOT(deleteSource(pqPipelineSource*)));
@@ -911,10 +911,10 @@ void MdViewerWidget::renderAndFinalSetup()
   this->currentView->updateAnimationControls();
   pqPipelineSource *source = this->currentView->origSrc;
   pqPipelineRepresentation *repr = this->currentView->origRep;
-  this->ui.proxiesPanel->clear();
-  this->ui.proxiesPanel->addProxy(source->getProxy(),"datasource",QStringList(),true);
-  this->ui.proxiesPanel->addProxy(repr->getProxy(),"display",QStringList("CubeAxesVisibility"),true);
-  this->ui.proxiesPanel->updateLayout();
+  //this->ui.proxiesPanel->clear();
+  //this->ui.proxiesPanel->addProxy(source->getProxy(),"datasource",QStringList(),true);
+  //this->ui.proxiesPanel->addProxy(repr->getProxy(),"display",QStringList("CubeAxesVisibility"),true);
+  //this->ui.proxiesPanel->updateLayout();
   this->setDestroyedListener();
   this->currentView->setVisibilityListener();
   this->currentView->onAutoScale(this->ui.colorSelectionWidget);
