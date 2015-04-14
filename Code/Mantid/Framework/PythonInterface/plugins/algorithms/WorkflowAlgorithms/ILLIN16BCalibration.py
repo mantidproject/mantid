@@ -65,8 +65,9 @@ class ILLIN16BCalibration(DataProcessorAlgorithm):
 
         # Clean up unused workspaces
         DeleteWorkspace(temp_raw)
-        DeleteWorkspace(temp_left)
-        DeleteWorkspace(temp_right)
+        if self._mirror_mode:
+            DeleteWorkspace(temp_left)
+            DeleteWorkspace(temp_right)
 
         # Integrate within peak range
         number_historgrams = mtd[self._out_ws].getNumberHistograms()

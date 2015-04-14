@@ -27,6 +27,7 @@ set ( TEST_PY_FILES
   InelasticIndirectReductionTest.py
   IndirectTransmissionTest.py
   IndirectTransmissionMonitorTest.py
+  ILLIN16BCalibrationTest.py
   LoadDNSLegacyTest.py
   LoadFullprofFileTest.py
   LoadLiveDataTest.py
