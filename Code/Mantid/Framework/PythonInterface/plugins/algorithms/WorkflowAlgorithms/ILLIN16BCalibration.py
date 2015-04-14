@@ -2,10 +2,7 @@
 from mantid.kernel import *
 from mantid.api import WorkspaceProperty, FileProperty, FileAction, \
                        DataProcessorAlgorithm, AlgorithmFactory, mtd
-from mantid.simpleapi import Load, CalculateFlatBackground, DeleteWorkspace, \
-                             Integration, SumSpectra, Scale, CropWorkspace, \
-                             FindDetectorsOutsideLimits, Plus, ScaleX, \
-                             RebinToWorkspace
+from mantid.simpleapi import *
 
 
 class ILLIN16BCalibration(DataProcessorAlgorithm):
@@ -23,78 +20,83 @@ class ILLIN16BCalibration(DataProcessorAlgorithm):
 
 
     def summary(self):
-        return 'Creates a calibration workspace for IN16B.'
+        return 'Creates a calibration workspace in energy trnasfer for IN16B.'
 
 
     def PyInit(self):
-        self.declareProperty(FileProperty(name='InputFile', defaultValue='', action=FileAction.Load),
+        self.declareProperty(FileProperty(name='Run', defaultValue='', action=FileAction.Load),
                              doc='Comma separated list of input files')
 
-        self.declareProperty(WorkspaceProperty('OutputWorkspace', '',
-                             direction=Direction.Output),
-                             doc='Output workspace for calibration data')
+        self.declareProperty(name='MirrorMode', defaultValue=False,
+                             doc='Data uses mirror mode')
 
-        self.declareProperty(IntArrayProperty(name='SpectraRange', values=[1, 2048],
+        self.declareProperty(IntArrayProperty(name='SpectraRange', values=[0, 23],
                              validator=IntArrayMandatoryValidator()),
                              doc='Spectra range to use')
 
         self.declareProperty(FloatArrayProperty(name='PeakRange', values=[0.0, 100.0],
                              validator=FloatArrayMandatoryValidator()),
-                             doc='Peak range in time of flight')
-
-        self.declareProperty(FloatArrayProperty(name='BackgroundRange', values=[0.0, 1000.0],
-                             validator=FloatArrayMandatoryValidator()),
-                             doc='Background range in time of flight')
+                             doc='Peak range in energy transfer')
 
         self.declareProperty(name='ScaleFactor', defaultValue=1.0,
                              doc='Intensity scaling factor')
 
-        self.declareProperty(name='MirrorMode', defaultValue=False,
-                             doc='Data uses mirror mode')
+        self.declareProperty(WorkspaceProperty('OutputWorkspace', '',
+                             direction=Direction.Output),
+                             doc='Output workspace for calibration data')
 
 
     def PyExec(self):
         self._setup()
 
-        Load(Filename=self._input_file,
-             OutputWorkspace=self._out_ws)
+        temp_raw = '__raw'
+        temp_left = '__left'
+        temp_right = '__right'
 
-        CropWorkspace(InputWorkspace=self._out_ws,
-                      OutputWorkspace=self._out_ws,
-                      StartWorkspaceIndex=int(self._spec_range[0]),
-                      EndWorkspaceIndex=int(self._spec_range[1]))
+        # Do an energy transfer reduction
+        IndirectILLReduction(Run=self._input_file,
+                             Analyser='silicon',
+                             Reflection='111',
+                             MirrorMode=self._mirror_mode,
+                             RawWorkspace=temp_raw,
+                             LeftWorkspace=temp_left,
+                             RightWorkspace=temp_right,
+                             ReducedWorkspace=self._out_ws)
 
-        if self._mirror_mode:
-            self._sum_mirror_mode()
+        # Clean up unused workspaces
+        DeleteWorkspace(temp_raw)
+        DeleteWorkspace(temp_left)
+        DeleteWorkspace(temp_right)
 
-        CalculateFlatBackground(InputWorkspace=self._out_ws,
-                                OutputWorkspace=self._out_ws,
-                                StartX=self._back_range[0],
-                                EndX=self._back_range[1],
-                                Mode='Mean')
-
+        # Integrate within peak range
         number_historgrams = mtd[self._out_ws].getNumberHistograms()
         Integration(InputWorkspace=self._out_ws,
                     OutputWorkspace=self._out_ws,
                     RangeLower=self._peak_range[0],
-                    RangeUpper=self._peak_range[1])
+                    RangeUpper=self._peak_range[1],
+                    StartWorkspaceIndex=self._spec_range[0],
+                    EndWorkspaceIndex=self._spec_range[1])
 
         ws_mask, num_zero_spectra = FindDetectorsOutsideLimits(InputWorkspace=self._out_ws,
                                                                OutputWorkspace='__temp_ws_mask')
         DeleteWorkspace(ws_mask)
 
-        tempSum = SumSpectra(InputWorkspace=self._out_ws,
-                             OutputWorkspace='__temp_sum')
-        total = tempSum.readY(0)[0]
-        DeleteWorkspace(tempSum)
+        # Process automatic scaling
+        temp_sum = '__sum'
+        SumSpectra(InputWorkspace=self._out_ws,
+                   OutputWorkspace=temp_sum)
+        total = mtd[temp_sum].readY(0)[0]
+        DeleteWorkspace(temp_sum)
 
         if self._intensity_scale is None:
-            self._intensity_scale = 1 / ( total / (number_historgrams - num_zero_spectra) )
+            self._intensity_scale = 1 / (total / (number_historgrams - num_zero_spectra))
 
+        # Apply scaling factor
         Scale(InputWorkspace=self._out_ws,
               OutputWorkspace=self._out_ws,
               Factor=self._intensity_scale,
               Operation='Multiply')
+
 
         self.setProperty('OutputWorkspace', self._out_ws)
 
@@ -104,11 +106,10 @@ class ILLIN16BCalibration(DataProcessorAlgorithm):
         Gets properties.
         """
 
-        self._input_file = self.getProperty('InputFile').value
+        self._input_file = self.getProperty('Run').value
         self._out_ws = self.getPropertyValue('OutputWorkspace')
 
         self._peak_range = self.getProperty('PeakRange').value
-        self._back_range = self.getProperty('BackgroundRange').value
         self._spec_range = self.getProperty('SpectraRange').value
         self._mirror_mode = self.getProperty('MirrorMode').value
 
@@ -125,7 +126,6 @@ class ILLIN16BCalibration(DataProcessorAlgorithm):
 
         issues['SpectraRange'] = self._validate_range('SpectraRange')
         issues['PeakRange'] = self._validate_range('PeakRange')
-        issues['BackgroundRange'] = self._validate_range('BackgroundRange')
 
         return issues
 
@@ -146,52 +146,6 @@ class ILLIN16BCalibration(DataProcessorAlgorithm):
             return 'Incorrect number of values (should be 2)'
 
         return None
-
-
-    def _sum_mirror_mode(self):
-        """
-        Sums both sides when using mirror mode.
-        """
-
-        # Calculate mid point
-        x = mtd[self._out_ws].readX(0)
-        mid_point = int((len(x) - 1) / 2)
-
-        # Left half
-        left_ws = '_left'
-        CropWorkspace(InputWorkspace=self._out_ws,
-                      OutputWorkspace=left_ws,
-                      XMax=x[mid_point - 1])
-
-        # Right half
-        right_ws = '_right'
-        CropWorkspace(InputWorkspace=self._out_ws,
-                      OutputWorkspace=right_ws,
-                      Xmin=x[mid_point])
-
-        # Shift X on right half workspace
-        factor = -mtd[right_ws].readX(0)[0]
-        ScaleX(InputWorkspace=right_ws,
-               OutputWorkspace=right_ws,
-               Factor=factor,
-               Operation='Add')
-
-        RebinToWorkspace(WorkspaceToRebin=right_ws,
-                         WorkspaceToMatch=left_ws,
-                         OutputWorkspace=right_ws)
-
-        # Sum both workspaces together
-        Plus(LHSWorkspace=left_ws,
-             RHSWorkspace=right_ws,
-             OutputWorkspace=self._out_ws)
-
-        Scale(InputWorkspace=self._out_ws,
-              OutputWorkspace=self._out_ws,
-              Factor=0.5,
-              Operation='Multiply')
-
-        DeleteWorkspace(left_ws)
-        DeleteWorkspace(right_ws)
 
 
 # Register algorithm with Mantid
