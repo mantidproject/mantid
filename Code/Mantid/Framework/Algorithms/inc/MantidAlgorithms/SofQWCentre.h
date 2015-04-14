@@ -1,10 +1,10 @@
-#ifndef MANTID_ALGORITHMS_SOFQW_H_
-#define MANTID_ALGORITHMS_SOFQW_H_
+#ifndef MANTID_ALGORITHMS_SOFQWCENTRE_H_
+#define MANTID_ALGORITHMS_SOFQWCENTRE_H_
 
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAPI/DataProcessorAlgorithm.h"
+#include "MantidAPI/Algorithm.h"
 #include "MantidAlgorithms/SofQCommon.h"
 
 namespace Mantid {
@@ -48,12 +48,21 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport SofQW : public API::DataProcessorAlgorithm {
+class DLLExport SofQWCentre : public API::Algorithm {
 public:
+  /// (Empty) Constructor
+  SofQWCentre() : API::Algorithm() {}
+  /// Virtual destructor
+  virtual ~SofQWCentre() {}
   /// Algorithm's name
-  virtual const std::string name() const { return "SofQW"; }
+  virtual const std::string name() const { return "SofQWCentre"; }
   /// Summary of algorithms purpose
-  virtual const std::string summary() const;
+  virtual const std::string summary() const {
+    return "Converts a 2D workspace that has axes in *units* of **DeltaE** "
+           "(energy transfer) against spectrum number to one "
+           "that gives intensity as a function of **DeltaE** against "
+           "**momentum transfer** ";
+  }
 
   /// Algorithm's version
   virtual int version() const { return (1); }
@@ -64,8 +73,11 @@ public:
   setUpOutputWorkspace(API::MatrixWorkspace_const_sptr inputWorkspace,
                        const std::vector<double> &binParams,
                        std::vector<double> &newAxis);
+  /// Convert the workspace to a distribution
+  void makeDistribution(API::MatrixWorkspace_sptr outputWS,
+                        const std::vector<double> qAxis);
   /// Create the input properties on the given algorithm object
-  static void createCommonInputProperties(API::Algorithm &alg);
+  static void createInputProperties(API::Algorithm &alg);
   /// Energy to K constant
   static double energyToK();
 
@@ -81,4 +93,4 @@ private:
 } // namespace Algorithms
 } // namespace Mantid
 
-#endif /*MANTID_ALGORITHMS_SOFQW_H_*/
+#endif /*MANTID_ALGORITHMS_SOFQWCENTRE_H_*/
