@@ -271,6 +271,32 @@ Background Start & Background End
 Low, Width & High
   Binning parameters used to rebin the resolution curve.
 
+ILL Calibration
+---------------
+
+.. interface:: Data Reduction
+  :widget: tabILLCalibration
+
+This tab is used to create calibration workspaces for the IN16B spectrometer at
+the ILL using the :ref:`ILLIN16BCalibration <algm-ILLIN16BCalibration>`
+algorithm.
+
+Options
+~~~~~~~
+
+Spectra Range
+  Sets the range of spectra in the reduced workspace over which to calculate
+  calibration
+
+Peak Range
+  Sets the integreation range over the peak in :math:`meV`
+
+Scale Factor
+  Override the calculated scale factor
+
+Mirror Mode
+  Enable of the data uses mirror mode
+
 ISIS Diagnostics
 ----------------
 
