@@ -740,7 +740,8 @@ IMDEventWorkspace_sptr ConvertSpiceDataToRealSpace::createMonitorMDWorkspace(
 //------------------------------------------------------------------------------------------------
 /** Parse detector efficiency from table workspace to map
  * @brief ConvertSpiceDataToRealSpace::parseDetectorEfficiencyTable
- * @param detefftablews
+ * @param detefftablews :: table workspace to parse
+ * @param deteffmap :: (output) a map for detector (ID) and efficiency factor
  */
 void ConvertSpiceDataToRealSpace::parseDetectorEfficiencyTable(
     DataObjects::TableWorkspace_sptr detefftablews,
