@@ -110,7 +110,7 @@ MantidUI::MantidUI(ApplicationWindow *aw):
   m_configServiceObserver(*this,&MantidUI::handleConfigServiceUpdate),
   m_appWindow(aw),
   m_lastShownInstrumentWin(NULL), m_lastShownSliceViewWin(NULL), m_lastShownSpectrumViewerWin(NULL), 
-  m_lastShownColorFillWin(NULL), m_lastShown1DPlotWin(NULL) 
+  m_lastShownColorFillWin(NULL), m_lastShown1DPlotWin(NULL), m_vatesSubWindow(NULL)
   //, m_spectrumViewWindow(NULL)
 {
 
@@ -722,13 +722,21 @@ void MantidUI::showVatesSimpleInterface()
       }
     }
 
+    if (m_vatesSubWindow)
     {
-      QMdiSubWindow *vatesSubWindow = new QMdiSubWindow;
-      vatesSubWindow->setAttribute(Qt::WA_DeleteOnClose, false);
+      QWidget *vwidget = m_vatesSubWindow->widget();
+      vwidget->show();
+      qobject_cast<MantidQt::API::VatesViewerInterface *>(vwidget)->renderWorkspace(wsName, wsType, instrumentName);
+      return;
+    }
+    else
+    {
+      m_vatesSubWindow = new QMdiSubWindow;
+      m_vatesSubWindow->setAttribute(Qt::WA_DeleteOnClose, false);
       QIcon icon; 
       icon.addFile(QString::fromUtf8(":/VatesSimpleGuiViewWidgets/icons/pvIcon.png"), QSize(), QIcon::Normal, QIcon::Off);
-      vatesSubWindow->setWindowIcon(icon);
-      connect(m_appWindow, SIGNAL(shutting_down()), vatesSubWindow, SLOT(close()));
+      m_vatesSubWindow->setWindowIcon(icon);
+      connect(m_appWindow, SIGNAL(shutting_down()), m_vatesSubWindow, SLOT(close()));
 
       MantidQt::API::InterfaceManager interfaceManager;
       MantidQt::API::VatesViewerInterface *vsui = interfaceManager.createVatesSimpleGui();
@@ -736,19 +744,19 @@ void MantidUI::showVatesSimpleInterface()
       {
         connect(m_appWindow, SIGNAL(shutting_down()),
           vsui, SLOT(shutdown()));
-        connect(vsui, SIGNAL(requestClose()), vatesSubWindow, SLOT(close()));
-        vsui->setParent(vatesSubWindow);
-        vatesSubWindow->setWindowTitle("Vates Simple Interface");
+        connect(vsui, SIGNAL(requestClose()), m_vatesSubWindow, SLOT(close()));
+        vsui->setParent(m_vatesSubWindow);
+        m_vatesSubWindow->setWindowTitle("Vates Simple Interface");
         vsui->setupPluginMode();
         //m_appWindow->setGeometry(m_vatesSubWindow, vsui);
-        vatesSubWindow->setWidget(vsui);
-        vatesSubWindow->widget()->show();
+        m_vatesSubWindow->setWidget(vsui);
+        m_vatesSubWindow->widget()->show();
         vsui->renderWorkspace(wsName, wsType,instrumentName);
       }
       else
       {
-        delete vatesSubWindow;
-        vatesSubWindow = NULL;
+        delete m_vatesSubWindow;
+        m_vatesSubWindow = NULL;
         return;
       }
     }

@@ -224,10 +224,10 @@ void MdViewerWidget::setupUiAndConnections()
   pqApplyBehavior* applyBehavior = new pqApplyBehavior(this);
   applyBehavior->registerPanel(this->ui.propertiesPanel);
   VatesParaViewApplication::instance()->setupParaViewBehaviors();
-  this->ui.pipelineBrowser->enableAnnotationFilter(m_widgetName);
-  this->ui.pipelineBrowser->disableAnnotationFilter();
-  this->ui.pipelineBrowser->enableAnnotationFilter(m_widgetName);
-  this->ui.pipelineBrowser->hide();
+  //this->ui.pipelineBrowser->enableAnnotationFilter(m_widgetName);
+  //this->ui.pipelineBrowser->disableAnnotationFilter();
+  //this->ui.pipelineBrowser->enableAnnotationFilter(m_widgetName);
+  //this->ui.pipelineBrowser->hide();
   g_log.warning("Annotation Name: " + m_widgetName.toStdString());
   
   // Connect the rebinned sources manager
