@@ -23,38 +23,68 @@ class DiffractionReductionScripter(BaseReductionScripter):
     TOPLEVEL_WORKFLOWALG = "SNSPowderReductionPlus"
     WIDTH_END = "".join([" " for i in range(len(TOPLEVEL_WORKFLOWALG))])
     WIDTH = WIDTH_END + " "
+    AUTOSCRIPTNAME = 'SNSPowderReductionScript_AutoSave.py'
 
     def __init__(self, name="VULCAN", facility="SNS"):
         """ Initialization
         """
+        # Call base class 
         super(DiffractionReductionScripter, self).__init__(name=name, facility=facility)
 
-        print "[diffraction_reduction_script]  Facility = %s,  Instrument = %s" % (self.facility_name, self.instrument_name)
+        # Find whether there is stored setup XMLs
+        homedir = os.path.expanduser("~")
+        mantidconfigdir = os.path.join(homedir, ".mantid")
+        self.configDir = mantidconfigdir
+
+        # create configuratin dir if it has not been 
+        if os.path.exists(self.configDir) is False:
+            os.makedirs(self.configDir)
+
+        # Information output
+        print "[diffraction_reduction_script]  Facility = %s,  Instrument = %s" % (
+                self.facility_name, self.instrument_name)
+        print "Auto-save Directory %s. " % (mantidconfigdir)
 
         return
 
     def to_script(self, file_name=None):
-        """ Generate reduction script via observers
-            @param file_name: name of the file to write the script to
-        """
+        """ Generate reduction script via observers and 
+        (1) save the script to disk and (2) save the reduction setup to disk. 
 
-        # 1. Collect from observers
+        Arguments: 
+         - file_name: name of the file to write the script to
+        """
+        # Collect partial scripters from observers
         paramdict = {}
         for observer in self._observers:
             obstate = observer.state()
             self.parseTabSetupScript(observer._subject.__class__.__name__, obstate, paramdict)
         # ENDFOR
 
-        # 2. Construct python commands
+        # Construct python commands
         script = self.constructPythonScript(paramdict)
+        
+        # Save script to disk
+        if file_name is None:
+            file_name = os.path.join(self.configDir, DiffractionReductionScripter.AUTOSCRIPTNAME)
 
-        if file_name is not None:
+        try:
             f = open(file_name, 'w')
             f.write(script)
             f.close()
+        except IOError as e:
+            print "Unable to save script to file. Reason: %s." % (str(e))
 
-        print "[diffraction_reduction_script]  Facility = %s,  Instrument = %s" % (self.facility_name, self.instrument_name)
-        print "The reduction script is ... \n", script, "\n==== End of Script ====="
+        # Export XML file 
+        autosavexmlfname = os.path.join(self.configDir, "snspowderreduction.xml")
+        self.to_xml(autosavexmlfname)
+
+        # Information output
+        wbuf = "Reduction script: (script is saved to %s; setup is saved to %s. \n" % (
+                file_name, autosavexmlfname)
+        wbuf += script
+        wbuf += "\n========== End of Script ==========="
+        print (wbuf)
 
         return script
 
@@ -190,6 +220,9 @@ class DiffractionReductionScripter(BaseReductionScripter):
             script += self.buildPowderDataReductionScript(runsetupdict, advsetupdict)
 
         # ENDIF : do filter
+
+
+        print "Script and Save XML to default."
 
         return script
 
