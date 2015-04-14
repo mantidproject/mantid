@@ -208,8 +208,8 @@ m_wsName(wsptr->getName().c_str()), m_view(wsptr->getHistory().createView())
 
   // The tree and the history details layout
   QHBoxLayout *treeLayout = new QHBoxLayout;
-  treeLayout->addWidget(m_Historytree,1); // History stretches 1
-  treeLayout->addWidget(m_histPropWindow->m_histpropTree,2); // Properties gets more space
+  treeLayout->addWidget(m_Historytree,3); // History stretches 1
+  treeLayout->addWidget(m_histPropWindow->m_histpropTree,5); // Properties gets more space
 
   //Create a GroupBox to display exec date,duration
   if(!m_execSumGrpBox)m_execSumGrpBox=createExecSummaryGrpBox();
@@ -499,9 +499,10 @@ void AlgHistoryProperties::displayAlgHistoryProperties()
 
   }// end of properties for loop
 
-  m_histpropTree->resizeColumnToContents(0);
-  m_histpropTree->resizeColumnToContents(2);
-  m_histpropTree->resizeColumnToContents(3);
+  // Fit some column widths to data
+  m_histpropTree->resizeColumnToContents(0); // Property name
+  m_histpropTree->resizeColumnToContents(2); // Default
+  m_histpropTree->resizeColumnToContents(3); // Direction
 }
 
 //--------------------------------------------------------------------------------------------------
@@ -613,6 +614,8 @@ void AlgHistoryTreeWidget::populateAlgHistoryTreeWidget(const WorkspaceHistory& 
     this->addTopLevelItem(item);
     populateNestedHistory(item, *algHistIter);
   }
+  resizeColumnToContents(0); // Algorithm name
+  resizeColumnToContents(1); // Unroll
   this->blockSignals(false);
 }
 
