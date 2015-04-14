@@ -231,7 +231,7 @@ public:
     BoxController *const bcc = b->getBoxController();
     delete b;
     delete bcc;
-
+    delete g;
   }
 
 
@@ -254,6 +254,9 @@ public:
 
     BoxController *const bcc = b->getBoxController();
     delete bcc;
+    delete g2;
+    delete g1;
+    delete b;
   }
 
   void test_setBoxController()
@@ -285,8 +288,10 @@ public:
   {
     // Build the grid box
     MDGridBox<MDLeanEvent<1>,1> * g = MDEventsTestHelper::makeMDGridBox<1>(10,10,0.0, 10.0);
+    // Clear the initial children
+    for (size_t i = 0; i < g->getNumChildren(); i++) delete g->getChild(i);
+    
     BoxController *const bcc = g->getBoxController();
-
     std::vector<API::IMDNode *> boxes;
     for (size_t i=0; i<15; i++)
       boxes.push_back( MDEventsTestHelper::makeMDBox1(10,bcc) );
@@ -299,9 +304,12 @@ public:
       // Parent was set correctly in child
       TS_ASSERT_EQUALS( g->getChild(i-2)->getParent(), g);
     }
+    // MDGridBox will delete the children that it pulled in but the rest need to be
+    // taken care of manually
+    size_t indices[5] = {0, 1, 12, 13, 14};
+    for(size_t i = 0; i < 5; ++i) delete boxes[indices[i]];
     delete g;
     delete bcc;
-
   }
 
   void test_getChildIndexFromID()
@@ -354,7 +362,7 @@ public:
     BoxController *const bcc =b->getBoxController();
     delete b;
     delete bcc;
-
+    delete g;
   }
 
 
@@ -528,6 +536,7 @@ public:
     BoxController *const bcc = b->getBoxController();
     delete b;
     delete bcc;
+    delete g;
   }
 
 
@@ -639,6 +648,7 @@ public:
     }
 
     // ----- Infinitely thin plane for an implicit function ------------
+    delete function;
     function = new MDImplicitFunction;
     coord_t normal3[1] = {-1};
     coord_t origin3[1] = {1.51f};
@@ -653,7 +663,7 @@ public:
     BoxController *const bcc = parent->getBoxController();
     delete parent;
     delete bcc;
-
+    delete function;
   }
 
 
@@ -678,7 +688,6 @@ public:
     // The boxes extents make sense
     for (size_t i=0; i<boxes.size(); i++)
     {
-      //std::cout << boxes[i]->getExtentsStr() << std::endl;
       TS_ASSERT( boxes[i]->getExtents(0).getMax() >= 2.00);
       TS_ASSERT( boxes[i]->getExtents(0).getMin() <= 3.00);
       TS_ASSERT( boxes[i]->getExtents(1).getMax() >= 2.00);
@@ -692,7 +701,6 @@ public:
     // The boxes extents make sense
     for (size_t i=0; i<boxes.size(); i++)
     {
-      //std::cout << boxes[i]->getExtentsStr() << std::endl;
       TS_ASSERT( boxes[i]->getExtents(0).getMax() >= 2.00);
       TS_ASSERT( boxes[i]->getExtents(0).getMin() <= 3.00);
       TS_ASSERT( boxes[i]->getExtents(1).getMax() >= 2.00);
@@ -703,7 +711,7 @@ public:
     BoxController *const bcc = parent->getBoxController();
     delete parent;
     delete bcc;
-
+    delete function;
   }
 
 
@@ -738,7 +746,7 @@ public:
     BoxController *const bcc = parent->getBoxController();
     delete parent;
     delete bcc;
-
+    delete function;
   }
 
   //-------------------------------------------------------------------------------------
@@ -771,7 +779,7 @@ public:
     BoxController *const bcc = parent->getBoxController();
     delete parent;
     delete bcc;
-
+    delete function;
   }
 
 
@@ -786,15 +794,12 @@ public:
     size_t numSplit = 4;
     for (size_t recurseLevels = 1; recurseLevels < 5; recurseLevels++)
     {
-      std::cout << " --- Recursion Level " << recurseLevels << " --- " << std::endl;
-      Timer tim1;
       double boxes_per_side = pow(double(numSplit), double(recurseLevels));
       double spacing = double(numSplit)/boxes_per_side;
       // How many times to add the same event
       size_t num_to_repeat = size_t(1e7 / (boxes_per_side*boxes_per_side));
 
       MDGridBox<MDLeanEvent<2>,2> * box = MDEventsTestHelper::makeRecursiveMDGridBox<2>(numSplit, recurseLevels);
-      std::cout << tim1.elapsed() << " seconds to generate the " << boxes_per_side << "^2 boxes." << std::endl;
 
       for (double x=0; x < numSplit; x += spacing)
         for (double y=0; y < numSplit; y += spacing)
@@ -807,10 +812,6 @@ public:
         }
       // You must refresh the cache after adding individual events.
       box->refreshCache(NULL);
-
-      double sec = tim1.elapsed();
-      std::cout << sec << " seconds to add " << box->getNPoints() << " events. Each box had " << num_to_repeat << " events." << std::endl;
-      std::cout << "equals " << 1e6*sec/double(box->getNPoints()) << " seconds per million events." << std::endl;
     }
 
   }
@@ -919,7 +920,7 @@ public:
     MDGridBox<MDLeanEvent<2>,2> * b = MDEventsTestHelper::makeMDGridBox<2>();
     int num_repeat = 1000;
 
-    PARALLEL_FOR_NO_WSP_CHECK()
+//    PARALLEL_FOR_NO_WSP_CHECK()
     for (int i=0; i < num_repeat; i++)
     {
       std::vector< MDLeanEvent<2> > events;
@@ -969,6 +970,8 @@ public:
     coord_t coords[2] = {1.5,1.5};
     const MDBoxBase<MDLeanEvent<2>,2> * c = dynamic_cast<const MDBoxBase<MDLeanEvent<2>,2> *>(b->getBoxAtCoord(coords));
     TS_ASSERT_EQUALS(c, b->getChild(11));
+    delete b->getBoxController();
+    delete b;
   }
 
 
@@ -1035,7 +1038,7 @@ public:
 
     // clean up  behind 
     BoxController *const bcc = b0->getBoxController();
-    delete b;
+    delete b0;
     delete bcc;
 
   }
@@ -1186,6 +1189,8 @@ public:
     doTestMDBin2(b, "Bin that fits partially in one MDBox'es, and goes of the edge",
         -3.2, 0.8, 0.1, 0.9,     2.0);
 
+    delete b->getBoxController();
+    delete b;
   }
 
 
@@ -1201,7 +1206,6 @@ public:
    */
   void do_check_integrateSphere(MDGridBox<MDLeanEvent<2>,2> & box, double x, double y, const double radius, double numExpected, std::string message)
   {
-    std::cout << "Sphere of radius " << radius << " at " << x << "," << y << "------" << message << "--\n";
     // The sphere transformation
     bool dimensionsUsed[2] = {true,true};
     coord_t center[2] = {static_cast<coord_t>(x),static_cast<coord_t>(y)};
@@ -1319,7 +1323,6 @@ public:
   void do_check_integrateSphere3d(MDGridBox<MDLeanEvent<3>,3> & box, double x, double y, double z,
       const double radius, double numExpected, std::string message)
   {
-    std::cout << "Sphere of radius " << radius << " at " << x << "," << y << "," << z << "--- " << message << " ---------\n";
     // The sphere transformation
     bool dimensionsUsed[3] = {true,true, true};
     coord_t center[3] = {static_cast<coord_t>(x),static_cast<coord_t>(y),static_cast<coord_t>(z)};
@@ -1351,6 +1354,8 @@ public:
     box.addEvent(MDLeanEvent<3>(2.0, 2.0, center));
 //    do_check_integrateSphere(box, -1.0,0.5, 1.01,  1.0, "Off an edge but just barely enough to get an event");
 //    do_check_integrateSphere(box, 0.0,0.5, 0.01,  1.0, "Tiny, but just barely enough to get an event");
+    delete box_ptr->getBoxController();
+    delete box_ptr;
   }
 
 
@@ -1370,7 +1375,6 @@ public:
       double numExpected, double xExpected, double yExpected,
       std::string message)
   {
-    std::cout << "Centroid of sphere of radius " << radius << " at " << x << "," << y << "------" << message << "--\n";
     // The sphere transformation
     bool dimensionsUsed[2] = {true,true};
     coord_t center[2] = {static_cast<coord_t>(x),static_cast<coord_t>(y)};
@@ -1421,6 +1425,9 @@ public:
     box.addEvent(MDLeanEvent<2>(1.0, 1.0, center));
     do_check_integrateSphere(box, -1.0,0.5, 1.01,  1.0, "Off an edge but just barely enough to get an event");
     do_check_integrateSphere(box, 0.0,0.5, 0.01,  1.0, "Tiny, but just barely enough to get an event");
+
+    delete box_ptr->getBoxController();
+    delete box_ptr;
   }
 
   void test_getIsMasked_WhenNoMasking()
@@ -1756,7 +1763,6 @@ public:
    * Gets about 11 million boxes */
   void test_getBoxes()
   {
-    CPUTimer tim;
     std::vector<API::IMDNode *> boxes;
     for (size_t i=0; i<10; i++)
     {
@@ -1766,7 +1772,6 @@ public:
       TS_ASSERT_EQUALS( boxes.size(), 1111111);
       TS_ASSERT_EQUALS( boxes[0], recursiveParent);
     }
-    std::cout << tim << " to getBoxes() 10 x 1.1 million boxes." << std::endl;
   }
 
 
