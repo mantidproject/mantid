@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>500</width>
-    <height>300</height>
+    <height>293</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -20,6 +20,124 @@
    <string>Form</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout_10">
+   <item>
+    <widget class="QGroupBox" name="gbInput">
+     <property name="title">
+      <string>Input</string>
+     </property>
+     <layout class="QHBoxLayout" name="horizontalLayout_2">
+      <item>
+       <widget class="MantidQt::MantidWidgets::MWRunFiles" name="rfRunFile" native="true">
+        <property name="label" stdset="0">
+         <string>Run File</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="gbCalibration">
+     <property name="title">
+      <string>Calibration</string>
+     </property>
+     <layout class="QGridLayout" name="gridLayout">
+      <item row="0" column="0">
+       <widget class="QLabel" name="lbSpectraRange">
+        <property name="text">
+         <string>Spectra range:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QLabel" name="lbPeakRange">
+        <property name="text">
+         <string>Peak range:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0">
+       <widget class="QLabel" name="lbScaleFactor">
+        <property name="text">
+         <string>Scale factor:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="2">
+       <widget class="QLabel" name="lbSpectraRangeTo">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="text">
+         <string>to</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QDoubleSpinBox" name="spPeakLower">
+        <property name="decimals">
+         <number>5</number>
+        </property>
+        <property name="minimum">
+         <double>-99.989999999999995</double>
+        </property>
+        <property name="singleStep">
+         <double>0.010000000000000</double>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="3">
+       <widget class="QDoubleSpinBox" name="spPeakUpper">
+        <property name="decimals">
+         <number>5</number>
+        </property>
+        <property name="minimum">
+         <double>-99.989999999999995</double>
+        </property>
+        <property name="singleStep">
+         <double>0.010000000000000</double>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="2">
+       <widget class="QLabel" name="lbPeakRangeTo">
+        <property name="text">
+         <string>to</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QSpinBox" name="spSpecMin"/>
+      </item>
+      <item row="0" column="3">
+       <widget class="QSpinBox" name="spSpecMax"/>
+      </item>
+      <item row="2" column="1">
+       <widget class="QDoubleSpinBox" name="spScaleFactor">
+        <property name="decimals">
+         <number>3</number>
+        </property>
+        <property name="singleStep">
+         <double>0.100000000000000</double>
+        </property>
+        <property name="value">
+         <double>1.000000000000000</double>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="1">
+       <widget class="QCheckBox" name="ckMirrorMode">
+        <property name="text">
+         <string>Mirror Mode</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
    <item>
     <spacer name="verticalSpacer">
      <property name="orientation">
@@ -74,6 +192,14 @@
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>MantidQt::MantidWidgets::MWRunFiles</class>
+   <extends>QWidget</extends>
+   <header>MantidQtMantidWidgets/MWRunFiles.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>
