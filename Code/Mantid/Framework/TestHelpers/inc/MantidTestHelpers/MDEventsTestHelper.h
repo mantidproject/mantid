@@ -206,6 +206,7 @@ makeMDGridBox(size_t split0 = 10, size_t split1 = 10,
 
   // Split
   MDGridBox<MDLeanEvent<nd>, nd> *out = new MDGridBox<MDLeanEvent<nd>, nd>(box);
+  delete box;
 
   return out;
 }

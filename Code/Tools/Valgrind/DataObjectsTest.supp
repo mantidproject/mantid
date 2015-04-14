@@ -17,3 +17,28 @@
    fun:_ZN6Mantid11DataObjects13MDBoxFlatTree21createOrOpenMDWSgroupERKSsRiS3_bRb
    ...
 }
+{
+   <HDF5_write_no_cancel>
+   Memcheck:Param
+   write(buf)
+   fun:__write_nocancel
+   ...
+   fun:H5FD_write
+   fun:H5F_accum_write
+   fun:H5F_block_write
+   ...
+   fun:H5D__flush_real
+   ...
+   fun:H5I_iterate
+   fun:H5D_flush
+   fun:H5F_flush
+   fun:H5Fflush
+   ...
+   fun:nxiflush_
+   fun:_ZN5NeXus4File5flushEv
+   fun:_ZNK6Mantid11DataObjects20BoxControllerNeXusIO9flushDataEv
+   fun:_ZNK6Mantid11DataObjects13MDBoxSaveable9flushDataEv
+   fun:_ZN6Mantid6Kernel10DiskBuffer15writeOldObjectsEv
+   fun:_ZN6Mantid6Kernel10DiskBuffer10flushCacheEv
+   fun:_ZN17MDBoxSaveableTest46test_fileBackEnd_nonConst_EventListChangesSizeEv
+}
