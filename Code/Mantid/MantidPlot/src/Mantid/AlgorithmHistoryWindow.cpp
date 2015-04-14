@@ -498,7 +498,10 @@ void AlgHistoryProperties::displayAlgHistoryProperties()
     propList.clear();
 
   }// end of properties for loop
-    
+
+  m_histpropTree->resizeColumnToContents(0);
+  m_histpropTree->resizeColumnToContents(2);
+  m_histpropTree->resizeColumnToContents(3);
 }
 
 //--------------------------------------------------------------------------------------------------
