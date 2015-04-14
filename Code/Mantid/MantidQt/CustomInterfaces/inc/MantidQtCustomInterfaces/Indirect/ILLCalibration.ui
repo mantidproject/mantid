@@ -78,6 +78,9 @@
       </item>
       <item row="1" column="1">
        <widget class="QDoubleSpinBox" name="spPeakLower">
+        <property name="suffix">
+         <string> meV</string>
+        </property>
         <property name="decimals">
          <number>5</number>
         </property>
@@ -87,10 +90,16 @@
         <property name="singleStep">
          <double>0.010000000000000</double>
         </property>
+        <property name="value">
+         <double>-0.010000000000000</double>
+        </property>
        </widget>
       </item>
       <item row="1" column="3">
        <widget class="QDoubleSpinBox" name="spPeakUpper">
+        <property name="suffix">
+         <string> meV</string>
+        </property>
         <property name="decimals">
          <number>5</number>
         </property>
@@ -98,6 +107,9 @@
          <double>-99.989999999999995</double>
         </property>
         <property name="singleStep">
+         <double>0.010000000000000</double>
+        </property>
+        <property name="value">
          <double>0.010000000000000</double>
         </property>
        </widget>
@@ -110,10 +122,21 @@
        </widget>
       </item>
       <item row="0" column="1">
-       <widget class="QSpinBox" name="spSpecMin"/>
+       <widget class="QSpinBox" name="spSpecMin">
+        <property name="maximum">
+         <number>9999</number>
+        </property>
+       </widget>
       </item>
       <item row="0" column="3">
-       <widget class="QSpinBox" name="spSpecMax"/>
+       <widget class="QSpinBox" name="spSpecMax">
+        <property name="maximum">
+         <number>9999</number>
+        </property>
+        <property name="value">
+         <number>23</number>
+        </property>
+       </widget>
       </item>
       <item row="2" column="1">
        <widget class="QDoubleSpinBox" name="spScaleFactor">
