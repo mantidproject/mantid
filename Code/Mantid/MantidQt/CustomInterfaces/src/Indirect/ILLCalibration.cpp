@@ -73,10 +73,16 @@ namespace CustomInterfaces
 
     m_batchAlgoRunner->addAlgorithm(calibrationAlg);
 
+    // Handle saving
     bool save = m_uiForm.ckSave->isChecked();
     if(save)
     {
-      //TODO: saving
+      BatchAlgorithmRunner::AlgorithmRuntimeProps saveProps;
+      saveProps["InputWorkspace"] = outputWsName.toStdString();
+      IAlgorithm_sptr saveAlg = AlgorithmManager::Instance().create("SaveNexusProcessed");
+      saveAlg->initialize();
+      saveAlg->setProperty("Filename", outputWsName.toStdString() + ".nxs");
+      m_batchAlgoRunner->addAlgorithm(saveAlg, saveProps);
     }
 
     m_batchAlgoRunner->executeBatchAsync();
