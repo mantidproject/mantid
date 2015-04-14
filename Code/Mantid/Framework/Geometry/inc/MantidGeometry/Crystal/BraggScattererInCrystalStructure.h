@@ -72,6 +72,7 @@ protected:
 
   virtual void declareProperties();
 
+  Kernel::V3D getPositionFromString(const std::string &positionString) const;
   void recalculateEquivalentPositions();
 
   Kernel::V3D m_position;

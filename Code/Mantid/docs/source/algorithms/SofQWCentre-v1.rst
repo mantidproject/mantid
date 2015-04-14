@@ -13,13 +13,15 @@ This algorithm is for use by inelastic instruments and takes as its
 input a workspace where the data's been reduced to be in `units <http://www.mantidproject.org/Units>`_ 
 of **energy transfer** against spectrum number (which can be seen as equivalent to
 angle, with the angle being taken from the detector(s) to which the
-spectrum pertains).
+spectrum pertains). For each detector the value of **momentum transfer**
+(:math:`Q`) is calculated, and the counts for detectors and each input 
+**energy transfer** bin are added to the appropriate output :math:`(Q ;\Delta E)` bin.
 
-This algorithm can operate in one of three modes. Each mode simply runs a different algorithm to perform the computation:
 
-- *Centre*: performs a basic centre-point rebinning, see :ref:`algm-SofQWCentre`
-- *Polygon*: performs a parallel-piped rebin, taking into account the curvature of the output bins see :ref:`algm-SofQWPolygon`
-- *NormalisedPolygon*: performs the same rebin as *Polygon* but the output bins normalised by the contributing overlap area see :ref:`algm-SofQWNormalisedPolygon`
+The momentum transfer (:math:`Q`-values) obtained for each detector are calculated
+for the detector center, so the binning algorithm uses center-point binning.
+Use :ref:`algm-SofQWPolygon` and :ref:`algm-SofQWNormalisedPolygon` for more complex and precise (but slower)
+binning strategies.
 
 The energy binning will not be changed by this algorithm, so the input
 workspace should already have the desired bins (though this axis can be
@@ -36,12 +38,12 @@ Usage
 
 **Example - simple transformation of inelastic workspace:**
 
-.. testcode:: SofQW
+.. testcode:: SofQWCentre
 
    # create sample inelastic workspace for MARI instrument containing 1 at all spectra values
    ws=CreateSimulationWorkspace(Instrument='MAR',BinParams='-10,1,10')
    # convert workspace into MD workspace 
-   ws=SofQW(InputWorkspace=ws,QAxisBinning='-3,0.1,3',Emode='Direct',EFixed=12)
+   ws=SofQWCentre(InputWorkspace=ws,QAxisBinning='-3,0.1,3',Emode='Direct',EFixed=12)
    
    print "The converted X values are:"
    print ws.readX(59)[0:10]
@@ -52,14 +54,14 @@ Usage
    print ws.readY(59)[10:21]   
 
 
-.. testcleanup:: SofQW
+.. testcleanup:: SofQWCentre
 
    DeleteWorkspace(ws)
    
 **Output:**
 
 
-.. testoutput:: SofQW
+.. testoutput:: SofQWCentre
 
    The converted X values are: 
    [-10.  -9.  -8.  -7.  -6.  -5.  -4.  -3.  -2.  -1.]

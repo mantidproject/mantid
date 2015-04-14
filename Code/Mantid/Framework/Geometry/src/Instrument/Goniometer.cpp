@@ -184,17 +184,12 @@ const GoniometerAxis &Goniometer::getAxis(size_t axisnumber) const {
 /// Get GoniometerAxis object using motor name
 /// @param axisname :: axis name
 const GoniometerAxis &Goniometer::getAxis(std::string axisname) const {
-  bool found = false;
   for (auto it = motors.begin(); it < motors.end(); ++it) {
     if (axisname.compare((*it).name) == 0) {
-      found = true;
       return (*it);
     }
   }
-  if (found == false) {
-    throw std::invalid_argument("Motor name " + axisname + " not found");
-  }
-  return motors.at(0);
+  throw std::invalid_argument("Motor name " + axisname + " not found");
 }
 
 /// @return the number of axes

@@ -26,14 +26,9 @@ namespace Mantid
       CameraManager::~CameraManager()
       {
       }
+
       /**
        * Get the plane equation for the view frustum.
-       * @param left The left plane.
-       * @param right The right plane.
-       * @param bottom The bottom plane.
-       * @param top The top plane.
-       * @param far The far plane.
-       * @param near The near plane.
        */
       Mantid::VATES::ViewFrustum CameraManager::getCurrentViewFrustum()
       {
@@ -132,7 +127,8 @@ namespace Mantid
         camera->SetFocalPoint(xpos, ypos, zpos);
 
         // Setup the position of the camera. We want this to be 
-        double zposCamera = zpos + peakRadius*3;
+        const double cameraDistance = 12;
+        double zposCamera = zpos + peakRadius*cameraDistance;
         camera->SetPosition(xpos, ypos, zposCamera);
         camera->SetViewUp(0.0, 1.0, 0.0);
 

@@ -229,7 +229,7 @@ void SplatterPlotView::render()
     try
     {
       m_peaksTableController->updatePeaksWorkspaces(this->peaksSource, this->splatSource);
-
+      
       if (m_peaksFilter)
       {
        updatePeaksFilter(m_peaksFilter);
@@ -657,7 +657,6 @@ void SplatterPlotView::destroyAllSourcesInView() {
   pqObjectBuilder *builder = pqApplicationCore::instance()->getObjectBuilder();
   builder->destroySources();
 }
-
 
 void SplatterPlotView::destroyFiltersForSplatterPlotView(){
    pqObjectBuilder *builder = pqApplicationCore::instance()->getObjectBuilder();

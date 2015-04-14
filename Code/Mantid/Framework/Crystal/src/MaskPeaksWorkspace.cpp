@@ -258,7 +258,6 @@ size_t MaskPeaksWorkspace::getWkspIndex(const detid2index_map &pixel_to_wi,
       return EMPTY_INT();
     return (it->second);
   }
-  return EMPTY_INT();
 }
 
 /**

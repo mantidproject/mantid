@@ -114,7 +114,7 @@ void vtkDataSetToNonOrthogonalDataSet::execute()
       wMatArr = run.getPropertyValueAsType<std::vector<double > >("W_MATRIX");
       try
       {
-        API::CoordTransform *transform = infoWs->getTransformToOriginal();
+        API::CoordTransform const *transform = infoWs->getTransformToOriginal();
         affMat = transform->makeAffineMatrix();
       }
       catch (std::runtime_error &)
@@ -149,7 +149,7 @@ void vtkDataSetToNonOrthogonalDataSet::execute()
       wMatArr = run.getPropertyValueAsType<std::vector<double > >("W_MATRIX");
       try
       {
-        API::CoordTransform *transform = infoWs->getTransformToOriginal();
+        API::CoordTransform const *transform = infoWs->getTransformToOriginal();
         affMat = transform->makeAffineMatrix();
       }
       catch (std::runtime_error &)

@@ -169,5 +169,17 @@ namespace CustomInterfaces
     m_view->setTimeRange (ws->readX(0).front(),ws->readX(0).back());
   }
 
+   MatrixWorkspace_sptr ALCDataLoadingPresenter::exportWorkspace()
+  {
+    if ( m_loadedData ) {
+
+      return boost::const_pointer_cast<MatrixWorkspace>(m_loadedData);
+
+    } else {
+
+      return MatrixWorkspace_sptr();
+    }
+   }
+
 } // namespace CustomInterfaces
 } // namespace MantidQt

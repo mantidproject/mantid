@@ -5,6 +5,13 @@ from mantid.api import FileFinder
 
 import os
 
+def _skip_test():
+    """Helper function to determine if we run the test"""
+    import platform
+
+    # Only runs on RHEL6 at the moment
+    return ("Linux" not in platform.platform())
+
 def getSaveDir():
     """determine where to save - the current working directory"""
     import os
@@ -30,6 +37,9 @@ class PG3Analysis(stresstesting.MantidStressTest):
     ref_file  = 'PG3_4844_reference.gsa'
     cal_file  = "PG3_FERNS_d4832_2011_08_24.cal"
     char_file = "PG3_characterization_2011_08_31-HR.txt"
+
+    def skipTests(self):
+        return _skip_test()
 
     def cleanup(self):
         do_cleanup()
@@ -71,6 +81,9 @@ class PG3Analysis(stresstesting.MantidStressTest):
 class PG3StripPeaks(stresstesting.MantidStressTest):
     ref_file = 'PG3_4866_reference.gsa'
     cal_file  = "PG3_FERNS_d4832_2011_08_24.cal"
+
+    def skipTests(self):
+        return _skip_test()
 
     def cleanup(self):
         do_cleanup()

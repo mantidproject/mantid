@@ -1,7 +1,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAlgorithms/SofQW2.h"
+#include "MantidAlgorithms/SofQWPolygon.h"
 #include "MantidAlgorithms/SofQW.h"
 #include "MantidAPI/SpectraAxis.h"
 #include "MantidAPI/SpectrumDetectorMapping.h"
@@ -14,7 +14,7 @@ namespace Mantid {
 namespace Algorithms {
 
 // Register the algorithm into the AlgorithmFactory
-DECLARE_ALGORITHM(SofQW2)
+DECLARE_ALGORITHM(SofQWPolygon)
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -26,19 +26,19 @@ using Geometry::Quadrilateral;
 using Geometry::Vertex2D;
 
 /// Default constructor
-SofQW2::SofQW2() : Rebin2D(), m_Qout(), m_thetaPts(), m_thetaWidth(0.0) {}
+SofQWPolygon::SofQWPolygon() : Rebin2D(), m_Qout(), m_thetaPts(), m_thetaWidth(0.0) {}
 
 //----------------------------------------------------------------------------------------------
 
 /**
  * Initialize the algorithm
  */
-void SofQW2::init() { SofQW::createInputProperties(*this); }
+void SofQWPolygon::init() { SofQW::createCommonInputProperties(*this); }
 
 /**
  * Execute the algorithm.
  */
-void SofQW2::exec() {
+void SofQWPolygon::exec() {
   MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
   // Do the full check for common binning
   if (!WorkspaceHelpers::commonBoundaries(inputWS)) {
@@ -69,12 +69,12 @@ void SofQW2::exec() {
 
   // Select the calculate Q method based on the mode
   // rather than doing this repeatedly in the loop
-  typedef double (SofQW2::*QCalculation)(double, double, double, double) const;
+  typedef double (SofQWPolygon::*QCalculation)(double, double, double, double) const;
   QCalculation qCalculator;
   if (m_EmodeProperties.m_emode == 1) {
-    qCalculator = &SofQW2::calculateDirectQ;
+    qCalculator = &SofQWPolygon::calculateDirectQ;
   } else {
-    qCalculator = &SofQW2::calculateIndirectQ;
+    qCalculator = &SofQWPolygon::calculateIndirectQ;
   }
 
   /* PARALLEL_FOR2(inputWS, outputWS) */
@@ -143,7 +143,7 @@ void SofQW2::exec() {
  * @param psi The value of the azimuth
  * @return The value of Q
  */
-double SofQW2::calculateDirectQ(const double efixed, const double deltaE,
+double SofQWPolygon::calculateDirectQ(const double efixed, const double deltaE,
                                 const double twoTheta, const double psi) const {
   const double ki = std::sqrt(efixed * SofQW::energyToK());
   const double kf = std::sqrt((efixed - deltaE) * SofQW::energyToK());
@@ -161,7 +161,7 @@ double SofQW2::calculateDirectQ(const double efixed, const double deltaE,
  * @param psi The value of the azimuth
  * @return The value of Q
  */
-double SofQW2::calculateIndirectQ(const double efixed, const double deltaE,
+double SofQWPolygon::calculateIndirectQ(const double efixed, const double deltaE,
                                   const double twoTheta,
                                   const double psi) const {
   UNUSED_ARG(psi);
@@ -176,7 +176,7 @@ double SofQW2::calculateIndirectQ(const double efixed, const double deltaE,
  * Init variables caches
  * @param workspace :: Workspace pointer
  */
-void SofQW2::initCachedValues(API::MatrixWorkspace_const_sptr workspace) {
+void SofQWPolygon::initCachedValues(API::MatrixWorkspace_const_sptr workspace) {
   m_EmodeProperties.initCachedValues(workspace, this);
   // Index theta cache
   initThetaCache(workspace);
@@ -190,7 +190,7 @@ void SofQW2::initCachedValues(API::MatrixWorkspace_const_sptr workspace) {
  * values are required very frequently so the total time is more than
  * offset by this precaching step
  */
-void SofQW2::initThetaCache(API::MatrixWorkspace_const_sptr workspace) {
+void SofQWPolygon::initThetaCache(API::MatrixWorkspace_const_sptr workspace) {
   const size_t nhist = workspace->getNumberHistograms();
   m_thetaPts = std::vector<double>(nhist);
   size_t ndets(0);

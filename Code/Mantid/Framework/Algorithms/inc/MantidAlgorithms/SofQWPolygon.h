@@ -1,5 +1,5 @@
-#ifndef MANTID_ALGORITHMS_SOFQW2_H_
-#define MANTID_ALGORITHMS_SOFQW2_H_
+#ifndef MANTID_ALGORITHMS_SOFQWPOLYGON_H_
+#define MANTID_ALGORITHMS_SOFQWPOLYGON_H_
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -56,12 +56,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class DLLExport SofQW2 : public Rebin2D {
+class DLLExport SofQWPolygon : public Rebin2D {
 public:
   /// Default constructor
-  SofQW2();
+  SofQWPolygon();
   /// Algorithm's name for identification
-  virtual const std::string name() const { return "SofQW2"; }
+  virtual const std::string name() const { return "SofQWPolygon"; }
+  virtual const std::string alias() const { return "SofQW2"; }
   /// Summary of algorithms purpose
   virtual const std::string summary() const {
     return "Calculate the intensity as a function of momentum transfer and "
@@ -69,7 +70,7 @@ public:
   }
 
   /// Algorithm's version for identification
-  virtual int version() const { return 1; };
+  virtual int version() const { return 1; }
   /// Algorithm's category for identification
   virtual const std::string category() const { return "Inelastic"; }
 
@@ -78,22 +79,12 @@ private:
   void init();
   /// Run the algorithm
   void exec();
-  //      /// Rebin the inputQ
-  //      void rebinToOutput(const Geometry::Quadrilateral & inputQ,
-  //      API::MatrixWorkspace_const_sptr inputWS,
-  //                         const size_t i, const size_t j,
-  //                         API::MatrixWorkspace_sptr outputWS);
   /// Calculate the Q value for a direct instrument
   double calculateDirectQ(const double efixed, const double deltaE,
                           const double twoTheta, const double psi) const;
   /// Calculate the Q value for an indirect instrument
   double calculateIndirectQ(const double efixed, const double deltaE,
                             const double twoTheta, const double psi) const;
-  //      /// Find the intersect region on the output grid
-  //      bool getIntersectionRegion(API::MatrixWorkspace_const_sptr outputWS,
-  //      const Geometry::Quadrilateral & inputQ,
-  //                                 size_t &qstart, size_t &qend, size_t
-  //                                 &en_start, size_t &en_end) const;
   /// Init variables cache base on the given workspace
   void initCachedValues(API::MatrixWorkspace_const_sptr workspace);
   /// Init the theta index
@@ -112,4 +103,4 @@ private:
 } // namespace Algorithms
 } // namespace Mantid
 
-#endif /* MANTID_ALGORITHMS_SOFQW2_H_ */
+#endif /* MANTID_ALGORITHMS_SOFQWPOLYGON_H_ */

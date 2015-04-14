@@ -369,6 +369,19 @@ def do_bleed_test(sample_run, max_framerate, ignored_pixels):
         ws_name = lhs_names[0]
     else:
         ws_name = '__do_bleed__test'
+    # Check if all necessary logs present in the workspace,as nxs workspace log names are diffferent
+    #  from a raw file workspace logs.
+    try:
+        nFrames= data_ws.run().getLogData('goodfrm').value
+    except RuntimeError:
+        try: 
+            nFrames = len(data_ws.run().getLogData('good_frame_log').value)
+            AddSampleLog(Workspace=data_ws, LogName='goodfrm', LogText=str(nFrames), LogType='Number') 
+        except RuntimeError: 
+            raise RuntimeError("""Can not run bleed test as no appropriate good frame log is found in the workspace: {0}\n
+                                  Disable bleed test by setting diag_bleed_test=False or add 'goodfrm' log value to the workspace\n"""\
+                                  .format(data_ws.name()))
+
 
     bleed_test, num_failed = CreatePSDBleedMask(InputWorkspace=data_ws, OutputWorkspace=ws_name,
                                                 MaxTubeFramerate=max_framerate,
