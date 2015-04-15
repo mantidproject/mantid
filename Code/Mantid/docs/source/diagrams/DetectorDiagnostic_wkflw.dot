@@ -35,8 +35,8 @@ digraph ReflectometryReductionOne {
 
   subgraph processes {
     $process_style
-    doDetVanTest2I  [label="Do Detector\n Beam Vanadium Tests"]
-	doDetVanTest2DV [label="Do Detector\n Beam Vanadium Tests"]
+    doDetVanTest2I  [label="Do Detector\n Vanadium Tests\n on Input workspace"]
+	doDetVanTest2DV [label="Do Detector\n Vanadium Tests\n on DetVanCompare"]
   }
 
   subgraph values {
