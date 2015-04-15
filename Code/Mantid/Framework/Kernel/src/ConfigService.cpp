@@ -999,6 +999,28 @@ ConfigServiceImpl::getKeys(const std::string &keyName) const {
   return keyVector;
 }
 
+/**
+ * Gets a list of all config options as property.key.
+ *
+ * @return Vector containing all config options
+ */
+std::vector<std::string> ConfigServiceImpl::keys() const {
+  std::vector<std::string> rootKeys;
+  m_pConf->keys(rootKeys);
+
+  std::vector<std::string> allKeys;
+  for(auto rkIt = rootKeys.begin(); rkIt != rootKeys.end(); ++rkIt) {
+    std::vector<std::string> subKeys;
+    m_pConf->keys(*rkIt, subKeys);
+
+    for(auto skIt = subKeys.begin(); skIt != subKeys.end(); ++skIt) {
+      allKeys.push_back(*riIt + "." + *skIt);
+    }
+  }
+
+  return allKeys;
+}
+
 /** Removes a key from the memory stored properties file and inserts the key
  *into the
  *  changed key list so that when the program calls saveConfig the properties
