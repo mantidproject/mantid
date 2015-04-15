@@ -183,23 +183,6 @@ def newTiledWindow(name=None):
     else:
         return new_proxy(proxies.TiledWindowProxy, _qti.app.newTiledWindow, name)
 
-#-----------------------------------------------------------------------------
-# Intercept qtiplot "plot" command and forward to plotSpectrum for a workspace
-def plot(source, *args, **kwargs):
-    """Create a new plot given a workspace, table or matrix.
-
-    Args:
-        source: what to plot; if it is a Workspace, will
-                call plotSpectrum()
-
-    Returns:
-        A handle to the created Graph widget.
-    """
-    if hasattr(source, '_getHeldObject') and isinstance(source._getHeldObject(), QtCore.QObject):
-        return new_proxy(proxies.Graph,_qti.app.plot, source._getHeldObject(), *args, **kwargs)
-    else:
-        return plotSpectrum(source, *args, **kwargs)
-
 #----------------------------------------------------------------------------------------------------
 def plotSpectrum(source, indices, error_bars = False, type = -1, window = None, clearWindow = False):
     """Open a 1D Plot of a spectrum in a workspace.
