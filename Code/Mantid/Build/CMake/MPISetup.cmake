@@ -27,7 +27,7 @@ include_directories( ${Boost_INCLUDE_DIRS} )
     
 #message ( STATUS "BOOST MPI LIBRARY: ${BOOST_MPI_LIBRARY}" )
 
-#set ( MANTIDLIBS  ${MANTIDLIBS} ${BOOST_MPI_LIBRARY} )
+set ( MANTIDLIBS  ${MANTIDLIBS}  ${Boost_LIBRARIES}  )
     
 # Add a definition that's used to guard MPI-specific parts of the main code
 add_definitions ( -DMPI_BUILD )
