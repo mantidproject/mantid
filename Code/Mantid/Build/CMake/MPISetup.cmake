@@ -18,9 +18,12 @@ set ( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}" ${MPI_CXX_COMPILE_FLAGS} )
 #set ( BOOST_ROOT /usr/lib64/openmpi ) # This is where (boost-)openmpi winds up on rhel6
 # find_package ( Boost COMPONENTS mpi serialization 
 #                HINTS "/usr/lib64/openmpi" "/usr/lib64/" )
-find_package ( Boost COMPONENTS mpi python serialization )
+find_package ( Boost COMPONENTS mpi serialization )
 include_directories( ${Boost_INCLUDE_DIRS} )
-set ( MANTIDLIBS  ${MANTIDLIBS} ${Boost_LIBRARIES} )
+
+#find_path ( MPIBOOST_LIBDIR libboost_mpi.so.5
+#            PATHS "/usr/lib64/openmpi/lib")
+set ( MANTIDLIBS  ${MANTIDLIBS} "/usr/lib64/openmpi/lib" )
     
 # Add a definition that's used to guard MPI-specific parts of the main code
 add_definitions ( -DMPI_BUILD )
