@@ -39,4 +39,4 @@ class LiquidsReflectometryReductionTest(stresstesting.MantidStressTest):
         self.disableChecking.append('Sample')
         self.disableChecking.append('SpectraMap')
         self.disableChecking.append('Axes')
-        return "reflectivity_119814", 'REFL_119814_combined_data.nxs'
+        return "reflectivity_119814", 'REFL_119814_combined_data_v2.nxs'
