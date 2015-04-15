@@ -326,8 +326,7 @@ namespace IDA
     }
     else if(shape == "Cylinder")
     {
-      double sampleInnerRadius = m_uiForm.spCylSampleInnerRadius->value();
-      alg->setProperty("SampleInnerRadius", sampleInnerRadius);
+      alg->setProperty("SampleInnerRadius", 0.0);
 
       double sampleOuterRadius = m_uiForm.spCylSampleOuterRadius->value();
       alg->setProperty("SampleOuterRadius", sampleOuterRadius);
@@ -343,7 +342,8 @@ namespace IDA
     }
     else if(shape == "Annulus")
     {
-      alg->setProperty("SampleInnerRadius", 0.0);
+      double sampleInnerRadius = m_uiForm.spAnnSampleInnerRadius->value();
+      alg->setProperty("SampleInnerRadius", sampleInnerRadius);
 
       double sampleOuterRadius = m_uiForm.spAnnSampleOuterRadius->value();
       alg->setProperty("SampleOuterRadius", sampleOuterRadius);
