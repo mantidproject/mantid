@@ -120,7 +120,8 @@ public:
 
   /// Method for adding a parameter providing its value as a string
   void add(const std::string &type, const IComponent *comp,
-           const std::string &name, const std::string &value);
+           const std::string &name, const std::string &value,
+           const std::string * const pDescription=NULL);
 
   /**
    * Method for adding a parameter providing its value of a particular type.
@@ -132,54 +133,62 @@ public:
    * to
    * @param name :: The name of the parameter
    * @param value :: The parameter's value
+   * @param pDescription :: if present, the constant pointer to a constant 
+   * string, containing parameter's description.
    */
   template <class T>
   void add(const std::string &type, const IComponent *comp,
-           const std::string &name, const T &value) {
+           const std::string &name, const T &value,
+           const std::string * const pDescription=NULL) {
     auto param = ParameterFactory::create(type, name);
     auto typedParam = boost::dynamic_pointer_cast<ParameterType<T>>(param);
     assert(typedParam); // If not true the factory has created the wrong type
     typedParam->setValue(value);
-    this->add(comp, param);
+
+    this->add(comp, param,pDescription);
   }
   /// Method for adding a parameter providing shared pointer to it. The class
   /// stores share pointer and increment ref count to it
-  void add(const IComponent *comp, const boost::shared_ptr<Parameter> &param);
+  void add(const IComponent *comp, const boost::shared_ptr<Parameter> &param,
+           const std::string * const pDescription=NULL);
 
   /** @name Helper methods for adding and updating parameter types  */
   /// Create or adjust "pos" parameter for a component
   void addPositionCoordinate(const IComponent *comp, const std::string &name,
-                             const double value);
+                             const double value,const std::string * const pDescription=NULL);
   /// Create or adjust "rot" parameter for a component
   void addRotationParam(const IComponent *comp, const std::string &name,
-                        const double deg);
+                        const double deg,const std::string * const pDescription=NULL);
   /// Adds a double value to the parameter map.
   void addDouble(const IComponent *comp, const std::string &name,
-                 const std::string &value);
+                 const std::string &value,const std::string * const pDescription=NULL);
   /// Adds a double value to the parameter map.
-  void addDouble(const IComponent *comp, const std::string &name, double value);
+  void addDouble(const IComponent *comp, const std::string &name, double value,
+    const std::string * const pDescription=NULL);
   /// Adds an int value to the parameter map.
   void addInt(const IComponent *comp, const std::string &name,
-              const std::string &value);
+              const std::string &value,const std::string * const pDescription=NULL);
   /// Adds an int value to the parameter map.
-  void addInt(const IComponent *comp, const std::string &name, int value);
+  void addInt(const IComponent *comp, const std::string &name, int value,
+    const std::string * const pDescription=NULL);
   /// Adds a bool value to the parameter map.
   void addBool(const IComponent *comp, const std::string &name,
-               const std::string &value);
+               const std::string &value,const std::string * const pDescription=NULL);
   /// Adds a bool value to the parameter map.
-  void addBool(const IComponent *comp, const std::string &name, bool value);
+  void addBool(const IComponent *comp, const std::string &name, bool value,
+    const std::string * const pDescription=NULL);
   /// Adds a std::string value to the parameter map.
   void addString(const IComponent *comp, const std::string &name,
-                 const std::string &value);
+                 const std::string &value,const std::string * const pDescription=NULL);
   /// Adds a Kernel::V3D value to the parameter map.
   void addV3D(const IComponent *comp, const std::string &name,
-              const std::string &value);
+              const std::string &value,const std::string * const pDescription=NULL);
   /// @param value :: Parameter value as a Kernel::V3D
   void addV3D(const IComponent *comp, const std::string &name,
-              const Kernel::V3D &value);
+              const Kernel::V3D &value,const std::string * const pDescription=NULL);
   /// Adds a Kernel::Quat value to the parameter map.
   void addQuat(const IComponent *comp, const std::string &name,
-               const Kernel::Quat &value);
+               const Kernel::Quat &value,const std::string * const pDescription=NULL);
   //@}
 
   /// Does the named parameter exist for the given component and type

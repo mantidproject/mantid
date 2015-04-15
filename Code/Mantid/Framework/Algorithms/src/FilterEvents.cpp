@@ -974,7 +974,7 @@ void FilterEvents::filterEventsBySplitters(double progressamount) {
     Kernel::TimeSplitterType splitters;
     generateSplitters(wsindex, splitters);
 
-    g_log.debug() << "[FilterEvents D1215]: Output orkspace Index " << wsindex
+    g_log.debug() << "[FilterEvents D1215]: Output workspace Index " << wsindex
                   << ": Name = " << opws->name()
                   << "; Number of splitters = " << splitters.size() << ".\n";
 

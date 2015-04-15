@@ -254,10 +254,11 @@ void ParameterMap::clearParametersByName(const std::string &name,
  * @param value :: The parameter's value
  */
 void ParameterMap::add(const std::string &type, const IComponent *comp,
-                       const std::string &name, const std::string &value) {
+                       const std::string &name, const std::string &value,
+                       const Kernel::Quat &value,const std::string * const pDescription) {
   auto param = ParameterFactory::create(type, name);
   param->fromString(value);
-  this->add(comp, param);
+  this->add(comp, param,pDescription);
 }
 
 /** Method for adding/replacing a parameter providing shared pointer to it.
@@ -266,10 +267,13 @@ void ParameterMap::add(const std::string &type, const IComponent *comp,
 * share pointer and increment ref count to it
 */
 void ParameterMap::add(const IComponent *comp,
-                       const boost::shared_ptr<Parameter> &par) {
+                       const boost::shared_ptr<Parameter> &par,
+                       const std::string * const pDescription) {
   // can not add null pointer
   if (!par)
     return;
+  if (pDescription)
+    par->setDescription(pDescription)
 
   PARALLEL_CRITICAL(m_mapAccess) {
     auto existing_par = positionOf(comp, par->name().c_str(), "");
@@ -295,7 +299,8 @@ void ParameterMap::add(const IComponent *comp,
  */
 void ParameterMap::addPositionCoordinate(const IComponent *comp,
                                          const std::string &name,
-                                         const double value) {
+                                         const double value,
+                                         const std::string * const pDescription) {
   Parameter_sptr param = get(comp, pos());
   V3D position;
   if (param) {
@@ -317,6 +322,10 @@ void ParameterMap::addPositionCoordinate(const IComponent *comp,
   else {
     g_log.warning() << "addPositionCoordinate() called with unrecognised "
                        "coordinate symbol: " << name;
+  // set description if one is provided
+  if(pDescription){
+    param->setDescription(pDescription);
+  }
     return;
   }
 
@@ -334,7 +343,8 @@ void ParameterMap::addPositionCoordinate(const IComponent *comp,
  * @param deg :: Parameter value in degrees
 */
 void ParameterMap::addRotationParam(const IComponent *comp,
-                                    const std::string &name, const double deg) {
+                                    const std::string &name, const double deg,
+                                    const std::string * const pDescription) {
   Parameter_sptr paramRotX = get(comp, rotx());
   Parameter_sptr paramRotY = get(comp, roty());
   Parameter_sptr paramRotZ = get(comp, rotz());

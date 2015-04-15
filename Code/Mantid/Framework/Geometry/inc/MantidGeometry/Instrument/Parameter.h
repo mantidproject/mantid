@@ -91,7 +91,13 @@ public:
   /// Returns the parameter value of type T if the parameter has type
   /// ParameterType<T>
   template <class T> const T &value();
-
+  /// set description:
+  virtual void setDescription(const std::string &source)
+  {m_description.assign(source);}
+  /// get description
+  virtual const std::string & getDescription()const{return m_description;}
+  /// get short description (tooltip)
+  virtual std::string getTooltip()const;
   /// Equality operator
   bool operator==(const Parameter &rhs) const {
     if (this->name() == rhs.name() && this->type() == rhs.type() &&
@@ -112,7 +118,7 @@ protected:
 
   friend class ParameterFactory;
   /// Constructor
-  Parameter() : m_type(""), m_name(""), m_str_value("") {}
+  Parameter() : m_type(""), m_name(""), m_str_value(""),m_description("") {}
 
 private:
   /// The type of the property
@@ -120,8 +126,9 @@ private:
   /// The name of the property
   std::string m_name;
   std::string m_str_value; ///< Parameter value as a string
-  /// property description
-  //std::string m_description;
+  /// parameter's description -- string containing the description
+  /// of this parameter
+  std::string m_description;
 };
 
 
