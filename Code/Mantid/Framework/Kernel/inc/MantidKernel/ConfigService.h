@@ -132,7 +132,9 @@ public:
                         bool use_cache = true) const;
   /// Searches for a key in the configuration property
   std::vector<std::string> getKeys(const std::string &keyName) const;
-  /// Returns a list of all keys in the configuration property
+  /// Returns a list of all keys under a given root key
+  std::vector<std::string> getKeysRecursive(const std::string &root = "") const;
+  /// Returns a list of all full keys in the config
   std::vector<std::string> keys() const;
   /// Removes the value from a selected keyName
   void remove(const std::string &rootName) const;
