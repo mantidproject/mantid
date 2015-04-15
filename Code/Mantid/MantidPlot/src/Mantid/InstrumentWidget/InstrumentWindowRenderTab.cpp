@@ -18,7 +18,6 @@
 #include <QAction>
 #include <QActionGroup>
 #include <QSignalMapper>
-#include <QMessageBox>
 #include <QToolTip>
 
 #include <qwt_scale_widget.h>
