@@ -111,6 +111,7 @@ void PeaksTabWidget::updateTabs(
 /**
  * Update the tab
  * @param visiblePeaks Vector which determines which peaks are visible.
+ * @param color
  * @param index The tab index.
  */
 void PeaksTabWidget::updateTab(std::vector<bool> visiblePeaks, QColor color, int index) {
