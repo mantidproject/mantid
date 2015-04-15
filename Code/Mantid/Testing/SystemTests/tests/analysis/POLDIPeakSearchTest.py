@@ -3,8 +3,9 @@ import stresstesting
 from mantid.simpleapi import *
 import numpy as np
 
-'''This test checks that the results of PoldiAutoCorrelation match the expected outcome.'''
 class POLDIPeakSearchTest(stresstesting.MantidStressTest):
+    '''This test checks that the results of PoldiAutoCorrelation match the expected outcome.'''
+
     def runTest(self):
         dataFiles = ["poldi2013n006903", "poldi2013n006904"]
 

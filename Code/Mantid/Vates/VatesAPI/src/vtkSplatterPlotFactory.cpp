@@ -379,7 +379,7 @@ namespace VATES
     bool do4D = doMDHisto4D(workspace);
 
     // Get the transformation that takes the points in the TRANSFORMED space back into the ORIGINAL (not-rotated) space.
-    Mantid::API::CoordTransform* transform = NULL;
+    Mantid::API::CoordTransform const* transform = NULL;
     if (m_useTransform)
     {
      transform = workspace->getTransformToOriginal();
@@ -683,6 +683,7 @@ namespace VATES
     // Create a new field data array 
     MetadataToFieldData convertMtoF;
     vtkFieldData* outputFD = vtkFieldData::New();
+    outputFD->ShallowCopy(fieldData);
     convertMtoF(outputFD, xmlString, XMLDefinitions::metaDataId().c_str());
     convertMtoF(outputFD, jsonString, m_vatesConfigurations->getMetadataIdJson().c_str());
     dataSet->SetFieldData(outputFD);

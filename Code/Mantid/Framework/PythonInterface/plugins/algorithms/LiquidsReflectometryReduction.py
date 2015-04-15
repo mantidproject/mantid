@@ -568,6 +568,7 @@ class LiquidsReflectometryReduction(PythonAlgorithm):
             # The S2H key has been changing in the earlier version of REFL reduction.
             # Get the key from the data to make sure we are backward compatible.
             s2h_key = keys[3]
+            s2w_key = keys[5]
             if 'IncidentMedium' in data_dict \
                 and data_dict['IncidentMedium'] == incident_medium.strip() \
                 and _value_check('LambdaRequested', data_dict, lr_value) \
@@ -575,7 +576,7 @@ class LiquidsReflectometryReduction(PythonAlgorithm):
                 and _value_check(s2h_key, data_dict, s2h):
 
                 if not match_slit_width or (_value_check('S1W', data_dict, s1w) \
-                        and _value_check('S2W', data_dict, s2w)):
+                        and _value_check(s2w_key, data_dict, s2w)):
                     data_found = data_dict
                     break
 

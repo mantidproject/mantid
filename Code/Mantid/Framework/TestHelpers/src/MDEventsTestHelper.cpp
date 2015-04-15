@@ -126,7 +126,7 @@ createDiffractionEventWorkspace(int numEvents, int numPixels, int numBins) {
  * @param wsName :: name of the workspace in ADS
  * @param numEvents :: number of events in the target workspace distributed
  *randomly if numEvents>0 or regularly & homogeneously if numEvents<0
- * coord :: Required coordinate system
+ * @param coord :: Required coordinate system
  * @return MDEW sptr
  */
 MDEventWorkspace3Lean::sptr makeFakeMDEventWorkspace(const std::string &wsName,

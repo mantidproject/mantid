@@ -1,6 +1,5 @@
 #pylint: disable=no-init
 import stresstesting
-import mantid
 from mantid.api import FileFinder
 from mantid.simpleapi import *
 from reduction_workflow.instruments.sans.hfir_command_interface import *

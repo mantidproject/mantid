@@ -15,7 +15,7 @@ the intensity as a function of momentum transfer
 :math:`Q` and energy transfer :math:`\Delta E`. 
 
 The rebinning is done as a weighted sum of overlapping polygons. See 
-:ref:`algm-SofQW` for centerpoint binning  or :ref:`algm-SofQW3` for 
+:ref:`algm-SofQWCentre` for centre-point binning  or :ref:`algm-SofQWNormalisedPolygon` for
 more complex and precise (but slower) binning strategy.
 
 Usage
@@ -23,12 +23,12 @@ Usage
 
 **Example - simple transformation of inelastic workspace:**
 
-.. testcode:: SofQW2
+.. testcode:: SofQWPolygon
 
    # create sample inelastic workspace for MARI instrument containing 1 at all spectra values
    ws=CreateSimulationWorkspace(Instrument='MAR',BinParams='-10,1,10')
    # convert workspace into MD workspace 
-   ws=SofQW2(InputWorkspace=ws,QAxisBinning='-3,0.1,3',Emode='Direct',EFixed=12)
+   ws=SofQWPolygon(InputWorkspace=ws,QAxisBinning='-3,0.1,3',Emode='Direct',EFixed=12)
   
    print "The converted X-Y values are:"
    Xrow=ws.readX(59);
@@ -41,13 +41,13 @@ Usage
 
 
 
-.. testcleanup:: SofQW2
+.. testcleanup:: SofQWPolygon
 
    DeleteWorkspace(ws)
    
 **Output:**
 
-.. testoutput:: SofQW2
+.. testoutput:: SofQWPolygon
 
    The converted X-Y values are:
    ! -10.00  12.79  !  -9.00  17.63  !  -8.00  17.86  !  -7.00  18.12  !  -6.00  18.46  !  -5.00  18.69  !  -4.00  19.24  !  -3.00  19.67  !  -2.00  18.49  !  -1.00  12.00  !

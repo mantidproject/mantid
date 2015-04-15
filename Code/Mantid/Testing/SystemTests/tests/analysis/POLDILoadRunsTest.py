@@ -4,8 +4,9 @@ from mantid.simpleapi import *
 from mantid.api import *
 import numpy as np
 
-#This assembly of test cases checks that the behavior of PoldiLoadRuns is correct.
 class POLDILoadRunsTest(stresstesting.MantidStressTest):
+    """This assembly of test cases checks that the behavior of PoldiLoadRuns is correct."""
+
     def runTest(self):
         self.loadSingleWorkspace()
         self.loadMultipleSingleWorkspaces()

@@ -29,7 +29,7 @@ should be the number of pixels that separates two pixels at the same
 vertical position in adjacent tubes.
 
 
-See  :ref:`algm-SofQW` for centerpoint binning  or :ref:`algm-SofQW2`  
+See  :ref:`algm-SofQWCentre` for centre-point binning  or :ref:`algm-SofQWPolygon`
 for simpler and less precise but faster binning strategies.
 
 Usage
@@ -37,12 +37,12 @@ Usage
 
 **Example - simple transformation of inelastic workspace:**
 
-.. testcode:: SofQW3
+.. testcode:: SofQWNormalisedPolygon
 
    # create sample inelastic workspace for MARI instrument containing 1 at all spectra 
    ws=CreateSimulationWorkspace(Instrument='MAR',BinParams='-10,1,10')
    # convert workspace into Matrix workspace with Q-dE coordinates 
-   ws=SofQW3(InputWorkspace=ws,QAxisBinning='-3,0.1,3',Emode='Direct',EFixed=12)
+   ws=SofQWNormalisedPolygon(InputWorkspace=ws,QAxisBinning='-3,0.1,3',Emode='Direct',EFixed=12)
   
    print "The converted X-Y values are:"
    Xrow=ws.readX(59);
@@ -55,13 +55,13 @@ Usage
 
 
 
-.. testcleanup:: SofQW3
+.. testcleanup:: SofQWNormalisedPolygon
 
    DeleteWorkspace(ws)
    
 **Output:**
 
-.. testoutput:: SofQW3
+.. testoutput:: SofQWNormalisedPolygon
 
    The converted X-Y values are:
    ! -10.00   1.00  !  -9.00   1.00  !  -8.00   1.00  !  -7.00   1.00  !  -6.00   1.00  !  -5.00   1.00  !  -4.00   1.00  !  -3.00   1.00  !  -2.00   1.00  !  -1.00   1.00  !

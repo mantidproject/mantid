@@ -146,7 +146,7 @@ namespace Mantid
 
     /**
      * Set the special coordinates.
-     * @param specialCoordinates. The special coordinates.
+     * @param specialCoordinates The special coordinates.
      */
     void MetadataJsonManager::setSpecialCoordinates(int specialCoordinates)
     {
