@@ -15,8 +15,6 @@ namespace CustomInterfaces
   {
     m_data = newData;
     emit dataChanged();
-
-    setFittedPeaks(IFunction_const_sptr());
   }
 
   MatrixWorkspace_sptr ALCPeakFittingModel::exportWorkspace()
