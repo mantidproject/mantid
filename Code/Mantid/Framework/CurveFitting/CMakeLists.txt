@@ -53,6 +53,7 @@ set ( SRC_FILES
 	src/GaussianComptonProfile.cpp
 	src/GramCharlierComptonProfile.cpp
 	src/IkedaCarpenterPV.cpp
+	src/LatticeFunction.cpp
 	src/LeBailFit.cpp
 	src/LeBailFunction.cpp
 	src/LevenbergMarquardtMDMinimizer.cpp
@@ -144,7 +145,7 @@ set ( INC_FILES
 	inc/MantidCurveFitting/DllConfig.h
 	inc/MantidCurveFitting/DynamicKuboToyabe.h
 	inc/MantidCurveFitting/EndErfc.h
-    inc/MantidCurveFitting/EstimatePeakErrors.h
+	inc/MantidCurveFitting/EstimatePeakErrors.h
 	inc/MantidCurveFitting/ExpDecay.h
 	inc/MantidCurveFitting/ExpDecayMuon.h
 	inc/MantidCurveFitting/ExpDecayOsc.h
@@ -168,6 +169,7 @@ set ( INC_FILES
 	inc/MantidCurveFitting/GramCharlierComptonProfile.h
 	inc/MantidCurveFitting/IkedaCarpenterPV.h
 	inc/MantidCurveFitting/Jacobian.h
+	inc/MantidCurveFitting/LatticeFunction.h
 	inc/MantidCurveFitting/LeBailFit.h
 	inc/MantidCurveFitting/LeBailFunction.h
 	inc/MantidCurveFitting/LevenbergMarquardtMDMinimizer.h
@@ -251,7 +253,7 @@ set ( TEST_FILES
 	DiffSphereTest.h
 	DynamicKuboToyabeTest.h
 	EndErfcTest.h
-    EstimatePeakErrorsTest.h
+	EstimatePeakErrorsTest.h
 	ExpDecayMuonTest.h
 	ExpDecayOscTest.h
 	ExpDecayTest.h
@@ -274,6 +276,7 @@ set ( TEST_FILES
 	IPeakFunctionCentreParameterNameTest.h
 	IPeakFunctionIntensityTest.h
 	IkedaCarpenterPVTest.h
+	LatticeFunctionTest.h
 	LeBailFitTest.h
 	LeBailFunctionTest.h
 	LeastSquaresTest.h
