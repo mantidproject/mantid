@@ -173,9 +173,9 @@ bool CompositePeaksPresenterVsi::hasPeaks() {
 /**
  * Sort the peak workpace by the specified column
  * @param columnToSortBy The column by which the workspace is to be sorted.
- * @param sortAscending If the column is to be sorted in ascending or descending
+ * @param sortedAscending If the column is to be sorted in ascending or descending
  * order.
- * @param peakWs The peak workspace which is being sorted.
+ * @param peaksWS The peak workspace which is being sorted.
  */
 void CompositePeaksPresenterVsi::sortPeaksWorkspace(
     const std::string &columnToSortBy, const bool sortedAscending,
