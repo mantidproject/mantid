@@ -222,7 +222,7 @@ namespace CustomInterfaces
    */
   void ISISEnergyTransfer::setInstrumentDefault()
   {
-    std::map<QString, QString> instDetails = getInstrumentDetails();
+    QMap<QString, QString> instDetails = getInstrumentDetails();
 
     // Set the search instrument for runs
     m_uiForm.dsRunFiles->setInstrumentOverride(instDetails["instrument"]);

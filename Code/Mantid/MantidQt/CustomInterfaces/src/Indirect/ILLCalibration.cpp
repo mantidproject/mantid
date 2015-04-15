@@ -5,6 +5,11 @@
 using namespace Mantid::API;
 using MantidQt::API::BatchAlgorithmRunner;
 
+namespace
+{
+  Mantid::Kernel::Logger g_log("ILLCalibration");
+}
+
 namespace MantidQt
 {
 namespace CustomInterfaces
@@ -17,6 +22,7 @@ namespace CustomInterfaces
   {
     m_uiForm.setupUi(parent);
 
+    connect(this, SIGNAL(newInstrumentConfiguration()), this, SLOT(newInstrumentSelected()));
     connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(algorithmComplete(bool)));
   }
 
@@ -35,7 +41,7 @@ namespace CustomInterfaces
 
   void ILLCalibration::run()
   {
-    std::map<QString, QString> instDetails = getInstrumentDetails();
+    QMap<QString, QString> instDetails = getInstrumentDetails();
 
     IAlgorithm_sptr calibrationAlg = AlgorithmManager::Instance().create("ILLIN16BCalibration");
     calibrationAlg->initialize();
@@ -123,6 +129,24 @@ namespace CustomInterfaces
       emit showMessageBox(uiv.generateErrorMessage());
 
     return uiv.isAllInputValid();
+  }
+
+
+  void ILLCalibration::newInstrumentSelected()
+  {
+    QMap<QString, QString> instDetails = getInstrumentDetails();
+
+    if(instDetails.contains("resolution"))
+    {
+      double res = instDetails["resolution"].toDouble();
+      double peakLower = -res * 10;
+      double peakUpper = res * 10;
+
+      g_log.debug() << "Resolution is " << res << std::endl;
+
+      m_uiForm.spPeakLower->setValue(peakLower);
+      m_uiForm.spPeakLower->setValue(peakUpper);
+    }
   }
 
 } // namespace CustomInterfaces

@@ -91,7 +91,7 @@ namespace CustomInterfaces
   protected:
     Mantid::API::MatrixWorkspace_sptr loadInstrumentIfNotExist(std::string instrumentName, std::string analyser="", std::string reflection="");
     /// Function to get details about the instrumet from a given workspace
-    std::map<QString, QString> getInstrumentDetails();
+    QMap<QString, QString> getInstrumentDetails();
     std::map<std::string, double> getRangesFromInstrument(QString instName = "", QString analyser = "", QString reflection = "");
     /// Get the instrument config widget
     MantidWidgets::IndirectInstrumentConfig *getInstrumentConfiguration();

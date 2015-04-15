@@ -64,7 +64,7 @@ namespace CustomInterfaces
 
   void ILLEnergyTransfer::run()
   {
-    std::map<QString, QString> instDetails = getInstrumentDetails();
+    QMap<QString, QString> instDetails = getInstrumentDetails();
 
     IAlgorithm_sptr reductionAlg = AlgorithmManager::Instance().create("IndirectILLReduction");
     reductionAlg->initialize();
@@ -134,7 +134,7 @@ namespace CustomInterfaces
    */
   void ILLEnergyTransfer::setInstrumentDefault()
   {
-    std::map<QString, QString> instDetails = getInstrumentDetails();
+    QMap<QString, QString> instDetails = getInstrumentDetails();
 
     // Set instrument in run file widgets
     m_uiForm.rfInput->setInstrumentOverride(instDetails["instrument"]);

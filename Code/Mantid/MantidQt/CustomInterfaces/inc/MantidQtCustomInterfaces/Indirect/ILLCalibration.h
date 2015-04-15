@@ -48,6 +48,7 @@ namespace CustomInterfaces
 
   private slots:
     void algorithmComplete(bool error);
+    void newInstrumentSelected();
 
   private:
     Ui::ILLCalibration m_uiForm;
