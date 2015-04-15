@@ -743,37 +743,37 @@ namespace IDA
 
     auto hwhmRangeSelector = m_uiForm.ppPlot->getRangeSelector("ConvFitHWHM");
 
-    //TODO
     switch ( index )
     {
       case 0:
         hwhmRangeSelector->setVisible(false);
-        m_uiForm.ckPlotGuess->setEnabled(true);
         break;
       case 1:
         m_cfTree->addProperty(m_properties["Lorentzian1"]);
         hwhmRangeSelector->setVisible(true);
-        m_uiForm.ckPlotGuess->setEnabled(true);
         break;
       case 2:
         m_cfTree->addProperty(m_properties["Lorentzian1"]);
         m_cfTree->addProperty(m_properties["Lorentzian2"]);
         hwhmRangeSelector->setVisible(true);
-        m_uiForm.ckPlotGuess->setEnabled(true);
         break;
       case 3:
         m_cfTree->addProperty(m_properties["DiffSphere"]);
         hwhmRangeSelector->setVisible(false);
         m_uiForm.ckPlotGuess->setChecked(false);
-        m_uiForm.ckPlotGuess->setEnabled(false);
+        m_blnManager->setValue(m_properties["UseDeltaFunc"], false);
         break;
       case 4:
         m_cfTree->addProperty(m_properties["DiffRotDiscreteCircle"]);
         hwhmRangeSelector->setVisible(false);
         m_uiForm.ckPlotGuess->setChecked(false);
-        m_uiForm.ckPlotGuess->setEnabled(false);
+        m_blnManager->setValue(m_properties["UseDeltaFunc"], false);
         break;
     }
+
+    // Disable Plot Guess and Use Delta Function for DiffSphere and DiffRotDiscreteCircle
+    m_uiForm.ckPlotGuess->setEnabled(index < 3);
+    m_properties["UseDeltaFunc"]->setEnabled(index < 3);
 
     updatePlotOptions();
   }
