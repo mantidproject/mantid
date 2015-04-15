@@ -1,7 +1,7 @@
 #ifndef _vtkMDHWSource_h 
 #define _vtkMDHWSource_h
 
-#include "vtkStructuredGridAlgorithm.h"
+#include "vtkUnstructuredGridAlgorithm.h"
 #include <string>
 
 namespace Mantid
@@ -40,11 +40,11 @@ namespace Mantid
 */
 
 // cppcheck-suppress class_X_Y
-class VTK_EXPORT vtkMDHWSource : public vtkStructuredGridAlgorithm
+class VTK_EXPORT vtkMDHWSource : public vtkUnstructuredGridAlgorithm
 {
 public:
   static vtkMDHWSource *New();
-  vtkTypeMacro(vtkMDHWSource, vtkStructuredGridAlgorithm)
+  vtkTypeMacro(vtkMDHWSource, vtkUnstructuredGridAlgorithm)
   void PrintSelf(ostream& os, vtkIndent indent);
   
   void SetWsName(std::string wsName);

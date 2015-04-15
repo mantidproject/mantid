@@ -108,8 +108,9 @@ vtkDataSetToNonOrthogonalDataSet::~vtkDataSetToNonOrthogonalDataSet() {}
 
 void vtkDataSetToNonOrthogonalDataSet::execute() {
   // Downcast to a vtkUnstructuredGrid
-  vtkPointSet *data = vtkPointSet::SafeDownCast(m_dataSet);
-  if (NULL == data) {
+  vtkUnstructuredGrid *data = vtkUnstructuredGrid::SafeDownCast(m_dataSet);
+  if (NULL == data)
+  {
     throw std::runtime_error("VTK dataset does not inherit from vtkPointSet");
   }
 
@@ -327,8 +328,8 @@ void vtkDataSetToNonOrthogonalDataSet::stripMatrix(Kernel::DblMatrix &mat) {
  * VTK dataset.
  * @param ugrid : The VTK dataset to add the metadata to
  */
-void vtkDataSetToNonOrthogonalDataSet::updateMetaData(vtkDataSet *ugrid) {
-
+void vtkDataSetToNonOrthogonalDataSet::updateMetaData(vtkUnstructuredGrid *ugrid)
+{
   // Create and add the change of basis matrix
   addChangeOfBasisMatrixToFieldData(ugrid, m_basisX, m_basisY, m_basisZ);
 }

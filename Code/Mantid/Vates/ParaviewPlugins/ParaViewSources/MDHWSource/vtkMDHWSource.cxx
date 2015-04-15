@@ -183,10 +183,20 @@ int vtkMDHWSource::RequestData(vtkInformation *, vtkInformationVector **, vtkInf
 
     vtkDataSet* product = m_presenter->execute(factory, loadingProgressUpdate, drawingProgressUpdate);
 
-    vtkDataSet* output = vtkDataSet::GetData(outInfo);
-    output->ShallowCopy(product);
-    product->Delete();
-    
+    //-------------------------------------------------------- Corrects problem whereby boundaries not set propertly in PV.
+    vtkBox* box = vtkBox::New();
+    box->SetBounds(product->GetBounds());
+    vtkPVClipDataSet* clipper = vtkPVClipDataSet::New();
+    clipper->SetInputData(product);
+    clipper->SetClipFunction(box);
+    clipper->SetInsideOut(true);
+    clipper->Update();
+    vtkDataSet* clipperOutput = clipper->GetOutput();
+    //--------------------------------------------------------
+
+    vtkUnstructuredGrid *output = vtkUnstructuredGrid::SafeDownCast(
+      outInfo->Get(vtkDataObject::DATA_OBJECT()));
+    output->ShallowCopy(clipperOutput);
     try
     {
       m_presenter->makeNonOrthogonal(output);
@@ -198,7 +208,8 @@ int vtkMDHWSource::RequestData(vtkInformation *, vtkInformationVector **, vtkInf
                     << "plot non-orthogonal axes. " << error);
     }
     m_presenter->setAxisLabels(output);
-    
+
+    clipper->Delete();
   }
   return 1;
 }
@@ -220,22 +231,6 @@ int vtkMDHWSource::RequestInformation(vtkInformation *vtkNotUsed(request), vtkIn
       setTimeRange(outputVector);
     }
   }
-  if (m_presenter == NULL)
-  {
-    // updater information has been called prematurely. We will reexecute once all attributes are setup.
-    return 1;
-  }
-  if(!m_presenter->canReadFile())
-  {
-    vtkErrorMacro(<<"Cannot fetch the specified workspace from Mantid ADS.");
-    return 0;
-  }
-
-  m_presenter->executeLoadMetadata();
-  setTimeRange(outputVector);
-  std::vector<int> extents = dynamic_cast<MDHWInMemoryLoadingPresenter*>(m_presenter)->getExtents();
-  outputVector->GetInformationObject(0)->Set(vtkStreamingDemandDrivenPipeline::WHOLE_EXTENT(),&extents[0],static_cast<int>(extents.size()));
-
   return 1;
 }
 

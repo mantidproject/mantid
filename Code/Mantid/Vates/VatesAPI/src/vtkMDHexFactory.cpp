@@ -4,7 +4,6 @@
 #include "MantidVatesAPI/vtkMDHexFactory.h"
 #include "MantidVatesAPI/Common.h"
 #include "MantidVatesAPI/ProgressAction.h"
-#include "MantidVatesAPI/NoThresholdRange.h"
 #include "MantidVatesAPI/vtkNullUnstructuredGrid.h"
 #include <vtkCellData.h>
 #include <vtkFloatArray.h>
