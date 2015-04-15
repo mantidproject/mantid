@@ -21,15 +21,15 @@ set ( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}" ${MPI_CXX_COMPILE_FLAGS} )
 find_package ( Boost COMPONENTS mpi serialization )
 include_directories( ${Boost_INCLUDE_DIRS} )
 
-  FIND_LIBRARY(BOOST_MPI_LIBRARY
-    NAMES boost_mpi-mt
-    PATHS "/usr/lib64/openmpi/lib"
-    PATH_SUFFIXES lib
-    DOC "Boost MPI library" )  
+#  FIND_LIBRARY(BOOST_MPI_LIBRARY
+#    NAMES boost_mpi-mt
+#    PATHS "/usr/lib64/openmpi/lib"
+#    PATH_SUFFIXES lib
+#    DOC "Boost MPI library" )  
     
-message ( STATUS "BOOST MPI LIBRARY: ${BOOST_MPI_LIBRARY}" )
+#message ( STATUS "BOOST MPI LIBRARY: ${BOOST_MPI_LIBRARY}" )
 
-set ( MANTIDLIBS  ${MANTIDLIBS} ${BOOST_MPI_LIBRARY} )
+#set ( MANTIDLIBS  ${MANTIDLIBS} ${BOOST_MPI_LIBRARY} )
     
 # Add a definition that's used to guard MPI-specific parts of the main code
 add_definitions ( -DMPI_BUILD )
