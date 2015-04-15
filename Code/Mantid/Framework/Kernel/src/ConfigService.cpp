@@ -978,8 +978,7 @@ ConfigServiceImpl::getKeys(const std::string &keyName) const {
   try {
     m_pConf->keys(keyName, rawKeys);
     // Work around a limitation of Poco < v1.4 which has no remove functionality
-    // so
-    // check those that have been marked with the correct flag
+    // so check those that have been marked with the correct flag
     const size_t nraw = rawKeys.size();
     for (size_t i = 0; i < nraw; ++i) {
       const std::string key = rawKeys[i];
@@ -1001,25 +1000,46 @@ ConfigServiceImpl::getKeys(const std::string &keyName) const {
 }
 
 /**
- * Gets a list of all config options as property.key.
+ * Recursively gets a list of all config options from a given root node.
  *
  * @return Vector containing all config options
  */
-std::vector<std::string> ConfigServiceImpl::keys() const {
-  std::vector<std::string> rootKeys;
-  m_pConf->keys(rootKeys);
-
+std::vector<std::string> ConfigServiceImpl::getKeysRecursive(const std::string &root) const {
   std::vector<std::string> allKeys;
-  for (auto rkIt = rootKeys.begin(); rkIt != rootKeys.end(); ++rkIt) {
-    std::vector<std::string> subKeys;
-    m_pConf->keys(*rkIt, subKeys);
+  std::vector<std::string> rootKeys = getKeys(root);
 
-    for (auto skIt = subKeys.begin(); skIt != subKeys.end(); ++skIt) {
-      allKeys.push_back(*riIt + "." + *skIt);
+  for (auto rkIt = rootKeys.begin(); rkIt != rootKeys.end(); ++rkIt) {
+    std::string searchString;
+    if (root.empty()) {
+      searchString = *rkIt;
+    } else {
+      searchString = root + "." + *rkIt;
+    }
+
+    std::vector<std::string> subKeys = getKeysRecursive(searchString);
+
+    if (subKeys.size() == 0) {
+      allKeys.push_back(*rkIt);
+    } else {
+      for (auto skIt = subKeys.begin(); skIt != subKeys.end(); ++skIt) {
+        allKeys.push_back(*rkIt + "." + *skIt);
+      }
     }
   }
 
   return allKeys;
+}
+
+/**
+ * Recursively gets a list of all config options.
+ *
+ * This function is needed as Boost Python does not like calling function with
+ * default arguments.
+ *
+ * @return Vector containing all config options
+ */
+std::vector<std::string> ConfigServiceImpl::keys() const {
+  return getKeysRecursive();
 }
 
 /** Removes a key from the memory stored properties file and inserts the key
