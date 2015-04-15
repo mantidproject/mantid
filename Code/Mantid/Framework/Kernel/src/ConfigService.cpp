@@ -1004,9 +1004,12 @@ ConfigServiceImpl::getKeys(const std::string &keyName) const {
  *
  * @return Vector containing all config options
  */
-std::vector<std::string> ConfigServiceImpl::getKeysRecursive(const std::string &root) const {
-  std::vector<std::string> allKeys;
+void ConfigServiceImpl::getKeysRecursive(const std::string &root,
+    std::vector<std::string> &allKeys) const {
   std::vector<std::string> rootKeys = getKeys(root);
+
+  if(rootKeys.size() == 0)
+    allKeys.push_back(root);
 
   for (auto rkIt = rootKeys.begin(); rkIt != rootKeys.end(); ++rkIt) {
     std::string searchString;
@@ -1016,18 +1019,8 @@ std::vector<std::string> ConfigServiceImpl::getKeysRecursive(const std::string &
       searchString = root + "." + *rkIt;
     }
 
-    std::vector<std::string> subKeys = getKeysRecursive(searchString);
-
-    if (subKeys.size() == 0) {
-      allKeys.push_back(*rkIt);
-    } else {
-      for (auto skIt = subKeys.begin(); skIt != subKeys.end(); ++skIt) {
-        allKeys.push_back(*rkIt + "." + *skIt);
-      }
-    }
+    getKeysRecursive(searchString, allKeys);
   }
-
-  return allKeys;
 }
 
 /**
@@ -1039,7 +1032,9 @@ std::vector<std::string> ConfigServiceImpl::getKeysRecursive(const std::string &
  * @return Vector containing all config options
  */
 std::vector<std::string> ConfigServiceImpl::keys() const {
-  return getKeysRecursive();
+  std::vector<std::string> allKeys;
+  getKeysRecursive("", allKeys);
+  return allKeys;
 }
 
 /** Removes a key from the memory stored properties file and inserts the key
