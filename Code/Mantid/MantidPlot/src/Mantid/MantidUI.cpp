@@ -2176,6 +2176,8 @@ void MantidUI::disableSaveNexus()
 */
 QString MantidUI::saveToString(const std::string& workingDir)
 {
+  using namespace Mantid::API;
+
   QString wsNames;
   wsNames="<mantidworkspaces>\n";
   wsNames+="WorkspaceNames";
@@ -2185,19 +2187,19 @@ QString MantidUI::saveToString(const std::string& workingDir)
   { 
     QTreeWidgetItem* item=tree->topLevelItem(i);
     QString wsName=item->text(0);
-    if (Mantid::API::FrameworkManager::Instance().getWorkspace(wsName.toStdString())->id() == "WorkspaceGroup")
+
+    Workspace_sptr ws = AnalysisDataService::Instance().retrieveWS<Workspace>(wsName.toStdString());
+    WorkspaceGroup_sptr group = boost::dynamic_pointer_cast<Mantid::API::WorkspaceGroup>(ws);
+    if (ws->id() == "WorkspaceGroup" && group && !group->isMultiperiod())
     {
-      Mantid::API::WorkspaceGroup_sptr group = boost::dynamic_pointer_cast<Mantid::API::WorkspaceGroup>(Mantid::API::AnalysisDataService::Instance().retrieve(wsName.toStdString()));
       wsNames+="\t";
-      //wsName is a group, add it to list and indicate what the group contains by a "[" and end the group with a "]"
       wsNames+=wsName;
       std::vector<std::string> secondLevelItems = group->getNames();
-      for(size_t j=0; j<secondLevelItems.size(); j++) //ignore string "WorkspaceGroup at position 0" (start at child '1')
+      for(size_t j=0; j<secondLevelItems.size(); j++)
       {
         wsNames+=",";
         wsNames+=QString::fromStdString(secondLevelItems[j]);
         std::string fileName(workingDir + "//" + secondLevelItems[j] + ".nxs");
-        //saving to  nexus file
         savedatainNexusFormat(fileName,secondLevelItems[j]);
       }
     }
@@ -2207,7 +2209,6 @@ QString MantidUI::saveToString(const std::string& workingDir)
       wsNames+=wsName;
 
       std::string fileName(workingDir + "//" + wsName.toStdString() + ".nxs");
-      //saving to  nexus file
       savedatainNexusFormat(fileName,wsName.toStdString());
     }
   }
