@@ -313,23 +313,21 @@ void vtkMDEWSource::updateAlgorithmProgress(double progress, const std::string& 
 /*
 Getter for the workspace type name.
 */
-const char* vtkMDEWSource::GetWorkspaceTypeName()
+char* vtkMDEWSource::GetWorkspaceTypeName()
 {
   if(m_presenter == NULL)
   {
-    std::string output;
-    return output.c_str();
+    return const_cast<char*>("");
   }
   try
   {
     //Forward request on to MVP presenter
     typeName = m_presenter->getWorkspaceTypeName();
-    return typeName.c_str();
+    return const_cast<char*>(typeName.c_str());
   }
   catch(std::runtime_error&)
   {
-    std::string output;
-    return output.c_str();
+    return const_cast<char*>("");
   }
 }
 

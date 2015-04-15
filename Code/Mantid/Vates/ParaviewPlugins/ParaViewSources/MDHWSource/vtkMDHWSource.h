@@ -64,7 +64,7 @@ public:
   /// Getter for the workspace name
   const char* GetWorkspaceName();
   /// Getter for the workspace type
-  const char* GetWorkspaceTypeName();
+  char* GetWorkspaceTypeName();
   /// Getter for the minimum value of the workspace data
   double GetMinValue();
   /// Getter for the maximum value of the workspace data
