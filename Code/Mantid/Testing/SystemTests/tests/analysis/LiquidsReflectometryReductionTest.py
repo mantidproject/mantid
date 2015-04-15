@@ -35,13 +35,6 @@ class LiquidsReflectometryReductionTest(stresstesting.MantidStressTest):
                                       OutputWorkspace='reflectivity_119814')
 
     def validate(self):
-        # Be more tolerant with the output.
-        self.tolerance = 0.01
-
-        # Skip the first point so we don't have to have a big tolerance
-        data_y = mtd["reflectivity_119814"].dataY(0)
-        data_y[1] = 0.631281639115562
-
         self.disableChecking.append('Instrument')
         self.disableChecking.append('Sample')
         self.disableChecking.append('SpectraMap')
