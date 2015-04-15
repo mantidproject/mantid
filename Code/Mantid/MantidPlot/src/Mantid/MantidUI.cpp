@@ -3326,6 +3326,7 @@ void MantidUI::drawColorFillPlots(const QStringList & wsNames, Graph::CurveType 
 * @param curveType :: The type of curve
 * @param window :: An optional pointer to a plot window. If not NULL the window is cleared
 *                      and reused
+* @param hidden
 * @returns A pointer to the created plot
 */
 MultiLayer* MantidUI::drawSingleColorFillPlot(const QString & wsName, Graph::CurveType curveType,
