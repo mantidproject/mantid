@@ -154,10 +154,7 @@ Mantid::Kernel::DateAndTime timeFromPulse(const pulse_id_struct *p) {
 
 namespace Mantid {
 namespace LiveData {
-DECLARE_LISTENER(TOPAZLiveEventDataListener);
-// The DECLARE_LISTENER macro seems to confuse some editors' syntax checking.
-// The semi-colon limits the complaints to one line.  It has no actual effect
-// on the code.
+DECLARE_LISTENER(TOPAZLiveEventDataListener)
 
 namespace {
 /// static logger
@@ -323,6 +320,8 @@ void TOPAZLiveEventDataListener::run() {
     }   
     
     m_dataSocket.bind(m_dataAddr);
+    m_dataSocket.setReceiveTimeout(Poco::Timespan(
+      RECV_TIMEOUT, 0)); // POCO timespan is seconds, microseconds
     
     Poco::Net::SocketAddress sendAddr;  // address of the sender
     // loop until the foreground thread tells us to stop
@@ -337,9 +336,15 @@ void TOPAZLiveEventDataListener::run() {
         try {
           bytesRead = m_dataSocket.receiveFrom(m_udpBuf, m_udpBufSize, sendAddr);
         } catch (Poco::TimeoutException &) {
+          if (m_stopThread == false) {
           // Don't need to stop processing or anything - just log a warning
           g_log.warning( "Timeout reading from the network.  "
                          "Is event_catcher still sending?");
+          }
+          
+          continue;  // don't process the data in the buffer (since
+                     // it's incomplete or otherwise bad)
+                     
         } catch (Poco::Net::NetException &e) {
           std::string msg("m_dataSocket::receiveBytes(): ");
           msg += e.name();
@@ -359,7 +364,7 @@ void TOPAZLiveEventDataListener::run() {
                               
         g_log.debug() << "Received UDP Packet.  " << bytesRead << " bytes  "
                       << num_pulse_ids << " pulses  " << num_events
-                      << " events\n";
+                      << " events\n" << std::endl;
         
         PULSE_ID_PTR pid = (PULSE_ID_PTR)(m_udpBuf + sizeof(COMMAND_HEADER));
         NEUTRON_EVENT_PTR events =
@@ -369,9 +374,9 @@ void TOPAZLiveEventDataListener::run() {
         for (unsigned i = 0; i < num_pulse_ids; i++)
         {
             g_log.debug() << "Pulse ID: " << pid[i].pulseIDhigh << ", " 
-                        << pid[i].pulseIDlow << "\n";
-            g_log.debug() << "  Event ID: " << pid[i].eventID << "\n";
-            g_log.debug() << "  Charge: " << pid[i].charge << "\n";
+                        << pid[i].pulseIDlow << std::endl;
+            g_log.debug() << "  Event ID: " << pid[i].eventID << std::endl;
+            g_log.debug() << "  Charge: " << pid[i].charge << std::endl;
             
             // Figure out the event indexes that belong to this pulse
             unsigned long firstEvent = pid[i].eventID;
@@ -428,7 +433,7 @@ void TOPAZLiveEventDataListener::run() {
     // exception handler for generic runtime exceptions
     g_log.fatal() << "Caught a runtime exception.\n"
                   << "Exception message: " << e.what() << ".\n"
-                  << "Thread will exit.\n";
+                  << "Thread will exit."  << std::endl;
     m_isConnected = false;
 
     m_backgroundException =
@@ -439,7 +444,7 @@ void TOPAZLiveEventDataListener::run() {
     // these errors
     g_log.fatal() << "Caught an invalid argument exception.\n"
                   << "Exception message: " << e.what() << ".\n"
-                  << "Thread will exit.\n";
+                  << "Thread will exit." << std::endl;
     m_isConnected = false;
     
     std::string newMsg(
@@ -483,22 +488,6 @@ void TOPAZLiveEventDataListener::initWorkspace()
     Property *prop = new TimeSeriesProperty<double>(PROTON_CHARGE_PROPERTY);
     m_eventBuffer->mutableRun().addLogData(prop);
     
-// HACK!! Clean this up before checking in the code!
-#if 0
-    Not exactly sure what other time series we'll need...
-
-    // We also know we'll need 3 time series properties on the workspace.  Create
-    // them
-    // now. (We may end up adding values to the pause and scan properties before
-    // we
-    // can call initWorkspacePart2().)
-    Property *prop = new TimeSeriesProperty<int>(PAUSE_PROPERTY);
-    m_eventBuffer->mutableRun().addLogData(prop);
-    prop = new TimeSeriesProperty<int>(SCAN_PROPERTY);
-    m_eventBuffer->mutableRun().addLogData(prop);
-    
-#endif
-
     // Use the LoadEmptyInstrument algorithm to create a proper workspace
     // for the TOPAZ beamline
     boost::shared_ptr<Algorithm> loadInst =
