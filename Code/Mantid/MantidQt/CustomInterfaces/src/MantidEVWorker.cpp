@@ -452,6 +452,7 @@ bool MantidEVWorker::saveIsawPeaks( const std::string & peaks_ws_name,
  *
  *  @param peaks_ws_name   The name of the peaks workspace to save.
  *  @param file_name       The name of the NeXus file to write to.
+ *  @param append
  *
  *  @return true if SaveNexusPeaks completed successfully.
  */
