@@ -255,7 +255,7 @@ void ParameterMap::clearParametersByName(const std::string &name,
  */
 void ParameterMap::add(const std::string &type, const IComponent *comp,
                        const std::string &name, const std::string &value,
-                       const Kernel::Quat &value,const std::string * const pDescription) {
+                       const std::string * const pDescription) {
   auto param = ParameterFactory::create(type, name);
   param->fromString(value);
   this->add(comp, param,pDescription);
@@ -273,7 +273,7 @@ void ParameterMap::add(const IComponent *comp,
   if (!par)
     return;
   if (pDescription)
-    par->setDescription(pDescription)
+    par->setDescription(*pDescription);
 
   PARALLEL_CRITICAL(m_mapAccess) {
     auto existing_par = positionOf(comp, par->name().c_str(), "");
@@ -324,7 +324,7 @@ void ParameterMap::addPositionCoordinate(const IComponent *comp,
                        "coordinate symbol: " << name;
   // set description if one is provided
   if(pDescription){
-    param->setDescription(pDescription);
+    param->setDescription(*pDescription);
   }
     return;
   }
@@ -400,8 +400,8 @@ void ParameterMap::addRotationParam(const IComponent *comp,
  * @param value :: Parameter value as a string
 */
 void ParameterMap::addDouble(const IComponent *comp, const std::string &name,
-                             const std::string &value) {
-  add(pDouble(), comp, name, value);
+                             const std::string &value,const std::string * const pDescription) {
+  add(pDouble(), comp, name, value,pDescription);
 }
 
 /**
@@ -411,8 +411,8 @@ void ParameterMap::addDouble(const IComponent *comp, const std::string &name,
  * @param value :: Parameter value as a double
 */
 void ParameterMap::addDouble(const IComponent *comp, const std::string &name,
-                             double value) {
-  add(pDouble(), comp, name, value);
+                             double value,const std::string * const pDescription) {
+  add(pDouble(), comp, name, value,pDescription);
 }
 
 /**
@@ -422,8 +422,8 @@ void ParameterMap::addDouble(const IComponent *comp, const std::string &name,
  * @param value :: Parameter value as a string
  */
 void ParameterMap::addInt(const IComponent *comp, const std::string &name,
-                          const std::string &value) {
-  add(pInt(), comp, name, value);
+                          const std::string &value,const std::string * const pDescription) {
+  add(pInt(), comp, name, value,pDescription);
 }
 
 /**
@@ -433,8 +433,8 @@ void ParameterMap::addInt(const IComponent *comp, const std::string &name,
  * @param value :: Parameter value as an int
  */
 void ParameterMap::addInt(const IComponent *comp, const std::string &name,
-                          int value) {
-  add(pInt(), comp, name, value);
+                          int value,const std::string * const pDescription) {
+  add(pInt(), comp, name, value,pDescription);
 }
 
 /**
@@ -444,8 +444,8 @@ void ParameterMap::addInt(const IComponent *comp, const std::string &name,
  * @param value :: Parameter value as a string
  */
 void ParameterMap::addBool(const IComponent *comp, const std::string &name,
-                           const std::string &value) {
-  add(pBool(), comp, name, value);
+                           const std::string &value,const std::string * const pDescription) {
+  add(pBool(), comp, name, value,pDescription);
 }
 /**
  * Adds a bool value to the parameter map.
@@ -454,8 +454,8 @@ void ParameterMap::addBool(const IComponent *comp, const std::string &name,
  * @param value :: Parameter value as a bool
  */
 void ParameterMap::addBool(const IComponent *comp, const std::string &name,
-                           bool value) {
-  add(pBool(), comp, name, value);
+                           bool value,const std::string * const pDescription) {
+  add(pBool(), comp, name, value,pDescription);
 }
 
 /**
@@ -465,8 +465,8 @@ void ParameterMap::addBool(const IComponent *comp, const std::string &name,
  * @param value :: Parameter value
 */
 void ParameterMap::addString(const IComponent *comp, const std::string &name,
-                             const std::string &value) {
-  add<std::string>(pString(), comp, name, value);
+                             const std::string &value,const std::string * const pDescription) {
+  add<std::string>(pString(), comp, name, value,pDescription);
 }
 
 /**
@@ -476,8 +476,8 @@ void ParameterMap::addString(const IComponent *comp, const std::string &name,
  * @param value :: Parameter value as a string
  */
 void ParameterMap::addV3D(const IComponent *comp, const std::string &name,
-                          const std::string &value) {
-  add(pV3D(), comp, name, value);
+                          const std::string &value,const std::string * const pDescription) {
+  add(pV3D(), comp, name, value,pDescription);
   clearPositionSensitiveCaches();
 }
 
@@ -488,8 +488,8 @@ void ParameterMap::addV3D(const IComponent *comp, const std::string &name,
  * @param value :: Parameter value as a V3D
 */
 void ParameterMap::addV3D(const IComponent *comp, const std::string &name,
-                          const V3D &value) {
-  add(pV3D(), comp, name, value);
+                          const V3D &value,const std::string * const pDescription) {
+  add(pV3D(), comp, name, value,pDescription);
   clearPositionSensitiveCaches();
 }
 
@@ -500,8 +500,8 @@ void ParameterMap::addV3D(const IComponent *comp, const std::string &name,
  * @param value :: Parameter value as a Quat
 */
 void ParameterMap::addQuat(const IComponent *comp, const std::string &name,
-                           const Quat &value) {
-  add(pQuat(), comp, name, value);
+                           const Quat &value,const std::string * const pDescription) {
+  add(pQuat(), comp, name, value,pDescription);
   clearPositionSensitiveCaches();
 }
 
