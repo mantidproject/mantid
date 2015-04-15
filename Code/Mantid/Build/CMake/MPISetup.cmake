@@ -22,7 +22,7 @@ find_package ( Boost COMPONENTS mpi serialization )
 include_directories( ${Boost_INCLUDE_DIRS} )
 
   FIND_LIBRARY(BOOST_MPI_LIBRARY
-    NAMES boost_mpi boost_mpi-mt
+    NAMES boost_mpi-mt
     PATHS "/usr/lib64/openmpi/lib"
     PATH_SUFFIXES lib
     DOC "Boost MPI library" )  
