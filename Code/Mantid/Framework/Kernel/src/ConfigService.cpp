@@ -1010,11 +1010,11 @@ std::vector<std::string> ConfigServiceImpl::keys() const {
   m_pConf->keys(rootKeys);
 
   std::vector<std::string> allKeys;
-  for(auto rkIt = rootKeys.begin(); rkIt != rootKeys.end(); ++rkIt) {
+  for (auto rkIt = rootKeys.begin(); rkIt != rootKeys.end(); ++rkIt) {
     std::vector<std::string> subKeys;
     m_pConf->keys(*rkIt, subKeys);
 
-    for(auto skIt = subKeys.begin(); skIt != subKeys.end(); ++skIt) {
+    for (auto skIt = subKeys.begin(); skIt != subKeys.end(); ++skIt) {
       allKeys.push_back(*riIt + "." + *skIt);
     }
   }
