@@ -2,11 +2,10 @@
 #define MANTID_DATAOBJECTS_MDLEANEVENT_H_
 
 #include "MantidKernel/System.h"
-#include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidGeometry/MDGeometry/MDTypes.h"
-#include "MantidAPI/BoxController.h"
+#include <algorithm>
 #include <numeric>
-#include <cmath>
+#include <vector>
 
 namespace Mantid {
 namespace DataObjects {

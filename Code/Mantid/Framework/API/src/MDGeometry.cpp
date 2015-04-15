@@ -16,16 +16,16 @@ namespace API {
 /** Constructor
  */
 MDGeometry::MDGeometry()
-    : m_originalWorkspaces(), m_transforms_FromOriginal(),
+    : m_dimensions(), m_originalWorkspaces(), m_origin(), m_transforms_FromOriginal(),
       m_transforms_ToOriginal(),
       m_delete_observer(*this, &MDGeometry::deleteNotificationReceived),
-      m_observingDelete(false), m_Wtransf(3, 3, true) {}
+      m_observingDelete(false), m_Wtransf(3, 3, true), m_basisVectors() {}
 
 //----------------------------------------------------------------------------------------------
 /** Copy Constructor
  */
 MDGeometry::MDGeometry(const MDGeometry &other)
-    : m_originalWorkspaces(), m_origin(other.m_origin),
+    : m_dimensions(), m_originalWorkspaces(), m_origin(other.m_origin),
       m_transforms_FromOriginal(), m_transforms_ToOriginal(),
       m_delete_observer(*this, &MDGeometry::deleteNotificationReceived),
       m_observingDelete(false), m_Wtransf(other.m_Wtransf),

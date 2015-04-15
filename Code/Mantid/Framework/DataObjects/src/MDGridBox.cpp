@@ -42,8 +42,8 @@ TMDE(MDGridBox)::MDGridBox(
     BoxController *const bc, const uint32_t depth,
     const std::vector<
         Mantid::Geometry::MDDimensionExtents<coord_t>> &extentsVector)
-    : MDBoxBase<MDE, nd>(bc, depth, UNDEF_SIZET, extentsVector), numBoxes(0),
-      nPoints(0) {
+    : MDBoxBase<MDE, nd>(bc, depth, UNDEF_SIZET, extentsVector),
+      numBoxes(0), m_Children(), diagonalSquared(0.f), nPoints(0) {
   initGridBox();
 }
 
@@ -58,11 +58,11 @@ TMDE(MDGridBox)::MDGridBox(
     const std::vector<
         Mantid::Geometry::MDDimensionExtents<coord_t>> &extentsVector)
     : MDBoxBase<MDE, nd>(bc.get(), depth, UNDEF_SIZET, extentsVector),
-      numBoxes(0), nPoints(0) {
+      numBoxes(0), m_Children(), diagonalSquared(0.f), nPoints(0) {
   initGridBox();
 }
 /// common part of MDGridBox contstructor;
-template <typename MDE, size_t nd> void MDGridBox<MDE, nd>::initGridBox() {
+template <typename MDE, size_t nd> size_t MDGridBox<MDE, nd>::initGridBox() {
   if (!this->m_BoxController)
     throw std::runtime_error(
         "MDGridBox::ctor(): No BoxController specified in box.");
@@ -86,6 +86,7 @@ template <typename MDE, size_t nd> void MDGridBox<MDE, nd>::initGridBox() {
   if (tot == 0)
     throw std::runtime_error(
         "MDGridBox::ctor(): Invalid splitting criterion (one was zero).");
+  return tot;
 }
 
 //-----------------------------------------------------------------------------------------------
@@ -93,41 +94,18 @@ template <typename MDE, size_t nd> void MDGridBox<MDE, nd>::initGridBox() {
  * @param box :: MDBox containing the events to split
  */
 TMDE(MDGridBox)::MDGridBox(MDBox<MDE, nd> *box)
-    : MDBoxBase<MDE, nd>(*box, box->getBoxController()), numBoxes(0), nPoints(0) {
-  if (!this->m_BoxController)
-    throw std::runtime_error("MDGridBox::ctor(): constructing from box:: No "
-                             "BoxController specified in box.");
-
-  //    std::cout << "Splitting MDBox ID " << box->getId() << " with " <<
-  //    box->getNPoints() << " events into MDGridBox" << std::endl;
-
-  // How many is it split?
-  // If we are at the top level and we have a specific top level split, then set it.
-  boost::optional<std::vector<size_t>> splitTopInto = this->m_BoxController->getSplitTopInto();
-  if (this->getDepth() == 0 && splitTopInto)
-  {
-    for (size_t d = 0; d < nd; d++)
-      split[d] = splitTopInto.get()[d];
-  }
-  else
-  {
-   for (size_t d = 0; d < nd; d++)
-    split[d] = this->m_BoxController->getSplitInto(d);
-  }
-
-  // Compute sizes etc.
-  size_t tot = computeSizesFromSplit();
-  if (tot == 0)
-    throw std::runtime_error("MDGridBox::ctor(): constructing from "
-                             "box::Invalid splitting criterion (one was "
-                             "zero).");
+    : MDBoxBase<MDE, nd>(*box, box->getBoxController()), split(),
+      splitCumul(), m_SubBoxSize(), numBoxes(0), m_Children(),
+      diagonalSquared(0.f), nPoints(0)
+{
+  size_t totalSize = initGridBox();
 
   double ChildVol(1);
   for (size_t d = 0; d < nd; d++)
     ChildVol *= m_SubBoxSize[d];
 
   // Splitting an input MDBox requires creating a bunch of children
-  fillBoxShell(tot, coord_t(1. / ChildVol));
+  fillBoxShell(totalSize, coord_t(1. / ChildVol));
 
   // Prepare to distribute the events that were in the box before, this will
   // load missing events from HDD in file based ws if there are some.
@@ -210,7 +188,7 @@ void MDGridBox<MDE, nd>::fillBoxShell(const size_t tot,
  */
 TMDE(MDGridBox)::MDGridBox(const MDGridBox<MDE, nd> &other,
                            Mantid::API::BoxController *const otherBC)
-    : MDBoxBase<MDE, nd>(other, otherBC), numBoxes(other.numBoxes),
+    : MDBoxBase<MDE, nd>(other, otherBC), numBoxes(other.numBoxes), m_Children(),
       diagonalSquared(other.diagonalSquared), nPoints(other.nPoints) {
   for (size_t d = 0; d < nd; d++) 
   {
@@ -437,7 +415,7 @@ TMDE(std::vector<MDE> *MDGridBox)::getEventsCopy() {
  */
 TMDE(void MDGridBox)::getBoxes(std::vector<API::IMDNode *> &outBoxes,
                                size_t maxDepth, bool leafOnly) {
-  // Add this box, unless we only want the leaves
+ //Add this box, unless we only want the leaves
   if (!leafOnly)
     outBoxes.push_back(this);
 
