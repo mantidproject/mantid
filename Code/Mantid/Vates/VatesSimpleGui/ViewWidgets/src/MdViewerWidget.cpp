@@ -668,12 +668,6 @@ void MdViewerWidget::renderWorkspace(QString workspaceName, int workspaceType, s
     sourcePlugin = "MDEW Source";
   }
 
-  pqPipelineSource* source = this->currentView->setPluginSource(sourcePlugin, workspaceName);
-  //pqSaveDataReaction::saveActiveData("/tmp/data.vtk");
-  source->getProxy()->SetAnnotation(this->m_widgetName.toLatin1().data(), "1");
-  //this->ui.proxiesPanel->clear();
-  //this->ui.proxiesPanel->addProxy(source->getProxy(),"datasource",QStringList(),true);
-  //this->ui.proxiesPanel->updateLayout();
 
   // Make sure that we are not loading a rebinned vsi workspace.
   if (workspaceName.contains(m_rebinnedWorkspaceIdentifier))
@@ -686,8 +680,9 @@ void MdViewerWidget::renderWorkspace(QString workspaceName, int workspaceType, s
   }
 
   // Load a new source plugin
-  this->currentView->setPluginSource(sourcePlugin, workspaceName);
-  this->renderAndFinalSetup();
+    pqPipelineSource* source = this->currentView->setPluginSource(sourcePlugin, workspaceName);
+    source->getProxy()->SetAnnotation(this->m_widgetName.toLatin1().data(), "1");
+    this->renderAndFinalSetup();
 
   // Reset the current view to the correct initial view
   // Note that we can only reset if a source plugin exists.
