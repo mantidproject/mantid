@@ -4,7 +4,9 @@
 #include "MantidKernel/System.h"
 #include "MantidGeometry/MDGeometry/MDTypes.h"
 #include <algorithm>
+#include <cmath>
 #include <numeric>
+#include <string>
 #include <vector>
 
 namespace Mantid {
@@ -13,7 +15,7 @@ namespace DataObjects {
 /** Templated class holding data about a neutron detection event
  * in N-dimensions (for example, Qx, Qy, Qz, E).
  *
- *   Each neutron has a signal (a float, can be != 1) and an error. This
+ *  Each neutron has a signal (a float, can be != 1) and an error. This
  * is the same principle as the WeightedEvent in EventWorkspace's
  *
  * This class is meant to be as small in memory as possible, since there
