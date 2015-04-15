@@ -53,7 +53,5 @@ configure_file( ${CMAKE_CURRENT_SOURCE_DIR}/../Installers/LinuxInstaller/modulef
                 ${CMAKE_BINARY_DIR}/modulefile/${CPACK_PACKAGE_VERSION}
 )
 
-include ( SetupDataTargets )
-
 include ( CPack )
 
