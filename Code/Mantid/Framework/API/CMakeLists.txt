@@ -76,6 +76,7 @@ set ( SRC_FILES
 	src/ImplicitFunctionParserFactory.cpp
 	src/InstrumentDataService.cpp
 	src/JointDomain.cpp
+	src/LatticeDomain.cpp
 	src/LinearScale.cpp
 	src/LiveListenerFactory.cpp
 	src/LogManager.cpp
@@ -242,6 +243,7 @@ set ( INC_FILES
 	inc/MantidAPI/InstrumentDataService.h
 	inc/MantidAPI/Jacobian.h
 	inc/MantidAPI/JointDomain.h
+	inc/MantidAPI/LatticeDomain.h
 	inc/MantidAPI/LinearScale.h
 	inc/MantidAPI/LiveListenerFactory.h
 	inc/MantidAPI/LogManager.h
@@ -348,6 +350,7 @@ set ( TEST_FILES
 	ImplicitFunctionParserFactoryTest.h
 	IncreasingAxisValidatorTest.h
 	InstrumentDataServiceTest.h
+	LatticeDomainTest.h
 	LiveListenerFactoryTest.h
 	LogManagerTest.h
 	MDGeometryTest.h
