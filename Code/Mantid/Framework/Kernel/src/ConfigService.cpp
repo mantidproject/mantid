@@ -1008,7 +1008,7 @@ void ConfigServiceImpl::getKeysRecursive(const std::string &root,
     std::vector<std::string> &allKeys) const {
   std::vector<std::string> rootKeys = getKeys(root);
 
-  if(rootKeys.size() == 0)
+  if(rootKeys.empty())
     allKeys.push_back(root);
 
   for (auto rkIt = rootKeys.begin(); rkIt != rootKeys.end(); ++rkIt) {
