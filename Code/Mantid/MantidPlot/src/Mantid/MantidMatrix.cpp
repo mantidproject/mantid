@@ -13,6 +13,7 @@
 #include "TSVSerialiser.h"
 
 #include "MantidAPI/NumericAxis.h"
+#include "MantidAPI/BinEdgeAxis.h"
 #include "MantidAPI/RefAxis.h"
 #include "MantidAPI/SpectraAxis.h"
 #include "MantidAPI/TextAxis.h"
@@ -1209,8 +1210,9 @@ QVariant MantidMatrixModel::headerData(int section, Qt::Orientation orientation,
     
     QString unit = QString::fromStdWString( axis->unit()->label().utf8());
 
+    // Handle RefAxis for X axis
     Mantid::API::RefAxis* refAxis = dynamic_cast<Mantid::API::RefAxis*>(axis);
-    if (refAxis)
+    if (refAxis && axisIndex == 0)
     {
       //still need to protect from ragged workspaces
       if (m_type==X)
@@ -1252,6 +1254,26 @@ QVariant MantidMatrixModel::headerData(int section, Qt::Orientation orientation,
       }
 
       if (role == Qt::ToolTipRole) 
+      {
+        return QString("index %1%2%3 %4%5 (bin centre)").arg(QString::number(section), toolTipSeperator,
+          QString::fromStdString(axis->unit()->caption()),
+          QString::number(binCentreValue), unit);
+      }
+      else
+      {
+        return QString("%1%2%3%4").arg(QString::number(section), headerSeperator,
+          QString::number(binCentreValue), unit);
+      }
+    }
+
+    // Handle BinEdgeAxis for vertical axis
+    Mantid::API::BinEdgeAxis* binEdgeAxis = dynamic_cast<Mantid::API::BinEdgeAxis*>(axis);
+    if (binEdgeAxis && axisIndex == 1)
+    {
+      const Mantid::MantidVec axisBinEdges = binEdgeAxis->getValues();
+      double binCentreValue = (axisBinEdges[section] + axisBinEdges[section + 1]) / 2.0;
+
+      if (role == Qt::ToolTipRole)
       {
         return QString("index %1%2%3 %4%5 (bin centre)").arg(QString::number(section), toolTipSeperator,
           QString::fromStdString(axis->unit()->caption()),
