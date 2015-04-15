@@ -33,13 +33,13 @@ void addChangeOfBasisMatrixToFieldData(vtkDataObject *dataObject,
   if (!dataObject) {
     throw std::invalid_argument("Change of basis needs a vtkDataObject");
   }
-  if (!u.size() == 3) {
+  if (u.size() != 3) {
     throw std::invalid_argument("Change of basis requires 3-element u");
   }
-  if (!v.size() == 3) {
+  if (v.size() != 3) {
     throw std::invalid_argument("Change of basis requires 3-element v");
   }
-  if (!w.size() == 3) {
+  if (w.size() != 3) {
     throw std::invalid_argument("Change of basis requires 3-element w");
   }
 
