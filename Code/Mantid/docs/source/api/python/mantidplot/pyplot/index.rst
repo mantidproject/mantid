@@ -1,15 +1,15 @@
-=================================================
- :mod:`future.pyplot` --- Future plotting package
-=================================================
+===================================================
+ :mod:`pyplot` --- Matplotlib-like plotting package
+===================================================
 
 New plotting interface
 ----------------------
 
 This package provides a simple command line interface to the Mantid
 plotting functionality, resembling matplotlib and its pyplot package
-(http://matplotlib.org). The module is subject to changes and it is
-provided as a 'future' import. Feedback is very much welcome!
+(http://matplotlib.org). The module is subject to changes and feedback
+is very much welcome!
 
-.. automodule:: pymantidplot.future.pyplot
+.. automodule:: pymantidplot.pyplot
    :members:
    :show-inheritance:
