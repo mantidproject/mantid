@@ -282,6 +282,12 @@ namespace CustomInterfaces
       m_uiForm.ckCm1Units->setChecked(defaultOptions);
     }
 
+    if(!instDetails["save-nexus-choice"].isEmpty())
+    {
+      bool defaultOptions = instDetails["save-nexus-choice"] == "true";
+      m_uiForm.ckSaveNexus->setChecked(defaultOptions);
+    }
+
     if(!instDetails["save-ascii-choice"].isEmpty())
     {
       bool defaultOptions = instDetails["save-ascii-choice"] == "true";
