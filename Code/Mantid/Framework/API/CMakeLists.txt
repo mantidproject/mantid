@@ -56,6 +56,7 @@ set ( SRC_FILES
 	src/IFunction1DSpectrum.cpp
 	src/IFunctionMD.cpp
 	src/IFunctionMW.cpp
+	src/ILatticeFunction.cpp
 	src/ILiveListener.cpp
 	src/IMDEventWorkspace.cpp
 	src/IMDHistoWorkspace.cpp
@@ -213,6 +214,7 @@ set ( INC_FILES
 	inc/MantidAPI/IFunctionMD.h
 	inc/MantidAPI/IFunctionMW.h
 	inc/MantidAPI/IFunctionWithLocation.h
+	inc/MantidAPI/ILatticeFunction.h
 	inc/MantidAPI/ILiveListener.h
 	inc/MantidAPI/IMDEventWorkspace.h
 	inc/MantidAPI/IMDHistoWorkspace.h
@@ -342,6 +344,7 @@ set ( TEST_FILES
 	IFunction1DSpectrumTest.h
 	IFunction1DTest.h
 	IFunctionMDTest.h
+	ILatticeFunctionTest.h
 	ILiveListenerTest.h
 	IMDWorkspaceTest.h
 	ISpectrumTest.h
