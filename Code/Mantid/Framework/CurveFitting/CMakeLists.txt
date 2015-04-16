@@ -24,6 +24,7 @@ set ( SRC_FILES
 	src/CostFuncFitting.cpp
 	src/CostFuncLeastSquares.cpp
 	src/CostFuncRwp.cpp
+	src/CostFuncUnweightedLeastSquares.cpp
 	src/CubicSpline.cpp
 	src/DampingMinimizer.cpp
 	src/DeltaFunction.cpp
@@ -136,6 +137,7 @@ set ( INC_FILES
 	inc/MantidCurveFitting/CostFuncFitting.h
 	inc/MantidCurveFitting/CostFuncLeastSquares.h
 	inc/MantidCurveFitting/CostFuncRwp.h
+	inc/MantidCurveFitting/CostFuncUnweightedLeastSquares.h
 	inc/MantidCurveFitting/CubicSpline.h
 	inc/MantidCurveFitting/DampingMinimizer.h
 	inc/MantidCurveFitting/DeltaFunction.h
@@ -246,6 +248,7 @@ set ( TEST_FILES
 	ConvertToYSpaceTest.h
 	ConvolutionTest.h
 	ConvolveWorkspacesTest.h
+	CostFuncUnweightedLeastSquaresTest.h
 	CubicSplineTest.h
 	DampingMinimizerTest.h
 	DeltaFunctionTest.h
