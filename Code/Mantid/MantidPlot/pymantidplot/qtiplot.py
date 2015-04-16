@@ -12,7 +12,7 @@ except ImportError:
     raise ImportError('The "mantidplot.qtiplot" module can only be used from within MantidPlot.')
 
 import pymantidplot
-import pymantidplot.proxies
+from PyQt4 import QtCore
 
 #-----------------------------------------------------------------------------
 # Intercept qtiplot "plot" command and forward to plotSpectrum for a workspace
@@ -30,6 +30,6 @@ def plot(source, *args, **kwargs):
         A handle to the created Graph widget.
     """
     if hasattr(source, '_getHeldObject') and isinstance(source._getHeldObject(), QtCore.QObject):
-        return pymantidplot.proxies.new_proxy(proxies.Graph,_qti.app.plot, source._getHeldObject(), *args, **kwargs)
+        return pymantidplot.proxies.new_proxy(pymantidplot.proxies.Graph,_qti.app.plot, source._getHeldObject(), *args, **kwargs)
     else:
         return pymantidplot.plotSpectrum(source, *args, **kwargs)
