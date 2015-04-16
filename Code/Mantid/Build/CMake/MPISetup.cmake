@@ -37,7 +37,7 @@ set ( CPACK_PACKAGE_NAME mantid-mpi )
 include ( CPackCommon )
 include ( CPackLinuxSetup )
 # Framework dependencies
-set ( CPACK_RPM_PACKAGE_REQUIRES "boost >= 1.34.1,nexus,gsl,glibc,OpenCASCADE-libs-modelling >= 6.3.0,OpenCASCADE-libs-foundation >= 6.3.0,muParser,numpy" )
+set ( CPACK_RPM_PACKAGE_REQUIRES "boost >= 1.34.1,nexus,gsl,glibc,OCE-modelling,OCE-foundation,muParser,numpy" )
 set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},poco-crypto,poco-util,poco-xml,poco-net,poco-netssl,poco-foundation" )
 set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},gperftools-libs >= 2.0" )
 set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},boost-openmpi" )
