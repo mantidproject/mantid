@@ -461,13 +461,6 @@ from mantid.api import mtd
 from mantid.simpleapi import CreateWorkspace as CreateWorkspace
 import mantidplot  
 
-print ("You are loading '" + __name__ + "', which is an experimental module." +
-"""
-Please note: this module is at a very early stage of development and
-provides limited functionality. It is work in progress and is subject
-to change. Feedback is very much welcome! Please let us know any wishes
-and suggestions.""")
-
 class Line2D():
     """
     A very minimal replica of matplotlib.Line.Line2D. The true Line2D
