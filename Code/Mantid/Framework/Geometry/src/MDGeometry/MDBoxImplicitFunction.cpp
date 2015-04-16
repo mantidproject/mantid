@@ -9,11 +9,6 @@ namespace Mantid {
 namespace Geometry {
 
 //----------------------------------------------------------------------------------------------
-/** Default ctor
- */
-MDBoxImplicitFunction::MDBoxImplicitFunction() : MDImplicitFunction() {}
-
-//----------------------------------------------------------------------------------------------
 /** Constructor with min/max dimensions.
  *
  * The dimensions must be IN THE SAME ORDER and the SAME LENGTH as the
@@ -24,7 +19,8 @@ MDBoxImplicitFunction::MDBoxImplicitFunction() : MDImplicitFunction() {}
  * @param max :: nd-sized vector of the maximum edge of the box
  */
 MDBoxImplicitFunction::MDBoxImplicitFunction(const std::vector<coord_t> &min,
-                                             const std::vector<coord_t> &max) {
+                                             const std::vector<coord_t> &max)
+    : m_max(max), m_min(min) {
   construct(VMD(min), VMD(max));
 }
 
@@ -39,7 +35,8 @@ MDBoxImplicitFunction::MDBoxImplicitFunction(const std::vector<coord_t> &min,
  * @param max :: nd-sized vector of the maximum edge of the box
  */
 MDBoxImplicitFunction::MDBoxImplicitFunction(const Mantid::Kernel::VMD &min,
-                                             const Mantid::Kernel::VMD &max) {
+                                             const Mantid::Kernel::VMD &max)
+    : m_max(max), m_min(min) {
   construct(min, max);
 }
 
@@ -59,7 +56,10 @@ void MDBoxImplicitFunction::construct(const Mantid::Kernel::VMD &min,
     throw std::invalid_argument(
         "MDBoxImplicitFunction::ctor(): Invalid number of dimensions!");
 
+  double volume = 1;
   for (size_t d = 0; d < nd; d++) {
+    volume *= (max[d] - min[d]);
+
     // Make two parallel planes per dimension
 
     // Normal on the min side, so it faces towards +X
@@ -84,12 +84,61 @@ void MDBoxImplicitFunction::construct(const Mantid::Kernel::VMD &min,
     MDPlane p_max(normal_max, origin_max);
     this->addPlane(p_max);
   }
+  m_volume = volume;
 }
 
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
 MDBoxImplicitFunction::~MDBoxImplicitFunction() {}
+
+/**
+ * Calculate volume
+ * @return box volume
+ */
+double MDBoxImplicitFunction::volume() const { return m_volume; }
+
+/**
+ * Calculate the fraction of a box residing inside this implicit function
+ * @param boxVertexes to get fraction for
+ * @return fraction 0 to 1
+ */
+double MDBoxImplicitFunction::fraction(coord_t *boxVertexes,
+                                       const size_t nVertexes) const {
+
+  double fraction = 0;
+  const eContact contact = this->boxContact(boxVertexes, nVertexes);
+  if (contact == NOT_TOUCHING) {
+    fraction = 0; //
+  } else if (contact == CONTAINED) {
+    fraction = 1;
+  } else {
+
+    size_t nd = m_min.size();
+    std::vector<coord_t> dmins(nd, std::numeric_limits<coord_t>::max());
+    std::vector<coord_t> dmaxs(nd, std::numeric_limits<coord_t>::min());
+    coord_t frac = 1;
+
+    for (size_t d = 0; d < nd; ++d) {
+
+      for (size_t i = 0; i < nVertexes; ++i) {
+
+        dmins[d] = std::min(dmins[d], boxVertexes[i + nVertexes * d]);
+        dmaxs[d] = std::max(dmaxs[d], boxVertexes[i + nVertexes * d]);
+      }
+      float dBoxRange = (dmaxs[d] - dmins[d]);
+
+      const coord_t dInnerMin = std::max(m_min[d], dmins[d]);
+      const coord_t dInnerMax = std::min(m_max[d], dmaxs[d]);
+      const coord_t dOverlap = dInnerMax - dInnerMin;
+
+      frac *= dOverlap / dBoxRange;
+    }
+    fraction = frac;
+  }
+  return fraction;
+
+}
 
 } // namespace Mantid
 } // namespace Geometry

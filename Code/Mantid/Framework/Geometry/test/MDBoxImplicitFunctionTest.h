@@ -51,6 +51,259 @@ public:
     TS_ASSERT( !try2Dpoint(f, 1.5,2.1) );
   }
 
+
+  void test_volume()
+  {
+    std::vector<coord_t> min, max;
+    min.push_back(0);
+    min.push_back(0);
+    min.push_back(0);
+    max.push_back(1);
+    max.push_back(2);
+    max.push_back(3);
+    MDBoxImplicitFunction box(min, max);
+    TS_ASSERT_EQUALS(1*2*3, box.volume());
+  }
+
+  void test_fraction_when_not_contained()
+  {
+      // The implicit function box
+      const coord_t areaMin = 1;
+      const coord_t areaMax = 2;
+      std::vector<coord_t> min;
+      min.push_back(areaMin);
+      min.push_back(areaMin);
+      std::vector<coord_t> max;
+      max.push_back(areaMax);
+      max.push_back(areaMax);
+      MDBoxImplicitFunction f(min,max);
+
+      // The box to test.
+      const coord_t boxMin = 0;
+      const coord_t boxMax = 0.1;
+      std::vector<coord_t> boxVertexes;
+      // vertex
+      boxVertexes.push_back(boxMin);
+      boxVertexes.push_back(boxMin);
+      // vertex
+      boxVertexes.push_back(boxMin);
+      boxVertexes.push_back(boxMax);
+      // vertex
+      boxVertexes.push_back(boxMax);
+      boxVertexes.push_back(boxMin);
+      // vertex
+      boxVertexes.push_back(boxMax);
+      boxVertexes.push_back(boxMax);
+
+      TS_ASSERT_EQUALS(0.0, f.fraction(&boxVertexes[0], 4));
+  }
+
+  void test_fraction_when_fully_contained()
+  {
+      // The implicit function box
+      const coord_t areaMin = 1;
+      const coord_t areaMax = 2;
+      std::vector<coord_t> min;
+      min.push_back(areaMin);
+      min.push_back(areaMin);
+      std::vector<coord_t> max;
+      max.push_back(areaMax);
+      max.push_back(areaMax);
+      MDBoxImplicitFunction f(min,max);
+
+      // The box to test.
+      const coord_t boxMin = 1.1;
+      const coord_t boxMax = 1.9;
+      std::vector<coord_t> boxVertexes;
+      // vertex
+      boxVertexes.push_back(boxMin);
+      boxVertexes.push_back(boxMin);
+      // vertex
+      boxVertexes.push_back(boxMin);
+      boxVertexes.push_back(boxMax);
+      // vertex
+      boxVertexes.push_back(boxMax);
+      boxVertexes.push_back(boxMin);
+      // vertex
+      boxVertexes.push_back(boxMax);
+      boxVertexes.push_back(boxMax);
+
+      TS_ASSERT_EQUALS(1.0, f.fraction(&boxVertexes[0], 4));
+  }
+
+  void test_fraction_when_partially_contained_1D_simple()
+  {
+      // The implicit function box
+      const coord_t areaMin = 0.9;
+      const coord_t areaMax = 2;
+      std::vector<coord_t> min;
+      min.push_back(areaMin);
+      std::vector<coord_t> max;
+      max.push_back(areaMax);
+      MDBoxImplicitFunction f(min,max);
+
+      // The box to test.
+      const coord_t boxMin = 0;
+      const coord_t boxMax = 1;
+      std::vector<coord_t> boxVertexes;
+      // vertex
+      boxVertexes.push_back(boxMin);
+      // vertex
+      boxVertexes.push_back(boxMax);
+
+      /*
+
+                box to test
+      (x = 0) *------------------* (x = 1)
+
+                            implicit function 1D
+                    (x = 0.9) *--------------------------* (x = 2)
+
+      */
+
+      TSM_ASSERT_DELTA("Overlap fraction is incorrectly calculated", 0.1, f.fraction(&boxVertexes[0], boxVertexes.size()), 1e-3);
+  }
+
+  void test_fraction_when_partially_contained_1D_complex()
+  {
+      // The implicit function box
+      const coord_t areaMin = 0.25;
+      const coord_t areaMax = 0.75;
+      std::vector<coord_t> min;
+      min.push_back(areaMin);
+      std::vector<coord_t> max;
+      max.push_back(areaMax);
+      MDBoxImplicitFunction f(min,max);
+
+      // The box to test.
+      const coord_t boxMin = 0;
+      const coord_t boxMax = 1.0;
+      std::vector<coord_t> boxVertexes;
+      // vertex
+      boxVertexes.push_back(boxMin);
+      // vertex
+      boxVertexes.push_back(boxMax);
+
+      /*
+
+                                    box to test
+      (x = 0) *------------------------------------------------------* (x = 1)
+
+                                 implicit function 1D
+                  (x = 0.25) *--------------------------* (x = 0.75)
+
+      */
+
+      TSM_ASSERT_DELTA("Overlap fraction is incorrectly calculated", 0.5, f.fraction(&boxVertexes[0], boxVertexes.size()), 1e-3);
+  }
+
+
+  void test_fraction_when_partially_contained_2d_simple()
+  {
+
+      /*
+
+        1/4 overlap
+
+                ---------------
+                |             |
+                |             |
+        ---------------       |
+        |       |     |       |
+        |       |     |       |
+        |       ------|--------
+        |             |
+        |             |
+        ---------------
+
+
+
+      */
+
+      // The implicit function box
+      const coord_t areaMin = 0.5;
+      const coord_t areaMax = 1.5;
+      std::vector<coord_t> min;
+      min.push_back(areaMin);
+      min.push_back(areaMin);
+      std::vector<coord_t> max;
+      max.push_back(areaMax);
+      max.push_back(areaMax);
+      MDBoxImplicitFunction f(min,max);
+
+      // The box to test.
+      const coord_t boxMin = 0;
+      const coord_t boxMax = 1;
+      std::vector<coord_t> boxVertexes;
+      // vertex
+      boxVertexes.push_back(boxMin);
+      boxVertexes.push_back(boxMin);
+      // vertex
+      boxVertexes.push_back(boxMin);
+      boxVertexes.push_back(boxMax);
+      // vertex
+      boxVertexes.push_back(boxMax);
+      boxVertexes.push_back(boxMin);
+      // vertex
+      boxVertexes.push_back(boxMax);
+      boxVertexes.push_back(boxMax);
+
+      TSM_ASSERT_DELTA("2d overlap incorrectly calculated", 1.0/4, f.fraction(&boxVertexes[0], 4), 1e-3);
+  }
+
+  void test_fraction_when_partially_contained_2d_complex()
+  {
+
+      /*
+
+        1/8 overlap
+
+                ---------------
+                |  function   |
+                |             |
+        ---------------       |
+        |       |     |       |
+        |       ------|--------
+        |             |
+        |   box       |
+        |             |
+        ---------------
+
+
+
+      */
+
+      // The implicit function box
+      const coord_t areaMin = 0.5;
+      const coord_t areaMax = 1.5;
+      std::vector<coord_t> min;
+      min.push_back(areaMin); // xmin at 0.5
+      min.push_back(areaMin + (areaMin/2)); // ymin at 0.75
+      std::vector<coord_t> max;
+      max.push_back(areaMax);
+      max.push_back(areaMax + (areaMin/2)); // ymax at 0.75
+      MDBoxImplicitFunction f(min,max);
+
+      // The box to test.
+      const coord_t boxMin = 0;
+      const coord_t boxMax = 1;
+      std::vector<coord_t> boxVertexes;
+      // vertex
+      boxVertexes.push_back(boxMin);
+      boxVertexes.push_back(boxMin);
+      // vertex
+      boxVertexes.push_back(boxMin);
+      boxVertexes.push_back(boxMax);
+      // vertex
+      boxVertexes.push_back(boxMax);
+      boxVertexes.push_back(boxMin);
+      // vertex
+      boxVertexes.push_back(boxMax);
+      boxVertexes.push_back(boxMax);
+
+      TSM_ASSERT_DELTA("2d overlap incorrectly calculated", 1.0/8, f.fraction(&boxVertexes[0], 4), 1e-3);
+  }
+
 };
 
 
