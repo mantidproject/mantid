@@ -163,8 +163,6 @@ private:
   void disconnectDialogs();
   /// Consolidate constructor related items.
   void internalSetup(bool pMode);
-  /// Disable communication with the proxy tab widget.
-  void removeProxyTabWidgetConnections();
   /// Perform first render and final setup for mode buttons.
   void renderAndFinalSetup();
   /// Set the signals/slots for the ParaView components based on the view.

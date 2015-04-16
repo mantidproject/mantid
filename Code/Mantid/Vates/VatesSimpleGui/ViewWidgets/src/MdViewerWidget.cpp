@@ -282,19 +282,6 @@ void MdViewerWidget::connectLoadDataReaction(QAction *action)
 }
 
 /**
- * This function disconnects ParaView connections between pqActiveObjects
- * and the pqProxyTabWidget. This is necessary for clean view switching.
- */
-void MdViewerWidget::removeProxyTabWidgetConnections()
-{
-  //QObject::disconnect(&pqActiveObjects::instance(), 0,
-  //                    this->ui.propertiesPanel, 0);
-  //this->ui.propertiesPanel->setRepresentation(NULL);
-  //this->ui.propertiesPanel->setView(NULL);
-  //this->ui.propertiesPanel->setOutputPort(NULL);
-}
-
-/**
  * This function creates the requested view on the main window.
  * @param container the UI widget to associate the view mode with
  * @param v the view mode to set on the main window
@@ -978,7 +965,6 @@ void MdViewerWidget::switchViews(ModeControlWidget::Views v)
   this->viewSwitched = true;
   this->currentView->closeSubWindows();
   this->disconnectDialogs();
-  this->removeProxyTabWidgetConnections();
   this->hiddenView = this->setMainViewWidget(this->ui.viewWidget, v);
   this->hiddenView->setColorScaleState(this->ui.colorSelectionWidget);
   this->hiddenView->hide();
