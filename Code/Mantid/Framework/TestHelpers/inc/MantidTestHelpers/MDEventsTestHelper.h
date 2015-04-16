@@ -206,6 +206,7 @@ makeMDGridBox(size_t split0 = 10, size_t split1 = 10,
 
   // Split
   MDGridBox<MDLeanEvent<nd>, nd> *out = new MDGridBox<MDLeanEvent<nd>, nd>(box);
+  delete box;
 
   return out;
 }
@@ -304,7 +305,7 @@ static MDGridBox<MDLeanEvent<nd>, nd> *makeRecursiveMDGridBox(size_t splitInto,
   // Split into the gridbox.
   MDGridBox<MDLeanEvent<nd>, nd> *gridbox =
       new MDGridBox<MDLeanEvent<nd>, nd>(box);
-
+  delete box;
   // Now recursively split more
   recurseSplit(gridbox, 0, levels);
 
