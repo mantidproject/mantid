@@ -261,7 +261,10 @@ namespace SimpleGui
 
     QList<pqPipelineSource *> sources;
 
-    sources = smModel->findItems<pqPipelineSource *>(server);
+    if (server)
+    {
+      sources = smModel->findItems<pqPipelineSource *>(server);
+    }
 
     return sources;
   }
