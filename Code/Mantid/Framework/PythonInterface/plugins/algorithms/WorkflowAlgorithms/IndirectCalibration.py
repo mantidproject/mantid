@@ -29,26 +29,28 @@ class IndirectCalibration(DataProcessorAlgorithm):
         self.declareProperty(StringArrayProperty(name='InputFiles'),
                              doc='Comma separated list of input files')
 
-        self.declareProperty(WorkspaceProperty('OutputWorkspace', '',\
-                             direction=Direction.Output),
-                             doc='Output workspace for calibration data')
-
         self.declareProperty(IntArrayProperty(name='DetectorRange', values=[0, 1],\
                              validator=IntArrayMandatoryValidator()),
-                             doc='Range of detectors')
+                             doc='Range of detectors.')
 
         self.declareProperty(FloatArrayProperty(name='PeakRange', values=[0.0, 100.0],\
                              validator=FloatArrayMandatoryValidator()),
-                             doc='')
+                             doc='Time of flight range over the peak.')
 
         self.declareProperty(FloatArrayProperty(name='BackgroundRange', values=[0.0, 1000.0],\
                              validator=FloatArrayMandatoryValidator()),
-                             doc='')
+                             doc='Time of flight range over the background.')
 
         self.declareProperty(name='ScaleFactor', defaultValue=1.0,
-                             doc='')
+                             doc='Factor by which to scale the result.')
 
-        self.declareProperty(name='Plot', defaultValue=False, doc='Plot the calibration data')
+        self.declareProperty(name='Plot', defaultValue=False,
+                             doc='Plot the calibration data as a spectra plot.')
+
+        self.declareProperty(WorkspaceProperty('OutputWorkspace', '',
+                             direction=Direction.Output),
+                             doc='Output workspace for calibration data.')
+
 
 
     def validateInputs(self):
@@ -107,14 +109,25 @@ class IndirectCalibration(DataProcessorAlgorithm):
         else:
             calib_ws_name = runs[0]
 
-        CalculateFlatBackground(InputWorkspace=calib_ws_name, OutputWorkspace=calib_ws_name,\
-                StartX=self._back_range[0], EndX=self._back_range[1], Mode='Mean')
+        CalculateFlatBackground(InputWorkspace=calib_ws_name, OutputWorkspace=calib_ws_name,
+                                StartX=self._back_range[0], EndX=self._back_range[1], Mode='Mean')
 
-        from inelastic_indirect_reduction_steps import NormaliseToUnityStep
-        ntu = NormaliseToUnityStep()
-        ntu.set_factor(self._intensity_scale)
-        ntu.set_peak_range(self._peak_range[0], self._peak_range[1])
-        ntu.execute(None, calib_ws_name)
+        number_historgrams = mtd[calib_ws_name].getNumberHistograms()
+        ws_mask, num_zero_spectra = FindDetectorsOutsideLimits(InputWorkspace=calib_ws_name, OutputWorkspace='__temp_ws_mask')
+        DeleteWorkspace(ws_mask)
+
+        Integration(InputWorkspace=calib_ws_name, OutputWorkspace=calib_ws_name,
+                    RangeLower=self._peak_range[0], RangeUpper=self._peak_range[1])
+
+        temp_sum = SumSpectra(InputWorkspace=calib_ws_name, OutputWorkspace='__temp_sum')
+        total = temp_sum.readY(0)[0]
+        DeleteWorkspace(temp_sum)
+
+        if self._intensity_scale is None:
+            self._intensity_scale = 1 / (total / (number_historgrams - num_zero_spectra))
+
+        Scale(InputWorkspace=calib_ws_name, OutputWorkspace=calib_ws_name,
+              Factor=self._intensity_scale, Operation='Multiply')
 
         RenameWorkspace(InputWorkspace=calib_ws_name, OutputWorkspace=self._out_ws)
 

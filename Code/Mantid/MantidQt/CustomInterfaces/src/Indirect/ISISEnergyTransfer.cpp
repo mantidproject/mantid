@@ -1,13 +1,13 @@
 #include "MantidQtCustomInterfaces/Indirect/ISISEnergyTransfer.h"
 
 #include "MantidGeometry/IDTypes.h"
-#include "MantidQtCustomInterfaces/Background.h"
 #include "MantidQtCustomInterfaces/UserInputValidator.h"
 
 #include <QFileInfo>
 #include <QInputDialog>
 
 using namespace Mantid::API;
+using MantidQt::API::BatchAlgorithmRunner;
 
 namespace MantidQt
 {
@@ -106,10 +106,9 @@ namespace CustomInterfaces
 
   void ISISEnergyTransfer::run()
   {
-    using MantidQt::API::BatchAlgorithmRunner;
-
-    IAlgorithm_sptr reductionAlg = AlgorithmManager::Instance().create("InelasticIndirectReduction", -1);
+    IAlgorithm_sptr reductionAlg = AlgorithmManager::Instance().create("ISISIndirectEnergyTransfer");
     reductionAlg->initialize();
+    BatchAlgorithmRunner::AlgorithmRuntimeProps reductionRuntimeProps;
 
     reductionAlg->setProperty("Instrument", getInstrumentConfiguration()->getInstrumentName().toStdString());
     reductionAlg->setProperty("Analyser", getInstrumentConfiguration()->getAnalyserName().toStdString());
@@ -119,7 +118,6 @@ namespace CustomInterfaces
     reductionAlg->setProperty("InputFiles", files.toStdString());
 
     reductionAlg->setProperty("SumFiles", m_uiForm.ckSumFiles->isChecked());
-    reductionAlg->setProperty("LoadLogs", m_uiForm.ckLoadLogs->isChecked());
 
     if(m_uiForm.ckUseCalib->isChecked())
     {
@@ -130,7 +128,7 @@ namespace CustomInterfaces
     std::vector<long> detectorRange;
     detectorRange.push_back(m_uiForm.spSpectraMin->value());
     detectorRange.push_back(m_uiForm.spSpectraMax->value());
-    reductionAlg->setProperty("DetectorRange", detectorRange);
+    reductionAlg->setProperty("SpectraRange", detectorRange);
 
     if(m_uiForm.ckBackgroundRemoval->isChecked())
     {
@@ -157,32 +155,23 @@ namespace CustomInterfaces
     if(m_uiForm.ckScaleMultiplier->isChecked())
       reductionAlg->setProperty("ScaleFactor", m_uiForm.spScaleMultiplier->value());
 
-    if(m_uiForm.cbGroupingOptions->currentText() != "Default")
-    {
-      QString grouping = createMapFile(m_uiForm.cbGroupingOptions->currentText());
-      reductionAlg->setProperty("Grouping", grouping.toStdString());
-    }
+    if(m_uiForm.ckCm1Units->isChecked())
+      reductionAlg->setProperty("UnitX", "DeltaE_inWavenumber");
 
-    reductionAlg->setProperty("Fold", m_uiForm.ckFold->isChecked());
-    reductionAlg->setProperty("SaveCM1", m_uiForm.ckCm1Units->isChecked());
+    QPair<QString, QString> grouping = createMapFile(m_uiForm.cbGroupingOptions->currentText());
+    reductionAlg->setProperty("GroupingMethod", grouping.first.toStdString());
+
+    if(grouping.first == "Workspace")
+      reductionRuntimeProps["GroupingWorkspace"] = grouping.second.toStdString();
+    else if(grouping.second == "File")
+      reductionAlg->setProperty("MapFile", grouping.second.toStdString());
+
+    reductionAlg->setProperty("FoldMultipleFrames", m_uiForm.ckFold->isChecked());
+    reductionAlg->setProperty("Plot", m_uiForm.cbPlotType->currentText().toStdString());
     reductionAlg->setProperty("SaveFormats", getSaveFormats());
-
     reductionAlg->setProperty("OutputWorkspace", "IndirectEnergyTransfer_Workspaces");
 
-    // Plot Output options
-    switch(m_uiForm.cbPlotType->currentIndex())
-    {
-      case 0: // "None"
-        break;
-      case 1: // "Spectra"
-        reductionAlg->setProperty("Plot", "spectra");
-        break;
-      case 2: // "Contour"
-        reductionAlg->setProperty("Plot", "contour");
-        break;
-    }
-
-    m_batchAlgoRunner->addAlgorithm(reductionAlg);
+    m_batchAlgoRunner->addAlgorithm(reductionAlg, reductionRuntimeProps);
 
     connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(algorithmComplete(bool)));
     disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(plotRawComplete(bool)));
@@ -320,7 +309,7 @@ namespace CustomInterfaces
    * @param groupType :: Type of grouping (All, Group, Indiviual)
    * @return path to mapping file, or an empty string if file could not be created.
    */
-  QString ISISEnergyTransfer::createMapFile(const QString& groupType)
+  QPair<QString, QString> ISISEnergyTransfer::createMapFile(const QString& groupType)
   {
     QString specRange = m_uiForm.spSpectraMin->text() + "," + m_uiForm.spSpectraMax->text();
 
@@ -328,10 +317,9 @@ namespace CustomInterfaces
     {
       QString groupFile = m_uiForm.dsMapFile->getFirstFilename();
       if(groupFile == "")
-      {
         emit showMessageBox("You must enter a path to the .map file.");
-      }
-      return groupFile;
+
+      return qMakePair(QString("File"), groupFile);
     }
     else if(groupType == "Groups")
     {
@@ -347,18 +335,22 @@ namespace CustomInterfaces
 
       m_batchAlgoRunner->addAlgorithm(groupingAlg);
 
-      return groupWS;
+      return qMakePair(QString("Workspace"), groupWS);
+    }
+    else if (groupType == "Default")
+    {
+      return qMakePair(QString("IPF"), QString());
     }
     else
     {
       // Catch All and Individual
-      return groupType;
+      return qMakePair(groupType, QString());
     }
   }
 
   /**
    * Converts the checkbox selection to a comma delimited list of save formats for the
-   * InelasticIndirectReduction algorithm.
+   * ISISIndirectEnergyTransfer algorithm.
    *
    * @return A vector of save formats
    */
