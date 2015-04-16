@@ -287,8 +287,8 @@ void MdViewerWidget::connectLoadDataReaction(QAction *action)
  */
 void MdViewerWidget::removeProxyTabWidgetConnections()
 {
-  QObject::disconnect(&pqActiveObjects::instance(), 0,
-                      this->ui.propertiesPanel, 0);
+  //QObject::disconnect(&pqActiveObjects::instance(), 0,
+  //                    this->ui.propertiesPanel, 0);
   //this->ui.propertiesPanel->setRepresentation(NULL);
   //this->ui.propertiesPanel->setView(NULL);
   //this->ui.propertiesPanel->setOutputPort(NULL);
