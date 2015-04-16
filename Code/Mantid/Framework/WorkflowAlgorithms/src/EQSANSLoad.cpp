@@ -515,7 +515,13 @@ void EQSANSLoad::exec() {
     // Get monitor workspace as necessary
     std::string mon_wsname = getPropertyValue("OutputWorkspace") + "_monitors";
     if (loadMonitors && loadAlg->existsProperty("MonitorWorkspace")) {
-      MatrixWorkspace_sptr monWS = loadAlg->getProperty("MonitorWorkspace");
+      Workspace_sptr monWSOutput = loadAlg->getProperty("MonitorWorkspace");
+      MatrixWorkspace_sptr monWS = boost::dynamic_pointer_cast<MatrixWorkspace>(monWSOutput);
+      if (!monWS) {
+        //this was a group workspace - DGSReduction does not support multi period data yet
+        throw Exception::NotImplementedError(
+          "The file contains multi period data, support for this is not implemented in EQSANSLoad yet");
+      }
       declareProperty(new WorkspaceProperty<>("MonitorWorkspace", mon_wsname,
                                               Direction::Output),
                       "Monitors from the Event NeXus file");
