@@ -54,6 +54,7 @@ set ( SRC_FILES
 	src/GaussianComptonProfile.cpp
 	src/GramCharlierComptonProfile.cpp
 	src/IkedaCarpenterPV.cpp
+	src/LatticeDomainCreator.cpp
 	src/LatticeFunction.cpp
 	src/LeBailFit.cpp
 	src/LeBailFunction.cpp
@@ -171,6 +172,7 @@ set ( INC_FILES
 	inc/MantidCurveFitting/GramCharlierComptonProfile.h
 	inc/MantidCurveFitting/IkedaCarpenterPV.h
 	inc/MantidCurveFitting/Jacobian.h
+	inc/MantidCurveFitting/LatticeDomainCreator.h
 	inc/MantidCurveFitting/LatticeFunction.h
 	inc/MantidCurveFitting/LeBailFit.h
 	inc/MantidCurveFitting/LeBailFunction.h
@@ -279,6 +281,7 @@ set ( TEST_FILES
 	IPeakFunctionCentreParameterNameTest.h
 	IPeakFunctionIntensityTest.h
 	IkedaCarpenterPVTest.h
+	LatticeDomainCreatorTest.h
 	LatticeFunctionTest.h
 	LeBailFitTest.h
 	LeBailFunctionTest.h
