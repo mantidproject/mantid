@@ -2985,6 +2985,7 @@ Plots the spectra from the given workspaces
 @param style :: Curve style for plot
 @param plotWindow :: Window to plot to. If NULL a new one will be created
 @param clearWindow :: Whether to clear specified plotWindow before plotting. Ignored if plotWindow == NULL
+@param waterfallPlot :: If true create a waterfall type plot
 */
 MultiLayer* MantidUI::plot1D(const QStringList& ws_names, const QList<int>& indexList, bool spectrumPlot, bool errs,
                              Graph::CurveType style, MultiLayer* plotWindow, bool clearWindow, bool waterfallPlot)
@@ -3019,6 +3020,7 @@ MultiLayer* MantidUI::plot1D(const QStringList& ws_names, const QList<int>& inde
 @param errs :: If true include the errors on the graph
 @param plotWindow :: Window to plot to. If NULL a new one will be created
 @param clearWindow :: Whether to clear specified plotWindow before plotting. Ignored if plotWindow == NULL
+@param waterfallPlot :: If true create a waterfall type plot
 @return NULL if failure. Otherwise, if plotWindow == NULL - created window, if not NULL - plotWindow
 */
 MultiLayer* MantidUI::plot1D(const QMultiMap<QString, set<int> >& toPlot, bool spectrumPlot,
@@ -3050,6 +3052,7 @@ MultiLayer* MantidUI::plot1D(const QMultiMap<QString, set<int> >& toPlot, bool s
 @param errs :: If true include the errors on the graph
 @param plotWindow :: Window to plot to. If NULL a new one will be created
 @param clearWindow :: Whether to clear specified plotWindow before plotting. Ignored if plotWindow == NULL
+@param waterfallPlot :: If true create a waterfall type plot
 @return NULL if failure. Otherwise, if plotWindow == NULL - created window, if not NULL - plotWindow
 */
 MultiLayer* MantidUI::plot1D(const QString& wsName, const std::set<int>& indexList, bool spectrumPlot,
@@ -3076,6 +3079,7 @@ MultiLayer* MantidUI::plot1D(const QString& wsName, const std::set<int>& indexLi
 @param style :: curve style for plot
 @param plotWindow :: Window to plot to. If NULL a new one will be created
 @param clearWindow :: Whether to clear specified plotWindow before plotting. Ignored if plotWindow == NULL
+@param waterfallPlot :: If true create a waterfall type plot
 @return NULL if failure. Otherwise, if plotWindow == NULL - created window, if not NULL - plotWindow
 */
 MultiLayer* MantidUI::plot1D(const QMultiMap<QString,int>& toPlot, bool spectrumPlot,

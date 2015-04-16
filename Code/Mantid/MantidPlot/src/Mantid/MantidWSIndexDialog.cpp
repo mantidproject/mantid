@@ -21,6 +21,7 @@
  * @param mui :: The MantidUI area
  * @param flags :: Window flags that are passed the the QDialog constructor
  * @param wsNames :: the names of the workspaces to be plotted
+ * @param showWaterfallOption :: If true the waterfall checkbox is created
  */
 MantidWSIndexDialog::MantidWSIndexDialog(MantidUI* mui, Qt::WFlags flags, QList<QString> wsNames, const bool showWaterfallOption) 
   : QDialog(mui->appWindow(), flags), 
