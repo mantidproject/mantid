@@ -44,7 +44,6 @@
 {
    <gomp_false_positive_leak_workspace2d>
    Memcheck:Leak
-   match-leak-kinds: possible
    fun:calloc
    fun:_dl_allocate_tls
    ...
@@ -55,7 +54,6 @@
 {
    <gomp_false_positive_leak_mdgridboxtest>
    Memcheck:Leak
-   match-leak-kinds: possible
    fun:calloc
    fun:_dl_allocate_tls
    ...
