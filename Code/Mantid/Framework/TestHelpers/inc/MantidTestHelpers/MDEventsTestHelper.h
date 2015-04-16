@@ -42,7 +42,6 @@ createDiffractionEventWorkspace(int numEvents, int numPixels = 400,
  *points
  *
  * @param wsName :: name of the workspace in ADS
- * @param fileBacked :: true for file-backed
  * @return MDEW sptr
  */
 MDEventWorkspace3Lean::sptr
