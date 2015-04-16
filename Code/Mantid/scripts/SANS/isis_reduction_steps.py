@@ -147,36 +147,38 @@ class LoadRun(object):
 
         outWs = Load(self._data_file, **extra_options)
 
-        logger.information('====================================================')
-        logger.information('Output ws is ' + outWs.getName())
-        logger.information('Output ws type is ' + str(type(outWs)))
-        
-        if isinstance(outWs, WorkspaceGroup) and '-add' in outWs.getName():
-            if len(outWs) != 2:
-                raise RuntimeError("Incorrect number of child workspaces. Make sure that the grouped workspace was created within the Add Runs tab.")
-            if check_child_ws_for_name_and_type_for_added_eventdata(outWs):
-                raise RuntimeError("Incorrect format of the group workspace. We expect an EventWorkspace for the data and a MatrixWorkspace for the monitors.")
+        appendix = "_monitors"
+
+        # We need to check if we are dealing with a group workspace which is made up of added event data. Note that 
+        # we can also have a group workspace which is associated with period data, which don't want to deal with here.
+
+        added_event_data_flag = False
+
+        if isinstance(outWs, WorkspaceGroup) and check_child_ws_for_name_and_type_for_added_eventdata(outWs):
             if self._period != self.UNSET_PERIOD:
                 raise RuntimeError("Trying to use multiperiod and added eventdata. This is currently not supported.")
-            extract_child_ws_for_added_eventdata(outWs)
+            extract_child_ws_for_added_eventdata(outWs, appendix)
+            added_event_data_flag = True
+            # Reload the outWs, it has changed from a group workspace to an event workspace
+            outWs = mtd[workspace]
         
+        monitor_ws_name = workspace + appendix
+        
+        if not added_event_data_flag:
+            if isinstance(outWs, IEventWorkspace):
+                LoadNexusMonitors(self._data_file, OutputWorkspace=monitor_ws_name)
+            else:
+                if monitor_ws_name in mtd:
+                    DeleteWorkspace(monitor_ws_name)
         
 
-        for ws_name in mtd.getObjectNames():
-            print ws_name
-
-        quit()
-
-        monitor_ws_name = workspace + "_monitors"
-
-        if isinstance(outWs, IEventWorkspace):
-            LoadNexusMonitors(self._data_file, OutputWorkspace=monitor_ws_name)
-        else:
-            if monitor_ws_name in mtd:
-                DeleteWorkspace(monitor_ws_name)
-
-        loader_name = outWs.getHistory().lastAlgorithm().getProperty('LoaderName').value
-
+        # There is a a bug in getHistory() in combination with renamed workspaces, hence we need to hedge for this here.
+        loader_name = ''
+        try: 
+            load_name = outWs.getHistory().lastAlgorithm().getProperty('LoaderName').value
+        except:
+            pass
+        
         if loader_name == 'LoadRaw':
             self._loadSampleDetails(workspace)
 
@@ -184,7 +186,9 @@ class LoadRun(object):
             outWs = mtd[self._leaveSinglePeriod(outWs.name(), self._period)]
 
         self.periods_in_file = self._find_workspace_num_periods(workspace)
+        
         self._wksp_name = workspace
+
 
     def _get_workspace_name(self, entry_num=None):
         """
@@ -1097,6 +1101,7 @@ class LoadSample(LoadRun):
 
     def execute(self, reducer, isSample):
         self._assignHelper(reducer)
+        
         if self.wksp_name == '':
             raise RuntimeError('Unable to load SANS sample run, cannot continue.')
 

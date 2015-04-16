@@ -166,39 +166,57 @@ class LoadAddedEventDataSampleTestStressTest(stresstesting.MantidStressTest):
         config["default.instrument"] = "SANS2D"
         ici.SANS2D()
         ici.MaskFile('MaskSANS2DReductionGUI.txt')
-        #ici.SetDetectorOffsets('REAR', -16.0, 58.0, 0.0, 0.0, 0.0, 0.0)
-        #ici.SetDetectorOffsets('FRONT', -44.0, -20.0, 47.0, 0.0, 1.0, 1.0)
-        #ici.Gravity(False)
-        #ici.Set1D()
+        ici.SetDetectorOffsets('REAR', -16.0, 58.0, 0.0, 0.0, 0.0, 0.0)
+        ici.SetDetectorOffsets('FRONT', -44.0, -20.0, 47.0, 0.0, 1.0, 1.0)
+        ici.Gravity(False)
+        ici.Set1D()
 
         added_event_data_file = self._prepare_added_event_data('SANS2D00028051', 'SANS2D00028050')
-
+        #added_event_data_file = self._prepare_normal_event_data('SANS2D00022051')
         ici.AssignSample(added_event_data_file)
-        ici.WavRangeReduction()
-        #ici.WavRangeReduction(4.6, 12.85, False)
+        #ici.WavRangeReduction()
 
+        ici.WavRangeReduction(4.6, 12.85, False)
+
+        temp_save_dir = config['defaultsave.directory']
+        output_file1 = os.path.join(temp_save_dir, '28051rear_1D_4.6_12.85' + '.nxs')
+        SaveNexus(InputWorkspace = '28051rear_1D_4.6_12.85', Filename = output_file1)
+
+        output_file2 = os.path.join(temp_save_dir, '28051rear_1D_4.6_12.85_incident_monitor' + '.nxs')
+        SaveNexus(InputWorkspace = '28051rear_1D_4.6_12.85_incident_monitor', Filename = output_file2)
+        
+        temp_save_dir = config['defaultsave.directory']
+        output_file3 = os.path.join(temp_save_dir, '28051_sans_nxs' + '.nxs')
+        SaveNexus(InputWorkspace = '28051_sans_nxs', Filename = output_file3)
+
+        output_file4 = os.path.join(temp_save_dir, '28051_sans_nxs_monitors' + '.nxs')
+        SaveNexus(InputWorkspace = '28051_sans_nxs_monitors', Filename = output_file4)
+        
 
     def _prepare_added_event_data(self, name_first, name_second):
         name1 = name_first
-        name2 = name_second
-        LoadEventNexus(Filename = "SANS2D00022048.nxs", OutputWorkspace = name1, LoadMonitors = 1)
+        name1_monitors = name1 + '_monitors'
+        Load(Filename = "SANS2D00022048.nxs", OutputWorkspace = name1)
+        LoadNexusMonitors(Filename = "SANS2D00022048.nxs", OutputWorkspace=name1_monitors)
+
         #todo -- clone first workspace rather than load twice
-        LoadEventNexus(Filename = "SANS2D00022048.nxs", OutputWorkspace = name2, LoadMonitors = 1)
+        name2 = name_second
+        name2_monitors = name2 + '_monitors'
+        CloneWorkspace(InputWorkspace = name1, OutputWorkspace = name2)
+        CloneWorkspace(InputWorkspace = name1_monitors, OutputWorkspace = name2_monitors)
 
         added_data_name = name1 + '-add'
         Plus(LHSWorkspace = name1, RHSWorkspace = name2, OutputWorkspace = added_data_name)
 
         added_monitor_name = added_data_name + '_monitors'
-        monitor_name1 = name1 + '_monitors'
-        monitor_name2 = name2 + '_monitors'
-        Plus(LHSWorkspace = monitor_name1, RHSWorkspace = monitor_name2, OutputWorkspace = added_monitor_name)
+        Plus(LHSWorkspace = name1_monitors, RHSWorkspace = name2_monitors, OutputWorkspace = added_monitor_name)
 
         group_name = added_data_name + '_group'
         GroupWorkspaces(InputWorkspaces = [added_data_name, added_monitor_name], OutputWorkspace = group_name)
         DeleteWorkspace(name1)
         DeleteWorkspace(name2)
-        DeleteWorkspace(monitor_name1)
-        DeleteWorkspace(monitor_name2)
+        DeleteWorkspace(name1_monitors)
+        DeleteWorkspace(name2_monitors)
         #to do: Work out what actual temporary system test save directory is.
         temp_save_dir = config['defaultsave.directory']
         output_file = os.path.join(temp_save_dir, added_data_name + '.nxs')
@@ -209,11 +227,12 @@ class LoadAddedEventDataSampleTestStressTest(stresstesting.MantidStressTest):
         #'defaultsave.directory'
         #'datasearch.directories'
 
+
     def requiredMemoryMB(self):
         return 2000
 
     def validate(self):
-        return False
+        pass
 
 if __name__ == '__main__':
     unittest.main()

@@ -141,16 +141,20 @@ class TestLoadingAddedEventWorkspaceNameParsing(unittest.TestCase):
 
 
 class TestLoadingAddedEventWorkspaceExtraction(unittest.TestCase):
-    def do_test_extraction(self, event_name, monitor_name, event_name_expect, monitor_name_expect):
+    _appendix = '_monitors'
+
+    def do_test_extraction(self, event_name, monitor_name):
         out_ws_name = 'out_group'
+        event_name_expect = out_ws_name
+        monitor_name_expect = out_ws_name + self._appendix
+
         provide_group_workspace_for_added_event_data(event_ws_name = event_name, monitor_ws_name = monitor_name, out_ws_name = out_ws_name)
         out_ws_group = mtd[out_ws_name]
-
+        
         # Act
-        su.extract_child_ws_for_added_eventdata(out_ws_group)
+        su.extract_child_ws_for_added_eventdata(out_ws_group, self._appendix)
 
         # Assert
-        # Make sure that two files exist with a truncated name
 
         self.assertTrue(event_name_expect in mtd)
         self.assertTrue(monitor_name_expect in mtd)
@@ -158,40 +162,10 @@ class TestLoadingAddedEventWorkspaceExtraction(unittest.TestCase):
         DeleteWorkspace(event_name_expect)
         DeleteWorkspace(monitor_name_expect)
 
-    def test_pruning_of_data_and_monitor_child_names(self):
-        # Check when there is no special ending
-        out = su.get_pruned_added_event_data_names(TEST_STRING_DATA)
-        self.assertTrue(TEST_STRING_DATA == out)
-        out_mon = su.get_pruned_added_event_data_names(TEST_STRING_MON)
-        self.assertTrue(TEST_STRING_MON == out_mon)
-
-        # Check when there is a _1 ending
-        out1 = su.get_pruned_added_event_data_names(TEST_STRING_DATA1)
-        self.assertTrue(TEST_STRING_DATA == out1)
-        out1_mon = su.get_pruned_added_event_data_names(TEST_STRING_MON1)
-        self.assertTrue(TEST_STRING_MON == out1_mon)
-
-        # Check when there is a _2 ending
-        out2 = su.get_pruned_added_event_data_names(TEST_STRING_DATA2)
-        self.assertTrue(TEST_STRING_DATA == out2)
-        out2_mon = su.get_pruned_added_event_data_names(TEST_STRING_MON2)
-        self.assertTrue(TEST_STRING_MON == out2_mon)
-
-        # Check when there is a multiple ending
-        out3 = su.get_pruned_added_event_data_names(TEST_STRING_DATA3)
-        self.assertTrue(TEST_STRING_DATA == out3)
-        out3_mon = su.get_pruned_added_event_data_names(TEST_STRING_MON3)
-        self.assertTrue(TEST_STRING_MON == out3_mon)
 
     def test_extract_data_and_monitor_child_ws(self):
         # Check when there is no special ending
-        self.do_test_extraction(TEST_STRING_DATA, TEST_STRING_MON, TEST_STRING_DATA, TEST_STRING_MON)
-        # Check when there is a _1 ending
-        self.do_test_extraction(TEST_STRING_DATA1, TEST_STRING_MON1, TEST_STRING_DATA, TEST_STRING_MON)
-        # Check when there is a _2 ending
-        self.do_test_extraction(TEST_STRING_DATA2, TEST_STRING_MON2, TEST_STRING_DATA, TEST_STRING_MON)
-        # Check when there is a multiple ending
-        self.do_test_extraction(TEST_STRING_DATA3, TEST_STRING_MON3, TEST_STRING_DATA, TEST_STRING_MON)
+        self.do_test_extraction(TEST_STRING_DATA, TEST_STRING_MON)
 
 
 if __name__ == "__main__":
