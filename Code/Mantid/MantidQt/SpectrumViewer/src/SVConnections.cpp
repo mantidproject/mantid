@@ -731,7 +731,7 @@ void SVConnections::showColorScale( std::vector<QRgb> & positiveColorTable,
  */
 void SVConnections::openOnlineHelp()
 {
-  MantidQt::API::HelpWindow::showCustomInterface(NULL, QString("SpectrumView"));
+  MantidQt::API::HelpWindow::showCustomInterface(NULL, QString("SpectrumViewer"));
 }
 
 } // namespace SpectrumView

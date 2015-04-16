@@ -141,4 +141,4 @@ to a minimum size.  If the handle is moved substantially below
 the minimum size, the graph will collapse to zero size.
 
 
-.. categories:: Interfaces Indirect
+.. categories:: Interfaces
