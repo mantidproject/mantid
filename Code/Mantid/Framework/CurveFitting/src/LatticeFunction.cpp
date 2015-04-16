@@ -1,4 +1,5 @@
 #include "MantidCurveFitting/LatticeFunction.h"
+#include "MantidAPI/FunctionFactory.h"
 #include "MantidGeometry/Crystal/UnitCell.h"
 
 namespace Mantid {
@@ -6,6 +7,8 @@ namespace CurveFitting {
 
 using namespace API;
 using namespace Geometry;
+
+DECLARE_FUNCTION(LatticeFunction)
 
 LatticeFunction::LatticeFunction() : ILatticeFunction(), m_cellParameters() {}
 
