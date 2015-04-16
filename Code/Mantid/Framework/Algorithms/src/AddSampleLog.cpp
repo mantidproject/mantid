@@ -20,10 +20,11 @@ using namespace Kernel;
 using namespace API;
 
 void AddSampleLog::init() {
-  declareProperty(new WorkspaceProperty<>("Workspace", "", Direction::InOut),
-                  "Workspace to add the log entry to");
+  declareProperty(
+      new WorkspaceProperty<Workspace>("Workspace", "", Direction::InOut),
+      "Workspace to add the log entry to");
   declareProperty("LogName", "",
-                  boost::make_shared<MandatoryValidator<std::string>>(),
+                  boost::make_shared<MandatoryValidator<std::string> >(),
                   "The name that will identify the log entry");
 
   declareProperty("LogText", "", "The content of the log");
@@ -39,11 +40,11 @@ void AddSampleLog::init() {
 
 void AddSampleLog::exec() {
   // A pointer to the workspace to add a log to
-  MatrixWorkspace_sptr wSpace = getProperty("Workspace");
+  Workspace_sptr ws1 = getProperty("Workspace");
+  ExperimentInfo_sptr ws = boost::dynamic_pointer_cast<ExperimentInfo>(ws1);
   // we're going to edit the workspaces run details so get a non-const reference
   // to it
-  Run &theRun = wSpace->mutableRun();
-
+  Run &theRun = ws->mutableRun();
   // get the data that the user wants to add
   std::string propName = getProperty("LogName");
   std::string propValue = getProperty("LogText");
@@ -78,7 +79,8 @@ void AddSampleLog::exec() {
     Kernel::DateAndTime startTime;
     try {
       startTime = theRun.startTime();
-    } catch (std::runtime_error &) {
+    }
+    catch (std::runtime_error &) {
       // Swallow the error - startTime will just be 0
     }
 

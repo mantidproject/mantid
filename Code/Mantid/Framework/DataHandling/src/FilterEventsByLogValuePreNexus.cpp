@@ -794,26 +794,6 @@ void FilterEventsByLogValuePreNexus::runLoadInstrument(
   localWorkspace->populateInstrumentParameters();
 }
 
-//-----------------------------------------------------------------------------
-/** Turn a pixel id into a "corrected" pixelid and period.
- */
-inline void FilterEventsByLogValuePreNexus::fixPixelId(PixelType &pixel,
-                                                       uint32_t &period) const {
-  // FIXME - This function is not used at all
-  throw std::runtime_error("Function fixPixelId is not verified. ");
-
-  if (!this->using_mapping_file) { // nothing to do here
-    period = 0;
-    return;
-  }
-
-  PixelType unmapped_pid = pixel % this->numpixel;
-  period = (pixel - unmapped_pid) / this->numpixel;
-  pixel = this->pixelmap[unmapped_pid];
-
-  return;
-}
-
 //----------------------------------------------------------------------------------------------
 /** Process the event file properly.
  * @param workspace :: EventWorkspace to write to.

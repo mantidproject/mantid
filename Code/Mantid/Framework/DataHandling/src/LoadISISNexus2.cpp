@@ -730,7 +730,7 @@ size_t LoadISISNexus2::prepareSpectraBlocks(
 * @param entry :: The opened root entry node for accessing the monitor and data
 * nodes
 * @param local_workspace :: The workspace to place the data in
-* @param update_spectra_det_map :: reset spectra-detector map to the one
+* @param update_spectra2det_mapping :: reset spectra-detector map to the one
 * calculated earlier. (Warning! -- this map has to be calculated correctly!)
 */
 void

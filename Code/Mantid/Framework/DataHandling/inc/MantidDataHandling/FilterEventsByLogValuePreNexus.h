@@ -138,8 +138,6 @@ private:
   void runLoadInstrument(const std::string &eventfilename,
                          API::MatrixWorkspace_sptr localWorkspace);
 
-  inline void fixPixelId(PixelType &pixel, uint32_t &period) const;
-
   void procEvents(DataObjects::EventWorkspace_sptr &workspace);
 
   void procEventsLinear(DataObjects::EventWorkspace_sptr &workspace,

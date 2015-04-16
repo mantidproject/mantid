@@ -2176,6 +2176,8 @@ void MantidUI::disableSaveNexus()
 */
 QString MantidUI::saveToString(const std::string& workingDir)
 {
+  using namespace Mantid::API;
+
   QString wsNames;
   wsNames="<mantidworkspaces>\n";
   wsNames+="WorkspaceNames";
@@ -2185,19 +2187,22 @@ QString MantidUI::saveToString(const std::string& workingDir)
   { 
     QTreeWidgetItem* item=tree->topLevelItem(i);
     QString wsName=item->text(0);
-    if (Mantid::API::FrameworkManager::Instance().getWorkspace(wsName.toStdString())->id() == "WorkspaceGroup")
+
+    Workspace_sptr ws = AnalysisDataService::Instance().retrieveWS<Workspace>(wsName.toStdString());
+    WorkspaceGroup_sptr group = boost::dynamic_pointer_cast<Mantid::API::WorkspaceGroup>(ws);
+    // We don't split up multiperiod workspaces for performance reasons.
+    // There's significant optimisations we can perform on load if they're a
+    // single file.
+    if (ws->id() == "WorkspaceGroup" && group && !group->isMultiperiod())
     {
-      Mantid::API::WorkspaceGroup_sptr group = boost::dynamic_pointer_cast<Mantid::API::WorkspaceGroup>(Mantid::API::AnalysisDataService::Instance().retrieve(wsName.toStdString()));
       wsNames+="\t";
-      //wsName is a group, add it to list and indicate what the group contains by a "[" and end the group with a "]"
       wsNames+=wsName;
       std::vector<std::string> secondLevelItems = group->getNames();
-      for(size_t j=0; j<secondLevelItems.size(); j++) //ignore string "WorkspaceGroup at position 0" (start at child '1')
+      for(size_t j=0; j<secondLevelItems.size(); j++)
       {
         wsNames+=",";
         wsNames+=QString::fromStdString(secondLevelItems[j]);
         std::string fileName(workingDir + "//" + secondLevelItems[j] + ".nxs");
-        //saving to  nexus file
         savedatainNexusFormat(fileName,secondLevelItems[j]);
       }
     }
@@ -2207,7 +2212,6 @@ QString MantidUI::saveToString(const std::string& workingDir)
       wsNames+=wsName;
 
       std::string fileName(workingDir + "//" + wsName.toStdString() + ".nxs");
-      //saving to  nexus file
       savedatainNexusFormat(fileName,wsName.toStdString());
     }
   }
@@ -3269,9 +3273,54 @@ void MantidUI::showSequentialPlot(Ui::SequentialFitDialog* ui, MantidQt::MantidW
 */
 void MantidUI::drawColorFillPlots(const QStringList & wsNames, Graph::CurveType curveType)
 {
-  for( QStringList::const_iterator cit = wsNames.begin(); cit != wsNames.end(); ++cit )
+  int nPlots = wsNames.size();
+  if ( nPlots > 1 )
   {
-    this->drawSingleColorFillPlot(*cit, curveType);
+    int nCols = 1;
+    if ( nPlots >= 16 )
+    {
+      nCols = 4;
+    }
+    else if ( nPlots >= 9 )
+    {
+      nCols = 3;
+    }
+    else if ( nPlots >= 4 )
+    {
+      nCols = 2;
+    }
+    else
+    {
+      nCols = nPlots;
+    }
+
+    int nRows = nPlots / nCols;
+    if ( nPlots % nCols != 0 )
+    {
+      ++nRows;
+    }
+
+    auto tiledWindow = new TiledWindow(appWindow(),"",appWindow()->generateUniqueName("TiledWindow"),nRows,nCols);
+    appWindow()->addMdiSubWindow(tiledWindow);
+
+    int row = 0;
+    int col = 0;
+    for( QStringList::const_iterator cit = wsNames.begin(); cit != wsNames.end(); ++cit )
+    {
+      const bool hidden = true;
+      auto plot = this->drawSingleColorFillPlot(*cit, curveType, NULL, hidden);
+      tiledWindow->addWidget(plot,row,col);
+      ++col;
+      if (col == nCols)
+      {
+        col = 0;
+        ++row;
+      }
+    }
+  }
+  else if ( nPlots == 1 )
+  {
+    this->drawSingleColorFillPlot(wsNames.front(), curveType);
   }
 }
 
@@ -3281,10 +3330,11 @@ void MantidUI::drawColorFillPlots(const QStringList & wsNames, Graph::CurveType 
 * @param curveType :: The type of curve
 * @param window :: An optional pointer to a plot window. If not NULL the window is cleared
 *                      and reused
+* @param hidden
 * @returns A pointer to the created plot
 */
 MultiLayer* MantidUI::drawSingleColorFillPlot(const QString & wsName, Graph::CurveType curveType,
-                                              MultiLayer* window)
+                                              MultiLayer* window, bool hidden)
 {
   auto workspace = boost::dynamic_pointer_cast<const Mantid::API::MatrixWorkspace>(getWorkspace(wsName));
   if(!workspace) return NULL;
@@ -3298,6 +3348,10 @@ MultiLayer* MantidUI::drawSingleColorFillPlot(const QString & wsName, Graph::Cur
     try
     {
       window = appWindow()->multilayerPlot(appWindow()->generateUniqueName( wsName + "-"));
+      if (hidden)
+      {
+        window->hide();
+      }
     }
     catch(std::runtime_error& e)
     {
@@ -3470,7 +3524,7 @@ void MantidUI::savedatainNexusFormat(const std::string& fileName,const std::stri
     Mantid::API::IAlgorithm_sptr alg = createAlgorithm(algorithm);
     alg->setPropertyValue("Filename",fileName);
     alg->setPropertyValue("InputWorkspace",wsName);
-    alg->execute();
+    executeAlgorithmAsync(alg, true /* wait for completion */);
   }
   catch(...)
   {
@@ -3489,7 +3543,7 @@ void MantidUI::loadWSFromFile(const std::string& wsName, const std::string& file
     Mantid::API::IAlgorithm_sptr alg = createAlgorithm("Load");
     alg->setPropertyValue("Filename",fileName);
     alg->setPropertyValue("OutputWorkspace",wsName);
-    alg->execute();
+    executeAlgorithmAsync(alg, true /* wait for completion */);
   }
   catch(...)
   {
