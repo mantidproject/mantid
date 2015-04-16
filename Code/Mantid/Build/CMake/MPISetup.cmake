@@ -15,9 +15,10 @@ set ( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}" ${MPI_CXX_COMPILE_FLAGS} )
 # Setting the linker flags doesn't seem to work right (or matter)
 #set ( CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS}" ${MPI_CXX_LINK_FLAGS} ) 
   
-set ( BOOST_ROOT /usr/lib64/openmpi ) # This is where (boost-)openmpi winds up on rhel6
+set ( ENV{BOOSTROOT} /usr/lib64/openmpi/lib ) # This is where (boost-)openmpi winds up on rhel6
 find_package ( Boost COMPONENTS mpi mpi_python serialization REQUIRED )
 include_directories( ${Boost_INCLUDE_DIRS} )
+unset ( ENV{BOOSTROOT} )
 
 #  FIND_LIBRARY(BOOST_MPI_LIBRARY
 #    NAMES boost_mpi-mt
