@@ -263,7 +263,7 @@ public:
   {
     // -- Specialized Helper Functions --
 
-    typedef boost::function<void (ParameterMap*, const IComponent*,const std::string&,const std::string &)> AddFuncHelper;
+    typedef boost::function<void (ParameterMap*, const IComponent*,const std::string&,const std::string &,const std::string *const)> AddFuncHelper;
 
     // double
     AddFuncHelper faddDouble;
@@ -619,7 +619,7 @@ private:
     std::string newValue = boost::lexical_cast<std::string>(newTypedValue);
 
     ParameterMap pmap;
-    addFunc(&pmap, m_testInstrument.get(), name, origValue);
+    addFunc(&pmap, m_testInstrument.get(), name, origValue,NULL);
 
     ParameterMap copy(pmap); // invoke copy constructor
 
@@ -627,7 +627,7 @@ private:
     auto parameter = copy.get(m_testInstrument.get(), name);
     TS_ASSERT_EQUALS(origTypedValue, parameter->value<ValueType>());
     //change the value on the copy and it should NOT update on the original
-    addFunc(&copy, m_testInstrument.get(), name, newValue);
+    addFunc(&copy, m_testInstrument.get(), name, newValue,NULL);
 
     auto copyParameter = copy.get(m_testInstrument.get(), name);
     TS_ASSERT_EQUALS(newTypedValue, copyParameter->value<ValueType>());
