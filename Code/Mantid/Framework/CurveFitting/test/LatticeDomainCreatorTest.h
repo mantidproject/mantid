@@ -3,12 +3,15 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/LatticeDomain.h"
 #include "MantidCurveFitting/LatticeDomainCreator.h"
+#include "MantidCurveFitting/LatticeFunction.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using Mantid::CurveFitting::LatticeDomainCreator;
+using Mantid::CurveFitting::LatticeFunction;
 using Mantid::Kernel::V3D;
 
 using namespace Mantid::API;
@@ -125,7 +128,8 @@ public:
   void testCreateOutputWorkspace() {
     ITableWorkspace_sptr table = getValidTableWs();
 
-    IFunction_sptr fn;
+    // Function that does nothing.
+    IFunction_sptr fn = boost::make_shared<EmptyLatticeFunction>();
     FunctionDomain_sptr domain;
     FunctionValues_sptr values;
 
@@ -196,6 +200,15 @@ private:
     TestableLatticeDomainCreator() : LatticeDomainCreator(NULL, "") {}
 
     void setWorkspace(const Workspace_sptr &ws) { m_workspace = ws; }
+  };
+
+  class EmptyLatticeFunction : public LatticeFunction {
+  public:
+    void functionLattice(const LatticeDomain &latticeDomain,
+                         FunctionValues &values) const {
+      UNUSED_ARG(latticeDomain);
+      UNUSED_ARG(values);
+    }
   };
 };
 

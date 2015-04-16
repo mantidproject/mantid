@@ -55,6 +55,9 @@ Workspace_sptr LatticeDomainCreator::createOutputWorkspace(
     throw std::invalid_argument("LatticeDomain is required.");
   }
 
+  // Calculate function values again.
+  function->function(*domain, *values);
+
   ITableWorkspace_sptr tableWorkspace =
       WorkspaceFactory::Instance().createTable();
 
