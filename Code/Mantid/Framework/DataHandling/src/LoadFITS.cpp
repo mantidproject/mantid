@@ -336,7 +336,8 @@ void LoadFITS::doLoadHeaders(const std::vector<std::string> &paths,
       } catch (std::exception &e) {
         throw std::runtime_error(
             "Coult not interpret the entry number of bits per pixel (" +
-            m_headerBitDepthKey +
+            m_headerBitDepthKey + " = " +
+            headers[i].headerKeys[m_headerScaleKey] +
             ") as a floating point number (double). Error: " + e.what());
       }
     }
@@ -360,7 +361,8 @@ void LoadFITS::doLoadHeaders(const std::vector<std::string> &paths,
             g_log.warning()
                 << "The value given in the FITS header entry for the data "
                    "offset (" +
-                       m_headerOffsetKey +
+                       m_headerOffsetKey + " = " +
+                       headers[i].headerKeys[m_headerOffsetKey] +
                        ") has a fractional part, and it will be ignored!"
                 << std::endl;
           }
@@ -368,8 +370,10 @@ void LoadFITS::doLoadHeaders(const std::vector<std::string> &paths,
         } catch (std::exception &e) {
           throw std::runtime_error(
               "Coult not interpret the entry number of data offset (" +
-              m_headerOffsetKey + ") as an integer number nor a floating point "
-                                  "number (double). Error: " +
+              m_headerOffsetKey + " = " +
+              headers[i].headerKeys[m_headerOffsetKey] +
+              ") as an integer number nor a floating point "
+              "number (double). Error: " +
               e.what());
         }
       }
