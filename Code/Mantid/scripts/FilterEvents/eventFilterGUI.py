@@ -1,4 +1,4 @@
-#pylint: disable=invalid-name
+#pylint: disable=invalid-name, too-many-lines, too-many-instance-attributes
 import numpy
 
 from FilterEvents.Ui_MainWindow import Ui_MainWindow #import line for the UI python class
@@ -292,8 +292,6 @@ class MainWindow(QtGui.QMainWindow):
     def computeMock(self):
         """ Compute vecx and vecy as mocking
         """
-        import random, math
-
         x0 = 0.
         xf = 1.
         dx = 0.1
@@ -672,10 +670,10 @@ class MainWindow(QtGui.QMainWindow):
         filename = str(self.ui.lineEdit.text())
 
         # Find out it is relative path or absolute path
-        if os.path.abspath(filename) == filename:
-            isabspath = True
-        else:
-            isabspath = False
+        #if os.path.abspath(filename) == filename:
+        #    isabspath = True
+        #else:
+        #    isabspath = False
 
         dataws = self._loadFile(str(filename))
         if dataws is None:
@@ -1018,12 +1016,6 @@ class MainWindow(QtGui.QMainWindow):
 
         title = str(self.ui.lineEdit_title.text())
 
-        """ Debug
-        for k in kwargs.keys():
-            print k, kwargs[k], type(kwargs[k])
-        print "Input workspace = ", str(self._dataWS)
-         END DB """
-
         splitws, infows = api.GenerateEventsFilter(\
                 InputWorkspace      = self._dataWS,\
                 UnitOfTime          = "Seconds",\
@@ -1171,7 +1163,7 @@ class MainWindow(QtGui.QMainWindow):
         tablewsnames = []
         for wsname in wsnames:
             wksp = AnalysisDataService.retrieve(wsname)
-            if isinstance(wksp, mantid.api._api.ITableWorkspace):
+            if isinstance(wksp, mantid.api.ITableWorkspace):
                 tablewsnames.append(wsname)
         # ENDFOR
 

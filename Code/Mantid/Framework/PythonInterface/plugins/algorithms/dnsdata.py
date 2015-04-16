@@ -195,7 +195,7 @@ class DNSdata:
             except ValueError:
                 # if start and end time are not given, let them empty
                 pass
-                
+
 
 def parse_header(h):
     """
