@@ -108,7 +108,7 @@ class MantidPlotPyplotGeneralTest(unittest.TestCase):
 
         tool_names = ['plot_bin', 'bin']
         for tname in tool_names:
-            lines = plot(WorkspaceName2D, [0, 1, 2], tool=tnames)
+            lines = plot(WorkspaceName2D, [0, 1, 2], tool=tname)
             self.check_output_lines(lines, 3)
             self.close_win(lines)
 
