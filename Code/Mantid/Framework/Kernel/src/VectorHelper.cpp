@@ -3,9 +3,6 @@
 
 #include "MantidKernel/VectorHelper.h"
 #include <algorithm>
-#include <vector>
-#include <numeric>
-#include <limits>
 #include <iostream>
 #include <sstream>
 #include <boost/algorithm/string.hpp>

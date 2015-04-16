@@ -5,26 +5,13 @@
 
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"
-#include "MantidKernel/InstrumentInfo.h"
-#include "MantidKernel/Exception.h"
 
-#include <algorithm>
-#include <numeric>
-#include <iterator>
-#include <cassert>
-
-#include <ctype.h>
-#include <cctype>
 #include <sstream>
 
 #include <boost/regex.hpp>
-#include <boost/tokenizer.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/lexical_cast.hpp>
-#include <boost/regex.hpp>
 #include <boost/bind.hpp>
-
-#include <Poco/Path.h>
 
 namespace Mantid {
 namespace Kernel {

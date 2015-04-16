@@ -1,6 +1,4 @@
 #include "MantidKernel/ISaveable.h"
-#include "MantidKernel/System.h"
-#include <limits>
 //#include "MantidKernel/INode.h"
 
 namespace Mantid {

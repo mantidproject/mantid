@@ -4,10 +4,7 @@
 #include "MantidKernel/NeutronAtom.h"
 #include <algorithm>
 #include <iostream> // REMOVE
-#include <limits>
 #include <sstream>
-#include <stdexcept>
-#include "MantidKernel/PhysicalConstants.h"
 #include <boost/math/special_functions/fpclassify.hpp>
 
 namespace Mantid {

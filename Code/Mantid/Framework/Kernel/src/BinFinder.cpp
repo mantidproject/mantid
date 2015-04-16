@@ -1,5 +1,4 @@
 #include "MantidKernel/BinFinder.h"
-#include "MantidKernel/Exception.h"
 
 using std::size_t;
 

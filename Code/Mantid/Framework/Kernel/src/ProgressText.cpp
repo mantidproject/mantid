@@ -1,5 +1,4 @@
 #include "MantidKernel/ProgressText.h"
-#include "MantidKernel/System.h"
 #include <iostream>
 #include <fstream>
 #include <iomanip>

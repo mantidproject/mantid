@@ -1,8 +1,6 @@
 #include <algorithm>
 #include <iostream> // REMOVE
-#include <limits>
 #include <sstream>
-#include <stdexcept>
 #include "MantidKernel/Atom.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include <boost/math/special_functions/fpclassify.hpp>

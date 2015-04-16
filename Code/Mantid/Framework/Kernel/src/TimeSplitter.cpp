@@ -1,7 +1,5 @@
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/TimeSplitter.h"
-#include <ctime>
-#include <ostream>
 
 namespace Mantid {
 namespace Kernel {

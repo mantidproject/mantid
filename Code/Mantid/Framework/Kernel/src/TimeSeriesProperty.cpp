@@ -1,13 +1,10 @@
 #include "MantidKernel/TimeSeriesProperty.h"
-#include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/EmptyValues.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/TimeSplitter.h"
 
-#include <sstream>
 #if !(defined __APPLE__ && defined __INTEL_COMPILER)
-#include <algorithm>
 #else
 #include <boost/range/algorithm_ext/is_sorted.hpp>
 #endif
