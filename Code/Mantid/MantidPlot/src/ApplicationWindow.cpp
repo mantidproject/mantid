@@ -10287,6 +10287,17 @@ void ApplicationWindow::showGraphContextMenu()
     cm.insertItem(tr("&Normalization"), &normalization);
   }
 
+  QMenu plotType(this);
+  if(ag->curves() > 1)
+  {
+    QAction *waterfall = new QAction(tr("&Waterfall"), &plotType);
+    waterfall->setCheckable(true);
+    waterfall->setChecked(ag->isWaterfallPlot());
+    connect(waterfall, SIGNAL(toggled(bool)), plot, SLOT(toggleWaterfall(bool)));
+    plotType.addAction(waterfall);
+    cm.insertItem(tr("&Plot Type"), &plotType);
+  }
+
   cm.insertSeparator();
   copy.insertItem(tr("&Layer"), this, SLOT(copyActiveLayer()));
   copy.insertItem(tr("&Window"), plot, SLOT(copyAllLayers()));
