@@ -266,7 +266,6 @@ set ( MOC_FILES inc/MantidQtCustomInterfaces/Background.h
 
 set ( UI_FILES inc/MantidQtCustomInterfaces/DataComparison.ui
                inc/MantidQtCustomInterfaces/DirectConvertToEnergy.ui
-	       inc/MantidQtCustomInterfaces/EditLocalParameterDialog.ui
                inc/MantidQtCustomInterfaces/Indirect/AbsorptionCorrections.ui
                inc/MantidQtCustomInterfaces/Indirect/ApplyCorr.ui
                inc/MantidQtCustomInterfaces/Indirect/CalcCorr.ui
