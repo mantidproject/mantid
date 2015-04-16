@@ -8,6 +8,7 @@
 #include <numeric>
 #include <string>
 #include <vector>
+#include <stdexcept>
 
 namespace Mantid {
 namespace DataObjects {
