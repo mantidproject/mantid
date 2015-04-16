@@ -88,8 +88,6 @@ namespace IDA
     m_properties["FABADA"]->addSubProperty(m_properties["UseFABADA"]);
     m_properties["OutputFABADAChain"] = m_blnManager->addProperty("Output Chain");
     m_blnManager->setValue(m_properties["OutputFABADAChain"], true);
-    m_properties["OutputFABADAPDF"] = m_blnManager->addProperty("Output PDF");
-    m_blnManager->setValue(m_properties["OutputFABADAPDF"], true);
     m_properties["FABADAChainLength"] = m_dblManager->addProperty("Chain Length");
     m_dblManager->setDecimals(m_properties["FABADAChainLength"], 0);
     m_dblManager->setValue(m_properties["FABADAChainLength"], 10000);
@@ -772,12 +770,10 @@ namespace IDA
       int chainLength = static_cast<int>(m_dblManager->value(m_properties["FABADAChainLength"]));
 
       minimizer += ",ChainLength=" + QString::number(chainLength);
+      minimizer += ",PDF=" + outputName + "_PDF";
 
       if(m_blnManager->value(m_properties["OutputFABADAChain"]))
         minimizer += ",Chains=" + outputName + "_Chain";
-
-      if(m_blnManager->value(m_properties["OutputFABADAPDF"]))
-        minimizer += ",PDF=" + outputName + "_PDF";
     }
 
     return minimizer;
@@ -1226,13 +1222,11 @@ namespace IDA
       if(checked)
       {
         m_properties["FABADA"]->addSubProperty(m_properties["OutputFABADAChain"]);
-        m_properties["FABADA"]->addSubProperty(m_properties["OutputFABADAPDF"]);
         m_properties["FABADA"]->addSubProperty(m_properties["FABADAChainLength"]);
       }
       else
       {
         m_properties["FABADA"]->removeSubProperty(m_properties["OutputFABADAChain"]);
-        m_properties["FABADA"]->removeSubProperty(m_properties["OutputFABADAPDF"]);
         m_properties["FABADA"]->removeSubProperty(m_properties["FABADAChainLength"]);
       }
     }
