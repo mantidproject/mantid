@@ -66,6 +66,7 @@ namespace IDA
     m_cfTree->addProperty(m_properties["Convolve"]);
     m_blnManager->setValue(m_properties["Convolve"], true);
 
+    // Fitting range
     m_properties["FitRange"] = m_grpManager->addProperty("Fitting Range");
     m_properties["StartX"] = m_dblManager->addProperty("StartX");
     m_dblManager->setDecimals(m_properties["StartX"], NUM_DECIMALS);
@@ -75,6 +76,21 @@ namespace IDA
     m_properties["FitRange"]->addSubProperty(m_properties["EndX"]);
     m_cfTree->addProperty(m_properties["FitRange"]);
 
+    // FABADA
+    m_properties["FABADA"] = m_grpManager->addProperty("Bayesian");
+    m_properties["UseFABADA"] = m_blnManager->addProperty("Use FABADA");
+    m_properties["FABADA"]->addSubProperty(m_properties["UseFABADA"]);
+    m_properties["OutputFABADAChain"] = m_blnManager->addProperty("Output Chain");
+    m_blnManager->setValue(m_properties["OutputFABADAChain"], true);
+    m_properties["OutputFABADAPDF"] = m_blnManager->addProperty("Output PDF");
+    m_blnManager->setValue(m_properties["OutputFABADAPDF"], true);
+    m_properties["FABADAChainLength"] = m_dblManager->addProperty("Chain Length");
+    m_dblManager->setDecimals(m_properties["FABADAChainLength"], 0);
+    m_properties["FABADAMaxIterations"] = m_dblManager->addProperty("Max Iterations");
+    m_dblManager->setDecimals(m_properties["FABADAMaxIterations"], 0);
+    m_cfTree->addProperty(m_properties["FABADA"]);
+
+    // Background type
     m_properties["LinearBackground"] = m_grpManager->addProperty("Background");
     m_properties["BGA0"] = m_dblManager->addProperty("A0");
     m_dblManager->setDecimals(m_properties["BGA0"], NUM_DECIMALS);
@@ -92,6 +108,7 @@ namespace IDA
     m_properties["DeltaFunction"]->addSubProperty(m_properties["UseDeltaFunc"]);
     m_cfTree->addProperty(m_properties["DeltaFunction"]);
 
+    // Fit functions
     m_properties["Lorentzian1"] = createLorentzian("Lorentzian 1");
     m_properties["Lorentzian2"] = createLorentzian("Lorentzian 2");
     m_properties["DiffSphere"] = createDiffSphere("Diffusion Sphere");
@@ -170,6 +187,12 @@ namespace IDA
     QString enX = m_properties["EndX"]->valueText();
     QString specMin = m_uiForm.spSpectraMin->text();
     QString specMax = m_uiForm.spSpectraMax->text();
+    QString maxIterations = m_properties["FABADAMaxIterations"]->valueText();
+    QString chainLength = m_properties["FABADAChainLength"]->valueText();
+
+    QString minimizer = "Levenberg-Marquardt";
+    if(m_blnManager->value(m_properties["UseFABADA"]))
+      minimizer = "FABADA";
 
     QString pyInput =
       "from IndirectDataAnalysis import confitSeq\n"
@@ -1155,6 +1178,23 @@ namespace IDA
 
     if(prop == m_properties["UseDeltaFunc"])
       updatePlotOptions();
+    else if(prop == m_properties["UseFABADA"])
+    {
+      if(checked)
+      {
+        m_properties["FABADA"]->addSubProperty(m_properties["OutputFABADAChain"]);
+        m_properties["FABADA"]->addSubProperty(m_properties["OutputFABADAPDF"]);
+        m_properties["FABADA"]->addSubProperty(m_properties["FABADAChainLength"]);
+        m_properties["FABADA"]->addSubProperty(m_properties["FABADAMaxIterations"]);
+      }
+      else
+      {
+        m_properties["FABADA"]->removeSubProperty(m_properties["OutputFABADAChain"]);
+        m_properties["FABADA"]->removeSubProperty(m_properties["OutputFABADAPDF"]);
+        m_properties["FABADA"]->removeSubProperty(m_properties["FABADAChainLength"]);
+        m_properties["FABADA"]->removeSubProperty(m_properties["FABADAMaxIterations"]);
+      }
+    }
   }
 
   void ConvFit::fitContextMenu(const QPoint &)
