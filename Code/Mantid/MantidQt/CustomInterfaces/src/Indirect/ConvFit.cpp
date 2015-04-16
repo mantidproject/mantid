@@ -763,12 +763,12 @@ namespace IDA
   QString ConvFit::minimizerString(QString outputName) const
   {
     QString minimizer = "Levenberg-Marquardt";
+
     if(m_blnManager->value(m_properties["UseFABADA"]))
     {
       minimizer = "FABADA";
 
       int chainLength = static_cast<int>(m_dblManager->value(m_properties["FABADAChainLength"]));
-
       minimizer += ",ChainLength=" + QString::number(chainLength);
       minimizer += ",PDF=" + outputName + "_PDF";
 
@@ -1221,11 +1221,16 @@ namespace IDA
     {
       if(checked)
       {
+        // FABADA needs a much higher iteration limit
+        m_dblManager->setValue(m_properties["MaxIterations"], 20000);
+
         m_properties["FABADA"]->addSubProperty(m_properties["OutputFABADAChain"]);
         m_properties["FABADA"]->addSubProperty(m_properties["FABADAChainLength"]);
       }
       else
       {
+        m_dblManager->setValue(m_properties["MaxIterations"], 500);
+
         m_properties["FABADA"]->removeSubProperty(m_properties["OutputFABADAChain"]);
         m_properties["FABADA"]->removeSubProperty(m_properties["FABADAChainLength"]);
       }
