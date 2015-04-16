@@ -67,6 +67,7 @@
 
 #include <gsl/gsl_vector.h>
 #include "Mantid/MantidMDCurveDialog.h"
+#include "Mantid/MantidWSIndexDialog.h"
 #include "MantidQtSliceViewer/LinePlotOptions.h"
 
 #include "TSVSerialiser.h"
@@ -1385,8 +1386,10 @@ void MultiLayer::dropOntoMatrixCurve(Graph *g, MantidMatrixCurve* originalCurve,
   }
 
   if ( tree == NULL ) return; // (shouldn't happen)
-  QMultiMap<QString,std::set<int> > toPlot = tree->chooseSpectrumFromSelected();
-
+  bool waterfallOpt = false;
+  const auto userInput = tree->chooseSpectrumFromSelected(waterfallOpt);
+  const auto toPlot = userInput.plots;
+  
   // Iterate through the selected workspaces adding a set of curves from each
   for(QMultiMap<QString,std::set<int> >::const_iterator it=toPlot.begin();it!=toPlot.end();++it)
   {
