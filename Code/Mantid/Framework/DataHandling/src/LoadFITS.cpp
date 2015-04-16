@@ -9,7 +9,6 @@
 #include <Poco/BinaryReader.h>
 #include <Poco/FileStream.h>
 
-
 using namespace Mantid::DataHandling;
 using namespace Mantid::DataObjects;
 using namespace Mantid::API;
@@ -262,7 +261,7 @@ void LoadFITS::doLoadHeaders(const std::vector<std::string> &paths,
     // needed to know how to load the data: BITPIX, NAXIS, NAXISi (where i =
     // 1..NAXIS, e.g. NAXIS2 for two axis).
     try {
-      string tmpBitPix = headers[i].headerKeys[m_headerBitDepthKey];
+      std::string tmpBitPix = headers[i].headerKeys[m_headerBitDepthKey];
       if (boost::contains(tmpBitPix, "-")) {
         boost::erase_all(tmpBitPix, "-");
         headers[i].isFloat = true;
@@ -270,7 +269,13 @@ void LoadFITS::doLoadHeaders(const std::vector<std::string> &paths,
         headers[i].isFloat = false;
       }
 
-      headers[i].bitsPerPixel = lexical_cast<int>(tmpBitPix);
+      try {
+        headers[i].bitsPerPixel = lexical_cast<int>(tmpBitPix);
+      } catch (std::exception &e) {
+        throw std::runtime_error(
+            "Coult not interpret the entry number of bits per pixel (" +
+            m_headerBitDepthKey + ") as an integer. Error: " + e.what());
+      }
       // Check that the files use bit depths of either 8, 16 or 32
       if (headers[i].bitsPerPixel != 8 && headers[i].bitsPerPixel != 16 &&
           headers[i].bitsPerPixel != 32 && headers[i].bitsPerPixel != 64)
@@ -321,14 +326,54 @@ void LoadFITS::doLoadHeaders(const std::vector<std::string> &paths,
           ". Error description: " + e.what());
     }
 
-    headers[i].scale =
-        (headers[i].headerKeys[m_headerScaleKey] == "")
-            ? 1
-            : lexical_cast<double>(headers[i].headerKeys[m_headerScaleKey]);
-    headers[i].offset =
-        (headers[i].headerKeys[m_headerOffsetKey] == "")
-            ? 0
-            : lexical_cast<int>(headers[i].headerKeys[m_headerOffsetKey]);
+    // scale parameter, header BSCALE in the fits standard
+    if ("" == headers[i].headerKeys[m_headerScaleKey]) {
+      headers[i].scale = 1;
+    } else {
+      try {
+        headers[i].scale =
+            lexical_cast<double>(headers[i].headerKeys[m_headerScaleKey]);
+      } catch (std::exception &e) {
+        throw std::runtime_error(
+            "Coult not interpret the entry number of bits per pixel (" +
+            m_headerBitDepthKey +
+            ") as a floating point number (double). Error: " + e.what());
+      }
+    }
+
+    // data offsset parameter, header BZERO in the fits standard
+    if ("" == headers[i].headerKeys[m_headerOffsetKey]) {
+      headers[i].offset = 0;
+    } else {
+      try {
+        headers[i].offset =
+            lexical_cast<int>(headers[i].headerKeys[m_headerOffsetKey]);
+      } catch (std::exception & /*e*/) {
+        // still, second try with floating point format (as used for example by
+        // Starlight XPRESS cameras)
+        try {
+          double doff =
+              lexical_cast<double>(headers[i].headerKeys[m_headerOffsetKey]);
+          double intPart;
+          if (0 != modf(doff, &intPart)) {
+            // anyway we'll do a cast, but warn if there was a fraction
+            g_log.warning()
+                << "The value given in the FITS header entry for the data "
+                   "offset (" +
+                       m_headerOffsetKey +
+                       ") has a fractional part, and it will be ignored!"
+                << std::endl;
+          }
+          headers[i].offset = static_cast<int>(doff);
+        } catch (std::exception &e) {
+          throw std::runtime_error(
+              "Coult not interpret the entry number of data offset (" +
+              m_headerOffsetKey + ") as an integer number nor a floating point "
+                                  "number (double). Error: " +
+              e.what());
+        }
+      }
+    }
 
     // Check each header is valid/supported: standard (no extension to
     // FITS), and has two axis
