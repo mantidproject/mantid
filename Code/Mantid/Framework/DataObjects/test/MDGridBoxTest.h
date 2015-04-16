@@ -931,14 +931,14 @@ public:
           double centers[2] = {x,y};
           events.push_back( MDLeanEvent<2>(2.0, 2.0, centers) );
         }
-      //TS_ASSERT_THROWS_NOTHING( b->addEvents( events ); );
+      TS_ASSERT_THROWS_NOTHING( b->addEvents( events ); );
     }
 
     // Get the right totals again by refreshing
-    // b->refreshCache(ts);
-    // TS_ASSERT_EQUALS( b->getNPoints(), 100*num_repeat);
-    // TS_ASSERT_EQUALS( b->getSignal(), 100*num_repeat*2.0);
-    // TS_ASSERT_EQUALS( b->getErrorSquared(), 100*num_repeat*2.0);
+    b->refreshCache(ts);
+    TS_ASSERT_EQUALS( b->getNPoints(), 100*num_repeat);
+    TS_ASSERT_EQUALS( b->getSignal(), 100*num_repeat*2.0);
+    TS_ASSERT_EQUALS( b->getErrorSquared(), 100*num_repeat*2.0);
 
     // clean up  behind
     BoxController *const bcc = b->getBoxController();

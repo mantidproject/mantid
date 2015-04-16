@@ -42,7 +42,7 @@
    fun:_ZN17MDBoxSaveableTest46test_fileBackEnd_nonConst_EventListChangesSizeEv
 }
 {
-   <gomp_false_positive_leak>
+   <gomp_false_positive_leak_workspace2d>
    Memcheck:Leak
    match-leak-kinds: possible
    fun:calloc
@@ -51,4 +51,14 @@
    fun:_ZNK6Mantid3API15MatrixWorkspace20getIntegratedSpectraERSt6vectorIdSaIdEEddb
    fun:_ZN15Workspace2DTest33testIntegrateSpectra_entire_rangeEv
    fun:_ZN71TestDescription_suite_Workspace2DTest_testIntegrateSpectra_entire_range7runTestEv
+}
+{
+   <gomp_false_positive_leak_mdgridboxtest>
+   Memcheck:Leak
+   match-leak-kinds: possible
+   fun:calloc
+   fun:_dl_allocate_tls
+   ...
+   fun:_ZN13MDGridBoxTest28do_test_addEvents_inParallelEPN6Mantid6Kernel15ThreadSchedulerE
+   fun:_ZN13MDGridBoxTest25test_addEvents_inParallelEv
 }
