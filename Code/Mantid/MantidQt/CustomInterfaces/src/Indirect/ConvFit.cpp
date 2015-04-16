@@ -66,6 +66,12 @@ namespace IDA
     m_cfTree->addProperty(m_properties["Convolve"]);
     m_blnManager->setValue(m_properties["Convolve"], true);
 
+    // Max iterations option
+    m_properties["MaxIterations"] = m_dblManager->addProperty("Max Iterations");
+    m_dblManager->setDecimals(m_properties["MaxIterations"], 0);
+    m_dblManager->setValue(m_properties["MaxIterations"], 500);
+    m_cfTree->addProperty(m_properties["MaxIterations"]);
+
     // Fitting range
     m_properties["FitRange"] = m_grpManager->addProperty("Fitting Range");
     m_properties["StartX"] = m_dblManager->addProperty("StartX");
@@ -86,8 +92,7 @@ namespace IDA
     m_blnManager->setValue(m_properties["OutputFABADAPDF"], true);
     m_properties["FABADAChainLength"] = m_dblManager->addProperty("Chain Length");
     m_dblManager->setDecimals(m_properties["FABADAChainLength"], 0);
-    m_properties["FABADAMaxIterations"] = m_dblManager->addProperty("Max Iterations");
-    m_dblManager->setDecimals(m_properties["FABADAMaxIterations"], 0);
+    m_dblManager->setValue(m_properties["FABADAChainLength"], 10000);
     m_cfTree->addProperty(m_properties["FABADA"]);
 
     // Background type
@@ -187,12 +192,6 @@ namespace IDA
     QString enX = m_properties["EndX"]->valueText();
     QString specMin = m_uiForm.spSpectraMin->text();
     QString specMax = m_uiForm.spSpectraMax->text();
-    QString maxIterations = m_properties["FABADAMaxIterations"]->valueText();
-    QString chainLength = m_properties["FABADAChainLength"]->valueText();
-
-    QString minimizer = "Levenberg-Marquardt";
-    if(m_blnManager->value(m_properties["UseFABADA"]))
-      minimizer = "FABADA";
 
     QString pyInput =
       "from IndirectDataAnalysis import confitSeq\n"
@@ -757,6 +756,33 @@ namespace IDA
     }
   }
 
+  /**
+   * Generates a string that defines the fitting minimizer based on the user
+   * options.
+   *
+   * @return Minimizer as a string
+   */
+  QString ConvFit::minimizerString(QString outputName) const
+  {
+    QString minimizer = "Levenberg-Marquardt";
+    if(m_blnManager->value(m_properties["UseFABADA"]))
+    {
+      minimizer = "FABADA";
+
+      int chainLength = static_cast<int>(m_dblManager->value(m_properties["FABADAChainLength"]));
+
+      minimizer += ",ChainLength=" + QString::number(chainLength);
+
+      if(m_blnManager->value(m_properties["OutputFABADAChain"]))
+        minimizer += ",Chains=" + outputName + "_Chain";
+
+      if(m_blnManager->value(m_properties["OutputFABADAPDF"]))
+        minimizer += ",PDF=" + outputName + "_PDF";
+    }
+
+    return minimizer;
+  }
+
   void ConvFit::typeSelection(int index)
   {
     m_cfTree->removeProperty(m_properties["Lorentzian1"]);
@@ -946,24 +972,41 @@ namespace IDA
       g_log.error("No fit type defined!");
     }
 
-    QString outputNm = runPythonCode(QString("from IndirectCommon import getWSprefix\nprint getWSprefix('") + m_cfInputWSName + QString("')\n")).trimmed();
-    outputNm += QString("conv_") + fitType + bgType + m_uiForm.spPlotSpectrum->text();
-    std::string output = outputNm.toStdString();
+    m_singleFitOutputName = runPythonCode(QString("from IndirectCommon import getWSprefix\nprint getWSprefix('") + m_cfInputWSName + QString("')\n")).trimmed();
+    m_singleFitOutputName += QString("conv_") + fitType + bgType + m_uiForm.spPlotSpectrum->text();
+    int maxIterations = static_cast<int>(m_dblManager->value(m_properties["MaxIterations"]));
 
-    IAlgorithm_sptr alg = AlgorithmManager::Instance().create("Fit");
-    alg->initialize();
-    alg->setPropertyValue("Function", function->asString());
-    alg->setPropertyValue("InputWorkspace", m_cfInputWSName.toStdString());
-    alg->setProperty<int>("WorkspaceIndex", m_uiForm.spPlotSpectrum->text().toInt());
-    alg->setProperty<double>("StartX", m_dblManager->value(m_properties["StartX"]));
-    alg->setProperty<double>("EndX", m_dblManager->value(m_properties["EndX"]));
-    alg->setProperty("Output", output);
-    alg->setProperty("CreateOutput", true);
-    alg->setProperty("OutputCompositeMembers", true);
-    alg->setProperty("ConvolveMembers", true);
-    alg->execute();
+    m_singleFitAlg = AlgorithmManager::Instance().create("Fit");
+    m_singleFitAlg->initialize();
+    m_singleFitAlg->setPropertyValue("Function", function->asString());
+    m_singleFitAlg->setPropertyValue("InputWorkspace", m_cfInputWSName.toStdString());
+    m_singleFitAlg->setProperty<int>("WorkspaceIndex", m_uiForm.spPlotSpectrum->text().toInt());
+    m_singleFitAlg->setProperty<double>("StartX", m_dblManager->value(m_properties["StartX"]));
+    m_singleFitAlg->setProperty<double>("EndX", m_dblManager->value(m_properties["EndX"]));
+    m_singleFitAlg->setProperty("Output", m_singleFitOutputName.toStdString());
+    m_singleFitAlg->setProperty("CreateOutput", true);
+    m_singleFitAlg->setProperty("OutputCompositeMembers", true);
+    m_singleFitAlg->setProperty("ConvolveMembers", true);
+    m_singleFitAlg->setProperty("MaxIterations", maxIterations);
+    m_singleFitAlg->setProperty("Minimizer", minimizerString(m_singleFitOutputName).toStdString());
 
-    if ( ! alg->isExecuted() )
+    m_batchAlgoRunner->addAlgorithm(m_singleFitAlg);
+    connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)),
+            this, SLOT(singleFitComplete(bool)));
+    m_batchAlgoRunner->executeBatchAsync();
+  }
+
+  /**
+   * Handle completion of the fit algorithm for single fit.
+   *
+   * @param error If the fit algorithm failed
+   */
+  void ConvFit::singleFitComplete(bool error)
+  {
+    disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)),
+               this, SLOT(singleFitComplete(bool)));
+
+    if(error)
     {
       showMessageBox("Fit algorithm failed.");
       return;
@@ -971,9 +1014,9 @@ namespace IDA
 
     // Plot the line on the mini plot
     m_uiForm.ppPlot->removeSpectrum("Guess");
-    m_uiForm.ppPlot->addSpectrum("Fit", outputNm+"_Workspace", 1, Qt::red);
+    m_uiForm.ppPlot->addSpectrum("Fit", m_singleFitOutputName+"_Workspace", 1, Qt::red);
 
-    IFunction_sptr outputFunc = alg->getProperty("Function");
+    IFunction_sptr outputFunc = m_singleFitAlg->getProperty("Function");
 
     // Get params.
     QMap<QString,double> parameters;
@@ -1185,14 +1228,12 @@ namespace IDA
         m_properties["FABADA"]->addSubProperty(m_properties["OutputFABADAChain"]);
         m_properties["FABADA"]->addSubProperty(m_properties["OutputFABADAPDF"]);
         m_properties["FABADA"]->addSubProperty(m_properties["FABADAChainLength"]);
-        m_properties["FABADA"]->addSubProperty(m_properties["FABADAMaxIterations"]);
       }
       else
       {
         m_properties["FABADA"]->removeSubProperty(m_properties["OutputFABADAChain"]);
         m_properties["FABADA"]->removeSubProperty(m_properties["OutputFABADAPDF"]);
         m_properties["FABADA"]->removeSubProperty(m_properties["FABADAChainLength"]);
-        m_properties["FABADA"]->removeSubProperty(m_properties["FABADAMaxIterations"]);
       }
     }
   }
