@@ -1,4 +1,5 @@
 #include "MantidKernel/DiskBuffer.h"
+#include <sstream>
 
 using namespace Mantid::Kernel;
 
