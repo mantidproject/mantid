@@ -9,9 +9,10 @@ As with other MantidPlot modules, this has to run from within MantidPlot
 try:
     import _qti
 except ImportError:
-    raise ImportError('The "mantidplot.qti" module can only be used from within MantidPlot.')
+    raise ImportError('The "mantidplot.qtiplot" module can only be used from within MantidPlot.')
 
 import pymantidplot
+import pymantidplot.proxies
 
 #-----------------------------------------------------------------------------
 # Intercept qtiplot "plot" command and forward to plotSpectrum for a workspace
