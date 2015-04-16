@@ -136,6 +136,7 @@ pqComponents
 vtkPVServerManagerRendering
 vtkRenderingFreeType
 vtkRenderingFreeTypeOpenGL
+vtksys
 ${QT_LIBRARIES}
 VatesSimpleGuiQtWidgets
 MantidQtAPI

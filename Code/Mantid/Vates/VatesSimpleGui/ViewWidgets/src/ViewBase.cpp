@@ -290,6 +290,10 @@ pqPipelineSource* ViewBase::setPluginSource(QString pluginName, QString wsName)
   src->getProxy()->UpdateVTKObjects(); // Updates all the proxies
   src->updatePipeline(); // Updates the pipeline
   src->setModifiedState(pqProxy::UNMODIFIED); // Just to that the UI state looks consistent with the apply
+
+  // Update the properties, from PV3.98.1 to PV4.3.1, it wasn't updating any longer, so need to force it
+  src->getProxy()->UpdatePropertyInformation();
+
   return src;
 }
 

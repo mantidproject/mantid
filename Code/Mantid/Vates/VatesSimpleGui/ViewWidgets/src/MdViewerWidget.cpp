@@ -1026,7 +1026,7 @@ void MdViewerWidget::swapViews()
  */
 bool MdViewerWidget::eventFilter(QObject *obj, QEvent *ev)
 {
-  /*if (this->currentView == obj)
+  if (this->currentView == obj)
   {
     if (this->pluginMode && QEvent::Hide == ev->type() &&
         !ev->spontaneous())
@@ -1044,7 +1044,7 @@ bool MdViewerWidget::eventFilter(QObject *obj, QEvent *ev)
 
       return true;
     }
-  }*/
+  }
   if(ev->type() == QEvent::WindowActivate)
   {
     if(this->currentView)
