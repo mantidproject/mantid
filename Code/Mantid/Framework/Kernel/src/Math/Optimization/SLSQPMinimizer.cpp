@@ -18,6 +18,8 @@ int slsqp_(int *m, int *meq, int *la, int *n, double *x, double *xl, double *xu,
 ///@endcond
 }
 
+using std::abs
+
 /**
  * Perform the minimization using the SLSQP routine
  * @param x0 The starting parameter values
