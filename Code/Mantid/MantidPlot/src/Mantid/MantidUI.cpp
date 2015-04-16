@@ -18,6 +18,7 @@
 #include "../ScriptingWindow.h"
 #include "../Folder.h"
 #include "../TiledWindow.h"
+#include "../PythonThreading.h"
 
 #include "MantidKernel/Property.h"
 #include "MantidKernel/ConfigService.h"
@@ -305,8 +306,8 @@ void MantidUI::shutdown()
       Poco::Thread::sleep(100);
     }
   }
-
-  Mantid::API::FrameworkManager::Instance().clear();
+  bool prompt = false;
+  this->clearAllMemory(prompt);
 }
 
 MantidUI::~MantidUI()
@@ -2121,13 +2122,17 @@ void MantidUI::insertMenu()
   appWindow()->myMenuBar()->insertItem(tr("Man&tid"), mantidMenu);
 }
 
-void MantidUI::clearAllMemory()
+void MantidUI::clearAllMemory(const bool prompt)
 {
+  if(prompt) {
   QMessageBox::StandardButton pressed =
     QMessageBox::question(appWindow(), "MantidPlot", "All workspaces and windows will be removed. Are you sure?", QMessageBox::Ok|QMessageBox::Cancel, QMessageBox::Ok);
 
   if( pressed != QMessageBox::Ok ) return;
-
+  }
+  // If any python objects need to be cleared away then the GIL needs to be held. This doesn't feel like
+  // it is in the right place but it will do no harm
+  GlobalInterpreterLock gil;
   // Relevant notifications are connected to signals that will close all dependent windows
   Mantid::API::FrameworkManager::Instance().clear();
 }

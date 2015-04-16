@@ -444,7 +444,7 @@ signals:
     void importNumSeriesLog(const QString &wsName, const QString &logname, int filter);
 
     // Clear all Mantid related memory
-    void clearAllMemory();
+    void clearAllMemory(const bool prompt = true);
     void releaseFreeMemory();
     // Ticket #672
     void saveNexusWorkspace();
