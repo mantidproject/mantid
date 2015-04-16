@@ -314,75 +314,72 @@ void LineViewer::readTextboxes() {
  */
 IAlgorithm_sptr
 LineViewer::applyMatrixWorkspace(Mantid::API::MatrixWorkspace_sptr ws) {
-  try {
-    if (getPlanarWidth() <= 0)
-      throw std::runtime_error("Planar Width must be > 0");
+  // (half-width in the plane)
+  const double planeWidth = getPlanarWidth();
 
-    IAlgorithm_sptr alg =
-        AlgorithmManager::Instance().createUnmanaged("Rebin2D");
-    alg->initialize();
+  if (planeWidth <= 0) {
+    g_log.error() << "Planar width must be > 0" << std::endl;
+    g_log.error() << "Planar width is: " << planeWidth << std::endl;
+    return IAlgorithm_sptr();
+  }
+
+  // Length of the line
+  const double lengthX = m_end[m_freeDimX] - m_start[m_freeDimX];
+  const double lengthY = m_end[m_freeDimY] - m_start[m_freeDimY];
+  const bool lineIsHorizontal = fabs(lengthX) > fabs(lengthY);
+
+  IAlgorithm_sptr alg = AlgorithmManager::Instance().createUnmanaged("Rebin2D");
+  alg->initialize();
+
+  try {
     alg->setProperty("InputWorkspace", ws);
     alg->setPropertyValue("OutputWorkspace", m_integratedWSName);
-    if (ws->id() == "RebinnedOutput") {
-      alg->setProperty("UseFractionalArea", true);
-    } else {
-      alg->setProperty("UseFractionalArea", false);
-    }
-    // (half-width in the plane)
-    double planeWidth = this->getPlanarWidth();
-    // Length of the line
-    double dx = m_end[m_freeDimX] - m_start[m_freeDimX];
-    double dy = m_end[m_freeDimY] - m_start[m_freeDimY];
-    size_t numBins = m_numBins;
+    alg->setProperty("UseFractionalArea", (ws->id() == "RebinnedOutput"));
+    alg->setProperty("Transpose", !lineIsHorizontal);
 
-    if (fabs(dx) > fabs(dy)) {
+    // Swap the axes if the line is NOT horizontal (i.e. vertical)
+    const int axisX = lineIsHorizontal ? m_freeDimX : m_freeDimY;
+    const int axisY = lineIsHorizontal ? m_freeDimY : m_freeDimX;
+
+    // If necessary, swap the start and end around so that start < end
+    const bool swapEnds = m_start[axisX] > m_end[axisY];
+    const double start = swapEnds ? m_end[axisX] : m_start[axisX];
+    const double end = swapEnds ? m_start[axisX] : m_end[axisX];
+
+    // Calculate the bin width
+    const double binWidth = (end - start) / static_cast<double>(m_numBins);
+
+    // The start value of the opposite axis
+    const double vertical = m_start[axisY];
+
+    // Output stringstreams for the binning
+    std::stringstream axis1Binning, axis2Binning;
+
+    if (binWidth <= 0)
+      return IAlgorithm_sptr();
+
+    axis1Binning << start << "," << binWidth << "," << end;
+    axis2Binning << (vertical - planeWidth) << "," << (planeWidth * 2) << ","
+                 << (vertical + planeWidth);
+
+    // If the line is vertical we swap the axes binning order
+    if (lineIsHorizontal) {
       // Horizontal line
-      double start = m_start[m_freeDimX];
-      double end = m_end[m_freeDimX];
-      if (end < start) {
-        start = end;
-        end = m_start[m_freeDimX];
-      }
-      double vertical = m_start[m_freeDimY];
-      double binWidth = (end - start) / static_cast<double>(numBins);
-      if (binWidth <= 0)
-        return IAlgorithm_sptr();
-
-      alg->setPropertyValue("Axis1Binning", Strings::toString(start) + "," +
-                                                Strings::toString(binWidth) +
-                                                "," + Strings::toString(end));
-      alg->setPropertyValue("Axis2Binning",
-                            Strings::toString(vertical - planeWidth) + "," +
-                                Strings::toString(planeWidth * 2) + "," +
-                                Strings::toString(vertical + planeWidth));
-      alg->setProperty("Transpose", false);
+      alg->setPropertyValue("Axis1Binning", axis1Binning.str());
+      alg->setPropertyValue("Axis2Binning", axis2Binning.str());
     } else {
       // Vertical line
-      double start = m_start[m_freeDimY];
-      double end = m_end[m_freeDimY];
-      if (end < start) {
-        start = end;
-        end = m_start[m_freeDimY];
-      }
-      double binWidth = (end - start) / static_cast<double>(numBins);
-
-      double vertical = m_start[m_freeDimX];
-      alg->setPropertyValue("Axis1Binning",
-                            Strings::toString(vertical - planeWidth) + "," +
-                                Strings::toString(planeWidth * 2) + "," +
-                                Strings::toString(vertical + planeWidth));
-      alg->setPropertyValue("Axis2Binning", Strings::toString(start) + "," +
-                                                Strings::toString(binWidth) +
-                                                "," + Strings::toString(end));
-      alg->setProperty("Transpose", true);
+      alg->setPropertyValue("Axis1Binning", axis2Binning.str());
+      alg->setPropertyValue("Axis2Binning", axis1Binning.str());
     }
-    return alg;
   } catch (std::exception &e) {
     // Log the error
     g_log.error() << "Invalid property passed to Rebin2D:" << std::endl;
     g_log.error() << e.what() << std::endl;
     return IAlgorithm_sptr();
   }
+
+  return alg;
 }
 
 //----------------------------------------------------------------------------------------
