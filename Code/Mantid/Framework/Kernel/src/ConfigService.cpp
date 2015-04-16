@@ -37,6 +37,7 @@
 #include <boost/regex.hpp>
 
 #include <fstream>
+#include <iostream>
 
 #ifdef __APPLE__
 #include <mach-o/dyld.h>
