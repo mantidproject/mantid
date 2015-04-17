@@ -3,6 +3,7 @@
 //------------------------------------------
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/EmptyValues.h"
+#include <cmath>
 
 namespace Mantid {
 namespace Kernel {

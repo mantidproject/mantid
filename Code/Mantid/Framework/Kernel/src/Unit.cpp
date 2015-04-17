@@ -7,6 +7,7 @@
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/UnitLabelTypes.h"
 #include <cfloat>
+#include <limits>
 
 namespace Mantid {
 namespace Kernel {

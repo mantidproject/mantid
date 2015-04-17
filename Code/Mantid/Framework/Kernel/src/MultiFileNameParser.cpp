@@ -6,6 +6,7 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"
 
+#include <numeric>
 #include <sstream>
 
 #include <boost/regex.hpp>
