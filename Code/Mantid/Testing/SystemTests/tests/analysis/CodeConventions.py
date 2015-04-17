@@ -63,6 +63,7 @@ FUNC_BAD_PARAMS = {
 class Algorithms(stresstesting.MantidStressTest):
 
     def __init__(self):
+        super(Algorithms, self).__init__()
         self.__ranOk = 0
         self.algRegExp = re.compile(r'^[A-Z][a-zA-Z0-9]+$')
         self.paramRegExp = re.compile(r'^[A-Z][a-zA-Z0-9]*$')
@@ -147,6 +148,7 @@ class Algorithms(stresstesting.MantidStressTest):
 
 class FitFunctions(stresstesting.MantidStressTest):
     def __init__(self):
+        super(FitFunctions, self).__init__()
         self.__ranOk = 0
         self.funcRegExp = re.compile(r'^[A-Z][a-zA-Z0-9]+$')
         self.paramRegExp = re.compile(r'^[A-Z][a-zA-Z0-9]*$')

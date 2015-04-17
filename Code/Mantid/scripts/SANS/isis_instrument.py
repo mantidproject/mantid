@@ -1,11 +1,8 @@
 #pylint: disable=invalid-name
-import datetime
 import math
 import os
 import re
 import sys
-import time
-import xml.dom.minidom
 
 from mantid.simpleapi import *
 from mantid.api import WorkspaceGroup, Workspace, ExperimentInfo
@@ -1382,7 +1379,7 @@ class LARMOR(ISISInstrument):
 
         # The angle value
         # Note that the x position gets converted from mm to m when read from the user file so we need to reverse this if X is now an angle
-        if(int(run_num) < 2217):
+        if int(run_num) < 2217:
             # Initial commisioning before run 2217 did not pay much attention to making sure the bench_rot value was meaningful
             xshift = -xbeam
             sanslog.notice("Setup move " + str(xshift*XSF) + " " + str(0.0) + " " + str(0.0))
@@ -1446,7 +1443,7 @@ class LARMOR(ISISInstrument):
             run_num = ws_ref.getRun().getLogData('run_number').value
         except:
             run_num = int(re.findall(r'\d+',str(ws_name))[-1])
-        if(int(run_num) >= 2217):
+        if int(run_num) >= 2217:
             try:
                 #logger.warning("Trying get_detector_log")
                 log = self.get_detector_log(ws_ref)
