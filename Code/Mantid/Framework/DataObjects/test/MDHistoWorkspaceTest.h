@@ -13,6 +13,8 @@
 #include "MantidDataObjects/MDHistoWorkspaceIterator.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 #include <boost/math/special_functions/fpclassify.hpp>
+#include <boost/scoped_array.hpp>
+#include <boost/scoped_ptr.hpp>
 #include <cxxtest/TestSuite.h>
 #include <iomanip>
 #include <iostream>
@@ -43,6 +45,7 @@ private:
       }
       it->next(1);
     }
+    delete it;
     return numberMasked;
   }
   /// Helper method returns the size of an element in the MDHistoWorkspace
@@ -233,16 +236,17 @@ public:
   {
     MDHistoDimension_sptr dimX(new MDHistoDimension("X", "x", "m", -10, 10, 5));
     MDHistoWorkspace ws(dimX);
-    coord_t * v;
     size_t numVertices;
-    v = ws.getVertexesArray(0,numVertices);
+    coord_t *v1 = ws.getVertexesArray(0,numVertices);
     TS_ASSERT_EQUALS( numVertices, 2 );
-    TS_ASSERT_DELTA( v[0], -10.0, 1e-5);
-    TS_ASSERT_DELTA( v[1], -6.0, 1e-5);
-
-    v = ws.getVertexesArray(4,numVertices);
-    TS_ASSERT_DELTA( v[0], 6.0, 1e-5);
-    TS_ASSERT_DELTA( v[1], 10.0, 1e-5);
+    TS_ASSERT_DELTA( v1[0], -10.0, 1e-5);
+    TS_ASSERT_DELTA( v1[1], -6.0, 1e-5);
+    delete [] v1;
+    
+    coord_t *v2 = ws.getVertexesArray(4,numVertices);
+    TS_ASSERT_DELTA( v2[0], 6.0, 1e-5);
+    TS_ASSERT_DELTA( v2[1], 10.0, 1e-5);
+    delete [] v2;
   }
 
   //---------------------------------------------------------------------------------------------------
@@ -251,25 +255,24 @@ public:
     MDHistoDimension_sptr dimX(new MDHistoDimension("X", "x", "m", -10, 10, 5));
     MDHistoDimension_sptr dimY(new MDHistoDimension("Y", "y", "m", -10, 10, 5));
     MDHistoWorkspace ws(dimX, dimY);
-    coord_t * v;
     size_t numVertices, i;
 
-    v = ws.getVertexesArray(0,numVertices);
+    boost::scoped_array<coord_t> v1(ws.getVertexesArray(0,numVertices));
     TS_ASSERT_EQUALS( numVertices, 4 );
     i = 0*2;
-    TS_ASSERT_DELTA( v[i+0], -10.0, 1e-5);
-    TS_ASSERT_DELTA( v[i+1], -10.0, 1e-5);
+    TS_ASSERT_DELTA( v1[i+0], -10.0, 1e-5);
+    TS_ASSERT_DELTA( v1[i+1], -10.0, 1e-5);
     i = 3*2;
-    TS_ASSERT_DELTA( v[i+0], -6.0, 1e-5);
-    TS_ASSERT_DELTA( v[i+1], -6.0, 1e-5);
+    TS_ASSERT_DELTA( v1[i+0], -6.0, 1e-5);
+    TS_ASSERT_DELTA( v1[i+1], -6.0, 1e-5);
     // The opposite corner
-    v = ws.getVertexesArray(24,numVertices);
+    boost::scoped_array<coord_t> v2(ws.getVertexesArray(24,numVertices));
     i = 0*2;
-    TS_ASSERT_DELTA( v[i+0], 6.0, 1e-5);
-    TS_ASSERT_DELTA( v[i+1], 6.0, 1e-5);
+    TS_ASSERT_DELTA( v2[i+0], 6.0, 1e-5);
+    TS_ASSERT_DELTA( v2[i+1], 6.0, 1e-5);
     i = 3*2;
-    TS_ASSERT_DELTA( v[i+0], 10.0, 1e-5);
-    TS_ASSERT_DELTA( v[i+1], 10.0, 1e-5);
+    TS_ASSERT_DELTA( v2[i+0], 10.0, 1e-5);
+    TS_ASSERT_DELTA( v2[i+1], 10.0, 1e-5);
   }
 
   //---------------------------------------------------------------------------------------------------
@@ -279,10 +282,9 @@ public:
     MDHistoDimension_sptr dimY(new MDHistoDimension("Y", "y", "m", -9, 10, 5));
     MDHistoDimension_sptr dimZ(new MDHistoDimension("Z", "z", "m", -8, 10, 5));
     MDHistoWorkspace ws(dimX, dimY, dimZ);
-    coord_t * v;
     size_t numVertices, i;
 
-    v = ws.getVertexesArray(0,numVertices);
+    boost::scoped_array<coord_t> v(ws.getVertexesArray(0,numVertices));
     TS_ASSERT_EQUALS( numVertices, 8 );
     i = 0;
     TS_ASSERT_DELTA( v[i+0], -10.0, 1e-5);
@@ -353,8 +355,11 @@ public:
     MDHistoWorkspaceIterator * hwit = dynamic_cast<MDHistoWorkspaceIterator *>(it);
     TS_ASSERT( hwit );
     TS_ASSERT( it->next() );
-    it = ws.createIterator(new MDImplicitFunction() );
+    delete it;
+    boost::scoped_ptr<MDImplicitFunction> mdfunction(new MDImplicitFunction);
+    it = ws.createIterator(mdfunction.get());
     TS_ASSERT( it );
+    delete it;
   }
 
   //---------------------------------------------------------------------------------------------------
