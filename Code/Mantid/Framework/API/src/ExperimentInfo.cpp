@@ -290,7 +290,7 @@ void ExperimentInfo::populateInstrumentParameters() {
         }
         if (rtpValues.haveRadius) // Just overwrite x,y,z
         {
-          // convert spherical coordinates to cartesian coordinate values
+          // convert spherical coordinates to Cartesian coordinate values
           double x = rtpValues.radius * std::sin(rtpValues.theta) *
                      std::cos(rtpValues.phi);
           paramMap.addPositionCoordinate(paramInfo->m_component, "x", x);

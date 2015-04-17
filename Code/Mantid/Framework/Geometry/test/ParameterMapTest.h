@@ -179,6 +179,20 @@ public:
     TS_ASSERT_EQUALS(pmapA,pmapB);
   }
 
+  void testHelpString(){
+    ParameterMap pmapA;
+    std::string descr("Test description");
+    pmapA.addDouble(m_testInstrument.get(), "testDouble", 4.2,&descr);
+    auto parD= pmapA.getRecursive(m_testInstrument.get(),"testDouble");
+    TS_ASSERT_EQUALS(parD->getDescription(),descr);
+    TS_ASSERT_EQUALS(parD->getTooltip(),"Test description");
+
+    parD->setDescription("Short description\n\nLongDescription");
+    TS_ASSERT_EQUALS(parD->getDescription(),"Short description\n\nLongDescription");
+    TS_ASSERT_EQUALS(parD->getTooltip(),"Short description");
+  }
+
+
 
   void testAdding_A_Parameter_That_Is_Not_Present_Puts_The_Parameter_In()
   {

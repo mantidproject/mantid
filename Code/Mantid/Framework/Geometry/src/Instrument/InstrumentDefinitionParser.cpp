@@ -2715,7 +2715,7 @@ V3D InstrumentDefinitionParser::parsePosition(Poco::XML::Element *pElem) {
     retVal.spherical(R, theta, phi);
   } else if (pElem->hasAttribute("r") || pElem->hasAttribute("t") ||
              pElem->hasAttribute("p"))
-  // This is alternative way a user may specify sphecical coordinates
+  // This is alternative way a user may specify spherical coordinates
   // which may be preferred in the long run to the more verbose of
   // using R, theta and phi.
   {

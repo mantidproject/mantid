@@ -22,8 +22,8 @@ std::string Parameter::getTooltip()const{
   if (pos == std::string::npos){
     return std::string(m_description);
   }else{
-    if (pos>1){
-      return m_description.substr(0,pos-1);
+    if (pos>0){
+      return m_description.substr(0,pos);
     }else{
       return std::string("");
     }
