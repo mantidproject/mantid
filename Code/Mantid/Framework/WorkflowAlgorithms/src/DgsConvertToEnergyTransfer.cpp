@@ -202,7 +202,7 @@ void DgsConvertToEnergyTransfer::exec() {
         Workspace_sptr monWSOutput = loadmon->getProperty("OutputWorkspace");
         // the algorithm can return a group workspace if the file is multi period
         monWS = boost::dynamic_pointer_cast<MatrixWorkspace>(monWSOutput);
-        if (!monWS) {
+        if ((monWSOutput) && (!monWS)) {
           //this was a group workspace - DGSReduction does not support multi period data yet
           throw Exception::NotImplementedError(
             "The file contains multi period data, support for this is not implemented in DGSReduction yet");

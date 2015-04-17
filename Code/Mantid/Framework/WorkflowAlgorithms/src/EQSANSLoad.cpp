@@ -517,8 +517,8 @@ void EQSANSLoad::exec() {
     if (loadMonitors && loadAlg->existsProperty("MonitorWorkspace")) {
       Workspace_sptr monWSOutput = loadAlg->getProperty("MonitorWorkspace");
       MatrixWorkspace_sptr monWS = boost::dynamic_pointer_cast<MatrixWorkspace>(monWSOutput);
-      if (!monWS) {
-        //this was a group workspace - DGSReduction does not support multi period data yet
+      if ((monWSOutput) && (!monWS)) {
+        //this was a group workspace - EQSansLoad does not support multi period data yet
         throw Exception::NotImplementedError(
           "The file contains multi period data, support for this is not implemented in EQSANSLoad yet");
       }
