@@ -224,9 +224,9 @@ IndexPeaks( PeaksWorkspace=peaks_ws, Tolerance=tolerance)
 #
 SaveIsawUB( InputWorkspace=peaks_ws,Filename=run_niggli_matrix_file )
 if output_nexus:
-	SaveNexus( InputWorkspace=peaks_ws, Filename=run_niggli_integrate_file )
+    SaveNexus( InputWorkspace=peaks_ws, Filename=run_niggli_integrate_file )
 else:
-	SaveIsawPeaks( InputWorkspace=peaks_ws, AppendFile=False,
+    SaveIsawPeaks( InputWorkspace=peaks_ws, AppendFile=False,
                Filename=run_niggli_integrate_file )
 
 #
@@ -335,9 +335,9 @@ elif use_cylindrical_integration:
 # result.
 #
 if output_nexus:
-	SaveNexus( InputWorkspace=peaks_ws, Filename=run_niggli_integrate_file )
+    SaveNexus( InputWorkspace=peaks_ws, Filename=run_niggli_integrate_file )
 else:
-	SaveIsawPeaks( InputWorkspace=peaks_ws, AppendFile=False,
+    SaveIsawPeaks( InputWorkspace=peaks_ws, AppendFile=False,
                Filename=run_niggli_integrate_file )
 
 # Print warning if user is trying to integrate using the cylindrical method and transorm the cell
@@ -362,10 +362,10 @@ else:
                       CellType=cell_type, Centering=centering,\
                       AllowPermutations=allow_perm,\
                       Apply=True, Tolerance=tolerance )
-	if output_nexus:
-        	SaveNexus( InputWorkspace=peaks_ws, Filename=run_conventional_integrate_file )
+    if output_nexus:
+            SaveNexus( InputWorkspace=peaks_ws, Filename=run_conventional_integrate_file )
         else:
-        	SaveIsawPeaks( InputWorkspace=peaks_ws, AppendFile=False,\
+            SaveIsawPeaks( InputWorkspace=peaks_ws, AppendFile=False,\
                    Filename=run_conventional_integrate_file )
         SaveIsawUB( InputWorkspace=peaks_ws, Filename=run_conventional_matrix_file )
 

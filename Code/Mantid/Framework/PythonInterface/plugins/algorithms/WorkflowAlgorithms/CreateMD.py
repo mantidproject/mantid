@@ -84,7 +84,7 @@ class CreateMD(DataProcessorAlgorithm):
             if input_workspace.sample().hasOrientedLattice():
                 logger.warning("Sample already has a UB. This will not be overwritten by %s. Use ClearUB and re-run."%self.name())
             else:
-                self._set_ub(workspace=input_workspace, a=alatt[0], b=alatt[1], c=alatt[2], 
+                self._set_ub(workspace=input_workspace, a=alatt[0], b=alatt[1], c=alatt[2],
                              alpha=angdeg[0], beta=angdeg[1], gamma=angdeg[2], u=u, v=v)
 
         if any(goniometer_params):
@@ -109,19 +109,27 @@ class CreateMD(DataProcessorAlgorithm):
 
         self.declareProperty('Emode', defaultValue='Direct', validator=StringListValidator(self._possible_emodes()), direction=Direction.Input, doc='Analysis mode ' + str(self._possible_emodes()) )
 
-        self.declareProperty(FloatArrayProperty('Alatt', values=[], validator=FloatArrayMandatoryValidator(), direction=Direction.Input ), doc='Lattice parameters' )
+        self.declareProperty(FloatArrayProperty('Alatt', values=[], validator=FloatArrayMandatoryValidator(),
+                                                direction=Direction.Input ), doc='Lattice parameters' )
 
-        self.declareProperty(FloatArrayProperty('Angdeg', values=[], validator=FloatArrayMandatoryValidator(), direction=Direction.Input ), doc='Lattice angles' )
+        self.declareProperty(FloatArrayProperty('Angdeg', values=[], validator=FloatArrayMandatoryValidator(),
+                                                direction=Direction.Input ), doc='Lattice angles' )
 
-        self.declareProperty(FloatArrayProperty('u', values=[], validator=FloatArrayMandatoryValidator(), direction=Direction.Input ), doc='Lattice vector parallel to neutron beam' )
+        self.declareProperty(FloatArrayProperty('u', values=[], validator=FloatArrayMandatoryValidator(),
+                                                direction=Direction.Input ), doc='Lattice vector parallel to neutron beam' )
 
-        self.declareProperty(FloatArrayProperty('v', values=[], validator=FloatArrayMandatoryValidator(), direction=Direction.Input ), doc='Lattice vector perpendicular to neutron beam in the horizontal plane' )
+        self.declareProperty(FloatArrayProperty('v', values=[], validator=FloatArrayMandatoryValidator(),
+                                                direction=Direction.Input ),
+                             doc='Lattice vector perpendicular to neutron beam in the horizontal plane' )
 
-        self.declareProperty(FloatArrayProperty('Psi', values=[], direction=Direction.Input), doc='Psi rotation in degrees. Optional or one entry per run.' )
+        self.declareProperty(FloatArrayProperty('Psi', values=[], direction=Direction.Input),
+                             doc='Psi rotation in degrees. Optional or one entry per run.' )
 
-        self.declareProperty(FloatArrayProperty('Gl', values=[], direction=Direction.Input), doc='gl rotation in degrees. Optional or one entry per run.' )
+        self.declareProperty(FloatArrayProperty('Gl', values=[], direction=Direction.Input),
+                             doc='gl rotation in degrees. Optional or one entry per run.' )
 
-        self.declareProperty(FloatArrayProperty('Gs', values=[], direction=Direction.Input), doc='gs rotation in degrees. Optional or one entry per run.' )
+        self.declareProperty(FloatArrayProperty('Gs', values=[], direction=Direction.Input),
+                             doc='gs rotation in degrees. Optional or one entry per run.' )
 
         self.declareProperty(IMDWorkspaceProperty('OutputWorkspace', '', direction=Direction.Output ), doc='Output MDWorkspace')
 
@@ -178,33 +186,34 @@ class CreateMD(DataProcessorAlgorithm):
         v = self.getProperty('v').value
         psi = self.getProperty('Psi').value
         gl = self.getProperty('Gl').value
-        gs = self.getProperty('Gs').value        
-        
+        gs = self.getProperty('Gs').value
+
         input_workspaces = self.getProperty("InputWorkspaces").value
-        
+
         ws_entries = len(input_workspaces)
-        
+
         self._validate_inputs()
-            
+
         if len(psi) == 0:
             psi = [0.0] * ws_entries
-            
+
         if len(gl) == 0:
             gl = [0.0] * ws_entries
-            
+
         if len(gs) == 0:
             gs = [0.0] * ws_entries
-        
+
         output_workspace = None
         run_md = None
 
         to_merge_names = list()
-        
+
         run_data = zip(input_workspaces, psi, gl, gs)
         for run_entry in run_data:
             ws_name, psi_entry, gl_entry, gs_entry = run_entry
             ws = AnalysisDataService.retrieve(ws_name)
-            run_md = self._single_run(input_workspace=ws, emode=emode, alatt=alatt, angdeg=angdeg, u=u, v=v, psi=psi_entry, gl=gl_entry, gs=gs_entry)
+            run_md = self._single_run(input_workspace=ws, emode=emode, alatt=alatt, angdeg=angdeg, u=u, v=v,
+                                      psi=psi_entry, gl=gl_entry, gs=gs_entry)
             to_merge_name = ws_name + "_md"
             AnalysisDataService.addOrReplace(to_merge_name, run_md)
             to_merge_names.append(to_merge_name)

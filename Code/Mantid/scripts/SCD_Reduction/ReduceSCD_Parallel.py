@@ -174,7 +174,7 @@ if output_nexus:
         for item in candidates:
             if os.path.exists(item):
                 full_name = str(item)
-    
+
         if not full_name.endswith('nxs'):
             print "Exiting since the data_directory was not specified and"
             print "findnexus failed for event NeXus file: " + instrument_name + " " + str(run)
@@ -203,17 +203,17 @@ if not use_cylindrical_integration:
                 uc_alpha = peaks_ws.sample().getOrientedLattice().alpha()
                 uc_beta = peaks_ws.sample().getOrientedLattice().beta()
                 uc_gamma = peaks_ws.sample().getOrientedLattice().gamma()
-		if output_nexus:
+        if output_nexus:
                     peaks_total = CombinePeaksWorkspaces(LHSWorkspace=peaks_total, RHSWorkspace=peaks_ws)
                     SaveNexus( InputWorkspace=peaks_ws, Filename=niggli_integrate_file )
-		else:
+        else:
                     SaveIsawPeaks( InputWorkspace=peaks_ws, AppendFile=False, Filename=niggli_integrate_file )
             first_time = False
         else:
-	    if output_nexus:
+        if output_nexus:
                 peaks_total = CombinePeaksWorkspaces(LHSWorkspace=peaks_total, RHSWorkspace=peaks_ws)
                 SaveNexus( InputWorkspace=peaks_total, Filename=niggli_integrate_file )
-	    else:
+        else:
                 SaveIsawPeaks( InputWorkspace=peaks_ws, AppendFile=True, Filename=niggli_integrate_file )
 
 #

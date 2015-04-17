@@ -8,15 +8,15 @@ from reduction_application import ReductionGUI
 from PyQt4 import QtCore, uic
 
 reducer = ReductionGUI(instrument_list=["PG3", "NOM", "VULCAN"])
-if reducer.setup_layout(load_last=True): 
-  
+if reducer.setup_layout(load_last=True):
+
     # Set up reduction configuration from previous usage
     try:
         # Find home dir
-        homedir = os.path.expanduser("~") 
+        homedir = os.path.expanduser("~")
         mantidconfigdir = os.path.join(homedir, ".mantid")
         autopath = os.path.join(mantidconfigdir, 'snspowderreduction.xml')
-        # Load configuration 
+        # Load configuration
         reducer.open_file(autopath)
     except IOError as e:
         print "[Error] Unable to load previously reduction setup from file %s.\nReason: %s." % (
