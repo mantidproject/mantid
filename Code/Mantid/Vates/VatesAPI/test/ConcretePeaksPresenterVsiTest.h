@@ -53,7 +53,7 @@ public:
     TopPlane top(0.0, -1.0, 0.0, 1.0);
     FarPlane farPlane(0.0, 0.0, 1.0, 1.0);
     NearPlane nearPlane(0.0, 0.0, -1.0,1.0);
-    ViewFrustum frustum(left, right, bottom, top, farPlane, nearPlane);
+    ViewFrustum_sptr frustum(new ViewFrustum(left, right, bottom, top, farPlane, nearPlane));
 
     boost::shared_ptr<MockPeaksWorkspaceConcrete> pw_ptr(new MockPeaksWorkspaceConcrete());
     // Act
@@ -73,7 +73,7 @@ public:
     TopPlane top(0.0, -1.0, 0.0, 1.0);
     FarPlane farPlane(0.0, 0.0, 1.0, 1.0);
     NearPlane nearPlane(0.0, 0.0, -1.0,1.0);
-    ViewFrustum frustum(left, right, bottom, top, farPlane, nearPlane);
+    ViewFrustum_sptr frustum(new ViewFrustum(left, right, bottom, top, farPlane, nearPlane));
 
     Mantid::Kernel::V3D coordinate(1,0,0);
     double peakRadius = 10;

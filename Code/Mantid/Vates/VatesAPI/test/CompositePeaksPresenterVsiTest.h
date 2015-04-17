@@ -4,8 +4,10 @@
 #include <cxxtest/TestSuite.h>
 #include "MantidVatesAPI/CompositePeaksPresenterVsi.h"
 #include "MantidVatesAPI/ConcretePeaksPresenterVsi.h"
+#include "MantidVatesAPI/ViewFrustum.h"
 #include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
+
 
 #include <boost/shared_ptr.hpp>
 #include <stdexcept>
@@ -58,9 +60,10 @@ public:
     TopPlane top(0.0, -1.0, 0.0, 1.0);
     FarPlane farPlane(0.0, 0.0, 1.0, 1.0);
     NearPlane nearPlane(0.0, 0.0, -1.0,1.0);
-    ViewFrustum frustum(left, right, bottom, top, farPlane, nearPlane);
+    ViewFrustum_sptr frustum(new ViewFrustum(left, right, bottom, top, farPlane, nearPlane));
 
     boost::shared_ptr<MockPeaksWorkspaceComposite> pw_ptr(new MockPeaksWorkspaceComposite());
+    
     std::string name = "pw1";
     PeaksPresenterVsi_sptr p1(new ConcretePeaksPresenterVsi(pw_ptr, frustum, frame));
 
@@ -92,7 +95,7 @@ public:
     TopPlane top(0.0, -1.0, 0.0, 1.0);
     FarPlane farPlane(0.0, 0.0, 1.0, 1.0);
     NearPlane nearPlane(0.0, 0.0, -1.0,1.0);
-    ViewFrustum frustum(left, right, bottom, top, farPlane, nearPlane);
+    ViewFrustum_sptr frustum(new ViewFrustum(left, right, bottom, top, farPlane, nearPlane));
 
     boost::shared_ptr<MockPeaksWorkspaceComposite> pw_ptr(new MockPeaksWorkspaceComposite());
     std::string name = "pw1";
