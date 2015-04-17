@@ -1,5 +1,6 @@
 #include "MantidCurveFitting/LatticeDomainCreator.h"
 
+#include "MantidAPI/ILatticeFunction.h"
 #include "MantidAPI/IPeak.h"
 #include "MantidAPI/LatticeDomain.h"
 #include "MantidAPI/TableRow.h"
@@ -15,6 +16,7 @@ using namespace API;
 using namespace Kernel;
 using namespace DataObjects;
 
+/// Constructor
 LatticeDomainCreator::LatticeDomainCreator(
     Kernel::IPropertyManager *manager, const std::string &workspacePropertyName,
     API::IDomainCreator::DomainType domainType)
@@ -25,6 +27,18 @@ LatticeDomainCreator::LatticeDomainCreator(
   m_workspacePropertyName = m_workspacePropertyNames.front();
 }
 
+/**
+ * Creates a LatticeDomain from the assigned Workspace
+ *
+ * This function uses the internally stored workspace which can either be an
+ * IPeaksWorkspace or a TableWorkspace with HKL and d-values to create a
+ * LatticeDomain. It also assigns fit data to the supplied value object. If
+ * null-pointers are passed, new objects are allocated.
+ *
+ * @param domain :: Pointer to outgoing FunctionDomain instance.
+ * @param values :: Pointer to outgoing FunctionValues object.
+ * @param i0 :: Size offset for values object if it already contains data.
+ */
 void LatticeDomainCreator::createDomain(
     boost::shared_ptr<API::FunctionDomain> &domain,
     boost::shared_ptr<API::FunctionValues> &values, size_t i0) {
@@ -43,20 +57,41 @@ void LatticeDomainCreator::createDomain(
   }
 }
 
+/**
+ * Creates an output workspace from calculated and observed values
+ *
+ * This method creates a table workspace for an ILatticeFunction, containing
+ * observed and calculated d-values for each HKL, as well as the difference
+ * between those two values.
+ *
+ * @param baseName :: Basename for output workspace.
+ * @param function :: An ILatticeFunction
+ * @param domain :: Pointer to LatticeDomain instance.
+ * @param values :: Pointer to FunctionValues instance.
+ * @param outputWorkspacePropertyName :: Name of output workspace property.
+ * @return TableWorkspace with calculated and observed d-values.
+ */
 Workspace_sptr LatticeDomainCreator::createOutputWorkspace(
     const std::string &baseName, IFunction_sptr function,
     boost::shared_ptr<FunctionDomain> domain,
     boost::shared_ptr<FunctionValues> values,
     const std::string &outputWorkspacePropertyName) {
+
   boost::shared_ptr<LatticeDomain> latticeDomain =
       boost::dynamic_pointer_cast<LatticeDomain>(domain);
-
   if (!latticeDomain) {
     throw std::invalid_argument("LatticeDomain is required.");
   }
 
+  ILatticeFunction_sptr latticeFunction =
+      boost::dynamic_pointer_cast<ILatticeFunction>(function);
+  if (!latticeFunction) {
+    throw std::invalid_argument(
+        "LatticeDomainCreator can only process ILatticeFunction.");
+  }
+
   // Calculate function values again.
-  function->function(*domain, *values);
+  latticeFunction->functionLattice(*latticeDomain, *values);
 
   ITableWorkspace_sptr tableWorkspace =
       WorkspaceFactory::Instance().createTable();
@@ -106,6 +141,7 @@ size_t LatticeDomainCreator::getDomainSize() const {
   return 0;
 }
 
+/// Get the workspace with peak data from the property manager.
 void LatticeDomainCreator::setWorkspaceFromPropertyManager() {
   if (!m_manager) {
     throw std::invalid_argument(
@@ -121,6 +157,7 @@ void LatticeDomainCreator::setWorkspaceFromPropertyManager() {
   }
 }
 
+/// Creates a LatticeDomain from an IPeaksWorkspace, using HKL and d-values.
 void LatticeDomainCreator::createDomainFromPeaksWorkspace(
     const API::IPeaksWorkspace_sptr &workspace,
     boost::shared_ptr<API::FunctionDomain> &domain,
@@ -164,6 +201,20 @@ void LatticeDomainCreator::createDomainFromPeaksWorkspace(
   values->setFitWeights(1.0);
 }
 
+/**
+ * Creates a domain from an ITableWorkspace
+ *
+ * This method creates a LatticeDomain from a table workspace that contains two
+ * columns, HKL and d. HKL can either be a V3D-column or a string column,
+ * containing three integers separated by space, comma, semi-colon and
+ * optionally surrounded by []. The d-column can be double or a string that can
+ * be parsed as a double number.
+ *
+ * @param workspace :: ITableWorkspace with format specified above.
+ * @param domain :: Pointer to outgoing FunctionDomain instance.
+ * @param values :: Pointer to outgoing FunctionValues object.
+ * @param i0 :: Size offset for values object if it already contains data.
+ */
 void LatticeDomainCreator::createDomainFromPeakTable(
     const ITableWorkspace_sptr &workspace,
     boost::shared_ptr<FunctionDomain> &domain,
