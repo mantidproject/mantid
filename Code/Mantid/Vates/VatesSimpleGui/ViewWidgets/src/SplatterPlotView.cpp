@@ -25,6 +25,7 @@
 #include <pqServerManagerModel.h>
 #include <vtkDataObject.h>
 #include <vtkProperty.h>
+#include <vtkPVRenderView.h>
 #include <vtkSMDoubleVectorProperty.h>
 #include <vtkSMPropertyHelper.h>
 #include <vtkSMPVRepresentationProxy.h>
@@ -242,6 +243,16 @@ void SplatterPlotView::render()
   }
 
   emit this->triggerAccept();
+  if (vtkSMProxy* viewProxy = this->getView()->getProxy())
+    {
+    vtkSMPropertyHelper helper(viewProxy, "InteractionMode");
+    if (helper.GetAsInt() == vtkPVRenderView::INTERACTION_MODE_2D)
+      {
+      helper.Set(vtkPVRenderView::INTERACTION_MODE_3D);
+      viewProxy->UpdateProperty("InteractionMode",1);
+      this->resetCamera();
+      }
+    }
 }
 
 void SplatterPlotView::renderAll()
