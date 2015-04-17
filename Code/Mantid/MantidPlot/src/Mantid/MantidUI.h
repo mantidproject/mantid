@@ -212,23 +212,23 @@ public:
     // Create a 1d graph form specified MatrixWorkspace and index
   MultiLayer* plot1D(const QStringList& wsnames, const QList<int>& indexList, bool spectrumPlot,
                      bool errs=true, Graph::CurveType style = Graph::Unspecified,
-                     MultiLayer* plotWindow = NULL, bool clearWindow = false);
+                     MultiLayer* plotWindow = NULL, bool clearWindow = false, bool waterfallPlot = false);
 
   MultiLayer* plot1D(const QString& wsName, const std::set<int>& indexList, bool spectrumPlot,
                      MantidQt::DistributionFlag distr = MantidQt::DistributionDefault,
                      bool errs=false,
-                     MultiLayer* plotWindow = NULL, bool clearWindow = false);
+                     MultiLayer* plotWindow = NULL, bool clearWindow = false, bool waterfallPlot = false);
 
   MultiLayer* plot1D(const QMultiMap<QString,int>& toPlot, bool spectrumPlot,
                      MantidQt::DistributionFlag distr = MantidQt::DistributionDefault,
                      bool errs=false,
                      Graph::CurveType style = Graph::Unspecified,
-                     MultiLayer* plotWindow = NULL, bool clearWindow = false);
+                     MultiLayer* plotWindow = NULL, bool clearWindow = false, bool waterfallPlot = false);
 
   MultiLayer* plot1D(const QMultiMap<QString,std::set<int> >& toPlot, bool spectrumPlot,
                      MantidQt::DistributionFlag distr = MantidQt::DistributionDefault,
                      bool errs=false,
-                     MultiLayer* plotWindow = NULL, bool clearWindow = false);
+                     MultiLayer* plotWindow = NULL, bool clearWindow = false, bool waterfallPlot = false);
   
     /// Draw a color fill plot for each of the listed workspaces
     void drawColorFillPlots(const QStringList & wsNames, Graph::CurveType curveType = Graph::ColorMap);
@@ -444,7 +444,7 @@ signals:
     void importNumSeriesLog(const QString &wsName, const QString &logname, int filter);
 
     // Clear all Mantid related memory
-    void clearAllMemory();
+    void clearAllMemory(const bool prompt = true);
     void releaseFreeMemory();
     // Ticket #672
     void saveNexusWorkspace();

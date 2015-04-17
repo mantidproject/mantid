@@ -7,4 +7,47 @@
    fun:_ZN6Mantid11DataObjects14parallel_sort2INS0_8TofEventEEEvRSt6vectorIT_SaIS4_EE
    ...
 }
-
+{
+   <Leak_within_nexus_library>
+   Memcheck:Leak
+   ...
+   ...
+   fun:_ZN5NeXus4File11getNextAttrEv
+   fun:_ZN5NeXus4File7hasAttrERKSs
+   fun:_ZN6Mantid11DataObjects13MDBoxFlatTree21createOrOpenMDWSgroupERKSsRiS3_bRb
+   ...
+}
+{
+   <HDF5_write>
+   Memcheck:Param
+   write(buf)
+   ...
+   fun:H5FD_write
+   ...
+   fun:nxiflush_
+   fun:_ZN5NeXus4File5flushEv
+   fun:_ZNK6Mantid11DataObjects20BoxControllerNeXusIO9flushDataEv
+   fun:_ZNK6Mantid11DataObjects13MDBoxSaveable9flushDataEv
+   fun:_ZN6Mantid6Kernel10DiskBuffer15writeOldObjectsEv
+   fun:_ZN6Mantid6Kernel10DiskBuffer10flushCacheEv
+   fun:_ZN17MDBoxSaveableTest46test_fileBackEnd_nonConst_EventListChangesSizeEv
+}
+{
+   <gomp_false_positive_leak_workspace2d>
+   Memcheck:Leak
+   fun:calloc
+   fun:_dl_allocate_tls
+   ...
+   fun:_ZNK6Mantid3API15MatrixWorkspace20getIntegratedSpectraERSt6vectorIdSaIdEEddb
+   fun:_ZN15Workspace2DTest33testIntegrateSpectra_entire_rangeEv
+   fun:_ZN71TestDescription_suite_Workspace2DTest_testIntegrateSpectra_entire_range7runTestEv
+}
+{
+   <gomp_false_positive_leak_mdgridboxtest>
+   Memcheck:Leak
+   fun:calloc
+   fun:_dl_allocate_tls
+   ...
+   fun:_ZN13MDGridBoxTest28do_test_addEvents_inParallelEPN6Mantid6Kernel15ThreadSchedulerE
+   fun:_ZN13MDGridBoxTest25test_addEvents_inParallelEv
+}
