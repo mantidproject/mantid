@@ -95,9 +95,7 @@ namespace Mantid
           /**
            * Callback function for background color changing events
            *@param caller Calling object.
-           *@param vtkNotUsed(eventId) Not used.
-           *@param vtkNotUsed(clientData) Not used.
-           *@param vtkNotUsed(callData) Not used.
+           *@param vtkNotUsed Not used.
            */
           static void backgroundColorChangeCallbackFunction(vtkObject* caller, long unsigned int vtkNotUsed(eventId), void* vtkNotUsed(clientData), void* vtkNotUsed(callData));
 

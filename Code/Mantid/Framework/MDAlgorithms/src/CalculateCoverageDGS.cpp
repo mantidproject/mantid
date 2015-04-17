@@ -292,7 +292,6 @@ void CalculateCoverageDGS::exec() {
   W.setRow(2, Q3Basis);
 
   m_rubw = gon * UB * W * (2.0 * M_PI);
-  m_rubw.Invert();
 
   // calculate maximum original limits
   Geometry::OrientedLattice ol;
@@ -303,7 +302,7 @@ void CalculateCoverageDGS::exec() {
   m_kmax = static_cast<coord_t>(Qmax * ol.b());
   m_lmin = static_cast<coord_t>(-Qmax * ol.c());
   m_lmax = static_cast<coord_t>(Qmax * ol.c());
-
+  m_rubw.Invert();
   // adjust Q steps/dimensions
   if (q1min == EMPTY_DBL()) {
     q1min = m_hmin;

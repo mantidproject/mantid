@@ -1,5 +1,5 @@
-#ifndef MANTID_ALGORITHMS_SOFQW3_H_
-#define MANTID_ALGORITHMS_SOFQW3_H_
+#ifndef MANTID_ALGORITHMS_SOFQWNORMALISEDPOLYGON_H_
+#define MANTID_ALGORITHMS_SOFQWNORMALISEDPOLYGON_H_
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -20,8 +20,7 @@ one that gives intensity as a function of momentum transfer against energy. This
 version
 uses proper parallelpiped rebinning to compute the overlap of the various
 overlapping
-weights. WARNING: This is undergoing testing and should not be used in a
-production environment.
+weights.
 
 Required Properties:
 <UL>
@@ -57,12 +56,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class DLLExport SofQW3 : public Rebin2D {
+class DLLExport SofQWNormalisedPolygon : public Rebin2D {
 public:
   /// Default constructor
-  SofQW3();
+  SofQWNormalisedPolygon();
   /// Algorithm's name for identification
   virtual const std::string name() const;
+  virtual const std::string alias() const { return "SofQW3"; }
   /// Summary of algorithms purpose
   virtual const std::string summary() const {
     return "Calculate the intensity as a function of momentum transfer and "
@@ -117,4 +117,4 @@ private:
 } // namespace Algorithms
 } // namespace Mantid
 
-#endif /* MANTID_ALGORITHMS_SOFQW3_H_ */
+#endif /* MANTID_ALGORITHMS_SOFQWNORMALISEDPOLYGON_H_ */

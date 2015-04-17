@@ -4151,7 +4151,7 @@ void Graph::copy(Graph* g)
             fc->copy(fcCV);
         }
       } else if (style == VerticalBars || style == HorizontalBars) {
-        QwtBarCurve *bc = dynamic_cast<QwtBarCurve *>(c);
+        QwtBarCurve *bc = dynamic_cast<QwtBarCurve *>(cv);
         if (bc) {
           c = new QwtBarCurve(bc->orientation(), cv->table(), cv->xColumnName(),
                               cv->title().text(), cv->startRow(), cv->endRow());

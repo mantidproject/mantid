@@ -8,6 +8,8 @@
 #include <iomanip>
 #include <iostream>
 
+#include <boost/scoped_array.hpp>
+
 using namespace Mantid;
 using namespace Mantid::DataObjects;
 
@@ -43,12 +45,12 @@ public:
     TS_ASSERT_EQUALS( a.getCenter(2), 2.5);
 
     // Dynamic array
-    coord_t * coords2 = new coord_t[5];
+    boost::scoped_array<coord_t> coords2(new coord_t[5]);
     coords2[0] = 1.0;
     coords2[1] = 2.0;
     coords2[2] = 3.0;
 
-    MDLeanEvent<3> b(2.5, 1.5, coords2 );
+    MDLeanEvent<3> b(2.5, 1.5, coords2.get() );
     TS_ASSERT_EQUALS( b.getSignal(), 2.5);
     TS_ASSERT_EQUALS( b.getErrorSquared(), 1.5);
     TS_ASSERT_EQUALS( b.getCenter(0), 1);

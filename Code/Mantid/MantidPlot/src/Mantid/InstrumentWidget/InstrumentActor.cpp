@@ -342,11 +342,7 @@ IDetector_const_sptr InstrumentActor::getDetector(size_t i) const
     // Call the local getInstrument, NOT the one on the workspace
     return this->getInstrument()->getDetector(m_detIDs.at(i));
   }
-  catch(...)
-  {
-    return IDetector_const_sptr();
-  }
-  // Add line that can never be reached to quiet compiler complaints
+  catch(...) { };
   return IDetector_const_sptr();
 }
 

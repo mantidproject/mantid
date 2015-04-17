@@ -96,7 +96,7 @@ public:
     ConcretePeaksPresenterVsi presenter(pw_ptr, frustum, frame);
     double radius = 0;
     Mantid::Kernel::V3D coord(0,0,0);
-    presenter.getPeaksInfo(pw_ptr,0,coord, radius);
+    presenter.getPeaksInfo(pw_ptr,0,coord, radius, coordinateSystem);
 
     //Assert
     TSM_ASSERT_EQUALS("Should have a radius of 10", radius, peakRadius);

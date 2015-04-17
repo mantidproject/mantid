@@ -319,7 +319,7 @@ API::MatrixWorkspace_sptr ConvertCWPDMDToSpectra::reducePowderData(
  * @brief ConvertCWPDMDToSpectra::findXBoundary
  * @param dataws
  * @param targetunit
- * @param wavelength
+ * @param map_runwavelength
  * @param xmin :: (output) lower binning boundary
  * @param xmax :: (output) upper binning boundary
  */

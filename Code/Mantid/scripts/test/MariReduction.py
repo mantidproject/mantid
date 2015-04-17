@@ -97,17 +97,17 @@ if __name__ == "__main__":
 ##### Here one sets up folders where to find input data and where to save results             #####
     # It can be done here or from Mantid GUI
     # Folder where map files are located:
-     map_mask_dir = 'd:/Data/MantidSystemTests/Data'
+     #map_mask_dir = 'd:/Data/MantidSystemTests/Data'
     # folder where input data can be found
-     data_dir = 'd:/Data/Mantid_Testing/14_11_27'
+     #data_dir = 'd:/Data/Mantid_Testing/14_11_27'
      # auxiliary folder with results
-     ref_data_dir = 'd:/Data/MantidSystemTests/SystemTests/AnalysisTests/ReferenceResults'
+     #ref_data_dir = 'd:/Data/MantidSystemTests/SystemTests/AnalysisTests/ReferenceResults'
      # Set input path to
-     config.setDataSearchDirs('{0};{1};{2}'.format(data_dir,map_mask_dir,ref_data_dir))
+     #config.setDataSearchDirs('{0};{1};{2}'.format(data_dir,map_mask_dir,ref_data_dir))
      # use appendDataSearch directory to add to existing data search path
      #config.appendDataSearchDir('d:/Data/Mantid_GIT/Test/AutoTestData')
      # folder to save resulting spe/nxspe files.
-     config['defaultsave.directory'] = data_dir
+     #config['defaultsave.directory'] = data_dir
 
 ###### Initialize reduction class above and set up reduction properties. Note no parameters  ######
      rd = ReduceMARI()
