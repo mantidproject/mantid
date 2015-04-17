@@ -13,9 +13,6 @@
 #      range of pt. and det number
 #     
 #
-#
-#
-#
 ###############################################################################
 
 """ Test main """
@@ -58,12 +55,12 @@ if MOS == LINUX:
 elif MOS == OSX: 
     reducer.ui.lineEdit_cache.setText('/Users/wzz/Temp/')
 
-# example: 'http://neutron.ornl.gov/user_data/hb2a/exp400/Datafiles/HB2A_exp0400_scan0001.dat'
-print "Set to exp 457, scan 10"
+print "Set to exp 379, scan 10"
 reducer.ui.lineEdit_expNo.setText('379')
 reducer.ui.lineEdit_scanNo.setText('10')
 reducer.ui.lineEdit_wavelength.setText('2.41')
 
+# binning parameter
 reducer.ui.lineEdit_min2Theta.setText('5.0')
 reducer.ui.lineEdit_max2Theta.setText('150.0')
 reducer.ui.lineEdit_binsize2Theta.setText('0.1')

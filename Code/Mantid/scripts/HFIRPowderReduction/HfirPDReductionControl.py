@@ -70,11 +70,11 @@ class PDRManager:
         """
         self.datamdws = datamdws
         self.monitormdws = monitormdws
-        if reducedws is not None: 
+        if reducedws is not None:
             self.reducedws = reducedws
-        if unit is not None: 
+        if unit is not None:
             self.unit = unit
-        try: 
+        try:
             self.binsize = float(binsize)
         except TypeError as e:
             print e
@@ -105,7 +105,7 @@ class HFIRPDRedControl:
         if self._myWorkspaceDict.has_key((exp, scan)) is False:
             raise NotImplementedError("Exp %d Scan %d does not have reduced \
                     workspace." % (exp, scan))
-        else: 
+        else:
             rmanager = self._myWorkspaceDict[(exp, scan)]
         # END-IF-ELSE
 
@@ -162,7 +162,7 @@ class HFIRPDRedControl:
             rlist.append((pt, vecx, vecy))
         # ENDFOR
 
-        return (rlist)
+        return rlist
 
 
     def getSampleLogNames(self, expno, scanno):
@@ -414,11 +414,11 @@ class HFIRPDRedControl:
         outwsname = "Merged_Exp%d_Scan%s_%s" % (exp,
                 str(expscanfilelist[0][1]), str(expscanfilelist[-1][1]))
         api.ConvertCWPDMDToSpectra(InputWorkspace=mg_datamdws,
-                InputMonitorWorkspace=mg_monitormdws,
-                OutputWorkspace=outwsname,
-                BinningParams=binpar,
-                UnitOutput=unit, 
-                NeutronWaveLength=wavelength)
+                                   InputMonitorWorkspace=mg_monitormdws,
+                                   OutputWorkspace=outwsname,
+                                   BinningParams=binpar,
+                                   UnitOutput=unit, 
+                                   NeutronWaveLength=wavelength)
         moutws = AnalysisDataService.retrieve(outwsname)
         if moutws is None:
             raise NotImplementedError("Merge failed.")
@@ -446,16 +446,16 @@ class HFIRPDRedControl:
             binpar = "%.7f, %.7f, %.7f" % (xmin, binsize, xmax)
 
         reducedwsname = wsmanager.datamdws.name() + "_" + unit
-        api.ConvertCWPDMDToSpectra(InputWorkspace=wsmanager.datamdws,
-            InputMonitorWorkspace=wsmanager.monitormdws,
-            OutputWorkspace=reducedwsname,
-            UnitOutput=unit,
-            BinningParams = binpar,
-            NeutronWaveLength=wavelength)
+        api.ConvertCWPDMDToSpectra(InputWorkspace=wsmanager.datamdws, 
+                                   InputMonitorWorkspace=wsmanager.monitormdws, 
+                                   OutputWorkspace=reducedwsname, 
+                                   UnitOutput=unit, 
+                                   BinningParams = binpar, 
+                                   NeutronWaveLength=wavelength)
         outws = AnalysisDataService.retrieve(reducedwsname)
         if outws is not None: 
-           wsmanager.reducedws = outws
-           wsmanager.unit = unit
+            wsmanager.reducedws = outws 
+            wsmanager.unit = unit
         else:
             raise NotImplementedError("Failed to convert unit to %s." % (unit))
         

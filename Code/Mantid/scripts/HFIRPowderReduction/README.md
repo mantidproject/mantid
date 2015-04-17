@@ -1,4 +1,16 @@
-Use cases for tabs: 
+Tasks
+-----
+  
+  1. Make tab *Raw Detector* work;
+  2. Make tab *Individual Detector* work;
+  3. Find out why the vanadium runs (379-10/11) look funny, i.e., oscilating curves;
+  5. Implement tab *vanadium*;
+  6. Talk with Clarina how to deal with vanadium spectrum with peaks striped; 
+  7. Each tab with *Previous* and *Next* buttons should have a data structure to record whether a certain plot is already on canvas
+
+
+Use cases for tabs
+------------------
 
   1. **Raw Detectors**: Visualize the reading of detectors directly coming out of the raw data
     * Plot N lines for N Pts.;
@@ -23,15 +35,78 @@ Use cases for tabs:
     * *Mantid::StripPeaks()* will be called instread of *StripVadadiumPeaks()* because
       the later one only works in d-spacing;
   6. **Advanced Setup**
-    * URL for raw data files;
+    * URL for raw data files; 
+
+
+Suggested workflow for *Multiple Scans*
+=======================================
+
+It might be confusing to use the functionalities in tab *Multiple Scans*. 
+Here is the suggested workflow to reduce multiple scans and possibly merge them.
+
+ 1. Set up *Exp No* and range of scan numbers;
+ 2. Push button *Load All* to load and reduce all runs specified in previous step to single-spectrum diffraction pattern;
+ 3. Waterfall plot all reduced scans in default;
+ 4. Optinally plot all data in 2D fill plot;
+ 5. User can delete some scans from the reduced scans via GUI or input text edit;
+ 6. Push button *Merge* to merge the scans;
+ 7. Push button *Save All* to save all individual scans to files;
+ 8. Push button *Save Merged* to save the merged scans to one file; 
+
+
+Features (Implemented)
+----------------------
+
+ * Automatic wavelength mapping (in progress);
+
+
+HB2A Data Reduction
+-------------------
+
+Raw experimental data are to be corrected by (1) detector efficiency, (2) vanadium spectrum and etc. 
+Experiments are done with neutrons with various wavelengthes.  
+There information can be retrieved from HB2A's data repository accessible from internet. 
+
+Experiment setup and sample log
+===============================
+
+ 1. **Wavelength**: There are three settings for neutron wavelength, referenced by sample log *m1*. 
+   * Ge 113: :math:`\lambda = 2.41 \AA`, m1 = 9.45
+   * Ge 115: :math:`\lambda = 1.54 \AA`, m1 = 0
+   * Ge 117  :math:`\lambda = 1.12 \AA`, No used
+
+ 2. **Collimator translation**: There are two status for collimator, which is specified by sample log *colltrans*
+   * *IN*:  colltrans = 0
+   * *OUT*: colltrans = +/-80
+
+
+Raw data correction files
+=========================
+
+ 1. **Detector efficiency**: 
+   * File name: *HB2A_exp0IJK__GE_abc_XY_vcorr.txt* where
+    - IJK is the experiment number
+    - abc is the GE set up.  It can be 113, 115 or 117
+    - XY is either IN or OUT. 
+    - Exmaple: *HB2A_exp0400__Ge_113_IN_vcorr.txt*
+   * Web address: *http://neutron.ornl.gov/user_data/hb2a/exp400/Datafiles/HB2A_exp0IJK__Ge_abc_IN_vcorr.txt*
+    - IJK is the experiment number
+    - abc is the GE set up.  It can be 113, 115 or 117
+    - XY is either IN or OUT. 
+    - Exmaple: *http://neutron.ornl.gov/user_data/hb2a/exp400/Datafiles/HB2A_exp0400__Ge_113_IN_vcorr.txt*
+
+ 2. **Excluded detectors**:  Some detectors might be exluded from the experiment for some reason.  It is recorded in some excluded detectors' file.
+   * File name: *HB2A_exp0IJK__exclude_detectors.txt*
+    - IJK is the epxeriment number
+    - Exmaple: *HB2A_exp0400__exclude_detectors.txt*
+   * Web address: *http://neutron.ornl.gov/user_data/hb2a/expIJK/Datafiles/HB2A_exp0IJK__exclude_detectors.txt*
+    - IJK is the experiment number
+    - Example: *http://neutron.ornl.gov/user_data/hb2a/exp400/Datafiles/HB2A_exp0400__exclude_detectors.txt*
+
+ 3. Detector gaps: The 2-theta gap (in unit degrees) can be changed among cycles. 
+   * Location example: *http://neutron.ornl.gov/user_data/hb2a/exp400/Datafiles/HB2A_exp0400__gaps.txt*
 
 
 
-Tasks:
-  
-  1. Make tab *Raw Detector* work;
-  2. Make tab *Individual Detector* work;
-  3. Find out why the vanadium runs (379-10/11) look funny, i.e., oscilating curves;
-  4. Implement automatic wavelength mapping; 
-  5. Implement tab *vanadium*;
-  6. Talk with Clarina how to deal with vanadium spectrum with peaks striped; 
+
+

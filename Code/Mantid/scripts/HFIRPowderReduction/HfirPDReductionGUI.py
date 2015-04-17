@@ -62,6 +62,34 @@ class MainWindow(QtGui.QMainWindow):
 
         # Define gui-event handling 
 
+        # main           
+        self.connect(self.ui.comboBox_wavelength, QtCore.SIGNAL('currentIndexChanged(int)'),
+                self.doUpdateWavelength)
+        self.connect(self.ui.actionQuit, QtCore.SIGNAL('triggered()'),
+                self.doExist)
+
+        # tab 'Raw Detectors'
+        self.connect(self.ui.pushButton_plotRaw, QtCore.SIGNAL('clicked()'),
+                self.doPlotRawDet)
+        self.connect(self.ui.pushButton_ptUp, QtCore.SIGNAL('clicked()'),
+                self.doPlotPrevPtRaw)
+        self.connect(self.ui.pushButton_ptDown, QtCore.SIGNAL('clicked()'),
+                self.doPlotNextPtRaw)
+        self.connect(self.ui.pushButton_clearRawDets, QtCore.SIGNAL('clicked()'),
+                self.doClearRawDetCanvas)
+
+        # tab 'Individual Detectors'
+        self.connect(self.ui.pushButton_plotIndvDet, QtCore.SIGNAL('clicked()'),
+                self.doPlotIndvDet)
+        self.connect(self.ui.pushButton_plotPrevDet, QtCore.SIGNAL('clicked()'),
+                self.doPlotPrevDetRaw)
+        self.connect(self.ui.pushButton_plotNextDet, QtCore.SIGNAL('clicked()'),
+                self.doPlotNextDetRaw)
+        self.connect(self.ui.pushButton_clearCanvasIndDet, QtCore.SIGNAL('clicked()'),
+                self.doClearIndDetCanvas)
+        self.connect(self.ui.pushButton_plotLog , QtCore.SIGNAL('clicked()'),
+                self.doPlotSampleLog)
+
         # tab 'Normalized'
         self.connect(self.ui.pushButton_loadData, QtCore.SIGNAL('clicked()'), 
                 self.doLoadData)
@@ -78,6 +106,24 @@ class MainWindow(QtGui.QMainWindow):
         self.connect(self.ui.pushButton_saveData, QtCore.SIGNAL('clicked()'),
                 self.doSaveData)
 
+        # tab 'Multiple Scans'
+        self.connect(self.ui.pushButton_mergeScans, QtCore.SIGNAL('clicked()'),
+                self.doMergeScans)
+        self.connect(self.ui.pushButton_view2D, QtCore.SIGNAL('clicked()'), 
+                self.doMergeScanView2D)
+        self.connect(self.ui.pushButton_viewMerge, QtCore.SIGNAL('clicked()'),
+                self.doMergeScanView1D)
+        self.connect(self.ui.pushButton_clearMultCanvas, QtCore.SIGNAL('clicked()'),
+                self.doClearMultiRunCanvas)
+
+        # tab 'Vanadium'
+        self.connect(self.ui.pushButton_stripVanPeaks, QtCore.SIGNAL('clicked()'),
+                self.doStripVandiumPeaks)
+        self.connect(self.ui.pushButton_saveVanRun, QtCore.SIGNAL('clicked()'),
+                self.doSaveVanRun)
+        self.connect(self.ui.pushButton_rebin2Theta, QtCore.SIGNAL('clicked()'),
+                self.doRebin2Theta)
+
         # tab 'Advanced Setup'
         self.connect(self.ui.pushButton_browseCache, QtCore.SIGNAL('clicked()'),
                 self.doBrowseCache)
@@ -88,46 +134,8 @@ class MainWindow(QtGui.QMainWindow):
         self.connect(self.ui.pushButton_browseLocalSrc, QtCore.SIGNAL('clicked()'),
                 self.doBrowseLocalDataSrc)
         self.connect(self.ui.pushButton_chkServer, QtCore.SIGNAL('clicked()'),
-                self.doCheckSrcServer)
-
-        # tab 'Raw Detectors'
-        self.connect(self.ui.pushButton_plotRaw, QtCore.SIGNAL('clicked()'),
-                self.doPlotRawDet)
-        self.connect(self.ui.pushButton_ptUp, QtCore.SIGNAL('clicked()'),
-                self.doPlotPrevPtRaw)
-        self.connect(self.ui.pushButton_ptDown, QtCore.SIGNAL('clicked()'),
-                self.doPlotNextPtRaw)
-
-        # tab 'Individual Detectors'
-        self.connect(self.ui.pushButton_plotIndvDet, QtCore.SIGNAL('clicked()'),
-                self.doPlotIndvDet)
-        self.connect(self.ui.pushButton_plotPrevDet, QtCore.SIGNAL('clicked()'),
-                self.doPlotPrevDetRaw)
-        self.connect(self.ui.pushButton_plotNextDet, QtCore.SIGNAL('clicked()'),
-                self.doPlotNextDetRaw)
-                
-        # main           
-        self.connect(self.ui.comboBox_wavelength, QtCore.SIGNAL('currentIndexChanged(int)'),
-                self.doUpdateWavelength)
-        self.connect(self.ui.actionQuit, QtCore.SIGNAL('triggered()'),
-                self.doExist)
-
-        # tab 'Vanadium'
-        self.connect(self.ui.pushButton_stripVanPeaks, QtCore.SIGNAL('clicked()'),
-                self.doStripVandiumPeaks)
-        self.connect(self.ui.pushButton_saveVanRun, QtCore.SIGNAL('clicked()'),
-                self.doSaveVanRun)
-        self.connect(self.ui.pushButton_rebin2Theta, QtCore.SIGNAL('clicked()'),
-                self.doRebin2Theta)
-
-        # tab 'Multiple Scans'
-        self.connect(self.ui.pushButton_mergeScans, QtCore.SIGNAL('clicked()'),
-                self.doMergeScans)
-        self.connect(self.ui.pushButton_view2D, QtCore.SIGNAL('clicked()'), 
-                self.doMergeScanView2D)
-        self.connect(self.ui.pushButton_viewMerge, QtCore.SIGNAL('clicked()'),
-                self.doMergeScanView1D)
-
+                self.doCheckSrcServer) 
+        
         # Define signal-event handling
         
         # define event handlers for matplotlib canvas
@@ -303,8 +311,31 @@ class MainWindow(QtGui.QMainWindow):
         
         return
 
+
+    def doClearIndDetCanvas(self):
+        """ Clear the canvas in tab 'Individual Detector'
+        """
+        # TODO ASAP
+        raise NotImplementedError("ASAP - doClearIndDetCanvas")
+
+
+    def doClearMultiRunCanvas(self):
+        """ Clear the canvas in tab 'Multiple Run'
+        """
+        # TODO ASAP
+        raise NotImplementedError("ASAP - doClearMultiRunCanvas")
+
+    def doClearRawDetCanvas(self):
+        """ Clear the canvas in tab 'Raw Detector'
+        """
+        # TODO ASAP
+        raise NotImplementedError("ASAP - doClearRawDetCanvas")
+
     def doLoadData(self):
         """ Load and reduce data 
+        It does not support for tab 'Multiple Scans' and 'Advanced Setup'
+        For tab 'Raw Detector' and 'Individual Detector', this method will load data to MDEventWorkspaces
+        For tab 'Normalized' and 'Vanadium', this method will load data to MDEVentWorkspaces and reduce to single spectrum
         """
         # Kick away unsupported tabs
         itab = self.ui.tabWidget.currentIndex()
@@ -335,6 +366,9 @@ class MainWindow(QtGui.QMainWindow):
         if status is False:
             self._logError("Unable to download or locate local data file for Exp %d \
                 Scan %d." % (expno, scanno))
+        # ENDIF(status)
+
+        # TODO - ASAP : Need a method to download the correction file and find out the wavelength!
 
         # Now do different tasks for different tab
         if itab == 0 or itab == 1:
@@ -370,9 +404,9 @@ class MainWindow(QtGui.QMainWindow):
                 # itab = 4 
                 unit = 'dSpacing'
                 try:
-                    xmin, binsize, xmax = self._uiGetBinningParams(xmin_w=self.ui.lineEdit_minD,
-                            binsize_w=self.ui.lineEdit_binsizeD,
-                            xmax_w=self.ui.lineEdit_maxD)
+                    xmin, binsize, xmax = self._uiGetBinningParams(xmin_w=self.ui.lineEdit_min2Theta,
+                            binsize_w=self.ui.lineEdit_binsize2Theta,
+                            xmax_w=self.ui.lineEdit_max2Theta)
                 except Exception as e:
                     self._logError(str(e))
                     return
@@ -404,6 +438,9 @@ class MainWindow(QtGui.QMainWindow):
                             xlabel, label="Exp %d Scan %d Bin = %.5f" % (expno, scanno, binsize), \
                             clearcanvas=clearcanvas)
             # ENDIF(execstatus)
+        else:
+            # Non-supported case
+            raise NotImplementedError('GUI has been changed, but the change has not been considered!')
         # END-IF-ELSE (itab)
             
         return execstatus
@@ -670,8 +707,11 @@ class MainWindow(QtGui.QMainWindow):
 
 
     def doPlotPrevDetRaw(self):
-        """ Plot previous raw detector
+        """ Plot previous raw detector signals for tab 'Individual Detector'
         """
+        # TODO - ASAP
+        raise NotImplementedError("ASAP doPlotPrevDetRaw")
+
         # check
         if self._ptNo is not None and self._detNo is not None:
             detno = self._detNo + 1
@@ -695,9 +735,10 @@ class MainWindow(QtGui.QMainWindow):
 
 
     def doPlotNextDetRaw(self):
-        """ Plot next raw detector signals for an individual detector
+        """ Plot next raw detector signals for tab 'Individual Detector'
         """
-        raise NotImplementedError("ASAP")
+        # TODO - ASAP
+        raise NotImplementedError("ASAP doPlotNextDetRaw")
 
         # check
         if self._ptNo is not None:
@@ -769,6 +810,12 @@ class MainWindow(QtGui.QMainWindow):
 
         return
 
+    def doPlotSampleLog(self):
+        """ Plot sample log vs. Pt. in tab 'Individual Detector'
+        """
+        logname = str(self.ui.comboBox_indvDetYLabel.currentText())
+        # TODO - ASAP
+        raise NotImplementedError("ASAP: doPlotSampleLog")
 
 
     def doRebin2Theta(self):
@@ -790,7 +837,7 @@ class MainWindow(QtGui.QMainWindow):
             return False
 
         # Get new binning parameters
-        unit = 'Degrees'
+        unit = '2theta'
         try: 
             xmin, binsize, xmax = self._uiGetBinningParams(xmin_w=self.ui.lineEdit_min2Theta, 
                     binsize_w=self.ui.lineEdit_binsize2Theta, 
@@ -973,8 +1020,8 @@ class MainWindow(QtGui.QMainWindow):
         
         self._viewMerge_X = event.xdata
         self._viewMerge_Y = event.ydata
-        
-        if int(prey) != int(self._viewMerge_Y):
+       
+        if prey is None or int(prey) != int(self._viewMerge_Y):
             print "Mouse is moving to ", event.xdata, event.ydata
 
         return

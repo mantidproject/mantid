@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1115</width>
-    <height>1024</height>
+    <width>1412</width>
+    <height>1216</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -116,7 +116,7 @@
            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Question about use case of tab'Raw Detectors': What do you want to see?&lt;/p&gt;&lt;p&gt;1. single detector's counts in all Pt.? &lt;/p&gt;&lt;p&gt;&amp;gt; what is the X-axis? Pt. or 2theta? &lt;/p&gt;&lt;p&gt;2. all detectors' counts in one Pt.?&lt;/p&gt;&lt;p&gt;&amp;gt; what is the X-axis? Det no or 2theta? &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
           </property>
           <property name="currentIndex">
-           <number>4</number>
+           <number>3</number>
           </property>
           <widget class="QWidget" name="tab_3">
            <attribute name="title">
@@ -1014,6 +1014,13 @@
                    </spacer>
                   </item>
                   <item>
+                   <widget class="QPushButton" name="pushButton_viewWaterFall">
+                    <property name="text">
+                     <string>Waterfall </string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
                    <widget class="QPushButton" name="pushButton_view2D">
                     <property name="text">
                      <string>View 2D</string>
@@ -1021,7 +1028,7 @@
                    </widget>
                   </item>
                   <item>
-                   <widget class="QPushButton" name="pushButton_saveMerge">
+                   <widget class="QPushButton" name="pushButton_saveAllIndScans">
                     <property name="text">
                      <string>Save All</string>
                     </property>
@@ -1055,9 +1062,32 @@
                    </widget>
                   </item>
                   <item>
-                   <widget class="QPushButton" name="pushButton_2">
+                   <widget class="QPushButton" name="pushButton_saveMerge">
                     <property name="text">
-                     <string>SAve Merged</string>
+                     <string>Save Merged</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <spacer name="verticalSpacer_19">
+                    <property name="orientation">
+                     <enum>Qt::Vertical</enum>
+                    </property>
+                    <property name="sizeType">
+                     <enum>QSizePolicy::Preferred</enum>
+                    </property>
+                    <property name="sizeHint" stdset="0">
+                     <size>
+                      <width>20</width>
+                      <height>40</height>
+                     </size>
+                    </property>
+                   </spacer>
+                  </item>
+                  <item>
+                   <widget class="QPushButton" name="pushButton_clearMultCanvas">
+                    <property name="text">
+                     <string>Clear</string>
                     </property>
                    </widget>
                   </item>
@@ -1635,8 +1665,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1115</width>
-     <height>22</height>
+     <width>1412</width>
+     <height>25</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
