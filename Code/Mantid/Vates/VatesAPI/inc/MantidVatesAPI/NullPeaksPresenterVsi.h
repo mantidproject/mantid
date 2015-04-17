@@ -23,7 +23,7 @@ public:
     throw std::runtime_error(
         "NullPeaksPresenterVsi does not implement this method. Misused");
   }
-  virtual void updateViewFrustum(ViewFrustum) {}
+  virtual void updateViewFrustum(ViewFrustum_sptr) {}
   virtual std::string getFrame() const {
     throw std::runtime_error(
         "NullPeaksPresenterVsi does not implement this method. Misused");

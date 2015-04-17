@@ -266,8 +266,7 @@ void PeaksTableControllerVsi::updatePeakWorkspaceColor() {
  * Update the view region for the presenters
  */
 void PeaksTableControllerVsi::updateViewableArea() {
-  Mantid::VATES::ViewFrustum frustum = m_cameraManager->getCurrentViewFrustum();
-  m_presenter->updateViewFrustum(frustum);
+  m_presenter->updateViewFrustum(m_cameraManager->getCurrentViewFrustum());
 }
 
 /**
