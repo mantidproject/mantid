@@ -64,7 +64,8 @@ public:
       const std::vector<std::string> &constraint, std::string &penaltyFactor,
       const std::string &fitFunc, const std::string &extractSingleValueAs,
       const std::string &eq, const Geometry::IComponent *comp,
-      double angleConvertConst);
+      double angleConvertConst,
+      const std::string &description);
 
   /// Destructor
   ~XMLInstrumentParameter() {}
@@ -108,6 +109,8 @@ public:
   /// otherwise if this const equals 180/pi it means that angle=radian is set in
   /// IDF
   double m_angleConvertConst;
+  /// if present, contains help string, describing the parameter
+  const std::string m_description;
 };
 
 } // namespace Geometry

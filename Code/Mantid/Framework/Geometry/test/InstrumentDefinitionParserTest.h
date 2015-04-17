@@ -34,7 +34,7 @@ private:
   };
 
   /**
-  Helper type to pass around related IDF enviroment information in a collection.
+  Helper type to pass around related IDF environment information in a collection.
   */
   struct IDFEnvironment
   {

@@ -6,7 +6,12 @@
 </component-link>
 
 <component-link name="IDF_for_UNIT_TESTING2.xml/combined translation6" >
-  <parameter name="fjols-test-paramfile"> <value val="50.0" /> </parameter>
+  <parameter name="fjols-test-paramfile"> 
+    <value val="50.0" /> 
+    <description is="test description
+    
+    full test description" />     
+  </parameter>
 </component-link>
 
 <component-link id="1301" >

@@ -310,7 +310,7 @@ InstrumentDefinitionParser::parseXML(Kernel::ProgressBase *prog) {
   setLogfile(m_instrument.get(), pRootElem, m_instrument->getLogfileCache());
 
   //
-  // do analysis for each top level compoment element
+  // do analysis for each top level component element
   //
   Poco::AutoPtr<NodeList> pNL_comp =
       pRootElem->childNodes(); // here get all child nodes
@@ -1782,262 +1782,275 @@ InstrumentDefinitionParser::setLogfile(const Geometry::IComponent *comp,
   for (unsigned long i = 0; i < pNL_comp_length; i++) {
     // we are only interest in the top level parameter elements hence
     // the reason for the if statement below
-    if ((pNL_comp->item(i))->nodeType() == Node::ELEMENT_NODE &&
-        ((pNL_comp->item(i))->nodeName()).compare("parameter") == 0) {
-      Element *pParamElem = static_cast<Element *>(pNL_comp->item(i));
+    if (!((pNL_comp->item(i))->nodeType() == Node::ELEMENT_NODE &&
+      ((pNL_comp->item(i))->nodeName()).compare("parameter") == 0))
+      continue;
 
-      if (!pParamElem->hasAttribute("name"))
+    Element *pParamElem = static_cast<Element *>(pNL_comp->item(i));
+
+    if (!pParamElem->hasAttribute("name"))
+      throw Kernel::Exception::InstrumentDefinitionError(
+      "XML element with name or type = " + comp->getName() +
+      " contain <parameter> element with no name attribute in XML "
+      "instrument file",
+      filename);
+
+    std::string paramName = pParamElem->getAttribute("name");
+
+    if (paramName.compare("rot") == 0 || paramName.compare("pos") == 0) {
+      g_log.error()
+        << "XML element with name or type = " << comp->getName()
+        << " contains <parameter> element with name=\"" << paramName
+        << "\"."
+        << " This is a reserved Mantid keyword. Please use other name, "
+        << "and see www.mantidproject.org/IDF for list of reserved "
+        "keywords."
+        << " This parameter is ignored";
+      continue;
+    }
+
+    std::string logfileID = "";
+    std::string value = "";
+
+    std::string type = "double";               // default
+    std::string extractSingleValueAs = "mean"; // default
+    std::string eq = "";
+
+    Poco::AutoPtr<NodeList> pNLvalue =
+      pParamElem->getElementsByTagName("value");
+    size_t numberValueEle = pNLvalue->length();
+    Element *pValueElem;
+
+    Poco::AutoPtr<NodeList> pNLlogfile =
+      pParamElem->getElementsByTagName("logfile");
+    size_t numberLogfileEle = pNLlogfile->length();
+    Element *pLogfileElem;
+
+    Poco::AutoPtr<NodeList> pNLLookUp =
+      pParamElem->getElementsByTagName("lookuptable");
+    size_t numberLookUp = pNLLookUp->length();
+
+    Poco::AutoPtr<NodeList> pNLFormula =
+      pParamElem->getElementsByTagName("formula");
+    size_t numberFormula = pNLFormula->length();
+
+
+    if(numberValueEle+ numberLogfileEle + numberLookUp + numberFormula > 1){
+      g_log.warning() << "XML element with name or type = " << comp->getName()
+          << " contains <parameter> element where the value of "
+          "the parameter has been specified"
+          << " more than once. See www.mantidproject.org/IDF for "
+          "how the value"
+          << " of the parameter is set in this case.";
+    }
+
+    if(numberValueEle + numberLogfileEle + numberLookUp + numberFormula == 0){
+        g_log.error()
+          << "XML element with name or type = " << comp->getName()
+          << " contains <parameter> for which no value is specified."
+          << " See www.mantidproject.org/IDF for how to set the value"
+          << " of a parameter. This parameter is ignored.";
+        continue;
+    }
+
+    // if more than one <value> specified for a parameter use only the first
+    // <value> element
+    if (numberValueEle >= 1) {
+      pValueElem = static_cast<Element *>(pNLvalue->item(0));
+      if (!pValueElem->hasAttribute("val"))
         throw Kernel::Exception::InstrumentDefinitionError(
-            "XML element with name or type = " + comp->getName() +
-                " contain <parameter> element with no name attribute in XML "
-                "instrument file",
-            filename);
+        "XML element with name or type = " + comp->getName() +
+        " contains <parameter> element with invalid syntax for its "
+        "subelement <value>." +
+        " Correct syntax is <value val=\"\"/>",
+        filename);
+      value = pValueElem->getAttribute("val");
+    } else if (numberLogfileEle >= 1) {
+      // <logfile > tag was used at least once.
+      pLogfileElem = static_cast<Element *>(pNLlogfile->item(0));
+      if (!pLogfileElem->hasAttribute("id"))
+        throw Kernel::Exception::InstrumentDefinitionError(
+        "XML element with name or type = " + comp->getName() +
+        " contains <parameter> element with invalid syntax for its "
+        "subelement logfile>." +
+        " Correct syntax is <logfile id=\"\"/>",
+        filename);
+      logfileID = pLogfileElem->getAttribute("id");
 
-      std::string paramName = pParamElem->getAttribute("name");
+      if (pLogfileElem->hasAttribute("eq"))
+        eq = pLogfileElem->getAttribute("eq");
+      if (pLogfileElem->hasAttribute("extract-single-value-as"))
+        extractSingleValueAs =
+        pLogfileElem->getAttribute("extract-single-value-as");
+    }
 
-      if (paramName.compare("rot") == 0 || paramName.compare("pos") == 0) {
-        g_log.error()
-            << "XML element with name or type = " << comp->getName()
-            << " contains <parameter> element with name=\"" << paramName
-            << "\"."
-            << " This is a reserved Mantid keyword. Please use other name, "
-            << "and see www.mantidproject.org/IDF for list of reserved "
-               "keywords."
-            << " This parameter is ignored";
-        continue;
-      }
+    if (pParamElem->hasAttribute("type"))
+      type = pParamElem->getAttribute("type");
 
-      std::string logfileID = "";
-      std::string value = "";
+    // check if <fixed /> element present
 
-      std::string type = "double";               // default
-      std::string extractSingleValueAs = "mean"; // default
-      std::string eq = "";
+    bool fixed = false;
+    Poco::AutoPtr<NodeList> pNLFixed =
+      pParamElem->getElementsByTagName("fixed");
+    size_t numberFixed = pNLFixed->length();
+    if (numberFixed >= 1) {
+      fixed = true;
+    }
 
-      Poco::AutoPtr<NodeList> pNLvalue =
-          pParamElem->getElementsByTagName("value");
-      size_t numberValueEle = pNLvalue->length();
-      Element *pValueElem;
+    // some processing
 
-      Poco::AutoPtr<NodeList> pNLlogfile =
-          pParamElem->getElementsByTagName("logfile");
-      size_t numberLogfileEle = pNLlogfile->length();
-      Element *pLogfileElem;
+    std::string fittingFunction = "";
+    std::string tie = "";
 
-      Poco::AutoPtr<NodeList> pNLLookUp =
-          pParamElem->getElementsByTagName("lookuptable");
-      size_t numberLookUp = pNLLookUp->length();
-
-      Poco::AutoPtr<NodeList> pNLFormula =
-          pParamElem->getElementsByTagName("formula");
-      size_t numberFormula = pNLFormula->length();
-
-      if (numberValueEle + numberLogfileEle + numberLookUp + numberFormula >
-          1) {
-        g_log.warning() << "XML element with name or type = " << comp->getName()
-                        << " contains <parameter> element where the value of "
-                           "the parameter has been specified"
-                        << " more than once. See www.mantidproject.org/IDF for "
-                           "how the value"
-                        << " of the parameter is set in this case.";
-      }
-
-      if (numberValueEle + numberLogfileEle + numberLookUp + numberFormula ==
-          0) {
-        g_log.error()
-            << "XML element with name or type = " << comp->getName()
-            << " contains <parameter> for which no value is specified."
-            << " See www.mantidproject.org/IDF for how to set the value"
-            << " of a parameter. This parameter is ignored.";
-        continue;
-      }
-
-      // if more than one <value> specified for a parameter use only the first
-      // <value> element
-      if (numberValueEle >= 1) {
-        pValueElem = static_cast<Element *>(pNLvalue->item(0));
-        if (!pValueElem->hasAttribute("val"))
-          throw Kernel::Exception::InstrumentDefinitionError(
-              "XML element with name or type = " + comp->getName() +
-                  " contains <parameter> element with invalid syntax for its "
-                  "subelement <value>." +
-                  " Correct syntax is <value val=\"\"/>",
-              filename);
-        value = pValueElem->getAttribute("val");
-      } else if (numberLogfileEle >= 1) {
-        // <logfile > tag was used at least once.
-        pLogfileElem = static_cast<Element *>(pNLlogfile->item(0));
-        if (!pLogfileElem->hasAttribute("id"))
-          throw Kernel::Exception::InstrumentDefinitionError(
-              "XML element with name or type = " + comp->getName() +
-                  " contains <parameter> element with invalid syntax for its "
-                  "subelement logfile>." +
-                  " Correct syntax is <logfile id=\"\"/>",
-              filename);
-        logfileID = pLogfileElem->getAttribute("id");
-
-        if (pLogfileElem->hasAttribute("eq"))
-          eq = pLogfileElem->getAttribute("eq");
-        if (pLogfileElem->hasAttribute("extract-single-value-as"))
-          extractSingleValueAs =
-              pLogfileElem->getAttribute("extract-single-value-as");
-      }
-
-      if (pParamElem->hasAttribute("type"))
-        type = pParamElem->getAttribute("type");
-
-      // check if <fixed /> element present
-
-      bool fixed = false;
-      Poco::AutoPtr<NodeList> pNLFixed =
-          pParamElem->getElementsByTagName("fixed");
-      size_t numberFixed = pNLFixed->length();
-      if (numberFixed >= 1) {
-        fixed = true;
-      }
-
-      // some processing
-
-      std::string fittingFunction = "";
-      std::string tie = "";
-
-      if (type.compare("fitting") == 0) {
-        size_t found = paramName.find(":");
-        if (found != std::string::npos) {
-          // check that only one : in name
-          size_t index = paramName.find(":", found + 1);
-          if (index != std::string::npos) {
-            g_log.error()
-                << "Fitting <parameter> in instrument definition file defined "
-                   "with"
-                << " more than one column character :. One must used.\n";
-          } else {
-            fittingFunction = paramName.substr(0, found);
-            paramName = paramName.substr(found + 1, paramName.size());
-          }
+    if (type.compare("fitting") == 0) {
+      size_t found = paramName.find(":");
+      if (found != std::string::npos) {
+        // check that only one : in name
+        size_t index = paramName.find(":", found + 1);
+        if (index != std::string::npos) {
+          g_log.error()
+            << "Fitting <parameter> in instrument definition file defined "
+            "with"
+            << " more than one column character :. One must used.\n";
+        } else {
+          fittingFunction = paramName.substr(0, found);
+          paramName = paramName.substr(found + 1, paramName.size());
         }
       }
+    }
 
-      if (fixed) {
-        std::ostringstream str;
-        str << paramName << "=" << value;
-        tie = str.str();
+    if (fixed) {
+      std::ostringstream str;
+      str << paramName << "=" << value;
+      tie = str.str();
+    }
+
+    // check if <min> or <max> elements present
+
+    std::vector<std::string> constraint(2, "");
+
+    Poco::AutoPtr<NodeList> pNLMin = pParamElem->getElementsByTagName("min");
+    size_t numberMin = pNLMin->length();
+    Poco::AutoPtr<NodeList> pNLMax = pParamElem->getElementsByTagName("max");
+    size_t numberMax = pNLMax->length();
+
+    if (numberMin >= 1) {
+      Element *pMin = static_cast<Element *>(pNLMin->item(0));
+      constraint[0] = pMin->getAttribute("val");
+    }
+    if (numberMax >= 1) {
+      Element *pMax = static_cast<Element *>(pNLMax->item(0));
+      constraint[1] = pMax->getAttribute("val");
+    }
+
+    // check if penalty-factor> elements present
+
+    std::string penaltyFactor;
+
+    Poco::AutoPtr<NodeList> pNL_penaltyFactor =
+      pParamElem->getElementsByTagName("penalty-factor");
+    size_t numberPenaltyFactor = pNL_penaltyFactor->length();
+
+    if (numberPenaltyFactor >= 1) {
+      Element *pPenaltyFactor =
+        static_cast<Element *>(pNL_penaltyFactor->item(0));
+      penaltyFactor = pPenaltyFactor->getAttribute("val");
+    }
+
+
+    // Check if look up table is specified
+
+    std::vector<std::string> allowedUnits = UnitFactory::Instance().getKeys();
+
+    boost::shared_ptr<Interpolation> interpolation(new Interpolation);
+
+    if (numberLookUp >= 1) {
+      Element *pLookUp = static_cast<Element *>(pNLLookUp->item(0));
+
+      if (pLookUp->hasAttribute("interpolation"))
+        interpolation->setMethod(pLookUp->getAttribute("interpolation"));
+      if (pLookUp->hasAttribute("x-unit")) {
+        std::vector<std::string>::iterator it;
+        it = find(allowedUnits.begin(), allowedUnits.end(),
+          pLookUp->getAttribute("x-unit"));
+        if (it == allowedUnits.end()) {
+          g_log.warning() << "x-unit used with interpolation table must be "
+            "one of the recognised units "
+            << " see http://www.mantidproject.org/Unit_Factory";
+        } else
+          interpolation->setXUnit(pLookUp->getAttribute("x-unit"));
+      }
+      if (pLookUp->hasAttribute("y-unit")) {
+        std::vector<std::string>::iterator it;
+        it = find(allowedUnits.begin(), allowedUnits.end(),
+          pLookUp->getAttribute("y-unit"));
+        if (it == allowedUnits.end()) {
+          g_log.warning() << "y-unit used with interpolation table must be "
+            "one of the recognised units "
+            << " see http://www.mantidproject.org/Unit_Factory";
+        } else
+          interpolation->setYUnit(pLookUp->getAttribute("y-unit"));
       }
 
-      // check if <min> or <max> elements present
+      Poco::AutoPtr<NodeList> pNLpoint =
+        pLookUp->getElementsByTagName("point");
+      unsigned long numberPoint = pNLpoint->length();
 
-      std::vector<std::string> constraint(2, "");
-
-      Poco::AutoPtr<NodeList> pNLMin = pParamElem->getElementsByTagName("min");
-      size_t numberMin = pNLMin->length();
-      Poco::AutoPtr<NodeList> pNLMax = pParamElem->getElementsByTagName("max");
-      size_t numberMax = pNLMax->length();
-
-      if (numberMin >= 1) {
-        Element *pMin = static_cast<Element *>(pNLMin->item(0));
-        constraint[0] = pMin->getAttribute("val");
+      for (unsigned long i = 0; i < numberPoint; i++) {
+        Element *pPoint = static_cast<Element *>(pNLpoint->item(i));
+        double x = atof(pPoint->getAttribute("x").c_str());
+        double y = atof(pPoint->getAttribute("y").c_str());
+        interpolation->addPoint(x, y);
       }
-      if (numberMax >= 1) {
-        Element *pMax = static_cast<Element *>(pNLMax->item(0));
-        constraint[1] = pMax->getAttribute("val");
+    }
+
+    // Check if formula is specified
+
+    std::string formula = "";
+    std::string formulaUnit = "";
+    std::string resultUnit = "";
+
+    if (numberFormula >= 1) {
+      Element *pFormula = static_cast<Element *>(pNLFormula->item(0));
+      formula = pFormula->getAttribute("eq");
+      if (pFormula->hasAttribute("unit")) {
+        std::vector<std::string>::iterator it;
+        it = find(allowedUnits.begin(), allowedUnits.end(),
+          pFormula->getAttribute("unit"));
+        if (it == allowedUnits.end()) {
+          g_log.warning() << "unit attribute used with formula must be one "
+            "of the recognized units "
+            << " see http://www.mantidproject.org/Unit_Factory";
+        } else
+          formulaUnit = pFormula->getAttribute("unit");
       }
+      if (pFormula->hasAttribute("result-unit"))
+        resultUnit = pFormula->getAttribute("result-unit");
+    }
+    // Check if parameter description is 
+    std::string description = "";
 
-      // check if penalty-factor> elements present
+    Poco::AutoPtr<NodeList> pNLDescription =
+        pParamElem->getElementsByTagName("description");
+    size_t numberDescription = pNLDescription ->length();
 
-      std::string penaltyFactor;
+    if (numberDescription >= 1){
+      Element *pDescription =
+        static_cast<Element *>(pNLDescription->item(0));
+      description = pDescription->getAttribute("is");
+    }
 
-      Poco::AutoPtr<NodeList> pNL_penaltyFactor =
-          pParamElem->getElementsByTagName("penalty-factor");
-      size_t numberPenaltyFactor = pNL_penaltyFactor->length();
-
-      if (numberPenaltyFactor >= 1) {
-        Element *pPenaltyFactor =
-            static_cast<Element *>(pNL_penaltyFactor->item(0));
-        penaltyFactor = pPenaltyFactor->getAttribute("val");
-      }
-
-      // Check if look up table is specified
-
-      std::vector<std::string> allowedUnits = UnitFactory::Instance().getKeys();
-
-      boost::shared_ptr<Interpolation> interpolation(new Interpolation);
-
-      if (numberLookUp >= 1) {
-        Element *pLookUp = static_cast<Element *>(pNLLookUp->item(0));
-
-        if (pLookUp->hasAttribute("interpolation"))
-          interpolation->setMethod(pLookUp->getAttribute("interpolation"));
-        if (pLookUp->hasAttribute("x-unit")) {
-          std::vector<std::string>::iterator it;
-          it = find(allowedUnits.begin(), allowedUnits.end(),
-                    pLookUp->getAttribute("x-unit"));
-          if (it == allowedUnits.end()) {
-            g_log.warning() << "x-unit used with interpolation table must be "
-                               "one of the recognised units "
-                            << " see http://www.mantidproject.org/Unit_Factory";
-          } else
-            interpolation->setXUnit(pLookUp->getAttribute("x-unit"));
-        }
-        if (pLookUp->hasAttribute("y-unit")) {
-          std::vector<std::string>::iterator it;
-          it = find(allowedUnits.begin(), allowedUnits.end(),
-                    pLookUp->getAttribute("y-unit"));
-          if (it == allowedUnits.end()) {
-            g_log.warning() << "y-unit used with interpolation table must be "
-                               "one of the recognised units "
-                            << " see http://www.mantidproject.org/Unit_Factory";
-          } else
-            interpolation->setYUnit(pLookUp->getAttribute("y-unit"));
-        }
-
-        Poco::AutoPtr<NodeList> pNLpoint =
-            pLookUp->getElementsByTagName("point");
-        unsigned long numberPoint = pNLpoint->length();
-
-        for (unsigned long i = 0; i < numberPoint; i++) {
-          Element *pPoint = static_cast<Element *>(pNLpoint->item(i));
-          double x = atof(pPoint->getAttribute("x").c_str());
-          double y = atof(pPoint->getAttribute("y").c_str());
-          interpolation->addPoint(x, y);
-        }
-      }
-
-      // Check if formula is specified
-
-      std::string formula = "";
-      std::string formulaUnit = "";
-      std::string resultUnit = "";
-
-      if (numberFormula >= 1) {
-        Element *pFormula = static_cast<Element *>(pNLFormula->item(0));
-        formula = pFormula->getAttribute("eq");
-        if (pFormula->hasAttribute("unit")) {
-          std::vector<std::string>::iterator it;
-          it = find(allowedUnits.begin(), allowedUnits.end(),
-                    pFormula->getAttribute("unit"));
-          if (it == allowedUnits.end()) {
-            g_log.warning() << "unit attribute used with formula must be one "
-                               "of the recognised units "
-                            << " see http://www.mantidproject.org/Unit_Factory";
-          } else
-            formulaUnit = pFormula->getAttribute("unit");
-        }
-        if (pFormula->hasAttribute("result-unit"))
-          resultUnit = pFormula->getAttribute("result-unit");
-      }
-
-      auto cacheKey = std::make_pair(paramName, comp);
-      auto cacheValue =
-          boost::shared_ptr<XMLInstrumentParameter>(new XMLInstrumentParameter(
-              logfileID, value, interpolation, formula, formulaUnit, resultUnit,
-              paramName, type, tie, constraint, penaltyFactor, fittingFunction,
-              extractSingleValueAs, eq, comp, m_angleConvertConst));
-      auto inserted = logfileCache.insert(std::make_pair(cacheKey, cacheValue));
-      if (!inserted.second) {
-        logfileCache[cacheKey] = cacheValue;
-      }
-    } // end of if statement
-  }
+    auto cacheKey = std::make_pair(paramName, comp);
+    auto cacheValue =
+      boost::shared_ptr<XMLInstrumentParameter>(new XMLInstrumentParameter(
+      logfileID, value, interpolation, formula, formulaUnit, resultUnit,
+      paramName, type, tie, constraint, penaltyFactor, fittingFunction,
+      extractSingleValueAs, eq, comp, m_angleConvertConst,description));
+    auto inserted = logfileCache.insert(std::make_pair(cacheKey, cacheValue));
+    if (!inserted.second) {
+      logfileCache[cacheKey] = cacheValue;
+    }
+  } // end element loop
 }
 
 //-----------------------------------------------------------------------------------------------------------------------
