@@ -132,6 +132,8 @@ public:
                         bool use_cache = true) const;
   /// Searches for a key in the configuration property
   std::vector<std::string> getKeys(const std::string &keyName) const;
+  /// Returns a list of all full keys in the config
+  std::vector<std::string> keys() const;
   /// Removes the value from a selected keyName
   void remove(const std::string &rootName) const;
   /// Checks to see whether a key has a value assigned to it
@@ -290,6 +292,9 @@ private:
   /// if valid
   bool addDirectoryifExists(const std::string &directoryName,
                             std::vector<std::string> &directoryList);
+  /// Returns a list of all keys under a given root key
+  void getKeysRecursive(const std::string &root,
+                        std::vector<std::string> &allKeys) const;
 
   // Forward declaration of inner class
   template <class T> class WrappedObject;

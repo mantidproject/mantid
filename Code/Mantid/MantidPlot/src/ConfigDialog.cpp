@@ -83,6 +83,7 @@ Description          : Preferences dialog
 
 #include <limits>
 
+using Mantid::Kernel::ConfigService;
 
 ConfigDialog::ConfigDialog( QWidget* parent, Qt::WFlags fl )
   : QDialog( parent, fl )
@@ -677,23 +678,21 @@ void ConfigDialog::initMantidPage()
   //Ignore paraview.
   ckIgnoreParaView = new QCheckBox("Ignore ParaView");
   ckIgnoreParaView->setToolTip("Don't bother me with anything to do with ParaView.\nRequires restart of MantidPlot to take effect.");
-  Mantid::Kernel::ConfigServiceImpl& conf = Mantid::Kernel::ConfigService::Instance();
+  auto& cfgSvc = ConfigService::Instance();
   const std::string ignoreParaViewProperty = "paraview.ignore";
-  bool ignoreParaView = conf.hasProperty(ignoreParaViewProperty) && bool(atoi(conf.getString(ignoreParaViewProperty).c_str()));
+  bool ignoreParaView =  cfgSvc.hasProperty(ignoreParaViewProperty) && bool(atoi(cfgSvc.getString(ignoreParaViewProperty).c_str()));
   ckIgnoreParaView->setChecked(ignoreParaView);
   grid->addWidget(ckIgnoreParaView, 3, 0);
 
   // Populate boxes
-  Mantid::Kernel::ConfigServiceImpl & mantid_config = Mantid::Kernel::ConfigService::Instance();
-
-  auto faclist = mantid_config.getFacilityNames();
+  auto faclist =  cfgSvc.getFacilityNames();
   for ( auto it = faclist.begin(); it != faclist.end(); ++it )
   {
     facility->addItem(QString::fromStdString(*it));
   }
 
   // Set default property
-  QString property = QString::fromStdString(mantid_config.getFacility().name());
+  QString property = QString::fromStdString( cfgSvc.getFacility().name());
   int index = facility->findText(property);
   if( index < 0 )
   {
@@ -723,7 +722,7 @@ void ConfigDialog::initMdPlottingPage()
   // VSI tab
   initMdPlottingVsiTab();
 
-  // Set the connections 
+  // Set the connections
   setupMdPlottingConnections();
 
   // Update the visibility of the Vsi tab if the General Md Color Map was selected the last time
@@ -865,7 +864,7 @@ void ConfigDialog::initMdPlottingVsiTab()
 }
 
 /**
- * Set up the connections for Md Plotting 
+ * Set up the connections for Md Plotting
  */
 void ConfigDialog::setupMdPlottingConnections()
 {
@@ -986,7 +985,7 @@ void ConfigDialog::initSendToProgramTab()
   //Add buttons to the bottom of the widget
   deleteButton = new QPushButton(tr("Delete"));
   deleteButton->setEnabled(false);
-  connect(deleteButton, SIGNAL(clicked()), this, SLOT(deleteDialog()));    
+  connect(deleteButton, SIGNAL(clicked()), this, SLOT(deleteDialog()));
   editButton = new QPushButton(tr("Edit..."));
   editButton->setEnabled(false);
   connect(editButton, SIGNAL(clicked()), this, SLOT(editDialog()));
@@ -1021,7 +1020,7 @@ void ConfigDialog::enableButtons()
   QList<QTreeWidgetItem *> selectedItems = treePrograms->selectedItems();
   //Set the buttons on whether the conditions are met. Reducing the amount of user errors
   if (selectedItems.size() == 0)
-  {  
+  {
     deleteButton->setEnabled(false);
     editButton->setEnabled(false);
   }
@@ -1124,7 +1123,7 @@ void ConfigDialog::deleteDialog()
     {
       //For each program selected, remove all details from the user.properties file;
       for (int i = 0; i<selectedItems.size(); ++i)
-      {      
+      {
         m_sendToSettings.erase(selectedItems[i]->text(0).toStdString());
       }
       //clear the tree and repopulate it without the programs that have just been deleted
@@ -1163,8 +1162,8 @@ void ConfigDialog::updateProgramTree()
   //Store into a map ready to go into config service when apply is clicked
   std::map<std::string, std::map<std::string,std::string> >::const_iterator itr = m_sendToSettings.begin();
   for( ; itr != m_sendToSettings.end(); ++itr)
-  {    
-    //creating the map of kvps needs to happen first as createing the item requires them. 
+  {
+    //creating the map of kvps needs to happen first as createing the item requires them.
     std::map<std::string, std::string> programKeysAndDetails = itr->second;
 
     //Populate list
@@ -1189,11 +1188,11 @@ void ConfigDialog::updateChildren(std::map<std::string, std::string> &programKey
 
 void ConfigDialog::updateSendToTab()
 {
-  Mantid::Kernel::ConfigServiceImpl& mantid_config = Mantid::Kernel::ConfigService::Instance();
+  Mantid::Kernel::ConfigServiceImpl&  cfgSvc = Mantid::Kernel::ConfigService::Instance();
 
   //Add new values to the config service
   std::map<std::string, std::map<std::string,std::string> >::const_iterator itr = m_sendToSettings.begin();
-  std::vector<std::string> programNames = mantid_config.getKeys("workspace.sendto.name");
+  std::vector<std::string> programNames =  cfgSvc.getKeys("workspace.sendto.name");
 
   for( ; itr != m_sendToSettings.end(); ++itr)
   {
@@ -1206,7 +1205,7 @@ void ConfigDialog::updateSendToTab()
       }
     }
 
-    mantid_config.setString("workspace.sendto.name." + itr->first , "0");
+     cfgSvc.setString("workspace.sendto.name." + itr->first , "0");
 
     std::map<std::string, std::string> programKeysAndDetails = itr->second;
 
@@ -1215,8 +1214,8 @@ void ConfigDialog::updateSendToTab()
     for( ; pItr != programKeysAndDetails.end(); ++pItr)
     {
       if(pItr->second != "")
-        mantid_config.setString("workspace.sendto." + itr->first + "." + pItr->first, pItr->second);
-    }  
+         cfgSvc.setString("workspace.sendto." + itr->first + "." + pItr->first, pItr->second);
+    }
   }
 
   //Delete the keys that are in the config but not in the temporary m_sendToSettings map
@@ -1224,11 +1223,11 @@ void ConfigDialog::updateSendToTab()
   {
     if (programNames[i] != "")
     {
-      mantid_config.remove("workspace.sendto.name." + programNames[i]);
-      std::vector<std::string> programKeys = mantid_config.getKeys("workspace.sendto." + programNames[i]);
+       cfgSvc.remove("workspace.sendto.name." + programNames[i]);
+      std::vector<std::string> programKeys =  cfgSvc.getKeys("workspace.sendto." + programNames[i]);
       for (size_t j = 0; j<programKeys.size(); ++j)
       {
-        mantid_config.remove("workspace.sendto." + programNames[i] + "." +  programKeys[j]);
+         cfgSvc.remove("workspace.sendto." + programNames[i] + "." +  programKeys[j]);
       }
     }
   }
@@ -1415,7 +1414,7 @@ void ConfigDialog::initCurveFittingTab()
   backgroundFunctions->addItem("None");
   Mantid::API::FunctionFactoryImpl & function_creator = Mantid::API::FunctionFactory::Instance();
   std::vector<std::string> allfunctions = function_creator.getKeys();
-  size_t nfuncs = allfunctions.size(); 
+  size_t nfuncs = allfunctions.size();
   for( size_t i = 0; i < nfuncs; ++i )
   {
     std::string name = allfunctions[i];
@@ -1546,7 +1545,7 @@ void ConfigDialog::initOptionsPage()
   boxDistribution = new QCheckBox();
   boxDistribution->setChecked(app->autoDistribution1D);
   optionsLayout->addWidget( boxDistribution, 3, 0);
-  
+
   labelFrameWidth = new QLabel();
   optionsLayout->addWidget( labelFrameWidth, 4, 0 );
   boxFrameWidth= new QSpinBox();
@@ -2231,6 +2230,9 @@ void ConfigDialog::apply()
   app->d_in_place_editing = !boxLabelsEditing->isChecked();
   app->titleOn=boxTitle->isChecked();
   app->autoDistribution1D = boxDistribution->isChecked();
+  // Sync with config service
+  ConfigService::Instance().setString("graph1d.autodistribution",
+                                      boxDistribution->isChecked() ? "On" : "Off");
   if (boxFrame->isChecked())
     app->canvasFrameWidth = boxFrameWidth->value();
   else
@@ -2402,12 +2404,12 @@ void ConfigDialog::apply()
   // resize the list to the maximum width
   itemsList->resize(itemsList->maximumWidth(),itemsList->height());
 
-  //Mantid 
-  Mantid::Kernel::ConfigServiceImpl& mantid_config = Mantid::Kernel::ConfigService::Instance();
+  //Mantid
+  Mantid::Kernel::ConfigServiceImpl&  cfgSvc = Mantid::Kernel::ConfigService::Instance();
 
-  mantid_config.setString("default.facility", facility->currentText().toStdString());
-  mantid_config.setString("default.instrument", defInstr->currentText().toStdString());
-  mantid_config.setString("paraview.ignore", QString::number(ckIgnoreParaView->isChecked()).toStdString());
+   cfgSvc.setString("default.facility", facility->currentText().toStdString());
+   cfgSvc.setString("default.instrument", defInstr->currentText().toStdString());
+   cfgSvc.setString("paraview.ignore", QString::number(ckIgnoreParaView->isChecked()).toStdString());
 
 
   updateDirSearchSettings();
@@ -2417,11 +2419,11 @@ void ConfigDialog::apply()
 
   try
   {
-    mantid_config.saveConfig(mantid_config.getUserFilename());
+     cfgSvc.saveConfig( cfgSvc.getUserFilename());
   }
   catch(std::runtime_error&)
   {
-    QMessageBox::warning(this, "MantidPlot", 
+    QMessageBox::warning(this, "MantidPlot",
       "Unable to update Mantid user properties file.\n"
       "Configuration will not be saved.");
   }
@@ -2435,9 +2437,9 @@ void ConfigDialog::apply()
  */
 void ConfigDialog::updateMdPlottingSettings()
 {
-  //////// GENERAL TAB 
+  //////// GENERAL TAB
 
-  // Read the common color map check box 
+  // Read the common color map check box
   if (mdPlottingGeneralFrame->isChecked())
   {
     m_mdSettings.setUsageGeneralMdColorMap(true);
@@ -2484,25 +2486,25 @@ void ConfigDialog::updateMdPlottingSettings()
 
 void ConfigDialog::updateDirSearchSettings()
 {
-  Mantid::Kernel::ConfigServiceImpl& mantid_config = Mantid::Kernel::ConfigService::Instance();
+  Mantid::Kernel::ConfigServiceImpl&  cfgSvc = Mantid::Kernel::ConfigService::Instance();
 
   QString setting = lePythonScriptsDirs->text();
   setting.replace('\\','/');
-  mantid_config.setString("pythonscripts.directories",setting.toStdString());
+   cfgSvc.setString("pythonscripts.directories",setting.toStdString());
 
   setting = lePythonPluginsDirs->text();
   setting.replace('\\','/');
-  mantid_config.setString("user.python.plugins.directories",setting.toStdString());
+   cfgSvc.setString("user.python.plugins.directories",setting.toStdString());
 
   setting = leInstrumentDir->text();
   setting.replace('\\','/');
-  mantid_config.setString("instrumentDefinition.directory",setting.toStdString());
+   cfgSvc.setString("instrumentDefinition.directory",setting.toStdString());
 
 }
 
 void ConfigDialog::updateCurveFitSettings()
 {
-  Mantid::Kernel::ConfigServiceImpl& mantid_config = Mantid::Kernel::ConfigService::Instance();
+  Mantid::Kernel::ConfigServiceImpl&  cfgSvc = Mantid::Kernel::ConfigService::Instance();
 
   // Form setting string from function name and parameters
   QString fname = backgroundFunctions->currentText();
@@ -2516,49 +2518,49 @@ void ConfigDialog::updateCurveFitSettings()
 
   ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parentWidget());
 
-  //mantid_config.setString("curvefitting.autoBackground", setting);
+  // cfgSvc.setString("curvefitting.autoBackground", setting);
   app->mantidUI->fitFunctionBrowser()->setAutoBackgroundName(QString::fromStdString(setting));
 
   setting = defaultPeakShape->currentText().toStdString();
-  //mantid_config.setString("curvefitting.defaultPeak", setting);
+  // cfgSvc.setString("curvefitting.defaultPeak", setting);
   app->mantidUI->fitFunctionBrowser()->setDefaultPeakType(setting);
 
   setting = QString::number(findPeaksFWHM->value()).toStdString();
-  mantid_config.setString("curvefitting.findPeaksFWHM", setting);
+   cfgSvc.setString("curvefitting.findPeaksFWHM", setting);
 
   setting = QString::number(findPeaksTolerance->value()).toStdString();
-  mantid_config.setString("curvefitting.findPeaksTolerance", setting);
+   cfgSvc.setString("curvefitting.findPeaksTolerance", setting);
 
   setting = QString::number(peakRadius->value()).toStdString();
-  mantid_config.setString("curvefitting.peakRadius", setting);
+   cfgSvc.setString("curvefitting.peakRadius", setting);
 
   app->mantidUI->fitFunctionBrowser()->setDecimals(decimals->value());
 }
 
 void ConfigDialog::updateMantidOptionsTab()
 {
-  Mantid::Kernel::ConfigServiceImpl& mantid_config = Mantid::Kernel::ConfigService::Instance();
+  auto& cfgSvc = ConfigService::Instance();
 
   // re-use plot instances (spectra, slice, color-fill, etc.)
   QString reusePlotInst = m_reusePlotInstances->isChecked()? "On" : "Off";
-  mantid_config.setString("MantidOptions.ReusePlotInstances",reusePlotInst.toStdString());
+   cfgSvc.setString("MantidOptions.ReusePlotInstances",reusePlotInst.toStdString());
 
   //invisible workspaces options
   QString showinvisible_ws = m_invisibleWorkspaces->isChecked()? "1" : "0";
-  mantid_config.setString("MantidOptions.InvisibleWorkspaces",showinvisible_ws.toStdString());
+   cfgSvc.setString("MantidOptions.InvisibleWorkspaces",showinvisible_ws.toStdString());
 
   //OpenGL option
   QString setting = m_useOpenGL->isChecked() ? "On" : "Off";
-  mantid_config.setString("MantidOptions.InstrumentView.UseOpenGL",setting.toStdString());
+   cfgSvc.setString("MantidOptions.InstrumentView.UseOpenGL",setting.toStdString());
 
   //Hidden categories
   QString hiddenCategories = buildHiddenCategoryString().join(";");
 
   //store it if it has changed
   std::string hiddenCategoryString = hiddenCategories.toStdString();
-  if (hiddenCategoryString != mantid_config.getString("algorithms.categories.hidden"))
+  if (hiddenCategoryString !=  cfgSvc.getString("algorithms.categories.hidden"))
   {
-    mantid_config.setString("algorithms.categories.hidden",hiddenCategoryString);
+     cfgSvc.setString("algorithms.categories.hidden",hiddenCategoryString);
 
     //update the algorithm tree
     ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parentWidget());
@@ -2896,5 +2898,3 @@ void ConfigDialog::addInstrumentDir()
     leInstrumentDir->setText(dir);
   }
 }
-
-

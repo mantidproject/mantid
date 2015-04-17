@@ -265,6 +265,7 @@ std::map<QString, QString> IndirectDataReduction::getInstrumentDetails()
   ipfElements.push_back("back-end");
   ipfElements.push_back("rebin-default");
   ipfElements.push_back("cm-1-convert-choice");
+  ipfElements.push_back("save-nexus-choice");
   ipfElements.push_back("save-ascii-choice");
   ipfElements.push_back("fold-frames-choice");
 

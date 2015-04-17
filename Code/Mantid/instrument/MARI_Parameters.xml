@@ -414,6 +414,7 @@
        wb_integr_range=detector_van_range;
        van_mass=vanadium-mass;
        check_background = background;
+       motor_log_names = motor_name;
        mon1_norm_spec=norm-mon1-spec;
        mon2_norm_spec=norm-mon2-spec;       
        scale_factor=scale-factor;

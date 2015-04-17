@@ -52,8 +52,7 @@ LoadISISNexus2::LoadISISNexus2()
       m_load_selected_spectra(false), m_specInd2specNum_map(), m_spec2det_map(),
       m_entrynumber(0), m_tof_data(), m_proton_charge(0.), m_spec(),
       m_spec_end(NULL), m_monitors(), m_logCreator(), m_progress(),
-      m_cppFile() {
-}
+      m_cppFile() {}
 
 /**
 * Return the confidence criteria for this algorithm can load the file
@@ -231,14 +230,13 @@ void LoadISISNexus2::exec() {
       m_filename, local_workspace, "raw_data_1", this);
   if (m_load_selected_spectra)
     m_spec2det_map = SpectrumDetectorMapping(spec(), udet(), udet.dim0());
-  else
-    if (bseparateMonitors) {
-      m_spec2det_map = SpectrumDetectorMapping(spec(), udet(), udet.dim0());
-      local_workspace->updateSpectraUsing(m_spec2det_map);
-    }else{
-      local_workspace->updateSpectraUsing(
+  else if (bseparateMonitors) {
+    m_spec2det_map = SpectrumDetectorMapping(spec(), udet(), udet.dim0());
+    local_workspace->updateSpectraUsing(m_spec2det_map);
+  } else {
+    local_workspace->updateSpectraUsing(
         SpectrumDetectorMapping(spec(), udet(), udet.dim0()));
-    }
+  }
 
   if (!foundInstrument) {
     runLoadInstrument(local_workspace);
@@ -263,7 +261,7 @@ void LoadISISNexus2::exec() {
     m_tof_data.reset(new MantidVec(timeBins(), timeBins() + x_length));
   }
   int64_t firstentry = (m_entrynumber > 0) ? m_entrynumber : 1;
-  loadPeriodData(firstentry, entry, local_workspace,m_load_selected_spectra);
+  loadPeriodData(firstentry, entry, local_workspace, m_load_selected_spectra);
 
   // Clone the workspace at this point to provide a base object for future
   // workspace generation.
@@ -273,9 +271,9 @@ void LoadISISNexus2::exec() {
 
   createPeriodLogs(firstentry, local_workspace);
 
+  WorkspaceGroup_sptr wksp_group(new WorkspaceGroup);
   if (m_detBlockInfo.numberOfPeriods > 1 && m_entrynumber == 0) {
 
-    WorkspaceGroup_sptr wksp_group(new WorkspaceGroup);
     wksp_group->setTitle(local_workspace->getTitle());
 
     // This forms the name of the group
@@ -289,7 +287,7 @@ void LoadISISNexus2::exec() {
       if (p > 1) {
         local_workspace = boost::dynamic_pointer_cast<DataObjects::Workspace2D>(
             WorkspaceFactory::Instance().create(period_free_workspace));
-        loadPeriodData(p, entry, local_workspace,m_load_selected_spectra);
+        loadPeriodData(p, entry, local_workspace, m_load_selected_spectra);
         createPeriodLogs(p, local_workspace);
         // Check consistency of logs data for multi-period workspaces and raise
         // warnings where necessary.
@@ -302,62 +300,99 @@ void LoadISISNexus2::exec() {
                   boost::static_pointer_cast<Workspace>(local_workspace));
     }
     // The group is the root property value
-    if (!bseparateMonitors)
-      setProperty("OutputWorkspace",
-                  boost::dynamic_pointer_cast<Workspace>(wksp_group));
+    setProperty("OutputWorkspace",
+                boost::dynamic_pointer_cast<Workspace>(wksp_group));
   } else {
-    if (!bseparateMonitors)
-      setProperty("OutputWorkspace",
-                  boost::dynamic_pointer_cast<Workspace>(local_workspace));
+    setProperty("OutputWorkspace",
+                boost::dynamic_pointer_cast<Workspace>(local_workspace));
   }
 
   //***************************************************************************************************
   // Workspace or group of workspaces without monitors is loaded. Now we are
   // loading monitors separately.
   if (bseparateMonitors) {
-    setProperty("OutputWorkspace",
-                boost::dynamic_pointer_cast<Workspace>(local_workspace));
-    if (m_detBlockInfo.numberOfPeriods > 1) {
-      g_log.error() << " Separate monitor workspace loading have not been "
-                       "implemented for multiperiod workspaces. Performed "
-                       "separate monitors loading\n";
-    } else {
-      std::string wsName = getProperty("OutputWorkspace");
-      if (m_monBlockInfo.numberOfSpectra == 0) {
-        g_log.information() << " no monitors to load for workspace: " << wsName
-                            << std::endl;
-      } else {
-        x_length = m_monBlockInfo.numberOfChannels + 1;
-        DataObjects::Workspace2D_sptr monitor_workspace =
-            boost::dynamic_pointer_cast<DataObjects::Workspace2D>(
-                WorkspaceFactory::Instance().create(
-                    local_workspace, m_monBlockInfo.numberOfSpectra, x_length,
-                    m_monBlockInfo.numberOfChannels));
-        local_workspace->setMonitorWorkspace(monitor_workspace);
+    std::string wsName = getPropertyValue("OutputWorkspace");
+    if (m_monBlockInfo.numberOfSpectra > 0) {
+      x_length = m_monBlockInfo.numberOfChannels + 1;
+      // reset the size of the period free workspace to the monitor size
+      period_free_workspace =
+          boost::dynamic_pointer_cast<DataObjects::Workspace2D>(
+              WorkspaceFactory::Instance().create(
+                  period_free_workspace, m_monBlockInfo.numberOfSpectra,
+                  x_length, m_monBlockInfo.numberOfChannels));
+      auto monitor_workspace =
+          boost::dynamic_pointer_cast<DataObjects::Workspace2D>(
+              WorkspaceFactory::Instance().create(period_free_workspace));
 
-        m_spectraBlocks.clear();
-        m_specInd2specNum_map.clear();
-        std::vector<int64_t> dummyS1;
-        // at the moment here we clear this map to enable possibility to load
-        // monitors from the spectra block (wiring table bug).
-        // if monitor's spectra present in the detectors block due to this bug
-        // should be read from monitors, this map should be dealt with properly.
-        ExcluedMonitorsSpectra.clear();
-        buildSpectraInd2SpectraNumMap(true, m_monBlockInfo.spectraID_min,
-                                      m_monBlockInfo.spectraID_max, dummyS1,
-                                      ExcluedMonitorsSpectra);
-        // lo
-        prepareSpectraBlocks(m_monitors, m_specInd2specNum_map, m_monBlockInfo);
+      m_spectraBlocks.clear();
+      m_specInd2specNum_map.clear();
+      std::vector<int64_t> dummyS1;
+      // at the moment here we clear this map to enable possibility to load
+      // monitors from the spectra block (wiring table bug).
+      // if monitor's spectra present in the detectors block due to this bug
+      // should be read from monitors, this map should be dealt with properly.
+      ExcluedMonitorsSpectra.clear();
+      buildSpectraInd2SpectraNumMap(true, m_monBlockInfo.spectraID_min,
+                                    m_monBlockInfo.spectraID_max, dummyS1,
+                                    ExcluedMonitorsSpectra);
+      // lo
+      prepareSpectraBlocks(m_monitors, m_specInd2specNum_map, m_monBlockInfo);
 
-        int64_t firstentry = (m_entrynumber > 0) ? m_entrynumber : 1;
-        loadPeriodData(firstentry, entry, monitor_workspace,true);
+      int64_t firstentry = (m_entrynumber > 0) ? m_entrynumber : 1;
+      loadPeriodData(firstentry, entry, monitor_workspace, true);
+      local_workspace->setMonitorWorkspace(monitor_workspace);
 
-        std::string monitorwsName = wsName + "_monitors";
+      ISISRunLogs monLogCreator(monitor_workspace->run(),
+                                m_detBlockInfo.numberOfPeriods);
+      monLogCreator.addPeriodLogs(1, monitor_workspace->mutableRun());
+
+      const std::string monitorPropBase = "MonitorWorkspace";
+      const std::string monitorWsNameBase = wsName + "_monitors";
+      if (m_detBlockInfo.numberOfPeriods > 1 && m_entrynumber == 0) {
+        WorkspaceGroup_sptr monitor_group(new WorkspaceGroup);
+        monitor_group->setTitle(monitor_workspace->getTitle());
+
+        for (int p = 1; p <= m_detBlockInfo.numberOfPeriods; ++p) {
+          std::ostringstream os;
+          os << "_" << p;
+          m_progress->report("Loading period " + os.str());
+          if (p > 1) {
+            monitor_workspace =
+                boost::dynamic_pointer_cast<DataObjects::Workspace2D>(
+                    WorkspaceFactory::Instance().create(period_free_workspace));
+            loadPeriodData(p, entry, monitor_workspace,
+                           m_load_selected_spectra);
+            monLogCreator.addPeriodLogs(p, monitor_workspace->mutableRun());
+            // Check consistency of logs data for multi-period workspaces and
+            // raise
+            // warnings where necessary.
+            validateMultiPeriodLogs(monitor_workspace);
+            auto data_ws = boost::static_pointer_cast<API::MatrixWorkspace>(
+                wksp_group->getItem(p - 1));
+            data_ws->setMonitorWorkspace(monitor_workspace);
+          }
+          declareProperty(new WorkspaceProperty<Workspace>(
+              monitorPropBase + os.str(), monitorWsNameBase + os.str(),
+              Direction::Output));
+          monitor_group->addWorkspace(monitor_workspace);
+          setProperty(monitorPropBase + os.str(),
+                      boost::static_pointer_cast<Workspace>(monitor_workspace));
+        }
+        // The group is the root property value
         declareProperty(new WorkspaceProperty<Workspace>(
-            "MonitorWorkspace", monitorwsName, Direction::Output));
-        setProperty("MonitorWorkspace",
+            monitorPropBase, monitorWsNameBase, Direction::Output));
+        setProperty(monitorPropBase,
+                    boost::dynamic_pointer_cast<Workspace>(monitor_group));
+
+      } else {
+        declareProperty(new WorkspaceProperty<Workspace>(
+            monitorPropBase, monitorWsNameBase, Direction::Output));
+        setProperty(monitorPropBase,
                     boost::static_pointer_cast<Workspace>(monitor_workspace));
       }
+    } else {
+      g_log.information() << " no monitors to load for workspace: " << wsName
+                          << std::endl;
     }
   }
 
@@ -695,7 +730,7 @@ size_t LoadISISNexus2::prepareSpectraBlocks(
 * @param entry :: The opened root entry node for accessing the monitor and data
 * nodes
 * @param local_workspace :: The workspace to place the data in
-* @param update_spectra_det_map :: reset spectra-detector map to the one
+* @param update_spectra2det_mapping :: reset spectra-detector map to the one
 * calculated earlier. (Warning! -- this map has to be calculated correctly!)
 */
 void

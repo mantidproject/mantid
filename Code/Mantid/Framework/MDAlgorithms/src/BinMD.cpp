@@ -408,6 +408,17 @@ void BinMD::exec() {
     IterateEvents = true;
   }
 
+  /*
+  We should fail noisily here. CALL_MDEVENT_FUNCTION will silently allow IMDHistoWorkspaces to cascade through to the end
+  and result in an empty output. The only way we allow InputWorkspaces to be IMDHistoWorkspaces is if they also happen to contain original workspaces
+  that are MDEventWorkspaces.
+  */
+  if(boost::dynamic_pointer_cast<IMDHistoWorkspace>(m_inWS))
+  {
+      throw std::runtime_error("Cannot rebin a workspace that is histogrammed and has no original workspace that is an MDEventWorkspace. "
+                               "Reprocess the input so that it contains full MDEvents.");
+  }
+
   CALL_MDEVENT_FUNCTION(this->binByIterating, m_inWS);
 
   // Copy the

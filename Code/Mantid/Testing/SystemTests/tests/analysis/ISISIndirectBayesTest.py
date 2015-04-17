@@ -1,4 +1,4 @@
-#pylint: disable=no-init
+#pylint: disable=no-init,attribute-defined-outside-init
 import stresstesting
 import os
 from mantid.simpleapi import *

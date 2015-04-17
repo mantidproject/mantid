@@ -978,8 +978,7 @@ ConfigServiceImpl::getKeys(const std::string &keyName) const {
   try {
     m_pConf->keys(keyName, rawKeys);
     // Work around a limitation of Poco < v1.4 which has no remove functionality
-    // so
-    // check those that have been marked with the correct flag
+    // so check those that have been marked with the correct flag
     const size_t nraw = rawKeys.size();
     for (size_t i = 0; i < nraw; ++i) {
       const std::string key = rawKeys[i];
@@ -998,6 +997,44 @@ ConfigServiceImpl::getKeys(const std::string &keyName) const {
     keyVector.clear();
   }
   return keyVector;
+}
+
+/**
+ * Recursively gets a list of all config options from a given root node.
+ *
+ * @return Vector containing all config options
+ */
+void ConfigServiceImpl::getKeysRecursive(const std::string &root,
+    std::vector<std::string> &allKeys) const {
+  std::vector<std::string> rootKeys = getKeys(root);
+
+  if(rootKeys.empty())
+    allKeys.push_back(root);
+
+  for (auto rkIt = rootKeys.begin(); rkIt != rootKeys.end(); ++rkIt) {
+    std::string searchString;
+    if (root.empty()) {
+      searchString = *rkIt;
+    } else {
+      searchString = root + "." + *rkIt;
+    }
+
+    getKeysRecursive(searchString, allKeys);
+  }
+}
+
+/**
+ * Recursively gets a list of all config options.
+ *
+ * This function is needed as Boost Python does not like calling function with
+ * default arguments.
+ *
+ * @return Vector containing all config options
+ */
+std::vector<std::string> ConfigServiceImpl::keys() const {
+  std::vector<std::string> allKeys;
+  getKeysRecursive("", allKeys);
+  return allKeys;
 }
 
 /** Removes a key from the memory stored properties file and inserts the key

@@ -129,6 +129,11 @@
             <string>Cylinder</string>
            </property>
           </item>
+          <item>
+           <property name="text">
+            <string>Annulus</string>
+           </property>
+          </item>
          </widget>
         </item>
        </layout>
@@ -152,6 +157,9 @@
           </item>
           <item row="3" column="0">
            <widget class="QLabel" name="lbFlatCanFrontThickness">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
             <property name="text">
              <string>Container Front Thickness:</string>
             </property>
@@ -159,6 +167,9 @@
           </item>
           <item row="3" column="2">
            <widget class="QLabel" name="lbFlatCanBackThickness">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
             <property name="text">
              <string>Container Back Thickness:</string>
             </property>
@@ -166,6 +177,9 @@
           </item>
           <item row="3" column="3">
            <widget class="QDoubleSpinBox" name="spFlatCanBackThickness">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
             <property name="suffix">
              <string> cm</string>
             </property>
@@ -186,6 +200,9 @@
           </item>
           <item row="3" column="1">
            <widget class="QDoubleSpinBox" name="spFlatCanFrontThickness">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
             <property name="suffix">
              <string> cm</string>
             </property>
@@ -279,26 +296,13 @@
            </widget>
           </item>
           <item row="0" column="0">
-           <widget class="QLabel" name="lbCylSampleInnerRadius">
+           <widget class="QLabel" name="lbCylSampleOuterRadius">
             <property name="text">
-             <string>Sample Inner Radius:</string>
+             <string>Sample Radius:</string>
             </property>
            </widget>
           </item>
           <item row="0" column="1">
-           <widget class="QDoubleSpinBox" name="spCylSampleInnerRadius">
-            <property name="decimals">
-             <number>3</number>
-            </property>
-            <property name="maximum">
-             <double>9999.989999999999782</double>
-            </property>
-            <property name="singleStep">
-             <double>0.100000000000000</double>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="3">
            <widget class="QDoubleSpinBox" name="spCylSampleOuterRadius">
             <property name="decimals">
              <number>3</number>
@@ -311,22 +315,11 @@
             </property>
            </widget>
           </item>
-          <item row="0" column="2">
-           <widget class="QLabel" name="lbCylSampleOuterRadius">
-            <property name="text">
-             <string>Sample Outer Radius:</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="0">
-           <widget class="QLabel" name="lbCylCanOuterRadius">
-            <property name="text">
-             <string>Container Outer Radius:</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="1">
+          <item row="0" column="3">
            <widget class="QDoubleSpinBox" name="spCylCanOuterRadius">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
             <property name="decimals">
              <number>3</number>
             </property>
@@ -337,6 +330,133 @@
              <double>0.100000000000000</double>
             </property>
            </widget>
+          </item>
+          <item row="0" column="2">
+           <widget class="QLabel" name="lbCylCanOuterRadius">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="text">
+             <string>Container Radius:</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+        <widget class="QWidget" name="pgAnnulus">
+         <layout class="QGridLayout" name="gridLayout_5">
+          <property name="margin">
+           <number>0</number>
+          </property>
+          <item row="5" column="3">
+           <widget class="QDoubleSpinBox" name="spAnnBeamWidth">
+            <property name="decimals">
+             <number>3</number>
+            </property>
+            <property name="singleStep">
+             <double>0.100000000000000</double>
+            </property>
+           </widget>
+          </item>
+          <item row="5" column="2">
+           <widget class="QLabel" name="lbAnnBeamWidth">
+            <property name="text">
+             <string>Beam Width:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="5" column="0">
+           <widget class="QLabel" name="lbAnnBeamHeight">
+            <property name="text">
+             <string>Beam Height:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="5" column="1">
+           <widget class="QDoubleSpinBox" name="spAnnBeamHeight">
+            <property name="decimals">
+             <number>3</number>
+            </property>
+            <property name="singleStep">
+             <double>0.100000000000000</double>
+            </property>
+           </widget>
+          </item>
+          <item row="7" column="0">
+           <widget class="QLabel" name="lbAnnStepSize">
+            <property name="text">
+             <string>Step Size:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="7" column="1">
+           <widget class="QDoubleSpinBox" name="spAnnStepSize">
+            <property name="decimals">
+             <number>4</number>
+            </property>
+            <property name="singleStep">
+             <double>0.001000000000000</double>
+            </property>
+            <property name="value">
+             <double>0.002000000000000</double>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="lbAnnCanOuterRadius">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="text">
+             <string>Container Outer Radius:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QDoubleSpinBox" name="spAnnCanOuterRadius">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="decimals">
+             <number>3</number>
+            </property>
+            <property name="maximum">
+             <double>9999.989999999999782</double>
+            </property>
+            <property name="singleStep">
+             <double>0.100000000000000</double>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="3">
+           <widget class="QDoubleSpinBox" name="spAnnSampleOuterRadius">
+            <property name="decimals">
+             <number>3</number>
+            </property>
+            <property name="maximum">
+             <double>9999.989999999999782</double>
+            </property>
+            <property name="singleStep">
+             <double>0.100000000000000</double>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="2">
+           <widget class="QLabel" name="lbAnnSampleOuterRadius">
+            <property name="text">
+             <string>Sample Outer Radius:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="0">
+           <widget class="QLabel" name="lbAnnSampleInnerRadius">
+            <property name="text">
+             <string>Sample Inner Radius:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QDoubleSpinBox" name="spAnnSampleInnerRadius"/>
           </item>
          </layout>
         </widget>
@@ -488,10 +608,34 @@
      </property>
      <layout class="QHBoxLayout" name="horizontalLayout">
       <item>
-       <widget class="QCheckBox" name="ckPlotOutput">
+       <widget class="QLabel" name="lbPlotOutput">
         <property name="text">
-         <string>Plot Output</string>
+         <string>Plot Output:</string>
         </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QComboBox" name="cbPlotOutput">
+        <item>
+         <property name="text">
+          <string>None</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Wavelength</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Angle</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Both</string>
+         </property>
+        </item>
        </widget>
       </item>
       <item>
@@ -533,17 +677,17 @@
   <tabstop>spFlatSampleAngle</tabstop>
   <tabstop>spFlatCanFrontThickness</tabstop>
   <tabstop>spFlatCanBackThickness</tabstop>
-  <tabstop>spCylSampleInnerRadius</tabstop>
-  <tabstop>spCylSampleOuterRadius</tabstop>
-  <tabstop>spCylCanOuterRadius</tabstop>
   <tabstop>spCylBeamHeight</tabstop>
   <tabstop>spCylBeamWidth</tabstop>
   <tabstop>spCylStepSize</tabstop>
+  <tabstop>spAnnBeamHeight</tabstop>
+  <tabstop>spAnnBeamWidth</tabstop>
+  <tabstop>spAnnStepSize</tabstop>
   <tabstop>spSampleNumberDensity</tabstop>
   <tabstop>leSampleChemicalFormula</tabstop>
   <tabstop>spCanNumberDensity</tabstop>
   <tabstop>leCanChemicalFormula</tabstop>
-  <tabstop>ckPlotOutput</tabstop>
+  <tabstop>cbPlotOutput</tabstop>
   <tabstop>ckSave</tabstop>
  </tabstops>
  <resources/>
@@ -575,8 +719,8 @@
      <y>65</y>
     </hint>
     <hint type="destinationlabel">
-     <x>330</x>
-     <y>481</y>
+     <x>339</x>
+     <y>389</y>
     </hint>
    </hints>
   </connection>
@@ -591,8 +735,152 @@
      <y>65</y>
     </hint>
     <hint type="destinationlabel">
-     <x>487</x>
+     <x>640</x>
      <y>65</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ckUseCan</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>lbFlatCanFrontThickness</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>173</x>
+     <y>65</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>99</x>
+     <y>222</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ckUseCan</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>lbFlatCanBackThickness</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>173</x>
+     <y>65</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>413</x>
+     <y>222</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ckUseCan</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>spFlatCanFrontThickness</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>173</x>
+     <y>65</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>256</x>
+     <y>222</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ckUseCan</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>spFlatCanBackThickness</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>173</x>
+     <y>65</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>569</x>
+     <y>222</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ckUseCan</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>lbCylCanOuterRadius</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>173</x>
+     <y>65</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>115</x>
+     <y>178</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ckUseCan</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>spCylCanOuterRadius</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>173</x>
+     <y>65</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>119</x>
+     <y>178</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>spFlatCanFrontThickness</sender>
+   <signal>valueChanged(double)</signal>
+   <receiver>spFlatCanBackThickness</receiver>
+   <slot>setValue(double)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>256</x>
+     <y>222</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>569</x>
+     <y>222</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ckUseCan</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>lbAnnCanOuterRadius</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>173</x>
+     <y>65</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>119</x>
+     <y>178</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>ckUseCan</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>spAnnCanOuterRadius</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>173</x>
+     <y>65</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>119</x>
+     <y>178</y>
     </hint>
    </hints>
   </connection>

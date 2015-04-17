@@ -4,6 +4,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAlgorithms/CheckWorkspacesMatch.h"
+#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidDataObjects/EventWorkspace.h"
@@ -33,6 +34,7 @@ public:
 
   CheckWorkspacesMatchTest() : ws1(WorkspaceCreationHelper::Create2DWorkspace123(2,2))
   {
+    FrameworkManager::Instance();
   }
   
   void testName()

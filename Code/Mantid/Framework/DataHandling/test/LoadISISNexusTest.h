@@ -18,6 +18,8 @@
 #include "MantidDataHandling/LoadISISNexus.h"
 #include "MantidDataHandling/LoadISISNexus2.h"
 
+#include <cmath>
+
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::DataHandling;
@@ -46,7 +48,7 @@ private:
   // Helper method to check that the log data contains a specific period number entry.
   void checkPeriodLogData(MatrixWorkspace_sptr workspace, int expectedPeriodNumber)
   {
-    Property* p = NULL; 
+    Property* p = NULL;
     TS_ASSERT_THROWS_NOTHING(p = fetchPeriodLog(workspace, expectedPeriodNumber));
     TS_ASSERT(p != NULL)
       TSM_ASSERT_THROWS("Shouldn't have a period less than the expected entry", fetchPeriodLog(workspace, expectedPeriodNumber-1), Mantid::Kernel::Exception::NotFoundError);
@@ -112,8 +114,8 @@ public:
     TS_ASSERT_EQUALS(mon_ws->readY(0)[3],0.);
 
 
-  
     const std::vector< Property* >& logs = mon_ws->run().getLogData();
+    for(size_t i = 0; i < logs.size(); ++i) std::cerr << logs[i]->name() << "\n";
     TS_ASSERT_EQUALS(logs.size(), 62);
 
     std::string header = mon_ws->run().getPropertyValueAsType<std::string>("run_header");
@@ -633,38 +635,62 @@ public:
     AnalysisDataService::Instance().remove("outWS");
   }
 
-  void xestExecMonExcludedInTheEnd()
+  void testExecMultiPeriodMonitorSeparate()
   {
-    Mantid::API::FrameworkManager::Instance();
     LoadISISNexus2 ld;
+    ld.setChild(true);
     ld.initialize();
-    ld.setPropertyValue("Filename","MAPS00018314.nxs");
-    ld.setPropertyValue("SpectrumMin","2");
-    ld.setPropertyValue("SpectrumMax","10");
-    ld.setPropertyValue("OutputWorkspace","outWS");
-    ld.setPropertyValue("LoadMonitors","Separate"); //
+    ld.setPropertyValue("Filename","POLREF00004699.nxs");
+    ld.setPropertyValue("OutputWorkspace","__unused_for_child");
+    ld.setPropertyValue("LoadMonitors","Separate");
     TS_ASSERT_THROWS_NOTHING(ld.execute());
     TS_ASSERT(ld.isExecuted());
 
+    Workspace_sptr detWS = ld.getProperty("OutputWorkspace");
+    auto detGroup = boost::dynamic_pointer_cast<WorkspaceGroup>(detWS);
+    TS_ASSERT(detGroup);
+    Workspace_sptr monWS = ld.getProperty("MonitorWorkspace");
+    auto monGroup = boost::dynamic_pointer_cast<WorkspaceGroup>(monWS);
+    TS_ASSERT(monGroup);
 
-    MatrixWorkspace_sptr ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("outWS");
-    TS_ASSERT_EQUALS(ws->blocksize(),2000);
-    TS_ASSERT_EQUALS(ws->getNumberHistograms(),9);
+    if(!(detGroup && monGroup)) return;
 
-    MatrixWorkspace_sptr ws_mon = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("outWS_monitors");
-    TS_ASSERT(ws_mon)
+    TS_ASSERT_EQUALS(2, detGroup->size());
+    TS_ASSERT_EQUALS(2, monGroup->size());
 
-    TS_ASSERT_EQUALS(ws_mon->blocksize(),2000);
-    TS_ASSERT_EQUALS(ws_mon->getNumberHistograms(),4);
-    TS_ASSERT_DELTA(ws_mon->readX(0)[0],10,1.e-8);
+    auto detWS0 = boost::dynamic_pointer_cast<MatrixWorkspace>(detGroup->getItem(0));
+    TS_ASSERT_EQUALS(1000, detWS0->blocksize());
+    TS_ASSERT_EQUALS(243, detWS0->getNumberHistograms());
+    TS_ASSERT_DELTA(105, detWS0->readX(1)[1], 1e-08);
+    TS_ASSERT_DELTA(2, detWS0->readY(1)[1], 1e-08);
+    TS_ASSERT_DELTA(std::sqrt(2.0), detWS0->readE(1)[1], 1e-08);
+    TS_ASSERT_EQUALS(detWS0->getSpectrum(0)->getSpectrumNo(),4);
 
+    auto monWS0 = boost::dynamic_pointer_cast<MatrixWorkspace>(monGroup->getItem(0));
+    TS_ASSERT_EQUALS(1000, monWS0->blocksize());
+    TS_ASSERT_EQUALS(3, monWS0->getNumberHistograms());
+    TS_ASSERT_DELTA(105, monWS0->readX(1)[1], 1e-08);
+    TS_ASSERT_DELTA(12563.0, monWS0->readY(0)[1], 1e-08);
+    TS_ASSERT_DELTA(std::sqrt(12563.0), monWS0->readE(0)[1], 1e-08);
+    TS_ASSERT_EQUALS(monWS0->getSpectrum(0)->getSpectrumNo(),1);
+    TS_ASSERT_EQUALS(monWS0->getSpectrum(2)->getSpectrumNo(),3);
 
-    TS_ASSERT_EQUALS(ws_mon->getSpectrum(0)->getSpectrumNo(),41473);
-    TS_ASSERT_EQUALS(ws_mon->getSpectrum(3)->getSpectrumNo(),41476);
-
-
-    AnalysisDataService::Instance().remove("outWS");
-    AnalysisDataService::Instance().remove("outWS_monitors");
+    auto monWS1 = boost::dynamic_pointer_cast<MatrixWorkspace>(monGroup->getItem(1));
+    TS_ASSERT_EQUALS(1000, monWS1->blocksize());
+    TS_ASSERT_EQUALS(3, monWS1->getNumberHistograms());
+    TS_ASSERT_DELTA(105, monWS1->readX(1)[1], 1e-08);
+    TS_ASSERT_DELTA(12595.0, monWS1->readY(0)[1], 1e-08);
+    TS_ASSERT_DELTA(std::sqrt(12595.0), monWS1->readE(0)[1], 1e-08);
+    TS_ASSERT_EQUALS(monWS1->getSpectrum(0)->getSpectrumNo(),1);
+    TS_ASSERT_EQUALS(monWS1->getSpectrum(2)->getSpectrumNo(),3);
+  
+    // Same number of logs
+    const auto & monPeriod1Run = monWS0->run();
+    const auto & monPeriod2Run = monWS1->run();
+    TS_ASSERT_EQUALS(monPeriod1Run.getLogData().size(), monPeriod2Run.getLogData().size() );
+    TS_ASSERT(monPeriod1Run.hasProperty("period 1"))
+    TS_ASSERT(monPeriod2Run.hasProperty("period 2"))
+    
   }
 
 };

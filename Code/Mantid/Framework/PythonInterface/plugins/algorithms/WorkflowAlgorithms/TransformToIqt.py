@@ -23,7 +23,7 @@ class TransformToIqt(PythonAlgorithm):
 
 
     def category(self):
-        return "Workflow\\Inelastic;PythonAlgorithms"
+        return "Workflow\\Inelastic;PythonAlgorithms;Workflow\\MIDAS"
 
 
     def summary(self):

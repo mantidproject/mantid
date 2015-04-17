@@ -3,6 +3,22 @@
 
 require 'pathname'
 
+def copyFile(file)
+    p "copying file #{file}"
+    output = system("cp #{file} Contents/MacOS/")
+    if output != true
+        exit 1
+    end
+end
+
+def addPythonLibrary(directory)
+    p "copying directory #{directory}"
+    output = system("rsync -a --exclude=.pyc #{directory} Contents/MacOS/")
+    if output != true
+        exit 1
+    end
+end
+
 lib_dir = Pathname.new("/usr/local/lib")
 openssl_dir = Pathname.new("/usr/local/opt/openssl/lib")
 
@@ -51,11 +67,11 @@ library_filenames = ["libboost_regex-mt.dylib",
 #This copies the libraries over, then changes permissions and the id from /usr/local/lib to @rpath
 library_filenames.each do |filename|
     if filename.include? "libssl.dylib"
-        `cp #{openssl_dir+filename} Contents/MacOS/`
+        copyFile(openssl_dir+filename)
     elsif  filename.include? "libcrypto.dylib"
-        `cp #{openssl_dir+filename} Contents/MacOS/`
+        copyFile(openssl_dir+filename)
     else
-        `cp #{lib_dir+filename} Contents/MacOS/`
+        copyFile(lib_dir+filename)
     end
     `chmod +w Contents/MacOS/#{filename}`
     `install_name_tool -id @rpath/#{filename} Contents/MacOS/#{filename}`
@@ -151,32 +167,20 @@ end
 `install_name_tool -change /usr/local/lib/QtCore.framework/Versions/4/QtCore @loader_path/../../Frameworks/QtCore.framework/Versions/4/QtCore Contents/MacOS/PyQt4/QtXml.so`
 
 #Copy over python libraries not included with OSX. 
-`cp -r /Library/Python/2.7/site-packages/sphinx Contents/MacOS/`
-`cp -r /Library/Python/2.7/site-packages/sphinx_bootstrap_theme Contents/MacOS/`
-`cp -r /Library/Python/2.7/site-packages/IPython Contents/MacOS/`
-`cp -r /Library/Python/2.7/site-packages/zmq Contents/MacOS/`
-`cp -r /Library/Python/2.7/site-packages/pygments Contents/MacOS/`
-
-#add other dependencies found in current package
 #currently missing epics
-`cp /Library/Python/2.7/site-packages/gnureadline.so Contents/MacOS/`
-`cp /Library/Python/2.7/site-packages/readline.py Contents/MacOS/`
-`cp /Library/Python/2.7/site-packages/readline.pyc Contents/MacOS/`
-`cp /Library/Python/2.7/site-packages/pyparsing.py Contents/MacOS/`
-`cp /Library/Python/2.7/site-packages/pyparsing.pyc Contents/MacOS/`
-`cp -r /Library/Python/2.7/site-packages/_markerlib/ Contents/MacOS/`
-`cp -r /Library/Python/2.7/site-packages/backports Contents/MacOS/`
-`cp -r /Library/Python/2.7/site-packages/certifi Contents/MacOS/`
-`cp -r /Library/Python/2.7/site-packages/tornado Contents/MacOS/`
-`cp -r /Library/Python/2.7/site-packages/markupsafe Contents/MacOS/`
-`cp -r /Library/Python/2.7/site-packages/jinja2 Contents/MacOS/`
-`cp -r /usr/local/lib/python2.7/site-packages/nxs Contents/MacOS/`
-`cp -r /Library/Python/2.7/site-packages/psutil Contents/MacOS/`
+path = "/Library/Python/2.7/site-packages"
+directories = ["sphinx","sphinx_bootstrap_theme","IPython","zmq","pygments","backports","certifi","tornado","markupsafe","jinja2","psutil"]
+directories.each do |directory|
+  addPythonLibrary("#{path}/#{directory}")
+end
+
+files = ["gnureadline.so","readline.py","pyparsing.py"]
+files.each do |file|
+  copyFile("#{path}/#{file}")
+end
+
 `mkdir Contents/MacOS/bin`
 `cp /usr/local/bin/ipython Contents/MacOS/bin/`
-
-# current .pyc files have permissions issues. These files are recreated by CPack.
-`rm Contents/MacOS/nxs/*.pyc`
 
 #Lastly check for any libraries in the package linking against homebrew libraries.
 search_patterns.each do |pattern|
@@ -185,6 +189,7 @@ search_patterns.each do |pattern|
     dependencies.split("\n").each do |dependency|
       if dependency.include? "/usr/local/"
          p "issue with library: #{library} linked against: #{dependency}"
+         exit 1
       end
     end
   end

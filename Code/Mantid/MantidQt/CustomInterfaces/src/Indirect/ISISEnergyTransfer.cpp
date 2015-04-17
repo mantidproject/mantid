@@ -1,12 +1,13 @@
 #include "MantidQtCustomInterfaces/Indirect/ISISEnergyTransfer.h"
 
-#include "MantidQtCustomInterfaces/Background.h"
+#include "MantidGeometry/IDTypes.h"
 #include "MantidQtCustomInterfaces/UserInputValidator.h"
 
 #include <QFileInfo>
 #include <QInputDialog>
 
 using namespace Mantid::API;
+using MantidQt::API::BatchAlgorithmRunner;
 
 namespace MantidQt
 {
@@ -105,10 +106,9 @@ namespace CustomInterfaces
 
   void ISISEnergyTransfer::run()
   {
-    using MantidQt::API::BatchAlgorithmRunner;
-
-    IAlgorithm_sptr reductionAlg = AlgorithmManager::Instance().create("InelasticIndirectReduction", -1);
+    IAlgorithm_sptr reductionAlg = AlgorithmManager::Instance().create("ISISIndirectEnergyTransfer");
     reductionAlg->initialize();
+    BatchAlgorithmRunner::AlgorithmRuntimeProps reductionRuntimeProps;
 
     reductionAlg->setProperty("Instrument", getInstrumentConfiguration()->getInstrumentName().toStdString());
     reductionAlg->setProperty("Analyser", getInstrumentConfiguration()->getAnalyserName().toStdString());
@@ -118,7 +118,6 @@ namespace CustomInterfaces
     reductionAlg->setProperty("InputFiles", files.toStdString());
 
     reductionAlg->setProperty("SumFiles", m_uiForm.ckSumFiles->isChecked());
-    reductionAlg->setProperty("LoadLogs", m_uiForm.ckLoadLogs->isChecked());
 
     if(m_uiForm.ckUseCalib->isChecked())
     {
@@ -129,7 +128,7 @@ namespace CustomInterfaces
     std::vector<long> detectorRange;
     detectorRange.push_back(m_uiForm.spSpectraMin->value());
     detectorRange.push_back(m_uiForm.spSpectraMax->value());
-    reductionAlg->setProperty("DetectorRange", detectorRange);
+    reductionAlg->setProperty("SpectraRange", detectorRange);
 
     if(m_uiForm.ckBackgroundRemoval->isChecked())
     {
@@ -156,32 +155,23 @@ namespace CustomInterfaces
     if(m_uiForm.ckScaleMultiplier->isChecked())
       reductionAlg->setProperty("ScaleFactor", m_uiForm.spScaleMultiplier->value());
 
-    if(m_uiForm.cbGroupingOptions->currentText() != "Default")
-    {
-      QString grouping = createMapFile(m_uiForm.cbGroupingOptions->currentText());
-      reductionAlg->setProperty("Grouping", grouping.toStdString());
-    }
+    if(m_uiForm.ckCm1Units->isChecked())
+      reductionAlg->setProperty("UnitX", "DeltaE_inWavenumber");
 
-    reductionAlg->setProperty("Fold", m_uiForm.ckFold->isChecked());
-    reductionAlg->setProperty("SaveCM1", m_uiForm.ckCm1Units->isChecked());
+    QPair<QString, QString> grouping = createMapFile(m_uiForm.cbGroupingOptions->currentText());
+    reductionAlg->setProperty("GroupingMethod", grouping.first.toStdString());
+
+    if(grouping.first == "Workspace")
+      reductionRuntimeProps["GroupingWorkspace"] = grouping.second.toStdString();
+    else if(grouping.second == "File")
+      reductionAlg->setProperty("MapFile", grouping.second.toStdString());
+
+    reductionAlg->setProperty("FoldMultipleFrames", m_uiForm.ckFold->isChecked());
+    reductionAlg->setProperty("Plot", m_uiForm.cbPlotType->currentText().toStdString());
     reductionAlg->setProperty("SaveFormats", getSaveFormats());
-
     reductionAlg->setProperty("OutputWorkspace", "IndirectEnergyTransfer_Workspaces");
 
-    // Plot Output options
-    switch(m_uiForm.cbPlotType->currentIndex())
-    {
-      case 0: // "None"
-        break;
-      case 1: // "Spectra"
-        reductionAlg->setProperty("Plot", "spectra");
-        break;
-      case 2: // "Contour"
-        reductionAlg->setProperty("Plot", "contour");
-        break;
-    }
-
-    m_batchAlgoRunner->addAlgorithm(reductionAlg);
+    m_batchAlgoRunner->addAlgorithm(reductionAlg, reductionRuntimeProps);
 
     connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(algorithmComplete(bool)));
     disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(plotRawComplete(bool)));
@@ -254,7 +244,7 @@ namespace CustomInterfaces
       m_uiForm.leRebinString->setText(instDetails["rebin-default"]);
       m_uiForm.ckDoNotRebin->setChecked(false);
       QStringList rbp = instDetails["rebin-default"].split(",", QString::SkipEmptyParts);
-      if ( rbp.size() == 3 )
+      if(rbp.size() == 3)
       {
         m_uiForm.spRebinLow->setValue(rbp[0].toDouble());
         m_uiForm.spRebinWidth->setValue(rbp[1].toDouble());
@@ -279,6 +269,12 @@ namespace CustomInterfaces
     {
       bool defaultOptions = instDetails["cm-1-convert-choice"] == "true";
       m_uiForm.ckCm1Units->setChecked(defaultOptions);
+    }
+
+    if(!instDetails["save-nexus-choice"].isEmpty())
+    {
+      bool defaultOptions = instDetails["save-nexus-choice"] == "true";
+      m_uiForm.ckSaveNexus->setChecked(defaultOptions);
     }
 
     if(!instDetails["save-ascii-choice"].isEmpty())
@@ -319,7 +315,7 @@ namespace CustomInterfaces
    * @param groupType :: Type of grouping (All, Group, Indiviual)
    * @return path to mapping file, or an empty string if file could not be created.
    */
-  QString ISISEnergyTransfer::createMapFile(const QString& groupType)
+  QPair<QString, QString> ISISEnergyTransfer::createMapFile(const QString& groupType)
   {
     QString specRange = m_uiForm.spSpectraMin->text() + "," + m_uiForm.spSpectraMax->text();
 
@@ -327,10 +323,9 @@ namespace CustomInterfaces
     {
       QString groupFile = m_uiForm.dsMapFile->getFirstFilename();
       if(groupFile == "")
-      {
         emit showMessageBox("You must enter a path to the .map file.");
-      }
-      return groupFile;
+
+      return qMakePair(QString("File"), groupFile);
     }
     else if(groupType == "Groups")
     {
@@ -346,18 +341,22 @@ namespace CustomInterfaces
 
       m_batchAlgoRunner->addAlgorithm(groupingAlg);
 
-      return groupWS;
+      return qMakePair(QString("Workspace"), groupWS);
+    }
+    else if (groupType == "Default")
+    {
+      return qMakePair(QString("IPF"), QString());
     }
     else
     {
       // Catch All and Individual
-      return groupType;
+      return qMakePair(groupType, QString());
     }
   }
 
   /**
    * Converts the checkbox selection to a comma delimited list of save formats for the
-   * InelasticIndirectReduction algorithm.
+   * ISISIndirectEnergyTransfer algorithm.
    *
    * @return A vector of save formats
    */
@@ -386,6 +385,7 @@ namespace CustomInterfaces
    */
   void ISISEnergyTransfer::plotRaw()
   {
+    using Mantid::specid_t;
     using MantidQt::API::BatchAlgorithmRunner;
 
     if(!m_uiForm.dsRunFiles->isValid())
@@ -394,9 +394,14 @@ namespace CustomInterfaces
       return;
     }
 
-    std::vector<int> detectorRange;
-    detectorRange.push_back(m_uiForm.spSpectraMin->value());
-    detectorRange.push_back(m_uiForm.spSpectraMax->value());
+    specid_t detectorMin = static_cast<specid_t>(m_uiForm.spPlotTimeSpecMin->value());
+    specid_t detectorMax = static_cast<specid_t>(m_uiForm.spPlotTimeSpecMax->value());
+
+    if(detectorMin > detectorMax)
+    {
+      emit showMessageBox("Minimum spectra must be less than or equal to maximum spectra.");
+      return;
+    }
 
     QString rawFile = m_uiForm.dsRunFiles->getFirstFilename();
     QFileInfo rawFileInfo(rawFile);
@@ -406,12 +411,26 @@ namespace CustomInterfaces
     loadAlg->initialize();
     loadAlg->setProperty("Filename", rawFile.toStdString());
     loadAlg->setProperty("OutputWorkspace", name);
-    loadAlg->setProperty("SpectrumMin", detectorRange[0]);
-    loadAlg->setProperty("SpectrumMax", detectorRange[1]);
+    loadAlg->setProperty("SpectrumMin", detectorMin);
+    loadAlg->setProperty("SpectrumMax", detectorMax);
     m_batchAlgoRunner->addAlgorithm(loadAlg);
 
-    BatchAlgorithmRunner::AlgorithmRuntimeProps inputFromLoad;
-    inputFromLoad["InputWorkspace"] = name;
+    // Rebin the workspace to its self to ensure constant binning
+    BatchAlgorithmRunner::AlgorithmRuntimeProps inputToRebin;
+    inputToRebin["WorkspaceToMatch"] = name;
+    inputToRebin["WorkspaceToRebin"] = name;
+    inputToRebin["OutputWorkspace"] = name;
+
+    IAlgorithm_sptr rebinAlg = AlgorithmManager::Instance().create("RebinToWorkspace");
+    rebinAlg->initialize();
+    m_batchAlgoRunner->addAlgorithm(rebinAlg, inputToRebin);
+
+    BatchAlgorithmRunner::AlgorithmRuntimeProps inputFromRebin;
+    inputFromRebin["InputWorkspace"] = name;
+
+    std::vector<specid_t> detectorList;
+    for(specid_t i = detectorMin; i <= detectorMax; i++)
+      detectorList.push_back(i);
 
     if(m_uiForm.ckBackgroundRemoval->isChecked())
     {
@@ -425,7 +444,7 @@ namespace CustomInterfaces
       calcBackAlg->setProperty("Mode", "Mean");
       calcBackAlg->setProperty("StartX", range[0]);
       calcBackAlg->setProperty("EndX", range[1]);
-      m_batchAlgoRunner->addAlgorithm(calcBackAlg, inputFromLoad);
+      m_batchAlgoRunner->addAlgorithm(calcBackAlg, inputFromRebin);
 
       BatchAlgorithmRunner::AlgorithmRuntimeProps inputFromCalcBG;
       inputFromCalcBG["InputWorkspace"] = name + "_bg";
@@ -433,22 +452,22 @@ namespace CustomInterfaces
       IAlgorithm_sptr groupAlg = AlgorithmManager::Instance().create("GroupDetectors");
       groupAlg->initialize();
       groupAlg->setProperty("OutputWorkspace", name + "_grp");
-      groupAlg->setProperty("DetectorList", detectorRange);
+      groupAlg->setProperty("DetectorList", detectorList);
       m_batchAlgoRunner->addAlgorithm(groupAlg, inputFromCalcBG);
 
       IAlgorithm_sptr rawGroupAlg = AlgorithmManager::Instance().create("GroupDetectors");
       rawGroupAlg->initialize();
       rawGroupAlg->setProperty("OutputWorkspace", name + "_grp_raw");
-      rawGroupAlg->setProperty("DetectorList", detectorRange);
-      m_batchAlgoRunner->addAlgorithm(rawGroupAlg, inputFromLoad);
+      rawGroupAlg->setProperty("DetectorList", detectorList);
+      m_batchAlgoRunner->addAlgorithm(rawGroupAlg, inputFromRebin);
     }
     else
     {
       IAlgorithm_sptr rawGroupAlg = AlgorithmManager::Instance().create("GroupDetectors");
       rawGroupAlg->initialize();
       rawGroupAlg->setProperty("OutputWorkspace", name + "_grp");
-      rawGroupAlg->setProperty("DetectorList", detectorRange);
-      m_batchAlgoRunner->addAlgorithm(rawGroupAlg, inputFromLoad);
+      rawGroupAlg->setProperty("DetectorList", detectorList);
+      m_batchAlgoRunner->addAlgorithm(rawGroupAlg, inputFromRebin);
     }
 
     disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(algorithmComplete(bool)));
@@ -472,8 +491,7 @@ namespace CustomInterfaces
     QFileInfo rawFileInfo(rawFile);
     std::string name = rawFileInfo.baseName().toStdString();
 
-    std::string pyInput = "from mantidplot import plotSpectrum\nplotSpectrum('" + name + "_grp', 0)\n";
-    m_pythonRunner.runPythonCode(QString::fromStdString(pyInput));
+    plotSpectrum(QString::fromStdString(name) + "_grp");
   }
 
   /**

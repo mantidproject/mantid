@@ -85,7 +85,7 @@
          </sizepolicy>
         </property>
         <property name="autoLoad" stdset="0">
-         <bool>false</bool>
+         <bool>true</bool>
         </property>
         <property name="workspaceSuffixes" stdset="0">
          <stringlist>
@@ -139,6 +139,16 @@
              <item>
               <property name="text">
                <string>Two Lorentzians</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>Diffusion Sphere</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>Diffusion Circle</string>
               </property>
              </item>
             </widget>
@@ -354,6 +364,18 @@
       </item>
       <item>
        <widget class="QComboBox" name="cbPlotType">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>120</width>
+          <height>0</height>
+         </size>
+        </property>
         <item>
          <property name="text">
           <string>None</string>
