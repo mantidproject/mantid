@@ -16,7 +16,10 @@
 
 <component-link id="1301" >
   <parameter name="testDouble"> <value val="25.0" /> </parameter>
-  <parameter name="testString" type="string"> <value val="hello world" /> </parameter>
+  <parameter name="testString" type="string">
+    <value val="hello world" />
+    <description is="its test hello word"/>
+  </parameter>
 </component-link>
 
 </parameter-file>
