@@ -163,6 +163,7 @@ class LoadSampleTestStressTest(stresstesting.MantidStressTest):
 class LoadAddedEventDataSampleTestStressTest(stresstesting.MantidStressTest):
     def runTest(self):
         self._success = False
+        self._out_file_name = None
         config["default.instrument"] = "SANS2D"
         ici.SANS2D()
         ici.MaskFile('MaskSANS2DReductionGUI.txt')
@@ -171,27 +172,16 @@ class LoadAddedEventDataSampleTestStressTest(stresstesting.MantidStressTest):
         ici.Gravity(False)
         ici.Set1D()
 
-        added_event_data_file = self._prepare_added_event_data('SANS2D00028051', 'SANS2D00028050')
+        self._prepare_added_event_data('SANS2D00028051', 'SANS2D00028050')
         #added_event_data_file = self._prepare_normal_event_data('SANS2D00022051')
-        ici.AssignSample(added_event_data_file)
+        ici.AssignSample(self._out_file_name )
         #ici.WavRangeReduction()
 
         ici.WavRangeReduction(4.6, 12.85, False)
 
-        temp_save_dir = config['defaultsave.directory']
-        output_file1 = os.path.join(temp_save_dir, '28051rear_1D_4.6_12.85' + '.nxs')
-        SaveNexus(InputWorkspace = '28051rear_1D_4.6_12.85', Filename = output_file1)
-
-        output_file2 = os.path.join(temp_save_dir, '28051rear_1D_4.6_12.85_incident_monitor' + '.nxs')
-        SaveNexus(InputWorkspace = '28051rear_1D_4.6_12.85_incident_monitor', Filename = output_file2)
-        
-        temp_save_dir = config['defaultsave.directory']
-        output_file3 = os.path.join(temp_save_dir, '28051_sans_nxs' + '.nxs')
-        SaveNexus(InputWorkspace = '28051_sans_nxs', Filename = output_file3)
-
-        output_file4 = os.path.join(temp_save_dir, '28051_sans_nxs_monitors' + '.nxs')
-        SaveNexus(InputWorkspace = '28051_sans_nxs_monitors', Filename = output_file4)
-        
+        # Need to do validation ourselves since we have to compare to sets of workspace-file pairs
+        if self._validateWorkspaceToNeXusCustom():
+            self._success = True
 
     def _prepare_added_event_data(self, name_first, name_second):
         name1 = name_first
@@ -221,18 +211,74 @@ class LoadAddedEventDataSampleTestStressTest(stresstesting.MantidStressTest):
         temp_save_dir = config['defaultsave.directory']
         output_file = os.path.join(temp_save_dir, added_data_name + '.nxs')
         SaveNexus(InputWorkspace = group_name, Filename = output_file)
+        self._out_file_name = output_file
 
+
+    def _prepare_normal_event_data(self, name ):
+        temp ='temp'
+        Load(Filename = "SANS2D00022048.nxs", OutputWorkspace = temp)
+        temp_save_dir = config['defaultsave.directory']
+        output_file = os.path.join(temp_save_dir, name + '.nxs')
+        SaveNexus(InputWorkspace = temp, Filename = output_file)
         return output_file
 
-        #'defaultsave.directory'
-        #'datasearch.directories'
 
+    def _validateWorkspaceToNeXusCustom(self):
+        '''
+        Since we need to compare two have two comparisons, we need to redefine the validateWorkspaceToNexus method here.
+        Assumes that the items from self.validate() are many tuples  where the first item is a nexus file and loads it, 
+        to compare to the supplied workspace which is the second item.
+        '''
+        
+        value_pairs = list(self._validateCustom())
+
+        # Make sure we have pairs of two 
+        if len(value_pairs )%2 != 0:
+            return False
+
+        # For all pairs create a list and run the normal comparison
+        validationResult = [] 
+
+        for index in range(0, len(value_pairs), 2):
+            valNames = value_pairs[index : index + 2]
+
+            numRezToCheck=len(valNames)
+            mismatchName=None;
+
+            validationResult.extend([True]);
+            for ik in range(0,numRezToCheck,2): # check All results
+                workspace2 = valNames[ik+1]
+                if workspace2.endswith('.nxs'):
+                    Load(Filename=workspace2,OutputWorkspace="RefFile")
+                    workspace2 = "RefFile"
+                else:
+                    raise RuntimeError("Should supply a NeXus file: %s" % workspace2)
+                valPair=(valNames[ik],"RefFile");
+                if numRezToCheck>2:
+                    mismatchName = valNames[ik];
+
+                if not(self.validateWorkspaces(valPair,mismatchName)):
+                    validationResult[index/2] = False;
+                    print 'Workspace {0} not equal to its reference file'.format(valNames[ik]);
+            #end check All results
+
+        # Check if a comparison went wrong
+        return all(item is True for item in validationResult)
+
+    def _validateCustom(self):
+        return '28051rear_1D_4.6_12.85', 'SANS2DLoadingAddedEventData.nxs', '28051rear_1D_4.6_12.85_incident_monitor', 'SANS2DLoadingAddedEventDataMonitor.nxs'
 
     def requiredMemoryMB(self):
         return 2000
 
+    def validateMethod(self):
+           return "WorkspaceToNexus"
+
+    def cleanup(self):
+        os.remove(self._out_file_name)
+
     def validate(self):
-        pass
+        return self._success
 
 if __name__ == '__main__':
     unittest.main()
