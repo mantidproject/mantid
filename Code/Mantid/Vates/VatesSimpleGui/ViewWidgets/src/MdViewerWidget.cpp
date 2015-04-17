@@ -132,7 +132,7 @@ REGISTER_VATESGUI(MdViewerWidget)
  */
 MdViewerWidget::MdViewerWidget() : VatesViewerInterface(), currentView(NULL),
   dataLoader(NULL), hiddenView(NULL), lodAction(NULL), screenShot(NULL), viewLayout(NULL),
-  viewSettings(NULL), m_rebinAlgorithmDialogProvider(this), m_rebinnedWorkspaceIdentifier("_tempvsi")
+  viewSettings(NULL), initialView(ModeControlWidget::STANDARD), m_rebinAlgorithmDialogProvider(this), m_rebinnedWorkspaceIdentifier("_tempvsi")
 {
   // Calling workspace observer functions.
   observeAfterReplace();

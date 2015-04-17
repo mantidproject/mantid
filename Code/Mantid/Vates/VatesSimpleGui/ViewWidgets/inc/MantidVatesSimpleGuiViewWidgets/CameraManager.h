@@ -45,7 +45,7 @@ public:
 
   ~CameraManager();
   
-  Mantid::VATES::ViewFrustum getCurrentViewFrustum();
+  Mantid::VATES::ViewFrustum_sptr getCurrentViewFrustum();
 
   void setCameraToPeak(double xpos, double ypos, double zpos, double peakRadius);
 };

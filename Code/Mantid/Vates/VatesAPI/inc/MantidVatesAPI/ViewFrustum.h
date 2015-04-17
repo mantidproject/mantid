@@ -7,6 +7,7 @@
 #include <cmath>
 #include <cfloat>
 #include <vector>
+#include <boost/shared_ptr.hpp>
 
 namespace Mantid
 {
@@ -23,9 +24,9 @@ class DLLExport FrustumPlane
                                                                                                 m_paramB(paramB),
                                                                                                 m_paramC(paramC), 
                                                                                                 m_paramD(paramD){}
-    FrustumPlane(const FrustumPlane<I, T>& other) : m_paramA(other.m_paramA), 
+    FrustumPlane(const FrustumPlane<I, T>& other) : m_paramA(other.m_paramA),
                                                     m_paramB(other.m_paramB),
-                                                    m_paramC(other.m_paramC), 
+                                                    m_paramC(other.m_paramC),
                                                     m_paramD(other.m_paramD){}
     T A() {return m_paramA;}
     T B() {return m_paramB;}
@@ -170,6 +171,9 @@ class DLLExport ViewFrustum
     matrix.setColumn(1, vec1);
     matrix.setColumn(2, vec2);
   }
+
+/// shared pointer to the view frustum
+typedef boost::shared_ptr<Mantid::VATES::ViewFrustum> ViewFrustum_sptr;
 }
 }
 #endif
