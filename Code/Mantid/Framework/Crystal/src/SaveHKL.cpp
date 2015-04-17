@@ -10,6 +10,7 @@
 #include <fstream>
 #include "Poco/File.h"
 #include "boost/assign.hpp"
+#include <boost/math/special_functions/fpclassify.hpp>
 
 using namespace Mantid::Geometry;
 using namespace Mantid::DataObjects;

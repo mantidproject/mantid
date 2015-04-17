@@ -1,19 +1,20 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidCrystal/PeakIntegration.h"
-#include "MantidDataObjects/EventWorkspace.h"
+#include "MantidAPI/MemoryManager.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IPeakFunction.h"
-#include "MantidKernel/VectorHelper.h"
-#include "MantidKernel/ArrayProperty.h"
-#include <fstream>
+#include "MantidCrystal/PeakIntegration.h"
+#include "MantidDataObjects/EventWorkspace.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
+#include "MantidKernel/VectorHelper.h"
+#include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/VisibleWhenProperty.h"
-#include "MantidAPI/MemoryManager.h"
+#include <boost/math/special_functions/fpclassify.hpp>
+#include <fstream>
 
 namespace Mantid {
 namespace Crystal {
