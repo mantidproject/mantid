@@ -2,7 +2,6 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidCrystal/PeakIntegration.h"
-#include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidAPI/FileProperty.h"
@@ -10,19 +9,10 @@
 #include "MantidAPI/IPeakFunction.h"
 #include "MantidKernel/VectorHelper.h"
 #include "MantidKernel/ArrayProperty.h"
-#include <boost/math/special_functions/fpclassify.hpp>
 #include <fstream>
-#include <ostream>
-#include <iomanip>
-#include <sstream>
-#include "MantidGeometry/IComponent.h"
-#include "MantidGeometry/ICompAssembly.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
-#include <boost/algorithm/string.hpp>
-#include "MantidKernel/VectorHelper.h"
 #include "MantidKernel/VisibleWhenProperty.h"
-#include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidAPI/MemoryManager.h"
 
 namespace Mantid {

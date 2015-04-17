@@ -3,25 +3,14 @@
 #include "MantidCrystal/ConnectedComponentLabeling.h"
 #include "MantidCrystal/HardThresholdBackground.h"
 #include "MantidCrystal/PeakClusterProjection.h"
-#include "MantidAPI/IMDHistoWorkspace.h"
-#include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/IMDIterator.h"
 #include "MantidAPI/AlgorithmManager.h"
-#include "MantidAPI/Progress.h"
-#include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/Utils.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
-
-#include <boost/make_shared.hpp>
-#include <boost/math/special_functions/fpclassify.hpp>
-#include <map>
-#include <algorithm>
-#include <boost/tuple/tuple.hpp>
-#include <cmath>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;

@@ -1,9 +1,5 @@
 #include "MantidCrystal/SortPeaksWorkspace.h"
-#include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/MandatoryValidator.h"
-#include "MantidAPI/WorkspaceProperty.h"
-#include "MantidAPI/IPeaksWorkspace.h"
-#include <boost/make_shared.hpp>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;

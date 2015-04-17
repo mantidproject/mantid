@@ -1,5 +1,4 @@
 #include "MantidCrystal/SetUB.h"
-#include "MantidKernel/System.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ArrayLengthValidator.h"
 #include "MantidKernel/BoundedValidator.h"

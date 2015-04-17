@@ -1,5 +1,4 @@
 #include "MantidCrystal/SavePeaksFile.h"
-#include "MantidKernel/System.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 

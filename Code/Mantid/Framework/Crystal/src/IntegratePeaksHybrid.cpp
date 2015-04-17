@@ -41,23 +41,15 @@
 #include "MantidCrystal/ICluster.h"
 #include "MantidCrystal/PeakClusterProjection.h"
 
-#include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/IMDIterator.h"
-#include "MantidAPI/WorkspaceProperty.h"
-#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
-#include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 
-#include <boost/make_shared.hpp>
 #include <boost/format.hpp>
-#include <boost/algorithm/string.hpp>
-#include <boost/math/special_functions/fpclassify.hpp>
-#include <cmath>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
