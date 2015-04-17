@@ -64,9 +64,9 @@ reducer.ui.lineEdit_expNo.setText('379')
 reducer.ui.lineEdit_scanNo.setText('10')
 reducer.ui.lineEdit_wavelength.setText('2.41')
 
-reducer.ui.lineEdit_minD.setText('1.0')
-reducer.ui.lineEdit_maxD.setText('20.0')
-reducer.ui.lineEdit_binsizeD.setText('0.01')
+reducer.ui.lineEdit_min2Theta.setText('5.0')
+reducer.ui.lineEdit_max2Theta.setText('150.0')
+reducer.ui.lineEdit_binsize2Theta.setText('0.1')
 
 # set to the right tab
 reducer.ui.tabWidget.setCurrentIndex(4)
@@ -75,8 +75,8 @@ reducer.ui.tabWidget.setCurrentIndex(4)
 reducer.doLoadData()
 
 # rebin
-reducer.ui.lineEdit_binsizeD.setText('0.001')
-reducer.doRebinD()
+reducer.ui.lineEdit_binsize2Theta.setText('0.1')
+reducer.doRebin2Theta()
 """
 reducer.doStripVandiumPeaks()
 reducer.doSaveVanRun()

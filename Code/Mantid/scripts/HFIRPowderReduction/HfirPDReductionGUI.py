@@ -117,8 +117,8 @@ class MainWindow(QtGui.QMainWindow):
                 self.doStripVandiumPeaks)
         self.connect(self.ui.pushButton_saveVanRun, QtCore.SIGNAL('clicked()'),
                 self.doSaveVanRun)
-        self.connect(self.ui.pushButton_rebinD, QtCore.SIGNAL('clicked()'),
-                self.doRebinD)
+        self.connect(self.ui.pushButton_rebin2Theta, QtCore.SIGNAL('clicked()'),
+                self.doRebin2Theta)
 
         # tab 'Multiple Scans'
         self.connect(self.ui.pushButton_mergeScans, QtCore.SIGNAL('clicked()'),
@@ -169,17 +169,17 @@ class MainWindow(QtGui.QMainWindow):
         validator7.setBottom(0)
         self.ui.lineEdit_detID.setValidator(validator7)
 
-        validator8 = QtGui.QDoubleValidator(self.ui.lineEdit_minD)
+        validator8 = QtGui.QDoubleValidator(self.ui.lineEdit_min2Theta)
         validator8.setBottom(0.)
-        self.ui.lineEdit_minD.setValidator(validator8)
+        self.ui.lineEdit_min2Theta.setValidator(validator8)
 
-        validator9 = QtGui.QDoubleValidator(self.ui.lineEdit_maxD)
+        validator9 = QtGui.QDoubleValidator(self.ui.lineEdit_max2Theta)
         validator9.setBottom(0.)
-        self.ui.lineEdit_maxD.setValidator(validator9)
+        self.ui.lineEdit_max2Theta.setValidator(validator9)
 
-        validator10 = QtGui.QDoubleValidator(self.ui.lineEdit_binsizeD)
+        validator10 = QtGui.QDoubleValidator(self.ui.lineEdit_binsize2Theta)
         validator10.setBottom(0.)
-        self.ui.lineEdit_binsizeD.setValidator(validator10)
+        self.ui.lineEdit_binsize2Theta.setValidator(validator10)
 
         validator11 = QtGui.QIntValidator(self.ui.lineEdit_scanStart)
         validator11.setBottom(1)
@@ -771,35 +771,44 @@ class MainWindow(QtGui.QMainWindow):
 
 
 
-    def doRebinD(self):
-        """ Rebin MDEventWorkspaces in d-Spacing. for pushButton_rebinD
+    def doRebin2Theta(self):
+        """ Rebin MDEventWorkspaces in 2-theta. for pushButton_rebinD
         in vanadium peak strip tab
+
+
+        Suggested workflow
+        1. Rebin data 
+        2. Calculate vanadium peaks in 2theta
+        3. 
         """ 
-        # exp number an scan number
+        # TODO - Need to heavy test!
+        # Get exp number an scan number
         try: 
             expno, scanno = self._uiGetExpScanNumber()
         except Exception as e:
             self._logError("Error to get Exp and Scan due to %s." % (str(e)))
             return False
 
-        # wave length
-        wavelength = float(self.ui.lineEdit_wavelength.text())
-
-        # get new binning parameters
-        unit = 'dSpacing' 
+        # Get new binning parameters
+        unit = 'Degrees'
         try: 
-            xmin, binsize, xmax = self._uiGetBinningParams(xmin_w=self.ui.lineEdit_minD, 
-                    binsize_w=self.ui.lineEdit_binsizeD, 
-                    xmax_w=self.ui.lineEdit_maxD) 
+            xmin, binsize, xmax = self._uiGetBinningParams(xmin_w=self.ui.lineEdit_min2Theta, 
+                    binsize_w=self.ui.lineEdit_binsize2Theta, 
+                    xmax_w=self.ui.lineEdit_max2Theta) 
         except Exception as e: 
             self._logError(str(e)) 
             return False
 
         # Reduce data 
+        wavelength = float(self.ui.lineEdit_wavelength.text())
         execstatus = self._myControl.rebin(expno, scanno, unit, wavelength, \
                 xmin, binsize, xmax)
         print "[DB] reduction status = %s, Binning = %s, %s, %s" % (str(execstatus),
                 str(xmin), str(binsize), str(xmax))
+
+        # Get wave length and get list of vanadium peaks in 2theta
+        wavelength = float(self.ui.lineEdit_wavelength.text())
+        vanpeakposlist = self._myControl.getVanadiumPeakPos(wavelength=wavelength)
 
         # Plot data
         clearcanvas = True
@@ -809,6 +818,7 @@ class MainWindow(QtGui.QMainWindow):
         self._plotReducedData(expno, scanno, canvas, \
                 xlabel, label="Exp %d Scan %d Bin = %.5f" % (expno, scanno, binsize), \
                 clearcanvas=clearcanvas)
+        self._plotVanadiumPeaks(canvas, canvas)
 
         return True
 
@@ -850,14 +860,25 @@ class MainWindow(QtGui.QMainWindow):
     def doStripVandiumPeaks(self):
         """ Strip vanadium peaks
         """
-        inputws = self._myReducedPDWs
-        
-        api.StripVanadiumPeaks(inputws, BackgroundType="Linear",
-                WorkspaceIndex=0)
+        # Get exp number an scan number
+        try: 
+            expno, scanno = self._uiGetExpScanNumber()
+        except Exception as e:
+            self._logError("Error to get Exp and Scan due to %s." % (str(e)))
+            return False
+
+        self._myControl.stripVanadiumPeaks(expno, scanno, peaklist)
 
         self._plotVanadiumRun(xlabel, 0, True)
 
+        clearcanvas = True
+        xlabel = self._getXLabelFromUnit(unit)
+        print "[DB] Unit %s has label %s." % (unit, xlabel)
+        canvas = self.ui.graphicsView_vanPeaks
 
+        self._plotReducedData(expno, scanno, canvas, \
+                xlabel, label="Exp %d Scan %d Bin = %.5f" % (expno, scanno, binsize), \
+                clearcanvas=clearcanvas)
 
         raise NotImplementedError("ASAP")
 
@@ -1250,7 +1271,18 @@ class MainWindow(QtGui.QMainWindow):
         return
 
 
-     
+    def _plotPeakIndicators(self, canvas, peakpositions):
+        """ On canvas indicate peaks with vertical lines
+        """
+        rangey = canvas.getYRange()
+
+        for pos in peakpositions:
+            vecx = numpy.array([pos, pos])
+            vecy = numpy.array([rangey[0], rangey[1]])
+            canvas.addPlot(vecx, vecy, clear=False)
+
+        return
+
     def _uiCheckBinningParameters(self, curxmin=None, curxmax=None, curbinsize=None, curunit=None, targetunit=None):
         """ check the binning parameters including xmin, xmax, bin size and target unit
         

@@ -39,6 +39,10 @@ finally:
         from mantid.simpleapi import AnalysisDataService
         from mantid.kernel import ConfigService
 
+
+VanadiumPeakPositions = [0.5044,0.5191,0.5350,0.5526,0.5936,0.6178,0.6453,0.6768, 
+        0.7134,0.7566,0.8089,0.8737,0.9571,1.0701,1.2356,1.5133,2.1401]
+
 """ Powder data reduction class
 """
 class PDRManager:
@@ -223,7 +227,34 @@ class HFIRPDRedControl:
             raise NotImplementedError("No merged workspace for key = %s." % (str(mkey)))
 
         return (vecx, vecy)
+
         
+    def getVanadiumPeaksPos(self, exp, scan):
+        """ Convert vanadium peaks from d-spacing to 2theta 
+        Arguments
+         - exp
+         - scan
+    
+        Return :: list of peak positions in 2-theta (Degrees)
+        """
+        wsmanager = self.getWorkspace(exp, scan, raiseexception=True)
+        if wsmanager.datamdws is None:
+            self._logError("Unable to rebin the data for exp=%d, scan=%d because either data MD workspace and \
+                monitor MD workspace is not present."  % (exp, scan))
+            return False
+
+        wavelength = wsmanager.datamdws.getExperimentInfo(0).run().getProperty('wavelength').value()
+
+        vanpeakpos2theta = []
+        for peakpos in VanadiumPeakPositions:
+            # FIXME - Check equation
+            twotheta = math.asin(peakpos*0.25/(math.pi*wavelength))
+            vanpeakpos2theta.append(twotheta)
+
+        vanpeakpos2theta = sorted(vanpeakpos2theta)
+
+        return vanpeakpos2theta
+
     
     def getWkspToMerge(self):
         """ Get the individual workspaces that are used for merging in the last
@@ -520,6 +551,30 @@ class HFIRPDRedControl:
         return 
 
 
+    def stripVanadiumPeaks(self, exp, scan, binparams, vanpeakposlist):
+        """ Strip vanadium peaks 
+        """
+        # Get reduced workspace
+        wsmanager = self.getWorkspace(exp, scan, raiseexception=True)
+        wksp = wsmanager.reducedws
+        if wksp is None:
+            raise NotImplementedError("Unable to rebin the data for exp=%d, scan=%d because either data MD workspace and \
+                monitor MD workspace is not present."  % (exp, scan))
+
+        # Convert unit to Time-of-flight
+        xaxis_unit = wksp.getAxis(0).unit().ID()
+        if xaxis != 'Degrees': 
+            wksp = mantid.ConvertCWPDToSpectra(InputWorkspace=wksp, OutputWorkspace=wksp.name(),
+                    Params=binparams)
+
+        # Call 
+        wksp = StripPeaks(InputWorkspace=wksp, OutputWorksapce=wksp.name(),
+                PeakList=vanpeakposlist)
+
+        return 
+
+
+
 """ External Methods """
 def downloadFile(url, localfilepath):
     """
@@ -540,3 +595,5 @@ def downloadFile(url, localfilepath):
     ofile.close()
 
     return (True, "")
+
+
