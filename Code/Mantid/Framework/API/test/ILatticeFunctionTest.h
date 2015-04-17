@@ -92,6 +92,8 @@ private:
 
     MOCK_METHOD1(setCrystalSystem, void(const std::string &));
     MOCK_METHOD1(setUnitCell, void(const std::string &));
+    MOCK_METHOD1(setUnitCell, void(const Mantid::Geometry::UnitCell &));
+    MOCK_CONST_METHOD0(getUnitCell, Mantid::Geometry::UnitCell());
   };
 
   // Mock jacobian for being able to test derivative calls
