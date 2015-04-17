@@ -195,7 +195,7 @@ if not use_cylindrical_integration:
             peaks_ws = LoadIsawPeaks( Filename=one_run_file )
         if first_time:
             if UseFirstLattice and not read_UB:
-    # Find a UB (using FFT) for the first run to use in the FindUBUsingLatticeParameters
+                # Find a UB (using FFT) for the first run to use in the FindUBUsingLatticeParameters
                 FindUBUsingFFT( PeaksWorkspace=peaks_ws, MinD=min_d, MaxD=max_d, Tolerance=tolerance )
                 uc_a = peaks_ws.sample().getOrientedLattice().a()
                 uc_b = peaks_ws.sample().getOrientedLattice().b()
@@ -203,17 +203,17 @@ if not use_cylindrical_integration:
                 uc_alpha = peaks_ws.sample().getOrientedLattice().alpha()
                 uc_beta = peaks_ws.sample().getOrientedLattice().beta()
                 uc_gamma = peaks_ws.sample().getOrientedLattice().gamma()
-        if output_nexus:
-                    peaks_total = CombinePeaksWorkspaces(LHSWorkspace=peaks_total, RHSWorkspace=peaks_ws)
-                    SaveNexus( InputWorkspace=peaks_ws, Filename=niggli_integrate_file )
-        else:
-                    SaveIsawPeaks( InputWorkspace=peaks_ws, AppendFile=False, Filename=niggli_integrate_file )
+            if output_nexus:
+                peaks_total = CombinePeaksWorkspaces(LHSWorkspace=peaks_total, RHSWorkspace=peaks_ws)
+                SaveNexus( InputWorkspace=peaks_ws, Filename=niggli_integrate_file )
+            else:
+                SaveIsawPeaks( InputWorkspace=peaks_ws, AppendFile=False, Filename=niggli_integrate_file )
             first_time = False
         else:
-        if output_nexus:
+            if output_nexus:
                 peaks_total = CombinePeaksWorkspaces(LHSWorkspace=peaks_total, RHSWorkspace=peaks_ws)
                 SaveNexus( InputWorkspace=peaks_total, Filename=niggli_integrate_file )
-        else:
+            else:
                 SaveIsawPeaks( InputWorkspace=peaks_ws, AppendFile=True, Filename=niggli_integrate_file )
 
 #
@@ -232,18 +232,21 @@ if not use_cylindrical_integration:
     if read_UB:
         LoadIsawUB(InputWorkspace=peaks_ws, Filename=UB_filename)
         if UseFirstLattice:
-      # Find UB using lattice parameters from the specified file
+            # Find UB using lattice parameters from the specified file
             uc_a = peaks_ws.sample().getOrientedLattice().a()
             uc_b = peaks_ws.sample().getOrientedLattice().b()
             uc_c = peaks_ws.sample().getOrientedLattice().c()
             uc_alpha = peaks_ws.sample().getOrientedLattice().alpha()
             uc_beta = peaks_ws.sample().getOrientedLattice().beta()
             uc_gamma = peaks_ws.sample().getOrientedLattice().gamma()
-            FindUBUsingLatticeParameters(PeaksWorkspace= peaks_ws,a=uc_a,b=uc_b,c=uc_c,alpha=uc_alpha,beta=uc_beta, gamma=uc_gamma,NumInitial=num_peaks_to_find,Tolerance=tolerance)
-  #OptimizeCrystalPlacement(PeaksWorkspace=peaks_ws,ModifiedPeaksWorkspace=peaks_ws,FitInfoTable='CrystalPlacement_info',MaxIndexingError=tolerance)
+            FindUBUsingLatticeParameters(PeaksWorkspace= peaks_ws,a=uc_a,b=uc_b,c=uc_c,alpha=uc_alpha,beta=uc_beta,
+                                         gamma=uc_gamma,NumInitial=num_peaks_to_find,Tolerance=tolerance)
+        #OptimizeCrystalPlacement(PeaksWorkspace=peaks_ws,ModifiedPeaksWorkspace=peaks_ws,
+        #                         FitInfoTable='CrystalPlacement_info',MaxIndexingError=tolerance)
     elif UseFirstLattice and not read_UB:
-    # Find UB using lattice parameters using the FFT results from first run if no UB file is specified
-        FindUBUsingLatticeParameters(PeaksWorkspace= peaks_ws,a=uc_a,b=uc_b,c=uc_c,alpha=uc_alpha,beta=uc_beta, gamma=uc_gamma,NumInitial=num_peaks_to_find,Tolerance=tolerance)
+        # Find UB using lattice parameters using the FFT results from first run if no UB file is specified
+        FindUBUsingLatticeParameters(PeaksWorkspace= peaks_ws,a=uc_a,b=uc_b,c=uc_c,alpha=uc_alpha,beta=uc_beta,
+                                     gamma=uc_gamma,NumInitial=num_peaks_to_find,Tolerance=tolerance)
     else:
         FindUBUsingFFT( PeaksWorkspace=peaks_ws, MinD=min_d, MaxD=max_d, Tolerance=tolerance )
 
@@ -296,7 +299,8 @@ if use_cylindrical_integration:
         filename = output_directory + '/' + instrument_name + '_' + r_num + '.profiles'
         input = open(filename, 'r')
         for line in input:
-            if line[0] == '0': break
+            if line[0] == '0':
+                break
         output.write(line)
         for line in input:
             output.write(line)
