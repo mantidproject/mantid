@@ -2,6 +2,7 @@
 
 #include "MantidKernel/Logger.h"
 #include <iomanip>
+#include <cmath>
 
 namespace Mantid {
 namespace CurveFitting {
