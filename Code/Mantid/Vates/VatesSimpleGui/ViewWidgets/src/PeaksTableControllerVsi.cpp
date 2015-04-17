@@ -72,7 +72,7 @@ PeaksTableControllerVsi::PeaksTableControllerVsi(
     boost::shared_ptr<CameraManager> cameraManager, QWidget *parent)
     : QWidget(parent), m_cameraManager(cameraManager),
       m_presenter(new Mantid::VATES::CompositePeaksPresenterVsi()),
-      m_peaksTabWidget(NULL), m_peakMarker(NULL) {
+      m_peaksTabWidget(NULL), m_peakMarker(NULL), m_coordinateSystem(Mantid::Kernel::SpecialCoordinateSystem::QLab) {
   m_peakTransformSelector.registerCandidate(
       boost::make_shared<Mantid::API::PeakTransformHKLFactory>());
   m_peakTransformSelector.registerCandidate(
