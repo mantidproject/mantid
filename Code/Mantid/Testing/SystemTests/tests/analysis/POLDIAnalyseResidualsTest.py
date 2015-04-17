@@ -48,7 +48,7 @@ class POLDIAnalyseResidualsTest(stresstesting.MantidStressTest):
             self.assertDelta(slope, 1.0, 1e-2, "Slope is larger than 1.0 for %s (is: %d)" % (dataFile, slope))
 
             relativeSlopeError = fitResult.cell(1, 2) / slope
-            self.assertLessThan(relativeSlopeError, 5e-3, 
+            self.assertLessThan(relativeSlopeError, 5e-3,
                                 "Relative error of slope is too large for %s (is: %d)" % (dataFile, relativeSlopeError))
 
             intercept = fitResult.cell(0, 1)
@@ -56,5 +56,5 @@ class POLDIAnalyseResidualsTest(stresstesting.MantidStressTest):
 
             residuals = mtd[fitNameTemplate + "_Workspace"].dataY(2)
             maxAbsoluteResidual = np.max(np.abs(residuals))
-            self.assertLessThan(maxAbsoluteResidual, 1.0, 
+            self.assertLessThan(maxAbsoluteResidual, 1.0,
                                 "Maximum absolute residual is too large for %s (is: %d)" % (dataFile, maxAbsoluteResidual))
