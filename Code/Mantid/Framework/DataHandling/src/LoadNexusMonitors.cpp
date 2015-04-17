@@ -155,8 +155,13 @@ void LoadNexusMonitors::exec() {
   this->nMonitors = monitorNames.size();
 
   // Nothing to do
-  if (0 == nMonitors)
-    return;
+  if (0 == nMonitors) {
+    //previous version just used to return, but that
+    //threw an error when the OutputWorkspace property was not set.
+    //and the error message was confusing.
+    //This has changed to throw a specific error.
+    throw std::invalid_argument(this->filename + " does not contain any monitors");
+  }
 
   // With this property you can make the exception that even if there's event
   // data, monitors will be loaded
