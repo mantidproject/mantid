@@ -41,6 +41,20 @@ void LatticeFunction::setUnitCell(const std::string &unitCellString) {
   m_cellParameters->setParametersFromUnitCell(strToUnitCell(unitCellString));
 }
 
+/// Sets the unit cell parameters from a UnitCell object.
+void LatticeFunction::setUnitCell(const UnitCell &unitCell) {
+  throwIfNoFunctionSet();
+
+  m_cellParameters->setParametersFromUnitCell(unitCell);
+}
+
+/// Returns a UnitCell object constructed from the function parameters.
+UnitCell LatticeFunction::getUnitCell() const {
+  throwIfNoFunctionSet();
+
+  return m_cellParameters->getUnitCellFromParameters();
+}
+
 /// Sets the decorated function to expose parameters
 void LatticeFunction::init() {
   setDecoratedFunction("PawleyParameterFunction");

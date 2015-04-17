@@ -11,7 +11,9 @@ namespace API {
 
 /** ILatticeFunction
 
-  This abstract class defines the interface for a function that
+  This abstract class defines the interface for a function that calculates
+  values based on HKL-values and a lattice. Currently the only implementation
+  is CurveFitting::LatticeFunction.
 
     @author Michael Wedel, Paul Scherrer Institut - SINQ
     @date 15/04/2015
@@ -57,6 +59,11 @@ public:
 
   /// Set the function parameters according to the supplied unit cell.
   virtual void setUnitCell(const std::string &unitCellString) = 0;
+  /// Overload to set unit cell directly from UnitCell object.
+  virtual void setUnitCell(const Geometry::UnitCell &unitCell) = 0;
+
+  /// Returns a unit cell object created from the function parameters
+  virtual Geometry::UnitCell getUnitCell() const = 0;
 };
 
 typedef boost::shared_ptr<ILatticeFunction> ILatticeFunction_sptr;

@@ -53,6 +53,8 @@ public:
 
   void setCrystalSystem(const std::string &crystalSystem);
   void setUnitCell(const std::string &unitCellString);
+  void setUnitCell(const Geometry::UnitCell &unitCell);
+  Geometry::UnitCell getUnitCell() const;
 
 protected:
   void init();
