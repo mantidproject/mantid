@@ -2,12 +2,13 @@
 import os
 from mantid.simpleapi import *
 from mantid.kernel import Logger
+from SANSUtility import (bundle_added_event_data_as_group)
 sanslog = Logger("SANS")
 from shutil import copyfile
 
 _NO_INDIVIDUAL_PERIODS = -1
 
-def add_runs(runs, inst='sans2d', defType='.nxs', rawTypes=('.raw', '.s*', 'add','.RAW'), lowMem=False, binning='Monitors'):
+def add_runs(runs, inst='sans2d', defType='.nxs', rawTypes=('.raw', '.s*', 'add','.RAW'), lowMem=False, binning='Monitors', saveAsEvent=False):
     if inst.upper() == "SANS2DTUBES":
         inst = "SANS2D"
   #check if there is at least one file in the list
@@ -86,7 +87,7 @@ def add_runs(runs, inst='sans2d', defType='.nxs', rawTypes=('.raw', '.s*', 'add'
             return ""
 
     # in case of event file force it into a histogram workspace
-        if isFirstDataSetEvent:
+        if isFirstDataSetEvent and saveAsEvent == False:
             wsInMonitor = mtd['AddFilesSumTempory_monitors']
             if binning == 'Monitors':
                 monX = wsInMonitor.dataX(0)
@@ -125,17 +126,27 @@ def add_runs(runs, inst='sans2d', defType='.nxs', rawTypes=('.raw', '.s*', 'add'
 
             if 'AddFilesSumTempory_Rebin' in mtd : DeleteWorkspace('AddFilesSumTempory_Rebin')
 
+
         lastFile = os.path.splitext(lastFile)[0]
     # now save the added file
         outFile = lastFile+'-add.'+'nxs'
+        outFile_monitors = lastFile+'-add_monitors.'+'nxs'
         logger.notice('writing file:   '+outFile)
+
         if period == 1 or period == _NO_INDIVIDUAL_PERIODS:
-      #replace the file the first time around
+        #replace the file the first time around
             SaveNexusProcessed(InputWorkspace="AddFilesSumTempory",
                                Filename=outFile, Append=False)
+            # If we are saving event data, then we need to save also the monitor file
+            if isFirstDataSetEvent and saveAsEvent:
+                SaveNexusProcessed(InputWorkspace="AddFilesSumTempory_monitors", 
+                                   Filename=outFile_monitors , Append=False)
+
         else:
       #then append
             SaveNexusProcessed("AddFilesSumTempory", outFile, Append=True)
+            if isFirstDataSetEvent and saveAsEvent:
+                SaveNexusProcessed("AddFilesSumTempory_monitors", outFile_monitors , Append=True)
 
         DeleteWorkspace("AddFilesSumTempory")
         if isFirstDataSetEvent:
@@ -149,8 +160,10 @@ def add_runs(runs, inst='sans2d', defType='.nxs', rawTypes=('.raw', '.s*', 'add'
         else:
             period += 1
 
-  #this adds the path to the filename
+    if isFirstDataSetEvent and saveAsEvent:
+        outFile = bundle_added_event_data_as_group(outFile, outFile_monitors)
 
+  #this adds the path to the filename
     path,base = os.path.split(outFile)
     if path == '' or base not in os.listdir(path):
         path = config['defaultsave.directory'] + path
@@ -278,7 +291,6 @@ def _copyLog(lastPath, logFile, pathout):
         error = 'Error copying log file ' + logFile + ' to directory ' + pathout+'\n'
         print error
         logger.notice(error)
-
 
 if __name__ == '__main__':
     add_runs(('16183','16197'),'SANS2D','.nxs')

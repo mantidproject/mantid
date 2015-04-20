@@ -503,10 +503,25 @@ def bundle_added_event_data_as_group(out_file_name, out_file_monitors_name):
     DeleteWorkspace(event_data_ws)
     DeleteWorkspace(monitor_ws)
 
-    #os.remove(out_file_name)
-    #os.remove(out_file_monitors_name)
+    # Delete the intermediate workspaces
+    full_data_path_name = get_full_path_for_added_event_data(out_file_name)
+    full_monitor_path_name = get_full_path_for_added_event_data(out_file_monitors_name)
+
+    if os.path.exists(full_data_path_name):
+        os.remove(full_data_path_name)
+    if os.path.exists(full_monitor_path_name):
+        os.remove(full_monitor_path_name)
 
     return out_group_file_name
+
+def get_full_path_for_added_event_data(file_name):
+    path,base = os.path.split(file_name)
+    if path == '' or base not in os.listdir(path):
+        path = config['defaultsave.directory'] + path
+        assert base in os.listdir(path)
+    full_path_name = os.path.join(path, base)
+
+    return full_path_name
 
 ###############################################################################
 ######################### Start of Deprecated Code ############################
