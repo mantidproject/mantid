@@ -159,8 +159,16 @@ public:
     TSM_ASSERT_EQUALS("Filtering by Nth position is not performed correctly", expectedFilteredValue, actualFilteredValue);
   }
 
+  void test_help_string()
+  {
+    std::vector<std::string> constr;
+    std::string penaltyFactor;
+    XMLInstrumentParameter testPar("logfileID","value",boost::make_shared<Interpolation>(),"formula",
+      "sourceFU","resultFU","testPar","aType","noTie",
+      constr,penaltyFactor,"aFitFunc","FilterBy","eqTo",NULL,0.0,"test string.     Long test string.");
 
-
+    TS_ASSERT_EQUALS(testPar.m_description,"test string. Long test string.");
+  }
 };
 
 

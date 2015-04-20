@@ -9,6 +9,7 @@
 #include "MantidKernel/Logger.h"
 #include <ctime>
 #include <fstream>
+#include <boost/regex.hpp>
 
 namespace Mantid {
 namespace Geometry {
@@ -40,6 +41,7 @@ using namespace Kernel;
 *  @param penaltyFactor :: The level of penalty associated with the constraint
 *  @param fitFunc :: What fit function this applies to
 *  @param angleConvertConst :: angle conversion constant?????
+*  @param description :: text description of the parameter
 */
 XMLInstrumentParameter::XMLInstrumentParameter(
     const std::string &logfileID, const std::string &value,
@@ -59,7 +61,13 @@ XMLInstrumentParameter::XMLInstrumentParameter(
       m_interpolation(interpolation),
       m_extractSingleValueAs(extractSingleValueAs), m_eq(eq), m_component(comp),
       m_angleConvertConst(angleConvertConst),
-      m_description(description){}
+      m_description(""){
+        if(!description.empty()){ // remove multiple spaces
+          boost::regex re("\\s+");
+          std::string desc = boost::regex_replace(description,re," ");
+          (const_cast<std::string *>(&m_description))->assign(desc);
+        }
+}
 
 /** Returns the parameter value.
  * This interprets the XML parameter specification in order to do one of these

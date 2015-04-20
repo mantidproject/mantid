@@ -248,6 +248,12 @@ public:
     }
     return retval;
   }
+  /** Get the component description by name */
+  const std::string getDescription(const std::string &compName,
+                                const std::string &name) const;
+  /** Get the component tooltip by name */
+  const std::string getTooltip(const std::string &compName,
+                                const std::string &name) const;
 
   /// Return the value of a parameter as a string
   std::string getString(const IComponent *comp, const std::string &name,

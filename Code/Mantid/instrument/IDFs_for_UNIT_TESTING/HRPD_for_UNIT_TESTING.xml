@@ -59,6 +59,9 @@
       <point x="61000" y="110" />
       <point x="62000" y="120" />
     </lookuptable> 
+    <description is = "this is test description 
+    
+    long long description"/>
   </parameter>      
 </component>
 

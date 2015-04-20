@@ -187,9 +187,16 @@ public:
     TS_ASSERT_EQUALS(parD->getDescription(),descr);
     TS_ASSERT_EQUALS(parD->getTooltip(),"Test description");
 
-    parD->setDescription("Short description\n\nLongDescription");
-    TS_ASSERT_EQUALS(parD->getDescription(),"Short description\n\nLongDescription");
-    TS_ASSERT_EQUALS(parD->getTooltip(),"Short description");
+    parD->setDescription("Short description. LongDescription.");
+    TS_ASSERT_EQUALS(parD->getDescription(),"Short description. LongDescription.");
+    TS_ASSERT_EQUALS(parD->getTooltip(),"Short description.");
+
+
+    descr = pmapA.getDescription("basic","testDouble");
+    TS_ASSERT_EQUALS(descr,"Short description. LongDescription.");
+    descr = pmapA.getTooltip("basic","testDouble");
+    TS_ASSERT_EQUALS(descr,"Short description.");
+
   }
 
 

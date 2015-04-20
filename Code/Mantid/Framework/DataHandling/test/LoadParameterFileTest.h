@@ -54,6 +54,9 @@ public:
     TS_ASSERT_EQUALS( ptrDet->getName(), "combined translation6");
     Parameter_sptr param = paramMap.get(&(*ptrDet), "fjols");
     TS_ASSERT_DELTA( param->value<double>(), 20.0, 0.0001);
+    auto descr = param->getDescription();
+//    TS_ASSERT_EQUAL(descr,"test fjols description");
+
     param = paramMap.get(&(*ptrDet), "nedtur");
     TS_ASSERT_DELTA( param->value<double>(), 77.0, 0.0001);
     param = paramMap.get(&(*ptrDet), "fjols-test-paramfile");
@@ -76,10 +79,13 @@ public:
     TS_ASSERT_DELTA (dummy[0], 200.0, 0.0001);
     dummy = paramMap.getDouble("nickel-holder", "mistake");
     TS_ASSERT_EQUALS (dummy.size(), 0);
+    param = paramMap.getRecursive(i.get(),"mistake");
+//    TS_ASSERT_EQUALS(param->getTooltip(),"You made a terrible mistake")
+    
     dummy = paramMap.getDouble("nickel-holder", "fjols-test-paramfile");
     TS_ASSERT_DELTA (dummy[0], 2000.0, 0.0001);
 
-	AnalysisDataService::Instance().remove(wsName);
+  AnalysisDataService::Instance().remove(wsName);
 
   }
 
@@ -149,7 +155,7 @@ public:
     dummy = paramMap.getDouble("nickel-holder", "fjols-test-paramfile");
     TS_ASSERT_DELTA (dummy[0], 2010.0, 0.0001);
 
-	  AnalysisDataService::Instance().remove(wsName);
+    AnalysisDataService::Instance().remove(wsName);
 
   }
 

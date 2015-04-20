@@ -199,11 +199,11 @@ InstrumentDefinitionParser::parseXML(Kernel::ProgressBase *prog) {
   // Collect some information about types for later use including:
   //  * populate directory getTypeElement
   //  * populate directory isTypeAssemply
-  //  * create shapes for all none assemply components and store in
+  //  * create shapes for all none assembly components and store in
   //  mapTyepNameToShape
-  //  * If 'Outline' attribute set for assemply add attribute object_created=no
+  //  * If 'Outline' attribute set for assembly add attribute object_created=no
   //  to tell
-  //    create shape for such assemply also later
+  //  create shape for such assembly also later
   unsigned long numberTypes = pNL_type->length();
   for (unsigned long iType = 0; iType < numberTypes; iType++) {
     Element *pTypeElem = static_cast<Element *>(pNL_type->item(iType));
@@ -2035,6 +2035,7 @@ InstrumentDefinitionParser::setLogfile(const Geometry::IComponent *comp,
     size_t numberDescription = pNLDescription ->length();
 
     if (numberDescription >= 1){
+      // use only first description from a list
       Element *pDescription =
         static_cast<Element *>(pNLDescription->item(0));
       description = pDescription->getAttribute("is");

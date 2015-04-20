@@ -81,7 +81,7 @@ public:
                        "double", "", 
                     constraint, penaltyFactor, 
                        fitFunc, extractSingleValueAs, 
-			      eq, comp, angleConvert);
+                       eq, comp, angleConvert,"bla bla bla");
 
     TimeSeriesProperty<double>* dummy = NULL;
     TS_ASSERT_DELTA( testParamEntry.createParamValue(dummy), 1000.0, 0.0001);

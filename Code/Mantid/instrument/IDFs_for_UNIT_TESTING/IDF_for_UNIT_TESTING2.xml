@@ -21,7 +21,11 @@
  <!-- <offsets spherical="delta" /> -->
 </defaults>
 
-<parameter name="somefunction:toplevel" type="fitting"> <value val="100.0" /> <min val="80"/> <max val="120"/> </parameter>
+<parameter name="somefunction:toplevel" type="fitting"> <value val="100.0" /> <min val="80"/> <max val="120"/> 
+<description is = "Test description for the fitting parameter toplevel\n
+    
+    long long test description for toplevel fitting parameter"/>
+</parameter>
 
 <parameter name="somefunction:percentage" type="fitting"> <value val="250.0" /> <min val="80%"/> <max val="120%"/> <penalty-factor val="9.1" /> </parameter> 
 
@@ -29,7 +33,9 @@
 
 
 <component-link name="nickel-holder" >
-  <parameter name="fjols"> <value val="200.0" /> </parameter>
+  <parameter name="fjols"> <value val="200.0" /> 
+  <description is = "test fjols description" />
+  </parameter>
   <parameter name="fjols-string" type="string"> <value val="boevs" /> </parameter>
 </component-link>
 
@@ -96,7 +102,9 @@
     <logfile id="nedtur"/>   
     <value val="200.0" />     
   </parameter>     
-  <parameter name="mistake"> </parameter> 
+  <parameter name="mistake">
+  <description is = "You made a terrible mistake"/>
+  </parameter> 
 </component>
 
 <type name="undulator" is="source">

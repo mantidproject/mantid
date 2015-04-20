@@ -125,6 +125,52 @@ bool ParameterMap::operator==(const ParameterMap &rhs) const {
   return true;
 }
 
+/** Get the component description by name
+   *  @param compName :: The name of the component
+   *  @param name :: The name of the parameter
+   *  @return :: the description for the first parameter found and
+   *  having non-empty description,
+   *  or empty string if no description found.
+*/
+const std::string ParameterMap::getDescription(const std::string &compName,
+                                const std::string &name) const{
+    pmap_cit it;
+    std::string result("");
+    for (it = m_map.begin(); it != m_map.end(); ++it) {
+      if (compName.compare(((const IComponent *)(*it).first)->getName()) == 0) {
+        boost::shared_ptr<Parameter> param =
+            get((const IComponent *)(*it).first, name);
+        if (param)
+          result = param->getDescription();
+          if(!result.empty())
+            return result;
+      }
+    }
+    return result;
+}
+/** Get the component tooltip by name
+   *  @param compName :: The name of the component
+   *  @param name :: The name of the parameter
+   *  @return :: the tooltip (short description) for the first parameter 
+   *  found and having non-empty description,
+   *  or empty string if no description found.
+*/
+const std::string ParameterMap::getTooltip(const std::string &compName,
+                                const std::string &name) const{
+    pmap_cit it;
+    std::string result("");
+    for (it = m_map.begin(); it != m_map.end(); ++it) {
+      if (compName.compare(((const IComponent *)(*it).first)->getName()) == 0) {
+        boost::shared_ptr<Parameter> param =
+            get((const IComponent *)(*it).first, name);
+        if (param)
+          result = param->getTooltip();
+          if(!result.empty())
+            return result;
+      }
+    }
+    return result;
+}
 /**
  * Output information that helps understanding the mismatch between two
  * parameter maps.
