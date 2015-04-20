@@ -35,6 +35,9 @@ LatticeDomainCreator::LatticeDomainCreator(
  * LatticeDomain. It also assigns fit data to the supplied value object. If
  * null-pointers are passed, new objects are allocated.
  *
+ * Reflections where HKL is (000) are ignored, so the final domain size may
+ * be smaller than the number of rows in the input workspace.
+ *
  * @param domain :: Pointer to outgoing FunctionDomain instance.
  * @param values :: Pointer to outgoing FunctionValues object.
  * @param i0 :: Size offset for values object if it already contains data.
@@ -181,8 +184,12 @@ void LatticeDomainCreator::createDomainFromPeaksWorkspace(
 
   for (size_t i = 0; i < peakCount; ++i) {
     IPeak *currentPeak = workspace->getPeakPtr(static_cast<int>(i));
-    hkls.push_back(currentPeak->getHKL());
-    dSpacings.push_back(currentPeak->getDSpacing());
+    V3D hkl = currentPeak->getHKL();
+
+    if (hkl != V3D(0, 0, 0)) {
+      hkls.push_back(hkl);
+      dSpacings.push_back(currentPeak->getDSpacing());
+    }
   }
 
   LatticeDomain *latticeDomain = new LatticeDomain(hkls);
@@ -240,10 +247,14 @@ void LatticeDomainCreator::createDomainFromPeakTable(
 
     for (size_t i = 0; i < peakCount; ++i) {
       try {
-        hkls.push_back(extractor(hklColumn, i));
+        V3D hkl = extractor(hklColumn, i);
 
-        double d = (*dColumn)[i];
-        dSpacings.push_back(d);
+        if (hkl != V3D(0, 0, 0)) {
+          hkls.push_back(hkl);
+
+          double d = (*dColumn)[i];
+          dSpacings.push_back(d);
+        }
       }
       catch (std::bad_alloc) {
         // do nothing.

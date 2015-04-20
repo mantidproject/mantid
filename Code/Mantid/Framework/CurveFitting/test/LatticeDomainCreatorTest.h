@@ -77,6 +77,24 @@ public:
     TS_ASSERT_EQUALS(values->getFitWeight(2), 1.0);
   }
 
+  void testCreateDomainHKL000() {
+      ITableWorkspace_sptr table = getValidTableWs();
+      TableRow newRow = table->appendRow();
+      newRow << V3D(0, 0, 0) << 0.0;
+
+      TestableLatticeDomainCreator dc;
+
+      FunctionDomain_sptr domain;
+      FunctionValues_sptr values;
+
+      TS_ASSERT_THROWS_NOTHING(
+          dc.createDomainFromPeakTable(table, domain, values, 0));
+
+      // Domain size should still be 3, because 0, 0, 0 can not be used
+      TS_ASSERT_EQUALS(domain->size(), 3);
+      TS_ASSERT_EQUALS(values->size(), 3);
+  }
+
   void testCreateDomainTableWsInvalid() {
     ITableWorkspace_sptr invalid = getInvalidTableWs();
     ITableWorkspace_sptr empty = getEmptyTableWs();
