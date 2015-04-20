@@ -17,7 +17,7 @@ CompositePeaksPresenterVsi::~CompositePeaksPresenterVsi() {}
  * Update the view frustum
  * @param frustum The view frustum
  */
-void CompositePeaksPresenterVsi::updateViewFrustum(ViewFrustum_sptr frustum) {
+void CompositePeaksPresenterVsi::updateViewFrustum(ViewFrustum_const_sptr frustum) {
   for (std::vector<PeaksPresenterVsi_sptr>::iterator it =
            m_peaksPresenters.begin();
        it != m_peaksPresenters.end(); ++it) {

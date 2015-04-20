@@ -11,6 +11,7 @@
 #include "MantidKernel/V3D.h"
 #include "MantidKernel/SpecialCoordinateSystem.h"
 #include "MantidKernel/Logger.h"
+#include "MantidVatesAPI/ViewFrustum.h"
 #include "MantidVatesAPI/PeaksPresenterVsi.h"
 #include "MantidVatesAPI/NullPeaksPresenterVsi.h"
 #include "MantidVatesAPI/ConcretePeaksPresenterVsi.h"

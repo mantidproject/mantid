@@ -15,11 +15,11 @@ namespace VATES {
 class DLLExport ConcretePeaksPresenterVsi : public PeaksPresenterVsi {
 public:
   ConcretePeaksPresenterVsi(Mantid::API::IPeaksWorkspace_sptr peaksWorkspace,
-                            ViewFrustum_sptr frustum, std::string wsFrame);
+                            ViewFrustum_const_sptr frustum, std::string wsFrame);
   ~ConcretePeaksPresenterVsi();
   virtual Mantid::API::IPeaksWorkspace_sptr getPeaksWorkspace() const;
   virtual std::vector<bool> getViewablePeaks() const;
-  virtual void updateViewFrustum(ViewFrustum_sptr frustum);
+  virtual void updateViewFrustum(ViewFrustum_const_sptr frustum);
   virtual std::string getFrame() const;
   virtual std::string getPeaksWorkspaceName() const;
   virtual void
@@ -35,7 +35,7 @@ private:
   /// Viewable Peaks
   mutable std::vector<bool> m_viewablePeaks;
   /// The viewable region
-  ViewFrustum_sptr m_viewableRegion;
+  ViewFrustum_const_sptr m_viewableRegion;
   /// The peaks workspace
   Mantid::API::IPeaksWorkspace_sptr m_peaksWorkspace;
   /// The frame

@@ -174,6 +174,7 @@ class DLLExport ViewFrustum
 
 /// shared pointer to the view frustum
 typedef boost::shared_ptr<Mantid::VATES::ViewFrustum> ViewFrustum_sptr;
+typedef boost::shared_ptr<const Mantid::VATES::ViewFrustum> ViewFrustum_const_sptr;
 }
 }
 #endif

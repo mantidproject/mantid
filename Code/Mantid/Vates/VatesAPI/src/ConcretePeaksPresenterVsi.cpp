@@ -17,7 +17,7 @@ namespace VATES {
  * @param frame The coordinate frame
  */
 ConcretePeaksPresenterVsi::ConcretePeaksPresenterVsi(
-    Mantid::API::IPeaksWorkspace_sptr peaksWorkspace, ViewFrustum_sptr frustum,
+    Mantid::API::IPeaksWorkspace_sptr peaksWorkspace, ViewFrustum_const_sptr frustum,
     std::string frame)
     : m_viewableRegion(frustum), m_peaksWorkspace(peaksWorkspace),
       m_frame(frame) {}
@@ -29,7 +29,7 @@ ConcretePeaksPresenterVsi::~ConcretePeaksPresenterVsi() {}
  * Update the view frustum
  * @param frustum The view frustum.
  */
-void ConcretePeaksPresenterVsi::updateViewFrustum(ViewFrustum_sptr frustum) {
+void ConcretePeaksPresenterVsi::updateViewFrustum(ViewFrustum_const_sptr frustum) {
   m_viewableRegion = frustum;
 }
 

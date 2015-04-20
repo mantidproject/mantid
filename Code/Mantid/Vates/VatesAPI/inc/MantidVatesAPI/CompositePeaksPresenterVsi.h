@@ -23,7 +23,7 @@ public:
   }
   std::vector<Mantid::API::IPeaksWorkspace_sptr> getPeaksWorkspaces() const;
   virtual std::vector<bool> getViewablePeaks() const;
-  virtual void updateViewFrustum(ViewFrustum_sptr frustum);
+  virtual void updateViewFrustum(ViewFrustum_const_sptr frustum);
   virtual std::string getFrame() const;
   virtual std::string getPeaksWorkspaceName() const{
     throw std::runtime_error(

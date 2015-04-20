@@ -10,6 +10,7 @@
 
 
 #include <boost/shared_ptr.hpp>
+#include <boost/make_shared.hpp>
 #include <stdexcept>
 
 #include "MockObjects.h"
@@ -60,7 +61,7 @@ public:
     TopPlane top(0.0, -1.0, 0.0, 1.0);
     FarPlane farPlane(0.0, 0.0, 1.0, 1.0);
     NearPlane nearPlane(0.0, 0.0, -1.0,1.0);
-    ViewFrustum_sptr frustum(new ViewFrustum(left, right, bottom, top, farPlane, nearPlane));
+    ViewFrustum_const_sptr frustum = boost::make_shared<const Mantid::VATES::ViewFrustum>(left, right, bottom, top, farPlane, nearPlane);
 
     boost::shared_ptr<MockPeaksWorkspaceComposite> pw_ptr(new MockPeaksWorkspaceComposite());
     
@@ -95,7 +96,7 @@ public:
     TopPlane top(0.0, -1.0, 0.0, 1.0);
     FarPlane farPlane(0.0, 0.0, 1.0, 1.0);
     NearPlane nearPlane(0.0, 0.0, -1.0,1.0);
-    ViewFrustum_sptr frustum(new ViewFrustum(left, right, bottom, top, farPlane, nearPlane));
+    ViewFrustum_const_sptr frustum = boost::make_shared<const Mantid::VATES::ViewFrustum>(left, right, bottom, top, farPlane, nearPlane);
 
     boost::shared_ptr<MockPeaksWorkspaceComposite> pw_ptr(new MockPeaksWorkspaceComposite());
     std::string name = "pw1";

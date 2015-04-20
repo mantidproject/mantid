@@ -17,7 +17,7 @@ public:
   virtual ~PeaksPresenterVsi(){};
   virtual std::vector<bool> getViewablePeaks() const = 0;
   virtual Mantid::API::IPeaksWorkspace_sptr getPeaksWorkspace() const = 0;
-  virtual void updateViewFrustum(ViewFrustum_sptr frustum) = 0;
+  virtual void updateViewFrustum(ViewFrustum_const_sptr frustum) = 0;
   virtual std::string getFrame() const = 0;
   virtual std::string getPeaksWorkspaceName() const = 0;
   virtual void getPeaksInfo(Mantid::API::IPeaksWorkspace_sptr peaksWorkspace,
