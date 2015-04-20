@@ -157,21 +157,21 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
         return 'Diffraction;PythonAlgorithms'
 
     def summary(self):
-        return "This Python algorithm performs the operations necessary for the reduction of diffraction data \
-                from the Osiris instrument at ISIS \
-                into dSpacing, by correcting for the monitor and linking the various d-ranges together."
+        return "This Python algorithm performs the operations necessary for the reduction of diffraction data "+
+                "from the Osiris instrument at ISIS "+
+                "into dSpacing, by correcting for the monitor and linking the various d-ranges together."
 
     def PyInit(self):
-        runs_desc='The list of run numbers that are part of the sample run. \
-                   There should be five of these in most cases. Enter them as comma separated values.'
+        runs_desc='The list of run numbers that are part of the sample run. '+
+                  'There should be five of these in most cases. Enter them as comma separated values.'
         self.declareProperty('Sample', '', doc=runs_desc)
         self.declareProperty('Vanadium', '', doc=runs_desc)
         self.declareProperty(FileProperty('CalFile', '', action=FileAction.Load),
-                             doc='Filename of the .cal file to use in the [[AlignDetectors]] and \
-                                  [[DiffractionFocussing]] child algorithms.')
+                             doc='Filename of the .cal file to use in the [[AlignDetectors]] and '+
+                                 '[[DiffractionFocussing]] child algorithms.')
         self.declareProperty(MatrixWorkspaceProperty('OutputWorkspace', '', Direction.Output),
-                             doc="Name to give the output workspace. If no name is provided, \
-                                 one will be generated based on the run numbers.")
+                             doc="Name to give the output workspace. If no name is provided, "+
+                                 "one will be generated based on the run numbers.")
 
         self._cal = None
         self._outputWsName = None
