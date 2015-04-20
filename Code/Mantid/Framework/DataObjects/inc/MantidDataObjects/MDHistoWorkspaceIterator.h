@@ -8,12 +8,17 @@
 #include "MantidDataObjects/SkippingPolicy.h"
 #include <map>
 #include <vector>
+#include <boost/tuple/tuple.hpp>
 
 namespace Mantid {
 namespace DataObjects {
 
-// Typdef for a map for mapping width of neighbours (key) to permutations needed in the calcualtion.
+// Typedef for a map for mapping width of neighbours (key) to permutations needed in the calcualtion.
 typedef std::map<std::vector<int>, std::vector<int64_t> > PermutationsMap;
+// Typedef for extents
+typedef boost::tuple<Mantid::coord_t, Mantid::coord_t> MDExtentPair; // Min/Max pair
+// Typedef for vector of extents
+typedef std::vector<MDExtentPair> VecMDExtents;
 
 /** An implementation of IMDIterator that iterates through
   a MDHistoWorkspace. It treats the bin in the workspace as
@@ -93,6 +98,8 @@ public:
                                     const bool *maskDim) const;
 
   virtual Mantid::Kernel::VMD getCenter() const;
+
+  virtual VecMDExtents getBoxExtents() const;
 
   virtual size_t getNumEvents() const;
 

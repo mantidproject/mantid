@@ -323,9 +323,31 @@ Mantid::Kernel::VMD MDHistoWorkspaceIterator::getCenter() const {
   Utils::NestedForLoop::GetIndicesFromLinearIndex(m_nd, m_pos, m_indexMaker,
                                                   m_indexMax, m_index);
   // Find the center
-  for (size_t d = 0; d < m_nd; d++)
+  for (size_t d = 0; d < m_nd; ++d) {
     m_center[d] = m_origin[d] + (coord_t(m_index[d]) + 0.5f) * m_binWidth[d];
+  }
   return VMD(m_nd, m_center);
+}
+
+/**
+ * Get the extents in n-dimensions corresponding to the position of the box of the current iterator.
+ * @return pairs of min/max extents.
+ */
+VecMDExtents MDHistoWorkspaceIterator::getBoxExtents() const
+{
+
+    // Get the indexes.
+    Utils::NestedForLoop::GetIndicesFromLinearIndex(m_nd, m_pos, m_indexMaker,
+                                                    m_indexMax, m_index);
+    VecMDExtents extents(m_nd);
+    // Find the extents.
+    for (size_t d = 0; d < m_nd; ++d) {
+      const coord_t min = m_origin[d] + coord_t(m_index[d]) * m_binWidth[d]; // Min in d
+      const coord_t max = min + m_binWidth[d]; // Max in d
+      extents[d] = MDExtentPair(min, max);
+    }
+
+    return extents;
 }
 
 //----------------------------------------------------------------------------------------------
