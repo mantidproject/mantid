@@ -9,16 +9,7 @@
 #include "MantidAPI/IPeakFunction.h"
 #include "MantidKernel/VectorHelper.h"
 #include "MantidKernel/ArrayProperty.h"
-#include "MantidKernel/Strings.h"
-#include "MantidDataObjects/TableWorkspace.h"
-#include "MantidAPI/TableRow.h"
-#include "MantidGeometry/Instrument/RectangularDetector.h"
-#include <boost/math/special_functions/fpclassify.hpp>
 #include <fstream>
-#include <ostream>
-#include <iomanip>
-#include <sstream>
-#include <set>
 
 namespace Mantid {
 namespace Crystal {

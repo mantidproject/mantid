@@ -1,14 +1,6 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidCrystal/SaveIsawUB.h"
-#include "MantidKernel/Matrix.h"
-#include "MantidKernel/System.h"
-#include <iostream>
 #include <fstream>
-#include <iomanip>
-#include <stdio.h>
-#include <exception>
-#include <MantidGeometry/Crystal/OrientedLattice.h>
-#include <MantidGeometry/Crystal/UnitCell.h>
 #include "MantidAPI/IMDEventWorkspace.h"
 
 using Mantid::Kernel::DblMatrix;

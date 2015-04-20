@@ -1,10 +1,8 @@
 #include "MantidCrystal/FindUBUsingMinMaxD.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
-#include "MantidDataObjects/Peak.h"
 #include "MantidGeometry/Crystal/IndexingUtils.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
-#include <cstdio>
 
 namespace Mantid {
 namespace Crystal {

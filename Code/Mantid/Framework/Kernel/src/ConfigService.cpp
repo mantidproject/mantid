@@ -22,12 +22,9 @@
 #include <Poco/StringTokenizer.h>
 #include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/Document.h>
-#include <Poco/DOM/Element.h>
 #include <Poco/DOM/NodeList.h>
 #include <Poco/Environment.h>
-#include <Poco/File.h>
 #include <Poco/Process.h>
-#include <Poco/String.h>
 #include <Poco/URI.h>
 #ifdef _WIN32
 #pragma warning(disable : 4250)
@@ -40,10 +37,7 @@
 #include <boost/regex.hpp>
 
 #include <fstream>
-#include <sstream>
 #include <iostream>
-#include <string>
-#include <algorithm>
 
 #ifdef __APPLE__
 #include <mach-o/dyld.h>
