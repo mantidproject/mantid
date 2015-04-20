@@ -1,4 +1,4 @@
-#pylint: #pylint: skip-file
+#pylint: skip-file
 from mantid import config
 from PyChop import fluxGUI
 from PyChop import PyChopGUI
