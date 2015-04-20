@@ -19,12 +19,12 @@ public:
   virtual ~IntegrateEllipsoids();
   void qListFromEventWS(Integrate3DEvents &integrator, API::Progress &prog,
                         DataObjects::EventWorkspace_sptr &wksp,
-                        UnitsConversionHelper &unitConverter,
-                        MDTransf_sptr &qConverter, Kernel::DblMatrix const &UBinv, bool hkl_integ);
+                        MDTransf_sptr &qConverter,
+                        Kernel::DblMatrix const &UBinv, bool hkl_integ);
   void qListFromHistoWS(Integrate3DEvents &integrator, API::Progress &prog,
                         DataObjects::Workspace2D_sptr &wksp,
-                        UnitsConversionHelper &unitConverter,
-                        MDTransf_sptr &qConverter, Kernel::DblMatrix const &UBinv, bool hkl_integ);
+                        MDTransf_sptr &qConverter,
+                        Kernel::DblMatrix const &UBinv, bool hkl_integ);
   virtual const std::string name() const;
   /// Summary of algorithms purpose
   virtual const std::string summary() const {
