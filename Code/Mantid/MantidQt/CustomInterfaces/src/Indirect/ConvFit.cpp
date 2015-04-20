@@ -634,16 +634,21 @@ namespace IDA
   {
     QtProperty* diffRotDiscreteCircleGroup = m_grpManager->addProperty(name);
 
+    m_properties[name+".N"] = m_dblManager->addProperty("N");
+    m_dblManager->setValue(m_properties[name+".N"], 3.0);
+
     m_properties[name+".Intensity"] = m_dblManager->addProperty("Intensity");
     m_properties[name+".Radius"] = m_dblManager->addProperty("Radius");
     m_properties[name+".Decay"] = m_dblManager->addProperty("Decay");
     m_properties[name+".Shift"] = m_dblManager->addProperty("Shift");
 
+    m_dblManager->setDecimals(m_properties[name+".N"], 0);
     m_dblManager->setDecimals(m_properties[name+".Intensity"], NUM_DECIMALS);
     m_dblManager->setDecimals(m_properties[name+".Radius"], NUM_DECIMALS);
     m_dblManager->setDecimals(m_properties[name+".Decay"], NUM_DECIMALS);
     m_dblManager->setDecimals(m_properties[name+".Shift"], NUM_DECIMALS);
 
+    diffRotDiscreteCircleGroup->addSubProperty(m_properties[name+".N"]);
     diffRotDiscreteCircleGroup->addSubProperty(m_properties[name+".Intensity"]);
     diffRotDiscreteCircleGroup->addSubProperty(m_properties[name+".Radius"]);
     diffRotDiscreteCircleGroup->addSubProperty(m_properties[name+".Decay"]);
@@ -669,9 +674,12 @@ namespace IDA
       {
         std::string propName = props[i]->propertyName().toStdString();
         double propValue = props[i]->valueText().toDouble();
-        if ( propValue )
+        if(propValue)
         {
-          func->setParameter(propName, propValue);
+          if(func->hasAttribute(propName))
+            func->setAttributeValue(propName, propValue);
+          else
+            func->setParameter(propName, propValue);
         }
       }
     }
