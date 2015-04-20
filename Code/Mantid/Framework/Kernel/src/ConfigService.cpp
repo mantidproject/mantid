@@ -316,7 +316,6 @@ void ConfigServiceImpl::loadConfig(const std::string &filename,
     // there was a problem loading the file - it probably is not there
     std::cerr << "Problem loading the configuration file " << filename << " "
               << e.what() << std::endl;
-
     if (!append) {
       // if we have no property values then take the default
       m_PropertyString = defaultConfig();
@@ -1567,42 +1566,6 @@ bool ConfigServiceImpl::isNetworkDrive(const std::string &path) {
 }
 
 /**
- * Set the environment variable for the PV_PLUGIN_PATH based on where Mantid is.
- */
-void ConfigServiceImpl::setParaViewPluginPath() const {
-  std::string mantid_loc = this->getDirectoryOfExecutable();
-  Poco::Path pv_plugin_path(mantid_loc +
-                            "/pvplugins/pvplugins"); // Developer build paths
-  pv_plugin_path = pv_plugin_path.absolute();
-  g_log.debug() << "Trying " << pv_plugin_path.toString()
-                << " as PV_PLUGIN_PATH\n";
-  Poco::File pv_plugin(pv_plugin_path.toString());
-  if (!pv_plugin.exists() || !pv_plugin.isDirectory()) {
-    // Installation paths
-    g_log.debug("ParaView plugin directory \"" + pv_plugin.path() +
-                "\" does not exist. Trying properties file location.");
-    std::string user_loc = this->getString("pvplugins.directory");
-    if (user_loc.empty()) {
-      g_log.debug(
-          "No ParaView plugin directory specified in the properties file.");
-      return; // it didn't work
-    }
-    pv_plugin_path = Poco::Path(user_loc, "pvplugins");
-    pv_plugin_path = pv_plugin_path.absolute();
-    pv_plugin = Poco::File(pv_plugin_path.toString());
-    if (!pv_plugin.exists() || !pv_plugin.isDirectory()) {
-      g_log.debug("ParaView plugin directory \"" + pv_plugin.path() +
-                  "\" does not exist");
-      return; // it didn't work
-    }
-  }
-
-  // one of the two choices worked so set to that directory
-  g_log.debug("Setting PV_PLUGIN_PATH = \"" + pv_plugin.path() + "\"");
-  Poco::Environment::set("PV_PLUGIN_PATH", pv_plugin.path());
-}
-
-/**
  * Gets the directory that we consider to be the directory containing the
  * Mantid.properties file.
  * Basically, this is the either the directory pointed to by MANTIDPATH or the
@@ -1962,151 +1925,21 @@ void ConfigServiceImpl::removeObserver(const Poco::AbstractObserver &observer)
 }
 
 /*
-Ammend paths to point to include the paraview core libraries.
-@param path : path to add
-*/
-void ConfigServiceImpl::setParaviewLibraryPath(const std::string &path) {
-#ifdef _WIN32
-  const std::string platformPathName = "PATH";
-  Poco::Path existingPath;
-  char separator = existingPath.pathSeparator();
-  std::string strSeparator;
-  strSeparator.push_back(separator);
-
-  if (Poco::Environment::has(platformPathName)) {
-    existingPath = Poco::Environment::get(platformPathName);
-    existingPath.append(strSeparator + path);
-  } else {
-    existingPath = path;
-  }
-  const std::string newPath = existingPath.toString();
-  Poco::Environment::set(platformPathName, newPath);
-#elif defined __linux__
-  UNUSED_ARG(path)
-  throw std::runtime_error("Cannot dynamically set the library path on Linux");
-#elif defined __APPLE__
-  UNUSED_ARG(path)
-  throw std::runtime_error("Cannot dynamically set the library path on Mac");
-#else
-  throw std::runtime_error("ConfigServiceImpl::setParaviewLibraryPath cannot "
-                           "determine the running platform and therefore "
-                           "cannot set the path to the Paraview libraries.");
-#endif
-}
-
-/*
-Extracts the string from a poco pipe and returns the numerical part.
-@param pipe : input pipe.
-@return the numerical part of the version string contained inside the pipe.
-*/
-const std::string extractVersionNumberFromPipe(const Poco::Pipe &pipe) {
-  std::string versionString = "undetermined";
-  Poco::PipeInputStream pipeStream(pipe);
-  std::stringstream stringStream;
-  Poco::StreamCopier::copyStream(pipeStream, stringStream);
-  const std::string givenVersion = stringStream.str();
-  boost::smatch match;
-  boost::regex expression(
-      "(\\d+)\\.(\\d+)\\.?(\\d*)$"); // Gets the version number part.
-  if (boost::regex_search(givenVersion, match, expression)) {
-    versionString = match[0];
-  }
-  return versionString;
-}
-
-/*
-Checks to see whether paraview usage is explicitly ignored in the property file
-then,
-quick check to determine if paraview is installed. We make the assumption
-that if the executable paraview binary is on the path that the paraview
-libraries
-will also be available on the library path, or equivalent.
+Checks to see whether the pvplugins.directory variable is set. If it is set, assume
+we have built Mantid with ParaView
 @return True if paraview is available or not disabled.
 */
-bool ConfigServiceImpl::quickParaViewCheck() const {
-  const std::string paraviewIgnoreProperty = "paraview.ignore";
-  const bool ignoreParaview = hasProperty(paraviewIgnoreProperty) &&
-                              atoi(getString(paraviewIgnoreProperty).c_str());
-  if (ignoreParaview) {
-    g_log.debug("Ignoring ParaView");
-    return false;
-  }
-
-  g_log.debug("Checking for ParaView");
-  bool isAvailable = false;
-
-  try {
-    // Try to run "paraview -V", which will succeed if ParaView is installed.
-    std::string paraviewDir = getString("paraview.path");
-    std::string cmd = "paraview";
-    if (!paraviewDir.empty()) {
-      Poco::Path paraviewExe = Poco::Path(paraviewDir, "paraview");
-      cmd = paraviewExe.toString();
-    }
-    std::vector<std::string> args;
-    args.push_back("-V");
-    Poco::Pipe outPipe, errorPipe;
-    Poco::ProcessHandle ph =
-        Poco::Process::launch(cmd, args, 0, &outPipe, &errorPipe);
-    const int rc = ph.wait();
-    // Only if the paraview query returned successfully.
-    if (rc == 1) {
-      // Check the actual version numbers against what we expect they should be.
-      const std::string givenVersionNumber =
-          extractVersionNumberFromPipe(errorPipe);
-      const std::string targetVersionNumber = ParaViewVersion::targetVersion();
-      if (givenVersionNumber == targetVersionNumber) {
-        isAvailable = true;
-        g_log.information("ParaView is available");
-        // Now set the plugin path.
-        this->setParaViewPluginPath();
-      } else {
-        std::stringstream messageStream;
-        messageStream << "The compatible version of ParaView is "
-                      << targetVersionNumber << " but the installed version is "
-                      << givenVersionNumber;
-        g_log.debug(messageStream.str());
-        g_log.information("ParaView is not available");
-      }
-    } else {
-      std::stringstream messageStream;
-      messageStream << "ParaView version query failed with code: " << rc;
-      g_log.debug(messageStream.str());
-      g_log.information("ParaView is not available");
-    }
-  }
-  catch (Poco::SystemException &e) {
-    g_log.debug(e.what());
-    g_log.information("ParaView is not available");
-  }
-  return isAvailable;
+bool ConfigServiceImpl::pvPluginsAvailable() const {
+  std::string pvpluginsDir = getString("pvplugins.directory");
+  return !pvpluginsDir.empty();
 }
 
-/*
-Quick check to determine if VATES is installed.
-@return TRUE if available.
-*/
-bool ConfigServiceImpl::quickVatesCheck() const {
-  std::string path = this->getDirectoryOfExecutable();
-
-  Poco::File dir(path);
-  typedef std::vector<std::string> VecFiles;
-
-  VecFiles files;
-  dir.list(files);
-  VecFiles::iterator it = files.begin();
-
-  bool found = false;
-  while (it != files.end()) {
-    std::string file = *it;
-    boost::regex expression("^(VatesSimpleGui)", boost::regex::icase);
-    if (boost::regex_search(file, expression)) {
-      found = true;
-      break;
-    }
-    ++it;
-  }
-  return found;
+/**
+ * Gets the path to the ParaView plugins
+ * @returns A string giving the directory of the ParaView plugins
+ */
+const std::string ConfigServiceImpl::getPVPluginsPath() const {
+  return getString("pvplugins.directory");
 }
 
 /*
@@ -2133,14 +1966,6 @@ Kernel::ProxyInfo &ConfigServiceImpl::getProxy(const std::string &url) {
     m_isProxySet = true;
   }
   return m_proxyInfo;
-}
-
-/**
- * Gets the path to ParaView.
- * @returns The ParaView path.
- */
-const std::string ConfigServiceImpl::getParaViewPath() const {
-  return getString("paraview.path");
 }
 
 /// \cond TEMPLATE

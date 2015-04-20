@@ -7,7 +7,7 @@
 #endif
 
 #include <pqView.h>
-#include <pqActiveView.h>
+#include <pqActiveObjects.h>
 #include <vtkSMRenderViewProxy.h>
 #include <vtkCamera.h>
 #include <vtkRenderer.h>
@@ -39,7 +39,7 @@ namespace Mantid
         double far[4];
         double near[4];
 
-        pqView * view = pqActiveView::instance().current();
+        pqView * view = pqActiveObjects::instance().activeView();
 
         vtkSMRenderViewProxy* proxy = NULL;
 
@@ -107,7 +107,7 @@ namespace Mantid
       */
       void CameraManager::setCameraToPeak(double xpos, double ypos, double zpos, double peakRadius)
       {
-        pqView * view = pqActiveView::instance().current();
+        pqView * view = pqActiveObjects::instance().activeView();
         vtkSMRenderViewProxy* proxy = NULL;
 
         if (view)

@@ -23,15 +23,6 @@
    write(buf)
    ...
    fun:H5FD_write
-   fun:H5F_accum_write
-   fun:H5F_block_write
-   ...
-   fun:H5D__flush_real
-   ...
-   fun:H5I_iterate
-   fun:H5D_flush
-   fun:H5F_flush
-   fun:H5Fflush
    ...
    fun:nxiflush_
    fun:_ZN5NeXus4File5flushEv
