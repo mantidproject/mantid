@@ -12,6 +12,10 @@
 using namespace Mantid;
 using namespace Mantid::Geometry;
 
+namespace {
+typedef boost::tuple<Mantid::coord_t, Mantid::coord_t> Extent;
+}
+
 class MDBoxImplicitFunctionTest : public CxxTest::TestSuite
 {
 public:
@@ -81,21 +85,13 @@ public:
       // The box to test.
       const coord_t boxMin = 0;
       const coord_t boxMax = 0.1;
-      std::vector<coord_t> boxVertexes;
-      // vertex
-      boxVertexes.push_back(boxMin);
-      boxVertexes.push_back(boxMin);
-      // vertex
-      boxVertexes.push_back(boxMin);
-      boxVertexes.push_back(boxMax);
-      // vertex
-      boxVertexes.push_back(boxMax);
-      boxVertexes.push_back(boxMin);
-      // vertex
-      boxVertexes.push_back(boxMax);
-      boxVertexes.push_back(boxMax);
+      std::vector<Extent> extents;
+      // extent
+      extents.push_back(Extent(boxMin, boxMax));
+      // extent
+      extents.push_back(Extent(boxMin, boxMax));
 
-      TS_ASSERT_EQUALS(0.0, f.fraction(&boxVertexes[0], 4));
+      TS_ASSERT_EQUALS(0.0, f.fraction(extents));
   }
 
   void test_fraction_when_fully_contained()
@@ -115,20 +111,17 @@ public:
       const coord_t boxMin = 1.1;
       const coord_t boxMax = 1.9;
       std::vector<coord_t> boxVertexes;
-      // vertex
-      boxVertexes.push_back(boxMin);
-      boxVertexes.push_back(boxMin);
-      // vertex
-      boxVertexes.push_back(boxMin);
-      boxVertexes.push_back(boxMax);
-      // vertex
-      boxVertexes.push_back(boxMax);
-      boxVertexes.push_back(boxMin);
-      // vertex
-      boxVertexes.push_back(boxMax);
-      boxVertexes.push_back(boxMax);
+      std::vector<Extent> extents;
+      // extent
+      extents.push_back(Extent(boxMin, boxMax));
+      // extent
+      extents.push_back(Extent(boxMin, boxMax));
+      // extent
+      extents.push_back(Extent(boxMin, boxMax));
+      // extent
+      extents.push_back(Extent(boxMin, boxMax));
 
-      TS_ASSERT_EQUALS(1.0, f.fraction(&boxVertexes[0], 4));
+      TS_ASSERT_EQUALS(1.0, f.fraction(extents));
   }
 
   void test_fraction_when_partially_contained_1D_simple()
@@ -145,11 +138,9 @@ public:
       // The box to test.
       const coord_t boxMin = 0;
       const coord_t boxMax = 1;
-      std::vector<coord_t> boxVertexes;
-      // vertex
-      boxVertexes.push_back(boxMin);
-      // vertex
-      boxVertexes.push_back(boxMax);
+      std::vector<Extent> extents;
+      // extent
+      extents.push_back(Extent(boxMin, boxMax));
 
       /*
 
@@ -161,7 +152,7 @@ public:
 
       */
 
-      TSM_ASSERT_DELTA("Overlap fraction is incorrectly calculated", 0.1, f.fraction(&boxVertexes[0], boxVertexes.size()), 1e-3);
+      TSM_ASSERT_DELTA("Overlap fraction is incorrectly calculated", 0.1, f.fraction(extents), 1e-4);
   }
 
   void test_fraction_when_partially_contained_1D_complex()
@@ -178,11 +169,9 @@ public:
       // The box to test.
       const coord_t boxMin = 0;
       const coord_t boxMax = 1.0;
-      std::vector<coord_t> boxVertexes;
-      // vertex
-      boxVertexes.push_back(boxMin);
-      // vertex
-      boxVertexes.push_back(boxMax);
+      std::vector<Extent> extents;
+      // extent
+      extents.push_back(Extent(boxMin, boxMax));
 
       /*
 
@@ -194,7 +183,7 @@ public:
 
       */
 
-      TSM_ASSERT_DELTA("Overlap fraction is incorrectly calculated", 0.5, f.fraction(&boxVertexes[0], boxVertexes.size()), 1e-3);
+      TSM_ASSERT_DELTA("Overlap fraction is incorrectly calculated", 0.5, f.fraction(extents), 1e-4);
   }
 
 
@@ -234,21 +223,13 @@ public:
       // The box to test.
       const coord_t boxMin = 0;
       const coord_t boxMax = 1;
-      std::vector<coord_t> boxVertexes;
-      // vertex
-      boxVertexes.push_back(boxMin);
-      boxVertexes.push_back(boxMin);
-      // vertex
-      boxVertexes.push_back(boxMin);
-      boxVertexes.push_back(boxMax);
-      // vertex
-      boxVertexes.push_back(boxMax);
-      boxVertexes.push_back(boxMin);
-      // vertex
-      boxVertexes.push_back(boxMax);
-      boxVertexes.push_back(boxMax);
+      std::vector<Extent> extents;
+      // extent
+      extents.push_back(Extent(boxMin, boxMax));
+      // extent
+      extents.push_back(Extent(boxMin, boxMax));
 
-      TSM_ASSERT_DELTA("2d overlap incorrectly calculated", 1.0/4, f.fraction(&boxVertexes[0], 4), 1e-3);
+      TSM_ASSERT_DELTA("2d overlap incorrectly calculated", 1.0/4, f.fraction(extents), 1e-3);
   }
 
   void test_fraction_when_partially_contained_2d_complex()
@@ -287,21 +268,13 @@ public:
       // The box to test.
       const coord_t boxMin = 0;
       const coord_t boxMax = 1;
-      std::vector<coord_t> boxVertexes;
-      // vertex
-      boxVertexes.push_back(boxMin);
-      boxVertexes.push_back(boxMin);
-      // vertex
-      boxVertexes.push_back(boxMin);
-      boxVertexes.push_back(boxMax);
-      // vertex
-      boxVertexes.push_back(boxMax);
-      boxVertexes.push_back(boxMin);
-      // vertex
-      boxVertexes.push_back(boxMax);
-      boxVertexes.push_back(boxMax);
+      std::vector<Extent> extents;
+      // extent
+      extents.push_back(Extent(boxMin, boxMax));
+      // extent
+      extents.push_back(Extent(boxMin, boxMax));
 
-      TSM_ASSERT_DELTA("2d overlap incorrectly calculated", 1.0/8, f.fraction(&boxVertexes[0], 4), 1e-3);
+      TSM_ASSERT_DELTA("2d overlap incorrectly calculated", 1.0/8, f.fraction(extents), 1e-3);
   }
 
 };

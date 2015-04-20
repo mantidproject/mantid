@@ -75,7 +75,7 @@ public:
   }
 
   // Users may set all binning parameter to [] i.e. direct copy, no integration.
-  void xtest_exec_do_nothing_but_clone()
+  void test_exec_do_nothing_but_clone()
   {
     using namespace Mantid::DataObjects;
     MDHistoWorkspace_sptr ws = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 1 /*nd*/, 10);
@@ -96,7 +96,7 @@ public:
     TS_ASSERT_EQUALS(outWS->getSignalAt(1), ws->getSignalAt(1));
   }
 
-  void xtest_1D_integration_exact_binning()
+  void test_1D_integration_exact_binning()
   {
 
       /*
@@ -138,7 +138,7 @@ public:
       TSM_ASSERT_DELTA("Wrong error value", std::sqrt(5 * (ws->getErrorAt(0) * ws->getErrorAt(0))), outWS->getErrorAt(0), 1e-4);
   }
 
-  void xtest_1D_integration_partial_binning_complex(){
+  void test_1D_integration_partial_binning_complex(){
 
       /*
 
@@ -241,17 +241,14 @@ public:
     TS_ASSERT_DELTA(max, intdim->getMaximum(), 1e-4);
     TS_ASSERT_EQUALS(1, intdim->getNBins());
     auto dim = outWS->getDimension(0);
-    TS_ASSERT_DELTA(0, dim->getMinimum(), 1e-4);
-    TS_ASSERT_DELTA(10, dim->getMaximum(), 1e-4);
-    TS_ASSERT_EQUALS(1, dim->getNBins());
+    TSM_ASSERT_DELTA("Not integrated binning should be the same as the original dimension", 0, dim->getMinimum(), 1e-4);
+    TSM_ASSERT_DELTA("Not integrated binning should be the same as the original dimension", 10, dim->getMaximum(), 1e-4);
+    TSM_ASSERT_EQUALS("Not integrated binning should be the same as the original dimension", 10, dim->getNBins());
 
     // Check the data.
     TSM_ASSERT_DELTA("Wrong integrated value", 6.0, outWS->getSignalAt(0), 1e-4);
     TSM_ASSERT_DELTA("Wrong error value", std::sqrt(6.0 * (ws->getErrorAt(0) * ws->getErrorAt(0))), outWS->getErrorAt(0), 1e-4);
-
   }
-
-
 
 
 };
@@ -259,6 +256,44 @@ public:
 //=====================================================================================
 // Performance Tests
 //=====================================================================================
+using namespace Mantid::DataObjects;
+class IntegrateMDHistoWorkspaceTestPerformance : public CxxTest::TestSuite
+{
 
+private:
+
+  MDHistoWorkspace_sptr m_ws;
+
+public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static IntegrateMDHistoWorkspaceTestPerformance *createSuite() { return new IntegrateMDHistoWorkspaceTestPerformance(); }
+  static void destroySuite( IntegrateMDHistoWorkspaceTestPerformance *suite ) { delete suite; }
+
+  IntegrateMDHistoWorkspaceTestPerformance() {
+      // Create a 4D workspace.
+      m_ws = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0 /*signal*/, 4 /*nd*/, 50 /*nbins*/, 10 /*max*/, 1.0 /*error sq*/);
+  }
+
+  void test_execute_4d()
+  {
+      IntegrateMDHistoWorkspace alg;
+      alg.setChild(true);
+      alg.setRethrows(true);
+      alg.initialize();
+      const double min = 0;
+      const double max = 5;
+      alg.setProperty("InputWorkspace", m_ws);
+      alg.setProperty("P1Bin", boost::assign::list_of(min)(max).convert_to_container<std::vector<double> >());
+      alg.setProperty("P2Bin", boost::assign::list_of(min)(max).convert_to_container<std::vector<double> >());
+      alg.setProperty("P3Bin", boost::assign::list_of(min)(max).convert_to_container<std::vector<double> >());
+      alg.setProperty("P4Bin", boost::assign::list_of(min)(max).convert_to_container<std::vector<double> >());
+      alg.setPropertyValue("OutputWorkspace", "dummy");
+      alg.execute();
+      IMDHistoWorkspace_sptr outWS=alg.getProperty("OutputWorkspace");
+      TS_ASSERT(outWS);
+  }
+
+};
 
 #endif /* MANTID_MDALGORITHMS_INTEGRATEMDHISTOWORKSPACETEST_H_ */

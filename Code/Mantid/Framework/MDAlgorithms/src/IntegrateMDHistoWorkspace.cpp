@@ -209,16 +209,10 @@ namespace MDAlgorithms
               double sumSQErrors = 0;
               const size_t iteratorIndex = outIterator->getLinearIndex();
               do {
-                  size_t numVertices;
-                  Mantid::coord_t* const vertexes = inIterator->getVertexesArray(numVertices);
-                  const double weight = box.fraction(vertexes, numVertices); // TODO not ideal because vertices need to be sorted to get min max in this function. could we calculate this better?
+                  const double weight = box.fraction(inIterator->getBoxExtents());
                   sumSignal += weight *  inIterator->getSignal();
                   sumSQErrors += weight * (inIterator->getError() * inIterator->getError());
-                  std::cout << "index " << inIterator->getLinearIndex() << " x " << weight << std::endl;
               } while(inIterator->next());
-
-              std::cout << "outer index " << iteratorIndex << std::endl << std::endl;
-
 
               outWS->setSignalAt(iteratorIndex, sumSignal);
               outWS->setErrorSquaredAt(iteratorIndex, sumSQErrors);

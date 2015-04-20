@@ -5,6 +5,8 @@
 #include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
 #include "MantidGeometry/MDGeometry/MDTypes.h"
 #include "MantidKernel/VMD.h"
+#include <vector>
+#include <boost/tuple/tuple.hpp>
 
 namespace Mantid {
 namespace Geometry {
@@ -48,7 +50,7 @@ public:
 
   double volume() const;
 
-  double fraction(coord_t* box, const size_t nVertexes) const;
+  double fraction(const std::vector<boost::tuple<Mantid::coord_t, Mantid::coord_t> >& extents) const;
 
   virtual ~MDBoxImplicitFunction();
 

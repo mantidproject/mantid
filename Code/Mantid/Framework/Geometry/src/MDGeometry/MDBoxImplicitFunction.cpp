@@ -100,44 +100,34 @@ double MDBoxImplicitFunction::volume() const { return m_volume; }
 
 /**
  * Calculate the fraction of a box residing inside this implicit function
- * @param boxVertexes to get fraction for
+ * @param boxExtents to get fraction for
  * @return fraction 0 to 1
  */
-double MDBoxImplicitFunction::fraction(coord_t *boxVertexes,
-                                       const size_t nVertexes) const {
-
-  double fraction = 0;
-  const eContact contact = this->boxContact(boxVertexes, nVertexes);
-  if (contact == NOT_TOUCHING) {
-    fraction = 0; //
-  } else if (contact == CONTAINED) {
-    fraction = 1;
-  } else {
+double MDBoxImplicitFunction::fraction(const std::vector<boost::tuple<Mantid::coord_t, Mantid::coord_t> >& boxExtents) const {
 
     size_t nd = m_min.size();
-    std::vector<coord_t> dmins(nd, std::numeric_limits<coord_t>::max());
-    std::vector<coord_t> dmaxs(nd, std::numeric_limits<coord_t>::min());
     coord_t frac = 1;
 
     for (size_t d = 0; d < nd; ++d) {
 
-      for (size_t i = 0; i < nVertexes; ++i) {
+      const coord_t min = boxExtents[d].get<0>();
+      const coord_t max = boxExtents[d].get<1>();
 
-        dmins[d] = std::min(dmins[d], boxVertexes[i + nVertexes * d]);
-        dmaxs[d] = std::max(dmaxs[d], boxVertexes[i + nVertexes * d]);
+      // Check that there is overlap at all. There must be overlap in ALL dimensions for the fraction to be > 0, so abort early if not.
+      if( max < m_min[d] || min > m_max[d]) {
+          frac = 0;
+          break;
       }
-      float dBoxRange = (dmaxs[d] - dmins[d]);
 
-      const coord_t dInnerMin = std::max(m_min[d], dmins[d]);
-      const coord_t dInnerMax = std::min(m_max[d], dmaxs[d]);
+      const coord_t dBoxRange = (max - min); // max-min
+      const coord_t dInnerMin = std::max(m_min[d], min);
+      const coord_t dInnerMax = std::min(m_max[d], max);
       const coord_t dOverlap = dInnerMax - dInnerMin;
 
       frac *= dOverlap / dBoxRange;
     }
-    fraction = frac;
-  }
-  return fraction;
 
+  return frac;
 }
 
 } // namespace Mantid
