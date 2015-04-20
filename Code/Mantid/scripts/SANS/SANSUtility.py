@@ -471,6 +471,43 @@ def mask_detectors_with_masking_ws(ws_name, masking_ws_name):
 
     MaskDetectors(Workspace=ws, DetectorList=masked_det_ids)
 
+def bundle_added_event_data_as_group(out_file_name, out_file_monitors_name):
+    """
+    We load an added event data file and its associated monitor file. Combine 
+    the data in a group workspace and delete the original files.
+    @param out_file_name :: the file name of the event data file
+    @param out_file_monitors_name :: the file name of the monitors file
+    @return the name fo the new group workspace file
+    """
+    event_data_temp = 'event_data_temp'
+    Load(Filename = out_file_name, OutputWorkspace = event_data_temp)
+    event_data_ws = mtd[event_data_temp]
+
+    monitor_temp = 'monitor_temp'
+    Load(Filename = out_file_monitors_name, OutputWorkspace = monitor_temp)
+    monitor_ws = mtd[monitor_temp]
+
+    # Extract the file name and the extension
+    file_name, file_extension = os.path.splitext(out_file_name)
+    out_group_file_name = file_name + '_group' + file_extension
+    out_group_ws_name = event_data_ws.getName() + '_group'
+
+    # Create a grouped workspace with the data and the monitor child workspaces
+    GroupWorkspaces(InputWorkspaces = [event_data_ws, monitor_ws], OutputWorkspace = out_group_ws_name)
+    group_ws = mtd[out_group_ws_name]
+
+    # Save the group 
+    SaveNexusProcessed(InputWorkspace = group_ws, Filename = out_group_file_name, Append=False)
+
+    # Delete the files and the temporary workspaces
+    DeleteWorkspace(event_data_ws)
+    DeleteWorkspace(monitor_ws)
+
+    #os.remove(out_file_name)
+    #os.remove(out_file_monitors_name)
+
+    return out_group_file_name
+
 ###############################################################################
 ######################### Start of Deprecated Code ############################
 ###############################################################################

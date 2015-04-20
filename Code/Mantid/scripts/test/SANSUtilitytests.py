@@ -1,5 +1,9 @@
+import mantid
 import unittest
+from mantid.simpleapi import *
+from mantid.api import WorkspaceGroup
 import SANSUtility as su
+import re
 
 class TestSliceStringParser(unittest.TestCase):
 
@@ -47,6 +51,50 @@ class TestSliceStringParser(unittest.TestCase):
 
     def test_empty_string_is_valid(self):
         self.checkValues(su.sliceParser(""), [[-1,-1]])
+
+class TestBundleAddedEventDataFilesToGroupWorkspaceFile(unittest.TestCase):
+    def _prepare_workspaces(self, names):
+        CreateSampleWorkspace(WorkspaceType = 'Event', OutputWorkspace = names[0])
+        CreateWorkspace(DataX = [1,1,1], DataY = [1,1,1], OutputWorkspace = names[1])
+        
+        temp_save_dir = config['defaultsave.directory']
+        data_file_name = os.path.join(temp_save_dir, names[0] + '.nxs')
+        monitor_file_name = os.path.join(temp_save_dir, names[1] + '.nxs')
+
+        SaveNexusProcessed(InputWorkspace = names[0], Filename = data_file_name)
+        SaveNexusProcessed(InputWorkspace = names[1], Filename = monitor_file_name)
+
+        file_names = [data_file_name, monitor_file_name]
+
+        return file_names
+
+
+    def _cleanup_workspaces(self, names):
+        for name in names:
+            DeleteWorkspace(name)
+
+
+    def test_load_valid_added_event_data_and_monitor_file_produces_group_ws(self):
+        # Arrange
+        names = ['even_data', 'monitor']
+        file_names = self._prepare_workspaces(names = names)
+        
+        # Act
+        group_ws_name = 'g_ws'
+        output_group_file_name = su.bundle_added_event_data_as_group(file_names[0], file_names[1])
+        Load(Filename = output_group_file_name, OutputWorkspace = group_ws_name)
+        group_ws = mtd[group_ws_name]
+        print ''
+        # Assert
+        self.assertTrue(isinstance(group_ws, WorkspaceGroup))
+        self.assertEqual(group_ws.size(), 2)
+        self.assertFalse(os.path.exists(file_names[0]))
+        self.assertFalse(os.path.exists(file_names[1]))
+
+        # Clean up
+        names.append(group_ws_name)
+        self._cleanup_workspaces(names = names)
+
 
 if __name__ == "__main__":
     unittest.main()
