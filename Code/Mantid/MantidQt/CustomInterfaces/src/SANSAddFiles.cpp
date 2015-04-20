@@ -51,7 +51,7 @@ SANSAddFiles::SANSAddFiles(QWidget *parent, Ui::SANSRunWindow *ParWidgets) :
   m_newOutDir(*this, &SANSAddFiles::changeOutputDir)
 {
   initLayout();
-  
+
   //get lists of suported extentions
   IAlgorithm_sptr alg = AlgorithmManager::Instance().create("Load");
   Property *prop = alg->getProperty("Filename");
@@ -120,6 +120,10 @@ void SANSAddFiles::initLayout()
   setToolTips();
 
   setOutDir(ConfigService::Instance().getString("defaultsave.directory"));
+
+  // Track changes in the selection of the histogram option
+  connect(m_SANSForm->comboBox_histogram_choice, SIGNAL(currentIndexChanged (int)), this, SLOT(onCurrentIndexChangedForHistogramChoice(int)));
+
 }
 /**
  * Restore previous input
@@ -257,11 +261,13 @@ void SANSAddFiles::runPythonAddFiles()
   //there are multiple file list inputs that can be filled in loop through them
   for(int i = 0; i < m_SANSForm->toAdd_List->count(); ++i )
   {
-    const QString filename =
+     QString filename =
       m_SANSForm->toAdd_List->item(i)->data(Qt::WhatsThisRole).toString();
     //allow but do nothing with empty entries
     if ( ! filename.isEmpty() )
     {
+      // Make sure that the file separators are valid
+      filename.replace("\\", "/");
       code_torun += "'"+filename+"',";
     }
   }
@@ -288,14 +294,31 @@ void SANSAddFiles::runPythonAddFiles()
   QString lowMem = m_SANSForm->loadSeparateEntries->isChecked()?"True":"False";
   code_torun += ", lowMem="+lowMem;
 
-  if ( m_SANSForm->takeBinningFromMonitors->isChecked() == false )
-    code_torun += ", binning='" + m_SANSForm->eventToHistBinning->text() + "'";
+  // In case of event data, check if the user either wants 
+  // 0. Custom historgram binning
+  // 1. A binning which is set by the data set
+  // 2. To save the actual event data
+  switch (m_SANSForm->comboBox_histogram_choice->currentIndex())
+  {
+    case 0:
+      code_torun += ", binning='" + m_SANSForm->eventToHistBinning->text() + "'";
+      break;
+    case 1:
+      break;
+    case 2:
+      code_torun += ", saveAsEvent=True";
+      break;
+    default:
+      break;
+  }
+
   code_torun += ")\n";
 
   g_log.debug() << "Executing Python: \n" << code_torun.toStdString() << std::endl;
 
   m_SANSForm->sum_Btn->setEnabled(false);
   m_pythonRunning = true;
+
   //call the algorithms by executing the above script as Python
   QString status = runPythonCode(code_torun, false);
   
@@ -401,6 +424,22 @@ void SANSAddFiles::enableSumming()
   );
 
   m_SANSForm->sum_Btn->setEnabled(nonEmptyItemsCount > 1);
+}
+
+/**
+ * Reacts to changges of the combo box selection for the histogram options for event data
+ * @param index the new index of the combo box.
+ */
+void SANSAddFiles::onCurrentIndexChangedForHistogramChoice(int index) 
+{
+  if (index == 0)
+  {
+    this->m_SANSForm->eventToHistBinning->setEnabled(true);
+  }
+  else
+  {
+    this->m_SANSForm->eventToHistBinning->setEnabled(false);
+  }
 }
 
 }//namespace CustomInterfaces
