@@ -342,7 +342,7 @@ LineViewer::applyMatrixWorkspace(Mantid::API::MatrixWorkspace_sptr ws) {
     const int axisY = lineIsHorizontal ? m_freeDimY : m_freeDimX;
 
     // If necessary, swap the start and end around so that start < end
-    const bool swapEnds = m_start[axisX] > m_end[axisY];
+    const bool swapEnds = m_start[axisX] > m_end[axisX];
     const double start = swapEnds ? m_end[axisX] : m_start[axisX];
     const double end = swapEnds ? m_start[axisX] : m_end[axisX];
 
