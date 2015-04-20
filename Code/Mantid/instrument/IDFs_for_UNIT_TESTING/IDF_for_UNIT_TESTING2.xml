@@ -22,8 +22,7 @@
 </defaults>
 
 <parameter name="somefunction:toplevel" type="fitting"> <value val="100.0" /> <min val="80"/> <max val="120"/> 
-<description is = "Test description for the fitting parameter toplevel\n
-    
+<description is = "Test description for the fitting parameter toplevel.
     long long test description for toplevel fitting parameter"/>
 </parameter>
 
@@ -34,7 +33,7 @@
 
 <component-link name="nickel-holder" >
   <parameter name="fjols"> <value val="200.0" /> 
-  <description is = "test fjols description" />
+  <description is = "test fjols description." />
   </parameter>
   <parameter name="fjols-string" type="string"> <value val="boevs" /> </parameter>
 </component-link>
@@ -103,7 +102,6 @@
     <value val="200.0" />     
   </parameter>     
   <parameter name="mistake">
-  <description is = "You made a terrible mistake"/>
   </parameter> 
 </component>
 

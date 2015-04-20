@@ -30,9 +30,15 @@ public:
 
   void testExecIDF_for_unit_testing2() // IDF stands for Instrument Definition File
   {
+    MatrixWorkspace_sptr output;
 
     // Create workspace wsName
     load_IDF2(); 
+    TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName));
+    ParameterMap& paramMap = output->instrumentParameters();
+    std::string descr = paramMap.getDescription("nickel-holder","fjols");
+    TS_ASSERT_EQUALS(descr,"test fjols description.");
+
 
     // load in additional parameters
     LoadParameterFile loaderPF;
@@ -44,30 +50,36 @@ public:
 
 
     // Get back the saved workspace
-    MatrixWorkspace_sptr output;
     TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName));
 
-    ParameterMap& paramMap = output->instrumentParameters();
+    paramMap = output->instrumentParameters();
     boost::shared_ptr<const Instrument> i = output->getInstrument();
     boost::shared_ptr<const IDetector> ptrDet = i->getDetector(1008);
     TS_ASSERT_EQUALS( ptrDet->getID(), 1008);
     TS_ASSERT_EQUALS( ptrDet->getName(), "combined translation6");
     Parameter_sptr param = paramMap.get(&(*ptrDet), "fjols");
     TS_ASSERT_DELTA( param->value<double>(), 20.0, 0.0001);
-    auto descr = param->getDescription();
-//    TS_ASSERT_EQUAL(descr,"test fjols description");
 
     param = paramMap.get(&(*ptrDet), "nedtur");
     TS_ASSERT_DELTA( param->value<double>(), 77.0, 0.0001);
     param = paramMap.get(&(*ptrDet), "fjols-test-paramfile");
     TS_ASSERT_DELTA( param->value<double>(), 50.0, 0.0001);
+    descr = param->getDescription();
+    TS_ASSERT_EQUALS(descr,"test description. Full test description.");
+
 
     ptrDet = i->getDetector(1301);
     TS_ASSERT_EQUALS( ptrDet->getID(), 1301);
     TS_ASSERT_EQUALS( ptrDet->getName(), "pixel");
     param = paramMap.get(ptrDet.get(), "testDouble");
     TS_ASSERT_DELTA( param->value<double>(), 25.0, 0.0001);
-    TS_ASSERT_EQUALS( paramMap.getString(ptrDet.get(), "testString"), "hello world");
+    TS_ASSERT_EQUALS(paramMap.getString(ptrDet.get(), "testString"), "hello world");
+
+    param = paramMap.get(ptrDet.get(), "testString");
+    TS_ASSERT_EQUALS(param->getTooltip(),"its test hello word.");
+    TS_ASSERT_EQUALS(param->getDescription(),"its test hello word.");
+    TS_ASSERT_EQUALS(paramMap.getDescription("pixel","testString"),"its test hello word.");
+
 
     std::vector<double> dummy = paramMap.getDouble("nickel-holder", "klovn");
     TS_ASSERT_DELTA( dummy[0], 1.0, 0.0001);
@@ -79,8 +91,6 @@ public:
     TS_ASSERT_DELTA (dummy[0], 200.0, 0.0001);
     dummy = paramMap.getDouble("nickel-holder", "mistake");
     TS_ASSERT_EQUALS (dummy.size(), 0);
-    param = paramMap.getRecursive(i.get(),"mistake");
-//    TS_ASSERT_EQUALS(param->getTooltip(),"You made a terrible mistake")
     
     dummy = paramMap.getDouble("nickel-holder", "fjols-test-paramfile");
     TS_ASSERT_DELTA (dummy[0], 2000.0, 0.0001);

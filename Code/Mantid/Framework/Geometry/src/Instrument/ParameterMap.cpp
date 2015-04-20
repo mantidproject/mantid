@@ -140,10 +140,11 @@ const std::string ParameterMap::getDescription(const std::string &compName,
       if (compName.compare(((const IComponent *)(*it).first)->getName()) == 0) {
         boost::shared_ptr<Parameter> param =
             get((const IComponent *)(*it).first, name);
-        if (param)
+        if (param){
           result = param->getDescription();
           if(!result.empty())
             return result;
+        }
       }
     }
     return result;
@@ -163,10 +164,11 @@ const std::string ParameterMap::getTooltip(const std::string &compName,
       if (compName.compare(((const IComponent *)(*it).first)->getName()) == 0) {
         boost::shared_ptr<Parameter> param =
             get((const IComponent *)(*it).first, name);
-        if (param)
+        if (param){
           result = param->getTooltip();
           if(!result.empty())
             return result;
+        }
       }
     }
     return result;
@@ -325,7 +327,7 @@ void ParameterMap::add(const IComponent *comp,
     auto existing_par = positionOf(comp, par->name().c_str(), "");
     // As this is only an add method it should really throw if it already
     // exists.
-    // However, this is old behaviour and many things rely on this actually be
+    // However, this is old behavior and many things rely on this actually be
     // an
     // add/replace-style function
     if (existing_par != m_map.end()) {

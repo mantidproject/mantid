@@ -2178,7 +2178,7 @@ void InstrumentDefinitionParser::setComponentLinks(
 Check that the cache file does actually exist and that it was modified last
 after the last modification to the xml def file. i.e. the vtp file contains the
 most recent set of changes.
-@param cacheCandiate : candiate cache file object to use the the geometries.
+@param cacheCandiate : candidate cache file object to use the geometries.
 */
 bool InstrumentDefinitionParser::canUseProposedCacheFile(
     IDFObject_const_sptr cacheCandiate) const {
