@@ -222,7 +222,20 @@ public:
     else
       return std::string("");
   }
+  /** Get a parameter's description   */
+  std::string getParDescription(const std::string &pname,
+                               bool recursive = true) const;
 
+  /** Get this parameter's description -- no recursive search within children*/
+  std::string getParDescription() const;
+
+  /** Get a parameter's tooltip (short description) */
+  std::string getParTooltip(const std::string &pname,
+                               bool recursive = true) const;
+  /** Get a parameter's tooltip (short description) -- no recursive search within children*/
+  std::string getParTooltip() const;
+  /**Set components description. Works for parameterized components only */
+  void setDescription(const std::string &descr);
   /**
   * Get a parameter defined as a bool
   * @param pname :: The name of the parameter
