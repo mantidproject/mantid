@@ -149,7 +149,7 @@ public:
                   output requested
 
       (x = 0.75) *|--------------|* (x = 4.25)
-                1/4 + 1 + + 1 + 1/4 = 3.5 counts
+                1/4 + 1 + 1 + 1 + 1/4 = 3.5 counts
 
       */
 
@@ -272,7 +272,7 @@ public:
 
   IntegrateMDHistoWorkspaceTestPerformance() {
       // Create a 4D workspace.
-      m_ws = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0 /*signal*/, 4 /*nd*/, 50 /*nbins*/, 10 /*max*/, 1.0 /*error sq*/);
+      m_ws = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0 /*signal*/, 4 /*nd*/, 100 /*nbins*/, 10 /*max*/, 1.0 /*error sq*/);
   }
 
   void test_execute_4d()
@@ -282,7 +282,7 @@ public:
       alg.setRethrows(true);
       alg.initialize();
       const double min = 0;
-      const double max = 5;
+      const double max = 1;
       alg.setProperty("InputWorkspace", m_ws);
       alg.setProperty("P1Bin", boost::assign::list_of(min)(max).convert_to_container<std::vector<double> >());
       alg.setProperty("P2Bin", boost::assign::list_of(min)(max).convert_to_container<std::vector<double> >());

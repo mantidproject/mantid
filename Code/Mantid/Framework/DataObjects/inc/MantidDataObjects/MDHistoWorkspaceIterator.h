@@ -83,6 +83,8 @@ public:
 
   virtual void jumpTo(size_t index);
 
+  virtual coord_t jumpToNearest(const Mantid::Kernel::VMD& fromLocation);
+
   virtual signal_t getNormalizedSignal() const;
 
   virtual signal_t getNormalizedError() const;
@@ -98,8 +100,6 @@ public:
                                     const bool *maskDim) const;
 
   virtual Mantid::Kernel::VMD getCenter() const;
-
-  virtual VecMDExtents getBoxExtents() const;
 
   virtual size_t getNumEvents() const;
 
@@ -128,6 +128,8 @@ public:
   virtual bool isWithinBounds(size_t index) const;
 
   size_t permutationCacheSize() const;
+
+  VecMDExtents getBoxExtents() const;
 
 protected:
   /// The MDHistoWorkspace being iterated.
