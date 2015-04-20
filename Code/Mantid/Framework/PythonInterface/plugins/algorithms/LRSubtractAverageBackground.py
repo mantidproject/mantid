@@ -48,7 +48,7 @@ class LRSubtractAverageBackground(PythonAlgorithm):
         x_range = self.getProperty("LowResolutionRange").value
         x_min = int(x_range[0])
         x_max = int(x_range[1])
-        
+
         sum_peak = self.getProperty("SumPeak").value
 
         # Number of pixels in each direction
@@ -81,7 +81,7 @@ class LRSubtractAverageBackground(PythonAlgorithm):
                                YPixelMax=bck_max,
                                ErrorWeighting = True,
                                SumPixels=True, NormalizeSum=True)
-            
+
         if right_bck is not None and left_bck is not None:
             average = (left_bck + right_bck) / 2.0
         elif right_bck is not None:
@@ -118,7 +118,7 @@ class LRSubtractAverageBackground(PythonAlgorithm):
             AnalysisDataService.remove(str(right_bck))
         if AnalysisDataService.doesExist(average_name):
             AnalysisDataService.remove(average_name)
-            
+
         self.setProperty('OutputWorkspace', workspace)
 
 AlgorithmFactory.subscribe(LRSubtractAverageBackground)

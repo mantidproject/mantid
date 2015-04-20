@@ -844,7 +844,7 @@ class RunDescriptor(PropDescriptor):
             except:
                 try:
                     monws_name = mon_ws.name()
-                except: 
+                except:
                     monws_name = 'None'
                 RunDescriptor._logger('*** Monitor workspace {0} does not have monitor with ID {1}. Monitor workspace set to None'.\
                                           format(monws_name,monID),'warning')
@@ -1090,7 +1090,7 @@ class RunDescriptor(PropDescriptor):
         except:
             try:
                 ws_index = data_ws.getIndexFromSpectrumNumber(spectraID)
-            except: 
+            except:
                 raise RuntimeError('*** Error: Can not retrieve spectra with ID {0} from source workspace: {1}'.\
                                     format(spectraID,data_ws.name()))
 
