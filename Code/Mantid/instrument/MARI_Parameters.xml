@@ -13,6 +13,8 @@
      if None - it is undefined -->
 <parameter name="det_cal_file" type="string">
    <value val="None"/>
+   <description is = "The file which defines proper (calibrated) detector positions.
+                      If property set to None - this file is undefined."/>
 </parameter>
 <!--  mari.cal -->
 <!-- The file which defines detectors to spectra mapping; File extension has to be specified here but filepath not
