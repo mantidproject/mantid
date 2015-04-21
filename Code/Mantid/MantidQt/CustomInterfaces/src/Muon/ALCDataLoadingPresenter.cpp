@@ -96,6 +96,10 @@ namespace CustomInterfaces
       {
         QCoreApplication::processEvents();
       }
+      if (!result.error().empty())
+      {
+        throw std::runtime_error(result.error());
+      }
 
       m_loadedData = alg->getProperty("OutputWorkspace");
 
