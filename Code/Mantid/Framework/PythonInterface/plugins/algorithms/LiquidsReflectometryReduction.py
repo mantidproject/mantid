@@ -1,4 +1,12 @@
 #pylint: disable=no-init,invalid-name
+"""
+    This algorithm is a refactored version of the RefLReduction algorithm.
+    It was written in an attempt to:
+      - Not rely on external code but only on algorithms.
+      - Do work using existing algorithms as opposed to doing everything in arrays.
+      - Keep the same parameters and work as a drop-in replacement for the old algorithm.
+      - Reproduce the output of the old algorithm.
+"""
 import time
 import math
 import os
@@ -21,14 +29,17 @@ class LiquidsReflectometryReduction(PythonAlgorithm):
         return "Liquids Reflectometer (REFL) reduction"
 
     def PyInit(self):
+        #TODO: Revisit the choice of names when we are entirely rid of the old code.
         self.declareProperty(IntArrayProperty("RunNumbers"), "List of run numbers to process")
         self.declareProperty("NormalizationRunNumber", 0, "Run number of the normalization run to use")
-        self.declareProperty(IntArrayProperty("SignalPeakPixelRange"), "Pixel range defining the data peak")
+        self.declareProperty(IntArrayProperty("SignalPeakPixelRange", [123, 137],
+                                              IntArrayLengthValidator(2), direction=Direction.Input),
+                                              "Pixel range defining the data peak")
         self.declareProperty("SubtractSignalBackground", True,
                              doc='If true, the background will be subtracted from the data peak')
         self.declareProperty(IntArrayProperty("SignalBackgroundPixelRange", [123, 137],
                                               IntArrayLengthValidator(2), direction=Direction.Input),
-                                              "Pixelrange defining the background. Default:(123,137)")
+                                              "Pixel range defining the background. Default:(123,137)")
         self.declareProperty("NormFlag", True, doc="If true, the data will be normalized")
         self.declareProperty(IntArrayProperty("NormPeakPixelRange", [127, 133],
                                               IntArrayLengthValidator(2), direction=Direction.Input),
@@ -51,7 +62,7 @@ class LiquidsReflectometryReduction(PythonAlgorithm):
         self.declareProperty(FloatArrayProperty("TOFRange", [0., 340000.],
                                                 FloatArrayLengthValidator(2), direction=Direction.Input),
                                                 "TOF range to use")
-        self.declareProperty("TofRangeFlag", True,
+        self.declareProperty("TOFRangeFlag", True,
                              doc="If true, the TOF will be cropped according to the TOF range property")
         self.declareProperty("QMin", 0.05, doc="Minimum Q-value")
         self.declareProperty("QStep", 0.02, doc="Step size in Q. Enter a negative value to get a log scale")
@@ -73,11 +84,6 @@ class LiquidsReflectometryReduction(PythonAlgorithm):
                                               "Pixel range to use for calculating the primary fraction correction.")
 
     def PyExec(self):
-        # The old reflectivity reduction has an offset between the input
-        # pixel numbers and what it actually uses. Set the offset to zero
-        # to turn it off.
-        self.LEGACY_OFFSET = -1
-
         # The old reduction code had a tolerance value for matching the
         # slit parameters to get the scaling factors
         self.TOLERANCE = 0.020
@@ -115,7 +121,7 @@ class LiquidsReflectometryReduction(PythonAlgorithm):
                                                  SignalRange=signal_range)
 
         # Get the TOF range
-        crop_TOF = self.getProperty("TofRangeFlag").value
+        crop_TOF = self.getProperty("TOFRangeFlag").value
         tof_step = self.getProperty("TOFSteps").value
         if crop_TOF:
             TOFrange = self.getProperty("TOFRange").value  #microS
@@ -181,9 +187,11 @@ class LiquidsReflectometryReduction(PythonAlgorithm):
         else:
             normalized_data = data_cropped
 
+        # At this point, the workspace should be considered a distribution of points
         normalized_data = ConvertToPointData(InputWorkspace=normalized_data,
                                              OutputWorkspace=str(normalized_data))
-
+        normalized_data.setDistribution(True)
+        
         # Apply scaling factors
         normalized_data = self.apply_scaling_factor(normalized_data)
 
@@ -310,93 +318,6 @@ class LiquidsReflectometryReduction(PythonAlgorithm):
         angle_offset_deg = self.getProperty("AngleOffset").value
         return theta + angle_offset_deg * math.pi / 180.0
 
-    def subtract_background(self, workspace, peak_range, background_range,
-                            low_res_range, sum_peak=False, offset=None):
-        """
-            Subtract background in place
-            @param workspace: Mantid workspace
-            @param peak_range: range of pixels defining the peak [min, max]
-            @param background_range: range of pixels defining the background [min, max]
-            @param low_res_range: low resolution range to integrate over
-            @param sum_peak: if True, the resulting peak will be summed
-        """
-        if offset is None:
-            offset = self.LEGACY_OFFSET
-        peak_min = int(peak_range[0]) + offset
-        peak_max = int(peak_range[1]) + offset
-        bck_min = int(background_range[0]) + offset
-        bck_max = int(background_range[1]) + offset
-
-        # Get low-resolution range
-        x_min = int(low_res_range[0]) + offset
-        x_max = int(low_res_range[1]) + offset
-
-        left_bck = None
-        if peak_min > bck_min:
-            left_bck = RefRoi(InputWorkspace=workspace, IntegrateY=False,
-                              NXPixel=self.number_of_pixels_x,
-                              NYPixel=self.number_of_pixels_y,
-                              ConvertToQ=False,
-                              XPixelMin=x_min,
-                              XPixelMax=x_max,
-                              YPixelMin=bck_min,
-                              YPixelMax=peak_min - 1,
-                              ErrorWeighting = True,
-                              SumPixels=True, NormalizeSum=True)
-
-        right_bck = None
-        if peak_max < bck_max:
-            right_bck = RefRoi(InputWorkspace=workspace, IntegrateY=False,
-                               NXPixel=self.number_of_pixels_x,
-                               NYPixel=self.number_of_pixels_y,
-                               ConvertToQ=False,
-                               XPixelMin=x_min,
-                               XPixelMax=x_max,
-                               YPixelMin=peak_max + 1,
-                               YPixelMax=bck_max,
-                               ErrorWeighting = True,
-                               SumPixels=True, NormalizeSum=True)
-            
-        if right_bck is not None and left_bck is not None:
-            average = (left_bck + right_bck) / 2.0
-        elif right_bck is not None:
-            average = right_bck
-        elif left_bck is not None:
-            average = left_bck
-        else:
-            average = RefRoi(InputWorkspace=workspace, IntegrateY=False,
-                             NXPixel=self.number_of_pixels_x,
-                             NYPixel=self.number_of_pixels_y,
-                             ConvertToQ=False,
-                             XPixelMin=x_min,
-                             XPixelMax=x_max,
-                             YPixelMin=bck_min,
-                             YPixelMax=bck_max,
-                             ErrorWeighting = True,
-                             SumPixels=True, NormalizeSum=True)
-        # Integrate over the low-res direction
-        workspace = RefRoi(InputWorkspace=workspace, IntegrateY=False,
-                           NXPixel=self.number_of_pixels_x,
-                           NYPixel=self.number_of_pixels_y,
-                           XPixelMin=x_min,
-                           XPixelMax=x_max,
-                           ConvertToQ=False,
-                           SumPixels=sum_peak,
-                           OutputWorkspace=str(workspace))
-        #TODO Check whether we should multiply by the number of pixels
-        # in the low-res direction
-        workspace = Minus(LHSWorkspace=workspace, RHSWorkspace=average,
-                          OutputWorkspace=str(workspace))
-        # Avoid leaving trash behind
-        average_name = str(average)
-        if AnalysisDataService.doesExist(str(left_bck)):
-            AnalysisDataService.remove(str(left_bck))
-        if AnalysisDataService.doesExist(str(right_bck)):
-            AnalysisDataService.remove(str(right_bck))
-        if AnalysisDataService.doesExist(average_name):
-            AnalysisDataService.remove(average_name)
-        return workspace
-
     def process_data(self, workspace, tof_range, crop_low_res, low_res_range,
                      peak_range, subtract_background, background_range):
         """
@@ -432,9 +353,11 @@ class LiquidsReflectometryReduction(PythonAlgorithm):
 
         # Subtract background
         if subtract_background:
-            workspace = self.subtract_background(workspace,
-                                                 peak_range, background_range,
-                                                 [x_min, x_max])
+            workspace = LRSubtractAverageBackground(InputWorkspace=workspace,
+                                                    PeakRange=peak_range,
+                                                    BackgroundRange=background_range,
+                                                    LowResolutionRange=[x_min, x_max],
+                                                    OutputWorkspace=str(workspace))
         else:
             # If we don't subtract the background, we still have to integrate
             # over the low resolution axis
@@ -453,8 +376,8 @@ class LiquidsReflectometryReduction(PythonAlgorithm):
 
         # Crop to only the selected peak region
         cropped = CropWorkspace(InputWorkspace = workspace,
-                                StartWorkspaceIndex=int(peak_range[0]) + self.LEGACY_OFFSET,
-                                EndWorkspaceIndex=int(peak_range[1]) + self.LEGACY_OFFSET,
+                                StartWorkspaceIndex=int(peak_range[0]),
+                                EndWorkspaceIndex=int(peak_range[1]),
                                 OutputWorkspace="%s_cropped" % str(workspace))
 
         # Avoid leaving trash behind
@@ -595,8 +518,6 @@ class LiquidsReflectometryReduction(PythonAlgorithm):
             norm_tof = normalization.dataX(0)
             norm_value = normalization.dataY(0)
             norm_error = normalization.dataE(0)
-            #TODO: The following is done on the bin edges.
-            # Should it not be done for the center of the bin?
             for i in range(len(norm_value)):
                 norm_value[i] = norm_tof[i] * b + a
                 norm_error[i] = math.sqrt(a_error*a_error + norm_tof[i] * norm_tof[i] * b_error * b_error)

@@ -24,6 +24,9 @@
     <parameter name="cm-1-convert-choice" type="string">
       <value val="true" />
     </parameter>
+    <parameter name="save-nexus-choice" type="string">
+      <value val="false" />
+    </parameter>
     <parameter name="save-ascii-choice" type="string">
       <value val="true" />
     </parameter>

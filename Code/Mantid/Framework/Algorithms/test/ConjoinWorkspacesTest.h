@@ -111,6 +111,9 @@ public:
 
     // Check that 2nd input workspace no longer exists
     TS_ASSERT_THROWS( AnalysisDataService::Instance().retrieve("bottom"), Exception::NotFoundError );
+
+    // Check that th workspace has the correct number of history entries
+    TS_ASSERT_EQUALS(output->getHistory().size(), 3);
   }
 
   //----------------------------------------------------------------------------------------------

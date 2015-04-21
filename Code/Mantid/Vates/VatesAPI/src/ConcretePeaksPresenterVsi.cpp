@@ -35,7 +35,7 @@ void ConcretePeaksPresenterVsi::updateViewFrustum(ViewFrustum frustum) {
 
 /**
  * Get the viewable peaks. Essentially copied from the slice viewer.
- * @retruns A vector indicating which of the peaks are viewable.
+ * @returns A vector indicating which of the peaks are viewable.
  */
 std::vector<bool> ConcretePeaksPresenterVsi::getViewablePeaks() const{
   // Need to apply a transform.

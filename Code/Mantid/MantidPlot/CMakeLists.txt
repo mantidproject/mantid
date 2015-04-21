@@ -189,7 +189,6 @@ set ( MANTID_SRCS  src/Mantid/AlgorithmMonitor.cpp
                    src/Mantid/PeakPickerTool.cpp
                    src/Mantid/Preferences.cpp
                    src/Mantid/RemoveErrorsDialog.cpp
-                   src/Mantid/SetUpParaview.cpp
                    src/Mantid/UserFitFunctionDialog.cpp
                    src/Mantid/WorkspaceIcons.cpp
                    src/Mantid/InstrumentWidget/BinDialog.cpp
@@ -427,7 +426,6 @@ set ( MANTID_HDRS  src/Mantid/AlgorithmMonitor.h
                    src/Mantid/PeakPickerTool.h
                    src/Mantid/Preferences.h
                    src/Mantid/RemoveErrorsDialog.h
-                   src/Mantid/SetUpParaview.h
                    src/Mantid/UserFitFunctionDialog.h
                    src/Mantid/WorkspaceIcons.h
                    src/Mantid/InstrumentWidget/BinDialog.h
@@ -700,7 +698,6 @@ set ( MANTID_MOC_FILES src/Mantid/AlgorithmMonitor.h
                        src/Mantid/MantidTable.h
                        src/Mantid/PeakPickerTool.h
                        src/Mantid/RemoveErrorsDialog.h
-                       src/Mantid/SetUpParaview.h
                        src/Mantid/UserFitFunctionDialog.h
                        src/Mantid/InstrumentWidget/XIntegrationControl.h
                        src/Mantid/InstrumentWidget/BinDialog.h
@@ -731,7 +728,6 @@ set ( UI_FILES src/SendToProgramDialog.ui
                src/Mantid/UserFitFunctionDialog.ui
                src/Mantid/MantidAbout.ui
                src/Mantid/RemoveErrorsDialog.ui
-               src/Mantid/SetUpParaview.ui
                src/Mantid/ManageCustomMenus.ui
                src/Mantid/ManageInterfaceCategories.ui
                src/Mantid/MantidMDCurveDialog.ui
@@ -1044,7 +1040,10 @@ if ( APPLE )
                    @ONLY )
         install ( SCRIPT ${CMAKE_CURRENT_BINARY_DIR}/FixMacportsBundle.cmake )
   else ()
-    install ( FILES  make_package.rb DESTINATION MantidPlot.app/ )
+    configure_file( ${CMAKE_CURRENT_SOURCE_DIR}/make_package.rb.in
+                   ${CMAKE_CURRENT_BINARY_DIR}/make_package.rb
+                   @ONLY )
+    install ( FILES  ${CMAKE_CURRENT_BINARY_DIR}/make_package.rb DESTINATION MantidPlot.app/ )
     configure_file ( ${CMAKE_CURRENT_SOURCE_DIR}/FixMavericksBundle.cmake.in
                    ${CMAKE_CURRENT_BINARY_DIR}/FixMavericksBundle.cmake
                    @ONLY )

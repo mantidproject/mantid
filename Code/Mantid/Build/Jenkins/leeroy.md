@@ -22,9 +22,10 @@ Adding a new job to Leeroy
 
 To setup a new Jenkins jobs to work with Leeroy there are three additional thing needed over the standard settings for a job in Jenkins.
 
-   * Add a Job Notifications with `URL` set to `http://localhost:5000/notification/jenkins`
+   * Add a Job Notifications with `URL` set to `http://localhost:5000/notification/jenkins` and `Log` to `1`.
    * Add 5 string parameters; `GIT_BASE_REPO`, `GIT_HEAD_REPO`, `GIT_SHA1`, `GITHUB_URL` and `PR`.
-   * Under Source Code Management set Repository `URL` to `git://github.com/$GIT_HEAD_REPO.git`, Refspec (under Advanced) to `refs/pull/$PR/merge:pull-$PR-merged-$GIT_SHA1` and Branch Specifier to `pull-$PR-merged-$GIT_SHA1`.
+   * Under Source Code Management set Repository `URL` to `git://github.com/$GIT_HEAD_REPO.git`, Refspec (under Advanced) to `+refs/pull/$PR/merge:pull-$PR-merged` and Branch Specifier to `pull-$PR-merged`.
+   * Add the build to `config.json` and restart Leeroy.
 
 
 Other things
@@ -84,6 +85,11 @@ Config file (`config.json`)
             "github_repo": "mantidproject/mantid",
             "jenkins_job_name": "pull_requests-cppcheck",
             "context": "cppcheck"
+        },
+        {
+            "github_repo": "mantidproject/mantid",
+            "jenkins_job_name": "pull_requests-doxygen",
+            "context": "Doxygen"
         }
     ],
     "user": "USER",

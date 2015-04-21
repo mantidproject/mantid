@@ -62,10 +62,9 @@ private:
   std::string m_wsNameXML;
   std::string m_wsName;
   std::string m_geomXML;
-  LocationPolicy m_locationPolicy;
 public:
 
-  VatesKnowledgeSerializer(LocationPolicy locationPolicy=LocationMandatory);
+  VatesKnowledgeSerializer();
 
   /// Set the implicit function to use called.
   void setImplicitFunction(boost::shared_ptr<const Mantid::Geometry::MDImplicitFunction> spFunction);

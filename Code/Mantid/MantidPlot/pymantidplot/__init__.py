@@ -184,7 +184,8 @@ def newTiledWindow(name=None):
         return new_proxy(proxies.TiledWindowProxy, _qti.app.newTiledWindow, name)
 
 #----------------------------------------------------------------------------------------------------
-def plotSpectrum(source, indices, error_bars = False, type = -1, window = None, clearWindow = False):
+def plotSpectrum(source, indices, error_bars = False, type = -1, window = None,
+                 clearWindow = False, waterfall = False):
     """Open a 1D Plot of a spectrum in a workspace.
 
     This plots one or more spectra, with X as the bin boundaries,
@@ -197,6 +198,7 @@ def plotSpectrum(source, indices, error_bars = False, type = -1, window = None, 
         type: curve style for plot (-1: unspecified; 0: line, default; 1: scatter/dots)
         window: window used for plotting. If None a new one will be created
         clearWindow: if is True, the window specified will be cleared before adding new curve
+        waterfall: if True, plot as a waterfall if there is more than 1 curve
     Returns:
         A handle to window if one was specified, otherwise a handle to the created one. None in case of error.
     """
@@ -222,7 +224,7 @@ def plotSpectrum(source, indices, error_bars = False, type = -1, window = None, 
 
     graph = proxies.Graph(threadsafe_call(_qti.app.mantidUI.plot1D,
                                           workspace_names, index_list, True, error_bars,
-                                          type, window, clearWindow))
+                                          type, window, clearWindow, waterfall))
     if graph._getHeldObject() == None:
         raise RuntimeError("Cannot create graph, see log for details.")
     else:
@@ -319,7 +321,8 @@ def fitBrowser():
     return proxies.FitBrowserProxy(_qti.app.mantidUI.fitFunctionBrowser())
 
 #-----------------------------------------------------------------------------
-def plotBin(source, indices, error_bars = False, type = -1, window = None, clearWindow = False):
+def plotBin(source, indices, error_bars = False, type = -1, window = None, clearWindow = False,
+            waterfall = False):
     """Create a 1D Plot of bin count vs spectrum in a workspace.
 
     This puts the spectrum number as the X variable, and the
@@ -335,6 +338,7 @@ def plotBin(source, indices, error_bars = False, type = -1, window = None, clear
         type: Plot style
         window: window used for plotting. If None a new one will be created
         clearWindow: if is True, the window specified will be cleared before adding new curve
+        waterfall: if True, plot as a waterfall if there is more than 1 curve
     Returns:
         A handle to window if one was specified, otherwise a handle to the created one. None in case of error.
     """
@@ -360,7 +364,7 @@ def plotBin(source, indices, error_bars = False, type = -1, window = None, clear
 
     graph = proxies.Graph(threadsafe_call(_qti.app.mantidUI.plot1D,
                                           workspace_names, index_list, False, error_bars,
-                                          type, window, clearWindow))
+                                          type, window, clearWindow, waterfall))
     if graph._getHeldObject() == None:
         raise RuntimeError("Cannot create graph, see log for details.")
     else:

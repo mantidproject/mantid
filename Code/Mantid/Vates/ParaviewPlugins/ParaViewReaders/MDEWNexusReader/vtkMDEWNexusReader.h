@@ -11,10 +11,10 @@ class VTK_EXPORT vtkMDEWNexusReader : public vtkUnstructuredGridAlgorithm
 public:
 
   static vtkMDEWNexusReader *New();
-  vtkTypeMacro(vtkMDEWNexusReader, vtkUnstructuredGridAlgorithm);
+  vtkTypeMacro(vtkMDEWNexusReader, vtkUnstructuredGridAlgorithm)
   void PrintSelf(ostream& os, vtkIndent indent);
-  vtkSetStringMacro(FileName);
-  vtkGetStringMacro(FileName);
+  vtkSetStringMacro(FileName)
+  vtkGetStringMacro(FileName)
   int CanReadFile(const char* fname);
   void SetInMemory(bool inMemory);
   void SetDepth(int depth);

@@ -63,7 +63,7 @@ namespace CustomInterfaces
   private:
     Ui::ISISEnergyTransfer m_uiForm;
 
-    QString createMapFile(const QString& groupType); ///< create the mapping file with which to group results
+    QPair<QString, QString> createMapFile(const QString& groupType); ///< create the mapping file with which to group results
     std::vector<std::string> getSaveFormats(); ///< get a vector of save formats
 
   };
