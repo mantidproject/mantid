@@ -4,23 +4,22 @@
 //---------------------------------------------------
 // Includes
 //---------------------------------------------------
-#include "MantidAPI/IFileLoader.h"
-#include "MantidDataObjects/Workspace2D.h"
 #include <map>
 #include <sstream>
 #include <string>
 #include <vector>
 
-using namespace std;
+#include "MantidAPI/IFileLoader.h"
+#include "MantidDataObjects/Workspace2D.h"
 
 struct FITSInfo {
-  vector<string> headerItems;
-  std::map<string, string> headerKeys;
+  std::vector<std::string> headerItems;
+  std::map<std::string, std::string> headerKeys;
   int bitsPerPixel;
   int numberOfAxis;
   int offset;
   int headerSizeMultiplier;
-  vector<size_t> axisPixelLengths;
+  std::vector<size_t> axisPixelLengths;
   double tof;
   double timeBin;
   double scale;
@@ -97,7 +96,8 @@ private:
   void exec();
 
   /// Loads files into workspace(s)
-  void doLoadFiles(const std::vector<std::string> &paths);
+  void doLoadFiles(const std::vector<std::string> &paths,
+                   bool loadAsRectImg = false);
 
   /// Loads the FITS header(s) into a struct
   void doLoadHeaders(const std::vector<std::string> &paths,
@@ -111,16 +111,28 @@ private:
   makeWorkspace(const FITSInfo &fileInfo, size_t &newFileNumber,
                 std::vector<char> &buffer, API::MantidImage &imageY,
                 API::MantidImage &imageE,
-                const DataObjects::Workspace2D_sptr parent);
+                const DataObjects::Workspace2D_sptr parent,
+                bool loadAsRectImg = false);
 
   // Reads the data from a single FITS file into a workspace
   void readDataToWorkspace2D(DataObjects::Workspace2D_sptr ws,
                              const FITSInfo &fileInfo, API::MantidImage &imageY,
                              API::MantidImage &imageE,
-                             std::vector<char> &buffer);
+                             std::vector<char> &buffer, bool loadAsRectImg,
+                             double scale_1);
 
   /// Once loaded, check against standard and limitations of this algorithm
   void headerSanityCheck(const FITSInfo &hdr, const FITSInfo &hdrFirst);
+
+  /// filter noise pixel by pixel
+  void doFilterNoise(double thresh, API::MantidImage &imageY,
+                     API::MantidImage &imageE);
+
+  /// rebin the matrix/image
+  void doRebin(int rebin, API::MantidImage &imageX, API::MantidImage &imageY);
+
+  /// identifies fits coming from 'other' cameras by specific headers
+  bool isInstrOtherThanIMAT(FITSInfo &hdr);
 
   void setupDefaultKeywordNames();
 
@@ -151,7 +163,7 @@ private:
   std::string m_imageType;
 
   std::string m_baseName;
-  size_t m_spectraCount;
+  size_t m_pixelCount;
   API::Progress *m_progress;
 
   // Number of digits for the fixed width appendix number added to

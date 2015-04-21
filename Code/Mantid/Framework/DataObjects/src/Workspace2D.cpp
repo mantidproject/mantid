@@ -23,15 +23,13 @@ Workspace2D::Workspace2D() {}
 Workspace2D::~Workspace2D() {
 // Clear out the memory
 
-// The omp loop is here primarily MSVC. On MSVC 2012
-// when you allocate memory in a multithreaded loop, like our cow_ptrs will do,
-// the deallocation time increases by a huge amount if the memory is just
-// naively deallocated in a serial order. This is because when it was allocated
-// in the omp loop then the actual memory ends up being interleaved and
-// then trying to deallocate this serially leads to lots of swapping in and out
-// of
-// memory.
-// See
+// The omp loop is here primarily MSVC. On MSVC 2012 when you allocate
+// memory in a multithreaded loop, like our cow_ptrs will do, the
+// deallocation time increases by a huge amount if the memory is just
+// naively deallocated in a serial order. This is because when it was
+// allocated in the omp loop then the actual memory ends up being
+// interleaved and then trying to deallocate this serially leads to
+// lots of swapping in and out of memory. See
 // http://social.msdn.microsoft.com/Forums/en-US/2fe4cfc7-ca5c-4665-8026-42e0ba634214/visual-studio-2012-slow-deallocation-when-new-called-within-openmp-loop?forum=vcgeneral
 
 #ifdef _MSC_VER
@@ -42,13 +40,17 @@ Workspace2D::~Workspace2D() {
   }
 }
 
-/** Sets the size of the workspace and initializes arrays to zero
-*  @param NVectors :: The number of vectors/histograms/detectors in the
-* workspace
-*  @param XLength :: The number of X data points/bin boundaries in each vector
-* (must all be the same)
-*  @param YLength :: The number of data/error points in each vector (must all be
-* the same)
+/**
+ * Sets the size of the workspace and initializes arrays to zero
+ *
+ * @param NVectors :: The number of vectors/histograms/detectors in the
+ * workspace
+ *
+ * @param XLength :: The number of X data points/bin boundaries in each vector
+ * (must all be the same)
+ *
+ * @param YLength :: The number of data/error points in each vector (must all be
+ * the same)
 */
 void Workspace2D::init(const std::size_t &NVectors, const std::size_t &XLength,
                        const std::size_t &YLength) {
@@ -90,7 +92,9 @@ size_t Workspace2D::size() const { return data.size() * blocksize(); }
 
 /// get the size of each vector
 size_t Workspace2D::blocksize() const {
-  return (data.size() > 0) ? static_cast<ISpectrum const *>(data[0])->dataY().size() : 0;
+  return (data.size() > 0)
+             ? static_cast<ISpectrum const *>(data[0])->dataY().size()
+             : 0;
 }
 
 /**
@@ -118,16 +122,27 @@ void Workspace2D::setImageE(const MantidImage &image, size_t start,
 }
 
 /**
-  * Copy the data from an image to the (Y's) and the errors for this workspace.
+  * Copy the data from an image to the (Y's) and the errors for this
+  * workspace.
+  *
   * @param imageY :: An image to copy the data from.
   * @param imageE :: An image to copy the errors from.
   * @param start :: Startinf workspace indx to copy data to.
+  *
+  * @param loadAsRectImg :: load using one histogram per row and one
+  * bin per column, instead of the default one histogram per pixel
+  *
+  * @param double scale_1 :: scale factor for the X axis (norammly
+  * representing the inverse of the pixel width or similar.
+  *
   * @param parallelExecution :: Should inner loop run as parallel operation
   */
-
 void Workspace2D::setImageYAndE(const API::MantidImage &imageY,
                                 const API::MantidImage &imageE, size_t start,
+                                bool loadAsRectImg, double scale_1,
                                 bool parallelExecution) {
+  UNUSED_ARG(parallelExecution) // for parallel for
+
   if (imageY.empty() && imageE.empty())
     return;
   if (imageY.empty() && imageE[0].empty())
@@ -135,14 +150,15 @@ void Workspace2D::setImageYAndE(const API::MantidImage &imageY,
   if (imageE.empty() && imageY[0].empty())
     return;
 
-  if (blocksize() != 1) {
+  if (!loadAsRectImg && blocksize() != 1) {
     throw std::runtime_error(
-        "Cannot set image: a single bin workspace is expected.");
+        "Cannot set image in workspace: a single bin workspace is "
+        "required when initializing a workspace from an "
+        "image using a histogram per pixel.");
   }
 
   size_t height;
   size_t width;
-
   if (!imageY.empty()) {
     height = imageY.size();
     width = imageY.front().size();
@@ -152,30 +168,65 @@ void Workspace2D::setImageYAndE(const API::MantidImage &imageY,
   }
   size_t dataSize = width * height;
 
-  if (start + dataSize > getNumberHistograms()) {
+  if (start + dataSize > getNumberHistograms() * blocksize()) {
     throw std::runtime_error(
         "Cannot set image: image is bigger than workspace.");
   }
 
-  PARALLEL_FOR_IF(parallelExecution)
-  for (int i = 0; i < static_cast<int>(height); ++i) {
-    const auto &rowY = imageY[i];
-    const auto &rowE = imageE[i];
+  if (!loadAsRectImg) {
+    // 1 pixel - one spectrum
+    PARALLEL_FOR_IF(parallelExecution)
+    for (int i = 0; i < static_cast<int>(height); ++i) {
 
-    size_t spec = start + static_cast<size_t>(i) * width;
-    auto rowYEnd = rowY.end();
-    auto rowEEnd = rowE.end();
+      const auto &rowY = imageY[i];
+      const auto &rowE = imageE[i];
+      size_t spec = start + static_cast<size_t>(i) * width;
+      auto pE = rowE.begin();
+      for (auto pY = rowY.begin(); pY != rowY.end() && pE != rowE.end();
+           ++pY, ++pE, ++spec) {
+        data[spec]->dataY()[0] = *pY;
+        data[spec]->dataE()[0] = *pE;
+      }
+    }
+  } else {
 
-    auto pixelE = rowE.begin();
-    for (auto pixelY = rowY.begin(); pixelY != rowYEnd && pixelE != rowEEnd;
-         ++pixelY, ++pixelE, ++spec) {
-      if (rowY.begin() != rowY.end())
-        (*data[spec]).dataY()[0] = *pixelY;
-      if (rowE.begin() != rowE.end())
-        (*data[spec]).dataE()[0] = *pixelE;
+    if (height != (getNumberHistograms()))
+      throw std::runtime_error(
+          std::string("To load an image into a workspace with one spectrum per "
+                      "row, then number of spectra (") +
+          boost::lexical_cast<std::string>(getNumberHistograms()) +
+          ") needs to be equal to the height (rows) of the image (" +
+          boost::lexical_cast<std::string>(height) + ")");
+
+    if (width != blocksize())
+      throw std::runtime_error(
+          std::string("To load an image into a workspace with one spectrum per "
+                      "row, then number of bins (") +
+          boost::lexical_cast<std::string>(blocksize()) +
+          ") needs to be equal to the width (columns) of the image (" +
+          boost::lexical_cast<std::string>(width) + ")");
+
+    // one spectrum - one row
+    PARALLEL_FOR_IF(parallelExecution)
+    for (int i = 0; i < static_cast<int>(height); ++i) {
+
+      const auto &rowY = imageY[i];
+      const auto &rowE = imageE[i];
+      data[i]->dataY() = rowY;
+      data[i]->dataE() = rowE;
+    }
+    // X values. Set first spectrum and copy/propagate that one to all the other
+    // spectra
+    PARALLEL_FOR_IF(parallelExecution)
+    for (int i = 0; i < static_cast<int>(width) + 1; ++i) {
+      data[0]->dataX()[i] = i * scale_1;
+    }
+    PARALLEL_FOR_IF(parallelExecution)
+    for (int i = 1; i < static_cast<int>(height); ++i) {
+      std::cerr << " ** i: " << i << std::endl;
+      data[i]->setX(data[0]->dataX());
     }
   }
-  UNUSED_ARG(parallelExecution)
 }
 
 //--------------------------------------------------------------------------------------------

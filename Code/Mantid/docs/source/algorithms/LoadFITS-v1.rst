@@ -20,13 +20,35 @@ property. The workspaces included in the group are named with the same
 name and an appendix _1, _2, etc., incremented sequentially as new
 files are loaded with the same OutputWorkspace property.
 
-The current implementation of this algorithm only supports 2D files
-(FITS images with two axes), and it should in principle be able to
-load FITS files from different sources.
+The way image pixels are loaded into the resulting workspaces depends
+on the porperty LoadAsRectImg. If it is false, one spectrum will be
+created for every image pixel. Otherwise, one spectrum will be created
+for every image row.
 
-The workspaces created by this algorithm contain one spectrum per
-pixel. The first spectrum correspond to the top-left corner and the
-last spectrum to the bottom-right corner.
+When LoadAsRectImg is true, the workspaces created by this algorithm
+contain one spectrum per row (and one bin per column). The first
+spectrum corresponds to the first (topmost) row and the last spectrum
+corresponds to the last (bottom) column. With this type of workspace
+you can display the image with a "color fill plot" or plot2D.
+
+When LoadAsRectImg is false, the workspaces created by this algorithm
+contain one spectrum per pixel. The first spectrum corresponds to the
+top-left corner and the last spectrum to the bottom-right corner. The
+image pixels are assigned to spectra row by row, i.e., the first
+spectra correspond to the first or topmost row, the next spectra
+correspond to the next rows, going from top down, until finally the
+last spectra correspond to the last or bottom row.
+
+
+The current implementation of this algorithm only supports 2D files
+(FITS images with two axes). With this condition, in principle this
+algorithm should be able to load any standard FITS file, and also
+those who do not deviate too much from the standard. See below an
+explanation of the minimum set of basic standard header entries that
+this algorithm requires (those should be present in any FITS file), So
+far, the algorithm has been tested with files produced by the cameras
+used for the IMAT instrument at ISIS, and Starlight Xpress CCD cameras
+used for calibration of other instruments at ISIS.
 
 FITS header entries
 ###################
