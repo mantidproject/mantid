@@ -48,6 +48,7 @@ namespace Algorithms
 
     void setupMemberVariables(const API::MatrixWorkspace_const_sptr inputWS);
     API::MatrixWorkspace_sptr setupOutputWorkspace(const API::MatrixWorkspace_const_sptr inputWS);
+    void fillOutputHist(const API::MatrixWorkspace_const_sptr inputWS, const API::MatrixWorkspace_sptr outputWS);
 
     void putBackBinWidth(const API::MatrixWorkspace_sptr outputWS);
 
@@ -72,6 +73,8 @@ namespace Algorithms
     bool m_inputEvents;        ///< Flag indicating whether input workspace is an EventWorkspace
     Kernel::Unit_const_sptr m_inputUnit;  ///< The unit of the input workspace
     Kernel::Unit_sptr m_outputUnit;       ///< The unit we're going to
+
+    const double deg2rad = M_PI / 180.;
 
   };
 
