@@ -50,6 +50,7 @@
     </parameter>
     <parameter name="Delay (us)">
       <logfile id="fermi_delay" extract-single-value-as="last_value" />
+      <description is="Delay is the time chopper waits for...? (test description)"/>
     </parameter>
   </component>
   <type name="fermi-chopper" is="chopper">
