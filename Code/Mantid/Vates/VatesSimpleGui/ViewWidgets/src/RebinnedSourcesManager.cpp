@@ -100,10 +100,20 @@ namespace Mantid
       {
         // If the original workspace has been deleted, then delete the rebinned
         // source (and workspace via the listener)
-        if (m_originalWorkspaceToRebinnedWorkspace.count(wsName))
+        bool isOriginal = m_originalWorkspaceToRebinnedWorkspace.count(wsName) > 0;
+        bool isRebinned = m_rebinnedWorkspaceToOriginalWorkspace.count(wsName) > 0;
+        if (isOriginal || isRebinned)
         {
           // Get the rebinned source and destroy the entire pipeline
-          pqPipelineSource* source = getSourceForWorkspace(m_originalWorkspaceToRebinnedWorkspace[wsName]);
+          pqPipelineSource* source;
+          if (isOriginal)
+          {
+            source = getSourceForWorkspace(m_originalWorkspaceToRebinnedWorkspace[wsName]);
+          }
+          else
+          {
+            source = getSourceForWorkspace(wsName);
+          }
 
           // Go to the end of the pipeline
           while(source->getNumberOfConsumers() > 0)
@@ -123,7 +133,15 @@ namespace Mantid
           }
 
           builder->destroy(source); // The listener takes now care of the workspace.
-          untrackWorkspaces(m_originalWorkspaceToRebinnedWorkspace[wsName]);
+
+          if (isOriginal)
+          {
+            untrackWorkspaces(m_originalWorkspaceToRebinnedWorkspace[wsName]);
+          }
+          else
+          {
+            untrackWorkspaces(m_rebinnedWorkspaceToOriginalWorkspace[wsName]);
+          }
         }
       }
 

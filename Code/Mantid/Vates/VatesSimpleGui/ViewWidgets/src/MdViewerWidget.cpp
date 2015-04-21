@@ -484,7 +484,7 @@ void MdViewerWidget::renderOriginalWorkspace(const std::string originalWorkspace
 {
   // Load a new source plugin
   QString sourcePlugin = "MDEW Source";
-  this->currentView->setPluginSource(sourcePlugin, QString::fromStdString(originalWorkspaceName));
+  pqPipelineSource* src = this->currentView->setPluginSource(sourcePlugin, QString::fromStdString(originalWorkspaceName));
 
   // Render and final setup
   this->renderAndFinalSetup();
@@ -1307,15 +1307,6 @@ void MdViewerWidget::preDeleteHandle(const std::string &wsName,
         return;
       }
     }
-
-
-    // Check if rebinned source and perform an unbinning
-    if (m_rebinnedSourcesManager.isRebinnedSource(wsName))
-    {
-      removeRebinning(src, true);
-      return;
-    }
-
 
     // Remove all visibility listeners
     this->currentView->removeVisibilityListener();
