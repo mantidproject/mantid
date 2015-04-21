@@ -79,6 +79,9 @@
           <xs:attribute name="units"/>
         </xs:complexType>
       </xs:element>
+      <xs:element name="description">      
+        <xs:attribute name="is"/>
+      </xs:element>      
       <xs:element name="fixed"/>
       <xs:element name="formula">
         <xs:complexType>

@@ -34,6 +34,7 @@ class ValidateParameterFiles(stresstesting.MantidStressTest):
         from genxmlif import GenXmlIfError
         from minixsv import pyxsval
         direc = config['instrumentDefinition.directory']
+        print direc
         self.xsdFile =  os.path.join(direc,'Schema/ParameterFile/1.0/','ParameterFileSchema.xsd')
         files = self.__getDataFileList__()
 
@@ -59,3 +60,8 @@ class ValidateParameterFiles(stresstesting.MantidStressTest):
                                    % (len(failed), len(files)))
         else:
             print "Succesfully Validated %d files" % len(files)
+
+if __name__ == '__main__':
+    
+    valid = ValidateParameterFiles()
+    valid.runTest()

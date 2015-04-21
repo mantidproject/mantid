@@ -90,3 +90,8 @@ class ValidateInstrumentDefinitionFiles(stresstesting.MantidStressTest):
                                    % (len(failed), len(files)))
         else:
             print "Succesfully Validated %d files" % len(files)
+            
+if __name__ == '__main__':
+    
+    valid = ValidateInstrumentDefinitionFiles()
+    valid.runTest()
