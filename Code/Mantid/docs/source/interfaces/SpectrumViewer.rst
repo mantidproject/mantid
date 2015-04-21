@@ -10,7 +10,7 @@ Overview
 The 2.2 release of MantidPlot includes the "SpectrumView" data viewer, a viewer
 that quickly displays a large collection of spectra as an image.  The viewer can
 be started from the right-click menu of a matrix workspace by selecting ''Show
-Image Viewer''.  Each row of the image represents one spectrum.
+Spectrum Viewer''.  Each row of the image represents one spectrum.
 
 If the user points at a location on the image the data from that spectrum are
 displayed on a graph across the bottom of the image, and the data from the
