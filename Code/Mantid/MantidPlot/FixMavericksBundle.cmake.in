@@ -1,3 +1,6 @@
 set ( bundle ${CMAKE_INSTALL_PREFIX}/MantidPlot.app )
 execute_process(COMMAND chmod +x make_package.rb WORKING_DIRECTORY ${bundle})
-execute_process(COMMAND ./make_package.rb WORKING_DIRECTORY ${bundle})
+execute_process(COMMAND ./make_package.rb WORKING_DIRECTORY ${bundle} RESULT_VARIABLE install_name_tool_result)
+if(NOT install_name_tool_result EQUAL 0)
+  message(FATAL_ERROR "Package script failed!!!\n")
+endif()

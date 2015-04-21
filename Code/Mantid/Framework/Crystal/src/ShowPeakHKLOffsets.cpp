@@ -1,15 +1,7 @@
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidAPI/WorkspaceProperty.h"
-#include "MantidKernel/Property.h"
-#include "MantidDataObjects/TableWorkspace.h"
 #include "MantidCrystal/ShowPeakHKLOffsets.h"
-#include "MantidKernel/Matrix.h"
-#include "MantidDataObjects/Peak.h"
-#include "MantidKernel/V3D.h"
-#include "MantidAPI/Sample.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
-#include "../../API/inc/MantidAPI/WorkspaceFactory.h"
-#include "../../API/inc/MantidAPI/ITableWorkspace.h"
 
 using Mantid::DataObjects::PeaksWorkspace;
 using Mantid::API::WorkspaceProperty;

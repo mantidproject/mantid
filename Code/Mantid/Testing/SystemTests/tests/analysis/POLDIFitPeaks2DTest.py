@@ -93,7 +93,7 @@ class POLDIFitPeaks2DPawleyTest(stresstesting.MantidStressTest):
         si_refs = PoldiCreatePeaksFromCell("F d -3 m", "Si 0 0 0", a=5.431, LatticeSpacingMin=0.7)
         indexed = PoldiIndexKnownCompounds(peaks_ref, "si_refs")
 
-        DeleteTableRows("indexed_si_refs", "10-30")
+        DeleteTableRows("indexed_si_refs", "8-30")
 
         fit2d, fit1d, peaks_ref_2d, cell = PoldiFitPeaks2D('si_data_6904', 'indexed_si_refs',
                                                            PawleyFit=True,

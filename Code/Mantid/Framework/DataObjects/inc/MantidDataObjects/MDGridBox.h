@@ -238,7 +238,7 @@ private:
   /**Private constructor as it does not work without box controller */
   MDGridBox() {}
   /// common part of MDGridBox contstructor;
-  void initGridBox();
+  size_t initGridBox();
 };
 
 #ifndef __INTEL_COMPILER

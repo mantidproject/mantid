@@ -10,25 +10,24 @@ def _skip_test():
     import platform
 
     # Only runs on RHEL6 at the moment
-    return ("Linux" not in platform.platform())
+    return "Linux" not in platform.platform()
 
 def getSaveDir():
     """determine where to save - the current working directory"""
-    import os
     return os.path.abspath(os.path.curdir)
 
 def do_cleanup():
     Files = ["PG3_9829.gsa",
-    "PG3_9829.py",
-    "PG3_9830.gsa",
-    "PG3_9830.py",
-    "PG3_4844-1.dat",
-    "PG3_4844.getn",
-    "PG3_4844.gsa",
-    "PG3_4844.py",
-    "PG3_4866.gsa"]
-    for file in Files:
-        absfile = FileFinder.getFullPath(file)
+             "PG3_9829.py",
+             "PG3_9830.gsa",
+             "PG3_9830.py",
+             "PG3_4844-1.dat",
+             "PG3_4844.getn",
+             "PG3_4844.gsa",
+             "PG3_4844.py",
+             "PG3_4866.gsa"]
+    for filename in Files:
+        absfile = FileFinder.getFullPath(filename)
         if os.path.exists(absfile):
             os.remove(absfile)
     return True
@@ -96,7 +95,6 @@ class PG3StripPeaks(stresstesting.MantidStressTest):
 
     def runTest(self):
         # determine where to save
-        import os
         savedir = os.path.abspath(os.path.curdir)
 
         LoadEventNexus(Filename="PG3_4866_event.nxs",

@@ -1420,7 +1420,7 @@ def applyScalingFactor(tof_axis,
     file created by the sfCalculator procedure
     """
     isSFfound = False
-    
+
     #sf_file = 'NaN'
     if os.path.isfile(sf_file):
 

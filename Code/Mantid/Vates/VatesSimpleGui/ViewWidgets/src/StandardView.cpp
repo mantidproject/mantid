@@ -17,6 +17,7 @@
 #include <vtkDataObject.h>
 #include <vtkSMPropertyHelper.h>
 #include <vtkSMProxy.h>
+#include <vtkSMPVRepresentationProxy.h>
 
 #if defined(__INTEL_COMPILER)
   #pragma warning enable 1170
@@ -146,7 +147,16 @@ void StandardView::render()
   vtkSMPropertyHelper(drep->getProxy(), "Representation").Set(reptype.toStdString().c_str());
   drep->getProxy()->UpdateVTKObjects();
   this->origRep = qobject_cast<pqPipelineRepresentation*>(drep);
-  this->origRep->colorByArray("signal", vtkDataObject::FIELD_ASSOCIATION_CELLS);
+  if (!this->isPeaksWorkspace(this->origSrc))
+  {
+    vtkSMPVRepresentationProxy::SetScalarColoring(drep->getProxy(), "signal",
+                                                  vtkDataObject::FIELD_ASSOCIATION_CELLS);
+    //drep->getProxy()->UpdateVTKObjects();
+    //vtkSMPVRepresentationProxy::RescaleTransferFunctionToDataRange(drep->getProxy(),
+    //                                                               "signal",
+    //                                                               vtkDataObject::FIELD_ASSOCIATION_CELLS);
+    drep->getProxy()->UpdateVTKObjects();
+  }
 
   this->resetDisplay();
   emit this->triggerAccept();

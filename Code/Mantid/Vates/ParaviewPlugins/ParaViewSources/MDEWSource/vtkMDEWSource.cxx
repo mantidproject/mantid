@@ -4,6 +4,7 @@
 #include "vtkInformationVector.h"
 #include "vtkObjectFactory.h"
 #include "vtkPVClipDataSet.h"
+#include "vtkPVInformationKeys.h"
 #include "vtkUnstructuredGridAlgorithm.h"
 #include "vtkUnstructuredGrid.h"
 #include "vtkStreamingDemandDrivenPipeline.h"
@@ -256,7 +257,7 @@ void vtkMDEWSource::setTimeRange(vtkInformationVector* outputVector)
   if(m_presenter->hasTDimensionAvailable())
   {
     vtkInformation *outInfo = outputVector->GetInformationObject(0);
-    outInfo->Set(vtkStreamingDemandDrivenPipeline::TIME_LABEL_ANNOTATION(),
+    outInfo->Set(vtkPVInformationKeys::TIME_LABEL_ANNOTATION(),
                  m_presenter->getTimeStepLabel().c_str());
     std::vector<double> timeStepValues = m_presenter->getTimeStepValues();
     outInfo->Set(vtkStreamingDemandDrivenPipeline::TIME_STEPS(), &timeStepValues[0],
@@ -316,7 +317,7 @@ char* vtkMDEWSource::GetWorkspaceTypeName()
 {
   if(m_presenter == NULL)
   {
-    return "";
+    return const_cast<char*>("");
   }
   try
   {
@@ -326,7 +327,7 @@ char* vtkMDEWSource::GetWorkspaceTypeName()
   }
   catch(std::runtime_error&)
   {
-    return "";
+    return const_cast<char*>("");
   }
 }
 

@@ -19,7 +19,6 @@ import stresstesting
 
 
 from mantid.api import *
-#sys.path.append("/home/ruth/GIT_MantidBuild/bin/")
 from mantid.simpleapi import *
 
 class ReduceOneSCD_Run( stresstesting.MantidStressTest):

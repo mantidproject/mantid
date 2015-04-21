@@ -4,9 +4,10 @@
 #include "MantidCrystal/DisjointElement.h"
 #include <boost/make_shared.hpp>
 #include <boost/functional/hash.hpp>
-#include <algorithm>
-#include <set>
 #include <list>
+#include <set>
+#include <stdexcept>
+
 
 namespace {
 template <typename T> std::pair<T, T> ordered_pair(const T &a, const T &b) {

@@ -3,8 +3,6 @@
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/MersenneTwister.h"
-#include <iomanip>
-#include <iostream>
 
 using Mantid::Kernel::TimeSeriesProperty;
 

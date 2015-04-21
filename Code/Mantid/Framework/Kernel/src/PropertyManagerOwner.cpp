@@ -3,8 +3,6 @@
 //----------------------------------------------------------------------
 #include "MantidKernel/PropertyManagerOwner.h"
 #include "MantidKernel/PropertyManager.h"
-#include "MantidKernel/Exception.h"
-#include <algorithm>
 
 namespace Mantid {
 namespace Kernel {

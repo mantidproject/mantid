@@ -1,6 +1,7 @@
 #ifndef MDBOX_SAVEABLE_TEST_H
 #define MDBOX_SAVEABLE_TEST_H
 
+#include <boost/scoped_ptr.hpp>
 #include <cxxtest/TestSuite.h>
 #include <map>
 #include <memory>
@@ -266,6 +267,8 @@ static void destroySuite(MDBoxSaveableTest * suite) { delete suite; }
     TSM_ASSERT_EQUALS( "Child is NOT on disk", b->getISaveable()->wasSaved(), false);
 
     bc->getFileIO()->closeFile();      
+    delete gb;
+    delete c;
     do_deleteNexusFile("MDGridBoxTest.nxs");
   }
 
@@ -745,7 +748,7 @@ static void destroySuite(MDBoxSaveableTest * suite) { delete suite; }
 
    
     // Create the grid box and make it file-backed.
-    MDBoxBase<MDE,2> * b = MDEventsTestHelper::makeMDGridBox<2>();
+    MDBoxBase<MDE,2> *b = MDEventsTestHelper::makeMDGridBox<2>();
     // box controlled is owned by the workspace, so here we make shared pointer from the box pointer as it is owned by this function
     BoxController_sptr spBc = boost::shared_ptr<BoxController >(b->getBoxController());
 
@@ -814,7 +817,7 @@ static void destroySuite(MDBoxSaveableTest * suite) { delete suite; }
     TSM_ASSERT_LESS_THAN("And the events were properly saved sequentially in the files.", minimumSaved, maxFilePos);
     std::cout << dbuf->getMemoryStr() << std::endl;
     
-
+    delete b;
     const std::string filename = fbc->getFileName();
     fbc->closeFile();
     if (Poco::File(filename).exists()) Poco::File(filename).remove();
