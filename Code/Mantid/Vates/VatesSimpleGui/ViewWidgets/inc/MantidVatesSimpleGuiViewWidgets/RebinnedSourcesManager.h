@@ -75,6 +75,8 @@ namespace Mantid
 
           bool isRebinnedSource(std::string name);
 
+          bool doesWorkspaceBelongToRebinnedSource(std::string workspaceName);
+
         signals:
           void switchSources(std::string rebinnedWorkspaceName,  std::string sourceType);
 
@@ -83,6 +85,8 @@ namespace Mantid
           void addHandle(const std::string &workspaceName, const boost::shared_ptr<Mantid::API::Workspace> workspace);
 
           void preDeleteHandle(const std::string &wsName, const boost::shared_ptr<Mantid::API::Workspace> );
+
+          void afterReplaceHandle(const std::string &workspaceName, const boost::shared_ptr<Mantid::API::Workspace> workspace);
 
         private slots:
           void onRebinnedSourceDestroyed();

@@ -469,7 +469,7 @@ void MdViewerWidget::prepareRebinnedWorkspace(const std::string rebinnedWorkspac
   // It seems that the new source gets set as active before it is fully constructed. We therefore reset it.
   pqActiveObjects::instance().setActiveSource(NULL);
   pqActiveObjects::instance().setActiveSource(newRebinnedSource);
-  m_rebinnedSourcesManager.registerRebinnedSource(newRebinnedSource);
+  //m_rebinnedSourcesManager.registerRebinnedSource(newRebinnedSource);
 
   this->renderAndFinalSetup();
 
@@ -656,13 +656,17 @@ void MdViewerWidget::renderWorkspace(QString workspaceName, int workspaceType, s
   }
 
 
-  // Make sure that we are not loading a rebinned vsi workspace.
+  // Make sure that we are not loading a rebinned vsi workspace which is already loaded
+  // 
   if (workspaceName.contains(m_rebinnedWorkspaceIdentifier))
   {
-    QMessageBox::information(this, QApplication::tr("Loading Source Warning"),
-                             QApplication::tr("You cannot load a rebinned rebinned vsi source. \n "\
-                                              "Please select another source."));
-
+    if (m_rebinnedSourcesManager.doesWorkspaceBelongToRebinnedSource(workspaceName.toStdString()))
+    {
+      QMessageBox::information(this, QApplication::tr("Loading Source Warning"),
+                          QApplication::tr("You cannot load a rebinned vsi source which \n "\
+                                          "is currently in use.\n "
+                                          "Please select another source."));
+    }
     return;
   }
 
@@ -1304,13 +1308,15 @@ void MdViewerWidget::preDeleteHandle(const std::string &wsName,
       }
     }
 
+
     // Check if rebinned source and perform an unbinning
     if (m_rebinnedSourcesManager.isRebinnedSource(wsName))
     {
       removeRebinning(src, true);
       return;
     }
-    
+
+
     // Remove all visibility listeners
     this->currentView->removeVisibilityListener();
 

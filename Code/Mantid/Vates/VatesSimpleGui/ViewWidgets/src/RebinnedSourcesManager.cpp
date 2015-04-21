@@ -51,9 +51,10 @@ namespace Mantid
       Mantid::Kernel::Logger g_log("RebinnedSourcesManager");
     }
 
-      RebinnedSourcesManager::RebinnedSourcesManager(QWidget* parent) : QWidget(parent), m_tempPostfix("_tempvsi"), m_tempPrefix("__")
+      RebinnedSourcesManager::RebinnedSourcesManager(QWidget* parent) : QWidget(parent), m_tempPostfix("_tempvsi"), m_tempPrefix("")
       {
         observeAdd();
+        observeAfterReplace();
         observePreDelete();
       }
 
@@ -124,6 +125,16 @@ namespace Mantid
           builder->destroy(source); // The listener takes now care of the workspace.
           untrackWorkspaces(m_originalWorkspaceToRebinnedWorkspace[wsName]);
         }
+      }
+
+      /**
+       * Catch a change of a workspace
+       * @param workspaceName Name of the workspace.
+       * @param workspace A pointer to the added workspace.
+       */
+      void RebinnedSourcesManager::afterReplaceHandle(const std::string &workspaceName, const boost::shared_ptr<Mantid::API::Workspace> workspace)
+      {
+        addHandle(workspaceName, workspace);
       }
 
       /**
@@ -650,6 +661,28 @@ namespace Mantid
         }
       }
 
+      /**
+       * Check if rebinned workspace has already been loaded
+       * @param workspaceName The name of the rebinned workspace
+       */
+      bool RebinnedSourcesManager::doesWorkspaceBelongToRebinnedSource(std::string workspaceName)
+      {
+        pqPipelineSource *source = getSourceForWorkspace(workspaceName);
+
+        if (!source)
+        {
+          return false;
+        }
+
+        if (isRebinnedSource(workspaceName))
+        {
+          return true;
+        }
+        else
+        {
+          return false;
+        }
+      }
     }
   }
 }
