@@ -127,6 +127,16 @@ class Qt4MplPlotView(QtGui.QWidget):
         """ Get ...
         """
         return self.canvas.getLastPlotIndexKey()
+    
+    def getXLimit(self):
+        """ Get limit of Y-axis
+        """
+        return self.canvas.getXLimit()
+        
+    def getYLimit(self):
+        """ Get limit of Y-axis
+        """
+        return self.canvas.getYLimit()
         
     def removePlot(self, ikey):
         """
@@ -274,7 +284,7 @@ class Qt4MplCanvas(FigureCanvas):
             self.axes.set_ylabel(ylabel, fontsize=20)
 
         # set/update legend
-        self.axes.legend()
+        self._setupLegend()
 
         # Register
         if len(r) == 1: 
@@ -329,9 +339,14 @@ class Qt4MplCanvas(FigureCanvas):
         """ Add an image by file
         """
         import matplotlib.image as mpimg 
+
+        # set aspect to auto mode
+        self.axes.set_aspect('auto')
+
         img = mpimg.imread(str(imagefilename))
         lum_img = img[:,:,0] 
-        imgplot = self.axes.imshow(lum_img) 
+        # TODO : refactor for image size, interpolation and origin
+        imgplot = self.axes.imshow(img, extent=[0, 1000, 800, 0], interpolation='none', origin='lower')
 
         # Set color bar.  plt.colorbar() does not work!
         if self.colorbar is None:
@@ -388,6 +403,16 @@ class Qt4MplCanvas(FigureCanvas):
         """
         return self.axes
 
+    def getXLimit(self):
+        """ Get limit of Y-axis
+        """
+        return self.axes.get_xlim()
+
+    def getYLimit(self):
+        """ Get limit of Y-axis
+        """
+        return self.axes.get_ylim()
+
     def setXYLimit(self, xmin, xmax, ymin, ymax):
         """
         """
@@ -413,8 +438,6 @@ class Qt4MplCanvas(FigureCanvas):
         self.draw()
 
         return
-
-
 
     def removePlot(self, ikey):
         """ Remove the line with its index as key
@@ -502,6 +525,36 @@ class Qt4MplCanvas(FigureCanvas):
         w, h = self.get_width_height()
         self.resize(w+1,h)
         self.resize(w,h)
+
+        return
+
+
+    def _setupLegend(self):
+        """ Set up legend
+        self.axes.legend()
+        Handler is a Line2D object. Lable maps to the line object
+        """
+        loclist = [
+            "best",
+            "upper right",
+            "upper left",
+            "lower left",
+            "lower right",
+            "right",
+            "center left",
+            "center right",
+            "lower center",
+            "upper center", 
+            "center"] 
+
+        handles, labels = self.axes.get_legend_handles_labels()
+        self.axes.legend(handles, labels, loc='best')    
+        print handles
+        print labels
+        #self.axes.legend(self._myLegendHandlers, self._myLegentLabels)
+
+        return
+
 
 
 class MyNavigationToolbar(NavigationToolbar):

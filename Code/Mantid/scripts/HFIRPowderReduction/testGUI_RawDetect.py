@@ -80,7 +80,7 @@ elif MOS == OSX:
 
 # plot raw
 reducer.ui.tabWidget.setCurrentIndex(0)
-reducer.doPlotRawDet()
+reducer.doPlotRawPtMain()
 
 # FIXME - Phase 2nd
 reducer.ui.comboBox_rawDetMode.setCurrentIndex(1)

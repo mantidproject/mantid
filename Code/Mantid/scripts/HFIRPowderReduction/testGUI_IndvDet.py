@@ -59,7 +59,7 @@ elif MOS == OSX:
 
 # plot raw
 reducer.doLoadData()
-reducer.doPlotIndvDet()
+reducer.doPlotIndvDetMain()
 
 app.exec_()
 

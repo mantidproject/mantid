@@ -38,6 +38,27 @@ Use cases for tabs
     * URL for raw data files; 
 
 
+Suggested workflow for *Normalization*
+======================================
+
+Here is a typical use case for reduce data via tab *Noramlization*
+
+ 1. User specify *Exp No* and *Scan No*;
+ 2. HFIR-PDR-GUI loads SPICE data according to experiment number and scan number;
+ 3. HFIR-PDR-GUI checks whether vanadium correction file, i.e., detector efficiency file exists on server;
+ 4. HFIR-PDR-GUI checks whether excluded detectors file exists on server;
+ 5. HFIR-PDR-GUI checks log **m1** for wavelength and set to *Wavelength* ;
+ 6. User may specify detector efficient file;
+ 7. User specifies *Bin Size*; (Or auto bin size determination???)
+ 8. User pushes button *Load Data*;
+ 9. HFIR-PDF-GUI reduce data in unit of *2theta* by taking accounting of 
+   * Detector efficiency;
+   * Excluded detectors; 
+ 10. HFIR-PDR-GUI plots the reduced data;
+ 11. User may rebin by different binning parameters or unit;
+ 12. User may save the result;
+
+
 Suggested workflow for *Multiple Scans*
 =======================================
 
@@ -71,7 +92,7 @@ Experiment setup and sample log
 ===============================
 
  1. **Wavelength**: There are three settings for neutron wavelength, referenced by sample log *m1*. 
-   * Ge 113: :math:`\lambda = 2.41 \AA`, m1 = 9.45
+   * Ge 113: :math:`\lambda = 2.41 \AA`, m1 = 9.45  (The **error** can be 0.05, such that in Exp 231 scan0001, m1=9.5)
    * Ge 115: :math:`\lambda = 1.54 \AA`, m1 = 0
    * Ge 117  :math:`\lambda = 1.12 \AA`, No used
 

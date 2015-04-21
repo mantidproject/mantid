@@ -5,7 +5,7 @@
 ################################################################################
 
 
-def makeHB2ADetEfficiencyFileName(self, expno, m1, colltrans):
+def makeHB2ADetEfficiencyFileName(expno, m1, colltrans):
     """ Fabricate the detector's efficiency file name for HB2A
     Example: HB2A_exp0400__Ge_113_IN_vcorr.txt
 
@@ -23,11 +23,11 @@ def makeHB2ADetEfficiencyFileName(self, expno, m1, colltrans):
     # Determine wavelength setup
     wavelengthsetup = None
     m1 = float(m1)
-    if abs(m1 - 9.45) < 0.01:
+    if abs(m1 - 9.45) < 0.1:
         # m1 = 9.45
         wavelength = 2.41
         wavelengthsetup = 'Ge_113'
-    elif abs(m1) < 0.01:
+    elif abs(m1) < 0.1:
         # m1 = 0.
         wavelength = 1.54
         wavelengthsetup = 'Ge_115'
@@ -36,23 +36,30 @@ def makeHB2ADetEfficiencyFileName(self, expno, m1, colltrans):
         raise NotImplementedError("'m1' value %f is not defined for wavelength setup." % (m1))
 
     # Determine In/Out, i.e., collimator trans 
-    colltrans = int(colltrans)
-    if abs(colltrans) == 80:
-        collimator = 'OUT'
-    elif colltrans == 0:
-        collimator = 'IN'
-    else:
-        raise NotImplementedError("'colltrans' equal to %d is not defined for IN/OUT." % (colltrans))
+    if colltrans is not None:
+        # colltrans is in sample log
+        colltrans = int(colltrans)
+        if abs(colltrans) == 80:
+            collimator = 'OUT'
+        elif colltrans == 0:
+            collimator = 'IN'
+        else:
+            raise NotImplementedError("'colltrans' equal to %d is not defined for IN/OUT." % (colltrans))
 
-    # Make the detector efficiency file name
-    expno = int(expno)
-    defefffilename = 'HB2A_exp%04d__%s_%s_vcorr.txt' % (expno, wavelengthsetup, collimator)
-    url = 'http://neutron.ornl.gov/user_data/hb2a/exp%d/Datafiles/%s' % (expno, defefffilename)
+        # Make the detector efficiency file name
+        expno = int(expno)
+        defefffilename = 'HB2A_exp%04d__%s_%s_vcorr.txt' % (expno, wavelengthsetup, collimator)
+        url = 'http://neutron.ornl.gov/user_data/hb2a/exp%d/Datafiles/%s' % (expno, defefffilename)
+    else:
+        # old style, no colltrans
+        defefffilename = None
+        url = None
+    # ENDIFELSE
 
     return (defefffilename, url, wavelength)
 
 
-def makeExcludedDetectorFileName(self, expno):
+def makeExcludedDetectorFileName(expno):
     """ Make the excluded detectors' file name
 
     Return :: 2-tuple (file name, URL)
@@ -64,7 +71,7 @@ def makeExcludedDetectorFileName(self, expno):
     return (excludeddetfilename, url)
 
 
-def makeDetGapFileName(self, expno):
+def makeDetGapFileName(expno):
     """ Make the detectors' gap file name
 
     Return :: 2-tuple (file name, URL)

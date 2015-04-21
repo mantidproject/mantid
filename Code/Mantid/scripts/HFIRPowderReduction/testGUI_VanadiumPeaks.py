@@ -71,13 +71,15 @@ reducer.ui.tabWidget.setCurrentIndex(4)
 # load and reduce data 
 reducer.doLoadData()
 
-# rebin
-reducer.ui.lineEdit_binsize2Theta.setText('0.1')
-reducer.doRebin2Theta()
-"""
-reducer.doStripVandiumPeaks()
-reducer.doSaveVanRun()
-"""
+print "Stop Here First"
+
+# # rebin
+# reducer.ui.lineEdit_binsize2Theta.setText('0.1')
+# reducer.doRebin2Theta()
+# """
+# reducer.doStripVandiumPeaks()
+# reducer.doSaveVanRun()
+# """
 
 # Skip if there is something wrong
 reducer.show()

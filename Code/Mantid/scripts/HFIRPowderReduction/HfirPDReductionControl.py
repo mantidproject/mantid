@@ -6,6 +6,7 @@
 import sys
 import os
 import urllib2
+import math
 
 import numpy
 
@@ -65,7 +66,20 @@ class PDRManager:
         self.reducedws = None
         self.binsize = 1E10
 
+        self._wavelength = None
+
         return
+
+    def getVanadiumPeaks(self):
+        """
+        """
+        return self._vanadiumPeakPosList[:]
+
+
+    def getWavelength(self):
+        """
+        """
+        return self._wavelength
 
     def setup(self, datamdws, monitormdws, reducedws=None, unit=None, binsize=None):
         """ Set up
@@ -81,6 +95,34 @@ class PDRManager:
         except TypeError as e:
             print e
             pass
+
+        return
+
+    def setVanadiumPeaks(self, vanpeakposlist):
+        """ Set up vanadium peaks in 2theta
+        """
+        # Validate input
+        if isinstance(vanpeakposlist, list) is False:
+            raise NotImplementedError("Input must be a list.  Now it it is %s." % (str(type(vanpeakposlist))))
+        elif len(vanpeakposlist) == 0:
+            raise NotImplementedError("Input must be a non-empty list.")
+
+        vanpeakposlist = sorted(vanpeakposlist)
+        if vanpeakposlist[0] < 5.:
+            raise NotImplementedError("Check whether the list %s is in unit of 2theta" % (str(vanpeakposlist)))
+
+        # Set up
+        self._vanadiumPeakPosList = vanpeakposlist[:]
+
+        return
+
+
+    def setWavelength(self, wavelength):
+        """ Set wavelength for this run
+        """
+        self._wavelength = float(wavelength)
+        if wavelength <= 0:
+            raise NotImplementedError("It is not physical to have negative neutron wavelength")
 
         return
 
@@ -146,6 +188,7 @@ class HFIRPDRedControl:
 
         # get the complete list of Pt. number
         if ptnolist is None:
+            # FIXME / TODO - This is not implemented yet!
             ptnolist = self._getRunNumberList(datamdws=rmanager.datamdws)
 
         rlist = []
@@ -245,15 +288,22 @@ class HFIRPDRedControl:
                 monitor MD workspace is not present."  % (exp, scan))
             return False
 
-        wavelength = wsmanager.datamdws.getExperimentInfo(0).run().getProperty('wavelength').value()
+        wavelength = wsmanager.getWavelength()
 
         vanpeakpos2theta = []
         for peakpos in VanadiumPeakPositions:
             # FIXME - Check equation
-            twotheta = math.asin(peakpos*0.25/(math.pi*wavelength))
-            vanpeakpos2theta.append(twotheta)
+            # print "wavelength: ", wavelength, " peak pos: ", peakpos
+            # print "lambd_over_2d = ", wavelength/2./peakpos
+            lambda_over_2d =  wavelength/2./peakpos
+            if abs(lambda_over_2d) <= 1.:
+                twotheta = math.asin(lambda_over_2d)*2.*180/math.pi 
+                vanpeakpos2theta.append(twotheta)
+            else:
+                print "Vanadium peak %f is out of d-Spacing range." % (peakpos)
 
         vanpeakpos2theta = sorted(vanpeakpos2theta)
+        wsmanager.setVanadiumPeaks(vanpeakpos2theta) 
 
         return vanpeakpos2theta
 
@@ -331,6 +381,8 @@ class HFIRPDRedControl:
         api.LoadSpiceAscii(Filename=datafilename, 
                 OutputWorkspace=tablewsname, RunInfoWorkspace=infowsname)
 
+        raise NotImplementedError("Need to split from here!")
+
         # convert to MDWorkspace
         datamdwsname = basewsname + "_DataMD"
         monitorwsname = basewsname + "_MonitorMD"
@@ -338,6 +390,14 @@ class HFIRPDRedControl:
                 RunInfoWorkspace=infowsname,
                 OutputWorkspace=datamdwsname,
                 OutputMonitorWorkspace=monitorwsname)
+
+        # Download the correction file and find out the wavelength!
+        # TODO / FIXME - ASAP 2
+        if False:
+            status, errmsg = self.retrieveCorrectionData(instrument='HB2A', exp=expno, scan=scanno)
+            if status is False:
+                self._logError("Unable to download correction files for Exp %d Scan %d. \
+                        \nReason: %s." % (expno, scanno, errmsg))
 
         datamdws = AnalysisDataService.retrieve(datamdwsname)
         monitormdws = AnalysisDataService.retrieve(monitorwsname)
@@ -464,36 +524,79 @@ class HFIRPDRedControl:
         return True
 
 
-    def reduceSpicePDData(self, exp, scan, datafilename, unit, xmin, xmax, binsize, wavelength):
+    def reduceSpicePDData(self, exp, scan, datafilename, unit, xmin, xmax, binsize, wavelength=None):
         """ Reduce SPICE powder diffraction data. 
         Return - Boolean as reduction is successful or not
         """
         # base workspace name
         # print "base workspace name: ", datafilename
-        try:
-            basewsname = os.path.basename(datafilename).split(".")[0]
-        except AttributeError as e:
-            raise NotImplementedError("Unable to parse data file name due to %s." % (str(e)))
+        # try:
+        #     basewsname = os.path.basename(datafilename).split(".")[0]
+        # except AttributeError as e:
+        #     raise NotImplementedError("Unable to parse data file name due to %s." % (str(e)))
 
-        # load SPICE
-        tablewsname = basewsname + "_RawTable"
-        infowsname  = basewsname + "ExpInfo"
-        api.LoadSpiceAscii(Filename=datafilename, 
-                OutputWorkspace=tablewsname, RunInfoWorkspace=infowsname)
+        # # load SPICE
+        # tablewsname = basewsname + "_RawTable"
+        # infowsname  = basewsname + "ExpInfo"
+        # api.LoadSpiceAscii(Filename=datafilename, 
+        #         OutputWorkspace=tablewsname, RunInfoWorkspace=infowsname)
 
-        # convert to MDWorkspace
-        datamdwsname = basewsname + "_DataMD"
-        monitorwsname = basewsname + "_MonitorMD"
-        api.ConvertSpiceDataToRealSpace(InputWorkspace=tablewsname,
-                RunInfoWorkspace=infowsname,
-                OutputWorkspace=datamdwsname,
-                OutputMonitorWorkspace=monitorwsname)
+        # # convert to MDWorkspace
+        # datamdwsname = basewsname + "_DataMD"
+        # monitorwsname = basewsname + "_MonitorMD"
+        # api.ConvertSpiceDataToRealSpace(InputWorkspace=tablewsname,
+        #         RunInfoWorkspace=infowsname,
+        #         OutputWorkspace=datamdwsname,
+        #         OutputMonitorWorkspace=monitorwsname)
 
-        datamdws = AnalysisDataService.retrieve(datamdwsname)
-        monitormdws = AnalysisDataService.retrieve(monitorwsname)
+        # datamdws = AnalysisDataService.retrieve(datamdwsname)
+        # monitormdws = AnalysisDataService.retrieve(monitorwsname)
+    
+        # Get reduction manager
+        try: 
+            wsmanager = self._myWorkspaceDict[(int(exp), int(scan))]
+        except KeyError:
+            raise NotImplementedError("SPICE data for Exp %d Scan %d has not been loaded." % (
+                int(expno), int(scanno)))
+
+        datamdws = wsmanager.datamdws
+        monitormdws = wsmanager.monitormdws
+
+        # Get correction files
+        # TODO / FIXME : Develop file loading and parsing algorithms!!!
+        localdir = os.path.dirname(datafilename)
+        print "[Dev] Data file name: %s  in local directory %s." % (datafilename, localdir)
+        status, returnbody = self.retrieveCorrectionData(instrument='HB2A', datamdws=datamdws, exp=exp, localdatadir=localdir)
+
+        if status is False:
+            errmsg = returnbody
+            self._logError("Unable to download correction files for Exp %d Scan %d. \
+                    \nReason: %s." % (expno, scanno, errmsg))
+            vcorrfilename = None
+            excludedfilename = None
+        else:
+            print "[Info] Detectors correction files: %s." % (str(returnbody))
+            autowavelength = returnbody[0]
+            vcorrfilename = returnbody[1]
+            excludedfilename = returnbody[2]
+            print "[Dev] Wavelength: %f vs %f (user vs. local)" % (wavelength, autowavelength)
+            
+            if autowavelength is not None: 
+                wavelength = autowavelength
+
+        # TODO - Parse and setup corrections... 
+        if vcorrfilename is not None:
+            vcorrtablews = self._myControl.parseDetEfficiencyFile('HB2A', vcorrfilename) 
+        else:
+            vcorrtablews = None
+
+        # TODO - Parse and set up excluded detectors
+        if excludedfilename is not None: 
+            excludeddetlist = self._myControl.parseExcludedDetFile('HB2A', excludedfilename)
+        else:
+            excludeddetlist = []
 
         # binning from MD to single spectrum ws
-        
         # set up binning parameters
         if xmin is None or xmax is None:
             binpar = "%.7f" % (binsize)
@@ -501,6 +604,7 @@ class HFIRPDRedControl:
             binpar = "%.7f, %.7f, %.7f" % (xmin, binsize, xmax)
 
         outwsname = basewsname + "_Reduced"
+        # TODO - Applied excluded detectors and vanadium correction into account
         api.ConvertCWPDMDToSpectra(InputWorkspace=datamdwsname,
                 InputMonitorWorkspace=monitorwsname,
                 OutputWorkspace=outwsname,
@@ -518,13 +622,16 @@ class HFIRPDRedControl:
         # Manager:
         wsmanager = PDRManager(exp, scan)
         wsmanager.setup(datamdws, monitormdws, outws, unit, binsize)
+        wsmanager.setWavelength(wavelength)
 
         self._myWorkspaceDict[(exp, scan)] = wsmanager
+
+        # TODO - Should feed back wavelength (auto) back to GUI if it is different from the one specified by user
         
         return True
 
 
-    def retrieveCorrectionData(self, instrument, exp, scan):
+    def retrieveCorrectionData(self, instrument, datamdws, exp, localdatadir):
         """ Retrieve including dowloading and/or local locating 
         powder diffraction's correction files
 
@@ -532,39 +639,58 @@ class HFIRPDRedControl:
          - instrument :: name of powder diffractometer in upper case
          - exp :: integer as epxeriment number
          - scan :: integer as scan number
+
+        Return :: 2-tuple (True, list of returned file names) or (False, error reason)
         """
         if instrument.upper() == 'HB2A':
-            # get detector efficiency correction file
+            # For HFIR HB2A only
+
+            # Get parameter m1 and colltrans
+            m1 = datamdws.getExperimentInfo(0).run().getProperty('m1').value
             try: 
-                wsmanager = self._myWorkspaceDict[(int(exp), int(scan))]
-            except KeyError:
-                return (False, "Exp %s Scan %s has not been loaded. \
-                        This method must be called after data is loaded." % (str(exp), 
-                            str(scan)))
+                colltrans = datamdws.getExperimentInfo(0).run().getProperty('colltrans').value
+            except RuntimeError:
+                colltrans = None
 
-            m1 = wsmanager.datamdws.getExperimentInfo(0).run.getProperty('m1').value()
-            colltrans = wsmanager.datamdws.getExperimentInfo(0).run.getProperty('colltrans').value()
-
+            # detector efficiency file
             detefffname, deteffurl, wavelength = hutil.makeHB2ADetEfficiencyFileName(exp, m1, colltrans)
+            if detefffname is not None: 
+                localdetefffname = os.path.join(localdatadir, detefffname) 
+                print "[DB] Detector efficiency file name: %s From %s" % (detefffname, deteffurl) 
+                if os.path.exists(localdetefffname) is False: 
+                    downloadFile(deteffurl, localdetefffname) 
+                else: 
+                    print "[Info] Detector efficiency file %s exists in directory %s." % (detefffname, localdatadir)
+            else:
+                localdetefffname = None
+            # ENDIF
 
-            downloadFile(deteffurl, localfilepath)
+            # excluded detectors file
+            excldetfname, exclurl = hutil.makeExcludedDetectorFileName(exp)
+            localexcldetfname = os.path.join(localdatadir, excldetfname)
+            print "[DB] Excluded det file name: %s From %s" % (excldetfname, exclurl)
+            if os.path.exists(localexcldetfname) is False:
+                downloadstatus, errmsg = downloadFile(exclurl, localexcldetfname)
+                if downloadstatus is False:
+                    localexcldetfname = False
+                    print errmsg 
+            else:
+                print "[Info] Detector exclusion file %s exists in directory %s." % (excldetfname, localdatadir)
 
-            # get excluded detector file
-            excldetfilenane, exclurl = hutil.makeExcludedDetectorFileName(exp)
+            # # get excluded detector file
 
-            downloadFile(exclurl, localfilepath)
+            # downloadFile(exclurl, localfilepath)
 
-            # Set to ws manager
-            wsmanager.setWavelength(wavelength)
-            wsmanager.setDetEfficencyFile(...)
-            wsmanager.setExcludedDetFile(...)
-
+            # # Set to ws manager
+            # wsmanager.setWavelength(wavelength)
+            # wsmanager.setDetEfficencyFile()
+            # wsmanager.setExcludedDetFile()
 
         else:
             raise NotImplementedError("Instrument %s is not supported to retrieve correction file." % (instrument))
 
 
-        return
+        return (True, [wavelength, localdetefffname, localexcldetfname])
 
 
 
@@ -598,8 +724,11 @@ class HFIRPDRedControl:
         return 
 
 
-    def stripVanadiumPeaks(self, exp, scan, binparams, vanpeakposlist):
+    def stripVanadiumPeaks(self, exp, scan, binparams, vanpeakposlist=None):
         """ Strip vanadium peaks 
+
+        Arguments: 
+         - vanpeakposlist :: list of peak positions.  If none, then using default
         """
         # Get reduced workspace
         wsmanager = self.getWorkspace(exp, scan, raiseexception=True)
@@ -609,14 +738,21 @@ class HFIRPDRedControl:
                 monitor MD workspace is not present."  % (exp, scan))
 
         # Convert unit to Time-of-flight
-        xaxis_unit = wksp.getAxis(0).unit().ID()
-        if xaxis != 'Degrees': 
+        xaxis_unit = wksp.getAxis(0).getUnit().unitID()
+        if xaxis_unit != 'Degrees': 
             wksp = mantid.ConvertCWPDToSpectra(InputWorkspace=wksp, OutputWorkspace=wksp.name(),
                     Params=binparams)
 
-        # Call 
-        wksp = StripPeaks(InputWorkspace=wksp, OutputWorksapce=wksp.name(),
-                PeakList=vanpeakposlist)
+        # Vanadium peaks positions
+        if vanpeakposlist is None or len(vanpeakposlist) == 0:
+            vanpeakposlist = wsmanager.getVanadiumPeaks()
+            if vanpeakposlist is None:
+                raise NotImplementedError('No vanadium peaks has been set up.')
+        # ENDIF
+
+        wksp = api.StripPeaks(InputWorkspace=wksp, 
+                              OutputWorkspace=wksp.name(), 
+                              PeakPositions=numpy.array(vanpeakposlist))
 
         return 
 
@@ -626,13 +762,21 @@ class HFIRPDRedControl:
 def downloadFile(url, localfilepath):
     """
     Test: 'http://neutron.ornl.gov/user_data/hb2a/exp400/Datafiles/HB2A_exp0400_scan0001.dat'
+
+    Arguments:
+     - localfilepath :: local data file name with full path.
     """
     # open URL
     try: 
         response = urllib2.urlopen(url) 
         wbuf = response.read()
     except urllib2.HTTPError as e:
-        raise NotImplementedError("Unable to download file from %s\n\tCause: %s." % (url, str(e)))
+        # Unable to download file
+        if str(e).count('HTTP Error 404') == 1:
+            return (False, str(e))
+        else: 
+            raise NotImplementedError("Unable to download file from %s\n\tCause: %s." % (url, str(e)))
+    # ENDIFELSE
 
     if wbuf.count('not found') > 0:
         return (False, "File cannot be found at %s." % (url))

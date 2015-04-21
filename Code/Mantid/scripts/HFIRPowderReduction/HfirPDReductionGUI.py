@@ -80,11 +80,11 @@ class MainWindow(QtGui.QMainWindow):
 
         # tab 'Individual Detectors'
         self.connect(self.ui.pushButton_plotIndvDet, QtCore.SIGNAL('clicked()'),
-                self.doPlotIndvDet)
+                self.doPlotIndvDetMain)
         self.connect(self.ui.pushButton_plotPrevDet, QtCore.SIGNAL('clicked()'),
-                self.doPlotPrevDetRaw)
+                self.doPlotIndvDetPrev)
         self.connect(self.ui.pushButton_plotNextDet, QtCore.SIGNAL('clicked()'),
-                self.doPlotNextDetRaw)
+                self.doPlotIndvDetNext)
         self.connect(self.ui.pushButton_clearCanvasIndDet, QtCore.SIGNAL('clicked()'),
                 self.doClearIndDetCanvas)
         self.connect(self.ui.pushButton_plotLog , QtCore.SIGNAL('clicked()'),
@@ -383,12 +383,6 @@ class MainWindow(QtGui.QMainWindow):
                 Scan %d." % (expno, scanno))
         # ENDIF(status)
 
-        # Download the correction file and find out the wavelength!
-        status, errmsg = self._myControl.retrieveCorrectionData(instrument='HB2A', expno, scanno)
-        if status is False:
-            self._logError("Unable to download correction files for Exp %d Scan %d. \
-                    \nReason: %s." % (expno, scanno, errmsg))
-
         # Now do different tasks for different tab
         if itab == 0 or itab == 1:
             # Load data only
@@ -420,8 +414,8 @@ class MainWindow(QtGui.QMainWindow):
                     self._logError(str(e))
                     return
             else:
-                # itab = 4 
-                unit = 'dSpacing'
+                # itab = 4 : strip vanadium peaks
+                unit = '2theta'
                 try:
                     xmin, binsize, xmax = self._uiGetBinningParams(xmin_w=self.ui.lineEdit_min2Theta,
                             binsize_w=self.ui.lineEdit_binsize2Theta,
@@ -433,6 +427,7 @@ class MainWindow(QtGui.QMainWindow):
             # END-IF-ELSE
 
             # Reduce data 
+            execstatus = self._myControl.loadSpicePDData(expno, scanno, datafilename)
             execstatus = self._myControl.reduceSpicePDData(expno, scanno, \
                     datafilename, unit, xmin, xmax, binsize, wavelength)
             print "[DB] reduction status = %s, Binning = %s, %s, %s" % (str(execstatus),
@@ -457,6 +452,14 @@ class MainWindow(QtGui.QMainWindow):
                             xlabel, label="Exp %d Scan %d Bin = %.5f" % (expno, scanno, binsize), \
                             clearcanvas=clearcanvas)
             # ENDIF(execstatus)
+
+            # Plot vanadium peaks positions
+            if execstatus is True and itab == 4:
+                vanpeakpos = self._myControl.getVanadiumPeaksPos(expno, scanno)
+                print "Vanadium peaks: ", vanpeakpos
+                self._plotPeakIndicators(self.ui.graphicsView_vanPeaks, vanpeakpos)
+            # ENDIF(execstatus)
+
         else:
             # Non-supported case
             raise NotImplementedError('GUI has been changed, but the change has not been considered!')
@@ -650,7 +653,7 @@ class MainWindow(QtGui.QMainWindow):
         return
 
 
-    def doPlotIndvDet(self):
+    def doPlotIndvDetMain(self):
         """ Plot individual detector
         """
         # get exp and scan numbers and check whether the data has been loaded
@@ -675,11 +678,53 @@ class MainWindow(QtGui.QMainWindow):
         # plot
         try: 
             self._plotIndividualDetCounts(expno, scanno, detid, xlabel)
+            self._expNo = expno
+            self._scanNo = scanno
+            self._detID = detid
         except NotImplementedError as e:
             self._logError(str(e))
 
         return
 
+    def doPlotIndvDetNext(self):
+        """ Plot next raw detector signals for tab 'Individual Detector'
+        """
+        # TODO - ASAP (3) Not correct now!
+        # Validate the operation
+        if self._rawDetPtNo is None and self._rawDetExpNo is None \
+                and self._rawDetScanNo is None:
+            self._logError('doPlotRawDetPrev cannot work because no Exp/Scan/Pt has been set.')
+
+        # Plot
+        execstatus = self._plotRawDetSignal(self._rawDetExpNo, self._rawDetScanNo, 
+                self._rawDetPlotMode, self._rawDetPtNo+1, doOverPlot)
+
+        # Write back
+        if execstatus is True:
+            self._rawDetPtNo += 1
+            self.ui.lineEdit_ptNo.setText(str(self._rawDetPtNo))
+
+        return
+
+    def doPlotIndvDetPrev(self):
+        """ Plot previous individual detector's signal for tab 'Individual Detector'
+        """
+        # TODO - ASAP (3) Not correct now!
+        # Validate the operation
+        if self._rawDetPtNo is None and self._rawDetExpNo is None \
+                and self._rawDetScanNo is None:
+            self._logError('doPlotRawDetPrev cannot work because no Exp/Scan/Pt has been set.')
+
+        # Plot
+        execstatus = self._plotRawDetSignal(self._rawDetExpNo, self._rawDetScanNo, 
+                self._rawDetPlotMode, self._rawDetPtNo-1, doOverPlot)
+
+        # Write back
+        if execstatus is True:
+            self._rawDetPtNo += 1
+            self.ui.lineEdit_ptNo.setText(str(self._rawDetPtNo))
+
+        return
 
     def doPlotQ(self):
         """ Rebin the data and plot in momentum transfer Q
@@ -691,51 +736,11 @@ class MainWindow(QtGui.QMainWindow):
         return
 
 
-    # TODO - Remove this commented method after code is tested
-    # def doPlotRawDetPrev(self):
-    #     """ Plot previous raw detector signals for tab 'Individual Detector'
-    #     """
-    #     # Validate the operation
-    #     if self._rawDetPtNo is None and self._rawDetExpNo is None \
-    #             and self._rawDetScanNo is None:
-    #         self._logError('doPlotRawDetPrev cannot work because no Exp/Scan/Pt has been set.')
-
-    #     # Plot
-    #     execstatus = self._plotRawDetSignal(self._rawDetExpNo, self._rawDetScanNo, 
-    #             self._rawDetPlotMode, self._rawDetPtNo-1, doOverPlot)
-
-    #     # Write back
-    #     if execstatus is True:
-    #         self._rawDetPtNo += 1
-    #         self.ui.lineEdit_ptNo.setText(str(self._rawDetPtNo))
-
-    #     return
-
-
-    # TODO - Remove this commented method after code is tested
-    # def doPlotRawDetNext(self):
-    #     """ Plot next raw detector signals for tab 'Individual Detector'
-    #     """
-    #     # FIXME - Is this correct?  Should be for all Pt. or all Detector???
-    #     # Validate the operation
-    #     if self._rawDetPtNo is None and self._rawDetExpNo is None \
-    #             and self._rawDetScanNo is None:
-    #         self._logError('doPlotRawDetPrev cannot work because no Exp/Scan/Pt has been set.')
-
-    #     # Plot
-    #     execstatus = self._plotRawDetSignal(self._rawDetExpNo, self._rawDetScanNo, 
-    #             self._rawDetPlotMode, self._rawDetPtNo+1, doOverPlot)
-
-    #     # Write back
-    #     if execstatus is True:
-    #         self._rawDetPtNo += 1
-    #         self.ui.lineEdit_ptNo.setText(str(self._rawDetPtNo))
-
-    #     return
-
     def doPlotRawPtMain(self):
         """ Plot current raw detector signal for a specific Pt.
         """
+        # FIXME / TODO - shall check whether the plot is on canvas
+
         # get experiment number and scan number for data file
         try: 
             expno = self.getInteger(self.ui.lineEdit_expNo)
@@ -761,7 +766,7 @@ class MainWindow(QtGui.QMainWindow):
             self._rawDetPtNo = ptNo 
             self._rawDetExpNo = expno 
             self._rawDetScanNo = scanno
-            self._rawDetPlotMode = plotMode
+            self._rawDetPlotMode = plotmode
         else:
             print "[Error] Execution fails with signal %s. " % (str(execstatus))
 
@@ -771,10 +776,11 @@ class MainWindow(QtGui.QMainWindow):
     def doPlotRawPtNext(self):
         """ Plot next raw detector signals
         """
-        # FIXME - Is this correct?  Should be for all Pt. or all Detector???
+        # FIXME / TODO - shall check whether the plot is on canvas
+
         # check
-        if self._ptNo is not None:
-            ptno = self._ptNo + 1
+        if self._rawDetPtNo is not None:
+            ptno = self._rawDetPtNo + 1
         else:
             self._logError("Unable to plot previous raw detector \
                     because Pt. or Detector ID has not been set up yet.")
@@ -783,13 +789,13 @@ class MainWindow(QtGui.QMainWindow):
         # get plot mode and plot
         plotmode = str(self.ui.comboBox_rawDetMode.currentText())
         overplot = bool(self.ui.checkBox_overpltRawDet.isChecked())
-        execstatus = self._plotRawDetSignal(self._expNo, self._scanNo, plotmode, 
+        execstatus = self._plotRawDetSignal(self._rawDetExpNo, self._rawDetScanNo, plotmode, 
                 ptno, overplot)
 
         # update if it is good to plot
         if execstatus is True: 
-            self._ptNo = ptno
-            self.ui.lineEdit_ptNo.setText(str(self._ptNo))
+            self._rawDetPtNo = ptno
+            self.ui.lineEdit_ptNo.setText(str(ptno))
 
         return
 
@@ -797,9 +803,11 @@ class MainWindow(QtGui.QMainWindow):
     def doPlotRawPtPrev(self):
         """ Plot previous raw detector
         """
+        # FIXME/ TODO - shall check whether the plot is on canvas
+
         # check
-        if self._ptNo is not None:
-            ptno = self._ptNo - 1
+        if self._rawDetPtNo is not None:
+            ptno = self._rawDetPtNo - 1
         else:
             self._logError("Unable to plot previous raw detector \
                     because Pt. or Detector ID has not been set up yet.")
@@ -808,13 +816,13 @@ class MainWindow(QtGui.QMainWindow):
         # get plot mode and do plt
         plotmode = str(self.ui.comboBox_rawDetMode.currentText())
         overplot = bool(self.ui.checkBox_overpltRawDet.isChecked())
-        execstatus = self._plotRawDetSignal(self._expNo, self._scanNo, plotmode, 
+        execstatus = self._plotRawDetSignal(self._rawDetExpNo, self._rawDetScanNo, plotmode, 
                 ptno, overplot)
 
         # update if it is good to plot
         if execstatus is True:
-            self._ptNo = ptno 
-            self.ui.lineEdit_ptNo.setText(str(self._ptNo))
+            self._rawDetPtNo = ptno 
+            self.ui.lineEdit_ptNo.setText(str(ptno))
 
         return
 
@@ -862,6 +870,7 @@ class MainWindow(QtGui.QMainWindow):
                 str(xmin), str(binsize), str(xmax))
 
         # Get wave length and get list of vanadium peaks in 2theta
+        # FIXME / TODO : mimic it to deLoadData()
         wavelength = float(self.ui.lineEdit_wavelength.text())
         vanpeakposlist = self._myControl.getVanadiumPeakPos(wavelength=wavelength)
 
@@ -922,7 +931,9 @@ class MainWindow(QtGui.QMainWindow):
             self._logError("Error to get Exp and Scan due to %s." % (str(e)))
             return False
 
-        self._myControl.stripVanadiumPeaks(expno, scanno, peaklist)
+        # TODO - ASAP (1) binparams should be read from GUI
+        binparams = "5., 0.1, 150."
+        self._myControl.stripVanadiumPeaks(expno, scanno, binparams, vanpeakposlist=None)
 
         self._plotVanadiumRun(xlabel, 0, True)
 
@@ -1160,8 +1171,25 @@ class MainWindow(QtGui.QMainWindow):
         canvas.setXYLimit(xmin-dx*0.1, xmax+dx*0.1, ymin-dy*0.1, ymax+dy*0.1)
 
         return True
-
         
+        
+    def _plotPeakIndicators(self, canvas, peakposlist):
+        """ Plot indicators for peaks
+        """
+        print "[DB] Peak indicators are at ", peakposlist
+        
+        rangey = canvas.getYLimit()
+        rangex = canvas.getXLimit()
+
+        for pos in peakposlist:
+            if pos >= rangex[0] and pos <= rangex[1]:
+                vecx = numpy.array([pos, pos])
+                vecy = numpy.array([rangey[0], rangey[1]])
+                canvas.addPlot(vecx, vecy, color='black', linestyle='--') 
+        # ENDFOR
+        
+        return
+
                 
     def _plotRawDetSignal(self, expno, scanno, plotmode, ptno, dooverplot):
         """ Plot the counts of one detector of a certain Pt. in an experiment
@@ -1325,18 +1353,6 @@ class MainWindow(QtGui.QMainWindow):
             
         return
 
-
-    def _plotPeakIndicators(self, canvas, peakpositions):
-        """ On canvas indicate peaks with vertical lines
-        """
-        rangey = canvas.getYRange()
-
-        for pos in peakpositions:
-            vecx = numpy.array([pos, pos])
-            vecy = numpy.array([rangey[0], rangey[1]])
-            canvas.addPlot(vecx, vecy, clear=False)
-
-        return
 
     def _uiCheckBinningParameters(self, curxmin=None, curxmax=None, curbinsize=None, curunit=None, targetunit=None):
         """ check the binning parameters including xmin, xmax, bin size and target unit
