@@ -256,6 +256,9 @@ namespace Algorithms
               // Make local copies of the units. This allows running the loop in parallel
               Unit * localFromUnit = fromUnit->clone();
               Unit * localOutputUnit = outputUnit->clone();
+              g_log.debug() << "\tL1=" << l1 << ",L2=" << l2 << ",TT=" << twoTheta << ",EF=" << efixed
+                            << ",EM=" << emode << std::endl;
+
 
               /// @todo Don't yet consider hold-off (delta)
               const double delta = 0.0;
