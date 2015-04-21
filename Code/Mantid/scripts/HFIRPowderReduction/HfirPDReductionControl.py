@@ -9,6 +9,8 @@ import urllib2
 
 import numpy
 
+import HfirUtility as hutil
+
 # Import mantid
 IMPORT_MANTID = False
 try:
@@ -520,7 +522,52 @@ class HFIRPDRedControl:
         self._myWorkspaceDict[(exp, scan)] = wsmanager
         
         return True
-      
+
+
+    def retrieveCorrectionData(self, instrument, exp, scan):
+        """ Retrieve including dowloading and/or local locating 
+        powder diffraction's correction files
+
+        Arguments:
+         - instrument :: name of powder diffractometer in upper case
+         - exp :: integer as epxeriment number
+         - scan :: integer as scan number
+        """
+        if instrument.upper() == 'HB2A':
+            # get detector efficiency correction file
+            try: 
+                wsmanager = self._myWorkspaceDict[(int(exp), int(scan))]
+            except KeyError:
+                return (False, "Exp %s Scan %s has not been loaded. \
+                        This method must be called after data is loaded." % (str(exp), 
+                            str(scan)))
+
+            m1 = wsmanager.datamdws.getExperimentInfo(0).run.getProperty('m1').value()
+            colltrans = wsmanager.datamdws.getExperimentInfo(0).run.getProperty('colltrans').value()
+
+            detefffname, deteffurl, wavelength = hutil.makeHB2ADetEfficiencyFileName(exp, m1, colltrans)
+
+            downloadFile(deteffurl, localfilepath)
+
+            # get excluded detector file
+            excldetfilenane, exclurl = hutil.makeExcludedDetectorFileName(exp)
+
+            downloadFile(exclurl, localfilepath)
+
+            # Set to ws manager
+            wsmanager.setWavelength(wavelength)
+            wsmanager.setDetEfficencyFile(...)
+            wsmanager.setExcludedDetFile(...)
+
+
+        else:
+            raise NotImplementedError("Instrument %s is not supported to retrieve correction file." % (instrument))
+
+
+        return
+
+
+
     def savePDFile(self, exp, scan, filetype, sfilename):
         """ Save a reduced workspace to gsas/fullprof/topaz data file
         """

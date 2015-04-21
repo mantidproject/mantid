@@ -70,11 +70,11 @@ class MainWindow(QtGui.QMainWindow):
 
         # tab 'Raw Detectors'
         self.connect(self.ui.pushButton_plotRaw, QtCore.SIGNAL('clicked()'),
-                self.doPlotRawDet)
+                self.doPlotRawPtMain)
         self.connect(self.ui.pushButton_ptUp, QtCore.SIGNAL('clicked()'),
-                self.doPlotPrevPtRaw)
+                self.doPlotRawPtPrev)
         self.connect(self.ui.pushButton_ptDown, QtCore.SIGNAL('clicked()'),
-                self.doPlotNextPtRaw)
+                self.doPlotRawPtNext)
         self.connect(self.ui.pushButton_clearRawDets, QtCore.SIGNAL('clicked()'),
                 self.doClearRawDetCanvas)
 
@@ -315,21 +315,36 @@ class MainWindow(QtGui.QMainWindow):
     def doClearIndDetCanvas(self):
         """ Clear the canvas in tab 'Individual Detector'
         """
-        # TODO ASAP
-        raise NotImplementedError("ASAP - doClearIndDetCanvas")
+        self.ui.graphicsView_indvDet.clearAllLines()
 
 
     def doClearMultiRunCanvas(self):
         """ Clear the canvas in tab 'Multiple Run'
+
+        This canvas is applied to both 1D and 2D image.  
+        Clear-all-lines might be not enough to clear 2D image
         """
-        # TODO ASAP
-        raise NotImplementedError("ASAP - doClearMultiRunCanvas")
+        self.ui.graphicsView_mergeRun.clearCanvas()
+
+        return
+
 
     def doClearRawDetCanvas(self):
-        """ Clear the canvas in tab 'Raw Detector'
+        """ Clear the canvas in tab 'Raw Detector':
+        only need to clear lines
         """
-        # TODO ASAP
-        raise NotImplementedError("ASAP - doClearRawDetCanvas")
+        self.ui.graphicsView_Raw.clearAllLines()
+
+        return
+
+
+    def doClearVanadiumCanvas(self):
+        """ Clear the canvas in tab 'Vanadium'
+        """
+        self.ui.graphicsView_vanPeaks.clearAllLines()
+
+        return
+
 
     def doLoadData(self):
         """ Load and reduce data 
@@ -368,7 +383,11 @@ class MainWindow(QtGui.QMainWindow):
                 Scan %d." % (expno, scanno))
         # ENDIF(status)
 
-        # TODO - ASAP : Need a method to download the correction file and find out the wavelength!
+        # Download the correction file and find out the wavelength!
+        status, errmsg = self._myControl.retrieveCorrectionData(instrument='HB2A', expno, scanno)
+        if status is False:
+            self._logError("Unable to download correction files for Exp %d Scan %d. \
+                    \nReason: %s." % (expno, scanno, errmsg))
 
         # Now do different tasks for different tab
         if itab == 0 or itab == 1:
@@ -672,8 +691,50 @@ class MainWindow(QtGui.QMainWindow):
         return
 
 
-    def doPlotRawDet(self):
-        """ Plot current raw detector signals
+    # TODO - Remove this commented method after code is tested
+    # def doPlotRawDetPrev(self):
+    #     """ Plot previous raw detector signals for tab 'Individual Detector'
+    #     """
+    #     # Validate the operation
+    #     if self._rawDetPtNo is None and self._rawDetExpNo is None \
+    #             and self._rawDetScanNo is None:
+    #         self._logError('doPlotRawDetPrev cannot work because no Exp/Scan/Pt has been set.')
+
+    #     # Plot
+    #     execstatus = self._plotRawDetSignal(self._rawDetExpNo, self._rawDetScanNo, 
+    #             self._rawDetPlotMode, self._rawDetPtNo-1, doOverPlot)
+
+    #     # Write back
+    #     if execstatus is True:
+    #         self._rawDetPtNo += 1
+    #         self.ui.lineEdit_ptNo.setText(str(self._rawDetPtNo))
+
+    #     return
+
+
+    # TODO - Remove this commented method after code is tested
+    # def doPlotRawDetNext(self):
+    #     """ Plot next raw detector signals for tab 'Individual Detector'
+    #     """
+    #     # FIXME - Is this correct?  Should be for all Pt. or all Detector???
+    #     # Validate the operation
+    #     if self._rawDetPtNo is None and self._rawDetExpNo is None \
+    #             and self._rawDetScanNo is None:
+    #         self._logError('doPlotRawDetPrev cannot work because no Exp/Scan/Pt has been set.')
+
+    #     # Plot
+    #     execstatus = self._plotRawDetSignal(self._rawDetExpNo, self._rawDetScanNo, 
+    #             self._rawDetPlotMode, self._rawDetPtNo+1, doOverPlot)
+
+    #     # Write back
+    #     if execstatus is True:
+    #         self._rawDetPtNo += 1
+    #         self.ui.lineEdit_ptNo.setText(str(self._rawDetPtNo))
+
+    #     return
+
+    def doPlotRawPtMain(self):
+        """ Plot current raw detector signal for a specific Pt.
         """
         # get experiment number and scan number for data file
         try: 
@@ -697,73 +758,20 @@ class MainWindow(QtGui.QMainWindow):
 
         # set global values if good 
         if execstatus is True: 
-            self._ptNo = ptNo 
-            self._expNo = expno 
-            self._scanNo = scanno
+            self._rawDetPtNo = ptNo 
+            self._rawDetExpNo = expno 
+            self._rawDetScanNo = scanno
+            self._rawDetPlotMode = plotMode
         else:
             print "[Error] Execution fails with signal %s. " % (str(execstatus))
 
         return
 
 
-    def doPlotPrevDetRaw(self):
-        """ Plot previous raw detector signals for tab 'Individual Detector'
-        """
-        # TODO - ASAP
-        raise NotImplementedError("ASAP doPlotPrevDetRaw")
-
-        # check
-        if self._ptNo is not None and self._detNo is not None:
-            detno = self._detNo + 1
-        else:
-            self._logError("Unable to plot previous raw detector \
-                    because Pt. or Detector ID has not been set up yet.")
-            return
-
-        # det number minus 1
-        status, errmsg = self._checkValidPtDet(self._ptNo, detno)
-        if status is False:
-            self._logError(errmsg)
-        else:
-            self._detNo = detno
-            self.ui.lineEdit_detNo.setText(str(self._detNo))
-
-        # plot
-        self._plotRawDetSignal(self._ptNo, self._detNo)
-
-        return
-
-
-    def doPlotNextDetRaw(self):
-        """ Plot next raw detector signals for tab 'Individual Detector'
-        """
-        # TODO - ASAP
-        raise NotImplementedError("ASAP doPlotNextDetRaw")
-
-        # check
-        if self._ptNo is not None:
-            detno = self._detNo + 1
-        else:
-            self._logError("Unable to plot previous raw detector \
-                    because Pt. or Detector ID has not been set up yet.")
-            return
-
-        # det number plus 1
-        status, errmsg = self._checkValidPtDet(self._ptNo, detno)
-        if status is False:
-            self._logError(errmsg)
-        else:
-            self._detNo = detno
-            self.ui.lineEdit_detNo.setText(str(self._detNo))
-
-        # plot
-        self._plotRawDetSignal(self._ptNo, self._detNo)
-
-        return
-
-    def doPlotNextPtRaw(self):
+    def doPlotRawPtNext(self):
         """ Plot next raw detector signals
         """
+        # FIXME - Is this correct?  Should be for all Pt. or all Detector???
         # check
         if self._ptNo is not None:
             ptno = self._ptNo + 1
@@ -786,7 +794,7 @@ class MainWindow(QtGui.QMainWindow):
         return
 
 
-    def doPlotPrevPtRaw(self):
+    def doPlotRawPtPrev(self):
         """ Plot previous raw detector
         """
         # check
