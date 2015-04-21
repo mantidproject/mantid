@@ -71,7 +71,7 @@ void SaveNXSPE::init() {
  */
 void SaveNXSPE::exec() {
   // Retrieve the input workspace
-  const MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
+  MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
 
   // Do the full check for common binning
   if (!WorkspaceHelpers::commonBoundaries(inputWS)) {
@@ -95,7 +95,11 @@ void SaveNXSPE::exec() {
   ::NeXus::File nxFile(this->filename, NXACC_CREATE5);
 
   // Make the top level entry (and open it)
-  nxFile.makeGroup(inputWS->getName(), "NXentry", true);
+  std::string entryName = getPropertyValue("InputWorkspace");
+  if(entryName.empty()) {
+    entryName = "mantid_workspace";
+  }
+  nxFile.makeGroup(entryName, "NXentry", true);
 
   // Definition name and version
   nxFile.writeData("definition", "NXSPE");
@@ -281,7 +285,7 @@ void SaveNXSPE::exec() {
       this->createChildAlgorithm("FindDetectorsPar", 0, 1, true, 1);
 
   spCalcDetPar->initialize();
-  spCalcDetPar->setPropertyValue("InputWorkspace", inputWS->getName());
+  spCalcDetPar->setProperty("InputWorkspace", inputWS);
   std::string parFileName = this->getPropertyValue("ParFile");
   if (!(parFileName.empty() || parFileName == "not_used.par")) {
     spCalcDetPar->setPropertyValue("ParFile", parFileName);
