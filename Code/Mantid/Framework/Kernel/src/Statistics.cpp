@@ -2,15 +2,14 @@
 #include "MantidKernel/Statistics.h"
 
 #include <algorithm>
-#include <functional>
-#include <limits>
-#include <cmath>
-#include <numeric>
-#include <string>
-#include <stdexcept>
-#include <iostream>
-#include <sstream>
 #include <cfloat>
+#include <cmath>
+#include <iostream>
+#include <limits>
+#include <numeric>
+#include <sstream>
+#include <stdexcept>
+
 
 namespace Mantid {
 namespace Kernel {

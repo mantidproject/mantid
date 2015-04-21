@@ -1,4 +1,4 @@
-#pylint: disable=invalid-name
+#pylint: skip-file
 # -*- coding: utf-8 -*-
 
 # Form implementation generated from reading ui file '/Users/jon/QtSDK/pychopui.ui'

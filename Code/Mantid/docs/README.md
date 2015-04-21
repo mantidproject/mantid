@@ -13,4 +13,4 @@ or `pip`:
 
 This may require admin privileges on some environments.
 
-CMake produces a `docs-html` target that is used to build the documentation. The output files will appear in a `html` sub directory of the main `build/docs` directory.
+CMake produces a `docs-html` target that is used to build the documentation (only if you set the cmake variable DOCS_HTML=ON). The output files will appear in a `html` sub directory of the main `build/docs` directory.

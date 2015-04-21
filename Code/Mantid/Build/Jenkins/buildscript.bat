@@ -7,6 +7,12 @@ setlocal enableextensions enabledelayedexpansion
 :: WORKSPACE & JOB_NAME are environment variables that are set by Jenkins.
 :: BUILD_THREADS & PARAVIEW_DIR should be set in the configuration of each slave.
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+
+:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+:: All node currently have PARAVIEW_DIR=3.98.1 and PARAVIEW_NEXT_DIR=4.3.1
+:::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+set PARAVIEW_DIR=%PARAVIEW_NEXT_DIR%
+
 set CMAKE_BIN_DIR=C:\Program Files (x86)\CMake 2.8\bin
 "%CMAKE_BIN_DIR%\cmake.exe" --version
 echo %sha1%
@@ -161,4 +167,3 @@ if not "%JOB_NAME%"=="%JOB_NAME:pull_requests=%" (
   python !SYSTEMTESTS_DIR!\scripts\mantidinstaller.py uninstall %BUILD_DIR%
   if !RETCODE! NEQ 0 exit /B 1
 )
-

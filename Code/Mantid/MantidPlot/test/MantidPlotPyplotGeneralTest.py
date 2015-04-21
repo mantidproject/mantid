@@ -1,4 +1,4 @@
-"""General tests for the basic interface of mantidplot.future.pyplot
+"""General tests for the basic interface of mantidplot.pyplot
 
 Tests correct creation of output lines from plots (with correct
 Figure, Graph, etc. data), and proper handling (exception) of wrong
@@ -10,9 +10,6 @@ from mantidplottests import *
 import time
 import numpy as np
 from PyQt4 import QtGui, QtCore
-
-# Future pyplot
-from pymantidplot.future.pyplot import *
 
 # =============== Create fake workspaces to plot =======================
 X1 = np.linspace(0,10, 100)
@@ -51,7 +48,7 @@ mdSignal = np.sin(range(0,100,1))
 errInput = mdSignal/20.5
 CreateMDHistoWorkspace(Dimensionality="1", Names='x', Units='m', Extents='0,10', NumberOfBins=len(mdSignal), SignalInput=mdSignal, ErrorInput=errInput, OutputWorkspace=MDWWorkspaceName)
 
-class MantidPlotFuturePyplotGeneralTest(unittest.TestCase):
+class MantidPlotPyplotGeneralTest(unittest.TestCase):
 
     def setUp(self):
         self.g = None
@@ -89,32 +86,36 @@ class MantidPlotFuturePyplotGeneralTest(unittest.TestCase):
             self.close_win_by_graph(lines[0]._graph)        
 
     def test_plot_spectrum_ok(self):
-        lines = plot(WorkspaceName2D, [0, 1], tool='plot_spectrum')
-        self.check_output_lines(lines, 2)
-        self.close_win(lines)
-
         lines_spec = plot_spectrum(WorkspaceName2D, [0, 1])
         self.check_output_lines(lines_spec, 2)
         self.close_win(lines_spec)
 
-        if self.assertTrue(len(lines) == len(lines_spec)):
-            for i in range(0, len(lines)):
-                self.assertEqual(lines[i].get_xdata(), lines_spec[i].get_xdata())
-                self.assertEqual(lines[i].get_ydata(), lines_spec[i].get_ydata())
+        tool_names = ['plot_spectrum', 'plot_sp', 'spectrum', 'sp']
+        for tname in tool_names:
+            lines = plot(WorkspaceName2D, [0, 1], tool=tname)
+            self.check_output_lines(lines, 2)
+            self.close_win(lines)
+
+            if self.assertTrue(len(lines) == len(lines_spec)):
+                for i in range(0, len(lines)):
+                    self.assertEqual(lines[i].get_xdata(), lines_spec[i].get_xdata())
+                    self.assertEqual(lines[i].get_ydata(), lines_spec[i].get_ydata())
 
     def test_plot_bin_ok(self):
-        lines = plot(WorkspaceName2D, [0, 1, 2], tool='plot_bin')
-        self.check_output_lines(lines, 3)
-        self.close_win(lines)
-
         lines_bin = plot_bin(WorkspaceName2D, [0, 1, 2])
         self.check_output_lines(lines_bin, 3)
         self.close_win(lines_bin)
 
-        if self.assertTrue(len(lines) == len(lines_bin)):
-            for i in range(0, len(lines)):
-                self.assertEqual(lines[i].get_xdata(), lines2_bin[i].get_xdata())
-                self.assertEqual(lines[i].get_ydata(), lines2_bin[i].get_ydata())
+        tool_names = ['plot_bin', 'bin']
+        for tname in tool_names:
+            lines = plot(WorkspaceName2D, [0, 1, 2], tool=tname)
+            self.check_output_lines(lines, 3)
+            self.close_win(lines)
+
+            if self.assertTrue(len(lines) == len(lines_bin)):
+                for i in range(0, len(lines)):
+                    self.assertEqual(lines[i].get_xdata(), lines2_bin[i].get_xdata())
+                    self.assertEqual(lines[i].get_ydata(), lines2_bin[i].get_ydata())
 
     def test_lines_get_data(self):
         y = [0.2, 0.5, 0.1, 0.6]
@@ -134,18 +135,20 @@ class MantidPlotFuturePyplotGeneralTest(unittest.TestCase):
         self.assertEqual(len(lines), 1)
         self.close_win(lines)
 
-        lines = plot(MDWWorkspaceName, tool='plot_md')
-        self.assertEqual(len(lines), 1)
-        self.close_win(lines)
+        tool_names = ['plot_md', 'md']
+        for tnames in tool_names:
+            lines = plot(MDWWorkspaceName, tool='plot_md')
+            self.assertEqual(len(lines), 1)
+            self.close_win(lines)
 
         # now see what happens with non-md workspaces
         try:
-            self.assertRaises(ValueError, plot(WorkspaceName2D, tool='plot_md'), "wont see this")
+            self.assertRaises(ValueError, plot(WorkspaceName2D, tool='plot_md'), "won't see this")
         except:
             print "Failed, as it should"
 
         try:
-            self.assertRaises(ValueError, plot_md(WorkspaceName2D), "wont see this")
+            self.assertRaises(ValueError, plot_md(WorkspaceName2D), "won't see this")
         except:
             print "Failed, as it should"
 
@@ -169,20 +172,22 @@ class MantidPlotFuturePyplotGeneralTest(unittest.TestCase):
         self.close_win(lines)
 
     def test_plot_with_style_args(self):
+        # note that these tests also use various aliases for the tool name 'plot_spectrum'
+        # Not adding all the possible combinations here, as this suite is becoming time consuming
         lines = plot(WorkspaceName2D, [0,1], '--g', tool='plot_spectrum')
         self.check_output_lines(lines, 2)
         self.close_win(lines)
 
-        lines = plot(WorkspaceName2D, [0,1], 'y:>', tool='plot_spectrum')
+        lines = plot(WorkspaceName2D, [0,1], 'y:>', tool='plot_sp')
         self.check_output_lines(lines, 2)
         self.close_win(lines)
 
     def test_plot_with_style_args_and_kwargs(self):
-        lines = plot(WorkspaceName2D, [0,1], '-.m', tool='plot_spectrum')
+        lines = plot(WorkspaceName2D, [0,1], '-.m', tool='spectrum')
         self.check_output_lines(lines, 2)
         self.close_win(lines)
 
-        lines = plot(WorkspaceName2D, [0,1], 'r-.>', tool='plot_spectrum')
+        lines = plot(WorkspaceName2D, [0,1], 'r-.>', tool='sp')
         self.check_output_lines(lines, 2)
         self.close_win(lines)
 
@@ -191,11 +196,11 @@ class MantidPlotFuturePyplotGeneralTest(unittest.TestCase):
         self.check_output_lines(lines, 2)
         self.close_win(lines)
 
-        lines = plot(WorkspaceName2D, [0,1], tool='plot_spectrum', linewidth=3, linestyle='-.', marker='v')
+        lines = plot(WorkspaceName2D, [0,1], tool='plot_sp', linewidth=3, linestyle='-.', marker='v')
         self.check_output_lines(lines, 2)
         self.close_win(lines)
 
-        lines = plot(SecondWorkspaceName2D, [0,1, 2], tool='plot_spectrum', linewidth=3, linestyle='-.', marker='v')
+        lines = plot(SecondWorkspaceName2D, [0,1, 2], tool='sp', linewidth=3, linestyle='-.', marker='v')
         self.check_output_lines(lines, 3)
         self.close_win(lines)
 
@@ -221,4 +226,4 @@ class MantidPlotFuturePyplotGeneralTest(unittest.TestCase):
             print "Failed, as it should"
 
 # Run the unit tests
-mantidplottests.runTests(MantidPlotFuturePyplotGeneralTest)
+mantidplottests.runTests(MantidPlotPyplotGeneralTest)

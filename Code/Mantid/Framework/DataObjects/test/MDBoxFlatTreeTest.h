@@ -78,7 +78,18 @@ public:
       }
     }
 
-
+    // Clean up MDGridBoxes as they will take care of their children
+    // If we delete directly in the first loop over then the pointers later in the list
+    // become invalid
+    std::vector<size_t> gridIndices;
+    for(size_t i = 0; i < Boxes.size(); ++i) {
+      if(!Boxes[i]->isBox()) gridIndices.push_back(i);
+    }
+    for(size_t i = 0; i < gridIndices.size(); ++i) {
+      delete Boxes[gridIndices[i]];
+    }
+    
+    // Clean up file
     if(testFile.exists())
       testFile.remove();
   }
