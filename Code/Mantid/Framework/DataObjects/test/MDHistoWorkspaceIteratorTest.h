@@ -110,7 +110,6 @@ public:
       it->jumpTo(i);
       TS_ASSERT_DELTA( it->getNormalizedSignal(), double(i) / 1.0, 1e-5);
     }
-    delete it;
   }
 
   void test_iterator_1D()
