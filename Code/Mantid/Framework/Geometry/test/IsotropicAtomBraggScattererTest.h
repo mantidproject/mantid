@@ -78,7 +78,7 @@ public:
 
     void testCreate()
     {
-        IsotropicAtomBraggScatterer_sptr isotropic = getInitializedScatterer("Si", V3D(0.3, 0.1, 0.12), 1.0, 0.5);
+        IsotropicAtomBraggScatterer_sptr isotropic = getInitializedScatterer("Si", "[0.3, 0.1, 0.12]", 1.0, 0.5);
 
         TS_ASSERT(isotropic);
         TS_ASSERT_EQUALS(isotropic->getElement(), "Si");
@@ -92,7 +92,7 @@ public:
         UnitCell cell(5.43, 5.43, 5.43);
         SpaceGroup_const_sptr spaceGroup = SpaceGroupFactory::Instance().createSpaceGroup("P m -3 m");
 
-        IsotropicAtomBraggScatterer_sptr scatterer = getInitializedScatterer("H", V3D(1.0, 0, 0), 0.0);
+        IsotropicAtomBraggScatterer_sptr scatterer = getInitializedScatterer("H", "[1, 0, 0]", 0.0);
         scatterer->setProperty("U", 3.04);
         scatterer->setProperty("Occupancy", 0.5);
         scatterer->setProperty("UnitCell", unitCellToStr(cell));
@@ -116,7 +116,7 @@ public:
 
     void testCalculateStructureFactor()
     {
-        IsotropicAtomBraggScatterer_sptr scatterer = getInitializedScatterer("Si", V3D(0.0, 0.0, 0.0), 0.0);
+        IsotropicAtomBraggScatterer_sptr scatterer = getInitializedScatterer("Si", "0, 0, 0", 0.0);
 
         double bSi = scatterer->getNeutronAtom().coh_scatt_length_real;
 
@@ -192,7 +192,7 @@ private:
         return scatterer;
     }
 
-    IsotropicAtomBraggScatterer_sptr getInitializedScatterer(const std::string &element, const V3D &position, double U = 0.0, double occ = 1.0)
+    IsotropicAtomBraggScatterer_sptr getInitializedScatterer(const std::string &element, const std::string &position, double U = 0.0, double occ = 1.0)
     {
         IsotropicAtomBraggScatterer_sptr scatterer = getInitializedScatterer();
 

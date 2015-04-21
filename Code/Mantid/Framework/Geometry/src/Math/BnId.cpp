@@ -6,11 +6,9 @@
 #include <set>
 #include <map>
 #include <stack>
-#include <string>
 #include <sstream>
 #include <algorithm>
 #include <iterator>
-#include <functional>
 
 #include "MantidGeometry/Math/BnId.h"
 

@@ -1,9 +1,4 @@
 #include "MantidKernel/MultiFileValidator.h"
-#include "MantidKernel/Logger.h"
-#include <Poco/File.h>
-#include <Poco/Path.h>
-#include <algorithm>
-#include <iostream>
 
 namespace Mantid {
 namespace Kernel {

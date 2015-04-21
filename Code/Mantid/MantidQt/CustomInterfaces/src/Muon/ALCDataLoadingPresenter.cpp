@@ -6,6 +6,8 @@
 #include "MantidQtCustomInterfaces/Muon/MuonAnalysisHelper.h"
 #include "MantidQtAPI/AlgorithmInputHistory.h"
 
+#include <Poco/ActiveResult.h>
+
 #include <QApplication>
 #include <QFileInfo>
 #include <QDir>
@@ -87,7 +89,17 @@ namespace CustomInterfaces
       }
 
       alg->setPropertyValue("OutputWorkspace", "__NotUsed");
-      alg->execute();
+
+      // Execute async so we can show progress bar
+      Poco::ActiveResult<bool> result(alg->executeAsync());
+      while( !result.available() )
+      {
+        QCoreApplication::processEvents();
+      }
+      if (!result.error().empty())
+      {
+        throw std::runtime_error(result.error());
+      }
 
       m_loadedData = alg->getProperty("OutputWorkspace");
 
@@ -168,6 +180,18 @@ namespace CustomInterfaces
     // Set allowed time range
     m_view->setTimeRange (ws->readX(0).front(),ws->readX(0).back());
   }
+
+   MatrixWorkspace_sptr ALCDataLoadingPresenter::exportWorkspace()
+  {
+    if ( m_loadedData ) {
+
+      return boost::const_pointer_cast<MatrixWorkspace>(m_loadedData);
+
+    } else {
+
+      return MatrixWorkspace_sptr();
+    }
+   }
 
 } // namespace CustomInterfaces
 } // namespace MantidQt

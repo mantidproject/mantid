@@ -1,5 +1,4 @@
 #include "MantidKernel/Strings.h"
-#include "MantidKernel/Exception.h"
 #include "MantidKernel/UnitLabel.h"
 
 #include <Poco/StringTokenizer.h>
@@ -13,11 +12,6 @@
 #include <cmath>
 #include <fstream>
 #include <iomanip>
-#include <iostream>
-#include <list>
-#include <sstream>
-#include <cstring>
-#include <vector>
 
 using std::size_t;
 

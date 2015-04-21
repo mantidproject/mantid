@@ -165,6 +165,9 @@ namespace SimpleGui
     // Set the color scale output
     VsiColorScale vsiColorScale;
 
+    // Initialize log scale to false
+    vsiColorScale.useLogScale = false;
+
     // If either the min or max value are at the end of the double spectrum, we might only have a peak Ws visible, 
     // we need to hedge for that
     if (minValue == DBL_MAX || maxValue == -DBL_MAX) {
@@ -239,11 +242,11 @@ namespace SimpleGui
     }
 
     // Otherwise get the data range of the representation for the active view
-    pqPipelineRepresentation* pipelineRepresenation = qobject_cast<pqPipelineRepresentation*>(source->getRepresentation(pqActiveObjects::instance().activeView()));
+    pqPipelineRepresentation* pipelineRepresentation = qobject_cast<pqPipelineRepresentation*>(source->getRepresentation(pqActiveObjects::instance().activeView()));
 
-    if (pipelineRepresenation)
+    if (pipelineRepresentation)
     {
-      QPair<double, double> range = pipelineRepresenation->getColorFieldRange();
+      QPair<double, double> range = pipelineRepresentation->getLookupTable()->getScalarRange();
 
       minValue = range.first;
       maxValue = range.second;
@@ -261,7 +264,10 @@ namespace SimpleGui
 
     QList<pqPipelineSource *> sources;
 
-    sources = smModel->findItems<pqPipelineSource *>(server);
+    if (server)
+    {
+      sources = smModel->findItems<pqPipelineSource *>(server);
+    }
 
     return sources;
   }

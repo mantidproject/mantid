@@ -13,12 +13,11 @@ namespace Mantid
 namespace VATES
 {
 
-VatesKnowledgeSerializer::VatesKnowledgeSerializer(LocationPolicy locationPolicy) : 
+VatesKnowledgeSerializer::VatesKnowledgeSerializer() : 
   m_wsLocationXML(""), 
   m_wsNameXML(""), 
   m_wsName(""), 
-  m_geomXML(""),
-  m_locationPolicy(locationPolicy)
+  m_geomXML("")
 {
 }
 

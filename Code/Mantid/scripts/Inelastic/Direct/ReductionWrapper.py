@@ -7,6 +7,7 @@ from Direct.PropertyManager import PropertyManager
 # this import is used by children
 from Direct.DirectEnergyConversion import DirectEnergyConversion
 import os
+import re
 from abc import abstractmethod
 
 
@@ -32,12 +33,12 @@ class ReductionWrapper(object):
             """
             web_vars = {}
             if self.advanced_vars:
-                web_vars = self.advanced_vars
+                web_vars = self.advanced_vars.copy()
             if self.standard_vars:
                 if len(web_vars)>0:
                     web_vars.update(self.standard_vars)
                 else:
-                    web_vars = self.standard_vars
+                    web_vars = self.standard_vars.copy()
             return web_vars
 
 
@@ -67,7 +68,7 @@ class ReductionWrapper(object):
         self._wvs = ReductionWrapper.var_holder(web_var)
       # Initialize reduced for given instrument
         self.reducer = DirectEnergyConversion(instrumentName)
-        # 
+        #
         web_vars = self._wvs.get_all_vars()
         if web_vars :
             self.reducer.prop_man.set_input_parameters(**web_vars)
@@ -114,7 +115,7 @@ class ReductionWrapper(object):
             f.write(row)
             str_wrapper = ',\n         '
         f.write("\n}\nadvanced_vars={\n")
-
+        #print advances variables
         str_wrapper = '         '
         for key,val in self._wvs.advanced_vars.iteritems():
             if isinstance(val,str):
@@ -123,13 +124,42 @@ class ReductionWrapper(object):
                 row = "{0}\'{1}\':{2}".format(str_wrapper,key,val)
             f.write(row)
             str_wrapper = ',\n        '
-        f.write("\n}\n")
+
+        def write_help_block(fhandle,block_name,block_dict):
+            str_wrapper = '         '
+            row = "{0}\'{1}\' : {{\n".format(str_wrapper,block_name)
+            fhandle.write(row)
+            for key in block_dict:
+                try:
+                    prop = getattr(PropertyManager,key)
+                    docstring = prop.__doc__
+                    if not docstring:
+                        continue
+                except:
+                    continue
+                contents = self._do_format(docstring)
+                row = "{0}\'{1}\':\'{2}\'".format(str_wrapper,key,contents)
+                fhandle.write(row)
+                str_wrapper = ',\n        '
+            fhandle.write('{0} }},\n'.format(str_wrapper))
+
+        f.write("\n}\nvariable_help={\n")
+        write_help_block(f,"standard_vars",self._wvs.standard_vars)
+        write_help_block(f,"advanced_vars",self._wvs.advanced_vars)
+        f.write("}\n")
         f.close()
+
+    def _do_format(self,docstring):
+        """Format docstring to write it as string in the reduce_var file"""
+        contents = re.sub(" +"," ",docstring)
+        contents = contents.split('\n')
+        contents = '\\n'.join(contents)
+        return contents
 
     @property
     def validate_run_number(self):
         """The property defines the run number to validate. If defined, switches reduction wrapper from
-           reduction to validation mode, where reduction tries to load result, previously calculated, 
+           reduction to validation mode, where reduction tries to load result, previously calculated,
            for this run and then compare this result with the result, defined earlier"""
         return self._run_number_to_validate
 
@@ -181,13 +211,13 @@ class ReductionWrapper(object):
 
 #
     def validate_result(self,Error=1.e-6,ToleranceRelErr=True):
-      """Method to validate result against existing validation file
+        """Method to validate result against existing validation file
          or workspace
 
          Change this method to verify different results or validate results differently"""
-      rez,message = ReductionWrapper.build_or_validate_result(self,
+        rez,message = ReductionWrapper.build_or_validate_result(self,
                                      Error,ToleranceRelErr)
-      return rez,message
+        return rez,message
    #
 
     def set_custom_output_filename(self):
@@ -226,7 +256,7 @@ class ReductionWrapper(object):
             else:
                 if len(path)>0:
                     config.appendDataSearchDir(path)
-                # it there bug in getFullPath? It returns the same string if given full path 
+                # it there bug in getFullPath? It returns the same string if given full path
                 # but file has not been found
                 name,fext=os.path.splitext(name)
                 fileName = FileFinder.getFullPath(name+'.nxs')
@@ -239,7 +269,7 @@ class ReductionWrapper(object):
                 else:
                     build_validation = True
         elif isinstance(validation_file,api.Workspace):
-        # its workspace: 
+        # its workspace:
             reference_ws = validation_file
             build_validation = False
             fileName = "workspace:"+reference_ws.name()
@@ -483,11 +513,13 @@ class ReductionWrapper(object):
                             results.append(ws)
                     else:
                         if nruns == 1:
-                            RenameWorkspace(InputWorkspace=red_ws,OutputWorkspace=out_ws_name)
+                            if red_ws.name() != out_ws_name:
+                                RenameWorkspace(InputWorkspace=red_ws,OutputWorkspace=out_ws_name)
                             results.append(mtd[out_ws_name])
                         else:
                             OutWSName = '{0}#{1}of{2}'.format(out_ws_name,num+1,nruns)
-                            RenameWorkspace(InputWorkspace=red_ws,OutputWorkspace=OutWSName)
+                            if red_ws.name() != out_ws_name:
+                                RenameWorkspace(InputWorkspace=red_ws,OutputWorkspace=OutWSName)
                             results.append(mtd[OutWSName])
                 #end
                 if len(results) == 1:

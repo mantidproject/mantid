@@ -10,7 +10,6 @@ from mantid.simpleapi import *
 from mantid.api import FileFinder
 
 # Import our workflows.
-from inelastic_indirect_reducer import IndirectReducer
 from IndirectDataAnalysis import furyfitSeq, furyfitMult, confitSeq, abscorFeeder
 
 '''
@@ -18,11 +17,10 @@ from IndirectDataAnalysis import furyfitSeq, furyfitMult, confitSeq, abscorFeede
 - OSIRIS/IRIS supported by all tabs / interfaces.
 - VESUVIO is not supported by any interface as of yet.
 
-For diagrams on the intended work flow of the IDA and Indirect parts of the
-C2E interface, please see:
+For diagrams on the intended work flow of the IDR and IDA interfaces see:
 
-- http://www.mantidproject.org/IDA
-- http://www.mantidproject.org/Indirect
+- Indirect_DataReduction.rst
+- Indirect_DataAnalysis.rst
 
 System test class hierarchy as shown below:
 
@@ -80,7 +78,8 @@ stresstesting.MantidStressTest
 
 
 class ISISIndirectInelasticBase(stresstesting.MantidStressTest):
-    '''A common base class for the ISISIndirectInelastic* base classes.
+    '''
+    A common base class for the ISISIndirectInelastic* base classes.
     '''
 
     __metaclass__ = ABCMeta  # Mark as an abstract class
@@ -96,15 +95,18 @@ class ISISIndirectInelasticBase(stresstesting.MantidStressTest):
         raise NotImplementedError("Implement _run.")
 
     def validate_results_and_references(self):
+        num_ref_files = len(self.get_reference_files())
+        num_results = len(self.result_names)
+
         if type(self.get_reference_files()) != list:
             raise RuntimeError("The reference file(s) should be in a list")
         if type(self.result_names) != list:
             raise RuntimeError("The result workspace(s) should be in a list")
-        if len(self.get_reference_files()) !=\
-           len(self.result_names):
-            raise RuntimeError("The number of result workspaces does not match"
-                               " the number of reference files.")
-        if len(self.get_reference_files()) < 1:
+        if num_ref_files != num_results:
+            raise RuntimeError("The number of result workspaces (%d) does not match"
+                               " the number of reference files (%d)." % (
+                               num_ref_files, num_results))
+        if num_ref_files < 1 or num_results < 1:
             raise RuntimeError("There needs to be a least one result and "
                                "reference.")
 
@@ -147,8 +149,8 @@ class ISISIndirectInelasticBase(stresstesting.MantidStressTest):
         and returns the full path.'''
         return os.path.join(config['defaultsave.directory'], filename)
 
-
 #==============================================================================
+
 class ISISIndirectInelasticReduction(ISISIndirectInelasticBase):
     '''A base class for the ISIS indirect inelastic reduction tests
 
@@ -171,23 +173,20 @@ class ISISIndirectInelasticReduction(ISISIndirectInelasticBase):
         '''Defines the workflow for the test'''
         self.tolerance = 1e-7
 
-        reducer = IndirectReducer()
-        reducer.set_instrument_name(self.instr_name)
-        reducer.set_detector_range(self.detector_range[0],
-                                   self.detector_range[1])
-        reducer.set_sum_files(self.sum_files)
-        self.parameter_file = self.instr_name + '_graphite_002_Parameters.xml'
-        reducer.set_parameter_file(self.parameter_file)
-
-        for name in self.data_files:
-            reducer.append_data_file(name)
+        kwargs = {}
 
         if self.rebin_string is not None:
-            reducer.set_rebin_string(self.rebin_string)
+            kwargs['RebinString'] = self.rebin_string
 
-        # Do the reduction and rename the result.
-        reducer.reduce()
-        self.result_names = sorted(reducer.get_result_workspaces())
+        reductions = ISISIndirectEnergyTransfer(Instrument=self.instr_name,
+                                                Analyser='graphite',
+                                                Reflection='002',
+                                                InputFiles=self.data_files,
+                                                SumFiles=self.sum_files,
+                                                SpectraRange=self.detector_range,
+                                                **kwargs)
+
+        self.result_names = sorted(reductions.getNames())
 
     def _validate_properties(self):
         '''Check the object properties are in an expected state to continue'''
@@ -205,13 +204,12 @@ class ISISIndirectInelasticReduction(ISISIndirectInelasticBase):
 
 #------------------------- TOSCA tests ----------------------------------------
 
-
 class TOSCAReduction(ISISIndirectInelasticReduction):
 
     def __init__(self):
         ISISIndirectInelasticReduction.__init__(self)
         self.instr_name = 'TOSCA'
-        self.detector_range = [0, 139]
+        self.detector_range = [1, 140]
         self.data_files = ['TSC15352.raw']
         self.rebin_string = '-2.5,0.015,3,-0.005,1000'
 
@@ -223,8 +221,8 @@ class TOSCAMultiFileReduction(ISISIndirectInelasticReduction):
     def __init__(self):
         ISISIndirectInelasticReduction.__init__(self)
         self.instr_name = 'TOSCA'
-        self.detector_range = [0, 139]
-        self.data_files = ['TSC15352.raw', 'TSC15353.raw','TSC15354.raw']
+        self.detector_range = [1, 140]
+        self.data_files = ['TSC15352.raw', 'TSC15353.raw', 'TSC15354.raw']
         self.rebin_string = '-2.5,0.015,3,-0.005,1000'
 
     def get_reference_files(self):
@@ -237,7 +235,7 @@ class TOSCAMultiFileSummedReduction(ISISIndirectInelasticReduction):
     def __init__(self):
         ISISIndirectInelasticReduction.__init__(self)
         self.instr_name = 'TOSCA'
-        self.detector_range = [0, 139]
+        self.detector_range = [1, 140]
         self.data_files = ['TSC15352.raw', 'TSC15353.raw','TSC15354.raw']
         self.rebin_string = '-2.5,0.015,3,-0.005,1000'
         self.sum_files = True
@@ -245,16 +243,14 @@ class TOSCAMultiFileSummedReduction(ISISIndirectInelasticReduction):
     def get_reference_files(self):
         return ['II.TOSCAMultiFileSummedReduction.nxs']
 
-
 #------------------------- OSIRIS tests ---------------------------------------
-
 
 class OSIRISReduction(ISISIndirectInelasticReduction):
 
     def __init__(self):
         ISISIndirectInelasticReduction.__init__(self)
         self.instr_name = 'OSIRIS'
-        self.detector_range = [962, 1003]
+        self.detector_range = [963, 1004]
         self.data_files = ['OSIRIS00106550.raw']
         self.rebin_string = None
 
@@ -266,7 +262,7 @@ class OSIRISMultiFileReduction(ISISIndirectInelasticReduction):
     def __init__(self):
         ISISIndirectInelasticReduction.__init__(self)
         self.instr_name = 'OSIRIS'
-        self.detector_range = [962, 1003]
+        self.detector_range = [963, 1004]
         self.data_files = ['OSIRIS00106550.raw',' OSIRIS00106551.raw']
         self.rebin_string = None
 
@@ -280,7 +276,7 @@ class OSIRISMultiFileSummedReduction(ISISIndirectInelasticReduction):
     def __init__(self):
         ISISIndirectInelasticReduction.__init__(self)
         self.instr_name = 'OSIRIS'
-        self.detector_range = [962, 1003]
+        self.detector_range = [963, 1004]
         self.data_files = ['OSIRIS00106550.raw', 'OSIRIS00106551.raw']
         self.rebin_string = None
         self.sum_files = True
@@ -295,7 +291,7 @@ class IRISReduction(ISISIndirectInelasticReduction):
     def __init__(self):
         ISISIndirectInelasticReduction.__init__(self)
         self.instr_name = 'IRIS'
-        self.detector_range = [2, 52]
+        self.detector_range = [3, 53]
         self.data_files = ['IRS21360.raw']
         self.rebin_string = None
 
@@ -308,7 +304,7 @@ class IRISMultiFileReduction(ISISIndirectInelasticReduction):
     def __init__(self):
         ISISIndirectInelasticReduction.__init__(self)
         self.instr_name = 'IRIS'
-        self.detector_range = [2, 52]
+        self.detector_range = [3, 53]
         self.data_files = ['IRS21360.raw', 'IRS53664.raw']
         self.rebin_string = None
 
@@ -321,7 +317,7 @@ class IRISMultiFileSummedReduction(ISISIndirectInelasticReduction):
     def __init__(self):
         ISISIndirectInelasticReduction.__init__(self)
         self.instr_name = 'IRIS'
-        self.detector_range = [2, 52]
+        self.detector_range = [3, 53]
         self.data_files = ['IRS21360.raw', 'IRS53664.raw']
         self.sum_files = True
         self.rebin_string = None
@@ -331,19 +327,30 @@ class IRISMultiFileSummedReduction(ISISIndirectInelasticReduction):
         #as they should be the same
         return ['II.IRISMultiFileSummedReduction.nxs']
 
-#--------------------- Generic Reduction tests -----------------------------
+#==============================================================================
 
 class ISISIndirectInelasticReductionOutput(stresstesting.MantidStressTest):
 
     def runTest(self):
-        reducer = self._setup_reducer()
-        reducer.reduce()
-        self.result_names = sorted(reducer.get_result_workspaces())
+        self.file_formats = ['nxs', 'spe', 'nxspe', 'ascii', 'aclimax']
+        self.file_extensions = ['.nxs', '.spe', '.nxspe', '.dat', '_aclimax.dat']
+
+        self.instr_name = 'TOSCA'
+        self.detector_range = [1, 140]
+        self.data_files = ['TSC15352.raw']
+        self.rebin_string = '-2.5,0.015,3,-0.005,1000'
+
+        reductions = ISISIndirectEnergyTransfer(Instrument=self.instr_name,
+                                                Analyser='graphite',
+                                                Reflection='002',
+                                                InputFiles=self.data_files,
+                                                SpectraRange=self.detector_range,
+                                                RebinString=self.rebin_string,
+                                                SaveFormats=self.file_formats)
+
+        self.result_name = reductions[0].getName()
 
     def validate(self):
-        self.assertEqual(len(self.result_names), 1)
-        self.result_name = self.result_names[0]
-
         self.output_file_names = self._get_file_names()
         self.assert_reduction_output_exists(self.output_file_names)
         self.assert_ascii_file_matches()
@@ -404,31 +411,6 @@ class ISISIndirectInelasticReductionOutput(stresstesting.MantidStressTest):
         actual_result = self._read_ascii_file(file_path, num_lines)
         self.assertTrue(actual_result == expected_result, msg + " (%s != %s)" % (actual_result, expected_result))
 
-    def _setup_reducer(self):
-        self.file_formats = ['nxs', 'spe', 'nxspe', 'ascii', 'aclimax']
-        self.file_extensions = ['.nxs', '.spe', '.nxspe', '.dat', '_aclimax.dat']
-        self.instr_name = 'TOSCA'
-        self.detector_range = [0, 139]
-        self.data_files = ['TSC15352.raw']
-        self.rebin_string = '-2.5,0.015,3,-0.005,1000'
-        self.parameter_file = self.instr_name + '_graphite_002_Parameters.xml'
-
-        reducer = IndirectReducer()
-        reducer.set_instrument_name(self.instr_name)
-        reducer.set_detector_range(self.detector_range[0],
-                                   self.detector_range[1])
-        reducer.set_sum_files(False)
-        reducer.set_parameter_file(self.parameter_file)
-        reducer.set_save_formats(self.file_formats)
-
-        for name in self.data_files:
-            reducer.append_data_file(name)
-
-        if self.rebin_string is not None:
-            reducer.set_rebin_string(self.rebin_string)
-
-        return reducer
-
     def _read_ascii_file(self, path, num_lines):
         with open(path,'rb') as file_handle:
             lines = [file_handle.readline().rstrip() for _ in xrange(num_lines)]
@@ -446,6 +428,7 @@ class ISISIndirectInelasticReductionOutput(stresstesting.MantidStressTest):
         return output_names
 
 #==============================================================================
+
 class ISISIndirectInelasticCalibration(ISISIndirectInelasticBase):
     '''A base class for the ISIS indirect inelastic calibration tests
 
@@ -488,7 +471,6 @@ class ISISIndirectInelasticCalibration(ISISIndirectInelasticBase):
 
 #------------------------- OSIRIS tests ---------------------------------------
 
-
 class OSIRISCalibration(ISISIndirectInelasticCalibration):
 
     def __init__(self):
@@ -503,7 +485,6 @@ class OSIRISCalibration(ISISIndirectInelasticCalibration):
 
 #------------------------- IRIS tests ---------------------------------------
 
-
 class IRISCalibration(ISISIndirectInelasticCalibration):
 
     def __init__(self):
@@ -516,8 +497,8 @@ class IRISCalibration(ISISIndirectInelasticCalibration):
     def get_reference_files(self):
         return ["II.IRISCalibration.nxs"]
 
-
 #==============================================================================
+
 class ISISIndirectInelasticResolution(ISISIndirectInelasticBase):
     '''A base class for the ISIS indirect inelastic resolution tests
 
@@ -572,7 +553,6 @@ class ISISIndirectInelasticResolution(ISISIndirectInelasticBase):
 
 #------------------------- OSIRIS tests ---------------------------------------
 
-
 class OSIRISResolution(ISISIndirectInelasticResolution):
 
     def __init__(self):
@@ -590,7 +570,6 @@ class OSIRISResolution(ISISIndirectInelasticResolution):
 
 #------------------------- IRIS tests -----------------------------------------
 
-
 class IRISResolution(ISISIndirectInelasticResolution):
 
     def __init__(self):
@@ -606,8 +585,8 @@ class IRISResolution(ISISIndirectInelasticResolution):
     def get_reference_files(self):
         return ["II.IRISResolution.nxs"]
 
-
 #==============================================================================
+
 class ISISIndirectInelasticDiagnostics(ISISIndirectInelasticBase):
     '''A base class for the ISIS indirect inelastic diagnostic tests
 
@@ -646,9 +625,7 @@ class ISISIndirectInelasticDiagnostics(ISISIndirectInelasticBase):
         if type(self.suffix) != str:
             raise RuntimeError("suffix property should be a string")
 
-
 #------------------------- IRIS tests -----------------------------------------
-
 
 class IRISDiagnostics(ISISIndirectInelasticDiagnostics):
 
@@ -663,9 +640,7 @@ class IRISDiagnostics(ISISIndirectInelasticDiagnostics):
     def get_reference_files(self):
         return ["II.IRISDiagnostics.nxs"]
 
-
 #------------------------- OSIRIS tests ---------------------------------------
-
 
 class OSIRISDiagnostics(ISISIndirectInelasticDiagnostics):
 
@@ -680,8 +655,8 @@ class OSIRISDiagnostics(ISISIndirectInelasticDiagnostics):
     def get_reference_files(self):
         return ["II.OSIRISDiagnostics.nxs"]
 
-
 #==============================================================================
+
 class ISISIndirectInelasticMoments(ISISIndirectInelasticBase):
     '''A base class for the ISIS indirect inelastic TransformToIqt/TransformToIqtFit tests
 
@@ -715,8 +690,8 @@ class ISISIndirectInelasticMoments(ISISIndirectInelasticBase):
         if type(self.scale) != float:
             raise RuntimeError("Scale should be a float")
 
-
 #------------------------- OSIRIS tests ---------------------------------------
+
 class OSIRISMoments(ISISIndirectInelasticMoments):
 
     def __init__(self):
@@ -729,8 +704,8 @@ class OSIRISMoments(ISISIndirectInelasticMoments):
     def get_reference_files(self):
         return ['II.OSIRISMoments.nxs']
 
-
 #------------------------- IRIS tests -----------------------------------------
+
 class IRISMoments(ISISIndirectInelasticMoments):
 
     def __init__(self):
@@ -743,8 +718,8 @@ class IRISMoments(ISISIndirectInelasticMoments):
     def get_reference_files(self):
         return ['II.IRISMoments.nxs']
 
-
 #==============================================================================
+
 class ISISIndirectInelasticElwinAndMSDFit(ISISIndirectInelasticBase):
     '''A base class for the ISIS indirect inelastic Elwin/MSD Fit tests
 
@@ -810,7 +785,6 @@ class ISISIndirectInelasticElwinAndMSDFit(ISISIndirectInelasticBase):
 
 #------------------------- OSIRIS tests ---------------------------------------
 
-
 class OSIRISElwinAndMSDFit(ISISIndirectInelasticElwinAndMSDFit):
 
     def __init__(self):
@@ -828,7 +802,6 @@ class OSIRISElwinAndMSDFit(ISISIndirectInelasticElwinAndMSDFit):
 
 #------------------------- IRIS tests -----------------------------------------
 
-
 class IRISElwinAndMSDFit(ISISIndirectInelasticElwinAndMSDFit):
 
     def __init__(self):
@@ -844,8 +817,8 @@ class IRISElwinAndMSDFit(ISISIndirectInelasticElwinAndMSDFit):
                 'II.IRISElwinEQ2.nxs',
                 'II.IRISMSDFit.nxs']
 
-
 #==============================================================================
+
 class ISISIndirectInelasticFuryAndFuryFit(ISISIndirectInelasticBase):
     '''
     A base class for the ISIS indirect inelastic Fury/FuryFit tests
@@ -917,7 +890,6 @@ class ISISIndirectInelasticFuryAndFuryFit(ISISIndirectInelasticBase):
 
 #------------------------- OSIRIS tests ---------------------------------------
 
-
 class OSIRISFuryAndFuryFit(ISISIndirectInelasticFuryAndFuryFit):
 
     def __init__(self):
@@ -943,7 +915,6 @@ class OSIRISFuryAndFuryFit(ISISIndirectInelasticFuryAndFuryFit):
 
 #------------------------- IRIS tests -----------------------------------------
 
-
 class IRISFuryAndFuryFit(ISISIndirectInelasticFuryAndFuryFit):
 
     def __init__(self):
@@ -968,7 +939,6 @@ class IRISFuryAndFuryFit(ISISIndirectInelasticFuryAndFuryFit):
                 'II.IRISFuryFitSeq.nxs']
 
 #==============================================================================
-
 
 class ISISIndirectInelasticFuryAndFuryFitMulti(ISISIndirectInelasticBase):
     '''A base class for the ISIS indirect inelastic Fury/FuryFit tests
@@ -1039,7 +1009,6 @@ class ISISIndirectInelasticFuryAndFuryFitMulti(ISISIndirectInelasticBase):
 
 #------------------------- OSIRIS tests ---------------------------------------
 
-
 class OSIRISFuryAndFuryFitMulti(ISISIndirectInelasticFuryAndFuryFitMulti):
 
     def skipTests(self):
@@ -1068,7 +1037,6 @@ class OSIRISFuryAndFuryFitMulti(ISISIndirectInelasticFuryAndFuryFitMulti):
 
 #------------------------- IRIS tests -----------------------------------------
 
-
 class IRISFuryAndFuryFitMulti(ISISIndirectInelasticFuryAndFuryFitMulti):
 
     def __init__(self):
@@ -1093,7 +1061,6 @@ class IRISFuryAndFuryFitMulti(ISISIndirectInelasticFuryAndFuryFitMulti):
                 'II.IRISFuryFitMulti.nxs']
 
 #==============================================================================
-
 
 class ISISIndirectInelasticConvFit(ISISIndirectInelasticBase):
     '''A base class for the ISIS indirect inelastic ConvFit tests
@@ -1149,7 +1116,6 @@ class ISISIndirectInelasticConvFit(ISISIndirectInelasticBase):
 
 #------------------------- OSIRIS tests ---------------------------------------
 
-
 class OSIRISConvFit(ISISIndirectInelasticConvFit):
 
     def __init__(self):
@@ -1172,8 +1138,8 @@ class OSIRISConvFit(ISISIndirectInelasticConvFit):
     def get_reference_files(self):
         return ['II.OSIRISConvFitSeq.nxs']
 
-
 #------------------------- IRIS tests -----------------------------------------
+
 class IRISConvFit(ISISIndirectInelasticConvFit):
 
     def __init__(self):
@@ -1198,7 +1164,6 @@ class IRISConvFit(ISISIndirectInelasticConvFit):
         return ['II.IRISConvFitSeq.nxs']
 
 #==============================================================================
-
 
 class ISISIndirectInelasticApplyCorrections(ISISIndirectInelasticBase):
     '''A base class for the ISIS indirect inelastic Apply Corrections tests
@@ -1282,7 +1247,6 @@ class IRISApplyCorrectionsWithCan(ISISIndirectInelasticApplyCorrections):
     def get_reference_files(self):
         return ['II.IRISApplyCorrectionsWithCan.nxs']
 
-
 class IRISApplyCorrectionsWithCorrectionsWS(ISISIndirectInelasticApplyCorrections):
     """ Test applying corrections with a corrections workspace """
 
@@ -1323,9 +1287,6 @@ class IRISApplyCorrectionsWithBoth(ISISIndirectInelasticApplyCorrections):
 # Transmission Monitor Test
 
 class ISISIndirectInelasticTransmissionMonitor(ISISIndirectInelasticBase):
-    '''
-    '''
-
     # Mark as an abstract class
     __metaclass__ = ABCMeta
 
@@ -1347,8 +1308,8 @@ class ISISIndirectInelasticTransmissionMonitor(ISISIndirectInelasticBase):
         if type(self.can) != str:
             raise RuntimeError("Can should be a string.")
 
-
 #------------------------- IRIS tests -----------------------------------------
+
 class IRISTransmissionMonitor(ISISIndirectInelasticTransmissionMonitor):
 
     def __init__(self):

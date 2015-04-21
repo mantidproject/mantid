@@ -13,6 +13,9 @@ set ( CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/Build/CMake")
 # Define the project name.
 project ( Mantid )
 
+SET (CPACK_INSTALL_CMAKE_PROJECTS
+     "${CMAKE_BINARY_DIR}" "Mantid" "ALL" "/")
+
 ###########################################################################
 # Quick exit if we only want data targets
 ###########################################################################
@@ -151,6 +154,22 @@ set ( MAKE_VATES OFF CACHE BOOL "Switch for compiling the Vates project")
 
 if ( MAKE_VATES )
   add_subdirectory ( Vates )
+
+  if (NOT APPLE)
+    LIST( APPEND CPACK_INSTALL_CMAKE_PROJECTS
+          "${ParaView_DIR}" "ParaView Runtime Libs" "Runtime" "${INBUNDLE}/"
+    )
+    LIST( APPEND CPACK_INSTALL_CMAKE_PROJECTS
+          "${ParaView_DIR}" "VTK Runtime Libs" "RuntimeLibraries" "${INBUNDLE}/"
+    )
+    LIST( APPEND CPACK_INSTALL_CMAKE_PROJECTS
+          "${ParaView_DIR}" "HDF5 Core Library" "libraries" "${INBUNDLE}/"
+    )
+    LIST( APPEND CPACK_INSTALL_CMAKE_PROJECTS
+          "${ParaView_DIR}" "HDF5 HL Library" "hllibraries" "${INBUNDLE}/"
+    )
+  endif()
+
 endif ( MAKE_VATES )
 
 add_subdirectory ( MantidPlot )

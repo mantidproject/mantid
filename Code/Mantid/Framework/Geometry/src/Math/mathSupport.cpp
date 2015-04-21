@@ -4,7 +4,6 @@
 #include <vector>
 #include <iterator>
 #include <algorithm>
-#include <numeric>
 
 #include "MantidGeometry/Math/mathSupport.h"
 

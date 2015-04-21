@@ -16,7 +16,7 @@ default.facility = ISIS
 default.instrument =
 
 # Set of PyQt interfaces to add to the Interfaces menu, separated by a space.  Interfaces are seperated from their respective categories by a "/".
-mantidqt.python_interfaces = Direct/DGS_Reduction.py SANS/ORNL_SANS.py Reflectometry/REFL_Reduction.py Reflectometry/REFL_SF_Calculator.py Reflectometry/REFM_Reduction.py Utility/TofConverter.py Reflectometry/ISIS_Reflectometry.py Diffraction/Powder_Diffraction_Reduction.py Utility/FilterEvents.py
+mantidqt.python_interfaces = Direct/DGS_Reduction.py Direct/DGSPlanner.py SANS/ORNL_SANS.py Reflectometry/REFL_Reduction.py Reflectometry/REFL_SF_Calculator.py Reflectometry/REFM_Reduction.py Utility/TofConverter.py Reflectometry/ISIS_Reflectometry.py Diffraction/Powder_Diffraction_Reduction.py Utility/FilterEvents.py
 mantidqt.python_interfaces_directory = @MANTID_ROOT@/scripts
 
 # Where to find mantid plugin libraries
