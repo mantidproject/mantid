@@ -222,18 +222,18 @@ public:
     else
       return std::string("");
   }
-  /** Get a parameter's description   */
+  /** Get this component parameter's description -- no recursive search within children*/
+  std::string getDescription() const;
+
+  /** Get description of a parameter attached to this component  */
   std::string getParDescription(const std::string &pname,
                                bool recursive = true) const;
-
-  /** Get this parameter's description -- no recursive search within children*/
-  std::string getParDescription() const;
 
   /** Get a parameter's tooltip (short description) */
   std::string getParTooltip(const std::string &pname,
                                bool recursive = true) const;
   /** Get a parameter's tooltip (short description) -- no recursive search within children*/
-  std::string getParTooltip() const;
+  std::string getTooltip() const;
   /**Set components description. Works for parameterized components only */
   void setDescription(const std::string &descr);
   /**

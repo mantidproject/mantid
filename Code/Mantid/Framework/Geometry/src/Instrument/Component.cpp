@@ -567,6 +567,9 @@ namespace Mantid {
 
     std::string Component::getParDescription(const std::string &pname,
       bool recursive) const {
+        if (!m_map){ // no description for non-parameterized components
+          return std::string("");
+        }
         Parameter_sptr param = Parameter_sptr(); // Null shared pointer
         if (recursive) {
           param = m_map->getRecursive(this, pname);
@@ -579,7 +582,7 @@ namespace Mantid {
           return std::string("");
     }
     /** Get this parameter's description -- no recursive search within children*/
-    std::string Component::getParDescription() const{
+    std::string Component::getDescription() const{
       auto name = this->getName();
       return this->getParDescription(name,false);
 
@@ -597,6 +600,9 @@ namespace Mantid {
     */
     std::string Component::getParTooltip(const std::string &pname,
       bool recursive) const {
+        if (!m_map){ // no tooltips for non-parameterized components
+          return std::string("");
+        }
         Parameter_sptr param = Parameter_sptr(); // Null shared pointer
         if (recursive) {
           param = m_map->getRecursive(this, pname);
@@ -610,7 +616,7 @@ namespace Mantid {
     }
 
     /** Get a parameter's tooltip (short description) -- no recursive search within children*/
-    std::string Component::getParTooltip() const{
+    std::string Component::getTooltip() const{
       auto name = this->getName();
       return this->getParTooltip(name,false);
     }
@@ -625,8 +631,9 @@ namespace Mantid {
         if (param){
           param->setDescription(descr);
         }else{
-          throw Kernel::Exception::NotFoundError("Component",
-            "Can not found component named: "+name);
+          //I see no reason why component's parameter map should be constant.
+          //But as I do not understand why it is constant, let's HACK!
+          (const_cast<ParameterMap *>(m_map))->addString(this,name,"",&descr);
         }
       } else
         throw Kernel::Exception::NotImplementedError(

@@ -169,6 +169,35 @@ public:
     TS_ASSERT(ancs[0]->isParametrized());
 
   }
+  void testDescription()
+  {
+    Component parent("Parent",V3D(1,1,1));
+    //name and parent
+    Component q("Child",V3D(5,6,7),Quat(1,1,1,1),&parent);
+
+    TS_ASSERT_THROWS(parent.setDescription("descr"),Mantid::Kernel::Exception::NotImplementedError);
+
+    ParameterMap_sptr pmap( new ParameterMap() );
+    pmap->addString(&q,"ChildMessage","Message from a child");
+    Component pq(&q,pmap.get());
+
+    TS_ASSERT_EQUALS(pq.getName(),"Child");
+    TS_ASSERT(pq.isParametrized() );
+    //check the parent
+    TS_ASSERT(pq.getParent());
+    TS_ASSERT(pq.getParent()->isParametrized() );
+
+    TS_ASSERT_THROWS_NOTHING(pq.setDescription("This is child description. This is long child description."));
+
+    TS_ASSERT_EQUALS(parent.getTooltip(),"");
+    TS_ASSERT_EQUALS(pq.getTooltip(),"This is child description.");
+    TS_ASSERT_EQUALS(pq.getParTooltip("Child"),"This is child description.");
+
+
+    TS_ASSERT_EQUALS(pq.getDescription(),"This is child description. This is long child description.");
+
+  }
+
 
   void testGetFullName()
   {
