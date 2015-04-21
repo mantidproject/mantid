@@ -10,17 +10,8 @@ plot options.
 
 The module is at a very early stage of development and provides
 limited functionality. This is very much work in progress at the
-moment. The module is subject to changes and it is for now included in
-Mantid as a 'future' import. Feedback is very much welcome!
-
-To use this new functionality you first need to import the new pyplot module:
-
-.. code-block:: python
-
-    from pymantidplot.future.pyplot import *
-
-Please do not forget this step, otherwise you may get arcane error
-messages from functions of the old mantidplot Python CLI.
+moment. The module is subject to changes and feedback is very much
+welcome!
 
 Simple plots can be created and manipulated with a handul of
 commands. See the following examples.
@@ -65,7 +56,7 @@ Plot a Mantid workspace
 You can pass one or more workspaces to the plot function. By default
 it will plot the spectra of the workspace(s), selecting them by the
 indices specified in the second argument. This behavior is similar to
-he plotSpectrum function of the traditional mantidplot module. This is
+the plotSpectrum function of the traditional mantidplot module. This is
 a simple example that produces plots of spectra:
 
 .. code-block:: python
@@ -77,11 +68,49 @@ a simple example that produces plots of spectra:
     # 3 spectra plot
     plot(ws, [100, 101, 102])
 
+========================
+Different types of plots
+========================
+
+The plot() function provides a unified interface to different types of
+plots, including specific graphs of spectra, bins, multidimensional
+workspaces, etc. These specific types of plots are explained in the
+next sections. plot() makes a guess as to what tool to use to plot a
+workspace. For example, if you pass an MD workspace it will make an MD
+plot. But you can request a specific type of plot by specifying a
+keyword argument ('tool'). The following tools (or different types of
+plots) are supported:
+
++------------------------+------------------------------------------------------------+-----------------------+
+| Tool                   | tool= parameter values (all are equivalent aliases)        | Old similar function  |
++========================+============================================================+=======================+
+| plot spectra (default) | 'plot_spectrum', 'spectrum', 'plot_sp', 'sp'               | plotSpectrum          |
++------------------------+------------------------------------------------------------+-----------------------+
+| plot bins              | 'plot_bin', 'bin'                                          | plotBin               |
++------------------------+------------------------------------------------------------+-----------------------+
+| plot MD                | 'plot_md', 'md'                                            | plotMD                |
++------------------------+------------------------------------------------------------+-----------------------+
+
+The last column of the table lists the functions that produce similar
+plots in the traditional MantidPlot Python plotting interface. For the
+time being this module only supports these types of specific
+plots. Note that the traditional plotting interface of MantidPlot
+provides support for many more specific types of plots. These or
+similar ones will be added in this module in future releases:
+
+* plot2D
+* plot3D
+* plotSlice
+* instrumentWindow
+* waterFallPlot
+* mergePlots
+* stemPlot
+
 Plot spectra using workspace objects and workspace names
 --------------------------------------------------------
 
 It is also possible to pass workspace names to plot, as in the
-following example:
+following example where we plot a few spectra:
 
 .. code-block:: python
 
@@ -108,11 +137,14 @@ names in the list passed to plot:
 
 Here, the plot function is making a guess and plotting the spectra of
 these workspaces (instead of the bins or anything else). You can make
-that choice more explicit by specifying the 'tool' argument:
+that choice more explicit by specifying the 'tool' argument. In this
+case we use 'plot_spectrum' (which also has shorter aliases:
+'spectrum', or simply 'sp' as listed in the table above):
 
 .. code-block:: python
 
     plot(['MAR11060', loq], [800, 900], tool='plot_spectrum')
+    plot(['MAR11060', loq], [801, 901], tool='sp')
 
 Alternatively, you can use the plot_spectrum command, which is
 equivalent to the plot command with the keyword argument
@@ -126,7 +158,7 @@ Plotting bins
 -------------
 
 To plot workspace bins you can use the keyword 'tool' with the value
-'plot_bin', like this:
+'plot_bin' (or equivalent 'bin'), like this:
 
 .. code-block:: python
 
@@ -143,7 +175,7 @@ Plotting MD workspaces
 ----------------------
 
 Similarly, to plot MD workspaces you can use the keyword 'tool' with
-the value 'plot_md', like this:
+the value 'plot_md' (or 'md' as a short alias), like this:
 
 .. code-block:: python
 
@@ -161,8 +193,9 @@ to the Mantid (http://www.mantidproject.org/MBC_MDWorkspaces) for a
 more real example, which necessarily gets more complicated and data
 intensive.
 
+=========================
 Changing style properties
--------------------------
+=========================
 
 You can modify the style of your plots. For example like this (for a
 full list of options currently supported, see below).
@@ -273,9 +306,9 @@ results.
 Multi-plot commands
 -------------------
 
-In this version of future.pyplot there is limited support for
-multi-plot commands (as in pyplot and matlab). For example, you can
-type commands like the following:
+In this version of pyplot there is limited support for multi-plot
+commands (as in pyplot and matlab). For example, you can type commands
+like the following:
 
 .. code-block:: python
 
@@ -368,11 +401,35 @@ to the more object oriented methods described above. For example, the
 function xlabel is equivalent to the method set_xlabel applied on the
 Axes object for the current figure.
 
+This module is by default imported into the standard MantidPlot
+namespace. You can use the functions and classes included here without
+any prefix or adding this module name prefix (pymantidplot.pyplot), as
+in the following example:
+
+.. code-block:: python
+
+    # Two equivalent lines:
+    pymantidplot.pyplot.plot([1, 3, 2])
+    plot([1, 3, 2])
+
+Note that the plot() function of this module has replaced the
+traditional plot() function of MantidPlot which has been moved into a
+package called qtiplot. To use it you can do as follows:
+
+.. code-block:: python
+
+    pymantidplot.qtiplot.plot('MAR11060', [800, 801])
+    # or if you prefer shorter prefixes:
+    import pymantidplot.qtiplot as qtiplt
+    qtiplt.plot('MAR11060', [800, 801])
+
+
 Below is the reference documentation of the classes and functions
 included in this module.
 
 """
-# Copyright &copy; 2007-2014 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+# Copyright &copy; 2014-2015 ISIS Rutherford Appleton Laboratory, NScD
+# Oak Ridge National Laboratory & European Spallation Source
 #
 # This file is part of Mantid.
 # Mantid is free software; you can redistribute it and/or modify
@@ -394,7 +451,7 @@ included in this module.
 try:
     import _qti
 except ImportError:
-    raise ImportError('The \'mantidplot\' and \'pymantidplot.future.pyplot\' modules can only be used from within MantidPlot.')
+    raise ImportError('The \'mantidplot\' and \'pymantidplot.pyplot\' modules can only be used from within MantidPlot.')
 
 import numpy as np
 from PyQt4 import Qt, QtGui, QtCore
@@ -403,13 +460,6 @@ from mantid.api import mtd
 #    return __is_workspace(arg) or (mantid.api.mtd.doesExist(arg) and isinstance(mantid.api.mtd[arg], mantid.api.IMDWorkspace))
 from mantid.simpleapi import CreateWorkspace as CreateWorkspace
 import mantidplot  
-
-print ("You are loading '" + __name__ + "', which is an experimental module." +
-"""
-Please note: this module is at a very early stage of development and
-provides limited functionality. It is work in progress and is subject
-to change. Feedback is very much welcome! Please let us know any wishes
-and suggestions.""")
 
 class Line2D():
     """
@@ -1225,19 +1275,21 @@ def __plot_as_array(*args, **kwargs):
     return __list_of_lines_from_graph(graph)
 
 def __plot_with_tool(tool, *args, **kwargs):
-    bin_tool_name = 'plot_bin'
-    spectrum_tool_name = 'plot_spectrum'
-    md_tool_name = 'plot_md'
+    bin_tool_names = ['plot_bin', 'bin']
+    spectrum_tool_names = ['plot_spectrum', 'plot_sp', 'spectrum', 'sp']
+    md_tool_names = ['plot_md', 'md']
 
-    if bin_tool_name == tool or spectrum_tool_name == tool:
-        if len(args) < 2:
-            raise ValueError("To plot using %s as a tool you need to give at least two parameters"%tool)
+    if len(args) < 2:
+        if tool in bin_tool_names:
+            raise ValueError("To plot bins (using '%s' as tool) you need to give at least two parameters, where the second parameter selects the bins"%tool)
+        elif tool in spectrum_tool_names:
+            raise ValueError("To plot spectra (using '%s' as tool) you need to give at least two parameters, where the second parameter selects the spectrum(a)"%tool)
 
-    if bin_tool_name == tool:
+    if tool in bin_tool_names:
         return plot_bin(args[0], args[1], *args[2:], **kwargs)
-    elif md_tool_name == tool:
+    elif tool in md_tool_names:
         return plot_md(args[0], *args[1:], **kwargs)
-    elif spectrum_tool_name == tool:
+    elif tool in spectrum_tool_names:
         return plot_spectrum(args[0], args[1], *args[2:], **kwargs)
     # here you would add slice/spectrum/instrument viewer, etc. and maybe you'll want to put them in a dict
     else:
@@ -1363,11 +1415,11 @@ def plot(*args, **kwargs):
     parameters, for example: linewidth, linestyle, marker, color.
 
     An important keyword argument is tool. At the moment the
-    following values are supported:
+    following values are supported (they have long and short aliases):
 
-    * plot_spectrum  (default for workspaces)
-    * plot_bin
-    * plot_md
+    * To plot spectra: 'plot_spectrum' OR 'spectrum' OR 'plot_sp' OR 'sp'  (default for workspaces).
+    * To plot bins: 'plot_bin' OR 'bin'
+    * To do an MD plot: 'plot_md' OR 'md'
 
     Please see the documentation of this module (use help()) for more details.
 
