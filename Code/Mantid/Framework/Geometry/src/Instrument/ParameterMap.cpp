@@ -300,6 +300,9 @@ void ParameterMap::clearParametersByName(const std::string &name,
  * @param comp :: A pointer to the component that this parameter is attached to
  * @param name :: The name of the parameter
  * @param value :: The parameter's value
+ * @param pDescription :: a pointer (may be NULL) to a string, containing parameter's
+ * description. If provided, the contents of the string is copied to the parameters
+ * memory
  */
 void ParameterMap::add(const std::string &type, const IComponent *comp,
                        const std::string &name, const std::string &value,
