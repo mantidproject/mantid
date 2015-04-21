@@ -473,6 +473,9 @@ void MdViewerWidget::prepareRebinnedWorkspace(const std::string rebinnedWorkspac
   this->renderAndFinalSetup();
 
   this->currentView->onAutoScale(this->ui.colorSelectionWidget);
+
+  // Register the source
+  m_rebinnedSourcesManager.registerRebinnedSource(newRebinnedSource);
 }
 
 /**
@@ -527,6 +530,12 @@ void MdViewerWidget::removeRebinning(pqPipelineSource* source, bool forced, Mode
                       "To unbin, select a rebinned source and \n"\
                       "press Remove Rebinning again"));
       }
+      return;
+    }
+
+    // We need to check that the rebinned workspace name has still a source associated to it
+    if (!m_rebinnedSourcesManager.isRebinnedSource(rebinnedWorkspaceName))
+    {
       return;
     }
 

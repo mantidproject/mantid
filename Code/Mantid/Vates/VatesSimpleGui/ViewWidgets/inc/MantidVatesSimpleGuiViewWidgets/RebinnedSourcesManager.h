@@ -75,6 +75,8 @@ namespace Mantid
 
           bool doesWorkspaceBelongToRebinnedSource(std::string workspaceName);
 
+          void registerRebinnedSource(pqPipelineSource* source);
+
         signals:
           void switchSources(std::string rebinnedWorkspaceName,  std::string sourceType);
 
@@ -85,6 +87,9 @@ namespace Mantid
           void preDeleteHandle(const std::string &wsName, const boost::shared_ptr<Mantid::API::Workspace> );
 
           void afterReplaceHandle(const std::string &workspaceName, const boost::shared_ptr<Mantid::API::Workspace> workspace);
+
+        private slots:
+          void onRebinnedSourceDestroyed();
 
         private:
           std::map<std::string, std::string> m_originalWorkspaceToRebinnedWorkspace; ///< Holds the mapping from the original source to the rebinned source
@@ -112,6 +117,8 @@ namespace Mantid
           static void copySafe(vtkSMProxy* dest, vtkSMProxy* source);
 
           void getWorkspaceInfo(pqPipelineSource* source, std::string& workspaceName, std::string& workSpaceType);
+
+          void removePipeline(pqPipelineSource* source);
       };
 
     } // SimpleGui

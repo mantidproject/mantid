@@ -115,24 +115,7 @@ namespace Mantid
             source = getSourceForWorkspace(wsName);
           }
 
-          // Go to the end of the pipeline
-          while(source->getNumberOfConsumers() > 0)
-          {
-            source = source->getConsumer(0);
-          }
-
-          //Destroy the pipeline from the end
-          pqObjectBuilder* builder = pqApplicationCore::instance()->getObjectBuilder();
-          pqPipelineFilter* filter = qobject_cast<pqPipelineFilter*>(source);
-
-          while (filter)
-          {
-            source = filter->getInput(0);
-            builder->destroy(filter);
-            filter = qobject_cast<pqPipelineFilter*>(source);
-          }
-
-          builder->destroy(source); // The listener takes now care of the workspace.
+          removePipeline(source);
 
           if (isOriginal)
           {
@@ -140,7 +123,7 @@ namespace Mantid
           }
           else
           {
-            untrackWorkspaces(m_rebinnedWorkspaceToOriginalWorkspace[wsName]);
+            untrackWorkspaces(wsName);
           }
         }
       }
@@ -577,11 +560,21 @@ namespace Mantid
        */
       bool RebinnedSourcesManager::isRebinnedSource(std::string name)
       {
-        if (m_rebinnedWorkspaceToOriginalWorkspace.count(name) > 0)
+        // We need to iterate over all sources and check if the source name exists
+        pqPipelineSource* source  = getSourceForWorkspace(name);
+
+        // If the workspace is tracked and the source exists then it is a rebinned source
+        // else if the workspace is tracked and the source does not exist => untrack it
+        if (m_rebinnedWorkspaceToOriginalWorkspace.count(name) > 0 && source)
         {
           return true;
         }
-        else
+        else if (m_rebinnedWorkspaceToOriginalWorkspace.count(name) > 0 && !source)
+        {
+          untrackWorkspaces(name);
+          return false;
+        }
+        else 
         {
           return false;
         }
@@ -608,6 +601,54 @@ namespace Mantid
         {
           return false;
         }
+      }
+
+      /**
+       * Register the rebinned source. Specifically, connect to the destroyed signal of the rebinned source.
+       * @param source The rebinned source.
+       */
+      void RebinnedSourcesManager::registerRebinnedSource(pqPipelineSource* source)
+      {
+        if (!source)
+        {
+          return;
+        }
+
+        QObject::connect(source, SIGNAL(destroyed()),
+                         this, SLOT(onRebinnedSourceDestroyed()));
+      }
+
+      /**
+       * React to the deletion of a rebinned source.
+       */
+      void RebinnedSourcesManager::onRebinnedSourceDestroyed()
+      {
+
+      }
+
+      /**
+       * Remove the pipeline
+       */
+      void RebinnedSourcesManager::removePipeline(pqPipelineSource* source)
+      {
+        // Go to the end of the pipeline
+        while(source->getNumberOfConsumers() > 0)
+        {
+          source = source->getConsumer(0);
+        }
+
+        //Destroy the pipeline from the end
+        pqObjectBuilder* builder = pqApplicationCore::instance()->getObjectBuilder();
+        pqPipelineFilter* filter = qobject_cast<pqPipelineFilter*>(source);
+
+        while (filter)
+        {
+          source = filter->getInput(0);
+          builder->destroy(filter);
+          filter = qobject_cast<pqPipelineFilter*>(source);
+        }
+
+        builder->destroy(source); // The listener takes now care of the workspace.
       }
     }
   }
