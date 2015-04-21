@@ -58,6 +58,7 @@ FUNC_BAD_PARAMS = {
     "StretchedExpFT":("height", "tau", "beta"),
     "PawleyParameterFunction":("a","b","c"),
     "PawleyFunction":("f0.a","f0.b","f0.c", "f0.Alpha", "f0.Beta", "f0.Gamma", "f0.ZeroShift"),
+    "LatticeFunction":("a","b","c")
     }
 
 class Algorithms(stresstesting.MantidStressTest):
