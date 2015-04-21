@@ -79,7 +79,6 @@ const std::string TomoReconstruction::m_CustomCmdTool = "Custom command";
  *
  * @param parent Parent window (most likely the Mantid main app window).
  */
-#include "MantidKernel/cow_ptr.h"
 TomoReconstruction::TomoReconstruction(QWidget *parent)
     : UserSubWindow(parent), m_loggedIn(false), m_facility("ISIS"),
       m_computeRes(), m_localCompName("Local"), m_SCARFtools(),
@@ -222,7 +221,7 @@ void TomoReconstruction::doSetupSectionRun() {
 
 void TomoReconstruction::doSetupGeneralWidgets() {
   connect(m_ui.pushButton_help, SIGNAL(released()), this, SLOT(openHelpWin()));
-  connect(m_ui.pushButton_close, SIGNAL(release()), this,
+  connect(m_ui.pushButton_close, SIGNAL(released()), this,
           SLOT(closeInterface()));
 }
 
@@ -512,12 +511,17 @@ void TomoReconstruction::runToolIndexChanged(int i) {
  * @param pw Password/authentication credentials as a string
  */
 void TomoReconstruction::doLogin(const std::string &pw) {
+  const std::string user = getUsername();
+  if (user.empty()) {
+    userError("Cannot log in",
+              "To log in you need to specify a username (and a password!).");
+  }
+
   // TODO: once the remote algorithms are rearranged into the
   // 'RemoteJobManager' design, this will use...
   // auto alg = Algorithm::fromString("Authenticate");
   auto alg = Algorithm::fromString("SCARFTomoReconstruction");
   alg->initialize();
-  const std::string user = getUsername();
   alg->setPropertyValue("UserName", user);
   alg->setPropertyValue("Action", "LogIn");
   alg->setPropertyValue("Password", pw);
@@ -815,7 +819,8 @@ void TomoReconstruction::jobTableRefreshClicked() {
   t->setRowCount(static_cast<int>(ids.size()));
   for (size_t i = 0; i < jobMax; ++i) {
     int ii = static_cast<int>(i);
-    t->setItem(ii, 0, new QTableWidgetItem(QString::fromStdString(m_SCARFName)));
+    t->setItem(ii, 0,
+               new QTableWidgetItem(QString::fromStdString(m_SCARFName)));
     t->setItem(ii, 1, new QTableWidgetItem(QString::fromStdString(names[i])));
     t->setItem(ii, 2, new QTableWidgetItem(QString::fromStdString(ids[i])));
     t->setItem(ii, 3, new QTableWidgetItem(QString::fromStdString(status[i])));
@@ -1676,8 +1681,6 @@ void TomoReconstruction::closeInterface() {
   if (answer == QMessageBox::AcceptRole) {
     saveSettings();
     close();
-  } else {
-    // just ignore
   }
 }
 

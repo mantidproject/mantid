@@ -104,6 +104,10 @@ private slots:
   void flatPathBrowseClicked();
   void darkPathBrowseClicked();
 
+  /// open the MantidQT help window for this interface
+  void openHelpWin();
+  void closeInterface();
+
   void menuSaveClicked();
   void menuSaveAsClicked();
   void availablePluginSelected();
@@ -142,11 +146,6 @@ private:
   void userWarning(std::string err, std::string description);
 
   void userError(std::string err, std::string description);
-
-  /// open the MantidQT help window for this interface
-  void openHelpWin();
-
-  void closeInterface();
 
   /// Load default interface settings for each tab, normally on startup
   void readSettings();
