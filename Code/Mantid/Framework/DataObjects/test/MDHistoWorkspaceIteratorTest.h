@@ -8,14 +8,14 @@
 #include "MantidDataObjects/MDHistoWorkspaceIterator.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 #include <cxxtest/TestSuite.h>
-#include <iomanip>
-#include <iostream>
 #include "MantidKernel/VMD.h"
 #include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
 #include "MantidGeometry/MDGeometry/MDPlane.h"
 #include <boost/assign/list_of.hpp>
 #include <boost/function.hpp>
 #include <boost/bind.hpp>
+#include <boost/scoped_ptr.hpp>
+
 
 using namespace Mantid;
 using namespace Mantid::DataObjects;
@@ -67,9 +67,10 @@ public:
   void do_test_iterator(size_t nd, size_t numPoints)
   {
     MDHistoWorkspace_sptr ws = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, nd, 10);
-    for (size_t i = 0; i < numPoints; i++)
+    for (size_t i = 0; i < numPoints; i++) {
       ws->setSignalAt(i, double(i));
-    MDHistoWorkspaceIterator * it = new MDHistoWorkspaceIterator(ws);
+    }
+    boost::scoped_ptr<MDHistoWorkspaceIterator> it(new MDHistoWorkspaceIterator(ws));
     TSM_ASSERT( "This iterator is valid at the start.", it->valid());
     size_t i = 0;
 
@@ -90,10 +91,10 @@ public:
     {
       TS_ASSERT_DELTA( it->getNormalizedSignal(), double(i) / 1.0, 1e-5);
       TS_ASSERT_DELTA( it->getNormalizedError(), 1.0, 1e-5);
-      coord_t * vertexes;
       size_t numVertices;
-      vertexes = it->getVertexesArray(numVertices);
-      TS_ASSERT( vertexes);
+      coord_t *vertexes = it->getVertexesArray(numVertices);
+      TS_ASSERT(vertexes);
+      delete [] vertexes;
       TS_ASSERT_EQUALS( it->getNumEvents(), 1);
       TS_ASSERT_EQUALS( it->getInnerDetectorID(0), 0);
       TS_ASSERT_EQUALS( it->getInnerRunIndex(0), 0);
@@ -164,6 +165,7 @@ public:
     it->next();
     TS_ASSERT_EQUALS(it->getNormalizedSignal(), 30.);
     TS_ASSERT( !it->next());
+
     delete it;
   }
 
@@ -194,6 +196,7 @@ public:
     TS_ASSERT_EQUALS(it->getNormalizedSignal(), 13.);
     it->next();
     // And so forth....
+
     delete it;
   }
 
@@ -232,7 +235,7 @@ public:
     TS_ASSERT_EQUALS( it->getDataSize(), 33);
     TS_ASSERT_DELTA( it->getInnerPosition(0,0), 0.5, 1e-5);
     TS_ASSERT_DELTA( it->getInnerPosition(0,1), 0.5, 1e-5);
-
+    
     it = iterators[1];
     TS_ASSERT_DELTA( it->getSignal(), 33.0, 1e-5);
     TS_ASSERT_EQUALS( it->getDataSize(), 33);
@@ -244,8 +247,8 @@ public:
     TS_ASSERT_EQUALS( it->getDataSize(), 34);
     TS_ASSERT_DELTA( it->getInnerPosition(0,0), 6.5, 1e-5);
     TS_ASSERT_DELTA( it->getInnerPosition(0,1), 6.5, 1e-5);
-
-    delete it;
+    
+    for(size_t i = 0; i < 3; ++i) delete iterators[i];
   }
 
   void test_predictable_steps()
@@ -689,7 +692,6 @@ public:
     }
 
     delete it;
-
   }
 
   void test_neighbours_1d_with_width()
@@ -747,7 +749,7 @@ public:
       TS_ASSERT_EQUALS(2, neighbourIndexes.size());
       TSM_ASSERT( "Neighbours at index 9 includes 8", doesContainIndex(neighbourIndexes, 8));
       TSM_ASSERT( "Neighbours at index 9 includes 7", doesContainIndex(neighbourIndexes, 7));
-
+      
       delete it;
   }
 

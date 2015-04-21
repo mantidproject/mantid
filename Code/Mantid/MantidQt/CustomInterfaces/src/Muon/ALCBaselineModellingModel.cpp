@@ -57,9 +57,6 @@ namespace CustomInterfaces
   {
     m_data = data;
     emit dataChanged();
-
-    setCorrectedData(MatrixWorkspace_const_sptr());
-    setFittedFunction(IFunction_const_sptr());
   }
 
   /**

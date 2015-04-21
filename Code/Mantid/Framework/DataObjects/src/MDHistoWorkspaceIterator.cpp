@@ -260,12 +260,14 @@ bool MDHistoWorkspaceIterator::next() {
   } else {
     ++m_pos;
   }
-  // Keep calling next if the current position is masked.
   bool ret = m_pos < m_max;
-  while (m_skippingPolicy->keepGoing()) {
-    ret = this->next();
-    if (!ret)
-      break;
+  if(ret) {
+    // Keep calling next if the current position is masked and still valid.
+    while (m_skippingPolicy->keepGoing()) {
+      ret = this->next();
+      if (!ret)
+        break;
+    }
   }
   // Go through every point;
   return ret;

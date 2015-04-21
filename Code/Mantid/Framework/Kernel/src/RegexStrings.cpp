@@ -4,9 +4,7 @@
 #include <sstream>
 #include <vector>
 #include <list>
-#include <string>
 #include <algorithm>
-#include <functional>
 
 #include "MantidKernel/RegexStrings.h"
 #include "MantidKernel/Strings.h"

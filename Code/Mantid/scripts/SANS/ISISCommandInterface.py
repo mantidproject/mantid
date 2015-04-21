@@ -864,7 +864,7 @@ def SetDetectorOffsets(bank, x, y, z, rot, radius, side, xtilt=0.0, ytilt=0.0 ):
     detector.y_tilt = ytilt
 
 def SetCorrectionFile(bank, filename):
-    # 10/03/15 RKH, create a new routine that allows change of "direct beam file" = correction file, for a given 
+    # 10/03/15 RKH, create a new routine that allows change of "direct beam file" = correction file, for a given
     # detector, this simplify the iterative process used to adjust it. Will still have to keep changing the name of the file
     # for each iteratiom to avoid Mantid using a cached version, but can then use only a single user (=mask) file for each set of iterations.
     # Modelled this on SetDetectorOffsets above ...
@@ -876,7 +876,7 @@ def SetCorrectionFile(bank, filename):
 
     detector = ReductionSingleton().instrument.getDetector(bank)
     detector.correction_file = filename
-    
+
 def LimitsR(rmin, rmax, quiet=False, reducer=None):
     if reducer == None:
         reducer = ReductionSingleton().reference()

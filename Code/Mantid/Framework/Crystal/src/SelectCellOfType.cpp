@@ -1,15 +1,9 @@
 #include "MantidCrystal/SelectCellOfType.h"
-#include "MantidCrystal/IndexPeaks.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
-#include "MantidDataObjects/Peak.h"
 #include "MantidGeometry/Crystal/IndexingUtils.h"
 #include "MantidGeometry/Crystal/ScalarUtils.h"
-#include "MantidGeometry/Crystal/ReducedCell.h"
-#include "MantidGeometry/Crystal/ConventionalCell.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidKernel/ListValidator.h"
-#include <boost/lexical_cast.hpp>
-#include <cstdio>
 #include "MantidCrystal/SelectCellWithForm.h"
 
 namespace Mantid {

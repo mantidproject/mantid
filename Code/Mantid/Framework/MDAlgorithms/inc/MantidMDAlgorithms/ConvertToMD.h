@@ -87,7 +87,7 @@ protected: // for testing, otherwise private:
   bool doWeNeedNewTargetWorkspace(API::IMDEventWorkspace_sptr spws);
   /**Create new MD workspace using existing parameters for algorithm */
   API::IMDEventWorkspace_sptr
-  createNewMDWorkspace(const MDAlgorithms::MDWSDescription &NewMDWSDescription);
+  createNewMDWorkspace(const MDAlgorithms::MDWSDescription &targWSDescr);
 
   bool buildTargetWSDescription(API::IMDEventWorkspace_sptr spws,
                                 const std::string &Q_mod_req,

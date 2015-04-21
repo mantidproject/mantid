@@ -8,9 +8,6 @@
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/Fast_Exponential.h"
 #include "MantidKernel/VectorHelper.h"
-#include "MantidKernel/Unit.h"
-#include "MantidKernel/PhysicalConstants.h"
-#include "MantidKernel/V3D.h"
 #include "MantidAPI/MemoryManager.h"
 #include "boost/assign.hpp"
 

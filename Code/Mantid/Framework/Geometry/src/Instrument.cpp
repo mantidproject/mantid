@@ -1,18 +1,10 @@
 #include "MantidGeometry/Instrument.h"
-#include "MantidKernel/V3D.h"
-#include "MantidKernel/Exception.h"
-#include "MantidKernel/Logger.h"
-#include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidGeometry/Instrument/ParComponentFactory.h"
-#include "MantidGeometry/Objects/BoundingBox.h"
-#include "MantidGeometry/Instrument/CompAssembly.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 
 #include <Poco/Path.h>
-#include <algorithm>
-#include <sstream>
 #include <queue>
 
 using namespace Mantid::Kernel;

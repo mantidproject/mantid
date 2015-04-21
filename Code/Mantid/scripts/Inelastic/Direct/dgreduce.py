@@ -151,7 +151,7 @@ def arb_units(wb_run,sample_run,ei_guess,rebin,map_file='default',monovan_run=No
     return res
 
 def runs_are_equal(ws1,ws2):
-    """Compare two run numbers, provided either as run numbers, 
+    """Compare two run numbers, provided either as run numbers,
        or as workspaces or as ws names"""
     if ws1 == ws2:
         return True
