@@ -211,7 +211,6 @@ void MDHistoWorkspaceIterator::jumpTo(size_t index) {
 /**
  * Jump the iterator to the nearest valid position correspoinding to the centre current position of the desired iterator position.
  * @param fromLocation : destination or nearest to.
- * @param return absolute distance from the requested position.
  * @return absolute distance of end position from requested position.
  */
 Mantid::coord_t MDHistoWorkspaceIterator::jumpToNearest(const VMD& fromLocation)
