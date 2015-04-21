@@ -6,6 +6,8 @@
 #include "MantidQtCustomInterfaces/Muon/MuonAnalysisHelper.h"
 #include "MantidQtAPI/AlgorithmInputHistory.h"
 
+#include <Poco/ActiveResult.h>
+
 #include <QApplication>
 #include <QFileInfo>
 #include <QDir>
@@ -87,7 +89,13 @@ namespace CustomInterfaces
       }
 
       alg->setPropertyValue("OutputWorkspace", "__NotUsed");
-      alg->execute();
+
+      // Execute async so we can show progress bar
+      Poco::ActiveResult<bool> result(alg->executeAsync());
+      while( !result.available() )
+      {
+        QCoreApplication::processEvents();
+      }
 
       m_loadedData = alg->getProperty("OutputWorkspace");
 
