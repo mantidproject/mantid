@@ -12,7 +12,7 @@
 #include <vtkCamera.h>
 #include <vtkRenderer.h>
 #include <vtkRenderWindow.h>
-
+#include <boost/make_shared.hpp>
 namespace Mantid
 {
   namespace Vates
@@ -30,7 +30,7 @@ namespace Mantid
       /**
        * Get the plane equation for the view frustum.
        */
-      Mantid::VATES::ViewFrustum CameraManager::getCurrentViewFrustum()
+      Mantid::VATES::ViewFrustum_const_sptr CameraManager::getCurrentViewFrustum()
       {
         double left[4];
         double right[4];
@@ -87,12 +87,13 @@ namespace Mantid
           near[k] = planes[k + 16];
           far[k] = planes[k + 20];
         }
-        Mantid::VATES::ViewFrustum frustum(Mantid::VATES::LeftPlane(left[0], left[1], left[2], left[3]),
-                                           Mantid::VATES::RightPlane(right[0], right[1], right[2], right[3]),
-                                           Mantid::VATES::BottomPlane(bottom[0], bottom[1], bottom[2], bottom[3]),
-                                           Mantid::VATES::TopPlane(top[0], top[1], top[2], top[3]),
-                                           Mantid::VATES::FarPlane(far[0], far[1], far[2], far[3]),
-                                           Mantid::VATES::NearPlane(near[0], near[1], near[2], near[3]));
+
+        Mantid::VATES::ViewFrustum_const_sptr frustum = boost::make_shared<const Mantid::VATES::ViewFrustum>(Mantid::VATES::LeftPlane(left[0], left[1], left[2], left[3]),
+                                                                                                             Mantid::VATES::RightPlane(right[0], right[1], right[2], right[3]),
+                                                                                                             Mantid::VATES::BottomPlane(bottom[0], bottom[1], bottom[2], bottom[3]),
+                                                                                                             Mantid::VATES::TopPlane(top[0], top[1], top[2], top[3]),
+                                                                                                             Mantid::VATES::FarPlane(far[0], far[1], far[2], far[3]),
+                                                                                                             Mantid::VATES::NearPlane(near[0], near[1], near[2], near[3]));
 
         return frustum;
       }

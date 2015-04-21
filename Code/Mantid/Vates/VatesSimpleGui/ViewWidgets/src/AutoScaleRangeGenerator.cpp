@@ -165,6 +165,9 @@ namespace SimpleGui
     // Set the color scale output
     VsiColorScale vsiColorScale;
 
+    // Initialize log scale to false
+    vsiColorScale.useLogScale = false;
+
     // If either the min or max value are at the end of the double spectrum, we might only have a peak Ws visible, 
     // we need to hedge for that
     if (minValue == DBL_MAX || maxValue == -DBL_MAX) {
