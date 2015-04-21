@@ -1,8 +1,11 @@
 #include "MantidMDAlgorithms/IntegrateMDHistoWorkspace.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/MultiThreaded.h"
 
+#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/IMDIterator.h"
+#include "MantidAPI/Progress.h"
 
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidGeometry/MDGeometry/MDBoxImplicitFunction.h"
@@ -188,6 +191,8 @@ void IntegrateMDHistoWorkspace::exec() {
      */
     outWS = createShapedOutput(inWS.get(), pbins);
 
+    Progress progress(this, 0, 1, size_t(outWS->getNPoints()));
+
     // Store in each dimension
     std::vector<Mantid::coord_t> binWidthsOut(nDims);
     std::vector<int> widthVector(nDims); // used for nearest neighbour search
@@ -195,20 +200,32 @@ void IntegrateMDHistoWorkspace::exec() {
       binWidthsOut[i] = outWS->getDimension(i)->getBinWidth();
 
       // Maximum width vector for region in output workspace corresponding to region in input workspace.
-      widthVector[i] = int(2 * (binWidthsOut[i] / inWS->getDimension(i)->getBinWidth()) + 0.5); // round up.
+
+      /* int(wout/win + 0.5) = n_pixels in input corresponding to 1 pixel in output. Rounded up.
+         The width vector is the total width. So we always need to double it to take account of the whole region.
+         For example, 8/4 + 0.5 = 2, but thats only 1 pixel on each side of the center, we need 2 * that to give the correct
+         answer of 4.
+      */
+      widthVector[i] =  2 * int((binWidthsOut[i] / inWS->getDimension(i)->getBinWidth()) + 0.5); // round up.
 
       if(widthVector[i]%2 == 0) {
           widthVector[i]+= 1; // make it odd if not already.
       }
     }
 
-    boost::scoped_ptr<MDHistoWorkspaceIterator> outIterator(
-        dynamic_cast<MDHistoWorkspaceIterator *>(outWS->createIterator()));
-
-    boost::scoped_ptr<MDHistoWorkspaceIterator> inIterator(
-        dynamic_cast<MDHistoWorkspaceIterator *>(inWS->createIterator()));
-
     // Outer loop over the output workspace iterator poistions.
+    const int nThreads = Mantid::API::FrameworkManager::Instance()
+                             .getNumOMPThreads(); // NThreads to Request
+
+    auto outIterators = outWS->createIterators(nThreads, NULL);
+
+    PARALLEL_FOR_NO_WSP_CHECK()
+    for (int i = 0; i < int(outIterators.size()); ++i) {
+
+    PARALLEL_START_INTERUPT_REGION
+    boost::scoped_ptr<MDHistoWorkspaceIterator> outIterator(
+                  dynamic_cast<MDHistoWorkspaceIterator *>(outIterators[i]));
+
     do {
 
       Mantid::Kernel::VMD outIteratorCenter = outIterator->getCenter();
@@ -225,6 +242,10 @@ void IntegrateMDHistoWorkspace::exec() {
 
       double sumSignal = 0;
       double sumSQErrors = 0;
+
+      // Create a thread-local input iterator.
+      boost::scoped_ptr<MDHistoWorkspaceIterator> inIterator(
+          dynamic_cast<MDHistoWorkspaceIterator *>(inWS->createIterator()));
 
       /*
       We jump to the iterator position which is closest in the model coordinates
@@ -246,7 +267,11 @@ void IntegrateMDHistoWorkspace::exec() {
       outWS->setSignalAt(iteratorIndex, sumSignal);
       outWS->setErrorSquaredAt(iteratorIndex, sumSQErrors);
 
+      progress.report();
     } while (outIterator->next());
+    PARALLEL_END_INTERUPT_REGION
+  }
+  PARALLEL_CHECK_INTERUPT_REGION
   }
 
   this->setProperty("OutputWorkspace", outWS);
