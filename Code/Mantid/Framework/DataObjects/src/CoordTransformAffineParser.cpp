@@ -42,7 +42,7 @@ Mantid::API::CoordTransform *CoordTransformAffineParser::createTransform(
 
   Element *paramListElement =
       coordTransElement->getChildElement("ParameterList");
-  Poco::XML::NodeList *parameters =
+  Poco::AutoPtr<Poco::XML::NodeList> parameters =
       paramListElement->getElementsByTagName("Parameter");
 
   // Add input dimension parameter.

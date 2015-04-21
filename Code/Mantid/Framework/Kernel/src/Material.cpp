@@ -7,9 +7,6 @@
 #include <boost/make_shared.hpp>
 #include <boost/regex.hpp>
 #include <boost/tokenizer.hpp>
-#include <sstream>
-#include <stdexcept>
-#include <utility>
 
 namespace Mantid {
 

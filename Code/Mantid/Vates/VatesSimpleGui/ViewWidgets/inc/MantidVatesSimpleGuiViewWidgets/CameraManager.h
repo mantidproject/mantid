@@ -4,6 +4,7 @@
 #include "MantidVatesSimpleGuiViewWidgets/WidgetDllOption.h"
 #include "MantidVatesAPI/ViewFrustum.h"
 
+
 namespace Mantid
 {
 namespace Vates
@@ -45,7 +46,7 @@ public:
 
   ~CameraManager();
   
-  Mantid::VATES::ViewFrustum getCurrentViewFrustum();
+  Mantid::VATES::ViewFrustum_const_sptr getCurrentViewFrustum();
 
   void setCameraToPeak(double xpos, double ypos, double zpos, double peakRadius);
 };

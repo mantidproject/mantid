@@ -1,20 +1,12 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidCrystal/StatisticsOfPeaksWorkspace.h"
-#include "MantidDataObjects/Peak.h"
-#include "MantidDataObjects/PeaksWorkspace.h"
-#include "MantidKernel/Strings.h"
-#include "MantidKernel/System.h"
 #include "MantidKernel/Utils.h"
-#include "MantidKernel/V3D.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/ListValidator.h"
 
-#include <boost/math/special_functions/fpclassify.hpp>
 #include <fstream>
-#include <Poco/File.h>
-#include <Poco/Path.h>
 #include "boost/assign.hpp"
 
 using namespace Mantid::Geometry;

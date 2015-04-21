@@ -8,7 +8,7 @@ MAX_ALG_LEN = 40 # TODO convention says 20 is the maximum
 
 SPECIAL = ["InputWorkspace", "OutputWorkspace", "Workspace",
            "ReductionProperties"]
-SPECIAL_UPPER = [name.upper for name in SPECIAL]
+SPECIAL_UPPER = [specialname.upper for specialname in SPECIAL]
 
 # TODO this list should be empty
 ALG_BAD_PARAMS = {
@@ -29,10 +29,10 @@ ALG_BAD_PARAMS = {
     "PoldiRemoveDeadWires(v1)":("nbExcludedWires", "nbAuteDeadWires"),
     "SaveIsawQvector(v1)":("Qx_vector", "Qy_vector", "Qz_vector"),
     "SCDCalibratePanels(v1)":("a", "b", "c", "alpha", "beta", "gamma",
-                          "useL0", "usetimeOffset", "usePanelWidth",
-                          "usePanelHeight", "usePanelPosition",
-                          "usePanelOrientation", "tolerance",
-                          "MaxPositionChange_meters"),
+                              "useL0", "usetimeOffset", "usePanelWidth",
+                              "usePanelHeight", "usePanelPosition",
+                              "usePanelOrientation", "tolerance",
+                              "MaxPositionChange_meters"),
     "SetSampleMaterial(v1)":("bAverage", "bSquaredAverage"),
     "SetUB(v1)":("a", "b", "c", "alpha", "beta", "gamma", "u", "v"),
     "ViewBOA(v1)":("CD-Distance"),
@@ -58,9 +58,18 @@ FUNC_BAD_PARAMS = {
     "StretchedExpFT":("height", "tau", "beta"),
     "PawleyParameterFunction":("a","b","c"),
     "PawleyFunction":("f0.a","f0.b","f0.c", "f0.Alpha", "f0.Beta", "f0.Gamma", "f0.ZeroShift"),
+    "LatticeFunction":("a","b","c")
     }
 
 class Algorithms(stresstesting.MantidStressTest):
+
+    def __init__(self):
+        super(Algorithms, self).__init__()
+        self.__ranOk = 0
+        self.algRegExp = re.compile(r'^[A-Z][a-zA-Z0-9]+$')
+        self.paramRegExp = re.compile(r'^[A-Z][a-zA-Z0-9]*$')
+        self.categoryRegExp = re.compile(r'^([A-Z][a-zA-Z]+\\?)+$')
+
     def verifyAlgName(self, name):
         if not self.algRegExp.match(name):
             print "Algorithm " + name + " has a name that violates conventions"
@@ -108,11 +117,6 @@ class Algorithms(stresstesting.MantidStressTest):
         return True
 
     def runTest(self):
-        self.__ranOk = 0
-        self.algRegExp = re.compile(r'^[A-Z][a-zA-Z0-9]+$')
-        self.paramRegExp = re.compile(r'^[A-Z][a-zA-Z0-9]*$')
-        self.categoryRegExp = re.compile(r'^([A-Z][a-zA-Z]+\\?)+$')
-
         algs = AlgorithmFactory.getRegisteredAlgorithms(True)
 
         for (name, versions) in algs.iteritems():
@@ -144,6 +148,13 @@ class Algorithms(stresstesting.MantidStressTest):
         return True
 
 class FitFunctions(stresstesting.MantidStressTest):
+    def __init__(self):
+        super(FitFunctions, self).__init__()
+        self.__ranOk = 0
+        self.funcRegExp = re.compile(r'^[A-Z][a-zA-Z0-9]+$')
+        self.paramRegExp = re.compile(r'^[A-Z][a-zA-Z0-9]*$')
+        self.categoryRegExp = re.compile(r'^([A-Z][a-zA-Z]+\\?)+$')
+
     def verifyFuncName(self, name):
         if name in FUNC_BAD_NAME:
             return True
@@ -192,11 +203,6 @@ class FitFunctions(stresstesting.MantidStressTest):
         return True
 
     def runTest(self):
-        self.__ranOk = 0
-        self.funcRegExp = re.compile(r'^[A-Z][a-zA-Z0-9]+$')
-        self.paramRegExp = re.compile(r'^[A-Z][a-zA-Z0-9]*$')
-        self.categoryRegExp = re.compile(r'^([A-Z][a-zA-Z]+\\?)+$')
-
         functions = mantid.api.FunctionFactory.getFunctionNames()
         for name in functions:
             if not self.verifyFuncName(name):

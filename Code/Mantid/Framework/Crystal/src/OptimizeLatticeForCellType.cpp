@@ -1,6 +1,5 @@
 #include "MantidCrystal/OptimizeLatticeForCellType.h"
 #include "MantidCrystal/GSLFunctions.h"
-#include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/WorkspaceValidators.h"
@@ -12,11 +11,7 @@
 #include "MantidGeometry/Crystal/IndexingUtils.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidGeometry/Crystal/ReducedCell.h"
-#include <boost/math/special_functions/fpclassify.hpp>
 #include <fstream>
-#include <iomanip>
-#include <ostream>
-#include <sstream>
 
 using namespace Mantid::Geometry;
 

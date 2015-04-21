@@ -1,7 +1,5 @@
 #include "MantidCrystal/OptimizeExtinctionParameters.h"
-#include "MantidCrystal/GSLFunctions.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
-#include "MantidGeometry/Crystal/PointGroup.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/WorkspaceValidators.h"
@@ -11,11 +9,7 @@
 #include "MantidKernel/VectorHelper.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/BoundedValidator.h"
-#include <boost/math/special_functions/fpclassify.hpp>
 #include <fstream>
-#include <iomanip>
-#include <ostream>
-#include <sstream>
 
 using namespace Mantid::Geometry;
 

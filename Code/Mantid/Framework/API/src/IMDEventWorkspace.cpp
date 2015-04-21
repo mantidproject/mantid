@@ -11,7 +11,7 @@ namespace API {
 //-----------------------------------------------------------------------------------------------
 /** Empty constructor */
 IMDEventWorkspace::IMDEventWorkspace()
-    : IMDWorkspace(), m_fileNeedsUpdating(false) {}
+    : IMDWorkspace(), MultipleExperimentInfos(), m_fileNeedsUpdating(false) {}
 
 //-----------------------------------------------------------------------------------------------
 /** Copy constructor */

@@ -22,7 +22,8 @@ class GetEiT0atSNS(mantid.api.PythonAlgorithm):
     def PyInit(self):
         """ Declare properties
         """
-        self.declareProperty(mantid.api.WorkspaceProperty("MonitorWorkspace", "",direction=mantid.kernel.Direction.InOut), "Monitor workspace")
+        self.declareProperty(mantid.api.WorkspaceProperty("MonitorWorkspace", "",direction=mantid.kernel.Direction.InOut),
+                             "Monitor workspace")
         self.declareProperty("IncidentEnergyGuess",-1.,doc="Incident energy guess")
         self.declareProperty("Ei",0.0,mantid.kernel.Direction.Output)
         self.declareProperty("T0",0.0,mantid.kernel.Direction.Output)
@@ -72,8 +73,8 @@ class GetEiT0atSNS(mantid.api.PythonAlgorithm):
                 wtemp=mantid.simpleapi.ChangeBinOffset(wm,t1f*16667,sp1,sp1)
                 wtemp=mantid.simpleapi.ChangeBinOffset(wtemp,t2f*16667,sp2,sp2)
                 wtemp=mantid.simpleapi.Rebin(InputWorkspace=wtemp,Params="1",PreserveEvents=True)
-
-                alg=mantid.simpleapi.GetEi(InputWorkspace=wtemp,Monitor1Spec=sp1+1,Monitor2Spec=sp2+1,EnergyEstimate=EGuess)   #Run GetEi algorithm
+                #Run GetEi algorithm
+                alg=mantid.simpleapi.GetEi(InputWorkspace=wtemp,Monitor1Spec=sp1+1,Monitor2Spec=sp2+1,EnergyEstimate=EGuess)
                 Ei=alg[0]
                 Tzero=alg[3]                                        #Extract incident energy and T0
                 mantid.simpleapi.DeleteWorkspace(wtemp)

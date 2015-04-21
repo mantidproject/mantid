@@ -1,4 +1,4 @@
-#pylint: disable=invalid-name
+#pylint: disable=invalid-name,attribute-defined-outside-init,line-too-long,too-many-instance-attributes,too-many-statements
 # -*- coding: utf-8 -*-
 
 # Form implementation generated from reading ui file 'diffraction_filter_setup.ui'

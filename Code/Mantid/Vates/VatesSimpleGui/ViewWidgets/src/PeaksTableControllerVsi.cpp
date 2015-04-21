@@ -11,6 +11,7 @@
 #include "MantidKernel/V3D.h"
 #include "MantidKernel/SpecialCoordinateSystem.h"
 #include "MantidKernel/Logger.h"
+#include "MantidVatesAPI/ViewFrustum.h"
 #include "MantidVatesAPI/PeaksPresenterVsi.h"
 #include "MantidVatesAPI/NullPeaksPresenterVsi.h"
 #include "MantidVatesAPI/ConcretePeaksPresenterVsi.h"
@@ -72,7 +73,7 @@ PeaksTableControllerVsi::PeaksTableControllerVsi(
     boost::shared_ptr<CameraManager> cameraManager, QWidget *parent)
     : QWidget(parent), m_cameraManager(cameraManager),
       m_presenter(new Mantid::VATES::CompositePeaksPresenterVsi()),
-      m_peaksTabWidget(NULL), m_peakMarker(NULL) {
+      m_peaksTabWidget(NULL), m_peakMarker(NULL), m_coordinateSystem(Mantid::Kernel::SpecialCoordinateSystem::QLab) {
   m_peakTransformSelector.registerCandidate(
       boost::make_shared<Mantid::API::PeakTransformHKLFactory>());
   m_peakTransformSelector.registerCandidate(
@@ -266,8 +267,7 @@ void PeaksTableControllerVsi::updatePeakWorkspaceColor() {
  * Update the view region for the presenters
  */
 void PeaksTableControllerVsi::updateViewableArea() {
-  Mantid::VATES::ViewFrustum frustum = m_cameraManager->getCurrentViewFrustum();
-  m_presenter->updateViewFrustum(frustum);
+  m_presenter->updateViewFrustum(m_cameraManager->getCurrentViewFrustum());
 }
 
 /**

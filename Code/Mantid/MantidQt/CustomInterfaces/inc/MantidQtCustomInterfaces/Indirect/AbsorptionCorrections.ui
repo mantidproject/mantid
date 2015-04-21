@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>575</width>
+    <width>587</width>
     <height>488</height>
    </rect>
   </property>
@@ -783,6 +783,22 @@
     <hint type="destinationlabel">
      <x>436</x>
      <y>501</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>spFlatCanFrontThickness</sender>
+   <signal>valueChanged(double)</signal>
+   <receiver>spFlatCanBackThickness</receiver>
+   <slot>setValue(double)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>238</x>
+     <y>212</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>514</x>
+     <y>212</y>
     </hint>
    </hints>
   </connection>
