@@ -86,8 +86,8 @@ void setThicknessUsingDimensionInfo(IMDWorkspace_sptr ws, size_t dimIndex,
 
 LineViewer::LineViewer(QWidget *parent)
     : QWidget(parent), m_planeWidth(0), m_numBins(100), m_allDimsFree(false),
-      m_freeDimX(0), m_freeDimY(1), m_fixedBinWidthMode(false),
-      m_fixedBinWidth(0.1), m_binWidth(0.1) {
+      m_freeDimX(0), m_freeDimY(1), m_initFreeDimX(-1), m_initFreeDimY(-1),
+      m_fixedBinWidthMode(false), m_fixedBinWidth(0.1), m_binWidth(0.1) {
   ui.setupUi(this);
 
   // Other setup
@@ -327,6 +327,11 @@ LineViewer::applyMatrixWorkspace(Mantid::API::MatrixWorkspace_sptr ws) {
   const double lengthX = m_end[m_freeDimX] - m_start[m_freeDimX];
   const double lengthY = m_end[m_freeDimY] - m_start[m_freeDimY];
   const bool lineIsHorizontal = fabs(lengthX) > fabs(lengthY);
+  const bool axesAreFlipped = m_freeDimX == m_initFreeDimY &&
+    m_freeDimY == m_initFreeDimX;
+  // True when (NOT lineIsHorizontal) XOR axesAreFlipped
+  // The truth table simplifies down to lineIsHorizontal == axesAreFlipped
+  const bool shouldTranspose = lineIsHorizontal == axesAreFlipped;
 
   IAlgorithm_sptr alg = AlgorithmManager::Instance().createUnmanaged("Rebin2D");
   alg->initialize();
@@ -335,7 +340,7 @@ LineViewer::applyMatrixWorkspace(Mantid::API::MatrixWorkspace_sptr ws) {
     alg->setProperty("InputWorkspace", ws);
     alg->setPropertyValue("OutputWorkspace", m_integratedWSName);
     alg->setProperty("UseFractionalArea", (ws->id() == "RebinnedOutput"));
-    alg->setProperty("Transpose", !lineIsHorizontal);
+    alg->setProperty("Transpose", shouldTranspose);
 
     // Swap the axes if the line is NOT horizontal (i.e. vertical)
     const int axisX = lineIsHorizontal ? m_freeDimX : m_freeDimY;
@@ -363,7 +368,7 @@ LineViewer::applyMatrixWorkspace(Mantid::API::MatrixWorkspace_sptr ws) {
                  << (vertical + planeWidth);
 
     // If the line is vertical we swap the axes binning order
-    if (lineIsHorizontal) {
+    if (!shouldTranspose) {
       // Horizontal line
       alg->setPropertyValue("Axis1Binning", axis1Binning.str());
       alg->setPropertyValue("Axis2Binning", axis2Binning.str());
@@ -640,6 +645,8 @@ bool LineViewer::getFixedBinWidthMode() const { return m_fixedBinWidthMode; }
 void LineViewer::setWorkspace(Mantid::API::IMDWorkspace_sptr ws) {
   if (!ws)
     throw std::runtime_error("LineViewer::setWorkspace(): Invalid workspace.");
+  m_initFreeDimX = -1;
+  m_initFreeDimY = -1;
   m_ws = ws;
   m_thickness = VMD(ws->getNumDims());
   createDimensionWidgets();
@@ -729,6 +736,12 @@ void LineViewer::setFreeDimensions(bool all, int dimX, int dimY) {
   if (dimY < 0 || dimY >= nd)
     throw std::runtime_error("LineViewer::setFreeDimensions(): Free Y "
                              "dimension index is out of range.");
+
+  if(m_initFreeDimX < 0)
+    m_initFreeDimX = int(dimX);
+  if(m_initFreeDimY < 0)
+    m_initFreeDimY = int(dimY);
+
   m_allDimsFree = all;
   m_freeDimX = dimX;
   m_freeDimY = dimY;
@@ -741,6 +754,11 @@ void LineViewer::setFreeDimensions(bool all, int dimX, int dimY) {
  * @param dimY :: index of the Y-dimension of the plane
  */
 void LineViewer::setFreeDimensions(size_t dimX, size_t dimY) {
+  if(m_initFreeDimX < 0)
+    m_initFreeDimX = int(dimX);
+  if(m_initFreeDimY < 0)
+    m_initFreeDimY = int(dimY);
+
   m_allDimsFree = false;
   m_freeDimX = int(dimX);
   m_freeDimY = int(dimY);
