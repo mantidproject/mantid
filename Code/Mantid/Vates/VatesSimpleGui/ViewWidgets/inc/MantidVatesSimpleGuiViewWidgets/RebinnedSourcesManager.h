@@ -71,8 +71,6 @@ namespace Mantid
 
           void getStoredWorkspaceNames(pqPipelineSource* source, std::string& originalWorkspaceName, std::string& rebinnedWorkspaceName);
 
-          void registerRebinnedSource(pqPipelineSource* source);
-
           bool isRebinnedSource(std::string name);
 
           bool doesWorkspaceBelongToRebinnedSource(std::string workspaceName);
@@ -87,9 +85,6 @@ namespace Mantid
           void preDeleteHandle(const std::string &wsName, const boost::shared_ptr<Mantid::API::Workspace> );
 
           void afterReplaceHandle(const std::string &workspaceName, const boost::shared_ptr<Mantid::API::Workspace> workspace);
-
-        private slots:
-          void onRebinnedSourceDestroyed();
 
         private:
           std::map<std::string, std::string> m_originalWorkspaceToRebinnedWorkspace; ///< Holds the mapping from the original source to the rebinned source
@@ -110,13 +105,7 @@ namespace Mantid
 
           void processWorkspaceNames(std::string& inputWorkspace, std::string& outputWorkspace, std::string workspaceName, std::string algorithmType);
 
-          void removeUnusedRebinnedWorkspaces();
-
           void untrackWorkspaces(std::string rebinnedSource);
-
-          void removeRebinnedWorkspace(std::string rebinnedWorkspace);
-
-          void compareToSources(std::string workspaceName);
 
           void copyProperties(pqPipelineFilter* filter1, pqPipelineFilter* filter2);
 

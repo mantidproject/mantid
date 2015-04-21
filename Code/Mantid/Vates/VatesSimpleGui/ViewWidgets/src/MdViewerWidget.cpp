@@ -469,7 +469,6 @@ void MdViewerWidget::prepareRebinnedWorkspace(const std::string rebinnedWorkspac
   // It seems that the new source gets set as active before it is fully constructed. We therefore reset it.
   pqActiveObjects::instance().setActiveSource(NULL);
   pqActiveObjects::instance().setActiveSource(newRebinnedSource);
-  //m_rebinnedSourcesManager.registerRebinnedSource(newRebinnedSource);
 
   this->renderAndFinalSetup();
 
