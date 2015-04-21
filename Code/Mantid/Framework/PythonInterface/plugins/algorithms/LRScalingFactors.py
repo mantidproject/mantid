@@ -10,9 +10,9 @@ class LRScalingFactors(PythonAlgorithm):
         This algorithm runs through a sequence of direct beam data sets
         to extract scaling factors. The method was developed by J. Ankner (ORNL).
 
-        As you loop through, we find matching data sets with the only
+        As we loop through, we find matching data sets with the only
         difference between the two is an attenuator.
-        The ration of those matching data sets allows use to rescale
+        The ratio of those matching data sets allows use to rescale
         a direct beam run taken with a larger number of attenuators
         to a standard data set taken with tighter slit settings and
         no attenuators.
