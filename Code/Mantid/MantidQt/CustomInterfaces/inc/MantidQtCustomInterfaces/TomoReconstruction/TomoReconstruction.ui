@@ -13,7 +13,7 @@
   <property name="windowTitle">
    <string>IMAT Tomographic Reconstruction</string>
   </property>
-  <widget class="QWidget" name="centralwidget">
+  <widget class="QWidget" name="mainWidget">
    <layout class="QGridLayout" name="gridLayout_4">
     <item row="0" column="0">
      <widget class="QTabWidget" name="tabMain">
@@ -21,7 +21,7 @@
        <string/>
       </property>
       <property name="currentIndex">
-       <number>1</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="setupTab">
        <property name="enabled">
@@ -70,7 +70,7 @@
               </size>
              </property>
              <property name="currentIndex">
-              <number>0</number>
+              <number>1</number>
              </property>
              <widget class="QWidget" name="tab_SCARF">
               <attribute name="title">
@@ -127,7 +127,7 @@
                     </size>
                    </property>
                    <property name="text">
-                    <string>/work/imat/test/cycle/</string>
+                    <string>/work/imat/runs/test</string>
                    </property>
                   </widget>
                  </item>
@@ -485,7 +485,7 @@
               </size>
              </property>
              <property name="text">
-              <string>Flat field directory:</string>
+              <string>Open beam dir.:</string>
              </property>
             </widget>
            </item>
@@ -520,7 +520,7 @@
               </size>
              </property>
              <property name="text">
-              <string>Dark field directory:</string>
+              <string>Dark field dir.:</string>
              </property>
             </widget>
            </item>
@@ -576,7 +576,7 @@
            <property name="spacing">
             <number>2</number>
            </property>
-           <item row="0" column="0">
+           <item row="1" column="0">
             <widget class="QFrame" name="frame">
              <property name="enabled">
               <bool>false</bool>
@@ -654,6 +654,31 @@
               </item>
              </layout>
             </widget>
+           </item>
+           <item row="0" column="0">
+            <layout class="QHBoxLayout" name="horizontalLayout_2">
+             <item>
+              <widget class="QLabel" name="label">
+               <property name="text">
+                <string>Tools/scripts base directory:</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLineEdit" name="lineEdit_scripts_base_dir">
+               <property name="text">
+                <string>/work/imat/testing_phase/scripts</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="pushButton_reset_scripts_base_dir">
+               <property name="text">
+                <string>Reset</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
            </item>
           </layout>
          </widget>
@@ -773,7 +798,7 @@
                      <x>0</x>
                      <y>0</y>
                      <width>370</width>
-                     <height>285</height>
+                     <height>269</height>
                     </rect>
                    </property>
                    <layout class="QGridLayout" name="gridLayout_5">
@@ -1111,6 +1136,55 @@
        </layout>
       </widget>
      </widget>
+    </item>
+    <item row="1" column="0">
+     <layout class="QHBoxLayout" name="horizontalLayout_3">
+      <item>
+       <widget class="QPushButton" name="pushButton_help">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>25</width>
+          <height>25</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>?</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="horizontalSpacer">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>158</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
+       <widget class="QPushButton" name="pushButton_close">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="text">
+         <string>Close</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
     </item>
    </layout>
   </widget>

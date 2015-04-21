@@ -13,7 +13,7 @@
   <property name="windowTitle">
    <string>Savu configuration</string>
   </property>
-  <widget class="QWidget" name="centralwidget">
+  <widget class="QWidget" name="savuConfigCentralWidget">
    <layout class="QGridLayout" name="gridLayout">
     <item row="0" column="0">
      <layout class="QVBoxLayout" name="verticalLayout">

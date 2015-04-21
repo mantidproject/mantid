@@ -120,6 +120,7 @@ private:
   void doSetupSectionSetup();
   void doSetupSectionParameters();
   void doSetupSectionRun();
+  void doSetupGeneralWidgets();
 
   void setupComputeResource();
   void setupRunTool();
@@ -132,9 +133,6 @@ private:
   /// Show a tool specific configuration dialog
   void showToolConfig(const std::string &name);
 
-  /// Load default interface settings for each tab
-  void loadSettings();
-
   std::string validateCompResource(const std::string &res);
 
   Mantid::API::WorkspaceGroup_sptr loadFITSImage(const std::string &path);
@@ -144,6 +142,16 @@ private:
   void userWarning(std::string err, std::string description);
 
   void userError(std::string err, std::string description);
+
+  /// open the MantidQT help window for this interface
+  void openHelpWin();
+
+  void closeInterface();
+
+  /// Load default interface settings for each tab, normally on startup
+  void readSettings();
+  /// save settings (before closing)
+  void saveSettings();
 
   std::string paramValStringFromArray(const Json::Value &jsonVal,
                                       const std::string &name);
@@ -214,6 +222,9 @@ private:
   Mantid::API::ITableWorkspace_sptr m_currPlugins;
   std::string m_currentParamPath;
   static size_t m_nameSeqNo;
+
+  // path name for persistent settings
+  std::string m_settingsGroup;
 };
 
 class TomoToolConfigTomoPy : public QDialog {

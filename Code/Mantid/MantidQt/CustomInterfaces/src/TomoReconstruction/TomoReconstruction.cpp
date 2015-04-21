@@ -4,12 +4,14 @@
 #include "MantidKernel/RemoteJobManager.h"
 #include "MantidQtAPI/AlgorithmRunner.h"
 #include "MantidQtAPI/AlgorithmInputHistory.h"
+#include "MantidQtAPI/HelpWindow.h"
 #include "MantidQtCustomInterfaces/TomoReconstruction/TomoReconstruction.h"
 
 #include <boost/lexical_cast.hpp>
 #include <QFileDialog>
 #include <QMessageBox>
 #include <QPainter>
+#include <QSettings>
 
 using namespace Mantid::API;
 
@@ -84,7 +86,8 @@ TomoReconstruction::TomoReconstruction(QWidget *parent)
       m_pathSCARFbase("/work/imat/recon/"),
       m_pathFITS(m_pathSCARFbase + "data/fits"),
       m_pathFlat(m_pathSCARFbase + "data/flat"),
-      m_pathDark(m_pathSCARFbase + "data/dark"), m_currentParamPath() {
+      m_pathDark(m_pathSCARFbase + "data/dark"), m_currentParamPath(),
+      m_settingsGroup("CustomInterfaces/TomoReconstruction") {
 
   m_computeRes.push_back(m_SCARFName);
 
@@ -104,6 +107,8 @@ TomoReconstruction::~TomoReconstruction() {
   // be tidy and always log out if we're in.
   if (m_loggedIn)
     doLogout();
+
+  saveSettings();
 }
 
 void TomoReconstruction::doSetupSectionParameters() {
@@ -147,6 +152,7 @@ void TomoReconstruction::doSetupSectionParameters() {
 void TomoReconstruction::doSetupSectionSetup() {
   // disable 'local' for now
   m_ui.tabWidget_comp_resource->setTabEnabled(false, 1);
+  m_ui.tab_local->setEnabled(false);
 
   m_ui.groupBox_run_config->setEnabled(false);
 
@@ -214,12 +220,19 @@ void TomoReconstruction::doSetupSectionRun() {
   m_ui.pushButton_run_job_visualize->setEnabled(false);
 }
 
+void TomoReconstruction::doSetupGeneralWidgets() {
+  connect(m_ui.pushButton_help, SIGNAL(released()), this, SLOT(openHelpWin()));
+  connect(m_ui.pushButton_close, SIGNAL(release()), this,
+          SLOT(closeInterface()));
+}
+
 void TomoReconstruction::initLayout() {
   // TODO: should split the tabs out into their own files
   m_ui.setupUi(this);
 
-  loadSettings();
+  readSettings();
 
+  doSetupGeneralWidgets();
   doSetupSectionSetup();
   doSetupSectionRun();
 }
@@ -305,13 +318,33 @@ void TomoReconstruction::SCARFLogoutClicked() {
 }
 
 /**
- * Load the setting for each tab on the interface.
+ * Load the settings for the tabs and widgets of the interface. This
+ * relies on Qt settings functionality (QSettings class).
  *
  * This includes setting the default browsing directory to be the
  * default save directory.
  */
-void TomoReconstruction::loadSettings() {
+void TomoReconstruction::readSettings() {
   // TODO: define what settings we'll have in the end.
+  QSettings sett;
+  sett.beginGroup(QString::fromStdString(m_settingsGroup));
+
+  QString SCARFBase =
+      sett.value("SCARF-base-path", "/work/imat/runs/test").toString();
+  sett.endGroup();
+
+  m_ui.lineEdit_SCARF_path->setText(SCARFBase);
+}
+
+/**
+ * Save persistent settings. Qt based.
+ */
+void TomoReconstruction::saveSettings() {
+  QSettings sett;
+  sett.beginGroup(QString::fromStdString(m_settingsGroup));
+  QString s = m_ui.lineEdit_SCARF_path->text();
+  sett.setValue("SCARF-base-path", s);
+  sett.endGroup();
 }
 
 /**
@@ -692,7 +725,7 @@ void TomoReconstruction::reconstructClicked() {
 
 void TomoReconstruction::runVisualizeClicked() {
   QTableWidget *tbl = m_ui.tableWidget_run_jobs;
-  const int idCol = 1;
+  const int idCol = 2;
   QTableWidgetItem *hdr = tbl->horizontalHeaderItem(idCol);
   if ("ID" != hdr->text())
     throw std::runtime_error("Expected to get the Id of jobs from the "
@@ -715,7 +748,7 @@ void TomoReconstruction::jobCancelClicked() {
   const std::string &resource = getComputeResource();
 
   QTableWidget *tbl = m_ui.tableWidget_run_jobs;
-  const int idCol = 1;
+  const int idCol = 2;
   QTableWidgetItem *hdr = tbl->horizontalHeaderItem(idCol);
   if ("ID" != hdr->text())
     throw std::runtime_error("Expected to get the Id of jobs from the "
@@ -781,14 +814,12 @@ void TomoReconstruction::jobTableRefreshClicked() {
   bool sort = t->isSortingEnabled();
   t->setRowCount(static_cast<int>(ids.size()));
   for (size_t i = 0; i < jobMax; ++i) {
-    t->setItem(static_cast<int>(i), 0,
-               new QTableWidgetItem(QString::fromStdString(names[i])));
-    t->setItem(static_cast<int>(i), 1,
-               new QTableWidgetItem(QString::fromStdString(ids[i])));
-    t->setItem(static_cast<int>(i), 2,
-               new QTableWidgetItem(QString::fromStdString(status[i])));
-    t->setItem(static_cast<int>(i), 3,
-               new QTableWidgetItem(QString::fromStdString(cmds[i])));
+    int ii = static_cast<int>(i);
+    t->setItem(ii, 0, new QTableWidgetItem(QString::fromStdString(m_SCARFName)));
+    t->setItem(ii, 1, new QTableWidgetItem(QString::fromStdString(names[i])));
+    t->setItem(ii, 2, new QTableWidgetItem(QString::fromStdString(ids[i])));
+    t->setItem(ii, 3, new QTableWidgetItem(QString::fromStdString(status[i])));
+    t->setItem(ii, 4, new QTableWidgetItem(QString::fromStdString(cmds[i])));
   }
   t->setSortingEnabled(sort);
 }
@@ -1307,7 +1338,7 @@ TomoReconstruction::paramValStringFromArray(const Json::Value &jsonVal,
     }
   }
   // this could be s.back() with C++11
-  s[s.length()-1] = ']'; // and last comma becomes closing ]
+  s[s.length() - 1] = ']'; // and last comma becomes closing ]
   return s;
 }
 
@@ -1608,6 +1639,46 @@ void TomoReconstruction::userError(std::string err, std::string description) {
   QMessageBox::critical(this, QString::fromStdString(err),
                         QString::fromStdString(description), QMessageBox::Ok,
                         QMessageBox::Ok);
+}
+
+void TomoReconstruction::openHelpWin() {
+  MantidQt::API::HelpWindow::showCustomInterface(
+      NULL, QString("Tomographic_Reconstruction"));
+}
+
+void TomoReconstruction::closeInterface() {
+  QMessageBox msgBox;
+  msgBox.setWindowTitle(tr("Close the tomographic reconstruction interface"));
+  // If we used these, then we'd have layout issues
+  // msgBox.setStandardButtons(QMessageBox::No | QMessageBox::Yes);
+  // msgBox.setDefaultButton(QMessageBox::Yes);
+  msgBox.setIconPixmap(QPixmap(":/images/help-contents-64.png"));
+  QCheckBox confirm_checkBox("Always ask for confirmation", &msgBox);
+  confirm_checkBox.setCheckState(Qt::Checked);
+  msgBox.layout()->addItem(new QSpacerItem(0, 0, QSizePolicy::Expanding));
+  msgBox.layout()->addWidget(&confirm_checkBox);
+  QPushButton *bYes = msgBox.addButton("Yes", QMessageBox::YesRole);
+  bYes->setIcon(style()->standardIcon(QStyle::SP_DialogYesButton));
+  // bYes->setFixedSize(100,100);
+  QPushButton *bNo = msgBox.addButton("No", QMessageBox::NoRole);
+  bNo->setIcon(style()->standardIcon(QStyle::SP_DialogNoButton));
+  msgBox.setDefaultButton(bNo);
+  msgBox.setText(tr("You are about to close this interface"));
+  msgBox.setInformativeText(tr(
+      "If you close this interface you will need to log in again "
+      "and you might loose some of the current state. Jobs running on remote "
+      "compute resources will remain unaffected though. Are you sure?"));
+
+  int answer = msgBox.exec();
+  // TODO: save confirm_checkBox.isChecked() in this dialog's
+  // preferences
+
+  if (answer == QMessageBox::AcceptRole) {
+    saveSettings();
+    close();
+  } else {
+    // just ignore
+  }
 }
 
 } // namespace CustomInterfaces
