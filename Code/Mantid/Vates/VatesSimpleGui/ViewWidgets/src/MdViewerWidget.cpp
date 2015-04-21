@@ -486,7 +486,7 @@ void MdViewerWidget::renderOriginalWorkspace(const std::string originalWorkspace
 {
   // Load a new source plugin
   QString sourcePlugin = "MDEW Source";
-  pqPipelineSource* src = this->currentView->setPluginSource(sourcePlugin, QString::fromStdString(originalWorkspaceName));
+  this->currentView->setPluginSource(sourcePlugin, QString::fromStdString(originalWorkspaceName));
 
   // Render and final setup
   this->renderAndFinalSetup();
