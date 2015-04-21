@@ -26,7 +26,8 @@ namespace IDA
     bool doValidation(bool silent = false);
 
   private slots:
-    void algorithmComplete(bool error);
+    void absCorComplete(bool error);
+    void postProcessComplete(bool error);
     void getBeamWidthFromWorkspace(const QString& wsName);
 
   private:

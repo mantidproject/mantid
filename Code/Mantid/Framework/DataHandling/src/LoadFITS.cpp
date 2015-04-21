@@ -558,7 +558,7 @@ void LoadFITS::readDataToWorkspace2D(Workspace2D_sptr ws,
  *
  * @param hdr FITS header struct loaded from a file - to check
  *
- * @param hdr FITS header struct loaded from a (first) reference file - to
+ * @param hdrFirst FITS header struct loaded from a (first) reference file - to
  * compare against
  *
  * @throws std::exception if there's any issue or unsupported entry in the
@@ -635,7 +635,7 @@ size_t LoadFITS::fetchNumber(const std::string &name) {
  * including number
  *
  * @param number input number to add padding to
- * @parm totalDigitCount width of the resulting string with 0s followed by
+ * @param totalDigitCount width of the resulting string with 0s followed by
  * number
  *
  * @return A string with the 0-padded number

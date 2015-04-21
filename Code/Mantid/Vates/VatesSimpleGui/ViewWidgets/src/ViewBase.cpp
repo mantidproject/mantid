@@ -282,15 +282,17 @@ pqPipelineSource* ViewBase::setPluginSource(QString pluginName, QString wsName)
   pqServer *server = pqActiveObjects::instance().activeServer();
   pqPipelineSource *src = builder->createSource("sources", pluginName,
                                                 server);
+  src->getProxy()->SetAnnotation("MdViewerWidget0", "1");
   vtkSMPropertyHelper(src->getProxy(),
                       "Mantid Workspace Name").Set(wsName.toStdString().c_str());
 
   // Update the source so that it retrieves the data from the Mantid workspace
-  vtkSMSourceProxy *srcProxy = vtkSMSourceProxy::SafeDownCast(src->getProxy());
-  srcProxy->UpdateVTKObjects();
-  srcProxy->Modified();
-  srcProxy->UpdatePipelineInformation();
-  src->updatePipeline();
+  src->getProxy()->UpdateVTKObjects(); // Updates all the proxies
+  src->updatePipeline(); // Updates the pipeline
+  src->setModifiedState(pqProxy::UNMODIFIED); // Just to that the UI state looks consistent with the apply
+
+  // Update the properties, from PV3.98.1 to PV4.3.1, it wasn't updating any longer, so need to force it
+  src->getProxy()->UpdatePropertyInformation();
 
   return src;
 }

@@ -1,6 +1,5 @@
 #pylint: disable=invalid-name
 """ Sample LET reduction script """
-import os
 #os.environ["PATH"] = r"c:/Mantid/Code/builds/br_master/bin/Release;"+os.environ["PATH"]
 
 
@@ -32,7 +31,7 @@ def find_binning_range(energy,ebin):
         mult=2.8868
         dt_DAE = 1
     else:
-       raise RuntimeError("Find_binning_range: unsupported/unknown instrument found")
+        raise RuntimeError("Find_binning_range: unsupported/unknown instrument found")
 
     energy=float(energy)
 

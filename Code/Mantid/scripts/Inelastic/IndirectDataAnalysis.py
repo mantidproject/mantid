@@ -48,7 +48,6 @@ def calculateEISF(params_table):
             mtd[params_table].setCell(col_name, i, value)
             mtd[params_table].setCell(error_col_name, i, error)
 
-##############################################################################
 
 def confitSeq(inputWS, func, startX, endX, ftype, bgd, temperature=None, specMin=0, specMax=None, convolve=True, Plot='None', Save=False):
     StartTime('ConvFit')
@@ -78,20 +77,33 @@ def confitSeq(inputWS, func, startX, endX, ftype, bgd, temperature=None, specMin
     input_params = [temp_fit_workspace+',i%d' % i
                     for i in xrange(specMin, specMax+1)]
 
+    fit_args = dict()
+    if 'DS' in ftype or 'DC' in ftype:
+        fit_args['PassWSIndexToFunction'] = True
+
     PlotPeakByLogValue(Input=';'.join(input_params),
                        OutputWorkspace=output_workspace, Function=func,
                        StartX=startX, EndX=endX, FitType='Sequential',
                        CreateOutput=True, OutputCompositeMembers=True,
-                       ConvolveMembers=convolve)
+                       ConvolveMembers=convolve,
+                       **fit_args)
 
     DeleteWorkspace(output_workspace + '_NormalisedCovarianceMatrices')
     DeleteWorkspace(output_workspace + '_Parameters')
     DeleteWorkspace(temp_fit_workspace)
 
-    wsname = output_workspace + "_Result"
-    parameter_names = ['Height', 'Amplitude', 'FWHM', 'EISF']
+    wsname = output_workspace + '_Result'
+
+    if 'DS' in ftype:
+        parameter_names = ['Height', 'Intensity', 'Radius', 'Diffusion', 'Shift']
+    elif 'DC' in ftype:
+        parameter_names = ['Height', 'Intensity', 'Radius', 'Decay', 'Shift']
+    else:
+        parameter_names = ['Height', 'Amplitude', 'FWHM', 'EISF']
+
     if using_delta_func:
         calculateEISF(output_workspace)
+
     convertParametersToWorkspace(output_workspace, "axis-1", parameter_names, wsname)
 
     #set x units to be momentum transfer
@@ -141,6 +153,7 @@ def confitSeq(inputWS, func, startX, endX, ftype, bgd, temperature=None, specMin
         plotParameters(wsname, Plot)
 
     EndTime('ConvFit')
+
 
 ##############################################################################
 # FuryFit

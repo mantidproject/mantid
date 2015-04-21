@@ -1,4 +1,4 @@
-#pylint: disable=invalid-name,no-init
+#pylint: disable=invalid-name,no-init,attribute-defined-outside-init
 import stresstesting
 from mantid.simpleapi import *
 

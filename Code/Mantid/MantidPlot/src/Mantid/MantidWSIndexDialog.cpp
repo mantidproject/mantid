@@ -21,11 +21,13 @@
  * @param mui :: The MantidUI area
  * @param flags :: Window flags that are passed the the QDialog constructor
  * @param wsNames :: the names of the workspaces to be plotted
+ * @param showWaterfallOption :: If true the waterfall checkbox is created
  */
-MantidWSIndexDialog::MantidWSIndexDialog(MantidUI* mui, Qt::WFlags flags, QList<QString> wsNames) 
+MantidWSIndexDialog::MantidWSIndexDialog(MantidUI* mui, Qt::WFlags flags, QList<QString> wsNames, const bool showWaterfallOption) 
   : QDialog(mui->appWindow(), flags), 
   m_mantidUI(mui),
   m_spectra(false),
+  m_waterfall(showWaterfallOption),
   m_wsNames(wsNames),
   m_wsIndexIntervals(),
   m_spectraIdIntervals(),
@@ -42,6 +44,14 @@ MantidWSIndexDialog::MantidWSIndexDialog(MantidUI* mui, Qt::WFlags flags, QList<
   }
   // Set up UI.
   init();
+}
+
+MantidWSIndexDialog::UserInput MantidWSIndexDialog::getSelections() const
+{
+  UserInput options;
+  options.plots = getPlots();
+  options.waterfall = waterfallPlotRequested();
+  return options;
 }
 
 QMultiMap<QString,std::set<int> > MantidWSIndexDialog::getPlots() const
@@ -86,6 +96,11 @@ QMultiMap<QString,std::set<int> > MantidWSIndexDialog::getPlots() const
   }
 
   return plots;
+}
+
+bool MantidWSIndexDialog::waterfallPlotRequested() const
+{
+  return m_waterfallOpt->isChecked();
 }
 
 //----------------------------------
@@ -149,6 +164,7 @@ void MantidWSIndexDialog::init()
   setWindowTitle(tr("MantidPlot"));
   initSpectraBox();
   initWorkspaceBox();
+  initOptionsBoxes();
   initButtons();
   setLayout(m_outer);
 }
@@ -183,6 +199,18 @@ void MantidWSIndexDialog::initSpectraBox()
     m_outer->addItem(m_spectraBox);
 
   connect(m_spectraField->lineEdit(), SIGNAL(textEdited(const QString &)), this, SLOT(editedSpectraField()));
+}
+
+void MantidWSIndexDialog::initOptionsBoxes()
+{
+  m_optionsBox = new QHBoxLayout;
+  m_waterfallOpt = new QCheckBox("Waterfall Plot");
+  if(m_waterfall)
+    m_optionsBox->add(m_waterfallOpt);
+  else
+    m_waterfallOpt->setChecked(true);
+
+  m_outer->addItem(m_optionsBox);
 }
 
 void MantidWSIndexDialog::initButtons()

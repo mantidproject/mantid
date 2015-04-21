@@ -91,8 +91,6 @@ class MARIReductionFromFile(ISISDirectInelasticReduction):
         outWS = self.red.reduce()
         outWS*=self.scale_to_fix_abf
 
-
-
     def get_result_workspace(self):
         """Returns the result workspace to be checked"""
         return "outWS"
@@ -316,6 +314,12 @@ class MARIReductionWaitAndSum(ISISDirectInelasticReduction):
       It verifies operation on summing two files on demand. with wait for
       files appearing on data search path
       """
+        targ_path = config['defaultsave.directory']
+        self._file_to_clear = os.path.join(targ_path,'MAR11002.raw')
+        if os.path.exists(self._file_to_clear):
+            os.remove(self._file_to_clear)
+            self._file_to_clear = ''
+
         self.red.wait_for_file = 100
         self.red._debug_wait_for_files_operation = self.prepare_test_file
         self._counter=0

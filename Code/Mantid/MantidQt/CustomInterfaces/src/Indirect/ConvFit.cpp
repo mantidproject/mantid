@@ -94,6 +94,8 @@ namespace IDA
 
     m_properties["Lorentzian1"] = createLorentzian("Lorentzian 1");
     m_properties["Lorentzian2"] = createLorentzian("Lorentzian 2");
+    m_properties["DiffSphere"] = createDiffSphere("Diffusion Sphere");
+    m_properties["DiffRotDiscreteCircle"] = createDiffRotDiscreteCircle("Diffusion Circle");
 
     m_uiForm.leTempCorrection->setValidator(new QDoubleValidator(m_parentWidget));
 
@@ -115,7 +117,7 @@ namespace IDA
     // Have FWHM Range linked to Fit Start/End Range
     connect(fitRangeSelector, SIGNAL(rangeChanged(double, double)),
             hwhmRangeSelector, SLOT(setRange(double, double)));
-    hwhmRangeSelector->setRange(-1.0,1.0);
+    hwhmRangeSelector->setRange(-1.0, 1.0);
     hwhmUpdateRS(0.02);
 
     typeSelection(m_uiForm.cbFitType->currentIndex());
@@ -124,6 +126,9 @@ namespace IDA
     // Replot input automatically when file / spec no changes
     connect(m_uiForm.spPlotSpectrum, SIGNAL(valueChanged(int)), this, SLOT(updatePlot()));
     connect(m_uiForm.dsSampleInput, SIGNAL(dataReady(const QString&)), this, SLOT(newDataLoaded(const QString&)));
+
+    connect(m_uiForm.dsSampleInput, SIGNAL(dataReady(const QString&)), this, SLOT(extendResolutionWorkspace()));
+    connect(m_uiForm.dsResInput, SIGNAL(dataReady(const QString&)), this, SLOT(extendResolutionWorkspace()));
 
     connect(m_uiForm.spSpectraMin, SIGNAL(valueChanged(int)), this, SLOT(specMinChanged(int)));
     connect(m_uiForm.spSpectraMax, SIGNAL(valueChanged(int)), this, SLOT(specMaxChanged(int)));
@@ -139,6 +144,8 @@ namespace IDA
     // Tie
     connect(m_uiForm.cbFitType,SIGNAL(currentIndexChanged(QString)),SLOT(showTieCheckbox(QString)));
     showTieCheckbox( m_uiForm.cbFitType->currentText() );
+
+    updatePlotOptions();
   }
 
   void ConvFit::run()
@@ -266,6 +273,44 @@ namespace IDA
     updatePlot();
   }
 
+  /**
+   * Create a resolution workspace with the same number of histograms as in the sample.
+   *
+   * Needed to allow DiffSphere and DiffRotDiscreteCircle fit functions to work as they need
+   * to have the WorkspaceIndex attribute set.
+   */
+  void ConvFit::extendResolutionWorkspace()
+  {
+    if(m_cfInputWS && m_uiForm.dsResInput->isValid())
+    {
+      const QString resWsName = m_uiForm.dsResInput->getCurrentDataName();
+
+      API::BatchAlgorithmRunner::AlgorithmRuntimeProps appendProps;
+      appendProps["InputWorkspace1"] = "__ConvFit_Resolution";
+
+      size_t numHist = m_cfInputWS->getNumberHistograms();
+      for(size_t i = 0; i < numHist; i++)
+      {
+        IAlgorithm_sptr appendAlg = AlgorithmManager::Instance().create("AppendSpectra");
+        appendAlg->initialize();
+        appendAlg->setProperty("InputWorkspace2", resWsName.toStdString());
+        appendAlg->setProperty("OutputWorkspace", "__ConvFit_Resolution");
+
+        if(i == 0)
+        {
+          appendAlg->setProperty("InputWorkspace1", resWsName.toStdString());
+          m_batchAlgoRunner->addAlgorithm(appendAlg);
+        }
+        else
+        {
+          m_batchAlgoRunner->addAlgorithm(appendAlg, appendProps);
+        }
+      }
+
+      m_batchAlgoRunner->executeBatchAsync();
+    }
+  }
+
   namespace
   {
     ////////////////////////////
@@ -327,6 +372,14 @@ namespace IDA
    *							|
    *							+-- Lorentzian 2 (yes/no)
    *							+-- Temperature Correction (yes/no)
+   *					+-- ProductFunction
+   *							|
+   *							+-- InelasticDiffSphere (yes/no)
+   *							+-- Temperature Correction (yes/no)
+   *					+-- ProductFunction
+   *							|
+   *							+-- InelasticDiffRotDiscreteCircle (yes/no)
+   *							+-- Temperature Correction (yes/no)
    *
    * @param tieCentres :: whether to tie centres of the two lorentzians.
    *
@@ -377,18 +430,8 @@ namespace IDA
     conv->addFunction(func);
 
     //add resolution file
-    if (m_uiForm.dsResInput->isFileSelectorVisible())
-    {
-      std::string resfilename = m_uiForm.dsResInput->getFullFilePath().toStdString();
-      IFunction::Attribute attr(resfilename);
-      func->setAttribute("FileName", attr);
-    }
-    else
-    {
-      std::string resWorkspace = m_uiForm.dsResInput->getCurrentDataName().toStdString();
-      IFunction::Attribute attr(resWorkspace);
-      func->setAttribute("Workspace", attr);
-    }
+    IFunction::Attribute attr("__ConvFit_Resolution");
+    func->setAttribute("Workspace", attr);
 
     // --------------------------------------------------------
     // --- Composite / Convolution / Model / Delta Function ---
@@ -425,7 +468,7 @@ namespace IDA
     int fitTypeIndex = m_uiForm.cbFitType->currentIndex();
 
     // Add 1st Lorentzian
-    if(fitTypeIndex > 0)
+    if(fitTypeIndex == 1 || fitTypeIndex == 2)
     {
       //if temperature not included then product is lorentzian * 1
       //create product function for temp * lorentzian
@@ -462,6 +505,46 @@ namespace IDA
       prefix2 = createParName(index, subIndex);
 
       populateFunction(func, model, m_properties["Lorentzian2"], prefix2, false);
+    }
+
+    // -------------------------------------------------------------
+    // --- Composite / Convolution / Model / InelasticDiffSphere ---
+    // -------------------------------------------------------------
+    if(fitTypeIndex == 3)
+    {
+      auto product = boost::dynamic_pointer_cast<CompositeFunction>(FunctionFactory::Instance().createFunction("ProductFunction"));
+
+      if(useTempCorrection)
+      {
+        createTemperatureCorrection(product);
+      }
+
+      func = FunctionFactory::Instance().createFunction("InelasticDiffSphere");
+      subIndex = product->addFunction(func);
+      index = model->addFunction(product);
+      prefix2 = createParName(index, subIndex);
+
+      populateFunction(func, model, m_properties["DiffSphere"], prefix2, false);
+    }
+
+    // ------------------------------------------------------------------------
+    // --- Composite / Convolution / Model / InelasticDiffRotDiscreteCircle ---
+    // ------------------------------------------------------------------------
+    if(fitTypeIndex == 4)
+    {
+      auto product = boost::dynamic_pointer_cast<CompositeFunction>(FunctionFactory::Instance().createFunction("ProductFunction"));
+
+      if(useTempCorrection)
+      {
+        createTemperatureCorrection(product);
+      }
+
+      func = FunctionFactory::Instance().createFunction("InelasticDiffRotDiscreteCircle");
+      subIndex = product->addFunction(func);
+      index = model->addFunction(product);
+      prefix2 = createParName(index, subIndex);
+
+      populateFunction(func, model, m_properties["DiffRotDiscreteCircle"], prefix2, false);
     }
 
     conv->addFunction(model);
@@ -547,18 +630,71 @@ namespace IDA
   QtProperty* ConvFit::createLorentzian(const QString & name)
   {
     QtProperty* lorentzGroup = m_grpManager->addProperty(name);
+
     m_properties[name+".Amplitude"] = m_dblManager->addProperty("Amplitude");
     // m_dblManager->setRange(m_properties[name+".Amplitude"], 0.0, 1.0); // 0 < Amplitude < 1
     m_properties[name+".PeakCentre"] = m_dblManager->addProperty("PeakCentre");
     m_properties[name+".FWHM"] = m_dblManager->addProperty("FWHM");
+
     m_dblManager->setDecimals(m_properties[name+".Amplitude"], NUM_DECIMALS);
     m_dblManager->setDecimals(m_properties[name+".PeakCentre"], NUM_DECIMALS);
     m_dblManager->setDecimals(m_properties[name+".FWHM"], NUM_DECIMALS);
     m_dblManager->setValue(m_properties[name+".FWHM"], 0.02);
+
     lorentzGroup->addSubProperty(m_properties[name+".Amplitude"]);
     lorentzGroup->addSubProperty(m_properties[name+".PeakCentre"]);
     lorentzGroup->addSubProperty(m_properties[name+".FWHM"]);
+
     return lorentzGroup;
+  }
+
+  QtProperty* ConvFit::createDiffSphere(const QString & name)
+  {
+    QtProperty* diffSphereGroup = m_grpManager->addProperty(name);
+
+    m_properties[name+".Intensity"] = m_dblManager->addProperty("Intensity");
+    m_properties[name+".Radius"] = m_dblManager->addProperty("Radius");
+    m_properties[name+".Diffusion"] = m_dblManager->addProperty("Diffusion");
+    m_properties[name+".Shift"] = m_dblManager->addProperty("Shift");
+
+    m_dblManager->setDecimals(m_properties[name+".Intensity"], NUM_DECIMALS);
+    m_dblManager->setDecimals(m_properties[name+".Radius"], NUM_DECIMALS);
+    m_dblManager->setDecimals(m_properties[name+".Diffusion"], NUM_DECIMALS);
+    m_dblManager->setDecimals(m_properties[name+".Shift"], NUM_DECIMALS);
+
+    diffSphereGroup->addSubProperty(m_properties[name+".Intensity"]);
+    diffSphereGroup->addSubProperty(m_properties[name+".Radius"]);
+    diffSphereGroup->addSubProperty(m_properties[name+".Diffusion"]);
+    diffSphereGroup->addSubProperty(m_properties[name+".Shift"]);
+
+    return diffSphereGroup;
+  }
+
+  QtProperty* ConvFit::createDiffRotDiscreteCircle(const QString & name)
+  {
+    QtProperty* diffRotDiscreteCircleGroup = m_grpManager->addProperty(name);
+
+    m_properties[name+".N"] = m_dblManager->addProperty("N");
+    m_dblManager->setValue(m_properties[name+".N"], 3.0);
+
+    m_properties[name+".Intensity"] = m_dblManager->addProperty("Intensity");
+    m_properties[name+".Radius"] = m_dblManager->addProperty("Radius");
+    m_properties[name+".Decay"] = m_dblManager->addProperty("Decay");
+    m_properties[name+".Shift"] = m_dblManager->addProperty("Shift");
+
+    m_dblManager->setDecimals(m_properties[name+".N"], 0);
+    m_dblManager->setDecimals(m_properties[name+".Intensity"], NUM_DECIMALS);
+    m_dblManager->setDecimals(m_properties[name+".Radius"], NUM_DECIMALS);
+    m_dblManager->setDecimals(m_properties[name+".Decay"], NUM_DECIMALS);
+    m_dblManager->setDecimals(m_properties[name+".Shift"], NUM_DECIMALS);
+
+    diffRotDiscreteCircleGroup->addSubProperty(m_properties[name+".N"]);
+    diffRotDiscreteCircleGroup->addSubProperty(m_properties[name+".Intensity"]);
+    diffRotDiscreteCircleGroup->addSubProperty(m_properties[name+".Radius"]);
+    diffRotDiscreteCircleGroup->addSubProperty(m_properties[name+".Decay"]);
+    diffRotDiscreteCircleGroup->addSubProperty(m_properties[name+".Shift"]);
+
+    return diffRotDiscreteCircleGroup;
   }
 
   void ConvFit::populateFunction(IFunction_sptr func, IFunction_sptr comp, QtProperty* group, const std::string & pref, bool tie)
@@ -578,9 +714,12 @@ namespace IDA
       {
         std::string propName = props[i]->propertyName().toStdString();
         double propValue = props[i]->valueText().toDouble();
-        if ( propValue )
+        if(propValue)
         {
-          func->setParameter(propName, propValue);
+          if(func->hasAttribute(propName))
+            func->setAttributeValue(propName, propValue);
+          else
+            func->setParameter(propName, propValue);
         }
       }
     }
@@ -610,6 +749,10 @@ namespace IDA
         fitType += "1L"; break;
       case 2:
         fitType += "2L"; break;
+      case 3:
+        fitType += "DS"; break;
+      case 4:
+        fitType += "DC"; break;
     }
 
     return fitType;
@@ -643,6 +786,8 @@ namespace IDA
   {
     m_cfTree->removeProperty(m_properties["Lorentzian1"]);
     m_cfTree->removeProperty(m_properties["Lorentzian2"]);
+    m_cfTree->removeProperty(m_properties["DiffSphere"]);
+    m_cfTree->removeProperty(m_properties["DiffRotDiscreteCircle"]);
 
     auto hwhmRangeSelector = m_uiForm.ppPlot->getRangeSelector("ConvFitHWHM");
 
@@ -660,7 +805,25 @@ namespace IDA
         m_cfTree->addProperty(m_properties["Lorentzian2"]);
         hwhmRangeSelector->setVisible(true);
         break;
+      case 3:
+        m_cfTree->addProperty(m_properties["DiffSphere"]);
+        hwhmRangeSelector->setVisible(false);
+        m_uiForm.ckPlotGuess->setChecked(false);
+        m_blnManager->setValue(m_properties["UseDeltaFunc"], false);
+        break;
+      case 4:
+        m_cfTree->addProperty(m_properties["DiffRotDiscreteCircle"]);
+        hwhmRangeSelector->setVisible(false);
+        m_uiForm.ckPlotGuess->setChecked(false);
+        m_blnManager->setValue(m_properties["UseDeltaFunc"], false);
+        break;
     }
+
+    // Disable Plot Guess and Use Delta Function for DiffSphere and DiffRotDiscreteCircle
+    m_uiForm.ckPlotGuess->setEnabled(index < 3);
+    m_properties["UseDeltaFunc"]->setEnabled(index < 3);
+
+    updatePlotOptions();
   }
 
   void ConvFit::bgTypeSelection(int index)
@@ -853,7 +1016,7 @@ namespace IDA
     m_dblManager->setValue(m_properties["BGA0"], parameters["f0.A0"]);
     m_dblManager->setValue(m_properties["BGA1"], parameters["f0.A1"]);
 
-    int noLorentz = m_uiForm.cbFitType->currentIndex();
+    int fitTypeIndex = m_uiForm.cbFitType->currentIndex();
 
     int funcIndex = 0;
     int subIndex = 0;
@@ -866,7 +1029,10 @@ namespace IDA
     }
 
     bool usingDeltaFunc = m_blnManager->value(m_properties["UseDeltaFunc"]);
-    bool usingCompositeFunc = ((usingDeltaFunc && noLorentz > 0) || noLorentz > 1);
+
+    // If using a delta function with any fit type or using two Lorentzians
+    bool usingCompositeFunc = ((usingDeltaFunc && fitTypeIndex > 0) || fitTypeIndex == 2);
+
     QString prefBase = "f1.f1.";
 
     if ( usingDeltaFunc )
@@ -883,7 +1049,7 @@ namespace IDA
       funcIndex++;
     }
 
-    if ( noLorentz > 0 )
+    if ( fitTypeIndex == 1 || fitTypeIndex == 2 )
     {
       // One Lorentz
       QString pref = prefBase;
@@ -903,7 +1069,7 @@ namespace IDA
       funcIndex++;
     }
 
-    if ( noLorentz > 1 )
+    if ( fitTypeIndex == 2 )
     {
       // Two Lorentz
       QString pref = prefBase;
@@ -912,6 +1078,46 @@ namespace IDA
       m_dblManager->setValue(m_properties["Lorentzian 2.Amplitude"], parameters[pref+"Amplitude"]);
       m_dblManager->setValue(m_properties["Lorentzian 2.PeakCentre"], parameters[pref+"PeakCentre"]);
       m_dblManager->setValue(m_properties["Lorentzian 2.FWHM"], parameters[pref+"FWHM"]);
+    }
+
+    if ( fitTypeIndex == 3 )
+    {
+      // DiffSphere
+      QString pref = prefBase;
+
+      if ( usingCompositeFunc )
+      {
+        pref += "f" + QString::number(funcIndex) + ".f" + QString::number(subIndex) + ".";
+      }
+      else
+      {
+        pref += "f" + QString::number(subIndex) + ".";
+      }
+
+      m_dblManager->setValue(m_properties["Diffusion Sphere.Intensity"], parameters[pref+"Intensity"]);
+      m_dblManager->setValue(m_properties["Diffusion Sphere.Radius"], parameters[pref+"Radius"]);
+      m_dblManager->setValue(m_properties["Diffusion Sphere.Diffusion"], parameters[pref+"Diffusion"]);
+      m_dblManager->setValue(m_properties["Diffusion Sphere.Shift"], parameters[pref+"Shift"]);
+    }
+
+    if ( fitTypeIndex == 4 )
+    {
+      // DiffSphere
+      QString pref = prefBase;
+
+      if ( usingCompositeFunc )
+      {
+        pref += "f" + QString::number(funcIndex) + ".f" + QString::number(subIndex) + ".";
+      }
+      else
+      {
+        pref += "f" + QString::number(subIndex) + ".";
+      }
+
+      m_dblManager->setValue(m_properties["Diffusion Circle.Intensity"], parameters[pref+"Intensity"]);
+      m_dblManager->setValue(m_properties["Diffusion Circle.Radius"], parameters[pref+"Radius"]);
+      m_dblManager->setValue(m_properties["Diffusion Circle.Decay"], parameters[pref+"Decay"]);
+      m_dblManager->setValue(m_properties["Diffusion Circle.Shift"], parameters[pref+"Shift"]);
     }
 
     m_pythonExportWsName = "";
@@ -993,22 +1199,10 @@ namespace IDA
 
   void ConvFit::checkBoxUpdate(QtProperty* prop, bool checked)
   {
-    // Add/remove some properties to display only relevant options
-    if ( prop == m_properties["UseDeltaFunc"] )
-    {
-      if ( checked )
-      {
-        m_properties["DeltaFunction"]->addSubProperty(m_properties["DeltaHeight"]);
-        m_uiForm.cbPlotType->addItem("Height");
-        m_uiForm.cbPlotType->addItem("EISF");
-      }
-      else
-      {
-        m_properties["DeltaFunction"]->removeSubProperty(m_properties["DeltaHeight"]);
-        m_uiForm.cbPlotType->removeItem(m_uiForm.cbPlotType->count()-1);
-        m_uiForm.cbPlotType->removeItem(m_uiForm.cbPlotType->count()-1);
-      }
-    }
+    UNUSED_ARG(checked);
+
+    if(prop == m_properties["UseDeltaFunc"])
+      updatePlotOptions();
   }
 
   void ConvFit::fitContextMenu(const QPoint &)
@@ -1093,6 +1287,46 @@ namespace IDA
   void ConvFit::showTieCheckbox(QString fitType)
   {
     m_uiForm.ckTieCentres->setVisible( fitType == "Two Lorentzians" );
+  }
+
+  void ConvFit::updatePlotOptions()
+  {
+    m_uiForm.cbPlotType->clear();
+
+    bool deltaFunction = m_blnManager->value(m_properties["UseDeltaFunc"]);
+
+    QStringList plotOptions;
+    plotOptions << "None";
+
+    if(deltaFunction)
+      plotOptions << "Height";
+
+    switch(m_uiForm.cbFitType->currentIndex())
+    {
+      // Lorentzians
+      case 1:
+      case 2:
+        plotOptions << "Amplitude" << "FWHM";
+        if(deltaFunction)
+          plotOptions << "EISF";
+        break;
+
+      // DiffSphere
+      case 3:
+        plotOptions << "Intensity" << "Radius" << "Diffusion" << "Shift";
+        break;
+
+      // DiffRotDiscreteCircle
+      case 4:
+        plotOptions << "Intensity" << "Radius" << "Decay" << "Shift";
+        break;
+
+      default:
+        break;
+    }
+
+    plotOptions << "All";
+    m_uiForm.cbPlotType->addItems(plotOptions);
   }
 
 } // namespace IDA

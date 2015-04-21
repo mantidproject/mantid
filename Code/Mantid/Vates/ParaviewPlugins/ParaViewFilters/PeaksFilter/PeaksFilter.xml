@@ -2,6 +2,9 @@
   <!-- Begin ScaleWorkspace -->
   <ProxyGroup name="filters">
     <SourceProxy name="MantidParaViewPeaksFilter" class="vtkPeaksFilter" label="MD Peaks Filter" >
+      <Hints>
+        <ShowInMenu category="Mantid"/>
+      </Hints>
       <InputProperty
         name="Input"
         command="SetInputConnection">

@@ -25,8 +25,10 @@ namespace IDA
     void newData(const QString &dataName);
     /// Updates the preview mini plot
     void plotPreview(int specIndex);
-    /// Handle algorithm completion
-    void algorithmComplete(bool error);
+    /// Handle abs. correction algorithm completion
+    void absCorComplete(bool error);
+    /// Handle convert units and save algorithm completion
+    void postProcessComplete(bool error);
 
   private:
     virtual void setup();
@@ -39,10 +41,7 @@ namespace IDA
 
     Ui::ApplyCorr m_uiForm;
 
-    /// Name of sample workspace (for plotting)
-    std::string m_sampleWsName;
-    /// Name of container workspace (for plotting)
-    std::string m_canWsName;
+    std::string m_originalSampleUnits;
 
   };
 

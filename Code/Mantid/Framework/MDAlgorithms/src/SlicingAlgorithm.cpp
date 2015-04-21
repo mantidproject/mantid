@@ -219,7 +219,7 @@ void SlicingAlgorithm::makeBasisVectorFromString(const std::string &str) {
     VMD basis0(this->m_inWS->getNumDims());
     VMD basis1 = basis;
     // Convert the points to the original coordinates (from inWS to originalWS)
-    CoordTransform *toOrig = m_inWS->getTransformToOriginal();
+    CoordTransform const *toOrig = m_inWS->getTransformToOriginal();
     VMD origBasis0 = toOrig->applyVMD(basis0);
     VMD origBasis1 = toOrig->applyVMD(basis1);
     // New basis vector, now in the original workspace
@@ -378,7 +378,7 @@ void SlicingAlgorithm::createGeneralTransform() {
   // Now, convert the original vector to the coordinates of the ORIGNAL ws, if
   // any
   if (m_originalWS) {
-    CoordTransform *toOrig = m_inWS->getTransformToOriginal();
+    CoordTransform const*toOrig = m_inWS->getTransformToOriginal();
     m_translation = toOrig->applyVMD(m_translation);
   }
 
@@ -686,7 +686,7 @@ void SlicingAlgorithm::createTransform() {
   if (m_originalWS) {
     // The intermediate workspace is the MDHistoWorkspace being BINNED
     m_intermediateWS = m_inWS;
-    CoordTransform *originalToIntermediate =
+    CoordTransform const *originalToIntermediate =
         m_intermediateWS->getTransformFromOriginal();
     if (originalToIntermediate &&
         (m_originalWS->getNumDims() == m_intermediateWS->getNumDims())) {

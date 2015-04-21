@@ -29,12 +29,11 @@
 #else
 #include <Poco/FileStream.h>
 #include <Poco/NullStream.h>
-#include <stdlib.h>
+
 #endif
 
 // std
 #include <fstream>
-#include <sstream>
 
 namespace Mantid {
 namespace Kernel {
@@ -53,7 +52,7 @@ Logger g_log("InternetHelper");
 /** Constructor
 */
 InternetHelper::InternetHelper()
-    : m_proxyInfo(), m_isProxySet(false), m_timeout(30), m_contentLength(0),
+    : m_proxyInfo(), m_isProxySet(false), m_timeout(30), m_isTimeoutSet(false), m_contentLength(0),
       m_method(HTTPRequest::HTTP_GET), m_contentType("application/json"),
       m_body(), m_headers(), m_request(NULL),m_response(NULL) {}
 
@@ -61,7 +60,7 @@ InternetHelper::InternetHelper()
 /** Constructor
 */
 InternetHelper::InternetHelper(const Kernel::ProxyInfo &proxy)
-    : m_proxyInfo(proxy), m_isProxySet(true), m_timeout(30),
+    : m_proxyInfo(proxy), m_isProxySet(true), m_timeout(30), m_isTimeoutSet(false), m_contentLength(0),
       m_method(HTTPRequest::HTTP_GET), m_contentType("application/json"),
       m_body(), m_headers(), m_request(NULL),m_response(NULL) {}
 
@@ -207,7 +206,7 @@ int InternetHelper::sendHTTPRequest(const std::string &url,
   // Configure Poco HTTP Client Session
   try {
     Poco::Net::HTTPClientSession session(uri.getHost(), uri.getPort());
-    session.setTimeout(Poco::Timespan(m_timeout, 0)); // m_timeout seconds
+    session.setTimeout(Poco::Timespan(getTimeout(), 0)); 
 
     // configure proxy
     setupProxyOnSession(session, url);
@@ -249,7 +248,7 @@ int InternetHelper::sendHTTPSRequest(const std::string &url,
     // Create the session
     HTTPSClientSession session(uri.getHost(),
                                static_cast<Poco::UInt16>(uri.getPort()));
-    session.setTimeout(Poco::Timespan(m_timeout, 0)); // m_timeout seconds
+    session.setTimeout(Poco::Timespan(getTimeout(), 0)); 
 
     // HACK:: Currently the automatic proxy detection only supports http proxy
     // detection
@@ -413,7 +412,10 @@ int InternetHelper::downloadFile(const std::string &urlFile,
 /** Sets the timeout in seconds
 * @param seconds The value in seconds for the timeout
 **/
-void InternetHelper::setTimeout(int seconds) { m_timeout = seconds; }
+void InternetHelper::setTimeout(int seconds) {
+  m_timeout = seconds; 
+  m_isTimeoutSet = true;
+}
 
 /// Checks the HTTP status to decide if this is a relocation
 /// @param response the HTTP status
@@ -442,7 +444,15 @@ void InternetHelper::throwNotConnected(const std::string &url,
 /** Gets the timeout in seconds
 * @returns The value in seconds for the timeout
 **/
-int InternetHelper::getTimeout() { return m_timeout; }
+int InternetHelper::getTimeout() {
+  if (!m_isTimeoutSet)
+  {
+    if (!ConfigService::Instance().getValue("network.default.timeout",m_timeout)) {
+      m_timeout = 30; // the default value if the key is not found
+    }
+  }
+  return m_timeout; 
+}
 
 /** Sets the Method
 * @param method A string of GET or POST, anything other than POST is considered GET
@@ -583,6 +593,7 @@ std::map<std::string, std::string>& InternetHelper::headers() {
 void InternetHelper::reset() {
   m_headers.clear();
   m_timeout = 30;
+  m_isTimeoutSet = false;
   m_body = "";
   m_method = HTTPRequest::HTTP_GET;
   m_contentType = "application/json";

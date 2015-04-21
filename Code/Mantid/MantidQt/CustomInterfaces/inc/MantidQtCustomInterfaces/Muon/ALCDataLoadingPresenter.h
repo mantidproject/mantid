@@ -47,6 +47,9 @@ namespace CustomInterfaces
     /// @return Last loaded data workspace
     MatrixWorkspace_const_sptr loadedData() const { return m_loadedData; }
 
+    /// @return Loaded data as MatrixWorkspace_sptr
+    MatrixWorkspace_sptr exportWorkspace();
+
   private slots:
     /// Load new data and update the view accordingly
     void load();

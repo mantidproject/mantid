@@ -237,12 +237,14 @@ bool MDHistoWorkspaceIterator::next() {
   } else {
     ++m_pos;
   }
-  // Keep calling next if the current position is masked.
   bool ret = m_pos < m_max;
-  while (m_skippingPolicy->keepGoing()) {
-    ret = this->next();
-    if (!ret)
-      break;
+  if(ret) {
+    // Keep calling next if the current position is masked and still valid.
+    while (m_skippingPolicy->keepGoing()) {
+      ret = this->next();
+      if (!ret)
+        break;
+    }
   }
   // Go through every point;
   return ret;
@@ -534,7 +536,8 @@ MDHistoWorkspaceIterator::findNeighbourIndexesByWidth(const std::vector<int>& wi
 
   // Filter out indexes that are are not actually neighbours.
   // Accumulate neighbour indexes.
-  std::vector<size_t> neighbourIndexes;
+  std::vector<size_t> neighbourIndexes(permutationsVertexTouching.size());
+  size_t nextFree = 0;
   for (size_t i = 0; i < permutationsVertexTouching.size(); ++i) {
     if (permutationsVertexTouching[i] == 0) {
       continue;
@@ -544,9 +547,10 @@ MDHistoWorkspaceIterator::findNeighbourIndexesByWidth(const std::vector<int>& wi
     if (neighbour_index < m_ws->getNPoints() &&
         Utils::isNeighbourOfSubject(m_nd, neighbour_index, m_index,
                                     m_indexMaker, m_indexMax, widths) ) {
-      neighbourIndexes.push_back(neighbour_index);
+      neighbourIndexes[nextFree++] = neighbour_index;
     }
   }
+  neighbourIndexes.resize(nextFree);
 
   // Remove duplicates
   std::sort(neighbourIndexes.begin(), neighbourIndexes.end());

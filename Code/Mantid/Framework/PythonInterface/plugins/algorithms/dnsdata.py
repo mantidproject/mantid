@@ -1,7 +1,8 @@
+#pylint: disable=invalid-name,too-many-instance-attributes,too-few-public-methods,anomalous-backslash-in-string
 import sys, re
 import datetime
 
-class DNSdata:
+class DNSdata(object):
     """
     class which describes the DNS data structure
     will be used for data read-in and write-out routines
@@ -167,13 +168,14 @@ class DNSdata:
             # parse block 6 (TOF parameters)
             b6splitted = map(str.strip, blocks[6].split('#'))
             self.tof_channel_number = int(b6splitted[2].split()[2])
-            self.tof_channel_width = float(b6splitted[3].split()[3])
-            self.tof_delay_time = float(b6splitted[4].split()[2])
-            self.tof_elastic_channel = int(b6splitted[6].split()[3])
-            # chopper rotation speed
-            self.chopper_rotation_speed = float(b6splitted[7].split()[2])
-            # chopper number of slits
-            self.chopper_slits = int(b6splitted[5].split()[2])
+            if self.tof_channel_number > 1:
+                self.tof_channel_width = float(b6splitted[3].split()[3])
+                self.tof_delay_time = float(b6splitted[4].split()[2])
+                self.tof_elastic_channel = int(b6splitted[6].split()[3])
+                # chopper rotation speed
+                self.chopper_rotation_speed = float(b6splitted[7].split()[2])
+                # chopper number of slits
+                self.chopper_slits = int(b6splitted[5].split()[2])
 
             # parse block 7 (Time and monitor)
             # assume everything to be at the fixed positions
@@ -184,12 +186,17 @@ class DNSdata:
             # monitor data
             line = b7splitted[3].split()
             self.monitor_counts = int(line[1])
-            # start_time and end_time
+            # start_time and end_time (if specified)
             outfmt = "%Y-%m-%dT%H:%M:%S"
             sinfmt = "start   at %a %b  %d %H:%M:%S %Y"
             einfmt = "stopped at %a %b  %d %H:%M:%S %Y"
-            self.start_time = datetime.datetime.strptime(b7splitted[5], sinfmt).strftime(outfmt)
-            self.end_time = datetime.datetime.strptime(b7splitted[6], einfmt).strftime(outfmt)
+            try:
+                self.start_time = datetime.datetime.strptime(b7splitted[5], sinfmt).strftime(outfmt)
+                self.end_time = datetime.datetime.strptime(b7splitted[6], einfmt).strftime(outfmt)
+            except ValueError:
+                # if start and end time are not given, let them empty
+                pass
+
 
 def parse_header(h):
     """

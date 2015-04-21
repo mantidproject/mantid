@@ -6,15 +6,11 @@
 */
 #include "MantidCrystal/PredictFractionalPeaks.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
-#include "MantidGeometry/Instrument.h"
-#include "MantidGeometry/IComponent.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ArrayLengthValidator.h"
 #include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 
-#include <math.h>
-#include "MantidKernel/IPropertySettings.h"
 //#include "MantidKernel/Strings.h"
 namespace Mantid {
 using namespace Mantid::DataObjects;

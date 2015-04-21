@@ -1,4 +1,4 @@
-#pylint: disable=no-init
+#pylint: disable=no-init,attribute-defined-outside-init
 import stresstesting
 from mantid.kernel import *
 from mantid.api import *
@@ -123,7 +123,7 @@ class DOSPartialCrossSectionScaleTest(stresstesting.MantidStressTest):
         self.ref_result = 'II.DOSPartialCrossSectionScaleTest.nxs'
 
         DensityOfStates(File=file_name, SpectrumType=spec_type, Ions="H,C,O", ScaleByCrossSection='Incoherent',
-                      OutputWorkspace=self.ouput_ws_name)
+                        OutputWorkspace=self.ouput_ws_name)
 
     def validate(self):
         return self.ouput_ws_name, self.ref_result
@@ -146,7 +146,7 @@ class DOSPartialSummedContributionsCrossSectionScaleTest(stresstesting.MantidStr
         self.tolerance = 1e-10
 
         DensityOfStates(File=file_name, SpectrumType=spec_type, Ions="H,C,O", SumContributions=True,
-                      ScaleByCrossSection='Incoherent', OutputWorkspace=self.ouput_ws_name)
+                        ScaleByCrossSection='Incoherent', OutputWorkspace=self.ouput_ws_name)
 
     def validate(self):
         return self.ouput_ws_name, self.ref_result

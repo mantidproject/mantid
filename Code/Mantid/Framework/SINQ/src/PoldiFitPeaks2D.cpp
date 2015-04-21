@@ -15,8 +15,11 @@
 #include "MantidSINQ/PoldiUtilities/PoldiPeakCollection.h"
 #include "MantidSINQ/PoldiUtilities/PoldiInstrumentAdapter.h"
 #include "MantidSINQ/PoldiUtilities/PoldiDeadWireDecorator.h"
+
+#include "MantidAPI/ILatticeFunction.h"
 #include "MantidAPI/IPeakFunction.h"
 #include "MantidAPI/IPawleyFunction.h"
+#include "MantidGeometry/Crystal/UnitCell.h"
 
 #include "MantidSINQ/PoldiUtilities/Poldi2DFunction.h"
 
@@ -416,13 +419,13 @@ Poldi2DFunction_sptr PoldiFitPeaks2D::getFunctionIndividualPeaks(
  *
  * This function creates a PawleyFunction using the supplied profile function
  * name and the crystal system as well as initial cell from the input
- *properties
- * of the algorithm and wraps it in a Poldi2DFunction.
+ * properties of the algorithm and wraps it in a Poldi2DFunction.
+ *
+ * The cell is refined using LatticeFunction to get better starting values.
  *
  * Because the peak intensities are integral at this step but PawleyFunction
  * expects peak heights, a profile function is created and
- *setIntensity/height-
- * methods are used to convert.
+ * setIntensity/height-methods are used to convert.
  *
  * @param profileFunctionName :: Profile function name for PawleyFunction.
  * @param peakCollection :: Peak collection with peaks to be used in the fit.
@@ -430,7 +433,7 @@ Poldi2DFunction_sptr PoldiFitPeaks2D::getFunctionIndividualPeaks(
  */
 Poldi2DFunction_sptr PoldiFitPeaks2D::getFunctionPawley(
     std::string profileFunctionName,
-    const PoldiPeakCollection_sptr &peakCollection) const {
+    const PoldiPeakCollection_sptr &peakCollection) {
   Poldi2DFunction_sptr mdFunction(new Poldi2DFunction);
 
   boost::shared_ptr<PoldiSpectrumPawleyFunction> poldiPawleyFunction =
@@ -452,7 +455,8 @@ Poldi2DFunction_sptr PoldiFitPeaks2D::getFunctionPawley(
   pawleyFunction->setCrystalSystem(crystalSystem);
 
   std::string initialCell = getProperty("InitialCell");
-  pawleyFunction->setUnitCell(initialCell);
+  pawleyFunction->setUnitCell(
+      getRefinedStartingCell(initialCell, crystalSystem, peakCollection));
 
   IPeakFunction_sptr pFun = boost::dynamic_pointer_cast<IPeakFunction>(
       FunctionFactory::Instance().createFunction(profileFunctionName));
@@ -475,6 +479,61 @@ Poldi2DFunction_sptr PoldiFitPeaks2D::getFunctionPawley(
 }
 
 /**
+ * Tries to refine the initial cell using the supplied peaks
+ *
+ * This method tries to refine the initial unit cell using the indexed peaks
+ * that are supplied in the PoldiPeakCollection. If there are unindexed peaks,
+ * the cell will not be refined at all, instead the unmodified initial cell
+ * is returned.
+ *
+ * @param initialCell :: String with the initial unit cell
+ * @param crystalSystem :: Crystal system name
+ * @param peakCollection :: Collection of bragg peaks, must be indexed
+ *
+ * @return String for refined unit cell
+ */
+std::string PoldiFitPeaks2D::getRefinedStartingCell(
+    const std::string &initialCell, const std::string &crystalSystem,
+    const PoldiPeakCollection_sptr &peakCollection) {
+
+  Geometry::UnitCell cell = Geometry::strToUnitCell(initialCell);
+
+  ILatticeFunction_sptr latticeFunction =
+      boost::dynamic_pointer_cast<ILatticeFunction>(
+          FunctionFactory::Instance().createFunction("LatticeFunction"));
+
+  latticeFunction->setCrystalSystem(crystalSystem);
+  latticeFunction->fix(latticeFunction->parameterIndex("ZeroShift"));
+  latticeFunction->setUnitCell(cell);
+
+  // Remove errors from d-values
+  PoldiPeakCollection_sptr clone = peakCollection->clone();
+  for (size_t i = 0; i < clone->peakCount(); ++i) {
+    PoldiPeak_sptr peak = clone->peak(i);
+
+    // If there are unindexed peaks, don't refine, just return the initial cell
+    if(peak->hkl() == MillerIndices()) {
+        return initialCell;
+    }
+
+    peak->setD(UncertainValue(peak->d().value()));
+  }
+
+  TableWorkspace_sptr peakTable = clone->asTableWorkspace();
+
+  IAlgorithm_sptr fit = createChildAlgorithm("Fit");
+  fit->setProperty("Function",
+                   boost::static_pointer_cast<IFunction>(latticeFunction));
+  fit->setProperty("InputWorkspace", peakTable);
+  fit->setProperty("CostFunction", "Unweighted least squares");
+  fit->execute();
+
+  Geometry::UnitCell refinedCell = latticeFunction->getUnitCell();
+
+  return Geometry::unitCellToStr(refinedCell);
+}
+
+/**
  * Constructs a proper function from a peak collection
  *
  * This method constructs a Poldi2DFunction depending on whether or not a
@@ -485,7 +544,7 @@ Poldi2DFunction_sptr PoldiFitPeaks2D::getFunctionPawley(
  * @return Poldi2DFunction with one PoldiSpectrumDomainFunction per peak
  */
 Poldi2DFunction_sptr PoldiFitPeaks2D::getFunctionFromPeakCollection(
-    const PoldiPeakCollection_sptr &peakCollection) const {
+    const PoldiPeakCollection_sptr &peakCollection) {
   std::string profileFunctionName = getProperty("PeakProfileFunction");
 
   bool pawleyFit = getProperty("PawleyFit");

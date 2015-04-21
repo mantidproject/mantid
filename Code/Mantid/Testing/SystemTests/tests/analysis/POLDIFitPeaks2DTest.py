@@ -5,7 +5,8 @@ import numpy as np
 
 class POLDIFitPeaks2DTest(stresstesting.MantidStressTest):
     """The system test currently checks that the calculation of 2D spectra
-works correctly."""
+    works correctly."""
+
     def runTest(self):
         dataFiles = ["poldi2013n006904"]
 
@@ -83,6 +84,7 @@ works correctly."""
                 self.assertLessThan(maxDifference, 0.07)
 
 class POLDIFitPeaks2DPawleyTest(stresstesting.MantidStressTest):
+
     def runTest(self):
         si = PoldiLoadRuns(2013, 6903, 6904, 2)
         corr = PoldiAutoCorrelation('si_data_6904')
@@ -91,7 +93,7 @@ class POLDIFitPeaks2DPawleyTest(stresstesting.MantidStressTest):
         si_refs = PoldiCreatePeaksFromCell("F d -3 m", "Si 0 0 0", a=5.431, LatticeSpacingMin=0.7)
         indexed = PoldiIndexKnownCompounds(peaks_ref, "si_refs")
 
-        DeleteTableRows("indexed_si_refs", "10-30")
+        DeleteTableRows("indexed_si_refs", "8-30")
 
         fit2d, fit1d, peaks_ref_2d, cell = PoldiFitPeaks2D('si_data_6904', 'indexed_si_refs',
                                                            PawleyFit=True,

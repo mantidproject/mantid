@@ -1,5 +1,6 @@
 #include "MantidMDAlgorithms/CutMD.h"
 #include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidAPI/Projection.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/Matrix.h"
@@ -20,57 +21,6 @@ MinMax getDimensionExtents(IMDEventWorkspace_sptr ws, size_t index) {
         "Invalid workspace passed to getDimensionExtents.");
   auto dim = ws->getDimension(index);
   return std::make_pair(dim->getMinimum(), dim->getMaximum());
-}
-
-DblMatrix matrixFromProjection(ITableWorkspace_sptr projection) {
-  if (!projection) {
-    return DblMatrix(3, 3, true /* makeIdentity */);
-  }
-
-  const size_t numDims = projection->rowCount();
-  DblMatrix ret(3, 3);
-  for (size_t i = 0; i < numDims; i++) {
-    const std::string name =
-        projection->getColumn("name")->cell<std::string>(i);
-    const std::string valueStr =
-        projection->getColumn("value")->cell<std::string>(i);
-    std::vector<std::string> valueStrVec;
-    boost::split(valueStrVec, valueStr, boost::is_any_of(","));
-
-    std::vector<double> valueDblVec;
-    for (auto it = valueStrVec.begin(); it != valueStrVec.end(); ++it)
-      valueDblVec.push_back(boost::lexical_cast<double>(*it));
-
-    if (name == "u")
-      ret.setRow(0, valueDblVec);
-    else if (name == "v")
-      ret.setRow(1, valueDblVec);
-    else if (name == "w")
-      ret.setRow(2, valueDblVec);
-  }
-  return ret;
-}
-
-std::vector<std::string> unitsFromProjection(ITableWorkspace_sptr projection) {
-  std::vector<std::string> ret(3, "r");
-  if (!projection)
-    return ret;
-
-  const size_t numDims = projection->rowCount();
-  for (size_t i = 0; i < numDims; i++) {
-    const std::string name =
-        projection->getColumn("name")->cell<std::string>(i);
-    const std::string unit =
-        projection->getColumn("type")->cell<std::string>(i);
-
-    if (name == "u")
-      ret[0] = unit;
-    else if (name == "v")
-      ret[1] = unit;
-    else if (name == "w")
-      ret[2] = unit;
-  }
-  return ret;
 }
 
 DblMatrix scaleProjection(const DblMatrix &inMatrix,
@@ -281,7 +231,7 @@ void CutMD::exec() {
   // Collect input properties
   const IMDEventWorkspace_sptr inWS = getProperty("InputWorkspace");
   const size_t numDims = inWS->getNumDims();
-  const ITableWorkspace_sptr projection = getProperty("Projection");
+  const ITableWorkspace_sptr projectionWS = getProperty("Projection");
   std::vector<std::vector<double>> pbins(5);
   pbins[0] = getProperty("P1Bin");
   pbins[1] = getProperty("P2Bin");
@@ -291,21 +241,10 @@ void CutMD::exec() {
   const bool noPix = getProperty("NoPix");
 
   // Check Projection format
-  if (projection) {
-    auto colNames = projection->getColumnNames();
-    if (colNames.size() != 4 ||
-        std::find(colNames.begin(), colNames.end(), "name") == colNames.end() ||
-        std::find(colNames.begin(), colNames.end(), "value") ==
-            colNames.end() ||
-        std::find(colNames.begin(), colNames.end(), "offset") ==
-            colNames.end() ||
-        std::find(colNames.begin(), colNames.end(), "type") == colNames.end())
-      throw std::runtime_error(
-          "Invalid Projection supplied. Please check column names.");
-    if (projection->rowCount() < 3)
-      throw std::runtime_error(
-          "Insufficient rows in projection table. Must be 3 or more.");
-  }
+  Projection projection;
+  if (projectionWS)
+    projection = Projection(*projectionWS);
+
   // Check PBin properties
   for (size_t i = 0; i < 5; ++i) {
     if (i < numDims && pbins[i].empty())
@@ -327,12 +266,15 @@ void CutMD::exec() {
   extentLimits.push_back(getDimensionExtents(inWS, 2));
 
   // Scale projection
-  DblMatrix projectionMatrix = matrixFromProjection(projection);
-  std::vector<std::string> targetUnits = unitsFromProjection(projection);
-  std::vector<std::string> originUnits(3); // TODO. This is a hack!
-  originUnits[0] = "r";
-  originUnits[1] = "r";
-  originUnits[2] = "r";
+  DblMatrix projectionMatrix(3, 3);
+  projectionMatrix.setRow(0, projection.U());
+  projectionMatrix.setRow(1, projection.V());
+  projectionMatrix.setRow(2, projection.W());
+
+  std::vector<std::string> targetUnits(3);
+  for (size_t i = 0; i < 3; ++i)
+    targetUnits[i] = projection.getUnit(i) == RLU ? "r" : "a";
+  std::vector<std::string> originUnits(3, "r"); // TODO. This is a hack!
 
   DblMatrix scaledProjectionMatrix =
       scaleProjection(projectionMatrix, originUnits, targetUnits, inWS);
@@ -437,7 +379,13 @@ void CutMD::exec() {
                                    true);
   }
 
-  // Done!
+  auto geometry = boost::dynamic_pointer_cast<Mantid::API::MDGeometry>(sliceWS);
+
+  /* Original workspace and transformation information does not make sense for self-contained Horace-style
+   * cuts, so clear it out. */
+  geometry->clearTransforms();
+  geometry->clearOriginalWorkspaces();
+
   setProperty("OutputWorkspace", sliceWS);
 }
 

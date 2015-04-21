@@ -88,7 +88,7 @@ class BuildSQWTest(stresstesting.MantidStressTest):
 
         # Do the final merge
         sqw_file = os.path.join(config["defaultsave.directory"],"BuildSQWTestCurrent.nxs")
-        finalSQW = MergeMDFiles(",".join(self._created_files),OutputFilename=sqw_file,Parallel='0')
+        dummy_finalSQW = MergeMDFiles(",".join(self._created_files),OutputFilename=sqw_file,Parallel='0')
         self._created_files.append(sqw_file)
 
     def validate(self):
@@ -101,14 +101,14 @@ class BuildSQWTest(stresstesting.MantidStressTest):
         for filename in self._created_files:
             try:
                 os.remove(filename)
-            except OSError,exc:
+            except OSError:
                 mantid.logger.warning("Unable to remove created file '%s'" % filename)
 
 class LoadSQW_FileBasedTest(BuildSQWTest):
     """ The test checks loading MD workspace from SQW file when target file is file based"""
 
     def __init__(self):
-
+        super(LoadSQW_FileBasedTest, self).__init__()
         self._input_data = ["Test22meV2f.sqw","Test22meVMD.nxs"]
 
     def runTest(self):
@@ -116,7 +116,7 @@ class LoadSQW_FileBasedTest(BuildSQWTest):
         MDws_file = os.path.join(config["defaultsave.directory"],"LoadSQWTestFileBased.nxs")
         sqw_file = os.path.join(self._input_location,self._input_data[0])
 
-        wsMD=LoadSQW(Filename=sqw_file, OutputFilename=MDws_file)
+        dummy_wsMD=LoadSQW(Filename=sqw_file, OutputFilename=MDws_file)
 
         self._created_files=MDws_file
 
@@ -127,7 +127,7 @@ class LoadSQW_FileBasedTest(BuildSQWTest):
         Reference=LoadMD(Filename=ref_file, FileBackEnd=True, Memory=100)
         rez = CompareMDWorkspaces(Workspace1="wsMD",Workspace2=Reference,Tolerance=1.e-5,CheckEvents=False,IgnoreBoxID=False)
 
-        DeleteWorkspace("wsMD")
+        DeleteWorkspace("dummy_wsMD")
 
         return rez[0]
 
@@ -135,14 +135,14 @@ class LoadSQW_MemBasedTest(BuildSQWTest):
     """ The test checks loading MD workspace from SQW file when target file is file based"""
 
     def __init__(self):
-
+        super(LoadSQW_MemBasedTest, self).__init__()
         self._input_data = ["Test22meV2f.sqw","Test22meVMD.nxs"]
 
     def runTest(self):
 
         sqw_file = os.path.join(self._input_location,self._input_data[0])
 
-        wsMD=LoadSQW(Filename=sqw_file)
+        dummy_wsMD=LoadSQW(Filename=sqw_file)
 
         self._created_files=[]
 
@@ -153,6 +153,6 @@ class LoadSQW_MemBasedTest(BuildSQWTest):
         Reference=LoadMD(Filename=ref_file, FileBackEnd=True, Memory=100)
         rez = CompareMDWorkspaces(Workspace1="wsMD",Workspace2=Reference,Tolerance=1.e-5,CheckEvents=False,IgnoreBoxID=False)
 
-        DeleteWorkspace("wsMD")
+        DeleteWorkspace("dummy_wsMD")
 
-        return rez[0];
+        return rez[0]

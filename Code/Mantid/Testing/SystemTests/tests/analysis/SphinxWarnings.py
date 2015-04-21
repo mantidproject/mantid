@@ -12,30 +12,30 @@ class SphinxWarnings(stresstesting.MantidStressTest):
     def __init__(self):
         stresstesting.MantidStressTest.__init__(self)
         self.allowedCategories=['Arithmetic',
-                        'CorrectionFunctions',
-                        'Crystal',
-                        'DataHandling',
-                        'Diagnostics',
-                        'Diffraction',
-                        'Events',
-                        'Examples',
-                        'ISIS',
-                        'Inelastic',
-                        'MDAlgorithms',
-                        'MPI',
-                        'Muon',
-                        'Optimization',
-                        'PythonAlgorithms',
-                        'Quantification',
-                        'Reflectometry',
-                        'Remote',
-                        'SANS',
-                        'Simulation',
-                        'SINQ',
-                        'Sample',
-                        'Transforms',
-                        'Utility',
-                        'Workflow']
+                                'CorrectionFunctions',
+                                'Crystal',
+                                'DataHandling',
+                                'Diagnostics',
+                                'Diffraction',
+                                'Events',
+                                'Examples',
+                                'ISIS',
+                                'Inelastic',
+                                'MDAlgorithms',
+                                'MPI',
+                                'Muon',
+                                'Optimization',
+                                'PythonAlgorithms',
+                                'Quantification',
+                                'Reflectometry',
+                                'Remote',
+                                'SANS',
+                                'Simulation',
+                                'SINQ',
+                                'Sample',
+                                'Transforms',
+                                'Utility',
+                                'Workflow']
         self.errorMessage=""
 
     def checkString(self,s):
@@ -86,7 +86,8 @@ class SphinxWarnings(stresstesting.MantidStressTest):
                     #check categories
                     for cat in alg.categories():
                         if cat.split("\\")[0] not in self.allowedCategories:
-                            self.errorMessage+=name+" "+str(version)+" Category: "+cat.split("\\")[0]+" is not in the allowed list. If you need this category, please add it to the systemtest.\n"
+                            self.errorMessage += name+" "+str(version)+" Category: "+cat.split("\\")[0]+" is not in the allowed list."
+                            self.errorMessage += " If you need this category, please add it to the systemtest.\n"
                     #check summary
                     summary=alg.summary()
                     result=self.checkString(summary)

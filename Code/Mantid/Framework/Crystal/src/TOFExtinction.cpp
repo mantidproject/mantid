@@ -4,16 +4,10 @@
 #include "MantidDataObjects/Peak.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
-#include "MantidKernel/Strings.h"
-#include "MantidKernel/System.h"
 #include "MantidKernel/Utils.h"
-#include "MantidKernel/V3D.h"
-#include "MantidKernel/Statistics.h"
 #include "MantidKernel/ListValidator.h"
-#include <boost/math/special_functions/fpclassify.hpp>
-#include "MantidDataObjects/TableWorkspace.h"
-#include "MantidAPI/TableRow.h"
 #include <fstream>
+#include <boost/math/special_functions/fpclassify.hpp>
 
 using namespace Mantid::Geometry;
 using namespace Mantid::DataObjects;
@@ -145,9 +139,7 @@ void TOFExtinction::exec() {
       double Xqt = getXqt(EgLaueI, cell, wl, twoth, tbar, fsq);
       y_corr = getLorentzian(Xqt, twoth);
       sigfsq_ys = getSigFsqr(EgLaueI, cell, wl, twoth, tbar, fsq, sigfsq);
-    }
-
-    else if (cType.compare("Type II Zachariasen") == 0) {
+    } else if (cType.compare("Type II Zachariasen") == 0) {
       // Apply correction to fsq with Type-II Z for testing
       double EsLaue = getEgLaue(r_crystallite, twoth, wl, divBeam, betaBeam);
       double Xqt = getXqt(EsLaue, cell, wl, twoth, tbar, fsq);
@@ -165,9 +157,7 @@ void TOFExtinction::exec() {
       double Xqt = getXqt(EsLaue, cell, wl, twoth, tbar, fsq);
       y_corr = getLorentzian(Xqt, twoth);
       sigfsq_ys = getSigFsqr(EsLaue, cell, wl, twoth, tbar, fsq, sigfsq);
-    }
-
-    else if (cType.compare("Type I&II Zachariasen") == 0) {
+    } else if (cType.compare("Type I&II Zachariasen") == 0) {
       // Apply correction to fsq with Type-II Z for testing
       double EgLaueI = getEgLaue(Eg, twoth, wl, divBeam, betaBeam);
       double EsLaue = getEgLaue(r_crystallite, twoth, wl, divBeam, betaBeam);
@@ -194,7 +184,13 @@ void TOFExtinction::exec() {
       sigfsq_ys = sigfsq;
     }
 
-    peak1.setIntensity(fsq * y_corr);
+    double ys = fsq / y_corr;
+    // std::cout << fsq << "  " << y_corr<<"  "<<wl<<"  "<<twoth<<"  "<<tbar<< "
+    // " << ys <<"\n";
+    if (!boost::math::isnan(ys))
+      peak1.setIntensity(ys);
+    else
+      peak1.setIntensity(0.0);
     sigfsq_ys =
         std::sqrt(1.0 + sigfsq_ys * sigfsq_ys + std::pow(0.005 * sigfsq_ys, 2));
     peak1.setSigmaIntensity(sigfsq_ys);
@@ -233,6 +229,8 @@ double TOFExtinction::getZachariasen(double Xqt) {
   return y_ext;
 }
 double TOFExtinction::getGaussian(double Xqt, double twoth) {
+  if (Xqt < 0.0 || Xqt > 30.0)
+    return 1;
   // Type-I, Gaussian, Becker, P. J. & Coppens, P. (1974). Acta Cryst. A30, 129;
   double y_ext = std::sqrt(
       1 + 2 * Xqt +
@@ -250,9 +248,9 @@ double TOFExtinction::getLorentzian(double Xqt, double twoth) {
                           (1 + 0.15 * Xqt -
                            0.2 * std::pow((0.75 - std::cos(twoth)), 2) * Xqt));
   else
-    y_ext = std::sqrt(1 + 2 * Xqt +
-                      (0.025 + 0.285 * std::cos(twoth)) * std::pow(Xqt, 2) /
-                          (1 - 0.45 * Xqt * std::cos(twoth)));
+    y_ext = std::sqrt(1 + 2 * Xqt + (0.025 + 0.285 * std::cos(twoth)) *
+                                        std::pow(Xqt, 2) /
+                                        (1 - 0.45 * Xqt * std::cos(twoth)));
   return y_ext;
 }
 double TOFExtinction::getEsLaue(double r, double twoth, double wl) {
@@ -303,6 +301,8 @@ double TOFExtinction::getTypeIIZachariasen(double XqtII) {
   return y_ext_II;
 }
 double TOFExtinction::getTypeIIGaussian(double XqtII, double twoth) {
+  if (XqtII < 0.0 || XqtII > 30.0)
+    return 1;
   // Becker, P. J. & Coppens, P. (1974). Acta Cryst. A30, 129;
   double y_ext_II = std::sqrt(
       1 + 2 * XqtII +
@@ -321,10 +321,9 @@ double TOFExtinction::getTypeIILorentzian(double XqtII, double twoth) {
                       (1 + 0.15 * XqtII -
                        0.2 * std::pow((0.75 - std::cos(twoth)), 2) * XqtII));
   else
-    y_ext_II =
-        std::sqrt(1 + 2 * XqtII +
-                  (0.025 + 0.285 * std::cos(twoth)) * std::pow(XqtII, 2) /
-                      (1 - 0.45 * XqtII * std::cos(twoth)));
+    y_ext_II = std::sqrt(
+        1 + 2 * XqtII + (0.025 + 0.285 * std::cos(twoth)) * std::pow(XqtII, 2) /
+                            (1 - 0.45 * XqtII * std::cos(twoth)));
   return y_ext_II;
 }
 double TOFExtinction::getSigFsqr(double Rg, double cellV, double wl,

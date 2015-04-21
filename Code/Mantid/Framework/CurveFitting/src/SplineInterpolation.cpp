@@ -146,14 +146,6 @@ SplineInterpolation::setupOutputWorkspace(API::MatrixWorkspace_sptr inws,
   MatrixWorkspace_sptr outputWorkspace =
       WorkspaceFactory::Instance().create(inws, size);
 
-  // create labels for output workspace
-  API::TextAxis *tAxis = new API::TextAxis(size);
-  for (int i = 0; i < size; ++i) {
-    std::string index = boost::lexical_cast<std::string>(i);
-    tAxis->setLabel(i, "Y" + index);
-  }
-  outputWorkspace->replaceAxis(1, tAxis);
-
   return outputWorkspace;
 }
 

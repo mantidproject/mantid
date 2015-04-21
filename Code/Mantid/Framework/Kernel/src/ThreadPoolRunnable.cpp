@@ -1,5 +1,4 @@
 #include "MantidKernel/ThreadPoolRunnable.h"
-#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace Kernel {
