@@ -536,7 +536,8 @@ MDHistoWorkspaceIterator::findNeighbourIndexesByWidth(const std::vector<int>& wi
 
   // Filter out indexes that are are not actually neighbours.
   // Accumulate neighbour indexes.
-  std::vector<size_t> neighbourIndexes;
+  std::vector<size_t> neighbourIndexes(permutationsVertexTouching.size());
+  size_t nextFree = 0;
   for (size_t i = 0; i < permutationsVertexTouching.size(); ++i) {
     if (permutationsVertexTouching[i] == 0) {
       continue;
@@ -546,9 +547,10 @@ MDHistoWorkspaceIterator::findNeighbourIndexesByWidth(const std::vector<int>& wi
     if (neighbour_index < m_ws->getNPoints() &&
         Utils::isNeighbourOfSubject(m_nd, neighbour_index, m_index,
                                     m_indexMaker, m_indexMax, widths) ) {
-      neighbourIndexes.push_back(neighbour_index);
+      neighbourIndexes[nextFree++] = neighbour_index;
     }
   }
+  neighbourIndexes.resize(nextFree);
 
   // Remove duplicates
   std::sort(neighbourIndexes.begin(), neighbourIndexes.end());

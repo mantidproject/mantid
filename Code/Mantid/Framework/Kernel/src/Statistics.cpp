@@ -9,6 +9,7 @@
 #include <numeric>
 #include <sstream>
 #include <stdexcept>
+#include <functional>
 
 
 namespace Mantid {
