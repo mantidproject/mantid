@@ -9,6 +9,7 @@ from datetime import date
 class PoldiLoadRuns(PythonAlgorithm):
     _nameTemplate = ""
     _mergeCheckEnabled = True
+    _autoMaskBadDetectors = True
 
     def category(self):
         return "SINQ\\Poldi"
@@ -44,6 +45,10 @@ class PoldiLoadRuns(PythonAlgorithm):
 
         self.declareProperty('EnableMergeCheck', True, direction=Direction.Input,
                              doc="Enable all the checks in PoldiMerge. Do not deactivate without very good reason.")
+
+        self.declareProperty('MaskBadDetectors', True, direction=Direction.Input,
+                             doc=('Automatically disable detectors with unusually small or large values, in addition'
+                                  ' to those masked in the instrument definition.'))
 
         self.declareProperty(WorkspaceProperty(name='OutputWorkspace',
                                                defaultValue='',
@@ -92,6 +97,9 @@ class PoldiLoadRuns(PythonAlgorithm):
 
         # PoldiMerge checks that instruments are compatible, but it can be disabled (calibration measurements)
         self._mergeCheckEnabled = self.getProperty('EnableMergeCheck').value
+
+        # The same for removing additional dead or misbehaving wires
+        self._autoMaskBadDetectors = self.getProperty('MaskBadDetectors').value
 
         # Get a list of output workspace names.
         outputWorkspaces = self.getLoadedWorkspaceNames(year, mergeRange, mergeWidth)
@@ -172,8 +180,13 @@ class PoldiLoadRuns(PythonAlgorithm):
                 for j in range(i, i + mergeWidth - 1):
                     DeleteWorkspace(self._nameTemplate + str(j))
 
-            # If the workspace is still valid (merging could have failed), it's appended to the output.
+            # If the workspace is still valid (merging could have failed), it's processed further
             if AnalysisDataService.doesExist(currentTotalWsName):
+                # If the option is enabled, mask detectors that are likely to be misbehaving
+                if self._autoMaskBadDetectors:
+                    self.log().information("Masking bad detectors automatically.")
+                    self.autoMaskBadDetectors(currentTotalWsName)
+
                 outputWorkspaces.append(currentTotalWsName)
 
         return outputWorkspaces
@@ -183,6 +196,19 @@ class PoldiLoadRuns(PythonAlgorithm):
         LoadSINQ("POLDI", year, j, OutputWorkspace=workspaceName)
         LoadInstrument(workspaceName, InstrumentName="POLDI")
         PoldiTruncateData(InputWorkspace=workspaceName, OutputWorkspace=workspaceName)
+
+    # Automatically determine bad detectors and mask them
+    def autoMaskBadDetectors(self, currentTotalWsName):
+        Integration(currentTotalWsName, OutputWorkspace='integrated')
+
+        MedianDetectorTest('integrated', SignificanceTest=4.0, HighOutlier=400, CorrectForSolidAngle=False,
+                           OutputWorkspace='maskWorkspace')
+
+        MaskDetectors(Workspace=AnalysisDataService.retrieve(currentTotalWsName), MaskedWorkspace='maskWorkspace')
+
+        # Clean up
+        DeleteWorkspace('integrated')
+        DeleteWorkspace('maskWorkspace')
 
     # Returns true if the supplied workspace is a WorkspaceGroup
     def isGroupWorkspace(self, workspace):

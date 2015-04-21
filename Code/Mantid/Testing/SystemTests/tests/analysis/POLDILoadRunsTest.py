@@ -19,6 +19,8 @@ class POLDILoadRunsTest(stresstesting.MantidStressTest):
         self.loadWorkspacesDontOverwriteOther()
         self.loadWorkspacesOverwriteOther()
 
+        self.checkRemoveBadDetectors()
+
     def loadSingleWorkspace(self):
         singleWs = PoldiLoadRuns(2013, 6904)
 
@@ -127,6 +129,25 @@ class POLDILoadRunsTest(stresstesting.MantidStressTest):
         otherWs = PoldiLoadRuns(2013, 6904, OverwriteExistingWorkspace=False)
 
         self.assertTrue(issubclass(type(otherWs), Workspace))
+
+    def checkRemoveBadDetectors(self):
+        # Determine bad detectors automatically
+        twoWorkspacesMerged = PoldiLoadRuns(2013, 6903, 6904, 2, MaskBadDetectors=True)
+
+        wsMerged = AnalysisDataService.retrieve("twoWorkspacesMerged_data_6904")
+        self.assertEquals(len([True for x in range(wsMerged.getNumberHistograms()) if wsMerged.getDetector(
+            x).isMasked()]), 76)
+
+        self.clearAnalysisDataService()
+
+        # Only use those from the IDF
+        twoWorkspacesMerged = PoldiLoadRuns(2013, 6903, 6904, 2, MaskBadDetectors=False)
+
+        wsMerged = AnalysisDataService.retrieve("twoWorkspacesMerged_data_6904")
+        self.assertEquals(len([True for x in range(wsMerged.getNumberHistograms()) if wsMerged.getDetector(
+            x).isMasked()]), 12)
+
+        self.clearAnalysisDataService()
 
     def compareWorkspaces(self, left, right):
         for i in range(left.getNumberHistograms()):
