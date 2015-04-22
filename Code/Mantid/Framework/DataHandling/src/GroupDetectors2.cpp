@@ -754,7 +754,7 @@ int GroupDetectors2::readInt(std::string line) {
 * @param unUsedSpec :: list of spectra that haven't yet been included in a group
 * @throw invalid_argument if there is any problem with the file
 */
-void GroupDetectors2::readFile(spec2index_map &specs2index, std::ifstream &File,
+void GroupDetectors2::readFile(spec2index_map &specs2index, std::istream &File,
                                size_t &lineNum,
                                std::vector<int64_t> &unUsedSpec) {
   // used in writing the spectra to the outData map. The groups are just

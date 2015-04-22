@@ -189,7 +189,7 @@ private:
   /// possible), white space and # comments ignored
   int readInt(std::string line);
 
-  void readFile(spec2index_map &specs2index, std::ifstream &File,
+  void readFile(spec2index_map &specs2index, std::istream &File,
                 size_t &lineNum, std::vector<int64_t> &unUsedSpec);
 
   /// used while reading the file reads reads spectra numbers from the string
