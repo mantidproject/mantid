@@ -199,11 +199,15 @@ void PlotAsymmetryByLogValue::exec() {
   // Loop through runs
   for (size_t i = is; i <= ie; i++) {
 
-    // Load run, apply dead time corrections and detector grouping
-    Workspace_sptr loadedWs = doLoad(i);
+    // Check if run i was already loaded
+    if ( !g_redX.count(i) ) {
 
-    // Analyse loadedWs
-    doAnalysis (loadedWs, i-is);
+      // Load run, apply dead time corrections and detector grouping
+      Workspace_sptr loadedWs = doLoad(i);
+
+      // Analyse loadedWs
+      doAnalysis (loadedWs, i);
+    }
 
     progress.report();
   }
@@ -222,6 +226,7 @@ void PlotAsymmetryByLogValue::exec() {
   populateOutputWorkspace(outWS,nplots);
   // Assign the result to the output workspace property
   setProperty("OutputWorkspace", outWS);
+
 }
 
 /**  Loads one run and applies dead-time corrections and detector grouping if required
