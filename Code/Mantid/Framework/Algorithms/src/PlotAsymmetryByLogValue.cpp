@@ -95,6 +95,8 @@ std::string PlotAsymmetryByLogValue::g_logFunc;
 std::string PlotAsymmetryByLogValue::g_stype;
 std::vector<int> PlotAsymmetryByLogValue::g_forward_list;
 std::vector<int> PlotAsymmetryByLogValue::g_backward_list;
+int PlotAsymmetryByLogValue::g_red = 1;
+int PlotAsymmetryByLogValue::g_green = EMPTY_INT();
 
 /** Initialisation method. Declares properties to be used in algorithm.
 *
@@ -179,9 +181,6 @@ void PlotAsymmetryByLogValue::exec() {
   checkProperties();
 
   // Get properties
-  // Get green and red periods
-  m_red = getProperty("Red");
-  m_green = getProperty("Green");
   // Get type of dead-time corrections
   m_dtcType = getPropertyValue("DeadTimeCorrType");
   // Get runs
@@ -213,7 +212,7 @@ void PlotAsymmetryByLogValue::exec() {
 
 
   // Create the 2D workspace for the output
-  int nplots = (m_green!= EMPTY_INT()) ? 4 : 1;
+  int nplots = (g_green!= EMPTY_INT()) ? 4 : 1;
   size_t npoints = ie - is + 1;
   MatrixWorkspace_sptr outWS = WorkspaceFactory::Instance().create(
       "Workspace2D",
@@ -245,13 +244,18 @@ void PlotAsymmetryByLogValue::checkProperties () {
   // Get grouping properties
   std::vector<int> forward_list = getProperty("ForwardSpectra");
   std::vector<int> backward_list = getProperty("BackwardSpectra");
+  // Get green and red periods
+  int red = getProperty("Red");
+  int green = getProperty("Green");
 
   // Check if any property has changed
   if ( g_logName != logName ||
     g_logFunc != logFunc ||
     g_stype != stype ||
     g_forward_list != forward_list ||
-    g_backward_list != backward_list ) {
+    g_backward_list != backward_list ||
+    g_green != green ||
+    g_red != red) {
 
       // If so, clear previous results
     g_redX.clear();
@@ -276,6 +280,8 @@ void PlotAsymmetryByLogValue::checkProperties () {
   g_forward_list = forward_list;
   g_backward_list = backward_list;
   m_autogroup = (g_forward_list.size() == 0 && g_backward_list.size() == 0);
+  g_green = green;
+  g_red = red;
 
 
 }
@@ -554,11 +560,11 @@ void PlotAsymmetryByLogValue::doAnalysis (Workspace_sptr loadedWs, int64_t index
         Workspace2D_sptr memberWs =
             boost::dynamic_pointer_cast<Workspace2D>(loadedGroup->getItem(mi));
         int period = mi + 1;
-        if ( period == m_red ){
+        if ( period == g_red ){
           ws_red = memberWs;
         }
-        if ( m_green!= EMPTY_INT() ){
-          if ( period == m_green ){
+        if ( g_green!= EMPTY_INT() ){
+          if ( period == g_green ){
             ws_green = memberWs;
           }
         }
@@ -569,11 +575,11 @@ void PlotAsymmetryByLogValue::doAnalysis (Workspace_sptr loadedWs, int64_t index
         throw std::invalid_argument("Red period is out of range");
       }
       // Check ws_green
-      if ( (m_green!=EMPTY_INT()) && (!ws_green) ){
+      if ( (g_green!=EMPTY_INT()) && (!ws_green) ){
         throw std::invalid_argument("Green period is out of range");
       }
 
-      if ( m_green==EMPTY_INT() ){
+      if ( g_green==EMPTY_INT() ){
         double Y, E;
         calcIntAsymmetry(ws_red, Y, E);
         g_redX[index] = getLogValue(*ws_red);

@@ -120,9 +120,9 @@ private:
   /// Store type of dead time corrections
   std::string m_dtcType;
   /// Store red period
-  int m_red;
+  static int g_red;
   /// Store green period
-  int m_green;
+  static int g_green;
   // Mantid vectors to store results
   // Red mantid vectors
   static std::map<int64_t, double> g_redX;
