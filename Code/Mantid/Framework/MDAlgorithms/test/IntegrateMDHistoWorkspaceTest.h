@@ -41,7 +41,7 @@ public:
     alg.initialize();
     alg.setProperty("InputWorkspace", ws);
     const double step = 0.1;
-    alg.setProperty("P1Bin", boost::assign::list_of(0)(step)(1).convert_to_container<std::vector<double> >());
+    alg.setProperty("P1Bin", boost::assign::list_of(0.0)(step)(1.0).convert_to_container<std::vector<double> >());
     alg.setPropertyValue("OutputWorkspace", "dummy");
     TSM_ASSERT("Expect validation errors", alg.validateInputs().size() > 0);
     TSM_ASSERT_THROWS("No new steps allowed", alg.execute(), std::runtime_error&);
