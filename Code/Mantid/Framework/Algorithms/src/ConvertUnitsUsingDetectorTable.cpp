@@ -347,6 +347,7 @@ namespace Algorithms
 
           try
           {
+              double deg2rad = M_PI / 180.;
               specid_t spectraNumber = static_cast<specid_t>(spectraColumn->toDouble(i));
               wsid = outputWS->getIndexFromSpectrumNumber(spectraNumber);
               g_log.debug() << "###### Spectra #" << spectraNumber << " ==> Workspace ID:" << wsid << std::endl;

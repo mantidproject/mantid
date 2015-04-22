@@ -74,8 +74,6 @@ namespace Algorithms
     Kernel::Unit_const_sptr m_inputUnit;  ///< The unit of the input workspace
     Kernel::Unit_sptr m_outputUnit;       ///< The unit we're going to
 
-    const double deg2rad = M_PI / 180.;
-
   };
 
 
