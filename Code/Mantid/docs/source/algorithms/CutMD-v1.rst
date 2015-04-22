@@ -138,5 +138,27 @@ Output:
    number of dimensions not integrated 3
    min dE 5.0
    max dE -5.0
+   
+**Example - CutMD on MDHistoWorkspace:**
 
+.. testcode:: ExampleMDHisto
+
+   signal  = [1.0] * 100;
+   error=[1.0] * 100;
+   # Create Histo workspace
+   histo_ws=CreateMDHistoWorkspace(Dimensionality=2,Extents=[-10,10,-10,10],SignalInput=signal ,ErrorInput=error, NumberOfBins=[10,10], Names='X,Y', Units='Q,Q')
+              
+   # Cut the MDHistoWorkspace to give a single bin containing half the data              
+   cut= CutMD(InputWorkspace=histo_ws, PBins=[[-10, 10], [-5, 5]]) 
+
+   print 'Total signal in input = %0.2f' %  sum(signal)
+   print 'Half the volume should give half the signal = %0.2f' % cut.getSignalArray()
+
+Output:
+
+.. testoutput:: ExampleMDhisto
+
+   Total signal in input = 100.00
+   Half the volume should give half the signal = 50.00
+   
 .. categories::
