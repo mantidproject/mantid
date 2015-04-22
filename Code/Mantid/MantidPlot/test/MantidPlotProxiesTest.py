@@ -137,7 +137,7 @@ class MantidPlotProxiesTest(unittest.TestCase):
         self.try_closing(iv, "getInstrumentView()")
 
     def test_convertToWaterfall(self):
-        g = plot(workspace("IRS26173"),(0,1,2,3,4))
+        g = pymantidplot.qtiplot.plot(workspace("IRS26173"),(0,1,2,3,4))
         convertToWaterfall(g)
         self.try_closing(g, "convertToWaterfall()")
 

@@ -114,7 +114,7 @@ public:
   {
     AlgorithmProperty testProp("CalculateStep");
     TS_ASSERT_EQUALS(testProp.setValue("ComplexSum()"),
-      "AlgorithmManager:: Unable to create algorithm ComplexSum Algorithm not registered ComplexSum");
+      "Algorithm not registered ComplexSum");
   }
 
   void test_Alg_With_An_AlgorithmProperty_Accepts_Another_Algorithm()

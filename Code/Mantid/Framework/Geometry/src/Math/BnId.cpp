@@ -9,6 +9,7 @@
 #include <sstream>
 #include <algorithm>
 #include <iterator>
+#include <functional>
 
 #include "MantidGeometry/Math/BnId.h"
 
