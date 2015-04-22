@@ -217,7 +217,7 @@ Mantid::coord_t MDHistoWorkspaceIterator::jumpToNearest(const VMD& fromLocation)
 {
 
     std::vector<size_t> indexes(m_nd);
-    coord_t sqDiff;
+    coord_t sqDiff = 0;
     for(size_t d = 0; d < m_nd; ++d) {
         coord_t dExact = (fromLocation[d] - m_origin[d]) / m_binWidth[d]; // Index position in this space.
         coord_t dRound = size_t(dExact + 0.5); // Round to nearest bin edge.
