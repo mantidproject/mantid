@@ -134,7 +134,7 @@ namespace Mantid
         view->getViewProxy()->GetProperty("Background")->AddObserver(vtkCommand::ModifiedEvent, backgroundColorChangeCallback);
       }
 
-      void BackgroundRgbProvider::backgroundColorChangeCallbackFunction(vtkObject* caller, long unsigned int vtkNotUsed(eventId), void* vtkNotUsed(clientData), void* vtkNotUsed(callData))
+      void BackgroundRgbProvider::backgroundColorChangeCallbackFunction(vtkObject* caller, long unsigned int, void*, void*)
       {
         // Extract the background color and persist it 
         vtkSMDoubleVectorProperty* background =vtkSMDoubleVectorProperty::SafeDownCast(caller);
