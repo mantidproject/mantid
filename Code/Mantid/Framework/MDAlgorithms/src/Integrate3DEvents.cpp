@@ -122,12 +122,6 @@ Mantid::Geometry::PeakShape_const_sptr Integrate3DEvents::ellipseIntegrateEvents
   }
 
   std::vector<std::pair<double, V3D> > &some_events = event_lists[hkl_key];
-  // This does not seem to be used for anything
-  /*for (size_t it = 0; it != some_events.size(); ++it) {
-    hkl_key = getHklKey2(some_events[it].second);
-    if (hkl_key != 0) // only save if hkl != (0,0,0)
-      peak_qs[hkl_key] = some_events[it].second;
-  }*/
 
   if (some_events.size() < 3) // if there are not enough events to
   {                           // find covariance matrix, return

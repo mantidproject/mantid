@@ -17,12 +17,6 @@ class DLLExport IntegrateEllipsoids : public API::Algorithm {
 public:
   IntegrateEllipsoids();
   virtual ~IntegrateEllipsoids();
-  void qListFromEventWS(Integrate3DEvents &integrator, API::Progress &prog,
-                        DataObjects::EventWorkspace_sptr &wksp,
-                        Kernel::DblMatrix const &UBinv, bool hkl_integ);
-  void qListFromHistoWS(Integrate3DEvents &integrator, API::Progress &prog,
-                        DataObjects::Workspace2D_sptr &wksp,
-                        Kernel::DblMatrix const &UBinv, bool hkl_integ);
   virtual const std::string name() const;
   /// Summary of algorithms purpose
   virtual const std::string summary() const {
@@ -36,6 +30,12 @@ public:
 private:
   void init();
   void exec();
+  void qListFromEventWS(Integrate3DEvents &integrator, API::Progress &prog,
+                        DataObjects::EventWorkspace_sptr &wksp,
+                        Kernel::DblMatrix const &UBinv, bool hkl_integ);
+  void qListFromHistoWS(Integrate3DEvents &integrator, API::Progress &prog,
+                        DataObjects::Workspace2D_sptr &wksp,
+                        Kernel::DblMatrix const &UBinv, bool hkl_integ);
 
   MDWSDescription m_targWSDescr;
 

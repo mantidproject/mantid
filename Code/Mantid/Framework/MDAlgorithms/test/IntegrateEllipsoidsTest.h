@@ -201,25 +201,6 @@ public:
       TS_ASSERT_THROWS(alg.setProperty("InputWorkspace", inputWorkspaceNoInstrument), std::invalid_argument&);
   }
 
-  //Comment out since don't know how to set x axis to TOF with no axes
-  void xtest_event_or_workspace2d_inputs_only() {
-
-    auto otherMatrixWorkspaceInstance =
-        boost::make_shared<WorkspaceSingleValue>();
-    otherMatrixWorkspaceInstance->setInstrument(m_eventWS->getInstrument());
-
-    IntegrateEllipsoids alg;
-    alg.setChild(true);
-    alg.setRethrows(true);
-    alg.initialize();
-    alg.setProperty("InputWorkspace", otherMatrixWorkspaceInstance);
-    alg.setProperty("PeaksWorkspace", m_peaksWS);
-    alg.setPropertyValue("OutputWorkspace", "dummy");
-
-    TSM_ASSERT_THROWS("Only these two subtypes of Matrix workspace allowed",
-                     alg.execute(), std::runtime_error &);
-  }
-
   void test_execution_events() {
 
     IntegrateEllipsoids alg;
