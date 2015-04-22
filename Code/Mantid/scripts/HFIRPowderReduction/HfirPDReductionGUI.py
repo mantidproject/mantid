@@ -383,9 +383,10 @@ class MainWindow(QtGui.QMainWindow):
                 Scan %d." % (expno, scanno))
         # ENDIF(status)
 
-        # Now do different tasks for different tab
-        if itab == 0 or itab == 1:
-            # Load data only
+
+        # Load data for tab 0, 1, 2 and 4
+        if itab in [0, 1, 2, 4]:
+            # Load SPICE data (step 1)
             try: 
                 execstatus = self._myControl.loadSpicePDData(expno, scanno, datafilename)
                 if execstatus is False:
@@ -400,10 +401,81 @@ class MainWindow(QtGui.QMainWindow):
                     self._logError(cause)
                     return
             # END-TRY-EXCEPT-FINALLY
-                    
-        elif itab == 2 or itab == 4:
-            # load and reduce data 
-            wavelength = float(self.ui.lineEdit_wavelength.text())
+
+            # Obtain the correction file names and wavelength from SPICE file
+            localdir = os.path.dirname(datafilename)
+            status, returnbody = self._myControl.retrieveCorrectionData(instrument='HB2A', 
+                                                                        exp=expno, scan=scanno, 
+                                                                        localdatadir=localdir)
+            if status is True:
+                autowavelength = returnbody[0]
+                vancorrfname = returnbody[1]
+                excldetfname = returnbody[2]
+            else:
+                autowavelength = None
+                vancorrfname = None
+                excldetfname = None
+            else:
+
+            # Optionally parse det effecient file
+            if self.ui.checkBox_useDetEffCorr.isChecked():
+                if vancorrfname is None:
+                    vancorrfname = QtGui.QFileBrowse()
+
+                self.ui.lineEdit_vcorrFileName.setText(str(vancorrfname))
+                
+                detefftablews = self._myControl.parseDetEffCorrFile('HB2A', vancorrfname)
+            else:
+                detefftablews = None
+            # ENDIF
+
+            # Parse SPICE data to MDEventWorkspaces
+            try:
+                execstatus = self._myControl.arseSpiceData(self, expno, scanno, detefftablews=detefftablews)
+                if execstatus is False:
+                    cause = "Parse data failed."
+                else:
+                    cause = None
+            except Exception as e:
+                execstatus = False
+                cause = str(e)
+            finally:
+                if execstatus is False:
+                    self._logError(cause)
+                    return
+            # END-TRY-EXCEPT-FINALLY
+        else:
+            # Unsupported case
+            raise NotImplementedError("%d-th tab should not get this far."%(itab))
+        # ENDIFELSE
+
+        # Process wavelength
+        wavelength = self.getFloat(self.self.ui.lineEdit_wavelength)
+        if autowavelength is not None:
+            if wavelength is None:
+                wavelength = autowavelength
+            elif abs(autowavelength-wavelength) > 0.01:
+                self._logWarning("User specified wavelength %f has different value from HB2A's setup %f." % (
+                    wavelength, autowavelength))
+                wavelength = autowavelength
+            # so wavelength = autowavelength
+        elif wavelength is None:
+            raise NotImplementedError("Wavelength is not set up!")
+
+        # Reduce data for tab normalized and vanadium
+        if itab == 2 or itab == 4:
+            # Reduce data
+
+            # optionally parse det exclusion file
+            if self.ui.checkBox_useDetExcludeFile.isChecked():
+                if excldetfname is None:
+                    excldetfname = QtGui.QFileBrowse()
+
+                excludedetlist = self._myControl.loadExcludedDetFile('HB2A', excldetfname)
+                self.ui.lineEdit_excludedDetFileName.setText(excldetfname)
+            else:
+                excludedetlist = []
+            # ENDIF
 
             if itab == 2:
                 # Get other information
@@ -427,9 +499,8 @@ class MainWindow(QtGui.QMainWindow):
             # END-IF-ELSE
 
             # Reduce data 
-            execstatus = self._myControl.loadSpicePDData(expno, scanno, datafilename)
             execstatus = self._myControl.reduceSpicePDData(expno, scanno, \
-                    datafilename, unit, xmin, xmax, binsize, wavelength)
+                    datafilename, unit, xmin, xmax, binsize, wavelength, excludedetlist)
             print "[DB] reduction status = %s, Binning = %s, %s, %s" % (str(execstatus),
                     str(xmin), str(binsize), str(xmax))
 
@@ -681,6 +752,7 @@ class MainWindow(QtGui.QMainWindow):
             self._expNo = expno
             self._scanNo = scanno
             self._detID = detid
+            self._indvXLabel = xlabel
         except NotImplementedError as e:
             self._logError(str(e))
 
@@ -689,40 +761,36 @@ class MainWindow(QtGui.QMainWindow):
     def doPlotIndvDetNext(self):
         """ Plot next raw detector signals for tab 'Individual Detector'
         """
-        # TODO - ASAP (3) Not correct now!
-        # Validate the operation
-        if self._rawDetPtNo is None and self._rawDetExpNo is None \
-                and self._rawDetScanNo is None:
-            self._logError('doPlotRawDetPrev cannot work because no Exp/Scan/Pt has been set.')
+        # Plot 
+        try: 
+            currdetid = self._detID + 1
+            self._plotIndividualDetCounts(self._expNo, self._scanNo, currdetid,
+                    self._indvXLabel)
+        except Exception as e:
+            self._logError(str(e))
+        else:
+            self._detID = currdetid
 
-        # Plot
-        execstatus = self._plotRawDetSignal(self._rawDetExpNo, self._rawDetScanNo, 
-                self._rawDetPlotMode, self._rawDetPtNo+1, doOverPlot)
-
-        # Write back
-        if execstatus is True:
-            self._rawDetPtNo += 1
-            self.ui.lineEdit_ptNo.setText(str(self._rawDetPtNo))
+        # Update widget
+        self.ui.lineEdit_detID.setText(str(self._detID))
 
         return
 
     def doPlotIndvDetPrev(self):
         """ Plot previous individual detector's signal for tab 'Individual Detector'
         """
-        # TODO - ASAP (3) Not correct now!
-        # Validate the operation
-        if self._rawDetPtNo is None and self._rawDetExpNo is None \
-                and self._rawDetScanNo is None:
-            self._logError('doPlotRawDetPrev cannot work because no Exp/Scan/Pt has been set.')
+        # Plot 
+        try: 
+            currdetid = self._detID - 1
+            self._plotIndividualDetCounts(self._expNo, self._scanNo, currdetid,
+                    self._indvXLabel)
+        except Exception as e:
+            self._logError(str(e))
+        else:
+            self._detID = currdetid
 
-        # Plot
-        execstatus = self._plotRawDetSignal(self._rawDetExpNo, self._rawDetScanNo, 
-                self._rawDetPlotMode, self._rawDetPtNo-1, doOverPlot)
-
-        # Write back
-        if execstatus is True:
-            self._rawDetPtNo += 1
-            self.ui.lineEdit_ptNo.setText(str(self._rawDetPtNo))
+        # Update widget
+        self.ui.lineEdit_detID.setText(str(self._detID))
 
         return
 

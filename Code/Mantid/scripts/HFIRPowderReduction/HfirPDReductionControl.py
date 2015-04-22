@@ -358,18 +358,10 @@ class HFIRPDRedControl:
         return True
 
         
-    def loadDataFile(self, expno, scanno):
-        """ Return :: datafilename (None for failed)
-        """
-
-        raise NotImplementedError("Need to refactor from GUI script!")
-
-
     def loadSpicePDData(self, expno, scanno, datafilename):
         """ Load SPICE powder diffraction data to MDEventsWorkspaces
         """
-        # FIXME : Think of refactoring with reduceSpicePDData
-        # base workspace name
+        # Create base workspace name
         try:
             basewsname = os.path.basename(datafilename).split(".")[0]
         except AttributeError as e:
@@ -381,23 +373,38 @@ class HFIRPDRedControl:
         api.LoadSpiceAscii(Filename=datafilename, 
                 OutputWorkspace=tablewsname, RunInfoWorkspace=infowsname)
 
-        raise NotImplementedError("Need to split from here!")
+        tablews = AnalysisDataService.retrieve(tablewsname)
+        infows  = AnalysisDataService.retrieve(infowsname)
 
-        # convert to MDWorkspace
+        # Create a reduction manager and add workspaces to it
+        wsmanager = PDRManager(expno, scanno)
+        wsmanager.setRawWorkspaces(tablews, infws)
+        self._myWorkspaceDict[ (int(expno), int(scanno) )] = wsmanager
+
+        return
+
+    
+    def parseSpiceData(self, expno, scanno, detefftablews=None):
+        """ Load SPICE data to MDWorkspaces
+        """
+        # Get reduction manager
+        try: 
+            wsmanager = self._myWorkspaceDict[ (int(expno), int(scanno) )]
+        except KeyError:
+            raise NotImplementedError("Exp %d Scan %d has not been loaded yet." % (int(expno),
+                int(scanno)))
+
+        # Convert to MDWorkspace
+        tablews = wsmanager.getRawDataTable()
+        infows  = wsmanager.getRawInfoMatrixWS()
+
         datamdwsname = basewsname + "_DataMD"
         monitorwsname = basewsname + "_MonitorMD"
-        api.ConvertSpiceDataToRealSpace(InputWorkspace=tablewsname,
-                RunInfoWorkspace=infowsname,
-                OutputWorkspace=datamdwsname,
-                OutputMonitorWorkspace=monitorwsname)
-
-        # Download the correction file and find out the wavelength!
-        # TODO / FIXME - ASAP 2
-        if False:
-            status, errmsg = self.retrieveCorrectionData(instrument='HB2A', exp=expno, scan=scanno)
-            if status is False:
-                self._logError("Unable to download correction files for Exp %d Scan %d. \
-                        \nReason: %s." % (expno, scanno, errmsg))
+        api.ConvertSpiceDataToRealSpace(InputWorkspace=tablews, 
+                                        RunInfoWorkspace=infows, 
+                                        OutputWorkspace=datamdwsname, 
+                                        OutputMonitorWorkspace=monitorwsname,
+                                        DetEffTable=detefftablews)
 
         datamdws = AnalysisDataService.retrieve(datamdwsname)
         monitormdws = AnalysisDataService.retrieve(monitorwsname)
@@ -407,16 +414,11 @@ class HFIRPDRedControl:
                     for experiment %d and scan %d." % (expno, scanno))
 
         # Manager:
-        wsmanager = PDRManager(expno, scanno)
-        wsmanager.setup(datamdws, monitormdws)
+        wsmanager.setupMDWrokspaces(datamdws, monitormdws)
         self._myWorkspaceDict[(expno, scanno)] = wsmanager
         
         return True
 
-
-
-
-    #---------------------------------------------------------------------------
         
     def mergeReduceSpiceData(self, expscanfilelist, unit, xmin, xmax, binsize, 
             wavelength):

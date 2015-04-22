@@ -105,7 +105,7 @@
       <item>
        <layout class="QHBoxLayout" name="horizontalLayout_25">
         <item>
-         <widget class="QCheckBox" name="checkBox">
+         <widget class="QCheckBox" name="checkBox_useDetEffCorr">
           <property name="text">
            <string>Detectors Efficiency Correction</string>
           </property>
@@ -188,7 +188,7 @@
       <item>
        <layout class="QHBoxLayout" name="horizontalLayout_24">
         <item>
-         <widget class="QCheckBox" name="checkBox_2">
+         <widget class="QCheckBox" name="checkBox_useDetExcludeFile">
           <property name="text">
            <string>Using Exclusion File</string>
           </property>
@@ -1786,7 +1786,7 @@
      <x>0</x>
      <y>0</y>
      <width>1412</width>
-     <height>25</height>
+     <height>22</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
