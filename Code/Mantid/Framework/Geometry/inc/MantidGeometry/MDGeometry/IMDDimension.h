@@ -107,7 +107,7 @@ public:
 
 /// Shared Pointer for IMDDimension. Frequently used type in framework.
 typedef boost::shared_ptr<IMDDimension> IMDDimension_sptr;
-/// Shared Pointer to const IMDDimension. Not stictly necessary since
+/// Shared Pointer to const IMDDimension. Not strictly necessary since
 /// IMDDimension is pure abstract.
 typedef boost::shared_ptr<const IMDDimension> IMDDimension_const_sptr;
 /// Vector of constant shared pointers to IMDDimensions.
