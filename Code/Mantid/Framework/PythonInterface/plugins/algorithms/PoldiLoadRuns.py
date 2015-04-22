@@ -10,6 +10,7 @@ class PoldiLoadRuns(PythonAlgorithm):
     _nameTemplate = ""
     _mergeCheckEnabled = True
     _autoMaskBadDetectors = True
+    _autoMaskThreshold = 3.0
 
     def category(self):
         return "SINQ\\Poldi"
@@ -49,6 +50,11 @@ class PoldiLoadRuns(PythonAlgorithm):
         self.declareProperty('MaskBadDetectors', True, direction=Direction.Input,
                              doc=('Automatically disable detectors with unusually small or large values, in addition'
                                   ' to those masked in the instrument definition.'))
+
+        self.declareProperty('BadDetectorThreshold', 3.0, direction=Direction.Input,
+                             doc=('Detectors are masked based on how much their intensity (integrated over time) '
+                                  'deviates from the median calculated from all detectors. This parameter indicates '
+                                  'how many times bigger the intensity needs to be for a detector to be masked.'))
 
         self.declareProperty(WorkspaceProperty(name='OutputWorkspace',
                                                defaultValue='',
@@ -100,6 +106,7 @@ class PoldiLoadRuns(PythonAlgorithm):
 
         # The same for removing additional dead or misbehaving wires
         self._autoMaskBadDetectors = self.getProperty('MaskBadDetectors').value
+        self._autoMaskThreshold = self.getProperty('BadDetectorThreshold').value
 
         # Get a list of output workspace names.
         outputWorkspaces = self.getLoadedWorkspaceNames(year, mergeRange, mergeWidth)
@@ -201,8 +208,8 @@ class PoldiLoadRuns(PythonAlgorithm):
     def autoMaskBadDetectors(self, currentTotalWsName):
         Integration(currentTotalWsName, OutputWorkspace='integrated')
 
-        MedianDetectorTest('integrated', SignificanceTest=4.0, HighOutlier=400, CorrectForSolidAngle=False,
-                           OutputWorkspace='maskWorkspace')
+        MedianDetectorTest('integrated', SignificanceTest=3.0, HighThreshold=self._autoMaskThreshold, HighOutlier=200, \
+                           CorrectForSolidAngle=False, OutputWorkspace='maskWorkspace')
 
         MaskDetectors(Workspace=AnalysisDataService.retrieve(currentTotalWsName), MaskedWorkspace='maskWorkspace')
 

@@ -4,6 +4,7 @@ from mantid.simpleapi import *
 from mantid.api import *
 import numpy as np
 
+
 class POLDILoadRunsTest(stresstesting.MantidStressTest):
     """This assembly of test cases checks that the behavior of PoldiLoadRuns is correct."""
 
@@ -132,11 +133,22 @@ class POLDILoadRunsTest(stresstesting.MantidStressTest):
 
     def checkRemoveBadDetectors(self):
         # Determine bad detectors automatically
-        twoWorkspacesMerged = PoldiLoadRuns(2013, 6903, 6904, 2, MaskBadDetectors=True)
+        twoWorkspacesMerged = PoldiLoadRuns(2013, 6903, 6904, 2, MaskBadDetectors=True,
+                                            BadDetectorThreshold=2.5)
 
         wsMerged = AnalysisDataService.retrieve("twoWorkspacesMerged_data_6904")
         self.assertEquals(len([True for x in range(wsMerged.getNumberHistograms()) if wsMerged.getDetector(
-            x).isMasked()]), 76)
+            x).isMasked()]), 36)
+
+        self.clearAnalysisDataService()
+
+        # Lower threshold, more excluded detectors
+        twoWorkspacesMerged = PoldiLoadRuns(2013, 6903, 6904, 2, MaskBadDetectors=True,
+                                            BadDetectorThreshold=2.0)
+
+        wsMerged = AnalysisDataService.retrieve("twoWorkspacesMerged_data_6904")
+        self.assertEquals(len([True for x in range(wsMerged.getNumberHistograms()) if wsMerged.getDetector(
+            x).isMasked()]), 49)
 
         self.clearAnalysisDataService()
 
