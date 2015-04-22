@@ -764,8 +764,6 @@ void GroupDetectors2::readFile(spec2index_map &specs2index, std::istream &File,
     do {
       std::getline(File, thisLine), lineNum++;
       spectrumNo = readInt(thisLine);
-      if (spectrumNo != EMPTY_LINE)
-        spectrumNo = specs2index[spectrumNo];
       // we haven't started reading a new group and so if the file ends here it
       // is OK
       if (!File)
