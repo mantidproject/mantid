@@ -97,6 +97,7 @@ std::vector<int> PlotAsymmetryByLogValue::g_forward_list;
 std::vector<int> PlotAsymmetryByLogValue::g_backward_list;
 int PlotAsymmetryByLogValue::g_red = 1;
 int PlotAsymmetryByLogValue::g_green = EMPTY_INT();
+std::string PlotAsymmetryByLogValue::g_dtcType;
 
 /** Initialisation method. Declares properties to be used in algorithm.
 *
@@ -180,9 +181,6 @@ void PlotAsymmetryByLogValue::exec() {
   // results, if any
   checkProperties();
 
-  // Get properties
-  // Get type of dead-time corrections
-  m_dtcType = getPropertyValue("DeadTimeCorrType");
   // Get runs
   std::string firstFN = getProperty("FirstRun");
   std::string lastFN = getProperty("LastRun");
@@ -247,6 +245,8 @@ void PlotAsymmetryByLogValue::checkProperties () {
   // Get green and red periods
   int red = getProperty("Red");
   int green = getProperty("Green");
+  // Get type of dead-time corrections
+  std::string dtcType = getPropertyValue("DeadTimeCorrType");
 
   // Check if any property has changed
   if ( g_logName != logName ||
@@ -255,7 +255,8 @@ void PlotAsymmetryByLogValue::checkProperties () {
     g_forward_list != forward_list ||
     g_backward_list != backward_list ||
     g_green != green ||
-    g_red != red) {
+    g_red != red ||
+    g_dtcType != dtcType) {
 
       // If so, clear previous results
     g_redX.clear();
@@ -282,6 +283,7 @@ void PlotAsymmetryByLogValue::checkProperties () {
   m_autogroup = (g_forward_list.size() == 0 && g_backward_list.size() == 0);
   g_green = green;
   g_red = red;
+  g_dtcType = dtcType;
 
 
 }
@@ -303,8 +305,8 @@ Workspace_sptr PlotAsymmetryByLogValue::doLoad (int64_t runNumber ) {
   Workspace_sptr loadedWs = load->getProperty("OutputWorkspace");
 
   // Check if dead-time corrections have to be applied
-  if (m_dtcType != "None") {
-    if (m_dtcType == "FromSpecifiedFile") {
+  if (g_dtcType != "None") {
+    if (g_dtcType == "FromSpecifiedFile") {
 
       // If user specifies a file, load corrections now
       Workspace_sptr customDeadTimes;

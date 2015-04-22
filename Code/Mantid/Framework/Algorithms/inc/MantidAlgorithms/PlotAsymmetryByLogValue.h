@@ -118,7 +118,7 @@ private:
   /// If true call LoadMuonNexus with Autogroup on
   bool m_autogroup;
   /// Store type of dead time corrections
-  std::string m_dtcType;
+  static std::string g_dtcType;
   /// Store red period
   static int g_red;
   /// Store green period
