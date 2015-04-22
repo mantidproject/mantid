@@ -4,6 +4,7 @@
 #include <vector>
 #include <algorithm>
 #include <iterator>
+#include <functional>
 #include <gsl/gsl_poly.h>
 
 #include "MantidKernel/Exception.h"
