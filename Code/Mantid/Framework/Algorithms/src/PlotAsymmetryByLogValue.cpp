@@ -77,6 +77,20 @@ using namespace DataObjects;
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(PlotAsymmetryByLogValue)
 
+// Static member variables
+std::map<int64_t, double> PlotAsymmetryByLogValue::g_redX;
+std::map<int64_t, double> PlotAsymmetryByLogValue::g_redY;
+std::map<int64_t, double> PlotAsymmetryByLogValue::g_redE;
+std::map<int64_t, double> PlotAsymmetryByLogValue::g_greenX;
+std::map<int64_t, double> PlotAsymmetryByLogValue::g_greenY;
+std::map<int64_t, double> PlotAsymmetryByLogValue::g_greenE;
+std::map<int64_t, double> PlotAsymmetryByLogValue::g_sumX;
+std::map<int64_t, double> PlotAsymmetryByLogValue::g_sumY;
+std::map<int64_t, double> PlotAsymmetryByLogValue::g_sumE;
+std::map<int64_t, double> PlotAsymmetryByLogValue::g_diffX;
+std::map<int64_t, double> PlotAsymmetryByLogValue::g_diffY;
+std::map<int64_t, double> PlotAsymmetryByLogValue::g_diffE;
+
 /** Initialisation method. Declares properties to be used in algorithm.
 *
 */
