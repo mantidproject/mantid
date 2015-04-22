@@ -92,6 +92,7 @@ std::map<int64_t, double> PlotAsymmetryByLogValue::g_diffY;
 std::map<int64_t, double> PlotAsymmetryByLogValue::g_diffE;
 std::string PlotAsymmetryByLogValue::g_logName;
 std::string PlotAsymmetryByLogValue::g_logFunc;
+std::string PlotAsymmetryByLogValue::g_stype;
 
 /** Initialisation method. Declares properties to be used in algorithm.
 *
@@ -183,9 +184,6 @@ void PlotAsymmetryByLogValue::exec() {
   // Get green and red periods
   m_red = getProperty("Red");
   m_green = getProperty("Green");
-  // Get type of computation
-  std::string stype = getProperty("Type");
-  m_int = stype == "Integral";
   // Get type of dead-time corrections
   m_dtcType = getPropertyValue("DeadTimeCorrType");
   // Get runs
@@ -242,7 +240,8 @@ void PlotAsymmetryByLogValue::checkProperties () {
 
   // Check if any property has changed
   if ( g_logName != getPropertyValue("LogValue") ||
-    g_logFunc != getPropertyValue("Function") ) {
+    g_logFunc != getPropertyValue("Function") ||
+    g_stype != getPropertyValue("Type")) {
 
       // If so, clear previous results
     g_redX.clear();
@@ -264,6 +263,9 @@ void PlotAsymmetryByLogValue::checkProperties () {
   g_logName = getPropertyValue("LogValue");
   // Get function to apply to logValue
   g_logFunc = getPropertyValue("Function");
+  // Get type of computation
+  g_stype = getPropertyValue("Type");
+  m_int = g_stype == "Integral";
 
 
 }

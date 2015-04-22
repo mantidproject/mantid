@@ -144,6 +144,8 @@ private:
   static std::string g_logName;
   // LogValue function
   static std::string g_logFunc;
+  // Type of computation: integral or differential
+  static std::string g_stype;
 };
 
 } // namespace Algorithm
