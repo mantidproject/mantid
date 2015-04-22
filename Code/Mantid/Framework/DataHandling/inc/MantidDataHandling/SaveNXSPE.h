@@ -58,12 +58,6 @@ private:
   /// Execution code
   void exec();
 
-  /// the number of bins in each histogram, as the histogram must have common
-  /// bins this shouldn't change
-  size_t nBins;
-  /// The filename of the output file
-  std::string filename;
-
   // Some constants to be written for masked values.
   /// Value for data if pixel is masked
   static const double MASK_FLAG;

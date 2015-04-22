@@ -1,13 +1,13 @@
 #include "MantidDataHandling/SaveNXSPE.h"
+
 #include "MantidAPI/FileProperty.h"
-#include "MantidKernel/ConfigService.h"
-#include "MantidKernel/MantidVersion.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
 #include "MantidGeometry/Instrument/Detector.h"
-#include "MantidGeometry/Instrument/ObjComponent.h"
 #include "MantidDataHandling/FindDetectorsPar.h"
+#include "MantidKernel/MantidVersion.h"
 
+#include <boost/scoped_array.hpp>
 #include <Poco/File.h>
 #include <Poco/Path.h>
 #include <limits>
@@ -26,6 +26,8 @@ const double SaveNXSPE::MASK_ERROR = 0.0;
 // works fine but there were cases that some compilers crush on this (VS2008 in
 // mixed .net environment ?)
 const std::string SaveNXSPE::NXSPE_VER = "1.2";
+// 4MB chunk size
+const size_t SaveNXSPE::MAX_CHUNK_SIZE = 4194304;
 
 SaveNXSPE::SaveNXSPE() : API::Algorithm() {}
 
@@ -80,23 +82,19 @@ void SaveNXSPE::exec() {
   }
 
   // Number of spectra
-  const int nHist = static_cast<int>(inputWS->getNumberHistograms());
+  const int64_t nHist = static_cast<int64_t>(inputWS->getNumberHistograms());
   // Number of energy bins
-  this->nBins = inputWS->blocksize();
-
-  // Get a pointer to the sample
-  Geometry::IComponent_const_sptr sample =
-      inputWS->getInstrument()->getSample();
+  const int64_t nBins = static_cast<int64_t>(inputWS->blocksize());
 
   // Retrieve the filename from the properties
-  this->filename = getPropertyValue("Filename");
+  std::string filename = getPropertyValue("Filename");
 
   // Create the file.
-  ::NeXus::File nxFile(this->filename, NXACC_CREATE5);
+  ::NeXus::File nxFile(filename, NXACC_CREATE5);
 
   // Make the top level entry (and open it)
   std::string entryName = getPropertyValue("InputWorkspace");
-  if(entryName.empty()) {
+  if (entryName.empty()) {
     entryName = "mantid_workspace";
   }
   nxFile.makeGroup(entryName, "NXentry", true);
@@ -120,7 +118,7 @@ void SaveNXSPE::exec() {
   double efixed = getProperty("Efixed");
   if (isEmpty(efixed))
     efixed = MASK_FLAG;
-  // Now lets check to see if the workspace nows better.
+  // Now lets check to see if the workspace knows better.
   // TODO: Check that this is the way round we want to do it.
   const API::Run &run = inputWS->run();
   if (run.hasProperty("Ei")) {
@@ -189,13 +187,12 @@ void SaveNXSPE::exec() {
   nxFile.closeData();
 
   // let's create some blank arrays in the nexus file
-
-  std::vector<int> array_dims;
-  array_dims.push_back((int)nHist);
-  array_dims.push_back((int)nBins);
-
-  nxFile.makeData("data", ::NeXus::FLOAT64, array_dims, false);
-  nxFile.makeData("error", ::NeXus::FLOAT64, array_dims, false);
+  typedef std::vector<int64_t> Dimensions;
+  Dimensions arrayDims(2);
+  arrayDims[0] = nHist;
+  arrayDims[1] = nBins;
+  nxFile.makeData("data", ::NeXus::FLOAT64, arrayDims, false);
+  nxFile.makeData("error", ::NeXus::FLOAT64, arrayDims, false);
 
   // Add the axes attributes to the data
   nxFile.openData("data");
@@ -203,84 +200,80 @@ void SaveNXSPE::exec() {
   nxFile.putAttr("axes", "polar:energy");
   nxFile.closeData();
 
-  std::vector<int64_t> slab_start;
-  std::vector<int64_t> slab_size;
-
   // What size slabs are we going to write...
-  slab_size.push_back(1);
-  slab_size.push_back((int64_t)nBins);
+  // Use an intermediate in-memory buffer to reduce the number
+  // of calls to putslab, i.e disk writes but still write whole rows
+  Dimensions slabStart(2, 0), slabSize(2, 0);
+  Dimensions::value_type chunkRows =
+      static_cast<Dimensions::value_type>(MAX_CHUNK_SIZE / 8 / nBins);
+  if (nHist < chunkRows) {
+    chunkRows = nHist;
+  }
+  // slab size for all but final write
+  slabSize[0] = chunkRows;
+  slabSize[1] = nBins;
 
-  // And let's start at the beginning
-  slab_start.push_back(0);
-  slab_start.push_back(0);
+  // Allocate the temporary buffers for the signal and errors
+  typedef boost::scoped_array<double> Buffer;
+  const size_t bufferSize(slabSize[0] * slabSize[1]);
+  Buffer signalBuffer(new double[bufferSize]);
+  Buffer errorBuffer(new double[bufferSize]);
 
-  // define the data and error vectors for masked detectors
-  std::vector<double> masked_data(nBins, MASK_FLAG);
-  std::vector<double> masked_error(nBins, MASK_ERROR);
+  // Write the data
+  Progress progress(this, 0, 1, nHist);
+  int64_t bufferCounter(0);
+  for (int64_t i = 0; i < nHist; ++i) {
+    progress.report();
 
-  // Create a progress reporting object
-  Progress progress(this, 0, 1, 100);
-  const int progStep = (int)(ceil(nHist / 100.0));
-  Geometry::IDetector_const_sptr det;
-  // Loop over spectra
-  for (int i = 0; i < nHist; i++) {
+    Geometry::IDetector_const_sptr det;
     try { // detector exist
       det = inputWS->getDetector(i);
-      // Check that we aren't writing a monitor...
-      if (!det->isMonitor()) {
-        Geometry::IDetector_const_sptr det = inputWS->getDetector(i);
-
-        if (!det->isMasked()) {
-          // no masking...
-          // Open the data
-          nxFile.openData("data");
-          slab_start[0] = i;
-          nxFile.putSlab(const_cast<MantidVec &>(inputWS->readY(i)), slab_start,
-                         slab_size);
-          // Close the data
-          nxFile.closeData();
-
-          // Open the error
-          nxFile.openData("error");
-          // MantidVec& tmparr = const_cast<MantidVec&>(inputWS->dataE(i));
-          // nxFile.putSlab((void*)(&(tmparr[0])), slab_start, slab_size);
-          nxFile.putSlab(const_cast<MantidVec &>(inputWS->readE(i)), slab_start,
-                         slab_size);
-          // Close the error
-          nxFile.closeData();
-        } else {
-          // Write a masked value...
-          // Open the data
-          nxFile.openData("data");
-          slab_start[0] = i;
-          nxFile.putSlab(masked_data, slab_start, slab_size);
-          // Close the data
-          nxFile.closeData();
-
-          // Open the error
-          nxFile.openData("error");
-          nxFile.putSlab(masked_error, slab_start, slab_size);
-          // Close the error
-          nxFile.closeData();
-        }
-      }
     } catch (Exception::NotFoundError &) {
-      // Catch if no detector. Next line tests whether this happened - test
-      // placed
-      // outside here because Mac Intel compiler doesn't like 'continue' in a
-      // catch
-      // in an openmp block.
     }
-    // If no detector found, skip onto the next spectrum
-    if (!det)
-      continue;
 
-    // make regular progress reports and check for canceling the algorithm
-    if (i % progStep == 0) {
-      progress.report();
+    double *signalBufferStart = signalBuffer.get() + bufferCounter * nBins;
+    double *errorBufferStart = errorBuffer.get() + bufferCounter * nBins;
+    if (det && !det->isMonitor()) {
+      // a detector but not a monitor
+      if (!det->isMasked()) {
+        const auto &inY = inputWS->readY(i);
+        std::copy(inY.begin(), inY.end(), signalBufferStart);
+        const auto &inE = inputWS->readE(i);
+        std::copy(inE.begin(), inE.end(), errorBufferStart);
+      } else {
+        std::fill_n(signalBufferStart, nBins, MASK_FLAG);
+        std::fill_n(errorBufferStart, nBins, MASK_ERROR);
+      }
+    } else {
+      // no detector gets zeroes.
+      std::fill_n(signalBufferStart, nBins, 0.0);
+      std::fill_n(errorBufferStart, nBins, 0.0);
+    }
+    ++bufferCounter;
+
+    // Do we need to flush the buffer. Either we have filled the buffer
+    // or we have reached the end of the workspace and not completely filled
+    // the buffer
+    if (bufferCounter == chunkRows || i == nHist - 1) {
+      // techincally only need to update for the very last slab but
+      // this is always correct and avoids an if statement
+      slabSize[0] = bufferCounter;
+      nxFile.openData("data");
+      nxFile.putSlab(signalBuffer.get(), slabStart, slabSize);
+      nxFile.closeData();
+
+      // Open the error
+      nxFile.openData("error");
+      nxFile.putSlab(errorBuffer.get(), slabStart, slabSize);
+      nxFile.closeData();
+
+      // Reset counters for next time
+      slabStart[0] += bufferCounter;
+      bufferCounter = 0;
     }
   }
-  // execute the ChildAlgorithm to calculate the detector's parameters;
+
+  // execute the algorithm to calculate the detector's parameters;
   IAlgorithm_sptr spCalcDetPar =
       this->createChildAlgorithm("FindDetectorsPar", 0, 1, true, 1);
 
