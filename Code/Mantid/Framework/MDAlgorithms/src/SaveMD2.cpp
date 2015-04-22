@@ -132,6 +132,18 @@ void SaveMD2::doSaveHisto(Mantid::DataObjects::MDHistoWorkspace_sptr ws) {
     file->putAttr(mess.str(), ws->getDimension(d)->toXMLString());
   }
 
+  // Save each axis dimension as an array
+  for (size_t d=0; d < numDims; d++) {
+    std::vector<double> axis;
+    IMDDimension_const_sptr dim = ws->getDimension(d);
+    for (size_t n=0; n <= dim->getNBins(); n++)
+      axis.push_back(dim->getX(n));
+    file->makeData(dim->getDimensionId(), ::NeXus::FLOAT64, static_cast<int>(dim->getNBins()), true);
+    file->putData(axis);
+    file->putAttr("units", std::string(dim->getUnits()));
+    file->closeData();
+  }
+
   // Write out the affine matrices
   MDBoxFlatTree::saveAffineTransformMatricies(
       file, boost::dynamic_pointer_cast<const IMDWorkspace>(ws));
