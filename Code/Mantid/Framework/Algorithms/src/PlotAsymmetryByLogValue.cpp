@@ -93,6 +93,8 @@ std::map<int64_t, double> PlotAsymmetryByLogValue::g_diffE;
 std::string PlotAsymmetryByLogValue::g_logName;
 std::string PlotAsymmetryByLogValue::g_logFunc;
 std::string PlotAsymmetryByLogValue::g_stype;
+std::vector<int> PlotAsymmetryByLogValue::g_forward_list;
+std::vector<int> PlotAsymmetryByLogValue::g_backward_list;
 
 /** Initialisation method. Declares properties to be used in algorithm.
 *
@@ -177,10 +179,6 @@ void PlotAsymmetryByLogValue::exec() {
   checkProperties();
 
   // Get properties
-  // Get grouping property
-  m_forward_list = getProperty("ForwardSpectra");
-  m_backward_list = getProperty("BackwardSpectra");
-  m_autogroup = (m_forward_list.size() == 0 && m_backward_list.size() == 0);
   // Get green and red periods
   m_red = getProperty("Red");
   m_green = getProperty("Green");
@@ -244,11 +242,16 @@ void PlotAsymmetryByLogValue::checkProperties () {
   std::string logFunc = getPropertyValue("Function");
   // Get type of computation
   std::string stype = getPropertyValue("Type");
+  // Get grouping properties
+  std::vector<int> forward_list = getProperty("ForwardSpectra");
+  std::vector<int> backward_list = getProperty("BackwardSpectra");
 
   // Check if any property has changed
   if ( g_logName != logName ||
     g_logFunc != logFunc ||
-    g_stype != stype ) {
+    g_stype != stype ||
+    g_forward_list != forward_list ||
+    g_backward_list != backward_list ) {
 
       // If so, clear previous results
     g_redX.clear();
@@ -270,6 +273,9 @@ void PlotAsymmetryByLogValue::checkProperties () {
   g_logFunc = logFunc;
   g_stype = stype;
   m_int = g_stype == "Integral";
+  g_forward_list = forward_list;
+  g_backward_list = backward_list;
+  m_autogroup = (g_forward_list.size() == 0 && g_backward_list.size() == 0);
 
 
 }
@@ -627,8 +633,8 @@ void PlotAsymmetryByLogValue::calcIntAsymmetry(API::MatrixWorkspace_sptr ws,
     asym->setProperty("InputWorkspace", ws);
     asym->setPropertyValue("OutputWorkspace", "tmp");
     if (!m_autogroup) {
-      asym->setProperty("ForwardSpectra", m_forward_list);
-      asym->setProperty("BackwardSpectra", m_backward_list);
+      asym->setProperty("ForwardSpectra", g_forward_list);
+      asym->setProperty("BackwardSpectra", g_backward_list);
     }
     asym->execute();
     MatrixWorkspace_sptr asymWS = asym->getProperty("OutputWorkspace");
@@ -662,8 +668,8 @@ void PlotAsymmetryByLogValue::calcIntAsymmetry(API::MatrixWorkspace_sptr ws,
     asym->setProperty("InputWorkspace", intWS);
     asym->setPropertyValue("OutputWorkspace", "tmp");
     if (!m_autogroup) {
-      asym->setProperty("ForwardSpectra", m_forward_list);
-      asym->setProperty("BackwardSpectra", m_backward_list);
+      asym->setProperty("ForwardSpectra", g_forward_list);
+      asym->setProperty("BackwardSpectra", g_backward_list);
     }
     asym->execute();
     MatrixWorkspace_sptr out = asym->getProperty("OutputWorkspace");
@@ -686,10 +692,10 @@ PlotAsymmetryByLogValue::calcIntAsymmetry(API::MatrixWorkspace_sptr ws_red,
                                           API::MatrixWorkspace_sptr ws_green,
                                           double &Y, double &E) {
   if (!m_autogroup) {
-    groupDetectors(ws_red, m_backward_list);
-    groupDetectors(ws_red, m_forward_list);
-    groupDetectors(ws_green, m_backward_list);
-    groupDetectors(ws_green, m_forward_list);
+    groupDetectors(ws_red, g_backward_list);
+    groupDetectors(ws_red, g_forward_list);
+    groupDetectors(ws_green, g_backward_list);
+    groupDetectors(ws_green, g_forward_list);
   }
 
   Property *startXprop = getProperty("TimeMin");

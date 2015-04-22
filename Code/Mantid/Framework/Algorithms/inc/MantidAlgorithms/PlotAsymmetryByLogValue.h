@@ -112,9 +112,9 @@ private:
   /// Stores property "Int"
   bool m_int;
   /// Store forward spectra
-  std::vector<int> m_forward_list;
+  static std::vector<int> g_forward_list;
   /// Store backward spectra
-  std::vector<int> m_backward_list;
+  static std::vector<int> g_backward_list;
   /// If true call LoadMuonNexus with Autogroup on
   bool m_autogroup;
   /// Store type of dead time corrections
