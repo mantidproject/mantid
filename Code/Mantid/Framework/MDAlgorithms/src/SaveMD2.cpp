@@ -99,6 +99,7 @@ void SaveMD2::doSaveHisto(Mantid::DataObjects::MDHistoWorkspace_sptr ws) {
 
   // The base entry. Named so as to distinguish from other workspace types.
   file->makeGroup("MDHistoWorkspace", "NXentry", true);
+  file->putAttr("SaveMDVersion", 2);
 
   // Write out the coordinate system
   file->writeData("coordinate_system",
