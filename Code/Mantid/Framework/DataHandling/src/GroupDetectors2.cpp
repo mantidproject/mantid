@@ -759,16 +759,18 @@ void GroupDetectors2::readFile(spec2index_map &specs2index, std::istream &File,
                                std::vector<int64_t> &unUsedSpec) {
   // go through the rest of the file reading in lists of spectra number to group
   while (File) {
+    int spectrumNo = EMPTY_LINE;
     std::string thisLine;
     do {
       std::getline(File, thisLine), lineNum++;
+      spectrumNo = readInt(thisLine);
+      if (spectrumNo != EMPTY_LINE)
+        spectrumNo = specs2index[spectrumNo];
       // we haven't started reading a new group and so if the file ends here it
       // is OK
       if (!File)
         return;
-    } while (readInt(thisLine) == EMPTY_LINE && File);
-    // the spectrum number is the same as the group number
-    int spectrumNo = boost::lexical_cast<int>(thisLine);
+    } while (spectrumNo == EMPTY_LINE && File);
 
     // the number of spectra that will be combined in the group
     int numberOfSpectra = EMPTY_LINE;
