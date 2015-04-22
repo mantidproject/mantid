@@ -65,6 +65,8 @@ namespace VATES
   m_buildSortedList(true), m_wsName(""), dataSet(NULL),
   slice(false), sliceMask(NULL), sliceImplicitFunction(NULL),
   m_time(0.0),
+  m_minValue(0.1),
+  m_maxValue(0.1),
   m_metaDataExtractor(new MetaDataExtractorUtils()),
   m_metadataJsonManager(new MetadataJsonManager()),
   m_vatesConfigurations(new VatesConfigurations())

@@ -283,7 +283,8 @@ void SaveHKL::exec() {
     std::string bankName = p.getBankName();
     int nCols, nRows;
     sizeBanks(bankName, nCols, nRows);
-    if (widthBorder != EMPTY_INT() &&
+    // peaks with detectorID=-1 are from LoadHKL
+    if (widthBorder != EMPTY_INT() && p.getDetectorID() != -1 &&
         (p.getCol() < widthBorder || p.getRow() < widthBorder ||
          p.getCol() > (nCols - widthBorder) ||
          p.getRow() > (nRows - widthBorder))){

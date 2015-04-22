@@ -136,7 +136,7 @@ REGISTER_VATESGUI(MdViewerWidget)
  */
 MdViewerWidget::MdViewerWidget() : VatesViewerInterface(), currentView(NULL),
   dataLoader(NULL), hiddenView(NULL), lodAction(NULL), screenShot(NULL), viewLayout(NULL),
-  viewSettings(NULL), m_rebinAlgorithmDialogProvider(this), m_rebinnedWorkspaceIdentifier("_tempvsi")
+  viewSettings(NULL), initialView(ModeControlWidget::STANDARD), m_rebinAlgorithmDialogProvider(this), m_rebinnedWorkspaceIdentifier("_tempvsi")
 {
   //this will initialize the ParaView application if needed.
   VatesParaViewApplication::instance();
@@ -854,7 +854,9 @@ ModeControlWidget::Views MdViewerWidget::checkViewAgainstWorkspace(ModeControlWi
     // Histo workspaces cannot have a splatter plot, 
     if (view == ModeControlWidget::SPLATTERPLOT)
     {
-      g_log.warning() << "Selected a splatter plot for a histo workspace. Defaulted to standard view. \n";  
+      g_log.notice() << "The preferred initial view favours the splatterplot as initial view, "
+                          << "but an MDHisto workspace is being loaded. An MDHisto workspace "
+                          << "cannot be loaded into a splatterplot view. Defaulted to standard view. \n";  
 
       selectedView =  ModeControlWidget::STANDARD;
     } 

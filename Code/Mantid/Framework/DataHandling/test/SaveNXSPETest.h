@@ -9,7 +9,18 @@
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidDataHandling/LoadInstrument.h"
+#include "MantidTestHelpers/ComponentCreationHelper.h"
+
+#include <boost/math/special_functions/fpclassify.hpp>
+#include <boost/shared_array.hpp>
+#include "boost/tuple/tuple.hpp"
+
+#include <hdf5.h>
+#include <hdf5_hl.h>
+
 #include <Poco/File.h>
+
+#include <limits>
 
 using namespace Mantid::API;
 using namespace Mantid::DataHandling;
@@ -18,13 +29,7 @@ using Mantid::Geometry::ParameterMap;
 using Mantid::Geometry::Instrument;
 using Mantid::Geometry::IDetector_const_sptr;
 
-
-static const double MASK_FLAG=-1e30;   // values here need to match what is in the SaveNXSPE.h file
-static const double MASK_ERROR=0.0;
-
-static const int NHIST = 3;
 static const int THEMASKED = 2;
-static const int DEFAU_Y = 2;
 
 class SaveNXSPETest : public CxxTest::TestSuite
 {
@@ -32,148 +37,134 @@ public:
   static SaveNXSPETest *createSuite() { return new SaveNXSPETest(); }
   static void destroySuite(SaveNXSPETest *suite) { delete suite; }
 
-  SaveNXSPETest()
-  {// the functioning of SaveNXSPE is affected by a function call in the FrameworkManager's constructor, creating the algorithm in this way ensures that function is executed
-    saver = FrameworkManager::Instance().createAlgorithm("SaveNXSPE");
-  }
-
   void testName()
   {
-    TS_ASSERT_EQUALS( saver->name(), "SaveNXSPE" );
+    SaveNXSPE saver;
+    TS_ASSERT_EQUALS( saver.name(), "SaveNXSPE" );
   }
 
   void testVersion()
   {
-    TS_ASSERT_EQUALS( saver->version(), 1 );
+    SaveNXSPE saver;
+    TS_ASSERT_EQUALS( saver.version(), 1 );
   }
 
   void testInit()
   {
-    TS_ASSERT_THROWS_NOTHING( saver->initialize() );
-    TS_ASSERT( saver->isInitialized() );
+    SaveNXSPE saver;
+    TS_ASSERT_THROWS_NOTHING( saver.initialize() );
+    TS_ASSERT( saver.isInitialized() );
 
-    TS_ASSERT_EQUALS( static_cast<int>(saver->getProperties().size()), 6 );
+    TS_ASSERT_EQUALS( static_cast<int>(saver.getProperties().size()), 6 );
   }
 
-  void testExec()
+  void test_Saving_Workspace_Smaller_Than_Chunk_Size()
   {
     // Create a small test workspace
-    std::string WSName = "saveNXSPETest_input";
-    MatrixWorkspace_const_sptr input = makeWorkspace(WSName);
+    const int nhist(3), nx(10);
+    MatrixWorkspace_sptr input = makeWorkspace(nhist, nx);
+    auto loadedData = saveAndReloadWorkspace(input);
+    auto dims = loadedData.get<0>();
+    auto signal = loadedData.get<1>();
+    auto error = loadedData.get<2>();
 
-    TS_ASSERT_THROWS_NOTHING( saver->setPropertyValue("InputWorkspace", WSName) );
-    std::string outputFile("testNXSPE.nxspe");
-    TS_ASSERT_THROWS_NOTHING( saver->setPropertyValue("Filename",outputFile) );
-    outputFile = saver->getPropertyValue("Filename");//get absolute path
-
-    TS_ASSERT_THROWS_NOTHING( saver->setProperty("Efixed", 0.0));
-    TS_ASSERT_THROWS_NOTHING( saver->setProperty("Psi", 0.0));
-    TS_ASSERT_THROWS_NOTHING( saver->setProperty("KiOverKfScaling", true));
-
-
-    TS_ASSERT_THROWS_NOTHING( saver->execute() );
-    TS_ASSERT( saver->isExecuted() );
-
-    TS_ASSERT( Poco::File(outputFile).exists() );
-
-    // TODO: Test the files contents...
-
-    AnalysisDataService::Instance().remove(WSName);
-    if( Poco::File(outputFile).exists() )
-      Poco::File(outputFile).remove();
+    double tolerance(1e-08);
+    TS_ASSERT_EQUALS(nhist, dims[0]);
+    TS_ASSERT_EQUALS(nx, dims[1]);
+    // element 0,0
+    TS_ASSERT_DELTA(0.0, signal[0], tolerance);
+    TS_ASSERT_DELTA(0.0, error[0], tolerance);
+    // element 0,9
+    TS_ASSERT_DELTA(9.0, signal[9], tolerance);
+    TS_ASSERT_DELTA(18.0, error[9], tolerance);
+    // element 1,2 in 2D flat buffer
+    TS_ASSERT(boost::math::isnan(signal[1*dims[1] + 2]));
+    TS_ASSERT_DELTA(0.0, error[1*dims[1] + 2], tolerance);
+    // final element
+    TS_ASSERT_DELTA(29.0, signal[dims[0]*dims[1] - 1], tolerance);
+    TS_ASSERT_DELTA(58.0, error[dims[0]*dims[1] - 1], tolerance);
   }
+
+  void test_Saving_Workspace_Larger_Than_Chunk_Size()
+  {
+    // Create a test workspace
+    const int nhist(5250), nx(100);
+    MatrixWorkspace_sptr input = makeWorkspace(nhist, nx);
+    auto loadedData = saveAndReloadWorkspace(input);
+    auto dims = loadedData.get<0>();
+    auto signal = loadedData.get<1>();
+    auto error = loadedData.get<2>();
+
+    double tolerance(1e-08);
+    TS_ASSERT_EQUALS(nhist, dims[0]);
+    TS_ASSERT_EQUALS(nx, dims[1]);
+    // element 0,0
+    TS_ASSERT_DELTA(0.0, signal[0], tolerance);
+    TS_ASSERT_DELTA(0.0, error[0], tolerance);
+    // element 0,9
+    TS_ASSERT_DELTA(99.0, signal[99], tolerance);
+    TS_ASSERT_DELTA(198.0, error[99], tolerance);
+    // element 1,2 in 2D flat buffer
+    TS_ASSERT(boost::math::isnan(signal[1*dims[1] + 2]));
+    TS_ASSERT_DELTA(0.0, error[1*dims[1] + 2], tolerance);
+    // final element
+    TS_ASSERT_DELTA(524999.0, signal[dims[0]*dims[1] - 1], tolerance);
+    TS_ASSERT_DELTA(1049998.0, error[dims[0]*dims[1] - 1], tolerance);
+  }
+
   void testExecWithParFile()
   {
-   
-     std::string WSName = "saveNXSPETest_input";
-     MatrixWorkspace_const_sptr input = makeWorkspace(WSName);
+     MatrixWorkspace_sptr input = makeWorkspace();
 
-     TS_ASSERT_THROWS_NOTHING( saver->setPropertyValue("InputWorkspace", WSName) );
-     TS_ASSERT_THROWS_NOTHING( saver->setProperty("ParFile","testParFile.par"));
-     std::string outputFile("testNXSPE.nxspe");
-     TS_ASSERT_THROWS_NOTHING( saver->setPropertyValue("Filename",outputFile) );
-      outputFile = saver->getPropertyValue("Filename");//get absolute path
+     SaveNXSPE saver;
+     saver.initialize();
+     saver.setChild(true);
+     TS_ASSERT_THROWS_NOTHING( saver.setProperty("InputWorkspace", input) );
+     TS_ASSERT_THROWS_NOTHING( saver.setProperty("ParFile","testParFile.par"));
+     std::string outputFile("SaveNXSPETest_testExecWithParFile.nxspe");
+     TS_ASSERT_THROWS_NOTHING( saver.setPropertyValue("Filename",outputFile) );
+     outputFile = saver.getPropertyValue("Filename");//get absolute path
 
     // throws file not exist from ChildAlgorithm
-      saver->setRethrows(true);
-      TS_ASSERT_THROWS( saver->execute(),Mantid::Kernel::Exception::FileError);
-  
+      saver.setRethrows(true);
+      TS_ASSERT_THROWS( saver.execute(),Mantid::Kernel::Exception::FileError);
       TS_ASSERT( Poco::File(outputFile).exists() );
 
-   
       if( Poco::File(outputFile).exists() ) Poco::File(outputFile).remove();
-      AnalysisDataService::Instance().remove(WSName);
-  }
-  void xtestThatOutputIsValidFromWorkspaceWithNumericAxis()
-  {
-    // Create a small test workspace
-    std::string WSName = "saveNXSPETestB_input";
-    MatrixWorkspace_sptr input = makeWorkspaceWithNumericAxis(WSName);
-
-    TS_ASSERT_THROWS_NOTHING( saver->setPropertyValue("InputWorkspace", WSName) );
-    const std::string outputFile("testNXSPE_Axis.nxspe");
-    TS_ASSERT_THROWS_NOTHING( saver->setPropertyValue("Filename",outputFile) );
-    // do not forget to nullify parFile property, as it will keep it from previous set 
-    TS_ASSERT_THROWS_NOTHING(saver->setProperty("ParFile", ""))
-    saver->setRethrows(true);
-    saver->execute();
-    TS_ASSERT( saver->isExecuted() );
-
-    TS_ASSERT( Poco::File(outputFile).exists() );
-    if( Poco::File(outputFile).exists() )
-    {
-      Poco::File(outputFile).remove();
-    }
   }
 
 private:
-
-  MatrixWorkspace_sptr makeWorkspace(const std::string & input)
+  
+  MatrixWorkspace_sptr makeWorkspace(int nhist = 3, int nx = 10)
   {
-    // all the Y values in this new workspace are set to DEFAU_Y, which currently = 2
-    MatrixWorkspace_sptr inputWS = WorkspaceCreationHelper::Create2DWorkspaceBinned(NHIST,10,1.0);
-    return setUpWorkspace(input, inputWS);
-  }
-
-  MatrixWorkspace_sptr makeWorkspaceWithNumericAxis(const std::string & input)
-  {
-    // all the Y values in this new workspace are set to DEFAU_Y, which currently = 2
-    MatrixWorkspace_sptr inputWS = WorkspaceCreationHelper::Create2DWorkspaceBinned(NHIST,10,1.0);
-    inputWS = setUpWorkspace(input, inputWS);
-    Axis * axisOne = inputWS->getAxis(1);
-    NumericAxis *newAxisOne = new NumericAxis(axisOne->length());
-    for(size_t i = 0; i < axisOne->length(); ++i)
-    {
-      newAxisOne->setValue(i, axisOne->operator()((i)));
+    auto testWS = WorkspaceCreationHelper::Create2DWorkspaceBinned(nhist,nx,1.0);
+    // Fill workspace with increasing counter to properly check saving
+    for(int i = 0; i < nhist; ++i) {
+      auto & outY = testWS->dataY(i);
+      auto & outE = testWS->dataE(i);
+      for(int j = 0; j < nx; ++j) {
+        outY[j] = i*nx + j;
+        outE[j] = outY[j]*2.0;
+      }
     }
-    // Set the units
-    inputWS->replaceAxis(1, newAxisOne);
-    inputWS->getAxis(1)->unit() = UnitFactory::Instance().create("Energy");
-    inputWS->setYUnit("MyCaption");
-    return inputWS;
+    return setUpWorkspace(testWS);
   }
 
-  MatrixWorkspace_sptr setUpWorkspace(const std::string & input, MatrixWorkspace_sptr inputWS)
+  MatrixWorkspace_sptr setUpWorkspace(MatrixWorkspace_sptr inputWS)
   {
     inputWS->getAxis(0)->unit() = Mantid::Kernel::UnitFactory::Instance().create("DeltaE");
+    // Create an instrument but we don't care where they are
+    std::vector<double> dummy(inputWS->getNumberHistograms(), 0.0);
+    auto testInst = 
+        ComponentCreationHelper::createCylInstrumentWithDetInGivenPositions(dummy, dummy, dummy);
+    inputWS->setInstrument(testInst);
 
-    // the following is largely about associating detectors with the workspace
-    for (int j = 0; j < NHIST; ++j)
+    // Associate detectors with the workspace
+    for (size_t j = 0; j < inputWS->getNumberHistograms(); ++j)
     {
       // Just set the spectrum number to match the index
-      inputWS->getSpectrum(j)->setSpectrumNo(j+1);
+      inputWS->getSpectrum(j)->setSpectrumNo(static_cast<Mantid::specid_t>(j+1));
     }
-
-    AnalysisDataService::Instance().add(input,inputWS);
-
-    // Load the instrument data
-    Mantid::DataHandling::LoadInstrument loader;
-    loader.initialize();
-    // Path to test input file assumes Test directory checked out from SVN
-    std::string inputFile = "INES_Definition.xml";
-    loader.setPropertyValue("Filename", inputFile);
-    loader.setPropertyValue("Workspace", input);
-    loader.execute();
 
     // mask the detector
     ParameterMap* m_Pmap = &(inputWS->instrumentParameters());
@@ -187,9 +178,60 @@ private:
 
     return inputWS;
   }
- 
-private:
-  IAlgorithm* saver;
+  
+  typedef boost::tuple<boost::shared_array<hsize_t>,
+                       boost::shared_array<double>, 
+                       boost::shared_array<double>> DataHolder;
+  
+  DataHolder saveAndReloadWorkspace(const MatrixWorkspace_sptr inputWS)
+  {
+    SaveNXSPE saver;
+    saver.initialize();
+    saver.setChild(true);
+    TS_ASSERT_THROWS_NOTHING( saver.setProperty("InputWorkspace", inputWS) );
+    std::string outputFile("SaveNXSPETest_testEXEC.nxspe");
+    TS_ASSERT_THROWS_NOTHING( saver.setPropertyValue("Filename",outputFile) );
+    outputFile = saver.getPropertyValue("Filename");//get absolute path
+
+    TS_ASSERT_THROWS_NOTHING( saver.setProperty("Efixed", 0.0));
+    TS_ASSERT_THROWS_NOTHING( saver.setProperty("Psi", 0.0));
+    TS_ASSERT_THROWS_NOTHING( saver.setProperty("KiOverKfScaling", true));
+    TS_ASSERT_THROWS_NOTHING( saver.execute() );
+    TS_ASSERT( saver.isExecuted() );
+
+    TS_ASSERT( Poco::File(outputFile).exists() );
+    if( !Poco::File(outputFile).exists() ) {
+      return boost::make_tuple(boost::shared_array<hsize_t>(), boost::shared_array<double>(),
+                               boost::shared_array<double>());
+    }
+
+    auto h5file = H5Fopen(outputFile.c_str(), H5F_ACC_RDWR, H5P_DEFAULT);
+    char * dset = "/mantid_workspace/data/data";
+    int rank(0);
+    herr_t status = H5LTget_dataset_ndims(h5file, dset, &rank);
+    TS_ASSERT_EQUALS(0, status);
+    TS_ASSERT_EQUALS(2, rank);
+
+    boost::shared_array<hsize_t> dims(new hsize_t[rank]);
+    H5T_class_t classId(H5T_NO_CLASS);
+    size_t typeSize(0);
+    status = H5LTget_dataset_info(h5file, dset, dims.get(), &classId, &typeSize);
+    TS_ASSERT_EQUALS(0, status);
+    TS_ASSERT_EQUALS(H5T_FLOAT, classId);
+    TS_ASSERT_EQUALS(8, typeSize);
+
+    size_t bufferSize(dims[0]*dims[1]);
+    boost::shared_array<double> signal(new double[bufferSize]), error(new double[bufferSize]);
+    status = H5LTread_dataset_double(h5file, dset, signal.get());
+    TS_ASSERT_EQUALS(0, status);
+    dset = "/mantid_workspace/data/error";
+    status = H5LTread_dataset_double(h5file, dset, error.get());
+    TS_ASSERT_EQUALS(0, status);
+    H5Fclose(h5file);
+    //Poco::File(outputFile).remove();
+
+    return boost::make_tuple(dims, signal, error);
+  }
 };
 
 #endif /*SAVENXSPETEST_H_*/
