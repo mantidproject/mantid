@@ -1593,6 +1593,8 @@ IPropertyManager::getValue<API::IAlgorithm_sptr>(
   } else {
     std::string message =
         "Attempt to assign property " + name + " to incorrect type";
+    int i = 0;
+    std::cin >> i;
     throw std::runtime_error(message);
   }
 }
@@ -1615,6 +1617,8 @@ IPropertyManager::getValue<API::IAlgorithm_const_sptr>(
   } else {
     std::string message =
         "Attempt to assign property " + name + " to incorrect type";
+    int i = 0;
+    std::cin >> i;
     throw std::runtime_error(message);
   }
 }

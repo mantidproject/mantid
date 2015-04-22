@@ -10,9 +10,7 @@ Description
 -----------
 
 This algorithm performs slicing of multiDimensional data according to a chosen
-projection, and binning choice. The algorithm uses :ref:`algm-BinMD` or
-:ref:`algm-SliceMD` to achieve the binning of the data. The choice of child
-algorithm used for the slicing is controlled by the NoPix option.
+projection, limits and binning steps. 
 
 The synax is similar to that used by `Horace <http://horace.isis.rl.ac.uk/Manipulating_and_extracting_data_from_SQW_files_and_objects#cut_sqw>`__.
 
@@ -22,6 +20,19 @@ or the path to a workspace, or simply a workspace object in python. These will
 all then be processed sequentially with the same options. The only requirement
 is that the same number of output workspaces are also given so that CutMD knows
 what to call each output workspace created.
+
+MDEventWorkspaces
+~~~~~~~~~~~~~~~~~~~
+
+For input of type :ref:`MDEventWorkspace <MDWorkspace>` the algorithm uses :ref:`algm-BinMD` or
+:ref:`algm-SliceMD` to achieve the binning of the data. The choice of child
+algorithm used for slicing in this case is controlled by the NoPix option. 
+
+MDHistoWorkspaces
+~~~~~~~~~~~~~~~~~~~
+
+If the input is an :ref:`MDHistoWorkspace <MDHistoWorkspace>` :ref:`algm-BinMD` and :ref:`algm-SliceMD` are not made available as they needto get hold of the original MDEvents associated with an :ref:`MDEventWorkspace <MDWorkspace>` in order to perform the rebinning. As this information is missing from the MDHistoWorkspace images, those operations are forbidden. Instead, a limited subset of the operations are allowed, and are performed via :ref:`algm-IntegrateMDHistoWorkspace`. In this case, the Projection and NoPix properties are ignored. See :ref:`algm-IntegrateMDHistoWorkspace` for how the binning parameters are used.
+
 
 Creating Projections
 ~~~~~~~~~~~~~~~~~~~~
