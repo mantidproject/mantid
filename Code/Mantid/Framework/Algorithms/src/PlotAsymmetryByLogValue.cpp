@@ -238,10 +238,17 @@ void PlotAsymmetryByLogValue::checkProperties () {
   // previous call, we need to re-do all the computations, which means
   // clearing static maps that store previous results
 
+  // Log Value
+  std::string logName = getPropertyValue("LogValue");
+  // Get function to apply to logValue
+  std::string logFunc = getPropertyValue("Function");
+  // Get type of computation
+  std::string stype = getPropertyValue("Type");
+
   // Check if any property has changed
-  if ( g_logName != getPropertyValue("LogValue") ||
-    g_logFunc != getPropertyValue("Function") ||
-    g_stype != getPropertyValue("Type")) {
+  if ( g_logName != logName ||
+    g_logFunc != logFunc ||
+    g_stype != stype ) {
 
       // If so, clear previous results
     g_redX.clear();
@@ -259,12 +266,9 @@ void PlotAsymmetryByLogValue::checkProperties () {
 
   }
 
-  // Populate input properties
-  g_logName = getPropertyValue("LogValue");
-  // Get function to apply to logValue
-  g_logFunc = getPropertyValue("Function");
-  // Get type of computation
-  g_stype = getPropertyValue("Type");
+  g_logName = logName;
+  g_logFunc = logFunc;
+  g_stype = stype;
   m_int = g_stype == "Integral";
 
 
