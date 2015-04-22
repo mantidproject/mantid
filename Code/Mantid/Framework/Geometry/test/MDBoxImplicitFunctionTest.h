@@ -72,8 +72,8 @@ public:
   void test_fraction_when_not_contained()
   {
       // The implicit function box
-      const coord_t areaMin = 1;
-      const coord_t areaMax = 2;
+      const coord_t areaMin = 1.0f;
+      const coord_t areaMax = 2.0f;
       std::vector<coord_t> min;
       min.push_back(areaMin);
       min.push_back(areaMin);
@@ -83,8 +83,8 @@ public:
       MDBoxImplicitFunction f(min,max);
 
       // The box to test.
-      const coord_t boxMin = 0;
-      const coord_t boxMax = 0.1;
+      const coord_t boxMin = 0.0f;
+      const coord_t boxMax = 0.1f;
       std::vector<Extent> extents;
       // extent
       extents.push_back(Extent(boxMin, boxMax));
@@ -97,8 +97,8 @@ public:
   void test_fraction_when_fully_contained()
   {
       // The implicit function box
-      const coord_t areaMin = 1;
-      const coord_t areaMax = 2;
+      const coord_t areaMin = 1.0f;
+      const coord_t areaMax = 2.0f;
       std::vector<coord_t> min;
       min.push_back(areaMin);
       min.push_back(areaMin);
@@ -108,8 +108,8 @@ public:
       MDBoxImplicitFunction f(min,max);
 
       // The box to test.
-      const coord_t boxMin = 1.1;
-      const coord_t boxMax = 1.9;
+      const coord_t boxMin = 1.1f;
+      const coord_t boxMax = 1.9f;
       std::vector<coord_t> boxVertexes;
       std::vector<Extent> extents;
       // extent
@@ -127,8 +127,8 @@ public:
   void test_fraction_when_partially_contained_1D_simple()
   {
       // The implicit function box
-      const coord_t areaMin = 0.9;
-      const coord_t areaMax = 2;
+      const coord_t areaMin = 0.9f;
+      const coord_t areaMax = 2.0f;
       std::vector<coord_t> min;
       min.push_back(areaMin);
       std::vector<coord_t> max;
