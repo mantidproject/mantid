@@ -254,17 +254,17 @@ namespace Algorithms {
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(PerformIndexOperations)
 
-//----------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 /** Constructor
  */
 PerformIndexOperations::PerformIndexOperations() {}
 
-//----------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 /** Destructor
  */
 PerformIndexOperations::~PerformIndexOperations() {}
 
-//----------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string PerformIndexOperations::name() const {
   return "PerformIndexOperations";
@@ -278,9 +278,9 @@ const std::string PerformIndexOperations::category() const {
   return "Transforms\\Grouping";
 }
 
-//----------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 
-//----------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
  */
 void PerformIndexOperations::init() {
@@ -337,7 +337,7 @@ VecCommands interpret(const std::string &processingInstructions) {
   return commands;
 }
 
-//----------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 /** Execute the algorithm.
  */
 void PerformIndexOperations::exec() {
