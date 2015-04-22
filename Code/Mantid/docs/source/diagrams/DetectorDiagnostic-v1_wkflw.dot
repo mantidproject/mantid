@@ -11,7 +11,6 @@ digraph ReflectometryReductionOne {
     sampleTotWorkspace [label="SampleTotalCountsWorkspace"]
     sampleBkgWorkspace [label="SampleBackgroundWorkspace"]
     sampleWorkspace    [label="SampleWorkspace"]
-	numberOfFailures   [label="NumberOfFailures"]
   }
 
   subgraph decisions {
@@ -39,11 +38,6 @@ digraph ReflectometryReductionOne {
 	doDetVanTest2DV [label="Do Detector\n Vanadium Tests\n on DetVanCompare"]
   }
 
-  subgraph values {
-    $value_style
-    valTest         [label="test"]
-  }
-
   inputWorkspace     -> checkHardMask
   hardMaskWorkspace  -> checkHardMask
   checkHardMask      -> useHardMask      [label="Yes"]
@@ -58,13 +52,14 @@ digraph ReflectometryReductionOne {
   sampleTotWorkspace -> checkSampleTot
   checkSampleTot     -> findDetsOutLims  [label="Yes"]
   checkSampleTot     -> checkSampleBkg   [label="No"]
+  sampleBkgWorkspace -> checkSampleBkg
   findDetsOutLims    -> checkSampleBkg
   checkSampleBkg     -> medianDetTest    [label="Yes"]
   checkSampleBkg     -> checkSample      [label="No"]
   medianDetTest      -> checkSample
   sampleWorkspace    -> checkSample
   checkSample        -> createPSDBMask  [label="Yes"]
-  checkSample        -> ExtractMask     [label="No"]   
-  createPSDBMask     -> ExtractMask
-  ExtractMask        -> OutputWorkspace
+  checkSample        -> extractMask     [label="No"]   
+  createPSDBMask     -> extractMask
+  extractMask        -> outputWorkspace
 }
