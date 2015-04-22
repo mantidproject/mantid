@@ -119,6 +119,8 @@ private:
   bool m_autogroup;
   /// Store type of dead time corrections
   static std::string g_dtcType;
+  /// File to read corrections from
+  static std::string g_dtcFile;
   /// Store red period
   static int g_red;
   /// Store green period

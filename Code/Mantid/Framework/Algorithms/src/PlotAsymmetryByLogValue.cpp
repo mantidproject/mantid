@@ -98,6 +98,7 @@ std::vector<int> PlotAsymmetryByLogValue::g_backward_list;
 int PlotAsymmetryByLogValue::g_red = 1;
 int PlotAsymmetryByLogValue::g_green = EMPTY_INT();
 std::string PlotAsymmetryByLogValue::g_dtcType;
+std::string PlotAsymmetryByLogValue::g_dtcFile;
 
 /** Initialisation method. Declares properties to be used in algorithm.
 *
@@ -247,7 +248,7 @@ void PlotAsymmetryByLogValue::checkProperties () {
   int green = getProperty("Green");
   // Get type of dead-time corrections
   std::string dtcType = getPropertyValue("DeadTimeCorrType");
-
+  std::string dtcFile = getPropertyValue("DeadTimeCorrFile");
   // Check if any property has changed
   if ( g_logName != logName ||
     g_logFunc != logFunc ||
@@ -256,7 +257,8 @@ void PlotAsymmetryByLogValue::checkProperties () {
     g_backward_list != backward_list ||
     g_green != green ||
     g_red != red ||
-    g_dtcType != dtcType) {
+    g_dtcType != dtcType ||
+    g_dtcFile != dtcFile) {
 
       // If so, clear previous results
     g_redX.clear();
@@ -284,6 +286,7 @@ void PlotAsymmetryByLogValue::checkProperties () {
   g_green = green;
   g_red = red;
   g_dtcType = dtcType;
+  g_dtcFile = dtcFile;
 
 
 }
@@ -310,7 +313,7 @@ Workspace_sptr PlotAsymmetryByLogValue::doLoad (int64_t runNumber ) {
 
       // If user specifies a file, load corrections now
       Workspace_sptr customDeadTimes;
-      loadCorrectionsFromFile (customDeadTimes, getPropertyValue("DeadTimeCorrFile"));
+      loadCorrectionsFromFile (customDeadTimes, g_dtcFile);
       applyDeadtimeCorr (loadedWs, customDeadTimes);
     } else {
       // Load corrections from run
