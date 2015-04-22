@@ -70,7 +70,8 @@ namespace Algorithms
   const std::string ConvertUnitsUsingDetectorTable::category() const { return "Utility\\Development";}
 
   /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
-  const std::string ConvertUnitsUsingDetectorTable::summary() const { return "Performs a unit change on the X values of a workspace";}
+  const std::string ConvertUnitsUsingDetectorTable::summary() const { return " *** Warning - This Routine is under development *** \n"
+                                                                             "Performs a unit change on the X values of a workspace";}
 
   //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.
@@ -330,16 +331,17 @@ namespace Algorithms
       std::vector<double> emptyVec;
       int failedDetectorCount = 0;
 
-      std::vector<std::string> parameters = outputWS->getInstrument()->getStringParameter("show-signed-theta");
-      bool bUseSignedVersion = (!parameters.empty()) && find(parameters.begin(), parameters.end(), "Always") != parameters.end();
-      function<double(IDetector_const_sptr)> thetaFunction = bUseSignedVersion ? bind(&MatrixWorkspace::detectorSignedTwoTheta, outputWS, _1) : bind(&MatrixWorkspace::detectorTwoTheta, outputWS, _1);
+//      std::vector<std::string> parameters = outputWS->getInstrument()->getStringParameter("show-signed-theta");
+//      bool bUseSignedVersion = (!parameters.empty()) && find(parameters.begin(), parameters.end(), "Always") != parameters.end();
+//      function<double(IDetector_const_sptr)> thetaFunction = bUseSignedVersion ? bind(&MatrixWorkspace::detectorSignedTwoTheta, outputWS, _1) : bind(&MatrixWorkspace::detectorTwoTheta, outputWS, _1);
 
 
+      // TODO: Check why this parallel stuff breaks
       // Loop over the histograms (detector spectra)
-      PARALLEL_FOR1(outputWS)
+      //PARALLEL_FOR1(outputWS)
               for (int64_t i = 0; i < numberOfSpectra_i; ++i)
       {
-          PARALLEL_START_INTERUPT_REGION
+          //PARALLEL_START_INTERUPT_REGION
 
           std::size_t wsid = i;
 
@@ -347,29 +349,25 @@ namespace Algorithms
           {
               specid_t spectraNumber = static_cast<specid_t>(spectraColumn->toDouble(i));
               wsid = outputWS->getIndexFromSpectrumNumber(spectraNumber);
-              g_log.notice() << "###### Spectra #" << spectraNumber << " ==> Workspace ID:" << wsid << std::endl;
+              g_log.debug() << "###### Spectra #" << spectraNumber << " ==> Workspace ID:" << wsid << std::endl;
               l1 = l1Column->toDouble(wsid);
               l2 = l2Column->toDouble(wsid);
               twoTheta = deg2rad * twoThetaColumn->toDouble(wsid);
               efixed = efixedColumn->toDouble(wsid);
               emode = static_cast<int>(emodeColumn->toDouble(wsid));
 
-
-              g_log.notice() << "\tL1=" << l1 << ",L2=" << l2 << ",TT=" << twoTheta << ",EF=" << efixed
+              g_log.debug() << "\tL1=" << l1 << ",L2=" << l2 << ",TT=" << twoTheta << ",EF=" << efixed
                             << ",EM=" << emode << std::endl;
-
 
               // Make local copies of the units. This allows running the loop in parallel
               Unit * localFromUnit = fromUnit->clone();
               Unit * localOutputUnit = outputUnit->clone();
-
               /// @todo Don't yet consider hold-off (delta)
               const double delta = 0.0;
               // Convert the input unit to time-of-flight
               localFromUnit->toTOF(outputWS->dataX(wsid),emptyVec,l1,l2,twoTheta,emode,efixed,delta);
               // Convert from time-of-flight to the desired unit
               localOutputUnit->fromTOF(outputWS->dataX(wsid),emptyVec,l1,l2,twoTheta,emode,efixed,delta);
-
               // EventWorkspace part, modifying the EventLists.
               if ( m_inputEvents )
               {
@@ -388,9 +386,9 @@ namespace Algorithms
           }
 
           prog.report("Convert to " + m_outputUnit->unitID());
-          PARALLEL_END_INTERUPT_REGION
+          //PARALLEL_END_INTERUPT_REGION
       } // loop over spectra
-      PARALLEL_CHECK_INTERUPT_REGION
+      //PARALLEL_CHECK_INTERUPT_REGION
 
               if (failedDetectorCount != 0)
       {

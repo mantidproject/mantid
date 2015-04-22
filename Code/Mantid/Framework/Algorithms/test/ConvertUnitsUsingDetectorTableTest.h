@@ -3,15 +3,15 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidAlgorithms/ConvertUnitsUsingDetectorTable.h"
+
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidKernel/UnitFactory.h"
+#include "MantidDataHandling/SaveNexusProcessed.h"
 
-
-
-#include "MantidAlgorithms/ConvertUnitsUsingDetectorTable.h"
 
 
 
@@ -35,37 +35,13 @@ public:
   void test_Init()
   {
     ConvertUnitsUsingDetectorTable alg;
-    TS_ASSERT_THROWS_NOTHING( alg.initialize() )
-    TS_ASSERT( alg.isInitialized() )
+    TS_ASSERT_THROWS_NOTHING( alg.initialize() );
+    TS_ASSERT( alg.isInitialized() );
   }
 
-  void xtest_exec()
-  {
-    // Name of the output workspace.
-    std::string outWSName("ConvertUnitsUsingDetectorTableTest_OutputWS");
-
-    ConvertUnitsUsingDetectorTable alg;
-    TS_ASSERT_THROWS_NOTHING( alg.initialize() )
-    TS_ASSERT( alg.isInitialized() )
-    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("REPLACE_PROPERTY_NAME_HERE!!!!", "value") );
-    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("OutputWorkspace", outWSName) );
-    TS_ASSERT_THROWS_NOTHING( alg.execute(); );
-    TS_ASSERT( alg.isExecuted() );
-
-    // Retrieve the workspace from data service. TODO: Change to your desired type
-    Workspace_sptr ws;
-    TS_ASSERT_THROWS_NOTHING( ws = AnalysisDataService::Instance().retrieveWS<Workspace>(outWSName) );
-    TS_ASSERT(ws);
-    if (!ws) return;
-
-    // TODO: Check the results
-
-    // Remove workspace from the data service.
-    AnalysisDataService::Instance().remove(outWSName);
-  }
 
   // TODO: Make this test useful
-  void test_TofToEnergy()
+  void test_TofToLambda()
   {
      ConvertUnitsUsingDetectorTable myAlg;
      myAlg.initialize();
@@ -73,7 +49,7 @@ public:
 
      const std::string workspaceName("_ws_testConvertUsingDetectorTable");
      int nBins = 10;
-     MatrixWorkspace_sptr WS = WorkspaceCreationHelper::Create2DWorkspaceBinned(2, nBins, 5.0, 50.0);
+     MatrixWorkspace_sptr WS = WorkspaceCreationHelper::Create2DWorkspaceBinned(2, nBins, 500.0, 50.0);
      WS->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
 
      AnalysisDataService::Instance().add(workspaceName,WS);
@@ -92,27 +68,35 @@ public:
       row0 << 1 << 100.0 << 10.0 << 90.0 << 7.0 << 0;
 
       API::TableRow row1 = pars->appendRow();
-      row1 << 2 << 100.0 << 10.0 << 90.0 << 7.0 << 1;
+      row1 << 2 << 1.0 << 1.0 << 90.0 << 7.0 << 0;
+
+//      Mantid::DataHandling::SaveNexusProcessed saver;
+//      saver.initialize();
+//      saver.setProperty("InputWorkspace",pars);
+//      saver.setPropertyValue("Filename", "pars.nxs");
+//      saver.execute();
 
       // Set the properties
       myAlg.setRethrows(true);
       myAlg.setPropertyValue("InputWorkspace", workspaceName);
       myAlg.setPropertyValue("OutputWorkspace", workspaceName);
-      myAlg.setPropertyValue("Target", "Energy");
+      myAlg.setPropertyValue("Target", "Wavelength");
       myAlg.setProperty("DetectorParameters", pars);
 
       myAlg.execute();
 
       auto outWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(workspaceName);
 
-      for (int j=0; j < outWS->getNumberHistograms(); ++j) {
-          for (int i=0; i < outWS->blocksize(); ++i) {
-              std::cout << "dataX[" << j << "]["<< i << "] = " << outWS->dataX(j)[i] << std::endl;
-          }
-      }
+//      for (int j=0; j < outWS->getNumberHistograms(); ++j) {
+//          for (int i=0; i < outWS->blocksize(); ++i) {
+//              std::cout << "dataX[" << j << "]["<< i << "] = " << outWS->dataX(j)[i] << std::endl;
+//          }
+//      }
 
-      TS_ASSERT_DELTA( outWS->dataX(1)[1], 25.3444, 0.01 );
-      // TODO: Add more checks.
+      TS_ASSERT_DELTA( outWS->dataX(0)[0], 0.017982, 0.000001 );
+      TS_ASSERT_DELTA( outWS->dataX(0)[9], 0.034166, 0.000001 );
+//      TS_ASSERT_DELTA( outWS->dataX(1)[0], 0.179818, 0.000001 );
+//      TS_ASSERT_DELTA( outWS->dataX(1)[9], 0.017982, 0.000001 );
 
       AnalysisDataService::Instance().remove(workspaceName);
   }
