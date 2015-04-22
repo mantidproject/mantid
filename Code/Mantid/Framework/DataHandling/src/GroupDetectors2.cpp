@@ -757,9 +757,6 @@ int GroupDetectors2::readInt(std::string line) {
 void GroupDetectors2::readFile(spec2index_map &specs2index, std::istream &File,
                                size_t &lineNum,
                                std::vector<int64_t> &unUsedSpec) {
-  // used in writing the spectra to the outData map. The groups are just
-  // labelled incrementally from 1
-  int spectrumNo = 1;
   // go through the rest of the file reading in lists of spectra number to group
   while (File) {
     std::string thisLine;
@@ -770,6 +767,8 @@ void GroupDetectors2::readFile(spec2index_map &specs2index, std::istream &File,
       if (!File)
         return;
     } while (readInt(thisLine) == EMPTY_LINE && File);
+    // the spectrum number is the same as the group number
+    int spectrumNo = boost::lexical_cast<int>(thisLine);
 
     // the number of spectra that will be combined in the group
     int numberOfSpectra = EMPTY_LINE;
@@ -808,7 +807,6 @@ void GroupDetectors2::readFile(spec2index_map &specs2index, std::istream &File,
     if ((m_GroupSpecInds.size() % INTERVAL) == 1) {
       fileReadProg(m_GroupSpecInds.size(), specs2index.size());
     }
-    spectrumNo++;
   }
 }
 /** The function expects that the string passed to it contains a series of
