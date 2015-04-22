@@ -238,6 +238,9 @@ class MainWindow(QtGui.QMainWindow):
         # Interactive graphics
         self._viewMerge_X = None   
         self._viewMerge_Y = None   
+
+        # Control of plots: key = canvas, value = list of 2-integer-tuple (expno, scanno)
+        self._tabPlotDict = {}
         
         return
 
@@ -1138,12 +1141,6 @@ class MainWindow(QtGui.QMainWindow):
         Either download the data from a server or copy the data file from local 
         disk
         """
-        # FIXME / TODO : Need to load vanadium correction data automatically!
-        print "************************************************************"
-        print "* ASAP: Load vanadium correction data!                     *"
-        print "************************************************************"
-
-
         # Get on hold of raw data file
         useserver = self.ui.radioButton_useServer.isChecked()
         uselocal = self.ui.radioButton_useLocal.isChecked()
@@ -1199,6 +1196,11 @@ class MainWindow(QtGui.QMainWindow):
     def _plotIndividualDetCounts(self, expno, scanno, detid, xlabel):
         """ Plot a specific detector's counts along all experiment points (pt)
         """
+        # Validate input
+        expno = int(expno)
+        scanno = int(scanno)
+        detid = int(detid)
+
         # load data if necessary
         if self._myControl.hasDataLoaded(expno, scanno) is False:
             rvalue, filename = self._uiLoadDataFile(expno, scanno)   
@@ -1224,19 +1226,26 @@ class MainWindow(QtGui.QMainWindow):
             xlabel = r'2\theta'
 
         label = "Detector ID: %d" % (detid)
-        canvas.addPlot(vecx, vecy, marker=marker, color=color, xlabel=xlabel, \
+
+        # Check line managing dictionary
+        if self._tabLineDict.has_key(canvas) is None:
+            self._tabLineDict[canvas] = []
+
+        if self._tabLineDict[canvas].count( (expno, scanno, detid) ) is False:
+            canvas.addPlot(vecx, vecy, marker=marker, color=color, xlabel=xlabel, \
                 ylabel='Counts',label=label)
+            self._tabLineDict[canvas].append( (expno, scanno, detid) )
         
-        # auto setup for image boundary
-        xmin = min(vecx)
-        xmax = max(vecx)
+            # auto setup for image boundary
+            xmin = min(min(vecx), canvas.getXLimit[0])
+            xmax = max(max(vecx), canvas.getXLimit[1])
 
-        ymax = max(vecy)
-        ymin = min(vecy)
+            ymin = min(min(vecy), canvas.getYLimit[0])
+            ymax = max(max(vecy), canvas.getYLimit[1])
 
-        dx = xmax-xmin
-        dy = ymax-ymin
-        canvas.setXYLimit(xmin-dx*0.1, xmax+dx*0.1, ymin-dy*0.1, ymax+dy*0.1)
+            dx = xmax-xmin
+            dy = ymax-ymin
+            canvas.setXYLimit(xmin-dx*0.1, xmax+dx*0.1, ymin-dy*0.1, ymax+dy*0.1)
 
         return True
         
@@ -1262,7 +1271,12 @@ class MainWindow(QtGui.QMainWindow):
     def _plotRawDetSignal(self, expno, scanno, plotmode, ptno, dooverplot):
         """ Plot the counts of one detector of a certain Pt. in an experiment
         """
-        # load data if necessary
+        # Validate input
+        expno = int(expno)
+        scanno = int(scanno)
+        ptno = int(ptno) 
+
+        # Load data if necessary
         if self._myControl.hasDataLoaded(expno, scanno) is False:
             rvalue, filename = self._uiLoadDataFile(expno, scanno)   
             if rvalue is False:
@@ -1271,7 +1285,7 @@ class MainWindow(QtGui.QMainWindow):
                 return
             self._myControl.loadSpicePDData(expno, scanno, filename)
 
-        # get vecx and vecy
+        # Get vecx and vecy
         if plotmode == "All Pts.":
             # Plot all Pts.
             vecxylist = self._myControl.getRawDetectorCounts(expno, scanno)
@@ -1279,6 +1293,8 @@ class MainWindow(QtGui.QMainWindow):
             # Clear previous
             self.ui.graphicsView_Raw.clearAllLines()
             self.ui.graphicsView_Raw.setLineMarkerColorIndex(0)
+
+            self._tabLineDict[canvas] = []
 
         elif plotmode == "Single Pts.":
             # Plot plot
@@ -1295,6 +1311,9 @@ class MainWindow(QtGui.QMainWindow):
 
         # plot
         canvas = self.ui.graphicsView_Raw
+        if self._tabLineDict.has_key(canvas) is False:
+            self._tabLineDict[canvas] = []
+
         # FIXME
         unit = r"$2\theta$"
 
@@ -1306,10 +1325,18 @@ class MainWindow(QtGui.QMainWindow):
         for ptno, vecx, vecy in vecxylist:
             # FIXME - Label is left blank as there can be too many labels 
             label = str(ptno)
+
+            # skip if this plot has existed
+            if self._tabLineDict[canvas].count( (expno, scanno, ptno) ) == 1:
+                continue
+
             marker, color = canvas.getNextLineMarkerColorCombo()
             canvas.addPlot(vecx, vecy, marker=marker, color=color, xlabel=unit, \
                     ylabel='intensity',label=label)
-           
+          
+            # set up line tuple
+            self._tabLineDict[canvas].append( (expno, scanno, ptno) )
+
             # auto setup for image boundary
             tmpxmin = min(vecx)
             tmpxmax = max(vecx)
