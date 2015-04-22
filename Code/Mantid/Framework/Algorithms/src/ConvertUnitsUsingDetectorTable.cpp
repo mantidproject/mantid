@@ -301,7 +301,7 @@ namespace Algorithms
       Column_const_sptr efixedColumn;
       Column_const_sptr emodeColumn;
 
-      std::vector<std::string> columnNames = paramWS->getColumnNames();
+      //std::vector<std::string> columnNames = paramWS->getColumnNames();
 
       // Now lets read the parameters
       try {
