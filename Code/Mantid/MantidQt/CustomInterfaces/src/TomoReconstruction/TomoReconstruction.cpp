@@ -126,26 +126,26 @@ void TomoReconstruction::doSetupSectionParameters() {
 
   // Lists/trees
   connect(m_uiSavu.listAvailablePlugins, SIGNAL(itemSelectionChanged()), this,
-          SLOT(on_availablePluginSelected()));
+          SLOT(availablePluginSelected()));
   connect(m_uiSavu.treeCurrentPlugins, SIGNAL(itemSelectionChanged()), this,
-          SLOT(on_currentPluginSelected()));
+          SLOT(currentPluginSelected()));
   connect(m_uiSavu.treeCurrentPlugins, SIGNAL(itemExpanded(QTreeWidgetItem *)),
-          this, SLOT(on_expandedItem(QTreeWidgetItem *)));
+          this, SLOT(expandedItem(QTreeWidgetItem *)));
 
   // Buttons
   connect(m_uiSavu.btnTransfer, SIGNAL(released()), this,
-          SLOT(on_transferClicked()));
-  connect(m_uiSavu.btnMoveUp, SIGNAL(released()), this, SLOT(on_moveUpClicked()));
+          SLOT(transferClicked()));
+  connect(m_uiSavu.btnMoveUp, SIGNAL(released()), this, SLOT(moveUpClicked()));
   connect(m_uiSavu.btnMoveDown, SIGNAL(released()), this,
-          SLOT(on_moveDownClicked()));
-  connect(m_uiSavu.btnRemove, SIGNAL(released()), this, SLOT(on_removeClicked()));
+          SLOT(moveDownClicked()));
+  connect(m_uiSavu.btnRemove, SIGNAL(released()), this, SLOT(removeClicked()));
 
   // Connect slots
   // Menu Items
-  connect(m_ui.actionOpen, SIGNAL(triggered()), this, SLOT(on_menuOpenClicked()));
-  connect(m_ui.actionSave, SIGNAL(triggered()), this, SLOT(on_menuSaveClicked()));
+  connect(m_ui.actionOpen, SIGNAL(triggered()), this, SLOT(menuOpenClicked()));
+  connect(m_ui.actionSave, SIGNAL(triggered()), this, SLOT(menuSaveClicked()));
   connect(m_ui.actionSaveAs, SIGNAL(triggered()), this,
-          SLOT(on_menuSaveAsClicked()));
+          SLOT(menuSaveAsClicked()));
 }
 
 void TomoReconstruction::doSetupSectionSetup() {
@@ -156,17 +156,17 @@ void TomoReconstruction::doSetupSectionSetup() {
   m_ui.groupBox_run_config->setEnabled(false);
 
   connect(m_ui.pushButton_SCARF_login, SIGNAL(released()), this,
-          SLOT(on_SCARFLoginClicked()));
+          SLOT(SCARFLoginClicked()));
   connect(m_ui.pushButton_SCARF_logout, SIGNAL(released()), this,
-          SLOT(on_SCARFLogoutClicked()));
+          SLOT(SCARFLogoutClicked()));
 
   // 'browse' buttons
   connect(m_ui.pushButton_fits_dir, SIGNAL(released()), this,
-          SLOT(on_fitsPathBrowseClicked()));
+          SLOT(fitsPathBrowseClicked()));
   connect(m_ui.pushButton_flat_dir, SIGNAL(released()), this,
-          SLOT(on_flatPathBrowseClicked()));
+          SLOT(flatPathBrowseClicked()));
   connect(m_ui.pushButton_dark_dir, SIGNAL(released()), this,
-          SLOT(on_darkPathBrowseClicked()));
+          SLOT(darkPathBrowseClicked()));
 }
 
 void TomoReconstruction::doSetupSectionRun() {
@@ -194,17 +194,17 @@ void TomoReconstruction::doSetupSectionRun() {
 
   // Button signals
   connect(m_ui.pushButton_browse_image, SIGNAL(released()), this,
-          SLOT(on_browseImageClicked()));
+          SLOT(browseImageClicked()));
   connect(m_ui.pushButton_reconstruct, SIGNAL(released()), this,
-          SLOT(on_reconstructClicked()));
+          SLOT(reconstructClicked()));
   connect(m_ui.pushButton_run_tool_setup, SIGNAL(released()), this,
-          SLOT(on_toolSetupClicked()));
+          SLOT(toolSetupClicked()));
   connect(m_ui.pushButton_run_refresh, SIGNAL(released()), this,
-          SLOT(on_jobTableRefreshClicked()));
+          SLOT(jobTableRefreshClicked()));
   connect(m_ui.pushButton_run_job_visualize, SIGNAL(released()), this,
-          SLOT(on_runVisualizeClicked()));
+          SLOT(runVisualizeClicked()));
   connect(m_ui.pushButton_run_job_cancel, SIGNAL(released()), this,
-          SLOT(on_jobCancelClicked()));
+          SLOT(jobCancelClicked()));
 
   // update tools for a resource
   connect(m_ui.comboBox_run_compute_resource, SIGNAL(currentIndexChanged(int)),
@@ -220,13 +220,13 @@ void TomoReconstruction::doSetupSectionRun() {
 }
 
 void TomoReconstruction::doSetupGeneralWidgets() {
-  connect(m_ui.pushButton_help, SIGNAL(released()), this, SLOT(on_openHelpWin()));
-  connect(m_ui.pushButton_close, SIGNAL(released()), this,
-          SLOT(on_closeInterface()));
+  connect(m_ui.pushButton_help, SIGNAL(released()), this, SLOT(openHelpWin()));
+  // note connection to the parent window, otherwise you'll be left
+  // with an empty frame window
+  connect(m_ui.pushButton_close, SIGNAL(released()), this->parent(), SLOT(close()));
 }
 
 void TomoReconstruction::initLayout() {
-  // TODO: should split the tabs out into their own files
   m_ui.setupUi(this);
 
   readSettings();
@@ -285,7 +285,7 @@ void TomoReconstruction::updateCompResourceStatus(bool online) {
   }
 }
 
-void TomoReconstruction::on_SCARFLoginClicked() {
+void TomoReconstruction::SCARFLoginClicked() {
   try {
     doLogin(getPassword());
   } catch (std::exception &e) {
@@ -301,7 +301,7 @@ void TomoReconstruction::on_SCARFLoginClicked() {
   m_ui.pushButton_SCARF_login->setEnabled(true);
 }
 
-void TomoReconstruction::on_SCARFLogoutClicked() {
+void TomoReconstruction::SCARFLogoutClicked() {
   try {
     doLogout();
   } catch (std::exception &e) {
@@ -484,12 +484,12 @@ void TomoReconstruction::setupRunTool() {
 }
 
 /// needs to at least update the 'tool' combo box
-void TomoReconstruction::on_compResourceIndexChanged(int i) {
+void TomoReconstruction::compResourceIndexChanged(int i) {
   UNUSED_ARG(i);
   setupRunTool();
 }
 
-void TomoReconstruction::on_runToolIndexChanged(int i) {
+void TomoReconstruction::runToolIndexChanged(int i) {
   UNUSED_ARG(i);
   QComboBox *rt = m_ui.comboBox_run_tool;
 
@@ -684,7 +684,7 @@ void TomoToolSetupDialog::okClicked() {}
 
 void TomoToolSetupDialog::cancelClicked() {}
 
-void TomoReconstruction::on_toolSetupClicked() {
+void TomoReconstruction::toolSetupClicked() {
   // big TODO: handle tool specific options / config files
   QComboBox *rt = m_ui.comboBox_run_tool;
   if (!rt)
@@ -717,17 +717,17 @@ void TomoReconstruction::showToolConfig(const std::string &name) {
   }
 }
 
-void TomoReconstruction::on_reconstructClicked() {
+void TomoReconstruction::reconstructClicked() {
   const std::string &resource = getComputeResource();
 
   if (m_localCompName != resource) {
     doSubmitReconstructionJob();
 
-    on_jobTableRefreshClicked();
+    jobTableRefreshClicked();
   }
 }
 
-void TomoReconstruction::on_runVisualizeClicked() {
+void TomoReconstruction::runVisualizeClicked() {
   QTableWidget *tbl = m_ui.tableWidget_run_jobs;
   const int idCol = 2;
   QTableWidgetItem *hdr = tbl->horizontalHeaderItem(idCol);
@@ -748,7 +748,7 @@ void TomoReconstruction::on_runVisualizeClicked() {
 }
 
 /// processes (cancels) all the jobs selected in the table
-void TomoReconstruction::on_jobCancelClicked() {
+void TomoReconstruction::jobCancelClicked() {
   const std::string &resource = getComputeResource();
 
   QTableWidget *tbl = m_ui.tableWidget_run_jobs;
@@ -798,7 +798,7 @@ void TomoReconstruction::doQueryJobStatus(std::vector<std::string> &ids,
   cmds = alg->getProperty("RemoteJobsCommands");
 }
 
-void TomoReconstruction::on_jobTableRefreshClicked() {
+void TomoReconstruction::jobTableRefreshClicked() {
   std::vector<std::string> ids, names, status, cmds;
   doQueryJobStatus(ids, names, status, cmds);
 
@@ -829,7 +829,7 @@ void TomoReconstruction::on_jobTableRefreshClicked() {
   t->setSortingEnabled(sort);
 }
 
-void TomoReconstruction::on_browseImageClicked() {
+void TomoReconstruction::browseImageClicked() {
   // get path
   QString fitsStr = QString("Supported formats: FITS, TIFF and PNG "
                             "(*.fits *.fit *.tiff *.tif *.png);;"
@@ -1019,7 +1019,7 @@ void TomoReconstruction::refreshCurrentPluginListUI() {
 }
 
 // Updates the selected plugin info from Available plugins list.
-void TomoReconstruction::on_availablePluginSelected() {
+void TomoReconstruction::availablePluginSelected() {
   if (m_uiSavu.listAvailablePlugins->selectedItems().count() != 0) {
     size_t idx = static_cast<size_t>(
         m_uiSavu.listAvailablePlugins->currentIndex().row());
@@ -1031,7 +1031,7 @@ void TomoReconstruction::on_availablePluginSelected() {
 }
 
 // Updates the selected plugin info from Current plugins list.
-void TomoReconstruction::on_currentPluginSelected() {
+void TomoReconstruction::currentPluginSelected() {
   if (m_uiSavu.treeCurrentPlugins->selectedItems().count() != 0) {
     auto currItem = m_uiSavu.treeCurrentPlugins->selectedItems()[0];
 
@@ -1047,7 +1047,7 @@ void TomoReconstruction::on_currentPluginSelected() {
 }
 
 // On user editing a parameter tree item, update the data object to match.
-void TomoReconstruction::on_paramValModified(QTreeWidgetItem *item,
+void TomoReconstruction::paramValModified(QTreeWidgetItem *item,
                                           int /*column*/) {
   OwnTreeWidgetItem *ownItem = dynamic_cast<OwnTreeWidgetItem *>(item);
   int topLevelIndex = -1;
@@ -1074,13 +1074,13 @@ void TomoReconstruction::on_paramValModified(QTreeWidgetItem *item,
 
     m_currPlugins->cell<std::string>(topLevelIndex, 1) =
         ::Json::FastWriter().write(root);
-    on_currentPluginSelected();
+    currentPluginSelected();
   }
 }
 
 // When a top level item is expanded, also expand its child items - if tree
 // items
-void TomoReconstruction::on_expandedItem(QTreeWidgetItem *item) {
+void TomoReconstruction::expandedItem(QTreeWidgetItem *item) {
   if (item->parent() == NULL) {
     for (int i = 0; i < item->childCount(); ++i) {
       item->child(i)->setExpanded(true);
@@ -1090,7 +1090,7 @@ void TomoReconstruction::on_expandedItem(QTreeWidgetItem *item) {
 
 // Adds one plugin from the available plugins list into the list of
 // current plugins
-void TomoReconstruction::on_transferClicked() {
+void TomoReconstruction::transferClicked() {
   if (m_uiSavu.listAvailablePlugins->selectedItems().count() != 0) {
     int idx = m_uiSavu.listAvailablePlugins->currentIndex().row();
     Mantid::API::TableRow row = m_currPlugins->appendRow();
@@ -1101,7 +1101,7 @@ void TomoReconstruction::on_transferClicked() {
   }
 }
 
-void TomoReconstruction::on_moveUpClicked() {
+void TomoReconstruction::moveUpClicked() {
   if (m_uiSavu.treeCurrentPlugins->selectedItems().count() != 0) {
     size_t idx =
         static_cast<size_t>(m_uiSavu.treeCurrentPlugins->currentIndex().row());
@@ -1118,7 +1118,7 @@ void TomoReconstruction::on_moveUpClicked() {
   }
 }
 
-void TomoReconstruction::on_moveDownClicked() {
+void TomoReconstruction::moveDownClicked() {
   // TODO: this can be done with the same function as above...
   if (m_uiSavu.treeCurrentPlugins->selectedItems().count() != 0) {
     size_t idx =
@@ -1136,7 +1136,7 @@ void TomoReconstruction::on_moveDownClicked() {
   }
 }
 
-void TomoReconstruction::on_removeClicked() {
+void TomoReconstruction::removeClicked() {
   // Also clear ADS entries
   if (m_uiSavu.treeCurrentPlugins->selectedItems().count() != 0) {
     int idx = m_uiSavu.treeCurrentPlugins->currentIndex().row();
@@ -1146,7 +1146,7 @@ void TomoReconstruction::on_removeClicked() {
   }
 }
 
-void TomoReconstruction::on_menuOpenClicked() {
+void TomoReconstruction::menuOpenClicked() {
   QString s =
       QFileDialog::getOpenFileName(0, "Open file", QDir::currentPath(),
                                    "NeXus files (*.nxs);;All files (*.*)",
@@ -1175,9 +1175,9 @@ void TomoReconstruction::on_menuOpenClicked() {
   }
 }
 
-void TomoReconstruction::on_menuSaveClicked() {
+void TomoReconstruction::menuSaveClicked() {
   if (m_currentParamPath == "") {
-    on_menuSaveAsClicked();
+    menuSaveAsClicked();
     return;
   }
 
@@ -1203,7 +1203,7 @@ void TomoReconstruction::on_menuSaveClicked() {
   }
 }
 
-void TomoReconstruction::on_menuSaveAsClicked() {
+void TomoReconstruction::menuSaveAsClicked() {
   QString s =
       QFileDialog::getSaveFileName(0, "Save file", QDir::currentPath(),
                                    "NeXus files (*.nxs);;All files (*.*)",
@@ -1211,7 +1211,7 @@ void TomoReconstruction::on_menuSaveAsClicked() {
   std::string returned = s.toStdString();
   if (returned != "") {
     m_currentParamPath = returned;
-    on_menuSaveClicked();
+    menuSaveClicked();
   }
 }
 
@@ -1413,15 +1413,15 @@ void TomoReconstruction::processPathBrowseClick(QLineEdit *le,
   }
 }
 
-  void TomoReconstruction::on_fitsPathBrowseClicked() {
+void TomoReconstruction::fitsPathBrowseClicked() {
   processPathBrowseClick(m_ui.lineEdit_path_FITS, m_pathFITS);
 }
 
-void TomoReconstruction::on_flatPathBrowseClicked() {
+void TomoReconstruction::flatPathBrowseClicked() {
   processPathBrowseClick(m_ui.lineEdit_path_flat, m_pathFlat);
 }
 
-void TomoReconstruction::on_darkPathBrowseClicked() {
+void TomoReconstruction::darkPathBrowseClicked() {
   processPathBrowseClick(m_ui.lineEdit_path_dark, m_pathDark);
 }
 
@@ -1646,18 +1646,18 @@ void TomoReconstruction::userError(std::string err, std::string description) {
                         QMessageBox::Ok);
 }
 
-void TomoReconstruction::on_openHelpWin() {
+void TomoReconstruction::openHelpWin() {
   MantidQt::API::HelpWindow::showCustomInterface(
       NULL, QString("Tomographic_Reconstruction"));
 }
 
-void TomoReconstruction::on_closeInterface() {
+void TomoReconstruction::closeEvent(QCloseEvent *event) {
   QMessageBox msgBox;
-  msgBox.setWindowTitle(tr("Close the tomographic reconstruction interface"));
+  msgBox.setWindowTitle("Close the tomographic reconstruction interface");
   // If we used these, then we'd have layout issues
   // msgBox.setStandardButtons(QMessageBox::No | QMessageBox::Yes);
   // msgBox.setDefaultButton(QMessageBox::Yes);
-  msgBox.setIconPixmap(QPixmap(":/images/help-contents-64.png"));
+  msgBox.setIconPixmap(QPixmap(":/win/unknown.png"));
   QCheckBox confirm_checkBox("Always ask for confirmation", &msgBox);
   confirm_checkBox.setCheckState(Qt::Checked);
   msgBox.layout()->addItem(new QSpacerItem(0, 0, QSizePolicy::Expanding));
@@ -1668,19 +1668,18 @@ void TomoReconstruction::on_closeInterface() {
   QPushButton *bNo = msgBox.addButton("No", QMessageBox::NoRole);
   bNo->setIcon(style()->standardIcon(QStyle::SP_DialogNoButton));
   msgBox.setDefaultButton(bNo);
-  msgBox.setText(tr("You are about to close this interface"));
-  msgBox.setInformativeText(tr(
+  msgBox.setText("You are about to close this interface");
+  msgBox.setInformativeText(
       "If you close this interface you will need to log in again "
       "and you might loose some of the current state. Jobs running on remote "
-      "compute resources will remain unaffected though. Are you sure?"));
+      "compute resources will remain unaffected though. Are you sure?");
 
   int answer = msgBox.exec();
-  // TODO: save confirm_checkBox.isChecked() in this dialog's
-  // preferences
-
   if (answer == QMessageBox::AcceptRole) {
     saveSettings();
-    close();
+    event->accept();
+  } else {
+    event->ignore();
   }
 }
 

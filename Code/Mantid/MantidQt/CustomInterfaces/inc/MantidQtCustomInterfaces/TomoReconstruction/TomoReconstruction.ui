@@ -15,6 +15,12 @@
   </property>
   <widget class="QWidget" name="mainWidget">
    <layout class="QGridLayout" name="gridLayout_4">
+    <property name="margin">
+     <number>3</number>
+    </property>
+    <property name="spacing">
+     <number>1</number>
+    </property>
     <item row="0" column="0">
      <widget class="QTabWidget" name="tabMain">
       <property name="toolTip">
@@ -122,8 +128,8 @@
                     <rect>
                      <x>0</x>
                      <y>0</y>
-                     <width>370</width>
-                     <height>269</height>
+                     <width>374</width>
+                     <height>278</height>
                     </rect>
                    </property>
                    <layout class="QGridLayout" name="gridLayout_5">
@@ -395,7 +401,7 @@
                </attribute>
                <column>
                 <property name="text">
-                 <string>Runs on</string>
+                 <string>Running on</string>
                 </property>
                </column>
                <column>
@@ -549,6 +555,9 @@
                      <height>20</height>
                     </size>
                    </property>
+                   <property name="toolTip">
+                    <string>Type your password. It will be used just for authentication. Tt won't be displayed or saved anywhere</string>
+                   </property>
                    <property name="text">
                     <string/>
                    </property>
@@ -695,7 +704,7 @@
                     </size>
                    </property>
                    <property name="toolTip">
-                    <string>type your username on the remote compute resource</string>
+                    <string>Type your username on the remote compute resource</string>
                    </property>
                    <property name="text">
                     <string/>

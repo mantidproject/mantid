@@ -63,11 +63,11 @@ public: // public constructor, destructor and functions
 
 protected slots:
   /// for buttons, run tab
-  void on_reconstructClicked();
-  void on_toolSetupClicked();
-  void on_runVisualizeClicked();
-  void on_jobCancelClicked();
-  void on_jobTableRefreshClicked();
+  void reconstructClicked();
+  void toolSetupClicked();
+  void runVisualizeClicked();
+  void jobCancelClicked();
+  void jobTableRefreshClicked();
 
 protected:
   bool doPing();
@@ -93,32 +93,31 @@ protected:
   std::string currentPathSavuConfig();
 
 private slots:
-  void on_compResourceIndexChanged(int);
-  void on_runToolIndexChanged(int);
-  void on_SCARFLoginClicked();
-  void on_SCARFLogoutClicked();
+  void compResourceIndexChanged(int);
+  void runToolIndexChanged(int);
+  void SCARFLoginClicked();
+  void SCARFLogoutClicked();
 
-  void on_browseImageClicked();
+  void browseImageClicked();
 
-  void on_fitsPathBrowseClicked();
-  void on_flatPathBrowseClicked();
-  void on_darkPathBrowseClicked();
+  void fitsPathBrowseClicked();
+  void flatPathBrowseClicked();
+  void darkPathBrowseClicked();
 
   /// open the MantidQT help window for this interface
-  void on_openHelpWin();
-  void on_closeInterface();
+  void openHelpWin();
 
-  void on_menuSaveClicked();
-  void on_menuSaveAsClicked();
-  void on_availablePluginSelected();
-  void on_currentPluginSelected();
-  void on_transferClicked();
-  void on_moveUpClicked();
-  void on_moveDownClicked();
-  void on_removeClicked();
-  void on_menuOpenClicked();
-  void on_paramValModified(QTreeWidgetItem *, int);
-  void on_expandedItem(QTreeWidgetItem *);
+  void menuSaveClicked();
+  void menuSaveAsClicked();
+  void availablePluginSelected();
+  void currentPluginSelected();
+  void transferClicked();
+  void moveUpClicked();
+  void moveDownClicked();
+  void removeClicked();
+  void menuOpenClicked();
+  void paramValModified(QTreeWidgetItem *, int);
+  void expandedItem(QTreeWidgetItem *);
 
 private:
   void doSetupSectionSetup();
@@ -151,6 +150,8 @@ private:
   void readSettings();
   /// save settings (before closing)
   void saveSettings();
+
+  virtual void closeEvent(QCloseEvent *ev);
 
   std::string paramValStringFromArray(const Json::Value &jsonVal,
                                       const std::string &name);

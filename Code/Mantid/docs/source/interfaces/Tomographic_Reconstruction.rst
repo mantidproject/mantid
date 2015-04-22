@@ -1,5 +1,5 @@
-Data Comparison
-===============
+Tomographic Reconstruction
+==========================
 
 .. contents:: Table of Contents
   :local:
@@ -16,7 +16,8 @@ it is presently being tested and trialed for the IMAT instrument at
 ISIS.
 
 .. interface:: Tomographic Reconstruction
-  :align: right
+  :align: center
+  :width: 600
 
 An important feature of this interface is the capability to submit
 jobs to a remote compute resource (a compute cluster for
@@ -36,14 +37,16 @@ jobs submitted recently.
 .. interface:: Tomographic Reconstruction
   :widget: runTab
   :align: right
+  :width: 300
 
 In the setup tab you can set the details of the remote and/or local
 compute resources. Importantly, here is where you can set you username
 and password to log into the remote compute resource.
-          
+
 .. interface:: Tomographic Reconstruction
   :widget: setupTab
   :align: right
+  :width: 300
 
 In principle, the use of this interface is straightforward. The next
 sections provide all the details that might be needed to fully
@@ -58,8 +61,7 @@ SCARF:
 * `TomoPy
   <https://www1.aps.anl.gov/Science/Scientific-Software/TomoPy>`_
 
-* `Astra Toolbox
-    <http://sourceforge.net/p/astra-toolbox/wiki/Home/>`_
+* `Astra Toolbox <http://sourceforge.net/p/astra-toolbox/wiki/Home/>`_
 
 In the near future it is expected that support will be added for `Savu
 <https://github.com/DiamondLightSource/Savu>`_, developed at the
