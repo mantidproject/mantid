@@ -100,6 +100,8 @@ private:
   double getLogValue(API::MatrixWorkspace &ws);
   /// Populate output workspace with results
   void populateOutputWorkspace (API::MatrixWorkspace_sptr &outWS, int nplots);
+  /// Check input properties
+  void checkProperties ();
 
   /// Stores base name shared by all runs
   std::string m_filenameBase;

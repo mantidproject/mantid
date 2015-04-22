@@ -168,6 +168,11 @@ void PlotAsymmetryByLogValue::init() {
 */
 void PlotAsymmetryByLogValue::exec() {
 
+
+  // Check input properties to decide whether or not we can reuse previous
+  // results, if any
+  checkProperties();
+
   // Get properties
   // Get grouping property
   m_forward_list = getProperty("ForwardSpectra");
@@ -226,6 +231,16 @@ void PlotAsymmetryByLogValue::exec() {
   populateOutputWorkspace(outWS,nplots);
   // Assign the result to the output workspace property
   setProperty("OutputWorkspace", outWS);
+
+}
+
+/**  Checks input properties and compares them to previous values
+*/
+void PlotAsymmetryByLogValue::checkProperties () {
+
+  // If any of the following properties has a different value from the
+  // previous call, we need to re-do all the computations, which means
+  // clearing static maps that store previous results
 
 }
 
