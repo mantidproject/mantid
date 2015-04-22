@@ -123,13 +123,13 @@ private:
   int m_green;
   // Mantid vectors to store results
   // Red mantid vectors
-  std::map<int64_t, double> m_redX, m_redY, m_redE;
+  std::map<int64_t, double> g_redX, g_redY, g_redE;
   // Green mantid vectors
-  std::map<int64_t, double> m_greenX, m_greenY, m_greenE;
+  std::map<int64_t, double> g_greenX, g_greenY, g_greenE;
   // Mantid vectors to store Red + Green
-  std::map<int64_t, double> m_sumX, m_sumY, m_sumE;
+  std::map<int64_t, double> g_sumX, g_sumY, g_sumE;
   // Mantid vectors to store Red - Green
-  std::map<int64_t, double> m_diffX, m_diffY, m_diffE;
+  std::map<int64_t, double> g_diffX, g_diffY, g_diffE;
   // LogValue name
   std::string m_logName;
   // LogValue function

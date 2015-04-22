@@ -275,11 +275,11 @@ void PlotAsymmetryByLogValue::populateOutputWorkspace (MatrixWorkspace_sptr &out
   if (nplots == 1) {
 
     std::vector<double> vecRedX, vecRedY, vecRedE;
-    for (auto it=m_redX.begin(); it!=m_redX.end(); ++it)
+    for (auto it=g_redX.begin(); it!=g_redX.end(); ++it)
     {
-      vecRedX.push_back( m_redX[ it->first ] );
-      vecRedY.push_back( m_redY[ it->first ] );
-      vecRedE.push_back( m_redE[ it->first ] );
+      vecRedX.push_back( g_redX[ it->first ] );
+      vecRedY.push_back( g_redY[ it->first ] );
+      vecRedE.push_back( g_redE[ it->first ] );
     }
 
     tAxis->setLabel(0, "Asymmetry");
@@ -292,20 +292,20 @@ void PlotAsymmetryByLogValue::populateOutputWorkspace (MatrixWorkspace_sptr &out
     std::vector<double> vecGreenX, vecGreenY, vecGreenE;
     std::vector<double> vecSumX, vecSumY, vecSumE;
     std::vector<double> vecDiffX, vecDiffY, vecDiffE;
-    for (auto it=m_redX.begin(); it!=m_redX.end(); ++it)
+    for (auto it=g_redX.begin(); it!=g_redX.end(); ++it)
     {
-      vecRedX.push_back( m_redX[ it->first ] );
-      vecRedY.push_back( m_redY[ it->first ] );
-      vecRedE.push_back( m_redE[ it->first ] );
-      vecGreenX.push_back( m_greenX[ it->first ] );
-      vecGreenY.push_back( m_greenY[ it->first ] );
-      vecGreenE.push_back( m_greenE[ it->first ] );
-      vecSumX.push_back( m_sumX[ it->first ] );
-      vecSumY.push_back( m_sumY[ it->first ] );
-      vecSumE.push_back( m_sumE[ it->first ] );
-      vecDiffX.push_back( m_diffX[ it->first ] );
-      vecDiffY.push_back( m_diffY[ it->first ] );
-      vecDiffE.push_back( m_diffE[ it->first ] );
+      vecRedX.push_back( g_redX[ it->first ] );
+      vecRedY.push_back( g_redY[ it->first ] );
+      vecRedE.push_back( g_redE[ it->first ] );
+      vecGreenX.push_back( g_greenX[ it->first ] );
+      vecGreenY.push_back( g_greenY[ it->first ] );
+      vecGreenE.push_back( g_greenE[ it->first ] );
+      vecSumX.push_back( g_sumX[ it->first ] );
+      vecSumY.push_back( g_sumY[ it->first ] );
+      vecSumE.push_back( g_sumE[ it->first ] );
+      vecDiffX.push_back( g_diffX[ it->first ] );
+      vecDiffY.push_back( g_diffY[ it->first ] );
+      vecDiffE.push_back( g_diffE[ it->first ] );
     }
 
     tAxis->setLabel(0, "Red-Green");
@@ -469,9 +469,9 @@ void PlotAsymmetryByLogValue::doAnalysis (Workspace_sptr loadedWs, int64_t index
 
       double Y, E;
       calcIntAsymmetry(loadedWs2D, Y, E);
-      m_redX[index]=getLogValue(*loadedWs2D);
-      m_redY[index]=Y;
-      m_redE[index]=E;
+      g_redX[index]=getLogValue(*loadedWs2D);
+      g_redY[index]=Y;
+      g_redE[index]=E;
 
     } else {
 
@@ -506,9 +506,9 @@ void PlotAsymmetryByLogValue::doAnalysis (Workspace_sptr loadedWs, int64_t index
       if ( m_green==EMPTY_INT() ){
         double Y, E;
         calcIntAsymmetry(ws_red, Y, E);
-        m_redX[index] = getLogValue(*ws_red);
-        m_redY[index] = Y;
-        m_redE[index] = E;
+        g_redX[index] = getLogValue(*ws_red);
+        g_redY[index] = Y;
+        g_redE[index] = E;
 
       } else{
       
@@ -518,23 +518,23 @@ void PlotAsymmetryByLogValue::doAnalysis (Workspace_sptr loadedWs, int64_t index
         calcIntAsymmetry(ws_red, YR, ER);
         calcIntAsymmetry(ws_green, YG, EG);
         // Red data
-        m_redX[index] = logValue;
-        m_redY[index] = YR;
-        m_redE[index] = ER;
+        g_redX[index] = logValue;
+        g_redY[index] = YR;
+        g_redE[index] = ER;
         // Green data
-        m_greenX[index] = logValue;
-        m_greenY[index] = YG;
-        m_greenE[index] = EG;
+        g_greenX[index] = logValue;
+        g_greenY[index] = YG;
+        g_greenE[index] = EG;
         // Sum
-        m_sumX[index] = logValue;
-        m_sumY[index] = YR+YG;
-        m_sumE[index] = sqrt(ER * ER + EG * EG);
+        g_sumX[index] = logValue;
+        g_sumY[index] = YR+YG;
+        g_sumE[index] = sqrt(ER * ER + EG * EG);
         // move to last for safety since some grouping takes place in the
         // calcIntAsymmetry call below
         calcIntAsymmetry(ws_red, ws_green, YR, ER);
-        m_diffX[index] = logValue;
-        m_diffY[index] = YR;
-        m_diffE[index] = ER;
+        g_diffX[index] = logValue;
+        g_diffY[index] = YR;
+        g_diffE[index] = ER;
       }
     } // else loadedGroup
 
