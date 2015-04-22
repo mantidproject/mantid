@@ -180,9 +180,6 @@ void PlotAsymmetryByLogValue::exec() {
   size_t is = atoi(firstFN.c_str()); // starting run number
   size_t ie = atoi(lastFN.c_str());  // last run number
 
-  // Resize vectors that will store results
-  resizeVectors(ie-is+1);
-
   Progress progress(this, 0, 1, ie - is + 2);
 
   // Loop through runs
@@ -276,27 +273,57 @@ void PlotAsymmetryByLogValue::populateOutputWorkspace (MatrixWorkspace_sptr &out
 {
   TextAxis *tAxis = new TextAxis(nplots);
   if (nplots == 1) {
+
+    std::vector<double> vecRedX, vecRedY, vecRedE;
+    for (auto it=m_redX.begin(); it!=m_redX.end(); ++it)
+    {
+      vecRedX.push_back( m_redX[ it->first ] );
+      vecRedY.push_back( m_redY[ it->first ] );
+      vecRedE.push_back( m_redE[ it->first ] );
+    }
+
     tAxis->setLabel(0, "Asymmetry");
-    outWS->dataX(0) = m_redX;
-    outWS->dataY(0) = m_redY;
-    outWS->dataE(0) = m_redE;
+    outWS->dataX(0) = vecRedX;
+    outWS->dataY(0) = vecRedY;
+    outWS->dataE(0) = vecRedE;
   } else {
+
+    std::vector<double> vecRedX, vecRedY, vecRedE;
+    std::vector<double> vecGreenX, vecGreenY, vecGreenE;
+    std::vector<double> vecSumX, vecSumY, vecSumE;
+    std::vector<double> vecDiffX, vecDiffY, vecDiffE;
+    for (auto it=m_redX.begin(); it!=m_redX.end(); ++it)
+    {
+      vecRedX.push_back( m_redX[ it->first ] );
+      vecRedY.push_back( m_redY[ it->first ] );
+      vecRedE.push_back( m_redE[ it->first ] );
+      vecGreenX.push_back( m_redX[ it->first ] );
+      vecGreenY.push_back( m_redY[ it->first ] );
+      vecGreenE.push_back( m_redE[ it->first ] );
+      vecSumX.push_back( m_redX[ it->first ] );
+      vecSumY.push_back( m_redY[ it->first ] );
+      vecSumE.push_back( m_redE[ it->first ] );
+      vecDiffX.push_back( m_redX[ it->first ] );
+      vecDiffY.push_back( m_redY[ it->first ] );
+      vecDiffE.push_back( m_redE[ it->first ] );
+    }
+
     tAxis->setLabel(0, "Red-Green");
     tAxis->setLabel(1, "Red");
     tAxis->setLabel(2, "Green");
     tAxis->setLabel(3, "Red+Green");
-    outWS->dataX(0) = m_diffX;
-    outWS->dataY(0) = m_diffY;
-    outWS->dataE(0) = m_diffE;
-    outWS->dataX(1) = m_redX;
-    outWS->dataY(1) = m_redY;
-    outWS->dataE(1) = m_redE;
-    outWS->dataX(2) = m_greenX;
-    outWS->dataY(2) = m_greenY;
-    outWS->dataE(2) = m_greenE;
-    outWS->dataX(3) = m_sumX;
-    outWS->dataY(3) = m_sumY;
-    outWS->dataE(3) = m_sumE;
+    outWS->dataX(0) = vecDiffX;
+    outWS->dataY(0) = vecDiffY;
+    outWS->dataE(0) = vecDiffE;
+    outWS->dataX(1) = vecRedX;
+    outWS->dataY(1) = vecRedY;
+    outWS->dataE(1) = vecRedE;
+    outWS->dataX(2) = vecGreenX;
+    outWS->dataY(2) = vecGreenY;
+    outWS->dataE(2) = vecGreenE;
+    outWS->dataX(3) = vecSumX;
+    outWS->dataY(3) = vecSumY;
+    outWS->dataE(3) = vecSumE;
   }
   outWS->replaceAxis(1, tAxis);
   outWS->getAxis(0)->title() = m_logName;
@@ -692,28 +719,6 @@ PlotAsymmetryByLogValue::groupDetectors(API::MatrixWorkspace_sptr &ws,
   ws = group->getProperty("OutputWorkspace");
 }
 
-/**  Resize vectors that will store results.
- *  @param size :: The size of the vectors
- */
-void PlotAsymmetryByLogValue::resizeVectors(size_t size) {
-
-  // Red vectors
-  m_redX.resize(size);
-  m_redY.resize(size);
-  m_redE.resize(size);
-  // Green vectors
-  m_greenX.resize(size);
-  m_greenY.resize(size);
-  m_greenE.resize(size);
-  // Diff vectors
-  m_diffX.resize(size);
-  m_diffY.resize(size);
-  m_diffE.resize(size);
-  // Sum vectors
-  m_sumX.resize(size);
-  m_sumY.resize(size);
-  m_sumE.resize(size);
-}
 /**
  * Get log value from a workspace. Convert to double if possible.
  *

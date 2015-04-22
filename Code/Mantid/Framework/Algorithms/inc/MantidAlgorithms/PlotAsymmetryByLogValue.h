@@ -84,8 +84,6 @@ private:
   void doAnalysis (API::Workspace_sptr loadedWs, int64_t index);
   // Parse run names
   void parseRunNames (std::string& firstFN, std::string& lastFN, std::string& fnBase, std::string& fnExt, int& fnZeros);
-  // Resize vectors
-  void resizeVectors (size_t size);
   // Load dead-time corrections from specified file
   void loadCorrectionsFromFile (API::Workspace_sptr &customDeadTimes, std::string deadTimeFile );
   // Apply dead-time corrections
@@ -125,13 +123,13 @@ private:
   int m_green;
   // Mantid vectors to store results
   // Red mantid vectors
-  MantidVec m_redX, m_redY, m_redE;
+  std::map<int64_t, double> m_redX, m_redY, m_redE;
   // Green mantid vectors
-  MantidVec m_greenX, m_greenY, m_greenE;
+  std::map<int64_t, double> m_greenX, m_greenY, m_greenE;
   // Mantid vectors to store Red + Green
-  MantidVec m_sumX, m_sumY, m_sumE;
+  std::map<int64_t, double> m_sumX, m_sumY, m_sumE;
   // Mantid vectors to store Red - Green
-  MantidVec m_diffX, m_diffY, m_diffE;
+  std::map<int64_t, double> m_diffX, m_diffY, m_diffE;
   // LogValue name
   std::string m_logName;
   // LogValue function
