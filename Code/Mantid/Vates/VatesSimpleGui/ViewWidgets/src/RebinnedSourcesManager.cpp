@@ -51,7 +51,7 @@ namespace Mantid
       Mantid::Kernel::Logger g_log("RebinnedSourcesManager");
     }
 
-      RebinnedSourcesManager::RebinnedSourcesManager(QWidget* parent) : QWidget(parent), m_tempPostfix("_tempvsi"), m_tempPrefix("")
+      RebinnedSourcesManager::RebinnedSourcesManager(QWidget* parent) : QWidget(parent), m_tempPostfix("_rebinned_vsi"), m_tempPrefix(""), m_inputSource(NULL), m_rebinnedSource(NULL)
       {
         observeAdd();
         observeAfterReplace();
@@ -69,7 +69,15 @@ namespace Mantid
        */
       void RebinnedSourcesManager::addHandle(const std::string &workspaceName, Mantid::API::Workspace_sptr workspace)
       {
-        if (m_rebinnedWorkspaceToOriginalWorkspace.count(workspaceName) > 0 || m_rebinnedWorkspaceToRebinnedWorkspace.count(workspaceName) > 0)
+        // Check if the workspace which has experienced a change is being tracked in our buffer
+        if (m_newWorkspacePairBuffer.size() == 0)
+        {
+          return;
+        }
+
+        std::string outputWorkspace = m_newWorkspacePairBuffer.begin()->second.first;
+
+        if (outputWorkspace == workspaceName)
         {
           std::string sourceType;
           Mantid::API::IMDEventWorkspace_sptr eventWorkspace = boost::dynamic_pointer_cast<Mantid::API::IMDEventWorkspace>(workspace);
@@ -98,33 +106,16 @@ namespace Mantid
        */
       void RebinnedSourcesManager::preDeleteHandle(const std::string &wsName, const boost::shared_ptr<Mantid::API::Workspace>)
       {
-        // If the original workspace has been deleted, then delete the rebinned
-        // source (and workspace via the listener)
-        bool isOriginal = m_originalWorkspaceToRebinnedWorkspace.count(wsName) > 0;
-        bool isRebinned = m_rebinnedWorkspaceToOriginalWorkspace.count(wsName) > 0;
-        if (isOriginal || isRebinned)
+        // Check if the workspace which is to be deleted is a tracked rebinned workspace
+        std::vector<pqPipelineSource*> sources = findAllRebinnedSourcesForWorkspace(wsName);
+
+        for (std::vector<pqPipelineSource *>::const_iterator it = sources.begin(); it != sources.end(); ++it)
         {
-          // Get the rebinned source and destroy the entire pipeline
-          pqPipelineSource* source;
-          if (isOriginal)
-          {
-            source = getSourceForWorkspace(m_originalWorkspaceToRebinnedWorkspace[wsName]);
-          }
-          else
-          {
-            source = getSourceForWorkspace(wsName);
-          }
+          // Untrack the source
+          untrackWorkspaces(createKeyPairForSource(*it));
 
-          removePipeline(source);
-
-          if (isOriginal)
-          {
-            untrackWorkspaces(m_originalWorkspaceToRebinnedWorkspace[wsName]);
-          }
-          else
-          {
-            untrackWorkspaces(wsName);
-          }
+          // Delete pipeline
+          removePipeline(*it);
         }
       }
 
@@ -140,13 +131,15 @@ namespace Mantid
 
       /**
        * Check if the sources are valid.
-       * @param source The pipeline source.
+       * @param src The pipeline source.
        * @param inputWorkspace Reference for the name of the input workspace.
        * @param outputWorkspace Reference for the name of the output workspace.
        * @param algorithmType The type of the algorithm which will be used to create the rebinned source.
        */
-      void RebinnedSourcesManager::checkSource(pqPipelineSource* source, std::string& inputWorkspace, std::string& outputWorkspace, std::string algorithmType)
+      void RebinnedSourcesManager::checkSource(pqPipelineSource* src, std::string& inputWorkspace, std::string& outputWorkspace, std::string algorithmType)
       {
+        pqPipelineSource* source = goToPipelineBeginning(src);
+
         std::string workspaceName;
         std::string workspaceType;
 
@@ -158,7 +151,7 @@ namespace Mantid
         // Check if it is a Histo or Event workspace, if it is neither, then don't do anything
         if (isHistoWorkspace || isEventWorkspace)
         {
-          processWorkspaceNames(inputWorkspace, outputWorkspace, workspaceName, algorithmType);
+          processWorkspaceNames(inputWorkspace, outputWorkspace, source, workspaceName, algorithmType);
         }
       }
 
@@ -191,11 +184,10 @@ namespace Mantid
           filter = qobject_cast<pqPipelineFilter*>(source);
         }
 
-        proxy = source->getProxy();
-
         // Ensure that the source is either an MDEvent source or an MDHisto source
-        if (!QString(proxy->GetXMLName()).contains("MDEW Source") &&
-            !QString(proxy->GetXMLName()).contains("MDHW Source"))
+        std::string sourceName(source->getProxy()->GetXMLName());
+        if (sourceName.find("MDEW Source") == std::string::npos &&
+            sourceName.find("MDHW Source") == std::string::npos)
         {
           return;
         }
@@ -204,43 +196,27 @@ namespace Mantid
         workspaceName = vtkSMPropertyHelper(source->getProxy(), "WorkspaceName", true).GetAsString();
 
         workspaceType = vtkSMPropertyHelper(source->getProxy(), "WorkspaceTypeName", true).GetAsString();
-
       }
 
       /**
        * Creates the pipeline for the rebinned source.
-       * @param rebinnedSource The name of the rebinned source.
-       * @param sourceToBeDeleted The name of the sources which needs to be removed from the pipeline browser.
        */
-      void RebinnedSourcesManager::repipeRebinnedSource(std::string rebinnedSource, std::string& sourceToBeDeleted)
+      void RebinnedSourcesManager::repipeRebinnedSource()
       {
-        // We need to check if the source from which we receive our filters is the original source or 
-        // a rebinned source.
-        if (m_rebinnedWorkspaceToRebinnedWorkspace.count(rebinnedSource) == 0)
-        {
-          std::string originalSource = m_rebinnedWorkspaceToOriginalWorkspace[rebinnedSource];
+       swapSources(m_inputSource, m_rebinnedSource);
 
-          // Swap with the original source
-          swapSources(originalSource, rebinnedSource);
+       // If we had been dealing with rebinning a rebinned workspace and changing the algorithm,
+       // e.g. when changing from BinMD to SliceMD, then we need to untrack the old, rebinned
+       // workspace
+       if (m_newRebinnedWorkspacePairBuffer.size() > 0)
+       {
+         untrackWorkspaces(createKeyPairForSource(m_inputSource));
+       }
 
-          sourceToBeDeleted = originalSource;
-        }
-        else
-        {
-          std::string oldRebinnedSource = m_rebinnedWorkspaceToRebinnedWorkspace[rebinnedSource];
-          std::string originalSource = m_rebinnedWorkspaceToOriginalWorkspace[oldRebinnedSource];
+       m_newRebinnedWorkspacePairBuffer.clear();
+       m_newWorkspacePairBuffer.clear();
 
-          // Swap with the other rebinned source
-          swapSources(oldRebinnedSource, rebinnedSource);
-          
-          sourceToBeDeleted = oldRebinnedSource;
-
-          m_originalWorkspaceToRebinnedWorkspace.insert(std::pair<std::string, std::string>(originalSource, rebinnedSource));
-          m_rebinnedWorkspaceToOriginalWorkspace.insert(std::pair<std::string, std::string>(rebinnedSource, originalSource));
-
-          // Unregister the connection between the two rebinned sources.
-          m_rebinnedWorkspaceToRebinnedWorkspace.erase(rebinnedSource);
-        }
+       deleteSpecificSource(m_inputSource);
       }
 
       /**
@@ -248,25 +224,27 @@ namespace Mantid
        * @param rebinnedSource The name of the rebinned source.
        * @param originalSource The name of the original source.
        */
-      void RebinnedSourcesManager::repipeOriginalSource(std::string rebinnedSource, std::string originalSource)
+      void RebinnedSourcesManager::repipeOriginalSource(pqPipelineSource* rebinnedSource, pqPipelineSource* originalSource)
       {
-        // Swap source from rebinned source to original source.
-        swapSources(rebinnedSource, originalSource);
+        // Advance the rebinnedSource to the start of the pipeline
+        pqPipelineSource* rebSource = goToPipelineBeginning(rebinnedSource);
 
-        m_originalWorkspaceToRebinnedWorkspace.erase(originalSource);
-        m_rebinnedWorkspaceToOriginalWorkspace.erase(rebinnedSource);
+        // Swap source from rebinned source to original source.
+        swapSources(rebSource, originalSource);
+
+        // Untrack the sources
+        untrackWorkspaces(createKeyPairForSource(rebSource));
+
+        deleteSpecificSource(rebSource);
       }
 
       /**
        * Swap the sources at the bottom level of the pipeline.
-       * @param source1 First source.
-       * @param source2 Second source.
+       * @param src1 First source.
+       * @param src2 Second source.
        */
-      void RebinnedSourcesManager::swapSources(std::string source1, std::string source2)
+      void RebinnedSourcesManager::swapSources(pqPipelineSource* src1, pqPipelineSource* src2)
       {
-        pqPipelineSource* src1= getSourceForWorkspace(source1);
-        pqPipelineSource* src2 = getSourceForWorkspace(source2);
-
         if (!src1 || !src2)
         {
           throw std::runtime_error("VSI error: Either the original or rebinned source don't seem to exist.");
@@ -295,121 +273,149 @@ namespace Mantid
        * @param originalWorkspaceName The name of the original workspace.
        * @param rebinnedWorkspaceName The name of the rebinned workspace.
        */
-      void RebinnedSourcesManager::getStoredWorkspaceNames(pqPipelineSource* source, std::string& originalWorkspaceName, std::string& rebinnedWorkspaceName)
+      void RebinnedSourcesManager::getStoredWorkspaceNames(pqPipelineSource* src, std::string& originalWorkspaceName, std::string& rebinnedWorkspaceName)
       {
-        if (!source)
+        if (!src)
         {
           return;
         }
 
-        // Get the underlying workspace name and type
-        std::string workspaceName;
-        std::string workspaceType;
-        getWorkspaceInfo(source, workspaceName, workspaceType);
+        pqPipelineSource* source = goToPipelineBeginning(src);
 
-        // The input can either be a rebinned source or a 
-        if (m_rebinnedWorkspaceToOriginalWorkspace.count(workspaceName) > 0)
+        // Get the key pair which contains the name of the rebinned workspace and the source name
+        std::pair<std::string, std::string> key = createKeyPairForSource(source);
+        rebinnedWorkspaceName = key.first;
+
+        if (m_rebinnedWorkspaceAndSourceToOriginalWorkspace.count(key) > 0 )
         {
-          originalWorkspaceName = m_rebinnedWorkspaceToOriginalWorkspace[workspaceName];
-          rebinnedWorkspaceName = workspaceName;
-        } else if (m_originalWorkspaceToRebinnedWorkspace.count(workspaceName) > 0)
+          originalWorkspaceName = m_rebinnedWorkspaceAndSourceToOriginalWorkspace[key];
+        }
+        else
         {
-          originalWorkspaceName = workspaceName;
-          rebinnedWorkspaceName = m_originalWorkspaceToRebinnedWorkspace[workspaceName];
+          originalWorkspaceName  = "";
         }
       }
 
       /**
-       * Get the desired source
+       * Get all sources which are linked to the workspace which is to be deleted. The workspace
+       * can be a rebinned workspace or an unrebinned workspace.
        * @param workspaceName The workspace name associated with the source.
+       * @returns a list with all tracked (true sources) which are associated with the workspace
        */
-      pqPipelineSource* RebinnedSourcesManager::getSourceForWorkspace(std::string workspaceName)
+      std::vector<pqPipelineSource*> RebinnedSourcesManager::findAllRebinnedSourcesForWorkspace(std::string workspaceName)
       {
+        std::vector<std::string> linkedSources;
+        // We need to iterate over the map
+        for (std::map<std::pair<std::string, std::string>, std::string>::const_iterator it = m_rebinnedWorkspaceAndSourceToOriginalWorkspace.begin();
+             it != m_rebinnedWorkspaceAndSourceToOriginalWorkspace.begin(); ++it)
+        {
+          // Check the first part of the key and the value ofthe map
+          std::string rebinnedWorkspaceName = it->first.first;
+          std::string originalWorkspaceName = it->second;
+
+          if (workspaceName == rebinnedWorkspaceName || workspaceName == originalWorkspaceName)
+          {
+            linkedSources.push_back(it->first.second);
+          }
+        }
+
+        // Now that we have the sources it is time to get them from the ParaView server
+        std::vector<pqPipelineSource*> sourcesToBeDeleted;
+
         pqServer *server = pqActiveObjects::instance().activeServer();
         pqServerManagerModel *smModel = pqApplicationCore::instance()->getServerManagerModel();
-        QList<pqPipelineSource *> sources;
-        QList<pqPipelineSource *>::Iterator source;
-        sources = smModel->findItems<pqPipelineSource *>(server);
+        QList<pqPipelineSource *> sources = smModel->findItems<pqPipelineSource *>(server);
 
-        for (source = sources.begin(); source != sources.end(); ++source)
+        for (QList<pqPipelineSource*>::Iterator source = sources.begin(); source != sources.end(); ++source)
         {
-
           pqPipelineFilter* filter = qobject_cast<pqPipelineFilter*>(*source);
-
           if (!filter)
           {
-            std::string wsName(vtkSMPropertyHelper((*source)->getProxy(),
-                                                  "WorkspaceName", true).GetAsString());
-            if (!wsName.empty())
+            std::string sourceName((*source)->getProxy()->GetGlobalIDAsString());
+
+            if (doesSourceNeedToBeDeleted(sourceName, linkedSources))
             {
-              if (wsName == workspaceName)
-              {
-                return (*source);
-              }
+              sourcesToBeDeleted.push_back(*source);
             }
           }
         }
-        return NULL;
+
+        return sourcesToBeDeleted;
+      }
+
+      /**
+       * Check if a source is being tracked and hence needs to be deleted
+       * @param sourceName the name of the source which we want to check
+       * @param trackedSources a list of tracked sources which need to be deleted
+       */
+      bool RebinnedSourcesManager::doesSourceNeedToBeDeleted(std::string sourceName, std::vector<std::string> trackedSources)
+      {
+        for (std::vector<std::string>::iterator it = trackedSources.begin(); it != trackedSources.end(); ++it)
+        {
+          if (!sourceName.empty() && *it == sourceName)
+          {
+            return true;
+          }
+        }
+
+        return false;
       }
 
       /**
        * Process the workspaces names for the original source and the input source
        * @param inputWorkspace Reference to the input workpspace.
        * @param outputWorkspace Reference to the output workspace.
+       * @param source A pointer to the original source
        * @param workspaceName The name of the workspace of the current source.
        * @param algorithmType The algorithm which creates the rebinned source.
        */
-      void RebinnedSourcesManager::processWorkspaceNames(std::string& inputWorkspace, std::string& outputWorkspace, std::string workspaceName, std::string algorithmType)
+      void RebinnedSourcesManager::processWorkspaceNames(std::string& inputWorkspace, std::string& outputWorkspace, pqPipelineSource* source,  std::string workspaceName, std::string algorithmType)
       {
+        // Reset the temporary tracking elements, which are needed only for the duration of the rebinning itself
+        m_newWorkspacePairBuffer.clear();
+        m_newRebinnedWorkspacePairBuffer.clear();
+        m_inputSource = NULL;
+        m_rebinnedSource = NULL;
+
         // If the workspace is the original workspace
         if (workspaceName.find(m_tempPostfix) == std::string::npos)
         {
           inputWorkspace = workspaceName;
           outputWorkspace =  m_tempPrefix + workspaceName + algorithmType + m_tempPostfix;
-
-          // Record the workspace
-          m_originalWorkspaceToRebinnedWorkspace.insert(std::pair<std::string, std::string>(inputWorkspace, outputWorkspace));
-          m_rebinnedWorkspaceToOriginalWorkspace.insert(std::pair<std::string, std::string>(outputWorkspace, inputWorkspace));
         } // If the workspace is rebinned and was created with the same algorithm as the currently selected one.
-        else if (workspaceName.find(algorithmType) != std::string::npos) 
+        else if (workspaceName.find(algorithmType) != std::string::npos && workspaceName.find(m_tempPostfix) != std::string::npos) 
         {
-          if (m_rebinnedWorkspaceToOriginalWorkspace.count(workspaceName) > 0)
+          // Check if the source and the workspace name are being tracked already
+          if (isRebinnedSourceBeingTracked(source))
           {
-            inputWorkspace = m_rebinnedWorkspaceToOriginalWorkspace[workspaceName];
+            inputWorkspace = m_rebinnedWorkspaceAndSourceToOriginalWorkspace[createKeyPairForSource(source)];
             outputWorkspace = workspaceName;
           }
         }
         else // If the workspace is rebinned but was not created with the same algorithm as the currently selected one.
         {
-          if (m_rebinnedWorkspaceToOriginalWorkspace.count(workspaceName) > 0)
+          if (isRebinnedSourceBeingTracked(source))
           {
-            inputWorkspace = m_rebinnedWorkspaceToOriginalWorkspace[workspaceName];
+            inputWorkspace = m_rebinnedWorkspaceAndSourceToOriginalWorkspace[createKeyPairForSource(source)];
             outputWorkspace = m_tempPrefix + inputWorkspace + algorithmType + m_tempPostfix;
-
-            // Map the new rebinned workspace name to the old rebinned workspace name
-            m_rebinnedWorkspaceToRebinnedWorkspace.insert(std::pair<std::string, std::string>(outputWorkspace, workspaceName));
+            // Keep track of the old rebinned workspace and source
+            m_newRebinnedWorkspacePairBuffer.insert(std::pair<std::string, std::pair<std::string, pqPipelineSource*>>(workspaceName, std::pair<std::string, pqPipelineSource*>(outputWorkspace, source)));
           }
         }
+        // Record the workspaces
+        m_newWorkspacePairBuffer.insert(std::pair<std::string, std::pair<std::string, pqPipelineSource*>>(inputWorkspace, std::pair<std::string, pqPipelineSource*>(outputWorkspace, source)));
+        m_inputSource= source;
       }
 
       /**
        * Stop keeping tabs on the specific workspace pair
-       * @param rebinnedWorkspace The name of the rebinned workspace.
+       * @param key a key to the tracking map
        */
-      void RebinnedSourcesManager::untrackWorkspaces(std::string rebinnedWorkspace)
+      void RebinnedSourcesManager::untrackWorkspaces(std::pair<std::string, std::string> key)
       {
-        std::string originalWorkspace = m_rebinnedWorkspaceToOriginalWorkspace[rebinnedWorkspace];
-
-        // Remove the mapping ofthe rebinned workspace to the original workspace.
-        if (m_rebinnedWorkspaceToOriginalWorkspace.count(rebinnedWorkspace) > 0)
+        if (m_rebinnedWorkspaceAndSourceToOriginalWorkspace.count(key) > 0)
         {
-          m_rebinnedWorkspaceToOriginalWorkspace.erase(rebinnedWorkspace);
-        }
-
-        // Remove the mapping of the original workspace to the rebinned workspace, if the mapping is still intact.
-        if (m_originalWorkspaceToRebinnedWorkspace.count(originalWorkspace) > 0 && m_originalWorkspaceToRebinnedWorkspace[originalWorkspace] == rebinnedWorkspace)
-        {
-          m_originalWorkspaceToRebinnedWorkspace.erase(originalWorkspace);
+          m_rebinnedWorkspaceAndSourceToOriginalWorkspace.erase(key);
         }
       }
 
@@ -555,55 +561,6 @@ namespace Mantid
       }
 
       /**
-       * Check if we have a rebinned source
-       * @param name The source name.
-       */
-      bool RebinnedSourcesManager::isRebinnedSource(std::string name)
-      {
-        // We need to iterate over all sources and check if the source name exists
-        pqPipelineSource* source  = getSourceForWorkspace(name);
-
-        // If the workspace is tracked and the source exists then it is a rebinned source
-        // else if the workspace is tracked and the source does not exist => untrack it
-        if (m_rebinnedWorkspaceToOriginalWorkspace.count(name) > 0 && source)
-        {
-          return true;
-        }
-        else if (m_rebinnedWorkspaceToOriginalWorkspace.count(name) > 0 && !source)
-        {
-          untrackWorkspaces(name);
-          return false;
-        }
-        else 
-        {
-          return false;
-        }
-      }
-
-      /**
-       * Check if rebinned workspace has already been loaded
-       * @param workspaceName The name of the rebinned workspace
-       */
-      bool RebinnedSourcesManager::doesWorkspaceBelongToRebinnedSource(std::string workspaceName)
-      {
-        pqPipelineSource *source = getSourceForWorkspace(workspaceName);
-
-        if (!source)
-        {
-          return false;
-        }
-
-        if (isRebinnedSource(workspaceName))
-        {
-          return true;
-        }
-        else
-        {
-          return false;
-        }
-      }
-
-      /**
        * Register the rebinned source. Specifically, connect to the destroyed signal of the rebinned source.
        * @param source The rebinned source.
        */
@@ -612,6 +569,29 @@ namespace Mantid
         if (!source)
         {
           return;
+        }
+
+        // Make sure that the underlying source is associated with the buffered workspace pair and register it
+        try
+        {
+          // Add entry to map from (rebinnedWsName, rebinnedSourceName) -> (originalWsName)
+          if (m_newWorkspacePairBuffer.size() != 1)
+          {
+            throw std::runtime_error("Original source for rebinned source could not be found.");
+          }
+
+          std::string originalWorkspaceName = m_newWorkspacePairBuffer.begin()->first;
+          std::string rebinnedWorkspaceName = m_newWorkspacePairBuffer.begin()->second.first;
+
+          std::pair<std::string, std::string> key = std::pair<std::string, std::string>(rebinnedWorkspaceName, getSourceName(source));
+          m_rebinnedWorkspaceAndSourceToOriginalWorkspace.insert(std::pair<std::pair<std::string, std::string>, std::string>(key, originalWorkspaceName));
+
+          // Record the rebinned source
+          m_rebinnedSource = source;
+        }
+        catch (std::runtime_error &ex)
+        {
+          g_log.warning() << ex.what(); 
         }
 
         QObject::connect(source, SIGNAL(destroyed()),
@@ -623,7 +603,8 @@ namespace Mantid
        */
       void RebinnedSourcesManager::onRebinnedSourceDestroyed()
       {
-
+        // Remove the destroyed source
+        
       }
 
       /**
@@ -650,6 +631,106 @@ namespace Mantid
 
         builder->destroy(source); // The listener takes now care of the workspace.
       }
+
+      /**
+       * Gets the source name
+       * @param source A pointer to a source
+       * @returns the name of the source
+       */
+      std::string RebinnedSourcesManager::getSourceName(pqPipelineSource* source)
+      {
+        return std::string(source->getProxy()->GetGlobalIDAsString());
+      }
+
+      /**
+       * Check if a rebinned source is being tracked.
+       * @param src A pointer to a source
+       * @returns if it is being tracked or not
+       */
+      bool RebinnedSourcesManager::isRebinnedSourceBeingTracked(pqPipelineSource* src)
+      {
+        pqPipelineSource* source = goToPipelineBeginning(src);
+
+        std::pair<std::string, std::string> key = createKeyPairForSource(source);
+
+        if (m_rebinnedWorkspaceAndSourceToOriginalWorkspace.count(key) > 0)
+        {
+          return true;
+        }
+        else
+        {
+          return false;
+        }
+      }
+
+      /**
+       * Construct a workspaceName, sourceName key pair for a given source
+       * @param source A pointer to a source
+       * @returns a key which can be used with the tracking map
+       */
+      std::pair<std::string, std::string> RebinnedSourcesManager::createKeyPairForSource(pqPipelineSource* source)
+      {
+        if (!source)
+        {
+          return std::pair<std::string, std::string>("", "");
+        }
+
+        std::string workspaceName = vtkSMPropertyHelper(source->getProxy(), "WorkspaceName", true).GetAsString();
+        return std::pair<std::string, std::string>(workspaceName, getSourceName(source));
+      }
+
+      /**
+       * Delete a specific source and all of its filters. This assumes a linear filter system
+       * @param workspaceName The workspaceName associated with the source which is to be deleted
+       */
+      void RebinnedSourcesManager::deleteSpecificSource(pqPipelineSource* source)
+      {
+        if (NULL != source)
+        {
+          // Go to the end of the source and work your way back
+          pqPipelineSource* tempSource = source;
+
+          while ((tempSource->getAllConsumers()).size() > 0)
+          {
+            tempSource = tempSource->getConsumer(0);
+          }
+
+          // Now delete all filters and the source
+          pqObjectBuilder *builder = pqApplicationCore::instance()->getObjectBuilder();
+
+          // Crawl up to the source level 
+          pqPipelineFilter* filter = qobject_cast<pqPipelineFilter*>(tempSource);
+
+          while (filter)
+          {
+            tempSource = filter->getInput(0);
+            builder->destroy(filter);
+            filter = qobject_cast<pqPipelineFilter*>(tempSource);
+          }
+
+          builder->destroy(tempSource);
+        }
+      }
+
+      /**
+        * Go to the beginning of a pipeline (assuming that it is linear
+        * @param source A pointer to a source
+        * @returns a pointer to the beginning of the pipeline
+        */
+        pqPipelineSource* RebinnedSourcesManager::goToPipelineBeginning(pqPipelineSource* source)
+        {
+          // Crawl up to the beginnign of the pipeline
+          pqPipelineSource* tempSource = source;
+          pqPipelineFilter* filter = qobject_cast<pqPipelineFilter*>(tempSource);
+          while (filter)
+          {
+            tempSource = filter->getInput(0);
+            filter = qobject_cast<pqPipelineFilter*>(tempSource);
+          }
+
+          return tempSource;
+        }
+
     }
   }
 }

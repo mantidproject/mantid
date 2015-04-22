@@ -436,13 +436,8 @@ void MdViewerWidget::onSwitchSoures(std::string rebinnedWorkspaceName, std::stri
 
   try
   {
-    std::string sourceToBeDeleted;
-
     // Repipe the filters to the rebinned source
-    m_rebinnedSourcesManager.repipeRebinnedSource(rebinnedWorkspaceName, sourceToBeDeleted);
-
-    // Remove the original source
-    deleteSpecificSource(sourceToBeDeleted);
+    m_rebinnedSourcesManager.repipeRebinnedSource();
 
     // Update the color scale
     this->currentView->onAutoScale(this->ui.colorSelectionWidget);
@@ -482,14 +477,16 @@ void MdViewerWidget::prepareRebinnedWorkspace(const std::string rebinnedWorkspac
  * Creates and renders back to the original source 
  * @param originalWorkspaceName The name of the original workspace
  */
-void MdViewerWidget::renderOriginalWorkspace(const std::string originalWorkspaceName)
+pqPipelineSource* MdViewerWidget::renderOriginalWorkspace(const std::string originalWorkspaceName)
 {
   // Load a new source plugin
   QString sourcePlugin = "MDEW Source";
-  this->currentView->setPluginSource(sourcePlugin, QString::fromStdString(originalWorkspaceName));
+  pqPipelineSource* source = this->currentView->setPluginSource(sourcePlugin, QString::fromStdString(originalWorkspaceName));
 
   // Render and final setup
   this->renderAndFinalSetup();
+
+  return source;
 }
 
 
@@ -534,26 +531,23 @@ void MdViewerWidget::removeRebinning(pqPipelineSource* source, bool forced, Mode
     }
 
     // We need to check that the rebinned workspace name has still a source associated to it
-    if (!m_rebinnedSourcesManager.isRebinnedSource(rebinnedWorkspaceName))
+    if (!m_rebinnedSourcesManager.isRebinnedSourceBeingTracked(source))
     {
       return;
     }
 
     // Create the original source
-    renderOriginalWorkspace(originalWorkspaceName);
+    pqPipelineSource* originalSource = renderOriginalWorkspace(originalWorkspaceName);
 
     // Repipe the filters to the original source
     try
     {
-      m_rebinnedSourcesManager.repipeOriginalSource(rebinnedWorkspaceName, originalWorkspaceName);
+      m_rebinnedSourcesManager.repipeOriginalSource(source, originalSource);
     }
     catch (const std::runtime_error& error)
     {
       g_log.warning() << error.what();
     }
-
-    // Remove the rebinned workspace source
-    deleteSpecificSource(rebinnedWorkspaceName);
 
     // Render and final setup
     pqActiveObjects::instance().activeView()->forceRender();
@@ -663,21 +657,18 @@ void MdViewerWidget::renderWorkspace(QString workspaceName, int workspaceType, s
     sourcePlugin = "MDEW Source";
   }
 
-
+#if 0
   // Make sure that we are not loading a rebinned vsi workspace which is already loaded
   // 
-  if (workspaceName.contains(m_rebinnedWorkspaceIdentifier))
+  if (m_rebinnedSourcesManager.doesWorkspaceBelongToRebinnedSource(workspaceName.toStdString()))
   {
-    if (m_rebinnedSourcesManager.doesWorkspaceBelongToRebinnedSource(workspaceName.toStdString()))
-    {
-      QMessageBox::information(this, QApplication::tr("Loading Source Warning"),
-                          QApplication::tr("You cannot load a rebinned vsi source which \n "\
-                                          "is currently in use.\n "
-                                          "Please select another source."));
-    }
+    QMessageBox::information(this, QApplication::tr("Loading Source Warning"),
+                        QApplication::tr("You cannot load a rebinned vsi source which \n "\
+                                        "is currently in use.\n "
+                                        "Please select another source."));
     return;
   }
-
+#endif
   // Load a new source plugin
     pqPipelineSource* source = this->currentView->setPluginSource(sourcePlugin, workspaceName);
     source->getProxy()->SetAnnotation(this->m_widgetName.toLatin1().data(), "1");
@@ -1323,39 +1314,6 @@ void MdViewerWidget::preDeleteHandle(const std::string &wsName,
   }
 }
 
-/**
- * Delete a specific source and all of its filters. This assumes a linear filter system
- * @param workspaceName The workspaceName associated with the source which is to be deleted
- */
-void MdViewerWidget::deleteSpecificSource(std::string workspaceName)
-{
-  pqPipelineSource *source = this->currentView->hasWorkspace(workspaceName.c_str());
-  if (NULL != source)
-  {
-    // Go to the end of the source and work your way back
-    pqPipelineSource* tempSource = source;
-
-    while ((tempSource->getAllConsumers()).size() > 0)
-    {
-      tempSource = tempSource->getConsumer(0);
-    }
-
-    // Now delete all filters and the source
-    pqObjectBuilder *builder = pqApplicationCore::instance()->getObjectBuilder();
-
-    // Crawl up to the source level 
-    pqPipelineFilter* filter = qobject_cast<pqPipelineFilter*>(tempSource);
-
-    while (filter)
-    {
-      tempSource = filter->getInput(0);
-      builder->destroy(filter);
-      filter = qobject_cast<pqPipelineFilter*>(tempSource);
-    }
-
-    builder->destroy(tempSource);
-  }
-}
 
 /**
 * Set the listener for when sources are being destroyed

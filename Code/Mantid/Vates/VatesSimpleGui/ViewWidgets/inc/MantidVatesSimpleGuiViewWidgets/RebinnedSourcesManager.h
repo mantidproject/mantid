@@ -19,6 +19,7 @@
 #endif
 
 #include <QWidget>
+#include <QList>
 #include <map>
 #include <string>
 
@@ -65,17 +66,15 @@ namespace Mantid
 
           void checkSource(pqPipelineSource* source, std::string& inputWorkspace, std::string& outputWorkspace,  std::string algorithmType);
 
-          void repipeRebinnedSource(std::string rebinnedSource, std::string& sourceToBeDeleted);
+          void repipeRebinnedSource();
 
-          void repipeOriginalSource(std::string rebinnedSource, std::string originalSource);
+          void repipeOriginalSource(pqPipelineSource* rebinnedSource, pqPipelineSource* originalSource);
 
           void getStoredWorkspaceNames(pqPipelineSource* source, std::string& originalWorkspaceName, std::string& rebinnedWorkspaceName);
 
-          bool isRebinnedSource(std::string name);
-
-          bool doesWorkspaceBelongToRebinnedSource(std::string workspaceName);
-
           void registerRebinnedSource(pqPipelineSource* source);
+
+          bool isRebinnedSourceBeingTracked(pqPipelineSource* source);
 
         signals:
           void switchSources(std::string rebinnedWorkspaceName,  std::string sourceType);
@@ -98,19 +97,28 @@ namespace Mantid
 
           std::map<std::string, std::string> m_rebinnedWorkspaceToRebinnedWorkspace; ///< Holds information from a rebinned source to another temproary source which replaces it.
 
+
+          std::map<std::pair<std::string, std::string>, std::string> m_rebinnedWorkspaceAndSourceToOriginalWorkspace; ///< Holds a mapping from (RebinnedWsName, RebinnedSourceName unique ID) to (OriginalWsName)
+          std::map<std::string, std::pair<std::string, pqPipelineSource*>>  m_newWorkspacePairBuffer; ///< Holds information for the name of a new, rebinned workspace vs an original workspace and source
+          std::map<std::string, std::pair<std::string, pqPipelineSource*>>  m_newRebinnedWorkspacePairBuffer; ///< Holds information for the name of a new, rebinned workspace vs an old rebinned workspace and source
+
           std::string m_tempPostfix;
 
           std::string m_tempPrefix;
 
-          pqPipelineSource* getSourceForWorkspace(std::string workspaceName);
+          pqPipelineSource* m_inputSource;
 
-          void swapSources(std::string source1, std::string source2);
+          pqPipelineSource* m_rebinnedSource;
+
+          std::vector<pqPipelineSource*> findAllRebinnedSourcesForWorkspace(std::string workspaceName);
+
+          void swapSources(pqPipelineSource* source1, pqPipelineSource* source2);
 
           void rebuildPipeline(pqPipelineSource* source1, pqPipelineSource* source2);
 
-          void processWorkspaceNames(std::string& inputWorkspace, std::string& outputWorkspace, std::string workspaceName, std::string algorithmType);
+          void processWorkspaceNames(std::string& inputWorkspace, std::string& outputWorkspace, pqPipelineSource* source, std::string workspaceName, std::string algorithmType);
 
-          void untrackWorkspaces(std::string rebinnedSource);
+          void untrackWorkspaces(std::pair<std::string, std::string> key);
 
           void copyProperties(pqPipelineFilter* filter1, pqPipelineFilter* filter2);
 
@@ -119,6 +127,16 @@ namespace Mantid
           void getWorkspaceInfo(pqPipelineSource* source, std::string& workspaceName, std::string& workSpaceType);
 
           void removePipeline(pqPipelineSource* source);
+
+          void deleteSpecificSource(pqPipelineSource* source);
+
+          std::string getSourceName(pqPipelineSource* source);
+
+          std::pair<std::string, std::string> createKeyPairForSource(pqPipelineSource* source);
+
+          pqPipelineSource* goToPipelineBeginning(pqPipelineSource* source);
+
+          bool doesSourceNeedToBeDeleted(std::string sourceName, std::vector<std::string> trackedSources);
       };
 
     } // SimpleGui
