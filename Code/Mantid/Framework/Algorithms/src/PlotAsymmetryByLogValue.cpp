@@ -90,6 +90,7 @@ std::map<int64_t, double> PlotAsymmetryByLogValue::g_sumE;
 std::map<int64_t, double> PlotAsymmetryByLogValue::g_diffX;
 std::map<int64_t, double> PlotAsymmetryByLogValue::g_diffY;
 std::map<int64_t, double> PlotAsymmetryByLogValue::g_diffE;
+std::string PlotAsymmetryByLogValue::g_logName;
 
 /** Initialisation method. Declares properties to be used in algorithm.
 *
@@ -178,8 +179,6 @@ void PlotAsymmetryByLogValue::exec() {
   m_forward_list = getProperty("ForwardSpectra");
   m_backward_list = getProperty("BackwardSpectra");
   m_autogroup = (m_forward_list.size() == 0 && m_backward_list.size() == 0);
-  // Get log value
-  m_logName = getPropertyValue("LogValue");
   // Get green and red periods
   m_red = getProperty("Red");
   m_green = getProperty("Green");
@@ -241,6 +240,28 @@ void PlotAsymmetryByLogValue::checkProperties () {
   // If any of the following properties has a different value from the
   // previous call, we need to re-do all the computations, which means
   // clearing static maps that store previous results
+
+  // Get log value
+  if ( g_logName != getPropertyValue("LogValue") ) {
+
+    g_redX.clear();
+    g_redY.clear();
+    g_redE.clear();
+    g_greenX.clear();
+    g_greenY.clear();
+    g_greenE.clear();
+    g_sumX.clear();
+    g_sumY.clear();
+    g_sumE.clear();
+    g_diffX.clear();
+    g_diffY.clear();
+    g_diffE.clear();
+
+  }
+
+  // Populate input properties
+  g_logName = getPropertyValue("LogValue");
+
 
 }
 
@@ -360,7 +381,7 @@ void PlotAsymmetryByLogValue::populateOutputWorkspace (MatrixWorkspace_sptr &out
     outWS->dataE(3) = vecSumE;
   }
   outWS->replaceAxis(1, tAxis);
-  outWS->getAxis(0)->title() = m_logName;
+  outWS->getAxis(0)->title() = g_logName;
   outWS->setYUnitLabel("Asymmetry");
 }
 /**  Parse run names
@@ -762,9 +783,9 @@ PlotAsymmetryByLogValue::groupDetectors(API::MatrixWorkspace_sptr &ws,
  *doesn't exist.
  */
 double PlotAsymmetryByLogValue::getLogValue(MatrixWorkspace &ws) {
-  auto *property = ws.run().getLogData(m_logName);
+  auto *property = ws.run().getLogData(g_logName);
   if (!property) {
-    throw std::invalid_argument("Log " + m_logName + " does not exist.");
+    throw std::invalid_argument("Log " + g_logName + " does not exist.");
   }
   double value = 0;
   // try different property types
@@ -797,7 +818,7 @@ double PlotAsymmetryByLogValue::getLogValue(MatrixWorkspace &ws) {
     }
   }
 
-  throw std::invalid_argument("Log " + m_logName +
+  throw std::invalid_argument("Log " + g_logName +
                               " cannot be converted to a double type.");
 }
 

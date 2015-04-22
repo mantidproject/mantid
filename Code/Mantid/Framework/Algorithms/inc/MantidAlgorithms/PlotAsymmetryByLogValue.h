@@ -141,7 +141,7 @@ private:
   static std::map<int64_t, double> g_diffY;
   static std::map<int64_t, double> g_diffE;
   // LogValue name
-  std::string m_logName;
+  static std::string g_logName;
   // LogValue function
   std::string m_logFunc;
 };
