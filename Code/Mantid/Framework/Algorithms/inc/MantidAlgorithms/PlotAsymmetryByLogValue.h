@@ -143,7 +143,7 @@ private:
   // LogValue name
   static std::string g_logName;
   // LogValue function
-  std::string m_logFunc;
+  static std::string g_logFunc;
 };
 
 } // namespace Algorithm

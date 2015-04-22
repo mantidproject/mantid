@@ -91,6 +91,7 @@ std::map<int64_t, double> PlotAsymmetryByLogValue::g_diffX;
 std::map<int64_t, double> PlotAsymmetryByLogValue::g_diffY;
 std::map<int64_t, double> PlotAsymmetryByLogValue::g_diffE;
 std::string PlotAsymmetryByLogValue::g_logName;
+std::string PlotAsymmetryByLogValue::g_logFunc;
 
 /** Initialisation method. Declares properties to be used in algorithm.
 *
@@ -190,8 +191,6 @@ void PlotAsymmetryByLogValue::exec() {
   // Get runs
   std::string firstFN = getProperty("FirstRun");
   std::string lastFN = getProperty("LastRun");
-  // Get function to apply to logValue
-  m_logFunc = getPropertyValue("Function");
 
   // Parse run names and get the number of runs
   parseRunNames( firstFN, lastFN, m_filenameBase, m_filenameExt, m_filenameZeros);
@@ -241,9 +240,11 @@ void PlotAsymmetryByLogValue::checkProperties () {
   // previous call, we need to re-do all the computations, which means
   // clearing static maps that store previous results
 
-  // Get log value
-  if ( g_logName != getPropertyValue("LogValue") ) {
+  // Check if any property has changed
+  if ( g_logName != getPropertyValue("LogValue") ||
+    g_logFunc != getPropertyValue("Function") ) {
 
+      // If so, clear previous results
     g_redX.clear();
     g_redY.clear();
     g_redE.clear();
@@ -261,6 +262,8 @@ void PlotAsymmetryByLogValue::checkProperties () {
 
   // Populate input properties
   g_logName = getPropertyValue("LogValue");
+  // Get function to apply to logValue
+  g_logFunc = getPropertyValue("Function");
 
 
 }
@@ -789,21 +792,21 @@ double PlotAsymmetryByLogValue::getLogValue(MatrixWorkspace &ws) {
   }
   double value = 0;
   // try different property types
-  if (convertLogToDouble<double>(property, value, m_logFunc))
+  if (convertLogToDouble<double>(property, value, g_logFunc))
     return value;
-  if (convertLogToDouble<float>(property, value, m_logFunc))
+  if (convertLogToDouble<float>(property, value, g_logFunc))
     return value;
-  if (convertLogToDouble<int>(property, value, m_logFunc))
+  if (convertLogToDouble<int>(property, value, g_logFunc))
     return value;
-  if (convertLogToDouble<long>(property, value, m_logFunc))
+  if (convertLogToDouble<long>(property, value, g_logFunc))
     return value;
-  if (convertLogToDouble<long long>(property, value, m_logFunc))
+  if (convertLogToDouble<long long>(property, value, g_logFunc))
     return value;
-  if (convertLogToDouble<unsigned int>(property, value, m_logFunc))
+  if (convertLogToDouble<unsigned int>(property, value, g_logFunc))
     return value;
-  if (convertLogToDouble<unsigned long>(property, value, m_logFunc))
+  if (convertLogToDouble<unsigned long>(property, value, g_logFunc))
     return value;
-  if (convertLogToDouble<unsigned long long>(property, value, m_logFunc))
+  if (convertLogToDouble<unsigned long long>(property, value, g_logFunc))
     return value;
   // try if it's a string and can be lexically cast to double
   auto slog =
