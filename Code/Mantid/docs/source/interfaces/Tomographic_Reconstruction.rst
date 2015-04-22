@@ -149,14 +149,13 @@ A Savu reconstruction pipeline is defined by a list of processing
 steps (or plugins) and their parameters. In the Savu setup dialog this
 list is built on the right panel (current configuration) by adding and
 sorting available plugins available from the tree shown on the left
-panel.
-
-.. interface:: Tomographic Reconstruction
-  :widget: savuConfigCentralWidget
-  :align: right
-
-From the file menu, different savu configurations can be saved for
+panel. From the file menu, different savu configurations can be saved for
 later use and loaded from previously saved files.
+
+.. Leave this out for now. Not used at the moment.
+   .. interface:: Tomographic Reconstruction
+     :widget: savuConfigCentralWidget
+     :align: right
 
 
 .. categories:: Interfaces Diffraction
