@@ -1,15 +1,15 @@
 #ifndef MANTIDQTCUSTOMINTERFACES_TOMORECONSTRUCTION_H_
 #define MANTIDQTCUSTOMINTERFACES_TOMORECONSTRUCTION_H_
 
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceGroup.h"
+#include "MantidAPI/TableRow.h"
+#include "MantidQtAPI/UserSubWindow.h"
 #include "ui_TomoReconstruction.h"
 #include "ui_TomoToolConfigAstra.h"
 #include "ui_TomoToolConfigCustom.h"
 #include "ui_TomoToolConfigSavu.h"
 #include "ui_TomoToolConfigTomoPy.h"
-#include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/WorkspaceGroup.h"
-#include "MantidAPI/TableRow.h"
-#include "MantidQtAPI/UserSubWindow.h"
 
 #include <QDialog>
 #include <jsoncpp/json/json.h>
@@ -63,11 +63,11 @@ public: // public constructor, destructor and functions
 
 protected slots:
   /// for buttons, run tab
-  void reconstructClicked();
-  void toolSetupClicked();
-  void runVisualizeClicked();
-  void jobCancelClicked();
-  void jobTableRefreshClicked();
+  void on_reconstructClicked();
+  void on_toolSetupClicked();
+  void on_runVisualizeClicked();
+  void on_jobCancelClicked();
+  void on_jobTableRefreshClicked();
 
 protected:
   bool doPing();
@@ -93,32 +93,32 @@ protected:
   std::string currentPathSavuConfig();
 
 private slots:
-  void compResourceIndexChanged(int);
-  void runToolIndexChanged(int);
-  void SCARFLoginClicked();
-  void SCARFLogoutClicked();
+  void on_compResourceIndexChanged(int);
+  void on_runToolIndexChanged(int);
+  void on_SCARFLoginClicked();
+  void on_SCARFLogoutClicked();
 
-  void browseImageClicked();
+  void on_browseImageClicked();
 
-  void fitsPathBrowseClicked();
-  void flatPathBrowseClicked();
-  void darkPathBrowseClicked();
+  void on_fitsPathBrowseClicked();
+  void on_flatPathBrowseClicked();
+  void on_darkPathBrowseClicked();
 
   /// open the MantidQT help window for this interface
-  void openHelpWin();
-  void closeInterface();
+  void on_openHelpWin();
+  void on_closeInterface();
 
-  void menuSaveClicked();
-  void menuSaveAsClicked();
-  void availablePluginSelected();
-  void currentPluginSelected();
-  void transferClicked();
-  void moveUpClicked();
-  void moveDownClicked();
-  void removeClicked();
-  void menuOpenClicked();
-  void paramValModified(QTreeWidgetItem *, int);
-  void expandedItem(QTreeWidgetItem *);
+  void on_menuSaveClicked();
+  void on_menuSaveAsClicked();
+  void on_availablePluginSelected();
+  void on_currentPluginSelected();
+  void on_transferClicked();
+  void on_moveUpClicked();
+  void on_moveDownClicked();
+  void on_removeClicked();
+  void on_menuOpenClicked();
+  void on_paramValModified(QTreeWidgetItem *, int);
+  void on_expandedItem(QTreeWidgetItem *);
 
 private:
   void doSetupSectionSetup();
