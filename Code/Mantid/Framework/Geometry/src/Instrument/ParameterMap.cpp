@@ -389,7 +389,7 @@ void ParameterMap::addPositionCoordinate(const IComponent *comp,
   // clear the position cache
   clearPositionSensitiveCaches();
   // finally add or update "pos" parameter
-  addV3D(comp, pos(), position);
+  addV3D(comp, pos(), position,pDescription);
 }
 
 /** Create or adjust "rot" parameter for a component
@@ -450,7 +450,7 @@ void ParameterMap::addRotationParam(const IComponent *comp,
   clearPositionSensitiveCaches();
 
   // finally add or update "pos" parameter
-  addQuat(comp, rot(), quat);
+  addQuat(comp, rot(), quat,pDescription);
 }
 
 /**
