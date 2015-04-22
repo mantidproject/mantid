@@ -66,7 +66,7 @@ reducer = HfirPDReductionGUI.MainWindow() #the main ui class in this file is cal
 reducer.show()
 
 # example: 'http://neutron.ornl.gov/user_data/hb2a/exp400/Datafiles/HB2A_exp0400_scan0001.dat'
-print "Set to exp 231, scan 1"
+print "[Test] Set to exp 231, scan 1"
 reducer.ui.lineEdit_expNo.setText('231')
 reducer.ui.lineEdit_scanNo.setText('1')
 
@@ -80,6 +80,7 @@ elif MOS == OSX:
 
 # plot raw
 reducer.ui.tabWidget.setCurrentIndex(0)
+reducer.doLoadData()
 reducer.doPlotRawPtMain()
 
 # FIXME - Phase 2nd

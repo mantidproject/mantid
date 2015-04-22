@@ -83,26 +83,12 @@ reducer.ui.lineEdit_xmin.setText('5.0')
 reducer.ui.lineEdit_xmax.setText('150.0')
 reducer.ui.lineEdit_binsize.setText('0.1')
 
+reducer.ui.checkBox_useDetEffCorr.setChecked(True)
+reducer.ui.checkBox_useDetExcludeFile.setChecked(True)
 
 # load and reduce data 
 reducer.doLoadData()
 
-# try:
-#     reducer.doLoadData()
-# except Exception as e:
-#     print e
-#     raise e
-# 
-# try: 
-#     reducer.doPlotDspacing()
-# except Exception as e:
-#     print e
-# 
-# try: 
-#     reducer.doPlotQ()
-# except Exception as e:
-#     print e
-# 
-# Skip if there is something wrong
+# Get into execution loop
 app.exec_()
 

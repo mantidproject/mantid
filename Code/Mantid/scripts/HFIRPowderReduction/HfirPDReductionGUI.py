@@ -1,6 +1,8 @@
 ################################################################################
 #
 # Main class for HFIR powder reduction GUI
+# 
+# Key word for future developing: FUTURE, NEXT, REFACTOR
 #
 ################################################################################
 
@@ -240,7 +242,7 @@ class MainWindow(QtGui.QMainWindow):
         self._viewMerge_Y = None   
 
         # Control of plots: key = canvas, value = list of 2-integer-tuple (expno, scanno)
-        self._tabPlotDict = {}
+        self._tabLineDict = {}
         
         return
 
@@ -316,9 +318,14 @@ class MainWindow(QtGui.QMainWindow):
 
 
     def doClearIndDetCanvas(self):
-        """ Clear the canvas in tab 'Individual Detector'
+        """ Clear the canvas in tab 'Individual Detector' and current plotted lines
+        in managing dictionary
         """
         self.ui.graphicsView_indvDet.clearAllLines()
+        if self._tabLineDict.has_key(self.ui.graphicsView_indvDet):
+            self._tabLineDict[self.ui.graphicsView_indvDet] = []
+
+        return
 
 
     def doClearMultiRunCanvas(self):
@@ -337,6 +344,7 @@ class MainWindow(QtGui.QMainWindow):
         only need to clear lines
         """
         self.ui.graphicsView_Raw.clearAllLines()
+        self._tabLineDict[self.ui.graphicsView_Raw] = []
 
         return
 
@@ -410,6 +418,7 @@ class MainWindow(QtGui.QMainWindow):
             status, returnbody = self._myControl.retrieveCorrectionData(instrument='HB2A', 
                                                                         exp=expno, scan=scanno, 
                                                                         localdatadir=localdir)
+
             if status is True:
                 autowavelength = returnbody[0]
                 vancorrfname = returnbody[1]
@@ -418,7 +427,6 @@ class MainWindow(QtGui.QMainWindow):
                 autowavelength = None
                 vancorrfname = None
                 excldetfname = None
-            else:
 
             # Optionally parse det effecient file
             if self.ui.checkBox_useDetEffCorr.isChecked():
@@ -431,15 +439,16 @@ class MainWindow(QtGui.QMainWindow):
             else:
                 detefftablews = None
             # ENDIF
-
+            
             # Parse SPICE data to MDEventWorkspaces
             try:
-                execstatus = self._myControl.arseSpiceData(self, expno, scanno, detefftablews=detefftablews)
+                print "Det EFF Table WS: ", str(detefftablews)
+                execstatus = self._myControl.parseSpiceData(expno, scanno, detefftablews)
                 if execstatus is False:
                     cause = "Parse data failed."
                 else:
                     cause = None
-            except Exception as e:
+            except NotImplementedError as e:
                 execstatus = False
                 cause = str(e)
             finally:
@@ -449,11 +458,13 @@ class MainWindow(QtGui.QMainWindow):
             # END-TRY-EXCEPT-FINALLY
         else:
             # Unsupported case
-            raise NotImplementedError("%d-th tab should not get this far."%(itab))
+            errmsg = "%d-th tab should not get this far.\n"%(itab)
+            errmsg += 'GUI has been changed, but the change has not been considered! iTab = %d' % (itab)
+            raise NotImplementedError(errmsg) 
         # ENDIFELSE
 
         # Process wavelength
-        wavelength = self.getFloat(self.self.ui.lineEdit_wavelength)
+        wavelength = self.getFloat(self.ui.lineEdit_wavelength)
         if autowavelength is not None:
             if wavelength is None:
                 wavelength = autowavelength
@@ -533,10 +544,6 @@ class MainWindow(QtGui.QMainWindow):
                 print "Vanadium peaks: ", vanpeakpos
                 self._plotPeakIndicators(self.ui.graphicsView_vanPeaks, vanpeakpos)
             # ENDIF(execstatus)
-
-        else:
-            # Non-supported case
-            raise NotImplementedError('GUI has been changed, but the change has not been considered!')
         # END-IF-ELSE (itab)
             
         return execstatus
@@ -607,6 +614,7 @@ class MainWindow(QtGui.QMainWindow):
         """ Merge several scans 
         for tab 'merge'
         """
+        # FIXME - Updated to new workflow!
         # get inputs for scans
         try:
             expno = int(self.ui.lineEdit_expNo.text())
@@ -730,7 +738,7 @@ class MainWindow(QtGui.QMainWindow):
     def doPlotIndvDetMain(self):
         """ Plot individual detector
         """
-        # get exp and scan numbers and check whether the data has been loaded
+        # Get exp and scan numbers and check whether the data has been loaded
         try:
             expno = self.getInteger(self.ui.lineEdit_expNo)
             scanno = self.getInteger(self.ui.lineEdit_scanNo)
@@ -738,12 +746,17 @@ class MainWindow(QtGui.QMainWindow):
             self._logError(str(e))
             return
 
-        # get detector ID and x-label option
+        # Get detector ID and x-label option
         try:
             detid = self.getInteger(self.ui.lineEdit_detID)
         except EmptyError:
             self._logError("Detector ID must be specified for plotting individual detector.")
             return
+
+        # Over plot previous or clear
+        overplot = self.ui.checkBox_overPlotIndvDet.isChecked()
+        if overplot is False:
+            self.doClearIndDetCanvas()
 
         xlabel = str(self.ui.comboBox_indvDetXLabel.currentText())
         if xlabel.strip() == "":
@@ -767,6 +780,12 @@ class MainWindow(QtGui.QMainWindow):
         # Plot 
         try: 
             currdetid = self._detID + 1
+
+            # Over plot previous or clear
+            overplot = self.ui.checkBox_overPlotIndvDet.isChecked()
+            if overplot is False:
+                self.doClearIndDetCanvas()
+
             self._plotIndividualDetCounts(self._expNo, self._scanNo, currdetid,
                     self._indvXLabel)
         except Exception as e:
@@ -785,6 +804,12 @@ class MainWindow(QtGui.QMainWindow):
         # Plot 
         try: 
             currdetid = self._detID - 1
+
+            # Over plot previous or clear
+            overplot = self.ui.checkBox_overPlotIndvDet.isChecked()
+            if overplot is False:
+                self.doClearIndDetCanvas()
+
             self._plotIndividualDetCounts(self._expNo, self._scanNo, currdetid,
                     self._indvXLabel)
         except Exception as e:
@@ -810,9 +835,7 @@ class MainWindow(QtGui.QMainWindow):
     def doPlotRawPtMain(self):
         """ Plot current raw detector signal for a specific Pt.
         """
-        # FIXME / TODO - shall check whether the plot is on canvas
-
-        # get experiment number and scan number for data file
+        # Get experiment number and scan number for data file
         try: 
             expno = self.getInteger(self.ui.lineEdit_expNo)
             scanno = self.getInteger(self.ui.lineEdit_scanNo)
@@ -847,17 +870,16 @@ class MainWindow(QtGui.QMainWindow):
     def doPlotRawPtNext(self):
         """ Plot next raw detector signals
         """
-        # FIXME / TODO - shall check whether the plot is on canvas
-
-        # check
+        # Check
         if self._rawDetPtNo is not None:
             ptno = self._rawDetPtNo + 1
         else:
             self._logError("Unable to plot previous raw detector \
                     because Pt. or Detector ID has not been set up yet.")
             return
+        # ENDIFELSE
 
-        # get plot mode and plot
+        # Get plot mode and plot
         plotmode = str(self.ui.comboBox_rawDetMode.currentText())
         overplot = bool(self.ui.checkBox_overpltRawDet.isChecked())
         execstatus = self._plotRawDetSignal(self._rawDetExpNo, self._rawDetScanNo, plotmode, 
@@ -1096,6 +1118,20 @@ class MainWindow(QtGui.QMainWindow):
 
         return value
 
+    def getFloat(self, lineedit):
+        """ Get integer from line edit
+        """
+        valuestr = str(lineedit.text()).strip()
+        if len(valuestr) == 0:
+            raise EmptyError("Input is empty. It cannot be converted to integer.")
+
+        try:
+            value = float(valuestr)
+        except ValueError as e:
+            raise e
+
+        return value
+
 
     def on_mouseMotion(self, event):
         """
@@ -1201,17 +1237,18 @@ class MainWindow(QtGui.QMainWindow):
         scanno = int(scanno)
         detid = int(detid)
 
-        # load data if necessary
+        # Reject if data is not loaded
         if self._myControl.hasDataLoaded(expno, scanno) is False:
-            rvalue, filename = self._uiLoadDataFile(expno, scanno)   
-            if rvalue is False:
-                self._logError("Unable to download or locate local data file for Exp %d \
-                    Scan %d." % (expno, scanno))
-                return
-            self._myControl.loadSpicePDData(expno, scanno, filename)
+            self._logError("Data file for Exp %d Scan %d has not been loaded." % (expno, scanno))
+            return False
+        
+        # Canvas and line information
+        canvas = self.ui.graphicsView_indvDet
+        if self._tabLineDict.has_key(canvas) is False:
+            self._tabLineDict[canvas] = []
 
         # pop out the xlabel list
-        # FIXME - Only need to set up once!
+        # REFACTOR - Only need to set up once if previous plot has the same setup
         floatsamplelognamelist = self._myControl.getSampleLogNames(expno, scanno)
         self.ui.comboBox_indvDetXLabel.clear()
         self.ui.comboBox_indvDetXLabel.addItems(floatsamplelognamelist)
@@ -1219,33 +1256,27 @@ class MainWindow(QtGui.QMainWindow):
         # get data
         vecx, vecy = self._myControl.getIndividualDetCounts(expno, scanno, detid, xlabel)
 
-        # plot to canvas
-        canvas = self.ui.graphicsView_indvDet
+        # Plot to canvas
         marker, color = canvas.getNextLineMarkerColorCombo()
         if xlabel is None:
-            xlabel = r'2\theta'
+            xlabel = r'$2\theta$'
 
         label = "Detector ID: %d" % (detid)
 
-        # Check line managing dictionary
-        if self._tabLineDict.has_key(canvas) is None:
-            self._tabLineDict[canvas] = []
-
-        if self._tabLineDict[canvas].count( (expno, scanno, detid) ) is False:
+        if self._tabLineDict[canvas].count( (expno, scanno, detid) ) == 0:
             canvas.addPlot(vecx, vecy, marker=marker, color=color, xlabel=xlabel, \
                 ylabel='Counts',label=label)
             self._tabLineDict[canvas].append( (expno, scanno, detid) )
         
             # auto setup for image boundary
-            xmin = min(min(vecx), canvas.getXLimit[0])
-            xmax = max(max(vecx), canvas.getXLimit[1])
-
-            ymin = min(min(vecy), canvas.getYLimit[0])
-            ymax = max(max(vecy), canvas.getYLimit[1])
+            xmin = min(min(vecx), canvas.getXLimit()[0])
+            xmax = max(max(vecx), canvas.getXLimit()[1])
+            ymin = min(min(vecy), canvas.getYLimit()[0])
+            ymax = max(max(vecy), canvas.getYLimit()[1])
 
             dx = xmax-xmin
             dy = ymax-ymin
-            canvas.setXYLimit(xmin-dx*0.1, xmax+dx*0.1, ymin-dy*0.1, ymax+dy*0.1)
+            canvas.setXYLimit(xmin-dx*0.0001, xmax+dx*0.0001, ymin-dy*0.0001, ymax+dy*0.0001)
 
         return True
         
@@ -1276,14 +1307,15 @@ class MainWindow(QtGui.QMainWindow):
         scanno = int(scanno)
         ptno = int(ptno) 
 
-        # Load data if necessary
-        if self._myControl.hasDataLoaded(expno, scanno) is False:
-            rvalue, filename = self._uiLoadDataFile(expno, scanno)   
-            if rvalue is False:
-                self._logError("Unable to download or locate local data file for Exp %d \
-                    Scan %d." % (expno, scanno))
-                return
-            self._myControl.loadSpicePDData(expno, scanno, filename)
+        # Set up canvas and dictionary
+        canvas = self.ui.graphicsView_Raw
+        if self._tabLineDict.has_key(canvas) is False:
+            self._tabLineDict[canvas] = []
+
+        # Check whether data exists
+        if self._myControl.hasDataLoaded(expno, scanno) is False: 
+            self._logError("File has not been loaded for Exp %d Scan %d.  Load data first!" % (expno, scanno)) 
+            return
 
         # Get vecx and vecy
         if plotmode == "All Pts.":
@@ -1293,7 +1325,6 @@ class MainWindow(QtGui.QMainWindow):
             # Clear previous
             self.ui.graphicsView_Raw.clearAllLines()
             self.ui.graphicsView_Raw.setLineMarkerColorIndex(0)
-
             self._tabLineDict[canvas] = []
 
         elif plotmode == "Single Pts.":
@@ -1301,6 +1332,7 @@ class MainWindow(QtGui.QMainWindow):
             if dooverplot is False:
                 self.ui.graphicsView_Raw.clearAllLines()
                 self.ui.graphicsView_Raw.setLineMarkerColorIndex(0)
+                self._tabLineDict[canvas] = []
 
             # Plot one pts.
             vecxylist = self._myControl.getRawDetectorCounts(expno, scanno, [ptno])
@@ -1309,22 +1341,17 @@ class MainWindow(QtGui.QMainWindow):
             # Raise exception
             raise NotImplementedError("Plot mode %s is not supported." % (plotmode))
 
-        # plot
-        canvas = self.ui.graphicsView_Raw
-        if self._tabLineDict.has_key(canvas) is False:
-            self._tabLineDict[canvas] = []
-
-        # FIXME
+        # Set up unit/x-label
         unit = r"$2\theta$"
 
         # plot
-        xmin = 1.E10
-        xmax = -1.0E10
-        ymin = 1.E10
-        ymax = -1.0E10
+        xmin = None
+        xmax = None
+        ymin = None
+        ymax = None
         for ptno, vecx, vecy in vecxylist:
-            # FIXME - Label is left blank as there can be too many labels 
-            label = str(ptno)
+            # FUTURE: Label is left blank as there can be too many labels 
+            label = 'Pt %d' % (ptno)
 
             # skip if this plot has existed
             if self._tabLineDict[canvas].count( (expno, scanno, ptno) ) == 1:
@@ -1338,25 +1365,17 @@ class MainWindow(QtGui.QMainWindow):
             self._tabLineDict[canvas].append( (expno, scanno, ptno) )
 
             # auto setup for image boundary
-            tmpxmin = min(vecx)
-            tmpxmax = max(vecx)
-            if tmpxmin < xmin:
-                xmin = tmpxmin
-            if tmpxmax > xmax:
-                xmax = tmpxmax
-
-            tmpymax = max(vecy)
-            tmpymin = min(vecy)
-            if tmpymin < ymin:
-                ymin = tmpymin
-            if tmpymax > ymax:
-                ymax = tmpymax
+            xmin = min(min(vecx), canvas.getXLimit()[0])
+            xmax = max(max(vecx), canvas.getXLimit()[1])
+            ymin = min(min(vecy), canvas.getYLimit()[0])
+            ymax = max(max(vecy), canvas.getYLimit()[1])
         # ENDFOR
 
-        # set X-Y range
-        dx = xmax-xmin
-        dy = ymax-ymin
-        canvas.setXYLimit(xmin-dx*0.1, xmax+dx*0.1, ymin-dy*0.1, ymax+dy*0.1)
+        # Reset canvas x-y limit
+        if xmin is not None:
+            dx = xmax-xmin
+            dy = ymax-ymin
+            canvas.setXYLimit(xmin-dx*0.0001, xmax+dx*0.0001, ymin-dy*0.0001, ymax+dy*0.0001)
 
         return True
 
@@ -1692,3 +1711,5 @@ class MainWindow(QtGui.QMainWindow):
         # ENDFOR
 
         return intlist
+
+

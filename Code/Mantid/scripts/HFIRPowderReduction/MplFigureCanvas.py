@@ -231,6 +231,7 @@ class Qt4MplCanvas(FigureCanvas):
         """
         # Instantialize matplotlib Figure
         self.fig = Figure()
+        self.fig.patch.set_facecolor('white')
         self.axes = self.fig.add_subplot(111) # return: matplotlib.axes.AxesSubplot
 
         # Initialize parent class and set parent
@@ -316,9 +317,10 @@ class Qt4MplCanvas(FigureCanvas):
         # show image
         imgplot = self.axes.imshow(array2d, extent=[xmin,xmax,ymin,ymax], interpolation='none')
         # set y ticks as an option: 
-        if yticklabels is not None: 
-            # it will always label the first N ticks even image is zoomed in
-            self.axes.set_yticklabels(yticklabels)
+        # FIXME - Set up the Y-axis ticks is erroreous
+        # if yticklabels is not None: 
+        #     # it will always label the first N ticks even image is zoomed in
+        #     self.axes.set_yticklabels(yticklabels)
         # explicitly set aspect ratio of the image
         self.axes.set_aspect('auto')
 

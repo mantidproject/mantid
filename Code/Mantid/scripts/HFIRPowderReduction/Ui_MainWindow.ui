@@ -106,6 +106,18 @@
        <layout class="QHBoxLayout" name="horizontalLayout_25">
         <item>
          <widget class="QCheckBox" name="checkBox_useDetEffCorr">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>250</width>
+            <height>0</height>
+           </size>
+          </property>
           <property name="text">
            <string>Detectors Efficiency Correction</string>
           </property>
@@ -189,6 +201,18 @@
        <layout class="QHBoxLayout" name="horizontalLayout_24">
         <item>
          <widget class="QCheckBox" name="checkBox_useDetExcludeFile">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>250</width>
+            <height>0</height>
+           </size>
+          </property>
           <property name="text">
            <string>Using Exclusion File</string>
           </property>
@@ -213,7 +237,7 @@
         <item>
          <widget class="QLabel" name="label_excFileName">
           <property name="text">
-           <string>Excluded Detectors File</string>
+           <string>Excluded  Detectors File</string>
           </property>
          </widget>
         </item>
@@ -1786,7 +1810,7 @@
      <x>0</x>
      <y>0</y>
      <width>1412</width>
-     <height>22</height>
+     <height>25</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
