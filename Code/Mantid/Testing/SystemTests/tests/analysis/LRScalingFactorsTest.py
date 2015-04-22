@@ -26,9 +26,10 @@ class LRPrimaryFractionTest(stresstesting.MantidStressTest):
     def validate(self):
         if not os.path.isfile(self.cfg_file):
             raise RuntimeError, "Output file was not created"
-        
-        reference = [[7.79202718645, 3.39894488089e-05, 0.0936282133631, 5.79945870854e-06],
-                     [24.4210636894, 0.00010609255313, 0.390001391338, 2.51447482677e-05]]
+
+        reference = [[7.82, 3.20e-05, 0.054, 3.3e-06],
+                     [24.42, 0.000105, 0.225, 1.45e-05]]
+        tolerances = [[0.1, 5e-6, 0.1, 3e-6], [0.1, 1e-5, 0.2, 2e-5]]
         fd = open(self.cfg_file, 'r')
         item_number = 0
         for line in fd.readlines():
@@ -45,10 +46,13 @@ class LRPrimaryFractionTest(stresstesting.MantidStressTest):
                     error_a = float(pair[1])
                 elif pair[0].strip() == 'error_b':
                     error_b = float(pair[1])
-            if not (abs(reference[item_number][0]- a ) < 0.01 \
-                and abs(reference[item_number][1] - b) < 0.01 \
-                and abs(reference[item_number][2]-error_a) < 1e-6 \
-                and abs(reference[item_number][3] - error_b) < 1e-6):
+            if not (abs(reference[item_number][0]- a ) < tolerances[item_number][0] \
+                and abs(reference[item_number][1] - b) < tolerances[item_number][1] \
+                and abs(reference[item_number][2]-error_a) < tolerances[item_number][2] \
+                and abs(reference[item_number][3] - error_b) < tolerances[item_number][3]):
+                logger.error("Found    %5.3g %5.3g %5.3g %5.3g" % (a, b, error_a, error_b))
+                logger.error("Expected %5.3g %5.3g %5.3g %5.3g" % (reference[item_number][0], reference[item_number][1],
+                                                                   reference[item_number][2], reference[item_number][3]))
                 return False
             item_number += 1
         os.remove(self.cfg_file)

@@ -172,7 +172,7 @@ class LRScalingFactors(PythonAlgorithm):
             self.process_data(workspace,
                               peak_range=peak,
                               background_range=background)
-            
+
             # If we don't have the attenuator information and we have the
             # same slit settings as the previous run, it means we added an
             # attenuator.
@@ -243,19 +243,28 @@ class LRScalingFactors(PythonAlgorithm):
                                      NaNValue=0.0, NaNError=1000.0,
                                      InfinityValue=0.0, InfinityError=1000.0)
 
-                # Remove prompt pulse bin, replace the y value by the 
+                # Remove prompt pulse bin, replace the y value by the
                 # average and give it a very large error.
                 x_values = mtd[f_ws].readX(0)
                 y_values = mtd[f_ws].dataY(0)
-                average = numpy.average(y_values)
                 e_values = mtd[f_ws].dataE(0)
+                # We will create a cleaned up workspace without the bins
+                # corresponding to the prompt pulses
+                x_clean = []
+                y_clean = []
+                e_clean = []
                 for i in range(len(y_values)):
                     # Go up to 4 frames - that should cover more than enough TOF
                     for n in range(1, 4):
                         peak_x = 1.0e6 / 60.0 * n
-                        if peak_x > x_values[i] and peak_x < x_values[i+1]:
-                            y_values[i] = average
-                            e_values[i] = average*100.0
+                        if not (peak_x > x_values[i] and peak_x < x_values[i+1]) \
+                            and y_values[i] > 0.0:
+                            x_clean.append((x_values[i+1]+x_values[i])/2.0)
+                            y_clean.append(y_values[i])
+                            e_clean.append(e_values[i])
+
+                CreateWorkspace(OutputWorkspace=f_ws, DataX=x_clean,
+                                DataY=y_clean, DataE=e_clean, NSpec=1)
 
                 Fit(InputWorkspace=f_ws,
                     Function="name=UserFunction, Formula=a+b*x, a=1, b=0",
