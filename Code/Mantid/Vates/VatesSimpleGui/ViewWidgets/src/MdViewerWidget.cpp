@@ -295,22 +295,22 @@ ViewBase* MdViewerWidget::setMainViewWidget(QWidget *container,
   {
   case ModeControlWidget::STANDARD:
   {
-    view = new StandardView(container);
+    view = new StandardView(container, &m_rebinnedSourcesManager);
   }
   break;
   case ModeControlWidget::THREESLICE:
   {
-    view = new ThreeSliceView(container);
+    view = new ThreeSliceView(container, &m_rebinnedSourcesManager);
   }
   break;
   case ModeControlWidget::MULTISLICE:
   {
-    view = new MultiSliceView(container);
+    view = new MultiSliceView(container, &m_rebinnedSourcesManager);
   }
   break;
   case ModeControlWidget::SPLATTERPLOT:
   {
-    view = new SplatterPlotView(container);
+    view = new SplatterPlotView(container, &m_rebinnedSourcesManager);
   }
   break;
   default:

@@ -1,4 +1,5 @@
 #include "MantidVatesSimpleGuiViewWidgets/StandardView.h"
+#include "MantidVatesSimpleGuiViewWidgets/RebinnedSourcesManager.h"
 // Have to deal with ParaView warnings and Intel compiler the hard way.
 #if defined(__INTEL_COMPILER)
   #pragma warning disable 1170
@@ -41,7 +42,8 @@ namespace SimpleGui
  * buttons and creates the rendering view.
  * @param parent the parent widget for the standard view
  */
-  StandardView::StandardView(QWidget *parent) : ViewBase(parent),m_binMDAction(NULL),
+  StandardView::StandardView(QWidget *parent, RebinnedSourcesManager* rebinnedSourcesManager) : ViewBase(parent, rebinnedSourcesManager),
+                                                                 m_binMDAction(NULL),
                                                                  m_sliceMDAction(NULL),
                                                                  m_unbinAction(NULL)
 {

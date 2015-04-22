@@ -25,6 +25,7 @@ namespace Vates
 {
 namespace SimpleGui
 {
+  class RebinnedSourcesManager;
 /**
  *
  This class creates a scatter plot using the SplatterPlot ParaView plugin. The
@@ -62,7 +63,7 @@ public:
    * Default constructor.
    * @param parent the parent widget for the threeslice view
    */
-  explicit SplatterPlotView(QWidget *parent = 0);
+  explicit SplatterPlotView(QWidget *parent = 0, RebinnedSourcesManager* rebinnedSourcesManager = 0);
   /// Default destructor
   virtual ~SplatterPlotView();
 
