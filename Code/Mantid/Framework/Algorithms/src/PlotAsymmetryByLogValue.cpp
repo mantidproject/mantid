@@ -297,15 +297,15 @@ void PlotAsymmetryByLogValue::populateOutputWorkspace (MatrixWorkspace_sptr &out
       vecRedX.push_back( m_redX[ it->first ] );
       vecRedY.push_back( m_redY[ it->first ] );
       vecRedE.push_back( m_redE[ it->first ] );
-      vecGreenX.push_back( m_redX[ it->first ] );
-      vecGreenY.push_back( m_redY[ it->first ] );
-      vecGreenE.push_back( m_redE[ it->first ] );
-      vecSumX.push_back( m_redX[ it->first ] );
-      vecSumY.push_back( m_redY[ it->first ] );
-      vecSumE.push_back( m_redE[ it->first ] );
-      vecDiffX.push_back( m_redX[ it->first ] );
-      vecDiffY.push_back( m_redY[ it->first ] );
-      vecDiffE.push_back( m_redE[ it->first ] );
+      vecGreenX.push_back( m_greenX[ it->first ] );
+      vecGreenY.push_back( m_greenY[ it->first ] );
+      vecGreenE.push_back( m_greenE[ it->first ] );
+      vecSumX.push_back( m_sumX[ it->first ] );
+      vecSumY.push_back( m_sumY[ it->first ] );
+      vecSumE.push_back( m_sumE[ it->first ] );
+      vecDiffX.push_back( m_diffX[ it->first ] );
+      vecDiffY.push_back( m_diffY[ it->first ] );
+      vecDiffE.push_back( m_diffE[ it->first ] );
     }
 
     tAxis->setLabel(0, "Red-Green");
