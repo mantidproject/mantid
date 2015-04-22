@@ -38,7 +38,8 @@ They are passed onto child algorithms that under the same name, except
 * SampleBkgLowAcceptanceFactor, SampleBkgHighAcceptanceFactor, SampleBkgSignificanceTest and SampleCorrectForSolidAngle are passed onto :ref:`algm-MedianDetectorTest` as LowThreshold, HighThreshold, SignicanceTest and CorrectForSolidAngle respectively.
 
 Numerous uses of :ref:`algm-MaskDetectors` are not shown and can be taken be be executed whenever appropriate. 
-Also the output property NumberOfFailures from the execututed child algorithms are added together.
+Also the output property NumberOfFailures from the executed child algorithms are added together 
+to form the NumberOfFailures output by the main algorithm.
 
 
 .. diagram:: DetectorDiagnostic-v1_wkflw.dot
