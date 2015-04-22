@@ -432,7 +432,7 @@ void MdViewerWidget::onRebin(std::string algorithmType)
 void MdViewerWidget::onSwitchSoures(std::string rebinnedWorkspaceName, std::string sourceType)
 {
   // Create the rebinned workspace
-  prepareRebinnedWorkspace(rebinnedWorkspaceName, sourceType); 
+  pqPipelineSource* rebinnedSource = prepareRebinnedWorkspace(rebinnedWorkspaceName, sourceType); 
 
   try
   {
@@ -444,6 +444,9 @@ void MdViewerWidget::onSwitchSoures(std::string rebinnedWorkspaceName, std::stri
 
     // Set the splatterplot button explicitly
     this->currentView->setSplatterplot(true);
+
+    pqActiveObjects::instance().setActiveSource(NULL);
+    pqActiveObjects::instance().setActiveSource(rebinnedSource);
   }
   catch (const std::runtime_error& error)
   {
@@ -456,7 +459,7 @@ void MdViewerWidget::onSwitchSoures(std::string rebinnedWorkspaceName, std::stri
  * @param rebinnedWorkspaceName The name of the rebinned workspace.
  * @param sourceType The name of the source plugin. 
  */
-void MdViewerWidget::prepareRebinnedWorkspace(const std::string rebinnedWorkspaceName, std::string sourceType)
+pqPipelineSource* MdViewerWidget::prepareRebinnedWorkspace(const std::string rebinnedWorkspaceName, std::string sourceType)
 {
   // Load a new source plugin
   pqPipelineSource* newRebinnedSource = this->currentView->setPluginSource(QString::fromStdString(sourceType), QString::fromStdString(rebinnedWorkspaceName));
@@ -471,6 +474,8 @@ void MdViewerWidget::prepareRebinnedWorkspace(const std::string rebinnedWorkspac
 
   // Register the source
   m_rebinnedSourcesManager.registerRebinnedSource(newRebinnedSource);
+
+  return newRebinnedSource;
 }
 
 /**
