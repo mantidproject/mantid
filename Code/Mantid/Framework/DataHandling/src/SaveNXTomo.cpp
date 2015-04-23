@@ -35,9 +35,12 @@ void SaveNXTomo::init() {
   wsValidator->add<API::CommonBinsValidator>();
   wsValidator->add<API::HistogramValidator>();
 
-  declareProperty(new WorkspaceProperty<>("InputWorkspaces", "",
-                                          Direction::Input, wsValidator),
-                  "The name of the workspaces to save.");
+  declareProperty(
+      new WorkspaceProperty<>("InputWorkspaces", "", Direction::Input,
+                              wsValidator),
+      "The name of the workspace(s) to save, giving the name of the "
+      "group workspace when saving multiple ones grouped into a "
+      "WorkspaceGroup.");
 
   declareProperty(
       new API::FileProperty("Filename", "", FileProperty::Save,
@@ -55,7 +58,8 @@ void SaveNXTomo::init() {
 }
 
 /**
- * Execute the algorithm : Single workspace
+ * Execute the algorithm for the single workspace (no group) case. See
+ * processGroups() for when a workspace group is given as input.
  */
 void SaveNXTomo::exec() {
   try {
@@ -66,6 +70,28 @@ void SaveNXTomo::exec() {
 
   if (m_workspaces.size() != 0)
     processAll();
+}
+
+/**
+* Run instead of exec when operating on groups
+*/
+bool SaveNXTomo::processGroups() {
+  try {
+    std::string name = getPropertyValue("InputWorkspaces");
+    WorkspaceGroup_sptr groupWS =
+        AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(name);
+
+    for (int i = 0; i < groupWS->getNumberOfEntries(); ++i) {
+      m_workspaces.push_back(
+          boost::dynamic_pointer_cast<Workspace2D>(groupWS->getItem(i)));
+    }
+  } catch (...) {
+  }
+
+  if (m_workspaces.size() != 0)
+    processAll();
+
+  return true;
 }
 
 /**
@@ -438,28 +464,6 @@ SaveNXTomo::writeIntensityValue(const DataObjects::Workspace2D_sptr workspace,
   nxFile.openData("data");
   nxFile.putSlab(intensityValue, thisFileInd, 1);
   nxFile.closeData();
-}
-
-/**
-* Run instead of exec when operating on groups
-*/
-bool SaveNXTomo::processGroups() {
-  try {
-    std::string name = getPropertyValue("InputWorkspaces");
-    WorkspaceGroup_sptr groupWS =
-        AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(name);
-
-    for (int i = 0; i < groupWS->getNumberOfEntries(); ++i) {
-      m_workspaces.push_back(
-          boost::dynamic_pointer_cast<Workspace2D>(groupWS->getItem(i)));
-    }
-  } catch (...) {
-  }
-
-  if (m_workspaces.size() != 0)
-    processAll();
-
-  return true;
 }
 
 } // namespace DataHandling
