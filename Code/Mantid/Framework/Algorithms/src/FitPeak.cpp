@@ -544,6 +544,7 @@ void FitOneSinglePeak::highBkgdFit() {
   // Fit the composite function as final
   double compcost = fitCompositeFunction(m_peakFunc, m_bkgdFunc, m_dataWS,
                                          m_wsIndex, m_minFitX, m_maxFitX);
+  m_bestRwp = compcost;
 
   m_sstream << "MultStep-Fit: Best Fitted Peak: " << m_peakFunc->asString()
             << ". Final " << m_costFunction << " = " << compcost << "\n"
@@ -797,6 +798,8 @@ double FitOneSinglePeak::fitCompositeFunction(
   // so far the best Rwp
   bool modecal = true;
   // FIXME - This is not a good practise...
+  double backRwp = fitFunctionSD(bkgdfunc, dataws, wsindex, startx, endx, modecal);
+  m_sstream << "Background: Pre-fit Goodness = " << backRwp << "\n";
   m_bestRwp = fitFunctionSD(compfunc, dataws, wsindex, startx, endx, modecal);
   m_sstream << "Peak+Backgruond: Pre-fit Goodness = " << m_bestRwp << "\n";
 
@@ -820,11 +823,11 @@ double FitOneSinglePeak::fitCompositeFunction(
               << errorreason << "\n";
 
   double goodness_final = DBL_MAX;
-  if (goodness <= m_bestRwp) {
+  if (goodness <= m_bestRwp && goodness <= backRwp) {
     // Fit for composite function renders a better result
     goodness_final = goodness;
     processNStoreFitResult(goodness_final, true);
-  } else if (goodness > m_bestRwp && m_bestRwp < DBL_MAX) {
+  } else if (goodness > m_bestRwp && m_bestRwp < DBL_MAX && m_bestRwp <= backRwp) {
     // A worse result is got.  Revert to original function parameters
     m_sstream << "Fit peak/background composite function FAILS to render a "
                  "better solution. "
@@ -833,6 +836,7 @@ double FitOneSinglePeak::fitCompositeFunction(
 
     pop(bkuppeakmap, peakfunc);
     pop(bkupbkgdmap, bkgdfunc);
+    goodness_final = m_bestRwp;
   } else {
     m_sstream << "Fit peak-background function fails in all approaches! \n";
   }
