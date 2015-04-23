@@ -433,7 +433,15 @@ void SaveHKL::exec() {
 
     out << std::endl;
   }
-  out << "   0   0   0    0.00    0.00   0  0.0000 0.0000      0      0 0.0000 "
+  if (decimalHKL == EMPTY_INT() )
+    out << std::setw(4) << 0
+          << std::setw(4) << 0
+          << std::setw(4) << 0;
+  else
+    out << std::setw(5+decimalHKL) << std::fixed << std::setprecision(decimalHKL) << 0.0
+          << std::setw(5+decimalHKL) << std::fixed << std::setprecision(decimalHKL) << 0.0
+          << std::setw(5+decimalHKL) << std::fixed << std::setprecision(decimalHKL) << 0.0;
+  out << "    0.00    0.00   0  0.0000 0.0000      0      0 0.0000 "
          "  0";
   out << std::endl;
 
