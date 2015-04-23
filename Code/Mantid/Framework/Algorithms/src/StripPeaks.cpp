@@ -213,11 +213,27 @@ StripPeaks::removePeaks(API::MatrixWorkspace_const_sptr input,
                       << ". Error: Peak fit with too wide peak width" << width
                       << " denoted by chi^2 = " << chisq << " <= 0. \n";
     }
+    {
+        auto left = lower_bound(X.begin(), X.end(), centre);
+        double delta_d = (*left) - (*(left-1));
+        if ((width/delta_d) < 1.) {
+            g_log.warning() << "StripPeaks():  Peak Index = " << i
+                            << " @ X = " << centre
+                            << "  Error: Peak fit with too narrow of peak "
+                            << "delta_d = " << delta_d
+                            << " sigma/delta_d = " << (width/delta_d) << "\n";
+            continue;
+        }
+    }
 
     g_log.information() << "Subtracting peak " << i << " from spectrum "
                         << peakslist->getRef<int>("spectrum", i)
                         << " at x = " << centre << " h = " << height
                         << " s = " << width << " chi2 = " << chisq << "\n";
+    g_log.information() << "     background = "
+                        << peakslist->getRef<double>("A0", i) << " + "
+                        << peakslist->getRef<double>("A1", i) << " x + "
+                        << peakslist->getRef<double>("A2", i) << " x^2\n";
 
     // Loop over the spectrum elements
     const int spectrumLength = static_cast<int>(Y.size());
