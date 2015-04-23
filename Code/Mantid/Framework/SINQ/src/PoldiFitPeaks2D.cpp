@@ -122,7 +122,7 @@ void PoldiFitPeaks2D::init() {
   declareProperty("LambdaMin", 1.1,
                   "Minimum wavelength for 1D spectrum calculation");
   declareProperty("LambdaMax", 5.0,
-                  "Minimum wavelength for 1D spectrum calculation");
+                  "Maximum wavelength for 1D spectrum calculation");
 
   declareProperty(new WorkspaceProperty<TableWorkspace>(
                       "RefinedPoldiPeakWorkspace", "", Direction::Output),
