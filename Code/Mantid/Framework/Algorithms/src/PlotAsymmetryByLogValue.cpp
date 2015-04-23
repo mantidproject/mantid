@@ -99,6 +99,9 @@ int PlotAsymmetryByLogValue::g_red = 1;
 int PlotAsymmetryByLogValue::g_green = EMPTY_INT();
 std::string PlotAsymmetryByLogValue::g_dtcType;
 std::string PlotAsymmetryByLogValue::g_dtcFile;
+std::string PlotAsymmetryByLogValue::g_filenameBase;
+std::string PlotAsymmetryByLogValue::g_filenameExt;
+int PlotAsymmetryByLogValue::g_filenameZeros = 0;
 
 /** Initialisation method. Declares properties to be used in algorithm.
 *
@@ -187,7 +190,7 @@ void PlotAsymmetryByLogValue::exec() {
   std::string lastFN = getProperty("LastRun");
 
   // Parse run names and get the number of runs
-  parseRunNames( firstFN, lastFN, m_filenameBase, m_filenameExt, m_filenameZeros);
+  parseRunNames( firstFN, lastFN, g_filenameBase, g_filenameExt, g_filenameZeros);
   size_t is = atoi(firstFN.c_str()); // starting run number
   size_t ie = atoi(lastFN.c_str());  // last run number
 
@@ -298,8 +301,8 @@ Workspace_sptr PlotAsymmetryByLogValue::doLoad (int64_t runNumber ) {
 
   // Get complete run name
   std::ostringstream fn, fnn;
-  fnn << std::setw(m_filenameZeros) << std::setfill('0') << runNumber;
-  fn << m_filenameBase << fnn.str() << m_filenameExt;
+  fnn << std::setw(g_filenameZeros) << std::setfill('0') << runNumber;
+  fn << g_filenameBase << fnn.str() << g_filenameExt;
 
   // Load run
   IAlgorithm_sptr load = createChildAlgorithm("LoadMuonNexus");

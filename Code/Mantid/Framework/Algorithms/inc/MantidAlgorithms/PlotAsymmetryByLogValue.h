@@ -104,11 +104,11 @@ private:
   void checkProperties ();
 
   /// Stores base name shared by all runs
-  std::string m_filenameBase;
+  static std::string g_filenameBase;
   /// Stores extension shared by all runs
-  std::string m_filenameExt;
+  static std::string g_filenameExt;
   /// Sotres number of zeros in run name
-  int m_filenameZeros;
+  static int g_filenameZeros;
   /// Stores property "Int"
   bool m_int;
   /// Store forward spectra
