@@ -3,8 +3,6 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidDataHandling/LoadParameterFile.h"
-#include "MantidDataHandling/LoadInstrument.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -19,7 +17,6 @@
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
-using namespace Mantid::DataHandling;
 using namespace Mantid::DataObjects;
 
 class LoadParameterFileTest : public CxxTest::TestSuite
@@ -40,12 +37,13 @@ public:
 
 
     // load in additional parameters
-    LoadParameterFile loaderPF;
-    TS_ASSERT_THROWS_NOTHING(loaderPF.initialize());
-    loaderPF.setPropertyValue("Filename", "IDFs_for_UNIT_TESTING/IDF_for_UNIT_TESTING2_paramFile.xml");
-    loaderPF.setPropertyValue("Workspace", wsName);
-    TS_ASSERT_THROWS_NOTHING(loaderPF.execute());
-    TS_ASSERT( loaderPF.isExecuted() );
+    auto pLoaderPF = FrameworkManager::Instance().createAlgorithm("LoadParameterFile");
+
+    TS_ASSERT_THROWS_NOTHING(pLoaderPF->initialize());
+    pLoaderPF->setPropertyValue("Filename", "IDFs_for_UNIT_TESTING/IDF_for_UNIT_TESTING2_paramFile.xml");
+    pLoaderPF->setPropertyValue("Workspace", wsName);
+    TS_ASSERT_THROWS_NOTHING(pLoaderPF->execute());
+    TS_ASSERT( pLoaderPF->isExecuted() );
 
 
     // Get back the saved workspace
@@ -121,12 +119,14 @@ public:
       "</parameter-file>";
 
     // load in additional parameters
-    LoadParameterFile loaderPF;
-    TS_ASSERT_THROWS_NOTHING(loaderPF.initialize());
-    loaderPF.setPropertyValue("ParameterXML", parameterXML);
-    loaderPF.setPropertyValue("Workspace", wsName);
-    TS_ASSERT_THROWS_NOTHING(loaderPF.execute());
-    TS_ASSERT( loaderPF.isExecuted() );
+    auto pLoaderPF = FrameworkManager::Instance().createAlgorithm("LoadParameterFile");
+
+
+    TS_ASSERT_THROWS_NOTHING(pLoaderPF->initialize());
+    pLoaderPF->setPropertyValue("ParameterXML", parameterXML);
+    pLoaderPF->setPropertyValue("Workspace", wsName);
+    TS_ASSERT_THROWS_NOTHING(pLoaderPF->execute());
+    TS_ASSERT( pLoaderPF->isExecuted() );
 
     // Get back the saved workspace
     MatrixWorkspace_sptr output;
@@ -174,18 +174,18 @@ public:
      load_IDF2();
 
      // Run algorithm without file or string properties set
-    LoadParameterFile loaderPF;
-    TS_ASSERT_THROWS_NOTHING(loaderPF.initialize());
-    loaderPF.setPropertyValue("Workspace", wsName);
-    TS_ASSERT_THROWS_NOTHING(loaderPF.execute());
-    TS_ASSERT( ! loaderPF.execute() )
+    auto pLoaderPF = FrameworkManager::Instance().createAlgorithm("LoadParameterFile");
+    TS_ASSERT_THROWS_NOTHING(pLoaderPF->initialize());
+    pLoaderPF->setPropertyValue("Workspace", wsName);
+    TS_ASSERT_THROWS_NOTHING(pLoaderPF->execute());
+    TS_ASSERT( ! pLoaderPF->execute() )
   }
 
   void load_IDF2()
   {
-    LoadInstrument loaderIDF2;
+    auto pLoadInstrument = FrameworkManager::Instance().createAlgorithm("LoadInstrument");
 
-    TS_ASSERT_THROWS_NOTHING(loaderIDF2.initialize());
+    TS_ASSERT_THROWS_NOTHING(pLoadInstrument->initialize());
 
     //create a workspace with some sample data
     wsName = "LoadParameterFileTestIDF2";
@@ -196,11 +196,11 @@ public:
     TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(wsName, ws2D));
 
     // Path to test input file assumes Test directory checked out from git
-    loaderIDF2.setPropertyValue("Filename", "IDFs_for_UNIT_TESTING/IDF_for_UNIT_TESTING2.xml");
+    pLoadInstrument->setPropertyValue("Filename", "IDFs_for_UNIT_TESTING/IDF_for_UNIT_TESTING2.xml");
     //inputFile = loaderIDF2.getPropertyValue("Filename");
-    loaderIDF2.setPropertyValue("Workspace", wsName);
-    TS_ASSERT_THROWS_NOTHING(loaderIDF2.execute());
-    TS_ASSERT( loaderIDF2.isExecuted() );
+    pLoadInstrument->setPropertyValue("Workspace", wsName);
+    TS_ASSERT_THROWS_NOTHING(pLoadInstrument->execute());
+    TS_ASSERT( pLoadInstrument->isExecuted() );
 
   }
 
