@@ -76,6 +76,13 @@ public:
         TS_ASSERT_EQUALS(tableSi->getName(), "Indexed_Si");
         TS_ASSERT_EQUALS(tableSi->rowCount(), 4);
 
+        // Make sure unit cell and point group is carried over from compound ws
+        ITableWorkspace_sptr si = AnalysisDataService::Instance().retrieveWS<ITableWorkspace>("Si");
+        TS_ASSERT_EQUALS(tableSi->getLogs()->getProperty("PointGroup")->value(),
+                         si->getLogs()->getProperty("PointGroup")->value());
+        TS_ASSERT_EQUALS(tableSi->getLogs()->getProperty("UnitCell")->value(),
+                         si->getLogs()->getProperty("UnitCell")->value());
+
         Workspace_sptr unindexed = group->getItem(1);
         TS_ASSERT(unindexed);
 

@@ -194,18 +194,37 @@ public:
         TS_ASSERT_EQUALS(peaks.pointGroup()->getName(), m3m->getName());
     }
 
+    void testUnitCell()
+    {
+        PoldiPeakCollection peaks;
+
+        UnitCell defaultCell;
+        TS_ASSERT_EQUALS(unitCellToStr(peaks.unitCell()), unitCellToStr(defaultCell));
+
+        UnitCell cell(1, 2, 3, 90, 91, 92);
+        peaks.setUnitCell(cell);
+
+        UnitCell newCell = peaks.unitCell();
+        TS_ASSERT_EQUALS(unitCellToStr(newCell), unitCellToStr(cell));
+    }
+
+    void testUnitCellFromLogs()
+    {
+        TableWorkspace_sptr newDummy(m_dummyData->clone());
+
+        UnitCell cell(1, 2, 3, 90, 91, 92);
+        newDummy->logs()->addProperty<std::string>("UnitCell", unitCellToStr(cell));
+
+        PoldiPeakCollection collection(newDummy);
+        TS_ASSERT_EQUALS(unitCellToStr(collection.unitCell()), unitCellToStr(cell));
+    }
+
     void testPointGroupStringConversion()
     {
         TestablePoldiPeakCollection peaks;
         PointGroup_sptr m3m = PointGroupFactory::Instance().createPointGroup("m-3m");
 
         TS_ASSERT(peaks.pointGroupFromString(peaks.pointGroupToString(m3m)));
-
-        std::cout << m3m->getName() << std::endl;
-
-        std::vector<PointGroup_sptr> pgs = getAllPointGroups();
-        std::cout << "Size:  " << pgs.size() << std::endl;
-
         TS_ASSERT_EQUALS(m3m->getName(), peaks.pointGroupFromString(peaks.pointGroupToString(m3m))->getName());
     }
 
@@ -276,6 +295,7 @@ public:
         TS_ASSERT_EQUALS(clone->getProfileFunctionName(), peaks->getProfileFunctionName());
         TS_ASSERT_EQUALS(clone->intensityType(), peaks->intensityType());
         TS_ASSERT_EQUALS(clone->peakCount(), peaks->peakCount());
+        TS_ASSERT_EQUALS(unitCellToStr(clone->unitCell()), unitCellToStr(peaks->unitCell()));
 
         for(size_t i = 0; i < clone->peakCount(); ++i) {
             PoldiPeak_sptr clonePeak = clone->peak(i);

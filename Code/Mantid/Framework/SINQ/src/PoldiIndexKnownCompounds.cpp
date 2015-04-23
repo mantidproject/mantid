@@ -747,6 +747,14 @@ PoldiIndexKnownCompounds::getIntensitySortedPeakCollection(
   return sortedPeaks;
 }
 
+void PoldiIndexKnownCompounds::assignCrystalStructureParameters(
+    PoldiPeakCollection_sptr &indexedPeaks,
+    const PoldiPeakCollection_sptr &phasePeaks) const {
+
+    indexedPeaks->setPointGroup(phasePeaks->pointGroup());
+    indexedPeaks->setUnitCell(phasePeaks->unitCell());
+}
+
 /** Initialize the algorithm's properties.
    */
 void PoldiIndexKnownCompounds::init() {
@@ -836,6 +844,9 @@ void PoldiIndexKnownCompounds::exec() {
   for (size_t i = 0; i < m_indexedPeaks.size(); ++i) {
     PoldiPeakCollection_sptr intensitySorted =
         getIntensitySortedPeakCollection(m_indexedPeaks[i]);
+
+    assignCrystalStructureParameters(intensitySorted, m_expectedPhases[i]);
+
     ITableWorkspace_sptr tableWs = intensitySorted->asTableWorkspace();
     AnalysisDataService::Instance().addOrReplace("Indexed_" + m_phaseNames[i],
                                                  tableWs);

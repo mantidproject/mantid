@@ -3,6 +3,7 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/LogManager.h"
 #include "MantidGeometry/Crystal/PointGroupFactory.h"
+
 #include "boost/format.hpp"
 #include "boost/algorithm/string/join.hpp"
 
@@ -19,11 +20,11 @@ using namespace Mantid::Kernel;
 
 PoldiPeakCollection::PoldiPeakCollection(IntensityType intensityType)
     : m_peaks(), m_intensityType(intensityType), m_profileFunctionName(),
-      m_pointGroup() {}
+      m_pointGroup(), m_unitCell() {}
 
 PoldiPeakCollection::PoldiPeakCollection(const TableWorkspace_sptr &workspace)
     : m_peaks(), m_intensityType(Maximum), m_profileFunctionName(),
-      m_pointGroup() {
+      m_pointGroup(), m_unitCell() {
   if (workspace) {
     constructFromTableWorkspace(workspace);
   }
@@ -41,6 +42,8 @@ PoldiPeakCollection::PoldiPeakCollection(
 
   m_pointGroup =
       pointGroupFromString(pointGroupToString(crystalStructure->pointGroup()));
+
+  m_unitCell = crystalStructure->cell();
 
   std::vector<V3D> uniqueHKL = crystalStructure->getUniqueHKLs(
       dMin, dMax, Geometry::CrystalStructure::UseStructureFactor);
@@ -104,6 +107,12 @@ void PoldiPeakCollection::setPointGroup(const PointGroup_sptr &pointGroup) {
 
 PointGroup_sptr PoldiPeakCollection::pointGroup() const { return m_pointGroup; }
 
+void PoldiPeakCollection::setUnitCell(const UnitCell &unitCell) {
+  m_unitCell = unitCell;
+}
+
+UnitCell PoldiPeakCollection::unitCell() const { return m_unitCell; }
+
 TableWorkspace_sptr PoldiPeakCollection::asTableWorkspace() {
   TableWorkspace_sptr peaks = boost::dynamic_pointer_cast<TableWorkspace>(
       WorkspaceFactory::Instance().createTable());
@@ -131,6 +140,8 @@ void PoldiPeakCollection::dataToTableLog(const TableWorkspace_sptr &table) {
                                      m_profileFunctionName);
   tableLog->addProperty<std::string>("PointGroup",
                                      pointGroupToString(m_pointGroup));
+  tableLog->addProperty<std::string>("UnitCell",
+                                     Geometry::unitCellToStr(m_unitCell));
 }
 
 void PoldiPeakCollection::peaksToTable(const TableWorkspace_sptr &table) {
@@ -217,6 +228,7 @@ void PoldiPeakCollection::recoverDataFromLog(
   m_intensityType = intensityTypeFromString(getIntensityTypeFromLog(tableLog));
   m_profileFunctionName = getProfileFunctionNameFromLog(tableLog);
   m_pointGroup = pointGroupFromString(getPointGroupStringFromLog(tableLog));
+  m_unitCell = unitCellFromString(getUnitCellStringFromLog(tableLog));
 }
 
 std::string
@@ -232,6 +244,11 @@ std::string PoldiPeakCollection::getProfileFunctionNameFromLog(
 std::string PoldiPeakCollection::getPointGroupStringFromLog(
     const LogManager_sptr &tableLog) {
   return getStringValueFromLog(tableLog, "PointGroup");
+}
+
+std::string
+PoldiPeakCollection::getUnitCellStringFromLog(const LogManager_sptr &tableLog) {
+  return getStringValueFromLog(tableLog, "UnitCell");
 }
 
 std::string
@@ -285,6 +302,20 @@ PointGroup_sptr PoldiPeakCollection::pointGroupFromString(
   }
 
   return PointGroup_sptr();
+}
+
+UnitCell PoldiPeakCollection::unitCellFromString(
+    const std::string &unitCellString) const {
+  UnitCell cell;
+
+  try {
+    cell = strToUnitCell(unitCellString);
+  }
+  catch (std::runtime_error) {
+    // do nothing
+  }
+
+  return cell;
 }
 }
 }
