@@ -275,6 +275,32 @@ void PlotAsymmetryByLogValue::checkProperties (size_t &is, size_t &ie) {
 
         // If so, clear previous results
         clearResultsFromTo(isOld,ieOld);
+
+    } else {
+
+      // If all of the above are the same, we may re-use previous
+      // results, provided that new run numbers are 'appropriate'
+
+      if ( is > ieOld || ie < isOld ) {
+
+        // Completely new set of runs
+        clearResultsFromTo(isOld,ieOld);
+
+      } else {
+
+        if ( is > isOld ) {
+
+          // Remove runs from isOld to is-1
+          clearResultsFromTo(isOld,is-1);
+        }
+
+        if ( ie < ieOld ) {
+
+          // Remove runs from ie+1 to ieOld
+          clearResultsFromTo(ie+1,ieOld);
+        }
+
+      }
     }
   }
 
