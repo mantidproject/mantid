@@ -294,6 +294,16 @@ void TomoReconstruction::SCARFLoginClicked() {
           e.what());
   }
 
+  try {
+    jobTableRefreshClicked()
+  } catch (std::exception &e) {
+    throw(std::string("The login operation went apparently fine but an issue "
+                      "was found while trying to retrieve the status of the "
+                      "jobs currently running on the remote resource. Error "
+                      "description: ") +
+          e.what());
+  }
+
   enableLoggedActions(true);
   updateCompResourceStatus(true);
   m_loggedIn = true;
@@ -662,6 +672,7 @@ void TomoReconstruction::doCancelJob(const std::string &id) {
   auto alg = Algorithm::fromString("SCARFTomoReconstruction");
   alg->initialize();
   alg->setPropertyValue("UserName", getUsername());
+  alg->setPropertyValue("Action", "CancelJob");
   alg->setPropertyValue("JobID", id);
   try {
     alg->execute();
@@ -930,7 +941,6 @@ WorkspaceGroup_sptr TomoReconstruction::loadFITSImage(const std::string &path) {
   auto alg = Algorithm::fromString("LoadFITS");
   alg->initialize();
   alg->setPropertyValue("Filename", path);
-  alg->setProperty("ImageKey", "0");
   std::string wsName = "__fits_ws_imat_tomography_gui";
   alg->setProperty("OutputWorkspace", wsName);
   try {
