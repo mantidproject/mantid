@@ -142,6 +142,7 @@ void SaveMD2::doSaveHisto(Mantid::DataObjects::MDHistoWorkspace_sptr ws) {
     file->makeData(dim->getDimensionId(), ::NeXus::FLOAT64, static_cast<int>(dim->getNBins()), true);
     file->putData(axis);
     file->putAttr("units", std::string(dim->getUnits()));
+    file->putAttr("long_name", std::string(dim->getName()));
     file->closeData();
     if (d !=0)
       axes_label.insert(0,":");
