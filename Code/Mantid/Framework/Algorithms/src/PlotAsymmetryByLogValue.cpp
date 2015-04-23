@@ -179,6 +179,9 @@ void PlotAsymmetryByLogValue::exec() {
   parseRunNames( firstFN, lastFN, m_filenameBase, m_filenameExt, m_filenameZeros);
   size_t is = atoi(firstFN.c_str()); // starting run number
   size_t ie = atoi(lastFN.c_str());  // last run number
+  if ( ie < is ) {
+    throw std::runtime_error("First run number is greater than last run number");
+  }
 
   // Resize vectors that will store results
   resizeVectors(ie-is+1);
