@@ -434,7 +434,25 @@ class HFIRPDRedControl:
 
         return
 
-    
+
+    def parseDetEffCorrFile(instrument, vancorrfname):
+        """ Parse detector efficiency correction file='HB2A
+
+        Return :: 2-tuple (table workspace and or 
+        """
+        if instrument.upper() == 'HB2A':
+            vancorrdict, errmsg = hutil.parseDetEffCorrFile(vancorrfname)
+            if vancorrdict.size() > 0: 
+                detefftablews = self._generateTableWS(vancorrdict)
+            else:
+                detefftablews = None
+        else:
+            detefftablews = None
+            errmsg = "Instrument %s is not supported for parsing vanadium (detector efficiency) correction."
+
+        return (detefftablews, errmsg)
+
+
     def parseSpiceData(self, expno, scanno, detefftablews=None):
         """ Load SPICE data to MDWorkspaces
         """
@@ -829,6 +847,19 @@ class HFIRPDRedControl:
                               PeakPositions=numpy.array(vanpeakposlist))
 
         return 
+
+
+    def _generateTableWS(self, vancorrdict):
+        """ Create table workspace
+        """
+        tablews = api.CreateEmptyTableWorkspace()
+        tablews.addColumn('int', 'DetID')
+        tablews.addColumn('float', 'Correction')
+
+        for detid in sorted(vancorrdict.keys()):
+            tablews.appendRow( [detid, vancorrdict[detid]] )
+
+        return tablews
 
 
     def _getValueFromTable(self, tablews, colname, rowindex=0):

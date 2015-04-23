@@ -81,3 +81,31 @@ def makeDetGapFileName(expno):
     url = 'http://neutron.ornl.gov/user_data/hb2a/exp%d/Datafiles/%s' % (expno, detgapfilename)
 
     return (detgapfilename, url)
+
+
+def parseDetEffCorrFile(vancorrfname):
+    """ Parse HB2A vanadium correction (detector efficiency correction) file
+    Return :: dictionary : key = det id, value = factor
+    """
+    try:
+        cfile = open(vancorrfname, 'r')
+        lines = cfile.readlines()
+        cfile.close()
+    except IOError:
+        return (False, 'Unable to read vanadium correction file %s.'%(vancorrfname))
+
+    corrdict = {}
+    detid = 1
+    for line in lines:
+        line = line.strip()
+        if len(line) == 0 or line[0] == '#':
+            continue
+
+        terms = line.split()
+        factor = float(terms[0])
+        corrdict[detid] = factor
+
+        detid += 1
+    # ENDFOR
+
+    return corrdict

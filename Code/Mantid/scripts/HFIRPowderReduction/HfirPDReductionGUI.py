@@ -423,20 +423,39 @@ class MainWindow(QtGui.QMainWindow):
                 autowavelength = returnbody[0]
                 vancorrfname = returnbody[1]
                 excldetfname = returnbody[2]
+                raise "Why excldetfname is not a string or None?"
+                print "Excluded File Name = ", str(excldetfname)
             else:
                 autowavelength = None
                 vancorrfname = None
                 excldetfname = None
 
             # Optionally parse det effecient file
-            if self.ui.checkBox_useDetEffCorr.isChecked():
+            if self.ui.checkBox_useDetEffCorr.isChecked() is True:
+                # Apply detector efficiency correction
                 if vancorrfname is None:
-                    vancorrfname = QtGui.QFileBrowse()
+                    # browse vanadium correction file
+                    filefilter = "Text (*.txt);;Data (*.dat);;All files (*.*)" 
+                    curdir = os.getcwd()
+                    vancorrfnames = QtGui.QFileDialog.getOpenFileNames(self, 'Open File(s)', curdir, filefilter)
+                    if len(vancorrfnames) > 0:
+                        vancorrfname = vancorrfnames[0]
+                        self.ui.lineEdit_vcorrFileName.setText(str(vancorrfname)) 
+                    else:
+                        self._logError("User does not specify any vanadium correction file.")
+                        self.ui.checkBox_useDetEffCorr.setChecked(False)
+                    # ENDIF-len()
+                # ENDIF vancorrfname 
 
-                self.ui.lineEdit_vcorrFileName.setText(str(vancorrfname))
-                
-                detefftablews = self._myControl.parseDetEffCorrFile('HB2A', vancorrfname)
+                # Parse if it is not None
+                if vancorrfname is not None:
+                    detefftablews = self._myControl.parseDetEffCorrFile('HB2A', vancorrfname)
+                else:
+                    detefftablews = None
+                # ENDIF
+
             else:
+                # Not chosen to apply detector efficiency correction:w
                 detefftablews = None
             # ENDIF
             
@@ -481,15 +500,23 @@ class MainWindow(QtGui.QMainWindow):
             # Reduce data
 
             # optionally parse det exclusion file
+            excludedetlist = []
             if self.ui.checkBox_useDetExcludeFile.isChecked():
                 if excldetfname is None:
-                    excldetfname = QtGui.QFileBrowse()
+                    filefilter = "Text (*.txt);;Data (*.dat);;All files (*.*)" 
+                    curdir = os.getcwd()
+                    excldetfnames = QtGui.QFileDialog.getOpenFileNames(slef, 'Open File(s)', curdir, filefilter)
+                    try: 
+                        excldetfname = excldetfnames[0]
+                    except IndexError:
+                        self.ui.checkBox_useDetExcludeFile.setChecked(False)
+                # ENDIF
 
-                excludedetlist = self._myControl.loadExcludedDetFile('HB2A', excldetfname)
-                self.ui.lineEdit_excludedDetFileName.setText(excldetfname)
-            else:
-                excludedetlist = []
-            # ENDIF
+                if excldetfname is not None:
+                    print "Detector exclusion file name is %s." % (excldetfname) 
+                    self.ui.lineEdit_excludedDetFileName.setText(excldetfname)
+                    excludedetlist = self._myControl.loadExcludedDetFile('HB2A', excldetfname) 
+                # ENDIF
 
             if itab == 2:
                 # Get other information
