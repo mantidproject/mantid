@@ -64,10 +64,13 @@ public:
 
   std::map<std::string, std::string> validateInputs();
 
+  bool checkGroups() { return false; }
+
   boost::shared_ptr<Kernel::DblMatrix> getLocalCovarianceMatrix(
       const boost::shared_ptr<const Kernel::DblMatrix> &covarianceMatrix,
       size_t parameterOffset, size_t nParams) const;
 
+  std::vector<PoldiPeakCollection_sptr> getPeakCollectionsFromInput() const;
 protected:
   Poldi2DFunction_sptr getFunctionIndividualPeaks(
       std::string profileFunctionName,

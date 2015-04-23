@@ -83,8 +83,8 @@ void PoldiFitPeaks2D::init() {
   declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace", "",
                                                          Direction::Input),
                   "Measured POLDI 2D-spectrum.");
-  declareProperty(new WorkspaceProperty<TableWorkspace>("PoldiPeakWorkspace",
-                                                        "", Direction::Input),
+  declareProperty(new WorkspaceProperty<Workspace>("PoldiPeakWorkspace", "",
+                                                   Direction::Input),
                   "Table workspace with peak information.");
 
   auto peakFunctionValidator = boost::make_shared<StringListValidator>(
@@ -540,12 +540,71 @@ Poldi2DFunction_sptr PoldiFitPeaks2D::getFunctionFromPeakCollection(
   return getFunctionIndividualPeaks(profileFunctionName, peakCollection);
 }
 
+/**
+ * Extracts a vector of PoldiPeakCollection objects from the input
+ *
+ * This method examines what kind of workspace has been supplied to the
+ * PoldiPeakWorkspace input property and tries to construct a vector
+ * of peak collections from this. It works with either a single TableWorkspace
+ * or with a WorkspaceGroups that contains several TableWorkspaces.
+ *
+ * If the workspace can not be interpreted properly, the method throws an
+ * std::invalid_argument exception.
+ *
+ * @return Vector with one or more PoldiPeakCollections.
+ */
+std::vector<PoldiPeakCollection_sptr>
+PoldiFitPeaks2D::getPeakCollectionsFromInput() const {
+  Workspace_sptr peakWorkspace = getProperty("PoldiPeakWorkspace");
+
+  std::vector<PoldiPeakCollection_sptr> peakCollections;
+
+  // If the input workspace is a TableWorkspace, insert it into the vector and
+  // return it.
+  TableWorkspace_sptr peakTable =
+      boost::dynamic_pointer_cast<TableWorkspace>(peakWorkspace);
+  if (peakTable) {
+    try {
+      peakCollections.push_back(getPeakCollection(peakTable));
+    }
+    catch (std::runtime_error) {
+      // do nothing
+    }
+
+    return peakCollections;
+  }
+
+  // If it's a WorkspaceGroup there are multiple peak tables, make a collection
+  // for each of them.
+  WorkspaceGroup_sptr peakTables =
+      boost::dynamic_pointer_cast<WorkspaceGroup>(peakWorkspace);
+  if (peakTables) {
+    for (size_t i = 0;
+         i < static_cast<size_t>(peakTables->getNumberOfEntries()); ++i) {
+      TableWorkspace_sptr peakTable =
+          boost::dynamic_pointer_cast<TableWorkspace>(peakTables->getItem(i));
+
+      if (peakTable) {
+        try {
+          peakCollections.push_back(getPeakCollection(peakTable));
+        }
+        catch (std::runtime_error) {
+          // do nothing
+        }
+      }
+    }
+
+    return peakCollections;
+  }
+
+  // Otherwise throw a runtime error.
+  throw std::runtime_error("Cannot proceed without peak workspace.");
+}
+
 /// Executes the algorithm
 void PoldiFitPeaks2D::exec() {
-  TableWorkspace_sptr peakTable = getProperty("PoldiPeakWorkspace");
-  if (!peakTable) {
-    throw std::runtime_error("Cannot proceed without peak workspace.");
-  }
+  std::vector<PoldiPeakCollection_sptr> peakCollections =
+      getPeakCollectionsFromInput();
 
   MatrixWorkspace_sptr ws = getProperty("InputWorkspace");
   setDeltaTFromWorkspace(ws);
@@ -553,15 +612,15 @@ void PoldiFitPeaks2D::exec() {
   setPoldiInstrument(boost::make_shared<PoldiInstrumentAdapter>(ws));
   setTimeTransformerFromInstrument(m_poldiInstrument);
 
-  PoldiPeakCollection_sptr peakCollection = getPeakCollection(peakTable);
-
   Property *profileFunctionProperty =
       getPointerToProperty("PeakProfileFunction");
   if (!profileFunctionProperty->isDefault()) {
-    peakCollection->setProfileFunctionName(profileFunctionProperty->value());
+    for (auto pc = peakCollections.begin(); pc != peakCollections.end(); ++pc) {
+      (*pc)->setProfileFunctionName(profileFunctionProperty->value());
+    }
   }
 
-  IAlgorithm_sptr fitAlgorithm = calculateSpectrum(peakCollection, ws);
+  IAlgorithm_sptr fitAlgorithm = calculateSpectrum(peakCollections.front(), ws);
 
   IFunction_sptr fitFunction = getFunction(fitAlgorithm);
 
@@ -572,7 +631,7 @@ void PoldiFitPeaks2D::exec() {
   PoldiPeakCollection_sptr integralPeaks =
       getCountPeakCollection(normalizedPeaks);
 
-  assignMillerIndices(peakCollection, integralPeaks);
+  assignMillerIndices(peakCollections.front(), integralPeaks);
 
   setProperty("OutputWorkspace", getWorkspace(fitAlgorithm));
   setProperty("RefinedPoldiPeakWorkspace", integralPeaks->asTableWorkspace());
