@@ -133,6 +133,7 @@ void SaveMD2::doSaveHisto(Mantid::DataObjects::MDHistoWorkspace_sptr ws) {
   }
 
   // Save each axis dimension as an array
+  std::string axes_label;
   for (size_t d=0; d < numDims; d++) {
     std::vector<double> axis;
     IMDDimension_const_sptr dim = ws->getDimension(d);
@@ -142,6 +143,9 @@ void SaveMD2::doSaveHisto(Mantid::DataObjects::MDHistoWorkspace_sptr ws) {
     file->putData(axis);
     file->putAttr("units", std::string(dim->getUnits()));
     file->closeData();
+    if (d !=0)
+      axes_label.insert(0,":");
+    axes_label.insert(0,dim->getDimensionId());
   }
 
   // Write out the affine matrices
@@ -166,6 +170,8 @@ void SaveMD2::doSaveHisto(Mantid::DataObjects::MDHistoWorkspace_sptr ws) {
 
   file->makeData("signal", ::NeXus::FLOAT64, size, true);
   file->putData(ws->getSignalArray());
+  file->putAttr("signal",1);
+  file->putAttr("axes",axes_label);
   file->closeData();
 
   file->makeData("errors_squared", ::NeXus::FLOAT64, size, true);
