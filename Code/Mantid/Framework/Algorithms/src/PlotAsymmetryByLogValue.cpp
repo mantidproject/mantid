@@ -182,7 +182,8 @@ void PlotAsymmetryByLogValue::exec() {
 
   // Check input properties to decide whether or not we can reuse previous
   // results, if any
-  checkProperties();
+  size_t is, ie;
+  checkProperties(is,ie);
 
   Progress progress(this, 0, 1, ie - is + 2);
 
@@ -221,7 +222,7 @@ void PlotAsymmetryByLogValue::exec() {
 
 /**  Checks input properties and compares them to previous values
 */
-void PlotAsymmetryByLogValue::checkProperties () {
+void PlotAsymmetryByLogValue::checkProperties (size_t &is, size_t &ie) {
 
   // If any of the following properties has a different value from the
   // previous call, we need to re-do all the computations, which means
@@ -250,8 +251,8 @@ void PlotAsymmetryByLogValue::checkProperties () {
   std::string filenameBase, filenameExt;
   int filenameZeros;
   parseRunNames( firstFN, lastFN, filenameBase, filenameExt, filenameZeros);
-  size_t is = atoi(firstFN.c_str()); // starting run number
-  size_t ie = atoi(lastFN.c_str());  // last run number
+  is = atoi(firstFN.c_str()); // starting run number
+  ie = atoi(lastFN.c_str());  // last run number
 
   // Check if any property has changed
   if ( g_logName != logName ||
