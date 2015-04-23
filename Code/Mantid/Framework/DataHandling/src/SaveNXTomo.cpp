@@ -38,9 +38,9 @@ void SaveNXTomo::init() {
   declareProperty(
       new WorkspaceProperty<>("InputWorkspaces", "", Direction::Input,
                               wsValidator),
-      "The name of the workspace(s) to save, this can be the name of a "
-      "WorkspaceGroup in which case all the Workspace2D included in the "
-      "group will be saved.");
+      "The name of the workspace(s) to save - this can be the name of a single "
+      "Workspace2D or the name of a WorkspaceGroup in which case all the "
+      "Workspace2Ds included in the group will be saved.");
 
   declareProperty(
       new API::FileProperty("Filename", "", FileProperty::Save,
