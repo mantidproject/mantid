@@ -52,6 +52,8 @@ if necessary.
 The algorithm will always produce a WorkspaceGroup which contains as many peak tables as compounds specified in the
 file.
 
+Please note that this algorithm is only available if the `pyparsing`-module is installed.
+
 Usage
 -----
 
