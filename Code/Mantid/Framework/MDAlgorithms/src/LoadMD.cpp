@@ -211,12 +211,19 @@ void LoadMD::loadSlab(std::string name, void *data, MDHistoWorkspace_sptr ws,
   if (m_file->getInfo().type != dataType)
     throw std::runtime_error("Unexpected data type for '" + name +
                              "' data set.'");
-  if (m_file->getInfo().dims[0] != static_cast<int>(ws->getNPoints()))
+
+  int nPoints = 1;
+  size_t numDims = m_file->getInfo().dims.size();
+  std::vector<int> size(numDims);
+  for (size_t d = 0; d < numDims; d++) {
+    nPoints *= static_cast<int>(m_file->getInfo().dims[d]);
+    size[d] = static_cast<int>(m_file->getInfo().dims[d]);
+  }
+  if (nPoints != static_cast<int>(ws->getNPoints()))
     throw std::runtime_error(
         "Inconsistency between the number of points in '" + name +
         "' and the number of bins defined by the dimensions.");
   std::vector<int> start(1, 0);
-  std::vector<int> size(1, static_cast<int>(ws->getNPoints()));
   try {
     m_file->getSlab(data, start, size);
   } catch (...) {
