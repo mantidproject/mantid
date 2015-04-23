@@ -41,8 +41,8 @@ reconstruction tools.
 .. code-block:: python
 
    # Usually you'll save image data loaded from FITS files
-   LoadFITS('example1.fits', OutputWorkspace='reconstruction'))
-   LoadFITS('example2.fits', OutputWorkspace='reconstruction'))
+   LoadFITS('example1.fits', OutputWorkspace='reconstruction')
+   LoadFITS('example2.fits', OutputWorkspace='reconstruction')
    # Write NXTomo file with data from 2 images
    SaveNXTomo(InputWorkspaces='reconstruction', Filename='input_rec')
 
