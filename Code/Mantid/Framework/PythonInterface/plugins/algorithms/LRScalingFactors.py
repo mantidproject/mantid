@@ -206,7 +206,8 @@ class LRScalingFactors(PythonAlgorithm):
                 references[0] = {'index': i,
                                  'run': run,
                                  'ref_ws': workspace_name,
-                                 'ratio_ws': None}
+                                 'ratio_ws': None,
+                                 'diagnostics': str(run)}
                 previous_ws = workspace_name
                 continue
 
@@ -219,12 +220,15 @@ class LRScalingFactors(PythonAlgorithm):
                 Divide(LHSWorkspace = previous_ws,
                        RHSWorkspace = references[n_attenuator-1]['ref_ws'],
                        OutputWorkspace = "ScalingRatio_%s" % n_attenuator)
+                references[n_attenuator]['diagnostics'] = "%s / %s" % (str(data_runs[i-1]), references[n_attenuator-1]['run'])
                 # Multiply the result by the ratio for that run, and store
                 if references[n_attenuator-1]['ratio_ws'] is not None:
                     Multiply(LHSWorkspace = references[n_attenuator-1]['ratio_ws'],
                              RHSWorkspace = "ScalingRatio_%s" % n_attenuator,
                              OutputWorkspace = "ScalingRatio_%s" % n_attenuator)
+                    references[n_attenuator]['diagnostics'] += " * %s" % references[n_attenuator-1]['diagnostics']
                 references[n_attenuator]['ratio_ws'] = "ScalingRatio_%s" % n_attenuator
+                
             # If this is not a reference run, compute F
             else:
                 # Divide by the reference for this number of attenuators
@@ -278,9 +282,22 @@ class LRScalingFactors(PythonAlgorithm):
                                         'S1H':s1h, 'S1W':s1w,
                                         'S2iH':s2h, 'S2iW':s2w,
                                         'a':a, 'error_a': error_a, 
-                                        'b':b, 'error_b': error_b})
-
+                                        'b':b, 'error_b': error_b,
+                                        'diagnostics': '%s / %s * %s' % (run, references[n_attenuator]['run'], references[n_attenuator]['diagnostics'])
+                                        })
             previous_ws = workspace_name
+
+        # Log some useful information to track what happened
+        for item in scaling_factors:
+            log_info = "LambdaRequested=%s " % item["LambdaRequested"]
+            log_info += "S1H=%s " % item["S1H"]
+            log_info += "S2iH=%s " % item["S2iH"]
+            log_info += "S1W=%s " % item["S1W"]
+            log_info += "S2iW=%s " % item["S2iW"]
+            log_info += "a=%s " % item["a"]
+            log_info += "b=%s " % item["b"]
+            log_info += "  |  %s" % item["diagnostics"]
+            logger.information(log_info)
         # Save the output in a configuration file
         self.save_scaling_factor_file(scaling_factors)
 
