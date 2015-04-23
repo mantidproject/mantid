@@ -253,26 +253,29 @@ void PlotAsymmetryByLogValue::checkProperties (size_t &is, size_t &ie) {
   parseRunNames( firstFN, lastFN, filenameBase, filenameExt, filenameZeros);
   is = atoi(firstFN.c_str()); // starting run number
   ie = atoi(lastFN.c_str());  // last run number
-  size_t isOld = g_redX.begin()->first; // Old first run number
-  size_t ieOld = g_redX.rbegin()->first; // Old last run number
 
+  if ( !g_redX.empty() ) {
 
-  // Check if any property has changed
-  if ( g_logName != logName ||
-    g_logFunc != logFunc ||
-    g_stype != stype ||
-    g_forward_list != forward_list ||
-    g_backward_list != backward_list ||
-    g_green != green ||
-    g_red != red ||
-    g_dtcType != dtcType ||
-    g_dtcFile != dtcFile ||
-    g_filenameBase != filenameBase ||
-    g_filenameExt != filenameExt ||
-    g_filenameZeros != filenameZeros) {
+    size_t isOld = g_redX.begin()->first; // Old first run number
+    size_t ieOld = g_redX.rbegin()->first; // Old last run number
 
-      // If so, clear previous results
-      clearResultsFromTo(isOld,ieOld);
+    // Check if any property has changed
+    if ( g_logName != logName ||
+      g_logFunc != logFunc ||
+      g_stype != stype ||
+      g_forward_list != forward_list ||
+      g_backward_list != backward_list ||
+      g_green != green ||
+      g_red != red ||
+      g_dtcType != dtcType ||
+      g_dtcFile != dtcFile ||
+      g_filenameBase != filenameBase ||
+      g_filenameExt != filenameExt ||
+      g_filenameZeros != filenameZeros) {
+
+        // If so, clear previous results
+        clearResultsFromTo(isOld,ieOld);
+    }
   }
 
   g_logName = logName;
