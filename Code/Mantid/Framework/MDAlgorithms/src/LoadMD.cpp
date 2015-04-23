@@ -158,17 +158,27 @@ void LoadMD::exec() {
   // Open the entry
   m_file->openGroup(entryName, "NXentry");
 
-  // How many dimensions?
-  std::vector<int32_t> vecDims;
-  m_file->readData("dimensions", vecDims);
-  if (vecDims.empty())
-    throw std::runtime_error("LoadMD:: Error loading number of dimensions.");
-  m_numDims = vecDims[0];
-  if (m_numDims <= 0)
-    throw std::runtime_error("LoadMD:: number of dimensions <= 0.");
+  // Check is SaveMD version 2 was used
+  int SaveMDVersion = 0;
+  if (m_file->hasAttr("SaveMDVersion"))
+    m_file->getAttr("SaveMDVersion", SaveMDVersion);
 
-  // Now load all the dimension xml
-  this->loadDimensions();
+  if (SaveMDVersion == 2)
+    this->loadDimensions2();
+  else {
+    // How many dimensions?
+    std::vector<int32_t> vecDims;
+    m_file->readData("dimensions", vecDims);
+    if (vecDims.empty())
+      throw std::runtime_error("LoadMD:: Error loading number of dimensions.");
+    m_numDims = vecDims[0];
+    if (m_numDims <= 0)
+      throw std::runtime_error("LoadMD:: number of dimensions <= 0.");
+
+    // Now load all the dimension xml
+    this->loadDimensions();
+  }
+
   // Coordinate system
   this->loadCoordinateSystem();
 
@@ -223,7 +233,7 @@ void LoadMD::loadSlab(std::string name, void *data, MDHistoWorkspace_sptr ws,
     throw std::runtime_error(
         "Inconsistency between the number of points in '" + name +
         "' and the number of bins defined by the dimensions.");
-  std::vector<int> start(1, 0);
+  std::vector<int> start(numDims, 0);
   try {
     m_file->getSlab(data, start, size);
   } catch (...) {
@@ -277,6 +287,37 @@ void LoadMD::loadDimensions() {
     m_file->getAttr(mess.str(), dimXML);
     // Use the dimension factory to read the XML
     m_dims.push_back(createDimension(dimXML));
+  }
+}
+
+//----------------------------------------------------------------------------------------------
+/** Load all the dimensions into this->m_dims
+* The dimensions are stored as an nxData array */
+void LoadMD::loadDimensions2() {
+  m_dims.clear();
+
+  std::string axes;
+
+  m_file->openData("signal");
+  m_file->getAttr("axes", axes);
+  m_file->closeData();
+
+  std::vector<std::string> splitAxes;
+  boost::split(splitAxes, axes, boost::is_any_of(":"));
+  // Create each dimension from axes data
+  // We loop axes backwards because Mantid
+  for (size_t d = splitAxes.size(); d > 0; d--) {
+    std::string long_name;
+    std::string units;
+    std::vector<double> axis;
+    m_file->openData(splitAxes[d - 1]);
+    m_file->getAttr("long_name", long_name);
+    m_file->getAttr("units", units);
+    m_file->getData(axis);
+    m_file->closeData();
+    m_dims.push_back(boost::make_shared<MDHistoDimension>(
+        long_name, splitAxes[d - 1], units, static_cast<coord_t>(axis.front()),
+        static_cast<coord_t>(axis.back()), axis.size() - 1));
   }
 }
 
