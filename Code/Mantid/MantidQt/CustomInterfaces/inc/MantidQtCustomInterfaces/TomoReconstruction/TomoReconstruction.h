@@ -225,6 +225,20 @@ private:
 
   // path name for persistent settings
   std::string m_settingsGroup;
+
+  // Basic representation of user settings, read/written on startup/close.
+  // TODO: this could be done more sophisticated, with a class using
+  // QDataStream and in/out stream operators for example. Keeping
+  // it simple for now
+  struct UserSettings {
+    std::string SCARFBasePath;
+    bool onCloseAskForConfirmation;
+
+    UserSettings()
+        : SCARFBasePath("/work/imat/runs/test/"),
+          onCloseAskForConfirmation(false) {}
+  };
+  UserSettings settings;
 };
 
 class TomoToolConfigTomoPy : public QDialog {

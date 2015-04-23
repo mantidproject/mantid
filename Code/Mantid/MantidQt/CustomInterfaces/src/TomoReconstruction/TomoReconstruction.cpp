@@ -223,7 +223,8 @@ void TomoReconstruction::doSetupGeneralWidgets() {
   connect(m_ui.pushButton_help, SIGNAL(released()), this, SLOT(openHelpWin()));
   // note connection to the parent window, otherwise you'll be left
   // with an empty frame window
-  connect(m_ui.pushButton_close, SIGNAL(released()), this->parent(), SLOT(close()));
+  connect(m_ui.pushButton_close, SIGNAL(released()), this->parent(),
+          SLOT(close()));
 }
 
 void TomoReconstruction::initLayout() {
@@ -325,25 +326,39 @@ void TomoReconstruction::SCARFLogoutClicked() {
  */
 void TomoReconstruction::readSettings() {
   // TODO: define what settings we'll have in the end.
-  QSettings sett;
-  sett.beginGroup(QString::fromStdString(m_settingsGroup));
+  QSettings qs;
+  qs.beginGroup(QString::fromStdString(m_settingsGroup));
 
-  QString SCARFBase =
-      sett.value("SCARF-base-path", "/work/imat/runs/test").toString();
-  sett.endGroup();
+  settings.SCARFBasePath =
+      qs.value("SCARF-base-path",
+               QString::fromStdString(settings.SCARFBasePath))
+          .toString()
+          .toStdString();
+  // WARNING: it's critical to keep 'false' as default value, otherwise
+  // scripted runs may have issues. The CI builds could get stuck when
+  // closing this interface.
+  settings.onCloseAskForConfirmation =
+      qs.value("on-close-ask-for-confirmation", false).toBool();
 
-  m_ui.lineEdit_SCARF_path->setText(SCARFBase);
+  restoreGeometry(qs.value("interface-win-geometry").toByteArray());
+  qs.endGroup();
+
+  m_ui.lineEdit_SCARF_path->setText(
+      QString::fromStdString(settings.SCARFBasePath));
 }
 
 /**
  * Save persistent settings. Qt based.
  */
 void TomoReconstruction::saveSettings() {
-  QSettings sett;
-  sett.beginGroup(QString::fromStdString(m_settingsGroup));
+  QSettings qs;
+  qs.beginGroup(QString::fromStdString(m_settingsGroup));
   QString s = m_ui.lineEdit_SCARF_path->text();
-  sett.setValue("SCARF-base-path", s);
-  sett.endGroup();
+  qs.setValue("SCARF-base-path", s);
+  qs.setValue("on-close-ask-for-confirmation",
+              settings.onCloseAskForConfirmation);
+  qs.setValue("interface-win-geometry", saveGeometry());
+  qs.endGroup();
 }
 
 /**
@@ -1652,29 +1667,35 @@ void TomoReconstruction::openHelpWin() {
 }
 
 void TomoReconstruction::closeEvent(QCloseEvent *event) {
-  QMessageBox msgBox;
-  msgBox.setWindowTitle("Close the tomographic reconstruction interface");
-  // If we used these, then we'd have layout issues
-  // msgBox.setStandardButtons(QMessageBox::No | QMessageBox::Yes);
-  // msgBox.setDefaultButton(QMessageBox::Yes);
-  msgBox.setIconPixmap(QPixmap(":/win/unknown.png"));
-  QCheckBox confirm_checkBox("Always ask for confirmation", &msgBox);
-  confirm_checkBox.setCheckState(Qt::Checked);
-  msgBox.layout()->addItem(new QSpacerItem(0, 0, QSizePolicy::Expanding));
-  msgBox.layout()->addWidget(&confirm_checkBox);
-  QPushButton *bYes = msgBox.addButton("Yes", QMessageBox::YesRole);
-  bYes->setIcon(style()->standardIcon(QStyle::SP_DialogYesButton));
-  // bYes->setFixedSize(100,100);
-  QPushButton *bNo = msgBox.addButton("No", QMessageBox::NoRole);
-  bNo->setIcon(style()->standardIcon(QStyle::SP_DialogNoButton));
-  msgBox.setDefaultButton(bNo);
-  msgBox.setText("You are about to close this interface");
-  msgBox.setInformativeText(
-      "If you close this interface you will need to log in again "
-      "and you might loose some of the current state. Jobs running on remote "
-      "compute resources will remain unaffected though. Are you sure?");
+  int answer = QMessageBox::AcceptRole;
 
-  int answer = msgBox.exec();
+  bool ask = settings.onCloseAskForConfirmation;
+  if (ask) {
+    QMessageBox msgBox;
+    msgBox.setWindowTitle("Close the tomographic reconstruction interface");
+    // with something like this, we'd have layout issues:
+    // msgBox.setStandardButtons(QMessageBox::No | QMessageBox::Yes);
+    // msgBox.setDefaultButton(QMessageBox::Yes);
+    msgBox.setIconPixmap(QPixmap(":/win/unknown.png"));
+    QCheckBox confirmCheckBox("Always ask for confirmation", &msgBox);
+    confirmCheckBox.setCheckState(Qt::Checked);
+    msgBox.layout()->addItem(new QSpacerItem(0, 0, QSizePolicy::Expanding));
+    msgBox.layout()->addWidget(&confirmCheckBox);
+    QPushButton *bYes = msgBox.addButton("Yes", QMessageBox::YesRole);
+    bYes->setIcon(style()->standardIcon(QStyle::SP_DialogYesButton));
+    QPushButton *bNo = msgBox.addButton("No", QMessageBox::NoRole);
+    bNo->setIcon(style()->standardIcon(QStyle::SP_DialogNoButton));
+    msgBox.setDefaultButton(bNo);
+    msgBox.setText("You are about to close this interface");
+    msgBox.setInformativeText(
+        "If you close this interface you will need to log in again "
+        "and you might loose some of the current state. Jobs running on remote "
+        "compute resources will remain unaffected though. Are you sure?");
+
+    settings.onCloseAskForConfirmation = confirmCheckBox.isChecked();
+    answer = msgBox.exec();
+  }
+
   if (answer == QMessageBox::AcceptRole) {
     saveSettings();
     event->accept();
