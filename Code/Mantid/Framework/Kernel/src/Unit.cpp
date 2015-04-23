@@ -6,7 +6,6 @@
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/UnitLabelTypes.h"
-#include <cmath>
 #include <cfloat>
 #include <limits>
 
@@ -1097,13 +1096,11 @@ void Time::init() {}
 double Time::singleToTOF(const double x) const {
   UNUSED_ARG(x);
   throw std::runtime_error("Time is not allowed to be convert to TOF. ");
-  return 0.0;
 }
 
 double Time::singleFromTOF(const double tof) const {
   UNUSED_ARG(tof);
   throw std::runtime_error("Time is not allwed to be converted from TOF. ");
-  return 0.0;
 }
 
 double Time::conversionTOFMax() const {
@@ -1133,13 +1130,11 @@ void Degrees::init() {}
 double Degrees::singleToTOF(const double x) const {
   UNUSED_ARG(x);
   throw std::runtime_error("Degrees is not allowed to be convert to TOF. ");
-  return 0.0;
 }
 
 double Degrees::singleFromTOF(const double tof) const {
   UNUSED_ARG(tof);
   throw std::runtime_error("Degrees is not allwed to be converted from TOF. ");
-  return 0.0;
 }
 
 double Degrees::conversionTOFMax() const {

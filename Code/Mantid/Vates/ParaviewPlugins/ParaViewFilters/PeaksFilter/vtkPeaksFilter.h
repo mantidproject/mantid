@@ -11,7 +11,7 @@ class VTK_EXPORT vtkPeaksFilter : public vtkUnstructuredGridAlgorithm
 {
 public:
   static vtkPeaksFilter *New();
-  vtkTypeMacro(vtkPeaksFilter, vtkUnstructuredGridAlgorithm);
+  vtkTypeMacro(vtkPeaksFilter, vtkUnstructuredGridAlgorithm)
   void PrintSelf(ostream& os, vtkIndent indent);
   void SetPeaksWorkspace(std::string peaksWorkspaceName);
   void SetRadiusNoShape(double radius);

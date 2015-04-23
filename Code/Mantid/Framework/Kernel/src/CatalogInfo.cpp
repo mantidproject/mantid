@@ -73,30 +73,24 @@ const std::string CatalogInfo::linuxPrefix() const { return (m_linuxPrefix); }
  * @return The path to the archive for the user's OS.
  */
 std::string CatalogInfo::transformArchivePath(std::string &path) {
+  std::string ret;
 #ifdef __linux__
   path = replacePrefix(path, catalogPrefix(), linuxPrefix());
   path = replaceAllOccurences(path, "\\", "/");
-  return path;
+  ret = path;
 #elif __APPLE__
   path = replacePrefix(path, catalogPrefix(), macPrefix());
   path = replaceAllOccurences(path, "\\", "/");
-  return path;
+  ret = path;
 #elif _WIN32
   // Check to see if path is a windows path.
-  std::size_t pos = path.find("\\");
-
-  if (pos != std::string::npos) {
-    // The path is a windows path, so return it.
-    return path;
-  } else {
+  if (path.find("\\") == std::string::npos) {
     path = replacePrefix(path, linuxPrefix(), windowsPrefix());
     path = replaceAllOccurences(path, "/", "\\");
-    return path;
   }
+  ret = path;
 #endif
-
-  // This is used to suppress compiler "return" warning.
-  return ("");
+  return ret;
 }
 
 /**

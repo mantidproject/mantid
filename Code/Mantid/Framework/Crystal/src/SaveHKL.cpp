@@ -1,21 +1,16 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidCrystal/SaveHKL.h"
-#include "MantidDataObjects/Peak.h"
-#include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
-#include "MantidKernel/Strings.h"
-#include "MantidKernel/System.h"
 #include "MantidKernel/Utils.h"
-#include "MantidKernel/V3D.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidCrystal/AnvredCorrection.h"
-#include <boost/math/special_functions/fpclassify.hpp>
 #include <fstream>
 #include "Poco/File.h"
 #include "boost/assign.hpp"
+#include <boost/math/special_functions/fpclassify.hpp>
 
 using namespace Mantid::Geometry;
 using namespace Mantid::DataObjects;
@@ -288,7 +283,8 @@ void SaveHKL::exec() {
     std::string bankName = p.getBankName();
     int nCols, nRows;
     sizeBanks(bankName, nCols, nRows);
-    if (widthBorder != EMPTY_INT() &&
+    // peaks with detectorID=-1 are from LoadHKL
+    if (widthBorder != EMPTY_INT() && p.getDetectorID() != -1 &&
         (p.getCol() < widthBorder || p.getRow() < widthBorder ||
          p.getCol() > (nCols - widthBorder) ||
          p.getRow() > (nRows - widthBorder))){

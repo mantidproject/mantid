@@ -160,7 +160,7 @@ class QtProxyObject(QtCore.QObject):
         """
         Reroute a method call to the the stored object via
         the threadsafe call mechanism. Essentially this guarantees
-        that when the method is called it wil be on the GUI thread
+        that when the method is called it will be on the GUI thread
         """
         callable = getattr(self._getHeldObject(), attr)
         return CrossThreadCall(callable)
@@ -627,6 +627,7 @@ class InstrumentWindow(MDIWindow):
         import warnings
         warnings.warn("InstrumentWindow.selectComponent has been deprecated. Use the tree tab selectComponentByName method instead.")
         QtProxyObject.__getattr__(self, "selectComponent")(name)
+
 
 #-----------------------------------------------------------------------------
 class SliceViewerWindowProxy(QtProxyObject):

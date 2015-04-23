@@ -1,3 +1,4 @@
+#pylint: disable=no-init,too-many-instance-attributes
 from mantid.simpleapi import *
 from mantid.api import PythonAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty, WorkspaceGroupProperty, \
                        PropertyMode, MatrixWorkspace
@@ -27,23 +28,21 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
 
 
     def PyInit(self):
-        self.declareProperty(MatrixWorkspaceProperty('SampleWorkspace', '',
-                             direction=Direction.Input),
+        self.declareProperty(MatrixWorkspaceProperty('SampleWorkspace', '', direction=Direction.Input),
                              doc='Name for the input Sample workspace.')
 
         self.declareProperty(WorkspaceGroupProperty('CorrectionsWorkspace', '',
-                             optional=PropertyMode.Optional, direction=Direction.Input),
+                                                    optional=PropertyMode.Optional, direction=Direction.Input),
                              doc='Name for the input Corrections workspace.')
 
         self.declareProperty(MatrixWorkspaceProperty('CanWorkspace', '',
-                             optional=PropertyMode.Optional, direction=Direction.Input),
+                                                     optional=PropertyMode.Optional, direction=Direction.Input),
                              doc='Name for the input Can workspace.')
 
         self.declareProperty(name='CanScaleFactor', defaultValue=1.0,
                              doc='Factor to scale the can data')
 
-        self.declareProperty(MatrixWorkspaceProperty('OutputWorkspace', '',
-                             direction=Direction.Output),
+        self.declareProperty(MatrixWorkspaceProperty('OutputWorkspace', '', direction=Direction.Output),
                              doc='The output corrections workspace.')
 
 

@@ -11,18 +11,6 @@
 #include "MantidAPI/ParamFunction.h"
 #include "MantidCrystal/PeakHKLErrors.h"
 #include "MantidCrystal/SCDPanelErrors.h"
-#include "MantidDataObjects/Peak.h"
-#include "MantidDataObjects/PeaksWorkspace.h"
-#include "MantidGeometry/IComponent.h"
-#include "MantidGeometry/Instrument/CompAssembly.h"
-#include "MantidGeometry/Instrument/Goniometer.h"
-#include "MantidGeometry/Instrument/ParameterMap.h"
-#include "MantidGeometry/IObjComponent.h"
-#include "MantidKernel/Matrix.h"
-#include "MantidKernel/Quat.h"
-#include "MantidKernel/V3D.h"
-#include <cctype>
-#include <string>
 
 using namespace Mantid::DataObjects;
 using namespace Mantid::API;

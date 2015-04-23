@@ -1,10 +1,7 @@
 #include "MantidKernel/FileValidator.h"
-#include "MantidKernel/Logger.h"
-#include <algorithm>
 #include <boost/algorithm/string/case_conv.hpp>
 #include <Poco/File.h>
 #include <Poco/Path.h>
-#include <iostream>
 
 namespace Mantid {
 namespace Kernel {

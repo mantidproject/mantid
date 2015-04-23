@@ -57,9 +57,6 @@ namespace CustomInterfaces
   {
     m_data = data;
     emit dataChanged();
-
-    setCorrectedData(MatrixWorkspace_const_sptr());
-    setFittedFunction(IFunction_const_sptr());
   }
 
   /**
@@ -104,69 +101,90 @@ namespace CustomInterfaces
 
   MatrixWorkspace_sptr ALCBaselineModellingModel::exportWorkspace()
   {
-    IAlgorithm_sptr clone = AlgorithmManager::Instance().create("CloneWorkspace");
-    clone->setChild(true);
-    clone->setProperty("InputWorkspace", boost::const_pointer_cast<MatrixWorkspace>(m_data));
-    clone->setProperty("OutputWorkspace", "__NotUsed");
-    clone->execute();
+    if ( m_data && m_fittedFunction && m_correctedData ) {
 
-    Workspace_sptr cloneResult = clone->getProperty("OutputWorkspace");
+      IAlgorithm_sptr clone = AlgorithmManager::Instance().create("CloneWorkspace");
+      clone->setChild(true);
+      clone->setProperty("InputWorkspace", boost::const_pointer_cast<MatrixWorkspace>(m_data));
+      clone->setProperty("OutputWorkspace", "__NotUsed");
+      clone->execute();
 
-    Workspace_sptr baseline = ALCHelper::createWsFromFunction(m_fittedFunction, m_data->readX(0));
+      Workspace_sptr cloneResult = clone->getProperty("OutputWorkspace");
 
-    IAlgorithm_sptr join1 = AlgorithmManager::Instance().create("ConjoinWorkspaces");
-    join1->setChild(true);
-    join1->setProperty("InputWorkspace1", cloneResult);
-    join1->setProperty("InputWorkspace2", baseline);
-    join1->setProperty("CheckOverlapping", false);
-    join1->execute();
+      Workspace_sptr baseline = ALCHelper::createWsFromFunction(m_fittedFunction, m_data->readX(0));
 
-    MatrixWorkspace_sptr join1Result = join1->getProperty("InputWorkspace1");
+      IAlgorithm_sptr join1 = AlgorithmManager::Instance().create("ConjoinWorkspaces");
+      join1->setChild(true);
+      join1->setProperty("InputWorkspace1", cloneResult);
+      join1->setProperty("InputWorkspace2", baseline);
+      join1->setProperty("CheckOverlapping", false);
+      join1->execute();
 
-    IAlgorithm_sptr join2 = AlgorithmManager::Instance().create("ConjoinWorkspaces");
-    join2->setChild(true);
-    join2->setProperty("InputWorkspace1", join1Result);
-    join2->setProperty("InputWorkspace2", boost::const_pointer_cast<MatrixWorkspace>(m_correctedData));
-    join2->setProperty("CheckOverlapping", false);
-    join2->execute();
+      MatrixWorkspace_sptr join1Result = join1->getProperty("InputWorkspace1");
 
-    MatrixWorkspace_sptr result = join2->getProperty("InputWorkspace1");
+      IAlgorithm_sptr join2 = AlgorithmManager::Instance().create("ConjoinWorkspaces");
+      join2->setChild(true);
+      join2->setProperty("InputWorkspace1", join1Result);
+      join2->setProperty("InputWorkspace2", boost::const_pointer_cast<MatrixWorkspace>(m_correctedData));
+      join2->setProperty("CheckOverlapping", false);
+      join2->execute();
 
-    TextAxis* yAxis = new TextAxis(result->getNumberHistograms());
-    yAxis->setLabel(0,"Data");
-    yAxis->setLabel(1,"Baseline");
-    yAxis->setLabel(2,"Corrected");
-    result->replaceAxis(1,yAxis);
+      MatrixWorkspace_sptr result = join2->getProperty("InputWorkspace1");
 
-    return result;
+      TextAxis* yAxis = new TextAxis(result->getNumberHistograms());
+      yAxis->setLabel(0,"Data");
+      yAxis->setLabel(1,"Baseline");
+      yAxis->setLabel(2,"Corrected");
+      result->replaceAxis(1,yAxis);
+
+      return result;
+
+    } else {
+    
+      return MatrixWorkspace_sptr();
+    }
   }
 
   ITableWorkspace_sptr ALCBaselineModellingModel::exportSections()
   {
-    ITableWorkspace_sptr table = WorkspaceFactory::Instance().createTable("TableWorkspace");
+    if ( !m_sections.empty() ) {
 
-    table->addColumn("double", "Start X");
-    table->addColumn("double", "End X");
+      ITableWorkspace_sptr table = WorkspaceFactory::Instance().createTable("TableWorkspace");
 
-    for(auto it = m_sections.begin(); it != m_sections.end(); ++it)
-    {
-      TableRow newRow = table->appendRow();
-      newRow << it->first << it->second;
+      table->addColumn("double", "Start X");
+      table->addColumn("double", "End X");
+
+      for(auto it = m_sections.begin(); it != m_sections.end(); ++it)
+      {
+        TableRow newRow = table->appendRow();
+        newRow << it->first << it->second;
+      }
+
+      return table;
+
+    } else {
+
+      return ITableWorkspace_sptr();
     }
-
-    return table;
   }
 
   ITableWorkspace_sptr ALCBaselineModellingModel::exportModel()
   {
-    ITableWorkspace_sptr table = WorkspaceFactory::Instance().createTable("TableWorkspace");
+    if ( m_fittedFunction ) {
 
-    table->addColumn("str", "Function");
+      ITableWorkspace_sptr table = WorkspaceFactory::Instance().createTable("TableWorkspace");
 
-    TableRow newRow = table->appendRow();
-    newRow << m_fittedFunction->asString();
+      table->addColumn("str", "Function");
 
-    return table;
+      TableRow newRow = table->appendRow();
+      newRow << m_fittedFunction->asString();
+
+      return table;
+
+    } else {
+      
+      return ITableWorkspace_sptr();
+    }
   }
 
   void ALCBaselineModellingModel::setCorrectedData(MatrixWorkspace_const_sptr data)

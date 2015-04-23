@@ -106,6 +106,7 @@ private:
   void runLoadMappingTable(DataObjects::Workspace2D_sptr);
   void runLoadLog(DataObjects::Workspace2D_sptr);
   void loadRunDetails(DataObjects::Workspace2D_sptr localWorkspace);
+  void addPeriodLog(DataObjects::Workspace2D_sptr localWorkspace, int64_t period);
 
   /// Loads dead time table for the detector
   void loadDeadTimes(Mantid::NeXus::NXRoot &root);

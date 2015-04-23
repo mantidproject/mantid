@@ -1,11 +1,8 @@
 #pylint: disable=invalid-name
-import datetime
 import math
 import os
 import re
 import sys
-import time
-import xml.dom.minidom
 
 from mantid.simpleapi import *
 from mantid.api import WorkspaceGroup, Workspace, ExperimentInfo
@@ -435,24 +432,24 @@ class ISISInstrument(BaseInstrument):
         # see if a second step size is defined. If not set the second value to the first for compatibility
         #logger.warning("Trying to find centre-finder-step-size2")
         try:
-           self.cen_find_step2 = float(self.definition.getNumberParameter('centre-finder-step-size2')[0])
+            self.cen_find_step2 = float(self.definition.getNumberParameter('centre-finder-step-size2')[0])
         except:
            #logger.warning("Failed to find centre-finder-step-size2")
-           self.cen_find_step2 = self.cen_find_step
+            self.cen_find_step2 = self.cen_find_step
 
         logger.warning("Trying to find beam-centre-scale-factor1")
         try:
-           self.beam_centre_scale_factor1 = float(self.definition.getNumberParameter('beam-centre-scale-factor1')[0])
+            self.beam_centre_scale_factor1 = float(self.definition.getNumberParameter('beam-centre-scale-factor1')[0])
         except:
-           logger.warning("Failed to find beam-centre-scale-factor1")
-           self.beam_centre_scale_factor1 = 1000.0
+            logger.warning("Failed to find beam-centre-scale-factor1")
+            self.beam_centre_scale_factor1 = 1000.0
 
         logger.warning("Trying to find beam-centre-scale-factor2")
         try:
-           self.beam_centre_scale_factor2 = float(self.definition.getNumberParameter('beam-centre-scale-factor2')[0])
+            self.beam_centre_scale_factor2 = float(self.definition.getNumberParameter('beam-centre-scale-factor2')[0])
         except:
-           logger.warning("Failed to find beam-centre-scale-factor2")
-           self.beam_centre_scale_factor2 = 1000.0
+            logger.warning("Failed to find beam-centre-scale-factor2")
+            self.beam_centre_scale_factor2 = 1000.0
 
         firstDetect = DetectorBank(self.definition, 'low-angle')
         #firstDetect.disable_y_and_rot_corrs()
@@ -924,14 +921,14 @@ class SANS2D(ISISInstrument):
         FRONT_DET_Z, FRONT_DET_X, FRONT_DET_ROT, REAR_DET_Z, REAR_DET_X = self.getDetValues(ws)
 
         # Deal with front detector
-        # 10/03/15 RKH need to add tilt of detector, in degrees, with respect to the horizontal or vertical of the detector plane 
+        # 10/03/15 RKH need to add tilt of detector, in degrees, with respect to the horizontal or vertical of the detector plane
         # this time we can rotate about the detector's own axis so can use RotateInstrumentComponent, ytilt rotates about x axis, xtilt rotates about z axis
         #
         if frontDet.y_tilt != 0.0:
             RotateInstrumentComponent(Workspace=ws,ComponentName= self.getDetector('front').name(), X = "1.", Y = "0.", Z = "0.", Angle = frontDet.y_tilt)
         if frontDet.x_tilt != 0.0:
             RotateInstrumentComponent(Workspace=ws,ComponentName= self.getDetector('front').name(), X = "0.", Y = "0.", Z = "1.", Angle = frontDet.x_tilt)
-        #		
+        #
         # 9/1/12  this all dates to Richard Heenan & Russell Taylor's original python development for SANS2d
     	# the rotation axis on the SANS2d front detector is actually set front_det_radius = 306mm behind the detector.
     	# Since RotateInstrumentComponent will only rotate about the centre of the detector, we have to to the rest here.
@@ -961,7 +958,7 @@ class SANS2D(ISISInstrument):
 
         # deal with rear detector
 
-        # 10/03/15 RKH need to add tilt of detector, in degrees, with respect to the horizontal or vertical of the detector plane 
+        # 10/03/15 RKH need to add tilt of detector, in degrees, with respect to the horizontal or vertical of the detector plane
         # Best to do the tilts first, while the detector is still centred on the z axis, ytilt rotates about x axis, xtilt rotates about z axis
         # NOTE the beam centre coordinates may change
         if rearDet.y_tilt != 0.0:
@@ -1382,7 +1379,7 @@ class LARMOR(ISISInstrument):
 
         # The angle value
         # Note that the x position gets converted from mm to m when read from the user file so we need to reverse this if X is now an angle
-        if(int(run_num) < 2217):
+        if int(run_num) < 2217:
             # Initial commisioning before run 2217 did not pay much attention to making sure the bench_rot value was meaningful
             xshift = -xbeam
             sanslog.notice("Setup move " + str(xshift*XSF) + " " + str(0.0) + " " + str(0.0))
@@ -1446,7 +1443,7 @@ class LARMOR(ISISInstrument):
             run_num = ws_ref.getRun().getLogData('run_number').value
         except:
             run_num = int(re.findall(r'\d+',str(ws_name))[-1])
-        if(int(run_num) >= 2217):
+        if int(run_num) >= 2217:
             try:
                 #logger.warning("Trying get_detector_log")
                 log = self.get_detector_log(ws_ref)

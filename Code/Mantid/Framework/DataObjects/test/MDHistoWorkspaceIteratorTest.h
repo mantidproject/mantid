@@ -8,14 +8,14 @@
 #include "MantidDataObjects/MDHistoWorkspaceIterator.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 #include <cxxtest/TestSuite.h>
-#include <iomanip>
-#include <iostream>
 #include "MantidKernel/VMD.h"
 #include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
 #include "MantidGeometry/MDGeometry/MDPlane.h"
 #include <boost/assign/list_of.hpp>
 #include <boost/function.hpp>
 #include <boost/bind.hpp>
+#include <boost/scoped_ptr.hpp>
+
 
 using namespace Mantid;
 using namespace Mantid::DataObjects;
@@ -67,9 +67,10 @@ public:
   void do_test_iterator(size_t nd, size_t numPoints)
   {
     MDHistoWorkspace_sptr ws = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, nd, 10);
-    for (size_t i = 0; i < numPoints; i++)
+    for (size_t i = 0; i < numPoints; i++) {
       ws->setSignalAt(i, double(i));
-    MDHistoWorkspaceIterator * it = new MDHistoWorkspaceIterator(ws);
+    }
+    boost::scoped_ptr<MDHistoWorkspaceIterator> it(new MDHistoWorkspaceIterator(ws));
     TSM_ASSERT( "This iterator is valid at the start.", it->valid());
     size_t i = 0;
 
@@ -90,10 +91,10 @@ public:
     {
       TS_ASSERT_DELTA( it->getNormalizedSignal(), double(i) / 1.0, 1e-5);
       TS_ASSERT_DELTA( it->getNormalizedError(), 1.0, 1e-5);
-      coord_t * vertexes;
       size_t numVertices;
-      vertexes = it->getVertexesArray(numVertices);
-      TS_ASSERT( vertexes);
+      coord_t *vertexes = it->getVertexesArray(numVertices);
+      TS_ASSERT(vertexes);
+      delete [] vertexes;
       TS_ASSERT_EQUALS( it->getNumEvents(), 1);
       TS_ASSERT_EQUALS( it->getInnerDetectorID(0), 0);
       TS_ASSERT_EQUALS( it->getInnerRunIndex(0), 0);
@@ -163,6 +164,8 @@ public:
     it->next();
     TS_ASSERT_EQUALS(it->getNormalizedSignal(), 30.);
     TS_ASSERT( !it->next());
+
+    delete it;
   }
 
   void test_iterator_2D_implicitFunction_thatExcludesTheStart()
@@ -192,6 +195,8 @@ public:
     TS_ASSERT_EQUALS(it->getNormalizedSignal(), 13.);
     it->next();
     // And so forth....
+
+    delete it;
   }
 
   void test_iterator_2D_implicitFunction_thatExcludesEverything()
@@ -206,6 +211,8 @@ public:
     MDHistoWorkspaceIterator * it = new MDHistoWorkspaceIterator(ws, function);
 
     TSM_ASSERT( "This iterator is not valid at the start.", !it->valid());
+
+    delete it;
   }
 
   /** Create several parallel iterators */
@@ -227,7 +234,7 @@ public:
     TS_ASSERT_EQUALS( it->getDataSize(), 33);
     TS_ASSERT_DELTA( it->getInnerPosition(0,0), 0.5, 1e-5);
     TS_ASSERT_DELTA( it->getInnerPosition(0,1), 0.5, 1e-5);
-
+    
     it = iterators[1];
     TS_ASSERT_DELTA( it->getSignal(), 33.0, 1e-5);
     TS_ASSERT_EQUALS( it->getDataSize(), 33);
@@ -239,7 +246,8 @@ public:
     TS_ASSERT_EQUALS( it->getDataSize(), 34);
     TS_ASSERT_DELTA( it->getInnerPosition(0,0), 6.5, 1e-5);
     TS_ASSERT_DELTA( it->getInnerPosition(0,1), 6.5, 1e-5);
-
+    
+    for(size_t i = 0; i < 3; ++i) delete iterators[i];
   }
 
   void test_predictable_steps()
@@ -254,6 +262,7 @@ public:
       expected = current + 1;
       histoIt->next();
     }
+    delete histoIt;
   }
 
   void test_skip_masked_detectors()
@@ -278,6 +287,8 @@ public:
     histoIt->next();
     TSM_ASSERT_EQUALS("The first index hit should be 2 since that is the first unmasked one", 5,
         histoIt->getLinearIndex());
+
+    delete histoIt;
   }
 
   //template<typename ContainerType, typename ElementType>
@@ -350,6 +361,7 @@ public:
     neighbourIndexes = findNeighbourMemberFunction(it);
     TSM_ASSERT( "Neighbour at index 9 is 8", doesContainIndex(neighbourIndexes, 8));
 
+    delete it;
   }
 
   void test_neighbours_1d_face_touching()
@@ -436,6 +448,8 @@ public:
     // Is on an edge
     TSM_ASSERT( "Neighbour at index 15 is 11", doesContainIndex(neighbourIndexes, 11));
     TSM_ASSERT( "Neighbour at index 15 is 14", doesContainIndex(neighbourIndexes, 14));
+
+    delete it;
   }
 
   void test_neighbours_2d_vertex_touching()
@@ -516,6 +530,8 @@ public:
     TSM_ASSERT( "Neighbour at index 15 is 10", doesContainIndex(neighbourIndexes, 10));
     TSM_ASSERT( "Neighbour at index 15 is 11", doesContainIndex(neighbourIndexes, 11));
     TSM_ASSERT( "Neighbour at index 15 is 14", doesContainIndex(neighbourIndexes, 14));
+
+    delete it;
   }
 
   void test_neighbours_3d_face_touching()
@@ -592,6 +608,7 @@ public:
       TS_ASSERT(doesContainIndex(neighbourIndexes, *i));
     }
 
+    delete it;
   }
 
   void test_neighbours_3d_vertex_touching()
@@ -673,6 +690,7 @@ public:
       TS_ASSERT(doesContainIndex(neighbourIndexes, *i));
     }
 
+    delete it;
   }
 
   void test_neighbours_1d_with_width()
@@ -730,6 +748,8 @@ public:
       TS_ASSERT_EQUALS(2, neighbourIndexes.size());
       TSM_ASSERT( "Neighbours at index 9 includes 8", doesContainIndex(neighbourIndexes, 8));
       TSM_ASSERT( "Neighbours at index 9 includes 7", doesContainIndex(neighbourIndexes, 7));
+      
+      delete it;
   }
 
   void test_neighbours_2d_vertex_touching_by_width()
@@ -808,6 +828,8 @@ public:
     TSM_ASSERT( "Neighbour at index is 11", doesContainIndex(neighbourIndexes, 11));
     TSM_ASSERT( "Neighbour at index is 13", doesContainIndex(neighbourIndexes, 13));
     TSM_ASSERT( "Neighbour at index is 14", doesContainIndex(neighbourIndexes, 14));
+
+    delete it;
   }
 
   void test_neighbours_2d_vertex_touching_by_width_vector()
@@ -884,6 +906,8 @@ public:
     TSM_ASSERT( "Neighbour at index is 11", doesContainIndex(neighbourIndexes, 11));
     TSM_ASSERT( "Neighbour at index is 13", doesContainIndex(neighbourIndexes, 13));
     TSM_ASSERT( "Neighbour at index is 14", doesContainIndex(neighbourIndexes, 14));
+
+    delete it;
   }
 
 
@@ -939,6 +963,8 @@ public:
     TS_ASSERT(doesContainIndex(neighbourIndexes, 24));
     TS_ASSERT(doesContainIndex(neighbourIndexes, 25));
     TS_ASSERT(doesContainIndex(neighbourIndexes, 26));
+
+    delete it;
   }
 
   void test_cache()
@@ -960,8 +986,120 @@ public:
       TSM_ASSERT_EQUALS("One cache item expected", 1, it->permutationCacheSize()); // Same item, no change to cache
       it->findNeighbourIndexesByWidth(5);
       TSM_ASSERT_EQUALS("Two cache entries expected", 2, it->permutationCacheSize());
+
+      delete it;
   }
 
+  void test_getBoxExtents_1d() {
+      const size_t nd = 1;
+      MDHistoWorkspace_sptr ws = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0 /*signal*/, nd, 3 /*3 bins*/); // Dimension length defaults to 10
+      MDHistoWorkspaceIterator * it = new MDHistoWorkspaceIterator(ws);
+
+      // At zeroth position
+      VecMDExtents extents = it->getBoxExtents();
+      TSM_ASSERT_EQUALS("Wrong number of extents pairs. This is 1D.", 1, extents.size());
+      TS_ASSERT_DELTA(extents[0].get<0>(), 0, 1e-4);
+      TS_ASSERT_DELTA(extents[0].get<1>(), 10.0 * 1.0/3.0, 1e-4);
+
+      // At middle position
+      it->next();
+      extents = it->getBoxExtents();
+      TS_ASSERT_DELTA(extents[0].get<0>(), 10.0 * 1.0/3.0, 1e-4);
+      TS_ASSERT_DELTA(extents[0].get<1>(), 10.0 * 2.0/3.0, 1e-4);
+
+      // At end position
+      it->next();
+      extents = it->getBoxExtents();
+      TS_ASSERT_DELTA(extents[0].get<0>(), 10.0 * 2.0/3.0, 1e-4);
+      TS_ASSERT_DELTA(extents[0].get<1>(), 10.0 * 3.0/3.0, 1e-4);
+
+      delete it;
+  }
+
+  void test_getBoxExtents_3d() {
+      MDHistoWorkspace_sptr ws = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0 /*signal*/, 3 /*nd*/, 4 /*nbins per dim*/, 6 /*max*/, 1.0 /*error sq*/);
+      MDHistoWorkspaceIterator * it = new MDHistoWorkspaceIterator(ws);
+
+      // At zeroth position
+      VecMDExtents extents = it->getBoxExtents();
+      TSM_ASSERT_EQUALS("Wrong number of extents pairs. This is 3D.", 3, extents.size());
+      TS_ASSERT_DELTA(extents[0].get<0>(), 0, 1e-4);
+      TS_ASSERT_DELTA(extents[0].get<1>(), 6.0/4.0, 1e-4);
+      TS_ASSERT_DELTA(extents[1].get<0>(), 0, 1e-4);
+      TS_ASSERT_DELTA(extents[1].get<1>(), 6.0/4.0, 1e-4);
+      TS_ASSERT_DELTA(extents[2].get<0>(), 0, 1e-4);
+      TS_ASSERT_DELTA(extents[2].get<1>(), 6.0/4.0, 1e-4);
+
+      // At last position
+      it->jumpTo((4*4*4) - 1);
+      extents = it->getBoxExtents();
+      TSM_ASSERT_EQUALS("Wrong number of extents pairs. This is 3D.", 3, extents.size());
+      TS_ASSERT_DELTA(extents[0].get<0>(), 3.0/4 * 6.0, 1e-4);
+      TS_ASSERT_DELTA(extents[0].get<1>(), 4.0/4 * 6.0, 1e-4);
+      TS_ASSERT_DELTA(extents[1].get<0>(), 3.0/4 * 6.0, 1e-4);
+      TS_ASSERT_DELTA(extents[1].get<1>(), 4.0/4 * 6.0, 1e-4);
+      TS_ASSERT_DELTA(extents[2].get<0>(), 3.0/4 * 6.0, 1e-4);
+      TS_ASSERT_DELTA(extents[2].get<1>(), 4.0/4 * 6.0, 1e-4);
+
+      delete it;
+  }
+
+  void test_jump_to_nearest_1d() {
+
+      MDHistoWorkspace_sptr wsIn = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0 /*signal*/, 1 /*nd*/, 4 /*nbins per dim*/, 12 /*max*/);
+      MDHistoWorkspace_sptr wsOut = MDEventsTestHelper::makeFakeMDHistoWorkspace(0.0 /*signal*/, 1 /*nd*/, 3 /*nbins per dim*/, 12 /*max*/);
+
+      /*
+
+                           input
+      (x = 0) *|--------|--------|--------|--------|* (x = 12)
+               0        3        6        9        12 (x values)
+               0        1        2        3        4 (iterator indexes)
+                    x        x        x        x     (centres x)
+                    |        |        |        |
+                   1.5      4.5      7.5      10.5
+
+                            output
+      (x = 0) *|----------|------------|-----------|* (x = 12)
+               0          4            8           12 (x values)
+               0          1            2           3 (iterator indexes)
+
+
+      */
+
+      MDHistoWorkspaceIterator * itIn = new MDHistoWorkspaceIterator(wsIn);
+      MDHistoWorkspaceIterator * itOut = new MDHistoWorkspaceIterator(wsOut);
+
+      // First position
+      TS_ASSERT_EQUALS(itIn->getLinearIndex(), 0);
+      auto diff = itOut->jumpToNearest(itIn->getCenter());
+      TS_ASSERT_EQUALS(itOut->getLinearIndex(), 0); // 1.5 closer to 0 than 4.
+      TS_ASSERT_DELTA(1.5, diff, 1e-4);
+
+      // Second position
+      itIn->next();
+      TS_ASSERT_EQUALS(itIn->getLinearIndex(), 1);
+      diff = itOut->jumpToNearest(itIn->getCenter());
+      TS_ASSERT_EQUALS(itOut->getLinearIndex(), 1); // 4.5 closer to 4 than 5
+      TS_ASSERT_DELTA(0.5, diff, 1e-4);
+
+      // Third position
+      itIn->next();
+      TS_ASSERT_EQUALS(itIn->getLinearIndex(), 2);
+      diff = itOut->jumpToNearest(itIn->getCenter());
+      TS_ASSERT_EQUALS(itOut->getLinearIndex(), 2); // 7.5 is closer to 8 than 4
+      TS_ASSERT_DELTA(0.5, diff, 1e-4);
+
+      // Fourth position
+      itIn->next();
+      TS_ASSERT_EQUALS(itIn->getLinearIndex(), 3);
+      diff = itOut->jumpToNearest(itIn->getCenter());
+      TS_ASSERT_EQUALS(itOut->getLinearIndex(), 3); // 10.5 closer to 12 than 8
+      TS_ASSERT_DELTA(1.5, diff, 1e-4);
+
+      delete itIn;
+      delete itOut;
+  }
 
 };
 
@@ -1001,6 +1139,7 @@ public:
       UNUSED_ARG(sig);
       UNUSED_ARG(err);
     } while (it->next());
+    delete it;
   }
 
   /** ~Two million iterations */
@@ -1017,6 +1156,7 @@ public:
       UNUSED_ARG(sig);
       UNUSED_ARG(err);
     } while (it->next());
+    delete it;
   }
 
   /** ~Two million iterations */
@@ -1031,6 +1171,7 @@ public:
       UNUSED_ARG(sig);
       UNUSED_ARG(err);
     } while (it->next());
+    delete it;
   }
 
   /** Use jumpTo() */
@@ -1047,6 +1188,7 @@ public:
       UNUSED_ARG(sig);
       UNUSED_ARG(err);
     }
+    delete it;
   }
 
   void test_masked_get_vertexes_call_throws()

@@ -48,6 +48,7 @@ set ( SRC_FILES
 	src/Integrate3DEvents.cpp
 	src/IntegrateEllipsoids.cpp
 	src/IntegrateFlux.cpp
+	src/IntegrateMDHistoWorkspace.cpp
 	src/IntegratePeaksMD.cpp
 	src/IntegratePeaksMD2.cpp
 	src/InvalidParameter.cpp
@@ -165,6 +166,7 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/Integrate3DEvents.h
 	inc/MantidMDAlgorithms/IntegrateEllipsoids.h
 	inc/MantidMDAlgorithms/IntegrateFlux.h
+	inc/MantidMDAlgorithms/IntegrateMDHistoWorkspace.h
 	inc/MantidMDAlgorithms/IntegratePeaksMD.h
 	inc/MantidMDAlgorithms/IntegratePeaksMD2.h
 	inc/MantidMDAlgorithms/InvalidParameter.h
@@ -279,6 +281,7 @@ set ( TEST_FILES
 	Integrate3DEventsTest.h
 	IntegrateEllipsoidsTest.h
 	IntegrateFluxTest.h
+	IntegrateMDHistoWorkspaceTest.h
 	IntegratePeaksMD2Test.h
 	IntegratePeaksMDTest.h
 	InvalidParameterParserTest.h

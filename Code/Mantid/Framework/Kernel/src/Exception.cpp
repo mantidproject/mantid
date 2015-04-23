@@ -1,6 +1,5 @@
 #include <iostream>
 #include <sstream>
-#include <string>
 #include "MantidKernel/Exception.h"
 
 namespace Mantid {
