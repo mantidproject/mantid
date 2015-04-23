@@ -103,7 +103,7 @@ private:
   /// Check input properties
   void checkProperties (size_t &is, size_t &ie);
   /// Clear previous results
-  void clearResults ();
+  void clearResultsFromTo (size_t is, size_t ie);
 
   /// Stores base name shared by all runs
   static std::string g_filenameBase;

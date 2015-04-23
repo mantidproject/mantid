@@ -253,6 +253,9 @@ void PlotAsymmetryByLogValue::checkProperties (size_t &is, size_t &ie) {
   parseRunNames( firstFN, lastFN, filenameBase, filenameExt, filenameZeros);
   is = atoi(firstFN.c_str()); // starting run number
   ie = atoi(lastFN.c_str());  // last run number
+  size_t isOld = g_redX.begin()->first; // Old first run number
+  size_t ieOld = g_redX.rbegin()->first; // Old last run number
+
 
   // Check if any property has changed
   if ( g_logName != logName ||
@@ -269,7 +272,7 @@ void PlotAsymmetryByLogValue::checkProperties (size_t &is, size_t &ie) {
     g_filenameZeros != filenameZeros) {
 
       // If so, clear previous results
-      clearResults();
+      clearResultsFromTo(isOld,ieOld);
   }
 
   g_logName = logName;
@@ -292,21 +295,22 @@ void PlotAsymmetryByLogValue::checkProperties (size_t &is, size_t &ie) {
 
 /**  Clears any possible result from previous call
 */
-void PlotAsymmetryByLogValue::clearResults() {
+void PlotAsymmetryByLogValue::clearResultsFromTo(size_t is, size_t ie) {
 
-  g_redX.clear();
-  g_redY.clear();
-  g_redE.clear();
-  g_greenX.clear();
-  g_greenY.clear();
-  g_greenE.clear();
-  g_sumX.clear();
-  g_sumY.clear();
-  g_sumE.clear();
-  g_diffX.clear();
-  g_diffY.clear();
-  g_diffE.clear();
-
+  for (size_t i=is; i<=ie; i++) {
+    g_redX.erase(i);
+    g_redY.erase(i);
+    g_redE.erase(i);
+    g_greenX.erase(i);
+    g_greenY.erase(i);
+    g_greenE.erase(i);
+    g_sumX.erase(i);
+    g_sumY.erase(i);
+    g_sumE.erase(i);
+    g_diffX.erase(i);
+    g_diffY.erase(i);
+    g_diffE.erase(i);
+  }
 
 }
 
