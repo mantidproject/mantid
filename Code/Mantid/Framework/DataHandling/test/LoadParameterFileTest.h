@@ -31,7 +31,7 @@ public:
     // Create workspace wsName
     load_IDF2(); 
     TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName));
-    ParameterMap& paramMap = output->instrumentParameters();
+    const ParameterMap& paramMap = output->instrumentParameters();
     std::string descr = paramMap.getDescription("nickel-holder","fjols");
     TS_ASSERT_EQUALS(descr,"test fjols description.");
 
@@ -49,7 +49,6 @@ public:
     // Get back the saved workspace
     TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName));
 
-    paramMap = output->instrumentParameters();
     boost::shared_ptr<const Instrument> i = output->getInstrument();
     boost::shared_ptr<const IDetector> ptrDet = i->getDetector(1008);
     TS_ASSERT_EQUALS( ptrDet->getID(), 1008);
@@ -110,11 +109,15 @@ public:
       "  <parameter name=\"fjols-test-paramfile\"> <value val=\"2010.0\" /> </parameter>"
       " </component-link>"
       " <component-link name=\"IDF_for_UNIT_TESTING2.xml/combined translation6\" >"
-      "  <parameter name=\"fjols-test-paramfile\"> <value val=\"52.0\" /> </parameter>"
+      "  <parameter name=\"fjols-test-paramfile\"> <value val=\"52.0\" />"
+      "  <description is = \"test description2. Full test description2.\"/>"
+      "</parameter>"
       "	</component-link>"
       " <component-link id=\"1301\" >"
       "  <parameter name=\"testDouble\"> <value val=\"27.0\" /> </parameter>"
-      "  <parameter name=\"testString\" type=\"string\"> <value val=\"goodbye world\" /> </parameter>"
+      "  <parameter name=\"testString\" type=\"string\"> <value val=\"goodbye world\" />"
+      "  <description is = \"its test goodbye world.\"/>"
+      "</parameter>"
       "	</component-link>"
       "</parameter-file>";
 
@@ -132,7 +135,7 @@ public:
     MatrixWorkspace_sptr output;
     TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName));
 
-    ParameterMap& paramMap = output->instrumentParameters();
+    const ParameterMap& paramMap = output->instrumentParameters();
     boost::shared_ptr<const Instrument> i = output->getInstrument();
     boost::shared_ptr<const IDetector> ptrDet = i->getDetector(1008);
     TS_ASSERT_EQUALS( ptrDet->getID(), 1008);
@@ -143,6 +146,9 @@ public:
     TS_ASSERT_DELTA( param->value<double>(), 77.0, 0.0001);
     param = paramMap.get(&(*ptrDet), "fjols-test-paramfile");
     TS_ASSERT_DELTA( param->value<double>(), 52.0, 0.0001);
+    std::string descr = param->getDescription();
+    TS_ASSERT_EQUALS(descr,"test description2. Full test description2.");
+
 
     ptrDet = i->getDetector(1301);
     TS_ASSERT_EQUALS( ptrDet->getID(), 1301);
@@ -150,6 +156,12 @@ public:
     param = paramMap.get(ptrDet.get(), "testDouble");
     TS_ASSERT_DELTA( param->value<double>(), 27.0, 0.0001);
     TS_ASSERT_EQUALS( paramMap.getString(ptrDet.get(), "testString"), "goodbye world");
+
+    param = paramMap.get(ptrDet.get(), "testString");
+    TS_ASSERT_EQUALS(param->getTooltip(),"its test goodbye world.");
+    TS_ASSERT_EQUALS(param->getDescription(),"its test goodbye world.");
+    TS_ASSERT_EQUALS(paramMap.getDescription("pixel","testString"),"its test goodbye world.");
+
 
     std::vector<double> dummy = paramMap.getDouble("nickel-holder", "klovn");
     TS_ASSERT_DELTA( dummy[0], 1.0, 0.0001);
