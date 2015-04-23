@@ -10,17 +10,19 @@ Description
 -----------
 
 Save one or more workspaces (of type :ref:`Workspace2D <Workspace2D>`)
-into a NeXus NXtomo file (NeXus application definition format). This
-algorithm has been designed to save workspaces such as those
+into a NeXus NXtomo file (NeXus application definition format). When
+the input workspace given is a :ref:`Workspace2D <Workspace2D>`, that
+single workspace is written to the output NXTomo file. When the input
+workspace is a :ref:`WorkspaceGroup <WorkspaceGroup>` (as LoadFITS
+produces), all the :ref:`Workspace2D <Workspace2D>` workspaces
+included in the group will be written to the output file.
+
+This algorithm has been designed to save workspaces such as those
 containing data from FITS images that the algorithm
-:ref:`algm-LoadFITS` produces. Different workspaces may not be saved
-properly (it may not make sense to save them into NXTomo files) or may
-produce errors in this algorithm. When the input workspace given is a
-:ref:`Workspace2D <Workspace2D>`, that single workspace is written to
-the output NXTomo file. When the input workspace is a
-:ref:`WorkspaceGropu <WorkspaceGroup>` (as LoadFITS produces), all the
-:ref:`Workspace2D <Workspace2D>` workspaces included in the group will
-be written to the output file.
+:ref:`algm-LoadFITS` produces. Workspaces with a different structure
+and/or without the logs included in FITS image workspaces may not be
+saved properly (it may not make sense to save them into NXTomo files)
+or may produce errors in this algorithm.
 
 Depending on the value given to the property *OverwriteFile* it will
 create a new NXTomo file and add into it the data from the input

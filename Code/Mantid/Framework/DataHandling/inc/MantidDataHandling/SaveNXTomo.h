@@ -65,7 +65,7 @@ public:
 
   /// Algorithm's category for identification
   virtual const std::string category() const {
-    return "DataHandling\\Nexus;DataHandling\\Tomo;Diffraction";
+    return "DataHandling\\Nexus;DataHandling\\Tomography;Diffraction";
   }
 
 private:
