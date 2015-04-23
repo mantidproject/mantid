@@ -130,11 +130,11 @@ The following example shows an example for refinement of lattice parameters usin
                                        CompoundWorkspaces = "si_peaks")
 
     # Only consider the first 8 peaks
-    DeleteTableRows("indexed_si_peaks", "8-30")
+    DeleteTableRows("peaks_refined_6904_indexed_si_peaks", "8-30")
 
     # Fit a unit cell.
     PoldiFitPeaks2D(InputWorkspace="truncated_data_6904",
-                             PoldiPeakWorkspace="indexed_si_peaks",
+                             PoldiPeakWorkspace="peaks_refined_6904_indexed_si_peaks",
                              OutputWorkspace="fitted_6904",
                              PawleyFit = True,
                              InitialCell = "5.431 5.431 5.431 90 90 90",

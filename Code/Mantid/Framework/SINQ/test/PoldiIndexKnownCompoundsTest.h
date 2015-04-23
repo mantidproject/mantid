@@ -73,7 +73,7 @@ public:
         // Table with peaks that can be attributed to Si
         ITableWorkspace_sptr tableSi = boost::dynamic_pointer_cast<ITableWorkspace>(indexedSi);
         TS_ASSERT(tableSi);
-        TS_ASSERT_EQUALS(tableSi->getName(), "Indexed_Si");
+        TS_ASSERT_EQUALS(tableSi->getName(), "measured_SI_indexed_Si");
         TS_ASSERT_EQUALS(tableSi->rowCount(), 4);
 
         // Make sure unit cell and point group is carried over from compound ws
@@ -89,7 +89,7 @@ public:
         // Table with peaks that can be attributed to Si
         ITableWorkspace_sptr tableUnindexed = boost::dynamic_pointer_cast<ITableWorkspace>(unindexed);
         TS_ASSERT(tableUnindexed);
-        TS_ASSERT_EQUALS(tableUnindexed->getName(), "Unindexed_measured_SI");
+        TS_ASSERT_EQUALS(tableUnindexed->getName(), "measured_SI_unindexed");
         TS_ASSERT_EQUALS(tableUnindexed->rowCount(), 0);
 
         AnalysisDataService::Instance().remove(outWSName);
