@@ -269,19 +269,7 @@ void PlotAsymmetryByLogValue::checkProperties (size_t &is, size_t &ie) {
     g_filenameZeros != filenameZeros) {
 
       // If so, clear previous results
-    g_redX.clear();
-    g_redY.clear();
-    g_redE.clear();
-    g_greenX.clear();
-    g_greenY.clear();
-    g_greenE.clear();
-    g_sumX.clear();
-    g_sumY.clear();
-    g_sumE.clear();
-    g_diffX.clear();
-    g_diffY.clear();
-    g_diffE.clear();
-
+      clearResults();
   }
 
   g_logName = logName;
@@ -298,6 +286,26 @@ void PlotAsymmetryByLogValue::checkProperties (size_t &is, size_t &ie) {
   g_filenameBase = filenameBase;
   g_filenameExt = filenameExt;
   g_filenameZeros = filenameZeros;
+
+
+}
+
+/**  Clears any possible result from previous call
+*/
+void PlotAsymmetryByLogValue::clearResults() {
+
+  g_redX.clear();
+  g_redY.clear();
+  g_redE.clear();
+  g_greenX.clear();
+  g_greenY.clear();
+  g_greenE.clear();
+  g_sumX.clear();
+  g_sumY.clear();
+  g_sumE.clear();
+  g_diffX.clear();
+  g_diffY.clear();
+  g_diffE.clear();
 
 
 }

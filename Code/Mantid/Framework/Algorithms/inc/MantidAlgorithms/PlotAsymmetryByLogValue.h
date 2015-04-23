@@ -102,6 +102,8 @@ private:
   void populateOutputWorkspace (API::MatrixWorkspace_sptr &outWS, int nplots);
   /// Check input properties
   void checkProperties (size_t &is, size_t &ie);
+  /// Clear previous results
+  void clearResults ();
 
   /// Stores base name shared by all runs
   static std::string g_filenameBase;
