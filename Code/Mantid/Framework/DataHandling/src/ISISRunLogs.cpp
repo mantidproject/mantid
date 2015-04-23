@@ -86,5 +86,14 @@ void ISISRunLogs::addPeriodLogs(const int period, API::Run &exptRun) {
   }
 }
 
+/**
+ * Add the period log to a run.
+ * @param period :: A period number.
+ * @param exptRun :: The run to add the log to.
+ */
+void ISISRunLogs::addPeriodLog(const int period, API::Run &exptRun) {
+  exptRun.addLogData(m_logParser->createPeriodLog(period));
+}
+
 } // namespace DataHandling
 } // namespace Mantid
