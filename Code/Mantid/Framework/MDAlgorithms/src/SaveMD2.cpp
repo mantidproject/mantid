@@ -134,19 +134,20 @@ void SaveMD2::doSaveHisto(Mantid::DataObjects::MDHistoWorkspace_sptr ws) {
 
   // Save each axis dimension as an array
   std::string axes_label;
-  for (size_t d=0; d < numDims; d++) {
+  for (size_t d = 0; d < numDims; d++) {
     std::vector<double> axis;
     IMDDimension_const_sptr dim = ws->getDimension(d);
-    for (size_t n=0; n <= dim->getNBins(); n++)
+    for (size_t n = 0; n <= dim->getNBins(); n++)
       axis.push_back(dim->getX(n));
-    file->makeData(dim->getDimensionId(), ::NeXus::FLOAT64, static_cast<int>(dim->getNBins()), true);
+    file->makeData(dim->getDimensionId(), ::NeXus::FLOAT64,
+                   static_cast<int>(dim->getNBins()), true);
     file->putData(axis);
     file->putAttr("units", std::string(dim->getUnits()));
     file->putAttr("long_name", std::string(dim->getName()));
     file->closeData();
-    if (d !=0)
-      axes_label.insert(0,":");
-    axes_label.insert(0,dim->getDimensionId());
+    if (d != 0)
+      axes_label.insert(0, ":");
+    axes_label.insert(0, dim->getDimensionId());
   }
 
   // Write out the affine matrices
@@ -171,8 +172,8 @@ void SaveMD2::doSaveHisto(Mantid::DataObjects::MDHistoWorkspace_sptr ws) {
 
   file->makeData("signal", ::NeXus::FLOAT64, size, true);
   file->putData(ws->getSignalArray());
-  file->putAttr("signal",1);
-  file->putAttr("axes",axes_label);
+  file->putAttr("signal", 1);
+  file->putAttr("axes", axes_label);
   file->closeData();
 
   file->makeData("errors_squared", ::NeXus::FLOAT64, size, true);
@@ -205,11 +206,13 @@ void SaveMD2::exec() {
 
   if (eventWS) {
     // If event workspace use SaveMD version 1.
-    IAlgorithm_sptr saveMDv1 = createChildAlgorithm("SaveMD",-1,-1,true,1);
-    saveMDv1->setProperty<IMDWorkspace_sptr>("InputWorkspace",ws);
-    saveMDv1->setProperty<std::string>("Filename",getProperty("Filename"));
-    saveMDv1->setProperty<bool>("UpdateFileBackEnd",getProperty("UpdateFileBackEnd"));
-    saveMDv1->setProperty<bool>("MakeFileBacked",getProperty("MakeFileBacked"));
+    IAlgorithm_sptr saveMDv1 = createChildAlgorithm("SaveMD", -1, -1, true, 1);
+    saveMDv1->setProperty<IMDWorkspace_sptr>("InputWorkspace", ws);
+    saveMDv1->setProperty<std::string>("Filename", getProperty("Filename"));
+    saveMDv1->setProperty<bool>("UpdateFileBackEnd",
+                                getProperty("UpdateFileBackEnd"));
+    saveMDv1->setProperty<bool>("MakeFileBacked",
+                                getProperty("MakeFileBacked"));
     saveMDv1->execute();
   } else if (histoWS) {
     this->doSaveHisto(histoWS);
