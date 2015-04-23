@@ -102,6 +102,8 @@ std::string PlotAsymmetryByLogValue::g_dtcFile;
 std::string PlotAsymmetryByLogValue::g_filenameBase;
 std::string PlotAsymmetryByLogValue::g_filenameExt;
 int PlotAsymmetryByLogValue::g_filenameZeros = 0;
+double PlotAsymmetryByLogValue::g_minTime = EMPTY_DBL();
+double PlotAsymmetryByLogValue::g_maxTime = EMPTY_DBL();
 
 /** Initialisation method. Declares properties to be used in algorithm.
 *
@@ -242,6 +244,9 @@ void PlotAsymmetryByLogValue::checkProperties (size_t &is, size_t &ie) {
   // Get green and red periods
   int red = getProperty("Red");
   int green = getProperty("Green");
+  // Get time min and time max
+  double minTime = getProperty("TimeMin");
+  double maxTime = getProperty("TimeMax");
   // Get type of dead-time corrections
   std::string dtcType = getPropertyValue("DeadTimeCorrType");
   std::string dtcFile = getPropertyValue("DeadTimeCorrFile");
@@ -275,7 +280,9 @@ void PlotAsymmetryByLogValue::checkProperties (size_t &is, size_t &ie) {
       g_dtcFile != dtcFile ||
       g_filenameBase != filenameBase ||
       g_filenameExt != filenameExt ||
-      g_filenameZeros != filenameZeros) {
+      g_filenameZeros != filenameZeros ||
+      g_minTime != minTime ||
+      g_maxTime != maxTime) {
 
         // If so, clear previous results
         clearResultsFromTo(isOld,ieOld);
@@ -320,6 +327,8 @@ void PlotAsymmetryByLogValue::checkProperties (size_t &is, size_t &ie) {
   g_filenameBase = filenameBase;
   g_filenameExt = filenameExt;
   g_filenameZeros = filenameZeros;
+  g_minTime = minTime;
+  g_maxTime = maxTime;
 
 }
 

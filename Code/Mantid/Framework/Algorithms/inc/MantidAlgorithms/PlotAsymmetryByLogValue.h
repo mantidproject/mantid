@@ -150,6 +150,10 @@ private:
   static std::string g_logFunc;
   // Type of computation: integral or differential
   static std::string g_stype;
+  // Minimum time for the analysis
+  static double g_minTime;
+  // Maximum time for the analysis
+  static double g_maxTime;
 };
 
 } // namespace Algorithm
