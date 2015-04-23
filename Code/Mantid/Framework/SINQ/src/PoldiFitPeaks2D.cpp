@@ -34,6 +34,7 @@ DECLARE_ALGORITHM(PoldiFitPeaks2D)
 using namespace API;
 using namespace Kernel;
 using namespace DataObjects;
+using namespace Geometry;
 
 /** Constructor
  */
@@ -65,11 +66,6 @@ std::map<std::string, std::string> PoldiFitPeaks2D::validateInputs() {
   bool isPawleyFit = getProperty("PawleyFit");
 
   if (isPawleyFit) {
-    Property *cellProperty = getPointerToProperty("InitialCell");
-    if (cellProperty->isDefault()) {
-      errorMap["InitialCell"] = "Initial cell must be given for PawleyFit.";
-    }
-
     Property *refinedCellParameters =
         getPointerToProperty("RefinedCellParameters");
     if (refinedCellParameters->isDefault()) {
@@ -97,30 +93,10 @@ void PoldiFitPeaks2D::init() {
                   "Profile function to use for integrating the peak profiles "
                   "before calculating the spectrum.");
 
-  declareProperty("PawleyFit", false, "Instead of refining individual peaks, "
-                                      "refine a unit cell. Peaks must be "
-                                      "indexed, an initial cell must be "
-                                      "provided, as well as a crystal system.");
-  declareProperty("InitialCell", "", "Initial unit cell parameters as 6 "
-                                     "space-separated numbers. Only used when "
-                                     "PawleyFit is checked.");
-
-  std::vector<std::string> crystalSystems;
-  crystalSystems.push_back("Cubic");
-  crystalSystems.push_back("Tetragonal");
-  crystalSystems.push_back("Hexagonal");
-  crystalSystems.push_back("Trigonal");
-  crystalSystems.push_back("Orthorhombic");
-  crystalSystems.push_back("Monoclinic");
-  crystalSystems.push_back("Triclinic");
-
-  auto crystalSystemValidator =
-      boost::make_shared<StringListValidator>(crystalSystems);
-
-  declareProperty("CrystalSystem", "Cubic", crystalSystemValidator,
-                  "Crystal system to use for constraining "
-                  "unit cell parameters. Only used when "
-                  "PawleyFit is checked.");
+  declareProperty("PawleyFit", false,
+                  "Instead of refining individual peaks, "
+                  "refine a unit cell. Peaks must be "
+                  "indexed using PoldiIndexKnownCompounds.");
 
   declareProperty("FitConstantBackground", true,
                   "Add a constant background term to the fit.");
@@ -451,12 +427,21 @@ Poldi2DFunction_sptr PoldiFitPeaks2D::getFunctionPawley(
       poldiPawleyFunction->getPawleyFunction();
   pawleyFunction->setProfileFunction(profileFunctionName);
 
-  std::string crystalSystem = getProperty("CrystalSystem");
+  // Extract crystal system from peak collection
+  PointGroup_sptr pointGroup = peakCollection->pointGroup();
+  if (!pointGroup) {
+    throw std::invalid_argument("Can not initialize pawley function properly - "
+                                "peaks do not have point group.");
+  }
+
+  std::string crystalSystem =
+      getCrystalSystemAsString(pointGroup->crystalSystem());
   pawleyFunction->setCrystalSystem(crystalSystem);
 
-  std::string initialCell = getProperty("InitialCell");
-  pawleyFunction->setUnitCell(
-      getRefinedStartingCell(initialCell, crystalSystem, peakCollection));
+  UnitCell cell = peakCollection->unitCell();
+  // Extract unit cell from peak collection
+  pawleyFunction->setUnitCell(getRefinedStartingCell(
+      unitCellToStr(cell), crystalSystem, peakCollection));
 
   IPeakFunction_sptr pFun = boost::dynamic_pointer_cast<IPeakFunction>(
       FunctionFactory::Instance().createFunction(profileFunctionName));
@@ -512,8 +497,8 @@ std::string PoldiFitPeaks2D::getRefinedStartingCell(
     PoldiPeak_sptr peak = clone->peak(i);
 
     // If there are unindexed peaks, don't refine, just return the initial cell
-    if(peak->hkl() == MillerIndices()) {
-        return initialCell;
+    if (peak->hkl() == MillerIndices()) {
+      return initialCell;
     }
 
     peak->setD(UncertainValue(peak->d().value()));
@@ -947,6 +932,9 @@ PoldiPeakCollection_sptr PoldiFitPeaks2D::getIntegratedPeakCollection(
       boost::make_shared<PoldiPeakCollection>(PoldiPeakCollection::Integral);
   integratedPeakCollection->setProfileFunctionName(profileFunctionName);
 
+  // Preserve unit cell, point group
+  assignCrystalData(integratedPeakCollection, rawPeakCollection);
+
   for (size_t i = 0; i < rawPeakCollection->peakCount(); ++i) {
     PoldiPeak_sptr peak = rawPeakCollection->peak(i);
 
@@ -991,6 +979,9 @@ PoldiPeakCollection_sptr PoldiFitPeaks2D::getNormalizedPeakCollection(
   normalizedPeakCollection->setProfileFunctionName(
       peakCollection->getProfileFunctionName());
 
+  // Carry over unit cell and point group
+  assignCrystalData(normalizedPeakCollection, peakCollection);
+
   for (size_t i = 0; i < peakCollection->peakCount(); ++i) {
     PoldiPeak_sptr peak = peakCollection->peak(i);
     double calculatedIntensity =
@@ -1031,6 +1022,9 @@ PoldiPeakCollection_sptr PoldiFitPeaks2D::getCountPeakCollection(
   countPeakCollection->setProfileFunctionName(
       peakCollection->getProfileFunctionName());
 
+  // Get crystal data into new peak collection
+  assignCrystalData(countPeakCollection, peakCollection);
+
   for (size_t i = 0; i < peakCollection->peakCount(); ++i) {
     PoldiPeak_sptr peak = peakCollection->peak(i);
     double calculatedIntensity =
@@ -1063,6 +1057,15 @@ void PoldiFitPeaks2D::assignMillerIndices(const PoldiPeakCollection_sptr &from,
 
     toPeak->setHKL(fromPeak->hkl());
   }
+}
+
+/// Copy crystal data from source to target collection to preserve during
+/// integration etc.
+void PoldiFitPeaks2D::assignCrystalData(
+    PoldiPeakCollection_sptr &targetCollection,
+    const PoldiPeakCollection_sptr &sourceCollection) const {
+  targetCollection->setUnitCell(sourceCollection->unitCell());
+  targetCollection->setPointGroup(sourceCollection->pointGroup());
 }
 
 } // namespace Poldi

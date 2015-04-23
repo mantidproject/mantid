@@ -97,8 +97,6 @@ class POLDIFitPeaks2DPawleyTest(stresstesting.MantidStressTest):
 
         fit2d, fit1d, peaks_ref_2d, cell = PoldiFitPeaks2D('si_data_6904', 'indexed_si_refs',
                                                            PawleyFit=True,
-                                                           InitialCell="5.431 5.431 5.431 90 90 90",
-                                                           CrystalSystem="Cubic",
                                                            MaximumIterations=100)
 
         cell_a = cell.cell(0, 1)
