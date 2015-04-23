@@ -111,8 +111,19 @@ analysis machine located in R3.
 Running jobs remotely
 ---------------------
 
+To be able to run jobs on a remote compute resource (cluster, supercomputer, etc.)
+
+* Log into the resource
+* Select it and setup one reconstruction tool
+* Use the **reconstruct** button in the **Run** tab of the interface
+
+You can monitor the status of the jobs currently running (and recently
+run) on remote compute resources in the same tab.
+
 Running jobs locally
 --------------------
+
+This functionality is not available at present.
 
 Example
 -------
