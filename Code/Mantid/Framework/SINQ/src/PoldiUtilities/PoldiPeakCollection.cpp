@@ -2,6 +2,7 @@
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/LogManager.h"
+#include "MantidGeometry/Crystal/PointGroupFactory.h"
 #include "boost/format.hpp"
 #include "boost/algorithm/string/join.hpp"
 
@@ -271,7 +272,7 @@ PoldiPeakCollection::intensityTypeFromString(std::string typeString) const {
 std::string PoldiPeakCollection::pointGroupToString(
     const PointGroup_sptr &pointGroup) const {
   if (pointGroup) {
-    return pointGroup->getName();
+    return pointGroup->getSymbol();
   }
 
   return "";
@@ -279,11 +280,8 @@ std::string PoldiPeakCollection::pointGroupToString(
 
 PointGroup_sptr PoldiPeakCollection::pointGroupFromString(
     const std::string &pointGroupString) const {
-  std::vector<PointGroup_sptr> allPointGroups = getAllPointGroups();
-  for (auto it = allPointGroups.begin(); it != allPointGroups.end(); ++it) {
-    if ((*it)->getName() == pointGroupString) {
-      return *it;
-    }
+  if (PointGroupFactory::Instance().isSubscribed(pointGroupString)) {
+    return PointGroupFactory::Instance().createPointGroup(pointGroupString);
   }
 
   return PointGroup_sptr();
