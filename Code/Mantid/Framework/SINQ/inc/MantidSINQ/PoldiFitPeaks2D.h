@@ -71,6 +71,7 @@ public:
       size_t parameterOffset, size_t nParams) const;
 
   std::vector<PoldiPeakCollection_sptr> getPeakCollectionsFromInput() const;
+
 protected:
   Poldi2DFunction_sptr getFunctionIndividualPeaks(
       std::string profileFunctionName,
@@ -94,10 +95,16 @@ protected:
 
   PoldiPeakCollection_sptr
   getPeakCollection(const DataObjects::TableWorkspace_sptr &peakTable) const;
+
   PoldiPeakCollection_sptr getIntegratedPeakCollection(
       const PoldiPeakCollection_sptr &rawPeakCollection) const;
+
   PoldiPeakCollection_sptr getNormalizedPeakCollection(
       const PoldiPeakCollection_sptr &peakCollection) const;
+
+  std::vector<PoldiPeakCollection_sptr> getNormalizedPeakCollections(
+      const std::vector<PoldiPeakCollection_sptr> &peakCollections) const;
+
   PoldiPeakCollection_sptr
   getCountPeakCollection(const PoldiPeakCollection_sptr &peakCollection) const;
 
@@ -106,13 +113,18 @@ protected:
 
   PoldiPeakCollection_sptr
   getPeakCollectionFromFunction(const API::IFunction_sptr &fitFunction);
+
+  std::vector<PoldiPeakCollection_sptr>
+  getCountPeakCollections(const API::IFunction_sptr &fitFunction);
+
   Poldi2DFunction_sptr
   getFunctionFromPeakCollection(const PoldiPeakCollection_sptr &peakCollection);
   void addBackgroundTerms(Poldi2DFunction_sptr poldi2DFunction) const;
 
-  API::IAlgorithm_sptr
-  calculateSpectrum(const PoldiPeakCollection_sptr &peakCollection,
-                    const API::MatrixWorkspace_sptr &matrixWorkspace);
+  API::IAlgorithm_sptr calculateSpectrum(
+      const std::vector<PoldiPeakCollection_sptr> &peakCollections,
+      const API::MatrixWorkspace_sptr &matrixWorkspace);
+
   API::MatrixWorkspace_sptr
   getWorkspace(const API::IAlgorithm_sptr &fitAlgorithm) const;
   API::IFunction_sptr

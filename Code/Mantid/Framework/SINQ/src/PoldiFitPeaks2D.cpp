@@ -124,11 +124,11 @@ void PoldiFitPeaks2D::init() {
   declareProperty("LambdaMax", 5.0,
                   "Maximum wavelength for 1D spectrum calculation");
 
-  declareProperty(new WorkspaceProperty<TableWorkspace>(
-                      "RefinedPoldiPeakWorkspace", "", Direction::Output),
+  declareProperty(new WorkspaceProperty<Workspace>("RefinedPoldiPeakWorkspace",
+                                                   "", Direction::Output),
                   "Table workspace with fitted peaks.");
 
-  declareProperty(new WorkspaceProperty<ITableWorkspace>(
+  declareProperty(new WorkspaceProperty<Workspace>(
       "RefinedCellParameters", "", Direction::Output, PropertyMode::Optional));
 }
 
@@ -340,6 +340,48 @@ PoldiPeakCollection_sptr PoldiFitPeaks2D::getPeakCollectionFromFunction(
   }
 
   return normalizedPeaks;
+}
+
+std::vector<PoldiPeakCollection_sptr> PoldiFitPeaks2D::getCountPeakCollections(
+    const API::IFunction_sptr &fitFunction) {
+  Poldi2DFunction_sptr poldiFunction =
+      boost::dynamic_pointer_cast<Poldi2DFunction>(fitFunction);
+
+  if (!poldiFunction) {
+    throw std::runtime_error("Can only extract peaks from Poldi2DFunction.");
+  }
+
+  // Covariance matrix - needs to be assigned to the member functions for error
+  // calculation
+  boost::shared_ptr<const Kernel::DblMatrix> covarianceMatrix =
+      poldiFunction->getCovarianceMatrix();
+
+  std::vector<PoldiPeakCollection_sptr> countPeakCollections;
+
+  size_t offset = 0;
+  for (size_t i = 0; i < poldiFunction->nFunctions(); ++i) {
+    IFunction_sptr localFunction = poldiFunction->getFunction(i);
+    size_t nLocalParams = localFunction->nParams();
+
+    // Assign local covariance matrix.
+    boost::shared_ptr<Kernel::DblMatrix> localCov =
+        getLocalCovarianceMatrix(covarianceMatrix, offset, nLocalParams);
+    localFunction->setCovarianceMatrix(localCov);
+
+    try {
+      PoldiPeakCollection_sptr normalizedPeaks =
+          getPeakCollectionFromFunction(localFunction);
+
+      countPeakCollections.push_back(getCountPeakCollection(normalizedPeaks));
+    }
+    catch (std::invalid_argument) {
+      // not a Poldi2DFunction - skip (the background functions)
+    }
+
+    offset += nLocalParams;
+  }
+
+  return countPeakCollections;
 }
 
 /**
@@ -620,30 +662,65 @@ void PoldiFitPeaks2D::exec() {
     }
   }
 
-  IAlgorithm_sptr fitAlgorithm = calculateSpectrum(peakCollections.front(), ws);
+  IAlgorithm_sptr fitAlgorithm = calculateSpectrum(peakCollections, ws);
 
   IFunction_sptr fitFunction = getFunction(fitAlgorithm);
 
   MatrixWorkspace_sptr outWs1D = get1DSpectrum(fitFunction, ws);
 
-  PoldiPeakCollection_sptr normalizedPeaks =
-      getPeakCollectionFromFunction(fitFunction);
-  PoldiPeakCollection_sptr integralPeaks =
-      getCountPeakCollection(normalizedPeaks);
+  std::vector<PoldiPeakCollection_sptr> integralPeaks =
+      getCountPeakCollections(fitFunction);
 
-  assignMillerIndices(peakCollections.front(), integralPeaks);
+  assignMillerIndices(peakCollections.front(), integralPeaks.front());
 
   setProperty("OutputWorkspace", getWorkspace(fitAlgorithm));
-  setProperty("RefinedPoldiPeakWorkspace", integralPeaks->asTableWorkspace());
+
+  if (integralPeaks.size() == 1) {
+    setProperty("RefinedPoldiPeakWorkspace",
+                integralPeaks.front()->asTableWorkspace());
+  } else {
+    WorkspaceGroup_sptr peaksGroup = boost::make_shared<WorkspaceGroup>();
+
+    for (auto pc = integralPeaks.begin(); pc != integralPeaks.end(); ++pc) {
+      peaksGroup->addWorkspace((*pc)->asTableWorkspace());
+    }
+
+    setProperty("RefinedPoldiPeakWorkspace", peaksGroup);
+  }
+
   setProperty("Calculated1DSpectrum", outWs1D);
 
   bool isPawleyFit = getProperty("PawleyFit");
   if (isPawleyFit) {
-    ITableWorkspace_sptr cellParameters = getRefinedCellParameters(fitFunction);
+    Poldi2DFunction_sptr poldi2DFunction =
+        boost::dynamic_pointer_cast<Poldi2DFunction>(fitFunction);
 
-    if (cellParameters->rowCount() > 0) {
-      setProperty("RefinedCellParameters",
-                  getRefinedCellParameters(fitFunction));
+    std::vector<ITableWorkspace_sptr> cells;
+
+    if (poldi2DFunction) {
+      for (size_t i = 0; i < poldi2DFunction->nFunctions(); ++i) {
+        try {
+          ITableWorkspace_sptr cell =
+              getRefinedCellParameters(poldi2DFunction->getFunction(i));
+          cells.push_back(cell);
+        }
+        catch (std::invalid_argument) {
+          // do nothing
+        }
+      }
+
+      if (cells.size() == 1) {
+        setProperty("RefinedCellParameters", cells.front());
+      } else {
+        WorkspaceGroup_sptr cellsGroup = boost::make_shared<WorkspaceGroup>();
+
+        for (auto it = cells.begin(); it != cells.end(); ++it) {
+          cellsGroup->addWorkspace(*it);
+        }
+
+        setProperty("RefinedCellParameters", cellsGroup);
+      }
+
     } else {
       g_log.warning() << "Warning: Cell parameter table is empty.";
     }
@@ -694,16 +771,22 @@ void PoldiFitPeaks2D::addBackgroundTerms(Poldi2DFunction_sptr poldi2DFunction)
  * @return Instance of Fit-algorithm, after execution
  */
 IAlgorithm_sptr PoldiFitPeaks2D::calculateSpectrum(
-    const PoldiPeakCollection_sptr &peakCollection,
+    const std::vector<PoldiPeakCollection_sptr> &peakCollections,
     const MatrixWorkspace_sptr &matrixWorkspace) {
-  PoldiPeakCollection_sptr integratedPeaks =
-      getIntegratedPeakCollection(peakCollection);
-  PoldiPeakCollection_sptr normalizedPeakCollection =
-      getNormalizedPeakCollection(integratedPeaks);
 
-  Poldi2DFunction_sptr mdFunction =
-      getFunctionFromPeakCollection(normalizedPeakCollection);
+  std::vector<PoldiPeakCollection_sptr> normalizedPeakCollections =
+      getNormalizedPeakCollections(peakCollections);
 
+  // Create a Poldi2DFunction that collects all sub-functions
+  Poldi2DFunction_sptr mdFunction(new Poldi2DFunction);
+
+  // Add one Poldi2DFunction for each peak collection
+  for (auto pc = normalizedPeakCollections.begin();
+       pc != normalizedPeakCollections.end(); ++pc) {
+    mdFunction->addFunction(getFunctionFromPeakCollection(*pc));
+  }
+
+  // And finally background terms
   addBackgroundTerms(mdFunction);
 
   IAlgorithm_sptr fit = createChildAlgorithm("Fit", -1, -1, true);
@@ -1052,6 +1135,21 @@ PoldiPeakCollection_sptr PoldiFitPeaks2D::getNormalizedPeakCollection(
   }
 
   return normalizedPeakCollection;
+}
+
+std::vector<PoldiPeakCollection_sptr>
+PoldiFitPeaks2D::getNormalizedPeakCollections(
+    const std::vector<PoldiPeakCollection_sptr> &peakCollections) const {
+  std::vector<PoldiPeakCollection_sptr> normalizedPeakCollections;
+
+  for (auto pc = peakCollections.begin(); pc != peakCollections.end(); ++pc) {
+    PoldiPeakCollection_sptr integratedPeakCollection =
+        getIntegratedPeakCollection(*pc);
+    normalizedPeakCollections.push_back(
+        getNormalizedPeakCollection(integratedPeakCollection));
+  }
+
+  return normalizedPeakCollections;
 }
 
 /**
