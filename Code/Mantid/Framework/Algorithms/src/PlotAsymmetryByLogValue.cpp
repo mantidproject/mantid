@@ -180,19 +180,9 @@ void PlotAsymmetryByLogValue::init() {
 */
 void PlotAsymmetryByLogValue::exec() {
 
-
   // Check input properties to decide whether or not we can reuse previous
   // results, if any
   checkProperties();
-
-  // Get runs
-  std::string firstFN = getProperty("FirstRun");
-  std::string lastFN = getProperty("LastRun");
-
-  // Parse run names and get the number of runs
-  parseRunNames( firstFN, lastFN, g_filenameBase, g_filenameExt, g_filenameZeros);
-  size_t is = atoi(firstFN.c_str()); // starting run number
-  size_t ie = atoi(lastFN.c_str());  // last run number
 
   Progress progress(this, 0, 1, ie - is + 2);
 
@@ -252,6 +242,17 @@ void PlotAsymmetryByLogValue::checkProperties () {
   // Get type of dead-time corrections
   std::string dtcType = getPropertyValue("DeadTimeCorrType");
   std::string dtcFile = getPropertyValue("DeadTimeCorrFile");
+  // Get runs
+  std::string firstFN = getProperty("FirstRun");
+  std::string lastFN = getProperty("LastRun");
+
+  // Parse run names and get the number of runs
+  std::string filenameBase, filenameExt;
+  int filenameZeros;
+  parseRunNames( firstFN, lastFN, filenameBase, filenameExt, filenameZeros);
+  size_t is = atoi(firstFN.c_str()); // starting run number
+  size_t ie = atoi(lastFN.c_str());  // last run number
+
   // Check if any property has changed
   if ( g_logName != logName ||
     g_logFunc != logFunc ||
@@ -261,7 +262,10 @@ void PlotAsymmetryByLogValue::checkProperties () {
     g_green != green ||
     g_red != red ||
     g_dtcType != dtcType ||
-    g_dtcFile != dtcFile) {
+    g_dtcFile != dtcFile ||
+    g_filenameBase != filenameBase ||
+    g_filenameExt != filenameExt ||
+    g_filenameZeros != filenameZeros) {
 
       // If so, clear previous results
     g_redX.clear();
@@ -290,6 +294,9 @@ void PlotAsymmetryByLogValue::checkProperties () {
   g_red = red;
   g_dtcType = dtcType;
   g_dtcFile = dtcFile;
+  g_filenameBase = filenameBase;
+  g_filenameExt = filenameExt;
+  g_filenameZeros = filenameZeros;
 
 
 }
