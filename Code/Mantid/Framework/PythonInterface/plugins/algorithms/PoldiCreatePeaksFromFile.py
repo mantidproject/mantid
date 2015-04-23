@@ -1,4 +1,4 @@
-# pylint: disable=no-init,invalid-name,too-few-public-methods
+# pylint: disable=no-init,invalid-name,too-few-public-methods,unused-import
 from mantid.kernel import *
 from mantid.simpleapi import *
 from mantid.api import *
@@ -213,5 +213,9 @@ class PoldiCreatePeaksFromFile(PythonAlgorithm):
 
         return compound.getName()
 
-
-AlgorithmFactory.subscribe(PoldiCreatePeaksFromFile)
+try:
+    import pyparsing
+    AlgorithmFactory.subscribe(PoldiCreatePeaksFromFile)
+except:
+    logger.debug('Failed to subscribe algorithm PoldiCreatePeaksFromFile; Python package pyparsing'\
+        'may be missing (https://pypi.python.org/pypi/pyparsing)')
