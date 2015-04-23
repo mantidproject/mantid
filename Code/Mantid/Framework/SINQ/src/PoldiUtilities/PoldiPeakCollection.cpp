@@ -20,11 +20,13 @@ using namespace Mantid::Kernel;
 
 PoldiPeakCollection::PoldiPeakCollection(IntensityType intensityType)
     : m_peaks(), m_intensityType(intensityType), m_profileFunctionName(),
-      m_pointGroup(), m_unitCell() {}
+      m_pointGroup(PointGroupFactory::Instance().createPointGroup("1")),
+      m_unitCell() {}
 
 PoldiPeakCollection::PoldiPeakCollection(const TableWorkspace_sptr &workspace)
     : m_peaks(), m_intensityType(Maximum), m_profileFunctionName(),
-      m_pointGroup(), m_unitCell() {
+      m_pointGroup(PointGroupFactory::Instance().createPointGroup("1")),
+      m_unitCell() {
   if (workspace) {
     constructFromTableWorkspace(workspace);
   }
@@ -58,6 +60,8 @@ PoldiPeakCollection_sptr PoldiPeakCollection::clone() {
   PoldiPeakCollection_sptr clone =
       boost::make_shared<PoldiPeakCollection>(m_intensityType);
   clone->setProfileFunctionName(m_profileFunctionName);
+  clone->setPointGroup(m_pointGroup);
+  clone->setUnitCell(m_unitCell);
 
   for (size_t i = 0; i < m_peaks.size(); ++i) {
     clone->addPeak(m_peaks[i]->clone());
@@ -102,7 +106,13 @@ bool PoldiPeakCollection::hasProfileFunctionName() const {
 }
 
 void PoldiPeakCollection::setPointGroup(const PointGroup_sptr &pointGroup) {
-  m_pointGroup = pointGroup;
+  if (!pointGroup) {
+    throw std::invalid_argument(
+        "Cannot assign null-pointer to pointgroup in PoldiPeakCollection.");
+  }
+
+  m_pointGroup =
+      PointGroupFactory::Instance().createPointGroup(pointGroup->getSymbol());
 }
 
 PointGroup_sptr PoldiPeakCollection::pointGroup() const { return m_pointGroup; }
@@ -292,7 +302,7 @@ std::string PoldiPeakCollection::pointGroupToString(
     return pointGroup->getSymbol();
   }
 
-  return "";
+  return "1";
 }
 
 PointGroup_sptr PoldiPeakCollection::pointGroupFromString(
