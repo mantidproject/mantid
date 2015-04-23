@@ -121,18 +121,8 @@ void SaveMD2::doSaveHisto(Mantid::DataObjects::MDHistoWorkspace_sptr ws) {
     }
   }
 
-  // Write out some general information like # of dimensions
-  size_t numDims = ws->getNumDims();
-  file->writeData("dimensions", int32_t(numDims));
-
-  // Save each dimension, as their XML representation
-  for (size_t d = 0; d < ws->getNumDims(); d++) {
-    std::ostringstream mess;
-    mess << "dimension" << d;
-    file->putAttr(mess.str(), ws->getDimension(d)->toXMLString());
-  }
-
   // Save each axis dimension as an array
+  size_t numDims = ws->getNumDims();
   std::string axes_label;
   for (size_t d = 0; d < numDims; d++) {
     std::vector<double> axis;
@@ -166,8 +156,6 @@ void SaveMD2::doSaveHisto(Mantid::DataObjects::MDHistoWorkspace_sptr ws) {
     IMDDimension_const_sptr dim = ws->getDimension(d);
     // Size in each dimension (reverse order for RANK)
     size[numDims - 1 - d] = int(dim->getNBins());
-    g_log.debug() << "Dim: " << d << " Bins: " << size[numDims - 1 - d]
-                  << std::endl;
   }
 
   file->makeData("signal", ::NeXus::FLOAT64, size, true);
