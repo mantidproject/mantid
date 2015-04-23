@@ -185,7 +185,7 @@ void PlotAsymmetryByLogValue::exec() {
   size_t is, ie;
   checkProperties(is,ie);
 
-  Progress progress(this, 0, 1, ie - is + 2);
+  Progress progress(this, 0, 1, ie - is + 1);
 
   // Loop through runs
   for (size_t i = is; i <= ie; i++) {
@@ -221,6 +221,8 @@ void PlotAsymmetryByLogValue::exec() {
 }
 
 /**  Checks input properties and compares them to previous values
+*   @param is :: [output] Number of the first run
+*   @param ie :: [output] Number of the last run
 */
 void PlotAsymmetryByLogValue::checkProperties (size_t &is, size_t &ie) {
 
@@ -254,6 +256,8 @@ void PlotAsymmetryByLogValue::checkProperties (size_t &is, size_t &ie) {
   is = atoi(firstFN.c_str()); // starting run number
   ie = atoi(lastFN.c_str());  // last run number
 
+
+  // Skip checks if there are no previous results
   if ( !g_redX.empty() ) {
 
     size_t isOld = g_redX.begin()->first; // Old first run number
@@ -282,28 +286,26 @@ void PlotAsymmetryByLogValue::checkProperties (size_t &is, size_t &ie) {
       // results, provided that new run numbers are 'appropriate'
 
       if ( is > ieOld || ie < isOld ) {
-
         // Completely new set of runs
         clearResultsFromTo(isOld,ieOld);
 
       } else {
 
         if ( is > isOld ) {
-
           // Remove runs from isOld to is-1
           clearResultsFromTo(isOld,is-1);
         }
-
         if ( ie < ieOld ) {
-
           // Remove runs from ie+1 to ieOld
           clearResultsFromTo(ie+1,ieOld);
         }
 
-      }
-    }
-  }
+      } // else
+    } // else
 
+  } // !g_redX.empty()
+
+  // Asign new values to static variables
   g_logName = logName;
   g_logFunc = logFunc;
   g_stype = stype;
@@ -319,10 +321,11 @@ void PlotAsymmetryByLogValue::checkProperties (size_t &is, size_t &ie) {
   g_filenameExt = filenameExt;
   g_filenameZeros = filenameZeros;
 
-
 }
 
 /**  Clears any possible result from previous call
+*   @param is :: [input] Run number to clear resulst from
+*   @param ie :: [input] Run number to clear results to
 */
 void PlotAsymmetryByLogValue::clearResultsFromTo(size_t is, size_t ie) {
 
