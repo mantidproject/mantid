@@ -1173,7 +1173,9 @@ void PoldiFitPeaks2D::exec() {
   std::vector<PoldiPeakCollection_sptr> integralPeaks =
       getCountPeakCollections(fitFunction);
 
-  assignMillerIndices(peakCollections.front(), integralPeaks.front());
+  for(size_t i = 0; i < peakCollections.size(); ++i) {
+      assignMillerIndices(peakCollections[i], integralPeaks[i]);
+  }
 
   // Get the calculated 2D workspace
   setProperty("OutputWorkspace", getWorkspace(fitAlgorithm));
