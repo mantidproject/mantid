@@ -15,10 +15,12 @@
 #include <jsoncpp/json/json.h>
 #include <QDialog>
 #include <QMutex>
-#include <QTimer>
 
-class QTreeWidgetItem;
+// Qt classes forward declarations
 class QLineEdit;
+class QThread;
+class QTimer;
+class QTreeWidgetItem;
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -246,6 +248,7 @@ private:
 
   // for periodic update of the job status table/tree
   QTimer *m_keepAliveTimer;
+  QThread *m_keepAliveThread;
   // mutex for the "job status info -> job status table " operations
   QMutex m_statusMutex;
 

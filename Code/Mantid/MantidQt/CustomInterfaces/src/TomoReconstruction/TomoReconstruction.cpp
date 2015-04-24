@@ -14,6 +14,8 @@
 #include <QMessageBox>
 #include <QPainter>
 #include <QSettings>
+#include <QThread>
+#include <QTimer>
 
 using namespace Mantid::API;
 
@@ -89,7 +91,7 @@ TomoReconstruction::TomoReconstruction(QWidget *parent)
       m_pathFlat(m_pathSCARFbase + "data/flat"),
       m_pathDark(m_pathSCARFbase + "data/dark"), m_currentParamPath(),
       m_settingsGroup("CustomInterfaces/TomoReconstruction"),
-      m_keepAliveTimer(NULL) {
+      m_keepAliveTimer(NULL), m_keepAliveThread(NULL) {
 
   m_computeRes.push_back(m_SCARFName);
 
@@ -108,6 +110,7 @@ TomoReconstruction::TomoReconstruction(QWidget *parent)
 TomoReconstruction::~TomoReconstruction() {
   cleanup();
   delete m_keepAliveTimer;
+  delete m_keepAliveThread;
 }
 
 /**
@@ -327,11 +330,13 @@ void TomoReconstruction::SCARFLoginClicked() {
 
   int kat = settings.useKeepAlive;
   if (kat > 0) {
-    g_log.information()
+    g_log.notice()
         << "Reconstruction GUI: starting mechanism to periodically query the "
-           "status of jobs. This is also expected to keep "
-           "sessions on remote compute resources alive after "
-           "logging in." << std::endl;
+           "status of jobs. This will update the status of running jobs every "
+        << kat << " seconds. You can also update it at any moment by clicking "
+                  "on the refresh button. This periodic update mechanism is "
+                  "also expected to keep sessions on remote compute resources "
+                  "alive after logging in." << std::endl;
     startKeepAliveMechanism(kat);
   }
 }
@@ -1771,19 +1776,26 @@ void TomoReconstruction::openHelpWin() {
 
 void TomoReconstruction::periodicStatusUpdateRequested() {
   // does just the widgets update
-  std::cerr << " **** periodicStatusUpdateRequested-> updateJobsTable "
-            << std::endl;
   updateJobsTable();
 }
 
 void TomoReconstruction::startKeepAliveMechanism(int period) {
+  if (m_keepAliveThread)
+    delete m_keepAliveThread;
+  QThread *m_keepAliveThread = new QThread();
+
   if (m_keepAliveTimer)
     delete m_keepAliveTimer;
-  m_keepAliveTimer = new QTimer();
-  m_keepAliveTimer->setInterval(1000 * period); // QTimer takes timeoud in ms
-  connect(m_keepAliveTimer, SIGNAL(timeout()), this,
-          SLOT(jobTableRefreshClicked()));
-  m_keepAliveTimer->start();
+  m_keepAliveTimer = new QTimer(NULL); // no-parent so it can be moveToThread
+
+  m_keepAliveTimer->setInterval(1000 * period);
+  m_keepAliveTimer->moveToThread(m_keepAliveThread);
+  // direct connection from the thread
+  connect(m_keepAliveTimer, SIGNAL(timeout()), SLOT(jobTableRefreshClicked()),
+          Qt::DirectConnection);
+  QObject::connect(m_keepAliveThread, SIGNAL(started()), m_keepAliveTimer,
+                   SLOT(start()));
+  m_keepAliveThread->start();
 }
 
 void TomoReconstruction::killKeepAliveMechanism() {
