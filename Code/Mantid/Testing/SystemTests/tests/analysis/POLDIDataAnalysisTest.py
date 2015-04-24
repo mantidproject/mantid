@@ -19,7 +19,7 @@ class POLDIDataAnalysisTestSi(stresstesting.MantidStressTest):
         return 'poldi_data_6904', 'Si'
 
     def _loadData(self):
-        PoldiLoadRuns(2013, 6903, 6904, 2, OutputWorkspace='poldi')
+        PoldiLoadRuns(2013, 6903, 6904, 2, OutputWorkspace='poldi', MaskBadDetectors=False)
 
     def _createSi(self):
         PoldiCreatePeaksFromCell(SpaceGroup='F d -3 m',
