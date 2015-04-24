@@ -63,9 +63,12 @@ The algorithm requires relatively little input and can be run like this:
 
     print "Refined lattice parameter a =", cell_a, "+/-", cell_a_error
 
+This will print the following output:
+
 .. testoutput::
 
     Refined lattice parameter a = 5.43126 +/- 5e-05
 
+If PlotResult is changed to True, a plot of the spectrum and the residuals is created as described above.
 
 .. categories::
