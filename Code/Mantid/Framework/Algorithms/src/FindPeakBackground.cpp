@@ -214,30 +214,17 @@ void FindPeakBackground::exec() {
       min_peak = peaks[0].start;
       // extra point for histogram input
       max_peak = peaks[0].stop + sizex - sizey;
-      estimateBackground(inpX, inpY, l0, n, peaks[0].start, peaks[0].stop, a0,
-                         a1, a2);
       goodfit = 1;
     } else {
-      // assume background is 12 first and last points
-      g_log.debug("Peaks' size = 0 -> zero background.");
-      min_peak = l0 + 12;
-      max_peak = n - 13;
-      if (min_peak > sizey)
-        min_peak = sizey - 1;
+      // assume the whole thing is background
+      g_log.debug("Peaks' size = 0 -> whole region assumed background");
+      min_peak = n;
+      max_peak = l0;
 
-      if (min_peak > max_peak) {
-        g_log.information("failed to find peak - not estimating background");
-        goodfit = -1;
-      } else {
-        g_log.information("failed to find peak - estimating background using "
-                          "first and last 12 points");
-        // FIXME : as it is assumed that background is 12 first and 12 last,
-        // then
-        //         why not do a simple fit here!
-        estimateBackground(inpX, inpY, l0, n, min_peak, max_peak, a0, a1, a2);
-        goodfit = 2;
-      }
+      goodfit = 2;
     }
+    estimateBackground(inpX, inpY, l0, n, min_peak, max_peak,
+                       (peaks.size() > 0), a0, a1, a2);
 
     // Add a new row
     API::TableRow t = m_outPeakTableWS->getRow(0);
@@ -261,18 +248,18 @@ void FindPeakBackground::exec() {
 * @param i_max :: index of maximum in X to estimate background
 * @param p_min :: index of peak min in X to estimate background
 * @param p_max :: index of peak max in X to estimate background
+* @param hasPeak :: ban data in the peak range
 * @param out_bg0 :: interception
 * @param out_bg1 :: slope
 * @param out_bg2 :: a2 = 0
 */
-void FindPeakBackground::estimateBackground(
-    const MantidVec &X, const MantidVec &Y, const size_t i_min,
-    const size_t i_max, const size_t p_min, const size_t p_max, double &out_bg0,
+void FindPeakBackground::estimateBackground(const MantidVec &X, const MantidVec &Y, const size_t i_min,
+    const size_t i_max, const size_t p_min, const size_t p_max, const bool hasPeak, double &out_bg0,
     double &out_bg1, double &out_bg2) {
   // Validate input
   if (i_min >= i_max)
     throw std::runtime_error("i_min cannot larger or equal to i_max");
-  if (p_min >= p_max)
+  if ((!hasPeak) && (p_min >= p_max))
     throw std::runtime_error("p_min cannot larger or equal to p_max");
 
   // set all parameters to zero
@@ -403,8 +390,8 @@ void FindPeakBackground::estimateBackground(
     out_bg0 = bg0_flat;
   }
 
-  g_log.debug() << "Estimated background: A0 = " << out_bg0
-                << ", A1 = " << out_bg1 << ", A2 = " << out_bg2 << "\n";
+  g_log.information() << "Estimated background: A0 = " << out_bg0
+                      << ", A1 = " << out_bg1 << ", A2 = " << out_bg2 << "\n";
 
   return;
 }
