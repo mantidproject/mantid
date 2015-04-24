@@ -156,7 +156,7 @@ Output:
 
 Output:
 
-.. testoutput:: ExampleMDhisto
+.. testoutput:: ExampleMDHisto
 
    Total signal in input = 100.00
    Half the volume should give half the signal = 50.00
