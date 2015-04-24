@@ -19,6 +19,8 @@ vtkScaleWorkspace::vtkScaleWorkspace() :
   m_xScaling(1),
   m_yScaling(1),
   m_zScaling(1),
+  m_minValue(0.1),
+  m_maxValue(0.1),
   m_specialCoordinates(-1),
   m_metadataJsonManager(new MetadataJsonManager()),
   m_vatesConfigurations(new VatesConfigurations())

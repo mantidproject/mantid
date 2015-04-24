@@ -1,6 +1,9 @@
 #include "MantidCurveFitting/PawleyFunction.h"
 
 #include "MantidAPI/FunctionFactory.h"
+
+#include "MantidCurveFitting/BoundaryConstraint.h"
+
 #include "MantidKernel/UnitConversion.h"
 #include "MantidKernel/UnitFactory.h"
 
@@ -173,7 +176,8 @@ void PawleyParameterFunction::setProfileFunction(
  * This method takes the name of a crystal system (case insensitive) and stores
  * it. Furthermore it creates the necessary parameters, which means that after
  * calling this function, PawleyParameterFunction potentially exposes a
- * different number of parameters.
+ * different number of parameters. The parameters are constrained to physically
+ * meaningful values (angles between 0 and 180 degrees, cell edges above 0).
  *
  * @param crystalSystem :: Crystal system, case insensitive.
  */
@@ -212,30 +216,43 @@ void PawleyParameterFunction::createCrystalSystemParameters(
   switch (crystalSystem) {
   case PointGroup::Cubic:
     declareParameter("a", 1.0);
+    addLengthConstraint("a");
     break;
 
   case PointGroup::Hexagonal:
   case PointGroup::Tetragonal:
     declareParameter("a", 1.0);
     declareParameter("c", 1.0);
+    addLengthConstraint("a");
+    addLengthConstraint("c");
     break;
 
   case PointGroup::Orthorhombic:
     declareParameter("a", 1.0);
     declareParameter("b", 1.0);
     declareParameter("c", 1.0);
+    addLengthConstraint("a");
+    addLengthConstraint("b");
+    addLengthConstraint("c");
     break;
 
   case PointGroup::Monoclinic:
     declareParameter("a", 1.0);
     declareParameter("b", 1.0);
     declareParameter("c", 1.0);
+    addLengthConstraint("a");
+    addLengthConstraint("b");
+    addLengthConstraint("c");
+
     declareParameter("Beta", 90.0);
+    addAngleConstraint("Beta");
     break;
 
   case PointGroup::Trigonal:
     declareParameter("a", 1.0);
     declareParameter("Alpha", 90.0);
+    addLengthConstraint("a");
+    addAngleConstraint("Alpha");
     break;
 
   default:
@@ -243,14 +260,38 @@ void PawleyParameterFunction::createCrystalSystemParameters(
     declareParameter("a", 1.0);
     declareParameter("b", 1.0);
     declareParameter("c", 1.0);
+    addLengthConstraint("a");
+    addLengthConstraint("b");
+    addLengthConstraint("c");
 
     declareParameter("Alpha", 90.0);
     declareParameter("Beta", 90.0);
     declareParameter("Gamma", 90.0);
+    addAngleConstraint("Alpha");
+    addAngleConstraint("Beta");
+    addAngleConstraint("Gamma");
     break;
   }
 
   declareParameter("ZeroShift", 0.0);
+}
+
+/// Adds a default constraint so that cell edge lengths can not be less than 0.
+void
+PawleyParameterFunction::addLengthConstraint(const std::string &parameterName) {
+  BoundaryConstraint *cellEdgeConstraint =
+      new BoundaryConstraint(this, parameterName, 0.0, true);
+  cellEdgeConstraint->setPenaltyFactor(1e12);
+  addConstraint(cellEdgeConstraint);
+}
+
+/// Adds a default constraint so cell angles are in the range 0 to 180.
+void
+PawleyParameterFunction::addAngleConstraint(const std::string &parameterName) {
+  BoundaryConstraint *cellAngleConstraint =
+      new BoundaryConstraint(this, parameterName, 0.0, 180.0, true);
+  cellAngleConstraint->setPenaltyFactor(1e12);
+  addConstraint(cellAngleConstraint);
 }
 
 /// Tries to extract and store the center parameter name from the function.

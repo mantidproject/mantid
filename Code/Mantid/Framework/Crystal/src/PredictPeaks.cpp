@@ -1,16 +1,7 @@
 #include "MantidCrystal/PredictPeaks.h"
-#include "MantidDataObjects/Peak.h"
-#include "MantidDataObjects/PeaksWorkspace.h"
-#include "MantidGeometry/Crystal/UnitCell.h"
-#include "MantidKernel/Matrix.h"
 #include "MantidGeometry/Objects/InstrumentRayTracer.h"
-#include "MantidKernel/PropertyWithValue.h"
-#include "MantidKernel/System.h"
-#include <cmath>
-#include <MantidGeometry/Crystal/OrientedLattice.h>
 #include "MantidKernel/ListValidator.h"
 #include "MantidAPI/WorkspaceValidators.h"
-#include "MantidGeometry/Crystal/ReflectionCondition.h"
 #include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 

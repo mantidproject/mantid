@@ -1,6 +1,4 @@
 #include "MantidKernel/VMD.h"
-#include "MantidKernel/System.h"
-#include "MantidKernel/DllConfig.h"
 
 using namespace Mantid::Kernel;
 

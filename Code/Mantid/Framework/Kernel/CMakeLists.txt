@@ -13,7 +13,7 @@ set ( SRC_FILES
 	src/ChecksumHelper.cpp
 	src/DataItem.cpp
 	src/DateAndTime.cpp
-	src/DateTimeValidator.cpp 
+	src/DateTimeValidator.cpp
 	src/DateValidator.cpp
 	src/DeltaEMode.cpp
 	src/DirectoryValidator.cpp
@@ -397,7 +397,7 @@ set_property ( TARGET Kernel PROPERTY FOLDER "MantidFramework" )
 if ( GCC_COMPILER_VERSION AND GCC_COMPILER_VERSION VERSION_LESS "4.5" )
  target_link_libraries ( Kernel stdc++ )
 endif()
-target_link_libraries ( Kernel ${NEXUS_LIBRARIES} ${MANTIDLIBS} ${GSL_LIBRARIES} 
+target_link_libraries ( Kernel ${NEXUS_LIBRARIES} ${MANTIDLIBS} ${GSL_LIBRARIES}
                         ${NETWORK_LIBRARIES} ${JSONCPP_LIBRARIES} )
 if ( WIN32 )
   target_link_libraries ( Kernel Psapi.lib ) # For memory usage queries
@@ -447,7 +447,11 @@ if ( ${CMAKE_PROJECT_NAME} STREQUAL "MantidFramework" )
 endif ()
 
 set ( PLUGINS "." )
-set ( PV_PLUGINS "./pvplugins" )
+if ( MAKE_VATES )
+  set ( PV_PLUGINS "./${PVPLUGINS_DIR}" )
+else ()
+  set ( PV_PLUGINS "" )
+endif ()
 set ( IGNORE_PARAVIEW "0" )
 set ( QTPLUGINS "." )
 set ( UPDATE_INSTRUMENT_DEFINTITIONS "0" )

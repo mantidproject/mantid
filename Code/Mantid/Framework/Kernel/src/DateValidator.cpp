@@ -3,7 +3,6 @@
 //----------------------------------------------------------------------
 #include "MantidKernel/DateValidator.h"
 #include <boost/lexical_cast.hpp>
-#include <time.h>
 
 namespace Mantid {
 namespace Kernel {

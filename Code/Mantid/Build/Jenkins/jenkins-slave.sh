@@ -34,12 +34,14 @@ JAR_FILE=slave.jar
 # Some versions of cron don't set the USER environment variable
 # required by vnc
 [ -z "$USER" ] && export USER=$(whoami)
+# Put /usr/local/bin on the PATH if brew is installed
+[ -f /usr/local/bin/brew ] && export PATH=${PATH}:/usr/local/bin
 
 #####################################################################
 # Script
 #####################################################################
 # exit if it is already running
-RUNNING=$(ps u -u $(whoami) | grep java | grep ${JAR_FILE})
+RUNNING=$(ps u -U $(whoami) | grep java | grep ${JAR_FILE})
 if [ ! -z "${RUNNING}" ]; then
   echo "Slave process is already running"
   exit 0

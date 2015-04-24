@@ -6,7 +6,6 @@
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/UnitLabelTypes.h"
-#include <cmath>
 #include <cfloat>
 #include <limits>
 

@@ -189,7 +189,6 @@ set ( MANTID_SRCS  src/Mantid/AlgorithmMonitor.cpp
                    src/Mantid/PeakPickerTool.cpp
                    src/Mantid/Preferences.cpp
                    src/Mantid/RemoveErrorsDialog.cpp
-                   src/Mantid/SetUpParaview.cpp
                    src/Mantid/UserFitFunctionDialog.cpp
                    src/Mantid/WorkspaceIcons.cpp
                    src/Mantid/InstrumentWidget/BinDialog.cpp
@@ -427,7 +426,6 @@ set ( MANTID_HDRS  src/Mantid/AlgorithmMonitor.h
                    src/Mantid/PeakPickerTool.h
                    src/Mantid/Preferences.h
                    src/Mantid/RemoveErrorsDialog.h
-                   src/Mantid/SetUpParaview.h
                    src/Mantid/UserFitFunctionDialog.h
                    src/Mantid/WorkspaceIcons.h
                    src/Mantid/InstrumentWidget/BinDialog.h
@@ -700,7 +698,6 @@ set ( MANTID_MOC_FILES src/Mantid/AlgorithmMonitor.h
                        src/Mantid/MantidTable.h
                        src/Mantid/PeakPickerTool.h
                        src/Mantid/RemoveErrorsDialog.h
-                       src/Mantid/SetUpParaview.h
                        src/Mantid/UserFitFunctionDialog.h
                        src/Mantid/InstrumentWidget/XIntegrationControl.h
                        src/Mantid/InstrumentWidget/BinDialog.h
@@ -731,7 +728,6 @@ set ( UI_FILES src/SendToProgramDialog.ui
                src/Mantid/UserFitFunctionDialog.ui
                src/Mantid/MantidAbout.ui
                src/Mantid/RemoveErrorsDialog.ui
-               src/Mantid/SetUpParaview.ui
                src/Mantid/ManageCustomMenus.ui
                src/Mantid/ManageInterfaceCategories.ui
                src/Mantid/MantidMDCurveDialog.ui
@@ -855,20 +851,13 @@ copy_files_to_dir ( "${PY_FILES}"
 set( MTDPLOTPY_FILES
   __init__.py
   proxies.py
+  pyplot.py
+  qtiplot.py
 )
 copy_files_to_dir ( "${MTDPLOTPY_FILES}"
                             ${CMAKE_CURRENT_SOURCE_DIR}/pymantidplot
                             ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/pymantidplot
                             MTDPLOT_INSTALL_FILES )
-                            
-set( FUTURE_FILES
-  __init__.py
-  pyplot.py
-)
-copy_files_to_dir ( "${FUTURE_FILES}"
-                            ${CMAKE_CURRENT_SOURCE_DIR}/pymantidplot/future
-                            ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/pymantidplot/future
-                            MTDPLOT_FUTURE_INSTALL_FILES )
 
 # IPython scripts
 set( IPY_FILES
@@ -887,7 +876,7 @@ copy_files_to_dir ( "${IPY_FILES}"
 add_executable ( MantidPlot ${WIN_CONSOLE} MACOSX_BUNDLE ${ALL_SRC} src/main.cpp
 							${INC_FILES} ${QTIPLOT_C_SRC} ${UI_HDRS}
 							${RES_FILES} ${MANTID_RC_FILE}
-							${PYTHON_INSTALL_FILES} ${MTDPLOT_INSTALL_FILES} ${CONFIG_RESET_SCRIPT_FILE} ${MTDPLOT_FUTURE_INSTALL_FILES} ${IPYTHON_INSTALL_FILES}
+							${PYTHON_INSTALL_FILES} ${MTDPLOT_INSTALL_FILES} ${CONFIG_RESET_SCRIPT_FILE} ${IPYTHON_INSTALL_FILES}
 )
 
 # Library dependencies
@@ -963,7 +952,7 @@ set ( MANTIDPLOT_TEST_PY_FILES
     MantidPlotMdiSubWindowTest.py
     MantidPlotTiledWindowTest.py
     MantidPlotInputArgsCheck.py
-    MantidPlotFuturePyplotGeneralTest.py
+    MantidPlotPyplotGeneralTest.py
 )
 
 if ( 0 )
@@ -1029,9 +1018,6 @@ install ( FILES ${PY_FILES} DESTINATION ${BIN_DIR} )
 foreach(PY_FILE ${MTDPLOTPY_FILES} )
   install ( FILES pymantidplot/${PY_FILE} DESTINATION ${BIN_DIR}/pymantidplot )
 endforeach()
-foreach(FUT_PY_FILE ${FUTURE_FILES} )
-  install ( FILES pymantidplot/future/${FUT_PY_FILE} DESTINATION ${BIN_DIR}/pymantidplot/future )
-endforeach()
 foreach(PY_FILE ${IPY_FILES} )
   install ( FILES ipython_widget/${PY_FILE} DESTINATION ${BIN_DIR}/ipython_widget )
 endforeach()
@@ -1054,7 +1040,10 @@ if ( APPLE )
                    @ONLY )
         install ( SCRIPT ${CMAKE_CURRENT_BINARY_DIR}/FixMacportsBundle.cmake )
   else ()
-    install ( FILES  make_package.rb DESTINATION MantidPlot.app/ )
+    configure_file( ${CMAKE_CURRENT_SOURCE_DIR}/make_package.rb.in
+                   ${CMAKE_CURRENT_BINARY_DIR}/make_package.rb
+                   @ONLY )
+    install ( FILES  ${CMAKE_CURRENT_BINARY_DIR}/make_package.rb DESTINATION MantidPlot.app/ )
     configure_file ( ${CMAKE_CURRENT_SOURCE_DIR}/FixMavericksBundle.cmake.in
                    ${CMAKE_CURRENT_BINARY_DIR}/FixMavericksBundle.cmake
                    @ONLY )

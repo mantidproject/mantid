@@ -3,7 +3,6 @@
 #include "MantidKernel/PhysicalConstants.h"
 
 #include <boost/lexical_cast.hpp>
-#include <iostream>
 
 namespace Mantid {
 namespace Kernel {

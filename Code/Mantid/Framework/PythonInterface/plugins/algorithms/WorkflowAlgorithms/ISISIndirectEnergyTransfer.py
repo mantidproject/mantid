@@ -1,3 +1,4 @@
+#pylint: disable=invalid-name,attribute-defined-outside-init,too-many-instance-attributes,too-many-branches
 from mantid.kernel import *
 from mantid.api import *
 from mantid.simpleapi import *
@@ -29,8 +30,8 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
 
         self.declareProperty(name='SumFiles', defaultValue=False, doc='Toggle input file summing or sequential processing')
 
-        self.declareProperty(WorkspaceProperty('CalibrationWorkspace', '',
-                             direction=Direction.Input, optional=PropertyMode.Optional), doc='Workspace contining calibration data')
+        self.declareProperty(WorkspaceProperty('CalibrationWorkspace', '', direction=Direction.Input, optional=PropertyMode.Optional),
+                             doc='Workspace contining calibration data')
 
         # Instrument configuration properties
         self.declareProperty(name='Instrument', defaultValue='', doc='Instrument used during run.',
@@ -40,8 +41,7 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
         self.declareProperty(name='Reflection', defaultValue='', doc='Reflection number for instrument setup during run.',
                              validator=StringListValidator(['002', '004', '006']))
 
-        self.declareProperty(IntArrayProperty(name='SpectraRange', values=[0, 1],
-                             validator=IntArrayMandatoryValidator()),
+        self.declareProperty(IntArrayProperty(name='SpectraRange', values=[0, 1],validator=IntArrayMandatoryValidator()),
                              doc='Comma separated range of spectra number to use.')
         self.declareProperty(FloatArrayProperty(name='BackgroundRange'),
                              doc='Range of background to subtact from raw data in time of flight.')
@@ -55,11 +55,9 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
         self.declareProperty(name='GroupingMethod', defaultValue='IPF',
                              validator=StringListValidator(['Individual', 'All', 'File', 'Workspace', 'IPF']),
                              doc='Method used to group spectra.')
-        self.declareProperty(WorkspaceProperty('GroupingWorkspace', '',
-                             direction=Direction.Input, optional=PropertyMode.Optional),
+        self.declareProperty(WorkspaceProperty('GroupingWorkspace', '', direction=Direction.Input, optional=PropertyMode.Optional),
                              doc='Workspace containing spectra grouping.')
-        self.declareProperty(FileProperty('MapFile', '',
-                             action=FileAction.OptionalLoad, extensions=['.map']),
+        self.declareProperty(FileProperty('MapFile', '', action=FileAction.OptionalLoad, extensions=['.map']),
                              doc='Workspace containing spectra grouping.')
 
         # Output properties
@@ -69,8 +67,7 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
         self.declareProperty(name='Plot', defaultValue='None', doc='Type of plot to output after reduction.',
                              validator=StringListValidator(['None', 'Spectra', 'Contour', 'Both']))
 
-        self.declareProperty(WorkspaceGroupProperty('OutputWorkspace', '',
-                             direction=Direction.Output),
+        self.declareProperty(WorkspaceGroupProperty('OutputWorkspace', '', direction=Direction.Output),
                              doc='Workspace group for the resulting workspaces.')
 
 

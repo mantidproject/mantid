@@ -111,7 +111,7 @@ class LiquidsReflectometryReduction(PythonAlgorithm):
             file_list.append(data_file)
         runs = reduce((lambda x, y: '%s+%s' % (x, y)), file_list)
         ws_event_data = Load(Filename=runs, OutputWorkspace="REF_L_%s" % dataRunNumbers[0])
-        
+
         # Compute the primary fraction using the unprocessed workspace
         apply_primary_fraction = self.getProperty("ApplyPrimaryFraction").value
         primary_fraction = [1.0, 0.0]
@@ -168,7 +168,7 @@ class LiquidsReflectometryReduction(PythonAlgorithm):
                                              normPeakRange, bck_request, normBackRange)
             # Avoid leaving trash behind
             AnalysisDataService.remove(str(ws_event_norm))
-    
+
             # Sum up the normalization peak
             norm_summed = SumSpectra(InputWorkspace = norm_cropped)
             norm_summed = RebinToWorkspace(WorkspaceToRebin=norm_summed,
@@ -191,7 +191,7 @@ class LiquidsReflectometryReduction(PythonAlgorithm):
         normalized_data = ConvertToPointData(InputWorkspace=normalized_data,
                                              OutputWorkspace=str(normalized_data))
         normalized_data.setDistribution(True)
-        
+
         # Apply scaling factors
         normalized_data = self.apply_scaling_factor(normalized_data)
 
@@ -231,7 +231,7 @@ class LiquidsReflectometryReduction(PythonAlgorithm):
         q_rebin = Rebin(InputWorkspace=q_workspace, Params=q_range,
                         OutputWorkspace=name_output_ws)
 
-        # Apply the primary fraction 
+        # Apply the primary fraction
         if apply_primary_fraction:
             ws_fraction = CreateSingleValuedWorkspace(DataValue=primary_fraction[0],
                                                       ErrorValue=primary_fraction[1])
@@ -270,7 +270,7 @@ class LiquidsReflectometryReduction(PythonAlgorithm):
         # Clean up the workspace for backward compatibility
         data_y = q_rebin.dataY(0)
         data_e = q_rebin.dataE(0)
-        # Again for backward compatibility, the first and last points of the 
+        # Again for backward compatibility, the first and last points of the
         # raw output when not cropping was simply set to 0 += 1.
         if crop is False:
             data_y[0] = 0
@@ -334,9 +334,9 @@ class LiquidsReflectometryReduction(PythonAlgorithm):
             error_msg += "[%g, %g] found [%g, %g]" % (tof_range[0], tof_range[1],
                                                       tof_min, tof_max)
             raise RuntimeError, error_msg
-        
+
         tof_step = self.getProperty("TOFSteps").value
-        workspace = Rebin(InputWorkspace=workspace, Params=[0, tof_step, tof_max], 
+        workspace = Rebin(InputWorkspace=workspace, Params=[0, tof_step, tof_max],
                           PreserveEvents=False, OutputWorkspace="%s_histo" % str(workspace))
 
         # Crop TOF range
@@ -404,7 +404,7 @@ class LiquidsReflectometryReduction(PythonAlgorithm):
 
         # Get the incident medium
         incident_medium = self.getProperty("IncidentMediumSelected").value
-        
+
         # Get the wavelength
         lr = workspace.getRun().getProperty('LambdaRequest').value[0]
         lr_value = float("{0:.2f}".format(lr))
@@ -459,7 +459,7 @@ class LiquidsReflectometryReduction(PythonAlgorithm):
         scaling_data = open(scaling_factor_file, 'r')
         file_content = scaling_data.read()
         scaling_data.close()
-        
+
         data_found = None
         for line in file_content.split('\n'):
             if line.startswith('#'):
@@ -468,7 +468,7 @@ class LiquidsReflectometryReduction(PythonAlgorithm):
             # Parse the line of data and produce a dict
             toks = line.split()
             data_dict = reduce(_reduce, toks, {})
-            
+
             # Get ordered list of keys
             keys = []
             for token in toks:
@@ -483,7 +483,7 @@ class LiquidsReflectometryReduction(PythonAlgorithm):
             elif len(keys)<10:
                 logger.error("Bad scaling factor entry\n  %s" % line)
                 continue
-                
+
             # Sanity check
             if keys[0] != 'IncidentMedium' and keys[1] != 'LambdaRequested' \
                 and keys[2] != 'S1H':

@@ -289,23 +289,18 @@ inline void getIndicesFromLinearIndex(const size_t linear_index,
  * @param widths : width in pixels per dimension
  * @return True if the are neighbours, otherwise false.
  */
-inline bool isNeighbourOfSubject(const size_t ndims,
-                                 const size_t neighbour_linear_index,
-                                 const size_t *subject_indices,
-                                 const size_t *num_bins,
-                                 const size_t *index_max, const std::vector<int>& widths) {
-  std::vector<size_t> neighbour_indices(ndims);
-  Utils::NestedForLoop::GetIndicesFromLinearIndex(ndims, neighbour_linear_index,
-                                                  num_bins, index_max,
-                                                  &neighbour_indices.front());
-
+inline bool
+isNeighbourOfSubject(const size_t ndims, const size_t neighbour_linear_index,
+                     const size_t *subject_indices, const size_t *num_bins,
+                     const size_t *index_max, const std::vector<int> &widths) {
   for (size_t ind = 0; ind < ndims; ++ind) {
-    long double diff =
-        std::abs(static_cast<long double>(subject_indices[ind]) -
-                 static_cast<long double>(neighbour_indices[ind]));
-    if (diff > widths[ind]/2) {
+    size_t neigh_index =
+        (neighbour_linear_index / num_bins[ind]) % index_max[ind];
+    const long double subj = static_cast<long double>(subject_indices[ind]);
+    const long double neigh = static_cast<long double>(neigh_index);
+    const long double diff = std::abs(subj - neigh);
+    if (diff > widths[ind] / 2)
       return false;
-    }
   }
   return true;
 }

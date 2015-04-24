@@ -121,7 +121,7 @@ boost::shared_ptr<Mantid::Geometry::DetectorGroup> createGroupOfTwoMonitors();
 /** create instrument with cylindrical detectors located in specific angular
  * positions */
 Mantid::Geometry::Instrument_sptr
-createCylInstrumentWithDetInGivenPosisions(const std::vector<double> &L2,
+createCylInstrumentWithDetInGivenPositions(const std::vector<double> &L2,
                                            const std::vector<double> &polar,
                                            const std::vector<double> &azim);
 /**

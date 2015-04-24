@@ -16,6 +16,7 @@
 #include <pqPipelineSource.h>
 #include <pqPluginManager.h>
 #include <pqRenderView.h>
+#include <pqScalarsToColors.h>
 #include <vtkSMPropertyHelper.h>
 #include <vtkSMProxy.h>
 
@@ -44,32 +45,9 @@ namespace
 ThreeSliceView::ThreeSliceView(QWidget *parent) : ViewBase(parent)
 {
   this->ui.setupUi(this);
-
-  // We need to load the QuadView plugin
-  QString quadViewLibrary;
-#ifdef Q_OS_WIN32
-  // Windows requires the full
-  // path information. The DLL is located in the apropriate executeable path of paraview.
-  const Poco::Path paraviewPath(Mantid::Kernel::ConfigService::Instance().getParaViewPath());
-  Poco::Path quadViewFullPath(paraviewPath, QUADVIEW_LIBRARY.toStdString());
-  quadViewLibrary = quadViewFullPath.toString().c_str();
-#else
-  quadViewLibrary = QUADVIEW_LIBRARY;
-#endif
-
-  // Need to load plugin
-  pqPluginManager* pm = pqApplicationCore::instance()->getPluginManager();
-  QString error;
-  pm->loadExtension(pqActiveObjects::instance().activeServer(),
-                    quadViewLibrary, &error, false);
-
-  g_log.debug() << "Loading QuadView library from " << quadViewLibrary.toStdString() << "\n";
-
   this->mainView = this->createRenderView(this->ui.mainRenderFrame,
-                                          QString("pqQuadView"));
+                                          QString("OrthographicSliceView"));
   pqActiveObjects::instance().setActiveView(this->mainView);
-
-  vtkSMPropertyHelper(this->mainView->getProxy(), "ShowCubeAxes").Set(1);
 }
 
 ThreeSliceView::~ThreeSliceView()
@@ -144,7 +122,7 @@ void ThreeSliceView::correctVisibility()
 */
 void ThreeSliceView::correctColorScaleRange()
 {
-  QPair<double, double> range = this->origRep->getColorFieldRange();
+  QPair<double, double> range = this->origRep->getLookupTable()->getScalarRange();
   emit this->dataRange(range.first, range.second);
 }
 

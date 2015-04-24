@@ -1,6 +1,6 @@
 #ifndef _vtkEventNexusReader_h
 #define _vtkEventNexusReader_h
-#include "vtkPolyDataAlgorithm.h"
+#include "MantidVatesAPI/vtkPolyDataAlgorithm_Silent.h"
 #include "MantidAPI/IPeaksWorkspace.h"
 
 class vtkImplicitFunction;
@@ -9,7 +9,7 @@ class VTK_EXPORT vtkNexusPeaksReader : public vtkPolyDataAlgorithm
 {
 public:
   static vtkNexusPeaksReader *New();
-  vtkTypeMacro(vtkNexusPeaksReader, vtkPolyDataAlgorithm);
+  vtkTypeMacro(vtkNexusPeaksReader, vtkPolyDataAlgorithm)
   void PrintSelf(ostream& os, vtkIndent indent);
   vtkSetStringMacro(FileName);
   vtkGetStringMacro(FileName);

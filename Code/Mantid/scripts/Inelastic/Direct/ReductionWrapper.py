@@ -68,7 +68,7 @@ class ReductionWrapper(object):
         self._wvs = ReductionWrapper.var_holder(web_var)
       # Initialize reduced for given instrument
         self.reducer = DirectEnergyConversion(instrumentName)
-        # 
+        #
         web_vars = self._wvs.get_all_vars()
         if web_vars :
             self.reducer.prop_man.set_input_parameters(**web_vars)
@@ -159,7 +159,7 @@ class ReductionWrapper(object):
     @property
     def validate_run_number(self):
         """The property defines the run number to validate. If defined, switches reduction wrapper from
-           reduction to validation mode, where reduction tries to load result, previously calculated, 
+           reduction to validation mode, where reduction tries to load result, previously calculated,
            for this run and then compare this result with the result, defined earlier"""
         return self._run_number_to_validate
 
@@ -211,13 +211,13 @@ class ReductionWrapper(object):
 
 #
     def validate_result(self,Error=1.e-6,ToleranceRelErr=True):
-      """Method to validate result against existing validation file
+        """Method to validate result against existing validation file
          or workspace
 
          Change this method to verify different results or validate results differently"""
-      rez,message = ReductionWrapper.build_or_validate_result(self,
+        rez,message = ReductionWrapper.build_or_validate_result(self,
                                      Error,ToleranceRelErr)
-      return rez,message
+        return rez,message
    #
 
     def set_custom_output_filename(self):
@@ -256,7 +256,7 @@ class ReductionWrapper(object):
             else:
                 if len(path)>0:
                     config.appendDataSearchDir(path)
-                # it there bug in getFullPath? It returns the same string if given full path 
+                # it there bug in getFullPath? It returns the same string if given full path
                 # but file has not been found
                 name,fext=os.path.splitext(name)
                 fileName = FileFinder.getFullPath(name+'.nxs')
@@ -269,7 +269,7 @@ class ReductionWrapper(object):
                 else:
                     build_validation = True
         elif isinstance(validation_file,api.Workspace):
-        # its workspace: 
+        # its workspace:
             reference_ws = validation_file
             build_validation = False
             fileName = "workspace:"+reference_ws.name()
