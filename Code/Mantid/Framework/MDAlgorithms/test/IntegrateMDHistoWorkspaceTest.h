@@ -47,7 +47,7 @@ public:
     TSM_ASSERT_THROWS("No new steps allowed", alg.execute(), std::runtime_error&);
   }
 
-  void test_throw_if_incorrect_binning_limits()
+  void test_throw_if_incorrect_binning_limits_when_integrating()
   {
     using namespace Mantid::DataObjects;
     MDHistoWorkspace_sptr ws = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 1 /*nd*/, 10);
@@ -72,6 +72,39 @@ public:
     alg.setProperty("P1Bin", boost::assign::list_of(min)(max).convert_to_container<std::vector<double> >());
     TSM_ASSERT("Expect validation errors", alg.validateInputs().size() > 0);
     TSM_ASSERT_THROWS("Incorrect limits", alg.execute(), std::runtime_error&);
+  }
+
+  void test_throw_if_incorrect_binning_limits_when_similar()
+  {
+    using namespace Mantid::DataObjects;
+    MDHistoWorkspace_sptr ws = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 1 /*nd*/, 10);
+
+    IntegrateMDHistoWorkspace alg;
+    alg.setChild(true);
+    alg.setRethrows(true);
+    alg.initialize();
+    alg.setProperty("InputWorkspace", ws);
+    alg.setPropertyValue("OutputWorkspace", "dummy");
+
+    const double min = 3;
+    double step = 0;
+    // Test equal to
+    double max = min;
+    alg.setProperty("P1Bin", boost::assign::list_of(min)(step)(max).convert_to_container<std::vector<double> >());
+    TSM_ASSERT("Expect validation errors", alg.validateInputs().size() > 0);
+    TSM_ASSERT_THROWS("Incorrect limits", alg.execute(), std::runtime_error&);
+
+    // Test less than
+    max = min - 0.01;
+    alg.setProperty("P1Bin", boost::assign::list_of(min)(step)(max).convert_to_container<std::vector<double> >());
+    TSM_ASSERT("Expect validation errors", alg.validateInputs().size() > 0);
+    TSM_ASSERT_THROWS("Incorrect limits", alg.execute(), std::runtime_error&);
+
+    // Test non-zero step. ZERO means copy!
+    max = min - 0.01;
+    alg.setProperty("P1Bin", boost::assign::list_of(min)(1.0)(max).convert_to_container<std::vector<double> >());
+    TSM_ASSERT("Expect validation errors", alg.validateInputs().size() > 0);
+    TSM_ASSERT_THROWS("Step has been specified", alg.execute(), std::runtime_error&);
   }
 
   // Users may set all binning parameter to [] i.e. direct copy, no integration.
@@ -138,7 +171,50 @@ public:
       TSM_ASSERT_DELTA("Wrong error value", std::sqrt(5 * (ws->getErrorAt(0) * ws->getErrorAt(0))), outWS->getErrorAt(0), 1e-4);
   }
 
+
   void test_1D_integration_partial_binning_complex(){
+
+      /*
+
+                           input
+      (x = 0) *|--|--|--|--|--|--|--|--|--|--|* (x = 10)
+                1  1  1  1  1  1  1  1  1  1
+
+                  output requested
+
+      (x = 0.75) *|--------------|* (x = 4.25)
+                1/4 + 1 + 1 + 1 + 1/4 = 3.5 counts
+
+      */
+
+
+      using namespace Mantid::DataObjects;
+      MDHistoWorkspace_sptr ws = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0 /*signal*/, 1 /*nd*/, 10 /*nbins*/, 10 /*max*/, 1.0 /*error sq*/);
+
+      IntegrateMDHistoWorkspace alg;
+      alg.setChild(true);
+      alg.setRethrows(true);
+      alg.initialize();
+      alg.setProperty("InputWorkspace", ws);
+      const double min = 0.75;
+      const double max = 4.25;
+      alg.setProperty("P1Bin", boost::assign::list_of(min)(max).convert_to_container<std::vector<double> >());
+      alg.setPropertyValue("OutputWorkspace", "dummy");
+      alg.execute();
+      IMDHistoWorkspace_sptr outWS=alg.getProperty("OutputWorkspace");
+
+      // Quick check that output seems to have the right shape.
+      TSM_ASSERT_EQUALS("All integrated", 1, outWS->getNPoints());
+      auto dim = outWS->getDimension(0);
+      TS_ASSERT_EQUALS(min, dim->getMinimum());
+      TS_ASSERT_EQUALS(max, dim->getMaximum());
+
+      // Check the data.
+      TSM_ASSERT_DELTA("Wrong integrated value", 3.5, outWS->getSignalAt(0), 1e-4);
+      TSM_ASSERT_DELTA("Wrong error value", std::sqrt(3.5 * (ws->getErrorAt(0) * ws->getErrorAt(0))), outWS->getErrorAt(0), 1e-4);
+  }
+
+  void test_1D_integration_partial_binning_complex_with_original_step(){
 
       /*
 

@@ -36,19 +36,52 @@ bool emptyBinning(const std::vector<double> &binning) {
 }
 
 /**
+ * Check for integration binning
+ * @param binning : binning
+ * @return : true if binning is min, max integration style
+ */
+bool integrationBinning(const std::vector<double> &binning) {
+  return binning.size() == 2 && binning[0] < binning[1];
+}
+
+/**
+ * Check for similar binning
+ * @param binning : binning
+ * @return : true if binning similar, with limits but same bin width
+ */
+bool similarBinning(const std::vector<double> &binning) {
+  return binning.size() == 3 && binning[1] == 0.0;
+}
+
+/**
  * Determine whether the binning provided is any good.
  * @param binning : Binning property
  * @return : string containing error. Or empty for no error.
  */
 std::string checkBinning(const std::vector<double> &binning) {
   std::string error; // No error.
-  if (!emptyBinning(binning) && binning.size() != 2) {
-    error = "You may only integrate out dimensions between limits.";
-  } else if (binning.size() == 2) {
-    auto min = binning[0];
-    auto max = binning[1];
-    if (min >= max) {
-      error = "min must be < max limit for binning";
+  if (!emptyBinning(binning)) {
+    if (binning.size() == 3) {
+      const double step = binning[1];
+      if (step != 0) {
+        error = "Only step size zero is allowed. Denotes copy of original step "
+                "size for that dimension.";
+      } else {
+         auto min = binning[0];
+         auto max = binning[2];
+         if (min >= max) {
+            error = "Min must be < max limit for binning";
+         }
+      }
+
+    } else if (binning.size() == 2) {
+         auto min = binning[0];
+         auto max = binning[1];
+         if (min >= max) {
+            error = "Min must be < max limit for binning";
+         }
+    } else {
+      error = "Unknown binning prameters for dimension.";
     }
   }
   return error;
@@ -70,34 +103,47 @@ createShapedOutput(IMDHistoWorkspace const *const inWS,
     IMDDimension_const_sptr inDim = inWS->getDimension(i);
     auto outDim = boost::make_shared<MDHistoDimension>(inDim.get());
     // Apply dimensions as inputs.
-    if (i < pbins.size() && !emptyBinning(pbins[i])) {
+    if (i < pbins.size() && integrationBinning(pbins[i])) {
       auto binning = pbins[i];
       outDim->setRange(
           1 /*single bin*/,
           static_cast<Mantid::coord_t>(binning.front()) /*min*/,
           static_cast<Mantid::coord_t>(
               binning.back()) /*max*/); // Set custom min, max and nbins.
+    } else if( i < pbins.size() && similarBinning(pbins[i]) ) {
+      auto binning = pbins[i];
+      const double width = inDim->getBinWidth();
+      const double min = binning.front();
+      double max = binning.back();
+      const size_t roundedNBins = static_cast<size_t>((max-min/width) + 0.5); // round up to a whole number of bins.
+      max = width * double( roundedNBins ); // recalculate the width
+      outDim->setRange(
+          roundedNBins,
+          static_cast<Mantid::coord_t>(min) /*min*/,
+          static_cast<Mantid::coord_t>(max)
+              ) /*max*/); // Set custom min, max and nbins.
     }
     dimensions[i] = outDim;
   }
-  return MDHistoWorkspace_sptr(new MDHistoWorkspace(dimensions));
+  return boost::make_shared<MDHistoWorkspace>(dimensions);
 }
 
 /**
- * Perform a weighted sum at the iterator position. This function does not increment the iterator.
+ * Perform a weighted sum at the iterator position. This function does not
+ * increment the iterator.
  * @param iterator : Iterator to use in sum
  * @param box : Box implicit function defining valid region.
  * @param sumSignal : Accumlation in/out ref.
  * @param sumSQErrors : Accumulation error in/out ref. Squared value.
  */
-void performWeightedSum(MDHistoWorkspaceIterator const * const iterator, MDBoxImplicitFunction& box, double& sumSignal, double& sumSQErrors) {
-    const double weight = box.fraction(iterator->getBoxExtents());
-    sumSignal += weight * iterator->getSignal();
-    const double error = iterator->getError();
-    sumSQErrors +=
-        weight * (error * error);
+void performWeightedSum(MDHistoWorkspaceIterator const *const iterator,
+                        MDBoxImplicitFunction &box, double &sumSignal,
+                        double &sumSQErrors) {
+  const double weight = box.fraction(iterator->getBoxExtents());
+  sumSignal += weight * iterator->getSignal();
+  const double error = iterator->getError();
+  sumSQErrors += weight * (error * error);
 }
-
 }
 
 namespace Mantid {
@@ -186,7 +232,8 @@ void IntegrateMDHistoWorkspace::exec() {
     outWS = inWS->clone();
   } else {
 
-    /* Create the output workspace in the right shape. This allows us to iterate over our output
+    /* Create the output workspace in the right shape. This allows us to iterate
+       over our output
        structure and fill it.
      */
     outWS = createShapedOutput(inWS.get(), pbins);
@@ -199,17 +246,23 @@ void IntegrateMDHistoWorkspace::exec() {
     for (size_t i = 0; i < nDims; ++i) {
       binWidthsOut[i] = outWS->getDimension(i)->getBinWidth();
 
-      // Maximum width vector for region in output workspace corresponding to region in input workspace.
+      // Maximum width vector for region in output workspace corresponding to
+      // region in input workspace.
 
-      /* int(wout/win + 0.5) = n_pixels in input corresponding to 1 pixel in output. Rounded up.
-         The width vector is the total width. So we always need to double it to take account of the whole region.
-         For example, 8/4 + 0.5 = 2, but thats only 1 pixel on each side of the center, we need 2 * that to give the correct
+      /* int(wout/win + 0.5) = n_pixels in input corresponding to 1 pixel in
+         output. Rounded up.
+         The width vector is the total width. So we always need to double it to
+         take account of the whole region.
+         For example, 8/4 + 0.5 = 2, but thats only 1 pixel on each side of the
+         center, we need 2 * that to give the correct
          answer of 4.
       */
-      widthVector[i] =  2 * int((binWidthsOut[i] / inWS->getDimension(i)->getBinWidth()) + 0.5); // round up.
+      widthVector[i] =
+          2 * int((binWidthsOut[i] / inWS->getDimension(i)->getBinWidth()) +
+                  0.5); // round up.
 
-      if(widthVector[i]%2 == 0) {
-          widthVector[i]+= 1; // make it odd if not already.
+      if (widthVector[i] % 2 == 0) {
+        widthVector[i] += 1; // make it odd if not already.
       }
     }
 
@@ -222,56 +275,62 @@ void IntegrateMDHistoWorkspace::exec() {
     PARALLEL_FOR_NO_WSP_CHECK()
     for (int i = 0; i < int(outIterators.size()); ++i) {
 
-    PARALLEL_START_INTERUPT_REGION
-    boost::scoped_ptr<MDHistoWorkspaceIterator> outIterator(
-                  dynamic_cast<MDHistoWorkspaceIterator *>(outIterators[i]));
+      PARALLEL_START_INTERUPT_REGION
+      boost::scoped_ptr<MDHistoWorkspaceIterator> outIterator(
+          dynamic_cast<MDHistoWorkspaceIterator *>(outIterators[i]));
 
-    do {
+      do {
 
-      Mantid::Kernel::VMD outIteratorCenter = outIterator->getCenter();
+        Mantid::Kernel::VMD outIteratorCenter = outIterator->getCenter();
 
-      // Calculate the extents for this out iterator position.
-      std::vector<Mantid::coord_t> mins(nDims);
-      std::vector<Mantid::coord_t> maxs(nDims);
-      for (size_t i = 0; i < nDims; ++i) {
-        const coord_t delta = binWidthsOut[i] / 2;
-        mins[i] = outIteratorCenter[i] - delta;
-        maxs[i] = outIteratorCenter[i] + delta;
-      }
-      MDBoxImplicitFunction box(mins, maxs);
+        // Calculate the extents for this out iterator position.
+        std::vector<Mantid::coord_t> mins(nDims);
+        std::vector<Mantid::coord_t> maxs(nDims);
+        for (size_t i = 0; i < nDims; ++i) {
+          const coord_t delta = binWidthsOut[i] / 2;
+          mins[i] = outIteratorCenter[i] - delta;
+          maxs[i] = outIteratorCenter[i] + delta;
+        }
+        MDBoxImplicitFunction box(mins, maxs);
 
-      double sumSignal = 0;
-      double sumSQErrors = 0;
+        double sumSignal = 0;
+        double sumSQErrors = 0;
 
-      // Create a thread-local input iterator.
-      boost::scoped_ptr<MDHistoWorkspaceIterator> inIterator(
-          dynamic_cast<MDHistoWorkspaceIterator *>(inWS->createIterator()));
+        // Create a thread-local input iterator.
+        boost::scoped_ptr<MDHistoWorkspaceIterator> inIterator(
+            dynamic_cast<MDHistoWorkspaceIterator *>(inWS->createIterator()));
 
-      /*
-      We jump to the iterator position which is closest in the model coordinates
-      to the centre of our output iterator. This allows us to consider a much smaller region of space as part of our inner loop
-      rather than iterating over the full set of boxes of the input workspace.
-      */
-      inIterator->jumpToNearest(outIteratorCenter);
+        /*
+        We jump to the iterator position which is closest in the model
+        coordinates
+        to the centre of our output iterator. This allows us to consider a much
+        smaller region of space as part of our inner loop
+        rather than iterating over the full set of boxes of the input workspace.
+        */
+        inIterator->jumpToNearest(outIteratorCenter);
 
-      performWeightedSum(inIterator.get(), box, sumSignal, sumSQErrors); // Use the present position. neighbours below exclude the current position.
+        performWeightedSum(inIterator.get(), box, sumSignal,
+                           sumSQErrors); // Use the present position. neighbours
+                                         // below exclude the current position.
 
-      // Look at all of the neighbours of our position. We previously calculated what the width vector would need to be.
-      auto neighbourIndexes = inIterator->findNeighbourIndexesByWidth(widthVector);
-      for (size_t i = 0; i < neighbourIndexes.size(); ++i) {
+        // Look at all of the neighbours of our position. We previously
+        // calculated what the width vector would need to be.
+        auto neighbourIndexes =
+            inIterator->findNeighbourIndexesByWidth(widthVector);
+        for (size_t i = 0; i < neighbourIndexes.size(); ++i) {
           inIterator->jumpTo(neighbourIndexes[i]); // Go to that neighbour
           performWeightedSum(inIterator.get(), box, sumSignal, sumSQErrors);
-      }
+        }
 
-      const size_t iteratorIndex = outIterator->getLinearIndex();
-      outWS->setSignalAt(iteratorIndex, sumSignal);
-      outWS->setErrorSquaredAt(iteratorIndex, sumSQErrors);
+        const size_t iteratorIndex = outIterator->getLinearIndex();
+        outWS->setSignalAt(iteratorIndex, sumSignal);
+        outWS->setErrorSquaredAt(iteratorIndex, sumSQErrors);
 
-      progress.report();
-    } while (outIterator->next());
-    PARALLEL_END_INTERUPT_REGION
-  }
-  PARALLEL_CHECK_INTERUPT_REGION
+        progress.report();
+      } while (outIterator->next());
+      PARALLEL_END_INTERUPT_REGION
+    }
+    PARALLEL_CHECK_INTERUPT_REGION
   }
 
   this->setProperty("OutputWorkspace", outWS);
