@@ -997,12 +997,22 @@ void FindPeaks::fitSinglePeak(const API::MatrixWorkspace_sptr &input,
           }
       }
       if (new_i_max > i_max) new_i_max = i_max;
-      std::stringstream outss;
-      outss << "Fit single peak in X-range " << vecX[new_i_min]
-            << ", " << vecX[new_i_max] << ", centre at "
-            << vecX[i_centre] << " (index = " << i_centre
-            << "). ";
-      g_log.information(outss.str());
+
+      if (i_min != new_i_min || i_max != new_i_max) {
+          std::stringstream outss;
+          outss << "Reset X-range to" << vecX[new_i_min]
+                   << ", " << vecX[new_i_max] << ", centre at "
+                   << vecX[i_centre] << " (index = " << i_centre
+                   << "). ";
+          g_log.information(outss.str());
+
+          // check that the peak is still in range
+          if ( i_centre >= new_i_max || i_centre <= new_i_min) {
+              g_log.information("fit window no longer contains the peak");
+              addNonFitRecord(spectrum, m_peakFunction->centre());
+              return;
+          }
+      }
   }
 
 
