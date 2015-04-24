@@ -1,4 +1,5 @@
 #include "MantidVatesSimpleGuiViewWidgets/StandardView.h"
+#include "MantidVatesSimpleGuiViewWidgets/RebinnedSourcesManager.h"
 // Have to deal with ParaView warnings and Intel compiler the hard way.
 #if defined(__INTEL_COMPILER)
   #pragma warning disable 1170
@@ -40,8 +41,10 @@ namespace SimpleGui
  * This function sets up the UI components, adds connections for the view's
  * buttons and creates the rendering view.
  * @param parent the parent widget for the standard view
+ * @param rebinnedSourcesManager Pointer to a RebinnedSourcesManager
  */
-  StandardView::StandardView(QWidget *parent) : ViewBase(parent),m_binMDAction(NULL),
+  StandardView::StandardView(QWidget *parent, RebinnedSourcesManager* rebinnedSourcesManager) : ViewBase(parent, rebinnedSourcesManager),
+                                                                 m_binMDAction(NULL),
                                                                  m_sliceMDAction(NULL),
                                                                  m_cutMDAction(NULL),
                                                                  m_unbinAction(NULL)
@@ -231,13 +234,6 @@ void StandardView::closeSubWindows()
 {
 }
 
-/**
- * This function reacts to a destroyed source.
- */
-void StandardView::onSourceDestroyed()
-{
-  //setRebinAndUnbinButtons();
-}
 
 /**
  * Check if the rebin and unbin buttons should be visible

@@ -18,6 +18,8 @@ namespace Vates
 {
 namespace SimpleGui
 {
+
+  class RebinnedSourcesManager;
 /**
  *
  This class represents the initial view for the main program. It is meant to
@@ -51,7 +53,7 @@ class EXPORT_OPT_MANTIDVATES_SIMPLEGUI_VIEWWIDGETS StandardView : public ViewBas
 
 public:
   /// Default constructor.
-  StandardView(QWidget *parent = 0);
+  StandardView(QWidget *parent = 0, RebinnedSourcesManager* rebinnedSourcesManager = 0);
   /// Default destructor.
   virtual ~StandardView();
 
@@ -75,8 +77,6 @@ public:
   void closeSubWindows();
 
 public slots:
-  /// React when the visibility of a representation changes
-  void onSourceDestroyed();
   /// Listen to a change in the active source.
   void activeSourceChangeListener(pqPipelineSource* source);
 

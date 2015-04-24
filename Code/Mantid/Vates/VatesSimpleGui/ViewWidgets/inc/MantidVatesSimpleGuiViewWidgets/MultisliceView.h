@@ -17,6 +17,8 @@ namespace Vates
 {
 namespace SimpleGui
 {
+
+  class RebinnedSourcesManager;
 /**
  *
   This class uses the MultiSliceView created by Kitware based on our
@@ -52,8 +54,9 @@ public:
   /**
    * Default constructor.
    * @param parent the parent widget of the multislice view widget
+   * @param rebinnedSourcesManager Pointer to a RebinnedSourcesManager
    */
-  MultiSliceView(QWidget *parent = 0);
+  MultiSliceView(QWidget *parent = 0, RebinnedSourcesManager* rebinnedSourcesManager = 0);
   /// Default constructor.
   virtual ~MultiSliceView();
 
