@@ -33,6 +33,7 @@ public slots:
 
 private slots:
   void setDefaultAccumulationMethod(const QString&);
+  void updateUiElements(const QString&);
   void accept();
   void initListenerPropLayout(const QString&);
 
