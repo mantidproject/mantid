@@ -3,6 +3,7 @@
 
 #include <QDesktopServices>
 
+#include "MantidQtAPI/HelpWindow.h"
 #include "MantidQtAPI/MantidColorMap.h"
 
 #include "MantidQtSpectrumViewer/SVConnections.h"
@@ -730,7 +731,7 @@ void SVConnections::showColorScale( std::vector<QRgb> & positiveColorTable,
  */
 void SVConnections::openOnlineHelp()
 {
-  QDesktopServices::openUrl(QUrl("http://www.mantidproject.org/MantidPlot:_ImageViewer"));
+  MantidQt::API::HelpWindow::showCustomInterface(NULL, QString("SpectrumViewer"));
 }
 
 } // namespace SpectrumView

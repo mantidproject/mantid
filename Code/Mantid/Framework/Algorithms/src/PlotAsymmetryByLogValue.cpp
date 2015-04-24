@@ -77,6 +77,34 @@ using namespace DataObjects;
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(PlotAsymmetryByLogValue)
 
+// Static member variables
+std::map<int64_t, double> PlotAsymmetryByLogValue::g_redX;
+std::map<int64_t, double> PlotAsymmetryByLogValue::g_redY;
+std::map<int64_t, double> PlotAsymmetryByLogValue::g_redE;
+std::map<int64_t, double> PlotAsymmetryByLogValue::g_greenX;
+std::map<int64_t, double> PlotAsymmetryByLogValue::g_greenY;
+std::map<int64_t, double> PlotAsymmetryByLogValue::g_greenE;
+std::map<int64_t, double> PlotAsymmetryByLogValue::g_sumX;
+std::map<int64_t, double> PlotAsymmetryByLogValue::g_sumY;
+std::map<int64_t, double> PlotAsymmetryByLogValue::g_sumE;
+std::map<int64_t, double> PlotAsymmetryByLogValue::g_diffX;
+std::map<int64_t, double> PlotAsymmetryByLogValue::g_diffY;
+std::map<int64_t, double> PlotAsymmetryByLogValue::g_diffE;
+std::string PlotAsymmetryByLogValue::g_logName;
+std::string PlotAsymmetryByLogValue::g_logFunc;
+std::string PlotAsymmetryByLogValue::g_stype;
+std::vector<int> PlotAsymmetryByLogValue::g_forward_list;
+std::vector<int> PlotAsymmetryByLogValue::g_backward_list;
+int PlotAsymmetryByLogValue::g_red = 1;
+int PlotAsymmetryByLogValue::g_green = EMPTY_INT();
+std::string PlotAsymmetryByLogValue::g_dtcType;
+std::string PlotAsymmetryByLogValue::g_dtcFile;
+std::string PlotAsymmetryByLogValue::g_filenameBase;
+std::string PlotAsymmetryByLogValue::g_filenameExt;
+int PlotAsymmetryByLogValue::g_filenameZeros = 0;
+double PlotAsymmetryByLogValue::g_minTime = EMPTY_DBL();
+double PlotAsymmetryByLogValue::g_maxTime = EMPTY_DBL();
+
 /** Initialisation method. Declares properties to be used in algorithm.
 *
 */
@@ -154,52 +182,34 @@ void PlotAsymmetryByLogValue::init() {
 */
 void PlotAsymmetryByLogValue::exec() {
 
-  // Get properties
-  // Get grouping property
-  m_forward_list = getProperty("ForwardSpectra");
-  m_backward_list = getProperty("BackwardSpectra");
-  m_autogroup = (m_forward_list.size() == 0 && m_backward_list.size() == 0);
-  // Get log value
-  m_logName = getPropertyValue("LogValue");
-  // Get green and red periods
-  m_red = getProperty("Red");
-  m_green = getProperty("Green");
-  // Get type of computation
-  std::string stype = getProperty("Type");
-  m_int = stype == "Integral";
-  // Get type of dead-time corrections
-  m_dtcType = getPropertyValue("DeadTimeCorrType");
-  // Get runs
-  std::string firstFN = getProperty("FirstRun");
-  std::string lastFN = getProperty("LastRun");
-  // Get function to apply to logValue
-  m_logFunc = getPropertyValue("Function");
+  // Check input properties to decide whether or not we can reuse previous
+  // results, if any
+  size_t is, ie;
+  checkProperties(is,ie);
 
-  // Parse run names and get the number of runs
-  parseRunNames( firstFN, lastFN, m_filenameBase, m_filenameExt, m_filenameZeros);
-  size_t is = atoi(firstFN.c_str()); // starting run number
-  size_t ie = atoi(lastFN.c_str());  // last run number
-
-  // Resize vectors that will store results
-  resizeVectors(ie-is+1);
-
-  Progress progress(this, 0, 1, ie - is + 2);
+  Progress progress(this, 0, 1, ie - is + 1);
 
   // Loop through runs
   for (size_t i = is; i <= ie; i++) {
 
-    // Load run, apply dead time corrections and detector grouping
-    Workspace_sptr loadedWs = doLoad(i);
+    // Check if run i was already loaded
+    if ( !g_redX.count(i) ) {
 
-    // Analyse loadedWs
-    doAnalysis (loadedWs, i-is);
+      // Load run, apply dead time corrections and detector grouping
+      Workspace_sptr loadedWs = doLoad(i);
+
+      if ( loadedWs ) {
+        // Analyse loadedWs
+        doAnalysis (loadedWs, i);
+      }
+    }
 
     progress.report();
   }
 
 
   // Create the 2D workspace for the output
-  int nplots = (m_green!= EMPTY_INT()) ? 4 : 1;
+  int nplots = (g_green!= EMPTY_INT()) ? 4 : 1;
   size_t npoints = ie - is + 1;
   MatrixWorkspace_sptr outWS = WorkspaceFactory::Instance().create(
       "Workspace2D",
@@ -211,6 +221,143 @@ void PlotAsymmetryByLogValue::exec() {
   populateOutputWorkspace(outWS,nplots);
   // Assign the result to the output workspace property
   setProperty("OutputWorkspace", outWS);
+
+}
+
+/**  Checks input properties and compares them to previous values
+*   @param is :: [output] Number of the first run
+*   @param ie :: [output] Number of the last run
+*/
+void PlotAsymmetryByLogValue::checkProperties (size_t &is, size_t &ie) {
+
+  // If any of the following properties has a different value from the
+  // previous call, we need to re-do all the computations, which means
+  // clearing static maps that store previous results
+
+  // Log Value
+  std::string logName = getPropertyValue("LogValue");
+  // Get function to apply to logValue
+  std::string logFunc = getPropertyValue("Function");
+  // Get type of computation
+  std::string stype = getPropertyValue("Type");
+  // Get grouping properties
+  std::vector<int> forward_list = getProperty("ForwardSpectra");
+  std::vector<int> backward_list = getProperty("BackwardSpectra");
+  // Get green and red periods
+  int red = getProperty("Red");
+  int green = getProperty("Green");
+  // Get time min and time max
+  double minTime = getProperty("TimeMin");
+  double maxTime = getProperty("TimeMax");
+  // Get type of dead-time corrections
+  std::string dtcType = getPropertyValue("DeadTimeCorrType");
+  std::string dtcFile = getPropertyValue("DeadTimeCorrFile");
+  // Get runs
+  std::string firstFN = getProperty("FirstRun");
+  std::string lastFN = getProperty("LastRun");
+
+  // Parse run names and get the number of runs
+  std::string filenameBase, filenameExt;
+  int filenameZeros;
+  parseRunNames( firstFN, lastFN, filenameBase, filenameExt, filenameZeros);
+  is = atoi(firstFN.c_str()); // starting run number
+  ie = atoi(lastFN.c_str());  // last run number
+  if ( ie < is ) {
+    throw std::runtime_error("First run number is greater than last run number");
+  }
+
+
+  // Skip checks if there are no previous results
+  if ( !g_redX.empty() ) {
+
+    size_t isOld = g_redX.begin()->first; // Old first run number
+    size_t ieOld = g_redX.rbegin()->first; // Old last run number
+
+    // Check if any property has changed
+    if ( g_logName != logName ||
+      g_logFunc != logFunc ||
+      g_stype != stype ||
+      g_forward_list != forward_list ||
+      g_backward_list != backward_list ||
+      g_green != green ||
+      g_red != red ||
+      g_dtcType != dtcType ||
+      g_dtcFile != dtcFile ||
+      g_filenameBase != filenameBase ||
+      g_filenameExt != filenameExt ||
+      g_filenameZeros != filenameZeros ||
+      g_minTime != minTime ||
+      g_maxTime != maxTime) {
+
+        // If so, clear previous results
+        clearResultsFromTo(isOld,ieOld);
+
+    } else {
+
+      // If all of the above are the same, we may re-use previous
+      // results, provided that new run numbers are 'appropriate'
+
+      if ( is > ieOld || ie < isOld ) {
+        // Completely new set of runs
+        clearResultsFromTo(isOld,ieOld);
+
+      } else {
+
+        if ( is > isOld ) {
+          // Remove runs from isOld to is-1
+          clearResultsFromTo(isOld,is-1);
+        }
+        if ( ie < ieOld ) {
+          // Remove runs from ie+1 to ieOld
+          clearResultsFromTo(ie+1,ieOld);
+        }
+
+      } // else
+    } // else
+
+  } // !g_redX.empty()
+
+  // Asign new values to static variables
+  g_logName = logName;
+  g_logFunc = logFunc;
+  g_stype = stype;
+  m_int = g_stype == "Integral";
+  g_forward_list = forward_list;
+  g_backward_list = backward_list;
+  m_autogroup = (g_forward_list.size() == 0 && g_backward_list.size() == 0);
+  g_green = green;
+  g_red = red;
+  g_dtcType = dtcType;
+  g_dtcFile = dtcFile;
+  g_filenameBase = filenameBase;
+  g_filenameExt = filenameExt;
+  g_filenameZeros = filenameZeros;
+  g_minTime = minTime;
+  g_maxTime = maxTime;
+
+}
+
+/**  Clears any possible result from previous call
+*   @param is :: [input] Run number to clear resulst from
+*   @param ie :: [input] Run number to clear results to
+*/
+void PlotAsymmetryByLogValue::clearResultsFromTo(size_t is, size_t ie) {
+
+  for (size_t i=is; i<=ie; i++) {
+    g_redX.erase(i);
+    g_redY.erase(i);
+    g_redE.erase(i);
+    g_greenX.erase(i);
+    g_greenY.erase(i);
+    g_greenE.erase(i);
+    g_sumX.erase(i);
+    g_sumY.erase(i);
+    g_sumE.erase(i);
+    g_diffX.erase(i);
+    g_diffY.erase(i);
+    g_diffE.erase(i);
+  }
+
 }
 
 /**  Loads one run and applies dead-time corrections and detector grouping if required
@@ -220,8 +367,14 @@ Workspace_sptr PlotAsymmetryByLogValue::doLoad (int64_t runNumber ) {
 
   // Get complete run name
   std::ostringstream fn, fnn;
-  fnn << std::setw(m_filenameZeros) << std::setfill('0') << runNumber;
-  fn << m_filenameBase << fnn.str() << m_filenameExt;
+  fnn << std::setw(g_filenameZeros) << std::setfill('0') << runNumber;
+  fn << g_filenameBase << fnn.str() << g_filenameExt;
+
+  // Check if file exists
+  if ( !Poco::File(fn.str()).exists() ) {
+    g_log.warning() << "File " << fn.str() << " not found" << std::endl;
+    return Workspace_sptr();
+  }
 
   // Load run
   IAlgorithm_sptr load = createChildAlgorithm("LoadMuonNexus");
@@ -230,12 +383,12 @@ Workspace_sptr PlotAsymmetryByLogValue::doLoad (int64_t runNumber ) {
   Workspace_sptr loadedWs = load->getProperty("OutputWorkspace");
 
   // Check if dead-time corrections have to be applied
-  if (m_dtcType != "None") {
-    if (m_dtcType == "FromSpecifiedFile") {
+  if (g_dtcType != "None") {
+    if (g_dtcType == "FromSpecifiedFile") {
 
       // If user specifies a file, load corrections now
       Workspace_sptr customDeadTimes;
-      loadCorrectionsFromFile (customDeadTimes, getPropertyValue("DeadTimeCorrFile"));
+      loadCorrectionsFromFile (customDeadTimes, g_dtcFile);
       applyDeadtimeCorr (loadedWs, customDeadTimes);
     } else {
       // Load corrections from run
@@ -276,30 +429,60 @@ void PlotAsymmetryByLogValue::populateOutputWorkspace (MatrixWorkspace_sptr &out
 {
   TextAxis *tAxis = new TextAxis(nplots);
   if (nplots == 1) {
+
+    std::vector<double> vecRedX, vecRedY, vecRedE;
+    for (auto it=g_redX.begin(); it!=g_redX.end(); ++it)
+    {
+      vecRedX.push_back( g_redX[ it->first ] );
+      vecRedY.push_back( g_redY[ it->first ] );
+      vecRedE.push_back( g_redE[ it->first ] );
+    }
+
     tAxis->setLabel(0, "Asymmetry");
-    outWS->dataX(0) = m_redX;
-    outWS->dataY(0) = m_redY;
-    outWS->dataE(0) = m_redE;
+    outWS->dataX(0) = vecRedX;
+    outWS->dataY(0) = vecRedY;
+    outWS->dataE(0) = vecRedE;
   } else {
+
+    std::vector<double> vecRedX, vecRedY, vecRedE;
+    std::vector<double> vecGreenX, vecGreenY, vecGreenE;
+    std::vector<double> vecSumX, vecSumY, vecSumE;
+    std::vector<double> vecDiffX, vecDiffY, vecDiffE;
+    for (auto it=g_redX.begin(); it!=g_redX.end(); ++it)
+    {
+      vecRedX.push_back( g_redX[ it->first ] );
+      vecRedY.push_back( g_redY[ it->first ] );
+      vecRedE.push_back( g_redE[ it->first ] );
+      vecGreenX.push_back( g_greenX[ it->first ] );
+      vecGreenY.push_back( g_greenY[ it->first ] );
+      vecGreenE.push_back( g_greenE[ it->first ] );
+      vecSumX.push_back( g_sumX[ it->first ] );
+      vecSumY.push_back( g_sumY[ it->first ] );
+      vecSumE.push_back( g_sumE[ it->first ] );
+      vecDiffX.push_back( g_diffX[ it->first ] );
+      vecDiffY.push_back( g_diffY[ it->first ] );
+      vecDiffE.push_back( g_diffE[ it->first ] );
+    }
+
     tAxis->setLabel(0, "Red-Green");
     tAxis->setLabel(1, "Red");
     tAxis->setLabel(2, "Green");
     tAxis->setLabel(3, "Red+Green");
-    outWS->dataX(0) = m_diffX;
-    outWS->dataY(0) = m_diffY;
-    outWS->dataE(0) = m_diffE;
-    outWS->dataX(1) = m_redX;
-    outWS->dataY(1) = m_redY;
-    outWS->dataE(1) = m_redE;
-    outWS->dataX(2) = m_greenX;
-    outWS->dataY(2) = m_greenY;
-    outWS->dataE(2) = m_greenE;
-    outWS->dataX(3) = m_sumX;
-    outWS->dataY(3) = m_sumY;
-    outWS->dataE(3) = m_sumE;
+    outWS->dataX(0) = vecDiffX;
+    outWS->dataY(0) = vecDiffY;
+    outWS->dataE(0) = vecDiffE;
+    outWS->dataX(1) = vecRedX;
+    outWS->dataY(1) = vecRedY;
+    outWS->dataE(1) = vecRedE;
+    outWS->dataX(2) = vecGreenX;
+    outWS->dataY(2) = vecGreenY;
+    outWS->dataE(2) = vecGreenE;
+    outWS->dataX(3) = vecSumX;
+    outWS->dataY(3) = vecSumY;
+    outWS->dataE(3) = vecSumE;
   }
   outWS->replaceAxis(1, tAxis);
-  outWS->getAxis(0)->title() = m_logName;
+  outWS->getAxis(0)->title() = g_logName;
   outWS->setYUnitLabel("Asymmetry");
 }
 /**  Parse run names
@@ -442,9 +625,9 @@ void PlotAsymmetryByLogValue::doAnalysis (Workspace_sptr loadedWs, int64_t index
 
       double Y, E;
       calcIntAsymmetry(loadedWs2D, Y, E);
-      m_redX[index]=getLogValue(*loadedWs2D);
-      m_redY[index]=Y;
-      m_redE[index]=E;
+      g_redX[index]=getLogValue(*loadedWs2D);
+      g_redY[index]=Y;
+      g_redE[index]=E;
 
     } else {
 
@@ -457,11 +640,11 @@ void PlotAsymmetryByLogValue::doAnalysis (Workspace_sptr loadedWs, int64_t index
         Workspace2D_sptr memberWs =
             boost::dynamic_pointer_cast<Workspace2D>(loadedGroup->getItem(mi));
         int period = mi + 1;
-        if ( period == m_red ){
+        if ( period == g_red ){
           ws_red = memberWs;
         }
-        if ( m_green!= EMPTY_INT() ){
-          if ( period == m_green ){
+        if ( g_green!= EMPTY_INT() ){
+          if ( period == g_green ){
             ws_green = memberWs;
           }
         }
@@ -472,16 +655,16 @@ void PlotAsymmetryByLogValue::doAnalysis (Workspace_sptr loadedWs, int64_t index
         throw std::invalid_argument("Red period is out of range");
       }
       // Check ws_green
-      if ( (m_green!=EMPTY_INT()) && (!ws_green) ){
+      if ( (g_green!=EMPTY_INT()) && (!ws_green) ){
         throw std::invalid_argument("Green period is out of range");
       }
 
-      if ( m_green==EMPTY_INT() ){
+      if ( g_green==EMPTY_INT() ){
         double Y, E;
         calcIntAsymmetry(ws_red, Y, E);
-        m_redX[index] = getLogValue(*ws_red);
-        m_redY[index] = Y;
-        m_redE[index] = E;
+        g_redX[index] = getLogValue(*ws_red);
+        g_redY[index] = Y;
+        g_redE[index] = E;
 
       } else{
       
@@ -491,23 +674,23 @@ void PlotAsymmetryByLogValue::doAnalysis (Workspace_sptr loadedWs, int64_t index
         calcIntAsymmetry(ws_red, YR, ER);
         calcIntAsymmetry(ws_green, YG, EG);
         // Red data
-        m_redX[index] = logValue;
-        m_redY[index] = YR;
-        m_redE[index] = ER;
+        g_redX[index] = logValue;
+        g_redY[index] = YR;
+        g_redE[index] = ER;
         // Green data
-        m_greenX[index] = logValue;
-        m_greenY[index] = YG;
-        m_greenE[index] = EG;
+        g_greenX[index] = logValue;
+        g_greenY[index] = YG;
+        g_greenE[index] = EG;
         // Sum
-        m_sumX[index] = logValue;
-        m_sumY[index] = YR+YG;
-        m_sumE[index] = sqrt(ER * ER + EG * EG);
+        g_sumX[index] = logValue;
+        g_sumY[index] = YR+YG;
+        g_sumE[index] = sqrt(ER * ER + EG * EG);
         // move to last for safety since some grouping takes place in the
         // calcIntAsymmetry call below
         calcIntAsymmetry(ws_red, ws_green, YR, ER);
-        m_diffX[index] = logValue;
-        m_diffY[index] = YR;
-        m_diffE[index] = ER;
+        g_diffX[index] = logValue;
+        g_diffY[index] = YR;
+        g_diffE[index] = ER;
       }
     } // else loadedGroup
 
@@ -536,8 +719,8 @@ void PlotAsymmetryByLogValue::calcIntAsymmetry(API::MatrixWorkspace_sptr ws,
     asym->setProperty("InputWorkspace", ws);
     asym->setPropertyValue("OutputWorkspace", "tmp");
     if (!m_autogroup) {
-      asym->setProperty("ForwardSpectra", m_forward_list);
-      asym->setProperty("BackwardSpectra", m_backward_list);
+      asym->setProperty("ForwardSpectra", g_forward_list);
+      asym->setProperty("BackwardSpectra", g_backward_list);
     }
     asym->execute();
     MatrixWorkspace_sptr asymWS = asym->getProperty("OutputWorkspace");
@@ -571,8 +754,8 @@ void PlotAsymmetryByLogValue::calcIntAsymmetry(API::MatrixWorkspace_sptr ws,
     asym->setProperty("InputWorkspace", intWS);
     asym->setPropertyValue("OutputWorkspace", "tmp");
     if (!m_autogroup) {
-      asym->setProperty("ForwardSpectra", m_forward_list);
-      asym->setProperty("BackwardSpectra", m_backward_list);
+      asym->setProperty("ForwardSpectra", g_forward_list);
+      asym->setProperty("BackwardSpectra", g_backward_list);
     }
     asym->execute();
     MatrixWorkspace_sptr out = asym->getProperty("OutputWorkspace");
@@ -595,10 +778,10 @@ PlotAsymmetryByLogValue::calcIntAsymmetry(API::MatrixWorkspace_sptr ws_red,
                                           API::MatrixWorkspace_sptr ws_green,
                                           double &Y, double &E) {
   if (!m_autogroup) {
-    groupDetectors(ws_red, m_backward_list);
-    groupDetectors(ws_red, m_forward_list);
-    groupDetectors(ws_green, m_backward_list);
-    groupDetectors(ws_green, m_forward_list);
+    groupDetectors(ws_red, g_backward_list);
+    groupDetectors(ws_red, g_forward_list);
+    groupDetectors(ws_green, g_backward_list);
+    groupDetectors(ws_green, g_forward_list);
   }
 
   Property *startXprop = getProperty("TimeMin");
@@ -692,28 +875,6 @@ PlotAsymmetryByLogValue::groupDetectors(API::MatrixWorkspace_sptr &ws,
   ws = group->getProperty("OutputWorkspace");
 }
 
-/**  Resize vectors that will store results.
- *  @param size :: The size of the vectors
- */
-void PlotAsymmetryByLogValue::resizeVectors(size_t size) {
-
-  // Red vectors
-  m_redX.resize(size);
-  m_redY.resize(size);
-  m_redE.resize(size);
-  // Green vectors
-  m_greenX.resize(size);
-  m_greenY.resize(size);
-  m_greenE.resize(size);
-  // Diff vectors
-  m_diffX.resize(size);
-  m_diffY.resize(size);
-  m_diffE.resize(size);
-  // Sum vectors
-  m_sumX.resize(size);
-  m_sumY.resize(size);
-  m_sumE.resize(size);
-}
 /**
  * Get log value from a workspace. Convert to double if possible.
  *
@@ -723,27 +884,27 @@ void PlotAsymmetryByLogValue::resizeVectors(size_t size) {
  *doesn't exist.
  */
 double PlotAsymmetryByLogValue::getLogValue(MatrixWorkspace &ws) {
-  auto *property = ws.run().getLogData(m_logName);
+  auto *property = ws.run().getLogData(g_logName);
   if (!property) {
-    throw std::invalid_argument("Log " + m_logName + " does not exist.");
+    throw std::invalid_argument("Log " + g_logName + " does not exist.");
   }
   double value = 0;
   // try different property types
-  if (convertLogToDouble<double>(property, value, m_logFunc))
+  if (convertLogToDouble<double>(property, value, g_logFunc))
     return value;
-  if (convertLogToDouble<float>(property, value, m_logFunc))
+  if (convertLogToDouble<float>(property, value, g_logFunc))
     return value;
-  if (convertLogToDouble<int>(property, value, m_logFunc))
+  if (convertLogToDouble<int>(property, value, g_logFunc))
     return value;
-  if (convertLogToDouble<long>(property, value, m_logFunc))
+  if (convertLogToDouble<long>(property, value, g_logFunc))
     return value;
-  if (convertLogToDouble<long long>(property, value, m_logFunc))
+  if (convertLogToDouble<long long>(property, value, g_logFunc))
     return value;
-  if (convertLogToDouble<unsigned int>(property, value, m_logFunc))
+  if (convertLogToDouble<unsigned int>(property, value, g_logFunc))
     return value;
-  if (convertLogToDouble<unsigned long>(property, value, m_logFunc))
+  if (convertLogToDouble<unsigned long>(property, value, g_logFunc))
     return value;
-  if (convertLogToDouble<unsigned long long>(property, value, m_logFunc))
+  if (convertLogToDouble<unsigned long long>(property, value, g_logFunc))
     return value;
   // try if it's a string and can be lexically cast to double
   auto slog =
@@ -758,7 +919,7 @@ double PlotAsymmetryByLogValue::getLogValue(MatrixWorkspace &ws) {
     }
   }
 
-  throw std::invalid_argument("Log " + m_logName +
+  throw std::invalid_argument("Log " + g_logName +
                               " cannot be converted to a double type.");
 }
 
