@@ -91,13 +91,6 @@ namespace Mantid
           void onRebinnedSourceDestroyed();
 
         private:
-          std::map<std::string, std::string> m_originalWorkspaceToRebinnedWorkspace; ///< Holds the mapping from the original source to the rebinned source
-
-          std::map<std::string, std::string> m_rebinnedWorkspaceToOriginalWorkspace; ///< Holds the mapping from the rebinned source to the original source
-
-          std::map<std::string, std::string> m_rebinnedWorkspaceToRebinnedWorkspace; ///< Holds information from a rebinned source to another temproary source which replaces it.
-
-
           std::map<std::pair<std::string, std::string>, std::string> m_rebinnedWorkspaceAndSourceToOriginalWorkspace; ///< Holds a mapping from (RebinnedWsName, RebinnedSourceName unique ID) to (OriginalWsName)
           std::map<std::string, std::pair<std::string, pqPipelineSource*>>  m_newWorkspacePairBuffer; ///< Holds information for the name of a new, rebinned workspace vs an original workspace and source
           std::map<std::string, std::pair<std::string, pqPipelineSource*>>  m_newRebinnedWorkspacePairBuffer; ///< Holds information for the name of a new, rebinned workspace vs an old rebinned workspace and source

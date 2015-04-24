@@ -599,12 +599,46 @@ namespace Mantid
       }
 
       /**
-       * React to the deletion of a rebinned source.
+       * React to the deletion of a rebinned source. We need to make sure that the source is untracked
        */
       void RebinnedSourcesManager::onRebinnedSourceDestroyed()
       {
-        // Remove the destroyed source
-        
+        pqServer *server = pqActiveObjects::instance().activeServer();
+        pqServerManagerModel *smModel = pqApplicationCore::instance()->getServerManagerModel();
+        QList<pqPipelineSource *> sources = smModel->findItems<pqPipelineSource *>(server);
+
+        std::vector<std::pair<std::string, std::string>> toBeUntracked;
+
+        // Compare all registered sources to all loaded sources,
+        for (std::map<std::pair<std::string, std::string>, std::string>::iterator it = m_rebinnedWorkspaceAndSourceToOriginalWorkspace.begin();
+             it != m_rebinnedWorkspaceAndSourceToOriginalWorkspace.end(); ++it)
+        {
+          std::string registeredSourceName = it->first.second;
+
+          QList<pqPipelineSource*>::Iterator source = sources.begin();
+
+          // Find the source which matches the registered source
+          while(source != sources.end())
+          {
+            if (registeredSourceName == getSourceName(*source))
+            {
+              break;
+            }
+            ++source;
+          }
+
+          // If there was no matching source then mark it to be untracked
+          if (source == sources.end())
+          {
+            toBeUntracked.push_back(it->first);
+          }
+        }
+
+        // Finally untrack all sources which need it
+        for (std::vector<std::pair<std::string, std::string>>::iterator key = toBeUntracked.begin(); key != toBeUntracked.end(); ++key)
+        {
+          untrackWorkspaces(*key);
+        }
       }
 
       /**

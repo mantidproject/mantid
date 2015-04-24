@@ -662,18 +662,6 @@ void MdViewerWidget::renderWorkspace(QString workspaceName, int workspaceType, s
     sourcePlugin = "MDEW Source";
   }
 
-#if 0
-  // Make sure that we are not loading a rebinned vsi workspace which is already loaded
-  // 
-  if (m_rebinnedSourcesManager.doesWorkspaceBelongToRebinnedSource(workspaceName.toStdString()))
-  {
-    QMessageBox::information(this, QApplication::tr("Loading Source Warning"),
-                        QApplication::tr("You cannot load a rebinned vsi source which \n "\
-                                        "is currently in use.\n "
-                                        "Please select another source."));
-    return;
-  }
-#endif
   // Load a new source plugin
     pqPipelineSource* source = this->currentView->setPluginSource(sourcePlugin, workspaceName);
     source->getProxy()->SetAnnotation(this->m_widgetName.toLatin1().data(), "1");
@@ -1287,9 +1275,8 @@ void MdViewerWidget::afterReplaceHandle(const std::string &wsName,
 
 /**
  * This function responds to a workspace being deleted. If there are one or
- * more PeaksWorkspaces present, the requested one will be deleted. If the
- * deleted source is a rebinned source, then we revert back to the
-*  original source. Otherwise, if it is an IMDWorkspace, everything goes! 
+ * more PeaksWorkspaces present, the requested one will be deleted. 
+ * Otherwise, if it is an IMDWorkspace, everything goes! 
  * @param wsName : Name of workspace being deleted
  * @param ws : Pointer to workspace being deleted
  */
