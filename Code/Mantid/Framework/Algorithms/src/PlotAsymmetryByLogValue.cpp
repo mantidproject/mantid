@@ -198,8 +198,10 @@ void PlotAsymmetryByLogValue::exec() {
       // Load run, apply dead time corrections and detector grouping
       Workspace_sptr loadedWs = doLoad(i);
 
-      // Analyse loadedWs
-      doAnalysis (loadedWs, i);
+      if ( loadedWs ) {
+        // Analyse loadedWs
+        doAnalysis (loadedWs, i);
+      }
     }
 
     progress.report();
@@ -367,6 +369,12 @@ Workspace_sptr PlotAsymmetryByLogValue::doLoad (int64_t runNumber ) {
   std::ostringstream fn, fnn;
   fnn << std::setw(g_filenameZeros) << std::setfill('0') << runNumber;
   fn << g_filenameBase << fnn.str() << g_filenameExt;
+
+  // Check if file exists
+  if ( !Poco::File(fn.str()).exists() ) {
+    g_log.warning() << "File " << fn.str() << " not found" << std::endl;
+    return Workspace_sptr();
+  }
 
   // Load run
   IAlgorithm_sptr load = createChildAlgorithm("LoadMuonNexus");
