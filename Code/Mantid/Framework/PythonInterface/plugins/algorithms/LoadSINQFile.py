@@ -13,6 +13,7 @@ import mantid.simpleapi
 from mantid import config
 import os.path
 import numpy as np
+import re
 
 #--------- place to look for dictionary files
 
@@ -48,13 +49,21 @@ class LoadSINQFile(PythonAlgorithm):
             "MARSI":"marsin.dic",
             "MARSE":"marse.dic",
             "POLDI":"poldi.dic",
+            "POLDI_NEW":"poldi_new.dic",
             "RITA-2":"rita.dic",
             "SANS":"sans.dic",
             "SANS2":"sans.dic",
             "TRICS":"trics.dic"\
         }
+
+        lookupInstrumentName = inst
+        if inst == 'POLDI':
+            year = self._extractYearFromFileName(fname)
+            if year >= 2015:
+                lookupInstrumentName += '_NEW'
+
         dictsearch = os.path.join(config['instrumentDefinition.directory'],"nexusdictionaries")
-        dicname = os.path.join(dictsearch, diclookup[inst])
+        dicname = os.path.join(dictsearch, diclookup[lookupInstrumentName])
         wname = "__tmp"
         ws = mantid.simpleapi.LoadFlexiNexus(fname,dicname,OutputWorkspace=wname)
 
@@ -62,11 +71,11 @@ class LoadSINQFile(PythonAlgorithm):
             if ws.getNumberHistograms() == 800:
                 ws.maskDetectors(SpectraList=range(0,800)[::2])
 
-            config.appendDataSearchDir(config['groupingFiles.directory'])
-            grp_file = "POLDI_Grouping_800to400.xml"
-            ws = mantid.simpleapi.GroupDetectors(InputWorkspace=ws,
-                                                 OutputWorkspace=wname,
-                                                 MapFile=grp_file, Behaviour="Sum")
+                config.appendDataSearchDir(config['groupingFiles.directory'])
+                grp_file = "POLDI_Grouping_800to400.xml"
+                ws = mantid.simpleapi.GroupDetectors(InputWorkspace=ws,
+                                                     OutputWorkspace=wname,
+                                                     MapFile=grp_file, Behaviour="Sum")
 
             # Reverse direction of POLDI data so that low index corresponds to low 2theta.
             histogramCount = ws.getNumberHistograms()
@@ -85,6 +94,13 @@ class LoadSINQFile(PythonAlgorithm):
         self.setProperty("OutputWorkspace", ws)
         # delete temporary reference
         mantid.simpleapi.DeleteWorkspace(wname,EnableLogging=False)
+
+    def _extractYearFromFileName(self, filename):
+        pureFileName = os.path.basename(filename)
+        pattern = re.compile("\w+(\d{4})n[\w\d\.]+")
+        matches = re.match(pattern, pureFileName)
+
+        return int(matches.group(1))
 
 #---------- register with Mantid
 AlgorithmFactory.subscribe(LoadSINQFile)
