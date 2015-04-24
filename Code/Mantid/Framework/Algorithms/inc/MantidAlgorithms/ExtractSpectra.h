@@ -46,6 +46,7 @@ public:
 private:
   void init();
   void exec();
+  void execHistogram();
   void execEvent();
 
   void checkProperties();
@@ -61,16 +62,14 @@ private:
   std::size_t m_minX;
   /// The bin index to end the cropped workspace at
   std::size_t m_maxX;
-  /// The spectrum index to start the cropped workspace from
-  specid_t m_minSpec;
-  /// The spectrum index to end the cropped workspace at
-  specid_t m_maxSpec;
   /// Flag indicating whether the input workspace has common boundaries
   bool m_commonBoundaries;
   /// Flag indicating whether we're dealing with histogram data
   bool m_histogram;
   /// Flag indicating whether XMin and/or XMax has been set
   bool m_croppingInX;
+  /// The list of spectra to extract.
+  std::vector<specid_t> m_spectrumList;
 };
 
 } // namespace Algorithms

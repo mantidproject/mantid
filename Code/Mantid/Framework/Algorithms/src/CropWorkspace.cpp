@@ -71,8 +71,23 @@ void CropWorkspace::exec() {
 
   auto extract = createChildAlgorithm("ExtractSpectra");
   extract->initialize();
-  extract->copyPropertiesFrom(*this);
   extract->setRethrows(true);
+
+  MatrixWorkspace_sptr inputWorkspace = getProperty("InputWorkspace");
+  extract->setProperty("InputWorkspace", inputWorkspace);
+
+  double xmin = getProperty("XMin");
+  extract->setProperty("XMin", xmin);
+
+  double xmax = getProperty("XMax");
+  extract->setProperty("XMax", xmax);
+
+  int start = getProperty("StartWorkspaceIndex");
+  extract->setProperty("StartWorkspaceIndex", start);
+
+  int end = getProperty("EndWorkspaceIndex");
+  extract->setProperty("EndWorkspaceIndex", end);
+
   extract->execute();
 
   MatrixWorkspace_sptr outputWorkspace = extract->getProperty("OutputWorkspace");

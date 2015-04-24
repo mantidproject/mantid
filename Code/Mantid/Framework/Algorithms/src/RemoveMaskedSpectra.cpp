@@ -77,61 +77,19 @@ void RemoveMaskedSpectra::exec() {
   }
 
   // Find indices of the unmasked spectra.
-  std::vector<size_t> indices;
+  std::vector<specid_t> indices;
   makeIndexList(indices, maskedWorkspace.get());
 
-  // Number of spectra in the cropped workspace.
-  size_t nSpectra = indices.size();
-  // Number of bins/data points in the cropped workspace.
-  size_t nBins = inputWorkspace->blocksize();
-  size_t histogram = inputWorkspace->isHistogramData() ? 1 : 0;
+  auto extract = createChildAlgorithm("ExtractSpectra");
+  extract->initialize();
+  extract->setRethrows(true);
 
-  // Create the output workspace.
-  MatrixWorkspace_sptr outputWorkspace = WorkspaceFactory::Instance().create(
-      inputWorkspace, nSpectra, nBins + histogram, nBins);
+  extract->setProperty("InputWorkspace", inputWorkspace);
+  extract->setProperty("SpectrumList", indices);
 
-  // If this is a Workspace2D, get the spectra axes for copying in the spectraNo
-  // later.
-  Axis *inAxis1(NULL), *outAxis1(NULL);
-  TextAxis *outTxtAxis(NULL);
-  if (inputWorkspace->axes() > 1) {
-    inAxis1 = inputWorkspace->getAxis(1);
-    outAxis1 = outputWorkspace->getAxis(1);
-    outTxtAxis = dynamic_cast<TextAxis *>(outAxis1);
-  }
+  extract->execute();
 
-  // Check for common boundaries in input workspace.
-  bool commonBoundaries = WorkspaceHelpers::commonBoundaries(inputWorkspace);
-
-  MantidVecPtr newX;
-  if (commonBoundaries) newX = inputWorkspace->refX(0);
-
-  // Add spectra to the output workspace.
-  for (size_t j = 0; j < nSpectra; ++j) {
-    auto i = indices[j];
-    // copy the x bins
-    if (commonBoundaries) {
-      outputWorkspace->setX(j, newX);
-    } else {
-      outputWorkspace->setX(j, inputWorkspace->refX(i));
-    }
-    // Copy the y values and errors.
-    outputWorkspace->getSpectrum(j)->setData(inputWorkspace->readY(i), inputWorkspace->readE(i));
-    // Copy spectrum number & detectors
-    outputWorkspace->getSpectrum(j)
-        ->copyInfoFrom(*inputWorkspace->getSpectrum(i));
-    // Copy over the axis entry for each spectrum, regardless of the type of
-    // axes present.
-    if (inAxis1) {
-      if (outAxis1->isText()) {
-        outTxtAxis->setLabel(j, inAxis1->label(i));
-      } else if (!outAxis1->isSpectra()) // handled by copyInfoFrom line
-      {
-        dynamic_cast<NumericAxis *>(outAxis1)
-            ->setValue(j, inAxis1->operator()(i));
-      }
-    }
-  }
+  MatrixWorkspace_sptr outputWorkspace = extract->getProperty("OutputWorkspace");
   setProperty("OutputWorkspace", outputWorkspace);
 }
 
@@ -140,12 +98,12 @@ void RemoveMaskedSpectra::exec() {
 /// @param indices :: A reference to a vector to fill with the indices.
 /// @param maskedWorkspace :: A workspace with masking information.
 void RemoveMaskedSpectra::makeIndexList(
-    std::vector<size_t> &indices, const API::MatrixWorkspace *maskedWorkspace) {
+    std::vector<specid_t> &indices, const API::MatrixWorkspace *maskedWorkspace) {
   auto mask = dynamic_cast<const DataObjects::MaskWorkspace *>(maskedWorkspace);
   if (mask) {
     for (size_t i = 0; i < mask->getNumberHistograms(); ++i) {
       if (mask->readY(i)[0] == 0.0) {
-        indices.push_back(i);
+        indices.push_back(static_cast<specid_t>(i));
       }
     }
   } else {
@@ -157,7 +115,7 @@ void RemoveMaskedSpectra::makeIndexList(
         continue;
       }
       if (det->isMasked()) {
-        indices.push_back(i);
+        indices.push_back(static_cast<specid_t>(i));
       }
     }
   }

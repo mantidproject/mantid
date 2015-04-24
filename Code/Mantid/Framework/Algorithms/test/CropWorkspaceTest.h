@@ -130,6 +130,7 @@ public:
     TS_ASSERT_THROWS_NOTHING( algo.setPropertyValue("EndWorkspaceIndex","4") );
     TS_ASSERT(algo.execute());
     TS_ASSERT(algo.isExecuted());
+    if ( !algo.isExecuted() ) return;
 
     // verify the output workspace
     ws = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(eventname);
@@ -158,6 +159,7 @@ public:
 
     TS_ASSERT_THROWS_NOTHING( crop.execute() );
     TS_ASSERT( crop.isExecuted() );
+    if ( !crop.isExecuted() ) return;
 
     MatrixWorkspace_const_sptr output;
     TS_ASSERT_THROWS_NOTHING( output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outputWS) );
@@ -189,6 +191,7 @@ public:
     TS_ASSERT_THROWS_NOTHING( crop2.setPropertyValue("OutputWorkspace","unCropped") );
     TS_ASSERT_THROWS_NOTHING( crop2.execute() );
     TS_ASSERT( crop2.isExecuted() );
+    if ( !crop2.isExecuted() ) return;
 
     MatrixWorkspace_const_sptr output;
     TS_ASSERT_THROWS_NOTHING( output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("unCropped") );
@@ -229,6 +232,7 @@ public:
     TS_ASSERT_THROWS_NOTHING( crop3.setPropertyValue("OutputWorkspace","pointOut") );
     TS_ASSERT_THROWS_NOTHING( crop3.execute() );
     TS_ASSERT( crop3.isExecuted() );
+    if ( !crop3.isExecuted() ) return;
 
     MatrixWorkspace_const_sptr output;
     TS_ASSERT_THROWS_NOTHING( output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("pointOut") );
@@ -273,6 +277,7 @@ public:
     TS_ASSERT_THROWS_NOTHING( crop4.setPropertyValue("XMax","4.1") );
     TS_ASSERT_THROWS_NOTHING( crop4.execute() );
     TS_ASSERT( crop4.isExecuted() );
+    if ( !crop4.isExecuted() ) return;
     
     MatrixWorkspace_const_sptr output;
     TS_ASSERT_THROWS_NOTHING( output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("raggedOut") );
@@ -311,6 +316,7 @@ public:
     TS_ASSERT_THROWS_NOTHING( crop4.setPropertyValue("XMax","5.1") );
     TS_ASSERT_THROWS_NOTHING( crop4.execute() );
     TS_ASSERT( crop4.isExecuted() );
+    if ( !crop4.isExecuted() ) return;
 
     MatrixWorkspace_const_sptr output;
     TS_ASSERT_THROWS_NOTHING( output = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("raggedOut") );
@@ -383,6 +389,7 @@ public:
     alg->setPropertyValue("OutputWorkspace",wsName);
     alg->execute();
     TS_ASSERT(alg->isExecuted());
+    if ( !alg->isExecuted() ) return;
 
     // Check the output
     MatrixWorkspace_sptr outputWS;

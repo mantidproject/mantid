@@ -43,7 +43,7 @@ public:
 private:
   void init();
   void exec();
-  void makeIndexList(std::vector<size_t> &indices,
+  void makeIndexList(std::vector<specid_t> &indices,
                      const API::MatrixWorkspace *maskedWorkspace);
 };
 
