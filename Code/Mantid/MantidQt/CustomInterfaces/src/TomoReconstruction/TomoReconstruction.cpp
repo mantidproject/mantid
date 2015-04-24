@@ -89,7 +89,7 @@ TomoReconstruction::TomoReconstruction(QWidget *parent)
       m_pathFlat(m_pathSCARFbase + "data/flat"),
       m_pathDark(m_pathSCARFbase + "data/dark"), m_currentParamPath(),
       m_settingsGroup("CustomInterfaces/TomoReconstruction"),
-      m_keepAliveThread(NULL) {
+      m_keepAliveTimer(NULL) {
 
   m_computeRes.push_back(m_SCARFName);
 
@@ -107,11 +107,11 @@ TomoReconstruction::TomoReconstruction(QWidget *parent)
 
 TomoReconstruction::~TomoReconstruction() {
   cleanup();
-  delete m_keepAliveThread;
+  delete m_keepAliveTimer;
 }
 
 /**
- * Close open sessions, kill threads, save settings, etc. for a
+ * Close open sessions, kill timers/threads etc., save settings, etc. for a
  * graceful window close/destruct
  */
 void TomoReconstruction::cleanup() {
@@ -327,10 +327,11 @@ void TomoReconstruction::SCARFLoginClicked() {
 
   int kat = settings.useKeepAlive;
   if (kat > 0) {
-    g_log.information() << "Starting mechanism to periodically query the "
-                           "status of jobs. This is also expected to keep "
-                           "sessions on remote compute resources alive after "
-                           "logging in." << std::endl;
+    g_log.information()
+        << "Reconstruction GUI: starting mechanism to periodically query the "
+           "status of jobs. This is also expected to keep "
+           "sessions on remote compute resources alive after "
+           "logging in." << std::endl;
     startKeepAliveMechanism(kat);
   }
 }
@@ -830,7 +831,18 @@ void TomoReconstruction::jobCancelClicked() {
 void TomoReconstruction::jobTableRefreshClicked() {
   // get the info from the server into data members. This operation is subject
   // to delays in the connection, etc.
-  getJobStatusInfo();
+  try {
+    getJobStatusInfo();
+  } catch (std::runtime_error &e) {
+    g_log.warning() << "There was an issue while trying to retrieve job status "
+                       "information from the remote compute resource ("
+                    << getComputeResource()
+                    << "). Stopping periodic (automatic) status update to "
+                       "prevent more failures. You can start the automatic "
+                       "update mechanism again by logging in, as apparently "
+                       "there is some problem with the last session. "
+                    << std::endl;
+  }
 
   // update widgets from that info
   updateJobsTable();
@@ -855,24 +867,25 @@ void TomoReconstruction::getJobStatusInfo() {
                 "correct. The table of jobs may not be fully up to date.");
   }
 
-  m_statusMutex.lock();
-  m_jobsStatus.clear();
-  m_jobsStatusCmds.clear();
-  // TODO: udate when we update to remote algorithms v2
-  // As SCARF doesn't provide all the info at the moment, and as we're
-  // using the SCARFTomoReconstruction algorithm, the
-  // IRemoteJobManager::RemoteJobInfo struct is for now used only partially
-  // (cmds out). So this loop feels both incomplete and an unecessary second
-  // step that could be avoided.
-  for (size_t i = 0; i < ids.size(); ++i) {
-    IRemoteJobManager::RemoteJobInfo ji;
-    ji.id = ids[i];
-    ji.name = names[i];
-    ji.status = status[i];
-    m_jobsStatus.push_back(ji);
-    m_jobsStatusCmds.push_back(cmds[i]);
+  {
+    QMutexLocker lockit(&m_statusMutex);
+    m_jobsStatus.clear();
+    m_jobsStatusCmds.clear();
+    // TODO: udate when we update to remote algorithms v2
+    // As SCARF doesn't provide all the info at the moment, and as we're
+    // using the SCARFTomoReconstruction algorithm, the
+    // IRemoteJobManager::RemoteJobInfo struct is for now used only partially
+    // (cmds out). So this loop feels both incomplete and an unecessary second
+    // step that could be avoided.
+    for (size_t i = 0; i < ids.size(); ++i) {
+      IRemoteJobManager::RemoteJobInfo ji;
+      ji.id = ids[i];
+      ji.name = names[i];
+      ji.status = status[i];
+      m_jobsStatus.push_back(ji);
+      m_jobsStatusCmds.push_back(cmds[i]);
+    }
   }
-  m_statusMutex.unlock();
 }
 
 void TomoReconstruction::doQueryJobStatus(std::vector<std::string> &ids,
@@ -915,21 +928,22 @@ void TomoReconstruction::updateJobsTable() {
   bool sort = t->isSortingEnabled();
   t->setRowCount(static_cast<int>(m_jobsStatus.size()));
 
-  m_statusMutex.lock();
-  for (size_t i = 0; i < m_jobsStatus.size(); ++i) {
-    int ii = static_cast<int>(i);
-    t->setItem(ii, 0,
-               new QTableWidgetItem(QString::fromStdString(m_SCARFName)));
-    t->setItem(ii, 1, new QTableWidgetItem(
-                          QString::fromStdString(m_jobsStatus[i].name)));
-    t->setItem(ii, 2, new QTableWidgetItem(
-                          QString::fromStdString(m_jobsStatus[i].id)));
-    t->setItem(ii, 3, new QTableWidgetItem(
-                          QString::fromStdString(m_jobsStatus[i].status)));
-    t->setItem(ii, 4, new QTableWidgetItem(
-                          QString::fromStdString(m_jobsStatusCmds[i])));
+  {
+    QMutexLocker lockit(&m_statusMutex);
+    for (size_t i = 0; i < m_jobsStatus.size(); ++i) {
+      int ii = static_cast<int>(i);
+      t->setItem(ii, 0,
+                 new QTableWidgetItem(QString::fromStdString(m_SCARFName)));
+      t->setItem(ii, 1, new QTableWidgetItem(
+                            QString::fromStdString(m_jobsStatus[i].name)));
+      t->setItem(ii, 2, new QTableWidgetItem(
+                            QString::fromStdString(m_jobsStatus[i].id)));
+      t->setItem(ii, 3, new QTableWidgetItem(
+                            QString::fromStdString(m_jobsStatus[i].status)));
+      t->setItem(ii, 4, new QTableWidgetItem(
+                            QString::fromStdString(m_jobsStatusCmds[i])));
+    }
   }
-  m_statusMutex.unlock();
 
   t->setSortingEnabled(sort);
 }
@@ -1757,26 +1771,24 @@ void TomoReconstruction::openHelpWin() {
 
 void TomoReconstruction::periodicStatusUpdateRequested() {
   // does just the widgets update
+  std::cerr << " **** periodicStatusUpdateRequested-> updateJobsTable "
+            << std::endl;
   updateJobsTable();
 }
 
 void TomoReconstruction::startKeepAliveMechanism(int period) {
-  m_keepAliveThread = new KeepAliveJobStatusPeriodicallyThread(period, this);
-  connect(m_keepAliveThread, SIGNAL(periodicStatusUpdateRequested()), this,
-          SLOT(periodicStatusUpdateRequested()));
-  m_keepAliveThread->start();
+  if (m_keepAliveTimer)
+    delete m_keepAliveTimer;
+  m_keepAliveTimer = new QTimer();
+  m_keepAliveTimer->setInterval(1000 * period); // QTimer takes timeoud in ms
+  connect(m_keepAliveTimer, SIGNAL(timeout()), this,
+          SLOT(jobTableRefreshClicked()));
+  m_keepAliveTimer->start();
 }
 
 void TomoReconstruction::killKeepAliveMechanism() {
-  if (!m_keepAliveThread)
-    return;
-
-  m_keepAliveThread->markToStopSoon();
-  // Note: better not to feel tempted to use terminate(), as it is not
-  // uncommon that it doesn't take immediate effect which leads to segfaults -
-  // QThread destroyed while still running.
-  // m_keepAliveThread->terminate();
-  m_keepAliveThread->wait();
+  if (m_keepAliveTimer)
+    m_keepAliveTimer->stop();
 }
 
 void TomoReconstruction::closeEvent(QCloseEvent *event) {
@@ -1814,33 +1826,6 @@ void TomoReconstruction::closeEvent(QCloseEvent *event) {
     event->accept();
   } else {
     event->ignore();
-  }
-}
-
-void KeepAliveJobStatusPeriodicallyThread::markToStopSoon() {
-  m_endSoon = true;
-}
-
-void KeepAliveJobStatusPeriodicallyThread::run() {
-  setTerminationEnabled(true);
-
-  QElapsedTimer timer;
-  timer.start();
-
-  while (!m_endSoon) {
-    if (timer.elapsed() >= 1000*m_timeout && m_tomoGUI) {
-      // Yes, this is ugly, and this query-status-and-store-with-lock
-      // functionality should probably be encapsulated in some helper class.
-      // That will come after the remote algorithms related TODOs (see above)
-      // are done, as for now we can do with this temporarily.
-      m_tomoGUI->getJobStatusInfo();
-
-      // the slot connected to this should just update the widgets
-      emit periodicStatusUpdateRequested();
-    }
-
-    // so it wakes up every second in case it needs to die
-    QThread::sleep(1);
   }
 }
 

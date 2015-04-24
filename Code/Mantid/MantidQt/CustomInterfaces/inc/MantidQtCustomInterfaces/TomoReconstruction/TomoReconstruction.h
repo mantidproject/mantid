@@ -15,17 +15,13 @@
 #include <jsoncpp/json/json.h>
 #include <QDialog>
 #include <QMutex>
-#include <QThread>
+#include <QTimer>
 
 class QTreeWidgetItem;
 class QLineEdit;
 
 namespace MantidQt {
 namespace CustomInterfaces {
-
-// forward declaration of GUI periodic update thread
-class KeepAliveJobStatusPeriodicallyThread;
-
 /**
 Tomographic reconstruction GUI. Interface for editing parameters,
 running and monitoring reconstruction jobs, quick image inspection,
@@ -248,7 +244,8 @@ private:
   // path name for persistent settings
   std::string m_settingsGroup;
 
-  KeepAliveJobStatusPeriodicallyThread *m_keepAliveThread;
+  // for periodic update of the job status table/tree
+  QTimer *m_keepAliveTimer;
   // mutex for the "job status info -> job status table " operations
   QMutex m_statusMutex;
 
@@ -310,42 +307,6 @@ private:
   QPushButton *okButton, *cancelButton;
 };
 
-/**
- * A simple GUI update thread. For now it is implemented in a very Qt
- * style, as it is essentially a GUI. It's meant to emit one or more
- * signals periodically. These signals should be connected to slots of
- * the TomoReconstruction interface. It could also be done in a more
- * Mantid/algorithm way.
- */
-class KeepAliveJobStatusPeriodicallyThread : public QThread {
-  Q_OBJECT
-
-public:
-  /**
-   * Constructor, needs a timeout or period.
-   *
-   * @param period time, in seconds, to refresh the GUI (job status, etc.)
-   */
-  KeepAliveJobStatusPeriodicallyThread(int period, TomoReconstruction *gui)
-    : m_timeout(period), m_tomoGUI(gui), m_endSoon(false) {};
-
-  /// tell this should stop soon, for graceful termination
-  void markToStopSoon();
-
-signals:
-  /// for periodic update of the server / jobs status
-  void periodicStatusUpdateRequested();
-
-protected:
-  /// The standard Qt / Java-ish run method for this thread
-  void run();
-
-private:
-  // period in seconds
-  int m_timeout;
-  TomoReconstruction *m_tomoGUI;
-  bool m_endSoon;
-};
 }
 }
 
