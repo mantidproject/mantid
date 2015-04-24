@@ -82,9 +82,8 @@ set ( PRE_UNINSTALL_FILE ${CMAKE_CURRENT_BINARY_DIR}/prerm )
 set ( POST_UNINSTALL_FILE ${CMAKE_CURRENT_BINARY_DIR}/postrm )
 
 if ( "${UNIX_DIST}" MATCHES "RedHatEnterprise" OR "${UNIX_DIST}" MATCHES "^Fedora" ) # RHEL/Fedora
-  if ( "${UNIX_CODENAME}" MATCHES "Santiago" OR
-       "${UNIX_CODENAME}" MATCHES "Maipo" )
-    set ( WRAPPER_PREFIX "scl enable mantidlibs \"" )
+  if ( "${UNIX_CODENAME}" MATCHES "Santiago" )
+    set ( WRAPPER_PREFIX "scl enable mantidlibs34 \"" )
     set ( WRAPPER_POSTFIX "\"" )
   else()
     set ( WRAPPER_PREFIX "" )
