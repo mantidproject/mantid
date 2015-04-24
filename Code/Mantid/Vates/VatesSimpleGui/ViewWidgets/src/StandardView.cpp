@@ -41,6 +41,7 @@ namespace SimpleGui
  * This function sets up the UI components, adds connections for the view's
  * buttons and creates the rendering view.
  * @param parent the parent widget for the standard view
+ * @param rebinnedSourcesManager Pointer to a RebinnedSourcesManager
  */
   StandardView::StandardView(QWidget *parent, RebinnedSourcesManager* rebinnedSourcesManager) : ViewBase(parent, rebinnedSourcesManager),
                                                                  m_binMDAction(NULL),

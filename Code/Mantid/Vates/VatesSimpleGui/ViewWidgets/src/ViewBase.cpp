@@ -49,6 +49,7 @@ namespace SimpleGui
 /**
  * Default constructor.
  * @param parent the parent widget for the view
+ * @param rebinnedSourcesManager Pointer to a RebinnedSourcesManager
  */
 ViewBase::ViewBase(QWidget *parent, RebinnedSourcesManager* rebinnedSourcesManager) : QWidget(parent),
                                       m_rebinnedSourcesManager(rebinnedSourcesManager), m_currentColorMapModel(NULL), m_temporaryWorkspaceIdentifier("rebinned_vsi")

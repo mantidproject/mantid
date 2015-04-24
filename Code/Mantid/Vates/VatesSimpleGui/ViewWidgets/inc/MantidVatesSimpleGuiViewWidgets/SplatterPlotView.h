@@ -62,6 +62,7 @@ public:
   /**
    * Default constructor.
    * @param parent the parent widget for the threeslice view
+   * @param rebinnedSourcesManager Pointer to a RebinnedSourcesManager
    */
   explicit SplatterPlotView(QWidget *parent = 0, RebinnedSourcesManager* rebinnedSourcesManager = 0);
   /// Default destructor

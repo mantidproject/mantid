@@ -269,7 +269,7 @@ namespace Mantid
 
       /**
        * Get the stored workspace names assoicated with a source.
-       * @param source The name of the source.
+       * @param src The name of the source.
        * @param originalWorkspaceName The name of the original workspace.
        * @param rebinnedWorkspaceName The name of the rebinned workspace.
        */
@@ -715,7 +715,7 @@ namespace Mantid
 
       /**
        * Delete a specific source and all of its filters. This assumes a linear filter system
-       * @param workspaceName The workspaceName associated with the source which is to be deleted
+       * @param source A pointer to the source
        */
       void RebinnedSourcesManager::deleteSpecificSource(pqPipelineSource* source)
       {
