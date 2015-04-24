@@ -2,9 +2,6 @@
 from mantid.simpleapi import *
 from mantid.api import *
 from mantid.kernel import *
-from mantidplot import *
-
-from IndirectImport import import_mantidplot
 
 class PoldiDataAnalysis(PythonAlgorithm):
     """
@@ -220,6 +217,7 @@ class PoldiDataAnalysis(PythonAlgorithm):
         plotResults = self.getProperty('PlotResult').value
 
         if plotResults:
+            from IndirectImport import import_mantidplot
             plot = import_mantidplot()
 
             plotWindow = plot.plotSpectrum(total, 0, type=1)
