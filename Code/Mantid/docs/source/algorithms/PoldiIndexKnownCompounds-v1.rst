@@ -65,7 +65,7 @@ Output:
 .. testoutput:: PoldiIndexKnownCompoundsExample
 
     Indexed_Si contains 13 indexed peaks.
-    Number of unindexed peaks: 1
+    Number of unindexed peaks: 0
 
 .. categories::
 
