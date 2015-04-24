@@ -131,7 +131,7 @@ void SaveMD2::doSaveHisto(Mantid::DataObjects::MDHistoWorkspace_sptr ws) {
       axis.push_back(dim->getX(n));
     file->makeData(dim->getDimensionId(), ::NeXus::FLOAT64,
                    static_cast<int>(dim->getNBins()+1), true);
-    file->putData(axis);
+    file->putData(&axis[0]);
     file->putAttr("units", std::string(dim->getUnits()));
     file->putAttr("long_name", std::string(dim->getName()));
     file->closeData();
