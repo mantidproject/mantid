@@ -358,7 +358,7 @@ class PropertyManager(NonIDF_Properties):
             old_changes[prop_name] = getattr(self,prop_name)
 
 
-        param_list = prop_helpers.get_default_idf_param_list(pInstrument)
+        param_list = prop_helpers.get_default_idf_param_list(pInstrument,self.__subst_dict)
         # remove old changes which are not related to IDF (not to reapply it again)
         for prop_name in old_changes:
             if not prop_name in param_list:
@@ -370,7 +370,9 @@ class PropertyManager(NonIDF_Properties):
                 for name in dependencies:
                     if name in param_list:
                         modified = True
-                        break
+                        # old parameter have been modified through compound parameter.
+                        #its old value is irrelevant
+                        param_list[name] = getattr(self,name)
                 if not modified:
                     del old_changes[prop_name]
         #end
@@ -393,8 +395,12 @@ class PropertyManager(NonIDF_Properties):
                     setattr(self,key,val)
                     new_val = getattr(self,key)
                 except:
-                    self.log("property {0} have not been found in existing IDF. Ignoring this property"\
-                       .format(key),'warning')
+                    try:
+                        cur_val = getattr(self,key)
+                    except: 
+                        cur_val = "Undefined"
+                    self.log("Retrieving or reapplying script property {0} failed. Property value remains: {1}"\
+                       .format(key,cur_val),'warning')
                     continue
                 if isinstance(new_val,api.Workspace) and isinstance(cur_val,api.Workspace):
                 # do simplified workspace comparison which is appropriate here
@@ -424,34 +430,40 @@ class PropertyManager(NonIDF_Properties):
 
         # Walk through the complex properties first and then through simple properties
         for key,val in sorted_param.iteritems():
-            if not key in old_changes_list:
-                # complex properties change through their dependencies so we are setting them first
+            # complex properties may change through their dependencies so we are setting them first
+            if isinstance(val,prop_helpers.ComplexProperty):
+                public_name = key[1:]
+            else:
+                # no complex properties left so we have simple key-value pairs
+                public_name = key
+            if not public_name in old_changes_list:
                 if isinstance(val,prop_helpers.ComplexProperty):
-                    public_name = key[1:]
-                    prop_new_val = val.__get__(param_list)
+                    prop_idf_val = val.__get__(param_list)
                 else:
-                    # no complex properties left so we have simple key-value pairs
-                    public_name = key
-                    prop_new_val = val
+                    prop_idf_val = val
 
                 try: # this is reliability check, and except ideally should never be hit. May occur if old IDF contains
                     # properties, not present in recent IDF.
                     cur_val = getattr(self,public_name)
                 except:
-                    self.log("property {0} have not been found in existing IDF. Ignoring this property"\
+                    self.log("Can not retrieve property {0} value from existing reduction parameters. Ignoring this property"\
                         .format(public_name),'warning')
                     continue
 
-                if prop_new_val !=cur_val :
-                    setattr(self,public_name,prop_new_val)
-                # Dependencies removed either properties are equal or not
-                try:
-                    dependencies = val.dependencies()
-                except:
-                    dependencies =[]
-                for dep_name in dependencies:
-                    # delete dependent properties not to deal with them again
-                    del sorted_param[dep_name]
+                if prop_idf_val !=cur_val :
+                    setattr(self,public_name,prop_idf_val)
+            else:
+                pass
+            # Dependencies removed either properties are equal or not.
+            # or if public_name for property in old change list. Remove dependencies
+            # too, as property has been set up as whole.
+            try:
+                dependencies = val.dependencies()
+            except:
+                dependencies =[]
+            for dep_name in dependencies:
+                # delete dependent properties not to deal with them again
+                del sorted_param[dep_name]
         #end
 
 

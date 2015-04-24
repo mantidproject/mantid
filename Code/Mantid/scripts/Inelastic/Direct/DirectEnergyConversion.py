@@ -245,9 +245,10 @@ class DirectEnergyConversion(object):
                 #>>>here result workspace is being processed
                 #-- not touching result ws
                 bkgd_range = self.background_test_range
-                background_int = Integration(result_ws,\
-                           RangeLower=bkgd_range[0],RangeUpper=bkgd_range[1],\
-                           IncludePartialBins=True)
+                bin_size = 2*(bkgd_range[1]-bkgd_range[0])
+                background_int = Rebin(result_ws,\
+                                       Params=[bkgd_range[0],bin_size,bkgd_range[1]],\
+                                       PreserveEvents=False,FullBinsOnly=False)
                 total_counts = Integration(result_ws, IncludePartialBins=True)
                 background_int = ConvertUnits(background_int, Target="Energy",EMode='Elastic', AlignBins=0)
                 self.prop_man.log("Diagnose: finished convertUnits ",'information')
@@ -337,11 +338,9 @@ class DirectEnergyConversion(object):
         # long run.
         prop_man.log("****************************************************************")
         prop_man.validate_properties()
+        prop_man.log("*** Loading or retrieving sample run: {0}".format(prop_man.sample_run))
         prop_man.log("****************************************************************")
 
-        # inform user on what parameters have changed from script or gui
-        # if monovan present, check if abs_norm_ parameters are set
-        self.prop_man.log_changed_values('notice')
         # before trying to process new results, let's remove from memory old results
         # if any present and they are not needed any more (user have not renamed them)
         self._clear_old_results()
@@ -363,6 +362,9 @@ class DirectEnergyConversion(object):
                          format(PropertyManager.sample_run.get_workspace().name()))
             prop_man.log_changed_values('notice',False,oldChanges)
             prop_man.log("****************************************************************")
+        # inform user on what parameters have changed from script or gui
+        # if monovan present, check if abs_norm_ parameters are set
+        self.prop_man.log_changed_values('notice')
 
         masking = None
         masks_done = False

@@ -94,7 +94,7 @@ void CreatePSDBleedMask::exec() {
   // This algorithm assumes that the instrument geometry is tube based, i.e. the
   // parent CompAssembly
   // of the lowest detector in the tree is a "tube" and that all pixels in a
-  // tube are consectively ordered
+  // tube are consecutively ordered
   // with respect to spectra number
   const int numSpectra =
       static_cast<int>(inputWorkspace->getNumberHistograms());
