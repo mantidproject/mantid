@@ -533,7 +533,9 @@ class BaseReductionScripter(object):
                 submit_cmd =  "Authenticate(Version=1, ComputeResource='%s', " % resource
                 submit_cmd += "UserName='%s', Password='%s')\n" % (user, pwd)
 
-                submit_cmd += "id=StartRemoteTransaction(ComputeResource='%s')\n" % resource
+                # Note: keeping version 1 for now. See comment about
+                # versions in cluster_status.py
+                submit_cmd += "id=StartRemoteTransaction(Version=1, ComputeResource='%s')\n" % resource
 
                 # Note: keeping version 1 for now. See comment about
                 # versions in cluster_status.py
