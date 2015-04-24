@@ -10,10 +10,6 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidKernel/UnitFactory.h"
-#include "MantidDataHandling/SaveNexusProcessed.h"
-
-
-
 
 using Mantid::Algorithms::ConvertUnitsUsingDetectorTable;
 using namespace Mantid;
@@ -69,12 +65,6 @@ public:
 
       API::TableRow row1 = pars->appendRow();
       row1 << 2 << 1.0 << 1.0 << 90.0 << 7.0 << 0;
-
-//      Mantid::DataHandling::SaveNexusProcessed saver;
-//      saver.initialize();
-//      saver.setProperty("InputWorkspace",pars);
-//      saver.setPropertyValue("Filename", "pars.nxs");
-//      saver.execute();
 
       // Set the properties
       myAlg.setRethrows(true);
