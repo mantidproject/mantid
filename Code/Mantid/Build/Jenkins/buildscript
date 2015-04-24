@@ -124,7 +124,7 @@ fi
 # RHEL6 setup steps - nodes must have a "rhel6" label set (in lowercase)
 ###############################################################################
 if [[ ${NODE_LABELS} == *rhel6* ]]; then
-  SCL_ON_RHEL6="scl enable mantidlibs"
+  SCL_ON_RHEL6="scl enable mantidlibs34"
   ON_RHEL6=true
 else
   SCL_ON_RHEL6="eval"
@@ -176,7 +176,7 @@ $SCL_ON_RHEL6 "cmake -DCMAKE_BUILD_TYPE=${BUILD_CONFIG} -DENABLE_CPACK=ON -DMAKE
 # Coverity build should exit early
 ###############################################################################
 if [[ ${JOB_NAME} == *coverity_build_and_submit* ]]; then
-  ${COVERITY_DIR}/cov-build --dir cov-int scl enable mantidlibs "make -j${BUILD_THREADS}"
+  ${COVERITY_DIR}/cov-build --dir cov-int scl enable mantidlibs34 "make -j${BUILD_THREADS}"
   tar czvf mantid.tgz cov-int
   status=$(curl --form token=$COVERITY_TOKEN --form email=mantidproject@gmail.com \
        --form file=@mantid.tgz --form version=$GIT_COMMIT \
