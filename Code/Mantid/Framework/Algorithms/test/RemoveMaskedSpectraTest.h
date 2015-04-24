@@ -1,25 +1,25 @@
-#ifndef MANTID_DATAHANDLING_CROPWORKSPACEBYMASKTEST_H_
-#define MANTID_DATAHANDLING_CROPWORKSPACEBYMASKTEST_H_
+#ifndef MANTID_ALGORITHMS_REMOVEMASKEDSPECTRATEST_H_
+#define MANTID_ALGORITHMS_REMOVEMASKEDSPECTRATEST_H_
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidDataHandling/CropWorkspaceByMask.h"
+#include "MantidAlgorithms/RemoveMaskedSpectra.h"
 
-using Mantid::DataHandling::CropWorkspaceByMask;
+using Mantid::Algorithms::RemoveMaskedSpectra;
 using namespace Mantid::API;
 
-class CropWorkspaceByMaskTest : public CxxTest::TestSuite
+class RemoveMaskedSpectraTest : public CxxTest::TestSuite
 {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static CropWorkspaceByMaskTest *createSuite() { return new CropWorkspaceByMaskTest(); }
-  static void destroySuite( CropWorkspaceByMaskTest *suite ) { delete suite; }
+  static RemoveMaskedSpectraTest *createSuite() { return new RemoveMaskedSpectraTest(); }
+  static void destroySuite( RemoveMaskedSpectraTest *suite ) { delete suite; }
 
 
   void test_Init()
   {
-    CropWorkspaceByMask alg;
+    RemoveMaskedSpectra alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
     TS_ASSERT( alg.isInitialized() )
   }
@@ -27,9 +27,9 @@ public:
   void test_exec()
   {
     // Name of the output workspace.
-    std::string outWSName("CropWorkspaceByMaskTest_OutputWS");
+    std::string outWSName("RemoveMaskedSpectraTest_OutputWS");
 
-    CropWorkspaceByMask alg;
+    RemoveMaskedSpectra alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
     TS_ASSERT( alg.isInitialized() )
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("REPLACE_PROPERTY_NAME_HERE!!!!", "value") );
@@ -58,4 +58,4 @@ public:
 };
 
 
-#endif /* MANTID_DATAHANDLING_CROPWORKSPACEBYMASKTEST_H_ */
+#endif /* MANTID_ALGORITHMS_REMOVEMASKEDSPECTRATEST_H_ */

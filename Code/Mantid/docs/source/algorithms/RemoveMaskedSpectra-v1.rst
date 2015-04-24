@@ -20,23 +20,23 @@ Usage
     autotestdata\UsageData and the following tag unindented
     .. include:: ../usagedata-note.txt
 
-**Example - CropWorkspaceByMask**
+**Example - RemoveMaskedSpectra**
 
-.. testcode:: CropWorkspaceByMaskExample
+.. testcode:: RemoveMaskedSpectraExample
 
    # Create a host workspace
    ws = CreateWorkspace(DataX=range(0,3), DataY=(0,2))
    or
    ws = CreateSampleWorkspace()
 
-   wsOut = CropWorkspaceByMask()
+   wsOut = RemoveMaskedSpectra()
 
    # Print the result
    print "The output workspace has %i spectra" % wsOut.getNumberHistograms()
 
 Output:
 
-.. testoutput:: CropWorkspaceByMaskExample
+.. testoutput:: RemoveMaskedSpectraExample
 
   The output workspace has ?? spectra
 

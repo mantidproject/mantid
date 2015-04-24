@@ -197,6 +197,7 @@ set ( SRC_FILES
 	src/RemoveBins.cpp
 	src/RemoveExpDecay.cpp
 	src/RemoveLowResTOF.cpp
+	src/RemoveMaskedSpectra.cpp
 	src/RemovePromptPulse.cpp
 	src/RemoveWorkspaceHistory.cpp
 	src/RenameWorkspace.cpp
@@ -455,6 +456,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/RemoveBins.h
 	inc/MantidAlgorithms/RemoveExpDecay.h
 	inc/MantidAlgorithms/RemoveLowResTOF.h
+	inc/MantidAlgorithms/RemoveMaskedSpectra.h
 	inc/MantidAlgorithms/RemovePromptPulse.h
 	inc/MantidAlgorithms/RemoveWorkspaceHistory.h
 	inc/MantidAlgorithms/RenameWorkspace.h
@@ -706,6 +708,7 @@ set ( TEST_FILES
 	RemoveBinsTest.h
 	RemoveExpDecayTest.h
 	RemoveLowResTOFTest.h
+	RemoveMaskedSpectraTest.h
 	RemovePromptPulseTest.h
 	RemoveWorkspaceHistoryTest.h
 	RenameWorkspaceTest.h

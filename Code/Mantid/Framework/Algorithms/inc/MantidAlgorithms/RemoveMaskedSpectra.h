@@ -1,14 +1,13 @@
-#ifndef MANTID_DATAHANDLING_CROPWORKSPACEBYMASK_H_
-#define MANTID_DATAHANDLING_CROPWORKSPACEBYMASK_H_
+#ifndef MANTID_ALGORITHMS_REMOVEMASKEDSPECTRA_H_
+#define MANTID_ALGORITHMS_REMOVEMASKEDSPECTRA_H_
 
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
 
 namespace Mantid {
-namespace DataHandling {
+namespace Algorithms {
 
-/** CropWorkspaceByMask crops a MatrixWorkspace by a mask. It removes all masked
-  spectra.
+/** RemoveMaskedSpectra removes all masked spectra.
 
   Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
@@ -31,10 +30,10 @@ namespace DataHandling {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport CropWorkspaceByMask : public API::Algorithm {
+class DLLExport RemoveMaskedSpectra : public API::Algorithm {
 public:
-  CropWorkspaceByMask();
-  virtual ~CropWorkspaceByMask();
+  RemoveMaskedSpectra();
+  virtual ~RemoveMaskedSpectra();
 
   virtual const std::string name() const;
   virtual int version() const;
@@ -44,11 +43,11 @@ public:
 private:
   void init();
   void exec();
-  /// Fill in a vector with spectra indices to be extracted.
-  void makeIndexList(std::vector<size_t>& indices, const API::MatrixWorkspace* maskedWorkspace);
+  void makeIndexList(std::vector<size_t> &indices,
+                     const API::MatrixWorkspace *maskedWorkspace);
 };
 
-} // namespace DataHandling
+} // namespace Algorithms
 } // namespace Mantid
 
-#endif /* MANTID_DATAHANDLING_CROPWORKSPACEBYMASK_H_ */
+#endif /* MANTID_ALGORITHMS_REMOVEMASKEDSPECTRA_H_ */

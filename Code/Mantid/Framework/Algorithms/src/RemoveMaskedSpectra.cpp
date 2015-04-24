@@ -1,48 +1,51 @@
-#include "MantidDataHandling/CropWorkspaceByMask.h"
+#include "MantidAlgorithms/RemoveMaskedSpectra.h"
 #include "MantidDataObjects/MaskWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
 
 namespace Mantid {
-namespace DataHandling {
+namespace Algorithms {
 
 using namespace Kernel;
 using namespace API;
 
 // Register the algorithm into the AlgorithmFactory
-DECLARE_ALGORITHM(CropWorkspaceByMask)
+DECLARE_ALGORITHM(RemoveMaskedSpectra)
 
 //----------------------------------------------------------------------------------------------
-/// Constructor
-CropWorkspaceByMask::CropWorkspaceByMask() {}
+/** Constructor
+ */
+RemoveMaskedSpectra::RemoveMaskedSpectra() {}
 
 //----------------------------------------------------------------------------------------------
-/// Destructor
-CropWorkspaceByMask::~CropWorkspaceByMask() {}
+/** Destructor
+ */
+RemoveMaskedSpectra::~RemoveMaskedSpectra() {}
 
 //----------------------------------------------------------------------------------------------
 
 /// Algorithms name for identification. @see Algorithm::name
-const std::string CropWorkspaceByMask::name() const {
-  return "CropWorkspaceByMask";
+const std::string RemoveMaskedSpectra::name() const {
+  return "RemoveMaskedSpectra";
 }
 
 /// Algorithm's version for identification. @see Algorithm::version
-int CropWorkspaceByMask::version() const { return 1; };
+int RemoveMaskedSpectra::version() const { return 1; };
 
 /// Algorithm's category for identification. @see Algorithm::category
-const std::string CropWorkspaceByMask::category() const {
+const std::string RemoveMaskedSpectra::category() const {
   return "Transforms\\Splitting";
 }
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
-const std::string CropWorkspaceByMask::summary() const {
+const std::string RemoveMaskedSpectra::summary() const {
   return "Extracts unmasked spectra from a workspace and places them in a new "
          "workspace.";
 }
 
 //----------------------------------------------------------------------------------------------
-/// Initialize the algorithm's properties.
-void CropWorkspaceByMask::init() {
+/** Initialize the algorithm's properties.
+ */
+void RemoveMaskedSpectra::init() {
   declareProperty(
       new WorkspaceProperty<>("InputWorkspace", "", Direction::Input),
       "An input workspace.");
@@ -58,12 +61,17 @@ void CropWorkspaceByMask::init() {
 }
 
 //----------------------------------------------------------------------------------------------
-/// Execute the algorithm.
-void CropWorkspaceByMask::exec() {
+/** Execute the algorithm.
+ */
+void RemoveMaskedSpectra::exec() {
   MatrixWorkspace_sptr inputWorkspace = getProperty("InputWorkspace");
   MatrixWorkspace_sptr maskedWorkspace = getProperty("MaskedWorkspace");
 
-  if ( !maskedWorkspace ) maskedWorkspace = inputWorkspace;
+  if (!maskedWorkspace){
+    maskedWorkspace = inputWorkspace;
+  } else if (inputWorkspace->getNumberHistograms() != maskedWorkspace->getNumberHistograms()) {
+    throw std::runtime_error("Masked workspace has a different number of spectra.");
+  }
 
   std::vector<size_t> indices;
   makeIndexList(indices, maskedWorkspace.get());
@@ -72,19 +80,22 @@ void CropWorkspaceByMask::exec() {
   size_t nSpectra = indices.size();
   // Number of bins/data points in the cropped workspace.
   size_t nBins = inputWorkspace->blocksize();
-  size_t histogram = inputWorkspace->isHistogramData()? 1 : 0;
+  size_t histogram = inputWorkspace->isHistogramData() ? 1 : 0;
 
   // Create the output workspace
   MatrixWorkspace_sptr outputWorkspace = WorkspaceFactory::Instance().create(
       inputWorkspace, nSpectra, nBins, nBins - histogram);
 
+  for (size_t i = 0; i < nSpectra; ++i) {
+    auto j = indices[i];
+  }
 }
 
 //----------------------------------------------------------------------------------------------
 /// Fill in a vector with spectra indices to be extracted.
 /// @param indices :: A reference to a vector to fill with the indices.
 /// @param maskedWorkspace :: A workspace with masking information.
-void CropWorkspaceByMask::makeIndexList(
+void RemoveMaskedSpectra::makeIndexList(
     std::vector<size_t> &indices, const API::MatrixWorkspace *maskedWorkspace) {
   auto mask = dynamic_cast<const DataObjects::MaskWorkspace *>(maskedWorkspace);
   if (mask) {
@@ -101,7 +112,6 @@ void CropWorkspaceByMask::makeIndexList(
       } catch (Exception::NotFoundError &) {
         continue;
       }
-
       if (det->isMasked()) {
         indices.push_back(i);
       }
@@ -109,5 +119,5 @@ void CropWorkspaceByMask::makeIndexList(
   }
 }
 
-} // namespace DataHandling
+} // namespace Algorithms
 } // namespace Mantid
