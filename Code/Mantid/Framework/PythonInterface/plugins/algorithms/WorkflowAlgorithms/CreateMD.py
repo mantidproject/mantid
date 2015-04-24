@@ -7,6 +7,9 @@ import __builtin__
 
 class CreateMD(DataProcessorAlgorithm):
 
+    def version(self):
+        return 4
+
     def _possible_emodes(self):
         return ['Elastic', 'Direct', 'Indirect']
 
@@ -209,10 +212,10 @@ class CreateMD(DataProcessorAlgorithm):
         v = self.getProperty('v').value
         psi = self.getProperty('Psi').value
         gl = self.getProperty('Gl').value
+        gs = self.getProperty('Gs').value
         efix = self.getProperty('EFix').value   
         in_place = self.getProperty('InPlace')    
 
-        input_workspaces = self.getProperty("InputWorkspaces").value
         data_sources = self.getProperty("DataSources").value
 
         entries = len(data_sources)
