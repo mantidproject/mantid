@@ -260,6 +260,9 @@ void PlotAsymmetryByLogValue::checkProperties (size_t &is, size_t &ie) {
   parseRunNames( firstFN, lastFN, filenameBase, filenameExt, filenameZeros);
   is = atoi(firstFN.c_str()); // starting run number
   ie = atoi(lastFN.c_str());  // last run number
+  if ( ie < is ) {
+    throw std::runtime_error("First run number is greater than last run number");
+  }
 
 
   // Skip checks if there are no previous results

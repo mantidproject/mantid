@@ -10,10 +10,11 @@
 #include <pqAnimationScene.h>
 #include <pqApplicationCore.h>
 #include <pqDataRepresentation.h>
+#include <pqDeleteReaction.h>
 #include <pqObjectBuilder.h>
-#include <pqPipelineSource.h>
 #include <pqPipelineFilter.h>
 #include <pqPipelineRepresentation.h>
+#include <pqPipelineSource.h>
 #include <pqPVApplicationCore.h>
 #include <pqRenderView.h>
 #include <pqScalarsToColors.h>
@@ -33,6 +34,7 @@
 #include <QDebug>
 #include <QHBoxLayout>
 #include <QPointer>
+#include <QSet>
 
 #include <stdexcept>
 
@@ -91,19 +93,23 @@ pqRenderView* ViewBase::createRenderView(QWidget* widget, QString viewName)
  */
 void ViewBase::destroyFilter(pqObjectBuilder *builder, const QString &name)
 {
+  (void) builder;
+
   pqServer *server = pqActiveObjects::instance().activeServer();
   pqServerManagerModel *smModel = pqApplicationCore::instance()->getServerManagerModel();
   QList<pqPipelineSource *> sources;
   QList<pqPipelineSource *>::Iterator source;
   sources = smModel->findItems<pqPipelineSource *>(server);
+  QSet<pqPipelineSource*> toDelete;
   for (source = sources.begin(); source != sources.end(); ++source)
   {
     const QString sourceName = (*source)->getSMName();
     if (sourceName.startsWith(name))
     {
-      builder->destroy(*source);
+    toDelete.insert(*source);
     }
   }
+  pqDeleteReaction::deleteSources(toDelete);
 }
 
 /**

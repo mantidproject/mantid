@@ -105,7 +105,6 @@ public:
     algCutMD->setProperty("P1Bin", "0.1");
     algCutMD->setProperty("P2Bin", "0.1");
     algCutMD->setProperty("P3Bin", "0.1");
-    algCutMD->setProperty("CheckAxes", false);
     algCutMD->execute();
     TS_ASSERT(algCutMD->isExecuted());
 
@@ -150,7 +149,6 @@ public:
     algCutMD->setProperty("P1Bin", "0,0.3,0.8");
     algCutMD->setProperty("P2Bin", "0.1");
     algCutMD->setProperty("P3Bin", "0.1");
-    algCutMD->setProperty("CheckAxes", false);
     algCutMD->setProperty("NoPix", true);
     algCutMD->execute();
     TS_ASSERT(algCutMD->isExecuted());
@@ -177,7 +175,6 @@ public:
     algCutMD->setProperty("P1Bin", "0,1.1,1");
     algCutMD->setProperty("P2Bin", "21");
     algCutMD->setProperty("P3Bin", "0.1");
-    algCutMD->setProperty("CheckAxes", false);
     algCutMD->setProperty("NoPix", true);
     algCutMD->execute();
     TS_ASSERT(algCutMD->isExecuted());
