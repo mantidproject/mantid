@@ -96,6 +96,7 @@ void SaveHKL::init() {
                   "The minimum Intensity");
   declareProperty(new WorkspaceProperty<PeaksWorkspace>("OutputWorkspace", "SaveHKLOutput",
                                                         Direction::Output), "Output PeaksWorkspace");
+  declareProperty("HKLDecimalPlaces", EMPTY_INT(), "Number of decimal places for fractional HKL.  Default is integer HKL.");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -117,6 +118,7 @@ void SaveHKL::exec() {
   double minIsigI = getProperty("MinIsigI");
   double minIntensity = getProperty("MinIntensity");
   int widthBorder = getProperty("WidthBorder");
+  int decimalHKL = getProperty("HKLDecimalPlaces");
 
   // Sequence and run number
   int seqNum = 1;
@@ -322,8 +324,14 @@ void SaveHKL::exec() {
       banned.push_back(wi);
       continue;
     }
-    out << std::setw(4) << Utils::round(-p.getH()) << std::setw(4)
-        << Utils::round(-p.getK()) << std::setw(4) << Utils::round(-p.getL());
+    if (decimalHKL == EMPTY_INT() )
+      out << std::setw(4) << Utils::round(-p.getH())
+            << std::setw(4) << Utils::round(-p.getK())
+            << std::setw(4) << Utils::round(-p.getL());
+    else
+      out << std::setw(5+decimalHKL) << std::fixed << std::setprecision(decimalHKL) << -p.getH()
+            << std::setw(5+decimalHKL) << std::fixed << std::setprecision(decimalHKL) << -p.getK()
+            << std::setw(5+decimalHKL) << std::fixed << std::setprecision(decimalHKL) << -p.getL();
     double correc = scaleFactor;
     double relSigSpect = 0.0;
     if (bank != bankold)
@@ -425,7 +433,15 @@ void SaveHKL::exec() {
 
     out << std::endl;
   }
-  out << "   0   0   0    0.00    0.00   0  0.0000 0.0000      0      0 0.0000 "
+  if (decimalHKL == EMPTY_INT() )
+    out << std::setw(4) << 0
+          << std::setw(4) << 0
+          << std::setw(4) << 0;
+  else
+    out << std::setw(5+decimalHKL) << std::fixed << std::setprecision(decimalHKL) << 0.0
+          << std::setw(5+decimalHKL) << std::fixed << std::setprecision(decimalHKL) << 0.0
+          << std::setw(5+decimalHKL) << std::fixed << std::setprecision(decimalHKL) << 0.0;
+  out << "    0.00    0.00   0  0.0000 0.0000      0      0 0.0000 "
          "  0";
   out << std::endl;
 
