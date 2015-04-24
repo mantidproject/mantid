@@ -348,7 +348,7 @@ void MantidQwtIMDWorkspaceData::setPreviewMode(bool preview)
   else
   {
     const size_t indexOfTransform = nTransformsToOriginal-1; // Get the last transform
-    CoordTransform * temp = m_workspace->getTransformToOriginal(indexOfTransform);
+    CoordTransform const * temp = m_workspace->getTransformToOriginal(indexOfTransform);
     if (temp)
           m_transform = temp->clone();
   }

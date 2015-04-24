@@ -17,6 +17,7 @@
 #include "MantidVatesAPI/vtkImageData_Silent.h"
 #include <vtkPVXMLElement.h>
 #include <vtkSmartPointer.h>
+#include <vtkSMSessionProxyManager.h>
 #include <vtkPVConfig.h>
 
 #if defined(__INTEL_COMPILER)
@@ -108,13 +109,21 @@ void SaveScreenshotReaction::saveScreenshot()
   QSize size = ssDialog.viewSize();
   QString palette = ssDialog.palette();
 
-  // temporarily load the color palette chosen by the user.
-  vtkSmartPointer<vtkPVXMLElement> currentPalette;
-  pqApplicationCore* core = pqApplicationCore::instance();
-  if (!palette.isEmpty())
+  vtkSMSessionProxyManager *pxm =
+      pqActiveObjects::instance().activeServer()->proxyManager();
+  vtkSMProxy *colorPalette = pxm->GetProxy("global_properties", "ColorPalette");
+  vtkSmartPointer<vtkSMProxy> clone;
+  if (colorPalette && !palette.isEmpty())
   {
-    currentPalette.TakeReference(core->getCurrrentPalette());
-    core->loadPalette(palette);
+    // save current property values
+    clone.TakeReference(pxm->NewProxy(colorPalette->GetXMLGroup(),
+                                      colorPalette->GetXMLName()));
+    clone->Copy(colorPalette);
+
+    vtkSMProxy *chosenPalette = pxm->NewProxy("palettes",
+                                              palette.toLatin1().data());
+    colorPalette->Copy(chosenPalette);
+    chosenPalette->Delete();
   }
 
   int stereo = ssDialog.getStereoMode();
@@ -123,19 +132,25 @@ void SaveScreenshotReaction::saveScreenshot()
     pqRenderViewBase::setStereo(stereo);
   }
 
-  SaveScreenshotReaction::saveScreenshot(file,
-                                         size, ssDialog.quality());
+  SaveScreenshotReaction::saveScreenshot(file, size, ssDialog.quality());
 
-  // restore palette.
-  if (!palette.isEmpty())
+  // restore color palette.
+  if (clone)
   {
-    core->loadPalette(currentPalette);
+    colorPalette->Copy(clone);
   }
 
+  // restore stereo
   if (stereo)
   {
     pqRenderViewBase::setStereo(0);
-    core->render();
+  }
+
+  // check if need to render to clear the changes we did
+  // while saving the screenshot.
+  if (clone || stereo)
+  {
+    pqApplicationCore::instance()->render();
   }
 }
 

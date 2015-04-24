@@ -75,7 +75,11 @@ protected:
 
   Poldi2DFunction_sptr
   getFunctionPawley(std::string profileFunctionName,
-                    const PoldiPeakCollection_sptr &peakCollection) const;
+                    const PoldiPeakCollection_sptr &peakCollection);
+
+  std::string getRefinedStartingCell(const std::string &initialCell,
+                      const std::string &crystalSystem,
+                      const PoldiPeakCollection_sptr &peakCollection);
 
   PoldiPeak_sptr
   getPeakFromPeakFunction(API::IPeakFunction_sptr profileFunction,
@@ -99,7 +103,7 @@ protected:
   PoldiPeakCollection_sptr
   getPeakCollectionFromFunction(const API::IFunction_sptr &fitFunction);
   Poldi2DFunction_sptr getFunctionFromPeakCollection(
-      const PoldiPeakCollection_sptr &peakCollection) const;
+      const PoldiPeakCollection_sptr &peakCollection);
   void addBackgroundTerms(Poldi2DFunction_sptr poldi2DFunction) const;
 
   API::IAlgorithm_sptr

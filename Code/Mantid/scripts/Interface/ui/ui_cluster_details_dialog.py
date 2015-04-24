@@ -1,4 +1,4 @@
-#pylint: disable=invalid-name
+#pylint: disable=invalid-name,attribute-defined-outside-init,too-many-instance-attributes
 # -*- coding: utf-8 -*-
 
 # Form implementation generated from reading ui file 'ui/cluster_details_dialog.ui'

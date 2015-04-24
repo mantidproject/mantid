@@ -185,7 +185,6 @@
 #include "Mantid/ManageCustomMenus.h"
 #include "Mantid/ManageInterfaceCategories.h"
 #include "Mantid/FirstTimeSetup.h"
-#include "Mantid/SetUpParaview.h"
 
 #include "MantidQtAPI/FileDialogHandler.h"
 #include "MantidQtAPI/InterfaceManager.h"
@@ -217,13 +216,17 @@
 
 using namespace Qwt3D;
 using namespace MantidQt::API;
+using Mantid::Kernel::ConfigService;
+
+using Mantid::API::FrameworkManager;
+using Mantid::Kernel::ConfigService;
+using Mantid::Kernel::LibraryManager;
+using Mantid::Kernel::Logger;
 
 namespace
 {
   /// static logger
-  Mantid::Kernel::Logger g_log("ApplicationWindow");
-  /// ParaView plugins key
-  const char * PVPLUGINS_DIR_KEY = "pvplugins.directory";
+  Logger g_log("ApplicationWindow");
 }
 
 extern "C"
@@ -353,26 +356,23 @@ void ApplicationWindow::init(bool factorySettings, const QStringList& args)
   logWindow->setWidget(resultsLog);
   connect(resultsLog, SIGNAL(errorReceived(const QString &)), logWindow, SLOT(show()));
 
-
-  // Start Mantid
-  // Set the Paraview path BEFORE libaries are loaded. Doing it here prevents
-  // the logs being poluted with library loading errors.
-  trySetParaviewPath(args);
   // Process all pending events before loading Mantid
   // Helps particularly on Windows with cleaning up the
   // splash screen after the 3D visualization dialog has closed
   qApp->processEvents();
 
-  using Mantid::Kernel::ConfigService;
   auto & config = ConfigService::Instance(); // Starts logging
   resultsLog->attachLoggingChannel(); // Must be done after logging starts
-  using Mantid::API::FrameworkManager;
-  auto & framework = FrameworkManager::Instance(); // Loads framework libraries
+  // Load Mantid core libraries by starting the framework
+  FrameworkManager::Instance();
   // Load Paraview plugin libraries if possible
-  if(config.quickParaViewCheck())
+  if(config.pvPluginsAvailable())
   {
     // load paraview plugins
-    framework.loadPluginsUsingKey(PVPLUGINS_DIR_KEY);
+    if (g_log.getLevel() == Logger::Priority::PRIO_DEBUG) {
+      g_log.debug("Loading libraries from \"" + config.getPVPluginsPath() + "\"");
+    }
+    LibraryManager::Instance().OpenAllLibraries(config.getPVPluginsPath(), false);
   }
 
   // Create UI object
@@ -594,18 +594,11 @@ void ApplicationWindow::init(bool factorySettings, const QStringList& args)
   // It is raised in the about2start method as on OS X if the event loop is not running then raise()
   // does not push the dialog to the top of the stack
   d_showFirstTimeSetup = shouldWeShowFirstTimeSetup(args);
- 
+
   using namespace Mantid::API;
   // Do this as late as possible to avoid unnecessary updates
   AlgorithmFactory::Instance().enableNotifications();
   AlgorithmFactory::Instance().notificationCenter.postNotification(new AlgorithmFactoryUpdateNotification);
-
-  /*
-  The scripting enironment call setScriptingLanguage is trampling over the PATH, so we have to set it again.
-  Here we do not off the setup dialog.
-  */
-  const bool skipDialog = true;
-  trySetParaviewPath(args, skipDialog);
 }
 
 /** Determines if the first time dialog should be shown
@@ -627,7 +620,7 @@ bool ApplicationWindow::shouldWeShowFirstTimeSetup(const QStringList& commandArg
 
   //first check the facility and instrument
   using Mantid::Kernel::ConfigService;
-  auto & config = ConfigService::Instance(); 
+  auto & config = ConfigService::Instance();
   std::string facility = config.getString("default.facility");
   std::string instrument = config.getString("default.instrument");
   if ( facility.empty() || instrument.empty() )
@@ -641,13 +634,13 @@ bool ApplicationWindow::shouldWeShowFirstTimeSetup(const QStringList& commandArg
     {
       const Mantid::Kernel::FacilityInfo& facilityInfo = config.getFacility(facility);
       const Mantid::Kernel::InstrumentInfo& instrumentInfo = config.getInstrument(instrument);
-      g_log.information()<<"Default facility '" << facilityInfo.name() 
+      g_log.information()<<"Default facility '" << facilityInfo.name()
         << "', instrument '" << instrumentInfo.name() << "'" << std::endl;
     }
     catch (Mantid::Kernel::Exception::NotFoundError&)
     {
       //failed to find the facility or instrument
-      g_log.error()<<"Could not find your default facility '" << facility 
+      g_log.error()<<"Could not find your default facility '" << facility
         <<"' or instrument '" << instrument << "' in facilities.xml, showing please select again." << std::endl;
       return true;
     }
@@ -672,79 +665,6 @@ bool ApplicationWindow::shouldWeShowFirstTimeSetup(const QStringList& commandArg
   }
 
   return false;
-}
-
-/*
-Function tries to set the paraview path.
-
-This is a windows only feature. the PATH enviromental variable can be set at runtime on windows.
-
-- Abort if Vates libraries do not seem to be present.
-- Othwerise, if the paraview.path is already in the properties file, use it.
-- Otherwise, if the user is not using executeandquit command arguments launch the Setup gui.
-
-@param commandArguments : all command line arguments.
-@param noDialog : set to true to skip over the a dialog launch.
-*/
-void ApplicationWindow::trySetParaviewPath(const QStringList& commandArguments, bool noDialog)
-{
-#ifdef _WIN32
-
-    Mantid::Kernel::ConfigServiceImpl& confService = Mantid::Kernel::ConfigService::Instance();
-    //Early check of execute and quit command arguments used by system tests.
-    QString str;
-    bool b_skipDialog = noDialog;
-    foreach(str, commandArguments)
-    {
-      if ((this->shouldExecuteAndQuit(str)) ||
-        (this->isSilentStartup(str)))
-      {
-        b_skipDialog = true;
-        break;
-      }
-    }
-
-    //ONLY If skipping is not already selected
-    if(!b_skipDialog)
-    {
-      //If the ignore property exists and is set to true, then skip the dialog.
-      const std::string paraviewIgnoreProperty = "paraview.ignore";
-      b_skipDialog = confService.hasProperty(paraviewIgnoreProperty) && QString::fromStdString(confService.getString(paraviewIgnoreProperty)).toInt() > 0;
-    }
-
-    if(this->hasParaviewPath())
-    {
-      //Already have a path in the properties file, just apply it.
-      std::string path = confService.getString("paraview.path");
-      confService.setParaviewLibraryPath(path);
-    }
-    else
-    {
-      //Only run the following if skipping is not implied.
-      if(!b_skipDialog)
-      {
-        //Launch the dialog to set the PV path.
-        SetUpParaview pv(SetUpParaview::FirstLaunch);
-        pv.setWindowFlags(Qt::WindowStaysOnTopHint);
-        pv.exec();
-      }
-    }
-
-#else
-  UNUSED_ARG(commandArguments)
-  UNUSED_ARG(noDialog)
-#endif
-}
-
-
-/*
-Getter to determine if the paraview path has been set.
-*/
-bool ApplicationWindow::hasParaviewPath() const
-{
-  const std::string propertyname = "paraview.path";
-  Mantid::Kernel::ConfigServiceImpl& config = Mantid::Kernel::ConfigService::Instance();
-  return config.hasProperty(propertyname) && !config.getString(propertyname).empty() ;
 }
 
 void ApplicationWindow::initWindow()
@@ -1369,12 +1289,6 @@ void ApplicationWindow::initMainMenu()
   help->insertSeparator();
   help->addAction(actionFirstTimeSetup);
   help->insertSeparator();
-
-  ///The paraview action should only be available on windows
-#ifdef _WIN32
-  help->addAction(actionSetupParaview);
-  help->insertSeparator();
-#endif
 
   help->addAction(actionAbout);
 
@@ -5221,7 +5135,27 @@ void ApplicationWindow::readSettings()
 
   settings.beginGroup("/General");
   titleOn = settings.value("/Title", true).toBool();
-  autoDistribution1D = settings.value("/AutoDistribution1D", true).toBool();
+  // The setting for this was originally stored as a QSetting but then was migrated to
+  // the Mantid ConfigService and is now saved by the ConfigDialog
+  auto & cfgSvc = ConfigService::Instance();
+  if ( settings.contains("/AutoDistribution1D") ) {
+    // if the setting was false then the user changed it
+    // sync this to the new location and remove the key for the future
+    bool qsettingsFlag = settings.value("/AutoDistribution1D", true).toBool();
+    if(qsettingsFlag == false) {
+      cfgSvc.setString("graph1d.autodistribution", "Off");
+      try {
+         cfgSvc.saveConfig( cfgSvc.getUserFilename());
+      } catch(std::runtime_error&) {
+        g_log.warning("Unable to update autodistribution property from ApplicationWindow");
+      }
+    }
+    settings.remove("/AutoDistribution1D");
+  }
+  // Pull default from config service
+  const std::string propStr = cfgSvc.getString("graph1d.autodistribution");
+  autoDistribution1D = (propStr == "On");
+
   canvasFrameWidth = settings.value("/CanvasFrameWidth", 0).toInt();
   defaultPlotMargin = settings.value("/Margin", 0).toInt();
   drawBackbones = settings.value("/AxesBackbones", true).toBool();
@@ -5600,7 +5534,6 @@ void ApplicationWindow::saveSettings()
   settings.beginGroup("/2DPlots");
   settings.beginGroup("/General");
   settings.setValue("/Title", titleOn);
-  settings.setValue("/AutoDistribution1D", autoDistribution1D);
   settings.setValue("/CanvasFrameWidth", canvasFrameWidth);
   settings.setValue("/Margin", defaultPlotMargin);
   settings.setValue("/AxesBackbones", drawBackbones);
@@ -9136,7 +9069,9 @@ void ApplicationWindow::minimizeWindow(MdiSubWindow *w)
   auto wli = dynamic_cast<WindowListItem*>(lv->currentItem());
 
   if (!wli)
-    w = wli->window();
+    return;
+
+  w = wli->window();
 
   if (!w)
     return;
@@ -10266,6 +10201,17 @@ void ApplicationWindow::showGraphContextMenu()
     noNorm->setChecked(!ag->isDistribution());
     binNorm->setChecked(ag->isDistribution());
     cm.insertItem(tr("&Normalization"), &normalization);
+  }
+
+  QMenu plotType(this);
+  if(ag->curves() > 1)
+  {
+    QAction *waterfall = new QAction(tr("&Waterfall"), &plotType);
+    waterfall->setCheckable(true);
+    waterfall->setChecked(ag->isWaterfallPlot());
+    connect(waterfall, SIGNAL(toggled(bool)), plot, SLOT(toggleWaterfall(bool)));
+    plotType.addAction(waterfall);
+    cm.insertItem(tr("&Plot Type"), &plotType);
   }
 
   cm.insertSeparator();
@@ -12107,9 +12053,6 @@ void ApplicationWindow::createActions()
 
   actionFirstTimeSetup = new QAction(tr("First Time Setup"), this);
   connect(actionFirstTimeSetup, SIGNAL(activated()), this, SLOT(showFirstTimeSetup()));
-
-  actionSetupParaview = new QAction(tr("Setup 3D Visualisation"), this);
-  connect(actionSetupParaview, SIGNAL(activated()), this, SLOT(showSetupParaview()));
 
   actionNewProject = new QAction(QIcon(":/NewProject16x16.png"), tr("New &Project"), this);
   actionNewProject->setShortcut( tr("Ctrl+N") );
@@ -14080,14 +14023,6 @@ void ApplicationWindow::showalgorithmDescriptions()
   HelpWindow::showAlgorithm(this);
 }
 
-void ApplicationWindow::showSetupParaview()
-{
-  SetUpParaview* dialog = new SetUpParaview(SetUpParaview::MantidMenu);
-  dialog->setAttribute(Qt::WA_DeleteOnClose);
-  dialog->show();
-  dialog->setFocus();
-}
-
 void ApplicationWindow::showFirstTimeSetup()
 {
   FirstTimeSetup *dialog = new FirstTimeSetup(this);
@@ -15637,7 +15572,7 @@ ApplicationWindow::~ApplicationWindow()
   }
   delete d_current_folder;
 
-  
+
 
   btnPointer->setChecked(true);
   delete mantidUI;

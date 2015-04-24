@@ -15,10 +15,10 @@ set ( SRC_FILES
 	src/CloneMDWorkspace.cpp
 	src/CompareMDWorkspaces.cpp
 	src/ConvToMDBase.cpp
-	src/ConvertCWPDMDToSpectra.cpp
 	src/ConvToMDEventsWS.cpp
 	src/ConvToMDHistoWS.cpp
 	src/ConvToMDSelector.cpp
+	src/ConvertCWPDMDToSpectra.cpp
 	src/ConvertMDHistoToMatrixWorkspace.cpp
 	src/ConvertSpiceDataToRealSpace.cpp
 	src/ConvertToDetectorFaceMD.cpp
@@ -39,6 +39,7 @@ set ( SRC_FILES
 	src/FakeMDEventData.cpp
 	src/FindPeaksMD.cpp
 	src/FitMD.cpp
+	src/GetSpiceDataRawCountsFromMD.cpp
 	src/GreaterThanMD.cpp
 	src/IDynamicRebinning.cpp
 	src/ImportMDEventWorkspace.cpp
@@ -47,6 +48,7 @@ set ( SRC_FILES
 	src/Integrate3DEvents.cpp
 	src/IntegrateEllipsoids.cpp
 	src/IntegrateFlux.cpp
+	src/IntegrateMDHistoWorkspace.cpp
 	src/IntegratePeaksMD.cpp
 	src/IntegratePeaksMD2.cpp
 	src/InvalidParameter.cpp
@@ -155,6 +157,7 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/FindPeaksMD.h
 	inc/MantidMDAlgorithms/FitMD.h
 	inc/MantidMDAlgorithms/GSLFunctions.h
+	inc/MantidMDAlgorithms/GetSpiceDataRawCountsFromMD.h
 	inc/MantidMDAlgorithms/GreaterThanMD.h
 	inc/MantidMDAlgorithms/IDynamicRebinning.h
 	inc/MantidMDAlgorithms/ImportMDEventWorkspace.h
@@ -163,6 +166,7 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/Integrate3DEvents.h
 	inc/MantidMDAlgorithms/IntegrateEllipsoids.h
 	inc/MantidMDAlgorithms/IntegrateFlux.h
+	inc/MantidMDAlgorithms/IntegrateMDHistoWorkspace.h
 	inc/MantidMDAlgorithms/IntegratePeaksMD.h
 	inc/MantidMDAlgorithms/IntegratePeaksMD2.h
 	inc/MantidMDAlgorithms/InvalidParameter.h
@@ -270,12 +274,14 @@ set ( TEST_FILES
 	FitMDTest.h
 	FitResolutionConvolvedModelTest.h
 	ForegroundModelTest.h
+	GetSpiceDataRawCountsFromMDTest.h
 	GreaterThanMDTest.h
 	ImportMDEventWorkspaceTest.h
 	ImportMDHistoWorkspaceTest.h
 	Integrate3DEventsTest.h
 	IntegrateEllipsoidsTest.h
 	IntegrateFluxTest.h
+	IntegrateMDHistoWorkspaceTest.h
 	IntegratePeaksMD2Test.h
 	IntegratePeaksMDTest.h
 	InvalidParameterParserTest.h

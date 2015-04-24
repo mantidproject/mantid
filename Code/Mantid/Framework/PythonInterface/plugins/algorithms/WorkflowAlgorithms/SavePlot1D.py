@@ -37,7 +37,7 @@ class SavePlot1D(mantid.api.PythonAlgorithm):
             from distutils.version import LooseVersion
             if LooseVersion(matplotlib.__version__)<LooseVersion("1.2.0"):
                 ok2run='Wrong version of matplotlib. Required >= 1.2.0'
-        except:
+        except ImportError:
             ok2run='Problem importing matplotlib'
         if ok2run!='':
             raise RuntimeError(ok2run)
@@ -46,7 +46,7 @@ class SavePlot1D(mantid.api.PythonAlgorithm):
         import matplotlib.pyplot as plt
         self._wksp = self.getProperty("InputWorkspace").value
         plt.figure()
-        if type(self._wksp)==mantid.api._api.WorkspaceGroup:
+        if type(self._wksp)==mantid.api.WorkspaceGroup:
             for i in range(self._wksp.getNumberOfEntries()):
                 plt.subplot(self._wksp.getNumberOfEntries(),1,i+1)
                 self.DoPlot(self._wksp.getItem(i))

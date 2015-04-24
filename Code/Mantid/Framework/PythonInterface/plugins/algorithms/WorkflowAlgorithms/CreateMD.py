@@ -2,7 +2,6 @@
 from mantid.kernel import *
 from mantid.api import *
 from mantid.simpleapi import *
-import numpy as np
 import __builtin__
 
 
@@ -88,7 +87,6 @@ class CreateMD(DataProcessorAlgorithm):
         merge_alg.setPropertyValue('OutputWorkspace', 'dummy')
         merge_alg.execute()
         return merge_alg.getProperty('OutputWorkspace').value
-
     def _single_run(self, input_workspace, emode, efix, psi, gl, gs, in_place, alatt=None, angdeg=None, u=None, v=None, out_mdws=None):
         ub_params = map(any, [alatt, angdeg, u, v])
         goniometer_params = [psi, gl, gs]
@@ -98,7 +96,8 @@ class CreateMD(DataProcessorAlgorithm):
             if input_workspace.sample().hasOrientedLattice():
                 logger.warning("Sample already has a UB. This will not be overwritten by %s. Use ClearUB and re-run."%self.name())
             else:
-                self._set_ub(workspace=input_workspace, a=alatt[0], b=alatt[1], c=alatt[2], alpha=angdeg[0], beta=angdeg[1], gamma=angdeg[2], u=u, v=v)
+                self._set_ub(workspace=input_workspace, a=alatt[0], b=alatt[1], c=alatt[2],
+                             alpha=angdeg[0], beta=angdeg[1], gamma=angdeg[2], u=u, v=v)
 
         if efix > 0.0:
             self._add_sample_log(workspace=input_workspace, log_name='Ei',log_number=efix)
@@ -108,10 +107,10 @@ class CreateMD(DataProcessorAlgorithm):
             self._add_sample_log(workspace=input_workspace, log_name='gs', log_number=gs)
             self._add_sample_log(workspace=input_workspace, log_name='psi', log_number=psi)
             self._set_goniometer(workspace=input_workspace)
-        
+
         output_run = self._convert_to_md(workspace=input_workspace, analysis_mode=emode, in_place=in_place, out_mdws=out_mdws)
         return output_run
-    
+
 
     def category(self):
         return 'MDAlgorithms'
@@ -127,26 +126,33 @@ class CreateMD(DataProcessorAlgorithm):
 
         self.declareProperty('Emode', defaultValue='Direct', validator=StringListValidator(self._possible_emodes()), direction=Direction.Input, doc='Analysis mode ' + str(self._possible_emodes()) )
  
-        self.declareProperty(FloatArrayProperty('Alatt', values=[], validator=FloatArrayMandatoryValidator(), direction=Direction.Input ), doc='Lattice parameters' )
+        self.declareProperty(FloatArrayProperty('Alatt', values=[], validator=FloatArrayMandatoryValidator(),
+                                                direction=Direction.Input ), doc='Lattice parameters' )
 
-        self.declareProperty(FloatArrayProperty('Angdeg', values=[], validator=FloatArrayMandatoryValidator(), direction=Direction.Input ), doc='Lattice angles' )
+        self.declareProperty(FloatArrayProperty('Angdeg', values=[], validator=FloatArrayMandatoryValidator(),
+                                                direction=Direction.Input ), doc='Lattice angles' )
 
-        self.declareProperty(FloatArrayProperty('u', values=[], validator=FloatArrayMandatoryValidator(), direction=Direction.Input ), doc='Lattice vector parallel to neutron beam' )
+        self.declareProperty(FloatArrayProperty('u', values=[], validator=FloatArrayMandatoryValidator(),
+                                                direction=Direction.Input ), doc='Lattice vector parallel to neutron beam' )
 
-        self.declareProperty(FloatArrayProperty('v', values=[], validator=FloatArrayMandatoryValidator(), direction=Direction.Input ), doc='Lattice vector perpendicular to neutron beam in the horizontal plane' )
+        self.declareProperty(FloatArrayProperty('v', values=[], validator=FloatArrayMandatoryValidator(),
+                                                direction=Direction.Input ),
+                             doc='Lattice vector perpendicular to neutron beam in the horizontal plane' )
 
-        self.declareProperty(FloatArrayProperty('Psi', values=[], direction=Direction.Input), doc='Psi rotation in degrees. Optional or one entry per run.' )
+        self.declareProperty(FloatArrayProperty('Psi', values=[], direction=Direction.Input),
+                             doc='Psi rotation in degrees. Optional or one entry per run.' )
 
-        self.declareProperty(FloatArrayProperty('Gl', values=[], direction=Direction.Input), doc='gl rotation in degrees. Optional or one entry per run.' )
+        self.declareProperty(FloatArrayProperty('Gl', values=[], direction=Direction.Input),
+                             doc='gl rotation in degrees. Optional or one entry per run.' )
 
-        self.declareProperty(FloatArrayProperty('Gs', values=[], direction=Direction.Input), doc='gs rotation in degrees. Optional or one entry per run.' )
+        self.declareProperty(FloatArrayProperty('Gs', values=[], direction=Direction.Input),
+                             doc='gs rotation in degrees. Optional or one entry per run.' )
 
         self.declareProperty(IMDWorkspaceProperty('OutputWorkspace', '', direction=Direction.Output ), doc='Output MDWorkspace')
 
         self.declareProperty('InPlace', defaultValue=False, direction=Direction.Input, doc="Execute conversions to MD and Merge in one-step. Less memory overhead.")
 
     def _validate_inputs(self):
-    
         emode = self.getProperty('Emode').value
         alatt = self.getProperty('Alatt').value
         angdeg = self.getProperty('Angdeg').value
@@ -158,40 +164,40 @@ class CreateMD(DataProcessorAlgorithm):
         efix = self.getProperty('EFix').value     
 
         input_workspaces = self.getProperty("DataSources").value
-        
+
         ws_entries = len(input_workspaces)
-        
+
         if ws_entries < 1:
             raise ValueError("Need one or more input datasource")
-            
+
         if len(u) != 3:
             raise ValueError("u must have 3 components")
-            
+
         if len(v) != 3:
             raise ValueError("v must have 3 components")
-            
+
         if len(alatt) != 3:
             raise ValueError("lattice parameters must have 3 components")
-            
+
         if len(angdeg) != 3:
             raise ValueError("Angle must have 3 components")
 
         if not emode in self._possible_emodes():
             raise ValueError("Unknown emode %s Allowed values are %s" % (emode, self._possible_emodes()))
-            
+
         if len(psi) > 0 and len(psi) != ws_entries:
             raise ValueError("If Psi is given a entry should be provided for every input datasource")
-        
+
         if len(gl) > 0 and len(gl) != ws_entries:
             raise ValueError("If Gl is given a entry should be provided for every input datasource")
-            
+
         if len(gs) > 0 and len(gs) != ws_entries:
             raise ValueError("If Gs is given a entry should be provided for every input datasource")
 
         if len(efix) > 1 and len(efix) != ws_entries:
             raise ValueError("Either specify a single EFix value, or as many as there are input datasources")
-         
-            
+
+
     def PyExec(self):
 
         logger.warning('You are running algorithm %s that is the beta stage of development' % (self.name()))
@@ -203,23 +209,23 @@ class CreateMD(DataProcessorAlgorithm):
         v = self.getProperty('v').value
         psi = self.getProperty('Psi').value
         gl = self.getProperty('Gl').value
-        gs = self.getProperty('Gs').value   
         efix = self.getProperty('EFix').value   
         in_place = self.getProperty('InPlace')    
-        
+
+        input_workspaces = self.getProperty("InputWorkspaces").value
         data_sources = self.getProperty("DataSources").value
-        
+
         entries = len(data_sources)
-        
+
         self._validate_inputs()
-            
+
         ''' pad out lists'''
         if len(psi) == 0:
             psi = [0.0] * entries
-            
+
         if len(gl) == 0:
             gl = [0.0] * entries
-            
+
         if len(gs) == 0:
             gs = [0.0] * entries
 
@@ -227,12 +233,12 @@ class CreateMD(DataProcessorAlgorithm):
             efix = [-1.0] * entries
         elif len(efix) == 1:
             efix = efix * entries
-        
+
         output_workspace = None
         run_md = None
 
         to_merge_names = list()
-        
+
         run_data = zip(data_sources, psi, gl, gs, efix)
         counter = 0
         run_md = None
@@ -269,12 +275,5 @@ class CreateMD(DataProcessorAlgorithm):
             DeleteWorkspace(mdws)
 
         self.setProperty("OutputWorkspace", output_workspace)
-                
-
-
-
-
-
-
 
 AlgorithmFactory.subscribe(CreateMD)

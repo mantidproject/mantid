@@ -364,6 +364,18 @@
       </item>
       <item>
        <widget class="QComboBox" name="cbPlotType">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>120</width>
+          <height>0</height>
+         </size>
+        </property>
         <item>
          <property name="text">
           <string>None</string>

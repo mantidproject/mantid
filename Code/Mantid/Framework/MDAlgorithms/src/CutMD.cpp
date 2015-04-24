@@ -220,8 +220,6 @@ void CutMD::init() {
                                   "as output. True to create an "
                                   "MDHistoWorkspace as output. This is DND "
                                   "only in Horace terminology.");
-  declareProperty("CheckAxes", true,
-                  "Check that the axis look to be correct, and abort if not.");
 }
 
 void CutMD::exec() {
@@ -379,7 +377,13 @@ void CutMD::exec() {
                                    true);
   }
 
-  // Done!
+  auto geometry = boost::dynamic_pointer_cast<Mantid::API::MDGeometry>(sliceWS);
+
+  /* Original workspace and transformation information does not make sense for self-contained Horace-style
+   * cuts, so clear it out. */
+  geometry->clearTransforms();
+  geometry->clearOriginalWorkspaces();
+
   setProperty("OutputWorkspace", sliceWS);
 }
 

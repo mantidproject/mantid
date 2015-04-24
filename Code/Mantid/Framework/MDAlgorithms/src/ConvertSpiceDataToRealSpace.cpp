@@ -13,6 +13,7 @@
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidDataObjects/MDEventWorkspace.h"
 #include "MantidDataObjects/MDEvent.h"
+#include "MantidDataObjects/TableWorkspace.h"
 
 #include <boost/algorithm/string/predicate.hpp>
 #include <Poco/TemporaryFile.h>
@@ -90,6 +91,12 @@ void ConvertSpiceDataToRealSpace::init() {
   declareProperty(new WorkspaceProperty<IMDEventWorkspace>(
                       "OutputMonitorWorkspace", "", Direction::Output),
                   "Name to use for the output workspace.");
+
+  declareProperty(
+      new WorkspaceProperty<TableWorkspace>("DetectorEfficiencyTableWorkspace",
+                                            "", Direction::Input,
+                                            PropertyMode::Optional),
+      "Name of a table workspace containing the detectors' efficiency.");
 }
 
 //------------------------------------------------------------------------------------------------
@@ -100,6 +107,13 @@ void ConvertSpiceDataToRealSpace::exec() {
   DataObjects::TableWorkspace_sptr dataTableWS = getProperty("InputWorkspace");
   MatrixWorkspace_const_sptr parentWS = getProperty("RunInfoWorkspace");
   m_instrumentName = getPropertyValue("Instrument");
+
+  DataObjects::TableWorkspace_sptr detEffTableWS =
+      getProperty("DetectorEfficiencyTableWorkspace");
+  std::map<detid_t, double> detEffMap; // map for detector efficiency
+  if (detEffTableWS) {
+    parseDetectorEfficiencyTable(detEffTableWS, detEffMap);
+  }
 
   // Check whether parent workspace has run start: order (1) parent ws, (2) user
   // given (3) nothing
@@ -156,6 +170,12 @@ void ConvertSpiceDataToRealSpace::exec() {
 
   std::vector<MatrixWorkspace_sptr> vec_ws2d = convertToMatrixWorkspace(
       dataTableWS, parentWS, runstart, logvecmap, vectimes);
+
+  // Apply detector e(fficiency
+  if (!detEffMap.empty()){
+    correctByDetectorEfficiency(vec_ws2d,
+                                detEffMap); // std::vector<MatrixWorkspace_sptr>
+  }
 
   // check range for x/y/z
   m_numBins.resize(3);
@@ -716,5 +736,60 @@ IMDEventWorkspace_sptr ConvertSpiceDataToRealSpace::createMonitorMDWorkspace(
 
   return outWs;
 }
+
+//------------------------------------------------------------------------------------------------
+/** Parse detector efficiency from table workspace to map
+ * @brief ConvertSpiceDataToRealSpace::parseDetectorEfficiencyTable
+ * @param detefftablews
+ * @param deteffmap
+ */
+void ConvertSpiceDataToRealSpace::parseDetectorEfficiencyTable(
+    DataObjects::TableWorkspace_sptr detefftablews,
+    std::map<detid_t, double> &deteffmap) {
+  // clear map
+  deteffmap.clear();
+
+  // check table workspace
+  size_t numcols = detefftablews->columnCount();
+  if (numcols != 2)
+    throw std::runtime_error(
+        "Input tableworkspace must have 2 and only 2 columns.");
+
+  // parse the detector
+  size_t numrows = detefftablews->rowCount();
+  for (size_t i = 0; i < numrows; ++i) {
+    detid_t detid = detefftablews->cell<detid_t>(i, 0);
+    double deteff = detefftablews->cell<double>(i, 1);
+    deteffmap.insert(std::make_pair(detid, deteff));
+  }
+
+  return;
+}
+
+//------------------------------------------------------------------------------------------------
+/** Apply the detector's efficiency correction to
+ * @brief ConvertSpiceDataToRealSpace::correctByDetectorEfficiency
+ * @param vec_ws2d
+ * @param detEffMap
+ */
+void ConvertSpiceDataToRealSpace::correctByDetectorEfficiency(
+    std::vector<MatrixWorkspace_sptr> vec_ws2d,
+    const std::map<detid_t, double> &detEffMap) {
+  std::vector<MatrixWorkspace_sptr>::iterator it;
+  std::map<detid_t, double>::const_iterator detiter;
+  for (it = vec_ws2d.begin(); it != vec_ws2d.end(); ++it) {
+    MatrixWorkspace_sptr ws = *it;
+    size_t numspec = ws->getNumberHistograms();
+    for (size_t iws = 0; iws < numspec; ++iws) {
+      detid_t detid = ws->getDetector(iws)->getID();
+      detiter = detEffMap.find(detid);
+      if (detiter != detEffMap.end())
+        ws->dataY(iws)[0] /= detiter->second;
+    }
+  }
+
+  return;
+}
+
 } // namespace DataHandling
 } // namespace Mantid

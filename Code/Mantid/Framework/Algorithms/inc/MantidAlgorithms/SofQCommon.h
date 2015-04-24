@@ -1,7 +1,7 @@
 #ifndef MANTID_ALGORITHMS_SOFQW_COMMON_H_
 #define MANTID_ALGORITHMS_SOFQW_COMMON_H_
 
-#include "MantidAPI/Algorithm.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/IDetector.h"
 // Two small routines used by all SofQW algorithms intended to provide united
 // user interface to all SofQ algorihtms.

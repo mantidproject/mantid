@@ -43,7 +43,6 @@ public:
 
    CoordTransformAffineParser parser;
    CoordTransformAffine* transform = dynamic_cast<CoordTransformAffine*>(parser.createTransform(pRootElem));
-
    AffineMatrixType product = transform->getMatrix();
 
    //Check that matrix is recovered.

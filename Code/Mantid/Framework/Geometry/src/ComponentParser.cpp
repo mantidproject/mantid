@@ -1,6 +1,4 @@
 #include "MantidGeometry/ComponentParser.h"
-#include "MantidKernel/System.h"
-#include "MantidGeometry/Instrument/Component.h"
 
 using namespace Mantid::Kernel;
 

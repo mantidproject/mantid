@@ -198,25 +198,32 @@ public:
     TSM_ASSERT_EQUALS("Wrong number of rows", 3, table->rowCount());
   }
 
+  IMDWorkspace_sptr createSlice() {
+
+      auto in_ws = MDEventsTestHelper::makeMDEW<2>(2, -10.0, 10, 3);
+
+      // Create a line slice at 45 degrees to the original workspace.
+      IAlgorithm_sptr binMDAlg = AlgorithmManager::Instance().create("BinMD");
+      binMDAlg->setRethrows(true);
+      binMDAlg->initialize();
+      binMDAlg->setChild(true);
+      binMDAlg->setProperty("InputWorkspace", in_ws);
+      binMDAlg->setProperty("AxisAligned", false);
+      binMDAlg->setPropertyValue("BasisVector0", "X,units,0.7071,0.7071"); // cos 45 to in_ws x-axis (consistent with a 45 degree anti-clockwise rotation)
+      binMDAlg->setPropertyValue("BasisVector1", "Y,units,-0.7071,0.7071"); // cos 45 to in_ws y-axis (consistent with a 45 degree anti-clockwise rotation)
+      binMDAlg->setPropertyValue("OutputExtents", "0,28.284,-1,1"); // 0 to sqrt((-10-10)^2 + (-10-10)^2), -1 to 1 (in new coordinate axes)
+      binMDAlg->setPropertyValue("OutputBins", "10,1");
+      binMDAlg->setPropertyValue("OutputWorkspace", "temp");
+      binMDAlg->execute();
+      Workspace_sptr temp = binMDAlg->getProperty("OutputWorkspace");
+      auto slice = boost::dynamic_pointer_cast<IMDWorkspace>(temp);
+      return slice;
+  }
+
   void testOnSlice()
   {
-    auto in_ws = MDEventsTestHelper::makeMDEW<2>(2, -10.0, 10, 3);
 
-    // Create a line slice at 45 degrees to the original workspace.
-    IAlgorithm_sptr binMDAlg = AlgorithmManager::Instance().create("BinMD");
-    binMDAlg->setRethrows(true);
-    binMDAlg->initialize();
-    binMDAlg->setChild(true);
-    binMDAlg->setProperty("InputWorkspace", in_ws);
-    binMDAlg->setProperty("AxisAligned", false);
-    binMDAlg->setPropertyValue("BasisVector0", "X,units,0.7071,0.7071"); // cos 45 to in_ws x-axis (consistent with a 45 degree anti-clockwise rotation)
-    binMDAlg->setPropertyValue("BasisVector1", "Y,units,-0.7071,0.7071"); // cos 45 to in_ws y-axis (consistent with a 45 degree anti-clockwise rotation)
-    binMDAlg->setPropertyValue("OutputExtents", "0,28.284,-1,1"); // 0 to sqrt((-10-10)^2 + (-10-10)^2), -1 to 1 (in new coordinate axes)
-    binMDAlg->setPropertyValue("OutputBins", "10,1");
-    binMDAlg->setPropertyValue("OutputWorkspace", "temp");
-    binMDAlg->execute();
-    Workspace_sptr temp = binMDAlg->getProperty("OutputWorkspace");
-    auto slice = boost::dynamic_pointer_cast<IMDWorkspace>(temp);
+    IMDWorkspace_sptr slice = createSlice();
 
     QueryMDWorkspace query;
     query.setRethrows(true);
@@ -228,7 +235,7 @@ public:
     ITableWorkspace_sptr table =  query.getProperty("OutputWorkspace");
 
     TSM_ASSERT("Workspace output is not an ITableWorkspace", table !=NULL);
-    size_t expectedCount = 3 + in_ws->getNumDims(); //3 fixed columns are Signal, Error, nEvents
+    size_t expectedCount = 3 + 2; //3 fixed columns are Signal, Error, nEvents and then data is 2D
     TSM_ASSERT_EQUALS("Six columns expected", expectedCount, table->columnCount());
     TSM_ASSERT_EQUALS("Wrong number of rows", 10, table->rowCount());
 
@@ -247,6 +254,50 @@ public:
       messageBuffer << "X and Y should be equal at row index: " << i;
       TSM_ASSERT_DELTA(messageBuffer.str(), x, y, 1e-3);
     }
+
+  }
+
+  void testOnSlice_without_transform_to_original()
+  {
+      IMDWorkspace_sptr slice = createSlice();
+
+      QueryMDWorkspace query;
+      query.setRethrows(true);
+      query.setChild(true);
+      query.initialize();
+      query.setProperty("TransformCoordsToOriginal", false); // DO NOT, use the original workspace coordinates.
+      query.setProperty("InputWorkspace", slice);
+      query.setPropertyValue("OutputWorkspace", "QueryWS");
+      query.execute();
+      ITableWorkspace_sptr table =  query.getProperty("OutputWorkspace");
+
+      TSM_ASSERT("Workspace output is not an ITableWorkspace", table !=NULL);
+      size_t expectedCount = 3 + 2; //3 fixed columns are Signal, Error, nEvents and then data is 2D
+      TSM_ASSERT_EQUALS("Six columns expected", expectedCount, table->columnCount());
+      TSM_ASSERT_EQUALS("Wrong number of rows", 10, table->rowCount());
+
+      /*
+       Since we were displaying the results in the new coordinate system
+       then y == 0 and x would increment from 0 to sqrt((-10-10)^2 + (-10-10)^2).
+
+       Note that what we do in the following is to check that the y and x coordinates are NOT the same. They will ONLY be the same in the
+       original coordinate system owing to the way that they have been rotated.
+       */
+      const double xMax = std::sqrt( 20 * 20 * 2);
+      const double xMin = 0;
+
+      auto xColumn = table->getColumn(3);
+      auto yColumn = table->getColumn(4);
+
+
+      TS_ASSERT_EQUALS(0, yColumn->toDouble(0));// Always zero
+      TS_ASSERT_EQUALS(0, yColumn->toDouble(table->rowCount()-1));
+
+
+      const double binHalfWidth = 1.5;
+      TSM_ASSERT_DELTA("From zero", xMin, xColumn->toDouble(0), binHalfWidth /*account for bin widths*/);
+      TSM_ASSERT_DELTA("To max", xMax, xColumn->toDouble(table->rowCount()-1), binHalfWidth /*account for bin widths*/);
+
 
   }
 
