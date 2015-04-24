@@ -157,7 +157,7 @@ public:
   void test_updateAvailableLogs()
   {
     EXPECT_CALL(*m_view, firstRun()).WillRepeatedly(Return("MUSR00015189.nxs"));
-    EXPECT_CALL(*m_view, setAvailableLogs(AllOf(Property(&std::vector<std::string>::size, 33),
+    EXPECT_CALL(*m_view, setAvailableLogs(AllOf(Property(&std::vector<std::string>::size, 37),
                                                 Contains("run_number"),
                                                 Contains("sample_magn_field"),
                                                 Contains("Field_Danfysik"))));

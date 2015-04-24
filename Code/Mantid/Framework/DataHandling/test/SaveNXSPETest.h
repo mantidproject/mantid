@@ -206,7 +206,7 @@ private:
     }
 
     auto h5file = H5Fopen(outputFile.c_str(), H5F_ACC_RDWR, H5P_DEFAULT);
-    char * dset = "/mantid_workspace/data/data";
+    const char * dset = "/mantid_workspace/data/data";
     int rank(0);
     herr_t status = H5LTget_dataset_ndims(h5file, dset, &rank);
     TS_ASSERT_EQUALS(0, status);
@@ -224,8 +224,9 @@ private:
     boost::shared_array<double> signal(new double[bufferSize]), error(new double[bufferSize]);
     status = H5LTread_dataset_double(h5file, dset, signal.get());
     TS_ASSERT_EQUALS(0, status);
-    dset = "/mantid_workspace/data/error";
-    status = H5LTread_dataset_double(h5file, dset, error.get());
+
+    const char * dsetErr = "/mantid_workspace/data/error";
+    status = H5LTread_dataset_double(h5file, dsetErr, error.get());
     TS_ASSERT_EQUALS(0, status);
     H5Fclose(h5file);
     //Poco::File(outputFile).remove();
