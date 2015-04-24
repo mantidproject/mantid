@@ -363,7 +363,8 @@ PoldiPeakCollection_sptr PoldiFitPeaks1D2::getReducedPeakCollection(
 }
 
 bool PoldiFitPeaks1D2::peakIsAcceptable(const PoldiPeak_sptr &peak) const {
-  return peak->intensity() > 0 && peak->fwhm(PoldiPeak::Relative) < 0.02;
+  return peak->intensity() > 0 && peak->fwhm(PoldiPeak::Relative) < 0.02 &&
+         peak->fwhm(PoldiPeak::Relative) > 0.001;
 }
 
 void PoldiFitPeaks1D2::exec() {
@@ -386,7 +387,7 @@ void PoldiFitPeaks1D2::exec() {
     ++i;
   }
 
-  setProperty("OutputWorkspace", m_peaks->asTableWorkspace());
+  setProperty("OutputWorkspace", fittedPeaksNew->asTableWorkspace());
   setProperty("FitPlotsWorkspace", m_fitplots);
 }
 
