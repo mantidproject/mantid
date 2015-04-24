@@ -109,3 +109,32 @@ def parseDetEffCorrFile(vancorrfname):
     # ENDFOR
 
     return corrdict
+
+
+def parseDetExclusionFile(detexludefilename):
+    """ Parse excluded detectors file
+    """
+    try:
+        defile = open(detexludefilename)
+        lines = defile.readlines()
+        defile.close()
+    except IOError:
+        return (None, 'Unable to read excluded detector file %s.'%(detexludefilename))
+
+    detexcludelist = []
+    for line in lines:
+        line = line.strip()
+        if len(line) == 0 or line[0] == '#':
+            continue
+
+        terms = line.split()
+        for term in terms:
+            try: 
+                detid = int(term)
+                detexcludelist.append(detid)
+            except ValueError:
+                break
+        # ENDFOR
+    # ENDFOR
+
+    return (detexcludelist, '')

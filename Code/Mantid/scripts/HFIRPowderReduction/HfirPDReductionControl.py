@@ -240,7 +240,6 @@ class HFIRPDRedControl:
 
         # get the complete list of Pt. number
         if ptnolist is None:
-            # FIXME / TODO - This is not implemented yet!
             ptnolist = self._getRunNumberList(datamdws=rmanager.datamdws)
 
         rlist = []
@@ -283,6 +282,44 @@ class HFIRPDRedControl:
                 lognamelist.append(p.name)
 
         return lognamelist
+
+
+    def getSampleLogValue(self, expno, scanno, samplelogname, xlabel):
+        """ Get vecx and vecy for sample log 
+        """
+        # Check and get data
+        exp = int(expno)
+        scan = int(scanno)
+
+        if self._myWorkspaceDict.has_key((exp, scan)) is False:
+            raise NotImplementedError("Exp %d Scan %d does not have reduced \
+                    workspace." % (exp, scan))
+        else: 
+            rmanager = self._myWorkspaceDict[(exp, scan)]
+            datamdws = rmanager.datamdws
+            monitormdws = rmanager.monitormdws
+            
+            if datamdws is None or monitormdws is None:
+                raise NotImplementedError('Reduction manager has no MDEventWorkspaces setup.')
+        # END-IF-ELSE
+
+        # get the complete list of Pt. number
+        if ptnolist is None:
+            ptnolist = self._getRunNumberList(datamdws=rmanager.datamdws)
+
+        rlist = []
+        # get data
+        tempoutws = api.GetSpiceDataRawCountsFromMD(InputWorkspace=datamdws, 
+                                                    MonitorWorkspace=monitormdws, 
+                                                    Mode='Det.', 
+                                                    SampeLogName=samplelogname)
+
+        vecx = tempoutws.readX(0)[:]
+        vecy = tempoutws.readY(0)[:]
+
+        return (vecx, vecy)
+
+
 
     def getVectorToPlot(self, exp, scan):
         """ Get vec x and vec y of the reduced workspace to plot
@@ -341,11 +378,9 @@ class HFIRPDRedControl:
 
         wavelength = wsmanager.getWavelength()
 
+        # Convert the vanadium peaks' position from dSpacing to 2theta
         vanpeakpos2theta = []
         for peakpos in VanadiumPeakPositions:
-            # FIXME - Check equation
-            # print "wavelength: ", wavelength, " peak pos: ", peakpos
-            # print "lambd_over_2d = ", wavelength/2./peakpos
             lambda_over_2d =  wavelength/2./peakpos
             if abs(lambda_over_2d) <= 1.:
                 twotheta = math.asin(lambda_over_2d)*2.*180/math.pi 
@@ -613,30 +648,6 @@ class HFIRPDRedControl:
         """ Reduce SPICE powder diffraction data. 
         Return - Boolean as reduction is successful or not
         """
-        # base workspace name
-        # print "base workspace name: ", datafilename
-        # try:
-        #     basewsname = os.path.basename(datafilename).split(".")[0]
-        # except AttributeError as e:
-        #     raise NotImplementedError("Unable to parse data file name due to %s." % (str(e)))
-
-        # # load SPICE
-        # tablewsname = basewsname + "_RawTable"
-        # infowsname  = basewsname + "ExpInfo"
-        # api.LoadSpiceAscii(Filename=datafilename, 
-        #         OutputWorkspace=tablewsname, RunInfoWorkspace=infowsname)
-
-        # # convert to MDWorkspace
-        # datamdwsname = basewsname + "_DataMD"
-        # monitorwsname = basewsname + "_MonitorMD"
-        # api.ConvertSpiceDataToRealSpace(InputWorkspace=tablewsname,
-        #         RunInfoWorkspace=infowsname,
-        #         OutputWorkspace=datamdwsname,
-        #         OutputMonitorWorkspace=monitorwsname)
-
-        # datamdws = AnalysisDataService.retrieve(datamdwsname)
-        # monitormdws = AnalysisDataService.retrieve(monitorwsname)
-    
         # Get reduction manager
         try: 
             wsmanager = self._myWorkspaceDict[(int(exp), int(scan))]
@@ -647,40 +658,6 @@ class HFIRPDRedControl:
         datamdws = wsmanager.datamdws
         monitormdws = wsmanager.monitormdws
 
-        # # Get correction files
-        # # TODO / FIXME : Develop file loading and parsing algorithms!!!
-        # localdir = os.path.dirname(datafilename)
-        # print "[Dev] Data file name: %s  in local directory %s." % (datafilename, localdir)
-        # status, returnbody = self.retrieveCorrectionData(instrument='HB2A', datamdws=datamdws, exp=exp, localdatadir=localdir)
-
-        # if status is False:
-        #     errmsg = returnbody
-        #     self._logError("Unable to download correction files for Exp %d Scan %d. \
-        #             \nReason: %s." % (expno, scanno, errmsg))
-        #     vcorrfilename = None
-        #     excludedfilename = None
-        # else:
-        #     print "[Info] Detectors correction files: %s." % (str(returnbody))
-        #     autowavelength = returnbody[0]
-        #     vcorrfilename = returnbody[1]
-        #     excludedfilename = returnbody[2]
-        #     print "[Dev] Wavelength: %f vs %f (user vs. local)" % (wavelength, autowavelength)
-        #     
-        #     if autowavelength is not None: 
-        #         wavelength = autowavelength
-
-        # TODO - Parse and setup corrections... 
-        # if vcorrfilename is not None:
-        #     vcorrtablews = self._myControl.parseDetEfficiencyFile('HB2A', vcorrfilename) 
-        # else:
-        #     vcorrtablews = None
-
-        # # TODO - Parse and set up excluded detectors
-        # if excludedfilename is not None: 
-        #     excludeddetlist = self._myControl.parseExcludedDetFile('HB2A', excludedfilename)
-        # else:
-        #     excludeddetlist = []
-
         # binning from MD to single spectrum ws
         # set up binning parameters
         if xmin is None or xmax is None:
@@ -690,13 +667,13 @@ class HFIRPDRedControl:
 
         basewsname = datamdws.name().split("_DataMD")[0]
         outwsname = basewsname + "_Reduced"
-        # TODO - Applied excluded detectors and vanadium correction into account
         api.ConvertCWPDMDToSpectra(InputWorkspace=datamdws,
                 InputMonitorWorkspace=monitormdws,
                 OutputWorkspace=outwsname,
                 BinningParams=binpar,
                 UnitOutput = unit, 
-                NeutronWaveLength=wavelength)
+                NeutronWaveLength=wavelength,
+                ExcludedDetectors=numpy.array(excludeddetlist))
 
         print "[DB] Reduction is finished.  Data is in workspace %s. " % (outwsname)
 
@@ -711,8 +688,6 @@ class HFIRPDRedControl:
         wsmanager.setWavelength(wavelength)
 
         self._myWorkspaceDict[(exp, scan)] = wsmanager
-
-        # TODO - Should feed back wavelength (auto) back to GUI if it is different from the one specified by user
         
         return True
 
@@ -829,11 +804,12 @@ class HFIRPDRedControl:
             raise NotImplementedError("Unable to rebin the data for exp=%d, scan=%d because either data MD workspace and \
                 monitor MD workspace is not present."  % (exp, scan))
 
-        # Convert unit to Time-of-flight
+        # Convert unit to Time-of-flight by rebinning
         xaxis_unit = wksp.getAxis(0).getUnit().unitID()
         if xaxis_unit != 'Degrees': 
-            wksp = mantid.ConvertCWPDToSpectra(InputWorkspace=wksp, OutputWorkspace=wksp.name(),
-                    Params=binparams)
+            wksp = api.ConvertCWPDToSpectra(InputWorkspace=wksp, 
+                                            OutputWorkspace=wksp.name(), 
+                                            Params=binparams)
 
         # Vanadium peaks positions
         if vanpeakposlist is None or len(vanpeakposlist) == 0:
@@ -860,6 +836,24 @@ class HFIRPDRedControl:
             tablews.appendRow( [detid, vancorrdict[detid]] )
 
         return tablews
+
+
+    def _getRunNumberList(self, datamdws):
+        """ Get list of run number (i.e., Pt) from an MDEventWorkspace
+
+        Return :: list of MDEventWrokspace
+        """
+        ptnolist = []
+
+        numexpinfo = datamdws.getNumberExperimentInfo()
+        for i in xrange(len(numexpinfo)):
+            expinfo = datamdws.getExperimentInfo(i)
+            runid = expinfo.getRun()
+            if runid > 0:
+                ptnolist.append(runid)
+        # ENDFOR
+
+        return sorted(ptnolist)
 
 
     def _getValueFromTable(self, tablews, colname, rowindex=0):

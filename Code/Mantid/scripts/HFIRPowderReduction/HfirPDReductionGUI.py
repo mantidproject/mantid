@@ -629,8 +629,7 @@ class MainWindow(QtGui.QMainWindow):
         clearcache = self.ui.checkBox_delCache.isChecked()
 
         if clearcache is True:
-            # TODO - Clear cache
-            print "Clear Cache! Implement ASAP!"
+            delAllFile(self._cache)
 
         self.close()
 
@@ -923,9 +922,7 @@ class MainWindow(QtGui.QMainWindow):
     def doPlotRawPtPrev(self):
         """ Plot previous raw detector
         """
-        # FIXME/ TODO - shall check whether the plot is on canvas
-
-        # check
+        # Validate input
         if self._rawDetPtNo is not None:
             ptno = self._rawDetPtNo - 1
         else:
@@ -950,8 +947,10 @@ class MainWindow(QtGui.QMainWindow):
         """ Plot sample log vs. Pt. in tab 'Individual Detector'
         """
         logname = str(self.ui.comboBox_indvDetYLabel.currentText())
-        # TODO - ASAP
-        raise NotImplementedError("ASAP: doPlotSampleLog")
+
+        self._plotSampleLog(logname)
+
+        return
 
 
     def doRebin2Theta(self):
@@ -1327,7 +1326,7 @@ class MainWindow(QtGui.QMainWindow):
 
                 
     def _plotRawDetSignal(self, expno, scanno, plotmode, ptno, dooverplot):
-        """ Plot the counts of one detector of a certain Pt. in an experiment
+        """ Plot the counts of all detectors of a certain Pt. in an experiment
         """
         # Validate input
         expno = int(expno)
@@ -1494,6 +1493,59 @@ class MainWindow(QtGui.QMainWindow):
             
         return
 
+
+    def _plotSampleLog(self, expno, scanno, samplelogname):
+        """ Plot the value of a sample log among all Pt.
+        """
+        # Validate input
+        expno = int(expno)
+        scanno = int(scanno)
+        samplelogname = str(samplelogname)
+
+        # Reject if data is not loaded
+        if self._myControl.hasDataLoaded(expno, scanno) is False:
+            self._logError("Data file for Exp %d Scan %d has not been loaded." % (expno, scanno))
+            return False
+        
+        # Canvas and line information
+        canvas = self.ui.graphicsView_indvDet
+        canvas.clearAllLines() 
+        
+        self._indvDetCanvasMode = 'samplelog'
+
+        # pop out the xlabel list
+        # REFACTOR - Only need to set up once if previous plot has the same setup
+        floatsamplelognamelist = self._myControl.getSampleLogNames(expno, scanno)
+        self.ui.comboBox_indvDetXLabel.clear()
+        self.ui.comboBox_indvDetXLabel.addItems(floatsamplelognamelist)
+
+        # get data
+        vecx, vecy = self._myControl.getSampleLogValue(expno, scanno, samplelogname, xlabel)
+
+        # Plot to canvas
+        marker, color = canvas.getNextLineMarkerColorCombo()
+        if xlabel is None:
+            xlabel = r'Pt'
+
+        label = samplelogname
+
+        if self._tabLineDict[canvas].count( (expno, scanno, detid) ) == 0:
+            canvas.addPlot(vecx, vecy, marker=marker, color=color, xlabel=xlabel, \
+                ylabel='Counts',label=label)
+            self._tabLineDict[canvas].append( (expno, scanno, detid) )
+        
+            # auto setup for image boundary
+            xmin = min(min(vecx), canvas.getXLimit()[0])
+            xmax = max(max(vecx), canvas.getXLimit()[1])
+            ymin = min(min(vecy), canvas.getYLimit()[0])
+            ymax = max(max(vecy), canvas.getYLimit()[1])
+
+            dx = xmax-xmin
+            dy = ymax-ymin
+            canvas.setXYLimit(xmin-dx*0.0001, xmax+dx*0.0001, ymin-dy*0.0001, ymax+dy*0.0001)
+
+        return True
+        
 
     def _uiCheckBinningParameters(self, curxmin=None, curxmax=None, curbinsize=None, curunit=None, targetunit=None):
         """ check the binning parameters including xmin, xmax, bin size and target unit
