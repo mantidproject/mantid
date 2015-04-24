@@ -68,11 +68,17 @@ reducer = HfirPDReductionGUI.MainWindow() #the main ui class in this file is cal
 reducer.show()
 
 # example: 'http://neutron.ornl.gov/user_data/hb2a/exp400/Datafiles/HB2A_exp0400_scan0001.dat'
-print "Set to exp 231, scan 1"
-reducer.ui.lineEdit_expNo.setText('231')
-reducer.ui.lineEdit_scanNo.setText('1')
-reducer.ui.lineEdit_wavelength.setText('2.41')
-reducer.ui.tabWidget.setCurrentIndex(2)
+if False:
+    print "Simple Test: Set to exp 231, scan 1 (No automatic file setup)"
+    reducer.ui.lineEdit_expNo.setText('231')
+    reducer.ui.lineEdit_scanNo.setText('1')
+    reducer.ui.lineEdit_wavelength.setText('2.41')
+    reducer.ui.tabWidget.setCurrentIndex(2)
+else:
+    print "Automatic Data Location Test: Set to exp 379, scan 10"
+    reducer.ui.lineEdit_expNo.setText('379')
+    reducer.ui.lineEdit_scanNo.setText('10')
+    reducer.ui.tabWidget.setCurrentIndex(2)
 
 if MOS == LINUX:
     reducer.ui.lineEdit_cache.setText('/home/wzz/Temp/')

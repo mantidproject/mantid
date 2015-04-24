@@ -303,16 +303,15 @@ class HFIRPDRedControl:
                 raise NotImplementedError('Reduction manager has no MDEventWorkspaces setup.')
         # END-IF-ELSE
 
-        # get the complete list of Pt. number
-        if ptnolist is None:
-            ptnolist = self._getRunNumberList(datamdws=rmanager.datamdws)
+        # get the complete list of Pt. number 
+        ptnolist = self._getRunNumberList(datamdws=rmanager.datamdws)
 
         rlist = []
         # get data
         tempoutws = api.GetSpiceDataRawCountsFromMD(InputWorkspace=datamdws, 
                                                     MonitorWorkspace=monitormdws, 
-                                                    Mode='Det.', 
-                                                    SampeLogName=samplelogname)
+                                                    Mode='Sample Log',
+                                                    SampleLogName=samplelogname)
 
         vecx = tempoutws.readX(0)[:]
         vecy = tempoutws.readY(0)[:]
@@ -470,14 +469,14 @@ class HFIRPDRedControl:
         return
 
 
-    def parseDetEffCorrFile(instrument, vancorrfname):
+    def parseDetEffCorrFile(self, instrument, vancorrfname):
         """ Parse detector efficiency correction file='HB2A
 
         Return :: 2-tuple (table workspace and or 
         """
         if instrument.upper() == 'HB2A':
             vancorrdict, errmsg = hutil.parseDetEffCorrFile(vancorrfname)
-            if vancorrdict.size() > 0: 
+            if len(vancorrdict) > 0: 
                 detefftablews = self._generateTableWS(vancorrdict)
             else:
                 detefftablews = None
@@ -486,6 +485,19 @@ class HFIRPDRedControl:
             errmsg = "Instrument %s is not supported for parsing vanadium (detector efficiency) correction."
 
         return (detefftablews, errmsg)
+
+
+    def parseExcludedDetFile(self, instrument, excldetfname):
+        """ Parse excluded detectors file
+
+        Return :: 2 -tuple (list/None, error message)
+        """
+        if instrument.upper() == 'HB2A':
+            excldetlist, errmsg = hutil.parseDetExclusionFile(excldetfname)
+        else:
+            raise NotImplementedError('Instrument %s is not supported for parsing excluded detectors file.'%(instrument))
+
+        return excldetlist, errmsg
 
 
     def parseSpiceData(self, expno, scanno, detefftablews=None):
@@ -509,7 +521,7 @@ class HFIRPDRedControl:
                                         RunInfoWorkspace=infows, 
                                         OutputWorkspace=datamdwsname, 
                                         OutputMonitorWorkspace=monitorwsname,
-                                        DetEffTable=detefftablews)
+                                        DetectorEfficiencyTableWorkspace=detefftablews)
 
         datamdws = AnalysisDataService.retrieve(datamdwsname)
         monitormdws = AnalysisDataService.retrieve(monitorwsname)
@@ -667,13 +679,14 @@ class HFIRPDRedControl:
 
         basewsname = datamdws.name().split("_DataMD")[0]
         outwsname = basewsname + "_Reduced"
+        print "[DB]", numpy.array(excludeddetlist)
         api.ConvertCWPDMDToSpectra(InputWorkspace=datamdws,
                 InputMonitorWorkspace=monitormdws,
                 OutputWorkspace=outwsname,
                 BinningParams=binpar,
                 UnitOutput = unit, 
                 NeutronWaveLength=wavelength,
-                ExcludedDetectors=numpy.array(excludeddetlist))
+                ExcludedDetectorIDs=numpy.array(excludeddetlist))
 
         print "[DB] Reduction is finished.  Data is in workspace %s. " % (outwsname)
 
@@ -739,8 +752,8 @@ class HFIRPDRedControl:
             if os.path.exists(localexcldetfname) is False:
                 downloadstatus, errmsg = downloadFile(exclurl, localexcldetfname)
                 if downloadstatus is False:
-                    localexcldetfname = False
-                    print errmsg 
+                    localexcldetfname = None
+                    print "[Error] %s" % (errmsg)
             else:
                 print "[Info] Detector exclusion file %s exists in directory %s." % (excldetfname, localdatadir)
 
@@ -828,12 +841,12 @@ class HFIRPDRedControl:
     def _generateTableWS(self, vancorrdict):
         """ Create table workspace
         """
-        tablews = api.CreateEmptyTableWorkspace()
+        tablews = api.CreateEmptyTableWorkspace(OutputWorkspace="tempcorrtable")
         tablews.addColumn('int', 'DetID')
-        tablews.addColumn('float', 'Correction')
+        tablews.addColumn('double', 'Correction')
 
         for detid in sorted(vancorrdict.keys()):
-            tablews.appendRow( [detid, vancorrdict[detid]] )
+            tablews.addRow( [detid, vancorrdict[detid]] )
 
         return tablews
 
@@ -845,11 +858,11 @@ class HFIRPDRedControl:
         """
         ptnolist = []
 
-        numexpinfo = datamdws.getNumberExperimentInfo()
-        for i in xrange(len(numexpinfo)):
+        numexpinfo = datamdws.getNumExperimentInfo()
+        for i in xrange(numexpinfo):
             expinfo = datamdws.getExperimentInfo(i)
-            runid = expinfo.getRun()
-            if runid > 0:
+            runid = expinfo.run().getProperty('run_number').value
+            if runid >= 0:
                 ptnolist.append(runid)
         # ENDFOR
 

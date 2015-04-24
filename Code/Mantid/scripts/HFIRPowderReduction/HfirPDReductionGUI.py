@@ -42,16 +42,16 @@ class EmptyError(Exception):
 
 class MainWindow(QtGui.QMainWindow):
     """ Class of Main Window (top)
-
-    Copy to ui.setupUI
-    # Version 3.0 + Import for Ui_MainWindow.py
-        from MplFigureCanvas import Qt4MplCanvas
-
-        # Replace 'self.graphicsView = QtGui.QtGraphicsView' with the following
-        self.graphicsView = Qt4MplCanvas(self.centralwidget)
-        self.mainplot = self.graphicsView.getPlot()
-
     """
+
+    # Copy to ui.setupUI
+    # # Version 3.0 + Import for Ui_MainWindow.py
+    #     from MplFigureCanvas import Qt4MplCanvas
+
+    #     # Replace 'self.graphicsView = QtGui.QtGraphicsView' with the following
+    #     self.graphicsView = Qt4MplCanvas(self.centralwidget)
+    #     self.mainplot = self.graphicsView.getPlot()
+
     def __init__(self, parent=None):
         """ Intialization and set up
         """
@@ -69,6 +69,8 @@ class MainWindow(QtGui.QMainWindow):
                 self.doUpdateWavelength)
         self.connect(self.ui.actionQuit, QtCore.SIGNAL('triggered()'),
                 self.doExist)
+        self.connect(self.ui.pushButton_browseExcludedDetFile, QtCore.SIGNAL('clicked'),
+                self.doBrowseExcludedDetetorFile)
 
         # tab 'Raw Detectors'
         self.connect(self.ui.pushButton_plotRaw, QtCore.SIGNAL('clicked()'),
@@ -268,6 +270,37 @@ class MainWindow(QtGui.QMainWindow):
             self.ui.lineEdit_cache.setText(dirs)
 
         return
+
+    def doBrowseExcludedDetetorFile(self):
+        """ 
+
+        Return :: None
+        """
+        # FIXME - Documentation
+
+        # Get file name 
+        filefilter = "Text (*.txt);;Data (*.dat);;All files (*.*)" 
+        curdir = os.getcwd()
+        excldetfnames = QtGui.QFileDialog.getOpenFileNames(self, 'Open File(s)', curdir, filefilter)
+        try: 
+            excldetfname = excldetfnames[0]
+            self.ui.lineEdit_excludedDetFileName.setText(excldetfname)
+        except IndexError:
+            # return if there is no file selected
+            return 
+        
+        # Parse det exclusion file
+        print "Detector exclusion file name is %s." % (excldetfname) 
+        excludedetlist, errmsg = self._myControl.parseExcludedDetFile('HB2A', excldetfname)
+        textbuf = ""
+        for detid in excludedetlist:
+            textbuf += "%d," % (detid)
+        if len(textbuf) > 0:
+            textbuf = textbuf[:-1]
+            self.ui.lineEdit_detExcluded.setText(textbuf)
+        # ENDIF
+
+        return
         
     def doBrowseLocalDataSrc(self):
         """ Browse local data storage
@@ -361,7 +394,7 @@ class MainWindow(QtGui.QMainWindow):
         """ Load and reduce data 
         It does not support for tab 'Multiple Scans' and 'Advanced Setup'
         For tab 'Raw Detector' and 'Individual Detector', this method will load data to MDEventWorkspaces
-        For tab 'Normalized' and 'Vanadium', this method will load data to MDEVentWorkspaces and reduce to single spectrum
+        For tab 'Normalized' and 'Vanadium', this method will load data to MDEVentWorkspaces but NOT reduce to single spectrum
         """
         # Kick away unsupported tabs
         itab = self.ui.tabWidget.currentIndex()
@@ -384,7 +417,6 @@ class MainWindow(QtGui.QMainWindow):
         except Exception as e:
             self._logError("Error to get Exp and Scan due to %s." % (str(e)))
             return
-
         self._logDebug("Attending to load Exp %d Scan %d." % (expno, scanno))
 
         # Form data file name and download data
@@ -393,7 +425,6 @@ class MainWindow(QtGui.QMainWindow):
             self._logError("Unable to download or locate local data file for Exp %d \
                 Scan %d." % (expno, scanno))
         # ENDIF(status)
-
 
         # Load data for tab 0, 1, 2 and 4
         if itab in [0, 1, 2, 4]:
@@ -423,14 +454,37 @@ class MainWindow(QtGui.QMainWindow):
                 autowavelength = returnbody[0]
                 vancorrfname = returnbody[1]
                 excldetfname = returnbody[2]
-                raise "Why excldetfname is not a string or None?"
-                print "Excluded File Name = ", str(excldetfname)
+
+                if vancorrfname is not None:
+                    self.ui.lineEdit_vcorrFileName.setText(vancorrfname)
+                if excldetfname is not None:
+                    self.ui.lineEdit_excludedDetFileName.setText(excldetfname)
+
             else:
                 autowavelength = None
                 vancorrfname = None
                 excldetfname = None
 
-            # Optionally parse det effecient file
+            # Set wavelength
+            if autowavelength is None:
+                self.ui.comboBox_wavelength.setCurrentIndex(4)
+                self.ui.lineEdit_wavelength.setText(self.ui.comboBox_wavelength.currentText())
+            else:
+                self.ui.lineEdit_wavelength.setText(str(autowavelength))
+                allowedwavelengths = [2.41, 1.54, 1.12]
+                numitems = self.ui.comboBox_wavelength.count() 
+                good = False
+                for ic in xrange(numitems-1):
+                    if abs(autowavelength - allowedwavelengths[ic]) < 0.01:
+                        good = True
+                        self.ui.comboBox_wavelength.setCurrentIndex(ic)
+                # ENDFOR
+                
+                if good is False: 
+                    self.ui.comboBox_wavelength.setCurrentIndex(numitems-1)
+            # ENDIF
+
+            # Optionally obtain and parse det effecient file
             if self.ui.checkBox_useDetEffCorr.isChecked() is True:
                 # Apply detector efficiency correction
                 if vancorrfname is None:
@@ -449,7 +503,9 @@ class MainWindow(QtGui.QMainWindow):
 
                 # Parse if it is not None
                 if vancorrfname is not None:
-                    detefftablews = self._myControl.parseDetEffCorrFile('HB2A', vancorrfname)
+                    detefftablews, errmsg = self._myControl.parseDetEffCorrFile('HB2A', vancorrfname)
+                    if detefftablews is None:
+                        print "Parsing detectors efficiency file error: %s." % (errmsg)
                 else:
                     detefftablews = None
                 # ENDIF
@@ -475,12 +531,37 @@ class MainWindow(QtGui.QMainWindow):
                     self._logError(cause)
                     return
             # END-TRY-EXCEPT-FINALLY
+
+            # Optionally parse detector exclusion file and set to line text
+            if excldetfname is not None:
+                excludedetlist, errmsg = self._myControl.parseExcludedDetFile('HB2A', excldetfname)
+            
+                textbuf = ""
+                for detid in excludedetlist:
+                    textbuf += "%d," % (detid)
+                if len(textbuf) > 0:
+                    textbuf = textbuf[:-1]
+                    self.ui.lineEdit_detExcluded.setText(textbuf)
+            # ENDIF
+
         else:
-            # Unsupported case
+            # Unsupported Tabs 
             errmsg = "%d-th tab should not get this far.\n"%(itab)
             errmsg += 'GUI has been changed, but the change has not been considered! iTab = %d' % (itab)
             raise NotImplementedError(errmsg) 
         # ENDIFELSE
+
+        # Set up some widgets from 
+        floatsamplelognamelist = self._myControl.getSampleLogNames(expno, scanno)
+        self.ui.comboBox_indvDetXLabel.clear()
+        self.ui.comboBox_indvDetXLabel.addItems(floatsamplelognamelist)
+        self.ui.comboBox_indvDetYLabel.clear()
+        self.ui.comboBox_indvDetYLabel.addItems(floatsamplelognamelist)
+
+        return
+
+
+    def _reduceData(self):
 
         # Process wavelength
         wavelength = self.getFloat(self.ui.lineEdit_wavelength)
@@ -499,24 +580,6 @@ class MainWindow(QtGui.QMainWindow):
         if itab == 2 or itab == 4:
             # Reduce data
 
-            # optionally parse det exclusion file
-            excludedetlist = []
-            if self.ui.checkBox_useDetExcludeFile.isChecked():
-                if excldetfname is None:
-                    filefilter = "Text (*.txt);;Data (*.dat);;All files (*.*)" 
-                    curdir = os.getcwd()
-                    excldetfnames = QtGui.QFileDialog.getOpenFileNames(slef, 'Open File(s)', curdir, filefilter)
-                    try: 
-                        excldetfname = excldetfnames[0]
-                    except IndexError:
-                        self.ui.checkBox_useDetExcludeFile.setChecked(False)
-                # ENDIF
-
-                if excldetfname is not None:
-                    print "Detector exclusion file name is %s." % (excldetfname) 
-                    self.ui.lineEdit_excludedDetFileName.setText(excldetfname)
-                    excludedetlist = self._myControl.loadExcludedDetFile('HB2A', excldetfname) 
-                # ENDIF
 
             if itab == 2:
                 # Get other information
@@ -616,6 +679,7 @@ class MainWindow(QtGui.QMainWindow):
 
         # call load data
         execstatus = self.doLoadData()
+        execstatus = self._reduceData(XXX)
         if execstatus is False:
             scanno = scanno - 1
             self.ui.lineEdit_scanNo.setText(str(scanno))
@@ -946,9 +1010,10 @@ class MainWindow(QtGui.QMainWindow):
     def doPlotSampleLog(self):
         """ Plot sample log vs. Pt. in tab 'Individual Detector'
         """
+        expno =  int(self.ui.lineEdit_expNo.text())
+        scanno = int(self.ui.lineEdit_scanNo.text())
         logname = str(self.ui.comboBox_indvDetYLabel.currentText())
-
-        self._plotSampleLog(logname)
+        self._plotSampleLog(expno, scanno, logname)
 
         return
 
@@ -1037,7 +1102,6 @@ class MainWindow(QtGui.QMainWindow):
         """
         # TODO - Need to get use case from Clarina
         raise NotImplementedError("Need use case from instrument scientist")
-
 
 
     def doStripVandiumPeaks(self):
@@ -1274,10 +1338,6 @@ class MainWindow(QtGui.QMainWindow):
             self._tabLineDict[canvas] = []
 
         # pop out the xlabel list
-        # REFACTOR - Only need to set up once if previous plot has the same setup
-        floatsamplelognamelist = self._myControl.getSampleLogNames(expno, scanno)
-        self.ui.comboBox_indvDetXLabel.clear()
-        self.ui.comboBox_indvDetXLabel.addItems(floatsamplelognamelist)
 
         # get data
         vecx, vecy = self._myControl.getIndividualDetCounts(expno, scanno, detid, xlabel)
@@ -1331,7 +1391,6 @@ class MainWindow(QtGui.QMainWindow):
         # Validate input
         expno = int(expno)
         scanno = int(scanno)
-        ptno = int(ptno) 
 
         # Set up canvas and dictionary
         canvas = self.ui.graphicsView_Raw
@@ -1355,6 +1414,8 @@ class MainWindow(QtGui.QMainWindow):
 
         elif plotmode == "Single Pts.":
             # Plot plot
+            ptno = int(ptno) 
+
             if dooverplot is False:
                 self.ui.graphicsView_Raw.clearAllLines()
                 self.ui.graphicsView_Raw.setLineMarkerColorIndex(0)
@@ -1508,8 +1569,6 @@ class MainWindow(QtGui.QMainWindow):
             return False
         
         # Canvas and line information
-        canvas = self.ui.graphicsView_indvDet
-        canvas.clearAllLines() 
         
         self._indvDetCanvasMode = 'samplelog'
 
@@ -1519,30 +1578,34 @@ class MainWindow(QtGui.QMainWindow):
         self.ui.comboBox_indvDetXLabel.clear()
         self.ui.comboBox_indvDetXLabel.addItems(floatsamplelognamelist)
 
+        # FIXME
+        xlabel='Pt'
+
         # get data
         vecx, vecy = self._myControl.getSampleLogValue(expno, scanno, samplelogname, xlabel)
 
         # Plot to canvas
+        canvas = self.ui.graphicsView_indvDet
+        canvas.clearAllLines() 
+
         marker, color = canvas.getNextLineMarkerColorCombo()
         if xlabel is None:
             xlabel = r'Pt'
 
         label = samplelogname
 
-        if self._tabLineDict[canvas].count( (expno, scanno, detid) ) == 0:
-            canvas.addPlot(vecx, vecy, marker=marker, color=color, xlabel=xlabel, \
-                ylabel='Counts',label=label)
-            self._tabLineDict[canvas].append( (expno, scanno, detid) )
+        canvas.addPlot(vecx, vecy, marker=marker, color=color, xlabel=xlabel, \
+            ylabel='Counts',label=label)
         
-            # auto setup for image boundary
-            xmin = min(min(vecx), canvas.getXLimit()[0])
-            xmax = max(max(vecx), canvas.getXLimit()[1])
-            ymin = min(min(vecy), canvas.getYLimit()[0])
-            ymax = max(max(vecy), canvas.getYLimit()[1])
+        # auto setup for image boundary
+        xmin = min(vecx)
+        xmax = max(vecx)
+        ymin = min(vecy)
+        ymax = max(vecy)
 
-            dx = xmax-xmin
-            dy = ymax-ymin
-            canvas.setXYLimit(xmin-dx*0.0001, xmax+dx*0.0001, ymin-dy*0.0001, ymax+dy*0.0001)
+        dx = xmax-xmin
+        dy = ymax-ymin
+        canvas.setXYLimit(xmin-dx*0.0001, xmax+dx*0.0001, ymin-dy*0.0001, ymax+dy*0.0001)
 
         return True
         
@@ -1624,6 +1687,38 @@ class MainWindow(QtGui.QMainWindow):
             raise NotImplementedError("Error:  bins size '%s' is not a float number." % (binsize))
             
         return (xmin, binsize, xmax)
+
+
+    def _uiGetDetectorExclusionFile(self):
+        """
+
+        Return :: list of detector IDs to exclude from reduction
+        """ 
+        # TODO - Documentation
+
+        excludedetidlist = []
+
+        if self.ui.checkBox_useDetExcludeFile.isChecked():
+            detids_str = str(self.ui.lineEdit_detExcluded.text()).strip()
+            if len(detid_str) > 0:
+                # Editor lineEdit_detExcluded has value: overriding any automatic operation
+                terms = detid_str.split(',')
+                for t in terms:
+                    try:
+                        detid = int(t.strip())
+                        excludedetidlist.append(detid)
+                    except ValueError as e:
+                        print "[Error] string %s cannot be convert to detector ID due to %s." % (t, str(e))
+                # ENDFOR (t)
+            else:
+                # No user's input
+                print "[Warning] user does not specify any detector to exclude."
+            # ENDIF
+        # ENDIF
+
+        return excludedetidlist 
+
+
         
     def _uiGetExpScanNumber(self):
         """ Get experiment number and scan number from widgets for merged 

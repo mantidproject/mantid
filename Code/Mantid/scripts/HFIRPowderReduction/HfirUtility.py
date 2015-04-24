@@ -108,7 +108,7 @@ def parseDetEffCorrFile(vancorrfname):
         detid += 1
     # ENDFOR
 
-    return corrdict
+    return (corrdict, '')
 
 
 def parseDetExclusionFile(detexludefilename):
