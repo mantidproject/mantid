@@ -8,6 +8,8 @@
 #include "MantidQtCustomInterfaces/TomoReconstruction/TomoReconstruction.h"
 
 #include <boost/lexical_cast.hpp>
+
+#include <QElapsedTimer>
 #include <QFileDialog>
 #include <QMessageBox>
 #include <QPainter>
@@ -86,7 +88,8 @@ TomoReconstruction::TomoReconstruction(QWidget *parent)
       m_pathFITS(m_pathSCARFbase + "data/fits"),
       m_pathFlat(m_pathSCARFbase + "data/flat"),
       m_pathDark(m_pathSCARFbase + "data/dark"), m_currentParamPath(),
-      m_settingsGroup("CustomInterfaces/TomoReconstruction") {
+      m_settingsGroup("CustomInterfaces/TomoReconstruction"),
+      m_keepAliveThread(NULL) {
 
   m_computeRes.push_back(m_SCARFName);
 
@@ -103,15 +106,26 @@ TomoReconstruction::TomoReconstruction(QWidget *parent)
 }
 
 TomoReconstruction::~TomoReconstruction() {
-  // be tidy and always log out if we're in.
-  if (m_loggedIn)
-    doLogout();
+  cleanup();
+  delete m_keepAliveThread;
+}
+
+/**
+ * Close open sessions, kill threads, save settings, etc. for a
+ * graceful window close/destruct
+ */
+void TomoReconstruction::cleanup() {
+  killKeepAliveMechanism();
 
   saveSettings();
+
+  // be tidy and always log out if we're in.
+  if (m_loggedIn)
+    SCARFLogoutClicked();
 }
 
 void TomoReconstruction::doSetupSectionParameters() {
-  // TODO: should split the tabs out into their own files
+  // TODO: should split the tabs out into their own files?
 
   // geometry, etc. niceties
   // on the left (just plugin names) 1/2, right: 2/3
@@ -289,13 +303,14 @@ void TomoReconstruction::updateCompResourceStatus(bool online) {
 void TomoReconstruction::SCARFLoginClicked() {
   try {
     doLogin(getPassword());
+    m_loggedIn = true;
   } catch (std::exception &e) {
     throw(std::string("Problem when logging in. Error description: ") +
           e.what());
   }
 
   try {
-    jobTableRefreshClicked()
+    jobTableRefreshClicked();
   } catch (std::exception &e) {
     throw(std::string("The login operation went apparently fine but an issue "
                       "was found while trying to retrieve the status of the "
@@ -306,10 +321,18 @@ void TomoReconstruction::SCARFLoginClicked() {
 
   enableLoggedActions(true);
   updateCompResourceStatus(true);
-  m_loggedIn = true;
 
   m_ui.pushButton_SCARF_login->setEnabled(false);
-  m_ui.pushButton_SCARF_login->setEnabled(true);
+  m_ui.pushButton_SCARF_logout->setEnabled(true);
+
+  int kat = settings.useKeepAlive;
+  if (kat > 0) {
+    g_log.information() << "Starting mechanism to periodically query the "
+                           "status of jobs. This is also expected to keep "
+                           "sessions on remote compute resources alive after "
+                           "logging in." << std::endl;
+    startKeepAliveMechanism(kat);
+  }
 }
 
 void TomoReconstruction::SCARFLogoutClicked() {
@@ -335,7 +358,6 @@ void TomoReconstruction::SCARFLogoutClicked() {
  * default save directory.
  */
 void TomoReconstruction::readSettings() {
-  // TODO: define what settings we'll have in the end.
   QSettings qs;
   qs.beginGroup(QString::fromStdString(m_settingsGroup));
 
@@ -350,6 +372,8 @@ void TomoReconstruction::readSettings() {
   settings.onCloseAskForConfirmation =
       qs.value("on-close-ask-for-confirmation", false).toBool();
 
+  settings.useKeepAlive =
+      qs.value("use-keep-alive", settings.useKeepAlive).toInt();
   restoreGeometry(qs.value("interface-win-geometry").toByteArray());
   qs.endGroup();
 
@@ -367,6 +391,7 @@ void TomoReconstruction::saveSettings() {
   qs.setValue("SCARF-base-path", s);
   qs.setValue("on-close-ask-for-confirmation",
               settings.onCloseAskForConfirmation);
+  qs.setValue("use-keep-alive", settings.useKeepAlive);
   qs.setValue("interface-win-geometry", saveGeometry());
   qs.endGroup();
 }
@@ -536,14 +561,21 @@ void TomoReconstruction::runToolIndexChanged(int i) {
  * @param pw Password/authentication credentials as a string
  */
 void TomoReconstruction::doLogin(const std::string &pw) {
+  if (m_loggedIn) {
+    userError("Better to logout before logging in again",
+              "You're currently logged in. Please, log out before logging in "
+              "again if that's what you meant.");
+  }
+
   const std::string user = getUsername();
   if (user.empty()) {
     userError("Cannot log in",
               "To log in you need to specify a username (and a password!).");
+    return;
   }
 
-  // TODO: once the remote algorithms are rearranged into the
-  // 'RemoteJobManager' design, this will use...
+  // TODO (trac #11538): once the remote algorithms are rearranged
+  // into the 'RemoteJobManager' design, this will use...
   // auto alg = Algorithm::fromString("Authenticate");
   auto alg = Algorithm::fromString("SCARFTomoReconstruction");
   alg->initialize();
@@ -795,6 +827,54 @@ void TomoReconstruction::jobCancelClicked() {
   }
 }
 
+void TomoReconstruction::jobTableRefreshClicked() {
+  // get the info from the server into data members. This operation is subject
+  // to delays in the connection, etc.
+  getJobStatusInfo();
+
+  // update widgets from that info
+  updateJobsTable();
+}
+
+void TomoReconstruction::getJobStatusInfo() {
+  if (!m_loggedIn)
+    return;
+
+  std::vector<std::string> ids, names, status, cmds;
+  doQueryJobStatus(ids, names, status, cmds);
+
+  size_t jobMax = ids.size();
+  if (ids.size() != names.size() || ids.size() != status.size() ||
+      ids.size() != cmds.size()) {
+    // this should not really happen
+    jobMax = std::min(ids.size(), names.size());
+    jobMax = std::min(jobMax, status.size());
+    jobMax = std::min(jobMax, cmds.size());
+    userWarning("Problem retrieving job status information",
+                "The response from the compute resource did not seem "
+                "correct. The table of jobs may not be fully up to date.");
+  }
+
+  m_statusMutex.lock();
+  m_jobsStatus.clear();
+  m_jobsStatusCmds.clear();
+  // TODO: udate when we update to remote algorithms v2
+  // As SCARF doesn't provide all the info at the moment, and as we're
+  // using the SCARFTomoReconstruction algorithm, the
+  // IRemoteJobManager::RemoteJobInfo struct is for now used only partially
+  // (cmds out). So this loop feels both incomplete and an unecessary second
+  // step that could be avoided.
+  for (size_t i = 0; i < ids.size(); ++i) {
+    IRemoteJobManager::RemoteJobInfo ji;
+    ji.id = ids[i];
+    ji.name = names[i];
+    ji.status = status[i];
+    m_jobsStatus.push_back(ji);
+    m_jobsStatusCmds.push_back(cmds[i]);
+  }
+  m_statusMutex.unlock();
+}
+
 void TomoReconstruction::doQueryJobStatus(std::vector<std::string> &ids,
                                           std::vector<std::string> &names,
                                           std::vector<std::string> &status,
@@ -824,34 +904,33 @@ void TomoReconstruction::doQueryJobStatus(std::vector<std::string> &ids,
   cmds = alg->getProperty("RemoteJobsCommands");
 }
 
-void TomoReconstruction::jobTableRefreshClicked() {
-  std::vector<std::string> ids, names, status, cmds;
-  doQueryJobStatus(ids, names, status, cmds);
-
-  size_t jobMax = ids.size();
-  if (ids.size() != names.size() || ids.size() != status.size() ||
-      ids.size() != cmds.size()) {
-    // this should not really happen
-    jobMax = std::min(ids.size(), names.size());
-    jobMax = std::min(jobMax, status.size());
-    jobMax = std::min(jobMax, cmds.size());
-    userWarning("Problem retrieving job status information",
-                "The response from the compute resource did not seem "
-                "correct. The table of jobs may not be fully up to date.");
-  }
+/**
+ * Update the job status and general info table/tree from the info
+ * stored in this class' data members, which ideally should have
+ * information from a recent query to the server.
+ */
+void TomoReconstruction::updateJobsTable() {
 
   QTableWidget *t = m_ui.tableWidget_run_jobs;
   bool sort = t->isSortingEnabled();
-  t->setRowCount(static_cast<int>(ids.size()));
-  for (size_t i = 0; i < jobMax; ++i) {
+  t->setRowCount(static_cast<int>(m_jobsStatus.size()));
+
+  m_statusMutex.lock();
+  for (size_t i = 0; i < m_jobsStatus.size(); ++i) {
     int ii = static_cast<int>(i);
     t->setItem(ii, 0,
                new QTableWidgetItem(QString::fromStdString(m_SCARFName)));
-    t->setItem(ii, 1, new QTableWidgetItem(QString::fromStdString(names[i])));
-    t->setItem(ii, 2, new QTableWidgetItem(QString::fromStdString(ids[i])));
-    t->setItem(ii, 3, new QTableWidgetItem(QString::fromStdString(status[i])));
-    t->setItem(ii, 4, new QTableWidgetItem(QString::fromStdString(cmds[i])));
+    t->setItem(ii, 1, new QTableWidgetItem(
+                          QString::fromStdString(m_jobsStatus[i].name)));
+    t->setItem(ii, 2, new QTableWidgetItem(
+                          QString::fromStdString(m_jobsStatus[i].id)));
+    t->setItem(ii, 3, new QTableWidgetItem(
+                          QString::fromStdString(m_jobsStatus[i].status)));
+    t->setItem(ii, 4, new QTableWidgetItem(
+                          QString::fromStdString(m_jobsStatusCmds[i])));
   }
+  m_statusMutex.unlock();
+
   t->setSortingEnabled(sort);
 }
 
@@ -1676,6 +1755,30 @@ void TomoReconstruction::openHelpWin() {
       NULL, QString("Tomographic_Reconstruction"));
 }
 
+void TomoReconstruction::periodicStatusUpdateRequested() {
+  // does just the widgets update
+  updateJobsTable();
+}
+
+void TomoReconstruction::startKeepAliveMechanism(int period) {
+  m_keepAliveThread = new KeepAliveJobStatusPeriodicallyThread(period, this);
+  connect(m_keepAliveThread, SIGNAL(periodicStatusUpdateRequested()), this,
+          SLOT(periodicStatusUpdateRequested()));
+  m_keepAliveThread->start();
+}
+
+void TomoReconstruction::killKeepAliveMechanism() {
+  if (!m_keepAliveThread)
+    return;
+
+  m_keepAliveThread->markToStopSoon();
+  // Note: better not to feel tempted to use terminate(), as it is not
+  // uncommon that it doesn't take immediate effect which leads to segfaults -
+  // QThread destroyed while still running.
+  // m_keepAliveThread->terminate();
+  m_keepAliveThread->wait();
+}
+
 void TomoReconstruction::closeEvent(QCloseEvent *event) {
   int answer = QMessageBox::AcceptRole;
 
@@ -1707,10 +1810,37 @@ void TomoReconstruction::closeEvent(QCloseEvent *event) {
   }
 
   if (answer == QMessageBox::AcceptRole) {
-    saveSettings();
+    cleanup();
     event->accept();
   } else {
     event->ignore();
+  }
+}
+
+void KeepAliveJobStatusPeriodicallyThread::markToStopSoon() {
+  m_endSoon = true;
+}
+
+void KeepAliveJobStatusPeriodicallyThread::run() {
+  setTerminationEnabled(true);
+
+  QElapsedTimer timer;
+  timer.start();
+
+  while (!m_endSoon) {
+    if (timer.elapsed() >= 1000*m_timeout && m_tomoGUI) {
+      // Yes, this is ugly, and this query-status-and-store-with-lock
+      // functionality should probably be encapsulated in some helper class.
+      // That will come after the remote algorithms related TODOs (see above)
+      // are done, as for now we can do with this temporarily.
+      m_tomoGUI->getJobStatusInfo();
+
+      // the slot connected to this should just update the widgets
+      emit periodicStatusUpdateRequested();
+    }
+
+    // so it wakes up every second in case it needs to die
+    QThread::sleep(1);
   }
 }
 

@@ -1,6 +1,7 @@
 #ifndef MANTIDQTCUSTOMINTERFACES_TOMORECONSTRUCTION_H_
 #define MANTIDQTCUSTOMINTERFACES_TOMORECONSTRUCTION_H_
 
+#include "MantidAPI/IRemoteJobManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/TableRow.h"
@@ -11,14 +12,20 @@
 #include "ui_TomoToolConfigSavu.h"
 #include "ui_TomoToolConfigTomoPy.h"
 
-#include <QDialog>
 #include <jsoncpp/json/json.h>
+#include <QDialog>
+#include <QMutex>
+#include <QThread>
 
 class QTreeWidgetItem;
 class QLineEdit;
 
 namespace MantidQt {
 namespace CustomInterfaces {
+
+// forward declaration of GUI periodic update thread
+class KeepAliveJobStatusPeriodicallyThread;
+
 /**
 Tomographic reconstruction GUI. Interface for editing parameters,
 running and monitoring reconstruction jobs, quick image inspection,
@@ -45,7 +52,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-
 class DLLExport TomoReconstruction : public MantidQt::API::UserSubWindow {
   Q_OBJECT
 
@@ -61,13 +67,16 @@ public: // public constructor, destructor and functions
   /// Setup tab UI
   virtual void initLayout();
 
-protected slots:
-  /// for buttons, run tab
+public slots:
+  void periodicStatusUpdateRequested();
+
+  /// for buttons, run tab, and similar
   void reconstructClicked();
   void toolSetupClicked();
   void runVisualizeClicked();
   void jobCancelClicked();
   void jobTableRefreshClicked();
+  void getJobStatusInfo();
 
 protected:
   bool doPing();
@@ -79,6 +88,10 @@ protected:
                         std::vector<std::string> &cmds);
   void doSubmitReconstructionJob();
   void doCancelJob(const std::string &id);
+
+  void updateJobsTable();
+
+  void cleanup();
 
   void makeRunnableWithOptions(std::string &run, std::string &opt);
   std::string getComputeResource();
@@ -150,6 +163,11 @@ private:
   void readSettings();
   /// save settings (before closing)
   void saveSettings();
+
+  /// Starts a periodic query just to keep sessions alive when logged in
+  void startKeepAliveMechanism(int period);
+  /// Stops/kills the periodic query (for example if the user logs out)
+  void killKeepAliveMechanism();
 
   virtual void closeEvent(QCloseEvent *ev);
 
@@ -223,8 +241,16 @@ private:
   std::string m_currentParamPath;
   static size_t m_nameSeqNo;
 
+  // status of remote jobs
+  std::vector<Mantid::API::IRemoteJobManager::RemoteJobInfo> m_jobsStatus;
+  std::vector<std::string> m_jobsStatusCmds;
+
   // path name for persistent settings
   std::string m_settingsGroup;
+
+  KeepAliveJobStatusPeriodicallyThread *m_keepAliveThread;
+  // mutex for the "job status info -> job status table " operations
+  QMutex m_statusMutex;
 
   // Basic representation of user settings, read/written on startup/close.
   // TODO: this could be done more sophisticated, with a class using
@@ -232,10 +258,11 @@ private:
   // it simple for now
   struct UserSettings {
     std::string SCARFBasePath;
+    int useKeepAlive; // use if >0, number of seconds for a periodic query
     bool onCloseAskForConfirmation;
 
     UserSettings()
-        : SCARFBasePath("/work/imat/runs/test/"),
+        : SCARFBasePath("/work/imat/runs/test/"), useKeepAlive(60),
           onCloseAskForConfirmation(false) {}
   };
   UserSettings settings;
@@ -281,6 +308,43 @@ private:
   QHBoxLayout *hRun, *hOpt;
   QGridLayout *layout;
   QPushButton *okButton, *cancelButton;
+};
+
+/**
+ * A simple GUI update thread. For now it is implemented in a very Qt
+ * style, as it is essentially a GUI. It's meant to emit one or more
+ * signals periodically. These signals should be connected to slots of
+ * the TomoReconstruction interface. It could also be done in a more
+ * Mantid/algorithm way.
+ */
+class KeepAliveJobStatusPeriodicallyThread : public QThread {
+  Q_OBJECT
+
+public:
+  /**
+   * Constructor, needs a timeout or period.
+   *
+   * @param period time, in seconds, to refresh the GUI (job status, etc.)
+   */
+  KeepAliveJobStatusPeriodicallyThread(int period, TomoReconstruction *gui)
+    : m_timeout(period), m_tomoGUI(gui), m_endSoon(false) {};
+
+  /// tell this should stop soon, for graceful termination
+  void markToStopSoon();
+
+signals:
+  /// for periodic update of the server / jobs status
+  void periodicStatusUpdateRequested();
+
+protected:
+  /// The standard Qt / Java-ish run method for this thread
+  void run();
+
+private:
+  // period in seconds
+  int m_timeout;
+  TomoReconstruction *m_tomoGUI;
+  bool m_endSoon;
 };
 }
 }
