@@ -232,6 +232,9 @@ public:
 
         TS_ASSERT(peaks.pointGroupFromString(peaks.pointGroupToString(m3m)));
         TS_ASSERT_EQUALS(m3m->getName(), peaks.pointGroupFromString(peaks.pointGroupToString(m3m))->getName());
+
+        PointGroup_sptr one = PointGroupFactory::Instance().createPointGroup("1");
+        TS_ASSERT_EQUALS(peaks.pointGroupFromString("DoesNotExist")->getSymbol(), one->getSymbol());
     }
 
     void testGetPointGroupStringFromLog()

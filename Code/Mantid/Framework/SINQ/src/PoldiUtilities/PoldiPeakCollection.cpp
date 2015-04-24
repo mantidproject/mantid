@@ -42,8 +42,8 @@ PoldiPeakCollection::PoldiPeakCollection(
         "Cannot create PoldiPeakCollection from invalid CrystalStructure.");
   }
 
-  m_pointGroup =
-      pointGroupFromString(pointGroupToString(crystalStructure->pointGroup()));
+  m_pointGroup = PointGroupFactory::Instance().createPointGroupFromSpaceGroup(
+      crystalStructure->spaceGroup());
 
   m_unitCell = crystalStructure->cell();
 
@@ -311,7 +311,7 @@ PointGroup_sptr PoldiPeakCollection::pointGroupFromString(
     return PointGroupFactory::Instance().createPointGroup(pointGroupString);
   }
 
-  return PointGroup_sptr();
+  return PointGroupFactory::Instance().createPointGroup("1");
 }
 
 UnitCell PoldiPeakCollection::unitCellFromString(
