@@ -259,7 +259,7 @@ void FindPeakBackground::estimateBackground(const MantidVec &X, const MantidVec 
   // Validate input
   if (i_min >= i_max)
     throw std::runtime_error("i_min cannot larger or equal to i_max");
-  if ((!hasPeak) && (p_min >= p_max))
+  if ((hasPeak) && (p_min >= p_max))
     throw std::runtime_error("p_min cannot larger or equal to p_max");
 
   // set all parameters to zero
