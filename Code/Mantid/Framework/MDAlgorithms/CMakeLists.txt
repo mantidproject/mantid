@@ -319,6 +319,7 @@ set ( TEST_FILES
 	ResolutionConvolvedCrossSectionTest.h
 	SaveIsawQvectorTest.h
 	SaveMDTest.h
+	SaveMD2Test.h
 	SaveZODSTest.h
 	SetMDUsingMaskTest.h
 	SimulateResolutionConvolvedModelTest.h
