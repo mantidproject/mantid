@@ -377,8 +377,8 @@ namespace Mantid
         m_inputSource = NULL;
         m_rebinnedSource = NULL;
 
-        // If the workspace is the original workspace
-        if (workspaceName.find(m_tempPostfix) == std::string::npos)
+        // If the workspace is the original workspace or it is a freshly loaded, i.e. it is not being tracked
+        if (workspaceName.find(m_tempPostfix) == std::string::npos || !isRebinnedSourceBeingTracked(source))
         {
           inputWorkspace = workspaceName;
           outputWorkspace =  m_tempPrefix + workspaceName + algorithmType + m_tempPostfix;

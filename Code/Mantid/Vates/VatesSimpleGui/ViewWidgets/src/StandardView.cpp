@@ -226,13 +226,6 @@ void StandardView::closeSubWindows()
 {
 }
 
-/**
- * This function reacts to a destroyed source.
- */
-void StandardView::onSourceDestroyed()
-{
-  //setRebinAndUnbinButtons();
-}
 
 /**
  * Check if the rebin and unbin buttons should be visible

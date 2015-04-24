@@ -439,6 +439,9 @@ void MdViewerWidget::onSwitchSoures(std::string rebinnedWorkspaceName, std::stri
     // Repipe the filters to the rebinned source
     m_rebinnedSourcesManager.repipeRebinnedSource();
 
+    // Update the animation controls in order to get the correct time slice
+    this->currentView->updateAnimationControls();
+
     // Update the color scale
     this->currentView->onAutoScale(this->ui.colorSelectionWidget);
 
@@ -1269,7 +1272,7 @@ void MdViewerWidget::afterReplaceHandle(const std::string &wsName,
     src->updatePipeline();
 
     this->currentView->setColorsForView(this->ui.colorSelectionWidget);
-    this->currentView->renderAll();;
+    this->currentView->renderAll();
   }
 }
 
