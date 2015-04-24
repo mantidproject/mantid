@@ -13,7 +13,7 @@ class PoldiDataAnalysis(PythonAlgorithm):
     """
 
     def category(self):
-        return "Workflow"
+        return "SINQ\\Poldi"
 
     def name(self):
         return "PoldiDataAnalysis"
