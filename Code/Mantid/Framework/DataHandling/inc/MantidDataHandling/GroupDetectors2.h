@@ -190,7 +190,8 @@ private:
   int readInt(std::string line);
 
   void readFile(spec2index_map &specs2index, std::istream &File,
-                size_t &lineNum, std::vector<int64_t> &unUsedSpec);
+                size_t &lineNum, std::vector<int64_t> &unUsedSpec,
+                bool ignoreGroupNumber);
 
   /// used while reading the file reads reads spectra numbers from the string
   /// and returns spectra indexes

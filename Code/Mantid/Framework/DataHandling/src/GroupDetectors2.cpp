@@ -70,6 +70,11 @@ void GroupDetectors2::init() {
       "help\n"
       "for the file format");
   declareProperty(
+      "IgnoreGroupNumber", true,
+      "This option is only relevant if you're using MapFile.\n"
+      "If true the spectra will numbered sequentially, starting from one.\n"
+      "Otherwise, the group number will be used for the spectrum numbers.");
+  declareProperty(
       new ArrayProperty<specid_t>("SpectraList"),
       "An array containing a list of the spectrum numbers to combine\n"
       "(DetectorList and WorkspaceIndexList are ignored if this is set)");
@@ -423,7 +428,8 @@ void GroupDetectors2::processFile(std::string fname,
       totalNumberOfGroups = readInt(firstLine);
     }
 
-    readFile(specs2index, File, lineNum, unUsedSpec);
+    bool ignoreGroupNo = getProperty("IgnoreGroupNumber");
+    readFile(specs2index, File, lineNum, unUsedSpec, ignoreGroupNo);
 
     if (m_GroupSpecInds.size() != static_cast<size_t>(totalNumberOfGroups)) {
       g_log.warning() << "The input file header states there are "
@@ -756,19 +762,25 @@ int GroupDetectors2::readInt(std::string line) {
 */
 void GroupDetectors2::readFile(spec2index_map &specs2index, std::istream &File,
                                size_t &lineNum,
-                               std::vector<int64_t> &unUsedSpec) {
+                               std::vector<int64_t> &unUsedSpec,
+                               bool ignoreGroupNumber) {
   // go through the rest of the file reading in lists of spectra number to group
+  int oldSpectrumNo = 1;
   while (File) {
-    int spectrumNo = EMPTY_LINE;
+    int groupNo = EMPTY_LINE;
     std::string thisLine;
     do {
       std::getline(File, thisLine), lineNum++;
-      spectrumNo = readInt(thisLine);
+      groupNo = readInt(thisLine);
       // we haven't started reading a new group and so if the file ends here it
       // is OK
       if (!File)
         return;
-    } while (spectrumNo == EMPTY_LINE && File);
+    } while (groupNo == EMPTY_LINE && File);
+
+    // If we're ignoring the group number, use the old spectrum number way of
+    // just counting, otherwise use the group number.
+    const int spectrumNo = ignoreGroupNumber ? oldSpectrumNo++ : groupNo;
 
     // the number of spectra that will be combined in the group
     int numberOfSpectra = EMPTY_LINE;
