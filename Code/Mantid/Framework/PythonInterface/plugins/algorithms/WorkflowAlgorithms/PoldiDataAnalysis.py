@@ -1,7 +1,8 @@
-#pylint: disable=no-init,invalid-name
+# pylint: disable=no-init,invalid-name
 import mantid.simpleapi as api
 from mantid.api import *
 from mantid.kernel import *
+
 
 class PoldiDataAnalysis(PythonAlgorithm):
     """
@@ -22,9 +23,36 @@ class PoldiDataAnalysis(PythonAlgorithm):
         return "Run all necessary steps for a complete analysis of POLDI data."
 
     def PyInit(self):
-        pass
+        self.declareProperty(
+            WorkspaceProperty(name="InputWorkspace", defaultValue="", direction=Direction.Input),
+            doc='MatrixWorkspace with 2D POLDI data and valid POLDI instrument.')
 
-    def PyExec(self):
-        pass
+        self.declareProperty(
+            "MaximumPeakNumber", 10, direction=Direction.Input,
+            doc='Maximum number of peaks to process in the analysis.')
 
-AlgorithmFactory.subscribe(PoldiDataAnalysis())
+        self.declareProperty(
+            WorkspaceProperty("ExpectedPeaks", defaultValue="", direction=Direction.Input),
+            doc='TableWorkspace or WorkspaceGroup with expected peaks used for indexing.'
+        )
+
+        self.declareProperty(
+            "PawleyFit", False, direction=Direction.Input,
+            doc='Should the 2D-fit determine lattice parameters?'
+        )
+
+        self.declareProperty(
+            "RunTwice", False, direction=Direction.Input,
+            doc=('If this is activated, peaks are searched again in the residuals and the 1D- and 2D-fit is repeated '
+                 'with these data.')
+        )
+
+        self.declareProperty(
+            WorkspaceProperty(name="OutputWorkspace", defaultValue="", direction=Direction.Output),
+            doc='WorkspaceGroup with result data from all processing steps.'
+        )
+
+        def PyExec(self):
+            pass
+
+    AlgorithmFactory.subscribe(PoldiDataAnalysis())
