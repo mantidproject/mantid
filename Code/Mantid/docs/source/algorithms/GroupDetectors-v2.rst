@@ -13,10 +13,9 @@ This algorithm sums, bin-by-bin, multiple spectra into a single spectra.
 The errors are summed in quadrature and the algorithm checks that the
 bin boundaries in X are the same. The new summed spectra are created at
 the start of the output workspace and have spectra index numbers that
-start at zero and increase in the order the groups are specified. Each
-new group takes the spectra numbers from the first input spectrum
-specified for that group. All detectors from the grouped spectra will be
-moved to belong to the new spectrum.
+start at zero and increase in the order the groups are specified. All
+detectors from the grouped spectra will be moved to belong to the new
+spectrum.
 
 Not all spectra in the input workspace have to be copied to a group. If
 KeepUngroupedSpectra is set to true any spectra not listed will be
@@ -28,30 +27,30 @@ To create a single group the list of spectra can be identified using a
 list of either spectrum numbers, detector IDs or workspace indices. The
 list should be set against the appropriate property.
 
-An input file allows the specification of many groups. The file must
-have the following format\* (extra space and comments starting with #
-are allowed)::
+An input file allows the specification of many groups. The file has the
+following format::
+ [number of groups in file]
+ 
+ [first group's number]
+ [number of spectra in first group]
+ [spectrum 1] [spectrum 2] [spectrum 3] [...] [spectrum n]
+ 
+ [second group's number]
+ [number of spectra in second group]
+ [spectrum 1] [spectrum 2] [spectrum 3] [...] [spectrum n]
+ 
+ [repeat as necessary]
 
- "unused number1"
- "unused number2"
- "number_of_input_spectra1"
- "input spec1" "input spec2" "input spec3" "input spec4"
- "input spec5 input spec6"
- **
- "unused number2"
- "number_of_input_spectra2"
- "input spec1" "input spec2" "input spec3" "input spec4"
+Mantid will still work if the number of groups specified at the start is
+incorrect, but other software may not. Mantid will warn you if the value
+given is incorrect.
 
-\* each phrase in "" is replaced by a single integer
+Each group's spectrum number is determined by the group's number. This
+behaviour can be overriden by enabling the IgnoreGroupNumber property, in
+which case the first group will be numbered 1, and the second 2, and so on.
 
-\*\* the section of the file that follows is repeated once for each
-group
-
-Some programs require that "unused number1" is the number of groups
-specified in the file but Mantid ignores that number and all groups
-contained in the file are read regardless. "unused number2" is in other
-implementations the group's spectrum number but in this algorithm it is
-is ignored and can be any integer (not necessarily the same integer)
+Blank lines and whitespace in the map file are ignored. Comments may be
+entered using a #, like in a Python script.
 
 An example of an input file follows::
 
