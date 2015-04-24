@@ -185,7 +185,6 @@
 #include "Mantid/ManageCustomMenus.h"
 #include "Mantid/ManageInterfaceCategories.h"
 #include "Mantid/FirstTimeSetup.h"
-#include "Mantid/SetUpParaview.h"
 
 #include "MantidQtAPI/FileDialogHandler.h"
 #include "MantidQtAPI/InterfaceManager.h"
@@ -219,12 +218,15 @@ using namespace Qwt3D;
 using namespace MantidQt::API;
 using Mantid::Kernel::ConfigService;
 
+using Mantid::API::FrameworkManager;
+using Mantid::Kernel::ConfigService;
+using Mantid::Kernel::LibraryManager;
+using Mantid::Kernel::Logger;
+
 namespace
 {
   /// static logger
-  Mantid::Kernel::Logger g_log("ApplicationWindow");
-  /// ParaView plugins key
-  const char * PVPLUGINS_DIR_KEY = "pvplugins.directory";
+  Logger g_log("ApplicationWindow");
 }
 
 extern "C"
@@ -354,11 +356,6 @@ void ApplicationWindow::init(bool factorySettings, const QStringList& args)
   logWindow->setWidget(resultsLog);
   connect(resultsLog, SIGNAL(errorReceived(const QString &)), logWindow, SLOT(show()));
 
-
-  // Start Mantid
-  // Set the Paraview path BEFORE libaries are loaded. Doing it here prevents
-  // the logs being poluted with library loading errors.
-  trySetParaviewPath(args);
   // Process all pending events before loading Mantid
   // Helps particularly on Windows with cleaning up the
   // splash screen after the 3D visualization dialog has closed
@@ -366,13 +363,16 @@ void ApplicationWindow::init(bool factorySettings, const QStringList& args)
 
   auto & config = ConfigService::Instance(); // Starts logging
   resultsLog->attachLoggingChannel(); // Must be done after logging starts
-  using Mantid::API::FrameworkManager;
-  auto & framework = FrameworkManager::Instance(); // Loads framework libraries
+  // Load Mantid core libraries by starting the framework
+  FrameworkManager::Instance();
   // Load Paraview plugin libraries if possible
-  if(config.quickParaViewCheck())
+  if(config.pvPluginsAvailable())
   {
     // load paraview plugins
-    framework.loadPluginsUsingKey(PVPLUGINS_DIR_KEY);
+    if (g_log.getLevel() == Logger::Priority::PRIO_DEBUG) {
+      g_log.debug("Loading libraries from \"" + config.getPVPluginsPath() + "\"");
+    }
+    LibraryManager::Instance().OpenAllLibraries(config.getPVPluginsPath(), false);
   }
 
   // Create UI object
@@ -599,13 +599,6 @@ void ApplicationWindow::init(bool factorySettings, const QStringList& args)
   // Do this as late as possible to avoid unnecessary updates
   AlgorithmFactory::Instance().enableNotifications();
   AlgorithmFactory::Instance().notificationCenter.postNotification(new AlgorithmFactoryUpdateNotification);
-
-  /*
-  The scripting enironment call setScriptingLanguage is trampling over the PATH, so we have to set it again.
-  Here we do not off the setup dialog.
-  */
-  const bool skipDialog = true;
-  trySetParaviewPath(args, skipDialog);
 }
 
 /** Determines if the first time dialog should be shown
@@ -672,79 +665,6 @@ bool ApplicationWindow::shouldWeShowFirstTimeSetup(const QStringList& commandArg
   }
 
   return false;
-}
-
-/*
-Function tries to set the paraview path.
-
-This is a windows only feature. the PATH enviromental variable can be set at runtime on windows.
-
-- Abort if Vates libraries do not seem to be present.
-- Othwerise, if the paraview.path is already in the properties file, use it.
-- Otherwise, if the user is not using executeandquit command arguments launch the Setup gui.
-
-@param commandArguments : all command line arguments.
-@param noDialog : set to true to skip over the a dialog launch.
-*/
-void ApplicationWindow::trySetParaviewPath(const QStringList& commandArguments, bool noDialog)
-{
-#ifdef _WIN32
-
-    Mantid::Kernel::ConfigServiceImpl& confService = Mantid::Kernel::ConfigService::Instance();
-    //Early check of execute and quit command arguments used by system tests.
-    QString str;
-    bool b_skipDialog = noDialog;
-    foreach(str, commandArguments)
-    {
-      if ((this->shouldExecuteAndQuit(str)) ||
-        (this->isSilentStartup(str)))
-      {
-        b_skipDialog = true;
-        break;
-      }
-    }
-
-    //ONLY If skipping is not already selected
-    if(!b_skipDialog)
-    {
-      //If the ignore property exists and is set to true, then skip the dialog.
-      const std::string paraviewIgnoreProperty = "paraview.ignore";
-      b_skipDialog = confService.hasProperty(paraviewIgnoreProperty) && QString::fromStdString(confService.getString(paraviewIgnoreProperty)).toInt() > 0;
-    }
-
-    if(this->hasParaviewPath())
-    {
-      //Already have a path in the properties file, just apply it.
-      std::string path = confService.getString("paraview.path");
-      confService.setParaviewLibraryPath(path);
-    }
-    else
-    {
-      //Only run the following if skipping is not implied.
-      if(!b_skipDialog)
-      {
-        //Launch the dialog to set the PV path.
-        SetUpParaview pv(SetUpParaview::FirstLaunch);
-        pv.setWindowFlags(Qt::WindowStaysOnTopHint);
-        pv.exec();
-      }
-    }
-
-#else
-  UNUSED_ARG(commandArguments)
-  UNUSED_ARG(noDialog)
-#endif
-}
-
-
-/*
-Getter to determine if the paraview path has been set.
-*/
-bool ApplicationWindow::hasParaviewPath() const
-{
-  const std::string propertyname = "paraview.path";
-  Mantid::Kernel::ConfigServiceImpl& config = Mantid::Kernel::ConfigService::Instance();
-  return config.hasProperty(propertyname) && !config.getString(propertyname).empty() ;
 }
 
 void ApplicationWindow::initWindow()
@@ -1369,12 +1289,6 @@ void ApplicationWindow::initMainMenu()
   help->insertSeparator();
   help->addAction(actionFirstTimeSetup);
   help->insertSeparator();
-
-  ///The paraview action should only be available on windows
-#ifdef _WIN32
-  help->addAction(actionSetupParaview);
-  help->insertSeparator();
-#endif
 
   help->addAction(actionAbout);
 
@@ -12140,9 +12054,6 @@ void ApplicationWindow::createActions()
   actionFirstTimeSetup = new QAction(tr("First Time Setup"), this);
   connect(actionFirstTimeSetup, SIGNAL(activated()), this, SLOT(showFirstTimeSetup()));
 
-  actionSetupParaview = new QAction(tr("Setup 3D Visualisation"), this);
-  connect(actionSetupParaview, SIGNAL(activated()), this, SLOT(showSetupParaview()));
-
   actionNewProject = new QAction(QIcon(":/NewProject16x16.png"), tr("New &Project"), this);
   actionNewProject->setShortcut( tr("Ctrl+N") );
   connect(actionNewProject, SIGNAL(activated()), this, SLOT(newProject()));
@@ -14110,14 +14021,6 @@ void ApplicationWindow::showMantidConcepts()
 void ApplicationWindow::showalgorithmDescriptions()
 {
   HelpWindow::showAlgorithm(this);
-}
-
-void ApplicationWindow::showSetupParaview()
-{
-  SetUpParaview* dialog = new SetUpParaview(SetUpParaview::MantidMenu);
-  dialog->setAttribute(Qt::WA_DeleteOnClose);
-  dialog->show();
-  dialog->setFocus();
 }
 
 void ApplicationWindow::showFirstTimeSetup()

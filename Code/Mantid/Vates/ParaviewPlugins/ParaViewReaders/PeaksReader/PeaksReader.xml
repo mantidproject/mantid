@@ -39,6 +39,11 @@
              Set the size of the unintegrated peak markers.
            </Documentation>
          </DoubleVectorProperty>
+         <Hints>
+           <ReaderFactory
+             extensions="peaks"
+             file_description="ISAW Peaks File" />
+         </Hints>
     </SourceProxy>
   </ProxyGroup>
   <!-- End PeaksReader -->

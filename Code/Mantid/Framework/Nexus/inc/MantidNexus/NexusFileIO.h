@@ -60,7 +60,7 @@ public:
   /// Default constructor
   NexusFileIO();
 
-  /// Contructor with Progress suplied
+  /// Contructor with Progress supplied
   NexusFileIO(API::Progress *prog);
 
   /// Destructor

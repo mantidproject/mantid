@@ -14,7 +14,8 @@ Overview and similar algorithms
 
 This algorithm will integrate disjoint single crystal Bragg peaks by
 summing the number of raw or weighted events in a 3D ellipsoidal peak region in
-reciprocal space and subtracting an estimate of the background obtained
+reciprocal space (See *IntegrateInHKL* option for integrating in HKL) 
+and subtracting an estimate of the background obtained
 from an ellipsoidal shell. In some ways it is similar to the
 :ref:`algm-IntegratePeaksMD` algorithm. In particular the size parameters to
 this algorithm are also specified in inverse Angstroms and the
@@ -91,6 +92,13 @@ Explanation of Inputs
    :math:`0 < PeakSize \leq BackgroundInnerSize` and 
    :math:`BackgroundInnerSize < BackgroundOuterSize \leq RegionRadius`
 
+-  If the *IntegrateInHKL* option is selected, then HKL space is used for
+   the integration instead of reciprocal space.  This option may be useful
+   for large unit cells where the radius of integration needs to be very different
+   for peaks at low Q and high Q.  With this option the *PeakSize*, 
+   *BackgroundInnerSize* and *BackgroundOuterSize* are specified in HKL and they
+   just need to be smaller than 0.5.
+	
 -  The integrated intensities will be set in the specified
    *OutputWorkspace*. If this is different from the input *PeaksWorkspace*,
    the input peaks workspace will be copied to the *OutputWorkspace*

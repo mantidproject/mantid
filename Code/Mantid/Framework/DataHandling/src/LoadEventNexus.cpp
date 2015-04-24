@@ -5,6 +5,7 @@
 
 #include <boost/random/mersenne_twister.hpp>
 #include <boost/random/uniform_real.hpp>
+#include <boost/shared_ptr.hpp>
 #include <boost/shared_array.hpp>
 
 #include "MantidKernel/ArrayProperty.h"
@@ -2365,16 +2366,37 @@ void LoadEventNexus::runLoadMonitors() {
     loadMonitors->setPropertyValue("MonitorsAsEvents",
                                    this->getProperty("MonitorsAsEvents"));
     loadMonitors->execute();
-    MatrixWorkspace_sptr mons = loadMonitors->getProperty("OutputWorkspace");
-    this->declareProperty(new WorkspaceProperty<>("MonitorWorkspace",
-                                                  mon_wsname,
-                                                  Direction::Output),
-                          "Monitors from the Event NeXus file");
-    this->setProperty("MonitorWorkspace", mons);
-    // Set the internal monitor workspace pointer as well
-    WS->setMonitorWorkspace(mons);
+    Workspace_sptr monsOut = loadMonitors->getProperty("OutputWorkspace");
+    this->declareProperty(new WorkspaceProperty<Workspace>("MonitorWorkspace",
+                                                    mon_wsname,
+                                                    Direction::Output),
+                            "Monitors from the Event NeXus file");
+    this->setProperty("MonitorWorkspace", monsOut);
+    //The output will either be a group workspace or a matrix workspace
+    MatrixWorkspace_sptr mons = boost::dynamic_pointer_cast<MatrixWorkspace>(monsOut);
+    if (mons) {
+      // Set the internal monitor workspace pointer as well
+      WS->setMonitorWorkspace(mons);
 
-    filterDuringPause(mons);
+      filterDuringPause(mons);
+    } else {
+      WorkspaceGroup_sptr monsGrp = boost::dynamic_pointer_cast<WorkspaceGroup>(monsOut);
+      if (monsGrp) {
+        //declare a property for each member of the group
+        for (int i = 0; i < monsGrp->getNumberOfEntries(); i++)
+        {
+          std::stringstream ssWsName;
+          ssWsName << mon_wsname << "_" << i+1;    
+          std::stringstream ssPropName;
+          ssPropName << "MonitorWorkspace" << "_" << i+1;
+          this->declareProperty(new WorkspaceProperty<MatrixWorkspace>(ssPropName.str(),
+                                                      ssWsName.str(),
+                                                      Direction::Output),
+                              "Monitors from the Event NeXus file");
+          this->setProperty(ssPropName.str(), monsGrp->getItem(i));
+        }
+      }
+    }
   } catch (...) {
     g_log.error("Error while loading the monitors from the file. File may "
                 "contain no monitors.");

@@ -1,6 +1,5 @@
 #include "MantidKernel/LogFilter.h"
 #include "MantidKernel/TimeSeriesProperty.h"
-#include <stdexcept>
 
 namespace Mantid {
 namespace Kernel {

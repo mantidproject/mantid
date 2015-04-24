@@ -6,14 +6,11 @@
 #include <set>
 #include <map>
 #include <stack>
-#include <string>
 #include <sstream>
 #include <algorithm>
-#include <functional>
 #include <iterator>
 
 #include "MantidKernel/Exception.h"
-#include "MantidKernel/Logger.h"
 #include "MantidKernel/Strings.h"
 #include "MantidGeometry/Math/Algebra.h"
 #include "MantidGeometry/Math/MapSupport.h"

@@ -9,7 +9,27 @@
 namespace Mantid {
 namespace CurveFitting {
 
-/** PawleyFit
+/** @class V3DFromHKLColumnExtractor
+
+  Small helper class to extract HKLs as V3D from table columns. The table
+  column can either store V3D directly, or a string with various separators:
+    , ; [ ] (space)
+
+*/
+struct DLLExport V3DFromHKLColumnExtractor {
+  Kernel::V3D operator()(const API::Column_const_sptr &hklColumn,
+                         size_t i) const;
+
+protected:
+  Kernel::V3D getHKLFromV3DColumn(const API::Column_const_sptr &hklColumn,
+                                  size_t i) const;
+  Kernel::V3D getHKLFromStringColumn(const API::Column_const_sptr &hklColumn,
+                                     size_t i) const;
+
+  Kernel::V3D getHKLFromString(const std::string &hklString) const;
+};
+
+/** @class PawleyFit
 
   This algorithm uses the Pawley-method to refine lattice parameters using a
   powder diffractogram and a list of unique Miller indices. From the initial
@@ -58,10 +78,6 @@ protected:
                          const API::ITableWorkspace_sptr &tableWs,
                          const Kernel::Unit_sptr &unit, double startX,
                          double endX) const;
-
-  Kernel::V3D getHKLFromColumn(size_t i,
-                               const API::Column_const_sptr &hklColumn) const;
-  Kernel::V3D getHkl(const std::string &hklString) const;
 
   API::ITableWorkspace_sptr
   getLatticeFromFunction(const PawleyFunction_sptr &pawleyFn) const;

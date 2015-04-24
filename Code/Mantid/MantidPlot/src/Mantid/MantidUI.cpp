@@ -111,8 +111,8 @@ MantidUI::MantidUI(ApplicationWindow *aw):
   m_configServiceObserver(*this,&MantidUI::handleConfigServiceUpdate),
   m_appWindow(aw),
   m_lastShownInstrumentWin(NULL), m_lastShownSliceViewWin(NULL), m_lastShownSpectrumViewerWin(NULL), 
-  m_lastShownColorFillWin(NULL), m_lastShown1DPlotWin(NULL), 
-  m_vatesSubWindow(NULL)//, m_spectrumViewWindow(NULL)
+  m_lastShownColorFillWin(NULL), m_lastShown1DPlotWin(NULL), m_vatesSubWindow(NULL)
+  //, m_spectrumViewWindow(NULL)
 {
 
   // To be able to use them in queued signals they need to be registered
@@ -734,7 +734,8 @@ void MantidUI::showVatesSimpleInterface()
     {
       m_vatesSubWindow = new QMdiSubWindow;
       m_vatesSubWindow->setAttribute(Qt::WA_DeleteOnClose, false);
-      QIcon icon; icon.addFile(QString::fromUtf8(":/VatesSimpleGuiViewWidgets/icons/pvIcon.png"), QSize(), QIcon::Normal, QIcon::Off);
+      QIcon icon; 
+      icon.addFile(QString::fromUtf8(":/VatesSimpleGuiViewWidgets/icons/pvIcon.png"), QSize(), QIcon::Normal, QIcon::Off);
       m_vatesSubWindow->setWindowIcon(icon);
       connect(m_appWindow, SIGNAL(shutting_down()), m_vatesSubWindow, SLOT(close()));
 
@@ -747,12 +748,11 @@ void MantidUI::showVatesSimpleInterface()
         connect(vsui, SIGNAL(requestClose()), m_vatesSubWindow, SLOT(close()));
         vsui->setParent(m_vatesSubWindow);
         m_vatesSubWindow->setWindowTitle("Vates Simple Interface");
-
         vsui->setupPluginMode();
         //m_appWindow->setGeometry(m_vatesSubWindow, vsui);
         m_vatesSubWindow->setWidget(vsui);
         m_vatesSubWindow->widget()->show();
-        vsui->renderWorkspace(wsName, wsType, instrumentName);
+        vsui->renderWorkspace(wsName, wsType,instrumentName);
       }
       else
       {
@@ -2532,6 +2532,9 @@ void MantidUI::importNumSeriesLog(const QString &wsName, const QString &logName,
     t->setNumericPrecision(16);   //it's the number of all digits
   }
 
+  // The time when the first data was recorded.
+  auto firstTime = time_value_map.begin()->first;
+
   //Make the column header with the units, if any
   QString column1 = label.section("-",1);
   if (logData->units() != "")
@@ -2546,6 +2549,7 @@ void MantidUI::importNumSeriesLog(const QString &wsName, const QString &logName,
     Mantid::Kernel::TimeSeriesProperty<bool>* f = 0;
     if (filter == 1 || filter ==3)
     {
+      // one of the filters is the running status
       try
       {
         f = dynamic_cast<Mantid::Kernel::TimeSeriesProperty<bool> *>(ws->run().getLogData("running"));
@@ -2557,6 +2561,15 @@ void MantidUI::importNumSeriesLog(const QString &wsName, const QString &logName,
           t->close();
           importNumSeriesLog(wsName,logName,0);
           return;
+        }
+        // If filter records start later than the data we add a value at the filter's front
+        if ( f->firstTime() > firstTime )
+        {
+          // add a "not running" value to the status filter
+          Mantid::Kernel::TimeSeriesProperty<bool> atStart("tmp");
+          atStart.addValue(firstTime,false);
+          atStart.addValue(f->firstTime(),f->firstValue());
+          flt.addFilter(atStart);
         }
       }
       catch(...)

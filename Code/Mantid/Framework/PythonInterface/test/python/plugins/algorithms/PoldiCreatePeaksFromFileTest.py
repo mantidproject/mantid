@@ -170,4 +170,6 @@ class PoldiCreatePeaksFromFileTest(unittest.TestCase):
 
 
 if __name__ == '__main__':
-    unittest.main()
+    # Only test if algorithm is registered (pyparsing dependency).
+    if AlgorithmFactory.exists("PoldiCreatePeaksFromFile"):
+        unittest.main()
