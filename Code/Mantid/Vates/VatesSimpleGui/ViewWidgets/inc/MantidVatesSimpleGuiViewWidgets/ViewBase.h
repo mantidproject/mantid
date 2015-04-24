@@ -219,7 +219,7 @@ signals:
    */
   void unbin();
   /**
-   * Singal to tell other elements that the log scale was altered programatically
+   * Signal to tell other elements that the log scale was altered programatically
    * @param state flag wheter or not to enable the 
    */
   void setLogScale(bool state);

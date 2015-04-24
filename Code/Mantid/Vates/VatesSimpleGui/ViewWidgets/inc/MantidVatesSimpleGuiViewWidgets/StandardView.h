@@ -88,9 +88,7 @@ protected slots:
   /// Invoke the ScaleWorkspace on the current dataset.
   void onScaleButtonClicked();
   /// On BinMD button clicked
-  void onBinMD();
-  /// On SliceMD button clicked
-  void onSliceMD();
+  void onRebin();
 
 private:
   Q_DISABLE_COPY(StandardView)
@@ -104,9 +102,14 @@ private:
   void setRebinAndUnbinButtons();
   /// Set up the buttons
   void setupViewButtons();
+  ///  Give the user the ability to rebin
+  void allowRebinningOptions(bool allow);
+  ///  Allow the user the ability to unbin
+  void allowUnbinOption(bool allow);
 
   QAction* m_binMDAction;
   QAction* m_sliceMDAction;
+  QAction* m_cutMDAction;
   QAction* m_unbinAction;
 };
 
