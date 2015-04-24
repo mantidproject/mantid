@@ -21,7 +21,7 @@ public:
 
   void test_algorithm() {
     testAlg = Mantid::API::AlgorithmManager::Instance().create(
-        "StartRemoteTransaction" /*, 1*/);
+        "StartRemoteTransaction", 1);
     TS_ASSERT(testAlg);
     TS_ASSERT_EQUALS(testAlg->name(), "StartRemoteTransaction");
     TS_ASSERT_EQUALS(testAlg->version(), 1);

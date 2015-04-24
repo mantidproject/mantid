@@ -20,8 +20,15 @@
 #include <pqRenderView.h>
 #include <pqServerManagerModel.h>
 #include <vtkContextMouseEvent.h>
+#include <vtkDataObject.h>
+#include <vtkMatrix4x4.h>
+#include <vtkNew.h>
+#include <vtkPVArrayInformation.h>
+#include <vtkPVChangeOfBasisHelper.h>
+#include <vtkPVDataInformation.h>
 #include <vtkSMPropertyHelper.h>
-#include <vtkSMProxy.h>
+#include <vtkSMSourceProxy.h>
+#include <vtkVector.h>
 
 #if defined(__INTEL_COMPILER)
   #pragma warning enable 1170
@@ -40,6 +47,69 @@ namespace Vates
 {
 namespace SimpleGui
 {
+
+//-----------------------------------------------------------------------------
+// This is copied from ParaView's
+// pqModelTransformSupportBehavior::getChangeOfBasisMatrix(). Once ParaView min
+// version is updated to > 4.3, simply use that method.
+template<class T, int size>
+vtkTuple<T, size> GetValues(
+  const char* aname, vtkSMSourceProxy* producer, int port, bool *pisvalid)
+{
+  bool dummy;
+  pisvalid = pisvalid? pisvalid : &dummy;
+  *pisvalid = false;
+
+  vtkTuple<T, size> value;
+  vtkPVDataInformation* dinfo = producer->GetDataInformation(port);
+  if (vtkPVArrayInformation* ainfo =
+    (dinfo? dinfo->GetArrayInformation(aname, vtkDataObject::FIELD) : NULL))
+    {
+    if (ainfo->GetNumberOfComponents() == size)
+      {
+      *pisvalid = true;
+      for (int cc=0; cc < size; cc++)
+        {
+        value[cc] = ainfo->GetComponentRange(cc)[0];
+        }
+      }
+    }
+  return value;
+}
+
+static vtkTuple<double, 16> GetChangeOfBasisMatrix(
+  vtkSMSourceProxy* producer, int port=0, bool* pisvalid=NULL)
+{
+  return GetValues<double, 16>("ChangeOfBasisMatrix", producer, port, pisvalid);
+}
+
+static void GetOrientations(vtkSMSourceProxy* producer, vtkVector3d sliceNormals[3])
+{
+  bool isvalid = false;
+  vtkTuple<double, 16> cobm = GetChangeOfBasisMatrix(producer, 0, &isvalid);
+  if (isvalid)
+    {
+    vtkNew<vtkMatrix4x4> changeOfBasisMatrix;
+    std::copy(&cobm[0], &cobm[0] + 16, &changeOfBasisMatrix->Element[0][0]);
+    vtkVector3d axisBases[3];
+    vtkPVChangeOfBasisHelper::GetBasisVectors(changeOfBasisMatrix.GetPointer(),
+      axisBases[0], axisBases[1], axisBases[2]);
+    for (int cc=0; cc < 3; cc++)
+      {
+      sliceNormals[cc] = axisBases[(cc+1)%3].Cross(axisBases[(cc+2)%3]);
+      sliceNormals[cc].Normalize();
+      }
+    }
+  else
+    {
+    sliceNormals[0] = vtkVector3d(1, 0, 0);
+    sliceNormals[1] = vtkVector3d(0, 1, 0);
+    sliceNormals[2] = vtkVector3d(0, 0, 1);
+    }
+}
+
+//-----------------------------------------------------------------------------
+
 
 MultiSliceView::MultiSliceView(QWidget *parent, RebinnedSourcesManager* rebinnedSourcesManager) : ViewBase(parent, rebinnedSourcesManager)
 {
@@ -220,7 +290,10 @@ void MultiSliceView::showCutInSliceViewer(int axisIndex,
       sliceOffsetOnAxis /= scaling[0];
     }
   }
-  const double *orient = this->mainView->GetSliceNormal(axisIndex);
+
+  vtkVector3d sliceNormals[3];
+  GetOrientations(vtkSMSourceProxy::SafeDownCast(src1->getProxy()), sliceNormals);
+  vtkVector3d& orient = sliceNormals[axisIndex];
 
   // Construct origin vector from orientation vector
   double origin[3];
@@ -233,7 +306,7 @@ void MultiSliceView::showCutInSliceViewer(int axisIndex,
   rks.setWorkspaceName(wsName.toStdString());
   rks.setGeometryXML(geomXML);
 
-  MDImplicitFunction_sptr impplane(new MDPlaneImplicitFunction(3, orient,
+  MDImplicitFunction_sptr impplane(new MDPlaneImplicitFunction(3, orient.GetData(),
                                                                origin));
   rks.setImplicitFunction(impplane);
   QString titleAddition = "";

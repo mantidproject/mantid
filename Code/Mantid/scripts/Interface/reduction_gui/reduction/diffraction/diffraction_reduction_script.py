@@ -28,7 +28,7 @@ class DiffractionReductionScripter(BaseReductionScripter):
     def __init__(self, name="VULCAN", facility="SNS"):
         """ Initialization
         """
-        # Call base class 
+        # Call base class
         super(DiffractionReductionScripter, self).__init__(name=name, facility=facility)
 
         # Find whether there is stored setup XMLs
@@ -36,7 +36,7 @@ class DiffractionReductionScripter(BaseReductionScripter):
         mantidconfigdir = os.path.join(homedir, ".mantid")
         self.configDir = mantidconfigdir
 
-        # create configuratin dir if it has not been 
+        # create configuratin dir if it has not been
         if os.path.exists(self.configDir) is False:
             os.makedirs(self.configDir)
 
@@ -48,10 +48,10 @@ class DiffractionReductionScripter(BaseReductionScripter):
         return
 
     def to_script(self, file_name=None):
-        """ Generate reduction script via observers and 
-        (1) save the script to disk and (2) save the reduction setup to disk. 
+        """ Generate reduction script via observers and
+        (1) save the script to disk and (2) save the reduction setup to disk.
 
-        Arguments: 
+        Arguments:
          - file_name: name of the file to write the script to
         """
         # Collect partial scripters from observers
@@ -63,7 +63,7 @@ class DiffractionReductionScripter(BaseReductionScripter):
 
         # Construct python commands
         script = self.constructPythonScript(paramdict)
-        
+
         # Save script to disk
         if file_name is None:
             file_name = os.path.join(self.configDir, DiffractionReductionScripter.AUTOSCRIPTNAME)
@@ -75,7 +75,7 @@ class DiffractionReductionScripter(BaseReductionScripter):
         except IOError as e:
             print "Unable to save script to file. Reason: %s." % (str(e))
 
-        # Export XML file 
+        # Export XML file
         autosavexmlfname = os.path.join(self.configDir, "snspowderreduction.xml")
         self.to_xml(autosavexmlfname)
 

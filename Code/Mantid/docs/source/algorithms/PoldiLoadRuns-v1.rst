@@ -9,7 +9,11 @@
 Description
 -----------
 
-This algorithm makes it easier to load POLDI data. Besides importing the raw data (:ref:`algm-LoadSINQ`), it performs the otherwise manually performed steps of instrument loading (:ref:`algm-LoadInstrument`), truncation (:ref:`algm-PoldiTruncateData`). To make the algorithm more useful, it is possible to load data from multiple runs by specifying a range. In many cases, data files need to be merged in a systematic manner, which is also covered by this algorithm. For this purpose there is a parameter that specifies how the files of the specified range should be merged. The data files are named following the scheme `group_data_run`, where `group` is the name specified in `OutputWorkspace` and `run` is the run number and placed into a WorkspaceGroup with the name given in `OutputWorkspace`.
+This algorithm makes it easier to load POLDI data. Besides importing the raw data (:ref:`algm-LoadSINQ`), it performsthe otherwise manually performed steps of instrument loading (:ref:`algm-LoadInstrument`), truncation (:ref:`algm-PoldiTruncateData`). To make the algorithm more useful, it is possible to load data from multiple runs by specifying a range. In many cases, data files need to be merged in a systematic manner, which is also covered by this algorithm. For this purpose there is a parameter that specifies how the files of the specified range should be merged. The data files are named following the scheme `group_data_run`, where `group` is the name specified in `OutputWorkspace` and `run` is the run number and placed into a WorkspaceGroup with the name given in `OutputWorkspace`.
+
+By default, detectors that show unusually large integrated intensities are excluded if the pass a certain threshold
+with respect to the median of integrated intensities in all detectors. The threshold can be adjusted using an
+additional parameter. Detectors that are masked in the instrument definition are always masked.
 
 The data loaded in this way can be used directly for further processing with :ref:`algm-PoldiAutoCorrelation`.
 
