@@ -758,6 +758,7 @@ int GroupDetectors2::readInt(std::string line) {
 * @param File :: the input stream that is linked to the file
 * @param lineNum :: the last line read in the file, is updated by this function
 * @param unUsedSpec :: list of spectra that haven't yet been included in a group
+* @param ignoreGroupNumber :: ignore group numbers when numbering spectra
 * @throw invalid_argument if there is any problem with the file
 */
 void GroupDetectors2::readFile(spec2index_map &specs2index, std::istream &File,
