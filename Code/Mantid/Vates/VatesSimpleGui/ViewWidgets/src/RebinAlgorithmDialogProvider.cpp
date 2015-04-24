@@ -25,6 +25,8 @@
 #include <QHash>
 #include "boost/shared_ptr.hpp"
 
+using namespace MantidQt::MantidWidgets;
+
 namespace Mantid
 {
   namespace Vates
@@ -37,10 +39,11 @@ namespace Mantid
       Mantid::Kernel::Logger g_log("RebinAlgorithmDialogProvider");
     }
 
+      const size_t RebinAlgorithmDialogProvider::BinCutOffValue = 50;
+
       RebinAlgorithmDialogProvider::RebinAlgorithmDialogProvider(QWidget* parent) : 
                                                     m_lblInputWorkspace("InputWorkspace"),
                                                     m_lblOutputWorkspace("OutputWorkspace"),
-                                                    m_binCutOffValue(50),
                                                     m_parent(parent)
       {
       }
@@ -82,7 +85,7 @@ namespace Mantid
        * @param workspaceName The name of the input workspace.
        * @returns A pointer to the current event workspace
        */
-      Mantid::API::IMDEventWorkspace_sptr RebinAlgorithmDialogProvider::getWorkspace(std::string workspaceName)
+      Mantid::API::IMDEventWorkspace_sptr RebinAlgorithmDialogProvider::getWorkspace(const std::string& workspaceName)
       {
         Mantid::API::IMDEventWorkspace_sptr eventWorkspace;
 
@@ -129,9 +132,9 @@ namespace Mantid
        * @returns The algorithm dialog
        */
       MantidQt::API::AlgorithmDialog* RebinAlgorithmDialogProvider::createDialog(Mantid::API::IAlgorithm_sptr algorithm,
-                                                                 std::string inputWorkspace,
-                                                                 std::string outputWorkspace,
-                                                                 std::string algorithmType)
+                                                                 const std::string& inputWorkspace,
+                                                                 const std::string& outputWorkspace,
+                                                                 const std::string& algorithmType)
       {
         QHash<QString, QString> presets;
        //Check if a workspace is selected in the dock and set this as a preference for the input workspace
@@ -140,21 +143,12 @@ namespace Mantid
 
         MantidQt::API::AlgorithmDialog* dialog = NULL;
 
-        // Set the correct algorithm dialog, Add CutMD here once it is ready.
-        if (algorithmType == "BinMD")
-        {
-          dialog = new MantidQt::MantidWidgets::BinMDDialog(m_parent);
-          getPresetsForSliceMDAlgorithmDialog(inputWorkspace, outputWorkspace, presets);
-        }
-        else if (algorithmType == "SliceMD")
-        {
-          dialog = new MantidQt::MantidWidgets::SliceMDDialog(m_parent);
-          getPresetsForSliceMDAlgorithmDialog(inputWorkspace, outputWorkspace, presets);
-        }
-        else
-        {
-          return dialog;
-        }
+        
+        MantidQt::API::InterfaceManager interfaceManager;
+        presets.insert(m_lblInputWorkspace, QString::fromStdString(inputWorkspace));
+        presets.insert(m_lblOutputWorkspace, QString::fromStdString(outputWorkspace));
+
+        dialog = interfaceManager.createDialogFromName(QString::fromStdString(algorithmType), -1, m_parent, false, presets);
 
         // The parent so that the dialog appears on top of it
         dialog->setParent(m_parent);
@@ -166,48 +160,18 @@ namespace Mantid
         flags |= Qt::WindowContextHelpButtonHint;
         dialog->setWindowFlags(flags);
 
-        dialog->setAlgorithm(algorithm);
-        dialog->setPresetValues(presets);
-        dialog->setOptionalMessage(QString(algorithm->summary().c_str()));
-
-        MantidQt::MantidWidgets::BinMDDialog * binDialog = dynamic_cast<MantidQt::MantidWidgets::BinMDDialog *>(dialog);
-        MantidQt::MantidWidgets::SliceMDDialog * sliceDialog = dynamic_cast<MantidQt::MantidWidgets::SliceMDDialog *>(dialog);
-
-
-        if (binDialog)
+        if (SlicingAlgorithmDialog * slicingDialog = dynamic_cast<SlicingAlgorithmDialog *>(dialog))
         {
-          binDialog->initializeLayout();
-          binDialog->customiseLayoutForVsi(inputWorkspace);
+    
+          slicingDialog->customiseLayoutForVsi(inputWorkspace);
 
           // Setup the values of the axis dimensions
-          setAxisDimensions(binDialog, inputWorkspace);
-        }
-        else if (sliceDialog)
-        {
-          sliceDialog->initializeLayout();
-          sliceDialog->customiseLayoutForVsi(inputWorkspace);
-
-         // Setup the values of the axis dimensions
-          setAxisDimensions(sliceDialog, inputWorkspace);
+          setAxisDimensions(slicingDialog, inputWorkspace);
         }
 
         return dialog;
       }
 
-      /**
-        * Determine the preset values 
-        * @param inputWorkspace The name of the input workspace.
-        * @param outputWorkspace The name of the output workspace.
-        * @param presets A container for the preset values.
-        */
-      void RebinAlgorithmDialogProvider::getPresetsForSliceMDAlgorithmDialog(std::string inputWorkspace, std::string outputWorkspace, QHash<QString, QString>& presets)
-      {
-        // Set the input workspace
-        presets.insert(QString(m_lblInputWorkspace),QString::fromStdString(inputWorkspace));
-
-        // Set the output workspace
-        presets.insert(QString(m_lblOutputWorkspace),QString::fromStdString(outputWorkspace));
-      }
 
       /**
        * Resets the aligned dimensions properties in a SlicingAlgorithmDialog.
@@ -232,12 +196,12 @@ namespace Mantid
 
           // Check the bins size
           QString newNumberOfBins;
-          if (numberOfBins < m_binCutOffValue && index < 3)
+          if (numberOfBins < BinCutOffValue && index < 3)
           {
             // Only do this for BinMD, it is too costly for SliceMD to have very large cuts
             if (dynamic_cast<MantidQt::MantidWidgets::BinMDDialog *>(dialog))
             {
-              newNumberOfBins = QString::number(static_cast<unsigned long long>(m_binCutOffValue));
+              newNumberOfBins = QString::number(static_cast<unsigned long long>(BinCutOffValue));
             }
             else
             {

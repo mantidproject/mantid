@@ -51,22 +51,21 @@ namespace Mantid
 
           void showDialog(std::string inputWorkspace, std::string outputWorkspace, std::string algorithmType);
 
-        private:
-          MantidQt::API::AlgorithmDialog* createDialog(Mantid::API::IAlgorithm_sptr algorithm, std::string inputWorkspace, std::string outputWorkspace, std::string algorithmType);
+           static const size_t BinCutOffValue;
 
-          void getPresetsForSliceMDAlgorithmDialog( std::string inputWorkspace, std::string outputWorkspace, QHash<QString, QString>& presets);
+        private:
+          MantidQt::API::AlgorithmDialog* createDialog(Mantid::API::IAlgorithm_sptr algorithm, const std::string& inputWorkspace, const std::string& outputWorkspace, const std::string& algorithmType);
 
           void setAxisDimensions(MantidQt::MantidWidgets::SlicingAlgorithmDialog* dialog,  std::string inputWorkspace);
 
-          Mantid::API::IMDEventWorkspace_sptr getWorkspace(std::string workspaceName);
+          Mantid::API::IMDEventWorkspace_sptr getWorkspace(const std::string& workspaceName);
 
           Mantid::API::IAlgorithm_sptr createAlgorithm(const std::string& algName, int version);
 
           Mantid::VATES::ADSWorkspaceProvider<Mantid::API::IMDEventWorkspace> m_adsWorkspaceProvider;
 
-          QString m_lblInputWorkspace;
-          QString m_lblOutputWorkspace;
-          size_t m_binCutOffValue;
+          const QString m_lblInputWorkspace;
+          const QString m_lblOutputWorkspace;
           QWidget* m_parent;
       };
 

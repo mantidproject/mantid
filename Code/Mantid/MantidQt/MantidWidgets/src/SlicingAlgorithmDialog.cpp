@@ -442,12 +442,12 @@ namespace MantidQt
       ui.file_backend_layout->setVisible(false);
 
       // Output workspace
-      ui.lbl_workspace_output->setVisible(false);
-      ui.txt_output->setVisible(false);
+      ui.lbl_workspace_output->setDisabled(true);
+      ui.txt_output->setDisabled(true);
 
       // Input workspace
-      ui.workspace_selector->setVisible(false);
-      ui.lbl_workspace_input->setVisible(false);
+      ui.workspace_selector->setDisabled(true);
+      ui.lbl_workspace_input->setDisabled(true);
 
       // Reset the input workspace
       ui.workspace_selector->clear();
