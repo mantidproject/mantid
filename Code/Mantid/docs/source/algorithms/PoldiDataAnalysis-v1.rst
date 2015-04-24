@@ -38,6 +38,8 @@ The algorithm requires relatively little input and can be run like this:
 
 .. testcode::
 
+    import numpy as np
+
     # Load POLDI data
     PoldiLoadRuns(2013, 6903, 6904, 2, OutputWorkspace='poldi', MaskBadDetectors=False)
 
@@ -48,6 +50,7 @@ The algorithm requires relatively little input and can be run like this:
 
     PoldiDataAnalysis(InputWorkspace='poldi_data_6904',
                       ExpectedPeaks='Si', PawleyFit=True,
+                      MaximumPeakNumber=8,
                       PlotResult=False,
                       OutputWorkspace='result')
 
@@ -55,8 +58,8 @@ The algorithm requires relatively little input and can be run like this:
 
     cell = AnalysisDataService.retrieve('poldi_data_6904_cell_refined')
 
-    cell_a = np.round(lattice_parameters.cell(0, 1), 5)
-    cell_a_error = np.round(lattice_parameters.cell(0, 2), 5)
+    cell_a = np.round(cell.cell(0, 1), 5)
+    cell_a_error = np.round(cell.cell(0, 2), 5)
 
     print "Refined lattice parameter a =", cell_a, "+/-", cell_a_error
 
