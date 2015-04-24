@@ -407,6 +407,45 @@ LineViewer::applyMDWorkspace(Mantid::API::IMDWorkspace_sptr ws) {
   double angle = atan2(dy, dx);
   double perpAngle = angle + M_PI / 2.0;
 
+  // Check if this is a axis-aligned cut of a histogram workspace with at most
+  // 5 dimensions. If so, we'll use IntegrateMDHistoWorkspace.
+  auto histWS = boost::dynamic_pointer_cast<IMDHistoWorkspace>(ws);
+  if (histWS && histWS->getNumDims() <= 5 && (dx == 0 || dy == 0)) {
+    const int axis = dx != 0 ? m_freeDimX : m_freeDimY;
+
+    //One per axis
+    std::stringstream pbin[5];
+    for (size_t i = 0; i < histWS->getNumDims(); ++i) {
+      if (static_cast<int>(i) == axis) {
+        // For the axes we're integrating along we want to re-use the existing
+        // binning, rather than peforming another rebin.
+        // TODO: We can't actually do this *yet* so pass in nothing
+
+        /////////////////// F I X    M E    P L E A S E  //////////////////////
+
+        /* const double start = m_start[axis]; */
+        /* const double end = m_end[axis]; */
+        /* const double binWidth = (end - start) / static_cast<double>(m_numBins); */
+        /* pbin[i] << start << "," << binWidth << "," << end; */
+      } else {
+        // For other axes, the range is the value ± half the thickness
+        const double base = m_start[i];
+        const double offset = m_thickness[i] * 0.5;
+        pbin[i] << base - offset << "," << base + offset;
+      }
+    }
+
+    auto alg = AlgorithmManager::Instance().create("IntegrateMDHistoWorkspace");
+    alg->setProperty("InputWorkspace", histWS);
+    alg->setPropertyValue("OutputWorkspace", m_integratedWSName);
+    alg->setPropertyValue("P1Bin", pbin[0].str());
+    alg->setPropertyValue("P2Bin", pbin[1].str());
+    alg->setPropertyValue("P3Bin", pbin[2].str());
+    alg->setPropertyValue("P4Bin", pbin[3].str());
+    alg->setPropertyValue("P5Bin", pbin[4].str());
+    return alg;
+  }
+
   // Build the basis vectors using the angles
   VMD basisX = m_start * 0;
   basisX[m_freeDimX] = VMD_t(cos(angle));
