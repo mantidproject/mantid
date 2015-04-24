@@ -528,9 +528,15 @@
                <item row="0" column="0">
                 <layout class="QHBoxLayout" name="horizontalLayout_7">
                  <item>
-                  <widget class="QLabel" name="label_21">
+                  <widget class="QLabel" name="label_SCARF_username">
                    <property name="text">
                     <string>Username:</string>
+                   </property>
+                   <property name="minimumSize">
+                    <size>
+                     <width>90</width>
+                     <height>20</height>
+                    </size>
                    </property>
                   </widget>
                  </item>
@@ -577,6 +583,12 @@
                   <widget class="QLabel" name="label_SCARF_password">
                    <property name="text">
                     <string>Password:</string>
+                   </property>
+                   <property name="minimumSize">
+                    <size>
+                     <width>90</width>
+                     <height>20</height>
+                    </size>
                    </property>
                   </widget>
                  </item>
@@ -833,6 +845,11 @@
                    </layout>
                   </item>
                  </layout>
+                 <zorder></zorder>
+                 <zorder>horizontalSpacer_16</zorder>
+                 <zorder></zorder>
+                 <zorder></zorder>
+                 <zorder>layoutWidget</zorder>
                 </widget>
                </item>
               </layout>

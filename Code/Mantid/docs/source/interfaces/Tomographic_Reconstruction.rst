@@ -8,12 +8,9 @@ Overview
 --------
 
 This interface aims at integrating and simplifying the following tasks
-related to tomographic reconstruction and imaging with neutrons:
-
-
-while much of its functionality is being developed in a generic way,
-it is presently being tested and trialed for the IMAT instrument at
-ISIS.
+related to tomographic reconstruction and imaging with neutrons. While
+much of its functionality is being developed in a generic way, it is
+presently being tested and trialed for the IMAT instrument at ISIS.
 
 .. interface:: Tomographic Reconstruction
   :align: center
@@ -25,7 +22,6 @@ example). Currently remote jobs are run on the `SCARF cluster
 <http://www.scarf.rl.ac.uk/>`_, administered by the Scientific
 Computing Department of STFC. You can also use this cluster via remote
 login and through its `web portal <https://portal.scarf.rl.ac.uk/>`_.
-
 
 Interface at a glance
 ---------------------
@@ -41,7 +37,11 @@ jobs submitted recently.
 
 In the setup tab you can set the details of the remote and/or local
 compute resources. Importantly, here is where you can set you username
-and password to log into the remote compute resource.
+and password to log into the remote compute resource. To be able to
+run jobs remotely you first need to log into the remote compute
+resource. Once you log in, an automatic mechanism will periodically
+query the status of jobs (for example every minute). You can also
+update it at any time by clicking on the refresh button.
 
 .. interface:: Tomographic Reconstruction
   :widget: setupTab
