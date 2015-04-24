@@ -32,7 +32,7 @@ namespace
  * Default
  */
 MantidColorMap::MantidColorMap() : QwtColorMap(QwtColorMap::Indexed), m_scale_type(GraphOptions::Log10),
-				     m_colors(0), m_num_colors(0)
+				     m_colors(0), m_num_colors(0), m_name(), m_path()
 {
   m_nan = std::numeric_limits<double>::quiet_NaN();
   this->setNanColor(255,255,255);
@@ -46,7 +46,7 @@ MantidColorMap::MantidColorMap() : QwtColorMap(QwtColorMap::Indexed), m_scale_ty
  * @param type :: The scale type, currently Linear or Log10 
  */
 MantidColorMap::MantidColorMap(const QString & filename, GraphOptions::ScaleType type) : 
-  QwtColorMap(QwtColorMap::Indexed), m_scale_type(type), m_colors(0), m_num_colors(0)
+  QwtColorMap(QwtColorMap::Indexed), m_scale_type(type), m_colors(0), m_num_colors(0), m_name(), m_path()
 {
   m_nan = std::numeric_limits<double>::quiet_NaN();
   this->setNanColor(255,255,255);
@@ -132,7 +132,12 @@ bool MantidColorMap::loadMap(const QString & filename)
     m_colors = new_colormap;
     if (m_num_colors > 1)
       m_colors[0] = m_nan_color;
+    m_path = filename;
+    //set the name of the color map to the filename
+    QFileInfo fileinfo(filename);
+    m_name=fileinfo.baseName(); 
   } 
+
   return is_success;
 }
 
@@ -210,6 +215,7 @@ void MantidColorMap::setupDefaultMap()
 
   m_colors.clear();
   m_num_colors = 256;
+  m_name = QString::fromStdString("Default");
 
   std::stringstream colorstream(colorstring);
   float red(0.0f), green(0.0f), blue(0.0f);
