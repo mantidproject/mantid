@@ -69,11 +69,11 @@ class POLDIDataAnalysisTestSiPawley(POLDIDataAnalysisTestSi):
     def runTest(self):
         data, expectedPeaks = self.prepareTest()
 
-        output = PoldiDataAnalysis(InputWorkspace=data,
+        PoldiDataAnalysis(InputWorkspace=data,
                                    MaximumPeakNumber=11,
                                    ExpectedPeaks=expectedPeaks,
                                    PawleyFit=True,
-                                   PlotResult=False)
+                                   PlotResult=False, OutputWorkspace='output')
 
         # inspect the cell
         cell = AnalysisDataService.retrieve('poldi_data_6904_cell_refined')

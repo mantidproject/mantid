@@ -1,4 +1,4 @@
-# pylint: disable=no-init,invalid-name
+# pylint: disable=no-init,invalid-name,attribute-defined-outside-init
 from mantid.simpleapi import *
 from mantid.api import *
 from mantid.kernel import *
@@ -225,8 +225,6 @@ class PoldiDataAnalysis(PythonAlgorithm):
             plotWindow = plot.plotSpectrum(residuals, 0, type=0, window=plotWindow)
             plotWindow.activeLayer().setTitle('Fit result for ' + self.baseName)
             plotWindow.activeLayer().removeLegend()
-
-
 
 
 AlgorithmFactory.subscribe(PoldiDataAnalysis())
