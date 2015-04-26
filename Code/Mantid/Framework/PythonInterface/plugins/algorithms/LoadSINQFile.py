@@ -58,9 +58,7 @@ class LoadSINQFile(PythonAlgorithm):
 
         lookupInstrumentName = inst
         if inst == 'POLDI':
-            year = self._extractYearFromFileName(fname)
-            if year < 2015:
-                lookupInstrumentName += '_legacy'
+            lookupInstrumentName = self._getPoldiLookupName(fname, lookupInstrumentName)
 
         dictsearch = os.path.join(config['instrumentDefinition.directory'],"nexusdictionaries")
         dicname = os.path.join(dictsearch, diclookup[lookupInstrumentName])
@@ -94,6 +92,12 @@ class LoadSINQFile(PythonAlgorithm):
         self.setProperty("OutputWorkspace", ws)
         # delete temporary reference
         mantid.simpleapi.DeleteWorkspace(wname,EnableLogging=False)
+
+    def _getPoldiLookupName(self, fname, lookupInstrumentName):
+        year = self._extractYearFromFileName(fname)
+        if year < 2015:
+            lookupInstrumentName += '_legacy'
+        return lookupInstrumentName
 
     def _extractYearFromFileName(self, filename):
         pureFileName = os.path.basename(filename)
