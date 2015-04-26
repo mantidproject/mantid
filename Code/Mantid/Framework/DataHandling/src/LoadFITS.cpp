@@ -625,6 +625,7 @@ LoadFITS::makeWorkspace(const FITSInfo &fileInfo, size_t &newFileNumber,
 
     ws->isDistribution(true);
   } else {
+    // TODO: what to do when loading 1pixel - 1 spectrum?
   }
   ws->setYUnitLabel("brightness");
 
@@ -754,8 +755,8 @@ void LoadFITS::readDataToImgs(const FITSInfo &fileInfo, MantidImage &imageY,
  * filtering is done in place for both imageY and imageE.
  *
  * @param thresh Threshold to apply on pixels
- * @param Image raw data (Y values)
- * @param Image raw data (E/error values)
+ * @param ImageY raw data (Y values)
+ * @param ImageE raw data (E/error values)
  */
 void LoadFITS::doFilterNoise(double thresh, MantidImage &imageY,
                              MantidImage &imageE) {
@@ -817,8 +818,8 @@ void LoadFITS::doFilterNoise(double thresh, MantidImage &imageY,
  * Group pixels in blocks of rebin X rebin.
  *
  * @param rebin bin size (n to make blocks of n*n pixels)
- * @param Image raw data (Y values)
- * @param Image raw data (E/error values)
+ * @param ImageY raw data (Y values)
+ * @param ImageE raw data (E/error values)
  * @param rebinnedY raw data after rebin (Y values)
  * @param rebinnedE raw data after rebin (E/error values)
  */
@@ -910,6 +911,8 @@ void LoadFITS::headerSanityCheck(const FITSInfo &hdr,
  * the instrument does not appear to be IMAT, which is the only one
  * for which we have a camera-instrument definition and because of
  * that is the only one loaded for the moment.
+ *
+ * @param hdr FITS header information
  *
  * @return whether this file seems to come from 'another' camera such
  * as Starlight Xpress, etc.
