@@ -3,17 +3,12 @@
 
 #include "MantidAPI/IRemoteJobManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidQtAPI/UserSubWindow.h"
-#include "ui_TomoReconstruction.h"
-#include "ui_TomoToolConfigAstra.h"
-#include "ui_TomoToolConfigCustom.h"
-#include "ui_TomoToolConfigSavu.h"
-#include "ui_TomoToolConfigTomoPy.h"
+#include "MantidQtCustomInterfaces/TomoReconstruction/TomoToolConfigDialog.h"
 
 #include <jsoncpp/json/json.h>
-#include <QDialog>
 #include <QMutex>
 
 // Qt classes forward declarations
@@ -153,9 +148,17 @@ private:
 
   void drawImage(const Mantid::API::MatrixWorkspace_sptr &ws);
 
-  void userWarning(std::string err, std::string description);
+  void splitCmdLine(const std::string &cmd, std::string &run,
+                    std::string &opts);
 
-  void userError(std::string err, std::string description);
+  void checkDataPathsSet();
+
+  void checkWarningToolNotSetup(const std::string &tool,
+                                const std::string &settings);
+
+  void userWarning(const std::string &err, const std::string &description);
+
+  void userError(const std::string &err, const std::string &description);
 
   /// Load default interface settings for each tab, normally on startup
   void readSettings();
@@ -195,6 +198,8 @@ private:
 
   /// Main interface window
   Ui::TomoReconstruction m_ui;
+
+  /// Tool specific setup dialogs
   Ui::TomoToolConfigAstra m_uiAstra;
   Ui::TomoToolConfigCustom m_uiCustom;
   Ui::TomoToolConfigSavu m_uiSavu;
@@ -265,51 +270,21 @@ private:
         : SCARFBasePath("/work/imat/runs/test/"), useKeepAlive(60),
           onCloseAskForConfirmation(false) {}
   };
-  UserSettings settings;
+  UserSettings m_settings;
+
+  /// Settings for the third party (tomographic reconstruction) tools
+  struct UserToolsSettings {
+    // This is just too basic at the moment. We probably want to store
+    // here the real settings objects, and rather than this horror have a
+    // dictionary of tools-settings
+    std::string tomoPy;
+    std::string astra;
+    std::string CCPi;
+    std::string savu;
+    std::string custom;
+  };
+  UserToolsSettings m_toolsSettings;
 };
-
-class TomoToolConfigTomoPy : public QDialog {
-  Q_OBJECT
-public:
-  TomoToolConfigTomoPy(QWidget *parent = 0);
-};
-
-class TomoToolConfigSavu : public QMainWindow {
-  Q_OBJECT
-public:
-  TomoToolConfigSavu(QWidget *parent = 0);
-};
-
-class TomoToolConfigAstra : public QDialog {
-  Q_OBJECT
-public:
-  TomoToolConfigAstra(QWidget *parent = 0);
-};
-
-class TomoToolConfigCustom : public QDialog {
-  Q_OBJECT
-public:
-  TomoToolConfigCustom(QWidget *parent = 0);
-};
-
-class TomoToolSetupDialog : public QDialog {
-  Q_OBJECT
-
-public:
-  TomoToolSetupDialog(QWidget *parent = 0);
-
-private slots:
-  void okClicked();
-  void cancelClicked();
-
-private:
-  QLabel *labelRun, *labelOpt;
-  QLineEdit *editRun, *editOpt;
-  QHBoxLayout *hRun, *hOpt;
-  QGridLayout *layout;
-  QPushButton *okButton, *cancelButton;
-};
-
 }
 }
 

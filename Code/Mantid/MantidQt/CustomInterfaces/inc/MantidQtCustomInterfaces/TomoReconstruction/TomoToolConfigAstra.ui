@@ -9,8 +9,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>436</width>
-    <height>225</height>
+    <width>563</width>
+    <height>233</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -47,6 +47,9 @@
         </item>
         <item row="1" column="0">
          <widget class="QLabel" name="label_runnable_4">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
           <property name="text">
            <string>List:</string>
           </property>
@@ -60,20 +63,24 @@
          </widget>
         </item>
         <item row="1" column="1" colspan="4">
-         <widget class="QLineEdit" name="lineEdit"/>
+         <widget class="QLineEdit" name="lineEdit">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+         </widget>
         </item>
         <item row="0" column="3">
-         <widget class="QDoubleSpinBox" name="doubleSpinBox_3">
+         <widget class="QDoubleSpinBox" name="doubleSpinBox_angle_max">
           <property name="maximum">
-           <double>180.000000000000000</double>
+           <double>360.000000000000000</double>
           </property>
           <property name="value">
-           <double>180.000000000000000</double>
+           <double>360.000000000000000</double>
           </property>
          </widget>
         </item>
         <item row="0" column="1">
-         <widget class="QDoubleSpinBox" name="doubleSpinBox_2">
+         <widget class="QDoubleSpinBox" name="doubleSpinBox_angle_min">
           <property name="maximum">
            <double>180.000000000000000</double>
           </property>
@@ -83,7 +90,7 @@
       </widget>
      </item>
      <item row="3" column="1">
-      <widget class="QDoubleSpinBox" name="doubleSpinBox">
+      <widget class="QDoubleSpinBox" name="doubleSpinBox_center_rot">
        <property name="maximum">
         <double>180.000000000000000</double>
        </property>
@@ -97,7 +104,11 @@
       </widget>
      </item>
      <item row="2" column="1" colspan="2">
-      <widget class="QLineEdit" name="lineEdit_runnable"/>
+      <widget class="QLineEdit" name="lineEdit_runnable">
+       <property name="text">
+        <string>/work/imat/runs-scripts/scripts/astra/astra-2d-FBP.py</string>
+       </property>
+      </widget>
      </item>
      <item row="2" column="0">
       <widget class="QLabel" name="label_runnable">
@@ -127,7 +138,7 @@
       </spacer>
      </item>
      <item row="1" column="1" colspan="2">
-      <widget class="QComboBox" name="comboBox">
+      <widget class="QComboBox" name="comboBox_method">
        <item>
         <property name="text">
          <string>FBP: filtered back propagation</string>

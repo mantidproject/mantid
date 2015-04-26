@@ -2,10 +2,11 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/RemoteJobManager.h"
-#include "MantidQtAPI/AlgorithmRunner.h"
 #include "MantidQtAPI/AlgorithmInputHistory.h"
+#include "MantidQtAPI/AlgorithmRunner.h"
 #include "MantidQtAPI/HelpWindow.h"
 #include "MantidQtCustomInterfaces/TomoReconstruction/TomoReconstruction.h"
+#include "MantidQtCustomInterfaces/TomoReconstruction/ToolSettings.h"
 
 #include <boost/lexical_cast.hpp>
 
@@ -18,58 +19,24 @@
 #include <QTimer>
 
 using namespace Mantid::API;
+using namespace MantidQt::CustomInterfaces;
 
-// Add this class to the list of specialised dialogs in this namespace
 namespace MantidQt {
 namespace CustomInterfaces {
+
+// Add this class to the list of specialised dialogs in this namespace
 DECLARE_SUBWINDOW(TomoReconstruction)
 
 namespace {
 Mantid::Kernel::Logger g_log("TomoReconstruction");
 }
 
-class OwnTreeWidgetItem : public QTreeWidgetItem {
-public:
-  OwnTreeWidgetItem(QTreeWidgetItem *parent,
-                    QTreeWidgetItem *logicalParent = NULL,
-                    const std::string &key = "")
-      : QTreeWidgetItem(parent), m_rootParent(logicalParent), m_key(key) {}
-
-  OwnTreeWidgetItem(QStringList list, QTreeWidgetItem *logicalParent = NULL,
-                    const std::string &key = "")
-      : QTreeWidgetItem(list), m_rootParent(logicalParent), m_key(key) {}
-
-  OwnTreeWidgetItem(QTreeWidgetItem *parent, QStringList list,
-                    QTreeWidgetItem *logicalParent = NULL,
-                    const std::string &key = "")
-      : QTreeWidgetItem(parent, list), m_rootParent(logicalParent), m_key(key) {
-  }
-
-  QTreeWidgetItem *getRootParent() { return m_rootParent; }
-
-  std::string getKey() { return m_key; }
-
-private:
-  QTreeWidgetItem *m_rootParent;
-  std::string m_key;
-};
-
-TomoToolConfigTomoPy::TomoToolConfigTomoPy(QWidget *parent) : QDialog(parent) {}
-
-TomoToolConfigSavu::TomoToolConfigSavu(QWidget *parent) : QMainWindow(parent) {}
-
-TomoToolConfigAstra::TomoToolConfigAstra(QWidget *parent) : QDialog(parent) {}
-
-TomoToolConfigCustom::TomoToolConfigCustom(QWidget *parent) : QDialog(parent) {}
-
-using namespace MantidQt::CustomInterfaces;
-
 size_t TomoReconstruction::m_nameSeqNo = 0;
 
 // names by which we know compute resourcess
 const std::string TomoReconstruction::m_SCARFName = "SCARF@STFC";
 
-// names by which we knoe image/tomography reconstruction tools (3rd party)
+// names by which we know image/tomography reconstruction tools (3rd party)
 const std::string TomoReconstruction::m_TomoPyTool = "TomoPy";
 const std::string TomoReconstruction::m_AstraTool = "Astra";
 const std::string TomoReconstruction::m_CCPiTool = "CCPi CGLS";
@@ -231,7 +198,7 @@ void TomoReconstruction::doSetupSectionRun() {
           SLOT(runToolIndexChanged(int)));
 
   m_ui.pushButton_reconstruct->setEnabled(false);
-  m_ui.pushButton_run_tool_setup->setEnabled(false);
+  m_ui.pushButton_run_tool_setup->setEnabled(true);
   m_ui.pushButton_run_job_cancel->setEnabled(false);
   m_ui.pushButton_run_job_visualize->setEnabled(false);
 }
@@ -328,7 +295,7 @@ void TomoReconstruction::SCARFLoginClicked() {
   m_ui.pushButton_SCARF_login->setEnabled(false);
   m_ui.pushButton_SCARF_logout->setEnabled(true);
 
-  int kat = settings.useKeepAlive;
+  int kat = m_settings.useKeepAlive;
   if (kat > 0) {
     g_log.notice()
         << "Reconstruction GUI: starting mechanism to periodically query the "
@@ -367,24 +334,24 @@ void TomoReconstruction::readSettings() {
   QSettings qs;
   qs.beginGroup(QString::fromStdString(m_settingsGroup));
 
-  settings.SCARFBasePath =
+  m_settings.SCARFBasePath =
       qs.value("SCARF-base-path",
-               QString::fromStdString(settings.SCARFBasePath))
+               QString::fromStdString(m_settings.SCARFBasePath))
           .toString()
           .toStdString();
   // WARNING: it's critical to keep 'false' as default value, otherwise
   // scripted runs may have issues. The CI builds could get stuck when
   // closing this interface.
-  settings.onCloseAskForConfirmation =
+  m_settings.onCloseAskForConfirmation =
       qs.value("on-close-ask-for-confirmation", false).toBool();
 
-  settings.useKeepAlive =
-      qs.value("use-keep-alive", settings.useKeepAlive).toInt();
+  m_settings.useKeepAlive =
+      qs.value("use-keep-alive", m_settings.useKeepAlive).toInt();
   restoreGeometry(qs.value("interface-win-geometry").toByteArray());
   qs.endGroup();
 
   m_ui.lineEdit_SCARF_path->setText(
-      QString::fromStdString(settings.SCARFBasePath));
+      QString::fromStdString(m_settings.SCARFBasePath));
 }
 
 /**
@@ -396,8 +363,8 @@ void TomoReconstruction::saveSettings() {
   QString s = m_ui.lineEdit_SCARF_path->text();
   qs.setValue("SCARF-base-path", s);
   qs.setValue("on-close-ask-for-confirmation",
-              settings.onCloseAskForConfirmation);
-  qs.setValue("use-keep-alive", settings.useKeepAlive);
+              m_settings.onCloseAskForConfirmation);
+  qs.setValue("use-keep-alive", m_settings.useKeepAlive);
   qs.setValue("interface-win-geometry", saveGeometry());
   qs.endGroup();
 }
@@ -545,8 +512,7 @@ void TomoReconstruction::compResourceIndexChanged(int i) {
   setupRunTool();
 }
 
-void TomoReconstruction::runToolIndexChanged(int i) {
-  UNUSED_ARG(i);
+void TomoReconstruction::runToolIndexChanged(int /* i */) {
   QComboBox *rt = m_ui.comboBox_run_tool;
 
   if (!rt)
@@ -555,8 +521,10 @@ void TomoReconstruction::runToolIndexChanged(int i) {
   std::string tool = rt->currentText().toStdString();
   // disallow reconstruct on tools that don't run yet: Savu and CCPi
   if (m_CCPiTool == tool || m_SavuTool == tool) {
+    m_ui.pushButton_run_tool_setup->setEnabled(false);
     m_ui.pushButton_reconstruct->setEnabled(false);
   } else {
+    m_ui.pushButton_run_tool_setup->setEnabled(true);
     m_ui.pushButton_reconstruct->setEnabled(true);
   }
 }
@@ -643,6 +611,15 @@ bool TomoReconstruction::doPing() {
  * Handle the job submission request relies on a submit algorithm.
  */
 void TomoReconstruction::doSubmitReconstructionJob() {
+  std::string run, opt;
+  try {
+    makeRunnableWithOptions(run, opt);
+  } catch (std::exception &e) {
+    g_log.warning() << "Could not prepare the requested reconstruction job "
+                       "submission. There was an error: " +
+                           std::string(e.what());
+  }
+
   // TODO: once the remote algorithms are rearranged into the
   // 'RemoteJobManager' design, this will use:
   // auto transAlg = Algorithm::fromString("StartRemoteTransaction");
@@ -653,8 +630,6 @@ void TomoReconstruction::doSubmitReconstructionJob() {
   alg->setPropertyValue("Action", "SubmitJob");
   alg->setPropertyValue("UserName", getUsername());
 
-  std::string run, opt;
-  makeRunnableWithOptions(run, opt);
   alg->setProperty("RunnablePath", run);
   alg->setProperty("JobOptions", opt);
 
@@ -677,19 +652,36 @@ void TomoReconstruction::doSubmitReconstructionJob() {
  */
 void TomoReconstruction::makeRunnableWithOptions(std::string &run,
                                                  std::string &opt) {
+  std::string comp =
+      m_ui.comboBox_run_compute_resource->currentText().toStdString();
+
+  checkDataPathsSet();
+
   // For now we only know how to 'aproximately' run commands on SCARF
-  if (m_SCARFName ==
-      m_ui.comboBox_run_compute_resource->currentText().toStdString()) {
+  if (m_SCARFName == comp) {
     const std::string tool =
         m_ui.comboBox_run_tool->currentText().toStdString();
     std::string base = currentPathSCARF() + "/";
     if (tool == m_TomoPyTool) {
-      run = "/work/imat/z-tests-fedemp/scripts/tomopy/imat_recon_FBP.py";
-      opt = "--input_dir " + base + currentPathFITS() + " " + "--dark " + base +
-            currentPathDark() + " " + "--white " + base + currentPathFlat();
+      checkWarningToolNotSetup(tool, m_toolsSettings.tomoPy);
+      // this should get something like:
+      // run = "/work/imat/z-tests-fedemp/scripts/tomopy/imat_recon_FBP.py";
+      // opt = "--input_dir " + base + currentPathFITS() + " " + "--dark " +
+      // base +
+      //      currentPathDark() + " " + "--white " + base + currentPathFlat();
+
+      // TODO this is very unreliable, it will go away better when the
+      // settings are properly stored as toool-settings objects
+      splitCmdLine(m_toolsSettings.tomoPy, run, opt);
     } else if (tool == m_AstraTool) {
-      run = "/work/imat/scripts/astra/astra-3d-SIRT3D.py";
-      opt = base + currentPathFITS();
+      checkWarningToolNotSetup(tool, m_toolsSettings.astra);
+      // this should produce something like this:
+      // run = "/work/imat/scripts/astra/astra-3d-SIRT3D.py";
+      // opt = base + currentPathFITS();
+      splitCmdLine(m_toolsSettings.astra, run, opt);
+    } else if (tool == m_CustomCmdTool) {
+      checkWarningToolNotSetup(tool, m_toolsSettings.custom);
+      splitCmdLine(m_toolsSettings.custom, run, opt);
     } else {
       userWarning("Unable to use this tool",
                   "I do not know how to submit jobs to use this tool: " + tool +
@@ -700,6 +692,15 @@ void TomoReconstruction::makeRunnableWithOptions(std::string &run,
   } else {
     run = "error_dont_know_what_to_do";
     opt = "no_options_known";
+
+    userWarning("Unrecognized remote compute resource",
+                "The remote compute resource that you are trying not used is "
+                "not known: " +
+                    comp + ". This seems to indicate that this interface is "
+                           "misconfigured or there has been an unexpected "
+                           "failure.");
+    throw std::runtime_error(
+        "Could not recognize the remote compute resource: " + comp);
   }
 }
 
@@ -721,35 +722,7 @@ void TomoReconstruction::doCancelJob(const std::string &id) {
   }
 }
 
-TomoToolSetupDialog::TomoToolSetupDialog(QWidget *parent) : QDialog(parent) {
-  labelRun = new QLabel("Runnable script");
-  editRun = new QLineEdit("/work/imat/");
-  hRun = new QHBoxLayout();
-  hRun->addWidget(labelRun);
-  hRun->addWidget(editRun);
-
-  labelOpt = new QLabel("Command line options");
-  editOpt = new QLineEdit("/work/imat");
-  hOpt = new QHBoxLayout();
-  hOpt->addWidget(labelOpt);
-  hOpt->addWidget(editOpt);
-
-  layout = new QGridLayout();
-  layout->addLayout(hRun, 0, 0);
-  layout->addLayout(hOpt, 1, 0);
-
-  // connect(lineEdit, SIGNAL(textChanged(const QString &)),
-  //     this, SLOT(enableFindButton(const QString &)));
-  connect(okButton, SIGNAL(clicked()), this, SLOT(okClicked()));
-  connect(cancelButton, SIGNAL(clicked()), this, SLOT(cancelClicked()));
-}
-
-void TomoToolSetupDialog::okClicked() {}
-
-void TomoToolSetupDialog::cancelClicked() {}
-
 void TomoReconstruction::toolSetupClicked() {
-  // big TODO: handle tool specific options / config files
   QComboBox *rt = m_ui.comboBox_run_tool;
   if (!rt)
     return;
@@ -764,12 +737,48 @@ void TomoReconstruction::showToolConfig(const std::string &name) {
   if (m_TomoPyTool == name) {
     TomoToolConfigTomoPy tomopy;
     m_uiTomoPy.setupUi(&tomopy);
-    tomopy.show();
+    int res = tomopy.exec();
+    if (QDialog::Accepted == res) {
+      // TODO: move this
+      int mi = m_uiTomoPy.comboBox_method->currentIndex();
+      QString run = m_uiTomoPy.lineEdit_runnable->text();
+      if (1 == mi) {
+        // hard-coded for now, this is a different script
+        run = "/work/imat/runs-scripts/scripts/tomopy/imat_recon_SIRT.py";
+      }
+      double minAngle = m_uiTomoPy.doubleSpinBox_angle_min->value();
+      double maxAngle = m_uiTomoPy.doubleSpinBox_angle_max->value();
+      double cor = m_uiTomoPy.doubleSpinBox_center_rot->value();
+
+      ToolSettingsTomoPy settings(run.toStdString(), currentPathDark(),
+                                  currentPathFlat(), currentPathFITS(), cor,
+                                  minAngle, maxAngle);
+      m_toolsSettings.tomoPy = settings.toCommand();
+    }
   } else if (m_AstraTool == name) {
     TomoToolConfigAstra astra;
     m_uiAstra.setupUi(&astra);
-    astra.show();
+    int res = astra.exec();
+    if (QDialog::Accepted == res) {
+      // TODO: move this
+      int mi = m_uiAstra.comboBox_method->currentIndex();
+      QString run = m_uiAstra.lineEdit_runnable->text();
+      if (1 == mi) {
+        // hard-coded for now, this is a different script
+        run = "/work/imat/runs-scripts/scripts/astra/astra-3d-SIRT3D.py";
+      }
+      double cor = m_uiTomoPy.doubleSpinBox_center_rot->value();
+      double minAngle = m_uiAstra.doubleSpinBox_angle_min->value();
+      double maxAngle = m_uiAstra.doubleSpinBox_angle_max->value();
+
+      ToolSettingsAstraToolbox settings(run.toStdString(), cor, minAngle,
+                                        maxAngle, currentPathDark(),
+                                        currentPathFlat(), currentPathFITS());
+
+      m_toolsSettings.astra = settings.toCommand();
+    }
   } else if (m_SavuTool == name) {
+    // TODO: savu not ready
     TomoToolConfigSavu savu;
     m_uiSavu.setupUi(&savu);
     doSetupSectionParameters();
@@ -777,8 +786,17 @@ void TomoReconstruction::showToolConfig(const std::string &name) {
   } else if (m_CustomCmdTool == name) {
     TomoToolConfigCustom cmd;
     m_uiCustom.setupUi(&cmd);
-    cmd.show();
+    int res = cmd.exec();
+    if (QDialog::Accepted == res) {
+      // TODO: move this
+      QString run = m_uiCustom.lineEdit_runnable->text();
+      QString opts = m_uiCustom.textEdit_cl_opts->text();
+
+      ToolSettingsCustom settings(run.toStdString(), opts.toStdString());
+      m_toolsSettings.custom = settings.toCommand();
+    }
   }
+  // TODO: 'CCPi CGLS' not ready
 }
 
 void TomoReconstruction::reconstructClicked() {
@@ -845,8 +863,8 @@ void TomoReconstruction::jobTableRefreshClicked() {
                     << "). Stopping periodic (automatic) status update to "
                        "prevent more failures. You can start the automatic "
                        "update mechanism again by logging in, as apparently "
-                       "there is some problem with the last session. "
-                    << std::endl;
+                       "there is some problem with the last session: "
+                    << e.what() << std::endl;
   }
 
   // update widgets from that info
@@ -1079,475 +1097,6 @@ WorkspaceGroup_sptr TomoReconstruction::loadFITSImage(const std::string &path) {
   }
 }
 
-void TomoReconstruction::loadAvailablePlugins() {
-  // TODO:: load actual plugins when we know them
-  // creating a few relatively realistic choices for now (should crossh check
-  //  with the savu api when finalized).
-  // - Should also verify the param string is valid json when setting
-
-  // Create plugin table
-  Mantid::API::TableRow row = m_availPlugins->appendRow();
-  row << "savu.plugins.timeseries_field_corrections"
-      << "{}"
-      << "Time Series Field Corrections"
-      << "Citation info";
-
-  row = m_availPlugins->appendRow();
-  row << "savu.plugins.median_filter"
-      << "{\"kernel_size\":[1, 3, 3]}"
-      << "Median Filter"
-      << "Citation info";
-
-  row = m_availPlugins->appendRow();
-  row << "savu.plugins.vo_centering"
-      << "{}"
-      << "Vo Centering"
-      << "Citation info";
-
-  row = m_availPlugins->appendRow();
-  row << "savu.plugins.simple_recon"
-      << "{\"center_of_rotation\":86}"
-      << "Simple Reconstruction"
-      << "Citation info";
-
-  row = m_availPlugins->appendRow();
-  row << "savu.plugins.astra_recon"
-      << "{\"center_of_rotation\":\"86\", "
-         "\"reconsturction_type\":\"SIRT\", \"number_of_iterations\":5}"
-      << "Simple Reconstruction"
-      << "Citation info";
-
-  // Update the UI
-  refreshAvailablePluginListUI();
-}
-
-// Reloads the GUI list of available plugins from the data object ::
-// Populating only through this ensures correct indexing.
-void TomoReconstruction::refreshAvailablePluginListUI() {
-  // Table WS structure, id/params/name/cite
-  m_uiSavu.listAvailablePlugins->clear();
-  for (size_t i = 0; i < m_availPlugins->rowCount(); ++i) {
-    QString str =
-        QString::fromStdString(m_availPlugins->cell<std::string>(i, 2));
-    m_uiSavu.listAvailablePlugins->addItem(str);
-  }
-}
-
-// Reloads the GUI list of current plugins from the data object ::
-// Populating only through this ensures correct indexing.
-void TomoReconstruction::refreshCurrentPluginListUI() {
-  // Table WS structure, id/params/name/cite
-  m_uiSavu.treeCurrentPlugins->clear();
-  createPluginTreeEntries(m_currPlugins);
-}
-
-// Updates the selected plugin info from Available plugins list.
-void TomoReconstruction::availablePluginSelected() {
-  if (m_uiSavu.listAvailablePlugins->selectedItems().count() != 0) {
-    size_t idx = static_cast<size_t>(
-        m_uiSavu.listAvailablePlugins->currentIndex().row());
-    if (idx < m_availPlugins->rowCount()) {
-      m_uiSavu.availablePluginDesc->setText(
-          tableWSRowToString(m_availPlugins, idx));
-    }
-  }
-}
-
-// Updates the selected plugin info from Current plugins list.
-void TomoReconstruction::currentPluginSelected() {
-  if (m_uiSavu.treeCurrentPlugins->selectedItems().count() != 0) {
-    auto currItem = m_uiSavu.treeCurrentPlugins->selectedItems()[0];
-
-    while (currItem->parent() != NULL)
-      currItem = currItem->parent();
-
-    int topLevelIndex =
-        m_uiSavu.treeCurrentPlugins->indexOfTopLevelItem(currItem);
-
-    m_uiSavu.currentPluginDesc->setText(
-        tableWSRowToString(m_currPlugins, topLevelIndex));
-  }
-}
-
-// On user editing a parameter tree item, update the data object to match.
-void TomoReconstruction::paramValModified(QTreeWidgetItem *item,
-                                          int /*column*/) {
-  OwnTreeWidgetItem *ownItem = dynamic_cast<OwnTreeWidgetItem *>(item);
-  int topLevelIndex = -1;
-
-  if (ownItem->getRootParent() != NULL) {
-    topLevelIndex = m_uiSavu.treeCurrentPlugins->indexOfTopLevelItem(
-        ownItem->getRootParent());
-  }
-
-  if (topLevelIndex != -1) {
-    // Recreate the json string from the nodes and write back
-    std::string json = m_currPlugins->cell<std::string>(topLevelIndex, 1);
-    // potential new line out, and trim spaces
-    json.erase(std::remove(json.begin(), json.end(), '\n'), json.end());
-    json.erase(std::remove(json.begin(), json.end(), '\r'), json.end());
-    json = Poco::trimInPlace(json);
-
-    ::Json::Reader r;
-    ::Json::Value root;
-    if (r.parse(json, root)) {
-      // Look for the key and replace it
-      root[ownItem->getKey()] = ownItem->text(0).toStdString();
-    }
-
-    m_currPlugins->cell<std::string>(topLevelIndex, 1) =
-        ::Json::FastWriter().write(root);
-    currentPluginSelected();
-  }
-}
-
-// When a top level item is expanded, also expand its child items - if tree
-// items
-void TomoReconstruction::expandedItem(QTreeWidgetItem *item) {
-  if (item->parent() == NULL) {
-    for (int i = 0; i < item->childCount(); ++i) {
-      item->child(i)->setExpanded(true);
-    }
-  }
-}
-
-// Adds one plugin from the available plugins list into the list of
-// current plugins
-void TomoReconstruction::transferClicked() {
-  if (m_uiSavu.listAvailablePlugins->selectedItems().count() != 0) {
-    int idx = m_uiSavu.listAvailablePlugins->currentIndex().row();
-    Mantid::API::TableRow row = m_currPlugins->appendRow();
-    for (size_t j = 0; j < m_currPlugins->columnCount(); ++j) {
-      row << m_availPlugins->cell<std::string>(idx, j);
-    }
-    createPluginTreeEntry(row);
-  }
-}
-
-void TomoReconstruction::moveUpClicked() {
-  if (m_uiSavu.treeCurrentPlugins->selectedItems().count() != 0) {
-    size_t idx =
-        static_cast<size_t>(m_uiSavu.treeCurrentPlugins->currentIndex().row());
-    if (idx > 0 && idx < m_currPlugins->rowCount()) {
-      // swap row, all columns
-      for (size_t j = 0; j < m_currPlugins->columnCount(); ++j) {
-        std::string swap = m_currPlugins->cell<std::string>(idx, j);
-        m_currPlugins->cell<std::string>(idx, j) =
-            m_currPlugins->cell<std::string>(idx - 1, j);
-        m_currPlugins->cell<std::string>(idx - 1, j) = swap;
-      }
-      refreshCurrentPluginListUI();
-    }
-  }
-}
-
-void TomoReconstruction::moveDownClicked() {
-  // TODO: this can be done with the same function as above...
-  if (m_uiSavu.treeCurrentPlugins->selectedItems().count() != 0) {
-    size_t idx =
-        static_cast<size_t>(m_uiSavu.treeCurrentPlugins->currentIndex().row());
-    if (idx < m_currPlugins->rowCount() - 1) {
-      // swap all columns
-      for (size_t j = 0; j < m_currPlugins->columnCount(); ++j) {
-        std::string swap = m_currPlugins->cell<std::string>(idx, j);
-        m_currPlugins->cell<std::string>(idx, j) =
-            m_currPlugins->cell<std::string>(idx + 1, j);
-        m_currPlugins->cell<std::string>(idx + 1, j) = swap;
-      }
-      refreshCurrentPluginListUI();
-    }
-  }
-}
-
-void TomoReconstruction::removeClicked() {
-  // Also clear ADS entries
-  if (m_uiSavu.treeCurrentPlugins->selectedItems().count() != 0) {
-    int idx = m_uiSavu.treeCurrentPlugins->currentIndex().row();
-    m_currPlugins->removeRow(idx);
-
-    refreshCurrentPluginListUI();
-  }
-}
-
-void TomoReconstruction::menuOpenClicked() {
-  QString s =
-      QFileDialog::getOpenFileName(0, "Open file", QDir::currentPath(),
-                                   "NeXus files (*.nxs);;All files (*.*)",
-                                   new QString("NeXus files (*.nxs)"));
-  std::string returned = s.toStdString();
-  if (returned != "") {
-    bool opening = true;
-
-    if (m_currPlugins->rowCount() > 0) {
-      QMessageBox::StandardButton reply = QMessageBox::question(
-          this, "Open file confirmation",
-          "Opening the configuration file will clear the current list."
-          "\nWould you like to continue?",
-          QMessageBox::Yes | QMessageBox::No);
-      if (reply == QMessageBox::No) {
-        opening = false;
-      }
-    }
-
-    if (opening) {
-      loadSavuTomoConfig(returned, m_currPlugins);
-
-      m_currentParamPath = returned;
-      refreshCurrentPluginListUI();
-    }
-  }
-}
-
-void TomoReconstruction::menuSaveClicked() {
-  if (m_currentParamPath == "") {
-    menuSaveAsClicked();
-    return;
-  }
-
-  if (m_currPlugins->rowCount() != 0) {
-    AnalysisDataService::Instance().add(createUniqueNameHidden(),
-                                        m_currPlugins);
-    std::string csvWorkspaceNames = m_currPlugins->name();
-
-    auto alg = Algorithm::fromString("SaveTomoConfig");
-    alg->initialize();
-    alg->setPropertyValue("Filename", m_currentParamPath);
-    alg->setPropertyValue("InputWorkspaces", csvWorkspaceNames);
-    alg->execute();
-
-    if (!alg->isExecuted()) {
-      throw std::runtime_error("Error when trying to save config file");
-    }
-  } else {
-    // Alert that the plugin list is empty
-    QMessageBox::information(this, tr("Unable to save file"),
-                             "The current plugin list is empty, please add one "
-                             "or more to the list.");
-  }
-}
-
-void TomoReconstruction::menuSaveAsClicked() {
-  QString s =
-      QFileDialog::getSaveFileName(0, "Save file", QDir::currentPath(),
-                                   "NeXus files (*.nxs);;All files (*.*)",
-                                   new QString("NeXus files (*.nxs)"));
-  std::string returned = s.toStdString();
-  if (returned != "") {
-    m_currentParamPath = returned;
-    menuSaveClicked();
-  }
-}
-
-QString TomoReconstruction::tableWSRowToString(ITableWorkspace_sptr table,
-                                               size_t i) {
-  std::stringstream msg;
-  msg << "ID: " << table->cell<std::string>(i, 0) << std::endl
-      << "Params: " << table->cell<std::string>(i, 1) << std::endl
-      << "Name: " << table->cell<std::string>(i, 2) << std::endl
-      << "Cite: " << table->cell<std::string>(i, 3);
-  return QString::fromStdString(msg.str());
-}
-
-/**
- * Creates a treewidget item for a row of a table workspace.
- *
- * @param row Row from a table workspace with each row specfying a savu plugin
- */
-void TomoReconstruction::createPluginTreeEntry(TableRow &row) {
-  QStringList idStr, nameStr, citeStr, paramsStr;
-  idStr.push_back(QString::fromStdString("ID: " + row.cell<std::string>(0)));
-  nameStr.push_back(
-      QString::fromStdString("Name: " + row.cell<std::string>(2)));
-  citeStr.push_back(
-      QString::fromStdString("Cite: " + row.cell<std::string>(3)));
-  paramsStr.push_back(QString::fromStdString("Params:"));
-
-  // Setup editable tree items
-  QList<QTreeWidgetItem *> items;
-  OwnTreeWidgetItem *pluginBaseItem = new OwnTreeWidgetItem(nameStr);
-  OwnTreeWidgetItem *pluginParamsItem =
-      new OwnTreeWidgetItem(pluginBaseItem, paramsStr, pluginBaseItem);
-
-  // Add to the tree list. Adding now to build hierarchy for later setItemWidget
-  // call
-  items.push_back(new OwnTreeWidgetItem(pluginBaseItem, idStr, pluginBaseItem));
-  items.push_back(
-      new OwnTreeWidgetItem(pluginBaseItem, nameStr, pluginBaseItem));
-  items.push_back(
-      new OwnTreeWidgetItem(pluginBaseItem, citeStr, pluginBaseItem));
-  items.push_back(pluginParamsItem);
-
-  // Params will be a json string which needs splitting into child tree items
-  // [key/value]
-  ::Json::Value root;
-  std::string paramString = row.cell<std::string>(1);
-  ::Json::Reader r;
-  if (r.parse(paramString, root)) {
-    auto members = root.getMemberNames();
-    for (auto it = members.begin(); it != members.end(); ++it) {
-      OwnTreeWidgetItem *container =
-          new OwnTreeWidgetItem(pluginParamsItem, pluginBaseItem);
-
-      QWidget *w = new QWidget();
-      w->setAutoFillBackground(true);
-
-      QHBoxLayout *layout = new QHBoxLayout(w);
-      layout->setMargin(1);
-      QLabel *label1 = new QLabel(QString::fromStdString((*it) + ": "));
-
-      QTreeWidget *paramContainerTree = new QTreeWidget(w);
-      connect(paramContainerTree, SIGNAL(itemChanged(QTreeWidgetItem *, int)),
-              this, SLOT(paramValModified(QTreeWidgetItem *, int)));
-      paramContainerTree->setHeaderHidden(true);
-      paramContainerTree->setIndentation(0);
-
-      auto jsonVal = root.get(*it, "");
-      std::string valStr = pluginParamValString(jsonVal, *it);
-
-      QStringList paramVal(QString::fromStdString(valStr));
-      OwnTreeWidgetItem *paramValueItem =
-          new OwnTreeWidgetItem(paramVal, pluginBaseItem, *it);
-      paramValueItem->setFlags(Qt::ItemIsEditable | Qt::ItemIsEnabled);
-
-      paramContainerTree->addTopLevelItem(paramValueItem);
-      QRect rect = paramContainerTree->visualItemRect(paramValueItem);
-      paramContainerTree->setMaximumHeight(rect.height());
-      paramContainerTree->setFrameShape(QFrame::NoFrame);
-
-      layout->addWidget(label1);
-      layout->addWidget(paramContainerTree);
-
-      pluginParamsItem->addChild(container);
-      m_uiSavu.treeCurrentPlugins->setItemWidget(container, 0, w);
-    }
-  }
-
-  pluginBaseItem->addChildren(items);
-  m_uiSavu.treeCurrentPlugins->addTopLevelItem(pluginBaseItem);
-}
-
-/**
- * This is a kind of .asString() method for arrays. It iterates
- * through the array elements and builds the string enclosed by [].
- *
- * @param jsonVal Value of a parameter that seems to be an array
- *(isArray()==true)
- * @param name Name of the parameter (to give informative messages)
- *
- * @return String with a parameter value(s), enclosed by [] and
- * separated by commas
- */
-std::string
-TomoReconstruction::paramValStringFromArray(const Json::Value &jsonVal,
-                                            const std::string &name) {
-  std::string s;
-  s = "[";
-  for (Json::ArrayIndex i = 0; i < jsonVal.size(); ++i) {
-    if (jsonVal[i].isArray()) {
-      userWarning(
-          "Could not recognize parameter value in list/array",
-          "The value of parameter '" + name +
-              "' could not be interpreted "
-              "as a string. It does not seem to be well formed or supported. "
-              "For example, parameter values given as lists of lists are not "
-              "supported.");
-    } else {
-      try {
-        s += jsonVal[i].asString() + " ,";
-      } catch (std::exception &e) {
-        userWarning(
-            "Could not recognize value in list/array of values",
-            "The " + boost::lexical_cast<std::string>(i) +
-                "-th value of the list/array could not be interpreted "
-                "as a text string. It will be empty in the list of current "
-                "plugins. You can still edit it. Error details: " +
-                std::string(e.what()));
-      }
-    }
-  }
-  // this could be s.back() with C++11
-  s[s.length() - 1] = ']'; // and last comma becomes closing ]
-  return s;
-}
-
-/**
- * Build a string with the value of a parameter in a json
- * string. Works for scalar and list/array values.
- *
- * @param jsonVal Value of a parameter that seems to be an array
- * @param name Name of the parameter (to give informative messages)
- *
- * @return String with a parameter value
- */
-std::string TomoReconstruction::pluginParamValString(const Json::Value &jsonVal,
-                                                     const std::string &name) {
-  std::string s;
-  // string and numeric values can (normally) be converted to string but arrays
-  // cannot
-  if (!jsonVal.isArray()) {
-    try {
-      s = jsonVal.asString();
-    } catch (std::exception &e) {
-      userWarning(
-          "Could not recognize parameter value",
-          "The value of parameter '" + name +
-              "' could not be interpreted "
-              "as a string. It will be empty in the list of current plugins. "
-              "You can still edit it. Error details: " +
-              std::string(e.what()));
-    }
-  } else {
-    s = paramValStringFromArray(jsonVal, name);
-  }
-  return s;
-}
-
-void TomoReconstruction::createPluginTreeEntries(ITableWorkspace_sptr table) {
-  for (size_t i = 0; i < table->rowCount(); ++i) {
-    TableRow r = table->getRow(i);
-    createPluginTreeEntry(r);
-  }
-}
-
-/**
- * Get path from user and update a line edit and a variable.
- *
- * @param le a line edit where the path is shown.
- * @param data variable where the path is stored (in addition to the line
- * edit object).
- */
-void TomoReconstruction::processPathBrowseClick(QLineEdit *le,
-                                                std::string &data) {
-  QString algPrev =
-      MantidQt::API::AlgorithmInputHistory::Instance().getPreviousDirectory();
-  QString prev;
-  if (le->text().isEmpty()) {
-    prev = algPrev;
-  } else {
-    prev = le->text();
-  }
-
-  QString path(QFileDialog::getExistingDirectory(
-      this, tr("Open directory/folder"), prev));
-
-  if (!path.isEmpty()) {
-    le->setText(path);
-    data = path.toStdString();
-  }
-}
-
-void TomoReconstruction::fitsPathBrowseClicked() {
-  processPathBrowseClick(m_ui.lineEdit_path_FITS, m_pathFITS);
-}
-
-void TomoReconstruction::flatPathBrowseClicked() {
-  processPathBrowseClick(m_ui.lineEdit_path_flat, m_pathFlat);
-}
-
-void TomoReconstruction::darkPathBrowseClicked() {
-  processPathBrowseClick(m_ui.lineEdit_path_dark, m_pathDark);
-}
-
 /**
  * Check that the selected compute resource is listed as supported and
  * usable for the remote manager (if it is not local). Local jobs are
@@ -1634,6 +1183,55 @@ std::string TomoReconstruction::currentPathFlat() {
 
 std::string TomoReconstruction::currentPathDark() {
   return m_ui.lineEdit_path_dark->text().toStdString();
+}
+
+void TomoReconstruction::fitsPathBrowseClicked() {
+  processPathBrowseClick(m_ui.lineEdit_path_FITS, m_pathFITS);
+}
+
+void TomoReconstruction::flatPathBrowseClicked() {
+  processPathBrowseClick(m_ui.lineEdit_path_flat, m_pathFlat);
+}
+
+void TomoReconstruction::darkPathBrowseClicked() {
+  processPathBrowseClick(m_ui.lineEdit_path_dark, m_pathDark);
+}
+
+/**
+ * Get path from user and update a line edit and a variable.
+ *
+ * @param le a line edit where the path is shown.
+ * @param data variable where the path is stored (in addition to the line
+ * edit object).
+ */
+void TomoReconstruction::processPathBrowseClick(QLineEdit *le,
+                                                std::string &data) {
+  QString algPrev =
+      MantidQt::API::AlgorithmInputHistory::Instance().getPreviousDirectory();
+  QString prev;
+  if (le->text().isEmpty()) {
+    prev = algPrev;
+  } else {
+    prev = le->text();
+  }
+
+  QString path(QFileDialog::getExistingDirectory(
+      this, tr("Open directory/folder"), prev));
+
+  if (!path.isEmpty()) {
+    std::string pp = path.toStdString();
+    // to UNIX, assuming SCARF or similar
+    boost::replace_all(pp, "\\", "/");
+    if (pp.length() >= 2 && ':' == pp[1]) {
+      if (2 == pp.length())
+        pp = ""; // don't accept '/'
+      else
+        pp = pp.substr(2);
+    }
+
+    le->setText(QString::fromStdString(pp));
+    data = pp;
+  }
 }
 
 /**
@@ -1744,13 +1342,70 @@ void TomoReconstruction::drawImage(const MatrixWorkspace_sptr &ws) {
 }
 
 /**
- * Show a warning message to the user (pop up)
+  * Temporary helper to do an operation that shouldn't be needed any longer when
+  * the code is reorganized to use the tool settings objetcs better.
+  */
+void TomoReconstruction::splitCmdLine(const std::string &cmd, std::string &run,
+                                      std::string &opts) {
+  if (cmd.empty())
+    return;
+
+  auto pos = cmd.find(' ');
+  if (std::string::npos == pos)
+    return;
+
+  run = cmd.substr(0, pos);
+  opts = cmd.substr(pos + 1);
+}
+
+/**
+ * Make sure that the data paths (sample, dark, open beam) make
+ * sense. Otherwise, warn the user and log error.
  *
- * @param err Basic error title
- * @param description More detailed explanation, hints, additional
- * information, etc.
+ * @throw std::runtime_error if the required fields are not set
+ * properly
  */
-void TomoReconstruction::userWarning(std::string err, std::string description) {
+void TomoReconstruction::checkDataPathsSet() {
+  if (currentPathFITS().empty() || currentPathFlat().empty() ||
+      currentPathDark().empty()) {
+    userWarning("Please define the paths to your dataset images",
+                "You have not defined some of the following paths: sample, "
+                "dark, or open beam images. "
+                "They are all required to run reconstruction jobs. Please "
+                "define these paths in the settings tab. ");
+    throw std::runtime_error("Cannot run any reconstruction job without the "
+                             "paths to the sample, dark and open beam images");
+  }
+}
+
+/**
+ * A specific warning that can be shown for multiple tools
+ *
+ * @param tool Name of the tool this warning applies to
+ * @param current settings for the tool
+ */
+void TomoReconstruction::checkWarningToolNotSetup(const std::string &tool,
+                                                  const std::string &settings) {
+  if (settings.empty()) {
+    userWarning("Please define the settings of this tool",
+                "You have not defined any settings for this tool: " + tool +
+                    ". Before running it you need to define its settings "
+                    "(parameters). You can do so by clicking on the setup "
+                    "button.");
+    throw std::runtime_error("Cannot run the tool " + tool +
+                             " before its settings have been defined.");
+  }
+}
+
+/**
+* Show a warning message to the user (pop up)
+*
+* @param err Basic error title
+* @param description More detailed explanation, hints, additional
+* information, etc.
+*/
+void TomoReconstruction::userWarning(const std::string &err,
+                                     const std::string &description) {
   QMessageBox::warning(this, QString::fromStdString(err),
                        QString::fromStdString(description), QMessageBox::Ok,
                        QMessageBox::Ok);
@@ -1763,7 +1418,8 @@ void TomoReconstruction::userWarning(std::string err, std::string description) {
  * @param description More detailed explanation, hints, additional
  * information, etc.
  */
-void TomoReconstruction::userError(std::string err, std::string description) {
+void TomoReconstruction::userError(const std::string &err,
+                                   const std::string &description) {
   QMessageBox::critical(this, QString::fromStdString(err),
                         QString::fromStdString(description), QMessageBox::Ok,
                         QMessageBox::Ok);
@@ -1806,7 +1462,7 @@ void TomoReconstruction::killKeepAliveMechanism() {
 void TomoReconstruction::closeEvent(QCloseEvent *event) {
   int answer = QMessageBox::AcceptRole;
 
-  bool ask = settings.onCloseAskForConfirmation;
+  bool ask = m_settings.onCloseAskForConfirmation;
   if (ask) {
     QMessageBox msgBox;
     msgBox.setWindowTitle("Close the tomographic reconstruction interface");
@@ -1829,7 +1485,7 @@ void TomoReconstruction::closeEvent(QCloseEvent *event) {
         "and you might loose some of the current state. Jobs running on remote "
         "compute resources will remain unaffected though. Are you sure?");
 
-    settings.onCloseAskForConfirmation = confirmCheckBox.isChecked();
+    m_settings.onCloseAskForConfirmation = confirmCheckBox.isChecked();
     answer = msgBox.exec();
   }
 

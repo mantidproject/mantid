@@ -81,7 +81,10 @@ set ( SRC_FILES
 	src/SANSPlotSpecial.cpp
 	src/SANSRunWindow.cpp
 	src/StepScan.cpp
+	src/TomoReconstruction/SavuConfigDialog.cpp
 	src/TomoReconstruction/TomoReconstruction.cpp
+	src/TomoReconstruction/TomoToolConfigDialog.cpp
+	src/TomoReconstruction/ToolSettings.cpp
 	src/UserInputValidator.cpp
 )
 
@@ -180,6 +183,8 @@ set ( INC_FILES
 	inc/MantidQtCustomInterfaces/SANSRunWindow.h
 	inc/MantidQtCustomInterfaces/StepScan.h
 	inc/MantidQtCustomInterfaces/TomoReconstruction/TomoReconstruction.h
+	inc/MantidQtCustomInterfaces/TomoReconstruction/TomoToolConfigDialog.h
+	inc/MantidQtCustomInterfaces/TomoReconstruction/ToolSettings.h
 	inc/MantidQtCustomInterfaces/Updateable.h
 	inc/MantidQtCustomInterfaces/UserInputValidator.h
 )
@@ -262,6 +267,7 @@ set ( MOC_FILES inc/MantidQtCustomInterfaces/Background.h
                 inc/MantidQtCustomInterfaces/SANSDiagnostics.h
                 inc/MantidQtCustomInterfaces/StepScan.h
                 inc/MantidQtCustomInterfaces/TomoReconstruction/TomoReconstruction.h
+                inc/MantidQtCustomInterfaces/TomoReconstruction/TomoToolConfigDialog.h
 )
 
 set ( UI_FILES inc/MantidQtCustomInterfaces/DataComparison.ui
