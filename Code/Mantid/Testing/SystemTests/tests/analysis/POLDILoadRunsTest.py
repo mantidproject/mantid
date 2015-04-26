@@ -21,6 +21,7 @@ class POLDILoadRunsTest(stresstesting.MantidStressTest):
         self.loadWorkspacesOverwriteOther()
 
         self.checkRemoveBadDetectors()
+        self.check2015PoldiData()
 
     def loadSingleWorkspace(self):
         singleWs = PoldiLoadRuns(2013, 6904)
@@ -133,8 +134,9 @@ class POLDILoadRunsTest(stresstesting.MantidStressTest):
 
     def checkRemoveBadDetectors(self):
         # Determine bad detectors automatically
-        twoWorkspacesMerged = PoldiLoadRuns(2013, 6903, 6904, 2, MaskBadDetectors=True,
-                                            BadDetectorThreshold=2.5)
+        PoldiLoadRuns(2013, 6903, 6904, 2, MaskBadDetectors=True,
+                                            BadDetectorThreshold=2.5,
+                                            OutputWorkspace='twoWorkspacesMerged')
 
         wsMerged = AnalysisDataService.retrieve("twoWorkspacesMerged_data_6904")
         self.assertEquals(len([True for x in range(wsMerged.getNumberHistograms()) if wsMerged.getDetector(
@@ -143,8 +145,9 @@ class POLDILoadRunsTest(stresstesting.MantidStressTest):
         self.clearAnalysisDataService()
 
         # Lower threshold, more excluded detectors
-        twoWorkspacesMerged = PoldiLoadRuns(2013, 6903, 6904, 2, MaskBadDetectors=True,
-                                            BadDetectorThreshold=2.0)
+        PoldiLoadRuns(2013, 6903, 6904, 2, MaskBadDetectors=True,
+                                            BadDetectorThreshold=2.0,
+                                            OutputWorkspace='twoWorkspacesMerged')
 
         wsMerged = AnalysisDataService.retrieve("twoWorkspacesMerged_data_6904")
         self.assertEquals(len([True for x in range(wsMerged.getNumberHistograms()) if wsMerged.getDetector(
@@ -153,13 +156,26 @@ class POLDILoadRunsTest(stresstesting.MantidStressTest):
         self.clearAnalysisDataService()
 
         # Only use those from the IDF
-        twoWorkspacesMerged = PoldiLoadRuns(2013, 6903, 6904, 2, MaskBadDetectors=False)
+        PoldiLoadRuns(2013, 6903, 6904, 2, MaskBadDetectors=False,
+                                            OutputWorkspace='twoWorkspacesMerged')
 
         wsMerged = AnalysisDataService.retrieve("twoWorkspacesMerged_data_6904")
         self.assertEquals(len([True for x in range(wsMerged.getNumberHistograms()) if wsMerged.getDetector(
             x).isMasked()]), 12)
 
         self.clearAnalysisDataService()
+
+    def check2015PoldiData(self):
+        PoldiLoadRuns(2015, 977, OutputWorkspace='ws')
+
+        ws2015 = AnalysisDataService.retrieve('ws_data_977')
+        self.assertEquals(ws2015.getNumberHistograms(), 400)
+        self.assertEquals(len(ws2015.readX(0)), 125)
+        self.assertTrue(ws2015.run().hasProperty('chopperspeed'))
+
+        self.clearAnalysisDataService()
+
+
 
     def compareWorkspaces(self, left, right):
         for i in range(left.getNumberHistograms()):
