@@ -674,10 +674,6 @@ LoadFITS::makeWorkspace(const FITSInfo &fileInfo, size_t &newFileNumber,
  * @param imageE Object to set the E data values in
  * @param buffer pre-allocated buffer to contain data values
  *
- * @param loadAsRectImg if true, the new workspace will have one
- * spectrum per row and one bin per column, instead of the (default)
- * as many spectra as pixels.
- *
  * @throws std::runtime_error if there are file input issues
  */
 void LoadFITS::readDataToImgs(const FITSInfo &fileInfo, MantidImage &imageY,
@@ -755,8 +751,8 @@ void LoadFITS::readDataToImgs(const FITSInfo &fileInfo, MantidImage &imageY,
  * filtering is done in place for both imageY and imageE.
  *
  * @param thresh Threshold to apply on pixels
- * @param ImageY raw data (Y values)
- * @param ImageE raw data (E/error values)
+ * @param imageY raw data (Y values)
+ * @param imageE raw data (E/error values)
  */
 void LoadFITS::doFilterNoise(double thresh, MantidImage &imageY,
                              MantidImage &imageE) {
@@ -818,8 +814,8 @@ void LoadFITS::doFilterNoise(double thresh, MantidImage &imageY,
  * Group pixels in blocks of rebin X rebin.
  *
  * @param rebin bin size (n to make blocks of n*n pixels)
- * @param ImageY raw data (Y values)
- * @param ImageE raw data (E/error values)
+ * @param imageY raw data (Y values)
+ * @param imageE raw data (E/error values)
  * @param rebinnedY raw data after rebin (Y values)
  * @param rebinnedE raw data after rebin (E/error values)
  */

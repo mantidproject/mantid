@@ -132,7 +132,7 @@ void Workspace2D::setImageE(const MantidImage &image, size_t start,
   * @param loadAsRectImg :: load using one histogram per row and one
   * bin per column, instead of the default one histogram per pixel
   *
-  * @param double scale_1 :: scale factor for the X axis (norammly
+  * @param scale_1 :: scale factor for the X axis (norammly
   * representing the inverse of the pixel width or similar.
   *
   * @param parallelExecution :: Should inner loop run as parallel operation
