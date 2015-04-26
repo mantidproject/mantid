@@ -43,14 +43,34 @@ resource. Once you log in, an automatic mechanism will periodically
 query the status of jobs (for example every minute). You can also
 update it at any time by clicking on the refresh button.
 
+In this tab you also have to set the folders/directories where the
+input data for reconstruction jobs is found. This information is
+required every time you start analyzing a new dataset. The required
+fields are:
+
+Samples directory
+  Directory containing the sample images
+
+Open beam directory
+  Where to find the open beam (flat/white) image(s)
+
+Dark field directory
+  Where to find the dark image(s)
+
 .. interface:: Tomographic Reconstruction
   :widget: setupTab
   :align: right
   :width: 300
 
-In principle, the use of this interface is straightforward. The next
-sections provide all the details that might be needed to fully
-understand the process.
+In principle, the use of this interface is straightforward. **NB**: as
+this interface is in an early stage and under heavy development,
+several practical details are missing. This implies that there may be
+usability issues at times and some steps may not be as intuitive or
+simple as they could. Please, do not hesitate to provide feedback.
+
+The next sections provide further details that might be needed to
+fully understand the process of generating tomographic reconstructions
+with this interface.
 
 Tools
 -----
