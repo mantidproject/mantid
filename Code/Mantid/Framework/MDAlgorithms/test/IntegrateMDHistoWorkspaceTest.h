@@ -214,7 +214,7 @@ public:
       TSM_ASSERT_DELTA("Wrong error value", std::sqrt(3.5 * (ws->getErrorAt(0) * ws->getErrorAt(0))), outWS->getErrorAt(0), 1e-4);
   }
 
-  void test_1D_integration_partial_binning_complex_with_original_step(){
+  void test_1D_integration_with_original_step_and_forbidden_partial_binning(){
 
       /*
 
@@ -222,10 +222,15 @@ public:
       (x = 0) *|--|--|--|--|--|--|--|--|--|--|* (x = 10)
                 1  1  1  1  1  1  1  1  1  1
 
-                  output requested
+                  output requested, but partial bins are forbidden so round to the nearest bin edges
 
       (x = 0.75) *|--------------|* (x = 4.25)
-                1/4 + 1 + 1 + 1 + 1/4 = 3.5 counts
+                1/4 , 1 , 1 , 1 , 1/4
+
+                  output with rounding (maintain closest possible bin boundaries. no partial binning)
+
+      (x = 0) *|--------------------|* (x = 5)
+                 1 , 1 , 1 , 1 , 1, 1
 
       */
 
@@ -240,21 +245,27 @@ public:
       alg.setProperty("InputWorkspace", ws);
       const double min = 0.75;
       const double max = 4.25;
-      alg.setProperty("P1Bin", boost::assign::list_of(min)(max).convert_to_container<std::vector<double> >());
+      alg.setProperty("P1Bin", boost::assign::list_of(min)(0.0)(max).convert_to_container<std::vector<double> >());
       alg.setPropertyValue("OutputWorkspace", "dummy");
       alg.execute();
       IMDHistoWorkspace_sptr outWS=alg.getProperty("OutputWorkspace");
 
       // Quick check that output seems to have the right shape.
-      TSM_ASSERT_EQUALS("All integrated", 1, outWS->getNPoints());
-      auto dim = outWS->getDimension(0);
-      TS_ASSERT_EQUALS(min, dim->getMinimum());
-      TS_ASSERT_EQUALS(max, dim->getMaximum());
+      TSM_ASSERT_EQUALS("Should have rounded to whole widths.", 5, outWS->getNPoints());
+      auto outDim = outWS->getDimension(0);
+      auto inDim = ws->getDimension(0);
+      TS_ASSERT_EQUALS(0.0f, outDim->getMinimum());
+      TS_ASSERT_EQUALS(5.0f, outDim->getMaximum());
+      TSM_ASSERT_EQUALS("Bin width should be unchanged", inDim->getBinWidth(), outDim->getBinWidth());
 
       // Check the data.
-      TSM_ASSERT_DELTA("Wrong integrated value", 3.5, outWS->getSignalAt(0), 1e-4);
-      TSM_ASSERT_DELTA("Wrong error value", std::sqrt(3.5 * (ws->getErrorAt(0) * ws->getErrorAt(0))), outWS->getErrorAt(0), 1e-4);
-  }
+      TSM_ASSERT_DELTA("Wrong value", 1.0, outWS->getSignalAt(0), 1e-4);
+      TSM_ASSERT_DELTA("Wrong value", 1.0, outWS->getSignalAt(1), 1e-4);
+      TSM_ASSERT_DELTA("Wrong value", 1.0, outWS->getSignalAt(2), 1e-4);
+      TSM_ASSERT_DELTA("Wrong value", 1.0, outWS->getSignalAt(3), 1e-4);
+      TSM_ASSERT_DELTA("Wrong value", 1.0, outWS->getSignalAt(4), 1e-4);
+
+   }
 
   void test_2d_partial_binning() {
 

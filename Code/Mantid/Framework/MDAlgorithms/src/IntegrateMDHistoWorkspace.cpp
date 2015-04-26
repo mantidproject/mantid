@@ -91,11 +91,12 @@ std::string checkBinning(const std::vector<double> &binning) {
  * Create the output workspace in the right shape.
  * @param inWS : Input workspace for dimensionality
  * @param pbins : User provided binning
+ * @param logger : Logging object
  * @return
  */
 MDHistoWorkspace_sptr
 createShapedOutput(IMDHistoWorkspace const *const inWS,
-                   std::vector<std::vector<double>> pbins) {
+                   std::vector<std::vector<double>> pbins, Logger& logger) {
   const size_t nDims = inWS->getNumDims();
   std::vector<Mantid::Geometry::IMDDimension_sptr> dimensions(nDims);
   for (size_t i = 0; i < nDims; ++i) {
@@ -112,20 +113,33 @@ createShapedOutput(IMDHistoWorkspace const *const inWS,
               binning.back()) /*max*/); // Set custom min, max and nbins.
     } else if( i < pbins.size() && similarBinning(pbins[i]) ) {
       auto binning = pbins[i];
-      const double width = inDim->getBinWidth();
-      const double min = binning.front();
+      const double width = inDim->getBinWidth(); // Take the width from the input dimension
+      double min = binning.front();
       double max = binning.back();
-      const size_t roundedNBins = static_cast<size_t>((max-min/width) + 0.5); // round up to a whole number of bins.
-      max = width * double( roundedNBins ); // recalculate the width
+
+      // Correct users, input, output and rounded to the nearest whole width.
+      min = width * static_cast<int>(min/width); // Rounded down
+      max = width * static_cast<int>(max/width + 1.0); // Rounded up
+
+      if(min != binning.front()) {
+          std::stringstream buffer;
+          buffer << "Rounding min from: " << binning.front() << " to the nearest whole width at: " << min;
+          logger.warning(buffer.str());
+      }
+      if(max != binning.back()) {
+          std::stringstream buffer;
+          buffer << "Rounding max from: " << binning.back() << " to the nearest whole width at: " << max;
+          logger.warning(buffer.str());
+      }
+      const size_t roundedNBins = static_cast<size_t>((max-min)/width+0.5); // round up to a whole number of bins.
       outDim->setRange(
           roundedNBins,
           static_cast<Mantid::coord_t>(min) /*min*/,
-          static_cast<Mantid::coord_t>(max)
-              ) /*max*/); // Set custom min, max and nbins.
+          static_cast<Mantid::coord_t>(max) /*max*/); // Set custom min, max and nbins.
     }
     dimensions[i] = outDim;
   }
-  return boost::make_shared<MDHistoWorkspace>(dimensions);
+  return MDHistoWorkspace_sptr(new MDHistoWorkspace(dimensions));
 }
 
 /**
@@ -236,7 +250,7 @@ void IntegrateMDHistoWorkspace::exec() {
        over our output
        structure and fill it.
      */
-    outWS = createShapedOutput(inWS.get(), pbins);
+    outWS = createShapedOutput(inWS.get(), pbins, g_log);
 
     Progress progress(this, 0, 1, size_t(outWS->getNPoints()));
 
