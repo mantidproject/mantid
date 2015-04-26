@@ -80,7 +80,9 @@ public:
   virtual int version() const { return 1; }
 
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const { return "DataHandling;DataHandling\\Tomography"; }
+  virtual const std::string category() const {
+    return "DataHandling;DataHandling\\Tomography";
+  }
 
   /// Returns a confidence value that this algorithm can load a file
   virtual int confidence(Kernel::FileDescriptor &descriptor) const;
@@ -97,7 +99,7 @@ private:
 
   /// Loads files into workspace(s)
   void doLoadFiles(const std::vector<std::string> &paths,
-                   bool loadAsRectImg = false);
+                   const std::string &outWSName, bool loadAsRectImg = false);
 
   /// Loads the FITS header(s) into a struct
   void doLoadHeaders(const std::vector<std::string> &paths,
@@ -115,11 +117,8 @@ private:
                 bool loadAsRectImg = false);
 
   // Reads the data from a single FITS file into a workspace
-  void readDataToWorkspace2D(DataObjects::Workspace2D_sptr ws,
-                             const FITSInfo &fileInfo, API::MantidImage &imageY,
-                             API::MantidImage &imageE,
-                             std::vector<char> &buffer, bool loadAsRectImg,
-                             double scale_1);
+  void readDataToImgs(const FITSInfo &fileInfo, API::MantidImage &imageY,
+                      API::MantidImage &imageE, std::vector<char> &buffer);
 
   /// Once loaded, check against standard and limitations of this algorithm
   void headerSanityCheck(const FITSInfo &hdr, const FITSInfo &hdrFirst);
@@ -129,7 +128,9 @@ private:
                      API::MantidImage &imageE);
 
   /// rebin the matrix/image
-  void doRebin(int rebin, API::MantidImage &imageX, API::MantidImage &imageY);
+  void doRebin(size_t rebin, API::MantidImage &imageY,
+               API::MantidImage &imageE, API::MantidImage &rebinnedY,
+               API::MantidImage &rebinnedE);
 
   /// identifies fits coming from 'other' cameras by specific headers
   bool isInstrOtherThanIMAT(FITSInfo &hdr);
@@ -164,6 +165,10 @@ private:
 
   std::string m_baseName;
   size_t m_pixelCount;
+  // rebin block size (m_rebin x m_rebin) cells
+  int m_rebin;
+  // noise threshold level
+  double m_noiseThresh;
   API::Progress *m_progress;
 
   // Number of digits for the fixed width appendix number added to

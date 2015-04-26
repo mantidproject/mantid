@@ -8,6 +8,7 @@
 #include "MantidKernel/UnitFactory.h"
 
 #include <boost/algorithm/string.hpp>
+
 #include <Poco/BinaryReader.h>
 #include <Poco/FileStream.h>
 
@@ -39,7 +40,8 @@ const std::string LoadFITS::m_defaultImgType = "SAMPLE";
 LoadFITS::LoadFITS()
     : m_headerScaleKey(), m_headerOffsetKey(), m_headerBitDepthKey(),
       m_headerRotationKey(), m_headerImageKeyKey(), m_headerAxisNameKeys(),
-      m_mapFile(), m_baseName(), m_pixelCount(0), m_progress(NULL) {
+      m_mapFile(), m_baseName(), m_pixelCount(0), m_rebin(1),
+      m_noiseThresh(0.0), m_progress(NULL) {
   setupDefaultKeywordNames();
 }
 
@@ -113,16 +115,16 @@ void LoadFITS::init() {
       "one histogram per row and one bin per pixel, such that a 2D "
       "color plot (color fill plot) will display an image.");
 
-  declareProperty(new Kernel::PropertyWithValue<double>(
-                      "FilterNoiseLevel", 0.0, Kernel::Direction::Input),
-                  "Threshold to remove noisy pixels. Try 50.");
+  auto zeroOrPosDbl = boost::make_shared<BoundedValidator<double>>();
+  zeroOrPosDbl->setLower(0.0);
+  declareProperty("FilterNoiseLevel", 0.0, zeroOrPosDbl,
+                  "Threshold to remove noisy pixels. Try 50 for example.");
 
   auto posInt = boost::make_shared<BoundedValidator<int>>();
   posInt->setLower(1);
   declareProperty("BinSize", 1, posInt,
                   "Rebunch n*n on both axes, generating pixels with sums of "
-                  "blocks of n by n original pixels.",
-                  Kernel::Direction::Input);
+                  "blocks of n by n original pixels.");
 
   auto posDbl = boost::make_shared<BoundedValidator<double>>();
   posDbl->setLower(std::numeric_limits<double>::epsilon());
@@ -145,25 +147,34 @@ void LoadFITS::exec() {
   mapHeaderKeys();
 
   std::string fName = getPropertyValue("Filename");
-
   std::vector<std::string> paths;
   boost::split(paths, fName, boost::is_any_of(","));
 
+  m_rebin = getProperty("BinSize");
+  m_noiseThresh = getProperty("FilterNoiseLevel");
   bool loadAsRectImg = getProperty("LoadAsRectImg");
-  doLoadFiles(paths, loadAsRectImg);
+  const std::string outWSName = getPropertyValue("OutputWorkspace");
+
+  doLoadFiles(paths, outWSName, loadAsRectImg);
 }
 
 /**
  * Create FITS file information for each file selected. Loads headers
- * and data from the files and fills the output workspace(s).
+ * and data from the files and creates and fills the output
+ * workspace(s).
  *
  * @param paths File names as given in the algorithm input property
  *
+ * @param outWSName name of the output (group) workspace to create
+ *
  * @param loadAsRectImg Load files with 1 spectrum per row and 1 bin
  * per column, so a color fill plot displays the image
+ *
+ * @throw std::runtime_error when load fails (for example a memory
+ * allocation issue, wrong rebin requested, etc.)
  */
 void LoadFITS::doLoadFiles(const std::vector<std::string> &paths,
-                           bool loadAsRectImg) {
+                           const std::string &outWSName, bool loadAsRectImg) {
   std::vector<FITSInfo> headers;
 
   doLoadHeaders(paths, headers);
@@ -175,6 +186,20 @@ void LoadFITS::doLoadFiles(const std::vector<std::string> &paths,
   // Presumably 2 axis, but futureproofing.
   for (int i = 1; i < headers[0].numberOfAxis; ++i) {
     m_pixelCount *= headers[0].axisPixelLengths[i];
+  }
+
+  // Check consistency of m_rebin asap
+  for (int i = 0; i < headers[0].numberOfAxis; ++i) {
+    if (0 != (headers[0].axisPixelLengths[i] % m_rebin)) {
+      throw std::runtime_error(
+          "Cannot rebin this image in blocks of " +
+          boost::lexical_cast<std::string>(m_rebin) + " x " +
+          boost::lexical_cast<std::string>(m_rebin) +
+          " pixels as requested because the size of dimension " +
+          boost::lexical_cast<std::string>(i + 1) + " (" +
+          boost::lexical_cast<std::string>(headers[0].axisPixelLengths[i]) +
+          ") is not a multiple of the bin size.");
+    }
   }
 
   MantidImage imageY(headers[0].axisPixelLengths[1],
@@ -194,7 +219,7 @@ void LoadFITS::doLoadFiles(const std::vector<std::string> &paths,
 
   // Create a group for these new workspaces, if the group already exists, add
   // to it.
-  string groupName = getPropertyValue("OutputWorkspace");
+  string groupName = outWSName;
 
   // This forms the name of the group
   m_baseName = getPropertyValue("OutputWorkspace") + "_";
@@ -508,45 +533,68 @@ LoadFITS::makeWorkspace(const FITSInfo &fileInfo, size_t &newFileNumber,
                         std::vector<char> &buffer, MantidImage &imageY,
                         MantidImage &imageE, const Workspace2D_sptr parent,
                         bool loadAsRectImg) {
-  // Create ws
-  Workspace2D_sptr ws;
-  if (!parent) {
-    if (!loadAsRectImg) {
-      ws =
-          dynamic_pointer_cast<Workspace2D>(WorkspaceFactory::Instance().create(
-              "Workspace2D", m_pixelCount, 2, 1));
-    } else {
-      ws =
-          dynamic_pointer_cast<Workspace2D>(WorkspaceFactory::Instance().create(
-              "Workspace2D",
-              fileInfo.axisPixelLengths[1],     // one bin per column
-              fileInfo.axisPixelLengths[0] + 1, // one spectrum per row
-              fileInfo.axisPixelLengths[0]));
-    }
-  } else {
-    ws = dynamic_pointer_cast<Workspace2D>(
-        WorkspaceFactory::Instance().create(parent));
-  }
 
   string currNumberS = padZeros(newFileNumber, DIGIT_SIZE_APPEND);
   ++newFileNumber;
 
   string baseName = m_baseName + currNumberS;
 
-  ws->setTitle(baseName);
+  // set data
+  readDataToImgs(fileInfo, imageY, imageE, buffer);
+
+  // Create ws
+  Workspace2D_sptr ws;
+  if (!parent) {
+    if (!loadAsRectImg) {
+      size_t finalPixelCount = m_pixelCount / m_rebin * m_rebin;
+      ws =
+          dynamic_pointer_cast<Workspace2D>(WorkspaceFactory::Instance().create(
+              "Workspace2D", finalPixelCount, 2, 1));
+    } else {
+      ws =
+          dynamic_pointer_cast<Workspace2D>(WorkspaceFactory::Instance().create(
+              "Workspace2D",
+              fileInfo.axisPixelLengths[1] / m_rebin, // one bin per column
+              fileInfo.axisPixelLengths[0] / m_rebin +
+                  1, // one spectrum per row
+              fileInfo.axisPixelLengths[0] / m_rebin));
+    }
+  } else {
+    ws = dynamic_pointer_cast<Workspace2D>(
+        WorkspaceFactory::Instance().create(parent));
+  }
+
+  doFilterNoise(m_noiseThresh, imageY, imageE);
 
   // this pixel scale property is used to set the workspace X values
   double cm_1 = getProperty("Scale");
+  // amount of width units (e.g. cm) per pixel
   double cmpp = 1; // cm per pixel == bin width
   if (0.0 != cm_1)
     cmpp /= cm_1;
-  // set data
-  readDataToWorkspace2D(ws, fileInfo, imageY, imageE, buffer, loadAsRectImg, cmpp);
+  cmpp *= static_cast<double>(m_rebin);
 
-  // TODO: set units - and start/end time info
+  // Set in WS
+  // Note this can change the sizes of the images and the number of pixels
+  if (1 == m_rebin) {
+    ws->setImageYAndE(imageY, imageE, 0, loadAsRectImg, cmpp,
+                      false /* no parallel load */);
+  } else {
+    MantidImage rebinnedY(imageY.size() / m_rebin,
+                          std::vector<double>(imageY[0].size() / m_rebin));
+    MantidImage rebinnedE(imageE.size() / m_rebin,
+                          std::vector<double>(imageE[0].size() / m_rebin));
+
+    doRebin(m_rebin, imageY, imageE, rebinnedY, rebinnedE);
+    ws->setImageYAndE(rebinnedY, rebinnedE, 0, loadAsRectImg, cmpp,
+                      false /* no parallel load */);
+  }
+
+  ws->setTitle(baseName);
+
   // add axes
-  size_t width = fileInfo.axisPixelLengths[0];
-  size_t height = fileInfo.axisPixelLengths[1];
+  size_t width = fileInfo.axisPixelLengths[0] / m_rebin;
+  size_t height = fileInfo.axisPixelLengths[1] / m_rebin;
   if (loadAsRectImg) {
     // width/X axis
     auto axw = new Mantid::API::NumericAxis(width + 1);
@@ -571,7 +619,7 @@ LoadFITS::makeWorkspace(const FITSInfo &fileInfo, size_t &newFileNumber,
     ws->replaceAxis(1, axh);
     // "cm" height label unit
     unitLbl = boost::dynamic_pointer_cast<Kernel::Units::Label>(
-            UnitFactory::Instance().create("Label"));
+        UnitFactory::Instance().create("Label"));
     unitLbl->setLabel("height", "cm");
     ws->getAxis(1)->unit() = unitLbl;
 
@@ -618,10 +666,9 @@ LoadFITS::makeWorkspace(const FITSInfo &fileInfo, size_t &newFileNumber,
 }
 
 /**
- * Reads the data (matrix) from a single FITS file into a workspace
+ * Reads the data (matrix) from a single FITS file into image objects.
  *
- * @param ws Workspace to populate with the data
- * @param fileInfo information pertaining to the FITS file to load
+ * @param fileInfo information on the FITS file to load, including its path
  * @param imageY Object to set the Y data values in
  * @param imageE Object to set the E data values in
  * @param buffer pre-allocated buffer to contain data values
@@ -630,16 +677,10 @@ LoadFITS::makeWorkspace(const FITSInfo &fileInfo, size_t &newFileNumber,
  * spectrum per row and one bin per column, instead of the (default)
  * as many spectra as pixels.
  *
- * @param scale_1 amount of width units (e.g. cm) per pixel, uset to
- * set the X values of the workspace.
- *
  * @throws std::runtime_error if there are file input issues
  */
-void LoadFITS::readDataToWorkspace2D(Workspace2D_sptr ws,
-                                     const FITSInfo &fileInfo,
-                                     MantidImage &imageY, MantidImage &imageE,
-                                     std::vector<char> &buffer,
-                                     bool loadAsRectImg, double scale_1) {
+void LoadFITS::readDataToImgs(const FITSInfo &fileInfo, MantidImage &imageY,
+                              MantidImage &imageE, std::vector<char> &buffer) {
   std::string filename = fileInfo.filePath;
   Poco::FileStream file(filename, std::ios::in);
 
@@ -705,52 +746,102 @@ void LoadFITS::readDataToWorkspace2D(Workspace2D_sptr ws,
       start += bytespp;
     }
   }
-
-  double thresh = getProperty("FilterNoiseLevel");
-  doFilterNoise(thresh, imageY, imageE);
-
-  // Upscale image
-  int rebin = getProperty("BinSize");
-  // TODO: group pixels. Can this be done with Rebin() ?
-  doRebin(rebin, imageY, imageY);
-
-  // Set in WS
-  ws->setImageYAndE(imageY, imageE, 0, loadAsRectImg, scale_1,
-                    false /* no paralle load */);
 }
 
 /**
  * Apply a simple noise filter by averaging threshold-filtered
- * neighbor pixels (with 4-neighbohood / 4-connectivity).
+ * neighbor pixels (with 4-neighbohood / 4-connectivity). The
+ * filtering is done in place for both imageY and imageE.
  *
  * @param thresh Threshold to apply on pixels
  * @param Image raw data (Y values)
  * @param Image raw data (E/error values)
  */
-void LoadFITS::doFilterNoise(double thresh, MantidImage & /*imageY*/,
-                             MantidImage & /*imageE*/) {
-  if (thresh > 0.0) {
-    // TODO: filter
-    g_log.warning() << "FilterNoiseLevel not implemented at the momemnt "
-                    << std::endl;
-    // TODO: add unit test for this
+void LoadFITS::doFilterNoise(double thresh, MantidImage &imageY,
+                             MantidImage &imageE) {
+  if (thresh <= 0.0)
+    return;
+
+  MantidImage goodY = imageY;
+  MantidImage goodE = imageE;
+
+  // TODO: this is not very smart about the edge pixels (leftmost and
+  // rightmost columns, topmost and bottom rows)
+  for (size_t j = 1; j < (imageY.size() - 1); ++j) {
+    for (size_t i = 1; i < (imageY[0].size() - 1); ++i) {
+
+      if (((imageY[j][i] - imageY[j][i - 1]) > thresh) &&
+          ((imageY[j][i] - imageY[j][i + 1]) > thresh) &&
+          ((imageY[j][i] - imageY[j - 1][i]) > thresh) &&
+          ((imageY[j][i] - imageY[j + 1][i]) > thresh))
+        goodY[j][i] = 0;
+      else
+        goodY[j][i] = 1;
+
+      if (((imageE[j][i] - imageE[j][i - 1]) > thresh) &&
+          ((imageE[j][i] - imageE[j][i + 1]) > thresh) &&
+          ((imageE[j][i] - imageE[j - 1][i]) > thresh) &&
+          ((imageE[j][i] - imageE[j + 1][i]) > thresh))
+        goodE[j][i] = 0;
+      else
+        goodE[j][i] = 1;
+    }
+  }
+
+  for (size_t j = 1; j < (imageY.size() - 1); ++j) {
+    for (size_t i = 1; i < (imageY[0].size() - 1); ++i) {
+      if (!goodY[j][i]) {
+        if (goodY[j - 1][i] || goodY[j + 1][i] || goodY[j][i - 1] ||
+            goodY[j][i + 1]) {
+          imageY[j][i] = goodY[j - 1][i] * imageY[j - 1][i] +
+                         goodY[j + 1][i] * imageY[j + 1][i] +
+                         goodY[j][i - 1] * imageY[j][i - 1] +
+                         goodY[j][i + 1] * imageY[j][i + 1];
+        }
+      }
+
+      if (!goodE[j][i]) {
+        if (goodE[j - 1][i] || goodE[j + 1][i] || goodE[j][i - 1] ||
+            goodE[j][i + 1]) {
+          imageE[j][i] = goodE[j - 1][i] * imageE[j - 1][i] +
+                         goodE[j + 1][i] * imageE[j + 1][i] +
+                         goodE[j][i - 1] * imageE[j][i - 1] +
+                         goodE[j][i + 1] * imageE[j][i + 1];
+        }
+      }
+    }
   }
 }
 
 /**
- * Apply a simple noise filter by averaging threshold-filtered
- * neighbor pixels (with 4-neighbohood / 4-connectivity).
+ * Group pixels in blocks of rebin X rebin.
  *
  * @param rebin bin size (n to make blocks of n*n pixels)
  * @param Image raw data (Y values)
  * @param Image raw data (E/error values)
+ * @param rebinnedY raw data after rebin (Y values)
+ * @param rebinnedE raw data after rebin (E/error values)
  */
-void LoadFITS::doRebin(int rebin, MantidImage & /*imageX*/,
-                       MantidImage & /*imageY*/) {
-  if (rebin > 1) {
-    // TODO: filter
-    g_log.warning() << "BinSize not implemented at the momemnt " << std::endl;
-    // TODO: add unit test for this
+void LoadFITS::doRebin(size_t rebin, MantidImage &imageY, MantidImage &imageE,
+                       MantidImage &rebinnedY, MantidImage &rebinnedE) {
+  if (1 >= rebin)
+    return;
+
+  for (size_t j = 0; j < (rebinnedY.size() - rebin + 1); ++j) {
+    for (size_t i = 0; i < (rebinnedY[0].size() - rebin + 1); ++i) {
+      double accumY = 0.0;
+      double accumE = 0.0;
+      size_t origJ = j*rebin;
+      size_t origI = i*rebin;
+      for (size_t k = 0; k < rebin; ++k) {
+        for (size_t l = 0; l < rebin; ++l) {
+          accumY += imageY[origJ + k][origI + l];
+          accumE += imageE[origJ + k][origI + l];
+        }
+      }
+      rebinnedY[j][i] = accumY;
+      rebinnedE[j][i] = accumE;
+    }
   }
 }
 

@@ -223,7 +223,6 @@ void Workspace2D::setImageYAndE(const API::MantidImage &imageY,
     }
     PARALLEL_FOR_IF(parallelExecution)
     for (int i = 1; i < static_cast<int>(height); ++i) {
-      std::cerr << " ** i: " << i << std::endl;
       data[i]->setX(data[0]->dataX());
     }
   }
