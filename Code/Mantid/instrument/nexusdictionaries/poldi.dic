@@ -36,7 +36,3 @@ ChopperSpeed=/entry1/POLDI/chopper/rotation_speed
 SampleName=/entry1/POLDI/name
 #
 start_time=/entry1/start_time
-#
-TablePositionX=/entry1/sample/shu
-TablePositionY=/entry1/sample/sv
-TablePositionZ=/entry1/sample/shl
