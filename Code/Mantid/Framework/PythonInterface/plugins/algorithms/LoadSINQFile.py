@@ -101,7 +101,7 @@ class LoadSINQFile(PythonAlgorithm):
 
     def _extractYearFromFileName(self, filename):
         pureFileName = os.path.basename(filename)
-        pattern = re.compile("\w+(\d{4})n[\w\d\.]+")
+        pattern = re.compile(r'\w+(\d{4})n[\w\d\.]+')
         matches = re.match(pattern, pureFileName)
 
         return int(matches.group(1))
