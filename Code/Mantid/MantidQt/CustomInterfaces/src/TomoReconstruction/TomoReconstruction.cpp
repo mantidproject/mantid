@@ -661,7 +661,7 @@ void TomoReconstruction::makeRunnableWithOptions(std::string &run,
   if (m_SCARFName == comp) {
     const std::string tool =
         m_ui.comboBox_run_tool->currentText().toStdString();
-    std::string base = currentPathSCARF() + "/";
+
     if (tool == m_TomoPyTool) {
       checkWarningToolNotSetup(tool, m_toolsSettings.tomoPy);
       // this should get something like:
@@ -1382,7 +1382,7 @@ void TomoReconstruction::checkDataPathsSet() {
  * A specific warning that can be shown for multiple tools
  *
  * @param tool Name of the tool this warning applies to
- * @param current settings for the tool
+ * @param settings current settings for the tool
  */
 void TomoReconstruction::checkWarningToolNotSetup(const std::string &tool,
                                                   const std::string &settings) {

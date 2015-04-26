@@ -54,7 +54,7 @@ public:
    * should be able to translate application names into binary paths
    * and similar internally.
    *
-   * @param Name of the runnable object (application, executable,
+   * @param runnable name of the runnable object (application, executable,
    * etc.). This can be a full path, an application name, etc. At
    * present it is used in its simplest form: platform and machine
    * dependent full path to an execuatable or script.
