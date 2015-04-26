@@ -21,9 +21,9 @@ name and an appendix _1, _2, etc., incremented sequentially as new
 files are loaded with the same OutputWorkspace property.
 
 The way image pixels are loaded into the resulting workspaces depends
-on the porperty LoadAsRectImg. If it is false, one spectrum will be
-created for every image pixel. Otherwise, one spectrum will be created
-for every image row.
+on the porperty LoadAsRectImg. If it is set as false, one spectrum
+will be created for every image pixel. Otherwise, one spectrum will be
+created for every image row.
 
 When LoadAsRectImg is true, the workspaces created by this algorithm
 contain one spectrum per row (and one bin per column). The first
@@ -75,9 +75,50 @@ This algorithm uses one child algorithm:
 Usage
 -----
 
-**Example**
+Example 1: loading one spectrum per image row
+#############################################
 
-.. testcode:: LoadFITS
+.. testcode:: LoadFITS1SpectrumPerRow
+
+
+    ws_name = 'FITSimgs'
+    wsg = LoadFITS(Filename='FITS_small_01.fits', LoadAsRectImg=1, OutputWorkspace=ws_name)
+    ws = wsg.getItem(0)
+
+    # A couple of standard FITS header entries
+    bpp_log = 'BITPIX'
+    try:
+        log = ws.getRun().getLogData(bpp_log).value
+        print "Bits per pixel: %s" % int(log)
+    except RuntimeError:
+        print "Could not find the keyword '%s' in this FITS file" % bpp_log
+
+    axis1_log = 'NAXIS1'
+    axis2_log = 'NAXIS2'
+    try:
+        log1 = ws.getRun().getLogData(axis1_log).value
+        log2 = ws.getRun().getLogData(axis2_log).value
+        print "FITS image size: %s x %s pixels" % (int(log1), int(log2))
+        print "Number of spectra in the output workspace: %d" % ws.getNumberHistograms()
+    except RuntimeError:
+        print "Could not find the keywords '%s' and '%s' in this FITS file" % (axis1_log, axis2_log)
+
+.. testcleanup:: LoadFITS1SpectrumPerRow
+
+    DeleteWorkspace(ws_name)
+
+Output:
+
+.. testoutput:: LoadFITS1SpectrumPerRow
+
+   Bits per pixel: 16
+   FITS image size: 512 x 512 pixels
+   Number of spectra in the output workspace: 512
+
+Example 2: loading one spectrum per pixel
+#########################################
+
+.. testcode:: LoadFITSManySpectra
 
     ws_name = 'FITSws'
     wsg = LoadFITS(Filename='FITS_small_01.fits', OutputWorkspace=ws_name)
@@ -101,13 +142,13 @@ Usage
     except RuntimeError:
         print "Could not find the keywords '%s' and '%s' in this FITS file" % (axis1_log, axis2_log)
 
-.. testcleanup:: LoadFITS
+.. testcleanup:: LoadFITSManySpectra
 
     DeleteWorkspace(ws_name)
 
 Output:
 
-.. testoutput:: LoadFITS
+.. testoutput:: LoadFITSManySpectra
 
    Bits per pixel: 16
    FITS image size: 512 x 512 pixels
