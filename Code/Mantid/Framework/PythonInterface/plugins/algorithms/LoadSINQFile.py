@@ -48,8 +48,8 @@ class LoadSINQFile(PythonAlgorithm):
             "HRPT":"hrpt.dic",
             "MARSI":"marsin.dic",
             "MARSE":"marse.dic",
+            "POLDI_legacy":"poldi_legacy.dic",
             "POLDI":"poldi.dic",
-            "POLDI_NEW":"poldi_new.dic",
             "RITA-2":"rita.dic",
             "SANS":"sans.dic",
             "SANS2":"sans.dic",
@@ -59,8 +59,8 @@ class LoadSINQFile(PythonAlgorithm):
         lookupInstrumentName = inst
         if inst == 'POLDI':
             year = self._extractYearFromFileName(fname)
-            if year >= 2015:
-                lookupInstrumentName += '_NEW'
+            if year < 2015:
+                lookupInstrumentName += '_legacy'
 
         dictsearch = os.path.join(config['instrumentDefinition.directory'],"nexusdictionaries")
         dicname = os.path.join(dictsearch, diclookup[lookupInstrumentName])
