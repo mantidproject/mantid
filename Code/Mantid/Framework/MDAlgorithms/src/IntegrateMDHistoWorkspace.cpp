@@ -15,6 +15,7 @@
 #include <algorithm>
 #include <map>
 #include <utility>
+#include <cmath>
 
 #include <boost/make_shared.hpp>
 #include <boost/scoped_ptr.hpp>
@@ -118,8 +119,8 @@ createShapedOutput(IMDHistoWorkspace const *const inWS,
       double max = binning.back();
 
       // Correct users, input, output and rounded to the nearest whole width.
-      min = width * static_cast<int>(min/width); // Rounded down
-      max = width * static_cast<int>(max/width + 1.0); // Rounded up
+      min = width * std::floor(min/width); // Rounded down
+      max = width * std::ceil(max/width); // Rounded up
 
       if(min != binning.front()) {
           std::stringstream buffer;

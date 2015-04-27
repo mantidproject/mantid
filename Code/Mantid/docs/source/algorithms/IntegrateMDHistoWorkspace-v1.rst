@@ -94,7 +94,7 @@ Output:
   Input bin width is 0.10
   Number of non integrated dimensions after integration are 1
   Non integrated dimension is ['zeta', 0, 0]
-  Limits are from -9.40 to 9.10
+  Limits are from -9.50 to 9.10
   Output bin width is 0.10
   
 .. categories::
