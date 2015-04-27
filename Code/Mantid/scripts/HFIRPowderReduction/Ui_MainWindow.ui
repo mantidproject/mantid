@@ -334,7 +334,7 @@
            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Question about use case of tab'Raw Detectors': What do you want to see?&lt;/p&gt;&lt;p&gt;1. single detector's counts in all Pt.? &lt;/p&gt;&lt;p&gt;&amp;gt; what is the X-axis? Pt. or 2theta? &lt;/p&gt;&lt;p&gt;2. all detectors' counts in one Pt.?&lt;/p&gt;&lt;p&gt;&amp;gt; what is the X-axis? Det no or 2theta? &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
           </property>
           <property name="currentIndex">
-           <number>3</number>
+           <number>0</number>
           </property>
           <widget class="QWidget" name="tab_3">
            <attribute name="title">
@@ -347,11 +347,6 @@
                <layout class="QHBoxLayout" name="horizontalLayout_13">
                 <item>
                  <widget class="QComboBox" name="comboBox_rawDetMode">
-                  <item>
-                   <property name="text">
-                    <string>All Pts.</string>
-                   </property>
-                  </item>
                   <item>
                    <property name="text">
                     <string>Single Pts.</string>
@@ -372,7 +367,7 @@
                 <item>
                  <widget class="QLabel" name="label_ptInfo">
                   <property name="text">
-                   <string>Pt. Number From 1 To ?</string>
+                   <string>Pt. Number From 1 To 44</string>
                   </property>
                  </widget>
                 </item>
@@ -1189,7 +1184,20 @@
                  </widget>
                 </item>
                 <item>
-                 <widget class="QLineEdit" name="lineEdit_mergeMinX"/>
+                 <widget class="QLineEdit" name="lineEdit_mergeMinX">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
+                  <property name="minimumSize">
+                   <size>
+                    <width>0</width>
+                    <height>0</height>
+                   </size>
+                  </property>
+                 </widget>
                 </item>
                 <item>
                  <widget class="QLabel" name="label_14">
@@ -1199,7 +1207,14 @@
                  </widget>
                 </item>
                 <item>
-                 <widget class="QLineEdit" name="lineEdit_mergeMaxX"/>
+                 <widget class="QLineEdit" name="lineEdit_mergeMaxX">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
+                 </widget>
                 </item>
                 <item>
                  <widget class="QLabel" name="label_16">
@@ -1209,10 +1224,58 @@
                  </widget>
                 </item>
                 <item>
-                 <widget class="QLineEdit" name="lineEdit_mergeBinSize"/>
+                 <widget class="QLineEdit" name="lineEdit_mergeBinSize">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
+                 </widget>
                 </item>
                 <item>
-                 <widget class="QLabel" name="label_6">
+                 <widget class="QComboBox" name="comboBox_mscanUnit">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
+                  <property name="minimumSize">
+                   <size>
+                    <width>140</width>
+                    <height>0</height>
+                   </size>
+                  </property>
+                  <item>
+                   <property name="text">
+                    <string>2Theta</string>
+                   </property>
+                  </item>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QPushButton" name="pushButton_mscanBin">
+                  <property name="text">
+                   <string>Bin Data</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <spacer name="horizontalSpacer_3">
+                  <property name="orientation">
+                   <enum>Qt::Horizontal</enum>
+                  </property>
+                  <property name="sizeHint" stdset="0">
+                   <size>
+                    <width>40</width>
+                    <height>20</height>
+                   </size>
+                  </property>
+                 </spacer>
+                </item>
+                <item>
+                 <widget class="QLabel" name="label_mergeMessage">
                   <property name="sizePolicy">
                    <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
                     <horstretch>0</horstretch>
@@ -1254,9 +1317,9 @@
                    </spacer>
                   </item>
                   <item>
-                   <widget class="QPushButton" name="pushButton_viewWaterFall">
+                   <widget class="QPushButton" name="pushButton_viewMScan1D">
                     <property name="text">
-                     <string>Waterfall </string>
+                     <string>View 1D</string>
                     </property>
                    </widget>
                   </item>
@@ -1941,7 +2004,7 @@
      <x>0</x>
      <y>0</y>
      <width>1412</width>
-     <height>22</height>
+     <height>25</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">

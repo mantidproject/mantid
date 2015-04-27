@@ -176,6 +176,10 @@ class HFIRPDRedControl:
         self._myWorkspaceDict = {}  # dictionary to manage all the workspaces reduced 
                                     # key = Exp/Scan
         self._myMergedWSDict = {}   # key = Exp/Scan list
+        
+        self._myWavelengthDict = {}
+
+        self._lastWkspToMerge = []
 
         return
 
@@ -416,6 +420,12 @@ class HFIRPDRedControl:
 
         return vanpeakpos2theta
 
+    def getWavelength(self, exp, scan):
+        """ Get wavelength
+        """
+        exp = int(exp)
+        scan = int(scan)
+        return self._myWavelengthDict[(exp, scan)]
     
     def getWkspToMerge(self):
         """ Get the individual workspaces that are used for merging in the last
@@ -493,6 +503,70 @@ class HFIRPDRedControl:
         return
 
 
+    def mergeReduceSpiceData(self, expno, scannolist, unit, xmin, xmax, binsize):
+        """ Merge and reduce SPICE data files
+        Arguements:
+         - expscanfilelist: list of 3 tuples: expnumber, scannumber and file name
+        """
+        # Collect data MD workspaces and monitor MD workspaces
+        datamdwslist = []
+        monitormdwslist = []
+        self._lastWkspToMerge = []
+
+        print "[Checkpoint 0] Scans = ", str(scannolist)
+        for scanno in sorted(scannolist): 
+            try: 
+                wsmanager = self.getWorkspace(expno, scanno, True) 
+                datamdwslist.append(wsmanager.datamdws) 
+                monitormdwslist.append(wsmanager.monitormdws)
+                self._lastWkspToMerge.append(wsmanager)
+            except Exception as e:
+                print '[Error] Unable to retrieve MDWorkspaces for Exp %d Scan %d due to %s.' % (
+                    expno, scanno, str(e))
+                scannolist.remove(scanno)
+        # ENDFOR
+        
+        print "[Checkpoing 1] Scans = ", str(scannolist)
+
+        # Merge and binning
+        if len(datamdwslist) > 1: 
+            mg_datamdws = datamdwslist[0] +  datamdwslist[1]
+            mg_monitormdws = monitormdwslist[0] + monitormdwslist[1]
+        else:
+            mg_datamdws = datamdwslist[0] 
+            mg_monitormdws = monitormdwslist[0] 
+        for iw in xrange(2, len(datamdwslist)):
+            mg_datamdws += datamdwslist[iw] 
+            mg_monitormdws += monitormdwslist[iw]
+
+        # Set up binning parameters
+        if xmin is None or xmax is None:
+            binpar = "%.7f" % (binsize)
+        else:
+            binpar = "%.7f, %.7f, %.7f" % (xmin, binsize, xmax)
+
+        # set up output workspace's name
+        scannolist = sorted(scannolist)
+        outwsname = "Merged_Exp%d_Scan%s_%s" % (expno, scannolist[0], scannolist[-1])
+
+        # Merge
+        wavelength = self.getWavelength(expno, scanno)
+        api.ConvertCWPDMDToSpectra(InputWorkspace=mg_datamdws,
+                                   InputMonitorWorkspace=mg_monitormdws,
+                                   OutputWorkspace=outwsname,
+                                   BinningParams=binpar,
+                                   UnitOutput=unit, 
+                                   NeutronWaveLength=wavelength)
+        moutws = AnalysisDataService.retrieve(outwsname)
+        if moutws is None:
+            raise NotImplementedError("Merge failed.")
+
+        key = (expno, str(scannolist))
+        self._myMergedWSDict[key] = moutws
+        
+        return key
+
+
     def parseDetEffCorrFile(self, instrument, vancorrfname):
         """ Parse detector efficiency correction file='HB2A
 
@@ -561,92 +635,6 @@ class HFIRPDRedControl:
         return True
 
         
-    def mergeReduceSpiceData(self, expscanfilelist, unit, xmin, xmax, binsize, 
-            wavelength):
-        """ Merge and reduce SPICE data files
-        Arguements:
-         - expscanfilelist: list of 3 tuples: expnumber, scannumber and file name
-        """
-        # FIXME : Updated to new workflow! and catch more exceptions
-        # data structure initialization
-        datamdwslist = []
-        monitormdwslist = []
-        self._lastWkspToMerge = []
-
-        # reduce individual data 
-        scanlist = []
-        for tuple3 in expscanfilelist:
-            # get input tuple
-            try:
-                exp   = int(tuple3[0])
-                scan  = int(tuple3[1])
-                fname = tuple3[2]
-                if os.path.exists(fname) is False:
-                    raise NotImplementedError("Spice file %s cannot be found. " % (fname))
-            except Exception as e:
-                raise NotImplementedError("Invalid exp-scan-file list tuple. \
-                        Reason: %s." % (str(e)))
-
-            # load spice data
-            execstatus = self.loadSpicePDData(exp, scan, fname)
-
-            # TODO - Need to deal with correction files 
-            detefftablews = None
-
-            # parse raw spice data to MDEventsWorkspaces
-            execstatus = self.parseSpiceData(exp, scan, detefftablews)
-
-            # get exluded detectors' list
-            excludeddetlist = []
-
-            # reduce
-            rebingood = self.reduceSpicePDData(exp, scan, fname, unit, xmin, xmax, 
-                    binsize, wavelength, excludeddetlist)
-
-            if rebingood is True:
-                wsmanager = self.getWorkspace(exp, scan, True)
-                datamdwslist.append(wsmanager.datamdws)
-                monitormdwslist.append(wsmanager.monitormdws)
-            
-                scanlist.append(scan)
-                self._lastWkspToMerge.append(wsmanager)
-        # ENDFOR
-
-        # merge and rebin
-        if len(datamdwslist) > 1: 
-            mg_datamdws = datamdwslist[0] +  datamdwslist[1]
-            mg_monitormdws = monitormdwslist[0] + monitormdwslist[1]
-        else:
-            mg_datamdws = datamdwslist[0] 
-            mg_monitormdws = monitormdwslist[0] 
-        for iw in xrange(2, len(datamdwslist)):
-            mg_datamdws += datamdwslist[iw] 
-            mg_monitormdws += monitormdwslist[iw]
-
-        if xmin is None or xmax is None:
-            binpar = "%.7f" % (binsize)
-        else:
-            binpar = "%.7f, %.7f, %.7f" % (xmin, binsize, xmax)
-
-        exp = int(expscanfilelist[0][0])
-        outwsname = "Merged_Exp%d_Scan%s_%s" % (exp,
-                str(expscanfilelist[0][1]), str(expscanfilelist[-1][1]))
-        api.ConvertCWPDMDToSpectra(InputWorkspace=mg_datamdws,
-                                   InputMonitorWorkspace=mg_monitormdws,
-                                   OutputWorkspace=outwsname,
-                                   BinningParams=binpar,
-                                   UnitOutput=unit, 
-                                   NeutronWaveLength=wavelength)
-        moutws = AnalysisDataService.retrieve(outwsname)
-        if moutws is None:
-            raise NotImplementedError("Merge failed.")
-
-        key = (exp, str(scanlist))
-        self._myMergedWSDict[key] = moutws
-        
-        return key
-
-
     def rebin(self, exp, scan, unit, wavelength, xmin, binsize, xmax):
         """ Rebin the data MD workspace and monitor MD workspace for new bin parameter and/or 
         units
@@ -752,13 +740,12 @@ class HFIRPDRedControl:
             # Get parameter m1 and colltrans
             m1 = self._getValueFromTable(wsmanager.getRawSpiceTable(), 'm1')
             colltrans = self._getValueFromTable(wsmanager.getRawSpiceTable(), 'colltrans')
-            #try: 
-            #    colltrans = datamdws.getExperimentInfo(0).run().getProperty('colltrans').value
-            #except RuntimeError:
-            #    colltrans = None
 
             # detector efficiency file
-            detefffname, deteffurl, wavelength = hutil.makeHB2ADetEfficiencyFileName(exp, m1, colltrans)
+            try: 
+                detefffname, deteffurl, wavelength = hutil.makeHB2ADetEfficiencyFileName(exp, m1, colltrans)
+            except NotImplementedError as e:
+                raise e
             if detefffname is not None: 
                 localdetefffname = os.path.join(localdatadir, detefffname) 
                 print "[DB] Detector efficiency file name: %s From %s" % (detefffname, deteffurl) 
@@ -782,16 +769,13 @@ class HFIRPDRedControl:
             else:
                 print "[Info] Detector exclusion file %s exists in directory %s." % (excldetfname, localdatadir)
 
-            # # get excluded detector file
-
-            # downloadFile(exclurl, localfilepath)
-
-            # # Set to ws manager
-            # wsmanager.setWavelength(wavelength)
+            # Set to ws manager
+            wsmanager.setWavelength(wavelength)
             # wsmanager.setDetEfficencyFile()
             # wsmanager.setExcludedDetFile()
 
         else:
+            # Other instruments
             raise NotImplementedError("Instrument %s is not supported to retrieve correction file." % (instrument))
 
 
@@ -827,6 +811,19 @@ class HFIRPDRedControl:
                 Filename=filename+".xye", Format="TOPAS")
                 
         return 
+
+
+    def setWavelength(self, exp, scan, wavelength):
+        """ Set wavelength for a specific scan
+        """
+        exp = int(exp)
+        scan = int(scan)
+        if wavelength == None: 
+            self._myWavelengthDict[(exp, scan)] = None
+        else: 
+            self._myWavelengthDict[(exp, scan)] = float(wavelength)
+
+        return
 
 
     def stripVanadiumPeaks(self, exp, scan, binparams, vanpeakposlist=None):

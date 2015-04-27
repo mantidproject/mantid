@@ -2,7 +2,7 @@
 #
 # Main class for HFIR powder reduction GUI
 # 
-# Key word for future developing: FUTURE, NEXT, REFACTOR
+# Key word for future developing: FUTURE, NEXT, REFACTOR, RELEASE 2.0
 #
 ################################################################################
 
@@ -102,33 +102,36 @@ class MainWindow(QtGui.QMainWindow):
         self.connect(self.ui.pushButton_nextScan, QtCore.SIGNAL('clicked()'),
                 self.doLoadNextScan)
         self.connect(self.ui.pushButton_unit2theta, QtCore.SIGNAL('clicked()'),
-                self.doPlot2Theta)
+                self.doReduce2Theta)
         self.connect(self.ui.pushButton_unitD, QtCore.SIGNAL('clicked()'),
-                self.doPlotDspacing)
+                self.doReduceDSpacing)
         self.connect(self.ui.pushButton_unitQ, QtCore.SIGNAL('clicked()'),
-                self.doPlotQ)
+                self.doReduceQ)
         self.connect(self.ui.pushButton_saveData, QtCore.SIGNAL('clicked()'),
                 self.doSaveData)
 
         # tab 'Multiple Scans'
         self.connect(self.ui.pushButton_loadMultData, QtCore.SIGNAL('clicked()'),
                 self.doLoadSetData)
+        self.connect(self.ui.pushButton_mscanBin, QtCore.SIGNAL('clicked()'),
+                self.doReduceSetData)
         self.connect(self.ui.pushButton_mergeScans, QtCore.SIGNAL('clicked()'),
                 self.doMergeScans)
+        self.connect(self.ui.pushButton_viewMScan1D, QtCore.SIGNAL('clicked()'), 
+                self.doMergeScanView1D)
         self.connect(self.ui.pushButton_view2D, QtCore.SIGNAL('clicked()'), 
                 self.doMergeScanView2D)
         self.connect(self.ui.pushButton_viewMerge, QtCore.SIGNAL('clicked()'),
-                self.doMergeScanView1D)
+                self.doMergeScanViewMerged)
         self.connect(self.ui.pushButton_clearMultCanvas, QtCore.SIGNAL('clicked()'),
                 self.doClearMultiRunCanvas)
-
         # tab 'Vanadium'
         self.connect(self.ui.pushButton_stripVanPeaks, QtCore.SIGNAL('clicked()'),
                 self.doStripVandiumPeaks)
         self.connect(self.ui.pushButton_saveVanRun, QtCore.SIGNAL('clicked()'),
                 self.doSaveVanRun)
         self.connect(self.ui.pushButton_rebin2Theta, QtCore.SIGNAL('clicked()'),
-                self.doRebin2Theta)
+                self.doReduceVanadium2Theta)
 
         # tab 'Advanced Setup'
         self.connect(self.ui.pushButton_browseCache, QtCore.SIGNAL('clicked()'),
@@ -203,12 +206,12 @@ class MainWindow(QtGui.QMainWindow):
         validator12.setBottom(1)
         self.ui.lineEdit_scanEnd.setValidator(validator12)
 
-        # TODO - Add valdiators
+        # TODO - Add valdiators for 
+        # lineEdit_normalizeMonitor float
+        # lineEdit_mergeMinX, lineEdit_mergeMaxX, lineEdit_mergeBinSize
 
         # Get initial setup
         self._initSetup()
-
-        # checkBox_clearPrevious
 
         return
 
@@ -216,14 +219,14 @@ class MainWindow(QtGui.QMainWindow):
     def _initSetup(self):
         """ Initial setup
         """
-        # FIXME - This part will be implemented soon as default configuration is made
+        # RELEASE 2.0 - This part will be implemented soon as default configuration is made
         # Mantid configuration
         self._instrument = str(self.ui.comboBox_instrument.currentText())
 
         # UI widgets setup
         self.ui.comboBox_outputFormat.addItems(['Fullprof', 'GSAS', 'Fullprof+GSAS'])
 
-        # FIXME : Need to disable some widgets... consider to refactor the code
+        # RELEASE 2.0 : Need to disable some widgets... consider to refactor the code
         self.ui.radioButton_useServer.setChecked(True)
         self.ui.radioButton_useLocal.setChecked(False)
         
@@ -276,12 +279,9 @@ class MainWindow(QtGui.QMainWindow):
         return
 
     def doBrowseExcludedDetetorFile(self):
-        """ 
-
+        """ Browse excluded detector's file
         Return :: None
         """
-        # FIXME - Documentation
-
         # Get file name 
         filefilter = "Text (*.txt);;Data (*.dat);;All files (*.*)" 
         curdir = os.getcwd()
@@ -393,6 +393,18 @@ class MainWindow(QtGui.QMainWindow):
 
         return
 
+    def doExist(self):
+        """ Exist the application
+        """
+        clearcache = self.ui.checkBox_delCache.isChecked()
+
+        if clearcache is True:
+            delAllFile(self._cache)
+
+        self.close()
+
+        return
+        
 
     def doLoadData(self, exp=None, scan=None):
         """ Load and reduce data 
@@ -405,286 +417,236 @@ class MainWindow(QtGui.QMainWindow):
         tabtext = str(self.ui.tabWidget.tabText(itab))
         print "[DB] Current active tab is No. %d as %s." % (itab, tabtext)
 
-        if itab == 3:
-            # 'multiple scans'
-            self._logNotice("Tab %s does not support 'Load Data'.  Use 'Load All' instead." % (tabtext))
-            return
+        #if itab == 3:
+        #    # 'multiple scans'
+        #    self._logNotice("Tab %s does not support 'Load Data'.  Use 'Load All' instead." % (tabtext))
+        #    return
 
-        elif itab == 5:
+        if itab == 5:
             # 'advanced'
             self._logNotice("Tab %s does not support 'Load Data'. Request is ambiguous." % (tabtext))
             return
 
-        # Get information
-        try: 
-            expno, scanno = self._uiGetExpScanNumber()
-        except Exception as e:
-            self._logError("Error to get Exp and Scan due to %s." % (str(e)))
-            return
-        self._logDebug("Attending to load Exp %d Scan %d." % (expno, scanno))
+        # Get exp number and scan number
+        if isinstance(exp, int) is True and isinstance(scan, int) is True:
+            # use input
+            expno = exp
+            scanno = scan
+        else:
+            # read from GUI
+            try: 
+                expno, scanno = self._uiGetExpScanNumber()
+            except Exception as e:
+                self._logError("Error to get Exp and Scan due to %s." % (str(e)))
+                return
+            self._logDebug("Attending to load Exp %d Scan %d." % (expno, scanno))
+        # ENDIF
 
         # Form data file name and download data
-        status, datafilename = self._uiLoadDataFile(exp=expno, scan=scanno)
+        status, datafilename = self._uiDownloadDataFile(exp=expno, scan=scanno)
         if status is False:
             self._logError("Unable to download or locate local data file for Exp %d \
                 Scan %d." % (expno, scanno))
         # ENDIF(status)
 
-        # Load data for tab 0, 1, 2 and 4
-        if itab in [0, 1, 2, 4]:
-            # Load SPICE data (step 1)
-            try: 
-                execstatus = self._myControl.loadSpicePDData(expno, scanno, datafilename)
-                if execstatus is False:
-                    cause = "Load data failed."
-                else:
-                    cause = None
-            except Exception as e:
-                execstatus = False
-                cause = str(e)
-            finally:
-                if execstatus is False:
-                    self._logError(cause)
-                    return
-            # END-TRY-EXCEPT-FINALLY
-
-            # Obtain the correction file names and wavelength from SPICE file
-            localdir = os.path.dirname(datafilename)
-            status, returnbody = self._myControl.retrieveCorrectionData(instrument='HB2A', 
-                                                                        exp=expno, scan=scanno, 
-                                                                        localdatadir=localdir)
-
-            if status is True:
-                autowavelength = returnbody[0]
-                vancorrfname = returnbody[1]
-                excldetfname = returnbody[2]
-
-                if vancorrfname is not None:
-                    self.ui.lineEdit_vcorrFileName.setText(vancorrfname)
-                if excldetfname is not None:
-                    self.ui.lineEdit_excludedDetFileName.setText(excldetfname)
-
-            else:
-                autowavelength = None
-                vancorrfname = None
-                excldetfname = None
-
-            # Set wavelength
-            if autowavelength is None:
-                self.ui.comboBox_wavelength.setCurrentIndex(4)
-                self.ui.lineEdit_wavelength.setText(self.ui.comboBox_wavelength.currentText())
-            else:
-                self.ui.lineEdit_wavelength.setText(str(autowavelength))
-                allowedwavelengths = [2.41, 1.54, 1.12]
-                numitems = self.ui.comboBox_wavelength.count() 
-                good = False
-                for ic in xrange(numitems-1):
-                    if abs(autowavelength - allowedwavelengths[ic]) < 0.01:
-                        good = True
-                        self.ui.comboBox_wavelength.setCurrentIndex(ic)
-                # ENDFOR
-                
-                if good is False: 
-                    self.ui.comboBox_wavelength.setCurrentIndex(numitems-1)
-            # ENDIF
-
-            # Optionally obtain and parse det effecient file
-            if self.ui.checkBox_useDetEffCorr.isChecked() is True:
-                # Apply detector efficiency correction
-                if vancorrfname is None:
-                    # browse vanadium correction file
-                    filefilter = "Text (*.txt);;Data (*.dat);;All files (*.*)" 
-                    curdir = os.getcwd()
-                    vancorrfnames = QtGui.QFileDialog.getOpenFileNames(self, 'Open File(s)', curdir, filefilter)
-                    if len(vancorrfnames) > 0:
-                        vancorrfname = vancorrfnames[0]
-                        self.ui.lineEdit_vcorrFileName.setText(str(vancorrfname)) 
-                    else:
-                        self._logError("User does not specify any vanadium correction file.")
-                        self.ui.checkBox_useDetEffCorr.setChecked(False)
-                    # ENDIF-len()
-                # ENDIF vancorrfname 
-
-                # Parse if it is not None
-                if vancorrfname is not None:
-                    detefftablews, errmsg = self._myControl.parseDetEffCorrFile('HB2A', vancorrfname)
-                    if detefftablews is None:
-                        print "Parsing detectors efficiency file error: %s." % (errmsg)
-                else:
-                    detefftablews = None
-                # ENDIF
-
-            else:
-                # Not chosen to apply detector efficiency correction:w
-                detefftablews = None
-            # ENDIF
-            
-            # Parse SPICE data to MDEventWorkspaces
-            try:
-                print "Det EFF Table WS: ", str(detefftablews)
-                execstatus = self._myControl.parseSpiceData(expno, scanno, detefftablews)
-                if execstatus is False:
-                    cause = "Parse data failed."
-                else:
-                    cause = None
-            except NotImplementedError as e:
-                execstatus = False
-                cause = str(e)
-            finally:
-                if execstatus is False:
-                    self._logError(cause)
-                    return
-            # END-TRY-EXCEPT-FINALLY
-
-            # Optionally parse detector exclusion file and set to line text
-            if excldetfname is not None:
-                excludedetlist, errmsg = self._myControl.parseExcludedDetFile('HB2A', excldetfname)
-            
-                textbuf = ""
-                for detid in excludedetlist:
-                    textbuf += "%d," % (detid)
-                if len(textbuf) > 0:
-                    textbuf = textbuf[:-1]
-                    self.ui.lineEdit_detExcluded.setText(textbuf)
-            # ENDIF
-
-        else:
-            # Unsupported Tabs 
+        # (Load data for tab 0, 1, 2 and 4)
+        if itab not in [0, 1, 2, 3, 4]:
+            # Unsupported Tabs: programming error!
             errmsg = "%d-th tab should not get this far.\n"%(itab)
             errmsg += 'GUI has been changed, but the change has not been considered! iTab = %d' % (itab)
             raise NotImplementedError(errmsg) 
+
+        # Load SPICE data to raw table (step 1)
+        try: 
+            execstatus = self._myControl.loadSpicePDData(expno, scanno, datafilename)
+            if execstatus is False:
+                cause = "Load data failed."
+            else:
+                cause = None
+        except Exception as e:
+            execstatus = False
+            cause = str(e)
+        finally:
+            if execstatus is False:
+                self._logError(cause)
+                return
+        # END-TRY-EXCEPT-FINALLY
+
+        # Obtain the correction file names and wavelength from SPICE file
+        wavelengtherror = False
+        errmsg = ""
+        localdir = os.path.dirname(datafilename)
+        try: 
+            status, returnbody = self._myControl.retrieveCorrectionData(instrument='HB2A', 
+                                                                    exp=expno, scan=scanno, 
+                                                                    localdatadir=localdir)
+        except NotImplementedError as e:
+            errmsg = str(e)
+            if errmsg.count('m1') > 0:
+                # error is about wavelength
+                status = False
+                wavelengtherror = True
+            else:
+                # other error
+                raise e
+        # ENDTRY
+
+        if status is True:
+            autowavelength = returnbody[0]
+            vancorrfname = returnbody[1]
+            excldetfname = returnbody[2]
+
+            if vancorrfname is not None:
+                self.ui.lineEdit_vcorrFileName.setText(vancorrfname)
+            if excldetfname is not None:
+                self.ui.lineEdit_excludedDetFileName.setText(excldetfname)
+        else:
+            autowavelength = None
+            vancorrfname = None
+            excldetfname = None
+        # ENDIF
+
+        # Set wavelength to GUI except 'multiple scans'
+        if autowavelength is None:
+            # unable to get wavelength from SPICE data
+            self.ui.comboBox_wavelength.setCurrentIndex(4)
+            if wavelengtherror is True:
+                self.ui.lineEdit_wavelength.setText(errmsg)
+            else: 
+                self.ui.lineEdit_wavelength.setText(self.ui.comboBox_wavelength.currentText())
+            self._myControl.setWavelength(expno, scanno, wavelength=None)
+        else:
+            # get wavelength from SPICE data.  set value to GUI 
+            self.ui.lineEdit_wavelength.setText(str(autowavelength))
+            allowedwavelengths = [2.41, 1.54, 1.12]
+            numitems = self.ui.comboBox_wavelength.count() 
+            good = False
+            for ic in xrange(numitems-1):
+                if abs(autowavelength - allowedwavelengths[ic]) < 0.01:
+                    good = True
+                    self.ui.comboBox_wavelength.setCurrentIndex(ic)
+            # ENDFOR
+            
+            if good is False: 
+                self.ui.comboBox_wavelength.setCurrentIndex(numitems-1)
+            # ENDIF
+
+            self._myControl.setWavelength(expno, scanno, wavelength=autowavelength)
         # ENDIFELSE
 
-        # Set up some widgets from 
-        floatsamplelognamelist = self._myControl.getSampleLogNames(expno, scanno)
-        self.ui.comboBox_indvDetXLabel.clear()
-        self.ui.comboBox_indvDetXLabel.addItems(floatsamplelognamelist)
-        self.ui.comboBox_indvDetYLabel.clear()
-        self.ui.comboBox_indvDetYLabel.addItems(floatsamplelognamelist)
+        # Optionally obtain and parse det effecient file
+        if self.ui.checkBox_useDetEffCorr.isChecked() is True:
+            # Apply detector efficiency correction
+            if vancorrfname is None:
+                # browse vanadium correction file
+                filefilter = "Text (*.txt);;Data (*.dat);;All files (*.*)" 
+                curdir = os.getcwd()
+                vancorrfnames = QtGui.QFileDialog.getOpenFileNames(self, 'Open File(s)', curdir, filefilter)
+                if len(vancorrfnames) > 0:
+                    vancorrfname = vancorrfnames[0]
+                    self.ui.lineEdit_vcorrFileName.setText(str(vancorrfname)) 
+                else:
+                    self._logError("User does not specify any vanadium correction file.")
+                    self.ui.checkBox_useDetEffCorr.setChecked(False)
+                # ENDIF-len()
+            # ENDIF vancorrfname 
 
-        return
+            # Parse if it is not None
+            if vancorrfname is not None:
+                detefftablews, errmsg = self._myControl.parseDetEffCorrFile('HB2A', vancorrfname)
+                if detefftablews is None:
+                    print "Parsing detectors efficiency file error: %s." % (errmsg)
+            else:
+                detefftablews = None
+            # ENDIF
+
+        else:
+            # Not chosen to apply detector efficiency correction:w
+            detefftablews = None
+        # ENDIF
+            
+        # Parse SPICE data to MDEventWorkspaces
+        try:
+            print "Det EFF Table WS: ", str(detefftablews)
+            execstatus = self._myControl.parseSpiceData(expno, scanno, detefftablews)
+            if execstatus is False:
+                cause = "Parse data failed."
+            else:
+                cause = None
+        except NotImplementedError as e:
+            execstatus = False
+            cause = str(e)
+        finally:
+            if execstatus is False:
+                self._logError(cause)
+                return
+        # END-TRY-EXCEPT-FINALLY
+
+        # Optionally parse detector exclusion file and set to line text
+        if excldetfname is not None:
+            excludedetlist, errmsg = self._myControl.parseExcludedDetFile('HB2A', excldetfname)
+        
+            textbuf = ""
+            for detid in excludedetlist:
+                textbuf += "%d," % (detid)
+            if len(textbuf) > 0:
+                textbuf = textbuf[:-1]
+                self.ui.lineEdit_detExcluded.setText(textbuf)
+        # ENDIF
+
+        # Set up some widgets for raw detector data.  Won't be applied to tab 3
+        if itab != 3:
+            floatsamplelognamelist = self._myControl.getSampleLogNames(expno, scanno)
+            self.ui.comboBox_indvDetXLabel.clear()
+            self.ui.comboBox_indvDetXLabel.addItems(floatsamplelognamelist)
+            self.ui.comboBox_indvDetYLabel.clear()
+            self.ui.comboBox_indvDetYLabel.addItems(floatsamplelognamelist)
+
+        return True
 
     def doLoadSetData(self):
         """ Load a set of data
         This is the first step of doing multiple scans processing 
         """
-        # Get inputs for exp number and scans
-        try:
-            expno = int(self.ui.lineEdit_expNo.text())
-            startscan = int(self.ui.lineEdit_scanStart.text())
-            endscan = int(self.ui.lineEdit_scanEnd.text())
-        except ValueError as e:
-            self._logError("For merging scans, both starting scan number and \
-                end scan number must be given.")
-            return
-       
-        # scans = [startscan, endscan] + [others] - [excluded]
-        status, extrascanlist = self._getIntArray(str(self.ui.lineEdit_extraScans.text()))
-        if status is False:
-            self._log(extrascanlsit)
-            return
+        # Get inputs for exp number and scans 
+        expno, scanlist = self._uiGetExpScanTabMultiScans()
 
-        status, excludedlist = self._getIntArray(str(self.ui.lineEdit_exclScans.text()))
-        self._logDebug("Excluded list: %s" %(str(excludedlist)))
-        if status is False:
-            self._logError(excludedlist)
-            return
-            
-        scanslist = range(startscan, endscan+1)
-        scanslist.extend(extralist)
-        scanslist = list(set(scanslist))
-        for scan in excludedlist:
-            scanslist.remove(scan)
-
-        # Load files
-        for scan in sorted(scanslist):
-
-            self.doLoadData(exp, scan, itab=3)
-
-            self.doReduceSpiceData()
-
+        # Load and reduce data 
+        loadstatus = True
+        for scan in sorted(scanlist):
+            tempstatus = self.doLoadData(expno, scan)
+            if tempstatus is False:
+                self.ui.label_mergeMessage.setText('Error to load Exp %d Scan %d.'(expno, scan))
+                loadstatus = False
+            else:
+                message = 'Loaded Exp %d Scan %d.' % (expno, scan)
+                self.ui.label_mergeMessage.setText(message)
         # ENDFOR
 
+        # Load status
+        if loadstatus is True:
+            self.ui.label_mergeMessage.setText('All data files are loaded')
+        else:
+            self.ui.label_mergeMessage.setText('Not all data files are loaded')
 
+        # Wave length
+        haswavelength = True
+        for scan in scanlist:
+            if self._myControl.getWavelength(expno, scan) is None:
+                self._logNotice("Exp %d Scan %d has no wavelength set up." % (expno, scan))
+                haswavelength = False
+                break
+        # ENDFOR
 
+        # Set unit box
+        if haswavelength is True:
+            self.ui.comboBox_mscanUnit.clear()
+            self.ui.comboBox_mscanUnit.addItems(['2theta', 'dSpacing', 'Momentum Transfer (Q)'])
+        else:
+            self.ui.comboBox_mscanUnit.clear()
+            self.ui.comboBox_mscanUnit.addItems(['2theta'])
 
-    def _reduceData(self):
-        # FIXME - This should be removed
-
-        # Process wavelength
-        wavelength = self.getFloat(self.ui.lineEdit_wavelength)
-        if autowavelength is not None:
-            if wavelength is None:
-                wavelength = autowavelength
-            elif abs(autowavelength-wavelength) > 0.01:
-                self._logWarning("User specified wavelength %f has different value from HB2A's setup %f." % (
-                    wavelength, autowavelength))
-                wavelength = autowavelength
-            # so wavelength = autowavelength
-        elif wavelength is None:
-            raise NotImplementedError("Wavelength is not set up!")
-
-        # Reduce data for tab normalized and vanadium
-        if itab == 2 or itab == 4:
-            # Reduce data
-
-
-            if itab == 2:
-                # Get other information
-                unit = self._currUnit
-                try:
-                    xmin, binsize, xmax = self._uiGetBinningParams()
-                except Exception as e:
-                    self._logError(str(e))
-                    return
-            else:
-                # itab = 4 : strip vanadium peaks
-                unit = '2theta'
-                try:
-                    xmin, binsize, xmax = self._uiGetBinningParams(xmin_w=self.ui.lineEdit_min2Theta,
-                            binsize_w=self.ui.lineEdit_binsize2Theta,
-                            xmax_w=self.ui.lineEdit_max2Theta)
-                except Exception as e:
-                    self._logError(str(e))
-                    return
-
-            # END-IF-ELSE
-
-            # Reduce data 
-            execstatus = self._myControl.reduceSpicePDData(expno, scanno, \
-                    unit, xmin, xmax, binsize, wavelength, excludedetlist)
-            print "[DB] reduction status = %s, Binning = %s, %s, %s" % (str(execstatus),
-                    str(xmin), str(binsize), str(xmax))
-
-            # Plot data
-            if execstatus is True:
-                if itab == 2:  
-                    # tab 'normalized' 
-                    clearcanvas = self.ui.checkBox_clearPrevious.isChecked() 
-                    xlabel = self._getXLabelFromUnit(unit)
-                    self._plotReducedData(expno, scanno, self.ui.graphicsView_reducedData, \
-                            xlabel, label="Exp %d Scan %d Bin = %.5f" % (expno, scanno, binsize), \
-                            clearcanvas=clearcanvas)
-                else:
-                    # tab 'vanadium'
-                    clearcanvas = True
-                    xlabel = self._getXLabelFromUnit(unit)
-                    print "[DB] Unit %s has label %s." % (unit, xlabel)
-                    canvas = self.ui.graphicsView_vanPeaks
-                    self._plotReducedData(expno, scanno, canvas, \
-                            xlabel, label="Exp %d Scan %d Bin = %.5f" % (expno, scanno, binsize), \
-                            clearcanvas=clearcanvas)
-            # ENDIF(execstatus)
-
-            # Plot vanadium peaks positions
-            if execstatus is True and itab == 4:
-                vanpeakpos = self._myControl.getVanadiumPeaksPos(expno, scanno)
-                print "Vanadium peaks: ", vanpeakpos
-                self._plotPeakIndicators(self.ui.graphicsView_vanPeaks, vanpeakpos)
-            # ENDIF(execstatus)
-        # END-IF-ELSE (itab)
-            
-        return execstatus
+        return
 
 
     def doLoadPrevScan(self):
@@ -762,109 +724,114 @@ class MainWindow(QtGui.QMainWindow):
         return good
 
 
-    def doExist(self):
-        """ Exist the application
-        """
-        clearcache = self.ui.checkBox_delCache.isChecked()
-
-        if clearcache is True:
-            delAllFile(self._cache)
-
-        self.close()
-
-        return
-        
         
     def doMergeScans(self):
-        """ Merge several scans 
-        for tab 'merge'
+        """ Merge several scans for tab 'merge'
         """
-        # FIXME - Updated to new workflow!
-        # get inputs for scans
+        # Get exp number and list of scans
         try:
-            expno = int(self.ui.lineEdit_expNo.text())
-            startscan = int(self.ui.lineEdit_scanStart.text())
-            endscan = int(self.ui.lineEdit_scanEnd.text())
-        except ValueError as e:
-            self._logError("For merging scans, both starting scan number and \
-                end scan number must be given.")
-            return
-        
-        excludedlist = self._getIntArray(str(self.ui.lineEdit_exclScans.text()))
-        self._logDebug("Excluded list: %s" %(str(excludedlist)))
-        if isinstance(excludedlist, str):
-            self._logError(excludedlist)
-            return
-            
-        scanslist = range(startscan, endscan+1)
-        for scan in excludedlist:
-            scanslist.remove(scan)
-        
-        # process input exp number and scan list
-        expscanfilelist = []
-        for scanno in scanslist:
-            retv, datafilename = self._uiLoadDataFile(expno, scanno)
-            if retv is True:
-                expscanfilelist.append( (expno, scanno, datafilename) )
-            else:
-                self._logError("Unable to load Exp %s Scan %s." % (expno, scanno))
-        # ENDFOR
+            expno, scanlist = self._uiGetExpScanTabMultiScans()
+        except Exception as e:
+            self._logError(str(e))
+            return False
 
+        # Check whether the wavelengths are same to merge
+        print "[Check point 1]  Scans = ", str(scanlist)
+        try:
+            wl_list = []
+            for scanno in scanlist:
+                print "Exp %d Scan %d. Wavelength = %s." % (expno, scanno, str(self._myControl.getWavelength(expno, scanno)))
+                wl_list.append(float(self._myControl.getWavelength(expno, scanno)))
+
+            wl_list = sorted(wl_list)
+            min_wl = wl_list[0]
+            max_wl = wl_list[-1]
+            if max_wl - min_wl > 1.0:
+                self._logWarning("All scans do not have same wavelengths!")
+        except Exception:
+            self._logError('Not all scans have wavelength set up.  Unable to merge scans.')
+            return
+
+        # Check!
         try: 
-            unit = self._currUnit
+            unit = str(self.ui.comboBox_mscanUnit.currentText())
             xmin, binsize, xmax = self._uiGetBinningParams(itab=3)
-            wavelength = float(self.ui.lineEdit_wavelength.text())
+            wavelength = min_wl
+            mindex = self._myControl.mergeReduceSpiceData(expno, scanlist, unit, xmin, xmax, binsize)
         except Exception as e:
             raise e
-        mindex = self._myControl.mergeReduceSpiceData(expscanfilelist, unit, xmin, xmax, binsize, wavelength)
         
-        label = "Exp %d, Scan %s." % (expno, str(scanslist))
+        label = "Exp %d, Scan %s." % (expno, str(scanlist))
         self._plotMergedReducedData(mindex, label)
         self._lastMergeIndex = mindex
         self._lastMergeLabel = label
         
         return
+
         
     def doMergeScanView1D(self):
-        """ Change the merged run's view to 1D plot
+        """ Change the multiple runs to 1D
         """
         # Highlight the button's color
-        self.ui.pushButton_view2D.setStyleSheet('QPushButton {color: black;}')
-        self.ui.pushButton_viewMerge.setStyleSheet('QPushButton {color: red;}')        
-        
+        self.ui.pushButton_view2D.setStyleSheet('QPushButton {background-color: yellow; color: red;}')
+        self.ui.pushButton_view2D.setEnabled(True) 
+        self.ui.pushButton_viewMScan1D.setStyleSheet('QPushButton {background-color: white; color: gray;}')
+        self.ui.pushButton_viewMScan1D.setEnabled(False)
+
+        # Process input experiment number and scan list
+        try:
+            expno, scanlist = self._uiGetExpScanTabMultiScans()
+        except Exception as e:
+            self._logError(str(e))
+            return False
+
         # Clear image
-        self.ui.graphicsView_mergeRun.clearCanvas()
+        canvas = self.ui.graphicsView_mergeRun
+        canvas.clearAllLines()
+        canvas.clearCanvas()
         
-        # Plot
-        self._plotMergedReducedData(self._lastMergeIndex, self._lastMergeLabel)
-        
+        # Plot data 
+        unit = str(self.ui.comboBox_mscanUnit.currentText())
+        xlabel = self._getXLabelFromUnit(unit)
+
+        for scanno in scanlist: 
+            label = "Exp %s Scan %s"%(str(expno), str(scanno)) 
+            self._plotReducedData(expno, scanno, canvas, xlabel, label=label, clearcanvas=False)
+        # ENDFOR
+
+        return
 
     def doMergeScanView2D(self):
         """ Change the merged run's view to 2D plot
         """
         # Highlight button color and change the color of another one
-        #self.ui.pushButton_view2D.setStyleSheet('QPushButton {background-color: #A3C1DA; color: red;}')
-        #self.ui.pushButton_viewMerge.setStyleSheet('QPushButton {background-color: #A3C1DA; color: black;}')
-        self.ui.pushButton_view2D.setStyleSheet('QPushButton {color: red;}')
-        self.ui.pushButton_viewMerge.setStyleSheet('QPushButton {color: black;}')
+        self.ui.pushButton_view2D.setStyleSheet('QPushButton {background-color: white; color: gray;}')
+        self.ui.pushButton_view2D.setEnabled(False)
+        self.ui.pushButton_viewMScan1D.setStyleSheet('QPushButton {background-color: yellow; color: red;}')
+        self.ui.pushButton_viewMScan1D.setEnabled(True)
+
+        # Get list of data to plot
+        expno, scanlist = self._uiGetExpScanTabMultiScans()
+
         # Convert the workspaces to 2D vector
         vecylist = []
         yticklabels = []
         xmin = None
         xmax = None
-        for ws in self._myControl.getWkspToMerge(): 
+        for scanno in scanlist:
             # put y values to list for constructing 2D array
-            vecy = ws.readY(0)
+            vecx, vecy = self._myControl.getVectorToPlot(expno, scanno)
+
             vecylist.append(vecy)
-            yticklabels.append(ws.name())
+            yticklabels.append('Exp %d Scan %d' % (expno, scanno))
             
             # set up range of x
             if xmin is None:
-                vecx = ws.readX(0)
                 xmin = vecx[0]
                 xmax = vecx[-1]
-            
+            # ENDIF
         # ENDFOR
+
         dim2array = numpy.array(vecylist)        
 
         print "2D vector: \n",  dim2array
@@ -879,45 +846,20 @@ class MainWindow(QtGui.QMainWindow):
 
         return
 
-
-    def doPlot2Theta(self):
-        """ Rebin the data and plot in 2theta
+    def doMergeScanViewMerged(self):
+        """ Change the merged run's view to 1D plot
         """
-        unit = '2theta'
-        canvas = self.ui.graphicsView_reducedData
-
-        # reduce
-        good, expno, scanno = self._uiReduceData(2, unit)
-
-        # plot
-        if good is True: 
-            self._currUnit = unit
-            xlabel = self._getXLabelFromUnit(unit)
-            label = "Exp %s Scan %s"%(str(expno), str(scanno))
-            self._plotReducedData(expno, scanno, canvas, xlabel, label=None, clearcanvas=True)
+        raise NotImplementedError('ASAP')
+        # Highlight the button's color
+        self.ui.pushButton_view2D.setStyleSheet('QPushButton {color: black;}')
+        self.ui.pushButton_viewMerge.setStyleSheet('QPushButton {color: red;}')        
         
-        return
-
-    def doPlotDspacing(self):
-        """ Rebin the data and plot in d-spacing
-        """
-        # new unit and information
-        unit = "dSpacing"
+        # Clear image
+        self.ui.graphicsView_mergeRun.clearCanvas()
         
-        canvas = self.ui.graphicsView_reducedData
-
-        # reduce
-        good, expno, scanno = self._uiReduceData(2, unit)
-
-        # plot
-        if good is True: 
-            self._currUnit = unit
-            xlabel = self._getXLabelFromUnit(unit)
-            label = "Exp %s Scan %s"%(str(expno), str(scanno))
-            self._plotReducedData(expno, scanno, canvas, xlabel, label=None, clearcanvas=True)
+        # Plot
+        self._plotMergedReducedData(self._lastMergeIndex, self._lastMergeLabel)
         
-        
-        return
 
 
     def doPlotIndvDetMain(self):
@@ -925,15 +867,15 @@ class MainWindow(QtGui.QMainWindow):
         """
         # Get exp and scan numbers and check whether the data has been loaded
         try:
-            expno = self.getInteger(self.ui.lineEdit_expNo)
-            scanno = self.getInteger(self.ui.lineEdit_scanNo)
+            expno = self._getInteger(self.ui.lineEdit_expNo)
+            scanno = self._getInteger(self.ui.lineEdit_scanNo)
         except EmptyError as e:
             self._logError(str(e))
             return
 
         # Get detector ID and x-label option
         try:
-            detid = self.getInteger(self.ui.lineEdit_detID)
+            detid = self._getInteger(self.ui.lineEdit_detID)
         except EmptyError:
             self._logError("Detector ID must be specified for plotting individual detector.")
             return
@@ -1007,32 +949,14 @@ class MainWindow(QtGui.QMainWindow):
 
         return
 
-    def doPlotQ(self):
-        """ Rebin the data and plot in momentum transfer Q
-        """
-        unit = 'Momentum Transfer (Q)'
-        canvas = self.ui.graphicsView_reducedData
-
-        # reduce
-        good, expno, scanno = self._uiReduceData(2, unit)
-
-        # plot
-        if good is True: 
-            self._currUnit = unit
-            xlabel = self._getXLabelFromUnit(unit)
-            label = "Exp %s Scan %s"%(str(expno), str(scanno))
-            self._plotReducedData(expno, scanno, canvas, xlabel, label=None, clearcanvas=True)
-        
-        return
-
 
     def doPlotRawPtMain(self):
         """ Plot current raw detector signal for a specific Pt.
         """
         # Get experiment number and scan number for data file
         try: 
-            expno = self.getInteger(self.ui.lineEdit_expNo)
-            scanno = self.getInteger(self.ui.lineEdit_scanNo)
+            expno = self._getInteger(self.ui.lineEdit_expNo)
+            scanno = self._getInteger(self.ui.lineEdit_scanNo)
         except EmptyError as e:
             self._logError(str(e))
             return
@@ -1041,7 +965,7 @@ class MainWindow(QtGui.QMainWindow):
         doOverPlot = bool(self.ui.checkBox_overpltRawDet.isChecked())
         plotmode = str(self.ui.comboBox_rawDetMode.currentText())
         try:
-            ptNo = self.getInteger(self.ui.lineEdit_ptNo)
+            ptNo = self._getInteger(self.ui.lineEdit_ptNo)
         except EmptyError:
             ptNo = None
 
@@ -1122,7 +1046,99 @@ class MainWindow(QtGui.QMainWindow):
         return
 
 
-    def doRebin2Theta(self):
+    def doReduce2Theta(self):
+        """ Rebin the data and plot in 2theta
+        """
+        unit = '2theta'
+        canvas = self.ui.graphicsView_reducedData
+
+        # reduce
+        good, expno, scanno = self._uiReduceData(2, unit)
+
+        # plot
+        if good is True: 
+            self._currUnit = unit
+            xlabel = self._getXLabelFromUnit(unit)
+            label = "Exp %s Scan %s"%(str(expno), str(scanno))
+            self._plotReducedData(expno, scanno, canvas, xlabel, label=None, clearcanvas=True)
+        
+        return
+    
+
+    def doReduceDSpacing(self):
+        """ Rebin the data and plot in d-spacing
+        """
+        # new unit and information
+        unit = "dSpacing"
+        
+        canvas = self.ui.graphicsView_reducedData
+
+        # reduce
+        good, expno, scanno = self._uiReduceData(2, unit)
+
+        # plot
+        if good is True: 
+            self._currUnit = unit
+            xlabel = self._getXLabelFromUnit(unit)
+            label = "Exp %s Scan %s"%(str(expno), str(scanno))
+            self._plotReducedData(expno, scanno, canvas, xlabel, label=None, clearcanvas=True)
+        
+        
+        return
+
+
+    def doReduceQ(self):
+        """ Rebin the data and plot in momentum transfer Q
+        """
+        unit = 'Momentum Transfer (Q)'
+        canvas = self.ui.graphicsView_reducedData
+
+        # reduce
+        good, expno, scanno = self._uiReduceData(2, unit)
+
+        # plot
+        if good is True: 
+            self._currUnit = unit
+            xlabel = self._getXLabelFromUnit(unit)
+            label = "Exp %s Scan %s"%(str(expno), str(scanno))
+            self._plotReducedData(expno, scanno, canvas, xlabel, label=None, clearcanvas=True)
+        
+        return
+
+
+    def doReduceSetData(self):
+        """ Reduce multiple data
+        """
+        # Get exp number and list of scans
+        try:
+            expno, scanlist = self._uiGetExpScanTabMultiScans()
+        except Exception as e:
+            self._logError(str(e))
+            return False
+
+        # Reduce and plot data 
+        unit = str(self.ui.comboBox_mscanUnit.currentText())
+        xlabel = self._getXLabelFromUnit(unit)
+
+        canvas = self.ui.graphicsView_mergeRun
+        canvas.clearAllLines()
+        canvas.clearCanvas()
+
+        for scan in scanlist: 
+            good, expno, scanno = self._uiReduceData(3, unit, expno, scan) 
+                
+            if good is True:            
+                label = "Exp %s Scan %s"%(str(expno), str(scanno)) 
+                self._plotReducedData(expno, scanno, canvas, xlabel, label=label, clearcanvas=False)
+            else:
+                self._logError('Failed to reduce Exp %s Scan %s'%(str(expno), str(scanno)))
+            # ENDIF
+        # ENDFOR
+
+        return
+
+
+    def doReduceVanadium2Theta(self):
         """ Rebin MDEventWorkspaces in 2-theta. for pushButton_rebinD
         in vanadium peak strip tab
 
@@ -1149,7 +1165,7 @@ class MainWindow(QtGui.QMainWindow):
             self._plotPeakIndicators(self.ui.graphicsView_vanPeaks, vanpeakpos)
 
         return good
-
+    
 
     def doSaveData(self):
         """ Save data
@@ -1277,34 +1293,6 @@ class MainWindow(QtGui.QMainWindow):
         return
 
 
-    def getInteger(self, lineedit):
-        """ Get integer from line edit
-        """
-        valuestr = str(lineedit.text()).strip()
-        if len(valuestr) == 0:
-            raise EmptyError("Input is empty. It cannot be converted to integer.")
-
-        try:
-            value = int(valuestr)
-        except ValueError as e:
-            raise e
-
-        return value
-
-    def getFloat(self, lineedit):
-        """ Get integer from line edit
-        """
-        valuestr = str(lineedit.text()).strip()
-        if len(valuestr) == 0:
-            raise EmptyError("Input is empty. It cannot be converted to integer.")
-
-        try:
-            value = float(valuestr)
-        except ValueError as e:
-            raise e
-
-        return value
-
 
     def on_mouseMotion(self, event):
         """
@@ -1345,59 +1333,6 @@ class MainWindow(QtGui.QMainWindow):
     #---------------------------------------------------------------------------
     # Private methods dealing with UI
     #---------------------------------------------------------------------------
-    def _uiLoadDataFile(self, exp, scan):
-        """ Download data file according to its exp and scan 
-        Either download the data from a server or copy the data file from local 
-        disk
-        """
-        # Get on hold of raw data file
-        useserver = self.ui.radioButton_useServer.isChecked()
-        uselocal = self.ui.radioButton_useLocal.isChecked()
-        if (useserver and uselocal) is False:
-            self._logError("It is logically wrong to set up server/local dir for data.")
-            useserver = True
-            uselocal = False
-            self.ui.radioButton_useServer.setChecked(True)
-            self.ui.radioButton_useLocal.setChecked(False)
-        # ENDIF
-        
-        rvalue = False
-        if self._srcFromServer is True:
-            # Use server: build the URl to download data
-            if self._serverAddress.endswith('/') is False:
-                self._serverAddress += '/'
-            fullurl = "%s%s/exp%d/Datafiles/%s_exp%04d_scan%04d.dat" % (self._serverAddress,
-                    self._instrument.lower(), exp, self._instrument.upper(), exp, scan)
-            print "URL: ", fullurl
-    
-            cachedir = str(self.ui.lineEdit_cache.text()).strip()
-            if os.path.exists(cachedir) is False:
-                cachedir = os.getcwd()
-                self.ui.lineEdit_cache.setText(cachedir)
-                self._logWarning("Cache directory is not valid. \
-                    Using current workspace directory %s as cache." % (cachedir) )
-    
-            filename = '%s_exp%04d_scan%04d.dat' % (self._instrument.upper(), exp, scan)
-            self._srcFileName = os.path.join(cachedir, filename)
-            status, errmsg = downloadFile(fullurl, self._srcFileName)
-            if status is False:
-                self._logError(errmsg)
-                self._srcFileName = None
-            else:
-                rvalue = True
-
-        elif self._srcAtLocal is True:
-            # Data from local
-            self._srcFileName = os.path.join(self._localSrcDataDir, "%s/Exp%d_Scan%04d.dat" % (self._instrument, exp, scan))
-            if os.path.exists(self._srcFileName) is True:
-                rvalue = True
-
-        else:
-            raise NotImplementedError("Logic error.  Neither downloaded from server.\
-                Nor from local drive")
-
-        return (rvalue,self._srcFileName)
-
     #--------------------------------------------------------------------------
     # Private methods to plot data
     #--------------------------------------------------------------------------
@@ -1562,15 +1497,13 @@ class MainWindow(QtGui.QMainWindow):
 
         canvas = self.ui.graphicsView_mergeRun
 
-        # FIXME : shall be an option?
-        clearcanvas = True
-        if clearcanvas is True:
-            canvas.clearAllLines()
-            canvas.setLineMarkerColorIndex(0)
+        # Clear canvas 
+        canvas.clearAllLines() 
+        canvas.clearCanvas()
 
-        # plot
+        # Plot
         marker, color = canvas.getNextLineMarkerColorCombo()
-        xlabel = self._getXLabelFromUnit(self._currUnit)
+        xlabel = self._getXLabelFromUnit(self.ui.comboBox_mscanUnit.currentText())
 
         canvas.addPlot(vecx, vecy, marker=marker, color=color, 
             xlabel=xlabel, ylabel='intensity',label=label)
@@ -1784,6 +1717,60 @@ class MainWindow(QtGui.QMainWindow):
             
         return (change, xmin, xmax, binsize)
         
+    
+    def _uiDownloadDataFile(self, exp, scan):
+        """ Download data file according to its exp and scan 
+        Either download the data from a server or copy the data file from local 
+        disk
+        """
+        # Get on hold of raw data file
+        useserver = self.ui.radioButton_useServer.isChecked()
+        uselocal = self.ui.radioButton_useLocal.isChecked()
+        if (useserver and uselocal) is False:
+            self._logError("It is logically wrong to set up server/local dir for data.")
+            useserver = True
+            uselocal = False
+            self.ui.radioButton_useServer.setChecked(True)
+            self.ui.radioButton_useLocal.setChecked(False)
+        # ENDIF
+        
+        rvalue = False
+        if self._srcFromServer is True:
+            # Use server: build the URl to download data
+            if self._serverAddress.endswith('/') is False:
+                self._serverAddress += '/'
+            fullurl = "%s%s/exp%d/Datafiles/%s_exp%04d_scan%04d.dat" % (self._serverAddress,
+                    self._instrument.lower(), exp, self._instrument.upper(), exp, scan)
+            print "URL: ", fullurl
+    
+            cachedir = str(self.ui.lineEdit_cache.text()).strip()
+            if os.path.exists(cachedir) is False:
+                cachedir = os.getcwd()
+                self.ui.lineEdit_cache.setText(cachedir)
+                self._logWarning("Cache directory is not valid. \
+                    Using current workspace directory %s as cache." % (cachedir) )
+    
+            filename = '%s_exp%04d_scan%04d.dat' % (self._instrument.upper(), exp, scan)
+            self._srcFileName = os.path.join(cachedir, filename)
+            status, errmsg = downloadFile(fullurl, self._srcFileName)
+            if status is False:
+                self._logError(errmsg)
+                self._srcFileName = None
+            else:
+                rvalue = True
+
+        elif self._srcAtLocal is True:
+            # Data from local
+            self._srcFileName = os.path.join(self._localSrcDataDir, "%s/Exp%d_Scan%04d.dat" % (self._instrument, exp, scan))
+            if os.path.exists(self._srcFileName) is True:
+                rvalue = True
+
+        else:
+            raise NotImplementedError("Logic error.  Neither downloaded from server.\
+                Nor from local drive")
+
+        return (rvalue,self._srcFileName)
+
     def _uiGetBinningParams(self, itab):
         """ Get binning parameters
         
@@ -1827,12 +1814,10 @@ class MainWindow(QtGui.QMainWindow):
 
 
     def _uiGetExcludedDetectors(self):
-        """
+        """ Get excluded detectors from input line edit
 
         Return :: list of detector IDs to exclude from reduction
         """ 
-        # TODO - Documentation
-
         excludedetidlist = []
 
         if self.ui.checkBox_useDetExcludeFile.isChecked():
@@ -1862,8 +1847,39 @@ class MainWindow(QtGui.QMainWindow):
         
         return (expno, scanno)
 
+
+    def _uiGetExpScanTabMultiScans(self): 
+        """ Get exp number and scans from tab 3 
+        """ 
+        try:
+            expno = int(self.ui.lineEdit_expNo.text())
+            startscan = int(self.ui.lineEdit_scanStart.text())
+            endscan = int(self.ui.lineEdit_scanEnd.text())
+        except ValueError as e:
+            raise RuntimeError("For merging scans, Exp No, Starting scan number and \
+                    end scan number must be given: %s" % (str(e)))
+       
+        # scans = [startscan, endscan] + [others] - [excluded]
+        status, extrascanlist = self._getIntArray(str(self.ui.lineEdit_extraScans.text()))
+        if status is False:
+            raise RuntimeError(extrascanlsit)
+
+        status, excludedlist = self._getIntArray(str(self.ui.lineEdit_exclScans.text()))
+        self._logDebug("Excluded list: %s" %(str(excludedlist)))
+        if status is False:
+            self._logError(excludedlist)
+            return
+            
+        scanslist = range(startscan, endscan+1)
+        scanslist.extend(extrascanlist)
+        scanslist = list(set(scanslist))
+        for scan in excludedlist:
+            scanslist.remove(scan)
+
+        return (expno, sorted(scanslist))
+    
         
-    def _uiReduceData(self, itab, unit):
+    def _uiReduceData(self, itab, unit, expno=None, scanno=None):
         """ Rebin and plot by reading GUI widgets' value
 
         Arguments: 
@@ -1871,18 +1887,26 @@ class MainWindow(QtGui.QMainWindow):
          - unit : string for target unit
         """
         # Experiment number and Scan number
-        try:
-            expno, scanno = self._uiGetExpScanNumber()
-        except NotImplementedError as e:
-            self._logError(str(e))
-            return
+        if isinstance(expno, int) and isinstance(scanno, int):
+            # Call from tab-3 multiple scan
+            pass
+        else:
+            try:
+                expno, scanno = self._uiGetExpScanNumber()
+            except NotImplementedError as e:
+                self._logError(str(e))
+                return
+        # ENDIF
 
         # Get binning parameter 
         xmin, binsize, xmax = self._uiGetBinningParams(itab) 
 
         # Get wavelength 
         try: 
-            wavelength = float(str(self.ui.lineEdit_wavelength.text()))
+            if itab == 3:
+                wavelength = float(self._myControl.getWavelength(expno, scanno))
+            else: 
+                wavelength = float(str(self.ui.lineEdit_wavelength.text()))
         except ValueError:
             if unit != '2theta':
                 raise NotImplementedError('Wavelength must be specified for unit %s.'%(unit))
@@ -1899,69 +1923,9 @@ class MainWindow(QtGui.QMainWindow):
             self._logError(str(e))
             return (False, expno, scanno)
 
-        """ 
-        # xmin=None, binsize=None, xmax=None, canvas=None):
-        #_rebinPlot(self, unit, xmin=None, binsize=None, xmax=None, canvas=None):
-        # FIXME - MAKE THIS WORK! for Noramlized and Vanadium!
-        # experiment number and scan number
-        
-        # binning parameters
-        if binsize is None:
-            try:    
-                xmin, binsize, xmax = self._uiGetBinningParams()
-            except NotImplementedError as e:
-                self._logError(str(e))
-                return
-        else:
-            
-        # wavelength
-        try: 
-            wavelength = float(self.ui.lineEdit_wavelength.text())
-        except ValueError as e:
-            self._logError(str(e))
-            return  
-        
-        # rebin
-        try:
-            # rebinned = self._myControl.rebin(expno, scanno, unit, wavelength, xmin, binsize, xmax)
-            print "[DB] reduction status = %s, Binning = %s, %s, %s" % (str(execstatus),
-                    str(xmin), str(binsize), str(xmax))
-            excludeddetlist = self._uiGetExcludedDetectors()
-            execstatus = self._myControl.reduceSpicePDData(expno, scanno, \
-                    datafilename, unit, xmin, xmax, binsize, wavelength, excludedetlist)
-        except NotImplementedError as e:
-            self._logError(str(e))
-            return False
-        """
-
         return (True, expno, scanno)
     
     
-    def _uiPlotXXX(self): 
-        if rebinned: 
-            # plot if rebinned
-            xlabel = self._getXLabelFromUnit(unit)
-           
-            # set up default canvas
-            if canvas is None:
-                canvas = self.ui.graphicsView_reducedData
-               
-            self._plotReducedData(expno, scanno, canvas, xlabel, 
-                label=None, clearcanvas=True)
-        else:
-           print "Rebinned = ", str(rebinned)
-
-        return
-
-
-
-    def _excludePt(self, pts):
-        """
-        """ 
-        # TODO
-
-        return
-
     def _logDebug(self, dbinfo):
         """ Log debug information
         """
@@ -1974,26 +1938,48 @@ class MainWindow(QtGui.QMainWindow):
         print "Log(Error): %s" % (errinfo)
 
 
+    def _logNotice(self, errinfo):
+        """ Log error information
+        """
+        print "Log(Notice): %s" % (errinfo)
+
+
     def _logWarning(self, errinfo):
         """ Log error information
         """
         print "Log(Warning): %s" % (errinfo)
-        
 
-    def _getXLabelFromUnit(self, unit):
-        """ Get X-label from unit
+        return
+
+        
+    def _getFloat(self, lineedit):
+        """ Get integer from line edit
         """
-        if unit == '2theta':
-            xlabel = r'$2\theta$ (Degrees)'
-        elif unit == 'dSpacing':
-            xlabel = r"d $(\AA)$"
-        elif unit == 'Momentum Transfer (Q)':
-            xlabel = r"Q $(\AA^{-1})$"
-        else:
-            xlabel = 'Wacky Unknown'
-        
-        return xlabel
+        valuestr = str(lineedit.text()).strip()
+        if len(valuestr) == 0:
+            raise EmptyError("Input is empty. It cannot be converted to integer.")
 
+        try:
+            value = float(valuestr)
+        except ValueError as e:
+            raise e
+
+        return value
+
+
+    def _getInteger(self, lineedit):
+        """ Get integer from line edit
+        """
+        valuestr = str(lineedit.text()).strip()
+        if len(valuestr) == 0:
+            raise EmptyError("Input is empty. It cannot be converted to integer.")
+
+        try:
+            value = int(valuestr)
+        except ValueError as e:
+            raise e
+
+        return value
 
     def _getIntArray(self, intliststring):
         """ Validate whether the string can be divided into integer strings.
@@ -2052,4 +2038,18 @@ class MainWindow(QtGui.QMainWindow):
 
         return (True, intlist)
 
+
+    def _getXLabelFromUnit(self, unit):
+        """ Get X-label from unit
+        """
+        if unit == '2theta':
+            xlabel = r'$2\theta$ (Degrees)'
+        elif unit == 'dSpacing':
+            xlabel = r"d $(\AA)$"
+        elif unit == 'Momentum Transfer (Q)':
+            xlabel = r"Q $(\AA^{-1})$"
+        else:
+            xlabel = 'Wacky Unknown'
+        
+        return xlabel
 

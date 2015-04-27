@@ -85,12 +85,12 @@ else:
 #
 # Test case: Experiment 231, Scan 1 to 10
 #
-print "Set to exp 231, scan 1"
-reducer.ui.lineEdit_expNo.setText('231')
+print "Set to exp 380, scan 1-10"
+reducer.ui.lineEdit_expNo.setText('380')
 reducer.ui.lineEdit_scanStart.setText('1')
 reducer.ui.lineEdit_scanEnd.setText('8')
 reducer.ui.lineEdit_exclScans.setText('2,4-6')
-reducer.ui.lineEdit_wavelength.setText('2.41')
+#reducer.ui.lineEdit_wavelength.setText('2.41')
 
 if MOS == LINUX:
     reducer.ui.lineEdit_cache.setText('/home/wzz/Temp/')
@@ -101,8 +101,14 @@ reducer.ui.lineEdit_mergeMinX.setText('5.0')
 reducer.ui.lineEdit_mergeMaxX.setText('150.0')
 reducer.ui.lineEdit_mergeBinSize.setText('0.1')
 
+
+# Load multiple sets of data and plot in 2D
+reducer.doLoadSetData()
+
+# Merge!
+
 # load and reduce data 
-reducer.doMergeScans()
+# reducer.doMergeScans()
 
 
 #-------------------------------------------------------------------------------
