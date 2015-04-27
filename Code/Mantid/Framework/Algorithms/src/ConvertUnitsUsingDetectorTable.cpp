@@ -46,7 +46,8 @@ namespace Algorithms
   //----------------------------------------------------------------------------------------------
   /** Constructor
    */
-  ConvertUnitsUsingDetectorTable::ConvertUnitsUsingDetectorTable()
+  ConvertUnitsUsingDetectorTable::ConvertUnitsUsingDetectorTable() : Algorithm(),
+      m_numberOfSpectra(0), m_distribution(false), m_inputEvents(false)
   {
   }
 
