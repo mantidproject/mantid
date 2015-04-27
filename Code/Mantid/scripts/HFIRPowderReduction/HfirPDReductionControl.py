@@ -826,6 +826,19 @@ class HFIRPDRedControl:
         return
 
 
+    def smoothVanadiumSpectrum(self, expno, scanno, smoothparams_str):
+        """
+        """ 
+        outws = api.FFTSmooth(InputWorkspace=vanRun, 
+                              OutputWorkspace=vanRun, 
+                              Filter="Butterworth",
+                              Params=smoothparams_str,
+                              IgnoreXBins=True,
+                              AllSpectra=True)
+
+        return True
+
+
     def stripVanadiumPeaks(self, exp, scan, binparams, vanpeakposlist=None):
         """ Strip vanadium peaks 
 

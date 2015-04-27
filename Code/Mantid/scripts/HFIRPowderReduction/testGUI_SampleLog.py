@@ -17,7 +17,7 @@
 """ Test main """
 import sys
 
-import HfirPDReductionGUI
+import HFIRPowderReduction.HfirPDReductionGUI
 from PyQt4 import QtGui
 
 
@@ -42,7 +42,7 @@ def qapp():
     return _app
 
 app = qapp()
-reducer = HfirPDReductionGUI.MainWindow() #the main ui class in this file is called MainWindow
+reducer = HFIRPowderReduction.HfirPDReductionGUI.MainWindow() #the main ui class in this file is called MainWindow
 reducer.show()
 
 # example: 'http://neutron.ornl.gov/user_data/hb2a/exp400/Datafiles/HB2A_exp0400_scan0001.dat'

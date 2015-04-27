@@ -9,9 +9,9 @@ def makeHB2ADetEfficiencyFileName(expno, m1, colltrans):
     """ Fabricate the detector's efficiency file name for HB2A
     Example: HB2A_exp0400__Ge_113_IN_vcorr.txt
 
-   * Ge 113: :math:`\lambda = 2.41 \AA`, m1 = 9.45
-   * Ge 115: :math:`\lambda = 1.54 \AA`, m1 = 0
-   * Ge 117  :math:`\lambda = 1.12 \AA`, No used
+   * Ge 113: lambda = 2.41 A, m1 = 9.45
+   * Ge 115: lambda = 1.54 A, m1 = 0
+   * Ge 117  lambda = 1.12 A, No used
 
     Arguments: 
      - expno :: experiment number

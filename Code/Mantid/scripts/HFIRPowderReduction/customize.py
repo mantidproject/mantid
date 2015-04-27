@@ -29,6 +29,7 @@ def main(argv):
 
     # replace and add import
     wbuf = ""
+    wbuf += "#pylint: disable=invalid-name,relative-import\n"
     importclass = True
     for line in lines:
         if line.count('class') == 1 and line.count('):') == 1 and importclass is True:

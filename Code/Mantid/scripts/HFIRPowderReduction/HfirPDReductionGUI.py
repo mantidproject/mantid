@@ -1,9 +1,6 @@
 ################################################################################
-#
 # Main class for HFIR powder reduction GUI
-# 
 # Key word for future developing: FUTURE, NEXT, REFACTOR, RELEASE 2.0
-#
 ################################################################################
 
 #pylint: disable=invalid-name
@@ -234,6 +231,9 @@ class MainWindow(QtGui.QMainWindow):
         self.ui.lineEdit_wavelength.setText('2.41')
 
         self.ui.pushButton_unit2theta.setText(r'$2\theta$')
+        
+        # vanadium spectrum smooth parameters
+        self.ui.lineEdit_smoothParams.setText('20,2')
 
         # Set up data source
         self._serverAddress = DEFAULT_SERVER 
@@ -1200,6 +1200,27 @@ class MainWindow(QtGui.QMainWindow):
         raise NotImplementedError("Need use case from instrument scientist")
 
 
+    def doSmoothVanadiumSpectrum(self):
+        """ Smooth vanadium spectrum
+        """
+        # Get experiment number and scan number
+        try:
+            expno, scanno = self._uiGetExpScanNumber(self)
+        except NotImplementedError as e:
+            self._logError("Unable to get exp number and scan number for smoothing vanadium data due to %s." % (
+                str(e)))
+            return False
+
+        smoothparams_str = str(self.ui.lineEdit_smoothParams.text())
+        # Smooth data
+        self._myControl.smoothVanadiumSpectrum(expno, scanno, smoothparams_str)
+
+        # Plot
+        self._plotVanadiumRun()
+
+        return
+
+
     def doStripVandiumPeaks(self):
         """ Strip vanadium peaks
         """
@@ -1993,13 +2014,12 @@ class MainWindow(QtGui.QMainWindow):
 
         # Split by ","
         termlevel0s = intliststring.split(",")
-        
         intlist = []
 
         # For each term
         for level0term in termlevel0s:
             level0term = level0term.strip()
-            
+
             # split upon dash -
             numdashes = level0term.count("-")
             if numdashes == 0:
@@ -2019,7 +2039,7 @@ class MainWindow(QtGui.QMainWindow):
                 twoterms = level0term.split("-")
                 templist = []
                 for i in xrange(2):
-                    valuestr = twoterms[i] 
+                    valuestr = twoterms[i]
                     try:
                         intvalue = int(valuestr)
                         if str(intvalue) != valuestr:
@@ -2050,6 +2070,5 @@ class MainWindow(QtGui.QMainWindow):
             xlabel = r"Q $(\AA^{-1})$"
         else:
             xlabel = 'Wacky Unknown'
-        
-        return xlabel
 
+        return xlabel
