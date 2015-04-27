@@ -120,13 +120,15 @@ class CreateMD(DataProcessorAlgorithm):
         return 'Creates a mutlidimensional workspace by transforming and combining individual runs.'
 
     def PyInit(self):
-        self.declareProperty(StringArrayProperty('DataSources',  values=[], direction=Direction.Input, validator=StringArrayMandatoryValidator()),
+        self.declareProperty(StringArrayProperty('DataSources',  values=[], direction=Direction.Input,
+                             validator=StringArrayMandatoryValidator()),
                              doc='Input workspaces to process, or filenames to load and process')
 
-        self.declareProperty(FloatArrayProperty('EFix', values=[], direction=Direction.Input), 
+        self.declareProperty(FloatArrayProperty('EFix', values=[], direction=Direction.Input),
                              doc='datasource energy values in meV')
 
-        self.declareProperty('Emode', defaultValue='Direct', validator=StringListValidator(self._possible_emodes()), direction=Direction.Input, 
+        self.declareProperty('Emode', defaultValue='Direct',
+                             validator=StringListValidator(self._possible_emodes()), direction=Direction.Input,
                              doc='Analysis mode ' + str(self._possible_emodes()) )
  
         self.declareProperty(FloatArrayProperty('Alatt', values=[], validator=FloatArrayMandatoryValidator(),
@@ -151,10 +153,10 @@ class CreateMD(DataProcessorAlgorithm):
         self.declareProperty(FloatArrayProperty('Gs', values=[], direction=Direction.Input),
                              doc='gs rotation in degrees. Optional or one entry per run.' )
 
-        self.declareProperty(IMDWorkspaceProperty('OutputWorkspace', '', direction=Direction.Output ), 
+        self.declareProperty(IMDWorkspaceProperty('OutputWorkspace', '', direction=Direction.Output ),
                              doc='Output MDWorkspace')
 
-        self.declareProperty('InPlace', defaultValue=False, direction=Direction.Input, 
+        self.declareProperty('InPlace', defaultValue=False, direction=Direction.Input,
                              doc="Execute conversions to MD and Merge in one-step. Less memory overhead.")
 
     def _validate_inputs(self):
@@ -165,8 +167,8 @@ class CreateMD(DataProcessorAlgorithm):
         v = self.getProperty('v').value
         psi = self.getProperty('Psi').value
         gl = self.getProperty('Gl').value
-        gs = self.getProperty('Gs').value  
-        efix = self.getProperty('EFix').value  
+        gs = self.getProperty('Gs').value
+        efix = self.getProperty('EFix').value
 
         input_workspaces = self.getProperty("DataSources").value
 
@@ -216,7 +218,7 @@ class CreateMD(DataProcessorAlgorithm):
         gl = self.getProperty('Gl').value
         gs = self.getProperty('Gs').value
         efix = self.getProperty('EFix').value
-        in_place = self.getProperty('InPlace') 
+        in_place = self.getProperty('InPlace')
 
         data_sources = self.getProperty("DataSources").value
 
@@ -252,15 +254,16 @@ class CreateMD(DataProcessorAlgorithm):
             must_load = not AnalysisDataService.doesExist(data_source)
             ws = None
             if must_load:
-                ws_name = "%s_md_%i" % ( os.path.splitext(data_source)[0] , counter )  # Strip off any file extensions, and call it _md_{n} where n avoids clashes in the dictionary
+                # Strip off any file extensions, and call it _md_{n} where n avoids clashes in the dictionary
+                ws_name = "%s_md_%i" % ( os.path.splitext(data_source)[0] , counter )  
                 ws = self._load_ws(data_source, ws_name)
                 to_merge_name = ws_name
             else:
                 ws = AnalysisDataService.retrieve(data_source)
-                to_merge_name = "%s_md" %  data_source  
+                to_merge_name = "%s_md" %  data_source
 
-            do_in_place = in_place and counter > 0 # We cannot process in place until we have an output MDWorkspace to use.    
-            run_md = self._single_run(input_workspace=ws if in_place else ws, emode=emode, efix=efix_entry, 
+            do_in_place = in_place and counter > 0 # We cannot process in place until we have an output MDWorkspace to use.
+            run_md = self._single_run(input_workspace=ws if in_place else ws, emode=emode, efix=efix_entry,
                 alatt=alatt, angdeg=angdeg, u=u, v=v, psi=psi_entry, gl=gl_entry, gs=gs_entry, in_place=do_in_place, out_mdws=run_md)
                 
                 
