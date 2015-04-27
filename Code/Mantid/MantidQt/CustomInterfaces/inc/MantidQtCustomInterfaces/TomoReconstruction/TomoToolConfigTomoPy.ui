@@ -196,5 +196,38 @@
   </layout>
  </widget>
  <resources/>
- <connections/>
+ <connections>
+  <connection>
+   <sender>buttonBox</sender>
+   <signal>accepted()</signal>
+   <receiver>TomoToolConfigTomoPy</receiver>
+   <slot>accept()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>434</x>
+     <y>200</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>291</x>
+     <y>111</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>buttonBox</sender>
+   <signal>rejected()</signal>
+   <receiver>TomoToolConfigTomoPy</receiver>
+   <slot>reject()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>434</x>
+     <y>200</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>291</x>
+     <y>111</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
 </ui>

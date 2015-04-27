@@ -520,12 +520,16 @@ void TomoReconstruction::runToolIndexChanged(int /* i */) {
 
   std::string tool = rt->currentText().toStdString();
   // disallow reconstruct on tools that don't run yet: Savu and CCPi
-  if (m_CCPiTool == tool || m_SavuTool == tool) {
+  if (m_CCPiTool == tool) {
     m_ui.pushButton_run_tool_setup->setEnabled(false);
+    m_ui.pushButton_reconstruct->setEnabled(false);
+  } else if (m_SavuTool == tool) {
+    // for now, show setup dialog, but cannot run
+    m_ui.pushButton_run_tool_setup->setEnabled(true);
     m_ui.pushButton_reconstruct->setEnabled(false);
   } else {
     m_ui.pushButton_run_tool_setup->setEnabled(true);
-    m_ui.pushButton_reconstruct->setEnabled(true);
+    m_ui.pushButton_reconstruct->setEnabled(m_loggedIn);
   }
 }
 
@@ -743,7 +747,8 @@ void TomoReconstruction::showToolConfig(const std::string &name) {
       int mi = m_uiTomoPy.comboBox_method->currentIndex();
       QString run = m_uiTomoPy.lineEdit_runnable->text();
       if (1 == mi) {
-        // hard-coded for now, this is a different script
+        // hard-coded for now, this is a different script on SCARF that should be
+        // integrated with the FBP script
         run = "/work/imat/runs-scripts/scripts/tomopy/imat_recon_SIRT.py";
       }
       double minAngle = m_uiTomoPy.doubleSpinBox_angle_min->value();
@@ -764,10 +769,10 @@ void TomoReconstruction::showToolConfig(const std::string &name) {
       int mi = m_uiAstra.comboBox_method->currentIndex();
       QString run = m_uiAstra.lineEdit_runnable->text();
       if (1 == mi) {
-        // hard-coded for now, this is a different script
+        // hard-coded for now, this is a different script on SCARF
         run = "/work/imat/runs-scripts/scripts/astra/astra-3d-SIRT3D.py";
       }
-      double cor = m_uiTomoPy.doubleSpinBox_center_rot->value();
+      double cor = m_uiAstra.doubleSpinBox_center_rot->value();
       double minAngle = m_uiAstra.doubleSpinBox_angle_min->value();
       double maxAngle = m_uiAstra.doubleSpinBox_angle_max->value();
 
@@ -778,11 +783,16 @@ void TomoReconstruction::showToolConfig(const std::string &name) {
       m_toolsSettings.astra = settings.toCommand();
     }
   } else if (m_SavuTool == name) {
-    // TODO: savu not ready
+    // TODO: savu not ready. This is a temporary kludge, it just shows
+    // the setup dialog so we can chat about it.
     TomoToolConfigSavu savu;
     m_uiSavu.setupUi(&savu);
     doSetupSectionParameters();
+    savu.setWindowModality(Qt::ApplicationModal);
     savu.show();
+    QEventLoop el;
+    connect(this, SIGNAL(destroyed()), &el, SLOT(quit()));
+    el.exec();
   } else if (m_CustomCmdTool == name) {
     TomoToolConfigCustom cmd;
     m_uiCustom.setupUi(&cmd);
@@ -790,7 +800,7 @@ void TomoReconstruction::showToolConfig(const std::string &name) {
     if (QDialog::Accepted == res) {
       // TODO: move this
       QString run = m_uiCustom.lineEdit_runnable->text();
-      QString opts = m_uiCustom.textEdit_cl_opts->text();
+      QString opts = m_uiCustom.textEdit_cl_opts->toPlainText();
 
       ToolSettingsCustom settings(run.toStdString(), opts.toStdString());
       m_toolsSettings.custom = settings.toCommand();
@@ -800,6 +810,9 @@ void TomoReconstruction::showToolConfig(const std::string &name) {
 }
 
 void TomoReconstruction::reconstructClicked() {
+  if (!m_loggedIn)
+    return;
+
   const std::string &resource = getComputeResource();
 
   if (m_localCompName != resource) {
