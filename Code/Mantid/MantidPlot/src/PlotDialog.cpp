@@ -1154,11 +1154,14 @@ void PlotDialog::showColorMapEditor(bool)
   if (grayScaleBox->isChecked() || defaultScaleBox->isChecked())
   {
     mSelectColormap->hide();
+    boxSetCMapAsDefault->hide();
   }
   else
   {
+    boxSetCMapAsDefault->show();
     mSelectColormap->show();
   }
+  setColorMapName();
 }
 
 void PlotDialog::initSpectrogramPage()
@@ -1182,12 +1185,22 @@ void PlotDialog::initSpectrogramPage()
   connect(customScaleBox, SIGNAL(toggled(bool)), this, SLOT(showColorMapEditor(bool)));
   vl->addWidget(customScaleBox);
 
-  QHBoxLayout *hl = new QHBoxLayout(imageGroupBox);
-  hl->addLayout(vl);
+  QVBoxLayout *vlCM = new QVBoxLayout();
+
+  mLabelCurrentColormap = new QLabel(tr("Map: "));
+  vlCM->addWidget(mLabelCurrentColormap);
+
+  boxSetCMapAsDefault = new QCheckBox(tr("Set as Default"));
+  vlCM->addWidget(boxSetCMapAsDefault);
+  vlCM->addStretch();
 
   mSelectColormap = new QPushButton(tr("Select ColorMap"));
-  hl->addWidget(mSelectColormap);
+  vlCM->addWidget(mSelectColormap);
   connect(mSelectColormap, SIGNAL(clicked()), this, SLOT(changeColormap()));
+
+  QHBoxLayout *hl = new QHBoxLayout(imageGroupBox);
+  hl->addLayout(vl);
+  hl->addLayout(vlCM);
 
   axisScaleBox = new QGroupBox(tr("Color Bar Scale"));
   axisScaleBox->setCheckable(true);
@@ -1211,7 +1224,43 @@ void PlotDialog::initSpectrogramPage()
   vl2->addWidget(axisScaleBox);
   vl2->addStretch();
 
+  setColorMapName();
+
   privateTabWidget->insertTab(spectrogramPage, tr("Contour") + " / " + tr("Image"));
+}
+
+void PlotDialog::setColorMapName()
+{
+  if (grayScaleBox->isChecked()) {
+    mLabelCurrentColormap->setText("Map: Greyscale");
+  } 
+  else {
+    Spectrogram *sp = NULL;
+    QTreeWidgetItem *it = listBox->currentItem();
+    if (it) {
+      CurveTreeItem *item = dynamic_cast<CurveTreeItem*>(it);
+      if (item) {
+        QwtPlotItem *plotItem = dynamic_cast<QwtPlotItem *>(item->plotItem());
+        if (plotItem) {
+          sp = dynamic_cast<Spectrogram*>(plotItem);
+        }
+      }
+    }
+    if (sp) {
+      if (defaultScaleBox->isChecked()) {
+        mLabelCurrentColormap->setText("Map: " + sp->getDefaultColorMap().getName());
+      } 
+      else if (mCurrentColorMap.isEmpty()) {
+        mLabelCurrentColormap->setText("Map: " + sp->getColorMap().getName());
+      } 
+      else
+      {
+          //set the name of the color map to the filename
+        QFileInfo fileinfo(mCurrentColorMap);
+        mLabelCurrentColormap->setText("Map: " + fileinfo.baseName());
+      }
+    }
+  }
 }
 
 void PlotDialog::showBoxSymbols(bool show)
@@ -1716,6 +1765,7 @@ void PlotDialog::insertTabs(int plot_type)
       || plot_type == Graph::ColorMapContour)
   {
     privateTabWidget->addTab(spectrogramPage, tr("Colors"));
+    setColorMapName();
     privateTabWidget->addTab(contourLinesPage, tr("Contour Lines"));
     privateTabWidget->showPage(spectrogramPage);
     privateTabWidget->addTab(labelsPage, tr("Labels"));
@@ -2397,8 +2447,10 @@ bool PlotDialog::acceptParams()
       sp->setCustomColorMap(sp->mutableColorMap());
       //sets the selected colormapfile name to spectrogram
       sp->setColorMapFileName(mCurrentColorMap);
-      //saves the settings
-      sp->saveSettings();
+      if (boxSetCMapAsDefault->isChecked()) {
+        //saves the settings as default
+        sp->saveSettings();
+      }
     }
 
     sp->showColorScale((QwtPlot::Axis) colorScaleBox->currentItem(), axisScaleBox->isChecked());
@@ -2946,6 +2998,7 @@ void PlotDialog::changeColormap(const QString &filename)
     return;
 
   mCurrentColorMap = fileselection;
+  setColorMapName();
 }
 
 void PlotDialog::showDefaultContourLinesBox(bool)
