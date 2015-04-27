@@ -128,9 +128,10 @@ private:
  */
 class ToolSettingsTomoPy : public ToolSettings {
 public:
-  ToolSettingsTomoPy(const std::string &runnable, const std::string &pathDark,
-                     const std::string &pathOpen, const std::string &pathSample,
-                     double centerRot, double angleMin, double angleMax);
+  ToolSettingsTomoPy(const std::string &runnable, const std::string &pathOut,
+                     const std::string &pathDark, const std::string &pathOpen,
+                     const std::string &pathSample, double centerRot,
+                     double angleMin, double angleMax);
 
 protected:
   virtual std::string makeCmdLineOptions() const;
@@ -156,6 +157,7 @@ class ToolSettingsAstraToolbox : public ToolSettings {
 public:
   ToolSettingsAstraToolbox(const std::string &runnable, double centerRot,
                            double angleMin, double angleMax,
+                           const std::string &pathOut,
                            const std::string &pathDark,
                            const std::string &pathOpen,
                            const std::string &pathSample);

@@ -31,17 +31,18 @@ namespace {
 Mantid::Kernel::Logger g_log("TomoReconstruction");
 }
 
-size_t TomoReconstruction::m_nameSeqNo = 0;
+size_t TomoReconstruction::g_nameSeqNo = 0;
 
 // names by which we know compute resourcess
-const std::string TomoReconstruction::m_SCARFName = "SCARF@STFC";
+const std::string TomoReconstruction::g_SCARFName = "SCARF@STFC";
 
 // names by which we know image/tomography reconstruction tools (3rd party)
-const std::string TomoReconstruction::m_TomoPyTool = "TomoPy";
-const std::string TomoReconstruction::m_AstraTool = "Astra";
-const std::string TomoReconstruction::m_CCPiTool = "CCPi CGLS";
-const std::string TomoReconstruction::m_SavuTool = "Savu";
-const std::string TomoReconstruction::m_CustomCmdTool = "Custom command";
+const std::string TomoReconstruction::g_TomoPyTool = "TomoPy";
+const std::string TomoReconstruction::g_AstraTool = "Astra";
+const std::string TomoReconstruction::g_CCPiTool = "CCPi CGLS";
+const std::string TomoReconstruction::g_SavuTool = "Savu";
+const std::string TomoReconstruction::g_CustomCmdTool = "Custom command";
+const std::string TomoReconstruction::g_defOutPath = "/work/imat/runs_output";
 
 /**
  * Almost default constructor, but note that this interface currently
@@ -60,13 +61,13 @@ TomoReconstruction::TomoReconstruction(QWidget *parent)
       m_settingsGroup("CustomInterfaces/TomoReconstruction"),
       m_keepAliveTimer(NULL), m_keepAliveThread(NULL) {
 
-  m_computeRes.push_back(m_SCARFName);
+  m_computeRes.push_back(g_SCARFName);
 
-  m_SCARFtools.push_back(m_TomoPyTool);
-  m_SCARFtools.push_back(m_AstraTool);
-  m_SCARFtools.push_back(m_CCPiTool);
-  m_SCARFtools.push_back(m_SavuTool);
-  m_SCARFtools.push_back(m_CustomCmdTool);
+  m_SCARFtools.push_back(g_TomoPyTool);
+  m_SCARFtools.push_back(g_AstraTool);
+  m_SCARFtools.push_back(g_CCPiTool);
+  m_SCARFtools.push_back(g_SavuTool);
+  m_SCARFtools.push_back(g_CustomCmdTool);
 
   m_availPlugins = Mantid::API::WorkspaceFactory::Instance().createTable();
   m_availPlugins->addColumns("str", "name", 4);
@@ -257,7 +258,7 @@ void TomoReconstruction::enableLoggedActions(bool enable) {
  */
 void TomoReconstruction::updateCompResourceStatus(bool online) {
   const std::string res = getComputeResource();
-  if (res == m_SCARFName) {
+  if (res == g_SCARFName) {
     if (online)
       m_ui.pushButton_remote_status->setText("Online");
     else
@@ -405,7 +406,7 @@ std::string TomoReconstruction::createUniqueNameHidden() {
   do {
     // with __ prefix => hidden
     name = "__TomoConfigTableWS_Seq_" +
-           boost::lexical_cast<std::string>(m_nameSeqNo++);
+           boost::lexical_cast<std::string>(g_nameSeqNo++);
   } while (AnalysisDataService::Instance().doesExist(name));
 
   return name;
@@ -481,7 +482,7 @@ void TomoReconstruction::setupRunTool() {
     // resources. For the time being this is rather simple (just
     // SCARF) and will probably stay like this for a while.
     const std::string res = getComputeResource();
-    if ("ISIS" == m_facility && m_SCARFName == res) {
+    if ("ISIS" == m_facility && g_SCARFName == res) {
       tools = m_SCARFtools;
     }
     // others would/could come here
@@ -492,14 +493,14 @@ void TomoReconstruction::setupRunTool() {
 
       // put CCPi but disable it, as it's not yet sorted out how it is
       // configured / run
-      if (m_CCPiTool == tools[i]) {
+      if (g_CCPiTool == tools[i]) {
         QModelIndex idx = rt->model()->index(static_cast<int>(i), 0);
         QVariant disabled(0);
         rt->model()->setData(idx, disabled, Qt::UserRole - 1);
       }
 
       // We cannot run Savu at present
-      if (m_SavuTool == tools[i] || m_CCPiTool == tools[i]) {
+      if (g_SavuTool == tools[i] || g_CCPiTool == tools[i]) {
         m_ui.pushButton_reconstruct->setEnabled(false);
       }
     }
@@ -520,10 +521,10 @@ void TomoReconstruction::runToolIndexChanged(int /* i */) {
 
   std::string tool = rt->currentText().toStdString();
   // disallow reconstruct on tools that don't run yet: Savu and CCPi
-  if (m_CCPiTool == tool) {
+  if (g_CCPiTool == tool) {
     m_ui.pushButton_run_tool_setup->setEnabled(false);
     m_ui.pushButton_reconstruct->setEnabled(false);
-  } else if (m_SavuTool == tool) {
+  } else if (g_SavuTool == tool) {
     // for now, show setup dialog, but cannot run
     m_ui.pushButton_run_tool_setup->setEnabled(true);
     m_ui.pushButton_reconstruct->setEnabled(false);
@@ -662,11 +663,11 @@ void TomoReconstruction::makeRunnableWithOptions(std::string &run,
   checkDataPathsSet();
 
   // For now we only know how to 'aproximately' run commands on SCARF
-  if (m_SCARFName == comp) {
+  if (g_SCARFName == comp) {
     const std::string tool =
         m_ui.comboBox_run_tool->currentText().toStdString();
 
-    if (tool == m_TomoPyTool) {
+    if (tool == g_TomoPyTool) {
       checkWarningToolNotSetup(tool, m_toolsSettings.tomoPy);
       // this should get something like:
       // run = "/work/imat/z-tests-fedemp/scripts/tomopy/imat_recon_FBP.py";
@@ -677,13 +678,13 @@ void TomoReconstruction::makeRunnableWithOptions(std::string &run,
       // TODO this is very unreliable, it will go away better when the
       // settings are properly stored as toool-settings objects
       splitCmdLine(m_toolsSettings.tomoPy, run, opt);
-    } else if (tool == m_AstraTool) {
+    } else if (tool == g_AstraTool) {
       checkWarningToolNotSetup(tool, m_toolsSettings.astra);
       // this should produce something like this:
       // run = "/work/imat/scripts/astra/astra-3d-SIRT3D.py";
       // opt = base + currentPathFITS();
       splitCmdLine(m_toolsSettings.astra, run, opt);
-    } else if (tool == m_CustomCmdTool) {
+    } else if (tool == g_CustomCmdTool) {
       checkWarningToolNotSetup(tool, m_toolsSettings.custom);
       splitCmdLine(m_toolsSettings.custom, run, opt);
     } else {
@@ -732,13 +733,13 @@ void TomoReconstruction::toolSetupClicked() {
     return;
 
   const std::string tool = rt->currentText().toStdString();
-  if (m_CCPiTool != tool) {
+  if (g_CCPiTool != tool) {
     showToolConfig(tool);
   }
 }
 
 void TomoReconstruction::showToolConfig(const std::string &name) {
-  if (m_TomoPyTool == name) {
+  if (g_TomoPyTool == name) {
     TomoToolConfigTomoPy tomopy;
     m_uiTomoPy.setupUi(&tomopy);
     int res = tomopy.exec();
@@ -747,7 +748,8 @@ void TomoReconstruction::showToolConfig(const std::string &name) {
       int mi = m_uiTomoPy.comboBox_method->currentIndex();
       QString run = m_uiTomoPy.lineEdit_runnable->text();
       if (1 == mi) {
-        // hard-coded for now, this is a different script on SCARF that should be
+        // hard-coded for now, this is a different script on SCARF that should
+        // be
         // integrated with the FBP script
         run = "/work/imat/runs-scripts/scripts/tomopy/imat_recon_SIRT.py";
       }
@@ -755,12 +757,12 @@ void TomoReconstruction::showToolConfig(const std::string &name) {
       double maxAngle = m_uiTomoPy.doubleSpinBox_angle_max->value();
       double cor = m_uiTomoPy.doubleSpinBox_center_rot->value();
 
-      ToolSettingsTomoPy settings(run.toStdString(), currentPathDark(),
-                                  currentPathFlat(), currentPathFITS(), cor,
-                                  minAngle, maxAngle);
+      ToolSettingsTomoPy settings(run.toStdString(), g_defOutPath,
+                                  currentPathDark(), currentPathFlat(),
+                                  currentPathFITS(), cor, minAngle, maxAngle);
       m_toolsSettings.tomoPy = settings.toCommand();
     }
-  } else if (m_AstraTool == name) {
+  } else if (g_AstraTool == name) {
     TomoToolConfigAstra astra;
     m_uiAstra.setupUi(&astra);
     int res = astra.exec();
@@ -776,13 +778,13 @@ void TomoReconstruction::showToolConfig(const std::string &name) {
       double minAngle = m_uiAstra.doubleSpinBox_angle_min->value();
       double maxAngle = m_uiAstra.doubleSpinBox_angle_max->value();
 
-      ToolSettingsAstraToolbox settings(run.toStdString(), cor, minAngle,
-                                        maxAngle, currentPathDark(),
-                                        currentPathFlat(), currentPathFITS());
+      ToolSettingsAstraToolbox settings(
+          run.toStdString(), cor, minAngle, maxAngle, g_defOutPath,
+          currentPathDark(), currentPathFlat(), currentPathFITS());
 
       m_toolsSettings.astra = settings.toCommand();
     }
-  } else if (m_SavuTool == name) {
+  } else if (g_SavuTool == name) {
     // TODO: savu not ready. This is a temporary kludge, it just shows
     // the setup dialog so we can chat about it.
     TomoToolConfigSavu savu;
@@ -793,7 +795,7 @@ void TomoReconstruction::showToolConfig(const std::string &name) {
     QEventLoop el;
     connect(this, SIGNAL(destroyed()), &el, SLOT(quit()));
     el.exec();
-  } else if (m_CustomCmdTool == name) {
+  } else if (g_CustomCmdTool == name) {
     TomoToolConfigCustom cmd;
     m_uiCustom.setupUi(&cmd);
     int res = cmd.exec();
@@ -969,7 +971,7 @@ void TomoReconstruction::updateJobsTable() {
     for (size_t i = 0; i < m_jobsStatus.size(); ++i) {
       int ii = static_cast<int>(i);
       t->setItem(ii, 0,
-                 new QTableWidgetItem(QString::fromStdString(m_SCARFName)));
+                 new QTableWidgetItem(QString::fromStdString(g_SCARFName)));
       t->setItem(ii, 1, new QTableWidgetItem(
                             QString::fromStdString(m_jobsStatus[i].name)));
       t->setItem(ii, 2, new QTableWidgetItem(
@@ -1175,7 +1177,7 @@ std::string TomoReconstruction::getComputeResource() {
  * @return Username ready to be used in remote queries
  */
 std::string TomoReconstruction::getUsername() {
-  if (m_SCARFName ==
+  if (g_SCARFName ==
       m_ui.comboBox_run_compute_resource->currentText().toStdString())
     return m_ui.lineEdit_SCARF_username->text().toStdString();
   else
@@ -1253,7 +1255,7 @@ void TomoReconstruction::processPathBrowseClick(QLineEdit *le,
  * @return Username ready to be used in remote queries
  */
 std::string TomoReconstruction::getPassword() {
-  if (m_SCARFName ==
+  if (g_SCARFName ==
       m_ui.comboBox_run_compute_resource->currentText().toStdString())
     return m_ui.lineEdit_SCARF_password->text().toStdString();
   else

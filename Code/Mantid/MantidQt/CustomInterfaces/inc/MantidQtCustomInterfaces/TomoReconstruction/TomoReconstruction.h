@@ -227,14 +227,14 @@ private:
   /// path to dark image
   std::string m_pathDark;
 
-  static const std::string m_SCARFName;
+  static const std::string g_SCARFName;
 
   // Names of image reconstruction tools
-  static const std::string m_TomoPyTool;
-  static const std::string m_AstraTool;
-  static const std::string m_CCPiTool;
-  static const std::string m_SavuTool;
-  static const std::string m_CustomCmdTool;
+  static const std::string g_TomoPyTool;
+  static const std::string g_AstraTool;
+  static const std::string g_CCPiTool;
+  static const std::string g_SavuTool;
+  static const std::string g_CustomCmdTool;
 
   // plugins for savu config files
   // std::vector<Mantid::API::ITableWorkspace_sptr> m_availPlugins;
@@ -242,12 +242,13 @@ private:
   // std::vector<Mantid::API::ITableWorkspace_sptr> m_currPlugins;
   Mantid::API::ITableWorkspace_sptr m_currPlugins;
   std::string m_currentParamPath;
-  static size_t m_nameSeqNo;
+  static size_t g_nameSeqNo;
 
   // status of remote jobs
   std::vector<Mantid::API::IRemoteJobManager::RemoteJobInfo> m_jobsStatus;
   std::vector<std::string> m_jobsStatusCmds;
 
+  static const std::string g_defOutPath;
   // path name for persistent settings
   std::string m_settingsGroup;
 
