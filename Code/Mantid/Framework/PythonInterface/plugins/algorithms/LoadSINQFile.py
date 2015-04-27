@@ -96,7 +96,8 @@ class LoadSINQFile(PythonAlgorithm):
     def _getPoldiLookupName(self, fname, lookupInstrumentName):
         year = self._extractYearFromFileName(fname)
         if year < 2015:
-            lookupInstrumentName += '_legacy'
+            return lookupInstrumentName + '_legacy'
+        # Otherwise, this is the current POLDI format.
         return lookupInstrumentName
 
     def _extractYearFromFileName(self, filename):
