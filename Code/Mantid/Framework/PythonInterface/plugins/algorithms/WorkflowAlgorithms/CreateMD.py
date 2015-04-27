@@ -6,7 +6,7 @@ from mantid.simpleapi import *
 class CreateMD(DataProcessorAlgorithm):
 
     def version(self):
-        return 4
+        return 1
 
     def _possible_emodes(self):
         return ['Elastic', 'Direct', 'Indirect']
