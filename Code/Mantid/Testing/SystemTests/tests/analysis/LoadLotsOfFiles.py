@@ -68,7 +68,8 @@ BANNED_FILES = ['992 Descriptions.txt',
                 'poldi2013n006903.hdf',
                 'poldi2013n006904.hdf',
                 'poldi2014n019874.hdf',
-                'poldi2014n019881.hdf'
+                'poldi2014n019881.hdf',
+                'poldi2015n000977.hdf'
                 ]
 
 EXPECTED_EXT = '.expected'
