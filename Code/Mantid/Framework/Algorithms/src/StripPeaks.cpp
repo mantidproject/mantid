@@ -230,10 +230,21 @@ StripPeaks::removePeaks(API::MatrixWorkspace_const_sptr input,
                         << peakslist->getRef<int>("spectrum", i)
                         << " at x = " << centre << " h = " << height
                         << " s = " << width << " chi2 = " << chisq << "\n";
-    g_log.information() << "     background = "
-                        << peakslist->getRef<double>("A0", i) << " + "
-                        << peakslist->getRef<double>("A1", i) << " x + "
-                        << peakslist->getRef<double>("A2", i) << " x^2\n";
+
+    {   // log the background function
+        double a0 = 0.;
+        double a1 = 0.;
+        double a2 = 0.;
+        const std::vector<std::string> columnNames = peakslist->getColumnNames();
+        if (std::find(columnNames.begin(), columnNames.end(), "A0") != columnNames.end())
+            a0 = peakslist->getRef<double>("A0", i);
+        if (std::find(columnNames.begin(), columnNames.end(), "A1") != columnNames.end())
+            a1 = peakslist->getRef<double>("A1", i);
+        if (std::find(columnNames.begin(), columnNames.end(), "A2") != columnNames.end())
+            a2 = peakslist->getRef<double>("A2", i);
+        g_log.information() << "     background = " << a0 << " + "
+                            << a1 << " x + " << a2 << " x^2\n";
+    }
 
     // Loop over the spectrum elements
     const int spectrumLength = static_cast<int>(Y.size());
