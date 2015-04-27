@@ -2,8 +2,6 @@
 from mantid.kernel import *
 from mantid.api import *
 from mantid.simpleapi import *
-import __builtin__
-
 
 class CreateMD(DataProcessorAlgorithm):
 
@@ -125,9 +123,11 @@ class CreateMD(DataProcessorAlgorithm):
         self.declareProperty(StringArrayProperty('DataSources',  values=[], direction=Direction.Input, validator=StringArrayMandatoryValidator()),
                              doc='Input workspaces to process, or filenames to load and process')
 
-        self.declareProperty(FloatArrayProperty('EFix', values=[], direction=Direction.Input), doc='datasource energy values in meV')
+        self.declareProperty(FloatArrayProperty('EFix', values=[], direction=Direction.Input), 
+                             doc='datasource energy values in meV')
 
-        self.declareProperty('Emode', defaultValue='Direct', validator=StringListValidator(self._possible_emodes()), direction=Direction.Input, doc='Analysis mode ' + str(self._possible_emodes()) )
+        self.declareProperty('Emode', defaultValue='Direct', validator=StringListValidator(self._possible_emodes()), direction=Direction.Input, 
+                             doc='Analysis mode ' + str(self._possible_emodes()) )
  
         self.declareProperty(FloatArrayProperty('Alatt', values=[], validator=FloatArrayMandatoryValidator(),
                                                 direction=Direction.Input ), doc='Lattice parameters' )
@@ -151,9 +151,11 @@ class CreateMD(DataProcessorAlgorithm):
         self.declareProperty(FloatArrayProperty('Gs', values=[], direction=Direction.Input),
                              doc='gs rotation in degrees. Optional or one entry per run.' )
 
-        self.declareProperty(IMDWorkspaceProperty('OutputWorkspace', '', direction=Direction.Output ), doc='Output MDWorkspace')
+        self.declareProperty(IMDWorkspaceProperty('OutputWorkspace', '', direction=Direction.Output ), 
+                             doc='Output MDWorkspace')
 
-        self.declareProperty('InPlace', defaultValue=False, direction=Direction.Input, doc="Execute conversions to MD and Merge in one-step. Less memory overhead.")
+        self.declareProperty('InPlace', defaultValue=False, direction=Direction.Input, 
+                             doc="Execute conversions to MD and Merge in one-step. Less memory overhead.")
 
     def _validate_inputs(self):
         emode = self.getProperty('Emode').value
@@ -163,8 +165,8 @@ class CreateMD(DataProcessorAlgorithm):
         v = self.getProperty('v').value
         psi = self.getProperty('Psi').value
         gl = self.getProperty('Gl').value
-        gs = self.getProperty('Gs').value   
-        efix = self.getProperty('EFix').value     
+        gs = self.getProperty('Gs').value  
+        efix = self.getProperty('EFix').value  
 
         input_workspaces = self.getProperty("DataSources").value
 
@@ -213,8 +215,8 @@ class CreateMD(DataProcessorAlgorithm):
         psi = self.getProperty('Psi').value
         gl = self.getProperty('Gl').value
         gs = self.getProperty('Gs').value
-        efix = self.getProperty('EFix').value   
-        in_place = self.getProperty('InPlace')    
+        efix = self.getProperty('EFix').value
+        in_place = self.getProperty('InPlace') 
 
         data_sources = self.getProperty("DataSources").value
 
@@ -222,7 +224,7 @@ class CreateMD(DataProcessorAlgorithm):
 
         self._validate_inputs()
 
-        ''' pad out lists'''
+        #pad out lists
         if len(psi) == 0:
             psi = [0.0] * entries
 
@@ -246,27 +248,27 @@ class CreateMD(DataProcessorAlgorithm):
         counter = 0
         run_md = None
         for run_entry in run_data:
-                data_source, psi_entry, gl_entry, gs_entry, efix_entry = run_entry
-                must_load = not AnalysisDataService.doesExist(data_source)
-                ws = None
-                if must_load:
-                    ws_name = "%s_md_%i" % ( os.path.splitext(data_source)[0] , counter )  # Strip off any file extensions, and call it _md_{n} where n avoids clashes in the dictionary
-                    ws = self._load_ws(data_source, ws_name)
-                    to_merge_name = ws_name
-                else:
-                    ws = AnalysisDataService.retrieve(data_source)
-                    to_merge_name = "%s_md" %  data_source  
+            data_source, psi_entry, gl_entry, gs_entry, efix_entry = run_entry
+            must_load = not AnalysisDataService.doesExist(data_source)
+            ws = None
+            if must_load:
+                ws_name = "%s_md_%i" % ( os.path.splitext(data_source)[0] , counter )  # Strip off any file extensions, and call it _md_{n} where n avoids clashes in the dictionary
+                ws = self._load_ws(data_source, ws_name)
+                to_merge_name = ws_name
+            else:
+                ws = AnalysisDataService.retrieve(data_source)
+                to_merge_name = "%s_md" %  data_source  
 
-                do_in_place = in_place and counter > 0 # We cannot process in place until we have an output MDWorkspace to use.    
-                run_md = self._single_run(input_workspace=ws if in_place else ws, emode=emode, efix=efix_entry, 
-                    alatt=alatt, angdeg=angdeg, u=u, v=v, psi=psi_entry, gl=gl_entry, gs=gs_entry, in_place=do_in_place, out_mdws=run_md)
+            do_in_place = in_place and counter > 0 # We cannot process in place until we have an output MDWorkspace to use.    
+            run_md = self._single_run(input_workspace=ws if in_place else ws, emode=emode, efix=efix_entry, 
+                alatt=alatt, angdeg=angdeg, u=u, v=v, psi=psi_entry, gl=gl_entry, gs=gs_entry, in_place=do_in_place, out_mdws=run_md)
                 
                 
-                to_merge_names.append(to_merge_name)
+            to_merge_names.append(to_merge_name)
 
-                AnalysisDataService.addOrReplace(to_merge_name, run_md)
+            AnalysisDataService.addOrReplace(to_merge_name, run_md)
 
-                counter += 1
+            counter += 1
 
         if len(to_merge_names) > 1 and not in_place:
             output_workspace = self._merge_runs(to_merge_names)
