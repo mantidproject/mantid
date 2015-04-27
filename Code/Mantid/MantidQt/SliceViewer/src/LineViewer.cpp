@@ -419,14 +419,10 @@ LineViewer::applyMDWorkspace(Mantid::API::IMDWorkspace_sptr ws) {
       if (static_cast<int>(i) == axis) {
         // For the axes we're integrating along we want to re-use the existing
         // binning, rather than peforming another rebin.
-        // TODO: We can't actually do this *yet* so pass in nothing
-
-        /////////////////// F I X    M E    P L E A S E  //////////////////////
-
-        /* const double start = m_start[axis]; */
-        /* const double end = m_end[axis]; */
-        /* const double binWidth = (end - start) / static_cast<double>(m_numBins); */
-        /* pbin[i] << start << "," << binWidth << "," << end; */
+        const double start = m_start[axis];
+        const double end = m_end[axis];
+        const double binWidth = 0; // 0 denotes re-use existing widths
+        pbin[i] << start << "," << binWidth << "," << end;
       } else {
         // For other axes, the range is the value ± half the thickness
         const double base = m_start[i];
