@@ -76,7 +76,7 @@ class PoldiCrystalFileParser(object):
         self.elementSymbol = Word(alphas, min=1, max=2).setFailAction(
             lambda o, s, loc, token: raiseParseErrorException("Element symbol must be one or two characters."))
         self.integerNumber = Word(nums)
-        self.decimalSeparator = Literal('.')
+        self.decimalSeparator = Word('./', max=1)
         self.floatNumber = Combine(
             self.integerNumber +
             Optional(self.decimalSeparator + Optional(self.integerNumber))
@@ -102,7 +102,7 @@ class PoldiCrystalFileParser(object):
             self.floatNumber, delim=White()))
 
         self.spaceGroup = Group(CaselessLiteral("spacegroup") + self.keyValueSeparator + Word(
-            alphanums + "-" + ' '))
+            alphanums + "-" + ' ' + '/'))
 
         self.compoundContent = Each([self.atomsGroup, self.unitCell, self.spaceGroup]).setFailAction(
             lambda o, s, loc, token: raiseParseErrorException(

@@ -44,7 +44,7 @@ Output:
 
 .. testoutput:: PoldiPeakSummaryExample
 
-    Number of refined peaks: 14
+    Number of refined peaks: 13
     Number of columns that describe a peak: 6
 
 .. categories::
