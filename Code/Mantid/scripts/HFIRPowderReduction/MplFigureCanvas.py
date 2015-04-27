@@ -11,11 +11,13 @@ from matplotlib.figure import Figure
 
 MplLineStyles = ['-' , '--' , '-.' , ':' , 'None' , ' ' , '']
 MplLineMarkers = [
+        ". (point         )",
+        "* (star          )",
+        "x (x             )",
         "o (circle        )",
         "s (square        )",
         "D (diamond       )",
         ", (pixel         )",
-        ". (point         )",
         "v (triangle_down )",
         "^ (triangle_up   )",
         "< (triangle_left )",
@@ -26,11 +28,9 @@ MplLineMarkers = [
         "4 (tri_right     )",
         "8 (octagon       )",
         "p (pentagon      )",
-        "* (star          )",
         "h (hexagon1      )",
         "H (hexagon2      )",
         "+ (plus          )",
-        "x (x             )",
         "d (thin_diamond  )",
         "| (vline         )",
         "_ (hline         )",

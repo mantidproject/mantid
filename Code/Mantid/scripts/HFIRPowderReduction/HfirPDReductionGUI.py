@@ -111,6 +111,8 @@ class MainWindow(QtGui.QMainWindow):
                 self.doSaveData)
 
         # tab 'Multiple Scans'
+        self.connect(self.ui.pushButton_loadMultData, QtCore.SIGNAL('clicked()'),
+                self.doLoadSetData)
         self.connect(self.ui.pushButton_mergeScans, QtCore.SIGNAL('clicked()'),
                 self.doMergeScans)
         self.connect(self.ui.pushButton_view2D, QtCore.SIGNAL('clicked()'), 
@@ -205,6 +207,8 @@ class MainWindow(QtGui.QMainWindow):
 
         # Get initial setup
         self._initSetup()
+
+        # checkBox_clearPrevious
 
         return
 
@@ -390,7 +394,7 @@ class MainWindow(QtGui.QMainWindow):
         return
 
 
-    def doLoadData(self):
+    def doLoadData(self, exp=None, scan=None):
         """ Load and reduce data 
         It does not support for tab 'Multiple Scans' and 'Advanced Setup'
         For tab 'Raw Detector' and 'Individual Detector', this method will load data to MDEventWorkspaces
@@ -560,8 +564,52 @@ class MainWindow(QtGui.QMainWindow):
 
         return
 
+    def doLoadSetData(self):
+        """ Load a set of data
+        This is the first step of doing multiple scans processing 
+        """
+        # Get inputs for exp number and scans
+        try:
+            expno = int(self.ui.lineEdit_expNo.text())
+            startscan = int(self.ui.lineEdit_scanStart.text())
+            endscan = int(self.ui.lineEdit_scanEnd.text())
+        except ValueError as e:
+            self._logError("For merging scans, both starting scan number and \
+                end scan number must be given.")
+            return
+       
+        # scans = [startscan, endscan] + [others] - [excluded]
+        status, extrascanlist = self._getIntArray(str(self.ui.lineEdit_extraScans.text()))
+        if status is False:
+            self._log(extrascanlsit)
+            return
+
+        status, excludedlist = self._getIntArray(str(self.ui.lineEdit_exclScans.text()))
+        self._logDebug("Excluded list: %s" %(str(excludedlist)))
+        if status is False:
+            self._logError(excludedlist)
+            return
+            
+        scanslist = range(startscan, endscan+1)
+        scanslist.extend(extralist)
+        scanslist = list(set(scanslist))
+        for scan in excludedlist:
+            scanslist.remove(scan)
+
+        # Load files
+        for scan in sorted(scanslist):
+
+            self.doLoadData(exp, scan, itab=3)
+
+            self.doReduceSpiceData()
+
+        # ENDFOR
+
+
+
 
     def _reduceData(self):
+        # FIXME - This should be removed
 
         # Process wavelength
         wavelength = self.getFloat(self.ui.lineEdit_wavelength)
@@ -604,7 +652,7 @@ class MainWindow(QtGui.QMainWindow):
 
             # Reduce data 
             execstatus = self._myControl.reduceSpicePDData(expno, scanno, \
-                    datafilename, unit, xmin, xmax, binsize, wavelength, excludedetlist)
+                    unit, xmin, xmax, binsize, wavelength, excludedetlist)
             print "[DB] reduction status = %s, Binning = %s, %s, %s" % (str(execstatus),
                     str(xmin), str(binsize), str(xmax))
 
@@ -655,36 +703,63 @@ class MainWindow(QtGui.QMainWindow):
                 return
             self.ui.lineEdit_scanNo.setText(str(scanno))
 
-        # call load data
+        # Load data
+        self.ui.lineEdit_scanNo.setText(str(scanno))
         execstatus = self.doLoadData()
+        print "[DB] Load data : ", execstatus
 
-        return execstatus
+        unit = self._currUnit 
+
+        # Reduce
+        good, expno, scanno = self._uiReduceData(2, unit)
+
+        # plot
+        if good is True: 
+            canvas = self.ui.graphicsView_reducedData
+            xlabel = self._getXLabelFromUnit(unit)
+            label = "Exp %s Scan %s"%(str(expno), str(scanno))
+            clearcanvas=self.ui.checkBox_clearPrevious.isChecked()
+            self._plotReducedData(expno, scanno, canvas, xlabel, label=label, clearcanvas=clearcanvas)
+
+        return good
 
 
     def doLoadNextScan(self):
+        """ 
         """
-        """
+        # FIXME - Change method name such that all plotting methods in the same tab will be together
+        # TODO - Need a plotting managing mechanism to avoid to plotting same exp/scan more than once
         # Advance scan number by 1
         try:
             scanno = int(self.ui.lineEdit_scanNo.text())
         except ValueError:
             self._logError("Either Exp No or Scan No is not set up right as integer.")
-            return
+            return False
         else:
             scanno = scanno + 1
             if scanno < 1:
                 self._logWarning("Scan number is 1 already.  Cannot have previous scan")
-                return
-            self.ui.lineEdit_scanNo.setText(str(scanno))
+                return False
 
-        # call load data
+        # Load data
+        self.ui.lineEdit_scanNo.setText(str(scanno))
         execstatus = self.doLoadData()
-        execstatus = self._reduceData(XXX)
-        if execstatus is False:
-            scanno = scanno - 1
-            self.ui.lineEdit_scanNo.setText(str(scanno))
+        print "[DB] Load data : ", execstatus
 
-        return execstatus
+        unit = self._currUnit 
+
+        # Reduce
+        good, expno, scanno = self._uiReduceData(2, unit)
+
+        # plot
+        if good is True: 
+            canvas = self.ui.graphicsView_reducedData
+            xlabel = self._getXLabelFromUnit(unit)
+            label = "Exp %s Scan %s"%(str(expno), str(scanno))
+            clearcanvas=self.ui.checkBox_clearPrevious.isChecked()
+            self._plotReducedData(expno, scanno, canvas, xlabel, label=label, clearcanvas=clearcanvas)
+
+        return good
 
 
     def doExist(self):
@@ -737,7 +812,7 @@ class MainWindow(QtGui.QMainWindow):
 
         try: 
             unit = self._currUnit
-            xmin, binsize, xmax = self._uiGetBinningParams()
+            xmin, binsize, xmax = self._uiGetBinningParams(itab=3)
             wavelength = float(self.ui.lineEdit_wavelength.text())
         except Exception as e:
             raise e
@@ -808,8 +883,18 @@ class MainWindow(QtGui.QMainWindow):
     def doPlot2Theta(self):
         """ Rebin the data and plot in 2theta
         """
-        self._uiRebinPlot('2theta')
-        self._currUnit = '2theta'
+        unit = '2theta'
+        canvas = self.ui.graphicsView_reducedData
+
+        # reduce
+        good, expno, scanno = self._uiReduceData(2, unit)
+
+        # plot
+        if good is True: 
+            self._currUnit = unit
+            xlabel = self._getXLabelFromUnit(unit)
+            label = "Exp %s Scan %s"%(str(expno), str(scanno))
+            self._plotReducedData(expno, scanno, canvas, xlabel, label=None, clearcanvas=True)
         
         return
 
@@ -817,10 +902,20 @@ class MainWindow(QtGui.QMainWindow):
         """ Rebin the data and plot in d-spacing
         """
         # new unit and information
-        newunit = "dSpacing"
+        unit = "dSpacing"
         
-        self._uiRebinPlot(newunit)
-        self._currUnit = newunit
+        canvas = self.ui.graphicsView_reducedData
+
+        # reduce
+        good, expno, scanno = self._uiReduceData(2, unit)
+
+        # plot
+        if good is True: 
+            self._currUnit = unit
+            xlabel = self._getXLabelFromUnit(unit)
+            label = "Exp %s Scan %s"%(str(expno), str(scanno))
+            self._plotReducedData(expno, scanno, canvas, xlabel, label=None, clearcanvas=True)
+        
         
         return
 
@@ -915,9 +1010,18 @@ class MainWindow(QtGui.QMainWindow):
     def doPlotQ(self):
         """ Rebin the data and plot in momentum transfer Q
         """
-        newunit = 'Momentum Transfer (Q)'
-        self._uiRebinPlot(unit =newunit)
-        self._currUnit = newunit
+        unit = 'Momentum Transfer (Q)'
+        canvas = self.ui.graphicsView_reducedData
+
+        # reduce
+        good, expno, scanno = self._uiReduceData(2, unit)
+
+        # plot
+        if good is True: 
+            self._currUnit = unit
+            xlabel = self._getXLabelFromUnit(unit)
+            label = "Exp %s Scan %s"%(str(expno), str(scanno))
+            self._plotReducedData(expno, scanno, canvas, xlabel, label=None, clearcanvas=True)
         
         return
 
@@ -1022,53 +1126,29 @@ class MainWindow(QtGui.QMainWindow):
         """ Rebin MDEventWorkspaces in 2-theta. for pushButton_rebinD
         in vanadium peak strip tab
 
-
         Suggested workflow
         1. Rebin data 
         2. Calculate vanadium peaks in 2theta
         3. 
         """ 
-        # TODO - Need to heavy test!
-        # Get exp number an scan number
-        try: 
-            expno, scanno = self._uiGetExpScanNumber()
-        except Exception as e:
-            self._logError("Error to get Exp and Scan due to %s." % (str(e)))
-            return False
-
-        # Get new binning parameters
+        # Reduce data
         unit = '2theta'
-        try: 
-            xmin, binsize, xmax = self._uiGetBinningParams(xmin_w=self.ui.lineEdit_min2Theta, 
-                    binsize_w=self.ui.lineEdit_binsize2Theta, 
-                    xmax_w=self.ui.lineEdit_max2Theta) 
-        except Exception as e: 
-            self._logError(str(e)) 
-            return False
+        itab = 4
+        good, expno, scanno = self._uiReduceData(itab, unit)
 
-        # Reduce data 
-        wavelength = float(self.ui.lineEdit_wavelength.text())
-        execstatus = self._myControl.rebin(expno, scanno, unit, wavelength, \
-                xmin, binsize, xmax)
-        print "[DB] reduction status = %s, Binning = %s, %s, %s" % (str(execstatus),
-                str(xmin), str(binsize), str(xmax))
+        # Plot reduced data and vanadium peaks
+        if good is True: 
+            canvas = self.ui.graphicsView_vanPeaks
+            xlabel = self._getXLabelFromUnit(unit)
+            label = "Exp %s Scan %s"%(str(expno), str(scanno))
+            self._plotReducedData(expno, scanno, canvas, xlabel, label=label, clearcanvas=True)
 
-        # Get wave length and get list of vanadium peaks in 2theta
-        # FIXME / TODO : mimic it to deLoadData()
-        wavelength = float(self.ui.lineEdit_wavelength.text())
-        vanpeakposlist = self._myControl.getVanadiumPeakPos(wavelength=wavelength)
+            # plot vanadium peaks
+            vanpeakpos = self._myControl.getVanadiumPeaksPos(expno, scanno)
+            self.ui.lineEdit_stripVPeaks.setText(str(vanpeakpos))
+            self._plotPeakIndicators(self.ui.graphicsView_vanPeaks, vanpeakpos)
 
-        # Plot data
-        clearcanvas = True
-        xlabel = self._getXLabelFromUnit(unit)
-        print "[DB] Unit %s has label %s." % (unit, xlabel)
-        canvas = self.ui.graphicsView_vanPeaks
-        self._plotReducedData(expno, scanno, canvas, \
-                xlabel, label="Exp %d Scan %d Bin = %.5f" % (expno, scanno, binsize), \
-                clearcanvas=clearcanvas)
-        self._plotVanadiumPeaks(canvas, canvas)
-
-        return True
+        return good
 
 
     def doSaveData(self):
@@ -1114,22 +1194,25 @@ class MainWindow(QtGui.QMainWindow):
             self._logError("Error to get Exp and Scan due to %s." % (str(e)))
             return False
 
-        # TODO - ASAP (1) binparams should be read from GUI
-        binparams = "5., 0.1, 150."
-        self._myControl.stripVanadiumPeaks(expno, scanno, binparams, vanpeakposlist=None)
+        # Default unit
+        unit = '2theta'
 
-        self._plotVanadiumRun(xlabel, 0, True)
+        # Get and build binning parameter
+        xmin, binsize, xmax = self._uiGetBinningParams(itab=4)
+        if xmin is None:
+            binparams = '%f'%(binsize)
+        else:
+            binparams = '%f,%f,%f'%(xmin, binsize, xmax)
+        
+        # Strip vanadium peak
+        good = self._myControl.stripVanadiumPeaks(expno, scanno, binparams, vanpeakposlist=None)
 
-        clearcanvas = True
-        xlabel = self._getXLabelFromUnit(unit)
-        print "[DB] Unit %s has label %s." % (unit, xlabel)
-        canvas = self.ui.graphicsView_vanPeaks
+        # Plot
+        if good is True: 
+            xlabel = self._getXLabelFromUnit(unit)
+            label="Exp %d Scan %d Bin = %.5f Vanadium Stripped" % (expno, scanno, binsize)
+            self._plotVanadiumRun(expno, scanno, xlabel, label, False)
 
-        self._plotReducedData(expno, scanno, canvas, \
-                xlabel, label="Exp %d Scan %d Bin = %.5f" % (expno, scanno, binsize), \
-                clearcanvas=clearcanvas)
-
-        raise NotImplementedError("ASAP")
 
         return
 
@@ -1263,7 +1346,7 @@ class MainWindow(QtGui.QMainWindow):
     # Private methods dealing with UI
     #---------------------------------------------------------------------------
     def _uiLoadDataFile(self, exp, scan):
-        """ Load data file according to its exp and scan 
+        """ Download data file according to its exp and scan 
         Either download the data from a server or copy the data file from local 
         disk
         """
@@ -1512,9 +1595,6 @@ class MainWindow(QtGui.QMainWindow):
         """ Plot reduced data for exp and scan
          self._plotReducedData(exp, scan, self.ui.canvas1, clearcanvas, xlabel=self._currUnit, 0, clearcanvas)
         """
-        # FIXME - NEED TO REFACTOR TOO!
-        # print "[DB] Plot reduced data!", "_inPlotState = ", str(self._inPlotState)
-
         # whether the data is load
         if self._myControl.hasReducedWS(exp, scan) is False:
             self._logWarning("No data to plot!")
@@ -1553,7 +1633,6 @@ class MainWindow(QtGui.QMainWindow):
             canvas.setXYLimit(xmin-dx*0.1, xmax+dx*0.1, ymin-dy*0.1, ymax+dy*0.1)
             
         return
-
 
     def _plotSampleLog(self, expno, scanno, samplelogname):
         """ Plot the value of a sample log among all Pt.
@@ -1608,7 +1687,59 @@ class MainWindow(QtGui.QMainWindow):
         canvas.setXYLimit(xmin-dx*0.0001, xmax+dx*0.0001, ymin-dy*0.0001, ymax+dy*0.0001)
 
         return True
+    
+
+    def _plotVanadiumRun(self, exp, scan, xlabel, label, clearcanvas=False):
+        """ Plot processed vanadium data
+        """
+        # whether the data is load
+        exp = int(exp)
+        scan = int(scan)
+
+        if self._myControl.hasReducedWS(exp, scan) is False:
+            self._logWarning("No data to plot!")
+            return
         
+        # plot
+        try: 
+            vecx, vecy = self._myControl.getVectorProcessVanToPlot(exp, scan)
+            vecx, vecyOrig = self._myControl.getVectorToPlot(exp, scan)
+            diffY = vecyOrig - vecy
+        except Exception as e:
+            print '[Error] Unable to retrieve processed vanadium spectrum for exp %d scan %d.  Reason: %s' % (exp, scan, str(e))
+            return
+
+
+        # get to know whether it is required to clear the image
+        canvas = self.ui.graphicsView_vanPeaks
+        if clearcanvas is True:
+            canvas.clearAllLines()
+            canvas.setLineMarkerColorIndex(0)
+        
+        # get the marker color for the line
+        marker, color = canvas.getNextLineMarkerColorCombo()
+        
+        # plot
+        canvas.addPlot(vecx, vecy, marker=marker, color=color, 
+            xlabel=xlabel, ylabel='intensity',label=label)
+
+        canvas.addPlot(vecx, diffY, marker='+', color='green', 
+            xlabel=xlabel, ylabel='intensity',label='Diff')
+
+        # reset canvas limits
+        if clearcanvas is True:
+            xmax = max(vecx)
+            xmin = min(vecx)
+            dx = xmax-xmin
+            
+            ymax = max(vecy)
+            ymin = min(diffY)
+            dy = ymax-ymin
+            
+            canvas.setXYLimit(xmin-dx*0.1, xmax+dx*0.1, ymin-dy*0.1, ymax+dy*0.1)
+            
+        return
+
 
     def _uiCheckBinningParameters(self, curxmin=None, curxmax=None, curbinsize=None, curunit=None, targetunit=None):
         """ check the binning parameters including xmin, xmax, bin size and target unit
@@ -1653,23 +1784,29 @@ class MainWindow(QtGui.QMainWindow):
             
         return (change, xmin, xmax, binsize)
         
-    def _uiGetBinningParams(self, xmin_w=None, binsize_w=None, xmax_w=None):
+    def _uiGetBinningParams(self, itab):
         """ Get binning parameters
         
         Return: 
          - xmin, binsize, xmax
         """
-        # get value
-        if xmin_w is None:
+        # Get value
+        if itab == 2:
             xmin = str(self.ui.lineEdit_xmin.text())
             xmax = str(self.ui.lineEdit_xmax.text())
             binsize = str(self.ui.lineEdit_binsize.text())
+        elif itab == 3:
+            xmin = str(self.ui.lineEdit_mergeMinX.text())
+            xmax = str(self.ui.lineEdit_mergeMaxX.text())
+            binsize = str(self.ui.lineEdit_mergeBinSize.text())
+        elif itab == 4:
+            xmin = str(self.ui.lineEdit_min2Theta.text())
+            xmax = str(self.ui.lineEdit_max2Theta.text())
+            binsize = str(self.ui.lineEdit_binsize2Theta.text())
         else:
-            xmin = str(xmin_w.text())
-            xmax = str(xmax_w.text())
-            binsize = str(binsize_w.text())
+            raise NotImplementedError("Binning parameters are not used for %d-th tab."%(itab))
         
-        # set data
+        # Parse values
         try:
             xmin = float(xmin)
             xmax = float(xmax)
@@ -1689,7 +1826,7 @@ class MainWindow(QtGui.QMainWindow):
         return (xmin, binsize, xmax)
 
 
-    def _uiGetDetectorExclusionFile(self):
+    def _uiGetExcludedDetectors(self):
         """
 
         Return :: list of detector IDs to exclude from reduction
@@ -1700,19 +1837,10 @@ class MainWindow(QtGui.QMainWindow):
 
         if self.ui.checkBox_useDetExcludeFile.isChecked():
             detids_str = str(self.ui.lineEdit_detExcluded.text()).strip()
-            if len(detid_str) > 0:
-                # Editor lineEdit_detExcluded has value: overriding any automatic operation
-                terms = detid_str.split(',')
-                for t in terms:
-                    try:
-                        detid = int(t.strip())
-                        excludedetidlist.append(detid)
-                    except ValueError as e:
-                        print "[Error] string %s cannot be convert to detector ID due to %s." % (t, str(e))
-                # ENDFOR (t)
-            else:
-                # No user's input
-                print "[Warning] user does not specify any detector to exclude."
+            status, excludedetidlist = self._getIntArray(detids_str)
+            if status is False:
+                self._logError(lineEdit_extraScans)
+                lineEdit_extraScans = []
             # ENDIF
         # ENDIF
 
@@ -1733,16 +1861,49 @@ class MainWindow(QtGui.QMainWindow):
                 is not set up right as integer." % (expnostr, scannostr))
         
         return (expno, scanno)
+
         
-    def _uiRebinPlot(self, unit, xmin=None, binsize=None, xmax=None, canvas=None):
+    def _uiReduceData(self, itab, unit):
         """ Rebin and plot by reading GUI widgets' value
+
+        Arguments: 
+         - itab : index of the tab.  Only 2 and 4 are allowed
+         - unit : string for target unit
         """
-        # experiment number and scan number
+        # Experiment number and Scan number
         try:
             expno, scanno = self._uiGetExpScanNumber()
         except NotImplementedError as e:
             self._logError(str(e))
             return
+
+        # Get binning parameter 
+        xmin, binsize, xmax = self._uiGetBinningParams(itab) 
+
+        # Get wavelength 
+        try: 
+            wavelength = float(str(self.ui.lineEdit_wavelength.text()))
+        except ValueError:
+            if unit != '2theta':
+                raise NotImplementedError('Wavelength must be specified for unit %s.'%(unit))
+
+        # Rebin
+        try:
+            # rebinned = self._myControl.rebin(expno, scanno, unit, wavelength, xmin, binsize, xmax)
+            excludeddetlist = self._uiGetExcludedDetectors()
+            execstatus = self._myControl.reduceSpicePDData(expno, scanno, \
+                    unit, xmin, xmax, binsize, wavelength, excludeddetlist)
+            print "[DB] reduction status = %s, Binning = %s, %s, %s" % (str(execstatus),
+                    str(xmin), str(binsize), str(xmax))
+        except NotImplementedError as e:
+            self._logError(str(e))
+            return (False, expno, scanno)
+
+        """ 
+        # xmin=None, binsize=None, xmax=None, canvas=None):
+        #_rebinPlot(self, unit, xmin=None, binsize=None, xmax=None, canvas=None):
+        # FIXME - MAKE THIS WORK! for Noramlized and Vanadium!
+        # experiment number and scan number
         
         # binning parameters
         if binsize is None:
@@ -1752,7 +1913,6 @@ class MainWindow(QtGui.QMainWindow):
                 self._logError(str(e))
                 return
         else:
-            xmin, binsize, xmax = self._uiGetBinningParams(xmin, binsize, xmax)
             
         # wavelength
         try: 
@@ -1763,32 +1923,36 @@ class MainWindow(QtGui.QMainWindow):
         
         # rebin
         try:
-            rebinned = self._myControl.rebin(expno, scanno, unit, wavelength, xmin, binsize, xmax)
+            # rebinned = self._myControl.rebin(expno, scanno, unit, wavelength, xmin, binsize, xmax)
+            print "[DB] reduction status = %s, Binning = %s, %s, %s" % (str(execstatus),
+                    str(xmin), str(binsize), str(xmax))
+            excludeddetlist = self._uiGetExcludedDetectors()
+            execstatus = self._myControl.reduceSpicePDData(expno, scanno, \
+                    datafilename, unit, xmin, xmax, binsize, wavelength, excludedetlist)
         except NotImplementedError as e:
             self._logError(str(e))
-            return
+            return False
+        """
+
+        return (True, expno, scanno)
+    
+    
+    def _uiPlotXXX(self): 
+        if rebinned: 
+            # plot if rebinned
+            xlabel = self._getXLabelFromUnit(unit)
+           
+            # set up default canvas
+            if canvas is None:
+                canvas = self.ui.graphicsView_reducedData
+               
+            self._plotReducedData(expno, scanno, canvas, xlabel, 
+                label=None, clearcanvas=True)
         else:
-            if rebinned:
-                # plot if rebinned
-                xlabel = self._getXLabelFromUnit(unit)
-                
-                # set up default canvas
-                if canvas is None:
-                    canvas = self.ui.graphicsView_reducedData
-                    
-                self._plotReducedData(expno, scanno, canvas, xlabel, 
-                    label=None, clearcanvas=True)
-            else:
-                print "Rebinned = ", str(rebinned)
+           print "Rebinned = ", str(rebinned)
 
         return
 
-    def _excludeDetectors(self, detids):
-        """
-        """
-        # TODO 
-
-        return
 
 
     def _excludePt(self, pts):
@@ -1834,10 +1998,12 @@ class MainWindow(QtGui.QMainWindow):
     def _getIntArray(self, intliststring):
         """ Validate whether the string can be divided into integer strings.
         Allowed: a, b, c-d, e, f
+
+        Return :: 2-tuple (status, list/error message)
         """
         intliststring = str(intliststring)
         if intliststring == "":
-            return []
+            return (True, [])
 
         # Split by ","
         termlevel0s = intliststring.split(",")
@@ -1856,9 +2022,9 @@ class MainWindow(QtGui.QMainWindow):
                 try:
                     intvalue = int(valuestr)
                     if str(intvalue) != valuestr:
-                        return "Contains non-integer string %s." % (valuestr)
+                        return (False, "Contains non-integer string %s." % (valuestr))
                 except ValueError:
-                    return "String %s is not an integer." % (valuestr)
+                    return (False, "String %s is not an integer." % (valuestr))
                 else:
                     intlist.append(intvalue)
 
@@ -1871,9 +2037,9 @@ class MainWindow(QtGui.QMainWindow):
                     try:
                         intvalue = int(valuestr)
                         if str(intvalue) != valuestr:
-                            return "Contains non-integer string %s." % (valuestr)
+                            return (False, "Contains non-integer string %s." % (valuestr))
                     except ValueError:
-                        return "String %s is not an integer." % (valuestr)
+                        return (False, "String %s is not an integer." % (valuestr))
                     else:
                         templist.append(intvalue)
                 # ENDFOR
@@ -1881,9 +2047,9 @@ class MainWindow(QtGui.QMainWindow):
 
             else:
                 # Undefined siutation
-                return "Term %s contains more than 1 dash." % (level0terms)
+                return (False, "Term %s contains more than 1 dash." % (level0terms))
         # ENDFOR
 
-        return intlist
+        return (True, intlist)
 
 

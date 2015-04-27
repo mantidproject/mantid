@@ -68,8 +68,12 @@ class PDRManager:
 
         self._rawSpiceTableWS = None
         self._rawLogInfoWS = None
+       
+        # special
+        self._processedVanWS = None
 
         self._wavelength = None
+        
 
         return
 
@@ -339,7 +343,27 @@ class HFIRPDRedControl:
 
         # get vectors
         return outws.readX(0), outws.readY(0)
-        
+       
+
+    def getVectorProcessVanToPlot(self, exp, scan):
+        """ Get vec x and y for the processed vanadium spectrum
+        """
+        # get on hold of processed vanadium data workspace
+        wsmanager = self.getWorkspace(exp, scan, raiseexception=True)
+        procVanWs = wsmanager._processedVanWS
+        if procVanWs is None:
+            raise NotImplementedError("Exp %d Scan %d does not have processed vanadium workspace." % (exp, scan))
+
+        # convert to point data if necessary
+        if len(procVanWs.readX(0)) != len(procVanWs.readY(0)):
+            wsname = procVanWs.name() + "_pd"
+            api.ConvertToPointData(InputWorkspace=procVanWs, OutputWorkspace=wsname)
+            outws = AnalysisDataService.retrieve(wsname)
+        else:
+            outws = procVanWs
+
+        # get vectors
+        return outws.readX(0), outws.readY(0)
 
     def getMergedVector(self, mkey):
         """
@@ -628,6 +652,7 @@ class HFIRPDRedControl:
         units
         Return - Boolean as successful or not
         """
+        raise NotImplementedError('This method should be replaced by reduceSpicePD...')
         wsmanager = self.getWorkspace(exp, scan, raiseexception=True)
         if wsmanager.datamdws is None or wsmanager.monitormdws is None:
             self._logError("Unable to rebin the data for exp=%d, scan=%d because either data MD workspace and \
@@ -656,7 +681,7 @@ class HFIRPDRedControl:
         return True
 
 
-    def reduceSpicePDData(self, exp, scan, datafilename, unit, xmin, xmax, binsize, wavelength=None, excludeddetlist=[]):
+    def reduceSpicePDData(self, exp, scan, unit, xmin, xmax, binsize, wavelength=None, excludeddetlist=[]):
         """ Reduce SPICE powder diffraction data. 
         Return - Boolean as reduction is successful or not
         """
@@ -665,7 +690,7 @@ class HFIRPDRedControl:
             wsmanager = self._myWorkspaceDict[(int(exp), int(scan))]
         except KeyError:
             raise NotImplementedError("SPICE data for Exp %d Scan %d has not been loaded." % (
-                int(expno), int(scanno)))
+                int(exp), int(scan)))
 
         datamdws = wsmanager.datamdws
         monitormdws = wsmanager.monitormdws
@@ -808,7 +833,10 @@ class HFIRPDRedControl:
         """ Strip vanadium peaks 
 
         Arguments: 
+         - binparams :: string as the list of xmin, binsize, xmax or just binsize
          - vanpeakposlist :: list of peak positions.  If none, then using default
+
+        Return ::
         """
         # Get reduced workspace
         wsmanager = self.getWorkspace(exp, scan, raiseexception=True)
@@ -831,11 +859,16 @@ class HFIRPDRedControl:
                 raise NotImplementedError('No vanadium peaks has been set up.')
         # ENDIF
 
+        
+        outwsname = wksp.name()+"_rmVan"
         wksp = api.StripPeaks(InputWorkspace=wksp, 
-                              OutputWorkspace=wksp.name(), 
+                              OutputWorkspace=outwsname, 
                               PeakPositions=numpy.array(vanpeakposlist))
 
-        return 
+        # Store
+        wsmanager._processedVanWS = wksp
+
+        return True
 
 
     def _generateTableWS(self, vancorrdict):

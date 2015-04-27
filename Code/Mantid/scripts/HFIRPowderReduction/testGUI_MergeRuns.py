@@ -97,10 +97,9 @@ if MOS == LINUX:
 elif MOS == OSX: 
     reducer.ui.lineEdit_cache.setText('/Users/wzz/Temp/')
 
-reducer.ui.lineEdit_xmin.setText('5.0')
-reducer.ui.lineEdit_xmax.setText('150.0')
-reducer.ui.lineEdit_binsize.setText('0.1')
-
+reducer.ui.lineEdit_mergeMinX.setText('5.0')
+reducer.ui.lineEdit_mergeMaxX.setText('150.0')
+reducer.ui.lineEdit_mergeBinSize.setText('0.1')
 
 # load and reduce data 
 reducer.doMergeScans()
