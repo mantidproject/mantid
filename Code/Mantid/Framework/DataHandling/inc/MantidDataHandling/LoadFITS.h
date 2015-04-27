@@ -157,7 +157,7 @@ private:
   std::vector<std::string> m_headerAxisNameKeys;
   std::string m_mapFile;
 
-  static const std::string m_defaultImgType;
+  static const std::string g_defaultImgType;
 
   // names of extension headers
   std::string m_sampleRotation;
@@ -173,19 +173,19 @@ private:
 
   // Number of digits for the fixed width appendix number added to
   // workspace names, i.e. 3=> workspace_001; 5 => workspace_00001
-  static const size_t DIGIT_SIZE_APPEND = 5;
+  static const size_t g_DIGIT_SIZE_APPEND = 5;
   /// size of a FITS header block (room for 36 entries, of 80
   /// characters each), in bytes. A FITS header always comes in
   /// multiples of this block.
-  static const int BASE_HEADER_SIZE = 2880;
+  static const int g_BASE_HEADER_SIZE = 2880;
 
   // names for several options that can be given in a "FITS" header
   // setup file
-  static const std::string m_BIT_DEPTH_NAME;
-  static const std::string m_AXIS_NAMES_NAME;
-  static const std::string m_ROTATION_NAME;
-  static const std::string m_IMAGE_KEY_NAME;
-  static const std::string m_HEADER_MAP_NAME;
+  static const std::string g_BIT_DEPTH_NAME;
+  static const std::string g_AXIS_NAMES_NAME;
+  static const std::string g_ROTATION_NAME;
+  static const std::string g_IMAGE_KEY_NAME;
+  static const std::string g_HEADER_MAP_NAME;
 };
 
 } // namespace DataHandling

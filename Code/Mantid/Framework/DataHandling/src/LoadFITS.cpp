@@ -26,13 +26,13 @@ namespace DataHandling {
 // Register the algorithm into the AlgorithmFactory
 DECLARE_FILELOADER_ALGORITHM(LoadFITS)
 
-const std::string LoadFITS::m_BIT_DEPTH_NAME = "BitDepthName";
-const std::string LoadFITS::m_ROTATION_NAME = "RotationName";
-const std::string LoadFITS::m_AXIS_NAMES_NAME = "AxisNames";
-const std::string LoadFITS::m_IMAGE_KEY_NAME = "ImageKeyName";
-const std::string LoadFITS::m_HEADER_MAP_NAME = "HeaderMapFile";
+const std::string LoadFITS::g_BIT_DEPTH_NAME = "BitDepthName";
+const std::string LoadFITS::g_ROTATION_NAME = "RotationName";
+const std::string LoadFITS::g_AXIS_NAMES_NAME = "AxisNames";
+const std::string LoadFITS::g_IMAGE_KEY_NAME = "ImageKeyName";
+const std::string LoadFITS::g_HEADER_MAP_NAME = "HeaderMapFile";
 
-const std::string LoadFITS::m_defaultImgType = "SAMPLE";
+const std::string LoadFITS::g_defaultImgType = "SAMPLE";
 
 /**
  * Constructor. Just initialize everything to prevent issues.
@@ -132,7 +132,7 @@ void LoadFITS::init() {
                   Kernel::Direction::Input);
 
   declareProperty(
-      new FileProperty(m_HEADER_MAP_NAME, "", FileProperty::OptionalDirectory,
+      new FileProperty(g_HEADER_MAP_NAME, "", FileProperty::OptionalDirectory,
                        "", Kernel::Direction::Input),
       "A file mapping header key names to non-standard names [line separated "
       "values in the format KEY=VALUE, e.g. BitDepthName=BITPIX] - do not use "
@@ -363,7 +363,7 @@ void LoadFITS::doLoadHeaders(const std::vector<std::string> &paths,
       if (headers[i].headerKeys.end() != it) {
         headers[i].imageKey = it->second;
       } else {
-        headers[i].imageKey = m_defaultImgType;
+        headers[i].imageKey = g_defaultImgType;
       }
     } catch (std::exception &e) {
       throw std::runtime_error("Failed to process the '" + m_headerImageKeyKey +
@@ -534,7 +534,7 @@ LoadFITS::makeWorkspace(const FITSInfo &fileInfo, size_t &newFileNumber,
                         MantidImage &imageE, const Workspace2D_sptr parent,
                         bool loadAsRectImg) {
 
-  string currNumberS = padZeros(newFileNumber, DIGIT_SIZE_APPEND);
+  string currNumberS = padZeros(newFileNumber, g_DIGIT_SIZE_APPEND);
   ++newFileNumber;
 
   string baseName = m_baseName + currNumberS;
@@ -683,7 +683,7 @@ void LoadFITS::readDataToImgs(const FITSInfo &fileInfo, MantidImage &imageY,
 
   size_t bytespp = (fileInfo.bitsPerPixel / 8);
   size_t len = m_pixelCount * bytespp;
-  file.seekg(BASE_HEADER_SIZE * fileInfo.headerSizeMultiplier);
+  file.seekg(g_BASE_HEADER_SIZE * fileInfo.headerSizeMultiplier);
   file.read(&buffer[0], len);
   if (!file) {
     throw std::runtime_error(
@@ -979,11 +979,11 @@ std::string LoadFITS::padZeros(const size_t number,
  *  Maps the header keys to specified values
  */
 void LoadFITS::mapHeaderKeys() {
-  if ("" == getPropertyValue(m_HEADER_MAP_NAME))
+  if ("" == getPropertyValue(g_HEADER_MAP_NAME))
     return;
 
   // If a map file is selected, use that.
-  std::string name = getPropertyValue(m_HEADER_MAP_NAME);
+  std::string name = getPropertyValue(g_HEADER_MAP_NAME);
   ifstream fStream(name.c_str());
 
   try {
@@ -995,19 +995,19 @@ void LoadFITS::mapHeaderKeys() {
       while (getline(fStream, line)) {
         boost::split(lineSplit, line, boost::is_any_of("="));
 
-        if (lineSplit[0] == m_ROTATION_NAME && lineSplit[1] != "")
+        if (lineSplit[0] == g_ROTATION_NAME && lineSplit[1] != "")
           m_headerRotationKey = lineSplit[1];
 
-        if (lineSplit[0] == m_BIT_DEPTH_NAME && lineSplit[1] != "")
+        if (lineSplit[0] == g_BIT_DEPTH_NAME && lineSplit[1] != "")
           m_headerBitDepthKey = lineSplit[1];
 
-        if (lineSplit[0] == m_AXIS_NAMES_NAME && lineSplit[1] != "") {
+        if (lineSplit[0] == g_AXIS_NAMES_NAME && lineSplit[1] != "") {
           m_headerAxisNameKeys.clear();
           boost::split(m_headerAxisNameKeys, lineSplit[1],
                        boost::is_any_of(","));
         }
 
-        if (lineSplit[0] == m_IMAGE_KEY_NAME && lineSplit[1] != "") {
+        if (lineSplit[0] == g_IMAGE_KEY_NAME && lineSplit[1] != "") {
           m_headerImageKeyKey = lineSplit[1];
         }
       }
