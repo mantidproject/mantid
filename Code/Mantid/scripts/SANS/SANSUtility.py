@@ -13,9 +13,10 @@ import types
 
 sanslog = Logger("SANS")
 
-REG_DATA_NAME = '-add[_1-9]*$'
-REG_BARE_MONITORS_NAME = 'monitors'
-REG_DATA_MONITORS_NAME = '-add_monitors[_1-9]*$'
+ADDED_EVENT_DATA_TAG = '_added_event_data'
+
+REG_DATA_NAME = '-add' + ADDED_EVENT_DATA_TAG + '[_1-9]*$'
+REG_DATA_MONITORS_NAME = '-add_monitors' + ADDED_EVENT_DATA_TAG + '[_1-9]*$'
 
 def deprecated(obj):
     """
@@ -513,7 +514,6 @@ def extract_child_ws_for_added_eventdata(ws_group, appendix):
     @param ws_group :: workspace group.
     @param appendix :: what to append to the names of the child workspaces
     '''
-
     # Store the name of the group workspace in a string
     ws_group_name = ws_group.getName()
 

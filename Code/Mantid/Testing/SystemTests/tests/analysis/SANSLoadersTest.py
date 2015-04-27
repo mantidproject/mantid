@@ -173,7 +173,6 @@ class LoadAddedEventDataSampleTestStressTest(stresstesting.MantidStressTest):
         ici.Set1D()
 
         self._prepare_added_event_data('SANS2D00028051', 'SANS2D00028050')
-        #added_event_data_file = self._prepare_normal_event_data('SANS2D00022051')
         ici.AssignSample(self._out_file_name )
         #ici.WavRangeReduction()
 
@@ -195,13 +194,13 @@ class LoadAddedEventDataSampleTestStressTest(stresstesting.MantidStressTest):
         CloneWorkspace(InputWorkspace = name1, OutputWorkspace = name2)
         CloneWorkspace(InputWorkspace = name1_monitors, OutputWorkspace = name2_monitors)
 
-        added_data_name = name1 + '-add'
+        added_data_name = name1 + '-add' + '_added_event_data'
         Plus(LHSWorkspace = name1, RHSWorkspace = name2, OutputWorkspace = added_data_name)
 
-        added_monitor_name = added_data_name + '_monitors'
+        added_monitor_name = name1 + '-add' + '_monitors' + '_added_event_data'
         Plus(LHSWorkspace = name1_monitors, RHSWorkspace = name2_monitors, OutputWorkspace = added_monitor_name)
 
-        group_name = added_data_name + '_group'
+        group_name = name1 + '-add'
         GroupWorkspaces(InputWorkspaces = [added_data_name, added_monitor_name], OutputWorkspace = group_name)
         DeleteWorkspace(name1)
         DeleteWorkspace(name2)
@@ -209,7 +208,7 @@ class LoadAddedEventDataSampleTestStressTest(stresstesting.MantidStressTest):
         DeleteWorkspace(name2_monitors)
         #to do: Work out what actual temporary system test save directory is.
         temp_save_dir = config['defaultsave.directory']
-        output_file = os.path.join(temp_save_dir, added_data_name + '.nxs')
+        output_file = os.path.join(temp_save_dir, group_name + '.nxs')
         SaveNexus(InputWorkspace = group_name, Filename = output_file)
         self._out_file_name = output_file
 

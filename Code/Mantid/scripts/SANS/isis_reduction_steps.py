@@ -153,7 +153,6 @@ class LoadRun(object):
         # we can also have a group workspace which is associated with period data, which don't want to deal with here.
 
         added_event_data_flag = False
-
         if isinstance(outWs, WorkspaceGroup) and check_child_ws_for_name_and_type_for_added_eventdata(outWs):
             if self._period != self.UNSET_PERIOD:
                 raise RuntimeError("Trying to use multiperiod and added eventdata. This is currently not supported.")
@@ -170,15 +169,14 @@ class LoadRun(object):
             else:
                 if monitor_ws_name in mtd:
                     DeleteWorkspace(monitor_ws_name)
-        
 
         # There is a a bug in getHistory() in combination with renamed workspaces, hence we need to hedge for this here.
         loader_name = ''
         try: 
             load_name = outWs.getHistory().lastAlgorithm().getProperty('LoaderName').value
         except:
-            pass
-        
+            logger.notice('Tried to get a loader from history. But data did not have a loader.')
+
         if loader_name == 'LoadRaw':
             self._loadSampleDetails(workspace)
 
@@ -186,7 +184,7 @@ class LoadRun(object):
             outWs = mtd[self._leaveSinglePeriod(outWs.name(), self._period)]
 
         self.periods_in_file = self._find_workspace_num_periods(workspace)
-        
+
         self._wksp_name = workspace
 
 

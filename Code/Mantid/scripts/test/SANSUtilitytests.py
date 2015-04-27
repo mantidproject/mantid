@@ -1,4 +1,4 @@
-
+import mantid
 import unittest
 import re
 # Need to import mantid before we import SANSUtility
@@ -7,17 +7,17 @@ from mantid.simpleapi import CreateWorkspace, CreateSampleWorkspace, GroupWorksp
 from mantid.api import mtd
 import SANSUtility as su
 
-TEST_STRING_DATA = 'SANS2D0003434-add'
-TEST_STRING_MON = 'SANS2D0003434-add_monitors'
+TEST_STRING_DATA = 'SANS2D0003434-add' + su.ADDED_EVENT_DATA_TAG
+TEST_STRING_MON = 'SANS2D0003434-add_monitors' + su.ADDED_EVENT_DATA_TAG
 
-TEST_STRING_DATA1 = 'SANS2D0003434-add_1'
-TEST_STRING_MON1 = 'SANS2D0003434-add_monitors_1'
+TEST_STRING_DATA1 = TEST_STRING_DATA + '_1'
+TEST_STRING_MON1 = TEST_STRING_MON + '_1'
 
-TEST_STRING_DATA2 = 'SANS2D0003434-add_2'
-TEST_STRING_MON2 = 'SANS2D0003434-add_monitors_2'
+TEST_STRING_DATA2 = TEST_STRING_DATA + '_2'
+TEST_STRING_MON2 = TEST_STRING_MON + '_2'
 
-TEST_STRING_DATA3 = 'SANS2D0003434-add_3'
-TEST_STRING_MON3 = 'SANS2D0003434-add_monitors_3'
+TEST_STRING_DATA3 = TEST_STRING_DATA + '_3'
+TEST_STRING_MON3 = TEST_STRING_MON + '_3'
 
 
 def provide_group_workspace_for_added_event_data(event_ws_name, monitor_ws_name, out_ws_name):
