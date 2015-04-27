@@ -76,7 +76,7 @@ class TestBundleAddedEventDataFilesToGroupWorkspaceFile(unittest.TestCase):
 
     def test_load_valid_added_event_data_and_monitor_file_produces_group_ws(self):
         # Arrange
-        names = ['even_data', 'monitor']
+        names = ['event_data', 'monitor']
         file_names = self._prepare_workspaces(names = names)
         
         # Act
@@ -84,16 +84,19 @@ class TestBundleAddedEventDataFilesToGroupWorkspaceFile(unittest.TestCase):
         output_group_file_name = su.bundle_added_event_data_as_group(file_names[0], file_names[1])
         Load(Filename = output_group_file_name, OutputWorkspace = group_ws_name)
         group_ws = mtd[group_ws_name]
-        print ''
+
         # Assert
         self.assertTrue(isinstance(group_ws, WorkspaceGroup))
         self.assertEqual(group_ws.size(), 2)
-        self.assertFalse(os.path.exists(file_names[0]))
-        self.assertFalse(os.path.exists(file_names[1]))
+        self.assertTrue(os.path.exists(file_names[0])) # File for group workspace exists
+        self.assertFalse(os.path.exists(file_names[1]))  # File for monitors is deleted
 
         # Clean up
         names.append(group_ws_name)
         self._cleanup_workspaces(names = names)
+
+        if os.path.exists(file_names[0]):
+            os.remove(file_names[0])
 
 
 if __name__ == "__main__":
