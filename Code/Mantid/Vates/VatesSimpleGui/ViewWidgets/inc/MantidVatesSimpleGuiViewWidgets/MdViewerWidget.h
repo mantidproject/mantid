@@ -190,15 +190,13 @@ private:
   /// Reset the current view to the appropriate initial view.
   void resetCurrentView(int workspaceType, const std::string& instrumentName);
   /// Render rebinned workspace
-  void prepareRebinnedWorkspace(const std::string rebinnedWorkspaceName, std::string sourceType); 
+  pqPipelineSource* prepareRebinnedWorkspace(const std::string rebinnedWorkspaceName, std::string sourceType); 
   /// Handle drag and drop of peaks workspcaes
   void handleDragAndDropPeaksWorkspaces(QEvent* e, QString text, QStringList& wsNames);
   /// Set up the default color for the background of the view.
   void setColorForBackground();
   /// Render the original workspace
-  void renderOriginalWorkspace(const std::string originalWorkspaceName);
-  /// Delete a specific workspace
-  void deleteSpecificSource(std::string workspaceName);
+  pqPipelineSource* renderOriginalWorkspace(const std::string originalWorkspaceName);
   /// Remove the rebinning when switching views or otherwise.
   void removeRebinning(pqPipelineSource* source, bool forced, ModeControlWidget::Views view = ModeControlWidget::STANDARD);
   /// Remove all rebinned sources

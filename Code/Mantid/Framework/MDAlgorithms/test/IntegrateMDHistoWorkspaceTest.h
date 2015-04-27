@@ -47,7 +47,7 @@ public:
     TSM_ASSERT_THROWS("No new steps allowed", alg.execute(), std::runtime_error&);
   }
 
-  void test_throw_if_incorrect_binning_limits()
+  void test_throw_if_incorrect_binning_limits_when_integrating()
   {
     using namespace Mantid::DataObjects;
     MDHistoWorkspace_sptr ws = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 1 /*nd*/, 10);
@@ -72,6 +72,39 @@ public:
     alg.setProperty("P1Bin", boost::assign::list_of(min)(max).convert_to_container<std::vector<double> >());
     TSM_ASSERT("Expect validation errors", alg.validateInputs().size() > 0);
     TSM_ASSERT_THROWS("Incorrect limits", alg.execute(), std::runtime_error&);
+  }
+
+  void test_throw_if_incorrect_binning_limits_when_similar()
+  {
+    using namespace Mantid::DataObjects;
+    MDHistoWorkspace_sptr ws = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, 1 /*nd*/, 10);
+
+    IntegrateMDHistoWorkspace alg;
+    alg.setChild(true);
+    alg.setRethrows(true);
+    alg.initialize();
+    alg.setProperty("InputWorkspace", ws);
+    alg.setPropertyValue("OutputWorkspace", "dummy");
+
+    const double min = 3;
+    double step = 0;
+    // Test equal to
+    double max = min;
+    alg.setProperty("P1Bin", boost::assign::list_of(min)(step)(max).convert_to_container<std::vector<double> >());
+    TSM_ASSERT("Expect validation errors", alg.validateInputs().size() > 0);
+    TSM_ASSERT_THROWS("Incorrect limits", alg.execute(), std::runtime_error&);
+
+    // Test less than
+    max = min - 0.01;
+    alg.setProperty("P1Bin", boost::assign::list_of(min)(step)(max).convert_to_container<std::vector<double> >());
+    TSM_ASSERT("Expect validation errors", alg.validateInputs().size() > 0);
+    TSM_ASSERT_THROWS("Incorrect limits", alg.execute(), std::runtime_error&);
+
+    // Test non-zero step. ZERO means copy!
+    max = min - 0.01;
+    alg.setProperty("P1Bin", boost::assign::list_of(min)(1.0)(max).convert_to_container<std::vector<double> >());
+    TSM_ASSERT("Expect validation errors", alg.validateInputs().size() > 0);
+    TSM_ASSERT_THROWS("Step has been specified", alg.execute(), std::runtime_error&);
   }
 
   // Users may set all binning parameter to [] i.e. direct copy, no integration.
@@ -138,6 +171,7 @@ public:
       TSM_ASSERT_DELTA("Wrong error value", std::sqrt(5 * (ws->getErrorAt(0) * ws->getErrorAt(0))), outWS->getErrorAt(0), 1e-4);
   }
 
+
   void test_1D_integration_partial_binning_complex(){
 
       /*
@@ -179,6 +213,59 @@ public:
       TSM_ASSERT_DELTA("Wrong integrated value", 3.5, outWS->getSignalAt(0), 1e-4);
       TSM_ASSERT_DELTA("Wrong error value", std::sqrt(3.5 * (ws->getErrorAt(0) * ws->getErrorAt(0))), outWS->getErrorAt(0), 1e-4);
   }
+
+  void test_1D_integration_with_original_step_and_forbidden_partial_binning(){
+
+      /*
+
+                           input
+      (x = 0) *|--|--|--|--|--|--|--|--|--|--|* (x = 10)
+                1  1  1  1  1  1  1  1  1  1
+
+                  output requested, but partial bins are forbidden so round to the nearest bin edges
+
+      (x = 0.75) *|--------------|* (x = 4.25)
+                1/4 , 1 , 1 , 1 , 1/4
+
+                  output with rounding (maintain closest possible bin boundaries. no partial binning)
+
+      (x = 0) *|--------------------|* (x = 5)
+                 1 , 1 , 1 , 1 , 1, 1
+
+      */
+
+
+      using namespace Mantid::DataObjects;
+      MDHistoWorkspace_sptr ws = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0 /*signal*/, 1 /*nd*/, 10 /*nbins*/, 10 /*max*/, 1.0 /*error sq*/);
+
+      IntegrateMDHistoWorkspace alg;
+      alg.setChild(true);
+      alg.setRethrows(true);
+      alg.initialize();
+      alg.setProperty("InputWorkspace", ws);
+      const double min = 0.75;
+      const double max = 4.25;
+      alg.setProperty("P1Bin", boost::assign::list_of(min)(0.0)(max).convert_to_container<std::vector<double> >());
+      alg.setPropertyValue("OutputWorkspace", "dummy");
+      alg.execute();
+      IMDHistoWorkspace_sptr outWS=alg.getProperty("OutputWorkspace");
+
+      // Quick check that output seems to have the right shape.
+      TSM_ASSERT_EQUALS("Should have rounded to whole widths.", 5, outWS->getNPoints());
+      auto outDim = outWS->getDimension(0);
+      auto inDim = ws->getDimension(0);
+      TS_ASSERT_EQUALS(0.0f, outDim->getMinimum());
+      TS_ASSERT_EQUALS(5.0f, outDim->getMaximum());
+      TSM_ASSERT_EQUALS("Bin width should be unchanged", inDim->getBinWidth(), outDim->getBinWidth());
+
+      // Check the data.
+      TSM_ASSERT_DELTA("Wrong value", 1.0, outWS->getSignalAt(0), 1e-4);
+      TSM_ASSERT_DELTA("Wrong value", 1.0, outWS->getSignalAt(1), 1e-4);
+      TSM_ASSERT_DELTA("Wrong value", 1.0, outWS->getSignalAt(2), 1e-4);
+      TSM_ASSERT_DELTA("Wrong value", 1.0, outWS->getSignalAt(3), 1e-4);
+      TSM_ASSERT_DELTA("Wrong value", 1.0, outWS->getSignalAt(4), 1e-4);
+
+   }
 
   void test_2d_partial_binning() {
 

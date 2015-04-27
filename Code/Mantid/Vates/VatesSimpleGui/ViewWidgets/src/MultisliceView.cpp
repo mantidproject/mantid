@@ -1,7 +1,6 @@
 #include "MantidVatesSimpleGuiViewWidgets/MultisliceView.h"
-
+#include "MantidVatesSimpleGuiViewWidgets/RebinnedSourcesManager.h"
 #include "MantidVatesSimpleGuiQtWidgets/GeometryParser.h"
-
 #include "MantidGeometry/MDGeometry/MDPlaneImplicitFunction.h"
 #include "MantidQtSliceViewer/SliceViewerWindow.h"
 #include "MantidQtFactory/WidgetFactory.h"
@@ -112,7 +111,7 @@ static void GetOrientations(vtkSMSourceProxy* producer, vtkVector3d sliceNormals
 //-----------------------------------------------------------------------------
 
 
-MultiSliceView::MultiSliceView(QWidget *parent) : ViewBase(parent)
+MultiSliceView::MultiSliceView(QWidget *parent, RebinnedSourcesManager* rebinnedSourcesManager) : ViewBase(parent, rebinnedSourcesManager)
 {
   this->ui.setupUi(this);
   pqRenderView *tmp = this->createRenderView(this->ui.renderFrame,

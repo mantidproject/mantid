@@ -8,8 +8,10 @@
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidTestHelpers/MDEventsTestHelper.h"
 
 #include <cxxtest/TestSuite.h>
+#include <boost/assign/list_of.hpp>
 
 using namespace Mantid::MDAlgorithms;
 using namespace Mantid::API;
@@ -438,6 +440,79 @@ public:
 
     AnalysisDataService::Instance().remove(wsName);
     AnalysisDataService::Instance().remove(wsOutName);
+  }
+
+  void test_slice_md_histo_workspace() {
+
+      
+      /*
+
+      Input filled with 1's binning = 1 in each dimension
+      ----------------------------- (10, 10)
+      |                           |
+      |                           |
+      |                           |
+      |                           |
+      |                           |
+      |                           |
+      |                           |
+      |                           |
+      |                           |
+      |                           |
+      -----------------------------
+    (0, 0)
+
+
+      Slice. Two vertical columns. Each 1 in width.
+
+      ----------------------------- (10, 10)
+      |                           |
+      |                           |
+      |__________________________ | (10, 7.1)
+      |    |    |   ...           |
+      |    |    |                 |
+      |    |    |                 |
+      |    |    |                 |
+      |    |    |                 |
+      |__________________________ | (10, 1.1)
+      |                           |
+      -----------------------------
+    (0, 0)
+
+    */
+
+    using namespace Mantid::DataObjects;
+    MDHistoWorkspace_sptr ws = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0 /*signal*/, 2 /*nd*/, 10 /*nbins*/, 10 /*max*/, 1.0 /*error sq*/);
+
+    CutMD alg; // This should be a pass-through to IntegrateMDHistoWorkspace
+    alg.setChild(true);
+    alg.setRethrows(true);
+    alg.initialize();
+    alg.setProperty("InputWorkspace", ws);
+    const double min = 1.1;
+    const double max = 7.1; // 7.1 - 1.1 = 6
+    alg.setProperty("P1Bin", std::vector<double>(0)); // Pass through. Do not change binning.
+    alg.setProperty("P2Bin", boost::assign::list_of(min)(max).convert_to_container<std::vector<double> >());
+    alg.setPropertyValue("OutputWorkspace", "dummy");
+    alg.execute();
+    IMDWorkspace_sptr outWS=alg.getProperty("OutputWorkspace");
+
+    // Quick check that output seems to have the right shape.
+    TSM_ASSERT_EQUALS("All integrated", 10, outWS->getNPoints()); // one dimension unchanged the other integrated
+    auto intdim = outWS->getDimension(1);
+    TS_ASSERT_DELTA(min, intdim->getMinimum(), 1e-4);
+    TS_ASSERT_DELTA(max, intdim->getMaximum(), 1e-4);
+    TS_ASSERT_EQUALS(1, intdim->getNBins());
+    auto dim = outWS->getDimension(0);
+    TSM_ASSERT_DELTA("Not integrated binning should be the same as the original dimension", 0, dim->getMinimum(), 1e-4);
+    TSM_ASSERT_DELTA("Not integrated binning should be the same as the original dimension", 10, dim->getMaximum(), 1e-4);
+    TSM_ASSERT_EQUALS("Not integrated binning should be the same as the original dimension", 10, dim->getNBins());
+
+    // Check the data.
+    auto histoOutWS = boost::dynamic_pointer_cast<IMDHistoWorkspace>(outWS);
+    TS_ASSERT(histoOutWS);
+    TSM_ASSERT_DELTA("Wrong integrated value", 6.0, histoOutWS->getSignalAt(0), 1e-4);
+    TSM_ASSERT_DELTA("Wrong error value", std::sqrt(6.0 * (ws->getErrorAt(0) * ws->getErrorAt(0))), histoOutWS->getErrorAt(0), 1e-4);
   }
 };
 

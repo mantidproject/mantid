@@ -46,11 +46,17 @@ block shows how such a file would look when there are two compounds:
 Note that only the atoms in the asymmetric unit need to be specified, the space group is used to generate all
 equivalent atoms. This information is used to determine systematic absences, while the space group is also used by
 some POLDI algorithms to obtain the point group to get reflection multiplicities and more. Anything that follows the
-`#`-character is considered a comment and is ignored by the parser to allow documentation of the crystal structures
+``#``-character is considered a comment and is ignored by the parser to allow documentation of the crystal structures
 if necessary.
 
 The algorithm will always produce a WorkspaceGroup which contains as many peak tables as compounds specified in the
 file.
+
+Required
+--------
+
+This algorithm requires python package ``pyparsing``, available at the `python package index <https://pypi.python.org/pypi/pyparsing>`_
+or through the operating system's package manager. If the package is not present, this algorithm will not be available.
 
 Usage
 -----
@@ -59,7 +65,7 @@ Usage
 
 The following usage example takes up the file showed above and passes it to the algorithm.
 
-.. testcode::
+.. code-block:: python
 
     # Create two tables with expected peaks directly from a file
     compounds = PoldiCreatePeaksFromFile('PoldiCrystalFileExample.dat', LatticeSpacingMin=0.7)
@@ -74,14 +80,10 @@ The following usage example takes up the file showed above and passes it to the 
 
 The script produces a WorkspaceGroup which contains a table with reflections for each compound in the file:
 
-.. testoutput::
+.. code-block:: python
 
     Number of loaded compounds: 2
     Compound 1: Iron_FCC has 11 reflections in the resolution range.
     Compound 2: Iron_BCC has 8 reflections in the resolution range.
-
-.. testcleanup::
-
-    DeleteWorkspace('compounds')
 
 .. categories::
