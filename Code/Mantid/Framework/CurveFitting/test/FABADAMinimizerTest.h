@@ -44,7 +44,9 @@ public:
     fit.setProperty("CreateOutput", true);
     fit.setProperty("MaxIterations", 100000);
     fit.setProperty("Minimizer", "FABADA,ChainLength=5000,StepsBetweenValues="
-                                 "10,ConvergenceCriteria = 0.1");
+                                 "10,ConvergenceCriteria=0.1,CostFunctionTable="
+                                 "CostFunction,Chains=Chain,ConvergedChain"
+                                 "=ConvergedChain,Parameters=Parameters");
 
     TS_ASSERT_THROWS_NOTHING(fit.execute());
 
@@ -104,9 +106,9 @@ public:
     TS_ASSERT_EQUALS(Xconv.size(), 500);
     TS_ASSERT_EQUALS(Xconv[437], 437);
 
-    TS_ASSERT(AnalysisDataService::Instance().doesExist("chain"));
+    TS_ASSERT(AnalysisDataService::Instance().doesExist("Chain"));
     MatrixWorkspace_sptr wsChain = boost::dynamic_pointer_cast<MatrixWorkspace>(
-        API::AnalysisDataService::Instance().retrieve("chain"));
+        API::AnalysisDataService::Instance().retrieve("Chain"));
     TS_ASSERT(wsChain);
     TS_ASSERT_EQUALS(wsChain->getNumberHistograms(), n + 1);
 

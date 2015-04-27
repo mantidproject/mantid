@@ -64,19 +64,19 @@ FABADAMinimizer::FABADAMinimizer() {
   declareProperty(
       new API::WorkspaceProperty<>("PDF", "PDF", Kernel::Direction::Output),
       "The name to give the output workspace");
-  declareProperty(new API::WorkspaceProperty<>("Chains", "Chain",
+  declareProperty(new API::WorkspaceProperty<>("Chains", "",
                                                Kernel::Direction::Output),
                   "The name to give the output workspace");
   declareProperty(new API::WorkspaceProperty<>(
-                      "ConvergedChain", "ConvergedChain",
+                      "ConvergedChain", "",
                       Kernel::Direction::Output, API::PropertyMode::Optional),
                   "The name to give the output workspace");
   declareProperty(
       new API::WorkspaceProperty<API::ITableWorkspace>(
-          "CostFunctionTable", "CostFunction", Kernel::Direction::Output),
+          "CostFunctionTable", "", Kernel::Direction::Output),
       "The name to give the output workspace");
   declareProperty(new API::WorkspaceProperty<API::ITableWorkspace>(
-                      "Parameters", "Parameters", Kernel::Direction::Output),
+                      "Parameters", "", Kernel::Direction::Output),
                   "The name to give the output workspace");
 }
 
@@ -320,7 +320,7 @@ bool FABADAMinimizer::iterate(size_t) {
   } // for i
 
   // Update the counter, after finishing the iteration for each parameter
-  m_counter += 1; 
+  m_counter += 1;
 
   // Check if Chi square has converged for all the parameters.
   if (m_counter > lowerIterationLimit && !m_converged) {
