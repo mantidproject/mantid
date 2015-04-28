@@ -89,14 +89,14 @@ def getWSprefix(wsname):
 def getEfixed(workspace, detIndex=0):
     inst = mtd[workspace].getInstrument()
 
-    if inst.hasParameter('Efixed')
+    if inst.hasParameter('Efixed'):
         return inst.getNumberParameter('EFixed')[0]
 
     if inst.hasParameter('analyser'):
         analyser_name = inst.getStringParameter('analyser')[0]
         analyser_comp = inst.getComponentByName(analyser_name)
 
-        if analyser_comp.hasParameter('Efixed')
+        if analyser_comp.hasParameter('Efixed'):
             return analyser_comp.getNumberParameter('EFixed')[0]
 
     raise ValueError('No Efixed parameter found')
