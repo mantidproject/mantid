@@ -168,7 +168,7 @@ class ReduceLET_MultiRep2015(ReductionWrapper):
         prop['bleed'] = False
         prop['norm_method']='current'
         prop['detector_van_range']=[2,7]
-        prop['background_range'] = [92000,98000] # TOF range for the calculating flat background
+        prop['background_range'] = [90000,95000] # TOF range for the calculating flat background
         prop['hardmaskOnly']='LET_hard.msk' # diag does not work well on LET. At present only use a hard mask RIB has created
 
         prop['check_background']=True
@@ -244,12 +244,12 @@ class ReduceLET_MultiRep2015(ReductionWrapper):
 #----------------------------------------------------------------------------------------------------------------------
 
 if __name__=="__main__":
-    maps_dir = r'd:\Data\MantidDevArea\Datastore\DataCopies\Testing\Data\SystemTest'
-    data_dir = r'd:\Data\Mantid_Testing\15_03_01'
-    ref_data_dir = r'd:\Data\MantidDevArea\Datastore\DataCopies\Testing\SystemTests\tests\analysis\reference'
-    config.setDataSearchDirs('{0};{1};{2}'.format(data_dir,maps_dir,ref_data_dir))
+    #maps_dir = r'd:\Data\MantidDevArea\Datastore\DataCopies\Testing\Data\SystemTest'
+    #data_dir = r'd:\Data\Mantid_Testing\15_03_01'
+    #ref_data_dir = r'd:\Data\MantidDevArea\Datastore\DataCopies\Testing\SystemTests\tests\analysis\reference'
+    #config.setDataSearchDirs('{0};{1};{2}'.format(data_dir,maps_dir,ref_data_dir))
     #config.appendDataSearchDir('d:/Data/Mantid_GIT/Test/AutoTestData')
-    config['defaultsave.directory'] = data_dir # folder to save resulting spe/nxspe files. Defaults are in
+    #config['defaultsave.directory'] = data_dir # folder to save resulting spe/nxspe files. Defaults are in
 
     # execute stuff from Mantid
     rd =ReduceLET_MultiRep2015()
