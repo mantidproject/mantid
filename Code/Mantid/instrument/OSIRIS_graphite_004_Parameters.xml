@@ -1,53 +1,56 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <parameter-file instrument = "OSIRIS" valid-from = "2010-07-15T00:00:00">
 
-<component-link name = "OSIRIS">
+  <component-link name = "OSIRIS">
 
-<parameter name="analysis-type" type="string">
-  <value val="spectroscopy" />
-</parameter>
+    <parameter name="analysis-type" type="string">
+      <value val="spectroscopy" />
+    </parameter>
 
-<parameter name="spectra-min">
-	<value val="963" />
-</parameter>
+    <parameter name="spectra-min">
+      <value val="963" />
+    </parameter>
 
-<parameter name="spectra-max">
-	<value val="1004" />
-</parameter>
+    <parameter name="spectra-max">
+      <value val="1004" />
+    </parameter>
 
-<parameter name="efixed-val">
-	<value val="7.3812" />
-</parameter>
+    <parameter name="peak-start">
+      <value val="29500" />
+    </parameter>
 
-<parameter name="peak-start">
-	<value val="29500" />
-</parameter>
+    <parameter name="peak-end">
+      <value val="30500" />
+    </parameter>
 
-<parameter name="peak-end">
-	<value val="30500" />
-</parameter>
+    <parameter name="back-start">
+      <value val="24000" />
+    </parameter>
 
-<parameter name="back-start">
-	<value val="24000" />
-</parameter>
+    <parameter name="back-end">
+      <value val="26000" />
+    </parameter>
 
-<parameter name="back-end">
-	<value val="26000" />
-</parameter>
+    <parameter name="analyser" type="string">
+      <value val="graphite" />
+    </parameter>
 
-<parameter name="analyser" type="string">
-  <value val="graphite" />
-</parameter>
+    <parameter name="reflection" type="string">
+      <value val="004" />
+    </parameter>
 
-<parameter name="reflection" type="string">
-  <value val="004" />
-</parameter>
+  </component-link>
 
-</component-link>
+  <component-link name="graphite">
 
-<component-link name="graphite">
-<parameter name="Efixed"> <value val="7.3812" /> </parameter>
+    <parameter name="Efixed">
+      <value val="7.3812" />
+    </parameter>
 
-<parameter name="resolution"> <value val="0.100" /> </parameter>
-</component-link>
+    <parameter name="resolution">
+      <value val="0.100" />
+    </parameter>
+
+  </component-link>
+
 </parameter-file>

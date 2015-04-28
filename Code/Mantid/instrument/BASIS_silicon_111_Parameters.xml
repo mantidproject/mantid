@@ -3,56 +3,55 @@
 
 <component-link name = "BASIS">
 
-<parameter name="analysis-type" type="string">
-  <value val="spectroscopy" />
-</parameter>
+  <parameter name="analysis-type" type="string">
+    <value val="spectroscopy" />
+  </parameter>
 
-<parameter name="spectra-min">
-	<value val="1" />
-</parameter>
+  <parameter name="spectra-min">
+    <value val="1" />
+  </parameter>
 
-<!--FIXME: This spectrum max should be bigger -->
-<parameter name="spectra-max">
-	<value val="16385" />
-</parameter>
+  <!--FIXME: This spectrum max should be bigger -->
+  <parameter name="spectra-max">
+    <value val="16385" />
+  </parameter>
 
-<parameter name="efixed-val">
-	<value val="2.082" />
-</parameter>
+  <parameter name="peak-start">
+    <value val="140400" />
+  </parameter>
 
-<parameter name="peak-start">
-	<value val="140400" />
-</parameter>
+  <parameter name="peak-end">
+    <value val="141000" />
+  </parameter>
 
-<parameter name="peak-end">
-	<value val="141000" />
-</parameter>
+  <parameter name="back-start">
+    <value val="136500" />
+  </parameter>
 
-<parameter name="back-start">
-	<value val="136500" />
-</parameter>
+  <parameter name="back-end">
+    <value val="138000" />
+  </parameter>
 
-<parameter name="back-end">
-	<value val="138000" />
-</parameter>
+  <parameter name="analyser" type="string">
+    <value val="silicon" />
+  </parameter>
 
-<parameter name="analyser" type="string">
-  <value val="silicon" />
-</parameter>
-
-<parameter name="reflection" type="string">
-  <value val="111" />
-</parameter>
+  <parameter name="reflection" type="string">
+    <value val="111" />
+  </parameter>
 
 </component-link>
 
 <component-link name="silicon">
+
   <parameter name="Efixed">
     <value val="2.082" />
   </parameter>
+
   <parameter name="resolution">
     <value val="0.0035" />
   </parameter>
+
 </component-link>
 
 </parameter-file>

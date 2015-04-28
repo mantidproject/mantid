@@ -15,10 +15,6 @@
 	<value val="104" />
 </parameter>
 
-<parameter name="efixed-val">
-	<value val="1.8567" />
-</parameter>
-
 <parameter name="peak-start">
 	<value val="62500" />
 </parameter>
@@ -35,16 +31,16 @@
 	<value val="61500" />
 </parameter>
 
+<parameter name="analyser" type="string">
+  <value val="mica" />
+</parameter>
 
-  <parameter name="analyser" type="string">
-    <value val="mica" />
-  </parameter>
-
-  <parameter name="reflection" type="string">
-    <value val="006" />
-  </parameter>
+<parameter name="reflection" type="string">
+  <value val="006" />
+</parameter>
 
 </component-link>
+
 <component-link name="mica">
   <parameter name="Efixed">
     <value val="1.8567" />

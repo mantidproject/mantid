@@ -1,27 +1,22 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <parameter-file instrument = "IN13" valid-from = "2010-07-15T00:00:00">
 
-<component-link name = "IN13">
+  <component-link name = "IN13">
 
-<parameter name="analysis-type" type="string">
-  <value val="spectroscopy" />
-</parameter>
+    <parameter name="analysis-type" type="string">
+      <value val="spectroscopy" />
+    </parameter>
 
-<parameter name="efixed-val">
-	<value val="16.45" />
-</parameter>
+    <parameter name="analyser" type="string">
+      <value val="CaF" />
+    </parameter>
 
+    <parameter name="reflection" type="string">
+      <value val="422" />
+    </parameter>
 
+  </component-link>
 
-<parameter name="analyser" type="string">
-  <value val="CaF" />
-</parameter>
-
-<parameter name="reflection" type="string">
-  <value val="422" />
-</parameter>
-
-</component-link>
   <component-link name="silicon">
     <parameter name="Efixed"> <value val="16.45" /> </parameter>
     <parameter name="resolution"> <value val="0.008" /> </parameter>

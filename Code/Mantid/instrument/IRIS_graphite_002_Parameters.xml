@@ -15,10 +15,6 @@
 	<value val="53" />
 </parameter>
 
-<parameter name="efixed-val">
-	<value val="1.8450" />
-</parameter>
-
 <parameter name="peak-start">
 	<value val="62500" />
 </parameter>
