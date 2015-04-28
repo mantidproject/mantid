@@ -150,14 +150,16 @@ createShapedOutput(IMDHistoWorkspace const *const inWS,
  * @param box : Box implicit function defining valid region.
  * @param sumSignal : Accumlation in/out ref.
  * @param sumSQErrors : Accumulation error in/out ref. Squared value.
+ * @param sumNEvents : Accumulation n_event in/out ref.
  */
 void performWeightedSum(MDHistoWorkspaceIterator const *const iterator,
                         MDBoxImplicitFunction &box, double &sumSignal,
-                        double &sumSQErrors) {
+                        double &sumSQErrors, double &sumNEvents) {
   const double weight = box.fraction(iterator->getBoxExtents());
   sumSignal += weight * iterator->getSignal();
   const double error = iterator->getError();
   sumSQErrors += weight * (error * error);
+  sumNEvents += weight * iterator->getNumEvents();
 }
 }
 
@@ -238,20 +240,19 @@ void IntegrateMDHistoWorkspace::exec() {
   pbins[3] = this->getProperty("P4Bin");
   pbins[4] = this->getProperty("P5Bin");
 
-  IMDHistoWorkspace_sptr outWS;
   const size_t emptyCount =
       std::count_if(pbins.begin(), pbins.end(), emptyBinning);
   if (emptyCount == pbins.size()) {
     // No work to do.
     g_log.information(this->name() + " Direct clone of input.");
-    outWS = inWS->clone();
+    this->setProperty("OutputWorkspace", inWS->clone());
   } else {
 
     /* Create the output workspace in the right shape. This allows us to iterate
        over our output
        structure and fill it.
      */
-    outWS = createShapedOutput(inWS.get(), pbins, g_log);
+    MDHistoWorkspace_sptr outWS = createShapedOutput(inWS.get(), pbins, g_log);
 
     Progress progress(this, 0, 1, size_t(outWS->getNPoints()));
 
@@ -310,6 +311,7 @@ void IntegrateMDHistoWorkspace::exec() {
 
         double sumSignal = 0;
         double sumSQErrors = 0;
+        double sumNEvents = 0;
 
         // Create a thread-local input iterator.
         boost::scoped_ptr<MDHistoWorkspaceIterator> inIterator(
@@ -325,7 +327,7 @@ void IntegrateMDHistoWorkspace::exec() {
         inIterator->jumpToNearest(outIteratorCenter);
 
         performWeightedSum(inIterator.get(), box, sumSignal,
-                           sumSQErrors); // Use the present position. neighbours
+                           sumSQErrors, sumNEvents); // Use the present position. neighbours
                                          // below exclude the current position.
 
         // Look at all of the neighbours of our position. We previously
@@ -334,21 +336,21 @@ void IntegrateMDHistoWorkspace::exec() {
             inIterator->findNeighbourIndexesByWidth(widthVector);
         for (size_t i = 0; i < neighbourIndexes.size(); ++i) {
           inIterator->jumpTo(neighbourIndexes[i]); // Go to that neighbour
-          performWeightedSum(inIterator.get(), box, sumSignal, sumSQErrors);
+          performWeightedSum(inIterator.get(), box, sumSignal, sumSQErrors, sumNEvents);
         }
 
         const size_t iteratorIndex = outIterator->getLinearIndex();
         outWS->setSignalAt(iteratorIndex, sumSignal);
         outWS->setErrorSquaredAt(iteratorIndex, sumSQErrors);
+        outWS->setNumEventsAt(iteratorIndex, sumNEvents);
 
         progress.report();
       } while (outIterator->next());
       PARALLEL_END_INTERUPT_REGION
     }
     PARALLEL_CHECK_INTERUPT_REGION
+    this->setProperty("OutputWorkspace", outWS);
   }
-
-  this->setProperty("OutputWorkspace", outWS);
 }
 
 /**
