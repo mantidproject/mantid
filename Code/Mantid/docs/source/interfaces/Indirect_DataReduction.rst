@@ -9,7 +9,7 @@ Overview
 
 The Indirect Data Reduction interface provides the initial reduction that
 is used to convert raw instrument data to S(Q, w) for analysis in the
-Indirect Data Analysis and Indirect Bayes interfaces.
+Indirect Data AnalPysis and Indirect Bayes interfaces.
 
 The tabs shown on this interface will vary depending on the current default
 facility such that only tabs that will work with data from the facility are
@@ -294,7 +294,7 @@ Use Calibration
   Allows you to select either a calibrtion file or workspace to apply to the raw
   files.
 
-Preciew Spectrum
+Preview Spectrum
   Allows selection of the spectrum to be shown in the preview plot to the right
   of the Time Slice section.
 
