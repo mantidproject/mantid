@@ -233,8 +233,8 @@ namespace CustomInterfaces
     m_uiForm.spSpectraMax->setMaximum(specMax);
     m_uiForm.spSpectraMax->setValue(specMax);
 
-    if(!instDetails["efixed-val"].isEmpty())
-      m_uiForm.leEfixed->setText(instDetails["efixed-val"]);
+    if(!instDetails["Efixed"].isEmpty())
+      m_uiForm.leEfixed->setText(instDetails["Efixed"]);
     else
       m_uiForm.leEfixed->clear();
 

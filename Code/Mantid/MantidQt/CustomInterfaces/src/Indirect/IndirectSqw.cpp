@@ -85,7 +85,7 @@ namespace CustomInterfaces
     }
 
     // Get correct S(Q, w) algorithm
-    QString eFixed = getInstrumentDetails()["efixed-val"];
+    QString eFixed = getInstrumentDetails()["Efixed"];
 
     IAlgorithm_sptr sqwAlg;
     QString rebinType = m_uiForm.cbRebinType->currentText();

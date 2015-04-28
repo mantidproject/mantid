@@ -394,10 +394,10 @@ namespace CustomInterfaces
     if(!inst)
       throw std::runtime_error("No instrument on workspace");
 
-    if(!inst->hasParameter("efixed-val"))
+    if(!inst->hasParameter("Efixed"))
       throw std::runtime_error("Instrument has no efixed parameter");
 
-    return inst->getNumberParameter("efixed-val")[0];
+    return inst->getNumberParameter("Efixed")[0];
   }
 
 
