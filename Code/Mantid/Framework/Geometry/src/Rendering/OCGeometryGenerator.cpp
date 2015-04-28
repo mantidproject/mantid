@@ -32,7 +32,9 @@
 #endif
 
 GCC_DIAG_OFF(conversion)
+// clang-format off
 GCC_DIAG_OFF(cast-qual)
+// clang-format on
 #include <gp_Trsf.hxx>
 #include <gp_Vec.hxx>
 #include <gp_Dir.hxx>
@@ -58,7 +60,9 @@ GCC_DIAG_OFF(cast-qual)
 #include <BRep_Tool.hxx>
 #include <Poly_Triangulation.hxx>
 GCC_DIAG_ON(conversion)
+// clang-format off
 GCC_DIAG_ON(cast-qual)
+// clang-format on
 
 #ifdef __INTEL_COMPILER
 #pragma warning enable 191
