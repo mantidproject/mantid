@@ -220,7 +220,7 @@ CrystalStructure::getDValues(const std::vector<V3D> &hkls) const {
 
   std::vector<double> dValues(hkls.size());
   std::transform(hkls.begin(), hkls.end(), dValues.begin(),
-                 boost::bind<double>(&CrystalStructure::getDValue, this, _1));
+                 boost::bind(&CrystalStructure::getDValue, this, _1));
 
   return dValues;
 }
