@@ -264,17 +264,15 @@ void IntegrateMDHistoWorkspace::exec() {
       // Maximum width vector for region in output workspace corresponding to
       // region in input workspace.
 
-      /* int(wout/win + 0.5) = n_pixels in input corresponding to 1 pixel in
-         output. Rounded up.
+      /* ceil(wout/win) = n_pixels in input corresponding to 1 pixel in output.
          The width vector is the total width. So we always need to double it to
          take account of the whole region.
-         For example, 8/4 + 0.5 = 2, but thats only 1 pixel on each side of the
-         center, we need 2 * that to give the correct
-         answer of 4.
+         For example, 8/4 = 2, but thats only 1 pixel on each side of the
+         center, we need 2 * that to give the correct answer of 4.
       */
       widthVector[i] =
-          2 * int((binWidthsOut[i] / inWS->getDimension(i)->getBinWidth()) +
-                  0.5); // round up.
+          2 * static_cast<int>(std::ceil(binWidthsOut[i] /
+                                         inWS->getDimension(i)->getBinWidth()));
 
       if (widthVector[i] % 2 == 0) {
         widthVector[i] += 1; // make it odd if not already.
