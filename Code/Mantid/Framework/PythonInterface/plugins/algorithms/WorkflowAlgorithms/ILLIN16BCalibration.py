@@ -10,9 +10,9 @@ class ILLIN16BCalibration(DataProcessorAlgorithm):
     _input_file = None
     _out_ws = None
     _peak_range = None
-    _back_range = None
     _spec_range = None
     _intensity_scale = None
+    _mirror_mode = None
 
 
     def category(self):
