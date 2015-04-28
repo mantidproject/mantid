@@ -96,13 +96,13 @@ def diagnose(white_int,**kwargs):
     if not parser.use_hard_mask_only :
         # White beam Test
         if white_mask:
-            test_results['First white beam test:'] = ['white_mask cache global', num_failed]
+            test_results['First detector vanadium test:'] = ['white_mask cache global', num_failed]
         else:
             __white_masks, num_failed = do_white_test(white_int, parser.tiny, parser.huge,
                                                     parser.van_out_lo, parser.van_out_hi,
                                                     parser.van_lo, parser.van_hi,
                                                     parser.van_sig, start_index, end_index)
-            test_results['First white beam test:'] = [str(__white_masks), num_failed]
+            test_results['First detector vanadium test:'] = [str(__white_masks), num_failed]
             add_masking(white_int, __white_masks, start_index, end_index)
             if van_mask:
                 add_masking(van_mask, __white_masks, start_index, end_index)
@@ -110,12 +110,12 @@ def diagnose(white_int,**kwargs):
 
         # Second white beam test
         if 'second_white' in kwargs: #NOT IMPLEMENTED
-            raise NotImplementedError("Second white is not yet implemented")
+            raise NotImplementedError("Second detector vanadium test")
             __second_white_masks, num_failed = do_second_white_test(white_int, parser.second_white, parser.tiny, parser.huge,\
                                                        parser.van_out_lo, parser.van_out_hi,\
                                                        parser.van_lo, parser.van_hi, parser.variation,\
                                                        parser.van_sig, start_index, end_index)
-            test_results['Second white beam test:'] = [str(__second_white_masks), num_failed]
+            test_results['Second detector vanadium test:'] = [str(__second_white_masks), num_failed]
             add_masking(white_int, __second_white_masks, start_index, end_index)
             #TODO
             #add_masking(van_mask, __second_white_masks, start_index, end_index)
@@ -150,7 +150,7 @@ def diagnose(white_int,**kwargs):
             if not hasattr(parser, 'sample_run'):
                 raise RuntimeError("Bleed test requested but the sample_run keyword has not been provided")
             __bleed_masks, failures = do_bleed_test(parser.sample_run, parser.bleed_maxrate, parser.bleed_pixels)
-            test_results['PSD Bleed test :'] = [str(__bleed_masks), failures]
+            test_results['PSD Bleed test:'] = [str(__bleed_masks), failures]
             add_masking(white_int, __bleed_masks)
             DeleteWorkspace(__bleed_masks)
     # endif not hard_mask_only
@@ -397,6 +397,9 @@ def print_test_summary(test_results,test_name=None):
     Input:
     test_results - A list or tuple containing either the number of failed spectra or None
                    indicating that the test was not run
+    IMPORTANT: The output of this function is used as 
+               input for GUI, so the keys names, = sign and : are control
+               symbols of MantidWidgets->DiagResults method.
     """
 
     if len(test_results) == 0:
@@ -416,7 +419,7 @@ def print_test_summary(test_results,test_name=None):
         t_result = test_results[t_name]
         if len(t_result[0])>max_ws_len :
             max_ws_len = len(t_result[0])
-    format_string = "!{{0:<{0}}} ! {{1:<{1}}} ! {{2:>10}}!".format(max_test_len,max_ws_len)
+    format_string = " {{0:<{0}}}  {{1:<{1}}}  {{2:>10}}".format(max_test_len,max_ws_len)
 
     for t_name in test_results:
         t_result = test_results[t_name]
