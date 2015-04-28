@@ -170,6 +170,9 @@ private:
   /// read in the input parameters and see what findout what will be to grouped
   void getGroups(API::MatrixWorkspace_const_sptr workspace,
                  std::vector<int64_t> &unUsedSpec);
+  /// read in a list of instructions and output commands in .map file format
+  void translateInstructions(const std::string &instructions,
+                             std::stringstream &commands);
   /// gets the list of spectra _index_ _numbers_ from a file of _spectra_
   /// _numbers_
   void processFile(std::string fname, API::MatrixWorkspace_const_sptr workspace,
@@ -252,8 +255,8 @@ private:
   /// reading it will take this percentage of the
   /// algorithm execution time
   static const int INTERVAL = 128; ///< copy this many histograms and then check
-  /// for an algorithm notification and update
-  /// the progress bar
+                                   /// for an algorithm notification and update
+                                   /// the progress bar
 };
 
 } // namespace DataHandling
