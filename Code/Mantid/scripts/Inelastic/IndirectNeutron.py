@@ -5,7 +5,7 @@ from IndirectImport import *
 from mantid.simpleapi import *
 from mantid import config, logger, mtd, FileFinder
 import sys, math, os.path, numpy as np
-from IndirectCommon import StartTime, EndTime, ExtractFloat, ExtractInt
+from IndirectCommon import StartTime, EndTime, ExtractFloat, ExtractInt, getEfixed
 MTD_PLOT = import_mantidplot()
 
 #  Routines for Ascii file of raw data
@@ -447,7 +447,7 @@ def RunParas(ascWS,instr,run,title):
     AddSampleLog(Workspace=ascWS, LogName="facility", LogType="String", LogText="ILL")
     ws.getRun()['run_number'] = run
     ws.getRun()['run_title'] = title
-    efixed = inst.getNumberParameter('efixed-val')[0]
+    efixed = getEfixed(ws)
 
     facility = ws.getRun().getLogData('facility').value
     logger.information('Facility is ' +facility)

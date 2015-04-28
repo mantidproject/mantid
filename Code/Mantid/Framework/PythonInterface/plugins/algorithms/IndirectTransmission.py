@@ -157,13 +157,13 @@ class IndirectTransmission(PythonAlgorithm):
         @param workspace Name of workspace to extract from
         @return Fixed energy value
         """
+        from IndirectCommon import getEfixed
 
         ws = mtd[workspace]
 
         # Try to get efixed from the parameters first
         try:
-            instrument = ws.getInstrument()
-            efixed = instrument.getNumberParameter('efixed-val')[0]
+            efixed = getEfixed(ws)
         except IndexError:
             efixed = 0.0
 

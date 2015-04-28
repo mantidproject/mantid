@@ -394,10 +394,21 @@ namespace CustomInterfaces
     if(!inst)
       throw std::runtime_error("No instrument on workspace");
 
-    if(!inst->hasParameter("Efixed"))
-      throw std::runtime_error("Instrument has no efixed parameter");
+    // Try to get the parameter form the base instrument
+    if(inst->hasParameter("Efixed"))
+      return inst->getNumberParameter("Efixed")[0];
 
-    return inst->getNumberParameter("Efixed")[0];
+    // Try to get it form the analyser component
+    if(inst->hasParameter("analyser"))
+    {
+      std::string analyserName = inst->getStringParameter("analyser")[0];
+      auto analyserComp = inst->getComponentByName(analyserName);
+
+      if(analyserComp && analyserComp->hasParameter("Efixed"))
+        return analyserComp->getNumberParameter("Efixed")[0];
+    }
+
+    throw std::runtime_error("Instrument has no efixed parameter");
   }
 
 

@@ -294,7 +294,7 @@ std::map<QString, QString> IndirectDataReduction::getInstrumentDetails()
       QString value = getInstrumentParameterFrom(instrument, key);
 
       if(value.isEmpty() && component != NULL)
-        QString value = getInstrumentParameterFrom(component, key);
+        value = getInstrumentParameterFrom(component, key);
 
       instDetails[QString::fromStdString(key)] = value;
     }
