@@ -9,13 +9,13 @@
 '''
 #these need to be moved into one NR folder or so
 #from ReflectometerCors import *
-from l2q import *
-from combineMulti import *
+from isis_reflectometry.l2q import *
+from isis_reflectometry.combineMulti import *
 from mantid.simpleapi import *  # New API
 
 from mantid.api import WorkspaceGroup, MatrixWorkspace
 from mantid.kernel import logger
-from convert_to_wavelength import ConvertToWavelength
+from isis_reflectometry.convert_to_wavelength import ConvertToWavelength
 import math
 import re
 import abc
@@ -122,7 +122,8 @@ def quick_explicit(run, i0_monitor_index, lambda_min, lambda_max,  background_mi
         detector_index_ranges = (multi_detector_start, nHist-1)
 
 
-    _monitor_ws, _detector_ws = to_lam.convert(wavelength_min=lambda_min, wavelength_max=lambda_max, detector_workspace_indexes=detector_index_ranges, monitor_workspace_index=i0_monitor_index, correct_monitor=True, bg_min=background_min, bg_max=background_max )
+    _monitor_ws, _detector_ws = to_lam.convert(wavelength_min=lambda_min, wavelength_max=lambda_max, 
+    detector_workspace_indexes=detector_index_ranges, monitor_workspace_index=i0_monitor_index, correct_monitor=True, bg_min=background_min, bg_max=background_max )
 
     inst = _sample_ws.getInstrument()
     # Some beamline constants from IDF
@@ -187,7 +188,6 @@ def quick_explicit(run, i0_monitor_index, lambda_min, lambda_max,  background_mi
             detLocation=inst.getComponentByName(detector_component_name).getPos()
             sampleLocation=inst.getComponentByName(sample_component_name).getPos()
             detLocation=inst.getComponentByName(detector_component_name).getPos()
-            sample2detector=detLocation-sampleLocation    # metres
             source=inst.getSource()
             beamPos = sampleLocation - source.getPos()
             theta = groupGet(str(_sample_ws),'samp','theta')
@@ -238,9 +238,8 @@ def make_trans_corr(transrun, stitch_start_overlap, stitch_end_overlap, stitch_p
     Make the transmission correction workspace.
     '''
 
-    '''
-    Check to see whether all optional inputs have been provide. If not we have to get them from the IDF.
-    '''
+
+    # Check to see whether all optional inputs have been provide. If not we have to get them from the IDF.
     if not all((lambda_min, lambda_max, background_min, background_max, int_min, int_max, detector_index_ranges, i0_monitor_index)):
         logger.notice("make_trans_corr: Fetching missing arguments from the IDF")
         instrument_source = transrun
