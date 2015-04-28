@@ -13,42 +13,23 @@ import numpy
 import HfirUtility as hutil
 
 # Import mantid
-IMPORT_MANTID = False
-try:
-    import mantid
-    IMPORT_MANTID = True
-except ImportError as e:
-    curdir = os.getcwd()
-    libpath = os.path.join(curdir.split('Code')[0], 'Code/debug/bin')
-    if os.path.exists(libpath) is False:
-        libpath = os.path.join(curdir.split('Code')[0], 'Code/release/bin')
-    sys.path.append(libpath)
-    #print libpath
-    #"/home/wzz/Mantid_Project/Mantid/Code/Mantid/scripts/HFIRPowderReduction"
-    ##sys.path.append('/home/wzz/Mantid_Project/Mantid2/Code/release/bin')
-    #sys.path.append('/home/wzz/Mantid/Code/debug/bin')
-    #sys.path.append('/Users/wzz/Mantid/Code/debug/bin')
-    try:
-        import mantid
-    except ImportError as e2:
-        print "Unable to import Mantid: %s." % (str(e))
-        raise e
-    else:
-        IMPORT_MANTID = True
-finally:
-    if IMPORT_MANTID is True:
-        import mantid.simpleapi as api
-        import mantid.kernel
-        from mantid.simpleapi import AnalysisDataService
-        from mantid.kernel import ConfigService
+
+curdir = os.getcwd()
+libpath = os.path.join(curdir.split('Code')[0], 'Code/debug/bin')
+if os.path.exists(libpath) is False:
+    libpath = os.path.join(curdir.split('Code')[0], 'Code/release/bin')
+sys.path.append(libpath) 
+import mantid
+import mantid.simpleapi as api
+import mantid.kernel
+from mantid.simpleapi import AnalysisDataService
+from mantid.kernel import ConfigService
 
 
 VanadiumPeakPositions = [0.5044,0.5191,0.5350,0.5526,0.5936,0.6178,0.6453,0.6768,
         0.7134,0.7566,0.8089,0.8737,0.9571,1.0701,1.2356,1.5133,2.1401]
 
-""" Powder data reduction class
-"""
-class PDRManager:
+class PDRManager(object):
     """ Powder diffraction reduction workspace manager
     """
     def __init__(self, exp, scan):
@@ -57,7 +38,7 @@ class PDRManager:
         try:
             self.exp = int(exp)
             self.scan = int(scan)
-        except ValueError as e:
+        except ValueError:
             raise NotImplementedError("Set non-integer value as Exp and Scan to PDRManager.")
 
         self.unit = None
@@ -112,7 +93,6 @@ class PDRManager:
             self.binsize = float(binsize)
         except TypeError as e:
             print e
-            pass
 
         return
 
@@ -165,9 +145,7 @@ class PDRManager:
         return
 
 
-""" HFIR powder diffraction data reduction control
-"""
-class HFIRPDRedControl:
+class HFIRPDRedControl(object):
     """ Class for controlling HFIR powder reduction
     """
     def __init__(self):
@@ -252,17 +230,17 @@ class HFIRPDRedControl:
 
         rlist = []
         # Loop over all Pt. number
-        for pt in ptnolist:
+        for ptno in ptnolist:
             # get data
             tempoutws = api.GetSpiceDataRawCountsFromMD(InputWorkspace=datamdws,
                                                         MonitorWorkspace=monitormdws,
                                                         Mode='Pt.',
-                                                        Pt = pt)
+                                                        Pt = ptno)
 
             vecx = tempoutws.readX(0)[:]
             vecy = tempoutws.readY(0)[:]
 
-            rlist.append((pt, vecx, vecy))
+            rlist.append((ptno, vecx, vecy))
         # ENDFOR
 
         return rlist
@@ -285,9 +263,9 @@ class HFIRPDRedControl:
         run = info0.run()
         plist = run.getProperties()
         lognamelist = []
-        for p in plist:
-            if p.__class__.__name__.lower().count('float') == 1:
-                lognamelist.append(p.name)
+        for prop in plist:
+            if prop.__class__.__name__.lower().count('float') == 1:
+                lognamelist.append(prop.name)
 
         return lognamelist
 
@@ -314,7 +292,6 @@ class HFIRPDRedControl:
         # get the complete list of Pt. number
         ptnolist = self._getRunNumberList(datamdws=rmanager.datamdws)
 
-        rlist = []
         # get data
         tempoutws = api.GetSpiceDataRawCountsFromMD(InputWorkspace=datamdws,
                                                     MonitorWorkspace=monitormdws,
@@ -369,20 +346,21 @@ class HFIRPDRedControl:
         # get vectors
         return outws.readX(0), outws.readY(0)
 
+
     def getMergedVector(self, mkey):
-        """
+        """ Get vector X and Y from merged scans
         """
         if self._myMergedWSDict.has_key(mkey) is True:
-            ws = self._myMergedWSDict[mkey]
+            wksp = self._myMergedWSDict[mkey]
 
             # convert to point data if necessary
-            if len(ws.readX(0)) != len(ws.readY(0)):
-                wsname = ws.name() + "_pd"
-                api.ConvertToPointData(InputWorkspace=ws, OutputWorkspace=wsname)
-                ws = AnalysisDataService.retrieve(wsname)
+            if len(wksp.readX(0)) != len(wksp.readY(0)):
+                wsname = wksp.name() + "_pd"
+                api.ConvertToPointData(InputWorkspace=wksp, OutputWorkspace=wsname)
+                wksp = AnalysisDataService.retrieve(wsname)
 
-            vecx = ws.readX(0)
-            vecy = ws.readY(0)
+            vecx = wksp.readX(0)
+            vecy = wksp.readY(0)
         else:
             raise NotImplementedError("No merged workspace for key = %s." % (str(mkey)))
 
@@ -550,7 +528,7 @@ class HFIRPDRedControl:
         outwsname = "Merged_Exp%d_Scan%s_%s" % (expno, scannolist[0], scannolist[-1])
 
         # Merge
-        wavelength = self.getWavelength(expno, scanno)
+        wavelength = self.getWavelength(expno, scannolist[0])
         api.ConvertCWPDMDToSpectra(InputWorkspace=mg_datamdws,
                                    InputMonitorWorkspace=mg_monitormdws,
                                    OutputWorkspace=outwsname,

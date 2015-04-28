@@ -1,10 +1,8 @@
 #pylint: disable=invalid-name
-import sys
 import os
 
-from PyQt4 import QtGui, QtCore
+from PyQt4 import QtGui
 
-import matplotlib
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt4agg import NavigationToolbar2QTAgg as NavigationToolbar
 from matplotlib.figure import Figure

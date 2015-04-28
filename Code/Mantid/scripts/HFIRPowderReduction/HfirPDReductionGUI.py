@@ -1,11 +1,10 @@
+#pylint: disable=invalid-name, relative-import
 ################################################################################
 # Main class for HFIR powder reduction GUI
 # Key word for future developing: FUTURE, NEXT, REFACTOR, RELEASE 2.0
 ################################################################################
 
-#pylint: disable=invalid-name
 import numpy
-import sys
 import os
 
 from Ui_MainWindow import Ui_MainWindow #import line for the UI python class
@@ -15,8 +14,6 @@ try:
 except AttributeError:
     def _fromUtf8(s):
         return s
-
-from matplotlib.pyplot import setp
 
 from HfirPDReductionControl import *
 
@@ -30,6 +27,9 @@ class EmptyError(Exception):
     """ Exception for finding empty input for integer or float
     """
     def __init__(self, value):
+        """ Init
+        """
+        Exception.__init__(self)
         self.value = value
 
     def __str__(self):
@@ -204,18 +204,23 @@ class MainWindow(QtGui.QMainWindow):
         self.ui.lineEdit_scanEnd.setValidator(validator12)
 
         # TODO - Add valdiators for
-        # lineEdit_normalizeMonitor float
-        # lineEdit_mergeMinX, lineEdit_mergeMaxX, lineEdit_mergeBinSize
+        validator13 = QtGui.QDoubleValidator(self.ui.lineEdit_normalizeMonitor)
+        validator13.setBottom(0.)
+        self.ui.lineEdit_normalizeMonitor.setValidator(validator13)
+
+        validator14 = QtGui.QDoubleValidator(self.ui.lineEdit_mergeMinX)
+        validator14.setBottom(0.)
+        self.ui.lineEdit_mergeMinX.setValidator(validator14)
+
+        validator15 = QtGui.QDoubleValidator(self.ui.lineEdit_mergeMaxX)
+        validator15.setBottom(0.)
+        self.ui.lineEdit_mergeMaxX.setValidator(validator15)
+
+        validator16 = QtGui.QDoubleValidator(self.ui.lineEdit_mergeBinSize)
+        validator16.setBottom(0.)
+        self.ui.lineEdit_mergeBinSize.setValidator(validator16)
 
         # Get initial setup
-        self._initSetup()
-
-        return
-
-
-    def _initSetup(self):
-        """ Initial setup
-        """
         # RELEASE 2.0 - This part will be implemented soon as default configuration is made
         # Mantid configuration
         self._instrument = str(self.ui.comboBox_instrument.currentText())
@@ -284,8 +289,8 @@ class MainWindow(QtGui.QMainWindow):
         """
         # Get file name
         filefilter = "Text (*.txt);;Data (*.dat);;All files (*.*)"
-        curdir = os.getcwd()
-        excldetfnames = QtGui.QFileDialog.getOpenFileNames(self, 'Open File(s)', curdir, filefilter)
+        curDir = os.getcwd()
+        excldetfnames = QtGui.QFileDialog.getOpenFileNames(self, 'Open File(s)', curDir, filefilter)
         try:
             excldetfname = excldetfnames[0]
             self.ui.lineEdit_excludedDetFileName.setText(excldetfname)
@@ -296,6 +301,8 @@ class MainWindow(QtGui.QMainWindow):
         # Parse det exclusion file
         print "Detector exclusion file name is %s." % (excldetfname)
         excludedetlist, errmsg = self._myControl.parseExcludedDetFile('HB2A', excldetfname)
+        if len(errmsg) > 0:
+            self._logError(errmsg)
         textbuf = ""
         for detid in excludedetlist:
             textbuf += "%d," % (detid)
@@ -540,8 +547,8 @@ class MainWindow(QtGui.QMainWindow):
             if vancorrfname is None:
                 # browse vanadium correction file
                 filefilter = "Text (*.txt);;Data (*.dat);;All files (*.*)"
-                curdir = os.getcwd()
-                vancorrfnames = QtGui.QFileDialog.getOpenFileNames(self, 'Open File(s)', curdir, filefilter)
+                curDir = os.getcwd()
+                vancorrfnames = QtGui.QFileDialog.getOpenFileNames(self, 'Open File(s)', cuDdir, filefilter)
                 if len(vancorrfnames) > 0:
                     vancorrfname = vancorrfnames[0]
                     self.ui.lineEdit_vcorrFileName.setText(str(vancorrfname))
@@ -616,7 +623,7 @@ class MainWindow(QtGui.QMainWindow):
         for scan in sorted(scanlist):
             tempstatus = self.doLoadData(expno, scan)
             if tempstatus is False:
-                self.ui.label_mergeMessage.setText('Error to load Exp %d Scan %d.'(expno, scan))
+                self.ui.label_mergeMessage.setText('Error to load Exp %d Scan %d.'%(expno, scan))
                 loadstatus = False
             else:
                 message = 'Loaded Exp %d Scan %d.' % (expno, scan)
@@ -689,7 +696,6 @@ class MainWindow(QtGui.QMainWindow):
     def doLoadNextScan(self):
         """
         """
-        # FIXME - Change method name such that all plotting methods in the same tab will be together
         # TODO - Need a plotting managing mechanism to avoid to plotting same exp/scan more than once
         # Advance scan number by 1
         try:
