@@ -73,10 +73,10 @@ class ILLIN16BCalibration(DataProcessorAlgorithm):
         number_historgrams = mtd[self._out_ws].getNumberHistograms()
         Integration(InputWorkspace=self._out_ws,
                     OutputWorkspace=self._out_ws,
-                    RangeLower=self._peak_range[0],
-                    RangeUpper=self._peak_range[1],
-                    StartWorkspaceIndex=self._spec_range[0],
-                    EndWorkspaceIndex=self._spec_range[1])
+                    RangeLower=float(self._peak_range[0]),
+                    RangeUpper=float(self._peak_range[1]),
+                    StartWorkspaceIndex=int(self._spec_range[0]),
+                    EndWorkspaceIndex=int(self._spec_range[1]))
 
         ws_mask, num_zero_spectra = FindDetectorsOutsideLimits(InputWorkspace=self._out_ws,
                                                                OutputWorkspace='__temp_ws_mask')
