@@ -38,6 +38,8 @@ std::string SCARFTomoReconstruction::m_acceptType =
 
 const std::string SCARFTomoReconstruction::m_SCARFComputeResource = "SCARF@STFC";
 
+int SCARFTomoReconstruction::m_jobSeq = 1;
+
 SCARFTomoReconstruction::SCARFTomoReconstruction():
   Mantid::API::Algorithm(), m_action()
 { }
@@ -93,6 +95,12 @@ void SCARFTomoReconstruction::init() {
                   "for tomographic reconstruction.");
   setPropertySettings("JobOptions",
                       new VisibleWhenProperty("Action", IS_EQUAL_TO, "SubmitJob"));
+
+  declareProperty("JobName", "", nullV, "Optional name for the job, if not given then a "
+                  "name will be generated internally or at the compute resource",
+                  Direction::Input);
+  setPropertySettings("JobName", new VisibleWhenProperty("Action", IS_EQUAL_TO,
+                                                         "SubmitJob"));
 
   // - Action: upload file
   declareProperty(new API::FileProperty("FileToUpload", "",
@@ -433,6 +441,13 @@ void SCARFTomoReconstruction::doSubmit(const std::string &username) {
     throw;
   }
 
+  std::string jobName = "";
+  try {
+    jobName = getPropertyValue("JobName");
+  } catch(std::runtime_error& /*e*/) {
+    jobName = "";
+  }
+
   progress(0, "Starting job...");
 
   // Job submit query, requires specific parameters for LSF submit
@@ -441,11 +456,22 @@ void SCARFTomoReconstruction::doSubmit(const std::string &username) {
   // /work/imat/webservice_test/tomopy/imat_recon_FBP.py;INPUT_ARGS=
   // /work/imat/scripts/test_;JOB_NAME=01_test_job;OUTPUT_FILE=%J.output;ERROR_FILE=
   // %J.error"
-  const std::string appName = "TOMOPY_0_0_3";
+
+  // Two applications are for now registered on SCARF:
+  //  TOMOPY_0_0_3, PYASTRATOOLBOX_1_1
+  std::string appName = "TOMOPY_0_0_3";
+  // Basic attempt at guessing the app that we might really need. This
+  // is not fixed/unstable at the moment
+  if (runnablePath.find("astra-2d-FBP") != std::string::npos
+      ||
+      runnablePath.find("astra-3d-SIRT3D") != std::string::npos ) {
+    appName = "PYASTRATOOLBOX_1_1";
+  }
+
   // this gets executed (for example via 'exec' or 'python', depending on the appName
   const std::string boundary = "bqJky99mlBWa-ZuqjC53mG6EzbmlxB";
   const std::string &body = buildSubmitBody(appName, boundary,
-                                            runnablePath, jobOptions);
+                                            runnablePath, jobOptions, jobName);
 
   // Job submit, needs these headers:
   // headers = {'Content-Type': 'multipart/mixed; boundary='+boundary,
@@ -884,9 +910,8 @@ void SCARFTomoReconstruction::encodeParam(std::string &body,
  * Tiny helper to generate an integer sequence number for the job
  * names.
  */
-int seqNo() {
-  static int s = 1;
-  return s++;
+int SCARFTomoReconstruction::jobSeqNo() {
+  return m_jobSeq++;
 }
 
 /**
@@ -897,13 +922,15 @@ int seqNo() {
  * @param boundary Boundary string between parts of the multi-part body
  * @param inputFile Input file parameter, this file will be run
  * @param inputArgs Arguments to the command (application specific)
+ * @param jobName Name passed by the user (can be empty == no preference)
  *
  * @return A string ready to be used as body of a 'job submit' HTTP request
  */
 std::string SCARFTomoReconstruction::buildSubmitBody(const std::string &appName,
                                                      const std::string &boundary,
                                                      const std::string &inputFile,
-                                                     const std::string &inputArgs) {
+                                                     const std::string &inputArgs,
+                                                     const std::string &jobName) {
   // BLOCK: start and encode app name like this:
   // --bqJky99mlBWa-ZuqjC53mG6EzbmlxB
   // Content-Disposition: form-data; name="AppName"
@@ -967,8 +994,14 @@ std::string SCARFTomoReconstruction::buildSubmitBody(const std::string &appName,
     // Content-Type: application/xml; charset=US-ASCII
     // Content-Transfer-Encoding: 8bit
     // <AppParam><id>JOB_NAME</id><value>foo</value><type></type></AppParam>
-    encodeParam(body, boundaryInner, "JOB_NAME", "Mantid_tomography_" +
-                boost::lexical_cast<std::string>(seqNo()));
+    std::string name;
+    if (jobName.empty()) {
+      name = "Mantid_tomography_" +
+        boost::lexical_cast<std::string>(jobSeqNo());
+    } else {
+      name = jobName;
+    }
+    encodeParam(body, boundaryInner, "JOB_NAME", name);
   }
   {
     // BLOCK: encode INPUT_FILE (this is what will be run,

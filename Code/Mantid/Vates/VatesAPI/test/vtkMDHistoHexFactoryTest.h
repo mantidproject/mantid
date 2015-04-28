@@ -11,6 +11,7 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include "MantidVatesAPI/vtkStructuredGrid_Silent.h"
+#include "vtkUnstructuredGrid.h"
 
 using namespace Mantid;
 using namespace Mantid::API;

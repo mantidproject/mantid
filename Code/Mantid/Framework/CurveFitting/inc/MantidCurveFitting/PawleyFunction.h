@@ -62,6 +62,10 @@ protected:
 
   void createCrystalSystemParameters(
       Geometry::PointGroup::CrystalSystem crystalSystem);
+
+  void addLengthConstraint(const std::string &parameterName);
+  void addAngleConstraint(const std::string &parameterName);
+
   void setCenterParameterNameFromFunction(
       const API::IPeakFunction_sptr &profileFunction);
 

@@ -18,6 +18,7 @@
 #include "../ScriptingWindow.h"
 #include "../Folder.h"
 #include "../TiledWindow.h"
+#include "../PythonThreading.h"
 
 #include "MantidKernel/Property.h"
 #include "MantidKernel/ConfigService.h"
@@ -110,8 +111,8 @@ MantidUI::MantidUI(ApplicationWindow *aw):
   m_configServiceObserver(*this,&MantidUI::handleConfigServiceUpdate),
   m_appWindow(aw),
   m_lastShownInstrumentWin(NULL), m_lastShownSliceViewWin(NULL), m_lastShownSpectrumViewerWin(NULL), 
-  m_lastShownColorFillWin(NULL), m_lastShown1DPlotWin(NULL), 
-  m_vatesSubWindow(NULL)//, m_spectrumViewWindow(NULL)
+  m_lastShownColorFillWin(NULL), m_lastShown1DPlotWin(NULL), m_vatesSubWindow(NULL)
+  //, m_spectrumViewWindow(NULL)
 {
 
   // To be able to use them in queued signals they need to be registered
@@ -305,8 +306,8 @@ void MantidUI::shutdown()
       Poco::Thread::sleep(100);
     }
   }
-
-  Mantid::API::FrameworkManager::Instance().clear();
+  bool prompt = false;
+  this->clearAllMemory(prompt);
 }
 
 MantidUI::~MantidUI()
@@ -733,7 +734,8 @@ void MantidUI::showVatesSimpleInterface()
     {
       m_vatesSubWindow = new QMdiSubWindow;
       m_vatesSubWindow->setAttribute(Qt::WA_DeleteOnClose, false);
-      QIcon icon; icon.addFile(QString::fromUtf8(":/VatesSimpleGuiViewWidgets/icons/pvIcon.png"), QSize(), QIcon::Normal, QIcon::Off);
+      QIcon icon; 
+      icon.addFile(QString::fromUtf8(":/VatesSimpleGuiViewWidgets/icons/pvIcon.png"), QSize(), QIcon::Normal, QIcon::Off);
       m_vatesSubWindow->setWindowIcon(icon);
       connect(m_appWindow, SIGNAL(shutting_down()), m_vatesSubWindow, SLOT(close()));
 
@@ -746,12 +748,11 @@ void MantidUI::showVatesSimpleInterface()
         connect(vsui, SIGNAL(requestClose()), m_vatesSubWindow, SLOT(close()));
         vsui->setParent(m_vatesSubWindow);
         m_vatesSubWindow->setWindowTitle("Vates Simple Interface");
-
         vsui->setupPluginMode();
         //m_appWindow->setGeometry(m_vatesSubWindow, vsui);
         m_vatesSubWindow->setWidget(vsui);
         m_vatesSubWindow->widget()->show();
-        vsui->renderWorkspace(wsName, wsType, instrumentName);
+        vsui->renderWorkspace(wsName, wsType,instrumentName);
       }
       else
       {
@@ -2121,13 +2122,17 @@ void MantidUI::insertMenu()
   appWindow()->myMenuBar()->insertItem(tr("Man&tid"), mantidMenu);
 }
 
-void MantidUI::clearAllMemory()
+void MantidUI::clearAllMemory(const bool prompt)
 {
+  if(prompt) {
   QMessageBox::StandardButton pressed =
     QMessageBox::question(appWindow(), "MantidPlot", "All workspaces and windows will be removed. Are you sure?", QMessageBox::Ok|QMessageBox::Cancel, QMessageBox::Ok);
 
   if( pressed != QMessageBox::Ok ) return;
-
+  }
+  // If any python objects need to be cleared away then the GIL needs to be held. This doesn't feel like
+  // it is in the right place but it will do no harm
+  GlobalInterpreterLock gil;
   // Relevant notifications are connected to signals that will close all dependent windows
   Mantid::API::FrameworkManager::Instance().clear();
 }
@@ -2527,6 +2532,9 @@ void MantidUI::importNumSeriesLog(const QString &wsName, const QString &logName,
     t->setNumericPrecision(16);   //it's the number of all digits
   }
 
+  // The time when the first data was recorded.
+  auto firstTime = time_value_map.begin()->first;
+
   //Make the column header with the units, if any
   QString column1 = label.section("-",1);
   if (logData->units() != "")
@@ -2541,6 +2549,7 @@ void MantidUI::importNumSeriesLog(const QString &wsName, const QString &logName,
     Mantid::Kernel::TimeSeriesProperty<bool>* f = 0;
     if (filter == 1 || filter ==3)
     {
+      // one of the filters is the running status
       try
       {
         f = dynamic_cast<Mantid::Kernel::TimeSeriesProperty<bool> *>(ws->run().getLogData("running"));
@@ -2552,6 +2561,15 @@ void MantidUI::importNumSeriesLog(const QString &wsName, const QString &logName,
           t->close();
           importNumSeriesLog(wsName,logName,0);
           return;
+        }
+        // If filter records start later than the data we add a value at the filter's front
+        if ( f->firstTime() > firstTime )
+        {
+          // add a "not running" value to the status filter
+          Mantid::Kernel::TimeSeriesProperty<bool> atStart("tmp");
+          atStart.addValue(firstTime,false);
+          atStart.addValue(f->firstTime(),f->firstValue());
+          flt.addFilter(atStart);
         }
       }
       catch(...)
@@ -2989,9 +3007,10 @@ Plots the spectra from the given workspaces
 @param style :: Curve style for plot
 @param plotWindow :: Window to plot to. If NULL a new one will be created
 @param clearWindow :: Whether to clear specified plotWindow before plotting. Ignored if plotWindow == NULL
+@param waterfallPlot :: If true create a waterfall type plot
 */
 MultiLayer* MantidUI::plot1D(const QStringList& ws_names, const QList<int>& indexList, bool spectrumPlot, bool errs,
-                             Graph::CurveType style, MultiLayer* plotWindow, bool clearWindow)
+                             Graph::CurveType style, MultiLayer* plotWindow, bool clearWindow, bool waterfallPlot)
 {
   // Convert the list into a map (with the same workspace as key in each case)
   QMultiMap<QString,int> pairs;
@@ -3013,7 +3032,8 @@ MultiLayer* MantidUI::plot1D(const QStringList& ws_names, const QList<int>& inde
   }
 
   // Pass over to the overloaded method
-  return plot1D(pairs,spectrumPlot,MantidQt::DistributionDefault, errs,style,plotWindow, clearWindow);
+  return plot1D(pairs,spectrumPlot,MantidQt::DistributionDefault, errs,style,plotWindow, clearWindow,
+                waterfallPlot);
 }
 /** Create a 1D graph from the specified list of workspaces/spectra.
 @param toPlot :: Map of form ws -> [spectra_list]
@@ -3022,11 +3042,12 @@ MultiLayer* MantidUI::plot1D(const QStringList& ws_names, const QList<int>& inde
 @param errs :: If true include the errors on the graph
 @param plotWindow :: Window to plot to. If NULL a new one will be created
 @param clearWindow :: Whether to clear specified plotWindow before plotting. Ignored if plotWindow == NULL
+@param waterfallPlot :: If true create a waterfall type plot
 @return NULL if failure. Otherwise, if plotWindow == NULL - created window, if not NULL - plotWindow
 */
 MultiLayer* MantidUI::plot1D(const QMultiMap<QString, set<int> >& toPlot, bool spectrumPlot,
                              MantidQt::DistributionFlag distr, bool errs,
-                             MultiLayer* plotWindow, bool clearWindow)
+                             MultiLayer* plotWindow, bool clearWindow, bool waterfallPlot)
 {
   // Convert the list into a map (with the same workspace as key in each case)
   QMultiMap<QString,int> pairs;
@@ -3042,7 +3063,7 @@ MultiLayer* MantidUI::plot1D(const QMultiMap<QString, set<int> >& toPlot, bool s
   }
 
   // Pass over to the overloaded method
-  return plot1D(pairs,spectrumPlot,distr,errs,Graph::Unspecified,plotWindow, clearWindow);
+  return plot1D(pairs,spectrumPlot,distr,errs,Graph::Unspecified,plotWindow, clearWindow, waterfallPlot);
 }
 
 /** Create a 1d graph from the specified spectra in a MatrixWorkspace
@@ -3053,10 +3074,11 @@ MultiLayer* MantidUI::plot1D(const QMultiMap<QString, set<int> >& toPlot, bool s
 @param errs :: If true include the errors on the graph
 @param plotWindow :: Window to plot to. If NULL a new one will be created
 @param clearWindow :: Whether to clear specified plotWindow before plotting. Ignored if plotWindow == NULL
+@param waterfallPlot :: If true create a waterfall type plot
 @return NULL if failure. Otherwise, if plotWindow == NULL - created window, if not NULL - plotWindow
 */
 MultiLayer* MantidUI::plot1D(const QString& wsName, const std::set<int>& indexList, bool spectrumPlot,
-  MantidQt::DistributionFlag distr, bool errs, MultiLayer* plotWindow, bool clearWindow)
+  MantidQt::DistributionFlag distr, bool errs, MultiLayer* plotWindow, bool clearWindow, bool waterfallPlot)
 {
   // Convert the list into a map (with the same workspace as key in each case)
   QMultiMap<QString,int> pairs;
@@ -3068,7 +3090,7 @@ MultiLayer* MantidUI::plot1D(const QString& wsName, const std::set<int>& indexLi
   }
 
   // Pass over to the overloaded method
-  return plot1D(pairs,spectrumPlot,distr,errs,Graph::Unspecified,plotWindow, clearWindow);
+  return plot1D(pairs,spectrumPlot,distr,errs,Graph::Unspecified,plotWindow, clearWindow, waterfallPlot);
 }
 
 /** Create a 1d graph form a set of workspace-spectrum pairs
@@ -3079,11 +3101,13 @@ MultiLayer* MantidUI::plot1D(const QString& wsName, const std::set<int>& indexLi
 @param style :: curve style for plot
 @param plotWindow :: Window to plot to. If NULL a new one will be created
 @param clearWindow :: Whether to clear specified plotWindow before plotting. Ignored if plotWindow == NULL
+@param waterfallPlot :: If true create a waterfall type plot
 @return NULL if failure. Otherwise, if plotWindow == NULL - created window, if not NULL - plotWindow
 */
 MultiLayer* MantidUI::plot1D(const QMultiMap<QString,int>& toPlot, bool spectrumPlot,
                              MantidQt::DistributionFlag distr, bool errs,
-                             Graph::CurveType style, MultiLayer* plotWindow, bool clearWindow)
+                             Graph::CurveType style, MultiLayer* plotWindow,
+                             bool clearWindow, bool waterfallPlot)
 {
   if(toPlot.size() == 0) return NULL;
 
@@ -3098,6 +3122,8 @@ MultiLayer* MantidUI::plot1D(const QMultiMap<QString,int>& toPlot, bool spectrum
     ask.exec();
     if (ask.clickedButton() != confirmButton) return NULL;
   }
+  // Force waterfall option to false if only 1 curve
+  if(toPlot.size() == 1) waterfallPlot = false;
 
   QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
@@ -3210,7 +3236,7 @@ MultiLayer* MantidUI::plot1D(const QMultiMap<QString,int>& toPlot, bool spectrum
     // happen, but it does apparently with some muon analyses.
     g->checkValuesInAxisRange(firstCurve);
   }
-
+  ml->toggleWaterfall(waterfallPlot);
   // Check if window does not contain any curves and should be closed
   ml->maybeNeedToClose();
 

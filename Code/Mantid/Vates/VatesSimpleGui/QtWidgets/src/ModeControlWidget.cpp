@@ -79,7 +79,7 @@ void ModeControlWidget::enableViewButtons(ModeControlWidget::Views initialView, 
     break;
 
     default:
-      g_log.warning() << "Attempted to disable an unknown default view. \n";
+      g_log.warning("Attempted to disable an unknown default view. \n");
       break;
   }
 }
@@ -203,7 +203,7 @@ ModeControlWidget::Views ModeControlWidget::getViewFromString(QString view)
   else 
   {
     // The view was not found, hence return the standard view
-    g_log.warning() << "The specified default view could not be found! \n";
+    g_log.warning("The specified default view could not be found! \n");
 
     return ModeControlWidget::STANDARD;
   }

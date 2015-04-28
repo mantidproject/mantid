@@ -135,7 +135,7 @@ SliceViewerWindow::SliceViewerWindow(const QString &wsName,
 
 SliceViewerWindow::~SliceViewerWindow() {}
 
-//------------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 /** Build the menus */
 void SliceViewerWindow::initMenus() {
   // Make File->Close() close the window
@@ -143,7 +143,7 @@ void SliceViewerWindow::initMenus() {
           SLOT(close()));
 }
 
-//------------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 /** Get the SliceViewer widget inside the SliceViewerWindow.
  * This is the main widget for controlling the 2D views
  * and slice points.
@@ -154,7 +154,7 @@ MantidQt::SliceViewer::SliceViewer *SliceViewerWindow::getSlicer() {
   return m_slicer;
 }
 
-//------------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 /** Get the LineViewer widget inside the SliceViewerWindow.
  * This is the widget for controlling the 1D line integration
  * settings.
@@ -165,31 +165,31 @@ MantidQt::SliceViewer::LineViewer *SliceViewerWindow::getLiner() {
   return m_liner;
 }
 
-//------------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 /** @return the label that was attached to this SliceViewerWindow's title */
 const QString &SliceViewerWindow::getLabel() const { return m_label; }
 
-//------------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 void SliceViewerWindow::resizeEvent(QResizeEvent * /*event*/) {
   //  if (m_liner->isVisible())
-    //    m_lastLinerWidth = m_liner->width();
+  //    m_lastLinerWidth = m_liner->width();
 }
 
-//------------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 /** Slot to close the window */
 void SliceViewerWindow::closeWindow() {
   // askOnCloseEvent(false); //(MdiSubWindow)
   close();
 }
 
-//------------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 /** Slot to replace the workspace being looked at. */
 void SliceViewerWindow::updateWorkspace() {
   m_liner->setWorkspace(m_ws);
   m_slicer->setWorkspace(m_ws);
 }
 
-//------------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 /** Slot called when the SliceViewer changes which workspace
  * is being viewed. */
 void SliceViewerWindow::slicerWorkspaceChanged() {
@@ -198,7 +198,7 @@ void SliceViewerWindow::slicerWorkspaceChanged() {
   m_liner->setWorkspace(m_ws);
 }
 
-//------------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 /** Slot called when the LineViewer is setting a fixed bin width mode
  *
  * @param fixed :: True for fixed bin width
@@ -214,7 +214,7 @@ void SliceViewerWindow::lineViewer_changedFixedBinWidth(bool fixed,
     m_slicer->getLineOverlay()->setSnapLength(0.0);
 }
 
-//------------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 /** Show or hide the LineViewer widget (on the right of the SliceViewer)
  *
  * @param visible :: True to show the LineViewer widget.
@@ -261,7 +261,7 @@ void SliceViewerWindow::showLineViewer(bool visible) {
   this->setUpdatesEnabled(true);
 }
 
-//------------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 /** Show or hide the LineViewer widget (on the right of the SliceViewer)
  *
  * @param visible :: True to show the PeaksViewer widget.
@@ -292,8 +292,7 @@ void SliceViewerWindow::showPeaksViewer(bool visible) {
     // Shrink the window to exclude the liner
     int w =
         this->width() - (m_peaksViewer->width() + m_splitter->handleWidth());
-    if (m_peaksViewer->width() > 0)
-    {
+    if (m_peaksViewer->width() > 0) {
       m_lastPeaksViewerWidth = m_peaksViewer->width();
     }
     m_peaksViewer->hide();
@@ -313,14 +312,14 @@ void SliceViewerWindow::showPeaksViewer(bool visible) {
   this->setUpdatesEnabled(true);
 }
 
-//------------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 /** Special slot called to resize the window
  * after some events have been processed. */
 void SliceViewerWindow::resizeWindow() {
   this->resize(m_desiredWidth, this->height());
 }
 
-//------------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 /** Using the positions from the LineOverlay, set the values in the LineViewer,
  * but don't update view. */
 void SliceViewerWindow::setLineViewerValues(QPointF start2D, QPointF end2D,
@@ -336,7 +335,7 @@ void SliceViewerWindow::setLineViewerValues(QPointF start2D, QPointF end2D,
   m_liner->setPlanarWidth(width);
 }
 
-//------------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 /** Slot called when the line overlay position is changing (being dragged) */
 void SliceViewerWindow::lineChanging(QPointF start2D, QPointF end2D,
                                      double width) {
@@ -388,7 +387,7 @@ void SliceViewerWindow::changePlanarWidth(double width) {
   m_slicer->getLineOverlay()->update();
 }
 
-//------------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 /** Signal to close this window if the workspace has just been deleted */
 void SliceViewerWindow::preDeleteHandle(
     const std::string &wsName,
@@ -409,7 +408,7 @@ void SliceViewerWindow::preDeleteHandle(
   }
 }
 
-//------------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 /**
  * @brief After replace handle
  * @param oldName
@@ -419,21 +418,22 @@ void SliceViewerWindow::renameHandle(const std::string &oldName,
                                      const std::string &newName) {
 
   if (oldName == m_wsName) {
-      IMDWorkspace_sptr new_md_ws = boost::dynamic_pointer_cast<IMDWorkspace>(
-                  AnalysisDataService::Instance().retrieve(newName));
+    IMDWorkspace_sptr new_md_ws = boost::dynamic_pointer_cast<IMDWorkspace>(
+        AnalysisDataService::Instance().retrieve(newName));
     if (new_md_ws) {
       m_ws = new_md_ws;
       emit needToUpdate();
     }
 
   } else {
-        // Remove any legacy workspace widgets + presenters bearing the old name. Remember, naming is a deep copy process. So the old name is the only reference we have.
-        m_peaksViewer->removePeaksWorkspace(oldName);
+    // Remove any legacy workspace widgets + presenters bearing the old name.
+    // Remember, naming is a deep copy process. So the old name is the only
+    // reference we have.
+    m_peaksViewer->removePeaksWorkspace(oldName);
   }
 }
 
-
-//------------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 /** Signal that the workspace being looked at was just replaced with a different
  * one */
 void SliceViewerWindow::afterReplaceHandle(

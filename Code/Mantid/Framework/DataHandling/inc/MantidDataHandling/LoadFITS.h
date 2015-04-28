@@ -4,23 +4,22 @@
 //---------------------------------------------------
 // Includes
 //---------------------------------------------------
-#include "MantidAPI/IFileLoader.h"
-#include "MantidDataObjects/Workspace2D.h"
 #include <map>
 #include <sstream>
 #include <string>
 #include <vector>
 
-using namespace std;
+#include "MantidAPI/IFileLoader.h"
+#include "MantidDataObjects/Workspace2D.h"
 
 struct FITSInfo {
-  vector<string> headerItems;
-  std::map<string, string> headerKeys;
+  std::vector<std::string> headerItems;
+  std::map<std::string, std::string> headerKeys;
   int bitsPerPixel;
   int numberOfAxis;
   int offset;
   int headerSizeMultiplier;
-  vector<size_t> axisPixelLengths;
+  std::vector<size_t> axisPixelLengths;
   double tof;
   double timeBin;
   double scale;
@@ -81,7 +80,9 @@ public:
   virtual int version() const { return 1; }
 
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const { return "DataHandling"; }
+  virtual const std::string category() const {
+    return "DataHandling;DataHandling\\Tomography";
+  }
 
   /// Returns a confidence value that this algorithm can load a file
   virtual int confidence(Kernel::FileDescriptor &descriptor) const;
@@ -97,7 +98,8 @@ private:
   void exec();
 
   /// Loads files into workspace(s)
-  void doLoadFiles(const std::vector<std::string> &paths);
+  void doLoadFiles(const std::vector<std::string> &paths,
+                   const std::string &outWSName, bool loadAsRectImg = false);
 
   /// Loads the FITS header(s) into a struct
   void doLoadHeaders(const std::vector<std::string> &paths,
@@ -111,16 +113,27 @@ private:
   makeWorkspace(const FITSInfo &fileInfo, size_t &newFileNumber,
                 std::vector<char> &buffer, API::MantidImage &imageY,
                 API::MantidImage &imageE,
-                const DataObjects::Workspace2D_sptr parent);
+                const DataObjects::Workspace2D_sptr parent,
+                bool loadAsRectImg = false);
 
   // Reads the data from a single FITS file into a workspace
-  void readDataToWorkspace2D(DataObjects::Workspace2D_sptr ws,
-                             const FITSInfo &fileInfo, API::MantidImage &imageY,
-                             API::MantidImage &imageE,
-                             std::vector<char> &buffer);
+  void readDataToImgs(const FITSInfo &fileInfo, API::MantidImage &imageY,
+                      API::MantidImage &imageE, std::vector<char> &buffer);
 
   /// Once loaded, check against standard and limitations of this algorithm
   void headerSanityCheck(const FITSInfo &hdr, const FITSInfo &hdrFirst);
+
+  /// filter noise pixel by pixel
+  void doFilterNoise(double thresh, API::MantidImage &imageY,
+                     API::MantidImage &imageE);
+
+  /// rebin the matrix/image
+  void doRebin(size_t rebin, API::MantidImage &imageY,
+               API::MantidImage &imageE, API::MantidImage &rebinnedY,
+               API::MantidImage &rebinnedE);
+
+  /// identifies fits coming from 'other' cameras by specific headers
+  bool isInstrOtherThanIMAT(FITSInfo &hdr);
 
   void setupDefaultKeywordNames();
 
@@ -144,31 +157,35 @@ private:
   std::vector<std::string> m_headerAxisNameKeys;
   std::string m_mapFile;
 
-  static const std::string m_defaultImgType;
+  static const std::string g_defaultImgType;
 
   // names of extension headers
   std::string m_sampleRotation;
   std::string m_imageType;
 
   std::string m_baseName;
-  size_t m_spectraCount;
+  size_t m_pixelCount;
+  // rebin block size (m_rebin x m_rebin) cells
+  int m_rebin;
+  // noise threshold level
+  double m_noiseThresh;
   API::Progress *m_progress;
 
   // Number of digits for the fixed width appendix number added to
   // workspace names, i.e. 3=> workspace_001; 5 => workspace_00001
-  static const size_t DIGIT_SIZE_APPEND = 5;
+  static const size_t g_DIGIT_SIZE_APPEND = 5;
   /// size of a FITS header block (room for 36 entries, of 80
   /// characters each), in bytes. A FITS header always comes in
   /// multiples of this block.
-  static const int BASE_HEADER_SIZE = 2880;
+  static const int g_BASE_HEADER_SIZE = 2880;
 
   // names for several options that can be given in a "FITS" header
   // setup file
-  static const std::string m_BIT_DEPTH_NAME;
-  static const std::string m_AXIS_NAMES_NAME;
-  static const std::string m_ROTATION_NAME;
-  static const std::string m_IMAGE_KEY_NAME;
-  static const std::string m_HEADER_MAP_NAME;
+  static const std::string g_BIT_DEPTH_NAME;
+  static const std::string g_AXIS_NAMES_NAME;
+  static const std::string g_ROTATION_NAME;
+  static const std::string g_IMAGE_KEY_NAME;
+  static const std::string g_HEADER_MAP_NAME;
 };
 
 } // namespace DataHandling

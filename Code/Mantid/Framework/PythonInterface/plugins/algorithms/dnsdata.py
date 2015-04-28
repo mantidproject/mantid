@@ -1,7 +1,8 @@
+#pylint: disable=invalid-name,too-many-instance-attributes,too-few-public-methods,anomalous-backslash-in-string
 import sys, re
 import datetime
 
-class DNSdata:
+class DNSdata(object):
     """
     class which describes the DNS data structure
     will be used for data read-in and write-out routines
@@ -195,7 +196,7 @@ class DNSdata:
             except ValueError:
                 # if start and end time are not given, let them empty
                 pass
-                
+
 
 def parse_header(h):
     """

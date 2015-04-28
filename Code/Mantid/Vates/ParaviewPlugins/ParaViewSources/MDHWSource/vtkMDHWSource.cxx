@@ -4,6 +4,7 @@
 #include "vtkInformationVector.h"
 #include "vtkObjectFactory.h"
 #include "vtkPVClipDataSet.h"
+#include "vtkPVInformationKeys.h"
 #include "vtkUnstructuredGridAlgorithm.h"
 #include "vtkUnstructuredGrid.h"
 #include "vtkStreamingDemandDrivenPipeline.h"
@@ -177,7 +178,7 @@ int vtkMDHWSource::RequestData(vtkInformation *, vtkInformationVector **, vtkInf
     factory->SetSuccessor(successor);
 
     vtkDataSet* product = m_presenter->execute(factory, loadingProgressUpdate, drawingProgressUpdate);
-    
+
     //-------------------------------------------------------- Corrects problem whereby boundaries not set propertly in PV.
     vtkBox* box = vtkBox::New();
     box->SetBounds(product->GetBounds());
@@ -192,7 +193,6 @@ int vtkMDHWSource::RequestData(vtkInformation *, vtkInformationVector **, vtkInf
     vtkUnstructuredGrid *output = vtkUnstructuredGrid::SafeDownCast(
       outInfo->Get(vtkDataObject::DATA_OBJECT()));
     output->ShallowCopy(clipperOutput);
-
     try
     {
       m_presenter->makeNonOrthogonal(output);
@@ -243,7 +243,7 @@ void vtkMDHWSource::setTimeRange(vtkInformationVector* outputVector)
   if(m_presenter->hasTDimensionAvailable())
   {
     vtkInformation *outInfo = outputVector->GetInformationObject(0);
-    outInfo->Set(vtkStreamingDemandDrivenPipeline::TIME_LABEL_ANNOTATION(),
+    outInfo->Set(vtkPVInformationKeys::TIME_LABEL_ANNOTATION(),
                  m_presenter->getTimeStepLabel().c_str());
     std::vector<double> timeStepValues = m_presenter->getTimeStepValues();
     outInfo->Set(vtkStreamingDemandDrivenPipeline::TIME_STEPS(), &timeStepValues[0],
@@ -300,7 +300,7 @@ char* vtkMDHWSource::GetWorkspaceTypeName()
 {
   if(m_presenter == NULL)
   {
-    return "";
+    return const_cast<char*>("");
   }
   try
   {
@@ -310,7 +310,7 @@ char* vtkMDHWSource::GetWorkspaceTypeName()
   }
   catch(std::runtime_error&)
   {
-    return "";
+    return const_cast<char*>("");
   }
 }
 

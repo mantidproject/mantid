@@ -106,6 +106,7 @@ public:
 
   void setGrayScale();
   void setDefaultColorMap();
+  MantidColorMap getDefaultColorMap();
   static QwtLinearColorMap defaultColorMap();
 
   void loadColorMap(const QString& file);

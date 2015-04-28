@@ -1,3 +1,4 @@
+#pylint: disable=no-init,too-many-instance-attributes,too-many-branches
 from mantid.simpleapi import *
 from mantid.api import DataProcessorAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty, PropertyMode, Progress, WorkspaceGroupProperty
 from mantid.kernel import StringMandatoryValidator, Direction, logger, FloatBoundedValidator
@@ -139,14 +140,14 @@ class IndirectFlatPlateAbsorption(DataProcessorAlgorithm):
 
                 SetSampleMaterial(can_wave_ws, ChemicalFormula=self._can_chemical_formula, SampleNumberDensity=self._can_number_density)
                 FlatPlateAbsorption(InputWorkspace=can_wave_ws,
-                                OutputWorkspace=self._acc_ws,
-                                SampleHeight=self._sample_height,
-                                SampleWidth=self._sample_width,
-                                SampleThickness=self._can_front_thickness + self._can_back_thickness,
-                                ElementSize=self._element_size,
-                                EMode='Indirect',
-                                EFixed=efixed,
-                                NumberOfWavelengthPoints=10)
+                                    OutputWorkspace=self._acc_ws,
+                                    SampleHeight=self._sample_height,
+                                    SampleWidth=self._sample_width,
+                                    SampleThickness=self._can_front_thickness + self._can_back_thickness,
+                                    ElementSize=self._element_size,
+                                    EMode='Indirect',
+                                    EFixed=efixed,
+                                    NumberOfWavelengthPoints=10)
 
                 Divide(LHSWorkspace=can_wave_ws, RHSWorkspace=self._acc_ws, OutputWorkspace=can_wave_ws)
                 Minus(LHSWorkspace=sample_wave_ws, RHSWorkspace=can_wave_ws, OutputWorkspace=sample_wave_ws)

@@ -75,6 +75,8 @@ private:
 
   void loadDimensions();
 
+  void loadDimensions2();
+
   void loadCoordinateSystem();
 
   /// Load all the affine matricies

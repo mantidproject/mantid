@@ -4,6 +4,7 @@
 #include "vtkInformationVector.h"
 #include "vtkObjectFactory.h"
 #include "vtkPVClipDataSet.h"
+#include "vtkPVInformationKeys.h"
 #include "vtkUnstructuredGridAlgorithm.h"
 #include "vtkUnstructuredGrid.h"
 #include "vtkStreamingDemandDrivenPipeline.h"
@@ -22,7 +23,7 @@ using namespace Mantid::VATES;
 vtkStandardNewMacro(vtkMDEWSource)
 
 /// Constructor
-vtkMDEWSource::vtkMDEWSource() :  m_wsName(""), m_depth(1000), m_time(0), m_presenter(NULL), m_isStartup(true), m_startupTimeValue(0)
+vtkMDEWSource::vtkMDEWSource() :  m_wsName(""), m_depth(1000), m_time(0), m_presenter(NULL)
 {
   this->SetNumberOfInputPorts(0);
   this->SetNumberOfOutputPorts(1);
@@ -173,17 +174,7 @@ int vtkMDEWSource::RequestData(vtkInformation *, vtkInformationVector **, vtkInf
     //get the info objects
     vtkInformation *outInfo = outputVector->GetInformationObject(0);
 
-    if (m_isStartup)
-    {
-      // This is part of a workaround for ParaView time steps. The time we get
-      // is the first time point for all sources, and not necessarily of this source.
-      // This causes problems when getting the time slice and we end up with an empty 
-      // data set. We therefore feed m_time the first time step of this source at 
-      // start up.
-      m_time = m_startupTimeValue;
-      m_isStartup = false;
-    }
-    else if (outInfo->Has(vtkStreamingDemandDrivenPipeline::UPDATE_TIME_STEP()))
+    if (outInfo->Has(vtkStreamingDemandDrivenPipeline::UPDATE_TIME_STEP()))
     {
       // usually only one actual step requested
       m_time =outInfo->Get(vtkStreamingDemandDrivenPipeline::UPDATE_TIME_STEP());
@@ -256,7 +247,7 @@ void vtkMDEWSource::setTimeRange(vtkInformationVector* outputVector)
   if(m_presenter->hasTDimensionAvailable())
   {
     vtkInformation *outInfo = outputVector->GetInformationObject(0);
-    outInfo->Set(vtkStreamingDemandDrivenPipeline::TIME_LABEL_ANNOTATION(),
+    outInfo->Set(vtkPVInformationKeys::TIME_LABEL_ANNOTATION(),
                  m_presenter->getTimeStepLabel().c_str());
     std::vector<double> timeStepValues = m_presenter->getTimeStepValues();
     outInfo->Set(vtkStreamingDemandDrivenPipeline::TIME_STEPS(), &timeStepValues[0],
@@ -264,9 +255,6 @@ void vtkMDEWSource::setTimeRange(vtkInformationVector* outputVector)
     double timeRange[2];
     timeRange[0] = timeStepValues.front();
     timeRange[1] = timeStepValues.back();
-
-    // This is part of a workaround to get the first time value of the current source.
-    m_startupTimeValue = timeRange[0];
 
     outInfo->Set(vtkStreamingDemandDrivenPipeline::TIME_RANGE(), timeRange, 2);
   }
@@ -316,7 +304,7 @@ char* vtkMDEWSource::GetWorkspaceTypeName()
 {
   if(m_presenter == NULL)
   {
-    return "";
+    return const_cast<char*>("");
   }
   try
   {
@@ -326,7 +314,7 @@ char* vtkMDEWSource::GetWorkspaceTypeName()
   }
   catch(std::runtime_error&)
   {
-    return "";
+    return const_cast<char*>("");
   }
 }
 
