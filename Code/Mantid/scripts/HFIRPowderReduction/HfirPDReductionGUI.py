@@ -1,4 +1,4 @@
-#pylint: disable=invalid-name, relative-import
+#pylint: disable=invalid-name, relative-import, too-many-lines,too-many-instance-attributes
 ################################################################################
 # Main class for HFIR powder reduction GUI
 # Key word for future developing: FUTURE, NEXT, REFACTOR, RELEASE 2.0
@@ -34,7 +34,6 @@ class EmptyError(Exception):
 
     def __str__(self):
         return repr(self.value)
-
 
 
 class MainWindow(QtGui.QMainWindow):

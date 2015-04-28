@@ -1,4 +1,4 @@
-#pylint: disable=invalid-name,relative-import
+#pylint: disable=invalid-name,relative-import,too-many-lines,too-many-instance-attributes,too-many-locals,attribute-defined-outside-init
 # -*- coding: utf-8 -*-
 
 # Form implementation generated from reading ui file 'Ui_MainWindow.ui'
