@@ -1413,9 +1413,9 @@ class RunDescriptorDependent(RunDescriptor):
 
     def get_ws_clone(self,clone_name='ws_clone'):
         if self._has_own_value:
-            return super(RunDescriptorDependent,self).get_ws_clone()
+            return super(RunDescriptorDependent,self).get_ws_clone(clone_name)
         else:
-            return self._host.get_ws_clone()
+            return self._host.get_ws_clone(clone_name)
 
     def chop_ws_part(self,origin,tof_range,rebin,chunk_num,n_chunks):
         if self._has_own_value:

@@ -239,8 +239,16 @@ class DirectEnergyConversion(object):
                     diagnostics.__Reducer__ = self
                     diag_params['sample_run'] = diag_sample
 
-                # Set up the background integrals for diagnostic purposes
-                result_ws = self.normalise(diag_sample, self.normalise_method)
+                # Set up the background integrals for diagnostic purposes.
+                # monitor-2 normalization in multirep mode goes per chunk
+                if (PropertyManager.incident_energy.multirep_mode() and self.normalise_method == 'monitor-2')\
+                    or self.bleed_test: # bleed test needs no normalization
+                    tmp_ws = diag_sample.get_ws_clone('sample_ws_clone')
+                    result_ws = self.normalise(tmp_ws,'current')
+                    name_to_clean = result_ws.name()
+                else:
+                    result_ws = self.normalise(diag_sample, self.normalise_method)
+                    name_to_clean = None
 
                 #>>>here result workspace is being processed
                 #-- not touching result ws
@@ -258,6 +266,8 @@ class DirectEnergyConversion(object):
                                            diag_params.get('second_white',None))
                 diag_params['background_int'] = background_int
                 diag_params['sample_counts'] = total_counts
+        else: # diag_sample is None
+            name_to_clean = None
 
 
         # extract existing white mask if one is defined and provide it for
@@ -310,6 +320,10 @@ class DirectEnergyConversion(object):
             DeleteWorkspace(Workspace='total_counts')
         if 'second_white' in diag_params:
             DeleteWorkspace(Workspace=diag_params['second_white'])
+        if name_to_clean:
+            DeleteWorkspace(name_to_clean)
+            if name_to_clean+'_monitors' in mtd:
+                DeleteWorkspace(name_to_clean+'_monitors')
         DeleteWorkspace(Workspace=whiteintegrals)
 
         return diag_mask
@@ -448,6 +462,8 @@ class DirectEnergyConversion(object):
                                                                   cut_ind,num_ei_cuts)
                 prop_man.log("*** Processing multirep chunk: #{0}/{1} for provisional energy: {2} meV".\
                     format(cut_ind,num_ei_cuts,ei_guess),'notice')
+                # do bleed corrections if necessary
+                self._do_bleed_corrections(PropertyManager.sample_run,cut_ind)
             else:
                 # single energy uses single workspace and all TOF are used
                 tof_range = None
@@ -536,6 +552,9 @@ class DirectEnergyConversion(object):
             if self._multirep_mode:
                 mono_ws_base = PropertyManager.monovan_run.chop_ws_part(mono_ws_base,tof_range,\
                                self._do_early_rebinning, cut_ind,num_ei_cuts)
+                # its pointless to do bleed for monovan run
+                #self._do_bleed_corrections(PropertyManager.monovan_run,cut_ind)
+
             deltaE_ws_sample = self.apply_absolute_normalization(deltaE_ws_sample,PropertyManager.monovan_run,\
                                                                 ei_guess,PropertyManager.wb_for_monovan_run,\
                                                                 'calculated')
@@ -604,6 +623,20 @@ class DirectEnergyConversion(object):
         white_ws *= self.wb_scale_factor
         return white_ws
 
+    def _do_bleed_corrections(self,sample_run,nchunk):
+        """Calculate separate bleed corrections, necessary in mutlirep mode"""
+        if not self.prop_man.diag_bleed_test:
+            return
+        CUR_bleed_masks, failures = diagnostics.do_bleed_test(sample_run, self.prop_man.bleed_maxrate, self.prop_man.bleed_pixels)
+        if failures > 0:
+            diagnostics.add_masking(sample_run.get_workspace(),CUR_bleed_masks)
+            self.prop_man.log("*** Bleeding test for chunk #{0} masked {1} pixels".format(nchunk,failures),'notice')
+        else:
+            DeleteWorkspace(CUR_bleed_masks)
+
+
+
+
     def mono_sample(self, mono_run, ei_guess, white_run=None, map_file=None,
                     spectra_masks=None, result_name=None, Tzero=None):
         """Convert a mono-chromatic sample run to DeltaE.
@@ -612,7 +645,6 @@ class DirectEnergyConversion(object):
         mono_run = self.get_run_descriptor(mono_run)
         if white_run:
             white_run = self.get_run_descriptor(white_run)
-
 
         mono_s = self._do_mono(mono_run, ei_guess,\
                              white_run, map_file, spectra_masks, Tzero)
@@ -780,10 +812,14 @@ class DirectEnergyConversion(object):
             kwargs['MonitorSpectrum'] = int(mon_spect) # shame TODO: change c++ algorithm, which need float monitor ID
             range_min = float(range[0] + range_offset)
             range_max = float(range[1] + range_offset)
+        #kwargs['NormFactorWS'] = 'Monitor1_norm_ws'
 
         # Normalize to monitor 1
         NormaliseToMonitor(InputWorkspace=old_name,OutputWorkspace=old_name,IntegrationRangeMin=range_min,
                            IntegrationRangeMax=range_max,IncludePartialBins=True,**kwargs)
+        #norm_mon1ws= mtd['Monitor1_norm_ws']
+        #norm_factor = norm_mon1ws.dataY(0)
+        #DeleteWorkspace(norm_mon1ws)
         return ('monitor-1',old_name)
     #
     def _normalize_to_monitor2(self,run,old_name, range_offset=0.0,external_monitor_ws=None):
@@ -797,15 +833,14 @@ class DirectEnergyConversion(object):
         else:
             mon_ws = run.get_monitors_ws()
 
-
-        if not mon_ws: # no monitors
-            if self.__in_white_normalization: # we can normalize wb integrals by current separately as they often do not
-                                             # have monitors
+        if self.__in_white_normalization: # we normalize wb integrals by current separately as they often do not
+                                          # have monitors or are in fact wb workspace with some special ei
                 self.normalise(run,'current',range_offset)
                 ws = run.get_workspace()
                 new_name = ws.name()
                 return ('current',new_name)
-            else:
+        else:
+            if not mon_ws: # no monitors
                 ws = run.get_workspace()
                 raise RuntimeError('Normalize by monitor-2:: Workspace {0} for run {1} does not have monitors in it'\
                    .format(ws.name(),run.run_number()))
@@ -1592,7 +1627,7 @@ class DirectEnergyConversion(object):
 
         delta = 2.0 * (upp - low)
         white_ws = Rebin(InputWorkspace=old_name,OutputWorkspace=old_name, Params=[low, delta, upp])
-        # Why aren't we doing this...
+        # Why aren't we doing this...-> because integration does not work properly for event workspaces
         #Integration(white_ws, white_ws, RangeLower=low, RangeUpper=upp)
         AddSampleLog(white_ws,LogName = done_Log,LogText=done_log_VAL,LogType='String')
         run.synchronize_ws(white_ws)

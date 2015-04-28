@@ -475,6 +475,76 @@ class DirectEnergyConversionTest(unittest.TestCase):
         rez = CheckWorkspacesMatch(result[1],result2[1])
         self.assertEqual(rez,'Success!')
 
+    def test_abs_multirep_with_bkg_and_bleed(self):
+        # create test workspace
+        run_monitors=CreateSampleWorkspace(Function='Multiple Peaks', NumBanks=4, BankPixelWidth=1,\
+                                            NumEvents=100000, XUnit='Energy', XMin=3, XMax=200, BinWidth=0.1)
+        LoadInstrument(run_monitors,InstrumentName='MARI')
+        ConvertUnits(InputWorkspace='run_monitors', OutputWorkspace='run_monitors', Target='TOF')
+        run_monitors = mtd['run_monitors']
+        tof = run_monitors.dataX(3)
+        tMin = tof[0]
+        tMax = tof[-1]
+        run = CreateSampleWorkspace( Function='Multiple Peaks',WorkspaceType='Event',NumBanks=8, BankPixelWidth=1,\
+                                     NumEvents=100000, XUnit='TOF',xMin=tMin,xMax=tMax)
+        LoadInstrument(run,InstrumentName='MARI')
+        AddSampleLog(run,LogName='gd_prtn_chrg',LogText='1.',LogType='Number')
+
+        # build "monovanadium"
+        mono = CloneWorkspace(run)
+        mono_monitors = CloneWorkspace(run_monitors)
+
+        # build "White-beam"
+        wb_ws   = Rebin(run,Params=[tMin,1,tMax],PreserveEvents=False)
+
+        # build "second run" to ensure repeated execution
+        run2 = CloneWorkspace(run)
+        run2_monitors = CloneWorkspace(run_monitors)
+
+        # Run multirep
+        tReducer = DirectEnergyConversion(run.getInstrument())
+        tReducer.prop_man.run_diagnostics=True 
+        tReducer.hard_mask_file=None
+        tReducer.map_file=None
+        tReducer.prop_man.background_range=[0.99*tMax,tMax]
+        tReducer.prop_man.monovan_mapfile=None
+        tReducer.save_format=None
+        tReducer.prop_man.normalise_method='monitor-2'
+        tReducer.prop_man.check_background = True
+        tReducer.prop_man.bleed = True
+        tReducer.norm_mon_integration_range=[tMin,tMax]
+
+        AddSampleLog(run,LogName='good_frame_log',LogText='1.',LogType='Number Series')
+        result = tReducer.convert_to_energy(wb_ws,run,[67.,122.],[-2,0.02,0.8],None,mono)
+
+        self.assertEqual(len(result),2)
+
+        ws1=result[0]
+        self.assertEqual(ws1.getAxis(0).getUnit().unitID(),'DeltaE')
+        x = ws1.readX(0)
+        self.assertAlmostEqual(x[0],-2*67.)
+        self.assertAlmostEqual(x[-1],0.8*67.)
+
+        ws2=result[1]
+        self.assertEqual(ws2.getAxis(0).getUnit().unitID(),'DeltaE')
+        x = ws2.readX(0)
+        self.assertAlmostEqual(x[0],-2*122.)
+        self.assertAlmostEqual(x[-1],0.8*122.)
+
+        # test another ws
+        # rename samples from previous workspace to avoid deleting them on current run
+        for ind,item in enumerate(result):
+            result[ind]=RenameWorkspace(item,OutputWorkspace='SampleRez#'+str(ind))
+        #
+        AddSampleLog(run2,LogName='goodfrm',LogText='1.',LogType='Number')
+        result2 = tReducer.convert_to_energy(None,run2)
+
+        rez = CheckWorkspacesMatch(result[0],result2[0])
+        self.assertEqual(rez,'Success!')
+        rez = CheckWorkspacesMatch(result[1],result2[1])
+        self.assertEqual(rez,'Success!')
+
+
 
 if __name__=="__main__":
    unittest.main()

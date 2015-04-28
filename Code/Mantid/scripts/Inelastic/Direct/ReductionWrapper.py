@@ -80,7 +80,7 @@ class ReductionWrapper(object):
             is interpreted as time to wait until check for specified run file
             if this file have not been find immediately.
 
-            if this variable is 0 or false and the the file have not been found,
+            if this variable is 0 or false and the file have not been found,
             reduction will fail
         """
         return self._wait_for_file

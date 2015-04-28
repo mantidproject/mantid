@@ -12,6 +12,7 @@ from mantid.simpleapi import *
 from mantid.kernel.funcreturns import lhs_info
 import os
 import Direct.RunDescriptor as RunDescriptor
+from Direct.PropertyManager import PropertyManager
 # Reference to reducer used if necessary for working with run descriptors (in diagnostics)
 __Reducer__ = None
 
@@ -64,7 +65,7 @@ def diagnose(white_int,**kwargs):
 
     # Map the test number to the results
     # Each element is the mask workspace name then the number of failures
-    test_results = [ [None, None], [None, None], [None, None], [None, None], [None, None]]
+    test_results = {}
 
     # Hard mask
     hardmask_file = kwargs.get('hard_mask_file', None)
@@ -89,20 +90,19 @@ def diagnose(white_int,**kwargs):
         # Find out how many detectors we hard masked
         _dummy_ws,masked_list = ExtractMask(InputWorkspace='hard_mask_ws')
         DeleteWorkspace('_dummy_ws')
-        test_results[0][0] = os.path.basename(parser.hard_mask_file)
-        test_results[0][1] = len(masked_list)
+        test_results['Hard mask:'] = [os.path.basename(parser.hard_mask_file),len(masked_list)]
         DeleteWorkspace('hard_mask_ws')
 
     if not parser.use_hard_mask_only :
         # White beam Test
         if white_mask:
-            test_results[1] = ['white_mask cache global', num_failed]
+            test_results['First white beam test:'] = ['white_mask cache global', num_failed]
         else:
             __white_masks, num_failed = do_white_test(white_int, parser.tiny, parser.huge,
                                                     parser.van_out_lo, parser.van_out_hi,
                                                     parser.van_lo, parser.van_hi,
                                                     parser.van_sig, start_index, end_index)
-            test_results[1] = [str(__white_masks), num_failed]
+            test_results['First white beam test:'] = [str(__white_masks), num_failed]
             add_masking(white_int, __white_masks, start_index, end_index)
             if van_mask:
                 add_masking(van_mask, __white_masks, start_index, end_index)
@@ -115,7 +115,7 @@ def diagnose(white_int,**kwargs):
                                                        parser.van_out_lo, parser.van_out_hi,\
                                                        parser.van_lo, parser.van_hi, parser.variation,\
                                                        parser.van_sig, start_index, end_index)
-            test_results[2] = [str(__second_white_masks), num_failed]
+            test_results['Second white beam test:'] = [str(__second_white_masks), num_failed]
             add_masking(white_int, __second_white_masks, start_index, end_index)
             #TODO
             #add_masking(van_mask, __second_white_masks, start_index, end_index)
@@ -129,6 +129,7 @@ def diagnose(white_int,**kwargs):
             maskZero, zero_count_failures = FindDetectorsOutsideLimits(InputWorkspace=parser.sample_counts,\
                                                                    StartWorkspaceIndex=start_index, EndWorkspaceIndex=end_index,\
                                                                    LowThreshold=1e-10, HighThreshold=1e100)
+            test_results['Zero total count sample check:'] = [str(maskZero),zero_count_failures]
             add_masking(white_int, maskZero, start_index, end_index)
             DeleteWorkspace(maskZero)
         #
@@ -138,18 +139,18 @@ def diagnose(white_int,**kwargs):
             add_masking(parser.background_int, white_int)
             __bkgd_mask, failures = do_background_test(parser.background_int, parser.samp_lo,\
                                                        parser.samp_hi, parser.samp_sig, parser.samp_zero, start_index, end_index)
-            test_results[3] = [str(__bkgd_mask), zero_count_failures + failures]
+            test_results['Background test:'] = [str(__bkgd_mask), zero_count_failures + failures]
             add_masking(white_int, __bkgd_mask, start_index, end_index)
             DeleteWorkspace(__bkgd_mask)
 
         #
         # Bleed test
-        #
-        if hasattr(parser, 'bleed_test') and parser.bleed_test:
+        # (bleed test in multirep mode calculated per TOF region)
+        if hasattr(parser, 'bleed_test') and parser.bleed_test and not PropertyManager.incident_energy.multirep_mode():
             if not hasattr(parser, 'sample_run'):
                 raise RuntimeError("Bleed test requested but the sample_run keyword has not been provided")
             __bleed_masks, failures = do_bleed_test(parser.sample_run, parser.bleed_maxrate, parser.bleed_pixels)
-            test_results[4] = [str(__bleed_masks), failures]
+            test_results['PSD Bleed test :'] = [str(__bleed_masks), failures]
             add_masking(white_int, __bleed_masks)
             DeleteWorkspace(__bleed_masks)
     # endif not hard_mask_only
@@ -293,7 +294,7 @@ def normalise_background(background_int, white_int, second_white_int=None):
 
     """
     if second_white_int is None:
-        #quetly divide background integral by white beam integral not reporting about possible 0 in
+        #quietly divide background integral by white beam integral not reporting about possible 0 in
         #wb integral (they will be removed by diag anyway)
         background_int =  Divide(LHSWorkspace=background_int,RHSWorkspace=white_int,WarnOnZeroDivide='0')
     else:
@@ -343,7 +344,7 @@ def do_bleed_test(sample_run, max_framerate, ignored_pixels):
     max_framerate - The maximum allowed framerate in a tube. If None, the instrument defaults are used.
     ignored_pixels - The number of central pixels to ignore. If None, the instrument defaults are used.
     """
-    # NOTE: it was deployed on loaded workspace and now it works on normalized workspace. Is this acceptable?
+    #NOTE: Should be deployed on non-normalized workspace only!
     logger.notice('Running PSD bleed test')
     # Load the sample run
     if __Reducer__: #  Try to use generic loader which would work with files or workspaces alike
@@ -355,9 +356,9 @@ def do_bleed_test(sample_run, max_framerate, ignored_pixels):
         data_ws    = sample_run.get_workspace() # this will load data if necessary
         ws_name    = data_ws.name()+'_bleed'
 
-    if max_framerate is None:
+    if max_framerate is None: #get defaults
         max_framerate = float(data_ws.getInstrument().getNumberParameter('max-tube-framerate')[0])
-    if ignored_pixels is None:
+    if ignored_pixels is None: #get defaults
         ignored_pixels = int(data_ws.getInstrument().getNumberParameter('num-ignored-pixels')[0])
     else:
         # Make sure it is an int
@@ -369,7 +370,7 @@ def do_bleed_test(sample_run, max_framerate, ignored_pixels):
         ws_name = lhs_names[0]
     else:
         ws_name = '__do_bleed__test'
-    # Check if all necessary logs present in the workspace,as nxs workspace log names are diffferent
+    # Check if all necessary logs present in the workspace,as nxs workspace log names are different
     #  from a raw file workspace logs.
     try:
         nFrames= data_ws.run().getLogData('goodfrm').value
@@ -397,51 +398,29 @@ def print_test_summary(test_results,test_name=None):
     test_results - A list or tuple containing either the number of failed spectra or None
                    indicating that the test was not run
     """
-    num_diags = 5
-    if len(test_results) != num_diags:
-        raise ValueError("Invalid input for print_test_summary. A list of %d numbers is expected." % num_diags)
 
-    tests_run=False
-    for failures in test_results:
-        if failures is not None:
-            tests_run = True
-
-    if tests_run == False:
+    if len(test_results) == 0:
         print "No tests have been run!"
         return
 
-    summary = (
-        ['Hard mask:',test_results[0]], \
-        ['First white beam test:',test_results[1]], \
-        ['Second white beam test:',test_results[2]], \
-        ['Background test:',test_results[3]], \
-        ['PSD Bleed test :',test_results[4]] \
-        )
     if test_name == None:
         print '======== Diagnostic Test Summary '
     else:
         print '======== Diagnostic Test Summary {0} '.format(test_name)
 
-    max_name_length = -1
-    max_ws_length = -1
-    for key in range(num_diags):
-        result = summary[key]
-        name_length = len(str(result[0]))
-        ws_length = len(str(result[1][0]))
-        if name_length > max_name_length:
-            max_name_length = name_length
-        if ws_length > max_ws_length:
-            max_ws_length = ws_length
+    max_test_len = 0
+    max_ws_len = 0
+    for t_name in test_results:
+        if len(t_name)>max_test_len:
+            max_test_len = len(t_name)
+        t_result = test_results[t_name]
+        if len(t_result[0])>max_ws_len :
+            max_ws_len = len(t_result[0])
+    format_string = "!{{0:<{0}}} ! {{1:<{1}}} ! {{2:>10}}!".format(max_test_len,max_ws_len)
 
-    max_name_length += 2
-    max_ws_length += 2
-    for result in summary:
-        test_name = str(result[0])
-        workspace = str(result[1][0])
-        nfailed = str(result[1][1])
-        line = test_name + ' '*(max_name_length-len(test_name)) + \
-               workspace + ' '*(max_ws_length-len(workspace)) + str(nfailed)
-        print line
+    for t_name in test_results:
+        t_result = test_results[t_name]
+        print format_string.format(t_name,t_result[0],t_result[1])
     # Append a new line
     print '================================================================'
     print ''
