@@ -159,7 +159,7 @@ void LoadMD::exec() {
   m_file->openGroup(entryName, "NXentry");
 
   // Check is SaveMD version 2 was used
-  int SaveMDVersion = 0;
+  SaveMDVersion = 0;
   if (m_file->hasAttr("SaveMDVersion"))
     m_file->getAttr("SaveMDVersion", SaveMDVersion);
 
@@ -261,6 +261,8 @@ void LoadMD::loadHisto() {
 
   this->loadAffineMatricies(boost::dynamic_pointer_cast<IMDWorkspace>(ws));
 
+  if (SaveMDVersion == 2 )
+    m_file->openGroup("data","NXdata");
   // Load each data slab
   this->loadSlab("signal", ws->getSignalArray(), ws, ::NeXus::FLOAT64);
   this->loadSlab("errors_squared", ws->getErrorSquaredArray(), ws,
@@ -298,6 +300,7 @@ void LoadMD::loadDimensions2() {
 
   std::string axes;
 
+  m_file->openGroup("data","NXdata");
   m_file->openData("signal");
   m_file->getAttr("axes", axes);
   m_file->closeData();
@@ -319,6 +322,7 @@ void LoadMD::loadDimensions2() {
         long_name, splitAxes[d - 1], units, static_cast<coord_t>(axis.front()),
         static_cast<coord_t>(axis.back()), axis.size() - 1));
   }
+  m_file->closeGroup();
 }
 
 /** Load the coordinate system **/

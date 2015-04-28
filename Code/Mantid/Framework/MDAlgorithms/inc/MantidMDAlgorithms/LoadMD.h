@@ -99,6 +99,9 @@ private:
   Kernel::SpecialCoordinateSystem m_coordSystem;
   /// load only the box structure with empty boxes but do not tload boxes events
   bool m_BoxStructureAndMethadata;
+
+  /// Version of SaveMD used to save the file
+  int SaveMDVersion ;
 };
 
 } // namespace DataObjects
