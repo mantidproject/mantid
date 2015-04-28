@@ -1,3 +1,4 @@
+#pylint: disable=invalid-name,relative-import
 # -*- coding: utf-8 -*-
 
 # Form implementation generated from reading ui file 'Ui_MainWindow.ui'
@@ -23,6 +24,7 @@ except AttributeError:
     def _translate(context, text, disambig):
         return QtGui.QApplication.translate(context, text, disambig)
 
+from MplFigureCanvas import *
 from MplFigureCanvas import *
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):

@@ -13,7 +13,7 @@ def makeHB2ADetEfficiencyFileName(expno, m1, colltrans):
    * Ge 115: lambda = 1.54 A, m1 = 0
    * Ge 117  lambda = 1.12 A, No used
 
-    Arguments: 
+    Arguments:
      - expno :: experiment number
      - m1 :: Ge setup for neutron wavelength (m1)
      - colltrans :: for In/Out
@@ -35,7 +35,7 @@ def makeHB2ADetEfficiencyFileName(expno, m1, colltrans):
         # not defined
         raise NotImplementedError("'m1' value %f is not defined for wavelength setup." % (m1))
 
-    # Determine In/Out, i.e., collimator trans 
+    # Determine In/Out, i.e., collimator trans
     if colltrans is not None:
         # colltrans is in sample log
         colltrans = int(colltrans)
@@ -66,7 +66,7 @@ def makeExcludedDetectorFileName(expno):
     """
     expno = int(expno)
     excludeddetfilename = 'HB2A_exp%04d__exclude_detectors.txt' % (expno)
-    url = 'http://neutron.ornl.gov/user_data/hb2a/exp%d/Datafiles/%s' % (expno, excludeddetfilename) 
+    url = 'http://neutron.ornl.gov/user_data/hb2a/exp%d/Datafiles/%s' % (expno, excludeddetfilename)
 
     return (excludeddetfilename, url)
 
@@ -129,7 +129,7 @@ def parseDetExclusionFile(detexludefilename):
 
         terms = line.split()
         for term in terms:
-            try: 
+            try:
                 detid = int(term)
                 detexcludelist.append(detid)
             except ValueError:

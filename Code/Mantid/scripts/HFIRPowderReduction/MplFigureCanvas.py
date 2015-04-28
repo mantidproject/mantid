@@ -45,10 +45,10 @@ MplBasicColors = [
         "magenta",
         "yellow",
         "white"]
-        
-        
+
+
 class Qt4MplPlotView(QtGui.QWidget):
-    """ A combined graphics view including matplotlib canvas and 
+    """ A combined graphics view including matplotlib canvas and
     a navigation tool bar
     """
     def __init__(self, parent):
@@ -56,28 +56,28 @@ class Qt4MplPlotView(QtGui.QWidget):
         """
         # instantianize parent
         QtGui.QWidget.__init__(self, parent)
-        
+
         # set up canvas
         self.canvas = Qt4MplCanvas(self)
         self.toolbar = MyNavigationToolbar(self.canvas, self.canvas)
-        
+
         # set up layout
         self.vbox = QtGui.QVBoxLayout(self)
         self.vbox.addWidget(self.canvas)
         self.vbox.addWidget(self.toolbar)
-        
+
         # auto line's maker+color list
         self._myLineMarkerColorList = []
         self._myLineMarkerColorIndex = 0
         self.setAutoLineMarkerColorCombo()
 
         return
-        
+
     def addPlot(self, x, y, color=None, label="", xlabel=None, ylabel=None, marker=None, linestyle=None, linewidth=1):
         """ Add a new plot
         """
         self.canvas.addPlot(x, y, color, label, xlabel, ylabel, marker, linestyle, linewidth)
-        
+
         return
 
 
@@ -112,7 +112,7 @@ class Qt4MplPlotView(QtGui.QWidget):
         """ Clear canvas
         """
         return self.canvas.clearCanvas()
-        
+
     def draw(self):
         """ Draw to commit the change
         """
@@ -122,33 +122,33 @@ class Qt4MplPlotView(QtGui.QWidget):
         """
         """
         return self.canvas.getPlot()
-        
+
     def getLastPlotIndexKey(self):
         """ Get ...
         """
         return self.canvas.getLastPlotIndexKey()
-    
+
     def getXLimit(self):
         """ Get limit of Y-axis
         """
         return self.canvas.getXLimit()
-        
+
     def getYLimit(self):
         """ Get limit of Y-axis
         """
         return self.canvas.getYLimit()
-        
+
     def removePlot(self, ikey):
         """
         """
         return self.canvas.removePlot(ikey)
 
     def setXYLimits(self, xmin=None, xmax=None, ymin=None, ymax=None):
-        """ 
+        """
         """
         return self.canvas.setXYLimit(xmin, xmax, ymin, ymax)
 
-        
+
     def updateLine(self, ikey, vecx, vecy, linestyle=None, linecolor=None, marker=None, markercolor=None):
         """
         """
@@ -169,10 +169,10 @@ class Qt4MplPlotView(QtGui.QWidget):
     def getLineBasicColorList(self):
         """
         """
-        return MplBasicColors 
-        
+        return MplBasicColors
+
     def getDefaultColorMarkerComboList(self):
-        """ Get a list of line/marker color and marker style combination 
+        """ Get a list of line/marker color and marker style combination
         as default to add more and more line to plot
         """
         return self.canvas.getDefaultColorMarkerComboList()
@@ -187,24 +187,24 @@ class Qt4MplPlotView(QtGui.QWidget):
         if marker.count(' (') > 0:
             marker = marker.split(' (')[0]
         print "[DB] Print line %d: marker = %s, color = %s" % (self._myLineMarkerColorIndex, marker, color)
-        
+
         # update the index
         self._myLineMarkerColorIndex += 1
         if self._myLineMarkerColorIndex == len(self._myLineMarkerColorList):
             self._myLineMarkerColorIndex = 0
-            
+
         return (marker, color)
-        
+
     def setXYLimit(self, xmin, xmax, ymin, ymax):
         """ Set X-Y limit automatically
         """
         self.canvas.axes.set_xlim([xmin, xmax])
         self.canvas.axes.set_ylim([ymin, ymax])
-        
+
         self.canvas.draw()
-        
+
         return
-        
+
     def setAutoLineMarkerColorCombo(self):
         """
         """
@@ -212,14 +212,14 @@ class Qt4MplPlotView(QtGui.QWidget):
         for marker in MplLineMarkers:
             for color in MplBasicColors:
                 self._myLineMarkerColorList.append( (marker, color) )
-                
+
         return
 
     def setLineMarkerColorIndex(self, newindex):
         """
         """
         self._myLineMarkerColorIndex = newindex
-        
+
         return
 
 class Qt4MplCanvas(FigureCanvas):
@@ -258,20 +258,20 @@ class Qt4MplCanvas(FigureCanvas):
         - x: numpy array X
         - y: numpy array Y
         """
-        # Test... FIXME 
+        # Test... FIXME
         self.axes.hold(True)
 
         # process inputs and defaults
         self.x = x
         self.y = y
-        
+
         if color is None:
             color = (0,1,0,1)
         if marker is None:
             marker = 'o'
         if linestyle is None:
             linestyle = '-'
-            
+
         # color must be RGBA (4-tuple)
         r = self.axes.plot(x, y, color=color, marker=marker, linestyle=linestyle,
                 label=label, linewidth=1) # return: list of matplotlib.lines.Line2D object
@@ -280,7 +280,7 @@ class Qt4MplCanvas(FigureCanvas):
 
         # set x-axis and y-axis label
         if xlabel is not None:
-            self.axes.set_xlabel(xlabel, fontsize=20)  
+            self.axes.set_xlabel(xlabel, fontsize=20)
         if ylabel is not None:
             self.axes.set_ylabel(ylabel, fontsize=20)
 
@@ -288,7 +288,7 @@ class Qt4MplCanvas(FigureCanvas):
         self._setupLegend()
 
         # Register
-        if len(r) == 1: 
+        if len(r) == 1:
             self._lineDict[self._lineIndex] = r[0]
         else:
             print "Impoooooooooooooooosible!"
@@ -310,15 +310,15 @@ class Qt4MplCanvas(FigureCanvas):
         self.axes.hold(holdprev)
 
         # Do plot
-        # y ticks will be shown on line 1, 4, 23, 24 and 30 
+        # y ticks will be shown on line 1, 4, 23, 24 and 30
         # yticks = [1, 4, 23, 24, 30]
         # self.axes.set_yticks(yticks)
 
         # show image
         imgplot = self.axes.imshow(array2d, extent=[xmin,xmax,ymin,ymax], interpolation='none')
-        # set y ticks as an option: 
+        # set y ticks as an option:
         # FIXME - Set up the Y-axis ticks is erroreous
-        # if yticklabels is not None: 
+        # if yticklabels is not None:
         #     # it will always label the first N ticks even image is zoomed in
         #     self.axes.set_yticklabels(yticklabels)
         # explicitly set aspect ratio of the image
@@ -333,20 +333,20 @@ class Qt4MplCanvas(FigureCanvas):
             self.colorbar.update_bruteforce(imgplot)
 
         # Flush...
-        self._flush() 
+        self._flush()
 
         return
 
     def addImage(self, imagefilename):
         """ Add an image by file
         """
-        import matplotlib.image as mpimg 
+        import matplotlib.image as mpimg
 
         # set aspect to auto mode
         self.axes.set_aspect('auto')
 
         img = mpimg.imread(str(imagefilename))
-        lum_img = img[:,:,0] 
+        lum_img = img[:,:,0]
         # TODO : refactor for image size, interpolation and origin
         imgplot = self.axes.imshow(img, extent=[0, 1000, 800, 0], interpolation='none', origin='lower')
 
@@ -362,7 +362,7 @@ class Qt4MplCanvas(FigureCanvas):
 
         return
 
-        
+
     def clearAllLines(self):
         """ Remove all lines from the canvas
         """
@@ -373,7 +373,7 @@ class Qt4MplCanvas(FigureCanvas):
                 self._lineDict[ikey] = None
             # ENDIF(plot)
         # ENDFOR
-        
+
         self.draw()
 
         return
@@ -419,7 +419,7 @@ class Qt4MplCanvas(FigureCanvas):
         """
         """
         # for X
-        xlims = self.axes.get_xlim() 
+        xlims = self.axes.get_xlim()
         xlims = list(xlims)
         if xmin is not None:
             xlims[0] = xmin
@@ -427,8 +427,8 @@ class Qt4MplCanvas(FigureCanvas):
             xlims[1] = xmax
         self.axes.set_xlim(xlims)
 
-        # for Y 
-        ylims = self.axes.get_ylim() 
+        # for Y
+        ylims = self.axes.get_ylim()
         ylims = list(ylims)
         if ymin is not None:
             ylims[0] = ymin
@@ -500,16 +500,16 @@ class Qt4MplCanvas(FigureCanvas):
     def getLineBasicColorList(self):
         """
         """
-        return MplBasicColors 
-        
+        return MplBasicColors
+
     def getDefaultColorMarkerComboList(self):
-        """ Get a list of line/marker color and marker style combination 
+        """ Get a list of line/marker color and marker style combination
         as default to add more and more line to plot
         """
         combolist = []
         nummarkers = len(MplLineMarkers)
         numcolors = len(MplBasicColors)
-        
+
         for i in xrange(nummarkers):
             marker = MplLineMarkers[i]
             for j in xrange(numcolors):
@@ -517,7 +517,7 @@ class Qt4MplCanvas(FigureCanvas):
                 combolist.append( (marker, color) )
             # ENDFOR (j)
         # ENDFOR(i)
-        
+
         return combolist
 
 
@@ -546,11 +546,11 @@ class Qt4MplCanvas(FigureCanvas):
             "center left",
             "center right",
             "lower center",
-            "upper center", 
-            "center"] 
+            "upper center",
+            "center"]
 
         handles, labels = self.axes.get_legend_handles_labels()
-        self.axes.legend(handles, labels, loc='best')    
+        self.axes.legend(handles, labels, loc='best')
         print handles
         print labels
         #self.axes.legend(self._myLegendHandlers, self._myLegentLabels)
