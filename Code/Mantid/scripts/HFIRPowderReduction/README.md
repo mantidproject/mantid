@@ -1,15 +1,13 @@
 Tasks
 -----
   
-  1. Tab *Normalized*: **Normalization Monitor** is not parsed;
-  2. Tab *Normalized*: apply reduction record to binning push buttons and avoid plotting one data twice on same plot with *Prev Scan* and *Next Scan*;
-  3. Tab *Normalized*: **Save** does not work well with option *gsas and fullprof*;
-  4. Tab *vanadium*: implement **Smooth Data**;
-  5. Tab *vanadium*: implement **Save**;
   6. Tab *Multiple Scans*: implement **Save Merged**
   7. Tab *Multiple Scans*: implement **Save All**
   6. Find out why the vanadium runs (379-10/11) look funny, i.e., oscilating curves;
   7. Talk with Clarina how to deal with vanadium spectrum with peaks striped; 
+  8. Tab *Normalized*: **Normalization Monitor** should have a default value as the average of monitor counts
+  9. Check whether a scan has been loaded as **Load** is pushed; 
+  10. Enable *SaveGSS*() work with reactor-source powder diffractometers;
 
 
 Finished Tasks
@@ -19,6 +17,11 @@ Finished Tasks
   2. Make tab *Individual Detector* work;
   3. Implement tab *vanadium*;
   4. (75%) Each tab with *Previous* and *Next* buttons should have a data structure to record whether a certain plot is already on canvas
+  5. Tab *Normalized*: **Normalization Monitor** is not parsed;
+  6. Tab *Normalized*: apply reduction record to binning push buttons and avoid plotting one data twice on same plot with *Prev Scan* and *Next Scan*;
+  7. Tab *Normalized*: **Save** does not work well with option *gsas and fullprof*;
+  8. Tab *vanadium*: implement **Smooth Data**;
+  9. Tab *vanadium*: implement **Save**;
 
 
 Use cases for tabs

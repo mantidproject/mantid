@@ -94,9 +94,9 @@ class MainWindow(QtGui.QMainWindow):
         self.connect(self.ui.pushButton_loadData, QtCore.SIGNAL('clicked()'),
                 self.doLoadData)
         self.connect(self.ui.pushButton_prevScan, QtCore.SIGNAL('clicked()'),
-                self.doLoadPrevScan)
+                self.doLoadReduceScanPrev)
         self.connect(self.ui.pushButton_nextScan, QtCore.SIGNAL('clicked()'),
-                self.doLoadNextScan)
+                self.doLoadReduceScanNext)
         self.connect(self.ui.pushButton_unit2theta, QtCore.SIGNAL('clicked()'),
                 self.doReduce2Theta)
         self.connect(self.ui.pushButton_unitD, QtCore.SIGNAL('clicked()'),
@@ -105,6 +105,8 @@ class MainWindow(QtGui.QMainWindow):
                 self.doReduceQ)
         self.connect(self.ui.pushButton_saveData, QtCore.SIGNAL('clicked()'),
                 self.doSaveData)
+        self.connect(self.ui.pushButton_clearTab2Canvas, QtCore.SIGNAL('clicked()'),
+                self.doClearCanvas)
 
         # tab 'Multiple Scans'
         self.connect(self.ui.pushButton_loadMultData, QtCore.SIGNAL('clicked()'),
@@ -121,6 +123,7 @@ class MainWindow(QtGui.QMainWindow):
                 self.doMergeScanViewMerged)
         self.connect(self.ui.pushButton_clearMultCanvas, QtCore.SIGNAL('clicked()'),
                 self.doClearMultiRunCanvas)
+
         # tab 'Vanadium'
         self.connect(self.ui.pushButton_stripVanPeaks, QtCore.SIGNAL('clicked()'),
                 self.doStripVandiumPeaks)
@@ -128,6 +131,12 @@ class MainWindow(QtGui.QMainWindow):
                 self.doSaveVanRun)
         self.connect(self.ui.pushButton_rebin2Theta, QtCore.SIGNAL('clicked()'),
                 self.doReduceVanadium2Theta)
+        self.connect(self.ui.pushButton_smoothVanData, QtCore.SIGNAL('clicked()'),
+                self.doSmoothVanadiumData)
+        self.connect(self.ui.pushButton_applySmooth, QtCore.SIGNAL('clicked()'),
+                self.doSmoothVanadiumApply)
+        self.connect(self.ui.pushButton_undoSmooth, QtCore.SIGNAL('clicked()'),
+                self.doSmoothVanadiumUndo)
 
         # tab 'Advanced Setup'
         self.connect(self.ui.pushButton_browseCache, QtCore.SIGNAL('clicked()'),
@@ -202,7 +211,6 @@ class MainWindow(QtGui.QMainWindow):
         validator12.setBottom(1)
         self.ui.lineEdit_scanEnd.setValidator(validator12)
 
-        # TODO - Add valdiators for
         validator13 = QtGui.QDoubleValidator(self.ui.lineEdit_normalizeMonitor)
         validator13.setBottom(0.)
         self.ui.lineEdit_normalizeMonitor.setValidator(validator13)
@@ -225,7 +233,7 @@ class MainWindow(QtGui.QMainWindow):
         self._instrument = str(self.ui.comboBox_instrument.currentText())
 
         # UI widgets setup
-        self.ui.comboBox_outputFormat.addItems(['Fullprof', 'GSAS', 'Fullprof+GSAS'])
+        self.ui.comboBox_outputFormat.addItems(['Fullprof']) # Supports Fullprof only now, 'GSAS', 'Fullprof+GSAS'])
 
         # RELEASE 2.0 : Need to disable some widgets... consider to refactor the code
         self.ui.radioButton_useServer.setChecked(True)
@@ -256,6 +264,11 @@ class MainWindow(QtGui.QMainWindow):
 
         # Control of plots: key = canvas, value = list of 2-integer-tuple (expno, scanno)
         self._tabLineDict = {}
+        self._tabBinParamDict = {}
+        for key in [2]:
+            self._tabLineDict[key] = []
+        for key in [2, 3, 4]:
+            self._tabBinParamDict[key] = [None, None, None]
 
         return
 
@@ -359,6 +372,15 @@ class MainWindow(QtGui.QMainWindow):
 
         return
 
+    def doClearCanvas(self):
+        """ Clear canvas
+        """
+        itab = self.ui.tabWidget.currentIndex()
+        if itab == 2:
+            self.ui.graphicsView_reducedData.clearAllLines()
+            self._tabLineDict[itab] = []
+
+        return
 
     def doClearIndDetCanvas(self):
         """ Clear the canvas in tab 'Individual Detector' and current plotted lines
@@ -398,6 +420,7 @@ class MainWindow(QtGui.QMainWindow):
         self.ui.graphicsView_vanPeaks.clearAllLines()
 
         return
+
 
     def doExist(self):
         """ Exist the application
@@ -655,10 +678,10 @@ class MainWindow(QtGui.QMainWindow):
         return
 
 
-    def doLoadPrevScan(self):
+    def doLoadReduceScanPrev(self):
+        """ Load and reduce previous scan for tab 'Normalized'
         """
-        """
-        # Advance scan number by 1
+        # Reduce scan number by 1
         try:
             scanno = int(self.ui.lineEdit_scanNo.text())
         except ValueError:
@@ -675,27 +698,27 @@ class MainWindow(QtGui.QMainWindow):
         self.ui.lineEdit_scanNo.setText(str(scanno))
         execstatus = self.doLoadData()
         print "[DB] Load data : ", execstatus
+        
+        # Reduce data
+        self._uiReducePlotNoramlized(self._currUnit)
 
-        unit = self._currUnit
+        ## Reduce
+        #good, expno, scanno = self._uiReduceData(2, unit)
 
-        # Reduce
-        good, expno, scanno = self._uiReduceData(2, unit)
+        ## plot
+        #if good is True:
+        #    canvas = self.ui.graphicsView_reducedData
+        #    xlabel = self._getXLabelFromUnit(unit)
+        #    label = "Exp %s Scan %s"%(str(expno), str(scanno))
+        #    clearcanvas=self.ui.checkBox_clearPrevious.isChecked()
+        #    self._plotReducedData(expno, scanno, canvas, xlabel, label=label, clearcanvas=clearcanvas)
 
-        # plot
-        if good is True:
-            canvas = self.ui.graphicsView_reducedData
-            xlabel = self._getXLabelFromUnit(unit)
-            label = "Exp %s Scan %s"%(str(expno), str(scanno))
-            clearcanvas=self.ui.checkBox_clearPrevious.isChecked()
-            self._plotReducedData(expno, scanno, canvas, xlabel, label=label, clearcanvas=clearcanvas)
-
-        return good
+        return 
 
 
-    def doLoadNextScan(self):
+    def doLoadReduceScanNext(self):
+        """ Load and reduce next scan for tab 'Normalized'
         """
-        """
-        # TODO - Need a plotting managing mechanism to avoid to plotting same exp/scan more than once
         # Advance scan number by 1
         try:
             scanno = int(self.ui.lineEdit_scanNo.text())
@@ -713,21 +736,21 @@ class MainWindow(QtGui.QMainWindow):
         execstatus = self.doLoadData()
         print "[DB] Load data : ", execstatus
 
-        unit = self._currUnit
+        # Reduce data
+        self._uiReducePlotNoramlized(self._currUnit)
 
-        # Reduce
-        good, expno, scanno = self._uiReduceData(2, unit)
+        ## Reduce
+        #good, expno, scanno = self._uiReduceData(2, unit)
 
-        # plot
-        if good is True:
-            canvas = self.ui.graphicsView_reducedData
-            xlabel = self._getXLabelFromUnit(unit)
-            label = "Exp %s Scan %s"%(str(expno), str(scanno))
-            clearcanvas=self.ui.checkBox_clearPrevious.isChecked()
-            self._plotReducedData(expno, scanno, canvas, xlabel, label=label, clearcanvas=clearcanvas)
+        ## plot
+        #if good is True:
+        #    canvas = self.ui.graphicsView_reducedData
+        #    xlabel = self._getXLabelFromUnit(unit)
+        #    label = "Exp %s Scan %s"%(str(expno), str(scanno))
+        #    clearcanvas=self.ui.checkBox_clearPrevious.isChecked()
+        #    self._plotReducedData(expno, scanno, canvas, xlabel, label=label, clearcanvas=clearcanvas)
 
-        return good
-
+        return 
 
 
     def doMergeScans(self):
@@ -1052,62 +1075,30 @@ class MainWindow(QtGui.QMainWindow):
 
 
     def doReduce2Theta(self):
-        """ Rebin the data and plot in 2theta
+        """ Rebin the data and plot in 2theta for tab 'Normalized'
         """
         unit = '2theta'
-        canvas = self.ui.graphicsView_reducedData
-
-        # reduce
-        good, expno, scanno = self._uiReduceData(2, unit)
-
-        # plot
-        if good is True:
-            self._currUnit = unit
-            xlabel = self._getXLabelFromUnit(unit)
-            label = "Exp %s Scan %s"%(str(expno), str(scanno))
-            self._plotReducedData(expno, scanno, canvas, xlabel, label=None, clearcanvas=True)
+        self._uiReducePlotNoramlized(unit)
 
         return
 
 
     def doReduceDSpacing(self):
-        """ Rebin the data and plot in d-spacing
+        """ Rebin the data and plot in d-spacing for tab 'Normalized'
         """
         # new unit and information
         unit = "dSpacing"
-
-        canvas = self.ui.graphicsView_reducedData
-
-        # reduce
-        good, expno, scanno = self._uiReduceData(2, unit)
-
-        # plot
-        if good is True:
-            self._currUnit = unit
-            xlabel = self._getXLabelFromUnit(unit)
-            label = "Exp %s Scan %s"%(str(expno), str(scanno))
-            self._plotReducedData(expno, scanno, canvas, xlabel, label=None, clearcanvas=True)
-
+        self._uiReducePlotNoramlized(unit)
 
         return
 
 
     def doReduceQ(self):
-        """ Rebin the data and plot in momentum transfer Q
+        """ Rebin the data and plot in momentum transfer Q for tab 'Normalized'
         """
         unit = 'Momentum Transfer (Q)'
-        canvas = self.ui.graphicsView_reducedData
-
-        # reduce
-        good, expno, scanno = self._uiReduceData(2, unit)
-
-        # plot
-        if good is True:
-            self._currUnit = unit
-            xlabel = self._getXLabelFromUnit(unit)
-            label = "Exp %s Scan %s"%(str(expno), str(scanno))
-            self._plotReducedData(expno, scanno, canvas, xlabel, label=None, clearcanvas=True)
-
+        self._uiReducePlotNoramlized(unit)
+        
         return
 
 
@@ -1188,9 +1179,8 @@ class MainWindow(QtGui.QMainWindow):
             else:
                 homedir = os.getcwd()
             # launch a dialog to get data
-            filter = "All files (*.*);;Fullprof (*.dat);;GSAS (*.gsa)"
-            sfilename = str(QtGui.QFileDialog.getSaveFileName(self, 'Save File',
-                homedir, filter))
+            filefilter = "All files (*.*);;Fullprof (*.dat);;GSAS (*.gsa)"
+            sfilename = str(QtGui.QFileDialog.getSaveFileName(self, 'Save File', homedir, filefilter))
         except NotImplementedError as e:
             self._logError(str(e))
         else:
@@ -1201,16 +1191,29 @@ class MainWindow(QtGui.QMainWindow):
     def doSaveVanRun(self):
         """ Save the vanadium run with peaks removed
         """
-        # TODO - Need to get use case from Clarina
-        raise NotImplementedError("Need use case from instrument scientist")
+        # Get experiment number and scan number
+        try:
+            expno, scanno = self._uiGetExpScanNumber()
+        except NotImplementedError as e:
+            self._logError("Unable to get exp number and scan number for smoothing vanadium data due to %s." % (
+                str(e)))
+            return False
+
+        homedir = os.getcwd()
+        filefilter = "Fullprof (*.dat)"
+        sfilename = str(QtGui.QFileDialog.getSaveFileName(self, 'Save File In Fullprof', homedir, filefilter))
+
+        self._myControl.saveProcessedVanadium(expno, scanno, sfilename)
+
+        return
 
 
-    def doSmoothVanadiumSpectrum(self):
+    def doSmoothVanadiumData(self):
         """ Smooth vanadium spectrum
         """
         # Get experiment number and scan number
         try:
-            expno, scanno = self._uiGetExpScanNumber(self)
+            expno, scanno = self._uiGetExpScanNumber()
         except NotImplementedError as e:
             self._logError("Unable to get exp number and scan number for smoothing vanadium data due to %s." % (
                 str(e)))
@@ -1218,13 +1221,48 @@ class MainWindow(QtGui.QMainWindow):
 
         smoothparams_str = str(self.ui.lineEdit_smoothParams.text())
         # Smooth data
-        self._myControl.smoothVanadiumSpectrum(expno, scanno, smoothparams_str)
+        status = self._myControl.smoothVanadiumSpectrum(expno, scanno, smoothparams_str)
+        if status is False:
+            self._logError("Failed to smooth vanadium data")
 
         # Plot
-        self._plotVanadiumRun()
+        unit = '2theta'
+        xlabel = self._getXLabelFromUnit(unit)
+        label = "Vanadium Exp %d Scan %d FFT-Smooth by %s" % (expno, scanno, smoothparams_str)
+        self._plotVanadiumRun(expno, scanno, xlabel, label, False, True)
 
         return
 
+    def doSmoothVanadiumApply(self):
+        """ Apply smoothing effect to vanadium data
+        """
+        # Get experiment number and scan number
+        try:
+            expno, scanno = self._uiGetExpScanNumber()
+        except NotImplementedError as e:
+            self._logError("Unable to get exp number and scan number for smoothing vanadium data due to %s." % (
+                str(e)))
+            return False
+
+        self._myControl.applySmoothVanadium(expno, scanno, True)
+
+        return
+
+
+    def doSmoothVanadiumUndo(self):
+        """ Undo smoothing vanadium
+        """
+        # 
+        try:
+            expno, scanno = self._uiGetExpScanNumber()
+        except NotImplementedError as e:
+            self._logError("Unable to get exp number and scan number for smoothing vanadium data due to %s." % (
+                str(e)))
+            return False
+
+        self._myControl.applySmoothVanadium(expno, scanno, False)
+
+        return
 
     def doStripVandiumPeaks(self):
         """ Strip vanadium peaks
@@ -1648,10 +1686,13 @@ class MainWindow(QtGui.QMainWindow):
         return True
 
 
-    def _plotVanadiumRun(self, exp, scan, xlabel, label, clearcanvas=False):
+    def _plotVanadiumRun(self, exp, scan, xlabel, label, clearcanvas=False, TempData=False):
         """ Plot processed vanadium data
+
+        Arguments: 
+         - TempData :: flag whether the vanadium run is a temporary data set
         """
-        # whether the data is load
+        # Check whether the data is load
         exp = int(exp)
         scan = int(scan)
 
@@ -1659,31 +1700,39 @@ class MainWindow(QtGui.QMainWindow):
             self._logWarning("No data to plot!")
             return
 
-        # plot
+        # Get data to plot 
         try:
-            vecx, vecy = self._myControl.getVectorProcessVanToPlot(exp, scan)
-            vecx, vecyOrig = self._myControl.getVectorToPlot(exp, scan)
-            diffY = vecyOrig - vecy
+            vecx, vecy = self._myControl.getVectorProcessVanToPlot(exp, scan, TempData)
+            if TempData is False:
+                vecx, vecyOrig = self._myControl.getVectorToPlot(exp, scan)
+                diffY = vecyOrig - vecy
         except Exception as e:
-            print '[Error] Unable to retrieve processed vanadium spectrum for exp %d scan %d.  Reason: %s' % (exp, scan, str(e))
+            print '[Error] Unable to retrieve processed vanadium spectrum for exp %d scan %d.  \
+                    Reason: %s' % (exp, scan, str(e))
             return
 
-
-        # get to know whether it is required to clear the image
+        # Get to know whether it is required to clear the image
         canvas = self.ui.graphicsView_vanPeaks
+        if TempData is True:
+            clearcanvas = False
         if clearcanvas is True:
             canvas.clearAllLines()
             canvas.setLineMarkerColorIndex(0)
 
         # get the marker color for the line
-        marker, color = canvas.getNextLineMarkerColorCombo()
+        if TempData is True:
+            marker = None
+            color = 'blue'
+        else: 
+            marker, color = canvas.getNextLineMarkerColorCombo()
 
         # plot
         canvas.addPlot(vecx, vecy, marker=marker, color=color,
             xlabel=xlabel, ylabel='intensity',label=label)
 
-        canvas.addPlot(vecx, diffY, marker='+', color='green',
-            xlabel=xlabel, ylabel='intensity',label='Diff')
+        if TempData is False:
+            canvas.addPlot(vecx, diffY, marker='+', color='green',
+                xlabel=xlabel, ylabel='intensity',label='Diff')
 
         # reset canvas limits
         if clearcanvas is True:
@@ -1696,6 +1745,7 @@ class MainWindow(QtGui.QMainWindow):
             dy = ymax-ymin
 
             canvas.setXYLimit(xmin-dx*0.1, xmax+dx*0.1, ymin-dy*0.1, ymax+dy*0.1)
+        # ENDIF
 
         return
 
@@ -1771,10 +1821,11 @@ class MainWindow(QtGui.QMainWindow):
 
             cachedir = str(self.ui.lineEdit_cache.text()).strip()
             if os.path.exists(cachedir) is False:
+                invalidcache = cachedir
                 cachedir = os.getcwd()
                 self.ui.lineEdit_cache.setText(cachedir)
-                self._logWarning("Cache directory is not valid. \
-                    Using current workspace directory %s as cache." % (cachedir) )
+                self._logWarning("Cache directory %s is not valid. \
+                    Using current workspace directory %s as cache." % (invalidcache, cachedir) )
 
             filename = '%s_exp%04d_scan%04d.dat' % (self._instrument.upper(), exp, scan)
             self._srcFileName = os.path.join(cachedir, filename)
@@ -1905,11 +1956,47 @@ class MainWindow(QtGui.QMainWindow):
         return (expno, sorted(scanslist))
 
 
+    def _uiIsBinParamsChange(self, itab, binparams):
+        """ Check whether current bin parameters are same 
+        as given value
+        """
+        xmin,binsize,xmax = self._uiGetBinningParams(itab)
+        newbinparams = [xmin, binsize, xmax]
+
+        # check binning
+        same = True
+        for i in xrange(3):
+            par_0 = binparams[i]
+            par_1 = newbinparams[i]
+
+            try:
+                if abs(float(par_0)-float(par_1)) > 1.0E-6:
+                    same = False
+            except TypeError:
+                if par_0 is not None or par_1 is not None:
+                    same = False
+            finally:
+                if same is False:
+                    break
+        # ENDFOR
+
+        change = not same
+        if change is True:
+            print "[D...............B]",
+            print "%s vs %s "  % (str(xmin), str(self._tabBinParamDict[itab][0])),
+            print "%s vs %s "  % (str(xmax), str(self._tabBinParamDict[itab][2])),
+            print "%s vs %s "  % (str(binsize), str(self._tabBinParamDict[itab][1]))
+        else:
+            print "[DB] Rebin = False"
+
+        return change
+
+
     def _uiReduceData(self, itab, unit, expno=None, scanno=None):
         """ Rebin and plot by reading GUI widgets' value
 
         Arguments:
-         - itab : index of the tab.  Only 2 and 4 are allowed
+         - itab : index of the tab.  Only 2m 3 and 4 are allowed
          - unit : string for target unit
         """
         # Experiment number and Scan number
@@ -1937,19 +2024,74 @@ class MainWindow(QtGui.QMainWindow):
             if unit != '2theta':
                 raise NotImplementedError('Wavelength must be specified for unit %s.'%(unit))
 
+        # Get scale factor
+        try: 
+            scalefactor = self._getFloat(self.ui.lineEdit_normalizeMonitor)
+        except EmptyError:
+            scalefactor = None
+        except ValueError as valueerror:
+            raise ValueError("Unable to get normalization factor due to %s."%(str(valueerror)))
+
         # Rebin
         try:
             # rebinned = self._myControl.rebin(expno, scanno, unit, wavelength, xmin, binsize, xmax)
             excludeddetlist = self._uiGetExcludedDetectors()
             execstatus = self._myControl.reduceSpicePDData(expno, scanno, \
-                    unit, xmin, xmax, binsize, wavelength, excludeddetlist)
-            print "[DB] reduction status = %s, Binning = %s, %s, %s" % (str(execstatus),
-                    str(xmin), str(binsize), str(xmax))
+                    unit, xmin, xmax, binsize, wavelength, excludeddetlist, scalefactor)
+
+            # Record binning
+            self._tabBinParamDict[itab] = [xmin, binsize, xmax]
         except NotImplementedError as e:
             self._logError(str(e))
             return (False, expno, scanno)
 
         return (True, expno, scanno)
+
+    
+    def _uiReducePlotNoramlized(self, unit):
+        """ Support Reduce2Theta, ReduceDspacing and ReduceQ
+        """
+        itab = 2
+        canvas = self.ui.graphicsView_reducedData
+        expno, scanno = self._uiGetExpScanNumber()
+
+        change = self._uiIsBinParamsChange(itab, self._tabBinParamDict[itab])
+        # check whether line record
+        if unit == self._currUnit and \
+                self._tabLineDict[itab].count((expno, scanno)) > 0 and change is False:
+            # there is no need to plot again as line exists
+            return
+
+        # reduce
+        good, expno, scanno = self._uiReduceData(2, unit)
+       
+        # failed to reduce
+        if good is False:
+            self._logError("Failed to reduce Exp %d Scan %d" % (expno, scanno))
+            return
+
+        # clear canvas???
+        if unit != self._currUnit:
+            clearcanvas = True
+        elif self.ui.checkBox_clearPrevious.isChecked() is False:
+            # NOTE: naming of the widget is VERY confusing.  Should be changed to keepPrevious
+            clearcanvas = True
+        else:
+            clearcanvas = False
+
+        # reset record dictionary if unit is different from present 
+        if clearcanvas is True:
+            self._tabLineDict[itab] = []
+
+        self._currUnit = unit
+        self._tabLineDict[itab].append((expno, scanno))
+
+        xlabel = self._getXLabelFromUnit(unit)
+        label = "Exp %s Scan %s"%(str(expno), str(scanno))
+        self._plotReducedData(expno, scanno, canvas, xlabel, label=None, clearcanvas=clearcanvas)
+
+        return
+
 
 
     def _logDebug(self, dbinfo):
@@ -1980,10 +2122,11 @@ class MainWindow(QtGui.QMainWindow):
 
     def _getFloat(self, lineedit):
         """ Get integer from line edit
+        Exception: ValueError if empty or no input
         """
         valuestr = str(lineedit.text()).strip()
         if len(valuestr) == 0:
-            raise EmptyError("Input is empty. It cannot be converted to integer.")
+            raise EmptyError("Input is empty. It cannot be converted to float.")
 
         try:
             value = float(valuestr)

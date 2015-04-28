@@ -13,7 +13,6 @@ import numpy
 import HfirUtility as hutil
 
 # Import mantid
-
 curdir = os.getcwd()
 libpath = os.path.join(curdir.split('Code')[0], 'Code/debug/bin')
 if os.path.exists(libpath) is False:
@@ -50,13 +49,36 @@ class PDRManager(object):
         self._rawSpiceTableWS = None
         self._rawLogInfoWS = None
 
-        # special
+        # vanadium only
         self._processedVanWS = None
+        self._processedVanWSTemp = None
+        self._processVanNote = ""
+        self._applySmoothVan = False
 
         self._wavelength = None
 
+        return
+
+    def applySmoothVanadium(self, smoothaccept):
+        """ Apply the smoothing effect of to vanadium data
+        """
+        if isinstance(smoothaccept, bool) is False:
+            raise NotImplementedError('Input for applySmoothVanadium() is not boolean!')
+
+        self._applySmoothVan = smoothaccept
 
         return
+
+    def getProcessedVanadiumWS(self):
+        """
+        """
+        return self._processedVanWS 
+
+    def getProcessedVanadiumWSTemp(self):
+        """
+        """
+        return self._processedVanWSTemp
+
 
     def getRawSpiceTable(self):
         """
@@ -69,6 +91,8 @@ class PDRManager(object):
         """
         return self._rawLogInfoWS
 
+
+
     def getVanadiumPeaks(self):
         """
         """
@@ -79,6 +103,11 @@ class PDRManager(object):
         """
         """
         return self._wavelength
+
+    def isSmoothApplied(self):
+        """
+        """
+        return self._applySmoothVan
 
     def setup(self, datamdws, monitormdws, reducedws=None, unit=None, binsize=None):
         """ Set up
@@ -115,6 +144,18 @@ class PDRManager(object):
         self.monitormdws = monitormdws
 
         return
+
+    def setProcessedVanadiumDataTemp(self, vanws, note):
+        """ Set tempory processed vanadium data
+        Arguments: 
+         - vanws :: workspace
+         - note  :: string as note
+        """
+        self._processedVanWSTemp = vanws
+        self._processVanNote = note
+
+        return
+
 
     def setVanadiumPeaks(self, vanpeakposlist):
         """ Set up vanadium peaks in 2theta
@@ -158,6 +199,18 @@ class HFIRPDRedControl(object):
         self._myWavelengthDict = {}
 
         self._lastWkspToMerge = []
+
+        return
+
+    def applySmoothVanadium(self, expno, scanno, applysmooth):
+        """ Apply smoothed vanadium
+        """
+        if self._myWorkspaceDict.has_key((expno, scanno)) is False:
+            raise NotImplementedError("Exp %d Scan %d does not have reduced \
+                    workspace." % (exp, scan))
+        else:
+            rmanager = self._myWorkspaceDict[(expno, scanno)]
+            rmanager.applySmoothVanadium(applysmooth)
 
         return
 
@@ -326,12 +379,18 @@ class HFIRPDRedControl(object):
         return outws.readX(0), outws.readY(0)
 
 
-    def getVectorProcessVanToPlot(self, exp, scan):
+    def getVectorProcessVanToPlot(self, exp, scan, tempdata=False):
         """ Get vec x and y for the processed vanadium spectrum
         """
         # get on hold of processed vanadium data workspace
         wsmanager = self.getWorkspace(exp, scan, raiseexception=True)
-        procVanWs = wsmanager._processedVanWS
+        
+        if tempdata is True:
+            procVanWs = wsmanager.getProcessedVanadiumWSTemp()
+        else:
+            procVanWs = wsmanager.getProcessedVanadiumWS()
+            #procVanWs = wsmanager._processedVanWS
+
         if procVanWs is None:
             raise NotImplementedError("Exp %d Scan %d does not have processed vanadium workspace." % (exp, scan))
 
@@ -613,41 +672,7 @@ class HFIRPDRedControl(object):
         return True
 
 
-    def rebin(self, exp, scan, unit, wavelength, xmin, binsize, xmax):
-        """ Rebin the data MD workspace and monitor MD workspace for new bin parameter and/or
-        units
-        Return - Boolean as successful or not
-        """
-        raise NotImplementedError('This method should be replaced by reduceSpicePD...')
-        wsmanager = self.getWorkspace(exp, scan, raiseexception=True)
-        if wsmanager.datamdws is None or wsmanager.monitormdws is None:
-            self._logError("Unable to rebin the data for exp=%d, scan=%d because either data MD workspace and \
-                monitor MD workspace is not present."  % (exp, scan))
-            return False
-
-        if xmin is None or xmax is None:
-            binpar = "%.7f" % (binsize)
-        else:
-            binpar = "%.7f, %.7f, %.7f" % (xmin, binsize, xmax)
-
-        reducedwsname = wsmanager.datamdws.name() + "_" + unit
-        api.ConvertCWPDMDToSpectra(InputWorkspace=wsmanager.datamdws,
-                                   InputMonitorWorkspace=wsmanager.monitormdws,
-                                   OutputWorkspace=reducedwsname,
-                                   UnitOutput=unit,
-                                   BinningParams = binpar,
-                                   NeutronWaveLength=wavelength)
-        outws = AnalysisDataService.retrieve(reducedwsname)
-        if outws is not None:
-            wsmanager.reducedws = outws
-            wsmanager.unit = unit
-        else:
-            raise NotImplementedError("Failed to convert unit to %s." % (unit))
-
-        return True
-
-
-    def reduceSpicePDData(self, exp, scan, unit, xmin, xmax, binsize, wavelength=None, excludeddetlist=[]):
+    def reduceSpicePDData(self, exp, scan, unit, xmin, xmax, binsize, wavelength=None, excludeddetlist=[],scalefactor=None):
         """ Reduce SPICE powder diffraction data.
         Return - Boolean as reduction is successful or not
         """
@@ -668,6 +693,12 @@ class HFIRPDRedControl(object):
         else:
             binpar = "%.7f, %.7f, %.7f" % (xmin, binsize, xmax)
 
+        # scale-factor
+        if scalefactor is None:
+            scalefactor = 1.
+        else:
+            scalefactor = float(scalefactor)
+
         basewsname = datamdws.name().split("_DataMD")[0]
         outwsname = basewsname + "_Reduced"
         print "[DB]", numpy.array(excludeddetlist)
@@ -677,7 +708,8 @@ class HFIRPDRedControl(object):
                 BinningParams=binpar,
                 UnitOutput = unit,
                 NeutronWaveLength=wavelength,
-                ExcludedDetectorIDs=numpy.array(excludeddetlist))
+                ExcludedDetectorIDs=numpy.array(excludeddetlist),
+                ScaleFactor=scalefactor)
 
         print "[DB] Reduction is finished.  Data is in workspace %s. " % (outwsname)
 
@@ -767,26 +799,61 @@ class HFIRPDRedControl(object):
         # get workspace
         wsmanager = self.getWorkspace(exp, scan, raiseexception=True)
         if wsmanager.reducedws is None:
-            raise NotImplementedError("Unable to rebin the data for exp=%d, scan=%d because either data MD workspace and \
-                monitor MD workspace is not present."  % (exp, scan))
+            raise NotImplementedError("Unable to rebin the data for exp=%d, scan=%d because \
+                    either data MD workspace and monitor MD workspace is not present."  % (exp, scan))
         else:
             wksp = wsmanager.reducedws
 
         # save
-        filetypes = filetypes.lower()
+        filetype = filetype.lower()
         if "gsas" in filetype:
-            api.SaveGSS(InputWorkspace=wksp, Filename=sfilename, \
-                SplitFiles=False, Append=False,\
-                MultiplyByBinWidth=normalized, Bank=1, Format="SLOG",\
-                 ExtendedHeader=True)
+            if sfilename.endswith('.dat') is True:
+                sfilename.replace('.dat', '.gsa')
+
+            api.SaveGSS(InputWorkspace=wksp, 
+                        Filename=sfilename, 
+                        SplitFiles=False, Append=False,
+                        MultiplyByBinWidth=False,
+                        Bank=1, 
+                        Format="SLOG", 
+                        ExtendedHeader=True)
+        # ENDIF
 
         if "fullprof" in filetype:
-            api.SaveFocusedXYE(InputWorkspace=wksp, StartAtBankNumber=1,
-                Filename=sfilename)
+            if sfilename.endswith('.gsa') is True:
+                sfilename.replace('.gsa', '.dat')
 
-        if "topas" in self._outTypes:
-            api.SaveFocusedXYE(InputWorkspace=wksp, StartAtBankNumber=info["bank"],\
-                Filename=filename+".xye", Format="TOPAS")
+            api.SaveFocusedXYE(InputWorkspace=wksp, 
+                               StartAtBankNumber=1, 
+                               Filename=sfilename)
+        # ENDIF 
+        
+        if "topas" in filetype:
+            sfilename = sfilename[:-4]+".xye"
+            api.SaveFocusedXYE(InputWorkspace=wksp, 
+                               StartAtBankNumber=info["bank"],
+                               Filename=sfilename, 
+                               Format="TOPAS")
+        # ENDIF
+
+        return
+
+
+    def saveProcessedVanadium(self, expno, scanno, savefilename):
+        """ Save processed vanadium data
+        """
+        # Get workspace
+        wsmanager = self.getWorkspace(expno, scanno, raiseexception=True)
+
+        if wsmanager.isSmoothApplied() is True:
+            wksp = wsmanager.getProcessedVanadiumWSTemp()
+        else:
+            wksp = wsmanager.getProcessedVanadiumWS()
+
+        # Save 
+        api.SaveFocusedXYE(InputWorkspace=wksp, 
+                   StartAtBankNumber=1, 
+                   Filename=savefilename)
 
         return
 
@@ -807,13 +874,21 @@ class HFIRPDRedControl(object):
     def smoothVanadiumSpectrum(self, expno, scanno, smoothparams_str):
         """
         """
+        # Get reduced workspace
+        wsmanager = self.getWorkspace(expno, scanno, raiseexception=True)
+        vanRun = wsmanager.getProcessedVanadiumWS()
+        outws = vanRun.name()+"_smooth"
+
         outws = api.FFTSmooth(InputWorkspace=vanRun,
-                              OutputWorkspace=vanRun,
+                              OutputWorkspace=outws,
                               Filter="Butterworth",
                               Params=smoothparams_str,
                               IgnoreXBins=True,
                               AllSpectra=True)
 
+        if outws is not None: 
+            wsmanager.setProcessedVanadiumDataTemp(outws, "FFT smooth")
+            
         return True
 
 
