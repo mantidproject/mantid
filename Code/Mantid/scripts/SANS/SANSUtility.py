@@ -490,6 +490,7 @@ def bundle_added_event_data_as_group(out_file_name, out_file_monitors_name):
 
     monitor_temp = file_name + '_monitors' + ADDED_EVENT_TAG
     Load(Filename = out_file_monitors_name, OutputWorkspace = monitor_temp)
+
     monitor_ws = mtd[monitor_temp]
 
     out_group_file_name = file_name + file_extension
