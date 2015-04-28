@@ -632,7 +632,7 @@ void PoldiPeakSearch::exec() {
   auto newEnd = std::remove_copy_if(
       peakCoordinates.begin(), peakCoordinates.end(),
       intensityFilteredPeaks.begin(),
-      boost::bind<bool>(&PoldiPeakSearch::isLessThanMinimum, this, _1));
+      boost::bind(&PoldiPeakSearch::isLessThanMinimum, this, _1));
   intensityFilteredPeaks.resize(
       std::distance(intensityFilteredPeaks.begin(), newEnd));
 
