@@ -29,7 +29,7 @@ DECLARE_ALGORITHM(ExtractSpectra)
 /** Constructor
  */
 ExtractSpectra::ExtractSpectra()
-    : Algorithm(), m_minX(0), m_maxX(0), //m_minSpec(-1), m_maxSpec(-1),
+    : Algorithm(), m_minX(0), m_maxX(0),
       m_commonBoundaries(false), m_histogram(false), m_croppingInX(false) {}
 
 //----------------------------------------------------------------------------------------------

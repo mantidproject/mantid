@@ -69,7 +69,7 @@ void CropWorkspace::init() {
  */
 void CropWorkspace::exec() {
 
-  auto extract = createChildAlgorithm("ExtractSpectra");
+  auto extract = createChildAlgorithm("ExtractSpectra", 0, 1);
   extract->initialize();
   extract->setRethrows(true);
 

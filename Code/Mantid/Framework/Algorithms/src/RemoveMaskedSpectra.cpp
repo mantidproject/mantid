@@ -80,7 +80,7 @@ void RemoveMaskedSpectra::exec() {
   std::vector<specid_t> indices;
   makeIndexList(indices, maskedWorkspace.get());
 
-  auto extract = createChildAlgorithm("ExtractSpectra");
+  auto extract = createChildAlgorithm("ExtractSpectra", 0, 1);
   extract->initialize();
   extract->setRethrows(true);
 
@@ -114,7 +114,7 @@ void RemoveMaskedSpectra::makeIndexList(
       } catch (Exception::NotFoundError &) {
         continue;
       }
-      if (det->isMasked()) {
+      if (!det->isMasked()) {
         indices.push_back(static_cast<specid_t>(i));
       }
     }
