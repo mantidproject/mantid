@@ -159,7 +159,7 @@ void performWeightedSum(MDHistoWorkspaceIterator const *const iterator,
   sumSignal += weight * iterator->getSignal();
   const double error = iterator->getError();
   sumSQErrors += weight * (error * error);
-  sumNEvents += weight * iterator->getNumEvents();
+  sumNEvents += weight * double(iterator->getNumEventsFraction());
 }
 }
 
