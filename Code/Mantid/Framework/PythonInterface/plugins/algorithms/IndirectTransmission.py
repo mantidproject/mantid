@@ -159,16 +159,13 @@ class IndirectTransmission(PythonAlgorithm):
         """
         from IndirectCommon import getEfixed
 
-        ws = mtd[workspace]
-
-        # Try to get efixed from the parameters first
         try:
-            efixed = getEfixed(ws)
-        except IndexError:
-            efixed = 0.0
+            # Try to get efixed from the parameters first
+            efixed = getEfixed(workspace)
 
-        # If that fails then get it by taking from group of all detectors
-        if efixed == 0.0:
+        except ValueError:
+            # If that fails then get it by taking from group of all detectors
+            ws = mtd[workspace]
             spectra_list = range(0, ws.getNumberHistograms())
             GroupDetectors(InputWorkspace=workspace,
                            OutputWorkspace=workspace,
