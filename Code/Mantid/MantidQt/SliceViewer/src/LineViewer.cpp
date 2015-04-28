@@ -412,6 +412,7 @@ LineViewer::applyMDWorkspace(Mantid::API::IMDWorkspace_sptr ws) {
   auto histWS = boost::dynamic_pointer_cast<IMDHistoWorkspace>(ws);
   if (histWS && histWS->getNumDims() <= 5 && (dx == 0 || dy == 0)) {
     const int axis = dx != 0 ? m_freeDimX : m_freeDimY;
+    const int paxis = dx != 0 ? m_freeDimY : m_freeDimX;
 
     //One per axis
     std::stringstream pbin[5];
@@ -419,10 +420,15 @@ LineViewer::applyMDWorkspace(Mantid::API::IMDWorkspace_sptr ws) {
       if (static_cast<int>(i) == axis) {
         // For the axes we're integrating along we want to re-use the existing
         // binning, rather than peforming another rebin.
-        const double start = m_start[axis];
-        const double end = m_end[axis];
+        const double start = std::min(m_start[axis], m_end[axis]);
+        const double end = std::max(m_start[axis], m_end[axis]);
         const double binWidth = 0; // 0 denotes re-use existing widths
         pbin[i] << start << "," << binWidth << "," << end;
+      } else if (static_cast<int>(i) == paxis) {
+        // For the perpendicular axis, range = value ± the plane width
+        const double base = m_start[i];
+        const double offset = planeWidth;
+        pbin[i] << base - offset << "," << base + offset;
       } else {
         // For other axes, the range is the value ± half the thickness
         const double base = m_start[i];
