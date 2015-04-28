@@ -56,8 +56,11 @@ class TestBundleAddedEventDataFilesToGroupWorkspaceFile(unittest.TestCase):
     def _prepare_workspaces(self, names):
         CreateSampleWorkspace(WorkspaceType = 'Event', OutputWorkspace = names[0])
         CreateWorkspace(DataX = [1,1,1], DataY = [1,1,1], OutputWorkspace = names[1])
-        
+
         temp_save_dir = config['defaultsave.directory']
+        if (temp_save_dir == ''):
+            temp_save_dir = os.getcwd()
+
         data_file_name = os.path.join(temp_save_dir, names[0] + '.nxs')
         monitor_file_name = os.path.join(temp_save_dir, names[1] + '.nxs')
 
@@ -78,7 +81,7 @@ class TestBundleAddedEventDataFilesToGroupWorkspaceFile(unittest.TestCase):
         # Arrange
         names = ['event_data', 'monitor']
         file_names = self._prepare_workspaces(names = names)
-        
+
         # Act
         group_ws_name = 'g_ws'
         output_group_file_name = su.bundle_added_event_data_as_group(file_names[0], file_names[1])

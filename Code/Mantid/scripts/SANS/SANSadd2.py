@@ -166,7 +166,11 @@ def add_runs(runs, inst='sans2d', defType='.nxs', rawTypes=('.raw', '.s*', 'add'
   #this adds the path to the filename
     path,base = os.path.split(outFile)
     if path == '' or base not in os.listdir(path):
+        # Try the default save directory
         path = config['defaultsave.directory'] + path
+        # If the path is still an empty string check in the current working directory
+        if path == '':
+            path = os.getcwd()
         assert base in os.listdir(path)
     pathout = path
     if logFile:
