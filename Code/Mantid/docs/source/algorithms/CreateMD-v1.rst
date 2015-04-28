@@ -142,5 +142,3 @@ Output
    DeltaE
 
 .. categories::
-
-.. categories::
