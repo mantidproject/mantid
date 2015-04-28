@@ -9,35 +9,53 @@
 Description
 -----------
 
-The algorithm identifies tubes, which become saturated due to hign 
-neutron flux (e.g. from inense bragg peaks) affecting these tubes
+The algorithm identifies tubes, which become saturated due to high
+neutron flux from intense Bragg peaks affecting these tubes,
 so that tubes are not counting neutrons but show constant high 
-counts over the tube and generates mask workspace to exclude such tubes.
+counts over the tube. After that it generates mask workspace to
+eliminate such tubes from the reduced results.
 
-The effect occurs due some old data acsqusition electronics and 
+The bleeding effect occurs due some old data acquisition electronics and 
 observed as homogeneous high counts reading symmetric over the whole 
-tube length.
+tube length. The bleeding occurs at or close to incident energy or 
+some energies in multirep mode. 
 
-The diagnostic test attempts to find all tubes within the instrument
-attached to the workspace. If successful, each tube is tested for
-saturation above the level defined by the production of 'MaxTubeFramerate' 
-property by 'goodfrm' log value, retrieved from the workspace.
+The example of the workspace, requesting bleed corrections is presented
+on the following picture:
 
-If any pixel, excluding the number of central pixels specified by 
-'NIgnoredCentralPixels' property, is counting above this threshold 
-then the entire tube is masked.
+.. image:: /images/BleedingSignal.png 
 
-The image below shows "over-corrected" image, where used 'MaxTubeFramerate'
-set up too low. Number of tubes with high neutron flux on them become masked.
+First of all, the diagnostic test attempts to find all tubes 
+within the instrument attached to the workspace. If successful, 
+each tube is tested for saturation above the level defined by the 
+production of 'MaxTubeFramerate' property by 'goodfrm' log value,
+retrieved from the workspace.
+
+If total signal, summed over all tubes pixels, excluding the number 
+of central pixels specified by the 'NIgnoredCentralPixels' property, 
+exceeds the threshold, specified by the 'MaxTubeFramerate'*'goodfrm' value,
+the tube becomes masked. 
+
+The next image shows two instrument views obtained for two 
+converted to energy transfer workspaces, recorded for two incident 
+energies in multirep mode. Second energy range suffers from 
+bleeding signal as on the picture above, so proper 
+bleeding corrections are calculated. First energy range does not 
+show bleeding signal, so no bleeding corrections applied to it.
 
 .. image:: /images/BleedingCorrections.png
 
-Restrictions on the input workspace
-###################################
+Restrictions and requirements to the input workspace
+####################################################
 
--  The workspace must contain goodfrm log with value ideally
-specifying the good frames arrival rate. Any value proportional to this 
-rate would work after appropriate adjasment to 'MaxTubeFramerate' value.
+-  The workspace must contain 'goodfrm' log with value
+specifying the number of good frames recorded by the instrument.
+
+- The workspace should not be normalized as 'goodfrm' is proportional to 
+neutron flux over workspace so the 'MaxTubeFramerate' have the meaning of 
+the frame rate only for non-normalized workspaces. To obtain consistent results in 
+case when a workspace is normalized, user should 
+divide 'MaxTubeFramerate' by the normalization factor.
 
 
 Usage
