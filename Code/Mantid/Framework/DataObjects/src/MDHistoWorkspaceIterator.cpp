@@ -377,9 +377,16 @@ VecMDExtents MDHistoWorkspaceIterator::getBoxExtents() const
 
 //----------------------------------------------------------------------------------------------
 /// Returns the number of events/points contained in this box
-/// @return 1 always: e.g. there is one (fake) event in the middle of the box.
+/// @return truncated number of events
 size_t MDHistoWorkspaceIterator::getNumEvents() const {
-  return static_cast<size_t>(m_ws->getNumEventsAt(m_pos));
+  return static_cast<size_t>(this->getNumEventsFraction());
+}
+
+//----------------------------------------------------------------------------------------------
+/// Returns the number of events/points contained in this box
+/// @return eact number of events (weights may be applied)
+signal_t MDHistoWorkspaceIterator::getNumEventsFraction() const {
+  return m_ws->getNumEventsAt(m_pos);
 }
 
 //----------------------------------------------------------------------------------------------
