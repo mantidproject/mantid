@@ -447,7 +447,7 @@ def RunParas(ascWS,instr,run,title):
     AddSampleLog(Workspace=ascWS, LogName="facility", LogType="String", LogText="ILL")
     ws.getRun()['run_number'] = run
     ws.getRun()['run_title'] = title
-    efixed = getEfixed(ws)
+    efixed = getEfixed(ascWS)
 
     facility = ws.getRun().getLogData('facility').value
     logger.information('Facility is ' +facility)
