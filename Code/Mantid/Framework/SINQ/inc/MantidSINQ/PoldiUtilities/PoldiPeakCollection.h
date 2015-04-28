@@ -46,7 +46,10 @@ typedef boost::shared_ptr<PoldiPeakCollection> PoldiPeakCollection_sptr;
 
 class MANTID_SINQ_DLL PoldiPeakCollection {
 public:
-  enum IntensityType { Maximum, Integral };
+  enum IntensityType {
+    Maximum,
+    Integral
+  };
 
   PoldiPeakCollection(IntensityType intensityType = Maximum);
   PoldiPeakCollection(const DataObjects::TableWorkspace_sptr &workspace);
@@ -72,6 +75,9 @@ public:
   void setPointGroup(const Geometry::PointGroup_sptr &pointGroup);
   Geometry::PointGroup_sptr pointGroup() const;
 
+  void setUnitCell(const Geometry::UnitCell &unitCell);
+  Geometry::UnitCell unitCell() const;
+
   DataObjects::TableWorkspace_sptr asTableWorkspace();
 
 protected:
@@ -93,6 +99,7 @@ protected:
   std::string
   getProfileFunctionNameFromLog(const API::LogManager_sptr &tableLog);
   std::string getPointGroupStringFromLog(const API::LogManager_sptr &tableLog);
+  std::string getUnitCellStringFromLog(const API::LogManager_sptr &tableLog);
 
   std::string getStringValueFromLog(const API::LogManager_sptr &logManager,
                                     std::string valueName);
@@ -105,11 +112,15 @@ protected:
   Geometry::PointGroup_sptr
   pointGroupFromString(const std::string &pointGroupString) const;
 
+  Geometry::UnitCell
+  unitCellFromString(const std::string &unitCellString) const;
+
   std::vector<PoldiPeak_sptr> m_peaks;
   IntensityType m_intensityType;
   std::string m_profileFunctionName;
 
   Geometry::PointGroup_sptr m_pointGroup;
+  Geometry::UnitCell m_unitCell;
 };
 }
 }

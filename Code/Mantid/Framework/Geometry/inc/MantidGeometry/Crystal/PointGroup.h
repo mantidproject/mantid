@@ -75,6 +75,14 @@ typedef std::multimap<PointGroup::CrystalSystem, PointGroup_sptr>
 PointGroupCrystalSystemMap;
 MANTID_GEOMETRY_DLL PointGroupCrystalSystemMap getPointGroupsByCrystalSystem();
 
+MANTID_GEOMETRY_DLL
+std::string
+getCrystalSystemAsString(const PointGroup::CrystalSystem &crystalSystem);
+
+MANTID_GEOMETRY_DLL
+PointGroup::CrystalSystem
+getCrystalSystemFromString(const std::string &crystalSystem);
+
 } // namespace Mantid
 } // namespace Geometry
 

@@ -95,7 +95,8 @@ private:
   std::string buildSubmitBody(const std::string &appName,
                               const std::string &boundary,
                               const std::string &inputFiles,
-                              const std::string &inputArgs);
+                              const std::string &inputArgs,
+                              const std::string &jobName);
 
   /// lower level helper to encode parameters
   void encodeParam(std::string &body, const std::string &boundary,
@@ -109,6 +110,9 @@ private:
   /// fill in output properties with job status and info
   void genOutputStatusInfo(const std::string &resp, const std::string &jobID =
                            std::string());
+
+  /// Job sequence number (from here, nothing to do with the job id on the cluster)
+  int jobSeqNo();
 
   // cookie obtained after logging in
   struct Token {
@@ -160,6 +164,9 @@ private:
 
   // store for username-token pairs
   static std::map<std::string, Token> m_tokenStash;
+
+  // just to generate a sequence number for jobs started using this alg.
+  static int m_jobSeq;
 };
 
 } // end namespace RemoteAlgorithms
