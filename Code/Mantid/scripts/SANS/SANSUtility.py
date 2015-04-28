@@ -475,7 +475,7 @@ def mask_detectors_with_masking_ws(ws_name, masking_ws_name):
 
 def bundle_added_event_data_as_group(out_file_name, out_file_monitors_name):
     """
-    We load an added event data file and its associated monitor file. Combine 
+    We load an added event data file and its associated monitor file. Combine
     the data in a group workspace and delete the original files.
     @param out_file_name :: the file name of the event data file
     @param out_file_monitors_name :: the file name of the monitors file
@@ -508,7 +508,7 @@ def bundle_added_event_data_as_group(out_file_name, out_file_monitors_name):
     GroupWorkspaces(InputWorkspaces = [event_data_ws, monitor_ws], OutputWorkspace = out_group_ws_name)
     group_ws = mtd[out_group_ws_name]
 
-    # Save the group 
+    # Save the group
     SaveNexusProcessed(InputWorkspace = group_ws, Filename = out_group_file_name, Append=False)
     # Delete the files and the temporary workspaces
     DeleteWorkspace(event_data_ws)

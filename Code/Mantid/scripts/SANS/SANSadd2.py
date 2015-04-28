@@ -139,7 +139,7 @@ def add_runs(runs, inst='sans2d', defType='.nxs', rawTypes=('.raw', '.s*', 'add'
                                Filename=outFile, Append=False)
             # If we are saving event data, then we need to save also the monitor file
             if isFirstDataSetEvent and saveAsEvent:
-                SaveNexusProcessed(InputWorkspace="AddFilesSumTempory_monitors", 
+                SaveNexusProcessed(InputWorkspace="AddFilesSumTempory_monitors",
                                    Filename=outFile_monitors , Append=False)
 
         else:
