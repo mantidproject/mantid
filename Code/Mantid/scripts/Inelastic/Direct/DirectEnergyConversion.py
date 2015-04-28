@@ -462,8 +462,12 @@ class DirectEnergyConversion(object):
                                                                   cut_ind,num_ei_cuts)
                 prop_man.log("*** Processing multirep chunk: #{0}/{1} for provisional energy: {2} meV".\
                     format(cut_ind,num_ei_cuts,ei_guess),'notice')
-                # do bleed corrections if necessary
-                self._do_bleed_corrections(PropertyManager.sample_run,cut_ind)
+                # do bleed corrections for chunk if necessary
+                bleed_mask = self._do_bleed_corrections(PropertyManager.sample_run,cut_ind)
+                if not bleed_mask is None:
+                    mask_ws_name =  PropertyManager.sample_run.get_workspace().name()+'_bleed_mask'
+                    RenameWorkspace(bleed_mask,OutputWorkspace=mask_ws_name)
+                    self._old_runs_list.append(mask_ws_name)
             else:
                 # single energy uses single workspace and all TOF are used
                 tof_range = None
@@ -624,16 +628,20 @@ class DirectEnergyConversion(object):
         return white_ws
 
     def _do_bleed_corrections(self,sample_run,nchunk):
-        """Calculate separate bleed corrections, necessary in mutlirep mode"""
+        """Calculate TOF-chunk specific bleed corrections, necessary in mutlirep mode
+        """
         if not self.prop_man.diag_bleed_test:
-            return
+            return None
+
         CUR_bleed_masks, failures = diagnostics.do_bleed_test(sample_run, self.prop_man.bleed_maxrate, self.prop_man.bleed_pixels)
         if failures > 0:
             diagnostics.add_masking(sample_run.get_workspace(),CUR_bleed_masks)
-            self.prop_man.log("*** Bleeding test for chunk #{0} masked {1} pixels".format(nchunk,failures),'notice')
+            bleed_mask = CUR_bleed_masks
         else:
             DeleteWorkspace(CUR_bleed_masks)
-
+            bleed_mask = None
+        self.prop_man.log("*** Bleeding test for chunk #{0} masked {1} pixels".format(nchunk,failures),'notice')
+        return bleed_mask
 
 
 

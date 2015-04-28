@@ -1,5 +1,6 @@
 #pylint: disable=invalid-name
 """ Sample MERLIN reduction scrip """
+import os
 #os.environ["PATH"] = r"c:/Mantid/Code/builds/br_master/bin/Release;"+os.environ["PATH"]
 
 from Direct.ReductionWrapper import *
@@ -52,7 +53,7 @@ class ReduceMERLIN(ReductionWrapper):
      #SaveNexus(ws,Filename = 'MARNewReduction.nxs')
         return outWS
 
-    def __init__(self):
+    def __init__(self,web_var=None):
         """ sets properties defaults for the instrument with Name"""
         ReductionWrapper.__init__(self,'MER',web_var)
 #----------------------------------------------------------------------------------------------------------------------
@@ -60,12 +61,12 @@ class ReduceMERLIN(ReductionWrapper):
 
 
 if __name__=="__main__":
-    maps_dir = 'd:/Data/MantidSystemTests/Data'
-    data_dir ='d:/Data/Mantid_Testing/14_11_27'
-    ref_data_dir = 'd:/Data/MantidSystemTests/SystemTests/AnalysisTests/ReferenceResults'
-    config.setDataSearchDirs('{0};{1};{2}'.format(data_dir,maps_dir,ref_data_dir))
+    #maps_dir = 'd:/Data/MantidSystemTests/Data'
+    #data_dir ='d:/Data/Mantid_Testing/14_11_27'
+    #ref_data_dir = 'd:/Data/MantidSystemTests/SystemTests/AnalysisTests/ReferenceResults'
+    #config.setDataSearchDirs('{0};{1};{2}'.format(data_dir,maps_dir,ref_data_dir))
      #config.appendDataSearchDir('d:/Data/Mantid_GIT/Test/AutoTestData')
-    config['defaultsave.directory'] = data_dir # folder to save resulting spe/nxspe files. Defaults are in
+    #config['defaultsave.directory'] = data_dir # folder to save resulting spe/nxspe files. Defaults are in
 
      # execute stuff from Mantid
     rd = ReduceMERLIN()
