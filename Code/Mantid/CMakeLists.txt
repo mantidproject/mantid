@@ -239,7 +239,7 @@ if ( ENABLE_CPACK )
         # On RHEL6 we have to use an updated qscintilla to fix an auto complete bug
         set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES} qscintilla >= 2.4.6" )
         # On RHEL6 we are using SCL packages for Qt
-        set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},scl-utils,mantidlibs34,mantidlibs34-runtime,mantidlibs34-qt,mantidlibs34-qt-x11" )
+        set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},scl-utils,mantidlibs34,mantidlibs34-runtime,mantidlibs34-qt,mantidlibs34-qt-x11,mantidlibs34-qt-webkit" )
       else()
         set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES} qscintilla" )
       endif()
@@ -268,7 +268,7 @@ if ( ENABLE_CPACK )
                                      "libmuparser0debian1,"
                                      "ipython-qtconsole (>= 1.1),python-matplotlib,python-scipy,"
                                      "libpocofoundation9,libpocoutil9,libpoconet9,libpoconetssl9,libpococrypto9,libpocoxml9")
-        elseif( "${UNIX_CODENAME}" STREQUAL "trusty" )
+        elseif( "${UNIX_CODENAME}" STREQUAL "trusty" OR "${UNIX_CODENAME}" STREQUAL "utopic" OR "${UNIX_CODENAME}" STREQUAL "vivid")
           list ( APPEND DEPENDS_LIST ",libqscintilla2-11,"
                                      "liboce-foundation8,liboce-modeling8,"
                                      "libmuparser2,"

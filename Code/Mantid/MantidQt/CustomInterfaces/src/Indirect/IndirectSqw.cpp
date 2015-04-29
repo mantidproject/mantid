@@ -84,16 +84,15 @@ namespace CustomInterfaces
       m_batchAlgoRunner->addAlgorithm(energyRebinAlg);
     }
 
-    // Get correct S(Q, w) algorithm
     QString eFixed = getInstrumentDetails()["Efixed"];
 
-    IAlgorithm_sptr sqwAlg;
+    IAlgorithm_sptr sqwAlg = AlgorithmManager::Instance().create("SofQW");
     QString rebinType = m_uiForm.cbRebinType->currentText();
 
-    if(rebinType == "Parallelepiped (SofQW2)")
-      sqwAlg = AlgorithmManager::Instance().create("SofQW2");
-    else if(rebinType == "Parallelepiped/Fractional Area (SofQW3)")
-      sqwAlg = AlgorithmManager::Instance().create("SofQW3");
+    if(rebinType == "Parallelepiped")
+      sqwAlg->setProperty("Method", "Polygon");
+    else if(rebinType == "Parallelepiped/Fractional Area")
+      sqwAlg->setProperty("Method", "NormalisedPolygon");
 
     // S(Q, w) algorithm
     sqwAlg->initialize();

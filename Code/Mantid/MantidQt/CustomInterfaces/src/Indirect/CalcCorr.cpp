@@ -302,8 +302,12 @@ namespace IDA
     {
       QString beamWidth = QString::fromStdString(instrument->getStringParameter(paramName)[0]);
       double beamWidthValue = beamWidth.toDouble();
+
       m_uiForm.spCylBeamWidth->setValue(beamWidthValue);
       m_uiForm.spCylBeamHeight->setValue(beamWidthValue);
+
+      m_uiForm.spAnnBeamWidth->setValue(beamWidthValue);
+      m_uiForm.spAnnBeamHeight->setValue(beamWidthValue);
     }
   }
 
