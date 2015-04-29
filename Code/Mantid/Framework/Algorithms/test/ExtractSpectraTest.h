@@ -66,7 +66,7 @@ public:
     if (!ws) return;
 
     TS_ASSERT_EQUALS(ws->getNumberHistograms(), nSpec);
-    params.testXRange("test_x_range",*ws);
+    params.testXRange(*ws);
   }
 
   void test_index_range()
@@ -78,7 +78,7 @@ public:
     if (!ws) return;
 
     TS_ASSERT_EQUALS(ws->blocksize(), nBins);
-    params.testIndexRange("test_index_range",*ws);
+    params.testIndexRange(*ws);
   }
 
   void test_spectrum_list()
@@ -90,7 +90,7 @@ public:
     if (!ws) return;
 
     TS_ASSERT_EQUALS(ws->blocksize(), nBins);
-    params.testSpectrumList("test_spectrum_list",*ws);
+    params.testSpectrumList(*ws);
   }
 
   void test_index_and_spectrum_list()
@@ -102,7 +102,7 @@ public:
     if (!ws) return;
 
     TS_ASSERT_EQUALS(ws->blocksize(), nBins);
-    params.testSpectrumList("test_spectrum_list",*ws);
+    params.testSpectrumList(*ws);
   }
 
   void test_x_range_and_spectrum_list()
@@ -113,8 +113,8 @@ public:
     auto ws = runAlgorithm(params);
     if (!ws) return;
 
-    params.testXRange("test_x_range_and_spectrum_list",*ws);
-    params.testSpectrumList("test_x_range_and_spectrum_list",*ws);
+    params.testXRange(*ws);
+    params.testSpectrumList(*ws);
   }
 
   void test_invalid_x_range()
@@ -151,7 +151,7 @@ public:
     if (!ws) return;
 
     TS_ASSERT_EQUALS(ws->getNumberHistograms(), nSpec);
-    params.testXRange("test_x_range_event",*ws);
+    params.testXRange(*ws);
   }
 
   void test_index_range_event()
@@ -163,7 +163,7 @@ public:
     if (!ws) return;
 
     TS_ASSERT_EQUALS(ws->blocksize(), nBins);
-    params.testIndexRange("test_index_range_event",*ws);
+    params.testIndexRange(*ws);
   }
 
   void test_spectrum_list_event()
@@ -175,7 +175,7 @@ public:
     if (!ws) return;
 
     TS_ASSERT_EQUALS(ws->blocksize(), nBins);
-    params.testSpectrumList("test_spectrum_list_event",*ws);
+    params.testSpectrumList(*ws);
   }
 
   void test_index_and_spectrum_list_event()
@@ -187,7 +187,7 @@ public:
     if (!ws) return;
 
     TS_ASSERT_EQUALS(ws->blocksize(), nBins);
-    params.testSpectrumList("test_spectrum_list_event",*ws);
+    params.testSpectrumList(*ws);
   }
 
   void test_x_range_and_spectrum_list_event()
@@ -198,8 +198,8 @@ public:
     auto ws = runAlgorithm(params);
     if (!ws) return;
 
-    params.testXRange("test_x_range_and_spectrum_list_event",*ws);
-    params.testSpectrumList("test_x_range_and_spectrum_list_event",*ws);
+    params.testXRange(*ws);
+    params.testSpectrumList(*ws);
   }
 
   void test_invalid_x_range_event()
@@ -227,6 +227,51 @@ public:
       auto ws = runAlgorithm(params, false);
     }
   }
+  // ---- test histo-ragged ----
+
+  void test_x_range_ragged()
+  {
+    Parameters params("histo-ragged");
+    params.setXRange();
+
+    auto ws = runAlgorithm(params);
+    if (!ws) return;
+
+    TS_ASSERT_EQUALS(ws->getNumberHistograms(), nSpec);
+    params.testXRange(*ws);
+  }
+
+  void test_index_range_ragged()
+  {
+    Parameters params("histo-ragged");
+    params.setIndexRange();
+
+    auto ws = runAlgorithm(params);
+    if (!ws) return;
+
+    TS_ASSERT_EQUALS(ws->blocksize(), nBins);
+    params.testIndexRange(*ws);
+  }
+
+  void test_spectrum_list_ragged()
+  {
+    Parameters params("histo-ragged");
+    params.setSpectrumList();
+
+    auto ws = runAlgorithm(params);
+    if (!ws) return;
+
+    TS_ASSERT_EQUALS(ws->blocksize(), nBins);
+    params.testSpectrumList(*ws);
+  }
+
+  void xtest_invalid_x_range_ragged()
+  {
+    Parameters params("histo-ragged");
+    params.setInvalidXRange();
+
+    auto ws = runAlgorithm(params, false);
+  }
 
 private:
 
@@ -242,6 +287,8 @@ private:
       return createInputWorkspaceHisto();
     else if (workspaceType == "event")
       return createInputWorkspaceEvent();
+    else if (workspaceType == "histo-ragged")
+      return createInputWorkspaceHistoRagged();
     throw std::runtime_error("Undefined workspace type");
   }
 
@@ -255,6 +302,20 @@ private:
       }
       space->dataY(j).assign(nBins, double(j));
       space->dataE(j).assign(nBins, sqrt(double(j)));
+    }
+    return space;
+  }
+
+  MatrixWorkspace_sptr createInputWorkspaceHistoRagged() const
+  {
+    // Set up a small workspace for testing
+    MatrixWorkspace_sptr space = WorkspaceFactory::Instance().create("Workspace2D", nSpec, nBins+1, nBins);
+    for (size_t j = 0; j < nSpec; ++j) {
+      for (size_t k = 0; k <= nBins; ++k) {
+        space->dataX(j)[k] = double(j + k);
+      }
+      space->dataY(j).assign(nBins, double(j+1));
+      space->dataE(j).assign(nBins, sqrt(double(j+1)));
     }
     return space;
   }
@@ -292,10 +353,44 @@ private:
       XMax = 3.1;
       return *this;
     }
-    void testXRange(const std::string& reference, const MatrixWorkspace& ws) const
+    void testXRange(const MatrixWorkspace& ws) const
     {
-      TSM_ASSERT_EQUALS(reference, ws.blocksize(), 1);
-      TSM_ASSERT_EQUALS(reference, ws.readX(0)[0], 2.0);
+      if (wsType == "histo-ragged")
+      {
+        TS_ASSERT_EQUALS(ws.blocksize(), 6);
+        TS_ASSERT_EQUALS(ws.readY(0)[0], 0.0);
+        TS_ASSERT_EQUALS(ws.readY(0)[1], 0.0);
+        TS_ASSERT_EQUALS(ws.readY(0)[2], 1.0);
+        TS_ASSERT_EQUALS(ws.readY(0)[3], 0.0);
+        TS_ASSERT_EQUALS(ws.readY(0)[4], 0.0);
+        TS_ASSERT_EQUALS(ws.readY(0)[5], 0.0);
+
+        TS_ASSERT_EQUALS(ws.readY(1)[0], 0.0);
+        TS_ASSERT_EQUALS(ws.readY(1)[1], 2.0);
+        TS_ASSERT_EQUALS(ws.readY(1)[2], 0.0);
+        TS_ASSERT_EQUALS(ws.readY(1)[3], 0.0);
+        TS_ASSERT_EQUALS(ws.readY(1)[4], 0.0);
+        TS_ASSERT_EQUALS(ws.readY(1)[5], 0.0);
+
+        TS_ASSERT_EQUALS(ws.readY(2)[0], 3.0);
+        TS_ASSERT_EQUALS(ws.readY(2)[1], 0.0);
+        TS_ASSERT_EQUALS(ws.readY(2)[2], 0.0);
+        TS_ASSERT_EQUALS(ws.readY(2)[3], 0.0);
+        TS_ASSERT_EQUALS(ws.readY(2)[4], 0.0);
+        TS_ASSERT_EQUALS(ws.readY(2)[5], 0.0);
+
+        TS_ASSERT_EQUALS(ws.readY(3)[0], 0.0);
+        TS_ASSERT_EQUALS(ws.readY(3)[1], 0.0);
+        TS_ASSERT_EQUALS(ws.readY(3)[2], 0.0);
+        TS_ASSERT_EQUALS(ws.readY(3)[3], 0.0);
+        TS_ASSERT_EQUALS(ws.readY(3)[4], 0.0);
+        TS_ASSERT_EQUALS(ws.readY(3)[5], 0.0);
+      }
+      else
+      {
+        TS_ASSERT_EQUALS(ws.blocksize(), 1);
+        TS_ASSERT_EQUALS(ws.readX(0)[0], 2.0);
+      }
     }
 
     // ---- index range ----
@@ -305,20 +400,20 @@ private:
       EndWorkspaceIndex = 3;
       return *this;
     }
-    void testIndexRange(const std::string& reference, const MatrixWorkspace& ws) const
+    void testIndexRange(const MatrixWorkspace& ws) const
     {
-      TSM_ASSERT_EQUALS(reference, ws.getNumberHistograms(), 3);
+      TS_ASSERT_EQUALS(ws.getNumberHistograms(), 3);
       if (wsType == "histo")
       {
-        TSM_ASSERT_EQUALS(reference, ws.readY(0)[0], 1.0);
-        TSM_ASSERT_EQUALS(reference, ws.readY(1)[0], 2.0);
-        TSM_ASSERT_EQUALS(reference, ws.readY(2)[0], 3.0);
+        TS_ASSERT_EQUALS(ws.readY(0)[0], 1.0);
+        TS_ASSERT_EQUALS(ws.readY(1)[0], 2.0);
+        TS_ASSERT_EQUALS(ws.readY(2)[0], 3.0);
       }
       else if (wsType == "event")
       {
-        TSM_ASSERT_EQUALS(reference, ws.getDetector(0)->getID(), 2);
-        TSM_ASSERT_EQUALS(reference, ws.getDetector(1)->getID(), 3);
-        TSM_ASSERT_EQUALS(reference, ws.getDetector(2)->getID(), 4);
+        TS_ASSERT_EQUALS(ws.getDetector(0)->getID(), 2);
+        TS_ASSERT_EQUALS(ws.getDetector(1)->getID(), 3);
+        TS_ASSERT_EQUALS(ws.getDetector(2)->getID(), 4);
       }
     }
 
@@ -331,20 +426,20 @@ private:
       SpectrumList[2] = 4;
       return *this;
     }
-    void testSpectrumList(const std::string& reference, const MatrixWorkspace& ws) const
+    void testSpectrumList(const MatrixWorkspace& ws) const
     {
-      TSM_ASSERT_EQUALS(reference, ws.getNumberHistograms(), 3);
+      TS_ASSERT_EQUALS(ws.getNumberHistograms(), 3);
       if (wsType == "histo")
       {
-        TSM_ASSERT_EQUALS(reference, ws.readY(0)[0], 0.0);
-        TSM_ASSERT_EQUALS(reference, ws.readY(1)[0], 2.0);
-        TSM_ASSERT_EQUALS(reference, ws.readY(2)[0], 4.0);
+        TS_ASSERT_EQUALS(ws.readY(0)[0], 0.0);
+        TS_ASSERT_EQUALS(ws.readY(1)[0], 2.0);
+        TS_ASSERT_EQUALS(ws.readY(2)[0], 4.0);
       }
       else if (wsType == "event")
       {
-        TSM_ASSERT_EQUALS(reference, ws.getDetector(0)->getID(), 1);
-        TSM_ASSERT_EQUALS(reference, ws.getDetector(1)->getID(), 3);
-        TSM_ASSERT_EQUALS(reference, ws.getDetector(2)->getID(), 5);
+        TS_ASSERT_EQUALS(ws.getDetector(0)->getID(), 1);
+        TS_ASSERT_EQUALS(ws.getDetector(1)->getID(), 3);
+        TS_ASSERT_EQUALS(ws.getDetector(2)->getID(), 5);
       }
    }
 
