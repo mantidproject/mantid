@@ -1,3 +1,4 @@
+#pylint: disable=too-many-lines,relative-import,invalid-name,too-many-instance-attributes,too-many-arguments
 ############################################################################
 #
 # HFIR powder reduction control class
@@ -18,11 +19,10 @@ libpath = os.path.join(curdir.split('Code')[0], 'Code/debug/bin')
 if os.path.exists(libpath) is False:
     libpath = os.path.join(curdir.split('Code')[0], 'Code/release/bin')
 sys.path.append(libpath) 
-import mantid
 import mantid.simpleapi as api
 import mantid.kernel
 from mantid.simpleapi import AnalysisDataService
-from mantid.kernel import ConfigService
+#from mantid.kernel import ConfigService
 
 
 VanadiumPeakPositions = [0.5044,0.5191,0.5350,0.5526,0.5936,0.6178,0.6453,0.6768,
@@ -54,6 +54,7 @@ class PDRManager(object):
         self._processedVanWSTemp = None
         self._processVanNote = ""
         self._applySmoothVan = False
+        self._vanadiumPeakPosList = []
 
         self._wavelength = None
 
@@ -72,7 +73,7 @@ class PDRManager(object):
     def getProcessedVanadiumWS(self):
         """
         """
-        return self._processedVanWS 
+        return self._processedVanWS
 
     def getProcessedVanadiumWSTemp(self):
         """
@@ -147,7 +148,7 @@ class PDRManager(object):
 
     def setProcessedVanadiumDataTemp(self, vanws, note):
         """ Set tempory processed vanadium data
-        Arguments: 
+        Arguments:
          - vanws :: workspace
          - note  :: string as note
         """
@@ -185,7 +186,7 @@ class PDRManager(object):
 
         return
 
-
+#pylint: disable=too-many-public-methods
 class HFIRPDRedControl(object):
     """ Class for controlling HFIR powder reduction
     """
@@ -237,7 +238,7 @@ class HFIRPDRedControl(object):
         # END-IF-ELSE
 
         # Get raw counts
-        # FIXME : use **args
+        # FUTURE: use **args
         if xlabel is None:
             tempoutws = \
                     api.GetSpiceDataRawCountsFromMD(InputWorkspace=datamdws,
@@ -343,7 +344,7 @@ class HFIRPDRedControl(object):
         # END-IF-ELSE
 
         # get the complete list of Pt. number
-        ptnolist = self._getRunNumberList(datamdws=rmanager.datamdws)
+        # ptnolist = self._getRunNumberList(datamdws=rmanager.datamdws)
 
         # get data
         tempoutws = api.GetSpiceDataRawCountsFromMD(InputWorkspace=datamdws,
@@ -672,10 +673,14 @@ class HFIRPDRedControl(object):
         return True
 
 
-    def reduceSpicePDData(self, exp, scan, unit, xmin, xmax, binsize, wavelength=None, excludeddetlist=[],scalefactor=None):
+    def reduceSpicePDData(self, exp, scan, unit, xmin, xmax, binsize, wavelength=None, excludeddetlist=None,scalefactor=None):
         """ Reduce SPICE powder diffraction data.
         Return - Boolean as reduction is successful or not
         """
+        # Default
+        if excludeddetlist is None:
+            excludeddetlist = None
+
         # Get reduction manager
         try:
             wsmanager = self._myWorkspaceDict[(int(exp), int(scan))]
@@ -800,8 +805,8 @@ class HFIRPDRedControl(object):
         else:
             raise NotImplementedError('Unable to locate the merged scan workspace.')
 
-        api.SaveFocusedXYE(InputWorkspace=wksp, 
-                           StartAtBankNumber=1, 
+        api.SaveFocusedXYE(InputWorkspace=wksp,
+                           StartAtBankNumber=1,
                            Filename=sfilename)
 
         return
@@ -824,12 +829,12 @@ class HFIRPDRedControl(object):
             if sfilename.endswith('.dat') is True:
                 sfilename.replace('.dat', '.gsa')
 
-            api.SaveGSS(InputWorkspace=wksp, 
-                        Filename=sfilename, 
+            api.SaveGSS(InputWorkspace=wksp,
+                        Filename=sfilename,
                         SplitFiles=False, Append=False,
                         MultiplyByBinWidth=False,
-                        Bank=1, 
-                        Format="SLOG", 
+                        Bank=1,
+                        Format="SLOG",
                         ExtendedHeader=True)
         # ENDIF
 
@@ -837,16 +842,16 @@ class HFIRPDRedControl(object):
             if sfilename.endswith('.gsa') is True:
                 sfilename.replace('.gsa', '.dat')
 
-            api.SaveFocusedXYE(InputWorkspace=wksp, 
-                               StartAtBankNumber=1, 
+            api.SaveFocusedXYE(InputWorkspace=wksp,
+                               StartAtBankNumber=1,
                                Filename=sfilename)
         # ENDIF 
         
         if "topas" in filetype:
             sfilename = sfilename[:-4]+".xye"
-            api.SaveFocusedXYE(InputWorkspace=wksp, 
+            api.SaveFocusedXYE(InputWorkspace=wksp,
                                StartAtBankNumber=info["bank"],
-                               Filename=sfilename, 
+                               Filename=sfilename,
                                Format="TOPAS")
         # ENDIF
 
@@ -900,9 +905,9 @@ class HFIRPDRedControl(object):
                               IgnoreXBins=True,
                               AllSpectra=True)
 
-        if outws is not None: 
+        if outws is not None:
             wsmanager.setProcessedVanadiumDataTemp(outws, "FFT smooth")
-            
+
         return True
 
 
@@ -935,7 +940,6 @@ class HFIRPDRedControl(object):
             if vanpeakposlist is None:
                 raise NotImplementedError('No vanadium peaks has been set up.')
         # ENDIF
-
 
         outwsname = wksp.name()+"_rmVan"
         wksp = api.StripPeaks(InputWorkspace=wksp,
@@ -991,7 +995,9 @@ class HFIRPDRedControl(object):
 
         return rvalue
 
-""" External Methods """
+#-------------------------------------------------------------------------------
+# External Methods 
+#-------------------------------------------------------------------------------
 def downloadFile(url, localfilepath):
     """
     Test: 'http://neutron.ornl.gov/user_data/hb2a/exp400/Datafiles/HB2A_exp0400_scan0001.dat'
