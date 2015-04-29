@@ -176,7 +176,7 @@ test/CompositePeaksPresenterVsiTest.h
 )
 
 include_directories( inc )
-include_directories ( SYSTEM ${QWT_INCLUDE_DIR} )
+include_directories ( SYSTEM ${QWT_INCLUDE_DIR} ${PARAVIEW_INCLUDE_DIRS})
 
 set( SRC_UNITY_IGNORE_FILES )
 if( UNITY_BUILD )
@@ -206,6 +206,10 @@ vtkFiltersSources
 vtkPVVTKExtensionsDefault
 ${QWT_LIBRARIES}
 )
+
+if (OSX_VERSION VERSION_GREATER 10.8)
+  set_target_properties ( VatesAPI PROPERTIES INSTALL_RPATH "@loader_path/../MacOS;@loader_path/../Libraries")
+endif ()
 
 # Create test file projects
 if( CXXTEST_FOUND AND GMOCK_FOUND AND GTEST_FOUND )

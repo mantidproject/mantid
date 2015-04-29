@@ -152,12 +152,6 @@ public:
                                             QwtDataX(0, 1, 1E-8), QwtDataX(2, 3, 1E-8),
                                             QwtDataY(0, 2, 1E-8), QwtDataY(2, 4, 1E-8))));
 
-    // Data changed -> clear sections
-    EXPECT_CALL(*m_view, setNoOfSectionRows(0));
-    EXPECT_CALL(*m_view, deleteSectionSelector(0));
-    EXPECT_CALL(*m_view, deleteSectionSelector(1));
-    EXPECT_CALL(*m_view, deleteSectionSelector(2));
-
     m_model->changeData();
   }
 

@@ -82,11 +82,9 @@ set ( PRE_UNINSTALL_FILE ${CMAKE_CURRENT_BINARY_DIR}/prerm )
 set ( POST_UNINSTALL_FILE ${CMAKE_CURRENT_BINARY_DIR}/postrm )
 
 if ( "${UNIX_DIST}" MATCHES "RedHatEnterprise" OR "${UNIX_DIST}" MATCHES "^Fedora" ) # RHEL/Fedora
-  if ( "${UNIX_CODENAME}" MATCHES "Santiago" OR 
-       "${UNIX_CODENAME}" MATCHES "Maipo" ) 
-    set ( WRAPPER_PREFIX "scl enable mantidlibs \"" )
+  if ( "${UNIX_CODENAME}" MATCHES "Santiago" )
+    set ( WRAPPER_PREFIX "scl enable mantidlibs34 \"" )
     set ( WRAPPER_POSTFIX "\"" )
-    set ( EXTRA_LDPATH "/usr/lib64/paraview" )
   else()
     set ( WRAPPER_PREFIX "" )
     set ( WRAPPER_POSTFIX "" )
@@ -130,21 +128,23 @@ endif()
 # MantidPlot launcher script
 ############################################################################
 # Local dev version
+set ( EXTRA_LDPATH "${ParaView_DIR}/lib" )
 set ( MANTIDPLOT_EXEC MantidPlot )
-configure_file ( ${CMAKE_MODULE_PATH}/Packaging/launch_mantidplot.sh.in 
+configure_file ( ${CMAKE_MODULE_PATH}/Packaging/launch_mantidplot.sh.in
                  ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/launch_mantidplot.sh @ONLY )
 # Needs to be executable
 execute_process ( COMMAND "chmod" "+x" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/launch_mantidplot.sh"
                   OUTPUT_QUIET ERROR_QUIET )
-configure_file ( ${CMAKE_MODULE_PATH}/Packaging/mantidpython.in 
+configure_file ( ${CMAKE_MODULE_PATH}/Packaging/mantidpython.in
                  ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/mantidpython @ONLY )
 # Needs to be executable
 execute_process ( COMMAND "chmod" "+x" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/mantidpython"
                   OUTPUT_QUIET ERROR_QUIET )
 
 # Package version
+set ( EXTRA_LDPATH "\${INSTALLDIR}/../lib/paraview-4.3" )
 set ( MANTIDPLOT_EXEC MantidPlot_exe )
-configure_file ( ${CMAKE_MODULE_PATH}/Packaging/launch_mantidplot.sh.in 
+configure_file ( ${CMAKE_MODULE_PATH}/Packaging/launch_mantidplot.sh.in
                  ${CMAKE_CURRENT_BINARY_DIR}/launch_mantidplot.sh.install @ONLY )
 install ( FILES ${CMAKE_CURRENT_BINARY_DIR}/launch_mantidplot.sh.install
           DESTINATION ${BIN_DIR} RENAME launch_mantidplot.sh
@@ -152,7 +152,7 @@ install ( FILES ${CMAKE_CURRENT_BINARY_DIR}/launch_mantidplot.sh.install
           GROUP_EXECUTE GROUP_READ
           WORLD_EXECUTE WORLD_READ
 )
-configure_file ( ${CMAKE_MODULE_PATH}/Packaging/mantidpython.in 
+configure_file ( ${CMAKE_MODULE_PATH}/Packaging/mantidpython.in
                  ${CMAKE_CURRENT_BINARY_DIR}/mantidpython.install @ONLY )
 install ( FILES ${CMAKE_CURRENT_BINARY_DIR}/mantidpython.install
           DESTINATION ${BIN_DIR} RENAME mantidpython

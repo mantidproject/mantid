@@ -205,7 +205,30 @@ size_t MDHistoWorkspaceIterator::getDataSize() const {
  * @param index :: point to jump to. Must be 0 <= index < getDataSize().
  */
 void MDHistoWorkspaceIterator::jumpTo(size_t index) {
-  m_pos = uint64_t(index + m_begin);
+    m_pos = uint64_t(index + m_begin);
+}
+
+/**
+ * Jump the iterator to the nearest valid position correspoinding to the centre current position of the desired iterator position.
+ * @param fromLocation : destination or nearest to.
+ * @return absolute distance of end position from requested position.
+ */
+Mantid::coord_t MDHistoWorkspaceIterator::jumpToNearest(const VMD& fromLocation)
+{
+
+    std::vector<size_t> indexes(m_nd);
+    coord_t sqDiff = 0;
+    for(size_t d = 0; d < m_nd; ++d) {
+        coord_t dExact = (fromLocation[d] - m_origin[d]) / m_binWidth[d]; // Index position in this space.
+        size_t dRound = size_t(dExact + 0.5); // Round to nearest bin edge.
+        sqDiff += (dExact - coord_t(dRound)) * (dExact - coord_t(dRound)) * m_binWidth[d] * m_binWidth[d];
+        indexes[d] = dRound;
+    }
+
+    const size_t linearIndex = Utils::NestedForLoop::GetLinearIndex(m_nd, &indexes[0],
+                                  m_indexMaker);
+    this->jumpTo(linearIndex);
+    return std::sqrt(sqDiff);
 }
 
 //----------------------------------------------------------------------------------------------
@@ -237,12 +260,14 @@ bool MDHistoWorkspaceIterator::next() {
   } else {
     ++m_pos;
   }
-  // Keep calling next if the current position is masked.
   bool ret = m_pos < m_max;
-  while (m_skippingPolicy->keepGoing()) {
-    ret = this->next();
-    if (!ret)
-      break;
+  if(ret) {
+    // Keep calling next if the current position is masked and still valid.
+    while (m_skippingPolicy->keepGoing()) {
+      ret = this->next();
+      if (!ret)
+        break;
+    }
   }
   // Go through every point;
   return ret;
@@ -323,16 +348,45 @@ Mantid::Kernel::VMD MDHistoWorkspaceIterator::getCenter() const {
   Utils::NestedForLoop::GetIndicesFromLinearIndex(m_nd, m_pos, m_indexMaker,
                                                   m_indexMax, m_index);
   // Find the center
-  for (size_t d = 0; d < m_nd; d++)
+  for (size_t d = 0; d < m_nd; ++d) {
     m_center[d] = m_origin[d] + (coord_t(m_index[d]) + 0.5f) * m_binWidth[d];
+  }
   return VMD(m_nd, m_center);
+}
+
+/**
+ * Get the extents in n-dimensions corresponding to the position of the box of the current iterator.
+ * @return pairs of min/max extents.
+ */
+VecMDExtents MDHistoWorkspaceIterator::getBoxExtents() const
+{
+
+    // Get the indexes.
+    Utils::NestedForLoop::GetIndicesFromLinearIndex(m_nd, m_pos, m_indexMaker,
+                                                    m_indexMax, m_index);
+    VecMDExtents extents(m_nd);
+    // Find the extents.
+    for (size_t d = 0; d < m_nd; ++d) {
+      const coord_t min = m_origin[d] + coord_t(m_index[d]) * m_binWidth[d]; // Min in d
+      const coord_t max = min + m_binWidth[d]; // Max in d
+      extents[d] = MDExtentPair(min, max);
+    }
+
+    return extents;
 }
 
 //----------------------------------------------------------------------------------------------
 /// Returns the number of events/points contained in this box
-/// @return 1 always: e.g. there is one (fake) event in the middle of the box.
+/// @return truncated number of events
 size_t MDHistoWorkspaceIterator::getNumEvents() const {
-  return static_cast<size_t>(m_ws->getNumEventsAt(m_pos));
+  return static_cast<size_t>(this->getNumEventsFraction());
+}
+
+//----------------------------------------------------------------------------------------------
+/// Returns the number of events/points contained in this box
+/// @return eact number of events (weights may be applied)
+signal_t MDHistoWorkspaceIterator::getNumEventsFraction() const {
+  return m_ws->getNumEventsAt(m_pos);
 }
 
 //----------------------------------------------------------------------------------------------
@@ -534,7 +588,8 @@ MDHistoWorkspaceIterator::findNeighbourIndexesByWidth(const std::vector<int>& wi
 
   // Filter out indexes that are are not actually neighbours.
   // Accumulate neighbour indexes.
-  std::vector<size_t> neighbourIndexes;
+  std::vector<size_t> neighbourIndexes(permutationsVertexTouching.size());
+  size_t nextFree = 0;
   for (size_t i = 0; i < permutationsVertexTouching.size(); ++i) {
     if (permutationsVertexTouching[i] == 0) {
       continue;
@@ -544,9 +599,10 @@ MDHistoWorkspaceIterator::findNeighbourIndexesByWidth(const std::vector<int>& wi
     if (neighbour_index < m_ws->getNPoints() &&
         Utils::isNeighbourOfSubject(m_nd, neighbour_index, m_index,
                                     m_indexMaker, m_indexMax, widths) ) {
-      neighbourIndexes.push_back(neighbour_index);
+      neighbourIndexes[nextFree++] = neighbour_index;
     }
   }
+  neighbourIndexes.resize(nextFree);
 
   // Remove duplicates
   std::sort(neighbourIndexes.begin(), neighbourIndexes.end());

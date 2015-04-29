@@ -13,7 +13,9 @@ PoldiFitPeaks2D is an algorithm that can be used to fit a set of individual peak
 
 The 1D-peak intensities need to be integral intensities, so the peaks are integrated if necessary. If there is no profile information supplied in the peak table (:ref:`algm-PoldiFitPeaks1D` adds this automatically), it's possible to supply a profile function as parameter to this algorithm. If a profile function name is present in the peak table, the one supplied in the parameters has priority.
 
-There are two modes for performing the fit. In the default mode, all peak profiles are fitted independently using the same function that is used for integration. The other possibility is to perform a Pawley-type fit, where peak positions are calculated using lattice parameters and Miller indices (see :ref:`algm-PawleyFit` for a more general explanation of the method). This mode is controlled by the PawleyFit parameter, if it is activated, InitialCell and CrystalSystem need to be specified as well. For these fits, an additional table will be created which contains the refined lattice parameters. Please note that the peaks need to be indexed to use this mode (:ref:`algm-PoldiCreatePeaksFromCell`, :ref:`algm-PoldiIndexKnownCompounds`).
+There are two modes for performing the fit. In the default mode, all peak profiles are fitted independently using the same function that is used for integration. The other possibility is to perform a Pawley-type fit, where peak positions are calculated using lattice parameters and Miller indices (see :ref:`algm-PawleyFit` for a more general explanation of the method). This mode is controlled by the PawleyFit parameter. For these fits, an additional table will be created which contains the refined lattice parameters. Please note that the peaks need to be indexed to use this mode (using :ref:`algm-PoldiCreatePeaksFromCell` and :ref:`algm-PoldiIndexKnownCompounds`).
+
+Alternatively, if the peaks have been indexed using a different method, the log values `UnitCell` and `CrystalSystem` must be set on the table workspace using :ref:`algm-AddSampleLog`. `UnitCell` must contain a string with 6 numbers that define a unit cell, with lengths in :math:`\mathrm{\AA{}}` and angles in degree (for example `5.4 5.4 5.4 90 90 90`), whereas `CrystalSystem` must be one of the seven crystal systems (for example `Cubic`).
 
 PoldiFitPeaks2D can also be used to calculate a theoretical 2D pattern from a set of peaks by limiting the iterations to 0.
 
@@ -130,15 +132,13 @@ The following example shows an example for refinement of lattice parameters usin
                                        CompoundWorkspaces = "si_peaks")
 
     # Only consider the first 8 peaks
-    DeleteTableRows("indexed_si_peaks", "8-30")
+    DeleteTableRows("peaks_refined_6904_indexed_si_peaks", "8-30")
 
     # Fit a unit cell.
     PoldiFitPeaks2D(InputWorkspace="truncated_data_6904",
-                             PoldiPeakWorkspace="indexed_si_peaks",
+                             PoldiPeakWorkspace="peaks_refined_6904_indexed_si_peaks",
                              OutputWorkspace="fitted_6904",
                              PawleyFit = True,
-                             InitialCell = "5.431 5.431 5.431 90 90 90",
-                             CrystalSystem = "Cubic",
                              MaximumIterations=100,
                              RefinedPoldiPeakWorkspace="peaks_fit_2d_6904",
                              Calculated1DSpectrum="simulated_1d_6904",
@@ -156,6 +156,6 @@ The refined lattice parameter is printed at the end:
 
 .. testoutput:: ExSilicon2DPawley
 
-    Refined lattice parameter a = 5.43126 +/- 5e-05
+    Refined lattice parameter a = 5.43125 +/- 4e-05
 
 .. categories::

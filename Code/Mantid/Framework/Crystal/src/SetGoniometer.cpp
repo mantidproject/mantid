@@ -1,10 +1,4 @@
 #include "MantidCrystal/SetGoniometer.h"
-#include "MantidKernel/System.h"
-#include <boost/algorithm/string/split.hpp>
-#include "MantidKernel/Strings.h"
-#include "MantidGeometry/Instrument/Goniometer.h"
-#include <boost/algorithm/string/detail/classification.hpp>
-#include "MantidKernel/V3D.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 

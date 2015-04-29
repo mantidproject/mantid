@@ -127,6 +127,9 @@ namespace IDA
     connect(m_uiForm.spPlotSpectrum, SIGNAL(valueChanged(int)), this, SLOT(updatePlot()));
     connect(m_uiForm.dsSampleInput, SIGNAL(dataReady(const QString&)), this, SLOT(newDataLoaded(const QString&)));
 
+    connect(m_uiForm.dsSampleInput, SIGNAL(dataReady(const QString&)), this, SLOT(extendResolutionWorkspace()));
+    connect(m_uiForm.dsResInput, SIGNAL(dataReady(const QString&)), this, SLOT(extendResolutionWorkspace()));
+
     connect(m_uiForm.spSpectraMin, SIGNAL(valueChanged(int)), this, SLOT(specMinChanged(int)));
     connect(m_uiForm.spSpectraMax, SIGNAL(valueChanged(int)), this, SLOT(specMaxChanged(int)));
 
@@ -270,6 +273,44 @@ namespace IDA
     updatePlot();
   }
 
+  /**
+   * Create a resolution workspace with the same number of histograms as in the sample.
+   *
+   * Needed to allow DiffSphere and DiffRotDiscreteCircle fit functions to work as they need
+   * to have the WorkspaceIndex attribute set.
+   */
+  void ConvFit::extendResolutionWorkspace()
+  {
+    if(m_cfInputWS && m_uiForm.dsResInput->isValid())
+    {
+      const QString resWsName = m_uiForm.dsResInput->getCurrentDataName();
+
+      API::BatchAlgorithmRunner::AlgorithmRuntimeProps appendProps;
+      appendProps["InputWorkspace1"] = "__ConvFit_Resolution";
+
+      size_t numHist = m_cfInputWS->getNumberHistograms();
+      for(size_t i = 0; i < numHist; i++)
+      {
+        IAlgorithm_sptr appendAlg = AlgorithmManager::Instance().create("AppendSpectra");
+        appendAlg->initialize();
+        appendAlg->setProperty("InputWorkspace2", resWsName.toStdString());
+        appendAlg->setProperty("OutputWorkspace", "__ConvFit_Resolution");
+
+        if(i == 0)
+        {
+          appendAlg->setProperty("InputWorkspace1", resWsName.toStdString());
+          m_batchAlgoRunner->addAlgorithm(appendAlg);
+        }
+        else
+        {
+          m_batchAlgoRunner->addAlgorithm(appendAlg, appendProps);
+        }
+      }
+
+      m_batchAlgoRunner->executeBatchAsync();
+    }
+  }
+
   namespace
   {
     ////////////////////////////
@@ -389,8 +430,7 @@ namespace IDA
     conv->addFunction(func);
 
     //add resolution file
-    std::string resWorkspace = m_uiForm.dsResInput->getCurrentDataName().toStdString();
-    IFunction::Attribute attr(resWorkspace);
+    IFunction::Attribute attr("__ConvFit_Resolution");
     func->setAttribute("Workspace", attr);
 
     // --------------------------------------------------------
@@ -634,16 +674,21 @@ namespace IDA
   {
     QtProperty* diffRotDiscreteCircleGroup = m_grpManager->addProperty(name);
 
+    m_properties[name+".N"] = m_dblManager->addProperty("N");
+    m_dblManager->setValue(m_properties[name+".N"], 3.0);
+
     m_properties[name+".Intensity"] = m_dblManager->addProperty("Intensity");
     m_properties[name+".Radius"] = m_dblManager->addProperty("Radius");
     m_properties[name+".Decay"] = m_dblManager->addProperty("Decay");
     m_properties[name+".Shift"] = m_dblManager->addProperty("Shift");
 
+    m_dblManager->setDecimals(m_properties[name+".N"], 0);
     m_dblManager->setDecimals(m_properties[name+".Intensity"], NUM_DECIMALS);
     m_dblManager->setDecimals(m_properties[name+".Radius"], NUM_DECIMALS);
     m_dblManager->setDecimals(m_properties[name+".Decay"], NUM_DECIMALS);
     m_dblManager->setDecimals(m_properties[name+".Shift"], NUM_DECIMALS);
 
+    diffRotDiscreteCircleGroup->addSubProperty(m_properties[name+".N"]);
     diffRotDiscreteCircleGroup->addSubProperty(m_properties[name+".Intensity"]);
     diffRotDiscreteCircleGroup->addSubProperty(m_properties[name+".Radius"]);
     diffRotDiscreteCircleGroup->addSubProperty(m_properties[name+".Decay"]);
@@ -669,9 +714,12 @@ namespace IDA
       {
         std::string propName = props[i]->propertyName().toStdString();
         double propValue = props[i]->valueText().toDouble();
-        if ( propValue )
+        if(propValue)
         {
-          func->setParameter(propName, propValue);
+          if(func->hasAttribute(propName))
+            func->setAttributeValue(propName, propValue);
+          else
+            func->setParameter(propName, propValue);
         }
       }
     }
@@ -760,12 +808,20 @@ namespace IDA
       case 3:
         m_cfTree->addProperty(m_properties["DiffSphere"]);
         hwhmRangeSelector->setVisible(false);
+        m_uiForm.ckPlotGuess->setChecked(false);
+        m_blnManager->setValue(m_properties["UseDeltaFunc"], false);
         break;
       case 4:
         m_cfTree->addProperty(m_properties["DiffRotDiscreteCircle"]);
         hwhmRangeSelector->setVisible(false);
+        m_uiForm.ckPlotGuess->setChecked(false);
+        m_blnManager->setValue(m_properties["UseDeltaFunc"], false);
         break;
     }
+
+    // Disable Plot Guess and Use Delta Function for DiffSphere and DiffRotDiscreteCircle
+    m_uiForm.ckPlotGuess->setEnabled(index < 3);
+    m_properties["UseDeltaFunc"]->setEnabled(index < 3);
 
     updatePlotOptions();
   }

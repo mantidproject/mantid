@@ -246,7 +246,7 @@ std::string CoordTransformAffine::toXMLString() const {
 
   AutoPtr<Element> coordTransformTypeElement = pDoc->createElement("Type");
   coordTransformTypeElement->appendChild(
-      pDoc->createTextNode("CoordTransformAffine"));
+     AutoPtr<Node>(pDoc->createTextNode("CoordTransformAffine")));
   coordTransformElement->appendChild(coordTransformTypeElement);
 
   AutoPtr<Element> paramListElement = pDoc->createElement("ParameterList");
@@ -301,6 +301,7 @@ CoordTransformAffine::combineTransformations(CoordTransform *first,
                              "same as the # of input dimensions of second.");
   // Convert both inputs to affine matrices, if needed
   CoordTransformAffine *firstAff = dynamic_cast<CoordTransformAffine *>(first);
+  bool ownFirstAff(false);
   if (!firstAff) {
     CoordTransformAligned *firstAl =
         dynamic_cast<CoordTransformAligned *>(first);
@@ -310,9 +311,11 @@ CoordTransformAffine::combineTransformations(CoordTransform *first,
           "must be either CoordTransformAffine or CoordTransformAligned.");
     firstAff = new CoordTransformAffine(firstAl->getInD(), firstAl->getOutD());
     firstAff->setMatrix(firstAl->makeAffineMatrix());
+    ownFirstAff = true;
   }
   CoordTransformAffine *secondAff =
       dynamic_cast<CoordTransformAffine *>(second);
+  bool ownSecondAff(false);
   if (!secondAff) {
     CoordTransformAligned *secondAl =
         dynamic_cast<CoordTransformAligned *>(second);
@@ -323,15 +326,18 @@ CoordTransformAffine::combineTransformations(CoordTransform *first,
     secondAff =
         new CoordTransformAffine(secondAl->getInD(), secondAl->getOutD());
     secondAff->setMatrix(secondAl->makeAffineMatrix());
+    ownSecondAff = true;
   }
   // Initialize the affine matrix
   CoordTransformAffine *out =
       new CoordTransformAffine(firstAff->getInD(), secondAff->getOutD());
   // Multiply the two matrices together
   Matrix<coord_t> outMat = secondAff->getMatrix() * firstAff->getMatrix();
-  std::cout << "Creating combined matrix " << outMat << std::endl;
   // Set in the output
   out->setMatrix(outMat);
+  // Clean up
+  if(ownFirstAff) delete firstAff;
+  if(ownSecondAff) delete secondAff;
   return out;
 }
 

@@ -3,9 +3,7 @@
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Crystal/IndexingUtils.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
-#include "MantidKernel/System.h"
 #include "MantidKernel/BoundedValidator.h"
-#include <cstdio>
 
 namespace Mantid {
 namespace Crystal {

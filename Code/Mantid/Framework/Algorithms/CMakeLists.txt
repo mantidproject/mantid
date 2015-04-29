@@ -52,6 +52,7 @@ set ( SRC_FILES
 	src/ConvertToMatrixWorkspace.cpp
 	src/ConvertToPointData.cpp
 	src/ConvertUnits.cpp
+	src/ConvertUnitsUsingDetectorTable.cpp
 	src/CopyDetectorMapping.cpp
 	src/CopyInstrumentParameters.cpp
 	src/CopyLogs.cpp
@@ -220,8 +221,9 @@ set ( SRC_FILES
 	src/SmoothNeighbours.cpp
 	src/SofQCommon.cpp
 	src/SofQW.cpp
-	src/SofQW2.cpp
-	src/SofQW3.cpp
+	src/SofQWCentre.cpp
+	src/SofQWNormalisedPolygon.cpp
+	src/SofQWPolygon.cpp
 	src/SolidAngle.cpp
 	src/SortEvents.cpp
 	src/SpatialGrouping.cpp
@@ -308,6 +310,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/ConvertToMatrixWorkspace.h
 	inc/MantidAlgorithms/ConvertToPointData.h
 	inc/MantidAlgorithms/ConvertUnits.h
+	inc/MantidAlgorithms/ConvertUnitsUsingDetectorTable.h
 	inc/MantidAlgorithms/CopyDetectorMapping.h
 	inc/MantidAlgorithms/CopyInstrumentParameters.h
 	inc/MantidAlgorithms/CopyLogs.h
@@ -477,8 +480,9 @@ set ( INC_FILES
 	inc/MantidAlgorithms/SmoothNeighbours.h
 	inc/MantidAlgorithms/SofQCommon.h
 	inc/MantidAlgorithms/SofQW.h
-	inc/MantidAlgorithms/SofQW2.h
-	inc/MantidAlgorithms/SofQW3.h
+	inc/MantidAlgorithms/SofQWCentre.h
+	inc/MantidAlgorithms/SofQWNormalisedPolygon.h
+	inc/MantidAlgorithms/SofQWPolygon.h
 	inc/MantidAlgorithms/SolidAngle.h
 	inc/MantidAlgorithms/SortEvents.h
 	inc/MantidAlgorithms/SpatialGrouping.h
@@ -512,7 +516,7 @@ set ( INC_FILES
 )
 
 set(SRC_UNITY_IGNORE_FILES src/AlignDetectors.cpp
-    src/FFTSmooth.cpp 
+    src/FFTSmooth.cpp
     src/FFTSmooth2.cpp
     src/FilterBadPulses.cpp
     src/SetUncertainties.cpp
@@ -575,6 +579,7 @@ set ( TEST_FILES
 	ConvertToMatrixWorkspaceTest.h
 	ConvertToPointDataTest.h
 	ConvertUnitsTest.h
+	ConvertUnitsUsingDetectorTableTest.h
 	CopyDetectorMappingTest.h
 	CopyInstrumentParametersTest.h
 	CopyLogsTest.h
@@ -722,8 +727,9 @@ set ( TEST_FILES
 	SignalOverErrorTest.h
 	SmoothDataTest.h
 	SmoothNeighboursTest.h
-	SofQW2Test.h
-	SofQW3Test.h
+	SofQWCentreTest.h
+	SofQWNormalisedPolygonTest.h
+	SofQWPolygonTest.h
 	SofQWTest.h
 	SolidAngleTest.h
 	SortEventsTest.h
@@ -759,7 +765,7 @@ enable_precompiled_headers ( inc/MantidAlgorithms/PrecompiledHeader.h SRC_FILES 
 # Add the target for this directory
 add_library ( Algorithms ${SRC_FILES} ${INC_FILES})
 # Set the name of the generated library
-set_target_properties ( Algorithms PROPERTIES OUTPUT_NAME MantidAlgorithms ) 
+set_target_properties ( Algorithms PROPERTIES OUTPUT_NAME MantidAlgorithms )
 
 if (OSX_VERSION VERSION_GREATER 10.8)
   set_target_properties ( Algorithms PROPERTIES INSTALL_RPATH "@loader_path/../Contents/MacOS")

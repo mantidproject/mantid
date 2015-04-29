@@ -67,6 +67,7 @@ Integrate3DEvents::~Integrate3DEvents() {}
  *
  * @param event_qs   List of event Q vectors to add to lists of Q's associated
  *                   with peaks.
+ * @param hkl_integ
  */
 void Integrate3DEvents::addEvents(std::vector<std::pair<double, V3D> > const &event_qs, bool hkl_integ) {
   for (size_t i = 0; i < event_qs.size(); i++) {
@@ -122,11 +123,6 @@ Mantid::Geometry::PeakShape_const_sptr Integrate3DEvents::ellipseIntegrateEvents
   }
 
   std::vector<std::pair<double, V3D> > &some_events = event_lists[hkl_key];
-  for (size_t it = 0; it != some_events.size(); ++it) {
-    hkl_key = getHklKey2(some_events[it].second);
-    if (hkl_key != 0) // only save if hkl != (0,0,0)
-      peak_qs[hkl_key] = some_events[it].second;
-  }
 
   if (some_events.size() < 3) // if there are not enough events to
   {                           // find covariance matrix, return
@@ -363,6 +359,7 @@ int64_t Integrate3DEvents::getHklKey(V3D const &q_vector) {
  *
  * @param event_Q      The Q-vector for the event that may be added to the
  *                     event_lists map, if it is close enough to some peak
+ * @param hkl_integ
  */
 void Integrate3DEvents::addEvent(std::pair<double, V3D> event_Q, bool hkl_integ) {
   int64_t hkl_key;

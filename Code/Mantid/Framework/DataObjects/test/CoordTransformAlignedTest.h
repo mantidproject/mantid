@@ -11,6 +11,8 @@
 #include "MantidKernel/Matrix.h"
 #include "MantidDataObjects/CoordTransformAffine.h"
 
+#include <boost/scoped_ptr.hpp>
+
 using namespace Mantid;
 using namespace Mantid::DataObjects;
 using namespace Mantid::API;
@@ -28,10 +30,12 @@ public:
     size_t dimToBinFrom[3] = {4, 1, 0};
     coord_t origin[3] = {5, 10, 15};
     coord_t scaling[3] = {1, 2, 3};
-    TSM_ASSERT_THROWS_ANYTHING( "DimtoBinFrom has too high an index", CoordTransformAligned ct(4,3, dimToBinFrom, origin, scaling); );
+    TSM_ASSERT_THROWS_ANYTHING( "DimtoBinFrom has too high an index", 
+                                 CoordTransformAligned(4,3, dimToBinFrom, origin, scaling) );
     std::vector<size_t> d(3);
     std::vector<coord_t> o(2), s(3);
-    TSM_ASSERT_THROWS_ANYTHING( "Non-matching vector lengths", CoordTransformAligned ct(3,3, d,o,s); );
+    TSM_ASSERT_THROWS_ANYTHING( "Non-matching vector lengths",
+                                 CoordTransformAligned(3,3, d,o,s) );
   }
 
   /** Construct from vector */
@@ -74,7 +78,7 @@ public:
     coord_t origin[3] = {5, 10, 15};
     coord_t scaling[3] = {1, 2, 3};
     CoordTransformAligned ct(4,3, dimToBinFrom, origin, scaling);
-    CoordTransform * clone = ct.clone();
+    boost::scoped_ptr<CoordTransform> clone(ct.clone());
 
     coord_t input[4] = {16, 11, 11111111 /*ignored*/, 6};
     coord_t output[3] = {0,0,0};

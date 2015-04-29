@@ -5,7 +5,7 @@
 //----------------------------------------------------------------------
 #include <vector>
 #include <sstream>
-#include <stdlib.h>
+
 #ifdef _WIN32
 #include <io.h>
 #endif /* _WIN32 */
@@ -13,24 +13,14 @@
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidNexus/NexusFileIO.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
-#include "MantidKernel/DateAndTime.h"
-#include "MantidKernel/ConfigService.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidAPI/NumericAxis.h"
-#include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/VectorHelper.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
-#include "MantidDataObjects/TableColumn.h"
-#include "MantidDataObjects/VectorColumn.h"
 #include "MantidDataObjects/RebinnedOutput.h"
-#include "MantidAPI/ITableWorkspace.h"
-#include "MantidAPI/AlgorithmHistory.h"
 
-#include <boost/tokenizer.hpp>
-#include <boost/make_shared.hpp>
 #include <Poco/File.h>
 
 namespace Mantid {

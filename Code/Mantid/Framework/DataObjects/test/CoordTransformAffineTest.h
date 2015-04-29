@@ -11,8 +11,8 @@
 #include "MantidDataObjects/CoordTransformDistance.h"
 #include "MantidDataObjects/MDEventFactory.h"
 #include <cxxtest/TestSuite.h>
-#include <iomanip>
-#include <iostream>
+
+#include <boost/scoped_ptr.hpp>
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
@@ -113,7 +113,7 @@ public:
     ct.addTranslation(translation);
 
     // Clone and check the clone works
-    CoordTransform * clone = ct.clone();
+    boost::scoped_ptr<CoordTransform> clone(ct.clone());
     clone->apply(in, out);
     compare(2, out, expected);
   }
@@ -269,7 +269,9 @@ public:
     TSM_ASSERT_THROWS_ANYTHING("Null input fails.", CoordTransformAffine::combineTransformations(NULL, &ct43) );
     TSM_ASSERT_THROWS_ANYTHING("Incompatible # of dimensions", CoordTransformAffine::combineTransformations(&ct42, &ct32) );
     TSM_ASSERT_THROWS_ANYTHING("Incompatible # of dimensions", CoordTransformAffine::combineTransformations(&ct32, &ct43) );
-    TSM_ASSERT_THROWS_NOTHING("Compatible # of dimensions", CoordTransformAffine::combineTransformations(&ct43, &ct32) );
+    CoordTransformAffine *ct(NULL);
+    TSM_ASSERT_THROWS_NOTHING("Compatible # of dimensions", ct = CoordTransformAffine::combineTransformations(&ct43, &ct32) );
+    delete ct;
     coord_t center[3] = {1,2,3};
     bool bools[3] = {true, true, true};
     CoordTransformDistance ctd(3, center, bools);
@@ -291,7 +293,7 @@ public:
     CoordTransformAffine ct2(2,2);
     ct2.addTranslation(translation2);
     // Combine them
-    CoordTransformAffine * combined = CoordTransformAffine::combineTransformations(&ct1, &ct2);
+    boost::scoped_ptr<CoordTransformAffine> combined(CoordTransformAffine::combineTransformations(&ct1, &ct2));
     combined->apply(in, out);
     compare(2, out, expected);
   }
@@ -311,7 +313,7 @@ public:
     ct2->apply(out1, out2);
 
     // Combine them
-    CoordTransformAffine * combined = CoordTransformAffine::combineTransformations(ct1, ct2);
+    boost::scoped_ptr<CoordTransformAffine> combined(CoordTransformAffine::combineTransformations(ct1, ct2));
     combined->apply(in, out_combined);
 
     // Applying the combined one = same as each one in sequence
@@ -434,4 +436,3 @@ public:
 
 
 #endif /* MANTID_DATAOBJECTS_COORDTRANSFORMAFFINETEST_H_ */
-

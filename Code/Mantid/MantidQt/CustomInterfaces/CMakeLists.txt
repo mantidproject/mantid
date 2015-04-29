@@ -1,5 +1,7 @@
 set ( SRC_FILES
+	src/background.cpp
   src/DataComparison.cpp
+	src/deltaECalc.cpp
 	src/DirectConvertToEnergy.cpp
 	src/Homer.cpp
 	src/Indirect/AbsorptionCorrections.cpp
@@ -80,15 +82,18 @@ set ( SRC_FILES
 	src/SANSPlotSpecial.cpp
 	src/SANSRunWindow.cpp
 	src/StepScan.cpp
+	src/TomoReconstruction/SavuConfigDialog.cpp
+	src/TomoReconstruction/TomoReconstruction.cpp
+	src/TomoReconstruction/TomoToolConfigDialog.cpp
+	src/TomoReconstruction/ToolSettings.cpp
 	src/UserInputValidator.cpp
-	src/background.cpp
-	src/deltaECalc.cpp
 )
 
 # Include files aren't required, but this makes them appear in Visual Studio
 set ( INC_FILES
 	inc/MantidQtCustomInterfaces/Background.h
   inc/MantidQtCustomInterfaces/DataComparison.h
+	inc/MantidQtCustomInterfaces/deltaECalc.h
 	inc/MantidQtCustomInterfaces/DirectConvertToEnergy.h
 	inc/MantidQtCustomInterfaces/DllConfig.h
 	inc/MantidQtCustomInterfaces/Homer.h
@@ -172,16 +177,18 @@ set ( INC_FILES
 	inc/MantidQtCustomInterfaces/QReflTableModel.h
 	inc/MantidQtCustomInterfaces/QtReflMainView.h
 	inc/MantidQtCustomInterfaces/QtReflOptionsDialog.h
-  inc/MantidQtCustomInterfaces/SampleTransmission.h
+        inc/MantidQtCustomInterfaces/SampleTransmission.h
 	inc/MantidQtCustomInterfaces/SANSAddFiles.h
 	inc/MantidQtCustomInterfaces/SANSDiagnostics.h
 	inc/MantidQtCustomInterfaces/SANSEventSlicing.h
 	inc/MantidQtCustomInterfaces/SANSPlotSpecial.h
 	inc/MantidQtCustomInterfaces/SANSRunWindow.h
 	inc/MantidQtCustomInterfaces/StepScan.h
+	inc/MantidQtCustomInterfaces/TomoReconstruction/TomoReconstruction.h
+	inc/MantidQtCustomInterfaces/TomoReconstruction/TomoToolConfigDialog.h
+	inc/MantidQtCustomInterfaces/TomoReconstruction/ToolSettings.h
 	inc/MantidQtCustomInterfaces/Updateable.h
 	inc/MantidQtCustomInterfaces/UserInputValidator.h
-	inc/MantidQtCustomInterfaces/deltaECalc.h
 )
 
 set ( SRC_UNITY_IGNORE_FILES )
@@ -228,13 +235,14 @@ set ( MOC_FILES inc/MantidQtCustomInterfaces/Background.h
                 inc/MantidQtCustomInterfaces/Indirect/ISISCalibration.h
                 inc/MantidQtCustomInterfaces/Indirect/ISISDiagnostics.h
                 inc/MantidQtCustomInterfaces/Indirect/ISISEnergyTransfer.h
+                inc/MantidQtCustomInterfaces/MantidEV.h
                 inc/MantidQtCustomInterfaces/MultiDatasetFit/MultiDatasetFit.h
-				inc/MantidQtCustomInterfaces/MultiDatasetFit/MDFAddWorkspaceDialog.h
-				inc/MantidQtCustomInterfaces/MultiDatasetFit/MDFDataController.h
-				inc/MantidQtCustomInterfaces/MultiDatasetFit/MDFPlotController.h
-				inc/MantidQtCustomInterfaces/MultiDatasetFit/MDFLocalParameterEditor.h
-				inc/MantidQtCustomInterfaces/MultiDatasetFit/MDFLocalParameterItemDelegate.h
-				inc/MantidQtCustomInterfaces/MultiDatasetFit/MDFEditLocalParameterDialog.h
+		inc/MantidQtCustomInterfaces/MultiDatasetFit/MDFAddWorkspaceDialog.h
+		inc/MantidQtCustomInterfaces/MultiDatasetFit/MDFDataController.h
+		inc/MantidQtCustomInterfaces/MultiDatasetFit/MDFPlotController.h
+		inc/MantidQtCustomInterfaces/MultiDatasetFit/MDFLocalParameterEditor.h
+		inc/MantidQtCustomInterfaces/MultiDatasetFit/MDFLocalParameterItemDelegate.h
+		inc/MantidQtCustomInterfaces/MultiDatasetFit/MDFEditLocalParameterDialog.h
                 inc/MantidQtCustomInterfaces/Muon/ALCBaselineModellingPresenter.h
                 inc/MantidQtCustomInterfaces/Muon/ALCBaselineModellingView.h
                 inc/MantidQtCustomInterfaces/Muon/ALCDataLoadingPresenter.h
@@ -260,8 +268,9 @@ set ( MOC_FILES inc/MantidQtCustomInterfaces/Background.h
                 inc/MantidQtCustomInterfaces/SANSRunWindow.h
                 inc/MantidQtCustomInterfaces/SANSEventSlicing.h              
                 inc/MantidQtCustomInterfaces/SANSDiagnostics.h
-                inc/MantidQtCustomInterfaces/MantidEV.h
                 inc/MantidQtCustomInterfaces/StepScan.h
+                inc/MantidQtCustomInterfaces/TomoReconstruction/TomoReconstruction.h
+                inc/MantidQtCustomInterfaces/TomoReconstruction/TomoToolConfigDialog.h
 )
 
 set ( UI_FILES inc/MantidQtCustomInterfaces/DataComparison.ui
@@ -298,9 +307,10 @@ set ( UI_FILES inc/MantidQtCustomInterfaces/DataComparison.ui
                inc/MantidQtCustomInterfaces/Indirect/ISISCalibration.ui
                inc/MantidQtCustomInterfaces/Indirect/ISISDiagnostics.ui
                inc/MantidQtCustomInterfaces/Indirect/ISISEnergyTransfer.ui
+               inc/MantidQtCustomInterfaces/MantidEV.ui
                inc/MantidQtCustomInterfaces/MultiDatasetFit/MultiDatasetFit.ui
-			   inc/MantidQtCustomInterfaces/MultiDatasetFit/MDFAddWorkspaceDialog.ui
-			   inc/MantidQtCustomInterfaces/MultiDatasetFit/EditLocalParameterDialog.ui
+	       inc/MantidQtCustomInterfaces/MultiDatasetFit/MDFAddWorkspaceDialog.ui
+	       inc/MantidQtCustomInterfaces/MultiDatasetFit/EditLocalParameterDialog.ui
                inc/MantidQtCustomInterfaces/Muon/ALCBaselineModellingView.ui
                inc/MantidQtCustomInterfaces/Muon/ALCDataLoadingView.ui
                inc/MantidQtCustomInterfaces/Muon/ALCInterface.ui
@@ -313,19 +323,23 @@ set ( UI_FILES inc/MantidQtCustomInterfaces/DataComparison.ui
                inc/MantidQtCustomInterfaces/SANSPlotSpecial.ui
                inc/MantidQtCustomInterfaces/SANSRunWindow.ui  
                inc/MantidQtCustomInterfaces/SANSEventSlicing.ui
-               inc/MantidQtCustomInterfaces/MantidEV.ui
                inc/MantidQtCustomInterfaces/StepScan.ui
+               inc/MantidQtCustomInterfaces/TomoReconstruction/TomoReconstruction.ui
+               inc/MantidQtCustomInterfaces/TomoReconstruction/TomoToolConfigAstra.ui
+               inc/MantidQtCustomInterfaces/TomoReconstruction/TomoToolConfigCustom.ui
+               inc/MantidQtCustomInterfaces/TomoReconstruction/TomoToolConfigSavu.ui
+               inc/MantidQtCustomInterfaces/TomoReconstruction/TomoToolConfigTomoPy.ui
 )
 
 set ( TEST_FILES
-	ALCBaselineModellingModelTest.h
-	ALCBaselineModellingPresenterTest.h
-	ALCDataLoadingPresenterTest.h
-	ALCPeakFittingPresenterTest.h
-	IO_MuonGroupingTest.h
-	MuonAnalysisHelperTest.h
-	ReflLegacyTransferStrategyTest.h
-	ReflMainViewPresenterTest.h
+  ALCBaselineModellingModelTest.h
+  ALCBaselineModellingPresenterTest.h
+  ALCDataLoadingPresenterTest.h
+  ALCPeakFittingPresenterTest.h
+  IO_MuonGroupingTest.h
+  MuonAnalysisHelperTest.h
+  ReflLegacyTransferStrategyTest.h
+  ReflMainViewPresenterTest.h
   UserInputValidatorTest.h
 )
 

@@ -325,6 +325,10 @@ Use Calibration
   Allows you to select either a calibrtion file or workspace to apply to the raw
   files.
 
+Preview Spectrum
+  Allows selection of the spectrum to be shown in the preview plot to the right
+  of the Time Slice section.
+
 Spectra Min & Spectra Max
   Allows selection of the range of detectors you are interested in, this is
   automatically set based on the instrument and analyser bank that are currently

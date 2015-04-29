@@ -79,6 +79,12 @@ public:
     D212 = dynamic_cast<ibox_t *>(C21->getChild(2));
     D213 = dynamic_cast<ibox_t *>(C21->getChild(3));
   }
+  
+  void tearDown()
+  {
+    delete A->getBoxController();
+    delete A;
+  }
 
   //--------------------------------------------------------------------------------------
   void test_ctor_with_null_box_fails()
@@ -125,6 +131,8 @@ public:
     // Calling next again does not cause problems.
     TS_ASSERT( !it->next() );
     TS_ASSERT( !it->next() );
+
+    delete it;
   }
 
   void test_depth_limit_1()
@@ -138,6 +146,8 @@ public:
     TS_ASSERT( nextIs(it, B3) );
     TS_ASSERT( !it->next() );
     TS_ASSERT( !it->next() );
+
+    delete it;
   }
 
   void test_depth_limit_0()
@@ -147,6 +157,8 @@ public:
     TS_ASSERT_EQUALS( it->getBox(), A);
     TS_ASSERT( !it->next() );
     TS_ASSERT( !it->next() );
+
+    delete it;
   }
 
   void test_starting_deeper()
@@ -160,6 +172,8 @@ public:
     TS_ASSERT( nextIs(it, C03) );
     TS_ASSERT( !it->next() );
     TS_ASSERT( !it->next() );
+
+    delete it;
   }
 
   void test_leaf_only()
@@ -184,6 +198,8 @@ public:
     // No more!
     TS_ASSERT( !it->next() );
     TS_ASSERT( !it->next() );
+
+    delete it;
   }
 
   void test_leaf_only_depth_2()
@@ -204,6 +220,8 @@ public:
     TS_ASSERT( nextIs(it, B3) );
     TS_ASSERT( !it->next() );
     TS_ASSERT( !it->next() );
+
+    delete it;
   }
 
   void test_leaf_only_depth_1()
@@ -217,6 +235,8 @@ public:
     TS_ASSERT( nextIs(it, B3) );
     TS_ASSERT( !it->next() );
     TS_ASSERT( !it->next() );
+
+    delete it;
   }
 
   void test_leaf_only_depth_0()
@@ -227,6 +247,8 @@ public:
     TS_ASSERT_EQUALS( it->getBox(), A);
     TS_ASSERT( !it->next() );
     TS_ASSERT( !it->next() );
+
+    delete it;
   }
 
   void test_leaf_only_starting_deeper()
@@ -242,6 +264,8 @@ public:
     TS_ASSERT( nextIs(it, C23) );
     TS_ASSERT( !it->next() );
     TS_ASSERT( !it->next() );
+    
+    delete it;
   }
 
   void test_leaf_only_starting_deeper_depth_limited()
@@ -254,6 +278,8 @@ public:
     TS_ASSERT( nextIs(it, C23) );
     TS_ASSERT( !it->next() );
     TS_ASSERT( !it->next() );
+
+    delete it;
   }
 
   //--------------------------------------------------------------------------------------
@@ -271,6 +297,8 @@ public:
 
     BoxController *const bc = A->getBoxController();
     delete bc;
+    delete it;
+    delete A;
   }
 
   //--------------------------------------------------------------------------------------
@@ -302,7 +330,8 @@ public:
 
     BoxController *const bc = A->getBoxController();
     delete bc;
-
+    delete it;
+    delete A;
   }
   //--------------------------------------------------------------------------------------
   void test_iterator_withImplicitFunction_above11()
@@ -314,6 +343,7 @@ public:
 
     // Create an iterator
     it = new MDBoxIterator<MDLeanEvent<1>,1>(A, 20, false, func);
+    delete func;
 
     // Start with the top one
     TS_ASSERT_EQUALS( it->getBox(), A);
@@ -335,6 +365,8 @@ public:
     // No more!
     TS_ASSERT( !it->next() );
     TS_ASSERT( !it->next() );
+
+    delete it;
   }
 
   //--------------------------------------------------------------------------------------
@@ -347,6 +379,7 @@ public:
 
     // Create an iterator
     it = new MDBoxIterator<MDLeanEvent<1>,1>(A, 20, true, func);
+    delete func;
 
     // C00-C01 are outside the range, so the first one is C02
     TS_ASSERT_EQUALS( it->getBox(), C02);
@@ -363,6 +396,8 @@ public:
     // No more!
     TS_ASSERT( !it->next() );
     TS_ASSERT( !it->next() );
+
+    delete it;
   }
 
 
@@ -376,6 +411,7 @@ public:
 
     // Create an iterator
     it = new MDBoxIterator<MDLeanEvent<1>,1>(A, 20, false, func);
+    delete func;
 
     // Start with the top one
     TS_ASSERT_EQUALS( it->getBox(), A);
@@ -394,6 +430,8 @@ public:
     // No more!
     TS_ASSERT( !it->next() );
     TS_ASSERT( !it->next() );
+
+    delete it;
   }
 
 
@@ -408,6 +446,7 @@ public:
 
     // Create an iterator
     it = new MDBoxIterator<MDLeanEvent<1>,1>(A, 20, false, func);
+    delete func;
 
     // Go down to the only two leaf boxes that are in range
     TS_ASSERT_EQUALS( it->getBox(), A);
@@ -418,6 +457,8 @@ public:
     // No more!
     TS_ASSERT( !it->next() );
     TS_ASSERT( !it->next() );
+
+    delete it;
   }
 
   //--------------------------------------------------------------------------------------
@@ -431,6 +472,7 @@ public:
 
     // Create an iterator
     it = new MDBoxIterator<MDLeanEvent<1>,1>(A, 20, true, func);
+    delete func;
 
     // Only two leaf boxes are in range
     TS_ASSERT_EQUALS( it->getBox(), D211);
@@ -438,6 +480,8 @@ public:
     // No more!
     TS_ASSERT( !it->next() );
     TS_ASSERT( !it->next() );
+
+    delete it;
   }
 
   //--------------------------------------------------------------------------------------
@@ -449,11 +493,14 @@ public:
 
     // Create an iterator
     it = new MDBoxIterator<MDLeanEvent<1>,1>(A, 20, false, func);
+    delete func;
 
     // Returns the first box but that's it
     TS_ASSERT_EQUALS( it->getBox(), A);
     TS_ASSERT( !it->next() );
     TS_ASSERT( !it->next() );
+    
+    delete it;
   }
 
   //--------------------------------------------------------------------------------------
@@ -465,10 +512,14 @@ public:
 
     // Create an iterator
     it = new MDBoxIterator<MDLeanEvent<1>,1>(A, 20, true, func);
+    delete func;
+    
     // Nothing in the iterator!
     TS_ASSERT_EQUALS( it->getDataSize(), 0);
     TS_ASSERT( !it->next() );
     TS_ASSERT( !it->next() );
+
+    delete it;
   }
 
   void test_getIsMasked()
@@ -542,6 +593,9 @@ public:
     TSM_ASSERT_EQUALS("Should NOT have skipped to the second box", 2, evaluationIterator->getPosition());
     TS_ASSERT_THROWS_NOTHING(evaluationIterator->next());
     TSM_ASSERT_EQUALS("Should NOT have skipped to the third box", 3, evaluationIterator->getPosition());
+
+    delete setupIterator;
+    delete evaluationIterator;
   }
 
   void test_custom_skipping_policy()

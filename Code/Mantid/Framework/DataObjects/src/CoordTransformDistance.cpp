@@ -112,7 +112,7 @@ std::string CoordTransformDistance::toXMLString() const {
 
   AutoPtr<Element> coordTransformTypeElement = pDoc->createElement("Type");
   coordTransformTypeElement->appendChild(
-      pDoc->createTextNode("CoordTransformDistance"));
+      AutoPtr<Text>(pDoc->createTextNode("CoordTransformDistance")));
   coordTransformElement->appendChild(coordTransformTypeElement);
 
   AutoPtr<Element> paramListElement = pDoc->createElement("ParameterList");

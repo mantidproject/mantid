@@ -5,13 +5,6 @@
 // Includes
 //---------------------------------------------------
 #include "MantidAPI/Algorithm.h"
-#include "MantidNexus/NexusClasses.h"
-#include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/Sample.h"
-#include "MantidDataObjects/Workspace2D.h"
-#include "MantidDataObjects/EventWorkspace.h"
-#include <nexus/NeXusFile.hpp>
-#include <nexus/NeXusException.hpp>
 
 namespace Mantid {
 namespace DataHandling {
@@ -19,14 +12,6 @@ namespace DataHandling {
 /**
  * Saves a workspace into a NeXus/HDF5 NXSPE file.
  *
- * Required properties:
- * <ul>
- * <li> InputWorkspace - The workspace to save. </li>
- * <li> Filename - The filename for output </li>
- * </ul>
- *
- * @author Stuart Campbell, NScD, Oak Ridge National Laboratory
- * @date 28/10/2010
  *
  * This file is part of Mantid.
  *
@@ -73,12 +58,6 @@ private:
   /// Execution code
   void exec();
 
-  /// the number of bins in each histogram, as the histogram must have common
-  /// bins this shouldn't change
-  size_t nBins;
-  /// The filename of the output file
-  std::string filename;
-
   // Some constants to be written for masked values.
   /// Value for data if pixel is masked
   static const double MASK_FLAG;
@@ -86,6 +65,8 @@ private:
   static const double MASK_ERROR;
   /// file format version
   static const std::string NXSPE_VER;
+  /// The size in bytes of a chunk to accumulate to write to the file at once
+  static const size_t MAX_CHUNK_SIZE;
 };
 
 } // namespace DataHandling

@@ -25,8 +25,10 @@
 #include <pqServerManagerModel.h>
 #include <vtkDataObject.h>
 #include <vtkProperty.h>
+#include <vtkPVRenderView.h>
 #include <vtkSMDoubleVectorProperty.h>
 #include <vtkSMPropertyHelper.h>
+#include <vtkSMPVRepresentationProxy.h>
 #include <vtkSMSourceProxy.h>
 
 #if defined(__INTEL_COMPILER)
@@ -55,7 +57,7 @@ namespace
 }
 
 
-SplatterPlotView::SplatterPlotView(QWidget *parent) : ViewBase(parent),
+SplatterPlotView::SplatterPlotView(QWidget *parent, RebinnedSourcesManager* rebinnedSourcesManager) : ViewBase(parent, rebinnedSourcesManager),
                                                       m_cameraManager(boost::make_shared<CameraManager>()),
                                                       m_peaksTableController(NULL),
                                                       m_peaksWorkspaceNameDelimiter(";")                         
@@ -134,6 +136,7 @@ void SplatterPlotView::destroyView()
   // Destroy the view.
   pqObjectBuilder *builder = pqApplicationCore::instance()->getObjectBuilder();
   builder->destroy(this->view);
+  pqActiveObjects::instance().setActiveSource(this->origSrc);
 }
 
 pqRenderView* SplatterPlotView::getView()
@@ -206,9 +209,9 @@ void SplatterPlotView::render()
   drep->getProxy()->UpdateVTKObjects();
   if (!isPeaksWorkspace)
   {
-    pqPipelineRepresentation *prep = NULL;
-    prep = qobject_cast<pqPipelineRepresentation*>(drep);
-    prep->colorByArray("signal", vtkDataObject::FIELD_ASSOCIATION_CELLS);
+    vtkSMPVRepresentationProxy::SetScalarColoring(drep->getProxy(), "signal",
+                                                  vtkDataObject::FIELD_ASSOCIATION_CELLS);
+    drep->getProxy()->UpdateVTKObjects();
   }
 
   this->resetDisplay();
@@ -227,7 +230,7 @@ void SplatterPlotView::render()
     try
     {
       m_peaksTableController->updatePeaksWorkspaces(this->peaksSource, this->splatSource);
-
+      
       if (m_peaksFilter)
       {
        updatePeaksFilter(m_peaksFilter);
@@ -240,6 +243,16 @@ void SplatterPlotView::render()
   }
 
   emit this->triggerAccept();
+  if (vtkSMProxy* viewProxy = this->getView()->getProxy())
+    {
+    vtkSMPropertyHelper helper(viewProxy, "InteractionMode");
+    if (helper.GetAsInt() == vtkPVRenderView::INTERACTION_MODE_2D)
+      {
+      helper.Set(vtkPVRenderView::INTERACTION_MODE_3D);
+      viewProxy->UpdateProperty("InteractionMode",1);
+      this->resetCamera();
+      }
+    }
 }
 
 void SplatterPlotView::renderAll()
@@ -496,8 +509,12 @@ void SplatterPlotView::createPeaksFilter()
     vtkSMPropertyHelper(dataRepresentation->getProxy(), "PointSize").Set(pointSize);
     dataRepresentation->getProxy()->UpdateVTKObjects();
 
-    pqPipelineRepresentation *pipelineRepresentation = qobject_cast<pqPipelineRepresentation*>(dataRepresentation);
-    pipelineRepresentation->colorByArray("signal", vtkDataObject::FIELD_ASSOCIATION_CELLS);
+    if (!this->isPeaksWorkspace(this->origSrc))
+    {
+      vtkSMPVRepresentationProxy::SetScalarColoring(dataRepresentation->getProxy(), "signal",
+                                                  vtkDataObject::FIELD_ASSOCIATION_CELLS);
+      dataRepresentation->getProxy()->UpdateVTKObjects();
+    }
     this->resetDisplay();
     this->setVisibilityListener();
     this->renderAll();
@@ -651,7 +668,6 @@ void SplatterPlotView::destroyAllSourcesInView() {
   pqObjectBuilder *builder = pqApplicationCore::instance()->getObjectBuilder();
   builder->destroySources();
 }
-
 
 void SplatterPlotView::destroyFiltersForSplatterPlotView(){
    pqObjectBuilder *builder = pqApplicationCore::instance()->getObjectBuilder();

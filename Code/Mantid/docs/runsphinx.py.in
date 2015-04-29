@@ -76,8 +76,12 @@ def main(sysarg):
     # causes Sphinx to fall over. We need to put it back while processing
     # the documentation
     from pygments.lexer import RegexLexer
-    # Reverse monkeypatch using unpatched function stored in mantid_ipython_widget!
-    RegexLexer.get_tokens_unprocessed = RegexLexer.get_tokens_unprocessed_unpatched
+    # Reverse monkeypatch using unpatched function stored in mantid_ipython_widget
+    # if it is available
+    try:
+        RegexLexer.get_tokens_unprocessed = RegexLexer.get_tokens_unprocessed_unpatched
+    except AttributeError:
+        pass
     try:
         return_value = sphinx.main(argv)
     finally:

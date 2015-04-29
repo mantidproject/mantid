@@ -29,7 +29,7 @@ namespace MDAlgorithmsTestHelper {
  * @param fileBacked :: true for file-backed
  * @param numEvents :: number of events in the target workspace distributed
  *randomly if numEvents>0 or regularly & homogeneously if numEvents<0
- * coord :: Required coordinate system
+ * @param coord :: Required coordinate system
  * @return MDEW sptr
  */
 DataObjects::MDEventWorkspace3Lean::sptr

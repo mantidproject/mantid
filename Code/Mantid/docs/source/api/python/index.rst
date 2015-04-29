@@ -24,13 +24,13 @@ Changes between version 1.0 and 2.0 of the API are described :ref:`here <pythona
 
    changes
 
-Future plotting interface
--------------------------
+Matplotlib-like plotting interface
+----------------------------------
 
 .. toctree::
    :maxdepth: 1
 
-   mantidplot.future.pyplot <mantidplot/future/pyplot/index>
+   mantidplot.pyplot <mantidplot/pyplot/index>
 
 Techniques
 ----------

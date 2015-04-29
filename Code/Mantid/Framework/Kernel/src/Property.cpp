@@ -6,9 +6,6 @@
 #include "MantidKernel/PropertyHistory.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 
-#include <map>
-#include <sstream>
-
 namespace Mantid {
 namespace Kernel {
 

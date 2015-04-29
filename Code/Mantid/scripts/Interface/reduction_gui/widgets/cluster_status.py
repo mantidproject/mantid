@@ -147,14 +147,20 @@ class RemoteJobsWidget(BaseWidget):
             self._settings.cluster_pass = pwd
             util.set_valid(self._content.username_edit, True)
             util.set_valid(self._content.password_edit, True)
-        alg = AlgorithmManager.create("Authenticate")
+        # Note: here and in the following create() calls. Version 1 of
+        # the remote algorithms is guaranteed to work at SNS. Version
+        # 2 generalizes the remote algorithms (see tickets #9277 and
+        # #11126). While the v2 implementation for the remote job
+        # submission API has been refactored without changes, it would
+        # need to be tested before upgrading v1->v2 in this script.
+        alg = AlgorithmManager.create("Authenticate", 1)
         alg.initialize()
         alg.setProperty("ComputeResource", str(self._settings.compute_resource))
         alg.setProperty("UserName", str(self._settings.cluster_user))
         alg.setProperty("Password", str(self._settings.cluster_pass))
         alg.execute()
 
-        alg = AlgorithmManager.create("QueryAllRemoteJobs")
+        alg = AlgorithmManager.create("QueryAllRemoteJobs", 1)
         alg.initialize()
         alg.setProperty("ComputeResource", str(self._settings.compute_resource))
         alg.execute()
@@ -247,7 +253,7 @@ class RemoteJobsWidget(BaseWidget):
         if is_running:
             try:
                 # At this point we are authenticated so just purge
-                alg = AlgorithmManager.create("AbortRemoteJob")
+                alg = AlgorithmManager.create("AbortRemoteJob", 1)
                 alg.initialize()
                 alg.setProperty("ComputeResource", str(self._settings.compute_resource))
                 alg.setProperty("JobID", job_id)
@@ -255,7 +261,7 @@ class RemoteJobsWidget(BaseWidget):
             except:
                 Logger("cluster_status").error("Problem aborting job: %s" % sys.exc_value)
         try:
-            alg = AlgorithmManager.create("StopRemoteTransaction")
+            alg = AlgorithmManager.create("StopRemoteTransaction", 1)
             alg.initialize()
             alg.setProperty("ComputeResource", str(self._settings.compute_resource))
             alg.setProperty("TransactionID", trans_id)

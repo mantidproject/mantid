@@ -50,7 +50,7 @@ namespace MDAlgorithms
     std::map<std::string, std::string> validateInputs();
 
     boost::shared_ptr<Mantid::API::IMDHistoWorkspace> hatSmooth(boost::shared_ptr<const Mantid::API::IMDHistoWorkspace> toSmooth,
-                                     const std::vector<int> &widthVector, boost::optional<boost::shared_ptr<const Mantid::API::IMDHistoWorkspace> > weighting);
+                                     const std::vector<int> &widthVector, boost::optional<boost::shared_ptr<const Mantid::API::IMDHistoWorkspace> > weightingWS);
 
   private:
 

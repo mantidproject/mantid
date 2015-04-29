@@ -1,5 +1,6 @@
 #include "MantidVatesSimpleGuiViewWidgets/ViewBase.h"
 #include "MantidVatesSimpleGuiViewWidgets/BackgroundRgbProvider.h"
+#include "MantidVatesSimpleGuiViewWidgets/RebinnedSourcesManager.h"
 
 #if defined(__INTEL_COMPILER)
   #pragma warning disable 1170
@@ -10,10 +11,11 @@
 #include <pqAnimationScene.h>
 #include <pqApplicationCore.h>
 #include <pqDataRepresentation.h>
+#include <pqDeleteReaction.h>
 #include <pqObjectBuilder.h>
-#include <pqPipelineSource.h>
 #include <pqPipelineFilter.h>
 #include <pqPipelineRepresentation.h>
+#include <pqPipelineSource.h>
 #include <pqPVApplicationCore.h>
 #include <pqRenderView.h>
 #include <pqScalarsToColors.h>
@@ -33,6 +35,7 @@
 #include <QDebug>
 #include <QHBoxLayout>
 #include <QPointer>
+#include <QSet>
 
 #include <stdexcept>
 
@@ -46,8 +49,10 @@ namespace SimpleGui
 /**
  * Default constructor.
  * @param parent the parent widget for the view
+ * @param rebinnedSourcesManager Pointer to a RebinnedSourcesManager
  */
-ViewBase::ViewBase(QWidget *parent) : QWidget(parent), m_currentColorMapModel(NULL), m_temporaryWorkspaceIdentifier("tempvsi")
+ViewBase::ViewBase(QWidget *parent, RebinnedSourcesManager* rebinnedSourcesManager) : QWidget(parent),
+                                      m_rebinnedSourcesManager(rebinnedSourcesManager), m_currentColorMapModel(NULL), m_temporaryWorkspaceIdentifier("rebinned_vsi")
 {
 }
 
@@ -91,19 +96,23 @@ pqRenderView* ViewBase::createRenderView(QWidget* widget, QString viewName)
  */
 void ViewBase::destroyFilter(pqObjectBuilder *builder, const QString &name)
 {
+  (void) builder;
+
   pqServer *server = pqActiveObjects::instance().activeServer();
   pqServerManagerModel *smModel = pqApplicationCore::instance()->getServerManagerModel();
   QList<pqPipelineSource *> sources;
   QList<pqPipelineSource *>::Iterator source;
   sources = smModel->findItems<pqPipelineSource *>(server);
+  QSet<pqPipelineSource*> toDelete;
   for (source = sources.begin(); source != sources.end(); ++source)
   {
     const QString sourceName = (*source)->getSMName();
     if (sourceName.startsWith(name))
     {
-      builder->destroy(*source);
+    toDelete.insert(*source);
     }
   }
+  pqDeleteReaction::deleteSources(toDelete);
 }
 
 /**
@@ -282,15 +291,17 @@ pqPipelineSource* ViewBase::setPluginSource(QString pluginName, QString wsName)
   pqServer *server = pqActiveObjects::instance().activeServer();
   pqPipelineSource *src = builder->createSource("sources", pluginName,
                                                 server);
+  src->getProxy()->SetAnnotation("MdViewerWidget0", "1");
   vtkSMPropertyHelper(src->getProxy(),
                       "Mantid Workspace Name").Set(wsName.toStdString().c_str());
 
   // Update the source so that it retrieves the data from the Mantid workspace
-  vtkSMSourceProxy *srcProxy = vtkSMSourceProxy::SafeDownCast(src->getProxy());
-  srcProxy->UpdateVTKObjects();
-  srcProxy->Modified();
-  srcProxy->UpdatePipelineInformation();
-  src->updatePipeline();
+  src->getProxy()->UpdateVTKObjects(); // Updates all the proxies
+  src->updatePipeline(); // Updates the pipeline
+  src->setModifiedState(pqProxy::UNMODIFIED); // Just to that the UI state looks consistent with the apply
+
+  // Update the properties, from PV3.98.1 to PV4.3.1, it wasn't updating any longer, so need to force it
+  src->getProxy()->UpdatePropertyInformation();
 
   return src;
 }
@@ -636,12 +647,12 @@ bool ViewBase::isTemporaryWorkspace(pqPipelineSource *src)
   {
     wsType = src->getSMName();
   }
-  
+
 
   QString wsName(vtkSMPropertyHelper(src->getProxy(),
                                     "WorkspaceName", true).GetAsString());
 
-  if (wsName.contains(m_temporaryWorkspaceIdentifier))
+  if (wsName.contains(m_temporaryWorkspaceIdentifier) && m_rebinnedSourcesManager->isRebinnedSourceBeingTracked(src))
   {
     return true;
   }

@@ -172,6 +172,9 @@ public slots:
 
   //! \name Waterfall Plots
   //@{
+  void toggleWaterfall(bool on);
+  void convertToWaterfall();
+  void convertFromWaterfall();
   void showWaterfallOffsetDialog();
   void reverseWaterfallOrder();
   void showWaterfallFillDialog();
@@ -227,6 +230,7 @@ private:
   void removeLayerSelectionFrame();
 
   void createWaterfallBox();
+  void removeWaterfallBox();
 
 	Graph* active_graph;
 	//! Used for resizing of layers.
@@ -276,7 +280,7 @@ class WaterfallFillDialog : QDialog
 public:
     WaterfallFillDialog(MultiLayer *parent, Graph *active_graph);
 
-public slots:    
+public slots:
   void setFillMode();
   void enableFill(bool b);
 
