@@ -8,10 +8,10 @@
 #ifndef SHOWPEAKHKLOFFSETSTEST_H_
 #define SHOWPEAKHKLOFFSETSTEST_H_
 #include <cxxtest/TestSuite.h>
+#include "MantidAPI/ITableWorkspace.h"
 #include "MantidCrystal/LoadIsawPeaks.h"
 #include "MantidCrystal/LoadIsawUB.h"
 #include "MantidCrystal/ShowPeakHKLOffsets.h"
-#include "../../DataObjects/inc/MantidDataObjects/TableWorkspace.h"
 
 using Mantid::Crystal::LoadIsawPeaks;
 using Mantid::Crystal::LoadIsawUB;
@@ -48,7 +48,7 @@ class ShowPeakHKLOffsetsTest: public CxxTest::TestSuite
      TS_ASSERT(show.execute())
      TS_ASSERT(show.isExecuted())
      show.setProperty("HKLIntegerOffsets","offsets");
-     boost::shared_ptr<TableWorkspace> Offsets= show.getProperty("HKLIntegerOffsets");
+     boost::shared_ptr<Mantid::API::ITableWorkspace> Offsets= show.getProperty("HKLIntegerOffsets"); 
 
 
      TS_ASSERT_DELTA( Offsets->Double(3,1), 0.0186555,.1)
