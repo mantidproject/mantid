@@ -175,10 +175,9 @@ double HKT (const double x, const double G, const double F) {
 }
 
 // Dynamic Kubo-Toyabe
-double getDKT (double t, double G, double F, double v){
+double getDKT (double t, double G, double F, double v, double eps){
 
-  const int tsmax = 656; // Length of the time axis, 32 us of valid data
-  const double eps = 0.05; // Bin width for calculations
+  const int tsmax = static_cast<int>(std::ceil(32.768/eps));
 
   static double oldG=-1., oldV=-1., oldF=-1.;
   static std::vector<double> gStat(tsmax), gDyn(tsmax);
@@ -266,7 +265,7 @@ void DynamicKuboToyabe::function1D(double* out, const double* xValues, const siz
   else {
 
     for (size_t i = 0; i<nData; i++){
-      out[i] = A*getDKT(xValues[i],G,F,v);
+      out[i] = A*getDKT(xValues[i],G,F,v,m_eps);
     }
   }
 
@@ -274,6 +273,10 @@ void DynamicKuboToyabe::function1D(double* out, const double* xValues, const siz
 }
 
 
+//----------------------------------------------------------------------------------------------
+/** Constructor
+ */
+DynamicKuboToyabe::DynamicKuboToyabe() : m_eps(0.05) {}
 
 void DynamicKuboToyabe::functionDeriv(const API::FunctionDomain& domain, API::Jacobian& jacobian)
 {
@@ -290,6 +293,55 @@ void DynamicKuboToyabe::setActiveParameter(size_t i, double value) {
   setParameter( i, fabs(value), false);
 
 }
+
+//----------------------------------------------------------------------------------------------
+/** Get Attribute names
+ * @return A list of attribute names
+*/
+std::vector<std::string> DynamicKuboToyabe::getAttributeNames() const {
+  std::vector<std::string> res;
+  res.push_back("eps");
+  return res;
+}
+
+//----------------------------------------------------------------------------------------------
+/** Get Attribute
+ * @param attName :: Attribute name. If it is not "eps" an exception is thrown.
+ * @return a value of attribute attName
+ */
+API::IFunction::Attribute DynamicKuboToyabe::getAttribute(const std::string &attName) const {
+
+  if (attName == "eps") {
+    return Attribute(m_eps);
+  }
+  throw std::invalid_argument("DynamicKuboToyabe: Unknown attribute " + attName);
+}
+
+//----------------------------------------------------------------------------------------------
+/** Set Attribute
+ * @param attName :: The attribute name. If it is not "eps" exception is thrown.
+ * @param att :: A double attribute containing a new positive value.
+ */
+void DynamicKuboToyabe::setAttribute(const std::string &attName,
+                              const API::IFunction::Attribute &att) {
+  if (attName == "eps") {
+
+    m_eps = att.asDouble();
+    if (m_eps < 0) {
+      throw std::invalid_argument("DynamicKuboToyabe: bin width cannot be negative.");
+    }
+  }
+  throw std::invalid_argument("DynamicKuboToyabe: Unknown attribute " + attName);
+}
+
+//----------------------------------------------------------------------------------------------
+/** Check if attribute attName exists
+  * @param attName :: The attribute name.
+  */
+bool DynamicKuboToyabe::hasAttribute(const std::string &attName) const {
+  return attName == "eps";
+}
+
 
 } // namespace CurveFitting
 } // namespace Mantid
