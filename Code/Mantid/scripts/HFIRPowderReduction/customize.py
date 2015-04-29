@@ -4,7 +4,6 @@
 ################################################################################
 import sys
 import shutil
-import datetime
 
 def main(argv):
     """ Main
@@ -13,7 +12,7 @@ def main(argv):
         print "Input: %s [pyqt python file name]" % (argv[0])
         return
 
-    # import 
+    # import
     pfilename = argv[1]
     if pfilename.endswith('.') is True:
         pfilename += "py"
@@ -21,16 +20,17 @@ def main(argv):
         pfile = open(pfilename, 'r')
         lines = pfile.readlines()
         pfile.close()
-    except IOError as e:
-        raise e
+    except IOError as ioe:
+        raise ioe
 
     # move the source file
     shutil.move(pfilename, pfilename+".bak")
 
     # replace and add import
     wbuf = ""
-    wbuf += "#pylint: disable=invalid-name,relative-import,too-many-lines,too-many-instance-attributes,\
-            too-many-locals,attribute-defined-outside-init\n"
+    wbuf += "#pylint: disable=invalid-name,relative-import,too-many-lines,too-many-instance-attributes,"
+    wbuf += "too-many-statements,line-too-long"
+    wbuf += "too-many-locals,attribute-defined-outside-init\n"
     importclass = True
     for line in lines:
         if line.count('class') == 1 and line.count('):') == 1 and importclass is True:

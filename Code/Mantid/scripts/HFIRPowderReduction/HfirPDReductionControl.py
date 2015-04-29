@@ -2,6 +2,7 @@
 ############################################################################
 #
 # HFIR powder reduction control class
+# Key Words: FUTURE
 #
 ############################################################################
 import sys
@@ -18,9 +19,8 @@ curdir = os.getcwd()
 libpath = os.path.join(curdir.split('Code')[0], 'Code/debug/bin')
 if os.path.exists(libpath) is False:
     libpath = os.path.join(curdir.split('Code')[0], 'Code/release/bin')
-sys.path.append(libpath) 
+sys.path.append(libpath)
 import mantid.simpleapi as api
-import mantid.kernel
 from mantid.simpleapi import AnalysisDataService
 #from mantid.kernel import ConfigService
 
@@ -93,7 +93,6 @@ class PDRManager(object):
         return self._rawLogInfoWS
 
 
-
     def getVanadiumPeaks(self):
         """
         """
@@ -146,6 +145,16 @@ class PDRManager(object):
 
         return
 
+    def setProcessedVanadiumData(self, wksp):
+        """ Set tempory processed vanadium data
+        Arguments:
+         - vanws :: workspace
+         - note  :: string as note
+        """
+        self._processedVanWS = wksp
+
+        return
+
     def setProcessedVanadiumDataTemp(self, vanws, note):
         """ Set tempory processed vanadium data
         Arguments:
@@ -156,7 +165,6 @@ class PDRManager(object):
         self._processVanNote = note
 
         return
-
 
     def setVanadiumPeaks(self, vanpeakposlist):
         """ Set up vanadium peaks in 2theta
@@ -331,6 +339,11 @@ class HFIRPDRedControl(object):
         exp = int(expno)
         scan = int(scanno)
 
+        # FUTURE: Fix this!  Should be applied to all sample logs
+        if xlabel != 'Pt.':
+            xlabel = 'Pt.'
+            self._logNotice('XLabel supports Pt. only.  More tests are required to support other log.')
+
         if self._myWorkspaceDict.has_key((exp, scan)) is False:
             raise NotImplementedError("Exp %d Scan %d does not have reduced \
                     workspace." % (exp, scan))
@@ -350,7 +363,8 @@ class HFIRPDRedControl(object):
         tempoutws = api.GetSpiceDataRawCountsFromMD(InputWorkspace=datamdws,
                                                     MonitorWorkspace=monitormdws,
                                                     Mode='Sample Log',
-                                                    SampleLogName=samplelogname)
+                                                    SampleLogName=samplelogname,
+                                                    XLabel=xlabel)
 
         vecx = tempoutws.readX(0)[:]
         vecy = tempoutws.readY(0)[:]
@@ -385,7 +399,7 @@ class HFIRPDRedControl(object):
         """
         # get on hold of processed vanadium data workspace
         wsmanager = self.getWorkspace(exp, scan, raiseexception=True)
-        
+
         if tempdata is True:
             procVanWs = wsmanager.getProcessedVanadiumWSTemp()
         else:
@@ -558,9 +572,9 @@ class HFIRPDRedControl(object):
                 datamdwslist.append(wsmanager.datamdws)
                 monitormdwslist.append(wsmanager.monitormdws)
                 self._lastWkspToMerge.append(wsmanager)
-            except Exception as e:
+            except KeyError as ne:
                 print '[Error] Unable to retrieve MDWorkspaces for Exp %d Scan %d due to %s.' % (
-                    expno, scanno, str(e))
+                    expno, scanno, str(ne))
                 scannolist.remove(scanno)
         # ENDFOR
 
@@ -845,8 +859,8 @@ class HFIRPDRedControl(object):
             api.SaveFocusedXYE(InputWorkspace=wksp,
                                StartAtBankNumber=1,
                                Filename=sfilename)
-        # ENDIF 
-        
+        # ENDIF
+
         if "topas" in filetype:
             sfilename = sfilename[:-4]+".xye"
             api.SaveFocusedXYE(InputWorkspace=wksp,
@@ -869,9 +883,9 @@ class HFIRPDRedControl(object):
         else:
             wksp = wsmanager.getProcessedVanadiumWS()
 
-        # Save 
-        api.SaveFocusedXYE(InputWorkspace=wksp, 
-                   StartAtBankNumber=1, 
+        # Save
+        api.SaveFocusedXYE(InputWorkspace=wksp,
+                   StartAtBankNumber=1,
                    Filename=savefilename)
 
         return
@@ -947,7 +961,7 @@ class HFIRPDRedControl(object):
                               PeakPositions=numpy.array(vanpeakposlist))
 
         # Store
-        wsmanager._processedVanWS = wksp
+        wsmanager.setProcessedVanadiumData(wksp)
 
         return True
 
@@ -996,7 +1010,7 @@ class HFIRPDRedControl(object):
         return rvalue
 
 #-------------------------------------------------------------------------------
-# External Methods 
+# External Methods
 #-------------------------------------------------------------------------------
 def downloadFile(url, localfilepath):
     """

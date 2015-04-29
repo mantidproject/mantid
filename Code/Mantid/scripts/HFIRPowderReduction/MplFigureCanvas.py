@@ -1,4 +1,4 @@
-#pylint: disable=invalid-name
+#pylint: disable=invalid-name,too-many-public-methods,too-many-arguments,non-parent-init-called
 import os
 
 from PyQt4 import QtGui
@@ -256,7 +256,7 @@ class Qt4MplCanvas(FigureCanvas):
         - x: numpy array X
         - y: numpy array Y
         """
-        # Test... FIXME
+        # Hold previous data
         self.axes.hold(True)
 
         # process inputs and defaults
@@ -272,7 +272,7 @@ class Qt4MplCanvas(FigureCanvas):
 
         # color must be RGBA (4-tuple)
         r = self.axes.plot(x, y, color=color, marker=marker, linestyle=linestyle,
-                label=label, linewidth=1) # return: list of matplotlib.lines.Line2D object
+                label=label, linewidth=linewidth) # return: list of matplotlib.lines.Line2D object
 
         self.axes.set_aspect('auto')
 
@@ -315,10 +315,11 @@ class Qt4MplCanvas(FigureCanvas):
         # show image
         imgplot = self.axes.imshow(array2d, extent=[xmin,xmax,ymin,ymax], interpolation='none')
         # set y ticks as an option:
-        # FIXME - Set up the Y-axis ticks is erroreous
-        # if yticklabels is not None:
-        #     # it will always label the first N ticks even image is zoomed in
-        #     self.axes.set_yticklabels(yticklabels)
+        if yticklabels is not None:
+            # it will always label the first N ticks even image is zoomed in
+            print "--------> [FixMe]: Set up the Y-axis ticks is erroreous"
+            #self.axes.set_yticklabels(yticklabels)
+
         # explicitly set aspect ratio of the image
         self.axes.set_aspect('auto')
 
@@ -343,9 +344,9 @@ class Qt4MplCanvas(FigureCanvas):
         # set aspect to auto mode
         self.axes.set_aspect('auto')
 
-        img = mpimg.imread(str(imagefilename))
+        #img = mpimg.imread(str(imagefilename))
         lum_img = img[:,:,0]
-        # TODO : refactor for image size, interpolation and origin
+        # FUTURE : refactor for image size, interpolation and origin
         imgplot = self.axes.imshow(img, extent=[0, 1000, 800, 0], interpolation='none', origin='lower')
 
         # Set color bar.  plt.colorbar() does not work!
@@ -529,7 +530,7 @@ class Qt4MplCanvas(FigureCanvas):
         return
 
 
-    def _setupLegend(self):
+    def _setupLegend(self, location='best'):
         """ Set up legend
         self.axes.legend()
         Handler is a Line2D object. Lable maps to the line object
@@ -547,10 +548,14 @@ class Qt4MplCanvas(FigureCanvas):
             "upper center",
             "center"]
 
+        # Check legend location valid or not
+        if location not in loclist:
+            location = 'best'
+
         handles, labels = self.axes.get_legend_handles_labels()
-        self.axes.legend(handles, labels, loc='best')
-        print handles
-        print labels
+        self.axes.legend(handles, labels, loc=location)
+        # print handles
+        # print labels
         #self.axes.legend(self._myLegendHandlers, self._myLegentLabels)
 
         return
@@ -560,8 +565,9 @@ class Qt4MplCanvas(FigureCanvas):
 class MyNavigationToolbar(NavigationToolbar):
     """ A customized navigation tool bar attached to canvas
     """
-    def __init__(self, parent, canvas, direction='h'):
+    def __init__(self, parent, canvas):
         """ Initialization
+        FUTURE: direction='h'
         """
         self.canvas = canvas
         QtGui.QWidget.__init__(self, parent)

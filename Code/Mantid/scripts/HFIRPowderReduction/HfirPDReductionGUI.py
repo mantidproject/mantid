@@ -481,11 +481,11 @@ class MainWindow(QtGui.QMainWindow):
         else:
             # read from GUI
             try:
+                self._logDebug("Attending to load Exp %d Scan %d." % (expno, scanno))
                 expno, scanno = self._uiGetExpScanNumber()
-            except NotImplementedError as ne
+            except NotImplementedError as ne:
                 self._logError("Error to get Exp and Scan due to %s." % (str(ne)))
                 return
-            self._logDebug("Attending to load Exp %d Scan %d." % (expno, scanno))
         # ENDIF
 
         # Form data file name and download data
