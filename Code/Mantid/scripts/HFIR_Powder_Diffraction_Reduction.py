@@ -1,4 +1,4 @@
-#pylint: disable=invalid-name
+#pylint: disable=invalid-name,no-name-in-module
 """
     Script used to start the DGS reduction GUI from MantidPlot
 """

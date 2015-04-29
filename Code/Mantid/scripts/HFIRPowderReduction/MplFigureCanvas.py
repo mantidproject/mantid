@@ -339,13 +339,13 @@ class Qt4MplCanvas(FigureCanvas):
     def addImage(self, imagefilename):
         """ Add an image by file
         """
-        import matplotlib.image as mpimg
+        #import matplotlib.image as mpimg
 
         # set aspect to auto mode
         self.axes.set_aspect('auto')
 
-        #img = mpimg.imread(str(imagefilename))
-        lum_img = img[:,:,0]
+        img = mpimg.imread(str(imagefilename))
+        # lum_img = img[:,:,0]
         # FUTURE : refactor for image size, interpolation and origin
         imgplot = self.axes.imshow(img, extent=[0, 1000, 800, 0], interpolation='none', origin='lower')
 

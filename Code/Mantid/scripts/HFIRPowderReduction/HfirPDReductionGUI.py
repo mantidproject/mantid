@@ -509,7 +509,7 @@ class MainWindow(QtGui.QMainWindow):
                 cause = "Load data failed."
             else:
                 cause = None
-        except NotImplementedError as ne
+        except NotImplementedError as ne:
             execstatus = False
             cause = str(ne)
         # END-TRY-EXCEPT
