@@ -26,52 +26,52 @@ def provide_group_workspace_for_added_event_data(event_ws_name, monitor_ws_name,
     GroupWorkspaces(InputWorkspaces = [event_ws_name, monitor_ws_name ], OutputWorkspace = out_ws_name)
 
 
-class TestSliceStringParser(unittest.TestCase):
+#class TestSliceStringParser(unittest.TestCase):
 
-    def checkValues(self, list1, list2):
+#    def checkValues(self, list1, list2):
 
-        def _check_single_values( v1, v2):
-            self.assertAlmostEqual(v1, v2)
+#        def _check_single_values( v1, v2):
+#            self.assertAlmostEqual(v1, v2)
 
-        self.assertEqual(len(list1), len(list2))
-        for v1,v2 in zip(list1, list2):
-            start_1,stop_1 = v1
-            start_2, stop_2 = v2
-            _check_single_values(start_1, start_2)
-            _check_single_values(stop_1, stop_2)
+#        self.assertEqual(len(list1), len(list2))
+#        for v1,v2 in zip(list1, list2):
+#            start_1,stop_1 = v1
+#            start_2, stop_2 = v2
+#            _check_single_values(start_1, start_2)
+#            _check_single_values(stop_1, stop_2)
 
-    def test_checkValues(self):
-        """sanity check to ensure that the others will work correctly"""
-        values = [  [[1,2],],
-                  [[None, 3],[4, None]],
-                 ]
-        for singlevalues in values:
-            self.checkValues(singlevalues, singlevalues)
+#    def test_checkValues(self):
+#        """sanity check to ensure that the others will work correctly"""
+#        values = [  [[1,2],],
+#                  [[None, 3],[4, None]],
+#                 ]
+#        for singlevalues in values:
+#            self.checkValues(singlevalues, singlevalues)
 
 
-    def test_parse_strings(self):
-        inputs = { '1-2':[[1,2]],         # single period syntax  min < x < max
-                   '1.3-5.6':[[1.3,5.6]], # float
-                   '1-2,3-4':[[1,2],[3,4]],# more than one slice
-                   '>1':[[1, -1]],       # just lower bound
-                   '<5':[[-1, 5]],      # just upper bound
-                   '<5,8-9': [[-1, 5], [8,9]],
-                   '1:2:5': [[1,3], [3,5]] # sintax: start, step, stop
-            }
+#    def test_parse_strings(self):
+#        inputs = { '1-2':[[1,2]],         # single period syntax  min < x < max
+#                   '1.3-5.6':[[1.3,5.6]], # float
+#                   '1-2,3-4':[[1,2],[3,4]],# more than one slice
+#                   '>1':[[1, -1]],       # just lower bound
+#                   '<5':[[-1, 5]],      # just upper bound
+#                   '<5,8-9': [[-1, 5], [8,9]],
+#                   '1:2:5': [[1,3], [3,5]] # sintax: start, step, stop
+#            }
 
-        for (k, v) in inputs.items():
-            self.checkValues(su.sliceParser(k),v)
+#        for (k, v) in inputs.items():
+#            self.checkValues(su.sliceParser(k),v)
 
-    def test_accept_spaces(self):
-        self.checkValues(su.sliceParser("1 - 2, 3 - 4"), [[1,2],[3,4]])
+#    def test_accept_spaces(self):
+#        self.checkValues(su.sliceParser("1 - 2, 3 - 4"), [[1,2],[3,4]])
 
-    def test_invalid_values_raise(self):
-        invalid_strs = ["5>6", ":3:", "MAX<min"]
-        for val in invalid_strs:
-            self.assertRaises(SyntaxError, su.sliceParser, val)
+#    def test_invalid_values_raise(self):
+#        invalid_strs = ["5>6", ":3:", "MAX<min"]
+#        for val in invalid_strs:
+#            self.assertRaises(SyntaxError, su.sliceParser, val)
 
-    def test_empty_string_is_valid(self):
-        self.checkValues(su.sliceParser(""), [[-1,-1]])
+#    def test_empty_string_is_valid(self):
+#        self.checkValues(su.sliceParser(""), [[-1,-1]])
 
 
 class TestLoadingAddedEventWorkspaceNameParsing(unittest.TestCase):
@@ -85,38 +85,38 @@ class TestLoadingAddedEventWorkspaceNameParsing(unittest.TestCase):
 
     def test_check_regex_for_data(self):
         # Check when there is no special ending
-        self.assertIsNotNone(re.search(su.REG_DATA_NAME, TEST_STRING_DATA))
+        self.assertNotEqual(None, re.search(su.REG_DATA_NAME, TEST_STRING_DATA))
         # Check when there is a _1 ending
-        self.assertIsNotNone(re.search(su.REG_DATA_NAME, TEST_STRING_DATA1))
+        self.assertNotEqual(None, re.search(su.REG_DATA_NAME, TEST_STRING_DATA1))
         # Check when there is a _2 ending
-        self.assertIsNotNone(re.search(su.REG_DATA_NAME, TEST_STRING_DATA2))
+        self.assertNotEqual(None, re.search(su.REG_DATA_NAME, TEST_STRING_DATA2))
         # Check when there is a multiple ending
-        self.assertIsNotNone(re.search(su.REG_DATA_NAME, TEST_STRING_DATA3))
+        self.assertNotEqual(None, re.search(su.REG_DATA_NAME, TEST_STRING_DATA3))
 
 
     def test_check_regex_for_data_monitors(self):
         # Check when there is no special ending
-        self.assertIsNotNone(re.search(su.REG_DATA_MONITORS_NAME, TEST_STRING_MON))
+        self.assertNotEqual(None, re.search(su.REG_DATA_MONITORS_NAME, TEST_STRING_MON))
         # Check when there is a _1 ending
-        self.assertIsNotNone(re.search(su.REG_DATA_MONITORS_NAME, TEST_STRING_MON1))
+        self.assertNotEqual(None, re.search(su.REG_DATA_MONITORS_NAME, TEST_STRING_MON1))
         # Check when there is a _2 ending
-        self.assertIsNotNone(re.search(su.REG_DATA_MONITORS_NAME, TEST_STRING_MON2))
+        self.assertNotEqual(None, re.search(su.REG_DATA_MONITORS_NAME, TEST_STRING_MON2))
         # Check when there is a multiple ending
-        self.assertIsNotNone(re.search(su.REG_DATA_MONITORS_NAME, TEST_STRING_MON3))
+        self.assertNotEqual(None, re.search(su.REG_DATA_MONITORS_NAME, TEST_STRING_MON3))
 
     def test_regexes_do_not_clash(self):
         # Check when there is no special ending
-        self.assertIsNone(re.search(su.REG_DATA_NAME, TEST_STRING_MON)) 
-        self.assertIsNone(re.search(su.REG_DATA_MONITORS_NAME, TEST_STRING_DATA))
+        self.assertEqual(None, re.search(su.REG_DATA_NAME, TEST_STRING_MON)) 
+        self.assertEqual(None, re.search(su.REG_DATA_MONITORS_NAME, TEST_STRING_DATA))
         # Check when there is a _1 ending
-        self.assertIsNone(re.search(su.REG_DATA_NAME, TEST_STRING_MON1)) 
-        self.assertIsNone(re.search(su.REG_DATA_MONITORS_NAME, TEST_STRING_DATA1))
+        self.assertEqual(None, re.search(su.REG_DATA_NAME, TEST_STRING_MON1)) 
+        self.assertEqual(None, re.search(su.REG_DATA_MONITORS_NAME, TEST_STRING_DATA1))
         # Check when there is a _2 ending
-        self.assertIsNone(re.search(su.REG_DATA_NAME, TEST_STRING_MON2)) 
-        self.assertIsNone(re.search(su.REG_DATA_MONITORS_NAME, TEST_STRING_DATA2))
+        self.assertEqual(None, re.search(su.REG_DATA_NAME, TEST_STRING_MON2)) 
+        self.assertEqual(None, re.search(su.REG_DATA_MONITORS_NAME, TEST_STRING_DATA2))
         # Check when there is a multiple ending
-        self.assertIsNone(re.search(su.REG_DATA_NAME, TEST_STRING_MON3)) 
-        self.assertIsNone(re.search(su.REG_DATA_MONITORS_NAME, TEST_STRING_DATA3))
+        self.assertEqual(None, re.search(su.REG_DATA_NAME, TEST_STRING_MON3)) 
+        self.assertEqual(None, re.search(su.REG_DATA_MONITORS_NAME, TEST_STRING_DATA3))
     
     def test_check_child_file_names_for_valid_names(self):
         # Check when there is no special ending
