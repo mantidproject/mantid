@@ -4,6 +4,7 @@
 #include <boost/python/class.hpp>
 #include <boost/python/enum.hpp>
 #include <boost/python/scope.hpp>
+#include <boost/python/list.hpp>
 
 using Mantid::Geometry::Group;
 using Mantid::Geometry::SymmetryOperation;
@@ -21,6 +22,17 @@ namespace {
 
       return pythonSymOps;
     }
+
+    boost::python::list getSymmetryOperations(Group &self) {
+      const std::vector<SymmetryOperation> &symOps = self.getSymmetryOperations();
+
+      boost::python::list pythonSymOps;
+      for (auto it = symOps.begin(); it != symOps.end(); ++it) {
+        pythonSymOps.append(*it);
+      }
+
+      return pythonSymOps;
+    }
 }
 
 void export_Group()
@@ -32,5 +44,6 @@ void export_Group()
   class_<Group, boost::noncopyable>("Group", no_init)
       .def("getOrder", &Group::order, "Returns the order of the group.")
       .def("getCoordinateSystem", &Group::getCoordinateSystem, "Returns the type of coordinate system to distinguish groups with hexagonal system definition.")
+      .def("getSymmetryOperations", &getSymmetryOperations, "Returns the symmetry operations contained in the group.")
       .def("getSymmetryOperationStrings", &getSymmetryOperationStrings, "Returns the x,y,z-strings for the contained symmetry operations.");
 }
