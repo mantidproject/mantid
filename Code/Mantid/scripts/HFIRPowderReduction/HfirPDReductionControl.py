@@ -792,6 +792,20 @@ class HFIRPDRedControl(object):
         return (True, [wavelength, localdetefffname, localexcldetfname])
 
 
+    def saveMergedScan(self, sfilename, mergeindex):
+        """ Save the current merged scan
+        """
+        if self._myMergedWSDict.has_key(mergeindex) is True:
+            wksp = self._myMergedWSDict[mergeindex]
+        else:
+            raise NotImplementedError('Unable to locate the merged scan workspace.')
+
+        api.SaveFocusedXYE(InputWorkspace=wksp, 
+                           StartAtBankNumber=1, 
+                           Filename=sfilename)
+
+        return
+
 
     def savePDFile(self, exp, scan, filetype, sfilename):
         """ Save a reduced workspace to gsas/fullprof/topaz data file

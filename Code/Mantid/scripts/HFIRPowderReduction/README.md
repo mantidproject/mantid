@@ -1,8 +1,6 @@
 Tasks
 -----
   
-  6. Tab *Multiple Scans*: implement **Save Merged**
-  7. Tab *Multiple Scans*: implement **Save All**
   6. Find out why the vanadium runs (379-10/11) look funny, i.e., oscilating curves;
   7. Talk with Clarina how to deal with vanadium spectrum with peaks striped; 
   8. Tab *Normalized*: **Normalization Monitor** should have a default value as the average of monitor counts
@@ -22,6 +20,8 @@ Finished Tasks
   7. Tab *Normalized*: **Save** does not work well with option *gsas and fullprof*;
   8. Tab *vanadium*: implement **Smooth Data**;
   9. Tab *vanadium*: implement **Save**;
+  10. Tab *Multiple Scans*: implement **Save Merged**
+  11. Tab *Multiple Scans*: implement **Save All**
 
 
 Use cases for tabs

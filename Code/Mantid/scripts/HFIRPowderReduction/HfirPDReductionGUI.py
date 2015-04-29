@@ -123,6 +123,10 @@ class MainWindow(QtGui.QMainWindow):
                 self.doMergeScanViewMerged)
         self.connect(self.ui.pushButton_clearMultCanvas, QtCore.SIGNAL('clicked()'),
                 self.doClearMultiRunCanvas)
+        self.connect(self.ui.pushButton_saveAllIndScans, QtCore.SIGNAL('clicked()'),
+                self.doSaveMultipleScans)
+        self.connect(self.ui.pushButton_saveMerge, QtCore.SIGNAL('clicked()'),
+                self.doSaveMergedScan)
 
         # tab 'Vanadium'
         self.connect(self.ui.pushButton_stripVanPeaks, QtCore.SIGNAL('clicked()'),
@@ -269,6 +273,9 @@ class MainWindow(QtGui.QMainWindow):
             self._tabLineDict[key] = []
         for key in [2, 3, 4]:
             self._tabBinParamDict[key] = [None, None, None]
+
+        self._lastMergeLabel = ""
+        self._lastMergeIndex = -1
 
         return
 
@@ -794,6 +801,8 @@ class MainWindow(QtGui.QMainWindow):
         self._lastMergeIndex = mindex
         self._lastMergeLabel = label
 
+        print "Last merged index = ",  self._lastMergeIndex 
+
         return
 
 
@@ -877,17 +886,19 @@ class MainWindow(QtGui.QMainWindow):
     def doMergeScanViewMerged(self):
         """ Change the merged run's view to 1D plot
         """
-        raise NotImplementedError('ASAP')
         # Highlight the button's color
-        self.ui.pushButton_view2D.setStyleSheet('QPushButton {color: black;}')
-        self.ui.pushButton_viewMerge.setStyleSheet('QPushButton {color: red;}')
+        self.ui.pushButton_view2D.setStyleSheet('QPushButton {color: red;}')
+        self.ui.pushButton_view2D.setEnabled(True)
+        self.ui.pushButton_viewMScan1D.setStyleSheet('QPushButton {color: red;}')
+        self.ui.pushButton_viewMScan1D.setEnabled(True)
 
         # Clear image
         self.ui.graphicsView_mergeRun.clearCanvas()
 
         # Plot
-        self._plotMergedReducedData(self._lastMergeIndex, self._lastMergeLabel)
+        self._plotMergedReducedData(mkey=self._lastMergeIndex, label=self._lastMergeLabel)
 
+        return
 
 
     def doPlotIndvDetMain(self):
@@ -1187,6 +1198,36 @@ class MainWindow(QtGui.QMainWindow):
             self._myControl.savePDFile(expno, scanno, filetype, sfilename)
 
         return
+
+    def doSaveMergedScan(self):
+        """ Save merged scan
+        """
+        homedir = os.getcwd()
+        filefilter = "Fullprof (*.dat)"
+        sfilename = str(QtGui.QFileDialog.getSaveFileName(self, 'Save File In Fullprof', homedir, filefilter))
+
+        self._myControl.saveMergedScan(sfilename, mergeindex=self._lastMergeIndex)
+
+        return
+
+
+    def doSaveMultipleScans(self):
+        """ Save multiple scans
+        """
+        # Get experiment number and scans
+        expno, scanslist = self._uiGetExpScanTabMultiScans()
+
+        # Get base file name  
+        homedir = os.getcwd()
+        savedir = str(QtGui.QFileDialog.getExistingDirectory(self,'Get Directory To Save Fullprof',homedir))
+
+        for scanno in scanslist:
+            sfilename = os.path.join(savedir, "HB2A_Exp%d_Scan%d_FP.dat"%(expno, scanno))
+            self._myControl.savePDFile(expno, scanno, 'fullprof', sfilename)
+        # ENDFOR
+
+        return
+
 
     def doSaveVanRun(self):
         """ Save the vanadium run with peaks removed
@@ -1572,16 +1613,15 @@ class MainWindow(QtGui.QMainWindow):
         canvas.addPlot(vecx, vecy, marker=marker, color=color,
             xlabel=xlabel, ylabel='intensity',label=label)
 
-        if clearcanvas is True:
-            xmax = max(vecx)
-            xmin = min(vecx)
-            dx = xmax-xmin
+        xmax = max(vecx)
+        xmin = min(vecx)
+        dx = xmax-xmin
 
-            ymax = max(vecy)
-            ymin = min(vecy)
-            dy = ymax-ymin
+        ymax = max(vecy)
+        ymin = min(vecy)
+        dy = ymax-ymin
 
-            canvas.setXYLimit(xmin-dx*0.1, xmax+dx*0.1, ymin-dy*0.1, ymax+dy*0.1)
+        canvas.setXYLimit(xmin-dx*0.1, xmax+dx*0.1, ymin-dy*0.1, ymax+dy*0.1)
 
         return
 
