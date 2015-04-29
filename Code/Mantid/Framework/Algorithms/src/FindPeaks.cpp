@@ -357,7 +357,7 @@ FindPeaks::findPeaksGivenStartingPoints(const std::vector<double> &peakcentres,
         const MantidVec &vecY = m_dataWS->readY(spec);
         const MantidVec &vecE = m_dataWS->readE(spec);
         const size_t numY = vecY.size();
-        size_t i_min = 0;
+        size_t i_min = 1;
         for ( ; i_min < numY; ++i_min) {
             if ((vecY[i_min] != 0.) || (vecE[i_min] != 0)) {
                 --i_min; // bring it back one
@@ -365,14 +365,14 @@ FindPeaks::findPeaksGivenStartingPoints(const std::vector<double> &peakcentres,
             }
         }
 
-        practical_x_min = vecX[i_min];
-        size_t i_max = numY-1;
+        size_t i_max = numY-2;
         for ( ; i_max > i_min; --i_max) {
             if ((vecY[i_max] != 0.) || (vecE[i_max] != 0)) {
                 ++i_max; // bring it back one
                 break;
             }
         }
+        g_log.warning() << "i_min = " << i_min << " i_max = " << i_max << "\n";
         practical_x_max = vecX[i_max];
     }
     g_log.information() << "practical x-range = [" << practical_x_min << " -> " << practical_x_max << "]\n";
