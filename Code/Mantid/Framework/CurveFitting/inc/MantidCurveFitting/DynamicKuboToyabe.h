@@ -77,6 +77,10 @@ namespace Mantid
       virtual void setActiveParameter(size_t i, double value);
 
     private:
+
+      // Evaluate DKT function for a given t, G, F, v and eps
+      double getDKT (double t, double G, double F, double v, double eps) const;
+
       /// Bin width
       double m_eps;
       double m_minEps;

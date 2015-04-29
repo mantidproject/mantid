@@ -175,17 +175,18 @@ double HKT (const double x, const double G, const double F) {
 }
 
 // Dynamic Kubo-Toyabe
-double getDKT (double t, double G, double F, double v, double eps){
+double DynamicKuboToyabe::getDKT (double t, double G, double F, double v, double eps) const {
 
   const int tsmax = static_cast<int>(std::ceil(32.768/eps));
 
-  static double oldG=-1., oldV=-1., oldF=-1.;
-  static std::vector<double> gStat(tsmax), gDyn(tsmax);
+  static double oldG=-1., oldV=-1., oldF=-1., oldEps=-1.;
 
+  const int maxTsmax = static_cast<int>(std::ceil(32.768/m_minEps));
+  static std::vector<double> gStat(maxTsmax), gDyn(maxTsmax);
 
-  if ( (G != oldG) || (v != oldV) || (F != oldF) ){
+  if ( (G != oldG) || (v != oldV) || (F != oldF) || (eps != oldEps)){
 
-    // If G or v or F have changed with respect to the 
+    // If G or v or F or eps have changed with respect to the 
     // previous call, we need to re-do the computations
 
 
@@ -212,6 +213,8 @@ double getDKT (double t, double G, double F, double v, double eps){
 
     // Store new v value
     oldV =v;
+    // Store new eps value
+    oldEps =eps;
 
     double hop = v*eps;
 
