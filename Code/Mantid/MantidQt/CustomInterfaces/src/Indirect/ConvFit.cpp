@@ -88,7 +88,6 @@ namespace IDA
     m_properties["UseFABADA"] = m_blnManager->addProperty("Use FABADA");
     m_properties["FABADA"]->addSubProperty(m_properties["UseFABADA"]);
     m_properties["OutputFABADAChain"] = m_blnManager->addProperty("Output Chain");
-    m_blnManager->setValue(m_properties["OutputFABADAChain"], true);
     m_properties["FABADAChainLength"] = m_dblManager->addProperty("Chain Length");
     m_dblManager->setDecimals(m_properties["FABADAChainLength"], 0);
     m_dblManager->setValue(m_properties["FABADAChainLength"], 10000);
