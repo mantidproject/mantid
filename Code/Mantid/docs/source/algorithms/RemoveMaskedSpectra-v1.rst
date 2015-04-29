@@ -1,4 +1,3 @@
-
 .. algorithm::
 
 .. summary::
@@ -10,35 +9,35 @@
 Description
 -----------
 
-TODO: Enter a full rst-markup description of your algorithm here.
+Removes all masked spectra from a workspace and stores all unmasked ones in the output workspace.
+The mask is taken either form the optional MaskedWorkspace property or form the input workspace
+if it is the only input. The MaskedWorkspace property can either be a masked MatrixWorkspace or
+a specialised MaskWorkspace.
 
 
 Usage
 -----
-..  Try not to use files in your examples,
-    but if you cannot avoid it then the (small) files must be added to
-    autotestdata\UsageData and the following tag unindented
-    .. include:: ../usagedata-note.txt
 
 **Example - RemoveMaskedSpectra**
 
 .. testcode:: RemoveMaskedSpectraExample
 
-   # Create a host workspace
-   ws = CreateWorkspace(DataX=range(0,3), DataY=(0,2))
-   or
-   ws = CreateSampleWorkspace()
+    # Create a workspace
+    ws = CreateSampleWorkspace()
+    # Mask some detectors
+    MaskDetectors(ws,SpectraList=[10,20,30,40,50])
+    print 'Input workspace has %s spectra' % ws.getNumberHistograms()
 
-   wsOut = RemoveMaskedSpectra()
-
-   # Print the result
-   print "The output workspace has %i spectra" % wsOut.getNumberHistograms()
+    # Removed the 5 masked spectra
+    removed = RemoveMaskedSpectra(ws)
+    print 'Output workspace has %s spectra' % removed.getNumberHistograms()
 
 Output:
 
 .. testoutput:: RemoveMaskedSpectraExample
 
-  The output workspace has ?? spectra
+    Input workspace has 200 spectra
+    Output workspace has 195 spectra
 
 .. categories::
 
