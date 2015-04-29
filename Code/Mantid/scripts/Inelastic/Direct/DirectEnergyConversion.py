@@ -1515,7 +1515,7 @@ class DirectEnergyConversion(object):
 
         return
 #-------------------------------------------------------------------------------
-    def _find_or_build_bkgr_ws(self,run,bkg_range_min=None,bkg_range_max=None,time_shift=0,target_workspace=None):
+    def _find_or_build_bkgr_ws(self,run,bkg_range_min=None,bkg_range_max=None,time_shift=0):
         """ Method calculates  background workspace or restore workspace with
             the same name as the one produced by this method from ADS
         """
@@ -1525,41 +1525,33 @@ class DirectEnergyConversion(object):
         bkg_range_max += time_shift
         run = self.get_run_descriptor(run)
         result_ws = run.get_workspace()
-        if target_workspace:
-            try:
-                NormalizationFactor = target_workspace.getRun().getLogData('NormalizationFactor').value;
-                normalize=True
-            except :
-                normalize=False
-        else:
-            normalize=False
 
         # has to have specific name for this working. The ws is build at
         # the beginning of multirep run.
-        if not 'bkgr_ws_source' in mtd:
+        if 'bkgr_ws_source' in mtd:
+            #TODO: This is questionable operation, which may be unnecessary if remove background
+            # uses time interval only. (and it probably does)
+            # need to check if bkgr_ws =mtd['bkgr_ws_source'] is enough here. 
+            # (and not delete it after bkg removal)
+            bkgr_ws = CloneWorkspace(InputWorkspace='bkgr_ws_source',OutputWorkspace='bkgr_ws')
+            if time_shift != 0: # Workspace has probably been shifted, so to have 
+                                # one needs to do appropriate shift here
+                                #correct units conversion as well
+                CopyInstrumentParameters(result_ws,bkgr_ws)
+             # Adjust the TOF such that the first monitor peak is at t=0
+                ScaleX(InputWorkspace=bkgr_ws,OutputWorkspace='bkgr_ws',Operation="Add",Factor=time_shift,\
+                     InstrumentParameter="DelayTime",Combine=True)
+        else: # calculate background workspace for future usage
             bkgr_ws = Rebin(result_ws,Params=[bkg_range_min,(bkg_range_max - bkg_range_min) * 1.001,bkg_range_max],PreserveEvents=False)
+            if run.is_monws_separate():
+                mon_ws = run.get_monitors_ws()
+                CloneWorkspace(mon_ws,OutputWorkspace="bkgr_ws_monitors")
+            bkgr_ws = self.normalise(bkgr_ws, self.normalise_method, time_shift)
+            if bkgr_ws.name()+"_monitors" in mtd:
+                DeleteWorkspace(bkgr_ws.name()+"_monitors")
             RenameWorkspace(InputWorkspace=bkgr_ws, OutputWorkspace='bkgr_ws_source')
             bkgr_ws = mtd['bkgr_ws_source']
-        #TODO: This is questionable operation, which may be unnecessary if remove background
-        # uses time interval only. (and it probably does)
-        # need to check if bkgr_ws =mtd['bkgr_ws_source'] is enough here. 
-        # (and not delete it after bkg removal)
-        bkgr_ws = CloneWorkspace(InputWorkspace='bkgr_ws_source',OutputWorkspace='bkgr_ws')
-        if time_shift != 0: # Workspace has probably been shifted, so to have 
-                            # one needs to do appropriate shift here
-                            #correct units conversion as well
-            CopyInstrumentParameters(result_ws,bkgr_ws)
-            # Adjust the TOF such that the first monitor peak is at t=0
-            ScaleX(InputWorkspace=bkgr_ws,OutputWorkspace='bkgr_ws',Operation="Add",Factor=time_shift,\
-                     InstrumentParameter="DelayTime",Combine=True)
-        if normalize:
-            if 'NormalizationFactor' in bkgr_ws.getRun():
-                existing_norm = bkgr_ws.getRun().getLogData('NormalizationFactor')
-            else:
-                existing_norm = 1
-            new_norm = NormalizationFactor/existing_norm
-            bkgr_ws/=new_norm
-            AddSampleLog(bkgr_ws,LogName='NormalizationFactor',LogText=str(new_norm),LogType='Number')
+
         return bkgr_ws
 #-------------------------------------------------------------------------------
     def _do_mono(self, run,  ei_guess,
