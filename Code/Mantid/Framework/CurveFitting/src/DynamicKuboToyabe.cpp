@@ -276,7 +276,7 @@ void DynamicKuboToyabe::function1D(double* out, const double* xValues, const siz
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
-DynamicKuboToyabe::DynamicKuboToyabe() : m_eps(0.05) {}
+DynamicKuboToyabe::DynamicKuboToyabe() : m_eps(0.05), m_minEps(0.003) {}
 
 //----------------------------------------------------------------------------------------------
 /** Function to calculate derivative numerically
@@ -337,12 +337,20 @@ void DynamicKuboToyabe::setAttribute(const std::string &attName,
                               const API::IFunction::Attribute &att) {
   if (attName == "eps") {
 
-    m_eps = att.asDouble();
-    if (m_eps < 0) {
+    double newVal = att.asDouble();
+
+    if (newVal < 0) {
       throw std::invalid_argument("DynamicKuboToyabe: bin width cannot be negative.");
+
+    } else if (newVal < m_minEps) {
+      throw std::invalid_argument("DynamicKuboToyabe: bin width too small.");
     }
+
+    m_eps = newVal;
+
+  } else {
+    throw std::invalid_argument("DynamicKuboToyabe: Unknown attribute " + attName);
   }
-  throw std::invalid_argument("DynamicKuboToyabe: Unknown attribute " + attName);
 }
 
 //----------------------------------------------------------------------------------------------

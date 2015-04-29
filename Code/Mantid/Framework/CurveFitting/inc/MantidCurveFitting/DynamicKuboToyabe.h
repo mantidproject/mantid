@@ -79,6 +79,7 @@ namespace Mantid
     private:
       /// Bin width
       double m_eps;
+      double m_minEps;
     };
 
   } // namespace CurveFitting
