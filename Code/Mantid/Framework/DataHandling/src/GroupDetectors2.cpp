@@ -2,34 +2,17 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidDataHandling/GroupDetectors2.h"
+
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidAPI/SpectraAxis.h"
-#include "MantidAPI/WorkspaceOpOverloads.h"
-#include "MantidKernel/ArrayProperty.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidDataHandling/LoadDetectorsGroupingFile.h"
+#include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
-#include "MantidDataHandling/LoadDetectorsGroupingFile.h"
-
-#include <boost/lexical_cast.hpp>
-#include <boost/shared_ptr.hpp>
-#include <iomanip>
-#include <iostream>
-#include <fstream>
-#include <ios>
-#include <set>
-#include <vector>
-#include <numeric>
 
 #include <boost/regex.hpp>
-
-#include <Poco/StringTokenizer.h>
-#include <Poco/File.h>
-#include <Poco/Path.h>
-#include <Poco/SAX/ContentHandler.h>
-#include <Poco/SAX/Attributes.h>
-#include <Poco/SAX/SAXParser.h>
 
 namespace Mantid {
 namespace DataHandling {

@@ -5,14 +5,10 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
-#include "MantidKernel/System.h"
-#include <climits>
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/GroupingWorkspace.h"
 
 #include <map>
-
-#include <Poco/SAX/ContentHandler.h>
 
 namespace Mantid {
 namespace DataHandling {
