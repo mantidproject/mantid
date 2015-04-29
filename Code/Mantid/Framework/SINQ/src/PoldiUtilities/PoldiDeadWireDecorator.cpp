@@ -68,7 +68,7 @@ PoldiDeadWireDecorator::getGoodElements(std::vector<int> rawElements) {
     std::vector<int> goodElements(newElementCount);
     std::remove_copy_if(
         rawElements.begin(), rawElements.end(), goodElements.begin(),
-        boost::bind<bool>(&PoldiDeadWireDecorator::isDeadElement, this, _1));
+        boost::bind(&PoldiDeadWireDecorator::isDeadElement, this, _1));
 
     return goodElements;
   }
