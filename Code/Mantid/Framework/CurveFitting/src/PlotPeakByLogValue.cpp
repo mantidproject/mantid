@@ -93,15 +93,11 @@ void PlotPeakByLogValue::init() {
                   "functions that"
                   "have attribute WorkspaceIndex.");
 
-  std::vector<std::string> minimizerOptions =
-      FuncMinimizerFactory::Instance().getKeys();
   declareProperty("Minimizer", "Levenberg-Marquardt",
-                  boost::make_shared<StringListValidator>(minimizerOptions),
                   "Minimizer to use for fitting. Minimizers available are "
-                  "'Levenberg-Marquardt', 'Simplex', \n"
+                  "'Levenberg-Marquardt', 'Simplex', 'FABADA',\n"
                   "'Conjugate gradient (Fletcher-Reeves imp.)', 'Conjugate "
-                  "gradient (Polak-Ribiere imp.)' and 'BFGS'",
-                  Direction::InOut);
+                  "gradient (Polak-Ribiere imp.)' and 'BFGS'");
 
   std::vector<std::string> costFuncOptions =
       CostFunctionFactory::Instance().getKeys();
@@ -110,6 +106,10 @@ void PlotPeakByLogValue::init() {
                   "Cost functions to use for fitting. Cost functions available "
                   "are 'Least squares' and 'Ignore positive peaks'",
                   Direction::InOut);
+
+  declareProperty("MaxIterations", 500,
+                  "Stop after this number of iterations if a good fit is not "
+                  "found");
 
   declareProperty("CreateOutput", false, "Set to true to create output "
                                          "workspaces with the results of the "
@@ -261,6 +261,7 @@ void PlotPeakByLogValue::exec() {
         fit->setPropertyValue("EndX", getPropertyValue("EndX"));
         fit->setPropertyValue("Minimizer", getPropertyValue("Minimizer"));
         fit->setPropertyValue("CostFunction", getPropertyValue("CostFunction"));
+        fit->setPropertyValue("MaxIterations", getPropertyValue("MaxIterations"));
         fit->setProperty("CalcErrors", true);
         fit->setProperty("CreateOutput", createFitOutput);
         fit->setProperty("OutputCompositeMembers", outputCompositeMembers);
