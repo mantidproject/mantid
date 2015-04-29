@@ -284,6 +284,10 @@ void PDFFourierTransform::exec() {
       boost::dynamic_pointer_cast<Units::Label>(unit);
   label->setLabel("AtomicDistance", "Angstrom");
   outputWS->setYUnitLabel("PDF");
+
+  outputWS->mutableRun().addProperty("Qmin", qmin, "Angstroms^-1", true);
+  outputWS->mutableRun().addProperty("Qmax", qmax, "Angstroms^-1", true);
+
   MantidVec &outputR = outputWS->dataX(0);
   for (size_t i = 0; i < sizer; i++) {
     outputR[i] = rdelta * static_cast<double>(1 + i);

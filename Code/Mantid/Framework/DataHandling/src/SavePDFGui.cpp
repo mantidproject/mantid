@@ -82,7 +82,24 @@ void SavePDFGui::exec() {
   std::ofstream out;
   out.open(filename.c_str(), std::ios_base::out);
 
-  // --------- write the header // TODO
+  // --------- write the header in the style of
+  //#Comment: neutron, Qmin=0.5, Qmax=31.42, Qdamp=0.017659, Qbroad= 0.0191822, Temperature = 300
+  out << "#Comment: neutron";
+  auto run = inputWS->run();
+  if (run.hasProperty("Qmin")) {
+      out << ", Qmin=" << run.getPropertyAsSingleValue("Qmin");
+  }
+  if (run.hasProperty("Qmax")) {
+      out << ", Qmax=" << run.getPropertyAsSingleValue("Qmax");
+  }
+  if (run.hasProperty("Qdamp")) {
+      out << ", Qdamp=" << run.getPropertyAsSingleValue("Qdamp");
+  }
+  if (run.hasProperty("Qbroad")) {
+      out << ", Qbroad=" << run.getPropertyAsSingleValue("Qbroad");
+  }
+  // TODO add the sample temperature
+  out << "\n";
 
   // --------- write the label for the data
   out << "##### start data\n";
