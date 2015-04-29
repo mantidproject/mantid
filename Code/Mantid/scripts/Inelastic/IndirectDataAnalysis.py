@@ -49,7 +49,10 @@ def calculateEISF(params_table):
             mtd[params_table].setCell(error_col_name, i, error)
 
 
-def confitSeq(inputWS, func, startX, endX, ftype, bgd, temperature=None, specMin=0, specMax=None, convolve=True, Plot='None', Save=False):
+def confitSeq(inputWS, func, startX, endX, ftype, bgd,
+              temperature=None, specMin=0, specMax=None, convolve=True,
+              minimizer='Levenberg-Marquardt', max_iterations=500,
+              Plot='None', Save=False):
     StartTime('ConvFit')
 
     bgd = bgd[:-2]
@@ -86,6 +89,8 @@ def confitSeq(inputWS, func, startX, endX, ftype, bgd, temperature=None, specMin
                        StartX=startX, EndX=endX, FitType='Sequential',
                        CreateOutput=True, OutputCompositeMembers=True,
                        ConvolveMembers=convolve,
+                       MaxIterations=max_iterations,
+                       Minimizer=minimizer,
                        **fit_args)
 
     DeleteWorkspace(output_workspace + '_NormalisedCovarianceMatrices')
