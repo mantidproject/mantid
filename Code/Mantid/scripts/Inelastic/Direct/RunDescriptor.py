@@ -1071,6 +1071,35 @@ class RunDescriptor(PropDescriptor):
             CopyInstrumentParameters(InputWorkspace=ws_calibration,OutputWorkspace=loaded_ws)
             AddSampleLog(Workspace=loaded_ws,LogName="calibrated",LogText=str(ws_calibration))
 #--------------------------------------------------------------------------------------------------------------------
+    def export_normalization(self,other_workspace):
+        """Method applies normalization, present on current workspace to other_workspace provided
+           as argument.
+
+           If other workspace is already normalized, the method modifies that normalization to match
+           the normalization of current workspace
+        """
+        source_ws = self.get_workspace()
+
+        if isinstance(other_workspace,api.MatrixWorkspace):
+            targ_ws = other_workspace
+        else:
+            targ_ws = mtd[other_workspace]
+
+        if not 'NormalizationFactor' in source_ws.getRun():
+            raise RuntimeError(""" Can not change normalization of target workspace {0}
+                               as source workspace {1} is not normalized"""\
+                               .format(source_ws.name(),targ_ws.name()))
+        TargFactor = source_ws.getRun().getLogData('NormalizationFactor').value
+        if 'NormalizationFactor' in targ_ws.getRun():
+            OldFactor = targ_ws.getRun().getLogData('NormalizationFactor').value
+            NormFactor=TargFactor/OldFactor
+            other_workspace/=NormFactor
+        else:
+            other_workspace/=TargFactor
+        AddSampleLog(other_workspace,LogName='NormalizationFactor',LogText=str(TargFactor),LogType='Number')
+
+
+#--------------------------------------------------------------------------------------------------------------------
     @staticmethod
     def copy_spectrum2monitors(data_ws,mon_ws,spectraID):
         """
