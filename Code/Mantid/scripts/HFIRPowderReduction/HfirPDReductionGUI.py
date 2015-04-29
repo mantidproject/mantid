@@ -287,6 +287,8 @@ class MainWindow(QtGui.QMainWindow):
         self._rawDetPlotMode = None
         self._rawDetPtNo = None
 
+        self._indvDetCanvasMode = 'samplelog'
+
         return
 
 
@@ -657,7 +659,12 @@ class MainWindow(QtGui.QMainWindow):
         This is the first step of doing multiple scans processing
         """
         # Get inputs for exp number and scans
-        expno, scanlist = self._uiGetExpScanTabMultiScans()
+        try:
+            rtup = self._uiGetExpScanTabMultiScans()
+            expno = rtup[0]  
+            scanlist = rtup[1]
+        except NotImplementedError as nie:
+            self._logError("Unable to load data set in multiple scans due to %s." % (str(nie)))
 
         # Load and reduce data
         loadstatus = True
@@ -715,12 +722,12 @@ class MainWindow(QtGui.QMainWindow):
 
         # Load data
         self.ui.lineEdit_scanNo.setText(str(scanno))
-        execstatus = self.doLoadData()
+        self.doLoadData()
 
         # Reduce data
         self._uiReducePlotNoramlized(self._currUnit)
 
-        return 
+        return
 
 
     def doLoadReduceScanNext(self):
@@ -755,14 +762,13 @@ class MainWindow(QtGui.QMainWindow):
         # Get exp number and list of scans
         try:
             r = self._uiGetExpScanTabMultiScans()
-            expno = r[0] 
+            expno = r[0]
             scanlist = r[1]
         except NotImplementedError as ne:
             self._logError(str(ne))
             return False
 
         # Check whether the wavelengths are same to merge
-        print "[Check point 1]  Scans = ", str(scanlist)
         try:
             wl_list = []
             for scanno in scanlist:
@@ -774,7 +780,7 @@ class MainWindow(QtGui.QMainWindow):
             max_wl = wl_list[-1]
             if max_wl - min_wl > 1.0:
                 self._logWarning("All scans do not have same wavelengths!")
-        except Exception:
+        except TypeError:
             self._logError('Not all scans have wavelength set up.  Unable to merge scans.')
             return
 
@@ -806,8 +812,10 @@ class MainWindow(QtGui.QMainWindow):
 
         # Process input experiment number and scan list
         try:
-            expno, scanlist = self._uiGetExpScanTabMultiScans()
-        except Exception as e:
+            r = self._uiGetExpScanTabMultiScans()
+            expno = r[0]
+            scanlist = r[1]
+        except NotImplementedError as e:
             self._logError(str(e))
             return False
 
@@ -837,7 +845,9 @@ class MainWindow(QtGui.QMainWindow):
         self.ui.pushButton_viewMScan1D.setEnabled(True)
 
         # Get list of data to plot
-        expno, scanlist = self._uiGetExpScanTabMultiScans()
+        r = self._uiGetExpScanTabMultiScans()
+        expno = r[0]
+        scanlist = r[1]
 
         # Convert the workspaces to 2D vector
         vecylist = []
@@ -943,7 +953,7 @@ class MainWindow(QtGui.QMainWindow):
 
             self._plotIndividualDetCounts(self._expNo, self._scanNo, currdetid,
                     self._indvXLabel)
-        except Exception as e:
+        except KeyError as e:
             self._logError(str(e))
         else:
             self._detID = currdetid
@@ -967,7 +977,7 @@ class MainWindow(QtGui.QMainWindow):
 
             self._plotIndividualDetCounts(self._expNo, self._scanNo, currdetid,
                     self._indvXLabel)
-        except Exception as e:
+        except KeyError as e:
             self._logError(str(e))
         else:
             self._detID = currdetid
@@ -1107,8 +1117,10 @@ class MainWindow(QtGui.QMainWindow):
         """
         # Get exp number and list of scans
         try:
-            expno, scanlist = self._uiGetExpScanTabMultiScans()
-        except Exception as e:
+            r = self._uiGetExpScanTabMultiScans()
+            expno = r[0]
+            scanlist = r[1]
+        except NotImplementedError as e:
             self._logError(str(e))
             return False
 
@@ -1121,7 +1133,10 @@ class MainWindow(QtGui.QMainWindow):
         canvas.clearCanvas()
 
         for scan in scanlist:
-            good, expno, scanno = self._uiReduceData(3, unit, expno, scan)
+            r = self._uiReduceData(3, unit, expno, scan)
+            good = r[0]
+            expno = r[1] 
+            scanno = r[2]
 
             if good is True:
                 label = "Exp %s Scan %s"%(str(expno), str(scanno))
@@ -1204,7 +1219,9 @@ class MainWindow(QtGui.QMainWindow):
         """ Save multiple scans
         """
         # Get experiment number and scans
-        expno, scanslist = self._uiGetExpScanTabMultiScans()
+        r = self._uiGetExpScanTabMultiScans()
+        expno = r[0]
+        scanslist = r[1]
 
         # Get base file name
         homedir = os.getcwd()
@@ -1299,7 +1316,7 @@ class MainWindow(QtGui.QMainWindow):
         # Get exp number an scan number
         try:
             expno, scanno = self._uiGetExpScanNumber()
-        except Exception as e:
+        except NotImplementedError as e:
             self._logError("Error to get Exp and Scan due to %s." % (str(e)))
             return False
 
@@ -1357,7 +1374,7 @@ class MainWindow(QtGui.QMainWindow):
          2: middle
          3: right
         """
-        # FUTURE: Need to make this work 
+        # FUTURE: Need to make this work
         x = event.xdata
         y = event.ydata
         button = event.button
@@ -1583,7 +1600,7 @@ class MainWindow(QtGui.QMainWindow):
         # get the data
         try:
             vecx, vecy = self._myControl.getMergedVector(mkey)
-        except Exception as e:
+        except KeyError as e:
             self._logError("Unable to retrieve merged reduced data due to %s." % (str(e)))
             return
 
@@ -1619,6 +1636,9 @@ class MainWindow(QtGui.QMainWindow):
         """ Plot reduced data for exp and scan
          self._plotReducedData(exp, scan, self.ui.canvas1, clearcanvas, xlabel=self._currUnit, 0, clearcanvas)
         """
+        if spectrum != 0:
+            raise NotImplementedError("Unable to support spectrum = %d case."%(spectrum))
+
         # whether the data is load
         if self._myControl.hasReducedWS(exp, scan) is False:
             self._logWarning("No data to plot!")
@@ -1681,7 +1701,7 @@ class MainWindow(QtGui.QMainWindow):
         self.ui.comboBox_indvDetXLabel.clear()
         self.ui.comboBox_indvDetXLabel.addItems(floatsamplelognamelist)
 
-        # FIXME
+        # FUTURE: xlabel can be other sample log
         xlabel='Pt'
 
         # get data
@@ -1733,7 +1753,7 @@ class MainWindow(QtGui.QMainWindow):
             if TempData is False:
                 vecx, vecyOrig = self._myControl.getVectorToPlot(exp, scan)
                 diffY = vecyOrig - vecy
-        except Exception as e:
+        except NotImplementedError as e:
             print '[Error] Unable to retrieve processed vanadium spectrum for exp %d scan %d.  \
                     Reason: %s' % (exp, scan, str(e))
             return
@@ -1750,7 +1770,7 @@ class MainWindow(QtGui.QMainWindow):
         if TempData is True:
             marker = None
             color = 'blue'
-        else: 
+        else:
             marker, color = canvas.getNextLineMarkerColorCombo()
 
         # plot
@@ -1775,50 +1795,6 @@ class MainWindow(QtGui.QMainWindow):
         # ENDIF
 
         return
-
-
-    def _uiCheckBinningParameters(self, curxmin=None, curxmax=None, curbinsize=None, curunit=None, targetunit=None):
-        """ check the binning parameters including xmin, xmax, bin size and target unit
-
-        Return: True or false
-        """
-        # get value
-        xmin = str(self.ui.lineEdit_xmin.text())
-        xmax = str(self.ui.lineEdit_xmax.text())
-        binsize = str(self.ui.lineEdit_binsize.text())
-
-        change = False
-        # check x-min
-        if len(xmin) > 0:
-            xmin = float(xmin)
-            if ( (self._myMinX is None) or (self._myMinX is not None and abs(xmin-self._myMinX) > 1.0E-5) ):
-                change = True
-        else:
-            xmin = None
-
-        # check x-max
-        if len(xmax) > 0:
-            xmax = float(xmax)
-            if ( (self._myMaxX is None) or (self._myMaxX is not None and
-                abs(xmax-self._myMaxX) > 1.0E-5) ):
-                change = True
-        else:
-            xmax = None
-
-        # check binsize
-        if len(binsize) > 0:
-            binsize = float(binsize)
-            if ( (self._myBinSize is None) or (self._myBinSize is not None and
-                abs(binsize-self._myBinSize) > 1.0E-5) ):
-                change = True
-        else:
-            binsize = None
-
-        # whether the unit should be changed or bin be changed?
-        if curunit != targetunit:
-            change = True
-
-        return (change, xmin, xmax, binsize)
 
 
     def _uiDownloadDataFile(self, exp, scan):
@@ -1855,25 +1831,26 @@ class MainWindow(QtGui.QMainWindow):
                     Using current workspace directory %s as cache." % (invalidcache, cachedir) )
 
             filename = '%s_exp%04d_scan%04d.dat' % (self._instrument.upper(), exp, scan)
-            self._srcFileName = os.path.join(cachedir, filename)
-            status, errmsg = downloadFile(fullurl, self._srcFileName)
+            srcFileName = os.path.join(cachedir, filename)
+            status, errmsg = downloadFile(fullurl, srcFileName)
             if status is False:
                 self._logError(errmsg)
-                self._srcFileName = None
+                srcFileName = None
             else:
                 rvalue = True
 
         elif self._srcAtLocal is True:
             # Data from local
-            self._srcFileName = os.path.join(self._localSrcDataDir, "%s/Exp%d_Scan%04d.dat" % (self._instrument, exp, scan))
-            if os.path.exists(self._srcFileName) is True:
+            srcFileName = os.path.join(self._localSrcDataDir, "%s/Exp%d_Scan%04d.dat" % (self._instrument, exp, scan))
+            if os.path.exists(srcFileName) is True:
                 rvalue = True
 
         else:
             raise NotImplementedError("Logic error.  Neither downloaded from server.\
                 Nor from local drive")
 
-        return (rvalue,self._srcFileName)
+        return (rvalue,srcFileName)
+
 
     def _uiGetBinningParams(self, itab):
         """ Get binning parameters
@@ -1911,7 +1888,7 @@ class MainWindow(QtGui.QMainWindow):
 
         try:
             binsize = float(binsize)
-        except ValueError as e:
+        except ValueError:
             raise NotImplementedError("Error:  bins size '%s' is not a float number." % (binsize))
 
         return (xmin, binsize, xmax)
@@ -1928,7 +1905,8 @@ class MainWindow(QtGui.QMainWindow):
             detids_str = str(self.ui.lineEdit_detExcluded.text()).strip()
             status, excludedetidlist = self._getIntArray(detids_str)
             if status is False:
-                self._logError(lineEdit_extraScans)
+                self._logError("Extra scans are not a list of integers: %s." % (
+                    str(self.ui.lineEdit_extraScans.text())))
                 lineEdit_extraScans = []
             # ENDIF
         # ENDIF
@@ -1984,7 +1962,7 @@ class MainWindow(QtGui.QMainWindow):
 
 
     def _uiIsBinParamsChange(self, itab, binparams):
-        """ Check whether current bin parameters are same 
+        """ Check whether current bin parameters are same
         as given value
         """
         xmin,binsize,xmax = self._uiGetBinningParams(itab)
@@ -2002,9 +1980,9 @@ class MainWindow(QtGui.QMainWindow):
             except TypeError:
                 if par_0 is not None or par_1 is not None:
                     same = False
-            finally:
-                if same is False:
-                    break
+
+            if same is False:
+                break
         # ENDFOR
 
         change = not same
@@ -2052,7 +2030,7 @@ class MainWindow(QtGui.QMainWindow):
                 raise NotImplementedError('Wavelength must be specified for unit %s.'%(unit))
 
         # Get scale factor
-        try: 
+        try:
             scalefactor = self._getFloat(self.ui.lineEdit_normalizeMonitor)
         except EmptyError:
             scalefactor = None
@@ -2063,7 +2041,7 @@ class MainWindow(QtGui.QMainWindow):
         try:
             # rebinned = self._myControl.rebin(expno, scanno, unit, wavelength, xmin, binsize, xmax)
             excludeddetlist = self._uiGetExcludedDetectors()
-            execstatus = self._myControl.reduceSpicePDData(expno, scanno, \
+            self._myControl.reduceSpicePDData(expno, scanno, \
                     unit, xmin, xmax, binsize, wavelength, excludeddetlist, scalefactor)
 
             # Record binning
@@ -2074,7 +2052,7 @@ class MainWindow(QtGui.QMainWindow):
 
         return (True, expno, scanno)
 
-    
+
     def _uiReducePlotNoramlized(self, unit):
         """ Support Reduce2Theta, ReduceDspacing and ReduceQ
         """
@@ -2106,7 +2084,7 @@ class MainWindow(QtGui.QMainWindow):
         else:
             clearcanvas = False
 
-        # reset record dictionary if unit is different from present 
+        # reset record dictionary if unit is different from present
         if clearcanvas is True:
             self._tabLineDict[itab] = []
 
@@ -2115,7 +2093,7 @@ class MainWindow(QtGui.QMainWindow):
 
         xlabel = self._getXLabelFromUnit(unit)
         label = "Exp %s Scan %s"%(str(expno), str(scanno))
-        self._plotReducedData(expno, scanno, canvas, xlabel, label=None, clearcanvas=clearcanvas)
+        self._plotReducedData(expno, scanno, canvas, xlabel, label=label, clearcanvas=clearcanvas)
 
         return
 
@@ -2177,6 +2155,7 @@ class MainWindow(QtGui.QMainWindow):
 
         return value
 
+
     def _getIntArray(self, intliststring):
         """ Validate whether the string can be divided into integer strings.
         Allowed: a, b, c-d, e, f
@@ -2192,6 +2171,9 @@ class MainWindow(QtGui.QMainWindow):
         intlist = []
 
         # For each term
+        errmsg = ""
+        returnstatus = True
+
         for level0term in termlevel0s:
             level0term = level0term.strip()
 
@@ -2203,9 +2185,11 @@ class MainWindow(QtGui.QMainWindow):
                 try:
                     intvalue = int(valuestr)
                     if str(intvalue) != valuestr:
-                        return (False, "Contains non-integer string %s." % (valuestr))
+                        returnstatus = False
+                        errmsg =  "Contains non-integer string %s." % (valuestr)
                 except ValueError:
-                    return (False, "String %s is not an integer." % (valuestr))
+                    returnstatus = False
+                    errmsg = "String %s is not an integer." % (valuestr)
                 else:
                     intlist.append(intvalue)
 
@@ -2218,18 +2202,34 @@ class MainWindow(QtGui.QMainWindow):
                     try:
                         intvalue = int(valuestr)
                         if str(intvalue) != valuestr:
-                            return (False, "Contains non-integer string %s." % (valuestr))
+                            returnstatus = False
+                            errmsg = "Contains non-integer string %s." % (valuestr)
                     except ValueError:
-                        return (False, "String %s is not an integer." % (valuestr))
+                        returnstatus = False
+                        errmsg = "String %s is not an integer." % (valuestr)
                     else:
                         templist.append(intvalue)
+
+                    # break loop
+                    if returnstatus is False:
+                        break
                 # ENDFOR
                 intlist.extend(range(templist[0], templist[1]+1))
 
             else:
                 # Undefined siutation
-                return (False, "Term %s contains more than 1 dash." % (level0terms))
+                returnstatus = False
+                errmsg = "Term %s contains more than 1 dash." % (level0terms)
+            # ENDIFELSE
+
+            # break loop if something is wrong
+            if returnstatus is False:
+                break
         # ENDFOR
+
+        # Return with false
+        if returnstatus is False:
+            return (False, errmsg)
 
         return (True, intlist)
 
