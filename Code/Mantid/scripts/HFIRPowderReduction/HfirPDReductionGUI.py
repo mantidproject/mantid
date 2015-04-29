@@ -661,7 +661,7 @@ class MainWindow(QtGui.QMainWindow):
         # Get inputs for exp number and scans
         try:
             rtup = self._uiGetExpScanTabMultiScans()
-            expno = rtup[0]  
+            expno = rtup[0]
             scanlist = rtup[1]
         except NotImplementedError as nie:
             self._logError("Unable to load data set in multiple scans due to %s." % (str(nie)))
@@ -1135,7 +1135,7 @@ class MainWindow(QtGui.QMainWindow):
         for scan in scanlist:
             r = self._uiReduceData(3, unit, expno, scan)
             good = r[0]
-            expno = r[1] 
+            expno = r[1]
             scanno = r[2]
 
             if good is True:
@@ -1161,7 +1161,10 @@ class MainWindow(QtGui.QMainWindow):
         # Reduce data
         unit = '2theta'
         itab = 4
-        good, expno, scanno = self._uiReduceData(itab, unit)
+        r = self._uiReduceData(itab, unit)
+        good = r[0]
+        expno = r[1]
+        scanno = r[2]
 
         # Plot reduced data and vanadium peaks
         if good is True:
@@ -1907,7 +1910,7 @@ class MainWindow(QtGui.QMainWindow):
             if status is False:
                 self._logError("Extra scans are not a list of integers: %s." % (
                     str(self.ui.lineEdit_extraScans.text())))
-                lineEdit_extraScans = []
+                excludedetidlist = []
             # ENDIF
         # ENDIF
 
@@ -2068,8 +2071,11 @@ class MainWindow(QtGui.QMainWindow):
             return
 
         # reduce
-        good, expno, scanno = self._uiReduceData(2, unit)
-       
+        r = self._uiReduceData(2, unit)
+        good = r[0]
+        expno = r[1]
+        scanno = r[2]
+
         # failed to reduce
         if good is False:
             self._logError("Failed to reduce Exp %d Scan %d" % (expno, scanno))
