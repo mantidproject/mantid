@@ -314,7 +314,7 @@ void DynamicKuboToyabe::setActiveParameter(size_t i, double value) {
  */
 std::vector<std::string> DynamicKuboToyabe::getAttributeNames() const {
   std::vector<std::string> res;
-  res.push_back("eps");
+  res.push_back("BinWidth");
   return res;
 }
 
@@ -325,7 +325,7 @@ std::vector<std::string> DynamicKuboToyabe::getAttributeNames() const {
  */
 API::IFunction::Attribute DynamicKuboToyabe::getAttribute(const std::string &attName) const {
 
-  if (attName == "eps") {
+  if (attName == "BinWidth") {
     return Attribute(m_eps);
   }
   throw std::invalid_argument("DynamicKuboToyabe: Unknown attribute " + attName);
@@ -338,7 +338,7 @@ API::IFunction::Attribute DynamicKuboToyabe::getAttribute(const std::string &att
  */
 void DynamicKuboToyabe::setAttribute(const std::string &attName,
                               const API::IFunction::Attribute &att) {
-  if (attName == "eps") {
+  if (attName == "BinWidth") {
 
     double newVal = att.asDouble();
 
@@ -364,7 +364,7 @@ void DynamicKuboToyabe::setAttribute(const std::string &attName,
  * @param attName :: The attribute name.
  */
 bool DynamicKuboToyabe::hasAttribute(const std::string &attName) const {
-  return attName == "eps";
+  return attName == "BinWidth";
 }
 
 
