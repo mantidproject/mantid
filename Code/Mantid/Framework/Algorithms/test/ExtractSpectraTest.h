@@ -28,7 +28,7 @@ public:
   }
 
   ExtractSpectraTest()
-      : nSpec(5), nBins(6), //inWSName("toCrop"),
+      : nSpec(5), nBins(6),
         outWSName("ExtractSpectraTest_OutputWS") {}
 
   void test_Init()
