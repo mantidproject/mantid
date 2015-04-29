@@ -244,8 +244,8 @@ class DirectEnergyConversion(object):
                 if (PropertyManager.incident_energy.multirep_mode() and self.normalise_method == 'monitor-2')\
                     or self.bleed_test: # bleed test below needs no normalization so use clone workspace
                     result_ws  = diag_sample.get_ws_clone('sample_ws_clone')
-                    norm_factor = whiteintegrals.getRun().getLogData('NormalizationFactor').value
-                    result_ws  /= norm_factor
+                    tmpRunDescriptor = self.get_run_descriptor(whiteintegrals)
+                    tmpRunDescriptor.export_normalization(result_ws)
                     name_to_clean = result_ws.name()
                 else:
                     result_ws = self.normalise(diag_sample, self.normalise_method)
@@ -519,7 +519,7 @@ class DirectEnergyConversion(object):
 
         end_time = time.time()
         prop_man.log("*** Elapsed time = {0} sec".format(end_time - start_time),'notice')
-        # Must! clear backrgound ws (if present in multirep) to calculate background 
+        # Must! clear background ws (if present in multirep) to calculate background 
         # source for next workspace 
         if 'bkgr_ws_source' in mtd:
             DeleteWorkspace('bkgr_ws_source')
@@ -1471,7 +1471,7 @@ class DirectEnergyConversion(object):
             bkg_range_min = bkgd_range[0] + bin_offset
             bkg_range_max = bkgd_range[1] + bin_offset
             if isinstance(result_ws,api.IEventWorkspace):
-                bkgr_ws = self._find_or_build_bkgr_ws(data_run,bkg_range_min,bkg_range_max,bin_offset,result_ws)
+                bkgr_ws = self._find_or_build_bkgr_ws(data_run,bkg_range_min,bkg_range_max,bin_offset)
             else:
                 bkgr_ws = None
                 CalculateFlatBackground(InputWorkspace=result_ws,OutputWorkspace=result_ws,
@@ -1497,7 +1497,10 @@ class DirectEnergyConversion(object):
         energy_bins = PropertyManager.energy_bins.get_abs_range(self.prop_man)
         if energy_bins:
             Rebin(InputWorkspace=result_name,OutputWorkspace=result_name,Params= energy_bins,PreserveEvents=False)
-            if bkgr_ws: # remove background after converting units and rebinning
+            if bkgr_ws:
+                #apply data ws normalization to background workspace
+                data_run.export_normalization(bkgr_ws)
+                # remove background after converting units and rebinning
                 RemoveBackground(InputWorkspace=result_name,OutputWorkspace=result_name,BkgWorkspace=bkgr_ws,EMode='Direct')
                 DeleteWorkspace(bkgr_ws)
         else:
@@ -1543,12 +1546,6 @@ class DirectEnergyConversion(object):
                      InstrumentParameter="DelayTime",Combine=True)
         else: # calculate background workspace for future usage
             bkgr_ws = Rebin(result_ws,Params=[bkg_range_min,(bkg_range_max - bkg_range_min) * 1.001,bkg_range_max],PreserveEvents=False)
-            if run.is_monws_separate():
-                mon_ws = run.get_monitors_ws()
-                CloneWorkspace(mon_ws,OutputWorkspace="bkgr_ws_monitors")
-            bkgr_ws = self.normalise(bkgr_ws, self.normalise_method, time_shift)
-            if bkgr_ws.name()+"_monitors" in mtd:
-                DeleteWorkspace(bkgr_ws.name()+"_monitors")
             RenameWorkspace(InputWorkspace=bkgr_ws, OutputWorkspace='bkgr_ws_source')
             bkgr_ws = mtd['bkgr_ws_source']
 

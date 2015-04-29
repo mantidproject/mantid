@@ -1092,6 +1092,9 @@ class RunDescriptor(PropDescriptor):
         TargFactor = source_ws.getRun().getLogData('NormalizationFactor').value
         if 'NormalizationFactor' in targ_ws.getRun():
             OldFactor = targ_ws.getRun().getLogData('NormalizationFactor').value
+            if abs(OldFactor-TargFactor)<1.e-5: # Already normalized
+                return
+
             NormFactor=TargFactor/OldFactor
             other_workspace/=NormFactor
         else:

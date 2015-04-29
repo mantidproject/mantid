@@ -506,11 +506,12 @@ class DirectEnergyConversionTest(unittest.TestCase):
         tReducer.prop_man.run_diagnostics=True 
         tReducer.hard_mask_file=None
         tReducer.map_file=None
+        tReducer.prop_man.check_background = True
         tReducer.prop_man.background_range=[0.99*tMax,tMax]
         tReducer.prop_man.monovan_mapfile=None
         tReducer.save_format=None
         tReducer.prop_man.normalise_method='monitor-2'
-        tReducer.prop_man.check_background = True
+
         tReducer.prop_man.bleed = True
         tReducer.norm_mon_integration_range=[tMin,tMax]
 
@@ -536,7 +537,7 @@ class DirectEnergyConversionTest(unittest.TestCase):
         for ind,item in enumerate(result):
             result[ind]=RenameWorkspace(item,OutputWorkspace='SampleRez#'+str(ind))
         #
-        AddSampleLog(run2,LogName='goodfrm',LogText='1.',LogType='Number')
+        AddSampleLog(run2,LogName='goodfrm',LogText='1',LogType='Number')
         result2 = tReducer.convert_to_energy(None,run2)
 
         rez = CheckWorkspacesMatch(result[0],result2[0])
@@ -547,4 +548,6 @@ class DirectEnergyConversionTest(unittest.TestCase):
 
 
 if __name__=="__main__":
-   unittest.main()
+        test = DirectEnergyConversionTest('test_abs_multirep_with_bkg_and_bleed')
+        test.test_abs_multirep_with_bkg_and_bleed()
+   #unittest.main()

@@ -73,12 +73,19 @@ void CreatePSDBleedMask::exec() {
   // We require the number of good frames. Check that we have this
   if (!inputWorkspace->run().hasProperty("goodfrm")) {
     throw std::invalid_argument(
-        "InputWorkspace does not contain the number of \"good frames\".");
+        "InputWorkspace does not contain the number of \"good frames\".\n"
+        "(The sample log named: goodfrm with value, specifying number of good frames)");
   }
   Kernel::PropertyWithValue<int> *frameProp =
       dynamic_cast<Kernel::PropertyWithValue<int> *>(
           inputWorkspace->run().getProperty("goodfrm"));
-  assert(frameProp);
+  if (!frameProp){
+    throw std::invalid_argument(
+      "InputWorkspace has the number of \"good frames\" property (goodfrm log value)"
+      "but this property value is not integer.");
+
+  }
+
   int goodFrames = (*frameProp)();
 
   // Store the other properties
