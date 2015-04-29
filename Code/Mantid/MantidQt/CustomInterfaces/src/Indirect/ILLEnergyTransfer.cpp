@@ -49,6 +49,10 @@ namespace CustomInterfaces
     if(!m_uiForm.rfInput->isValid())
       uiv.addErrorMessage("Run File is invalid.");
 
+    // Validate calibration file/workspace if it is being used
+    if(m_uiForm.ckUseCalibration->isChecked())
+      uiv.checkDataSelectorIsValid("Calibration", m_uiForm.dsCalibration);
+
     // Validate map file if it is being used
     bool useMapFile = m_uiForm.cbGroupingType->currentText() == "Map File";
     if(useMapFile && !m_uiForm.rfInput->isValid())
@@ -72,9 +76,17 @@ namespace CustomInterfaces
     reductionAlg->setProperty("Analyser", instDetails["analyser"].toStdString());
     reductionAlg->setProperty("Reflection", instDetails["reflection"].toStdString());
 
-    // Handle einput files
+    // Handle input files
     QString runFilename = m_uiForm.rfInput->getFirstFilename();
     reductionAlg->setProperty("Run", runFilename.toStdString());
+
+    // Handle calibration
+    bool useCalibration = m_uiForm.ckUseCalibration->isChecked();
+    if(useCalibration)
+    {
+      QString calibrationWsName = m_uiForm.dsCalibration->getCurrentDataName();
+      reductionAlg->setProperty("CalibrationWorkspace", calibrationWsName.toStdString());
+    }
 
     // Handle mapping file
     bool useMapFile = m_uiForm.cbGroupingType->currentText() == "Map File";

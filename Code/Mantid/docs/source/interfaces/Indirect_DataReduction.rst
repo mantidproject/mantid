@@ -190,11 +190,16 @@ Options
 Input
   Used to select the raw data in *.nxs* format
 
+Calibration
+  Gives the option of applying a calibration workspace or NeXus file created
+  with the ILL Calibration tab or :ref:`ILLIN16BCalibration
+  <algm-ILLIN16BCalibration>` algorithm.
+
 Grouping
   Used to switch between grouping as per the IDF (*Default*) or grouping using a
-  mapping file (*Map FIle*).
+  mapping file (*Map File*).
 
-Mirror Mode
+Use Mirror Mode
   Enable to reduce data that has been captured with mirror mode enabled.
 
 Plot

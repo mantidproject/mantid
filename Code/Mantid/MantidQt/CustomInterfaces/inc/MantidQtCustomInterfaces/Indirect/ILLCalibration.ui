@@ -223,6 +223,16 @@
    <container>1</container>
   </customwidget>
  </customwidgets>
+ <tabstops>
+  <tabstop>spSpecMin</tabstop>
+  <tabstop>spSpecMax</tabstop>
+  <tabstop>spPeakLower</tabstop>
+  <tabstop>spPeakUpper</tabstop>
+  <tabstop>spScaleFactor</tabstop>
+  <tabstop>ckMirrorMode</tabstop>
+  <tabstop>ckPlot</tabstop>
+  <tabstop>ckSave</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>
