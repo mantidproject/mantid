@@ -170,13 +170,8 @@ class LoadRun(object):
                 if monitor_ws_name in mtd:
                     DeleteWorkspace(monitor_ws_name)
 
-        # There is a a bug in getHistory() in combination with renamed workspaces, hence we need to hedge for this here.
-        loader_name = ''
-        try: 
-            loader_name = outWs.getHistory().lastAlgorithm().getProperty('LoaderName').value
-        except:
-            logger.notice('Tried to get a loader from history. But data did not have a loader.')
-
+        last_algorithm = outWs.getHistory().lastAlgorithm()
+        loader_name = last_algorithm.getProperty('LoaderName').value
         if loader_name == 'LoadRaw':
             self._loadSampleDetails(workspace)
 
