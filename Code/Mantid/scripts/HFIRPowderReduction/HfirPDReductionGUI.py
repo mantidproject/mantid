@@ -35,7 +35,7 @@ class EmptyError(Exception):
     def __str__(self):
         return repr(self.value)
 
-
+#pylint: disable=too-many-public-methods,too-many-branches,too-many-locals,too-many-arguments
 class MainWindow(QtGui.QMainWindow):
     """ Class of Main Window (top)
     """
@@ -277,6 +277,16 @@ class MainWindow(QtGui.QMainWindow):
         self._lastMergeLabel = ""
         self._lastMergeIndex = -1
 
+        self._expNo = None
+        self._scanNo = None
+        self._detID = None
+        self._indvXLabel = None
+
+        self._rawDetExpNo = None
+        self._rawDetScanNo = None
+        self._rawDetPlotMode = None
+        self._rawDetPtNo = None
+
         return
 
 
@@ -472,8 +482,8 @@ class MainWindow(QtGui.QMainWindow):
             # read from GUI
             try:
                 expno, scanno = self._uiGetExpScanNumber()
-            except Exception as e:
-                self._logError("Error to get Exp and Scan due to %s." % (str(e)))
+            except NotImplementedError as ne
+                self._logError("Error to get Exp and Scan due to %s." % (str(ne)))
                 return
             self._logDebug("Attending to load Exp %d Scan %d." % (expno, scanno))
         # ENDIF
@@ -499,14 +509,15 @@ class MainWindow(QtGui.QMainWindow):
                 cause = "Load data failed."
             else:
                 cause = None
-        except Exception as e:
+        except NotImplementedError as ne
             execstatus = False
-            cause = str(e)
-        finally:
-            if execstatus is False:
-                self._logError(cause)
-                return
-        # END-TRY-EXCEPT-FINALLY
+            cause = str(ne)
+        # END-TRY-EXCEPT
+
+        # Return as failed to load data
+        if execstatus is False:
+            self._logError(cause)
+            return
 
         # Obtain the correction file names and wavelength from SPICE file
         wavelengtherror = False
@@ -577,7 +588,7 @@ class MainWindow(QtGui.QMainWindow):
                 # browse vanadium correction file
                 filefilter = "Text (*.txt);;Data (*.dat);;All files (*.*)"
                 curDir = os.getcwd()
-                vancorrfnames = QtGui.QFileDialog.getOpenFileNames(self, 'Open File(s)', cuDdir, filefilter)
+                vancorrfnames = QtGui.QFileDialog.getOpenFileNames(self, 'Open File(s)', curDir, filefilter)
                 if len(vancorrfnames) > 0:
                     vancorrfname = vancorrfnames[0]
                     self.ui.lineEdit_vcorrFileName.setText(str(vancorrfname))
@@ -612,11 +623,12 @@ class MainWindow(QtGui.QMainWindow):
         except NotImplementedError as e:
             execstatus = False
             cause = str(e)
-        finally:
-            if execstatus is False:
-                self._logError(cause)
-                return
         # END-TRY-EXCEPT-FINALLY
+
+        # Return if data parsing is error
+        if execstatus is False:
+            self._logError(cause)
+            return
 
         # Optionally parse detector exclusion file and set to line text
         if excldetfname is not None:
@@ -704,21 +716,9 @@ class MainWindow(QtGui.QMainWindow):
         # Load data
         self.ui.lineEdit_scanNo.setText(str(scanno))
         execstatus = self.doLoadData()
-        print "[DB] Load data : ", execstatus
-        
+
         # Reduce data
         self._uiReducePlotNoramlized(self._currUnit)
-
-        ## Reduce
-        #good, expno, scanno = self._uiReduceData(2, unit)
-
-        ## plot
-        #if good is True:
-        #    canvas = self.ui.graphicsView_reducedData
-        #    xlabel = self._getXLabelFromUnit(unit)
-        #    label = "Exp %s Scan %s"%(str(expno), str(scanno))
-        #    clearcanvas=self.ui.checkBox_clearPrevious.isChecked()
-        #    self._plotReducedData(expno, scanno, canvas, xlabel, label=label, clearcanvas=clearcanvas)
 
         return 
 
@@ -746,18 +746,7 @@ class MainWindow(QtGui.QMainWindow):
         # Reduce data
         self._uiReducePlotNoramlized(self._currUnit)
 
-        ## Reduce
-        #good, expno, scanno = self._uiReduceData(2, unit)
-
-        ## plot
-        #if good is True:
-        #    canvas = self.ui.graphicsView_reducedData
-        #    xlabel = self._getXLabelFromUnit(unit)
-        #    label = "Exp %s Scan %s"%(str(expno), str(scanno))
-        #    clearcanvas=self.ui.checkBox_clearPrevious.isChecked()
-        #    self._plotReducedData(expno, scanno, canvas, xlabel, label=label, clearcanvas=clearcanvas)
-
-        return 
+        return
 
 
     def doMergeScans(self):
@@ -765,9 +754,11 @@ class MainWindow(QtGui.QMainWindow):
         """
         # Get exp number and list of scans
         try:
-            expno, scanlist = self._uiGetExpScanTabMultiScans()
-        except Exception as e:
-            self._logError(str(e))
+            r = self._uiGetExpScanTabMultiScans()
+            expno = r[0] 
+            scanlist = r[1]
+        except NotImplementedError as ne:
+            self._logError(str(ne))
             return False
 
         # Check whether the wavelengths are same to merge
@@ -791,7 +782,7 @@ class MainWindow(QtGui.QMainWindow):
         try:
             unit = str(self.ui.comboBox_mscanUnit.currentText())
             xmin, binsize, xmax = self._uiGetBinningParams(itab=3)
-            wavelength = min_wl
+            #wavelength = min_wl
             mindex = self._myControl.mergeReduceSpiceData(expno, scanlist, unit, xmin, xmax, binsize)
         except Exception as e:
             raise e
@@ -800,8 +791,6 @@ class MainWindow(QtGui.QMainWindow):
         self._plotMergedReducedData(mindex, label)
         self._lastMergeIndex = mindex
         self._lastMergeLabel = label
-
-        print "Last merged index = ",  self._lastMergeIndex 
 
         return
 
@@ -1109,7 +1098,7 @@ class MainWindow(QtGui.QMainWindow):
         """
         unit = 'Momentum Transfer (Q)'
         self._uiReducePlotNoramlized(unit)
-        
+
         return
 
 
@@ -1217,7 +1206,7 @@ class MainWindow(QtGui.QMainWindow):
         # Get experiment number and scans
         expno, scanslist = self._uiGetExpScanTabMultiScans()
 
-        # Get base file name  
+        # Get base file name
         homedir = os.getcwd()
         savedir = str(QtGui.QFileDialog.getExistingDirectory(self,'Get Directory To Save Fullprof',homedir))
 
@@ -1293,7 +1282,6 @@ class MainWindow(QtGui.QMainWindow):
     def doSmoothVanadiumUndo(self):
         """ Undo smoothing vanadium
         """
-        # 
         try:
             expno, scanno = self._uiGetExpScanNumber()
         except NotImplementedError as e:
@@ -1369,6 +1357,7 @@ class MainWindow(QtGui.QMainWindow):
          2: middle
          3: right
         """
+        # FUTURE: Need to make this work 
         x = event.xdata
         y = event.ydata
         button = event.button
@@ -1382,18 +1371,20 @@ class MainWindow(QtGui.QMainWindow):
 
             elif button == 3:
                 # right click of mouse will pop up a context-menu
-                self.ui.menu = QtGui.QMenu(self)
+                # menu should be self.ui.menu?
+                menu = QtGui.QMenu(self)
 
                 addAction = QtGui.QAction('Add', self)
                 addAction.triggered.connect(self.addSomething)
-                self.ui.menu.addAction(addAction)
+                menu.addAction(addAction)
 
                 rmAction = QtGui.QAction('Remove', self)
                 rmAction.triggered.connect(self.rmSomething)
-                self.ui.menu.addAction(rmAction)
+                menu.addAction(rmAction)
 
                 # add other required actions
-                self.ui.menu.popup(QtGui.QCursor.pos())
+                menu.popup(QtGui.QCursor.pos())
+        # ENDIF
 
         return
 
@@ -1402,7 +1393,7 @@ class MainWindow(QtGui.QMainWindow):
     def on_mouseMotion(self, event):
         """
         """
-        prex = self._viewMerge_X
+        #prex = self._viewMerge_X
         prey = self._viewMerge_Y
 
         curx = event.xdata
@@ -1422,7 +1413,7 @@ class MainWindow(QtGui.QMainWindow):
     def addSomething(self):
         """
         """
-        print "Add something?"
+        print "Add scan back to merge"
 
         return
 
@@ -1430,14 +1421,10 @@ class MainWindow(QtGui.QMainWindow):
     def rmSomething(self):
         """
         """
-        print "Remove something?"
+        print "Remove a scan from mergin."
 
         return
 
-
-    #---------------------------------------------------------------------------
-    # Private methods dealing with UI
-    #---------------------------------------------------------------------------
     #--------------------------------------------------------------------------
     # Private methods to plot data
     #--------------------------------------------------------------------------
@@ -1729,7 +1716,7 @@ class MainWindow(QtGui.QMainWindow):
     def _plotVanadiumRun(self, exp, scan, xlabel, label, clearcanvas=False, TempData=False):
         """ Plot processed vanadium data
 
-        Arguments: 
+        Arguments:
          - TempData :: flag whether the vanadium run is a temporary data set
         """
         # Check whether the data is load
@@ -1740,7 +1727,7 @@ class MainWindow(QtGui.QMainWindow):
             self._logWarning("No data to plot!")
             return
 
-        # Get data to plot 
+        # Get data to plot
         try:
             vecx, vecy = self._myControl.getVectorProcessVanToPlot(exp, scan, TempData)
             if TempData is False:
