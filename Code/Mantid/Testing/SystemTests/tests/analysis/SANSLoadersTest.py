@@ -225,18 +225,17 @@ class LoadSampleTestStressTest(stresstesting.MantidStressTest):
 #    def _validateWorkspaceToNeXusCustom(self):
 #        '''
 #        Since we need to compare two have two comparisons, we need to redefine the validateWorkspaceToNexus method here.
-#        Assumes that the items from self.validate() are many tuples  where the first item is a nexus file and loads it, 
+#        Assumes that the items from self.validate() are many tuples  where the first item is a nexus file and loads it,
 #        to compare to the supplied workspace which is the second item.
 #        '''
-        
 #        value_pairs = list(self._validateCustom())
 
-#        # Make sure we have pairs of two 
+#        # Make sure we have pairs of two
 #        if len(value_pairs )%2 != 0:
 #            return False
 
 #        # For all pairs create a list and run the normal comparison
-#        validationResult = [] 
+#        validationResult = []
 
 #        for index in range(0, len(value_pairs), 2):
 #            valNames = value_pairs[index : index + 2]
@@ -265,7 +264,8 @@ class LoadSampleTestStressTest(stresstesting.MantidStressTest):
 #        return all(item is True for item in validationResult)
 
 #    def _validateCustom(self):
-#        return '28051rear_1D_4.6_12.85', 'SANS2DLoadingAddedEventData.nxs', '28051rear_1D_4.6_12.85_incident_monitor', 'SANS2DLoadingAddedEventDataMonitor.nxs'
+#        return '28051rear_1D_4.6_12.85', 'SANS2DLoadingAddedEventData.nxs',
+#               '28051rear_1D_4.6_12.85_incident_monitor', 'SANS2DLoadingAddedEventDataMonitor.nxs'
 
 #    def requiredMemoryMB(self):
 #        return 2000
