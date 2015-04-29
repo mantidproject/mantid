@@ -186,7 +186,7 @@ double DynamicKuboToyabe::getDKT (double t, double G, double F, double v, double
 
   if ( (G != oldG) || (v != oldV) || (F != oldF) || (eps != oldEps)){
 
-    // If G or v or F or eps have changed with respect to the 
+    // If G or v or F or eps have changed with respect to the
     // previous call, we need to re-do the computations
 
 
@@ -279,7 +279,7 @@ void DynamicKuboToyabe::function1D(double* out, const double* xValues, const siz
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
-DynamicKuboToyabe::DynamicKuboToyabe() : m_eps(0.05), m_minEps(0.003) {}
+DynamicKuboToyabe::DynamicKuboToyabe() : m_eps(0.05), m_minEps(0.003), m_maxEps(0.05) {}
 
 //----------------------------------------------------------------------------------------------
 /** Function to calculate derivative numerically
@@ -343,10 +343,13 @@ void DynamicKuboToyabe::setAttribute(const std::string &attName,
     double newVal = att.asDouble();
 
     if (newVal < 0) {
-      throw std::invalid_argument("DynamicKuboToyabe: bin width cannot be negative.");
+      throw std::invalid_argument("DynamicKuboToyabe: bin width cannot be negative, ignoring new value.");
 
     } else if (newVal < m_minEps) {
-      throw std::invalid_argument("DynamicKuboToyabe: bin width too small.");
+      throw std::invalid_argument("DynamicKuboToyabe: bin width too small, ignoring new value.");
+
+    } else if (newVal > m_maxEps) {
+      throw std::invalid_argument("DynamicKuboToyabe: bin width too large, ignoring new value.");
     }
 
     m_eps = newVal;

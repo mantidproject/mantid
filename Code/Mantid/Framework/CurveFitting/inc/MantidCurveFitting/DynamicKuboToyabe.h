@@ -83,7 +83,7 @@ namespace Mantid
 
       /// Bin width
       double m_eps;
-      double m_minEps;
+      double m_minEps, m_maxEps;
     };
 
   } // namespace CurveFitting
