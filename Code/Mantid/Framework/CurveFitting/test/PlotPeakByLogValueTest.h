@@ -57,6 +57,21 @@ namespace
   };
 
   DECLARE_FUNCTION(PLOTPEAKBYLOGVALUETEST_Fun)
+
+  class PropertyNameIs
+  {
+    public:
+      PropertyNameIs(std::string name) : m_name(name) {};
+
+      bool operator()(Mantid::Kernel::PropertyHistory_sptr p)
+      {
+        return p->name() == m_name;
+      }
+
+    private:
+      std::string m_name;
+  };
+
 }
 
 class PlotPeak_Expression
@@ -468,11 +483,13 @@ public:
       const auto & properties = child->getProperties();
 
       // Check max iterations property
-      auto prop = std::find_if(properties.begin(), properties.end(), [](Mantid::Kernel::PropertyHistory_sptr p){ return p->name() == "MaxIterations"; });
+      PropertyNameIs maxIterationsCheck("MaxIterations");
+      auto prop = std::find_if(properties.begin(), properties.end(), maxIterationsCheck);
       TS_ASSERT_EQUALS((*prop)->value(), "50");
 
       // Check minimizer property
-      prop = std::find_if(properties.begin(), properties.end(), [](Mantid::Kernel::PropertyHistory_sptr p){ return p->name() == "Minimizer"; });
+      PropertyNameIs minimizerCheck("Minimizer");
+      prop = std::find_if(properties.begin(), properties.end(), minimizerCheck);
       TS_ASSERT_EQUALS((*prop)->value(), "Levenberg-Marquardt,AbsError=0.01,RelError=0.01");
     }
   }
