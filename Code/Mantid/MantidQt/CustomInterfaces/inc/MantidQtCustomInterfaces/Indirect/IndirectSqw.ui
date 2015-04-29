@@ -473,6 +473,18 @@
    <header>MantidQtMantidWidgets/DataSelector.h</header>
   </customwidget>
  </customwidgets>
+ <tabstops>
+  <tabstop>cbRebinType</tabstop>
+  <tabstop>spQLow</tabstop>
+  <tabstop>spQWidth</tabstop>
+  <tabstop>spQHigh</tabstop>
+  <tabstop>ckRebinInEnergy</tabstop>
+  <tabstop>spELow</tabstop>
+  <tabstop>spEWidth</tabstop>
+  <tabstop>spEHigh</tabstop>
+  <tabstop>cbPlotType</tabstop>
+  <tabstop>ckSave</tabstop>
+ </tabstops>
  <resources/>
  <connections>
   <connection>
