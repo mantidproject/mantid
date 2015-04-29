@@ -205,8 +205,8 @@ public:
 
     deleteData();
     WorkspaceCreationHelper::removeWS("PlotPeakResult");
-
   }
+
 
   void testWorkspaceList_plotting_against_ws_names()
   {
@@ -363,7 +363,7 @@ public:
   void test_createOutputOptionMultipleWorkspaces()
   {
     createData();
-    
+
     PlotPeakByLogValue alg;
     alg.initialize();
     alg.setPropertyValue("Input","PlotPeakGroup_0;PlotPeakGroup_1;PlotPeakGroup_2");
@@ -432,10 +432,51 @@ public:
       auto fit = AnalysisDataService::Instance().retrieveWS<const MatrixWorkspace>(wsNames[i]);
       TS_ASSERT( fit );
       TS_ASSERT( fit->getNumberHistograms() == 5);
-    } 
+    }
 
     AnalysisDataService::Instance().clear();
   }
+
+
+  void testMinimizer()
+  {
+    createData();
+
+    PlotPeakByLogValue alg;
+    alg.initialize();
+    alg.setPropertyValue("Input","PlotPeakGroup_0;PlotPeakGroup_1;PlotPeakGroup_2");
+    alg.setPropertyValue("OutputWorkspace","PlotPeakResult");
+    alg.setProperty("CreateOutput", true);
+    alg.setPropertyValue("WorkspaceIndex","1");
+    alg.setPropertyValue("Function","name=LinearBackground,A0=1,A1=0.3;name=Gaussian,PeakCentre=5,Height=2,Sigma=0.1");
+    alg.setPropertyValue("MaxIterations", "50");
+    alg.setPropertyValue("Minimizer", "Levenberg-Marquardt,AbsError=0.01,RelError=0.01");
+
+    alg.execute();
+    TS_ASSERT(alg.isExecuted());
+
+    auto fits = AnalysisDataService::Instance().retrieveWS<const WorkspaceGroup>("PlotPeakResult_Workspaces");
+    TS_ASSERT(fits);
+
+    for (size_t i = 0; i < fits->size(); ++i)
+    {
+      // Get the Fit algorithm history
+      auto fit = fits->getItem(i);
+      const auto & wsHistory = fit->getHistory();
+      const auto & child = wsHistory.getAlgorithmHistory(0);
+      TS_ASSERT_EQUALS(child->name(), "Fit");
+      const auto & properties = child->getProperties();
+
+      // Check max iterations property
+      auto prop = std::find_if(properties.begin(), properties.end(), [](Mantid::Kernel::PropertyHistory_sptr p){ return p->name() == "MaxIterations"; });
+      TS_ASSERT_EQUALS((*prop)->value(), "50");
+
+      // Check minimizer property
+      prop = std::find_if(properties.begin(), properties.end(), [](Mantid::Kernel::PropertyHistory_sptr p){ return p->name() == "Minimizer"; });
+      TS_ASSERT_EQUALS((*prop)->value(), "Levenberg-Marquardt,AbsError=0.01,RelError=0.01");
+    }
+  }
+
 
 private:
 
@@ -487,7 +528,7 @@ private:
 
       }
       xdata.access()[i] = xValue;
-    }    
+    }
     testWS->setX(0, xdata);
     testWS->setX(1, xdata);
     return testWS;
