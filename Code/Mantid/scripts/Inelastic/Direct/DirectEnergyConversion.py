@@ -1470,7 +1470,7 @@ class DirectEnergyConversion(object):
             bkgd_range = self.bkgd_range
             bkg_range_min = bkgd_range[0] + bin_offset
             bkg_range_max = bkgd_range[1] + bin_offset
-            if isinstance(result_ws,api.IEventWorkspace):
+            if isinstance(result_ws,api.IEventWorkspace) or PropertyManager.incident_energy.multirep_mode():
                 bkgr_ws = self._find_or_build_bkgr_ws(data_run,bkg_range_min,bkg_range_max,bin_offset)
             else:
                 bkgr_ws = None
