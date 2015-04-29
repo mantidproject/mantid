@@ -30,6 +30,8 @@ Usage
 
 **Example - a simple example of IndexPeaks**
 
+.. include:: ../usagedata-note.txt
+
 .. testcode:: ExIndexPeaksSimple
 
    # Load Peaks found in SXD23767.raw 
