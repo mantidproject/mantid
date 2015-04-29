@@ -173,7 +173,7 @@ class LoadRun(object):
         # There is a a bug in getHistory() in combination with renamed workspaces, hence we need to hedge for this here.
         loader_name = ''
         try: 
-            load_name = outWs.getHistory().lastAlgorithm().getProperty('LoaderName').value
+            loader_name = outWs.getHistory().lastAlgorithm().getProperty('LoaderName').value
         except:
             logger.notice('Tried to get a loader from history. But data did not have a loader.')
 
