@@ -338,7 +338,9 @@ namespace
    }
 }
 
+// clang-format off
 void export_ITableWorkspace()
+// clang-format on
 {
   using Mantid::PythonInterface::Policies::VectorToNumpy;
 

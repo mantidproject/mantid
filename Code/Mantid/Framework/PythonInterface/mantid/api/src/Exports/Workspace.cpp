@@ -17,7 +17,9 @@ namespace
   ///@endcond
 }
 
+// clang-format off
 void export_Workspace()
+// clang-format on
 {
   class_<Workspace, bases<DataItem>, boost::noncopyable>("Workspace", no_init)
     .def("getName", &Workspace::getName, return_value_policy<copy_const_reference>(), 

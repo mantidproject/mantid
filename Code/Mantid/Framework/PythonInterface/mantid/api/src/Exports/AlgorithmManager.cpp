@@ -64,7 +64,9 @@ namespace
   ///@endcond
 }
 
+// clang-format off
 void export_AlgorithmManager()
+// clang-format on
 {
   typedef class_<AlgorithmManagerImpl,boost::noncopyable> PythonType;
 

@@ -23,7 +23,9 @@ namespace {
     }
 }
 
+// clang-format off
 void export_Group()
+// clang-format on
 {
   enum_<Group::CoordinateSystem>("CoordinateSystem")
       .value("Orthogonal", Group::Orthogonal)

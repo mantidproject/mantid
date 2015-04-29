@@ -38,7 +38,9 @@ namespace
 
 }
 
+// clang-format off
 void export_SpaceGroupFactory()
+// clang-format on
 {
 
     class_<SpaceGroupFactoryImpl,boost::noncopyable>("SpaceGroupFactoryImpl", no_init)

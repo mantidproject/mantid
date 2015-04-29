@@ -107,7 +107,9 @@ GCC_DIAG_OFF(cast-qual)
 GCC_DIAG_ON(cast-qual)
 // clang-format on
 
+// clang-format off
 void export_AlgorithmFactory()
+// clang-format on
 {
 
   class_<AlgorithmFactoryImpl,boost::noncopyable>("AlgorithmFactoryImpl", no_init)

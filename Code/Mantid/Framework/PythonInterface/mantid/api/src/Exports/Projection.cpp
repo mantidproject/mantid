@@ -100,7 +100,9 @@ Projection_sptr projCtor3(
 
 } //anonymous namespace
 
+// clang-format off
 void export_Projection()
+// clang-format on
 {
   class_<Projection>(
     "Projection",
