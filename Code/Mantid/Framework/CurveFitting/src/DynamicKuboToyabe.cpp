@@ -278,16 +278,27 @@ void DynamicKuboToyabe::function1D(double* out, const double* xValues, const siz
  */
 DynamicKuboToyabe::DynamicKuboToyabe() : m_eps(0.05) {}
 
+//----------------------------------------------------------------------------------------------
+/** Function to calculate derivative numerically
+ */
 void DynamicKuboToyabe::functionDeriv(const API::FunctionDomain& domain, API::Jacobian& jacobian)
 {
   calNumericalDeriv(domain, jacobian);
 }
 
+//----------------------------------------------------------------------------------------------
+/** Function to calculate derivative analytically
+ */
 void DynamicKuboToyabe::functionDeriv1D(API::Jacobian* , const double* , const size_t )
 {
-  throw Mantid::Kernel::Exception::NotImplementedError("functionDerivLocal is not implemented for DynamicKuboToyabe.");
+  throw Mantid::Kernel::Exception::NotImplementedError("functionDeriv1D is not implemented for DynamicKuboToyabe.");
 }
 
+//----------------------------------------------------------------------------------------------
+/** Set new value of the i-th parameter
+ * @param i :: parameter index
+ * @param value :: new value
+ */
 void DynamicKuboToyabe::setActiveParameter(size_t i, double value) {
 
   setParameter( i, fabs(value), false);
@@ -297,7 +308,7 @@ void DynamicKuboToyabe::setActiveParameter(size_t i, double value) {
 //----------------------------------------------------------------------------------------------
 /** Get Attribute names
  * @return A list of attribute names
-*/
+ */
 std::vector<std::string> DynamicKuboToyabe::getAttributeNames() const {
   std::vector<std::string> res;
   res.push_back("eps");
@@ -336,8 +347,8 @@ void DynamicKuboToyabe::setAttribute(const std::string &attName,
 
 //----------------------------------------------------------------------------------------------
 /** Check if attribute attName exists
-  * @param attName :: The attribute name.
-  */
+ * @param attName :: The attribute name.
+ */
 bool DynamicKuboToyabe::hasAttribute(const std::string &attName) const {
   return attName == "eps";
 }
