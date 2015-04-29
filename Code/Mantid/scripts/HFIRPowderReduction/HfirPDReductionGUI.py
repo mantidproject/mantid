@@ -483,8 +483,8 @@ class MainWindow(QtGui.QMainWindow):
         else:
             # read from GUI
             try:
-                self._logDebug("Attending to load Exp %d Scan %d." % (expno, scanno))
                 expno, scanno = self._uiGetExpScanNumber()
+                self._logDebug("Attending to load Exp %d Scan %d." % (expno, scanno))
             except NotImplementedError as ne:
                 self._logError("Error to get Exp and Scan due to %s." % (str(ne)))
                 return
@@ -1695,7 +1695,6 @@ class MainWindow(QtGui.QMainWindow):
             return False
 
         # Canvas and line information
-
         self._indvDetCanvasMode = 'samplelog'
 
         # pop out the xlabel list
@@ -1704,8 +1703,7 @@ class MainWindow(QtGui.QMainWindow):
         self.ui.comboBox_indvDetXLabel.clear()
         self.ui.comboBox_indvDetXLabel.addItems(floatsamplelognamelist)
 
-        # FUTURE: xlabel can be other sample log
-        xlabel='Pt'
+        xlabel=str(self.ui.comboBox_indvDetXLabel.currentText())
 
         # get data
         vecx, vecy = self._myControl.getSampleLogValue(expno, scanno, samplelogname, xlabel)
@@ -2028,7 +2026,7 @@ class MainWindow(QtGui.QMainWindow):
                 wavelength = float(self._myControl.getWavelength(expno, scanno))
             else:
                 wavelength = float(str(self.ui.lineEdit_wavelength.text()))
-        except ValueError:
+        except TypeError:
             if unit != '2theta':
                 raise NotImplementedError('Wavelength must be specified for unit %s.'%(unit))
 

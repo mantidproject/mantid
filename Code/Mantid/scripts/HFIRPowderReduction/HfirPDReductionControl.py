@@ -339,11 +339,6 @@ class HFIRPDRedControl(object):
         exp = int(expno)
         scan = int(scanno)
 
-        # FUTURE: Fix this!  Should be applied to all sample logs
-        if xlabel != 'Pt.':
-            xlabel = 'Pt.'
-            self._logNotice('XLabel supports Pt. only.  More tests are required to support other log.')
-
         if self._myWorkspaceDict.has_key((exp, scan)) is False:
             raise NotImplementedError("Exp %d Scan %d does not have reduced \
                     workspace." % (exp, scan))
