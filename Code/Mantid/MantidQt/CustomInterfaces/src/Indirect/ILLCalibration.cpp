@@ -145,7 +145,7 @@ namespace CustomInterfaces
       g_log.debug() << "Resolution is " << res << std::endl;
 
       m_uiForm.spPeakLower->setValue(peakLower);
-      m_uiForm.spPeakLower->setValue(peakUpper);
+      m_uiForm.spPeakUpper->setValue(peakUpper);
     }
   }
 
