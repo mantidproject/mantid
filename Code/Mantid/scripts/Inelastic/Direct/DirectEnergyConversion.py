@@ -519,8 +519,8 @@ class DirectEnergyConversion(object):
 
         end_time = time.time()
         prop_man.log("*** Elapsed time = {0} sec".format(end_time - start_time),'notice')
-        # Must! clear background ws (if present in multirep) to calculate background 
-        # source for next workspace 
+        #Must! clear background ws (if present in multirep) to calculate background
+        #source for next workspace
         if 'bkgr_ws_source' in mtd:
             DeleteWorkspace('bkgr_ws_source')
 
@@ -771,7 +771,9 @@ class DirectEnergyConversion(object):
                 AddSampleLog(old_ws_name,LogName='NormalizationFactor',LogText=str(norm_factor),LogType='Number')
                 break
             if case(): # default
-                raise RuntimeError('Normalization method {0} not found. It must be one of monitor-1, monitor-2, current, or None'.format(method))
+                raise RuntimeError("""Normalization method {0} not found. 
+                                   It must be one of monitor-1, monitor-2, current, or None""".\
+                                   format(method))
         #endCase
 
 
@@ -849,11 +851,11 @@ class DirectEnergyConversion(object):
             mon_ws = run.get_monitors_ws()
 
         if self.__in_white_normalization: # we normalize wb integrals by current separately as they often do not
-                                          # have monitors or are in fact wb workspace with some special ei
-                self.normalise(run,'current',range_offset)
-                ws = run.get_workspace()
-                new_name = ws.name()
-                return ('current',new_name)
+            # have monitors or are in fact wb workspace with some special ei
+            self.normalise(run,'current',range_offset)
+            ws = run.get_workspace()
+            new_name = ws.name()
+            return ('current',new_name)
         else:
             if not mon_ws: # no monitors
                 ws = run.get_workspace()
@@ -882,7 +884,8 @@ class DirectEnergyConversion(object):
             if mon_ws_name.find('_shifted') != -1:
               # monitor-2 normalization ranges have to be identified before the
               # instrument is shifted
-                raise RuntimeError("Instrument have been shifted but no time range has been identified. Monitor-2 normalization can not be performed ")
+                raise RuntimeError("""Instrument have been shifted but no time range has been identified.
+                                   Monitor-2 normalization can not be performed """)
             else:
               # instrument and workspace shifted, so TOF will be calculated wrt
               # shifted instrument
@@ -916,7 +919,8 @@ class DirectEnergyConversion(object):
 
         spectra_id = self.prop_man.multirep_tof_specta_list
         if not spectra_id or len(spectra_id) == 0:
-            self.prop_man.log("*** WARNING! Multirep mode used but no closest and furthest spectra numbers defined in IDF (multirep_tof_specta_list)\n"\
+            self.prop_man.log("""*** WARNING! Multirep mode used but no closest and furthest spectra numbers
+                                defined in IDF (multirep_tof_specta_list)\n"""\
                               "    Using first spectra to identify TOF range for the energy range requested.\n"\
                               "    This is correct only if all detectors are equidistant from the sample",\
                               'warning')
@@ -990,7 +994,8 @@ class DirectEnergyConversion(object):
                     mon1_peak = 0
                     en_bin  = [energy_list[0],energy_list[1]-energy_list[0],energy_list[3]]
                     self.prop_man.log("*** WARNING: message from multirep chunking procedure: get_TOF_for_energies:\n"\
-                                      "    not able to identify energy peak looking for TOF range for incident energy: {0}meV, binning: {1}\n"\
+                                      "    not able to identify energy peak looking for TOF range for incident energy:"\
+                                           " {0}meV, binning: {1}\n"\
                                       "    Continuing under assumption that incident neutrons arrive at source at time=0".\
                                        format(ei_guess,en_bin),'warning')
         else:
@@ -1005,14 +1010,18 @@ class DirectEnergyConversion(object):
             ind = workspace.getIndexFromSpectrumNumber(specID)
             ExtractSingleSpectrum(InputWorkspace=workspace, OutputWorkspace=template_ws_name, WorkspaceIndex=ind)
             if ei:
-                CreateWorkspace(OutputWorkspace=range_ws_name,NSpec = 1,DataX=energy_list,DataY=y,UnitX='DeltaE',ParentWorkspace=template_ws_name)
+                CreateWorkspace(OutputWorkspace=range_ws_name,NSpec = 1,DataX=energy_list,\
+                                DataY=y,UnitX='DeltaE',ParentWorkspace=template_ws_name)
                 if src_name:
                     MoveInstrumentComponent(Workspace=range_ws_name,ComponentName= src_name, X=mon1_pos.getX(),
-                                        Y=mon1_pos.getY(), Z=mon1_pos.getZ(), RelativePosition=False)
-                range_ws = ConvertUnits(InputWorkspace=range_ws_name,OutputWorkspace=range_ws_name,Target='TOF',EMode='Direct',EFixed=ei)
+                                            Y=mon1_pos.getY(), Z=mon1_pos.getZ(), RelativePosition=False)
+                range_ws = ConvertUnits(InputWorkspace=range_ws_name,OutputWorkspace=range_ws_name,\
+                                        Target='TOF',EMode='Direct',EFixed=ei)
             else:
-                CreateWorkspace(OutputWorkspace=range_ws_name,NSpec = 1,DataX=energy_list,DataY=y,UnitX='Energy',ParentWorkspace=template_ws_name)
-                range_ws = ConvertUnits(InputWorkspace=range_ws_name,OutputWorkspace=range_ws_name,Target='TOF',EMode='Elastic')
+                CreateWorkspace(OutputWorkspace=range_ws_name,NSpec = 1,DataX=energy_list,\
+                                DataY=y,UnitX='Energy',ParentWorkspace=template_ws_name)
+                range_ws = ConvertUnits(InputWorkspace=range_ws_name,OutputWorkspace=range_ws_name,\
+                                        Target='TOF',EMode='Elastic')
             x = range_ws.dataX(0)+mon1_peak
             TOF_range.append(x.tolist())
 
@@ -1046,7 +1055,8 @@ class DirectEnergyConversion(object):
 
         if save_file is None:
             if workspace is None:
-                prop_man.log("DirectEnergyConversion:save_results: Nothing to do",'warning')
+                self.prop_man.log("DirectEnergyConversion:save_results: Nothing to save",\
+                                  'warning')
                 return
             else:
                 save_file = workspace.getName()
@@ -1155,8 +1165,10 @@ class DirectEnergyConversion(object):
 
         else:
             mvir = prop_man.monovan_integr_range
-            prop_man.log('*** Evaluating the integral from the monovan run and calculate the correction factor ******','notice')
-            prop_man.log('    Using absolute units vanadium integration range : [{0:8f}:{1:8f}]         ******'.format(mvir[0],mvir[1]),'notice')
+            prop_man.log('*** Evaluating the integral from the monovan run and calculate the correction factor ******',\
+                         'notice')
+            prop_man.log('    Using absolute units vanadium integration range : [{0:8f}:{1:8f}]         ******'.\
+                         format(mvir[0],mvir[1]),'notice')
             if not abs_norm_factor_is:
                 abs_norm_factor_is = 'calculated'
 
@@ -1171,8 +1183,9 @@ class DirectEnergyConversion(object):
 
             (anf_LibISIS,anf_SS2,anf_Puas,anf_TGP) = self.get_abs_normalization_factor(monovan_run,ei_monovan)
 
-            prop_man.log('*** Absolute correction factor(s): S^2: {0:10.4f}\n*** LibISIS: {1:10.4f} Poisson: {2:10.4f}  TGP: {3:10.4f} '\
-                .format(anf_LibISIS,anf_SS2,anf_Puas,anf_TGP),'notice')
+            prop_man.log("""*** Absolute correction factor(s): S^2: {0:10.4f}
+*** LibISIS: {1:10.4f} Poisson: {2:10.4f}  TGP: {3:10.4f} """\
+                        .format(anf_LibISIS,anf_SS2,anf_Puas,anf_TGP),'notice')
             prop_man.log('*** If these factors are substantially different, something is wrong                    ***','notice')
             absnorm_factor = anf_TGP
             # Store the factor for further usage
@@ -1180,7 +1193,8 @@ class DirectEnergyConversion(object):
             # reset current monovan run to run number (if it makes sense) --
             ## workspace is not good for further processing any more
         #end
-        prop_man.log('*** Using {0} value : {1} of absolute units correction factor (TGP)'.format(abs_norm_factor_is,absnorm_factor),'notice')
+        prop_man.log('*** Using {0} value : {1} of absolute units correction factor (TGP)'.\
+                     format(abs_norm_factor_is,absnorm_factor),'notice')
         prop_man.log('*******************************************************************************************','notice')
 
         sample_ws = sample_ws / absnorm_factor
@@ -1300,17 +1314,16 @@ class DirectEnergyConversion(object):
                 log_value = '\n--------> Absolute normalization factor is NaN <----------------------------------------------\n'
             else:
                 log_value = '\n--------> Warning, Monovanadium has zero spectra <--------------------------------------------\n'
-                log1_value = \
-               "--------> Processing workspace: {0}\n"\
-               "--------> Monovan Integration range : min={1}, max={2} (meV)\n"\
-               "--------> Summed:  {3} spectra with total signal: {4} and error: {5}\n"\
-               "--------> Dropped: {6} zero spectra\n"\
-               "--------> Using  mBarn/sR*fu normalization factor = {7} resulting in:\n"\
-               "--------> Abs norm factors: LibISIS: {8}\n"\
-               "--------> Abs norm factors: Sigma^2: {9}\n"\
-               "--------> Abs norm factors: Poisson: {10}\n"\
-               "--------> Abs norm factors: TGP    : {11}\n"\
-               .format(ws_name,minmax[0],minmax[1],nhist,sum(signal),sum(error),izerc,scale_factor,
+                log1_value = """--------> Processing workspace: {0}
+--------> Monovan Integration range : min={1}, max={2} (meV)
+--------> Summed:  {3} spectra with total signal: {4} and error: {5}
+--------> Dropped: {6} zero spectra
+--------> Using  mBarn/sR*fu normalization factor = {7} resulting in:
+--------> Abs norm factors: LibISIS: {8}
+--------> Abs norm factors: Sigma^2: {9}
+--------> Abs norm factors: Poisson: {10}
+--------> Abs norm factors: TGP    : {11}\n"""\
+                .format(ws_name,minmax[0],minmax[1],nhist,sum(signal),sum(error),izerc,scale_factor,
                           norm_factor['LibISIS'],norm_factor['SigSq'],norm_factor['Poisson'],norm_factor['TGP'])
             log_value = log_value + log1_value
             propman.log(log_value,'error')
@@ -1534,10 +1547,10 @@ class DirectEnergyConversion(object):
         if 'bkgr_ws_source' in mtd:
             #TODO: This is questionable operation, which may be unnecessary if remove background
             # uses time interval only. (and it probably does)
-            # need to check if bkgr_ws =mtd['bkgr_ws_source'] is enough here. 
+            # need to check if bkgr_ws =mtd['bkgr_ws_source'] is enough here.
             # (and not delete it after bkg removal)
             bkgr_ws = CloneWorkspace(InputWorkspace='bkgr_ws_source',OutputWorkspace='bkgr_ws')
-            if time_shift != 0: # Workspace has probably been shifted, so to have 
+            if time_shift != 0: # Workspace has probably been shifted, so to have
                                 # one needs to do appropriate shift here
                                 #correct units conversion as well
                 CopyInstrumentParameters(result_ws,bkgr_ws)
