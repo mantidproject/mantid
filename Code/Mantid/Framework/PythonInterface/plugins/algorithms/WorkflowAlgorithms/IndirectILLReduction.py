@@ -39,6 +39,10 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         self.declareProperty(FileProperty('Run', '', action=FileAction.Load, extensions=["nxs"]),
                              doc='File path of run.')
 
+        self.declareProperty(MatrixWorkspaceProperty("CalibrationWorkspace", "",
+                             optional=PropertyMode.Optional, direction=Direction.Input),
+                             doc="Workspace containing calibration intensities.")
+
         self.declareProperty(name='Analyser', defaultValue='silicon',
                              validator=StringListValidator(['silicon']),
                              doc='Analyser crystal.')
@@ -101,6 +105,7 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         self.log().information('IndirectILLreduction')
 
         run_path = self.getPropertyValue('Run')
+        self._calibration_workspace = self.getPropertyValue('CalibrationWorkspace')
         self._raw_workspace = self.getPropertyValue('RawWorkspace')
         self._red_workspace = self.getPropertyValue('ReducedWorkspace')
         self._red_left_workspace = self.getPropertyValue('LeftWorkspace')
@@ -282,6 +287,12 @@ class IndirectILLReduction(DataProcessorAlgorithm):
                       XMax=x_range[1])
         ScaleX(InputWorkspace=grouped_ws, OutputWorkspace=grouped_ws, Factor=-x_range[0],
                Operation='Add')
+
+        # Apply the detector intensity calibration
+        if self._calibration_workspace != '':
+            Divide(LHSWorkspace=grouped_ws,
+                   RHSWorkspace=self._calibration_workspace,
+                   OutputWorkspace=grouped_ws)
 
         Divide(LHSWorkspace=grouped_ws, RHSWorkspace=monitor_ws, OutputWorkspace=grouped_ws)
         formula = self._energy_range(grouped_ws)
