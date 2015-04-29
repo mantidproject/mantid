@@ -22,6 +22,8 @@
 #include <vector>
 #include <numeric>
 
+#include <boost/regex.hpp>
+
 #include <Poco/StringTokenizer.h>
 #include <Poco/File.h>
 #include <Poco/Path.h>
@@ -1332,6 +1334,15 @@ void GroupDetectors2::RangeHelper::getList(const std::string &line,
  */
 void GroupDetectors2::translateInstructions(const std::string &instructions,
                                             std::stringstream &commands) {
+
+  // first check that the instructions/pattern makes sense
+  boost::regex re(
+      "^\\s*[0-9]+\\s*$|^(\\s*,*[0-9]+(\\s*(,|:|\\+|\\-)\\s*)*[0-9]*)*$");
+  if (!boost::regex_match(instructions, re)) {
+    throw std::invalid_argument("GroupingPattern is not well formed: " +
+                                instructions);
+  }
+
   // vector of groups, each group being a vector of its spectra
   std::vector<std::vector<int>> outGroups;
 
