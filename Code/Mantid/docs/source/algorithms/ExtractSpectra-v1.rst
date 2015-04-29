@@ -9,35 +9,37 @@
 Description
 -----------
 
-TODO: Enter a full rst-markup description of your algorithm here.
+Extracts a number of spectra from a MatrixWorkspace and puts them into a new workspace.
+Optionally it can cut the number of bins (x values). See the :ref:`algm-CropWorkspace`
+algorithm for more details on how it works for ragged workspaces and workspaces with
+common bin boundaries.
 
 
 Usage
 -----
-..  Try not to use files in your examples,
-    but if you cannot avoid it then the (small) files must be added to
-    autotestdata\UsageData and the following tag unindented
-    .. include:: ../usagedata-note.txt
 
 **Example - ExtractSpectra**
 
 .. testcode:: ExtractSpectraExample
 
-   # Create a host workspace
-   ws = CreateWorkspace(DataX=range(0,3), DataY=(0,2))
-   or
-   ws = CreateSampleWorkspace()
+    # Create an input workspace
+    ws = CreateSampleWorkspace()
+    print 'Input workspace has %s bins' % ws.blocksize()
+    print 'Input workspace has %s spectra' % ws.getNumberHistograms()
 
-   wsOut = ExtractSpectra()
-
-   # Print the result
-   print "The output workspace has %i spectra" % wsOut.getNumberHistograms()
+    # Extract spectra 1,3 and 5 and crop the x-vector to interval 200 <= x <= 1300
+    cropped = ExtractSpectra(ws,200,1300,SpectrumList=[1,3,5])
+    print 'Output workspace has %s bins' % cropped.blocksize()
+    print 'Output workspace has %s spectra' % cropped.getNumberHistograms()
 
 Output:
 
 .. testoutput:: ExtractSpectraExample
 
-  The output workspace has ?? spectra
+    Input workspace has 100 bins
+    Input workspace has 200 spectra
+    Output workspace has 5 bins
+    Output workspace has 3 spectra
 
 .. categories::
 
