@@ -710,27 +710,25 @@ namespace MantidQt
 
         m_tableDirty = true;
       }
-      else
-      {
-        //qmin and qmax are both set, so let's crop the workspace to them
-        //cropworkspace fails on ragged workspaces, so we have to use rebin
-        IAlgorithm_sptr algCrop = AlgorithmManager::Instance().create("Rebin");
-        algCrop->initialize();
-        algCrop->setProperty("InputWorkspace", "IvsQ_" + runNo);
-        algCrop->setProperty("OutputWorkspace", "IvsQ_" + runNo);
-        const double qmin = m_model->data(m_model->index(rowNo, COL_QMIN)).toDouble();
-        const double qmax = m_model->data(m_model->index(rowNo, COL_QMAX)).toDouble();
-        const double dqq = m_model->data(m_model->index(rowNo, COL_DQQ)).toDouble();
-        std::vector<double> params;
-        params.push_back(qmin);
-        params.push_back(-dqq);
-        params.push_back(qmax);
-        algCrop->setProperty("Params", params);
-        algCrop->execute();
 
-        if(!algCrop->isExecuted())
-          throw std::runtime_error("Failed to run Rebin algorithm");
-      }
+      //We need to make sure that qmin and qmax are respected, so we rebin to
+      //those limits here.
+      IAlgorithm_sptr algCrop = AlgorithmManager::Instance().create("Rebin");
+      algCrop->initialize();
+      algCrop->setProperty("InputWorkspace", "IvsQ_" + runNo);
+      algCrop->setProperty("OutputWorkspace", "IvsQ_" + runNo);
+      const double qmin = m_model->data(m_model->index(rowNo, COL_QMIN)).toDouble();
+      const double qmax = m_model->data(m_model->index(rowNo, COL_QMAX)).toDouble();
+      const double dqq = m_model->data(m_model->index(rowNo, COL_DQQ)).toDouble();
+      std::vector<double> params;
+      params.push_back(qmin);
+      params.push_back(-dqq);
+      params.push_back(qmax);
+      algCrop->setProperty("Params", params);
+      algCrop->execute();
+
+      if(!algCrop->isExecuted())
+        throw std::runtime_error("Failed to run Rebin algorithm");
 
       //Also fill in theta if needed
       if(m_model->data(m_model->index(rowNo, COL_ANGLE)).toString().isEmpty() && thetaGiven)
