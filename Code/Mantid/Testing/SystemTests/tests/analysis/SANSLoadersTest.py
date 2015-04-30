@@ -163,7 +163,6 @@ class LoadSampleTestStressTest(stresstesting.MantidStressTest):
 class LoadAddedEventDataSampleTestStressTest(stresstesting.MantidStressTest):
     def runTest(self):
         self._success = False
-        self._out_file_name = None
         config["default.instrument"] = "SANS2D"
         ici.SANS2D()
         ici.MaskFile('MaskSANS2DReductionGUI.txt')
@@ -172,60 +171,15 @@ class LoadAddedEventDataSampleTestStressTest(stresstesting.MantidStressTest):
         ici.Gravity(False)
         ici.Set1D()
 
-        ici.add_runs(('28051', '28050') ,'SANS2D', 'nxs', saveAsEvent=True)
+        ici.add_runs(('22048', '22023') ,'SANS2D', 'nxs', saveAsEvent=True)
 
-        #self._prepare_added_event_data('SANS2D00028051', 'SANS2D00028050')
-        #ici.AssignSample(self._out_file_name )
-        ici.AssignSample('28051-add.nxs')
+        ici.AssignSample('22023-add.nxs')
 
         ici.WavRangeReduction(4.6, 12.85, False)
 
         # Need to do validation ourselves since we have to compare to sets of workspace-file pairs
         if self._validateWorkspaceToNeXusCustom():
             self._success = True
-
-        # Remove the 
-        os.remove(os.path.join(config['defaultsave.directory'],'SANS2D00028051-add.nxs'))
-        os.remove(os.path.join(config['defaultsave.directory'],'SANS2D00028051.log'))
-
-    def _prepare_added_event_data(self, name_first, name_second):
-        name1 = name_first
-        name1_monitors = name1 + '_monitors'
-        Load(Filename = "SANS2D00022048.nxs", OutputWorkspace = name1)
-        LoadNexusMonitors(Filename = "SANS2D00022048.nxs", OutputWorkspace=name1_monitors)
-
-        #todo -- clone first workspace rather than load twice
-        name2 = name_second
-        name2_monitors = name2 + '_monitors'
-        CloneWorkspace(InputWorkspace = name1, OutputWorkspace = name2)
-        CloneWorkspace(InputWorkspace = name1_monitors, OutputWorkspace = name2_monitors)
-
-        added_data_name = name1 + '-add' + '_added_event_data'
-        Plus(LHSWorkspace = name1, RHSWorkspace = name2, OutputWorkspace = added_data_name)
-
-        added_monitor_name = name1 + '-add' + '_monitors' + '_added_event_data'
-        Plus(LHSWorkspace = name1_monitors, RHSWorkspace = name2_monitors, OutputWorkspace = added_monitor_name)
-
-        group_name = name1 + '-add'
-        GroupWorkspaces(InputWorkspaces = [added_data_name, added_monitor_name], OutputWorkspace = group_name)
-        DeleteWorkspace(name1)
-        DeleteWorkspace(name2)
-        DeleteWorkspace(name1_monitors)
-        DeleteWorkspace(name2_monitors)
-        #to do: Work out what actual temporary system test save directory is.
-        temp_save_dir = config['defaultsave.directory']
-        output_file = os.path.join(temp_save_dir, group_name + '.nxs')
-        SaveNexus(InputWorkspace = group_name, Filename = output_file)
-        self._out_file_name = output_file
-
-
-    def _prepare_normal_event_data(self, name ):
-        temp ='temp'
-        Load(Filename = "SANS2D00022048.nxs", OutputWorkspace = temp)
-        temp_save_dir = config['defaultsave.directory']
-        output_file = os.path.join(temp_save_dir, name + '.nxs')
-        SaveNexus(InputWorkspace = temp, Filename = output_file)
-        return output_file
 
 
     def _validateWorkspaceToNeXusCustom(self):
@@ -270,7 +224,7 @@ class LoadAddedEventDataSampleTestStressTest(stresstesting.MantidStressTest):
         return all(item is True for item in validationResult)
 
     def _validateCustom(self):
-        return '28051rear_1D_4.6_12.85', 'SANS2DLoadingAddedEventData.nxs', '28051rear_1D_4.6_12.85_incident_monitor', 'SANS2DLoadingAddedEventDataMonitor.nxs'
+        return '22023rear_1D_4.6_12.85', 'SANS2DLoadingAddedEventData.nxs', '22023rear_1D_4.6_12.85_incident_monitor', 'SANS2DLoadingAddedEventDataMonitor.nxs'
 
     def requiredMemoryMB(self):
         return 2000
@@ -279,7 +233,7 @@ class LoadAddedEventDataSampleTestStressTest(stresstesting.MantidStressTest):
            return "WorkspaceToNexus"
 
     def cleanup(self):
-        os.remove(self._out_file_name)
+        os.remove(os.path.join(config['defaultsave.directory'],'SANS2D00022023-add.nxs'))
 
     def validate(self):
         return self._success
