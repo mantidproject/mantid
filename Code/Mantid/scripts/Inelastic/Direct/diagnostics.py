@@ -377,10 +377,10 @@ def do_bleed_test(sample_run, max_framerate, ignored_pixels):
     except RuntimeError:
         try:
             nFrames = data_ws.getRun().getLogData('good_frames').lastValue()
-            AddSampleLog(Workspace=data_ws, LogName='goodfrm', LogText=str(nFrames), LogType='Number')
+            AddSampleLog(Workspace=data_ws, LogName='goodfrm', LogText=str(int(nFrames)), LogType='Number')
         except RuntimeError:
-            raise RuntimeError("""Can not run bleed test as no appropriate good frame log is found in the workspace: {0}\n
-                                  Disable bleed test by setting diag_bleed_test=False or add 'goodfrm' log to the workspace\n"""\
+            raise RuntimeError("Bleed test fails as no appropriate 'good_frames' or 'goodfrm' log is loaded with ws: {0}\n"
+                               "Disable bleed test by setting diag_bleed_test=False or add 'goodfrm' log to the workspace\n"\
                                   .format(data_ws.name()))
 
 

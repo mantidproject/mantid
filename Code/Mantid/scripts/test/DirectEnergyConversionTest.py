@@ -515,7 +515,7 @@ class DirectEnergyConversionTest(unittest.TestCase):
         tReducer.prop_man.bleed = True
         tReducer.norm_mon_integration_range=[tMin,tMax]
 
-        AddSampleLog(run,LogName='good_frame_log',LogText='1.',LogType='Number Series')
+        AddSampleLog(run,LogName='good_frames',LogText='1.',LogType='Number Series')
         result = tReducer.convert_to_energy(wb_ws,run,[67.,122.],[-2,0.02,0.8],None,mono)
 
         self.assertEqual(len(result),2)
