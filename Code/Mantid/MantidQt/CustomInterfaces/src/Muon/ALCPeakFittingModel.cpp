@@ -59,26 +59,9 @@ namespace CustomInterfaces
 
   ITableWorkspace_sptr ALCPeakFittingModel::exportFittedPeaks()
   {
-    if ( m_fittedPeaks ) {
+    if ( m_parameterTable ) {
 
-      ITableWorkspace_sptr table = WorkspaceFactory::Instance().createTable("TableWorkspace");
-
-      table->addColumn("str", "Peaks");
-
-
-      if (auto composite = boost::dynamic_pointer_cast<CompositeFunction const>(m_fittedPeaks))
-      {
-        for (size_t i = 0; i < composite->nFunctions(); ++i)
-        {
-          static_cast<TableRow>(table->appendRow()) << composite->getFunction(i)->asString();
-        }
-      }
-      else
-      {
-        static_cast<TableRow>(table->appendRow()) << m_fittedPeaks->asString();
-      }
-
-      return table;
+      return m_parameterTable;
 
     } else {
     
@@ -100,6 +83,8 @@ namespace CustomInterfaces
     fit->setProperty("InputWorkspace", boost::const_pointer_cast<MatrixWorkspace>(m_data));
     fit->setProperty("CreateOutput", true);
     fit->execute();
+
+    m_parameterTable = fit->getProperty("OutputParameters");
 
     setFittedPeaks(static_cast<IFunction_sptr>(fit->getProperty("Function")));
   }

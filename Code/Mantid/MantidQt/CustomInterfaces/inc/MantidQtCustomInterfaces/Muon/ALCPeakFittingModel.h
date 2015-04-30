@@ -58,6 +58,9 @@ namespace CustomInterfaces
     /// The data we are fitting peaks to
     MatrixWorkspace_const_sptr m_data;
 
+    /// Parameter table containing fit results
+    ITableWorkspace_sptr m_parameterTable;
+
     /// Setter for convenience
     void setFittedPeaks(IFunction_const_sptr fittedPeaks);
 
