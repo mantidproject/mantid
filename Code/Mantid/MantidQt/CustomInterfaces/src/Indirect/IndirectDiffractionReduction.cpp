@@ -356,6 +356,9 @@ void IndirectDiffractionReduction::instrumentSelected(const QString & instrument
 {
   UNUSED_ARG(analyserName);
 
+  // Set the search instrument for runs
+  m_uiForm.dem_rawFiles->setInstrumentOverride(instrumentName);
+
   MatrixWorkspace_sptr instWorkspace = loadInstrument(instrumentName.toStdString(), reflectionName.toStdString());
   Instrument_const_sptr instrument = instWorkspace->getInstrument();
 
