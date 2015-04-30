@@ -343,15 +343,25 @@ void DynamicKuboToyabe::setAttribute(const std::string &attName,
     double newVal = att.asDouble();
 
     if (newVal < 0) {
-      throw std::invalid_argument("DynamicKuboToyabe: bin width cannot be negative, ignoring new value.");
+      clearAllParameters();
+      throw std::invalid_argument("DynamicKuboToyabe: bin width cannot be negative.");
 
     } else if (newVal < m_minEps) {
-      throw std::invalid_argument("DynamicKuboToyabe: bin width too small, ignoring new value.");
+      clearAllParameters();
+      std::stringstream ss;
+      ss << "DynamicKuboToyabe: bin width too small (BinWidth < " << std::setprecision(3) << m_minEps << ")";
+      throw std::invalid_argument(ss.str());
 
     } else if (newVal > m_maxEps) {
-      throw std::invalid_argument("DynamicKuboToyabe: bin width too large, ignoring new value.");
+      clearAllParameters();
+      std::stringstream ss;
+      ss << "DynamicKuboToyabe: bin width too large (BinWidth > " << std::setprecision(3) << m_maxEps << ")";
+      throw std::invalid_argument(ss.str());
     }
 
+    if ( !nParams() ) {
+      init();
+    }
     m_eps = newVal;
 
   } else {
