@@ -24,7 +24,9 @@ namespace
 
 // We only export the concrete unit classes that
 // have additional functionality over the base class
+// clang-format off
 void export_Label()
+// clang-format on
 {
   class_<Label, bases<Unit>, boost::noncopyable>("Label", no_init)
     .def("setLabel", &setLabelFromStdString,

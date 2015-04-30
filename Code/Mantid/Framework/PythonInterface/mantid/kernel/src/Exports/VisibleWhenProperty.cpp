@@ -4,7 +4,9 @@
 using namespace Mantid::Kernel;
 using namespace boost::python;
 
+// clang-format off
 void export_VisibleWhenProperty()
+// clang-format on
 {
   class_<VisibleWhenProperty, bases<EnabledWhenProperty>,
          boost::noncopyable>("VisibleWhenProperty", no_init)

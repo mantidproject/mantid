@@ -1,11 +1,12 @@
-import mantid
+
 import unittest
 import re
 # Need to import mantid before we import SANSUtility
 import mantid
 from mantid.simpleapi import CreateWorkspace, CreateSampleWorkspace, GroupWorkspaces, DeleteWorkspace
-from mantid.api import mtd
+from mantid.api import mtd, WorkspaceGroup
 import SANSUtility as su
+import re
 
 TEST_STRING_DATA = 'SANS2D0003434-add' + su.ADDED_EVENT_DATA_TAG
 TEST_STRING_MON = 'SANS2D0003434-add_monitors' + su.ADDED_EVENT_DATA_TAG
@@ -20,11 +21,7 @@ TEST_STRING_DATA3 = TEST_STRING_DATA + '_3'
 TEST_STRING_MON3 = TEST_STRING_MON + '_3'
 
 
-def provide_group_workspace_for_added_event_data(event_ws_name, monitor_ws_name, out_ws_name):
-    CreateWorkspace(DataX = [1,2,3], DataY = [2,3,4], OutputWorkspace = monitor_ws_name)
-    CreateSampleWorkspace(WorkspaceType= 'Event', OutputWorkspace = event_ws_name)
-    GroupWorkspaces(InputWorkspaces = [event_ws_name, monitor_ws_name ], OutputWorkspace = out_ws_name)
-
+# This test does not pass and was not used before 1/4/2015. SansUtilitytests was disabled.
 
 #class TestSliceStringParser(unittest.TestCase):
 
@@ -72,6 +69,60 @@ def provide_group_workspace_for_added_event_data(event_ws_name, monitor_ws_name,
 
 #    def test_empty_string_is_valid(self):
 #        self.checkValues(su.sliceParser(""), [[-1,-1]])
+
+class TestBundleAddedEventDataFilesToGroupWorkspaceFile(unittest.TestCase):
+    def _prepare_workspaces(self, names):
+        CreateSampleWorkspace(WorkspaceType = 'Event', OutputWorkspace = names[0])
+        CreateWorkspace(DataX = [1,1,1], DataY = [1,1,1], OutputWorkspace = names[1])
+
+        temp_save_dir = config['defaultsave.directory']
+        if (temp_save_dir == ''):
+            temp_save_dir = os.getcwd()
+
+        data_file_name = os.path.join(temp_save_dir, names[0] + '.nxs')
+        monitor_file_name = os.path.join(temp_save_dir, names[1] + '.nxs')
+
+        SaveNexusProcessed(InputWorkspace = names[0], Filename = data_file_name)
+        SaveNexusProcessed(InputWorkspace = names[1], Filename = monitor_file_name)
+
+        file_names = [data_file_name, monitor_file_name]
+
+        return file_names
+
+
+    def _cleanup_workspaces(self, names):
+        for name in names:
+            DeleteWorkspace(name)
+
+
+    def test_load_valid_added_event_data_and_monitor_file_produces_group_ws(self):
+        # Arrange
+        names = ['event_data', 'monitor']
+        file_names = self._prepare_workspaces(names = names)
+        self._cleanup_workspaces(names = names)
+
+        # Act
+        group_ws_name = 'g_ws'
+        output_group_file_name = su.bundle_added_event_data_as_group(file_names[0], file_names[1])
+
+        Load(Filename = output_group_file_name, OutputWorkspace = group_ws_name)
+        group_ws = mtd[group_ws_name]
+
+        # Assert
+        self.assertTrue(isinstance(group_ws, WorkspaceGroup))
+        self.assertEqual(group_ws.size(), 2)
+        self.assertTrue(os.path.exists(file_names[0])) # File for group workspace exists
+        self.assertFalse(os.path.exists(file_names[1]))  # File for monitors is deleted
+
+        # Clean up
+        ws_names_to_delete = []
+        for ws_name in mtd.getObjectNames():
+            if ws_name != group_ws_name:
+                ws_names_to_delete.append(str(ws_name))
+        self._cleanup_workspaces(names = ws_names_to_delete)
+
+        if os.path.exists(file_names[0]):
+            os.remove(file_names[0])
 
 
 class TestLoadingAddedEventWorkspaceNameParsing(unittest.TestCase):

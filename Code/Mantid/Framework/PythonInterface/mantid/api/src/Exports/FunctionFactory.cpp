@@ -86,7 +86,9 @@ namespace
   ///@endcond
 }
 
+// clang-format off
 void export_FunctionFactory()
+// clang-format on
 {
 
   class_<FunctionFactoryImpl,boost::noncopyable>("FunctionFactoryImpl", no_init)

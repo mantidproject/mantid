@@ -77,7 +77,7 @@ void PoldiBasicChopper::initializeVariableParameters(double rotationSpeed) {
   m_slitTimes.resize(m_slitPositions.size());
   std::transform(m_slitPositions.begin(), m_slitPositions.end(),
                  m_slitTimes.begin(),
-                 boost::bind<double>(
+                 boost::bind(
                      &PoldiBasicChopper::slitPositionToTimeFraction, this, _1));
 }
 

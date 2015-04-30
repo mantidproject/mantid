@@ -39,7 +39,9 @@ namespace
   BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(createPeaks_Overload, createPeaks, 0, 1)
 }
 
+// clang-format off
 void export_WorkspaceFactory()
+// clang-format on
 {
   const char * createFromParentDoc = "Create a workspace based on the given one. The meta-data, instrument etc are copied from the input"
       "If the size parameters are passed then the workspace will be a different size.";

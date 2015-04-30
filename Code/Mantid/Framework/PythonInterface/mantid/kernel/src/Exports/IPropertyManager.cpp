@@ -120,7 +120,9 @@ namespace
 
 }
 
+// clang-format off
 void export_IPropertyManager()
+// clang-format on
 {
   register_ptr_to_python<IPropertyManager*>();
 
