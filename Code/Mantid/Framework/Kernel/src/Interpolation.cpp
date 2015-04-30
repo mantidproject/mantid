@@ -28,12 +28,7 @@ Interpolation::Interpolation() : m_method("linear") {
 
 size_t
 Interpolation::findIndexOfNextLargerValue(const std::vector<double> &data,
-                                          double key, size_t range_start,
-                                          size_t range_end) const {
-
-  UNUSED_ARG(range_start);
-  UNUSED_ARG(range_end);
-
+                                          double key) const {
   auto begin = data.begin();
   auto end = data.end();
   auto pos = std::lower_bound(begin, end, key, LessOrEqualFunctor());
@@ -84,8 +79,8 @@ double Interpolation::value(const double &at) const {
 
   try {
     // otherwise
-    // General case. Find index of next largest value by binary search.
-    size_t idx = findIndexOfNextLargerValue(m_x, at, 1, N - 1);
+    // General case. Find index of next largest value by std::lower_bound.
+    size_t idx = findIndexOfNextLargerValue(m_x, at);
     return m_y[idx - 1] +
            (at - m_x[idx - 1]) * (m_y[idx] - m_y[idx - 1]) /
                (m_x[idx] - m_x[idx - 1]);
