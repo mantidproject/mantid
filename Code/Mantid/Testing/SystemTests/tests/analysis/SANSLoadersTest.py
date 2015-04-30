@@ -172,7 +172,7 @@ class LoadAddedEventDataSampleTestStressTest(stresstesting.MantidStressTest):
         ici.Gravity(False)
         ici.Set1D()
 
-        add_runs(('28051', '28050') ,'SANS2D', 'nxs', saveAsEvent=True)
+        ici.add_runs(('28051', '28050') ,'SANS2D', 'nxs', saveAsEvent=True)
 
         #self._prepare_added_event_data('SANS2D00028051', 'SANS2D00028050')
         #ici.AssignSample(self._out_file_name )
