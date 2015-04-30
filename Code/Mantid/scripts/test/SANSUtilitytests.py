@@ -3,7 +3,7 @@ import unittest
 import re
 # Need to import mantid before we import SANSUtility
 import mantid
-from mantid.simpleapi import CreateWorkspace, CreateSampleWorkspace, GroupWorkspaces, DeleteWorkspace
+from mantid.simpleapi import *
 from mantid.api import mtd, WorkspaceGroup
 import SANSUtility as su
 import re
