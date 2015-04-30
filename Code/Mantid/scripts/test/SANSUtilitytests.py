@@ -20,6 +20,10 @@ TEST_STRING_MON2 = TEST_STRING_MON + '_2'
 TEST_STRING_DATA3 = TEST_STRING_DATA + '_3'
 TEST_STRING_MON3 = TEST_STRING_MON + '_3'
 
+def provide_group_workspace_for_added_event_data(event_ws_name, monitor_ws_name, out_ws_name):
+    CreateWorkspace(DataX = [1,2,3], DataY = [2,3,4], OutputWorkspace = monitor_ws_name)
+    CreateSampleWorkspace(WorkspaceType= 'Event', OutputWorkspace = event_ws_name)
+    GroupWorkspaces(InputWorkspaces = [event_ws_name, monitor_ws_name ], OutputWorkspace = out_ws_name)
 
 # This test does not pass and was not used before 1/4/2015. SansUtilitytests was disabled.
 
