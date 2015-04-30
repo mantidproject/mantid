@@ -161,6 +161,10 @@ class LoadSampleTestStressTest(stresstesting.MantidStressTest):
         return self._success
 
 class LoadAddedEventDataSampleTestStressTest(stresstesting.MantidStressTest):
+    def __init__(self):
+        super(LoadAddedEventDataSampleTestStressTest, self).__init__()
+        self._success = False
+
     def runTest(self):
         self._success = False
         config["default.instrument"] = "SANS2D"
