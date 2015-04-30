@@ -97,7 +97,7 @@ public:
 
     TS_ASSERT_EQUALS( output->YUnit(), "Counts" );
     TS_ASSERT_EQUALS( output->YUnitLabel(), "Counts per microAmp.hour" );
-    Kernel::Property * normLog;
+    Kernel::Property * normLog(NULL);
     TS_ASSERT_THROWS_NOTHING(normLog = output->run().getProperty("NormalizationFactor"));
     Kernel::PropertyWithValue<double> *pFactor = dynamic_cast<Kernel::PropertyWithValue<double> *>(normLog);
     TS_ASSERT(pFactor);
