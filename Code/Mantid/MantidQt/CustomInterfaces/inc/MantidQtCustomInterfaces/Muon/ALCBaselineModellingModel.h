@@ -47,6 +47,8 @@ namespace CustomInterfaces
 
     MatrixWorkspace_const_sptr correctedData() const { return m_correctedData; }
 
+    ITableWorkspace_sptr parameterTable() const { return m_parameterTable; }
+
     const std::vector<Section>& sections() const { return m_sections; }
 
     // -- End of IALCBaselineModellingModel interface ----------------------------------------------
