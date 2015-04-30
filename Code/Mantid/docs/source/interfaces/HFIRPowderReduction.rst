@@ -86,9 +86,9 @@ Here is the suggested workflow to reduce multiple scans and possibly merge them.
 
  1. Set up *Exp No* and range of scan numbers;
  2. Push button *Load All* to load and reduce all runs specified in previous step to single-spectrum diffraction pattern;
- 3. Waterfall plot all reduced scans in default;
+ 3. Plot all reduced scans in default;
  4. Optinally plot all data in 2D fill plot;
- 5. User can delete some scans from the reduced scans via GUI or input text edit;
+ 5. User can delete some scans from the reduced scans via GUI or input text edit (not implemented yet);
  6. Push button *Merge* to merge the scans;
  7. Push button *Save All* to save all individual scans to files;
  8. Push button *Save Merged* to save the merged scans to one file; 

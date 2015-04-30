@@ -923,9 +923,12 @@ class MainWindow(QtGui.QMainWindow):
         if overplot is False:
             self.doClearIndDetCanvas()
 
-        xlabel = str(self.ui.comboBox_indvDetXLabel.currentText())
-        if xlabel.strip() == "":
-            xlabel = None
+        xlabel = str(self.ui.comboBox_indvDetXLabel.currentText()).strip()
+        if xlabel != "" and xlabel != "Pt.":
+            self._logNotice("X-label %s is not supported for plotting individual detector's counts.  Set to detector angle." % (xlabel))
+            xlabel = ""
+        else:
+            self._logNotice("X-label for individual detectror is %s." % (xlabel))
 
         # plot
         try:
@@ -1449,7 +1452,7 @@ class MainWindow(QtGui.QMainWindow):
     # Private methods to plot data
     #--------------------------------------------------------------------------
 
-    def _plotIndividualDetCounts(self, expno, scanno, detid, xlabel):
+    def _plotIndividualDetCounts(self, expno, scanno, detid, xaxis):
         """ Plot a specific detector's counts along all experiment points (pt)
         """
         # Validate input
@@ -1467,15 +1470,16 @@ class MainWindow(QtGui.QMainWindow):
         if self._tabLineDict.has_key(canvas) is False:
             self._tabLineDict[canvas] = []
 
-        # pop out the xlabel list
-
         # get data
-        vecx, vecy = self._myControl.getIndividualDetCounts(expno, scanno, detid, xlabel)
+        self._logNotice("X-axis is %s."%(xaxis))
+        vecx, vecy = self._myControl.getIndividualDetCounts(expno, scanno, detid, xaxis)
 
         # Plot to canvas
         marker, color = canvas.getNextLineMarkerColorCombo()
-        if xlabel is None:
+        if xaxis == "":
             xlabel = r'$2\theta$'
+        else:
+            xlabel = "Pt."
 
         label = "Detector ID: %d" % (detid)
 
