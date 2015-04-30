@@ -256,7 +256,7 @@ As more operations are added to a group, it can be useful to display the group i
       - :math:`\bar{1}`
       - :math:`1`
       
-Combining the symmetry operations does not result into any new operations, so the group is closed. Each element has an inverse (:math:`\bar{1}` occurs in each row) and an identity element exists (all elements in the first row are the same as in the header row).
+Combining the symmetry operations does not result into any new operations, so the group is closed. Each element has an inverse (in this case, each element is its own inverse). :math:` and an identity element exists (all elements in the first row are the same as in the header row).
 
 Some groups are so called cyclic groups, all elements of the group can be expressed as powers of one symmetry operation (which are explained above) from 0 to :math:`k-1`, where `k` is the order of the operation. The group with elements :math:`1` and :math:`2` is an example for such a cyclic group, it can be expressed as :math:`2^0 = 1` and :math:`2^1 = 2`.
 
