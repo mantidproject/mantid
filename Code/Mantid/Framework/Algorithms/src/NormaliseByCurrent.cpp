@@ -29,7 +29,6 @@ void NormaliseByCurrent::init() {
   declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace", "",
                                                          Direction::Output),
                   "Name of the output workspace");
-  declareProperty<double>("NormalizationFactor",0.,"The value of current used to normalize workspace",Direction::Output);
 }
 
 /**
@@ -90,19 +89,18 @@ void NormaliseByCurrent::exec() {
   g_log.information() << "Normalisation current: " << charge << " uamps"
                       << std::endl;
 
-  setProperty("NormalizationFactor", charge);
 
-  charge = 1.0 / charge; // Inverse of the charge to be multiplied by
+  double invcharge = 1.0 / charge; // Inverse of the charge to be multiplied by
 
   // The operator overloads properly take into account of both EventWorkspaces
   // and doing it in place or not.
   if (inputWS != outputWS) {
-    outputWS = inputWS * charge;
+    outputWS = inputWS * invcharge;
     setProperty("OutputWorkspace", outputWS);
   } else {
-    inputWS *= charge;
+    inputWS *= invcharge;
   }
-
+  outputWS->mutableRun().addLogData(new Kernel::PropertyWithValue<double>("NormalizationFactor", charge));
   outputWS->setYUnitLabel("Counts per microAmp.hour");
 }
 
