@@ -13,7 +13,7 @@
 
 using namespace Mantid::VATES;
 using namespace Mantid::API;
-using namespace Mantid::MDEvents;
+using namespace Mantid::DataObjects;
 using namespace testing;
 
 //=====================================================================================
@@ -87,7 +87,7 @@ public:
     //Expectation checks that progress should be >= 0 and <= 100 and called at least once!
     EXPECT_CALL(mockProgressAction, eventRaised(AllOf(Le(100),Ge(0)))).Times(AtLeast(1));
 
-    boost::shared_ptr<Mantid::MDEvents::MDEventWorkspace<Mantid::MDEvents::MDEvent<1>,1> >
+    boost::shared_ptr<Mantid::DataObjects::MDEventWorkspace<Mantid::DataObjects::MDEvent<1>,1> >
             ws = MDEventsTestHelper::makeMDEWFull<1>(10, 10, 10, 10);
 
     //Rebin it to make it possible to compare cells to bins.
@@ -128,7 +128,7 @@ public:
 
   void setUp()
   {
-    boost::shared_ptr<Mantid::MDEvents::MDEventWorkspace<Mantid::MDEvents::MDEvent<1>,1> > input 
+    boost::shared_ptr<Mantid::DataObjects::MDEventWorkspace<Mantid::DataObjects::MDEvent<1>,1> > input 
       = MDEventsTestHelper::makeMDEWFull<1>(2, 10, 10, 4000);
     //Rebin it to make it possible to compare cells to bins.
     using namespace Mantid::API;

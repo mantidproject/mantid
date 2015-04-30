@@ -1,6 +1,6 @@
 #include "MantidDataObjects/PeakShapeBase.h"
 #include "MantidKernel/SpecialCoordinateSystem.h"
-#include <jsoncpp/json/json.h>
+#include <json/json.h>
 
 namespace Mantid {
 namespace DataObjects {

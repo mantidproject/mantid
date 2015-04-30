@@ -26,7 +26,7 @@ using namespace testing;
 
 
 // Declare into the factory.
-DECLARE_WORKSPACE(WorkspaceTester);
+DECLARE_WORKSPACE(WorkspaceTester)
 
 /** Create a workspace with numSpectra, with
  * each spectrum having one detector, at id = workspace index.

@@ -35,9 +35,9 @@ class PeakReport(object):
 
     def clean_files(self):
         # Clean up generated image files
-        for file in self.__image_files:
-            os.remove(file)
-            self.__image_files.remove(file)
+        for ifile in self.__image_files:
+            os.remove(ifile)
+            self.__image_files.remove(ifile)
 
     def __del__(self):
         self.clean_files()
@@ -100,7 +100,8 @@ class PeakReport(object):
         if  not pdf_name:
             pdf_name = md_workspace.name() + 'IntegrationReport.pdf'
 
-        doc = SimpleDocTemplate(self.__out_location +  pdf_name, pagesize=letter, leftMargin=2, rightMargin=2, topMargin=2.5, bottomMargin=2 ,showBoundary=1)
+        doc = SimpleDocTemplate(self.__out_location +  pdf_name, pagesize=letter, leftMargin=2, rightMargin=2,
+                                topMargin=2.5, bottomMargin=2 ,showBoundary=1)
         parts = list()
         styles = getSampleStyleSheet()
         title = Paragraph("Peak Integration Report for %s" % md_workspace.name(), styles["Heading1"], )
@@ -144,8 +145,10 @@ class PeakReport(object):
             # Get the peak object
             peak = peaks_workspace.getPeak(i)
 
-            infoData = [['PeakNumber:', i],['Run Number:', peak.getRunNumber()], ['Intensity:', peak.getIntensity()], ['TOF:', peak.getTOF()]]
-            coordData = [['Detector Id:', peak.getDetectorID()], ['Q Lab:', peak.getQLabFrame()], ['Q Sample:', peak.getQSampleFrame()], ['HKL:', peak.getHKL()]]
+            infoData = [['PeakNumber:', i],['Run Number:', peak.getRunNumber()], ['Intensity:', peak.getIntensity()],
+                        ['TOF:', peak.getTOF()]]
+            coordData = [['Detector Id:', peak.getDetectorID()], ['Q Lab:', peak.getQLabFrame()],
+                         ['Q Sample:', peak.getQSampleFrame()], ['HKL:', peak.getHKL()]]
             data = [[ img , Table(infoData), Table(coordData)]]
 
             colwidths = (150, 160, 160)

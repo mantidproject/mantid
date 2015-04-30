@@ -85,7 +85,7 @@ flattenVecOfVec(std::vector<std::vector<std::string>> vecOfVec) {
 namespace Mantid {
 namespace DataHandling {
 // Register the algorithm into the algorithm factory
-DECLARE_ALGORITHM(Load);
+DECLARE_ALGORITHM(Load)
 
 // The mutex
 Poco::Mutex Load::m_mutex;

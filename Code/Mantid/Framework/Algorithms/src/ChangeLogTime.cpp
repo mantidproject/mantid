@@ -7,7 +7,7 @@ namespace Mantid {
 namespace Algorithms {
 
 // Register the algorithm into the AlgorithmFactory
-DECLARE_ALGORITHM(ChangeLogTime);
+DECLARE_ALGORITHM(ChangeLogTime)
 
 using std::string;
 using std::stringstream;

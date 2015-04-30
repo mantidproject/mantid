@@ -57,9 +57,6 @@ class Symmetrise(PythonAlgorithm):
 
 
     def PyExec(self):
-        from IndirectCommon import StartTime, EndTime
-
-        StartTime('Symmetrise')
         self._setup()
         temp_ws_name = '__symm_temp'
 
@@ -172,8 +169,6 @@ class Symmetrise(PythonAlgorithm):
             self._generate_props_table()
 
         self.setProperty('OutputWorkspace', self._output_workspace)
-
-        EndTime('Symmetrise')
 
 
     def validateInputs(self):

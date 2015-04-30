@@ -1,4 +1,4 @@
-#pylint: disable=invalid-name
+#pylint: skip-file
 import time as time
 import math
 import numpy

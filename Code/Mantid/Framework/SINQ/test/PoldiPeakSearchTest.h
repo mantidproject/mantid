@@ -6,6 +6,7 @@
 #include "MantidSINQ/PoldiPeakSearch.h"
 #include "MantidSINQ/PoldiUtilities/PoldiPeak.h"
 #include "MantidSINQ/PoldiUtilities/UncertainValue.h"
+#include "MantidKernel/UnitFactory.h"
 
 using Mantid::Poldi::PoldiPeakSearch;
 using namespace Mantid::Poldi;
@@ -133,7 +134,8 @@ public:
 
         maxima.sort();
 
-        std::vector<PoldiPeak_sptr> peaks = poldiPeakSearch.getPeaks(baseData.begin(), baseData.end(), maxima, testXData);
+        Unit_sptr qUnit = UnitFactory::Instance().create("MomentumTransfer");
+        std::vector<PoldiPeak_sptr> peaks = poldiPeakSearch.getPeaks(baseData.begin(), baseData.end(), maxima, testXData, qUnit);
 
         TS_ASSERT_EQUALS(peaks.size(), 4);
 

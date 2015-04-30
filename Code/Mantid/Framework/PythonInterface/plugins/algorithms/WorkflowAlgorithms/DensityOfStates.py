@@ -1,4 +1,4 @@
-#pylint: disable=no-init,invalid-name
+#pylint: disable=no-init,invalid-name,anomalous-backslash-in-string
 from mantid.kernel import *
 from mantid.api import *
 from mantid.simpleapi import *
@@ -28,8 +28,14 @@ class DensityOfStates(PythonAlgorithm):
     _num_ions = None
     _num_branches = None
 
+
+    def category(self):
+        return "Simulation"
+
+
     def summary(self):
         return "Calculates phonon densities of states, Raman and IR spectrum."
+
 
     def PyInit(self):
         # Declare properties
@@ -143,9 +149,7 @@ class DensityOfStates(PythonAlgorithm):
                 if k in self._ions:
                     partial_ions[k] = v
 
-            partial_workspaces, sum_workspace = self._compute_partial_ion_workflow(
-                                                    partial_ions, frequencies,
-                                                    eigenvectors, weights)
+            partial_workspaces, sum_workspace = self._compute_partial_ion_workflow(partial_ions, frequencies, eigenvectors, weights)
 
             if self._sum_contributions:
                 # Discard the partial workspaces
@@ -168,9 +172,7 @@ class DensityOfStates(PythonAlgorithm):
 
             eigenvectors = file_data[4]
 
-            partial_workspaces, sum_workspace = self._compute_partial_ion_workflow(
-                                                    self._ion_dict, frequencies,
-                                                    eigenvectors, weights)
+            partial_workspaces, sum_workspace = self._compute_partial_ion_workflow(self._ion_dict, frequencies, eigenvectors, weights)
 
             # Discard the partial workspaces
             for partial_ws in partial_workspaces:
@@ -453,7 +455,7 @@ class DensityOfStates(PythonAlgorithm):
         weights = weights[:self._num_branches]
 
         # Speed of light in vaccum in m/s
-        c = scipy.constants.c
+        #c = scipy.constants.c #unused for now
         # Wavelength of the laser
         laser_wavelength = 514.5e-9
         # Planck's constant

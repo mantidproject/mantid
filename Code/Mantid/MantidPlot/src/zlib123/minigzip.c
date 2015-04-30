@@ -252,7 +252,7 @@ void file_uncompress(file)
     {
         outfile = file;
         infile = buf;
-        // Add the .gz suffix to the filename in buf/infile
+        /* Add the .gz suffix to the filename in buf/infile */
         strcat(buf, GZ_SUFFIX);
     }
     in = gzopen(infile, "rb");

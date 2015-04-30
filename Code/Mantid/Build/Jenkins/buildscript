@@ -4,18 +4,65 @@
 #
 # Notes:
 #
-# WORKSPACE, JOB_NAME, NODE_LABEL GIT_COMMIT are environment variables that 
+# WORKSPACE, JOB_NAME, NODE_LABEL GIT_COMMIT are environment variables that
 # are set by Jenkins. The last one corresponds to any labels set on a slave.
 # BUILD_THREADS & PARAVIEW_DIR should be set in the configuration of each
 # slave.
 ###############################################################################
 SCRIPT_DIR=$(dirname "$0")
+# Package by default
+BUILDPKG=true
+
+###############################################################################
+# All node currently have PARAVIEW_DIR=3.98.1 and PARAVIEW_NEXT_DIR=4.3.1
+###############################################################################
+export PARAVIEW_DIR=${PARAVIEW_NEXT_DIR}
 
 ###############################################################################
 # Print out the versions of things we are using
 ###############################################################################
 cmake --version
 echo "SHA1=${sha1}"
+
+###############################################################################
+# Check job requirements from the name
+###############################################################################
+if [[ ${JOB_NAME} == *clean* ]]; then
+  CLEANBUILD=true
+fi
+
+if [[ ${JOB_NAME} == *debug* ]]; then
+  BUILD_CONFIG="Debug"
+elif [[ ${JOB_NAME} == *relwithdbg* ]]; then
+  BUILD_CONFIG="RelWithDbg"
+else
+  BUILD_CONFIG="Release"
+fi
+
+###############################################################################
+# Setup the build directory
+# For a clean build the entire thing is removed to guarantee it is clean. All
+# other build types are assumed to be incremental and the following items
+# are removed to ensure stale build objects don't interfere with each other:
+#   - build/bin/**: if libraries are removed from cmake they are not deleted
+#                   from bin and can cause random failures
+#   - build/ExternalData/**: data files will change over time and removing
+#                            the links helps keep it fresh
+###############################################################################
+BUILD_DIR=$WORKSPACE/build
+if [ -z "$BUILD_DIR" ]; then
+  echo "Build directory not set. Cannot continue"
+  exit 1
+fi
+
+if [[ "$CLEANBUILD" == true ]]; then
+  rm -rf $BUILD_DIR
+fi
+if [ -d $BUILD_DIR ]; then
+  rm -rf $BUILD_DIR/bin $BUILD_DIR/ExternalData
+else
+  mkdir $BUILD_DIR
+fi
 
 ###############################################################################
 # Setup clang
@@ -26,7 +73,7 @@ elif [[ $(uname) == 'Darwin' ]] ; then
   if [[ ! $(command -v icpc) ]] ; then
     USE_CLANG=true
   fi
-fi  
+fi
 
 if [[ $USE_CLANG ]]; then
   # Assuming we are using the clang compiler
@@ -35,14 +82,14 @@ if [[ $USE_CLANG ]]; then
   export CC=clang
   export CXX=clang++
   #check if CMakeCache.txt exists and if so that the cxx compiler is clang++
-  #only needed with incremental builds. Clean builds delete this directory in a later step. 
-  if [[ -e $WORKSPACE/build/CMakeCache.txt ]] && [[ ${JOB_NAME} != *clean* ]]; then
-    COMPILERFILEPATH=`grep 'CMAKE_CXX_COMPILER:FILEPATH' $WORKSPACE/build/CMakeCache.txt` 
-    if [[ $COMPILERFILEPATH != *clang++* ]]; then 
+  #only needed with incremental builds. Clean builds delete this directory in a later step.
+  if [[ -e $BUILD_DIR/CMakeCache.txt ]] && [[ ${JOB_NAME} != *clean* ]]; then
+    COMPILERFILEPATH=`grep 'CMAKE_CXX_COMPILER:FILEPATH' $BUILD_DIR/CMakeCache.txt`
+    if [[ $COMPILERFILEPATH != *clang++* ]]; then
       # Removing the build directory entirely guarantees clang is used.
-      rm -rf $WORKSPACE/build
+      rm -rf $BUILD_DIR
     fi
-  fi 
+  fi
 fi
 
 ###############################################################################
@@ -77,30 +124,14 @@ fi
 # RHEL6 setup steps - nodes must have a "rhel6" label set (in lowercase)
 ###############################################################################
 if [[ ${NODE_LABELS} == *rhel6* ]]; then
-  SCL_ON_RHEL6="scl enable mantidlibs"
+  SCL_ON_RHEL6="scl enable mantidlibs34"
   ON_RHEL6=true
 else
   SCL_ON_RHEL6="eval"
 fi
 
-###############################################################################
-# Check job requirements from the name
-###############################################################################
-if [[ ${JOB_NAME} == *clean* ]]; then
-  CLEANBUILD=true
-  BUILDPKG=true
-fi
-
-if [[ -e $WORKSPACE/build/CMakeCache.txt ]]; then
-  # Temporary while the builds flick between old & new TestingTools locations
-  TESTINGTOOLS_DIR=$(grep 'Code/Mantid/TestingTools/cxxtest' $WORKSPACE/build/CMakeCache.txt || true)
-  if [ ! -z "$TESTINGTOOLS_DIR"  ]; then
-    rm -fr $WORKSPACE/build
-  fi
-fi
-
-if [[ ${JOB_NAME} == *pull_requests* ]]; then
-  BUILDPKG=true
+if [[ ${NODE_LABELS} == *rhel7* ]]; then
+  ON_RHEL7=true
 fi
 
 ###############################################################################
@@ -114,6 +145,8 @@ if [[ "$BUILDPKG" == true ]]; then
       PACKAGINGVARS="-DENVVARS_ON_INSTALL=True -DCPACK_SET_DESTDIR=ON -DPACKAGE_DOCS=ON"
     elif [[ ${JOB_NAME} == *master* ]]; then
       PACKAGINGVARS="-DENVVARS_ON_INSTALL=False -DCMAKE_INSTALL_PREFIX=/opt/mantidnightly -DCPACK_PACKAGE_SUFFIX=nightly -DCPACK_SET_DESTDIR=OFF -DPACKAGE_DOCS=ON"
+    elif [[ ${JOB_NAME} == *pvnext* ]]; then
+      PACKAGINGVARS="-DENVVARS_ON_INSTALL=False -DCMAKE_INSTALL_PREFIX=/opt/mantidunstable-pvnext -DCPACK_PACKAGE_SUFFIX=unstable-pvnext -DCPACK_SET_DESTDIR=OFF"
     else
       PACKAGINGVARS="-DENVVARS_ON_INSTALL=False -DCMAKE_INSTALL_PREFIX=/opt/mantidunstable -DCPACK_PACKAGE_SUFFIX=unstable -DCPACK_SET_DESTDIR=OFF -DPACKAGE_DOCS=ON"
     fi
@@ -124,30 +157,15 @@ if [[ "$BUILDPKG" == true ]]; then
 fi
 
 ###############################################################################
-# Setup the build directory
+# Work in the build directory
 ###############################################################################
-if [[ "$CLEANBUILD" == true ]]; then
-  rm -rf $WORKSPACE/build
-fi
-[ -d $WORKSPACE/build ] || mkdir $WORKSPACE/build
-cd $WORKSPACE/build
+cd $BUILD_DIR
 
 ###############################################################################
 # Clean up any artifacts from last build so that if it fails
 # they don't get archived again
 ###############################################################################
 rm -f *.dmg *.rpm *.deb *.tar.gz
-
-###############################################################################
-## Check the required build configuration
-###############################################################################
-if [[ ${JOB_NAME} == *debug* ]]; then
-  BUILD_CONFIG="Debug"
-elif [[ ${JOB_NAME} == *relwithdbg* ]]; then
-  BUILD_CONFIG="RelWithDbg"
-else
-  BUILD_CONFIG="Release"
-fi
 
 ###############################################################################
 # CMake configuration
@@ -158,7 +176,7 @@ $SCL_ON_RHEL6 "cmake -DCMAKE_BUILD_TYPE=${BUILD_CONFIG} -DENABLE_CPACK=ON -DMAKE
 # Coverity build should exit early
 ###############################################################################
 if [[ ${JOB_NAME} == *coverity_build_and_submit* ]]; then
-  ${COVERITY_DIR}/cov-build --dir cov-int scl enable mantidlibs "make -j${BUILD_THREADS}"
+  ${COVERITY_DIR}/cov-build --dir cov-int scl enable mantidlibs34 "make -j${BUILD_THREADS}"
   tar czvf mantid.tgz cov-int
   status=$(curl --form token=$COVERITY_TOKEN --form email=mantidproject@gmail.com \
        --form file=@mantid.tgz --form version=$GIT_COMMIT \
@@ -215,6 +233,6 @@ fi
 # Run the system tests on RHEL6 when doing a pull request build. Run
 # from a package to have at least one Linux checks it install okay
 ###############################################################################
-if [[ "${ON_RHEL6}" == true ]] && [[ ${JOB_NAME} == *pull_requests* ]]; then
+if [[ "${ON_RHEL7}" == true ]] && [[ ${JOB_NAME} == *pull_requests* ]]; then
   $SCRIPT_DIR/systemtests
 fi

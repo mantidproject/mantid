@@ -28,7 +28,7 @@ EvaluateMDFunction::~EvaluateMDFunction() {}
 //----------------------------------------------------------------------------------------------
 
 /// Algorithm's version for identification. @see Algorithm::version
-int EvaluateMDFunction::version() const { return 1; };
+int EvaluateMDFunction::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
 const std::string EvaluateMDFunction::category() const {
@@ -38,7 +38,7 @@ const std::string EvaluateMDFunction::category() const {
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
 const std::string EvaluateMDFunction::summary() const {
   return "Evaluates an MD function on a MD histo workspace.";
-};
+}
 
 //----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.

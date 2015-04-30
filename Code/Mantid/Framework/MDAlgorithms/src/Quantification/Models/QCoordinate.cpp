@@ -4,7 +4,7 @@
 
 namespace Mantid {
 namespace MDAlgorithms {
-DECLARE_FOREGROUNDMODEL(QCoordinate);
+DECLARE_FOREGROUNDMODEL(QCoordinate)
 
 namespace // anonymous
     {

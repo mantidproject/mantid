@@ -28,10 +28,10 @@ MuonCalculateAsymmetry::~MuonCalculateAsymmetry() {}
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string MuonCalculateAsymmetry::name() const {
   return "MuonCalculateAsymmetry";
-};
+}
 
 /// Algorithm's version for identification. @see Algorithm::version
-int MuonCalculateAsymmetry::version() const { return 1; };
+int MuonCalculateAsymmetry::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
 const std::string MuonCalculateAsymmetry::category() const {

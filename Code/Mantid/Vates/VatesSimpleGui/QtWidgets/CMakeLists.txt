@@ -36,7 +36,8 @@ qt4_wrap_ui( UI_BUILT_SOURCES
 include_directories(
   inc
   ${CMAKE_CURRENT_BINARY_DIR}
-  ${QWT_INCLUDE_DIR} 
+  ${QWT_INCLUDE_DIR}
+  ${CMAKE_SOURCE_DIR}/MantidQt/API/inc
 )
 
 set( ALL_FILES
@@ -61,6 +62,11 @@ ${POCO_LIBRARIES}
 ${QT_LIBRARIES}
 ${QWT_LIBRARIES}
 ${MANTID_SUBPROJECT_LIBS}
+MantidQtAPI
 )
+
+if (OSX_VERSION VERSION_GREATER 10.8)
+  set_target_properties ( VatesSimpleGuiQtWidgets PROPERTIES INSTALL_RPATH "@loader_path/../Contents/Libraries;@loader_path/../Contents/MacOS")
+endif ()
 
 install( TARGETS VatesSimpleGuiQtWidgets ${SYSTEM_PACKAGE_TARGET} DESTINATION ${PVPLUGINS_DIR} )

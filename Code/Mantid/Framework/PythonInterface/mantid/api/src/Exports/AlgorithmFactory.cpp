@@ -63,7 +63,9 @@ namespace
   // Python algorithm registration mutex in anonymous namespace (aka static)
   Poco::Mutex PYALG_REGISTER_MUTEX;
 
+// clang-format off
 GCC_DIAG_OFF(cast-qual)
+// clang-format on
   /**
    * A free function to subscribe a Python algorithm into the factory
    * @param obj :: A Python object that should either be a class type derived from PythonAlgorithm
@@ -97,13 +99,17 @@ GCC_DIAG_OFF(cast-qual)
     FileLoaderRegistry::Instance().unsubscribe(descr.first, descr.second);
   }
 
-  BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(existsOverloader, exists, 1, 2);
+  BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(existsOverloader, exists, 1, 2)
 
   ///@endcond
 }
+// clang-format off
 GCC_DIAG_ON(cast-qual)
+// clang-format on
 
+// clang-format off
 void export_AlgorithmFactory()
+// clang-format on
 {
 
   class_<AlgorithmFactoryImpl,boost::noncopyable>("AlgorithmFactoryImpl", no_init)

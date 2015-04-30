@@ -268,10 +268,10 @@ PerformIndexOperations::~PerformIndexOperations() {}
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string PerformIndexOperations::name() const {
   return "PerformIndexOperations";
-};
+}
 
 /// Algorithm's version for identification. @see Algorithm::version
-int PerformIndexOperations::version() const { return 1; };
+int PerformIndexOperations::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
 const std::string PerformIndexOperations::category() const {

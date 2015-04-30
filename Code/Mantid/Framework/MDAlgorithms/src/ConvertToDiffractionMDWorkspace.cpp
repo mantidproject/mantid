@@ -13,8 +13,8 @@
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
 #include "MantidMDAlgorithms/ConvertToDiffractionMDWorkspace.h"
-#include "MantidMDEvents/MDEventFactory.h"
-#include "MantidMDEvents/MDEventWorkspace.h"
+#include "MantidDataObjects/MDEventFactory.h"
+#include "MantidDataObjects/MDEventWorkspace.h"
 #include "MantidAPI/MemoryManager.h"
 #include "MantidKernel/ListValidator.h"
 
@@ -122,10 +122,10 @@ void ConvertToDiffractionMDWorkspace::init() {
 }
 
 /// Our MDLeanEvent dimension
-typedef MDEvents::MDLeanEvent<3> MDE;
+typedef DataObjects::MDLeanEvent<3> MDE;
 
 //----------------------------------------------------------------------------------------------
-/** Convert one spectrum to MDEvents.
+/** Convert one spectrum to DataObjects.
  * Depending on options, it uses the histogram view or the
  * pure event view.
  * Then another method converts to 3D q-space and adds it to the
@@ -184,7 +184,7 @@ template <class T>
 void ConvertToDiffractionMDWorkspace::convertEventList(int workspaceIndex,
                                                        EventList &el) {
   size_t numEvents = el.getNumberEvents();
-  MDEvents::MDBoxBase<MDEvents::MDLeanEvent<3>, 3> *box = ws->getBox();
+  DataObjects::MDBoxBase<DataObjects::MDLeanEvent<3>, 3> *box = ws->getBox();
 
   // Get the position of the detector there.
   const std::set<detid_t> &detectors = el.getDetectorIDs();
@@ -354,7 +354,7 @@ void ConvertToDiffractionMDWorkspace::exec() {
   // Try to get the output workspace
   IMDEventWorkspace_sptr i_out = getProperty("OutputWorkspace");
   ws = boost::dynamic_pointer_cast<
-      MDEvents::MDEventWorkspace<MDEvents::MDLeanEvent<3>, 3>>(i_out);
+      DataObjects::MDEventWorkspace<DataObjects::MDLeanEvent<3>, 3>>(i_out);
 
   // Initalize the matrix to 3x3 identity
   mat = Kernel::Matrix<double>(3, 3, true);
@@ -411,8 +411,8 @@ void ConvertToDiffractionMDWorkspace::exec() {
   if (!ws || !Append) {
     // Create an output workspace with 3 dimensions.
     size_t nd = 3;
-    i_out = MDEvents::MDEventFactory::CreateMDWorkspace(nd, "MDLeanEvent");
-    ws = boost::dynamic_pointer_cast<MDEvents::MDEventWorkspace3Lean>(i_out);
+    i_out = DataObjects::MDEventFactory::CreateMDWorkspace(nd, "MDLeanEvent");
+    ws = boost::dynamic_pointer_cast<DataObjects::MDEventWorkspace3Lean>(i_out);
 
     // ---------------- Get the extents -------------
     std::vector<double> extents = getProperty("Extents");
@@ -619,4 +619,4 @@ void ConvertToDiffractionMDWorkspace::exec() {
 }
 
 } // namespace Mantid
-} // namespace MDEvents
+} // namespace DataObjects

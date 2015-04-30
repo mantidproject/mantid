@@ -64,7 +64,7 @@ namespace MantidQt
 {
 namespace CustomDialogs
 {
-  DECLARE_DIALOG(StartLiveDataDialog);
+  DECLARE_DIALOG(StartLiveDataDialog)
 
 //----------------------
 // Public member functions

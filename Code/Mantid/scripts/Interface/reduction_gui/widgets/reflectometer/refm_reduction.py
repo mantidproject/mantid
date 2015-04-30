@@ -32,6 +32,8 @@ class DataReflWidget(BaseWidget):
     short_name = 'REFM'
     peak_pixel_range = []
     background_pixel_range = []
+    _run_number_first_edit = None
+    ref_det_view = None
 
     def __init__(self, parent=None, state=None, settings=None, name="REFM", data_proxy=None):
         super(DataReflWidget, self).__init__(parent, state, settings, data_proxy=data_proxy)

@@ -2,14 +2,14 @@
 #define MANTID_VATES_VTK_MD_HEX_FACTORY_H_
 
 #include "MantidAPI/IMDEventWorkspace.h"
-#include "MantidMDEvents/MDEventFactory.h"
-#include "MantidMDEvents/MDEventWorkspace.h"
+#include "MantidDataObjects/MDEventFactory.h"
+#include "MantidDataObjects/MDEventWorkspace.h"
 #include "MantidVatesAPI/ThresholdRange.h"
 #include "MantidVatesAPI/vtkDataSetFactory.h"
 #include "MantidVatesAPI/TimeToTimeStep.h"
 #include <boost/shared_ptr.hpp>
 
-using Mantid::MDEvents::MDEventWorkspace;
+using Mantid::DataObjects::MDEventWorkspace;
 
 namespace Mantid
 {

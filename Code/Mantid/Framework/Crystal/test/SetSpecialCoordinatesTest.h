@@ -84,7 +84,7 @@ public:
 
   void test_ModifyMDEventWorkspace()
   {
-    IMDEventWorkspace_sptr inWS = Mantid::MDEvents::MDEventsTestHelper::makeMDEW<1>(1, 0, 1, 1);
+    IMDEventWorkspace_sptr inWS = Mantid::DataObjects::MDEventsTestHelper::makeMDEW<1>(1, 0, 1, 1);
     AnalysisDataService::Instance().add("inWS", inWS);
 
     SetSpecialCoordinates alg;
@@ -101,7 +101,7 @@ public:
 
   void test_ModifyMDHistoWorkspace()
   {
-    IMDHistoWorkspace_sptr inWS = Mantid::MDEvents::MDEventsTestHelper::makeFakeMDHistoWorkspace(1, 1);
+    IMDHistoWorkspace_sptr inWS = Mantid::DataObjects::MDEventsTestHelper::makeFakeMDHistoWorkspace(1, 1);
     AnalysisDataService::Instance().add("inWS", inWS);
 
     SetSpecialCoordinates alg;

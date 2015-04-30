@@ -9,7 +9,7 @@
 
 namespace Mantid {
 namespace CurveFitting {
-DECLARE_FUNCTION(Voigt);
+DECLARE_FUNCTION(Voigt)
 
 namespace {
 /// @cond

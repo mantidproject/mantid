@@ -33,8 +33,7 @@ class ConjoinFiles(PythonAlgorithm):
     def PyInit(self):
         greaterThanZero = IntArrayBoundedValidator()
         greaterThanZero.setLower(0)
-        self.declareProperty(IntArrayProperty("RunNumbers",values=[0],
-                             validator=greaterThanZero), doc="Run numbers")
+        self.declareProperty(IntArrayProperty("RunNumbers",values=[0],validator=greaterThanZero), doc="Run numbers")
         self.declareProperty(WorkspaceProperty("OutputWorkspace", "", direction=Direction.Output))
         self.declareProperty(FileProperty("Directory", "", FileAction.OptionalDirectory))
 

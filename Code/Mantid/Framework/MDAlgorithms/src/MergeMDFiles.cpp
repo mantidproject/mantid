@@ -3,9 +3,9 @@
 #include "MantidKernel/CPUTimer.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/System.h"
-#include "MantidMDEvents/MDBoxBase.h"
-#include "MantidMDEvents/MDEventFactory.h"
-#include "MantidMDEvents/BoxControllerNeXusIO.h"
+#include "MantidDataObjects/MDBoxBase.h"
+#include "MantidDataObjects/MDEventFactory.h"
+#include "MantidDataObjects/BoxControllerNeXusIO.h"
 #include "MantidMDAlgorithms/MergeMDFiles.h"
 #include "MantidAPI/MemoryManager.h"
 
@@ -14,7 +14,7 @@
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
-using namespace Mantid::MDEvents;
+using namespace Mantid::DataObjects;
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -205,7 +205,7 @@ void MergeMDFiles::doExecByCloning(Mantid::API::IMDEventWorkspace_sptr ws,
   bc->setMaxDepth(20);
   bc->setSplitThreshold(5000);
   auto saver = boost::shared_ptr<API::IBoxControllerIO>(
-      new MDEvents::BoxControllerNeXusIO(bc.get()));
+      new DataObjects::BoxControllerNeXusIO(bc.get()));
   saver->setDataType(sizeof(coord_t), m_MDEventType);
   if (m_fileBasedTargetWS) {
     bc->setFileBacked(saver, outputFile);
@@ -314,8 +314,10 @@ void MergeMDFiles::finalizeOutput(const std::string &outputFile) {
     // create or open WS group and put there additional information about WS and
     // its dimensions
     bool old_data_there;
+    // clang-format off
     boost::scoped_ptr< ::NeXus::File> file(MDBoxFlatTree::createOrOpenMDWSgroup(
         outputFile, m_nDims, m_MDEventType, false, old_data_there));
+    // clang-format on
     this->progress(0.94, "Saving ws history and dimensions");
     MDBoxFlatTree::saveWSGenericInfo(file.get(), m_OutIWS);
     // Save each ExperimentInfo to a spot in the file

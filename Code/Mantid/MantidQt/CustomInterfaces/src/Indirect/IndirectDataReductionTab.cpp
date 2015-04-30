@@ -2,6 +2,7 @@
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidKernel/Logger.h"
+#include "MantidQtCustomInterfaces/Indirect/IndirectDataReduction.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
@@ -187,7 +188,7 @@ namespace CustomInterfaces
     loadParamAlg->execute();
     energyWs = loadParamAlg->getProperty("Workspace");
 
-    double efixed = energyWs->getInstrument()->getNumberParameter("efixed-val")[0];
+    double efixed = getEFixed(energyWs);
 
     auto spectrum = energyWs->getSpectrum(0);
     spectrum->setSpectrumNo(3);

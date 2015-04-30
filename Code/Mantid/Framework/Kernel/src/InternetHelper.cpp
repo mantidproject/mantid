@@ -29,12 +29,11 @@
 #else
 #include <Poco/FileStream.h>
 #include <Poco/NullStream.h>
-#include <stdlib.h>
+
 #endif
 
 // std
 #include <fstream>
-#include <sstream>
 
 namespace Mantid {
 namespace Kernel {
@@ -45,36 +44,15 @@ using std::string;
 
 namespace {
 // anonymous namespace for some utility functions
-
 /// static Logger object
 Logger g_log("InternetHelper");
-
-/// Throw an exception occurs when the computer
-/// is not connected to the internet
-void throwNotConnected(const std::string &url,
-                       const HostNotFoundException &ex) {
-  std::stringstream info;
-  info << "Failed to download " << url
-       << " because there is no connection to the host " << ex.message()
-       << ".\nHint: Check your connection following this link: <a href=\""
-       << url << "\">" << url << "</a> ";
-  throw Exception::InternetError(info.str() + ex.displayText());
-}
-
-/// @returns true if the return code is considered a relocation
-bool isRelocated(const int response) {
-  return ((response == HTTPResponse::HTTP_FOUND) ||
-          (response == HTTPResponse::HTTP_MOVED_PERMANENTLY) ||
-          (response == HTTPResponse::HTTP_TEMPORARY_REDIRECT) ||
-          (response == HTTPResponse::HTTP_SEE_OTHER));
-}
 }
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
 */
 InternetHelper::InternetHelper()
-    : m_proxyInfo(), m_isProxySet(false), m_timeout(30), m_contentLength(0),
+    : m_proxyInfo(), m_isProxySet(false), m_timeout(30), m_isTimeoutSet(false), m_contentLength(0),
       m_method(HTTPRequest::HTTP_GET), m_contentType("application/json"),
       m_body(), m_headers(), m_request(NULL),m_response(NULL) {}
 
@@ -82,7 +60,7 @@ InternetHelper::InternetHelper()
 /** Constructor
 */
 InternetHelper::InternetHelper(const Kernel::ProxyInfo &proxy)
-    : m_proxyInfo(proxy), m_isProxySet(true), m_timeout(30),
+    : m_proxyInfo(proxy), m_isProxySet(true), m_timeout(30), m_isTimeoutSet(false), m_contentLength(0),
       m_method(HTTPRequest::HTTP_GET), m_contentType("application/json"),
       m_body(), m_headers(), m_request(NULL),m_response(NULL) {}
 
@@ -117,6 +95,7 @@ void InternetHelper::createRequest(Poco::URI &uri) {
 
   m_request =
       new HTTPRequest(m_method, uri.getPathAndQuery(), HTTPMessage::HTTP_1_1);
+
   m_response = new HTTPResponse();
   if (!m_contentType.empty()) {
     m_request->setContentType(m_contentType);
@@ -132,7 +111,7 @@ void InternetHelper::createRequest(Poco::URI &uri) {
     m_request->set(itHeaders->first, itHeaders->second);
   }
   
-	if (m_method == "POST") {
+  if (m_method == "POST") {
     m_request->setChunkedTransferEncoding(true);
   }
 }
@@ -150,8 +129,8 @@ int InternetHelper::sendRequestAndProcess(HTTPClientSession &session,
   g_log.debug() << "Answer from web: " << retStatus << " " << m_response->getReason()
                 << std::endl;
 
-  if (retStatus == HTTPResponse::HTTP_OK ||
-      (retStatus == HTTPResponse::HTTP_CREATED &&
+  if (retStatus == HTTP_OK ||
+      (retStatus == HTTP_CREATED &&
        m_method == HTTPRequest::HTTP_POST)) {
     Poco::StreamCopier::copyStream(rs, responseStream);
     return retStatus;
@@ -193,6 +172,26 @@ int InternetHelper::sendRequest(const std::string &url,
   return retval;
 }
 
+/**
+ * Helper to log (debug level) the request being sent (careful not to
+ * print blatant passwords, etc.).
+ *
+ * @param schemeName Normally "http" or "https"
+ * @param url url being sent (will be logged)
+ */
+void InternetHelper::logDebugRequestSending(const std::string &schemeName,
+                                            const std::string &url) const {
+  const std::string insecString = "password=";
+  if (std::string::npos == url.find(insecString)) {
+    g_log.debug() << "Sending " << schemeName << " " << m_method <<
+      " request to: " << url << "\n";
+  } else {
+    g_log.debug() << "Sending " << schemeName << " " << m_method <<
+      " request to an url where the query string seems to contain a "
+      "password! (not shown for security reasons)." << "\n";
+  }
+}
+
 /** Performs a request using http
 * @param url the address to the network resource
 * @param responseStream The stream to fill with the reply on success
@@ -200,13 +199,14 @@ int InternetHelper::sendRequest(const std::string &url,
 int InternetHelper::sendHTTPRequest(const std::string &url,
                                     std::ostream &responseStream) {
   int retStatus = 0;
-  g_log.debug() << "Sending request to: " << url << "\n";
+
+  logDebugRequestSending("http", url);
 
   Poco::URI uri(url);
   // Configure Poco HTTP Client Session
   try {
     Poco::Net::HTTPClientSession session(uri.getHost(), uri.getPort());
-    session.setTimeout(Poco::Timespan(m_timeout, 0)); // m_timeout seconds
+    session.setTimeout(Poco::Timespan(getTimeout(), 0)); 
 
     // configure proxy
     setupProxyOnSession(session, url);
@@ -229,7 +229,8 @@ int InternetHelper::sendHTTPRequest(const std::string &url,
 int InternetHelper::sendHTTPSRequest(const std::string &url,
                                      std::ostream &responseStream) {
   int retStatus = 0;
-  g_log.debug() << "Sending request to: " << url << "\n";
+
+  logDebugRequestSending("https", url);
 
   Poco::URI uri(url);
   try {
@@ -247,7 +248,7 @@ int InternetHelper::sendHTTPSRequest(const std::string &url,
     // Create the session
     HTTPSClientSession session(uri.getHost(),
                                static_cast<Poco::UInt16>(uri.getPort()));
-    session.setTimeout(Poco::Timespan(m_timeout, 0)); // m_timeout seconds
+    session.setTimeout(Poco::Timespan(getTimeout(), 0)); 
 
     // HACK:: Currently the automatic proxy detection only supports http proxy
     // detection
@@ -322,24 +323,24 @@ int InternetHelper::processErrorStates(const Poco::Net::HTTPResponse &res,
     rateLimitRemaining = -1;
   }
 
-  if (retStatus == HTTPResponse::HTTP_OK) {
+  if (retStatus == HTTP_OK) {
     throw Exception::InternetError("Response was ok, processing should never "
                                    "have entered processErrorStates",
                                    retStatus);
-  } else if (retStatus == HTTPResponse::HTTP_FOUND) {
+  } else if (retStatus == HTTP_FOUND) {
     throw Exception::InternetError("Response was HTTP_FOUND, processing should "
                                    "never have entered processErrorStates",
                                    retStatus);
-  } else if (retStatus == HTTPResponse::HTTP_MOVED_PERMANENTLY) {
+  } else if (retStatus == HTTP_MOVED_PERMANENTLY) {
     throw Exception::InternetError("Response was HTTP_MOVED_PERMANENTLY, "
                                    "processing should never have entered "
                                    "processErrorStates",
                                    retStatus);
-  } else if (retStatus == HTTPResponse::HTTP_NOT_MODIFIED) {
+  } else if (retStatus == HTTP_NOT_MODIFIED) {
     throw Exception::InternetError("Not modified since provided date" +
                                        rateLimitReset.toSimpleString(),
                                    retStatus);
-  } else if ((retStatus == HTTPResponse::HTTP_FORBIDDEN) &&
+  } else if ((retStatus == HTTP_FORBIDDEN) &&
              (rateLimitRemaining == 0)) {
     throw Exception::InternetError(
         "The Github API rate limit has been reached, try again after " +
@@ -349,7 +350,7 @@ int InternetHelper::processErrorStates(const Poco::Net::HTTPResponse &res,
     std::stringstream info;
     std::stringstream ss;
     Poco::StreamCopier::copyStream(rs, ss);
-    if (retStatus == HTTPResponse::HTTP_NOT_FOUND)
+    if (retStatus == HTTP_NOT_FOUND)
       info << "Failed to download " << url << " with the link "
            << "<a href=\"" << url << "\">.\n"
            << "Hint. Check that link is correct</a>";
@@ -411,13 +412,47 @@ int InternetHelper::downloadFile(const std::string &urlFile,
 /** Sets the timeout in seconds
 * @param seconds The value in seconds for the timeout
 **/
-void InternetHelper::setTimeout(int seconds) { m_timeout = seconds; }
+void InternetHelper::setTimeout(int seconds) {
+  m_timeout = seconds; 
+  m_isTimeoutSet = true;
+}
 
+/// Checks the HTTP status to decide if this is a relocation
+/// @param response the HTTP status
+/// @returns true if the return code is considered a relocation
+bool InternetHelper::isRelocated(const int response) {
+  return ((response == HTTP_FOUND) ||
+          (response == HTTP_MOVED_PERMANENTLY) ||
+          (response == HTTP_TEMPORARY_REDIRECT) ||
+          (response == HTTP_SEE_OTHER));
+}
+
+/// Throw an exception occurs when the computer
+/// is not connected to the internet
+/// @param url The url that was use
+/// @param ex The exception generated by Poco
+void InternetHelper::throwNotConnected(const std::string &url,
+                       const HostNotFoundException &ex) {
+  std::stringstream info;
+  info << "Failed to access " << url
+       << " because there is no connection to the host " << ex.message()
+       << ".\nHint: Check your connection following this link: <a href=\""
+       << url << "\">" << url << "</a> ";
+  throw Exception::InternetError(info.str() + ex.displayText());
+}
 
 /** Gets the timeout in seconds
 * @returns The value in seconds for the timeout
 **/
-int InternetHelper::getTimeout() { return m_timeout; }
+int InternetHelper::getTimeout() {
+  if (!m_isTimeoutSet)
+  {
+    if (!ConfigService::Instance().getValue("network.default.timeout",m_timeout)) {
+      m_timeout = 30; // the default value if the key is not found
+    }
+  }
+  return m_timeout; 
+}
 
 /** Sets the Method
 * @param method A string of GET or POST, anything other than POST is considered GET
@@ -558,6 +593,7 @@ std::map<std::string, std::string>& InternetHelper::headers() {
 void InternetHelper::reset() {
   m_headers.clear();
   m_timeout = 30;
+  m_isTimeoutSet = false;
   m_body = "";
   m_method = HTTPRequest::HTTP_GET;
   m_contentType = "application/json";

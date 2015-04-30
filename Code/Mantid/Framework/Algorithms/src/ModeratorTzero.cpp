@@ -14,7 +14,7 @@ namespace Mantid {
 namespace Algorithms {
 
 // Register the algorithm into the AlgorithmFactory
-DECLARE_ALGORITHM(ModeratorTzero);
+DECLARE_ALGORITHM(ModeratorTzero)
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;

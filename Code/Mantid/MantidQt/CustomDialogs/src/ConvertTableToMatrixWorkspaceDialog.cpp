@@ -22,7 +22,7 @@ namespace MantidQt
   namespace CustomDialogs
   {
     // Declare the dialog. Name must match the class name
-    DECLARE_DIALOG(ConvertTableToMatrixWorkspaceDialog);
+    DECLARE_DIALOG(ConvertTableToMatrixWorkspaceDialog)
 
     //--------------------------------------------------------------------------
     // Public methods

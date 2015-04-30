@@ -2,16 +2,8 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidKernel/ThreadPool.h"
-#include "MantidKernel/ThreadPoolRunnable.h"
-#include "MantidKernel/Task.h"
 #include "MantidKernel/ConfigService.h"
-#include <algorithm>
 #include <sstream>
-#include <cmath>
-#include <cfloat>
-#include <Poco/Mutex.h>
-#include <Poco/Runnable.h>
-#include <Poco/Thread.h>
 #include <Poco/Environment.h>
 
 namespace Mantid {

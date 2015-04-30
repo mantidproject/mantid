@@ -51,6 +51,8 @@ using namespace Kernel;
 using namespace API;
 using namespace Geometry;
 
+Poco::Mutex LoadInstrument::m_mutex;
+
 /// Empty default constructor
 LoadInstrument::LoadInstrument() : Algorithm() {}
 
@@ -171,19 +173,23 @@ void LoadInstrument::exec() {
 
   Instrument_sptr instrument;
   // Check whether the instrument is already in the InstrumentDataService
-  if (InstrumentDataService::Instance().doesExist(instrumentNameMangled)) {
-    // If it does, just use the one from the one stored there
-    instrument =
-        InstrumentDataService::Instance().retrieve(instrumentNameMangled);
-  } else {
-    // Really create the instrument
-    Progress *prog = new Progress(this, 0, 1, 100);
-    instrument = parser.parseXML(prog);
-    delete prog;
-    // Add to data service for later retrieval
-    InstrumentDataService::Instance().add(instrumentNameMangled, instrument);
-  }
+  {
+    // Make InstrumentService access thread-safe
+    Poco::Mutex::ScopedLock lock(m_mutex);
 
+    if (InstrumentDataService::Instance().doesExist(instrumentNameMangled)) {
+      // If it does, just use the one from the one stored there
+      instrument =
+        InstrumentDataService::Instance().retrieve(instrumentNameMangled);
+    } else {
+      // Really create the instrument
+      Progress *prog = new Progress(this, 0, 1, 100);
+      instrument = parser.parseXML(prog);
+      delete prog;
+      // Add to data service for later retrieval
+      InstrumentDataService::Instance().add(instrumentNameMangled, instrument);
+    }
+  }
   // Add the instrument to the workspace
   m_workspace->setInstrument(instrument);
 

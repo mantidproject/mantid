@@ -7,7 +7,7 @@
 namespace Mantid {
 namespace Algorithms {
 
-DECLARE_ALGORITHM(ConvertToHistogram);
+DECLARE_ALGORITHM(ConvertToHistogram)
 
 using API::MatrixWorkspace_sptr;
 using Mantid::MantidVec;

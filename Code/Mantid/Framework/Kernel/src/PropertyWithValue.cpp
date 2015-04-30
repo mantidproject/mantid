@@ -1,5 +1,4 @@
 #include "MantidKernel/PropertyWithValue.h"
-#include "MantidKernel/System.h"
 
 namespace Mantid {
 
@@ -10,16 +9,16 @@ namespace Kernel {
   template DLLExport class PropertyWithValue<std::vector<Type>>;
 
 // Explicit instantiations
-INSTANTIATE(int);
-INSTANTIATE(long);
-INSTANTIATE(long long);
-INSTANTIATE(unsigned short int);
-INSTANTIATE(unsigned int);
-INSTANTIATE(unsigned long);
-INSTANTIATE(unsigned long long);
-INSTANTIATE(bool);
-INSTANTIATE(double);
-INSTANTIATE(std::string);
+INSTANTIATE(int)
+INSTANTIATE(long)
+INSTANTIATE(long long)
+INSTANTIATE(unsigned short int)
+INSTANTIATE(unsigned int)
+INSTANTIATE(unsigned long)
+INSTANTIATE(unsigned long long)
+INSTANTIATE(bool)
+INSTANTIATE(double)
+INSTANTIATE(std::string)
 /// @endcond
 
 } // namespace Kernel

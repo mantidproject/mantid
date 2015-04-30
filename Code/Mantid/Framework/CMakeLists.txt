@@ -96,7 +96,6 @@ include_directories (DataObjects/inc)
 add_subdirectory (DataObjects)
 set ( MANTIDLIBS ${MANTIDLIBS} DataObjects )
 
-add_subdirectory (RemoteAlgorithms)
 add_subdirectory (Nexus)
 add_subdirectory (DataHandling)
 add_subdirectory (Algorithms)
@@ -105,6 +104,8 @@ add_subdirectory (CurveFitting)
 add_subdirectory (Crystal)
 add_subdirectory (ICat)
 add_subdirectory (LiveData)
+add_subdirectory (RemoteAlgorithms)
+add_subdirectory (RemoteJobManagers)
 add_subdirectory (SINQ)
 
 # If an MPI-enabled build, add in the MPI-specific algorithms package
@@ -125,7 +126,6 @@ if ( CXXTEST_FOUND )
 endif ()
 
 add_subdirectory (MDAlgorithms)
-add_subdirectory (MDEvents)
 add_subdirectory (Doxygen)
 add_subdirectory (ScriptRepository)
 add_subdirectory (ISISLiveData)
@@ -137,8 +137,9 @@ add_subdirectory (ISISLiveData)
 set ( FRAMEWORK_LIBS Kernel Geometry API PythonKernelModule
                      PythonGeometryModule PythonAPIModule DataObjects
                      DataHandling Nexus Algorithms CurveFitting ICat
-                     Crystal MDAlgorithms MDEvents WorkflowAlgorithms
-                     LiveData ISISLiveData RemoteAlgorithms SINQ
+                     Crystal MDAlgorithms WorkflowAlgorithms
+                     LiveData ISISLiveData RemoteAlgorithms RemoteJobManagers
+                     SINQ
 )
 
 add_custom_target( Framework DEPENDS ${FRAMEWORK_LIBS} )

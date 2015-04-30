@@ -2,7 +2,6 @@
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
-#include "MantidDataObjects/Peak.h"
 
 namespace Mantid {
 namespace Crystal {
@@ -27,9 +26,9 @@ CombinePeaksWorkspaces::~CombinePeaksWorkspaces() {}
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string CombinePeaksWorkspaces::name() const {
   return "CombinePeaksWorkspaces";
-};
+}
 /// Algorithm's version for identification. @see Algorithm::version
-int CombinePeaksWorkspaces::version() const { return 1; };
+int CombinePeaksWorkspaces::version() const { return 1; }
 /// Algorithm's category for identification. @see Algorithm::category
 const std::string CombinePeaksWorkspaces::category() const { return "Crystal"; }
 

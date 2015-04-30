@@ -1,18 +1,19 @@
 #include "MantidMDAlgorithms/ConvertToMDMinMaxGlobal.h"
+
 #include "MantidAPI/WorkspaceValidators.h"
-#include "MantidKernel/ListValidator.h"
-#include "MantidMDEvents/ConvToMDSelector.h"
-#include "MantidMDEvents/MDWSTransform.h"
 #include "MantidKernel/ArrayProperty.h"
-#include "MantidKernel/VisibleWhenProperty.h"
+#include "MantidKernel/ListValidator.h"
 #include "MantidKernel/TimeSeriesProperty.h"
-#include "MantidGeometry/Crystal/OrientedLattice.h"
+#include "MantidKernel/VisibleWhenProperty.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidGeometry/Crystal/OrientedLattice.h"
+#include "MantidMDAlgorithms/ConvToMDSelector.h"
+#include "MantidMDAlgorithms/MDWSTransform.h"
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
-using namespace Mantid::MDEvents;
+using namespace Mantid::DataObjects;
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -34,10 +35,10 @@ ConvertToMDMinMaxGlobal::~ConvertToMDMinMaxGlobal() {}
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string ConvertToMDMinMaxGlobal::name() const {
   return "ConvertToMDMinMaxGlobal";
-};
+}
 
 /// Algorithm's version for identification. @see Algorithm::version
-int ConvertToMDMinMaxGlobal::version() const { return 1; };
+int ConvertToMDMinMaxGlobal::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
 const std::string ConvertToMDMinMaxGlobal::category() const {
@@ -63,7 +64,7 @@ void ConvertToMDMinMaxGlobal::init() {
       "An input Matrix Workspace (Workspace2D or Event workspace) ");
 
   std::vector<std::string> Q_modes =
-      MDEvents::MDTransfFactory::Instance().getKeys();
+      MDAlgorithms::MDTransfFactory::Instance().getKeys();
   // something to do with different moments of time when algorithm or test loads
   // library. To avoid empty factory always do this.
   if (Q_modes.empty())

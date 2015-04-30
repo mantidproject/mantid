@@ -38,9 +38,11 @@ using namespace API;
 
 /// Constructor
 LoadRawHelper::LoadRawHelper()
-    : isisRaw(new ISISRAW2), m_list(false), m_spec_list(), m_spec_min(0),
-      m_spec_max(EMPTY_INT()), m_numberOfPeriods(0), m_specTimeRegimes(),
-      m_prog(0), m_bmspeclist(false) {}
+    : isisRaw(new ISISRAW2), m_list(false), m_interval(false), m_spec_list(),
+      m_spec_min(0), m_spec_max(EMPTY_INT()), m_numberOfPeriods(0), m_cache_options(),
+      m_specTimeRegimes(), m_prog(0.0), m_numberOfSpectra(0), m_monitordetectorList(),
+      m_bmspeclist(false), m_total_specs(0), m_logCreator() {
+}
 
 LoadRawHelper::~LoadRawHelper() {}
 
@@ -1078,9 +1080,11 @@ void LoadRawHelper::loadSpectra(
   int64_t noTimeRegimes = getNumberofTimeRegimes();
   int64_t lengthIn = static_cast<int64_t>(isisRaw->t_ntc1 + 1);
 
+  const int64_t periodTimesNSpectraP1 = period *
+    (static_cast<int64_t>(m_numberOfSpectra) + 1);
   // loop through spectra
   for (specid_t i = 1; i <= m_numberOfSpectra; ++i) {
-    int64_t histToRead = i + period * (m_numberOfSpectra + 1);
+    int64_t histToRead = i + periodTimesNSpectraP1;
     if ((i >= m_spec_min && i < m_spec_max) ||
         (m_list &&
          find(m_spec_list.begin(), m_spec_list.end(), i) !=
@@ -1088,7 +1092,9 @@ void LoadRawHelper::loadSpectra(
       progress(m_prog, "Reading raw file data...");
 
       // read spectrum from raw file
-      readData(file, histToRead);
+      if (!readData(file, histToRead))
+        throw std::runtime_error("Error reading raw file, in "
+                                 "LoadRawHelper::loadSpectra, readData failed");
       // set workspace data
       setWorkspaceData(ws_sptr, timeChannelsVec, wsIndex, i, noTimeRegimes,
                        lengthIn, 1);
@@ -1191,13 +1197,15 @@ LoadRawHelper::searchForLogFiles(const std::string &pathToRawFile) {
 
       try {
         Kernel::Glob::glob(Poco::Path(dir).resolve(pattern), potentialLogFiles);
-        // push potential log files from set to list.
-        potentialLogFilesList.insert(potentialLogFilesList.begin(),
-                                     potentialLogFiles.begin(),
-                                     potentialLogFiles.end());
       } catch (std::exception &) {
       }
     }
+
+    // push potential log files from set to list.
+    potentialLogFilesList.insert(potentialLogFilesList.begin(),
+                                  potentialLogFiles.begin(),
+                                  potentialLogFiles.end());
+
     // Remove extension from path, and append .log to path.
     std::string logName =
         pathToRawFile.substr(0, pathToRawFile.rfind('.')) + ".log";

@@ -10,9 +10,11 @@
 #include "MantidSINQ/PoldiUtilities/PoldiInstrumentAdapter.h"
 #include "MantidAPI/FunctionDomain1D.h"
 #include "MantidAPI/FunctionValues.h"
+#include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/MultiDomainFunction.h"
 #include "MantidCurveFitting/Gaussian.h"
 #include "MantidCurveFitting/FitMW.h"
+#include "MantidCurveFitting/Jacobian.h"
 
 using ::testing::Return;
 
@@ -48,13 +50,35 @@ public:
     void testInit()
     {
         PoldiSpectrumDomainFunction function;
+        TS_ASSERT_THROWS_NOTHING(function.initialize());
+
+        // Function has no parameters/attributes
+        TS_ASSERT_EQUALS(function.nParams(), 0);
+        TS_ASSERT_EQUALS(function.nAttributes(), 0);
+    }
+
+    void testProfileFunctionAttribute()
+    {
+        PoldiSpectrumDomainFunction function;
         function.initialize();
 
-        std::vector<std::string> parameterNames = function.getParameterNames();
+        TS_ASSERT_EQUALS(function.nParams(), 0);
 
-        TS_ASSERT_EQUALS(parameterNames[0], "Area");
-        TS_ASSERT_EQUALS(parameterNames[1], "Fwhm");
-        TS_ASSERT_EQUALS(parameterNames[2], "Centre");
+        TS_ASSERT_THROWS_NOTHING(function.setDecoratedFunction("Gaussian"));
+
+        // Make sure the parameters are exposed correctly
+        IFunction_sptr gaussian = FunctionFactory::Instance().createFunction("Gaussian");
+        TS_ASSERT_EQUALS(function.nParams(), gaussian->nParams());
+        for(size_t i = 0; i < gaussian->nParams(); ++i) {
+            TS_ASSERT_EQUALS(function.parameterName(i), gaussian->parameterName(i));
+        }
+
+        TS_ASSERT_THROWS_NOTHING(function.setDecoratedFunction("DeltaFunction"));
+        IFunction_sptr delta = FunctionFactory::Instance().createFunction("DeltaFunction");
+        TS_ASSERT_EQUALS(function.nParams(), delta->nParams());
+        for(size_t i = 0; i < delta->nParams(); ++i) {
+            TS_ASSERT_EQUALS(function.parameterName(i), delta->parameterName(i));
+        }
     }
 
     void testChopperSlitOffsets()
@@ -76,42 +100,18 @@ public:
         TS_ASSERT_EQUALS(function.m_chopperSlitOffsets.size(), m_chopper->slitPositions().size());
     }
 
-    void testActualFunction()
-    {
-        /* comparison with results from a math program */
-        double area = 1.0;
-        double sigma = 1.0;
-        double x0 = 0.0;
-
-        std::vector<double> reference;
-        reference.push_back(0.388349126567583);
-        reference.push_back(0.398942280401433);
-        reference.push_back(0.359646701831886);
-        reference.push_back(0.004431848411938);
-
-        TestablePoldiSpectrumDomainFunction function;
-
-        std::vector<double> x;
-        x.push_back(-0.232);
-        x.push_back(0.0);
-        x.push_back(0.4554);
-        x.push_back(3.0);
-
-        for(size_t i = 0; i < x.size(); ++i) {
-            TS_ASSERT_DELTA(function.actualFunction(x[i], x0, sigma, area), reference[i], 1e-15);
-        }
-    }
-
     void testFunction()
     {
         TestablePoldiSpectrumDomainFunction function;
         function.initialize();
-        function.setParameter("Area", 1.9854805);
-        function.setParameter("Fwhm", 0.0027446316797104233);
-        function.setParameter("Centre", 1.1086444);
+        function.setDecoratedFunction("Gaussian");
+        function.setParameter("Height", 679.59369981039407842726);//1.9854805);
+        function.setParameter("Sigma", 0.0027446316797104233 / (2.0 * sqrt(2.0 * log(2.0))));
+        function.setParameter("PeakCentre", 1.1086444);
 
-        function.initializeInstrumentParameters(m_instrument);
         function.m_deltaT = 3.0;
+        function.initializeInstrumentParameters(m_instrument);
+
 
         std::vector<double> xvalues(500, 1.0);
 
@@ -123,28 +123,73 @@ public:
         function.function(domain, values);
 
         std::vector<double> reference;
-        reference.push_back(2.5469337E-05);
-        reference.push_back(2.4222479E-04);
-        reference.push_back(1.7575109E-03);
-        reference.push_back(9.7287362E-03);
-        reference.push_back(4.1085955E-02);
-        reference.push_back(0.1323760);
-        reference.push_back(0.3253897);
-        reference.push_back(0.6102068);
-        reference.push_back(0.8730301);
-        reference.push_back(0.9529279);
-        reference.push_back(0.7935416);
-        reference.push_back(0.5041480);
-        reference.push_back(0.2443572);
-        reference.push_back(9.0358935E-02);
-        reference.push_back(2.5491528E-02);
-        reference.push_back(5.4865498E-03);
-        reference.push_back(9.0091029E-04);
-        reference.push_back(1.1286059E-04);
-        reference.push_back(1.0786535E-05);
+        reference.push_back(0.214381692355321);
+        reference.push_back(1.4396533098854);
+        reference.push_back(7.69011673999647);
+        reference.push_back(32.6747845396612);
+        reference.push_back(110.432605589092);
+        reference.push_back(296.883931458002);
+        reference.push_back(634.864220660384);
+        reference.push_back(1079.89069118744);
+        reference.push_back(1461.11207069126);
+        reference.push_back(1572.50503614829);
+        reference.push_back(1346.18685763306);
+        reference.push_back(916.691981263516);
+        reference.push_back(496.502218342172);
+        reference.push_back(213.861997764049);
+        reference.push_back(73.2741206547921);
+        reference.push_back(19.9697293956518);
+        reference.push_back(4.32910692237627);
+        reference.push_back(0.746498624291666);
+        reference.push_back(0.102391587633906);
 
         for(size_t i = 0; i < reference.size(); ++i) {
-            TS_ASSERT_DELTA(values[479 + i], reference[i], 9e-5);
+            TS_ASSERT_DELTA(values[479 + i] / reference[i], 1.0, 1e-14);
+        }
+    }
+
+    void testFunctionDeriv()
+    {
+        TestablePoldiSpectrumDomainFunction function;
+        function.initialize();
+        function.setDecoratedFunction("Gaussian");
+        function.setParameter("Height", 679.59369981039407842726);//1.9854805);
+        function.setParameter("Sigma", 0.0027446316797104233 / (2.0 * sqrt(2.0 * log(2.0))));
+        function.setParameter("PeakCentre", 1.1086444);
+
+        function.m_deltaT = 3.0;
+        function.initializeInstrumentParameters(m_instrument);
+
+        std::vector<double> xvalues(500, 1.0);
+        FunctionDomain1DSpectrum domain(342, xvalues);
+        TS_ASSERT_EQUALS(domain.getWorkspaceIndex(), 342);
+        Mantid::CurveFitting::Jacobian jacobian(500, 3);
+
+        function.functionDeriv(domain, jacobian);
+
+        std::vector<double> reference;
+        reference.push_back(0.214381692355321);
+        reference.push_back(1.4396533098854);
+        reference.push_back(7.69011673999647);
+        reference.push_back(32.6747845396612);
+        reference.push_back(110.432605589092);
+        reference.push_back(296.883931458002);
+        reference.push_back(634.864220660384);
+        reference.push_back(1079.89069118744);
+        reference.push_back(1461.11207069126);
+        reference.push_back(1572.50503614829);
+        reference.push_back(1346.18685763306);
+        reference.push_back(916.691981263516);
+        reference.push_back(496.502218342172);
+        reference.push_back(213.861997764049);
+        reference.push_back(73.2741206547921);
+        reference.push_back(19.9697293956518);
+        reference.push_back(4.32910692237627);
+        reference.push_back(0.746498624291666);
+        reference.push_back(0.102391587633906);
+
+        for(size_t i = 0; i < reference.size(); ++i) {
+            TS_ASSERT_DELTA((jacobian.get(479 + i, 0)) / (reference[i]/ 679.59369981039407842726), 1.0, 1e-14);
         }
     }
 
@@ -152,19 +197,76 @@ public:
     {
         TestablePoldiSpectrumDomainFunction *function = new TestablePoldiSpectrumDomainFunction();
         function->initialize();
-        function->setParameter("Area", 1.9854805);
-        function->setParameter("Fwhm", 0.0027446316797104233);
-        function->setParameter("Centre", 1.1086444);
+        function->setDecoratedFunction("Gaussian");
+        function->setParameter("Height", 1.9854805);
+        function->setParameter("Sigma", 0.0027446316797104233 / (2.0 * sqrt(2.0 * log(2.0))));
+        function->setParameter("PeakCentre", 1.1086444);
 
-        function->initializeInstrumentParameters(m_instrument);
         function->m_deltaT = 3.0;
+        function->initializeInstrumentParameters(m_instrument);
 
-        TS_ASSERT_EQUALS(function->getParameter(2), 1.1086444);
+        TS_ASSERT_EQUALS(function->getParameter("PeakCentre"), 1.1086444);
 
         MultiDomainFunction *mdf = new MultiDomainFunction();
         mdf->addFunction(IFunction_sptr(dynamic_cast<IFunction *>(function)));
 
-        TS_ASSERT_EQUALS(static_cast<IFunction*>(mdf)->getParameter(2), 1.1086444);
+        TS_ASSERT_EQUALS(static_cast<IFunction*>(mdf)->getParameter("f0.PeakCentre"), 1.1086444);
+    }
+
+    void testLocalJacobianConstruction()
+    {
+        TS_ASSERT_THROWS_NOTHING(LocalJacobian localJacobian(0, 0));
+        TS_ASSERT_THROWS_NOTHING(LocalJacobian localJacobian(0, 10));
+        TS_ASSERT_THROWS_NOTHING(LocalJacobian localJacobian(10, 0));
+        TS_ASSERT_THROWS_NOTHING(LocalJacobian localJacobian(10, 10));
+    }
+
+    void testLocalJacobianGetSet()
+    {
+        /* These checks also verify that the protected methods
+         * getRaw, index and safeIndex work as expected.
+         */
+        LocalJacobian localJacobian(20, 3);
+
+        for(size_t y = 0; y < 20; ++y) {
+            for(size_t p = 0; p < 3; ++p) {
+                double value = static_cast<double>(y * p);
+                TS_ASSERT_THROWS_NOTHING(localJacobian.set(y, p, value));
+                TS_ASSERT_THROWS_NOTHING(localJacobian.get(y, p));
+
+                TS_ASSERT_EQUALS(localJacobian.get(y, p), value);
+            }
+        }
+
+        TS_ASSERT_THROWS(localJacobian.set(20, 3, 30.0), std::out_of_range);
+        TS_ASSERT_THROWS(localJacobian.set(10, 4, 30.0), std::out_of_range);
+
+        TS_ASSERT_THROWS(localJacobian.get(20, 3), std::out_of_range);
+        TS_ASSERT_THROWS(localJacobian.get(10, 4), std::out_of_range);
+    }
+
+    void testLocalJacobianRawValues()
+    {
+        LocalJacobian writeAdapter(3, 1);
+
+        double *rawJacobianWrite = writeAdapter.rawValues();
+        for(size_t i = 0; i < 3; ++i) {
+            *(rawJacobianWrite + i) = static_cast<double>(i + 1);
+        }
+
+        TS_ASSERT_EQUALS(writeAdapter.get(0, 0), 1.0);
+        TS_ASSERT_EQUALS(writeAdapter.get(1, 0), 2.0);
+        TS_ASSERT_EQUALS(writeAdapter.get(2, 0), 3.0);
+
+        LocalJacobian readAdapter(3, 1);
+        readAdapter.set(0, 0, 1.0);
+        readAdapter.set(1, 0, 2.0);
+        readAdapter.set(2, 0, 3.0);
+
+        double *rawJacobianRead = readAdapter.rawValues();
+        for(size_t i = 0; i < 3; ++i) {
+            TS_ASSERT_EQUALS(*(rawJacobianRead + i), static_cast<double>(i + 1));
+        }
     }
 
    /*

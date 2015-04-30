@@ -1,24 +1,27 @@
 #ifndef MANTID_MDALGORITHMS_CALCULATECOVERAGEDGSTEST_H_
 #define MANTID_MDALGORITHMS_CALCULATECOVERAGEDGSTEST_H_
 
-#include <cxxtest/TestSuite.h>
-
-#include "MantidMDAlgorithms/CalculateCoverageDGS.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidKernel/V3D.h"
-#include "MantidKernel/Matrix.h"
+#include "MantidDataObjects/MDHistoWorkspace.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
-#include <vector>
-#include "MantidMDEvents/MDHistoWorkspace.h"
-#include "MantidKernel/PhysicalConstants.h"
 #include "MantidGeometry/MDGeometry/MDTypes.h"
+#include "MantidKernel/Matrix.h"
+#include "MantidKernel/PhysicalConstants.h"
+#include "MantidKernel/V3D.h"
+#include "MantidMDAlgorithms/CalculateCoverageDGS.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+
+#include <cxxtest/TestSuite.h>
+
+#include <vector>
+
 
 using Mantid::MDAlgorithms::CalculateCoverageDGS;
 using namespace Mantid::API;
+using namespace Mantid::DataObjects;
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
-using namespace Mantid::MDEvents;
+using namespace Mantid::MDAlgorithms;
 
 class CalculateCoverageDGSTest : public CxxTest::TestSuite
 {

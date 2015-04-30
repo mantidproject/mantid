@@ -5,7 +5,7 @@
 //----------------------------------------------------------------------
 #include <vector>
 #include <sstream>
-#include <stdlib.h>
+
 #ifdef _WIN32
 #include <io.h>
 #endif /* _WIN32 */
@@ -13,24 +13,14 @@
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidNexus/NexusFileIO.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
-#include "MantidKernel/DateAndTime.h"
-#include "MantidKernel/ConfigService.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidAPI/NumericAxis.h"
-#include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/VectorHelper.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
-#include "MantidDataObjects/TableColumn.h"
-#include "MantidDataObjects/VectorColumn.h"
 #include "MantidDataObjects/RebinnedOutput.h"
-#include "MantidAPI/ITableWorkspace.h"
-#include "MantidAPI/AlgorithmHistory.h"
 
-#include <boost/tokenizer.hpp>
-#include <boost/make_shared.hpp>
 #include <Poco/File.h>
 
 namespace Mantid {
@@ -116,7 +106,9 @@ void NexusFileIO::openNexusWrite(const std::string &fileName,
       throw Exception::FileError("Unable to open File:", fileName);
     }
     ::NeXus::File *file = new ::NeXus::File(fileID, true);
+    // clang-format off
     m_filehandle = boost::shared_ptr< ::NeXus::File>(file);
+    // clang-format on
   }
 
   //
@@ -1042,7 +1034,9 @@ int NexusFileIO::getWorkspaceSize(int &numberOfSpectra, int &numberOfChannels,
 bool NexusFileIO::checkAttributeName(const std::string &target) const {
   // see if the given attribute name is in the current level
   // return true if it is.
+  // clang-format off
   const std::vector< ::NeXus::AttrInfo> infos = m_filehandle->getAttrInfos();
+  // clang-format on
   for (auto it = infos.begin(); it != infos.end(); ++it) {
     if (target.compare(it->name) == 0)
       return true;

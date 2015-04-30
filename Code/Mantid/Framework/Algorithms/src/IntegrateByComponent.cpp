@@ -25,10 +25,10 @@ IntegrateByComponent::~IntegrateByComponent() {}
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string IntegrateByComponent::name() const {
   return "IntegrateByComponent";
-};
+}
 
 /// Algorithm's version for identification. @see Algorithm::version
-int IntegrateByComponent::version() const { return 1; };
+int IntegrateByComponent::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
 const std::string IntegrateByComponent::category() const {

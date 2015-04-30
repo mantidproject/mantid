@@ -8,11 +8,12 @@ set ( SRC_FILES
 	src/CPUTimer.cpp
 	src/CatalogInfo.cpp
 	src/CompositeValidator.cpp
+	src/ComputeResourceInfo.cpp
 	src/ConfigService.cpp
 	src/ChecksumHelper.cpp
 	src/DataItem.cpp
 	src/DateAndTime.cpp
-	src/DateTimeValidator.cpp 
+	src/DateTimeValidator.cpp
 	src/DateValidator.cpp
 	src/DeltaEMode.cpp
 	src/DirectoryValidator.cpp
@@ -128,6 +129,7 @@ set ( INC_FILES
 	inc/MantidKernel/Cache.h
 	inc/MantidKernel/CatalogInfo.h
 	inc/MantidKernel/CompositeValidator.h
+	inc/MantidKernel/ComputeResourceInfo.h
 	inc/MantidKernel/ConfigService.h
 	inc/MantidKernel/ChecksumHelper.h
 	inc/MantidKernel/DataItem.h
@@ -264,6 +266,7 @@ set ( TEST_FILES
 	CacheTest.h
 	CatalogInfoTest.h
 	CompositeValidatorTest.h
+	ComputeResourceInfoTest.h
 	ConfigServiceTest.h
 	ChecksumHelperTest.h
 	DataServiceTest.h
@@ -444,7 +447,11 @@ if ( ${CMAKE_PROJECT_NAME} STREQUAL "MantidFramework" )
 endif ()
 
 set ( PLUGINS "." )
-set ( PV_PLUGINS "./pvplugins" )
+if ( MAKE_VATES )
+  set ( PV_PLUGINS "./${PVPLUGINS_DIR}" )
+else ()
+  set ( PV_PLUGINS "" )
+endif ()
 set ( IGNORE_PARAVIEW "0" )
 set ( QTPLUGINS "." )
 set ( UPDATE_INSTRUMENT_DEFINTITIONS "0" )

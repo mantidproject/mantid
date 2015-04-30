@@ -43,6 +43,11 @@
           Available timestep values.
         </Documentation>
       </DoubleVectorProperty>
+      <Hints>
+        <ReaderFactory
+          extensions="nxs"
+          file_description="Event Nexus File" />
+      </Hints>
     </SourceProxy>
   </ProxyGroup>
   <!-- End EventNexusReader -->

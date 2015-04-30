@@ -1,6 +1,6 @@
 #include "MantidVatesAPI/vtkDataSetToGeometry.h"
 #include "MantidVatesAPI/FieldDataToMetadata.h"
-#include "MantidVatesAPI/RebinningCutterXMLDefinitions.h"
+#include "MantidVatesAPI/VatesXMLDefinitions.h"
 #include "MantidGeometry/MDGeometry/MDGeometryXMLDefinitions.h"
 #include "vtkDataSet.h"
 

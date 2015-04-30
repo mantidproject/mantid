@@ -1,7 +1,7 @@
 .. _MatrixWorkspace:
 
-MatrixWorkspace
-===============
+Matrix Workspace
+================
 
 What information is in a MatrixWorkspace
 ----------------------------------------

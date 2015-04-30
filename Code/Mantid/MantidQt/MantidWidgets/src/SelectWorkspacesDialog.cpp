@@ -49,8 +49,10 @@ namespace MantidWidgets
 /** Constructor
 @param parent : Parent widget
 @param typeFilter : optional filter for filtering workspaces by type.
+@param customButtonLabel : optional label for another custom button, return code for this is defined by CustomButton.
 */
-SelectWorkspacesDialog::SelectWorkspacesDialog(QWidget* parent, const std::string& typeFilter) :
+SelectWorkspacesDialog::SelectWorkspacesDialog(QWidget* parent, const std::string& typeFilter,
+                                               const std::string& customButtonLabel) :
 QDialog(parent)
 {
   setWindowTitle("MantidPlot - Select workspace");
@@ -72,9 +74,16 @@ QDialog(parent)
   m_wsList->addItems(tmp);
   m_wsList->setSelectionMode(QAbstractItemView::MultiSelection);
 
+  QDialogButtonBox* btnBox = new QDialogButtonBox(Qt::Horizontal);
+
+  if (!customButtonLabel.empty()) {
+    m_customButton = new QPushButton(QString::fromStdString(customButtonLabel));
+    btnBox->addButton(m_customButton,QDialogButtonBox::DestructiveRole);
+    connect(m_customButton, SIGNAL(clicked()), this, SLOT(customButtonPress()));
+  }
+
   m_okButton = new QPushButton("Select");
   QPushButton* cancelButton = new QPushButton("Cancel");
-  QDialogButtonBox* btnBox = new QDialogButtonBox(Qt::Horizontal);
   btnBox->addButton(m_okButton,QDialogButtonBox::AcceptRole);
   btnBox->addButton(cancelButton,QDialogButtonBox::RejectRole);
   connect(btnBox, SIGNAL(accepted()), this, SLOT(accept()));
@@ -107,6 +116,12 @@ QStringList SelectWorkspacesDialog::getSelectedNames()const
 void SelectWorkspacesDialog::selectionChanged()
 {
   m_okButton->setEnabled( m_wsList->selectionModel()->hasSelection() );
+}
+
+/// slot to handle the custom button press
+void SelectWorkspacesDialog::customButtonPress()
+{
+  this->done(CustomButton);
 }
 
 }

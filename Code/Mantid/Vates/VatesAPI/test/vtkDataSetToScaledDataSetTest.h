@@ -19,7 +19,7 @@
 #include <vtkUnsignedCharArray.h>
 #include <vtkUnstructuredGrid.h>
 
-using namespace Mantid::MDEvents;
+using namespace Mantid::DataObjects;
 using namespace Mantid::VATES;
 
 class vtkDataSetToScaledDataSetTest : public CxxTest::TestSuite

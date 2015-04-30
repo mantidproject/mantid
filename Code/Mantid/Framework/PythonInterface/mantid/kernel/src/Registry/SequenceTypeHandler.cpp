@@ -128,15 +128,15 @@ namespace Mantid
       #define INSTANTIATE(ElementType)\
         template DLLExport struct SequenceTypeHandler<std::vector<ElementType> >;
 
-      INSTANTIATE(int);
-      INSTANTIATE(long);
-      INSTANTIATE(long long);
-      INSTANTIATE(unsigned int);
-      INSTANTIATE(unsigned long);
-      INSTANTIATE(unsigned long long);
-      INSTANTIATE(double);
-      INSTANTIATE(std::string);
-      INSTANTIATE(bool);
+      INSTANTIATE(int)
+      INSTANTIATE(long)
+      INSTANTIATE(long long)
+      INSTANTIATE(unsigned int)
+      INSTANTIATE(unsigned long)
+      INSTANTIATE(unsigned long long)
+      INSTANTIATE(double)
+      INSTANTIATE(std::string)
+      INSTANTIATE(bool)
       ///@endcond
     }
   }

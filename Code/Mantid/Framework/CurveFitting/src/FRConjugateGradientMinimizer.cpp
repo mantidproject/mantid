@@ -15,10 +15,11 @@ namespace {
 Kernel::Logger g_log("FRConjugateGradientMinimizer");
 }
 
+// clang-format off
 ///@cond nodoc
-DECLARE_FUNCMINIMIZER(FRConjugateGradientMinimizer,
-                      Conjugate gradient(Fletcher - Reeves imp.))
+DECLARE_FUNCMINIMIZER(FRConjugateGradientMinimizer,Conjugate gradient (Fletcher-Reeves imp.))
 ///@endcond
+// clang-format on
 
 /// Return a concrete type to initialize m_gslSolver
 /// gsl_multimin_fdfminimizer_vector_bfgs2

@@ -6,7 +6,6 @@
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/UnitLabelTypes.h"
-#include <cmath>
 #include <cfloat>
 #include <limits>
 
@@ -1097,21 +1096,19 @@ void Time::init() {}
 double Time::singleToTOF(const double x) const {
   UNUSED_ARG(x);
   throw std::runtime_error("Time is not allowed to be convert to TOF. ");
-  return 0.0;
 }
 
 double Time::singleFromTOF(const double tof) const {
   UNUSED_ARG(tof);
   throw std::runtime_error("Time is not allwed to be converted from TOF. ");
-  return 0.0;
 }
 
 double Time::conversionTOFMax() const {
   return std::numeric_limits<double>::quiet_NaN();
-};
+}
 double Time::conversionTOFMin() const {
   return std::numeric_limits<double>::quiet_NaN();
-};
+}
 
 Unit *Time::clone() const { return new Time(*this); }
 
@@ -1122,9 +1119,33 @@ Unit *Time::clone() const { return new Time(*this); }
  * Degrees prints degrees as a label
  */
 
+DECLARE_UNIT(Degrees)
+
 Degrees::Degrees() : Empty(), m_label("degrees") {}
 
 const UnitLabel Degrees::label() const { return m_label; }
+
+void Degrees::init() {}
+
+double Degrees::singleToTOF(const double x) const {
+  UNUSED_ARG(x);
+  throw std::runtime_error("Degrees is not allowed to be convert to TOF. ");
+}
+
+double Degrees::singleFromTOF(const double tof) const {
+  UNUSED_ARG(tof);
+  throw std::runtime_error("Degrees is not allwed to be converted from TOF. ");
+}
+
+double Degrees::conversionTOFMax() const {
+  return std::numeric_limits<double>::quiet_NaN();
+}
+
+double Degrees::conversionTOFMin() const {
+  return std::numeric_limits<double>::quiet_NaN();
+}
+
+Unit *Degrees::clone() const { return new Degrees(*this); }
 
 } // namespace Units
 

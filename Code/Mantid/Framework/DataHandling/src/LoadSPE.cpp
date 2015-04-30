@@ -18,7 +18,7 @@ namespace DataHandling {
 using namespace Kernel;
 using namespace API;
 
-DECLARE_FILELOADER_ALGORITHM(LoadSPE);
+DECLARE_FILELOADER_ALGORITHM(LoadSPE)
 
 /**
  * Return the confidence with with this algorithm can load the file

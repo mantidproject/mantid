@@ -36,3 +36,10 @@ list(APPEND ExternalData_URL_TEMPLATES
   "http://198.74.56.37/ftp/external-data/%(algo)/%(hash)"
 )
 
+# Increase network timeout defaults to avoid our slow server connection but don't override what a user provides
+if(NOT ExternalData_TIMEOUT_INACTIVITY)
+  set(ExternalData_TIMEOUT_INACTIVITY 120)
+endif()
+if(NOT ExternalData_TIMEOUT_ABSOLUTE)
+  set(ExternalData_TIMEOUT_ABSOLUTE 600)
+endif()

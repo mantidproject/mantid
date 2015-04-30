@@ -1,4 +1,4 @@
-#pylint: disable=invalid-name
+#pylint: disable=invalid-name,attribute-defined-outside-init,too-many-statements,too-many-instance-attributes,line-too-long
 # -*- coding: utf-8 -*-
 
 # Form implementation generated from reading ui file 'ui/sans/hfir_background.ui'

@@ -1,5 +1,5 @@
 #include "MantidVatesSimpleGuiViewWidgets/StandardView.h"
-
+#include "MantidVatesSimpleGuiViewWidgets/RebinnedSourcesManager.h"
 // Have to deal with ParaView warnings and Intel compiler the hard way.
 #if defined(__INTEL_COMPILER)
   #pragma warning disable 1170
@@ -11,16 +11,22 @@
 #include <pqObjectBuilder.h>
 #include <pqPipelineRepresentation.h>
 #include <pqPipelineSource.h>
+#include <pqPipelineFilter.h>
 #include <pqRenderView.h>
+#include <pqServerManagerModel.h>
+#include <pqServer.h>
 #include <vtkDataObject.h>
 #include <vtkSMPropertyHelper.h>
 #include <vtkSMProxy.h>
+#include <vtkSMPVRepresentationProxy.h>
 
 #if defined(__INTEL_COMPILER)
   #pragma warning enable 1170
 #endif
 
 #include <QHBoxLayout>
+#include <QAction>
+#include <QMenu>
 #include <QMessageBox>
 #include <QString>
 
@@ -35,37 +41,81 @@ namespace SimpleGui
  * This function sets up the UI components, adds connections for the view's
  * buttons and creates the rendering view.
  * @param parent the parent widget for the standard view
+ * @param rebinnedSourcesManager Pointer to a RebinnedSourcesManager
  */
-StandardView::StandardView(QWidget *parent) : ViewBase(parent)
+  StandardView::StandardView(QWidget *parent, RebinnedSourcesManager* rebinnedSourcesManager) : ViewBase(parent, rebinnedSourcesManager),
+                                                                 m_binMDAction(NULL),
+                                                                 m_sliceMDAction(NULL),
+                                                                 m_cutMDAction(NULL),
+                                                                 m_unbinAction(NULL)
 {
   this->ui.setupUi(this);
   this->cameraReset = false;
+
+  // Set up the buttons
+  setupViewButtons();
 
   // Set the cut button to create a slice on the data
   QObject::connect(this->ui.cutButton, SIGNAL(clicked()), this,
                    SLOT(onCutButtonClicked()));
 
-  // Set the rebin button to create the RebinCutter operator
-  QObject::connect(this->ui.rebinButton, SIGNAL(clicked()), this,
-                   SLOT(onRebinButtonClicked()));
+  // Listen to a change in the active source, to adapt our rebin buttons
+  QObject::connect(&pqActiveObjects::instance(), SIGNAL(sourceChanged(pqPipelineSource*)),
+                   this, SLOT(activeSourceChangeListener(pqPipelineSource*)));
 
   // Set the scale button to create the ScaleWorkspace operator
   QObject::connect(this->ui.scaleButton, SIGNAL(clicked()),
                    this, SLOT(onScaleButtonClicked()));
 
-  // Check for rebinning source being deleted
-  pqObjectBuilder *builder = pqApplicationCore::instance()->getObjectBuilder();
-  QObject::connect(builder, SIGNAL(destroying(pqPipelineSource*)),
-                   this, SLOT(onDestroyingSource(pqPipelineSource*)));
-
   this->view = this->createRenderView(this->ui.renderFrame);
 
   QObject::connect(this->view.data(), SIGNAL(endRender()),
                    this, SLOT(onRenderDone()));
+
+
 }
 
 StandardView::~StandardView()
 {
+}
+
+void StandardView::setupViewButtons()
+{
+
+  // Populate the rebin button
+  QMenu* rebinMenu = new QMenu(this->ui.rebinToolButton);
+
+  m_binMDAction = new QAction("BinMD", rebinMenu);
+  m_binMDAction->setIconVisibleInMenu(false);
+  
+  m_sliceMDAction = new QAction("SliceMD", rebinMenu);
+  m_sliceMDAction->setIconVisibleInMenu(false);
+
+  m_cutMDAction = new QAction("CutMD", rebinMenu);
+  m_cutMDAction->setIconVisibleInMenu(false);
+
+  m_unbinAction = new QAction("Remove Rebinning", rebinMenu);
+  m_unbinAction->setIconVisibleInMenu(false);
+
+  rebinMenu->addAction(m_binMDAction);
+  rebinMenu->addAction(m_sliceMDAction);
+  rebinMenu->addAction(m_cutMDAction);
+  rebinMenu->addAction(m_unbinAction);
+
+  this->ui.rebinToolButton->setPopupMode(QToolButton::InstantPopup);
+  this->ui.rebinToolButton->setMenu(rebinMenu);
+
+  QObject::connect(m_binMDAction, SIGNAL(triggered()),
+                   this, SLOT(onRebin()), Qt::QueuedConnection);
+  QObject::connect(m_sliceMDAction, SIGNAL(triggered()),
+                   this, SLOT(onRebin()), Qt::QueuedConnection);
+  QObject::connect(m_cutMDAction, SIGNAL(triggered()),
+                   this, SLOT(onRebin()), Qt::QueuedConnection);
+  // Set the unbinbutton to remove the rebinning on a workspace
+  // which was binned in the VSI
+  QObject::connect(m_unbinAction, SIGNAL(triggered()),
+                   this, SIGNAL(unbin()), Qt::QueuedConnection);
+
 }
 
 void StandardView::destroyView()
@@ -89,13 +139,10 @@ void StandardView::render()
   }
   pqObjectBuilder* builder = pqApplicationCore::instance()->getObjectBuilder();
 
-  if (this->isMDHistoWorkspace(this->origSrc))
-  {
-    this->ui.rebinButton->setEnabled(false);
-  }
+  //setRebinAndUnbinButtons();
+
   if (this->isPeaksWorkspace(this->origSrc))
   {
-    this->ui.rebinButton->setEnabled(false);
     this->ui.cutButton->setEnabled(false);
   }
 
@@ -110,7 +157,16 @@ void StandardView::render()
   vtkSMPropertyHelper(drep->getProxy(), "Representation").Set(reptype.toStdString().c_str());
   drep->getProxy()->UpdateVTKObjects();
   this->origRep = qobject_cast<pqPipelineRepresentation*>(drep);
-  this->origRep->colorByArray("signal", vtkDataObject::FIELD_ASSOCIATION_CELLS);
+  if (!this->isPeaksWorkspace(this->origSrc))
+  {
+    vtkSMPVRepresentationProxy::SetScalarColoring(drep->getProxy(), "signal",
+                                                  vtkDataObject::FIELD_ASSOCIATION_CELLS);
+    //drep->getProxy()->UpdateVTKObjects();
+    //vtkSMPVRepresentationProxy::RescaleTransferFunctionToDataRange(drep->getProxy(),
+    //                                                               "signal",
+    //                                                               vtkDataObject::FIELD_ASSOCIATION_CELLS);
+    drep->getProxy()->UpdateVTKObjects();
+  }
 
   this->resetDisplay();
   emit this->triggerAccept();
@@ -121,29 +177,6 @@ void StandardView::onCutButtonClicked()
   // Apply cut to currently viewed data
   pqObjectBuilder* builder = pqApplicationCore::instance()->getObjectBuilder();
   builder->createFilter("filters", "Cut", this->getPvActiveSrc());
-}
-
-void StandardView::onRebinButtonClicked()
-{
-  const QString filterName = "MantidRebinning";
-  if (this->hasFilter(filterName))
-  {
-    QMessageBox::warning(this, QApplication::tr("Overplotting Warning"),
-                         QApplication::tr("Please click on the "+filterName+\
-                                          " entry to modify the rebinning "\
-                                          "parameters."));
-    return;
-  }
-  if (this->origSrc)
-  {
-    pqObjectBuilder* builder = pqApplicationCore::instance()->getObjectBuilder();
-    this->rebinCut = builder->createFilter("filters", "MDEWRebinningCutter",
-                                           this->origSrc);
-    this->ui.cutButton->setEnabled(false);
-    // Resulting MDHW can crash VSI when switching to SplatterPlot view,
-    // so disable that mode.
-    emit this->setViewStatus(ModeControlWidget::SPLATTERPLOT, false);
-  }
 }
 
 void StandardView::onScaleButtonClicked()
@@ -175,11 +208,13 @@ void StandardView::renderAll()
 void StandardView::resetDisplay()
 {
   this->view->resetDisplay();
+  this->view->forceRender();
 }
 
 void StandardView::resetCamera()
 {
   this->view->resetCamera();
+  this->view->forceRender();
 }
 
 /**
@@ -195,19 +230,119 @@ void StandardView::updateView()
   this->cameraReset = true;
 }
 
-/**
- * This function checks a pipeline source that ParaView says is being
- * deleted. If the source is a Mantid rebinning filter, the restriction
- * on the SplatterPlot view should be lifted. Also, the cut button can
- * be enabled.
- * @param src : The pipeline source being checked
- */
-void StandardView::onDestroyingSource(pqPipelineSource *src)
+void StandardView::closeSubWindows()
 {
-  if (src->getSMName().contains("MantidRebinning"))
+}
+
+
+/**
+ * Check if the rebin and unbin buttons should be visible
+ * Note that for a rebin button to be visible there may be no
+ * MDHisto workspaces present, yet temporary MDHisto workspaces are
+ * allowed.
+ */
+void StandardView::setRebinAndUnbinButtons()
+{
+  int numberOfTemporaryWorkspaces = 0;
+  int numberOfTrueMDHistoWorkspaces = 0;
+  int numberOfPeakWorkspaces = 0;
+
+  pqServer *server = pqActiveObjects::instance().activeServer();
+  pqServerManagerModel *smModel = pqApplicationCore::instance()->getServerManagerModel();
+  QList<pqPipelineSource *> sources = smModel->findItems<pqPipelineSource *>(server);
+
+  for (QList<pqPipelineSource *>::iterator source = sources.begin(); source != sources.end(); ++source)
   {
-    emit this->setViewStatus(ModeControlWidget::SPLATTERPLOT, true);
-    this->ui.cutButton->setEnabled(true);
+    if (isTemporaryWorkspace(*source))
+    {
+      ++numberOfTemporaryWorkspaces;
+    } else if (isMDHistoWorkspace(*source))
+    {
+      ++numberOfTrueMDHistoWorkspaces;
+    }
+    else if (isPeaksWorkspace(*source))
+    {
+      ++numberOfPeakWorkspaces;
+    }
+  }
+
+  // If there are any true MDHisto workspaces then the rebin button should be disabled
+  bool allowRebinning = numberOfTrueMDHistoWorkspaces > 0 || numberOfPeakWorkspaces > 0;
+  this->allowRebinningOptions(allowRebinning);
+
+  // If there are no temporary workspaces the button should be disabled.
+  const bool allowUnbin = !( numberOfTemporaryWorkspaces == 0 );
+  allowUnbinOption(allowUnbin);
+}
+
+
+/**
+ * Reacts to the user selecting the BinMD algorithm
+ */ 
+void StandardView::onRebin()
+{
+  if(QAction* action = dynamic_cast<QAction*>(sender())) {
+    emit rebin(action->text().toStdString()); }
+}
+
+/**
+Disable rebinning options
+*/
+void StandardView::allowRebinningOptions(bool allow) {
+    this->m_binMDAction->setEnabled(allow);
+    this->m_sliceMDAction->setEnabled(allow);
+    this->m_cutMDAction->setEnabled(allow);
+}
+
+/**
+Enable unbin option
+*/
+void StandardView::allowUnbinOption(bool allow) {
+  this->m_unbinAction->setEnabled(allow);
+}
+
+
+/**
+  * Listen for a change of the active source in order to check if the the 
+  * active source is an MDEventSource for which we allow rebinning.
+  */
+void StandardView::activeSourceChangeListener(pqPipelineSource* source)
+{
+  // If there is no active source, then we do not allow rebinning
+  if (!source)
+  {
+    this->allowRebinningOptions(false);
+    this->m_unbinAction->setEnabled(false);
+    return;
+  }
+
+  // If it is a filter work your way down
+  pqPipelineSource* localSource = source;
+  pqPipelineFilter* filter = qobject_cast<pqPipelineFilter*>(localSource);
+
+  while(filter)
+  {
+    localSource = filter->getInput(0);
+    filter = qobject_cast<pqPipelineFilter*>(localSource);
+  }
+
+  // Important to first check the temporary source, then for MDEvent source, 
+  // as a temporary source may be an MDEventSource.
+  std::string workspaceType(localSource->getProxy()->GetXMLName());
+  if (isTemporaryWorkspace(localSource))
+  {
+    this->allowRebinningOptions(true);
+    this->allowUnbinOption(true);
+  }
+  else if (workspaceType.find("MDEW Source") != std::string::npos)
+  {
+    this->allowRebinningOptions(true);
+    this->allowUnbinOption(true);
+  }
+  else
+  {
+    this->allowRebinningOptions(false);
+    this->allowUnbinOption(false);
   }
 }
 

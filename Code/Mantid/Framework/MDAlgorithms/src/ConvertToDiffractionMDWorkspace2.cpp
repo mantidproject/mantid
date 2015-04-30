@@ -1,23 +1,22 @@
 #include "MantidMDAlgorithms/ConvertToDiffractionMDWorkspace2.h"
 
-#include "MantidAPI/Algorithm.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/Progress.h"
 #include "MantidAPI/WorkspaceValidators.h"
+
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/MDEventWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
+
 #include "MantidKernel/ArrayProperty.h"
-#include "MantidKernel/CPUTimer.h"
-#include "MantidKernel/ProgressText.h"
 #include "MantidKernel/EnabledWhenProperty.h"
-#include "MantidMDEvents/MDEventWorkspace.h"
 #include "MantidKernel/ListValidator.h"
 
-#include "MantidMDEvents/MDWSTransform.h"
+#include "MantidMDAlgorithms/MDTransfFactory.h"
+#include "MantidMDAlgorithms/MDWSTransform.h"
 
-using namespace Mantid;
-using namespace Mantid::Kernel;
 using namespace Mantid::API;
+using namespace Mantid::Kernel;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
 
@@ -30,7 +29,7 @@ DECLARE_ALGORITHM(ConvertToDiffractionMDWorkspace2)
 /**Small class to diable propery on interface */
 class DisabledProperty : public EnabledWhenProperty {
 public:
-  DisabledProperty() : EnabledWhenProperty("NonExistingProperty", IS_DEFAULT){};
+  DisabledProperty() : EnabledWhenProperty("NonExistingProperty", IS_DEFAULT){}
   virtual bool fulfillsCriterion(const IPropertyManager * /*algo*/) const {
     return false;
   }
@@ -128,24 +127,24 @@ void ConvertToDiffractionMDWorkspace2::convertFramePropertyNames(
   // ----------------- Handle the type of output
   // -------------------------------------
 
-  MDEvents::MDWSTransform QSclAndFrames;
+  MDAlgorithms::MDWSTransform QSclAndFrames;
 
   if (TargFrame == frameOptions[0]) // "Q (sample frame)"
   {
     TargFrameName =
-        QSclAndFrames.getTargetFrame(MDEvents::CnvrtToMD::SampleFrame);
+        QSclAndFrames.getTargetFrame(MDAlgorithms::CnvrtToMD::SampleFrame);
     ScalingName = QSclAndFrames.getQScaling(
-        MDEvents::CnvrtToMD::NoScaling);   //< momentums in A^-1
+        MDAlgorithms::CnvrtToMD::NoScaling);   //< momentums in A^-1
   } else if (TargFrame == frameOptions[1]) //     "Q (lab frame)"
   {
-    TargFrameName = QSclAndFrames.getTargetFrame(MDEvents::CnvrtToMD::LabFrame);
+    TargFrameName = QSclAndFrames.getTargetFrame(MDAlgorithms::CnvrtToMD::LabFrame);
     ScalingName = QSclAndFrames.getQScaling(
-        MDEvents::CnvrtToMD::NoScaling);   //< momentums in A^-1
+        MDAlgorithms::CnvrtToMD::NoScaling);   //< momentums in A^-1
   } else if (TargFrame == frameOptions[2]) // "HKL"
   {
-    TargFrameName = QSclAndFrames.getTargetFrame(MDEvents::CnvrtToMD::HKLFrame);
+    TargFrameName = QSclAndFrames.getTargetFrame(MDAlgorithms::CnvrtToMD::HKLFrame);
     ScalingName = QSclAndFrames.getQScaling(
-        MDEvents::CnvrtToMD::HKLScale); //< momentums in A^-1
+        MDAlgorithms::CnvrtToMD::HKLScale); //< momentums in A^-1
   } else {
     throw std::invalid_argument(
         "ConvertToDiffractionMDWorkspace2::Unknown target frame: " + TargFrame);
@@ -198,7 +197,7 @@ void ConvertToDiffractionMDWorkspace2::exec() {
                        this->getPropertyValue("OutputWorkspace"));
   Convert->setProperty("OverwriteExisting", !this->getProperty("Append"));
 
-  if (!MDEvents::MDTransfFactory::Instance().exists("Q3D")) {
+  if (!MDTransfFactory::Instance().exists("Q3D")) {
     throw std::runtime_error(" ConvertToMD Q3D plugin used to transform into "
                              "DiffractionWorkspaced has not been registered "
                              "with the MDTransformation factory");
@@ -248,4 +247,4 @@ void ConvertToDiffractionMDWorkspace2::exec() {
 }
 
 } // namespace Mantid
-} // namespace MDEvents
+} // namespace DataObjects

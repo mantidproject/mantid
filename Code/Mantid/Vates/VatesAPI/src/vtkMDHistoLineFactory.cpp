@@ -1,6 +1,7 @@
 #include "MantidVatesAPI/vtkMDHistoLineFactory.h"
 #include "MantidVatesAPI/Common.h"
 #include "MantidVatesAPI/ProgressAction.h"
+#include "MantidVatesAPI/vtkNullUnstructuredGrid.h"
 #include "vtkCellArray.h"
 #include "vtkCellData.h"
 #include "vtkFloatArray.h"
@@ -9,11 +10,11 @@
 #include <vector>
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/NullCoordTransform.h"
-#include "MantidMDEvents/MDHistoWorkspace.h"
+#include "MantidDataObjects/MDHistoWorkspace.h"
 #include "MantidKernel/ReadLock.h"
 
 using Mantid::API::IMDWorkspace;
-using Mantid::MDEvents::MDHistoWorkspace;
+using Mantid::DataObjects::MDHistoWorkspace;
 using Mantid::API::NullCoordTransform;
 
 namespace Mantid
@@ -150,6 +151,15 @@ namespace Mantid
         points->Delete();
         signal->Delete();
         visualDataSet->Squeeze();
+
+        // Hedge against empty data sets
+        if (visualDataSet->GetNumberOfPoints() <= 0)
+        {
+          visualDataSet->Delete();
+          vtkNullUnstructuredGrid nullGrid;
+          visualDataSet = nullGrid.createNullData();
+        }
+
         return visualDataSet;
       }
     }

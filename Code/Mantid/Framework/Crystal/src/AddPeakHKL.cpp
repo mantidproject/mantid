@@ -3,7 +3,6 @@
 #include "MantidAPI/IPeak.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ArrayLengthValidator.h"
-#include "MantidKernel/V3D.h"
 
 namespace Mantid
 {
@@ -39,13 +38,13 @@ namespace Crystal
   const std::string AddPeakHKL::name() const { return "AddPeakHKL"; }
 
   /// Algorithm's version for identification. @see Algorithm::version
-  int AddPeakHKL::version() const { return 1;};
+  int AddPeakHKL::version() const { return 1;}
 
   /// Algorithm's category for identification. @see Algorithm::category
   const std::string AddPeakHKL::category() const { return "Crystal";}
 
   /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
-  const std::string AddPeakHKL::summary() const { return "Add a peak in the hkl frame";};
+  const std::string AddPeakHKL::summary() const { return "Add a peak in the hkl frame";}
 
   //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.

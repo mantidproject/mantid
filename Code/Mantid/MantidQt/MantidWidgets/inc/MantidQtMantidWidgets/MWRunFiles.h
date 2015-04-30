@@ -206,6 +206,8 @@ namespace MantidQt
       void findingFiles();
       /// Emitted when files have been found
       void filesFound();
+      /// Emitted when files have been found that are different to what was found last time
+      void filesFoundChanged();
       /// Emitted when file finding is finished (files may or may not have been found).
       void fileFindingFinished();
       /// Emitted when the live button is toggled
@@ -282,6 +284,8 @@ namespace MantidQt
       Ui::MWRunFiles m_uiForm;
       /// An array of valid file names derived from the entries in the leNumber LineEdit
       QStringList m_foundFiles;
+      /// An array of the last valid file names found
+      QStringList m_lastFoundFiles;
       /// The last directory viewed by the browse dialog
       QString m_lastDir;
       /// A file filter for the file browser

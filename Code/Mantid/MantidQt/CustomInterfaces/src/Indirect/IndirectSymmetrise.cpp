@@ -69,46 +69,50 @@ namespace CustomInterfaces
     m_propTrees["SymmPVPropTree"]->addProperty(m_properties["DeltaY"]);
 
     // Indicators for Y value at each EMin position
-    m_rangeSelectors["NegativeEMinYPos"] = new MantidWidgets::RangeSelector(m_uiForm.ppRawPlot,
-        MantidWidgets::RangeSelector::YSINGLE, true, true);
-    m_rangeSelectors["PositiveEMinYPos"] = new MantidWidgets::RangeSelector(m_uiForm.ppRawPlot,
-        MantidWidgets::RangeSelector::YSINGLE, true, true);
+    auto negativeEMinYPos = m_uiForm.ppRawPlot->addRangeSelector("NegativeEMinYPos",
+                                                                 MantidWidgets::RangeSelector::YSINGLE);
+    negativeEMinYPos->setInfoOnly(true);
+    negativeEMinYPos->setColour(Qt::blue);
+    negativeEMinYPos->setMinimum(0.0);
 
-    m_rangeSelectors["NegativeEMinYPos"]->setColour(Qt::red);
-    m_rangeSelectors["PositiveEMinYPos"]->setColour(Qt::blue);
-    m_rangeSelectors["NegativeEMinYPos"]->setMinimum(0);
-    m_rangeSelectors["PositiveEMinYPos"]->setMinimum(0);
+    auto positiveEMinYPos = m_uiForm.ppRawPlot->addRangeSelector("PositiveEMinYPos",
+                                                                 MantidWidgets::RangeSelector::YSINGLE);
+    positiveEMinYPos->setInfoOnly(true);
+    positiveEMinYPos->setColour(Qt::red);
+    positiveEMinYPos->setMinimum(0.0);
 
     // Indicator for centre of symmetry (x=0)
-    m_rangeSelectors["CentreMark_Raw"] = new MantidWidgets::RangeSelector(m_uiForm.ppRawPlot,
-        MantidWidgets::RangeSelector::XSINGLE, true, true);
-    m_rangeSelectors["CentreMark_Raw"]->setColour(Qt::cyan);
-    m_rangeSelectors["CentreMark_Raw"]->setMinimum(0.0);
+    auto centreMarkRaw = m_uiForm.ppRawPlot->addRangeSelector("CentreMark",
+                                                              MantidWidgets::RangeSelector::XSINGLE);
+    centreMarkRaw->setInfoOnly(true);
+    centreMarkRaw->setColour(Qt::cyan);
+    centreMarkRaw->setMinimum(0.0);
 
     // Indicators for negative and positive X range values on X axis
     // The user can use these to move the X range
     // Note that the max and min of the negative range selector corespond to the opposite X value
     // i.e. RS min is X max
-    m_rangeSelectors["NegativeE_Raw"] = new MantidWidgets::RangeSelector(m_uiForm.ppRawPlot);
-    m_rangeSelectors["PositiveE_Raw"] = new MantidWidgets::RangeSelector(m_uiForm.ppRawPlot);
+    auto negativeERaw = m_uiForm.ppRawPlot->addRangeSelector("NegativeE");
+    negativeERaw->setColour(Qt::darkGreen);
 
-    m_rangeSelectors["NegativeE_Raw"]->setColour(Qt::darkGreen);
-    m_rangeSelectors["PositiveE_Raw"]->setColour(Qt::darkGreen);
+    auto positiveERaw = m_uiForm.ppRawPlot->addRangeSelector("PositiveE");
+    positiveERaw->setColour(Qt::darkGreen);
 
     // Indicators for negative and positive X range values on X axis
-    m_rangeSelectors["NegativeE_PV"] = new MantidWidgets::RangeSelector(m_uiForm.ppPreviewPlot,
-        MantidWidgets::RangeSelector::XMINMAX, true, true);
-    m_rangeSelectors["PositiveE_PV"] = new MantidWidgets::RangeSelector(m_uiForm.ppPreviewPlot,
-        MantidWidgets::RangeSelector::XMINMAX, true, true);
+    auto negativeEPV = m_uiForm.ppPreviewPlot->addRangeSelector("NegativeE");
+    negativeEPV->setInfoOnly(true);
+    negativeEPV->setColour(Qt::darkGreen);
 
-    m_rangeSelectors["NegativeE_PV"]->setColour(Qt::darkGreen);
-    m_rangeSelectors["PositiveE_PV"]->setColour(Qt::darkGreen);
+    auto positiveEPV = m_uiForm.ppPreviewPlot->addRangeSelector("PositiveE");
+    positiveEPV->setInfoOnly(true);
+    positiveEPV->setColour(Qt::darkGreen);
 
     // Indicator for centre of symmetry (x=0)
-    m_rangeSelectors["CentreMark_PV"] = new MantidWidgets::RangeSelector(m_uiForm.ppPreviewPlot,
-        MantidWidgets::RangeSelector::XSINGLE, true, true);
-    m_rangeSelectors["CentreMark_PV"]->setColour(Qt::cyan);
-    m_rangeSelectors["CentreMark_PV"]->setMinimum(0.0);
+    auto centreMarkPV = m_uiForm.ppPreviewPlot->addRangeSelector("CentreMark",
+                                                                 MantidWidgets::RangeSelector::XSINGLE);
+    centreMarkPV->setInfoOnly(true);
+    centreMarkPV->setColour(Qt::cyan);
+    centreMarkPV->setMinimum(0.0);
 
     // SIGNAL/SLOT CONNECTIONS
     // Validate the E range when it is changed
@@ -120,10 +124,10 @@ namespace CustomInterfaces
     // Preview symmetrise
     connect(m_uiForm.pbPreview, SIGNAL(clicked()), this, SLOT(preview()));
     // X range selectors
-    connect(m_rangeSelectors["PositiveE_Raw"], SIGNAL(minValueChanged(double)), this, SLOT(xRangeMinChanged(double)));
-    connect(m_rangeSelectors["PositiveE_Raw"], SIGNAL(maxValueChanged(double)), this, SLOT(xRangeMaxChanged(double)));
-    connect(m_rangeSelectors["NegativeE_Raw"], SIGNAL(minValueChanged(double)), this, SLOT(xRangeMinChanged(double)));
-    connect(m_rangeSelectors["NegativeE_Raw"], SIGNAL(maxValueChanged(double)), this, SLOT(xRangeMaxChanged(double)));
+    connect(positiveERaw, SIGNAL(minValueChanged(double)), this, SLOT(xRangeMinChanged(double)));
+    connect(positiveERaw, SIGNAL(maxValueChanged(double)), this, SLOT(xRangeMaxChanged(double)));
+    connect(negativeERaw, SIGNAL(minValueChanged(double)), this, SLOT(xRangeMinChanged(double)));
+    connect(negativeERaw, SIGNAL(maxValueChanged(double)), this, SLOT(xRangeMaxChanged(double)));
 
     // Set default X range values
     m_dblManager->setValue(m_properties["EMin"], 0.1);
@@ -208,8 +212,8 @@ namespace CustomInterfaces
     double symmRange = std::max(fabs(axisRange.first), fabs(axisRange.second));
 
     // Set valid range for range selectors
-    m_rangeSelectors["NegativeE_Raw"]->setRange(-symmRange, 0);
-    m_rangeSelectors["PositiveE_Raw"]->setRange(0, symmRange);
+    m_uiForm.ppRawPlot->getRangeSelector("NegativeE")->setRange(-symmRange, 0);
+    m_uiForm.ppRawPlot->getRangeSelector("PositiveE")->setRange(0, symmRange);
 
     // Set some default (and valid) values for E range
     m_dblManager->setValue(m_properties["EMax"], axisRange.second);
@@ -401,8 +405,8 @@ namespace CustomInterfaces
     m_dblManager->setValue(m_properties["DeltaY"], deltaY);
 
     // Set indicator positions
-    m_rangeSelectors["NegativeEMinYPos"]->setMinimum(negativeY);
-    m_rangeSelectors["PositiveEMinYPos"]->setMinimum(positiveY);
+    m_uiForm.ppRawPlot->getRangeSelector("NegativeEMinYPos")->setMinimum(negativeY);
+    m_uiForm.ppRawPlot->getRangeSelector("PositiveEMinYPos")->setMinimum(positiveY);
 
     // Plot preview plot
     size_t spectrumIndex = symmWS->getIndexFromSpectrumNumber(spectrumNumber);
@@ -421,24 +425,29 @@ namespace CustomInterfaces
    */
   void IndirectSymmetrise::updateRangeSelectors(QtProperty *prop, double value)
   {
+    auto negativeERaw = m_uiForm.ppRawPlot->getRangeSelector("NegativeE");
+    auto positiveERaw = m_uiForm.ppRawPlot->getRangeSelector("PositiveE");
+    auto negativeEPV = m_uiForm.ppPreviewPlot->getRangeSelector("NegativeE");
+    auto positiveEPV = m_uiForm.ppPreviewPlot->getRangeSelector("PositiveE");
+
     value = fabs(value);
 
     if(prop == m_properties["EMin"])
     {
-      m_rangeSelectors["NegativeE_Raw"]->setMaximum(-value);
-      m_rangeSelectors["PositiveE_Raw"]->setMinimum(value);
+      negativeERaw->setMaximum(-value);
+      positiveERaw->setMinimum(value);
 
-      m_rangeSelectors["NegativeE_PV"]->setMinimum(-value);
-      m_rangeSelectors["PositiveE_PV"]->setMinimum(value);
+      negativeEPV->setMinimum(-value);
+      positiveEPV->setMinimum(value);
     }
 
     if(prop == m_properties["EMax"])
     {
-      m_rangeSelectors["NegativeE_Raw"]->setMinimum(-value);
-      m_rangeSelectors["PositiveE_Raw"]->setMaximum(value);
+      negativeERaw->setMinimum(-value);
+      positiveERaw->setMaximum(value);
 
-      m_rangeSelectors["NegativeE_PV"]->setMaximum(-value);
-      m_rangeSelectors["PositiveE_PV"]->setMaximum(value);
+      negativeEPV->setMaximum(-value);
+      positiveEPV->setMaximum(value);
     }
   }
 
@@ -449,13 +458,16 @@ namespace CustomInterfaces
    */
   void IndirectSymmetrise::xRangeMinChanged(double value)
   {
+    auto negativeERaw = m_uiForm.ppRawPlot->getRangeSelector("NegativeE");
+    auto positiveERaw = m_uiForm.ppRawPlot->getRangeSelector("PositiveE");
+
     MantidWidgets::RangeSelector *from = qobject_cast<MantidWidgets::RangeSelector*>(sender());
 
-    if(from == m_rangeSelectors["PositiveE_Raw"])
+    if(from == positiveERaw)
     {
       m_dblManager->setValue(m_properties["EMin"], std::abs(value));
     }
-    else if(from == m_rangeSelectors["NegativeE_Raw"])
+    else if(from == negativeERaw)
     {
       m_dblManager->setValue(m_properties["EMax"], std::abs(value));
     }
@@ -468,13 +480,16 @@ namespace CustomInterfaces
    */
   void IndirectSymmetrise::xRangeMaxChanged(double value)
   {
+    auto negativeERaw = m_uiForm.ppRawPlot->getRangeSelector("NegativeE");
+    auto positiveERaw = m_uiForm.ppRawPlot->getRangeSelector("PositiveE");
+
     MantidWidgets::RangeSelector *from = qobject_cast<MantidWidgets::RangeSelector*>(sender());
 
-    if(from == m_rangeSelectors["PositiveE_Raw"])
+    if(from == positiveERaw)
     {
       m_dblManager->setValue(m_properties["EMax"], std::abs(value));
     }
-    else if(from == m_rangeSelectors["NegativeE_Raw"])
+    else if(from == negativeERaw)
     {
       m_dblManager->setValue(m_properties["EMin"], std::abs(value));
     }

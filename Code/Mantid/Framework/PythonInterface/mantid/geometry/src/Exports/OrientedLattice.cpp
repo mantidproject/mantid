@@ -46,7 +46,9 @@ namespace //<unnamed>
 
 }
 
+// clang-format off
 void export_OrientedLattice()
+// clang-format on
 {
   /// return_value_policy for read-only numpy array
   typedef return_value_policy<Policies::MatrixToNumpy<Converters::WrapReadOnly> > return_readonly_numpy;

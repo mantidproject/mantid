@@ -98,13 +98,15 @@ namespace MantidQt
       void newInstrumentConfiguration();
 
     signals:
-      /// Emmitted when the instrument configuration is changed
+      /// Emitted when the instrument configuration is changed
       void instrumentConfigurationUpdated(const QString & instrumentName,
           const QString & analyserName, const QString & reflectionName);
 
     private slots:
-      /// Updates the list of analysers and reflections based on the selected instrument
+      /// Handles an instrument being selected
       void updateInstrumentConfigurations(const QString & instrumentName);
+      /// Updates the list of analysers when an instrument is selected
+      bool updateAnalysersList(Mantid::API::MatrixWorkspace_sptr ws);
       /// Updates the list of reflections when an analyser is selected
       void updateReflectionsList(int index);
       /// Filters out any disabled instruments

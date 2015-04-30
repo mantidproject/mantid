@@ -31,12 +31,17 @@ SECRET=${2}
 SLAVE_AGENT_URL="${JENKINS_URL}/computer/${NODE_NAME}/slave-agent.jnlp"
 # name of the slave jar - full path is determined later
 JAR_FILE=slave.jar
+# Some versions of cron don't set the USER environment variable
+# required by vnc
+[ -z "$USER" ] && export USER=$(whoami)
+# Put /usr/local/bin on the PATH if brew is installed
+[ -f /usr/local/bin/brew ] && export PATH=${PATH}:/usr/local/bin
 
 #####################################################################
 # Script
 #####################################################################
 # exit if it is already running
-RUNNING=$(ps aux | grep java | grep ${JAR_FILE})
+RUNNING=$(ps u -U $(whoami) | grep java | grep ${JAR_FILE})
 if [ ! -z "${RUNNING}" ]; then
   echo "Slave process is already running"
   exit 0

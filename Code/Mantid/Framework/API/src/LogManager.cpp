@@ -434,13 +434,13 @@ void LogManager::clearLogs() { m_manager.clear(); }
   template MANTID_API_DLL TYPE                                                 \
       LogManager::getPropertyValueAsType(const std::string &) const;
 
-INSTANTIATE(double);
-INSTANTIATE(int);
-INSTANTIATE(long);
-INSTANTIATE(uint32_t);
-INSTANTIATE(uint64_t);
-INSTANTIATE(std::string);
-INSTANTIATE(bool);
+INSTANTIATE(double)
+INSTANTIATE(int)
+INSTANTIATE(long)
+INSTANTIATE(uint32_t)
+INSTANTIATE(uint64_t)
+INSTANTIATE(std::string)
+INSTANTIATE(bool)
 
 template MANTID_API_DLL uint16_t
     LogManager::getPropertyValueAsType(const std::string &) const;

@@ -17,7 +17,7 @@
 InstrumentTreeWidget::InstrumentTreeWidget(QWidget *w):QTreeView(w), m_treeModel(0) 
 {
   connect(this,SIGNAL(clicked(const QModelIndex)),this,SLOT(sendComponentSelectedSignal(const QModelIndex)));
-};
+}
 
 void InstrumentTreeWidget::setInstrumentActor(InstrumentActor* instrActor)
 {

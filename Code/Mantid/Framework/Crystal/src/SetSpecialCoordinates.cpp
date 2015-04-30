@@ -1,11 +1,9 @@
 #include "MantidCrystal/SetSpecialCoordinates.h"
 #include "MantidAPI/WorkspaceValidators.h"
-#include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidKernel/ListValidator.h"
-#include <boost/make_shared.hpp>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -56,10 +54,10 @@ SetSpecialCoordinates::~SetSpecialCoordinates() {}
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string SetSpecialCoordinates::name() const {
   return "SetSpecialCoordinates";
-};
+}
 
 /// Algorithm's version for identification. @see Algorithm::version
-int SetSpecialCoordinates::version() const { return 1; };
+int SetSpecialCoordinates::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
 const std::string SetSpecialCoordinates::category() const { return "Crystal"; }

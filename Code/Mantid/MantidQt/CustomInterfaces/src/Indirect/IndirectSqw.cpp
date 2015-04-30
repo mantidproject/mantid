@@ -84,16 +84,15 @@ namespace CustomInterfaces
       m_batchAlgoRunner->addAlgorithm(energyRebinAlg);
     }
 
-    // Get correct S(Q, w) algorithm
     QString eFixed = getInstrumentDetails()["efixed-val"];
 
-    IAlgorithm_sptr sqwAlg;
+    IAlgorithm_sptr sqwAlg = AlgorithmManager::Instance().create("SofQW");
     QString rebinType = m_uiForm.cbRebinType->currentText();
 
-    if(rebinType == "Parallelepiped (SofQW2)")
-      sqwAlg = AlgorithmManager::Instance().create("SofQW2");
-    else if(rebinType == "Parallelepiped/Fractional Area (SofQW3)")
-      sqwAlg = AlgorithmManager::Instance().create("SofQW3");
+    if(rebinType == "Parallelepiped")
+      sqwAlg->setProperty("Method", "Polygon");
+    else if(rebinType == "Parallelepiped/Fractional Area")
+      sqwAlg->setProperty("Method", "NormalisedPolygon");
 
     // S(Q, w) algorithm
     sqwAlg->initialize();
@@ -160,22 +159,17 @@ namespace CustomInterfaces
     QString sampleWsName = m_uiForm.dsSampleInput->getCurrentDataName();
     QString sqwWsName = sampleWsName.left(sampleWsName.length() - 4) + "_sqw";
 
-    QString pyInput = "sqw_ws = '" + sqwWsName + "'\n";
     QString plotType = m_uiForm.cbPlotType->currentText();
 
     if(plotType == "Contour")
-    {
-      pyInput += "plot2D(sqw_ws)\n";
-    }
+      plot2D(sqwWsName);
 
     else if(plotType == "Spectra")
     {
-      pyInput +=
-        "n_spec = mtd[sqw_ws].getNumberHistograms()\n"
-        "plotSpectrum(sqw_ws, range(0, n_spec))\n";
+      auto ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(sqwWsName.toStdString());
+      int numHist = static_cast<int>(ws->getNumberHistograms());
+      plotSpectrum(sqwWsName, 0, numHist);
     }
-
-    m_pythonRunner.runPythonCode(pyInput);
   }
 
   /**

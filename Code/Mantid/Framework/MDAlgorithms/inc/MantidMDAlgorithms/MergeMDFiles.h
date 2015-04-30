@@ -4,8 +4,8 @@
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/IMDEventWorkspace.h"
-#include "MantidMDEvents/MDEventWorkspace.h"
-#include "MantidMDEvents/MDBoxFlatTree.h"
+#include "MantidDataObjects/MDEventWorkspace.h"
+#include "MantidDataObjects/MDBoxFlatTree.h"
 #include <nexus/NeXusFile.hpp>
 
 namespace Mantid {
@@ -72,9 +72,9 @@ private:
   uint64_t loadEventsFromSubBoxes(API::IMDNode *TargetBox);
 
   // the class which flatten the box structure and deal with it
-  MDEvents::MDBoxFlatTree m_BoxStruct;
+  DataObjects::MDBoxFlatTree m_BoxStruct;
   // the vector of box structures for contributing files components
-  std::vector<MDEvents::MDBoxFlatTree> m_fileComponentsStructure;
+  std::vector<DataObjects::MDBoxFlatTree> m_fileComponentsStructure;
 
 protected:
   /// number of workspace dimensions

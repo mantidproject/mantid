@@ -14,6 +14,10 @@ elseif(CMAKE_COMPILER_IS_GNUCXX AND GMOCK_VERSION VERSION_GREATER "1.6.0")
   string(REPLACE "-Wconversion" "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
 endif()
 
+if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+  set ( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-missing-field-initializers" )
+endif()
+
 add_subdirectory( gmock-${GMOCK_VERSION} )
 
 # Put the targets in the UnitTests folder

@@ -1,22 +1,31 @@
 <RCC>
-    <qresource prefix="/SliceViewer/icons">
-        <file>peak_disabled.png</file>
-        <file>auto_rebin.png</file>
-        <file>peak.png</file>
-        <file>view-fullscreen.png</file>
-        <file>color-pallette.png</file>
-        <file>color-pallette-part.png</file>
-        <file>stock-tool-pencil-16.png</file>
-        <file>stock-lock.png</file>
-        <file>cross.png</file>
-        <file>refresh.png</file>
-        <file>document-new.png</file>
-        <file>grid.png</file>
-        <file>letter_x.png</file>
-        <file>letter_y.png</file>
-        <file>SliceViewerWindow_icon.png</file>
-        <file>peak-cross-faded.png</file>
-        <file>peak-cross-small.png</file>
-        <file>peak-cross.png</file>
-    </qresource>
+  <qresource prefix="/SliceViewer/icons">
+    <file>Peak List on 32x32.png</file>
+    <file>cut on 32x32.png</file>
+    <file>grid on 32x32.png</file>
+    <file>rebin on 32x32.png</file>
+    <file>rebin finer 32x32.png</file>
+    <file>rebin auto 32x32.png</file>
+    <file>rebin 32x32.png</file>
+    <file>grid 32x32.png</file>
+    <file>cut remove 32x32.png</file>
+    <file>cut 32x32.png</file>
+    <file>Peak List 32x32.png</file>
+    <file>colour zoom minus scale 32x32.png</file>
+    <file>colour zoom plus scale 32x32.png</file>
+    <file>Scale colour to visible 32x32.png</file>
+    <file>zoom-select 32x32.png</file>
+    <file>zoom-out 32x32.png</file>
+    <file>zoom-in 32x32.png</file>
+    <file>view-fullscreen.png</file>
+    <file>refresh.png</file>
+    <file>document-new.png</file>
+    <file>grid.png</file>
+    <file>letter_x.png</file>
+    <file>letter_y.png</file>
+    <file>SliceViewerWindow_icon.png</file>
+    <file>peak-cross-faded.png</file>
+    <file>peak-cross-small.png</file>
+    <file>peak-cross.png</file>
+  </qresource>
 </RCC>

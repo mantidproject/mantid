@@ -9,6 +9,8 @@ include_directories(
   ${CMAKE_CURRENT_BINARY_DIR}
   ${CMAKE_CURRENT_BINARY_DIR}/../QtWidgets
   ${CMAKE_CURRENT_BINARY_DIR}/../ViewWidgets
+  ${CMAKE_SOURCE_DIR}/MantidQt/MantidWidgets/inc
+  ${CMAKE_BINARY_DIR}/MantidQt/MantidWidgets
 )
 
 # These are the C++ files to be compiled.
@@ -36,6 +38,8 @@ set( TEST_SUITES
 
 add_executable( ${PROJECT_NAME} ${INCLUDE_FILES} ${SOURCE_FILES} ${MOC_SRCS} )
 
+include_directories( SYSTEM ${PARAVIEW_INCLUDE_DIRS} )
+
 target_link_libraries( ${PROJECT_NAME}
 pqCore pqComponents pqApplicationComponents
 ${QT_LIBRARIES}
@@ -43,6 +47,10 @@ ${MANTID_SUBPROJECT_LIBS}
 VatesSimpleGuiQtWidgets
 VatesSimpleGuiViewWidgets
 )
+
+if (OSX_VERSION VERSION_GREATER 10.8)
+  set_target_properties ( ${PROJECT_NAME} PROPERTIES INSTALL_RPATH "@loader_path/../Libraries;@loader_path/../MacOS")
+endif ()
 
 if( SQUISH_FOUND )
   # Need to set the AUT first

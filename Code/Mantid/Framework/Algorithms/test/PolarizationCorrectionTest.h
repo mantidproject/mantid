@@ -178,6 +178,7 @@ public:
       checkAlg->setChild(true);
       checkAlg->setProperty("Workspace1", groupWS->getItem(i));
       checkAlg->setProperty("Workspace2", outWS->getItem(i));
+      checkAlg->setProperty("Tolerance", 3e-16);
       checkAlg->execute();
       const std::string result = checkAlg->getProperty("Result");
       TS_ASSERT_EQUALS("Success!", result);

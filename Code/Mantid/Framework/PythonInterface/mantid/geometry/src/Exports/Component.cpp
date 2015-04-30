@@ -9,20 +9,22 @@ using namespace boost::python;
 namespace
 {
   // Default parameter function overloads
-  BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Component_getParameterNames,Component::getParameterNames,0,1);
-  BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Component_hasParameter,Component::hasParameter,1,2);
-  BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Component_getNumberParameter,Component::getNumberParameter,1,2);
-  BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Component_getBoolParameter,Component::getBoolParameter,1,2);
-  BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Component_getPositionParameter,Component::getPositionParameter,1,2);
-  BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Component_getRotationParameter,Component::getRotationParameter,1,2);
-  BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Component_getStringParameter,Component::getStringParameter,1,2);
-  BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Component_getIntParameter,Component::getIntParameter,1,2);
-  BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Component_getParameterType,Component::getParameterType,1,2);
+  BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Component_getParameterNames,Component::getParameterNames,0,1)
+  BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Component_hasParameter,Component::hasParameter,1,2)
+  BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Component_getNumberParameter,Component::getNumberParameter,1,2)
+  BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Component_getBoolParameter,Component::getBoolParameter,1,2)
+  BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Component_getPositionParameter,Component::getPositionParameter,1,2)
+  BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Component_getRotationParameter,Component::getRotationParameter,1,2)
+  BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Component_getStringParameter,Component::getStringParameter,1,2)
+  BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Component_getIntParameter,Component::getIntParameter,1,2)
+  BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Component_getParameterType,Component::getParameterType,1,2)
 
 
 }
 
+// clang-format off
 void export_Component()
+// clang-format on
 {
   class_<Component, bases<IComponent>, boost::noncopyable>("Component", no_init)
     .def("getParameterNames", &Component::getParameterNames, Component_getParameterNames())

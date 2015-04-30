@@ -15,7 +15,7 @@
 #include "MantidVatesAPI/vtkStructuredGrid_Silent.h"
 
 using namespace Mantid::API;
-using namespace Mantid::MDEvents;
+using namespace Mantid::DataObjects;
 using namespace testing;
 
 class vtkDataSetFactoryTest : public CxxTest::TestSuite

@@ -216,7 +216,7 @@ class PDDetermineCharacterizations(PythonAlgorithm):
                                % wkspName)
         return None
 
-    def getWavelength(self, logs, wkspName):
+    def getWavelength(self, logs, dummy_wkspName):
         """ Get wave length
         Wavelength can be given by 2 sample logs, either LambdaRequest or lambda.
         And its unit can be either Angstrom or A.

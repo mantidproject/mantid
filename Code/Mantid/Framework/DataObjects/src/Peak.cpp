@@ -857,7 +857,7 @@ double Peak::getValueByColName(const std::string &name_in) const {
  * @brief Get the peak shape
  * @return : const ref to current peak shape.
  */
-const PeakShape &Peak::getPeakShape() { return *this->m_peakShape; }
+const PeakShape &Peak::getPeakShape() const { return *this->m_peakShape; }
 
 /**
  * @brief Set the peak shape

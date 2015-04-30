@@ -1,24 +1,19 @@
 #ifndef MANTID_MDEVENTS_PLUSMDEWTEST_H_
 #define MANTID_MDEVENTS_PLUSMDEWTEST_H_
 
-#include "MantidKernel/System.h"
-#include "MantidKernel/Timer.h"
-#include "MantidMDEvents/MDEventFactory.h"
-#include "MantidMDAlgorithms/PlusMD.h"
-#include <nexus/NeXusFile.hpp>
-#include "MantidTestHelpers/MDEventsTestHelper.h"
-#include <cxxtest/TestSuite.h>
-#include <iomanip>
-#include <iostream>
-#include <Poco/File.h>
-#include "MantidTestHelpers/BinaryOperationMDTestHelper.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FrameworkManager.h"
-#include "MantidMDEvents/BoxControllerNeXusIO.h"
+#include "MantidDataObjects/BoxControllerNeXusIO.h"
+#include "MantidDataObjects/MDEventFactory.h"
+#include "MantidMDAlgorithms/PlusMD.h"
+#include "MantidTestHelpers/BinaryOperationMDTestHelper.h"
+#include "MantidTestHelpers/MDAlgorithmsTestHelper.h"
 
-using namespace Mantid;
-using namespace Mantid::MDEvents;
-using namespace Mantid::MDAlgorithms;
+#include <Poco/File.h>
+
 using namespace Mantid::API;
+using namespace Mantid::DataObjects;
+using namespace Mantid::MDAlgorithms;
 
 class PlusMDTest : public CxxTest::TestSuite
 {
@@ -28,16 +23,16 @@ public:
   void test_Init()
   {
     PlusMD alg;
-    TS_ASSERT_THROWS_NOTHING( alg.initialize() )
-    TS_ASSERT( alg.isInitialized() )
+    TS_ASSERT_THROWS_NOTHING( alg.initialize() );
+    TS_ASSERT( alg.isInitialized() );
   }
   
   void do_test(bool lhs_file, bool rhs_file, int inPlace, bool deleteFile=true)
   {
     AnalysisDataService::Instance().clear();
     // Make two input workspaces
-    MDEventWorkspace3Lean::sptr lhs = MDEventsTestHelper::makeFileBackedMDEW("PlusMDTest_lhs", lhs_file);
-    MDEventWorkspace3Lean::sptr rhs = MDEventsTestHelper::makeFileBackedMDEW("PlusMDTest_rhs", rhs_file);
+    MDEventWorkspace3Lean::sptr lhs = MDAlgorithmsTestHelper::makeFileBackedMDEW("PlusMDTest_lhs", lhs_file);
+    MDEventWorkspace3Lean::sptr rhs = MDAlgorithmsTestHelper::makeFileBackedMDEW("PlusMDTest_rhs", rhs_file);
     std::string outWSName = "PlusMDTest_out";
     if (inPlace == 1)
       outWSName = "PlusMDTest_lhs";
@@ -81,7 +76,7 @@ public:
       Mantid::API::BoxController_sptr bc = ws->getBoxController();
       std::cout << bc->getFileIO()->getFreeSpaceMap().size() << " entries in the free space map" << std::endl;
 
-       auto loader = dynamic_cast<MDEvents::BoxControllerNeXusIO *>( bc->getFileIO());
+       auto loader = dynamic_cast<BoxControllerNeXusIO *>( bc->getFileIO());
        TS_ASSERT(loader);
        if(!loader)return;
        std::vector<uint64_t> freeSpaceMap;

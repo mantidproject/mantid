@@ -1,19 +1,20 @@
-#include "MantidDataHandling/SaveMask.h"
-#include "MantidKernel/System.h"
-#include "MantidDataObjects/SpecialWorkspace2D.h"
+#include <fstream>
+#include <sstream>
+#include <algorithm>
+
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/ISpectrum.h"
-
-#include "fstream"
-#include "sstream"
-#include "algorithm"
+#include "MantidDataHandling/SaveMask.h"
+#include "MantidDataObjects/SpecialWorkspace2D.h"
+#include "MantidKernel/System.h"
 
 #include <boost/shared_ptr.hpp>
-#include "Poco/DOM/Document.h"
-#include "Poco/DOM/Element.h"
-#include "Poco/DOM/Text.h"
-#include "Poco/DOM/AutoPtr.h"
-#include "Poco/DOM/DOMWriter.h"
+
+#include <Poco/DOM/Document.h>
+#include <Poco/DOM/Element.h>
+#include <Poco/DOM/Text.h>
+#include <Poco/DOM/AutoPtr.h>
+#include <Poco/DOM/DOMWriter.h>
 #ifdef _MSC_VER
 // Disable a flood of warnings from Poco about inheriting from
 // std::basic_istream

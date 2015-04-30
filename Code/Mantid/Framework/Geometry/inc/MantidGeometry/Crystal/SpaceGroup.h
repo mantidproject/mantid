@@ -73,13 +73,18 @@ public:
     const std::vector<SymmetryOperation> &symmetryOperations =
         getSymmetryOperations();
 
-    std::set<T> equivalents;
+    std::vector<T> equivalents;
     for (auto it = symmetryOperations.begin(); it != symmetryOperations.end();
          ++it) {
-      equivalents.insert(Geometry::getWrappedVector((*it) * position));
+      equivalents.push_back(Geometry::getWrappedVector((*it) * position));
     }
 
-    return std::vector<T>(equivalents.begin(), equivalents.end());
+    // Use fuzzy compare with the same condition as V3D::operator==().
+    std::sort(equivalents.begin(), equivalents.end(), FuzzyV3DLessThan());
+    equivalents.erase(std::unique(equivalents.begin(), equivalents.end()),
+                      equivalents.end());
+
+    return equivalents;
   }
 
 protected:

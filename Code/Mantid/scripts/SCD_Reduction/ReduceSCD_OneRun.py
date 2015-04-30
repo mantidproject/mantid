@@ -37,7 +37,6 @@
 
 import os
 import sys
-import shutil
 import time
 import ReduceDictionary
 sys.path.append("/opt/mantidnightly/bin")
@@ -72,6 +71,7 @@ calibration_file_1        = params_dictionary.get('calibration_file_1', None)
 calibration_file_2        = params_dictionary.get('calibration_file_2', None)
 data_directory            = params_dictionary[ "data_directory" ]
 output_directory          = params_dictionary[ "output_directory" ]
+output_nexus              = params_dictionary.get( "output_nexus", False)
 min_tof                   = params_dictionary[ "min_tof" ]
 max_tof                   = params_dictionary[ "max_tof" ]
 use_monitor_counts        = params_dictionary[ "use_monitor_counts" ]
@@ -145,7 +145,10 @@ print "\nProcessing File: " + full_name + " ......\n"
 # Name the files to write for this run
 #
 run_niggli_matrix_file = output_directory + "/" + run + "_Niggli.mat"
-run_niggli_integrate_file = output_directory + "/" + run + "_Niggli.integrate"
+if output_nexus:
+    run_niggli_integrate_file = output_directory + "/" + run + "_Niggli.nxs"
+else:
+    run_niggli_integrate_file = output_directory + "/" + run + "_Niggli.integrate"
 
 #
 # Load the run data and find the total monitor counts
@@ -206,7 +209,8 @@ if read_UB:
         uc_alpha = peaks_ws.sample().getOrientedLattice().alpha()
         uc_beta = peaks_ws.sample().getOrientedLattice().beta()
         uc_gamma = peaks_ws.sample().getOrientedLattice().gamma()
-        FindUBUsingLatticeParameters(PeaksWorkspace= peaks_ws,a=uc_a,b=uc_b,c=uc_c,alpha=uc_alpha,beta=uc_beta, gamma=uc_gamma,NumInitial=num_peaks_to_find,Tolerance=tolerance)
+        FindUBUsingLatticeParameters(PeaksWorkspace= peaks_ws,a=uc_a,b=uc_b,c=uc_c,alpha=uc_alpha,beta=uc_beta,
+                                     gamma=uc_gamma,NumInitial=num_peaks_to_find,Tolerance=tolerance)
 else:
   # Find a Niggli UB matrix that indexes the peaks in this run
     FindUBUsingFFT( PeaksWorkspace=peaks_ws, MinD=min_d, MaxD=max_d, Tolerance=tolerance )
@@ -219,8 +223,11 @@ IndexPeaks( PeaksWorkspace=peaks_ws, Tolerance=tolerance)
 # see these partial results
 #
 SaveIsawUB( InputWorkspace=peaks_ws,Filename=run_niggli_matrix_file )
-SaveIsawPeaks( InputWorkspace=peaks_ws, AppendFile=False,
-               Filename=run_niggli_integrate_file )
+if output_nexus:
+    SaveNexus( InputWorkspace=peaks_ws, Filename=run_niggli_integrate_file )
+else:
+    SaveIsawPeaks(InputWorkspace=peaks_ws, AppendFile=False,
+                  Filename=run_niggli_integrate_file )
 
 #
 # Get complete list of peaks to be integrated and load the UB matrix into
@@ -327,8 +334,11 @@ elif use_cylindrical_integration:
 # This is the only file needed, for the driving script to get a combined
 # result.
 #
-SaveIsawPeaks( InputWorkspace=peaks_ws, AppendFile=False,
-               Filename=run_niggli_integrate_file )
+if output_nexus:
+    SaveNexus( InputWorkspace=peaks_ws, Filename=run_niggli_integrate_file )
+else:
+    SaveIsawPeaks(InputWorkspace=peaks_ws, AppendFile=False,
+                  Filename=run_niggli_integrate_file )
 
 # Print warning if user is trying to integrate using the cylindrical method and transorm the cell
 if use_cylindrical_integration:
@@ -342,15 +352,22 @@ else:
     if (not cell_type is None) and (not centering is None) :
         run_conventional_matrix_file = output_directory + "/" + run + "_" +        \
                                    cell_type + "_" + centering + ".mat"
-        run_conventional_integrate_file = output_directory + "/" + run + "_" + \
+        if output_nexus:
+            run_conventional_integrate_file = output_directory + "/" + run + "_" + \
+                                      cell_type + "_" + centering + ".nxs"
+        else:
+            run_conventional_integrate_file = output_directory + "/" + run + "_" + \
                                       cell_type + "_" + centering + ".integrate"
         SelectCellOfType( PeaksWorkspace=peaks_ws,\
                       CellType=cell_type, Centering=centering,\
                       AllowPermutations=allow_perm,\
                       Apply=True, Tolerance=tolerance )
-        SaveIsawPeaks( InputWorkspace=peaks_ws, AppendFile=False,\
-                   Filename=run_conventional_integrate_file )
-        SaveIsawUB( InputWorkspace=peaks_ws, Filename=run_conventional_matrix_file )
+    if output_nexus:
+        SaveNexus(InputWorkspace=peaks_ws, Filename=run_conventional_integrate_file )
+    else:
+        SaveIsawPeaks(InputWorkspace=peaks_ws, AppendFile=False,\
+                      Filename=run_conventional_integrate_file )
+        SaveIsawUB(InputWorkspace=peaks_ws, Filename=run_conventional_matrix_file )
 
 end_time = time.time()
 print '\nReduced run ' + str(run) + ' in ' + str(end_time - start_time) + ' sec'

@@ -2,15 +2,15 @@
 #include "MantidKernel/Statistics.h"
 
 #include <algorithm>
-#include <functional>
-#include <limits>
-#include <cmath>
-#include <numeric>
-#include <string>
-#include <stdexcept>
-#include <iostream>
-#include <sstream>
 #include <cfloat>
+#include <cmath>
+#include <iostream>
+#include <limits>
+#include <numeric>
+#include <sstream>
+#include <stdexcept>
+#include <functional>
+
 
 namespace Mantid {
 namespace Kernel {
@@ -405,14 +405,14 @@ std::vector<double> getMomentsAboutMean(const std::vector<TYPE> &x,
 
 // --------------------------- Concrete instantiations
 // ---------------------------------------------
-INSTANTIATE(float);
-INSTANTIATE(double);
-INSTANTIATE(int);
-INSTANTIATE(long);
-INSTANTIATE(long long);
-INSTANTIATE(unsigned int);
-INSTANTIATE(unsigned long);
-INSTANTIATE(unsigned long long);
+INSTANTIATE(float)
+INSTANTIATE(double)
+INSTANTIATE(int)
+INSTANTIATE(long)
+INSTANTIATE(long long)
+INSTANTIATE(unsigned int)
+INSTANTIATE(unsigned long)
+INSTANTIATE(unsigned long long)
 
 } // namespace Kernel
 } // namespace Mantid

@@ -36,7 +36,7 @@ namespace DataHandling {
 class DLLExport LoadPreNexusMonitors : public Mantid::API::Algorithm {
 public:
   /// (Empty) Constructor
-  LoadPreNexusMonitors() : Mantid::API::Algorithm() {}
+  LoadPreNexusMonitors();
   /// Virtual destructor
   virtual ~LoadPreNexusMonitors() {}
   /// Algorithm's name

@@ -8,7 +8,7 @@
 namespace Mantid {
 namespace CurveFitting {
 
-DECLARE_FUNCTION(ComptonPeakProfile);
+DECLARE_FUNCTION(ComptonPeakProfile)
 
 namespace {
 ///@cond

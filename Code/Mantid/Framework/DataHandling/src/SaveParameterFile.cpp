@@ -36,10 +36,10 @@ SaveParameterFile::~SaveParameterFile() {}
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string SaveParameterFile::name() const {
   return "SaveParameterFile";
-};
+}
 
 /// Algorithm's version for identification. @see Algorithm::version
-int SaveParameterFile::version() const { return 1; };
+int SaveParameterFile::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
 const std::string SaveParameterFile::category() const {

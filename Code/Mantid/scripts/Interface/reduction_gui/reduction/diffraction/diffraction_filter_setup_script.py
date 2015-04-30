@@ -37,6 +37,8 @@ class FilterSetupScript(BaseScriptElement):
     logvaluetimesections = 1
     titleofsplitters = ""
 
+    parnamelist = None
+
     def __init__(self, inst_name):
         """ Initialization
         """

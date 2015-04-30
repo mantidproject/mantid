@@ -1,7 +1,7 @@
 #ifndef VTK_MD_HISTO_HEX_FACTORY_TEST_H_
 #define VTK_MD_HISTO_HEX_FACTORY_TEST_H_
 
-#include "MantidMDEvents/MDHistoWorkspace.h"
+#include "MantidDataObjects/MDHistoWorkspace.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 #include "MantidVatesAPI/UserDefinedThresholdRange.h"
 #include "MantidVatesAPI/NoThresholdRange.h"
@@ -11,10 +11,11 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include "MantidVatesAPI/vtkStructuredGrid_Silent.h"
+#include "vtkUnstructuredGrid.h"
 
 using namespace Mantid;
 using namespace Mantid::API;
-using namespace Mantid::MDEvents;
+using namespace Mantid::DataObjects;
 using namespace Mantid::VATES;
 using namespace Mantid::Geometry;
 using namespace testing;
@@ -48,8 +49,11 @@ class vtkMDHistoHexFactoryTest: public CxxTest::TestSuite
     vtkUnstructuredGrid* aboveProduct = dynamic_cast<vtkUnstructuredGrid*>(above.create(progressUpdate));
 
     TS_ASSERT_EQUALS((10*10*10), insideProduct->GetNumberOfCells());
-    TS_ASSERT_EQUALS(0, belowProduct->GetNumberOfCells());
-    TS_ASSERT_EQUALS(0, aboveProduct->GetNumberOfCells());
+
+    // This has changed, in order to ensure that we do not pass on empty 
+    // workspaces. A single point is created in the center by the vtkNullUnstructuredGrid
+    TS_ASSERT_EQUALS(1, belowProduct->GetNumberOfCells());
+    TS_ASSERT_EQUALS(1, aboveProduct->GetNumberOfCells());
   }
 
   void testSignalAspects()

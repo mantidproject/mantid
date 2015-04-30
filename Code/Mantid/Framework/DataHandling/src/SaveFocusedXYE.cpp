@@ -6,6 +6,7 @@
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/Exception.h"
 #include <Poco/File.h>
+#include <Poco/Path.h>
 #include <fstream>
 #include <iomanip>
 #include <cmath>
@@ -59,15 +60,26 @@ void SaveFocusedXYE::exec() {
   MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
   const size_t nHist = inputWS->getNumberHistograms();
   const bool isHistogram = inputWS->isHistogramData();
-  std::string filename = getProperty("Filename");
 
-  std::size_t pos = filename.find_first_of(".");
+  // this would be a subroutine if it were easier to return
+  // two strings
+  std::string filename = getProperty("Filename");
   std::string ext;
-  if (pos != std::string::npos) // Remove the extension
   {
-    ext = filename.substr(pos + 1, filename.npos);
-    filename = filename.substr(0, pos);
+      Poco::Path path(filename);
+      std::string directory = path.parent().toString();
+      std::string name = path.getFileName();
+
+      std::size_t pos = name.find_first_of(".");
+      if (pos != std::string::npos) // Remove the extension
+      {
+        ext = name.substr(pos + 1, name.npos);
+        name = name.substr(0, pos);
+      }
+
+      filename = Poco::Path(directory, name).toString();
   }
+
   const bool append = getProperty("Append");
   const bool headers = getProperty("IncludeHeader");
 

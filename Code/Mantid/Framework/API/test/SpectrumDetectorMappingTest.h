@@ -153,7 +153,7 @@ public:
 
   void test_getDetectorIDsForSpectrumNo()
   {
-    auto ws = boost::make_shared<WorkspaceTester>();
+    MatrixWorkspace_sptr ws = boost::make_shared<WorkspaceTester>();
     SpectrumDetectorMapping map(ws.get());
     // The happy path is tested in the methods above. Just test invalid entry here.
     TS_ASSERT_THROWS( map.getDetectorIDsForSpectrumNo(1), std::out_of_range );

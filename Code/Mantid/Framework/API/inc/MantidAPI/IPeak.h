@@ -87,7 +87,7 @@ public:
   virtual double getL1() const = 0;
   virtual double getL2() const = 0;
 
-  virtual const Mantid::Geometry::PeakShape& getPeakShape() = 0;
+  virtual const Mantid::Geometry::PeakShape& getPeakShape() const = 0;
 };
 
 } // namespace Mantid

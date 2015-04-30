@@ -4,16 +4,15 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidDataObjects/MDEventFactory.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidDataObjects/PeakShapeSpherical.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
-#include "MantidKernel/System.h"
-#include "MantidKernel/Timer.h"
-#include "MantidMDEvents/MDEventFactory.h"
 #include "MantidMDAlgorithms/IntegratePeaksMD.h"
 #include "MantidMDAlgorithms/CreateMDWorkspace.h"
 #include "MantidMDAlgorithms/FakeMDEventData.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
+
 #include <boost/math/distributions/normal.hpp>
 #include <boost/math/special_functions/fpclassify.hpp>
 #include <boost/math/special_functions/pow.hpp>
@@ -22,17 +21,15 @@
 #include <boost/random/uniform_int.hpp>
 #include <boost/random/uniform_real.hpp>
 #include <boost/random/variate_generator.hpp>
-#include <cxxtest/TestSuite.h>
-#include <Poco/File.h>
-#include <iomanip>
-#include <iostream>
 
-using Mantid::API::AnalysisDataService;
+#include <cxxtest/TestSuite.h>
+
+#include <Poco/File.h>
+
 using Mantid::Geometry::MDHistoDimension;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
-using namespace Mantid::MDEvents;
 using namespace Mantid::MDAlgorithms;
 using Mantid::Kernel::V3D;
 

@@ -14,9 +14,9 @@ namespace MantidQt
 			m_uiForm.setupUi(parent);
 
       // Create range selector
-      m_rangeSelectors["ResNormERange"] = new MantidWidgets::RangeSelector(m_uiForm.ppPlot);
-      connect(m_rangeSelectors["ResNormERange"], SIGNAL(minValueChanged(double)), this, SLOT(minValueChanged(double)));
-      connect(m_rangeSelectors["ResNormERange"], SIGNAL(maxValueChanged(double)), this, SLOT(maxValueChanged(double)));
+      auto eRangeSelector = m_uiForm.ppPlot->addRangeSelector("ResNormERange");
+      connect(eRangeSelector, SIGNAL(minValueChanged(double)), this, SLOT(minValueChanged(double)));
+      connect(eRangeSelector, SIGNAL(maxValueChanged(double)), this, SLOT(maxValueChanged(double)));
 
 			// Add the properties browser to the ui form
 			m_uiForm.treeSpace->addWidget(m_propTree);
@@ -132,6 +132,8 @@ namespace MantidQt
       MatrixWorkspace_sptr vanWs = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(filename.toStdString());
       m_uiForm.spPreviewSpectrum->setMaximum(static_cast<int>(vanWs->getNumberHistograms()) - 1);
 
+      auto eRangeSelector = m_uiForm.ppPlot->getRangeSelector("ResNormERange");
+
 			//Use the values from the instrument parameter file if we can
 			if(getInstrumentResolution(filename, res))
 			{
@@ -139,14 +141,14 @@ namespace MantidQt
 				res.first = res.first * 10;
 				res.second = res.second * 10;
 
-				setRangeSelector("ResNormERange", m_properties["EMin"], m_properties["EMax"], res);
+				setRangeSelector(eRangeSelector, m_properties["EMin"], m_properties["EMax"], res);
 			}
 			else
 			{
-				setRangeSelector("ResNormERange", m_properties["EMin"], m_properties["EMax"], range);
+				setRangeSelector(eRangeSelector, m_properties["EMin"], m_properties["EMax"], range);
 			}
 
-			setPlotPropertyRange("ResNormERange", m_properties["EMin"], m_properties["EMax"], range);
+			setPlotPropertyRange(eRangeSelector, m_properties["EMin"], m_properties["EMax"], range);
 		}
 
 		/**
@@ -177,13 +179,15 @@ namespace MantidQt
 		 */
     void ResNorm::updateProperties(QtProperty* prop, double val)
     {
+      auto eRangeSelector = m_uiForm.ppPlot->getRangeSelector("ResNormERange");
+
     	if(prop == m_properties["EMin"])
     	{
-				updateLowerGuide(m_rangeSelectors["ResNormERange"], m_properties["EMin"], m_properties["EMax"], val);
+				updateLowerGuide(eRangeSelector, m_properties["EMin"], m_properties["EMax"], val);
     	}
     	else if (prop == m_properties["EMax"])
     	{
-    		updateUpperGuide(m_rangeSelectors["ResNormERange"], m_properties["EMin"], m_properties["EMax"], val);
+    		updateUpperGuide(eRangeSelector, m_properties["EMin"], m_properties["EMax"], val);
 			}
     }
 

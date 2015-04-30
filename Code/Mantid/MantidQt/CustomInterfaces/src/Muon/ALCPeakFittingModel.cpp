@@ -15,63 +15,75 @@ namespace CustomInterfaces
   {
     m_data = newData;
     emit dataChanged();
-
-    setFittedPeaks(IFunction_const_sptr());
   }
 
   MatrixWorkspace_sptr ALCPeakFittingModel::exportWorkspace()
   {
-    // Create a new workspace by cloning data one
-    IAlgorithm_sptr clone = AlgorithmManager::Instance().create("CloneWorkspace");
-    clone->setChild(true); // Don't want workspaces in ADS
-    clone->setProperty("InputWorkspace", boost::const_pointer_cast<MatrixWorkspace>(m_data));
-    clone->setProperty("OutputWorkspace", "__NotUsed");
-    clone->execute();
+    if ( m_data && m_fittedPeaks) {
 
-    Workspace_sptr cloneResult = clone->getProperty("OutputWorkspace");
+      // Create a new workspace by cloning data one
+      IAlgorithm_sptr clone = AlgorithmManager::Instance().create("CloneWorkspace");
+      clone->setChild(true); // Don't want workspaces in ADS
+      clone->setProperty("InputWorkspace", boost::const_pointer_cast<MatrixWorkspace>(m_data));
+      clone->setProperty("OutputWorkspace", "__NotUsed");
+      clone->execute();
 
-    // Calculate function values for all data X values
-    MatrixWorkspace_sptr peaks = ALCHelper::createWsFromFunction(m_fittedPeaks, m_data->readX(0));
+      Workspace_sptr cloneResult = clone->getProperty("OutputWorkspace");
 
-    // Merge two workspaces
-    IAlgorithm_sptr join = AlgorithmManager::Instance().create("ConjoinWorkspaces");
-    join->setChild(true);
-    join->setProperty("InputWorkspace1", cloneResult);
-    join->setProperty("InputWorkspace2", peaks);
-    join->setProperty("CheckOverlapping", false);
-    join->execute();
+      // Calculate function values for all data X values
+      MatrixWorkspace_sptr peaks = ALCHelper::createWsFromFunction(m_fittedPeaks, m_data->readX(0));
 
-    MatrixWorkspace_sptr result = join->getProperty("InputWorkspace1");
+      // Merge two workspaces
+      IAlgorithm_sptr join = AlgorithmManager::Instance().create("ConjoinWorkspaces");
+      join->setChild(true);
+      join->setProperty("InputWorkspace1", cloneResult);
+      join->setProperty("InputWorkspace2", peaks);
+      join->setProperty("CheckOverlapping", false);
+      join->execute();
 
-    // Update axis lables so that it's understandable what's what on workspace data view / plot
-    TextAxis* yAxis = new TextAxis(result->getNumberHistograms());
-    yAxis->setLabel(0,"Data");
-    yAxis->setLabel(1,"FittedPeaks");
-    result->replaceAxis(1,yAxis);
+      MatrixWorkspace_sptr result = join->getProperty("InputWorkspace1");
 
-    return result;
+      // Update axis lables so that it's understandable what's what on workspace data view / plot
+      TextAxis* yAxis = new TextAxis(result->getNumberHistograms());
+      yAxis->setLabel(0,"Data");
+      yAxis->setLabel(1,"FittedPeaks");
+      result->replaceAxis(1,yAxis);
+
+      return result;
+
+    } else {
+    
+      return MatrixWorkspace_sptr();
+    }
   }
 
   ITableWorkspace_sptr ALCPeakFittingModel::exportFittedPeaks()
   {
-    ITableWorkspace_sptr table = WorkspaceFactory::Instance().createTable("TableWorkspace");
+    if ( m_fittedPeaks ) {
 
-    table->addColumn("str", "Peaks");
+      ITableWorkspace_sptr table = WorkspaceFactory::Instance().createTable("TableWorkspace");
+
+      table->addColumn("str", "Peaks");
 
 
-    if (auto composite = boost::dynamic_pointer_cast<CompositeFunction const>(m_fittedPeaks))
-    {
-      for (size_t i = 0; i < composite->nFunctions(); ++i)
+      if (auto composite = boost::dynamic_pointer_cast<CompositeFunction const>(m_fittedPeaks))
       {
-        static_cast<TableRow>(table->appendRow()) << composite->getFunction(i)->asString();
+        for (size_t i = 0; i < composite->nFunctions(); ++i)
+        {
+          static_cast<TableRow>(table->appendRow()) << composite->getFunction(i)->asString();
+        }
       }
-    }
-    else
-    {
+      else
+      {
         static_cast<TableRow>(table->appendRow()) << m_fittedPeaks->asString();
-    }
+      }
 
-    return table;
+      return table;
+
+    } else {
+    
+      return ITableWorkspace_sptr();
+    }
   }
 
   void ALCPeakFittingModel::setFittedPeaks(IFunction_const_sptr fittedPeaks)
@@ -86,6 +98,7 @@ namespace CustomInterfaces
     fit->setChild(true);
     fit->setProperty("Function", peaks->asString());
     fit->setProperty("InputWorkspace", boost::const_pointer_cast<MatrixWorkspace>(m_data));
+    fit->setProperty("CreateOutput", true);
     fit->execute();
 
     setFittedPeaks(static_cast<IFunction_sptr>(fit->getProperty("Function")));

@@ -78,8 +78,8 @@ public:
   const Kernel::DblMatrix &sampleToDetectorTransform() const;
 
 private:
-  DISABLE_DEFAULT_CONSTRUCT(CachedExperimentInfo);
-  DISABLE_COPY_AND_ASSIGN(CachedExperimentInfo);
+  DISABLE_DEFAULT_CONSTRUCT(CachedExperimentInfo)
+  DISABLE_COPY_AND_ASSIGN(CachedExperimentInfo)
 
   /// Cache frequently used values
   void initCaches(const Geometry::Instrument_const_sptr &instrument,

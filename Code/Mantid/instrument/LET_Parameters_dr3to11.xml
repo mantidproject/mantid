@@ -61,7 +61,7 @@
 </parameter>
 
 <!-- Monitor used to estimate total current on the sample  while normalizing by monitor 1.  -->
-<parameter name="norm-mon1-spec" >
+<parameter name="norm-mon1-spec">
   <value val="73729"/>
 </parameter>
   
@@ -392,6 +392,17 @@
    <value val="False"/>
 </parameter>
 
+<!-- The semicolon separated list of possible log names, containing information on crystl rotation.
+     First found log will be used togethere with motor_offset to identify crystal rotation 
+     (psi in Horace) -->
+<parameter name="motor_log_names"  type="string">
+   <value val="CCR_ROT;Rot"/>
+</parameter>
+<!-- Initial value used to identify crytsal rotation angle psi=motor_offset+wccr.timeAverageValue()  -->
+<parameter name="motor_offset">
+   <value val="None"/>
+</parameter>
+
 
 <!-- List of the words which can be used as a command line arguments to define reducer keywords
      the form is reducer_keword1=synonim1=synonim2=synonim3;reducer_keword1=synonim1a, so, 
@@ -403,15 +414,16 @@
        fix_ei=fixei;
        sum_runs=sum;
        wb_integr_range=detector_van_range;
+       motor_log_names = motor_name;
        van_mass=vanadium-mass;
        check_background = background;
        mon1_norm_spec=norm-mon1-spec;
-       mon2_norm_spec=norm-mon2-spec;       
+       mon2_norm_spec=norm-mon2-spec;
        scale_factor=scale-factor;
        wb_scale_factor=wb-scale-factor;
        monovan_integr_range=abs_units_van_range;
        monovan_lo_value = monovan-integr-min;
-       monovan_hi_value = monovan-integr-max;       
+       monovan_hi_value = monovan-integr-max;
        bkgd_range = background_range;
        background_test_range = diag_background_test_range;
        hard_mask_file=hard_mask;

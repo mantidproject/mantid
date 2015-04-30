@@ -8,12 +8,12 @@
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
-#include "MantidMDEvents/MDEventFactory.h"
+#include "MantidDataObjects/MDEventFactory.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
-using namespace Mantid::MDEvents;
+using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
 
 namespace Mantid {
@@ -37,10 +37,10 @@ ConvertToDetectorFaceMD::~ConvertToDetectorFaceMD() {}
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string ConvertToDetectorFaceMD::name() const {
   return "ConvertToDetectorFaceMD";
-};
+}
 
 /// Algorithm's version for identification. @see Algorithm::version
-int ConvertToDetectorFaceMD::version() const { return 1; };
+int ConvertToDetectorFaceMD::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
 const std::string ConvertToDetectorFaceMD::category() const {
@@ -82,12 +82,12 @@ void ConvertToDetectorFaceMD::init() {
  */
 template <class T, class MDE, size_t nd>
 void ConvertToDetectorFaceMD::convertEventList(
-    boost::shared_ptr<Mantid::MDEvents::MDEventWorkspace<MDE, nd>> outWS,
+    boost::shared_ptr<Mantid::DataObjects::MDEventWorkspace<MDE, nd>> outWS,
     size_t workspaceIndex, coord_t x, coord_t y, coord_t bankNum,
     uint16_t runIndex, int32_t detectorID) {
   EventList &el = in_ws->getEventList(workspaceIndex);
 
-  // The 3/4D MDEvents that will be added into the MDEventWorkspce
+  // The 3/4D DataObjects that will be added into the MDEventWorkspce
   std::vector<MDE> out_events;
   out_events.reserve(el.getNumberEvents());
 

@@ -10,6 +10,7 @@
 
 class pqPipelineSource;
 class pqRenderView;
+class QAction;
 
 namespace Mantid
 {
@@ -17,6 +18,8 @@ namespace Vates
 {
 namespace SimpleGui
 {
+
+  class RebinnedSourcesManager;
 /**
  *
  This class represents the initial view for the main program. It is meant to
@@ -50,7 +53,7 @@ class EXPORT_OPT_MANTIDVATES_SIMPLEGUI_VIEWWIDGETS StandardView : public ViewBas
 
 public:
   /// Default constructor.
-  StandardView(QWidget *parent = 0);
+  StandardView(QWidget *parent = 0, RebinnedSourcesManager* rebinnedSourcesManager = 0);
   /// Default destructor.
   virtual ~StandardView();
 
@@ -70,27 +73,44 @@ public:
   void updateUI();
   /// @see ViewBase::updateView()
   void updateView();
+  /// @see ViewBase::closeSubWindows
+  void closeSubWindows();
+
+public slots:
+  /// Listen to a change in the active source.
+  void activeSourceChangeListener(pqPipelineSource* source);
 
 protected slots:
   /// Add a slice to the current dataset.
   void onCutButtonClicked();
-  /// Check for a rebinning source being destroyed.
-  void onDestroyingSource(pqPipelineSource *src);
-  /// Invoke the RebinnerCutter on the current dataset.
-  void onRebinButtonClicked();
   /// Perform operations when rendering is done.
   void onRenderDone();
   /// Invoke the ScaleWorkspace on the current dataset.
   void onScaleButtonClicked();
+  /// On BinMD button clicked
+  void onRebin();
 
 private:
   Q_DISABLE_COPY(StandardView)
 
   bool cameraReset;
-  QPointer<pqPipelineSource> rebinCut; ///< Holder for the RebinnerCutter
   QPointer<pqPipelineSource> scaler; ///< Holder for the ScaleWorkspace
   Ui::StandardView ui; ///< The standard view's UI form
   QPointer<pqRenderView> view; ///< The main view
+
+  /// Set the rebin and unbin button visibility
+  void setRebinAndUnbinButtons();
+  /// Set up the buttons
+  void setupViewButtons();
+  ///  Give the user the ability to rebin
+  void allowRebinningOptions(bool allow);
+  ///  Allow the user the ability to unbin
+  void allowUnbinOption(bool allow);
+
+  QAction* m_binMDAction;
+  QAction* m_sliceMDAction;
+  QAction* m_cutMDAction;
+  QAction* m_unbinAction;
 };
 
 } // SimpleGui

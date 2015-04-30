@@ -70,6 +70,9 @@ public:
   virtual void functionDerivLocal(Jacobian *out, const double *xValues,
                                   const size_t nData) = 0;
 
+  /// Get name of parameter that is associated to centre.
+  std::string getCentreParameterName() const;
+
 protected:
   /// Defines the area around the centre where the peak values are to be
   /// calculated (in FWHM).

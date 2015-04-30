@@ -7,6 +7,7 @@
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/IPeak.h"
+#include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Events.h"
@@ -640,7 +641,14 @@ bool CheckWorkspacesMatch::checkAxes(API::MatrixWorkspace_const_sptr ws1,
     // Use Axis's equality operator to check length and values
     // Don't check spectra axis as that just takes it values from the ISpectrum
     // (see checkSpectraMap)
-    if (!ax1->isSpectra() && !ax1->operator==(*ax2)) {
+    if (ax1->isNumeric() && ax2->isNumeric()) {
+      const NumericAxis *na1 = static_cast<const NumericAxis *>(ax1);
+      const double tolerance = getProperty("Tolerance");
+      if (!na1->equalWithinTolerance(*ax2, tolerance)) {
+        result = axis_name + " values mismatch";
+        return false;
+      }
+    } else if (!ax1->isSpectra() && !ax1->operator==(*ax2)) {
       result = axis_name + " values mismatch";
       return false;
     }
@@ -800,12 +808,14 @@ bool CheckWorkspacesMatch::checkRunProperties(const API::Run &run1,
   double run1Charge(-1.0);
   try {
     run1Charge = run1.getProtonCharge();
-  } catch (Exception::NotFoundError &) {
+  }
+  catch (Exception::NotFoundError &) {
   }
   double run2Charge(-1.0);
   try {
     run2Charge = run2.getProtonCharge();
-  } catch (Exception::NotFoundError &) {
+  }
+  catch (Exception::NotFoundError &) {
   }
 
   if (run1Charge != run2Charge) {

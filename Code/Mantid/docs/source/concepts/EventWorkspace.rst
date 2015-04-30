@@ -1,7 +1,7 @@
 .. _EventWorkspace:
 
-EventWorkspace
-==============
+Event Workspace
+===============
 
 Quick Summary For Users
 -----------------------

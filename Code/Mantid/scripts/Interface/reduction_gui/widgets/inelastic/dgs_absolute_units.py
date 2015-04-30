@@ -12,6 +12,9 @@ class AbsoluteUnitsWidget(BaseWidget):
     ## Widget name
     name = "Absolute Units"
 
+    _old_absunits = None
+    copyAction = None
+
     def __init__(self, parent=None, state=None, settings=None, data_type=None):
         super(AbsoluteUnitsWidget, self).__init__(parent, state, settings, data_type=data_type)
 

@@ -3,18 +3,27 @@
 
 #include "ui_MdViewerWidget.h"
 #include "MantidVatesSimpleGuiViewWidgets/WidgetDllOption.h"
+#include "MantidVatesSimpleGuiViewWidgets/RebinAlgorithmDialogProvider.h"
+#include "MantidVatesSimpleGuiViewWidgets/RebinnedSourcesManager.h"
 
 #include "MantidQtAPI/VatesViewerInterface.h"
 #include "MantidQtAPI/WorkspaceObserver.h"
+#include "boost/shared_ptr.hpp"
+#include "MantidQtAPI/MdConstants.h"
+#include "MantidQtAPI/MdSettings.h"
+#include "MantidVatesSimpleGuiViewWidgets/BackgroundRgbProvider.h"
 
 #include <QPointer>
 #include <QWidget>
+#include <QString>
 
+class pqApplicationSettingsReaction;
 class pqLoadDataReaction;
 class pqPipelineSource;
-class pqViewSettingsReaction;
 class vtkSMDoubleVectorProperty;
 
+class QDragEnterEvent;
+class QDropEvent;
 class QAction;
 class QEvent;
 class QHBoxLayout;
@@ -31,7 +40,7 @@ namespace SimpleGui
 class RotationPointDialog;
 class SaveScreenshotReaction;
 class ViewBase;
-
+class RebinDialog;
 /**
  *
   This class represents the central widget for handling VATES visualization
@@ -101,7 +110,14 @@ protected slots:
   void renderingDone();
   /// Execute view switch.
   void switchViews(ModeControlWidget::Views v);
-
+  /// Triggered when panel is changed.
+  void panelChanged();
+  /// On rebin 
+  void onRebin(std::string algorithmType);
+  /// On  unbin
+  void onUnbin();
+  /// On switching an MDEvent source to a temporary source.
+  void onSwitchSoures(std::string rebinnedWorkspaceName, std::string sourceType);
 protected:
   /// Handle workspace preDeletion tasks.
   void preDeleteHandle(const std::string &wsName,
@@ -109,14 +125,16 @@ protected:
   /// Handle workspace replacement tasks.
   void afterReplaceHandle(const std::string &wsName,
                           const boost::shared_ptr<Mantid::API::Workspace> ws);
-
+  /// Detects if something is dragged onto the VSI
+  void dragEnterEvent(QDragEnterEvent *e);
+ /// Reacts to something being dropped onto the VSI
+ void dropEvent(QDropEvent *e);
 private:
   Q_DISABLE_COPY(MdViewerWidget)
-
+  QString m_widgetName;
   ViewBase *currentView; ///< Holder for the current view
   pqLoadDataReaction *dataLoader; ///< Holder for the load data reaction
   ViewBase *hiddenView; ///< Holder for the view that is being switched from
-  bool isPluginInitialized; ///< Flag for plugin initialization
   double lodThreshold; ///< Default value for the LOD threshold (5 MB)
   QAction *lodAction; ///< Holder for the LOD threshold menu item
   bool pluginMode; ///< Flag to say widget is in plugin mode
@@ -124,37 +142,33 @@ private:
   SaveScreenshotReaction *screenShot; ///< Holder for the screen shot reaction
   Ui::MdViewerWidgetClass ui; ///< The MD viewer's UI form
   QHBoxLayout *viewLayout; ///< Layout manager for the view widget
-  pqViewSettingsReaction *viewSettings; ///< Holder for the view settings reaction
+  pqApplicationSettingsReaction *viewSettings; ///< Holder for the view settings reaction
   bool viewSwitched;
   ModeControlWidget::Views initialView; ///< Holds the initial view
+  MantidQt::API::MdSettings mdSettings;///<Holds the MD settings which are used to persist data
+  MantidQt::API::MdConstants mdConstants;/// < Holds the MD constants
+  RebinAlgorithmDialogProvider m_rebinAlgorithmDialogProvider; ///<Provides dialogs to execute rebin algorithms
+  RebinnedSourcesManager m_rebinnedSourcesManager; ///<Holds the rebinned sources manager
+  QString m_rebinnedWorkspaceIdentifier; ///< Holds the identifier for temporary workspaces
 
-
-  /// Check the environmental variables.
-  void checkEnvSetup();
   /// Setup color selection widget connections.
   void connectColorSelectionWidget();
   /// Setup connections for all dialogs.
   void connectDialogs();
   /// Setup rotation point dialog connections.
   void connectRotationPointDialog();
-  /// Create the pqPVApplicationCore object in plugin mode.
-  void createAppCoreForPlugin();
   /// Add view specific stuff to a menu.
   void createMenus();
   /// Disconnect dialog connections.
   void disconnectDialogs();
   /// Consolidate constructor related items.
   void internalSetup(bool pMode);
-  /// Disable communication with the proxy tab widget.
-  void removeProxyTabWidgetConnections();
   /// Perform first render and final setup for mode buttons.
   void renderAndFinalSetup();
   /// Set the signals/slots for the ParaView components based on the view.
   void setParaViewComponentsForView();
   /// Run the necessary setup for the main view.
   void setupMainView();
-  /// Mimic ParaView behavior setup without QMainWindow.
-  void setupParaViewBehaviors();
   /// Creates the UI and mode switch connection.
   void setupUiAndConnections();
   /// Create the requested view.
@@ -170,13 +184,25 @@ private:
   /// Get the technique associated with an instrument.
   const std::string getTechniqueForInstrument(const std::string& instrumentName) const;
   /// Get the view for a specified instrument
-  std::string getViewForInstrument(const std::string& instrument) const;
+  QString getViewForInstrument(const std::string& instrument) const;
   /// Check if a technique contains a keyword
   bool checkIfTechniqueContainsKeyword(const std::set<std::string>& techniques, const std::string& keyword) const;
   /// Reset the current view to the appropriate initial view.
   void resetCurrentView(int workspaceType, const std::string& instrumentName);
-  /// Set visibility listener
-  void setVisibilityListener();
+  /// Render rebinned workspace
+  pqPipelineSource* prepareRebinnedWorkspace(const std::string rebinnedWorkspaceName, std::string sourceType); 
+  /// Handle drag and drop of peaks workspcaes
+  void handleDragAndDropPeaksWorkspaces(QEvent* e, QString text, QStringList& wsNames);
+  /// Set up the default color for the background of the view.
+  void setColorForBackground();
+  /// Render the original workspace
+  pqPipelineSource* renderOriginalWorkspace(const std::string originalWorkspaceName);
+  /// Remove the rebinning when switching views or otherwise.
+  void removeRebinning(pqPipelineSource* source, bool forced, ModeControlWidget::Views view = ModeControlWidget::STANDARD);
+  /// Remove all rebinned sources
+  void removeAllRebinning(ModeControlWidget::Views view);
+  /// Sets a listener for when sources are being destroyed
+  void setDestroyedListener();
 };
 
 } // SimpleGui

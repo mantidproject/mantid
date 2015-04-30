@@ -2,6 +2,8 @@
 #include "MantidVatesSimpleGuiViewWidgets/ColorSelectionWidget.h"
 #include "MantidVatesSimpleGuiViewWidgets/AutoScaleRangeGenerator.h"
 
+#include "MantidKernel/Logger.h"
+
 // Have to deal with ParaView warnings and Intel compiler the hard way.
 #if defined(__INTEL_COMPILER)
   #pragma warning disable 1170
@@ -30,6 +32,9 @@
 
 namespace Mantid
 {
+  // static logger
+  Kernel::Logger g_log("ColorUpdater");
+
 namespace Vates
 {
 namespace SimpleGui
@@ -74,6 +79,12 @@ void ColorUpdater::colorMapChange(pqPipelineRepresentation *repr,
                                   const pqColorMapModel *model)
 {
   pqScalarsToColors *lut = repr->getLookupTable();
+    if (NULL == lut)
+  {
+    // Got a bad proxy, so just return
+    return;
+  }
+
   // Need the scalar bounds to calculate the color point settings
   QPair<double, double> bounds = lut->getScalarRange();
 

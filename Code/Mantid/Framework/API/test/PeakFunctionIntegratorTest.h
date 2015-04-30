@@ -3,10 +3,9 @@
 
 #include <cxxtest/TestSuite.h>
 #include "MantidAPI/PeakFunctionIntegrator.h"
-#include "MantidAPI/FrameworkManager.h"
-#include "MantidAPI/FunctionFactory.h"
 
 #include "gsl/gsl_errno.h"
+#include <boost/make_shared.hpp>
 
 using namespace Mantid::API;
 using namespace Mantid::CurveFitting;
@@ -25,18 +24,55 @@ public:
     friend class PeakFunctionIntegratorTest;
 };
 
+class LocalGaussian : public IPeakFunction
+{
+public:
+    LocalGaussian() : IPeakFunction() {}
+
+    std::string name() const { return "LocalGaussian"; }
+
+    double centre() const { return getParameter("Center"); }
+    void setCentre(const double c) { setParameter("Center", c); }
+
+    double fwhm() const { return getParameter("Sigma") * (2.0 * sqrt(2.0 * log(2.0))); }
+    void setFwhm(const double w) { setParameter("Sigma", w / (2.0 * sqrt(2.0 * log(2.0)))); }
+
+    double height() const { return getParameter("Height"); }
+    void setHeight(const double h) { setParameter("Height", h); }
+
+    void init() {
+        declareParameter("Center");
+        declareParameter("Sigma");
+        declareParameter("Height");
+    }
+
+    void functionLocal(double *out, const double *xValues, const size_t nData) const {
+        double h = getParameter("Height");
+        double s = getParameter("Sigma");
+        double c = getParameter("Center");
+
+        for(size_t i = 0; i < nData; ++i) {
+            out[i] = h * exp(-0.5 * pow(((xValues[i] - c)/s), 2));
+        }
+    }
+
+    void functionDerivLocal(Jacobian *out, const double *xValues, const size_t nData) {
+        UNUSED_ARG(out);
+        UNUSED_ARG(xValues);
+        UNUSED_ARG(nData);
+
+        // Do nothing - not required for this test.
+    }
+};
+
 class PeakFunctionIntegratorTest : public CxxTest::TestSuite
 {
 private:
-    PeakFunctionIntegratorTest()
-    {
-        FrameworkManager::Instance();
-    }
-
     IPeakFunction_sptr getGaussian(double center, double fwhm, double height)
     {
-        IPeakFunction_sptr gaussian = boost::dynamic_pointer_cast<IPeakFunction>(
-                    FunctionFactory::Instance().createFunction("Gaussian"));
+        IPeakFunction_sptr gaussian = boost::make_shared<LocalGaussian>();
+        gaussian->initialize();
+
         gaussian->setCentre(center);
         gaussian->setFwhm(fwhm);
         gaussian->setHeight(height);
@@ -47,22 +83,6 @@ private:
     double getGaussianAnalyticalInfiniteIntegral(IPeakFunction_sptr gaussian)
     {
         return gaussian->height() * gaussian->fwhm() / (2.0 * sqrt(2.0 * log(2.0))) * sqrt(2.0 * M_PI);
-    }
-
-    IPeakFunction_sptr getLorentzian(double center, double fwhm, double height)
-    {
-        IPeakFunction_sptr lorentzian = boost::dynamic_pointer_cast<IPeakFunction>(
-                    FunctionFactory::Instance().createFunction("Lorentzian"));
-        lorentzian->setCentre(center);
-        lorentzian->setFwhm(fwhm);
-        lorentzian->setHeight(height);
-
-        return lorentzian;
-    }
-
-    double getLorentzianAnalyticalInfiniteIntegral(IPeakFunction_sptr lorentzian)
-    {
-        return lorentzian->getParameter("Amplitude");
     }
 
 public:
@@ -161,17 +181,6 @@ public:
         IntegrationResult rThreeSigma = integrator.integrate(*gaussian, -3.0, 3.0);
         TS_ASSERT_EQUALS(rThreeSigma.errorCode, static_cast<int>(GSL_SUCCESS));
         TS_ASSERT_DELTA(rThreeSigma.result, 0.997300203936740, integrator.requiredRelativePrecision());
-    }
-
-    void testIntegrateInfinityLorentzian()
-    {
-        IPeakFunction_sptr lorentzian = getLorentzian(0.0, 3.0, 8.0);
-        PeakFunctionIntegrator integrator(1e-8);
-
-        IntegrationResult result = integrator.integrateInfinity(*lorentzian);
-        TS_ASSERT_EQUALS(result.errorCode, static_cast<int>(GSL_SUCCESS));
-        TS_ASSERT_DELTA(result.result, getLorentzianAnalyticalInfiniteIntegral(lorentzian), integrator.requiredRelativePrecision());
-        TS_ASSERT_LESS_THAN(result.intervals, 1000);
     }
 
 };

@@ -32,7 +32,7 @@ public:
 const std::string IntegrateFlux::name() const { return "IntegrateFlux"; }
 
 /// Algorithm's version for identification. @see Algorithm::version
-int IntegrateFlux::version() const { return 1; };
+int IntegrateFlux::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
 const std::string IntegrateFlux::category() const { return "MDAlgorithms"; }
@@ -40,7 +40,7 @@ const std::string IntegrateFlux::category() const { return "MDAlgorithms"; }
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
 const std::string IntegrateFlux::summary() const {
   return "Interates spectra in a matrix workspace at a set of points.";
-};
+}
 
 //----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.

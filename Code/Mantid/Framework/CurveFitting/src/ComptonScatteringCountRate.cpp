@@ -20,7 +20,7 @@ const char *BKGD_ORDER_ATTR_NAME = "BackgroundOrderAttr";
 Logger g_log("ComptonScatteringCountRate");
 }
 
-DECLARE_FUNCTION(ComptonScatteringCountRate);
+DECLARE_FUNCTION(ComptonScatteringCountRate)
 
 //----------------------------------------------------------------------------------------------
 /** Constructor

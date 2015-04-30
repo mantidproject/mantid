@@ -1,6 +1,7 @@
 #ifndef MULTISLICEVIEW_H_
 #define MULTISLICEVIEW_H_
 
+#include "MantidKernel/VMD.h"
 #include "ui_MultisliceView.h"
 #include "MantidVatesSimpleGuiViewWidgets/ViewBase.h"
 #include "MantidVatesSimpleGuiViewWidgets/WidgetDllOption.h"
@@ -16,6 +17,8 @@ namespace Vates
 {
 namespace SimpleGui
 {
+
+  class RebinnedSourcesManager;
 /**
  *
   This class uses the MultiSliceView created by Kitware based on our
@@ -51,8 +54,9 @@ public:
   /**
    * Default constructor.
    * @param parent the parent widget of the multislice view widget
+   * @param rebinnedSourcesManager Pointer to a RebinnedSourcesManager
    */
-  MultiSliceView(QWidget *parent = 0);
+  MultiSliceView(QWidget *parent = 0, RebinnedSourcesManager* rebinnedSourcesManager = 0);
   /// Default constructor.
   virtual ~MultiSliceView();
 
@@ -87,6 +91,9 @@ protected slots:
                          int button, int modifier);
   /// Launch SliceViewer with the specified cut.
   void showCutInSliceViewer(int axisIndex, double sliceOffsetOnAxis);
+  
+  //// changes the slice point in VATES.
+  void changedSlicePoint(Mantid::Kernel::VMD selectedPoint);
 
 private:
   Q_DISABLE_COPY(MultiSliceView)

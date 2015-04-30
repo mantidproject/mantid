@@ -134,10 +134,10 @@ public:
 
 };
 
-DECLARE_FUNCTION(FunctionFactoryTest_FunctA);
-DECLARE_FUNCTION(FunctionFactoryTest_FunctB);
-DECLARE_FUNCTION(FunctionFactoryTest_CompFunctA);
-DECLARE_FUNCTION(FunctionFactoryTest_CompFunctB);
+DECLARE_FUNCTION(FunctionFactoryTest_FunctA)
+DECLARE_FUNCTION(FunctionFactoryTest_FunctB)
+DECLARE_FUNCTION(FunctionFactoryTest_CompFunctA)
+DECLARE_FUNCTION(FunctionFactoryTest_CompFunctB)
 
 class FunctionFactoryTest : public CxxTest::TestSuite
 {

@@ -6,9 +6,10 @@
 #include "MantidDataObjects/PeakShapeEllipsoid.h"
 #include "MantidKernel/cow_ptr.h"
 #include "MantidKernel/V3D.h"
+#include "MantidKernel/Matrix.h"
 #include <vector>
 #include <boost/assign/list_of.hpp>
-#include <jsoncpp/json/json.h>
+#include <json/json.h>
 
 using Mantid::DataObjects::PeakShapeEllipsoid;
 using Mantid::Kernel::SpecialCoordinateSystem;
@@ -173,8 +174,88 @@ public:
 
   }
 
+  
+  void test_directionsInSpecificFrameThrowsForMatrixWithInvalidDimensions(){
+    auto directions = list_of(V3D(1, 0, 0))(V3D(0, 1, 0))(V3D(0, 0, 1))
+                          .convert_to_container<std::vector<V3D>>();
+    const MantidVec abcRadii = list_of(2)(3)(4);
+    const MantidVec abcInnerRadii = list_of(5)(6)(7);
+    const MantidVec abcOuterRadii = list_of(8)(9)(10);
+    const SpecialCoordinateSystem frame = Mantid::Kernel::QLab;
+    const std::string algorithmName = "foo";
+    const int algorithmVersion = 3;
 
+    // Construct it.
+    PeakShapeEllipsoid a(directions, abcRadii, abcInnerRadii, abcOuterRadii,
+                         frame, algorithmName, algorithmVersion);
+    Mantid::Kernel::Matrix<double> matrix(3,2);
+    std::vector<double> column1;
+    column1.push_back(1.0);
+    column1.push_back(1.0);
+    column1.push_back(1.0);
+    std::vector<double> column2;
+    column2.push_back(1.0);
+    column2.push_back(1.0);
+    column2.push_back(1.0);
 
+    matrix.setColumn(0, column1);
+    matrix.setColumn(1, column2);
+    
+    TSM_ASSERT_THROWS("Should throw, bad goniometer matrix",
+                       a.getDirectionInSpecificFrame(matrix) , std::invalid_argument &);
+  }
+
+  void test_directionsInSepcificFrame(){
+    auto directions = list_of(V3D(1, 0, 0))(V3D(0, 1, 0))(V3D(0, 0, 1))
+                          .convert_to_container<std::vector<V3D>>();
+    const MantidVec abcRadii = list_of(2)(3)(4);
+    const MantidVec abcInnerRadii = list_of(5)(6)(7);
+    const MantidVec abcOuterRadii = list_of(8)(9)(10);
+    const SpecialCoordinateSystem frame = Mantid::Kernel::QLab;
+    const std::string algorithmName = "foo";
+    const int algorithmVersion = 3;
+
+    // Construct it.
+    PeakShapeEllipsoid a(directions, abcRadii, abcInnerRadii, abcOuterRadii,
+                         frame, algorithmName, algorithmVersion);
+
+    // 90 degree rotation around the z axis
+    Mantid::Kernel::Matrix<double> matrix(3,3);
+    std::vector<double> column1;
+    column1.push_back(0.0);
+    column1.push_back(1.0);
+    column1.push_back(0.0);
+    std::vector<double> column2;
+    column2.push_back(-1.0);
+    column2.push_back(0.0);
+    column2.push_back(0.0);
+
+    std::vector<double> column3;
+    column3.push_back(0.0);
+    column3.push_back(0.0);
+    column3.push_back(1.0);
+
+    matrix.setColumn(0, column1);
+    matrix.setColumn(1, column2);
+    matrix.setColumn(2, column3);
+    
+    std::vector<Mantid::Kernel::V3D> directionInNewFrame(3);
+    TSM_ASSERT_THROWS_NOTHING("Should throw nothing, valid goniometer matrix",
+                       directionInNewFrame = a.getDirectionInSpecificFrame(matrix));
+
+    const double delta = 1e-6;
+    TSM_ASSERT_DELTA("Should be rotated", directionInNewFrame[0][0], 0.0, delta);
+    TSM_ASSERT_DELTA("Should be rotated", directionInNewFrame[0][1], 1.0, delta);
+    TSM_ASSERT_DELTA("Should be rotated", directionInNewFrame[0][2], 0.0, delta);
+
+    TSM_ASSERT_DELTA("Should be rotated", directionInNewFrame[1][0], -1.0, delta);
+    TSM_ASSERT_DELTA("Should be rotated", directionInNewFrame[1][1], 0.0, delta);
+    TSM_ASSERT_DELTA("Should be rotated", directionInNewFrame[1][2],  0.0, delta);
+
+    TSM_ASSERT_DELTA("Should be rotated", directionInNewFrame[2][0], 0.0, delta);
+    TSM_ASSERT_DELTA("Should be rotated", directionInNewFrame[2][1], 0.0, delta);
+    TSM_ASSERT_DELTA("Should be rotated", directionInNewFrame[2][2], 1.0, delta);
+  }
 };
 
 #endif /* MANTID_DATAOBJECTS_PEAKSHAPEELLIPSOIDTEST_H_ */

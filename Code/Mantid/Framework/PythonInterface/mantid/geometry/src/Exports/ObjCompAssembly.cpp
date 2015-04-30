@@ -8,7 +8,9 @@ using Mantid::Geometry::ICompAssembly;
 using Mantid::Geometry::ObjComponent;
 using namespace boost::python;
 
+// clang-format off
 void export_ObjCompAssembly()
+// clang-format on
 {
   register_ptr_to_python<boost::shared_ptr<ObjCompAssembly>>();
 

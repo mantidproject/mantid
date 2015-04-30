@@ -1,4 +1,4 @@
-#pylint: disable=no-init
+#pylint: disable=no-init,too-many-instance-attributes,too-many-branches
 from mantid.simpleapi import *
 from mantid.kernel import *
 from mantid.api import *
@@ -34,6 +34,7 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
     _range_1_end = None
     _range_2_start = None
     _range_2_end = None
+    _mtd_plot = None
 
     def category(self):
         return 'Workflow\\Inelastic;PythonAlgorithms;Inelastic'
@@ -149,6 +150,9 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
             temp = self._get_temperature(input_ws)
             if temp is not None:
                 temperatures.append(temp)
+            else:
+                # No need to output a tmperature workspace if there are no temperatures
+                self._elt_workspace = ''
 
         logger.information('Creating Q and Q^2 workspaces')
 
@@ -327,16 +331,19 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
                 # Get temperature from log file
                 LoadLog(Workspace=ws_name, Filename=log_path)
                 run_logs = mtd[ws_name].getRun()
-                tmp = run_logs[self._sample_log_name].value
-                temp = tmp[len(tmp) - 1]
-                logger.debug('Temperature %d K found for run: %s' % (temp, run_name))
-                return temp
-
+                if self._sample_log_name in run_logs:
+                    tmp = run_logs[self._sample_log_name].value
+                    temp = tmp[len(tmp) - 1]
+                    logger.debug('Temperature %d K found for run: %s' % (temp, run_name))
+                    return temp
+                else:
+                    logger.warning('Log entry %s for run %s not found' % (self._sample_log_name, run_name))
             else:
-                # Can't find log file
                 logger.warning('Log file for run %s not found' % run_name)
-                logger.warning('No temperature found for run: %s' % run_name)
-                return None
+
+        # Can't find log file
+        logger.warning('No temperature found for run: %s' % run_name)
+        return None
 
 
 # Register algorithm with Mantid

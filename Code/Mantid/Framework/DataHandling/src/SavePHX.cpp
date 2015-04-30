@@ -14,7 +14,7 @@ namespace Mantid {
 namespace DataHandling {
 
 // Register the algorithm into the AlgorithmFactory
-DECLARE_ALGORITHM(SavePHX);
+DECLARE_ALGORITHM(SavePHX)
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;

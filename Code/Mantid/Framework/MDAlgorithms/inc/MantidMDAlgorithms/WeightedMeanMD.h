@@ -2,7 +2,7 @@
 #define MANTID_MDALGORITHMS_WEIGHTEDMEANMD_H_
 
 #include "MantidAPI/IMDEventWorkspace.h"
-#include "MantidMDEvents/MDEventWorkspace.h"
+#include "MantidDataObjects/MDEventWorkspace.h"
 #include "MantidMDAlgorithms/BinaryOperationMD.h"
 
 namespace Mantid {
@@ -59,12 +59,12 @@ private:
   void execEvent();
 
   /// Run the algorithm with a MDHisotWorkspace as output and operand
-  void execHistoHisto(Mantid::MDEvents::MDHistoWorkspace_sptr out,
-                      Mantid::MDEvents::MDHistoWorkspace_const_sptr operand);
+  void execHistoHisto(Mantid::DataObjects::MDHistoWorkspace_sptr out,
+                      Mantid::DataObjects::MDHistoWorkspace_const_sptr operand);
 
   /// Run the algorithm with a MDHisotWorkspace as output, scalar and operand
   void
-  execHistoScalar(Mantid::MDEvents::MDHistoWorkspace_sptr out,
+  execHistoScalar(Mantid::DataObjects::MDHistoWorkspace_sptr out,
                   Mantid::DataObjects::WorkspaceSingleValue_const_sptr scalar);
 };
 

@@ -35,11 +35,15 @@
 #include <qwt_scale_engine.h>
 #include <QPainter>
 #include <qwt_symbol.h>
+
 #include "Mantid/MantidMatrix.h"
 #include "Mantid/MantidMatrixFunction.h"
+#include "MantidAPI/IMDIterator.h"
+
+#include "MantidQtAPI/PlotAxis.h"
 #include "MantidQtAPI/QwtRasterDataMD.h"
 #include "MantidQtAPI/SignalRange.h"
-#include "MantidAPI/IMDIterator.h"
+
 #include "TSVSerialiser.h"
 
 #include <iostream>
@@ -266,6 +270,17 @@ void Spectrogram::postDataUpdate()
 
   plot->setAxisScale(color_axis, data().range().minValue(), data().range().maxValue());
 
+  if ( d_wsData )
+  {
+    auto workspace = d_wsData->getWorkspace();
+    if ( workspace )
+    {
+      using MantidQt::API::PlotAxis;
+      plot->setAxisTitle(QwtPlot::xBottom,  PlotAxis(*workspace, 0).title());
+      plot->setAxisTitle(QwtPlot::yLeft, PlotAxis(*workspace, 1).title());
+    }
+  }
+
   plot->replot();
 }
 
@@ -408,25 +423,11 @@ void Spectrogram::setGrayScale()
 
 void Spectrogram::setDefaultColorMap()
 {
-  // option 1 use last used colour map
-  QSettings settings;
-  settings.beginGroup("Mantid/2DPlotSpectrogram");
-  //Load Colormap. If the file is invalid the default stored colour map is used
-  QString lastColormapFile = settings.value("ColormapFile", "").toString();
-  settings.endGroup();
-
-  if (lastColormapFile.size() > 0)
-  {
-      mCurrentColorMap = lastColormapFile;
-      mColorMap.loadMap(lastColormapFile);
-  }
-  else
-  {
-    //option 2 use the default colormap from MantidColorMap.
-    mColorMap.setupDefaultMap();
-  }
+  MantidColorMap map = getDefaultColorMap();
   
-  setColorMap(mColorMap);
+  mCurrentColorMap = map.getFilePath();
+  mColorMap = map;
+  setColorMap(map);
       
   color_map_policy = Default;
 
@@ -438,6 +439,22 @@ void Spectrogram::setDefaultColorMap()
   if (colorAxis)
     colorAxis->setColorMap(this->data().range(), this->colorMap());
 
+}
+
+
+MantidColorMap Spectrogram::getDefaultColorMap()
+{
+  
+  QSettings settings;
+  settings.beginGroup("Mantid/2DPlotSpectrogram");
+  //Load Colormap. If the file is invalid the default stored colour map is used
+  QString lastColormapFile = settings.value("ColormapFile", "").toString();
+  settings.endGroup();
+
+  //if the file is not valid you will get the default
+  MantidColorMap retColorMap(lastColormapFile,GraphOptions::Linear);
+
+  return retColorMap;
 }
 
 void Spectrogram::loadColorMap(const QString& file)

@@ -64,7 +64,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         arrvalidator.setLower(0)
         self.declareProperty(IntArrayProperty("RunNumber", values=[0], validator=arrvalidator,\
                              direction=Direction.Input), "Number of sample run or 0 for only Vanadium and/or Background")
-        extensions = [ "_histo.nxs", "_event.nxs", "_runinfo.xml"]
+        extensions = [ "_histo.nxs", "_event.nxs", "_runinfo.xml", ".nxs.h5"]
         self.declareProperty("Extension", "_event.nxs",
                              StringListValidator(extensions))
         self.declareProperty("PreserveEvents", True,
@@ -498,7 +498,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         if outname is not None:
             name = outname
 
-        if extension.endswith("_event.nxs"):
+        if extension.endswith("_event.nxs") or extension.endswith(".nxs.h5"):
             chunk["Precount"] = True
             if filterWall is not None:
                 if filterWall[0] > 0.:

@@ -21,6 +21,8 @@ class CentreFinder(object):
         self.logger = Logger("CentreFinder")
         self._last_pos = guess_centre
         self.detector = None
+        self.XSF = 1.0
+        self.YSF = 1.0
 
     def SeekCentre(self, setup, trial):
         """
@@ -32,6 +34,10 @@ class CentreFinder(object):
         """
 
         self.detector = setup.instrument.cur_detector().name()
+
+        # populate the x and y scale factor values at this point for the text box
+        self.XSF = setup.instrument.beam_centre_scale_factor1
+        self.YSF = setup.instrument.beam_centre_scale_factor2
 
         self.move(setup, trial[0]-self._last_pos[0], trial[1]-self._last_pos[1])
 
@@ -83,8 +89,9 @@ class CentreFinder(object):
             @param y_res: asymmetry in y
             @return: a human readable string
         """
-        x_str = str(self._last_pos[0]*1000.).ljust(10)[0:9]
-        y_str = str(self._last_pos[1]*1000.).ljust(10)[0:9]
+
+        x_str = str(self._last_pos[0] * self.XSF).ljust(10)[0:9]
+        y_str = str(self._last_pos[1] * self.YSF).ljust(10)[0:9]
         x_res = '    SX='+str(x_res).ljust(7)[0:6]
         y_res = '    SY='+str(y_res).ljust(7)[0:6]
         return 'Itr '+str(iter)+':  ('+x_str+',  '+y_str+')'+x_res+y_res

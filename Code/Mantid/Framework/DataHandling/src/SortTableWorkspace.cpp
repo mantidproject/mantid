@@ -24,7 +24,7 @@ SortTableWorkspace::~SortTableWorkspace() {}
 //----------------------------------------------------------------------------------------------
 
 /// Algorithm's version for identification. @see Algorithm::version
-int SortTableWorkspace::version() const { return 1; };
+int SortTableWorkspace::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
 const std::string SortTableWorkspace::category() const { return "Utility"; }
@@ -32,7 +32,7 @@ const std::string SortTableWorkspace::category() const { return "Utility"; }
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
 const std::string SortTableWorkspace::summary() const {
   return "Sort a TableWorkspace.";
-};
+}
 
 //----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.

@@ -3,7 +3,7 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidGeometry/MDGeometry/MDTypes.h"
-#include "MantidMDEvents/MDHistoWorkspace.h"
+#include "MantidDataObjects/MDHistoWorkspace.h"
 #include "MantidKernel/Utils.h"
 #include <iostream>
 #include <fstream>
@@ -17,7 +17,7 @@ using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using namespace Mantid;
-using namespace Mantid::MDEvents;
+using namespace Mantid::DataObjects;
 using namespace ::NeXus;
 
 // A reference to the logger is provided by the base class, it is called g_log.

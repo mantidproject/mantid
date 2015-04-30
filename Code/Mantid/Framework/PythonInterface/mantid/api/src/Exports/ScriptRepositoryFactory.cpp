@@ -16,7 +16,9 @@ namespace
   ///@endcond
 }
 
+// clang-format off
 void export_ScriptRepositoryFactory()
+// clang-format on
 {
   class_<ScriptRepositoryFactoryImpl,boost::noncopyable>("ScriptRepositoryFactory", no_init)
       .def("create", &ScriptRepositoryFactoryImpl::create,

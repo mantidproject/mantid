@@ -208,7 +208,7 @@ public:
   void test_workspace()
   {
     // Generate file with two banks
-    string filename("TestWorskpace.irf");
+    string filename("GSASInstrumentFileTest_TestWorkspace.irf");
     generate2BankPrmFile(filename);
 
     // Create workspace group to put parameters into
@@ -308,7 +308,7 @@ public:
     TS_ASSERT_EQUALS( fitParam.getValue( 0.0 ), 0.0);
 
     // Clean
-    Poco::File("TestWorskpace.irf").remove();
+    Poco::File(filename).remove();
     AnalysisDataService::Instance().remove("loadGSASInstrumentFileWorkspace");
   }
 

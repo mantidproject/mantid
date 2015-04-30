@@ -30,10 +30,10 @@ LoadILLSANS::~LoadILLSANS() {}
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
-const std::string LoadILLSANS::name() const { return "LoadILLSANS"; };
+const std::string LoadILLSANS::name() const { return "LoadILLSANS"; }
 
 /// Algorithm's version for identification. @see Algorithm::version
-int LoadILLSANS::version() const { return 1; };
+int LoadILLSANS::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
 const std::string LoadILLSANS::category() const { return "DataHandling"; }

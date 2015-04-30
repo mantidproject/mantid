@@ -1,15 +1,8 @@
 #include "MantidCrystal/SCDPanelErrors.h"
 #include "MantidCrystal/SCDCalibratePanels.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/FunctionFactory.h"
-#include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidGeometry/Crystal/IndexingUtils.h"
-#include "MantidGeometry/Instrument/Parameter.h"
-#include "MantidDataObjects/PeaksWorkspace.h"
-#include <boost/lexical_cast.hpp>
-#include <stdio.h>
-#include <math.h>
 
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;

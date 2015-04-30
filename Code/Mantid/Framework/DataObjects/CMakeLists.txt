@@ -1,11 +1,32 @@
 set ( SRC_FILES
+	src/AffineMatrixParameter.cpp
+	src/AffineMatrixParameterParser.cpp
+	src/BoxControllerNeXusIO.cpp
+	src/CoordTransformAffine.cpp
+	src/CoordTransformAffineParser.cpp
+	src/CoordTransformAligned.cpp
+	src/CoordTransformDistance.cpp
+	src/CoordTransformDistanceParser.cpp
 	src/EventList.cpp
 	src/EventWorkspace.cpp
 	src/EventWorkspaceHelpers.cpp
 	src/EventWorkspaceMRU.cpp
 	src/Events.cpp
+	src/FakeMD.cpp
 	src/GroupingWorkspace.cpp
 	src/Histogram1D.cpp
+	src/MDBin.cpp
+	src/MDBox.cpp
+	src/MDBoxBase.cpp
+	src/MDBoxFlatTree.cpp
+	src/MDBoxIterator.cpp
+	src/MDBoxSaveable.cpp
+	src/MDEventFactory.cpp
+	src/MDEventWorkspace.cpp
+	src/MDGridBox.cpp
+	src/MDHistoWorkspace.cpp
+	src/MDHistoWorkspaceIterator.cpp
+	src/MDLeanEvent.cpp
 	src/MaskWorkspace.cpp
 	src/MementoTableWorkspace.cpp
 	src/NoShape.cpp
@@ -36,14 +57,37 @@ set ( SRC_UNITY_IGNORE_FILES
 )
 
 set ( INC_FILES
+	inc/MantidDataObjects/AffineMatrixParameter.h
+	inc/MantidDataObjects/AffineMatrixParameterParser.h
+	inc/MantidDataObjects/BoxControllerNeXusIO.h
+	inc/MantidDataObjects/CoordTransformAffine.h
+	inc/MantidDataObjects/CoordTransformAffineParser.h
+	inc/MantidDataObjects/CoordTransformAligned.h
+	inc/MantidDataObjects/CoordTransformDistance.h
+	inc/MantidDataObjects/CoordTransformDistanceParser.h
 	inc/MantidDataObjects/DllConfig.h
 	inc/MantidDataObjects/EventList.h
 	inc/MantidDataObjects/EventWorkspace.h
 	inc/MantidDataObjects/EventWorkspaceHelpers.h
 	inc/MantidDataObjects/EventWorkspaceMRU.h
 	inc/MantidDataObjects/Events.h
+	inc/MantidDataObjects/FakeMD.h
 	inc/MantidDataObjects/GroupingWorkspace.h
 	inc/MantidDataObjects/Histogram1D.h
+	inc/MantidDataObjects/MDBin.h
+	inc/MantidDataObjects/MDBox.h
+	inc/MantidDataObjects/MDBoxBase.h
+	inc/MantidDataObjects/MDBoxFlatTree.h
+	inc/MantidDataObjects/MDBoxIterator.h
+	inc/MantidDataObjects/MDBoxSaveable.h
+	inc/MantidDataObjects/MDDimensionStats.h
+	inc/MantidDataObjects/MDEventFactory.h
+	inc/MantidDataObjects/MDEventInserter.h
+	inc/MantidDataObjects/MDEventWorkspace.h
+	inc/MantidDataObjects/MDGridBox.h
+	inc/MantidDataObjects/MDHistoWorkspace.h
+	inc/MantidDataObjects/MDHistoWorkspaceIterator.h
+	inc/MantidDataObjects/MDLeanEvent.h
 	inc/MantidDataObjects/MaskWorkspace.h
 	inc/MantidDataObjects/MementoTableWorkspace.h
 	inc/MantidDataObjects/NoShape.h
@@ -69,13 +113,37 @@ set ( INC_FILES
 )
 
 set ( TEST_FILES
+	AffineMatrixParameterParserTest.h
+	AffineMatrixParameterTest.h
+	BoxControllerNeXusIOTest.h
+	CoordTransformAffineParserTest.h
+	CoordTransformAffineTest.h
+	CoordTransformAlignedTest.h
+	CoordTransformDistanceParserTest.h
+	CoordTransformDistanceTest.h
 	EventListTest.h
 	EventWorkspaceMRUTest.h
 	EventWorkspaceTest.h
 	EventsTest.h
+	FakeMDTest.h
 	GroupingWorkspaceTest.h
 	Histogram1DTest.h
 	LibraryManagerTest.h
+	MDBinTest.h
+	MDBoxBaseTest.h
+	MDBoxFlatTreeTest.h
+	MDBoxIteratorTest.h
+	MDBoxSaveableTest.h
+	MDBoxTest.h
+	MDDimensionStatsTest.h
+	MDEventFactoryTest.h
+	MDEventInserterTest.h
+	MDEventTest.h
+	MDEventWorkspaceTest.h
+	MDGridBoxTest.h
+	MDHistoWorkspaceIteratorTest.h
+	MDHistoWorkspaceTest.h
+	MDLeanEventTest.h
 	MaskWorkspaceTest.h
 	MementoTableWorkspaceTest.h
 	NoShapeTest.h
@@ -90,6 +158,7 @@ set ( TEST_FILES
 	PeaksWorkspaceTest.h
 	RebinnedOutputTest.h
 	RefAxisTest.h
+	SkippingPolicyTest.h
 	SpecialWorkspace2DTest.h
 	SplittersWorkspaceTest.h
 	TableColumnTest.h
@@ -120,7 +189,13 @@ set_target_properties ( DataObjects PROPERTIES OUTPUT_NAME MantidDataObjects
 if (OSX_VERSION VERSION_GREATER 10.8)
   set_target_properties ( DataObjects PROPERTIES INSTALL_RPATH "@loader_path/../MacOS")
 endif ()
-                                               
+
+# Intensive use of templated libaries can cause large objects to be generated. These require
+# an additional flag in MSVC.
+if ( MSVC )
+  set_target_properties ( DataObjects PROPERTIES COMPILE_FLAGS "/bigobj" )
+endif ()
+
 # Add to the 'Framework' group in VS
 set_property ( TARGET DataObjects PROPERTY FOLDER "MantidFramework" )
 

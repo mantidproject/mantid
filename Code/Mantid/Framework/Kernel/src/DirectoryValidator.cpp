@@ -1,9 +1,7 @@
 #include "MantidKernel/DirectoryValidator.h"
-#include <algorithm>
 #include <Poco/Exception.h>
 #include <Poco/File.h>
 #include <Poco/Path.h>
-#include <iostream>
 
 namespace Mantid {
 namespace Kernel {

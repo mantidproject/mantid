@@ -22,10 +22,10 @@ ExponentialMD::~ExponentialMD() {}
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
-const std::string ExponentialMD::name() const { return "ExponentialMD"; };
+const std::string ExponentialMD::name() const { return "ExponentialMD"; }
 
 /// Algorithm's version for identification. @see Algorithm::version
-int ExponentialMD::version() const { return 1; };
+int ExponentialMD::version() const { return 1; }
 
 //----------------------------------------------------------------------------------------------
 
@@ -46,7 +46,7 @@ void ExponentialMD::execEvent(Mantid::API::IMDEventWorkspace_sptr /*out*/) {
 
 //----------------------------------------------------------------------------------------------
 /// ExponentialMD::Run the algorithm with a MDHistoWorkspace
-void ExponentialMD::execHisto(Mantid::MDEvents::MDHistoWorkspace_sptr out) {
+void ExponentialMD::execHisto(Mantid::DataObjects::MDHistoWorkspace_sptr out) {
   out->exp();
 }
 

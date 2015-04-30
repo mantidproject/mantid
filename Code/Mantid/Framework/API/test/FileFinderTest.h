@@ -105,10 +105,46 @@ public:
     m_facFile.remove();
   }
 
-  void testGetFullPath()
+  void testGetFullPathWithFilename()
   {
     std::string path = FileFinder::Instance().getFullPath("CSP78173.raw");
     TS_ASSERT(!path.empty());
+  }
+
+  void testGetFullPathWithDirectoryFindsDirectoryPath()
+  {
+    // Use the Schema directory under instrument
+    std::string path = FileFinder::Instance().getFullPath("Schema");
+    TS_ASSERT(!path.empty());
+
+    // Code has separate path for path relative to working directory so check that too
+    std::string tempTestName("__FileFinderTestTempTestDir__");
+    Poco::File tempTestDir(Poco::Path().resolve(tempTestName));
+    tempTestDir.createDirectory();
+
+    path = FileFinder::Instance().getFullPath(tempTestName);
+    TS_ASSERT(!path.empty());
+
+    tempTestDir.remove();
+
+  }
+
+  void testGetFullPathSkipsDirectoriesOnRequest()
+  {
+    // Use the Schema directory under instrument
+    const bool ignoreDirs(true);
+    std::string path = FileFinder::Instance().getFullPath("Schema", ignoreDirs);
+    TSM_ASSERT("Expected an empty path when looking for a directory, instead I found " + path, path.empty());
+
+    // Code has separate path for path relative to working directory so check that too
+    std::string tempTestName("__FileFinderTestTempTestDir__");
+    Poco::File tempTestDir(Poco::Path().resolve(tempTestName));
+    tempTestDir.createDirectory();
+
+    path = FileFinder::Instance().getFullPath(tempTestName, ignoreDirs);
+    TSM_ASSERT("Expected an empty path when looking for a directory relative to current, instead I found " + path, path.empty());
+
+    tempTestDir.remove();
   }
 
   void testMakeFileNameForISIS()

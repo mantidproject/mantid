@@ -29,6 +29,29 @@ class IndirectTransmissionTest(unittest.TestCase):
         np.testing.assert_array_almost_equal(values, ref_result, decimal=4)
 
 
+    def test_indirect_transmission_tosca_graphite_002(self):
+        """
+        Test a transmission calculation using TOSCA, graphite, 002.
+        """
+
+        instrument = "TOSCA"
+        analyser = "graphite"
+        reflection = "002"
+
+        # Using water sample
+        formula = "H2-O"
+        density = 0.1
+        thickness = 0.1
+
+        ws = IndirectTransmission(Instrument=instrument, Analyser=analyser, Reflection=reflection,
+                                  ChemicalFormula=formula, NumberDensity=density, Thickness=thickness)
+
+        # Expected values from table
+        ref_result = [5.5137, 0.680081, 2.58187, 53.5069, 56.0888, 0.1, 0.1, 0.566834, 0.429298]
+        values = ws.column(1)
+        np.testing.assert_array_almost_equal(values, ref_result, decimal=4)
+
+
     def test_indirect_transmission_basis_silicon_111(self):
         """
         Test a transmission calculation using BASIS, silicon 111.

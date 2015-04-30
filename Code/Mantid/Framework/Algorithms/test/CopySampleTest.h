@@ -2,9 +2,6 @@
 #define MANTID_ALGORITHMS_COPYSAMPLETEST_H_
 
 #include <cxxtest/TestSuite.h>
-#include "MantidKernel/Timer.h"
-#include <iostream>
-#include <iomanip>
 
 #include "MantidAlgorithms/CopySample.h"
 #include "MantidDataObjects/WorkspaceSingleValue.h"
@@ -16,9 +13,9 @@
 #include "MantidGeometry/Instrument/ObjComponent.h"
 #include "MantidGeometry/Objects/Object.h"
 
-#include "MantidMDEvents/MDEvent.h"
-#include "MantidMDEvents/MDEventFactory.h"
-#include "MantidMDEvents/MDEventWorkspace.h"
+#include "MantidDataObjects/MDEvent.h"
+#include "MantidDataObjects/MDEventFactory.h"
+#include "MantidDataObjects/MDEventWorkspace.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 
 using namespace Mantid;
@@ -27,7 +24,6 @@ using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
-using namespace Mantid::MDEvents;
 
 class CopySampleTest : public CxxTest::TestSuite
 {

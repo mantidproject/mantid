@@ -10,7 +10,7 @@
 #include <cxxtest/TestSuite.h>
 #include "MantidVatesAPI/MetadataJsonManager.h"
 #include <string>
-#include <jsoncpp/json/reader.h>
+#include <json/reader.h>
 
 
 using Mantid::VATES::MetadataJsonManager;

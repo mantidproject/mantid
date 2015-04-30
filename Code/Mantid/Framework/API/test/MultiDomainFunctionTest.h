@@ -49,7 +49,7 @@ protected:
   }
 };
 
-DECLARE_FUNCTION(MultiDomainFunctionTest_Function);
+DECLARE_FUNCTION(MultiDomainFunctionTest_Function)
 
 namespace {
 

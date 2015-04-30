@@ -1,11 +1,10 @@
 #include "MantidMDAlgorithms/Quantification/SimulateResolutionConvolvedModel.h"
 
-#include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/IFunctionMD.h"
-#include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/FunctionDomainMD.h"
+#include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/FunctionValues.h"
-#include "MantidAPI/MemoryManager.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimensionBuilder.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
@@ -18,14 +17,12 @@
 namespace Mantid {
 namespace MDAlgorithms {
 // Register the algorithm into the AlgorithmFactory
-DECLARE_ALGORITHM(SimulateResolutionConvolvedModel);
+DECLARE_ALGORITHM(SimulateResolutionConvolvedModel)
 
 using namespace API;
+using namespace DataObjects;
+using namespace Geometry;
 using namespace Kernel;
-using Geometry::MDHistoDimensionBuilder;
-using Geometry::Vec_MDHistoDimensionBuilder;
-using MDEvents::MDEventWorkspace;
-using MDEvents::MDEvent;
 
 namespace {
 // Property names
@@ -176,6 +173,8 @@ void SimulateResolutionConvolvedModel::createOutputWorkspace() {
   }
   // Run information
   m_outputWS->copyExperimentInfos(*m_inputWS);
+  // Coordinates
+  m_outputWS->setCoordinateSystem(m_inputWS->getSpecialCoordinateSystem());
 
   m_outputWS->initialize();
   m_outputWS->splitBox(); // Make grid box

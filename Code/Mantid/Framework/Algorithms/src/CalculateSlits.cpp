@@ -28,10 +28,10 @@ CalculateSlits::~CalculateSlits() {}
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string CalculateSlits::name() const {
   return "CalculateSlits";
-};
+}
 
 /// Algorithm's version for identification. @see Algorithm::version
-int CalculateSlits::version() const { return 1; };
+int CalculateSlits::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
 const std::string CalculateSlits::category() const {
@@ -41,7 +41,7 @@ const std::string CalculateSlits::category() const {
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
 const std::string CalculateSlits::summary() const {
   return "Calculates appropriate slit widths for reflectometry instruments.";
-};
+}
 
 //----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.

@@ -23,8 +23,8 @@ namespace CustomInterfaces
     const unsigned int NUM_DECIMALS = 6;
 
     // RAW PLOT
-    m_rangeSelectors["MomentsRangeSelector"] = new MantidWidgets::RangeSelector(m_uiForm.ppRawPlot);
-    m_rangeSelectors["MomentsRangeSelector"]->setInfoOnly(false);
+    auto xRangeSelector = m_uiForm.ppRawPlot->addRangeSelector("XRange");
+    xRangeSelector->setInfoOnly(false);
 
     // PROPERTY TREE
     m_propTrees["MomentsPropTree"] = new QtTreePropertyBrowser();
@@ -41,7 +41,7 @@ namespace CustomInterfaces
 
     connect(m_uiForm.dsInput, SIGNAL(dataReady(const QString&)), this, SLOT(handleSampleInputReady(const QString&)));
 
-    connect(m_rangeSelectors["MomentsRangeSelector"], SIGNAL(selectionChangedLazy(double, double)), this, SLOT(rangeChanged(double, double)));
+    connect(xRangeSelector, SIGNAL(selectionChangedLazy(double, double)), this, SLOT(rangeChanged(double, double)));
     connect(m_dblManager, SIGNAL(valueChanged(QtProperty*, double)), this, SLOT(updateProperties(QtProperty*, double)));
 
     // Update the preview plot when the algorithm completes
@@ -114,8 +114,10 @@ namespace CustomInterfaces
     m_uiForm.ppRawPlot->clear();
     m_uiForm.ppRawPlot->addSpectrum("Raw", filename, 0);
     QPair<double, double> range = m_uiForm.ppRawPlot->getCurveRange("Raw");
-    setRangeSelector("MomentsRangeSelector", m_properties["EMin"], m_properties["EMax"], range);
-    setPlotPropertyRange("MomentsRangeSelector", m_properties["EMin"], m_properties["EMax"], range);
+
+    auto xRangeSelector = m_uiForm.ppRawPlot->getRangeSelector("XRange");
+    setRangeSelector(xRangeSelector, m_properties["EMin"], m_properties["EMax"], range);
+    setPlotPropertyRange(xRangeSelector, m_properties["EMin"], m_properties["EMax"], range);
 
     connect(m_dblManager, SIGNAL(valueChanged(QtProperty*, double)), this, SLOT(updateProperties(QtProperty*, double)));
 
@@ -154,7 +156,7 @@ namespace CustomInterfaces
       }
       else
       {
-        m_rangeSelectors["MomentsRangeSelector"]->setMinimum(val);
+        m_uiForm.ppRawPlot->getRangeSelector("XRange")->setMinimum(val);
       }
     }
     else if (prop == m_properties["EMax"])
@@ -166,7 +168,7 @@ namespace CustomInterfaces
       }
       else
       {
-        m_rangeSelectors["MomentsRangeSelector"]->setMaximum(val);
+        m_uiForm.ppRawPlot->getRangeSelector("XRange")->setMaximum(val);
       }
     }
 

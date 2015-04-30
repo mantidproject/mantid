@@ -11,11 +11,13 @@ The Indirect Data Reduction interface provides the initial reduction that
 is used to convert raw instrument data to S(Q, w) for analysis in the
 Indirect Data Analysis and Indirect Bayes interfaces.
 
+The tabs shown on this interface will vary depending on the current default
+facility such that only tabs that will work with data from the facility are
+shown, this page describes all the tabs which can possibly be shown.
+
 .. interface:: Data Reduction
   :align: right
   :width: 350
-
-.. warning:: Currently this interface only supports ISIS instruments.
 
 Instrument Options
 ~~~~~~~~~~~~~~~~~~
@@ -49,11 +51,11 @@ Manage Directories
   Opens the Manage Directories dialog allowing you to change your search directories
   and default save directory and enable/disable data archive search.
 
-Energy Transfer
----------------
+ISIS Energy Transfer
+--------------------
 
 .. interface:: Data Reduction
-  :widget: tabEnergyTransfer
+  :widget: tabISISEnergyTransfer
 
 This tab provides you with the functionality to convert the raw data from the
 experiment run into units of :math:`\Delta E`.
@@ -84,8 +86,11 @@ Background Removal
   Allows removal of a background given a time-of-flight range.
 
 Plot Time
-  When clicked create a time plot of the spectra range defined in the Spectra
-  Min and Spectra Max selectors.
+  Creates a time of flight plot of the grouping of the spectra in the range
+  defined in the Plot Time section, to include a single spectrum set the Spectra
+  Min and Spectra Max selectors to the same value. Note that this first rebins
+  the sample input to ensure that each detector spectrum has the same binning in
+  order to be grouped into a single spectrum.
 
 Detailed Balance
   Gives the option to perform an exponential correction on the data once it has
@@ -166,11 +171,44 @@ Multiple
 In this mode multiple binning ranges can be defined using he rebin string syntax
 used by the :ref:`Rebin <algm-Rebin>` algorithm.
 
-Calibration & Resolution
-------------------------
+ILL Energy Transfer
+-------------------
 
 .. interface:: Data Reduction
-  :widget: tabCalibration
+  :widget: tabILLEnergyTransfer
+
+This tab handles the reduction of data from the IN16B instrument at the ILL.
+
+This will output the raw (*_raw*) data read from the file and reduced (*_red*)
+workspace by default, with mirror mode enabled you will also get the left
+(*_left*) and right (*_right*) hand components of the data as separate
+workspaces.
+
+Options
+~~~~~~~
+
+Input
+  Used to select the raw data in *.nxs* format
+
+Grouping
+  Used to switch between grouping as per the IDF (*Default*) or grouping using a
+  mapping file (*Map FIle*).
+
+Mirror Mode
+  Enable to reduce data that has been captured with mirror mode enabled.
+
+Plot
+  If enabled will plot the result as a spectra plot.
+
+Save
+  If enabled the result will be saved as a NeXus file in the default save
+  directory.
+
+ISIS Calibration & Resolution
+-----------------------------
+
+.. interface:: Data Reduction
+  :widget: tabISISCalibration
 
 This tab gives you the ability to create Calibration and Resolution files.
 
@@ -233,11 +271,11 @@ Background Start & Background End
 Low, Width & High
   Binning parameters used to rebin the resolution curve.
 
-Diagnostics
------------
+ISIS Diagnostics
+----------------
 
 .. interface:: Data Reduction
-  :widget: tabDiagnostics
+  :widget: tabISISDiagnostics
 
 This tab allows you to perform an integration on a raw file over a specified
 time of flight range, and is equivalent to the Slice functionality found in
@@ -255,6 +293,10 @@ Input
 Use Calibration
   Allows you to select either a calibrtion file or workspace to apply to the raw
   files.
+
+Preview Spectrum
+  Allows selection of the spectrum to be shown in the preview plot to the right
+  of the Time Slice section.
 
 Spectra Min & Spectra Max
   Allows selection of the range of detectors you are interested in, this is
@@ -318,7 +360,7 @@ Symmetrise
 ----------
 
 .. interface:: Data Reduction
-  :widget: tabSymmertrise
+  :widget: tabSymmetrise
 
 This tab allows you to take an asymmetric reduced file and symmetrise it about
 the Y axis.
@@ -379,7 +421,7 @@ S(Q, w)
 -------
 
 .. interface:: Data Reduction
-  :widget: tabSofQW
+  :widget: tabSQw
 
 Provides an interface for running the SofQW algorithms.
 

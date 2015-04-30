@@ -34,6 +34,12 @@ except ImportError:
 
 class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
 
+    current_instrument = None
+    current_table = None
+    current_polarisation_method = None
+    labelStatus = None
+    accMethod = None
+
     def __init__(self):
         """
         Initialise the interface

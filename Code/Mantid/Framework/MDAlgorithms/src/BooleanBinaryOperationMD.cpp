@@ -22,10 +22,10 @@ BooleanBinaryOperationMD::~BooleanBinaryOperationMD() {}
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string BooleanBinaryOperationMD::name() const {
   return "BooleanBinaryOperationMD";
-};
+}
 
 /// Algorithm's version for identification. @see Algorithm::version
-int BooleanBinaryOperationMD::version() const { return 1; };
+int BooleanBinaryOperationMD::version() const { return 1; }
 
 //----------------------------------------------------------------------------------------------
 ///
@@ -63,7 +63,7 @@ void BooleanBinaryOperationMD::execEvent() {
 //----------------------------------------------------------------------------------------------
 /// Run the algorithm with a MDHisotWorkspace as output, scalar and operand
 void BooleanBinaryOperationMD::execHistoScalar(
-    Mantid::MDEvents::MDHistoWorkspace_sptr /*out*/,
+    Mantid::DataObjects::MDHistoWorkspace_sptr /*out*/,
     Mantid::DataObjects::WorkspaceSingleValue_const_sptr /*scalar*/) {
   throw std::runtime_error("Cannot perform the " + this->name() +
                            " operation on a WorkspaceSingleValue.");

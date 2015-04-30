@@ -99,39 +99,6 @@ public:
       TS_ASSERT_THROWS(transformer.initializeFromPoldiInstrument(invalid), std::invalid_argument);
   }
 
-  void testTimeTransformedWidth()
-  {
-      /* Values from existing analysis software */
-      double fwhm = 0.0027446316797104233;
-      double deltaT = 3.0;
-
-      TestablePoldiTimeTransformer function;
-      function.initializeFromPoldiInstrument(m_instrument);
-
-      TS_ASSERT_DELTA(function.timeTransformedWidth(fwhm, 342) / deltaT, 4.526804 * function.m_detectorElementData[342]->tofFactor(), 1e-5);
-  }
-
-  void testTimeTransformedCentre()
-  {
-      double centre = 1.10864434901480127601;
-
-      TestablePoldiTimeTransformer function;
-      function.initializeFromPoldiInstrument(m_instrument);
-
-      TS_ASSERT_DELTA(function.timeTransformedCentre(centre, 342), 5964.820800781, 1e-3);
-  }
-
-  void testTimeTransformedIntensity()
-  {
-      double centre = 1.10864434901480127601;
-      double areaD = 1.985481;
-
-      TestablePoldiTimeTransformer function;
-      function.initializeFromPoldiInstrument(m_instrument);
-
-      TS_ASSERT_DELTA(function.timeTransformedIntensity(areaD, centre, 342), 4.611182, 1e-5);
-  }
-
   void TestCalculatedTotalIntensity()
   {
       double centre = Conversions::qToD(5.667449);

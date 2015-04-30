@@ -9,14 +9,8 @@ set ( SRC_FILES
         src/PoldiFitPeaks1D2.cpp
         src/PoldiFitPeaks2D.cpp
 	src/PoldiIndexKnownCompounds.cpp
-	src/PoldiLoadChopperSlits.cpp
-	src/PoldiLoadIPP.cpp
-	src/PoldiLoadLog.cpp
-	src/PoldiLoadSpectra.cpp
-	src/PoldiPeakDetection2.cpp
 	src/PoldiPeakSearch.cpp
 	src/PoldiPeakSummary.cpp
-	src/PoldiRemoveDeadWires.cpp
 	src/PoldiTruncateData.cpp
 	src/PoldiUtilities/IPoldiFunction1D.cpp
 	src/PoldiUtilities/MillerIndices.cpp
@@ -38,6 +32,7 @@ set ( SRC_FILES
         src/PoldiUtilities/PoldiSourceSpectrum.cpp
 	src/PoldiUtilities/PoldiSpectrumConstantBackground.cpp
 	src/PoldiUtilities/PoldiSpectrumLinearBackground.cpp
+	src/PoldiUtilities/PoldiSpectrumPawleyFunction.cpp
 	src/PoldiUtilities/PoldiTimeTransformer.cpp
 	src/PoldiUtilities/UncertainValue.cpp
 	src/ProjectMD.cpp
@@ -58,14 +53,8 @@ set ( INC_FILES
         inc/MantidSINQ/PoldiFitPeaks1D2.h
         inc/MantidSINQ/PoldiFitPeaks2D.h
 	inc/MantidSINQ/PoldiIndexKnownCompounds.h
-	inc/MantidSINQ/PoldiLoadChopperSlits.h
-	inc/MantidSINQ/PoldiLoadIPP.h
-	inc/MantidSINQ/PoldiLoadLog.h
-	inc/MantidSINQ/PoldiLoadSpectra.h
-	inc/MantidSINQ/PoldiPeakDetection2.h
 	inc/MantidSINQ/PoldiPeakSearch.h
 	inc/MantidSINQ/PoldiPeakSummary.h
-	inc/MantidSINQ/PoldiRemoveDeadWires.h
 	inc/MantidSINQ/PoldiTruncateData.h
 	inc/MantidSINQ/PoldiUtilities/IPoldiFunction1D.h
 	inc/MantidSINQ/PoldiUtilities/MillerIndices.h
@@ -90,6 +79,7 @@ set ( INC_FILES
 	inc/MantidSINQ/PoldiUtilities/PoldiSpectrumConstantBackground.h
         inc/MantidSINQ/PoldiUtilities/PoldiSpectrumDomainFunction.h
 	inc/MantidSINQ/PoldiUtilities/PoldiSpectrumLinearBackground.h
+	inc/MantidSINQ/PoldiUtilities/PoldiSpectrumPawleyFunction.h
 	inc/MantidSINQ/PoldiUtilities/PoldiTimeTransformer.h
 	inc/MantidSINQ/PoldiUtilities/UncertainValue.h
 	inc/MantidSINQ/PoldiUtilities/UncertainValueIO.h
@@ -131,6 +121,7 @@ set ( TEST_FILES
         PoldiSpectrumDomainFunctionTest.h
 	PoldiSpectrumConstantBackgroundTest.h
 	PoldiSpectrumLinearBackgroundTest.h
+	PoldiSpectrumPawleyFunctionTest.h
 	PoldiTimeTransformerTest.h
 	PoldiTruncateDataTest.h
 	ProjectMDTest.h
@@ -155,9 +146,9 @@ endif ()
 # Add to the 'Framework' group in VS
 set_property ( TARGET SINQ PROPERTY FOLDER "MantidFramework" )
 
-include_directories ( inc ../MDEvents/inc )
+include_directories ( inc )
 
-target_link_libraries ( SINQ ${MANTIDLIBS} MDEvents )
+target_link_libraries ( SINQ ${MANTIDLIBS} )
 
 # Add the unit tests directory
 add_subdirectory ( test )

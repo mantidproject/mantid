@@ -2,13 +2,9 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidCrystal/FindSXPeaks.h"
-#include "MantidAPI/IPeak.h"
-#include "MantidAPI/Progress.h"
 #include "MantidAPI/WorkspaceValidators.h"
-#include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidKernel/VectorHelper.h"
 #include "MantidKernel/BoundedValidator.h"
-#include "MantidDataObjects/Peak.h"
 
 using namespace Mantid::DataObjects;
 

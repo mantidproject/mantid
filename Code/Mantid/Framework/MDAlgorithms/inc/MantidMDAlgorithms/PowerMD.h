@@ -56,7 +56,7 @@ private:
   void execEvent(Mantid::API::IMDEventWorkspace_sptr out);
 
   /// Run the algorithm with a MDHistoWorkspace
-  void execHisto(Mantid::MDEvents::MDHistoWorkspace_sptr out);
+  void execHisto(Mantid::DataObjects::MDHistoWorkspace_sptr out);
 };
 
 } // namespace MDAlgorithms

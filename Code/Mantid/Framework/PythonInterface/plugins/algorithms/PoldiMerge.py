@@ -32,7 +32,8 @@ class PoldiMerge(PythonAlgorithm):
                                                direction=Direction.Output),
                              doc="Workspace where all counts from the list workspaces have been added")
 
-        self.declareProperty("CheckInstruments", True, "If checked, only workspaces with equal instrument parameters are merged. Do not disable without a very good reason.")
+        self.declareProperty("CheckInstruments", True, "If checked, only workspaces with equal"\
+                                "instrument parameters are merged. Do not disable without a very good reason.")
 
     def PyExec(self):
         self.checkInstruments = self.getProperty("CheckInstruments").value
@@ -62,13 +63,16 @@ class PoldiMerge(PythonAlgorithm):
                 except RuntimeError as error:
                     self.handleError(error)
 
-        output = MergeRuns(workspaceNames)
-
-        self.setProperty("OutputWorkspace", output)
+        self.setProperty("OutputWorkspace", MergeRuns(workspaceNames))
 
     def canMerge(self, leftWorkspace, rightWorkspace):
         if not self.timingsMatch(leftWorkspace.dataX(0), rightWorkspace.dataX(0)):
             raise RuntimeError("Timings don't match")
+
+        # If this option is enabled, don't do any checks
+        if not self.checkInstruments:
+            self.log().warning('Instrument check has been disabled.')
+            return True
 
         leftRun = leftWorkspace.getRun()
         rightRun = rightWorkspace.getRun()
@@ -100,7 +104,7 @@ class PoldiMerge(PythonAlgorithm):
         leftInstrument = leftWorkspace.getInstrument()
         rightInstrument = rightWorkspace.getInstrument()
 
-        return (not self.checkInstruments) or self.instrumentParametersMatch(leftInstrument, rightInstrument)
+        return self.instrumentParametersMatch(leftInstrument, rightInstrument)
 
     def instrumentParametersMatch(self, leftInstrument, rightInstrument):
         if not leftInstrument.getDetector(0).getPos() == rightInstrument.getDetector(0).getPos():
@@ -120,8 +124,13 @@ class PoldiMerge(PythonAlgorithm):
 
     def propertiesMatch(self, leftRun, rightRun):
         for propertyName in self.comparedPropertyNames:
-            if abs(self.getPropertyValue(leftRun.getProperty(propertyName)) - self.getPropertyValue(rightRun.getProperty(propertyName))) > 5e-3:
-                raise RuntimeError("Property '%s' does not match" % (propertyName))
+            if leftRun.hasProperty(propertyName) and rightRun.hasProperty(propertyName):
+                leftProperty = leftRun.getProperty(propertyName)
+                rightProperty = rightRun.getProperty(propertyName)
+                if abs(self.getPropertyValue(leftProperty) - self.getPropertyValue(rightProperty)) > 5e-3:
+                    raise RuntimeError("Property '%s' does not match" % (propertyName))
+            else:
+                self.log().warning('Property ' + propertyName + ' is not present in data - skipping comparison.')
 
         return True
 

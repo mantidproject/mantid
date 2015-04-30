@@ -1,9 +1,9 @@
-#ifndef MANTID_MDEVENTS_SAVEMD_H_
-#define MANTID_MDEVENTS_SAVEMD_H_
+#ifndef MANTID_MDALGORITHMS_SAVEMD_H_
+#define MANTID_MDALGORITHMS_SAVEMD_H_
 
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
-#include "MantidMDEvents/MDEventWorkspace.h"
+#include "MantidDataObjects/MDEventWorkspace.h"
 
 namespace Mantid {
 
@@ -60,10 +60,10 @@ private:
 
   /// Helper method
   template <typename MDE, size_t nd>
-  void doSaveEvents(typename MDEvents::MDEventWorkspace<MDE, nd>::sptr ws);
+  void doSaveEvents(typename DataObjects::MDEventWorkspace<MDE, nd>::sptr ws);
 
   /// Save the MDHistoWorkspace.
-  void doSaveHisto(Mantid::MDEvents::MDHistoWorkspace_sptr ws);
+  void doSaveHisto(Mantid::DataObjects::MDHistoWorkspace_sptr ws);
 
   /// Save all the affine matricies
   void saveAffineTransformMatricies(::NeXus::File *const file,
@@ -79,7 +79,7 @@ private:
                   std::string tag = "");
 };
 
-} // namespace MDEvents
+} // namespace DataObjects
 } // namespace Mantid
 
-#endif /* MANTID_MDEVENTS_SAVEMD_H_ */
+#endif /* MANTID_MDALGORITHMS_SAVEMD_H_ */

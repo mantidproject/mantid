@@ -2,8 +2,8 @@
 #include "MantidKernel/ListValidator.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
-#include "MantidMDEvents/CoordTransformDistance.h"
-#include "MantidMDEvents/MDEventFactory.h"
+#include "MantidDataObjects/CoordTransformDistance.h"
+#include "MantidDataObjects/MDEventFactory.h"
 #include "MantidMDAlgorithms/IntegratePeaksMD.h"
 #include "MantidMDAlgorithms/CentroidPeaksMD.h"
 
@@ -19,7 +19,7 @@ using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
-using namespace Mantid::MDEvents;
+using namespace Mantid::DataObjects;
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
@@ -184,4 +184,4 @@ void CentroidPeaksMD::exec() {
 }
 
 } // namespace Mantid
-} // namespace MDEvents
+} // namespace DataObjects

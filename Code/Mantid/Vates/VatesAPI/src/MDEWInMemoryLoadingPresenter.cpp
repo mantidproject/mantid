@@ -118,6 +118,9 @@ namespace Mantid
 
       // Set the instrument which is associated with the workspace.
       m_metadataJsonManager->setInstrument(m_metaDataExtractor->extractInstrument(eventWs));
+      
+      // Set the special coordinates
+      m_metadataJsonManager->setSpecialCoordinates(m_specialCoords);
 
       //Call base-class extraction method.
       this->extractMetadata(eventWs);

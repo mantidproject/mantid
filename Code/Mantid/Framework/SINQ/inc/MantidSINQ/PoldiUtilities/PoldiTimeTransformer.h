@@ -108,10 +108,6 @@ public:
   size_t detectorElementCount() const;
 
   double dToTOF(double d) const;
-  double timeTransformedWidth(double widthD, size_t detectorIndex) const;
-  double timeTransformedCentre(double centreD, size_t detectorIndex) const;
-  double timeTransformedIntensity(double areaD, double centreD,
-                                  size_t detectorIndex) const;
   double detectorElementIntensity(double centreD, size_t detectorIndex) const;
 
   double calculatedTotalIntensity(double centreD) const;

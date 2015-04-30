@@ -22,7 +22,7 @@
 
 #include <boost/algorithm/string.hpp>    
 
-vtkStandardNewMacro(vtkPeaksReader);
+vtkStandardNewMacro(vtkPeaksReader)
 
 using namespace Mantid::VATES;
 using Mantid::Geometry::IMDDimension_sptr;

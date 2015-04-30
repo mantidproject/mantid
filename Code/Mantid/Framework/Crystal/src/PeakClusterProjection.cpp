@@ -1,14 +1,11 @@
 #include "MantidCrystal/PeakClusterProjection.h"
 
-#include "MantidKernel/V3D.h"
 #include "MantidAPI/IPeak.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/PeakTransformHKL.h"
 #include "MantidAPI/PeakTransformQLab.h"
 #include "MantidAPI/PeakTransformQSample.h"
-
-#include <stdexcept>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;

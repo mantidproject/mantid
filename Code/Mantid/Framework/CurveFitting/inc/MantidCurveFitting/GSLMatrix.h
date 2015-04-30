@@ -4,6 +4,8 @@
 #include "MantidCurveFitting/DllConfig.h"
 #include "MantidCurveFitting/GSLVector.h"
 
+#include "MantidKernel/Matrix.h"
+
 #include <gsl/gsl_matrix.h>
 #include <gsl/gsl_blas.h>
 #include <gsl/gsl_linalg.h>
@@ -97,7 +99,6 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 class MANTID_CURVEFITTING_DLL GSLMatrix {
   /// The pointer to the GSL matrix
   gsl_matrix *m_matrix;
-
 public:
   /// Constructor
   GSLMatrix() : m_matrix(NULL) {}
@@ -109,10 +110,46 @@ public:
   }
 
   /// Copy constructor
+  /// @param M :: The other matrix.
   GSLMatrix(const GSLMatrix &M) {
     m_matrix = gsl_matrix_alloc(M.size1(), M.size2());
     gsl_matrix_memcpy(m_matrix, M.gsl());
   }
+
+  /// Create a submatrix. A submatrix is a view into the parent matrix.
+  /// Lifetime of a submatrix cannot exceed the lifetime of the parent.
+  /// @param M :: The parent matrix.
+  /// @param row :: The first row in the submatrix.
+  /// @param col :: The first column in the submatrix.
+  /// @param nRows :: The number of rows in the submatrix.
+  /// @param nCols :: The number of columns in the submatrix.
+  GSLMatrix(const GSLMatrix &M, size_t row, size_t col, size_t nRows, size_t nCols) {
+    if ( row + nRows > M.size1() || col + nCols > M.size2() )
+    {
+      throw std::runtime_error("Submatrix exceeds matrix size.");
+    }
+    auto view = gsl_matrix_const_submatrix(M.gsl(), row, col, nRows, nCols);
+    m_matrix = gsl_matrix_alloc(nRows, nCols);
+    gsl_matrix_memcpy(m_matrix, &view.matrix);
+  }
+
+  /// Constructor
+  /// @param M :: A matrix to copy.
+  GSLMatrix(const Kernel::Matrix<double>& M) {
+    m_matrix = gsl_matrix_alloc(M.numRows(), M.numCols());
+    for(size_t i = 0; i < size1(); ++i)
+    for(size_t j = 0; j < size2(); ++j){
+      set(i,j, M[i][j]);
+    }
+  }
+
+  /// Create this matrix from a product of two other matrices
+  /// @param mult2 :: Matrix multiplication helper object.
+  GSLMatrix(const GSLMatrixMult2 &mult2) : m_matrix(NULL) {*this = mult2;}
+
+  /// Create this matrix from a product of three other matrices
+  /// @param mult3 :: Matrix multiplication helper object.
+  GSLMatrix(const GSLMatrixMult3 &mult3) : m_matrix(NULL) {*this = mult3;}
 
   /// Destructor.
   ~GSLMatrix() {

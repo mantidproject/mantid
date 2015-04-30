@@ -194,20 +194,9 @@ void CorelliCrossCorrelate::exec() {
     EventList *evlist = outputWS->getEventListPtr(i);
     IDetector_const_sptr detector = inputWS->getDetector(i);
 
-    switch (evlist->getEventType()) {
-    case TOF:
-      // Switch to weights if needed.
+    // Switch to weighted if needed.
+    if (evlist->getEventType() == TOF)
       evlist->switchTo(WEIGHTED);
-    /* no break */
-    // Fall through
-    case WEIGHTED:
-      break;
-    case WEIGHTED_NOTIME:
-      // Should never get here
-      throw std::runtime_error(
-          "This event list has no pulse time information.");
-      break;
-    }
 
     std::vector<WeightedEvent> &events = evlist->getWeightedEvents();
 

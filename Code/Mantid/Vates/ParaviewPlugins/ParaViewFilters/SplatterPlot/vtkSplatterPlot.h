@@ -17,7 +17,7 @@ class VTK_EXPORT vtkSplatterPlot : public vtkUnstructuredGridAlgorithm
 {
 public:
   static vtkSplatterPlot *New();
-  vtkTypeMacro(vtkSplatterPlot, vtkUnstructuredGridAlgorithm);
+  vtkTypeMacro(vtkSplatterPlot, vtkUnstructuredGridAlgorithm)
   double getTime() const;
   void PrintSelf(ostream& os, vtkIndent indent);
   void SetNumberOfPoints(int nPoints);

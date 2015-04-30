@@ -14,7 +14,9 @@ namespace
   typedef Workspace_sptr(DataProcessorAdapter::*loadOverload2)(const std::string&, const bool);
 }
 
+// clang-format off
 void export_DataProcessorAlgorithm()
+// clang-format on
 {
   // for strings will actually create a list
   using Mantid::PythonInterface::Policies::VectorToNumpy;

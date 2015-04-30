@@ -37,22 +37,6 @@ double PoldiTimeTransformer::dToTOF(double d) const {
   return m_detectorCenter.tof1A * d;
 }
 
-double PoldiTimeTransformer::timeTransformedWidth(double widthD,
-                                                  size_t detectorIndex) const {
-  return dToTOF(widthD) * m_detectorElementData[detectorIndex]->tofFactor();
-}
-
-double PoldiTimeTransformer::timeTransformedCentre(double centreD,
-                                                   size_t detectorIndex) const {
-  return dToTOF(centreD) * m_detectorElementData[detectorIndex]->timeFactor();
-}
-
-double
-PoldiTimeTransformer::timeTransformedIntensity(double areaD, double centreD,
-                                               size_t detectorIndex) const {
-  return areaD * detectorElementIntensity(centreD, detectorIndex);
-}
-
 double
 PoldiTimeTransformer::detectorElementIntensity(double centreD,
                                                size_t detectorIndex) const {

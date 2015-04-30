@@ -14,6 +14,7 @@ set ( TEST_PY_FILES
   PeakShapeTest.py
   PointGroupTest.py
   SpaceGroupTest.py
+  SymmetryElementTest.py
   SymmetryOperationTest.py
 )
 

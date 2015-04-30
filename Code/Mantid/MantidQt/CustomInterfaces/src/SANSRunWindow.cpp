@@ -59,7 +59,7 @@ namespace MantidQt
 {
 namespace CustomInterfaces
 {
-  DECLARE_SUBWINDOW(SANSRunWindow);
+  DECLARE_SUBWINDOW(SANSRunWindow)
 
 
 using namespace MantidQt::MantidWidgets;
@@ -920,10 +920,16 @@ bool SANSRunWindow::loadUserFile()
   // from the ticket #5942 both detectors have center coordinates
   dbl_param = runReduceScriptFunction(
     "print i.ReductionSingleton().get_beam_center('rear')[0]").toDouble();
-  m_uiForm.rear_beam_x->setText(QString::number(dbl_param*1000.0));
+  // get the scale factor1 for the beam centre to scale it correctly
+  double dbl_paramsf = runReduceScriptFunction(
+    "print i.ReductionSingleton().get_beam_center_scale_factor1()").toDouble();
+  m_uiForm.rear_beam_x->setText(QString::number(dbl_param*dbl_paramsf));
+  // get scale factor2 for the beam centre to scale it correctly
+  dbl_paramsf = runReduceScriptFunction(
+    "print i.ReductionSingleton().get_beam_center_scale_factor2()").toDouble();
   dbl_param = runReduceScriptFunction(
     "print i.ReductionSingleton().get_beam_center('rear')[1]").toDouble();
-  m_uiForm.rear_beam_y->setText(QString::number(dbl_param*1000.0));
+  m_uiForm.rear_beam_y->setText(QString::number(dbl_param*dbl_paramsf));
   // front
   dbl_param = runReduceScriptFunction(
     "print i.ReductionSingleton().get_beam_center('front')[0]").toDouble();

@@ -17,18 +17,18 @@ echo "SHA1=${sha1}"
 ###############################################################################
 # Set up the location for the local object store outside of the build and
 # source tree, which can be shared by multiple builds.
-# It defaults to the parent directory of the workspace but can be overridden
-# by setting the MANTID_DATA_STORE environment variable.
+# It defaults to a MantidExternalData directory within the HOME directory.
+# It can be overridden by setting the MANTID_DATA_STORE environment variable.
 ###############################################################################
 if [ -z "$MANTID_DATA_STORE" ]; then
-  export MANTID_DATA_STORE=$(dirname $WORKSPACE)
+  export MANTID_DATA_STORE=$HOME/MantidExternalData
 fi
 
 ###############################################################################
 # RHEL6 setup steps - nodes must have a "rhel6" label set (in lowercase)
 ###############################################################################
 if [[ ${NODE_LABELS} == *rhel6* ]]; then
-  SCL_ON_RHEL6="scl enable mantidlibs"
+  SCL_ON_RHEL6="scl enable mantidlibs34"
   ON_RHEL6=true
 else
   SCL_ON_RHEL6="eval"

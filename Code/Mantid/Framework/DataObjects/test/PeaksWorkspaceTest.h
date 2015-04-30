@@ -19,7 +19,6 @@
 #include "MantidTestHelpers/NexusTestHelper.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidAPI/AlgorithmManager.h"
-#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/LogManager.h"
 
 #include <Poco/File.h>
@@ -37,12 +36,6 @@ public:
   // This means the constructor isn't called when running other tests
   static PeaksWorkspaceTest *createSuite() { return new PeaksWorkspaceTest(); }
   static void destroySuite( PeaksWorkspaceTest *suite ) { delete suite; }
-
-  PeaksWorkspaceTest()
-  {
-     FrameworkManager::Instance();
-     AlgorithmManager::Instance();
-  }
 
   /** Build a test PeaksWorkspace with one peak (others peaks can be added)
    *

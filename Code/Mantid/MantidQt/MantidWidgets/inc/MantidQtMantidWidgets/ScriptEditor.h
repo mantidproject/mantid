@@ -81,7 +81,7 @@ private:
 class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS ScriptEditor : public QsciScintilla
 {
   // Qt macro
-  Q_OBJECT;
+  Q_OBJECT
 
 public:
   /**

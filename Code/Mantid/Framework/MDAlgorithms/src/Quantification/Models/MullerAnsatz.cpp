@@ -8,7 +8,7 @@
 
 namespace Mantid {
 namespace MDAlgorithms {
-DECLARE_FOREGROUNDMODEL(MullerAnsatz);
+DECLARE_FOREGROUNDMODEL(MullerAnsatz)
 
 using Kernel::Math::BoseEinsteinDistribution;
 

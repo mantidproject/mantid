@@ -21,7 +21,7 @@ namespace MantidQt
 {
   namespace CustomInterfaces
   {
-    DECLARE_SUBWINDOW(DirectConvertToEnergy);
+    DECLARE_SUBWINDOW(DirectConvertToEnergy)
   }
 }
 

@@ -19,8 +19,8 @@ namespace MantidQt
 			m_uiForm.setupUi(parent);
 
       // Create range selector
-      m_rangeSelectors["JumpFitQ"] = new MantidWidgets::RangeSelector(m_uiForm.ppPlot);
-      connect(m_rangeSelectors["JumpFitQ"], SIGNAL(selectionChangedLazy(double, double)), this, SLOT(qRangeChanged(double, double)));
+      auto qRangeSelector = m_uiForm.ppPlot->addRangeSelector("JumpFitQ");
+      connect(qRangeSelector, SIGNAL(selectionChangedLazy(double, double)), this, SLOT(qRangeChanged(double, double)));
 
 			// Add the properties browser to the ui form
 			m_uiForm.treeSpace->addWidget(m_propTree);
@@ -213,6 +213,8 @@ namespace MantidQt
 
 			findAllWidths(mws);
 
+      auto qRangeSelector = m_uiForm.ppPlot->getRangeSelector("JumpFitQ");
+
 			if(m_spectraList.size() > 0)
 			{
 				m_uiForm.cbWidth->setEnabled(true);
@@ -227,11 +229,11 @@ namespace MantidQt
 
 				// Use the values from the instrument parameter file if we can
 				if(getInstrumentResolution(filename, res))
-					setRangeSelector("JumpFitQ", m_properties["QMin"], m_properties["QMax"], res);
+					setRangeSelector(qRangeSelector, m_properties["QMin"], m_properties["QMax"], res);
 				else
-					setRangeSelector("JumpFitQ", m_properties["QMin"], m_properties["QMax"], range);
+					setRangeSelector(qRangeSelector, m_properties["QMin"], m_properties["QMax"], range);
 
-				setPlotPropertyRange("JumpFitQ", m_properties["QMin"], m_properties["QMax"], range);
+				setPlotPropertyRange(qRangeSelector, m_properties["QMin"], m_properties["QMax"], range);
 			}
 			else
 			{
@@ -341,13 +343,15 @@ namespace MantidQt
 		 */
     void JumpFit::updateProperties(QtProperty* prop, double val)
     {
+      auto qRangeSelector = m_uiForm.ppPlot->getRangeSelector("JumpFitQ");
+
     	if(prop == m_properties["QMin"])
     	{
-    		updateLowerGuide(m_rangeSelectors["JumpFitQ"], m_properties["QMin"], m_properties["QMax"], val);
+    		updateLowerGuide(qRangeSelector, m_properties["QMin"], m_properties["QMax"], val);
     	}
     	else if (prop == m_properties["QMax"])
     	{
-				updateUpperGuide(m_rangeSelectors["JumpFitQ"], m_properties["QMin"], m_properties["QMax"], val);
+				updateUpperGuide(qRangeSelector, m_properties["QMin"], m_properties["QMax"], val);
     	}
     }
 	} // namespace CustomInterfaces

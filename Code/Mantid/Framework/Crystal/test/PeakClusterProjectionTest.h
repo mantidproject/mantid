@@ -4,12 +4,11 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidCrystal/PeakClusterProjection.h"
-
+#include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidAPI/IPeak.h"
-#include "MantidAPI/FrameworkManager.h"
-#include "MantidAPI/AlgorithmManager.h"
 
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
@@ -21,7 +20,6 @@
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using namespace Mantid::Crystal;
-using namespace Mantid::MDEvents;
 using namespace Mantid::DataObjects;
 
 class PeakClusterProjectionTest: public CxxTest::TestSuite
@@ -90,8 +88,7 @@ public:
     delete suite;
   }
 
-  PeakClusterProjectionTest()
-  {
+  PeakClusterProjectionTest() {
     FrameworkManager::Instance();
   }
 

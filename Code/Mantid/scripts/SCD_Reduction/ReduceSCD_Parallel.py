@@ -84,6 +84,7 @@ params_dictionary = ReduceDictionary.LoadDictionary( *config_files )
 
 exp_name              = params_dictionary[ "exp_name" ]
 output_directory      = params_dictionary[ "output_directory" ]
+output_nexus          = params_dictionary.get( "output_nexus", False)
 reduce_one_run_script = params_dictionary[ "reduce_one_run_script" ]
 slurm_queue_name      = params_dictionary[ "slurm_queue_name" ]
 max_processes         = int(params_dictionary[ "max_processes" ])
@@ -94,6 +95,7 @@ cell_type             = params_dictionary[ "cell_type" ]
 centering             = params_dictionary[ "centering" ]
 allow_perm            = params_dictionary[ "allow_perm" ]
 run_nums              = params_dictionary[ "run_nums" ]
+data_directory        = params_dictionary[ "data_directory" ]
 
 use_cylindrical_integration = params_dictionary[ "use_cylindrical_integration" ]
 instrument_name       = params_dictionary[ "instrument_name" ]
@@ -153,17 +155,47 @@ print   "***********************************************************************
 # appending them to a combined output file.
 #
 niggli_name = output_directory + "/" + exp_name + "_Niggli"
-niggli_integrate_file = niggli_name + ".integrate"
+if output_nexus:
+    niggli_integrate_file = niggli_name + ".nxs"
+else:
+    niggli_integrate_file = niggli_name + ".integrate"
 niggli_matrix_file = niggli_name + ".mat"
 
 first_time = True
+
+if output_nexus:
+    #Only need this for instrument for peaks_total
+    short_filename = "%s_%s_event.nxs" % (instrument_name, str(run_nums[0]))
+    if data_directory is not None:
+        full_name = data_directory + "/" + short_filename
+    else:
+        candidates = FileFinder.findRuns(short_filename)
+        full_name = ""
+        for item in candidates:
+            if os.path.exists(item):
+                full_name = str(item)
+
+        if not full_name.endswith('nxs'):
+            print "Exiting since the data_directory was not specified and"
+            print "findnexus failed for event NeXus file: " + instrument_name + " " + str(run)
+            exit(0)
+    #
+    # Load the first data file to find instrument
+    #
+    wksp = LoadEventNexus( Filename=full_name, FilterByTofMin=0, FilterByTofMax=0 )
+    peaks_total = CreatePeaksWorkspace(NumberOfPeaks=0, InstrumentWorkspace=wksp)
+
 if not use_cylindrical_integration:
     for r_num in run_nums:
-        one_run_file = output_directory + '/' + str(r_num) + '_Niggli.integrate'
-        peaks_ws = LoadIsawPeaks( Filename=one_run_file )
+        if output_nexus:
+            one_run_file = output_directory + '/' + str(r_num) + '_Niggli.nxs'
+            peaks_ws = Load( Filename=one_run_file )
+        else:
+            one_run_file = output_directory + '/' + str(r_num) + '_Niggli.integrate'
+            peaks_ws = LoadIsawPeaks( Filename=one_run_file )
         if first_time:
             if UseFirstLattice and not read_UB:
-    # Find a UB (using FFT) for the first run to use in the FindUBUsingLatticeParameters
+                # Find a UB (using FFT) for the first run to use in the FindUBUsingLatticeParameters
                 FindUBUsingFFT( PeaksWorkspace=peaks_ws, MinD=min_d, MaxD=max_d, Tolerance=tolerance )
                 uc_a = peaks_ws.sample().getOrientedLattice().a()
                 uc_b = peaks_ws.sample().getOrientedLattice().b()
@@ -171,17 +203,27 @@ if not use_cylindrical_integration:
                 uc_alpha = peaks_ws.sample().getOrientedLattice().alpha()
                 uc_beta = peaks_ws.sample().getOrientedLattice().beta()
                 uc_gamma = peaks_ws.sample().getOrientedLattice().gamma()
-            SaveIsawPeaks( InputWorkspace=peaks_ws, AppendFile=False, Filename=niggli_integrate_file )
-
+            if output_nexus:
+                peaks_total = CombinePeaksWorkspaces(LHSWorkspace=peaks_total, RHSWorkspace=peaks_ws)
+                SaveNexus( InputWorkspace=peaks_ws, Filename=niggli_integrate_file )
+            else:
+                SaveIsawPeaks( InputWorkspace=peaks_ws, AppendFile=False, Filename=niggli_integrate_file )
             first_time = False
         else:
-            SaveIsawPeaks( InputWorkspace=peaks_ws, AppendFile=True, Filename=niggli_integrate_file )
+            if output_nexus:
+                peaks_total = CombinePeaksWorkspaces(LHSWorkspace=peaks_total, RHSWorkspace=peaks_ws)
+                SaveNexus( InputWorkspace=peaks_total, Filename=niggli_integrate_file )
+            else:
+                SaveIsawPeaks( InputWorkspace=peaks_ws, AppendFile=True, Filename=niggli_integrate_file )
 
 #
 # Load the combined file and re-index all of the peaks together.
 # Save them back to the combined Niggli file (Or selcted UB file if in use...)
 #
-    peaks_ws = LoadIsawPeaks( Filename=niggli_integrate_file )
+    if output_nexus:
+        peaks_ws = Load( Filename=niggli_integrate_file )
+    else:
+        peaks_ws = LoadIsawPeaks( Filename=niggli_integrate_file )
 
 #
 # Find a Niggli UB matrix that indexes the peaks in this run
@@ -190,23 +232,29 @@ if not use_cylindrical_integration:
     if read_UB:
         LoadIsawUB(InputWorkspace=peaks_ws, Filename=UB_filename)
         if UseFirstLattice:
-      # Find UB using lattice parameters from the specified file
+            # Find UB using lattice parameters from the specified file
             uc_a = peaks_ws.sample().getOrientedLattice().a()
             uc_b = peaks_ws.sample().getOrientedLattice().b()
             uc_c = peaks_ws.sample().getOrientedLattice().c()
             uc_alpha = peaks_ws.sample().getOrientedLattice().alpha()
             uc_beta = peaks_ws.sample().getOrientedLattice().beta()
             uc_gamma = peaks_ws.sample().getOrientedLattice().gamma()
-            FindUBUsingLatticeParameters(PeaksWorkspace= peaks_ws,a=uc_a,b=uc_b,c=uc_c,alpha=uc_alpha,beta=uc_beta, gamma=uc_gamma,NumInitial=num_peaks_to_find,Tolerance=tolerance)
-  #OptimizeCrystalPlacement(PeaksWorkspace=peaks_ws,ModifiedPeaksWorkspace=peaks_ws,FitInfoTable='CrystalPlacement_info',MaxIndexingError=tolerance)
+            FindUBUsingLatticeParameters(PeaksWorkspace= peaks_ws,a=uc_a,b=uc_b,c=uc_c,alpha=uc_alpha,beta=uc_beta,
+                                         gamma=uc_gamma,NumInitial=num_peaks_to_find,Tolerance=tolerance)
+        #OptimizeCrystalPlacement(PeaksWorkspace=peaks_ws,ModifiedPeaksWorkspace=peaks_ws,
+        #                         FitInfoTable='CrystalPlacement_info',MaxIndexingError=tolerance)
     elif UseFirstLattice and not read_UB:
-    # Find UB using lattice parameters using the FFT results from first run if no UB file is specified
-        FindUBUsingLatticeParameters(PeaksWorkspace= peaks_ws,a=uc_a,b=uc_b,c=uc_c,alpha=uc_alpha,beta=uc_beta, gamma=uc_gamma,NumInitial=num_peaks_to_find,Tolerance=tolerance)
+        # Find UB using lattice parameters using the FFT results from first run if no UB file is specified
+        FindUBUsingLatticeParameters(PeaksWorkspace= peaks_ws,a=uc_a,b=uc_b,c=uc_c,alpha=uc_alpha,beta=uc_beta,
+                                     gamma=uc_gamma,NumInitial=num_peaks_to_find,Tolerance=tolerance)
     else:
         FindUBUsingFFT( PeaksWorkspace=peaks_ws, MinD=min_d, MaxD=max_d, Tolerance=tolerance )
 
     IndexPeaks( PeaksWorkspace=peaks_ws, Tolerance=tolerance )
-    SaveIsawPeaks( InputWorkspace=peaks_ws, AppendFile=False, Filename=niggli_integrate_file )
+    if output_nexus:
+        SaveNexus( InputWorkspace=peaks_ws, Filename=niggli_integrate_file )
+    else:
+        SaveIsawPeaks( InputWorkspace=peaks_ws, AppendFile=False, Filename=niggli_integrate_file )
     SaveIsawUB( InputWorkspace=peaks_ws, Filename=niggli_matrix_file )
 
 #
@@ -216,12 +264,18 @@ if not use_cylindrical_integration:
 if not use_cylindrical_integration:
     if (not cell_type is None) and (not centering is None) :
         conv_name = output_directory + "/" + exp_name + "_" + cell_type + "_" + centering
-        conventional_integrate_file = conv_name + ".integrate"
+        if output_nexus:
+            conventional_integrate_file = conv_name + ".nxs"
+        else:
+            conventional_integrate_file = conv_name + ".integrate"
         conventional_matrix_file = conv_name + ".mat"
 
         SelectCellOfType( PeaksWorkspace=peaks_ws, CellType=cell_type, Centering=centering,\
                       AllowPermutations=allow_perm, Apply=True, Tolerance=tolerance )
-        SaveIsawPeaks( InputWorkspace=peaks_ws, AppendFile=False, Filename=conventional_integrate_file )
+        if output_nexus:
+            SaveNexus( InputWorkspace=peaks_ws, Filename=conventional_integrate_file )
+        else:
+            SaveIsawPeaks( InputWorkspace=peaks_ws, AppendFile=False, Filename=conventional_integrate_file )
         SaveIsawUB( InputWorkspace=peaks_ws, Filename=conventional_matrix_file )
 
 if use_cylindrical_integration:
@@ -245,7 +299,8 @@ if use_cylindrical_integration:
         filename = output_directory + '/' + instrument_name + '_' + r_num + '.profiles'
         input = open(filename, 'r')
         for line in input:
-            if line[0] == '0': break
+            if line[0] == '0':
+                break
         output.write(line)
         for line in input:
             output.write(line)

@@ -39,10 +39,10 @@ ConvertEmptyToTof::~ConvertEmptyToTof() {}
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string ConvertEmptyToTof::name() const {
   return "ConvertEmptyToTof";
-};
+}
 
 /// Algorithm's version for identification. @see Algorithm::version
-int ConvertEmptyToTof::version() const { return 1; };
+int ConvertEmptyToTof::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
 const std::string ConvertEmptyToTof::category() const {

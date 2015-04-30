@@ -13,11 +13,13 @@ using namespace boost::python;
 namespace
 {
   ///@cond
-  BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Workspace_isDirtyOverloads, Workspace::isDirty, 0, 1);
+  BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Workspace_isDirtyOverloads, Workspace::isDirty, 0, 1)
   ///@endcond
 }
 
+// clang-format off
 void export_Workspace()
+// clang-format on
 {
   class_<Workspace, bases<DataItem>, boost::noncopyable>("Workspace", no_init)
     .def("getName", &Workspace::getName, return_value_policy<copy_const_reference>(), 

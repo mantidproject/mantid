@@ -1,27 +1,22 @@
 #ifndef MANTID_MD_CONVERT2_Q_NDANY_TEST_H_
 #define MANTID_MD_CONVERT2_Q_NDANY_TEST_H_
 
-#include "MantidDataObjects/EventWorkspace.h"
-#include "MantidKernel/System.h"
-#include "MantidKernel/Timer.h"
-#include "MantidAPI/TextAxis.h"
+#include "MantidAPI/BoxController.h"
 #include "MantidMDAlgorithms/ConvertToMD.h"
+#include "MantidMDAlgorithms/ConvToMDSelector.h"
+#include "MantidMDAlgorithms/PreprocessDetectorsToMD.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidKernel/UnitFactory.h"
-#include "MantidMDEvents/ConvToMDSelector.h"
-#include "MantidMDAlgorithms/PreprocessDetectorsToMD.h"
+
+#include "MantidAPI/AlgorithmManager.h"
 #include <cxxtest/TestSuite.h>
-#include <iomanip>
-#include <iostream>
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::MDAlgorithms;
-using namespace Mantid::MDEvents;
 
 class Convert2AnyTestHelper: public ConvertToMD
 {
@@ -62,7 +57,7 @@ void testInit(){
     TS_ASSERT_THROWS_NOTHING( pAlg->initialize() )
     TS_ASSERT( pAlg->isInitialized() )
 
-    TSM_ASSERT_EQUALS("algorithm should have 21 properties",21,(size_t)(pAlg->getProperties().size()));
+    TSM_ASSERT_EQUALS("algorithm should have 22 properties",22,(size_t)(pAlg->getProperties().size()));
 }
 
 
@@ -171,6 +166,97 @@ void testExecQ3D()
     AnalysisDataService::Instance().remove("WS5DQ3D");
 }
 
+void testInitialSplittingEnabled()
+{ 
+  // Create workspace
+  auto alg = Mantid::API::AlgorithmManager::Instance().create("CreateSampleWorkspace");
+  alg->initialize();
+  alg->setChild(true);
+  alg->setProperty("WorkspaceType","Event");
+  alg->setPropertyValue("OutputWorkspace","dummy");
+  alg->execute();
+
+  Mantid::API::MatrixWorkspace_sptr ws = alg->getProperty("OutputWorkspace");
+
+  Mantid::API::Run& run = ws->mutableRun();
+  auto eiLog = new PropertyWithValue<double>("Ei", 12.0);
+  run.addLogData(eiLog);
+
+  ConvertToMD convertAlg;
+  convertAlg.setChild(true);
+  convertAlg.initialize();
+  convertAlg.setPropertyValue("OutputWorkspace","dummy");
+  convertAlg.setProperty("InputWorkspace", ws);
+  convertAlg.setProperty("QDimensions", "Q3D");
+  convertAlg.setProperty("dEAnalysisMode", "Direct");
+  convertAlg.setPropertyValue("MinValues","-10,-10,-10, 0");
+  convertAlg.setPropertyValue("MaxValues"," 10, 10, 10, 1");
+  convertAlg.setPropertyValue("TopLevelSplitting", "1");
+  convertAlg.execute();
+
+  IMDEventWorkspace_sptr outEventWS = convertAlg.getProperty("OutputWorkspace");
+
+  Mantid::API::BoxController_sptr boxController = outEventWS->getBoxController();
+  std::vector<size_t> numMDBoxes = boxController->getNumMDBoxes();
+  std::vector<size_t> numMDGridBoxes = boxController->getNumMDGridBoxes();
+  // Check depth 0
+  size_t level0 = numMDBoxes[0] + numMDGridBoxes[0];
+  TSM_ASSERT_EQUALS("Should have no MDBoxes at level 0", 1, level0);
+  // Check depth 1. The boxController is set to split with 50, 50, 50, 50.
+  // We need to ensure that the number of Boxes plus the number of Gridboxes is 50^4
+  size_t level1 = numMDBoxes[1] + numMDGridBoxes[1];
+  TSM_ASSERT_EQUALS("Should have 6250000 MDBoxes at level 1", 6250000, level1);
+
+  // Confirm that the boxcontroller is set to the original settings
+  TSM_ASSERT_EQUALS("Should be set to 5", 5, boxController->getSplitInto(0));
+  TSM_ASSERT_EQUALS("Should be set to 5", 5, boxController->getSplitInto(1));
+  TSM_ASSERT_EQUALS("Should be set to 5", 5, boxController->getSplitInto(2));
+  TSM_ASSERT_EQUALS("Should be set to 5", 5, boxController->getSplitInto(3));
+}
+
+void testInitialSplittingDisabled()
+{
+     Mantid::API::MatrixWorkspace_sptr ws2D = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("testWSProcessed");
+     API::NumericAxis *pAxis = new API::NumericAxis(3);
+     pAxis->setUnit("DeltaE");
+
+     ws2D->replaceAxis(0,pAxis);
+
+    pAlg->setPropertyValue("OutputWorkspace","WS5DQ3D");
+    pAlg->setPropertyValue("InputWorkspace","testWSProcessed");
+    pAlg->setPropertyValue("OtherDimensions","phi,chi");
+    pAlg->setPropertyValue("PreprocDetectorsWS","");
+     
+    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("QDimensions", "Q3D"));
+    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("dEAnalysisMode", "Direct"));
+    pAlg->setPropertyValue("MinValues","-10,-10,-10,  0,-10,-10");
+    pAlg->setPropertyValue("MaxValues"," 10, 10, 10, 20, 40, 20");
+    TS_ASSERT_THROWS_NOTHING(pAlg->setPropertyValue("TopLevelSplitting", "0"));
+    pAlg->setRethrows(false);
+    pAlg->execute();
+    TSM_ASSERT("Should finish successfully",pAlg->isExecuted());
+
+    IMDEventWorkspace_sptr outputWS = AnalysisDataService::Instance().retrieveWS<IMDEventWorkspace>("WS5DQ3D");
+    Mantid::API::BoxController_sptr boxController = outputWS->getBoxController();
+
+    std::vector<size_t> numMDBoxes = boxController->getNumMDBoxes();
+
+    // Check depth 0
+    TSM_ASSERT_EQUALS("Should have no MDBoxes at level 0", 0, numMDBoxes[0]);
+    // Check depth 1. The boxController is set to split with 5, 5, 5, 5, 5, 5
+    TSM_ASSERT_EQUALS("Should have 15625 MDBoxes at level 1", 15625, numMDBoxes[1]);
+
+    // Confirm that the boxcontroller is set to the original settings
+    TSM_ASSERT_EQUALS("Should be set to 5", 5, boxController->getSplitInto(0));
+    TSM_ASSERT_EQUALS("Should be set to 5", 5, boxController->getSplitInto(1));
+    TSM_ASSERT_EQUALS("Should be set to 5", 5, boxController->getSplitInto(2));
+
+    auto outWS = AnalysisDataService::Instance().retrieveWS<IMDWorkspace>("WS5DQ3D");
+    TS_ASSERT_EQUALS(Mantid::Kernel::HKL, outWS->getSpecialCoordinateSystem());
+
+    AnalysisDataService::Instance().remove("WS5DQ3D");
+}
+
 //DO NOT DISABLE THIS TEST
 void testAlgorithmProperties()
 {
@@ -269,7 +355,7 @@ class ConvertToMDTestPerformance : public CxxTest::TestSuite
    // pointer to mock algorithm to work with progress bar
    std::auto_ptr<WorkspaceCreationHelper::MockAlgorithm> pMockAlgorithm;
 
-    boost::shared_ptr<MDEvents::MDEventWSWrapper> pTargWS;
+    boost::shared_ptr<MDEventWSWrapper> pTargWS;
 
 public:
 static ConvertToMDTestPerformance *createSuite() { return new ConvertToMDTestPerformance(); }

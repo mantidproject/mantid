@@ -2,26 +2,34 @@
 #define LOADNEXUSPROCESSEDTEST_H_
 
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/FileFinder.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
-#include "MantidDataHandling/LoadInstrument.h"
 #include "MantidDataObjects/EventWorkspace.h"
-#include "MantidGeometry/Instrument.h"
-#include "MantidDataHandling/LoadNexusProcessed.h"
-#include "MantidDataHandling/SaveNexusProcessed.h"
-#include "MantidDataHandling/Load.h"
-#include "SaveNexusProcessedTest.h"
-#include <cxxtest/TestSuite.h>
-#include <iostream>
-#include <Poco/File.h>
-#include <boost/lexical_cast.hpp>
-#include "MantidGeometry/IDTypes.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidDataObjects/PeakShapeSpherical.h"
 #include "MantidDataObjects/Peak.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidGeometry/IDTypes.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/InstrumentDefinitionParser.h"
+#include "MantidDataHandling/LoadNexusProcessed.h"
+#include "MantidDataHandling/SaveNexusProcessed.h"
+#include "MantidDataHandling/Load.h"
+#include "MantidDataHandling/LoadInstrument.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
+#include "SaveNexusProcessedTest.h"
+
+#include <boost/lexical_cast.hpp>
+
+#include <cxxtest/TestSuite.h>
+
+#include <hdf5.h>
+
+#include <Poco/File.h>
+
+using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
 using namespace Mantid::DataObjects;
 using namespace Mantid::API;
@@ -813,9 +821,111 @@ public:
       Workspace_sptr ws = loadAlg.getProperty("OutputWorkspace");
       auto peakWS = boost::dynamic_pointer_cast<Mantid::DataObjects::PeaksWorkspace>(ws);
       TS_ASSERT(peakWS);
-
   }
 
+  void test_coordinates_saved_and_loaded_on_peaks_workspace()
+  {
+    auto peaksTestWS = WorkspaceCreationHelper::createPeaksWorkspace();
+    // Loading a peaks workspace without a instrument from an IDF doesn't work ...
+    const std::string filename = FileFinder::Instance().getFullPath(
+          "IDFs_for_UNIT_TESTING/MINITOPAZ_Definition.xml");
+    InstrumentDefinitionParser parser;
+    parser.initialize(filename, "MINITOPAZ", Strings::loadFile(filename));
+    auto instrument = parser.parseXML(NULL);
+    peaksTestWS->populateInstrumentParameters();
+    peaksTestWS->setInstrument(instrument);
+
+    const SpecialCoordinateSystem appliedCoordinateSystem = QSample;
+    peaksTestWS->setCoordinateSystem(appliedCoordinateSystem);
+
+    SaveNexusProcessed saveAlg;
+    saveAlg.setChild(true);
+    saveAlg.initialize();
+    saveAlg.setProperty("InputWorkspace", peaksTestWS);
+    saveAlg.setPropertyValue("Filename", "LoadAndSaveNexusProcessedCoordinateSystem.nxs");
+    saveAlg.execute();
+    std::string filePath = saveAlg.getPropertyValue("Filename");
+
+    LoadNexusProcessed loadAlg;
+    loadAlg.setChild(true);
+    loadAlg.initialize();
+    loadAlg.setPropertyValue("Filename", filePath);
+    loadAlg.setPropertyValue("OutputWorkspace", "__unused");
+    loadAlg.execute();
+    
+    Mantid::API::Workspace_sptr loadedWS = loadAlg.getProperty("OutputWorkspace");
+    auto loadedPeaksWS =
+        boost::dynamic_pointer_cast<Mantid::API::IPeaksWorkspace>(loadedWS);
+    Poco::File testFile(filePath);
+    if(testFile.exists())
+    {
+      testFile.remove();
+    }
+    
+    TS_ASSERT_EQUALS(appliedCoordinateSystem, loadedPeaksWS->getSpecialCoordinateSystem());
+  }
+
+  // backwards compatability check
+  void test_coordinates_saved_and_loaded_on_peaks_workspace_from_expt_info()
+  {
+    auto peaksTestWS = WorkspaceCreationHelper::createPeaksWorkspace();
+    // Loading a peaks workspace without a instrument from an IDF doesn't work ...
+    const std::string filename = FileFinder::Instance().getFullPath(
+          "IDFs_for_UNIT_TESTING/MINITOPAZ_Definition.xml");
+    InstrumentDefinitionParser parser;
+    parser.initialize(filename, "MINITOPAZ", Strings::loadFile(filename));
+    auto instrument = parser.parseXML(NULL);
+    peaksTestWS->populateInstrumentParameters();
+    peaksTestWS->setInstrument(instrument);
+
+    // simulate old-style file with "CoordinateSystem" log
+    const SpecialCoordinateSystem appliedCoordinateSystem = QSample;
+    peaksTestWS->logs()->addProperty("CoordinateSystem",
+                                     static_cast<int>(appliedCoordinateSystem));
+
+    SaveNexusProcessed saveAlg;
+    saveAlg.setChild(true);
+    saveAlg.initialize();
+    saveAlg.setProperty("InputWorkspace", peaksTestWS);
+    saveAlg.setPropertyValue("Filename", "LoadAndSaveNexusProcessedCoordinateSystemOldFormat.nxs");
+    saveAlg.execute();
+    std::string filePath = saveAlg.getPropertyValue("Filename");
+
+    // Remove the coordinate_system entry so it falls back on the log. NeXus
+    // can't do this so use the HDF5 API directly
+    auto fid = H5Fopen(filePath.c_str(), H5F_ACC_RDWR, H5P_DEFAULT);
+    auto mantid_id = H5Gopen(fid, "mantid_workspace_1", H5P_DEFAULT);
+    auto peaks_id = H5Gopen(mantid_id, "peaks_workspace", H5P_DEFAULT);
+    if (peaks_id > 0) {
+      H5Ldelete(peaks_id, "coordinate_system", H5P_DEFAULT);
+      H5Gclose(peaks_id);
+      H5Gclose(mantid_id);
+    } else {
+      TS_FAIL("Cannot unlink coordinate_system group. Test file has unexpected "
+              "structure.");
+    }
+    H5Fclose(fid);
+    
+    LoadNexusProcessed loadAlg;
+    loadAlg.setChild(true);
+    loadAlg.initialize();
+    loadAlg.setPropertyValue("Filename", filePath);
+    loadAlg.setPropertyValue("OutputWorkspace", "__unused");
+    loadAlg.execute();
+    
+    Mantid::API::Workspace_sptr loadedWS = loadAlg.getProperty("OutputWorkspace");
+    auto loadedPeaksWS =
+        boost::dynamic_pointer_cast<Mantid::API::IPeaksWorkspace>(loadedWS);
+    Poco::File testFile(filePath);
+    if(testFile.exists())
+    {
+      testFile.remove();
+    }
+    
+    TS_ASSERT_EQUALS(appliedCoordinateSystem, loadedPeaksWS->getSpecialCoordinateSystem());
+  }
+
+  
   void testTableWorkspace_vectorColumn()
   {
     // Create a table we will save

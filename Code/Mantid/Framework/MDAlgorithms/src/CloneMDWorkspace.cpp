@@ -1,15 +1,15 @@
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidKernel/System.h"
-#include "MantidMDEvents/MDEventFactory.h"
+#include "MantidDataObjects/MDEventFactory.h"
 #include <Poco/File.h>
 #include <Poco/Path.h>
 #include "MantidAPI/FileProperty.h"
-#include "MantidMDEvents/MDHistoWorkspace.h"
+#include "MantidDataObjects/MDHistoWorkspace.h"
 #include "MantidMDAlgorithms/CloneMDWorkspace.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
-using namespace Mantid::MDEvents;
+using namespace Mantid::DataObjects;
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -142,4 +142,4 @@ void CloneMDWorkspace::exec() {
 }
 
 } // namespace Mantid
-} // namespace MDEvents
+} // namespace DataObjects

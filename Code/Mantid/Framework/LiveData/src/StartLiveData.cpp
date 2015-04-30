@@ -37,10 +37,10 @@ StartLiveData::~StartLiveData() {}
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
-const std::string StartLiveData::name() const { return "StartLiveData"; };
+const std::string StartLiveData::name() const { return "StartLiveData"; }
 
 /// Algorithm's version for identification. @see Algorithm::version
-int StartLiveData::version() const { return 1; };
+int StartLiveData::version() const { return 1; }
 
 //----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.

@@ -2,9 +2,9 @@
 #define VTK_MD_HEX_FACTORY_TEST
 
 #include "MantidAPI/IMDEventWorkspace.h"
-#include "MantidMDEvents/MDEventFactory.h"
-#include "MantidMDEvents/MDEventWorkspace.h"
-#include "MantidMDEvents/MDHistoWorkspace.h"
+#include "MantidDataObjects/MDEventFactory.h"
+#include "MantidDataObjects/MDEventWorkspace.h"
+#include "MantidDataObjects/MDHistoWorkspace.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 #include "MantidVatesAPI/UserDefinedThresholdRange.h"
@@ -21,7 +21,7 @@
 using namespace Mantid;
 using namespace Mantid::VATES;
 using namespace Mantid::API;
-using namespace Mantid::MDEvents;
+using namespace Mantid::DataObjects;
 using namespace testing;
 
 //=====================================================================================
@@ -33,7 +33,7 @@ private:
 
   void doDimensionalityTesting(bool doCheckDimensionality)
   {
-    Mantid::MDEvents::MDEventWorkspace3Lean::sptr input_ws = MDEventsTestHelper::makeMDEW<3>(10, 0.0, 10.0, 1);
+    Mantid::DataObjects::MDEventWorkspace3Lean::sptr input_ws = MDEventsTestHelper::makeMDEW<3>(10, 0.0, 10.0, 1);
 
     using namespace Mantid::API;
     IAlgorithm_sptr slice = AlgorithmManager::Instance().createUnmanaged("SliceMD");
@@ -155,7 +155,7 @@ public:
   {
     FakeProgressAction progressUpdate;
 
-    Mantid::MDEvents::MDEventWorkspace3Lean::sptr ws = MDEventsTestHelper::makeMDEW<3>(10, 0.0, 10.0, 1);
+    Mantid::DataObjects::MDEventWorkspace3Lean::sptr ws = MDEventsTestHelper::makeMDEW<3>(10, 0.0, 10.0, 1);
     vtkMDHexFactory factory(ThresholdRange_scptr(new UserDefinedThresholdRange(0, 1)), "signal");
     factory.initialize(ws);
     vtkDataSet* product = NULL;
@@ -189,7 +189,7 @@ public:
     MockProgressAction mockProgressAction;
     EXPECT_CALL(mockProgressAction, eventRaised(_)).Times(AtLeast(1));
 
-    Mantid::MDEvents::MDEventWorkspace4Lean::sptr ws = MDEventsTestHelper::makeMDEW<4>(5, -10.0, 10.0, 1);
+    Mantid::DataObjects::MDEventWorkspace4Lean::sptr ws = MDEventsTestHelper::makeMDEW<4>(5, -10.0, 10.0, 1);
     vtkMDHexFactory factory(ThresholdRange_scptr(new UserDefinedThresholdRange(0, 1)), "signal");
     factory.initialize(ws);
     vtkDataSet* product = NULL;
@@ -231,8 +231,8 @@ class vtkMDHexFactoryTestPerformance : public CxxTest::TestSuite
 
 private:
   
-  Mantid::MDEvents::MDEventWorkspace3Lean::sptr m_ws3;
-  Mantid::MDEvents::MDEventWorkspace4Lean::sptr m_ws4;
+  Mantid::DataObjects::MDEventWorkspace3Lean::sptr m_ws3;
+  Mantid::DataObjects::MDEventWorkspace4Lean::sptr m_ws4;
 
 public :
 

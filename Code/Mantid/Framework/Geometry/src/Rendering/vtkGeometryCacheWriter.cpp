@@ -1,13 +1,17 @@
+#include <fstream>
+#include <iostream>
+#include <sstream>
+
 #include "MantidGeometry/Rendering/vtkGeometryCacheWriter.h"
-#include "MantidKernel/Logger.h"
 #include "MantidGeometry/Objects/Object.h"
 #include "MantidGeometry/Rendering/GeometryHandler.h"
+#include "MantidKernel/Logger.h"
 
+#include <Poco/DOM/AutoPtr.h>
 #include <Poco/DOM/Document.h>
+#include <Poco/DOM/DOMWriter.h>
 #include <Poco/DOM/Element.h>
 #include <Poco/DOM/Text.h>
-#include <Poco/DOM/AutoPtr.h>
-#include <Poco/DOM/DOMWriter.h>
 
 #ifdef _MSC_VER
 // Disable a flood of warnings from Poco about inheriting from
@@ -25,10 +29,6 @@
 
 #include <Poco/File.h>
 #include <Poco/Path.h>
-
-#include <iostream>
-#include <sstream>
-#include <fstream>
 
 using Poco::XML::Document;
 using Poco::XML::Element;

@@ -1,11 +1,10 @@
-#ifndef MANTID_MDEVENTS_CREATEMDWORKSPACE_H_
-#define MANTID_MDEVENTS_CREATEMDWORKSPACE_H_
+#ifndef MANTID_MDALGORITHMS_CREATEMDWORKSPACE_H_
+#define MANTID_MDALGORITHMS_CREATEMDWORKSPACE_H_
 
 #include "MantidAPI/Algorithm.h"
-#include "MantidKernel/System.h"
-#include "MantidMDEvents/BoxControllerSettingsAlgorithm.h"
-#include "MantidMDEvents/MDEventFactory.h"
-#include "MantidMDEvents/MDEventWorkspace.h"
+#include "MantidMDAlgorithms/BoxControllerSettingsAlgorithm.h"
+#include "MantidDataObjects/MDEventFactory.h"
+#include "MantidDataObjects/MDEventWorkspace.h"
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -20,13 +19,13 @@ namespace MDAlgorithms {
  * @date 2011-02-25 11:54:52.003137
  */
 class DLLExport CreateMDWorkspace
-    : public MDEvents::BoxControllerSettingsAlgorithm {
+    : public MDAlgorithms::BoxControllerSettingsAlgorithm {
 public:
   CreateMDWorkspace();
   ~CreateMDWorkspace();
 
   /// Algorithm's name for identification
-  virtual const std::string name() const { return "CreateMDWorkspace"; };
+  virtual const std::string name() const { return "CreateMDWorkspace"; }
   /// Summary of algorithms purpose
   virtual const std::string summary() const {
     return "Creates an empty MDEventWorkspace with a given number of "
@@ -34,7 +33,7 @@ public:
   }
 
   /// Algorithm's version for identification
-  virtual int version() const { return 1; };
+  virtual int version() const { return 1; }
   /// Algorithm's category for identification
   virtual const std::string category() const { return "MDAlgorithms"; }
 
@@ -43,10 +42,10 @@ private:
   void exec();
 
   template <typename MDE, size_t nd>
-  void finish(typename MDEvents::MDEventWorkspace<MDE, nd>::sptr ws);
+  void finish(typename DataObjects::MDEventWorkspace<MDE, nd>::sptr ws);
 };
 
 } // namespace Mantid
-} // namespace MDEvents
+} // namespace DataObjects
 
-#endif /* MANTID_MDEVENTS_CREATEMDWORKSPACE_H_ */
+#endif /* MANTID_MDALGORITHMS_CREATEMDWORKSPACE_H_ */

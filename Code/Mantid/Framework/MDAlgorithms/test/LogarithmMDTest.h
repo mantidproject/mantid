@@ -8,13 +8,13 @@
 #include <iomanip>
 
 #include "MantidMDAlgorithms/LogarithmMD.h"
-#include "MantidMDEvents/MDHistoWorkspace.h"
+#include "MantidDataObjects/MDHistoWorkspace.h"
 #include "MantidTestHelpers/BinaryOperationMDTestHelper.h"
 
 using namespace Mantid;
 using namespace Mantid::MDAlgorithms;
 using namespace Mantid::API;
-using Mantid::MDEvents::MDHistoWorkspace_sptr;
+using Mantid::DataObjects::MDHistoWorkspace_sptr;
 
 class LogarithmMDTest : public CxxTest::TestSuite
 {

@@ -81,10 +81,8 @@ Workspace2D_sptr Create1DWorkspaceConstant(int size, double value,
                                            double error) {
   MantidVecPtr x1, y1, e1;
   x1.access().resize(size, 1);
-  y1.access().resize(size);
-  std::fill(y1.access().begin(), y1.access().end(), value);
-  e1.access().resize(size);
-  std::fill(y1.access().begin(), y1.access().end(), error);
+  y1.access().resize(size, value);
+  e1.access().resize(size, error);
   Workspace2D_sptr retVal(new Workspace2D);
   retVal->initialize(1, size, size);
   retVal->setX(0, x1);
@@ -920,7 +918,7 @@ createProcessedInelasticWS(const std::vector<double> &L2,
 
   // detectors at L2, sample at 0 and source at -L2_min
   ws->setInstrument(
-      ComponentCreationHelper::createCylInstrumentWithDetInGivenPosisions(
+      ComponentCreationHelper::createCylInstrumentWithDetInGivenPositions(
           L2, polar, azimutal));
 
   for (int g = 0; g < static_cast<int>(numPixels); g++) {

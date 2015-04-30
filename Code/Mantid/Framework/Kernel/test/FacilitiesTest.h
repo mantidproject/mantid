@@ -2,6 +2,8 @@
 #define MANTID_FACILITIESTEST_H_
 
 #include <cxxtest/TestSuite.h>
+#include <fstream>
+#include <string>
 
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/ConfigService.h"
@@ -11,9 +13,6 @@
 #include <Poco/DOM/Document.h>
 #include <Poco/DOM/Element.h>
 #include <Poco/DOM/NodeList.h>
-
-#include <string>
-#include <fstream>
 
 using namespace Mantid::Kernel;
 

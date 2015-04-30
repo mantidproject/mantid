@@ -193,25 +193,28 @@ def AbsRun(inputWS, geom, beam, ncan, size, density, sigs, siga, avar, Save):
     accWS = name + '_acc'
     fname = name + '_abs'
 
+    log_names = [item[0] for item in sample_logs]
+    log_values = [item[1] for item in sample_logs]
+
     CreateWorkspace(OutputWorkspace=assWS, DataX=dataX, DataY=dataA1,
                     NSpec=ndet, UnitX='Wavelength',
                     VerticalAxisUnit=v_axis_unit, VerticalAxisValues=v_axis_values)
-    addSampleLogs(assWS, sample_logs)
+    AddSampleLogMultiple(Workspace=assWS, LogNames=log_names, LogValues=log_values)
 
     CreateWorkspace(OutputWorkspace=asscWS, DataX=dataX, DataY=dataA2,
                     NSpec=ndet, UnitX='Wavelength',
                     VerticalAxisUnit=v_axis_unit, VerticalAxisValues=v_axis_values)
-    addSampleLogs(asscWS, sample_logs)
+    AddSampleLogMultiple(Workspace=asscWS, LogNames=log_names, LogValues=log_values)
 
     CreateWorkspace(OutputWorkspace=acscWS, DataX=dataX, DataY=dataA3,
                     NSpec=ndet, UnitX='Wavelength',
                     VerticalAxisUnit=v_axis_unit, VerticalAxisValues=v_axis_values)
-    addSampleLogs(acscWS, sample_logs)
+    AddSampleLogMultiple(Workspace=acscWS, LogNames=log_names, LogValues=log_values)
 
     CreateWorkspace(OutputWorkspace=accWS, DataX=dataX, DataY=dataA4,
                     NSpec=ndet, UnitX='Wavelength',
                     VerticalAxisUnit=v_axis_unit, VerticalAxisValues=v_axis_values)
-    addSampleLogs(accWS, sample_logs)
+    AddSampleLogMultiple(Workspace=accWS, LogNames=log_names, LogValues=log_values)
 
     group = assWS + ',' + asscWS + ',' + acscWS + ',' + accWS
     GroupWorkspaces(InputWorkspaces=group, OutputWorkspace=fname)

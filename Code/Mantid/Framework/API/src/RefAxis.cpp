@@ -90,6 +90,17 @@ bool RefAxis::operator==(const Axis &axis2) const {
   return true;
 }
 
+/** Check if two numeric axis are equivalent to a given tolerance
+ *  @param axis2 :: Reference to the axis to compare to
+ *  @param tolerance :: Tolerance to compare to
+ *  @return true if self and second axis are equal
+ */
+bool RefAxis::equalWithinTolerance(const Axis &axis2,
+                                   const double tolerance) const {
+  UNUSED_ARG(tolerance);
+  return this->operator==(axis2);
+}
+
 double RefAxis::getMin() const {
   throw std::runtime_error("RefAxis cannot determine minimum value. Use readX "
                            "on the workspace instead");

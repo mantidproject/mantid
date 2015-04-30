@@ -24,10 +24,10 @@ DgsRemap::~DgsRemap() {}
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
-const std::string DgsRemap::name() const { return "DgsRemap"; };
+const std::string DgsRemap::name() const { return "DgsRemap"; }
 
 /// Algorithm's version for identification. @see Algorithm::version
-int DgsRemap::version() const { return 1; };
+int DgsRemap::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
 const std::string DgsRemap::category() const { return "Workflow\\Inelastic"; }

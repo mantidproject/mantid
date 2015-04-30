@@ -1,9 +1,9 @@
 #ifndef MANTID_MDALGORITHMS_CONVERT_TO_MD_PARENT_H_
 #define MANTID_MDALGORITHMS_CONVERT_TO_MD_PARENT_H_
 
-#include "MantidMDEvents/MDWSDescription.h"
-#include "MantidMDEvents/BoxControllerSettingsAlgorithm.h"
-#include "MantidMDEvents/ConvToMDBase.h"
+#include "MantidMDAlgorithms/BoxControllerSettingsAlgorithm.h"
+#include "MantidMDAlgorithms/ConvToMDBase.h"
+#include "MantidMDAlgorithms/MDWSDescription.h"
 
 #include "MantidKernel/DeltaEMode.h"
 
@@ -45,11 +45,10 @@ namespace MDAlgorithms {
 */
 
 /// Convert to MD Events class itself:
-class DLLExport ConvertToMDParent
-    : public MDEvents::BoxControllerSettingsAlgorithm {
+class DLLExport ConvertToMDParent : public BoxControllerSettingsAlgorithm {
 public:
-  ConvertToMDParent(){};
-  ~ConvertToMDParent(){};
+  ConvertToMDParent() {}
+  ~ConvertToMDParent() {}
 
   /// Algorithm's name for identification
   virtual const std::string name() const = 0;
@@ -74,7 +73,7 @@ protected:
   static Mantid::Kernel::Logger &g_Log;
 
   /// pointer to the class, which does the particular conversion
-  boost::shared_ptr<MDEvents::ConvToMDBase> m_Convertor;
+  boost::shared_ptr<MDAlgorithms::ConvToMDBase> m_Convertor;
 
   /// Template to check if a variable equal to NaN
   template <class T> inline bool isNaN(T val) {
@@ -86,4 +85,4 @@ protected:
 } // namespace Mantid
 } // namespace MDAlgorithms
 
-#endif /* MANTID_MDEVENTS_MAKEDIFFRACTIONMDEVENTWORKSPACE_H_ */
+#endif /* MANTID_MDALGORITHMS_MAKEDIFFRACTIONMDEVENTWORKSPACE_H_ */

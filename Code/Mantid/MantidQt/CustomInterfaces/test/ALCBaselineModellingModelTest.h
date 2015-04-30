@@ -81,6 +81,7 @@ public:
     {
       TS_ASSERT_EQUALS(fittedFunc->name(), "FlatBackground");
       TS_ASSERT_DELTA(fittedFunc->getParameter("A0"), 3, 1E-8);
+      TS_ASSERT_DELTA(fittedFunc->getError(0),0.447214,1E-6);
     }
 
     MatrixWorkspace_const_sptr corrected = m_model->correctedData();

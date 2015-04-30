@@ -23,18 +23,21 @@ namespace IDA
     virtual bool validate();
     virtual void loadSettings(const QSettings & settings);
 
+    bool doValidation(bool silent = false);
+
   private slots:
-    void shape(int index);
-    void useCanChecked(bool checked);
-    void tcSync();
-    void getBeamWidthFromWorkspace(const QString& wsname);
+    void absCorComplete(bool error);
+    void postProcessComplete(bool error);
+    void getBeamWidthFromWorkspace(const QString& wsName);
 
   private:
+    void addShapeSpecificSampleOptions(Mantid::API::IAlgorithm_sptr alg, QString shape);
+    void addShapeSpecificCanOptions(Mantid::API::IAlgorithm_sptr alg, QString shape);
+
     Ui::CalcCorr m_uiForm;
-    QDoubleValidator * m_dblVal;
-    QDoubleValidator * m_posDblVal;
 
   };
+
 } // namespace IDA
 } // namespace CustomInterfaces
 } // namespace MantidQt

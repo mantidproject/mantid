@@ -1,16 +1,9 @@
 #include "MantidKernel/ListValidator.h"
-#include "MantidKernel/MandatoryValidator.h"
 #include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidAPI/IPeak.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidCrystal/PeaksIntersection.h"
 #include "MantidDataObjects/TableWorkspace.h"
-#include "MantidAPI/Progress.h"
-
-#include <boost/make_shared.hpp>
-#include <boost/function.hpp>
-#include <boost/bind.hpp>
-#include <vector>
 
 using namespace Mantid::API;
 using namespace Mantid::Geometry;

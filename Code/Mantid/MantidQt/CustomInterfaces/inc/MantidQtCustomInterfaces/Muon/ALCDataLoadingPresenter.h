@@ -47,12 +47,15 @@ namespace CustomInterfaces
     /// @return Last loaded data workspace
     MatrixWorkspace_const_sptr loadedData() const { return m_loadedData; }
 
+    /// @return Loaded data as MatrixWorkspace_sptr
+    MatrixWorkspace_sptr exportWorkspace();
+
   private slots:
     /// Load new data and update the view accordingly
     void load();
 
-    /// Updates the list of logs user can choose from
-    void updateAvailableLogs();
+    /// Updates the list of logs and number of periods
+    void updateAvailableInfo();
 
   private:
     /// View which the object works with

@@ -7,7 +7,7 @@ namespace Mantid {
 namespace CurveFitting {
 
 // Register the algorithm into the AlgorithmFactory
-DECLARE_ALGORITHM(SplineInterpolation);
+DECLARE_ALGORITHM(SplineInterpolation)
 
 using namespace API;
 using namespace Kernel;
@@ -145,14 +145,6 @@ SplineInterpolation::setupOutputWorkspace(API::MatrixWorkspace_sptr inws,
                                           int size) const {
   MatrixWorkspace_sptr outputWorkspace =
       WorkspaceFactory::Instance().create(inws, size);
-
-  // create labels for output workspace
-  API::TextAxis *tAxis = new API::TextAxis(size);
-  for (int i = 0; i < size; ++i) {
-    std::string index = boost::lexical_cast<std::string>(i);
-    tAxis->setLabel(i, "Y" + index);
-  }
-  outputWorkspace->replaceAxis(1, tAxis);
 
   return outputWorkspace;
 }

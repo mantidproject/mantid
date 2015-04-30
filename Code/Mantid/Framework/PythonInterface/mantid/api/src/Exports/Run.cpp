@@ -111,7 +111,9 @@ namespace
 
 }
 
+// clang-format off
 void export_Run()
+// clang-format on
 {
   //Pointer
   register_ptr_to_python<Run*>();

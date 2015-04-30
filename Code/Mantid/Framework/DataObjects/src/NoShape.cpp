@@ -1,6 +1,6 @@
 #include "MantidDataObjects/NoShape.h"
 #include <stdexcept>
-#include <jsoncpp/json/json.h>
+#include <json/json.h>
 
 namespace Mantid {
 namespace DataObjects {

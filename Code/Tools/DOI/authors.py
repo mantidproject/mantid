@@ -73,7 +73,7 @@ _translations = {
     'Roman Tolchenov'         : 'Tolchenov, Roman',
     'MichaelWedel'            : 'Wedel, Michael',
     'Michael Wedel'           : 'Wedel, Michael',
-    'Ross Whitfield'          : 'Whitfield, Robert',
+    'Ross Whitfield'          : 'Whitfield, Ross',
     'Robert Whitley'          : 'Whitley, Robert',
     'Michael Whitty'          : 'Whitty, Michael',
     'Steve Williams'          : 'Williams, Steve',

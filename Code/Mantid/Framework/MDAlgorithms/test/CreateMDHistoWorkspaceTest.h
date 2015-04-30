@@ -10,7 +10,7 @@
 #include "MantidMDAlgorithms/CreateMDHistoWorkspace.h"
 
 using namespace Mantid;
-using namespace Mantid::MDEvents;
+using namespace Mantid::DataObjects;
 using namespace Mantid::MDAlgorithms;
 using namespace Mantid::API;
 

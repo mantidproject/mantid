@@ -9,6 +9,7 @@
 #include "MantidAPI/IBoxControllerIO.h"
 #include <nexus/NeXusFile.hpp>
 
+#include <boost/optional.hpp>
 #include <vector>
 
 namespace Mantid {
@@ -32,8 +33,8 @@ public:
    * @return BoxController instance
    */
   BoxController(size_t nd)
-      : nd(nd), m_maxId(0), m_SplitThreshold(1024), m_numSplit(1),
-        m_fileIO(boost::shared_ptr<API::IBoxControllerIO>()) {
+      : nd(nd), m_maxId(0), m_SplitThreshold(1024), m_splitTopInto(boost::none), m_numSplit(1), m_numTopSplit(1),
+      m_fileIO(boost::shared_ptr<API::IBoxControllerIO>()) {
     // TODO: Smarter ways to determine all of these values
     m_maxDepth = 5;
     m_addingEvents_eventsPerTask = 1000;
@@ -116,6 +117,19 @@ public:
     return m_splitInto[dim];
   }
 
+  //-----------------------------------------------------------------------------------
+  /** Return into how many to split along a dimension for the top level
+   *
+   * @return the splits in each dimesion for the top level
+   */
+  boost::optional<std::vector<size_t>> getSplitTopInto() const {
+    //      if (dim >= nd)
+    //        throw std::invalid_argument("BoxController::setSplitInto() called
+    //        with too high of a dimension index.");
+    return m_splitTopInto;
+  }
+
+
   /// Return how many boxes (total) a MDGridBox will contain.
   size_t getNumSplit() const { return m_numSplit; }
 
@@ -141,6 +155,25 @@ public:
                                   "too high of a dimension index.");
     m_splitInto[dim] = num;
     calcNumSplit();
+  }
+
+
+  //-----------------------------------------------------------------------------------
+  /** Set the way splitting will be done for the top level
+   *
+   * @param dim :: dimension to set
+   * @param num :: amount in which to split
+   */
+  void setSplitTopInto(size_t dim, size_t num) {
+    if (dim >= nd)
+      throw std::invalid_argument("BoxController::setSplitTopInto() called with "
+                                  "too high of a dimension index.");
+    // If the vector is not created, then create it
+    if (!m_splitTopInto) {
+      m_splitTopInto = std::vector<size_t>(nd,1);
+    }
+    m_splitTopInto.get()[dim] = num;
+    calcNumTopSplit();
   }
 
   //-----------------------------------------------------------------------------------
@@ -257,12 +290,27 @@ public:
       m_numMDBoxes[depth]--;
     }
     m_numMDGridBoxes[depth]++;
-    m_numMDBoxes[depth + 1] += m_numSplit;
+
+    // We need to account for optional top level splitting
+    if (depth == 0 && m_splitTopInto) {
+      
+      size_t numSplitTop = 1;
+      for (size_t d = 0; d < m_splitTopInto.get().size(); d++)
+        numSplitTop *= m_splitTopInto.get()[d];
+
+      m_numMDBoxes[depth + 1] += numSplitTop;
+    }
+    else {
+      m_numMDBoxes[depth + 1] += m_numSplit;
+    }
     m_mutexNumMDBoxes.unlock();
   }
 
   /** Return the vector giving the number of MD Boxes as a function of depth */
   const std::vector<size_t> &getNumMDBoxes() const { return m_numMDBoxes; }
+
+  /** Return the vector giving the number of MD Grid Boxes as a function of depth */
+  const std::vector<size_t> &getNumMDGridBoxes() const { return m_numMDGridBoxes; }
 
   /** Return the vector giving the MAXIMUM number of MD Boxes as a function of
    * depth */
@@ -356,13 +404,32 @@ private:
     resetMaxNumBoxes();
   }
 
+  /// When you split an MDBox by force, it becomes this many sub boxes
+  void calcNumTopSplit() {
+    m_numTopSplit = 1;
+    for (size_t d = 0; d < nd; d++) {
+      m_numTopSplit *= m_splitTopInto.get()[d];
+    }
+    /// And this changes the max # of boxes too
+    resetMaxNumBoxes();
+  }
+
   /// Calculate the vector of the max # of MDBoxes per level.
   void resetMaxNumBoxes() {
     // Now calculate the max # of boxes
     m_maxNumMDBoxes.resize(m_maxDepth + 1, 0); // Reset to 0
     m_maxNumMDBoxes[0] = 1;
     for (size_t depth = 1; depth < m_maxNumMDBoxes.size(); depth++)
-      m_maxNumMDBoxes[depth] = m_maxNumMDBoxes[depth - 1] * double(m_numSplit);
+    {
+      if (depth ==1 && m_splitTopInto)
+      {
+        m_maxNumMDBoxes[depth] = m_maxNumMDBoxes[depth - 1] * double(m_numTopSplit);
+      }
+      else 
+      {
+        m_maxNumMDBoxes[depth] = m_maxNumMDBoxes[depth - 1] * double(m_numSplit);
+      }
+    }
   }
 
 protected:
@@ -403,8 +470,14 @@ private:
   /// Splitting # for all dimensions
   std::vector<size_t> m_splitInto;
 
+  /// Splittin # for all dimensions in the top level
+  boost::optional<std::vector<size_t>> m_splitTopInto;
+
   /// When you split a MDBox, it becomes this many sub-boxes
   size_t m_numSplit;
+
+  /// When you split a top level MDBox by force, it becomes this many sub boxes
+  size_t m_numTopSplit;
 
   /// For adding events tasks
   size_t m_addingEvents_eventsPerTask;

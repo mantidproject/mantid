@@ -18,13 +18,14 @@ using namespace Kernel;
 using namespace API;
 using namespace NeXus;
 
-DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadSINQFocus);
+DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadSINQFocus)
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
-LoadSINQFocus::LoadSINQFocus() {
-  m_instrumentName = "";
+LoadSINQFocus::LoadSINQFocus(): m_instrumentName(""), m_instrumentPath(),
+    m_localWorkspace(), m_numberOfTubes(0), m_numberOfPixelsPerTube(0),
+    m_numberOfChannels(0), m_numberOfHistograms(0), m_loader() {
   m_supportedInstruments.push_back("FOCUS");
   this->useAlgorithm("LoadSINQ");
   this->deprecatedDate("2013-10-28");
@@ -37,10 +38,10 @@ LoadSINQFocus::~LoadSINQFocus() {}
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
-const std::string LoadSINQFocus::name() const { return "LoadSINQFocus"; };
+const std::string LoadSINQFocus::name() const { return "LoadSINQFocus"; }
 
 /// Algorithm's version for identification. @see Algorithm::version
-int LoadSINQFocus::version() const { return 1; };
+int LoadSINQFocus::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
 const std::string LoadSINQFocus::category() const { return "DataHandling"; }

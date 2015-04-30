@@ -285,23 +285,6 @@ class IndirectCommonTests(unittest.TestCase):
         self.assert_matrix_workspace_dimensions(params_workspace.name(),
                                                 expected_num_histograms=3, expected_blocksize=5)
 
-    def test_addSampleLogs(self):
-        ws = CreateSampleWorkspace()
-        logs = {}
-        logs['FloatLog'] = 3.149
-        logs['IntLog'] = 42
-        logs['StringLog'] = "A String Log"
-        logs['BooleanLog'] = True
-
-        indirect_common.addSampleLogs(ws, logs)
-
-        self.assert_logs_match_expected(ws.name(), logs)
-
-    def test_addSampleLogs_empty_dict(self):
-        ws = CreateSampleWorkspace()
-        logs = {}
-        self.assert_does_not_raise(Exception, indirect_common.addSampleLogs, ws, logs)
-
     #-----------------------------------------------------------
     # Custom assertion functions
     #-----------------------------------------------------------

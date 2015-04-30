@@ -59,12 +59,14 @@ namespace
   ///@cond
   //------------------------------------------------------------------------------------------------------
   /// Define overload generators
-  BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(create_overloads,AlgorithmManagerImpl::create, 1,2);
-  BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(createUnmanaged_overloads,AlgorithmManagerImpl::createUnmanaged, 1,2);
+  BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(create_overloads,AlgorithmManagerImpl::create, 1,2)
+  BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(createUnmanaged_overloads,AlgorithmManagerImpl::createUnmanaged, 1,2)
   ///@endcond
 }
 
+// clang-format off
 void export_AlgorithmManager()
+// clang-format on
 {
   typedef class_<AlgorithmManagerImpl,boost::noncopyable> PythonType;
 

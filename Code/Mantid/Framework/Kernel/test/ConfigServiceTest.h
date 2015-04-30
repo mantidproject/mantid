@@ -557,6 +557,17 @@ public:
     TS_ASSERT_EQUALS(keyVector.size(), 5);
   }
 
+  void testGetAllKeys()
+  {
+    const std::string propfilePath = ConfigService::Instance().getDirectoryOfExecutable();
+    const std::string propfile = propfilePath + "MantidTest.properties";
+    ConfigService::Instance().updateConfig(propfile);
+
+    std::vector<std::string> keys = ConfigService::Instance().keys();
+
+    TS_ASSERT_EQUALS(keys.size(), 17);
+  }
+
   void testRemovingProperty()
   {
     const std::string propfile = ConfigService::Instance().getDirectoryOfExecutable() 

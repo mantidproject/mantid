@@ -10,7 +10,7 @@ class VTK_EXPORT vtkScaleWorkspace : public vtkUnstructuredGridAlgorithm
 {
 public:
   static vtkScaleWorkspace *New();
-  vtkTypeMacro(vtkScaleWorkspace, vtkUnstructuredGridAlgorithm);
+  vtkTypeMacro(vtkScaleWorkspace, vtkUnstructuredGridAlgorithm)
   void PrintSelf(ostream& os, vtkIndent indent);
   void SetXScaling(double xScaling);
   void SetYScaling(double yScaling);
@@ -18,7 +18,7 @@ public:
   double GetMinValue();
   double GetMaxValue();
   const char* GetInstrument();
-
+  int GetSpecialCoordinates();
 protected:
   vtkScaleWorkspace();
   ~vtkScaleWorkspace();
@@ -35,6 +35,7 @@ private:
   double m_minValue;
   double m_maxValue;
   std::string m_instrument;
+  int m_specialCoordinates;
 
   boost::scoped_ptr<Mantid::VATES::MetadataJsonManager> m_metadataJsonManager;
   boost::scoped_ptr<Mantid::VATES::VatesConfigurations> m_vatesConfigurations;

@@ -29,10 +29,10 @@ RebinByPulseTimes::~RebinByPulseTimes() {}
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string RebinByPulseTimes::name() const {
   return "RebinByPulseTimes";
-};
+}
 
 /// Algorithm's version for identification. @see Algorithm::version
-int RebinByPulseTimes::version() const { return 1; };
+int RebinByPulseTimes::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
 const std::string RebinByPulseTimes::category() const {

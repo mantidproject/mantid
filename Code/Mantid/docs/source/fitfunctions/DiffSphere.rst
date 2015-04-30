@@ -42,6 +42,11 @@ The fit function DiffSphere has an elastic part, modelled by fitting
 function ElasticDiffSphere and an inelastic part, modelled by
 InelasticDiffSphere.
 
+When using InelasticDiffSphere, he value of Q can be obained either though the Q
+attribute or can be calucated from the input workspace using the WorkspaceIndex
+property. The value calculated using the workspace is used whenever the Q
+attibute is empty.
+
 .. attributes::
 
 .. properties::

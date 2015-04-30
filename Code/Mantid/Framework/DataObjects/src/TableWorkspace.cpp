@@ -204,7 +204,7 @@ TableWorkspace *TableWorkspace::clone() const {
   // copy logs/properties.
   copy->m_LogManager = boost::make_shared<API::LogManager>(*this->m_LogManager);
   return copy;
-};
+}
 
 /**
  * Sort.

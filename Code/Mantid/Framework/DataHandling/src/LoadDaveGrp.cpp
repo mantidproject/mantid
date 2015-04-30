@@ -12,7 +12,7 @@
 
 namespace Mantid {
 namespace DataHandling {
-DECLARE_FILELOADER_ALGORITHM(LoadDaveGrp);
+DECLARE_FILELOADER_ALGORITHM(LoadDaveGrp)
 
 LoadDaveGrp::LoadDaveGrp() : ifile(), line(), nGroups(0), xLength(0) {}
 

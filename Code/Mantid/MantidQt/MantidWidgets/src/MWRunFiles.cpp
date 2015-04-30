@@ -196,7 +196,7 @@ MWRunFiles::MWRunFiles(QWidget *parent)
   : MantidWidget(parent), m_findRunFiles(true), m_allowMultipleFiles(false), 
     m_isOptional(false), m_multiEntry(false), m_buttonOpt(Text), m_fileProblem(""),
     m_entryNumProblem(""), m_algorithmProperty(""), m_fileExtensions(), m_extsAsSingleOption(true),
-    m_liveButtonState(Hide), m_foundFiles(), m_lastDir(), m_fileFilter()
+    m_liveButtonState(Hide), m_foundFiles(), m_lastFoundFiles(), m_lastDir(), m_fileFilter()
 {
   m_thread = new FindFilesThread(this);
   
@@ -840,6 +840,7 @@ void MWRunFiles::inspectThreadResult()
     return;
   }
 
+  m_lastFoundFiles = m_foundFiles;
   m_foundFiles.clear();
 
   for( size_t i = 0; i < filenames.size(); ++i)
@@ -861,6 +862,7 @@ void MWRunFiles::inspectThreadResult()
 
   // Only emit the signal if file(s) were found
   if ( ! m_foundFiles.isEmpty() ) emit filesFound();
+  if ( m_lastFoundFiles != m_foundFiles ) emit filesFoundChanged();
 }
 
 /**

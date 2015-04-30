@@ -53,7 +53,8 @@ class MANTID_API_DLL SpectrumDetectorMapping {
   typedef boost::unordered_map<specid_t, std::set<detid_t>> sdmap;
 
 public:
-  explicit SpectrumDetectorMapping(const MatrixWorkspace *const workspace);
+  explicit SpectrumDetectorMapping(const MatrixWorkspace *const workspace,
+                                   bool useSpecNoIndex = true);
   SpectrumDetectorMapping(
       const std::vector<specid_t> &spectrumNumbers,
       const std::vector<detid_t> &detectorIDs,
@@ -67,7 +68,10 @@ public:
   std::set<specid_t> getSpectrumNumbers() const;
   const std::set<detid_t> &
   getDetectorIDsForSpectrumNo(const specid_t spectrumNo) const;
+  const std::set<detid_t> &
+  getDetectorIDsForSpectrumIndex(const size_t index) const;
   const sdmap &getMapping() const;
+  bool indexIsSpecNumber() const;
 
 private:
   void fillMapFromArray(const specid_t *const spectrumNumbers,
@@ -77,6 +81,7 @@ private:
                          const std::vector<detid_t> &detectorIDs,
                          const std::vector<detid_t> &ignoreDetIDs);
 
+  bool m_indexIsSpecNo;
   /// The mapping of a spectrum number to zero or more detector IDs
   sdmap m_mapping;
 };

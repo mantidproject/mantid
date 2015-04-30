@@ -5,7 +5,7 @@
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidKernel/System.h"
-#include "MantidMDEvents/MDHistoWorkspace.h"
+#include "MantidDataObjects/MDHistoWorkspace.h"
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -63,7 +63,7 @@ protected:
   virtual void execEvent(Mantid::API::IMDEventWorkspace_sptr out) = 0;
 
   /// Run the algorithm with a MDHistoWorkspace
-  virtual void execHisto(Mantid::MDEvents::MDHistoWorkspace_sptr out) = 0;
+  virtual void execHisto(Mantid::DataObjects::MDHistoWorkspace_sptr out) = 0;
 
   /// Input workspace
   Mantid::API::IMDWorkspace_sptr m_in;
@@ -72,7 +72,7 @@ protected:
   Mantid::API::IMDEventWorkspace_sptr m_in_event;
 
   /// Input workspace (MDHisto)
-  Mantid::MDEvents::MDHistoWorkspace_sptr m_in_histo;
+  Mantid::DataObjects::MDHistoWorkspace_sptr m_in_histo;
 
   /// Output workspace
   Mantid::API::IMDWorkspace_sptr m_out;

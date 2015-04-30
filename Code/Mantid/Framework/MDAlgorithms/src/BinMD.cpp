@@ -5,17 +5,17 @@
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/Utils.h"
-#include "MantidMDEvents/CoordTransformAffineParser.h"
-#include "MantidMDEvents/CoordTransformAligned.h"
-#include "MantidMDEvents/MDBoxBase.h"
-#include "MantidMDEvents/MDBox.h"
-#include "MantidMDEvents/MDEventFactory.h"
-#include "MantidMDEvents/MDEventWorkspace.h"
-#include "MantidMDEvents/MDHistoWorkspace.h"
+#include "MantidDataObjects/CoordTransformAffineParser.h"
+#include "MantidDataObjects/CoordTransformAligned.h"
+#include "MantidDataObjects/MDBoxBase.h"
+#include "MantidDataObjects/MDBox.h"
+#include "MantidDataObjects/MDEventFactory.h"
+#include "MantidDataObjects/MDEventWorkspace.h"
+#include "MantidDataObjects/MDHistoWorkspace.h"
 #include "MantidMDAlgorithms/BinMD.h"
 #include <boost/algorithm/string.hpp>
 #include "MantidKernel/EnabledWhenProperty.h"
-#include "MantidMDEvents/CoordTransformAffine.h"
+#include "MantidDataObjects/CoordTransformAffine.h"
 
 using Mantid::Kernel::CPUTimer;
 using Mantid::Kernel::EnabledWhenProperty;
@@ -29,7 +29,7 @@ DECLARE_ALGORITHM(BinMD)
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
-using namespace Mantid::MDEvents;
+using namespace Mantid::DataObjects;
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
@@ -163,7 +163,7 @@ inline void BinMD::binMDBox(MDBox<MDE, nd> *box, const size_t *const chunkMin,
       // Add the CACHED signal from the entire box
       signals[lastLinearIndex] += box->getSignal();
       errors[lastLinearIndex] += box->getErrorSquared();
-      // TODO: If MDEvents get a weight, this would need to get the summed
+      // TODO: If DataObjects get a weight, this would need to get the summed
       // weight.
       numEvents[lastLinearIndex] += static_cast<signal_t>(box->getNPoints());
 
@@ -213,7 +213,7 @@ inline void BinMD::binMDBox(MDBox<MDE, nd> *box, const size_t *const chunkMin,
       // Sum the signals as doubles to preserve precision
       signals[linearIndex] += static_cast<signal_t>(it->getSignal());
       errors[linearIndex] += static_cast<signal_t>(it->getErrorSquared());
-      // TODO: If MDEvents get a weight, this would need to get the summed
+      // TODO: If DataObjects get a weight, this would need to get the summed
       // weight.
       numEvents[linearIndex] += 1.0;
     }
@@ -408,13 +408,28 @@ void BinMD::exec() {
     IterateEvents = true;
   }
 
+  /*
+  We should fail noisily here. CALL_MDEVENT_FUNCTION will silently allow IMDHistoWorkspaces to cascade through to the end
+  and result in an empty output. The only way we allow InputWorkspaces to be IMDHistoWorkspaces is if they also happen to contain original workspaces
+  that are MDEventWorkspaces.
+  */
+  if(boost::dynamic_pointer_cast<IMDHistoWorkspace>(m_inWS))
+  {
+      throw std::runtime_error("Cannot rebin a workspace that is histogrammed and has no original workspace that is an MDEventWorkspace. "
+                               "Reprocess the input so that it contains full MDEvents.");
+  }
+
   CALL_MDEVENT_FUNCTION(this->binByIterating, m_inWS);
 
-  // Copy the experiment infos to the output
+  // Copy the
+
+  // Copy the coordinate system & experiment infos to the output
   IMDEventWorkspace_sptr inEWS =
       boost::dynamic_pointer_cast<IMDEventWorkspace>(m_inWS);
-  if (inEWS)
+  if (inEWS) {
+    outWS->setCoordinateSystem(inEWS->getSpecialCoordinateSystem());
     outWS->copyExperimentInfos(*inEWS);
+  }
 
   outWS->updateSum();
   // Save the output
@@ -422,4 +437,4 @@ void BinMD::exec() {
 }
 
 } // namespace Mantid
-} // namespace MDEvents
+} // namespace DataObjects

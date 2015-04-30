@@ -2,25 +2,22 @@
 #define MANTID_MDALGORITHMS_UNARYOPERATIONMDTEST_H_
 
 #include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidDataObjects/MDHistoWorkspace.h"
 #include "MantidDataObjects/WorkspaceSingleValue.h"
-#include "MantidKernel/System.h"
-#include "MantidKernel/Timer.h"
 #include "MantidMDAlgorithms/UnaryOperationMD.h"
 #include "MantidMDAlgorithms/BinaryOperationMD.h"
-#include "MantidMDEvents/MDHistoWorkspace.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
+
 #include <cxxtest/TestSuite.h>
+
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
-#include <iomanip>
-#include <iostream>
 
 using namespace Mantid;
-using namespace Mantid::MDAlgorithms;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
-using namespace Mantid::MDEvents;
+using namespace Mantid::MDAlgorithms;
 using namespace testing;
 
 class MockUnaryOperationMD : public UnaryOperationMD
@@ -28,7 +25,7 @@ class MockUnaryOperationMD : public UnaryOperationMD
 public:
   MOCK_METHOD1(execEvent, void(Mantid::API::IMDEventWorkspace_sptr));
   MOCK_METHOD0(checkInputs, void());
-  MOCK_METHOD1(execHisto, void(Mantid::MDEvents::MDHistoWorkspace_sptr));
+  MOCK_METHOD1(execHisto, void(Mantid::DataObjects::MDHistoWorkspace_sptr));
   void exec()
   { UnaryOperationMD::exec();  }
 };

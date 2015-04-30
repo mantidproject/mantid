@@ -24,8 +24,8 @@ namespace
   /// Dummy object to hold in a shared_ptr for test
   struct Holder
   {};
-  DECLARE_TEST_VALIDATOR(SharedPtrTypedValidator, boost::shared_ptr<Holder>);
-  DECLARE_TEST_VALIDATOR(PODTypedValidator, double);
+  DECLARE_TEST_VALIDATOR(SharedPtrTypedValidator, boost::shared_ptr<Holder>)
+  DECLARE_TEST_VALIDATOR(PODTypedValidator, double)
   class FakeDataItem : public Mantid::Kernel::DataItem
   {
   public:
@@ -34,7 +34,7 @@ namespace
     virtual bool threadSafe() const { return true; }
     virtual const std::string toString() const { return "FakeDataItem{}"; }
   };
-  DECLARE_TEST_VALIDATOR(DataItemSptrTypedValidator, boost::shared_ptr<FakeDataItem>);
+  DECLARE_TEST_VALIDATOR(DataItemSptrTypedValidator, boost::shared_ptr<FakeDataItem>)
 }
 
 class TypedValidatorTest : public CxxTest::TestSuite

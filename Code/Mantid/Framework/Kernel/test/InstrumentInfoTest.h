@@ -2,12 +2,14 @@
 #define INSTRUMENTINFOTEST_H_
 
 #include <cxxtest/TestSuite.h>
+
 #include "MantidKernel/InstrumentInfo.h"
 #include "MantidKernel/FacilityInfo.h"
+
+#include <Poco/AutoPtr.h>
 #include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/Document.h>
 #include <Poco/DOM/Element.h>
-#include <Poco/AutoPtr.h>
 
 using namespace Mantid::Kernel;
 

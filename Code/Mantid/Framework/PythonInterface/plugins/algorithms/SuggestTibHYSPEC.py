@@ -1,7 +1,7 @@
 #pylint: disable=no-init
 from mantid.api import PythonAlgorithm, AlgorithmFactory
 from mantid.kernel import FloatBoundedValidator,Direction,logger
-from numpy import sqrt,divide
+import numpy
 
 
 class SuggestTibHYSPEC(PythonAlgorithm):
@@ -33,7 +33,7 @@ class SuggestTibHYSPEC(PythonAlgorithm):
         return
 
     def e2v(self,energy):
-        return sqrt(energy/5.227e-6)
+        return numpy.sqrt(energy/5.227e-6)
 
     def PyExec(self):
         """ Main execution body
@@ -50,7 +50,7 @@ class SuggestTibHYSPEC(PythonAlgorithm):
         t_det_us = dist_mm /self.e2v(energy) * 1000 + T0_moderator
         frame_start_us = t_det_us - 16667/2
         frame_end_us = t_det_us + 16667/2
-        index_under_frame = divide(int(t_det_us),16667)
+        index_under_frame = numpy.divide(int(t_det_us),16667)
         pre_lead_us = 16667 * index_under_frame
         pre_tail_us = pre_lead_us + tail_length_us
         post_lead_us = 16667 * (1+ index_under_frame)

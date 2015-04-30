@@ -2,6 +2,9 @@
 #define MDCONSTANTS_H_
 
 #include "DllOption.h"
+#include <QString>
+#include <QColor>
+#include <QStringList>
 
 namespace MantidQt
 {
@@ -42,11 +45,47 @@ namespace MantidQt
 
         ~MdConstants();
 
+        /**
+         * Initialize constants which are required to store and persist MD settings.
+         */
+        void initializeSettingsConstants();
+
+        /**
+         * Initialize constants which are required for the view
+         */
+        void initializeViewConstants();
+
+        QString getGeneralMdColorMap() const;
+
+        QColor getDefaultBackgroundColor() const;
+
+        QStringList getVsiColorMaps() const;
+
+        QString getStandardView() const;
+
+        QString getMultiSliceView() const;
+
+        QString getThreeSliceView() const;
+
+        QString getSplatterPlotView() const;
+
+        QString getTechniqueDependence() const;
+        
         double getColorScaleStandardMax();
 
+        QStringList getAllInitialViews() const;
+        
         double getLogScaleDefaultValue();
 
       private:
+        QString m_generalMdColorMap;
+        QColor m_defaultBackgroundColor;
+        QStringList m_vsiColorMaps;
+        QString m_standardView;
+        QString m_multiSliceView;
+        QString m_threeSliceView;
+        QString m_splatterPlotView;
+        QString m_techniqueDependence;
 
         const double m_colorScaleStandardMax;
         const double m_logScaleDefaultValue;

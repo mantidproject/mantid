@@ -8,44 +8,16 @@
  *
  */
 #include "MantidCrystal/IntegratePeakTimeSlices.h"
-#include "MantidDataObjects/Peak.h"
-#include "MantidDataObjects/PeaksWorkspace.h"
-#include "MantidGeometry/Objects/BoundingBox.h"
-#include "MantidGeometry/Instrument/CompAssembly.h"
-#include "MantidGeometry/Instrument/RectangularDetector.h"
-#include "MantidKernel/IPropertyManager.h"
-#include "MantidGeometry/IComponent.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/ConstraintFactory.h"
-#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/FunctionDomain1D.h"
-#include "MantidAPI/FunctionValues.h"
 #include "MantidAPI/IFuncMinimizer.h"
 #include "MantidAPI/FuncMinimizerFactory.h"
 #include "MantidAPI/FunctionFactory.h"
-#include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidAPI/ITableWorkspace.h"
-#include "MantidAPI/SpectraDetectorTypes.h"
-#include "MantidAPI/Progress.h"
-#include "MantidGeometry/IDTypes.h"
-#include "MantidKernel/cow_ptr.h"
-#include "MantidKernel/PropertyManagerOwner.h"
-#include "MantidKernel/Unit.h"
-#include "MantidKernel/V3D.h"
 //#include "MantidGeometry/Surfaces/Surface.h"
-#include <boost/lexical_cast.hpp>
-#include <vector>
-#include "MantidAPI/Algorithm.h"
-#include <algorithm>
-#include <math.h>
-#include <cstdio>
-#include <stdio.h>
-#include <time.h>
 
 //#include <boost/random/poisson_distribution.hpp>
-#include "MantidAPI/ISpectrum.h"
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;

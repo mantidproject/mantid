@@ -52,6 +52,8 @@ public:
   double operator[](size_t i) const { return m_data[i]; }
   /// Get a pointer to i-th value
   const double *getPointerAt(size_t i) const { return m_data + i; }
+  /// Convert to a vector
+  std::vector<double> toVector() const;
 
 protected:
   /// Protected constructor, shouldn't be created directly. Use

@@ -1,5 +1,5 @@
 Name:           mantid-developer
-Version:        1.9
+Version:        1.10
 Release:        1%{?dist}
 Summary:        Meta Package to install dependencies for Mantid Development
 
@@ -30,7 +30,7 @@ Requires: poco-devel
 Requires: PyQt4-devel
 Requires: python-devel
 Requires: python-ipython >= 1.1
-Conflicts: python-ipython >= 2.0
+%{?el6:Conflicts: python-ipython >= 2.0}
 Requires: python-pip
 Requires: python-sphinx
 Requires: qscintilla-devel
@@ -57,8 +57,8 @@ Requires: texlive-was
 Requires: tex-preview
 Requires: dvipng
 %if 0%{?el6}
-Requires: mantidlibs-qt-devel
-Requires: mantidlibs-qtwebkit-devel
+Requires: mantidlibs34-qt-devel
+Requires: mantidlibs34-qtwebkit-devel
 Requires: scl-utils
 %else
 Requires: qt-devel

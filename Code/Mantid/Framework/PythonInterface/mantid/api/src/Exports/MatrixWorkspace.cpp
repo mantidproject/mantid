@@ -127,7 +127,9 @@ namespace
 }
 
 /** Python exports of the Mantid::API::MatrixWorkspace class. */
+// clang-format off
 void export_MatrixWorkspace()
+// clang-format on
 {
   /// Typedef to remove const qualifier on input detector shared_ptr. See Policies/RemoveConst.h for more details
   typedef double (MatrixWorkspace::*getDetectorSignature)(Mantid::Geometry::IDetector_sptr det) const;

@@ -41,23 +41,16 @@
 #include "MantidCrystal/ICluster.h"
 #include "MantidCrystal/PeakClusterProjection.h"
 
-#include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/IMDIterator.h"
-#include "MantidAPI/WorkspaceProperty.h"
-#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
-#include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 
-#include <boost/make_shared.hpp>
 #include <boost/format.hpp>
-#include <boost/algorithm/string.hpp>
 #include <boost/math/special_functions/fpclassify.hpp>
-#include <cmath>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -101,10 +94,10 @@ IntegratePeaksHybrid::~IntegratePeaksHybrid() {}
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string IntegratePeaksHybrid::name() const {
   return "IntegratePeaksHybrid";
-};
+}
 
 /// Algorithm's version for identification. @see Algorithm::version
-int IntegratePeaksHybrid::version() const { return 1; };
+int IntegratePeaksHybrid::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
 const std::string IntegratePeaksHybrid::category() const {

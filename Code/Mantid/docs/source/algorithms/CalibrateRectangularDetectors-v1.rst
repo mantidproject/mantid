@@ -54,4 +54,6 @@ and :math:`fwhm` as the peak's fitted width. Then,
 
 .. math:: c_l\times\frac{\Delta(d)}{d} < fwhm < c_h\times\frac{\Delta(d)}{d}
 
+.. seealso :: Algorithm :ref:`algm-EstimateResolutionDiffraction`
+
 .. categories::

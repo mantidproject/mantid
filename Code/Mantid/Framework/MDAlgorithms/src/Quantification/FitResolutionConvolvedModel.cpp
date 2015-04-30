@@ -11,7 +11,7 @@ namespace Mantid {
 namespace MDAlgorithms {
 
 // Register the algorithm into the AlgorithmFactory
-DECLARE_ALGORITHM(FitResolutionConvolvedModel);
+DECLARE_ALGORITHM(FitResolutionConvolvedModel)
 
 using Kernel::Direction;
 using Kernel::ListValidator;

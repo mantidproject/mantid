@@ -1,5 +1,5 @@
-#ifndef MANTID_MDEVENTS_SLICINGALGORITHM_H_
-#define MANTID_MDEVENTS_SLICINGALGORITHM_H_
+#ifndef MANTID_MDALGORITHMS_SLICINGALGORITHM_H_
+#define MANTID_MDALGORITHMS_SLICINGALGORITHM_H_
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/CoordTransform.h"
@@ -9,11 +9,11 @@
 #include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/VMD.h"
-#include "MantidMDEvents/MDBox.h"
-#include "MantidMDEvents/MDEventFactory.h"
-#include "MantidMDEvents/MDEventWorkspace.h"
-#include "MantidMDEvents/MDHistoWorkspace.h"
-#include "MantidMDEvents/CoordTransformAffine.h"
+#include "MantidDataObjects/MDBox.h"
+#include "MantidDataObjects/MDEventFactory.h"
+#include "MantidDataObjects/MDEventWorkspace.h"
+#include "MantidDataObjects/MDHistoWorkspace.h"
+#include "MantidDataObjects/CoordTransformAffine.h"
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -107,9 +107,9 @@ protected:
   Mantid::API::IMDWorkspace_sptr m_intermediateWS;
   /// Coordinate transformation to save in the output WS, from the intermediate
   /// WS
-  Mantid::MDEvents::CoordTransformAffine *m_transformFromIntermediate;
+  Mantid::DataObjects::CoordTransformAffine *m_transformFromIntermediate;
   /// Coordinate transformation to save in the intermediate WS
-  Mantid::MDEvents::CoordTransformAffine *m_transformToIntermediate;
+  Mantid::DataObjects::CoordTransformAffine *m_transformToIntermediate;
 
   /// Set to true if the cut is aligned with the axes
   bool m_axisAligned;
@@ -152,7 +152,7 @@ protected:
   bool m_NormalizeBasisVectors;
 };
 
-} // namespace MDEvents
+} // namespace DataObjects
 } // namespace Mantid
 
-#endif /* MANTID_MDEVENTS_SLICINGALGORITHM_H_ */
+#endif /* MANTID_MDALGORITHMS_SLICINGALGORITHM_H_ */

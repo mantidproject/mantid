@@ -19,7 +19,7 @@ using namespace Geometry;
 MedianDetectorTest::MedianDetectorTest()
     : DetectorDiagnostic(), m_inputWS(), m_loFrac(0.1), m_hiFrac(1.5),
       m_minSpec(0), m_maxSpec(EMPTY_INT()), m_rangeLower(0.0),
-      m_rangeUpper(0.0){};
+      m_rangeUpper(0.0){}
 
 const std::string MedianDetectorTest::category() const { return "Diagnostics"; }
 

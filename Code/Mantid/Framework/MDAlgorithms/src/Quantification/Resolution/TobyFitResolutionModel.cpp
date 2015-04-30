@@ -23,7 +23,7 @@ using API::Run;
 using API::IFunction;
 
 DECLARE_MDRESOLUTIONCONVOLUTION(TobyFitResolutionModel,
-                                "TobyFitResolutionModel");
+                                "TobyFitResolutionModel")
 
 namespace // anonymous
     {

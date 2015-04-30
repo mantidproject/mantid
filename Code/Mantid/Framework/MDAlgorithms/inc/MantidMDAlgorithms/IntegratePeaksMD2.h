@@ -5,7 +5,7 @@
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidKernel/System.h"
-#include "MantidMDEvents/MDEventWorkspace.h"
+#include "MantidDataObjects/MDEventWorkspace.h"
 #include "MantidAPI/CompositeFunction.h"
 
 namespace Mantid {
@@ -41,18 +41,19 @@ private:
   void exec();
 
   template <typename MDE, size_t nd>
-  void integrate(typename MDEvents::MDEventWorkspace<MDE, nd>::sptr ws);
+  void integrate(typename DataObjects::MDEventWorkspace<MDE, nd>::sptr ws);
 
   /// Input MDEventWorkspace
   Mantid::API::IMDEventWorkspace_sptr inWS;
 
   /// Calculate if this Q is on a detector
+  void calculateE1(Geometry::Instrument_const_sptr inst) ;
   bool detectorQ(Mantid::Kernel::V3D QLabFrame, double PeakRadius);
   void runMaskDetectors(Mantid::DataObjects::PeaksWorkspace_sptr peakWS,
                         std::string property, std::string values);
 
-  /// Instrument reference
-  Geometry::Instrument_const_sptr inst;
+  /// save for all detector pixels
+  std::vector<Kernel::V3D> E1Vec;
 
   /// Check if peaks overlap
   void checkOverlap(int i, Mantid::DataObjects::PeaksWorkspace_sptr peakWS,
@@ -60,6 +61,6 @@ private:
 };
 
 } // namespace Mantid
-} // namespace MDEvents
+} // namespace DataObjects
 
 #endif /* MANTID_MDALGORITHMS_INTEGRATEPEAKSMD_H_ */

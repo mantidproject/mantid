@@ -106,8 +106,8 @@ public:
   std::vector<double> minimize(const std::vector<double> &x0) const;
 
 private:
-  DISABLE_DEFAULT_CONSTRUCT(SLSQPMinimizer);
-  DISABLE_COPY_AND_ASSIGN(SLSQPMinimizer);
+  DISABLE_DEFAULT_CONSTRUCT(SLSQPMinimizer)
+  DISABLE_COPY_AND_ASSIGN(SLSQPMinimizer)
 
   /**
    * Compute the value of the objective function

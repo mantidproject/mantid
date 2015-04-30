@@ -170,7 +170,7 @@ protected:
   }
 
 private:
-  Q_DISABLE_COPY(pqNetworkAccessManager);
+  Q_DISABLE_COPY(pqNetworkAccessManager)
 };
 
 // ****************************************************************************

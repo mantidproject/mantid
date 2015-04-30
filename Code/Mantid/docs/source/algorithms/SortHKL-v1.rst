@@ -23,10 +23,11 @@ Usage
 
     #load a peaks workspace from file
     peaks = LoadIsawPeaks(Filename=r'Peaks5637.integrate')
+    LoadIsawUB(peaks,"ls5637.mat")
     peak = peaks.getPeak(0)
     print "HKL of first peak in table %d" % peak.getH(),peak.getK(),peak.getL()
     
-    pw,chi2 = SortHKL(InputWorkspace=peaks, PointGroup='-31m (Trigonal - Rhombohedral)')
+    pw,chi2,stats = SortHKL(InputWorkspace=peaks, PointGroup='-31m (Trigonal - Hexagonal)')
     peak = pw.getPeak(0)
     print "HKL of first peak in table %d" % peak.getH(),peak.getK(),peak.getL()
 
@@ -35,7 +36,7 @@ Output:
 .. testoutput:: ExSortHKLOption
 
     HKL of first peak in table 1 4.0 -9.0
-    HKL of first peak in table 1 3.0 -8.0
+    HKL of first peak in table -10 3.0 -40.0
 
 
 .. categories::

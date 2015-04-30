@@ -1,4 +1,5 @@
 #include <QAbstractTableModel>
+#include "DllOption.h"
 #include <boost/shared_ptr.hpp>
 #include "boost/bind.hpp"
 #include "boost/function.hpp"
@@ -47,7 +48,7 @@ namespace MantidQt
     File change history is stored at: <https://github.com/mantidproject/mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-    class QPeaksTableModel : public QAbstractTableModel
+    class EXPORT_OPT_MANTIDQT_SLICEVIEWER QPeaksTableModel : public QAbstractTableModel
     {
       Q_OBJECT
     public:

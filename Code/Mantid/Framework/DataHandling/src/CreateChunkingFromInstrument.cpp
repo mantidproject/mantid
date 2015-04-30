@@ -57,10 +57,10 @@ CreateChunkingFromInstrument::~CreateChunkingFromInstrument() {}
 /// Algorithm's name for identification. @see Algorithm::name
 const string CreateChunkingFromInstrument::name() const {
   return "CreateChunkingFromInstrument";
-};
+}
 
 /// Algorithm's version for identification. @see Algorithm::version
-int CreateChunkingFromInstrument::version() const { return 1; };
+int CreateChunkingFromInstrument::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
 const string CreateChunkingFromInstrument::category() const {

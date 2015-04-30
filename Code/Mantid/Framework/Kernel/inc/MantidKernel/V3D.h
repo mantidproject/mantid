@@ -80,6 +80,7 @@ public:
   bool operator==(const V3D &) const;
   bool operator!=(const V3D &) const;
   bool operator<(const V3D &) const;
+  bool operator>(const V3D &rhs) const;
 
   // Access
   // Setting x, y and z values

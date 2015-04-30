@@ -19,7 +19,7 @@
 
 namespace Mantid {
 namespace DataHandling {
-DECLARE_FILELOADER_ALGORITHM(LoadAscii2);
+DECLARE_FILELOADER_ALGORITHM(LoadAscii2)
 
 using namespace Kernel;
 using namespace API;

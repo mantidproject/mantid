@@ -1,6 +1,7 @@
 #include "MantidVatesAPI/vtkMDQuadFactory.h"
 #include "MantidVatesAPI/Common.h"
 #include "MantidVatesAPI/ProgressAction.h"
+#include "MantidVatesAPI/vtkNullUnstructuredGrid.h"
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/IMDIterator.h"
@@ -81,7 +82,7 @@ namespace Mantid
         vtkIdList * quadPointList = vtkIdList::New();
         quadPointList->SetNumberOfIds(4);
 
-        Mantid::API::CoordTransform* transform = NULL;
+        Mantid::API::CoordTransform const* transform = NULL;
         if (m_useTransform)
         {
           transform = imdws->getTransformToOriginal();
@@ -162,6 +163,14 @@ namespace Mantid
         signals->Delete();
         points->Delete();
         quadPointList->Delete();
+
+        // Hedge against empty data sets
+        if (visualDataSet->GetNumberOfPoints() <= 0)
+        {
+          visualDataSet->Delete();
+          vtkNullUnstructuredGrid nullGrid;
+          visualDataSet = nullGrid.createNullData();
+        }
 
         return visualDataSet;
       }

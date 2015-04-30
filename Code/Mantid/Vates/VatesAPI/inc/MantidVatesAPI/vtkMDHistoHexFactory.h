@@ -35,7 +35,7 @@
 #include <vtkFloatArray.h>
 #include <vtkCellData.h>
 #include <vtkHexahedron.h>
-#include "MantidMDEvents/MDHistoWorkspace.h"
+#include "MantidDataObjects/MDHistoWorkspace.h"
 
 namespace Mantid
 {
@@ -80,7 +80,7 @@ protected:
   void validateDimensionsPresent() const;
 
   /// Image from which to draw.
-  Mantid::MDEvents::MDHistoWorkspace_sptr m_workspace;
+  Mantid::DataObjects::MDHistoWorkspace_sptr m_workspace;
 
   /// Name of the scalar to provide on mesh.
   std::string m_scalarName;

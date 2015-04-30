@@ -42,8 +42,8 @@ public:
   virtual int version() const;
 
 private:
-  void execHistoHisto(Mantid::MDEvents::MDHistoWorkspace_sptr out,
-                      Mantid::MDEvents::MDHistoWorkspace_const_sptr operand);
+  void execHistoHisto(Mantid::DataObjects::MDHistoWorkspace_sptr out,
+                      Mantid::DataObjects::MDHistoWorkspace_const_sptr operand);
 };
 
 } // namespace MDAlgorithms

@@ -34,6 +34,58 @@ _LOGGING_ = False
 
 class LoadVesuvio(PythonAlgorithm):
 
+    _ws_index = None
+    _spectrum_no = None
+    foil_map = None
+    _inst_prefix = None
+    _mon_spectra = None
+    _mon_index = None
+    _backward_spectra_list = None
+    _forward_spectra_list = None
+    _mon_scale = None
+    _beta = None
+    _tof_max = None
+    _mon_tof_max = None
+    _back_mon_norm = None
+    _back_period_sum1 = None
+    _back_period_sum2 = None
+    _back_foil_out_norm = None
+    _forw_mon_norm = None
+    _forw_period_sum1 = None
+    _forw_period_sum2 = None
+    _forw_foil_out_norm = None
+    _diff_opt = None
+    _spectra = None
+    _sumspectra = None
+    _raw_grp = None
+    _raw_monitors = None
+    _nperiods = None
+    _goodframes = None
+    pt_times = None
+    delta_t = None
+    mon_pt_times = None
+    delta_tmon = None
+    summed_ws = None
+    summed_mon = None
+    _spectra_type = None
+    _mon_norm_start = None
+    _mon_norm_end = None
+    _period_sum1_start = None
+    _period_sum1_end = None
+    _period_sum2_start = None
+    _period_sum2_end = None
+    _foil_out_norm_start = None
+    _foil_out_norm_end = None
+    sum1 = None
+    sum2 = None
+    sum3 = None
+    foil_thin = None
+    mon_out = None
+    mon_thin = None
+    foil_thick = None
+    mon_thick = None
+    foil_out = None
+
     def summary(self):
         return "Loads raw data produced by the Vesuvio instrument at ISIS."
 
@@ -101,6 +153,7 @@ class LoadVesuvio(PythonAlgorithm):
             ip_file = self.getPropertyValue(INST_PAR_PROP)
             if len(ip_file) > 0:
                 self._load_ip_file(ip_file)
+
             if self._sumspectra:
                 self._sum_all_spectra()
 
@@ -160,6 +213,9 @@ class LoadVesuvio(PythonAlgorithm):
                 dataE += np.square(raw_group[group_index].readE(ws_index))
             np.sqrt(dataE, dataE)
             foil_out.setX(ws_index, x_values)
+
+        if self._sumspectra:
+            self._sum_all_spectra()
 
         DeleteWorkspace(Workspace=SUMMED_WS)
         self._store_results()
@@ -676,13 +732,20 @@ class LoadVesuvio(PythonAlgorithm):
         # foil_out has all spectra in order specified by input
         foil_start = 0
         for idx_out in range(len(self._spectra)):
+            ws_out.setX(idx_out, self.foil_out.readX(foil_start))
             summed_set = self._spectra[idx_out]
             nsummed = len(summed_set)
             y_out, e_out = ws_out.dataY(idx_out), ws_out.dataE(idx_out)
+            spec_out = ws_out.getSpectrum(idx_out)
+            spec_out.setSpectrumNo(self.foil_out.getSpectrum(foil_start).getSpectrumNo())
+            spec_out.clearDetectorIDs()
             for foil_idx in range(foil_start, foil_start+nsummed):
                 y_out += self.foil_out.readY(foil_idx)
                 foil_err = self.foil_out.readE(foil_idx)
                 e_out += foil_err*foil_err # gaussian errors
+                in_ids = self.foil_out.getSpectrum(foil_idx).getDetectorIDs()
+                for det_id in in_ids:
+                    spec_out.addDetectorID(det_id)
             #endfor
             np.sqrt(e_out, e_out)
             foil_start += nsummed

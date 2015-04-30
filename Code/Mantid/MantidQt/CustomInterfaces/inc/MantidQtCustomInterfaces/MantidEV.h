@@ -310,6 +310,12 @@ private slots:
   /// Slot to load a peaks workspace to the current MantidEV named workspace
   void loadIsawPeaks_slot();
 
+  /// Slot to save the current MantidEV peaks workspace
+  void saveNexusPeaks_slot();
+
+  /// Slot to load a peaks workspace to the current MantidEV named workspace
+  void loadNexusPeaks_slot();
+
   /// Slot to show the UB matrix
   void showUB_slot();
   

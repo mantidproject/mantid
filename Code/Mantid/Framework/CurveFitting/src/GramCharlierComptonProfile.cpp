@@ -14,7 +14,7 @@
 namespace Mantid {
 namespace CurveFitting {
 // Register into factory
-DECLARE_FUNCTION(GramCharlierComptonProfile);
+DECLARE_FUNCTION(GramCharlierComptonProfile)
 
 namespace {
 ///@cond

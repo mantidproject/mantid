@@ -23,7 +23,7 @@
 #include <nexus/NeXusException.hpp>
 #include <boost/algorithm/string.hpp>    
 
-vtkStandardNewMacro(vtkNexusPeaksReader);
+vtkStandardNewMacro(vtkNexusPeaksReader)
 
 using namespace Mantid::VATES;
 using Mantid::Geometry::IMDDimension_sptr;

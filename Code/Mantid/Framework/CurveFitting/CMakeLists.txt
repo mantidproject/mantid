@@ -2,6 +2,7 @@ set ( SRC_FILES
 	#	src/CostFuncIgnorePosPeaks.cpp
 	#	src/SCDPanelErrors.cpp
 	# src/ChebyshevPolynomialBackground.cpp
+	#src/RefinePowderInstrumentParameters.cpp
 	src/Abragam.cpp
 	src/AugmentedLagrangianOptimizer.cpp
 	src/BFGS_Minimizer.cpp
@@ -23,6 +24,7 @@ set ( SRC_FILES
 	src/CostFuncFitting.cpp
 	src/CostFuncLeastSquares.cpp
 	src/CostFuncRwp.cpp
+	src/CostFuncUnweightedLeastSquares.cpp
 	src/CubicSpline.cpp
 	src/DampingMinimizer.cpp
 	src/DeltaFunction.cpp
@@ -31,6 +33,7 @@ set ( SRC_FILES
 	src/DiffSphere.cpp
 	src/DynamicKuboToyabe.cpp
 	src/EndErfc.cpp
+	src/EstimatePeakErrors.cpp
 	src/ExpDecay.cpp
 	src/ExpDecayMuon.cpp
 	src/ExpDecayOsc.cpp
@@ -51,6 +54,8 @@ set ( SRC_FILES
 	src/GaussianComptonProfile.cpp
 	src/GramCharlierComptonProfile.cpp
 	src/IkedaCarpenterPV.cpp
+	src/LatticeDomainCreator.cpp
+	src/LatticeFunction.cpp
 	src/LeBailFit.cpp
 	src/LeBailFunction.cpp
 	src/LevenbergMarquardtMDMinimizer.cpp
@@ -66,14 +71,17 @@ set ( SRC_FILES
 	src/NormaliseByPeakArea.cpp
 	src/PRConjugateGradientMinimizer.cpp
 	src/ParDomain.cpp
+	src/PawleyFit.cpp
+	src/PawleyFunction.cpp
+	src/PeakParameterFunction.cpp
 	src/PlotPeakByLogValue.cpp
 	src/Polynomial.cpp
 	src/ProcessBackground.cpp
 	src/ProductFunction.cpp
 	src/ProductLinearExp.cpp
 	src/ProductQuadraticExp.cpp
+	src/PseudoVoigt.cpp
 	src/Quadratic.cpp
-	#src/RefinePowderInstrumentParameters.cpp
 	src/RefinePowderInstrumentParameters3.cpp
 	src/ReflectivityMulf.cpp
 	src/Resolution.cpp
@@ -98,7 +106,7 @@ set ( SRC_FILES
 	src/ThermalNeutronDtoTOFFunction.cpp
 	src/UserFunction.cpp
 	src/UserFunction1D.cpp
-  src/VesuvioResolution.cpp
+	src/VesuvioResolution.cpp
 	src/Voigt.cpp
 )
 
@@ -108,6 +116,7 @@ set ( INC_FILES
 	#	inc/MantidCurveFitting/CostFuncIgnorePosPeaks.h
 	#	inc/MantidCurveFitting/SCDPanelErrors.h
 	# inc/MantidCurveFitting/ChebyshevPolynomialBackground.h
+	#inc/MantidCurveFitting/RefinePowderInstrumentParameters.h
 	inc/MantidCurveFitting/Abragam.h
 	inc/MantidCurveFitting/AugmentedLagrangianOptimizer.h
 	inc/MantidCurveFitting/BFGS_Minimizer.h
@@ -129,6 +138,7 @@ set ( INC_FILES
 	inc/MantidCurveFitting/CostFuncFitting.h
 	inc/MantidCurveFitting/CostFuncLeastSquares.h
 	inc/MantidCurveFitting/CostFuncRwp.h
+	inc/MantidCurveFitting/CostFuncUnweightedLeastSquares.h
 	inc/MantidCurveFitting/CubicSpline.h
 	inc/MantidCurveFitting/DampingMinimizer.h
 	inc/MantidCurveFitting/DeltaFunction.h
@@ -138,6 +148,7 @@ set ( INC_FILES
 	inc/MantidCurveFitting/DllConfig.h
 	inc/MantidCurveFitting/DynamicKuboToyabe.h
 	inc/MantidCurveFitting/EndErfc.h
+	inc/MantidCurveFitting/EstimatePeakErrors.h
 	inc/MantidCurveFitting/ExpDecay.h
 	inc/MantidCurveFitting/ExpDecayMuon.h
 	inc/MantidCurveFitting/ExpDecayOsc.h
@@ -161,6 +172,8 @@ set ( INC_FILES
 	inc/MantidCurveFitting/GramCharlierComptonProfile.h
 	inc/MantidCurveFitting/IkedaCarpenterPV.h
 	inc/MantidCurveFitting/Jacobian.h
+	inc/MantidCurveFitting/LatticeDomainCreator.h
+	inc/MantidCurveFitting/LatticeFunction.h
 	inc/MantidCurveFitting/LeBailFit.h
 	inc/MantidCurveFitting/LeBailFunction.h
 	inc/MantidCurveFitting/LevenbergMarquardtMDMinimizer.h
@@ -176,14 +189,17 @@ set ( INC_FILES
 	inc/MantidCurveFitting/NormaliseByPeakArea.h
 	inc/MantidCurveFitting/PRConjugateGradientMinimizer.h
 	inc/MantidCurveFitting/ParDomain.h
+	inc/MantidCurveFitting/PawleyFit.h
+	inc/MantidCurveFitting/PawleyFunction.h
+	inc/MantidCurveFitting/PeakParameterFunction.h
 	inc/MantidCurveFitting/PlotPeakByLogValue.h
 	inc/MantidCurveFitting/Polynomial.h
 	inc/MantidCurveFitting/ProcessBackground.h
 	inc/MantidCurveFitting/ProductFunction.h
 	inc/MantidCurveFitting/ProductLinearExp.h
 	inc/MantidCurveFitting/ProductQuadraticExp.h
+	inc/MantidCurveFitting/PseudoVoigt.h
 	inc/MantidCurveFitting/Quadratic.h
-	#inc/MantidCurveFitting/RefinePowderInstrumentParameters.h
 	inc/MantidCurveFitting/RefinePowderInstrumentParameters3.h
 	inc/MantidCurveFitting/ReflectivityMulf.h
 	inc/MantidCurveFitting/Resolution.h
@@ -208,7 +224,7 @@ set ( INC_FILES
 	inc/MantidCurveFitting/ThermalNeutronDtoTOFFunction.h
 	inc/MantidCurveFitting/UserFunction.h
 	inc/MantidCurveFitting/UserFunction1D.h
-  inc/MantidCurveFitting/VesuvioResolution.h
+	inc/MantidCurveFitting/VesuvioResolution.h
 	inc/MantidCurveFitting/Voigt.h
 )
 
@@ -234,6 +250,7 @@ set ( TEST_FILES
 	ConvertToYSpaceTest.h
 	ConvolutionTest.h
 	ConvolveWorkspacesTest.h
+	CostFuncUnweightedLeastSquaresTest.h
 	CubicSplineTest.h
 	DampingMinimizerTest.h
 	DeltaFunctionTest.h
@@ -241,26 +258,31 @@ set ( TEST_FILES
 	DiffSphereTest.h
 	DynamicKuboToyabeTest.h
 	EndErfcTest.h
+	EstimatePeakErrorsTest.h
 	ExpDecayMuonTest.h
 	ExpDecayOscTest.h
 	ExpDecayTest.h
 	FABADAMinimizerTest.h
 	FRConjugateGradientTest.h
-  FitMWTest.h
-  FitTest.h
-  FitPowderDiffPeaksTest.h
+	FitMWTest.h
+	FitPowderDiffPeaksTest.h
+	FitTest.h
 	FlatBackgroundTest.h
 	FullprofPolynomialTest.h
 	FunctionDomain1DSpectrumCreatorTest.h
 	FunctionFactoryConstraintTest.h
+	FunctionParameterDecoratorFitTest.h
 	GSLMatrixTest.h
 	GausDecayTest.h
 	GausOscTest.h
 	GaussianComptonProfileTest.h
 	GaussianTest.h
 	GramCharlierComptonProfileTest.h
+	IPeakFunctionCentreParameterNameTest.h
+	IPeakFunctionIntensityTest.h
 	IkedaCarpenterPVTest.h
-        IPeakFunctionIntensityTest.h
+	LatticeDomainCreatorTest.h
+	LatticeFunctionTest.h
 	LeBailFitTest.h
 	LeBailFunctionTest.h
 	LeastSquaresTest.h
@@ -276,12 +298,16 @@ set ( TEST_FILES
 	NeutronBk2BkExpConvPVoigtTest.h
 	NormaliseByPeakAreaTest.h
 	PRConjugateGradientTest.h
+	PawleyFitTest.h
+	PawleyFunctionTest.h
+	PeakParameterFunctionTest.h
 	PlotPeakByLogValueTest.h
 	PolynomialTest.h
 	ProcessBackgroundTest.h
 	ProductFunctionTest.h
 	ProductLinearExpTest.h
 	ProductQuadraticExpTest.h
+	PseudoVoigtTest.h
 	QuadraticTest.h
 	RefinePowderInstrumentParameters3Test.h
 	ReflectivityMulfTest.h
@@ -305,7 +331,7 @@ set ( TEST_FILES
 	ThermalNeutronDtoTOFFunctionTest.h
 	UserFunction1DTest.h
 	UserFunctionTest.h
-  VesuvioResolutionTest.h
+	VesuvioResolutionTest.h
 	VoigtTest.h
 )
 

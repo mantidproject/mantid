@@ -4,11 +4,7 @@
 #include "MantidPythonInterface/kernel/Converters/NDArrayToVector.h"
 #include "MantidPythonInterface/kernel/Converters/NDArrayTypeIndex.h"
 #include <boost/python/extract.hpp>
-
-// See http://docs.scipy.org/doc/numpy/reference/c-api.array.html#PY_ARRAY_UNIQUE_SYMBOL
-#define PY_ARRAY_UNIQUE_SYMBOL KERNEL_ARRAY_API
-#define NO_IMPORT_ARRAY
-#include <numpy/arrayobject.h>
+#include "MantidPythonInterface/kernel/Converters/NumpyFunctions.h"
 
 namespace Mantid
 {
@@ -30,16 +26,20 @@ namespace Mantid
         {
           // Use the iterator API to iterate through the array
           // and assign each value to the corresponding vector
-          PyObject *iter = PyArray_IterNew((PyObject*)arr);
+          typedef union {
+            DestElementType* output;
+            void *input;
+          } npy_union;
+          npy_union data;
+          PyObject *iter = Converters::Impl::func_PyArray_IterNew(arr);
           npy_intp index(0);
           do
           {
-            DestElementType *data = (DestElementType*)PyArray_ITER_DATA(iter);
-            cvector[index] = *data;
+            data.input = PyArray_ITER_DATA(iter);
+            cvector[index] = *data.output;
             ++index;
             PyArray_ITER_NEXT(iter);
-          }
-          while(PyArray_ITER_NOTDONE(iter));
+          } while (PyArray_ITER_NOTDONE(iter));
         }
       };
 
@@ -163,15 +163,15 @@ namespace Mantid
         template DLLExport struct NDArrayToVector<ElementType>;
 
       ///@cond Doxygen doesn't seem to like this...
-      INSTANTIATE_TOVECTOR(int);
-      INSTANTIATE_TOVECTOR(long);
-      INSTANTIATE_TOVECTOR(long long);
-      INSTANTIATE_TOVECTOR(unsigned int);
-      INSTANTIATE_TOVECTOR(unsigned long);
-      INSTANTIATE_TOVECTOR(unsigned long long);
-      INSTANTIATE_TOVECTOR(double);
-      INSTANTIATE_TOVECTOR(bool);
-      INSTANTIATE_TOVECTOR(std::string); 
+      INSTANTIATE_TOVECTOR(int)
+      INSTANTIATE_TOVECTOR(long)
+      INSTANTIATE_TOVECTOR(long long)
+      INSTANTIATE_TOVECTOR(unsigned int)
+      INSTANTIATE_TOVECTOR(unsigned long)
+      INSTANTIATE_TOVECTOR(unsigned long long)
+      INSTANTIATE_TOVECTOR(double)
+      INSTANTIATE_TOVECTOR(bool)
+      INSTANTIATE_TOVECTOR(std::string)
       ///@endcond
     }
   }

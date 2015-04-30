@@ -1,7 +1,10 @@
+#include "PythonThreading.h"
+
 #include "MantidVatesSimpleGuiViewWidgets/MdViewerWidget.h"
 
 #include "MantidVatesSimpleGuiQtWidgets/ModeControlWidget.h"
 #include "MantidVatesSimpleGuiQtWidgets/RotationPointDialog.h"
+#include "MantidVatesSimpleGuiViewWidgets/BackgroundRgbProvider.h"
 #include "MantidVatesSimpleGuiViewWidgets/ColorSelectionWidget.h"
 #include "MantidVatesSimpleGuiViewWidgets/MultisliceView.h"
 #include "MantidVatesSimpleGuiViewWidgets/SaveScreenshotReaction.h"
@@ -9,36 +12,46 @@
 #include "MantidVatesSimpleGuiViewWidgets/StandardView.h"
 #include "MantidVatesSimpleGuiViewWidgets/ThreesliceView.h"
 #include "MantidVatesSimpleGuiViewWidgets/TimeControlWidget.h"
-
 #include "MantidQtAPI/InterfaceManager.h"
+#include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidKernel/DynamicFactory.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/InstrumentInfo.h"
 
+#include "boost/shared_ptr.hpp"
+#include "boost/scoped_ptr.hpp"
+#include "MantidQtAPI/MdConstants.h"
+#include "MantidQtAPI/MdSettings.h"
+
 // Have to deal with ParaView warnings and Intel compiler the hard way.
 #if defined(__INTEL_COMPILER)
   #pragma warning disable 1170
 #endif
-
+#include <pqApplicationCore.h>
 #include <pqActiveObjects.h>
 #include <pqAnimationManager.h>
 #include <pqAnimationScene.h>
 #include <pqApplicationCore.h>
+#include <pqApplicationSettingsReaction.h>
+#include <pqApplyBehavior.h>
+#include <pqDeleteReaction.h>
 #include <pqLoadDataReaction.h>
 #include <pqObjectBuilder.h>
-#include <pqObjectInspectorWidget.h>
 #include <pqParaViewBehaviors.h>
 #include <pqPipelineSource.h>
+#include <pqPipelineFilter.h>
 #include <pqPVApplicationCore.h>
 #include <pqRenderView.h>
 #include <pqSettings.h>
+#include <pqServer.h>
+#include <pqServerManagerModel.h>
 #include <pqStatusBar.h>
-#include <pqViewSettingsReaction.h>
 #include <vtkSMDoubleVectorProperty.h>
 #include <vtkSMPropertyHelper.h>
 #include <vtkSMProxyManager.h>
 #include <vtkSMProxy.h>
+#include <vtkSMViewProxy.h>
 #include <vtkSMSourceProxy.h>
 #include <vtkSMReaderFactory.h>
 #include <vtksys/SystemTools.hxx>
@@ -54,10 +67,8 @@
 #include <pqDataTimeStepBehavior.h>
 #include <pqDataRepresentation.h>
 #include <pqDefaultViewBehavior.h>
-#include <pqDeleteBehavior.h>
 #include <pqFixPathsInStateFilesBehavior.h>
 #include <pqInterfaceTracker.h>
-#include <pqMultiServerBehavior.h>
 #include <pqObjectPickingBehavior.h>
 //#include <pqPersistentMainWindowStateBehavior.h>
 #include <pqPipelineContextMenuBehavior.h>
@@ -65,18 +76,19 @@
 //#include <pqPluginActionGroupBehavior.h>
 //#include <pqPluginDockWidgetsBehavior.h>
 #include <pqPluginManager.h>
-#include <pqPVNewSourceBehavior.h>
+#include <pqPluginSettingsBehavior.h>
 #include <pqQtMessageHandlerBehavior.h>
 #include <pqServer.h>
 #include <pqServerManagerModel.h>
 #include <pqSpreadSheetVisibilityBehavior.h>
 #include <pqStandardPropertyWidgetInterface.h>
-#include <pqStandardViewModules.h>
+#include <pqStandardViewFrameActionsImplementation.h>
 #include <pqUndoRedoBehavior.h>
 #include <pqView.h>
-#include <pqViewFrameActionsBehavior.h>
+//#include <pqViewFrameActionsBehavior.h>
 #include <pqViewStreamingBehavior.h>
 #include <pqVerifyRequiredPluginBehavior.h>
+#include <pqSaveDataReaction.h>
 
 #if defined(__INTEL_COMPILER)
   #pragma warning enable 1170
@@ -84,18 +96,24 @@
 
 #include <QAction>
 #include <QDesktopServices>
+#include <QDragEnterEvent>
+#include <QDropEvent>
 #include <QHBoxLayout>
 #include <QMainWindow>
 #include <QMenuBar>
 #include <QModelIndex>
 #include <QUrl>
 #include <QWidget>
+#include <QMessageBox>
 
 #include <iostream>
 #include <vector>
 #include <set>
 #include <string>
 #include <boost/regex.hpp>
+#include <boost/shared_ptr.hpp>
+
+#include "MantidVatesSimpleGuiViewWidgets/VatesParaViewApplication.h"
 
 namespace Mantid
 {
@@ -118,8 +136,11 @@ REGISTER_VATESGUI(MdViewerWidget)
  */
 MdViewerWidget::MdViewerWidget() : VatesViewerInterface(), currentView(NULL),
   dataLoader(NULL), hiddenView(NULL), lodAction(NULL), screenShot(NULL), viewLayout(NULL),
-  viewSettings(NULL)
+  viewSettings(NULL), initialView(ModeControlWidget::STANDARD), m_rebinAlgorithmDialogProvider(this), m_rebinnedWorkspaceIdentifier("_tempvsi")
 {
+  //this will initialize the ParaView application if needed.
+  VatesParaViewApplication::instance();
+  
   // Calling workspace observer functions.
   observeAfterReplace();
   observePreDelete();
@@ -127,29 +148,25 @@ MdViewerWidget::MdViewerWidget() : VatesViewerInterface(), currentView(NULL),
 
   this->internalSetup(true);
 
-  // Create the mapping from the measurement technique to the view
-
+  setAcceptDrops(true);
+  // Connect the rebinned sources manager
+  QObject::connect(&m_rebinnedSourcesManager, SIGNAL(switchSources(std::string, std::string)),
+                   this, SLOT(onSwitchSoures(std::string, std::string)));
 }
 
 /**
  * This constructor is used in the standalone mode operation of the VSI.
  * @param parent the parent widget for the main window
  */
-MdViewerWidget::MdViewerWidget(QWidget *parent) : VatesViewerInterface(parent)
+MdViewerWidget::MdViewerWidget(QWidget *parent) : VatesViewerInterface(parent), m_rebinAlgorithmDialogProvider(this)
 {
-  this->checkEnvSetup();
+  
+  //this will initialize the ParaView application if needed.
+  VatesParaViewApplication::instance();
+  
   // We're in the standalone application mode
   this->internalSetup(false);
   this->setupUiAndConnections();
-  // FIXME: This doesn't allow a clean split of the classes. I will need
-  //        to investigate creating the individual behaviors to see if that
-  //        eliminates the dependence on the QMainWindow.
-  if (parent->inherits("QMainWindow"))
-  {
-    QMainWindow *mw = qobject_cast<QMainWindow *>(parent);
-    new pqParaViewBehaviors(mw, mw);
-  }
-
   this->setupMainView();
 }
 
@@ -164,27 +181,15 @@ MdViewerWidget::~MdViewerWidget()
  */
 void MdViewerWidget::internalSetup(bool pMode)
 {
-  this->isPluginInitialized = false;
+  static int widgetNumber = 0;
+  this->m_widgetName = QString("MdViewerWidget%1").arg(widgetNumber++);
   this->pluginMode = pMode;
   this->rotPointDialog = NULL;
   this->lodThreshold = 5.0;
   this->viewSwitched = false;
 }
 
-/**
- * This function uses VTK's system tools to check the environmental variables
- * to make sure PV_PLUGIN_PATH is available.
- */
-void MdViewerWidget::checkEnvSetup()
-{
-  QString pv_plugin_path = vtksys::SystemTools::GetEnv("PV_PLUGIN_PATH");
-  if (pv_plugin_path.isEmpty())
-  {
-    throw std::runtime_error("PV_PLUGIN_PATH not setup.\nVates plugins will not be available.\n"
-                             "Further use will cause the program to crash.\nPlease exit and "
-                             "set this variable.");
-  }
-}
+
 
 /**
  * This function sets up the UI components and connects some of the main
@@ -194,10 +199,8 @@ void MdViewerWidget::setupUiAndConnections()
 {
   this->ui.setupUi(this);
   this->ui.splitter_2->setStretchFactor(1, 1);
+  this->ui.splitter_3->setStretchFactor(0, 1);
   this->ui.statusBar->setSizeGripEnabled(false);
-
-  // Unset the connections since the views aren't up yet.
-  this->removeProxyTabWidgetConnections();
 
   QObject::connect(this->ui.modeControlWidget,
                    SIGNAL(executeSwitchViews(ModeControlWidget::Views)),
@@ -208,8 +211,37 @@ void MdViewerWidget::setupUiAndConnections()
                    SIGNAL(clicked()),
                    this,
                    SLOT(onRotationPoint()));
+
+  /// Provide access to the color-editor panel for the application.
+  pqApplicationCore::instance()->registerManager(
+    "COLOR_EDITOR_PANEL", this->ui.colorMapEditorDock);
+  this->ui.colorMapEditorDock->hide();
+  //this->connect(this->ui.proxiesPanel,SIGNAL(changeFinished(vtkSMProxy*)),SLOT(panelChanged()));
+  QAction* temp = new QAction(this);
+  pqDeleteReaction* deleteHandler = new pqDeleteReaction(temp);
+  deleteHandler->connect(this->ui.propertiesPanel,SIGNAL(deleteRequested(pqPipelineSource*)),SLOT(deleteSource(pqPipelineSource*)));
+  
+  pqApplyBehavior* applyBehavior = new pqApplyBehavior(this);
+  applyBehavior->registerPanel(this->ui.propertiesPanel);
+  VatesParaViewApplication::instance()->setupParaViewBehaviors();
+  //this->ui.pipelineBrowser->enableAnnotationFilter(m_widgetName);
+  //this->ui.pipelineBrowser->disableAnnotationFilter();
+  //this->ui.pipelineBrowser->enableAnnotationFilter(m_widgetName);
+  //this->ui.pipelineBrowser->hide();
+  g_log.warning("Annotation Name: " + m_widgetName.toStdString());
+  
+  // Connect the rebinned sources manager
+  QObject::connect(&m_rebinnedSourcesManager,
+                   SIGNAL(triggerAcceptForNewFilters()),
+                   this->ui.propertiesPanel,
+                   SLOT(apply()));
 }
 
+void MdViewerWidget::panelChanged()
+{
+    this->currentView->renderAll();
+}
+    
 /**
  * This function places the standard view to the main window, installs an
  * event filter, tweaks the UI layout for the view and calls the routine that
@@ -236,81 +268,6 @@ void MdViewerWidget::setupMainView()
   this->setParaViewComponentsForView();
 }
 
-
-
-/**
- * This function ensures that the main ParaView instance is only initialized
- * once. On the second call, it checks to make sure one doesn't exist. This is
- * only important for plugin mode operation of the VSI.
- */
-void MdViewerWidget::createAppCoreForPlugin()
-{
-  if (!pqApplicationCore::instance())
-  {
-    // Provide ParaView's application core with a path to ParaView
-    std::string paraviewPath = Mantid::Kernel::ConfigService::Instance().getParaViewPath();
-    if(paraviewPath.empty())
-    {
-      // ParaView crashes with an empty string but on Linux/OSX we dont set this property
-      paraviewPath = "/tmp/MantidPlot";
-    }
-    std::vector<char> argvConversion(paraviewPath.begin(), paraviewPath.end());
-    argvConversion.push_back('\0');
-
-    int argc = 1;
-    char *argv[] = {&argvConversion[0]};
-    g_log.debug() << "Intialize pqApplicationCore with " << argv << "\n";
-    new pqPVApplicationCore(argc, argv);
-  }
-  else
-  {
-    this->isPluginInitialized = true;
-  }
-}
-
-/**
- * This function duplicates the nearly identical call in ParaView for their
- * main program setup. This is necessary for the plugin mode since it does
- * not have access to the QMainWindow of MantidPlot.
- */
-void MdViewerWidget::setupParaViewBehaviors()
-{
-  // Register ParaView interfaces.
-  pqInterfaceTracker* pgm = pqApplicationCore::instance()->interfaceTracker();
-
-  // * adds support for standard paraview views.
-  pgm->addInterface(new pqStandardViewModules(pgm));
-
-  pgm->addInterface(new pqStandardPropertyWidgetInterface(pgm));
-
-  // Load plugins distributed with application.
-  pqApplicationCore::instance()->loadDistributedPlugins();
-
-  // Define application behaviors.
-  new pqQtMessageHandlerBehavior(this);
-  new pqDataTimeStepBehavior(this);
-  new pqViewFrameActionsBehavior(this);
-  new pqSpreadSheetVisibilityBehavior(this);
-  new pqPipelineContextMenuBehavior(this);
-  new pqDefaultViewBehavior(this);
-  new pqAlwaysConnectedBehavior(this);
-  new pqPVNewSourceBehavior(this);
-  new pqDeleteBehavior(this);
-  new pqUndoRedoBehavior(this);
-  new pqCrashRecoveryBehavior(this);
-  new pqAutoLoadPluginXMLBehavior(this);
-  //new pqPluginDockWidgetsBehavior(mainWindow);
-  new pqVerifyRequiredPluginBehavior(this);
-  //new pqPluginActionGroupBehavior(mainWindow);
-  new pqFixPathsInStateFilesBehavior(this);
-  new pqCommandLineOptionsBehavior(this);
-  //new pqPersistentMainWindowStateBehavior(mainWindow);
-  new pqObjectPickingBehavior(this);
-  new pqCollaborationBehavior(this);
-  new pqMultiServerBehavior(this);
-  new pqViewStreamingBehavior(this);
-}
-
 /**
  * This function connects ParaView's data loader the given action.
  * @param action the action to connect data loading to
@@ -322,19 +279,6 @@ void MdViewerWidget::connectLoadDataReaction(QAction *action)
   this->dataLoader = new pqLoadDataReaction(action);
   QObject::connect(this->dataLoader, SIGNAL(loadedData(pqPipelineSource*)),
                    this, SLOT(onDataLoaded(pqPipelineSource*)));
-}
-
-/**
- * This function disconnects ParaView connections between pqActiveObjects
- * and the pqProxyTabWidget. This is necessary for clean view switching.
- */
-void MdViewerWidget::removeProxyTabWidgetConnections()
-{
-  QObject::disconnect(&pqActiveObjects::instance(), 0,
-                      this->ui.propertiesPanel, 0);
-  this->ui.propertiesPanel->setRepresentation(NULL);
-  this->ui.propertiesPanel->setView(NULL);
-  this->ui.propertiesPanel->setOutputPort(NULL);
 }
 
 /**
@@ -351,22 +295,22 @@ ViewBase* MdViewerWidget::setMainViewWidget(QWidget *container,
   {
   case ModeControlWidget::STANDARD:
   {
-    view = new StandardView(container);
+    view = new StandardView(container, &m_rebinnedSourcesManager);
   }
   break;
   case ModeControlWidget::THREESLICE:
   {
-    view = new ThreeSliceView(container);
+    view = new ThreeSliceView(container, &m_rebinnedSourcesManager);
   }
   break;
   case ModeControlWidget::MULTISLICE:
   {
-    view = new MultiSliceView(container);
+    view = new MultiSliceView(container, &m_rebinnedSourcesManager);
   }
   break;
   case ModeControlWidget::SPLATTERPLOT:
   {
-    view = new SplatterPlotView(container);
+    view = new SplatterPlotView(container, &m_rebinnedSourcesManager);
   }
   break;
   default:
@@ -384,20 +328,22 @@ ViewBase* MdViewerWidget::setMainViewWidget(QWidget *container,
 void MdViewerWidget::setParaViewComponentsForView()
 {
   // Extra setup stuff to hook up view to other items
-  this->ui.propertiesPanel->setView(this->currentView->getView());
+  //this->ui.propertiesPanel->setView(this->currentView->getView());
   this->ui.pipelineBrowser->setActiveView(this->currentView->getView());
 
   pqActiveObjects *activeObjects = &pqActiveObjects::instance();
   QObject::connect(activeObjects, SIGNAL(portChanged(pqOutputPort*)),
                    this->ui.propertiesPanel, SLOT(setOutputPort(pqOutputPort*)));
-  QObject::connect(activeObjects, SIGNAL(representationChanged(pqRepresentation*)),
-                   this->ui.propertiesPanel, SLOT(setRepresentation(pqRepresentation*)));
+
+  //QObject::connect(activeObjects, SIGNAL(representationChanged(pqRepresentation*)),
+  //                 this->ui.propertiesPanel, SLOT(setRepresentation(pqRepresentation*)));
+
   QObject::connect(activeObjects, SIGNAL(viewChanged(pqView*)),
                    this->ui.propertiesPanel, SLOT(setView(pqView*)));
 
-  this->ui.propertiesPanel->setOutputPort(activeObjects->activePort());
-  this->ui.propertiesPanel->setView(this->currentView->getView());
-  this->ui.propertiesPanel->setRepresentation(activeObjects->activeRepresentation());
+  //this->ui.propertiesPanel->setOutputPort(activeObjects->activePort());
+  //this->ui.propertiesPanel->setView(this->currentView->getView());
+  //this->ui.propertiesPanel->setRepresentation(activeObjects->activeRepresentation());
 
   QObject::connect(this->currentView,
                    SIGNAL(triggerAccept()),
@@ -453,6 +399,206 @@ void MdViewerWidget::setParaViewComponentsForView()
                    SIGNAL(toggled(bool)),
                    this->currentView,
                    SLOT(onParallelProjection(bool)));
+
+  // Start listening to a rebinning event
+  QObject::connect(this->currentView, SIGNAL(rebin(std::string)),
+                   this, SLOT(onRebin(std::string)), Qt::UniqueConnection);
+
+  // Start listening to an unbinning event
+  QObject::connect(this->currentView, SIGNAL(unbin()),
+                   this, SLOT(onUnbin()), Qt::UniqueConnection);
+
+}
+
+/**
+ * Reaction for a rebin event
+ * @param algorithmType The type of rebinning algorithm
+ */
+void MdViewerWidget::onRebin(std::string algorithmType)
+{
+  pqPipelineSource* source = pqActiveObjects::instance().activeSource();
+
+  std::string inputWorkspaceName;
+  std::string outputWorkspaceName;
+  m_rebinnedSourcesManager.checkSource(source, inputWorkspaceName, outputWorkspaceName, algorithmType);
+  m_rebinAlgorithmDialogProvider.showDialog(inputWorkspaceName, outputWorkspaceName, algorithmType);
+}
+
+/**
+ * Switch a source.
+ * @param rebinnedWorkspaceName The name of the rebinned  workspace.
+ * @param sourceType The type of the source.
+ */
+void MdViewerWidget::onSwitchSoures(std::string rebinnedWorkspaceName, std::string sourceType)
+{
+  // Create the rebinned workspace
+  pqPipelineSource* rebinnedSource = prepareRebinnedWorkspace(rebinnedWorkspaceName, sourceType); 
+
+  try
+  {
+    // Repipe the filters to the rebinned source
+    m_rebinnedSourcesManager.repipeRebinnedSource();
+
+    // Update the animation controls in order to get the correct time slice
+    this->currentView->updateAnimationControls();
+
+    // Update the color scale
+    this->currentView->onAutoScale(this->ui.colorSelectionWidget);
+
+    // Set the splatterplot button explicitly
+    this->currentView->setSplatterplot(true);
+
+    pqActiveObjects::instance().setActiveSource(NULL);
+    pqActiveObjects::instance().setActiveSource(rebinnedSource);
+  }
+  catch (const std::runtime_error& error)
+  {
+    g_log.warning() << error.what();
+  }
+}
+
+/**
+ * Creates and renders a rebinned workspace source 
+ * @param rebinnedWorkspaceName The name of the rebinned workspace.
+ * @param sourceType The name of the source plugin. 
+ */
+pqPipelineSource* MdViewerWidget::prepareRebinnedWorkspace(const std::string rebinnedWorkspaceName, std::string sourceType)
+{
+  // Load a new source plugin
+  pqPipelineSource* newRebinnedSource = this->currentView->setPluginSource(QString::fromStdString(sourceType), QString::fromStdString(rebinnedWorkspaceName));
+
+  // It seems that the new source gets set as active before it is fully constructed. We therefore reset it.
+  pqActiveObjects::instance().setActiveSource(NULL);
+  pqActiveObjects::instance().setActiveSource(newRebinnedSource);
+
+  this->renderAndFinalSetup();
+
+  this->currentView->onAutoScale(this->ui.colorSelectionWidget);
+
+  // Register the source
+  m_rebinnedSourcesManager.registerRebinnedSource(newRebinnedSource);
+
+  return newRebinnedSource;
+}
+
+/**
+ * Creates and renders back to the original source 
+ * @param originalWorkspaceName The name of the original workspace
+ */
+pqPipelineSource* MdViewerWidget::renderOriginalWorkspace(const std::string originalWorkspaceName)
+{
+  // Load a new source plugin
+  QString sourcePlugin = "MDEW Source";
+  pqPipelineSource* source = this->currentView->setPluginSource(sourcePlugin, QString::fromStdString(originalWorkspaceName));
+
+  // Render and final setup
+  this->renderAndFinalSetup();
+
+  return source;
+}
+
+
+/**
+ * Gets triggered by an unbin event. It removes the rebinning on a workspace
+ * which has been rebinned from within the VSI.
+ */
+void MdViewerWidget::onUnbin()
+{
+  // Force the removal of the rebinning
+  pqPipelineSource *activeSource = pqActiveObjects::instance().activeSource();
+
+  removeRebinning(activeSource, true);
+}
+
+/**
+ * Remove the rebinning.
+ * @param source The pipeline source for which the rebinning will be removed.
+ * @param forced If it should be removed under all circumstances.
+ * @param view If switched, to which view is it being switched
+ */
+void MdViewerWidget::removeRebinning(pqPipelineSource* source, bool forced, ModeControlWidget::Views view)
+{
+  if (forced || view == ModeControlWidget::SPLATTERPLOT)
+  {
+    std::string originalWorkspaceName;
+    std::string rebinnedWorkspaceName;
+    m_rebinnedSourcesManager.getStoredWorkspaceNames(source, originalWorkspaceName, rebinnedWorkspaceName);
+
+    // If the active source has not been rebinned, then send a reminder to the user that only rebinned sources 
+    // can be unbinned
+    if (originalWorkspaceName.empty() || rebinnedWorkspaceName.empty())
+    {
+      if (forced == true)
+      {
+          QMessageBox::warning(this, QApplication::tr("Unbin Warning"),
+                      QApplication::tr("You cannot unbin a source which has not be rebinned. \n"\
+                      "To unbin, select a rebinned source and \n"\
+                      "press Remove Rebinning again"));
+      }
+      return;
+    }
+
+    // We need to check that the rebinned workspace name has still a source associated to it
+    if (!m_rebinnedSourcesManager.isRebinnedSourceBeingTracked(source))
+    {
+      return;
+    }
+
+    // Create the original source
+    pqPipelineSource* originalSource = renderOriginalWorkspace(originalWorkspaceName);
+
+    // Repipe the filters to the original source
+    try
+    {
+      m_rebinnedSourcesManager.repipeOriginalSource(source, originalSource);
+    }
+    catch (const std::runtime_error& error)
+    {
+      g_log.warning() << error.what();
+    }
+
+    // Render and final setup
+    pqActiveObjects::instance().activeView()->forceRender();
+
+    // Set the buttons correctly if we switch to splatterplot
+    if ( view == ModeControlWidget::SPLATTERPLOT)
+    {
+      this->currentView->setSplatterplot(false);
+      this->currentView->setStandard(true);
+    }
+  }
+}
+
+/**
+ * Remove rebinning from all rebinned sources
+ * @param view The view mode.
+ */
+void MdViewerWidget::removeAllRebinning(ModeControlWidget::Views view)
+{
+  // Iterate over all rebinned sources and remove them
+  pqServer *server = pqActiveObjects::instance().activeServer();
+  pqServerManagerModel *smModel = pqApplicationCore::instance()->getServerManagerModel();
+  QList<pqPipelineSource *> sources = smModel->findItems<pqPipelineSource *>(server);
+
+  // We need to record all true sources, The filters will be removed in the removeRebinning step
+  // Hence the iterator will not point to a valid object anymore.
+  QList<pqPipelineSource*> sourcesToAlter;
+
+  for (QList<pqPipelineSource *>::Iterator source = sources.begin(); source != sources.end(); ++source)
+  {
+    const QString srcProxyName = (*source)->getProxy()->GetXMLGroup();
+
+    if (srcProxyName == QString("sources"))
+    {
+      sourcesToAlter.push_back(*source);
+    }
+  }
+
+  for (QList<pqPipelineSource *>::Iterator source = sourcesToAlter.begin(); source!= sourcesToAlter.end(); ++source)
+  {
+    removeRebinning(*source, false, view);
+  }
+
 }
 
 /**
@@ -475,8 +621,9 @@ void MdViewerWidget::renderingDone()
 {
   if (this->viewSwitched)
   {
-    this->viewSwitched = false;
+    this->ui.colorSelectionWidget->loadColorMap(this->viewSwitched); // Load the default color map
     this->currentView->setColorsForView(this->ui.colorSelectionWidget);
+    this->viewSwitched = false;
   }
 }
 
@@ -489,14 +636,17 @@ void MdViewerWidget::renderingDone()
  */
 void MdViewerWidget::renderWorkspace(QString workspaceName, int workspaceType, std::string instrumentName)
 {
+  GlobalInterpreterLock gil;
+  // Workaround: Note that setting to the standard view was part of the eventFilter. This causes the 
+  //             VSI window to not close properly. Moving it here ensures that we have the switch, but
+  //             after the window is started again.
   if (this->currentView->getNumSources() == 0)
   {
-    this->ui.modeControlWidget->setToStandardView();
-  }
+    this->setColorForBackground();
+    this->ui.colorSelectionWidget->loadColorMap(this->viewSwitched);
 
-  // If there are no other sources, then set the required 
-  if (this->currentView->getNumSources() == 0)
-  {
+    this->ui.modeControlWidget->setToStandardView();
+    this->currentView->hide();
     // Set the auto log scale state
     this->currentView->initializeColorScale();
   }
@@ -516,9 +666,9 @@ void MdViewerWidget::renderWorkspace(QString workspaceName, int workspaceType, s
   }
 
   // Load a new source plugin
-  this->currentView->setPluginSource(sourcePlugin, workspaceName);
-
-  this->renderAndFinalSetup();
+    pqPipelineSource* source = this->currentView->setPluginSource(sourcePlugin, workspaceName);
+    source->getProxy()->SetAnnotation(this->m_widgetName.toLatin1().data(), "1");
+    this->renderAndFinalSetup();
 
   // Reset the current view to the correct initial view
   // Note that we can only reset if a source plugin exists.
@@ -526,7 +676,6 @@ void MdViewerWidget::renderWorkspace(QString workspaceName, int workspaceType, s
   // correct initial after calling renderAndFinalSetup. We first 
   // need to load in the current view and then switch to be inline
   // with the current architecture.
-  
   if (VatesViewerInterface::PEAKS != workspaceType)
   {
      resetCurrentView(workspaceType, instrumentName);
@@ -580,6 +729,10 @@ void MdViewerWidget::resetCurrentView(int workspaceType, const std::string& inst
   {
     this->ui.modeControlWidget->setToSelectedView(initialView);
   }
+  else
+  {
+    this->currentView->show();
+  }
 
   this->initialView = initialView;
 }
@@ -596,11 +749,19 @@ void MdViewerWidget::resetCurrentView(int workspaceType, const std::string& inst
 ModeControlWidget::Views MdViewerWidget::getInitialView(int workspaceType, std::string instrumentName)
 {
   // Get the possible initial views
-  std::string initialViewFromUserProperties = Mantid::Kernel::ConfigService::Instance().getVsiInitialView();
-  std::string initialViewFromTechnique = getViewForInstrument(instrumentName);
+  QString initialViewFromUserProperties = mdSettings.getUserSettingInitialView();
+  QString initialViewFromTechnique = getViewForInstrument(instrumentName);
 
-  // The user-properties-defined default view takes precedence over the techique-defined default view
-  std::string initialView = initialViewFromUserProperties.empty() ?  initialViewFromTechnique : initialViewFromUserProperties;
+  // The user-properties-defined default view takes precedence over the technique-defined default view
+  QString initialView;
+  if (initialViewFromUserProperties == mdConstants.getTechniqueDependence())
+  {
+   initialView = initialViewFromTechnique;
+  }
+  else
+  {
+   initialView = initialViewFromUserProperties;
+  }
 
   ModeControlWidget::Views view =  this->ui.modeControlWidget->getViewFromString(initialView);
 
@@ -614,12 +775,12 @@ ModeControlWidget::Views MdViewerWidget::getInitialView(int workspaceType, std::
  *                       data was measured.
  * @returns A view.
  */
-std::string MdViewerWidget::getViewForInstrument(const std::string& instrumentName) const
+QString MdViewerWidget::getViewForInstrument(const std::string& instrumentName) const
 {
   // If nothing is specified the standard view is chosen
   if (instrumentName.empty())
   {
-    return "STANDARD";
+    return mdConstants.getStandardView();
   }
 
   // Check for techniques
@@ -627,26 +788,31 @@ std::string MdViewerWidget::getViewForInstrument(const std::string& instrumentNa
   //               2. Neutron Diffraction --> SPLATTERPLOT
   //               3. *Spectroscopy* --> MULTISLICE
   //               4. Other --> STANDARD
-  const std::set<std::string> techniques = Mantid::Kernel::ConfigService::Instance().getInstrument(instrumentName).techniques();
+  QString associatedView;
+  try
+  {
+    const std::set<std::string> techniques = Mantid::Kernel::ConfigService::Instance().getInstrument(instrumentName).techniques();
 
-  std::string associatedView;
-
-  if (techniques.count("Single Crystal Diffraction") > 0 )
-  {
-    associatedView = "SPLATTERPLOT";
+    if (techniques.count("Single Crystal Diffraction") > 0 )
+    {
+      associatedView = mdConstants.getSplatterPlotView();
+    }
+    else if (techniques.count("Neutron Diffraction") > 0 )
+    {
+      associatedView = mdConstants.getSplatterPlotView();
+    } else if (checkIfTechniqueContainsKeyword(techniques, "Spectroscopy"))
+    {
+      associatedView = mdConstants.getMultiSliceView();
+    }
+    else
+    {
+      associatedView = mdConstants.getStandardView();
+    }
   }
-  else if (techniques.count("Neutron Diffraction") > 0 )
+  catch (...)
   {
-    associatedView = "SPLATTERPLOT";
-  } else if (checkIfTechniqueContainsKeyword(techniques, "Spectroscopy"))
-  {
-    associatedView = "MULTISLICE";
+    associatedView = mdConstants.getStandardView();
   }
-  else
-  {
-    associatedView = "STANDARD";
-  }
-
   return associatedView;
 }
 
@@ -687,7 +853,9 @@ ModeControlWidget::Views MdViewerWidget::checkViewAgainstWorkspace(ModeControlWi
     // Histo workspaces cannot have a splatter plot, 
     if (view == ModeControlWidget::SPLATTERPLOT)
     {
-      g_log.warning() << "Selected a splatter plot for a histo workspace. Defaulted to standard view. \n";  
+      g_log.notice() << "The preferred initial view favours the splatterplot as initial view, "
+                          << "but an MDHisto workspace is being loaded. An MDHisto workspace "
+                          << "cannot be loaded into a splatterplot view. Defaulted to standard view. \n";  
 
       selectedView =  ModeControlWidget::STANDARD;
     } 
@@ -710,17 +878,11 @@ ModeControlWidget::Views MdViewerWidget::checkViewAgainstWorkspace(ModeControlWi
  */
 void MdViewerWidget::setupPluginMode()
 {
-  this->createAppCoreForPlugin();
-  this->checkEnvSetup();
+  GlobalInterpreterLock gil;
   this->setupUiAndConnections();
-  if (!this->isPluginInitialized)
-  {
-    this->setupParaViewBehaviors();
-    this->createMenus();
-  }
+  this->createMenus();
   this->setupMainView();
 }
-
 
 /**
  * This function tells the current view to render the data, perform any
@@ -729,12 +891,33 @@ void MdViewerWidget::setupPluginMode()
  */
 void MdViewerWidget::renderAndFinalSetup()
 {
+  this->setColorForBackground();
   this->currentView->render();
+  this->ui.colorSelectionWidget->loadColorMap(this->viewSwitched);
   this->currentView->setColorsForView(this->ui.colorSelectionWidget);
   this->currentView->checkView(this->initialView);
   this->currentView->updateAnimationControls();
-  this->setVisibilityListener();
+  pqPipelineSource *source = this->currentView->origSrc;
+  //suppress unused variable;
+  (void)source;
+  pqPipelineRepresentation *repr = this->currentView->origRep;
+  //suppress unused variable;
+  (void)repr;
+  //this->ui.proxiesPanel->clear();
+  //this->ui.proxiesPanel->addProxy(source->getProxy(),"datasource",QStringList(),true);
+  //this->ui.proxiesPanel->addProxy(repr->getProxy(),"display",QStringList("CubeAxesVisibility"),true);
+  //this->ui.proxiesPanel->updateLayout();
+  this->setDestroyedListener();
+  this->currentView->setVisibilityListener();
   this->currentView->onAutoScale(this->ui.colorSelectionWidget);
+}
+
+/**
+ * Set the background color for this view. 
+ */
+void MdViewerWidget::setColorForBackground()
+{
+  this->currentView->setColorForBackground(this->viewSwitched);
 }
 
 /**
@@ -751,13 +934,6 @@ void MdViewerWidget::checkForUpdates()
   }
   vtkSMProxy *proxy = src->getProxy();
 
-  if (strcmp(proxy->GetXMLName(), "MDEWRebinningCutter") == 0)
-  {
-    this->currentView->onAutoScale(this->ui.colorSelectionWidget);
-    this->currentView->updateAnimationControls();
-    this->currentView->updateView();
-    this->currentView->updateUI();
-  }
   if (QString(proxy->GetXMLName()).contains("Threshold"))
   {
     this->ui.colorSelectionWidget->enableControls(true);
@@ -786,10 +962,10 @@ void MdViewerWidget::checkForUpdates()
  */
 void MdViewerWidget::switchViews(ModeControlWidget::Views v)
 {
+  this->removeAllRebinning(v);
   this->viewSwitched = true;
   this->currentView->closeSubWindows();
   this->disconnectDialogs();
-  this->removeProxyTabWidgetConnections();
   this->hiddenView = this->setMainViewWidget(this->ui.viewWidget, v);
   this->hiddenView->setColorScaleState(this->ui.colorSelectionWidget);
   this->hiddenView->hide();
@@ -803,13 +979,16 @@ void MdViewerWidget::switchViews(ModeControlWidget::Views v)
   this->connectDialogs();
   this->hiddenView->close();
   this->hiddenView->destroyView();
-  delete this->hiddenView;
+  this->hiddenView->deleteLater();
+  this->setColorForBackground();
   this->currentView->render();
   this->currentView->setColorsForView(this->ui.colorSelectionWidget);
+  
   this->currentView->checkViewOnSwitch();
   this->updateAppState();
   this->initialView = v; 
-  this->setVisibilityListener();
+  this->setDestroyedListener();
+  this->currentView->setVisibilityListener();
 }
 
 /**
@@ -843,12 +1022,23 @@ bool MdViewerWidget::eventFilter(QObject *obj, QEvent *ev)
       {
         this->ui.parallelProjButton->toggle();
       }
+
       this->ui.colorSelectionWidget->reset();
       this->currentView->setColorScaleState(this->ui.colorSelectionWidget);
-      pqObjectBuilder* builder = pqApplicationCore::instance()->getObjectBuilder();
-      builder->destroySources();
+      this->currentView ->destroyAllSourcesInView();
+      this->currentView->updateSettings();
+      this->currentView->hide();
 
       return true;
+    }
+  }
+  if(ev->type() == QEvent::WindowActivate)
+  {
+    if(this->currentView)
+    {
+      pqView* view = this->currentView->getView();
+      pqActiveObjects::instance().setActiveView(view);
+      pqActiveObjects::instance().setActiveSource(this->currentView->origSrc);
     }
   }
   return VatesViewerInterface::eventFilter(obj, ev);
@@ -897,10 +1087,10 @@ void MdViewerWidget::createMenus()
   this->screenShot = new SaveScreenshotReaction(screenShotAction);
   viewMenu->addAction(screenShotAction);
 
-  QAction *settingsAction = new QAction(QApplication::tr("View Settings..."), this);
+  QAction *settingsAction = new QAction(QApplication::tr("Settings..."), this);
   settingsAction->setShortcut(QKeySequence::fromString("Ctrl+Shift+S"));
   settingsAction->setStatusTip(QApplication::tr("Show the settings for the current view."));
-  this->viewSettings = new pqViewSettingsReaction(settingsAction);
+  this->viewSettings = new pqApplicationSettingsReaction(settingsAction);
   viewMenu->addAction(settingsAction);
 
   QMenu *helpMenu = menubar->addMenu(QApplication::tr("&Help"));
@@ -1041,8 +1231,6 @@ void MdViewerWidget::connectDialogs()
  */
 void MdViewerWidget::updateAppState()
 {
-  this->viewSettings->updateEnableState();
-
   ThreeSliceView *tsv = dynamic_cast<ThreeSliceView *>(this->currentView);
   SplatterPlotView *spv = dynamic_cast<SplatterPlotView *>(this->currentView);
   if (NULL != tsv || NULL != spv)
@@ -1074,32 +1262,26 @@ void MdViewerWidget::afterReplaceHandle(const std::string &wsName,
     // Have to mark the filter as modified to get it to update. Do this by
     // changing the requested workspace name to a dummy name and then change
     // back. However, push the change all the way down for it to work.
-    vtkSMPropertyHelper(src->getProxy(),
+    vtkSMProxy* proxy = src->getProxy();
+    vtkSMPropertyHelper(proxy,
                         "Mantid Workspace Name").Set("ChangeMe!");
-    vtkSMSourceProxy *srcProxy = vtkSMSourceProxy::SafeDownCast(src->getProxy());
-    srcProxy->UpdateVTKObjects();
-    srcProxy->Modified();
-    srcProxy->UpdatePipelineInformation();
-    src->updatePipeline();
+    proxy->UpdateVTKObjects();
 
-    vtkSMPropertyHelper(src->getProxy(),
+    vtkSMPropertyHelper(proxy,
                         "Mantid Workspace Name").Set(wsName.c_str());
     // Update the source so that it retrieves the data from the Mantid workspace
-    srcProxy = vtkSMSourceProxy::SafeDownCast(src->getProxy());
-    srcProxy->UpdateVTKObjects();
-    srcProxy->Modified();
-    srcProxy->UpdatePipelineInformation();
+    proxy->UpdateVTKObjects();
     src->updatePipeline();
 
     this->currentView->setColorsForView(this->ui.colorSelectionWidget);
-    this->currentView->renderAll();;
+    this->currentView->renderAll();
   }
 }
 
 /**
  * This function responds to a workspace being deleted. If there are one or
- * more PeaksWorkspaces present, the requested one will be deleted. Otherwise,
- * if it is an IMDWorkspace, everything goes!
+ * more PeaksWorkspaces present, the requested one will be deleted. 
+ * Otherwise, if it is an IMDWorkspace, everything goes! 
  * @param wsName : Name of workspace being deleted
  * @param ws : Pointer to workspace being deleted
  */
@@ -1107,6 +1289,7 @@ void MdViewerWidget::preDeleteHandle(const std::string &wsName,
                                      const boost::shared_ptr<Workspace> ws)
 {
   UNUSED_ARG(ws);
+  
   pqPipelineSource *src = this->currentView->hasWorkspace(wsName.c_str());
   if (NULL != src)
   {
@@ -1120,27 +1303,97 @@ void MdViewerWidget::preDeleteHandle(const std::string &wsName,
         return;
       }
     }
+
+    // Remove all visibility listeners
+    this->currentView->removeVisibilityListener();
+
     emit this->requestClose();
   }
 }
 
+
 /**
- * Set the listener for the visibility of the representations
- */
-void MdViewerWidget::setVisibilityListener()
+* Set the listener for when sources are being destroyed
+*/
+void MdViewerWidget::setDestroyedListener()
 {
-  // Set the connection to listen to a visibility change of the representation.
   pqServer *server = pqActiveObjects::instance().activeServer();
   pqServerManagerModel *smModel = pqApplicationCore::instance()->getServerManagerModel();
-  QList<pqPipelineSource *> sources;
-  sources = smModel->findItems<pqPipelineSource *>(server);
+  QList<pqPipelineSource *> sources = smModel->findItems<pqPipelineSource *>(server);
 
-  // Attach the visibilityChanged signal for all sources.
+  // Attach the destroyd signal of all sources to the viewbase.
   for (QList<pqPipelineSource *>::iterator source = sources.begin(); source != sources.end(); ++source)
   {
-    QObject::connect((*source), SIGNAL(visibilityChanged(pqPipelineSource*, pqDataRepresentation*)),
-                     this->currentView, SLOT(onVisibilityChanged(pqPipelineSource*, pqDataRepresentation*)),
-                     Qt::UniqueConnection);
+  QObject::connect((*source), SIGNAL(destroyed()),
+                    this->currentView, SLOT(onSourceDestroyed()), Qt::UniqueConnection);
+  }
+}
+
+
+
+
+/**
+ * Dectect when a PeaksWorkspace is dragged into the VSI.
+ * @param e A drag event.
+ */
+void MdViewerWidget::dragEnterEvent(QDragEnterEvent *e) {
+  QString name = e->mimeData()->objectName();
+  if (name == "MantidWorkspace") {
+  QString text = e->mimeData()->text();
+  QStringList wsNames;
+  handleDragAndDropPeaksWorkspaces(e,text, wsNames);
+  }
+  else {
+  e->ignore();
+  }
+}
+
+/**
+ * React to dropping a PeaksWorkspace ontot the VSI.
+ * @param e Drop event.
+ */
+void MdViewerWidget::dropEvent(QDropEvent *e) {
+  QString name = e->mimeData()->objectName();
+  if (name == "MantidWorkspace") {
+    QString text = e->mimeData()->text();
+    QStringList wsNames;
+    handleDragAndDropPeaksWorkspaces(e,text, wsNames);
+    if(!wsNames.empty()){
+    // We render the first workspace name, it is a peak workspace and the instrument is not relevant
+    renderWorkspace(wsNames[0], 1, "");
+    }
+  }
+}
+
+/**
+  * Handle the drag and drop events of peaks workspaces.
+  * @param e The event.
+  * @param text String containing information regarding the workspace name.
+  * @param wsNames  Reference to a list of workspaces names, which are being extracted.
+  */
+ void MdViewerWidget::handleDragAndDropPeaksWorkspaces(QEvent* e, QString text, QStringList& wsNames)
+ {
+  int endIndex = 0;
+  while (text.indexOf("[\"", endIndex) > -1) {
+    int startIndex = text.indexOf("[\"", endIndex) + 2;
+    endIndex = text.indexOf("\"]", startIndex);
+    QString candidate = text.mid(startIndex, endIndex - startIndex);
+    if(dynamic_cast<SplatterPlotView *>(this->currentView))
+    {
+      if(boost::dynamic_pointer_cast<IPeaksWorkspace>(AnalysisDataService::Instance().retrieve(candidate.toStdString())))
+      {
+      wsNames.append(candidate);
+      e->accept();
+      }
+      else
+      {
+      e->ignore();
+      }
+    }
+    else
+    {
+      e->ignore();
+    }
   }
 }
 

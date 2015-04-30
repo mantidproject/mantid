@@ -10,7 +10,7 @@ namespace Mantid {
 namespace CurveFitting {
 
 // Register the algorithm into the AlgorithmFactory
-DECLARE_ALGORITHM(ConvertToYSpace);
+DECLARE_ALGORITHM(ConvertToYSpace)
 
 using namespace API;
 using namespace Kernel;

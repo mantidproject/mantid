@@ -1,4 +1,4 @@
-#pylint: disable=no-init,invalid-name
+#pylint: disable=no-init,invalid-name,too-many-branches
 import mantid.simpleapi as api
 from mantid.api import *
 from mantid.kernel import *
@@ -6,6 +6,8 @@ from reduction_workflow.find_data import find_data
 import os
 
 class HFIRSANSReduction(PythonAlgorithm):
+
+    default_output_dir = None
 
     def category(self):
         return "Workflow\\SANS\\UsesPropertyManager"
@@ -18,7 +20,8 @@ class HFIRSANSReduction(PythonAlgorithm):
 
     def PyInit(self):
         self.declareProperty('Filename', '', doc='List of input file paths')
-        self.declareProperty('ReductionProperties', '__sans_reduction_properties', validator=StringMandatoryValidator(), doc='Property manager name for the reduction')
+        self.declareProperty('ReductionProperties', '__sans_reduction_properties', validator=StringMandatoryValidator(),
+                             doc='Property manager name for the reduction')
         self.declareProperty('OutputWorkspace', '', doc='Reduced workspace')
         self.declareProperty('OutputMessage', '', direction=Direction.Output, doc='Output message')
 
@@ -56,7 +59,7 @@ class HFIRSANSReduction(PythonAlgorithm):
                 if i==0:
                     output_str += _load_data(data_file[i], workspace)
                     # Use the first file location as the default output directory
-                    head, tail = os.path.split(data_file[0])
+                    head, dummy_tail = os.path.split(data_file[0])
                     if os.path.isdir(head):
                         self.default_output_dir = head
                 else:

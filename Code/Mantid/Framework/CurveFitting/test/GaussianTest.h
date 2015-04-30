@@ -51,7 +51,7 @@ protected:
   }
 };
 
-DECLARE_FUNCTION(SimplexGaussian);
+DECLARE_FUNCTION(SimplexGaussian)
 
 class GaussianTest : public CxxTest::TestSuite
 {
@@ -545,6 +545,15 @@ public:
 
       TS_ASSERT_THROWS_NOTHING(fn->setIntensity(20.0));
       TS_ASSERT_DELTA(fn->intensity(), 20.0, 1e-10);
+  }
+
+  void testGetCentreParameterName()
+  {
+      boost::shared_ptr<Gaussian> fn( new Gaussian() );
+      fn->initialize();
+
+      TS_ASSERT_THROWS_NOTHING(fn->getCentreParameterName());
+      TS_ASSERT_EQUALS(fn->getCentreParameterName(), "PeakCentre");
   }
 
 

@@ -89,7 +89,6 @@ class CreateLeBailFitInput(PythonAlgorithm):
     def importFullProfHKLFile(self, hklfilename, hklwsname):
         """ Import Fullprof's .hkl file
         """
-        import math
         import random
 
         rand = random.randint(1, 100000)

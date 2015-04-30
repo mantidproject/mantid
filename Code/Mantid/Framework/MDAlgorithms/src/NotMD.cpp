@@ -22,10 +22,10 @@ NotMD::~NotMD() {}
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
-const std::string NotMD::name() const { return "NotMD"; };
+const std::string NotMD::name() const { return "NotMD"; }
 
 /// Algorithm's version for identification. @see Algorithm::version
-int NotMD::version() const { return 1; };
+int NotMD::version() const { return 1; }
 
 //----------------------------------------------------------------------------------------------
 
@@ -46,7 +46,7 @@ void NotMD::execEvent(Mantid::API::IMDEventWorkspace_sptr /*out*/) {
 
 //----------------------------------------------------------------------------------------------
 /// NotMD::Run the algorithm with a MDHistoWorkspace
-void NotMD::execHisto(Mantid::MDEvents::MDHistoWorkspace_sptr out) {
+void NotMD::execHisto(Mantid::DataObjects::MDHistoWorkspace_sptr out) {
   out->operatorNot();
 }
 

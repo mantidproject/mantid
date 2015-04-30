@@ -68,6 +68,7 @@ namespace VATES
     }
 
     vtkPoints *points = m_inputData->GetPoints();
+
     double *point;
     vtkPoints* newPoints = vtkPoints::New();
     newPoints->Allocate(points->GetNumberOfPoints());

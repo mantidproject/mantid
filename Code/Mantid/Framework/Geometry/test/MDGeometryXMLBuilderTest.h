@@ -1,9 +1,10 @@
 #ifndef MD_GEOMETRYXMLBUILDER_TEST_H_
 #define MD_GEOMETRYXMLBUILDER_TEST_H_
 
+#include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
-#include <cxxtest/TestSuite.h>
+#include <string>
 
 #include "MantidGeometry/MDGeometry/MDGeometryXMLBuilder.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
@@ -13,16 +14,13 @@
 #include <boost/functional/hash.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/format.hpp>
-#include <string>
+
+#include <Poco/AutoPtr.h>
 #include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/Document.h>
 #include <Poco/DOM/Element.h>
 #include <Poco/DOM/NodeList.h>
-#include <Poco/DOM/NodeIterator.h>
-#include <Poco/DOM/NodeFilter.h>
-#include <Poco/File.h>
-#include <Poco/Path.h>
-#include <Poco/AutoPtr.h>
+
 
 using namespace Mantid;
 using namespace Mantid::Geometry;

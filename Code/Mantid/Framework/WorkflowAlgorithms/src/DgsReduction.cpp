@@ -39,10 +39,10 @@ DgsReduction::~DgsReduction() {}
 
 //----------------------------------------------------------------------------------------------
 /// Algorithm's name for identification. @see Algorithm::name
-const std::string DgsReduction::name() const { return "DgsReduction"; };
+const std::string DgsReduction::name() const { return "DgsReduction"; }
 
 /// Algorithm's version for identification. @see Algorithm::version
-int DgsReduction::version() const { return 1; };
+int DgsReduction::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
 const std::string DgsReduction::category() const {

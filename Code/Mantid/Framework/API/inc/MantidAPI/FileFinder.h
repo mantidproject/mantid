@@ -50,7 +50,7 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class MANTID_API_DLL FileFinderImpl {
 public:
-  std::string getFullPath(const std::string &filename) const;
+  std::string getFullPath(const std::string &filename, const bool ignoreDirs = false) const;
   std::string getPath(const std::vector<IArchiveSearch_sptr> &archs,
                       const std::set<std::string> &filename,
                       const std::vector<std::string> &extensions) const;
