@@ -1077,6 +1077,9 @@ class RunDescriptor(PropDescriptor):
 
            If other workspace is already normalized, the method modifies that normalization to match
            the normalization of current workspace
+
+           WARNING! this operation makes sense in special circumstances only (e.g. the initial workspace
+           has been split in parts)
         """
         source_ws = self.get_workspace()
 

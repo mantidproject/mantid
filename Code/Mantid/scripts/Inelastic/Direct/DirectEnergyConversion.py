@@ -242,10 +242,10 @@ class DirectEnergyConversion(object):
                 # Set up the background integrals for diagnostic purposes.
                 # monitor-2 normalization in multirep mode goes per chunk
                 if (PropertyManager.incident_energy.multirep_mode() and self.normalise_method == 'monitor-2')\
-                    or self.bleed_test: # bleed test below needs no normalization so use clone workspace
+                    or self.bleed_test: # bleed test below needs no normalization so normalize cloned workspace
                     result_ws  = diag_sample.get_ws_clone('sample_ws_clone')
-                    tmpRunDescriptor = self.get_run_descriptor(whiteintegrals)
-                    tmpRunDescriptor.export_normalization(result_ws)
+                    wb_normalization_method = whiteintegrals.getRun().getLogData('DirectInelasticReductionNormalisedBy').value
+                    result_ws = self.normalise(result_ws, wb_normalization_method)
                     name_to_clean = result_ws.name()
                 else:
                     result_ws = self.normalise(diag_sample, self.normalise_method)
@@ -767,8 +767,8 @@ class DirectEnergyConversion(object):
                 method,old_ws_name = self._normalize_to_monitor2(run,old_ws_name, range_offset,external_monitors_ws)
                 break
             if case('current'):
-                out_ws,norm_factor=NormaliseByCurrent(InputWorkspace=old_ws_name,OutputWorkspace=old_ws_name)
-                AddSampleLog(old_ws_name,LogName='NormalizationFactor',LogText=str(norm_factor),LogType='Number')
+                out_ws=NormaliseByCurrent(InputWorkspace=old_ws_name,OutputWorkspace=old_ws_name)
+                # NormalizationFactor log has been added by the algorithm themselves.
                 break
             if case(): # default
                 raise RuntimeError("""Normalization method {0} not found. 
@@ -1033,7 +1033,7 @@ class DirectEnergyConversion(object):
             TOF_range = TOF_range[0]
 
         return TOF_range
-
+    #
     def save_results(self, workspace, save_file=None, formats=None):
         """
         Save the result workspace to the specified filename using the list of formats specified in
