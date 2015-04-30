@@ -170,8 +170,12 @@ class LoadRun(object):
                 if monitor_ws_name in mtd:
                     DeleteWorkspace(monitor_ws_name)
 
-        last_algorithm = outWs.getHistory().lastAlgorithm()
-        loader_name = last_algorithm.getProperty('LoaderName').value
+        try:
+            last_algorithm = outWs.getHistory().lastAlgorithm()
+            loader_name = last_algorithm.getProperty('LoaderName').value
+        except:
+            sanslog.warning('Tried to get a loader name. But it seems that there is no loader name.')
+
         if loader_name == 'LoadRaw':
             self._loadSampleDetails(workspace)
 

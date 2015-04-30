@@ -160,124 +160,129 @@ class LoadSampleTestStressTest(stresstesting.MantidStressTest):
     def validate(self):
         return self._success
 
-#class LoadAddedEventDataSampleTestStressTest(stresstesting.MantidStressTest):
-#    def runTest(self):
-#        self._success = False
-#        self._out_file_name = None
-#        config["default.instrument"] = "SANS2D"
-#        ici.SANS2D()
-#        ici.MaskFile('MaskSANS2DReductionGUI.txt')
-#        ici.SetDetectorOffsets('REAR', -16.0, 58.0, 0.0, 0.0, 0.0, 0.0)
-#        ici.SetDetectorOffsets('FRONT', -44.0, -20.0, 47.0, 0.0, 1.0, 1.0)
-#        ici.Gravity(False)
-#        ici.Set1D()
+class LoadAddedEventDataSampleTestStressTest(stresstesting.MantidStressTest):
+    def runTest(self):
+        self._success = False
+        self._out_file_name = None
+        config["default.instrument"] = "SANS2D"
+        ici.SANS2D()
+        ici.MaskFile('MaskSANS2DReductionGUI.txt')
+        ici.SetDetectorOffsets('REAR', -16.0, 58.0, 0.0, 0.0, 0.0, 0.0)
+        ici.SetDetectorOffsets('FRONT', -44.0, -20.0, 47.0, 0.0, 1.0, 1.0)
+        ici.Gravity(False)
+        ici.Set1D()
 
-#        self._prepare_added_event_data('SANS2D00028051', 'SANS2D00028050')
-#        ici.AssignSample(self._out_file_name )
-#        #ici.WavRangeReduction()
+        add_runs( ('28051', '28050') ,'SANS2D', 'nxs', lowMem=True, binning='', saveAsEvent = 'True')
 
-#        ici.WavRangeReduction(4.6, 12.85, False)
+        #self._prepare_added_event_data('SANS2D00028051', 'SANS2D00028050')
+        #ici.AssignSample(self._out_file_name )
+        ici.AssignSample('28051-add.nxs')
 
-#        # Need to do validation ourselves since we have to compare to sets of workspace-file pairs
-#        if self._validateWorkspaceToNeXusCustom():
-#            self._success = True
+        ici.WavRangeReduction(4.6, 12.85, False)
 
-#    def _prepare_added_event_data(self, name_first, name_second):
-#        name1 = name_first
-#        name1_monitors = name1 + '_monitors'
-#        Load(Filename = "SANS2D00022048.nxs", OutputWorkspace = name1)
-#        LoadNexusMonitors(Filename = "SANS2D00022048.nxs", OutputWorkspace=name1_monitors)
+        # Need to do validation ourselves since we have to compare to sets of workspace-file pairs
+        if self._validateWorkspaceToNeXusCustom():
+            self._success = True
 
-#        #todo -- clone first workspace rather than load twice
-#        name2 = name_second
-#        name2_monitors = name2 + '_monitors'
-#        CloneWorkspace(InputWorkspace = name1, OutputWorkspace = name2)
-#        CloneWorkspace(InputWorkspace = name1_monitors, OutputWorkspace = name2_monitors)
+        # Remove the 
+        os.remove(os.path.join(config['defaultsave.directory'],'SANS2D00028051-add.nxs'))
+        os.remove(os.path.join(config['defaultsave.directory'],'SANS2D00028051.log'))
 
-#        added_data_name = name1 + '-add' + '_added_event_data'
-#        Plus(LHSWorkspace = name1, RHSWorkspace = name2, OutputWorkspace = added_data_name)
+    def _prepare_added_event_data(self, name_first, name_second):
+        name1 = name_first
+        name1_monitors = name1 + '_monitors'
+        Load(Filename = "SANS2D00022048.nxs", OutputWorkspace = name1)
+        LoadNexusMonitors(Filename = "SANS2D00022048.nxs", OutputWorkspace=name1_monitors)
 
-#        added_monitor_name = name1 + '-add' + '_monitors' + '_added_event_data'
-#        Plus(LHSWorkspace = name1_monitors, RHSWorkspace = name2_monitors, OutputWorkspace = added_monitor_name)
+        #todo -- clone first workspace rather than load twice
+        name2 = name_second
+        name2_monitors = name2 + '_monitors'
+        CloneWorkspace(InputWorkspace = name1, OutputWorkspace = name2)
+        CloneWorkspace(InputWorkspace = name1_monitors, OutputWorkspace = name2_monitors)
 
-#        group_name = name1 + '-add'
-#        GroupWorkspaces(InputWorkspaces = [added_data_name, added_monitor_name], OutputWorkspace = group_name)
-#        DeleteWorkspace(name1)
-#        DeleteWorkspace(name2)
-#        DeleteWorkspace(name1_monitors)
-#        DeleteWorkspace(name2_monitors)
-#        #to do: Work out what actual temporary system test save directory is.
-#        temp_save_dir = config['defaultsave.directory']
-#        output_file = os.path.join(temp_save_dir, group_name + '.nxs')
-#        SaveNexus(InputWorkspace = group_name, Filename = output_file)
-#        self._out_file_name = output_file
+        added_data_name = name1 + '-add' + '_added_event_data'
+        Plus(LHSWorkspace = name1, RHSWorkspace = name2, OutputWorkspace = added_data_name)
 
+        added_monitor_name = name1 + '-add' + '_monitors' + '_added_event_data'
+        Plus(LHSWorkspace = name1_monitors, RHSWorkspace = name2_monitors, OutputWorkspace = added_monitor_name)
 
-#    def _prepare_normal_event_data(self, name ):
-#        temp ='temp'
-#        Load(Filename = "SANS2D00022048.nxs", OutputWorkspace = temp)
-#        temp_save_dir = config['defaultsave.directory']
-#        output_file = os.path.join(temp_save_dir, name + '.nxs')
-#        SaveNexus(InputWorkspace = temp, Filename = output_file)
-#        return output_file
+        group_name = name1 + '-add'
+        GroupWorkspaces(InputWorkspaces = [added_data_name, added_monitor_name], OutputWorkspace = group_name)
+        DeleteWorkspace(name1)
+        DeleteWorkspace(name2)
+        DeleteWorkspace(name1_monitors)
+        DeleteWorkspace(name2_monitors)
+        #to do: Work out what actual temporary system test save directory is.
+        temp_save_dir = config['defaultsave.directory']
+        output_file = os.path.join(temp_save_dir, group_name + '.nxs')
+        SaveNexus(InputWorkspace = group_name, Filename = output_file)
+        self._out_file_name = output_file
 
 
-#    def _validateWorkspaceToNeXusCustom(self):
-#        '''
-#        Since we need to compare two have two comparisons, we need to redefine the validateWorkspaceToNexus method here.
-#        Assumes that the items from self.validate() are many tuples  where the first item is a nexus file and loads it,
-#        to compare to the supplied workspace which is the second item.
-#        '''
-#        value_pairs = list(self._validateCustom())
+    def _prepare_normal_event_data(self, name ):
+        temp ='temp'
+        Load(Filename = "SANS2D00022048.nxs", OutputWorkspace = temp)
+        temp_save_dir = config['defaultsave.directory']
+        output_file = os.path.join(temp_save_dir, name + '.nxs')
+        SaveNexus(InputWorkspace = temp, Filename = output_file)
+        return output_file
 
-#        # Make sure we have pairs of two
-#        if len(value_pairs )%2 != 0:
-#            return False
 
-#        # For all pairs create a list and run the normal comparison
-#        validationResult = []
+    def _validateWorkspaceToNeXusCustom(self):
+        '''
+        Since we need to compare two have two comparisons, we need to redefine the validateWorkspaceToNexus method here.
+        Assumes that the items from self.validate() are many tuples  where the first item is a nexus file and loads it,
+        to compare to the supplied workspace which is the second item.
+        '''
+        value_pairs = list(self._validateCustom())
 
-#        for index in range(0, len(value_pairs), 2):
-#            valNames = value_pairs[index : index + 2]
+        # Make sure we have pairs of two
+        if len(value_pairs )%2 != 0:
+            return False
 
-#            numRezToCheck=len(valNames)
-#            mismatchName=None;
+        # For all pairs create a list and run the normal comparison
+        validationResult = []
 
-#            validationResult.extend([True]);
-#            for ik in range(0,numRezToCheck,2): # check All results
-#                workspace2 = valNames[ik+1]
-#                if workspace2.endswith('.nxs'):
-#                    Load(Filename=workspace2,OutputWorkspace="RefFile")
-#                    workspace2 = "RefFile"
-#                else:
-#                    raise RuntimeError("Should supply a NeXus file: %s" % workspace2)
-#                valPair=(valNames[ik],"RefFile");
-#                if numRezToCheck>2:
-#                    mismatchName = valNames[ik];
+        for index in range(0, len(value_pairs), 2):
+            valNames = value_pairs[index : index + 2]
 
-#                if not(self.validateWorkspaces(valPair,mismatchName)):
-#                    validationResult[index/2] = False;
-#                    print 'Workspace {0} not equal to its reference file'.format(valNames[ik]);
-#            #end check All results
+            numRezToCheck=len(valNames)
+            mismatchName=None;
 
-#        # Check if a comparison went wrong
-#        return all(item is True for item in validationResult)
+            validationResult.extend([True]);
+            for ik in range(0,numRezToCheck,2): # check All results
+                workspace2 = valNames[ik+1]
+                if workspace2.endswith('.nxs'):
+                    Load(Filename=workspace2,OutputWorkspace="RefFile")
+                    workspace2 = "RefFile"
+                else:
+                    raise RuntimeError("Should supply a NeXus file: %s" % workspace2)
+                valPair=(valNames[ik],"RefFile");
+                if numRezToCheck>2:
+                    mismatchName = valNames[ik];
 
-#    def _validateCustom(self):
-#        return '28051rear_1D_4.6_12.85', 'SANS2DLoadingAddedEventData.nxs',
-#               '28051rear_1D_4.6_12.85_incident_monitor', 'SANS2DLoadingAddedEventDataMonitor.nxs'
+                if not(self.validateWorkspaces(valPair,mismatchName)):
+                    validationResult[index/2] = False;
+                    print 'Workspace {0} not equal to its reference file'.format(valNames[ik]);
+            #end check All results
 
-#    def requiredMemoryMB(self):
-#        return 2000
+        # Check if a comparison went wrong
+        return all(item is True for item in validationResult)
 
-#    def validateMethod(self):
-#           return "WorkspaceToNexus"
+    def _validateCustom(self):
+        return '28051rear_1D_4.6_12.85', 'SANS2DLoadingAddedEventData.nxs', '28051rear_1D_4.6_12.85_incident_monitor', 'SANS2DLoadingAddedEventDataMonitor.nxs'
 
-#    def cleanup(self):
-#        os.remove(self._out_file_name)
+    def requiredMemoryMB(self):
+        return 2000
 
-#    def validate(self):
-#        return self._success
+    def validateMethod(self):
+           return "WorkspaceToNexus"
+
+    def cleanup(self):
+        os.remove(self._out_file_name)
+
+    def validate(self):
+        return self._success
 
 
 if __name__ == '__main__':
