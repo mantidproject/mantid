@@ -1508,16 +1508,24 @@ class RunDescriptorDependent(RunDescriptor):
             return super(RunDescriptorDependent,self).clear_monitors()
         else:
             return self._host.clear_monitors()
+
     def get_masking(self,noutputs=None):
         if self._has_own_value:
             return super(RunDescriptorDependent,self).get_masking(noutputs)
         else:
             return self._host.get_masking(noutputs)
+
     def add_masked_ws(self,masked_ws):
         if self._has_own_value:
             return super(RunDescriptorDependent,self).add_masked_ws(masked_ws)
         else:
             return self._host.add_masked_ws(masked_ws)
+
+    def export_normalization(self,other_workspace):
+        if self._has_own_value:
+            return super(RunDescriptorDependent,self).export_normalization(other_workspace)
+        else:
+            return self._host.export_normalization(other_workspace)
 #--------------------------------------------------------------------------------------------------------------------
 #--------------------------------------------------------------------------------------------------------------------
 def build_run_file_name(run_num,inst,file_path='',fext=''):

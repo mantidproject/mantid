@@ -352,6 +352,7 @@ class DirectEnergyConversion(object):
         # and verify some other properties which can be wrong before starting a
         # long run.
         prop_man.log("****************************************************************")
+        prop_man.log("*** ISIS CONVERT TO ENERGY TRANSFER WRORKFLOW STARTED **********")
         prop_man.validate_properties()
         prop_man.log("*** Loading or retrieving sample run: {0}".format(prop_man.sample_run))
         prop_man.log("****************************************************************")
@@ -517,8 +518,7 @@ class DirectEnergyConversion(object):
 # END Main loop over incident energies
 #------------------------------------------------------------------------------------------
 
-        end_time = time.time()
-        prop_man.log("*** Elapsed time = {0} sec".format(end_time - start_time),'notice')
+
         #Must! clear background ws (if present in multirep) to calculate background
         #source for next workspace
         if 'bkgr_ws_source' in mtd:
@@ -531,6 +531,11 @@ class DirectEnergyConversion(object):
         #prop_man.wb_run = None
         # clear combined mask
         self.spectra_masks = None
+        end_time = time.time()
+        prop_man.log("*** ISIS CONVERT TO ENERGY TRANSFER WRORKFLOW FINISHED *********")
+        prop_man.log("*** Elapsed time : {0:>9.2f} sec                       *********".\
+                    format(end_time - start_time),'notice')
+        prop_man.log("****************************************************************")
         return result
 
     def _do_abs_corrections(self,deltaE_ws_sample,cashed_mono_int,ei_guess,\
