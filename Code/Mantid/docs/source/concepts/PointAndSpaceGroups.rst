@@ -3,7 +3,7 @@
 Point and space groups
 ======================
 
-This document explains how crystallographic point and space groups are used in Mantid. The :ref:`document <SymmetryGroups>` about symmetry operations, elements and groups is a prerequisite for this text, so it is recommended to read it beforehand.
+This document explains how crystallographic point and space groups are used in Mantid. The :ref:`document <Symmetry groups>` about symmetry operations, elements and groups is a prerequisite for this text, so it is recommended to read it beforehand.
 
 Introduction
 ------------

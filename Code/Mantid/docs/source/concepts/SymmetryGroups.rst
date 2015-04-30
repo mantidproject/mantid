@@ -195,7 +195,7 @@ Symmetry elements
 
 Sometimes it's easier to describe symmetry in terms of the symmetry element that is associated to an operation. Several notation systems exist for these elements, but Hermann-Mauguin symbols are most commonly used in crystallography. Information on how to read these symbols can be found in ITA. Except identity, inversions and translations, all symmetry elements have a characteristic axis. In case of mirror and glide planes, this axis is perpendicular to the plane.
 
-Section 11.2 [ITASymmetry]_ in the same book describes how to derive symmetry elements from matrix and vector pairs. The algorithms from that text are implemented in Mantid as well, so after a symmetry operation has been created using the factory, another factory can be used to generate the symmetry element corresponding to the operation. The resulting object can be queried for its Hermann-Mauguin symbol and its axis. For identity, inversion and translation this returns ``[0, 0, 0]``.
+Section 11.2 in the same book describes how to derive symmetry elements from matrix and vector pairs. The algorithms from that text are implemented in Mantid as well, so after a symmetry operation has been created using the factory, another factory can be used to generate the symmetry element corresponding to the operation. The resulting object can be queried for its Hermann-Mauguin symbol and its axis. For identity, inversion and translation this returns ``[0, 0, 0]``.
 
 .. testcode :: ExSymmetryElement
 
@@ -262,10 +262,11 @@ Some groups are so called cyclic groups, all elements of the group can be expres
 
 Just like in the case of symmetry operations, it's also possible to define a binary operation that combines two groups. For this, each symmetry operation of the first group is multiplied with each symmetry operation of the second group. If the resulting new set of operations fulfills the group axioms, the product of the two groups is again a group.
 
-These general group concepts are available in the C++ library of Mantid and are described in the API documentation (`Mantid::Geometry::SymmetryOperation <http://doxygen.mantidproject.org/nightly/d4/d82/classMantid_1_1Geometry_1_1SymmetryOperation.html#details>`_, `Mantid::Geometry::SymmetryElement <http://doxygen.mantidproject.org/nightly/df/d22/classMantid_1_1Geometry_1_1SymmetryElement.html>`_, `Mantid::Geometry::Group <http://doxygen.mantidproject.org/nightly/d3/d80/classMantid_1_1Geometry_1_1Group.html>`_). The most important specializations of symmetry groups implemented in Mantid are point- and space groups. They are explained in an additional :ref:`document <PointAndSpaceGroups>`.
+These general group concepts are available in the C++ library of Mantid and are described in the API documentation (`Mantid::Geometry::SymmetryOperation <http://doxygen.mantidproject.org/nightly/d4/d82/classMantid_1_1Geometry_1_1SymmetryOperation.html>`_, `Mantid::Geometry::SymmetryElement <http://doxygen.mantidproject.org/nightly/df/d22/classMantid_1_1Geometry_1_1SymmetryElement.html>`_, `Mantid::Geometry::Group <http://doxygen.mantidproject.org/nightly/d3/d80/classMantid_1_1Geometry_1_1Group.html>`_). The most important specializations of symmetry groups implemented in Mantid are point- and space groups. They are explained in an additional :ref:`document <Point and space groups>`.
 
 .. [Groups] `Wikipedia article on groups <http://en.wikipedia.org/wiki/Group_%28mathematics%29#Definition>`_. Can be found in different formulations in various places such as `Wolfram MathWorld <http://mathworld.wolfram.com/Group.html>`_.
 
 .. [ITASymmetry] International Tables for Crystallography (2006). Vol. A, part 11, p. 810 (chapters `11.1 <http://it.iucr.org/Ab/ch11o1v0001/>`_ and `11.2 <http://it.iucr.org/Ab/ch11o2v0001/>`_).
+
 
 .. categories:: Concepts
