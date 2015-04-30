@@ -40,6 +40,7 @@ namespace CustomInterfaces
     fit->execute();
 
     MatrixWorkspace_sptr fitOutput = fit->getProperty("OutputWorkspace");
+    m_parameterTable = fit->getProperty("OutputParameters");
 
     IAlgorithm_sptr extract = AlgorithmManager::Instance().create("ExtractSingleSpectrum");
     extract->setChild(true);
@@ -51,6 +52,7 @@ namespace CustomInterfaces
     setCorrectedData(extract->getProperty("OutputWorkspace"));
     setFittedFunction(funcToFit);
     m_sections = sections;
+
   }
 
   void ALCBaselineModellingModel::setData(MatrixWorkspace_const_sptr data)
@@ -170,16 +172,9 @@ namespace CustomInterfaces
 
   ITableWorkspace_sptr ALCBaselineModellingModel::exportModel()
   {
-    if ( m_fittedFunction ) {
+    if ( m_parameterTable ) {
 
-      ITableWorkspace_sptr table = WorkspaceFactory::Instance().createTable("TableWorkspace");
-
-      table->addColumn("str", "Function");
-
-      TableRow newRow = table->appendRow();
-      newRow << m_fittedFunction->asString();
-
-      return table;
+      return m_parameterTable;
 
     } else {
       

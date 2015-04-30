@@ -74,6 +74,9 @@ namespace CustomInterfaces
     /// Result function of the last fit
     IFunction_const_sptr m_fittedFunction;
 
+    /// Fit table containing parameters and errors
+    ITableWorkspace_sptr m_parameterTable;
+
     /// Sections used for the last fit
     std::vector<Section> m_sections;
 
