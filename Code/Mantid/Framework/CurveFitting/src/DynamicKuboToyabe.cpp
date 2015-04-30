@@ -279,7 +279,7 @@ void DynamicKuboToyabe::function1D(double* out, const double* xValues, const siz
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
-DynamicKuboToyabe::DynamicKuboToyabe() : m_eps(0.05), m_minEps(0.003), m_maxEps(0.05) {}
+DynamicKuboToyabe::DynamicKuboToyabe() : m_eps(0.05), m_minEps(0.001), m_maxEps(0.1) {}
 
 //----------------------------------------------------------------------------------------------
 /** Function to calculate derivative numerically
