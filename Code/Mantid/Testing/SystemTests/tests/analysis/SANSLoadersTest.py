@@ -162,7 +162,7 @@ class LoadSampleTestStressTest(stresstesting.MantidStressTest):
 
 class LoadAddedEventDataSampleTestStressTest(stresstesting.MantidStressTest):
     def __init__(self):
-        super(LoadAddedEventDataSampleTestStressTest, self).__init__()
+        stresstesting.MantidStressTest.__init__(self)
         self._success = False
 
     def runTest(self):

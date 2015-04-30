@@ -149,7 +149,7 @@ class LoadRun(object):
 
         appendix = "_monitors"
 
-        # We need to check if we are dealing with a group workspace which is made up of added event data. Note that 
+        # We need to check if we are dealing with a group workspace which is made up of added event data. Note that
         # we can also have a group workspace which is associated with period data, which don't want to deal with here.
 
         added_event_data_flag = False
@@ -160,9 +160,9 @@ class LoadRun(object):
             added_event_data_flag = True
             # Reload the outWs, it has changed from a group workspace to an event workspace
             outWs = mtd[workspace]
-        
+
         monitor_ws_name = workspace + appendix
-        
+
         if not added_event_data_flag:
             if isinstance(outWs, IEventWorkspace):
                 LoadNexusMonitors(self._data_file, OutputWorkspace=monitor_ws_name)
@@ -174,8 +174,8 @@ class LoadRun(object):
         try:
             last_algorithm = outWs.getHistory().lastAlgorithm()
             loader_name = last_algorithm.getProperty('LoaderName').value
-        except:
-            sanslog.warning('Tried to get a loader name. But it seems that there is no loader name.')
+        except RuntimeError, details:
+            sanslog.warning('Tried to get a loader name. But it seems that there is no loader name. Further info: ' + str(details))
 
         if loader_name == 'LoadRaw':
             self._loadSampleDetails(workspace)
