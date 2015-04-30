@@ -201,9 +201,9 @@ class LoadAddedEventDataSampleTestStressTest(stresstesting.MantidStressTest):
             valNames = value_pairs[index : index + 2]
 
             numRezToCheck=len(valNames)
-            mismatchName=None;
+            mismatchName=None
 
-            validationResult.extend([True]);
+            validationResult.extend([True])
             for ik in range(0,numRezToCheck,2): # check All results
                 workspace2 = valNames[ik+1]
                 if workspace2.endswith('.nxs'):
@@ -211,26 +211,27 @@ class LoadAddedEventDataSampleTestStressTest(stresstesting.MantidStressTest):
                     workspace2 = "RefFile"
                 else:
                     raise RuntimeError("Should supply a NeXus file: %s" % workspace2)
-                valPair=(valNames[ik],"RefFile");
+                valPair=(valNames[ik],"RefFile")
                 if numRezToCheck>2:
-                    mismatchName = valNames[ik];
+                    mismatchName = valNames[ik]
 
-                if not(self.validateWorkspaces(valPair,mismatchName)):
-                    validationResult[index/2] = False;
-                    print 'Workspace {0} not equal to its reference file'.format(valNames[ik]);
+                if not self.validateWorkspaces(valPair,mismatchName):
+                    validationResult[index/2] = False
+                    print 'Workspace {0} not equal to its reference file'.format(valNames[ik])
             #end check All results
 
         # Check if a comparison went wrong
         return all(item is True for item in validationResult)
 
     def _validateCustom(self):
-        return '22023rear_1D_4.6_12.85', 'SANS2DLoadingAddedEventData.nxs', '22023rear_1D_4.6_12.85_incident_monitor', 'SANS2DLoadingAddedEventDataMonitor.nxs'
+        return ('22023rear_1D_4.6_12.85', 'SANS2DLoadingAddedEventData.nxs',
+                '22023rear_1D_4.6_12.85_incident_monitor', 'SANS2DLoadingAddedEventDataMonitor.nxs')
 
     def requiredMemoryMB(self):
         return 2000
 
     def validateMethod(self):
-           return "WorkspaceToNexus"
+        return "WorkspaceToNexus"
 
     def cleanup(self):
         os.remove(os.path.join(config['defaultsave.directory'],'SANS2D00022023-add.nxs'))
