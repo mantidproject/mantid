@@ -11,11 +11,6 @@
 #include "MantidAPI/MemoryManager.h"
 #include "MantidKernel/BoundedValidator.h"
 
-namespace {
-/// The percentage 'fuzziness' to use when comparing to bin boundaries
-const double xBoundaryTolerance = 1.0e-15;
-}
-
 namespace Mantid {
 namespace Algorithms {
 

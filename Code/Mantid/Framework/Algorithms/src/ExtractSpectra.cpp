@@ -43,7 +43,7 @@ ExtractSpectra::~ExtractSpectra() {}
 const std::string ExtractSpectra::name() const { return "ExtractSpectra"; }
 
 /// Algorithm's version for identification. @see Algorithm::version
-int ExtractSpectra::version() const { return 1; };
+int ExtractSpectra::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
 const std::string ExtractSpectra::category() const {
@@ -54,7 +54,7 @@ const std::string ExtractSpectra::category() const {
 const std::string ExtractSpectra::summary() const {
   return "Extracts a list of spectra from a workspace and places them in a new "
          "workspace.";
-};
+}
 
 //----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.
@@ -142,7 +142,7 @@ void ExtractSpectra::execHistogram() {
   }
   Progress prog(this, 0.0, 1.0, (m_spectrumList.size()));
   // Loop over the required spectra, copying in the desired bins
-  for (int j = 0; j < m_spectrumList.size(); ++j) {
+  for (size_t j = 0; j < m_spectrumList.size(); ++j) {
     auto i = m_spectrumList[j];
     // Preserve/restore sharing if X vectors are the same
     if (m_commonBoundaries) {
@@ -252,7 +252,7 @@ void ExtractSpectra::execEvent() {
   eventW->sortAll(Mantid::DataObjects::TOF_SORT, &prog);
   // Loop over the required spectra, copying in the desired bins
   PARALLEL_FOR2(m_inputWorkspace, outputWorkspace)
-  for (int j = 0; j < m_spectrumList.size(); ++j) {
+  for (int j = 0; j < static_cast<int>(m_spectrumList.size()); ++j) {
     PARALLEL_START_INTERUPT_REGION
     auto i = m_spectrumList[j];
     const EventList &el = eventW->getEventList(i);
