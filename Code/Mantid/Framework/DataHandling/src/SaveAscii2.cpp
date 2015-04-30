@@ -117,8 +117,6 @@ void SaveAscii2::exec() {
   m_isHistogram = m_ws->isHistogramData();
   m_isCommonBins = m_ws->isCommonBins(); // checking for ragged workspace
   m_writeID = getProperty("WriteSpectrumID");
-  if (nSpectra != 1)
-    m_writeID = true;
 
   // Get the properties
   std::vector<int> spec_list = getProperty("SpectrumList");
