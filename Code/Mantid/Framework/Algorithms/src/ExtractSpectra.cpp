@@ -142,7 +142,7 @@ void ExtractSpectra::execHistogram() {
   }
   Progress prog(this, 0.0, 1.0, (m_spectrumList.size()));
   // Loop over the required spectra, copying in the desired bins
-  for (size_t j = 0; j < m_spectrumList.size(); ++j) {
+  for (int j = 0; j < static_cast<int>(m_spectrumList.size()); ++j) {
     auto i = m_spectrumList[j];
     // Preserve/restore sharing if X vectors are the same
     if (m_commonBoundaries) {
