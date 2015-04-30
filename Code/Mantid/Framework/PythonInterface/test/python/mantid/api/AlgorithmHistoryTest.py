@@ -79,7 +79,7 @@ class AlgorithmHistoryTest(unittest.TestCase):
 
     def _run_algorithm(self, algorithm_name, child_algorithm=False, record_history=True, **kwargs):
         """ Create and run an algorithm not in the simpleapi"""
-        alg = AlgorithmManager.create(algorithm_name)
+        alg = AlgorithmManager.createUnmanaged(algorithm_name)
         alg.initialize()
         alg.setChild(child_algorithm)
         alg.enableHistoryRecordingForChild(record_history)
