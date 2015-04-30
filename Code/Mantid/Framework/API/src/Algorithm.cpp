@@ -953,9 +953,13 @@ void Algorithm::initializeFromProxy(const AlgorithmProxy &proxy) {
 /** Fills History, Algorithm History and Algorithm Parameters
 */
 void Algorithm::fillHistory() {
-  // this is not a child algorithm. Add the history algorithm to the
-  // WorkspaceHistory object.
-  if (!isChild()) {
+  if(isRecordingHistoryForChild() && m_parentHistory) {
+    // Record the history of this in the parent algorithm
+    m_parentHistory->addChildHistory(m_history);
+  }
+  if (!isChild() || isRecordingHistoryForChild()) {
+    // Store the history as it stands in the workspace
+
     // Create two vectors to hold a list of pointers to the input & output
     // workspaces (InOut's go in both)
     std::vector<Workspace_sptr> inputWorkspaces, outputWorkspaces;
@@ -996,10 +1000,6 @@ void Algorithm::fillHistory() {
         }
       }
     }
-  }
-  // this is a child algorithm, but we still want to keep the history.
-  else if (m_recordHistoryForChild && m_parentHistory) {
-    m_parentHistory->addChildHistory(m_history);
   }
 }
 
