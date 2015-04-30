@@ -15,7 +15,9 @@ std::string ISO8601StringPlusSpace(DateAndTime & self)
   return self.toISO8601String()+" ";
 }
 
+// clang-format off
 void export_DateAndTime()
+// clang-format on
 {
   class_<DateAndTime>("DateAndTime", no_init)
     // Constructors
@@ -39,7 +41,9 @@ void export_DateAndTime()
   ;
 }
 
+// clang-format off
 void export_time_duration()
+// clang-format on
 {
   class_<time_duration>("time_duration", no_init)
     .def("hours", &time_duration::hours, "Returns the normalized number of hours")

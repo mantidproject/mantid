@@ -16,8 +16,10 @@ using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
 
+// clang-format off
 class SpecularReflectionPositionCorrectTest: public CxxTest::TestSuite,
     public SpecularReflectionAlgorithmTest
+// clang-format on
 {
 
 public:

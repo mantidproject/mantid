@@ -193,7 +193,9 @@ public:
     const string SDS("SDS");
     // top level file information
     ::NeXus::File file(filename);
+    // clang-format off
     vector< ::NeXus::AttrInfo> attr_infos = file.getAttrInfos();
+    // clang-format on
     // check group attributes
     file.openGroup("entry", "NXentry");
 

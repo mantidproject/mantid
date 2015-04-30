@@ -21,7 +21,9 @@ namespace {
 
 }
 
+// clang-format off
 void export_SymmetryOperationFactory()
+// clang-format on
 {
     class_<SymmetryOperationFactoryImpl,boost::noncopyable>("SymmetryOperationFactoryImpl", no_init)
             .def("exists", &SymmetryOperationFactoryImpl::isSubscribed, "Returns true if the symmetry operation is supplied.")

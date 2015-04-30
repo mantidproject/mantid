@@ -29,7 +29,9 @@ namespace
 }
 
 
+// clang-format off
 void export_V3D()
+// clang-format on
 {
   //V3D class
   class_< V3D >("V3D",init<>("Construct a V3D at the origin"))

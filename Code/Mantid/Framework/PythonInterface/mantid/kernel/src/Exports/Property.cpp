@@ -16,7 +16,9 @@ using Mantid::PythonInterface::std_vector_exporter;
 using namespace boost::python;
 
 
+// clang-format off
 void export_Property()
+// clang-format on
 {
   register_ptr_to_python<Property*>();
 

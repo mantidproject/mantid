@@ -11,8 +11,10 @@
 using namespace Mantid::Algorithms;
 using namespace Mantid::API;
 
+// clang-format off
 class SpecularReflectionCalculateThetaTest: public CxxTest::TestSuite,
     public SpecularReflectionAlgorithmTest
+// clang-format on
 {
 
 private:

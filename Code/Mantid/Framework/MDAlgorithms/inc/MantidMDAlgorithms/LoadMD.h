@@ -85,7 +85,9 @@ private:
   API::CoordTransform *loadAffineMatrix(std::string entry_name);
 
   /// Open file handle
+  // clang-format off
   boost::scoped_ptr< ::NeXus::File> m_file;
+  // clang-format on
 
   /// Name of that file
   std::string m_filename;

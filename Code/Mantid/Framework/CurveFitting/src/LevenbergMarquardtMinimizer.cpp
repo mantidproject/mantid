@@ -22,7 +22,9 @@ namespace {
 Kernel::Logger g_log("LevenbergMarquardtMinimizer");
 }
 
+// clang-format off
 DECLARE_FUNCMINIMIZER(LevenbergMarquardtMinimizer, Levenberg-Marquardt)
+// clang-format on
 
 LevenbergMarquardtMinimizer::LevenbergMarquardtMinimizer()
     : m_data(NULL), gslContainer(), m_gslSolver(NULL), m_function(),

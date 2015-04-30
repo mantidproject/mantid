@@ -88,7 +88,9 @@ namespace
 
 }
 
+// clang-format off
 void export_ArrayProperty()
+// clang-format on
 {
   // Match the python names to their C types
   EXPORT_ARRAY_PROP(double,Float);
