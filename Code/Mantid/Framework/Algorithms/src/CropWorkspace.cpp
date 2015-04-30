@@ -83,6 +83,10 @@ void CropWorkspace::exec() {
   m_histogram = m_inputWorkspace->isHistogramData();
   // Check for common boundaries in input workspace
   m_commonBoundaries = WorkspaceHelpers::commonBoundaries(m_inputWorkspace);
+  if (!m_commonBoundaries)
+    g_log.information("InputWorkspace has varying bin boundaries. Bins will not"
+                      " be modified, but the Y and E values for any bins "
+                      "outside XMin and XMax will be set to 0.");
 
   // Retrieve and validate the input properties
   this->checkProperties();
