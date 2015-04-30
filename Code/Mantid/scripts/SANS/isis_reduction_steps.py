@@ -170,6 +170,7 @@ class LoadRun(object):
                 if monitor_ws_name in mtd:
                     DeleteWorkspace(monitor_ws_name)
 
+        loader_name = ''
         try:
             last_algorithm = outWs.getHistory().lastAlgorithm()
             loader_name = last_algorithm.getProperty('LoaderName').value
