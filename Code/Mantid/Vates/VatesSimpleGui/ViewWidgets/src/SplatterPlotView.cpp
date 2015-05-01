@@ -522,7 +522,7 @@ void SplatterPlotView::createPeaksFilter()
     // Destroy peak filter
     if (m_peaksFilter)
     {
-      builder->destroy(m_peaksFilter);
+      this->destroyFilter(QString("MDPeaksFilter"));
     }
     g_log.warning() << ex.what();
   }
