@@ -550,6 +550,7 @@ protected:
 
   friend class ParameterTie;
   friend class CompositeFunction;
+  friend class FunctionParameterDecorator;
 
   /// Flag to hint that the function is being used in parallel computations
   bool m_isParallel;
