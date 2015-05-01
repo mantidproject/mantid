@@ -181,7 +181,7 @@ void TomoReconstruction::doSetupSectionRun() {
     setupComputeResource();
     setupRunTool();
   } catch (std::runtime_error &e) {
-    g_log.error() << "Failed to initizalie remote compute resource(s). This "
+    g_log.error() << "Failed to initialize remote compute resource(s). This "
                      "custom interface will not work. Error description: "
                   << e.what() << std::endl;
   }
@@ -448,7 +448,7 @@ void TomoReconstruction::setupComputeResource() {
                  ". If you have set that facility by mistake in your settings, "
                  "please update it." << std::endl;
       throw std::runtime_error(
-          "Failed to initalize because the facility is not " + fac.name());
+          "Failed to initialize because the facility is not " + fac.name());
     }
 
     if (m_computeRes.size() < 1) {
