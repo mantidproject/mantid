@@ -55,7 +55,7 @@ class ValidateInstrumentDefinitionFiles(stresstesting.MantidStressTest):
                     xsdTreeWrapper.unlink()
                 return inputTreeWrapper
 
-        def parseAndValidateXmlInputForceReadFile (inputFile, xsdFile=None, **kw):
+        def parseAndValidateXmlInputForceReadFile(inputFile, xsdFile=None, **kw):
             myXsValidator = MyXsValidator(**kw)
             # parse XML input file
             inputTreeWrapper = myXsValidator.parse (inputFile)
@@ -90,8 +90,8 @@ class ValidateInstrumentDefinitionFiles(stresstesting.MantidStressTest):
                                    % (len(failed), len(files)))
         else:
             print "Succesfully Validated %d files" % len(files)
-            
+
 if __name__ == '__main__':
-    
+
     valid = ValidateInstrumentDefinitionFiles()
     valid.runTest()
