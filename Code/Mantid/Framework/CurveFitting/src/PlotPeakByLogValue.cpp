@@ -9,6 +9,7 @@
 #include <algorithm>
 #include <Poco/StringTokenizer.h>
 #include <boost/lexical_cast.hpp>
+#include <boost/algorithm/string/replace.hpp>
 
 #include "MantidCurveFitting/PlotPeakByLogValue.h"
 #include "MantidAPI/AlgorithmManager.h"
@@ -244,7 +245,7 @@ void PlotPeakByLogValue::exec() {
                       << " with " << std::endl;
         g_log.debug() << ifun->asString() << std::endl;
 
-        std::string spectrum_index = boost::lexical_cast<std::string>(j);
+        const std::string spectrum_index = boost::lexical_cast<std::string>(j);
         std::string wsBaseName = "";
 
         if (createFitOutput)
@@ -259,7 +260,7 @@ void PlotPeakByLogValue::exec() {
         fit->setProperty("WorkspaceIndex", j);
         fit->setPropertyValue("StartX", getPropertyValue("StartX"));
         fit->setPropertyValue("EndX", getPropertyValue("EndX"));
-        fit->setPropertyValue("Minimizer", getPropertyValue("Minimizer"));
+        fit->setPropertyValue("Minimizer", getMinimizerString(wsNames[i].name, spectrum_index));
         fit->setPropertyValue("CostFunction", getPropertyValue("CostFunction"));
         fit->setPropertyValue("MaxIterations", getPropertyValue("MaxIterations"));
         fit->setProperty("CalcErrors", true);
@@ -552,6 +553,22 @@ PlotPeakByLogValue::makeNames() const {
     nameList.push_back(InputData(name, wi, spec, period, start, end));
   }
   return nameList;
+}
+
+/**
+ * Formats the minimizer string for a given spectrum from a given workspace.
+ *
+ * @param wsName Name of workspace being fitted
+ * @param specIndex Index of spectrum being fitted
+ * @return Formatted minimizer string
+ */
+std::string PlotPeakByLogValue::getMinimizerString(const std::string & wsName, const std::string & specIndex) const {
+  std::string format = getPropertyValue("Minimizer");
+  std::string wsBaseName = wsName + "_" + specIndex;
+  boost::replace_all(format, "$wsname", wsName);
+  boost::replace_all(format, "$wsindex", specIndex);
+  boost::replace_all(format, "$basename", wsBaseName);
+  return format;
 }
 
 } // namespace CurveFitting
