@@ -448,8 +448,8 @@ void TomoReconstruction::setupComputeResource() {
                  ". If you have set that facility by mistake in your settings, "
                  "please update it." << std::endl;
       throw std::runtime_error(
-          "Failed to initialize because the facility is  " + m_facility +
-          " (and not " + fac.name() + ").");
+          "Failed to initialize because the facility is  " + fac.name() +
+          " (and not " + m_facility + ").");
     }
 
     if (m_computeRes.size() < 1) {
