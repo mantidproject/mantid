@@ -4,7 +4,9 @@
 using Mantid::Kernel::MemoryStats;
 using namespace boost::python;
 
+// clang-format off
 void export_MemoryStats()
+// clang-format on
 {
 
   class_< MemoryStats>("MemoryStats", init<>("Construct MemoryStats object."))

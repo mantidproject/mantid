@@ -15,7 +15,9 @@ namespace
     ;
 }
 
+// clang-format off
 void export_MandatoryValidator()
+// clang-format on
 {
   EXPORT_MANDATORYVALIDATOR(double, Float);
   EXPORT_MANDATORYVALIDATOR(long, Int);

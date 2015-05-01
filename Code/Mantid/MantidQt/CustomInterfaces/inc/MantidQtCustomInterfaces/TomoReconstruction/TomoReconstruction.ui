@@ -845,11 +845,6 @@
                    </layout>
                   </item>
                  </layout>
-                 <zorder></zorder>
-                 <zorder>horizontalSpacer_16</zorder>
-                 <zorder></zorder>
-                 <zorder></zorder>
-                 <zorder>layoutWidget</zorder>
                 </widget>
                </item>
               </layout>

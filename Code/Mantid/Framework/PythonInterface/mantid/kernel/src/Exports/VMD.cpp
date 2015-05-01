@@ -47,7 +47,9 @@ namespace
   }
 }
 
+// clang-format off
 void export_VMD()
+// clang-format on
 {
   class_<VMD>("VMD", init<>("Default constructor gives an object with 1 dimension"))
     .def(init<VMD_t,VMD_t>("Constructs a 2 dimensional vector at the point given", args(("val0"),("val1"))))

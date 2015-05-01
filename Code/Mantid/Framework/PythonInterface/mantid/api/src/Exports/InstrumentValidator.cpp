@@ -8,7 +8,9 @@ using namespace boost::python;
 
 
 // This is typed on the ExperimentInfo class
+// clang-format off
 void export_InstrumentValidator()
+// clang-format on
 {
   TypedValidatorExporter<ExperimentInfo_sptr>::define("ExperimentInfoValidator");
 

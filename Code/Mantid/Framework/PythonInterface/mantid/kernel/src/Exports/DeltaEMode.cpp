@@ -9,7 +9,9 @@ using Mantid::Kernel::DeltaEMode;
 namespace Policies = Mantid::PythonInterface::Policies;
 using namespace boost::python;
 
+// clang-format off
 void export_DeltaEMode()
+// clang-format on
 {
   enum_<Mantid::Kernel::DeltaEMode::Type>("DeltaEModeType")
     .value("Elastic", DeltaEMode::Elastic)

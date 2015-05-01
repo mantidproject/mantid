@@ -260,7 +260,7 @@ QMap<QString, QString> IndirectDataReduction::getInstrumentDetails()
   ipfElements.push_back("analysis-type");
   ipfElements.push_back("spectra-min");
   ipfElements.push_back("spectra-max");
-  ipfElements.push_back("efixed-val");
+  ipfElements.push_back("Efixed");
   ipfElements.push_back("peak-start");
   ipfElements.push_back("peak-end");
   ipfElements.push_back("back-start");
@@ -303,7 +303,7 @@ QMap<QString, QString> IndirectDataReduction::getInstrumentDetails()
       QString value = getInstrumentParameterFrom(instrument, key);
 
       if(value.isEmpty() && component != NULL)
-        QString value = getInstrumentParameterFrom(component, key);
+        value = getInstrumentParameterFrom(component, key);
 
       instDetails[QString::fromStdString(key)] = value;
     }

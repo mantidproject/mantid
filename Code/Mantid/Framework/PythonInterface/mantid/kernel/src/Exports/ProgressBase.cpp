@@ -4,7 +4,9 @@
 using Mantid::Kernel::ProgressBase;
 using namespace boost::python;
 
+// clang-format off
 void export_ProgressBase()
+// clang-format on
 {
   class_<ProgressBase,boost::noncopyable>("ProgressBase", no_init)
     .def("report", (void (ProgressBase::*)())&ProgressBase::report, "Increment the progress by 1 and report with no message")

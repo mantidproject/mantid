@@ -40,33 +40,45 @@ namespace
       ;
 }
 
+// clang-format off
 void export_TimeSeriesProperty_Double()
+// clang-format on
 {
   EXPORT_TIMESERIES_PROP(double, Float);
 }
 
+// clang-format off
 void export_TimeSeriesProperty_Bool()
+// clang-format on
 {
   EXPORT_TIMESERIES_PROP(bool, Bool);
 }
 
+// clang-format off
 void export_TimeSeriesProperty_Int32()
+// clang-format on
 {
   EXPORT_TIMESERIES_PROP(int32_t, Int32);
 }
 
+// clang-format off
 void export_TimeSeriesProperty_Int64()
+// clang-format on
 {
   EXPORT_TIMESERIES_PROP(int64_t, Int64);
 }
 
+// clang-format off
 void export_TimeSeriesProperty_String()
+// clang-format on
 {
   EXPORT_TIMESERIES_PROP(std::string, String);
 }
 
 
+// clang-format off
 void export_TimeSeriesPropertyStatistics()
+// clang-format on
 {
   class_<Mantid::Kernel::TimeSeriesPropertyStatistics>("TimeSeriesPropertyStatistics", no_init)
     .add_property("minimum", &Mantid::Kernel::TimeSeriesPropertyStatistics::minimum)

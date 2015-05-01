@@ -9,7 +9,9 @@ using Mantid::Geometry::ReferenceFrame;
 using Mantid::Kernel::V3D;
 using namespace boost::python;
 
+// clang-format off
 void export_ReferenceFrame()
+// clang-format on
 {
   using namespace Mantid::Geometry;
 

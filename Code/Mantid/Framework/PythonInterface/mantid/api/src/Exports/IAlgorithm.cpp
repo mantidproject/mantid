@@ -262,7 +262,9 @@ namespace
 
 }
 
+// clang-format off
 void export_ialgorithm()
+// clang-format on
 {
   class_<AlgorithmIDProxy>("AlgorithmID", no_init)
     .def(self == self)

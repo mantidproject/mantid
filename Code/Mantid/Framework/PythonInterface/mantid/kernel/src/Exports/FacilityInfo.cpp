@@ -7,7 +7,9 @@ using Mantid::Kernel::FacilityInfo;
 using Mantid::Kernel::InstrumentInfo;
 using namespace boost::python;
 
+// clang-format off
 void export_FacilityInfo()
+// clang-format on
 {
 
   register_ptr_to_python<FacilityInfo*>();
