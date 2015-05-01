@@ -4,6 +4,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/FunctionParameterDecorator.h"
+#include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/ParamFunction.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
@@ -284,6 +285,20 @@ public:
 
     tie = fn->getTie(0);
     TS_ASSERT(!tie);
+  }
+
+  void testTiesInComposite() {
+    FunctionParameterDecorator_sptr fn1 =
+        getFunctionParameterDecoratorGaussian();
+
+    CompositeFunction_sptr composite = boost::make_shared<CompositeFunction>();
+    composite->addFunction(fn1);
+
+    TS_ASSERT_THROWS_NOTHING(composite->addTies("f0.Height=2.0*f0.Sigma"));
+
+    composite->setParameter("f0.Sigma", 3.0);
+    composite->applyTies();
+    TS_ASSERT_EQUALS(composite->getParameter("f0.Height"), 6.0);
   }
 
   void testParameterNames() {
