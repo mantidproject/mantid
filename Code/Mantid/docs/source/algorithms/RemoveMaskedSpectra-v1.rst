@@ -10,7 +10,7 @@ Description
 -----------
 
 Removes all masked spectra from a workspace and stores all unmasked ones in the output workspace.
-The mask is taken either form the optional MaskedWorkspace property or form the input workspace
+The mask is taken either from the optional MaskedWorkspace property or from the input workspace
 if it is the only input. The MaskedWorkspace property can either be a masked MatrixWorkspace or
 a specialised MaskWorkspace.
 

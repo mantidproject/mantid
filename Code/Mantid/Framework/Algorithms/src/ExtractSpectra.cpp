@@ -127,12 +127,14 @@ void ExtractSpectra::execHistogram() {
 
   // If this is a Workspace2D, get the spectra axes for copying in the spectraNo
   // later
-  Axis *inAxis1(NULL), *outAxis1(NULL);
+  Axis *inAxis1(NULL);
   TextAxis *outTxtAxis(NULL);
+  NumericAxis *outNumAxis(NULL);
   if (m_inputWorkspace->axes() > 1) {
     inAxis1 = m_inputWorkspace->getAxis(1);
-    outAxis1 = outputWorkspace->getAxis(1);
+    auto outAxis1 = outputWorkspace->getAxis(1);
     outTxtAxis = dynamic_cast<TextAxis *>(outAxis1);
+    if (!outTxtAxis) outNumAxis = dynamic_cast<NumericAxis *>(outAxis1);
   }
 
   cow_ptr<MantidVec> newX;
@@ -163,13 +165,12 @@ void ExtractSpectra::execHistogram() {
     // copy over the axis entry for each spectrum, regardless of the type of
     // axes present
     if (inAxis1) {
-      if (outAxis1->isText()) {
+      if (outTxtAxis) {
         outTxtAxis->setLabel(j, inAxis1->label(i));
-      } else if (!outAxis1->isSpectra()) // handled by copyInfoFrom line
-      {
-        dynamic_cast<NumericAxis *>(outAxis1)
-            ->setValue(j, inAxis1->operator()(i));
+      } else if (outNumAxis) {
+        outNumAxis->setValue(j, inAxis1->operator()(i));
       }
+      // spectra axis is handled by copyInfoFrom line
     }
     // Copy spectrum number & detectors
     outputWorkspace->getSpectrum(j)
