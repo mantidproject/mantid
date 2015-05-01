@@ -2532,6 +2532,9 @@ void MantidUI::importNumSeriesLog(const QString &wsName, const QString &logName,
     t->setNumericPrecision(16);   //it's the number of all digits
   }
 
+  // The time when the first data was recorded.
+  auto firstTime = time_value_map.begin()->first;
+
   //Make the column header with the units, if any
   QString column1 = label.section("-",1);
   if (logData->units() != "")
@@ -2546,6 +2549,7 @@ void MantidUI::importNumSeriesLog(const QString &wsName, const QString &logName,
     Mantid::Kernel::TimeSeriesProperty<bool>* f = 0;
     if (filter == 1 || filter ==3)
     {
+      // one of the filters is the running status
       try
       {
         f = dynamic_cast<Mantid::Kernel::TimeSeriesProperty<bool> *>(ws->run().getLogData("running"));
@@ -2557,6 +2561,15 @@ void MantidUI::importNumSeriesLog(const QString &wsName, const QString &logName,
           t->close();
           importNumSeriesLog(wsName,logName,0);
           return;
+        }
+        // If filter records start later than the data we add a value at the filter's front
+        if ( f->firstTime() > firstTime )
+        {
+          // add a "not running" value to the status filter
+          Mantid::Kernel::TimeSeriesProperty<bool> atStart("tmp");
+          atStart.addValue(firstTime,false);
+          atStart.addValue(f->firstTime(),f->firstValue());
+          flt.addFilter(atStart);
         }
       }
       catch(...)

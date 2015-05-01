@@ -10,7 +10,9 @@ using Mantid::PythonInterface::Registry::DataItemInterface;
 using namespace boost::python;
 namespace Policies = Mantid::PythonInterface::Policies;
 
+// clang-format off
 void export_WorkspaceGroup() 
+// clang-format on
 {
   class_< WorkspaceGroup, bases<Workspace>, boost::noncopyable >("WorkspaceGroup", no_init)
     .def("getNumberOfEntries", &WorkspaceGroup::getNumberOfEntries, "Returns the number of entries in the group")

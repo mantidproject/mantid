@@ -52,6 +52,7 @@ set ( SRC_FILES
 	src/ConvertToMatrixWorkspace.cpp
 	src/ConvertToPointData.cpp
 	src/ConvertUnits.cpp
+	src/ConvertUnitsUsingDetectorTable.cpp
 	src/CopyDetectorMapping.cpp
 	src/CopyInstrumentParameters.cpp
 	src/CopyLogs.cpp
@@ -311,6 +312,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/ConvertToMatrixWorkspace.h
 	inc/MantidAlgorithms/ConvertToPointData.h
 	inc/MantidAlgorithms/ConvertUnits.h
+	inc/MantidAlgorithms/ConvertUnitsUsingDetectorTable.h
 	inc/MantidAlgorithms/CopyDetectorMapping.h
 	inc/MantidAlgorithms/CopyInstrumentParameters.h
 	inc/MantidAlgorithms/CopyLogs.h
@@ -581,6 +583,7 @@ set ( TEST_FILES
 	ConvertToMatrixWorkspaceTest.h
 	ConvertToPointDataTest.h
 	ConvertUnitsTest.h
+	ConvertUnitsUsingDetectorTableTest.h
 	CopyDetectorMappingTest.h
 	CopyInstrumentParametersTest.h
 	CopyLogsTest.h

@@ -256,7 +256,9 @@ public:
 //=====================================================================================
 // Performance Tests
 //=====================================================================================
+// clang-format off
 class IntegratePeaksUsingClustersTestPerformance : public CxxTest::TestSuite, public ClusterIntegrationBaseTest
+// clang-format on
 {
 
 private:

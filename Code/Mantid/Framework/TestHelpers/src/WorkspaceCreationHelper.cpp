@@ -918,7 +918,7 @@ createProcessedInelasticWS(const std::vector<double> &L2,
 
   // detectors at L2, sample at 0 and source at -L2_min
   ws->setInstrument(
-      ComponentCreationHelper::createCylInstrumentWithDetInGivenPosisions(
+      ComponentCreationHelper::createCylInstrumentWithDetInGivenPositions(
           L2, polar, azimutal));
 
   for (int g = 0; g < static_cast<int>(numPixels); g++) {

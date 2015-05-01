@@ -183,26 +183,7 @@ void PawleyParameterFunction::setProfileFunction(
  */
 void
 PawleyParameterFunction::setCrystalSystem(const std::string &crystalSystem) {
-  std::string crystalSystemLC = boost::algorithm::to_lower_copy(crystalSystem);
-
-  if (crystalSystemLC == "cubic") {
-    m_crystalSystem = PointGroup::Cubic;
-  } else if (crystalSystemLC == "tetragonal") {
-    m_crystalSystem = PointGroup::Tetragonal;
-  } else if (crystalSystemLC == "hexagonal") {
-    m_crystalSystem = PointGroup::Hexagonal;
-  } else if (crystalSystemLC == "trigonal") {
-    m_crystalSystem = PointGroup::Trigonal;
-  } else if (crystalSystemLC == "orthorhombic") {
-    m_crystalSystem = PointGroup::Orthorhombic;
-  } else if (crystalSystemLC == "monoclinic") {
-    m_crystalSystem = PointGroup::Monoclinic;
-  } else if (crystalSystemLC == "triclinic") {
-    m_crystalSystem = PointGroup::Triclinic;
-  } else {
-    throw std::invalid_argument("Not a valid crystal system: '" +
-                                crystalSystem + "'.");
-  }
+  m_crystalSystem = Geometry::getCrystalSystemFromString(crystalSystem);
 
   createCrystalSystemParameters(m_crystalSystem);
 }

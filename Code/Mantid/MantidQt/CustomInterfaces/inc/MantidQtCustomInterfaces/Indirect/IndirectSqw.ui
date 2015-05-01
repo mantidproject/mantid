@@ -369,12 +369,12 @@
           </property>
           <item>
            <property name="text">
-            <string>Parallelepiped (SofQW2)</string>
+            <string>Parallelepiped</string>
            </property>
           </item>
           <item>
            <property name="text">
-            <string>Parallelepiped/Fractional Area (SofQW3)</string>
+            <string>Parallelepiped/Fractional Area</string>
            </property>
           </item>
          </widget>

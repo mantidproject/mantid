@@ -43,26 +43,26 @@ JumpAcceptanceRate
 FABADA Specific Outputs
 -----------------------
 
-PDF
+PDF (*required*)
   Probability Density Function for each fitted parameter and the cost function.
   This is output as a :ref:`MatrixWorkspace`.
 
-Chains
+Chains (*optional*)
   The value of each parameter and the cost function for each step taken.
   This is output as a :ref:`MatrixWorkspace`.
 
-ConvergedChain
+ConvergedChain (*optional*)
   A subset of Chains containing only the section after which the parameters have
   converged.
   This records the parameters at step intervals given by StepsBetweenValues.
   This is output as a :ref:`MatrixWorkspace`.
 
-CostFunctionTable
+CostFunctionTable (*optional*)
   Table containing the minimum and most probable values of the cost function as
   well as their reduced values.
   This is output as a TableWorkspace.
 
-Parameters
+Parameters (*optional*)
   Similar to the standard parameter table but also includes left and right
   errors for each parameter (cost function is not included).
   This is output as a TableWorkspace.

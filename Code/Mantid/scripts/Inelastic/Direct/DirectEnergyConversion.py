@@ -424,11 +424,9 @@ class DirectEnergyConversion(object):
                 # find the count rate seen in the regions of the histograms defined
                 # as the background regions, if the user defined such region.
                 # In multirep mode this has to be done here, as workspace
-                # will be cut in chunks and bg regions -- removed
-                ws_base = PropertyManager.sample_run.get_workspace()
+                # will be cut in chunks and bg regions removed
                 bkgd_range = self.bkgd_range
-                bkgr_ws = self._find_or_build_bkgr_ws(ws_base,bkgd_range[0],bkgd_range[1])
-                RenameWorkspace(InputWorkspace=bkgr_ws, OutputWorkspace='bkgr_ws_source')
+                self._find_or_build_bkgr_ws(PropertyManager.sample_run,bkgd_range[0],bkgd_range[1])
             # initialize list to store resulting workspaces to return
             result = []
         else:
@@ -491,7 +489,6 @@ class DirectEnergyConversion(object):
             else: # delete workspace if no output is requested
                 result = None
             self._old_runs_list.append(results_name)
-
         #end_for
 #------------------------------------------------------------------------------------------
 # END Main loop over incident energies
@@ -499,8 +496,14 @@ class DirectEnergyConversion(object):
 
         end_time = time.time()
         prop_man.log("*** Elapsed time = {0} sec".format(end_time - start_time),'notice')
+        # Must! clear backrgound ws (if present in multirep) to calculate background 
+        # source for next workspace 
+        if 'bkgr_ws_source' in mtd:
+            DeleteWorkspace('bkgr_ws_source')
+
 
         # CLEAR existing workspaces only if it is not run within loop
+
         #prop_man.monovan_run = None
         #prop_man.wb_run = None
         # clear combined mask
@@ -1407,7 +1410,7 @@ class DirectEnergyConversion(object):
             bkg_range_min = bkgd_range[0] + bin_offset
             bkg_range_max = bkgd_range[1] + bin_offset
             if isinstance(result_ws,api.IEventWorkspace):
-                bkgr_ws = self._find_or_build_bkgr_ws(result_ws,bkg_range_min,bkg_range_max,bin_offset)
+                bkgr_ws = self._find_or_build_bkgr_ws(data_run,bkg_range_min,bkg_range_max,bin_offset)
             else:
                 bkgr_ws = None
                 CalculateFlatBackground(InputWorkspace=result_ws,OutputWorkspace=result_ws,
@@ -1451,7 +1454,7 @@ class DirectEnergyConversion(object):
 
         return
 #-------------------------------------------------------------------------------
-    def _find_or_build_bkgr_ws(self,result_ws,bkg_range_min=None,bkg_range_max=None,time_shift=0):
+    def _find_or_build_bkgr_ws(self,run,bkg_range_min=None,bkg_range_max=None,time_shift=0):
         """ Method calculates  background workspace or restore workspace with
             the same name as the one produced by this method from ADS
         """
@@ -1459,23 +1462,34 @@ class DirectEnergyConversion(object):
             bkg_range_min,bkg_range_max = self.bkgd_range
         bkg_range_min += time_shift
         bkg_range_max += time_shift
+        run = self.get_run_descriptor(run)
+        result_ws = run.get_workspace()
 
-        # has to have specific name for this all working.  This ws is build at
-        # the beginning of
-        # multirep run
+        # has to have specific name for this working. The ws is build at
+        # the beginning of multirep run.
         if 'bkgr_ws_source' in mtd:
+            #TODO: This is questionable operation, which may be unnecessary if remove background
+            # uses time interval only. (and it probably does)
+            # need to check if bkgr_ws =mtd['bkgr_ws_source'] is enough here. 
+            # (and not delete it after bkg removal)
             bkgr_ws = CloneWorkspace(InputWorkspace='bkgr_ws_source',OutputWorkspace='bkgr_ws')
-            if time_shift != 0: # Workspace has probably been shifted, so to have correct units conversion
-                                # one needs to do appropriate shift here as
-                                                               # well
+            if time_shift != 0: # Workspace has probably been shifted, so to have 
+                                # one needs to do appropriate shift here
+                                #correct units conversion as well
                 CopyInstrumentParameters(result_ws,bkgr_ws)
              # Adjust the TOF such that the first monitor peak is at t=0
                 ScaleX(InputWorkspace=bkgr_ws,OutputWorkspace='bkgr_ws',Operation="Add",Factor=time_shift,\
                      InstrumentParameter="DelayTime",Combine=True)
-        else:
+        else: # calculate background workspace for future usage
             bkgr_ws = Rebin(result_ws,Params=[bkg_range_min,(bkg_range_max - bkg_range_min) * 1.001,bkg_range_max],PreserveEvents=False)
+            if run.is_monws_separate():
+                mon_ws = run.get_monitors_ws()
+                CloneWorkspace(mon_ws,OutputWorkspace="bkgr_ws_monitors")
             bkgr_ws = self.normalise(bkgr_ws, self.normalise_method, time_shift)
-
+            if bkgr_ws.name()+"_monitors" in mtd:
+                DeleteWorkspace(bkgr_ws.name()+"_monitors")
+            RenameWorkspace(InputWorkspace=bkgr_ws, OutputWorkspace='bkgr_ws_source')
+            bkgr_ws = mtd['bkgr_ws_source']
 
         return bkgr_ws
 #-------------------------------------------------------------------------------

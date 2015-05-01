@@ -42,7 +42,7 @@ namespace
 }
 
 
-ThreeSliceView::ThreeSliceView(QWidget *parent) : ViewBase(parent)
+ThreeSliceView::ThreeSliceView(QWidget *parent, RebinnedSourcesManager* rebinnedSourcesManager) : ViewBase(parent, rebinnedSourcesManager)
 {
   this->ui.setupUi(this);
   this->mainView = this->createRenderView(this->ui.mainRenderFrame,

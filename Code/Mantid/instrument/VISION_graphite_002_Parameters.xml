@@ -7,9 +7,9 @@
   <value val="spectroscopy" />
 </parameter>
 
-<!-- 
-This Min/Max approach doesn't work for instruments with gaps 
-in the detector numbering! 
+<!--
+This Min/Max approach doesn't work for instruments with gaps
+in the detector numbering!
 -->
 <parameter name="spectra-min">
 	<value val="1" />

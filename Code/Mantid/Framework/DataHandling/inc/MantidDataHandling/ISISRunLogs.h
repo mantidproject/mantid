@@ -52,6 +52,8 @@ public:
   void addStatusLog(API::Run &exptRun);
   /// Adds period related logs
   void addPeriodLogs(const int period, API::Run &exptRun);
+  /// Add 'period i' log.
+  void addPeriodLog(const int i, API::Run &exptRun);
 
 private:
   DISABLE_DEFAULT_CONSTRUCT(ISISRunLogs)

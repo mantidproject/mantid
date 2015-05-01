@@ -59,13 +59,13 @@ Input File
   Specify a range of input files that are either reduced (*_red.nxs*) or
   :math:`S(Q, \omega)`.
 
-Range One
+Integration Range
   The energy range over which to integrate the values.
 
-Use Two Ranges
+Background Subtraction
   If checked a background will be calculated and subtracted from the raw data.
 
-Range Two
+Background Range
   The energy range over which a background is calculated which is subtracted from
   the raw data.
 

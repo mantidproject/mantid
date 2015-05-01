@@ -1,3 +1,4 @@
+// clang-format off
 #ifndef @MULTIPLYDIVIDETEST_CLASS@_H_
 #define @MULTIPLYDIVIDETEST_CLASS@_H_
 

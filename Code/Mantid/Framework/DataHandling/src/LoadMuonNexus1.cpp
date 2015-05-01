@@ -1,11 +1,13 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
+#include "MantidDataHandling/LoadMuonNexus1.h"
+
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/Progress.h"
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/TableRow.h"
-#include "MantidDataHandling/LoadMuonNexus1.h"
+#include "MantidDataHandling/ISISRunLogs.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument/Detector.h"
@@ -232,6 +234,7 @@ void LoadMuonNexus1::exec() {
       localWorkspace->setTitle(title);
       localWorkspace->setComment(notes);
     }
+    addPeriodLog(localWorkspace,period);
 
     size_t counter = 0;
     for (int64_t i = m_spec_min; i < m_spec_max; ++i) {
@@ -707,6 +710,32 @@ void LoadMuonNexus1::runLoadLog(DataObjects::Workspace2D_sptr localWorkspace) {
     }
   } catch (...) {
     setProperty("MainFieldDirection", "Longitudinal");
+  }
+
+  auto &run = localWorkspace->mutableRun();
+  int n = static_cast<int>(m_numberOfPeriods);
+  ISISRunLogs runLogs(run, n);
+  runLogs.addStatusLog(run);
+}
+
+/**
+ * Add the 'period i' log to a workspace.
+ * @param localWorkspace A workspace to add the log to.
+ * @param period A period for this workspace.
+ */
+void LoadMuonNexus1::addPeriodLog(DataObjects::Workspace2D_sptr localWorkspace, int64_t period)
+{
+  auto &run = localWorkspace->mutableRun();
+  int n = static_cast<int>(m_numberOfPeriods);
+  ISISRunLogs runLogs(run, n);
+  if ( period == 0 )
+  {
+    runLogs.addPeriodLogs(1, run);
+  }
+  else
+  {
+    run.removeLogData("period 1");
+    runLogs.addPeriodLog(static_cast<int>(period) + 1, run);
   }
 }
 

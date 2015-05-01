@@ -10,6 +10,7 @@ set ( TEST_PY_FILES
   ConjoinSpectraTest.py
   CorrectLogTimesTest.py
   CreateLeBailFitInputTest.py
+  CreateMDTest.py
   IndirectCalibrationTest.py
   CreateWorkspaceTest.py
   CylinderPaalmanPingsCorrectionTest.py

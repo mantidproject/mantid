@@ -7,10 +7,6 @@
   <value val="spectroscopy" />
 </parameter>
 
-<parameter name="efixed-val">
-	<value val="7.3812" />
-</parameter>
-
 <parameter name="analyser" type="string">
   <value val="qmax" />
 </parameter>

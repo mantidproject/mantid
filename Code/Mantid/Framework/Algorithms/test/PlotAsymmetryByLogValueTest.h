@@ -292,6 +292,22 @@ public:
     AnalysisDataService::Instance().remove(ws);
   }
 
+  void test_invalidRunNumbers ()
+  {
+    const std::string ws = "Test_LogValueFunction";
+
+    PlotAsymmetryByLogValue alg;
+
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+
+    alg.setPropertyValue("FirstRun", lastRun);
+    alg.setPropertyValue("LastRun", firstRun);
+    alg.setPropertyValue("OutputWorkspace", ws);
+
+    TS_ASSERT_THROWS (alg.execute(),std::runtime_error);
+    TS_ASSERT (!alg.isExecuted());
+  }
+
 private:
   std::string firstRun,lastRun;
   

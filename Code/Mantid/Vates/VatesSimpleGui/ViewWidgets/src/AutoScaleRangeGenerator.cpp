@@ -233,7 +233,9 @@ namespace SimpleGui
 
     // Check if Peak Workspace. This workspace should not contribute to colorscale
     if (QString(proxy->GetXMLName()).contains("Peaks Source") ||
-        QString(proxy->GetXMLName()).contains("SinglePeakMarkerSource"))
+        QString(proxy->GetXMLName()).contains("SinglePeakMarkerSource") ||
+        QString(proxy->GetXMLName()).contains("Threshold") ||
+        QString(proxy->GetXMLName()).contains("ProbePoint"))
     {
       minValue = DBL_MAX;
       maxValue = -DBL_MAX;

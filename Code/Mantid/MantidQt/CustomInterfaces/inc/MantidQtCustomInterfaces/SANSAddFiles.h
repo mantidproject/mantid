@@ -63,6 +63,8 @@ private slots:
   void removeSelected();
   /// Enables/disables the "Sum" button based on whether there are files to sum.
   void enableSumming();
+  /// reacts to changges of the combo box selection for the histogram options for event data
+  void onCurrentIndexChangedForHistogramChoice(int index);
 };
 
 }

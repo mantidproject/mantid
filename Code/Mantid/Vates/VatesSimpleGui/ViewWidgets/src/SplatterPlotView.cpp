@@ -57,7 +57,7 @@ namespace
 }
 
 
-SplatterPlotView::SplatterPlotView(QWidget *parent) : ViewBase(parent),
+SplatterPlotView::SplatterPlotView(QWidget *parent, RebinnedSourcesManager* rebinnedSourcesManager) : ViewBase(parent, rebinnedSourcesManager),
                                                       m_cameraManager(boost::make_shared<CameraManager>()),
                                                       m_peaksTableController(NULL),
                                                       m_peaksWorkspaceNameDelimiter(";")                         

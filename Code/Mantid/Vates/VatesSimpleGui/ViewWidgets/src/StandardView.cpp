@@ -1,4 +1,5 @@
 #include "MantidVatesSimpleGuiViewWidgets/StandardView.h"
+#include "MantidVatesSimpleGuiViewWidgets/RebinnedSourcesManager.h"
 // Have to deal with ParaView warnings and Intel compiler the hard way.
 #if defined(__INTEL_COMPILER)
   #pragma warning disable 1170
@@ -40,9 +41,12 @@ namespace SimpleGui
  * This function sets up the UI components, adds connections for the view's
  * buttons and creates the rendering view.
  * @param parent the parent widget for the standard view
+ * @param rebinnedSourcesManager Pointer to a RebinnedSourcesManager
  */
-  StandardView::StandardView(QWidget *parent) : ViewBase(parent),m_binMDAction(NULL),
+  StandardView::StandardView(QWidget *parent, RebinnedSourcesManager* rebinnedSourcesManager) : ViewBase(parent, rebinnedSourcesManager),
+                                                                 m_binMDAction(NULL),
                                                                  m_sliceMDAction(NULL),
+                                                                 m_cutMDAction(NULL),
                                                                  m_unbinAction(NULL)
 {
   this->ui.setupUi(this);
@@ -77,6 +81,7 @@ StandardView::~StandardView()
 
 void StandardView::setupViewButtons()
 {
+
   // Populate the rebin button
   QMenu* rebinMenu = new QMenu(this->ui.rebinToolButton);
 
@@ -86,21 +91,26 @@ void StandardView::setupViewButtons()
   m_sliceMDAction = new QAction("SliceMD", rebinMenu);
   m_sliceMDAction->setIconVisibleInMenu(false);
 
+  m_cutMDAction = new QAction("CutMD", rebinMenu);
+  m_cutMDAction->setIconVisibleInMenu(false);
 
   m_unbinAction = new QAction("Remove Rebinning", rebinMenu);
   m_unbinAction->setIconVisibleInMenu(false);
 
   rebinMenu->addAction(m_binMDAction);
   rebinMenu->addAction(m_sliceMDAction);
+  rebinMenu->addAction(m_cutMDAction);
   rebinMenu->addAction(m_unbinAction);
 
   this->ui.rebinToolButton->setPopupMode(QToolButton::InstantPopup);
   this->ui.rebinToolButton->setMenu(rebinMenu);
 
   QObject::connect(m_binMDAction, SIGNAL(triggered()),
-                   this, SLOT(onBinMD()), Qt::QueuedConnection);
+                   this, SLOT(onRebin()), Qt::QueuedConnection);
   QObject::connect(m_sliceMDAction, SIGNAL(triggered()),
-                   this, SLOT(onSliceMD()), Qt::QueuedConnection);
+                   this, SLOT(onRebin()), Qt::QueuedConnection);
+  QObject::connect(m_cutMDAction, SIGNAL(triggered()),
+                   this, SLOT(onRebin()), Qt::QueuedConnection);
   // Set the unbinbutton to remove the rebinning on a workspace
   // which was binned in the VSI
   QObject::connect(m_unbinAction, SIGNAL(triggered()),
@@ -224,13 +234,6 @@ void StandardView::closeSubWindows()
 {
 }
 
-/**
- * This function reacts to a destroyed source.
- */
-void StandardView::onSourceDestroyed()
-{
-  //setRebinAndUnbinButtons();
-}
 
 /**
  * Check if the rebin and unbin buttons should be visible
@@ -252,55 +255,50 @@ void StandardView::setRebinAndUnbinButtons()
   {
     if (isTemporaryWorkspace(*source))
     {
-      numberOfTemporaryWorkspaces++;
+      ++numberOfTemporaryWorkspaces;
     } else if (isMDHistoWorkspace(*source))
     {
-      numberOfTrueMDHistoWorkspaces++;
+      ++numberOfTrueMDHistoWorkspaces;
     }
     else if (isPeaksWorkspace(*source))
     {
-      numberOfPeakWorkspaces++;
+      ++numberOfPeakWorkspaces;
     }
   }
 
   // If there are any true MDHisto workspaces then the rebin button should be disabled
-  if (numberOfTrueMDHistoWorkspaces > 0 || numberOfPeakWorkspaces > 0)
-  {
-    this->m_binMDAction->setEnabled(false);
-    this->m_sliceMDAction->setEnabled(false);
-  }
-  else 
-  {
-    this->m_binMDAction->setEnabled(true);
-    this->m_sliceMDAction->setEnabled(true);
-  }
+  bool allowRebinning = numberOfTrueMDHistoWorkspaces > 0 || numberOfPeakWorkspaces > 0;
+  this->allowRebinningOptions(allowRebinning);
 
   // If there are no temporary workspaces the button should be disabled.
-  if (numberOfTemporaryWorkspaces == 0)
-  {
-    this->m_unbinAction->setEnabled(false);
-  }
-  else
-  {
-    this->m_unbinAction->setEnabled(true);
-  }
+  const bool allowUnbin = !( numberOfTemporaryWorkspaces == 0 );
+  allowUnbinOption(allowUnbin);
 }
 
 
 /**
  * Reacts to the user selecting the BinMD algorithm
  */ 
-void StandardView::onBinMD()
+void StandardView::onRebin()
 {
-  emit rebin("BinMD");
+  if(QAction* action = dynamic_cast<QAction*>(sender())) {
+    emit rebin(action->text().toStdString()); }
 }
 
 /**
- * Reacts to the user selecting the SliceMD algorithm
- */ 
-void StandardView::onSliceMD()
-{
-  emit rebin("SliceMD");
+Disable rebinning options
+*/
+void StandardView::allowRebinningOptions(bool allow) {
+    this->m_binMDAction->setEnabled(allow);
+    this->m_sliceMDAction->setEnabled(allow);
+    this->m_cutMDAction->setEnabled(allow);
+}
+
+/**
+Enable unbin option
+*/
+void StandardView::allowUnbinOption(bool allow) {
+  this->m_unbinAction->setEnabled(allow);
 }
 
 
@@ -313,8 +311,7 @@ void StandardView::activeSourceChangeListener(pqPipelineSource* source)
   // If there is no active source, then we do not allow rebinning
   if (!source)
   {
-    this->m_binMDAction->setEnabled(false);
-    this->m_sliceMDAction->setEnabled(false);
+    this->allowRebinningOptions(false);
     this->m_unbinAction->setEnabled(false);
     return;
   }
@@ -334,21 +331,18 @@ void StandardView::activeSourceChangeListener(pqPipelineSource* source)
   std::string workspaceType(localSource->getProxy()->GetXMLName());
   if (isTemporaryWorkspace(localSource))
   {
-    this->m_binMDAction->setEnabled(true);
-    this->m_sliceMDAction->setEnabled(true);
-    this->m_unbinAction->setEnabled(true);
+    this->allowRebinningOptions(true);
+    this->allowUnbinOption(true);
   }
   else if (workspaceType.find("MDEW Source") != std::string::npos)
   {
-    this->m_binMDAction->setEnabled(true);
-    this->m_sliceMDAction->setEnabled(true);
-    this->m_unbinAction->setEnabled(false);
+    this->allowRebinningOptions(true);
+    this->allowUnbinOption(true);
   }
   else
   {
-    this->m_binMDAction->setEnabled(false);
-    this->m_sliceMDAction->setEnabled(false);
-    this->m_unbinAction->setEnabled(false);
+    this->allowRebinningOptions(false);
+    this->allowUnbinOption(false);
   }
 }
 

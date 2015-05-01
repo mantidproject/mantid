@@ -27,6 +27,7 @@ namespace SimpleGui
 {
 
 class ColorSelectionWidget;
+class RebinnedSourcesManager;
 
 /**
  *
@@ -59,7 +60,8 @@ class EXPORT_OPT_MANTIDVATES_SIMPLEGUI_VIEWWIDGETS ViewBase : public QWidget
   Q_OBJECT
 public:
   /// Default constructor.
-  ViewBase(QWidget *parent = 0);
+  ViewBase(QWidget *parent = 0, RebinnedSourcesManager* rebinnedSourcesManager = 0);
+
   /// Default destructor.
   virtual ~ViewBase() {}
 
@@ -219,7 +221,7 @@ signals:
    */
   void unbin();
   /**
-   * Singal to tell other elements that the log scale was altered programatically
+   * Signal to tell other elements that the log scale was altered programatically
    * @param state flag wheter or not to enable the 
    */
   void setLogScale(bool state);
@@ -244,7 +246,8 @@ private:
 
   ColorUpdater colorUpdater; ///< Handle to the color updating delegator
   BackgroundRgbProvider backgroundRgbProvider; /// < Holds the manager for background color related tasks.
-   const pqColorMapModel* m_currentColorMapModel;
+  RebinnedSourcesManager* m_rebinnedSourcesManager;
+  const pqColorMapModel* m_currentColorMapModel;
 
   QString m_temporaryWorkspaceIdentifier;
 };
