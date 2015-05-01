@@ -12,6 +12,7 @@
 #include <boost/algorithm/string/replace.hpp>
 
 #include "MantidCurveFitting/PlotPeakByLogValue.h"
+#include "MantidAPI/IFuncMinimizer.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FuncMinimizerFactory.h"
 #include "MantidAPI/CostFunctionFactory.h"
@@ -27,6 +28,11 @@
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
+
+namespace
+{
+  Mantid::Kernel::Logger g_log("PlotPeakByLogValue");
+}
 
 namespace Mantid {
 namespace CurveFitting {
@@ -341,6 +347,17 @@ void PlotPeakByLogValue::exec() {
     groupAlg->setProperty("OutputWorkspace", baseName + "_Workspaces");
     groupAlg->execute();
   }
+
+  for(auto it = m_minimizerWorkspaces.begin(); it != m_minimizerWorkspaces.end(); ++it)
+  {
+    const std::string paramName = (*it).first;
+    API::IAlgorithm_sptr groupAlg =
+        AlgorithmManager::Instance().createUnmanaged("GroupWorkspaces");
+    groupAlg->initialize();
+    groupAlg->setProperty("InputWorkspaces", (*it).second);
+    groupAlg->setProperty("OutputWorkspace", baseName + "_" + paramName);
+    groupAlg->execute();
+  }
 }
 
 /** Get a workspace identified by an InputData structure.
@@ -562,12 +579,26 @@ PlotPeakByLogValue::makeNames() const {
  * @param specIndex Index of spectrum being fitted
  * @return Formatted minimizer string
  */
-std::string PlotPeakByLogValue::getMinimizerString(const std::string & wsName, const std::string & specIndex) const {
+std::string PlotPeakByLogValue::getMinimizerString(const std::string & wsName, const std::string & specIndex) {
   std::string format = getPropertyValue("Minimizer");
   std::string wsBaseName = wsName + "_" + specIndex;
   boost::replace_all(format, "$wsname", wsName);
   boost::replace_all(format, "$wsindex", specIndex);
   boost::replace_all(format, "$basename", wsBaseName);
+
+  auto minimizer = FuncMinimizerFactory::Instance().createMinimizer(format);
+  auto minimizerProps = minimizer->getProperties();
+  for(auto it = minimizerProps.begin(); it != minimizerProps.end(); ++it)
+  {
+    Mantid::API::WorkspaceProperty<> *wsProp = dynamic_cast<Mantid::API::WorkspaceProperty<> *>(*it);
+    if(wsProp)
+    {
+      std::string wsPropName = (*it)->name();
+      std::string wsPropValue = (*it)->value();
+      m_minimizerWorkspaces[wsPropName].push_back(wsPropValue);
+    }
+  }
+
   return format;
 }
 
