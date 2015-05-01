@@ -652,9 +652,9 @@ void MdViewerWidget::renderWorkspace(QString workspaceName, int workspaceType, s
   }
 
   // Set the start up flag to false
-  if (!this->isStartup)
+  if (this->isStartup)
   {
-    this->isStartup = true;
+    this->isStartup = false;
   }
 
   QString sourcePlugin = "";
@@ -1035,6 +1035,7 @@ bool MdViewerWidget::eventFilter(QObject *obj, QEvent *ev)
       this->currentView ->destroyAllSourcesInView();
       this->currentView->updateSettings();
       this->currentView->hide();
+      this->isStartup = true; // reset the start up flag
 
       return true;
     }
@@ -1409,13 +1410,15 @@ void MdViewerWidget::dropEvent(QDropEvent *e) {
  */
 void MdViewerWidget::setColorMap()
 {
-  // When we start up the VSI we want to 
-  if (!this->viewSwitched)
+  // When the VSI is already started up we want to use the current color map
+  if (this->isStartup)
   {
+    // Do not use the current color map
     this->ui.colorSelectionWidget->loadColorMap(false);
   }
   else
   {
+    //Use the current color map
     this->ui.colorSelectionWidget->loadColorMap(true);
   }
 }
