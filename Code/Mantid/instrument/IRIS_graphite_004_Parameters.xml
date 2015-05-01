@@ -17,10 +17,6 @@
 	<value val="53" />
 </parameter>
 
-<parameter name="efixed-val">
-	<value val="7.3812" />
-</parameter>
-
 <parameter name="peak-start">
 	<value val="31500" />
 </parameter>
@@ -37,15 +33,16 @@
 	<value val="27000" />
 </parameter>
 
-  <parameter name="analyser" type="string">
-    <value val="graphite" />
-  </parameter>
+<parameter name="analyser" type="string">
+  <value val="graphite" />
+</parameter>
 
-  <parameter name="reflection" type="string">
-    <value val="004" />
-  </parameter>
+<parameter name="reflection" type="string">
+  <value val="004" />
+</parameter>
 
 </component-link>
+
 <component-link name="graphite">
 <parameter name="Efixed"> <value val="7.3812" /> </parameter>
 <parameter name="resolution"> <value val="0.0545" /> </parameter>
