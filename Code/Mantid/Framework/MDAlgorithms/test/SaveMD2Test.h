@@ -156,7 +156,7 @@ public:
 
   void test_saveExpInfo()
   {
-    std::string filename("MultiExperSaveTest.nxs");
+    std::string filename("MultiExperSaveMD2Test.nxs");
     // Make a 1D MDEventWorkspace
     MDEventWorkspace1Lean::sptr ws = MDEventsTestHelper::makeMDEW<1>(10, 0.0, 10.0, 2);
     // Make sure it is split
@@ -199,7 +199,7 @@ public:
 
   void test_saveAffine()
   {
-    std::string filename("MDAffineSaveTest.nxs");
+    std::string filename("MDAffineSaveMD2Test.nxs");
     // Make a 4D MDEventWorkspace
     MDEventWorkspace4Lean::sptr ws = MDEventsTestHelper::makeMDEW<4>(10, 0.0, 10.0, 2);
     AnalysisDataService::Instance().addOrReplace("SaveMD2Test_ws", ws);
