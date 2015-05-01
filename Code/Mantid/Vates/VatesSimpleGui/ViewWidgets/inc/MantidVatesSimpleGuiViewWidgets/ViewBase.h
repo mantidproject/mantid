@@ -99,8 +99,8 @@ public:
   virtual bool hasWorkspaceType(const QString &wsTypeName);
   /// Check if file/workspace is a MDHistoWorkspace.
   virtual bool isMDHistoWorkspace(pqPipelineSource *src);
-  /// Check if file/workspace is a temporary workspace
-  virtual bool isTemporaryWorkspace(pqPipelineSource* src);
+  /// Check if file/workspace is an internally rebinned workspace
+  virtual bool isInternallyRebinnedWorkspace(pqPipelineSource* src);
   /// Check if file/workspace is a Peaks one.
   virtual bool isPeaksWorkspace(pqPipelineSource *src);
   /// Prints properties for given source.
@@ -249,7 +249,7 @@ private:
   RebinnedSourcesManager* m_rebinnedSourcesManager;
   const pqColorMapModel* m_currentColorMapModel;
 
-  QString m_temporaryWorkspaceIdentifier;
+  QString m_internallyRebinnedWorkspaceIdentifier;
 };
 
 }

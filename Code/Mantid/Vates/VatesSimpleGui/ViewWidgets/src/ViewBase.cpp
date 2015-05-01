@@ -52,7 +52,7 @@ namespace SimpleGui
  * @param rebinnedSourcesManager Pointer to a RebinnedSourcesManager
  */
 ViewBase::ViewBase(QWidget *parent, RebinnedSourcesManager* rebinnedSourcesManager) : QWidget(parent),
-                                      m_rebinnedSourcesManager(rebinnedSourcesManager), m_currentColorMapModel(NULL), m_temporaryWorkspaceIdentifier("rebinned_vsi")
+                                      m_rebinnedSourcesManager(rebinnedSourcesManager), m_currentColorMapModel(NULL), m_internallyRebinnedWorkspaceIdentifier("rebinned_vsi")
 {
 }
 
@@ -627,10 +627,10 @@ bool ViewBase::isMDHistoWorkspace(pqPipelineSource *src)
 }
 
 /**
- * This function checks if a pqPipelineSource is a temporary workspace.
- * @return true if the source is a temporary workspace;
+ * This function checks if a pqPipelineSource is an internally rebinned workspace.
+ * @return true if the source is an internally rebinned workspace;
  */
-bool ViewBase::isTemporaryWorkspace(pqPipelineSource *src)
+bool ViewBase::isInternallyRebinnedWorkspace(pqPipelineSource *src)
 {
   if (NULL == src)
   {
@@ -649,7 +649,7 @@ bool ViewBase::isTemporaryWorkspace(pqPipelineSource *src)
   QString wsName(vtkSMPropertyHelper(src->getProxy(),
                                     "WorkspaceName", true).GetAsString());
 
-  if (wsName.contains(m_temporaryWorkspaceIdentifier) && m_rebinnedSourcesManager->isRebinnedSourceBeingTracked(src))
+  if (wsName.contains(m_internallyRebinnedWorkspaceIdentifier) && m_rebinnedSourcesManager->isRebinnedSourceBeingTracked(src))
   {
     return true;
   }
