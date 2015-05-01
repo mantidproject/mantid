@@ -144,6 +144,7 @@ private:
   QHBoxLayout *viewLayout; ///< Layout manager for the view widget
   pqApplicationSettingsReaction *viewSettings; ///< Holder for the view settings reaction
   bool viewSwitched;
+  bool isStartup;
   ModeControlWidget::Views initialView; ///< Holds the initial view
   MantidQt::API::MdSettings mdSettings;///<Holds the MD settings which are used to persist data
   MantidQt::API::MdConstants mdConstants;/// < Holds the MD constants
@@ -195,6 +196,8 @@ private:
   void handleDragAndDropPeaksWorkspaces(QEvent* e, QString text, QStringList& wsNames);
   /// Set up the default color for the background of the view.
   void setColorForBackground();
+  /// Set the color map 
+  void setColorMap();
   /// Render the original workspace
   pqPipelineSource* renderOriginalWorkspace(const std::string originalWorkspaceName);
   /// Remove the rebinning when switching views or otherwise.
