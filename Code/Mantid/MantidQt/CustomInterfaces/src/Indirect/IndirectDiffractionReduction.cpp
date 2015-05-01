@@ -245,8 +245,8 @@ void IndirectDiffractionReduction::runOSIRISdiffonlyReduction()
   try
   {
     QString nameBase = QString::fromStdString(Mantid::Kernel::MultiFileNameParsing::suggestWorkspaceName(stlFileNames));
-    tofWsName = "'" + nameBase + "_tof'";
-    drangeWsName = "'" + nameBase + "_dRange'";
+    tofWsName = nameBase + "_tof";
+    drangeWsName = nameBase + "_dRange";
   }
   catch(std::runtime_error & re)
   {
