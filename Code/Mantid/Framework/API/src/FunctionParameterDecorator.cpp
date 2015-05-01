@@ -298,7 +298,7 @@ void FunctionParameterDecorator::declareParameter(
   UNUSED_ARG(description);
 }
 
-/// Does nothing.
+/// Forwads addTie-call to the decorated function.
 void FunctionParameterDecorator::addTie(ParameterTie *tie) {
     throwIfNoFunctionSet();
 
