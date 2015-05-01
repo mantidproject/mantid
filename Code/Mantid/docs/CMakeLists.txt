@@ -83,6 +83,21 @@ if ( SPHINX_FOUND )
                            EXCLUDE_FROM_ALL 1)
   endif (DOCS_HTML)
 
+  # LINKCHECK target
+  set ( BUILDER linkcheck )
+  set ( SPHINX_CONF_DIR ${SPHINX_BUILD_DIR}/conf/${BUILDER} )
+  configure_file ( conf.py.in ${SPHINX_CONF_DIR}/conf.py @ONLY )
+  configure_file ( runsphinx.py.in runsphinx_linkcheck.py @ONLY )
+  add_custom_target ( ${TARGET_PREFIX}-linkcheck
+                      COMMAND ${DOCS_RUNNER_EXE} -xq runsphinx_linkcheck.py
+                      DEPENDS Framework MantidPlot MantidQt ${CMAKE_CURRENT_BINARY_DIR}/runsphinx_linkcheck.py ${SPHINX_CONF_DIR}/conf.py
+                      COMMENT "Checking documentation links"
+                      )
+  # Group within VS and exclude from whole build
+  set_target_properties ( ${TARGET_PREFIX}-linkcheck PROPERTIES FOLDER "Documentation"
+                          EXCLUDE_FROM_DEFAULT_BUILD 1
+                          EXCLUDE_FROM_ALL 1)
+
   ###############################################################################
   # Tests ( It would be nice to have this is a test sub directory but the
   #        configure of the runsphinx file doesn't like being in two directories.
