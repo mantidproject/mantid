@@ -226,14 +226,14 @@ public:
   std::string getDescription() const;
 
   /** Get description of a parameter attached to this component  */
-  std::string getParDescription(const std::string &pname,
+  std::string getParamDescription(const std::string &pname,
                                bool recursive = true) const;
 
-  /** Get a parameter's tooltip (short description) */
-  std::string getParTooltip(const std::string &pname,
+  /** Get a component's parameter short description */
+  std::string getParamShortDescription(const std::string &pname,
                                bool recursive = true) const;
-  /** Get a parameter's tooltip (short description) -- no recursive search within children*/
-  std::string getTooltip() const;
+  /** Get a components's short description*/
+  std::string getShortDescription() const;
   /**Set components description. Works for parameterized components only */
   void setDescription(const std::string &descr);
   /**

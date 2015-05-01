@@ -72,7 +72,7 @@ public:
     TS_ASSERT_EQUALS(paramMap.getString(ptrDet.get(), "testString"), "hello world");
 
     param = paramMap.get(ptrDet.get(), "testString");
-    TS_ASSERT_EQUALS(param->getTooltip(),"its test hello word.");
+    TS_ASSERT_EQUALS(param->getShortDescription(),"its test hello word.");
     TS_ASSERT_EQUALS(param->getDescription(),"its test hello word.");
     TS_ASSERT_EQUALS(paramMap.getDescription("pixel","testString"),"its test hello word.");
 
@@ -158,7 +158,7 @@ public:
     TS_ASSERT_EQUALS( paramMap.getString(ptrDet.get(), "testString"), "goodbye world");
 
     param = paramMap.get(ptrDet.get(), "testString");
-    TS_ASSERT_EQUALS(param->getTooltip(),"its test goodbye world.");
+    TS_ASSERT_EQUALS(param->getShortDescription(),"its test goodbye world.");
     TS_ASSERT_EQUALS(param->getDescription(),"its test goodbye world.");
     TS_ASSERT_EQUALS(paramMap.getDescription("pixel","testString"),"its test goodbye world.");
 

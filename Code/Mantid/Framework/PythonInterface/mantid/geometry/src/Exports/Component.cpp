@@ -18,8 +18,8 @@ namespace
   BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Component_getStringParameter,Component::getStringParameter,1,2)
   BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Component_getIntParameter,Component::getIntParameter,1,2)
   BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Component_getParameterType,Component::getParameterType,1,2)
-  BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Component_getParTooltip,Component::getParTooltip,1,2)
-  BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Component_getParDescription,Component::getParDescription,1,2)
+  BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Component_getParamShortDescription,Component::getParamShortDescription,1,2)
+  BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Component_getParamDescription,Component::getParamDescription,1,2)
 
 
 }
@@ -36,11 +36,11 @@ void export_Component()
     .def("getStringParameter", &Component::getStringParameter, Component_getStringParameter())
     .def("getIntParameter", &Component::getIntParameter, Component_getIntParameter())
     //
-    .def("getParTooltip", &Component::getParTooltip, Component_getParTooltip())
-    .def("getParDescription", &Component::getParDescription, Component_getParDescription())
-    .def("getTooltip", &Component::getTooltip,"Return the tooltip of current parameterized component")
+    .def("getParamShortDescription", &Component::getParamShortDescription, Component_getParamShortDescription())
+    .def("getParamDescription", &Component::getParamDescription, Component_getParamDescription())
+    .def("getShortDescription", &Component::getShortDescription,"Return the short description of current parameterized component")
     .def("getDescription", &Component::getDescription,"Return the description of current parameterized component")
-    .def("setDescription", &Component::setDescription, "Set component's description, if the component is parameterized component")
+    .def("setDescription", &Component::setDescription, "Set component's description, works only if the component is parameterized component")
 
     // HACK -- python should return parameters regardless of type. this is until rows below do not work
     .def("getParameterType", &Component::getParameterType, Component_getParameterType())

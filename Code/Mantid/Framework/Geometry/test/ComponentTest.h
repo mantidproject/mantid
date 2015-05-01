@@ -189,9 +189,9 @@ public:
 
     TS_ASSERT_THROWS_NOTHING(pq.setDescription("This is child description. This is long child description."));
 
-    TS_ASSERT_EQUALS(parent.getTooltip(),"");
-    TS_ASSERT_EQUALS(pq.getTooltip(),"This is child description.");
-    TS_ASSERT_EQUALS(pq.getParTooltip("Child"),"This is child description.");
+    TS_ASSERT_EQUALS(parent.getShortDescription(),"");
+    TS_ASSERT_EQUALS(pq.getShortDescription(),"This is child description.");
+    TS_ASSERT_EQUALS(pq.getParamShortDescription("Child"),"This is child description.");
 
 
     TS_ASSERT_EQUALS(pq.getDescription(),"This is child description. This is long child description.");

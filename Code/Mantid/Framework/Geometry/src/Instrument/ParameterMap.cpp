@@ -149,14 +149,14 @@ const std::string ParameterMap::getDescription(const std::string &compName,
     }
     return result;
 }
-/** Get the component tooltip by name
+/** Get the component short description by name
    *  @param compName :: The name of the component
    *  @param name :: The name of the parameter
-   *  @return :: the tooltip (short description) for the first parameter 
+   *  @return :: the short description for the first parameter 
    *  found and having non-empty description,
    *  or empty string if no description found.
 */
-const std::string ParameterMap::getTooltip(const std::string &compName,
+const std::string ParameterMap::getShortDescription(const std::string &compName,
                                 const std::string &name) const{
     pmap_cit it;
     std::string result("");
@@ -165,7 +165,7 @@ const std::string ParameterMap::getTooltip(const std::string &compName,
         boost::shared_ptr<Parameter> param =
             get((const IComponent *)(*it).first, name);
         if (param){
-          result = param->getTooltip();
+          result = param->getShortDescription();
           if(!result.empty())
             return result;
         }

@@ -565,7 +565,7 @@ namespace Mantid {
     * or empty string if not.
     */
 
-    std::string Component::getParDescription(const std::string &pname,
+    std::string Component::getParamDescription(const std::string &pname,
       bool recursive) const {
         if (!m_map){ // no description for non-parameterized components
           return std::string("");
@@ -584,12 +584,12 @@ namespace Mantid {
     /** Get this parameter's description -- no recursive search within children*/
     std::string Component::getDescription() const{
       auto name = this->getName();
-      return this->getParDescription(name,false);
+      return this->getParamDescription(name,false);
 
     }
 
     /**
-    * Get a parameter's tooltip (short description)
+    * Get a parameter's short description
     * Only parameterized component can have description
     *
     * @param pname ::     The name of the parameter
@@ -598,7 +598,7 @@ namespace Mantid {
     * @returns std::string describing parameter if such description is defined
     * or empty string if not.
     */
-    std::string Component::getParTooltip(const std::string &pname,
+    std::string Component::getParamShortDescription(const std::string &pname,
       bool recursive) const {
         if (!m_map){ // no tooltips for non-parameterized components
           return std::string("");
@@ -610,15 +610,15 @@ namespace Mantid {
           param = m_map->get(this, pname);
         }
         if (param)
-          return param->getTooltip();
+          return param->getShortDescription();
         else
           return std::string("");
     }
 
     /** Get a parameter's tooltip (short description) -- no recursive search within children*/
-    std::string Component::getTooltip() const{
+    std::string Component::getShortDescription() const{
       auto name = this->getName();
-      return this->getParTooltip(name,false);
+      return this->getParamShortDescription(name,false);
     }
     /**Set components description. Works for parameterized components only 
     * @param descr ::  String which describes the component.

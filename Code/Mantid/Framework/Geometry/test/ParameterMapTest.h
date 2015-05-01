@@ -185,16 +185,16 @@ public:
     pmapA.addDouble(m_testInstrument.get(), "testDouble", 4.2,&descr);
     auto parD= pmapA.getRecursive(m_testInstrument.get(),"testDouble");
     TS_ASSERT_EQUALS(parD->getDescription(),descr);
-    TS_ASSERT_EQUALS(parD->getTooltip(),"Test description");
+    TS_ASSERT_EQUALS(parD->getShortDescription(),"Test description");
 
     parD->setDescription("Short description. LongDescription.");
     TS_ASSERT_EQUALS(parD->getDescription(),"Short description. LongDescription.");
-    TS_ASSERT_EQUALS(parD->getTooltip(),"Short description.");
+    TS_ASSERT_EQUALS(parD->getShortDescription(),"Short description.");
 
 
     descr = pmapA.getDescription("basic","testDouble");
     TS_ASSERT_EQUALS(descr,"Short description. LongDescription.");
-    descr = pmapA.getTooltip("basic","testDouble");
+    descr = pmapA.getShortDescription("basic","testDouble");
     TS_ASSERT_EQUALS(descr,"Short description.");
 
   }

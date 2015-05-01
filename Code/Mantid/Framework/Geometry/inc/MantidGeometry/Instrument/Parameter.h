@@ -96,8 +96,8 @@ public:
   {m_description.assign(source);}
   /// get description
   virtual const std::string & getDescription()const{return m_description;}
-  /// get short description (tooltip)
-  virtual std::string getTooltip()const;
+  /// get short description 
+  virtual std::string getShortDescription()const;
   /// Equality operator
   bool operator==(const Parameter &rhs) const {
     if (this->name() == rhs.name() && this->type() == rhs.type() &&
