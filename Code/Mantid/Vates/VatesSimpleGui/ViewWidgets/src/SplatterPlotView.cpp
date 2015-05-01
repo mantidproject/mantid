@@ -466,8 +466,7 @@ void SplatterPlotView::onRemovePeaksTable()
 
   if (m_peaksFilter)
   {
-    pqObjectBuilder *builder = pqApplicationCore::instance()->getObjectBuilder();
-    builder->destroy(m_peaksFilter);
+    this->destroyFilter(QString("MDPeaksFilter"));
   }
 }
 

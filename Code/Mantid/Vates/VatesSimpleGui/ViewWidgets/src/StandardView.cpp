@@ -121,7 +121,7 @@ void StandardView::setupViewButtons()
 void StandardView::destroyView()
 {
   pqObjectBuilder *builder = pqApplicationCore::instance()->getObjectBuilder();
-  this->destroyFilter(builder, QString("Slice"));
+  this->destroyFilter(QString("Slice"));
   builder->destroy(this->view);
 }
 

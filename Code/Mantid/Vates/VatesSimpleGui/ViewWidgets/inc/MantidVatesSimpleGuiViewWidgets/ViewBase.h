@@ -75,7 +75,7 @@ public:
   virtual pqRenderView *createRenderView(QWidget *container,
                                          QString viewName=QString(""));
   /// Remove all filters of a given name: i.e. Slice.
-  virtual void destroyFilter(pqObjectBuilder *builder, const QString &name);
+  virtual void destroyFilter(const QString &name);
   /// Destroy sources and view relevant to mode switching.
   virtual void destroyView() = 0;
   /// Retrieve the current time step.

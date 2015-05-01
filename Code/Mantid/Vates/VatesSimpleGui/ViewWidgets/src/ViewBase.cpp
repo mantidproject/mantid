@@ -91,13 +91,10 @@ pqRenderView* ViewBase::createRenderView(QWidget* widget, QString viewName)
 
 /**
  * This function removes all filters of a given name: i.e. Slice.
- * @param builder the ParaView object builder
  * @param name the class name of the filters to remove
  */
-void ViewBase::destroyFilter(pqObjectBuilder *builder, const QString &name)
+void ViewBase::destroyFilter(const QString &name)
 {
-  (void) builder;
-
   pqServer *server = pqActiveObjects::instance().activeServer();
   pqServerManagerModel *smModel = pqApplicationCore::instance()->getServerManagerModel();
   QList<pqPipelineSource *> sources;
