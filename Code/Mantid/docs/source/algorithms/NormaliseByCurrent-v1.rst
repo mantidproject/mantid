@@ -11,7 +11,7 @@ Description
 
 Normalises a workspace according to the good proton charge figure taken
 from the Input Workspace log data, which is stored in the workspace's
-`Sample <http://www.mantidproject.org/Sample>`_ object). Every data point (and its error) is divided
+sample object). Every data point (and its error) is divided
 by that number.
 
 ISIS Calculation Details
