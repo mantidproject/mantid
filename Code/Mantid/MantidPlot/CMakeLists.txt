@@ -888,7 +888,7 @@ target_link_libraries ( MantidPlot
                         ${QWT_LIBRARIES} ${QWTPLOT3D_LIBRARIES}
                         ${QSCINTILLA_LIBRARIES}
                         ${PYTHON_LIBRARIES}
-                        ${ZLIB_LIBRARIES} -ltsan
+                        ${ZLIB_LIBRARIES} -lasan
 )
 # Plugin dependencies
 add_dependencies( MantidPlot mantidqtpython )
