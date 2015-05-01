@@ -170,10 +170,21 @@ void TomoReconstruction::doSetupSectionRun() {
   sizes[1] = 100;
   m_ui.splitter_run_jobs->setSizes(sizes);
 
-  setupComputeResource();
-  setupRunTool();
-
   m_ui.label_image_name->setText("none");
+
+  m_ui.pushButton_reconstruct->setEnabled(false);
+  m_ui.pushButton_run_tool_setup->setEnabled(false);
+  m_ui.pushButton_run_job_cancel->setEnabled(false);
+  m_ui.pushButton_run_job_visualize->setEnabled(false);
+
+  try {
+    setupComputeResource();
+    setupRunTool();
+  } catch (std::runtime_error &e) {
+    g_log.error() << "Failed to initizalie remote compute resource(s). This "
+                     "custom interface will not work. Error description: "
+                  << e.what() << std::endl;
+  }
 
   enableLoggedActions(m_loggedIn);
 
@@ -427,17 +438,17 @@ void TomoReconstruction::setupComputeResource() {
     const Mantid::Kernel::FacilityInfo &fac =
         Mantid::Kernel::ConfigService::Instance().getFacility();
     if (fac.name() != m_facility) {
-      userError("Facility not supported",
-                "This interface is designed "
-                "to be used at " +
-                    m_facility +
-                    ". You will probably not be "
-                    "able to use it in a useful way because your facility "
-                    "is " +
-                    fac.name() +
-                    ". If you have set that facility "
-                    "facility by mistake in your settings, please update it.");
-      return;
+      g_log.error()
+          << "Facility not supported. This interface is designed "
+             "to be used at " +
+                 m_facility +
+                 ". You will probably not be able to use it in a useful way "
+                 "because your facility is " +
+                 fac.name() +
+                 ". If you have set that facility by mistake in your settings, "
+                 "please update it." << std::endl;
+      throw std::runtime_error(
+          "Failed to initalize because the facility is not " + fac.name());
     }
 
     if (m_computeRes.size() < 1) {
