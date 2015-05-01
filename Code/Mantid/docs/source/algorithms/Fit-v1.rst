@@ -32,14 +32,12 @@ Overview
 This is a generic algorithm for fitting data in a Workspace with a
 function. The workspace must have the type supported by the algorithm.
 Currently supported types are: :ref:`MatrixWorkspace <MatrixWorkspace>` for
-fitting with a `IFunction1D <http://www.mantidproject.org/IFunction1D>`_ and
-`IMDWorkspace <http://www.mantidproject.org/IMDWorkspace>`_ for fitting with
-`IFunctionMD <http://www.mantidproject.org/IFunctionMD>`_. After Function and InputWorkspace
-properties are set the algorithm may decide that it needs more
-information from the caller to locate the fitting data. For example, if
-a spectrum in a MatrixWorkspace is to be fit with a 1D function it will
-need to know at least the index of that spectrum. To request this
-information Fit dynamically creates relevant properties which the caller
+fitting with a IFunction1D and :ref:`MDWorkspace <MDWorkspace>` for fitting with
+IFunctionMD. After Function and InputWorkspace properties are set the algorithm
+may decide that it needs more information from the caller to locate the fitting
+data. For example, if a spectrum in a MatrixWorkspace is to be fit with a 1D
+function it will need to know at least the index of that spectrum. To request
+this information Fit dynamically creates relevant properties which the caller
 can set. Note that the dynamic properties depend both on the workspace
 and the function. For example, the data in a MatrixWorkspace can be fit
 with a 2D function. In this case all spectra will be used in the fit and
