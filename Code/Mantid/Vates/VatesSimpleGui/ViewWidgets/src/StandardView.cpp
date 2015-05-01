@@ -337,7 +337,7 @@ void StandardView::activeSourceChangeListener(pqPipelineSource* source)
   else if (workspaceType.find("MDEW Source") != std::string::npos)
   {
     this->allowRebinningOptions(true);
-    this->allowUnbinOption(true);
+    this->allowUnbinOption(false);
   }
   else
   {
