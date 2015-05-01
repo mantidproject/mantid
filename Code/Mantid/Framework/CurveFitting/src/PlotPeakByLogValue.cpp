@@ -29,9 +29,8 @@
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
 
-namespace
-{
-  Mantid::Kernel::Logger g_log("PlotPeakByLogValue");
+namespace {
+Mantid::Kernel::Logger g_log("PlotPeakByLogValue");
 }
 
 namespace Mantid {
@@ -266,9 +265,11 @@ void PlotPeakByLogValue::exec() {
         fit->setProperty("WorkspaceIndex", j);
         fit->setPropertyValue("StartX", getPropertyValue("StartX"));
         fit->setPropertyValue("EndX", getPropertyValue("EndX"));
-        fit->setPropertyValue("Minimizer", getMinimizerString(wsNames[i].name, spectrum_index));
+        fit->setPropertyValue(
+            "Minimizer", getMinimizerString(wsNames[i].name, spectrum_index));
         fit->setPropertyValue("CostFunction", getPropertyValue("CostFunction"));
-        fit->setPropertyValue("MaxIterations", getPropertyValue("MaxIterations"));
+        fit->setPropertyValue("MaxIterations",
+                              getPropertyValue("MaxIterations"));
         fit->setProperty("CalcErrors", true);
         fit->setProperty("CreateOutput", createFitOutput);
         fit->setProperty("OutputCompositeMembers", outputCompositeMembers);
@@ -348,8 +349,8 @@ void PlotPeakByLogValue::exec() {
     groupAlg->execute();
   }
 
-  for(auto it = m_minimizerWorkspaces.begin(); it != m_minimizerWorkspaces.end(); ++it)
-  {
+  for (auto it = m_minimizerWorkspaces.begin();
+       it != m_minimizerWorkspaces.end(); ++it) {
     const std::string paramName = (*it).first;
     API::IAlgorithm_sptr groupAlg =
         AlgorithmManager::Instance().createUnmanaged("GroupWorkspaces");
@@ -579,7 +580,9 @@ PlotPeakByLogValue::makeNames() const {
  * @param specIndex Index of spectrum being fitted
  * @return Formatted minimizer string
  */
-std::string PlotPeakByLogValue::getMinimizerString(const std::string & wsName, const std::string & specIndex) {
+std::string
+PlotPeakByLogValue::getMinimizerString(const std::string &wsName,
+                                       const std::string &specIndex) {
   std::string format = getPropertyValue("Minimizer");
   std::string wsBaseName = wsName + "_" + specIndex;
   boost::replace_all(format, "$wsname", wsName);
@@ -588,11 +591,10 @@ std::string PlotPeakByLogValue::getMinimizerString(const std::string & wsName, c
 
   auto minimizer = FuncMinimizerFactory::Instance().createMinimizer(format);
   auto minimizerProps = minimizer->getProperties();
-  for(auto it = minimizerProps.begin(); it != minimizerProps.end(); ++it)
-  {
-    Mantid::API::WorkspaceProperty<> *wsProp = dynamic_cast<Mantid::API::WorkspaceProperty<> *>(*it);
-    if(wsProp)
-    {
+  for (auto it = minimizerProps.begin(); it != minimizerProps.end(); ++it) {
+    Mantid::API::WorkspaceProperty<> *wsProp =
+        dynamic_cast<Mantid::API::WorkspaceProperty<> *>(*it);
+    if (wsProp) {
       std::string wsPropName = (*it)->name();
       std::string wsPropValue = (*it)->value();
       m_minimizerWorkspaces[wsPropName].push_back(wsPropValue);
