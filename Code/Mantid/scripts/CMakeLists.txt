@@ -12,6 +12,7 @@ set ( TEST_PY_FILES
       test/SansIsisGuiSettings.py
       test/SettingsTest.py      
       test/ReductionSettingsTest.py
+      test/SANSUtilitytests.py
       )
 
 # python unit tests

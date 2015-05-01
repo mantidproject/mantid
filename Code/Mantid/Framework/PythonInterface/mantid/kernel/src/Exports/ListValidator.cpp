@@ -39,7 +39,9 @@ namespace
 
 }
 
+// clang-format off
 void export_ListValidator()
+// clang-format on
 {
   EXPORT_LISTVALIDATOR(std::string, String);
   EXPORT_LISTVALIDATOR(long, Int);

@@ -127,18 +127,18 @@ bool PoldiPeak::greaterThan(const PoldiPeak_sptr &first,
                             const PoldiPeak_sptr &second,
                             UncertainValue (PoldiPeak::*function)() const) {
   return static_cast<double>(
-             boost::bind<UncertainValue>(function, first.get())()) >
+             boost::bind(function, first.get())()) >
          static_cast<double>(
-             boost::bind<UncertainValue>(function, second.get())());
+             boost::bind(function, second.get())());
 }
 
 bool PoldiPeak::lessThan(const PoldiPeak_sptr &first,
                          const PoldiPeak_sptr &second,
                          UncertainValue (PoldiPeak::*function)() const) {
   return static_cast<double>(
-             boost::bind<UncertainValue>(function, first.get())()) <
+             boost::bind(function, first.get())()) <
          static_cast<double>(
-             boost::bind<UncertainValue>(function, second.get())());
+             boost::bind(function, second.get())());
 }
 
 PoldiPeak::PoldiPeak(UncertainValue d, UncertainValue intensity,

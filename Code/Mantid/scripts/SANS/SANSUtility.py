@@ -13,6 +13,8 @@ import types
 
 sanslog = Logger("SANS")
 
+ADDED_EVENT_TAG = '_added_event_data'
+
 def deprecated(obj):
     """
     Decorator to apply to functions or classes that we think are not being (or
@@ -470,6 +472,62 @@ def mask_detectors_with_masking_ws(ws_name, masking_ws_name):
             masked_det_ids.append(masking_ws.getDetector(ws_index).getID())
 
     MaskDetectors(Workspace=ws, DetectorList=masked_det_ids)
+
+def bundle_added_event_data_as_group(out_file_name, out_file_monitors_name):
+    """
+    We load an added event data file and its associated monitor file. Combine
+    the data in a group workspace and delete the original files.
+    @param out_file_name :: the file name of the event data file
+    @param out_file_monitors_name :: the file name of the monitors file
+    @return the name fo the new group workspace file
+    """
+    # Extract the file name and the extension
+    file_name, file_extension = os.path.splitext(out_file_name)
+
+    event_data_temp = file_name + ADDED_EVENT_TAG
+    Load(Filename = out_file_name, OutputWorkspace = event_data_temp)
+    event_data_ws = mtd[event_data_temp]
+
+    monitor_temp = file_name + '_monitors' + ADDED_EVENT_TAG
+    Load(Filename = out_file_monitors_name, OutputWorkspace = monitor_temp)
+
+    monitor_ws = mtd[monitor_temp]
+
+    out_group_file_name = file_name + file_extension
+    out_group_ws_name = file_name
+
+    # Delete the intermediate files
+    full_data_path_name = get_full_path_for_added_event_data(out_file_name)
+    full_monitor_path_name = get_full_path_for_added_event_data(out_file_monitors_name)
+
+    if os.path.exists(full_data_path_name):
+        os.remove(full_data_path_name)
+    if os.path.exists(full_monitor_path_name):
+        os.remove(full_monitor_path_name)
+
+    # Create a grouped workspace with the data and the monitor child workspaces
+    GroupWorkspaces(InputWorkspaces = [event_data_ws, monitor_ws], OutputWorkspace = out_group_ws_name)
+    group_ws = mtd[out_group_ws_name]
+
+    # Save the group
+    SaveNexusProcessed(InputWorkspace = group_ws, Filename = out_group_file_name, Append=False)
+    # Delete the files and the temporary workspaces
+    DeleteWorkspace(event_data_ws)
+    DeleteWorkspace(monitor_ws)
+
+    return out_group_file_name
+
+def get_full_path_for_added_event_data(file_name):
+    path,base = os.path.split(file_name)
+    if path == '' or base not in os.listdir(path):
+        path = config['defaultsave.directory'] + path
+        # If the path is still an empty string check in the current working directory
+        if path == '':
+            path = os.getcwd()
+        assert base in os.listdir(path)
+    full_path_name = os.path.join(path, base)
+
+    return full_path_name
 
 ###############################################################################
 ######################### Start of Deprecated Code ############################

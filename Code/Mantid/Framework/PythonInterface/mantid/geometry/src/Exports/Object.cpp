@@ -7,7 +7,9 @@ using Mantid::Geometry::Object;
 using Mantid::Geometry::BoundingBox;
 using namespace boost::python;
 
+// clang-format off
 void export_Object()
+// clang-format on
 {
   register_ptr_to_python<boost::shared_ptr<Object>>();
 

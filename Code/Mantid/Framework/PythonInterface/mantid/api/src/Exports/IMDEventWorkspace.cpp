@@ -15,7 +15,9 @@ namespace
   static const unsigned int NUM_EVENT_TYPES = 2;
 }
 
+// clang-format off
 void export_IMDEventWorkspace()
+// clang-format on
 {
   // MDEventWorkspace class
   class_< IMDEventWorkspace, bases<IMDWorkspace, MultipleExperimentInfos>,

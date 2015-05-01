@@ -9,7 +9,9 @@
 using namespace Mantid::API;
 using namespace boost::python;
 
+// clang-format off
 void export_algorithm_proxy()
+// clang-format on
 {
 
   register_ptr_to_python<boost::shared_ptr<AlgorithmProxy>>();

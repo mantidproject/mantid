@@ -4,7 +4,9 @@
 namespace Mantid {
 namespace MDAlgorithms {
 // register the class, whith conversion factory under ModQ name
+// clang-format off
 DECLARE_MD_TRANSFID(MDTransfModQ, |Q|)
+// clang-format on
 
 /**method calculates the units, the transformation expects the input ws to be
 in. If the input ws is in different units,

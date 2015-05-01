@@ -27,7 +27,9 @@ namespace
 
 }
 
+// clang-format off
 void export_ArrayBoundedValidator()
+// clang-format on
 {
   EXPORT_ARRAYBOUNDEDVALIDATOR(double, Float);
   EXPORT_ARRAYBOUNDEDVALIDATOR(long, Int);

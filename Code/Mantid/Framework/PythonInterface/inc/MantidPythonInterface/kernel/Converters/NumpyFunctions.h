@@ -28,13 +28,19 @@
 
 #include <boost/python/list.hpp>
 #include "MantidKernel/WarningSuppressions.h"
-GCC_DIAG_OFF(cast - qual)
+
+// clang-format off
+GCC_DIAG_OFF(cast-qual)
+// clang-format on
+
 // See
 // http://docs.scipy.org/doc/numpy/reference/c-api.array.html#PY_ARRAY_UNIQUE_SYMBOL
 #define PY_ARRAY_UNIQUE_SYMBOL KERNEL_ARRAY_API
 #define NO_IMPORT_ARRAY
 #include <numpy/arrayobject.h>
-GCC_DIAG_ON(cast - qual)
+// clang-format off
+GCC_DIAG_ON(cast-qual)
+// clang-format on
 
 /**functions containing numpy macros. We put them in a separate header file to
   *suppress the warning

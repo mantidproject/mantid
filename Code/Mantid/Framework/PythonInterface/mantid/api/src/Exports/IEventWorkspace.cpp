@@ -12,7 +12,9 @@ using namespace boost::python;
 /**
  * Python exports of the Mantid::API::IEventWorkspace class.
  */
+// clang-format off
 void export_IEventWorkspace()
+// clang-format on
 {
   class_<IEventWorkspace, bases<Mantid::API::MatrixWorkspace>, boost::noncopyable>("IEventWorkspace", no_init)
     .def("getNumberEvents", &IEventWorkspace::getNumberEvents, args("self"),

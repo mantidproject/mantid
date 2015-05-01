@@ -24,7 +24,9 @@ namespace //<unnamed>
   }
 }
 
+// clang-format off
 void export_Goniometer()
+// clang-format on
 {
 
   // return_value_policy for read-only numpy array

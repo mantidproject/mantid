@@ -1,3 +1,4 @@
+// clang-format off
 #ifndef @PLUSMINUSTEST_CLASS@_H_
 #define @PLUSMINUSTEST_CLASS@_H_
 #include <cxxtest/TestSuite.h>

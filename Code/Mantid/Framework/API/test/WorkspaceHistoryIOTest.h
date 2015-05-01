@@ -152,11 +152,15 @@ public:
       testHistory.addHistory(boost::make_shared<AlgorithmHistory>(algHist));
     }
 
+    // clang-format off
     auto savehandle = boost::make_shared< ::NeXus::File >("WorkspaceHistoryTest_test_SaveNexus.nxs",NXACC_CREATE5);
+    // clang-format on
     TS_ASSERT_THROWS_NOTHING(testHistory.saveNexus(savehandle.get()));
     savehandle->close();
 
+    // clang-format off
     auto loadhandle = boost::make_shared< ::NeXus::File >("WorkspaceHistoryTest_test_SaveNexus.nxs");
+    // clang-format on
     std::string rootstring = "/process/";
     for (int i = 1; i < 5; i++)
     {
@@ -181,11 +185,15 @@ public:
     algHist.addChildHistory(boost::make_shared<AlgorithmHistory>(childHist));
     testHistory.addHistory(boost::make_shared<AlgorithmHistory>(algHist));
 
+    // clang-format off
     auto savehandle = boost::make_shared< ::NeXus::File >("WorkspaceHistoryTest_test_SaveNexus.nxs",NXACC_CREATE5);
+    // clang-format on
     TS_ASSERT_THROWS_NOTHING(testHistory.saveNexus(savehandle.get()));
     savehandle->close();
 
+    // clang-format off
     auto loadhandle = boost::make_shared< ::NeXus::File >("WorkspaceHistoryTest_test_SaveNexus.nxs");
+    // clang-format on
     std::string rootstring = "/process/";
     TS_ASSERT_THROWS_NOTHING(loadhandle->openPath(rootstring + "MantidAlgorithm_1/"));
     TS_ASSERT_THROWS_NOTHING(loadhandle->openPath(rootstring + "MantidAlgorithm_1/author"));
@@ -205,11 +213,15 @@ public:
   {
     WorkspaceHistory testHistory;
 
+    // clang-format off
     auto savehandle = boost::make_shared< ::NeXus::File >("WorkspaceHistoryTest_test_SaveNexus.nxs",NXACC_CREATE5);
+    // clang-format on
     TS_ASSERT_THROWS_NOTHING(testHistory.saveNexus(savehandle.get()));
     savehandle->close();
 
+    // clang-format off
     auto loadhandle = boost::make_shared< ::NeXus::File >("WorkspaceHistoryTest_test_SaveNexus.nxs");
+    // clang-format on
     std::string rootstring = "/process/";
     TS_ASSERT_THROWS_NOTHING(loadhandle->openPath(rootstring));
     TS_ASSERT_THROWS_NOTHING(loadhandle->openPath(rootstring + "MantidEnvironment"));
@@ -222,7 +234,9 @@ public:
   void test_LoadNexus()
   {
     std::string filename = FileFinder::Instance().getFullPath("GEM38370_Focussed_Legacy.nxs");
+    // clang-format off
     auto loadhandle = boost::make_shared< ::NeXus::File >(filename);
+    // clang-format on
     loadhandle->openPath("/mantid_workspace_1");
 
     WorkspaceHistory emptyHistory;
@@ -243,7 +257,9 @@ public:
   void test_LoadNexus_NestedHistory()
   {
     std::string filename = FileFinder::Instance().getFullPath("HistoryTest_CreateTransmissionAuto.nxs");
+    // clang-format off
     auto loadhandle = boost::make_shared< ::NeXus::File >(filename);
+    // clang-format on
     loadhandle->openPath("/mantid_workspace_1");
 
     WorkspaceHistory wsHistory;
