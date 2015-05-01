@@ -1273,18 +1273,25 @@ std::string TomoReconstruction::getPassword() {
  */
 void TomoReconstruction::drawImage(const MatrixWorkspace_sptr &ws) {
   // From logs we expect a name "run_title", width "Axis1" and height "Axis2"
-  size_t width, height;
+  const size_t MAXDIM = 2048 * 16;
+  size_t width;
   try {
     width = boost::lexical_cast<size_t>(ws->run().getLogData("Axis1")->value());
+    // TODO: add a settings option for this (like max mem allocation for images)?
+    if (width >= MAXDIM)
+      width = MAXDIM;
   } catch (std::exception &e) {
     userError("Cannot load image", "There was a problem while trying to "
                                    "find the width of the image: " +
                                        std::string(e.what()));
     return;
   }
+  size_t height;
   try {
     height =
         boost::lexical_cast<size_t>(ws->run().getLogData("Axis2")->value());
+    if (height >= MAXDIM)
+      height = MAXDIM;
   } catch (std::exception &e) {
     userError("Cannot load image", "There was a problem while trying to "
                                    "find the height of the image: " +
