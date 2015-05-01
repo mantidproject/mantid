@@ -751,7 +751,8 @@ void ConfigDialog::initMdPlottingGeneralTab()
   mdPlottingTabWidget->addTab(mdPlottingGeneralPage, QString());
 
   // Color Map
-  mdPlottingGeneralFrame->setTitle("Use common Color Map for Slice Viewer and VSI");
+  mdPlottingGeneralFrame->setTitle("Use same default color map for Slice Viewer and VSI");
+  mdPlottingGeneralFrame->setToolTip("The specifed color map will be available for the Slice Viewer and the VSI when an instance is of either is started.");
   mdPlottingGeneralFrame->setCheckable(true);
   mdPlottingGeneralFrame->setChecked(m_mdSettings.getUsageGeneralMdColorMap());
 
@@ -799,12 +800,11 @@ void ConfigDialog::initMdPlottingVsiTab()
   QGridLayout *grid = new QGridLayout(frame);
   mdPlottingTabWidget->addTab(vsiPage, QString());
 
-  // Usage of the last setting
-  vsiLastSession = new QCheckBox();
-  lblVsiLastSession = new QLabel();
-  grid->addWidget(lblVsiLastSession , 0, 0);
-  grid->addWidget(vsiLastSession , 0, 1);
-  vsiLastSession->setChecked(m_mdSettings.getUsageLastSession());
+  // Initial View when loading into the VSI
+  vsiInitialView = new QComboBox();
+  lblVsiInitialView = new QLabel();
+  grid->addWidget(lblVsiInitialView, 0, 0);
+  grid->addWidget(vsiInitialView, 0, 1);
 
   // Color Map
   vsiDefaultColorMap = new QComboBox();
@@ -818,14 +818,17 @@ void ConfigDialog::initMdPlottingVsiTab()
   grid->addWidget(lblVsiDefaultBackground, 2, 0);
   grid->addWidget(vsiDefaultBackground, 2, 1);
 
+  // Usage of the last setting
+  vsiLastSession = new QCheckBox();
+  lblVsiLastSession = new QLabel();
+  grid->addWidget(lblVsiLastSession , 3, 0);
+  grid->addWidget(vsiLastSession , 3, 1);
+  vsiLastSession->setChecked(m_mdSettings.getUsageLastSession());
+
   const QColor backgroundColor = m_mdSettings.getUserSettingBackgroundColor();
   vsiDefaultBackground->setColor(backgroundColor);
 
-  // Initial View when loading into the VSI
-  vsiInitialView = new QComboBox();
-  lblVsiInitialView = new QLabel();
-  grid->addWidget(lblVsiInitialView, 3, 0);
-  grid->addWidget(vsiInitialView, 3, 1);
+
 
   grid->setRowStretch(4,1);
 
@@ -2188,13 +2191,36 @@ void ConfigDialog::languageChange()
 
   // MDPlotting change
   mdPlottingTabWidget->setTabText(mdPlottingTabWidget->indexOf(vsiPage), tr("VSI"));
-  lblVsiDefaultColorMap->setText(tr("Default Color Map"));
-  lblVsiDefaultBackground->setText(tr("Background Color"));
-  lblVsiLastSession->setText(tr("Use the settings of the last VSI session"));
-  lblVsiInitialView->setText(tr("Initial View"));
-
   mdPlottingTabWidget->setTabText(mdPlottingTabWidget->indexOf(mdPlottingGeneralPage), tr("General"));
-  lblGeneralDefaultColorMap->setText(tr("General Color Map"));
+
+  // Vsi background color
+  QString vsiDefaultBackgroundToolTipText = "Sets the default background color when a new instance of the VSI is opened.";
+  vsiDefaultBackground->setToolTip(vsiDefaultBackgroundToolTipText);
+  lblVsiDefaultBackground->setToolTip(vsiDefaultBackgroundToolTipText);
+  lblVsiDefaultBackground->setText(tr("Background color"));
+
+  // Vsi initial view
+  QString vsiInitialViewToolTipText = "Sets the initial view when loading a new source into the VSI.";
+  lblVsiInitialView->setText(tr("Initial view"));
+  vsiInitialView->setToolTip(vsiInitialViewToolTipText);
+  lblVsiInitialView->setToolTip(vsiInitialViewToolTipText);
+
+  // Vsi last session
+  QString vsiLastSessionToolTipText = "Use the values of the last session for the background color and the color map when a new instance of the VSI is opened.";
+  lblVsiLastSession->setText(tr("Use the settings of the last VSI session"));
+  lblVsiLastSession->setToolTip(vsiInitialViewToolTipText);
+
+  // Vsi default color map
+  QString vsiDefaultColorMapToolTipText = "Sets the default color map when a new instance of the VSI is opened.";
+  vsiDefaultColorMap->setToolTip(vsiDefaultColorMapToolTipText);
+  lblVsiDefaultColorMap->setToolTip(vsiDefaultColorMapToolTipText);
+  lblVsiDefaultColorMap->setText(tr("Default color map"));
+
+  // General plotting tab
+  QString vsiGeneralDefaultColorMapToolTipText = "Sets the default color map for both the Slice Viewer and the VSI.";
+  mdPlottingGeneralColorMap->setToolTip(vsiGeneralDefaultColorMapToolTipText);
+  lblGeneralDefaultColorMap->setToolTip(vsiGeneralDefaultColorMapToolTipText);
+  lblGeneralDefaultColorMap->setText(tr("Default color map"));
 }
 
 void ConfigDialog::accept()
