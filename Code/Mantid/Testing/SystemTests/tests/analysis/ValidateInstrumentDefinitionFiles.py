@@ -34,7 +34,7 @@ class ValidateInstrumentDefinitionFiles(stresstesting.MantidStressTest):
 
     def runTest(self):
         """Main entry point for the test suite"""
-
+        from minixsv import pyxsval
         # need to extend minixsv library to add method for that forces it to
         # validate against local schema when the xml file itself has
         # reference to schema online. The preference is to systemtest against
