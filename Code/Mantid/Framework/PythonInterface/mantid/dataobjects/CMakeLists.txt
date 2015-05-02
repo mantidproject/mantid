@@ -1,0 +1,69 @@
+#############################################################################################
+# _dataobjects Python module
+#############################################################################################
+
+set ( MODULE_TEMPLATE src/dataobjects.cpp.in )
+
+# Files containing export definitions, these are automatically processed
+# -- Do NOT sort this list. The order defines the order in which the export
+#    definitions occur and some depend on their base classes being exported first --
+set ( EXPORT_FILES
+  src/Exports/Workspace2D.cpp
+)
+
+# Files containing additional helper code that are not related to exporting class/functions
+set ( SRC_FILES
+)
+
+set ( INC_FILES
+)
+
+set ( PY_FILES
+  __init__.py
+)
+
+#############################################################################################
+# Generate a source file from the export definitions
+#############################################################################################
+create_module ( ${MODULE_TEMPLATE} ${CMAKE_CURRENT_BINARY_DIR}/dataobjects.cpp EXPORT_FILES
+                SRC_FILES )
+
+#############################################################################################
+# Copy over the pure Python files for the module
+#############################################################################################
+# Set the destination directory
+set ( OUTPUT_DIR ${PYTHON_PKG_ROOT}/dataobjects )
+
+if(CMAKE_GENERATOR STREQUAL Xcode)
+  # Set the output directory for the libraries.
+  set ( CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PYTHON_PKG_ROOT}/dataobjects )
+endif()
+
+copy_files_to_dir ( "${PY_FILES}" ${CMAKE_CURRENT_SOURCE_DIR} ${OUTPUT_DIR}
+                     PYTHON_INSTALL_FILES )
+
+#############################################################################################
+# Create the target for this directory
+#############################################################################################
+set ( FRAMEWORK_DIR ../../.. )
+include_directories ( ${FRAMEWORK_DIR}/DataObjects/inc )
+
+add_library ( PythonDataObjectsModule ${SRC_FILES} ${INC_FILES} ${PYTHON_INSTALL_FILES} )
+set_python_properties( PythonDataObjectsModule _dataobjects )
+set_target_output_directory ( PythonDataObjectsModule ${OUTPUT_DIR} .pyd )
+
+# Add the required dependencies
+target_link_libraries ( PythonDataObjectsModule PythonAPIModule PythonGeometryModule 
+                        PythonKernelModule DataObjects )
+
+if (OSX_VERSION VERSION_GREATER 10.8)
+  set_target_properties( PythonDataObjectsModule PROPERTIES 
+                         INSTALL_RPATH "@loader_path/../../../MacOS;@loader_path/../kernel/;@loader_path/../geometry/;@loader_path/../api/")
+endif ()
+###########################################################################
+# Installation settings
+###########################################################################
+install ( TARGETS PythonDataObjectsModule ${SYSTEM_PACKAGE_TARGET} DESTINATION ${BIN_DIR}/mantid/dataobjects )
+
+# Pure Python files
+install ( FILES ${PY_FILES} DESTINATION ${BIN_DIR}/mantid/dataobjects )

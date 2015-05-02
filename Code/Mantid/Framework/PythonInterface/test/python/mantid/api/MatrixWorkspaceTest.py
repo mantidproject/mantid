@@ -97,7 +97,7 @@ class MatrixWorkspaceTest(unittest.TestCase):
         # Is Workspace in the hierarchy of the value
         self.assertTrue(isinstance(propValue, Workspace))
         # Have got a MatrixWorkspace back and not just the generic interface
-        self.assertEquals(type(propValue), MatrixWorkspace)
+        self.assertTrue(isinstance(propValue, MatrixWorkspace))
         mem = propValue.getMemorySize()
         self.assertTrue( (mem > 0) )
 
@@ -334,4 +334,3 @@ class MatrixWorkspaceTest(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
-
