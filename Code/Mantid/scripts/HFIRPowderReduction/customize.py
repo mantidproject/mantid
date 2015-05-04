@@ -29,7 +29,7 @@ def main(argv):
     # replace and add import
     wbuf = ""
     wbuf += "#pylint: disable=invalid-name,relative-import,too-many-lines,too-many-instance-attributes,"
-    wbuf += "too-many-statements,line-too-long"
+    wbuf += "too-many-statements,line-too-long,"
     wbuf += "too-many-locals,attribute-defined-outside-init\n"
     importclass = True
     for line in lines:
