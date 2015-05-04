@@ -205,7 +205,8 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
                     efixed = 0.0
                 elif unit_id == 'DeltaE':
                     emode = 'Indirect'
-                    efixed = instrument.getNumberParameter('efixed-val')[0]
+                    from IndirectCommon import getEfixed
+                    efixed = getEfixed(mtd[self._sample_ws_name])
                 else:
                     raise ValueError('Unit %s in sample workspace is not supported' % unit_id)
 

@@ -1,27 +1,22 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <parameter-file instrument = "IN10" valid-from = "2010-07-15T00:00:00">
 
-<component-link name = "IN10">
+  <component-link name = "IN10">
 
-<parameter name="analysis-type" type="string">
-  <value val="spectroscopy" />
-</parameter>
+    <parameter name="analysis-type" type="string">
+      <value val="spectroscopy" />
+    </parameter>
 
-<parameter name="efixed-val">
-	<value val="2.082" />
-</parameter>
+    <parameter name="analyser" type="string">
+      <value val="silicon" />
+    </parameter>
 
+    <parameter name="reflection" type="string">
+      <value val="111" />
+    </parameter>
 
+  </component-link>
 
-<parameter name="analyser" type="string">
-  <value val="silicon" />
-</parameter>
-
-<parameter name="reflection" type="string">
-  <value val="111" />
-</parameter>
-
-</component-link>
   <component-link name="silicon">
     <parameter name="Efixed"> <value val="2.082" /> </parameter>
     <parameter name="resolution"> <value val="0.001" /> </parameter>

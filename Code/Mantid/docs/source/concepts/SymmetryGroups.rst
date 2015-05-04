@@ -176,7 +176,7 @@ It's also possible to query the order of a symmetry operation. The next example 
     print "Order of the symmetry operation:", k
 
     x = [0.3, 0.4, 0.5]
-    print "Original point:",x
+    print "Original point: ["+(','.join(" %.1f"%c for c in x)).strip()+"]"
     for i in range(k):
         x = symOp.transformCoordinates(x)
         print "After", i + 1, "application(s):", x

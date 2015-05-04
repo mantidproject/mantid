@@ -276,10 +276,10 @@ void
           interpretAs<float>(Buffer, current_pix + column_size),
           interpretAs<float>(Buffer, current_pix + column_size_2),
           interpretAs<float>(Buffer, current_pix + column_size_3)};
-      float error = interpretAs<float>(Buffer, current_pix + column_size_8);
+      const float errorSQ = interpretAs<float>(Buffer, current_pix + column_size_8);
       ws->addEvent(MDEvent<4>(
           interpretAs<float>(Buffer, current_pix + column_size_7), // Signal
-          error * error,                                           // Error sq
+          errorSQ,                                           // Error sq
           static_cast<uint16_t>(interpretAs<float>(
               Buffer, current_pix + column_size_6)), // run Index
           static_cast<int32_t>(interpretAs<float>(
