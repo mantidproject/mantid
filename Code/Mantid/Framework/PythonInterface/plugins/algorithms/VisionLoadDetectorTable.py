@@ -10,7 +10,7 @@ class VisionLoadDetectorTable(PythonAlgorithm):
         return "Utility\\Development;PythonAlgorithms"
 
     def summary(self):
-        return "*** Warning - This is under development ***\nAlgorithm to load detector parameters for VISION."
+        return "Warning - This is under development - Algorithm to load detector parameters for VISION."
 
     def PyInit(self):
         self.declareProperty(WorkspaceProperty("OutputWorkspace", "", Direction.Output),
