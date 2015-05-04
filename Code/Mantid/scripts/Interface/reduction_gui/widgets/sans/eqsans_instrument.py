@@ -235,6 +235,7 @@ class SANSInstrumentWidget(BaseWidget):
                                                             | QtGui.QFileDialog.DontResolveSymlinks)
         if output_dir:
             self._summary.output_dir_edit.setText(output_dir)
+            self._settings.emit_key_value("OUTPUT_DIR", output_dir)
 
     def _tof_clicked(self, is_checked):
         self._summary.low_tof_edit.setEnabled(not is_checked)
@@ -458,7 +459,7 @@ class SANSInstrumentWidget(BaseWidget):
         # Config Mask
         m.use_config_mask = self._summary.config_mask_chk.isChecked()
 
-       # Mask detector IDs
+        # Mask detector IDs
         m.use_mask_file = self._summary.mask_check.isChecked()
         m.mask_file = unicode(self._summary.mask_edit.text())
         m.detector_ids = self._masked_detectors
@@ -483,6 +484,7 @@ class SANSInstrumentWidget(BaseWidget):
         self._settings.data_output_dir = m.output_directory
 
         self._settings.emit_key_value("DARK_CURRENT", str(self._summary.dark_file_edit.text()))
+        self._settings.emit_key_value("OUTPUT_DIR", m.output_directory)
         return m
 
     def _show_help(self):
