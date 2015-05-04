@@ -334,7 +334,7 @@
            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
           </property>
           <property name="currentIndex">
-           <number>4</number>
+           <number>2</number>
           </property>
           <widget class="QWidget" name="tab_3">
            <attribute name="title">
@@ -367,7 +367,7 @@
                 <item>
                  <widget class="QLabel" name="label_ptInfo">
                   <property name="text">
-                   <string>Pt. Number From 1 To 44</string>
+                   <string>Pt. Number From 1 To Maximum Pt.</string>
                   </property>
                  </widget>
                 </item>
@@ -595,6 +595,9 @@
                     </item>
                     <item>
                      <widget class="QPushButton" name="pushButton_plotAllDet">
+                      <property name="enabled">
+                       <bool>false</bool>
+                      </property>
                       <property name="text">
                        <string>Plot All </string>
                       </property>
@@ -2079,32 +2082,13 @@
     <addaction name="separator"/>
     <addaction name="actionQuit"/>
    </widget>
-   <widget class="QMenu" name="menuView">
-    <property name="title">
-     <string>View</string>
-    </property>
-    <addaction name="actionLog"/>
-   </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
      <string>Help</string>
     </property>
-   </widget>
-   <widget class="QMenu" name="menuWindow">
-    <property name="title">
-     <string>Window</string>
-    </property>
-   </widget>
-   <widget class="QMenu" name="menuTool">
-    <property name="title">
-     <string>Tool</string>
-    </property>
-    <addaction name="actionLoad_Setup_File"/>
+    <addaction name="actionFind_Help"/>
    </widget>
    <addaction name="menuFile"/>
-   <addaction name="menuView"/>
-   <addaction name="menuTool"/>
-   <addaction name="menuWindow"/>
    <addaction name="menuHelp"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
@@ -2148,6 +2132,11 @@
   <action name="actionLoad_Setup_File">
    <property name="text">
     <string>Load Setup File</string>
+   </property>
+  </action>
+  <action name="actionFind_Help">
+   <property name="text">
+    <string>Find Help</string>
    </property>
   </action>
  </widget>

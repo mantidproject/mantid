@@ -1,9 +1,9 @@
-#pylint: disable=invalid-name,relative-import,too-many-lines,too-many-instance-attributes,too-many-locals,attribute-defined-outside-init,too-many-statements,line-too-long
+#pylint: disable=invalid-name,relative-import,too-many-lines,too-many-instance-attributes,too-many-statements,line-too-longtoo-many-locals,attribute-defined-outside-init
 # -*- coding: utf-8 -*-
 
 # Form implementation generated from reading ui file 'Ui_MainWindow.ui'
 #
-# Created: Tue Apr 28 16:28:49 2015
+# Created: Mon May  4 11:12:07 2015
 #      by: PyQt4 UI code generator 4.11.2
 #
 # WARNING! All changes made in this file will be lost!
@@ -288,6 +288,7 @@ class Ui_MainWindow(object):
         spacerItem10 = QtGui.QSpacerItem(20, 40, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Minimum)
         self.verticalLayout_12.addItem(spacerItem10)
         self.pushButton_plotAllDet = QtGui.QPushButton(self.tab_5)
+        self.pushButton_plotAllDet.setEnabled(False)
         self.pushButton_plotAllDet.setObjectName(_fromUtf8("pushButton_plotAllDet"))
         self.verticalLayout_12.addWidget(self.pushButton_plotAllDet)
         spacerItem11 = QtGui.QSpacerItem(20, 40, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Minimum)
@@ -943,14 +944,8 @@ class Ui_MainWindow(object):
         self.menubar.setObjectName(_fromUtf8("menubar"))
         self.menuFile = QtGui.QMenu(self.menubar)
         self.menuFile.setObjectName(_fromUtf8("menuFile"))
-        self.menuView = QtGui.QMenu(self.menubar)
-        self.menuView.setObjectName(_fromUtf8("menuView"))
         self.menuHelp = QtGui.QMenu(self.menubar)
         self.menuHelp.setObjectName(_fromUtf8("menuHelp"))
-        self.menuWindow = QtGui.QMenu(self.menubar)
-        self.menuWindow.setObjectName(_fromUtf8("menuWindow"))
-        self.menuTool = QtGui.QMenu(self.menubar)
-        self.menuTool.setObjectName(_fromUtf8("menuTool"))
         MainWindow.setMenuBar(self.menubar)
         self.statusbar = QtGui.QStatusBar(MainWindow)
         self.statusbar.setObjectName(_fromUtf8("statusbar"))
@@ -967,20 +962,18 @@ class Ui_MainWindow(object):
         self.actionOpen_2.setObjectName(_fromUtf8("actionOpen_2"))
         self.actionLoad_Setup_File = QtGui.QAction(MainWindow)
         self.actionLoad_Setup_File.setObjectName(_fromUtf8("actionLoad_Setup_File"))
+        self.actionFind_Help = QtGui.QAction(MainWindow)
+        self.actionFind_Help.setObjectName(_fromUtf8("actionFind_Help"))
         self.menuFile.addAction(self.actionNew)
         self.menuFile.addAction(self.actionOpen_2)
         self.menuFile.addSeparator()
         self.menuFile.addAction(self.actionQuit)
-        self.menuView.addAction(self.actionLog)
-        self.menuTool.addAction(self.actionLoad_Setup_File)
+        self.menuHelp.addAction(self.actionFind_Help)
         self.menubar.addAction(self.menuFile.menuAction())
-        self.menubar.addAction(self.menuView.menuAction())
-        self.menubar.addAction(self.menuTool.menuAction())
-        self.menubar.addAction(self.menuWindow.menuAction())
         self.menubar.addAction(self.menuHelp.menuAction())
 
         self.retranslateUi(MainWindow)
-        self.tabWidget.setCurrentIndex(4)
+        self.tabWidget.setCurrentIndex(2)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
     def retranslateUi(self, MainWindow):
@@ -1006,7 +999,7 @@ class Ui_MainWindow(object):
         self.label_detExcluded.setText(_translate("MainWindow", "Detectors to Exclude   ", None))
         self.tabWidget.setToolTip(_translate("MainWindow", "<html><head/><body><p><br/></p></body></html>", None))
         self.comboBox_rawDetMode.setItemText(0, _translate("MainWindow", "Single Pts.", None))
-        self.label_ptInfo.setText(_translate("MainWindow", "Pt. Number From 1 To 44", None))
+        self.label_ptInfo.setText(_translate("MainWindow", "Pt. Number From 1 To Maximum Pt.", None))
         self.pushButton_plotRaw.setText(_translate("MainWindow", "Plot Raw Detector", None))
         self.checkBox_overpltRawDet.setText(_translate("MainWindow", "Over Plot Previous", None))
         self.pushButton_ptUp.setText(_translate("MainWindow", "Previous Pt.", None))
@@ -1091,10 +1084,7 @@ class Ui_MainWindow(object):
         self.pushButton_browseLocalSrc.setText(_translate("MainWindow", "Browse", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_2), _translate("MainWindow", "Advanced Setup", None))
         self.menuFile.setTitle(_translate("MainWindow", "File", None))
-        self.menuView.setTitle(_translate("MainWindow", "View", None))
         self.menuHelp.setTitle(_translate("MainWindow", "Help", None))
-        self.menuWindow.setTitle(_translate("MainWindow", "Window", None))
-        self.menuTool.setTitle(_translate("MainWindow", "Tool", None))
         self.actionQuit.setText(_translate("MainWindow", "Quit", None))
         self.actionQuit.setShortcut(_translate("MainWindow", "Ctrl+Q", None))
         self.actionLog.setText(_translate("MainWindow", "Log", None))
@@ -1105,4 +1095,5 @@ class Ui_MainWindow(object):
         self.actionOpen_2.setText(_translate("MainWindow", "Open", None))
         self.actionOpen_2.setShortcut(_translate("MainWindow", "Ctrl+O", None))
         self.actionLoad_Setup_File.setText(_translate("MainWindow", "Load Setup File", None))
+        self.actionFind_Help.setText(_translate("MainWindow", "Find Help", None))
 

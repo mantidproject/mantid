@@ -15,6 +15,7 @@ except AttributeError:
     def _fromUtf8(s):
         return s
 
+import mantid
 from HfirPDReductionControl import *
 
 #----- default configuration ---------------
@@ -60,11 +61,15 @@ class MainWindow(QtGui.QMainWindow):
 
         # Define gui-event handling
 
+        # menu
+        self.connect(self.ui.actionQuit, QtCore.SIGNAL('triggered()'),
+                self.doExist)
+        self.connect(self.ui.actionFind_Help, QtCore.SIGNAL('triggered()'),
+                self.doHelp)
+
         # main
         self.connect(self.ui.comboBox_wavelength, QtCore.SIGNAL('currentIndexChanged(int)'),
                 self.doUpdateWavelength)
-        self.connect(self.ui.actionQuit, QtCore.SIGNAL('triggered()'),
-                self.doExist)
         self.connect(self.ui.pushButton_browseExcludedDetFile, QtCore.SIGNAL('clicked'),
                 self.doBrowseExcludedDetetorFile)
 
@@ -289,6 +294,14 @@ class MainWindow(QtGui.QMainWindow):
 
         self._indvDetCanvasMode = 'samplelog'
 
+        #help
+        self.assistantProcess = QtCore.QProcess(self)
+        # pylint: disable=protected-access
+        self.collectionFile=os.path.join(mantid._bindir,'../docs/qthelp/MantidProject.qhc')
+        version = ".".join(mantid.__version__.split(".")[:2])
+        self.qtUrl='qthelp://org.sphinx.mantidproject.'+version+'/doc/interfaces/HFIRPowderReduction.html'
+        self.externalUrl='http://docs.mantidproject.org/nightly/interfaces/HFIRPowderReduction.html'
+
         return
 
 
@@ -453,6 +466,25 @@ class MainWindow(QtGui.QMainWindow):
 
         return
 
+    def doHelp(self):
+        """ Show help
+        Copied from DGSPlanner
+        """
+        self.assistantProcess.close()
+        self.assistantProcess.waitForFinished()
+        helpapp = QtCore.QLibraryInfo.location(QtCore.QLibraryInfo.BinariesPath) + QtCore.QDir.separator()
+        helpapp += 'assistant'
+        args = ['-enableRemoteControl', '-collectionFile',self.collectionFile,'-showUrl',self.qtUrl]
+        if os.path.isfile(helpapp):
+            self.assistantProcess.close()
+            self.assistantProcess.waitForFinished()
+            self.assistantProcess.start(helpapp, args)
+            print "Show help from (app) ", helpapp
+        else:
+            QtGui.QDesktopServices.openUrl(QtCore.QUrl(self.externalUrl))
+            print "Show help from (url)", QtCore.QUrl(self.externalUrl)
+
+        return
 
     def doLoadData(self, exp=None, scan=None):
         """ Load and reduce data
@@ -860,6 +892,7 @@ class MainWindow(QtGui.QMainWindow):
 
             vecylist.append(vecy)
             yticklabels.append('Exp %d Scan %d' % (expno, scanno))
+            #print "[DB] Scan ", scanno, ": X range: ", vecx[0], vecx[-1], " Size X = ", len(vecx)
 
             # set up range of x
             if xmin is None:
@@ -870,9 +903,9 @@ class MainWindow(QtGui.QMainWindow):
 
         dim2array = numpy.array(vecylist)
 
-        print "2D vector: \n",  dim2array
-        print "x range: %f, %f" % (xmin, xmax)
-        print "y labels: ", yticklabels
+        #print "2D vector: \n",  dim2array
+        #print "x range: %f, %f" % (xmin, xmax)
+        #print "y labels: ", yticklabels
 
         # Plot
         holdprev=False
@@ -1895,6 +1928,11 @@ class MainWindow(QtGui.QMainWindow):
             binsize = float(binsize)
         except ValueError:
             raise NotImplementedError("Error:  bins size '%s' is not a float number." % (binsize))
+
+        # Fix for merging as xmin and xmax must be same for all scans
+        if itab == 3 and xmin is None:
+            xmin = 5.
+            xmax = 150.
 
         return (xmin, binsize, xmax)
 
