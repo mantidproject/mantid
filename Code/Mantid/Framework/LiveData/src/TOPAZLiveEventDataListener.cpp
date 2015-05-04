@@ -364,7 +364,7 @@ void TOPAZLiveEventDataListener::run() {
                               
         g_log.debug() << "Received UDP Packet.  " << bytesRead << " bytes  "
                       << num_pulse_ids << " pulses  " << num_events
-                      << " events\n" << std::endl;
+                      << " events" << std::endl;
         
         PULSE_ID_PTR pid = (PULSE_ID_PTR)(m_udpBuf + sizeof(COMMAND_HEADER));
         NEUTRON_EVENT_PTR events =
@@ -379,8 +379,20 @@ void TOPAZLiveEventDataListener::run() {
             g_log.debug() << "  Charge: " << pid[i].charge << std::endl;
             
             // Figure out the event indexes that belong to this pulse
-            unsigned long firstEvent = pid[i].eventID;
+            unsigned long firstEvent; 
             unsigned long lastEvent;
+            if (num_pulse_ids == 1)
+            {
+                 // This 'if' test is something of a workaround for a problem
+                 // we saw on the beamline:  event_catcher was spewing
+                 // eventID's that were much too high.
+                 firstEvent = 0;
+            }
+            else
+            {
+                  firstEvent = pid[i].eventID;
+            }
+
             if (i == num_pulse_ids - 1) // last pulse in the packet?
             {
                 lastEvent = num_events - 1;
@@ -399,19 +411,28 @@ void TOPAZLiveEventDataListener::run() {
             Mantid::Kernel::DateAndTime eventTime = timeFromPulse(&pid[i]);
             
             Poco::ScopedLock<Poco::FastMutex> scopedLock(m_mutex);
-            for (unsigned long j = firstEvent; j <= lastEvent; j++)
-            {
-                // Save the pulse charge in the logs
-                // TODO:  We're not sure what the units are on the charge value
-                // They *might* be picoCoulombs, or the might be units of 10pC
-                // (in which case we need to multiply by 10 because the
-                // property is definitely in picoCoulombs.)
-                m_eventBuffer->mutableRun()
+            // Save the pulse charge in the logs
+            // TODO:  We're not sure what the units are on the charge value
+            // They *might* be picoCoulombs, or the might be units of 10pC
+            // (in which case we need to multiply by 10 because the
+            // property is definitely in picoCoulombs.)
+            m_eventBuffer->mutableRun()
                     .getTimeSeriesProperty<double>(PROTON_CHARGE_PROPERTY)
                     ->addValue(eventTime, pid[i].charge);
-                
+
+            if (firstEvent > lastEvent)
+            {
+                g_log.error() << "Invalid event indexes! firstEvent: " << firstEvent
+                              << "  lastEvent: " << lastEvent << std::endl;
+                g_log.error() << "No events will be processed!" << std::endl;
+            }
+
+            for (unsigned long j = firstEvent; j <= lastEvent; j++)
+            {
                 // appendEvent needs tof to be in units of microseconds, but
                 // it comes from the ADARA stream in units of 100ns.
+                // TODO: We're not using the ADARA stream! Verify that event_catcher also
+                // uses 100ns.
                 appendEvent(events[j].pixelId, events[j].tof / 10.0, eventTime);
             }
         } // TODO: Verify that the mutex is unlocked when we go back to 
