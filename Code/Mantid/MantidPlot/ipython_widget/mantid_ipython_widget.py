@@ -14,7 +14,7 @@ from IPython.qt.console.rich_ipython_widget import RichIPythonWidget
 from IPython.qt.inprocess import QtInProcessKernelManager
 
 
-def our_run_code(self, code_obj):
+def our_run_code(self, code_obj, result=None):
     """ Method with which we replace the run_code method of IPython's InteractiveShell class.
         It calls the original method (renamed to ipython_run_code) on a separate thread
         so that we can avoid locking up the whole of MantidPlot while a command runs.
@@ -23,12 +23,19 @@ def our_run_code(self, code_obj):
         ----------
         code_obj : code object
           A compiled code object, to be executed
+        result : ExecutionResult, optional
+          An object to store exceptions that occur during execution.
 
         Returns
         -------
         False : Always, as it doesn't seem to matter.
     """
-    t = threading.Thread(target=self.ipython_run_code, args=[code_obj])
+    t = threading.Thread()
+    #ipython 3.0 introduces a third argument named result
+    try:
+        t = threading.Thread(target=self.ipython_run_code, args=[code_obj,result])
+    except TypeError:
+        t = threading.Thread(target=self.ipython_run_code, args=[code_obj])
     t.start()
     while t.is_alive():
         QtGui.QApplication.processEvents()
