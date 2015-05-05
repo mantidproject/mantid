@@ -145,6 +145,9 @@ void ReflectometryReductionOneAuto::init() {
   declareProperty("ThetaOut", Mantid::EMPTY_DBL(),
                   "Calculated final theta in degrees.", Direction::Output);
 
+  declareProperty("NormalizeByIntegratedMonitors", true,
+                  "Normalize by dividing by the integrated monitors.");
+
   declareProperty("CorrectDetectorPositions", true,
                   "Correct detector positions using ThetaIn (if given)");
 
@@ -290,6 +293,7 @@ void ReflectometryReductionOneAuto::exec() {
 
   bool correct_positions = this->getProperty("CorrectDetectorPositions");
   bool strict_spectrum_checking = this->getProperty("StrictSpectrumChecking");
+  bool norm_by_int_mons = getProperty("NormalizeByIntegratedMonitors");
 
   // Pass the arguments and execute the main algorithm.
 
@@ -301,6 +305,7 @@ void ReflectometryReductionOneAuto::exec() {
     refRedOne->setProperty("OutputWorkspace", output_workspace_name);
     refRedOne->setProperty("OutputWorkspaceWavelength",
                            output_workspace_lam_name);
+    refRedOne->setProperty("NormalizeByIntegratedMonitors", norm_by_int_mons);
     refRedOne->setProperty("I0MonitorIndex", i0_monitor_index);
     refRedOne->setProperty("ProcessingInstructions", processing_commands);
     refRedOne->setProperty("WavelengthMin", wavelength_min);
