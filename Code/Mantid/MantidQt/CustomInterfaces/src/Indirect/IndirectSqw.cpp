@@ -84,7 +84,7 @@ namespace CustomInterfaces
       m_batchAlgoRunner->addAlgorithm(energyRebinAlg);
     }
 
-    QString eFixed = getInstrumentDetails()["efixed-val"];
+    QString eFixed = getInstrumentDetails()["Efixed"];
 
     IAlgorithm_sptr sqwAlg = AlgorithmManager::Instance().create("SofQW");
     QString rebinType = m_uiForm.cbRebinType->currentText();

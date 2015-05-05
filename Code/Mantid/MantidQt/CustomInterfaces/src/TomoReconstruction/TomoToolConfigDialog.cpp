@@ -24,9 +24,17 @@ TomoToolConfigDialog::TomoToolConfigDialog(QWidget *parent) : QDialog(parent) {
   hOpt->addWidget(labelOpt);
   hOpt->addWidget(editOpt);
 
+  okButton = new QPushButton("Ok");
+  cancelButton = new QPushButton("Cancel");
+  hBut = new QHBoxLayout();
+  hBut->insertStretch(0,1);
+  hBut->addWidget(okButton);
+  hBut->addWidget(cancelButton);
+
   layout = new QGridLayout();
   layout->addLayout(hRun, 0, 0);
   layout->addLayout(hOpt, 1, 0);
+  layout->addLayout(hOpt, 2, 0);
 
   connect(okButton, SIGNAL(clicked()), this, SLOT(okClicked()));
   connect(cancelButton, SIGNAL(clicked()), this, SLOT(cancelClicked()));

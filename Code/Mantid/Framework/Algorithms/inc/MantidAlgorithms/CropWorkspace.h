@@ -5,9 +5,6 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
-#include "MantidDataObjects/EventWorkspace.h"
-
-#include <climits>
 
 namespace Mantid {
 namespace Algorithms {
@@ -91,31 +88,6 @@ private:
   void init();
   /// Execution code
   void exec();
-  void execEvent();
-
-  void checkProperties();
-  std::size_t getXMin(const int wsIndex = 0);
-  std::size_t getXMax(const int wsIndex = 0);
-  void cropRagged(API::MatrixWorkspace_sptr outputWorkspace, int inIndex,
-                  int outIndex);
-
-  /// The input workspace
-  API::MatrixWorkspace_sptr m_inputWorkspace;
-  DataObjects::EventWorkspace_sptr eventW;
-  /// The bin index to start the cropped workspace from
-  std::size_t m_minX;
-  /// The bin index to end the cropped workspace at
-  std::size_t m_maxX;
-  /// The spectrum index to start the cropped workspace from
-  specid_t m_minSpec;
-  /// The spectrum index to end the cropped workspace at
-  specid_t m_maxSpec;
-  /// Flag indicating whether the input workspace has common boundaries
-  bool m_commonBoundaries;
-  /// Flag indicating whether we're dealing with histogram data
-  bool m_histogram;
-  /// Flag indicating whether XMin and/or XMax has been set
-  bool m_croppingInX;
 };
 
 } // namespace Algorithms
