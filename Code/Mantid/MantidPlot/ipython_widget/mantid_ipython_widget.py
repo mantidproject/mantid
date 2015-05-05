@@ -1,5 +1,6 @@
 import threading
 import types
+import inspect
 
 from PyQt4 import QtGui
 
@@ -25,16 +26,17 @@ def our_run_code(self, code_obj, result=None):
           A compiled code object, to be executed
         result : ExecutionResult, optional
           An object to store exceptions that occur during execution.
-
         Returns
         -------
         False : Always, as it doesn't seem to matter.
     """
+
     t = threading.Thread()
     #ipython 3.0 introduces a third argument named result
-    try:
+    nargs = len(inspect.getargspec(self.ipython_run_code).args)
+    if (nargs == 3):
         t = threading.Thread(target=self.ipython_run_code, args=[code_obj,result])
-    except TypeError:
+    else:
         t = threading.Thread(target=self.ipython_run_code, args=[code_obj])
     t.start()
     while t.is_alive():
