@@ -15,6 +15,8 @@
 #include "MantidVatesAPI/TimeToTimeStep.h"
 #include "MantidVatesAPI/vtkMDHistoHex4DFactory.h"
 #include "MantidVatesAPI/vtkMDHistoHexFactory.h"
+#include "MantidVatesAPI/vtkMDHistoQuadFactory.h"
+#include "MantidVatesAPI/vtkMDHistoLineFactory.h"
 #include "MantidVatesAPI/FilteringUpdateProgressAction.h"
 #include "MantidVatesAPI/IgnoreZerosThresholdRange.h"
 
@@ -171,11 +173,16 @@ int vtkMDHWSource::RequestData(vtkInformation *, vtkInformationVector **, vtkInf
     ThresholdRange_scptr thresholdRange(new IgnoreZerosThresholdRange());
 
     /*
-    Will attempt to handle drawing in 4D case and then in 3D case if that fails.
+    Will attempt to handle drawing in 4D case and then in 3D case if that fails, and so on down to 1D
     */
-    vtkMDHistoHexFactory* successor = new vtkMDHistoHexFactory(thresholdRange, "signal");
+    vtkMDHistoLineFactory* lineFactory = new vtkMDHistoLineFactory(thresholdRange, "signal");
+    vtkMDHistoQuadFactory* quadFactory = new vtkMDHistoQuadFactory(thresholdRange, "signal");
+    vtkMDHistoHexFactory* hexFactory = new vtkMDHistoHexFactory(thresholdRange, "signal");
     vtkMDHistoHex4DFactory<TimeToTimeStep> *factory = new vtkMDHistoHex4DFactory<TimeToTimeStep>(thresholdRange, "signal", m_time);
-    factory->SetSuccessor(successor);
+
+    factory->SetSuccessor(hexFactory);
+    hexFactory->SetSuccessor(quadFactory);
+    quadFactory->SetSuccessor(lineFactory);
 
     vtkDataSet* product = m_presenter->execute(factory, loadingProgressUpdate, drawingProgressUpdate);
 
