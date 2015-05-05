@@ -728,13 +728,13 @@ void ConfigDialog::initMdPlottingPage()
   // Update the visibility of the Vsi tab if the General Md Color Map was selected the last time
   if (m_mdSettings.getUsageGeneralMdColorMap())
   {
-    changeUsageGeneralMdColorMap(true);
+    changeUsageGeneralMdColorMap();
   }
 
   // Update the visibility of the Vsi tab if the last session checkbox was selected.
   if (m_mdSettings.getUsageLastSession())
   {
-    changeUsageLastSession(false);
+    changeUsageLastSession();
   }
 }
 
@@ -869,44 +869,37 @@ void ConfigDialog::initMdPlottingVsiTab()
  */
 void ConfigDialog::setupMdPlottingConnections()
 {
-  QObject::connect(this->mdPlottingGeneralFrame, SIGNAL(toggled(bool)), this, SLOT(changeUsageGeneralMdColorMap(bool)));
-  QObject::connect(this->mdPlottingVsiFrameBottom, SIGNAL(toggled(bool)), this, SLOT(changeUsageLastSession(bool)));
+  QObject::connect(this->mdPlottingGeneralFrame, SIGNAL(toggled(bool)), this, SLOT(changeUsageGeneralMdColorMap()));
+  QObject::connect(this->mdPlottingVsiFrameBottom, SIGNAL(toggled(bool)), this, SLOT(changeUsageLastSession()));
 }
 
 /**
  * Handle a change of the General Md Color Map selection.
- * @param The state of the general MD color map checkbox
  */
-void ConfigDialog::changeUsageGeneralMdColorMap(bool state)
+void ConfigDialog::changeUsageGeneralMdColorMap()
 {
-  // Set the visibility of the default color map of the VSI
-  vsiDefaultColorMap->setDisabled(state);
-  lblVsiDefaultColorMap->setDisabled(state);
+  // If the general color map setting is turned off and the vsi colormap is turned on
+  // then we set the default color map to enabled, else we disable it
+  bool isDefaultColorMapSelectable = (!mdPlottingGeneralFrame->isChecked() && mdPlottingVsiFrameBottom->isChecked());
+
+  vsiDefaultColorMap->setEnabled(isDefaultColorMapSelectable);
+  lblVsiDefaultColorMap->setEnabled(isDefaultColorMapSelectable);
+  //vsiDefaultColorMap->setEnabled(true);
+  //lblVsiDefaultColorMap->setEnabled(true);
 }
 
 /**
  * Handle a change of the Last Session selection.
-  * @param The state of the last session checkbox.
+  * @param isDefaultColorMapVsiChecked The state of the vsi default checkbox.
  */
-void ConfigDialog::changeUsageLastSession(bool state)
+void ConfigDialog::changeUsageLastSession()
 {
-  // Set the visibility of the default color map of the VSI
-  if (mdPlottingGeneralFrame->isChecked())
-  {
-    if (mdPlottingGeneralFrame->isChecked())
-    {
-      vsiDefaultColorMap->setEnabled(false);
-    }
-    else
-    {
-      vsiDefaultColorMap->setEnabled(state);
-    }
-    lblVsiDefaultColorMap->setEnabled(state);
-  }
+  // Set the color map of the VSI default
+  changeUsageGeneralMdColorMap();
 
   // Set the visibility of the background color button of the VSI
-  vsiDefaultBackground->setEnabled(state);
-  lblVsiDefaultBackground->setEnabled(state);
+  vsiDefaultBackground->setEnabled(mdPlottingVsiFrameBottom->isChecked());
+  lblVsiDefaultBackground->setEnabled(mdPlottingVsiFrameBottom->isChecked());
 }
 
 

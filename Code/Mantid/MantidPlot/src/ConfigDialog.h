@@ -276,8 +276,8 @@ private:
   QCheckBox *boxUpdateTableValues;
 
   public slots:
-    void changeUsageGeneralMdColorMap(bool state);
-    void changeUsageLastSession(bool state);
+    void changeUsageGeneralMdColorMap();
+    void changeUsageLastSession();
 };
 
 #endif // CONFIGDIALOG_H
