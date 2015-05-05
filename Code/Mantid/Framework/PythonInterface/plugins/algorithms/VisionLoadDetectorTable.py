@@ -22,12 +22,13 @@ class VisionLoadDetectorTable(PythonAlgorithm):
 
     def PyExec(self):
         filename = self.getPropertyValue("DetectorFile")
+        output_ws_name = self.getPropertyValue("OutputWorkspace")
 
         # Open File and read parameters
         spectra,l1,l2,twotheta,efixed,emode = np.genfromtxt(filename, delimiter=',', unpack=True)
 
         # Setup the output table
-        output_workspace = CreateEmptyTableWorkspace()
+        output_workspace = CreateEmptyTableWorkspace(OutputWorkspace=output_ws_name)
         output_workspace.addColumn("int", "spectra")
         output_workspace.addColumn("double", "l1")
         output_workspace.addColumn("double", "l2")
