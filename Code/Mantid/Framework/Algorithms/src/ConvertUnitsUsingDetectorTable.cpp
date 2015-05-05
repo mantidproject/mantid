@@ -1,7 +1,9 @@
 #include "MantidAlgorithms/ConvertUnitsUsingDetectorTable.h"
 
 #include "MantidAPI/ITableWorkspace.h"
+#include "MantidDataObjects/TableWorkspace.h"
 #include "MantidAPI/AlgorithmFactory.h"
+#include "MantidAPI/TableRow.h"
 
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/UnitFactory.h"
@@ -9,7 +11,6 @@
 
 #include "MantidAlgorithms/ConvertUnitsUsingDetectorTable.h"
 #include "MantidAPI/WorkspaceValidators.h"
-#include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/Run.h"
 #include "MantidKernel/UnitFactory.h"
@@ -22,6 +23,8 @@
 #include <cfloat>
 #include <iostream>
 #include <limits>
+#include <vector>
+#include <algorithm>
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ListValidator.h"
 
@@ -84,7 +87,7 @@ namespace Algorithms
     declareProperty("Target","",boost::make_shared<StringListValidator>(UnitFactory::Instance().getKeys()),
                     "The name of the units to convert to (must be one of those registered in\n"
                     "the Unit Factory)");
-    declareProperty(new WorkspaceProperty<ITableWorkspace>("DetectorParameters", "", Direction::Input, PropertyMode::Optional),
+    declareProperty(new WorkspaceProperty<TableWorkspace>("DetectorParameters", "", Direction::Input, PropertyMode::Optional),
                     "Name of a TableWorkspace containing the detector parameters to use instead of the IDF.");
 
     // TODO: Do we need this ?
@@ -289,32 +292,49 @@ namespace Algorithms
     using namespace Geometry;
 
       // Let's see if we are using a TableWorkspace to override parameters
-      ITableWorkspace_sptr paramWS = getProperty("DetectorParameters");
+      TableWorkspace_sptr paramWS = getProperty("DetectorParameters");
 
       // See if we have supplied a DetectorParameters Workspace
       // TODO: Check if paramWS is NULL and if so throw an exception
 
       // Some variables to hold our values
-      Column_const_sptr l1Column;
-      Column_const_sptr l2Column;
-      Column_const_sptr spectraColumn;
-      Column_const_sptr twoThetaColumn;
-      Column_const_sptr efixedColumn;
-      Column_const_sptr emodeColumn;
+//      Column_const_sptr l1Column;
+//      Column_const_sptr l2Column;
+//      Column_const_sptr spectraColumn;
+//      Column_const_sptr twoThetaColumn;
+//      Column_const_sptr efixedColumn;
+//      Column_const_sptr emodeColumn;
 
-      //std::vector<std::string> columnNames = paramWS->getColumnNames();
+//      //std::vector<std::string> columnNames = paramWS->getColumnNames();
 
-      // Now lets read the parameters
+//      std::vector<int> spectraColumn;
+//      const std::vector<double> & l1Column;
+//      std::vector<double> l2Column;
+//      std::vector<double> twoThetaColumn;
+//      std::vector<double> efixedColumn;
+//      std::vector<int> emodeColumn;
+
+//      const std::string l1ColumnLabel("l1");
+
+      // Let's check all the columns exist and are readable
       try {
-          l1Column = paramWS->getColumn("l1");
-          l2Column = paramWS->getColumn("l2");
-          spectraColumn = paramWS->getColumn("spectra");
-          twoThetaColumn = paramWS->getColumn("twotheta");
-          efixedColumn = paramWS->getColumn("efixed");
-          emodeColumn = paramWS->getColumn("emode");
+
+          auto l2ColumnTmp = paramWS->getColumn("l2");
+          auto spectraColumnTmp = paramWS->getColumn("spectra");
+          auto twoThetaColumnTmp = paramWS->getColumn("twotheta");
+          auto efixedColumnTmp = paramWS->getColumn("efixed");
+          auto emodeColumnTmp = paramWS->getColumn("emode");
       } catch (...) {
           throw Exception::InstrumentDefinitionError("DetectorParameter TableWorkspace is not defined correctly.");
       }
+
+      // Now let's read them into some vectors.
+      auto l1Column = paramWS->getColVector<double>("l1");
+      auto l2Column = paramWS->getColVector<double>("l2");
+      auto twoThetaColumn = paramWS->getColVector<double>("twotheta");
+      auto efixedColumn = paramWS->getColVector<double>("efixed");
+      auto emodeColumn = paramWS->getColVector<int>("emode");
+      auto spectraColumn = paramWS->getColVector<int>("spectra");
 
 
       EventWorkspace_sptr eventWS = boost::dynamic_pointer_cast<EventWorkspace>(outputWS);
@@ -326,22 +346,22 @@ namespace Algorithms
       // Get the unit object for each workspace
       Kernel::Unit_const_sptr outputUnit = outputWS->getAxis(0)->unit();
 
-      int emode = 0;
-      double l1, l2, twoTheta, efixed;
-
       std::vector<double> emptyVec;
       int failedDetectorCount = 0;
 
-//      std::vector<std::string> parameters = outputWS->getInstrument()->getStringParameter("show-signed-theta");
-//      bool bUseSignedVersion = (!parameters.empty()) && find(parameters.begin(), parameters.end(), "Always") != parameters.end();
-//      function<double(IDetector_const_sptr)> thetaFunction = bUseSignedVersion ? bind(&MatrixWorkspace::detectorSignedTwoTheta, outputWS, _1) : bind(&MatrixWorkspace::detectorTwoTheta, outputWS, _1);
-
+      //ConstColumnVector<int> spectraNumber = paramWS->getVector("spectra");
 
       // TODO: Check why this parallel stuff breaks
       // Loop over the histograms (detector spectra)
       //PARALLEL_FOR1(outputWS)
-              for (int64_t i = 0; i < numberOfSpectra_i; ++i)
+      for (int64_t i = 0; i < numberOfSpectra_i; ++i)
       {
+          int emode = 0;
+          double l1, l2, twoTheta, efixed;
+
+
+         // Lets find what row this spectrum ID appears in our detector table.
+
           //PARALLEL_START_INTERUPT_REGION
 
           std::size_t wsid = i;
@@ -349,14 +369,44 @@ namespace Algorithms
           try
           {
               double deg2rad = M_PI / 180.;
-              specid_t spectraNumber = static_cast<specid_t>(spectraColumn->toDouble(i));
-              wsid = outputWS->getIndexFromSpectrumNumber(spectraNumber);
-              g_log.debug() << "###### Spectra #" << spectraNumber << " ==> Workspace ID:" << wsid << std::endl;
-              l1 = l1Column->toDouble(wsid);
-              l2 = l2Column->toDouble(wsid);
-              twoTheta = deg2rad * twoThetaColumn->toDouble(wsid);
-              efixed = efixedColumn->toDouble(wsid);
-              emode = static_cast<int>(emodeColumn->toDouble(wsid));
+
+              auto det = outputWS->getDetector(i);
+              int specid = det->getID();
+
+              //int spectraNumber = static_cast<int>(spectraColumn->toDouble(i));
+              //wsid = outputWS->getIndexFromSpectrumNumber(spectraNumber);
+              g_log.debug() << "###### Spectra #" << specid << " ==> Workspace ID:" << wsid << std::endl;
+
+              // Now we need to find the row that contains this spectrum
+              std::vector<int>::iterator specIter = spectraColumn.begin();
+
+              specIter = std::find(spectraColumn.begin(), spectraColumn.end(), specid);
+              int detectorRow = 0;
+              if (specIter != spectraColumn.end())
+              {
+                  detectorRow = std::distance(spectraColumn.begin(), specIter);
+                  l1 = l1Column[detectorRow];
+                  l2 = l2Column[detectorRow];
+                  twoTheta = twoThetaColumn[detectorRow] * deg2rad;
+                  efixed = efixedColumn[detectorRow];
+                  emode = emodeColumn[detectorRow];
+              }
+              else {
+                  // Not found
+                  g_log.debug() << "Spectrum " << specid << " not found!" << std::endl ;
+                  failedDetectorCount++;
+                  outputWS->maskWorkspaceIndex(wsid);
+              }
+
+              g_log.debug() << "specId from detector table = " << spectraColumn[detectorRow] << std::endl;
+
+              //l1 = l1Column->toDouble(detectorRow);
+              //l2 = l2Column->toDouble(detectorRow);
+              //twoTheta = deg2rad * twoThetaColumn->toDouble(detectorRow);
+              //efixed = efixedColumn->toDouble(detectorRow);
+              //emode = static_cast<int>(emodeColumn->toDouble(detectorRow));
+
+              g_log.debug() << "###### Spectra #" << specid << " ==> Det Table Row:" << detectorRow << std::endl;
 
               g_log.debug() << "\tL1=" << l1 << ",L2=" << l2 << ",TT=" << twoTheta << ",EF=" << efixed
                             << ",EM=" << emode << std::endl;
