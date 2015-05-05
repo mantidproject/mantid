@@ -356,7 +356,7 @@ namespace Algorithms
       //PARALLEL_FOR1(outputWS)
       for (int64_t i = 0; i < numberOfSpectra_i; ++i)
       {
-          int emode = 0;
+          int emode = 2;
           double l1, l2, twoTheta, efixed;
 
 
