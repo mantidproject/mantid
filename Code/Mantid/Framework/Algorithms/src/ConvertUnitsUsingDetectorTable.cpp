@@ -390,6 +390,38 @@ namespace Algorithms
                   twoTheta = twoThetaColumn[detectorRow] * deg2rad;
                   efixed = efixedColumn[detectorRow];
                   emode = emodeColumn[detectorRow];
+
+                  g_log.debug() << "specId from detector table = " << spectraColumn[detectorRow] << std::endl;
+
+                  //l1 = l1Column->toDouble(detectorRow);
+                  //l2 = l2Column->toDouble(detectorRow);
+                  //twoTheta = deg2rad * twoThetaColumn->toDouble(detectorRow);
+                  //efixed = efixedColumn->toDouble(detectorRow);
+                  //emode = static_cast<int>(emodeColumn->toDouble(detectorRow));
+
+                  g_log.debug() << "###### Spectra #" << specid << " ==> Det Table Row:" << detectorRow << std::endl;
+
+                  g_log.debug() << "\tL1=" << l1 << ",L2=" << l2 << ",TT=" << twoTheta << ",EF=" << efixed
+                                << ",EM=" << emode << std::endl;
+
+                  // Make local copies of the units. This allows running the loop in parallel
+                  Unit * localFromUnit = fromUnit->clone();
+                  Unit * localOutputUnit = outputUnit->clone();
+                  /// @todo Don't yet consider hold-off (delta)
+                  const double delta = 0.0;
+                  // Convert the input unit to time-of-flight
+                  localFromUnit->toTOF(outputWS->dataX(wsid),emptyVec,l1,l2,twoTheta,emode,efixed,delta);
+                  // Convert from time-of-flight to the desired unit
+                  localOutputUnit->fromTOF(outputWS->dataX(wsid),emptyVec,l1,l2,twoTheta,emode,efixed,delta);
+                  // EventWorkspace part, modifying the EventLists.
+                  if ( m_inputEvents )
+                  {
+                      eventWS->getEventList(wsid).convertUnitsViaTof(localFromUnit, localOutputUnit);
+                  }
+                  // Clear unit memory
+                  delete localFromUnit;
+                  delete localOutputUnit;
+
               }
               else {
                   // Not found
@@ -398,36 +430,7 @@ namespace Algorithms
                   outputWS->maskWorkspaceIndex(wsid);
               }
 
-              g_log.debug() << "specId from detector table = " << spectraColumn[detectorRow] << std::endl;
 
-              //l1 = l1Column->toDouble(detectorRow);
-              //l2 = l2Column->toDouble(detectorRow);
-              //twoTheta = deg2rad * twoThetaColumn->toDouble(detectorRow);
-              //efixed = efixedColumn->toDouble(detectorRow);
-              //emode = static_cast<int>(emodeColumn->toDouble(detectorRow));
-
-              g_log.debug() << "###### Spectra #" << specid << " ==> Det Table Row:" << detectorRow << std::endl;
-
-              g_log.debug() << "\tL1=" << l1 << ",L2=" << l2 << ",TT=" << twoTheta << ",EF=" << efixed
-                            << ",EM=" << emode << std::endl;
-
-              // Make local copies of the units. This allows running the loop in parallel
-              Unit * localFromUnit = fromUnit->clone();
-              Unit * localOutputUnit = outputUnit->clone();
-              /// @todo Don't yet consider hold-off (delta)
-              const double delta = 0.0;
-              // Convert the input unit to time-of-flight
-              localFromUnit->toTOF(outputWS->dataX(wsid),emptyVec,l1,l2,twoTheta,emode,efixed,delta);
-              // Convert from time-of-flight to the desired unit
-              localOutputUnit->fromTOF(outputWS->dataX(wsid),emptyVec,l1,l2,twoTheta,emode,efixed,delta);
-              // EventWorkspace part, modifying the EventLists.
-              if ( m_inputEvents )
-              {
-                  eventWS->getEventList(wsid).convertUnitsViaTof(localFromUnit, localOutputUnit);
-              }
-              // Clear unit memory
-              delete localFromUnit;
-              delete localOutputUnit;
 
           } catch (Exception::NotFoundError&) {
               // Get to here if exception thrown when calculating distance to detector
