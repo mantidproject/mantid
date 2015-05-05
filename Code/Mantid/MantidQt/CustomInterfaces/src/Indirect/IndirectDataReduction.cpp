@@ -207,6 +207,7 @@ Mantid::API::MatrixWorkspace_sptr IndirectDataReduction::loadInstrumentIfNotExis
     std::string parameterFilename = idfDirectory + instrumentName + "_Definition.xml";
     IAlgorithm_sptr loadAlg = AlgorithmManager::Instance().create("LoadEmptyInstrument");
     loadAlg->setChild(true);
+    loadAlg->setLogging(false);
     loadAlg->initialize();
     loadAlg->setProperty("Filename", parameterFilename);
     loadAlg->setProperty("OutputWorkspace", "__IDR_Inst");
@@ -219,6 +220,7 @@ Mantid::API::MatrixWorkspace_sptr IndirectDataReduction::loadInstrumentIfNotExis
       std::string ipfFilename = idfDirectory + instrumentName + "_" + analyser + "_" + reflection + "_Parameters.xml";
       IAlgorithm_sptr loadParamAlg = AlgorithmManager::Instance().create("LoadParameterFile");
       loadParamAlg->setChild(true);
+      loadParamAlg->setLogging(false);
       loadParamAlg->initialize();
       loadParamAlg->setProperty("Filename", ipfFilename);
       loadParamAlg->setProperty("Workspace", instWorkspace);
@@ -229,8 +231,10 @@ Mantid::API::MatrixWorkspace_sptr IndirectDataReduction::loadInstrumentIfNotExis
   }
   catch(std::exception &ex)
   {
-    g_log.error() << "Failed to load instrument with error: "
-                  << ex.what() << std::endl;
+    g_log.warning() << "Failed to load instrument with error: "
+                    << ex.what()
+                    << ". The current facility may not be fully supported."
+                    << std::endl;
     return MatrixWorkspace_sptr();
   }
 }
@@ -346,7 +350,7 @@ void IndirectDataReduction::instrumentLoadingDone(bool error)
 {
   if(error)
   {
-    g_log.error("Instument loading failed! This instrument (or analyser/reflection configuration) may not be supported by the interface.");
+    g_log.warning("Instument loading failed! This instrument (or analyser/reflection configuration) may not be supported by the interface.");
     return;
   }
 }
