@@ -144,7 +144,7 @@ private:
   QHBoxLayout *viewLayout; ///< Layout manager for the view widget
   pqApplicationSettingsReaction *viewSettings; ///< Holder for the view settings reaction
   bool viewSwitched;
-  bool isStartup;
+  bool useCurrentColorMap;
   ModeControlWidget::Views initialView; ///< Holds the initial view
   MantidQt::API::MdSettings mdSettings;///<Holds the MD settings which are used to persist data
   MantidQt::API::MdConstants mdConstants;/// < Holds the MD constants

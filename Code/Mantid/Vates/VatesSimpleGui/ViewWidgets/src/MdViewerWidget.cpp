@@ -136,7 +136,7 @@ REGISTER_VATESGUI(MdViewerWidget)
  */
 MdViewerWidget::MdViewerWidget() : VatesViewerInterface(), currentView(NULL),
   dataLoader(NULL), hiddenView(NULL), lodAction(NULL), screenShot(NULL), viewLayout(NULL),
-  viewSettings(NULL), isStartup(true), initialView(ModeControlWidget::STANDARD), m_rebinAlgorithmDialogProvider(this), m_rebinnedWorkspaceIdentifier("_tempvsi")
+  viewSettings(NULL), useCurrentColorMap(false), initialView(ModeControlWidget::STANDARD), m_rebinAlgorithmDialogProvider(this), m_rebinnedWorkspaceIdentifier("_tempvsi")
 {
   //this will initialize the ParaView application if needed.
   VatesParaViewApplication::instance();
@@ -651,10 +651,10 @@ void MdViewerWidget::renderWorkspace(QString workspaceName, int workspaceType, s
     this->currentView->initializeColorScale();
   }
 
-  // Set the start up flag to false
-  if (this->isStartup)
+  // Set usage of current color map to true, since we have loade the VSI
+  if (!this->useCurrentColorMap)
   {
-    this->isStartup = false;
+    this->useCurrentColorMap = true;
   }
 
   QString sourcePlugin = "";
@@ -885,7 +885,7 @@ ModeControlWidget::Views MdViewerWidget::checkViewAgainstWorkspace(ModeControlWi
 void MdViewerWidget::setupPluginMode()
 {
   GlobalInterpreterLock gil;
-  this->isStartup = true;
+  this->useCurrentColorMap = false; // Don't use the current color map at start up.
   this->setupUiAndConnections();
   this->createMenus();
   this->setupMainView();
@@ -1035,7 +1035,7 @@ bool MdViewerWidget::eventFilter(QObject *obj, QEvent *ev)
       this->currentView ->destroyAllSourcesInView();
       this->currentView->updateSettings();
       this->currentView->hide();
-      this->isStartup = true; // reset the start up flag
+      this->useCurrentColorMap = false;
 
       return true;
     }
@@ -1410,17 +1410,8 @@ void MdViewerWidget::dropEvent(QDropEvent *e) {
  */
 void MdViewerWidget::setColorMap()
 {
-  // When the VSI is already started up we want to use the current color map
-  if (this->isStartup)
-  {
-    // Do not use the current color map
-    this->ui.colorSelectionWidget->loadColorMap(false);
-  }
-  else
-  {
-    //Use the current color map
-    this->ui.colorSelectionWidget->loadColorMap(true);
-  }
+   // If it is not the first startup of the color map, then we want to use the current color map
+  this->ui.colorSelectionWidget->loadColorMap(this->useCurrentColorMap);
 }
 
 } // namespace SimpleGui
