@@ -734,7 +734,7 @@ void ConfigDialog::initMdPlottingPage()
   // Update the visibility of the Vsi tab if the last session checkbox was selected.
   if (m_mdSettings.getUsageLastSession())
   {
-    changeUsageLastSession(true);
+    changeUsageLastSession(false);
   }
 }
 
@@ -804,9 +804,12 @@ void ConfigDialog::initMdPlottingVsiTab()
   gridTop->addWidget(lblVsiInitialView, 0, 0);
   gridTop->addWidget(vsiInitialView, 0, 1);
 
-  QGroupBox *frame = new QGroupBox();
-  vsiTabLayout->addWidget(frame);
-  QGridLayout *grid = new QGridLayout(frame);
+  mdPlottingVsiFrameBottom = new QGroupBox();
+  mdPlottingVsiFrameBottom->setCheckable(true);
+  mdPlottingVsiFrameBottom->setChecked(!m_mdSettings.getUsageLastSession());
+
+  vsiTabLayout->addWidget(mdPlottingVsiFrameBottom);
+  QGridLayout *grid = new QGridLayout(mdPlottingVsiFrameBottom);
 
   mdPlottingTabWidget->addTab(vsiPage, QString());
 
@@ -822,17 +825,8 @@ void ConfigDialog::initMdPlottingVsiTab()
   grid->addWidget(lblVsiDefaultBackground, 1, 0);
   grid->addWidget(vsiDefaultBackground, 1, 1);
 
-  // Usage of the last setting
-  vsiLastSession = new QCheckBox();
-  lblVsiLastSession = new QLabel();
-  grid->addWidget(lblVsiLastSession , 2, 0);
-  grid->addWidget(vsiLastSession , 2, 1);
-  vsiLastSession->setChecked(m_mdSettings.getUsageLastSession());
-
   const QColor backgroundColor = m_mdSettings.getUserSettingBackgroundColor();
   vsiDefaultBackground->setColor(backgroundColor);
-
-
 
   grid->setRowStretch(4,1);
 
@@ -876,7 +870,7 @@ void ConfigDialog::initMdPlottingVsiTab()
 void ConfigDialog::setupMdPlottingConnections()
 {
   QObject::connect(this->mdPlottingGeneralFrame, SIGNAL(toggled(bool)), this, SLOT(changeUsageGeneralMdColorMap(bool)));
-  QObject::connect(this->vsiLastSession, SIGNAL(toggled(bool)), this, SLOT(changeUsageLastSession(bool)));
+  QObject::connect(this->mdPlottingVsiFrameBottom, SIGNAL(toggled(bool)), this, SLOT(changeUsageLastSession(bool)));
 }
 
 /**
@@ -897,15 +891,22 @@ void ConfigDialog::changeUsageGeneralMdColorMap(bool state)
 void ConfigDialog::changeUsageLastSession(bool state)
 {
   // Set the visibility of the default color map of the VSI
-  if (!mdPlottingGeneralFrame->isChecked())
+  if (mdPlottingGeneralFrame->isChecked())
   {
-    vsiDefaultColorMap->setDisabled(state);
-    lblVsiDefaultColorMap->setDisabled(state);
+    if (mdPlottingGeneralFrame->isChecked())
+    {
+      vsiDefaultColorMap->setEnabled(false);
+    }
+    else
+    {
+      vsiDefaultColorMap->setEnabled(state);
+    }
+    lblVsiDefaultColorMap->setEnabled(state);
   }
 
   // Set the visibility of the background color button of the VSI
-  vsiDefaultBackground->setDisabled(state);
-  lblVsiDefaultBackground->setDisabled(state);
+  vsiDefaultBackground->setEnabled(state);
+  lblVsiDefaultBackground->setEnabled(state);
 }
 
 
@@ -2209,11 +2210,10 @@ void ConfigDialog::languageChange()
   vsiInitialView->setToolTip(vsiInitialViewToolTipText);
   lblVsiInitialView->setToolTip(vsiInitialViewToolTipText);
 
-  // Vsi last session
-  QString vsiLastSessionToolTipText = "Use the values of the last session for the background color and the color map when a new instance of the VSI is opened.";
-  lblVsiLastSession->setText(tr("Use the settings of the last VSI session"));
-  vsiLastSession->setToolTip(vsiLastSessionToolTipText);
-  lblVsiLastSession->setToolTip(vsiLastSessionToolTipText);
+  // VSI master default
+  QString vsiMasterDefaultToolTipText = "User master defaults for the color map and the background color. If not checked the settings of the last session are used.";
+  mdPlottingVsiFrameBottom->setTitle(tr("Use defaults for color map and background color"));
+  mdPlottingVsiFrameBottom->setToolTip(vsiMasterDefaultToolTipText);
 
   // Vsi default color map
   QString vsiDefaultColorMapToolTipText = "Sets the default color map when a new instance of the VSI is opened.";
@@ -2499,10 +2499,14 @@ void ConfigDialog::updateMdPlottingSettings()
     m_mdSettings.setUserSettingColorMap(vsiDefaultColorMap->currentText());
   }
 
-  // Read if the usage of the last color map should be performed
-  if (vsiLastSession)
+  // Read if the usage of the last color map and background color should be performed
+  if (mdPlottingVsiFrameBottom->isChecked())
   {
-    m_mdSettings.setUsageLastSession(vsiLastSession->isChecked());
+    m_mdSettings.setUsageLastSession(false);
+  }
+  else
+  {
+    m_mdSettings.setUsageLastSession(true);
   }
 
   // Read the background selection
