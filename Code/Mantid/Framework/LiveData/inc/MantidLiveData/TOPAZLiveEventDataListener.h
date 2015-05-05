@@ -78,7 +78,12 @@ private:
     // Both values are designed to be passed straight into the TofEvent
     // constructor.
 
-    ILiveListener::RunStatus m_status;
+    // ILiveListener::RunStatus m_status;
+    // Currently commented out because we have yet to figure out how to
+    // get the run status from the data stream.  If we ever re-enable
+    // this variable, make sure it's properly initialized in the
+    // constructo.
+    
     bool m_workspaceInitialized;
     
     DataObjects::EventWorkspace_sptr

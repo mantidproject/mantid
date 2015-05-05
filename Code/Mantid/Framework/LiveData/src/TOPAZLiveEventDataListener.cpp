@@ -163,7 +163,7 @@ Kernel::Logger g_log("SNSLiveEventDataListener");
 
 /// Constructor
 TOPAZLiveEventDataListener::TOPAZLiveEventDataListener()
-    : ILiveListener(), m_status(NoRun), m_udpBufSize(32768),
+    : ILiveListener(), m_udpBufSize(32768),
       m_runNumber(0),m_stopThread(false)
 {
 
@@ -654,21 +654,6 @@ ILiveListener::RunStatus TOPAZLiveEventDataListener::runStatus() {
     throw(*m_backgroundException);
   }
 
-#if 0
-  // Need to protect against m_status and m_deferredRunDetailsPkt
-  // getting out of sync in the (currently only one) case where the
-  // background thread has not been paused...
-  Poco::ScopedLock<Poco::FastMutex> scopedLock(m_mutex);
-
-  // The MonitorLiveData algorithm calls this function *after* the call to
-  // extract data, which means the value we return should reflect the
-  // value that's appropriate for the events that were returned when
-  // extractData was called().
-  ILiveListener::RunStatus rv = m_status;
-
-
-  return rv;
-#endif
   // until we figure out how to get run info from the stream, this is
   // all we can do
   return ILiveListener::RunStatus::NoRun;
