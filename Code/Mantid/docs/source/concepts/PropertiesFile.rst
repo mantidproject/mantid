@@ -130,40 +130,40 @@ MantidPlot Properties
 Network Properties
 ******************
 
-+----------------------------------------+---------------------------------------------------+-----------------------+
-|Property                                |Description                                        |Example value          |
-+========================================+===================================================+=======================+
-|network.default.timeout                 |Defines the default timeout for all network        |30                     |
-|                                        |operations (in seconds).                           |                       |
-+----------------------------------------+---------------------------------------------------+-----------------------+
-|network.scriptrepo.timeout              |The timeout for network operations in the script   |5                      |
-|                                        |repository, this overrides the deafault timeout.   |                       |
-+----------------------------------------+---------------------------------------------------+-----------------------+
-|proxy.host                              | Allows the system proxy to be overridden, if not  | http://www.proxy.org  |
-|                                        | set mantid will use the system proxy              |                       |
-+----------------------------------------+---------------------------------------------------+-----------------------+
-|proxy.port                              | Must be set if proxy.host is set                  | 8080                  |
-+----------------------------------------+---------------------------------------------------+-----------------------+
-|proxy.httpsTargetUrl                    | A sample url used to determine the system proxy to| http://www.google.com |
-|                                        | use on windows.                                   |                       |
-+----------------------------------------+---------------------------------------------------+-----------------------+
++----------------------------------------+---------------------------------------------------+---------------------------------+
+|Property                                |Description                                        |Example value                    |
++========================================+===================================================+=================================+
+|network.default.timeout                 |Defines the default timeout for all network        |30                               |
+|                                        |operations (in seconds).                           |                                 |
++----------------------------------------+---------------------------------------------------+---------------------------------+
+|network.scriptrepo.timeout              |The timeout for network operations in the script   |5                                |
+|                                        |repository, this overrides the deafault timeout.   |                                 |
++----------------------------------------+---------------------------------------------------+---------------------------------+
+|proxy.host                              | Allows the system proxy to be overridden, if not  | :literal:`http://www.proxy.org` |
+|                                        | set mantid will use the system proxy              |                                 |
++----------------------------------------+---------------------------------------------------+---------------------------------+
+|proxy.port                              | Must be set if proxy.host is set                  | 8080                            |
++----------------------------------------+---------------------------------------------------+---------------------------------+
+|proxy.httpsTargetUrl                    | A sample url used to determine the system proxy to| :literal:`http://www.google.com`|
+|                                        | use on windows.                                   |                                 |
++----------------------------------------+---------------------------------------------------+---------------------------------+
 
 
 ScriptRepository Properties
 ***************************
 
-+-----------------------+-----------------------------------------------+----------------------------------------------------------------+
-|Property               |Description                                    |Example value                                                   |
-+=======================+===============================================+================================================================+
-|ScriptLocalRepository  |Directory where ScriptRepository is Installed. |c:\MantidInstall\MyScriptRepository                             |
-+-----------------------+-----------------------------------------------+----------------------------------------------------------------+
-|ScriptRepository       |Base URL for the remote script repository.     |http://download.mantidproject.org/scriptrepository/             |
-+-----------------------+-----------------------------------------------+----------------------------------------------------------------+
-|UploaderWebServer      |URL for uploading scripts.                     |http://upload.mantidproject.org/scriptrepository/payload/publish|
-+-----------------------+-----------------------------------------------+----------------------------------------------------------------+
-|ScriptRepositoryIgnore |CSV patterns for paths that should not be      |\*pyc;                                                          |
-|                       |listed at ScriptRepository.                    |                                                                |
-+-----------------------+-----------------------------------------------+----------------------------------------------------------------+
++-----------------------+-----------------------------------------------+----------------------------------------------------------------------------+
+|Property               |Description                                    |Example value                                                               |
++=======================+===============================================+============================================================================+
+|ScriptLocalRepository  |Directory where ScriptRepository is Installed. |:literal:`C:\\MantidInstall\\MyScriptRepository`                            |
++-----------------------+-----------------------------------------------+----------------------------------------------------------------------------+
+|ScriptRepository       |Base URL for the remote script repository.     |:literal:`http://download.mantidproject.org/scriptrepository/`              |
++-----------------------+-----------------------------------------------+----------------------------------------------------------------------------+
+|UploaderWebServer      |URL for uploading scripts.                     |:literal:`http://upload.mantidproject.org/scriptrepository/payload/publish` |
++-----------------------+-----------------------------------------------+----------------------------------------------------------------------------+
+|ScriptRepositoryIgnore |CSV patterns for paths that should not be      |:literal:`*pyc;`                                                            |
+|                       |listed at ScriptRepository.                    |                                                                            |
++-----------------------+-----------------------------------------------+----------------------------------------------------------------------------+
 
 
 Getting access to Mantid properties

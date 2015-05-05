@@ -83,7 +83,9 @@ namespace
     ;
 }
 
+// clang-format off
 void export_BoundedValidator()
+// clang-format on
 {
   EXPORT_BOUNDEDVALIDATOR(double, Float);
   EXPORT_BOUNDEDVALIDATOR(long, Int);

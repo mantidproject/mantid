@@ -8,6 +8,7 @@
 #include "MantidDataObjects/PeakShapeEllipsoid.h"
 #include "MantidDataObjects/WorkspaceSingleValue.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
+#include "MantidAPI/NumericAxis.h"
 #include <boost/make_shared.hpp>
 #include <boost/tuple/tuple.hpp>
 
@@ -79,7 +80,7 @@ createDiffractionData(const int nPixels = 100, const int nEventsPerPeak = 20,
                    tofGapBetweenEvents, eventWS, peaksWS);
   addFakeEllipsoid(V3D(1, -3, -5), nPixelsTotal, nEventsPerPeak,
                    tofGapBetweenEvents, eventWS, peaksWS);
-  addFakeEllipsoid(V3D(1, -4, -1), nPixelsTotal, nEventsPerPeak,
+  addFakeEllipsoid(V3D(1, -4, -2), nPixelsTotal, nEventsPerPeak,
                    tofGapBetweenEvents, eventWS, peaksWS);
   addFakeEllipsoid(V3D(1, -4, 0), nPixelsTotal, nEventsPerPeak,
                    tofGapBetweenEvents, eventWS, peaksWS);
@@ -200,25 +201,6 @@ public:
       TS_ASSERT_THROWS(alg.setProperty("InputWorkspace", inputWorkspaceNoInstrument), std::invalid_argument&);
   }
 
-
-  void test_event_or_workspace2d_inputs_only() {
-
-    auto otherMatrixWorkspaceInstance =
-        boost::make_shared<WorkspaceSingleValue>();
-    otherMatrixWorkspaceInstance->setInstrument(m_eventWS->getInstrument());
-
-    IntegrateEllipsoids alg;
-    alg.setChild(true);
-    alg.setRethrows(true);
-    alg.initialize();
-    alg.setProperty("InputWorkspace", otherMatrixWorkspaceInstance);
-    alg.setProperty("PeaksWorkspace", m_peaksWS);
-    alg.setPropertyValue("OutputWorkspace", "dummy");
-
-    TSM_ASSERT_THROWS("Only these two subtypes of Matrix workspace allowed",
-                     alg.execute(), std::runtime_error &);
-  }
-
   void test_execution_events() {
 
     IntegrateEllipsoids alg;
@@ -276,9 +258,8 @@ public:
           integratedPeaksWS->getPeak(1).getIntensity(), 2, 0.01);
     TSM_ASSERT_DELTA("Wrong intensity for peak 2",
           integratedPeaksWS->getPeak(2).getIntensity(), -2, 0.01);
-    //Answer is 16 on Mac ???
-    //TSM_ASSERT_DELTA("Wrong intensity for peak 3",
-          //integratedPeaksWS->getPeak(3).getIntensity(), 6, 0.01);
+    TSM_ASSERT_DELTA("Wrong intensity for peak 3",
+          integratedPeaksWS->getPeak(3).getIntensity(), 15, 0.01);
     TSM_ASSERT_DELTA("Wrong intensity for peak 4",
           integratedPeaksWS->getPeak(4).getIntensity(), 11, 0.01);
     TSM_ASSERT_DELTA("Wrong intensity for peak 5",
@@ -302,18 +283,17 @@ public:
                       integratedPeaksWS->getNumberPeaks(),
                       m_peaksWS->getNumberPeaks());
     TSM_ASSERT_DELTA("Wrong intensity for peak 0",
-          integratedPeaksWS->getPeak(0).getIntensity(), 163, 0.01);
+          integratedPeaksWS->getPeak(0).getIntensity(), 1.0, 0.01);
     TSM_ASSERT_DELTA("Wrong intensity for peak 1",
           integratedPeaksWS->getPeak(1).getIntensity(), 0, 0.01);
     TSM_ASSERT_DELTA("Wrong intensity for peak 2",
-          integratedPeaksWS->getPeak(2).getIntensity(), 163, 0.01);
-    //Answer is 951 on Mac ???
-    //TSM_ASSERT_DELTA("Wrong intensity for peak 3",
-          //integratedPeaksWS->getPeak(3).getIntensity(), 711, 0.01);
+          integratedPeaksWS->getPeak(2).getIntensity(), 1.0, 0.01);
+    TSM_ASSERT_DELTA("Wrong intensity for peak 3",
+          integratedPeaksWS->getPeak(3).getIntensity(), 10, 0.01);
     TSM_ASSERT_DELTA("Wrong intensity for peak 4",
-          integratedPeaksWS->getPeak(4).getIntensity(), 694, 0.01);
+          integratedPeaksWS->getPeak(4).getIntensity(), 13, 0.01);
     TSM_ASSERT_DELTA("Wrong intensity for peak 5",
-          integratedPeaksWS->getPeak(5).getIntensity(), 218, 0.01);
+          integratedPeaksWS->getPeak(5).getIntensity(), 12, 0.01);
 
   }
 };

@@ -106,7 +106,9 @@ void NexusFileIO::openNexusWrite(const std::string &fileName,
       throw Exception::FileError("Unable to open File:", fileName);
     }
     ::NeXus::File *file = new ::NeXus::File(fileID, true);
+    // clang-format off
     m_filehandle = boost::shared_ptr< ::NeXus::File>(file);
+    // clang-format on
   }
 
   //
@@ -1032,7 +1034,9 @@ int NexusFileIO::getWorkspaceSize(int &numberOfSpectra, int &numberOfChannels,
 bool NexusFileIO::checkAttributeName(const std::string &target) const {
   // see if the given attribute name is in the current level
   // return true if it is.
+  // clang-format off
   const std::vector< ::NeXus::AttrInfo> infos = m_filehandle->getAttrInfos();
+  // clang-format on
   for (auto it = infos.begin(); it != infos.end(); ++it) {
     if (target.compare(it->name) == 0)
       return true;

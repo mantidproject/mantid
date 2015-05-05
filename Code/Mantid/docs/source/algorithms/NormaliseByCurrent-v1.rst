@@ -11,8 +11,8 @@ Description
 
 Normalises a workspace according to the good proton charge figure taken
 from the Input Workspace log data, which is stored in the workspace's
-`Sample <http://www.mantidproject.org/Sample>`_ object). Every data point (and its error) is divided
-by that number.
+`sample objects <../api/python/mantid/api/Sample.html>`__). Every data point
+(and its error) is divided by that number.
 The good proton charge value is added to the normalized workspace
 as the value of *NormalizationFactor* log. 
 

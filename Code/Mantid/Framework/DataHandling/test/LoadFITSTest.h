@@ -70,6 +70,14 @@ public:
     TS_ASSERT_THROWS(lf.setPropertyValue("FITS", "anything"),
                      std::runtime_error);
 
+    TS_ASSERT_THROWS(lf.setPropertyValue("BinSize", "-1"),
+                     std::invalid_argument);
+    TS_ASSERT_THROWS(lf.setPropertyValue("BinSize", "0"),
+                     std::invalid_argument);
+    TS_ASSERT_THROWS(lf.setPropertyValue("FilterNoiseLevel", "-10"),
+                     std::invalid_argument);
+    TS_ASSERT_THROWS_NOTHING(lf.setPropertyValue("FilterNoiseLevel", "0"));
+
     TS_ASSERT_THROWS(lf.setPropertyValue("ImageKey", "anything"),
                      Mantid::Kernel::Exception::NotFoundError);
     TS_ASSERT_THROWS(lf.setPropertyValue("BITPIX", "anything"),
@@ -80,7 +88,7 @@ public:
                      std::runtime_error);
   }
 
-  void test_init() {
+  void test_initGood() {
     TS_ASSERT_THROWS_NOTHING(algToBeTested.initialize());
     TS_ASSERT(algToBeTested.isInitialized());
 
@@ -98,8 +106,8 @@ public:
 
     // Set the ImageKey to be 0 (this used to be required, but the key
     // should not be there any longer);
-    TS_ASSERT_THROWS( algToBeTested.setProperty<int>("ImageKey", 0),
-                      Mantid::Kernel::Exception::NotFoundError);
+    TS_ASSERT_THROWS(algToBeTested.setProperty<int>("ImageKey", 0),
+                     Mantid::Kernel::Exception::NotFoundError);
   }
 
   void test_performAssertions() {
@@ -140,10 +148,165 @@ public:
     // should be 375.183
     double sumE =
         ws1->readE(SPECTRA_COUNT - 1)[0] + ws2->readE(SPECTRA_COUNT - 1)[0];
-    TS_ASSERT_LESS_THAN(abs(sumE - 23.4489), 0.0001); // Include a small
-                                                      // tolerance check with
-                                                      // the assert - not
-                                                      // exactly 375.183
+    TS_ASSERT_LESS_THAN(std::abs(sumE - 23.4489), 0.0001); // Include a small
+    // tolerance check with
+    // the assert - not
+    // exactly 375.183
+  }
+
+  void test_noiseFilter() {
+    testAlg =
+        Mantid::API::AlgorithmManager::Instance().create("LoadFITS" /*, 1*/);
+
+    TS_ASSERT_THROWS_NOTHING(testAlg->initialize());
+    TS_ASSERT(testAlg->isInitialized());
+
+    outputSpace = "LoadFITSFiltered";
+    testAlg->setPropertyValue("OutputWorkspace", outputSpace);
+    testAlg->setProperty("FilterNoiseLevel", 200.0);
+
+    inputFile = smallFname1 + ", " + smallFname2;
+    testAlg->setPropertyValue("Filename", inputFile);
+
+    TS_ASSERT_THROWS_NOTHING(testAlg->execute());
+
+    WorkspaceGroup_sptr out;
+    TS_ASSERT(AnalysisDataService::Instance().doesExist(outputSpace));
+    TS_ASSERT_THROWS_NOTHING(
+        out = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
+            outputSpace));
+    const int nws = 2;
+    TS_ASSERT_EQUALS(out->getNumberOfEntries(), nws);
+
+    double expectedY[nws] = {144, 149.0};
+    double expectedE[nws] = {12, 12.2066};
+    for (int i = 0; i < out->getNumberOfEntries(); ++i) {
+      MatrixWorkspace_sptr ws;
+      TS_ASSERT_THROWS_NOTHING(
+          ws = boost::dynamic_pointer_cast<MatrixWorkspace>(out->getItem(i)));
+
+      TS_ASSERT_EQUALS(ws->getNumberHistograms(), SPECTRA_COUNT);
+
+      // check Y and Error
+      TS_ASSERT_EQUALS(ws->readY(SPECTRA_COUNT - 100)[0], expectedY[i]);
+      TS_ASSERT_LESS_THAN(
+          std::abs(ws->readE(SPECTRA_COUNT - 100)[0] - expectedE[i]), 0.0001);
+    }
+  }
+
+  void test_rebinWrong() {
+    testAlg =
+        Mantid::API::AlgorithmManager::Instance().create("LoadFITS" /*, 1*/);
+
+    TS_ASSERT_THROWS_NOTHING(testAlg->initialize());
+    TS_ASSERT(testAlg->isInitialized());
+
+    inputFile = smallFname1 + ", " + smallFname2;
+    testAlg->setPropertyValue("Filename", inputFile);
+    testAlg->setProperty("BinSize", 3);
+    // this should fail - width and height not multiple of 3
+    outputSpace = "LoadFITSx3";
+    testAlg->setPropertyValue("OutputWorkspace", outputSpace);
+
+    TS_ASSERT_THROWS_NOTHING(testAlg->execute());
+    TS_ASSERT(!AnalysisDataService::Instance().doesExist(outputSpace));
+  }
+
+  void test_rebinOK() {
+    testAlg =
+        Mantid::API::AlgorithmManager::Instance().create("LoadFITS" /*, 1*/);
+
+    TS_ASSERT_THROWS_NOTHING(testAlg->initialize());
+    TS_ASSERT(testAlg->isInitialized());
+
+    inputFile = smallFname1 + ", " + smallFname2;
+    testAlg->setPropertyValue("Filename", inputFile);
+    int binSize = 2;
+    testAlg->setProperty("BinSize", 2);
+    testAlg->setProperty("LoadAsRectImg", true);
+    outputSpace = "LoadFITSx2";
+    testAlg->setPropertyValue("OutputWorkspace", outputSpace);
+
+    TS_ASSERT_THROWS_NOTHING(testAlg->execute());
+
+    WorkspaceGroup_sptr out;
+    TS_ASSERT(AnalysisDataService::Instance().doesExist(outputSpace));
+    TS_ASSERT_THROWS_NOTHING(
+        out = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
+            outputSpace));
+    TS_ASSERT_EQUALS(out->getNumberOfEntries(), 2);
+
+    for (int i = 0; i < out->getNumberOfEntries(); ++i) {
+      MatrixWorkspace_sptr ws;
+      TS_ASSERT_THROWS_NOTHING(
+          ws = boost::dynamic_pointer_cast<MatrixWorkspace>(out->getItem(i)));
+
+      TS_ASSERT_EQUALS(ws->getNumberHistograms(), SPECTRA_COUNT_ASRECT / binSize);
+    }
+
+    // try 8, 512x512 => 64x64 image
+    binSize = 8;
+    testAlg =
+      Mantid::API::AlgorithmManager::Instance().create("LoadFITS" /*, 1*/);
+
+    TS_ASSERT_THROWS_NOTHING(testAlg->initialize());
+    TS_ASSERT(testAlg->isInitialized());
+
+    inputFile = smallFname1 + ", " + smallFname2;
+    testAlg->setPropertyValue("Filename", inputFile);
+    testAlg->setProperty("BinSize", binSize);
+    testAlg->setProperty("LoadAsRectImg", true);
+    outputSpace = "LoadFITSx8";
+    testAlg->setPropertyValue("OutputWorkspace", outputSpace);
+
+    TS_ASSERT_THROWS_NOTHING(testAlg->execute());
+
+    TS_ASSERT(AnalysisDataService::Instance().doesExist(outputSpace));
+    TS_ASSERT_THROWS_NOTHING(
+        out = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
+            outputSpace));
+    TS_ASSERT_EQUALS(out->getNumberOfEntries(), 2);
+
+    for (int i = 0; i < out->getNumberOfEntries(); ++i) {
+      MatrixWorkspace_sptr ws;
+      TS_ASSERT_THROWS_NOTHING(
+          ws = boost::dynamic_pointer_cast<MatrixWorkspace>(out->getItem(i)));
+
+      TS_ASSERT_EQUALS(ws->getNumberHistograms(), SPECTRA_COUNT_ASRECT / binSize);
+    }
+
+  }
+
+  void test_loadAsRect() {
+    testAlg =
+        Mantid::API::AlgorithmManager::Instance().create("LoadFITS" /*, 1*/);
+
+    TS_ASSERT_THROWS_NOTHING(testAlg->initialize());
+    TS_ASSERT(testAlg->isInitialized());
+
+    outputSpace = "LoadFITSRect";
+    testAlg->setPropertyValue("OutputWorkspace", outputSpace);
+    testAlg->setProperty("LoadAsRectImg", true);
+
+    inputFile = smallFname1 + ", " + smallFname2;
+    testAlg->setPropertyValue("Filename", inputFile);
+
+    TS_ASSERT_THROWS_NOTHING(testAlg->execute());
+
+    WorkspaceGroup_sptr out;
+    TS_ASSERT(AnalysisDataService::Instance().doesExist(outputSpace));
+    TS_ASSERT_THROWS_NOTHING(
+        out = AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(
+            outputSpace));
+    TS_ASSERT_EQUALS(out->getNumberOfEntries(), 2);
+
+    for (int i = 0; i < out->getNumberOfEntries(); ++i) {
+      MatrixWorkspace_sptr ws;
+      TS_ASSERT_THROWS_NOTHING(
+          ws = boost::dynamic_pointer_cast<MatrixWorkspace>(out->getItem(i)));
+
+      TS_ASSERT_EQUALS(ws->getNumberHistograms(), SPECTRA_COUNT_ASRECT);
+    }
   }
 
 private:
@@ -158,6 +321,7 @@ private:
   const static size_t xdim = 512;
   const static size_t ydim = 512;
   const static size_t SPECTRA_COUNT = xdim * ydim;
+  const static size_t SPECTRA_COUNT_ASRECT = ydim;
   // FITS headers
   const static std::string hdrSIMPLE;
   const static std::string hdrBITPIX;

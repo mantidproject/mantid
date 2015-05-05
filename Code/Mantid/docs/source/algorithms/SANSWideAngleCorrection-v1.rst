@@ -36,8 +36,7 @@ into the sample, its total transmission is then:
 and :math:`x = d`.
 
 Hammouda, gives an approximate result for the integral, see page 208 of
-`http://www.ncnr.nist.gov/staff/hammouda/the\_SANS\_toolbox.pdf SANS
-toolbox <http://www.ncnr.nist.gov/staff/hammouda/the_SANS_toolbox.pdf SANS toolbox>`__:
+`SANS toolbox <http://www.ncnr.nist.gov/staff/hammouda/the_SANS_toolbox.pdf>`__:
 
 :math:`T^{'} = \frac{T_0(T_0^A - 1)}{A \ln(T_0)}`
 

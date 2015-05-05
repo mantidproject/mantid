@@ -12,7 +12,9 @@ namespace Policies = Mantid::PythonInterface::Policies;
 namespace Converters = Mantid::PythonInterface::Converters;
 using namespace boost::python;
 
+// clang-format off
 void export_UnitFactory()
+// clang-format on
 {
   class_<UnitFactoryImpl, boost::noncopyable>("UnitFactoryImpl", no_init)
     .def("create", &UnitFactoryImpl::create, "Creates a named unit if it exists in the factory")

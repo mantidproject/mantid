@@ -50,7 +50,9 @@ namespace
   };
 }
 
+// clang-format off
 void export_DeprecatedAlgorithmChecker()
+// clang-format on
 {
   class_<DeprecatedAlgorithmChecker>("DeprecatedAlgorithmChecker", no_init)
     .def(init<const std::string&,int>((arg("algName"),arg("version")),"Constructs a DeprecatedAlgorithmChecker for the given algorithm & version. (-1 indicates latest version)"))

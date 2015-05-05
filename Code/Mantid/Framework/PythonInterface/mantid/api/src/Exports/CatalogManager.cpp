@@ -19,7 +19,9 @@ boost::python::object getActiveSessionsAsList(CatalogManagerImpl& self)
   return sessions;
 }
 
+// clang-format off
 void export_CatalogManager()
+// clang-format on
 {
   register_ptr_to_python<CatalogManagerImpl*>();
 

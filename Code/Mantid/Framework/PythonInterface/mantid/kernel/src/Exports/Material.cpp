@@ -9,7 +9,9 @@ using Mantid::Kernel::Material;
 using Mantid::PhysicalConstants::NeutronAtom;
 using namespace boost::python;
 
+// clang-format off
 void export_Material()
+// clang-format on
 {
   register_ptr_to_python<Material*>();
   register_ptr_to_python<boost::shared_ptr<Material> >();
