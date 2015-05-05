@@ -459,13 +459,14 @@ public:
 
     PlotPeakByLogValue alg;
     alg.initialize();
-    alg.setPropertyValue("Input","PlotPeakGroup_0;PlotPeakGroup_1;PlotPeakGroup_2");
+    alg.setPropertyValue("Input","PlotPeakGroup_0");
     alg.setPropertyValue("OutputWorkspace","PlotPeakResult");
     alg.setProperty("CreateOutput", true);
     alg.setPropertyValue("WorkspaceIndex","1");
     alg.setPropertyValue("Function","name=LinearBackground,A0=1,A1=0.3;name=Gaussian,PeakCentre=5,Height=2,Sigma=0.1");
     alg.setPropertyValue("MaxIterations", "50");
-    alg.setPropertyValue("Minimizer", "Levenberg-Marquardt,AbsError=0.01,RelError=0.01");
+    // This is a stupid use case but will at least demonstrate the functionality
+    alg.setPropertyValue("Minimizer", "Levenberg-Marquardt,AbsError=0.01,RelError=$wsindex");
 
     alg.execute();
     TS_ASSERT(alg.isExecuted());
@@ -473,10 +474,10 @@ public:
     auto fits = AnalysisDataService::Instance().retrieveWS<const WorkspaceGroup>("PlotPeakResult_Workspaces");
     TS_ASSERT(fits);
 
-    for (size_t i = 0; i < fits->size(); ++i)
+    if (fits->size() > 0)
     {
       // Get the Fit algorithm history
-      auto fit = fits->getItem(i);
+      auto fit = fits->getItem(0);
       const auto & wsHistory = fit->getHistory();
       const auto & child = wsHistory.getAlgorithmHistory(0);
       TS_ASSERT_EQUALS(child->name(), "Fit");
@@ -490,7 +491,7 @@ public:
       // Check minimizer property
       PropertyNameIs minimizerCheck("Minimizer");
       prop = std::find_if(properties.begin(), properties.end(), minimizerCheck);
-      TS_ASSERT_EQUALS((*prop)->value(), "Levenberg-Marquardt,AbsError=0.01,RelError=0.01");
+      TS_ASSERT_EQUALS((*prop)->value(), "Levenberg-Marquardt,AbsError=0.01,RelError=1");
     }
   }
 
