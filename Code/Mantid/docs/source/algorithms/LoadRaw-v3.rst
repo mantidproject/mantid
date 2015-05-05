@@ -35,7 +35,7 @@ and the different periods will be output as separate workspaces, which
 after the first one will have the period number appended (e.g.
 OutputWorkspace\_period). Each workspace will share the same
 `Instrument <http://www.mantidproject.org/Instrument>`__, SpectraToDetectorMap and
-sample objects. If the optional 'spectrum' properties are
+`sample objects <../api/python/mantid/api/Sample.html>`__. If the optional 'spectrum' properties are
 set for a multiperiod dataset, then they will ignored.
 
 If PeriodList property isn't empty then only periods listed there will be
@@ -60,7 +60,7 @@ aspects of the output `Workspace <http://www.mantidproject.org/Workspace>`__:
    `Instrument <http://www.mantidproject.org/Instrument>`__.
 -  :ref:`algm-LoadLog` - Will look for any log files in the same
    directory as the RAW file and load their data into the workspace's
-   sample object.
+   `sample objects <../api/python/mantid/api/Sample.html>`__.
 
 Previous Versions
 -----------------
