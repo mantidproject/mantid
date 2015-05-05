@@ -157,18 +157,15 @@ class IndirectTransmission(PythonAlgorithm):
         @param workspace Name of workspace to extract from
         @return Fixed energy value
         """
+        from IndirectCommon import getEfixed
 
-        ws = mtd[workspace]
-
-        # Try to get efixed from the parameters first
         try:
-            instrument = ws.getInstrument()
-            efixed = instrument.getNumberParameter('efixed-val')[0]
-        except IndexError:
-            efixed = 0.0
+            # Try to get efixed from the parameters first
+            efixed = getEfixed(workspace)
 
-        # If that fails then get it by taking from group of all detectors
-        if efixed == 0.0:
+        except ValueError:
+            # If that fails then get it by taking from group of all detectors
+            ws = mtd[workspace]
             spectra_list = range(0, ws.getNumberHistograms())
             GroupDetectors(InputWorkspace=workspace,
                            OutputWorkspace=workspace,
