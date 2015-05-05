@@ -595,9 +595,11 @@ PlotPeakByLogValue::getMinimizerString(const std::string &wsName,
     Mantid::API::WorkspaceProperty<> *wsProp =
         dynamic_cast<Mantid::API::WorkspaceProperty<> *>(*it);
     if (wsProp) {
-      std::string wsPropName = (*it)->name();
       std::string wsPropValue = (*it)->value();
-      m_minimizerWorkspaces[wsPropName].push_back(wsPropValue);
+      if (wsPropValue != "") {
+        std::string wsPropName = (*it)->name();
+        m_minimizerWorkspaces[wsPropName].push_back(wsPropValue);
+      }
     }
   }
 
