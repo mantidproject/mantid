@@ -106,7 +106,7 @@ void ReflectometryReductionOneAuto::init() {
 
   declareProperty(new PropertyWithValue<int>("I0MonitorIndex",
                                              Mantid::EMPTY_INT(), index_bounds),
-                  "I0 monitor index");
+                  "I0 monitor workspace index");
   declareProperty(new PropertyWithValue<std::string>("ProcessingInstructions",
                                                      "", Direction::Input),
                   "Processing commands to select and add spectrum to make a "

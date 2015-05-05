@@ -47,7 +47,7 @@ void ReflectometryWorkflowBase::initIndexInputs() {
   declareProperty(new PropertyWithValue<int>("I0MonitorIndex",
                                              Mantid::EMPTY_INT(),
                                              mandatoryWorkspaceIndex),
-                  "I0 monitor index");
+                  "I0 monitor workspace index");
 
   declareProperty(new PropertyWithValue<std::string>(
                       "ProcessingInstructions", "",
