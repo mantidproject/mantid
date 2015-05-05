@@ -53,14 +53,24 @@ ISISDataArchive::getArchivePath(const std::set<std::string> &filenames,
   }
 
   std::vector<std::string>::const_iterator ext = exts.begin();
-  for (; ext != exts.end(); ++ext) {
-    std::set<std::string>::const_iterator it = filenames.begin();
-    for (; it != filenames.end(); ++it) {
-      const std::string fullPath = getPath(*it + *ext);
-      if (!fullPath.empty())
-        return fullPath;
-    } // it
-  }   // ext
+  try {
+    for (; ext != exts.end(); ++ext) {
+      std::set<std::string>::const_iterator it = filenames.begin();
+      for (; it != filenames.end(); ++it) {
+        const std::string fullPath = getPath(*it + *ext);
+        if (!fullPath.empty())
+          return fullPath;
+      } // it
+    }   // ext
+  }
+  catch (Kernel::Exception::InternetError& ie) {
+    // If there was an internet error don't waste time on
+    // trying all extensions - it may take a lot of it
+    g_log.warning()
+      << "Could not access archive index "
+      << ie.what();
+    throw;
+  }
   return "";
 }
 
@@ -78,23 +88,14 @@ std::string ISISDataArchive::getPath(const std::string &fName) const {
 
   Kernel::InternetHelper inetHelper;
   std::ostringstream os;
+  inetHelper.sendRequest(URL_PREFIX + fName,os);
+  os << Poco::Path::separator() << fName;
   try {
-    inetHelper.sendRequest(URL_PREFIX + fName,os);
-
-    os << Poco::Path::separator() << fName;
-    try {
-      const std::string expectedPath = os.str();
-      if (Poco::File(expectedPath).exists())
-        return expectedPath;
-    } catch (Poco::Exception &) {
-    }
+    const std::string expectedPath = os.str();
+    if (Poco::File(expectedPath).exists())
+      return expectedPath;
+  } catch (Poco::Exception &) {
   }
-  catch (Kernel::Exception::InternetError& ie) {
-    g_log.warning() 
-      << "Could not access archive index " 
-      << ie.what();
-  }
-
   return "";
 }
 
