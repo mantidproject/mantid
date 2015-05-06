@@ -15,6 +15,7 @@ class IndirectCalibration(DataProcessorAlgorithm):
     _spec_range = None
     _intensity_scale = None
     _plot = None
+    _run_numbers = None
 
 
     def category(self):
@@ -29,16 +30,19 @@ class IndirectCalibration(DataProcessorAlgorithm):
         self.declareProperty(StringArrayProperty(name='InputFiles'),
                              doc='Comma separated list of input files')
 
-        self.declareProperty(IntArrayProperty(name='DetectorRange', values=[0, 1],\
-                             validator=IntArrayMandatoryValidator()),
+        self.declareProperty(IntArrayProperty(name='DetectorRange',
+                                              values=[0, 1],
+                                              validator=IntArrayMandatoryValidator()),
                              doc='Range of detectors.')
 
-        self.declareProperty(FloatArrayProperty(name='PeakRange', values=[0.0, 100.0],\
-                             validator=FloatArrayMandatoryValidator()),
+        self.declareProperty(FloatArrayProperty(name='PeakRange',
+                                                values=[0.0, 100.0],
+                                                validator=FloatArrayMandatoryValidator()),
                              doc='Time of flight range over the peak.')
 
-        self.declareProperty(FloatArrayProperty(name='BackgroundRange', values=[0.0, 1000.0],\
-                             validator=FloatArrayMandatoryValidator()),
+        self.declareProperty(FloatArrayProperty(name='BackgroundRange',
+                                                values=[0.0, 1000.0],
+                                                validator=FloatArrayMandatoryValidator()),
                              doc='Time of flight range over the background.')
 
         self.declareProperty(name='ScaleFactor', defaultValue=1.0,
@@ -48,9 +52,8 @@ class IndirectCalibration(DataProcessorAlgorithm):
                              doc='Plot the calibration data as a spectra plot.')
 
         self.declareProperty(WorkspaceProperty('OutputWorkspace', '',
-                             direction=Direction.Output),
+                                               direction=Direction.Output),
                              doc='Output workspace for calibration data.')
-
 
 
     def validateInputs(self):
@@ -156,8 +159,12 @@ class IndirectCalibration(DataProcessorAlgorithm):
             for run in runs:
                 DeleteWorkspace(Workspace=run)
 
+        self._add_logs()
         self.setProperty('OutputWorkspace', self._out_ws)
-        self._post_process()
+
+        if self._plot:
+            from mantidplot import plotBin
+            plotBin(mtd[self._out_ws], 0)
 
 
     def _setup(self):
@@ -179,9 +186,9 @@ class IndirectCalibration(DataProcessorAlgorithm):
         self._plot = self.getProperty('Plot').value
 
 
-    def _post_process(self):
+    def _add_logs(self):
         """
-        Handles adding logs and plotting.
+        Handles adding sample logs.
         """
 
         # Add sample logs to output workspace
@@ -199,10 +206,6 @@ class IndirectCalibration(DataProcessorAlgorithm):
         AddSampleLogMultiple(Workspace=self._out_ws,
                              LogNames=[log[0] for log in sample_logs],
                              LogValues=[log[1] for log in sample_logs])
-
-        if self._plot:
-            from mantidplot import plotBin
-            plotBin(mtd[self._out_ws], 0)
 
 
 # Register algorithm with Mantid
