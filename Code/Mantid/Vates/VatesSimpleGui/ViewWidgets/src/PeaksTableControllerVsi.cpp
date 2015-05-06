@@ -397,7 +397,7 @@ void PeaksTableControllerVsi::removeLayout(QWidget *widget) {
  */
 void PeaksTableControllerVsi::removeTable() {
   // Reset the color of peaks sources
-  //setPeakSourceColorToDefault();
+  setPeakSourceColorToDefault();
 
   destroySinglePeakSource();
   if (m_peaksTabWidget) {
@@ -631,8 +631,16 @@ void PeaksTableControllerVsi::setPeakSourceColorToDefault() {
         pqDataRepresentation *rep =
             (*src)
                 ->getRepresentation(pqActiveObjects::instance().activeView());
+        if (!rep)
+        {
+          continue;
+        }
           pqPipelineRepresentation *pipelineRepresentation =
               qobject_cast<pqPipelineRepresentation *>(rep);
+        if (!pipelineRepresentation)
+        {
+          continue;
+        }
         pipelineRepresentation->getProxy()->UpdatePropertyInformation();
 
         vtkSMDoubleVectorProperty *prop =
