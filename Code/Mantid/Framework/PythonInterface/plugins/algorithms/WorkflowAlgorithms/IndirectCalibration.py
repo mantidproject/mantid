@@ -1,4 +1,4 @@
-#pylint: disable=no-init
+#pylint: disable=no-init,too-many-instance-attributes
 from mantid.kernel import *
 from mantid.api import *
 from mantid.simpleapi import *
