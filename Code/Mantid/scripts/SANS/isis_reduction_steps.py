@@ -170,7 +170,7 @@ class LoadRun(object):
                 except ValueError, details:
                     sanslog.warning('The file does not contain monitors. \n' +
                                     'The normalization might behave differently than you expect.\n'
-                                   ' Further details: ' + details + '\n')
+                                   ' Further details: ' + str(details) + '\n')
             else:
                 if monitor_ws_name in mtd:
                     DeleteWorkspace(monitor_ws_name)
