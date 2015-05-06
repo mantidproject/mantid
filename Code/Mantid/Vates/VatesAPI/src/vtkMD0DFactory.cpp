@@ -2,8 +2,14 @@
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidVatesAPI/vtkNullUnstructuredGrid.h"
 #include "MantidVatesAPI/ProgressAction.h"
+#include "MantidKernel/Logger.h"
 
 using namespace Mantid::API;
+
+namespace
+{
+  Mantid::Kernel::Logger g_log("vtkMD0DFactory");
+}
 
 namespace Mantid
 {
@@ -16,6 +22,7 @@ namespace Mantid
     */
     vtkMD0DFactory::vtkMD0DFactory(ThresholdRange_scptr thresholdRange, const std::string& scalarName) : m_thresholdRange(thresholdRange), m_scalarName(scalarName)
     {
+      g_log.warning() << "Creating factory " << this->getFactoryTypeName() << ". You are viewing data with less than three dimensions in the VSI. \n";
     }
 
     /// Destructor

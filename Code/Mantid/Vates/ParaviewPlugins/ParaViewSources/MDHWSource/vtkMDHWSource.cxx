@@ -17,6 +17,7 @@
 #include "MantidVatesAPI/vtkMDHistoHexFactory.h"
 #include "MantidVatesAPI/vtkMDHistoQuadFactory.h"
 #include "MantidVatesAPI/vtkMDHistoLineFactory.h"
+#include "MantidVatesAPI/vtkMD0DFactory.h"
 #include "MantidVatesAPI/FilteringUpdateProgressAction.h"
 #include "MantidVatesAPI/IgnoreZerosThresholdRange.h"
 
@@ -175,6 +176,7 @@ int vtkMDHWSource::RequestData(vtkInformation *, vtkInformationVector **, vtkInf
     /*
     Will attempt to handle drawing in 4D case and then in 3D case if that fails, and so on down to 1D
     */
+    vtkMD0DFactory* zeroDFactory = new vtkMD0DFactory(thresholdRange, "signal");
     vtkMDHistoLineFactory* lineFactory = new vtkMDHistoLineFactory(thresholdRange, "signal");
     vtkMDHistoQuadFactory* quadFactory = new vtkMDHistoQuadFactory(thresholdRange, "signal");
     vtkMDHistoHexFactory* hexFactory = new vtkMDHistoHexFactory(thresholdRange, "signal");
@@ -183,6 +185,7 @@ int vtkMDHWSource::RequestData(vtkInformation *, vtkInformationVector **, vtkInf
     factory->SetSuccessor(hexFactory);
     hexFactory->SetSuccessor(quadFactory);
     quadFactory->SetSuccessor(lineFactory);
+    lineFactory->SetSuccessor(zeroDFactory);
 
     vtkDataSet* product = m_presenter->execute(factory, loadingProgressUpdate, drawingProgressUpdate);
 

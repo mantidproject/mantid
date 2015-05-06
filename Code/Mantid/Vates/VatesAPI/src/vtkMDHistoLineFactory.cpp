@@ -12,10 +12,16 @@
 #include "MantidAPI/NullCoordTransform.h"
 #include "MantidDataObjects/MDHistoWorkspace.h"
 #include "MantidKernel/ReadLock.h"
+#include "MantidKernel/Logger.h"
 
 using Mantid::API::IMDWorkspace;
 using Mantid::DataObjects::MDHistoWorkspace;
 using Mantid::API::NullCoordTransform;
+
+namespace
+{
+  Mantid::Kernel::Logger g_log("vtkMDHistoLineFactory");
+}
 
 namespace Mantid
 {
@@ -26,6 +32,7 @@ namespace Mantid
     vtkMDHistoLineFactory::vtkMDHistoLineFactory(ThresholdRange_scptr thresholdRange, const std::string& scalarName) : m_scalarName(scalarName),
       m_thresholdRange(thresholdRange)
     {
+      g_log.warning() << "Creating factory " << this->getFactoryTypeName() << ". You are viewing data with less than three dimensions in the VSI. \n";
     }
 
     /**

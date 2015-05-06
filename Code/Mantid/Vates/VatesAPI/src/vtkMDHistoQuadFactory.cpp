@@ -13,19 +13,25 @@
 #include "vtkSmartPointer.h" 
 #include <vector>
 #include "MantidKernel/ReadLock.h"
+#include "MantidKernel/Logger.h"
 
 using Mantid::API::IMDWorkspace;
 using Mantid::Kernel::CPUTimer;
 using Mantid::DataObjects::MDHistoWorkspace;
+
+namespace
+{
+  Mantid::Kernel::Logger g_log("vtkMDHistoQuadFactory");
+}
 
 namespace Mantid
 {
 
   namespace VATES
   {
-
     vtkMDHistoQuadFactory::vtkMDHistoQuadFactory(ThresholdRange_scptr thresholdRange, const std::string& scalarName) : m_scalarName(scalarName), m_thresholdRange(thresholdRange)
     {
+      g_log.warning() << "Creating factory " << this->getFactoryTypeName() << ". You are viewing data with less than three dimensions in the VSI. \n";
     }
 
     /**

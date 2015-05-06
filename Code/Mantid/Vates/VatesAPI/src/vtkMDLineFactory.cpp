@@ -13,8 +13,14 @@
 #include <vtkLine.h>
 #include <vtkCellData.h>
 #include "MantidKernel/ReadLock.h"
+#include "MantidKernel/Logger.h"
 
 using namespace Mantid::API;
+
+namespace
+{
+  Mantid::Kernel::Logger g_log("vtkMDLineFactory");
+}
 
 namespace Mantid
 {
@@ -27,6 +33,7 @@ namespace Mantid
     */
     vtkMDLineFactory::vtkMDLineFactory(ThresholdRange_scptr thresholdRange, const std::string& scalarName) : m_thresholdRange(thresholdRange), m_scalarName(scalarName)
     {
+      g_log.warning() << "Creating factory " << this->getFactoryTypeName() << ". You are viewing data with less than three dimensions in the VSI. \n";
     }
 
     /// Destructor
