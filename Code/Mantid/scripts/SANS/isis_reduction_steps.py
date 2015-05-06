@@ -165,7 +165,12 @@ class LoadRun(object):
 
         if not added_event_data_flag:
             if isinstance(outWs, IEventWorkspace):
-                LoadNexusMonitors(self._data_file, OutputWorkspace=monitor_ws_name)
+                try:
+                    LoadNexusMonitors(self._data_file, OutputWorkspace=monitor_ws_name)
+                except ValueError, details:
+                    sanslog.warning('The file does not contain monitors. \n' +
+                                    'The normalization might behave differently than you expect.\n'
+                                   ' Further details: ' + details + '\n')
             else:
                 if monitor_ws_name in mtd:
                     DeleteWorkspace(monitor_ws_name)
