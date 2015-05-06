@@ -18,7 +18,6 @@
 #include <pqActiveObjects.h>
 #include <pqApplicationCore.h>
 #include <pqDataRepresentation.h>
-#include <pqDeleteReaction.h>
 #include <pqObjectBuilder.h>
 #include <pqPipelineRepresentation.h>
 #include <pqPipelineSource.h>
@@ -365,17 +364,13 @@ void SplatterPlotView::destroyPeakSources()
   QList<pqPipelineSource *>::Iterator source;
   sources = smModel->findItems<pqPipelineSource *>(server);
 
-  //QSet<pqPipelineSource*> toDelete;
   for (source = sources.begin(); source != sources.end(); ++source)
   {
     if (this->isPeaksWorkspace(*source))
     {
-      //toDelete.insert(*source);
       builder->destroy(*source);
     }
   }
-
-  //pqDeleteReaction::deleteSources(toDelete);
 
   this->peaksSource.clear();
 }
@@ -637,8 +632,7 @@ void SplatterPlotView::updatePeaksFilter(pqPipelineSource* filter) {
 
   // If there are no peaks, then destroy the filter, else update it.
   if (peaksSource.isEmpty()) {
-    pqObjectBuilder* builder = pqApplicationCore::instance()->getObjectBuilder();
-    builder->destroy(filter);
+    this->destroyFilter(QString("MDPeaksFilter"));
   }
   else {
     std::string workspaceNamesConcatentated = m_peaksTableController->getConcatenatedWorkspaceNames(m_peaksWorkspaceNameDelimiter);
