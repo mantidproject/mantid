@@ -86,50 +86,70 @@ class IndirectCalibration(DataProcessorAlgorithm):
 
     def PyExec(self):
         from mantid import logger
+        from IndirectCommon import getInstrRun
 
         self._setup()
 
         runs = []
+        self._run_numbers = list()
         for in_file in self._input_files:
             (_, filename) = os.path.split(in_file)
             (root, _) = os.path.splitext(filename)
             try:
-                Load(Filename=in_file, OutputWorkspace=root,\
-                    SpectrumMin=int(self._spec_range[0]), SpectrumMax=int(self._spec_range[1]),\
-                    LoadLogFiles=False)
+                Load(Filename=in_file,
+                     OutputWorkspace=root,
+                     SpectrumMin=int(self._spec_range[0]),
+                     SpectrumMax=int(self._spec_range[1]),
+                     LoadLogFiles=False)
+
                 runs.append(root)
+                self._run_numbers.append(str(getInstrRun(root)[1]))
+
             except Exception as exc:
                 logger.error('Could not load raw file "%s": %s' % (in_file, str(exc)))
 
         calib_ws_name = 'calibration'
         if len(runs) > 1:
-            MergeRuns(InputWorkspaces=",".join(runs), OutputWorkspace=calib_ws_name)
+            MergeRuns(InputWorkspaces=",".join(runs),
+                      OutputWorkspace=calib_ws_name)
             factor = 1.0 / len(runs)
-            Scale(InputWorkspace=calib_ws_name, OutputWorkspace=calib_ws_name, Factor=factor)
+            Scale(InputWorkspace=calib_ws_name,
+                  OutputWorkspace=calib_ws_name,
+                  Factor=factor)
         else:
             calib_ws_name = runs[0]
 
-        CalculateFlatBackground(InputWorkspace=calib_ws_name, OutputWorkspace=calib_ws_name,
-                                StartX=self._back_range[0], EndX=self._back_range[1], Mode='Mean')
+        CalculateFlatBackground(InputWorkspace=calib_ws_name,
+                                OutputWorkspace=calib_ws_name,
+                                StartX=self._back_range[0],
+                                EndX=self._back_range[1],
+                                Mode='Mean')
 
         number_historgrams = mtd[calib_ws_name].getNumberHistograms()
-        ws_mask, num_zero_spectra = FindDetectorsOutsideLimits(InputWorkspace=calib_ws_name, OutputWorkspace='__temp_ws_mask')
+        ws_mask, num_zero_spectra = FindDetectorsOutsideLimits(InputWorkspace=calib_ws_name,
+                                                               OutputWorkspace='__temp_ws_mask')
         DeleteWorkspace(ws_mask)
 
-        Integration(InputWorkspace=calib_ws_name, OutputWorkspace=calib_ws_name,
-                    RangeLower=self._peak_range[0], RangeUpper=self._peak_range[1])
+        Integration(InputWorkspace=calib_ws_name,
+                    OutputWorkspace=calib_ws_name,
+                    RangeLower=self._peak_range[0],
+                    RangeUpper=self._peak_range[1])
 
-        temp_sum = SumSpectra(InputWorkspace=calib_ws_name, OutputWorkspace='__temp_sum')
+        temp_sum = SumSpectra(InputWorkspace=calib_ws_name,
+                              OutputWorkspace='__temp_sum')
         total = temp_sum.readY(0)[0]
         DeleteWorkspace(temp_sum)
 
         if self._intensity_scale is None:
             self._intensity_scale = 1 / (total / (number_historgrams - num_zero_spectra))
 
-        Scale(InputWorkspace=calib_ws_name, OutputWorkspace=calib_ws_name,
-              Factor=self._intensity_scale, Operation='Multiply')
+        Scale(InputWorkspace=calib_ws_name,
+              OutputWorkspace=calib_ws_name,
+              Factor=self._intensity_scale,
+              Operation='Multiply')
 
-        RenameWorkspace(InputWorkspace=calib_ws_name, OutputWorkspace=self._out_ws)
+        RenameWorkspace(InputWorkspace=calib_ws_name,
+                        OutputWorkspace=self._out_ws)
 
         # Remove old workspaces
         if len(runs) > 1:
@@ -165,12 +185,20 @@ class IndirectCalibration(DataProcessorAlgorithm):
         """
 
         # Add sample logs to output workspace
+        sample_logs = [
+                ('calib_peak_min', self._peak_range[0]),
+                ('calib_peak_max', self._peak_range[1]),
+                ('calib_back_min', self._back_range[0]),
+                ('calib_back_max', self._back_range[1]),
+                ('calib_run_numbers', ','.join(self._run_numbers))
+            ]
+
         if self._intensity_scale is not None:
-            AddSampleLog(Workspace=self._out_ws, LogName='Scale Factor', LogType='Number', LogText=str(self._intensity_scale))
-        AddSampleLog(Workspace=self._out_ws, LogName='Peak Min', LogType='Number', LogText=str(self._peak_range[0]))
-        AddSampleLog(Workspace=self._out_ws, LogName='Peak Max', LogType='Number', LogText=str(self._peak_range[1]))
-        AddSampleLog(Workspace=self._out_ws, LogName='Back Min', LogType='Number', LogText=str(self._back_range[0]))
-        AddSampleLog(Workspace=self._out_ws, LogName='Back Max', LogType='Number', LogText=str(self._back_range[1]))
+            sample_logs.append(('calib_scale_factor', self._intensity_scale))
+
+        AddSampleLogMultiple(Workspace=self._out_ws,
+                             LogNames=[log[0] for log in sample_logs],
+                             LogValues=[log[1] for log in sample_logs])
 
         if self._plot:
             from mantidplot import plotBin
