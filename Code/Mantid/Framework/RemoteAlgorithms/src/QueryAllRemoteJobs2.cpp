@@ -32,8 +32,8 @@ void QueryAllRemoteJobs2::init() {
   // declare several array properties for different pieces of data.  Values from
   // the same array index are for the same job.
   declareProperty(
-      new ArrayProperty<std::string>("JobId", nullValidator, Direction::Output),
-      "ID string for the job");
+      new ArrayProperty<std::string>("JobID", nullValidator, Direction::Output),
+      "ID string for the job(s)");
   declareProperty(new ArrayProperty<std::string>(
                       "JobStatusString", nullValidator, Direction::Output),
                   "Description of the job's current status (Queued, Running, "
@@ -60,6 +60,10 @@ void QueryAllRemoteJobs2::init() {
   declareProperty(new ArrayProperty<std::string>(
                       "CompletionDate", nullValidator, Direction::Output),
                   "The date & time the job finished");
+
+  declareProperty(new ArrayProperty<std::string>(
+                      "CommandLine", nullValidator, Direction::Output),
+                  "The command line run by this job on the remote compute resource machine(s)");
 }
 
 void QueryAllRemoteJobs2::exec() {
@@ -78,6 +82,7 @@ void QueryAllRemoteJobs2::exec() {
   std::vector<std::string> submitDates;
   std::vector<std::string> startDates;
   std::vector<std::string> completionDates;
+  std::vector<std::string> cmdLine;
   for (size_t j = 0; j < infos.size(); ++j) {
     jobIds.push_back(infos[j].id);
     jobNames.push_back(infos[j].name);
@@ -87,8 +92,9 @@ void QueryAllRemoteJobs2::exec() {
     submitDates.push_back(infos[j].submitDate.toISO8601String());
     startDates.push_back(infos[j].startDate.toISO8601String());
     completionDates.push_back(infos[j].completionTime.toISO8601String());
+    cmdLine.push_back(infos[j].cmdLine);
   }
-  setProperty("JobId", jobIds);
+  setProperty("JobID", jobIds);
   setProperty("JobStatusString", jobStatusStrs);
   setProperty("JobName", jobNames);
   setProperty("ScriptName", runNames);
@@ -96,6 +102,7 @@ void QueryAllRemoteJobs2::exec() {
   setProperty("SubmitDate", submitDates);
   setProperty("StartDate", startDates);
   setProperty("CompletionDate", completionDates);
+  setProperty("CommandLine", cmdLine);
 }
 
 } // end namespace RemoteAlgorithms

@@ -99,6 +99,12 @@ public:
     /// Date-time the job finished. No particular format can be
     /// assumed
     Mantid::Kernel::DateAndTime completionTime;
+    /// Command line for this job (when running a command ideally this
+    /// would be provided by the underlying job scheduling
+    /// mechanism). As examples, Platform LSF provides this. For the
+    /// Mantid remote job submission API it probably doesn't add any
+    /// important information.
+    std::string cmdLine;
   };
 
   /**
