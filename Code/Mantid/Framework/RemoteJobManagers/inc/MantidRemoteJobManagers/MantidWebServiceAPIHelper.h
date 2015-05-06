@@ -120,7 +120,7 @@ private:
   // function
   // takes a NameValueCollection object, so we have to convert.  (WTF Poco
   // devs?!?)
-  static std::vector<Poco::Net::HTTPCookie> m_cookies;
+  static std::vector<Poco::Net::HTTPCookie> g_cookies;
   Poco::Net::NameValueCollection getCookies() const;
 
   mutable Poco::Net::HTTPClientSession *

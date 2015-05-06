@@ -19,7 +19,7 @@ namespace {
 Mantid::Kernel::Logger g_log("SCARFLSFJobManager");
 }
 
-std::string LSFJobManager::g_loginBaseURL = "https://portal.scarf.rl.ac.uk/";
+std::string LSFJobManager::g_loginBaseURL = "https://portal.scarf.rl.ac.uk";
 std::string LSFJobManager::g_loginPath = "/cgi-bin/token.py";
 
 std::string SCARFLSFJobManager::g_logoutPath = "webservice/pacclient/logout/";
@@ -43,8 +43,8 @@ std::string SCARFLSFJobManager::g_pingBaseURL =
 void SCARFLSFJobManager::authenticate(const std::string &username,
                                       const std::string &password) {
   // base LSFJobManager class only supports a single user presently
-  m_tokenStash.clear();
-  m_transactions.clear();
+  g_tokenStash.clear();
+  g_transactions.clear();
 
   const std::string params = "?username=" + username + "&password=" + password;
   const Poco::URI fullURL =
@@ -76,9 +76,9 @@ void SCARFLSFJobManager::authenticate(const std::string &username,
     token_str = "platform_token=" + token_str;
     // insert in the token stash
     UsernameToken tok(username, Token(url, token_str));
-    m_tokenStash.insert(tok); // the password is never stored
-    g_log.notice() << "Got authentication token. You are now logged in "
-                   << std::endl;
+    g_tokenStash.insert(tok); // the password is never stored
+    g_log.notice() << "Got authentication token from the compute resource. You "
+                      "are now logged in." << std::endl;
   } else {
     throw std::runtime_error("Login failed. Please check your username and "
                              "password. Got status code " +
@@ -147,20 +147,20 @@ bool SCARFLSFJobManager::ping() {
  * logged in with authenticate().
  */
 void SCARFLSFJobManager::logout(const std::string &username) {
-  if (0 == m_tokenStash.size()) {
+  if (0 == g_tokenStash.size()) {
     throw std::runtime_error("Logout failed. No one is currenlty logged in.");
   }
 
   std::map<std::string, Token>::iterator it;
   if (!username.empty()) {
-    it = m_tokenStash.find(username);
-    if (m_tokenStash.end() == it) {
+    it = g_tokenStash.find(username);
+    if (g_tokenStash.end() == it) {
       throw std::invalid_argument(
           "Logout failed. The username given is not logged in: " + username);
     }
   }
   // only support for single-user
-  Token tok = m_tokenStash.begin()->second;
+  Token tok = g_tokenStash.begin()->second;
 
   // logout query, needs headers = {'Content-Type': 'text/plain', 'Cookie':
   // token,
@@ -189,11 +189,11 @@ void SCARFLSFJobManager::logout(const std::string &username) {
   // successfully logged out, forget the token
   if (username.empty()) {
     // delete first one
-    m_tokenStash.erase(m_tokenStash.begin());
+    g_tokenStash.erase(g_tokenStash.begin());
   } else {
     // delete requested one
-    if (m_tokenStash.end() != it)
-      m_tokenStash.erase(it);
+    if (g_tokenStash.end() != it)
+      g_tokenStash.erase(it);
   }
 }
 
