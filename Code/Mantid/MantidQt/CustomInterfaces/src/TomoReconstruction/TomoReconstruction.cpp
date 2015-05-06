@@ -565,13 +565,10 @@ void TomoReconstruction::doLogin(const std::string &pw) {
     return;
   }
 
-  // TODO (trac #11538): once the remote algorithms are rearranged
-  // into the 'RemoteJobManager' design, this will use...
-  // auto alg = Algorithm::fromString("Authenticate");
-  auto alg = Algorithm::fromString("SCARFTomoReconstruction");
+  auto alg = Algorithm::fromString("Authenticate");
   alg->initialize();
   alg->setPropertyValue("UserName", user);
-  alg->setPropertyValue("Action", "LogIn");
+  alg->setPropertyValue("ComputeResource", getComputeResource());
   alg->setPropertyValue("Password", pw);
   try {
     alg->execute();
@@ -635,26 +632,37 @@ void TomoReconstruction::doSubmitReconstructionJob() {
     g_log.warning() << "Could not prepare the requested reconstruction job "
                        "submission. There was an error: " +
                            std::string(e.what());
+    return;
   }
 
-  // TODO: once the remote algorithms are rearranged into the
-  // 'RemoteJobManager' design, this will use:
-  // auto transAlg = Algorithm::fromString("StartRemoteTransaction");
-  // auto submitAlg = Algorithm::fromString("SubmitRemoteJob");
-  // submitAlg->setPropertyValue("ComputeResource", res);
-  auto alg = Algorithm::fromString("SCARFTomoReconstruction");
-  alg->initialize();
-  alg->setPropertyValue("Action", "SubmitJob");
-  alg->setPropertyValue("UserName", getUsername());
+  std::string comp = getComputeResource();
 
-  alg->setProperty("RunnablePath", run);
-  alg->setProperty("JobOptions", opt);
-
+  // with SCARF we use one (pseudo)-transaction for every submission
+  auto transAlg = Algorithm::fromString("StartRemoteTransaction");
+  transAlg->initialize();
+  transAlg->setProperty("ComputeResource", comp);
+  std::string tid;
   try {
-    alg->execute();
+    transAlg->execute();
+    tid = transAlg->getPropertyValue("TransactionID");
+  } catch (std::runtime_error &e) {
+    throw std::runtime_error("Error when trying to start a transaction right "
+                             "before submitting a reconstruction job: " +
+                             std::string(e.what()));
+  }
+
+  auto submitAlg = Algorithm::fromString("SubmitRemoteJob");
+  submitAlg->initialize();
+  submitAlg->setProperty("ComputeResource", comp);
+  submitAlg->setProperty("TaskName", "Mantid tomographic reconstruction job");
+  submitAlg->setProperty("TransactionID", tid);
+  submitAlg->setProperty("ScriptName", run);
+  submitAlg->setProperty("ScriptParams", opt);
+  try {
+    submitAlg->execute();
   } catch (std::runtime_error &e) {
     throw std::runtime_error(
-        "Error when trying to cancel a reconstruction job: " +
+        "Error when trying to submit a reconstruction job: " +
         std::string(e.what()));
   }
 }
@@ -942,18 +950,9 @@ void TomoReconstruction::doQueryJobStatus(std::vector<std::string> &ids,
                                           std::vector<std::string> &names,
                                           std::vector<std::string> &status,
                                           std::vector<std::string> &cmds) {
-  // TODO: once the remote algorithms are rearranged into the
-  // 'RemoteJobManager' design, this will use...
-  // auto alg = Algorithm::fromString("QueryAllRemoteJobs");
-  // and
-  // auto alg = Algorithm::fromString("QueryRemoteJob");
-
-  // output properties to get: RemoteJobsID, RemoteJobsNames,
-  //    RemoteJobsStatus, RemoteJobsCommands
-  auto alg = Algorithm::fromString("SCARFTomoReconstruction");
+  auto alg = Algorithm::fromString("QueryAllRemoteJobs");
   alg->initialize();
-  alg->setPropertyValue("UserName", getUsername());
-  alg->setPropertyValue("Action", "JobStatus");
+  alg->setPropertyValue("ComputeResource", getComputeResource());
   try {
     alg->execute();
   } catch (std::runtime_error &e) {
@@ -961,10 +960,10 @@ void TomoReconstruction::doQueryJobStatus(std::vector<std::string> &ids,
         "Error when trying to query the status of jobs in " +
         getComputeResource() + ": " + e.what());
   }
-  ids = alg->getProperty("RemoteJobsID");
-  names = alg->getProperty("RemoteJobsNames");
-  status = alg->getProperty("RemoteJobsStatus");
-  cmds = alg->getProperty("RemoteJobsCommands");
+  ids = alg->getProperty("JobId");
+  names = alg->getProperty("JobName");
+  status = alg->getProperty("JobStatusString");
+  cmds = alg->getProperty("CommandLine");
 }
 
 /**
@@ -1289,7 +1288,8 @@ void TomoReconstruction::drawImage(const MatrixWorkspace_sptr &ws) {
   size_t width;
   try {
     width = boost::lexical_cast<size_t>(ws->run().getLogData("Axis1")->value());
-    // TODO: add a settings option for this (like max mem allocation for images)?
+    // TODO: add a settings option for this (like max mem allocation for
+    // images)?
     if (width >= MAXDIM)
       width = MAXDIM;
   } catch (std::exception &e) {
