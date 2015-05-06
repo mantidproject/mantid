@@ -137,32 +137,34 @@ private:
 void TomoReconstruction::paramValModified(QTreeWidgetItem *item,
                                           int /*column*/) {
   OwnTreeWidgetItem *ownItem = dynamic_cast<OwnTreeWidgetItem *>(item);
-  int topLevelIndex = -1;
+  if (!ownItem)
+    return;
 
+  int topLevelIndex = -1;
   if (ownItem->getRootParent() != NULL) {
     topLevelIndex = m_uiSavu.treeCurrentPlugins->indexOfTopLevelItem(
         ownItem->getRootParent());
   }
+  if (-1 == topLevelIndex)
+    return;
 
-  if (topLevelIndex != -1) {
-    // Recreate the json string from the nodes and write back
-    std::string json = m_currPlugins->cell<std::string>(topLevelIndex, 1);
-    // potential new line out, and trim spaces
-    json.erase(std::remove(json.begin(), json.end(), '\n'), json.end());
-    json.erase(std::remove(json.begin(), json.end(), '\r'), json.end());
-    json = Poco::trimInPlace(json);
+  // Recreate the json string from the nodes and write back
+  std::string json = m_currPlugins->cell<std::string>(topLevelIndex, 1);
+  // potential new line out, and trim spaces
+  json.erase(std::remove(json.begin(), json.end(), '\n'), json.end());
+  json.erase(std::remove(json.begin(), json.end(), '\r'), json.end());
+  json = Poco::trimInPlace(json);
 
-    ::Json::Reader r;
-    ::Json::Value root;
-    if (r.parse(json, root)) {
-      // Look for the key and replace it
-      root[ownItem->getKey()] = ownItem->text(0).toStdString();
-    }
-
-    m_currPlugins->cell<std::string>(topLevelIndex, 1) =
-        ::Json::FastWriter().write(root);
-    currentPluginSelected();
+  ::Json::Reader r;
+  ::Json::Value root;
+  if (r.parse(json, root)) {
+    // Look for the key and replace it
+    root[ownItem->getKey()] = ownItem->text(0).toStdString();
   }
+
+  m_currPlugins->cell<std::string>(topLevelIndex, 1) =
+      ::Json::FastWriter().write(root);
+  currentPluginSelected();
 }
 
 // When a top level item is expanded, also expand its child items - if tree
@@ -178,59 +180,63 @@ void TomoReconstruction::expandedItem(QTreeWidgetItem *item) {
 // Adds one plugin from the available plugins list into the list of
 // current plugins
 void TomoReconstruction::transferClicked() {
-  if (m_uiSavu.listAvailablePlugins->selectedItems().count() != 0) {
-    int idx = m_uiSavu.listAvailablePlugins->currentIndex().row();
-    Mantid::API::TableRow row = m_currPlugins->appendRow();
-    for (size_t j = 0; j < m_currPlugins->columnCount(); ++j) {
-      row << m_availPlugins->cell<std::string>(idx, j);
-    }
-    createPluginTreeEntry(row);
+  if (0 == m_uiSavu.listAvailablePlugins->selectedItems().count())
+    return;
+
+  int idx = m_uiSavu.listAvailablePlugins->currentIndex().row();
+  Mantid::API::TableRow row = m_currPlugins->appendRow();
+  for (size_t j = 0; j < m_currPlugins->columnCount(); ++j) {
+    row << m_availPlugins->cell<std::string>(idx, j);
   }
+  createPluginTreeEntry(row);
 }
 
 void TomoReconstruction::moveUpClicked() {
-  if (m_uiSavu.treeCurrentPlugins->selectedItems().count() != 0) {
-    size_t idx =
-        static_cast<size_t>(m_uiSavu.treeCurrentPlugins->currentIndex().row());
-    if (idx > 0 && idx < m_currPlugins->rowCount()) {
-      // swap row, all columns
-      for (size_t j = 0; j < m_currPlugins->columnCount(); ++j) {
-        std::string swap = m_currPlugins->cell<std::string>(idx, j);
-        m_currPlugins->cell<std::string>(idx, j) =
-            m_currPlugins->cell<std::string>(idx - 1, j);
-        m_currPlugins->cell<std::string>(idx - 1, j) = swap;
-      }
-      refreshCurrentPluginListUI();
+  if (0 == m_uiSavu.treeCurrentPlugins->selectedItems().count())
+    return;
+
+  size_t idx =
+      static_cast<size_t>(m_uiSavu.treeCurrentPlugins->currentIndex().row());
+  if (idx > 0 && idx < m_currPlugins->rowCount()) {
+    // swap row, all columns
+    for (size_t j = 0; j < m_currPlugins->columnCount(); ++j) {
+      std::string swap = m_currPlugins->cell<std::string>(idx, j);
+      m_currPlugins->cell<std::string>(idx, j) =
+          m_currPlugins->cell<std::string>(idx - 1, j);
+      m_currPlugins->cell<std::string>(idx - 1, j) = swap;
     }
+    refreshCurrentPluginListUI();
   }
 }
 
 void TomoReconstruction::moveDownClicked() {
   // TODO: this can be done with the same function as above...
-  if (m_uiSavu.treeCurrentPlugins->selectedItems().count() != 0) {
-    size_t idx =
-        static_cast<size_t>(m_uiSavu.treeCurrentPlugins->currentIndex().row());
-    if (idx < m_currPlugins->rowCount() - 1) {
-      // swap all columns
-      for (size_t j = 0; j < m_currPlugins->columnCount(); ++j) {
-        std::string swap = m_currPlugins->cell<std::string>(idx, j);
-        m_currPlugins->cell<std::string>(idx, j) =
-            m_currPlugins->cell<std::string>(idx + 1, j);
-        m_currPlugins->cell<std::string>(idx + 1, j) = swap;
-      }
-      refreshCurrentPluginListUI();
+  if (0 == m_uiSavu.treeCurrentPlugins->selectedItems().count())
+    return;
+
+  size_t idx =
+      static_cast<size_t>(m_uiSavu.treeCurrentPlugins->currentIndex().row());
+  if (idx < m_currPlugins->rowCount() - 1) {
+    // swap all columns
+    for (size_t j = 0; j < m_currPlugins->columnCount(); ++j) {
+      std::string swap = m_currPlugins->cell<std::string>(idx, j);
+      m_currPlugins->cell<std::string>(idx, j) =
+          m_currPlugins->cell<std::string>(idx + 1, j);
+      m_currPlugins->cell<std::string>(idx + 1, j) = swap;
     }
+    refreshCurrentPluginListUI();
   }
 }
 
 void TomoReconstruction::removeClicked() {
   // Also clear ADS entries
-  if (m_uiSavu.treeCurrentPlugins->selectedItems().count() != 0) {
-    int idx = m_uiSavu.treeCurrentPlugins->currentIndex().row();
-    m_currPlugins->removeRow(idx);
+  if (0 == m_uiSavu.treeCurrentPlugins->selectedItems().count())
+    return;
 
-    refreshCurrentPluginListUI();
-  }
+  int idx = m_uiSavu.treeCurrentPlugins->currentIndex().row();
+  m_currPlugins->removeRow(idx);
+
+  refreshCurrentPluginListUI();
 }
 
 void TomoReconstruction::menuOpenClicked() {
@@ -238,27 +244,28 @@ void TomoReconstruction::menuOpenClicked() {
       QFileDialog::getOpenFileName(0, "Open file", QDir::currentPath(),
                                    "NeXus files (*.nxs);;All files (*.*)",
                                    new QString("NeXus files (*.nxs)"));
-  std::string returned = s.toStdString();
-  if (returned != "") {
-    bool opening = true;
+  std::string name = s.toStdString();
 
-    if (m_currPlugins->rowCount() > 0) {
-      QMessageBox::StandardButton reply = QMessageBox::question(
-          this, "Open file confirmation",
-          "Opening the configuration file will clear the current list."
-          "\nWould you like to continue?",
-          QMessageBox::Yes | QMessageBox::No);
-      if (reply == QMessageBox::No) {
-        opening = false;
-      }
+  if ("" == name)
+    return;
+
+  bool opening = true;
+  if (m_currPlugins->rowCount() > 0) {
+    QMessageBox::StandardButton reply = QMessageBox::question(
+        this, "Open file confirmation",
+        "Opening the configuration file will clear the current list."
+        "\nWould you like to continue?",
+        QMessageBox::Yes | QMessageBox::No);
+    if (reply == QMessageBox::No) {
+      opening = false;
     }
+  }
 
-    if (opening) {
-      loadSavuTomoConfig(returned, m_currPlugins);
+  if (opening) {
+    loadSavuTomoConfig(name, m_currPlugins);
 
-      m_currentParamPath = returned;
-      refreshCurrentPluginListUI();
-    }
+    m_currentParamPath = name;
+    refreshCurrentPluginListUI();
   }
 }
 
@@ -268,7 +275,12 @@ void TomoReconstruction::menuSaveClicked() {
     return;
   }
 
-  if (m_currPlugins->rowCount() != 0) {
+  if (0 == m_currPlugins->rowCount()) {
+    // Alert that the plugin list is empty
+    QMessageBox::information(this, tr("Unable to save file"),
+                             "The current plugin list is empty, please add one "
+                             "or more to the list.");
+  } else {
     AnalysisDataService::Instance().add(createUniqueNameHidden(),
                                         m_currPlugins);
     std::string csvWorkspaceNames = m_currPlugins->name();
@@ -282,11 +294,6 @@ void TomoReconstruction::menuSaveClicked() {
     if (!alg->isExecuted()) {
       throw std::runtime_error("Error when trying to save config file");
     }
-  } else {
-    // Alert that the plugin list is empty
-    QMessageBox::information(this, tr("Unable to save file"),
-                             "The current plugin list is empty, please add one "
-                             "or more to the list.");
   }
 }
 
@@ -295,11 +302,12 @@ void TomoReconstruction::menuSaveAsClicked() {
       QFileDialog::getSaveFileName(0, "Save file", QDir::currentPath(),
                                    "NeXus files (*.nxs);;All files (*.*)",
                                    new QString("NeXus files (*.nxs)"));
-  std::string returned = s.toStdString();
-  if (returned != "") {
-    m_currentParamPath = returned;
-    menuSaveClicked();
-  }
+  std::string name = s.toStdString();
+  if ("" == name)
+    return;
+
+  m_currentParamPath = name;
+  menuSaveClicked();
 }
 
 QString TomoReconstruction::tableWSRowToString(ITableWorkspace_sptr table,

@@ -6,7 +6,7 @@
 
 The following pages document the Python bindings to the Mantid C++ libraries.
 
-If you are new to Python in Mantid then we advise first looking at our `Mantid training courses <http://www.mantidproject.org/Main_Page#Getting_Started>`_.
+If you are new to Python in Mantid then we advise first looking at our `Mantid training courses <http://www.mantidproject.org/Main_Page>`_.
 
 Reference
 ---------
