@@ -144,6 +144,7 @@ test/vtkMDHistoHex4DFactoryTest.h
 test/vtkMDHistoHexFactoryTest.h
 test/vtkMDHistoLineFactoryTest.h
 test/vtkMDHistoQuadFactoryTest.h
+test/vtkMD0DFactoryTest.h
 test/FieldDataToMetadataTest.h
 test/FilteringUpdateProgressActionTest.h
 test/LoadVTKTest.h

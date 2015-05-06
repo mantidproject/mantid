@@ -1,6 +1,7 @@
 #include "MantidVatesAPI/vtkMD0DFactory.h"
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidVatesAPI/vtkNullUnstructuredGrid.h"
+#include "MantidVatesAPI/ProgressAction.h"
 
 using namespace Mantid::API;
 
@@ -29,6 +30,7 @@ namespace Mantid
     */
     vtkDataSet* vtkMD0DFactory::create(ProgressAction& progressUpdating) const
     {
+      (void) progressUpdating;
       vtkNullUnstructuredGrid nullGrid;
       vtkUnstructuredGrid *visualDataSet = nullGrid.createNullData();
       return visualDataSet;
