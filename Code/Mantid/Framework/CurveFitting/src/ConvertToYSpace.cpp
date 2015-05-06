@@ -236,8 +236,7 @@ bool ConvertToYSpace::convert(const size_t index) {
     const auto &inE = m_inputWS->readE(index);
 
     // The t->y mapping flips the order of the axis so we need to reverse it to
-    // have a monotonically
-    // increasing axis
+    // have a monotonically increasing axis
     const size_t npts = inY.size();
     for (size_t j = 0; j < npts; ++j) {
       double ys(0.0), qs(0.0), ei(0.0);
@@ -284,6 +283,7 @@ void ConvertToYSpace::createOutputWorkspace() {
   if(getPropertyValue("QWorkspace") != "") {
     m_qOutputWS = WorkspaceFactory::Instance().create(m_inputWS);
 
+    m_qOutputWS->getAxis(0)->unit() = xLabel;
     m_qOutputWS->setYUnit("");
     m_qOutputWS->setYUnitLabel("");
   }
