@@ -46,6 +46,7 @@ src/vtkDataSetToWsLocation.cpp
 src/vtkEllipsoidTransformer.cpp
 src/vtkMDLineFactory.cpp
 src/vtkMDQuadFactory.cpp
+src/vtkMD0DFactory.cpp
 src/vtkNullUnstructuredGrid.cpp
 src/vtkSplatterPlotFactory.cpp
 src/vtkMDHexFactory.cpp
@@ -113,6 +114,7 @@ inc/MantidVatesAPI/vtkEllipsoidTransformer.h
 inc/MantidVatesAPI/vtkMDLineFactory.h
 inc/MantidVatesAPI/vtkMDQuadFactory.h
 inc/MantidVatesAPI/vtkMDHexFactory.h
+inc/MantidVatesAPI/vtkMD0DFactory.h
 inc/MantidVatesAPI/vtkNullUnstructuredGrid.h
 inc/MantidVatesAPI/vtkSplatterPlotFactory.h
 inc/MantidVatesAPI/vtkPeakMarkerFactory.h
