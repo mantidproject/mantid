@@ -64,10 +64,8 @@ namespace Mantid
         virtual void validate() const;
 
     private:
-      std::string m_scalarName;
-
       mutable ThresholdRange_scptr m_thresholdRange;
-    
+      std::string m_scalarName;
     };
     
   }

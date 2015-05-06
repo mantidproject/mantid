@@ -34,17 +34,16 @@ namespace Mantid
     @param progressUpdating: Reporting object to pass progress information up the stack.
     @return fully constructed vtkDataSet.
     */
-    vtkDataSet* vtkMD0DFactory::create(ProgressAction& progressUpdating) const
+    vtkDataSet* vtkMD0DFactory::create(ProgressAction&) const
     {
       g_log.warning() << "Factory " << this->getFactoryTypeName() << " is being used. You are viewing data with less than three dimensions in the VSI. \n";
-      (void) progressUpdating;
       vtkNullUnstructuredGrid nullGrid;
       vtkUnstructuredGrid *visualDataSet = nullGrid.createNullData();
       return visualDataSet;
     }
 
     /// Initalize with a target workspace.
-    void vtkMD0DFactory::initialize(Mantid::API::Workspace_sptr ws)
+    void vtkMD0DFactory::initialize(Mantid::API::Workspace_sptr)
     {
     }
 
