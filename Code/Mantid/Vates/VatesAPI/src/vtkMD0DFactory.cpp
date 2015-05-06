@@ -22,7 +22,6 @@ namespace Mantid
     */
     vtkMD0DFactory::vtkMD0DFactory(ThresholdRange_scptr thresholdRange, const std::string& scalarName) : m_thresholdRange(thresholdRange), m_scalarName(scalarName)
     {
-      g_log.warning() << "Creating factory " << this->getFactoryTypeName() << ". You are viewing data with less than three dimensions in the VSI. \n";
     }
 
     /// Destructor
@@ -37,6 +36,7 @@ namespace Mantid
     */
     vtkDataSet* vtkMD0DFactory::create(ProgressAction& progressUpdating) const
     {
+      g_log.warning() << "Factory " << this->getFactoryTypeName() << " is being used. You are viewing data with less than three dimensions in the VSI. \n";
       (void) progressUpdating;
       vtkNullUnstructuredGrid nullGrid;
       vtkUnstructuredGrid *visualDataSet = nullGrid.createNullData();

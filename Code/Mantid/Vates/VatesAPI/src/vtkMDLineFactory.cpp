@@ -33,7 +33,6 @@ namespace Mantid
     */
     vtkMDLineFactory::vtkMDLineFactory(ThresholdRange_scptr thresholdRange, const std::string& scalarName) : m_thresholdRange(thresholdRange), m_scalarName(scalarName)
     {
-      g_log.warning() << "Creating factory " << this->getFactoryTypeName() << ". You are viewing data with less than three dimensions in the VSI. \n";
     }
 
     /// Destructor
@@ -55,6 +54,8 @@ namespace Mantid
       }
       else
       {
+        g_log.warning() << "Factory " << this->getFactoryTypeName() << " is being used. You are viewing data with less than three dimensions in the VSI. \n";
+
         IMDEventWorkspace_sptr imdws = doInitialize<IMDEventWorkspace, 1>(m_workspace);
         // Acquire a scoped read-only lock to the workspace (prevent segfault from algos modifying ws)
         Mantid::Kernel::ReadLock lock(*imdws);

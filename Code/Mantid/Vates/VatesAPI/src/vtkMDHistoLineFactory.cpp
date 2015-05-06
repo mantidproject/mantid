@@ -32,7 +32,6 @@ namespace Mantid
     vtkMDHistoLineFactory::vtkMDHistoLineFactory(ThresholdRange_scptr thresholdRange, const std::string& scalarName) : m_scalarName(scalarName),
       m_thresholdRange(thresholdRange)
     {
-      g_log.warning() << "Creating factory " << this->getFactoryTypeName() << ". You are viewing data with less than three dimensions in the VSI. \n";
     }
 
     /**
@@ -76,6 +75,8 @@ namespace Mantid
       }
       else
       {
+        g_log.warning() << "Factory " << this->getFactoryTypeName() << " is being used. You are viewing data with less than three dimensions in the VSI. \n";
+
         Mantid::Kernel::ReadLock lock(*m_workspace);
         const int nBinsX = static_cast<int>( m_workspace->getXDimension()->getNBins() );
 
