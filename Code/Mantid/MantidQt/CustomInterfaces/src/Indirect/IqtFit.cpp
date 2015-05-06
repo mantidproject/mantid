@@ -164,7 +164,9 @@ namespace IDA
       "plot = '" + m_uiForm.cbPlotType->currentText() + "'\n"
       "spec_min = " + specMin + "\n"
       "spec_max = " + specMax + "\n"
-      "spec_max = None\n";
+      "spec_max = None\n"
+      "minimizer = '" + minimizerString("TODO-NAME") + "'\n"
+      "max_iterations = " + QString::number(m_dblManager->value(m_properties["MaxIterations"])) + "\n";
 
     if (constrainIntens) pyInput += "constrain_intens = True \n";
     else pyInput += "constrain_intens = False \n";
@@ -174,11 +176,11 @@ namespace IDA
 
     if( !constrainBeta )
     {
-      pyInput += "furyfitSeq(input, func, ftype, startx, endx, spec_min=spec_min, spec_max=spec_max, intensities_constrained=constrain_intens, Save=save, Plot=plot)\n";
+      pyInput += "furyfitSeq(input, func, ftype, startx, endx, spec_min=spec_min, spec_max=spec_max, intensities_constrained=constrain_intens, Save=save, Plot=plot, minimizer=minimizer, max_iterations=max_iterations)\n";
     }
     else
     {
-      pyInput += "furyfitMult(input, func, ftype, startx, endx, spec_min=spec_min, spec_max=spec_max, intensities_constrained=constrain_intens, Save=save, Plot=plot)\n";
+      pyInput += "furyfitMult(input, func, ftype, startx, endx, spec_min=spec_min, spec_max=spec_max, intensities_constrained=constrain_intens, Save=save, Plot=plot, minimizer=minimizer, max_iterations=max_iterations)\n";
     }
 
     QString pyOutput = runPythonCode(pyInput);

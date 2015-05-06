@@ -85,9 +85,13 @@ def confitSeq(inputWS, func, startX, endX, ftype, bgd,
         fit_args['PassWSIndexToFunction'] = True
 
     PlotPeakByLogValue(Input=';'.join(input_params),
-                       OutputWorkspace=output_workspace, Function=func,
-                       StartX=startX, EndX=endX, FitType='Sequential',
-                       CreateOutput=True, OutputCompositeMembers=True,
+                       OutputWorkspace=output_workspace,
+                       Function=func,
+                       StartX=startX,
+                       EndX=endX,
+                       FitType='Sequential',
+                       CreateOutput=True,
+                       OutputCompositeMembers=True,
                        ConvolveMembers=convolve,
                        MaxIterations=max_iterations,
                        Minimizer=minimizer,
@@ -164,7 +168,11 @@ def confitSeq(inputWS, func, startX, endX, ftype, bgd,
 # FuryFit
 ##############################################################################
 
-def furyfitSeq(inputWS, func, ftype, startx, endx, spec_min=0, spec_max=None, intensities_constrained=False, Save=False, Plot='None'):
+def furyfitSeq(inputWS, func, ftype, startx, endx,
+               spec_min=0, spec_max=None,
+               intensities_constrained=False,
+               minimizer='Levenberg-Marquardt', max_iterations=500,
+               Save=False, Plot='None'):
     StartTime('FuryFit')
 
     fit_type = ftype[:-2]
@@ -188,8 +196,15 @@ def furyfitSeq(inputWS, func, ftype, startx, endx, spec_min=0, spec_max=None, in
     input_str = [tmp_fit_workspace + ',i%d' % i for i in range(spec_min, spec_max + 1)]
     input_str = ';'.join(input_str)
 
-    PlotPeakByLogValue(Input=input_str, OutputWorkspace=output_workspace, Function=func,
-                       StartX=startx, EndX=endx, FitType='Sequential', CreateOutput=True)
+    PlotPeakByLogValue(Input=input_str,
+                       OutputWorkspace=output_workspace,
+                       Function=func,
+                       Minimizer=minimizer,
+                       MaxIterations=max_iterations,
+                       StartX=startx,
+                       EndX=endx,
+                       FitType='Sequential',
+                       CreateOutput=True)
 
     # Remove unsused workspaces
     DeleteWorkspace(output_workspace + '_NormalisedCovarianceMatrices')
@@ -236,7 +251,10 @@ def furyfitSeq(inputWS, func, ftype, startx, endx, spec_min=0, spec_max=None, in
     return result_workspace
 
 
-def furyfitMult(inputWS, function, ftype, startx, endx, spec_min=0, spec_max=None, intensities_constrained=False, Save=False, Plot='None'):
+def furyfitMult(inputWS, function, ftype, startx, endx,
+                spec_min=0, spec_max=None, intensities_constrained=False,
+                minimizer='Levenberg-Marquardt', max_iterations=500,
+                Save=False, Plot='None'):
     StartTime('FuryFit Multi')
 
     nHist = mtd[inputWS].getNumberHistograms()
@@ -262,8 +280,14 @@ def furyfitMult(inputWS, function, ftype, startx, endx, spec_min=0, spec_max=Non
 
     #fit multi-domian functino to workspace
     multi_domain_func, kwargs = createFuryMultiDomainFunction(function, tmp_fit_workspace)
-    Fit(Function=multi_domain_func, InputWorkspace=tmp_fit_workspace, WorkspaceIndex=0,
-        Output=output_workspace, CreateOutput=True, **kwargs)
+    Fit(Function=multi_domain_func,
+        InputWorkspace=tmp_fit_workspace,
+        WorkspaceIndex=0,
+        Output=output_workspace,
+        CreateOutput=True,
+        Minimizer=minimizer,
+        MaxIterations=max_iterations,
+        **kwargs)
 
     params_table = output_workspace + '_Parameters'
     transposeFitParametersTable(params_table)
