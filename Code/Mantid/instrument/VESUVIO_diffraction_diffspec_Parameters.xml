@@ -3,47 +3,44 @@
 
 <component-link name = "VESUVIO">
 
-<parameter name="analysis-type" type="string">
+  <parameter name="analysis-type" type="string">
     <value val="diffraction" />
-</parameter>
+  </parameter>
 
-<parameter name="analyser" type="string">
-  <value val="diff" />
-</parameter>
+  <parameter name="analyser" type="string">
+    <value val="diff" />
+  </parameter>
 
-<parameter name="reflection" type="string">
-  <value val="spec" />
-</parameter>
+  <parameter name="reflection" type="string">
+    <value val="spec" />
+  </parameter>
 
-<parameter name="spectra-min">
+  <parameter name="spectra-min">
     <value val="3" />
-</parameter>
+  </parameter>
 
-<parameter name="spectra-max">
+  <parameter name="spectra-max">
     <value val="134" />
-</parameter>
+  </parameter>
 
-<parameter name="Workflow.Diffraction.Correction" type="string">
+  <parameter name="Workflow.Diffraction.Correction" type="string">
     <value val="Monitor" />
-</parameter>
+  </parameter>
 
-<parameter name="Workflow.MonitorScalingFactor">
+  <parameter name="Workflow.MonitorScalingFactor">
     <value val="1" />
-</parameter>
+  </parameter>
 
-<parameter name="Workflow.Monitor1-SpectrumNumber">
-    <value val="0" />
-</parameter>
+  <!-- These two properties being set to invalid values (-1) will signal to the
+      reducer that it is not to correct for monitor efficiency.
+      -->
+  <parameter name="Workflow.Monitor1-Area">
+    <value val="-1" />
+  </parameter>
 
-<!-- These two properties being set to invalid values (-1) will signal to the
-    reducer that it is not to correct for monitor efficiency.
-    -->
-<parameter name="Workflow.Monitor1-Area">
+  <parameter name="Workflow.Monitor1-Thickness">
     <value val="-1" />
-</parameter>
-<parameter name="Workflow.Monitor1-Thickness">
-    <value val="-1" />
-</parameter>
+  </parameter>
 
 </component-link>
 
