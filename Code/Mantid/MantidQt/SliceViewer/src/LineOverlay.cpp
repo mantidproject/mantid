@@ -434,9 +434,9 @@ namespace SliceViewer
       // Round angle to closest 45 degrees, if in angle snap mode
       if (shiftPressed || m_angleSnapMode)
       {
-          // Convert the snap angle from degrees to radians
-          double angleSnapRad = m_angleSnap / (180.0 / M_PI);
-          angle = Utils::rounddbl(angle / angleSnapRad) * angleSnapRad;
+        // Convert the snap angle from degrees to radians
+        double angleSnapRad = m_angleSnap / (180.0 / M_PI);
+        angle = Utils::rounddbl(angle / angleSnapRad) * angleSnapRad;
       }
 
       // Round length to m_snapLength, if specified
