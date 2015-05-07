@@ -96,8 +96,6 @@ void TomoReconstruction::cleanup() {
 }
 
 void TomoReconstruction::doSetupSectionParameters() {
-  // TODO: should split the tabs out into their own files?
-
   // geometry, etc. niceties
   // on the left (just plugin names) 1/2, right: 2/3
   QList<int> sizes;
@@ -730,21 +728,22 @@ void TomoReconstruction::makeRunnableWithOptions(std::string &run,
 }
 
 void TomoReconstruction::doCancelJob(const std::string &id) {
-  // TODO: once the remote algorithms are rearranged into the
-  // 'RemoteJobManager' design, this will use:
-  // auto alg = Algorithm::fromString("EndRemoteTransaction");
-  auto alg = Algorithm::fromString("SCARFTomoReconstruction");
-  alg->initialize();
-  alg->setPropertyValue("UserName", getUsername());
-  alg->setPropertyValue("Action", "CancelJob");
-  alg->setPropertyValue("JobID", id);
+  std::string comp = getComputeResource();
+
+  auto algJob = Algorithm::fromString("AbortRemoteJob");
+  algJob->initialize();
+  algJob->setPropertyValue("ComputeResource", comp);
+  algJob->setPropertyValue("JobID", id);
   try {
-    alg->execute();
+    algJob->execute();
   } catch (std::runtime_error &e) {
     throw std::runtime_error(
         "Error when trying to cancel a reconstruction job: " +
         std::string(e.what()));
   }
+
+  // doesn't do StopRemoteTransaction. If there are multiple jobs per
+  // transaction there could be others that are still running.
 }
 
 void TomoReconstruction::toolSetupClicked() {
@@ -929,12 +928,12 @@ void TomoReconstruction::getJobStatusInfo() {
     QMutexLocker lockit(&m_statusMutex);
     m_jobsStatus.clear();
     m_jobsStatusCmds.clear();
-    // TODO: udate when we update to remote algorithms v2
-    // As SCARF doesn't provide all the info at the moment, and as we're
-    // using the SCARFTomoReconstruction algorithm, the
-    // IRemoteJobManager::RemoteJobInfo struct is for now used only partially
-    // (cmds out). So this loop feels both incomplete and an unecessary second
-    // step that could be avoided.
+    // TODO: udate when we update to remote algorithms v2 and more
+    // info might become available from SCARF.
+    // As SCARF doesn't provide all the info at the moment, the
+    // IRemoteJobManager::RemoteJobInfo struct is for now used only
+    // partially (cmds out). So this loop feels both incomplete and an
+    // unecessary second step that could be avoided.
     for (size_t i = 0; i < ids.size(); ++i) {
       IRemoteJobManager::RemoteJobInfo ji;
       ji.id = ids[i];
