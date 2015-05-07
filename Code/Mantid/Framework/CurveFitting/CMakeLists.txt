@@ -53,6 +53,7 @@ set ( SRC_FILES
 	src/Gaussian.cpp
 	src/GaussianComptonProfile.cpp
 	src/GramCharlierComptonProfile.cpp
+	src/IFittingAlgorithm.cpp
 	src/IkedaCarpenterPV.cpp
 	src/LatticeDomainCreator.cpp
 	src/LatticeFunction.cpp
@@ -170,6 +171,7 @@ set ( INC_FILES
 	inc/MantidCurveFitting/Gaussian.h
 	inc/MantidCurveFitting/GaussianComptonProfile.h
 	inc/MantidCurveFitting/GramCharlierComptonProfile.h
+	inc/MantidCurveFitting/IFittingAlgorithm.h
 	inc/MantidCurveFitting/IkedaCarpenterPV.h
 	inc/MantidCurveFitting/Jacobian.h
 	inc/MantidCurveFitting/LatticeDomainCreator.h
