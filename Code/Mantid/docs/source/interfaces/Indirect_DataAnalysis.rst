@@ -37,6 +37,18 @@ Manage Directories
   Opens the Manage Directories dialog allowing you to change your search directories
   and default save directory and enable/disable data archive search.
 
+Bayesian
+--------
+
+There is the option to perform Bayesian data analysis on the I(Q, t) Fit ConvFit
+tabs on this interface by using the :ref:`FABADA` fitting minimizer, however in
+order to to use this you will need to use better starting parameters than the
+defaults provided by the interface.
+
+You may also experience issues where the starting parameters may give a reliable
+fit on one spectra but not others, in this case the best option is to reduce
+the number of spectra that are fitted in one operation.
+
 Elwin
 -----
 
