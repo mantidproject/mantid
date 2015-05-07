@@ -617,11 +617,7 @@ MultiLayer* MantidUI::plotMDList(const QStringList& wsNames, const int plotAxis,
 
       // Using information from the first graph
       if( i == 0 && isGraphNew )
-      {
-        g->setXAxisTitle(data->getXAxisLabel());
-        g->setYAxisTitle(data->getYAxisLabel());
         g->setAutoScale();
-      }
     }
 
   }
@@ -2770,6 +2766,7 @@ void MantidUI::importNumSeriesLog(const QString &wsName, const QString &logName,
       g->setCurvePen(iFilterCurve, pn);
     }
   }
+  // THIS SECTION NEEDS TO BE FIXED REF #11710
   g->setXAxisTitle(t->colLabel(0));
   g->setYAxisTitle(t->colLabel(1).section(".",0,0));
   g->setTitle(label);
@@ -2994,8 +2991,6 @@ void MantidUI::setUpBinGraph(MultiLayer* ml, const QString& Name, Mantid::API::M
   {
     xtitle = MantidQt::API::PlotAxis(*workspace, 1).title();
   }
-  g->setXAxisTitle(xtitle);
-  g->setYAxisTitle(MantidQt::API::PlotAxis(false, *workspace).title());
 }
 
 /**
@@ -3221,8 +3216,6 @@ MultiLayer* MantidUI::plot1D(const QMultiMap<QString,int>& toPlot, bool spectrum
       return NULL;
     }
 
-    g->setXAxisTitle(firstCurve->mantidData()->getXAxisLabel());
-    g->setYAxisTitle(firstCurve->mantidData()->getYAxisLabel());
     g->setAutoScale();
     /* The 'setAutoScale' above is needed to make sure that the plot initially encompasses all the
      * data points. However, this has the side-effect suggested by its name: all the axes become
@@ -3275,6 +3268,7 @@ void MantidUI::showSequentialPlot(Ui::SequentialFitDialog* ui, MantidQt::MantidW
     MultiLayer* ml = appWindow()->multilayerPlot(t,colNames,ui->cbCurveType->currentIndex());
     // set plot titles
     Graph* g = ml->activeGraph();
+    // THIS SECTION NEEDS TO BE FIXED REF #11710
     if (g)
     {
       if (ui->ckbLogPlot->isChecked())
@@ -3405,6 +3399,7 @@ MultiLayer* MantidUI::drawSingleColorFillPlot(const QString & wsName, Graph::Cur
 
   plot->setTitle(wsName);
   using MantidQt::API::PlotAxis;
+  // THIS SECTION NEEDS TO BE FIXED REF #11710
   plot->setXAxisTitle(PlotAxis(*workspace, 0).title());
   plot->setYAxisTitle(PlotAxis(*workspace, 1).title());
 

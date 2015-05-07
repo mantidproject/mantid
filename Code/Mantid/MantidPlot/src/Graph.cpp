@@ -3074,6 +3074,13 @@ void Graph::updateScale()
     updateSecondaryAxis(QwtPlot::yRight);
   }
 
+  auto firstCurve = dynamic_cast<MantidCurve*>(curve(0));
+  if (firstCurve)
+  {
+    setXAxisTitle(firstCurve->mantidData()->getXAxisLabel());
+    setYAxisTitle(firstCurve->mantidData()->getYAxisLabel());
+  }
+
   d_plot->replot();//TODO: avoid 2nd replot!
   d_zoomer[0]->setZoomBase(false);
 }
