@@ -446,9 +446,9 @@ namespace SliceViewer
       double length;
       //for axis aligned angles just use respective distance for the length
       if (fmod(angle,M_PI) == 0 ) {
-        length = abs(currentDiff.x());
+        length = fabs(currentDiff.x());
       } else if (fmod(angle,M_PI) == M_PI/2 ) {
-        length = abs(currentDiff.y());
+        length = fabs(currentDiff.y());
       } else {
         length = sqrt(currentDiff.x()*currentDiff.x() + currentDiff.y()*currentDiff.y());
       }
