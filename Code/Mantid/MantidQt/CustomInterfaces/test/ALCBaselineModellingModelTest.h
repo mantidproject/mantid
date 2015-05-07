@@ -98,6 +98,24 @@ public:
       TS_ASSERT_DELTA(corrected->readY(0)[8], 97, 1E-8);
     }
 
+    ITableWorkspace_sptr parameters = m_model->parameterTable();
+    TS_ASSERT(parameters);
+
+    if (parameters)
+    {
+      // Check table dimensions
+      TS_ASSERT_EQUALS(parameters->rowCount(), 2);
+      TS_ASSERT_EQUALS(parameters->columnCount(), 3);
+
+      // Check table entries
+      TS_ASSERT_EQUALS(parameters->String(0,0), "A0");
+      TS_ASSERT_EQUALS(parameters->Double(0,1), 3);
+      TS_ASSERT_DELTA (parameters->Double(0,2), 0.447214,1E-6);
+      TS_ASSERT_EQUALS(parameters->String(1,0), "Cost function value");
+      TS_ASSERT_DELTA (parameters->Double(1,1), 1.250000,1E-6);
+      TS_ASSERT_EQUALS(parameters->Double(1,2), 0);
+    }
+
     TS_ASSERT_EQUALS(m_model->sections(), sections);
   }
 

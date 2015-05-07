@@ -170,10 +170,21 @@ void TomoReconstruction::doSetupSectionRun() {
   sizes[1] = 100;
   m_ui.splitter_run_jobs->setSizes(sizes);
 
-  setupComputeResource();
-  setupRunTool();
-
   m_ui.label_image_name->setText("none");
+
+  m_ui.pushButton_reconstruct->setEnabled(false);
+  m_ui.pushButton_run_tool_setup->setEnabled(false);
+  m_ui.pushButton_run_job_cancel->setEnabled(false);
+  m_ui.pushButton_run_job_visualize->setEnabled(false);
+
+  try {
+    setupComputeResource();
+    setupRunTool();
+  } catch (std::runtime_error &e) {
+    g_log.error() << "Failed to initialize remote compute resource(s). This "
+                     "custom interface will not work. Error description: "
+                  << e.what() << std::endl;
+  }
 
   enableLoggedActions(m_loggedIn);
 
@@ -427,17 +438,18 @@ void TomoReconstruction::setupComputeResource() {
     const Mantid::Kernel::FacilityInfo &fac =
         Mantid::Kernel::ConfigService::Instance().getFacility();
     if (fac.name() != m_facility) {
-      userError("Facility not supported",
-                "This interface is designed "
-                "to be used at " +
-                    m_facility +
-                    ". You will probably not be "
-                    "able to use it in a useful way because your facility "
-                    "is " +
-                    fac.name() +
-                    ". If you have set that facility "
-                    "facility by mistake in your settings, please update it.");
-      return;
+      g_log.error()
+          << "Facility not supported. This interface is designed "
+             "to be used at " +
+                 m_facility +
+                 ". You will probably not be able to use it in a useful way "
+                 "because your facility is " +
+                 fac.name() +
+                 ". If you have set that facility by mistake in your settings, "
+                 "please update it." << std::endl;
+      throw std::runtime_error(
+          "Failed to initialize because the facility is  " + fac.name() +
+          " (and not " + m_facility + ").");
     }
 
     if (m_computeRes.size() < 1) {
@@ -1273,18 +1285,25 @@ std::string TomoReconstruction::getPassword() {
  */
 void TomoReconstruction::drawImage(const MatrixWorkspace_sptr &ws) {
   // From logs we expect a name "run_title", width "Axis1" and height "Axis2"
-  size_t width, height;
+  const size_t MAXDIM = 2048 * 16;
+  size_t width;
   try {
     width = boost::lexical_cast<size_t>(ws->run().getLogData("Axis1")->value());
+    // TODO: add a settings option for this (like max mem allocation for images)?
+    if (width >= MAXDIM)
+      width = MAXDIM;
   } catch (std::exception &e) {
     userError("Cannot load image", "There was a problem while trying to "
                                    "find the width of the image: " +
                                        std::string(e.what()));
     return;
   }
+  size_t height;
   try {
     height =
         boost::lexical_cast<size_t>(ws->run().getLogData("Axis2")->value());
+    if (height >= MAXDIM)
+      height = MAXDIM;
   } catch (std::exception &e) {
     userError("Cannot load image", "There was a problem while trying to "
                                    "find the height of the image: " +
