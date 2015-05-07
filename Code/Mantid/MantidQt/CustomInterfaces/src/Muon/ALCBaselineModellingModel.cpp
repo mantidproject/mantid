@@ -96,7 +96,7 @@ namespace CustomInterfaces
 
   MatrixWorkspace_sptr ALCBaselineModellingModel::exportWorkspace()
   {
-    if ( m_data->getNumberHistograms() == 3 ) {
+    if ( m_data && m_data->getNumberHistograms() == 3 ) {
 
       // Export results only if data have been fit, that is,
       // if m_data has three histograms

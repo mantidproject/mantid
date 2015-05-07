@@ -19,7 +19,7 @@ namespace CustomInterfaces
 
   MatrixWorkspace_sptr ALCPeakFittingModel::exportWorkspace()
   {
-    if ( m_data->getNumberHistograms() == 3 ) {
+    if ( m_data && m_data->getNumberHistograms() == 3 ) {
 
       return boost::const_pointer_cast<MatrixWorkspace>(m_data);
 
