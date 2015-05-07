@@ -17,9 +17,48 @@
 namespace Mantid {
 namespace CurveFitting {
 
-using Mantid::Kernel::Direction;
-using Mantid::API::WorkspaceProperty;
-using API::IDomainCreator;
+using namespace Mantid::Kernel;
+using namespace Mantid::API;
+
+//----------------------------------------------------------------------------------------------
+namespace {
+/// Create a domain creator for a particular function and workspace pair.
+IDomainCreator *createDomainCreator(const IFunction *fun, const Workspace *ws,
+                                    const std::string &workspacePropertyName,
+                                    IPropertyManager* manager,
+                                    IDomainCreator::DomainType domainType
+                                    ) {
+
+  IDomainCreator *creator = NULL;
+
+  // ILatticeFunction requires API::LatticeDomain.
+  if (dynamic_cast<const ILatticeFunction*>(fun)) {
+    creator = new LatticeDomainCreator(manager, workspacePropertyName);
+  } else {
+    if (dynamic_cast<const API::MatrixWorkspace*>(ws) &&
+        !dynamic_cast<const IFunctionMD*>(fun)) {
+      /* IFunction1DSpectrum needs a different domain creator. If a function
+       * implements that type, we need to react appropriately at this point.
+       * Otherwise, the default creator FitMW is used.
+       */
+      if (dynamic_cast<const IFunction1DSpectrum*>(fun)) {
+        creator = new SeqDomainSpectrumCreator(manager, workspacePropertyName);
+      } else {
+        creator = new FitMW(manager, workspacePropertyName, domainType);
+      }
+    } else {
+      try {
+        creator = API::DomainCreatorFactory::Instance().createDomainCreator(
+            "FitMD", manager, workspacePropertyName, domainType);
+      }
+      catch (Kernel::Exception::NotFoundError &) {
+        throw std::invalid_argument("Unsupported workspace type" + ws->id());
+      }
+    }
+  }
+  return creator;
+}
+}
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
@@ -134,13 +173,11 @@ void IFittingAlgorithm::setFunction() {
 
 /**
  * Add a new workspace to the fit. The workspace is in the property named
- * workspacePropertyName
+ * workspacePropertyName.
  * @param workspacePropertyName :: A workspace property name (eg InputWorkspace
- * or InputWorkspace_2).
- *  The property must already exist in the algorithm.
+ *   or InputWorkspace_2). The property must already exist in the algorithm.
  * @param addProperties :: allow for declaration of properties that specify the
- * dataset
- *  within the workspace to fit to.
+ *   dataset within the workspace to fit to.
  */
 void IFittingAlgorithm::addWorkspace(const std::string &workspacePropertyName,
                        bool addProperties) {
@@ -153,35 +190,11 @@ void IFittingAlgorithm::addWorkspace(const std::string &workspacePropertyName,
   const size_t index =
       suffix.empty() ? 0 : boost::lexical_cast<size_t>(suffix.substr(1));
 
-  API::IFunction_sptr fun = getProperty("Function");
-  IDomainCreator *creator = NULL;
+  IFunction_sptr fun = getProperty("Function");
   setDomainType();
 
-  // ILatticeFunction requires API::LatticeDomain.
-  if (boost::dynamic_pointer_cast<API::ILatticeFunction>(fun)) {
-    creator = new LatticeDomainCreator(this, workspacePropertyName);
-  } else {
-    if (boost::dynamic_pointer_cast<const API::MatrixWorkspace>(ws) &&
-        !boost::dynamic_pointer_cast<API::IFunctionMD>(fun)) {
-      /* IFunction1DSpectrum needs a different domain creator. If a function
-       * implements that type, we need to react appropriately at this point.
-       * Otherwise, the default creator FitMW is used.
-       */
-      if (boost::dynamic_pointer_cast<API::IFunction1DSpectrum>(fun)) {
-        creator = new SeqDomainSpectrumCreator(this, workspacePropertyName);
-      } else {
-        creator = new FitMW(this, workspacePropertyName, m_domainType);
-      }
-    } else {
-      try {
-        creator = API::DomainCreatorFactory::Instance().createDomainCreator(
-            "FitMD", this, workspacePropertyName, m_domainType);
-      }
-      catch (Kernel::Exception::NotFoundError &) {
-        throw std::invalid_argument("Unsupported workspace type" + ws->id());
-      }
-    }
-  }
+  IDomainCreator *creator = createDomainCreator(
+      fun.get(), ws.get(), workspacePropertyName, this, m_domainType);
 
   if (!m_domainCreator) {
     if (m_workspacePropertyNames.empty()) {
@@ -217,7 +230,7 @@ void IFittingAlgorithm::addWorkspace(const std::string &workspacePropertyName,
 
 /**
  * Collect all input workspace property names in the m_workspacePropertyNames
- * vector
+ * vector.
  */
 void IFittingAlgorithm::addWorkspaces() {
   setDomainType();
@@ -233,35 +246,9 @@ void IFittingAlgorithm::addWorkspaces() {
         dynamic_cast<API::IWorkspaceProperty *>(*prop)) {
       const std::string workspacePropertyName = (**prop).name();
       API::Workspace_const_sptr ws = getProperty(workspacePropertyName);
-      IDomainCreator *creator = NULL;
-
-      // ILatticeFunction requires API::LatticeDomain.
-      if (boost::dynamic_pointer_cast<API::ILatticeFunction>(m_function)) {
-        creator = new LatticeDomainCreator(this, workspacePropertyName);
-      } else {
-        if (boost::dynamic_pointer_cast<const API::MatrixWorkspace>(ws) &&
-            !boost::dynamic_pointer_cast<API::IFunctionMD>(m_function)) {
-          /* IFunction1DSpectrum needs a different domain creator. If a function
-           * implements that type, we need to react appropriately at this point.
-           * Otherwise, the default creator FitMW is used.
-           */
-          if (boost::dynamic_pointer_cast<API::IFunction1DSpectrum>(
-                  m_function)) {
-            creator = new SeqDomainSpectrumCreator(this, workspacePropertyName);
-          } else {
-            creator = new FitMW(this, workspacePropertyName, m_domainType);
-          }
-        } else { // don't know what to do with this workspace
-          try {
-            creator = API::DomainCreatorFactory::Instance().createDomainCreator(
-                "FitMD", this, workspacePropertyName, m_domainType);
-          }
-          catch (Kernel::Exception::NotFoundError &) {
-            throw std::invalid_argument("Unsupported workspace type" +
-                                        ws->id());
-          }
-        }
-      }
+      IDomainCreator *creator =
+          createDomainCreator(m_function.get(), ws.get(), workspacePropertyName,
+                              this, m_domainType);
 
       const size_t n = std::string("InputWorkspace").size();
       const std::string suffix = (workspacePropertyName.size() > n)
