@@ -387,10 +387,21 @@ namespace SliceViewer
     double distance = fabs( diff.x()*(current.y()-pixA.y()) - (current.x() - pixA.x())*diff.y() )
         / sqrt(diff.x()*diff.x() + diff.y()*diff.y());
 
-    // Margin of 6 pixels, and must be between the 2 limits
-    return ((distance < 7) &&
-        isBetween( current.x(), pixA.x(), pixB.x()) &&
-        isBetween( current.y(), pixA.y(), pixB.y()) );
+    // Margin of 6 pixels, and must be between the 2 limits (if the limits are not the same)
+    bool retval = false;
+    if (distance < 7)
+    {
+      retval = true;
+      if ((pixA.x() != pixB.x()) && (!isBetween( current.x(), pixA.x(), pixB.x())))
+      {
+        retval = false;
+      }
+      if ((pixA.y() != pixB.y()) && (!isBetween( current.y(), pixA.y(), pixB.y())))
+      {
+        retval = false;
+      }
+    }
+    return retval;
   }
 
   //-----------------------------------------------------------------------------------------------
@@ -423,9 +434,9 @@ namespace SliceViewer
       // Round angle to closest 45 degrees, if in angle snap mode
       if (shiftPressed || m_angleSnapMode)
       {
-        // Convert the snap angle from degrees to radians
-        double angleSnapRad = m_angleSnap / (180.0 / M_PI);
-        angle = Utils::rounddbl(angle / angleSnapRad) * angleSnapRad;
+          // Convert the snap angle from degrees to radians
+          double angleSnapRad = m_angleSnap / (180.0 / M_PI);
+          angle = Utils::rounddbl(angle / angleSnapRad) * angleSnapRad;
       }
 
       // Round length to m_snapLength, if specified
