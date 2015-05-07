@@ -86,6 +86,9 @@ namespace CustomInterfaces
     /// Disables points which shouldn't be used for fitting
     static void disableUnwantedPoints(MatrixWorkspace_sptr ws, const std::vector<Section>& sections);
 
+    /// Enable previously disabled points
+    static void enableDisabledPoints(MatrixWorkspace_sptr destWs, MatrixWorkspace_const_sptr sourceWs);
+
   };
 
 } // namespace CustomInterfaces

@@ -39,8 +39,10 @@ namespace CustomInterfaces
     fit->setProperty("CreateOutput", true);
     fit->execute();
 
-    MatrixWorkspace_const_sptr fitOutput = fit->getProperty("OutputWorkspace");
+    MatrixWorkspace_sptr fitOutput = fit->getProperty("OutputWorkspace");
     m_parameterTable = fit->getProperty("OutputParameters");
+
+    enableDisabledPoints(fitOutput,m_data);
 
     setCorrectedData(fitOutput);
     setFittedFunction(funcToFit);
@@ -92,6 +94,18 @@ namespace CustomInterfaces
         ws->dataE(0)[i] = DISABLED_ERR;
       }
     }
+  }
+
+  /**
+   * Enable points that were disabled for fit
+   * @param destWs :: Workspace to enable points in
+   * @param sourceWs :: Workspace with original errors
+   */
+  void ALCBaselineModellingModel::enableDisabledPoints (MatrixWorkspace_sptr destWs, MatrixWorkspace_const_sptr sourceWs)
+  {
+    // Unwanted points were disabled by setting their errors to very high values.
+    // We recover here the original errors stored in sourceWs
+    destWs->dataE(0) = sourceWs->readE(0);
   }
 
   MatrixWorkspace_sptr ALCBaselineModellingModel::exportWorkspace()
