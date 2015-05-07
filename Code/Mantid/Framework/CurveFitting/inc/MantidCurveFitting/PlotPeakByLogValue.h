@@ -112,7 +112,12 @@ private:
   std::string getMinimizerString(const std::string &wsName,
                                  const std::string &specIndex);
 
+  /// Base name of output workspace
+  std::string m_baseName;
+
+  /// Record of workspaces output by the minimizer
   std::map<std::string, std::vector<std::string>> m_minimizerWorkspaces;
+
 };
 
 } // namespace CurveFitting

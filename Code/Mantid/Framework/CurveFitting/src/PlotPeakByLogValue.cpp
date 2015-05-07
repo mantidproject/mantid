@@ -147,7 +147,7 @@ void PlotPeakByLogValue::exec() {
   bool createFitOutput = getProperty("CreateOutput");
   bool outputCompositeMembers = getProperty("OutputCompositeMembers");
   bool outputConvolvedMembers = getProperty("ConvolveMembers");
-  std::string baseName = getPropertyValue("OutputWorkspace");
+  m_baseName = getPropertyValue("OutputWorkspace");
 
   bool isDataName = false; // if true first output column is of type string and
                            // is the data source name
@@ -333,19 +333,19 @@ void PlotPeakByLogValue::exec() {
     groupAlg->initialize();
     groupAlg->setProperty("InputWorkspaces", covariance_workspaces);
     groupAlg->setProperty("OutputWorkspace",
-                          baseName + "_NormalisedCovarianceMatrices");
+                          m_baseName + "_NormalisedCovarianceMatrices");
     groupAlg->execute();
 
     groupAlg = AlgorithmManager::Instance().createUnmanaged("GroupWorkspaces");
     groupAlg->initialize();
     groupAlg->setProperty("InputWorkspaces", parameter_workspaces);
-    groupAlg->setProperty("OutputWorkspace", baseName + "_Parameters");
+    groupAlg->setProperty("OutputWorkspace", m_baseName + "_Parameters");
     groupAlg->execute();
 
     groupAlg = AlgorithmManager::Instance().createUnmanaged("GroupWorkspaces");
     groupAlg->initialize();
     groupAlg->setProperty("InputWorkspaces", fit_workspaces);
-    groupAlg->setProperty("OutputWorkspace", baseName + "_Workspaces");
+    groupAlg->setProperty("OutputWorkspace", m_baseName + "_Workspaces");
     groupAlg->execute();
   }
 
@@ -356,7 +356,7 @@ void PlotPeakByLogValue::exec() {
         AlgorithmManager::Instance().createUnmanaged("GroupWorkspaces");
     groupAlg->initialize();
     groupAlg->setProperty("InputWorkspaces", (*it).second);
-    groupAlg->setProperty("OutputWorkspace", baseName + "_" + paramName);
+    groupAlg->setProperty("OutputWorkspace", m_baseName + "_" + paramName);
     groupAlg->execute();
   }
 }
@@ -588,6 +588,7 @@ PlotPeakByLogValue::getMinimizerString(const std::string &wsName,
   boost::replace_all(format, "$wsname", wsName);
   boost::replace_all(format, "$wsindex", specIndex);
   boost::replace_all(format, "$basename", wsBaseName);
+  boost::replace_all(format, "$outputname", m_baseName);
 
   auto minimizer = FuncMinimizerFactory::Instance().createMinimizer(format);
   auto minimizerProps = minimizer->getProperties();

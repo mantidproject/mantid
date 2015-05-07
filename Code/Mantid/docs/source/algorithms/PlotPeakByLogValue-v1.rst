@@ -84,6 +84,9 @@ The possible flags are:
   A convinience flag for :code:`$wsname_$wsindex` (the same format the fit
   result and parameter output takes)
 
+:code:`$outputname`
+  The output workspace name (i.e. the value of the OutputWorkspace property).
+
 Usage
 -----
 
