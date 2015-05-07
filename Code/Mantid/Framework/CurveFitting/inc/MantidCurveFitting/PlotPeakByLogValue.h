@@ -107,6 +107,12 @@ private:
 
   /// Create a list of input workspace names
   std::vector<InputData> makeNames() const;
+
+  /// Create a minimizer string based on template string provided
+  std::string getMinimizerString(const std::string &wsName,
+                                 const std::string &specIndex);
+
+  std::map<std::string, std::vector<std::string>> m_minimizerWorkspaces;
 };
 
 } // namespace CurveFitting
