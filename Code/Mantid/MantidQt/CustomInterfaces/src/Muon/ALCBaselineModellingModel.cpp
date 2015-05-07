@@ -39,17 +39,10 @@ namespace CustomInterfaces
     fit->setProperty("CreateOutput", true);
     fit->execute();
 
-    MatrixWorkspace_sptr fitOutput = fit->getProperty("OutputWorkspace");
+    MatrixWorkspace_const_sptr fitOutput = fit->getProperty("OutputWorkspace");
     m_parameterTable = fit->getProperty("OutputParameters");
 
-    IAlgorithm_sptr extract = AlgorithmManager::Instance().create("ExtractSingleSpectrum");
-    extract->setChild(true);
-    extract->setProperty("InputWorkspace", fitOutput);
-    extract->setProperty("WorkspaceIndex", 2);
-    extract->setProperty("OutputWorkspace", "__NotUsed__");
-    extract->execute();
-
-    setCorrectedData(extract->getProperty("OutputWorkspace"));
+    setCorrectedData(fitOutput);
     setFittedFunction(funcToFit);
     m_sections = sections;
 
@@ -103,43 +96,11 @@ namespace CustomInterfaces
 
   MatrixWorkspace_sptr ALCBaselineModellingModel::exportWorkspace()
   {
-    if ( m_data && m_fittedFunction && m_correctedData ) {
+    if ( m_data->getNumberHistograms() == 3 ) {
 
-      IAlgorithm_sptr clone = AlgorithmManager::Instance().create("CloneWorkspace");
-      clone->setChild(true);
-      clone->setProperty("InputWorkspace", boost::const_pointer_cast<MatrixWorkspace>(m_data));
-      clone->setProperty("OutputWorkspace", "__NotUsed");
-      clone->execute();
-
-      Workspace_sptr cloneResult = clone->getProperty("OutputWorkspace");
-
-      Workspace_sptr baseline = ALCHelper::createWsFromFunction(m_fittedFunction, m_data->readX(0));
-
-      IAlgorithm_sptr join1 = AlgorithmManager::Instance().create("ConjoinWorkspaces");
-      join1->setChild(true);
-      join1->setProperty("InputWorkspace1", cloneResult);
-      join1->setProperty("InputWorkspace2", baseline);
-      join1->setProperty("CheckOverlapping", false);
-      join1->execute();
-
-      MatrixWorkspace_sptr join1Result = join1->getProperty("InputWorkspace1");
-
-      IAlgorithm_sptr join2 = AlgorithmManager::Instance().create("ConjoinWorkspaces");
-      join2->setChild(true);
-      join2->setProperty("InputWorkspace1", join1Result);
-      join2->setProperty("InputWorkspace2", boost::const_pointer_cast<MatrixWorkspace>(m_correctedData));
-      join2->setProperty("CheckOverlapping", false);
-      join2->execute();
-
-      MatrixWorkspace_sptr result = join2->getProperty("InputWorkspace1");
-
-      TextAxis* yAxis = new TextAxis(result->getNumberHistograms());
-      yAxis->setLabel(0,"Data");
-      yAxis->setLabel(1,"Baseline");
-      yAxis->setLabel(2,"Corrected");
-      result->replaceAxis(1,yAxis);
-
-      return result;
+      // Export results only if data have been fit, that is,
+      // if m_data has three histograms
+      return boost::const_pointer_cast<MatrixWorkspace>(m_data);
 
     } else {
     
@@ -184,7 +145,7 @@ namespace CustomInterfaces
 
   void ALCBaselineModellingModel::setCorrectedData(MatrixWorkspace_const_sptr data)
   {
-    m_correctedData = data;
+    m_data = data;
     emit correctedDataChanged();
   }
 
@@ -192,6 +153,30 @@ namespace CustomInterfaces
   {
     m_fittedFunction = function;
     emit fittedFunctionChanged();
+  }
+
+  MatrixWorkspace_const_sptr ALCBaselineModellingModel::data() const
+  {
+    IAlgorithm_sptr extract = AlgorithmManager::Instance().create("ExtractSingleSpectrum");
+    extract->setChild(true);
+    extract->setProperty("InputWorkspace", boost::const_pointer_cast<MatrixWorkspace>(m_data));
+    extract->setProperty("WorkspaceIndex", 0);
+    extract->setProperty("OutputWorkspace", "__NotUsed__");
+    extract->execute();
+    MatrixWorkspace_const_sptr result = extract->getProperty("OutputWorkspace");
+    return result;
+  }
+
+  MatrixWorkspace_const_sptr ALCBaselineModellingModel::correctedData() const
+  {
+    IAlgorithm_sptr extract = AlgorithmManager::Instance().create("ExtractSingleSpectrum");
+    extract->setChild(true);
+    extract->setProperty("InputWorkspace", boost::const_pointer_cast<MatrixWorkspace>(m_data));
+    extract->setProperty("WorkspaceIndex", 2);
+    extract->setProperty("OutputWorkspace", "__NotUsed__");
+    extract->execute();
+    MatrixWorkspace_const_sptr result = extract->getProperty("OutputWorkspace");
+    return result;
   }
 
 } // namespace CustomInterfaces
