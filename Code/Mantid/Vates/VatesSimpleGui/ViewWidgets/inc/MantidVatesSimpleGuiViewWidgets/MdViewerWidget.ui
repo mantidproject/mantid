@@ -185,18 +185,18 @@
        <property name="orientation">
         <enum>Qt::Vertical</enum>
        </property>
-      <widget class="pqPipelineBrowserWidget" name="pipelineBrowser" native="true">
-       <property name="minimumSize">
-        <size>
-         <width>350</width>
-         <height>50</height>
-        </size>
-       </property>
-      </widget>
-      <widget class="QTabWidget" name="propInfoTabs">
-       <property name="currentIndex">
-        <number>0</number>
-       </property>
+       <widget class="pqPipelineBrowserWidget" name="pipelineBrowser" native="true">
+        <property name="minimumSize">
+         <size>
+          <width>350</width>
+          <height>50</height>
+         </size>
+        </property>
+       </widget>
+       <widget class="QTabWidget" name="propInfoTabs">
+        <property name="currentIndex">
+         <number>0</number>
+        </property>
         <widget class="QWidget" name="properties">
          <attribute name="title">
           <string>Properties</string>
@@ -222,8 +222,8 @@
               <rect>
                <x>0</x>
                <y>0</y>
-               <width>105</width>
-               <height>387</height>
+               <width>98</width>
+               <height>28</height>
               </rect>
              </property>
              <layout class="QVBoxLayout" name="verticalLayout">
@@ -248,6 +248,9 @@
       </widget>
      </widget>
      <widget class="QDockWidget" name="colorMapEditorDock">
+      <property name="floating">
+       <bool>true</bool>
+      </property>
       <property name="windowTitle">
        <string>Color Map Editor</string>
       </property>
@@ -334,11 +337,6 @@
    <extends>QWidget</extends>
    <header>pqColorMapEditor.h</header>
    <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>pqProxiesWidget</class>
-   <extends>QWidget</extends>
-   <header>pqProxiesWidget.h</header>
   </customwidget>
  </customwidgets>
  <resources>

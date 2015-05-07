@@ -105,6 +105,7 @@
 #include <QUrl>
 #include <QWidget>
 #include <QMessageBox>
+#include <QRect>
 
 #include <iostream>
 #include <vector>
@@ -216,6 +217,14 @@ void MdViewerWidget::setupUiAndConnections()
   pqApplicationCore::instance()->registerManager(
     "COLOR_EDITOR_PANEL", this->ui.colorMapEditorDock);
   this->ui.colorMapEditorDock->hide();
+
+  // 
+  QObject::connect(this->ui.colorMapEditorDock, SIGNAL(visibilityChanged(bool)),
+                    this, SLOT(handleColorMapEditorDockPosition(bool)));
+  QObject::connect(this->ui.colorMapEditorDock, SIGNAL(topLevelChanged(bool)),
+                    this, SLOT(handleColorMapEditorDockWhenDocking(bool)));
+
+
   //this->connect(this->ui.proxiesPanel,SIGNAL(changeFinished(vtkSMProxy*)),SLOT(panelChanged()));
   QAction* temp = new QAction(this);
   pqDeleteReaction* deleteHandler = new pqDeleteReaction(temp);
@@ -241,7 +250,38 @@ void MdViewerWidget::panelChanged()
 {
     this->currentView->renderAll();
 }
-    
+
+/**
+ * This is a hack to position the color map editor panel.
+ * We check if the visibility of the dock has changed and reposition it according to the VSI
+ */
+void MdViewerWidget::handleColorMapEditorDockPosition(bool)
+{
+  // Get the position of the VSI
+  QRect rect =   this->geometry();
+  QPoint pointGlobal = this->mapToGlobal(rect.topLeft());
+
+  // Set the color map editor dock to this position.
+  this->ui.colorMapEditorDock->move(pointGlobal.x(), pointGlobal.y());
+}
+
+/**
+ * We don't want the user to be able to redock the window. If the user tries to redock, 
+ * then we hide the color map editor and set it back to floating.
+  *@param isFloating :: true if is floating
+ */
+void MdViewerWidget::handleColorMapEditorDockWhenDocking(bool isFloating)
+{
+  // Hide the color map editor
+  this->ui.colorMapEditorDock->hide();
+
+  // If the color map editor is not floating, then make it floating
+  if (!isFloating)
+  {
+    this->ui.colorMapEditorDock->setFloating(true);
+  }
+}
+
 /**
  * This function places the standard view to the main window, installs an
  * event filter, tweaks the UI layout for the view and calls the routine that

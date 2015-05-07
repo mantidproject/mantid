@@ -28,7 +28,8 @@ class QAction;
 class QEvent;
 class QHBoxLayout;
 class QObject;
-class QString;
+
+
 
 namespace Mantid
 {
@@ -118,6 +119,10 @@ protected slots:
   void onUnbin();
   /// On switching an MDEvent source to a temporary source.
   void onSwitchSoures(std::string rebinnedWorkspaceName, std::string sourceType);
+  /// handles the position of the color editor panel 
+  void handleColorMapEditorDockPosition(bool);
+  /// handles the position of the color editor panel when being undocked or redocked
+  void handleColorMapEditorDockWhenDocking(bool isFloating);
 protected:
   /// Handle workspace preDeletion tasks.
   void preDeleteHandle(const std::string &wsName,
