@@ -9,7 +9,9 @@ using namespace Mantid::API;
 using Mantid::PythonInterface::Registry::DataItemInterface;
 using namespace boost::python;
 
+// clang-format off
 void export_IMDWorkspace()
+// clang-format on
 {
   boost::python::enum_<Mantid::API::MDNormalization>("MDNormalization")
           .value("NoNormalization", Mantid::API::NoNormalization)

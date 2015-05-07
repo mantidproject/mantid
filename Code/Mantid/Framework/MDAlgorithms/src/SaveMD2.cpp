@@ -15,11 +15,13 @@
 #include "MantidDataObjects/MDBoxFlatTree.h"
 #include "MantidDataObjects/BoxControllerNeXusIO.h"
 
+// clang-format off
 #if defined(__GLIBCXX__) && __GLIBCXX__ >= 20100121 // libstdc++-4.4.3
 typedef std::unique_ptr< ::NeXus::File> file_holder_type;
 #else
 typedef std::auto_ptr< ::NeXus::File> file_holder_type;
 #endif
+// clang-format on
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -121,6 +123,16 @@ void SaveMD2::doSaveHisto(Mantid::DataObjects::MDHistoWorkspace_sptr ws) {
     }
   }
 
+  // Write out the affine matrices
+  MDBoxFlatTree::saveAffineTransformMatricies(
+      file, boost::dynamic_pointer_cast<const IMDWorkspace>(ws));
+
+  // Check that the typedef has not been changed. The NeXus types would need
+  // changing if it does!
+  assert(sizeof(signal_t) == sizeof(double));
+
+  file->makeGroup("data", "NXdata", true);
+
   // Save each axis dimension as an array
   size_t numDims = ws->getNumDims();
   std::string axes_label;
@@ -139,14 +151,6 @@ void SaveMD2::doSaveHisto(Mantid::DataObjects::MDHistoWorkspace_sptr ws) {
       axes_label.insert(0, ":");
     axes_label.insert(0, dim->getDimensionId());
   }
-
-  // Write out the affine matrices
-  MDBoxFlatTree::saveAffineTransformMatricies(
-      file, boost::dynamic_pointer_cast<const IMDWorkspace>(ws));
-
-  // Check that the typedef has not been changed. The NeXus types would need
-  // changing if it does!
-  assert(sizeof(signal_t) == sizeof(double));
 
   // Number of data points
   // Size in each dimension (in the "C" style order, so z,y,x
@@ -175,6 +179,8 @@ void SaveMD2::doSaveHisto(Mantid::DataObjects::MDHistoWorkspace_sptr ws) {
   file->makeData("mask", ::NeXus::INT8, size, true);
   file->putData(ws->getMaskArray());
   file->closeData();
+
+  file->closeGroup();
 
   // TODO: Links to original workspace???
 

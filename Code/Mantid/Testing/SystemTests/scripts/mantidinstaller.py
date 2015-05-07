@@ -82,14 +82,14 @@ def run(cmd):
     """Run a command in a subprocess"""
     try:
         p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True)
-        out = p.communicate()[0]
+        stdout, stderr = p.communicate()
         if p.returncode != 0:
-            raise Exception('Returned with code '+str(p.returncode)+'\n'+out)
+            raise Exception('Returned with code '+str(p.returncode)+'\n'+ stdout)
     except Exception,err:
         log('Error in subprocess %s:\n' % str(err))
         raise
-    log(out)
-    return out
+    log(stdout)
+    return stdout
     
 
 class MantidInstaller(object):
@@ -207,12 +207,16 @@ class RPMInstaller(MantidInstaller):
         """Uses yum to run the install. Current user must be in sudoers
         """
         try:
+            run('sudo rpm -e ' + self.mantidInstaller)
+        except Exception:
+            # Assume it doesn't exist
+            pass
+        try:
             run('sudo yum -y install ' + self.mantidInstaller)
         except Exception, exc:
             # This reports an error if the same package is already installed
-            if 'is already installed' in str(exc):
+            if 'does not update installed package' in str(exc):
                 log("Current version is up-to-date, continuing.\n")
-                pass
             else:
                 raise
 

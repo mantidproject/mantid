@@ -17,7 +17,9 @@ using Mantid::Kernel::PropertyWithValue;
 using Mantid::PythonInterface::Converters::PySequenceToVector;
 namespace bpl = boost::python;
 
+// clang-format off
 void export_ActionEnum()
+// clang-format on
 {
   bpl::enum_<FileProperty::FileAction>("FileAction")
         .value("Save", FileProperty::Save)
@@ -63,7 +65,9 @@ namespace
 
 }
 
+// clang-format off
 void export_FileProperty()
+// clang-format on
 {
   bpl::class_<FileProperty, bpl::bases<PropertyWithValue<std::string> >, boost::noncopyable>("FileProperty", bpl::no_init)
     .def("__init__",

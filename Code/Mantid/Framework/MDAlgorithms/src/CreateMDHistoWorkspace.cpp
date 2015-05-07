@@ -49,12 +49,13 @@ const std::string CreateMDHistoWorkspace::category() const {
  */
 void CreateMDHistoWorkspace::init() {
   declareProperty(new ArrayProperty<double>("SignalInput"),
-                  "A comma separated list of all the signal values required "
-                  "for the workspace");
+                  "Signal array for n-dimensional workspace");
 
   declareProperty(new ArrayProperty<double>("ErrorInput"),
-                  "A comma separated list of all the error values required for "
-                  "the workspace");
+                  "Error array for n-dimensional workspace");
+
+  declareProperty(new ArrayProperty<double>("NumberOfEvents", std::vector<double>(0)),
+                  "Number of pixels array for n-dimensional workspace. Optional, defaults to 1 per bin.");
 
   // Declare all the generic properties required.
   this->initGenericImportProps();
@@ -65,11 +66,13 @@ void CreateMDHistoWorkspace::init() {
  */
 void CreateMDHistoWorkspace::exec() {
   MDHistoWorkspace_sptr ws = this->createEmptyOutputWorkspace();
-  double *signals = ws->getSignalArray();
-  double *errors = ws->getErrorSquaredArray();
+  Mantid::signal_t *signals = ws->getSignalArray();
+  Mantid::signal_t *errors = ws->getErrorSquaredArray();
+  Mantid::signal_t *nEvents = ws->getNumEventsArray();
 
   std::vector<double> signalValues = getProperty("SignalInput");
   std::vector<double> errorValues = getProperty("ErrorInput");
+  std::vector<double> numberOfEvents = getProperty("NumberOfEvents");
 
   size_t binProduct = this->getBinProduct();
   std::stringstream stream;
@@ -82,6 +85,15 @@ void CreateMDHistoWorkspace::exec() {
     throw std::invalid_argument("Expected size of the ErrorInput is: " +
                                 stream.str());
   }
+  if (!numberOfEvents.empty() && binProduct != numberOfEvents.size()) {
+    throw std::invalid_argument("Expected size of the NumberOfEvents is: " +
+                                stream.str() + ". Leave empty to auto fill with 1.0");
+  }
+
+  // Auto fill number of events.
+  if(numberOfEvents.empty()) {
+    numberOfEvents = std::vector<double>(binProduct, 1.0);
+  }
 
   // Copy from property
   std::copy(signalValues.begin(), signalValues.end(), signals);
@@ -93,6 +105,10 @@ void CreateMDHistoWorkspace::exec() {
   std::copy(errorValues.begin(), errorValues.end(), errors);
   // Clean up
   errorValues.swap(empty);
+  // Copy from property
+  std::copy(numberOfEvents.begin(), numberOfEvents.end(), nEvents);
+  // Clean up
+  numberOfEvents.swap(empty);
 
   setProperty("OutputWorkspace", ws);
 }

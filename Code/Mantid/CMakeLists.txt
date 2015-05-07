@@ -268,7 +268,7 @@ if ( ENABLE_CPACK )
                                      "libmuparser0debian1,"
                                      "ipython-qtconsole (>= 1.1),python-matplotlib,python-scipy,"
                                      "libpocofoundation9,libpocoutil9,libpoconet9,libpoconetssl9,libpococrypto9,libpocoxml9")
-        elseif( "${UNIX_CODENAME}" STREQUAL "trusty" )
+        elseif( "${UNIX_CODENAME}" STREQUAL "trusty" OR "${UNIX_CODENAME}" STREQUAL "utopic" OR "${UNIX_CODENAME}" STREQUAL "vivid")
           list ( APPEND DEPENDS_LIST ",libqscintilla2-11,"
                                      "liboce-foundation8,liboce-modeling8,"
                                      "libmuparser2,"

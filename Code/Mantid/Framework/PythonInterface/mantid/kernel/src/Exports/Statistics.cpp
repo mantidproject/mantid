@@ -213,7 +213,9 @@ namespace
 
 // -------------------------------------- Exports start here --------------------------------------
 
+// clang-format off
 void export_Statistics()
+// clang-format on
 {
   // typedef std::vector --> numpy array result converter
   typedef return_value_policy<Policies::VectorToNumpy> ReturnNumpyArray;

@@ -88,7 +88,7 @@ private slots:
 private:
   QLabel *labelRun, *labelOpt;
   QLineEdit *editRun, *editOpt;
-  QHBoxLayout *hRun, *hOpt;
+  QHBoxLayout *hRun, *hOpt, *hBut;
   QGridLayout *layout;
   QPushButton *okButton, *cancelButton;
 };

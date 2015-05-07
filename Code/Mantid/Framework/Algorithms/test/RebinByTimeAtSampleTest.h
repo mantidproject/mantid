@@ -268,8 +268,10 @@ public:
 //=====================================================================================
 // Performance Tests
 //=====================================================================================
+// clang-format off
 class RebinByTimeAtSampleTestPerformance: public CxxTest::TestSuite,
     public RebinByTimeBaseTestPerformance<RebinByTimeAtSample>
+// clang-format on
 {
 
 public:

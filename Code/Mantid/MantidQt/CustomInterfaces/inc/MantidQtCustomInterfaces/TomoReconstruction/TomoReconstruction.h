@@ -8,7 +8,7 @@
 #include "MantidQtAPI/UserSubWindow.h"
 #include "MantidQtCustomInterfaces/TomoReconstruction/TomoToolConfigDialog.h"
 
-#include <jsoncpp/json/json.h>
+#include <json/json.h>
 #include <QMutex>
 
 // Qt classes forward declarations

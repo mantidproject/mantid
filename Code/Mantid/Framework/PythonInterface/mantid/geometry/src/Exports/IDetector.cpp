@@ -6,7 +6,9 @@ using Mantid::Geometry::IDetector;
 using Mantid::Geometry::IObjComponent;
 using namespace boost::python;
 
+// clang-format off
 void export_IDetector()
+// clang-format on
 {
   register_ptr_to_python<boost::shared_ptr<IDetector>>();
   

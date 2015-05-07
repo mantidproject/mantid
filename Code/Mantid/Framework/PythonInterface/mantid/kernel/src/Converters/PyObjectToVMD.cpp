@@ -11,7 +11,9 @@
 #define NO_IMPORT_ARRAY
 #include <numpy/arrayobject.h>
 
+// clang-format off
 GCC_DIAG_OFF(strict-aliasing)
+// clang-format on
 
 namespace Mantid
 {

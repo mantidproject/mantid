@@ -13,7 +13,9 @@ using namespace boost::python;
 /// Overload generator for getInstrumentFilename
 BOOST_PYTHON_FUNCTION_OVERLOADS(getInstrumentFilename_Overload, ExperimentInfo::getInstrumentFilename, 1, 2)
 
+// clang-format off
 void export_ExperimentInfo()
+// clang-format on
 {
   register_ptr_to_python<boost::shared_ptr<ExperimentInfo>>();
 
