@@ -131,17 +131,17 @@ public:
 
   void test_exportWorkspace()
   {
-    // TODO: implement
+    TS_ASSERT_THROWS_NOTHING(m_model->exportWorkspace());
   }
 
   void test_exportTable()
   {
-    // TODO: implement
+    TS_ASSERT_THROWS_NOTHING(m_model->exportSections());
   }
 
   void test_exportModel()
   {
-    // TODO: implement
+    TS_ASSERT_THROWS_NOTHING(m_model->exportModel());
   }
 
 };
