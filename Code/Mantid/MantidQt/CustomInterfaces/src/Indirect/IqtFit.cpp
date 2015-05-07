@@ -165,7 +165,7 @@ namespace IDA
       "spec_min = " + specMin + "\n"
       "spec_max = " + specMax + "\n"
       "spec_max = None\n"
-      "minimizer = '" + minimizerString("TODO-NAME") + "'\n"
+      "minimizer = '" + minimizerString("$outputname_$wsindex") + "'\n"
       "max_iterations = " + QString::number(m_dblManager->value(m_properties["MaxIterations"])) + "\n";
 
     if (constrainIntens) pyInput += "constrain_intens = True \n";

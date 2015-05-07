@@ -207,7 +207,7 @@ namespace IDA
       "specMin = " + specMin + "\n"
       "specMax = " + specMax + "\n"
       "max_iterations = " + QString::number(maxIterations) + "\n"
-      "minimizer = '" + minimizerString("TODO-NAME") + "'\n"
+      "minimizer = '" + minimizerString("$outputname_$wsindex") + "'\n"
       "save = " + (m_uiForm.ckSave->isChecked() ? "True\n" : "False\n");
 
     if ( m_blnManager->value(m_properties["Convolve"]) ) pyInput += "convolve = True\n";
