@@ -349,8 +349,6 @@ namespace Algorithms
 
           try
           {
-              int emode = 2;
-              double l1, l2, twoTheta, efixed;
 
               double deg2rad = M_PI / 180.;
 
@@ -366,13 +364,13 @@ namespace Algorithms
 
               specIter = std::find(spectraColumn.begin(), spectraColumn.end(), specid);
               if (specIter != spectraColumn.end())
-              {
+              {                 
                   size_t detectorRow = std::distance(spectraColumn.begin(), specIter);
-                  l1 = l1Column[detectorRow];
-                  l2 = l2Column[detectorRow];
-                  twoTheta = twoThetaColumn[detectorRow] * deg2rad;
-                  efixed = efixedColumn[detectorRow];
-                  emode = emodeColumn[detectorRow];
+                  double l1 = l1Column[detectorRow];
+                  double l2 = l2Column[detectorRow];
+                  double twoTheta = twoThetaColumn[detectorRow] * deg2rad;
+                  double efixed = efixedColumn[detectorRow];
+                  int emode = emodeColumn[detectorRow];
 
                   g_log.debug() << "specId from detector table = " << spectraColumn[detectorRow] << std::endl;
 
