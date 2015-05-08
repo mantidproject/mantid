@@ -12,10 +12,16 @@
 #include "MantidAPI/NullCoordTransform.h"
 #include "MantidDataObjects/MDHistoWorkspace.h"
 #include "MantidKernel/ReadLock.h"
+#include "MantidKernel/Logger.h"
 
 using Mantid::API::IMDWorkspace;
 using Mantid::DataObjects::MDHistoWorkspace;
 using Mantid::API::NullCoordTransform;
+
+namespace
+{
+  Mantid::Kernel::Logger g_log("vtkMDHistoLineFactory");
+}
 
 namespace Mantid
 {
@@ -69,6 +75,8 @@ namespace Mantid
       }
       else
       {
+        g_log.warning() << "Factory " << this->getFactoryTypeName() << " is being used. You are viewing data with less than three dimensions in the VSI. \n";
+
         Mantid::Kernel::ReadLock lock(*m_workspace);
         const int nBinsX = static_cast<int>( m_workspace->getXDimension()->getNBins() );
 

@@ -13,8 +13,14 @@
 #include <vtkQuad.h>
 #include <vtkCellData.h>
 #include "MantidKernel/ReadLock.h"
+#include "MantidKernel/Logger.h"
 
 using namespace Mantid::API;
+
+namespace
+{
+  Mantid::Kernel::Logger g_log("vtkMDQuadFactory");
+}
 
 namespace Mantid
 {
@@ -44,6 +50,8 @@ namespace Mantid
       }
       else
       {
+        g_log.warning() << "Factory " << this->getFactoryTypeName() << " is being used. You are viewing data with less than three dimensions in the VSI. \n";
+
         IMDEventWorkspace_sptr imdws = this->castAndCheck<IMDEventWorkspace, 2>(m_workspace);
         // Acquire a scoped read-only lock to the workspace (prevent segfault from algos modifying ws)
         Mantid::Kernel::ReadLock lock(*imdws);
