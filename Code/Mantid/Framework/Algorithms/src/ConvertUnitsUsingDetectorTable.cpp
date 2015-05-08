@@ -340,9 +340,6 @@ namespace Algorithms
       //PARALLEL_FOR1(outputWS)
       for (int64_t i = 0; i < numberOfSpectra_i; ++i)
       {
-          int emode = 2;
-          double l1, l2, twoTheta, efixed;
-
 
          // Lets find what row this spectrum ID appears in our detector table.
 
@@ -352,6 +349,9 @@ namespace Algorithms
 
           try
           {
+              int emode = 2;
+              double l1, l2, twoTheta, efixed;
+
               double deg2rad = M_PI / 180.;
 
               auto det = outputWS->getDetector(i);
@@ -362,13 +362,12 @@ namespace Algorithms
               g_log.debug() << "###### Spectra #" << specid << " ==> Workspace ID:" << wsid << std::endl;
 
               // Now we need to find the row that contains this spectrum
-              std::vector<int>::iterator specIter = spectraColumn.begin();
+              std::vector<int>::iterator specIter;
 
               specIter = std::find(spectraColumn.begin(), spectraColumn.end(), specid);
-              size_t detectorRow = 0;
               if (specIter != spectraColumn.end())
               {
-                  detectorRow = std::distance(spectraColumn.begin(), specIter);
+                  size_t detectorRow = std::distance(spectraColumn.begin(), specIter);
                   l1 = l1Column[detectorRow];
                   l2 = l2Column[detectorRow];
                   twoTheta = twoThetaColumn[detectorRow] * deg2rad;
