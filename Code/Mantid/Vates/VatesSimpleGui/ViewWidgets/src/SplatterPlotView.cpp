@@ -149,11 +149,16 @@ void SplatterPlotView::render()
 {
   pqPipelineSource *src = NULL;
   src = pqActiveObjects::instance().activeSource();
-
-  // Hedge for no active source
-  if (!src)
+  bool isPeaksWorkspace = this->isPeaksWorkspace(src);
+  // Hedge for two things.
+  // 1. If there is no active source
+  // 2. If we are loading a peak workspace without haveing
+  //    a splatterplot source in place
+  bool isBadInput = !src || (isPeaksWorkspace && this->splatSource == NULL);
+  if (isBadInput)
   {
-    g_log.warning() << "SplatterPlotView: Active source is NULL. Cannot render.";
+    g_log.warning() << "SplatterPlotView: Could not render source. You are either loading an active source " 
+                    << "or you are loading a peak source without having a splatterplot source in place.\n";
     return;
   }
 
@@ -175,7 +180,6 @@ void SplatterPlotView::render()
     return;
   }
 
-  bool isPeaksWorkspace = this->isPeaksWorkspace(src);
   if (!isPeaksWorkspace)
   {
     this->origSrc = src;
@@ -512,7 +516,7 @@ void SplatterPlotView::createPeaksFilter()
     updatePeaksFilter(m_peaksFilter);
 
     // Create point representation of the source and set the point size 
-    const double pointSize = 4;
+    const double pointSize = 2;
     pqDataRepresentation *dataRepresentation  = m_peaksFilter->getRepresentation(this->view);
     vtkSMPropertyHelper(dataRepresentation->getProxy(), "Representation").Set("Points");
     vtkSMPropertyHelper(dataRepresentation->getProxy(), "PointSize").Set(pointSize);

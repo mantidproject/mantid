@@ -243,9 +243,9 @@ void StandardView::closeSubWindows()
  */
 void StandardView::setRebinAndUnbinButtons()
 {
-  int numberOfInternallyRebinnedWorkspaces = 0;
-  int numberOfTrueMDHistoWorkspaces = 0;
-  int numberOfPeakWorkspaces = 0;
+  unsigned int numberOfInternallyRebinnedWorkspaces = 0;
+  unsigned int numberOfTrueMDHistoWorkspaces = 0;
+  unsigned int numberOfPeakWorkspaces = 0;
 
   pqServer *server = pqActiveObjects::instance().activeServer();
   pqServerManagerModel *smModel = pqApplicationCore::instance()->getServerManagerModel();
@@ -271,8 +271,7 @@ void StandardView::setRebinAndUnbinButtons()
   this->allowRebinningOptions(allowRebinning);
 
   // If there are no internally rebinned workspaces the button should be disabled.
-  const bool allowUnbin = !( numberOfInternallyRebinnedWorkspaces == 0 );
-  allowUnbinOption(allowUnbin);
+  allowUnbinOption(numberOfInternallyRebinnedWorkspaces > 0);
 }
 
 
