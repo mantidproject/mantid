@@ -120,7 +120,7 @@ public:
   /// Determines if source has timesteps (4D).
   virtual bool srcHasTimeSteps(pqPipelineSource *src);
   /// Set the the background color for the view
-  virtual void setColorForBackground(bool viewSwitched);
+  virtual void setColorForBackground(bool useCurrentColorSettings);
   /// Sets the splatterplot button to the desired visibility.
   virtual void setSplatterplot(bool visibility);
   /// Initializes the settings of the color scale 

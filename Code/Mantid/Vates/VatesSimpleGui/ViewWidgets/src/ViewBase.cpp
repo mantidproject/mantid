@@ -767,11 +767,11 @@ bool ViewBase::hasWorkspaceType(const QString &wsTypeName)
 
 /**
  * This function sets the default colors for the background and connects a tracker for changes of the background color by the user.
- * @param viewSwitched If the view was switched or created.
+ * @param useCurrentColorSettings If the view was switched or created.
  */
-void ViewBase::setColorForBackground(bool viewSwitched)
+void ViewBase::setColorForBackground(bool useCurrentColorSettings)
 {
-  backgroundRgbProvider.setBackgroundColor(this->getView(), viewSwitched);
+  backgroundRgbProvider.setBackgroundColor(this->getView(), useCurrentColorSettings);
   backgroundRgbProvider.observe(this->getView());
 }
 
