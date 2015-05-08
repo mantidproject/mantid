@@ -160,7 +160,7 @@ namespace SliceViewer
   }
 
   //----------------------------------------------------------------------------------------------
-  /** Turn angle snap on/off
+  /** Turn angle snap on or off
    * @param angleSnap :: true for always angle snap. */
   void LineOverlay::setAngleSnapMode(bool angleSnap)
   {
