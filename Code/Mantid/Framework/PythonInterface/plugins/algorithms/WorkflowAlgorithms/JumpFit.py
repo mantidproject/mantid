@@ -1,6 +1,9 @@
 #pylint: disable=no-init
 from mantid.kernel import *
 from mantid.api import *
+from mantid.simpleapi import (SaveNexusProcessed, ExtractSingleSpectrum, Fit,
+                              CopyLogs, AddSampleLogMultiple, DeleteWorkspace)
+from mantid import logger, mtd
 import os
 
 
@@ -21,36 +24,37 @@ class JumpFit(PythonAlgorithm):
 
 
     def PyInit(self):
-        self.declareProperty(WorkspaceProperty('InputWorkspace', '', direction=Direction.Input),\
-                doc='Input workspace in HWHM')
+        self.declareProperty(WorkspaceProperty('InputWorkspace', '',
+                                               direction=Direction.Input),
+                             doc='Input workspace in HWHM')
 
         valid_functions = ['ChudleyElliot', 'HallRoss', 'FickDiffusion', 'TeixeiraWater']
         self.declareProperty(name='Function', defaultValue=valid_functions[0],
                              validator=StringListValidator(valid_functions),
                              doc='The fit function to use')
 
-        self.declareProperty(name='Width', defaultValue=0, validator=IntMandatoryValidator(),\
-                doc='Spectrum in the workspace to use for fiting')
+        self.declareProperty(name='Width', defaultValue=0,
+                             validator=IntMandatoryValidator(),
+                             doc='Spectrum in the workspace to use for fiting')
 
-        self.declareProperty(name='QMin', defaultValue=0.0, validator=FloatMandatoryValidator(),\
-                doc='Lower bound of Q range to use for fitting')
-        self.declareProperty(name='QMax', defaultValue=0.0, validator=FloatMandatoryValidator(),\
-                doc='Upper bound of Q range to use for fitting')
+        self.declareProperty(name='QMin', defaultValue=0.0,
+                             validator=FloatMandatoryValidator(),
+                             doc='Lower bound of Q range to use for fitting')
+        self.declareProperty(name='QMax', defaultValue=0.0,
+                             validator=FloatMandatoryValidator(),
+                             doc='Upper bound of Q range to use for fitting')
 
-        self.declareProperty(name='Output', defaultValue='', direction=Direction.InOut,\
-                doc='Output name')
+        self.declareProperty(name='Output', defaultValue='',
+                             direction=Direction.InOut,
+                             doc='Output name')
 
-        self.declareProperty(name='Plot', defaultValue=False,\
-                doc='Plot result workspace')
-        self.declareProperty(name='Save', defaultValue=False,\
-                doc='Save result workspace to nexus file in the default save directory')
+        self.declareProperty(name='Plot', defaultValue=False,
+                             doc='Plot result workspace')
+        self.declareProperty(name='Save', defaultValue=False,
+                             doc='Save result workspace to nexus file in the default save directory')
 
 
     def PyExec(self):
-        from mantid.simpleapi import ExtractSingleSpectrum, Fit, CopyLogs, AddSampleLog, \
-                                     DeleteWorkspace
-        from mantid import logger, mtd
-
         self._setup()
 
         # Select the width we wish to fit
@@ -117,21 +121,29 @@ class JumpFit(PythonAlgorithm):
 
             self._out_name = self._in_ws[:ws_suffix_index] + '_' + self._jump_function + '_fit'
 
-        Fit(Function=function, InputWorkspace=spectrum_ws, CreateOutput=True, Output=self._out_name,
-            StartX=self._q_min, EndX=self._q_max)
+        Fit(Function=function,
+            InputWorkspace=spectrum_ws,
+            CreateOutput=True,
+            Output=self._out_name,
+            StartX=self._q_min,
+            EndX=self._q_max)
         fit_workspace = self._out_name + '_Workspace'
 
         # Populate sample logs
-        CopyLogs(InputWorkspace=self._in_ws, OutputWorkspace=fit_workspace)
-        AddSampleLog(Workspace=fit_workspace, LogName="jump_function", LogType="String",
-                     LogText=self._jump_function)
-        AddSampleLog(Workspace=fit_workspace, LogName="q_min", LogType="Number",
-                     LogText=str(self._q_min))
-        AddSampleLog(Workspace=fit_workspace, LogName="q_max", LogType="Number",
-                     LogText=str(self._q_max))
+        CopyLogs(InputWorkspace=self._in_ws,
+                 OutputWorkspace=fit_workspace)
+
+        sample_logs = [
+                ('jumpfit_function', self._jump_function),
+                ('jumpfit_q_min', self._q_min),
+                ('jumpfit_q_max', self._q_max)
+            ]
+
+        AddSampleLogMultiple(Workspace=fit_workspace,
+                             LogNames=[item[0] for item in sample_logs],
+                             LogValues=[item[1] for item in sample_logs])
 
         self._process_output(fit_workspace)
-
         self.setProperty('Output', self._out_name)
 
         DeleteWorkspace(Workspace=spectrum_ws)
@@ -152,10 +164,7 @@ class JumpFit(PythonAlgorithm):
 
     def _process_output(self, workspace):
         if self._save:
-            from mantid.simpleapi import SaveNexusProcessed
-            from IndirectCommon import getDefaultWorkingDirectory
-            workdir = getDefaultWorkingDirectory()
-            fit_path = os.path.join(workdir, workspace + '.nxs')
+            fit_path = os.path.join(config['defaultsave.directory'], workspace + '.nxs')
             SaveNexusProcessed(InputWorkspace=workspace, Filename=fit_path)
 
             logger.information('Fit file is ' + fit_path)
