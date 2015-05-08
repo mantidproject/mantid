@@ -218,7 +218,7 @@ private:
   QComboBox *vsiDefaultColorMap, *vsiInitialView, *mdPlottingGeneralColorMap;
   QLabel *lblVsiDefaultColorMap, *lblVsiDefaultBackground, *lblGeneralDefaultColorMap, *lblBoxGeneralDefaultColorMap, *lblVsiLastSession, *lblVsiInitialView;
   ColorButton *vsiDefaultBackground;
-  QGroupBox* mdPlottingGeneralFrame;
+  QGroupBox* mdPlottingGeneralFrame, *mdPlottingVsiFrameBottom;
   QCheckBox* vsiLastSession;
   MantidQt::API::MdSettings m_mdSettings;
 
@@ -276,8 +276,8 @@ private:
   QCheckBox *boxUpdateTableValues;
 
   public slots:
-    void changeUsageGeneralMdColorMap(bool state);
-    void changeUsageLastSession(bool state);
+    void changeUsageGeneralMdColorMap();
+    void changeUsageLastSession();
 };
 
 #endif // CONFIGDIALOG_H

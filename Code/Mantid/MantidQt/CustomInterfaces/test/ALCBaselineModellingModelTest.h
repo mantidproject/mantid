@@ -44,14 +44,24 @@ public:
 
   void test_setData()
   {
-    MatrixWorkspace_sptr data = WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1);
+    std::vector<double> y = boost::assign::list_of(100)(1)(2)(100)(100)(3)(4)(5)(100);
+    std::vector<double> x = boost::assign::list_of(1)(2)(3)(4)(5)(6)(7)(8)(9);
+
+    MatrixWorkspace_sptr data = WorkspaceFactory::Instance().create("Workspace2D", 1, y.size(), y.size());
+    data->dataY(0) = y;
+    data->dataX(0) = x;
 
     QSignalSpy spy(m_model, SIGNAL(dataChanged()));
 
     TS_ASSERT_THROWS_NOTHING(m_model->setData(data));
 
     TS_ASSERT_EQUALS(spy.size(), 1);
-    TS_ASSERT_EQUALS(m_model->data(), data);
+
+    MatrixWorkspace_const_sptr modelData = m_model->data();
+
+    TS_ASSERT_EQUALS(modelData->readX(0), data->readX(0));
+    TS_ASSERT_EQUALS(modelData->readY(0), data->readY(0));
+    TS_ASSERT_EQUALS(modelData->readE(0), data->readE(0));
   }
 
   void test_fit()
@@ -121,17 +131,17 @@ public:
 
   void test_exportWorkspace()
   {
-    // TODO: implement
+    TS_ASSERT_THROWS_NOTHING(m_model->exportWorkspace());
   }
 
   void test_exportTable()
   {
-    // TODO: implement
+    TS_ASSERT_THROWS_NOTHING(m_model->exportSections());
   }
 
   void test_exportModel()
   {
-    // TODO: implement
+    TS_ASSERT_THROWS_NOTHING(m_model->exportModel());
   }
 
 };
