@@ -150,6 +150,13 @@ void SplatterPlotView::render()
   pqPipelineSource *src = NULL;
   src = pqActiveObjects::instance().activeSource();
 
+  // Hedge for no active source
+  if (!src)
+  {
+    g_log.warning() << "SplatterPlotView: Active source is NULL. Cannot render.";
+    return;
+  }
+
   QString renderType = "Points";
   pqObjectBuilder* builder = pqApplicationCore::instance()->getObjectBuilder();
 
