@@ -9,7 +9,6 @@
 
 using namespace Mantid::Kernel;
 
-
 namespace MantidQt
 {
 namespace SliceViewer
