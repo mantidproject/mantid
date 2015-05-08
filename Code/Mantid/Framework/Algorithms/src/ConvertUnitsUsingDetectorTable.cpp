@@ -297,30 +297,14 @@ namespace Algorithms
       // See if we have supplied a DetectorParameters Workspace
       // TODO: Check if paramWS is NULL and if so throw an exception
 
-      // Some variables to hold our values
-//      Column_const_sptr l1Column;
-//      Column_const_sptr l2Column;
-//      Column_const_sptr spectraColumn;
-//      Column_const_sptr twoThetaColumn;
-//      Column_const_sptr efixedColumn;
-//      Column_const_sptr emodeColumn;
-
-//      //std::vector<std::string> columnNames = paramWS->getColumnNames();
-
-//      std::vector<int> spectraColumn;
-//      const std::vector<double> & l1Column;
-//      std::vector<double> l2Column;
-//      std::vector<double> twoThetaColumn;
-//      std::vector<double> efixedColumn;
-//      std::vector<int> emodeColumn;
 
 //      const std::string l1ColumnLabel("l1");
 
       // Let's check all the columns exist and are readable
       try {
-
-          auto l2ColumnTmp = paramWS->getColumn("l2");
           auto spectraColumnTmp = paramWS->getColumn("spectra");
+          auto l1ColumnTmp = paramWS->getColumn("l1");
+          auto l2ColumnTmp = paramWS->getColumn("l2");
           auto twoThetaColumnTmp = paramWS->getColumn("twotheta");
           auto efixedColumnTmp = paramWS->getColumn("efixed");
           auto emodeColumnTmp = paramWS->getColumn("emode");
@@ -445,7 +429,7 @@ namespace Algorithms
       } // loop over spectra
       //PARALLEL_CHECK_INTERUPT_REGION
 
-              if (failedDetectorCount != 0)
+      if (failedDetectorCount != 0)
       {
           g_log.information() << "Something went wrong for " << failedDetectorCount << " spectra. Masking spectrum." << std::endl;
       }
