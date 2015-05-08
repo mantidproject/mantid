@@ -134,6 +134,7 @@ class JumpFit(PythonAlgorithm):
                  OutputWorkspace=fit_workspace)
 
         sample_logs = [
+                ('jumpfit_sample_workspace', self._in_ws),
                 ('jumpfit_function', self._jump_function),
                 ('jumpfit_q_min', self._q_min),
                 ('jumpfit_q_max', self._q_max)
