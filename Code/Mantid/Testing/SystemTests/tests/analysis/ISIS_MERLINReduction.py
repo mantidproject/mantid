@@ -52,7 +52,7 @@ class ReduceMERLIN(ReductionWrapper):
      #SaveNexus(ws,Filename = 'MARNewReduction.nxs')
         return outWS
 
-    def __init__(self):
+    def __init__(self,web_var=None):
         """ sets properties defaults for the instrument with Name"""
         ReductionWrapper.__init__(self,'MER',web_var)
 #----------------------------------------------------------------------------------------------------------------------

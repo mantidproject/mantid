@@ -36,7 +36,7 @@ class UserProperties(object):
         self.instrument[recent_date_id]   = str(instrument).upper()
         self.rb_dir[recent_date_id]       = rb_folder
         if self._recent_dateID:
-            for a_date in self.start_dates:
+            for date_key,a_date in self.start_dates.iteritems():
                 if recent_date > a_date:
                     self._recent_dateID = recent_date_id
         else:
