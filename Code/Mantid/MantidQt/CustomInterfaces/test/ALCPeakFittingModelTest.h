@@ -98,6 +98,11 @@ public:
 
   }
 
+  void test_exportWorkspace()
+  {
+    TS_ASSERT_THROWS_NOTHING (m_model->exportWorkspace());
+  }
+
 };
 
 
