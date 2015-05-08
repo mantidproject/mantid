@@ -381,7 +381,7 @@ namespace Algorithms
               std::vector<int>::iterator specIter = spectraColumn.begin();
 
               specIter = std::find(spectraColumn.begin(), spectraColumn.end(), specid);
-              int detectorRow = 0;
+              size_t detectorRow = 0;
               if (specIter != spectraColumn.end())
               {
                   detectorRow = std::distance(spectraColumn.begin(), specIter);
