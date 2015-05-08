@@ -379,8 +379,8 @@ void TOPAZLiveEventDataListener::run() {
             g_log.debug() << "  Charge: " << pid[i].charge << std::endl;
             
             // Figure out the event indexes that belong to this pulse
-            unsigned long firstEvent; 
-            unsigned long lastEvent;
+            uint64_t firstEvent; 
+            uint64_t lastEvent;
             if (num_pulse_ids == 1)
             {
                  // This 'if' test is something of a workaround for a problem
