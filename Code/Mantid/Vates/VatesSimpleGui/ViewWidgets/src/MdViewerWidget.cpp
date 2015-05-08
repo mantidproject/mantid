@@ -89,7 +89,6 @@
 #include <pqViewStreamingBehavior.h>
 #include <pqVerifyRequiredPluginBehavior.h>
 #include <pqSaveDataReaction.h>
-
 #if defined(__INTEL_COMPILER)
   #pragma warning enable 1170
 #endif
