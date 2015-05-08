@@ -42,7 +42,7 @@ void RenameLog::exec() {
   std::string origlogname = this->getProperty("OriginalLogName");
   std::string newlogname = this->getProperty("NewLogName");
 
-  Kernel::Property *property = matrixWS->run().getLogData(origlogname);
+  Kernel::Property *property = matrixWS->run().getLogData(origlogname)->clone();
   Kernel::TimeSeriesProperty<double> *timeprop =
       dynamic_cast<Kernel::TimeSeriesProperty<double> *>(property);
 
@@ -53,7 +53,7 @@ void RenameLog::exec() {
   }
 
   // std::cout << "Remove log" << origlogname << std::endl;
-  matrixWS->mutableRun().removeLogData(origlogname, false);
+  matrixWS->mutableRun().removeLogData(origlogname);
 
   // std::cout << "Change log name" << std::endl;
   timeprop->setName(newlogname);
