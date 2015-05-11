@@ -17,11 +17,12 @@
 #include <QWidget>
 #include <QString>
 
+// forward declaration of ParaQ classes
 class pqApplicationSettingsReaction;
 class pqLoadDataReaction;
 class pqPipelineSource;
-class vtkSMDoubleVectorProperty;
 
+// forward declaration of Qt classes
 class QDragEnterEvent;
 class QDropEvent;
 class QAction;
@@ -41,6 +42,7 @@ class RotationPointDialog;
 class SaveScreenshotReaction;
 class ViewBase;
 class RebinDialog;
+
 /**
  *
   This class represents the central widget for handling VATES visualization
@@ -117,7 +119,7 @@ protected slots:
   /// On  unbin
   void onUnbin();
   /// On switching an MDEvent source to a temporary source.
-  void onSwitchSoures(std::string rebinnedWorkspaceName, std::string sourceType);
+  void onSwitchSources(std::string rebinnedWorkspaceName, std::string sourceType);
 protected:
   /// Handle workspace preDeletion tasks.
   void preDeleteHandle(const std::string &wsName,
@@ -129,12 +131,16 @@ protected:
   void dragEnterEvent(QDragEnterEvent *e);
  /// Reacts to something being dropped onto the VSI
  void dropEvent(QDropEvent *e);
+
 private:
   Q_DISABLE_COPY(MdViewerWidget)
   QString m_widgetName;
-  ViewBase *currentView; ///< Holder for the current view
-  pqLoadDataReaction *dataLoader; ///< Holder for the load data reaction
+
+  ViewBase *currentView; ///< Holder for the current (shown) view
   ViewBase *hiddenView; ///< Holder for the view that is being switched from
+  bool viewSwitched;
+
+  pqLoadDataReaction *dataLoader; ///< Holder for the load data reaction
   double lodThreshold; ///< Default value for the LOD threshold (5 MB)
   QAction *lodAction; ///< Holder for the LOD threshold menu item
   bool pluginMode; ///< Flag to say widget is in plugin mode
@@ -143,13 +149,27 @@ private:
   Ui::MdViewerWidgetClass ui; ///< The MD viewer's UI form
   QHBoxLayout *viewLayout; ///< Layout manager for the view widget
   pqApplicationSettingsReaction *viewSettings; ///< Holder for the view settings reaction
-  bool viewSwitched;
   ModeControlWidget::Views initialView; ///< Holds the initial view
   MantidQt::API::MdSettings mdSettings;///<Holds the MD settings which are used to persist data
   MantidQt::API::MdConstants mdConstants;/// < Holds the MD constants
   RebinAlgorithmDialogProvider m_rebinAlgorithmDialogProvider; ///<Provides dialogs to execute rebin algorithms
   RebinnedSourcesManager m_rebinnedSourcesManager; ///<Holds the rebinned sources manager
   QString m_rebinnedWorkspaceIdentifier; ///< Holds the identifier for temporary workspaces
+
+  /// Holds the 'visual state' of the views. This relies on Load/SaveXMLState which
+  /// produce/consume a vtk XML tree object. Otherwise, the properties to save would be,
+  /// at least, the following. vtkCamera: Position, FocalPpoint, ViewUp, ViewAngle,
+  /// ClippingRange. pqRenderView: CenterOfRotation, CenterAxesVisibility
+  struct AllVSIViewsState {
+    AllVSIViewsState();
+    ~AllVSIViewsState();
+
+    vtkPVXMLElement *stateStandard;
+    vtkPVXMLElement *stateMulti;
+    vtkPVXMLElement *stateThreeSlice;
+    vtkPVXMLElement *stateSplatter;
+  };
+  AllVSIViewsState m_allViews;
 
   /// Setup color selection widget connections.
   void connectColorSelectionWidget();
@@ -172,7 +192,7 @@ private:
   /// Creates the UI and mode switch connection.
   void setupUiAndConnections();
   /// Create the requested view.
-  ViewBase *setMainViewWidget(QWidget *container, ModeControlWidget::Views v);
+  ViewBase *createAndSetMainViewWidget(QWidget *container, ModeControlWidget::Views v);
   /// Helper function to swap current and hidden view pointers.
   void swapViews();
   /// Update the state of application widgets.
@@ -197,12 +217,18 @@ private:
   void setColorForBackground();
   /// Render the original workspace
   pqPipelineSource* renderOriginalWorkspace(const std::string originalWorkspaceName);
+
   /// Remove the rebinning when switching views or otherwise.
   void removeRebinning(pqPipelineSource* source, bool forced, ModeControlWidget::Views view = ModeControlWidget::STANDARD);
   /// Remove all rebinned sources
   void removeAllRebinning(ModeControlWidget::Views view);
   /// Sets a listener for when sources are being destroyed
   void setDestroyedListener();
+
+  /// Save the state of the currently shown view so its state can be restored when switching back to it
+  void saveViewState(ViewBase *view);
+  /// Restore the state of the next (new) view when switching to it
+  void restoreViewState(ViewBase *view, ModeControlWidget::Views vtype);
 };
 
 } // SimpleGui
