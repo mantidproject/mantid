@@ -2766,9 +2766,6 @@ void MantidUI::importNumSeriesLog(const QString &wsName, const QString &logName,
       g->setCurvePen(iFilterCurve, pn);
     }
   }
-  // THIS SECTION NEEDS TO BE FIXED REF #11710
-  g->setXAxisTitle(t->colLabel(0));
-  g->setYAxisTitle(t->colLabel(1).section(".",0,0));
   g->setTitle(label);
   g->setAutoScale();
 

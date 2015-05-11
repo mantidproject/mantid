@@ -3074,11 +3074,18 @@ void Graph::updateScale()
     updateSecondaryAxis(QwtPlot::yRight);
   }
 
-  auto firstCurve = dynamic_cast<MantidCurve*>(curve(0));
-  if (firstCurve)
+  auto mantidCurve = dynamic_cast<MantidCurve*>(curve(0));
+  auto dataCurve = dynamic_cast<DataCurve*>(curve(0));
+
+  if (mantidCurve)
   {
-    setXAxisTitle(firstCurve->mantidData()->getXAxisLabel());
-    setYAxisTitle(firstCurve->mantidData()->getYAxisLabel());
+    setXAxisTitle(mantidCurve->mantidData()->getXAxisLabel());
+    setYAxisTitle(mantidCurve->mantidData()->getYAxisLabel());
+  }
+  else if (dataCurve && dataCurve->table())
+  {
+    setXAxisTitle(dataCurve->table()->colLabel(0));
+    setYAxisTitle(dataCurve->table()->colLabel(1).section(".",0,0));
   }
 
   d_plot->replot();//TODO: avoid 2nd replot!
