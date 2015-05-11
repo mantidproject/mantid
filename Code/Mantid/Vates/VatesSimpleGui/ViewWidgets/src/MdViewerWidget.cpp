@@ -136,7 +136,7 @@ REGISTER_VATESGUI(MdViewerWidget)
  */
 MdViewerWidget::MdViewerWidget() : VatesViewerInterface(), currentView(NULL),
   dataLoader(NULL), hiddenView(NULL), lodAction(NULL), screenShot(NULL), viewLayout(NULL),
-  viewSettings(NULL), initialView(ModeControlWidget::STANDARD), m_rebinAlgorithmDialogProvider(this), m_rebinnedWorkspaceIdentifier("_tempvsi")
+  viewSettings(NULL), useCurrentColorSettings(false), initialView(ModeControlWidget::STANDARD), m_rebinAlgorithmDialogProvider(this), m_rebinnedWorkspaceIdentifier("_tempvsi")
 {
   //this will initialize the ParaView application if needed.
   VatesParaViewApplication::instance();
@@ -621,7 +621,7 @@ void MdViewerWidget::renderingDone()
 {
   if (this->viewSwitched)
   {
-    this->ui.colorSelectionWidget->loadColorMap(this->viewSwitched); // Load the default color map
+    this->setColorMap(); // Load the default color map
     this->currentView->setColorsForView(this->ui.colorSelectionWidget);
     this->viewSwitched = false;
   }
@@ -643,12 +643,18 @@ void MdViewerWidget::renderWorkspace(QString workspaceName, int workspaceType, s
   if (this->currentView->getNumSources() == 0)
   {
     this->setColorForBackground();
-    this->ui.colorSelectionWidget->loadColorMap(this->viewSwitched);
+    this->setColorMap();
 
     this->ui.modeControlWidget->setToStandardView();
     this->currentView->hide();
     // Set the auto log scale state
     this->currentView->initializeColorScale();
+  }
+
+  // Set usage of current color settings to true, since we have loade the VSI
+  if (!this->useCurrentColorSettings)
+  {
+    this->useCurrentColorSettings = true;
   }
 
   QString sourcePlugin = "";
@@ -879,6 +885,7 @@ ModeControlWidget::Views MdViewerWidget::checkViewAgainstWorkspace(ModeControlWi
 void MdViewerWidget::setupPluginMode()
 {
   GlobalInterpreterLock gil;
+  this->useCurrentColorSettings = false; // Don't use the current color map at start up.
   this->setupUiAndConnections();
   this->createMenus();
   this->setupMainView();
@@ -893,7 +900,7 @@ void MdViewerWidget::renderAndFinalSetup()
 {
   this->setColorForBackground();
   this->currentView->render();
-  this->ui.colorSelectionWidget->loadColorMap(this->viewSwitched);
+  this->setColorMap();
   this->currentView->setColorsForView(this->ui.colorSelectionWidget);
   this->currentView->checkView(this->initialView);
   this->currentView->updateAnimationControls();
@@ -917,7 +924,7 @@ void MdViewerWidget::renderAndFinalSetup()
  */
 void MdViewerWidget::setColorForBackground()
 {
-  this->currentView->setColorForBackground(this->viewSwitched);
+  this->currentView->setColorForBackground(this->useCurrentColorSettings);
 }
 
 /**
@@ -1028,6 +1035,7 @@ bool MdViewerWidget::eventFilter(QObject *obj, QEvent *ev)
       this->currentView ->destroyAllSourcesInView();
       this->currentView->updateSettings();
       this->currentView->hide();
+      this->useCurrentColorSettings = false;
 
       return true;
     }
@@ -1397,6 +1405,14 @@ void MdViewerWidget::dropEvent(QDropEvent *e) {
   }
 }
 
+/**
+ * Set the color map
+ */
+void MdViewerWidget::setColorMap()
+{
+   // If it is not the first startup of the color map, then we want to use the current color map
+  this->ui.colorSelectionWidget->loadColorMap(this->useCurrentColorSettings);
+}
 
 } // namespace SimpleGui
 } // namespace Vates

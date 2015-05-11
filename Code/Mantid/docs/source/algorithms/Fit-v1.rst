@@ -32,14 +32,12 @@ Overview
 This is a generic algorithm for fitting data in a Workspace with a
 function. The workspace must have the type supported by the algorithm.
 Currently supported types are: :ref:`MatrixWorkspace <MatrixWorkspace>` for
-fitting with a `IFunction1D <http://www.mantidproject.org/IFunction1D>`_ and
-`IMDWorkspace <http://www.mantidproject.org/IMDWorkspace>`_ for fitting with
-`IFunctionMD <http://www.mantidproject.org/IFunctionMD>`_. After Function and InputWorkspace
-properties are set the algorithm may decide that it needs more
-information from the caller to locate the fitting data. For example, if
-a spectrum in a MatrixWorkspace is to be fit with a 1D function it will
-need to know at least the index of that spectrum. To request this
-information Fit dynamically creates relevant properties which the caller
+fitting with a IFunction1D and :ref:`MDWorkspace <MDWorkspace>` for fitting with
+IFunctionMD. After Function and InputWorkspace properties are set the algorithm
+may decide that it needs more information from the caller to locate the fitting
+data. For example, if a spectrum in a MatrixWorkspace is to be fit with a 1D
+function it will need to know at least the index of that spectrum. To request
+this information Fit dynamically creates relevant properties which the caller
 can set. Note that the dynamic properties depend both on the workspace
 and the function. For example, the data in a MatrixWorkspace can be fit
 with a 2D function. In this case all spectra will be used in the fit and
@@ -48,7 +46,7 @@ set before any other.
 
 The function and the initial values for its parameters are set with the
 Function property. A function can be simple or composite. A `simple
-function <../fitfunctions/categories/Functions.html>`__ has a name registered with Mantid
+function <../fitfunctions/categories/FitFunctions.html>`__ has a name registered with Mantid
 framework. The Fit algorithm creates an instance of a function by this
 name. A composite function is an arithmetic sum of two or more functions
 (simple or composite). Each function has a number of named parameters,
@@ -74,7 +72,7 @@ To use a simple function for a fit set its name and initial parameter
 values using the Function property. This property is a comma separated
 list of name=value pairs. The name of the first name=value pairs must be
 "name" and it must be set equal to the name of one of a `simple
-function <../fitfunctions/categories/Functions.html>`__. This name=value pair is followed
+function <../fitfunctions/categories/FitFunctions.html>`__. This name=value pair is followed
 by name=value pairs specifying values for the parameters of this
 function. If a parameter is not set in Function it will be given its
 default value defined by the function. All names are case sensitive. For
@@ -96,7 +94,7 @@ are created when the Formula attribute is set. It is important that
 Formula is defined before initializing the parameters.
 
 A list of the available simple functions can be found
-`here <../fitfunctions/categories/Functions.html>`__.
+`here <../fitfunctions/categories/FitFunctions.html>`__.
 
 Setting a composite function
 ############################
@@ -107,7 +105,7 @@ the Function property. Each simple function definition must be separated
 by a semicolon ';'. For example fitting two Gaussians on a linear
 background might look like this::
 
-   Function: "name=LinearBackground, A0=0.3; 
+   Function: "name=LinearBackground, A0=0.3;
               name=Gaussian, PeakCentre=4.6, Height=10, Sigma=0.5;
               name=Gaussian, PeakCentre=7.6, Height=8, Sigma=0.5"
 
@@ -207,10 +205,12 @@ Examples
 This example shows a simple fit to a Gaussian function. The algorithm
 properties are:
 
-| ``InputWorkspace:  Test``
-| ``WorkspaceIndex:  0``
-| ``Function:        name=Gaussian, PeakCentre=4, Height=1.3, Sigma=0.5``
-| ``Output:          res``
+::
+
+    InputWorkspace:  Test
+    WorkspaceIndex:  0
+    Function:        name=Gaussian, PeakCentre=4, Height=1.3, Sigma=0.5
+    Output:          res
 
 .. figure:: /images/GaussianFit.jpg
    :alt: GaussianFit.jpg
@@ -221,11 +221,13 @@ properties are:
 
 The next example shows a fit of the same data but with a tie.
 
-| ``InputWorkspace:  Test``
-| ``WorkspaceIndex:  0``
-| ``Function:        name=Gaussian, PeakCentre=4, Height=1.3, Sigma=0.5``
-| ``Ties:            Sigma=Height/2``
-| ``Output:          res``
+::
+
+    InputWorkspace:  Test
+    WorkspaceIndex:  0
+    Function:        name=Gaussian, PeakCentre=4, Height=1.3, Sigma=0.5
+    Ties:            Sigma=Height/2
+    Output:          res
 
 .. figure:: /images/GaussianFit_Ties.jpg
    :alt: GaussianFit_Ties.jpg
@@ -238,12 +240,14 @@ This example shows a fit of two overlapping Gaussians on a linear
 background. Here we create a composite function with a LinearBackground
 and two Gaussians:
 
-| ``InputWorkspace:  Test``
-| ``WorkspaceIndex:  0``
-| ``Function:        name=LinearBackground,A0=1;``
-| ``                 name=Gaussian,PeakCentre=4,Height=1.5, Sigma=0.5;``
-| ``                 name=Gaussian,PeakCentre=6,Height=4, Sigma=0.5 ``
-| ``Output:          res``
+::
+
+    InputWorkspace:  Test
+    WorkspaceIndex:  0
+    Function:        name=LinearBackground,A0=1;
+                     name=Gaussian,PeakCentre=4,Height=1.5, Sigma=0.5;
+                     name=Gaussian,PeakCentre=6,Height=4, Sigma=0.5
+    Output:          res
 
 .. figure:: /images/Gaussian2Fit.jpg
    :alt: Gaussian2Fit.jpg
@@ -255,13 +259,15 @@ and two Gaussians:
 This example repeats the previous one but with the Sigmas of the two
 Gaussians tied:
 
-| ``InputWorkspace:  Test``
-| ``WorkspaceIndex:  0``
-| ``Function:        name=LinearBackground,A0=1;``
-| ``                 name=Gaussian,PeakCentre=4,Height=1.5, Sigma=0.5;``
-| ``                 name=Gaussian,PeakCentre=6,Height=4, Sigma=0.5 ``
-| ``Ties:            f2.Sigma = f1.Sigma``
-| ``Output:          res``
+::
+
+    InputWorkspace:  Test
+    WorkspaceIndex:  0
+    Function:        name=LinearBackground,A0=1;
+                     name=Gaussian,PeakCentre=4,Height=1.5, Sigma=0.5;
+                     name=Gaussian,PeakCentre=6,Height=4, Sigma=0.5
+    Ties:            f2.Sigma = f1.Sigma
+    Output:          res
 
 .. figure:: /images/Gaussian2Fit_Ties.jpg
    :alt: Gaussian2Fit_Ties.jpg

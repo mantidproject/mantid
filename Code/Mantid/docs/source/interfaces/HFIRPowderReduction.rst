@@ -15,29 +15,29 @@ Use cases for tabs
 ------------------
 
   1. **Raw Detectors**: Visualize the reading of detectors directly coming out of the raw data
-    * Plot N lines for N Pts.;
-    * Highlight (make it thicker) the Pt that is interested;
-    * New from Mantid:  *ReadRawSpiceSignal(Pts)*;
+    - Plot N lines for N Pts.;
+    - Highlight (make it thicker) the Pt that is interested;
+    - New from Mantid:  *ReadRawSpiceSignal(Pts)*;
   2. **Individual Detector**: Visual the readings of one detector across an experiment
-    * Plot the counts of any individual detector;
-    * Able to change the X-axis from 2theta to arbitrary sample environment log;
-    * New from Mantid: *ReadRawSpiceSignal(DetectorID, XLabel)*;
+    - Plot the counts of any individual detector;
+    - Able to change the X-axis from 2theta to arbitrary sample environment log;
+    - New from Mantid: *ReadRawSpiceSignal(DetectorID, XLabel)*;
   3. **Normalized**: Reduce one scan each time
-    * Plot the reduced data
-    * Automatically locate detector efficiency file
-    * New from Mantid: *ConvertCWPDMDToSpectra(ExcludedDetectors=[])*
-    * New from Mantid: *ConvertSpiceDataToRealSpace(DetectorEfficiencyTable)*
+    - Plot the reduced data
+    - Automatically locate detector efficiency file
+    - New from Mantid: *ConvertCWPDMDToSpectra(ExcludedDetectors=[])*
+    - New from Mantid: *ConvertSpiceDataToRealSpace(DetectorEfficiencyTable)*
   4. **Multiple Scans**: Reduce a set of scans
-    * Reduce a set of scans and plot in 2D/water-fall mode;
-    * Able to merge all the scans;
-    * New from Mantid: *ConvertCWPDMDToSpectra(ExcludedDetectors=[])*
+    - Reduce a set of scans and plot in 2D/water-fall mode;
+    - Able to merge all the scans;
+    - New from Mantid: *ConvertCWPDMDToSpectra(ExcludedDetectors=[])*
   5. **Vanadium**: strip vanadium peaks
-    * Strip vanadium peak with unit 'Degrees' because of the binning (range and step size) must be respected;
-    * Peaks' position should be calculated and indicated auotmatically;
-    * *Mantid::StripPeaks()* will be called instread of *StripVadadiumPeaks()* because
+    - Strip vanadium peak with unit 'Degrees' because of the binning (range and step size) must be respected;
+    - Peaks' position should be calculated and indicated auotmatically;
+    - *Mantid::StripPeaks()* will be called instread of *StripVadadiumPeaks()* because
       the later one only works in d-spacing;
   6. **Advanced Setup**
-    * URL for raw data files; 
+    - URL for raw data files; 
 
 
 Workflow for *Normalization*
@@ -46,16 +46,16 @@ Workflow for *Normalization*
 Here is a typical use case for reduce data via tab *Noramlization*
 
  1. User specifies *Exp No* and *Scan No* and push button *Load*;
-   * HFIR-PDR-GUI loads SPICE data according to experiment number and scan number;
-   * HFIR-PDR-GUI checks whether vanadium correction file, i.e., detector efficiency file exists on server;
-   * HFIR-PDR-GUI checks whether excluded detectors file exists on server;
-   * HFIR-PDR-GUI checks log **m1** for wavelength and set to *Wavelength* ;
+  - HFIR-PDR-GUI loads SPICE data according to experiment number and scan number;
+  - HFIR-PDR-GUI checks whether vanadium correction file, i.e., detector efficiency file exists on server;
+  - HFIR-PDR-GUI checks whether excluded detectors file exists on server;
+  - HFIR-PDR-GUI checks log **m1** for wavelength and set to *Wavelength* ;
  2. User may specify detector efficient file;
  3. User specifies *Bin Size*; 
  4. User pushes button *2Theta*, *dSpacng*, or *Q*;
-   * HFIR-PDF-GUI reduce data in unit of *2theta* by taking accounting of 
-     - Detector efficiency;
-     - Excluded detectors; 
+  - HFIR-PDF-GUI reduce data in unit of *2theta* by taking accounting of 
+    - Detector efficiency;
+    - Excluded detectors; 
  5. HFIR-PDR-GUI plots the reduced data;
  6. User may rebin by different binning parameters or unit;
  7. User may push button *Next Scan* or *Prev Scan* to load and reduce other scans with current setup;
@@ -68,12 +68,12 @@ Workflow for *Raw Detectors*
 Here is a typical use case for reduce data via tab *Noramlization*
 
  1. User specifies *Exp No* and *Scan No* and push button *Load*;
-   * HFIR-PDR-GUI loads SPICE data according to experiment number and scan number;
-   * HFIR-PDR-GUI checks whether vanadium correction file, i.e., detector efficiency file exists on server;
-   * HFIR-PDR-GUI checks whether excluded detectors file exists on server;
-   * HFIR-PDR-GUI checks log **m1** for wavelength and set to *Wavelength* ;
+  - HFIR-PDR-GUI loads SPICE data according to experiment number and scan number;
+  - HFIR-PDR-GUI checks whether vanadium correction file, i.e., detector efficiency file exists on server;
+  - HFIR-PDR-GUI checks whether excluded detectors file exists on server;
+  - HFIR-PDR-GUI checks log **m1** for wavelength and set to *Wavelength* ;
  2. User specifies a *Pt.* number and push button *Plot Raw Detector*;
-   * HFIR-PDF-GUI plots the raw detector counts normalized by monitor count;
+  - HFIR-PDF-GUI plots the raw detector counts normalized by monitor count;
  3. User may push button *Previous Pt.* or *Next Pt.* for the other experiment points;
 
 
@@ -105,44 +105,44 @@ Experiment setup and sample log
 ===============================
 
  1. **Wavelength**: There are three settings for neutron wavelength, referenced by sample log *m1*. 
-   * Ge 113: :math:`\lambda = 2.41 \AA`, m1 = 9.45  (The **error** can be 0.05, such that in Exp 231 scan0001, m1=9.5)
-   * Ge 115: :math:`\lambda = 1.54 \AA`, m1 = 0
-   * Ge 117  :math:`\lambda = 1.12 \AA`, No used
+  - Ge 113: :math:`\lambda = 2.41 \AA`, m1 = 9.45  (The **error** can be 0.05, such that in Exp 231 scan0001, m1=9.5)
+  - Ge 115: :math:`\lambda = 1.54 \AA`, m1 = 0
+  - Ge 117  :math:`\lambda = 1.12 \AA`, No used
 
  2. **Collimator translation**: There are two status for collimator, which is specified by sample log *colltrans*
-   * *IN*:  colltrans = 0
-   * *OUT*: colltrans = +/-80
+  - *IN*:  colltrans = 0
+  - *OUT*: colltrans = +/-80
 
 
 Raw data correction files
 =========================
 
  1. **Detector efficiency**: 
-   * File name: *HB2A_exp0IJK__GE_abc_XY_vcorr.txt* where
+  - File name: *HB2A_exp0IJK__GE_abc_XY_vcorr.txt* where
     - IJK is the experiment number
     - abc is the GE set up.  It can be 113, 115 or 117
     - XY is either IN or OUT. 
     - Exmaple: *HB2A_exp0400__Ge_113_IN_vcorr.txt*
-   * Web address: *http://neutron.ornl.gov/user_data/hb2a/exp400/Datafiles/HB2A_exp0IJK__Ge_abc_IN_vcorr.txt*
+  - Web address: *http://neutron.ornl.gov/user_data/hb2a/exp400/Datafiles/HB2A_exp0IJK__Ge_abc_IN_vcorr.txt*
     - IJK is the experiment number
     - abc is the GE set up.  It can be 113, 115 or 117
     - XY is either IN or OUT. 
     - Exmaple: *http://neutron.ornl.gov/user_data/hb2a/exp400/Datafiles/HB2A_exp0400__Ge_113_IN_vcorr.txt*
 
  2. **Excluded detectors**:  Some detectors might be exluded from the experiment for some reason.  It is recorded in some excluded detectors' file.
-   * File name: *HB2A_exp0IJK__exclude_detectors.txt*
-    - IJK is the epxeriment number
-    - Exmaple: *HB2A_exp0400__exclude_detectors.txt*
-   * Web address: *http://neutron.ornl.gov/user_data/hb2a/expIJK/Datafiles/HB2A_exp0IJK__exclude_detectors.txt*
-    - IJK is the experiment number
-    - Example: *http://neutron.ornl.gov/user_data/hb2a/exp400/Datafiles/HB2A_exp0400__exclude_detectors.txt*
+  - File name: *HB2A_exp0IJK__exclude_detectors.txt*
+   - IJK is the epxeriment number
+   - Exmaple: *HB2A_exp0400__exclude_detectors.txt*
+  - Web address: *http://neutron.ornl.gov/user_data/hb2a/expIJK/Datafiles/HB2A_exp0IJK__exclude_detectors.txt*
+   - IJK is the experiment number
+   - Example: *http://neutron.ornl.gov/user_data/hb2a/exp400/Datafiles/HB2A_exp0400__exclude_detectors.txt*
 
  3. Detector gaps: The 2-theta gap (in unit degrees) can be changed among cycles. 
-   * Location example: *http://neutron.ornl.gov/user_data/hb2a/exp400/Datafiles/HB2A_exp0400__gaps.txt*
+   - Location example: *http://neutron.ornl.gov/user_data/hb2a/exp400/Datafiles/HB2A_exp0400__gaps.txt*
 
 
 Limitation
 ----------
 
-* HFIR powder reduction GUI supports for instrument HB2A only in release 3.4.0;
+- HFIR powder reduction GUI supports for instrument HB2A only in release 3.4.0;
 

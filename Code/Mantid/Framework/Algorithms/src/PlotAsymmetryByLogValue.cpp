@@ -884,10 +884,23 @@ PlotAsymmetryByLogValue::groupDetectors(API::MatrixWorkspace_sptr &ws,
  *doesn't exist.
  */
 double PlotAsymmetryByLogValue::getLogValue(MatrixWorkspace &ws) {
-  auto *property = ws.run().getLogData(g_logName);
+
+  const Run& run = ws.run();
+
+  // Get the start & end time for the run
+  Mantid::Kernel::DateAndTime start, end;
+  if ( run.hasProperty("run_start") && run.hasProperty("run_end") )
+  {
+    start = run.getProperty("run_start")->value();
+    end = run.getProperty("run_end")->value();
+  }
+
+  auto *property = run.getLogData(g_logName);
   if (!property) {
     throw std::invalid_argument("Log " + g_logName + " does not exist.");
   }
+  property->filterByTime(start, end);
+
   double value = 0;
   // try different property types
   if (convertLogToDouble<double>(property, value, g_logFunc))
