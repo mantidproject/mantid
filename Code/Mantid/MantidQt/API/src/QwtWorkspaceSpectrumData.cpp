@@ -123,11 +123,14 @@ size_t QwtWorkspaceSpectrumData::esize() const
  */
 double QwtWorkspaceSpectrumData::getYMin() const
 {
-  auto it = std::min_element(m_Y.begin(), m_Y.end());
-  double temp = 0;
-  if(it != m_Y.end())
+  double temp = m_Y[0];
+  for(size_t i = 1; i < m_Y.size(); ++i)
   {
-    temp = *it;
+    if ((boost::math::isnan)(temp) || (boost::math::isinf)(temp))
+      temp = m_Y[i];
+    else if (m_Y[i] < temp && !(boost::math::isnan)(m_Y[i]) &&
+        !(boost::math::isinf)(m_Y[i]))
+      temp = m_Y[i];
   }
   if (m_logScale && temp <= 0.)
   {
@@ -142,11 +145,14 @@ double QwtWorkspaceSpectrumData::getYMin() const
  */
 double QwtWorkspaceSpectrumData::getYMax() const
 {
-  auto it = std::max_element(m_Y.begin(), m_Y.end());
-  double temp = 0;
-  if(it != m_Y.end())
+  double temp = m_Y[0];
+  for(size_t i = 1; i < m_Y.size(); ++i)
   {
-    temp = *it;
+    if ((boost::math::isnan)(temp) || (boost::math::isinf)(temp))
+      temp = m_Y[i];
+    else if (m_Y[i] > temp && !(boost::math::isnan)(m_Y[i]) &&
+        !(boost::math::isinf)(m_Y[i]))
+      temp = m_Y[i];
   }
   if (m_logScale && temp <= 0.)
   {
