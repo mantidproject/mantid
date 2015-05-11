@@ -2,14 +2,8 @@
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidCrystal/LoadHKL.h"
 #include "MantidCrystal/AnvredCorrection.h"
-#include "MantidDataObjects/Peak.h"
-#include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Instrument/Detector.h"
-#include "MantidKernel/Strings.h"
-#include "MantidKernel/System.h"
 #include "MantidKernel/Utils.h"
-#include "MantidKernel/V3D.h"
-#include <boost/math/special_functions/fpclassify.hpp>
 #include <fstream>
 
 using namespace Mantid::Geometry;

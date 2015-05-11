@@ -80,6 +80,9 @@ private:
   /// is it possible to open the file?
   bool canOpenAsNeXus(const std::string &fname);
 
+  /// split multi period histogram workspace into a workspace group
+  void splitMutiPeriodHistrogramData(const size_t numPeriods);
+
   /// The name and path of the input file
   std::string filename;
   /// The workspace being filled out

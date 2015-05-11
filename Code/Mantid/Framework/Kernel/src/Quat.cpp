@@ -3,11 +3,6 @@
 #include "MantidKernel/Tolerance.h"
 #include "MantidKernel/V3D.h"
 
-#include <cmath>
-#include <stdexcept>
-#include <cstdlib>
-#include <float.h>
-
 #include <boost/algorithm/string.hpp>
 
 namespace Mantid {

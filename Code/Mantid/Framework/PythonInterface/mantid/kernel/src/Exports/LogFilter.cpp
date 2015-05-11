@@ -8,7 +8,9 @@ using Mantid::Kernel::Property;
 
 using namespace boost::python;
 
+// clang-format off
 void export_LogFilter()
+// clang-format on
 {
   class_<LogFilter,boost::noncopyable>("LogFilter", 
                                         init<const Property*>("Creates a log filter using the log to be filtered"))

@@ -1,6 +1,5 @@
 #include <algorithm>
 #include <iostream> // REMOVE
-#include <limits>
 #include <sstream>
 #include <stdexcept>
 #include "MantidKernel/Atom.h"

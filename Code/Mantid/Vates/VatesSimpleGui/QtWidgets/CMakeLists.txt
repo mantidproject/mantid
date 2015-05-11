@@ -65,4 +65,8 @@ ${MANTID_SUBPROJECT_LIBS}
 MantidQtAPI
 )
 
+if (OSX_VERSION VERSION_GREATER 10.8)
+  set_target_properties ( VatesSimpleGuiQtWidgets PROPERTIES INSTALL_RPATH "@loader_path/../Contents/Libraries;@loader_path/../Contents/MacOS")
+endif ()
+
 install( TARGETS VatesSimpleGuiQtWidgets ${SYSTEM_PACKAGE_TARGET} DESTINATION ${PVPLUGINS_DIR} )

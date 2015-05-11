@@ -48,6 +48,11 @@
         information_only="1"
         si_class="vtkSITimeLabelProperty">
       </StringVectorProperty>
+      <Hints>
+        <ReaderFactory
+          extensions="nxs"
+          file_description="MDEW Nexus File" />
+      </Hints>
     </SourceProxy>
   </ProxyGroup>
   <!-- End MDEWNexusReader -->

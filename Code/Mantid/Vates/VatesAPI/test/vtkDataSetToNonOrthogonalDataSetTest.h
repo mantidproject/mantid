@@ -160,12 +160,13 @@ private:
     return ds;
   }
 
-  float *getRangeComp(vtkDataSet *ds, std::string fieldname, int size)
+  template<typename T>
+  T *getRangeComp(vtkDataSet *ds, std::string fieldname, int size)
   {
     vtkDataArray *arr = ds->GetFieldData()->GetArray(fieldname.c_str());
-    vtkFloatArray *farr = vtkFloatArray::SafeDownCast(arr);
-    float *vals = new float[size];
-    farr->GetTupleValue(0, vals);
+    vtkTypedDataArray<T>* tarr = vtkTypedDataArray<T>::FastDownCast(arr);
+    T *vals = new T[size];
+    tarr->GetTupleValue(0, vals);
     return vals;
   }
 
@@ -181,21 +182,37 @@ private:
     TS_ASSERT_DELTA(point[1], 1.0, eps);
     TS_ASSERT_DELTA(point[2], 0.8660254, eps);
     // See if the basis vectors are available
-    float *xBasis = getRangeComp(grid, "AxisBaseForX", 3);
-    TS_ASSERT_DELTA(xBasis[0], 1.0, eps);
-    TS_ASSERT_DELTA(xBasis[1], 0.0, eps);
-    TS_ASSERT_DELTA(xBasis[2], 0.0, eps);
-    delete [] xBasis;
-    float *yBasis = getRangeComp(grid, "AxisBaseForY", 3);
-    TS_ASSERT_DELTA(yBasis[0], 0.0, eps);
-    TS_ASSERT_DELTA(yBasis[1], 1.0, eps);
-    TS_ASSERT_DELTA(yBasis[2], 0.0, eps);
-    delete [] yBasis;
-    float *zBasis = getRangeComp(grid, "AxisBaseForZ", 3);
-    TS_ASSERT_DELTA(zBasis[0], 0.5, eps);
-    TS_ASSERT_DELTA(zBasis[1], 0.0, eps);
-    TS_ASSERT_DELTA(zBasis[2], 0.8660254, eps);
-    delete [] zBasis;
+
+    double *basisMatrix = getRangeComp<double>(grid, "ChangeOfBasisMatrix", 16);
+    
+    // Row by row check
+
+    // basisX[0], basisY[0], basisZ[0], 0
+    int index = 0;
+    TS_ASSERT_DELTA(basisMatrix[index++], 1.0, eps);
+    TS_ASSERT_DELTA(basisMatrix[index++], 0.0, eps);
+    TS_ASSERT_DELTA(basisMatrix[index++], 0.5, eps);
+    TS_ASSERT_DELTA(basisMatrix[index++], 0.0, eps);
+
+    // basisX[1], basisY[1], basisZ[1], 0
+    TS_ASSERT_DELTA(basisMatrix[index++], 0.0, eps);
+    TS_ASSERT_DELTA(basisMatrix[index++], 1.0, eps);
+    TS_ASSERT_DELTA(basisMatrix[index++], 0.0, eps);
+    TS_ASSERT_DELTA(basisMatrix[index++], 0.0, eps);
+
+    // basisX[2], basisY[2], basisZ[2], 0
+    TS_ASSERT_DELTA(basisMatrix[index++], 0.0, eps);
+    TS_ASSERT_DELTA(basisMatrix[index++], 0.0, eps);
+    TS_ASSERT_DELTA(basisMatrix[index++], 0.8660254, eps);
+    TS_ASSERT_DELTA(basisMatrix[index++], 0.0, eps);
+
+    //0, 0, 0, 1
+    TS_ASSERT_DELTA(basisMatrix[index++], 0.0, eps);
+    TS_ASSERT_DELTA(basisMatrix[index++], 0.0, eps);
+    TS_ASSERT_DELTA(basisMatrix[index++], 0.0, eps);
+    TS_ASSERT_DELTA(basisMatrix[index++], 1.0, eps);
+
+    delete basisMatrix;
   }
 
 public:
@@ -296,21 +313,37 @@ public:
     TS_ASSERT_DELTA(point[1], 1.0, eps);
     TS_ASSERT_DELTA(point[2], 1.0, eps);
     // See if the basis vectors are available
-    float *xBasis = getRangeComp(ds, "AxisBaseForX", 3);
-    TS_ASSERT_DELTA(xBasis[0], 1.0, eps);
-    TS_ASSERT_DELTA(xBasis[1], 0.0, eps);
-    TS_ASSERT_DELTA(xBasis[2], 0.0, eps);
-    delete [] xBasis;
-    float *yBasis = getRangeComp(ds, "AxisBaseForY", 3);
-    TS_ASSERT_DELTA(yBasis[0], 0.0, eps);
-    TS_ASSERT_DELTA(yBasis[1], 1.0, eps);
-    TS_ASSERT_DELTA(yBasis[2], 0.0, eps);
-    delete [] yBasis;
-    float *zBasis = getRangeComp(ds, "AxisBaseForZ", 3);
-    TS_ASSERT_DELTA(zBasis[0], 0.0, eps);
-    TS_ASSERT_DELTA(zBasis[1], 0.0, eps);
-    TS_ASSERT_DELTA(zBasis[2], 1.0, eps);
-    delete [] zBasis;
+    double *basisMatrix = getRangeComp<double>(ds, "ChangeOfBasisMatrix", 16);
+    
+    // Row by row check
+
+    // basisX[0], basisY[0], basisZ[0], 0
+    int index = 0;
+    TS_ASSERT_DELTA(basisMatrix[index++], 1.0, eps);
+    TS_ASSERT_DELTA(basisMatrix[index++], 0.0, eps);
+    TS_ASSERT_DELTA(basisMatrix[index++], 0.0, eps);
+    TS_ASSERT_DELTA(basisMatrix[index++], 0.0, eps);
+
+    // basisX[1], basisY[1], basisZ[1], 0
+    TS_ASSERT_DELTA(basisMatrix[index++], 0.0, eps);
+    TS_ASSERT_DELTA(basisMatrix[index++], 1.0, eps);
+    TS_ASSERT_DELTA(basisMatrix[index++], 0.0, eps);
+    TS_ASSERT_DELTA(basisMatrix[index++], 0.0, eps);
+
+    // basisX[2], basisY[2], basisZ[2], 0
+    TS_ASSERT_DELTA(basisMatrix[index++], 0.0, eps);
+    TS_ASSERT_DELTA(basisMatrix[index++], 0.0, eps);
+    TS_ASSERT_DELTA(basisMatrix[index++], 1.0, eps);
+    TS_ASSERT_DELTA(basisMatrix[index++], 0.0, eps);
+
+    //0, 0, 0, 1
+    TS_ASSERT_DELTA(basisMatrix[index++], 0.0, eps);
+    TS_ASSERT_DELTA(basisMatrix[index++], 0.0, eps);
+    TS_ASSERT_DELTA(basisMatrix[index++], 0.0, eps);
+    TS_ASSERT_DELTA(basisMatrix[index++], 1.0, eps);
+
+    delete basisMatrix;
+    
     ds->Delete();
   }
 
@@ -338,21 +371,37 @@ public:
     TS_ASSERT_DELTA(point[1], 1.0, eps);
     TS_ASSERT_DELTA(point[2], 0.75592895, eps);
     // See if the basis vectors are available
-    float *xBasis = getRangeComp(ds, "AxisBaseForX", 3);
-    TS_ASSERT_DELTA(xBasis[0], 1.0, eps);
-    TS_ASSERT_DELTA(xBasis[1], 0.0, eps);
-    TS_ASSERT_DELTA(xBasis[2], 0.0, eps);
-    delete [] xBasis;
-    float *yBasis = getRangeComp(ds, "AxisBaseForY", 3);
-    TS_ASSERT_DELTA(yBasis[0], 0.0, eps);
-    TS_ASSERT_DELTA(yBasis[1], 1.0, eps);
-    TS_ASSERT_DELTA(yBasis[2], 0.0, eps);
-    delete [] yBasis;
-    float *zBasis = getRangeComp(ds, "AxisBaseForZ", 3);
-    TS_ASSERT_DELTA(zBasis[0], -0.65465367, eps);
-    TS_ASSERT_DELTA(zBasis[1], 0.0, eps);
-    TS_ASSERT_DELTA(zBasis[2], 0.75592895, eps);
-    delete [] zBasis;
+    double *basisMatrix = getRangeComp<double>(ds, "ChangeOfBasisMatrix", 16);
+
+    // Row by row check
+
+    // basisX[0], basisY[0], basisZ[0], 0
+    int index = 0;
+    TS_ASSERT_DELTA(basisMatrix[index++], 1.0, eps);
+    TS_ASSERT_DELTA(basisMatrix[index++], 0.0, eps);
+    TS_ASSERT_DELTA(basisMatrix[index++], -0.65465367, eps);
+    TS_ASSERT_DELTA(basisMatrix[index++], 0.0, eps);
+
+    // basisX[1], basisY[1], basisZ[1], 0
+    TS_ASSERT_DELTA(basisMatrix[index++], 0.0, eps);
+    TS_ASSERT_DELTA(basisMatrix[index++], 1.0, eps);
+    TS_ASSERT_DELTA(basisMatrix[index++], 0.0, eps);
+    TS_ASSERT_DELTA(basisMatrix[index++], 0.0, eps);
+
+    // basisX[2], basisY[2], basisZ[2], 0
+    TS_ASSERT_DELTA(basisMatrix[index++], 0.0, eps);
+    TS_ASSERT_DELTA(basisMatrix[index++], 0.0, eps);
+    TS_ASSERT_DELTA(basisMatrix[index++], 0.75592895, eps);
+    TS_ASSERT_DELTA(basisMatrix[index++], 0.0, eps);
+
+    //0, 0, 0, 1
+    TS_ASSERT_DELTA(basisMatrix[index++], 0.0, eps);
+    TS_ASSERT_DELTA(basisMatrix[index++], 0.0, eps);
+    TS_ASSERT_DELTA(basisMatrix[index++], 0.0, eps);
+    TS_ASSERT_DELTA(basisMatrix[index++], 1.0, eps);
+
+    delete basisMatrix;
+  
     ds->Delete();
   }
 };

@@ -3,6 +3,7 @@
 
 #include <set>
 #include <boost/make_shared.hpp>
+#include <boost/algorithm/string.hpp>
 #include <iostream>
 
 #include "MantidGeometry/Crystal/PointGroupFactory.h"
@@ -180,6 +181,51 @@ PointGroupCrystalSystemMap getPointGroupsByCrystalSystem() {
   }
 
   return map;
+}
+
+/// Return a human-readable string for the given crystal system
+std::string
+getCrystalSystemAsString(const PointGroup::CrystalSystem &crystalSystem) {
+  switch (crystalSystem) {
+  case PointGroup::Cubic:
+    return "Cubic";
+  case PointGroup::Tetragonal:
+    return "Tetragonal";
+  case PointGroup::Hexagonal:
+    return "Hexagonal";
+  case PointGroup::Trigonal:
+    return "Trigonal";
+  case PointGroup::Orthorhombic:
+    return "Orthorhombic";
+  case PointGroup::Monoclinic:
+    return "Monoclinic";
+  default:
+    return "Triclinic";
+  }
+}
+
+PointGroup::CrystalSystem
+getCrystalSystemFromString(const std::string &crystalSystem) {
+  std::string crystalSystemLC = boost::algorithm::to_lower_copy(crystalSystem);
+
+  if (crystalSystemLC == "cubic") {
+    return PointGroup::Cubic;
+  } else if (crystalSystemLC == "tetragonal") {
+    return PointGroup::Tetragonal;
+  } else if (crystalSystemLC == "hexagonal") {
+    return PointGroup::Hexagonal;
+  } else if (crystalSystemLC == "trigonal") {
+    return PointGroup::Trigonal;
+  } else if (crystalSystemLC == "orthorhombic") {
+    return PointGroup::Orthorhombic;
+  } else if (crystalSystemLC == "monoclinic") {
+    return PointGroup::Monoclinic;
+  } else if (crystalSystemLC == "triclinic") {
+    return PointGroup::Triclinic;
+  } else {
+    throw std::invalid_argument("Not a valid crystal system: '" +
+                                crystalSystem + "'.");
+  }
 }
 
 } // namespace Mantid

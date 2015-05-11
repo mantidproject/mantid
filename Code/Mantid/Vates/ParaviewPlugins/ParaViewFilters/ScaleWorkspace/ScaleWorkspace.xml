@@ -2,6 +2,9 @@
   <!-- Begin ScaleWorkspace -->
   <ProxyGroup name="filters">
     <SourceProxy name="MantidParaViewScaleWorkspace" class="vtkScaleWorkspace" label="MD Scale Workspace" >
+      <Hints>
+        <ShowInMenu category="Mantid"/>
+      </Hints>
       <InputProperty
         name="Input"
         command="SetInputConnection">

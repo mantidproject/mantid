@@ -844,7 +844,7 @@ class RunDescriptor(PropDescriptor):
             except:
                 try:
                     monws_name = mon_ws.name()
-                except: 
+                except:
                     monws_name = 'None'
                 RunDescriptor._logger('*** Monitor workspace {0} does not have monitor with ID {1}. Monitor workspace set to None'.\
                                           format(monws_name,monID),'warning')
@@ -974,13 +974,26 @@ class RunDescriptor(PropDescriptor):
         else:
             mon_load_option = 'Separate'
         #
+        nxs_file=False
+        file,ext = os.path.splitext(data_file)
+        if ext == '.nxs':
+            nxs_file = True
         try: # Hack: LoadEventNexus does not understand Separate at the moment and throws.
             # And event loader always loads monitors separately
             Load(Filename=data_file, OutputWorkspace=ws_name,LoadMonitors = mon_load_option)
         except ValueError:
             #mon_load_option =str(int(load_mon_with_workspace))
             Load(Filename=data_file, OutputWorkspace=ws_name,LoadMonitors = '1',MonitorsAsEvents='0')
-
+        #HACK >>> , necessary until #11565 is fixed
+        if nxs_file :
+           instr_name = RunDescriptor._holder.instr_name
+           if instr_name == 'LET' and self._run_number>14151 and self._run_number<14382:
+                FrameworkManager.clearInstruments()
+                idf_file = api.ExperimentInfo.getInstrumentFilename(instr_name)
+                idf_path,tile = os.path.split(idf_file)
+                idf_file = os.path.join(idf_path,'LET_Definition.xml')
+                LoadInstrument(ws_name,idf_file,RewriteSpectraMap='0')
+        #HACK<<<
         RunDescriptor._logger("Loaded {0}".format(data_file),'information')
 
         loaded_ws = mtd[ws_name]
@@ -1077,7 +1090,7 @@ class RunDescriptor(PropDescriptor):
         except:
             try:
                 ws_index = data_ws.getIndexFromSpectrumNumber(spectraID)
-            except: 
+            except:
                 raise RuntimeError('*** Error: Can not retrieve spectra with ID {0} from source workspace: {1}'.\
                                     format(spectraID,data_ws.name()))
 

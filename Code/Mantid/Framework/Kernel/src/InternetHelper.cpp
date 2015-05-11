@@ -29,12 +29,11 @@
 #else
 #include <Poco/FileStream.h>
 #include <Poco/NullStream.h>
-#include <stdlib.h>
+
 #endif
 
 // std
 #include <fstream>
-#include <sstream>
 
 namespace Mantid {
 namespace Kernel {

@@ -46,6 +46,7 @@ src/vtkDataSetToWsLocation.cpp
 src/vtkEllipsoidTransformer.cpp
 src/vtkMDLineFactory.cpp
 src/vtkMDQuadFactory.cpp
+src/vtkMD0DFactory.cpp
 src/vtkNullUnstructuredGrid.cpp
 src/vtkSplatterPlotFactory.cpp
 src/vtkMDHexFactory.cpp
@@ -113,6 +114,7 @@ inc/MantidVatesAPI/vtkEllipsoidTransformer.h
 inc/MantidVatesAPI/vtkMDLineFactory.h
 inc/MantidVatesAPI/vtkMDQuadFactory.h
 inc/MantidVatesAPI/vtkMDHexFactory.h
+inc/MantidVatesAPI/vtkMD0DFactory.h
 inc/MantidVatesAPI/vtkNullUnstructuredGrid.h
 inc/MantidVatesAPI/vtkSplatterPlotFactory.h
 inc/MantidVatesAPI/vtkPeakMarkerFactory.h
@@ -142,6 +144,7 @@ test/vtkMDHistoHex4DFactoryTest.h
 test/vtkMDHistoHexFactoryTest.h
 test/vtkMDHistoLineFactoryTest.h
 test/vtkMDHistoQuadFactoryTest.h
+test/vtkMD0DFactoryTest.h
 test/FieldDataToMetadataTest.h
 test/FilteringUpdateProgressActionTest.h
 test/LoadVTKTest.h
@@ -176,7 +179,7 @@ test/CompositePeaksPresenterVsiTest.h
 )
 
 include_directories( inc )
-include_directories ( SYSTEM ${QWT_INCLUDE_DIR} )
+include_directories ( SYSTEM ${QWT_INCLUDE_DIR} ${PARAVIEW_INCLUDE_DIRS})
 
 set( SRC_UNITY_IGNORE_FILES )
 if( UNITY_BUILD )
@@ -206,6 +209,10 @@ vtkFiltersSources
 vtkPVVTKExtensionsDefault
 ${QWT_LIBRARIES}
 )
+
+if (OSX_VERSION VERSION_GREATER 10.8)
+  set_target_properties ( VatesAPI PROPERTIES INSTALL_RPATH "@loader_path/../MacOS;@loader_path/../Libraries")
+endif ()
 
 # Create test file projects
 if( CXXTEST_FOUND AND GMOCK_FOUND AND GTEST_FOUND )

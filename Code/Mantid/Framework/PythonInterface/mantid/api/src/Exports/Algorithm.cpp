@@ -38,7 +38,9 @@ namespace
   BOOST_PYTHON_FUNCTION_OVERLOADS(declarePropertyType3_Overload, PythonAlgorithm::declarePyAlgProperty, 4, 5)
 }
 
+// clang-format off
 void export_leaf_classes()
+// clang-format on
 {
 
   register_ptr_to_python<boost::shared_ptr<Algorithm>>();

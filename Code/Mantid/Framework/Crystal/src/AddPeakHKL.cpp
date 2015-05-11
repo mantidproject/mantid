@@ -3,7 +3,6 @@
 #include "MantidAPI/IPeak.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ArrayLengthValidator.h"
-#include "MantidKernel/V3D.h"
 
 namespace Mantid
 {

@@ -34,7 +34,8 @@ namespace DataObjects {
 /** Default constructor
  */
 TMDE(MDEventWorkspace)::MDEventWorkspace()
-    : data(NULL), m_BoxController(new BoxController(nd)), m_coordSystem(None) {
+    : API::IMDEventWorkspace(), data(NULL),
+      m_BoxController(new BoxController(nd)), m_coordSystem(None) {
   // First box is at depth 0, and has this default boxController
   data = new MDBox<MDE, nd>(m_BoxController.get(), 0);
 }
@@ -43,8 +44,8 @@ TMDE(MDEventWorkspace)::MDEventWorkspace()
 /** Copy constructor
  */
 TMDE(MDEventWorkspace)::MDEventWorkspace(const MDEventWorkspace<MDE, nd> &other)
-    : IMDEventWorkspace(other),
-      m_BoxController(other.m_BoxController->clone()) {
+    : IMDEventWorkspace(other), data(NULL),
+      m_BoxController(other.m_BoxController->clone()), m_coordSystem(other.m_coordSystem) {
 
   const MDBox<MDE, nd> *mdbox =
       dynamic_cast<const MDBox<MDE, nd> *>(other.data);

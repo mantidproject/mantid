@@ -16,7 +16,7 @@ namespace MDF
 
 /// Constructor.
 /// @param parent :: A parent widget.
-AddWorkspaceDialog::AddWorkspaceDialog(QWidget *parent):QDialog(parent)
+AddWorkspaceDialog::AddWorkspaceDialog(QWidget *parent):QDialog(parent),m_maxIndex(0)
 {
   m_uiForm.setupUi(this);
   // populate the combo box with names of eligible workspaces

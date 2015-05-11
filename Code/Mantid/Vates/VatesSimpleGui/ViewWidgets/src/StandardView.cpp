@@ -1,4 +1,5 @@
 #include "MantidVatesSimpleGuiViewWidgets/StandardView.h"
+#include "MantidVatesSimpleGuiViewWidgets/RebinnedSourcesManager.h"
 // Have to deal with ParaView warnings and Intel compiler the hard way.
 #if defined(__INTEL_COMPILER)
   #pragma warning disable 1170
@@ -17,6 +18,7 @@
 #include <vtkDataObject.h>
 #include <vtkSMPropertyHelper.h>
 #include <vtkSMProxy.h>
+#include <vtkSMPVRepresentationProxy.h>
 
 #if defined(__INTEL_COMPILER)
   #pragma warning enable 1170
@@ -39,9 +41,12 @@ namespace SimpleGui
  * This function sets up the UI components, adds connections for the view's
  * buttons and creates the rendering view.
  * @param parent the parent widget for the standard view
+ * @param rebinnedSourcesManager Pointer to a RebinnedSourcesManager
  */
-  StandardView::StandardView(QWidget *parent) : ViewBase(parent),m_binMDAction(NULL),
+  StandardView::StandardView(QWidget *parent, RebinnedSourcesManager* rebinnedSourcesManager) : ViewBase(parent, rebinnedSourcesManager),
+                                                                 m_binMDAction(NULL),
                                                                  m_sliceMDAction(NULL),
+                                                                 m_cutMDAction(NULL),
                                                                  m_unbinAction(NULL)
 {
   this->ui.setupUi(this);
@@ -76,6 +81,7 @@ StandardView::~StandardView()
 
 void StandardView::setupViewButtons()
 {
+
   // Populate the rebin button
   QMenu* rebinMenu = new QMenu(this->ui.rebinToolButton);
 
@@ -85,21 +91,26 @@ void StandardView::setupViewButtons()
   m_sliceMDAction = new QAction("SliceMD", rebinMenu);
   m_sliceMDAction->setIconVisibleInMenu(false);
 
+  m_cutMDAction = new QAction("CutMD", rebinMenu);
+  m_cutMDAction->setIconVisibleInMenu(false);
 
   m_unbinAction = new QAction("Remove Rebinning", rebinMenu);
   m_unbinAction->setIconVisibleInMenu(false);
 
   rebinMenu->addAction(m_binMDAction);
   rebinMenu->addAction(m_sliceMDAction);
+  rebinMenu->addAction(m_cutMDAction);
   rebinMenu->addAction(m_unbinAction);
 
   this->ui.rebinToolButton->setPopupMode(QToolButton::InstantPopup);
   this->ui.rebinToolButton->setMenu(rebinMenu);
 
   QObject::connect(m_binMDAction, SIGNAL(triggered()),
-                   this, SLOT(onBinMD()), Qt::QueuedConnection);
+                   this, SLOT(onRebin()), Qt::QueuedConnection);
   QObject::connect(m_sliceMDAction, SIGNAL(triggered()),
-                   this, SLOT(onSliceMD()), Qt::QueuedConnection);
+                   this, SLOT(onRebin()), Qt::QueuedConnection);
+  QObject::connect(m_cutMDAction, SIGNAL(triggered()),
+                   this, SLOT(onRebin()), Qt::QueuedConnection);
   // Set the unbinbutton to remove the rebinning on a workspace
   // which was binned in the VSI
   QObject::connect(m_unbinAction, SIGNAL(triggered()),
@@ -110,7 +121,7 @@ void StandardView::setupViewButtons()
 void StandardView::destroyView()
 {
   pqObjectBuilder *builder = pqApplicationCore::instance()->getObjectBuilder();
-  this->destroyFilter(builder, QString("Slice"));
+  this->destroyFilter(QString("Slice"));
   builder->destroy(this->view);
 }
 
@@ -146,7 +157,16 @@ void StandardView::render()
   vtkSMPropertyHelper(drep->getProxy(), "Representation").Set(reptype.toStdString().c_str());
   drep->getProxy()->UpdateVTKObjects();
   this->origRep = qobject_cast<pqPipelineRepresentation*>(drep);
-  this->origRep->colorByArray("signal", vtkDataObject::FIELD_ASSOCIATION_CELLS);
+  if (!this->isPeaksWorkspace(this->origSrc))
+  {
+    vtkSMPVRepresentationProxy::SetScalarColoring(drep->getProxy(), "signal",
+                                                  vtkDataObject::FIELD_ASSOCIATION_CELLS);
+    //drep->getProxy()->UpdateVTKObjects();
+    //vtkSMPVRepresentationProxy::RescaleTransferFunctionToDataRange(drep->getProxy(),
+    //                                                               "signal",
+    //                                                               vtkDataObject::FIELD_ASSOCIATION_CELLS);
+    drep->getProxy()->UpdateVTKObjects();
+  }
 
   this->resetDisplay();
   emit this->triggerAccept();
@@ -214,25 +234,18 @@ void StandardView::closeSubWindows()
 {
 }
 
-/**
- * This function reacts to a destroyed source.
- */
-void StandardView::onSourceDestroyed()
-{
-  //setRebinAndUnbinButtons();
-}
 
 /**
  * Check if the rebin and unbin buttons should be visible
  * Note that for a rebin button to be visible there may be no
- * MDHisto workspaces present, yet temporary MDHisto workspaces are
- * allowed.
+ * MDHisto workspaces present, yet  MDHisto workspaces which result from 
+ * rebinning within the VSI are allowed.
  */
 void StandardView::setRebinAndUnbinButtons()
 {
-  int numberOfTemporaryWorkspaces = 0;
-  int numberOfTrueMDHistoWorkspaces = 0;
-  int numberOfPeakWorkspaces = 0;
+  unsigned int numberOfInternallyRebinnedWorkspaces = 0;
+  unsigned int numberOfTrueMDHistoWorkspaces = 0;
+  unsigned int numberOfPeakWorkspaces = 0;
 
   pqServer *server = pqActiveObjects::instance().activeServer();
   pqServerManagerModel *smModel = pqApplicationCore::instance()->getServerManagerModel();
@@ -240,57 +253,51 @@ void StandardView::setRebinAndUnbinButtons()
 
   for (QList<pqPipelineSource *>::iterator source = sources.begin(); source != sources.end(); ++source)
   {
-    if (isTemporaryWorkspace(*source))
+    if (isInternallyRebinnedWorkspace(*source))
     {
-      numberOfTemporaryWorkspaces++;
+      ++numberOfInternallyRebinnedWorkspaces;
     } else if (isMDHistoWorkspace(*source))
     {
-      numberOfTrueMDHistoWorkspaces++;
+      ++numberOfTrueMDHistoWorkspaces;
     }
     else if (isPeaksWorkspace(*source))
     {
-      numberOfPeakWorkspaces++;
+      ++numberOfPeakWorkspaces;
     }
   }
 
   // If there are any true MDHisto workspaces then the rebin button should be disabled
-  if (numberOfTrueMDHistoWorkspaces > 0 || numberOfPeakWorkspaces > 0)
-  {
-    this->m_binMDAction->setEnabled(false);
-    this->m_sliceMDAction->setEnabled(false);
-  }
-  else 
-  {
-    this->m_binMDAction->setEnabled(true);
-    this->m_sliceMDAction->setEnabled(true);
-  }
+  bool allowRebinning = numberOfTrueMDHistoWorkspaces > 0 || numberOfPeakWorkspaces > 0;
+  this->allowRebinningOptions(allowRebinning);
 
-  // If there are no temporary workspaces the button should be disabled.
-  if (numberOfTemporaryWorkspaces == 0)
-  {
-    this->m_unbinAction->setEnabled(false);
-  }
-  else
-  {
-    this->m_unbinAction->setEnabled(true);
-  }
+  // If there are no internally rebinned workspaces the button should be disabled.
+  allowUnbinOption(numberOfInternallyRebinnedWorkspaces > 0);
 }
 
 
 /**
  * Reacts to the user selecting the BinMD algorithm
  */ 
-void StandardView::onBinMD()
+void StandardView::onRebin()
 {
-  emit rebin("BinMD");
+  if(QAction* action = dynamic_cast<QAction*>(sender())) {
+    emit rebin(action->text().toStdString()); }
 }
 
 /**
- * Reacts to the user selecting the SliceMD algorithm
- */ 
-void StandardView::onSliceMD()
-{
-  emit rebin("SliceMD");
+Disable rebinning options
+*/
+void StandardView::allowRebinningOptions(bool allow) {
+    this->m_binMDAction->setEnabled(allow);
+    this->m_sliceMDAction->setEnabled(allow);
+    this->m_cutMDAction->setEnabled(allow);
+}
+
+/**
+Enable unbin option
+*/
+void StandardView::allowUnbinOption(bool allow) {
+  this->m_unbinAction->setEnabled(allow);
 }
 
 
@@ -303,8 +310,7 @@ void StandardView::activeSourceChangeListener(pqPipelineSource* source)
   // If there is no active source, then we do not allow rebinning
   if (!source)
   {
-    this->m_binMDAction->setEnabled(false);
-    this->m_sliceMDAction->setEnabled(false);
+    this->allowRebinningOptions(false);
     this->m_unbinAction->setEnabled(false);
     return;
   }
@@ -319,26 +325,30 @@ void StandardView::activeSourceChangeListener(pqPipelineSource* source)
     filter = qobject_cast<pqPipelineFilter*>(localSource);
   }
 
-  // Important to first check the temporary source, then for MDEvent source, 
-  // as a temporary source may be an MDEventSource.
+  // Important to first check for an internally rebinned source, then for MDEvent source, 
+  // since the internally rebinned source may be an MDEventSource.
   std::string workspaceType(localSource->getProxy()->GetXMLName());
-  if (isTemporaryWorkspace(localSource))
+
+  // Check if the source is associated with a workspace which was internally rebinned by the VSI.
+  // In this case the user can further rebin or unbin the source.
+  if (isInternallyRebinnedWorkspace(localSource))
   {
-    this->m_binMDAction->setEnabled(true);
-    this->m_sliceMDAction->setEnabled(true);
-    this->m_unbinAction->setEnabled(true);
+    this->allowRebinningOptions(true);
+    this->allowUnbinOption(true);
   }
+  // Check if we are dealing with a MDEvent workspace. In this case we allow rebinning, but 
+  // unbinning will not make a lot of sense.
   else if (workspaceType.find("MDEW Source") != std::string::npos)
   {
-    this->m_binMDAction->setEnabled(true);
-    this->m_sliceMDAction->setEnabled(true);
-    this->m_unbinAction->setEnabled(false);
+    this->allowRebinningOptions(true);
+    this->allowUnbinOption(false);
   }
+  // Otherwise we must be dealing with either a MDHIsto or PeaksWorkspace
+  // which cannot be neither rebinned nor unbinned.
   else
   {
-    this->m_binMDAction->setEnabled(false);
-    this->m_sliceMDAction->setEnabled(false);
-    this->m_unbinAction->setEnabled(false);
+    this->allowRebinningOptions(false);
+    this->allowUnbinOption(false);
   }
 }
 

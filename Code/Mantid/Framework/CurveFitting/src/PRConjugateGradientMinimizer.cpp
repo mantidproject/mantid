@@ -10,10 +10,12 @@
 
 namespace Mantid {
 namespace CurveFitting {
+
+// clang-format off
 ///@cond nodoc
-DECLARE_FUNCMINIMIZER(PRConjugateGradientMinimizer,
-                      Conjugate gradient(Polak - Ribiere imp.))
+DECLARE_FUNCMINIMIZER(PRConjugateGradientMinimizer,Conjugate gradient (Polak-Ribiere imp.))
 ///@endcond
+// clang-format on
 
 /// Return a concrete type to initialize m_gslSolver
 /// gsl_multimin_fdfminimizer_vector_bfgs2

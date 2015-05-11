@@ -1344,21 +1344,27 @@ void MantidDockWidget::groupingButtonClick()
 /// Plots a single spectrum from each selected workspace
 void MantidDockWidget::plotSpectra()
 {
-  const QMultiMap<QString,std::set<int> > toPlot = m_tree->chooseSpectrumFromSelected();
+  const auto userInput = m_tree->chooseSpectrumFromSelected();
   // An empty map will be returned if the user clicks cancel in the spectrum selection
-  if (toPlot.empty()) return;
+  if (userInput.plots.empty()) return;
 
-  m_mantidUI->plot1D(toPlot, true, MantidQt::DistributionDefault, false);
+  bool spectrumPlot(true), errs(false), clearWindow(false);
+  MultiLayer *window(NULL);
+  m_mantidUI->plot1D(userInput.plots, spectrumPlot, MantidQt::DistributionDefault, errs,
+                     window, clearWindow, userInput.waterfall);
 }
 
 /// Plots a single spectrum from each selected workspace with errors
 void MantidDockWidget::plotSpectraErr()
 {
-  const QMultiMap<QString,std::set<int> > toPlot = m_tree->chooseSpectrumFromSelected();
+  const auto userInput = m_tree->chooseSpectrumFromSelected();
   // An empty map will be returned if the user clicks cancel in the spectrum selection
-  if (toPlot.empty()) return;
+  if (userInput.plots.empty()) return;
 
-  m_mantidUI->plot1D(toPlot, true, MantidQt::DistributionDefault, true);
+  bool spectrumPlot(true), errs(true), clearWindow(false);
+  MultiLayer *window(NULL);
+  m_mantidUI->plot1D(userInput.plots, spectrumPlot, MantidQt::DistributionDefault, errs,
+                     window, clearWindow, userInput.waterfall);
 }
 
 /**
@@ -1671,9 +1677,10 @@ QStringList MantidTreeWidget::getSelectedWorkspaceNames() const
 * TableWorkspaces (which are implicitly excluded).  We only want workspaces we
 * can actually plot!
 *
-* @return :: A map of workspace name to spectrum numbers to plot.
+* @param showWaterfallOpt If true, show the waterfall option on the dialog
+* @return :: A MantidWSIndexDialog::UserInput structure listing the selected options
 */
-QMultiMap<QString,std::set<int> > MantidTreeWidget::chooseSpectrumFromSelected() const
+MantidWSIndexDialog::UserInput MantidTreeWidget::chooseSpectrumFromSelected(bool showWaterfallOpt) const
 {
   // Check for any selected WorkspaceGroup names and replace with the names of
   // their children.
@@ -1731,13 +1738,17 @@ QMultiMap<QString,std::set<int> > MantidTreeWidget::chooseSpectrumFromSelected()
         SINGLE_SPECTRUM
         );
     }
-    return spectrumToPlot;
+    MantidWSIndexDialog::UserInput selections;
+    selections.plots = spectrumToPlot;
+    selections.waterfall = false;
+    return selections;
   }
 
-  // Else, one or more workspaces 
-  MantidWSIndexDialog *dio = new MantidWSIndexDialog(m_mantidUI, 0, selectedMatrixWsNameList);
+  // Else, one or more workspaces
+  MantidWSIndexDialog *dio = new MantidWSIndexDialog(m_mantidUI, 0, selectedMatrixWsNameList,
+                                                     showWaterfallOpt);
   dio->exec();
-  return dio->getPlots();
+  return dio->getSelections();
 }
 
 void MantidTreeWidget::setSortScheme(MantidItemSortScheme sortScheme)

@@ -24,7 +24,9 @@ namespace
       ;
 }
 
+// clang-format off
 void export_FilteredTimeSeriesProperty()
+// clang-format on
 {
   EXPORT_FILTEREDTIMESERIES_PROP(double, Float);
   EXPORT_FILTEREDTIMESERIES_PROP(bool, Bool);

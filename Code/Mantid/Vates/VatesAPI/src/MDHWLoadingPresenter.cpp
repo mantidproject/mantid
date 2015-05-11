@@ -150,7 +150,7 @@ namespace Mantid
       vtkFieldData* outputFD = vtkFieldData::New();
       
       //Serialize metadata
-      VatesKnowledgeSerializer serializer(LocationNotRequired);
+      VatesKnowledgeSerializer serializer;
       serializer.setWorkspaceName(wsName);
       serializer.setGeometryXML(xmlBuilder.create());
       serializer.setImplicitFunction( Mantid::Geometry::MDImplicitFunction_sptr(new Mantid::Geometry::NullImplicitFunction()));

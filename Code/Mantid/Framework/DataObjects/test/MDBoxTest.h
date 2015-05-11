@@ -390,10 +390,10 @@ static void destroySuite(MDBoxTest * suite) { delete suite; }
     b.addEvent(ev);
     b.addEvent(ev);
     b.addEvent(ev);
-    std::vector<MDLeanEvent<2> > * events;
-    events = b.getEventsCopy();
+    std::vector<MDLeanEvent<2> > * events = b.getEventsCopy();
     TS_ASSERT_EQUALS( events->size(), 3);
     TS_ASSERT_EQUALS( (*events)[2].getSignal(), 4.0);
+    delete events;
   }
 
   void test_sptr()

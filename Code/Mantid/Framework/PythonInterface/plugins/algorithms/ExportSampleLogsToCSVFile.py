@@ -1,4 +1,4 @@
-#pylint: disable=no-init,invalid-name
+#pylint: disable=no-init,invalid-name,too-many-instance-attributes
 from mantid.api import *
 from mantid.kernel import *
 import os
@@ -182,7 +182,7 @@ class ExportSampleLogsToCSVFile(PythonAlgorithm):
             ofile = open(self._outputfilename, "w")
             ofile.write(wbuf)
             ofile.close()
-        except IOError as err:
+        except IOError:
             raise NotImplementedError("Unable to write file %s. Check permission." % (self._outputfilename))
 
         return
@@ -232,7 +232,7 @@ class ExportSampleLogsToCSVFile(PythonAlgorithm):
 
         wbuf = ""
         currtimeindexes = []
-        for i in xrange(len(logtimeslist)):
+        for dummy_i in xrange(len(logtimeslist)):
             currtimeindexes.append(0)
         nextlogindexes = []
 
@@ -271,7 +271,7 @@ class ExportSampleLogsToCSVFile(PythonAlgorithm):
             ofile = open(self._outputfilename, "w")
             ofile.write(wbuf)
             ofile.close()
-        except IOError as err:
+        except IOError:
             raise NotImplementedError("Unable to write file %s. Check permission." % (self._outputfilename))
 
         return
@@ -334,7 +334,6 @@ class ExportSampleLogsToCSVFile(PythonAlgorithm):
         wbuf = "%.6f\t%.6f\t" % (abstime, reltime)
 
         # Log valuess
-        tmplogvalues = []
         for i in xrange(len(logvaluelist)):
             timeindex = currtimeindexes[i]
             if not i in nexttimelogindexes:

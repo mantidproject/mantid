@@ -71,7 +71,8 @@ class TobyFitResolutionSimulationTest(MantidStressTest):
         CreateModeratorModel(Workspace=fake_data,ModelType='IkedaCarpenterModerator',
                              Parameters="TiltAngle=32,TauF=2.7,TauS=0,R=0")
         CreateChopperModel(Workspace=fake_data,ModelType='FermiChopperModel',
-                           Parameters="AngularVelocity=chopper_speed_log,ChopperRadius=0.049,SlitThickness=0.0023,SlitRadius=1.3,Ei=Ei,JitterSigma=0.0")
+                           Parameters="AngularVelocity=chopper_speed_log,ChopperRadius=0.049,\
+                           SlitThickness=0.0023,SlitRadius=1.3,Ei=Ei,JitterSigma=0.0")
 
         ##
         ## UB matrix
@@ -88,9 +89,9 @@ class TobyFitResolutionSimulationTest(MantidStressTest):
 
         # Create the MD workspace
         qscale = 'Q in A^-1'
-        fake_md = ConvertToMD(  InputWorkspace=fake_data, QDimensions="Q3D", QConversionScales=qscale,
-                                SplitInto=[3], SplitThreshold=100,
-        		                MinValues="-15,-15,-15,-30", MaxValues="25,25,25,279",OverwriteExisting=True)
+        fake_md = ConvertToMD(InputWorkspace=fake_data, QDimensions="Q3D", QConversionScales=qscale,
+                              SplitInto=[3], SplitThreshold=100,MinValues="-15,-15,-15,-30",
+                              MaxValues="25,25,25,279",OverwriteExisting=True)
 
         # Run the simulation.
         resol_model = "TobyFitResolutionModel"

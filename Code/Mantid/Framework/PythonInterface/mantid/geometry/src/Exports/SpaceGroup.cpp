@@ -33,7 +33,9 @@ namespace //<unnamed>
 
 }
 
+// clang-format off
 void export_SpaceGroup()
+// clang-format on
 {
   register_ptr_to_python<boost::shared_ptr<SpaceGroup> >();
 

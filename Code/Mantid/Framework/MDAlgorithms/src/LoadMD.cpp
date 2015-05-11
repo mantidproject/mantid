@@ -158,17 +158,27 @@ void LoadMD::exec() {
   // Open the entry
   m_file->openGroup(entryName, "NXentry");
 
-  // How many dimensions?
-  std::vector<int32_t> vecDims;
-  m_file->readData("dimensions", vecDims);
-  if (vecDims.empty())
-    throw std::runtime_error("LoadMD:: Error loading number of dimensions.");
-  m_numDims = vecDims[0];
-  if (m_numDims <= 0)
-    throw std::runtime_error("LoadMD:: number of dimensions <= 0.");
+  // Check is SaveMD version 2 was used
+  SaveMDVersion = 0;
+  if (m_file->hasAttr("SaveMDVersion"))
+    m_file->getAttr("SaveMDVersion", SaveMDVersion);
 
-  // Now load all the dimension xml
-  this->loadDimensions();
+  if (SaveMDVersion == 2)
+    this->loadDimensions2();
+  else {
+    // How many dimensions?
+    std::vector<int32_t> vecDims;
+    m_file->readData("dimensions", vecDims);
+    if (vecDims.empty())
+      throw std::runtime_error("LoadMD:: Error loading number of dimensions.");
+    m_numDims = vecDims[0];
+    if (m_numDims <= 0)
+      throw std::runtime_error("LoadMD:: number of dimensions <= 0.");
+
+    // Now load all the dimension xml
+    this->loadDimensions();
+  }
+
   // Coordinate system
   this->loadCoordinateSystem();
 
@@ -211,12 +221,19 @@ void LoadMD::loadSlab(std::string name, void *data, MDHistoWorkspace_sptr ws,
   if (m_file->getInfo().type != dataType)
     throw std::runtime_error("Unexpected data type for '" + name +
                              "' data set.'");
-  if (m_file->getInfo().dims[0] != static_cast<int>(ws->getNPoints()))
+
+  int nPoints = 1;
+  size_t numDims = m_file->getInfo().dims.size();
+  std::vector<int> size(numDims);
+  for (size_t d = 0; d < numDims; d++) {
+    nPoints *= static_cast<int>(m_file->getInfo().dims[d]);
+    size[d] = static_cast<int>(m_file->getInfo().dims[d]);
+  }
+  if (nPoints != static_cast<int>(ws->getNPoints()))
     throw std::runtime_error(
         "Inconsistency between the number of points in '" + name +
         "' and the number of bins defined by the dimensions.");
-  std::vector<int> start(1, 0);
-  std::vector<int> size(1, static_cast<int>(ws->getNPoints()));
+  std::vector<int> start(numDims, 0);
   try {
     m_file->getSlab(data, start, size);
   } catch (...) {
@@ -244,6 +261,8 @@ void LoadMD::loadHisto() {
 
   this->loadAffineMatricies(boost::dynamic_pointer_cast<IMDWorkspace>(ws));
 
+  if (SaveMDVersion == 2 )
+    m_file->openGroup("data","NXdata");
   // Load each data slab
   this->loadSlab("signal", ws->getSignalArray(), ws, ::NeXus::FLOAT64);
   this->loadSlab("errors_squared", ws->getErrorSquaredArray(), ws,
@@ -271,6 +290,39 @@ void LoadMD::loadDimensions() {
     // Use the dimension factory to read the XML
     m_dims.push_back(createDimension(dimXML));
   }
+}
+
+//----------------------------------------------------------------------------------------------
+/** Load all the dimensions into this->m_dims
+* The dimensions are stored as an nxData array */
+void LoadMD::loadDimensions2() {
+  m_dims.clear();
+
+  std::string axes;
+
+  m_file->openGroup("data","NXdata");
+  m_file->openData("signal");
+  m_file->getAttr("axes", axes);
+  m_file->closeData();
+
+  std::vector<std::string> splitAxes;
+  boost::split(splitAxes, axes, boost::is_any_of(":"));
+  // Create each dimension from axes data
+  // We loop axes backwards because Mantid
+  for (size_t d = splitAxes.size(); d > 0; d--) {
+    std::string long_name;
+    std::string units;
+    std::vector<double> axis;
+    m_file->openData(splitAxes[d - 1]);
+    m_file->getAttr("long_name", long_name);
+    m_file->getAttr("units", units);
+    m_file->getData(axis);
+    m_file->closeData();
+    m_dims.push_back(boost::make_shared<MDHistoDimension>(
+        long_name, splitAxes[d - 1], units, static_cast<coord_t>(axis.front()),
+        static_cast<coord_t>(axis.back()), axis.size() - 1));
+  }
+  m_file->closeGroup();
 }
 
 /** Load the coordinate system **/

@@ -1,4 +1,4 @@
-#pylint: disable=invalid-name
+#pylint: skip-file
 
 from PyChopUI import Ui_MainWindow
 from PyQt4 import QtCore, QtGui

@@ -17,7 +17,7 @@ namespace VATES {
  * @param frame The coordinate frame
  */
 ConcretePeaksPresenterVsi::ConcretePeaksPresenterVsi(
-    Mantid::API::IPeaksWorkspace_sptr peaksWorkspace, ViewFrustum frustum,
+    Mantid::API::IPeaksWorkspace_sptr peaksWorkspace, ViewFrustum_const_sptr frustum,
     std::string frame)
     : m_viewableRegion(frustum), m_peaksWorkspace(peaksWorkspace),
       m_frame(frame) {}
@@ -29,7 +29,7 @@ ConcretePeaksPresenterVsi::~ConcretePeaksPresenterVsi() {}
  * Update the view frustum
  * @param frustum The view frustum.
  */
-void ConcretePeaksPresenterVsi::updateViewFrustum(ViewFrustum frustum) {
+void ConcretePeaksPresenterVsi::updateViewFrustum(ViewFrustum_const_sptr frustum) {
   m_viewableRegion = frustum;
 }
 
@@ -44,7 +44,7 @@ std::vector<bool> ConcretePeaksPresenterVsi::getViewablePeaks() const{
 
   if (this->m_peaksWorkspace->getNumberPeaks() >= 1) {
     double effectiveRadius = 1e-2;
-    std::string viewable = m_viewableRegion.toExtentsAsString();
+    std::string viewable = m_viewableRegion->toExtentsAsString();
     Mantid::API::IPeaksWorkspace_sptr peaksWS = m_peaksWorkspace;
 
     Mantid::API::IAlgorithm_sptr alg =

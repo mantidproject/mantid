@@ -10,7 +10,7 @@ class VTK_EXPORT vtkScaleWorkspace : public vtkUnstructuredGridAlgorithm
 {
 public:
   static vtkScaleWorkspace *New();
-  vtkTypeMacro(vtkScaleWorkspace, vtkUnstructuredGridAlgorithm);
+  vtkTypeMacro(vtkScaleWorkspace, vtkUnstructuredGridAlgorithm)
   void PrintSelf(ostream& os, vtkIndent indent);
   void SetXScaling(double xScaling);
   void SetYScaling(double yScaling);

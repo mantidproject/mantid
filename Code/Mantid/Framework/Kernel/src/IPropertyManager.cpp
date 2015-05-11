@@ -2,9 +2,6 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidKernel/IPropertyManager.h"
-#include "MantidKernel/Exception.h"
-#include "MantidKernel/System.h"
-#include <algorithm>
 
 ///@cond
 DEFINE_IPROPERTYMANAGER_GETVALUE(int16_t)

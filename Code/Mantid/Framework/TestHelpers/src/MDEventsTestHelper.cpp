@@ -151,9 +151,9 @@ MDEventWorkspace3Lean::sptr makeFakeMDEventWorkspace(const std::string &wsName,
 !!!!*/
 MDBox<MDLeanEvent<1>, 1> *makeMDBox1(size_t splitInto,
                                      BoxController *splitter) {
-  if (!splitter)
+  if (!splitter) {
     splitter = (new BoxController(1));
-
+  }
   // Split at 5 events
   splitter->setSplitThreshold(5);
   // Splits into 10 boxes

@@ -4,7 +4,6 @@
 #include "MantidKernel/PropertyHistory.h"
 #include "MantidKernel/Property.h"
 
-#include <iostream>
 #include <sstream>
 
 namespace Mantid {

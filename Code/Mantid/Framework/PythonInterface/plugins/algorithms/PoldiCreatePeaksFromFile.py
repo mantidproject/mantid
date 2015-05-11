@@ -1,22 +1,19 @@
-# pylint: disable=no-init,invalid-name,too-few-public-methods
+# pylint: disable=no-init,invalid-name,too-few-public-methods,unused-import
 from mantid.kernel import *
 from mantid.simpleapi import *
 from mantid.api import *
 from mantid.geometry import *
-
-from pyparsing import *
 
 import os
 
 
 class PoldiCompound(object):
     """Small helper class to handle the results from PoldiCrystalFileParser."""
-    _name = ""
-    _spacegroup = ""
-    _atomString = ""
-    _cellDict = ""
 
     def __init__(self, name, elements):
+        self._spacegroup = ""
+        self._atomString = ""
+        self._cellDict = ""
         self._name = name
 
         self.assign(elements)
@@ -74,49 +71,51 @@ class PoldiCrystalFileParser(object):
     in the file. These are then processed by PoldiCreatePeaksFromFile to generate arguments
     for calling PoldiCreatePeaksFromCell.
     """
-    elementSymbol = Word(alphas, min=1, max=2).setFailAction(
-        lambda o, s, loc, token: raiseParseErrorException("Element symbol must be one or two characters."))
-    integerNumber = Word(nums)
-    decimalSeparator = Literal('.')
-    floatNumber = Combine(
-        integerNumber +
-        Optional(decimalSeparator + Optional(integerNumber))
-    )
 
-    whiteSpace = Suppress(White())
+    def __init__(self):
+        self.elementSymbol = Word(alphas, min=1, max=2).setFailAction(
+            lambda o, s, loc, token: raiseParseErrorException("Element symbol must be one or two characters."))
+        self.integerNumber = Word(nums)
+        self.decimalSeparator = Word('./', max=1)
+        self.floatNumber = Combine(
+            self.integerNumber +
+            Optional(self.decimalSeparator + Optional(self.integerNumber))
+        )
 
-    atomLine = Combine(
-        elementSymbol + whiteSpace +
-        delimitedList(floatNumber, delim=White()),
-        joinString=' '
-    )
+        self.whiteSpace = Suppress(White())
 
-    keyValueSeparator = Suppress(Literal(":"))
+        self.atomLine = Combine(
+            self.elementSymbol + self.whiteSpace +
+            delimitedList(self.floatNumber, delim=White()),
+            joinString=' '
+        )
 
-    groupOpener = Suppress(Literal('{'))
-    groupCloser = Suppress(Literal('}'))
+        self.keyValueSeparator = Suppress(Literal(":"))
 
-    atomsGroup = Group(CaselessLiteral("atoms") + keyValueSeparator +
-                       groupOpener + delimitedList(atomLine, delim=lineEnd) + groupCloser)
+        self.groupOpener = Suppress(Literal('{'))
+        self.groupCloser = Suppress(Literal('}'))
 
-    unitCell = Group(CaselessLiteral("lattice") + keyValueSeparator + delimitedList(
-        floatNumber, delim=White()))
+        self.atomsGroup = Group(CaselessLiteral("atoms") + self.keyValueSeparator +
+                                self.groupOpener + delimitedList(self.atomLine, delim=lineEnd) + self.groupCloser)
 
-    spaceGroup = Group(CaselessLiteral("spacegroup") + keyValueSeparator + Word(
-        alphanums + "-" + ' '))
+        self.unitCell = Group(CaselessLiteral("lattice") + self.keyValueSeparator + delimitedList(
+            self.floatNumber, delim=White()))
 
-    compoundContent = Each([atomsGroup, unitCell, spaceGroup]).setFailAction(
-        lambda o, s, loc, token: raiseParseErrorException(
-            "One of 'Lattice', 'SpaceGroup', 'Atoms' is missing or contains errors."))
+        self.spaceGroup = Group(CaselessLiteral("spacegroup") + self.keyValueSeparator + Word(
+            alphanums + "-" + ' ' + '/'))
 
-    compoundName = Word(alphanums + '_')
+        self.compoundContent = Each([self.atomsGroup, self.unitCell, self.spaceGroup]).setFailAction(
+            lambda o, s, loc, token: raiseParseErrorException(
+                "One of 'Lattice', 'SpaceGroup', 'Atoms' is missing or contains errors."))
 
-    compound = Group(compoundName + Optional(whiteSpace) + \
-                     groupOpener + compoundContent + groupCloser)
+        self.compoundName = Word(alphanums + '_')
 
-    comment = Suppress(Literal('#') + restOfLine)
+        self.compound = Group(self.compoundName + Optional(self.whiteSpace) + \
+                              self.groupOpener + self.compoundContent + self.groupCloser)
 
-    compounds = Optional(comment) + OneOrMore(compound).ignore(comment) + stringEnd
+        self.comment = Suppress(Literal('#') + restOfLine)
+
+        self.compounds = Optional(self.comment) + OneOrMore(self.compound).ignore(self.comment) + stringEnd
 
     def __call__(self, contentString):
         parsedContent = None
@@ -136,8 +135,6 @@ class PoldiCrystalFileParser(object):
 
 
 class PoldiCreatePeaksFromFile(PythonAlgorithm):
-    _parser = PoldiCrystalFileParser()
-
     def category(self):
         return "SINQ\\POLDI"
 
@@ -169,6 +166,7 @@ class PoldiCreatePeaksFromFile(PythonAlgorithm):
                               defaultValue="", direction=Direction.Output),
             doc="WorkspaceGroup with reflection tables.")
 
+        self._parser = PoldiCrystalFileParser()
 
     def PyExec(self):
         crystalFileName = self.getProperty("InputFile").value
@@ -214,4 +212,10 @@ class PoldiCreatePeaksFromFile(PythonAlgorithm):
         return compound.getName()
 
 
-AlgorithmFactory.subscribe(PoldiCreatePeaksFromFile)
+try:
+    from pyparsing import *
+
+    AlgorithmFactory.subscribe(PoldiCreatePeaksFromFile)
+except:
+    logger.debug('Failed to subscribe algorithm PoldiCreatePeaksFromFile; Python package pyparsing' \
+                 'may be missing (https://pypi.python.org/pypi/pyparsing)')

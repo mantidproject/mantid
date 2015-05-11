@@ -4,14 +4,10 @@
 #include "MantidCrystal/IndexSXPeaks.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidKernel/VectorHelper.h"
-#include "MantidAPI/Progress.h"
 #include "MantidKernel/ArrayProperty.h"
-#include "MantidAPI/Column.h"
 #include "MantidAPI/IPeak.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidKernel/BoundedValidator.h"
-#include <sstream>
-#include <algorithm>
 
 namespace Mantid {
 namespace Crystal {

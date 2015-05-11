@@ -1,23 +1,10 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/FrameworkManager.h"
-#include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/IFunction.h"
-#include "MantidAPI/ITableWorkspace.h"
 #include "MantidCrystal/GoniometerAnglesFromPhiRotation.h"
-#include "MantidCrystal/FindUBUsingFFT.h"
-#include "MantidDataObjects/Peak.h"
-#include "MantidDataObjects/PeaksWorkspace.h"
-#include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Crystal/IndexingUtils.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
-#include "MantidGeometry/Instrument/Goniometer.h"
-#include "MantidKernel/cow_ptr.h"
-#include "MantidKernel/Logger.h"
-#include "MantidKernel/Matrix.h"
-#include "MantidKernel/Property.h"
-#include <cstdio>
-#include <math.h>
 
 using Mantid::Kernel::Direction;
 using Mantid::Kernel::Logger;

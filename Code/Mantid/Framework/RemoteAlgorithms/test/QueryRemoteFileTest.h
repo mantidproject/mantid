@@ -21,7 +21,7 @@ public:
 
   void test_algorithm() {
     testAlg = Mantid::API::AlgorithmManager::Instance().create(
-        "QueryRemoteFile" /*, 1*/);
+        "QueryRemoteFile", 1);
     TS_ASSERT(testAlg);
     TS_ASSERT_EQUALS(testAlg->name(), "QueryRemoteFile");
     TS_ASSERT_EQUALS(testAlg->version(), 1);

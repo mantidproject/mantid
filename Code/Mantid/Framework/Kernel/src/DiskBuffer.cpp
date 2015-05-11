@@ -1,7 +1,4 @@
 #include "MantidKernel/DiskBuffer.h"
-#include "MantidKernel/System.h"
-#include <Poco/ScopedLock.h>
-#include <iostream>
 #include <sstream>
 
 using namespace Mantid::Kernel;

@@ -33,7 +33,7 @@ public:
     int row = 0;
     double radius;
     Mantid::Kernel::V3D position;
-    Mantid::Kernel::SpecialCoordinateSystem coord;
+    Mantid::Kernel::SpecialCoordinateSystem coord = Mantid::Kernel::SpecialCoordinateSystem::None;
     Mantid::API::IPeaksWorkspace_sptr peaksWorkspace;
     TSM_ASSERT_THROWS("Should not implement this method", presenter.getPeaksInfo(peaksWorkspace,row,position,radius, coord), std::runtime_error);
   }

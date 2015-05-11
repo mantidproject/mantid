@@ -22,10 +22,13 @@
 
     <!-- Available options are "Show" or "Hide". -->
     <parameter name="cm-1-convert-choice" type="string">
-      <value val="Show" />
+      <value val="true" />
     </parameter>
-    <parameter name="save-aclimax-choice" type="string">
-      <value val="Show" />
+    <parameter name="save-nexus-choice" type="string">
+      <value val="false" />
+    </parameter>
+    <parameter name="save-ascii-choice" type="string">
+      <value val="true" />
     </parameter>
     <parameter name="fold-frames-choice" type="string">
       <value val="true" />

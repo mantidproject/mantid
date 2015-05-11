@@ -1,4 +1,4 @@
-#pylint: disable=no-init,invalid-name
+#pylint: disable=no-init,invalid-name,too-many-locals,too-many-branches
 from mantid.api import *
 from mantid.kernel import *
 import math

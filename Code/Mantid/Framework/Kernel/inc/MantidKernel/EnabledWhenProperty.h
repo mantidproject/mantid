@@ -77,12 +77,10 @@ public:
    * (as string) to check for
    */
   EnabledWhenProperty(std::string otherPropName, ePropertyCriterion when,
-                      std::string value = "")
-      : IPropertySettings(), m_otherPropName(otherPropName), m_when(when),
-        m_value(value) {}
+                      std::string value = "");
 
   /// Destructor
-  virtual ~EnabledWhenProperty() {}
+  virtual ~EnabledWhenProperty();
 
   //--------------------------------------------------------------------------------------------
   /** Does the validator fulfill the criterion based on the
@@ -90,62 +88,21 @@ public:
    * @return true if fulfilled or if any problem was found (missing property,
    * e.g.).
    */
-  virtual bool fulfillsCriterion(const IPropertyManager *algo) const {
-    // Find the property
-    if (algo == NULL)
-      return true;
-    Property *prop = NULL;
-    try {
-      prop = algo->getPointerToProperty(m_otherPropName);
-    } catch (Exception::NotFoundError &) {
-      return true; // Property not found. Ignore
-    }
-    if (!prop)
-      return true;
-
-    // Value of the other property
-    std::string propValue = prop->value();
-
-    // OK, we have the property. Check the condition
-    switch (m_when) {
-    case IS_DEFAULT:
-      return prop->isDefault();
-    case IS_NOT_DEFAULT:
-      return !prop->isDefault();
-    case IS_EQUAL_TO:
-      return (propValue == m_value);
-    case IS_NOT_EQUAL_TO:
-      return (propValue != m_value);
-    case IS_MORE_OR_EQ: {
-      int check = boost::lexical_cast<int>(m_value);
-      int iPropV = boost::lexical_cast<int>(propValue);
-      return (iPropV >= check);
-    }
-    default:
-      // Unknown criterion
-      return true;
-    }
-  }
+  virtual bool fulfillsCriterion(const IPropertyManager *algo) const;
 
   //--------------------------------------------------------------------------------------------
   /// Return true/false based on whether the other property satisfies the
   /// criterion
-  virtual bool isEnabled(const IPropertyManager *algo) const {
-    return fulfillsCriterion(algo);
-  }
+  virtual bool isEnabled(const IPropertyManager *algo) const;
 
   //--------------------------------------------------------------------------------------------
   /// Return true always
-  virtual bool isVisible(const IPropertyManager *) const { return true; }
+  virtual bool isVisible(const IPropertyManager *) const;
   /// does nothing in this case and put here to satisfy the interface.
-  void modify_allowed_values(Property *const) {}
+  void modify_allowed_values(Property *const);
   //--------------------------------------------------------------------------------------------
   /// Make a copy of the present type of validator
-  virtual IPropertySettings *clone() {
-    EnabledWhenProperty *out =
-        new EnabledWhenProperty(m_otherPropName, m_when, m_value);
-    return out;
-  }
+  virtual IPropertySettings *clone();
 
 protected:
   /// Name of the OTHER property that we will check.

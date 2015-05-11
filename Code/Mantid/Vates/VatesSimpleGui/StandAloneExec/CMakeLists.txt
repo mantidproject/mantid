@@ -48,6 +48,10 @@ VatesSimpleGuiQtWidgets
 VatesSimpleGuiViewWidgets
 )
 
+if (OSX_VERSION VERSION_GREATER 10.8)
+  set_target_properties ( ${PROJECT_NAME} PROPERTIES INSTALL_RPATH "@loader_path/../Libraries;@loader_path/../MacOS")
+endif ()
+
 if( SQUISH_FOUND )
   # Need to set the AUT first
   set( SQUISH_AUT VatesSimpleGui )

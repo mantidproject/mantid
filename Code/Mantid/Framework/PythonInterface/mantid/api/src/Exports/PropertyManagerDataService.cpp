@@ -15,7 +15,9 @@ using namespace boost::python;
 /// Weak pointer to DataItem typedef
 typedef boost::weak_ptr<PropertyManager> PropertyManager_wptr;
 
+// clang-format off
 void export_PropertyManagerDataService()
+// clang-format on
 {
 
   register_ptr_to_python<PropertyManager_wptr>();

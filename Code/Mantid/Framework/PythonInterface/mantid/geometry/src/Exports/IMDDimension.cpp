@@ -20,7 +20,9 @@ namespace
   }
 }
 
+// clang-format off
 void export_IMDDimension()
+// clang-format on
 {
   register_ptr_to_python<boost::shared_ptr<IMDDimension>>();
 

@@ -1,4 +1,4 @@
-#pylint: disable=no-init
+#pylint: disable=no-init,too-many-instance-attributes
 from mantid.simpleapi import *
 from mantid.api import PythonAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty, PropertyMode
 from mantid.kernel import Direction, logger
@@ -162,8 +162,7 @@ class TransformToIqt(PythonAlgorithm):
 
         except (AttributeError, IndexError):
             resolution = 0.0175
-            logger.warning('Could not get resolution from IPF, using default value: %f' % (
-                            resolution))
+            logger.warning('Could not get resolution from IPF, using default value: %f' % (resolution))
 
         resolution_bins = int(round((2 * resolution) / self._e_width))
 

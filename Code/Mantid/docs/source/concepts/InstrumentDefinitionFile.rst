@@ -192,7 +192,7 @@ Of the four attributes in the example above
 
 (+) Both valid-from and valid-to are required to be set using the ISO
 8601 date-time format, i.e. as YYYY-MM-DD HH:MM:SS or
-YYYY-MM-DDTHH:MM:SS `2 <http://en.wikipedia.org/wiki/ISO_8601YYYY>`__.
+YYYY-MM-DDTHH:MM:SS `2 <http://en.wikipedia.org/wiki/ISO_8601>`__.
 Valid ranges may overlap, provided the valid-from times are all
 different. If several files are currently valid, the one with the most
 recent valid-from time is selected.

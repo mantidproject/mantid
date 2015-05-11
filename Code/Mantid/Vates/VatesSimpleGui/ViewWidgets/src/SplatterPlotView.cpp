@@ -3,6 +3,7 @@
 #include "MantidVatesSimpleGuiViewWidgets/PeaksTableControllerVsi.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidQtAPI/SelectionNotificationService.h"
+#include "MantidQtAPI/MdConstants.h"
 #include "MantidVatesAPI/ADSWorkspaceProvider.h"
 #include "MantidVatesAPI/vtkPeakMarkerFactory.h"
 #include "MantidVatesAPI/ViewFrustum.h"
@@ -25,8 +26,10 @@
 #include <pqServerManagerModel.h>
 #include <vtkDataObject.h>
 #include <vtkProperty.h>
+#include <vtkPVRenderView.h>
 #include <vtkSMDoubleVectorProperty.h>
 #include <vtkSMPropertyHelper.h>
+#include <vtkSMPVRepresentationProxy.h>
 #include <vtkSMSourceProxy.h>
 
 #if defined(__INTEL_COMPILER)
@@ -55,7 +58,7 @@ namespace
 }
 
 
-SplatterPlotView::SplatterPlotView(QWidget *parent) : ViewBase(parent),
+SplatterPlotView::SplatterPlotView(QWidget *parent, RebinnedSourcesManager* rebinnedSourcesManager) : ViewBase(parent, rebinnedSourcesManager),
                                                       m_cameraManager(boost::make_shared<CameraManager>()),
                                                       m_peaksTableController(NULL),
                                                       m_peaksWorkspaceNameDelimiter(";")                         
@@ -134,6 +137,7 @@ void SplatterPlotView::destroyView()
   // Destroy the view.
   pqObjectBuilder *builder = pqApplicationCore::instance()->getObjectBuilder();
   builder->destroy(this->view);
+  pqActiveObjects::instance().setActiveSource(this->origSrc);
 }
 
 pqRenderView* SplatterPlotView::getView()
@@ -145,6 +149,18 @@ void SplatterPlotView::render()
 {
   pqPipelineSource *src = NULL;
   src = pqActiveObjects::instance().activeSource();
+  bool isPeaksWorkspace = this->isPeaksWorkspace(src);
+  // Hedge for two things.
+  // 1. If there is no active source
+  // 2. If we are loading a peak workspace without haveing
+  //    a splatterplot source in place
+  bool isBadInput = !src || (isPeaksWorkspace && this->splatSource == NULL);
+  if (isBadInput)
+  {
+    g_log.warning() << "SplatterPlotView: Could not render source. You are either loading an active source " 
+                    << "or you are loading a peak source without having a splatterplot source in place.\n";
+    return;
+  }
 
   QString renderType = "Points";
   pqObjectBuilder* builder = pqApplicationCore::instance()->getObjectBuilder();
@@ -164,12 +180,11 @@ void SplatterPlotView::render()
     return;
   }
 
-  bool isPeaksWorkspace = this->isPeaksWorkspace(src);
   if (!isPeaksWorkspace)
   {
     this->origSrc = src;
     this->splatSource = builder->createFilter("filters",
-                                              "MantidParaViewSplatterPlot",
+                                              MantidQt::API::MdConstants::MantidParaViewSplatterPlot,
                                               this->origSrc);
     src = this->splatSource;
   }
@@ -206,9 +221,9 @@ void SplatterPlotView::render()
   drep->getProxy()->UpdateVTKObjects();
   if (!isPeaksWorkspace)
   {
-    pqPipelineRepresentation *prep = NULL;
-    prep = qobject_cast<pqPipelineRepresentation*>(drep);
-    prep->colorByArray("signal", vtkDataObject::FIELD_ASSOCIATION_CELLS);
+    vtkSMPVRepresentationProxy::SetScalarColoring(drep->getProxy(), "signal",
+                                                  vtkDataObject::FIELD_ASSOCIATION_CELLS);
+    drep->getProxy()->UpdateVTKObjects();
   }
 
   this->resetDisplay();
@@ -240,6 +255,16 @@ void SplatterPlotView::render()
   }
 
   emit this->triggerAccept();
+  if (vtkSMProxy* viewProxy = this->getView()->getProxy())
+    {
+    vtkSMPropertyHelper helper(viewProxy, "InteractionMode");
+    if (helper.GetAsInt() == vtkPVRenderView::INTERACTION_MODE_2D)
+      {
+      helper.Set(vtkPVRenderView::INTERACTION_MODE_3D);
+      viewProxy->UpdateProperty("InteractionMode",1);
+      this->resetCamera();
+      }
+    }
 }
 
 void SplatterPlotView::renderAll()
@@ -274,14 +299,14 @@ void SplatterPlotView::checkPeaksCoordinates()
   {
 
     int peakViewCoords = vtkSMPropertyHelper(this->origSrc->getProxy(),
-                                             "SpecialCoordinates").GetAsInt();
+                                             MantidQt::API::MdConstants::MantidParaViewSpecialCoordinates).GetAsInt();
     // Make commensurate with vtkPeakMarkerFactory
     peakViewCoords--;
 
     foreach(pqPipelineSource *src, this->peaksSource)
     {
       vtkSMPropertyHelper(src->getProxy(),
-                          "Peak Dimensions").Set(peakViewCoords);
+                          MantidQt::API::MdConstants::PeakDimensions).Set(peakViewCoords);
       src->getProxy()->UpdateVTKObjects();
     }
   }
@@ -290,7 +315,7 @@ void SplatterPlotView::checkPeaksCoordinates()
 void SplatterPlotView::onThresholdButtonClicked()
 {
   pqObjectBuilder* builder = pqApplicationCore::instance()->getObjectBuilder();
-  this->threshSource = builder->createFilter("filters", "Threshold",
+  this->threshSource = builder->createFilter("filters", MantidQt::API::MdConstants::Threshold,
                                              this->splatSource);
   emit this->lockColorControls();
 }
@@ -323,7 +348,7 @@ void SplatterPlotView::onPickModeToggled(bool state)
     {
       src = this->splatSource;
     }
-    this->probeSource = builder->createFilter("filters", "ProbePoint", src);
+    this->probeSource = builder->createFilter("filters", MantidQt::API::MdConstants::ProbePoint, src);
     emit this->triggerAccept();
   }
   else
@@ -350,6 +375,7 @@ void SplatterPlotView::destroyPeakSources()
   QList<pqPipelineSource *> sources;
   QList<pqPipelineSource *>::Iterator source;
   sources = smModel->findItems<pqPipelineSource *>(server);
+
   for (source = sources.begin(); source != sources.end(); ++source)
   {
     if (this->isPeaksWorkspace(*source))
@@ -357,6 +383,7 @@ void SplatterPlotView::destroyPeakSources()
       builder->destroy(*source);
     }
   }
+
   this->peaksSource.clear();
 }
 
@@ -376,7 +403,7 @@ void SplatterPlotView::readAndSendCoordinates()
   {
     // Get coordinate type
     int peakViewCoords = vtkSMPropertyHelper(this->origSrc->getProxy(),
-                                             "SpecialCoordinates").GetAsInt();
+                                             MantidQt::API::MdConstants::MantidParaViewSpecialCoordinates).GetAsInt();
     // Make commensurate with vtkPeakMarkerFactory
     peakViewCoords--;
 
@@ -453,8 +480,7 @@ void SplatterPlotView::onRemovePeaksTable()
 
   if (m_peaksFilter)
   {
-    pqObjectBuilder *builder = pqApplicationCore::instance()->getObjectBuilder();
-    builder->destroy(m_peaksFilter);
+    this->destroyFilter(MantidQt::API::MdConstants::MDPeaksFilter);
   }
 }
 
@@ -482,7 +508,7 @@ void SplatterPlotView::createPeaksFilter()
   // Set the peaks workspace name. We need to trigger accept in order to log the workspace in the filter
   try
   {
-    m_peaksFilter = builder->createFilter("filters","MantidParaViewPeaksFilter", this->splatSource);
+    m_peaksFilter = builder->createFilter("filters",MantidQt::API::MdConstants::MantidParaViewPeaksFilter, this->splatSource);
     QObject::connect(m_peaksFilter, SIGNAL(destroyed()),
                      this, SLOT(onPeaksFilterDestroyed()));
 
@@ -490,14 +516,18 @@ void SplatterPlotView::createPeaksFilter()
     updatePeaksFilter(m_peaksFilter);
 
     // Create point representation of the source and set the point size 
-    const double pointSize = 4;
+    const double pointSize = 2;
     pqDataRepresentation *dataRepresentation  = m_peaksFilter->getRepresentation(this->view);
     vtkSMPropertyHelper(dataRepresentation->getProxy(), "Representation").Set("Points");
     vtkSMPropertyHelper(dataRepresentation->getProxy(), "PointSize").Set(pointSize);
     dataRepresentation->getProxy()->UpdateVTKObjects();
 
-    pqPipelineRepresentation *pipelineRepresentation = qobject_cast<pqPipelineRepresentation*>(dataRepresentation);
-    pipelineRepresentation->colorByArray("signal", vtkDataObject::FIELD_ASSOCIATION_CELLS);
+    if (!this->isPeaksWorkspace(this->origSrc))
+    {
+      vtkSMPVRepresentationProxy::SetScalarColoring(dataRepresentation->getProxy(), "signal",
+                                                  vtkDataObject::FIELD_ASSOCIATION_CELLS);
+      dataRepresentation->getProxy()->UpdateVTKObjects();
+    }
     this->resetDisplay();
     this->setVisibilityListener();
     this->renderAll();
@@ -506,7 +536,7 @@ void SplatterPlotView::createPeaksFilter()
     // Destroy peak filter
     if (m_peaksFilter)
     {
-      builder->destroy(m_peaksFilter);
+      this->destroyFilter(MantidQt::API::MdConstants::MDPeaksFilter);
     }
     g_log.warning() << ex.what();
   }
@@ -582,9 +612,9 @@ void SplatterPlotView::setPeakButton(bool state)
  */
 void SplatterPlotView::setPeakSourceFrame(pqPipelineSource* source)
 {
-  int peakViewCoords = vtkSMPropertyHelper(this->origSrc->getProxy(), "SpecialCoordinates").GetAsInt();
+  int peakViewCoords = vtkSMPropertyHelper(this->origSrc->getProxy(), MantidQt::API::MdConstants::MantidParaViewSpecialCoordinates).GetAsInt();
   peakViewCoords--;
-  vtkSMPropertyHelper(source->getProxy(), "Peak Dimensions").Set(peakViewCoords);
+  vtkSMPropertyHelper(source->getProxy(), MantidQt::API::MdConstants::PeakDimensions).Set(peakViewCoords);
 }
 
 /**
@@ -592,9 +622,9 @@ void SplatterPlotView::setPeakSourceFrame(pqPipelineSource* source)
  */
 bool SplatterPlotView::checkIfPeaksWorkspaceIsAlreadyBeingTracked(pqPipelineSource* source) {
   bool isContained = false;
-  std::string sourceName(vtkSMPropertyHelper(source->getProxy(), "WorkspaceName").GetAsString());
+  std::string sourceName(vtkSMPropertyHelper(source->getProxy(), MantidQt::API::MdConstants::WorkspaceName).GetAsString());
   for (QList<QPointer<pqPipelineSource>>::Iterator it = peaksSource.begin(); it != peaksSource.end(); ++it) {
-    std::string trackedName(vtkSMPropertyHelper((*it)->getProxy(), "WorkspaceName").GetAsString());
+    std::string trackedName(vtkSMPropertyHelper((*it)->getProxy(), MantidQt::API::MdConstants::WorkspaceName).GetAsString());
     if ((*it == source) || (sourceName == trackedName)) {
       isContained = true;
       break;
@@ -614,8 +644,7 @@ void SplatterPlotView::updatePeaksFilter(pqPipelineSource* filter) {
 
   // If there are no peaks, then destroy the filter, else update it.
   if (peaksSource.isEmpty()) {
-    pqObjectBuilder* builder = pqApplicationCore::instance()->getObjectBuilder();
-    builder->destroy(filter);
+    this->destroyFilter(MantidQt::API::MdConstants::MDPeaksFilter);
   }
   else {
     std::string workspaceNamesConcatentated = m_peaksTableController->getConcatenatedWorkspaceNames(m_peaksWorkspaceNameDelimiter);
@@ -624,8 +653,8 @@ void SplatterPlotView::updatePeaksFilter(pqPipelineSource* filter) {
       throw std::runtime_error("The peaks viewer does not contain a valid peaks workspace.");
     }
 
-    vtkSMPropertyHelper(filter->getProxy(), "PeaksWorkspace").Set(workspaceNamesConcatentated.c_str());
-    vtkSMPropertyHelper(filter->getProxy(), "Delimiter").Set(m_peaksWorkspaceNameDelimiter.c_str());
+    vtkSMPropertyHelper(filter->getProxy(), MantidQt::API::MdConstants::PeaksWorkspace).Set(workspaceNamesConcatentated.c_str());
+    vtkSMPropertyHelper(filter->getProxy(), MantidQt::API::MdConstants::Delimiter).Set(m_peaksWorkspaceNameDelimiter.c_str());
     emit this->triggerAccept();
     filter->updatePipeline();
     this->resetCamera();
@@ -676,6 +705,7 @@ void SplatterPlotView::destroyFiltersForSplatterPlotView(){
     builder->destroy(this->splatSource);
   }
 }
+
 
 } // SimpleGui
 } // Vates

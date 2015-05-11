@@ -11,6 +11,7 @@ set( INCLUDE_FILES
   inc/MantidVatesSimpleGuiViewWidgets/LibHelper.h
   inc/MantidVatesSimpleGuiViewWidgets/MdViewerWidget.h
   inc/MantidVatesSimpleGuiViewWidgets/MultisliceView.h
+  inc/MantidVatesSimpleGuiViewWidgets/VatesParaViewApplication.h
   inc/MantidVatesSimpleGuiViewWidgets/RebinAlgorithmDialogProvider.h
   inc/MantidVatesSimpleGuiViewWidgets/PeaksTableControllerVsi.h
   inc/MantidVatesSimpleGuiViewWidgets/PeaksWidget.h
@@ -44,6 +45,7 @@ set( SOURCE_FILES
   src/SplatterPlotView.cpp
   src/ThreesliceView.cpp
   src/TimeControlWidget.cpp
+  src/VatesParaViewApplication.cpp
   src/ViewBase.cpp
 )
 
@@ -66,6 +68,7 @@ qt4_wrap_cpp( MOC_SOURCES
   inc/MantidVatesSimpleGuiViewWidgets/SplatterPlotView.h
   inc/MantidVatesSimpleGuiViewWidgets/ThreesliceView.h
   inc/MantidVatesSimpleGuiViewWidgets/TimeControlWidget.h
+  inc/MantidVatesSimpleGuiViewWidgets/VatesParaViewApplication.h
   inc/MantidVatesSimpleGuiViewWidgets/ViewBase.h
 )
 
@@ -97,7 +100,9 @@ include_directories(
   ${CMAKE_SOURCE_DIR}/MantidQt/Factory/inc
   ${CMAKE_CURRENT_BINARY_DIR}
   ${CMAKE_CURRENT_BINARY_DIR}/../QtWidgets
+  ${CMAKE_SOURCE_DIR}/MantidPlot/src
   ${QWT_INCLUDE_DIR}
+  ${PYTHON_INCLUDE_PATH}
 )
 
 set( ALL_FILES
@@ -128,6 +133,10 @@ include_directories( SYSTEM ${PARAVIEW_INCLUDE_DIRS} )
 target_link_libraries( VatesSimpleGuiViewWidgets
 pqApplicationComponents
 pqComponents
+vtkPVServerManagerRendering
+vtkRenderingFreeType
+vtkRenderingFreeTypeOpenGL
+vtksys
 ${QT_LIBRARIES}
 VatesSimpleGuiQtWidgets
 MantidQtAPI
@@ -135,12 +144,17 @@ VatesAPI
 ${MANTID_SUBPROJECT_LIBS}
 MantidQtSliceViewer
 MantidQtFactory
+${PYTHON_LIBRARIES}
 MantidWidgets
 )
 
+if (OSX_VERSION VERSION_GREATER 10.8)
+  set_target_properties ( VatesSimpleGuiViewWidgets PROPERTIES INSTALL_RPATH "@loader_path/../Contents/MacOS;@loader_path/../Contents/Libraries")
+endif ()
+
 # Create test file projects
 if( CXXTEST_FOUND AND GMOCK_FOUND AND GTEST_FOUND )
-  include_directories ( SYSTEM ${CXXTEST_INCLUDE_DIR} ${GMOCK_INCLUDE_DIR} ${GTEST_INCLUDE_DIR} )
+  include_directories ( SYSTEM ${CXXTEST_INCLUDE_DIR} ${GMOCK_INCLUDE_DIR} ${GTEST_INCLUDE_DIR})
 
   include_directories( inc ../../../Framework/TestHelpers/inc ../../../Framework/DataHandling/inc ../../../Framework/DataObjects/inc)
   set ( TESTHELPER_SRCS ../../../Framework/TestHelpers/src/ComponentCreationHelper.cpp 
@@ -148,7 +162,7 @@ if( CXXTEST_FOUND AND GMOCK_FOUND AND GTEST_FOUND )
                         ../../../Framework/TestHelpers/src/MDEventsTestHelper.cpp 
                         ../../../Framework/TestHelpers/src/StartFrameworkManager.cpp )
   cxxtest_add_test( VatesSimpleGuiViewWidgetsTest ${TEST_FILES} )
-  target_link_libraries( VatesSimpleGuiViewWidgetsTest VatesSimpleGuiViewWidgets DataHandling Kernel DataObjects ${GMOCK_LIBRARIES} ${GTEST_LIBRARIES} )
+  target_link_libraries( VatesSimpleGuiViewWidgetsTest VatesSimpleGuiViewWidgets DataHandling Kernel DataObjects ${GMOCK_LIBRARIES} ${GTEST_LIBRARIES})
   add_dependencies( AllTests VatesSimpleGuiViewWidgetsTest )
   # Add to the 'UnitTests' group in VS
   set_property ( TARGET VatesSimpleGuiViewWidgetsTest PROPERTY FOLDER "UnitTests" )

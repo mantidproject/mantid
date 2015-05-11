@@ -29,6 +29,7 @@ namespace IDA
     void typeSelection(int index);
     void bgTypeSelection(int index);
     void newDataLoaded(const QString wsName);
+    void extendResolutionWorkspace();
     void updatePlot();
     void plotGuess();
     void singleFit();

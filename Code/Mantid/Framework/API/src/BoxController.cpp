@@ -251,7 +251,7 @@ void BoxController::fromXMLString(const std::string &xml) {
 
   // Need to make sure that we handle box controllers which did not have the SplitTopInto 
   // attribute 
-  Poco::XML::NodeList* nodes = pBoxElement->getElementsByTagName("SplitTopInto");
+  Poco::AutoPtr<NodeList> nodes = pBoxElement->getElementsByTagName("SplitTopInto");
   if (nodes->length() > 0) {
     s = pBoxElement->getChildElement("SplitTopInto")->innerText();
     if (s.empty()) {

@@ -271,10 +271,6 @@ namespace VATES
       }
     }
     theHex->Delete();
-
-    std::cout << tim << " to create and add the hexadrons." << std::endl;
-
-
     points->Delete();
     signal->Delete();
     visualDataSet->Squeeze();

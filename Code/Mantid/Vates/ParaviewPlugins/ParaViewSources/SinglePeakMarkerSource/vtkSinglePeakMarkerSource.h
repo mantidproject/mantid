@@ -34,7 +34,7 @@ class VTK_EXPORT vtkSinglePeakMarkerSource : public vtkPolyDataAlgorithm
 {
 public:
   static vtkSinglePeakMarkerSource*New();
-  vtkTypeMacro(vtkSinglePeakMarkerSource,vtkPolyDataAlgorithm);
+  vtkTypeMacro(vtkSinglePeakMarkerSource,vtkPolyDataAlgorithm)
   void PrintSelf(ostream& os, vtkIndent indent);
   void SetRadiusMarker(double radius);
   void SetPosition1(double position1);

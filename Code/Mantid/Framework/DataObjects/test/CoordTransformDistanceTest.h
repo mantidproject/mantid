@@ -9,6 +9,8 @@
 #include <iostream>
 #include "MantidAPI/CoordTransform.h"
 
+#include <boost/scoped_ptr.hpp>
+
 using namespace Mantid;
 using namespace Mantid::DataObjects;
 using Mantid::API::CoordTransform;
@@ -30,13 +32,14 @@ public:
     bool used[4] = {true, false, true, true};
     CoordTransformDistance ct(4, center, used);
     // A copy was made
-    TS_ASSERT_DIFFERS(ct.getCenter(), center);
+    const coord_t *transformCentres = ct.getCenter();
+    TS_ASSERT_DIFFERS(transformCentres, center);
+    const bool * usedDims = ct.getDimensionsUsed();
     TS_ASSERT_DIFFERS(ct.getDimensionsUsed(), used);
-
     // Contents are good
     compare(4, center, ct.getCenter());
     for (size_t i=0; i<4; i++)
-      TS_ASSERT_EQUALS( used[i], ct.getDimensionsUsed()[i]);
+      TS_ASSERT_EQUALS( used[i], usedDims[i]);
   }
 
 
@@ -48,7 +51,7 @@ public:
     bool used[2] = {true, true};
     CoordTransformDistance ct(2,center,used);
 
-    CoordTransform * clone = ct.clone();
+    boost::scoped_ptr<CoordTransform> clone(ct.clone());
     coord_t out = 0;
     coord_t in1[2] = {0, 3};
     TS_ASSERT_THROWS_NOTHING( clone->apply(in1, &out) );

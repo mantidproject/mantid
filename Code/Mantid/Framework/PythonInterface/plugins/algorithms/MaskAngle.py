@@ -24,12 +24,16 @@ class MaskAngle(mantid.api.PythonAlgorithm):
         return "Algorithm to mask detectors with scattering angles in a given interval (in degrees)."
 
     def PyInit(self):
-        self.declareProperty(mantid.api.WorkspaceProperty("Workspace", "",direction=mantid.kernel.Direction.Input,validator=mantid.api.InstrumentValidator()), "Input workspace")
+        self.declareProperty(mantid.api.WorkspaceProperty("Workspace", "",direction=mantid.kernel.Direction.Input,
+                                                          validator=mantid.api.InstrumentValidator()), "Input workspace")
         angleValidator=mantid.kernel.FloatBoundedValidator()
         angleValidator.setBounds(0.,180.)
-        self.declareProperty(name="MinAngle", defaultValue=0.0, validator=angleValidator, direction=mantid.kernel.Direction.Input, doc="Angles above StartAngle are going to be masked")
-        self.declareProperty(name="MaxAngle", defaultValue=0.0, validator=angleValidator, direction=mantid.kernel.Direction.Input, doc="Angles above StartAngle are going to be masked")
-        self.declareProperty(mantid.kernel.IntArrayProperty(name="MaskedDetectors", direction=mantid.kernel.Direction.Output), doc="List of detector masked, with scatterin angles between MinAngle and MaxAngle")
+        self.declareProperty(name="MinAngle", defaultValue=0.0, validator=angleValidator,
+                             direction=mantid.kernel.Direction.Input, doc="Angles above StartAngle are going to be masked")
+        self.declareProperty(name="MaxAngle", defaultValue=0.0, validator=angleValidator,
+                             direction=mantid.kernel.Direction.Input, doc="Angles above StartAngle are going to be masked")
+        self.declareProperty(mantid.kernel.IntArrayProperty(name="MaskedDetectors", direction=mantid.kernel.Direction.Output),
+                             doc="List of detector masked, with scatterin angles between MinAngle and MaxAngle")
 
     def PyExec(self):
         ws = self.getProperty("Workspace").value

@@ -96,7 +96,7 @@ class NonIDF_Properties(object):
                          If not explicitly set, white beam for sample run is used.""")
     # TODO: do something about it.  Second white is explicitly used in
     # diagnostics but not accessed at all
-    second_white  = RunDescriptor("""Second white beam run resutlts currently unused in the workflow 
+    second_white  = RunDescriptor("""Second white beam run resutlts currently unused in the workflow
                     despite being referred to in Diagnostics.
                     In a future it should be enabled.""")
     #

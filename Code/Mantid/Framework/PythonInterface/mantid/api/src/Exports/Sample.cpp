@@ -10,7 +10,9 @@ using Mantid::Geometry::OrientedLattice;
 using Mantid::Kernel::Material;
 using namespace boost::python;
 
+// clang-format off
 void export_Sample()
+// clang-format on
 {
   register_ptr_to_python<Sample*>();
   register_ptr_to_python<boost::shared_ptr<Sample> >();

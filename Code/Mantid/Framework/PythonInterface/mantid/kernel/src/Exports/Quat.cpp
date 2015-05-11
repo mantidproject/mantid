@@ -18,7 +18,9 @@ using boost::python::return_value_policy;
 /**
  * Python exports of the Mantid::Kernel::Quat class.
  */
+// clang-format off
 void export_Quat()
+// clang-format on
 {
   //Quat class
   class_< Quat >("Quat", "Quaternions are the 3D generalization of complex numbers. "

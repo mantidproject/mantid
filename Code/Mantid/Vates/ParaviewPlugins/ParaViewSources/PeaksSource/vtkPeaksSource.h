@@ -3,7 +3,7 @@
 
 #include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidVatesAPI/vtkPeakMarkerFactory.h"
-#include "vtkPolyDataAlgorithm.h"
+#include "MantidVatesAPI/vtkPolyDataAlgorithm_Silent.h"
 #include <string>
 
 /**
@@ -39,7 +39,7 @@ class VTK_EXPORT vtkPeaksSource : public vtkPolyDataAlgorithm
 {
 public:
   static vtkPeaksSource *New();
-  vtkTypeMacro(vtkPeaksSource,vtkPolyDataAlgorithm);
+  vtkTypeMacro(vtkPeaksSource,vtkPolyDataAlgorithm)
   void PrintSelf(ostream& os, vtkIndent indent);
   
   void SetWsName(std::string wsName);

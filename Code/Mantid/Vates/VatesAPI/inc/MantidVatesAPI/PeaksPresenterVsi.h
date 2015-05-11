@@ -5,19 +5,19 @@
 #include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidKernel/V3D.h"
 #include "MantidKernel/SpecialCoordinateSystem.h"
+#include "MantidVatesAPI/ViewFrustum.h"
 #include <vector>
 #include <string>
 
 namespace Mantid {
 namespace VATES {
-class ViewFrustum;
 
 class DLLExport PeaksPresenterVsi {
 public:
   virtual ~PeaksPresenterVsi(){};
   virtual std::vector<bool> getViewablePeaks() const = 0;
   virtual Mantid::API::IPeaksWorkspace_sptr getPeaksWorkspace() const = 0;
-  virtual void updateViewFrustum(ViewFrustum frustum) = 0;
+  virtual void updateViewFrustum(ViewFrustum_const_sptr frustum) = 0;
   virtual std::string getFrame() const = 0;
   virtual std::string getPeaksWorkspaceName() const = 0;
   virtual void getPeaksInfo(Mantid::API::IPeaksWorkspace_sptr peaksWorkspace,

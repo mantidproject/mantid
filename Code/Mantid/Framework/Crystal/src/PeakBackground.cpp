@@ -1,7 +1,5 @@
 #include "MantidCrystal/PeakBackground.h"
 #include "MantidAPI/IPeak.h"
-#include <boost/function.hpp>
-#include <boost/bind.hpp>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
