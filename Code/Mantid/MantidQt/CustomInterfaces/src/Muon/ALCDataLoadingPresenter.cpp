@@ -61,6 +61,7 @@ namespace CustomInterfaces
       alg->setProperty("FirstRun", m_view->firstRun());
       alg->setProperty("LastRun", m_view->lastRun());
       alg->setProperty("LogValue", m_view->log());
+      alg->setProperty("Function", m_view->function());
       alg->setProperty("Type", m_view->calculationType());
       alg->setProperty("DeadTimeCorrType",m_view->deadTimeType());
       alg->setProperty("Red",m_view->redPeriod());
