@@ -43,7 +43,30 @@ void CalculateChiSquared::initConcrete() {
 //----------------------------------------------------------------------------------------------
 /// Execute the algorithm.
 void CalculateChiSquared::execConcrete() {
+
+  // Function may need some preparation.
+  m_function->setUpForFit();
+
+  API::FunctionDomain_sptr domain;
+  API::FunctionValues_sptr values;
+  //m_domainCreator->ignoreInvalidData(getProperty("IgnoreInvalidData"));
+  m_domainCreator->createDomain(domain, values);
+
+  // Do something with the function which may depend on workspace.
+  m_domainCreator->initFunction(m_function);
   
+  // Calculate function values.
+  m_function->function(*domain, *values);
+
+  // Calculate the chi squared.
+  double chiSquared = 0.0;
+  for(size_t i = 0; i < values->size(); ++i) {
+    double tmp = values->getFitData(i) - values->getCalculated(i);
+    chiSquared += tmp * tmp;
+  }
+
+  // Store the result.
+  setProperty("ChiSquared", chiSquared);
 }
 
 } // namespace CurveFitting
