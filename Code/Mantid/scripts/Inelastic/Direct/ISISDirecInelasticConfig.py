@@ -2,6 +2,7 @@ import os
 import platform
 import shutil
 import re
+import copy
 from datetime import date
 
 # the list of instruments this configuration is applicable to
@@ -59,38 +60,45 @@ class MantidConfigDirectInelastic(object):
 
         The class should not depend on Mantid itself.
 
-        Valid for Mantid 3.4 available on 12/05/2015 and expects server
+        1) Valid for Mantid 3.4 available on 12/05/2015 and expects server
         to have: 
         Map/masks folder with layout defined on (e.g. svn checkout)
         https://svn.isis.rl.ac.uk/InstrumentFiles/trunk
-        User scripts folder with layout defined on 
+        2) User scripts folder with layout defined on 
         (e.g. git checkout or Mantid script repository set-up):
         git@github.com:mantidproject/scriptrepository.git
         see https://github.com/mantidproject/scriptrepository for details
+        3) The data can be found in archive, mounted at /archive/NDXxxxxx/Instrument/data/cycle_XX_Y
+
+        4)There are number of other assumptions about script path, used scripts, Mantid confg, 
+          and other folders
+          All these assumptions are summarized within __init__
 
        The class have to change/to be amended if the configuration 
        changes or has additional features.
     """
-    def __init__(self,mantid,home,script_repo,map_mask_folder):
+    def __init__(self,mantid='/opt/Mantid/',home='/home/',\
+                 script_repo='/opt/UserScripts/',\
+                 map_mask_folder='/usr/local/mprogs/InstrumentFiles/'):
         """Initialize generic config variables and variables specific to a server"""
 
         self._mantid_path = str(mantid)
         self._home_path  = str(home)
         self._script_repo = str(script_repo)
         self._map_mask_folder = str(map_mask_folder)
-
+        # check if all necessary server folders specified as class parameters are present
         self._check_server_folders_present()
 
-        #
+        # Convid contents
         self._header = ("# This file can be used to override any properties for this installation.\n"
                         "# Any properties found in this file will override any that are found in the Mantid.Properties file\n"
-                        "# As this file will not be replaced with futher installations of Mantid it is a safe place to put\n"
+                        "# As this file will not be replaced with further installations of Mantid it is a safe place to put\n"
                         "# properties that suit your particular installation.\n"
                         "#\n"
                         "# See here for a list of possible options:''# http://www.mantidproject.org/Properties_File#Mantid.User.Properties''\n"
                         "#\n"
                         "#uncomment to enable archive search - ICat and Orbiter\n"
-                        "#datasearch.searcharchive = On #  may be important for autoreduction to work,\n")
+                        "datasearch.searcharchive = On #  may be important for autoreduction to work,\n")
         #
         self._footer = ("##\n"
                         "## LOGGING\n"
@@ -117,6 +125,8 @@ class MantidConfigDirectInelastic(object):
                         "## Uncomment to disable use of OpenGL to render unwrapped instrument views\n"
                         "#MantidOptions.InstrumentView.UseOpenGL=Off\n")
         #
+        self._root_data_folder='/archive'
+        # the common part of all strings, generated dynamically as function of input class parameters.
         self._dynamic_options_base = ['default.facility=ISIS']
         # Path to python scripts, defined and used by mantid wrt to Mantid Root (this path may be version specific)
         self._python_mantid_path = ['scripts/Calibration/','scripts/Examples/','scripts/Interface/','scripts/Vates/']
@@ -127,8 +137,18 @@ class MantidConfigDirectInelastic(object):
                         self._set_script_repo, # this would be necessary to have on an Instrument scientist account, disabled on generic setup
                         self._def_python_search_path,
                         self._set_datasearch_directory,self._set_rb_directory]
-        self._instr_name=None
-        self._cycle_folder=[]
+        self._user = None
+        self._cycle_data_folder=[]
+
+    def get_data_folder_name(self,instr,cycle_ID):
+        """Method to generate a data folder from instrument name and the cycle start date
+           (cycle ID)
+           The agreement on the naming as currently in ISIS:
+           e.g: /archive/NDXMERLIN/Instrument/data/cycle_08_1
+        """
+        folder = os.path.join(self._root_data_folder,'NDX'+instr.upper(),\
+                              'Instrument/data/cycle_'+str(cycle_ID[0])+'_'+str(cycle_ID[1]))
+        return folder
 
     def is_inelastic(self,instr_name):
         """Check if the instrument is inelastic"""
@@ -137,25 +157,26 @@ class MantidConfigDirectInelastic(object):
         else:
             return False
     #
-    def init_user(self,fedid,user_prop):
+    def init_user(self,fedid,theUser):
         """Define settings, specific to a user"""
         #
-        if not self.is_inelastic(user_prop.instr):
-           raise RuntimeError('Instrument {0} is not among acceptable instruments'.format(instrument))
-        self._instr_name=str(user_prop.instr)
+        for instr in theUser.instrument.values():
+            if not self.is_inelastic(instr):
+                raise RuntimeError('Instrument {0} is not among acceptable instruments'.format(instrument))
+        self._user=theUser
 
         self._fedid = str(fedid)
         user_folder = os.path.join(self._home_path,self._fedid)
         if not os.path.exists(user_folder):
             raise RuntimeError("User with fedID {0} does not exist. Create such user folder first".format(fedid))
-        if not os.path.exists(str(rb_folder)):
-            raise RuntimeError("Experiment folder with {0} does not exist. Create such folder first".format(rb_folder))
+        for rb_folder in theUser.rb_dir.values():
+            if not os.path.exists(str(rb_folder)):
+                raise RuntimeError("Experiment folder with {0} does not exist. Create such folder first".format(rb_folder))
         #
-        self._rb_folder_dir = str(user_prop.rb_folder)
         # how to check cycle folders, they may not be available
-        self._cycle_folder=[]
-        for folder in user_prop.cycle_folders:
-            self._cycle_folder.append(str(folder))
+        self._cycle_data_folder=[]
+        for date_key,folder_id in theUser.cycle_IDlist.items():
+            self._cycle_data_folder.append(self.get_data_folder_name(theUser.instrument[date_key],folder_id))
         # Initialize configuration settings 
         self._dynamic_options_val = copy.deepcopy(self._dynamic_options_base)
         self._init_config()
@@ -181,8 +202,11 @@ class MantidConfigDirectInelastic(object):
             fun()
     #
     def _set_default_inst(self):
-        if self._instr_name:
-            self._dynamic_options_val.append('default.instrument={0}'.format(self._instr_name))
+        """Set up last instrument, deployed by user"""
+        if self._user:
+            lastDateID = self._user._recent_dateID
+            InstrName = self._user.instrument[lastDateID]
+            self._dynamic_options_val.append('default.instrument={0}'.format(InstrName))
         else:
             self._dynamic_options_val.append('default.instrument={0}'.format('MARI'))
     #
@@ -192,32 +216,54 @@ class MantidConfigDirectInelastic(object):
     def _def_python_search_path(self):
         """Define path for Mantid Inelastic python scripts"""
         # Note, instrument name script folder is currently upper case on GIT
-        self._python_user_scripts.add(os.path.join('direct_inelastic/',str.upper(self._instr_name))+'/')
+        if not self._user:
+            raise RuntimeError("Can not define python search path without defined user")
 
+        # define main Manitd scripts search path
         path = os.path.join(self._mantid_path,'scripts/')
         for part in self._python_mantid_path:
             path +=';'+os.path.join(self._mantid_path,part)
-        for part in self._python_user_scripts:
+
+        # define and append user scrips search path
+        python_path = copy.deepcopy(self._python_user_scripts)
+        for instr in self._user.instrument.values():
+            python_path.add(os.path.join('direct_inelastic/',instr.upper()+'/'))
+        for part in python_path:
             path +=';'+os.path.join(self._script_repo,part)
 
         self._dynamic_options_val.append('pythonscripts.directories=' + path)
     #
     def _set_rb_directory(self):
-       self._dynamic_options_val.append('defaultsave.directory={0}'.format(self._rb_folder_dir))
+        """Set up default save directory, the one where data are saved by default"""
+        if self._user:
+            lastDateID = self._user._recent_dateID
+            rb_folder = self._user.rb_dir[lastDateID]
+            self._dynamic_options_val.append('defaultsave.directory={0}'.format(rb_folder))
+        else:
+            raise RuntimeError("Can not define RB folder without user being defined")
     #
     def _set_datasearch_directory(self):
         """Note, map/mask instrument folder is lower case as if loaded from SVN. 
            Autoreduction may have it upper case"""
+        if not self._user:
+            raise RuntimeError("Can not define Data search path without user being defined")
 
-        user_data_dir = os.path.abspath('{0}'.format(self._rb_folder_dir))
-        map_mask_dir  = os.path.abspath(os.path.join('{0}'.format(self._map_mask_folder),'{0}'.format(str.lower(self._instr_name))))
-        
-        all_folders=self._cycle_folder
-        data_dir = os.path.abspath('{0}'.format(all_folders[0]))
-        for folders in all_folders[1:]:
-             data_dir +=';'+os.path.abspath('{0}'.format(all_folders[0]))
+        lastDateID = self._user._recent_dateID
+        instr_name = self._user.instrument[lastDateID]
 
-        self._dynamic_options_val.append('datasearch.directories='+user_data_dir+';'+map_mask_dir+';'+data_dir)
+        map_mask_dir  = os.path.abspath(os.path.join('{0}'.format(self._map_mask_folder),\
+                                                     '{0}'.format(str.lower(instr_name))))
+        # set up all data folders
+        all_data_folders=self._cycle_data_folder
+        data_dir = os.path.abspath('{0}'.format(all_data_folders[0]))
+        for folder in all_data_folders[1:]:
+             data_dir +=';'+os.path.abspath('{0}'.format(folder))
+
+        all_rb_folders = self._user.rb_dir
+        for folder in all_rb_folders.values():
+            data_dir+=';'+os.path.abspath('{0}'.format(folder))
+
+        self._dynamic_options_val.append('datasearch.directories='+map_mask_dir+';'+data_dir)
     #
     def generate_config(self):
         """Save generated Mantid configuration file into user's home folder"""
