@@ -427,7 +427,7 @@ void TOPAZLiveEventDataListener::run() {
                 g_log.error() << "No events will be processed!" << std::endl;
             }
 
-            for (unsigned long j = firstEvent; j <= lastEvent; j++)
+            for (uint64_t j = firstEvent; j <= lastEvent; j++)
             {
                 // appendEvent needs tof to be in units of microseconds, but
                 // it comes from the ADARA stream in units of 100ns.
