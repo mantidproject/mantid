@@ -56,8 +56,12 @@ public:
 
 private:
   void init();
+  void exec();
   /// Child classes declare their properties here.
   virtual void initConcrete() = 0;
+  /// Child classes implement the algorithm logic here.
+  virtual void execConcrete() = 0;
+
   virtual void afterPropertySet(const std::string &propName);
   void addWorkspace(const std::string &workspaceNameProperty,
                     bool addProperties = true);

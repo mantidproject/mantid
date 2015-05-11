@@ -118,12 +118,7 @@ void Fit::copyMinimizerOutput(const API::IFuncMinimizer &minimizer) {
 *
 *  @throw runtime_error Thrown if algorithm cannot execute
 */
-void Fit::exec() {
-  // this is to make it work with AlgorithmProxy
-  if (!m_domainCreator) {
-    setFunction();
-    addWorkspaces();
-  }
+void Fit::execConcrete() {
 
   std::string ties = getPropertyValue("Ties");
   if (!ties.empty()) {

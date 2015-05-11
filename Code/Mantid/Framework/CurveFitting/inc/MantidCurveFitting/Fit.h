@@ -110,7 +110,7 @@ public:
 
 protected:
   void initConcrete();
-  void exec();
+  void execConcrete();
   void copyMinimizerOutput(const API::IFuncMinimizer &minimizer);
 };
 
