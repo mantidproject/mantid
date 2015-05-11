@@ -270,11 +270,10 @@ void CutMD::init() {
   std::sprintf(buffer, "How will the Q units of the input workspace be interpreted? This property will disappear in future versions of Mantid\n"
       "%s : Figure it out based on the label units\n"
       "%s : Force them to be rlu\n"
-      "%s : Force them to be inverse angstroms", AutoMethod, RLUMethod, InvAngstromMethod);
+      "%s : Force them to be inverse angstroms", AutoMethod.c_str(), RLUMethod.c_str(), InvAngstromMethod.c_str());
 
   std::string help(buffer);
   boost::algorithm::trim(help);
-  std::cout << "HELP " << help << std::endl;
   declareProperty(
     "InterpretQDimensionUnits", AutoMethod,
       boost::make_shared<StringListValidator>(propOptions), help
