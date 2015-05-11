@@ -121,7 +121,7 @@ void StandardView::setupViewButtons()
 void StandardView::destroyView()
 {
   pqObjectBuilder *builder = pqApplicationCore::instance()->getObjectBuilder();
-  this->destroyFilter(builder, QString("Slice"));
+  this->destroyFilter(QString("Slice"));
   builder->destroy(this->view);
 }
 
@@ -238,14 +238,14 @@ void StandardView::closeSubWindows()
 /**
  * Check if the rebin and unbin buttons should be visible
  * Note that for a rebin button to be visible there may be no
- * MDHisto workspaces present, yet temporary MDHisto workspaces are
- * allowed.
+ * MDHisto workspaces present, yet  MDHisto workspaces which result from 
+ * rebinning within the VSI are allowed.
  */
 void StandardView::setRebinAndUnbinButtons()
 {
-  int numberOfTemporaryWorkspaces = 0;
-  int numberOfTrueMDHistoWorkspaces = 0;
-  int numberOfPeakWorkspaces = 0;
+  unsigned int numberOfInternallyRebinnedWorkspaces = 0;
+  unsigned int numberOfTrueMDHistoWorkspaces = 0;
+  unsigned int numberOfPeakWorkspaces = 0;
 
   pqServer *server = pqActiveObjects::instance().activeServer();
   pqServerManagerModel *smModel = pqApplicationCore::instance()->getServerManagerModel();
@@ -253,9 +253,9 @@ void StandardView::setRebinAndUnbinButtons()
 
   for (QList<pqPipelineSource *>::iterator source = sources.begin(); source != sources.end(); ++source)
   {
-    if (isTemporaryWorkspace(*source))
+    if (isInternallyRebinnedWorkspace(*source))
     {
-      ++numberOfTemporaryWorkspaces;
+      ++numberOfInternallyRebinnedWorkspaces;
     } else if (isMDHistoWorkspace(*source))
     {
       ++numberOfTrueMDHistoWorkspaces;
@@ -270,9 +270,8 @@ void StandardView::setRebinAndUnbinButtons()
   bool allowRebinning = numberOfTrueMDHistoWorkspaces > 0 || numberOfPeakWorkspaces > 0;
   this->allowRebinningOptions(allowRebinning);
 
-  // If there are no temporary workspaces the button should be disabled.
-  const bool allowUnbin = !( numberOfTemporaryWorkspaces == 0 );
-  allowUnbinOption(allowUnbin);
+  // If there are no internally rebinned workspaces the button should be disabled.
+  allowUnbinOption(numberOfInternallyRebinnedWorkspaces > 0);
 }
 
 
@@ -326,19 +325,26 @@ void StandardView::activeSourceChangeListener(pqPipelineSource* source)
     filter = qobject_cast<pqPipelineFilter*>(localSource);
   }
 
-  // Important to first check the temporary source, then for MDEvent source, 
-  // as a temporary source may be an MDEventSource.
+  // Important to first check for an internally rebinned source, then for MDEvent source, 
+  // since the internally rebinned source may be an MDEventSource.
   std::string workspaceType(localSource->getProxy()->GetXMLName());
-  if (isTemporaryWorkspace(localSource))
+
+  // Check if the source is associated with a workspace which was internally rebinned by the VSI.
+  // In this case the user can further rebin or unbin the source.
+  if (isInternallyRebinnedWorkspace(localSource))
   {
     this->allowRebinningOptions(true);
     this->allowUnbinOption(true);
   }
+  // Check if we are dealing with a MDEvent workspace. In this case we allow rebinning, but 
+  // unbinning will not make a lot of sense.
   else if (workspaceType.find("MDEW Source") != std::string::npos)
   {
     this->allowRebinningOptions(true);
     this->allowUnbinOption(false);
   }
+  // Otherwise we must be dealing with either a MDHIsto or PeaksWorkspace
+  // which cannot be neither rebinned nor unbinned.
   else
   {
     this->allowRebinningOptions(false);
