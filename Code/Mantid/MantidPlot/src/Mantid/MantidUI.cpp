@@ -3265,7 +3265,6 @@ void MantidUI::showSequentialPlot(Ui::SequentialFitDialog* ui, MantidQt::MantidW
     MultiLayer* ml = appWindow()->multilayerPlot(t,colNames,ui->cbCurveType->currentIndex());
     // set plot titles
     Graph* g = ml->activeGraph();
-    // THIS SECTION NEEDS TO BE FIXED REF #11710
     if (g)
     {
       if (ui->ckbLogPlot->isChecked())
