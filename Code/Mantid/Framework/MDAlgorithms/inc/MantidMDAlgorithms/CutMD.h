@@ -51,9 +51,9 @@ public:
   
   static const std::string InvAngstromSymbol;
   static const std::string RLUSymbol;
-  static const std::string CutMD::AutoMethod;
-  static const std::string CutMD::RLUMethod;
-  static const std::string CutMD::InvAngstromMethod;
+  static const std::string AutoMethod;
+  static const std::string RLUMethod;
+  static const std::string InvAngstromMethod;
   
 };
 
