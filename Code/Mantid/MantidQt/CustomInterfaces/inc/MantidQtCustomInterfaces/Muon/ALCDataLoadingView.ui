@@ -104,6 +104,19 @@
                           </widget>
                         </item>
                         <item>
+                          <spacer name="logSpacer">
+                            <property name="orientation">
+                              <enum>Qt::Horizontal</enum>
+                            </property>
+                            <property name="sizeHint" stdset="0">
+                              <size>
+                                <width>40</width>
+                                <height>20</height>
+                              </size>
+                            </property>
+                          </spacer>
+                        </item>
+                        <item>
                           <widget class="QLabel" name="functionLabel">
                             <property name="text">
                               <string>Function</string>
@@ -115,9 +128,37 @@
                             <property name="editable">
                               <bool>false</bool>
                             </property>
-                            <property name="sizeAdjustPolicy">
-                              <enum>QComboBox::AdjustToContents</enum>
+                            <property name="minimumSize">
+                              <size>
+                                <width>75</width>
+                                <height>0</height>
+                              </size>
                             </property>
+                            <item>
+                              <property name="text">
+                                <string>Mean </string>
+                              </property>
+                            </item>
+                            <item>
+                              <property name="text">
+                                <string>Min</string>
+                              </property>
+                            </item>
+                            <item>
+                              <property name="text">
+                                <string>Max</string>
+                              </property>
+                            </item>
+                            <item>
+                              <property name="text">
+                                <string>First</string>
+                              </property>
+                            </item>
+                            <item>
+                              <property name="text">
+                                <string>Last</string>
+                              </property>
+                            </item>
                           </widget>
                         </item>
                       </layout>
