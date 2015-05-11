@@ -39,13 +39,13 @@ namespace CustomInterfaces
   public:
     // -- IALCBaselineModellingModel interface -----------------------------------------------------
 
-    MatrixWorkspace_const_sptr data() const { return m_data; }
+    MatrixWorkspace_const_sptr data() const;
 
     void fit(IFunction_const_sptr function, const std::vector<Section> &sections);
 
     IFunction_const_sptr fittedFunction() const { return m_fittedFunction; }
 
-    MatrixWorkspace_const_sptr correctedData() const { return m_correctedData; }
+    MatrixWorkspace_const_sptr correctedData() const;
 
     ITableWorkspace_sptr parameterTable() const { return m_parameterTable; }
 
@@ -67,11 +67,8 @@ namespace CustomInterfaces
 
 
   private:
-    /// Data to use for fitting
+    /// Data used for fitting
     MatrixWorkspace_const_sptr m_data;
-
-    /// Corrected data of the last fit
-    MatrixWorkspace_const_sptr m_correctedData;
 
     /// Result function of the last fit
     IFunction_const_sptr m_fittedFunction;
@@ -88,6 +85,9 @@ namespace CustomInterfaces
 
     /// Disables points which shouldn't be used for fitting
     static void disableUnwantedPoints(MatrixWorkspace_sptr ws, const std::vector<Section>& sections);
+
+    /// Enable previously disabled points
+    static void enableDisabledPoints(MatrixWorkspace_sptr destWs, MatrixWorkspace_const_sptr sourceWs);
 
   };
 
