@@ -42,7 +42,7 @@ Log
   Log value to use as X parameter
 
 Function
-  The function to apply to the Log value: Mean/Min/Max/First/Last
+  The function to apply to the time series log: Mean/Min/Max/First/Last
 
 Dead Time Correction
   Type of dead time corrections to apply. Options are *None*, in which case no 
