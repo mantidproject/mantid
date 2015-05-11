@@ -3395,10 +3395,6 @@ MultiLayer* MantidUI::drawSingleColorFillPlot(const QString & wsName, Graph::Cur
   appWindow()->setPreferences(plot);
 
   plot->setTitle(wsName);
-  using MantidQt::API::PlotAxis;
-  // THIS SECTION NEEDS TO BE FIXED REF #11710
-  plot->setXAxisTitle(PlotAxis(*workspace, 0).title());
-  plot->setYAxisTitle(PlotAxis(*workspace, 1).title());
 
   Spectrogram *spgrm = new Spectrogram(wsName, workspace);
   plot->plotSpectrogram(spgrm, curveType);
