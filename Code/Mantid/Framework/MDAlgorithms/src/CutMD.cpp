@@ -10,6 +10,7 @@
 
 #include <boost/make_shared.hpp>
 #include <boost/regex.hpp>
+#include <boost/algorithm/string.hpp>
 
 
 using namespace Mantid::API;
@@ -271,9 +272,12 @@ void CutMD::init() {
       "%s : Force them to be rlu\n"
       "%s : Force them to be inverse angstroms", AutoMethod, RLUMethod, InvAngstromMethod);
 
+  std::string help(buffer);
+  boost::algorithm::trim(help);
+  std::cout << "HELP " << help << std::endl;
   declareProperty(
     "InterpretQDimensionUnits", AutoMethod,
-      boost::make_shared<StringListValidator>(propOptions), buffer
+      boost::make_shared<StringListValidator>(propOptions), help
       );
 }
 
