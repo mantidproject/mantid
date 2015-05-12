@@ -41,10 +41,10 @@ namespace SimpleGui
 {
   
 ColorUpdater::ColorUpdater() :
-  autoScaleState(true),
-  logScaleState(false),
-  minScale(std::numeric_limits<double>::min()),
-  maxScale(std::numeric_limits<double>::max())
+  m_autoScaleState(true),
+  m_logScaleState(false),
+  m_minScale(std::numeric_limits<double>::min()),
+  m_maxScale(std::numeric_limits<double>::max())
 {
 }
 
@@ -59,18 +59,18 @@ ColorUpdater::~ColorUpdater()
 VsiColorScale ColorUpdater::autoScale()
 {
   // Get the custom auto scale.
-  VsiColorScale vsiColorScale =  this->autoScaleRangeGenerator.getColorScale();
+  VsiColorScale vsiColorScale =  this->m_autoScaleRangeGenerator.getColorScale();
 
   // Set the color scale for all sources
-  this->minScale = vsiColorScale.minValue;
-  this->maxScale = vsiColorScale.maxValue;
+  this->m_minScale = vsiColorScale.minValue;
+  this->m_maxScale = vsiColorScale.maxValue;
 
   // If the view 
 
-  this->logScaleState = vsiColorScale.useLogScale;
+  this->m_logScaleState = vsiColorScale.useLogScale;
 
   // Update the lookup tables, i.e. react to a color scale change
-  colorScaleChange(this->minScale, this->maxScale);
+  colorScaleChange(this->m_minScale, this->m_maxScale);
 
   return vsiColorScale;
 }
@@ -125,8 +125,8 @@ void ColorUpdater::colorMapChange(pqPipelineRepresentation *repr,
  */
 void ColorUpdater::colorScaleChange(double min, double max)
 {
-  this->minScale = min;
-  this->maxScale = max;
+  this->m_minScale = min;
+  this->m_maxScale = max;
 
   try
   {
@@ -172,11 +172,11 @@ void ColorUpdater::updateLookupTable(pqDataRepresentation* representation)
   if (NULL != lookupTable)
   {
     // Set the scalar range values
-    lookupTable->setScalarRange(this->minScale, this->maxScale);
+    lookupTable->setScalarRange(this->m_minScale, this->m_maxScale);
 
     // Set the logarithmic scale
     pqSMAdaptor::setElementProperty(lookupTable->getProxy()->GetProperty("UseLogScale"),
-                                     this->logScaleState);
+                                     this->m_logScaleState);
 
     // Need to set a lookup table lock here. This does not affect setScalarRange, 
     // but blocks setWholeScalarRange which gets called by ParaView overrides our
@@ -197,9 +197,9 @@ void ColorUpdater::updateLookupTable(pqDataRepresentation* representation)
  */
 void ColorUpdater::logScale(int state)
 {
-  this->logScaleState = state;
+  this->m_logScaleState = state;
 
-  this->colorScaleChange(this->minScale, this->maxScale);
+  this->colorScaleChange(this->m_minScale, this->m_maxScale);
 }
 
 /**
@@ -209,11 +209,11 @@ void ColorUpdater::logScale(int state)
  */
 void ColorUpdater::updateState(ColorSelectionWidget *cs)
 {
-  this->autoScaleState = cs->getAutoScaleState();
-  this->logScaleState = cs->getLogScaleState();
-  this->minScale = cs->getMinRange();
-  this->maxScale = cs->getMaxRange();
-  this->autoScaleRangeGenerator.updateLogScaleSetting(this->logScaleState);
+  this->m_autoScaleState = cs->getAutoScaleState();
+  this->m_logScaleState = cs->getLogScaleState();
+  this->m_minScale = cs->getMinRange();
+  this->m_maxScale = cs->getMaxRange();
+  this->m_autoScaleRangeGenerator.updateLogScaleSetting(this->m_logScaleState);
 }
 
 /**
@@ -221,7 +221,7 @@ void ColorUpdater::updateState(ColorSelectionWidget *cs)
  */
 bool ColorUpdater::isAutoScale()
 {
-  return this->autoScaleState;
+  return this->m_autoScaleState;
 }
 
 /**
@@ -229,7 +229,7 @@ bool ColorUpdater::isAutoScale()
  */
 bool ColorUpdater::isLogScale()
 {
-  return this->logScaleState;
+  return this->m_logScaleState;
 }
 
 /**
@@ -237,7 +237,7 @@ bool ColorUpdater::isLogScale()
  */
 double ColorUpdater::getMaximumRange()
 {
-  return this->maxScale;
+  return this->m_maxScale;
 }
 
 /**
@@ -245,7 +245,7 @@ double ColorUpdater::getMaximumRange()
  */
 double ColorUpdater::getMinimumRange()
 {
-  return this->minScale;
+  return this->m_minScale;
 }
 
 /**
@@ -254,10 +254,10 @@ double ColorUpdater::getMinimumRange()
  */
 void ColorUpdater::print()
 {
-  std::cout << "Auto Scale: " << this->autoScaleState << std::endl;
-  std::cout << "Log Scale: " << this->logScaleState << std::endl;
-  std::cout << "Min Range: " << this->minScale << std::endl;
-  std::cout << "Max Range: " << this->maxScale << std::endl;
+  std::cout << "Auto Scale: " << this->m_autoScaleState << std::endl;
+  std::cout << "Log Scale: " << this->m_logScaleState << std::endl;
+  std::cout << "Min Range: " << this->m_minScale << std::endl;
+  std::cout << "Max Range: " << this->m_maxScale << std::endl;
 }
 
 /**
@@ -265,8 +265,9 @@ void ColorUpdater::print()
  */
 void ColorUpdater::initializeColorScale()
 {
-  autoScaleRangeGenerator.initializeColorScale();
+  m_autoScaleRangeGenerator.initializeColorScale();
 }
+
 }
 }
 }

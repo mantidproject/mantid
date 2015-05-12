@@ -43,30 +43,30 @@ namespace SimpleGui
  */
   ColorSelectionWidget::ColorSelectionWidget(QWidget *parent) : QWidget(parent), colorMapManager(new ColorMapManager()), m_minHistoric(0.01), m_maxHistoric(0.01)
 {
-  this->ui.setupUi(this);
-  this->ui.autoColorScaleCheckBox->setChecked(true);
+  this->m_ui.setupUi(this);
+  this->m_ui.autoColorScaleCheckBox->setChecked(true);
   this->setEditorStatus(false);
 
-  this->presets = new pqColorPresetManager(this);
-  this->presets->restoreSettings();
+  this->m_presets = new pqColorPresetManager(this);
+  this->m_presets->restoreSettings();
 
   this->loadBuiltinColorPresets();
 
   m_minValidator = new QDoubleValidator(this);
   m_maxValidator = new QDoubleValidator(this);
 
-  this->ui.maxValLineEdit->setValidator(m_minValidator);
-  this->ui.minValLineEdit->setValidator(m_maxValidator);
+  this->m_ui.maxValLineEdit->setValidator(m_minValidator);
+  this->m_ui.minValLineEdit->setValidator(m_maxValidator);
 
-  QObject::connect(this->ui.autoColorScaleCheckBox, SIGNAL(stateChanged(int)),
+  QObject::connect(this->m_ui.autoColorScaleCheckBox, SIGNAL(stateChanged(int)),
   this, SLOT(autoOrManualScaling(int)));
-  QObject::connect(this->ui.presetButton, SIGNAL(clicked()),
+  QObject::connect(this->m_ui.presetButton, SIGNAL(clicked()),
   this, SLOT(loadPreset()));
-  QObject::connect(this->ui.minValLineEdit, SIGNAL(editingFinished()),
+  QObject::connect(this->m_ui.minValLineEdit, SIGNAL(editingFinished()),
   this, SLOT(getColorScaleRange()));
-  QObject::connect(this->ui.maxValLineEdit, SIGNAL(editingFinished()),
+  QObject::connect(this->m_ui.maxValLineEdit, SIGNAL(editingFinished()),
   this, SLOT(getColorScaleRange()));
-  QObject::connect(this->ui.useLogScaleCheckBox, SIGNAL(stateChanged(int)),
+  QObject::connect(this->m_ui.useLogScaleCheckBox, SIGNAL(stateChanged(int)),
                    this, SLOT(useLogScaling(int)));
 }
 
@@ -76,10 +76,10 @@ namespace SimpleGui
  */
 void ColorSelectionWidget::setEditorStatus(bool status)
 {
-  this->ui.maxValLabel->setEnabled(status);
-  this->ui.maxValLineEdit->setEnabled(status);
-  this->ui.minValLabel->setEnabled(status);
-  this->ui.minValLineEdit->setEnabled(status);
+  this->m_ui.maxValLabel->setEnabled(status);
+  this->m_ui.maxValLineEdit->setEnabled(status);
+  this->m_ui.minValLabel->setEnabled(status);
+  this->m_ui.minValLineEdit->setEnabled(status);
 }
 
 /**
@@ -88,7 +88,7 @@ void ColorSelectionWidget::setEditorStatus(bool status)
  */
 void ColorSelectionWidget::loadBuiltinColorPresets()
 {
-  pqColorPresetModel *presetModel = this->presets->getModel();
+  pqColorPresetModel *presetModel = this->m_presets->getModel();
 
   // Associate the colormap value with the index a continuous index
 
@@ -120,7 +120,7 @@ void ColorSelectionWidget::loadBuiltinColorPresets()
   {
     int defaultColorMapIndex = this->colorMapManager->getDefaultColorMapIndex(viewSwitched);
 
-    const pqColorMapModel *colorMap = this->presets->getModel()->getColorMap(defaultColorMapIndex);
+    const pqColorMapModel *colorMap = this->m_presets->getModel()->getColorMap(defaultColorMapIndex);
 
     if (colorMap)
     {
@@ -215,13 +215,13 @@ void ColorSelectionWidget::autoOrManualScaling(int state)
  */
 void ColorSelectionWidget::loadPreset()
 {
-  this->presets->setUsingCloseButton(false);
-  if (this->presets->exec() == QDialog::Accepted)
+  this->m_presets->setUsingCloseButton(false);
+  if (this->m_presets->exec() == QDialog::Accepted)
   {
     // Get the color map from the selection.
-    QItemSelectionModel *selection = this->presets->getSelectionModel();
+    QItemSelectionModel *selection = this->m_presets->getSelectionModel();
     QModelIndex index = selection->currentIndex();
-    const pqColorMapModel *colorMap = this->presets->getModel()->getColorMap(index.row());
+    const pqColorMapModel *colorMap = this->m_presets->getModel()->getColorMap(index.row());
 
     if (colorMap)
     {
@@ -238,7 +238,7 @@ void ColorSelectionWidget::loadPreset()
  */
 void ColorSelectionWidget::getColorScaleRange()
 {
-  if (this->ui.useLogScaleCheckBox->isChecked())
+  if (this->m_ui.useLogScaleCheckBox->isChecked())
   {
     setupLogScale(true);
   }
@@ -247,8 +247,8 @@ void ColorSelectionWidget::getColorScaleRange()
     setupLogScale(false);
   }
 
-  double min = this->ui.minValLineEdit->text().toDouble();
-  double max = this->ui.maxValLineEdit->text().toDouble();
+  double min = this->m_ui.minValLineEdit->text().toDouble();
+  double max = this->m_ui.maxValLineEdit->text().toDouble();
 
   emit this->colorScaleChanged(min, max);
 }
@@ -260,15 +260,15 @@ void ColorSelectionWidget::getColorScaleRange()
  */
 void ColorSelectionWidget::setColorScaleRange(double min, double max)
 {
-  if (this->ui.autoColorScaleCheckBox->isChecked())
+  if (this->m_ui.autoColorScaleCheckBox->isChecked())
   {
     m_minHistoric = min;
     m_maxHistoric = max;
 
-    this->ui.minValLineEdit->clear();
-    this->ui.minValLineEdit->insert(QString::number(min));
-    this->ui.maxValLineEdit->clear();
-    this->ui.maxValLineEdit->insert(QString::number(max));
+    this->m_ui.minValLineEdit->clear();
+    this->m_ui.minValLineEdit->insert(QString::number(min));
+    this->m_ui.maxValLineEdit->clear();
+    this->m_ui.maxValLineEdit->insert(QString::number(max));
   }
   else
   {
@@ -302,8 +302,8 @@ void ColorSelectionWidget::useLogScaling(int state)
 void ColorSelectionWidget::setupLogScale(int state)
 {
   // Get the min and max values
-  double min = this->ui.minValLineEdit->text().toDouble();
-  double max = this->ui.maxValLineEdit->text().toDouble();
+  double min = this->m_ui.minValLineEdit->text().toDouble();
+  double max = this->m_ui.maxValLineEdit->text().toDouble();
 
   // Make sure that the minimum is smaller or equal to the maximum
   setMinSmallerMax(min, max);
@@ -344,7 +344,7 @@ void ColorSelectionWidget::setupLogScale(int state)
  */
 void ColorSelectionWidget::onSetLogScale(bool state)
 {
-    ui.useLogScaleCheckBox->setChecked(state);
+    m_ui.useLogScaleCheckBox->setChecked(state);
 }
 
 /**
@@ -365,10 +365,10 @@ void ColorSelectionWidget::setMinSmallerMax(double& min, double& max)
     max = m_maxHistoric;
   }
 
-  this->ui.minValLineEdit->clear();
-  this->ui.minValLineEdit->insert(QString::number(min));
-  this->ui.maxValLineEdit->clear();
-  this->ui.maxValLineEdit->insert(QString::number(max));
+  this->m_ui.minValLineEdit->clear();
+  this->m_ui.minValLineEdit->insert(QString::number(min));
+  this->m_ui.maxValLineEdit->clear();
+  this->m_ui.maxValLineEdit->insert(QString::number(max));
 }
 
 /**
@@ -378,10 +378,10 @@ void ColorSelectionWidget::setMinSmallerMax(double& min, double& max)
  */
 void ColorSelectionWidget::enableControls(bool state)
 {
-  this->ui.colorSelectionLabel->setEnabled(state);
-  this->ui.autoColorScaleCheckBox->setEnabled(state);
-  this->ui.useLogScaleCheckBox->setEnabled(state);
-  int cbstate = this->ui.autoColorScaleCheckBox->isChecked();
+  this->m_ui.colorSelectionLabel->setEnabled(state);
+  this->m_ui.autoColorScaleCheckBox->setEnabled(state);
+  this->m_ui.useLogScaleCheckBox->setEnabled(state);
+  int cbstate = this->m_ui.autoColorScaleCheckBox->isChecked();
   if (state)
   {
     switch (cbstate)
@@ -398,7 +398,7 @@ void ColorSelectionWidget::enableControls(bool state)
   {
     this->setEditorStatus(false);
   }
-  this->ui.presetButton->setEnabled(state);
+  this->m_ui.presetButton->setEnabled(state);
 }
 
 /**
@@ -409,7 +409,7 @@ void ColorSelectionWidget::enableControls(bool state)
  */
 bool ColorSelectionWidget::getAutoScaleState()
 {
-  int state = this->ui.autoColorScaleCheckBox->isChecked();
+  int state = this->m_ui.autoColorScaleCheckBox->isChecked();
   if (Qt::Checked == state)
   {
     state -= 1;
@@ -425,7 +425,7 @@ bool ColorSelectionWidget::getAutoScaleState()
  */
 bool ColorSelectionWidget::getLogScaleState()
 {
-  int state = this->ui.useLogScaleCheckBox->isChecked();
+  int state = this->m_ui.useLogScaleCheckBox->isChecked();
   if (Qt::Checked == state)
   {
     state -= 1;
@@ -440,7 +440,7 @@ bool ColorSelectionWidget::getLogScaleState()
  */
 double ColorSelectionWidget::getMinRange()
 {
-  return this->ui.minValLineEdit->text().toDouble();
+  return this->m_ui.minValLineEdit->text().toDouble();
 }
 
 /**
@@ -449,7 +449,7 @@ double ColorSelectionWidget::getMinRange()
  */
 double ColorSelectionWidget::getMaxRange()
 {
-  return this->ui.maxValLineEdit->text().toDouble();
+  return this->m_ui.maxValLineEdit->text().toDouble();
 }
 
 /**
@@ -459,10 +459,10 @@ double ColorSelectionWidget::getMaxRange()
  */
 void ColorSelectionWidget::reset()
 {
-  this->ui.autoColorScaleCheckBox->setChecked(true);
-  this->ui.useLogScaleCheckBox->setChecked(false);
-  this->ui.minValLineEdit->setText("");
-  this->ui.maxValLineEdit->setText("");
+  this->m_ui.autoColorScaleCheckBox->setChecked(true);
+  this->m_ui.useLogScaleCheckBox->setChecked(false);
+  this->m_ui.minValLineEdit->setText("");
+  this->m_ui.maxValLineEdit->setText("");
 }
 
 } // SimpleGui

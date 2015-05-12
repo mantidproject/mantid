@@ -93,11 +93,11 @@ public:
 
 private:
   void updateLookupTable(pqDataRepresentation* representation); ///< Updates the lookup tables.
-  bool autoScaleState; ///< Holder for the auto scaling state
-  bool logScaleState; ///< Holder for the log scaling state
-  double minScale; ///< Holder for the minimum color range state
-  double maxScale; ///< Holder for the maximum color range state
-  AutoScaleRangeGenerator autoScaleRangeGenerator; ///< Holds a range generator for auto scale.
+  bool m_autoScaleState; ///< Holder for the auto scaling state
+  bool m_logScaleState; ///< Holder for the log scaling state
+  double m_minScale; ///< Holder for the minimum color range state
+  double m_maxScale; ///< Holder for the maximum color range state
+  AutoScaleRangeGenerator m_autoScaleRangeGenerator; ///< Holds a range generator for auto scale.
 };
 
 }
