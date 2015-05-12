@@ -23,14 +23,24 @@ class ISISDirectInelasticConfigTest(unittest.TestCase):
         self.userID = 'tuf666699'
         return super(ISISDirectInelasticConfigTest, self).__init__(methodName)
 
+    def get_save_dir(self):
+        targetDir = config['defaultsave.directory']
+        if targetDir is None or len(targetDir) == 0:
+            if platform.system() == 'Windows':
+                targetDir = str(os.environ['TEMP'])
+            else:
+                targetDir = '/tmp'
+        return targetDir 
+
     def setUp(self):
         # Create user's folder structure in default save directory.
         # the administrative script (not here) builds all this for real in /home
-        targetDir = config['defaultsave.directory']
+        targetDir = self.get_save_dir()
+
         self.rbdir = os.path.join(targetDir,self.userID,self.rbnumber)
         self.UserScriptRepoDir = os.path.join(targetDir,'UserScripts')
         self.MapMaskDir        = os.path.join(targetDir,'MapMaskDir')
-        self.userRootDir = os.path.join(config['defaultsave.directory'],self.userID)
+        self.userRootDir = os.path.join(targetDir,self.userID)
         if not os.path.exists(self.rbdir):
             os.makedirs(self.rbdir)
         if not os.path.exists(self.UserScriptRepoDir):
@@ -96,7 +106,7 @@ class ISISDirectInelasticConfigTest(unittest.TestCase):
         self.assertEqual(user._recent_dateID,id)
         self.assertEqual(user.start_dates['2000-01-12'],datetime.date(2000,01,12))
 
-        targetDir = config['defaultsave.directory']
+        targetDir = self.get_save_dir()
         rbdir = os.path.join(self.userRootDir,'RB1999666')
         if not os.path.exists(rbdir):
             os.makedirs(rbdir)
@@ -113,7 +123,8 @@ class ISISDirectInelasticConfigTest(unittest.TestCase):
         # script verifies the presence of a folder, not its contents.
         # for the script to work, let's run it on default save directory
         MantidDir = os.path.split(os.path.realpath(__file__))[0]
-        HomeRootDir = config['defaultsave.directory']
+        HomeRootDir = self.get_save_dir()
+
         mcf = MantidConfigDirectInelastic(MantidDir,HomeRootDir,self.UserScriptRepoDir,self.MapMaskDir)
 
         self.assertRaises(RuntimeError,MantidConfigDirectInelastic,'MissingMantidFolder',HomeRootDir,self.UserScriptRepoDir,self.MapMaskDir)
@@ -161,7 +172,7 @@ class ISISDirectInelasticConfigTest(unittest.TestCase):
         # script verifies the presence of a folder, not its contents.
         # for the script to work, let's run it on default save directory
         MantidDir = os.path.split(os.path.realpath(__file__))[0]
-        HomeRootDir = config['defaultsave.directory']
+        HomeRootDir = self.get_save_dir()
         mcf = MantidConfigDirectInelastic(MantidDir,HomeRootDir,self.UserScriptRepoDir,self.MapMaskDir)
 
         user = UserProperties()
