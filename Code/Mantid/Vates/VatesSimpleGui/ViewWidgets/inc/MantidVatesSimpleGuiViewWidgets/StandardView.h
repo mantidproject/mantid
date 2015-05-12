@@ -111,6 +111,19 @@ private:
   QAction* m_sliceMDAction;
   QAction* m_cutMDAction;
   QAction* m_unbinAction;
+
+  // name to show for the rebin actions on the rebin menu
+  static QString g_binMDName;
+  static QString g_sliceMDName;
+  static QString g_cutMDName;
+  /// name + a bit of description
+  static QString g_binMDLbl;
+  static QString g_sliceMDLbl;
+  static QString g_cutMDLbl;
+  /// tool tip text for the rebin algorithm
+  static QString g_binMDToolTipTxt;
+  static QString g_sliceMDToolTipTxt;
+  static QString g_cutMDToolTipTxt;
 };
 
 } // SimpleGui
