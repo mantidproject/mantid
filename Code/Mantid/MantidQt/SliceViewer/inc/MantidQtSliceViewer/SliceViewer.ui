@@ -17,16 +17,7 @@
    <property name="spacing">
     <number>3</number>
    </property>
-   <property name="leftMargin">
-    <number>0</number>
-   </property>
-   <property name="topMargin">
-    <number>0</number>
-   </property>
-   <property name="rightMargin">
-    <number>0</number>
-   </property>
-   <property name="bottomMargin">
+   <property name="margin">
     <number>0</number>
    </property>
    <item>
@@ -62,16 +53,7 @@
        <property name="sizeConstraint">
         <enum>QLayout::SetMinimumSize</enum>
        </property>
-       <property name="leftMargin">
-        <number>0</number>
-       </property>
-       <property name="topMargin">
-        <number>0</number>
-       </property>
-       <property name="rightMargin">
-        <number>0</number>
-       </property>
-       <property name="bottomMargin">
+       <property name="margin">
         <number>0</number>
        </property>
       </layout>
@@ -87,16 +69,7 @@
        <property name="spacing">
         <number>2</number>
        </property>
-       <property name="leftMargin">
-        <number>0</number>
-       </property>
-       <property name="topMargin">
-        <number>0</number>
-       </property>
-       <property name="rightMargin">
-        <number>0</number>
-       </property>
-       <property name="bottomMargin">
+       <property name="margin">
         <number>0</number>
        </property>
        <item>
@@ -663,6 +636,7 @@
                <string notr="true">QLabel {
  background-color : rgb(255, 255, 186);
  color : black; 
+ font: 8pt;
 }</string>
               </property>
               <property name="frameShape">
@@ -701,6 +675,7 @@
                <string notr="true">QLabel {
  background-color : rgb(255, 255, 186);
  color : black; 
+ font: 8pt;
 }</string>
               </property>
               <property name="frameShape">
@@ -742,6 +717,7 @@
                <string notr="true">QLabel {
  background-color : rgb(255, 255, 186);
  color : black; 
+ font: 8pt;
 }</string>
               </property>
               <property name="frameShape">
@@ -765,24 +741,30 @@
             <item row="3" column="1">
              <widget class="QComboBox" name="comboNormalization">
               <property name="sizePolicy">
-               <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+               <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
                 <horstretch>0</horstretch>
                 <verstretch>0</verstretch>
                </sizepolicy>
               </property>
               <property name="minimumSize">
                <size>
-                <width>80</width>
+                <width>70</width>
                 <height>0</height>
                </size>
               </property>
               <property name="font">
                <font>
-                <pointsize>13</pointsize>
+                <pointsize>8</pointsize>
+                <weight>50</weight>
+                <italic>false</italic>
+                <bold>false</bold>
                </font>
               </property>
               <property name="toolTip">
                <string>Normalization option</string>
+              </property>
+              <property name="styleSheet">
+               <string notr="true">font: 8pt;</string>
               </property>
              </widget>
             </item>
@@ -803,16 +785,7 @@
           <property name="spacing">
            <number>4</number>
           </property>
-          <property name="leftMargin">
-           <number>2</number>
-          </property>
-          <property name="topMargin">
-           <number>2</number>
-          </property>
-          <property name="rightMargin">
-           <number>2</number>
-          </property>
-          <property name="bottomMargin">
+          <property name="margin">
            <number>2</number>
           </property>
           <item>
