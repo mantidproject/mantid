@@ -199,8 +199,8 @@ class ISISDirectInelasticConfigTest(unittest.TestCase):
 
 
         mcf.init_user(self.userID,user)
-        self.makeFakeSourceReductionFile(mcf)
 
+        self.makeFakeSourceReductionFile(mcf)
         self.assertEqual(len(mcf._dynamic_configuration),6)
         self.assertEqual(mcf._dynamic_configuration[1],'default.instrument=MERLIN')
 
@@ -216,13 +216,36 @@ class ISISDirectInelasticConfigTest(unittest.TestCase):
         time_in_a_past = time.mktime(date_in_apast.timetuple())
         os.utime(config_file,(time_in_a_past,time_in_a_past))
         self.assertTrue(mcf.config_need_replacing(config_file))
-        # clear up
+        #--------------------------------------------------------------------
+        user1ID = 'tuf299966'
+        user1RootDir = os.path.join(self.get_save_dir(),user1ID)
+        if not os.path.exists(user1RootDir):
+            os.makedirs(user1RootDir)
+        #
+        user1 = UserProperties()
+        user1.set_user_properties('MARI','20000124','CYCLE20001',rbdir2)
+
+        mcf.init_user(user1ID,user1)
+        self.makeFakeSourceReductionFile(mcf)
+
+        mcf.generate_config()
+        self.assertEqual(len(mcf._dynamic_configuration),6)
+        self.assertEqual(mcf._dynamic_configuration[1],'default.instrument=MARI')
+        config_file = os.path.join(self.userRootDir,'.mantid','Mantid.user.properties')
+        self.assertTrue(os.path.exists(os.path.join(user1RootDir,'.mantid')))
+        self.assertTrue(os.path.exists(config_file))
+
+        #--------------------------------------------------------------------
+        # clean up
         if os.path.exists(os.path.join(self.userRootDir,'.mantid')):
             shutil.rmtree(os.path.join(self.userRootDir,'.mantid'))
         if os.path.exists(rbdir2):
             shutil.rmtree(rbdir2)
         if os.path.exists(rbdir3):
             shutil.rmtree(rbdir3)
+        if os.path.exists(user1RootDir):
+            shutil.rmtree(user1RootDir)
+
 
 
 
