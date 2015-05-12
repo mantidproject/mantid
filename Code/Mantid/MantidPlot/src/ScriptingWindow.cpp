@@ -171,7 +171,6 @@ void ScriptingWindow::showEvent(QShowEvent *event)
   event->accept();
 }
 
-
 /**
  * Open a script directly. This is here for backwards compatability with the old ScriptWindow
  * class
@@ -237,7 +236,6 @@ void ScriptingWindow::populateRecentScriptsMenu()
   }
 }
 
-
 /// Populate edit menu
 void ScriptingWindow::populateEditMenu()
 {
@@ -259,6 +257,7 @@ void ScriptingWindow::populateEditMenu()
   m_editMenu->insertSeparator();
   m_editMenu->addAction(m_find);
 }
+
 /// Populate execute menu
 void ScriptingWindow::populateExecMenu()
 {
@@ -293,15 +292,15 @@ void ScriptingWindow::populateWindowMenu()
     m_windowMenu->addAction(m_zoomIn);
     m_windowMenu->addAction(m_zoomOut);
     m_windowMenu->addAction(m_resetZoom);
+    m_windowMenu->addAction(m_selectFont);
 
     m_windowMenu->insertSeparator();
     m_windowMenu->addAction(m_toggleProgress);
     m_windowMenu->addAction(m_toggleFolding);
-
     m_windowMenu->addAction(m_toggleWhitespace);
-      m_windowMenu->insertSeparator();
+
+    m_windowMenu->insertSeparator();
     m_windowMenu->addAction(m_openConfigTabs);
-    m_windowMenu->addAction(m_selectFont);
   }
 }
 
@@ -314,7 +313,6 @@ void ScriptingWindow::populateHelpMenu()
 }
 
 /**
- *
  */
 void ScriptingWindow::updateWindowFlags()
 {
@@ -646,6 +644,10 @@ void ScriptingWindow::initWindowMenuActions()
   m_resetZoom = new QAction(("&Reset font size"), this);
   connect(m_resetZoom, SIGNAL(triggered()), m_manager, SLOT(resetZoom()));
 
+  // Show font selection dialog
+  m_selectFont = new QAction(tr("Select Font"), this);
+  connect(m_selectFont, SIGNAL(triggered()), m_manager, SLOT(showSelectFont()));
+
   // Toggle the progress arrow
   m_toggleProgress = new QAction(tr("&Progress Reporting"), this);
   m_toggleProgress->setCheckable(true);
@@ -664,10 +666,6 @@ void ScriptingWindow::initWindowMenuActions()
   // Open Config Tabs dialog
   m_openConfigTabs = new QAction(tr("Configure Tabs"), this);
   connect(m_openConfigTabs, SIGNAL(triggered()), m_manager, SLOT(openConfigTabs()));
-
-  // Show font selection dialog
-  m_selectFont = new QAction(tr("Select Font"), this);
-  connect(m_selectFont, SIGNAL(triggered()), m_manager, SLOT(showSelectFont()));
 }
 
 /**
