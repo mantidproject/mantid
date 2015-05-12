@@ -541,6 +541,37 @@ class RunDescriptorTest(unittest.TestCase):
         real_fext=PropertyManager.sample_run.get_fext()
         self.assertEqual('.nxs',real_fext)
 
+    def test_change_normalization(self):
+        propman  = self.prop_man
+        a_wksp=CreateSampleWorkspace(Function='Multiple Peaks',WorkspaceType='Event',
+                                NumBanks=4, BankPixelWidth=1, NumEvents=100, XUnit='TOF',
+                                XMin=2000, XMax=20000, BinWidth=1)
+        source_wksp = a_wksp/5.
+        propman.sample_run = source_wksp
+        self.assertRaises(RuntimeError,PropertyManager.sample_run.export_normalization,a_wksp)
+
+        AddSampleLog(source_wksp,LogName='NormalizationFactor',LogText='5.',LogType='Number')
+        PropertyManager.sample_run.export_normalization(a_wksp)
+
+        rez = CheckWorkspacesMatch(Workspace1=source_wksp,Workspace2=a_wksp,Tolerance=1.e-8)
+        self.assertEqual(rez,'Success!')
+
+        # divide by 20 to get final normalization factor equal 100 (ws/(5*20))
+        a_wksp/= 20
+        AddSampleLog(a_wksp,LogName='NormalizationFactor',LogText='100',LogType='Number')
+        # export normalization by 5
+        PropertyManager.sample_run.export_normalization(a_wksp)
+        rez = CheckWorkspacesMatch(Workspace1=source_wksp,Workspace2=a_wksp,Tolerance=1.e-6)
+        self.assertEqual(rez,'Success!')
+        self.assertAlmostEqual(a_wksp.getRun().getLogData('NormalizationFactor').value,5.)
+
+        propman.sample_run = None
+        DeleteWorkspace(a_wksp)
+
+
+
+
+
 
 
 

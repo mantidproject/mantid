@@ -499,7 +499,7 @@ namespace CustomInterfaces
    */
   void ISISEnergyTransfer::pbRunEditing()
   {
-    emit updateRunButton(false, "Editing...", "Run numbers are curently being edited.");
+    emit updateRunButton(false, "Editing...", "Run numbers are currently being edited.");
   }
 
   /**
@@ -507,7 +507,7 @@ namespace CustomInterfaces
    */
   void ISISEnergyTransfer::pbRunFinding()
   {
-    emit updateRunButton(false, "Finding files...", "Searchig for data files for the run numbers entered...");
+    emit updateRunButton(false, "Finding files...", "Searching for data files for the run numbers entered...");
     m_uiForm.dsRunFiles->setEnabled(false);
   }
 
@@ -518,7 +518,7 @@ namespace CustomInterfaces
   {
     if(!m_uiForm.dsRunFiles->isValid())
     {
-      emit updateRunButton(false, "Invalid Run(s)", "Cannot find data files for some of the run numbers enetered.");
+      emit updateRunButton(false, "Invalid Run(s)", "Cannot find data files for some of the run numbers entered.");
     }
     else
     {

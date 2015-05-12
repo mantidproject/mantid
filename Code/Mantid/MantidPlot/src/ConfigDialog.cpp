@@ -728,13 +728,13 @@ void ConfigDialog::initMdPlottingPage()
   // Update the visibility of the Vsi tab if the General Md Color Map was selected the last time
   if (m_mdSettings.getUsageGeneralMdColorMap())
   {
-    changeUsageGeneralMdColorMap(true);
+    changeUsageGeneralMdColorMap();
   }
 
   // Update the visibility of the Vsi tab if the last session checkbox was selected.
   if (m_mdSettings.getUsageLastSession())
   {
-    changeUsageLastSession(true);
+    changeUsageLastSession();
   }
 }
 
@@ -751,7 +751,6 @@ void ConfigDialog::initMdPlottingGeneralTab()
   mdPlottingTabWidget->addTab(mdPlottingGeneralPage, QString());
 
   // Color Map
-  mdPlottingGeneralFrame->setTitle("Use common Color Map for Slice Viewer and VSI");
   mdPlottingGeneralFrame->setCheckable(true);
   mdPlottingGeneralFrame->setChecked(m_mdSettings.getUsageGeneralMdColorMap());
 
@@ -794,38 +793,40 @@ void ConfigDialog::initMdPlottingVsiTab()
 {
   vsiPage = new QWidget();
   QVBoxLayout *vsiTabLayout = new QVBoxLayout(vsiPage);
-  QGroupBox *frame = new QGroupBox();
-  vsiTabLayout->addWidget(frame);
-  QGridLayout *grid = new QGridLayout(frame);
-  mdPlottingTabWidget->addTab(vsiPage, QString());
 
-  // Usage of the last setting
-  vsiLastSession = new QCheckBox();
-  lblVsiLastSession = new QLabel();
-  grid->addWidget(lblVsiLastSession , 0, 0);
-  grid->addWidget(vsiLastSession , 0, 1);
-  vsiLastSession->setChecked(m_mdSettings.getUsageLastSession());
+  // Initial View when loading into the VSI
+  QGroupBox *frameTop = new QGroupBox();
+  vsiTabLayout->addWidget(frameTop);
+  QGridLayout *gridTop = new QGridLayout(frameTop);
+  vsiInitialView = new QComboBox();
+
+  lblVsiInitialView = new QLabel();
+  gridTop->addWidget(lblVsiInitialView, 0, 0);
+  gridTop->addWidget(vsiInitialView, 0, 1);
+
+  mdPlottingVsiFrameBottom = new QGroupBox();
+  mdPlottingVsiFrameBottom->setCheckable(true);
+  mdPlottingVsiFrameBottom->setChecked(!m_mdSettings.getUsageLastSession());
+
+  vsiTabLayout->addWidget(mdPlottingVsiFrameBottom);
+  QGridLayout *grid = new QGridLayout(mdPlottingVsiFrameBottom);
+
+  mdPlottingTabWidget->addTab(vsiPage, QString());
 
   // Color Map
   vsiDefaultColorMap = new QComboBox();
   lblVsiDefaultColorMap = new QLabel();
-  grid->addWidget(lblVsiDefaultColorMap, 1, 0);
-  grid->addWidget(vsiDefaultColorMap, 1, 1);
+  grid->addWidget(lblVsiDefaultColorMap, 0, 0);
+  grid->addWidget(vsiDefaultColorMap, 0, 1);
 
   // Background Color
   vsiDefaultBackground = new ColorButton();
   lblVsiDefaultBackground = new QLabel();
-  grid->addWidget(lblVsiDefaultBackground, 2, 0);
-  grid->addWidget(vsiDefaultBackground, 2, 1);
+  grid->addWidget(lblVsiDefaultBackground, 1, 0);
+  grid->addWidget(vsiDefaultBackground, 1, 1);
 
   const QColor backgroundColor = m_mdSettings.getUserSettingBackgroundColor();
   vsiDefaultBackground->setColor(backgroundColor);
-
-  // Initial View when loading into the VSI
-  vsiInitialView = new QComboBox();
-  lblVsiInitialView = new QLabel();
-  grid->addWidget(lblVsiInitialView, 3, 0);
-  grid->addWidget(vsiInitialView, 3, 1);
 
   grid->setRowStretch(4,1);
 
@@ -868,37 +869,37 @@ void ConfigDialog::initMdPlottingVsiTab()
  */
 void ConfigDialog::setupMdPlottingConnections()
 {
-  QObject::connect(this->mdPlottingGeneralFrame, SIGNAL(toggled(bool)), this, SLOT(changeUsageGeneralMdColorMap(bool)));
-  QObject::connect(this->vsiLastSession, SIGNAL(toggled(bool)), this, SLOT(changeUsageLastSession(bool)));
+  QObject::connect(this->mdPlottingGeneralFrame, SIGNAL(toggled(bool)), this, SLOT(changeUsageGeneralMdColorMap()));
+  QObject::connect(this->mdPlottingVsiFrameBottom, SIGNAL(toggled(bool)), this, SLOT(changeUsageLastSession()));
 }
 
 /**
  * Handle a change of the General Md Color Map selection.
- * @param The state of the general MD color map checkbox
  */
-void ConfigDialog::changeUsageGeneralMdColorMap(bool state)
+void ConfigDialog::changeUsageGeneralMdColorMap()
 {
-  // Set the visibility of the default color map of the VSI
-  vsiDefaultColorMap->setDisabled(state);
-  lblVsiDefaultColorMap->setDisabled(state);
+  // If the general color map setting is turned off and the vsi colormap is turned on
+  // then we set the default color map to enabled, else we disable it
+  bool isDefaultColorMapSelectable = (!mdPlottingGeneralFrame->isChecked() && mdPlottingVsiFrameBottom->isChecked());
+
+  vsiDefaultColorMap->setEnabled(isDefaultColorMapSelectable);
+  lblVsiDefaultColorMap->setEnabled(isDefaultColorMapSelectable);
+  //vsiDefaultColorMap->setEnabled(true);
+  //lblVsiDefaultColorMap->setEnabled(true);
 }
 
 /**
  * Handle a change of the Last Session selection.
-  * @param The state of the last session checkbox.
+  * @param isDefaultColorMapVsiChecked The state of the vsi default checkbox.
  */
-void ConfigDialog::changeUsageLastSession(bool state)
+void ConfigDialog::changeUsageLastSession()
 {
-  // Set the visibility of the default color map of the VSI
-  if (!mdPlottingGeneralFrame->isChecked())
-  {
-    vsiDefaultColorMap->setDisabled(state);
-    lblVsiDefaultColorMap->setDisabled(state);
-  }
+  // Set the color map of the VSI default
+  changeUsageGeneralMdColorMap();
 
   // Set the visibility of the background color button of the VSI
-  vsiDefaultBackground->setDisabled(state);
-  lblVsiDefaultBackground->setDisabled(state);
+  vsiDefaultBackground->setEnabled(mdPlottingVsiFrameBottom->isChecked());
+  lblVsiDefaultBackground->setEnabled(mdPlottingVsiFrameBottom->isChecked());
 }
 
 
@@ -2188,13 +2189,39 @@ void ConfigDialog::languageChange()
 
   // MDPlotting change
   mdPlottingTabWidget->setTabText(mdPlottingTabWidget->indexOf(vsiPage), tr("VSI"));
-  lblVsiDefaultColorMap->setText(tr("Default Color Map"));
-  lblVsiDefaultBackground->setText(tr("Background Color"));
-  lblVsiLastSession->setText(tr("Use the settings of the last VSI session"));
-  lblVsiInitialView->setText(tr("Initial View"));
-
   mdPlottingTabWidget->setTabText(mdPlottingTabWidget->indexOf(mdPlottingGeneralPage), tr("General"));
-  lblGeneralDefaultColorMap->setText(tr("General Color Map"));
+
+  // Vsi background color
+  QString vsiDefaultBackgroundToolTipText = "Sets the default background color when a new instance of the VSI is opened.";
+  vsiDefaultBackground->setToolTip(vsiDefaultBackgroundToolTipText);
+  lblVsiDefaultBackground->setToolTip(vsiDefaultBackgroundToolTipText);
+  lblVsiDefaultBackground->setText(tr("Background color"));
+
+  // Vsi initial view
+  QString vsiInitialViewToolTipText = "Sets the initial view when loading a new source into the VSI.";
+  lblVsiInitialView->setText(tr("Initial view"));
+  vsiInitialView->setToolTip(vsiInitialViewToolTipText);
+  lblVsiInitialView->setToolTip(vsiInitialViewToolTipText);
+
+  // VSI master default
+  QString vsiMasterDefaultToolTipText = "User master defaults for the color map and the background color. If not checked the settings of the last session are used.";
+  mdPlottingVsiFrameBottom->setTitle(tr("Use defaults for color map and background color"));
+  mdPlottingVsiFrameBottom->setToolTip(vsiMasterDefaultToolTipText);
+
+  // Vsi default color map
+  QString vsiDefaultColorMapToolTipText = "Sets the default color map when a new instance of the VSI is opened.";
+  vsiDefaultColorMap->setToolTip(vsiDefaultColorMapToolTipText);
+  lblVsiDefaultColorMap->setToolTip(vsiDefaultColorMapToolTipText);
+  lblVsiDefaultColorMap->setText(tr("Default color map"));
+
+  // General plotting tab
+  QString vsiGeneralDefaultColorMapToolTipText = "Sets the default color map for both the Slice Viewer and the VSI.";
+  mdPlottingGeneralColorMap->setToolTip(vsiGeneralDefaultColorMapToolTipText);
+  lblGeneralDefaultColorMap->setToolTip(vsiGeneralDefaultColorMapToolTipText);
+  lblGeneralDefaultColorMap->setText(tr("Default color map"));
+
+  mdPlottingGeneralFrame->setTitle("Use same default color map for Slice Viewer and VSI");
+  mdPlottingGeneralFrame->setToolTip("The specifed color map will be available for the Slice Viewer and the VSI when a new instance of either is started.");
 }
 
 void ConfigDialog::accept()
@@ -2465,10 +2492,14 @@ void ConfigDialog::updateMdPlottingSettings()
     m_mdSettings.setUserSettingColorMap(vsiDefaultColorMap->currentText());
   }
 
-  // Read if the usage of the last color map should be performed
-  if (vsiLastSession)
+  // Read if the usage of the last color map and background color should be performed
+  if (mdPlottingVsiFrameBottom->isChecked())
   {
-    m_mdSettings.setUsageLastSession(vsiLastSession->isChecked());
+    m_mdSettings.setUsageLastSession(false);
+  }
+  else
+  {
+    m_mdSettings.setUsageLastSession(true);
   }
 
   // Read the background selection

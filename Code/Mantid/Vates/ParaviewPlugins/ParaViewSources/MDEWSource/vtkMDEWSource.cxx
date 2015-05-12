@@ -15,6 +15,7 @@
 #include "MantidVatesAPI/vtkMDHexFactory.h"
 #include "MantidVatesAPI/vtkMDQuadFactory.h"
 #include "MantidVatesAPI/vtkMDLineFactory.h"
+#include "MantidVatesAPI/vtkMD0DFactory.h"
 #include "MantidVatesAPI/FilteringUpdateProgressAction.h"
 #include "MantidVatesAPI/IgnoreZerosThresholdRange.h"
 
@@ -184,12 +185,14 @@ int vtkMDEWSource::RequestData(vtkInformation *, vtkInformationVector **, vtkInf
     FilterUpdateProgressAction<vtkMDEWSource> drawingProgressUpdate(this, "Drawing...");
 
     ThresholdRange_scptr thresholdRange(new IgnoreZerosThresholdRange());
+    vtkMD0DFactory* zeroDFactory = new vtkMD0DFactory(thresholdRange, "signal");
     vtkMDHexFactory* hexahedronFactory = new vtkMDHexFactory(thresholdRange, "signal");
     vtkMDQuadFactory* quadFactory = new vtkMDQuadFactory(thresholdRange, "signal");
     vtkMDLineFactory* lineFactory = new vtkMDLineFactory(thresholdRange, "signal");
 
     hexahedronFactory->SetSuccessor(quadFactory);
     quadFactory->SetSuccessor(lineFactory);
+    lineFactory->SetSuccessor(zeroDFactory);
 
     hexahedronFactory->setTime(m_time);
     vtkDataSet* product = m_presenter->execute(hexahedronFactory, loadingProgressUpdate, drawingProgressUpdate);
