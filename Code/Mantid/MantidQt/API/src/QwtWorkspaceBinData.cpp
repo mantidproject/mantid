@@ -2,6 +2,7 @@
 #include "MantidQtAPI/PlotAxis.h"
 
 #include <QStringBuilder>
+#include <boost/math/special_functions/fpclassify.hpp>
 
 /// Constructor
 QwtWorkspaceBinData::QwtWorkspaceBinData(const Mantid::API::MatrixWorkspace &workspace, int binIndex, const bool logScale)

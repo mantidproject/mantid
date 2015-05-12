@@ -8,6 +8,7 @@
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidGeometry/MDGeometry/MDTypes.h"
 #include <QStringBuilder>
+#include <boost/math/special_functions/fpclassify.hpp>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;

@@ -2,6 +2,7 @@
 #include "MantidQtAPI/PlotAxis.h"
 
 #include <QStringBuilder>
+#include <boost/math/special_functions/fpclassify.hpp>
 
 /**
  * Construct a QwtWorkspaceSpectrumData object with a source workspace
