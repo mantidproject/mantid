@@ -9,16 +9,72 @@ Overview
 
 .. image:: /images/ScriptingWindow.png
 
-TODO
+The scripting window allows you to write and execute Python scipts that interact
+with the Mantid :ref:`Python API`. It can be accessed either by selecting the
+*Script Window* option from the *View* menu in MantidPlot or by pressing F3.
 
 Editor Options
 --------------
 
-TODO
+The general options for the script editor are controled using the *Edit* and
+*Window* menus.
+
+Alongside the standard text copy and paste tools the *Edit* menu has tools that
+help format Python code, all of these tools can operate over a subsection of the
+code which is selected by highlighting it in th editor.
+
+Comment
+  Comments out the selected lines or the current line if no code is highlighted.
+
+Uncomment
+  Uncomments the selected lines or or the current line if no code is
+  highlighted.
+
+Tabs to Spaces
+  Converts any tabs in the current selection (or the entire script if no code is
+  highlighted) to spaces.
+
+Spaces to Tabs
+  Converts any spaces in the current selection (or the entire script if no code
+  is highlighted) to tabs.
+
+The *Window* menu contains options realting to the way in which code is
+displayed in the editor:
+
+Always On Top
+  Enabling this option ensures that the scripting windows will stay above all
+  other windows.
+
+Progress Reporting
+  This option ebales the green arrow which points to the current line being
+  executed on the left hand side of the editor.
 
 .. image:: /images/ScriptingWindow_FoldingOptionEnabled.png
+   :align: right
+   :scale: 50%
+
+Code Folding
+  This option adds fold markers next to the line numbers on the right hand side
+  of the editor which allow blocks of code to be collapsed based on their
+  indentation levels.
 
 .. image:: /images/ScriptingWindow_WhitespaceOptionEnabled.png
+   :align: right
+   :scale: 50%
+
+Show Whitespace
+  This option is used to show the whitespace in the editor window, this can be
+  very useful for finding indentation issues.
+
+.. image:: /images/ScriptingWindow_ConfigureTabs.png
+   :align: right
+
+Configure Tabs
+  This dialog is used to edit the way in which tabs are converted to and from
+  spaces by the *Tabs to Spaces* and *Spaces to Tabs* tools as well as how stabs
+  are displayed in the editor window.
+  It is recommended to leave these settings set to enable *Replace tabs with
+  spaces* and *Number of spaces per tab* set to 4.
 
 Execution Options
 -----------------
@@ -54,8 +110,14 @@ being executed.
 Script Output
 -------------
 
+The output pane at the bottom of the window displays the output from the script
+in the current tab, this shows the times exectution of the script has started
+and finished as well as anything output from the script using :code:`print`
+statements.
+
 .. image:: /images/ScriptingWindow_OutputOptions.png
 
-TODO
+Right clicking on the output pane opens the conetct menu which allows you to
+export the output in multiple ways as well as clearing the window.
 
 .. categories:: Interfaces
