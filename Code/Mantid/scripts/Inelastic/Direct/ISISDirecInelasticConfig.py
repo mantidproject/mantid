@@ -116,8 +116,22 @@ class MantidConfigDirectInelastic(object):
         self._map_mask_folder = str(map_mask_folder)
         # check if all necessary server folders specified as class parameters are present
         self._check_server_folders_present()
+        #
+        # Static Parts of dynamic contents of Mantid configuration file
+        self._root_data_folder='/archive' # root folder for all experimental results -- particular one will depend on
+                                          # instrument and cycle number.
+        # the common part of all strings, generated dynamically as function of input class parameters.
+        self._dynamic_options_base = ['default.facility=ISIS']
+        # Path to python scripts, defined and used by mantid wrt to Mantid Root (this path may be version specific)
+        self._python_mantid_path = ['scripts/Calibration/','scripts/Examples/','scripts/Interface/','scripts/Vates/']
+        # Static paths to user scripts, defined wrt script repository root
+        self._python_user_scripts = set(['direct_inelastic/ISIS/qtiGenie/'])
+        # File name, used as source of reduction scripts for particular instrument
+        self._sample_reduction_file = lambda InstrName : '{0}Reduction_Sample.py'.format(InstrName)
+        # File name, used as target for copying to user folder for user to deploy as the base for his reduction script
+        self._target_reduction_file = lambda InstrName,cycleID : '{0}Reduction_{1}_{2}.py'.format(InstrName,cycleID[0],cycleID[1])
 
-        # Convid contents
+        # Static contents of the Mantid Config file
         self._header = ("# This file can be used to override any properties for this installation.\n"
                         "# Any properties found in this file will override any that are found in the Mantid.Properties file\n"
                         "# As this file will not be replaced with further installations of Mantid it is a safe place to put\n"
@@ -152,14 +166,7 @@ class MantidConfigDirectInelastic(object):
                         "#MantidOptions.ReusePlotInstances=Off\n\n"
                         "## Uncomment to disable use of OpenGL to render unwrapped instrument views\n"
                         "#MantidOptions.InstrumentView.UseOpenGL=Off\n")
-        #
-        self._root_data_folder='/archive'
-        # the common part of all strings, generated dynamically as function of input class parameters.
-        self._dynamic_options_base = ['default.facility=ISIS']
-        # Path to python scripts, defined and used by mantid wrt to Mantid Root (this path may be version specific)
-        self._python_mantid_path = ['scripts/Calibration/','scripts/Examples/','scripts/Interface/','scripts/Vates/']
-        # Static paths to user scripts, defined wrt script repository root
-        self._python_user_scripts = set(['direct_inelastic/ISIS/qtiGenie/'])
+
         # Methods, which build & verify various parts of Mantid configuration
         self._dynamic_options = [self._set_default_inst,
                         self._set_script_repo, # this would be necessary to have on an Instrument scientist account, disabled on generic setup
@@ -184,6 +191,30 @@ class MantidConfigDirectInelastic(object):
             return True
         else:
             return False
+
+    def copy_reduction_sample(self,InstrName,CycleID,rb_folder):
+        """ Method copies sample reduction script from user script repository
+            to user folder.
+        """
+
+        source_file = self._sample_reduction_file(InstrName)
+
+        source_path = os.path.join(self._script_repo,'direct_inelastic',InstrName.upper())
+        full_source = os.path.join(source_path,source_file)
+
+        if not os.path.isfile(full_source):
+            return
+
+        target_file = self._target_reduction_file(InstrName,CycleID)
+        full_target = os.path.join(rb_folder,target_file)
+        # already have target file
+        if os.path.isfile(full_target):
+            return
+        shutil.copyfile(full_source,full_target)
+        os.chmod(full_target,0777)
+        if platform.system() != 'Windows':
+            os.system('chown '+self._fedid+':'+self._fedid+' '+full_target)
+
 
     def get_data_folder_name(self,instr,cycle_ID):
         """Method to generate a data folder from instrument name and the cycle start date
@@ -269,11 +300,11 @@ class MantidConfigDirectInelastic(object):
             path +=';'+os.path.join(self._mantid_path,part)
 
         # define and append user scrips search path
-        python_path = copy.deepcopy(self._python_user_scripts)
+        user_path_part = copy.deepcopy(self._python_user_scripts)
         for instr in self._user.instrument.values():
-            python_path.add(os.path.join('direct_inelastic/',instr.upper()+'/'))
-        for part in python_path:
-            path +=';'+os.path.join(self._script_repo,part)
+            user_path_part.add(os.path.join('direct_inelastic',instr.upper()))
+        for part in user_path_part:
+            path +=';'+os.path.join(self._script_repo,part)+'/'
 
         self._dynamic_configuration.append('pythonscripts.directories=' + path)
     #
@@ -325,6 +356,10 @@ class MantidConfigDirectInelastic(object):
         if platform.system() != 'Windows':
             os.system('chown -R '+self._fedid+':'+self._fedid+' '+config_path)
 
+        InstrName = self._user.get_last_instrument()
+        cycleID   = self._user.get_last_cycleID()
+        rb_folder = self._user.get_last_rbdir()
+        self.copy_reduction_sample(InstrName,cycleID,rb_folder)
 
     def _write_user_config_file(self,config_file_name):
         """Write existing dynamic configuration from memory to
