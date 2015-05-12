@@ -5,6 +5,7 @@
 #include "MantidVatesSimpleGuiViewWidgets/ViewBase.h"
 #include "MantidVatesSimpleGuiViewWidgets/WidgetDllOption.h"
 
+#include <QMap>
 #include <QPointer>
 #include <QWidget>
 
@@ -19,7 +20,8 @@ namespace Vates
 namespace SimpleGui
 {
 
-  class RebinnedSourcesManager;
+class RebinnedSourcesManager;
+
 /**
  *
  This class represents the initial view for the main program. It is meant to
@@ -93,6 +95,8 @@ protected slots:
 private:
   Q_DISABLE_COPY(StandardView)
 
+  QString getAlgNameFromMenuLabel(const QString &menuLbl);
+
   bool cameraReset;
   QPointer<pqPipelineSource> scaler; ///< Holder for the ScaleWorkspace
   Ui::StandardView ui; ///< The standard view's UI form
@@ -124,6 +128,8 @@ private:
   static QString g_binMDToolTipTxt;
   static QString g_sliceMDToolTipTxt;
   static QString g_cutMDToolTipTxt;
+
+  static QMap<QString, QString> g_actionToAlgName;
 };
 
 } // SimpleGui
