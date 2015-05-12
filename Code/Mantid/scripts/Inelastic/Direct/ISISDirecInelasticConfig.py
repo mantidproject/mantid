@@ -354,7 +354,7 @@ class MantidConfigDirectInelastic(object):
         else:
             pass
         if platform.system() != 'Windows':
-            os.system('chown -R '+self._fedid+':'+self._fedid+' '+config_path)
+            os.system('chown -R {0}:{0} {1}'.format(self._fedid,config_path))
 
         InstrName = self._user.get_last_instrument()
         cycleID   = self._user.get_last_cycleID()
