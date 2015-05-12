@@ -591,7 +591,14 @@ namespace IDA
     {
       Mantid::Geometry::Instrument_const_sptr inst =
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(workspaceName)->getInstrument();
-      std::string analyser = inst->getStringParameter("analyser")[0];
+      std::vector<std::string> analysers = inst->getStringParameter("analyser");
+      if(analysers.empty())
+      {
+        g_log.warning("Could not load instrument resolution from parameter file");
+        return 0.0;
+      }
+
+      std::string analyser = analysers[0];
       std::string idfDirectory = Mantid::Kernel::ConfigService::Instance().getString("instrumentDefinition.directory");
 
       // If the analyser component is not already in the data file the laod it from the parameter file
@@ -607,7 +614,7 @@ namespace IDA
 
         if(!loadParamFile->isExecuted())
         {
-          g_log.error("Could not load parameter file, ensure instrument directory is in data search paths.");
+          g_log.warning("Could not load parameter file, ensure instrument directory is in data search paths.");
           return 0.0;
         }
 
@@ -620,7 +627,7 @@ namespace IDA
     {
       UNUSED_ARG(e);
 
-      g_log.error("Could not load instrument resolution from parameter file");
+      g_log.warning("Could not load instrument resolution from parameter file");
       resolution = 0.0;
     }
 
