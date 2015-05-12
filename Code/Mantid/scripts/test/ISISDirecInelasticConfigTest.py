@@ -3,6 +3,7 @@ os.environ["PATH"] = r"c:/Mantid/Code/builds/br_master/bin/Release;"+os.environ[
 import unittest
 import shutil
 import datetime
+import time
 from mantid import config
 from Direct.ISISDirecInelasticConfig import UserProperties,MantidConfigDirectInelastic
 
@@ -113,14 +114,77 @@ class ISISDirectInelasticConfigTest(unittest.TestCase):
 
 
         mcf.init_user(self.userID,user)
-        mcf.generate_config()
-        self.assertTrue(os.path.exists(os.path.join(self.userRootDir,'.mantid')))
-        self.assertTrue(os.path.exists(os.path.join(self.userRootDir,'.mantid','Mantid.user.properties')))
 
+        self.assertEqual(len(mcf._dynamic_configuration),6)
+
+        mcf.generate_config()
+
+        config_file = os.path.join(self.userRootDir,'.mantid','Mantid.user.properties')
+        self.assertTrue(os.path.exists(os.path.join(self.userRootDir,'.mantid')))
+        self.assertTrue(os.path.exists(config_file))
+
+        self.assertFalse(mcf.config_need_replacing(config_file))
+        start_date = user.get_start_date()
+        date_in_apast=datetime.date(start_date.year,start_date.month,start_date.day-1)
+        time_in_a_past = time.mktime(date_in_apast.timetuple())
+        os.utime(config_file,(time_in_a_past,time_in_a_past))
+        self.assertTrue(mcf.config_need_replacing(config_file))
         # clear up
         if os.path.exists(os.path.join(self.userRootDir,'.mantid')):
             shutil.rmtree(os.path.join(self.userRootDir,'.mantid'))
 
+    def test_build_3Experiments_config(self):
+        # script verifies the presence of a folder, not its contents.
+        # for the script to work, let's run it on default save directory
+        MantidDir = os.path.split(os.path.realpath(__file__))[0]
+        HomeRootDir = config['defaultsave.directory']
+        mcf = MantidConfigDirectInelastic(MantidDir,HomeRootDir,self.UserScriptRepoDir,self.MapMaskDir)
+
+        user = UserProperties()
+        user.set_user_properties(self.instrument,self.start_date,self.cycle,self.rbdir)
+
+        rbnum2='RB1999000'
+        targetDir = config['defaultsave.directory']
+        rbdir2 = os.path.join(targetDir,self.userID,rbnum2)
+        if not os.path.exists(rbdir2):
+            os.makedirs(rbdir2)
+        user.set_user_properties('MARI','20000124','CYCLE20001',rbdir2)
+
+        rbnum3='RB1204000'
+        rbdir3 = os.path.join(targetDir,self.userID,rbnum3)
+        if not os.path.exists(rbdir3):
+            os.makedirs(rbdir3)
+        user.set_user_properties('MAPS','20041207','CYCLE20044',rbdir3)
+
+        # clear up the previous
+        if os.path.exists(os.path.join(self.userRootDir,'.mantid')):
+            shutil.rmtree(os.path.join(self.userRootDir,'.mantid'))
+
+
+        mcf.init_user(self.userID,user)
+
+        self.assertEqual(len(mcf._dynamic_configuration),6)
+        self.assertEqual(mcf._dynamic_configuration[1],'default.instrument=MERLIN')
+
+        mcf.generate_config()
+
+        config_file = os.path.join(self.userRootDir,'.mantid','Mantid.user.properties')
+        self.assertTrue(os.path.exists(os.path.join(self.userRootDir,'.mantid')))
+        self.assertTrue(os.path.exists(config_file))
+
+        self.assertFalse(mcf.config_need_replacing(config_file))
+        start_date = user.get_start_date()
+        date_in_apast=datetime.date(start_date.year,start_date.month,start_date.day-1)
+        time_in_a_past = time.mktime(date_in_apast.timetuple())
+        os.utime(config_file,(time_in_a_past,time_in_a_past))
+        self.assertTrue(mcf.config_need_replacing(config_file))
+        # clear up
+        if os.path.exists(os.path.join(self.userRootDir,'.mantid')):
+            shutil.rmtree(os.path.join(self.userRootDir,'.mantid'))
+        if os.path.exists(rbdir2):
+            shutil.rmtree(rbdir2)
+        if os.path.exists(rbdir3):
+            shutil.rmtree(rbdir3)
 
 
 
