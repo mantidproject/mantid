@@ -4,6 +4,7 @@ import unittest
 import shutil
 import datetime
 import time
+import platform
 from mantid import config
 from Direct.ISISDirecInelasticConfig import UserProperties,MantidConfigDirectInelastic
 
