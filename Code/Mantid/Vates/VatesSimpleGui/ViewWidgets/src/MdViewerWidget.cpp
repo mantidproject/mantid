@@ -133,6 +133,15 @@ namespace
 REGISTER_VATESGUI(MdViewerWidget)
 
 MdViewerWidget::AllVSIViewsState::AllVSIViewsState(){
+  initialize();
+}
+
+/**
+ * Initializes the views states with new empty values. This can be
+ * used to contruct or to re-initialize (forget) the states.
+ */
+void MdViewerWidget::AllVSIViewsState::initialize()
+{
   // these will be assigned from vtkSMProxy::SaveXMLState which
   // allocates a new tree with vtkPVXMLElement::New();
   stateStandard = vtkSmartPointer<vtkPVXMLElement>::New();
@@ -141,7 +150,8 @@ MdViewerWidget::AllVSIViewsState::AllVSIViewsState(){
   stateSplatter = vtkSmartPointer<vtkPVXMLElement>::New();
 }
 
-MdViewerWidget::AllVSIViewsState::~AllVSIViewsState() {
+MdViewerWidget::AllVSIViewsState::~AllVSIViewsState()
+{
 }
 
 /**
@@ -225,7 +235,7 @@ void MdViewerWidget::setupUiAndConnections()
 
 
   // Setup rotation point button
-  QObject::connect(this->ui.resetViewStateToAllData,
+  QObject::connect(this->ui.resetViewsStateToAllData,
                    SIGNAL(released()),
                    this,
                    SLOT(onResetViewToAll()));
@@ -253,7 +263,7 @@ void MdViewerWidget::setupUiAndConnections()
   //this->ui.pipelineBrowser->enableAnnotationFilter(m_widgetName);
   //this->ui.pipelineBrowser->hide();
   g_log.warning("Annotation Name: " + m_widgetName.toStdString());
-  
+
   // Connect the rebinned sources manager
   QObject::connect(&m_rebinnedSourcesManager,
                    SIGNAL(triggerAcceptForNewFilters()),
@@ -406,7 +416,13 @@ void MdViewerWidget::setParaViewComponentsForView()
   QObject::connect(this->currentView, SIGNAL(setViewStatus(ModeControlWidget::Views, bool)),
                    this->ui.modeControlWidget, SLOT(enableViewButton(ModeControlWidget::Views, bool)));
 
+
   this->connectColorSelectionWidget();
+
+  // Connect the reset view state button, which is between the color selection widget and the ParaQ toolbars
+  QObject::connect(this->ui.resetViewsStateToAllData, SIGNAL(released()),
+                   this, SLOT(onResetViewsStateToAllData()));
+
 
   // Set animation (time) control widget <-> view signals/slots.
   QObject::connect(this->currentView,
@@ -479,6 +495,33 @@ void MdViewerWidget::onSwitchSources(std::string rebinnedWorkspaceName, std::str
   {
     g_log.warning() << error.what();
   }
+}
+
+/**
+ * This gives the user a simple way to reset the state and forget all
+ * the interactions to start anew. Resets to all data and resets the
+ * center point and direction/rotation/angle.
+ */
+void MdViewerWidget::onResetViewsStateToAllData()
+{
+  // forget alll the view saved states
+  m_allViews.initialize();
+
+  if (!this->currentView)
+    return;
+
+  // reset direction/rotation
+  pqRenderView* pqv = this->currentView->getView();
+  if (!pqv) {
+    g_log.warning() << "Serious inconsistency found: could not retrieve a pqRenderView while "
+      "trying to reset the state of the views.";
+    return;
+  }
+  pqv->resetViewDirection(0, 0, -1, 0, 0, 0);
+
+  // reset current view
+  this->currentView->resetDisplay(); // includes a resetCamera() or more
+  this->currentView->render();
 }
 
 /**
@@ -1535,7 +1578,7 @@ void MdViewerWidget::saveViewState(ViewBase *view) {
 /**
  * Restores the state of a view (if there's a saved state for this
  * type of view, which should happen if the user has been in that view
- * before and is switching back to it.
+ * before and is switching back to it. @see saveViewState().
  *
  * @param view View where we want to restore the previous state
  * @param vtype Type of view (standard, multislice, etc.)

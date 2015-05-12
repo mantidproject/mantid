@@ -118,6 +118,9 @@ protected slots:
   void onUnbin();
   /// On switching an MDEvent source to a temporary source.
   void onSwitchSources(std::string rebinnedWorkspaceName, std::string sourceType);
+  /// reset state of all the views
+  void onResetViewsStateToAllData();
+
 protected:
   /// Handle workspace preDeletion tasks.
   void preDeleteHandle(const std::string &wsName,
@@ -162,6 +165,7 @@ private:
   struct AllVSIViewsState {
     AllVSIViewsState();
     ~AllVSIViewsState();
+    void initialize();
 
     vtkSmartPointer<vtkPVXMLElement> stateStandard;
     vtkSmartPointer<vtkPVXMLElement> stateMulti;
