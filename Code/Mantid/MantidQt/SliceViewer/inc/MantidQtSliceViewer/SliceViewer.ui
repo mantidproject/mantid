@@ -636,7 +636,7 @@
                <string notr="true">QLabel {
  background-color : rgb(255, 255, 186);
  color : black; 
- font: 8pt;
+ font: 10px;
 }</string>
               </property>
               <property name="frameShape">
@@ -675,7 +675,7 @@
                <string notr="true">QLabel {
  background-color : rgb(255, 255, 186);
  color : black; 
- font: 8pt;
+ font: 10px;
 }</string>
               </property>
               <property name="frameShape">
@@ -717,7 +717,7 @@
                <string notr="true">QLabel {
  background-color : rgb(255, 255, 186);
  color : black; 
- font: 8pt;
+ font: 10px;
 }</string>
               </property>
               <property name="frameShape">
@@ -754,7 +754,7 @@
               </property>
               <property name="font">
                <font>
-                <pointsize>8</pointsize>
+                <pointsize>-1</pointsize>
                 <weight>50</weight>
                 <italic>false</italic>
                 <bold>false</bold>
@@ -764,7 +764,7 @@
                <string>Normalization option</string>
               </property>
               <property name="styleSheet">
-               <string notr="true">font: 8pt;</string>
+               <string notr="true">font: 10px;</string>
               </property>
              </widget>
             </item>
