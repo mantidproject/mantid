@@ -2,20 +2,18 @@
 #define MDVIEWERWIDGET_H_
 
 #include "ui_MdViewerWidget.h"
-#include "MantidVatesSimpleGuiViewWidgets/WidgetDllOption.h"
-#include "MantidVatesSimpleGuiViewWidgets/RebinAlgorithmDialogProvider.h"
-#include "MantidVatesSimpleGuiViewWidgets/RebinnedSourcesManager.h"
-
-#include "MantidQtAPI/VatesViewerInterface.h"
-#include "MantidQtAPI/WorkspaceObserver.h"
-#include "boost/shared_ptr.hpp"
 #include "MantidQtAPI/MdConstants.h"
 #include "MantidQtAPI/MdSettings.h"
+#include "MantidQtAPI/VatesViewerInterface.h"
+#include "MantidQtAPI/WorkspaceObserver.h"
 #include "MantidVatesSimpleGuiViewWidgets/BackgroundRgbProvider.h"
+#include "MantidVatesSimpleGuiViewWidgets/RebinAlgorithmDialogProvider.h"
+#include "MantidVatesSimpleGuiViewWidgets/RebinnedSourcesManager.h"
+#include "MantidVatesSimpleGuiViewWidgets/WidgetDllOption.h"
 
-#include <QPointer>
-#include <QWidget>
-#include <QString>
+#include "boost/shared_ptr.hpp"
+
+#include <vtkSmartPointer.h>
 
 // forward declaration of ParaQ classes
 class pqApplicationSettingsReaction;
@@ -23,13 +21,13 @@ class pqLoadDataReaction;
 class pqPipelineSource;
 
 // forward declaration of Qt classes
+class QAction;
 class QDragEnterEvent;
 class QDropEvent;
-class QAction;
 class QEvent;
 class QHBoxLayout;
 class QObject;
-class QString;
+class QWidget;
 
 namespace Mantid
 {
@@ -165,10 +163,10 @@ private:
     AllVSIViewsState();
     ~AllVSIViewsState();
 
-    vtkPVXMLElement *stateStandard;
-    vtkPVXMLElement *stateMulti;
-    vtkPVXMLElement *stateThreeSlice;
-    vtkPVXMLElement *stateSplatter;
+    vtkSmartPointer<vtkPVXMLElement> stateStandard;
+    vtkSmartPointer<vtkPVXMLElement> stateMulti;
+    vtkSmartPointer<vtkPVXMLElement> stateThreeSlice;
+    vtkSmartPointer<vtkPVXMLElement> stateSplatter;
   };
   AllVSIViewsState m_allViews;
 

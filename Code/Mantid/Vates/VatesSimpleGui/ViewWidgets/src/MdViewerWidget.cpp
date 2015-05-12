@@ -132,21 +132,16 @@ namespace
 
 REGISTER_VATESGUI(MdViewerWidget)
 
-MdViewerWidget::AllVSIViewsState::AllVSIViewsState(): stateStandard(NULL),
-  stateMulti(NULL), stateThreeSlice(NULL), stateSplatter(NULL) {
+MdViewerWidget::AllVSIViewsState::AllVSIViewsState(){
+  // these will be assigned from vtkSMProxy::SaveXMLState which
+  // allocates a new tree with vtkPVXMLElement::New();
+  stateStandard = vtkSmartPointer<vtkPVXMLElement>::New();
+  stateMulti = vtkSmartPointer<vtkPVXMLElement>::New();
+  stateThreeSlice = vtkSmartPointer<vtkPVXMLElement>::New();
+  stateSplatter = vtkSmartPointer<vtkPVXMLElement>::New();
 }
 
 MdViewerWidget::AllVSIViewsState::~AllVSIViewsState() {
-  // these have been produced by vtkSMProxy::SaveXMLState which
-  // allocates a new tree with vtkPVXMLElement::New();
-  if (stateStandard)
-    stateStandard->Delete();
-  if (stateMulti)
-    stateMulti->Delete();
-  if (stateThreeSlice)
-    stateThreeSlice->Delete();
-  if (stateSplatter)
-    stateSplatter->Delete();
 }
 
 /**
@@ -227,6 +222,13 @@ void MdViewerWidget::setupUiAndConnections()
   QObject::connect(this->ui.modeControlWidget,
                    SIGNAL(executeSwitchViews(ModeControlWidget::Views)),
                    this, SLOT(switchViews(ModeControlWidget::Views)));
+
+
+  // Setup rotation point button
+  QObject::connect(this->ui.resetViewStateToAllData,
+                   SIGNAL(released()),
+                   this,
+                   SLOT(onResetViewToAll()));
 
   // Setup rotation point button
   QObject::connect(this->ui.resetCenterToPointButton,
@@ -1506,30 +1508,22 @@ void MdViewerWidget::saveViewState(ViewBase *view) {
   {
   case ModeControlWidget::STANDARD:
   {
-    if (m_allViews.stateStandard)
-      m_allViews.stateStandard->Delete();
-    m_allViews.stateStandard = view->getView()->getRenderViewProxy()->SaveXMLState(NULL);
+    m_allViews.stateStandard.TakeReference(view->getView()->getRenderViewProxy()->SaveXMLState(NULL));
   }
   break;
   case ModeControlWidget::THREESLICE:
   {
-    if (m_allViews.stateThreeSlice)
-      m_allViews.stateThreeSlice->Delete();
-    m_allViews.stateThreeSlice = view->getView()->getRenderViewProxy()->SaveXMLState(NULL);
+    m_allViews.stateThreeSlice.TakeReference(view->getView()->getRenderViewProxy()->SaveXMLState(NULL));
   }
   break;
   case ModeControlWidget::MULTISLICE:
   {
-    if (m_allViews.stateMulti)
-      m_allViews.stateMulti->Delete();
-    m_allViews.stateMulti = view->getView()->getRenderViewProxy()->SaveXMLState(NULL);
+    m_allViews.stateMulti.TakeReference(view->getView()->getRenderViewProxy()->SaveXMLState(NULL));
   }
   break;
   case ModeControlWidget::SPLATTERPLOT:
   {
-    if (m_allViews.stateSplatter)
-      m_allViews.stateSplatter->Delete();
-    m_allViews.stateSplatter = view->getView()->getRenderViewProxy()->SaveXMLState(NULL);
+    m_allViews.stateSplatter.TakeReference(view->getView()->getRenderViewProxy()->SaveXMLState(NULL));
   }
   break;
   default:
@@ -1557,25 +1551,25 @@ void MdViewerWidget::restoreViewState(ViewBase *view, ModeControlWidget::Views v
   case ModeControlWidget::STANDARD:
   {
     if (m_allViews.stateStandard)
-      loaded = view->getView()->getRenderViewProxy()->LoadXMLState(m_allViews.stateStandard, NULL);
+      loaded = view->getView()->getRenderViewProxy()->LoadXMLState(m_allViews.stateStandard.GetPointer(), NULL);
   }
   break;
   case ModeControlWidget::THREESLICE:
   {
     if (m_allViews.stateThreeSlice)
-      loaded = view->getView()->getRenderViewProxy()->LoadXMLState(m_allViews.stateThreeSlice, NULL);
+      loaded = view->getView()->getRenderViewProxy()->LoadXMLState(m_allViews.stateThreeSlice.GetPointer(), NULL);
   }
   break;
   case ModeControlWidget::MULTISLICE:
   {
     if (m_allViews.stateMulti)
-      loaded = view->getView()->getRenderViewProxy()->LoadXMLState(m_allViews.stateMulti, NULL);
+      loaded = view->getView()->getRenderViewProxy()->LoadXMLState(m_allViews.stateMulti.GetPointer(), NULL);
   }
   break;
   case ModeControlWidget::SPLATTERPLOT:
   {
     if (m_allViews.stateSplatter)
-      loaded = view->getView()->getRenderViewProxy()->LoadXMLState(m_allViews.stateSplatter, NULL);
+      loaded = view->getView()->getRenderViewProxy()->LoadXMLState(m_allViews.stateSplatter.GetPointer(), NULL);
   }
   break;
   default:
