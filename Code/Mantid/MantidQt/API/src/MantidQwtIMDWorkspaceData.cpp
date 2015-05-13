@@ -87,7 +87,11 @@ MantidQwtIMDWorkspaceData::MantidQwtIMDWorkspaceData(Mantid::API::IMDWorkspace_c
   }
   // Unit direction of the line
   m_dir = m_end - m_start;
-  m_dir.normalize();
+  if (m_end != m_start) {
+    m_dir.normalize();
+  } else {
+    m_dir[0] = 1.0;
+  }
   // And cache the X/Y values
   this->cacheLinePlot();
 }
