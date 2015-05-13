@@ -4,7 +4,8 @@ from mantid.api import *
 from mantid.kernel import *
 from mantid import config
 
-class MSGDiffractionReduction(PythonAlgorithm):
+
+class MSGDiffractionReduction(DataProcessorAlgorithm):
 
     def category(self):
         return 'Diffraction;PythonAlgorithms'
