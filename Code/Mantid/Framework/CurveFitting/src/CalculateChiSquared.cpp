@@ -49,7 +49,6 @@ void CalculateChiSquared::execConcrete() {
 
   API::FunctionDomain_sptr domain;
   API::FunctionValues_sptr values;
-  //m_domainCreator->ignoreInvalidData(getProperty("IgnoreInvalidData"));
   m_domainCreator->createDomain(domain, values);
 
   // Do something with the function which may depend on workspace.
@@ -61,10 +60,11 @@ void CalculateChiSquared::execConcrete() {
   // Calculate the chi squared.
   double chiSquared = 0.0;
   for(size_t i = 0; i < values->size(); ++i) {
-    double tmp = values->getFitData(i) - values->getCalculated(i);
-    chiSquared += tmp * tmp;
+    if (values->getFitWeight(i) > 0.0) {
+      double tmp = values->getFitData(i) - values->getCalculated(i);
+      chiSquared += tmp * tmp;
+    }
   }
-
   // Store the result.
   setProperty("ChiSquared", chiSquared);
 }

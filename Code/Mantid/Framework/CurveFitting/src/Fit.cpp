@@ -37,8 +37,6 @@ void Fit::initConcrete() {
   declareProperty(
       "MaxIterations", 500, mustBePositive->clone(),
       "Stop after this number of iterations if a good fit is not found");
-  declareProperty("IgnoreInvalidData", false,
-                  "Flag to ignore infinities, NaNs and data with zero errors.");
   declareProperty("OutputStatus", "", Kernel::Direction::Output);
   getPointerToProperty("OutputStatus")
       ->setDocumentation("Whether the fit was successful");
@@ -133,8 +131,7 @@ void Fit::execConcrete() {
   m_function->setUpForFit();
 
   API::FunctionDomain_sptr domain;
-  API::FunctionValues_sptr values; // TODO: should values be part of domain?
-  m_domainCreator->ignoreInvalidData(getProperty("IgnoreInvalidData"));
+  API::FunctionValues_sptr values;
   m_domainCreator->createDomain(domain, values);
 
   // do something with the function which may depend on workspace

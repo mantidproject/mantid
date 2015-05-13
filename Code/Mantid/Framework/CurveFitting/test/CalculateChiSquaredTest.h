@@ -11,6 +11,8 @@
 #include "MantidKernel/EmptyValues.h"
 
 #include <algorithm>
+#include <boost/math/special_functions/fpclassify.hpp>
+#include <limits>
 
 using Mantid::CurveFitting::CalculateChiSquared;
 using namespace Mantid;
@@ -87,7 +89,6 @@ public:
     tester.runAlgorithm();
     tester.check1DSpectrum();
     TS_ASSERT_DELTA(tester.chiSquared, 153.0, 1.0);
-    std::cerr << tester.chiSquared << std::endl;
   }
 
   void test_1D_values_point_data() {
@@ -107,13 +108,29 @@ public:
     tester.setWorkspaceIndex();
     tester.runAlgorithm();
     tester.check1DSpectrum();
-    TS_ASSERT_DELTA(tester.chiSquared, 153.0, 1.0);
-    std::cerr << tester.chiSquared << std::endl;
+    TS_ASSERT_DELTA(tester.chiSquared, 151.0, 1.0);
+  }
+
+  void test_1D_values_dont_ignore_invalid() {
+    Tester tester;
+    tester.set1DFunction();
+    tester.set1DSpectrumValuesInvalid();
+    tester.runAlgorithm();
+    tester.checkFailed();
+  }
+
+  void test_1D_values_ignore_invalid() {
+    Tester tester;
+    tester.set1DFunction();
+    tester.set1DSpectrumValuesInvalid();
+    tester.setIgnoreInvalidData();
+    tester.runAlgorithm();
+    tester.check1DSpectrum();
+    TS_ASSERT_DELTA(tester.chiSquared, 1450.39, 1.0);
   }
 
 private:
   class Tester {
-  public:
     // input parameters
     size_t nParams;
     size_t nData;
@@ -122,7 +139,6 @@ private:
     double xMax;
     std::vector<double> xBins;
     std::vector<double> xValues;
-    std::vector<double> yValues;
 
     // values for algorithm input properties
     IFunction_sptr function;
@@ -130,6 +146,7 @@ private:
     int workspaceIndex;
     double StartX;
     double EndX;
+    bool ignoreInvalidData;
 
     void makeXValues() {
       size_t dlt = isHisto ? 1 : 0;
@@ -160,13 +177,21 @@ private:
       }
     }
 
+    bool isGoodValue(double y, double e) {
+      return !ignoreInvalidData ||
+             (!boost::math::isnan(y) && !boost::math::isinf(y) &&
+              !boost::math::isnan(e) && !boost::math::isinf(e) && e > 0);
+    }
+
   public:
     // algorithm output
     double chiSquared;
+    bool isExecuted;
 
     Tester(size_t np = 3, size_t nd = 10, bool histo = true)
         : nParams(np), nData(nd), isHisto(histo), workspaceIndex(0), xMin(-10),
-          xMax(10), StartX(EMPTY_DBL()), EndX(EMPTY_DBL()) {
+          xMax(10), StartX(EMPTY_DBL()), EndX(EMPTY_DBL()),
+          ignoreInvalidData(false), chiSquared(-1), isExecuted(false) {
       makeXValues();
     }
 
@@ -176,13 +201,16 @@ private:
       TS_ASSERT(alg.isInitialized())
       TS_ASSERT_THROWS_NOTHING(alg.setProperty("Function", function));
       TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", workspace));
+      TS_ASSERT_THROWS_NOTHING(alg.setProperty("IgnoreInvalidData", ignoreInvalidData));
       if (dynamic_cast<IFunction1D *>(function.get())) {
+        TS_ASSERT_THROWS_NOTHING(alg.setProperty("WorkspaceIndex", workspaceIndex));
         TS_ASSERT_THROWS_NOTHING(alg.setProperty("StartX", StartX));
         TS_ASSERT_THROWS_NOTHING(alg.setProperty("EndX", EndX));
       }
       TS_ASSERT_THROWS_NOTHING(alg.execute());
-      TS_ASSERT(alg.isExecuted());
-      chiSquared = alg.getProperty("ChiSquared");
+      isExecuted = alg.isExecuted();
+      if (isExecuted)
+        chiSquared = alg.getProperty("ChiSquared");
     }
 
     void setXRange_All() {
@@ -202,11 +230,10 @@ private:
 
     void setWorkspaceIndex() {
       workspaceIndex = 3;
-      auto ws = dynamic_cast<MatrixWorkspace*>(workspace.get());
-      if (ws)
-        yValues = ws->readY(workspaceIndex);
-      else
-        TS_FAIL("Not a matrix workspace");
+    }
+
+    void setIgnoreInvalidData() {
+      ignoreInvalidData = true;
     }
 
     void set1DFunction() {
@@ -224,39 +251,55 @@ private:
                                                        nData + dn, nData);
       space->dataX(0).assign(xBins.begin(), xBins.end());
       workspace = space;
-      yValues = space->readY(0);
     }
 
     void set1DSpectrumValues(const size_t nSpec = 1) {
       size_t dn = isHisto ? 1 : 0;
       auto space = WorkspaceFactory::Instance().create("Workspace2D", nSpec,
                                                        nData + dn, nData);
-      space->dataX(0).assign(xBins.begin(), xBins.end());
       for (size_t spec = 0; spec < nSpec; ++spec) {
+        space->dataX(spec).assign(xBins.begin(), xBins.end());
         for (size_t i = 0; i < nData; ++i) {
           const double x = space->readX(0)[i];
           space->dataY(spec)[i] = (1.1 + 0.1 * double(spec)) * (1.0 + x + x * x);
+          space->dataE(spec)[i] = 10.0;
         }
       }
       workspace = space;
-      yValues = space->readY(0);
+    }
+
+    void set1DSpectrumValuesInvalid() {
+      set1DSpectrumValues();
+      auto &yValues = dynamic_cast<MatrixWorkspace&>(*workspace).dataY(workspaceIndex);
+      yValues[2] = std::numeric_limits<double>::infinity();
+      yValues[4] = std::numeric_limits<double>::quiet_NaN();
+      auto &eValues = dynamic_cast<MatrixWorkspace&>(*workspace).dataE(workspaceIndex);
+      eValues[6] = -1;
     }
 
     void check1DSpectrum() {
+      TS_ASSERT(isExecuted);
       setDefaultXRange();
       double sum2 = 0.0;
+      auto &yValues = dynamic_cast<MatrixWorkspace&>(*workspace).readY(workspaceIndex);
+      auto &eValues = dynamic_cast<MatrixWorkspace&>(*workspace).readE(workspaceIndex);
       for (size_t i = 0; i < xValues.size(); ++i) {
         const double xValue = xValues[i];
-        if (xValue >= StartX && xValue <= EndX) {
+        if (xValue >= StartX && xValue <= EndX && isGoodValue(yValues[i],eValues[i])) {
           FunctionDomain1DVector x(xValue);
           FunctionValues y(x);
           function->function(x, y);
           const double tmp = yValues[i] - y[0];
+          //std::cerr << "test " << yValues[i] << ' ' << y[0] << std::endl;
           sum2 += tmp * tmp;
         }
       }
       TS_ASSERT_DIFFERS(sum2, 0);
       TS_ASSERT_DELTA(sum2, chiSquared, 1e-10);
+    }
+
+    void checkFailed() {
+      TS_ASSERT(!isExecuted);
     }
   };
 };

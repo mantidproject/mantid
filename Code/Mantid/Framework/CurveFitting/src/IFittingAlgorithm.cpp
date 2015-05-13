@@ -85,6 +85,8 @@ void IFittingAlgorithm::init() {
   declareProperty(new API::WorkspaceProperty<API::Workspace>(
                       "InputWorkspace", "", Kernel::Direction::Input),
                   "Name of the input Workspace");
+  declareProperty("IgnoreInvalidData", false,
+                  "Flag to ignore infinities, NaNs and data with zero errors.");
 
   std::vector<std::string> domainTypes;
   domainTypes.push_back("Simple");
@@ -278,6 +280,7 @@ void IFittingAlgorithm::exec() {
     setFunction();
     addWorkspaces();
   }
+  m_domainCreator->ignoreInvalidData(getProperty("IgnoreInvalidData"));
   // Execute the concrete algorithm.
   this->execConcrete();
 }
