@@ -313,6 +313,8 @@ class LiquidsReflectometryReduction(PythonAlgorithm):
             tthd_value *= math.pi / 180.0
 
         theta = math.fabs(tthd_value - thi_value) / 2.
+        if theta < 0.001:
+            logger.warning("thi and tthd are equal: is this a direct beam?")
 
         # Add the offset
         angle_offset_deg = self.getProperty("AngleOffset").value

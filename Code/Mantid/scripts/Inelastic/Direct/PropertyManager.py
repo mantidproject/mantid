@@ -47,16 +47,20 @@ class PropertyManager(NonIDF_Properties):
           This is not considered a problem as only one instance of property manager is expected. If this need to be changed,
           adding property values to the __dict__ as values of _property_name keys should be safe.
 
-        4) __getattr__ (and __setattr__ ) method are overloaded to provide call to a descriptor before the search in the system dictionary.
-           Custom __getattr__ naturally works only if Python does not find a property name in the __dict__ or __class__.__dict__ (and mro()),
-           e.g. in case when an descriptor is called through one of its synonym name.
+        4) __getattr__ (and __setattr__ ) method are overloaded to provide call to a descriptor
+           before the search in the system dictionary.
+           Custom __getattr__ naturally works only if Python does not find a property name in the __dict__ or
+           __class__.__dict__ (and mro()), e.g. in case when an descriptor is called through one of its synonym name.
 
-           A problem will occur if a key with name equal to descriptor name is also present in __dict__. This name would override descriptor.
-           This is why any new descriptor should never place a key with its name in __dict__. Current design automatically remove IDF name
-           from __dict__ if a descriptor with such name exist, so further development should support this behavior.
+           A problem will occur if a key with name equal to descriptor name is also present in __dict__.
+           This name would override descriptor.
+           This is why any new descriptor should never place a key with its name in __dict__.
+           Current design automatically remove IDF name  from __dict__ if a descriptor with such name exist,
+           so further development should support this behavior.
 
-        5) In many places (descriptors, RunDescriptor itself), PropertyManager assumed to be a singleton, so most Descriptors are defined on a
-           class level. If this changes, careful refactoring will be necessary
+        5) In many places (descriptors, RunDescriptor itself), PropertyManager assumed to be a singleton,
+           so most Descriptors are defined on a class level.
+           If this changes, careful refactoring will be necessary
 
 
     Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
@@ -131,7 +135,6 @@ class PropertyManager(NonIDF_Properties):
 
         class_decor = '_'+type(self).__name__+'__'
 
-        result = {}
         for key,val in prop_dict.iteritems():
             new_key = class_decor+key
             object.__setattr__(self,new_key,val)
@@ -177,7 +180,7 @@ class PropertyManager(NonIDF_Properties):
         if name in self.__descriptors:
             super(PropertyManager,self).__setattr__(name,val)
         else:
-            other_prop=prop_helpers.gen_setter(self.__dict__,name,val)
+            prop_helpers.gen_setter(self.__dict__,name,val)
 
         # record the fact that the property have changed
         self.__changed_properties.add(name)
@@ -326,7 +329,8 @@ class PropertyManager(NonIDF_Properties):
             try:
                 result[key] = getattr(self,key)
             except KeyError:
-                self.log('--- Diagnostics property {0} is not found in instrument properties. Default value: {1} is used instead \n'.format(key,value),'warning')
+                self.log("--- Diagnostics property {0} is not found in instrument properties."
+                         "Default value: {1} is used instead \n".format(key,val),'warning')
 
         return result
     #
@@ -358,7 +362,7 @@ class PropertyManager(NonIDF_Properties):
             old_changes[prop_name] = getattr(self,prop_name)
 
 
-        param_list = prop_helpers.get_default_idf_param_list(pInstrument)
+        param_list = prop_helpers.get_default_idf_param_list(pInstrument,self.__subst_dict)
         # remove old changes which are not related to IDF (not to reapply it again)
         for prop_name in old_changes:
             if not prop_name in param_list:
@@ -370,7 +374,9 @@ class PropertyManager(NonIDF_Properties):
                 for name in dependencies:
                     if name in param_list:
                         modified = True
-                        break
+                        # old parameter have been modified through compound parameter.
+                        #its old value is irrelevant
+                        param_list[name] = getattr(self,name)
                 if not modified:
                     del old_changes[prop_name]
         #end
@@ -393,8 +399,12 @@ class PropertyManager(NonIDF_Properties):
                     setattr(self,key,val)
                     new_val = getattr(self,key)
                 except:
-                    self.log("property {0} have not been found in existing IDF. Ignoring this property"\
-                       .format(key),'warning')
+                    try:
+                        cur_val = getattr(self,key)
+                    except: 
+                        cur_val = "Undefined"
+                    self.log("Retrieving or reapplying script property {0} failed. Property value remains: {1}"\
+                       .format(key,cur_val),'warning')
                     continue
                 if isinstance(new_val,api.Workspace) and isinstance(cur_val,api.Workspace):
                 # do simplified workspace comparison which is appropriate here
@@ -402,7 +412,8 @@ class PropertyManager(NonIDF_Properties):
                      new_val.getNumberHistograms() == cur_val.getNumberHistograms() and \
                      new_val.getNEvents() == cur_val.getNEvents() and \
                      new_val.getAxis(0).getUnit().unitID() == cur_val.getAxis(0).getUnit().unitID():
-                        new_val =1; cur_val = 1
+                        new_val = 1
+                        cur_val = 1
                    #
                 #end
                 if new_val != cur_val:
@@ -424,34 +435,40 @@ class PropertyManager(NonIDF_Properties):
 
         # Walk through the complex properties first and then through simple properties
         for key,val in sorted_param.iteritems():
-            if not key in old_changes_list:
-                # complex properties change through their dependencies so we are setting them first
+            # complex properties may change through their dependencies so we are setting them first
+            if isinstance(val,prop_helpers.ComplexProperty):
+                public_name = key[1:]
+            else:
+                # no complex properties left so we have simple key-value pairs
+                public_name = key
+            if not public_name in old_changes_list:
                 if isinstance(val,prop_helpers.ComplexProperty):
-                    public_name = key[1:]
-                    prop_new_val = val.__get__(param_list)
+                    prop_idf_val = val.__get__(param_list)
                 else:
-                    # no complex properties left so we have simple key-value pairs
-                    public_name = key
-                    prop_new_val = val
+                    prop_idf_val = val
 
                 try: # this is reliability check, and except ideally should never be hit. May occur if old IDF contains
                     # properties, not present in recent IDF.
                     cur_val = getattr(self,public_name)
                 except:
-                    self.log("property {0} have not been found in existing IDF. Ignoring this property"\
+                    self.log("Can not retrieve property {0} value from existing reduction parameters. Ignoring this property"\
                         .format(public_name),'warning')
                     continue
 
-                if prop_new_val !=cur_val :
-                    setattr(self,public_name,prop_new_val)
-                # Dependencies removed either properties are equal or not
-                try:
-                    dependencies = val.dependencies()
-                except:
-                    dependencies =[]
-                for dep_name in dependencies:
-                    # delete dependent properties not to deal with them again
-                    del sorted_param[dep_name]
+                if prop_idf_val !=cur_val :
+                    setattr(self,public_name,prop_idf_val)
+            else:
+                pass
+            # Dependencies removed either properties are equal or not.
+            # or if public_name for property in old change list. Remove dependencies
+            # too, as property has been set up as whole.
+            try:
+                dependencies = val.dependencies()
+            except:
+                dependencies =[]
+            for dep_name in dependencies:
+                # delete dependent properties not to deal with them again
+                del sorted_param[dep_name]
         #end
 
 
@@ -635,9 +652,9 @@ class PropertyManager(NonIDF_Properties):
         momovan_properties=['sample_mass','sample_rmm']
         changed_prop = self.getChangedProperties()
         non_changed = []
-        for property in momovan_properties:
-            if not property in changed_prop:
-                non_changed.append(property)
+        for prop in momovan_properties:
+            if not prop in changed_prop:
+                non_changed.append(prop)
         return non_changed
 
     #
@@ -705,7 +722,8 @@ class PropertyManager(NonIDF_Properties):
 
     #       if provided without arguments it returns the list of the parameters available
     #    """
-    #    raise KeyError(' Help for this class is not yet implemented: see {0}_Parameter.xml in the file for the parameters description'.format())
+    #    raise KeyError(' Help for this class is not yet implemented: see {0}_Parameter.xml
+    # in the file for the parameters description'.format())
 
 if __name__=="__main__":
     pass

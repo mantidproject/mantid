@@ -61,6 +61,7 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "Mantid/MantidMatrixCurve.h"
 #include "MantidQtAPI/PlotAxis.h"
+#include "MantidQtAPI/QwtRasterDataMD.h"
 #include "MantidQtAPI/QwtWorkspaceSpectrumData.h"
 #include "Mantid/ErrorBarSettings.h"
 
@@ -3072,6 +3073,35 @@ void Graph::updateScale()
   {
     updateSecondaryAxis(QwtPlot::xTop);
     updateSecondaryAxis(QwtPlot::yRight);
+  }
+
+  auto mantidCurve = dynamic_cast<MantidCurve*>(curve(0));
+  auto dataCurve = dynamic_cast<DataCurve*>(curve(0));
+
+  if (mantidCurve)
+  {
+    setXAxisTitle(mantidCurve->mantidData()->getXAxisLabel());
+    setYAxisTitle(mantidCurve->mantidData()->getYAxisLabel());
+  }
+  else if (dataCurve && dataCurve->table())
+  {
+    setXAxisTitle(dataCurve->table()->colLabel(0));
+    setYAxisTitle(dataCurve->table()->colLabel(1).section(".",0,0));
+  }
+
+  Spectrogram* spec = spectrogram();
+  if (spec)
+  {
+    auto specData = dynamic_cast<const MantidQt::API::QwtRasterDataMD*>(&spec->data());
+    if (specData)
+    {
+      Mantid::API::IMDWorkspace_const_sptr ws = specData->getWorkspace();
+      if(ws)
+      {
+        setXAxisTitle(MantidQt::API::PlotAxis(*ws, 0).title());
+        setYAxisTitle(MantidQt::API::PlotAxis(*ws, 1).title());
+      }
+    }
   }
 
   d_plot->replot();//TODO: avoid 2nd replot!

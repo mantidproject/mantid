@@ -5,6 +5,7 @@
 #include "MantidVatesSimpleGuiViewWidgets/ViewBase.h"
 #include "MantidVatesSimpleGuiViewWidgets/WidgetDllOption.h"
 
+#include <QMap>
 #include <QPointer>
 #include <QWidget>
 
@@ -19,7 +20,8 @@ namespace Vates
 namespace SimpleGui
 {
 
-  class RebinnedSourcesManager;
+class RebinnedSourcesManager;
+
 /**
  *
  This class represents the initial view for the main program. It is meant to
@@ -93,6 +95,8 @@ protected slots:
 private:
   Q_DISABLE_COPY(StandardView)
 
+  QString getAlgNameFromMenuLabel(const QString &menuLbl);
+
   bool m_cameraReset;
   QPointer<pqPipelineSource> m_scaler; ///< Holder for the ScaleWorkspace
   Ui::StandardView m_ui; ///< The standard view's UI form
@@ -111,6 +115,21 @@ private:
   QAction* m_sliceMDAction;
   QAction* m_cutMDAction;
   QAction* m_unbinAction;
+
+  // name to show for the rebin actions on the rebin menu
+  static QString g_binMDName;
+  static QString g_sliceMDName;
+  static QString g_cutMDName;
+  /// name + a bit of description
+  static QString g_binMDLbl;
+  static QString g_sliceMDLbl;
+  static QString g_cutMDLbl;
+  /// tool tip text for the rebin algorithm
+  static QString g_binMDToolTipTxt;
+  static QString g_sliceMDToolTipTxt;
+  static QString g_cutMDToolTipTxt;
+
+  static QMap<QString, QString> g_actionToAlgName;
 };
 
 } // SimpleGui
