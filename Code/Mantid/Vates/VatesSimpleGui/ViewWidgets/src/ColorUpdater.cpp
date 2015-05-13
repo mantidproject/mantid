@@ -1,3 +1,4 @@
+#include <cmath>
 #include <limits>
 #include <stdexcept>
 
@@ -32,8 +33,6 @@
 
 #include <QColor>
 #include <QList>
-
-#include <QDebug>
 
 namespace Mantid
 {
