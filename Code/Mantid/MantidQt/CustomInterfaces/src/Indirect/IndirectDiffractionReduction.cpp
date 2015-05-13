@@ -120,7 +120,7 @@ void IndirectDiffractionReduction::demonRun()
   }
   else
   {
-    if(!m_uiForm.dem_rawFiles->isValid() || !validateRebin())
+    if(!m_uiForm.dem_rawFiles->isValid() || !validateRebin() || !validateParFile())
     {
       showInformationBox("Invalid input.\nIncorrect entries marked with red star.");
       return;
@@ -196,6 +196,7 @@ void IndirectDiffractionReduction::runGenericReduction(QString instName, QString
       rebin = rebinStart + "," + rebinWidth + "," + rebinEnd;
 
   bool individualGrouping = m_uiForm.ckIndividualGrouping->isChecked();
+  bool useParFile = m_uiForm.ckPARFile->isChecked();
 
   // Get detector range
   std::vector<long> detRange;
@@ -222,6 +223,9 @@ void IndirectDiffractionReduction::runGenericReduction(QString instName, QString
   msgDiffReduction->setProperty("IndividualGrouping", individualGrouping);
   msgDiffReduction->setProperty("SaveFormats", saveFormats);
   msgDiffReduction->setProperty("OutputWorkspace", "IndirectDiffraction_Workspaces");
+
+  if(useParFile)
+    msgDiffReduction->setProperty("InstrumentParFile", m_uiForm.rfPARFile->getFirstFilename().toStdString());
 
   m_batchAlgoRunner->addAlgorithm(msgDiffReduction);
 
@@ -404,6 +408,12 @@ void IndirectDiffractionReduction::instrumentSelected(const QString & instrument
     m_uiForm.ckIndividualGrouping->setToolTip("");
     m_uiForm.ckIndividualGrouping->setEnabled(true);
   }
+
+  // Update the VESUVIO PAR file option
+  bool isVesuvio = instrumentName == "VESUVIO";
+  if(!isVesuvio)
+    m_uiForm.ckPARFile->setChecked(false);
+  m_uiForm.ckPARFile->setEnabled(isVesuvio);
 }
 
 /**
@@ -450,6 +460,19 @@ void IndirectDiffractionReduction::saveSettings()
   settings.setValue("last_cal_file", m_uiForm.dem_calFile->getText());
   settings.setValue("last_van_files", m_uiForm.dem_vanadiumFile->getText());
   settings.endGroup();
+}
+
+/**
+ * Validates the instrument PAR file option.
+ *
+ * @returns Result of validation
+ */
+bool IndirectDiffractionReduction::validateParFile()
+{
+  bool useParFile = m_uiForm.ckPARFile->isChecked();
+  if(useParFile)
+    return m_uiForm.rfPARFile->isValid();
+  return true;
 }
 
 /**

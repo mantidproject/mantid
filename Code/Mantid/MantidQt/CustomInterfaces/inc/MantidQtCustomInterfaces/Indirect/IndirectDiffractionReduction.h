@@ -47,6 +47,7 @@ private:
   void loadSettings();
   void saveSettings();
 
+  bool validateParFile();
   bool validateRebin();
   bool validateVanCal();
 

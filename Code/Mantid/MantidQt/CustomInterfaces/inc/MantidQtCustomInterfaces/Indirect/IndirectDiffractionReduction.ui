@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>495</width>
+    <width>450</width>
     <height>500</height>
    </rect>
   </property>
@@ -290,6 +290,36 @@
          </property>
         </widget>
        </item>
+       <item>
+        <layout class="QHBoxLayout" name="loPARFile">
+         <item>
+          <widget class="QCheckBox" name="ckPARFile">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
+           <property name="text">
+            <string>Load PAR file:</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="MantidQt::MantidWidgets::MWRunFiles" name="rfPARFile" native="true">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
+           <property name="label" stdset="0">
+            <string/>
+           </property>
+           <property name="fileExtensions" stdset="0">
+            <stringlist>
+             <string>.par</string>
+             <string>.dat</string>
+            </stringlist>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
       </layout>
      </widget>
     </item>
@@ -443,6 +473,41 @@
    <header>MantidQtMantidWidgets/IndirectInstrumentConfig.h</header>
   </customwidget>
  </customwidgets>
+ <tabstops>
+  <tabstop>iicInstrumentConfiguration</tabstop>
+  <tabstop>dem_ckSumFiles</tabstop>
+  <tabstop>set_leSpecMin</tabstop>
+  <tabstop>set_leSpecMax</tabstop>
+  <tabstop>ckIndividualGrouping</tabstop>
+  <tabstop>ckPARFile</tabstop>
+  <tabstop>cbPlotType</tabstop>
+  <tabstop>ckGSS</tabstop>
+  <tabstop>ckNexus</tabstop>
+  <tabstop>ckAscii</tabstop>
+  <tabstop>pbHelp</tabstop>
+  <tabstop>pbRun</tabstop>
+  <tabstop>pbManageDirs</tabstop>
+  <tabstop>leRebinStart</tabstop>
+  <tabstop>leRebinEnd</tabstop>
+  <tabstop>leRebinWidth</tabstop>
+ </tabstops>
  <resources/>
- <connections/>
+ <connections>
+  <connection>
+   <sender>ckPARFile</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>rfPARFile</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>103</x>
+     <y>328</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>276</x>
+     <y>327</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
 </ui>
