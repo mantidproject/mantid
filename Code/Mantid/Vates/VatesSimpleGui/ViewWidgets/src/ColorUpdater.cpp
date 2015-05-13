@@ -22,6 +22,7 @@
 #include <pqServerManagerModel.h>
 #include <pqSMAdaptor.h>
 
+#include <vtkCallbackCommand.h>
 #include <vtkSMDoubleVectorProperty.h>
 #include <vtkSMProxy.h>
 
@@ -311,7 +312,8 @@ void ColorUpdater::observeColorScaleEdited(pqPipelineRepresentation *repr, Color
   ccdata.csel = cs;
   CRChangeCallback->SetClientData(&ccdata);
   // install callback
-  vtkSMDoubleVectorProperty *points = lutProxy->GetProperty("RGBPoints");
+  vtkSMDoubleVectorProperty *points =
+    vtkSMDoubleVectorProperty::SafeDownCast(lutProxy->GetProperty("RGBPoints"));
   points->AddObserver(vtkCommand::ModifiedEvent, CRChangeCallback);
 }
 
