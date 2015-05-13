@@ -73,12 +73,19 @@ void CreatePSDBleedMask::exec() {
   // We require the number of good frames. Check that we have this
   if (!inputWorkspace->run().hasProperty("goodfrm")) {
     throw std::invalid_argument(
-        "InputWorkspace does not contain the number of \"good frames\".");
+        "InputWorkspace does not contain the number of \"good frames\".\n"
+        "(The sample log named: goodfrm with value, specifying number of good frames)");
   }
   Kernel::PropertyWithValue<int> *frameProp =
       dynamic_cast<Kernel::PropertyWithValue<int> *>(
           inputWorkspace->run().getProperty("goodfrm"));
-  assert(frameProp);
+  if (!frameProp){
+    throw std::invalid_argument(
+      "InputWorkspace has the number of \"good frames\" property (goodfrm log value)"
+      "but this property value is not integer.");
+
+  }
+
   int goodFrames = (*frameProp)();
 
   // Store the other properties
@@ -94,7 +101,7 @@ void CreatePSDBleedMask::exec() {
   // This algorithm assumes that the instrument geometry is tube based, i.e. the
   // parent CompAssembly
   // of the lowest detector in the tree is a "tube" and that all pixels in a
-  // tube are consectively ordered
+  // tube are consecutively ordered
   // with respect to spectra number
   const int numSpectra =
       static_cast<int>(inputWorkspace->getNumberHistograms());

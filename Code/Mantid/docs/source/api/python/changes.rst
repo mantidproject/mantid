@@ -89,7 +89,7 @@ Changes
 * The *qti* module no longer exists. All user scripts should simply use the *mantidplot* module which contains
   all of the *qti* functionality but adds protection against crashes from closed windows.
 
-* There have also been changes with Python algorithm syntax. For this it will be most beneficial to read the new tutorial `here <http://www.mantidproject.org/Intoduction_to_PythonAlgorithms`_.
+* There have also been changes with Python algorithm syntax.
 
 Automatic Migration
 -------------------

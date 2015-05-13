@@ -24,11 +24,13 @@
   #pragma warning enable 1170
 #endif
 
-#include <QHBoxLayout>
 #include <QAction>
+#include <QHBoxLayout>
+#include <QHelpEvent>
 #include <QMenu>
 #include <QMessageBox>
 #include <QString>
+#include <QToolTip>
 
 namespace Mantid
 {
@@ -36,6 +38,51 @@ namespace Vates
 {
 namespace SimpleGui
 {
+
+/**
+ * Simple class for a QMenu where the actions do show their tool tip
+ * strings (this does not happen by default with standard QMenu).
+ */
+class QMenuWithToolTip: public QMenu {
+public:
+  QMenuWithToolTip(QWidget *parent): QMenu(parent)
+  {
+  }
+
+  bool event(QEvent* e) {
+    if (QEvent::ToolTip == e->type()) {
+      // grab the action specific tooltip
+      QHelpEvent *he = dynamic_cast<QHelpEvent*>(e);
+      if (!he)
+        return false;
+      QAction* a = actionAt(he->pos());
+      if (a && a->toolTip() != a->text()) {
+        QToolTip::showText(he->globalPos(), a->toolTip(), this);
+        return true;
+      }
+    }
+    return QMenu::event(e);
+  }
+};
+
+QString StandardView::g_binMDName = "BinMD";
+QString StandardView::g_sliceMDName = "SliceMD";
+QString StandardView::g_cutMDName = "CutMD";
+// important: these label strings must use the name of the corresponding
+// Mantid algorithm as first token (before first space), as it will
+// be used as a parameter when emitting the signal rebin
+QString StandardView::g_binMDLbl = "Fast (" + g_binMDName + ")";
+QString StandardView::g_sliceMDLbl = "Complete (" + g_sliceMDName + ")";
+QString StandardView::g_cutMDLbl = "Horace style (" + g_cutMDName + ")";
+
+const QString tipBefore = "Run the ";
+const QString tipAfter = " Mantid algorithm (the algorithm dialog will show up)";
+QString StandardView::g_binMDToolTipTxt = tipBefore + g_binMDName + tipAfter;
+QString StandardView::g_sliceMDToolTipTxt = tipBefore + g_sliceMDName + tipAfter;
+QString StandardView::g_cutMDToolTipTxt = tipBefore + g_cutMDName + tipAfter;
+
+// To map action labels to algorithm names
+QMap<QString, QString> StandardView::g_actionToAlgName;
 
 /**
  * This function sets up the UI components, adds connections for the view's
@@ -51,6 +98,13 @@ namespace SimpleGui
 {
   this->ui.setupUi(this);
   this->cameraReset = false;
+
+  // before setting the button-actions, register their algorithms
+  if (0 == g_actionToAlgName.size()) {
+    g_actionToAlgName.insert(g_binMDLbl, g_binMDName);
+    g_actionToAlgName.insert(g_sliceMDLbl, g_sliceMDName);
+    g_actionToAlgName.insert(g_cutMDLbl, g_cutMDName);
+  }
 
   // Set up the buttons
   setupViewButtons();
@@ -83,15 +137,18 @@ void StandardView::setupViewButtons()
 {
 
   // Populate the rebin button
-  QMenu* rebinMenu = new QMenu(this->ui.rebinToolButton);
+  QMenuWithToolTip* rebinMenu = new QMenuWithToolTip(this->ui.rebinToolButton);
 
-  m_binMDAction = new QAction("BinMD", rebinMenu);
+  m_binMDAction = new QAction(g_binMDLbl, rebinMenu);
+  m_binMDAction->setToolTip(g_binMDToolTipTxt);
   m_binMDAction->setIconVisibleInMenu(false);
   
-  m_sliceMDAction = new QAction("SliceMD", rebinMenu);
+  m_sliceMDAction = new QAction(g_sliceMDLbl, rebinMenu);
+  m_sliceMDAction->setToolTip(g_sliceMDToolTipTxt);
   m_sliceMDAction->setIconVisibleInMenu(false);
 
-  m_cutMDAction = new QAction("CutMD", rebinMenu);
+  m_cutMDAction = new QAction(g_cutMDLbl, rebinMenu);
+  m_cutMDAction->setToolTip(g_cutMDToolTipTxt);
   m_cutMDAction->setIconVisibleInMenu(false);
 
   m_unbinAction = new QAction("Remove Rebinning", rebinMenu);
@@ -281,7 +338,10 @@ void StandardView::setRebinAndUnbinButtons()
 void StandardView::onRebin()
 {
   if(QAction* action = dynamic_cast<QAction*>(sender())) {
-    emit rebin(action->text().toStdString()); }
+    // split always returns a list of at least one element
+    QString algName = getAlgNameFromMenuLabel(action->text());
+    emit rebin(algName.toStdString());
+  }
 }
 
 /**
@@ -350,6 +410,28 @@ void StandardView::activeSourceChangeListener(pqPipelineSource* source)
     this->allowRebinningOptions(false);
     this->allowUnbinOption(false);
   }
+}
+
+/**
+ * Helper for the rebinning menu. For example it will give you the
+ * name of the algorithm CutMD ("CutMD" == g_cutMDName) if you pass
+ * its label in the rebinning menu (g_cutMDToolTipTxt).
+ *
+ * @param menuLbl label (what is shown in the action)
+ * @return Name of the corresponding Mantid algorithm
+ */
+QString StandardView::getAlgNameFromMenuLabel(const QString &menuLbl)
+{
+  QString res;
+  if (g_actionToAlgName.contains(menuLbl))
+  {
+    res = g_actionToAlgName.value(menuLbl);
+  }
+  else {
+    // ideally an informative error would be given here but there doesn't seem to be
+    // a convnient way to do that in these view classes
+  }
+  return res;
 }
 
 } // SimpleGui
