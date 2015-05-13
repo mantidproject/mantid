@@ -54,9 +54,9 @@ namespace CustomInterfaces
       uiv.checkDataSelectorIsValid("Calibration", m_uiForm.dsCalibration);
 
     // Validate map file if it is being used
-    bool useMapFile = m_uiForm.cbGroupingType->currentText() == "Map File";
+    bool useMapFile = m_uiForm.cbGroupingType->currentText() == "File";
     if(useMapFile && !m_uiForm.rfMapFile->isValid())
-      uiv.addErrorMessage("Map File is invalid.");
+      uiv.addErrorMessage("Grouping file is invalid.");
 
     // Show error message for errors
     if(!uiv.isAllInputValid())
@@ -89,7 +89,7 @@ namespace CustomInterfaces
     }
 
     // Handle mapping file
-    bool useMapFile = m_uiForm.cbGroupingType->currentText() == "Map File";
+    bool useMapFile = m_uiForm.cbGroupingType->currentText() == "File";
     if(useMapFile)
     {
       QString mapFilename = m_uiForm.rfMapFile->getFirstFilename();

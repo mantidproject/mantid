@@ -51,7 +51,7 @@
         </item>
         <item>
          <property name="text">
-          <string>Map File</string>
+          <string>File</string>
          </property>
         </item>
        </widget>
@@ -70,7 +70,7 @@
           <item>
            <widget class="MantidQt::MantidWidgets::MWRunFiles" name="rfMapFile" native="true">
             <property name="label" stdset="0">
-             <string>Map File</string>
+             <string></string>
             </property>
             <property name="fileExtensions" stdset="0">
              <stringlist>

@@ -54,7 +54,7 @@ namespace CustomInterfaces
     bool mirrorMode = m_uiForm.ckMirrorMode->isChecked();
     calibrationAlg->setProperty("MirrorMode", mirrorMode);
 
-    bool useMapFile = m_uiForm.cbGrouping->currentText() == "Map File";
+    bool useMapFile = m_uiForm.cbGrouping->currentText() == "File";
     if(useMapFile)
     {
       QString mapFilename = m_uiForm.rfMapFile->getFirstFilename();
@@ -114,9 +114,9 @@ namespace CustomInterfaces
   {
     MantidQt::CustomInterfaces::UserInputValidator uiv;
 
-    bool useMapFile = m_uiForm.cbGrouping->currentText() == "Map File";
+    bool useMapFile = m_uiForm.cbGrouping->currentText() == "File";
     if(useMapFile && !m_uiForm.rfMapFile->isValid())
-      uiv.addErrorMessage("Map File is invalid.");
+      uiv.addErrorMessage("Grouping file is invalid.");
 
     // Validate peak range
     auto peakRange = std::make_pair<double, double>(m_uiForm.spPeakLower->value(), m_uiForm.spPeakUpper->value());

@@ -184,6 +184,10 @@ workspace by default, with mirror mode enabled you will also get the left
 (*_left*) and right (*_right*) hand components of the data as separate
 workspaces.
 
+Note that when using a calibration workspace the grouping of the calibration
+workspace must match that being used in the energy transfer reduction, i.e. both
+processes use the same grouping file (or both use the default grouping).
+
 Options
 ~~~~~~~
 
@@ -289,9 +293,9 @@ algorithm.
 Options
 ~~~~~~~
 
-Spectra Range
-  Sets the range of spectra in the reduced workspace over which to calculate
-  calibration
+Grouping
+  Used to switch between grouping as per the IDF (*Default*) or grouping using a
+  mapping file (*Map File*).
 
 Peak Range
   Sets the integreation range over the peak in :math:`meV`
