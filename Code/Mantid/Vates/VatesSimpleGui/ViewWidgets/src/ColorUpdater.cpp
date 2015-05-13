@@ -382,8 +382,8 @@ void ColorUpdater::colorScaleEditedCallbackFunc(vtkObject *caller, long unsigned
 
   double newMin = elems[0];
   double newMax = elems[noe-subtract];
-  if ((std::abs(newMin - csel->getMinRange()) > 1e-14) ||
-      (std::abs(csel->getMaxRange() - newMax) > 1e-14)
+  if ((std::fabs(newMin - csel->getMinRange()) > 1e-14) ||
+      (std::fabs(csel->getMaxRange() - newMax) > 1e-14)
       ) {
     pThis->m_minScale = newMin;
     pThis->m_maxScale = newMax;
