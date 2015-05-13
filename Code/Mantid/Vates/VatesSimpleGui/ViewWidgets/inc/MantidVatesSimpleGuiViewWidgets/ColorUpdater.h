@@ -9,6 +9,8 @@ class pqColorMapModel;
 class pqDataRepresentation;
 class pqPipelineRepresentation;
 
+class vtkObject;
+
 namespace Mantid
 {
 namespace Vates
@@ -91,8 +93,15 @@ public:
   /// Update the internal state.
   void updateState(ColorSelectionWidget *cs);
 
+  /// To update the VSI min/mas lineEdits when the user uses the Paraview color editor
+  void observeColorScaleEdited(pqPipelineRepresentation *repr, ColorSelectionWidget *cs);
+
 private:
+  /// vtk-callback function for color change events coming from the Paraview color editor
+  static void colorScaleEditedCallbackFunc(vtkObject* caller, long unsigned int, void*, void*);
+
   void updateLookupTable(pqDataRepresentation* representation); ///< Updates the lookup tables.
+
   bool m_autoScaleState; ///< Holder for the auto scaling state
   bool m_logScaleState; ///< Holder for the log scaling state
   double m_minScale; ///< Holder for the minimum color range state

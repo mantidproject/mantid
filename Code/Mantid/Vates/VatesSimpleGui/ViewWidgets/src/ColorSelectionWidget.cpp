@@ -190,7 +190,7 @@ void ColorSelectionWidget::addColorMapsFromXML(vtkPVXMLParser *parser,
 }
 
 /**
- * This function enables or diables the min and max line edits based on state
+ * This slot enables or diables the min and max line edits based on state
  * of the automatic scaling checkbox.
  * @param state the current state of the checkbox
  */

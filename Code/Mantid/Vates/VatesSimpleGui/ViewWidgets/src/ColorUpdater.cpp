@@ -1,8 +1,11 @@
+#include <limits>
+#include <stdexcept>
+
+#include "MantidKernel/Logger.h"
+
 #include "MantidVatesSimpleGuiViewWidgets/ColorUpdater.h"
 #include "MantidVatesSimpleGuiViewWidgets/ColorSelectionWidget.h"
 #include "MantidVatesSimpleGuiViewWidgets/AutoScaleRangeGenerator.h"
-
-#include "MantidKernel/Logger.h"
 
 // Have to deal with ParaView warnings and Intel compiler the hard way.
 #if defined(__INTEL_COMPILER)
@@ -18,6 +21,8 @@
 #include <pqScalarsToColors.h>
 #include <pqServerManagerModel.h>
 #include <pqSMAdaptor.h>
+
+#include <vtkSMDoubleVectorProperty.h>
 #include <vtkSMProxy.h>
 
 #if defined(__INTEL_COMPILER)
@@ -26,9 +31,6 @@
 
 #include <QColor>
 #include <QList>
-
-#include <limits>
-#include <stdexcept>
 
 namespace Mantid
 {
@@ -79,7 +81,7 @@ void ColorUpdater::colorMapChange(pqPipelineRepresentation *repr,
                                   const pqColorMapModel *model)
 {
   pqScalarsToColors *lut = repr->getLookupTable();
-    if (NULL == lut)
+  if (NULL == lut)
   {
     // Got a bad proxy, so just return
     return;
@@ -156,7 +158,6 @@ void ColorUpdater::colorScaleChange(double min, double max)
   }
   catch(std::invalid_argument &)
   {
-
     return;
   }
 }
@@ -266,6 +267,99 @@ void ColorUpdater::print()
 void ColorUpdater::initializeColorScale()
 {
   m_autoScaleRangeGenerator.initializeColorScale();
+}
+
+/**
+ * Data that has to be passed to the callback defined below for when
+ * the user edits the color range in the Paraview color map editor,
+ * which needs to notify/modify the VSI simple color selection widget
+ * (update the min/max values).
+ */
+struct ColorCallbackData {
+  ColorUpdater* colorUpdater;
+  ColorSelectionWidget* csel;
+};
+ColorCallbackData ccdata;
+
+/**
+ * Observe the vtkCommand::ModifiedEvent for the proxy property
+ * 'RGBPoints' of a pqColorToolbar. This method installs a VTK
+ * callback for that property (for when the user edits the color scale
+ * interactively in the ParaQ color map editor).
+ *
+ * @param repr Paraview representation whose color editor we have to observe
+ * @param cs The simple color selection widget (the VSI one, not the ParaQ one)
+ */
+void ColorUpdater::observeColorScaleEdited(pqPipelineRepresentation *repr, ColorSelectionWidget *cs)
+{
+  if (!repr)
+    return;
+
+  pqScalarsToColors *lut = repr->getLookupTable();
+  if (!lut)
+    return;
+
+  vtkSMProxy *lutProxy = lut->getProxy();
+  if (!lutProxy)
+    return;
+
+  // Prepare the callback. Vtk callbacks: http://www.vtk.org/Wiki/VTK/Tutorials/Callbacks
+  vtkSmartPointer<vtkCallbackCommand> CRChangeCallback = vtkSmartPointer<vtkCallbackCommand>::New();
+  CRChangeCallback->SetCallback(colorScaleEditedCallbackFunc);
+  // note this uses the same ccdata which would misbehave if we wanted multiple VSI instances
+  ccdata.colorUpdater = this;
+  ccdata.csel = cs;
+  CRChangeCallback->SetClientData(&ccdata);
+  // install callback
+  vtkSMDoubleVectorProperty *points = lutProxy->GetProperty("RGBPoints");
+  points->AddObserver(vtkCommand::ModifiedEvent, CRChangeCallback);
+}
+
+/**
+ * Callback/hook that runs every time the user edits the color map (in
+ * the Paraview color map/scale editor). This callback must be
+ * attached to the RGBPoints property of the Proxy for the color
+ * lookup table. Note that this goes in the opposite direction than
+ * most if not all of the updates made by the ColorUpdater.
+ *
+ * @param caller the proxy object that calls this (or the callback has been set to it with AddObserver
+ * @param clientData expects a ColorCallBackData struct that has the ColorUpdater object which set 
+ * the callback, and ColorSelectionWidget object of this VSI window. Never use this method with
+ * different data.
+ */
+void ColorUpdater::colorScaleEditedCallbackFunc(vtkObject* caller, long unsigned int, void* clientData, void*)
+{
+  // this won't help much. You must make sure that clientData is a proper ColorCallBackData struct
+  ColorCallbackData *data = static_cast<ColorCallbackData*>(clientData);
+  if (!data){
+    return;
+  }
+
+  ColorUpdater *pThis = data->colorUpdater;
+  if (!pThis){
+    return;
+  }
+
+  ColorSelectionWidget *csel = data->csel;
+  if (!csel){
+    return;
+  }
+
+  // This vector has 4 values per color definition: data value (bin limit) + 3 R-G-B coordinates
+  vtkSMDoubleVectorProperty *RGBPoints = vtkSMDoubleVectorProperty::SafeDownCast(caller);
+  if (!RGBPoints)
+    return;
+
+  double *elems = RGBPoints->GetElements();
+  int noe = RGBPoints->GetNumberOfElements();
+
+  // there should be at least one data value/bin + one triplet of R-G-B values
+  if (noe < 4)
+    return;
+
+  pThis->m_minScale = elems[0];
+  pThis->m_maxScale = elems[noe-4];
+  csel->setColorScaleRange(pThis->m_minScale, pThis->m_maxScale);
 }
 
 }
