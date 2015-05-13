@@ -74,6 +74,5 @@ Output:
    Good Proton Charge = 10.0
    Before normalisation [ 17.  12.]
    After normalisation  [ 1.7  1.2]
-   #Normalisation factor 10.0
 
 .. categories::
