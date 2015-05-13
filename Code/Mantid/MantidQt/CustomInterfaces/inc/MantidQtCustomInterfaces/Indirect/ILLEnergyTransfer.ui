@@ -116,7 +116,7 @@
             </property>
             <property name="fileExtensions" stdset="0">
              <stringlist>
-              <string>.map</string>
+              <string>.xml</string>
              </stringlist>
             </property>
            </widget>

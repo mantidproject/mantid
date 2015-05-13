@@ -54,10 +54,12 @@ namespace CustomInterfaces
     bool mirrorMode = m_uiForm.ckMirrorMode->isChecked();
     calibrationAlg->setProperty("MirrorMode", mirrorMode);
 
-    std::vector<long> specRange;
-    specRange.push_back(m_uiForm.spSpecMin->value());
-    specRange.push_back(m_uiForm.spSpecMax->value());
-    calibrationAlg->setProperty("SpectraRange", specRange);
+    bool useMapFile = m_uiForm.cbGrouping->currentText() == "Map File";
+    if(useMapFile)
+    {
+      QString mapFilename = m_uiForm.rfMapFile->getFirstFilename();
+      calibrationAlg->setProperty("MapFile", mapFilename.toStdString());
+    }
 
     std::vector<double> peakRange;
     peakRange.push_back(m_uiForm.spPeakLower->value());
@@ -112,9 +114,9 @@ namespace CustomInterfaces
   {
     MantidQt::CustomInterfaces::UserInputValidator uiv;
 
-    // Validate spectra range
-    auto specRange = std::make_pair<double, double>(m_uiForm.spSpecMin->value(), m_uiForm.spSpecMax->value());
-    uiv.checkValidRange("Spectra Range", specRange);
+    bool useMapFile = m_uiForm.cbGrouping->currentText() == "Map File";
+    if(useMapFile && !m_uiForm.rfMapFile->isValid())
+      uiv.addErrorMessage("Map File is invalid.");
 
     // Validate peak range
     auto peakRange = std::make_pair<double, double>(m_uiForm.spPeakLower->value(), m_uiForm.spPeakUpper->value());

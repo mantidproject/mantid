@@ -55,7 +55,7 @@ namespace CustomInterfaces
 
     // Validate map file if it is being used
     bool useMapFile = m_uiForm.cbGroupingType->currentText() == "Map File";
-    if(useMapFile && !m_uiForm.rfInput->isValid())
+    if(useMapFile && !m_uiForm.rfMapFile->isValid())
       uiv.addErrorMessage("Map File is invalid.");
 
     // Show error message for errors

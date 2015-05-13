@@ -1,7 +1,7 @@
 #pylint: disable=no-init
 from mantid.kernel import *
-from mantid.api import WorkspaceProperty, FileProperty, FileAction, \
-                       DataProcessorAlgorithm, AlgorithmFactory, mtd
+from mantid.api import (WorkspaceProperty, FileProperty, FileAction,
+                        DataProcessorAlgorithm, AlgorithmFactory, mtd)
 from mantid.simpleapi import *
 
 
@@ -9,8 +9,8 @@ class ILLIN16BCalibration(DataProcessorAlgorithm):
 
     _input_file = None
     _out_ws = None
+    _map_file = None
     _peak_range = None
-    _spec_range = None
     _intensity_scale = None
     _mirror_mode = None
 
@@ -24,15 +24,17 @@ class ILLIN16BCalibration(DataProcessorAlgorithm):
 
 
     def PyInit(self):
-        self.declareProperty(FileProperty(name='Run', defaultValue='', action=FileAction.Load),
+        self.declareProperty(FileProperty(name='Run', defaultValue='',
+                                          action=FileAction.Load),
                              doc='Comma separated list of input files')
 
         self.declareProperty(name='MirrorMode', defaultValue=False,
                              doc='Data uses mirror mode')
 
-        self.declareProperty(IntArrayProperty(name='SpectraRange', values=[0, 23],
-                             validator=IntArrayMandatoryValidator()),
-                             doc='Spectra range to use')
+        self.declareProperty(FileProperty(name='MapFile', defaultValue='',
+                                          action=FileAction.OptionalLoad,
+                                          extensions=['xml']),
+                             doc='Comma separated list of input files')
 
         self.declareProperty(FloatArrayProperty(name='PeakRange', values=[0.0, 100.0],
                              validator=FloatArrayMandatoryValidator()),
@@ -61,7 +63,8 @@ class ILLIN16BCalibration(DataProcessorAlgorithm):
                              RawWorkspace=temp_raw,
                              LeftWorkspace=temp_left,
                              RightWorkspace=temp_right,
-                             ReducedWorkspace=self._out_ws)
+                             ReducedWorkspace=self._out_ws,
+                             MapFile=self._map_file)
 
         # Clean up unused workspaces
         DeleteWorkspace(temp_raw)
@@ -74,9 +77,7 @@ class ILLIN16BCalibration(DataProcessorAlgorithm):
         Integration(InputWorkspace=self._out_ws,
                     OutputWorkspace=self._out_ws,
                     RangeLower=float(self._peak_range[0]),
-                    RangeUpper=float(self._peak_range[1]),
-                    StartWorkspaceIndex=int(self._spec_range[0]),
-                    EndWorkspaceIndex=int(self._spec_range[1]))
+                    RangeUpper=float(self._peak_range[1]))
 
         ws_mask, num_zero_spectra = FindDetectorsOutsideLimits(InputWorkspace=self._out_ws,
                                                                OutputWorkspace='__temp_ws_mask')
@@ -110,8 +111,8 @@ class ILLIN16BCalibration(DataProcessorAlgorithm):
         self._input_file = self.getProperty('Run').value
         self._out_ws = self.getPropertyValue('OutputWorkspace')
 
+        self._map_file = self.getPropertyValue('MapFile')
         self._peak_range = self.getProperty('PeakRange').value
-        self._spec_range = self.getProperty('SpectraRange').value
         self._mirror_mode = self.getProperty('MirrorMode').value
 
         self._intensity_scale = self.getProperty('ScaleFactor').value
@@ -125,7 +126,6 @@ class ILLIN16BCalibration(DataProcessorAlgorithm):
         """
         issues = dict()
 
-        issues['SpectraRange'] = self._validate_range('SpectraRange')
         issues['PeakRange'] = self._validate_range('PeakRange')
 
         return issues
