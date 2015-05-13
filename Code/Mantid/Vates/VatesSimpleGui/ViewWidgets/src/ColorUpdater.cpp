@@ -325,12 +325,21 @@ void ColorUpdater::observeColorScaleEdited(pqPipelineRepresentation *repr, Color
  * most if not all of the updates made by the ColorUpdater.
  *
  * @param caller the proxy object that calls this (or the callback has been set to it with AddObserver
+ * @param eventID vtkCommand event ID for callbacks, not used here
+ *
  * @param clientData expects a ColorCallBackData struct that has the ColorUpdater object which set 
  * the callback, and ColorSelectionWidget object of this VSI window. Never use this method with
  * different data.
+ *
+ * @param callData callback specific data which takes different forms
+ * depending on events, not used here.
  */
-void ColorUpdater::colorScaleEditedCallbackFunc(vtkObject* caller, long unsigned int, void* clientData, void*)
+void ColorUpdater::colorScaleEditedCallbackFunc(vtkObject *caller, long unsigned int eventID,
+                                                void *clientData, void *callData)
 {
+  UNUSED_ARG(eventID);
+  UNUSED_ARG(callData);
+
   // this won't help much. You must make sure that clientData is a proper ColorCallBackData struct
   ColorCallbackData *data = static_cast<ColorCallbackData*>(clientData);
   if (!data){
