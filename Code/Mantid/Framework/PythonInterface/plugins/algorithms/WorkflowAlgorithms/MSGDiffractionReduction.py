@@ -45,6 +45,9 @@ class MSGDiffractionReduction(PythonAlgorithm):
         self.declareProperty(StringArrayProperty(name='SaveFormats'),
                              doc='Save formats to save output in.')
 
+        self.declareProperty(name='InstrumentParFile', defaultValue='',
+                             doc='Parameter file for VESUVIO')
+
 
     def validateInputs(self):
         """
@@ -79,15 +82,16 @@ class MSGDiffractionReduction(PythonAlgorithm):
     def PyExec(self):
         from IndirectDiffractionReduction import MSGDiffractionReducer
 
+        instrument_name = self.getPropertyValue('Instrument')
         input_files = self.getProperty('InputFiles').value
         sum_files = self.getProperty('SumFiles').value
         individual_grouping = self.getProperty('IndividualGrouping').value
-        instrument_name = self.getPropertyValue('Instrument')
         mode = self.getPropertyValue('Mode')
         detector_range = self.getProperty('DetectorRange').value
         rebin_string = self.getPropertyValue('RebinParam')
         output_ws_group = self.getPropertyValue('OutputWorkspace')
         save_formats = self.getProperty('SaveFormats').value
+        evs_par_file = self.getPropertyValue('InstrumentParFile')
 
         ipf_filename = instrument_name + '_diffraction_' + mode + '_Parameters.xml'
 
@@ -109,6 +113,8 @@ class MSGDiffractionReduction(PythonAlgorithm):
 
         if instrument_name == 'VESUVIO':
             reducer.append_load_option('Mode', 'FoilOut')
+            if evs_par_file != '':
+                reducer.append_load_option('InstrumentParFile', evs_par_file)
 
         reducer.reduce()
 
