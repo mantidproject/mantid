@@ -33,6 +33,8 @@
 #include <QColor>
 #include <QList>
 
+#include <QDebug>
+
 namespace Mantid
 {
   // static logger
@@ -346,6 +348,7 @@ void ColorUpdater::colorScaleEditedCallbackFunc(vtkObject *caller, long unsigned
     return;
   }
 
+  // a pseudo-this
   ColorUpdater *pThis = data->colorUpdater;
   if (!pThis){
     return;
@@ -353,6 +356,14 @@ void ColorUpdater::colorScaleEditedCallbackFunc(vtkObject *caller, long unsigned
 
   ColorSelectionWidget *csel = data->csel;
   if (!csel){
+    return;
+  }
+
+  // This means that the user clicked on the auto-scale check box of the ColorSelectionWidget.
+  // That will change color properties of the ParaQ and trigger this callback. This condition
+  // prevents the callback from ruining the state of the ColorSelectionWidget (which is just
+  // being set by the user and we do not want to update programmatically in this case).
+  if (csel->inProcessUserRequestedAutoScale()) {
     return;
   }
 
@@ -365,12 +376,24 @@ void ColorUpdater::colorScaleEditedCallbackFunc(vtkObject *caller, long unsigned
   int noe = RGBPoints->GetNumberOfElements();
 
   // there should be at least one data value/bin + one triplet of R-G-B values
-  if (noe < 4)
+  const int subtract = 4;
+  if (noe < subtract)
     return;
 
-  pThis->m_minScale = elems[0];
-  pThis->m_maxScale = elems[noe-4];
-  csel->setColorScaleRange(pThis->m_minScale, pThis->m_maxScale);
+  double newMin = elems[0];
+  double newMax = elems[noe-subtract];
+  if ((std::abs(newMin - csel->getMinRange()) > 1e-14) ||
+      (std::abs(csel->getMaxRange() - newMax) > 1e-14)
+      ) {
+    pThis->m_minScale = newMin;
+    pThis->m_maxScale = newMax;
+    csel->setMinMax(pThis->m_minScale, pThis->m_maxScale);
+
+    if (csel->getAutoScaleState()) {
+      csel->setAutoScale(false);
+      pThis->m_autoScaleState = csel->getAutoScaleState();
+    }
+  }
 }
 
 }

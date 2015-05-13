@@ -1,3 +1,6 @@
+#include <cfloat>
+#include <iostream>
+
 #include "MantidVatesSimpleGuiViewWidgets/ColorSelectionWidget.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidVatesSimpleGuiViewWidgets/ColorMapManager.h"
@@ -26,8 +29,6 @@
 #include <QFile>
 #include <QFileInfo>
 
-#include <iostream>
-#include <cfloat>
 
 namespace Mantid
 {
@@ -41,7 +42,9 @@ namespace SimpleGui
  * sub-components and connections.
  * @param parent the parent widget of the mode control widget
  */
-  ColorSelectionWidget::ColorSelectionWidget(QWidget *parent) : QWidget(parent), colorMapManager(new ColorMapManager()), m_minHistoric(0.01), m_maxHistoric(0.01)
+ColorSelectionWidget::ColorSelectionWidget(QWidget *parent): QWidget(parent),
+    colorMapManager(new ColorMapManager()), m_minHistoric(0.01), m_maxHistoric(0.01),
+    m_inProcessUserRequestedAutoScale(false)
 {
   this->m_ui.setupUi(this);
   this->m_ui.autoColorScaleCheckBox->setChecked(true);
@@ -58,20 +61,25 @@ namespace SimpleGui
   this->m_ui.maxValLineEdit->setValidator(m_minValidator);
   this->m_ui.minValLineEdit->setValidator(m_maxValidator);
 
-  QObject::connect(this->m_ui.autoColorScaleCheckBox, SIGNAL(stateChanged(int)),
-  this, SLOT(autoOrManualScaling(int)));
+  QObject::connect(this->m_ui.autoColorScaleCheckBox, SIGNAL(clicked(bool)),
+                   this, SLOT(autoCheckBoxClicked(bool)));
+
   QObject::connect(this->m_ui.presetButton, SIGNAL(clicked()),
-  this, SLOT(loadPreset()));
+                   this, SLOT(loadPreset()));
+
   QObject::connect(this->m_ui.minValLineEdit, SIGNAL(editingFinished()),
-  this, SLOT(getColorScaleRange()));
+                   this, SLOT(getColorScaleRange()));
+
   QObject::connect(this->m_ui.maxValLineEdit, SIGNAL(editingFinished()),
-  this, SLOT(getColorScaleRange()));
+                   this, SLOT(getColorScaleRange()));
   QObject::connect(this->m_ui.useLogScaleCheckBox, SIGNAL(stateChanged(int)),
                    this, SLOT(useLogScaling(int)));
 }
 
 /**
- * This function sets the status of the color selection widgets.
+ * This function sets the status of the color selection min/max widgets. It
+ * doesn't modify the check boxes.
+ *
  * @param status the state to set the color selection widgets to
  */
 void ColorSelectionWidget::setEditorStatus(bool status)
@@ -190,23 +198,50 @@ void ColorSelectionWidget::addColorMapsFromXML(vtkPVXMLParser *parser,
 }
 
 /**
- * This slot enables or diables the min and max line edits based on state
- * of the automatic scaling checkbox.
- * @param state the current state of the checkbox
+ * Changes the status of the autoScaling checkbox. This is in
+ * principle meant to be used programmatically, when for example the
+ * color map is edited elsewhere (like in the Paraview color editor).
+ *
+ * @param autoScale whether to set auto scaling (on/off)
  */
-void ColorSelectionWidget::autoOrManualScaling(int state)
+void ColorSelectionWidget::setAutoScale(bool autoScale)
 {
-  switch (state)
+  this->m_ui.autoColorScaleCheckBox->setChecked(autoScale);
+  this->setEditorStatus(!autoScale);
+}
+
+/**
+ * Simply set the min and max values for the color scale.
+ *
+ * @param max maximum value (corresponding to the max line edit)
+ * @param min minimum value (corresponding to the max line edit)
+ */
+void ColorSelectionWidget::setMinMax(double& min, double& max)
+{
+  setMinSmallerMax(min, max);
+}
+
+/**
+ * This slot enables or diables the min and max line edits based on
+ * the (changing) state of the automatic scaling checkbox. It should
+ * be used for click events on the auto-scale check box.
+ *
+ * @param wasOn current checked state (before the user clicks)
+ */
+void ColorSelectionWidget::autoCheckBoxClicked(bool wasOn)
+{
+  m_inProcessUserRequestedAutoScale = true;
+  if (!wasOn)
   {
-  case Qt::Unchecked:
     this->setEditorStatus(true);
     emit this->autoScale(this);
-    break;
-  case Qt::Checked:
+  }
+  else
+  {
     this->setEditorStatus(false);
     emit this->autoScale(this);
-    break;
   }
+  m_inProcessUserRequestedAutoScale = false;
 }
 
 /**

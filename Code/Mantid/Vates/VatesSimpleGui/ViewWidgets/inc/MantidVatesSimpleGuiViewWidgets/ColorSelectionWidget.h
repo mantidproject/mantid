@@ -67,14 +67,22 @@ public:
   double getMaxRange();
   /// Load the default color map
   void loadColorMap(bool viewSwitched);
+  /// Programmatically enable/disable auto scaling of color range
+  void setAutoScale(bool autoScale);
+  /// Set min smaller max, can be used to programmatically set the widgets
+  void setMinMax(double& min, double& max);
+  /// Others need to know if this widget is in the process of updating colors at user's request
+  bool inProcessUserRequestedAutoScale() { return m_inProcessUserRequestedAutoScale; };
 
 public slots:
   /// Set state for all control widgets.
   void enableControls(bool state);
   /// Reset the widget's state.
   void reset();
-  /// Set the color scale range into the range widgets.
+  /// Set the color scale range into the range widgets (only in autoscale mode).
   void setColorScaleRange(double min, double max);
+  /// Slot for when the user clicks on the auto-scale check box
+  void autoCheckBoxClicked(bool wasOnn);
 
 signals:
   /**
@@ -100,8 +108,6 @@ signals:
   void logScale(int state);
 
 protected slots:
-  /// Set state of the automatic scaling checkbox.
-  void autoOrManualScaling(int state);
   /// Get the new color scale range.
   void getColorScaleRange();
   /// Show available color presets.
@@ -137,6 +143,9 @@ private:
 
   pqColorPresetManager *m_presets; ///< Dialog for choosing color presets
   Ui::ColorSelectionWidgetClass m_ui; ///< The mode control widget's UI form
+
+  /// this is a flag that is set while updating the color scale triggered by the user clicking on the auto-scale box
+  bool m_inProcessUserRequestedAutoScale;
 };
 
 } // SimpleGui
