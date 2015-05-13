@@ -127,7 +127,7 @@ class LoadData(ReductionStep):
             else:
                 logger.notice("Couldn't find specified mask file : " + str(basis_mask_filename))
 
-        if self._parameter_file is not None and "VESUVIO" in self._parameter_file and 'InstrumentParFile' not in self._extra_load_opts:
+        if self._parameter_file is not None:
             LoadParameterFile(Workspace=output_ws,Filename= self._parameter_file)
 
         self._monitor_index = self._reducer._get_monitor_index(mtd[output_ws])
