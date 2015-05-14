@@ -29,6 +29,7 @@ class QHBoxLayout;
 class QObject;
 class QWidget;
 
+
 namespace Mantid
 {
 namespace Vates
@@ -40,7 +41,7 @@ class RotationPointDialog;
 class SaveScreenshotReaction;
 class ViewBase;
 class RebinDialog;
-
+class ColorMapEditorPanel;
 /**
  *
   This class represents the central widget for handling VATES visualization
@@ -157,6 +158,7 @@ private:
   RebinAlgorithmDialogProvider m_rebinAlgorithmDialogProvider; ///<Provides dialogs to execute rebin algorithms
   RebinnedSourcesManager m_rebinnedSourcesManager; ///<Holds the rebinned sources manager
   QString m_rebinnedWorkspaceIdentifier; ///< Holds the identifier for temporary workspaces
+  ColorMapEditorPanel* m_colorMapEditorPanel; ///< Holder for the color map editor panel.
 
   /// Holds the 'visual state' of the views. This relies on Load/SaveXMLState which
   /// produce/consume a vtk XML tree object. Otherwise, the properties to save would be,

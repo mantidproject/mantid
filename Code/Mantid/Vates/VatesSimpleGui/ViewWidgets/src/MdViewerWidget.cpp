@@ -19,6 +19,7 @@
 #include "MantidVatesSimpleGuiQtWidgets/ModeControlWidget.h"
 #include "MantidVatesSimpleGuiQtWidgets/RotationPointDialog.h"
 #include "MantidVatesSimpleGuiViewWidgets/BackgroundRgbProvider.h"
+#include "MantidVatesSimpleGuiViewWidgets/ColorMapEditorPanel.h"
 #include "MantidVatesSimpleGuiViewWidgets/ColorSelectionWidget.h"
 #include "MantidVatesSimpleGuiViewWidgets/MultisliceView.h"
 #include "MantidVatesSimpleGuiViewWidgets/SaveScreenshotReaction.h"
@@ -99,7 +100,6 @@
 #include <pqViewStreamingBehavior.h>
 #include <pqVerifyRequiredPluginBehavior.h>
 #include <pqSaveDataReaction.h>
-
 #if defined(__INTEL_COMPILER)
   #pragma warning enable 1170
 #endif
@@ -115,6 +115,7 @@
 #include <QUrl>
 #include <QWidget>
 #include <QMessageBox>
+#include <QRect>
 
 namespace Mantid
 {
@@ -163,7 +164,7 @@ MdViewerWidget::MdViewerWidget() : VatesViewerInterface(), currentView(NULL),
   screenShot(NULL), viewLayout(NULL), viewSettings(NULL),
   useCurrentColorSettings(false), initialView(ModeControlWidget::STANDARD),
   m_rebinAlgorithmDialogProvider(this), m_rebinnedWorkspaceIdentifier("_tempvsi"),
-  m_allViews()
+  m_colorMapEditorPanel(NULL), m_allViews()
 {
   //this will initialize the ParaView application if needed.
   VatesParaViewApplication::instance();
@@ -247,9 +248,12 @@ void MdViewerWidget::setupUiAndConnections()
                    SLOT(onRotationPoint()));
 
   /// Provide access to the color-editor panel for the application.
-  pqApplicationCore::instance()->registerManager(
-    "COLOR_EDITOR_PANEL", this->ui.colorMapEditorDock);
-  this->ui.colorMapEditorDock->hide();
+  if (!m_colorMapEditorPanel)
+  {
+    m_colorMapEditorPanel = new ColorMapEditorPanel(this);
+    m_colorMapEditorPanel->setUpPanel();
+  }
+
   //this->connect(this->ui.proxiesPanel,SIGNAL(changeFinished(vtkSMProxy*)),SLOT(panelChanged()));
   QAction* temp = new QAction(this);
   pqDeleteReaction* deleteHandler = new pqDeleteReaction(temp);
@@ -275,7 +279,8 @@ void MdViewerWidget::panelChanged()
 {
     this->currentView->renderAll();
 }
-    
+
+
 /**
  * This function places the standard view to the main window, installs an
  * event filter, tweaks the UI layout for the view and calls the routine that
@@ -1129,6 +1134,8 @@ bool MdViewerWidget::eventFilter(QObject *obj, QEvent *ev)
       this->currentView->updateSettings();
       this->currentView->hide();
       this->useCurrentColorSettings = false;
+
+      this->m_colorMapEditorPanel->hide();
 
       return true;
     }
