@@ -5,7 +5,7 @@ digraph IndirectResolution {
   subgraph descision {
     $decision_style
     ScaleFactorIsOne [label="ScaleFactor is 1?"]
-    Save [label=""]
+    Save [label="Save?"]
   }
 
   subgraph params {

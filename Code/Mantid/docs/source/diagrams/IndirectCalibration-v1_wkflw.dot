@@ -1,20 +1,20 @@
 digraph IndirectCalibration {
   label="IndirectCalibration Flowchart"
-  /* $global_style */
+  $global_style
 
   subgraph values {
-    /* $value_style */
+    $value_style
     AutoScaleFactor [label="1 / (sum / (num_spectra / num_zero_spectra))"]
   }
 
   subgraph descision {
-    /* $decision_style */
+    $decision_style
     UseAutoScale [label="ScaleFactor = 1?"]
     MultipleFiles [label="Multiple Files?"]
   }
 
   subgraph params {
-    /* $param_style */
+    $param_style
     InputFiles
     DetectorRange
     PeakRange
@@ -24,7 +24,7 @@ digraph IndirectCalibration {
   }
 
   subgraph algorithms {
-    /* $algorithm_style */
+    $algorithm_style
     Load
     MergeRuns
     Scale_Raw [label="Scale"]

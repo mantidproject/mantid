@@ -6,6 +6,7 @@ digraph IndirectILLReduction {
     $value_style
     CE_End [label="Reduced Workspace"]
     MM_End [label="Reduced Workspace"]
+    MM_ScaleFactor [label="0.5"]
   }
 
   subgraph descision {
@@ -97,19 +98,20 @@ digraph IndirectILLReduction {
     CE_Mirror_Left                  -> MM_Plus
     MM_RebinToWorkspace_RightRed    -> MM_Plus
     MM_Plus                         -> MM_Scale
+    MM_ScaleFactor                  -> MM_Scale [label="Factor"]
     MM_Scale                        -> MM_End
   }
 
   Run                   -> LoadILLIndirect
+  LoadILLIndirect       -> RawWorkspace
   LoadILLIndirect       -> LoadParameterFile
   Analyser              -> LoadParameterFile
   Reflection            -> LoadParameterFile
-  LoadParameterFile     -> RawWorkspace
   LoadParameterFile     -> GroupDetectors
   MapFile               -> GroupDetectors
-  GroupDetectors        -> MirrorMode [label="Detectors"]
+  GroupDetectors        -> MirrorMode [label="Detector WS"]
   LoadParameterFile     -> ExtractSingleSpectrum
-  ExtractSingleSpectrum -> MirrorMode [label="Monitor"]
+  ExtractSingleSpectrum -> MirrorMode [label="Monitor WS"]
   MirrorMode            -> CE_Normal [label="No"]
   CE_Normal             -> ReducedWorkspace
   MirrorMode            -> RunMirrorMode [label="Yes"]
