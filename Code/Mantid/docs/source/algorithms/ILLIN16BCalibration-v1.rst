@@ -16,6 +16,11 @@ This first reduces the data using the :ref:`IndirectILLReduction
 <algm-IndirectILLReduction>` algorithm and then integrates each spectrum within
 the peak range.
 
+Workflow
+--------
+
+.. diagram:: ILLIN16BCalibration-v1_wkflw.dot
+
 Usage
 -----
 
