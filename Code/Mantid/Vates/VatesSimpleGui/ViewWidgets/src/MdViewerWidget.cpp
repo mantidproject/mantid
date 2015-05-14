@@ -1034,6 +1034,7 @@ void MdViewerWidget::checkForUpdates()
 /**
  * This function executes the logic for switching views on the main level
  * window.
+ *
  * @param v the view mode to switch to
  */
 void MdViewerWidget::switchViews(ModeControlWidget::Views v)
@@ -1044,8 +1045,8 @@ void MdViewerWidget::switchViews(ModeControlWidget::Views v)
   // normally it will just close child SliceView windows
   this->currentView->closeSubWindows();
   this->disconnectDialogs();
-
   this->hiddenView = this->createAndSetMainViewWidget(this->ui.viewWidget, v);
+  this->ui.colorSelectionWidget->ignoreColorChangeCallbacks(true);
   this->hiddenView->setColorScaleState(this->ui.colorSelectionWidget);
   this->hiddenView->hide();
   this->viewLayout->removeWidget(this->currentView);
@@ -1066,6 +1067,7 @@ void MdViewerWidget::switchViews(ModeControlWidget::Views v)
   this->hiddenView->deleteLater();
 
   this->setColorForBackground();
+
   // Currently this render will do one or more resetCamera() and even
   // resetDisplay() for different views, see for example
   // StandardView::onRenderDone().
@@ -1076,15 +1078,16 @@ void MdViewerWidget::switchViews(ModeControlWidget::Views v)
   // ViewBase and the specialized VSI view classes (trac ticket #11739).
   restoreViewState(this->currentView, v);
   this->currentView->setColorsForView(this->ui.colorSelectionWidget);
-  
   this->currentView->checkViewOnSwitch();
   this->updateAppState();
   this->initialView = v; 
 
-  // What about this?
   this->setDestroyedListener();
-
   this->currentView->setVisibilityListener();
+
+  // ignore callbacks until as late as possible to keep desired state
+  // regardless of what the Paraview widgets are doing
+  this->ui.colorSelectionWidget->ignoreColorChangeCallbacks(false);
 }
 
 /**
