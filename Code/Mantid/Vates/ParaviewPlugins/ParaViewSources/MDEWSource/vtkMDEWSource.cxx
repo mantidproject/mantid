@@ -1,5 +1,6 @@
-#include "vtkBox.h"
 #include "vtkMDEWSource.h"
+
+#include "vtkBox.h"
 #include "vtkInformation.h"
 #include "vtkInformationVector.h"
 #include "vtkObjectFactory.h"
@@ -9,6 +10,7 @@
 #include "vtkUnstructuredGrid.h"
 #include "vtkStreamingDemandDrivenPipeline.h"
 
+#include "MantidAPI/IMDWorkspace.h"'
 #include "MantidVatesAPI/MDEWInMemoryLoadingPresenter.h"
 #include "MantidVatesAPI/MDLoadingViewAdapter.h"
 #include "MantidVatesAPI/ADSWorkspaceProvider.h"
@@ -24,7 +26,7 @@ using namespace Mantid::VATES;
 vtkStandardNewMacro(vtkMDEWSource)
 
 /// Constructor
-vtkMDEWSource::vtkMDEWSource() :  m_wsName(""), m_depth(1000), m_time(0), m_presenter(NULL)
+vtkMDEWSource::vtkMDEWSource() :  m_wsName(""), m_depth(1000), m_time(0), m_presenter(NULL), m_normalization(AutoSelect)
 {
   this->SetNumberOfInputPorts(0);
   this->SetNumberOfOutputPorts(1);
@@ -166,6 +168,12 @@ const char* vtkMDEWSource::GetInstrument()
   }
 }
 
+void vtkMDEWSource::SetNormalization(int option)
+{
+  m_normalization = static_cast<Mantid::VATES::VisualNormalization>(option);
+  this->Modified();
+}
+
 
 int vtkMDEWSource::RequestData(vtkInformation *, vtkInformationVector **, vtkInformationVector *outputVector)
 {
@@ -186,7 +194,7 @@ int vtkMDEWSource::RequestData(vtkInformation *, vtkInformationVector **, vtkInf
 
     ThresholdRange_scptr thresholdRange(new IgnoreZerosThresholdRange());
     vtkMD0DFactory* zeroDFactory = new vtkMD0DFactory(thresholdRange, "signal");
-    vtkMDHexFactory* hexahedronFactory = new vtkMDHexFactory(thresholdRange, "signal");
+    vtkMDHexFactory* hexahedronFactory = new vtkMDHexFactory(thresholdRange, m_normalization);
     vtkMDQuadFactory* quadFactory = new vtkMDQuadFactory(thresholdRange, "signal");
     vtkMDLineFactory* lineFactory = new vtkMDLineFactory(thresholdRange, "signal");
 

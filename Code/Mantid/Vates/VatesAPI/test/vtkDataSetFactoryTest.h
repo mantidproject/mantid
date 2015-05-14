@@ -2,6 +2,7 @@
 #ifndef VTKDATASETFACTORYTEST_H_
 #define VTKDATASETFACTORYTEST_H_
 
+#include "MantidAPI/IMDWorkspace.h"
 #include "MantidVatesAPI/vtkDataSetFactory.h"
 #include "MantidVatesAPI/ProgressAction.h"
 #include <cxxtest/TestSuite.h>
@@ -119,6 +120,14 @@ public:
     TS_ASSERT(product != NULL);
     TSM_ASSERT_EQUALS("Output not wired up correctly to ::create() method", "vtkStructuredGrid", std::string(product->GetClassName()));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&factory));
+  }
+
+  void test_emum_to_enum()
+  {
+    // Ensure that enum definitions do not change. They should remain synched.
+    TS_ASSERT_EQUALS(static_cast<int>(Mantid::API::NoNormalization), static_cast<int>(Mantid::VATES::NoNormalization));
+    TS_ASSERT_EQUALS(static_cast<int>(Mantid::API::VolumeNormalization), static_cast<int>(Mantid::VATES::VolumeNormalization));
+    TS_ASSERT_EQUALS(static_cast<int>(Mantid::API::NumEventsNormalization), static_cast<int>(Mantid::VATES::NumEventsNormalization));
   }
 
 

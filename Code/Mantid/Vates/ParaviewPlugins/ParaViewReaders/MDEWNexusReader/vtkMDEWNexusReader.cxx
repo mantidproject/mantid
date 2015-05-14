@@ -124,7 +124,7 @@ int vtkMDEWNexusReader::RequestData(vtkInformation * vtkNotUsed(request), vtkInf
   FilterUpdateProgressAction<vtkMDEWNexusReader> drawingProgressAction(this, "Drawing...");
 
   ThresholdRange_scptr thresholdRange(new IgnoreZerosThresholdRange());
-  vtkMDHexFactory* hexahedronFactory = new vtkMDHexFactory(thresholdRange, "signal");
+  vtkMDHexFactory* hexahedronFactory = new vtkMDHexFactory(thresholdRange, VolumeNormalization);
   vtkMDQuadFactory* quadFactory = new vtkMDQuadFactory(thresholdRange, "signal");
   vtkMDLineFactory* lineFactory = new vtkMDLineFactory(thresholdRange, "signal");
 

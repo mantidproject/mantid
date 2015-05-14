@@ -3,19 +3,17 @@
 #ifndef MANTID_VATES_VTKDATASETFACTORY_H_
 #define MANTID_VATES_VTKDATASETFACTORY_H_
 
+#include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/Workspace.h"
 #include "MantidKernel/System.h"
 #include "vtkDataSet.h"
 #include <boost/shared_ptr.hpp>
+#include <boost/tuple/tuple.hpp>
 #include <string>
 
 class vtkFloatArray;
 namespace Mantid
 {
-  namespace API
-  {
-    class IMDWorkspace;
-  }
 
 namespace VATES
 {
@@ -30,6 +28,23 @@ namespace VATES
     bool isSparse;
     vtkIdType pointId;
   };
+
+  /** Enum describing different ways to normalize the signal
+ * in a MDWorkspace.
+ Do not change the enum integers. Adding new options to the enum is ok.
+ */
+enum VisualNormalization {
+  /// Don't normalize = return raw counts
+  NoNormalization = 0,
+  /// Divide the signal by the volume of the box/bin
+  VolumeNormalization = 1,
+  /// Divide the signal by the number of events that contributed to it.
+  NumEventsNormalization = 2,
+  /// Auto select Normalization
+  AutoSelect = 3
+};
+
+
 
 /** Abstract type to generate a vtk dataset on demand from a MDWorkspace.
  Uses Chain Of Responsibility pattern to self-manage and ensure that the workspace rendering is delegated to another factory
@@ -113,6 +128,8 @@ public:
 
   /// Dimensionalities of interest.
   enum Dimensionality{OneDimensional=1, TwoDimensional=2, ThreeDimensional=3, FourDimensional=4};
+
+  static const std::string ScalarName;
 
 protected:
   
@@ -226,6 +243,7 @@ private:
 };
 
 typedef boost::shared_ptr<vtkDataSetFactory> vtkDataSetFactory_sptr;
+
 
 }
 }

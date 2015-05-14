@@ -2,6 +2,7 @@
 #define _vtkMDEWSource_h
 
 #include "vtkUnstructuredGridAlgorithm.h"
+#include "MantidVatesAPI/vtkDataSetFactory.h"
 #include <string>
 
 namespace Mantid
@@ -50,6 +51,7 @@ public:
   
   void SetWsName(std::string wsName);
   void SetDepth(int depth);
+  void SetNormalization(int option);
 
   //------- MDLoadingView methods ----------------
   virtual double getTime() const;
@@ -96,6 +98,9 @@ private:
 
   /// Cached typename.
   std::string typeName;
+
+  /// Normalization option
+  Mantid::VATES::VisualNormalization m_normalization;
 
   vtkMDEWSource(const vtkMDEWSource&);
   void operator = (const vtkMDEWSource&);
