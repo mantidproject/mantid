@@ -193,10 +193,10 @@ int vtkMDEWSource::RequestData(vtkInformation *, vtkInformationVector **, vtkInf
     FilterUpdateProgressAction<vtkMDEWSource> drawingProgressUpdate(this, "Drawing...");
 
     ThresholdRange_scptr thresholdRange(new IgnoreZerosThresholdRange());
-    vtkMD0DFactory* zeroDFactory = new vtkMD0DFactory(thresholdRange, "signal");
+    vtkMD0DFactory* zeroDFactory = new vtkMD0DFactory;
     vtkMDHexFactory* hexahedronFactory = new vtkMDHexFactory(thresholdRange, m_normalization);
     vtkMDQuadFactory* quadFactory = new vtkMDQuadFactory(thresholdRange, m_normalization);
-    vtkMDLineFactory* lineFactory = new vtkMDLineFactory(thresholdRange, "signal");
+    vtkMDLineFactory* lineFactory = new vtkMDLineFactory(thresholdRange, m_normalization);
 
     hexahedronFactory->SetSuccessor(quadFactory);
     quadFactory->SetSuccessor(lineFactory);

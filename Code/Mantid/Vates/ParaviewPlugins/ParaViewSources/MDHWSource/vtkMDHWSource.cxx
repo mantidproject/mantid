@@ -176,7 +176,7 @@ int vtkMDHWSource::RequestData(vtkInformation *, vtkInformationVector **, vtkInf
     /*
     Will attempt to handle drawing in 4D case and then in 3D case if that fails, and so on down to 1D
     */
-    vtkMD0DFactory* zeroDFactory = new vtkMD0DFactory(thresholdRange, "signal");
+    vtkMD0DFactory* zeroDFactory = new vtkMD0DFactory;
     vtkMDHistoLineFactory* lineFactory = new vtkMDHistoLineFactory(thresholdRange, "signal");
     vtkMDHistoQuadFactory* quadFactory = new vtkMDHistoQuadFactory(thresholdRange, "signal");
     vtkMDHistoHexFactory* hexFactory = new vtkMDHistoHexFactory(thresholdRange, "signal");
