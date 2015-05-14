@@ -106,6 +106,15 @@ const char* vtkMDEWNexusReader::GetInputGeometryXML()
   }
 }
 
+/**
+@param option : Normalization option chosen by index.
+*/
+void vtkMDEWNexusReader::SetNormalization(int option)
+{
+  m_normalization = static_cast<Mantid::VATES::VisualNormalization>(option);
+  this->Modified();
+}
+
 int vtkMDEWNexusReader::RequestData(vtkInformation * vtkNotUsed(request), vtkInformationVector ** vtkNotUsed(inputVector), vtkInformationVector *outputVector)
 {
 
@@ -124,9 +133,9 @@ int vtkMDEWNexusReader::RequestData(vtkInformation * vtkNotUsed(request), vtkInf
   FilterUpdateProgressAction<vtkMDEWNexusReader> drawingProgressAction(this, "Drawing...");
 
   ThresholdRange_scptr thresholdRange(new IgnoreZerosThresholdRange());
-  vtkMDHexFactory* hexahedronFactory = new vtkMDHexFactory(thresholdRange, VolumeNormalization);
-  vtkMDQuadFactory* quadFactory = new vtkMDQuadFactory(thresholdRange, VolumeNormalization);
-  vtkMDLineFactory* lineFactory = new vtkMDLineFactory(thresholdRange, VolumeNormalization);
+  vtkMDHexFactory* hexahedronFactory = new vtkMDHexFactory(thresholdRange, m_normalization);
+  vtkMDQuadFactory* quadFactory = new vtkMDQuadFactory(thresholdRange, m_normalization);
+  vtkMDLineFactory* lineFactory = new vtkMDLineFactory(thresholdRange, m_normalization);
 
   hexahedronFactory->SetSuccessor(quadFactory);
   quadFactory->SetSuccessor(lineFactory);
