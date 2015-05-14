@@ -145,7 +145,7 @@ void ExperimentInfo::setInstrument(const Instrument_const_sptr &instr) {
     m_parmap = instr->getParameterMap();
   } else {
     sptr_instrument = instr;
-    m_parmap->clear();
+    m_parmap.reset(new ParameterMap());
   }
 }
 
