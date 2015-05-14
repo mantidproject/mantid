@@ -15,6 +15,7 @@ ColorMapEditorPanel::~ColorMapEditorPanel() {}
  */
 void ColorMapEditorPanel::setUpPanel() {
   this->ui.setupUi(this);
+  this->setWindowTitle("Color Editor Panel");
   this->hide();
   this->ui.dockWidget->installEventFilter(this);
   pqApplicationCore::instance()->registerManager("COLOR_EDITOR_PANEL",
