@@ -425,7 +425,7 @@ void ColorUpdater::colorScaleEditedCallbackFunc(vtkObject *caller, long unsigned
  *
  * @param eventID vtkCommand event ID for callbacks, not used here
  *
- * @param clientData, expects a ColorCallBackData struct that has the
+ * @param clientData expects a ColorCallBackData struct that has the
  * ColorUpdater object which set the callback, and
  * ColorSelectionWidget object of this VSI window. Never use this
  * method with different data.
