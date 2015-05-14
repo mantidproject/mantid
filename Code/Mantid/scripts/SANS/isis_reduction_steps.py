@@ -1672,6 +1672,7 @@ class ConvertToQISIS(ReductionStep):
                      '2D' : 'Qxy'}
     # defines if Q1D should correct for gravity by default
     _DEFAULT_GRAV = False
+    _DEFAULT_EXTRA_LENGTH = 0.0
     def __init__(self, normalizations):
         """
             @param normalizations: CalculateNormISIS object contains the workspace, ReductionSteps or files require for the optional normalization arguments
@@ -1689,6 +1690,8 @@ class ConvertToQISIS(ReductionStep):
         self._use_gravity = self._DEFAULT_GRAV
         #used to implement a default setting for gravity that can be over written but doesn't over write
         self._grav_set = False
+        #can be used to add an additional length to the neutron path during the correction for gravity in the Q calcuation
+        self._grav_extra_length = self._DEFAULT_EXTRA_LENGTH
         #this should contain the rebin parameters
         self.binning = None
 
@@ -1733,6 +1736,16 @@ class ConvertToQISIS(ReductionStep):
             print msg
             sanslog.warning(msg)
 
+    def get_extra_length(self):
+        return self._grav_extra_length
+
+    def set_extra_length(self, extra_length):
+        """
+            Add extra length when correcting for gravity when calculating Q
+            @param extra_length : additional length for the gravity correction during the calculation of Q
+        """
+        self._grav_extra_length = extra_length
+
     def execute(self, reducer, workspace):
         """
         Calculate the normalization workspaces and then call the chosen Q conversion algorithm.
@@ -1754,9 +1767,9 @@ class ConvertToQISIS(ReductionStep):
 
         try:
             if self._Q_alg == 'Q1D':
-                Q1D(DetBankWorkspace=workspace,OutputWorkspace= workspace, OutputBinning=self.binning, WavelengthAdj=wave_adj, PixelAdj=pixel_adj, AccountForGravity=self._use_gravity, RadiusCut=self.r_cut*1000.0, WaveCut=self.w_cut, OutputParts=self.outputParts, WavePixelAdj = wavepixeladj)
+                Q1D(DetBankWorkspace=workspace,OutputWorkspace= workspace, OutputBinning=self.binning, WavelengthAdj=wave_adj, PixelAdj=pixel_adj, AccountForGravity=self._use_gravity, RadiusCut=self.r_cut*1000.0, WaveCut=self.w_cut, OutputParts=self.outputParts, WavePixelAdj = wavepixeladj, ExtraLength=self._grav_extra_length)
             elif self._Q_alg == 'Qxy':
-                Qxy(InputWorkspace=workspace,OutputWorkspace= workspace,MaxQxy= reducer.QXY2,DeltaQ= reducer.DQXY, WavelengthAdj=wave_adj, PixelAdj=pixel_adj, AccountForGravity=self._use_gravity, RadiusCut=self.r_cut*1000.0, WaveCut=self.w_cut, OutputParts=self.outputParts)
+                Qxy(InputWorkspace=workspace,OutputWorkspace= workspace,MaxQxy= reducer.QXY2,DeltaQ= reducer.DQXY, WavelengthAdj=wave_adj, PixelAdj=pixel_adj, AccountForGravity=self._use_gravity, RadiusCut=self.r_cut*1000.0, WaveCut=self.w_cut, OutputParts=self.outputParts, ExtraLength=self._grav_extra_length)
                 ReplaceSpecialValues(InputWorkspace=workspace,OutputWorkspace= workspace, NaNValue="0", InfinityValue="0")
             else:
                 raise NotImplementedError('The type of Q reduction has not been set, e.g. 1D or 2D')
@@ -2068,15 +2081,21 @@ class UserFile(ReductionStep):
                 # for /DET/FRONT and /DET/REAR commands
                 reducer.instrument.setDetector(det_specif)
 
+        # There are two entries for Gravity: 1. ON/OFF (TRUE/FALSE)
+        #                                    2. LEXTRA=xx.xx
         elif upper_line.startswith('GRAVITY'):
-            flag = upper_line[8:].strip()
-            if flag == 'ON' or flag == 'TRUE':
+            grav = upper_line[8:].strip()
+            if grav == 'ON' or grav == 'TRUE':
                 reducer.to_Q.set_gravity(True, override=False)
-            elif flag == 'OFF' or flag == 'FALSE':
+            elif grav == 'OFF' or grav == 'FALSE':
                 reducer.to_Q.set_gravity(False, override=False)
+            elif grav.startswith('LEXTRA'):
+                extra_length = grav[6:].strip()
+                reducer.to_Q.set_extra_length(float(extra_length))
             else:
                 _issueWarning("Gravity flag incorrectly specified, disabling gravity correction")
                 reducer.to_Q.set_gravity(False, override=False)
+                reducer.to_Q.set_extra_length(0.0)
 
         elif upper_line.startswith('FIT/TRANS/'):
             #check if the selector is passed:

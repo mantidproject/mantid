@@ -813,33 +813,7 @@ MatrixWorkspace::detectorTwoTheta(Geometry::IDetector_const_sptr det) const {
   return det->getTwoTheta(samplePos, beamLine);
 }
 
-/**Calculates the distance a neutron coming from the sample will have deviated
-* from a
-*  straight tragetory before hitting a detector. If calling this function many
-* times
-*  for the same detector you can call this function once, with waveLength=1, and
-* use
-*  the fact drop is proportional to wave length squared .This function has no
-* knowledge
-*  of which axis is vertical for a given instrument
-*  @param det :: the detector that the neutron entered
-*  @param waveLength :: the neutrons wave length in meters
-*  @return the deviation in meters
-*/
-double MatrixWorkspace::gravitationalDrop(Geometry::IDetector_const_sptr det,
-                                          const double waveLength) const {
-  using namespace PhysicalConstants;
-  /// Pre-factor in gravity calculation: gm^2/2h^2
-  static const double gm2_OVER_2h2 =
-      g * NeutronMass * NeutronMass / (2.0 * h * h);
 
-  const V3D samplePos = getInstrument()->getSample()->getPos();
-  const double pathLength = det->getPos().distance(samplePos);
-  // Want L2 (sample-pixel distance) squared, times the prefactor g^2/h^2
-  const double L2 = gm2_OVER_2h2 * std::pow(pathLength, 2);
-
-  return waveLength * waveLength * L2;
-}
 
 //---------------------------------------------------------------------------------------
 /** Add parameters to the instrument parameter map that are defined in

@@ -951,7 +951,12 @@ bool SANSRunWindow::loadUserFile()
   {
     m_uiForm.gravity_check->setChecked(false);
   }
-  
+
+  // Read the extra length for the gravity correction
+  const double extraLengthParam =  runReduceScriptFunction(
+    "print i.ReductionSingleton().to_Q.get_extra_length()").toDouble();
+  m_uiForm.gravity_extra_length_line_edit->setText(QString::number(extraLengthParam));
+
   ////Detector bank: support REAR, FRONT, HAB, BOTH, MERGED, MERGE options
   QString detName = runReduceScriptFunction(
     "print i.ReductionSingleton().instrument.det_selection").trimmed();
@@ -2268,7 +2273,9 @@ QString SANSRunWindow::readUserFileGUIChanges(const States type)
   {
     exec_reduce += "False";
   }
-  exec_reduce += ")\n";
+  // Take into acount of the additional length
+  exec_reduce += ", extra_length=" + m_uiForm.gravity_extra_length_line_edit->text().trimmed() + ")\n";
+
   //Sample offset
   exec_reduce += "i.SetSampleOffset('"+
                  m_uiForm.smpl_offset->text()+"')\n";
