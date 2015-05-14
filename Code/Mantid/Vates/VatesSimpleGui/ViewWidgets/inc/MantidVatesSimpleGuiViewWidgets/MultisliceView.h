@@ -103,8 +103,8 @@ private:
   /// Create the current data representation.
   void setupData();
 
-  QPointer<pqMultiSliceView> mainView; ///< The main view class
-  Ui::MultiSliceViewClass ui; ///< The view's UI form
+  QPointer<pqMultiSliceView> m_mainView; ///< The main view class
+  Ui::MultiSliceViewClass m_ui; ///< The view's UI form
 };
 
 }

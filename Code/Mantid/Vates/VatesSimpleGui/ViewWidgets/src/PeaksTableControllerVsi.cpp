@@ -396,6 +396,9 @@ void PeaksTableControllerVsi::removeLayout(QWidget *widget) {
  * Remove the table.
  */
 void PeaksTableControllerVsi::removeTable() {
+  // Reset the color of peaks sources
+  setPeakSourceColorToDefault();
+
   destroySinglePeakSource();
   if (m_peaksTabWidget) {
     m_peaksTabWidget->deleteLater();
@@ -608,6 +611,50 @@ void PeaksTableControllerVsi::onPeaksSorted(
   // Invoke the ording command on the presenters
   m_presenter->sortPeaksWorkspace(columnToSortBy, sortAscending, ws);
   // Update the tabs
+}
+
+/**
+ * Reset the color of the peaks workspace glyphs to white
+ */
+void PeaksTableControllerVsi::setPeakSourceColorToDefault() {
+  pqServer *server = pqActiveObjects::instance().activeServer();
+  pqServerManagerModel *smModel = pqApplicationCore::instance()->getServerManagerModel();
+  QList<pqPipelineSource *> sources = smModel->findItems<pqPipelineSource *>(server);
+  for (QList<pqPipelineSource *>::iterator src = sources.begin(); src != sources.end(); ++src) {
+
+    std::string xmlName((*src)->getProxy()->GetXMLName());
+    if ((xmlName.find("Peaks Source") != std::string::npos)) {
+        double red = 1.0;
+        double green = 1.0;
+        double blue = 1.0;
+
+        pqDataRepresentation *rep =
+            (*src)
+                ->getRepresentation(pqActiveObjects::instance().activeView());
+        if (!rep)
+        {
+          continue;
+        }
+          pqPipelineRepresentation *pipelineRepresentation =
+              qobject_cast<pqPipelineRepresentation *>(rep);
+        if (!pipelineRepresentation)
+        {
+          continue;
+        }
+        pipelineRepresentation->getProxy()->UpdatePropertyInformation();
+
+        vtkSMDoubleVectorProperty *prop =
+            vtkSMDoubleVectorProperty::SafeDownCast(
+                pipelineRepresentation->getProxy()->GetProperty(
+                    "AmbientColor"));
+        prop->SetElement(0, red);
+        prop->SetElement(1, green);
+        prop->SetElement(2, blue);
+        pipelineRepresentation->getProxy()->UpdateVTKObjects();
+        pipelineRepresentation->updateHelperProxies();
+        pqActiveObjects::instance().activeView()->forceRender();
+    }
+  }
 }
 }
 }

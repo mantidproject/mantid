@@ -64,6 +64,14 @@ public:
     NormaliseByCurrent norm1;
     if ( !norm1.isInitialized() ) norm1.initialize();
 
+    const MantidVec &  Y = inWS->readY(0);
+    double initValue = Y[0];
+    bool checkNormFactor=true;
+    if (initValue<=0){
+      checkNormFactor = false;
+    }
+    double normFactor = initValue/expectedY;
+
     TS_ASSERT_THROWS_NOTHING( norm1.setProperty("InputWorkspace", inWS) );
     TS_ASSERT_THROWS_NOTHING( norm1.setPropertyValue("OutputWorkspace",wsNameOut) );
 
@@ -89,6 +97,16 @@ public:
 
     TS_ASSERT_EQUALS( output->YUnit(), "Counts" );
     TS_ASSERT_EQUALS( output->YUnitLabel(), "Counts per microAmp.hour" );
+    Kernel::Property * normLog(NULL);
+    TS_ASSERT_THROWS_NOTHING(normLog = output->run().getProperty("NormalizationFactor"));
+    Kernel::PropertyWithValue<double> *pFactor = dynamic_cast<Kernel::PropertyWithValue<double> *>(normLog);
+    TS_ASSERT(pFactor);
+
+    if(checkNormFactor){
+      double realFactor = (*pFactor)();
+      TS_ASSERT_DELTA(realFactor,normFactor,1.e-5);
+    }
+
 
     return output;
   }

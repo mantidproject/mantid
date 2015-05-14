@@ -2,6 +2,7 @@
 #include "MantidQtAPI/PlotAxis.h"
 
 #include <QStringBuilder>
+#include <boost/math/special_functions/fpclassify.hpp>
 
 /**
  * Construct a QwtWorkspaceSpectrumData object with a source workspace
@@ -22,7 +23,6 @@ QwtWorkspaceSpectrumData::QwtWorkspaceSpectrumData(const Mantid::API::MatrixWork
    m_dataIsNormalized(workspace.isDistribution()),
    m_binCentres(false),
    m_logScale(logScale),
-   m_minPositive(0),
    m_isDistribution(false)
 {
   // Actual plotting based on what type of data we have
@@ -31,6 +31,38 @@ QwtWorkspaceSpectrumData::QwtWorkspaceSpectrumData(const Mantid::API::MatrixWork
   m_xTitle = MantidQt::API::PlotAxis(workspace, 0).title();
   m_yTitle = MantidQt::API::PlotAxis((m_dataIsNormalized||m_isDistribution), workspace).title();
 
+  // Calculate the min and max values
+  double curMin = m_Y[0];
+  double curMinPos = m_Y[0];
+  double curMax = m_Y[0];
+  for(size_t i = 1; i < m_Y.size(); ++i)
+  {
+    // skip NaNs
+    if ((boost::math::isnan)(m_Y[i]) || (boost::math::isinf)(m_Y[i]))
+      continue;
+
+    // Try and get rid any starting NaNs as soon as possible
+    if ((boost::math::isnan)(curMin) || (boost::math::isinf)(curMin))
+      curMin = m_Y[i];
+    if (m_Y[i] > 0 && (curMinPos <= 0 || (boost::math::isnan)(curMinPos) ||
+                       (boost::math::isinf)(curMinPos)))
+      curMinPos = m_Y[i];
+    if ((boost::math::isnan)(curMax) || (boost::math::isinf)(curMax))
+      curMax = m_Y[i];
+
+    // Update our values as appropriate
+    if (m_Y[i] < curMin)
+      curMin = m_Y[i];
+    if (m_Y[i] < curMinPos && m_Y[i] > 0)
+      curMinPos = m_Y[i];
+    if (m_Y[i] > curMax)
+      curMax = m_Y[i];
+  }
+
+  // Save the results
+  m_minY = curMin;
+  m_minPositive = curMinPos;
+  m_maxY = curMax;
 }
 
 /// Virtual copy constructor
@@ -123,17 +155,10 @@ size_t QwtWorkspaceSpectrumData::esize() const
  */
 double QwtWorkspaceSpectrumData::getYMin() const
 {
-  auto it = std::min_element(m_Y.begin(), m_Y.end());
-  double temp = 0;
-  if(it != m_Y.end())
-  {
-    temp = *it;
-  }
-  if (m_logScale && temp <= 0.)
-  {
-    temp = m_minPositive;
-  }
-  return temp;
+  if (m_logScale)
+    return m_minPositive;
+  else
+    return m_minY;
 }
 
 /**
@@ -142,17 +167,10 @@ double QwtWorkspaceSpectrumData::getYMin() const
  */
 double QwtWorkspaceSpectrumData::getYMax() const
 {
-  auto it = std::max_element(m_Y.begin(), m_Y.end());
-  double temp = 0;
-  if(it != m_Y.end())
-  {
-    temp = *it;
-  }
-  if (m_logScale && temp <= 0.)
-  {
-    temp = m_minPositive;
-  }
-  return temp;
+  if (m_logScale && m_maxY <= 0)
+    return m_minPositive;
+  else
+    return m_maxY;
 }
 
 /**
