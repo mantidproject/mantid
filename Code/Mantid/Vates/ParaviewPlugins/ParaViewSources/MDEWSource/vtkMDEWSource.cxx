@@ -195,7 +195,7 @@ int vtkMDEWSource::RequestData(vtkInformation *, vtkInformationVector **, vtkInf
     ThresholdRange_scptr thresholdRange(new IgnoreZerosThresholdRange());
     vtkMD0DFactory* zeroDFactory = new vtkMD0DFactory(thresholdRange, "signal");
     vtkMDHexFactory* hexahedronFactory = new vtkMDHexFactory(thresholdRange, m_normalization);
-    vtkMDQuadFactory* quadFactory = new vtkMDQuadFactory(thresholdRange, "signal");
+    vtkMDQuadFactory* quadFactory = new vtkMDQuadFactory(thresholdRange, m_normalization);
     vtkMDLineFactory* lineFactory = new vtkMDLineFactory(thresholdRange, "signal");
 
     hexahedronFactory->SetSuccessor(quadFactory);

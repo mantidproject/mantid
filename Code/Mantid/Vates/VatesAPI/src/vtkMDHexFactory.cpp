@@ -23,42 +23,9 @@ using Mantid::Kernel::ReadLock;
 
 namespace Mantid {
 
-
 namespace VATES {
 
-namespace {
 
-// Helper typedef
-typedef Mantid::signal_t (Mantid::API::IMDNode::*NormFuncPtr)() const;
-
-/**
-Determine which normalization function will be called.
-*/
-NormFuncPtr makeMDEventNormalizationFunction(
-     VisualNormalization normalizationOption, Mantid::API::IMDWorkspace  const * const ws) {
-
-  using namespace Mantid::API;
- 
-  // Fetch the default and continue
-  if( normalizationOption == AutoSelect) {
-    // enum to enum.
-    normalizationOption = static_cast<VisualNormalization>(ws->displayNormalization());
-  } 
-  
-  
-  NormFuncPtr normalizationFunction;
-
-  if (normalizationOption == NumEventsNormalization) {
-    normalizationFunction = &IMDNode::getSignalByNEvents;
-  } else if (normalizationOption == Mantid::API::NoNormalization) {
-    normalizationFunction = &IMDNode::getSignal;
-  } else {
-    normalizationFunction = &IMDNode::getSignalNormalized;
-  }
-
-  return normalizationFunction;
-}
-}
 /*Constructor
   @param thresholdRange : Threshold range strategy
   @param normalizationOption : Info object setting how normalization should be
@@ -136,7 +103,7 @@ void vtkMDHexFactory::doCreate(
   vtkIdList *hexPointList = vtkIdList::New();
   hexPointList->SetNumberOfIds(8);
 
-  NormFuncPtr normFunction = makeMDEventNormalizationFunction(m_normalizationOption, ws.get());
+  NormFuncIMDNodePtr normFunction = makeMDEventNormalizationFunction(m_normalizationOption, ws.get());
 
   // This can be parallelized
   // cppcheck-suppress syntaxError

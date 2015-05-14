@@ -125,7 +125,7 @@ int vtkMDEWNexusReader::RequestData(vtkInformation * vtkNotUsed(request), vtkInf
 
   ThresholdRange_scptr thresholdRange(new IgnoreZerosThresholdRange());
   vtkMDHexFactory* hexahedronFactory = new vtkMDHexFactory(thresholdRange, VolumeNormalization);
-  vtkMDQuadFactory* quadFactory = new vtkMDQuadFactory(thresholdRange, "signal");
+  vtkMDQuadFactory* quadFactory = new vtkMDQuadFactory(thresholdRange, VolumeNormalization);
   vtkMDLineFactory* lineFactory = new vtkMDLineFactory(thresholdRange, "signal");
 
   hexahedronFactory->SetSuccessor(quadFactory);

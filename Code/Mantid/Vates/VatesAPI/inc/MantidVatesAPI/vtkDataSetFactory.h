@@ -29,21 +29,6 @@ namespace VATES
     vtkIdType pointId;
   };
 
-  /** Enum describing different ways to normalize the signal
- * in a MDWorkspace.
- Do not change the enum integers. Adding new options to the enum is ok.
- */
-enum VisualNormalization {
-  /// Don't normalize = return raw counts
-  NoNormalization = 0,
-  /// Divide the signal by the volume of the box/bin
-  VolumeNormalization = 1,
-  /// Divide the signal by the number of events that contributed to it.
-  NumEventsNormalization = 2,
-  /// Auto select Normalization
-  AutoSelect = 3
-};
-
 
 
 /** Abstract type to generate a vtk dataset on demand from a MDWorkspace.

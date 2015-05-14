@@ -4,9 +4,12 @@
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidDataObjects/MDEventFactory.h"
 #include "MantidDataObjects/MDEventWorkspace.h"
+#include "MantidVatesAPI/Normalization.h"
 #include "MantidVatesAPI/ThresholdRange.h"
-#include "MantidVatesAPI/vtkDataSetFactory.h"
 #include "MantidVatesAPI/TimeToTimeStep.h"
+#include "MantidVatesAPI/vtkDataSetFactory.h"
+
+
 #include <boost/shared_ptr.hpp>
 
 using Mantid::DataObjects::MDEventWorkspace;

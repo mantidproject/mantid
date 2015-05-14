@@ -25,6 +25,7 @@ src/MetadataToFieldData.cpp
 src/MetadataToFieldData.cpp
 src/MetaDataExtractorUtils.cpp
 src/MetadataJsonManager.cpp
+src/Normalization.cpp
 src/NoThresholdRange.cpp
 src/ProgressAction.cpp
 src/SynchronisingGeometryPresenter.cpp
@@ -85,6 +86,7 @@ inc/MantidVatesAPI/MDLoadingViewAdapter.h
 inc/MantidVatesAPI/MedianAndBelowThresholdRange.h
 inc/MantidVatesAPI/MetaDataExtractorUtils.h
 inc/MantidVatesAPI/MetadataJsonManager.h
+inc/MantidVatesAPI/Normalization.h
 inc/MantidVatesAPI/IgnoreZerosThresholdRange.h
 inc/MantidVatesAPI/IMDDimensionComparitor.h
 inc/MantidVatesAPI/MetadataToFieldData.h
@@ -158,6 +160,7 @@ test/MDHWNexusLoadingPresenterTest.h
 test/MetaDataExtractorUtilsTest.h
 test/MetadataJsonManagerTest.h
 test/MetadataToFieldDataTest.h
+test/NormalizationTest.h
 test/SQWLoadingPresenterTest.h
 test/SynchronisingGeometryPresenterTest.h
 test/TimeStepToTimeStepTest.h
