@@ -34,7 +34,7 @@ class IndirectILLReductionTest(unittest.TestCase):
         red_workspace = mtd[self.kwargs['ReducedWorkspace']]
 
         self.assertTrue(isinstance(red_workspace, mantid.api.MatrixWorkspace), "Should be a matrix workspace")
-        self.assertEqual("DeltaE", red_workspace.getAxis(0).getUnit().unitID())
+        self.assertEqual(red_workspace.getAxis(0).getUnit().unitID(), "DeltaE")
 
     def test_mirror_mode(self):
         self.kwargs['MirrorMode'] = True
