@@ -188,7 +188,7 @@ void ColorUpdater::updateLookupTable(pqDataRepresentation* representation)
 
     if (scalarOpacityFunctionProxy)
     {
-      vtkSMTransferFunctionProxy::RescaleTransferFunction(scalarOpacityFunctionProxy, this->minScale, this->maxScale);
+      vtkSMTransferFunctionProxy::RescaleTransferFunction(scalarOpacityFunctionProxy, this->m_minScale, this->m_maxScale);
     }
 
     // Need to set a lookup table lock here. This does not affect setScalarRange, 
