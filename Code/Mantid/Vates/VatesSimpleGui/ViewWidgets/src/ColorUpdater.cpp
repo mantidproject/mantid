@@ -25,6 +25,7 @@
 
 #include <vtkCallbackCommand.h>
 #include <vtkSMDoubleVectorProperty.h>
+#include <vtkSMIntVectorProperty.h>
 #include <vtkSMProxy.h>
 
 #if defined(__INTEL_COMPILER)
@@ -305,6 +306,7 @@ void ColorUpdater::observeColorScaleEdited(pqPipelineRepresentation *repr, Color
   if (!lutProxy)
     return;
 
+  // User updates the color scale (normally the range)
   // Prepare the callback. Vtk callbacks: http://www.vtk.org/Wiki/VTK/Tutorials/Callbacks
   vtkSmartPointer<vtkCallbackCommand> CRChangeCallback = vtkSmartPointer<vtkCallbackCommand>::New();
   CRChangeCallback->SetCallback(colorScaleEditedCallbackFunc);
@@ -315,7 +317,17 @@ void ColorUpdater::observeColorScaleEdited(pqPipelineRepresentation *repr, Color
   // install callback
   vtkSMDoubleVectorProperty *points =
     vtkSMDoubleVectorProperty::SafeDownCast(lutProxy->GetProperty("RGBPoints"));
-  points->AddObserver(vtkCommand::ModifiedEvent, CRChangeCallback);
+  if (points)
+    points->AddObserver(vtkCommand::ModifiedEvent, CRChangeCallback);
+
+  // User clicks on the log-scale tick box
+  vtkSmartPointer<vtkCallbackCommand> LogScaleCallback = vtkSmartPointer<vtkCallbackCommand>::New();
+  LogScaleCallback->SetCallback(logScaleClickedCallbackFunc);
+  LogScaleCallback->SetClientData(&ccdata);
+  vtkSMIntVectorProperty *logScaleProp =
+    vtkSMIntVectorProperty::SafeDownCast(lutProxy->GetProperty("UseLogScale"));
+  if (logScaleProp)
+    logScaleProp->AddObserver(vtkCommand::ModifiedEvent, LogScaleCallback);
 }
 
 /**
@@ -395,6 +407,66 @@ void ColorUpdater::colorScaleEditedCallbackFunc(vtkObject *caller, long unsigned
   }
 }
 
+/**
+ * Callback/hook for when the user changes the log scale property of
+ * the color map (in the Paraview color map/scale editor). This
+ * callback must be attached to the UseLogScale property of the Proxy
+ * for the color lookup table. Note that this goes in the opposite
+ * direction than most if not all of the updates made by the
+ * ColorUpdater.
+ *
+ * @param caller the proxy object that calls this (or the callback has
+ * been set to it with AddObserver
+ *
+ * @param eventID vtkCommand event ID for callbacks, not used here
+ *
+ * @param clientData, expects a ColorCallBackData struct that has the
+ * ColorUpdater object which set the callback, and
+ * ColorSelectionWidget object of this VSI window. Never use this
+ * method with different data.
+ *
+ * @param callData callback specific data which takes different forms
+ * depending on events, not used here.
+ */
+void ColorUpdater::logScaleClickedCallbackFunc(vtkObject *caller, long unsigned int eventID,
+                                                void *clientData, void *callData)
+{
+  UNUSED_ARG(eventID);
+  UNUSED_ARG(callData);
+
+  // this won't help much if you pass a wrong type.
+  ColorCallbackData *data = static_cast<ColorCallbackData*>(clientData);
+  if (!data){
+    return;
+  }
+
+  // pseudo-this
+  ColorUpdater *pThis = data->colorUpdater;
+  if (!pThis){
+    return;
+  }
+
+  ColorSelectionWidget *csel = data->csel;
+  if (!csel){
+    return;
+  }
+
+  // A single element int vector which actually contains a 0/1 value
+  vtkSMIntVectorProperty *useLogProp = vtkSMIntVectorProperty::SafeDownCast(caller);
+  if (!useLogProp)
+    return;
+
+  int *elems = useLogProp->GetElements();
+  int noe = useLogProp->GetNumberOfElements();
+  if (noe < 1)
+    return;
+
+  int logState = elems[0];
+  pThis->m_logScaleState = logState;
+  csel->onSetLogScale(logState);
 }
-}
-}
+
+} // SimpleGui
+} // Vates
+} // Mantid
+

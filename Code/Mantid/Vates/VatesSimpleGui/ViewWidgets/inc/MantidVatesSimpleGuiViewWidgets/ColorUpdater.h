@@ -97,8 +97,12 @@ public:
   void observeColorScaleEdited(pqPipelineRepresentation *repr, ColorSelectionWidget *cs);
 
 private:
-  /// vtk-callback function for color change events coming from the Paraview color editor
-  static void colorScaleEditedCallbackFunc(vtkObject* caller, long unsigned int, void*, void*);
+  /// vtkcallback function for color change events coming from the Paraview color editor
+  static void colorScaleEditedCallbackFunc(vtkObject* caller, long unsigned int eventID,
+                                           void *clientData, void *callData);
+  /// vtk callback function for user clicks on log-scale in the Paraview color editor
+  static void logScaleClickedCallbackFunc(vtkObject* caller, long unsigned int eventID,
+                                           void *clientData, void *callData);
 
   void updateLookupTable(pqDataRepresentation* representation); ///< Updates the lookup tables.
 

@@ -83,6 +83,8 @@ public slots:
   void setColorScaleRange(double min, double max);
   /// Slot for when the user clicks on the auto-scale check box
   void autoCheckBoxClicked(bool wasOnn);
+  /// Set log scaling button
+  void onSetLogScale(bool state);
 
 signals:
   /**
@@ -114,8 +116,8 @@ protected slots:
   void loadPreset();
   /// Set log color scaling.
   void useLogScaling(int state);
-  /// Set log scaling button
-  void onSetLogScale(bool state);
+  /// Set log color scaling, on user click
+  void useLogScalingClicked(bool wasOn);
 
 private:
   /// Add color maps from XML files.

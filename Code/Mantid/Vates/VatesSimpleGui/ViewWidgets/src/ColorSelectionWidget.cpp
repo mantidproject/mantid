@@ -61,6 +61,9 @@ ColorSelectionWidget::ColorSelectionWidget(QWidget *parent): QWidget(parent),
   this->m_ui.maxValLineEdit->setValidator(m_minValidator);
   this->m_ui.minValLineEdit->setValidator(m_maxValidator);
 
+  // note the clicked() signals, not stateChanged(), beware of programmatic state changes
+  // comming from user events from other sources (vtk callbacks and signals from the
+  // Paraview color map editor)
   QObject::connect(this->m_ui.autoColorScaleCheckBox, SIGNAL(clicked(bool)),
                    this, SLOT(autoCheckBoxClicked(bool)));
 
@@ -72,8 +75,9 @@ ColorSelectionWidget::ColorSelectionWidget(QWidget *parent): QWidget(parent),
 
   QObject::connect(this->m_ui.maxValLineEdit, SIGNAL(editingFinished()),
                    this, SLOT(getColorScaleRange()));
-  QObject::connect(this->m_ui.useLogScaleCheckBox, SIGNAL(stateChanged(int)),
-                   this, SLOT(useLogScaling(int)));
+
+  QObject::connect(this->m_ui.useLogScaleCheckBox, SIGNAL(clicked(bool)),
+                   this, SLOT(useLogScalingClicked(bool)));
 }
 
 /**
@@ -312,7 +316,22 @@ void ColorSelectionWidget::setColorScaleRange(double min, double max)
 }
 
 /**
- * This function sets the flag for using log color scaling based on the
+ * This slot sets the flag for using log color scaling based on the
+ * associated checkbox. It should be used for click events on the
+ * use-log-scaling check box.
+ *
+ * @param on state of use-log-scaling
+ */
+void ColorSelectionWidget::useLogScalingClicked(bool on)
+{
+  // Set up values for with or without log scale
+  getColorScaleRange();
+
+  emit this->logScale(wasOn);
+}
+
+/**
+ * This slot sets the flag for using log color scaling based on the
  * associated checkbox.
  * @param state flag for whether or not to use log color scaling
  */
