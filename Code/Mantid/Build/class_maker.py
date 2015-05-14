@@ -118,46 +118,46 @@ def write_source(subproject, classname, filename, args):
     f = open(filename, 'w')
 
     algorithm_top = """
-  using Mantid::Kernel::Direction;
-  using Mantid::API::WorkspaceProperty;
+using Mantid::Kernel::Direction;
+using Mantid::API::WorkspaceProperty;
 
-  // Register the algorithm into the AlgorithmFactory
-  DECLARE_ALGORITHM(%s)
-
+// Register the algorithm into the AlgorithmFactory
+DECLARE_ALGORITHM(%s)
 """ % (classname)
 
     algorithm_source = """
-  //----------------------------------------------------------------------------------------------
+//----------------------------------------------------------------------------------------------
 
-  /// Algorithms name for identification. @see Algorithm::name
-  const std::string %s::name() const { return "%s"; }
+/// Algorithms name for identification. @see Algorithm::name
+const std::string %s::name() const { return "%s"; }
 
-  /// Algorithm's version for identification. @see Algorithm::version
-  int %s::version() const { return 1;};
+/// Algorithm's version for identification. @see Algorithm::version
+int %s::version() const { return 1; };
 
-  /// Algorithm's category for identification. @see Algorithm::category
-  const std::string %s::category() const { return TODO: FILL IN A CATEGORY;}
+/// Algorithm's category for identification. @see Algorithm::category
+const std::string %s::category() const { return TODO: FILL IN A CATEGORY;}
 
-  /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
-  const std::string %s::summary() const { return TODO: FILL IN A SUMMARY;};
+/// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
+const std::string %s::summary() const { return TODO: FILL IN A SUMMARY;};
 
-  //----------------------------------------------------------------------------------------------
-  /** Initialize the algorithm's properties.
-   */
-  void %s::init()
-  {
-    declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input), "An input workspace.");
-    declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output), "An output workspace.");
-  }
+//----------------------------------------------------------------------------------------------
+/** Initialize the algorithm's properties.
+ */
+void %s::init() {
+  declareProperty(
+      new WorkspaceProperty<>("InputWorkspace", "", Direction::Input),
+      "An input workspace.");
+  declareProperty(
+      new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
+      "An output workspace.");
+}
 
-  //----------------------------------------------------------------------------------------------
-  /** Execute the algorithm.
-   */
-  void %s::exec()
-  {
-    // TODO Auto-generated execute stub
-  }
-
+//----------------------------------------------------------------------------------------------
+/** Execute the algorithm.
+ */
+void %s::exec() {
+  // TODO Auto-generated execute stub
+}
 """ % (classname, classname, classname, classname, classname, classname, classname)
 
     if not args.alg:
@@ -167,28 +167,19 @@ def write_source(subproject, classname, filename, args):
     # ------- Now the normal class text ------------------------------
     s = """#include "Mantid%s/%s%s.h"
 
-namespace Mantid
-{
-namespace %s
-{
+namespace Mantid {
+namespace %s {
 %s
+//----------------------------------------------------------------------------------------------
+/** Constructor
+ */
+%s::%s() {}
 
-  //----------------------------------------------------------------------------------------------
-  /** Constructor
-   */
-  %s::%s()
-  {
-  }
-
-  //----------------------------------------------------------------------------------------------
-  /** Destructor
-   */
-  %s::~%s()
-  {
-  }
-
+//----------------------------------------------------------------------------------------------
+/** Destructor
+ */
+%s::~%s() {}
 %s
-
 } // namespace %s
 } // namespace Mantid""" % (
         subproject, args.subfolder, classname, subproject, algorithm_top,
