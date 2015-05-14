@@ -1,6 +1,7 @@
 #ifndef VATES_MD_LINE_FACTORY
 #define VATES_MD_LINE_FACTORY
 
+#include "MantidVatesAPI/Normalization.h"
 #include "MantidVatesAPI/vtkDataSetFactory.h"
 #include "MantidVatesAPI/ThresholdRange.h"
 #include <boost/shared_ptr.hpp>
@@ -40,7 +41,7 @@ namespace Mantid
 
     public:
       /// Constructor
-      vtkMDLineFactory(ThresholdRange_scptr thresholdRange, const std::string& scalarName);
+      vtkMDLineFactory(ThresholdRange_scptr thresholdRange, const VisualNormalization normalizationOption);
 
       /// Destructor
       virtual ~vtkMDLineFactory();
@@ -65,7 +66,7 @@ namespace Mantid
       ThresholdRange_scptr m_thresholdRange;
 
       ///Name of the scalar.
-      std::string m_scalarName;
+      const VisualNormalization m_normalizationOption;
 
       /// Data source for the visualisation.
       Mantid::API::Workspace_sptr m_workspace;
