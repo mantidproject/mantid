@@ -183,16 +183,17 @@ void MantidQwtIMDWorkspaceData::calculateMinMax()
     // Try and get rid any starting NaNs as soon as possible
     if ((boost::math::isnan)(curMin) || (boost::math::isinf)(curMin))
       curMin = m_Y[i];
-    if ((boost::math::isnan)(curMinPos) || (boost::math::isinf)(curMinPos))
+    if (m_Y[i] > 0 && (curMinPos <= 0 || (boost::math::isnan)(curMinPos) ||
+                       (boost::math::isinf)(curMinPos)))
       curMinPos = m_Y[i];
     if ((boost::math::isnan)(curMax) || (boost::math::isinf)(curMax))
       curMax = m_Y[i];
 
     // Update our values as appropriate
     if (m_Y[i] < curMin)
-        curMin = m_Y[i];
+      curMin = m_Y[i];
     if (m_Y[i] < curMinPos && m_Y[i] > 0)
-        curMinPos = m_Y[i];
+      curMinPos = m_Y[i];
     if (m_Y[i] > curMax)
       curMax = m_Y[i];
   }
