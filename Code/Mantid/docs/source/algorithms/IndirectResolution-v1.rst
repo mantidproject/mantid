@@ -16,7 +16,7 @@ give a single resolution curve.
 Rebinning and intensity scaling can optionally be applied to the result.
 
 Workflow
-########
+--------
 
 .. diagram:: IndirectResolution-v1_wkflw.dot
 

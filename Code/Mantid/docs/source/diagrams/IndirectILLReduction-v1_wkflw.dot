@@ -2,6 +2,19 @@ digraph IndirectILLReduction {
   label="IndirectILLReduction Flowchart"
   $global_style
 
+  subgraph values{
+    $value_style
+    CE_End [label="Reduced Workspace"]
+    MM_End [label="Reduced Workspace"]
+  }
+
+  subgraph descision {
+    $decision_style
+    Save_Red [label="Save?"]
+    Save_LeftRed [label="Save?"]
+    Save_RightRed [label="Save?"]
+  }
+
   subgraph params {
     $param_style
     Run
@@ -43,16 +56,13 @@ digraph IndirectILLReduction {
     MM_SaveNexusProcessed_RightRed [label="SaveNexusProcessed"]
   }
 
-CE_Start [label="Calculate Energy"]
-CE_End [label="End"]
+  CE_Start [label="Calculate Energy"]
+  MM_Start [label="Mirror Mode"]
 
-MM_Start [label="Mirror Mode"]
-MM_End [label="End"]
-
-CE_Normal [label="Calculate Energy"]
-CE_Mirror_Right [label="Calculate Energy (Right)"]
-CE_Mirror_Left [label="Calculate Energy (Left)"]
-RunMirrorMode [label="Mirror Mode"]
+  CE_Normal [label="Calculate Energy"]
+  CE_Mirror_Right [label="Calculate Energy (Right)"]
+  CE_Mirror_Left [label="Calculate Energy (Left)"]
+  RunMirrorMode [label="Mirror Mode"]
 
   subgraph calculate_energy {
     CE_Start                  -> CE_Scale_Monitor [label="Monitor WS"]
@@ -77,30 +87,33 @@ RunMirrorMode [label="Mirror Mode"]
     MM_CropWorkspace_RightMonitor   -> CE_Mirror_Right
     CE_Mirror_Right                 -> MM_ScaleX_RightRed
     CE_Mirror_Left                  -> MM_RebinToWorkspace_RightRed
+    CE_Mirror_Left                  -> Save_LeftRed
     CE_Mirror_Left                  -> LeftWorkspace
-    LeftWorkspace                   -> MM_SaveNexusProcessed_LeftRed [label="If Save"]
+    Save_LeftRed                    -> MM_SaveNexusProcessed_LeftRed [label="Yes"]
     MM_ScaleX_RightRed              -> MM_RebinToWorkspace_RightRed
     MM_RebinToWorkspace_RightRed    -> RightWorkspace
-    RightWorkspace                  -> MM_SaveNexusProcessed_RightRed [label="If Save"]
+    RightWorkspace                  -> Save_RightRed
+    Save_RightRed                   -> MM_SaveNexusProcessed_RightRed [label="Yes"]
     CE_Mirror_Left                  -> MM_Plus
     MM_RebinToWorkspace_RightRed    -> MM_Plus
     MM_Plus                         -> MM_Scale
     MM_Scale                        -> MM_End
   }
 
-Run                   -> LoadILLIndirect
-LoadILLIndirect       -> LoadParameterFile
-Analyser              -> LoadParameterFile
-Reflection            -> LoadParameterFile
-LoadParameterFile     -> RawWorkspace
-LoadParameterFile     -> GroupDetectors
-MapFile               -> GroupDetectors
-GroupDetectors        -> MirrorMode [label="Detectors"]
-LoadParameterFile     -> ExtractSingleSpectrum
-ExtractSingleSpectrum -> MirrorMode [label="Monitor"]
-MirrorMode            -> CE_Normal [label="No"]
-CE_Normal             -> ReducedWorkspace
-MirrorMode            -> RunMirrorMode [label="Yes"]
-RunMirrorMode         -> ReducedWorkspace
-ReducedWorkspace      -> SaveNexusProcessed [label="If Save"]
+  Run                   -> LoadILLIndirect
+  LoadILLIndirect       -> LoadParameterFile
+  Analyser              -> LoadParameterFile
+  Reflection            -> LoadParameterFile
+  LoadParameterFile     -> RawWorkspace
+  LoadParameterFile     -> GroupDetectors
+  MapFile               -> GroupDetectors
+  GroupDetectors        -> MirrorMode [label="Detectors"]
+  LoadParameterFile     -> ExtractSingleSpectrum
+  ExtractSingleSpectrum -> MirrorMode [label="Monitor"]
+  MirrorMode            -> CE_Normal [label="No"]
+  CE_Normal             -> ReducedWorkspace
+  MirrorMode            -> RunMirrorMode [label="Yes"]
+  RunMirrorMode         -> ReducedWorkspace
+  ReducedWorkspace      -> Save_Red
+  Save_Red              -> SaveNexusProcessed [label="Yes"]
 }

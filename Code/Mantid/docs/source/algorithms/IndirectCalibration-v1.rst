@@ -18,7 +18,7 @@ algorithm which are then merged into a single run using :ref:`MergeRuns
 the output workspace.
 
 Workflow
-########
+--------
 
 .. diagram:: IndirectCalibration-v1_wkflw.dot
 

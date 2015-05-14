@@ -1,9 +1,20 @@
 digraph IndirectCalibration {
   label="IndirectCalibration Flowchart"
-  $global_style
+  /* $global_style */
+
+  subgraph values {
+    /* $value_style */
+    AutoScaleFactor [label="1 / (sum / (num_spectra / num_zero_spectra))"]
+  }
+
+  subgraph descision {
+    /* $decision_style */
+    UseAutoScale [label="ScaleFactor = 1?"]
+    MultipleFiles [label="Multiple Files?"]
+  }
 
   subgraph params {
-    $param_style
+    /* $param_style */
     InputFiles
     DetectorRange
     PeakRange
@@ -13,29 +24,37 @@ digraph IndirectCalibration {
   }
 
   subgraph algorithms {
-    $algorithm_style
+    /* $algorithm_style */
     Load
     MergeRuns
-    "Scale 1" [label="Scale"]
+    Scale_Raw [label="Scale"]
     CalculateFlatBackground
     FindDetectorsOutsideLimits
     Integration
-    "Scale 2" [label="Scale"]
+    SumSpectra
+    Scale_Auto [label="Scale"]
+    Scale_Manual [label="Scale"]
   }
 
   InputFiles                  -> Load
-  Load                        -> "Multiple Files ?"
-  "Multiple Files ?"          -> MergeRuns [label="Yes"]
-  MergeRuns                   -> "Scale 1"
-  "Scale 1"                   -> CalculateFlatBackground
+  DetectorRange               -> Load
+  Load                        -> MultipleFiles
+  MultipleFiles               -> MergeRuns [label="Yes"]
+  MergeRuns                   -> Scale_Raw
+  Scale_Raw                   -> CalculateFlatBackground
   BackgroundRange             -> CalculateFlatBackground
-  "Multiple Files ?"          -> CalculateFlatBackground [label="No"]
+  MultipleFiles               -> CalculateFlatBackground [label="No"]
   CalculateFlatBackground     -> FindDetectorsOutsideLimits
-  DetectorRange               -> FindDetectorsOutsideLimits
   CalculateFlatBackground     -> Integration
   PeakRange                   -> Integration
-  Integration                 -> "Scale 2"
-  ScaleFactor                 -> "Scale 2" [label="ScaleFactor != 1"]
-  FindDetectorsOutsideLimits  -> "Scale 2" [label="ScaleFactor = 1"]
-  "Scale 2"                   -> OutputWorkspace
+  Integration                 -> UseAutoScale
+  Integration                 -> SumSpectra
+  UseAutoScale                -> Scale_Auto [label="Yes"]
+  FindDetectorsOutsideLimits  -> AutoScaleFactor [label="num_zero_spectra"]
+  SumSpectra                  -> AutoScaleFactor [label="sum"]
+  AutoScaleFactor             -> Scale_Auto
+  Scale_Auto                  -> OutputWorkspace
+  UseAutoScale                -> Scale_Manual [label="No"]
+  ScaleFactor                 -> Scale_Manual
+  Scale_Manual                -> OutputWorkspace
 }
