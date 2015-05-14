@@ -6,6 +6,7 @@ set( INCLUDE_FILES
   inc/MantidVatesSimpleGuiViewWidgets/CameraManager.h
   inc/MantidVatesSimpleGuiViewWidgets/BackgroundRgbProvider.h
   inc/MantidVatesSimpleGuiViewWidgets/ColorMapManager.h
+  inc/MantidVatesSimpleGuiViewWidgets/ColorMapEditorPanel.h
   inc/MantidVatesSimpleGuiViewWidgets/ColorSelectionWidget.h
   inc/MantidVatesSimpleGuiViewWidgets/ColorUpdater.h
   inc/MantidVatesSimpleGuiViewWidgets/LibHelper.h
@@ -31,6 +32,7 @@ set( SOURCE_FILES
   src/CameraManager.cpp
   src/BackgroundRgbProvider.cpp
   src/ColorMapManager.cpp
+  src/ColorMapEditorPanel.cpp
   src/ColorSelectionWidget.cpp
   src/ColorUpdater.cpp
   src/MdViewerWidget.cpp
@@ -57,6 +59,7 @@ set( TEST_FILES
 # Qt's moc preprocessor.
 qt4_wrap_cpp( MOC_SOURCES
   inc/MantidVatesSimpleGuiViewWidgets/ColorSelectionWidget.h
+  inc/MantidVatesSimpleGuiViewWidgets/ColorMapEditorPanel.h
   inc/MantidVatesSimpleGuiViewWidgets/MdViewerWidget.h
   inc/MantidVatesSimpleGuiViewWidgets/MultisliceView.h
   inc/MantidVatesSimpleGuiViewWidgets/PeaksTableControllerVsi.h
@@ -76,6 +79,7 @@ qt4_wrap_cpp( MOC_SOURCES
 # Qt's ui file processor.
 qt4_wrap_ui( UI_BUILT_SOURCES
   inc/MantidVatesSimpleGuiViewWidgets/ColorSelectionWidget.ui
+  inc/MantidVatesSimpleGuiViewWidgets/ColorMapEditorPanel.ui
   inc/MantidVatesSimpleGuiViewWidgets/MdViewerWidget.ui
   inc/MantidVatesSimpleGuiViewWidgets/MultisliceView.ui
   inc/MantidVatesSimpleGuiViewWidgets/PeaksWidget.ui
