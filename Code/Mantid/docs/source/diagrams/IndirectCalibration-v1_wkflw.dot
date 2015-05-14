@@ -1,0 +1,41 @@
+digraph IndirectCalibration {
+  label="IndirectCalibration Flowchart"
+  $global_style
+
+  subgraph params {
+    $param_style
+    InputFiles
+    DetectorRange
+    PeakRange
+    BackgroundRange
+    ScaleFactor
+    OutputWorkspace
+  }
+
+  subgraph algorithms {
+    $algorithm_style
+    Load
+    MergeRuns
+    "Scale 1"
+    CalculateFlatBackground
+    FindDetectorsOutsideLimits
+    Integration
+    "Scale 2"
+  }
+
+  InputFiles                  -> Load
+  Load                        -> "Multiple Files ?"
+  "Multiple Files ?"          -> MergeRuns [label="Yes"]
+  MergeRuns                   -> "Scale 1"
+  "Scale 1"                   -> CalculateFlatBackground
+  BackgroundRange             -> CalculateFlatBackground
+  "Multiple Files"            -> CalculateFlatBackground [label="No"]
+  CalculateFlatBackground     -> FindDetectorsOutsideLimits
+  DetectorRange               -> FindDetectorsOutsideLimits
+  CalculateFlatBackground     -> Integration
+  PeakRange                   -> Integration
+  Integration                 -> "Scale 2"
+  ScaleFactor                 -> "Scale 2" [label="ScaleFactor != 0"]
+  FindDetectorsOutsideLimits  -> "Scale 2" [label="ScaleFactor = 0"]
+  "Scale 2"                   -> OutputWorkspace
+}
