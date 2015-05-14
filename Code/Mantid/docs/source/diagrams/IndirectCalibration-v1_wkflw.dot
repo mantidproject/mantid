@@ -16,11 +16,11 @@ digraph IndirectCalibration {
     $algorithm_style
     Load
     MergeRuns
-    "Scale 1"
+    "Scale 1" [label="Scale"]
     CalculateFlatBackground
     FindDetectorsOutsideLimits
     Integration
-    "Scale 2"
+    "Scale 2" [label="Scale"]
   }
 
   InputFiles                  -> Load
@@ -29,13 +29,13 @@ digraph IndirectCalibration {
   MergeRuns                   -> "Scale 1"
   "Scale 1"                   -> CalculateFlatBackground
   BackgroundRange             -> CalculateFlatBackground
-  "Multiple Files"            -> CalculateFlatBackground [label="No"]
+  "Multiple Files ?"          -> CalculateFlatBackground [label="No"]
   CalculateFlatBackground     -> FindDetectorsOutsideLimits
   DetectorRange               -> FindDetectorsOutsideLimits
   CalculateFlatBackground     -> Integration
   PeakRange                   -> Integration
   Integration                 -> "Scale 2"
-  ScaleFactor                 -> "Scale 2" [label="ScaleFactor != 0"]
-  FindDetectorsOutsideLimits  -> "Scale 2" [label="ScaleFactor = 0"]
+  ScaleFactor                 -> "Scale 2" [label="ScaleFactor != 1"]
+  FindDetectorsOutsideLimits  -> "Scale 2" [label="ScaleFactor = 1"]
   "Scale 2"                   -> OutputWorkspace
 }
