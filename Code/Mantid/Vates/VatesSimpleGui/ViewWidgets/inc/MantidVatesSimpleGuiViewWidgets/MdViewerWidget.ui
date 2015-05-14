@@ -247,22 +247,6 @@
        </property>
       </widget>
      </widget>
-     <widget class="QDockWidget" name="colorMapEditorDock">
-      <property name="floating">
-       <bool>true</bool>
-      </property>
-      <property name="windowTitle">
-       <string>Color Map Editor</string>
-      </property>
-      <widget class="pqColorMapEditor" name="colorMapEditorPanel">
-       <property name="minimumSize">
-        <size>
-         <width>400</width>
-         <height>0</height>
-        </size>
-       </property>
-      </widget>
-     </widget>
     </widget>
    </item>
    <item>
@@ -330,12 +314,6 @@
    <class>pqAxesToolbar</class>
    <extends>QWidget</extends>
    <header>pqAxesToolbar.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>pqColorMapEditor</class>
-   <extends>QWidget</extends>
-   <header>pqColorMapEditor.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

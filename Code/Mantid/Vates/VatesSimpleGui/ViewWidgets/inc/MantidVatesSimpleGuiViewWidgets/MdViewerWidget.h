@@ -42,6 +42,7 @@ class RotationPointDialog;
 class SaveScreenshotReaction;
 class ViewBase;
 class RebinDialog;
+class ColorMapEditorPanel;
 /**
  *
   This class represents the central widget for handling VATES visualization
@@ -119,10 +120,7 @@ protected slots:
   void onUnbin();
   /// On switching an MDEvent source to a temporary source.
   void onSwitchSoures(std::string rebinnedWorkspaceName, std::string sourceType);
-  /// handles the position of the color editor panel 
-  void handleColorMapEditorDockPosition(bool);
-  /// handles the position of the color editor panel when being undocked or redocked
-  void handleColorMapEditorDockWhenDocking(bool isFloating);
+
 protected:
   /// Handle workspace preDeletion tasks.
   void preDeleteHandle(const std::string &wsName,
@@ -156,6 +154,7 @@ private:
   RebinAlgorithmDialogProvider m_rebinAlgorithmDialogProvider; ///<Provides dialogs to execute rebin algorithms
   RebinnedSourcesManager m_rebinnedSourcesManager; ///<Holds the rebinned sources manager
   QString m_rebinnedWorkspaceIdentifier; ///< Holds the identifier for temporary workspaces
+  ColorMapEditorPanel* m_colorMapEditorPanel; ///< Holder for the color map editor panel.
 
   /// Setup color selection widget connections.
   void connectColorSelectionWidget();

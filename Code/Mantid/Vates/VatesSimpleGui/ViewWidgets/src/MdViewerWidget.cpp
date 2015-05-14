@@ -5,6 +5,7 @@
 #include "MantidVatesSimpleGuiQtWidgets/ModeControlWidget.h"
 #include "MantidVatesSimpleGuiQtWidgets/RotationPointDialog.h"
 #include "MantidVatesSimpleGuiViewWidgets/BackgroundRgbProvider.h"
+#include "MantidVatesSimpleGuiViewWidgets/ColorMapEditorPanel.h"
 #include "MantidVatesSimpleGuiViewWidgets/ColorSelectionWidget.h"
 #include "MantidVatesSimpleGuiViewWidgets/MultisliceView.h"
 #include "MantidVatesSimpleGuiViewWidgets/SaveScreenshotReaction.h"
@@ -136,7 +137,7 @@ REGISTER_VATESGUI(MdViewerWidget)
  */
 MdViewerWidget::MdViewerWidget() : VatesViewerInterface(), currentView(NULL),
   dataLoader(NULL), hiddenView(NULL), lodAction(NULL), screenShot(NULL), viewLayout(NULL),
-  viewSettings(NULL), useCurrentColorMap(false), initialView(ModeControlWidget::STANDARD), m_rebinAlgorithmDialogProvider(this), m_rebinnedWorkspaceIdentifier("_tempvsi")
+  viewSettings(NULL), useCurrentColorMap(false), initialView(ModeControlWidget::STANDARD), m_rebinAlgorithmDialogProvider(this), m_rebinnedWorkspaceIdentifier("_tempvsi"), m_colorMapEditorPanel(NULL)
 {
   //this will initialize the ParaView application if needed.
   VatesParaViewApplication::instance();
@@ -213,16 +214,11 @@ void MdViewerWidget::setupUiAndConnections()
                    SLOT(onRotationPoint()));
 
   /// Provide access to the color-editor panel for the application.
-  pqApplicationCore::instance()->registerManager(
-    "COLOR_EDITOR_PANEL", this->ui.colorMapEditorDock);
-  this->ui.colorMapEditorDock->hide();
-
-  // 
-  QObject::connect(this->ui.colorMapEditorDock, SIGNAL(visibilityChanged(bool)),
-                    this, SLOT(handleColorMapEditorDockPosition(bool)));
-  QObject::connect(this->ui.colorMapEditorDock, SIGNAL(topLevelChanged(bool)),
-                    this, SLOT(handleColorMapEditorDockWhenDocking(bool)));
-
+  if (!m_colorMapEditorPanel)
+  {
+    m_colorMapEditorPanel = new ColorMapEditorPanel(this);
+    m_colorMapEditorPanel->setUpPanel();
+  }
 
   //this->connect(this->ui.proxiesPanel,SIGNAL(changeFinished(vtkSMProxy*)),SLOT(panelChanged()));
   QAction* temp = new QAction(this);
@@ -250,36 +246,6 @@ void MdViewerWidget::panelChanged()
     this->currentView->renderAll();
 }
 
-/**
- * This is a hack to position the color map editor panel.
- * We check if the visibility of the dock has changed and reposition it according to the VSI
- */
-void MdViewerWidget::handleColorMapEditorDockPosition(bool)
-{
-  // Get the position of the VSI
-  QRect rect =   this->geometry();
-  QPoint pointGlobal = this->mapToGlobal(rect.topLeft());
-
-  // Set the color map editor dock to this position.
-  this->ui.colorMapEditorDock->move(pointGlobal.x(), pointGlobal.y());
-}
-
-/**
- * We don't want the user to be able to redock the window. If the user tries to redock, 
- * then we hide the color map editor and set it back to floating.
-  *@param isFloating :: true if is floating
- */
-void MdViewerWidget::handleColorMapEditorDockWhenDocking(bool isFloating)
-{
-  // Hide the color map editor
-  this->ui.colorMapEditorDock->hide();
-
-  // If the color map editor is not floating, then make it floating
-  if (!isFloating)
-  {
-    this->ui.colorMapEditorDock->setFloating(true);
-  }
-}
 
 /**
  * This function places the standard view to the main window, installs an
@@ -1075,6 +1041,8 @@ bool MdViewerWidget::eventFilter(QObject *obj, QEvent *ev)
       this->currentView->updateSettings();
       this->currentView->hide();
       this->useCurrentColorMap = false;
+
+      this->m_colorMapEditorPanel->hide();
 
       return true;
     }
