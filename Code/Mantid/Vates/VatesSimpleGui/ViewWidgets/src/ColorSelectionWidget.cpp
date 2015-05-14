@@ -29,7 +29,6 @@
 #include <QFile>
 #include <QFileInfo>
 
-
 namespace Mantid
 {
 namespace Vates
@@ -44,7 +43,7 @@ namespace SimpleGui
  */
 ColorSelectionWidget::ColorSelectionWidget(QWidget *parent): QWidget(parent),
     colorMapManager(new ColorMapManager()), m_minHistoric(0.01), m_maxHistoric(0.01),
-    m_inProcessUserRequestedAutoScale(false)
+    m_ignoreColorChangeCallbacks(false), m_inProcessUserRequestedAutoScale(false)
 {
   this->m_ui.setupUi(this);
   this->m_ui.autoColorScaleCheckBox->setChecked(true);
@@ -226,6 +225,27 @@ void ColorSelectionWidget::setMinMax(double& min, double& max)
 }
 
 /**
+ * To prevent updates from external callbacks, useful for example
+ * when switching. This is set to true before starting view update
+ * or switch operations, and then to false to re-enable user
+ * requested updates.
+ *
+ * @param ignore whether callbacks should be ignored.
+ */
+void ColorSelectionWidget::ignoreColorChangeCallbacks(bool ignore) {
+  m_ignoreColorChangeCallbacks = ignore;
+}
+
+/**
+ * Get the current state as for ignoring callbacks from color changes.
+ *
+ * @return whether this is currently ignoring color change callbacks.
+ */
+bool ColorSelectionWidget::isIgnoringColorCallbacks() {
+  return m_ignoreColorChangeCallbacks;
+}
+
+/**
  * This slot enables or diables the min and max line edits based on
  * the (changing) state of the automatic scaling checkbox. It should
  * be used for click events on the auto-scale check box.
@@ -320,14 +340,14 @@ void ColorSelectionWidget::setColorScaleRange(double min, double max)
  * associated checkbox. It should be used for click events on the
  * use-log-scaling check box.
  *
- * @param on state of use-log-scaling
+ * @param on clicked-state of use-log-scaling
  */
 void ColorSelectionWidget::useLogScalingClicked(bool on)
 {
   // Set up values for with or without log scale
   getColorScaleRange();
 
-  emit this->logScale(wasOn);
+  emit this->logScale(on);
 }
 
 /**

@@ -73,6 +73,9 @@ public:
   void setMinMax(double& min, double& max);
   /// Others need to know if this widget is in the process of updating colors at user's request
   bool inProcessUserRequestedAutoScale() { return m_inProcessUserRequestedAutoScale; };
+  /// To effectively block callbacks from external (Paraview) color changes
+  void ignoreColorChangeCallbacks(bool ignore);
+  bool isIgnoringColorCallbacks();
 
 public slots:
   /// Set state for all control widgets.
@@ -145,6 +148,7 @@ private:
 
   pqColorPresetManager *m_presets; ///< Dialog for choosing color presets
   Ui::ColorSelectionWidgetClass m_ui; ///< The mode control widget's UI form
+  bool m_ignoreColorChangeCallbacks; ///< Effectively blocks/disables callbacks
 
   /// this is a flag that is set while updating the color scale triggered by the user clicking on the auto-scale box
   bool m_inProcessUserRequestedAutoScale;

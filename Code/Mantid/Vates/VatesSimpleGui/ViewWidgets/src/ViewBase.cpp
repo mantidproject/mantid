@@ -1,5 +1,8 @@
+#include <stdexcept>
+
 #include "MantidVatesSimpleGuiViewWidgets/ViewBase.h"
 #include "MantidVatesSimpleGuiViewWidgets/BackgroundRgbProvider.h"
+#include "MantidVatesSimpleGuiViewWidgets/ColorSelectionWidget.h"
 #include "MantidVatesSimpleGuiViewWidgets/RebinnedSourcesManager.h"
 
 #if defined(__INTEL_COMPILER)
@@ -32,12 +35,9 @@
   #pragma warning enable 1170
 #endif
 
-#include <QDebug>
 #include <QHBoxLayout>
 #include <QPointer>
 #include <QSet>
-
-#include <stdexcept>
 
 namespace Mantid
 {

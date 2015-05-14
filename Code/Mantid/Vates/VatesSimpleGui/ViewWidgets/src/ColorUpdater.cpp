@@ -370,11 +370,16 @@ void ColorUpdater::colorScaleEditedCallbackFunc(vtkObject *caller, long unsigned
     return;
   }
 
-  // This means that the user clicked on the auto-scale check box of the ColorSelectionWidget.
+  // This means that either
+  //
+  // A) the user clicked on the auto-scale check box of the ColorSelectionWidget.
   // That will change color properties of the ParaQ and trigger this callback. This condition
   // prevents the callback from ruining the state of the ColorSelectionWidget (which is just
   // being set by the user and we do not want to update programmatically in this case).
-  if (csel->inProcessUserRequestedAutoScale()) {
+  //
+  // B) We are in the middle of an operation where we don't want callbacks to update the
+  // color map (for example when switching views or doing several view updates in a row)
+  if (csel->inProcessUserRequestedAutoScale() || csel->isIgnoringColorCallbacks()) {
     return;
   }
 
