@@ -19,7 +19,7 @@ namespace {
 Mantid::Kernel::Logger g_log("SCARFLSFJobManager");
 }
 
-std::string LSFJobManager::g_loginBaseURL = "https://portal.scarf.rl.ac.uk/";
+std::string LSFJobManager::g_loginBaseURL = "https://portal.scarf.rl.ac.uk";
 std::string LSFJobManager::g_loginPath = "/cgi-bin/token.py";
 
 std::string SCARFLSFJobManager::g_logoutPath = "webservice/pacclient/logout/";
@@ -77,8 +77,8 @@ void SCARFLSFJobManager::authenticate(const std::string &username,
     // insert in the token stash
     UsernameToken tok(username, Token(url, token_str));
     m_tokenStash.insert(tok); // the password is never stored
-    g_log.notice() << "Got authentication token. You are now logged in "
-                   << std::endl;
+    g_log.notice() << "Got authentication token for user '" + username +
+                          "'. You are now logged in " << std::endl;
   } else {
     throw std::runtime_error("Login failed. Please check your username and "
                              "password. Got status code " +

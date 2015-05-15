@@ -675,7 +675,14 @@ int LSFJobManager::doSendRequestGetResponse(const Poco::URI &uri,
       session.setMethod(method);
     }
   }
-  return session.sendRequest(uri.toString(), rss);
+
+  // properly URI-encode string. You won't normally need any escaping for
+  // standard LSF uris and paths, but if LSF extensions/variants use uri
+  // parameters you'll likely get in trouble.
+  std::string encodedURI;
+  Poco::URI::encode(uri.toString(), "", encodedURI);
+
+  return session.sendRequest(encodedURI, rss);
 }
 
 /**
