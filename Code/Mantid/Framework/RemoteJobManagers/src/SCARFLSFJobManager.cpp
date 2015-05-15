@@ -46,7 +46,14 @@ void SCARFLSFJobManager::authenticate(const std::string &username,
   m_tokenStash.clear();
   m_transactions.clear();
 
-  const std::string params = "?username=" + username + "&password=" + password;
+  // Do the URI %-encoding, but component by component
+  std::string encodedUser = url_component_encode(username);
+  // Poco::URI::encode(username, ";,/?:@&=+$#", encodedUser);
+  std::string encodedPass = url_component_encode(password);
+  // Poco::URI::encode(password, ";,/?:@&=+$#", encodedPass);
+
+  const std::string params =
+      "?username=" + encodedUser + "&password=" + encodedPass;
   const Poco::URI fullURL =
       makeFullURI(Poco::URI(g_loginBaseURL), g_loginPath, params);
   int code = 0;
@@ -195,6 +202,40 @@ void SCARFLSFJobManager::logout(const std::string &username) {
     if (m_tokenStash.end() != it)
       m_tokenStash.erase(it);
   }
+}
+
+/**
+ * This uri encode helper escapes anything that is not unreserved in
+ * RFC3986.
+ *
+ * Note: Poco's encode (Poco::URI::encode()) requires the list of
+ * characters to escape. This method is added here as I think this is
+ * a much safer and standard compliant way than giving a explicit list
+ * of characters to escape. If this same encode happens to be needed
+ * somewhere else maybe it should be moved to a more general place.
+ *
+ * @param in string (normally a component of an uri, like a parameter
+ * value)
+ *
+ * @return uri-encoded string, as per RFC3986
+ */
+std::string SCARFLSFJobManager::url_component_encode(const std::string &in) {
+  std::ostringstream out;
+  out.fill('0');
+  out << std::hex;
+
+  for (std::string::const_iterator i = in.begin(), n = in.end(); i != n; ++i) {
+    std::string::value_type c = (*i);
+    // unreserved characters go through, where:
+    // unreserved = ALPHA / DIGIT / "-" / "." / "_" / "~"
+    if (isalnum(c) || c == '-' || c == '_' || c == '.' || c == '~') {
+      out << c;
+    } else {
+      // Any non unreserved is pct-escaped
+      out << '%' << std::setw(2) << int((unsigned char) c);
+    }
+  }
+  return out.str();
 }
 
 } // end namespace RemoteJobManagers

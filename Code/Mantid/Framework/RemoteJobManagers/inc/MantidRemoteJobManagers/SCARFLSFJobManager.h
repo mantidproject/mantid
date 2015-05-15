@@ -45,6 +45,9 @@ public:
   virtual void logout(const std::string &username = std::string());
 
 private:
+  /// helper to encode uri components (SCARF username / passwords)
+  std::string url_component_encode(const std::string &in);
+
   static std::string g_pingPath;
   static std::string g_logoutPath;
   static std::string g_pingBaseURL;
