@@ -197,11 +197,11 @@ void ConvertMDHistoToMatrixWorkspace::make1DWorkspace() {
   const size_t numberTransformsToOriginal =
       inputWorkspace->getNumberTransformsToOriginal();
 
-  boost::shared_ptr<CoordTransform> transform =
+  CoordTransform_const_sptr transform =
       boost::make_shared<NullCoordTransform>(inputWorkspace->getNumDims());
   if (numberTransformsToOriginal > 0) {
     const size_t indexToLastTransform = numberTransformsToOriginal - 1;
-    transform = boost::shared_ptr<CoordTransform>(
+    transform = CoordTransform_const_sptr(
         inputWorkspace->getTransformToOriginal(indexToLastTransform),
         NullDeleter());
   }

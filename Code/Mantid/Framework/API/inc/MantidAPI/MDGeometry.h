@@ -6,6 +6,7 @@
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include <Poco/NObserver.h>
+#include <boost/shared_ptr.hpp>
 
 namespace Mantid {
 namespace API {
@@ -85,10 +86,10 @@ public:
   size_t numOriginalWorkspaces() const;
   boost::shared_ptr<Workspace> getOriginalWorkspace(size_t index = 0) const;
   void setOriginalWorkspace(boost::shared_ptr<Workspace> ws, size_t index = 0);
-  Mantid::API::CoordTransform *getTransformFromOriginal(size_t index = 0) const;
+  Mantid::API::CoordTransform const *getTransformFromOriginal(size_t index = 0) const;
   void setTransformFromOriginal(Mantid::API::CoordTransform *transform,
                                 size_t index = 0);
-  Mantid::API::CoordTransform *getTransformToOriginal(size_t index = 0) const;
+  Mantid::API::CoordTransform const *getTransformToOriginal(size_t index = 0) const;
   void setTransformToOriginal(Mantid::API::CoordTransform *transform,
                               size_t index = 0);
 
@@ -120,6 +121,11 @@ public:
   /// plane
   const Kernel::DblMatrix &getWTransf() const { return m_Wtransf; }
 
+  /// Clear transforms
+  void clearTransforms();
+  /// Clear original workspaces
+  void clearOriginalWorkspaces();
+
 protected:
   /// Function called when observer objects recieves a notification
   void deleteNotificationReceived(
@@ -138,11 +144,11 @@ protected:
 
   /// Coordinate Transformation that goes from the original workspace to this
   /// workspace's coordinates.
-  std::vector<Mantid::API::CoordTransform *> m_transforms_FromOriginal;
+  std::vector<boost::shared_ptr<const Mantid::API::CoordTransform> > m_transforms_FromOriginal;
 
   /// Coordinate Transformation that goes from this workspace's coordinates to
   /// the original workspace coordinates.
-  std::vector<Mantid::API::CoordTransform *> m_transforms_ToOriginal;
+  std::vector<boost::shared_ptr<const Mantid::API::CoordTransform> > m_transforms_ToOriginal;
 
   /// Poco delete notification observer object
   Poco::NObserver<MDGeometry, Mantid::API::WorkspacePreDeleteNotification>

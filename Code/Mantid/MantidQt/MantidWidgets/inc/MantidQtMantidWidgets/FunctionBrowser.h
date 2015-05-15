@@ -96,10 +96,6 @@ public:
   Mantid::API::IFunction_sptr getFunction(QtProperty* prop = NULL, bool attributesOnly = false);
   /// Check if a function is set
   bool hasFunction() const;
-  /// Get a list of names of global parameters
-  QStringList getGlobalParameters() const;
-  /// Get a list of names of local parameters
-  QStringList getLocalParameters() const;
 
   /// Return a function with specified index
   Mantid::API::IFunction_sptr getFunctionByIndex(const QString& index);
@@ -122,6 +118,25 @@ public:
   /// Update parameter values in the browser to match those of a function.
   void updateParameters(const Mantid::API::IFunction& fun);
 
+  /// Get a list of names of global parameters
+  QStringList getGlobalParameters() const;
+  /// Get a list of names of local parameters
+  QStringList getLocalParameters() const;
+  /// Get the number of datasets
+  int getNumberOfDatasets() const;
+  /// Get value of a local parameter
+  double getLocalParameterValue(const QString& parName, int i) const;
+  /// Set value of a local parameter
+  void setLocalParameterValue(const QString& parName, int i, double value);
+  /// Check if a local parameter is fixed
+  bool isLocalParameterFixed(const QString& parName, int i) const;
+  /// Fix/unfix local parameter
+  void setLocalParameterFixed(const QString& parName, int i, bool fixed);
+  /// Return the multidomain function if number of datasets is greater than 1
+  Mantid::API::IFunction_sptr getGlobalFunction();
+  /// Update parameter values in the browser to match those of a function.
+  void updateMultiDatasetParameters(const Mantid::API::IFunction& fun);
+
 signals:
   /// User selects a different function (or one of it's sub-properties)
   void currentFunctionChanged();
@@ -135,6 +150,15 @@ signals:
   void localParameterButtonClicked(const QString& parName);
 
   void functionStructureChanged();
+
+public slots:
+
+  // Handling of multiple datasets
+  void setNumberOfDatasets(int n);
+  void resetLocalParameters();
+  void setCurrentDataset(int i);
+  void removeDatasets(QList<int> indices);
+  void addDatasets(int n);
 
 protected:
   /// Create the Qt property browser
@@ -189,6 +213,12 @@ protected:
   QtProperty* getFunctionProperty(const QString& index)const;
   /// Split a qualified parameter name into function index and local parameter name.
   QStringList splitParameterName(const QString& paramName) const;
+  /// Get a property for a parameter
+  QtProperty* getParameterProperty(const QString& paramName) const;
+  /// Get a property for a parameter
+  QtProperty* getParameterProperty(const QString& funcIndex, const QString& paramName) const;
+  /// Get a tie property attached to a parameter property
+  QtProperty* getTieProperty(QtProperty* prop) const;
 
   /// Add a tie property
   AProperty addTieProperty(QtProperty* prop, QString tie);
@@ -209,6 +239,13 @@ protected:
   bool hasLowerBound(QtProperty* prop) const;
   /// Check if a parameter property has a upper bound
   bool hasUpperBound(QtProperty* prop) const;
+
+  /// Initialize storage and values for local parameters
+  void initLocalParameter(const QString& parName)const;
+  /// Make sure that the parameter is initialized
+  void checkLocalParameter(const QString& parName)const;
+  /// Make sure that properties are in sync with the cached ties
+  void updateLocalTie(const QString& parName);
 
 protected slots:
   /// Show the context menu
@@ -322,8 +359,22 @@ protected:
   /// Index of currently selected function. Gets updated in updateCurrentFunctionIndex()
   boost::optional<QString> m_currentFunctionIndex;
 
+
+  struct LocalParameterData
+  {
+    explicit LocalParameterData(double v = 0.0):value(v),fixed(false){}
+    double value;
+    bool fixed;
+  };
+
   /// Set true if the constructed function is intended to be used in a multi-dataset fit
   bool m_multiDataset;
+  /// Number of datasets this function is used for
+  int m_numberOfDatasets;
+  /// Storage for local paramter values
+  mutable QMap<QString,QVector<LocalParameterData>> m_localParameterValues;
+  /// Index of a dataset for which the parameters are currently displayed
+  int m_currentDataset;
 
   friend class CreateAttributePropertyForFunctionBrowser;
   friend class SetAttributeFromProperty;

@@ -1,5 +1,4 @@
 #include "MantidKernel/NexusDescriptor.h"
-#include "MantidKernel/Exception.h"
 
 #include <nexus/NeXusFile.hpp>
 #include <nexus/NeXusException.hpp>

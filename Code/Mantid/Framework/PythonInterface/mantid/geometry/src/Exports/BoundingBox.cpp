@@ -6,7 +6,9 @@ using Mantid::Geometry::BoundingBox;
 using Mantid::Kernel::V3D;
 using namespace boost::python;
 
+// clang-format off
 void export_BoundingBox()
+// clang-format on
 {
   class_<BoundingBox>("BoundingBox", "Constructs a zero-sized box")
     .def(init<double, double, double, double, double, double>(

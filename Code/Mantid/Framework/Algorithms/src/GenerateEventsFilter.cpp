@@ -1394,10 +1394,6 @@ void GenerateEventsFilter::makeMultipleFiltersByValuesPartialLog(
         }
       }
     } // ENDIF (log entry in specified time)
-    else {
-      // Log Index i falls out b/c out of time range...
-      currindex = -1;
-    }
 
     // d) Create Splitter
     if (createsplitter) {

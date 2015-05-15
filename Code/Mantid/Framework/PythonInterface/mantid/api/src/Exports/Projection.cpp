@@ -15,7 +15,9 @@ using namespace Mantid::API;
 using namespace Mantid::PythonInterface;
 using namespace boost::python;
 
+// clang-format off
 GCC_DIAG_OFF(strict-aliasing)
+// clang-format on
 
 namespace {
 std::string getUnit(Projection &p, size_t nd) {
@@ -98,7 +100,9 @@ Projection_sptr projCtor3(
 
 } //anonymous namespace
 
+// clang-format off
 void export_Projection()
+// clang-format on
 {
   class_<Projection>(
     "Projection",

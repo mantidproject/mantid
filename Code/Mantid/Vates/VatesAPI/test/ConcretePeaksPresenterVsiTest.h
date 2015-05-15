@@ -12,6 +12,7 @@
 #include "MantidKernel/V3D.h"
 #include "MockObjects.h"
 #include <boost/shared_ptr.hpp>
+#include <boost/make_shared.hpp>
 
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
@@ -53,7 +54,7 @@ public:
     TopPlane top(0.0, -1.0, 0.0, 1.0);
     FarPlane farPlane(0.0, 0.0, 1.0, 1.0);
     NearPlane nearPlane(0.0, 0.0, -1.0,1.0);
-    ViewFrustum frustum(left, right, bottom, top, farPlane, nearPlane);
+    ViewFrustum_const_sptr frustum = boost::make_shared<const Mantid::VATES::ViewFrustum>(left, right, bottom, top, farPlane, nearPlane);
 
     boost::shared_ptr<MockPeaksWorkspaceConcrete> pw_ptr(new MockPeaksWorkspaceConcrete());
     // Act
@@ -73,7 +74,7 @@ public:
     TopPlane top(0.0, -1.0, 0.0, 1.0);
     FarPlane farPlane(0.0, 0.0, 1.0, 1.0);
     NearPlane nearPlane(0.0, 0.0, -1.0,1.0);
-    ViewFrustum frustum(left, right, bottom, top, farPlane, nearPlane);
+    ViewFrustum_const_sptr frustum = boost::make_shared<const Mantid::VATES::ViewFrustum>(left, right, bottom, top, farPlane, nearPlane);
 
     Mantid::Kernel::V3D coordinate(1,0,0);
     double peakRadius = 10;
@@ -96,7 +97,7 @@ public:
     ConcretePeaksPresenterVsi presenter(pw_ptr, frustum, frame);
     double radius = 0;
     Mantid::Kernel::V3D coord(0,0,0);
-    presenter.getPeaksInfo(pw_ptr,0,coord, radius);
+    presenter.getPeaksInfo(pw_ptr,0,coord, radius, coordinateSystem);
 
     //Assert
     TSM_ASSERT_EQUALS("Should have a radius of 10", radius, peakRadius);

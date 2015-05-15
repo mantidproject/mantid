@@ -36,7 +36,9 @@ namespace
   BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(getString_Overload, getString, 1, 2)
 }
 
+// clang-format off
 void export_ConfigService()
+// clang-format on
 {
   using Mantid::PythonInterface::std_vector_exporter;
 
@@ -97,6 +99,8 @@ void export_ConfigService()
          "Set the  datasearch.directories property from a list of strings.")
 
     .def("saveConfig", &ConfigServiceImpl::saveConfig, "Saves the keys that have changed from their default to the given filename")
+
+    .def("keys", &ConfigServiceImpl::keys)
 
     // Treat this as a dictionary
     .def("__getitem__", &getStringUsingCache)

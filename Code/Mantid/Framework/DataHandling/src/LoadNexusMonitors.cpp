@@ -1,10 +1,11 @@
 #include "MantidDataHandling/LoadNexusMonitors.h"
 #include "MantidDataHandling/LoadEventNexus.h"
+#include "MantidDataHandling/ISISRunLogs.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/UnitFactory.h"
-
 #include <Poco/File.h>
 #include <Poco/Path.h>
 #include <boost/lexical_cast.hpp>
@@ -15,6 +16,8 @@
 
 using Mantid::DataObjects::EventWorkspace;
 using Mantid::DataObjects::EventWorkspace_sptr;
+using Mantid::API::WorkspaceGroup;
+using Mantid::API::WorkspaceGroup_sptr;
 
 namespace Mantid {
 namespace DataHandling {
@@ -42,7 +45,7 @@ void LoadNexusMonitors::init() {
       "attempt to load. The file extension must either be .nxs or .NXS");
 
   declareProperty(
-      new API::WorkspaceProperty<API::MatrixWorkspace>(
+      new API::WorkspaceProperty<API::Workspace>(
           "OutputWorkspace", "", Kernel::Direction::Output),
       "The name of the output workspace in which to load the NeXus monitors.");
 
@@ -91,6 +94,7 @@ void LoadNexusMonitors::exec() {
   std::vector<std::string> monitorNames;
   size_t numHistMon = 0;
   size_t numEventMon = 0;
+  size_t numPeriods = 0;
   // we want to sort monitors by monitor_number if they are present
   std::map<int, std::string> monitorNumber2Name;
   prog1.report();
@@ -136,6 +140,13 @@ void LoadNexusMonitors::exec() {
           file.closeData();
           monitorNumber2Name[monitorNo] = entry_name;
         }
+        if((numPeriods == 0) && (inner_entries.find("period_index") != inner_entries.end())) {
+          MantidVec period_data;
+          file.openData("period_index");
+          file.getDataCoerce(period_data);
+          file.closeData();
+          numPeriods = period_data.size();
+        }
       }
       file.closeGroup(); // close NXmonitor
     }
@@ -144,8 +155,13 @@ void LoadNexusMonitors::exec() {
   this->nMonitors = monitorNames.size();
 
   // Nothing to do
-  if (0 == nMonitors)
-    return;
+  if (0 == nMonitors) {
+    //previous version just used to return, but that
+    //threw an error when the OutputWorkspace property was not set.
+    //and the error message was confusing.
+    //This has changed to throw a specific error.
+    throw std::invalid_argument(this->filename + " does not contain any monitors");
+  }
 
   // With this property you can make the exception that even if there's event
   // data, monitors will be loaded
@@ -414,10 +430,16 @@ void LoadNexusMonitors::exec() {
     WS->getSpectrum(i)->setSpectrumNo(spectra_numbers[i]);
     WS->getSpectrum(i)->setDetectorID(detector_numbers[i]);
   }
-
   // add filename
   WS->mutableRun().addProperty("Filename", this->filename);
-  this->setProperty("OutputWorkspace", this->WS);
+
+  //if multiperiod histogram data
+  if ((numPeriods > 1) && (!useEventMon)) {
+    splitMutiPeriodHistrogramData(numPeriods);
+  }
+  else {
+    this->setProperty("OutputWorkspace", this->WS);
+  }
 }
 
 /**
@@ -533,6 +555,92 @@ bool LoadNexusMonitors::canOpenAsNeXus(const std::string &fname) {
   if (f)
     delete f;
   return res;
+}
+
+/**
+ * Splits multiperiod histogram data into seperate workspaces and puts them in a group
+ *
+ * @param numPeriods :: number of periods
+ **/
+void LoadNexusMonitors::splitMutiPeriodHistrogramData(const size_t numPeriods) {
+
+  //protection - we should not have entered the routine if these are not true
+  // More than 1 period
+  if (numPeriods < 2) {
+    g_log.warning() << "Attempted to split multiperiod histogram workspace with " 
+      << numPeriods << "periods, aborted." << std::endl;
+    return;
+  }
+
+  // Y array should be divisible by the number of periods
+  if (this->WS->blocksize() % numPeriods != 0) {
+    g_log.warning() << "Attempted to split multiperiod histogram workspace with " 
+      << this->WS->blocksize() << "data entries, into " << numPeriods << "periods." 
+      " Aborted."<< std::endl;
+    return;
+  }
+
+  WorkspaceGroup_sptr wsGroup(new WorkspaceGroup);
+  size_t yLength = this->WS->blocksize() / numPeriods;
+  size_t xLength = yLength + 1;
+  size_t numSpectra = this->WS->getNumberHistograms();
+  ISISRunLogs monLogCreator(this->WS->run(), static_cast<int>(numPeriods));
+  for (size_t i = 0; i < numPeriods; i++)
+  {
+    //create the period workspace
+    API::MatrixWorkspace_sptr wsPeriod = API::WorkspaceFactory::Instance().create(
+      this->WS,
+      numSpectra,
+      xLength,
+      yLength);
+
+    //assign x values - restart at start for all periods
+    for (size_t specIndex = 0; specIndex < numSpectra; specIndex++) {
+      MantidVec& outputVec = wsPeriod->dataX(specIndex);
+      const MantidVec& inputVec = this->WS->readX(specIndex);
+      for (size_t index = 0; index < xLength; index++) {
+        outputVec[index] = inputVec[index];
+      }
+    }
+    
+    //assign y values - use the values offset by the period number
+    for (size_t specIndex = 0; specIndex < numSpectra; specIndex++) {
+      MantidVec& outputVec = wsPeriod->dataY(specIndex);
+      const MantidVec& inputVec = this->WS->readY(specIndex);
+      for (size_t index = 0; index < yLength; index++) {
+        outputVec[index] = inputVec[(yLength * i) + index];
+      }
+    }
+
+    //assign E values
+    for (size_t specIndex = 0; specIndex < numSpectra; specIndex++) {
+      MantidVec& outputVec = wsPeriod->dataE(specIndex);
+      const MantidVec& inputVec = this->WS->readE(specIndex);
+      for (size_t index = 0; index < yLength; index++) {
+        outputVec[index] = inputVec[(yLength * i) + index];
+      }
+    }
+    
+    //add period logs
+    monLogCreator.addPeriodLogs(static_cast<int>(i+1), wsPeriod->mutableRun());
+
+    //add to workspace group
+    wsGroup->addWorkspace(wsPeriod);
+
+    //create additional output workspace property
+    std::stringstream ssWsName;
+    ssWsName << this->WS->name() << "_" << i+1;    
+    std::stringstream ssPropName;
+    ssPropName << "OutputWorkspace" << "_" << i+1;
+    declareProperty(
+      new API::WorkspaceProperty<API::Workspace>(
+          ssPropName.str(), ssWsName.str(), Kernel::Direction::Output),
+      "Additional output workspace for multi period monitors.");
+    setProperty(ssPropName.str(),wsPeriod);
+  }
+
+  // set the output workspace
+  this->setProperty("OutputWorkspace", wsGroup);
 }
 
 } // end DataHandling

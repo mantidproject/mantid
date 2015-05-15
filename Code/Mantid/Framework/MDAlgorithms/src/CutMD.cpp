@@ -1,10 +1,17 @@
 #include "MantidMDAlgorithms/CutMD.h"
 #include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/Projection.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/ListValidator.h"
 #include "MantidKernel/Matrix.h"
 #include "MantidKernel/System.h"
+
+#include <boost/make_shared.hpp>
+#include <boost/regex.hpp>
+#include <boost/algorithm/string.hpp>
+
 
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
@@ -46,7 +53,7 @@ DblMatrix scaleProjection(const DblMatrix &inMatrix,
         orientedLattice.dstar(inMatrix[i][0], inMatrix[i][1], inMatrix[i][2]);
     if (inUnits[i] == outUnits[i])
       continue;
-    else if (inUnits[i] == "a") {
+    else if (inUnits[i] == Mantid::MDAlgorithms::CutMD::InvAngstromSymbol) {
       // inv angstroms to rlu
       for (size_t j = 0; j < numDims; ++j)
         ret[i][j] *= dStar;
@@ -177,6 +184,34 @@ std::vector<std::string> labelProjection(const DblMatrix &projection) {
   }
   return ret;
 }
+
+/**
+Determine the original q units. Assumes first 3 dimensions by index are r,l,d
+@param inws : Input workspace to extract dimension info from
+@param logger : logging object
+@return vector of markers
+*/
+std::vector<std::string> findOriginalQUnits(IMDWorkspace const *const inws,
+                                            Mantid::Kernel::Logger &logger) {
+  std::vector<std::string> unitMarkers(3);
+  for (size_t i = 0; i < inws->getNumDims() && i < 3; ++i) {
+    auto units = inws->getDimension(i)->getUnits();
+    const boost::regex re("A\\^-1", boost::regex::icase);
+    // Does the unit label look like it's in Angstroms?
+    std::string unitMarker;
+    if (boost::regex_match(units.ascii(), re)) {
+      unitMarker = Mantid::MDAlgorithms::CutMD::InvAngstromSymbol;
+    } else {
+      unitMarker = Mantid::MDAlgorithms::CutMD::RLUSymbol;
+    }
+    unitMarkers[i] = unitMarker;
+    logger.debug() << "In dimension with index " << i << " and units "
+                   << units.ascii() << " taken to be of type " << unitMarker
+                   << std::endl;
+  }
+  return unitMarkers;
+}
+
 } // anonymous namespace
 
 namespace Mantid {
@@ -184,6 +219,12 @@ namespace MDAlgorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(CutMD)
+
+const std::string CutMD::InvAngstromSymbol = "a";
+const std::string CutMD::RLUSymbol = "r";
+const std::string CutMD::AutoMethod = "Auto";
+const std::string CutMD::RLUMethod = "RLU";
+const std::string CutMD::InvAngstromMethod = "Q in A^-1";
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
@@ -198,8 +239,8 @@ CutMD::~CutMD() {}
 //----------------------------------------------------------------------------------------------
 
 void CutMD::init() {
-  declareProperty(new WorkspaceProperty<IMDEventWorkspace>("InputWorkspace", "",
-                                                           Direction::Input),
+  declareProperty(new WorkspaceProperty<IMDWorkspace>("InputWorkspace", "",
+                                                      Direction::Input),
                   "MDWorkspace to slice");
 
   declareProperty(
@@ -220,8 +261,23 @@ void CutMD::init() {
                                   "as output. True to create an "
                                   "MDHistoWorkspace as output. This is DND "
                                   "only in Horace terminology.");
-  declareProperty("CheckAxes", true,
-                  "Check that the axis look to be correct, and abort if not.");
+
+  std::vector<std::string> propOptions;
+  propOptions.push_back(AutoMethod);
+  propOptions.push_back(RLUMethod);
+  propOptions.push_back(InvAngstromMethod);
+  char buffer[1024];
+  std::sprintf(buffer, "How will the Q units of the input workspace be interpreted? This property will disappear in future versions of Mantid\n"
+      "%s : Figure it out based on the label units\n"
+      "%s : Force them to be rlu\n"
+      "%s : Force them to be inverse angstroms", AutoMethod.c_str(), RLUMethod.c_str(), InvAngstromMethod.c_str());
+
+  std::string help(buffer);
+  boost::algorithm::trim(help);
+  declareProperty(
+    "InterpretQDimensionUnits", AutoMethod,
+      boost::make_shared<StringListValidator>(propOptions), help
+      );
 }
 
 void CutMD::exec() {
@@ -229,7 +285,7 @@ void CutMD::exec() {
                 "behaviour may change without warning.");
 
   // Collect input properties
-  const IMDEventWorkspace_sptr inWS = getProperty("InputWorkspace");
+  const IMDWorkspace_sptr inWS = getProperty("InputWorkspace");
   const size_t numDims = inWS->getNumDims();
   const ITableWorkspace_sptr projectionWS = getProperty("Projection");
   std::vector<std::vector<double>> pbins(5);
@@ -238,148 +294,189 @@ void CutMD::exec() {
   pbins[2] = getProperty("P3Bin");
   pbins[3] = getProperty("P4Bin");
   pbins[4] = getProperty("P5Bin");
-  const bool noPix = getProperty("NoPix");
 
-  // Check Projection format
-  Projection projection;
-  if (projectionWS)
-    projection = Projection(*projectionWS);
+  Workspace_sptr sliceWS; // output worskpace
 
-  // Check PBin properties
-  for (size_t i = 0; i < 5; ++i) {
-    if (i < numDims && pbins[i].empty())
-      throw std::runtime_error(
-          "P" + boost::lexical_cast<std::string>(i + 1) +
-          "Bin must be set when processing a workspace with " +
-          boost::lexical_cast<std::string>(numDims) + " dimensions.");
-    if (i >= numDims && !pbins[i].empty())
-      throw std::runtime_error(
-          "P" + boost::lexical_cast<std::string>(i + 1) +
-          "Bin must NOT be set when processing a workspace with " +
-          boost::lexical_cast<std::string>(numDims) + " dimensions.");
-  }
+  // Histogram workspaces can be sliced axis-aligned only.
+  if (auto histInWS = boost::dynamic_pointer_cast<IMDHistoWorkspace>(inWS)) {
 
-  // Get extents in projection
-  std::vector<MinMax> extentLimits;
-  extentLimits.push_back(getDimensionExtents(inWS, 0));
-  extentLimits.push_back(getDimensionExtents(inWS, 1));
-  extentLimits.push_back(getDimensionExtents(inWS, 2));
+    g_log.information("Integrating using binning parameters only.");
+    auto integrateAlg =
+        this->createChildAlgorithm("IntegrateMDHistoWorkspace", 0, 1);
+    integrateAlg->setProperty("InputWorkspace", histInWS);
+    integrateAlg->setProperty("P1Bin", pbins[0]);
+    integrateAlg->setProperty("P2Bin", pbins[1]);
+    integrateAlg->setProperty("P3Bin", pbins[2]);
+    integrateAlg->setProperty("P4Bin", pbins[3]);
+    integrateAlg->setProperty("P5Bin", pbins[4]);
+    integrateAlg->execute();
+    IMDHistoWorkspace_sptr temp = integrateAlg->getProperty("OutputWorkspace");
+    sliceWS = temp;
+  } else { // We are processing an MDEventWorkspace
 
-  // Scale projection
-  DblMatrix projectionMatrix(3, 3);
-  projectionMatrix.setRow(0, projection.U());
-  projectionMatrix.setRow(1, projection.V());
-  projectionMatrix.setRow(2, projection.W());
+    auto eventInWS = boost::dynamic_pointer_cast<IMDEventWorkspace>(inWS);
+    const bool noPix = getProperty("NoPix");
 
-  std::vector<std::string> targetUnits(3);
-  for (size_t i = 0; i < 3; ++i)
-    targetUnits[i] = projection.getUnit(i) == RLU ? "r" : "a";
-  std::vector<std::string> originUnits(3, "r"); // TODO. This is a hack!
+    // Check Projection format
+    Projection projection;
+    if (projectionWS)
+      projection = Projection(*projectionWS);
 
-  DblMatrix scaledProjectionMatrix =
-      scaleProjection(projectionMatrix, originUnits, targetUnits, inWS);
-
-  // Calculate extents for the first 3 dimensions
-  std::vector<MinMax> scaledExtents =
-      calculateExtents(scaledProjectionMatrix, extentLimits);
-  auto stepPair = calculateSteps(scaledExtents, pbins);
-  std::vector<MinMax> steppedExtents = stepPair.first;
-  std::vector<int> steppedBins = stepPair.second;
-
-  // Calculate extents for additional dimensions
-  for (size_t i = 3; i < numDims; ++i) {
-    const size_t nArgs = pbins[i].size();
-    const MinMax extentLimit = getDimensionExtents(inWS, i);
-    const double dimRange = extentLimit.second - extentLimit.first;
-
-    if (nArgs == 1) {
-      steppedExtents.push_back(extentLimit);
-      steppedBins.push_back(static_cast<int>(dimRange / pbins[i][0]));
-    } else if (nArgs == 2) {
-      steppedExtents.push_back(std::make_pair(pbins[i][0], pbins[i][1]));
-      steppedBins.push_back(1);
-    } else if (nArgs == 3) {
-      const double dimRange = pbins[i][2] - pbins[i][0];
-      const double stepSize = pbins[i][1] < dimRange ? pbins[i][1] : dimRange;
-      steppedExtents.push_back(std::make_pair(pbins[i][0], pbins[i][2]));
-      steppedBins.push_back(static_cast<int>(dimRange / stepSize));
+    // Check PBin properties
+    for (size_t i = 0; i < 5; ++i) {
+      if (i < numDims && pbins[i].empty())
+        throw std::runtime_error(
+            "P" + boost::lexical_cast<std::string>(i + 1) +
+            "Bin must be set when processing a workspace with " +
+            boost::lexical_cast<std::string>(numDims) + " dimensions.");
+      if (i >= numDims && !pbins[i].empty())
+        throw std::runtime_error(
+            "P" + boost::lexical_cast<std::string>(i + 1) +
+            "Bin must NOT be set when processing a workspace with " +
+            boost::lexical_cast<std::string>(numDims) + " dimensions.");
     }
 
-    // and double targetUnits' length by appending itself to itself
-    size_t preSize = targetUnits.size();
-    targetUnits.resize(preSize * 2);
-    for (size_t i = 0; i < preSize; ++i)
-      targetUnits[preSize + i] = targetUnits[i];
-  }
+    // Get extents in projection
+    std::vector<MinMax> extentLimits;
+    extentLimits.push_back(getDimensionExtents(eventInWS, 0));
+    extentLimits.push_back(getDimensionExtents(eventInWS, 1));
+    extentLimits.push_back(getDimensionExtents(eventInWS, 2));
 
-  // Make labels
-  std::vector<std::string> labels = labelProjection(projectionMatrix);
+    // Scale projection
+    DblMatrix projectionMatrix(3, 3);
+    projectionMatrix.setRow(0, projection.U());
+    projectionMatrix.setRow(1, projection.V());
+    projectionMatrix.setRow(2, projection.W());
 
-  // Either run RebinMD or SliceMD
-  const std::string cutAlgName = noPix ? "BinMD" : "SliceMD";
-  IAlgorithm_sptr cutAlg = createChildAlgorithm(cutAlgName, 0.0, 1.0);
-  cutAlg->initialize();
-  cutAlg->setProperty("InputWorkspace", inWS);
-  cutAlg->setProperty("OutputWorkspace", "sliced");
-  cutAlg->setProperty("NormalizeBasisVectors", false);
-  cutAlg->setProperty("AxisAligned", false);
-
-  for (size_t i = 0; i < numDims; ++i) {
-    std::string label;
-    std::string unit;
-    std::string vecStr;
-
-    if (i < 3) {
-      // Slicing algorithms accept name as [x, y, z]
-      label = labels[i];
-      unit = targetUnits[i];
-
-      std::vector<std::string> vec(numDims, "0");
-      for (size_t j = 0; j < 3; ++j)
-        vec[j] = boost::lexical_cast<std::string>(projectionMatrix[i][j]);
-      vecStr = boost::algorithm::join(vec, ", ");
-    } else {
-      // Always orthogonal
-      auto dim = inWS->getDimension(i);
-      label = dim->getName();
-      unit = dim->getUnits();
-      std::vector<std::string> vec(numDims, "0");
-      vec[i] = "1";
-      vecStr = boost::algorithm::join(vec, ", ");
+    std::vector<std::string> targetUnits(3);
+    for (size_t i = 0; i < 3; ++i)
+      targetUnits[i] =
+          projection.getUnit(i) == RLU ? RLUSymbol : InvAngstromSymbol;
+    
+    const std::string determineUnitsMethod = this->getProperty("InterpretQDimensionUnits");
+    std::vector<std::string> originUnits; 
+    if ( determineUnitsMethod == AutoMethod ) {
+        originUnits = findOriginalQUnits(inWS.get(), g_log);
+    } else if (determineUnitsMethod == RLUMethod ) {
+      originUnits = std::vector<std::string>(3, RLUSymbol);
+    } else{
+      originUnits = std::vector<std::string>(3, InvAngstromSymbol);
     }
 
-    const std::string value = label + ", " + unit + ", " + vecStr;
-    cutAlg->setProperty("BasisVector" + boost::lexical_cast<std::string>(i),
-                        value);
+    DblMatrix scaledProjectionMatrix =
+        scaleProjection(projectionMatrix, originUnits, targetUnits, eventInWS);
+
+    // Calculate extents for the first 3 dimensions
+    std::vector<MinMax> scaledExtents =
+        calculateExtents(scaledProjectionMatrix, extentLimits);
+    auto stepPair = calculateSteps(scaledExtents, pbins);
+    std::vector<MinMax> steppedExtents = stepPair.first;
+    std::vector<int> steppedBins = stepPair.second;
+
+    // Calculate extents for additional dimensions
+    for (size_t i = 3; i < numDims; ++i) {
+      const size_t nArgs = pbins[i].size();
+      const MinMax extentLimit = getDimensionExtents(eventInWS, i);
+      const double dimRange = extentLimit.second - extentLimit.first;
+
+      if (nArgs == 1) {
+        steppedExtents.push_back(extentLimit);
+        steppedBins.push_back(static_cast<int>(dimRange / pbins[i][0]));
+      } else if (nArgs == 2) {
+        steppedExtents.push_back(std::make_pair(pbins[i][0], pbins[i][1]));
+        steppedBins.push_back(1);
+      } else if (nArgs == 3) {
+        const double dimRange = pbins[i][2] - pbins[i][0];
+        const double stepSize = pbins[i][1] < dimRange ? pbins[i][1] : dimRange;
+        steppedExtents.push_back(std::make_pair(pbins[i][0], pbins[i][2]));
+        steppedBins.push_back(static_cast<int>(dimRange / stepSize));
+      }
+
+      // and double targetUnits' length by appending itself to itself
+      size_t preSize = targetUnits.size();
+      targetUnits.resize(preSize * 2);
+      for (size_t i = 0; i < preSize; ++i)
+        targetUnits[preSize + i] = targetUnits[i];
+    }
+
+    // Make labels
+    std::vector<std::string> labels = labelProjection(scaledProjectionMatrix);
+
+    // Either run RebinMD or SliceMD
+    const std::string cutAlgName = noPix ? "BinMD" : "SliceMD";
+    IAlgorithm_sptr cutAlg = createChildAlgorithm(cutAlgName, 0.0, 1.0);
+    cutAlg->initialize();
+    cutAlg->setProperty("InputWorkspace", inWS);
+    cutAlg->setProperty("OutputWorkspace", "sliced");
+    cutAlg->setProperty("NormalizeBasisVectors", false);
+    cutAlg->setProperty("AxisAligned", false);
+
+    for (size_t i = 0; i < numDims; ++i) {
+      std::string label;
+      std::string unit;
+      std::string vecStr;
+
+      if (i < 3) {
+        // Slicing algorithms accept name as [x, y, z]
+        label = labels[i];
+        unit = targetUnits[i];
+
+        std::vector<std::string> vec(numDims, "0");
+        for (size_t j = 0; j < 3; ++j)
+          vec[j] =
+              boost::lexical_cast<std::string>(scaledProjectionMatrix[i][j]);
+        vecStr = boost::algorithm::join(vec, ", ");
+      } else {
+        // Always orthogonal
+        auto dim = inWS->getDimension(i);
+        label = dim->getName();
+        unit = dim->getUnits();
+        std::vector<std::string> vec(numDims, "0");
+        vec[i] = "1";
+        vecStr = boost::algorithm::join(vec, ", ");
+      }
+
+      const std::string value = label + ", " + unit + ", " + vecStr;
+      cutAlg->setProperty("BasisVector" + boost::lexical_cast<std::string>(i),
+                          value);
+    }
+
+    // Translate extents into a single vector
+    std::vector<double> outExtents(steppedExtents.size() * 2);
+    for (size_t i = 0; i < steppedExtents.size(); ++i) {
+      outExtents[2 * i] = steppedExtents[i].first;
+      outExtents[2 * i + 1] = steppedExtents[i].second;
+    }
+
+    cutAlg->setProperty("OutputExtents", outExtents);
+    cutAlg->setProperty("OutputBins", steppedBins);
+
+    cutAlg->execute();
+    sliceWS = cutAlg->getProperty("OutputWorkspace");
+
+    MultipleExperimentInfos_sptr sliceInfo =
+        boost::dynamic_pointer_cast<MultipleExperimentInfos>(sliceWS);
+
+    if (!sliceInfo)
+      throw std::runtime_error(
+          "Could not extract experiment info from child's OutputWorkspace");
+
+    // Attach projection matrix to output
+    if (sliceInfo->getNumExperimentInfo() > 0) {
+      ExperimentInfo_sptr info = sliceInfo->getExperimentInfo(0);
+      info->mutableRun().addProperty("W_MATRIX", projectionMatrix.getVector(),
+                                     true);
+    }
   }
 
-  // Translate extents into a single vector
-  std::vector<double> outExtents(steppedExtents.size() * 2);
-  for (size_t i = 0; i < steppedExtents.size(); ++i) {
-    outExtents[2 * i] = steppedExtents[i].first;
-    outExtents[2 * i + 1] = steppedExtents[i].second;
-  }
+  auto geometry = boost::dynamic_pointer_cast<Mantid::API::MDGeometry>(sliceWS);
 
-  cutAlg->setProperty("OutputExtents", outExtents);
-  cutAlg->setProperty("OutputBins", steppedBins);
+  /* Original workspace and transformation information does not make sense for
+   * self-contained Horace-style
+   * cuts, so clear it out. */
+  geometry->clearTransforms();
+  geometry->clearOriginalWorkspaces();
 
-  cutAlg->execute();
-  Workspace_sptr sliceWS = cutAlg->getProperty("OutputWorkspace");
-  MultipleExperimentInfos_sptr sliceInfo =
-      boost::dynamic_pointer_cast<MultipleExperimentInfos>(sliceWS);
-
-  if (!sliceInfo)
-    throw std::runtime_error(
-        "Could not extract experiment info from child's OutputWorkspace");
-
-  // Attach projection matrix to output
-  if (sliceInfo->getNumExperimentInfo() > 0) {
-    ExperimentInfo_sptr info = sliceInfo->getExperimentInfo(0);
-    info->mutableRun().addProperty("W_MATRIX", projectionMatrix.getVector(),
-                                   true);
-  }
-
-  // Done!
   setProperty("OutputWorkspace", sliceWS);
 }
 

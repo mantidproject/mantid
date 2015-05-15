@@ -249,6 +249,7 @@ public:
     MDBoxBaseTester<MDLeanEvent<3>,3> c(b);
     TS_ASSERT_EQUALS( c.getParent(), daddy);
 
+    delete daddy;
   }
 
   /** Setting and getting the extents;
@@ -432,15 +433,14 @@ public:
     delete [] v;
   }
 
-  void test_sortBoxesByFilePos()
+  void xtest_sortBoxesByFilePos()
   {
-    std::vector<API::IMDNode *> boxes;
-    // 10 to 1 in reverse order
-
-    for (uint64_t i=0; i<10; i++)
-    {
-      boxes.push_back(new MDBoxBaseTester<MDLeanEvent<1>,1>(10-i));
-    }
+//    std::vector<API::IMDNode *> boxes;
+//    // 10 to 1 in reverse order
+//    for (uint64_t i=0; i<10; i++)
+//    {
+//      boxes.push_back(new MDBoxBaseTester<MDLeanEvent<1>,1>(10-i));
+//    }
     //TODO:
     //Kernel::ISaveable::sortObjByFilePos(boxes);
     //// After sorting, they are in the right order 1,2,3, etc.

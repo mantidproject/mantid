@@ -542,7 +542,6 @@ bool RectangularDetector::isValid(const V3D &point) const {
   (void)point;
   throw Kernel::Exception::NotImplementedError(
       "RectangularDetector::isValid() is not implemented.");
-  return false;
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -552,7 +551,6 @@ bool RectangularDetector::isOnSide(const V3D &point) const {
   (void)point;
   throw Kernel::Exception::NotImplementedError(
       "RectangularDetector::isOnSide() is not implemented.");
-  return false;
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -562,7 +560,6 @@ int RectangularDetector::interceptSurface(Track &track) const {
   (void)track;
   throw Kernel::Exception::NotImplementedError(
       "RectangularDetector::interceptSurface() is not implemented.");
-  return 0;
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -573,7 +570,6 @@ double RectangularDetector::solidAngle(const V3D &observer) const {
   (void)observer;
   throw Kernel::Exception::NotImplementedError(
       "RectangularDetector::solidAngle() is not implemented.");
-  return 0;
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -583,7 +579,6 @@ int RectangularDetector::getPointInObject(V3D &point) const {
   (void)point;
   throw Kernel::Exception::NotImplementedError(
       "RectangularDetector::getPointInObject() is not implemented.");
-  return 0;
 }
 
 //-------------------------------------------------------------------------------------------------

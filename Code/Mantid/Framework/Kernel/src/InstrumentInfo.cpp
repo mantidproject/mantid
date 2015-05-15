@@ -5,7 +5,6 @@
 
 #include "MantidKernel/InstrumentInfo.h"
 #include "MantidKernel/FacilityInfo.h"
-#include "MantidKernel/Exception.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/Strings.h"
 

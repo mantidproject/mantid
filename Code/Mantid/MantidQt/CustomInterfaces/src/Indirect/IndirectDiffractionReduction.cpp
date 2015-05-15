@@ -311,8 +311,8 @@ void IndirectDiffractionReduction::runOSIRISdiffonlyReduction()
   try
   {
     QString nameBase = QString::fromStdString(Mantid::Kernel::MultiFileNameParsing::suggestWorkspaceName(stlFileNames));
-    tofWsName = "'" + nameBase + "_tof'";
-    drangeWsName = "'" + nameBase + "_dRange'";
+    tofWsName = nameBase + "_tof";
+    drangeWsName = nameBase + "_dRange";
   }
   catch(std::runtime_error & re)
   {
@@ -423,6 +423,9 @@ void IndirectDiffractionReduction::instrumentSelected(const QString & instrument
     const QString & reflectionName)
 {
   UNUSED_ARG(analyserName);
+
+  // Set the search instrument for runs
+  m_uiForm.dem_rawFiles->setInstrumentOverride(instrumentName);
 
   MatrixWorkspace_sptr instWorkspace = loadInstrument(instrumentName.toStdString(), reflectionName.toStdString());
   Instrument_const_sptr instrument = instWorkspace->getInstrument();

@@ -284,9 +284,16 @@ Workspace_sptr LoadNexusProcessed::doAccelleratedMultiPeriodLoading(
     periodWorkspace->setX(i, tempMatrixWorkspace->refX(i));
   }
 
-  NXEntry mtdEntry = root.openEntry(entryName);
-  const std::string groupName = "workspace";
-  if (!mtdEntry.containsGroup(groupName)) {
+  // We avoid using `openEntry` or similar here because they're just wrappers
+  // around `open`. `open` is slow for large multiperiod datasets, because it
+  // does a search upon the entire HDF5 tree. `openLocal` is *much* quicker, as
+  // it only searches the current group. It does, however, require that the parent
+  // group is currently open.
+  NXEntry mtdEntry(root, entryName);
+  mtdEntry.openLocal();
+
+  NXData wsEntry(mtdEntry, "workspace");
+  if (!wsEntry.openLocal()) {
     std::stringstream buffer;
     buffer
         << "Group entry " << p - 1
@@ -295,7 +302,6 @@ Workspace_sptr LoadNexusProcessed::doAccelleratedMultiPeriodLoading(
     throw std::runtime_error(buffer.str());
   }
 
-  NXData wsEntry = mtdEntry.openNXData(groupName);
   if (wsEntry.isValid("frac_area")) {
     std::stringstream buffer;
     buffer << "Group entry " << p - 1 << " has fractional area present. Try "
@@ -304,8 +310,10 @@ Workspace_sptr LoadNexusProcessed::doAccelleratedMultiPeriodLoading(
     throw std::runtime_error(buffer.str());
   }
 
-  NXDataSetTyped<double> data = wsEntry.openDoubleData();
-  NXDataSetTyped<double> errors = wsEntry.openNXDouble("errors");
+  NXDataSetTyped<double> data(wsEntry, "values");
+  data.openLocal();
+  NXDataSetTyped<double> errors(wsEntry, "errors");
+  errors.openLocal();
 
   const int nChannels = data.dim1();
 
@@ -351,7 +359,15 @@ Workspace_sptr LoadNexusProcessed::doAccelleratedMultiPeriodLoading(
     }
   }
 
-  m_cppFile->openPath(mtdEntry.path());
+  // We always start one layer too deep
+  // go from /workspace_{n}/{something} -> /workspace_{n}
+  m_cppFile->closeGroup();
+
+  // Now move to the correct period group
+  // /workspace_{n} -> /workspace_{n+1}
+  m_cppFile->closeGroup();
+  m_cppFile->openGroup(entryName, "NXentry");
+
   try {
     // This loads logs, sample, and instrument.
     periodWorkspace->loadSampleAndLogInfoNexus(m_cppFile);
@@ -359,6 +375,11 @@ Workspace_sptr LoadNexusProcessed::doAccelleratedMultiPeriodLoading(
     g_log.information("Error loading Instrument section of nxs file");
     g_log.information(e.what());
   }
+
+  // We make sure to close the current entries. Failing to do this can cause
+  // strange off-by-one errors when loading the spectra.
+  wsEntry.close();
+  mtdEntry.close();
 
   const double fractionComplete = double(p - 1) / double(nWorkspaceEntries);
   progress(fractionComplete, "Loading multiperiod entry");

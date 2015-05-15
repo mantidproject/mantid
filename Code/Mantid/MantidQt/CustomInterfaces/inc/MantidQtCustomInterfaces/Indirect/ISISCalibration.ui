@@ -78,8 +78,14 @@
           <property name="enabled">
            <bool>false</bool>
           </property>
+          <property name="decimals">
+           <number>5</number>
+          </property>
           <property name="maximum">
            <double>999.990000000000009</double>
+          </property>
+          <property name="singleStep">
+           <double>0.100000000000000</double>
           </property>
           <property name="value">
            <double>1.000000000000000</double>
@@ -175,8 +181,14 @@
             <property name="enabled">
              <bool>false</bool>
             </property>
+            <property name="decimals">
+             <number>5</number>
+            </property>
             <property name="maximum">
              <double>999.990000000000009</double>
+            </property>
+            <property name="singleStep">
+             <double>0.100000000000000</double>
             </property>
             <property name="value">
              <double>1.000000000000000</double>

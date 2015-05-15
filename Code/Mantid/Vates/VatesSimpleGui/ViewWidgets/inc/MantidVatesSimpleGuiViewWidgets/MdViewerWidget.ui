@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1057</width>
+    <width>1361</width>
     <height>710</height>
    </rect>
   </property>
@@ -119,13 +119,46 @@
       <widget class="Mantid::Vates::SimpleGui::ColorSelectionWidget" name="colorSelectionWidget" native="true"/>
      </item>
      <item>
+      <spacer name="horizontalSpacer_bw_color_reset">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeType">
+         <enum>QSizePolicy::Minimum</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>10</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="QToolButton" name="resetViewsStateToAllData">
+       <property name="toolTip">
+        <string>Reset the state of all the views (to show all data)</string>
+       </property>
+       <property name="icon">
+        <iconset resource="../../icons/ViewWidgetsIcons.qrc">
+         <normaloff>:/VatesSimpleGuiViewWidgets/icons/resetViewToAll24.png</normaloff>:/VatesSimpleGuiViewWidgets/icons/resetViewToAll24.png</iconset>
+       </property>
+       <property name="iconSize">
+        <size>
+         <width>20</width>
+         <height>20</height>
+        </size>
+       </property>
+      </widget>
+     </item>
+     <item>
       <spacer name="horizontalSpacer_5">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
        </property>
        <property name="sizeHint" stdset="0">
         <size>
-         <width>40</width>
+         <width>20</width>
          <height>20</height>
         </size>
        </property>
@@ -167,74 +200,85 @@
     </layout>
    </item>
    <item>
-    <widget class="QSplitter" name="splitter_2">
+    <widget class="QSplitter" name="splitter_3">
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
      </property>
-     <widget class="QSplitter" name="splitter">
+     <property name="handleWidth">
+      <number>3</number>
+     </property>
+     <widget class="QSplitter" name="splitter_2">
       <property name="orientation">
-       <enum>Qt::Vertical</enum>
+       <enum>Qt::Horizontal</enum>
       </property>
-      <widget class="pqPipelineBrowserWidget" name="pipelineBrowser" native="true">
+      <property name="handleWidth">
+       <number>3</number>
+      </property>
+      <widget class="QSplitter" name="splitter">
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
+       </property>
+       <widget class="pqPipelineBrowserWidget" name="pipelineBrowser" native="true">
+        <property name="minimumSize">
+         <size>
+          <width>350</width>
+          <height>50</height>
+         </size>
+        </property>
+       </widget>
+       <widget class="QTabWidget" name="propInfoTabs">
+        <property name="currentIndex">
+         <number>0</number>
+        </property>
+        <widget class="QWidget" name="properties">
+         <attribute name="title">
+          <string>Properties</string>
+         </attribute>
+         <layout class="QVBoxLayout" name="verticalLayout_31">
+          <item>
+           <widget class="pqPropertiesPanel" name="propertiesPanel" native="true"/>
+          </item>
+         </layout>
+        </widget>
+        <widget class="QWidget" name="information">
+         <attribute name="title">
+          <string>Information</string>
+         </attribute>
+         <layout class="QVBoxLayout" name="verticalLayout_2">
+          <item>
+           <widget class="QScrollArea" name="scrollArea">
+            <property name="widgetResizable">
+             <bool>true</bool>
+            </property>
+            <widget class="QWidget" name="scrollAreaWidgetContents">
+             <property name="geometry">
+              <rect>
+               <x>0</x>
+               <y>0</y>
+               <width>98</width>
+               <height>28</height>
+              </rect>
+             </property>
+             <layout class="QVBoxLayout" name="verticalLayout">
+              <item>
+               <widget class="pqProxyInformationWidget" name="proxyInfo" native="true"/>
+              </item>
+             </layout>
+            </widget>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </widget>
+      </widget>
+      <widget class="QWidget" name="viewWidget" native="true">
        <property name="minimumSize">
         <size>
-         <width>350</width>
-         <height>50</height>
+         <width>800</width>
+         <height>600</height>
         </size>
        </property>
       </widget>
-      <widget class="QTabWidget" name="propInfoTabs">
-       <property name="currentIndex">
-        <number>0</number>
-       </property>
-       <widget class="QWidget" name="properties">
-        <attribute name="title">
-         <string>Properties</string>
-        </attribute>
-        <layout class="QVBoxLayout" name="verticalLayout_3">
-         <item>
-          <widget class="pqPropertiesPanel" name="propertiesPanel" native="true"/>
-         </item>
-        </layout>
-       </widget>
-       <widget class="QWidget" name="information">
-        <attribute name="title">
-         <string>Information</string>
-        </attribute>
-        <layout class="QVBoxLayout" name="verticalLayout_2">
-         <item>
-          <widget class="QScrollArea" name="scrollArea">
-           <property name="widgetResizable">
-            <bool>true</bool>
-           </property>
-           <widget class="QWidget" name="scrollAreaWidgetContents">
-            <property name="geometry">
-             <rect>
-              <x>0</x>
-              <y>0</y>
-              <width>274</width>
-              <height>370</height>
-             </rect>
-            </property>
-            <layout class="QVBoxLayout" name="verticalLayout">
-             <item>
-              <widget class="pqProxyInformationWidget" name="proxyInfo" native="true"/>
-             </item>
-            </layout>
-           </widget>
-          </widget>
-         </item>
-        </layout>
-       </widget>
-      </widget>
-     </widget>
-     <widget class="QWidget" name="viewWidget" native="true">
-      <property name="minimumSize">
-       <size>
-        <width>600</width>
-        <height>600</height>
-       </size>
-      </property>
      </widget>
     </widget>
    </item>

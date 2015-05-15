@@ -17,7 +17,7 @@ public:
   //----------------------------------------------
 
   static vtkEventNexusReader *New();
-  vtkTypeMacro(vtkEventNexusReader, vtkUnstructuredGridAlgorithm);
+  vtkTypeMacro(vtkEventNexusReader, vtkUnstructuredGridAlgorithm)
   void PrintSelf(ostream& os, vtkIndent indent);
   vtkSetStringMacro(FileName);
   vtkGetStringMacro(FileName);

@@ -144,7 +144,7 @@ public:
   static void saveAffineTransformMatricies(::NeXus::File *const file,
                                            API::IMDWorkspace_const_sptr ws);
   static void saveAffineTransformMatrix(::NeXus::File *const file,
-                                        API::CoordTransform *transform,
+                                        API::CoordTransform const *transform,
                                         std::string entry_name);
 
   static void saveWSGenericInfo(::NeXus::File *const file,

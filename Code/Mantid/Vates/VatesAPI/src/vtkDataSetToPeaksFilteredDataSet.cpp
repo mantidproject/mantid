@@ -178,7 +178,7 @@ namespace VATES
 
   /**
    * Get the peaks information which is the position and the largest radius of the peak.
-   * @param A list of peaks workspaces
+   * @param peaksWorkspaces A list of peaks workspaces
    * @returns A list of pair information which contains the position and the radius.
    */
   std::vector<std::pair<Mantid::Kernel::V3D, double>> vtkDataSetToPeaksFilteredDataSet::getPeaksInfo(std::vector<Mantid::API::IPeaksWorkspace_sptr> peaksWorkspaces)
@@ -207,7 +207,6 @@ GCC_DIAG_OFF(strict-aliasing)
    * @param peak The peak from which the information will be extracted.
    * @param coordinateSystem The coordinate system in which the peaks position should be retrieved.
    * @param peaksInfo A reference to the vector containing peak information.
-   * @param index The index of the peak in the peaksInfo vector.
    */
   void vtkDataSetToPeaksFilteredDataSet::addSinglePeak(Mantid::API::IPeak* peak, const Mantid::Kernel::SpecialCoordinateSystem coordinateSystem, std::vector<std::pair<Mantid::Kernel::V3D, double>>& peaksInfo)
   {

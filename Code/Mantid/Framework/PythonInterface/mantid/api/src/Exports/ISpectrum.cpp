@@ -7,7 +7,9 @@ using Mantid::API::ISpectrum;
 using Mantid::detid_t;
 using namespace boost::python;
 
+// clang-format off
 void export_ISpectrum()
+// clang-format on
 {
   register_ptr_to_python<ISpectrum*>();
 

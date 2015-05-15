@@ -3,7 +3,6 @@
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/EnabledWhenProperty.h"
 #include <boost/assign.hpp>
-#include <boost/make_shared.hpp>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;

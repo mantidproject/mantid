@@ -25,6 +25,7 @@ namespace Vates
 {
 namespace SimpleGui
 {
+  class RebinnedSourcesManager;
 /**
  *
  This class creates a scatter plot using the SplatterPlot ParaView plugin. The
@@ -61,8 +62,9 @@ public:
   /**
    * Default constructor.
    * @param parent the parent widget for the threeslice view
+   * @param rebinnedSourcesManager Pointer to a RebinnedSourcesManager
    */
-  explicit SplatterPlotView(QWidget *parent = 0);
+  explicit SplatterPlotView(QWidget *parent = 0, RebinnedSourcesManager* rebinnedSourcesManager = 0);
   /// Default destructor
   virtual ~SplatterPlotView();
 
@@ -149,15 +151,14 @@ private:
   /// Destroy splatter plot specific sources and filters
   void destroyFiltersForSplatterPlotView();
 
-  bool noOverlay; ///< Flag to respond to overlay situation correctly
-  QList<QPointer<pqPipelineSource> > peaksSource; ///< A list of peaks sources
-  QPointer<pqPipelineSource> probeSource; ///< The VTK probe filter
-  QPointer<pqPipelineRepresentation> splatRepr; ///< The splatter plot representation
-  QPointer<pqPipelineSource> splatSource; ///< The splatter plot source
-  QPointer<pqPipelineSource> threshSource; ///< The thresholding filter source
+  bool m_noOverlay; ///< Flag to respond to overlay situation correctly
+  QList<QPointer<pqPipelineSource> > m_peaksSource; ///< A list of peaks sources
+  QPointer<pqPipelineSource> m_probeSource; ///< The VTK probe filter
+  QPointer<pqPipelineSource> m_splatSource; ///< The splatter plot source
+  QPointer<pqPipelineSource> m_threshSource; ///< The thresholding filter source
   QPointer<pqPipelineSource> m_peaksFilter; ///< The peaks filter
-  Ui::SplatterPlotView ui; ///< The splatter plot view'a UI form
-  QPointer<pqRenderView> view; ///< The main view area
+  Ui::SplatterPlotView m_ui; ///< The splatter plot view'a UI form
+  QPointer<pqRenderView> m_view; ///< The main view area
   boost::shared_ptr<CameraManager> m_cameraManager; ///< The camera manager
   PeaksTableControllerVsi* m_peaksTableController; ///< The peaks table controller
   QAction* m_allPeaksAction;///<The action for showing all peaks in the table.

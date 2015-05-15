@@ -115,7 +115,6 @@ namespace CustomInterfaces
 
     // On last step - hide next step button, but show "Export results..."
     m_ui.nextStep->setVisible(hasNextStep);
-    m_ui.exportResults->setVisible(!hasNextStep);
 
     if (hasPrevStep)
     {
@@ -132,13 +131,6 @@ namespace CustomInterfaces
 
   void ALCInterface::exportResults()
   {
-    // If we are able to export the results, we should be on final step, which means all the previous
-    // steps were completed succesfully
-    if (!m_peakFittingModel->fittedPeaks())
-    {
-      QMessageBox::critical(this, "Error", "Please fit some peaks first");
-      return;
-    }
 
     bool ok;
     QString label = QInputDialog::getText(this, "Results label", "Label to assign to the results: ",
@@ -155,6 +147,8 @@ namespace CustomInterfaces
 
     std::map<std::string, Workspace_sptr> results;
 
+    results["Loaded_Data"] = m_dataLoading->exportWorkspace();
+
     results["Baseline_Workspace"] = m_baselineModellingModel->exportWorkspace();
     results["Baseline_Sections"] = m_baselineModellingModel->exportSections();
     results["Baseline_Model"] = m_baselineModellingModel->exportModel();
@@ -162,13 +156,29 @@ namespace CustomInterfaces
     results["Peaks_Workspace"] = m_peakFittingModel->exportWorkspace();
     results["Peaks_FitResults"] = m_peakFittingModel->exportFittedPeaks();
 
-    AnalysisDataService::Instance().addOrReplace(groupName, boost::make_shared<WorkspaceGroup>());
+    // Check if any of the above is not empty
+    for (auto it=results.begin(); it!=results.end(); ++it) {
+    
+      if ( it->second ) {
+        AnalysisDataService::Instance().addOrReplace(groupName, boost::make_shared<WorkspaceGroup>());
+        break;
+      }
+    }
 
-    for(auto it = results.begin(); it != results.end(); ++it)
-    {
-      std::string wsName = groupName + "_" + it->first;
-      AnalysisDataService::Instance().addOrReplace(wsName, it->second);
-      AnalysisDataService::Instance().addToGroup(groupName, wsName);
+    // There is something to export
+    if (AnalysisDataService::Instance().doesExist(groupName)) {
+
+      for(auto it = results.begin(); it != results.end(); ++it)
+      {
+        if ( it->second ) {
+          std::string wsName = groupName + "_" + it->first;
+          AnalysisDataService::Instance().addOrReplace(wsName, it->second);
+          AnalysisDataService::Instance().addToGroup(groupName, wsName);
+        }
+      }
+    } else {
+      // Nothing to export, show error message
+      QMessageBox::critical(this, "Error", "Nothing to export");
     }
   }
 

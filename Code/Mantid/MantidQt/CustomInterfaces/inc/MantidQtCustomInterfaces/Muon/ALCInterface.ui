@@ -49,17 +49,17 @@
          </property>
         </spacer>
        </item>
-       <item>
+        <item>
+          <widget class="QPushButton" name="exportResults">
+            <property name="text">
+              <string>Export results...</string>
+            </property>
+          </widget>
+        </item>
+        <item>
         <widget class="QPushButton" name="nextStep">
          <property name="text">
           <string>%NEXT%</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QPushButton" name="exportResults">
-         <property name="text">
-          <string>Export results...</string>
          </property>
         </widget>
        </item>

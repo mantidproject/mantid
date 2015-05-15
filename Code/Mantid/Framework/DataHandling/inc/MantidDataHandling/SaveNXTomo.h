@@ -65,17 +65,16 @@ public:
 
   /// Algorithm's category for identification
   virtual const std::string category() const {
-    return "DataHandling\\Nexus;DataHandling\\Tomo;Diffraction";
+    return "DataHandling\\Nexus;DataHandling\\Tomography;Diffraction";
   }
-
-  /// Run instead of exec when operating on groups
-  bool processGroups();
 
 private:
   /// Initialisation code
   void init();
   /// Execution code : Single workspace
   void exec();
+  /// Alternative execution code when operating on a WorkspaceGroup
+  bool processGroups();
 
   /// Creates the format for the output file if it doesn't exist
   ::NeXus::File setupFile();

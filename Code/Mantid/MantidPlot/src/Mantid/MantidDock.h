@@ -11,6 +11,8 @@
 
 #include "MantidQtMantidWidgets/AlgorithmSelectorWidget.h"
 
+#include "Mantid/MantidWSIndexDialog.h"
+
 #include <QActionGroup>
 #include <QAtomicInt>
 #include <QComboBox>
@@ -165,7 +167,7 @@ public:
   void mouseDoubleClickEvent(QMouseEvent *e);
 
   QStringList getSelectedWorkspaceNames() const;
-  QMultiMap<QString,std::set<int> > chooseSpectrumFromSelected() const;
+  MantidWSIndexDialog::UserInput chooseSpectrumFromSelected(bool showWaterfallOpt = true) const;
   void setSortScheme(MantidItemSortScheme);
   void setSortOrder(Qt::SortOrder);
   MantidItemSortScheme getSortScheme() const;

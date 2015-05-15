@@ -13,6 +13,9 @@ set ( CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/Build/CMake")
 # Define the project name.
 project ( Mantid )
 
+SET (CPACK_INSTALL_CMAKE_PROJECTS
+     "${CMAKE_BINARY_DIR}" "Mantid" "ALL" "/")
+
 ###########################################################################
 # Quick exit if we only want data targets
 ###########################################################################
@@ -151,6 +154,22 @@ set ( MAKE_VATES OFF CACHE BOOL "Switch for compiling the Vates project")
 
 if ( MAKE_VATES )
   add_subdirectory ( Vates )
+
+  if (NOT APPLE)
+    LIST( APPEND CPACK_INSTALL_CMAKE_PROJECTS
+          "${ParaView_DIR}" "ParaView Runtime Libs" "Runtime" "${INBUNDLE}/"
+    )
+    LIST( APPEND CPACK_INSTALL_CMAKE_PROJECTS
+          "${ParaView_DIR}" "VTK Runtime Libs" "RuntimeLibraries" "${INBUNDLE}/"
+    )
+    LIST( APPEND CPACK_INSTALL_CMAKE_PROJECTS
+          "${ParaView_DIR}" "HDF5 Core Library" "libraries" "${INBUNDLE}/"
+    )
+    LIST( APPEND CPACK_INSTALL_CMAKE_PROJECTS
+          "${ParaView_DIR}" "HDF5 HL Library" "hllibraries" "${INBUNDLE}/"
+    )
+  endif()
+
 endif ( MAKE_VATES )
 
 add_subdirectory ( MantidPlot )
@@ -220,7 +239,7 @@ if ( ENABLE_CPACK )
         # On RHEL6 we have to use an updated qscintilla to fix an auto complete bug
         set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES} qscintilla >= 2.4.6" )
         # On RHEL6 we are using SCL packages for Qt
-        set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},scl-utils,mantidlibs,mantidlibs-runtime,mantidlibs-qt,mantidlibs-qt-x11" )
+        set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},scl-utils,mantidlibs34,mantidlibs34-runtime,mantidlibs34-qt,mantidlibs34-qt-x11,mantidlibs34-qt-webkit" )
       else()
         set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES} qscintilla" )
       endif()
@@ -249,7 +268,7 @@ if ( ENABLE_CPACK )
                                      "libmuparser0debian1,"
                                      "ipython-qtconsole (>= 1.1),python-matplotlib,python-scipy,"
                                      "libpocofoundation9,libpocoutil9,libpoconet9,libpoconetssl9,libpococrypto9,libpocoxml9")
-        elseif( "${UNIX_CODENAME}" STREQUAL "trusty" )
+        elseif( "${UNIX_CODENAME}" STREQUAL "trusty" OR "${UNIX_CODENAME}" STREQUAL "utopic" OR "${UNIX_CODENAME}" STREQUAL "vivid")
           list ( APPEND DEPENDS_LIST ",libqscintilla2-11,"
                                      "liboce-foundation8,liboce-modeling8,"
                                      "libmuparser2,"

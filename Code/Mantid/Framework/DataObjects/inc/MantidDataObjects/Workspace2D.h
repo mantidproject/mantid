@@ -85,6 +85,8 @@ public:
   /// Copy the data from an image to this workspace's (Y's) and errors.
   void setImageYAndE(const API::MantidImage &imageY,
                      const API::MantidImage &imageE, size_t start = 0,
+                     bool loadAsRectImg = false,
+                     double scale_1 = 1.0,
                      bool parallelExecution = true);
 
 protected:

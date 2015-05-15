@@ -56,6 +56,7 @@ set ( SRC_FILES
 	src/IFunction1DSpectrum.cpp
 	src/IFunctionMD.cpp
 	src/IFunctionMW.cpp
+	src/ILatticeFunction.cpp
 	src/ILiveListener.cpp
 	src/IMDEventWorkspace.cpp
 	src/IMDHistoWorkspace.cpp
@@ -76,6 +77,7 @@ set ( SRC_FILES
 	src/ImplicitFunctionParserFactory.cpp
 	src/InstrumentDataService.cpp
 	src/JointDomain.cpp
+	src/LatticeDomain.cpp
 	src/LinearScale.cpp
 	src/LiveListenerFactory.cpp
 	src/LogManager.cpp
@@ -212,6 +214,7 @@ set ( INC_FILES
 	inc/MantidAPI/IFunctionMD.h
 	inc/MantidAPI/IFunctionMW.h
 	inc/MantidAPI/IFunctionWithLocation.h
+	inc/MantidAPI/ILatticeFunction.h
 	inc/MantidAPI/ILiveListener.h
 	inc/MantidAPI/IMDEventWorkspace.h
 	inc/MantidAPI/IMDHistoWorkspace.h
@@ -242,6 +245,7 @@ set ( INC_FILES
 	inc/MantidAPI/InstrumentDataService.h
 	inc/MantidAPI/Jacobian.h
 	inc/MantidAPI/JointDomain.h
+	inc/MantidAPI/LatticeDomain.h
 	inc/MantidAPI/LinearScale.h
 	inc/MantidAPI/LiveListenerFactory.h
 	inc/MantidAPI/LogManager.h
@@ -340,6 +344,7 @@ set ( TEST_FILES
 	IFunction1DSpectrumTest.h
 	IFunction1DTest.h
 	IFunctionMDTest.h
+	ILatticeFunctionTest.h
 	ILiveListenerTest.h
 	IMDWorkspaceTest.h
 	ISpectrumTest.h
@@ -348,6 +353,7 @@ set ( TEST_FILES
 	ImplicitFunctionParserFactoryTest.h
 	IncreasingAxisValidatorTest.h
 	InstrumentDataServiceTest.h
+	LatticeDomainTest.h
 	LiveListenerFactoryTest.h
 	LogManagerTest.h
 	MDGeometryTest.h

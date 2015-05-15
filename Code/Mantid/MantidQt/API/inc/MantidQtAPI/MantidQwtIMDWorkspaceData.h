@@ -62,6 +62,7 @@ public:
 private:
 
   void cacheLinePlot();
+  void calculateMinMax();
   void choosePlotAxis();
 
   friend class MantidMatrixCurve;
@@ -72,8 +73,14 @@ private:
   /// Indicates that the data is plotted on a log y scale
   bool m_logScale;
 
+  /// lowest y value
+  double m_minY;
+
   /// lowest positive y value
   double m_minPositive;
+
+  /// highest y value
+  double m_maxY;
 
   /// Are we in preview mode?
   bool m_preview;

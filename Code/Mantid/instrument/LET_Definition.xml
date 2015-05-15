@@ -6,7 +6,7 @@
             xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 http://schema.mantidproject.org/IDF/1.0/IDFSchema.xsd"
  name="LET" valid-from   ="1900-01-31 23:59:59"
                        valid-to     ="2014-02-10 23:59:59"
-		       last-modified="2012-03-13 00:00:00">
+		       last-modified="2015-03-09 00:00:00">
  
    <defaults>
      <length unit="meter"/>

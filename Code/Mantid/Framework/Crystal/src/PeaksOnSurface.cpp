@@ -2,7 +2,6 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include <boost/assign.hpp>
-#include <boost/make_shared.hpp>
 
 using namespace Mantid::Kernel;
 typedef std::vector<double> VecDouble;

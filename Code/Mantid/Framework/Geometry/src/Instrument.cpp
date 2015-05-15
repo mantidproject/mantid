@@ -1,18 +1,10 @@
 #include "MantidGeometry/Instrument.h"
-#include "MantidKernel/V3D.h"
-#include "MantidKernel/Exception.h"
-#include "MantidKernel/Logger.h"
-#include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidGeometry/Instrument/ParComponentFactory.h"
-#include "MantidGeometry/Objects/BoundingBox.h"
-#include "MantidGeometry/Instrument/CompAssembly.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 
 #include <Poco/Path.h>
-#include <algorithm>
-#include <sstream>
 #include <queue>
 
 using namespace Mantid::Kernel;
@@ -1068,7 +1060,13 @@ void Instrument::saveNexus(::NeXus::File *file,
 
   // XML contents of instrument, as a NX note
   file->makeGroup("instrument_xml", "NXnote", true);
-  file->writeData("data", getXmlText());
+  const std::string& xmlText = getXmlText();
+  if (xmlText.empty())
+    g_log.warning() << "Saving Instrument with no XML data. Mantid might NOT be"
+                    << " able to re-open the resulting Nexus file. This should"
+                    << " never happen. Please notify the Mantid development"
+                    << " team." << std::endl;
+  file->writeData("data", xmlText);
   file->writeData("type", "text/xml"); // mimetype
   file->writeData("description", "XML contents of the instrument IDF file.");
   file->closeGroup();

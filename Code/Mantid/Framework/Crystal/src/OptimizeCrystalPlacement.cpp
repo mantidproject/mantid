@@ -10,23 +10,10 @@
 #include "MantidCrystal/OptimizeCrystalPlacement.h"
 #include "MantidCrystal/PeakHKLErrors.h"
 #include "MantidCrystal/SCDCalibratePanels.h"
-#include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Crystal/IndexingUtils.h"
-#include "MantidGeometry/Crystal/OrientedLattice.h"
-#include "MantidGeometry/Instrument.h"
-#include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/EnabledWhenProperty.h"
-#include "MantidKernel/IPropertySettings.h"
-#include "MantidKernel/Property.h"
-#include "MantidKernel/V3D.h"
-#include <boost/lexical_cast.hpp>
 #include <cstdarg>
-#include <iostream>
-#include <map>
-
-#include <math.h>
-#include <sstream>
 
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;

@@ -30,6 +30,12 @@ using Mantid::Geometry::MDHistoDimension;
 using Mantid::Geometry::MDHistoDimension_sptr;
 using Mantid::coord_t;
 
+// Allow unused functions.
+#if __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-function"
+#endif
+
 //=====================================================================================
 // Test Helper Types. These are shared by several tests in VatesAPI
 //=====================================================================================
@@ -478,5 +484,9 @@ Create a field data entry containing (as contents) the argument text.
   }
 
 } // namespace
+
+#if __clang__
+#pragma clang diagnostic pop
+#endif
 
 #endif

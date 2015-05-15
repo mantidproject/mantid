@@ -1,7 +1,6 @@
 #include "MantidKernel/ChecksumHelper.h"
 
 #include <boost/regex.hpp>
-#include <boost/scoped_ptr.hpp>
 #include <boost/shared_array.hpp>
 
 #include <Poco/MD5Engine.h>
@@ -10,7 +9,6 @@
 
 #include <fstream>
 #include <sstream>
-#include <string>
 
 namespace Mantid {
 namespace Kernel {

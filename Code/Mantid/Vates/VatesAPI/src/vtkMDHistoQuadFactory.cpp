@@ -13,17 +13,22 @@
 #include "vtkSmartPointer.h" 
 #include <vector>
 #include "MantidKernel/ReadLock.h"
+#include "MantidKernel/Logger.h"
 
 using Mantid::API::IMDWorkspace;
 using Mantid::Kernel::CPUTimer;
 using Mantid::DataObjects::MDHistoWorkspace;
+
+namespace
+{
+  Mantid::Kernel::Logger g_log("vtkMDHistoQuadFactory");
+}
 
 namespace Mantid
 {
 
   namespace VATES
   {
-
     vtkMDHistoQuadFactory::vtkMDHistoQuadFactory(ThresholdRange_scptr thresholdRange, const std::string& scalarName) : m_scalarName(scalarName), m_thresholdRange(thresholdRange)
     {
     }
@@ -69,6 +74,8 @@ namespace Mantid
       }
       else
       {
+        g_log.warning() << "Factory " << this->getFactoryTypeName() << " is being used. You are viewing data with less than three dimensions in the VSI. \n";
+
         Mantid::Kernel::ReadLock lock(*m_workspace);
         CPUTimer tim;
         const int nBinsX = static_cast<int>( m_workspace->getXDimension()->getNBins() );
@@ -142,7 +149,7 @@ namespace Mantid
         std::cout << tim << " to check all the signal values." << std::endl;
 
         // Get the transformation that takes the points in the TRANSFORMED space back into the ORIGINAL (not-rotated) space.
-        Mantid::API::CoordTransform* transform = NULL;
+        Mantid::API::CoordTransform const* transform = NULL;
         if (m_useTransform)
           transform = m_workspace->getTransformToOriginal();
 

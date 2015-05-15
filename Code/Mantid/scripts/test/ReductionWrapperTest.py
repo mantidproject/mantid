@@ -114,7 +114,7 @@ class ReductionWrapperTest(unittest.TestCase):
         fcomp = fbase+'.pyc'
         if os.path.isfile(fcomp):
             os.remove(fcomp)
-        # save wen variables
+        # save web variables
         red.save_web_variables(file)
         self.assertTrue(os.path.isfile(file))
 
@@ -125,6 +125,7 @@ class ReductionWrapperTest(unittest.TestCase):
 
         self.assertEqual(rv.standard_vars,main_prop)
         self.assertEqual(rv.advanced_vars,adv_prop)
+        self.assertTrue(hasattr(rv,'variable_help'))
 
         reload(mr)
 

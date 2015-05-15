@@ -65,7 +65,7 @@ TMDE(MDBoxBase)::MDBoxBase(const MDBoxBase<MDE, nd> &box,
     : m_signal(box.m_signal), m_errorSquared(box.m_errorSquared),
       m_totalWeight(box.m_totalWeight), m_BoxController(otherBC),
       m_inverseVolume(box.m_inverseVolume), m_depth(box.m_depth),
-      m_parent(box.m_parent), m_fileID(box.m_fileID) {
+      m_parent(box.m_parent), m_fileID(box.m_fileID), m_dataMutex() {
 
   // Copy the extents
   for (size_t d = 0; d < nd; d++)

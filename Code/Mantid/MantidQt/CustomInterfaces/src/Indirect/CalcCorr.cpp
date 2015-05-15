@@ -295,15 +295,26 @@ namespace IDA
       return;
     }
 
-    std::string paramName = "Workflow.beam-width";
     auto instrument = ws->getInstrument();
 
-    if(instrument->hasParameter(paramName))
+    const std::string beamWidthParamName = "Workflow.beam-width";
+    if(instrument->hasParameter(beamWidthParamName))
     {
-      QString beamWidth = QString::fromStdString(instrument->getStringParameter(paramName)[0]);
+      QString beamWidth = QString::fromStdString(instrument->getStringParameter(beamWidthParamName)[0]);
       double beamWidthValue = beamWidth.toDouble();
+
       m_uiForm.spCylBeamWidth->setValue(beamWidthValue);
-      m_uiForm.spCylBeamHeight->setValue(beamWidthValue);
+      m_uiForm.spAnnBeamWidth->setValue(beamWidthValue);
+    }
+
+    const std::string beamHeightParamName = "Workflow.beam-height";
+    if(instrument->hasParameter(beamHeightParamName))
+    {
+      QString beamHeight = QString::fromStdString(instrument->getStringParameter(beamHeightParamName)[0]);
+      double beamHeightValue = beamHeight.toDouble();
+
+      m_uiForm.spCylBeamHeight->setValue(beamHeightValue);
+      m_uiForm.spAnnBeamHeight->setValue(beamHeightValue);
     }
   }
 
@@ -326,8 +337,7 @@ namespace IDA
     }
     else if(shape == "Cylinder")
     {
-      double sampleInnerRadius = m_uiForm.spCylSampleInnerRadius->value();
-      alg->setProperty("SampleInnerRadius", sampleInnerRadius);
+      alg->setProperty("SampleInnerRadius", 0.0);
 
       double sampleOuterRadius = m_uiForm.spCylSampleOuterRadius->value();
       alg->setProperty("SampleOuterRadius", sampleOuterRadius);
@@ -343,7 +353,8 @@ namespace IDA
     }
     else if(shape == "Annulus")
     {
-      alg->setProperty("SampleInnerRadius", 0.0);
+      double sampleInnerRadius = m_uiForm.spAnnSampleInnerRadius->value();
+      alg->setProperty("SampleInnerRadius", sampleInnerRadius);
 
       double sampleOuterRadius = m_uiForm.spAnnSampleOuterRadius->value();
       alg->setProperty("SampleOuterRadius", sampleOuterRadius);

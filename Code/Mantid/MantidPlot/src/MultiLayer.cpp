@@ -67,6 +67,7 @@
 
 #include <gsl/gsl_vector.h>
 #include "Mantid/MantidMDCurveDialog.h"
+#include "Mantid/MantidWSIndexDialog.h"
 #include "MantidQtSliceViewer/LinePlotOptions.h"
 
 #include "TSVSerialiser.h"
@@ -100,7 +101,7 @@ void LayerButton::mouseDoubleClickEvent ( QMouseEvent * )
 	emit showCurvesDialog();
 }
 
-MultiLayer::MultiLayer(ApplicationWindow* parent, int layers, int rows, int cols, 
+MultiLayer::MultiLayer(ApplicationWindow* parent, int layers, int rows, int cols,
                        const QString& label, const char* name, Qt::WFlags f)
                          : MdiSubWindow(parent, label, name, f),
                          active_graph(NULL),
@@ -191,7 +192,7 @@ void MultiLayer::insertCurve(MultiLayer* ml, int i)
   if( ml== this ) return;
   Graph *current = activeGraph();
   if( !current ) return;
-  
+
   current->insertCurve(ml->activeGraph(), i);
   current->updatePlot();
 }
@@ -213,10 +214,10 @@ LayerButton* MultiLayer::addLayerButton()
 Graph* MultiLayer::addLayer(int x, int y, int width, int height)
 {
 	addLayerButton();
-	if (!width && !height){		
-		width =	canvas->width() - left_margin - right_margin - (d_cols - 1)*colsSpace; 
+	if (!width && !height){
+		width =	canvas->width() - left_margin - right_margin - (d_cols - 1)*colsSpace;
 		height = canvas->height() - top_margin - left_margin - (d_rows - 1)*rowsSpace;
-		
+
 		int layers = graphsList.size();
 		x = left_margin + (layers % d_cols)*(width + colsSpace);
 	    y = top_margin + (layers / d_cols)*(height + rowsSpace);
@@ -642,9 +643,9 @@ void MultiLayer::arrangeLayers(bool fit, bool userSize)
 
 		this->showNormal();
 		QSize size = canvas->childrenRect().size();
-		this->resize(canvas->x() + size.width() + left_margin + 2*right_margin, 
+		this->resize(canvas->x() + size.width() + left_margin + 2*right_margin,
 					canvas->y() + size.height() + bottom_margin + 2*LayerButton::btnSize());
-		
+
 		foreach (Graph *gr, graphsList)
 			gr->setIgnoreResizeEvents(ignoreResize);
 	}
@@ -917,7 +918,7 @@ void MultiLayer::printAllLayers(QPainter *painter)
 		}
 	}
 	else
-	{	
+	{
 	   	int x_margin = (pageRect.width() - canvasRect.width())/2;
 	   	int y_margin = (pageRect.height() - canvasRect.height())/2;
 		if (d_print_cropmarks)
@@ -925,7 +926,7 @@ void MultiLayer::printAllLayers(QPainter *painter)
 		int margin = (int)((1/2.54)*printer->logicalDpiY()); // 1 cm margins
 		double scaleFactorX=(double)(paperRect.width()-4*margin)/(double)canvasRect.width();
 		double scaleFactorY=(double)(paperRect.height()-4*margin)/(double)canvasRect.height();
-		
+
 		for (int i=0; i<(int)graphsList.count(); i++)
 		{
             Graph *gr = static_cast<Graph *>(graphsList.at(i));
@@ -937,7 +938,7 @@ void MultiLayer::printAllLayers(QPainter *painter)
 			int width=int(size.width()*scaleFactorX);
 			int height=int(size.height()*scaleFactorY);
 			myPlot->print(painter, QRect(pos, QSize(width,height)));
-		
+
 		}
 	}
 	if (d_print_cropmarks)
@@ -1292,10 +1293,10 @@ void MultiLayer::dragEnterEvent( QDragEnterEvent * event )
 void MultiLayer::dropEvent( QDropEvent * event )
 {
   MantidTreeWidget * tree = dynamic_cast<MantidTreeWidget*>(event->source());
-  
+
   Graph *g = this->activeGraph();
   if (!g) return; // (shouldn't happen either)
-  
+
   if(g->curves() > 0)
   {
     //Do some capability queries on the base curve.
@@ -1383,10 +1384,12 @@ void MultiLayer::dropOntoMatrixCurve(Graph *g, MantidMatrixCurve* originalCurve,
     // Else we'll just have no error bars.
     errorBars = false;
   }
-  
-  if ( tree == NULL ) return; // (shouldn't happen)
-  QMultiMap<QString,std::set<int> > toPlot = tree->chooseSpectrumFromSelected();
 
+  if ( tree == NULL ) return; // (shouldn't happen)
+  bool waterfallOpt = false;
+  const auto userInput = tree->chooseSpectrumFromSelected(waterfallOpt);
+  const auto toPlot = userInput.plots;
+  
   // Iterate through the selected workspaces adding a set of curves from each
   for(QMultiMap<QString,std::set<int> >::const_iterator it=toPlot.begin();it!=toPlot.end();++it)
   {
@@ -1465,6 +1468,47 @@ void MultiLayer::maybeNeedToClose()
   }
 }
 
+void MultiLayer::toggleWaterfall(bool on)
+{
+  if(on) convertToWaterfall();
+  else convertFromWaterfall();
+}
+
+/**
+ * Assume we have a standard 1D plot and convert it to a waterfall layout
+ */
+void MultiLayer::convertToWaterfall()
+{
+  Graph *active = activeGraph();
+  if(!active || active->isWaterfallPlot()) return;
+
+  hide();
+  active->setWaterfallOffset(10,20);
+  setWaterfallLayout(true);
+  // Next two lines replace the legend so that it works on reversing the curve order
+  active->removeLegend();
+  active->newLegend();
+  show();
+}
+
+/**
+ * Assume we have a waterfall 1D plot and convert it to a standard overlayed layout
+ */
+void MultiLayer::convertFromWaterfall()
+{
+  Graph *active = activeGraph();
+  if(!active || !active->isWaterfallPlot()) return;
+
+  hide();
+  const bool updateOffset(true);
+  active->setWaterfallOffset(0, 0, updateOffset);
+  setWaterfallLayout(false);
+  // Next two lines replace the legend
+  active->removeLegend();
+  active->newLegend();
+  show();
+}
+
 void MultiLayer::setWaterfallLayout(bool on)
 {
   if (graphsList.isEmpty())
@@ -1476,13 +1520,7 @@ void MultiLayer::setWaterfallLayout(bool on)
     createWaterfallBox();
     updateWaterfalls();
   } else {
-    for (int i = 0; i < waterfallBox->count(); i++){
-      QLayoutItem *item = waterfallBox->itemAt(i);
-      if (item){
-        waterfallBox->removeItem(item);
-        delete item;
-      }
-    }
+    removeWaterfallBox();
   }
 }
 
@@ -1502,6 +1540,17 @@ void MultiLayer::createWaterfallBox()
   btn = new QPushButton(tr("Fill Area..."));
   connect (btn, SIGNAL(clicked()), this, SLOT(showWaterfallFillDialog()));
   waterfallBox->addWidget(btn);
+}
+
+void MultiLayer::removeWaterfallBox()
+{
+  if (waterfallBox->count() == 0)
+    return;
+
+  QLayoutItem *child;
+  while ((child = waterfallBox->takeAt(0)) != 0) {
+    delete child->widget();
+  }
 }
 
 void MultiLayer::updateWaterfalls()
@@ -1579,7 +1628,7 @@ void MultiLayer::showWaterfallFillDialog()
   if (active_graph->curvesList().isEmpty())
     return;
 
-  new WaterfallFillDialog(this, active_graph);  
+  new WaterfallFillDialog(this, active_graph);
 }
 
 
@@ -1591,30 +1640,30 @@ void MultiLayer::setWaterfallFillColor(const QColor& c)
 }
 
 
-WaterfallFillDialog::WaterfallFillDialog(MultiLayer *parent, Graph *active_graph) 
+WaterfallFillDialog::WaterfallFillDialog(MultiLayer *parent, Graph *active_graph)
 {
   this->setParent(parent);
   this->m_active_graph = active_graph;
   QDialog *waterfallFillDialog = new QDialog(this);
   waterfallFillDialog->setWindowTitle(tr("Fill Curves"));
-  
+
   QGroupBox *enableFillGroup = new QGroupBox(tr("Enable Fill"), waterfallFillDialog);
   enableFillGroup->setCheckable(true);
-  
-  QGridLayout *enableFillLayout =  new QGridLayout(enableFillGroup);  
+
+  QGridLayout *enableFillLayout =  new QGridLayout(enableFillGroup);
 
   // use line colour
   QRadioButton *rLineC = new QRadioButton("Use Line Colour", enableFillGroup);
   this->m_lineRadioButton = rLineC;
   enableFillLayout->addWidget(rLineC,0,0);
-  
+
   // use solid colour
   QRadioButton *rSolidC = new QRadioButton("Use Solid Colour", enableFillGroup);
   this->m_solidRadioButton = rSolidC;
   enableFillLayout->addWidget(rSolidC, 1,0);
 
-  QGroupBox *colourModeGroup = new QGroupBox( tr("Fill with Colour"), enableFillGroup);  
-  
+  QGroupBox *colourModeGroup = new QGroupBox( tr("Fill with Colour"), enableFillGroup);
+
   QGridLayout *hl1 = new QGridLayout(colourModeGroup);
   hl1->addWidget(new QLabel(tr("Colour")), 0, 0);
   ColorButton *fillColourBox = new ColorButton(colourModeGroup);
@@ -1624,26 +1673,26 @@ WaterfallFillDialog::WaterfallFillDialog(MultiLayer *parent, Graph *active_graph
   enableFillLayout->addWidget(colourModeGroup,2,0);
 
   QCheckBox *sideLinesBox = new QCheckBox(tr("Side Lines"), enableFillGroup);
-  enableFillLayout->addWidget(sideLinesBox, 3, 0); 
+  enableFillLayout->addWidget(sideLinesBox, 3, 0);
 
   QBrush brush = active_graph->curve(0)->brush();
 
   // check if all curve colours are the same (= solid fill)
   bool same = brush.style() != Qt::NoBrush; // check isn't first run against graph
-  
+
   if(same)
   {
     int n = active_graph->curvesList().size();
     for (int i = 0; i < n; i++)
     {
-      same = same && (active_graph->curve(i)->brush().color() == brush.color());    
+      same = same && (active_graph->curve(i)->brush().color() == brush.color());
     }
   }
   // set which is toggled
   enableFillGroup->setChecked(brush.style() != Qt::NoBrush);
 
   if(same)
-  {   
+  {
     rSolidC->toggle();
     if(enableFillGroup->isChecked())
       fillColourBox->setColor(brush.color());
@@ -1652,22 +1701,22 @@ WaterfallFillDialog::WaterfallFillDialog(MultiLayer *parent, Graph *active_graph
   {
     rLineC->toggle();
     if(enableFillGroup->isChecked())
-      active_graph->updateWaterfallFill(true);  
+      active_graph->updateWaterfallFill(true);
   }
 
   // If sidelines previously enabled, check it.
   PlotCurve *c = dynamic_cast<PlotCurve*>(active_graph->curve(0));
-  sideLinesBox->setChecked(c->sideLinesEnabled());   
-  
-  colourModeGroup->setEnabled(rSolidC->isChecked() && enableFillGroup->isChecked());  
-  
-  connect(enableFillGroup, SIGNAL(toggled(bool)), this, SLOT(enableFill(bool))); 
+  sideLinesBox->setChecked(c->sideLinesEnabled());
+
+  colourModeGroup->setEnabled(rSolidC->isChecked() && enableFillGroup->isChecked());
+
+  connect(enableFillGroup, SIGNAL(toggled(bool)), this, SLOT(enableFill(bool)));
   connect(fillColourBox, SIGNAL(colorChanged(const QColor&)), active_graph, SLOT(setWaterfallFillColor(const QColor&)));
-  connect(sideLinesBox, SIGNAL(toggled(bool)), active_graph, SLOT(setWaterfallSideLines(bool)));  
-  connect(rSolidC, SIGNAL(toggled(bool)), colourModeGroup, SLOT(setEnabled(bool)));  
-  connect(rSolidC, SIGNAL(toggled(bool)), this, SLOT(setFillMode())); 
-  connect(rLineC, SIGNAL(toggled(bool)), this, SLOT(setFillMode())); 
-  
+  connect(sideLinesBox, SIGNAL(toggled(bool)), active_graph, SLOT(setWaterfallSideLines(bool)));
+  connect(rSolidC, SIGNAL(toggled(bool)), colourModeGroup, SLOT(setEnabled(bool)));
+  connect(rSolidC, SIGNAL(toggled(bool)), this, SLOT(setFillMode()));
+  connect(rLineC, SIGNAL(toggled(bool)), this, SLOT(setFillMode()));
+
   QPushButton *closeBtn = new QPushButton(tr("&Close"),waterfallFillDialog);
   connect(closeBtn, SIGNAL(clicked()), waterfallFillDialog, SLOT(reject()));
 
@@ -1690,19 +1739,19 @@ void WaterfallFillDialog::enableFill(bool b)
   else
   {
     m_active_graph->curve(0)->setBrush(Qt::BrushStyle::NoBrush);
-    m_active_graph->updateWaterfallFill(false);     
+    m_active_graph->updateWaterfallFill(false);
   }
 }
 
 void WaterfallFillDialog::setFillMode()
 {
-  if( m_solidRadioButton->isChecked() ) 
-  {                  
+  if( m_solidRadioButton->isChecked() )
+  {
     m_active_graph->setWaterfallFillColor(this->m_colourBox->color());
-  }    
+  }
   else if( m_lineRadioButton->isChecked() )
-  {       
-    m_active_graph->updateWaterfallFill(true); 
+  {
+    m_active_graph->updateWaterfallFill(true);
   }
 }
 

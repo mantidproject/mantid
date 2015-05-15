@@ -139,8 +139,17 @@ namespace CustomInterfaces
 
   void ALCDataLoadingView::setAvailableLogs(const std::vector<std::string>& logs)
   {
+    // Keep the current log value
+    QString previousLog = m_ui.log->currentText();
+
     // Clear previous log list
     m_ui.log->clear();
+
+    // If previousLog is in 'logs' list, add it at the beginning
+    if ( std::find(logs.begin(), logs.end(), previousLog.toStdString()) != logs.end())
+    {
+      m_ui.log->addItem(previousLog);
+    }
 
     // Add new items
     for (auto it = logs.begin(); it != logs.end(); ++it)

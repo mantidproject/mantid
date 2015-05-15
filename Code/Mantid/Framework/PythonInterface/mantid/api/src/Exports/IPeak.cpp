@@ -31,7 +31,9 @@ void setQSampleFrame2(IPeak &peak, Mantid::Kernel::V3D qSampleFrame, double dist
 
 }
 
+// clang-format off
 void export_IPeak()
+// clang-format on
 {
   register_ptr_to_python<IPeak*>();
 

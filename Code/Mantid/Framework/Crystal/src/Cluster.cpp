@@ -1,7 +1,5 @@
 #include "MantidCrystal/Cluster.h"
-#include "MantidCrystal/DisjointElement.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
-#include <stdexcept>
 
 namespace {
 typedef std::vector<Mantid::Crystal::DisjointElement> VecElements;

@@ -8,7 +8,9 @@ using Mantid::Kernel::PropertyWithValue;
 using Mantid::PythonInterface::PropertyWithValueExporter;
 using namespace boost::python;
 
+// clang-format off
 void export_FunctionProperty()
+// clang-format on
 {
   // FuncitonProperty has base PropertyWithValue<boost::shared_ptr<IFunction>>
   // which must be exported

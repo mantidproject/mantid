@@ -20,7 +20,9 @@ using namespace boost::python;
 /// return_value_policy for copied numpy array
 typedef return_value_policy<Policies::VectorToNumpy> return_clone_numpy;
 
+// clang-format off
 void export_IEventList()
+// clang-format on
 {
   register_ptr_to_python<IEventList *>();
 

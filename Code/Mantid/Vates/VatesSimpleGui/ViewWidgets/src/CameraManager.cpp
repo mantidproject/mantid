@@ -7,12 +7,12 @@
 #endif
 
 #include <pqView.h>
-#include <pqActiveView.h>
+#include <pqActiveObjects.h>
 #include <vtkSMRenderViewProxy.h>
 #include <vtkCamera.h>
 #include <vtkRenderer.h>
 #include <vtkRenderWindow.h>
-
+#include <boost/make_shared.hpp>
 namespace Mantid
 {
   namespace Vates
@@ -26,16 +26,11 @@ namespace Mantid
       CameraManager::~CameraManager()
       {
       }
+
       /**
        * Get the plane equation for the view frustum.
-       * @param left The left plane.
-       * @param right The right plane.
-       * @param bottom The bottom plane.
-       * @param top The top plane.
-       * @param far The far plane.
-       * @param near The near plane.
        */
-      Mantid::VATES::ViewFrustum CameraManager::getCurrentViewFrustum()
+      Mantid::VATES::ViewFrustum_const_sptr CameraManager::getCurrentViewFrustum()
       {
         double left[4];
         double right[4];
@@ -44,7 +39,7 @@ namespace Mantid
         double far[4];
         double near[4];
 
-        pqView * view = pqActiveView::instance().current();
+        pqView * view = pqActiveObjects::instance().activeView();
 
         vtkSMRenderViewProxy* proxy = NULL;
 
@@ -92,12 +87,13 @@ namespace Mantid
           near[k] = planes[k + 16];
           far[k] = planes[k + 20];
         }
-        Mantid::VATES::ViewFrustum frustum(Mantid::VATES::LeftPlane(left[0], left[1], left[2], left[3]),
-                                           Mantid::VATES::RightPlane(right[0], right[1], right[2], right[3]),
-                                           Mantid::VATES::BottomPlane(bottom[0], bottom[1], bottom[2], bottom[3]),
-                                           Mantid::VATES::TopPlane(top[0], top[1], top[2], top[3]),
-                                           Mantid::VATES::FarPlane(far[0], far[1], far[2], far[3]),
-                                           Mantid::VATES::NearPlane(near[0], near[1], near[2], near[3]));
+
+        Mantid::VATES::ViewFrustum_const_sptr frustum = boost::make_shared<const Mantid::VATES::ViewFrustum>(Mantid::VATES::LeftPlane(left[0], left[1], left[2], left[3]),
+                                                                                                             Mantid::VATES::RightPlane(right[0], right[1], right[2], right[3]),
+                                                                                                             Mantid::VATES::BottomPlane(bottom[0], bottom[1], bottom[2], bottom[3]),
+                                                                                                             Mantid::VATES::TopPlane(top[0], top[1], top[2], top[3]),
+                                                                                                             Mantid::VATES::FarPlane(far[0], far[1], far[2], far[3]),
+                                                                                                             Mantid::VATES::NearPlane(near[0], near[1], near[2], near[3]));
 
         return frustum;
       }
@@ -111,7 +107,7 @@ namespace Mantid
       */
       void CameraManager::setCameraToPeak(double xpos, double ypos, double zpos, double peakRadius)
       {
-        pqView * view = pqActiveView::instance().current();
+        pqView * view = pqActiveObjects::instance().activeView();
         vtkSMRenderViewProxy* proxy = NULL;
 
         if (view)
@@ -132,7 +128,8 @@ namespace Mantid
         camera->SetFocalPoint(xpos, ypos, zpos);
 
         // Setup the position of the camera. We want this to be 
-        double zposCamera = zpos + peakRadius*3;
+        const double cameraDistance = 12;
+        double zposCamera = zpos + peakRadius*cameraDistance;
         camera->SetPosition(xpos, ypos, zposCamera);
         camera->SetViewUp(0.0, 1.0, 0.0);
 

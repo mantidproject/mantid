@@ -233,7 +233,9 @@ private:
   static double dblSqrt(double in);
 
   // C++ interface to the NXS file
+  // clang-format off
   boost::scoped_ptr< ::NeXus::File> m_cppFile;
+  // clang-format on
 
   bool findSpectraDetRangeInFile(
       NeXus::NXEntry &entry, boost::shared_array<int> &spectrum_index,

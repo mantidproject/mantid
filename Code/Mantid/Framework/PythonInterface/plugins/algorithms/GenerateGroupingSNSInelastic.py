@@ -3,7 +3,7 @@ import mantid
 import mantid.api
 import mantid.simpleapi
 import mantid.kernel
-from numpy import arange
+import numpy
 
 
 class GenerateGroupingSNSInelastic(mantid.api.PythonAlgorithm):
@@ -35,7 +35,8 @@ class GenerateGroupingSNSInelastic(mantid.api.PythonAlgorithm):
 
         self.declareProperty("AlongTubes", "1",mantid.kernel.StringListValidator(py), "Number of pixels across tubes to be grouped")
         self.declareProperty("AcrossTubes", "1", mantid.kernel.StringListValidator(px), "Number of pixels across tubes to be grouped")
-        self.declareProperty("Instrument", instrument[0], mantid.kernel.StringListValidator(instrument), "The instrument for wich to create grouping")
+        self.declareProperty("Instrument", instrument[0], mantid.kernel.StringListValidator(instrument),
+                             "The instrument for wich to create grouping")
         f=mantid.api.FileProperty("Filename","",mantid.api.FileAction.Save,".xml")
 
         self.declareProperty(f,"Output filename.")
@@ -65,7 +66,7 @@ class GenerateGroupingSNSInelastic(mantid.api.PythonAlgorithm):
         y=__w.extractY()
         numdet=(y[y==1]).size
 
-        spectra = arange(numdet).reshape(-1,8,128)
+        spectra = numpy.arange(numdet).reshape(-1,8,128)
 
         banks = numdet/8/128
 
@@ -76,9 +77,9 @@ class GenerateGroupingSNSInelastic(mantid.api.PythonAlgorithm):
 
 
         groupnum = 0
-        for i in arange(banks):
-            for j in arange(8/pixelsx)*pixelsx:
-                for k in arange(128/pixelsy)*pixelsy:
+        for i in numpy.arange(banks):
+            for j in numpy.arange(8/pixelsx)*pixelsx:
+                for k in numpy.arange(128/pixelsy)*pixelsy:
 
                     groupname = str(groupnum)
                     ids = spectra[i, j:j+pixelsx, k:k+pixelsy].reshape(-1)

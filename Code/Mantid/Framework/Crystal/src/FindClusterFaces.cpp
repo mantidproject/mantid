@@ -2,27 +2,16 @@
 
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/EnabledWhenProperty.h"
-#include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/Utils.h"
 
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/IMDIterator.h"
 #include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidAPI/IPeak.h"
-#include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
-#include "MantidAPI/Progress.h"
 #include "MantidAPI/TableRow.h"
-#include "MantidAPI/WorkspaceFactory.h"
 
 #include "MantidCrystal/PeakClusterProjection.h"
-
-#include <boost/optional.hpp>
-#include <boost/shared_ptr.hpp>
-#include <boost/make_shared.hpp>
-#include <map>
-#include <deque>
-#include <algorithm>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;

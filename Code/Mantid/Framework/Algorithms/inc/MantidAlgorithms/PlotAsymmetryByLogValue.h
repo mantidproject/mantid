@@ -84,8 +84,6 @@ private:
   void doAnalysis (API::Workspace_sptr loadedWs, int64_t index);
   // Parse run names
   void parseRunNames (std::string& firstFN, std::string& lastFN, std::string& fnBase, std::string& fnExt, int& fnZeros);
-  // Resize vectors
-  void resizeVectors (size_t size);
   // Load dead-time corrections from specified file
   void loadCorrectionsFromFile (API::Workspace_sptr &customDeadTimes, std::string deadTimeFile );
   // Apply dead-time corrections
@@ -102,40 +100,60 @@ private:
   double getLogValue(API::MatrixWorkspace &ws);
   /// Populate output workspace with results
   void populateOutputWorkspace (API::MatrixWorkspace_sptr &outWS, int nplots);
+  /// Check input properties
+  void checkProperties (size_t &is, size_t &ie);
+  /// Clear previous results
+  void clearResultsFromTo (size_t is, size_t ie);
 
   /// Stores base name shared by all runs
-  std::string m_filenameBase;
+  static std::string g_filenameBase;
   /// Stores extension shared by all runs
-  std::string m_filenameExt;
+  static std::string g_filenameExt;
   /// Sotres number of zeros in run name
-  int m_filenameZeros;
+  static int g_filenameZeros;
   /// Stores property "Int"
   bool m_int;
   /// Store forward spectra
-  std::vector<int> m_forward_list;
+  static std::vector<int> g_forward_list;
   /// Store backward spectra
-  std::vector<int> m_backward_list;
+  static std::vector<int> g_backward_list;
   /// If true call LoadMuonNexus with Autogroup on
   bool m_autogroup;
   /// Store type of dead time corrections
-  std::string m_dtcType;
+  static std::string g_dtcType;
+  /// File to read corrections from
+  static std::string g_dtcFile;
   /// Store red period
-  int m_red;
+  static int g_red;
   /// Store green period
-  int m_green;
+  static int g_green;
   // Mantid vectors to store results
   // Red mantid vectors
-  MantidVec m_redX, m_redY, m_redE;
+  static std::map<int64_t, double> g_redX;
+  static std::map<int64_t, double> g_redY;
+  static std::map<int64_t, double> g_redE;
   // Green mantid vectors
-  MantidVec m_greenX, m_greenY, m_greenE;
+  static std::map<int64_t, double> g_greenX;
+  static std::map<int64_t, double> g_greenY;
+  static std::map<int64_t, double> g_greenE;
   // Mantid vectors to store Red + Green
-  MantidVec m_sumX, m_sumY, m_sumE;
+  static std::map<int64_t, double> g_sumX;
+  static std::map<int64_t, double> g_sumY;
+  static std::map<int64_t, double> g_sumE;
   // Mantid vectors to store Red - Green
-  MantidVec m_diffX, m_diffY, m_diffE;
+  static std::map<int64_t, double> g_diffX;
+  static std::map<int64_t, double> g_diffY;
+  static std::map<int64_t, double> g_diffE;
   // LogValue name
-  std::string m_logName;
+  static std::string g_logName;
   // LogValue function
-  std::string m_logFunc;
+  static std::string g_logFunc;
+  // Type of computation: integral or differential
+  static std::string g_stype;
+  // Minimum time for the analysis
+  static double g_minTime;
+  // Maximum time for the analysis
+  static double g_maxTime;
 };
 
 } // namespace Algorithm

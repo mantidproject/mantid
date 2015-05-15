@@ -12,6 +12,7 @@
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using Mantid::CurveFitting::PawleyFit;
+using Mantid::CurveFitting::V3DFromHKLColumnExtractor;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 
@@ -23,17 +24,17 @@ public:
   static void destroySuite(PawleyFitTest *suite) { delete suite; }
 
   void testGetHKL() {
-    TestablePawleyFit pfit;
+    TestableV3DFromHKLColumnExtractor extractor;
 
     V3D referenceHKL(1, 2, 3);
 
-    TS_ASSERT_EQUALS(pfit.getHkl("1 2 3"), referenceHKL);
-    TS_ASSERT_EQUALS(pfit.getHkl(" 1 2 3 "), referenceHKL);
-    TS_ASSERT_EQUALS(pfit.getHkl("1 2 3"), referenceHKL);
-    TS_ASSERT_EQUALS(pfit.getHkl("1,2,3"), referenceHKL);
-    TS_ASSERT_EQUALS(pfit.getHkl("1;2;3"), referenceHKL);
-    TS_ASSERT_EQUALS(pfit.getHkl("[1,2,3]"), referenceHKL);
-    TS_ASSERT_EQUALS(pfit.getHkl("[1;2 3]"), referenceHKL);
+    TS_ASSERT_EQUALS(extractor.getHKLFromString("1 2 3"), referenceHKL);
+    TS_ASSERT_EQUALS(extractor.getHKLFromString(" 1 2 3 "), referenceHKL);
+    TS_ASSERT_EQUALS(extractor.getHKLFromString("1 2 3"), referenceHKL);
+    TS_ASSERT_EQUALS(extractor.getHKLFromString("1,2,3"), referenceHKL);
+    TS_ASSERT_EQUALS(extractor.getHKLFromString("1;2;3"), referenceHKL);
+    TS_ASSERT_EQUALS(extractor.getHKLFromString("[1,2,3]"), referenceHKL);
+    TS_ASSERT_EQUALS(extractor.getHKLFromString("[1;2 3]"), referenceHKL);
   }
 
   void testFitHexagonalCellQ() {
@@ -150,6 +151,10 @@ private:
   public:
     TestablePawleyFit() : PawleyFit() {}
     ~TestablePawleyFit() {}
+  };
+
+  class TestableV3DFromHKLColumnExtractor : public V3DFromHKLColumnExtractor {
+    friend class PawleyFitTest;
   };
 
   ITableWorkspace_sptr getHCPTable() {

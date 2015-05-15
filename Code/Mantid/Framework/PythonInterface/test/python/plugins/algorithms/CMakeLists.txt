@@ -10,6 +10,7 @@ set ( TEST_PY_FILES
   ConjoinSpectraTest.py
   CorrectLogTimesTest.py
   CreateLeBailFitInputTest.py
+  CreateMDTest.py
   IndirectCalibrationTest.py
   CreateWorkspaceTest.py
   CylinderPaalmanPingsCorrectionTest.py
@@ -24,9 +25,9 @@ set ( TEST_PY_FILES
   IndirectCylinderAbsorptionTest.py
   IndirectFlatPlateAbsorptionTest.py
   IndirectILLReductionTest.py
-  InelasticIndirectReductionTest.py
   IndirectTransmissionTest.py
   IndirectTransmissionMonitorTest.py
+  ISISIndirectEnergyTransferTest.py
   LoadDNSLegacyTest.py
   LoadFullprofFileTest.py
   LoadLiveDataTest.py

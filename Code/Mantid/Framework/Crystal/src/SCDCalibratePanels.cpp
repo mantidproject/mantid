@@ -1,34 +1,14 @@
 #include "MantidCrystal/SCDCalibratePanels.h"
-#include "MantidAPI/Algorithm.h"
 #include "MantidAPI/ConstraintFactory.h"
-#include "MantidDataObjects/PeaksWorkspace.h"
-#include "MantidDataObjects/Workspace2D.h"
-#include "MantidGeometry/Instrument.h"
-#include "MantidGeometry/IComponent.h"
-#include "MantidGeometry/Instrument/RectangularDetector.h"
-#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/EnabledWhenProperty.h"
-#include "MantidGeometry/Instrument/ParameterMap.h"
-#include "MantidKernel/V3D.h"
-#include "MantidKernel/Quat.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidKernel/ListValidator.h"
 
-#include "MantidAPI/Workspace.h"
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IFunction1D.h"
-#include "MantidAPI/ITableWorkspace.h"
-#include <boost/algorithm/string/trim.hpp>
-#include <iostream>
 #include <fstream>
-#include <math.h>
-#include <boost/algorithm/string.hpp>
-#include <boost/lexical_cast.hpp>
-#include "MantidKernel/Property.h"
-#include "MantidAPI/IFunction.h"
-#include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidGeometry/Crystal/IndexingUtils.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 

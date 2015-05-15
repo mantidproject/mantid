@@ -296,26 +296,13 @@
            </widget>
           </item>
           <item row="0" column="0">
-           <widget class="QLabel" name="lbCylSampleInnerRadius">
+           <widget class="QLabel" name="lbCylSampleOuterRadius">
             <property name="text">
-             <string>Sample Inner Radius:</string>
+             <string>Sample Radius:</string>
             </property>
            </widget>
           </item>
           <item row="0" column="1">
-           <widget class="QDoubleSpinBox" name="spCylSampleInnerRadius">
-            <property name="decimals">
-             <number>3</number>
-            </property>
-            <property name="maximum">
-             <double>9999.989999999999782</double>
-            </property>
-            <property name="singleStep">
-             <double>0.100000000000000</double>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="3">
            <widget class="QDoubleSpinBox" name="spCylSampleOuterRadius">
             <property name="decimals">
              <number>3</number>
@@ -328,24 +315,7 @@
             </property>
            </widget>
           </item>
-          <item row="0" column="2">
-           <widget class="QLabel" name="lbCylSampleOuterRadius">
-            <property name="text">
-             <string>Sample Outer Radius:</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="0">
-           <widget class="QLabel" name="lbCylCanOuterRadius">
-            <property name="enabled">
-             <bool>false</bool>
-            </property>
-            <property name="text">
-             <string>Container Outer Radius:</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="1">
+          <item row="0" column="3">
            <widget class="QDoubleSpinBox" name="spCylCanOuterRadius">
             <property name="enabled">
              <bool>false</bool>
@@ -358,6 +328,16 @@
             </property>
             <property name="singleStep">
              <double>0.100000000000000</double>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="2">
+           <widget class="QLabel" name="lbCylCanOuterRadius">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="text">
+             <string>Container Radius:</string>
             </property>
            </widget>
           </item>
@@ -422,27 +402,17 @@
             </property>
            </widget>
           </item>
-          <item row="0" column="0">
-           <widget class="QLabel" name="lbAnnSampleOuterRadius">
+          <item row="1" column="0">
+           <widget class="QLabel" name="lbAnnCanOuterRadius">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
             <property name="text">
-             <string>Sample Outer Radius:</string>
+             <string>Container Outer Radius:</string>
             </property>
            </widget>
           </item>
-          <item row="0" column="1">
-           <widget class="QDoubleSpinBox" name="spAnnSampleOuterRadius">
-            <property name="decimals">
-             <number>3</number>
-            </property>
-            <property name="maximum">
-             <double>9999.989999999999782</double>
-            </property>
-            <property name="singleStep">
-             <double>0.100000000000000</double>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="3">
+          <item row="1" column="1">
            <widget class="QDoubleSpinBox" name="spAnnCanOuterRadius">
             <property name="enabled">
              <bool>false</bool>
@@ -458,13 +428,43 @@
             </property>
            </widget>
           </item>
-          <item row="0" column="2">
-           <widget class="QLabel" name="lbAnnCanOuterRadius">
-            <property name="enabled">
-             <bool>false</bool>
+          <item row="0" column="3">
+           <widget class="QDoubleSpinBox" name="spAnnSampleOuterRadius">
+            <property name="decimals">
+             <number>3</number>
             </property>
+            <property name="maximum">
+             <double>9999.989999999999782</double>
+            </property>
+            <property name="singleStep">
+             <double>0.100000000000000</double>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="2">
+           <widget class="QLabel" name="lbAnnSampleOuterRadius">
             <property name="text">
-             <string>Container Outer Radius:</string>
+             <string>Sample Outer Radius:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="0">
+           <widget class="QLabel" name="lbAnnSampleInnerRadius">
+            <property name="text">
+             <string>Sample Inner Radius:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QDoubleSpinBox" name="spAnnSampleInnerRadius">
+            <property name="decimals">
+             <number>3</number>
+            </property>
+            <property name="maximum">
+             <double>9999.989999999999782</double>
+            </property>
+            <property name="singleStep">
+             <double>0.100000000000000</double>
             </property>
            </widget>
           </item>
@@ -687,12 +687,12 @@
   <tabstop>spFlatSampleAngle</tabstop>
   <tabstop>spFlatCanFrontThickness</tabstop>
   <tabstop>spFlatCanBackThickness</tabstop>
-  <tabstop>spCylSampleInnerRadius</tabstop>
   <tabstop>spCylSampleOuterRadius</tabstop>
   <tabstop>spCylCanOuterRadius</tabstop>
   <tabstop>spCylBeamHeight</tabstop>
   <tabstop>spCylBeamWidth</tabstop>
   <tabstop>spCylStepSize</tabstop>
+  <tabstop>spAnnSampleInnerRadius</tabstop>
   <tabstop>spAnnSampleOuterRadius</tabstop>
   <tabstop>spAnnCanOuterRadius</tabstop>
   <tabstop>spAnnBeamHeight</tabstop>

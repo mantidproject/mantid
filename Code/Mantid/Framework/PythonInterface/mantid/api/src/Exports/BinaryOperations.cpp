@@ -14,7 +14,9 @@
 
 namespace Policies = Mantid::PythonInterface::Policies;
 
+// clang-format off
 void export_BinaryOperations()
+// clang-format on
 {
   using namespace Mantid::API;
   using boost::python::return_value_policy;
@@ -143,7 +145,7 @@ namespace Mantid
       alg->setChild(false);
       alg->initialize();
       alg->setProperty<double>("DataValue",value);
-      const std::string & tmp_name("__tmp_binary_operation_double");
+      const std::string tmp_name("__tmp_binary_operation_double");
       alg->setPropertyValue("OutputWorkspace", tmp_name);
       alg->execute();
       MatrixWorkspace_sptr singleValue;

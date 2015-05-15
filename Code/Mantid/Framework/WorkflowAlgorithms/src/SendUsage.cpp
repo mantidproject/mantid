@@ -191,7 +191,7 @@ void SendUsage::generateHeader() {
 
   // paraview version or zero
   buffer << "\"ParaView\":\"";
-  if (ConfigService::Instance().quickParaViewCheck()) {
+  if (ConfigService::Instance().pvPluginsAvailable()) {
     buffer << Kernel::ParaViewVersion::targetVersion();
   } else {
     buffer << 0;

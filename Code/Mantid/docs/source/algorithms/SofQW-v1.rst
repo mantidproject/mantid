@@ -13,15 +13,13 @@ This algorithm is for use by inelastic instruments and takes as its
 input a workspace where the data's been reduced to be in `units <http://www.mantidproject.org/Units>`_ 
 of **energy transfer** against spectrum number (which can be seen as equivalent to
 angle, with the angle being taken from the detector(s) to which the
-spectrum pertains). For each detector the value of **momentum transfer**
-(:math:`Q`) is calculated, and the counts for detectors and each input 
-**energy transfer** bin are added to the appropriate output :math:`(Q ;\Delta E)` bin.
+spectrum pertains).
 
+This algorithm can operate in one of three modes. Each mode simply runs a different algorithm to perform the computation:
 
-The momentum tramsfer (:math:`Q`-values) obtained for each detector are calculated
-for the detector center, so the binning algorithm uses centerpoint binning. 
-Use :ref:`algm-SofQW2` and :ref:`algm-SofQW3` for more complex and precise (but slower)
-binning strategies.
+- *Centre*: performs a basic centre-point rebinning, see :ref:`algm-SofQWCentre`
+- *Polygon*: performs a parallel-piped rebin, taking into account the curvature of the output bins see :ref:`algm-SofQWPolygon`
+- *NormalisedPolygon*: performs the same rebin as *Polygon* but the output bins normalised by the contributing overlap area see :ref:`algm-SofQWNormalisedPolygon`
 
 The energy binning will not be changed by this algorithm, so the input
 workspace should already have the desired bins (though this axis can be

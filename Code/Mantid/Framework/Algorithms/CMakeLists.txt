@@ -52,6 +52,7 @@ set ( SRC_FILES
 	src/ConvertToMatrixWorkspace.cpp
 	src/ConvertToPointData.cpp
 	src/ConvertUnits.cpp
+	src/ConvertUnitsUsingDetectorTable.cpp
 	src/CopyDetectorMapping.cpp
 	src/CopyInstrumentParameters.cpp
 	src/CopyLogs.cpp
@@ -99,6 +100,7 @@ set ( SRC_FILES
 	src/ExtractMask.cpp
 	src/ExtractMaskToTable.cpp
 	src/ExtractSingleSpectrum.cpp
+	src/ExtractSpectra.cpp
 	src/FFT.cpp
 	src/FFTDerivative.cpp
 	src/FFTSmooth.cpp
@@ -197,6 +199,7 @@ set ( SRC_FILES
 	src/RemoveBins.cpp
 	src/RemoveExpDecay.cpp
 	src/RemoveLowResTOF.cpp
+	src/RemoveMaskedSpectra.cpp
 	src/RemovePromptPulse.cpp
 	src/RemoveWorkspaceHistory.cpp
 	src/RenameWorkspace.cpp
@@ -220,8 +223,9 @@ set ( SRC_FILES
 	src/SmoothNeighbours.cpp
 	src/SofQCommon.cpp
 	src/SofQW.cpp
-	src/SofQW2.cpp
-	src/SofQW3.cpp
+	src/SofQWCentre.cpp
+	src/SofQWNormalisedPolygon.cpp
+	src/SofQWPolygon.cpp
 	src/SolidAngle.cpp
 	src/SortEvents.cpp
 	src/SpatialGrouping.cpp
@@ -308,6 +312,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/ConvertToMatrixWorkspace.h
 	inc/MantidAlgorithms/ConvertToPointData.h
 	inc/MantidAlgorithms/ConvertUnits.h
+	inc/MantidAlgorithms/ConvertUnitsUsingDetectorTable.h
 	inc/MantidAlgorithms/CopyDetectorMapping.h
 	inc/MantidAlgorithms/CopyInstrumentParameters.h
 	inc/MantidAlgorithms/CopyLogs.h
@@ -355,6 +360,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/ExtractMask.h
 	inc/MantidAlgorithms/ExtractMaskToTable.h
 	inc/MantidAlgorithms/ExtractSingleSpectrum.h
+	inc/MantidAlgorithms/ExtractSpectra.h
 	inc/MantidAlgorithms/FFT.h
 	inc/MantidAlgorithms/FFTDerivative.h
 	inc/MantidAlgorithms/FFTSmooth.h
@@ -454,6 +460,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/RemoveBins.h
 	inc/MantidAlgorithms/RemoveExpDecay.h
 	inc/MantidAlgorithms/RemoveLowResTOF.h
+	inc/MantidAlgorithms/RemoveMaskedSpectra.h
 	inc/MantidAlgorithms/RemovePromptPulse.h
 	inc/MantidAlgorithms/RemoveWorkspaceHistory.h
 	inc/MantidAlgorithms/RenameWorkspace.h
@@ -477,8 +484,9 @@ set ( INC_FILES
 	inc/MantidAlgorithms/SmoothNeighbours.h
 	inc/MantidAlgorithms/SofQCommon.h
 	inc/MantidAlgorithms/SofQW.h
-	inc/MantidAlgorithms/SofQW2.h
-	inc/MantidAlgorithms/SofQW3.h
+	inc/MantidAlgorithms/SofQWCentre.h
+	inc/MantidAlgorithms/SofQWNormalisedPolygon.h
+	inc/MantidAlgorithms/SofQWPolygon.h
 	inc/MantidAlgorithms/SolidAngle.h
 	inc/MantidAlgorithms/SortEvents.h
 	inc/MantidAlgorithms/SpatialGrouping.h
@@ -512,7 +520,7 @@ set ( INC_FILES
 )
 
 set(SRC_UNITY_IGNORE_FILES src/AlignDetectors.cpp
-    src/FFTSmooth.cpp 
+    src/FFTSmooth.cpp
     src/FFTSmooth2.cpp
     src/FilterBadPulses.cpp
     src/SetUncertainties.cpp
@@ -575,6 +583,7 @@ set ( TEST_FILES
 	ConvertToMatrixWorkspaceTest.h
 	ConvertToPointDataTest.h
 	ConvertUnitsTest.h
+	ConvertUnitsUsingDetectorTableTest.h
 	CopyDetectorMappingTest.h
 	CopyInstrumentParametersTest.h
 	CopyLogsTest.h
@@ -618,6 +627,7 @@ set ( TEST_FILES
 	ExtractMaskTest.h
 	ExtractMaskToTableTest.h
 	ExtractSingleSpectrumTest.h
+	ExtractSpectraTest.h
 	FFTDerivativeTest.h
 	FFTSmooth2Test.h
 	FFTTest.h
@@ -704,6 +714,7 @@ set ( TEST_FILES
 	RemoveBinsTest.h
 	RemoveExpDecayTest.h
 	RemoveLowResTOFTest.h
+	RemoveMaskedSpectraTest.h
 	RemovePromptPulseTest.h
 	RemoveWorkspaceHistoryTest.h
 	RenameWorkspaceTest.h
@@ -722,8 +733,9 @@ set ( TEST_FILES
 	SignalOverErrorTest.h
 	SmoothDataTest.h
 	SmoothNeighboursTest.h
-	SofQW2Test.h
-	SofQW3Test.h
+	SofQWCentreTest.h
+	SofQWNormalisedPolygonTest.h
+	SofQWPolygonTest.h
 	SofQWTest.h
 	SolidAngleTest.h
 	SortEventsTest.h
@@ -759,7 +771,7 @@ enable_precompiled_headers ( inc/MantidAlgorithms/PrecompiledHeader.h SRC_FILES 
 # Add the target for this directory
 add_library ( Algorithms ${SRC_FILES} ${INC_FILES})
 # Set the name of the generated library
-set_target_properties ( Algorithms PROPERTIES OUTPUT_NAME MantidAlgorithms ) 
+set_target_properties ( Algorithms PROPERTIES OUTPUT_NAME MantidAlgorithms )
 
 if (OSX_VERSION VERSION_GREATER 10.8)
   set_target_properties ( Algorithms PROPERTIES INSTALL_RPATH "@loader_path/../Contents/MacOS")

@@ -38,12 +38,16 @@ CoordTransformAligned::CoordTransformAligned(const size_t inD,
   m_scaling = new coord_t[outD];
   for (size_t d = 0; d < outD; d++) {
     m_dimensionToBinFrom[d] = dimensionToBinFrom[d];
-    if (m_dimensionToBinFrom[d] >= inD)
+    if (m_dimensionToBinFrom[d] >= inD) {
+      delete [] m_dimensionToBinFrom;
+      delete [] m_origin;
+      delete [] m_scaling;
       throw std::runtime_error(
           "CoordTransformAligned::ctor(): invalid entry in "
           "dimensionToBinFrom[" +
           Mantid::Kernel::Strings::toString(d) +
           "]. Cannot build the coordinate transformation.");
+    }
     m_origin[d] = origin[d];
     m_scaling[d] = scaling[d];
   }
@@ -78,12 +82,16 @@ CoordTransformAligned::CoordTransformAligned(
   m_scaling = new coord_t[outD];
   for (size_t d = 0; d < outD; d++) {
     m_dimensionToBinFrom[d] = dimensionToBinFrom[d];
-    if (m_dimensionToBinFrom[d] >= inD)
+    if (m_dimensionToBinFrom[d] >= inD) {
+      delete [] m_dimensionToBinFrom;
+      delete [] m_origin;
+      delete [] m_scaling;
       throw std::runtime_error(
           "CoordTransformAligned::ctor(): invalid entry in "
           "dimensionToBinFrom[" +
           Mantid::Kernel::Strings::toString(d) +
           "]. Cannot build the coordinate transformation.");
+    }
     m_origin[d] = origin[d];
     m_scaling[d] = scaling[d];
   }
