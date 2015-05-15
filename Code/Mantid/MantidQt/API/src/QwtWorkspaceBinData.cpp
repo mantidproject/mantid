@@ -2,12 +2,12 @@
 #include "MantidQtAPI/PlotAxis.h"
 
 #include <QStringBuilder>
+#include <boost/math/special_functions/fpclassify.hpp>
 
 /// Constructor
 QwtWorkspaceBinData::QwtWorkspaceBinData(const Mantid::API::MatrixWorkspace &workspace, int binIndex, const bool logScale)
  : m_binIndex(binIndex), m_X(), m_Y(), m_E(), m_xTitle(), m_yTitle(),
-   m_logScale(logScale),
-   m_minPositive(0)
+   m_logScale(logScale)
 {
   init(workspace);
 }
@@ -52,12 +52,11 @@ Return the y value of data point i
 */
 double QwtWorkspaceBinData::y(size_t i) const
 {
-  double tmp = m_Y[i];
-  if (m_logScale && tmp <= 0.)
-  {
-    tmp = m_minPositive;
-  }
-  return tmp;
+  Mantid::signal_t val = m_Y[i];
+  if (m_logScale && val <= 0.)
+    return m_minPositive;
+  else
+    return val;
 }
 
 double QwtWorkspaceBinData::ex(size_t i) const
@@ -89,17 +88,10 @@ size_t QwtWorkspaceBinData::esize() const
  */
 double QwtWorkspaceBinData::getYMin() const
 {
-  auto it = std::min_element(m_Y.begin(), m_Y.end());
-  double temp = 0;
-  if(it != m_Y.end())
-  {
-    temp = *it;
-  }
-  if (m_logScale && temp <= 0.)
-  {
-    temp = m_minPositive;
-  }
-  return temp;
+  if (m_logScale)
+    return m_minPositive;
+  else
+    return m_minY;
 }
 
 /**
@@ -108,17 +100,10 @@ double QwtWorkspaceBinData::getYMin() const
  */
 double QwtWorkspaceBinData::getYMax() const
 {
-  auto it = std::max_element(m_Y.begin(), m_Y.end());
-  double temp = 0;
-  if(it != m_Y.end())
-  {
-    temp = *it;
-  }
-  if (m_logScale && temp <= 0.)
-  {
-    temp = m_minPositive;
-  }
-  return temp;
+  if (m_logScale && m_maxY <= 0)
+    return m_minPositive;
+  else
+    return m_maxY;
 }
 
 /**
@@ -208,4 +193,38 @@ void QwtWorkspaceBinData::init(const Mantid::API::MatrixWorkspace &workspace)
   // meta data
   m_xTitle = MantidQt::API::PlotAxis(workspace, 1).title();
   m_yTitle = MantidQt::API::PlotAxis(false, workspace).title();
+
+
+  // Calculate the min and max values
+  double curMin = m_Y[0];
+  double curMinPos = m_Y[0];
+  double curMax = m_Y[0];
+  for(size_t i = 1; i < m_Y.size(); ++i)
+  {
+    // skip NaNs
+    if ((boost::math::isnan)(m_Y[i]) || (boost::math::isinf)(m_Y[i]))
+      continue;
+
+    // Try and get rid any starting NaNs as soon as possible
+    if ((boost::math::isnan)(curMin) || (boost::math::isinf)(curMin))
+      curMin = m_Y[i];
+    if (m_Y[i] > 0 && (curMinPos <= 0 || (boost::math::isnan)(curMinPos) ||
+                       (boost::math::isinf)(curMinPos)))
+      curMinPos = m_Y[i];
+    if ((boost::math::isnan)(curMax) || (boost::math::isinf)(curMax))
+      curMax = m_Y[i];
+
+    // Update our values as appropriate
+    if (m_Y[i] < curMin)
+      curMin = m_Y[i];
+    if (m_Y[i] < curMinPos && m_Y[i] > 0)
+      curMinPos = m_Y[i];
+    if (m_Y[i] > curMax)
+      curMax = m_Y[i];
+  }
+
+  // Save the results
+  m_minY = curMin;
+  m_minPositive = curMinPos;
+  m_maxY = curMax;
 }
