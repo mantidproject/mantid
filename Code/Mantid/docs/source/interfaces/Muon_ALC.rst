@@ -89,6 +89,9 @@ Last
 Log
   Log value to use as X parameter
 
+Function
+  The function to apply to the time series log: Mean/Min/Max/First/Last
+
 Dead Time Correction
   Type of dead time corrections to apply. Options are *None*, in which case no 
   corrections will be applied, *From Data File*, to load corrections from 
