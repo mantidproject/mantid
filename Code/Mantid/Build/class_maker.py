@@ -241,8 +241,7 @@ def write_test(subproject, classname, filename, args):
 using Mantid::%s::%s;
 using namespace Mantid::API;
 
-class %sTest : public CxxTest::TestSuite
-{
+class %sTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
