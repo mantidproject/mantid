@@ -1,7 +1,8 @@
-#pylint: disable=invalid-name,attribute-defined-outside-init,too-many-instance-attributes,too-many-branches
+#pylint: disable=invalid-name,attribute-defined-outside-init,too-many-instance-attributes,too-many-branches,no-init
 from mantid.kernel import *
 from mantid.api import *
 from mantid.simpleapi import *
+
 import mantid
 import os
 import string
@@ -72,8 +73,18 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
 
 
     def PyExec(self):
+        from IndirectReductionCommon import (load_files,
+                                             identify_bad_detectors,
+                                             unwrap_monitor,
+                                             process_monitor_efficiency,
+                                             scale_monitor)
+
         self._setup()
-        self._load_files()
+        self._workspace_names, self._chopped_data = load_files(self._data_files,
+                                                              self._ipf_filename,
+                                                              self._spectra_range[0],
+                                                              self._spectra_range[1],
+                                                              self._sum_files)
 
         for c_ws_name in self._workspace_names:
             is_multi_frame = isinstance(mtd[c_ws_name], WorkspaceGroup)
@@ -95,18 +106,18 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
                 bin_counts = [mtd[ws].blocksize() for ws in mtd[c_ws_name].getNames()]
                 num_bins = np.amax(bin_counts)
 
-            masked_detectors = self._identify_bad_detectors(workspaces[0])
+            masked_detectors = identify_bad_detectors(workspaces[0])
 
             # Process workspaces
             for ws_name in workspaces:
                 monitor_ws_name = ws_name + '_mon'
 
                 # Process monitor
-                if not self._unwrap_monitor(ws_name):
+                if not unwrap_monitor(ws_name):
                     ConvertUnits(InputWorkspace=monitor_ws_name, OutputWorkspace=monitor_ws_name, Target='Wavelength', EMode='Elastic')
 
-                self._process_monitor_efficiency(ws_name)
-                self._scale_monitor(ws_name)
+                process_monitor_efficiency(ws_name)
+                scale_monitor(ws_name)
 
 
                 # Do background removal if a range was provided
@@ -298,289 +309,6 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
 
         # The list of workspaces being processed
         self._workspace_names = []
-
-
-    def _load_files(self):
-        """
-        Loads a set of files and extracts just the spectra we care about (i.e. detector range and monitor).
-        """
-
-        for filename in self._data_files:
-            # The filename without path and extension will be the workspace name
-            ws_name = os.path.splitext(os.path.basename(filename))[0]
-            logger.debug('Loading file %s as workspace %s' % (filename, ws_name))
-
-            Load(Filename=filename, OutputWorkspace=ws_name)
-
-            # Load the instrument parameters
-            LoadParameterFile(Workspace=ws_name, Filename=self._ipf_filename)
-
-            # Add the workspace to the list of workspaces
-            self._workspace_names.append(ws_name)
-
-            # Get the spectrum number for the monitor
-            instrument = mtd[ws_name].getInstrument()
-            monitor_index = int(instrument.getNumberParameter('Workflow.Monitor1-SpectrumNumber')[0])
-            logger.debug('Workspace %s monitor 1 spectrum number :%d' % (ws_name, monitor_index))
-
-            # Chop data if required
-            try:
-                chop_threshold = mtd[ws_name].getInstrument().getNumberParameter('Workflow.ChopDataIfGreaterThan')[0]
-                x_max = mtd[ws_name].readX(0)[-1]
-                self._chopped_data =  x_max > chop_threshold
-            except IndexError:
-                self._chopped_data = False
-            logger.information('Workspace %s need data chop: %s' % (ws_name, str(self._chopped_data)))
-
-            workspaces = [ws_name]
-            if self._chopped_data:
-                ChopData(InputWorkspace=ws_name, OutputWorkspace=ws_name, MonitorWorkspaceIndex=monitor_index,
-                         IntegrationRangeLower=5000.0, IntegrationRangeUpper=10000.0, NChops=5)
-                workspaces = mtd[ws_name].getNames()
-
-            for chop_ws_name in workspaces:
-                # Get the monitor spectrum
-                monitor_ws_name = chop_ws_name + '_mon'
-                ExtractSingleSpectrum(InputWorkspace=chop_ws_name, OutputWorkspace=monitor_ws_name,
-                                      WorkspaceIndex=monitor_index)
-
-                # Crop to the detectors required
-                CropWorkspace(InputWorkspace=chop_ws_name, OutputWorkspace=chop_ws_name,
-                              StartWorkspaceIndex=int(self._spectra_range[0]) - 1,
-                              EndWorkspaceIndex=int(self._spectra_range[1]) - 1)
-
-        logger.information('Loaded workspace names: %s' % (str(self._workspace_names)))
-        logger.information('Chopped data: %s' % (str(self._chopped_data)))
-
-        # Sum files if needed
-        if self._sum_files:
-            if self._chopped_data:
-                self._sum_chopped_runs()
-            else:
-                self._sum_regular_runs()
-
-        logger.information('Summed workspace names: %s' % (str(self._workspace_names)))
-
-
-    def _sum_regular_runs(self):
-        """
-        Sum runs with single workspace data.
-        """
-
-        # Use the first workspace name as the result of summation
-        summed_detector_ws_name = self._workspace_names[0]
-        summed_monitor_ws_name = self._workspace_names[0] + '_mon'
-
-        # Get a list of the run numbers for the original data
-        run_numbers = ','.join([str(mtd[ws_name].getRunNumber()) for ws_name in self._workspace_names])
-
-        # Generate lists of the detector and monitor workspaces
-        detector_workspaces = ','.join(self._workspace_names)
-        monitor_workspaces = ','.join([ws_name + '_mon' for ws_name in self._workspace_names])
-
-        # Merge the raw workspaces
-        MergeRuns(InputWorkspaces=detector_workspaces, OutputWorkspace=summed_detector_ws_name)
-        MergeRuns(InputWorkspaces=monitor_workspaces, OutputWorkspace=summed_monitor_ws_name)
-
-        # Delete old workspaces
-        for idx in range(1, len(self._workspace_names)):
-            DeleteWorkspace(self._workspace_names[idx])
-            DeleteWorkspace(self._workspace_names[idx] + '_mon')
-
-        # Derive the scale factor based on number of merged workspaces
-        scale_factor = 1.0 / len(self._workspace_names)
-        logger.information('Scale factor for summed workspaces: %f' % scale_factor)
-
-        # Scale the new detector and monitor workspaces
-        Scale(InputWorkspace=summed_detector_ws_name, OutputWorkspace=summed_detector_ws_name,
-              Factor=scale_factor)
-        Scale(InputWorkspace=summed_monitor_ws_name, OutputWorkspace=summed_monitor_ws_name,
-              Factor=scale_factor)
-
-        # Add the list of run numbers to the result workspace as a sample log
-        AddSampleLog(Workspace=summed_detector_ws_name, LogName='multi_run_numbers',
-                     LogType='String', LogText=run_numbers)
-
-        # Only have the one workspace now
-        self._workspace_names = [summed_detector_ws_name]
-
-
-    def _sum_chopped_runs(self):
-        """
-        Sum runs with chopped data.
-        """
-
-        try:
-            num_merges = len(mtd[self._workspace_names[0]].getNames())
-        except:
-            raise RuntimeError('Not all runs have been chapped, cannot sum.')
-
-        merges = list()
-
-        # Generate a list of workspaces to be merged
-        for idx in range(0, num_merges):
-            merges.append({'detector':list(), 'monitor':list()})
-
-            for ws_name in self._workspace_names:
-                detector_ws_name = mtd[ws_name].getNames()[idx]
-                monitor_ws_name = detector_ws_name + '_mon'
-
-                merges[idx]['detector'].append(detector_ws_name)
-                merges[idx]['monitor'].append(monitor_ws_name)
-
-        for merge in merges:
-            # Merge the chopped run segments
-            MergeRuns(InputWorkspaces=','.join(merge['detector']), OutputWorkspace=merge['detector'][0])
-            MergeRuns(InputWorkspaces=','.join(merge['monitor']), OutputWorkspace=merge['monitor'][0])
-
-            # Scale the merged runs
-            merge_size = len(merge['detector'])
-            factor = 1.0 / merge_size
-            Scale(InputWorkspace=merge['detector'][0], OutputWorkspace=merge['detector'][0], Factor=factor, Operation='Multiply')
-            Scale(InputWorkspace=merge['monitor'][0], OutputWorkspace=merge['monitor'][0], Factor=factor, Operation='Multiply')
-
-            # Remove the old workspaces
-            for idx in range(1, merge_size):
-                DeleteWorkspace(merge['detector'][idx])
-                DeleteWorkspace(merge['monitor'][idx])
-
-        # Only have the one workspace now
-        self._workspace_names = [self._workspace_names[0]]
-
-
-    def _identify_bad_detectors(self, ws_name):
-        """
-        Identify detectors which should be masked
-
-        @param ws_name Name of worksapce to use ot get masking detectors
-        """
-
-        instrument = mtd[ws_name].getInstrument()
-
-        try:
-            masking_type = instrument.getStringParameter('Workflow.Masking')[0]
-        except IndexError:
-            masking_type = 'None'
-
-        logger.information('Masking type: %s' % (masking_type))
-
-        masked_spec = list()
-
-        if masking_type == 'IdentifyNoisyDetectors':
-            ws_mask = '__workspace_mask'
-            IdentifyNoisyDetectors(InputWorkspace=ws_name, OutputWorkspace=ws_mask)
-
-            # Convert workspace to a list of spectra
-            num_spec = mtd[ws_mask].getNumberHistograms()
-            masked_spec = [spec for spec in range(0, num_spec) if mtd[ws_mask].readY(spec)[0] == 0.0]
-
-            # Remove the temporary masking workspace
-            DeleteWorkspace(ws_mask)
-
-        logger.debug('Masked specta for workspace %s: %s' % (ws_name, str(masked_spec)))
-
-        return masked_spec
-
-
-    def _unwrap_monitor(self, ws_name):
-        """
-        Unwrap monitor if required based on value of Workflow.UnwrapMonitor parameter
-
-        @param ws_name Name of workspace
-        @return True if the monitor was unwrapped
-        """
-
-        monitor_ws_name = ws_name + '_mon'
-        instrument = mtd[monitor_ws_name].getInstrument()
-
-        # Determine if the monitor should be unwrapped
-        try:
-            unwrap = instrument.getStringParameter('Workflow.UnwrapMonitor')[0]
-
-            if unwrap == 'Always':
-                should_unwrap = True
-            elif unwrap == 'BaseOnTimeRegime':
-                mon_time = mtd[monitor_ws_name].readX(0)[0]
-                det_time = mtd[ws_name].readX(0)[0]
-                logger.notice(str(mon_time) + " " + str(det_time))
-                should_unwrap = mon_time == det_time
-            else:
-                should_unwrap = False
-
-        except IndexError:
-            should_unwrap = False
-
-        logger.debug('Need to unwrap monitor for %s: %s' % (ws_name, str(should_unwrap)))
-
-        if should_unwrap:
-            sample = instrument.getSample()
-            sample_to_source = sample.getPos() - instrument.getSource().getPos()
-            radius = mtd[ws_name].getDetector(0).getDistance(sample)
-            z_dist = sample_to_source.getZ()
-            l_ref = z_dist + radius
-
-            logger.debug('For workspace %s: radius=%d, z_dist=%d, l_ref=%d' %
-                         (ws_name, radius, z_dist, l_ref))
-
-            _, join = UnwrapMonitor(InputWorkspace=monitor_ws_name,
-                                    OutputWorkspace=monitor_ws_name, LRef=l_ref)
-
-            RemoveBins(InputWorkspace=monitor_ws_name, OutputWorkspace=monitor_ws_name,
-                       XMin=join - 0.001, XMax=join + 0.001,
-                       Interpolation='Linear')
-
-            try:
-                FFTSmooth(InputWorkspace=monitor_ws_name, OutputWorkspace=monitor_ws_name, WorkspaceIndex=0)
-            except ValueError:
-                raise ValueError('Uneven bin widths are not supported.')
-
-        return should_unwrap
-
-
-    def _process_monitor_efficiency(self, ws_name):
-        """
-        Process monitor efficiency for a given workspace.
-
-        @param ws_name Name of workspace to process monitor for
-        """
-
-        monitor_ws_name = ws_name + '_mon'
-        instrument = mtd[ws_name].getInstrument()
-
-        try:
-            area = instrument.getNumberParameter('Workflow.Monitor1-Area')[0]
-            thickness = instrument.getNumberParameter('Workflow.Monitor1-Thickness')[0]
-            attenuation = instrument.getNumberParameter('Workflow.Monitor1-Attenuation')[0]
-        except IndexError:
-            raise ValueError('Cannot get monitor details form parameter file')
-
-        if area == -1 or thickness == -1 or attenuation == -1:
-            logger.information('For workspace %s, skipping monitor efficiency' % (ws_name))
-            return
-
-        OneMinusExponentialCor(InputWorkspace=monitor_ws_name, OutputWorkspace=monitor_ws_name,
-                               C=attenuation * thickness, C1=area)
-
-
-    def _scale_monitor(self, ws_name):
-        """
-        Scale monitor intensity by a factor given as the Workflow.MonitorScalingFactor parameter.
-
-        @param ws_name Name of workspace to process monitor for
-        """
-
-        monitor_ws_name = ws_name + '_mon'
-        instrument = mtd[ws_name].getInstrument()
-
-        try:
-            scale_factor = instrument.getNumberParameter('Workflow.Monitor1-ScalingFactor')[0]
-        except IndexError:
-            logger.information('No monitor scaling factor found for workspace %s' % ws_name)
-            return
-
-        if scale_factor != 1.0:
-            Scale(InputWorkspace=monitor_ws_name, OutputWorkspace=monitor_ws_name,
-                  Factor=1.0 / scale_factor, Operation='Multiply')
 
 
     def _group_spectra(self, ws_name, masked_detectors):
