@@ -2,10 +2,9 @@
 from mantid.kernel import *
 from mantid.api import *
 from mantid.simpleapi import *
+from mantid import config
 
-import mantid
 import os
-import string
 import numpy as np
 
 
@@ -77,7 +76,12 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
                                              identify_bad_detectors,
                                              unwrap_monitor,
                                              process_monitor_efficiency,
-                                             scale_monitor)
+                                             scale_monitor,
+                                             group_spectra,
+                                             fold_chopped,
+                                             rename_reduction,
+                                             save_reduction,
+                                             plot_reduction)
 
         self._setup()
         self._workspace_names, self._chopped_data = load_files(self._data_files,
@@ -177,32 +181,41 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
                           Factor=self._scale_factor, Operation='Multiply')
 
                 # Group spectra
-                self._group_spectra(ws_name, masked_detectors)
+                group_spectra(ws_name,
+                              masked_detectors,
+                              self._grouping_method,
+                              self._grouping_map_file,
+                              self._grouping_ws)
 
             if self._fold_multiple_frames and is_multi_frame:
-                self._fold_chopped(c_ws_name)
+                fold_chopped(c_ws_name)
 
             # Convert to output units if needed
             if self._output_x_units != 'DeltaE':
-                ConvertUnits(InputWorkspace=c_ws_name, OutputWorkspace=c_ws_name,
-                             EMode='Indirect', Target=self._output_x_units)
+                ConvertUnits(InputWorkspace=c_ws_name,
+                             OutputWorkspace=c_ws_name,
+                             EMode='Indirect',
+                             Target=self._output_x_units)
 
         # Rename output workspaces
-        output_workspace_names = [self._rename_workspace(ws_name) for ws_name in self._workspace_names]
+        output_workspace_names = [rename_reduction(ws_name, self._sum_files) for ws_name in self._workspace_names]
 
         # Save result workspaces
         if self._save_formats is not None:
-            self._save(output_workspace_names)
+            save_reduction(output_workspace_names,
+                           self._save_formats,
+                           self._output_x_units)
 
         # Group result workspaces
-        GroupWorkspaces(InputWorkspaces=output_workspace_names, OutputWorkspace=self._output_ws)
+        GroupWorkspaces(InputWorkspaces=output_workspace_names,
+                        OutputWorkspace=self._output_ws)
 
         self.setProperty('OutputWorkspace', self._output_ws)
 
         # Plot result workspaces
         if self._plot_type != 'None':
             for ws_name in mtd[self._output_ws].getNames():
-                self._plot_workspace(ws_name)
+                plot_reduction(ws_name, self._plot_type)
 
 
     def validateInputs(self):
@@ -309,258 +322,6 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
 
         # The list of workspaces being processed
         self._workspace_names = []
-
-
-    def _group_spectra(self, ws_name, masked_detectors):
-        """
-        Groups spectra in a given workspace according to the Workflow.GroupingMethod and
-        Workflow.GroupingFile parameters and GrpupingPolicy property.
-
-        @param ws_name Name of workspace to group spectra of
-        @param masked_detectors List of spectra numbers to mask
-        """
-
-        instrument = mtd[ws_name].getInstrument()
-
-        # If grouping as per he IPF is desired
-        if self._grouping_method == 'IPF':
-            # Get the grouping method from the parameter file
-            try:
-                grouping_method = instrument.getStringParameter('Workflow.GroupingMethod')[0]
-            except IndexError:
-                grouping_method = 'Individual'
-
-        else:
-            # Otherwise use the value of GroupingPolicy
-            grouping_method = self._grouping_method
-
-        logger.information('Grouping method for workspace %s is %s' % (ws_name, grouping_method))
-
-        if grouping_method == 'Individual':
-            # Nothing to do here
-            return
-
-        elif grouping_method == 'All':
-            # Get a list of all spectra minus those which are masked
-            num_spec = mtd[ws_name].getNumberHistograms()
-            spectra_list = [spec for spec in range(0, num_spec) if spec not in masked_detectors]
-
-            # Apply the grouping
-            GroupDetectors(InputWorkspace=ws_name, OutputWorkspace=ws_name, Behaviour='Average',
-                           WorkspaceIndexList=spectra_list)
-
-        elif grouping_method == 'File':
-            # Get the filename for the grouping file
-            if self._grouping_map_file is not None:
-                grouping_file = self._grouping_map_file
-            else:
-                try:
-                    grouping_file = instrument.getStringParameter('Workflow.GroupingFile')[0]
-                except IndexError:
-                    raise RuntimeError('Cannot get grouping file from properties or IPF.')
-
-            # If the file is not found assume it is in the grouping files directory
-            if not os.path.isfile(grouping_file):
-                grouping_file = os.path.join(config.getString('groupingFiles.directory'), grouping_file)
-
-            # If it is still not found just give up
-            if not os.path.isfile(grouping_file):
-                raise RuntimeError('Cannot find grouping file: %s' % (grouping_file))
-
-            # Mask detectors if required
-            if len(masked_detectors) > 0:
-                MaskDetectors(Workspace=ws_name, WorkspaceIndexList=masked_detectors)
-
-            # Apply the grouping
-            GroupDetectors(InputWorkspace=ws_name, OutputWorkspace=ws_name, Behaviour='Average',
-                           MapFile=grouping_file)
-
-        elif grouping_method == 'Workspace':
-            # Apply the grouping
-            GroupDetectors(InputWorkspace=ws_name, OutputWorkspace=ws_name, Behaviour='Average',
-                           CopyGroupingFromWorkspace=self._grouping_ws)
-
-        else:
-            raise RuntimeError('Invalid grouping method %s for workspace %s' % (grouping_method, ws_name))
-
-
-    def _fold_chopped(self, ws_name):
-        """
-        Folds multiple frames of a data set into one workspace.
-
-        @param ws_name Name of the group to fold
-        """
-
-        workspaces = mtd[ws_name].getNames()
-        merged_ws = ws_name + '_merged'
-        MergeRuns(InputWorkspaces=','.join(workspaces), OutputWorkspace=merged_ws)
-
-        scaling_ws = '__scaling_ws'
-        unit = mtd[ws_name].getItem(0).getAxis(0).getUnit().unitID()
-
-        ranges = []
-        for ws in mtd[ws_name].getNames():
-            x_min = mtd[ws].dataX(0)[0]
-            x_max = mtd[ws].dataX(0)[-1]
-            ranges.append((x_min, x_max))
-            DeleteWorkspace(Workspace=ws)
-
-        data_x = mtd[merged_ws].readX(0)
-        data_y = []
-        data_e = []
-
-        for i in range(0, mtd[merged_ws].blocksize()):
-            y_val = 0.0
-            for rng in ranges:
-                if data_x[i] >= rng[0] and data_x[i] <= rng[1]:
-                    y_val += 1.0
-
-            data_y.append(y_val)
-            data_e.append(0.0)
-
-        CreateWorkspace(OutputWorkspace=scaling_ws, DataX=data_x, DataY=data_y, DataE=data_e, UnitX=unit)
-
-        Divide(LHSWorkspace=merged_ws, RHSWorkspace=scaling_ws, OutputWorkspace=ws_name)
-        DeleteWorkspace(Workspace=merged_ws)
-        DeleteWorkspace(Workspace=scaling_ws)
-
-    def _rename_workspace(self, ws_name):
-        """
-        Renames a worksapce according to the naming policy in the Workflow.NamingConvention parameter.
-
-        @param ws_name Name of workspace
-        @return New name of workspace
-        """
-
-        is_multi_frame = isinstance(mtd[ws_name], WorkspaceGroup)
-
-        # Get the instrument
-        if is_multi_frame:
-            instrument = mtd[ws_name].getItem(0).getInstrument()
-        else:
-            instrument = mtd[ws_name].getInstrument()
-
-        # Get the naming convention parameter form the parameter file
-        try:
-            convention = instrument.getStringParameter('Workflow.NamingConvention')[0]
-        except IndexError:
-            # Defualt to run title if naming convention parameter not set
-            convention = 'RunTitle'
-        logger.information('Naming convention for workspace %s is %s' % (ws_name, convention))
-
-        # Get run number
-        if is_multi_frame:
-            run_number = mtd[ws_name].getItem(0).getRun()['run_number'].value
-        else:
-            run_number = mtd[ws_name].getRun()['run_number'].value
-        logger.information('Run number for workspace %s is %s' % (ws_name, run_number))
-
-        inst_name = instrument.getName()
-        for facility in config.getFacilities():
-            try:
-                short_inst_name = facility.instrument(inst_name).shortName()
-                break
-            except:
-                pass
-        logger.information('Short name for instrument %s is %s' % (inst_name, short_inst_name))
-
-        # Get run title
-        if is_multi_frame:
-            run_title = mtd[ws_name].getItem(0).getRun()['run_title'].value.strip()
-        else:
-            run_title = mtd[ws_name].getRun()['run_title'].value.strip()
-        logger.information('Run title for workspace %s is %s' % (ws_name, run_title))
-
-        if self._sum_files:
-            multi_run_marker = '_multi'
-        else:
-            multi_run_marker = ''
-
-        if convention == 'None':
-            new_name = ws_name
-
-        elif convention == 'RunTitle':
-            valid = "-_.() %s%s" % (string.ascii_letters, string.digits)
-            formatted_title = ''.join([c for c in run_title if c in valid])
-            new_name = '%s%s%s-%s' % (short_inst_name.lower(), run_number, multi_run_marker, formatted_title)
-
-        elif convention == 'AnalyserReflection':
-            analyser = instrument.getStringParameter('analyser')[0]
-            reflection = instrument.getStringParameter('reflection')[0]
-            new_name = '%s%s%s_%s%s_red' % (short_inst_name.upper(), run_number, multi_run_marker,
-                                            analyser, reflection)
-
-        else:
-            raise RuntimeError('No valid naming convention for workspace %s' % ws_name)
-
-        logger.information('New name for %s workspace: %s' % (ws_name, new_name))
-
-        RenameWorkspace(InputWorkspace=ws_name, OutputWorkspace=new_name)
-        return new_name
-
-
-    def _plot_workspace(self, ws_name):
-        """
-        Plot a given workspace based on the Plot property.
-
-        @param ws_name Name of workspace to plot
-        """
-
-        if self._plot_type == 'Spectra' or self._plot_type == 'Both':
-            from mantidplot import plotSpectrum
-            num_spectra = mtd[ws_name].getNumberHistograms()
-            try:
-                plotSpectrum(ws_name, range(0, num_spectra))
-            except RuntimeError:
-                logger.notice('Spectrum plotting canceled by user')
-
-        can_plot_contour = mtd[ws_name].getNumberHistograms() > 1
-        if (self._plot_type == 'Contour' or self._plot_type == 'Both') and can_plot_contour:
-            from mantidplot import importMatrixWorkspace
-            plot_workspace = importMatrixWorkspace(ws_name)
-            plot_workspace.plotGraph2D()
-
-
-    def _save(self, worksspace_names):
-        """
-        Saves the workspaces to the default save directory.
-
-        @param worksspace_names List of workspace names to save
-        """
-
-        for ws_name in worksspace_names:
-            if 'spe' in self._save_formats:
-                SaveSPE(InputWorkspace=ws_name, Filename=ws_name + '.spe')
-
-            if 'nxs' in self._save_formats:
-                SaveNexusProcessed(InputWorkspace=ws_name, Filename=ws_name + '.nxs')
-
-            if 'nxspe' in self._save_formats:
-                SaveNXSPE(InputWorkspace=ws_name, Filename=ws_name + '.nxspe')
-
-            if 'ascii' in self._save_formats:
-                # Version 1 of SaveASCII produces output that works better with excel/origin
-                # For some reason this has to be done with an algorithm object, using the function
-                # wrapper with Version did not change the version that was run
-                saveAsciiAlg = mantid.api.AlgorithmManager.createUnmanaged('SaveAscii', 1)
-                saveAsciiAlg.initialize()
-                saveAsciiAlg.setProperty('InputWorkspace', ws_name)
-                saveAsciiAlg.setProperty('Filename', ws_name + '.dat')
-                saveAsciiAlg.execute()
-
-            if 'aclimax' in self._save_formats:
-                if self._output_x_units == 'DeltaE_inWavenumber':
-                    bins = '24, -0.005, 4000' #cm-1
-                else:
-                    bins = '3, -0.005, 500' #meV
-                Rebin(InputWorkspace=ws_name,OutputWorkspace= ws_name + '_aclimax_save_temp', Params=bins)
-                SaveAscii(InputWorkspace=ws_name + '_aclimax_save_temp', Filename=ws_name + '_aclimax.dat', Separator='Tab')
-                DeleteWorkspace(Workspace=ws_name + '_aclimax_save_temp')
-
-            if 'davegrp' in self._save_formats:
-                ConvertSpectrumAxis(InputWorkspace=ws_name, OutputWorkspace=ws_name + '_davegrp_save_temp', Target='ElasticQ', EMode='Indirect')
-                SaveDaveGrp(InputWorkspace=ws_name + '_davegrp_save_temp', Filename=ws_name + '.grp')
-                DeleteWorkspace(Workspace=ws_name + '_davegrp_save_temp')
 
 
 # Register algorithm with Mantid

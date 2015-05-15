@@ -1,6 +1,6 @@
-#pylint: disable=invalid-name
-from mantid.api import *
-from mantid import mtd, logger
+#pylint: disable=invalid-name,too-many-branches
+from mantid.api import WorkspaceGroup
+from mantid import mtd, logger, config
 
 import os
 
@@ -345,5 +345,306 @@ def scale_monitor(workspace_name):
               OutputWorkspace=monitor_workspace_name,
               Factor=1.0 / scale_factor,
               Operation='Multiply')
+
+#-------------------------------------------------------------------------------
+
+def group_spectra(workspace_name, masked_detectors, method, group_file=None, group_ws=None):
+    """
+    Groups spectra in a given workspace according to the Workflow.GroupingMethod and
+    Workflow.GroupingFile parameters and GrpupingPolicy property.
+
+    @param workspace_name Name of workspace to group spectra of
+    @param masked_detectors List of spectra numbers to mask
+    @param method Grouping method (IPF, All, Individual, File, Workspace)
+    @param group_file File for File method
+    @param group_ws Workspace for Workspace method
+    """
+    from mantid.simpleapi import (MaskDetectors, GroupDetectors)
+
+    instrument = mtd[workspace_name].getInstrument()
+
+    # If grouping as per he IPF is desired
+    if method == 'IPF':
+        # Get the grouping method from the parameter file
+        try:
+            grouping_method = instrument.getStringParameter('Workflow.GroupingMethod')[0]
+        except IndexError:
+            grouping_method = 'Individual'
+
+    else:
+        # Otherwise use the value of GroupingPolicy
+        grouping_method = method
+
+    logger.information('Grouping method for workspace %s is %s' % (workspace_name, grouping_method))
+
+    if grouping_method == 'Individual':
+        # Nothing to do here
+        return
+
+    elif grouping_method == 'All':
+        # Get a list of all spectra minus those which are masked
+        num_spec = mtd[workspace_name].getNumberHistograms()
+        spectra_list = [spec for spec in range(0, num_spec) if spec not in masked_detectors]
+
+        # Apply the grouping
+        GroupDetectors(InputWorkspace=workspace_name,
+                       OutputWorkspace=workspace_name,
+                       Behaviour='Average',
+                       WorkspaceIndexList=spectra_list)
+
+    elif grouping_method == 'File':
+        # Get the filename for the grouping file
+        if group_file is not None:
+            grouping_file = group_file
+        else:
+            try:
+                grouping_file = instrument.getStringParameter('Workflow.GroupingFile')[0]
+            except IndexError:
+                raise RuntimeError('Cannot get grouping file from properties or IPF.')
+
+        # If the file is not found assume it is in the grouping files directory
+        if not os.path.isfile(grouping_file):
+            grouping_file = os.path.join(config.getString('groupingFiles.directory'), grouping_file)
+
+        # If it is still not found just give up
+        if not os.path.isfile(grouping_file):
+            raise RuntimeError('Cannot find grouping file: %s' % (grouping_file))
+
+        # Mask detectors if required
+        if len(masked_detectors) > 0:
+            MaskDetectors(Workspace=workspace_name,
+                          WorkspaceIndexList=masked_detectors)
+
+        # Apply the grouping
+        GroupDetectors(InputWorkspace=workspace_name,
+                       OutputWorkspace=workspace_name,
+                       Behaviour='Average',
+                       MapFile=grouping_file)
+
+    elif grouping_method == 'Workspace':
+        # Apply the grouping
+        GroupDetectors(InputWorkspace=workspace_name,
+                       OutputWorkspace=workspace_name,
+                       Behaviour='Average',
+                       CopyGroupingFromWorkspace=group_ws)
+
+    else:
+        raise RuntimeError('Invalid grouping method %s for workspace %s' % (grouping_method, workspace_name))
+
+#-------------------------------------------------------------------------------
+
+def fold_chopped(workspace_name):
+    """
+    Folds multiple frames of a data set into one workspace.
+
+    @param workspace_name Name of the group to fold
+    """
+    from mantid.simpleapi import (MergeRuns, DeleteWorkspace, CreateWorkspace,
+                                  Divide)
+
+    workspaces = mtd[workspace_name].getNames()
+    merged_ws = workspace_name + '_merged'
+    MergeRuns(InputWorkspaces=','.join(workspaces), OutputWorkspace=merged_ws)
+
+    scaling_ws = '__scaling_ws'
+    unit = mtd[workspace_name].getItem(0).getAxis(0).getUnit().unitID()
+
+    ranges = []
+    for ws in mtd[workspace_name].getNames():
+        x_min = mtd[ws].dataX(0)[0]
+        x_max = mtd[ws].dataX(0)[-1]
+        ranges.append((x_min, x_max))
+        DeleteWorkspace(Workspace=ws)
+
+    data_x = mtd[merged_ws].readX(0)
+    data_y = []
+    data_e = []
+
+    for i in range(0, mtd[merged_ws].blocksize()):
+        y_val = 0.0
+        for rng in ranges:
+            if data_x[i] >= rng[0] and data_x[i] <= rng[1]:
+                y_val += 1.0
+
+        data_y.append(y_val)
+        data_e.append(0.0)
+
+    CreateWorkspace(OutputWorkspace=scaling_ws,
+                    DataX=data_x,
+                    DataY=data_y,
+                    DataE=data_e,
+                    UnitX=unit)
+
+    Divide(LHSWorkspace=merged_ws,
+           RHSWorkspace=scaling_ws,
+           OutputWorkspace=workspace_name)
+
+    DeleteWorkspace(Workspace=merged_ws)
+    DeleteWorkspace(Workspace=scaling_ws)
+
+#-------------------------------------------------------------------------------
+
+def rename_reduction(workspace_name, multiple_files):
+    """
+    Renames a worksapce according to the naming policy in the Workflow.NamingConvention parameter.
+
+    @param workspace_name Name of workspace
+    @param multiple_files Insert the multiple file marker
+    @return New name of workspace
+    """
+    from mantid.simpleapi import RenameWorkspace
+    import string
+
+    is_multi_frame = isinstance(mtd[workspace_name], WorkspaceGroup)
+
+    # Get the instrument
+    if is_multi_frame:
+        instrument = mtd[workspace_name].getItem(0).getInstrument()
+    else:
+        instrument = mtd[workspace_name].getInstrument()
+
+    # Get the naming convention parameter form the parameter file
+    try:
+        convention = instrument.getStringParameter('Workflow.NamingConvention')[0]
+    except IndexError:
+        # Defualt to run title if naming convention parameter not set
+        convention = 'RunTitle'
+    logger.information('Naming convention for workspace %s is %s' % (workspace_name, convention))
+
+    # Get run number
+    if is_multi_frame:
+        run_number = mtd[workspace_name].getItem(0).getRun()['run_number'].value
+    else:
+        run_number = mtd[workspace_name].getRun()['run_number'].value
+    logger.information('Run number for workspace %s is %s' % (workspace_name, run_number))
+
+    inst_name = instrument.getName()
+    for facility in config.getFacilities():
+        try:
+            short_inst_name = facility.instrument(inst_name).shortName()
+            break
+        except _:
+            pass
+    logger.information('Short name for instrument %s is %s' % (inst_name, short_inst_name))
+
+    # Get run title
+    if is_multi_frame:
+        run_title = mtd[workspace_name].getItem(0).getRun()['run_title'].value.strip()
+    else:
+        run_title = mtd[workspace_name].getRun()['run_title'].value.strip()
+    logger.information('Run title for workspace %s is %s' % (workspace_name, run_title))
+
+    if multiple_files:
+        multi_run_marker = '_multi'
+    else:
+        multi_run_marker = ''
+
+    if convention == 'None':
+        new_name = workspace_name
+
+    elif convention == 'RunTitle':
+        valid = "-_.() %s%s" % (string.ascii_letters, string.digits)
+        formatted_title = ''.join([c for c in run_title if c in valid])
+        new_name = '%s%s%s-%s' % (short_inst_name.lower(), run_number, multi_run_marker, formatted_title)
+
+    elif convention == 'AnalyserReflection':
+        analyser = instrument.getStringParameter('analyser')[0]
+        reflection = instrument.getStringParameter('reflection')[0]
+        new_name = '%s%s%s_%s%s_red' % (short_inst_name.upper(), run_number, multi_run_marker,
+                                        analyser, reflection)
+
+    else:
+        raise RuntimeError('No valid naming convention for workspace %s' % workspace_name)
+
+    logger.information('New name for %s workspace: %s' % (workspace_name, new_name))
+
+    RenameWorkspace(InputWorkspace=workspace_name,
+                    OutputWorkspace=new_name)
+
+    return new_name
+
+#-------------------------------------------------------------------------------
+
+def plot_reduction(workspace_name, plot_type):
+    """
+    Plot a given workspace based on the Plot property.
+
+    @param workspace_name Name of workspace to plot
+    @param plot_types Type of plot to create
+    """
+
+    if plot_type == 'Spectra' or plot_type == 'Both':
+        from mantidplot import plotSpectrum
+        num_spectra = mtd[workspace_name].getNumberHistograms()
+        try:
+            plotSpectrum(workspace_name, range(0, num_spectra))
+        except RuntimeError:
+            logger.notice('Spectrum plotting canceled by user')
+
+    can_plot_contour = mtd[workspace_name].getNumberHistograms() > 1
+    if (plot_type == 'Contour' or plot_type == 'Both') and can_plot_contour:
+        from mantidplot import importMatrixWorkspace
+        plot_workspace = importMatrixWorkspace(workspace_name)
+        plot_workspace.plotGraph2D()
+
+#-------------------------------------------------------------------------------
+
+def save_reduction(worksspace_names, formats, x_units='DeltaE'):
+    """
+    Saves the workspaces to the default save directory.
+
+    @param worksspace_names List of workspace names to save
+    @param formats List of formats to save in
+    @param Output X units
+    """
+    from mantid.simpleapi import (SaveSPE, SaveNexusProcessed, SaveNXSPE,
+                                  SaveAscii, Rebin, DeleteWorkspace,
+                                  ConvertSpectrumAxis, SaveDaveGrp)
+
+    for workspace_name in worksspace_names:
+        if 'spe' in formats:
+            SaveSPE(InputWorkspace=workspace_name,
+                    Filename=workspace_name + '.spe')
+
+        if 'nxs' in formats:
+            SaveNexusProcessed(InputWorkspace=workspace_name,
+                               Filename=workspace_name + '.nxs')
+
+        if 'nxspe' in formats:
+            SaveNXSPE(InputWorkspace=workspace_name,
+                      Filename=workspace_name + '.nxspe')
+
+        if 'ascii' in formats:
+            # Version 1 of SaveAscii produces output that works better with excel/origin
+            # For some reason this has to be done with an algorithm object, using the function
+            # wrapper with Version did not change the version that was run
+            saveAsciiAlg = mantid.api.AlgorithmManager.createUnmanaged('SaveAscii', 1)
+            saveAsciiAlg.initialize()
+            saveAsciiAlg.setProperty('InputWorkspace', workspace_name)
+            saveAsciiAlg.setProperty('Filename', workspace_name + '.dat')
+            saveAsciiAlg.execute()
+
+        if 'aclimax' in formats:
+            if x_units == 'DeltaE_inWavenumber':
+                bins = '24, -0.005, 4000' #cm-1
+            else:
+                bins = '3, -0.005, 500' #meV
+
+            Rebin(InputWorkspace=workspace_name,
+                  OutputWorkspace=workspace_name + '_aclimax_save_temp',
+                  Params=bins)
+            SaveAscii(InputWorkspace=workspace_name + '_aclimax_save_temp',
+                      Filename=workspace_name + '_aclimax.dat',
+                      Separator='Tab')
+            DeleteWorkspace(Workspace=workspace_name + '_aclimax_save_temp')
+
+        if 'davegrp' in formats:
+            ConvertSpectrumAxis(InputWorkspace=workspace_name,
+                                OutputWorkspace=workspace_name + '_davegrp_save_temp',
+                                Target='ElasticQ',
+                                EMode='Indirect')
+            SaveDaveGrp(InputWorkspace=workspace_name + '_davegrp_save_temp',
+                        Filename=workspace_name + '.grp')
+            DeleteWorkspace(Workspace=workspace_name + '_davegrp_save_temp')
 
 #-------------------------------------------------------------------------------
