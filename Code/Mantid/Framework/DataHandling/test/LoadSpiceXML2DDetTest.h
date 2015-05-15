@@ -131,7 +131,7 @@ public:
     sizelist[1] = 256;
     loader.setProperty("DetectorGeometry", sizelist);
     loader.setProperty("LoadInstrument", true);
-    loader.setProperty("InstrumentFilename", idffname);
+    // loader.setProperty("InstrumentFilename", idffname);
     loader.setProperty("SpiceTableWorkspace", "SpiceDataTable");
 
     loader.execute();
