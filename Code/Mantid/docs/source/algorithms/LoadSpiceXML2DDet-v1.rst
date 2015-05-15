@@ -75,7 +75,8 @@ Usage
 
   # Load data by LoadSpiceXML2DDet()
   LoadSpiceXML2DDet(Filename='HB3A_exp355_scan0001_0522.xml', 
-      OutputWorkspace='s0001_0522', DetectorGeometry='256,256')    
+      OutputWorkspace='s0001_0522', DetectorGeometry='256,256',
+      LoadInstrument=False)    
 
   # Access output workspace and print out some result
   ws = mtd["s0001_0522"]

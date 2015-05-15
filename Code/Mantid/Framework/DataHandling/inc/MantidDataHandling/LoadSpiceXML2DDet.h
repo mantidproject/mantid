@@ -90,23 +90,18 @@ private:
   API::MatrixWorkspace_sptr
   createMatrixWorkspace(const std::vector<SpiceXMLNode> &vecxmlnode,
                         const size_t &numpixelx, const size_t &numpixely,
-                        const std::string &detnodename);
+                        const std::string &detnodename,
+                        const bool &loadinstrument);
 
-  /// Create output MatrixWorkspace with instrument
-  API::MatrixWorkspace_sptr
-  createInstrumentMatrixWorkspace(const std::vector<SpiceXMLNode> &vecxmlnode,
-                        const size_t &numpixelx, const size_t &numpixely,
-                        const std::string &detnodename, const std::string &idffilename);
-
-  ///
+  /// Set up sample logs from table workspace loaded where SPICE data file is
+  /// loaded
   void setupSampleLogFromSpiceTable(API::MatrixWorkspace_sptr matrixws,
-                                    API::ITableWorkspace_sptr spicetablews, int ptnumber);
+                                    API::ITableWorkspace_sptr spicetablews,
+                                    int ptnumber);
 
-  ///
-  void loadInstrument(API::MatrixWorkspace_sptr matrixws, const std::string &idffilename);
-
-
-
+  /// Load instrument
+  void loadInstrument(API::MatrixWorkspace_sptr matrixws,
+                      const std::string &idffilename);
 };
 
 } // namespace DataHandling
