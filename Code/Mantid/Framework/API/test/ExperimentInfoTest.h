@@ -11,8 +11,14 @@
 #include "MantidKernel/SingletonHolder.h"
 #include "MantidKernel/Matrix.h"
 
+#include "MantidNexus/NexusClasses.h"
+#include "MantidAPI/FileFinder.h"
+
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/NexusTestHelper.h"
+
+#include <nexus/NeXusFile.hpp>
+#include <nexus/NeXusException.hpp>
 
 #include <cxxtest/TestSuite.h>
 #include <boost/regex.hpp>
@@ -22,9 +28,12 @@
 #include <iostream>
 #include <set>
 
+
+
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
+using namespace NeXus;
 
 class FakeChopper : public Mantid::API::ChopperModel
 {
@@ -184,7 +193,7 @@ public:
     const std::string actualLogName = "SAMPLE_TEMP";
     addInstrumentWithParameter(expt, instPar, actualLogName);
 
-    TS_ASSERT_THROWS(expt.getLog(instPar), Exception::NotFoundError);
+    TS_ASSERT_THROWS(expt.getLog(instPar), Mantid::Kernel::Exception::NotFoundError);
   }
 
   void test_GetLog_Returns_Value_Of_Log_Named_In_Instrument_Parameter_If_It_Exists_And_Actual_Log_Entry_Exists()
@@ -228,7 +237,7 @@ public:
     const std::string actualLogName = "SAMPLE_TEMP";
     addInstrumentWithParameter(expt, instPar, actualLogName);
 
-    TS_ASSERT_THROWS(expt.getLogAsSingleValue(instPar), Exception::NotFoundError);
+    TS_ASSERT_THROWS(expt.getLogAsSingleValue(instPar), Mantid::Kernel::Exception::NotFoundError);
   }
 
   void test_GetLogAsSingleValue_Returns_Value_Of_Log_Named_In_Instrument_Parameter_If_It_Exists_And_Actual_Log_Entry_Exists()
@@ -673,6 +682,28 @@ public:
       {
           TS_ASSERT_DELTA(wTrVector[i],wMatrRestored[i],1.e-9);
       }
+
+  }
+
+  void test_nexus_intrument_info()
+  {
+     ExperimentInfo ei;
+
+    // We need a ISIS Nexus file with IDF embedded in it.
+    // Hopefully a shorter such file will later be available.
+
+    // Create the root Nexus class
+    std::string path = FileFinder::Instance().getFullPath("LET00014305.nxs");
+    Mantid::NeXus::NXRoot root(path);
+   
+    // Get nexus file for this and move it to ISIS Nexus group 'raw_data_1'
+    ::NeXus::File nxFile = new ::NeXus::File(root.m_fileID, NXACC_READ);
+    nxFile.openPath("raw_data_1");
+
+    std::string params;
+
+    // Load the Nexus IDF info
+    TS_ASSERT_THROWS_NOTHING(ei.loadInstrumentInfoNexus( &nxFile, params));
 
   }
 

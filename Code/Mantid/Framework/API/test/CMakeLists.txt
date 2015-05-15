@@ -1,7 +1,7 @@
 if ( CXXTEST_FOUND )
   include_directories ( SYSTEM ${CXXTEST_INCLUDE_DIR} ${GMOCK_INCLUDE_DIR} ${GTEST_INCLUDE_DIR} )
 
-  include_directories ( ../../TestHelpers/inc )
+  include_directories ( ../../TestHelpers/inc ../../Nexus/inc ${HDF5_INCLUDE_DIRS})
   # This variable is used within the cxxtest_add_test macro to build these helper classes into the test executable.
   # It will go out of scope at the end of this file so doesn't need un-setting
   set ( TESTHELPER_SRCS ../../TestHelpers/src/TearDownWorld.cpp
@@ -12,7 +12,7 @@ if ( CXXTEST_FOUND )
   
   if ( GMOCK_FOUND AND GTEST_FOUND )
     cxxtest_add_test ( APITest ${TEST_FILES} ${GMOCK_TEST_FILES})
-    target_link_libraries( APITest API ${GMOCK_LIBRARIES} ${GTEST_LIBRARIES}  )
+    target_link_libraries( APITest API ${GMOCK_LIBRARIES} ${GTEST_LIBRARIES} Nexus ${NEXUS_LIBRARIES})
   else ()
     cxxtest_add_test ( APITest ${TEST_FILES} )
     target_link_libraries( APITest API  )
