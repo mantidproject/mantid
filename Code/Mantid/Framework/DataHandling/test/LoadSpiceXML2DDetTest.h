@@ -37,6 +37,7 @@ public:
     sizelist[0] = 256;
     sizelist[1] = 256;
     loader.setProperty("DetectorGeometry", sizelist);
+    loader.setProperty("LoadInstrument", false);
 
     loader.execute();
     TS_ASSERT(loader.isExecuted());
@@ -97,6 +98,35 @@ public:
     // Clean
     AnalysisDataService::Instance().remove("Exp0335_S0038");
   }
+
+  void test_LoadHB3AXML2InstrumentedWS() {
+    std::string idffname("/home/wzz/Mantid/Code/Mantid/instrument/HB3A_Definition.xml");
+
+    LoadSpiceXML2DDet loader;
+    loader.initialize();
+
+    const std::string filename("HB3A_exp355_scan0001_0522.xml");
+    TS_ASSERT_THROWS_NOTHING(loader.setProperty("Filename", filename));
+    TS_ASSERT_THROWS_NOTHING(
+        loader.setProperty("OutputWorkspace", "Exp0335_S0038"));
+    std::vector<size_t> sizelist(2);
+    sizelist[0] = 256;
+    sizelist[1] = 256;
+    loader.setProperty("DetectorGeometry", sizelist);
+    loader.setProperty("LoadInstrument", true);
+    loader.setProperty("InstrumentFilename", idffname);
+
+    loader.execute();
+    TS_ASSERT(loader.isExecuted());
+
+    // Get data
+    MatrixWorkspace_sptr outws = boost::dynamic_pointer_cast<MatrixWorkspace>(
+        AnalysisDataService::Instance().retrieve("Exp0335_S0038"));
+    TS_ASSERT(outws);
+
+    TS_ASSERT(outws->getInstrument());
+  }
+
 };
 
 #endif /* MANTID_DATAHANDLING_LOADSPICEXML2DDETTEST_H_ */

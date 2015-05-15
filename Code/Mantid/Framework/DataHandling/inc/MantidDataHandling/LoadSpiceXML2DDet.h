@@ -4,6 +4,7 @@
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/ITableWorkspace.h"
 
 namespace Mantid {
 namespace DataHandling {
@@ -90,6 +91,22 @@ private:
   createMatrixWorkspace(const std::vector<SpiceXMLNode> &vecxmlnode,
                         const size_t &numpixelx, const size_t &numpixely,
                         const std::string &detnodename);
+
+  /// Create output MatrixWorkspace with instrument
+  API::MatrixWorkspace_sptr
+  createInstrumentMatrixWorkspace(const std::vector<SpiceXMLNode> &vecxmlnode,
+                        const size_t &numpixelx, const size_t &numpixely,
+                        const std::string &detnodename, const std::string &idffilename);
+
+  ///
+  void setupSampleLogFromSpiceTable(API::MatrixWorkspace_sptr matrixws,
+                                    API::ITableWorkspace_sptr spicetablews, int ptnumber);
+
+  ///
+  void loadInstrument(API::MatrixWorkspace_sptr matrixws, const std::string &idffilename);
+
+
+
 };
 
 } // namespace DataHandling
