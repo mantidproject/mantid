@@ -78,7 +78,7 @@ void Qxy::init() {
                   "OutputWorkspace_sumOfNormFactors. The division of "
                   "_sumOfCounts and _sumOfNormFactors equals the workspace "
                   "returned by the property OutputWorkspace");
-  declareProperty("ExtraLength", 0.0, mustBePositive,
+  declareProperty("ExtraLength", 0.0, mustBePositive2,
                   "Additional length for gravity correction.");
 }
 

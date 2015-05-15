@@ -884,7 +884,7 @@
           <item>
            <widget class="QLabel" name="label_15">
             <property name="text">
-             <string>Extra Length</string>
+             <string>Extra Length (m)</string>
             </property>
            </widget>
           </item>

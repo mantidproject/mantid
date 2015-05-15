@@ -1692,6 +1692,8 @@ class ConvertToQISIS(ReductionStep):
         self._grav_set = False
         #can be used to add an additional length to the neutron path during the correction for gravity in the Q calcuation
         self._grav_extra_length = self._DEFAULT_EXTRA_LENGTH
+        #used to implement a default setting for extra length for gravity; seee _grav_set
+        self._grav_extra_length_set = False
         #this should contain the rebin parameters
         self.binning = None
 
@@ -1739,12 +1741,22 @@ class ConvertToQISIS(ReductionStep):
     def get_extra_length(self):
         return self._grav_extra_length
 
-    def set_extra_length(self, extra_length):
+    def set_extra_length(self, extra_length, override=True):
         """
             Add extra length when correcting for gravity when calculating Q
             @param extra_length : additional length for the gravity correction during the calculation of Q
+            @param override: over write the setting from a previous call to this method (default is True).
+                             This was added because of the way _set_gravity is layed out.
         """
-        self._grav_extra_length = extra_length
+        if override:
+            self._grav_extra_length_set = True
+
+        if (not self._grav_extra_length_set) or override:
+            self._grav_extra_length = extra_length
+        else:
+            msg = "User file can't override previous extra length setting for gravity correction; extra length remains " + str(self._grav_extra_length)
+            print msg
+            sanslog.warning(msg)
 
     def execute(self, reducer, workspace):
         """
@@ -2091,11 +2103,11 @@ class UserFile(ReductionStep):
                 reducer.to_Q.set_gravity(False, override=False)
             elif grav.startswith('LEXTRA'):
                 extra_length = grav[6:].strip()
-                reducer.to_Q.set_extra_length(float(extra_length))
+                reducer.to_Q.set_extra_length(float(extra_length), override=False)
             else:
                 _issueWarning("Gravity flag incorrectly specified, disabling gravity correction")
                 reducer.to_Q.set_gravity(False, override=False)
-                reducer.to_Q.set_extra_length(0.0)
+                reducer.to_Q.set_extra_length(0.0, override=False)
 
         elif upper_line.startswith('FIT/TRANS/'):
             #check if the selector is passed:

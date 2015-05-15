@@ -310,6 +310,9 @@ void SANSRunWindow::initLayout()
   connect(m_uiForm.slicePb, SIGNAL(clicked()), this, SLOT(handleSlicePushButton()));
   connect(m_uiForm.pushButton_Help, SIGNAL(clicked()), this, SLOT(openHelpPage()));
 
+  // Set the validators
+  setValidators();
+
   readSettings();
 }
 /** Ssetup the controls for the Analysis Tab on this form
@@ -3804,6 +3807,16 @@ void SANSRunWindow::openHelpPage()
 {
   const auto helpPageUrl = m_helpPageUrls[static_cast<Tab>(m_uiForm.tabWidget->currentIndex())];
   QDesktopServices::openUrl(QUrl(helpPageUrl));
+}
+
+// Set the validators for inputs
+void SANSRunWindow::setValidators()
+{
+  // Validator policies
+  QDoubleValidator* mustBeDouble = new QDoubleValidator(this);
+
+  // For gravity extra length
+  m_uiForm.gravity_extra_length_line_edit->setValidator(mustBeDouble);
 }
 
 } //namespace CustomInterfaces
