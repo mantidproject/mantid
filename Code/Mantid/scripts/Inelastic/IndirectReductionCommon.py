@@ -3,6 +3,7 @@ from mantid.api import WorkspaceGroup
 from mantid import mtd, logger, config
 
 import os
+import numpy as np
 
 #-------------------------------------------------------------------------------
 
@@ -348,6 +349,32 @@ def scale_monitor(workspace_name):
 
 #-------------------------------------------------------------------------------
 
+def scale_detectors(workspace_name, e_mode='Indirect'):
+    """
+    Scales detectors by monitor intnesity.
+
+    @param workspace_name Name of detector workspace
+    @param e_mode Energy mode (Indirect for spectroscopy, Elastic for diffraction)
+    """
+    from mantid.simpleapi import (ConvertUnits, RebinToWorkspace, Divide)
+
+    monitor_workspace_name = workspace_name + '_mon'
+
+    ConvertUnits(InputWorkspace=workspace_name,
+                 OutputWorkspace=workspace_name,
+                 Target='Wavelength',
+                 EMode=e_mode)
+
+    RebinToWorkspace(WorkspaceToRebin=workspace_name,
+                     WorkspaceToMatch=monitor_workspace_name,
+                     OutputWorkspace=workspace_name)
+
+    Divide(LHSWorkspace=workspace_name,
+           RHSWorkspace=monitor_workspace_name,
+           OutputWorkspace=workspace_name)
+
+#-------------------------------------------------------------------------------
+
 def group_spectra(workspace_name, masked_detectors, method, group_file=None, group_ws=None):
     """
     Groups spectra in a given workspace according to the Workflow.GroupingMethod and
@@ -646,5 +673,70 @@ def save_reduction(worksspace_names, formats, x_units='DeltaE'):
             SaveDaveGrp(InputWorkspace=workspace_name + '_davegrp_save_temp',
                         Filename=workspace_name + '.grp')
             DeleteWorkspace(Workspace=workspace_name + '_davegrp_save_temp')
+
+#-------------------------------------------------------------------------------
+
+def get_multi_frame_rebin(workspace_name, rebin_string):
+    """
+    Creates a rebin string for rebinning multiple frames data.
+
+    @param workspace_name Name of multiple frame workspace group
+    @param rebin_string Original rebin string
+
+    @return New rebin string
+    @return Maximum number of bins in input workspaces
+    """
+
+    multi_frame = isinstance(mtd[workspace_name], WorkspaceGroup)
+
+    if rebin_string is not None and multi_frame:
+        rebin_string_comp = rebin_string.split(',')
+        if len(rebin_string_comp) >= 5:
+            rebin_string_2 = ','.join(rebin_string_comp[2:])
+        else:
+            rebin_string_2 = rebin_string
+
+        bin_counts = [mtd[ws].blocksize() for ws in mtd[workspace_name].getNames()]
+        num_bins = np.amax(bin_counts)
+
+        return rebin_string_2, num_bins
+
+    return None, None
+
+#-------------------------------------------------------------------------------
+
+def rebin_reduction(workspace_name, rebin_string, multi_frame_rebin_string, num_bins):
+    """
+    @param workspace_name Name of workspace to rebin
+    @param rebin_string Rebin parameters
+    @param multi_frame_rebin_string Rebin string for multiple frame rebinning
+    @param num_bins Max number of bins in input frames
+    """
+    from mantid.simpleapi import (Rebin, RebinToWorkspace)
+
+    if rebin_string is not None:
+        if multi_frame_rebin_string is not None and num_bins is not None:
+            # Multi frame data
+            if mtd[workspace_name].blocksize() == num_bins:
+                Rebin(InputWorkspace=workspace_name,
+                      OutputWorkspace=workspace_name,
+                      Params=rebin_string)
+            else:
+                Rebin(InputWorkspace=workspace_name,
+                      OutputWorkspace=workspace_name,
+                      Params=multi_frame_rebin_string)
+        else:
+            # Regular data
+            Rebin(InputWorkspace=workspace_name,
+                  OutputWorkspace=workspace_name,
+                  Params=rebin_string)
+    else:
+        try:
+            # If user does not want to rebin then just ensure uniform binning across spectra
+            RebinToWorkspace(WorkspaceToRebin=workspace_name,
+                             WorkspaceToMatch=workspace_name,
+                             OutputWorkspace=workspace_name)
+        except RuntimeError:
+            logger.warning('Rebinning failed, will try to continue anyway.')
 
 #-------------------------------------------------------------------------------

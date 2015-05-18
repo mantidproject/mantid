@@ -71,10 +71,13 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
 
     def PyExec(self):
         from IndirectReductionCommon import (load_files,
+                                             get_multi_frame_rebin,
                                              identify_bad_detectors,
                                              unwrap_monitor,
                                              process_monitor_efficiency,
                                              scale_monitor,
+                                             scale_detectors,
+                                             rebin_reduction,
                                              group_spectra,
                                              fold_chopped,
                                              rename_reduction)
@@ -96,15 +99,8 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
                 workspaces = [c_ws_name]
 
             # Process rebinning for framed data
-            if self._rebin_string is not None and is_multi_frame:
-                rebin_string_comp = self._rebin_string.split(',')
-                if len(rebin_string_comp) >= 5:
-                    rebin_string_2 = ','.join(rebin_string_comp[2:])
-                else:
-                    rebin_string_2 = self._rebin_string
-
-                bin_counts = [mtd[ws].blocksize() for ws in mtd[c_ws_name].getNames()]
-                num_bins = np.amax(bin_counts)
+            rebin_string_2, num_bins = get_multi_frame_rebin(c_ws_name,
+                                                             self._rebin_string)
 
             masked_detectors = identify_bad_detectors(workspaces[0])
 
@@ -123,16 +119,7 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
                 scale_monitor(ws_name)
 
                 # Scale detector data by monitor intensities
-                ConvertUnits(InputWorkspace=ws_name,
-                             OutputWorkspace=ws_name,
-                             Target='Wavelength',
-                             EMode='Elastic')
-                RebinToWorkspace(WorkspaceToRebin=ws_name,
-                                 WorkspaceToMatch=monitor_ws_name,
-                                 OutputWorkspace=ws_name)
-                Divide(LHSWorkspace=ws_name,
-                       RHSWorkspace=monitor_ws_name,
-                       OutputWorkspace=ws_name)
+                scale_detectors(ws_name, 'Elastic')
 
                 # Remove the no longer needed monitor workspace
                 DeleteWorkspace(monitor_ws_name)
@@ -144,30 +131,10 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
                              EMode='Elastic')
 
                 # Handle rebinning
-                if self._rebin_string is not None:
-                    if is_multi_frame:
-                        # Mulit frame data
-                        if mtd[ws_name].blocksize() == num_bins:
-                            Rebin(InputWorkspace=ws_name,
-                                  OutputWorkspace=ws_name,
-                                  Params=self._rebin_string)
-                        else:
-                            Rebin(InputWorkspace=ws_name,
-                                  OutputWorkspace=ws_name,
-                                  Params=rebin_string_2)
-                    else:
-                        # Regular data
-                        Rebin(InputWorkspace=ws_name,
-                              OutputWorkspace=ws_name,
-                              Params=self._rebin_string)
-                else:
-                    try:
-                        # If user does not want to rebin then just ensure uniform binning across spectra
-                        RebinToWorkspace(WorkspaceToRebin=ws_name,
-                                         WorkspaceToMatch=ws_name,
-                                         OutputWorkspace=ws_name)
-                    except RuntimeError:
-                        logger.warning('Rebinning failed, will try to continue anyway.')
+                rebin_reduction(ws_name,
+                                self._rebin_string,
+                                rebin_string_2,
+                                num_bins)
 
                 # Group spectra
                 group_spectra(ws_name,

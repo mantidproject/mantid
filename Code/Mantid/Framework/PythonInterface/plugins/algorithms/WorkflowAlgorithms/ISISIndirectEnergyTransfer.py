@@ -5,7 +5,6 @@ from mantid.simpleapi import *
 from mantid import config
 
 import os
-import numpy as np
 
 
 _str_or_none = lambda s: s if s != '' else None
@@ -73,10 +72,13 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
 
     def PyExec(self):
         from IndirectReductionCommon import (load_files,
+                                             get_multi_frame_rebin,
                                              identify_bad_detectors,
                                              unwrap_monitor,
                                              process_monitor_efficiency,
                                              scale_monitor,
+                                             scale_detectors,
+                                             rebin_reduction,
                                              group_spectra,
                                              fold_chopped,
                                              rename_reduction,
@@ -100,15 +102,8 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
                 workspaces = [c_ws_name]
 
             # Process rebinning for framed data
-            if self._rebin_string is not None and is_multi_frame:
-                rebin_string_comp = self._rebin_string.split(',')
-                if len(rebin_string_comp) >= 5:
-                    rebin_string_2 = ','.join(rebin_string_comp[2:])
-                else:
-                    rebin_string_2 = self._rebin_string
-
-                bin_counts = [mtd[ws].blocksize() for ws in mtd[c_ws_name].getNames()]
-                num_bins = np.amax(bin_counts)
+            rebin_string_2, num_bins = get_multi_frame_rebin(c_ws_name,
+                                                             self._rebin_string)
 
             masked_detectors = identify_bad_detectors(workspaces[0])
 
@@ -118,16 +113,19 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
 
                 # Process monitor
                 if not unwrap_monitor(ws_name):
-                    ConvertUnits(InputWorkspace=monitor_ws_name, OutputWorkspace=monitor_ws_name, Target='Wavelength', EMode='Elastic')
+                    ConvertUnits(InputWorkspace=monitor_ws_name,
+                                 OutputWorkspace=monitor_ws_name,
+                                 Target='Wavelength',
+                                 EMode='Elastic')
 
                 process_monitor_efficiency(ws_name)
                 scale_monitor(ws_name)
 
-
                 # Do background removal if a range was provided
                 if self._background_range is not None:
                     ConvertToDistribution(Workspace=ws_name)
-                    CalculateFlatBackground(InputWorkspace=ws_name, OutputWorkspace=ws_name,
+                    CalculateFlatBackground(InputWorkspace=ws_name,
+                                            OutputWorkspace=ws_name,
                                             StartX=self._background_range[0],
                                             EndX=self._background_range[1],
                                             Mode='Mean')
@@ -140,45 +138,41 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
                            OutputWorkspace=ws_name)
 
                 # Scale detector data by monitor intensities
-                ConvertUnits(InputWorkspace=ws_name, OutputWorkspace=ws_name, Target='Wavelength', EMode='Indirect')
-                RebinToWorkspace(WorkspaceToRebin=ws_name, WorkspaceToMatch=monitor_ws_name, OutputWorkspace=ws_name)
-                Divide(LHSWorkspace=ws_name, RHSWorkspace=monitor_ws_name, OutputWorkspace=ws_name)
+                scale_detectors(ws_name, 'Indirect')
 
                 # Remove the no longer needed monitor workspace
                 DeleteWorkspace(monitor_ws_name)
 
                 # Convert to energy
-                ConvertUnits(InputWorkspace=ws_name, OutputWorkspace=ws_name, Target='DeltaE', EMode='Indirect')
-                CorrectKiKf(InputWorkspace=ws_name, OutputWorkspace=ws_name, EMode='Indirect')
+                ConvertUnits(InputWorkspace=ws_name,
+                             OutputWorkspace=ws_name,
+                             Target='DeltaE',
+                             EMode='Indirect')
+                CorrectKiKf(InputWorkspace=ws_name,
+                            OutputWorkspace=ws_name,
+                            EMode='Indirect')
 
                 # Handle rebinning
-                if self._rebin_string is not None:
-                    if is_multi_frame:
-                        # Mulit frame data
-                        if mtd[ws_name].blocksize() == num_bins:
-                            Rebin(InputWorkspace=ws_name, OutputWorkspace=ws_name, Params=self._rebin_string)
-                        else:
-                            Rebin(InputWorkspace=ws_name, OutputWorkspace=ws_name, Params=rebin_string_2)
-                    else:
-                        # Regular data
-                        Rebin(InputWorkspace=ws_name, OutputWorkspace=ws_name, Params=self._rebin_string)
-                else:
-                    try:
-                        # If user does not want to rebin then just ensure uniform binning across spectra
-                        RebinToWorkspace(WorkspaceToRebin=ws_name, WorkspaceToMatch=ws_name, OutputWorkspace=ws_name)
-                    except RuntimeError:
-                        logger.warning('Rebinning failed, will try to continue anyway.')
+                rebin_reduction(ws_name,
+                                self._rebin_string,
+                                rebin_string_2,
+                                num_bins)
 
                 # Detailed balance
                 if self._detailed_balance is not None:
                     corr_factor = 11.606 / (2 * self._detailed_balance)
-                    ExponentialCorrection(InputWorkspaces=ws_name, OutputWorkspace=ws_name,
-                                          C0=1.0, C1=corr_factor, Operation='Multiply')
+                    ExponentialCorrection(InputWorkspaces=ws_name,
+                                          OutputWorkspace=ws_name,
+                                          C0=1.0,
+                                          C1=corr_factor,
+                                          Operation='Multiply')
 
                 # Scale
                 if self._scale_factor != 1.0:
-                    Scale(InputWorkspaces=ws_name, OutputWorkspace=ws_name,
-                          Factor=self._scale_factor, Operation='Multiply')
+                    Scale(InputWorkspaces=ws_name,
+                          OutputWorkspace=ws_name,
+                          Factor=self._scale_factor,
+                          Operation='Multiply')
 
                 # Group spectra
                 group_spectra(ws_name,
