@@ -29,17 +29,17 @@ digraph ISISIndirectDiffractionReduction {
 
   subgraph processes {
     $process_style
-    load_files
-    get_multi_frame_rebin
-    identify_bad_detectors
-    unwrap_monitor
-    process_monitor_efficiency
-    scale_monitor
-    scale_detectors
-    rebin_reduction
-    group_spectra
-    fold_chopped
-    rename_reduction
+    load_files                  [label="load_files\nLoads run files and instrument parameters.\nChops data into multiple frames if required.\nSumms runs if required."]
+    get_multi_frame_rebin       [label="get_multi_frame_rebin\nGets a rebin string for rebinning\nmultiple frames."]
+    identify_bad_detectors      [label="identify_bad_detectors\nGets a list of noisy detectors using\nthe IdentifyNoisyDetectors algorithm."]
+    unwrap_monitor              [label="unwrap_monitor\nUnwraps monitor based on IPF options\nusing UnwrapMonitor algorithm."]
+    process_monitor_efficiency  [label="process_monitor_efficiency\nCorrects for monitor efficiency by\narea, thickness and attenuation."]
+    scale_monitor               [label="scale_monitor\nApplies monitor scaling\nas per the IPF."]
+    scale_detectors             [label="scale_detectors\nScales detectors by the\nmonitor intensity."]
+    rebin_reduction             [label="rebin_reduction\nRebins the reduction based\non the RebinParam option."]
+    group_spectra               [label="group_spectra\nGroups spectra based\non the GroupingPolicy."]
+    fold_chopped                [label="fold_chopped\nFolds multiple frames into\na single reduction."]
+    rename_reduction            [label="rename_reduction\nRenames reduced workspaces\nas per the IPF options."]
   }
 
   subgraph values {

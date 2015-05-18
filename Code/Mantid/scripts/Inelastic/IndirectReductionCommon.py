@@ -351,7 +351,7 @@ def scale_monitor(workspace_name):
 
 def scale_detectors(workspace_name, e_mode='Indirect'):
     """
-    Scales detectors by monitor intnesity.
+    Scales detectors by monitor intensity.
 
     @param workspace_name Name of detector workspace
     @param e_mode Energy mode (Indirect for spectroscopy, Elastic for diffraction)
