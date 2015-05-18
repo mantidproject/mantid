@@ -519,6 +519,7 @@ void LoadSpiceXML2DDet::setupSampleLogFromSpiceTable(
   // FIXME - Shouldn't give a better value?
   Kernel::DateAndTime anytime(1000);
 
+  bool foundlog = false;
   for (size_t ir = 0; ir < numrows; ++ir) {
     int localpt = spicetablews->cell<int>(ir, 0);
     if (localpt != ptnumber)
@@ -533,8 +534,15 @@ void LoadSpiceXML2DDet::setupSampleLogFromSpiceTable(
       matrixws->mutableRun().addProperty(newlogproperty);
     }
 
+    // Break as the experiment pointer is found
+    foundlog = true;
     break;
   }
+
+  if (!foundlog)
+    g_log.warning() << "Pt. " << ptnumber
+                    << " is not found.  Log is not loaded to output workspace."
+                    << "\n";
 
   return;
 }

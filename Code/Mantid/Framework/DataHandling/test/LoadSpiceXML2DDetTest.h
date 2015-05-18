@@ -102,11 +102,19 @@ public:
     AnalysisDataService::Instance().remove("Exp0335_S0038");
   }
 
+  //----------------------------------------------------------------------------------------------
+  /** Test algorithm with loading HB3A
+   * @brief test_LoadHB3AXML2InstrumentedWS
+   * Testing include
+   * (1) 2theta = -15 degree (15 degree in SPICE): distance of 4 corners should
+   * be same. scattering
+   *     angles should be paired;
+   * (2) 2theta = 0 degree: scattering angle of all 4 corners should be same;
+   * (3) 2theta = 15 degree: scattering angles should be symmetric to case 1
+   */
   void test_LoadHB3AXML2InstrumentedWS() {
-    std::string idffname(
-        "/home/wzz/Mantid/Code/Mantid/instrument/HB3A_Definition.xml");
 
-    // Table workspace
+    // Set up Spice table workspace for log value
     ITableWorkspace_sptr datatablews =
         boost::dynamic_pointer_cast<ITableWorkspace>(
             boost::make_shared<DataObjects::TableWorkspace>());
@@ -117,8 +125,11 @@ public:
     TableRow row0 = datatablews->appendRow();
     row0 << 1 << 15.0;
     TableRow row1 = datatablews->appendRow();
-    row1 << 2 << 42.709750;
+    row1 << 2 << -15.0;
+    TableRow row2 = datatablews->appendRow();
+    row2 << 3 << 0.0;
 
+    // Test 2theta = 15 degree
     LoadSpiceXML2DDet loader;
     loader.initialize();
 
@@ -131,8 +142,8 @@ public:
     sizelist[1] = 256;
     loader.setProperty("DetectorGeometry", sizelist);
     loader.setProperty("LoadInstrument", true);
-    // loader.setProperty("InstrumentFilename", idffname);
     loader.setProperty("SpiceTableWorkspace", "SpiceDataTable");
+    loader.setProperty("PtNumber", 1);
 
     loader.execute();
     TS_ASSERT(loader.isExecuted());
@@ -143,23 +154,175 @@ public:
     TS_ASSERT(outws);
     TS_ASSERT_EQUALS(outws->getNumberHistograms(), 256 * 256);
 
+    // Value
+    TS_ASSERT_DELTA(outws->readY(255)[0], 1.0, 0.0001);
+    TS_ASSERT_DELTA(outws->readY(253 * 256 + 9)[0], 1.0, 0.00001);
+
     // Instrument
     TS_ASSERT(outws->getInstrument());
 
-    // Detector distance
+    Kernel::V3D source = outws->getInstrument()->getSource()->getPos();
     Kernel::V3D sample = outws->getInstrument()->getSample()->getPos();
     Kernel::V3D det0pos = outws->getDetector(0)->getPos();
     Kernel::V3D det255pos = outws->getDetector(255)->getPos();
+    Kernel::V3D detlast0 = outws->getDetector(256 * 255)->getPos();
     Kernel::V3D detlast = outws->getDetector(256 * 256 - 1)->getPos();
+    Kernel::V3D detmiddle =
+        outws->getDetector(256 / 2 * 256 + 256 / 2)->getPos();
+
+    // center of the detector must be negative
+    TS_ASSERT_LESS_THAN(detmiddle.X(), 0.0);
+
+    // detector distance
     double dist0 = sample.distance(det0pos);
     double dist255 = sample.distance(det255pos);
     double distlast = sample.distance(detlast);
+    double distlast0 = sample.distance(detlast0);
+    double distmiddle = sample.distance(detmiddle);
 
     TS_ASSERT_DELTA(dist0, dist255, 0.0001);
     TS_ASSERT_DELTA(dist0, distlast, 0.0001);
+    TS_ASSERT_DELTA(dist0, distlast0, 0.0001);
+    TS_ASSERT_DELTA(distmiddle, 0.3518, 0.000001);
 
-    TS_ASSERT_DELTA(outws->readY(255)[0], 1.0, 0.0001);
-    TS_ASSERT_DELTA(outws->readY(253 * 256 + 9)[0], 1.0, 0.00001);
+    // 2theta value
+    Kernel::V3D sample_source = sample - source;
+
+    Kernel::V3D det0_sample = det0pos - sample;
+    double twotheta0 = det0_sample.angle(sample_source) * 180. / 3.14159265;
+    // FIXME - Verify this with Huibo!
+    TS_ASSERT_DELTA(twotheta0, 11.6252, 0.0001);
+
+    Kernel::V3D detTL_sample = detlast0 - sample;
+    double twotheta_tl = detTL_sample.angle(sample_source) * 180. / 3.14159265;
+    TS_ASSERT_DELTA(twotheta0, twotheta_tl, 0.00001);
+
+    Kernel::V3D det255_sample = det255pos - sample;
+    double twotheta255 = det255_sample.angle(sample_source) * 180. / 3.14159265;
+
+    Kernel::V3D detlast_sample = detlast - sample;
+    double twothetalast =
+        detlast_sample.angle(sample_source) * 180. / 3.14159265;
+
+    TS_ASSERT_DELTA(twotheta255, twothetalast, 0.00001);
+
+    Kernel::V3D detmid_sample = detmiddle - sample;
+    double twotheta_middle =
+        detmid_sample.angle(sample_source) * 180. / 3.1415926;
+    TS_ASSERT_DELTA(twotheta_middle, 15.0, 0.02);
+
+    TS_ASSERT_LESS_THAN(twotheta0, twotheta_middle);
+    TS_ASSERT_LESS_THAN(twotheta_middle, twothetalast);
+
+    // Case: 2theta = 0
+    LoadSpiceXML2DDet loader2;
+    loader2.initialize();
+
+    TS_ASSERT_THROWS_NOTHING(loader2.setProperty("Filename", filename));
+    TS_ASSERT_THROWS_NOTHING(
+        loader2.setProperty("OutputWorkspace", "Exp0335_S0038B"));
+    loader2.setProperty("DetectorGeometry", sizelist);
+    loader2.setProperty("LoadInstrument", true);
+    loader2.setProperty("SpiceTableWorkspace", "SpiceDataTable");
+    loader2.setProperty("PtNumber", 3);
+
+    loader2.execute();
+    TS_ASSERT(loader2.isExecuted());
+
+    // Get data
+    MatrixWorkspace_sptr outws2 = boost::dynamic_pointer_cast<MatrixWorkspace>(
+        AnalysisDataService::Instance().retrieve("Exp0335_S0038B"));
+    TS_ASSERT(outws2);
+
+    // Check instrument
+    Kernel::V3D source2 = outws2->getInstrument()->getSource()->getPos();
+    Kernel::V3D sample2 = outws2->getInstrument()->getSample()->getPos();
+    Kernel::V3D det0pos2 = outws2->getDetector(0)->getPos();
+    Kernel::V3D det255pos2 = outws2->getDetector(255)->getPos();
+    Kernel::V3D detlast0_2 = outws2->getDetector(256 * 255)->getPos();
+    Kernel::V3D detlast2 = outws2->getDetector(256 * 256 - 1)->getPos();
+    Kernel::V3D detmiddle2 =
+        outws2->getDetector(256 / 2 * 256 + 256 / 2)->getPos();
+
+    // detector distance
+    double dist0b = sample2.distance(det0pos2);
+    double dist255b = sample2.distance(det255pos2);
+    double distlastb = sample2.distance(detlast2);
+    // double distlast0b = sample2.distance(detlast0_2);
+    double distmiddleb = sample2.distance(detmiddle2);
+
+    TS_ASSERT_DELTA(dist0b, dist0, 0.000001);
+    TS_ASSERT_DELTA(distmiddleb, distmiddle, 0.00001);
+    TS_ASSERT_DELTA(distlastb, distlast, 0.00001);
+    TS_ASSERT_DELTA(dist255b, dist255, 0.00001);
+
+    // 2theta
+    sample_source = sample2 - source2;
+
+    detmid_sample = detmiddle2 - sample2;
+    twotheta_middle = detmid_sample.angle(sample_source) * 180. / 3.1415926;
+    // FIXME - Justify with Huibo
+    TS_ASSERT_DELTA(twotheta_middle, 0.00, 0.03);
+
+    det0_sample = det0pos2 - sample2;
+    double twotheta0_2 = det0_sample.angle(sample_source) * 180. / 3.14159265;
+
+    detTL_sample = detlast0_2 - sample2;
+    twotheta_tl = detTL_sample.angle(sample_source) * 180. / 3.14159265;
+
+    det255_sample = det255pos2 - sample2;
+    double twotheta255_2 =
+        det255_sample.angle(sample_source) * 180. / 3.14159265;
+
+    detlast_sample = detlast2 - sample2;
+    twothetalast = detlast_sample.angle(sample_source) * 180. / 3.14159265;
+
+    TS_ASSERT_DELTA(twotheta0_2, twothetalast, 0.00001);
+    TS_ASSERT_DELTA(twotheta0_2, twotheta_tl, 0.00001);
+    TS_ASSERT_DELTA(twotheta0_2, twotheta255_2, 0.00001);
+
+    // Case 3: symmetry test
+    LoadSpiceXML2DDet loader3;
+    loader3.initialize();
+
+    TS_ASSERT_THROWS_NOTHING(loader3.setProperty("Filename", filename));
+    TS_ASSERT_THROWS_NOTHING(
+        loader3.setProperty("OutputWorkspace", "Exp0335_S0038C"));
+    loader3.setProperty("DetectorGeometry", sizelist);
+    loader3.setProperty("LoadInstrument", true);
+    loader3.setProperty("SpiceTableWorkspace", "SpiceDataTable");
+    loader3.setProperty("PtNumber", 2);
+
+    loader3.execute();
+    TS_ASSERT(loader3.isExecuted());
+
+    // Get data
+    MatrixWorkspace_sptr outws3 = boost::dynamic_pointer_cast<MatrixWorkspace>(
+        AnalysisDataService::Instance().retrieve("Exp0335_S0038C"));
+    TS_ASSERT(outws3);
+
+    // Check instrument
+    Kernel::V3D source3 = outws3->getInstrument()->getSource()->getPos();
+    Kernel::V3D sample3 = outws3->getInstrument()->getSample()->getPos();
+    Kernel::V3D det0pos3 = outws3->getDetector(0)->getPos();
+    Kernel::V3D det255pos3 = outws3->getDetector(255)->getPos();
+
+    // 2theta
+    sample_source = sample3 - source3;
+
+    det0_sample = det0pos3 - sample3;
+    double twotheta0_3 = det0_sample.angle(sample_source) * 180. / 3.14159265;
+    TS_ASSERT_DELTA(twotheta0_3, twotheta255, 0.00001);
+
+    det255_sample = det255pos3 - sample3;
+    double twotheta255_3 =
+        det255_sample.angle(sample_source) * 180. / 3.14159265;
+    TS_ASSERT_DELTA(twotheta255_3, twotheta0, 0.00001);
+
+    // Clean
+    AnalysisDataService::Instance().remove("SpiceDataTable");
+    AnalysisDataService::Instance().remove("Exp0335_S0038B");
+    AnalysisDataService::Instance().remove("Exp0335_S0038");
   }
 };
 
