@@ -880,7 +880,7 @@ add_executable ( MantidPlot ${WIN_CONSOLE} MACOSX_BUNDLE ${ALL_SRC} src/main.cpp
 )
 
 # Library dependencies
-target_link_libraries ( MantidPlot
+target_link_libraries ( MantidPlot LINK_PRIVATE 
                         ${CORE_MANTIDLIBS}
                         MantidQtAPI MantidWidgets MantidQtSliceViewer MantidQtFactory
                         MantidQtSpectrumViewer
@@ -892,7 +892,7 @@ target_link_libraries ( MantidPlot
 )
 
 if (WITH_ASAN)
-  target_link_libraries ( MantidPlot -lasan )
+  target_link_libraries ( MantidPlot LINK_PRIVATE -lasan )
 endif ()
 
 # Plugin dependencies

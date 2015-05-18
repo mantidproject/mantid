@@ -44,7 +44,7 @@ if (OSX_VERSION VERSION_GREATER 10.8)
 endif ()
 
 # ... and links to other required libs
-target_link_libraries ( MantidQtFactory MantidQtAPI MantidQtSliceViewer ${QT_LIBRARIES} ${QWT_LIBRARIES} )
+target_link_libraries ( MantidQtFactory LINK_PRIVATE MantidQtAPI MantidQtSliceViewer ${QT_LIBRARIES} ${QWT_LIBRARIES} )
 
 ###########################################################################
 # Installation settings

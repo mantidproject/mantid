@@ -199,7 +199,7 @@ endif ()
 # Add to the 'Framework' group in VS
 set_property ( TARGET DataObjects PROPERTY FOLDER "MantidFramework" )
 
-target_link_libraries ( DataObjects ${MANTIDLIBS} )
+target_link_libraries ( DataObjects LINK_PRIVATE ${MANTIDLIBS} ${JSONCPP_LIBRARIES} ${NEXUS_LIBRARIES} )
 
 # Add the unit tests directory
 add_subdirectory ( test )

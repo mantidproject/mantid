@@ -13,7 +13,7 @@ if ( CXXTEST_FOUND )
       )
 
   cxxtest_add_test ( LiveDataTest ${TEST_FILES} )
-  target_link_libraries( LiveDataTest LiveData )
+  target_link_libraries( LiveDataTest LINK_PRIVATE LiveData )
   add_dependencies ( LiveDataTest DataHandling Algorithms MDAlgorithms )
   add_dependencies ( FrameworkTests LiveDataTest )
   # Test data

@@ -87,7 +87,7 @@ else ()
 endif ()
 
 # ... and links to other required libs ...
-target_link_libraries ( mantidqtpython 
+target_link_libraries ( mantidqtpython LINK_PRIVATE 
 	MantidQtAPI MantidQtSliceViewer MantidQtFactory MantidQtRefDetectorViewer
 	${QT_LIBRARIES} ${QWT_LIBRARIES}
 	${PYTHON_LIBRARIES}

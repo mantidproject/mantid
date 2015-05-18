@@ -10,7 +10,7 @@ set_property( TARGET MantidParaViewSplatterPlotSMPlugin PROPERTY FOLDER "MantidV
 
 include_directories ( SYSTEM ${QWT_INCLUDE_DIR} )
 
-target_link_libraries( MantidParaViewSplatterPlotSMPlugin LINK_PUBLIC 
+target_link_libraries( MantidParaViewSplatterPlotSMPlugin LINK_PRIVATE  
 ${MANTID_SUBPROJECT_LIBS} ${QWT_LIBRARIES})
 
 if (OSX_VERSION VERSION_GREATER 10.8)

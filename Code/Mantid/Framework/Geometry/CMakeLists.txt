@@ -381,10 +381,10 @@ endif ()
 # Add to the 'Framework' group in VS
 set_property ( TARGET Geometry PROPERTY FOLDER "MantidFramework" )
 
-target_link_libraries ( Geometry ${MANTIDLIBS}  ${OPENGL_LIBRARIES} )
+target_link_libraries ( Geometry LINK_PRIVATE ${MANTIDLIBS}  ${OPENGL_LIBRARIES} ${GSL_LIBRARIES} ${NEXUS_LIBRARIES} )
 
 if (NOT NO_OPENCASCADE)
-  target_link_libraries ( Geometry ${OPENCASCADE_LIBRARIES} )
+  target_link_libraries ( Geometry LINK_PRIVATE ${OPENCASCADE_LIBRARIES} )
 endif ()
 
 # Add the unit tests directory

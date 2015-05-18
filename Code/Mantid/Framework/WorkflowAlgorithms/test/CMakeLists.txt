@@ -9,7 +9,7 @@ if ( CXXTEST_FOUND )
                         ../../TestHelpers/src/ComponentCreationHelper.cpp
                         ../../TestHelpers/src/WorkspaceCreationHelper.cpp )
   cxxtest_add_test ( WorkflowAlgorithmsTest ${TEST_FILES} )
-  target_link_libraries ( WorkflowAlgorithmsTest WorkflowAlgorithms Algorithms DataHandling )
+  target_link_libraries ( WorkflowAlgorithmsTest LINK_PRIVATE WorkflowAlgorithms Algorithms DataHandling )
   add_dependencies ( WorkflowAlgorithmsTest CurveFitting )
   add_dependencies ( FrameworkTests WorkflowAlgorithmsTest )
   # Test data

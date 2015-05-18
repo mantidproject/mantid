@@ -6,7 +6,7 @@ SERVER_MANAGER_SOURCES vtkScaleWorkspace.cxx)
 # Add to the 'VatesParaViewPlugins' group in VS
 set_property( TARGET MantidParaViewScaleWorkspaceSMPlugin PROPERTY FOLDER "MantidVatesParaViewPlugins")
 
-target_link_libraries( MantidParaViewScaleWorkspaceSMPlugin LINK_PUBLIC
+target_link_libraries( MantidParaViewScaleWorkspaceSMPlugin LINK_PRIVATE 
 ${MANTID_SUBPROJECT_LIBS} )
 
 if (OSX_VERSION VERSION_GREATER 10.8)

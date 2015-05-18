@@ -12,10 +12,10 @@ if ( CXXTEST_FOUND )
   
   if ( GMOCK_FOUND AND GTEST_FOUND )
     cxxtest_add_test ( APITest ${TEST_FILES} ${GMOCK_TEST_FILES})
-    target_link_libraries( APITest API ${GMOCK_LIBRARIES} ${GTEST_LIBRARIES}  )
+    target_link_libraries( APITest LINK_PRIVATE API ${GMOCK_LIBRARIES} ${GTEST_LIBRARIES}  )
   else ()
     cxxtest_add_test ( APITest ${TEST_FILES} )
-    target_link_libraries( APITest API  )
+    target_link_libraries( APITest LINK_PRIVATE API  )
   endif()
   add_dependencies ( FrameworkTests APITest )
   # Test data

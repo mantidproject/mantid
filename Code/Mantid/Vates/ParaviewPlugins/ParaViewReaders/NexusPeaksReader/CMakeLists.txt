@@ -8,7 +8,7 @@ add_paraview_plugin( MantidParaViewNexusPeaksReaderSMPlugin "1.0"
 # Add to the 'VatesParaViewPlugins' group in VS
 set_property( TARGET MantidParaViewNexusPeaksReaderSMPlugin PROPERTY FOLDER "MantidVatesParaViewPlugins" )
 
-target_link_libraries( MantidParaViewNexusPeaksReaderSMPlugin LINK_PUBLIC
+target_link_libraries( MantidParaViewNexusPeaksReaderSMPlugin LINK_PRIVATE 
 ${MANTID_SUBPROJECT_LIBS} ${NEXUS_C_LIBRARIES})
 
 if (OSX_VERSION VERSION_GREATER 10.8)

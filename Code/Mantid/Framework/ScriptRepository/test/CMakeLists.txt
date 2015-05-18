@@ -6,10 +6,10 @@ if ( CXXTEST_FOUND )
   
   if ( GMOCK_FOUND AND GTEST_FOUND )
     cxxtest_add_test ( ScriptRepositoryTest ${TEST_FILES} ${GMOCK_TEST_FILES})   
-    target_link_libraries( ScriptRepositoryTest ScriptRepository ${GMOCK_LIBRARIES} ${GTEST_LIBRARIES}  )
+    target_link_libraries( ScriptRepositoryTest LINK_PRIVATE ScriptRepository ${GMOCK_LIBRARIES} ${GTEST_LIBRARIES}  )
   else ()
     cxxtest_add_test ( ScriptRepositoryTest ${TEST_FILES} )
-    target_link_libraries( ScriptRepositoryTest ScriptRepository  )
+    target_link_libraries( ScriptRepositoryTest LINK_PRIVATE ScriptRepository  )
   endif()
   add_dependencies ( FrameworkTests ScriptRepositoryTest )
   # Add to the 'FrameworkTests' group in VS

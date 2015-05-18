@@ -134,7 +134,7 @@ set_property( TARGET VatesSimpleGuiViewWidgets PROPERTY FOLDER MantidVatesSimple
 
 include_directories( SYSTEM ${PARAVIEW_INCLUDE_DIRS} )
 
-target_link_libraries( VatesSimpleGuiViewWidgets
+target_link_libraries( VatesSimpleGuiViewWidgets LINK_PRIVATE 
 pqApplicationComponents
 pqComponents
 vtkPVServerManagerRendering
@@ -166,7 +166,7 @@ if( CXXTEST_FOUND AND GMOCK_FOUND AND GTEST_FOUND )
                         ../../../Framework/TestHelpers/src/MDEventsTestHelper.cpp 
                         ../../../Framework/TestHelpers/src/StartFrameworkManager.cpp )
   cxxtest_add_test( VatesSimpleGuiViewWidgetsTest ${TEST_FILES} )
-  target_link_libraries( VatesSimpleGuiViewWidgetsTest VatesSimpleGuiViewWidgets DataHandling Kernel DataObjects ${GMOCK_LIBRARIES} ${GTEST_LIBRARIES})
+  target_link_libraries( VatesSimpleGuiViewWidgetsTest LINK_PRIVATE VatesSimpleGuiViewWidgets DataHandling Kernel DataObjects ${GMOCK_LIBRARIES} ${GTEST_LIBRARIES})
   add_dependencies( AllTests VatesSimpleGuiViewWidgetsTest )
   # Add to the 'UnitTests' group in VS
   set_property ( TARGET VatesSimpleGuiViewWidgetsTest PROPERTY FOLDER "UnitTests" )

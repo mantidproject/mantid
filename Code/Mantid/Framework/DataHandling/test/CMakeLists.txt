@@ -12,7 +12,7 @@ if ( CXXTEST_FOUND )
       )
 
   cxxtest_add_test ( DataHandlingTest ${TEST_FILES} )
-  target_link_libraries( DataHandlingTest DataHandling ${HDF5_LIBRARIES} )
+  target_link_libraries( DataHandlingTest LINK_PRIVATE DataHandling ${HDF5_LIBRARIES} )
   add_dependencies ( DataHandlingTest Algorithms MDAlgorithms )
   add_dependencies ( FrameworkTests DataHandlingTest )
   # Test data

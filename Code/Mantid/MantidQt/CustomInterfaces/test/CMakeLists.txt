@@ -11,7 +11,7 @@ if ( CXXTEST_FOUND )
 
   if ( GMOCK_FOUND AND GTEST_FOUND )
     cxxtest_add_test ( CustomInterfacesTest ${TEST_FILES} ${GMOCK_TEST_FILES} )
-    target_link_libraries( CustomInterfacesTest CustomInterfaces DataObjects ${GMOCK_LIBRARIES} ${GTEST_LIBRARIES} )
+    target_link_libraries( CustomInterfacesTest LINK_PRIVATE CustomInterfaces DataObjects ${GMOCK_LIBRARIES} ${GTEST_LIBRARIES} )
     add_dependencies( CustomInterfacesTest MDAlgorithms )
     # Test data
     add_dependencies( CustomInterfacesTest StandardTestData )

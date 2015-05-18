@@ -9,10 +9,10 @@ if ( CXXTEST_FOUND )
 
   if ( GMOCK_FOUND AND GTEST_FOUND )
     cxxtest_add_test ( PSISINQTest ${TEST_FILES} ${GMOCK_TEST_FILES})
-    target_link_libraries ( PSISINQTest SINQ  CurveFitting ${MANTIDLIBS} ${GMOCK_LIBRARIES} ${GTEST_LIBRARIES} )
+    target_link_libraries ( PSISINQTest LINK_PRIVATE SINQ  CurveFitting ${MANTIDLIBS} ${GMOCK_LIBRARIES} ${GTEST_LIBRARIES} )
   else ()
     cxxtest_add_test ( PSISINQTest ${TEST_FILES} )
-    target_link_libraries ( PSISINQTest SINQ  CurveFitting ${MANTIDLIBS} )
+    target_link_libraries ( PSISINQTest LINK_PRIVATE SINQ  CurveFitting ${MANTIDLIBS} )
   endif()
   # Test data
   add_dependencies ( PSISINQTest StandardTestData )
