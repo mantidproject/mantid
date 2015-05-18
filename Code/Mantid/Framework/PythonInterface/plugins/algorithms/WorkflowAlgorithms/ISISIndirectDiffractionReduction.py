@@ -83,11 +83,17 @@ class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
                                              rename_reduction)
 
         self._setup()
+
+        load_opts = dict()
+        if self._instrument_name == 'VESUVIO':
+            load_opts['Mode'] = 'FoilOut'
+
         self._workspace_names, self._chopped_data = load_files(self._data_files,
                                                               self._ipf_filename,
                                                               self._spectra_range[0],
                                                               self._spectra_range[1],
-                                                              self._sum_files)
+                                                              self._sum_files,
+                                                              load_opts)
 
         for c_ws_name in self._workspace_names:
             is_multi_frame = isinstance(mtd[c_ws_name], WorkspaceGroup)

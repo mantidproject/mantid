@@ -7,7 +7,7 @@ import numpy as np
 
 #-------------------------------------------------------------------------------
 
-def load_files(data_files, ipf_filename, spec_min, spec_max, sum_files):
+def load_files(data_files, ipf_filename, spec_min, spec_max, sum_files, load_opts=dict()):
     """
     Loads a set of files and extracts just the spectra we care about (i.e. detector range and monitor).
 
@@ -16,11 +16,13 @@ def load_files(data_files, ipf_filename, spec_min, spec_max, sum_files):
     @param spec_min Minimum spectra ID to load
     @param spec_max Maximum spectra ID to load
     @param sum Sum loaded files
+    @param load_opts Additional options to be passed to load algorithm
 
     @return List of loaded workspace names and flag indicating chopped data
     """
-    from mantid.simpleapi import (Load, LoadParameterFile, ChopData,
-                                  ExtractSingleSpectrum, CropWorkspace)
+    from mantid.simpleapi import (Load, LoadVesuvio, LoadParameterFile,
+                                  ChopData, ExtractSingleSpectrum,
+                                  CropWorkspace)
 
     workspace_names = []
 
@@ -29,8 +31,16 @@ def load_files(data_files, ipf_filename, spec_min, spec_max, sum_files):
         ws_name = os.path.splitext(os.path.basename(filename))[0]
         logger.debug('Loading file %s as workspace %s' % (filename, ws_name))
 
-        Load(Filename=filename,
-             OutputWorkspace=ws_name)
+        if 'VESUVIO' in ipf_filename:
+            evs_filename = os.path.basename(filename).replace('EVS', '')
+            LoadVesuvio(Filename=evs_filename,
+                        OutputWorkspace=ws_name,
+                        SpectrumList='1-198',
+                        **load_opts)
+        else:
+            Load(Filename=filename,
+                 OutputWorkspace=ws_name,
+                 **load_opts)
 
         # Load the instrument parameters
         LoadParameterFile(Workspace=ws_name,
