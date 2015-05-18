@@ -9,7 +9,20 @@
 Description
 -----------
 
-The generic routine used to reduce diffraction runs from indirect inelastic geometry instruments at ISIS.
+The generic routine used to reduce diffraction runs from indirect geometry
+inelastic instruments at ISIS.
+
+Workflow
+--------
+
+The workflow of this algoirhm is shown in the following flowchart.
+
+.. diagram:: ISISIndirectDiffractionReduction-v1_wkflw.dot
+
+This workflow uses routines from the IndirectReductionCommon Python file which
+are described in the following flowchart.
+
+.. diagram:: IndirectReductionCommon_wkflw.dot
 
 Usage
 -----

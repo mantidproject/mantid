@@ -12,6 +12,18 @@ Description
 Performs a reduction from raw time of flight to energy transfer for an inelastic
 indirect geometry instrument at ISIS.
 
+Workflow
+--------
+
+The workflow of this algoirhm is shown in the following flowchart.
+
+.. diagram:: ISISIndirectEnergyTransfer-v1_wkflw.dot
+
+This workflow uses routines from the IndirectReductionCommon Python file which
+are described in the following flowchart.
+
+.. diagram:: IndirectReductionCommon_wkflw.dot
+
 Usage
 -----
 

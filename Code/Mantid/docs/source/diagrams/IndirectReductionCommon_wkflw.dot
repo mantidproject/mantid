@@ -1,0 +1,51 @@
+digraph ISISIndirectReductionCommon {
+  label="ISISIndirectReductionCommon Flowchart"
+  $global_style
+
+  subgraph decisions {
+    $decision_style
+    load_files_ShouldChopData [label="Should Chop Data?"]
+    load_files_IsChopped [label="Data Is Chopped?"]
+    load_files_SumFiles [label="Sum Files?"]
+  }
+
+  subgraph params {
+    $param_style
+  }
+
+  subgraph algorithms {
+    $algorithm_style
+    load_files_Load [label="Load"]
+    load_files_LoadParameterFile [label="LoadParameterFile"]
+    load_files_ChopData [label="ChopData"]
+    load_files_ExtractSingleSpectrum [label="ExtractSingleSpectrum"]
+    load_files_CropWorkspace [label="CropWorkspace"]
+  }
+
+  subgraph processes {
+    $process_style
+    load_files_SumRegular [label="sum_regular"]
+    load_files_SumChopped [label="sum_chopped"]
+  }
+
+  load_files_Start [label="load_files"]
+  load_files_End [label="End"]
+
+  subgraph load_files {
+    load_files_Start                  -> load_files_Load
+    load_files_Load                   -> load_files_LoadParameterFile
+    load_files_LoadParameterFile      -> load_files_ShouldChopData
+    load_files_ShouldChopData         -> load_files_ChopData [label="Yes"]
+    load_files_ChopData               -> load_files_ExtractSingleSpectrum
+    load_files_ShouldChopData         -> load_files_ExtractSingleSpectrum [label="No"]
+    load_files_ExtractSingleSpectrum  -> load_files_CropWorkspace
+    load_files_CropWorkspace          -> load_files_SumFiles
+    load_files_SumFiles               -> load_files_IsChopped [label="Yes"]
+    load_files_IsChopped              -> load_files_SumRegular [label="No"]
+    load_files_IsChopped              -> load_files_SumChopped [label="Yes"]
+    load_files_SumFiles               -> load_files_End [label="No"]
+    load_files_SumRegular             -> load_files_End
+    load_files_SumChopped             -> load_files_End
+  }
+
+}

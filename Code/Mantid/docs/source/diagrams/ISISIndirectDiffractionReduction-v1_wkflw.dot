@@ -1,0 +1,84 @@
+digraph ISISIndirectDiffractionReduction {
+  label="ISISIndirectDiffractionReduction Flowchart"
+  $global_style
+
+  subgraph decisions {
+    $decision_style
+    need_to_unwrap [label="Need To Unwrap Monitor?"]
+    is_multi_frame [label="Is Multiple Frames?"]
+  }
+
+  subgraph params {
+    $param_style
+    InputFiles
+    SumFiles
+    Instrument
+    Mode
+    SpectraRange
+    RebinParam
+    GroupingPolicy
+    OutputWorkspace
+  }
+
+  subgraph algorithms {
+    $algorithm_style
+    ConvertUnits
+    ConvertUnits_dSpacing [label="ConvertUnits"]
+    GroupWorkspaces
+  }
+
+  subgraph processes {
+    $process_style
+    load_files
+    get_multi_frame_rebin
+    identify_bad_detectors
+    unwrap_monitor
+    process_monitor_efficiency
+    scale_monitor
+    scale_detectors
+    rebin_reduction
+    group_spectra
+    fold_chopped
+    rename_reduction
+  }
+
+  subgraph values {
+    $value_style
+    multi_frame_rebin_string  [label="Multiple Frame Rebin String"]
+    multi_frame_num_bins      [label="Maximum Number of Bins"]
+    masked_detectors          [label="Masked Detectors"]
+  }
+
+  InputFiles                  -> load_files
+  SpectraRange                -> load_files
+  Instrument                  -> load_files
+  Mode                        -> load_files
+  SumFiles                    -> load_files
+  load_files                  -> get_multi_frame_rebin
+  RebinParam                  -> get_multi_frame_rebin
+  get_multi_frame_rebin       -> multi_frame_rebin_string
+  get_multi_frame_rebin       -> multi_frame_num_bins
+  load_files                  -> identify_bad_detectors
+  identify_bad_detectors      -> masked_detectors
+  load_files                  -> need_to_unwrap
+  need_to_unwrap              -> unwrap_monitor             [label="Yes"]
+  unwrap_monitor              -> ConvertUnits
+  ConvertUnits                -> process_monitor_efficiency
+  need_to_unwrap              -> process_monitor_efficiency [label="No"]
+  process_monitor_efficiency  -> scale_monitor
+  scale_monitor               -> scale_detectors
+  scale_detectors             -> ConvertUnits_dSpacing
+  ConvertUnits_dSpacing       -> rebin_reduction
+  RebinParam                  -> rebin_reduction
+  multi_frame_rebin_string    -> rebin_reduction
+  multi_frame_num_bins        -> rebin_reduction
+  rebin_reduction             -> group_spectra
+  GroupingPolicy              -> group_spectra
+  masked_detectors            -> group_spectra
+  group_spectra               -> is_multi_frame
+  is_multi_frame              -> fold_chopped               [label="Yes"]
+  fold_chopped                -> rename_reduction
+  is_multi_frame              -> rename_reduction           [label="No"]
+  rename_reduction            -> GroupWorkspaces
+  GroupWorkspaces             -> OutputWorkspace
+}

@@ -1,0 +1,143 @@
+digraph ISISIndirectEnergyTransfer {
+  label="ISISIndirectEnergyTransfer Flowchart"
+  $global_style
+
+  subgraph decisions {
+    $decision_style
+    is_multi_frame              [label="Is Data Multiple Frames?"]
+    is_x_unit_mev               [label="Is UnitX in meV?"]
+    should_fold                 [label="FoldMultipleFrames?"]
+    have_scale_factor           [label="ScaleFactor is not 1?"]
+    have_background_range       [label="Have BackgroundRange?"]
+    have_calibration_workspace  [label="Have CalibrationWorksapce"]
+    have_detailed_balance       [label="Have DetailedBalance?"]
+    have_save_formats           [label="Have SaveFormats?"]
+    need_to_unwrap              [label="Need to Unwrap Monitor?"]
+  }
+
+  subgraph params {
+    $param_style
+    InputFiles
+    SumFiles
+    CalibrationWorksapce
+    Instrument
+    Analyser
+    Reflection
+    SpectraRange
+    BackgroundRange
+    RebinString
+    DetailedBalance
+    ScaleFactor
+    GroupingMethod
+    GroupingWorkspace
+    MapFile
+    UnitX
+    SaveFormats
+    OutputWorkspace
+  }
+
+  subgraph algorithms {
+    $algorithm_style
+    ConvertUnits
+    ConvertUnits_DeltaE     [label="ConvertUnits"]
+    ConvertUnits_Output     [label="ConvertUnits"]
+    ConvertToDistribution
+    ConvertFromDistribution
+    ExponentialCorrection
+    GroupWorkspaces
+    CalculateFlatBackground
+    Divide
+    Scale
+    CorrectKiKf
+  }
+
+  subgraph processes {
+    $process_style
+    load_files
+    get_multi_frame_rebin
+    identify_bad_detectors
+    unwrap_monitor
+    scale_monitor
+    process_monitor_efficiency
+    scale_monitor
+    scale_detectors
+    rebin_reduction
+    group_spectra
+    fold_chopped
+    rename_reduction
+    save_reduction
+  }
+
+  subgraph values {
+    $value_style
+    multi_frame_rebin_string      [label="Multiple Frame Rebin String"]
+    multi_frame_num_bins          [label="Maximum Number of Bins"]
+    masked_detectors              [label="Masked Detectors"]
+    detailed_balance_corr_factor  [label="11.606 / (2 * DetailedBalance)"]
+  }
+
+  InputFiles                    -> load_files
+  Instrument                    -> load_files
+  Analyser                      -> load_files
+  Reflection                    -> load_files
+  SumFiles                      -> load_files
+  SpectraRange                  -> load_files
+  load_files                    -> get_multi_frame_rebin
+  RebinString                   -> get_multi_frame_rebin
+  get_multi_frame_rebin         -> multi_frame_rebin_string
+  get_multi_frame_rebin         -> multi_frame_num_bins
+  load_files                    -> identify_bad_detectors
+  identify_bad_detectors        -> masked_detectors
+  load_files                    -> need_to_unwrap
+  need_to_unwrap                -> unwrap_monitor               [label="Yes"]
+  unwrap_monitor                -> ConvertUnits
+  ConvertUnits                  -> process_monitor_efficiency
+  need_to_unwrap                -> process_monitor_efficiency   [label="No"]
+  process_monitor_efficiency    -> scale_monitor
+  scale_monitor                 -> have_background_range
+  have_background_range         -> ConvertToDistribution        [label="Yes"]
+  ConvertToDistribution         -> CalculateFlatBackground
+  BackgroundRange               -> CalculateFlatBackground
+  CalculateFlatBackground       -> ConvertFromDistribution
+  ConvertFromDistribution       -> have_calibration_workspace
+  have_background_range         -> have_calibration_workspace   [label="No"]
+  have_calibration_workspace    -> Divide                       [label="Yes"]
+  CalibrationWorksapce          -> Divide
+  Divide                        -> scale_detectors
+  have_calibration_workspace    -> scale_detectors              [label="No"]
+  scale_detectors               -> ConvertUnits_DeltaE
+  ConvertUnits_DeltaE           -> CorrectKiKf
+  CorrectKiKf                   -> rebin_reduction
+  RebinString                   -> rebin_reduction
+  multi_frame_rebin_string      -> rebin_reduction
+  multi_frame_num_bins          -> rebin_reduction
+  rebin_reduction               -> have_detailed_balance
+  have_detailed_balance         -> ExponentialCorrection        [label="Yes"]
+  DetailedBalance               -> detailed_balance_corr_factor
+  detailed_balance_corr_factor  -> ExponentialCorrection        [label="C1"]
+  ExponentialCorrection         -> have_scale_factor
+  have_detailed_balance         -> have_scale_factor            [label="No"]
+  have_scale_factor             -> Scale                        [label="Yes"]
+  ScaleFactor                   -> Scale
+  Scale                         -> group_spectra
+  have_scale_factor             -> group_spectra                [label="No"]
+  masked_detectors              -> group_spectra
+  GroupingMethod                -> group_spectra
+  MapFile                       -> group_spectra
+  GroupingWorkspace             -> group_spectra
+  group_spectra                 -> is_multi_frame
+  is_multi_frame                -> should_fold                  [label="Yes"]
+  should_fold                   -> fold_chopped                 [label="Yes"]
+  should_fold                   -> is_x_unit_mev                [label="No"]
+  fold_chopped                  -> is_x_unit_mev
+  is_multi_frame                -> is_x_unit_mev                [label="No"]
+  is_x_unit_mev                 -> ConvertUnits_Output          [label="No"]
+  UnitX                         -> ConvertUnits_Output
+  ConvertUnits_Output           -> rename_reduction
+  is_x_unit_mev                 -> rename_reduction             [label="Yes"]
+  rename_reduction              -> GroupWorkspaces
+  rename_reduction              -> have_save_formats
+  have_save_formats             -> save_reduction               [label="Yes"]
+  SaveFormats                   -> save_reduction
+  GroupWorkspaces               -> OutputWorkspace
+}
