@@ -3,6 +3,10 @@
 
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidKernel/PropertyWithValue.h"
+#include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidKernel/DateTimeValidator.h"
+#include <boost/shared_ptr.hpp>
 
 // Forward declarations
 class Mantid::Kernel::DateAndTime;
@@ -33,9 +37,8 @@ public:
   /// Algorithm's version for identification
   virtual int version() const { return 1; };
   /// Algorithm's category for identification
-  virtual const std::string category() const {
-    return "Utility";
-  }
+  virtual const std::string category() const { return "Utility"; }
+  static const std::string timeSeriesID;
 
 private:
   /// Initialise the properties
@@ -43,14 +46,76 @@ private:
   /// Run the algorithm
   void exec();
   /// Create the output workspace
-  Mantid::API::MatrixWorkspace_sptr createOutputWS(Mantid::API::MatrixWorkspace_const_sptr input);
+  Mantid::API::MatrixWorkspace_sptr
+  createOutputWS(Mantid::API::MatrixWorkspace_const_sptr input);
   /// Get the time shift
   double getTimeShift(API::MatrixWorkspace_const_sptr ws) const;
   /// Shift the time of the logs
   void shiftTimeOfLogs(Mantid::API::MatrixWorkspace_sptr ws, double timeShift);
   /// Get the date and time of the first good frame of a workspace
-  Mantid::Kernel::DateAndTime getStartTimeFromWorkspace(Mantid::API::MatrixWorkspace_const_sptr ws) const;
+  Mantid::Kernel::DateAndTime
+  getStartTimeFromWorkspace(Mantid::API::MatrixWorkspace_const_sptr ws) const;
+  /// Can the string be transformed to double
+  bool checkForDouble(std::string val);
+  /// Can the string be transformed to a DateTime
+  bool checkForDateTime(std::string val);
+  /// Reset the flag values
+  void resetFlags();
+  /// Time shift the log of a double series property
+  void shiftTimeOfLogForTimeSeriesProperty(
+      Mantid::API::MatrixWorkspace_sptr ws,
+      Mantid::Kernel::PropertyWithValue<std::string> *logEntry,
+      double timeShift);
+  /// Time shift the log of a string property
+  void shiftTimeOfLogForStringProperty(
+      Mantid::API::MatrixWorkspace_sptr ws,
+      Mantid::Kernel::PropertyWithValue<std::string> *logEntry,
+      double timeShift);
+  // Shift the time of the neutrons
+  void shiftTimeOfNeutrons(Mantid::API::MatrixWorkspace_sptr ws,
+                           double timeShift);
+
+  bool m_isDouble;
+  bool m_isDateAndTime;
+  boost::shared_ptr<Mantid::Kernel::DateTimeValidator> m_dateTimeValidator;
 };
+
+/**
+ * General check if we are dealing with a time series
+ * @param prop :: the property which is being checked
+ * @return True if the proerpty is a time series, otherwise false.
+ */
+template <typename T> bool isTimeSeries(Mantid::Kernel::Property *prop) {
+  bool isTimeSeries = false;
+  if (dynamic_cast<Kernel::TimeSeriesProperty<T> *>(prop)) {
+    isTimeSeries = true;
+  }
+  return isTimeSeries;
+}
+
+/**
+ * Shift the time in a time series. This is similar to the implementation in
+ * @param ws :: a matrix workspace
+ * @param prop :: a time series log
+ * @param timeShift :: the time shift in seconds
+ */
+template <typename T>
+void shiftTimeInLogForTimeSeries(Mantid::API::MatrixWorkspace_sptr ws,
+                                 Mantid::Kernel::Property *prop,
+                                 double timeShift) {
+  auto timeSeriesProperty = dynamic_cast<Kernel::TimeSeriesProperty<T> *>(prop);
+  // Create the new log
+  auto newlog = new TimeSeriesProperty<T>(timeSeriesProperty->name());
+  newlog->setUnits(timeSeriesProperty->units());
+  int size = timeSeriesProperty->realSize();
+  std::vector<T> values = timeSeriesProperty->valuesAsVector();
+  std::vector<DateAndTime> times = timeSeriesProperty->timesAsVector();
+  for (int i = 0; i < size; i++) {
+    newlog->addValue(times[i] + timeShift, values[i]);
+  }
+
+  ws->mutableRun().addProperty(newlog, true);
+}
 
 } // namespace Mantid
 } // namespace Algorithms
