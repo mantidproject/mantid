@@ -1,5 +1,5 @@
 #pylint: disable=invalid-name,too-many-branches
-from mantid.api import WorkspaceGroup
+from mantid.api import WorkspaceGroup, AlgorithmManager
 from mantid import mtd, logger, config
 
 import os
@@ -108,7 +108,8 @@ def sum_regular_runs(workspace_names):
     @param workspace_names List of names of input workspaces
     @return List of names of workspaces
     """
-    from mantid.simpleapi import (MergeRuns, Scale, AddSampleLog)
+    from mantid.simpleapi import (MergeRuns, Scale, AddSampleLog,
+                                  DeleteWorkspace)
 
     # Use the first workspace name as the result of summation
     summed_detector_ws_name = workspace_names[0]
@@ -655,7 +656,7 @@ def save_reduction(worksspace_names, formats, x_units='DeltaE'):
             # Version 1 of SaveAscii produces output that works better with excel/origin
             # For some reason this has to be done with an algorithm object, using the function
             # wrapper with Version did not change the version that was run
-            saveAsciiAlg = mantid.api.AlgorithmManager.createUnmanaged('SaveAscii', 1)
+            saveAsciiAlg = AlgorithmManager.createUnmanaged('SaveAscii', 1)
             saveAsciiAlg.initialize()
             saveAsciiAlg.setProperty('InputWorkspace', workspace_name)
             saveAsciiAlg.setProperty('Filename', workspace_name + '.dat')
