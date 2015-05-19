@@ -1,5 +1,6 @@
 #include "MantidAlgorithms/ChangeTimeZero.h"
 #include "MantidAlgorithms/CloneWorkspace.h"
+#include "MantidAlgorithms/ChangePulsetime.h"
 #include "MantidAPI/IMDIterator.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/EventList.h"
@@ -184,7 +185,7 @@ void ChangeTimeZero::shiftTimeOfLogForStringProperty(
 /**
  * Shift the time of the neutrons
  * @param ws :: a matrix workspace
- * @param timeShift :: the time shift
+ * @param timeShift :: the time shift in seconds
  */
 void ChangeTimeZero::shiftTimeOfNeutrons(Mantid::API::MatrixWorkspace_sptr ws,
                                          double timeShift) {
@@ -196,14 +197,13 @@ void ChangeTimeZero::shiftTimeOfNeutrons(Mantid::API::MatrixWorkspace_sptr ws,
     return;
   }
 
-  const auto scaleFactorTof = 1.0;
-
-  for (size_t workspaceIndex = 0;
-       workspaceIndex < eventWs->getNumberHistograms(); ++workspaceIndex) {
-    Mantid::DataObjects::EventList *eventList =
-        eventWs->getEventListPtr(workspaceIndex);
-    eventList->convertTof(scaleFactorTof, timeShift);
-  }
+  // Use the change pulse time algorithm to change the neutron time stamp
+  IAlgorithm_sptr alg = createChildAlgorithm("CloneWorkspace");
+  alg->initialize();
+  alg->setProperty("InputWorkspace", eventWs);
+  alg->setProperty("OutputWorkspace", eventWs);
+  alg->setProperty("TimeShift", timeShift);
+  alg->execute();
 }
 
 /**

@@ -8,6 +8,7 @@
 #include <iomanip>
 
 #include "MantidAlgorithms/ChangeTimeZero.h"
+#include "MantidKernel/DateAndTime.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/EventList.h"
@@ -53,7 +54,7 @@ public:
     m_stringID = "string";
   }
 
-    void test_Init()
+  void test_Init()
   {
     ChangeTimeZero alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
