@@ -38,7 +38,6 @@ public:
   virtual int version() const { return 1; };
   /// Algorithm's category for identification
   virtual const std::string category() const { return "Utility"; }
-  static const std::string timeSeriesID;
 
 private:
   /// Initialise the properties
@@ -47,14 +46,14 @@ private:
   void exec();
   /// Create the output workspace
   Mantid::API::MatrixWorkspace_sptr
-  createOutputWS(Mantid::API::MatrixWorkspace_const_sptr input);
+  createOutputWS(Mantid::API::MatrixWorkspace_sptr input);
   /// Get the time shift
-  double getTimeShift(API::MatrixWorkspace_const_sptr ws) const;
+  double getTimeShift(API::MatrixWorkspace_sptr ws) const;
   /// Shift the time of the logs
   void shiftTimeOfLogs(Mantid::API::MatrixWorkspace_sptr ws, double timeShift);
   /// Get the date and time of the first good frame of a workspace
   Mantid::Kernel::DateAndTime
-  getStartTimeFromWorkspace(Mantid::API::MatrixWorkspace_const_sptr ws) const;
+  getStartTimeFromWorkspace(Mantid::API::MatrixWorkspace_sptr ws) const;
   /// Can the string be transformed to double
   bool checkForDouble(std::string val);
   /// Can the string be transformed to a DateTime
@@ -62,9 +61,9 @@ private:
   /// Reset the flag values
   void resetFlags();
   /// Time shift the log of a double series property
-  void shiftTimeOfLogForTimeSeriesProperty(
+  void shiftTimeInLogForTimeSeries(
       Mantid::API::MatrixWorkspace_sptr ws,
-      Mantid::Kernel::PropertyWithValue<std::string> *logEntry,
+      Mantid::Kernel::Property *logEntry,
       double timeShift);
   /// Time shift the log of a string property
   void shiftTimeOfLogForStringProperty(
@@ -85,36 +84,12 @@ private:
  * @param prop :: the property which is being checked
  * @return True if the proerpty is a time series, otherwise false.
  */
-template <typename T> bool isTimeSeries(Mantid::Kernel::Property *prop) {
-  bool isTimeSeries = false;
-  if (dynamic_cast<Kernel::TimeSeriesProperty<T> *>(prop)) {
+bool isTimeSeries(Mantid::Kernel::Property *prop) {
+  auto isTimeSeries = false;
+  if (dynamic_cast<Mantid::Kernel::ITimeSeriesProperty*>(prop)) {
     isTimeSeries = true;
   }
   return isTimeSeries;
-}
-
-/**
- * Shift the time in a time series. This is similar to the implementation in
- * @param ws :: a matrix workspace
- * @param prop :: a time series log
- * @param timeShift :: the time shift in seconds
- */
-template <typename T>
-void shiftTimeInLogForTimeSeries(Mantid::API::MatrixWorkspace_sptr ws,
-                                 Mantid::Kernel::Property *prop,
-                                 double timeShift) {
-  auto timeSeriesProperty = dynamic_cast<Kernel::TimeSeriesProperty<T> *>(prop);
-  // Create the new log
-  auto newlog = new TimeSeriesProperty<T>(timeSeriesProperty->name());
-  newlog->setUnits(timeSeriesProperty->units());
-  int size = timeSeriesProperty->realSize();
-  std::vector<T> values = timeSeriesProperty->valuesAsVector();
-  std::vector<DateAndTime> times = timeSeriesProperty->timesAsVector();
-  for (int i = 0; i < size; i++) {
-    newlog->addValue(times[i] + timeShift, values[i]);
-  }
-
-  ws->mutableRun().addProperty(newlog, true);
 }
 
 } // namespace Mantid
