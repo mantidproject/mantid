@@ -181,6 +181,10 @@ if ( CXXTEST_FOUND )
 		MantidQtSliceViewer 
 		DataObjects 
 		Crystal 
+		${CORE_MANTIDLIBS}
+		${Boost_LIBRARIES}
+		${POCO_LIBRARIES}
+		${QT_LIBRARIES} 
 		${GMOCK_LIBRARIES} 
 		${GTEST_LIBRARIES} )
 
