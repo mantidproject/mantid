@@ -5,7 +5,7 @@ from mantid.simpleapi import *
 class EnginXCalibrateTest(stresstesting.MantidStressTest):
 
     def __init__(self):
-        super(EnginXCalibrateTest, self).__init__()
+        stresstesting.MantidStressTest.__init__(self)
         self.difc = -1
         self.zero = -1
 
