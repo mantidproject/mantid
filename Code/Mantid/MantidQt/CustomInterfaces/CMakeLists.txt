@@ -331,6 +331,7 @@ set ( TEST_FILES
   ALCBaselineModellingModelTest.h
   ALCBaselineModellingPresenterTest.h
   ALCDataLoadingPresenterTest.h
+  ALCPeakFittingModelTest.h
   ALCPeakFittingPresenterTest.h
   IO_MuonGroupingTest.h
   MuonAnalysisHelperTest.h

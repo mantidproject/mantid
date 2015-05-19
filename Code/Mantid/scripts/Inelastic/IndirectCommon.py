@@ -43,9 +43,11 @@ def getInstrRun(ws_name):
             raise RuntimeError("Could not find run number associated with workspace.")
 
     instrument = workspace.getInstrument().getName()
-    facility = config.getFacility()
-    instrument = facility.instrument(instrument).filePrefix(int(run_number))
-    instrument = instrument.lower()
+    if instrument != '':
+        facility = config.getFacility()
+        instrument = facility.instrument(instrument).filePrefix(int(run_number))
+        instrument = instrument.lower()
+
     return instrument, run_number
 
 

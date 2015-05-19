@@ -2,6 +2,18 @@
 
 .. summary::
 
+Overview
+--------
+
+This algorithm provides a method for making a rotating reference frame transformation, which provides a useful method of visualising high frequency signals. 
+Since the transformation leaves a comparatively low frequency signal, the data can readily be rebinned to improve counting statistics - this is particularly 
+useful during an experiment to provide an early check on the form of the measured signal. Data analysis (for example least squares fitting) to study the 
+form of the signal relaxation can be completed in either the laboratory or rotating reference frame according to preference.
+
+This algorithm is frequently run after making a phase quadrature transformation using the algorithm :ref:`algm-PhaseQuad`. Both algorithms are fully described in the 
+article by T.M. Riseman and J.H. Brewer [Hyp. Int., 65, (1990), 1107].
+
+
 .. alias::
 
 .. properties::

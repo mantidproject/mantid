@@ -29,6 +29,7 @@ void export_DateAndTime()
     .def("totalNanoseconds", &DateAndTime::totalNanoseconds)
     .def("setToMinimum", &DateAndTime::setToMinimum)
     .def("__str__", &ISO8601StringPlusSpace)
+    .def("__long__", &DateAndTime::totalNanoseconds)
     .def(self == self)
     .def(self != self)
     // cppcheck-suppress duplicateExpression

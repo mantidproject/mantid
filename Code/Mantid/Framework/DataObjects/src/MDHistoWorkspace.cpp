@@ -12,6 +12,7 @@
 #include "MantidAPI/IMDIterator.h"
 #include <boost/scoped_array.hpp>
 #include <boost/make_shared.hpp>
+#include <boost/math/special_functions/fpclassify.hpp>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
@@ -600,7 +601,12 @@ void MDHistoWorkspace::getLinePlot(const Mantid::Kernel::VMD &start,
           break;
         }
         // And add the normalized signal/error to the list too
-        y.push_back(this->getSignalAt(linearIndex) * normalizer);
+        auto signal = this->getSignalAt(linearIndex) * normalizer;
+        if (boost::math::isinf(signal)){
+          // The plotting library (qwt) doesn't like infs.
+          signal = std::numeric_limits<signal_t>::quiet_NaN();
+        }
+        y.push_back(signal);
         e.push_back(this->getErrorAt(linearIndex) * normalizer);
         // Save the position for next bin
         lastPos = pos;

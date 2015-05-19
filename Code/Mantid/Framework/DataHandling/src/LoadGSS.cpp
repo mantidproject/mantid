@@ -309,8 +309,6 @@ API::MatrixWorkspace_sptr LoadGSS::loadGSASFile(const std::string &filename,
         xPrev = -0.0;
       }
 
-      std::istringstream inputLine(currentLine, std::ios::in);
-
       // It is different for the definition of X, Y, Z in SLOG and RALF format
       if (filetype == 'r') {
         // RALF
@@ -318,16 +316,27 @@ API::MatrixWorkspace_sptr LoadGSS::loadGSASFile(const std::string &filename,
         // std::setw
         // For this reason we need to read the column values as string and then
         // convert to double
-        std::string xString, yString, eString;
-        inputLine >> std::setw(11) >> xString >> std::setw(18) >> yString >>
-            std::setw(18) >> eString;
-        xValue = boost::lexical_cast<double>(xString);
-        yValue = boost::lexical_cast<double>(yString);
-        eValue = boost::lexical_cast<double>(eString);
+        {
+          std::string str(currentLine, 15);
+          std::istringstream istr(str);
+          istr >> xValue;
+        }
+        {
+          std::string str(currentLine + 15, 18);
+          std::istringstream istr(str);
+          istr >> yValue;
+        }
+        {
+          std::string str(currentLine + 15 + 18, 18);
+          std::istringstream istr(str);
+          istr >> eValue;
+        }
+
         xValue = (2 * xValue) - xPrev;
 
       } else if (filetype == 's') {
         // SLOG
+        std::istringstream inputLine(currentLine, std::ios::in);
         inputLine >> xValue >> yValue >> eValue;
         if (calslogx0) {
           // calculation of x0 must use the x'[0]
