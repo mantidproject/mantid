@@ -242,6 +242,15 @@ void LoadSpiceXML2DDet::exec() {
   std::vector<SpiceXMLNode> vec_xmlnode;
   parseSpiceXML(xmlfilename, vec_xmlnode);
 
+  // Spice data in table workspace
+  std::string spicetablewsname = getPropertyValue("SpiceTableWorkspace");
+  ITableWorkspace_sptr spicetablews;
+  int ptnumber(0);
+  if (spicetablewsname.size() > 0) {
+    spicetablews = getProperty("SpiceTableWorkspace");
+    ptnumber = getProperty("PtNumber");
+  }
+
   // Create output workspace
   MatrixWorkspace_sptr outws;
   if (loadinstrument) {
@@ -252,15 +261,21 @@ void LoadSpiceXML2DDet::exec() {
                                   false);
   }
 
-  std::string spicetablewsname = getPropertyValue("SpiceTableWorkspace");
+  // Set up log
   if (spicetablewsname.size() > 0) {
-    ITableWorkspace_sptr spicetablews = getProperty("SpiceTableWorkspace");
-    int ptnumber = getProperty("PtNumber");
     setupSampleLogFromSpiceTable(outws, spicetablews, ptnumber);
   }
 
-  if (loadinstrument)
+  if (loadinstrument) {
     loadInstrument(outws, idffilename);
+    if (spicetablewsname.size() > 0) {
+      double wavelength;
+      bool has_wavelength = getHB3AWavelength(outws, wavelength);
+      if (has_wavelength) {
+        setXtoLabQ(outws, wavelength);
+      }
+    }
+  }
 
   setProperty("OutputWorkspace", outws);
 }
@@ -383,7 +398,7 @@ MatrixWorkspace_sptr LoadSpiceXML2DDet::createMatrixWorkspace(
   if (loadinstrument) {
     size_t numspec = numpixelx * numpixely;
     outws = boost::dynamic_pointer_cast<MatrixWorkspace>(
-        WorkspaceFactory::Instance().create("Workspace2D", numspec, 1, 1));
+        WorkspaceFactory::Instance().create("Workspace2D", numspec, 2, 1));
   } else {
     outws = boost::dynamic_pointer_cast<MatrixWorkspace>(
         WorkspaceFactory::Instance().create("Workspace2D", numpixely, numpixelx,
@@ -543,6 +558,81 @@ void LoadSpiceXML2DDet::setupSampleLogFromSpiceTable(
     g_log.warning() << "Pt. " << ptnumber
                     << " is not found.  Log is not loaded to output workspace."
                     << "\n";
+
+  return;
+}
+
+bool LoadSpiceXML2DDet::getHB3AWavelength(MatrixWorkspace_sptr dataws,
+                                          double &wavelength) {
+  bool haswavelength(false);
+  wavelength = -1;
+
+  if (dataws->run().hasProperty("_m1")) {
+    Kernel::TimeSeriesProperty<double> *ts =
+        dynamic_cast<Kernel::TimeSeriesProperty<double> *>(
+            dataws->run().getProperty("_m1"));
+    if (ts && ts->size() > 0) {
+      double m1pos = ts->valuesAsVector()[0];
+      if (fabs(m1pos - (-25.870000)) < 0.2) {
+        wavelength = 1.003;
+        haswavelength = true;
+      } else {
+        g_log.warning() << "m1 position " << m1pos
+                        << " does not have defined mapping to "
+                        << "wavelength."
+                        << "\n";
+      }
+    } else if (!ts) {
+      g_log.warning("Log _m1 is not TimeSeriesProperty.  Treat it as a single "
+                    "value property.");
+      double m1pos = atof(dataws->run().getProperty("_m1")->value().c_str());
+      if (fabs(m1pos - (-25.870000)) < 0.2) {
+        wavelength = 1.003;
+        haswavelength = true;
+      } else {
+        g_log.warning() << "m1 position " << m1pos
+                        << " does not have defined mapping to "
+                        << "wavelength."
+                        << "\n";
+      }
+    } else {
+      g_log.error("Log _m1 is empty.");
+    }
+  } else {
+    g_log.warning() << "No _m1 log is found."
+                    << "\n";
+  }
+
+  if (!haswavelength)
+    g_log.warning("No wavelength is setup!");
+  else
+    g_log.notice() << "[DB] Wavelength = " << wavelength << "\n";
+
+  return haswavelength;
+}
+
+void LoadSpiceXML2DDet::setXtoLabQ(API::MatrixWorkspace_sptr dataws,
+                                   const double &wavelength) {
+  // Geometry information
+  // Kernel::V3D sourcepos = dataws->getInstrument()->getSource()->getPos();
+  // Kernel::V3D samplepos = dataws->getInstrument()->getSample()->getPos();
+  // Kernel::V3D sample_source_vector = sourcepos - samplepos;
+
+  size_t numspec = dataws->getNumberHistograms();
+  for (size_t iws = 0; iws < numspec; ++iws) {
+    /*
+    Kernel::V3D detpos = dataws->getDetector(iws)->getPos();
+    Kernel::V3D detpos_sample_vector = detpos - samplepos;
+    double scattering_rad = detpos_sample_vector.angle(sample_source_vector);
+    */
+
+    // double ki = 4*sin(scattering_rad*0.5)*M_PI/wavelength;
+    double ki = 2. * M_PI / wavelength;
+    dataws->dataX(iws)[0] = ki;
+    dataws->dataX(iws)[1] = ki + 0.00001;
+  }
+
+  dataws->getAxis(0)->setUnit("Momentum");
 
   return;
 }

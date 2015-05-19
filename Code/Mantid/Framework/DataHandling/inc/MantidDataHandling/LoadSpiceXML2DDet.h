@@ -102,6 +102,11 @@ private:
   /// Load instrument
   void loadInstrument(API::MatrixWorkspace_sptr matrixws,
                       const std::string &idffilename);
+
+  /// Get wavelength from workspace
+  bool getHB3AWavelength(API::MatrixWorkspace_sptr dataws, double &wavelength);
+
+  void setXtoLabQ(API::MatrixWorkspace_sptr dataws, const double &wavelength);
 };
 
 } // namespace DataHandling

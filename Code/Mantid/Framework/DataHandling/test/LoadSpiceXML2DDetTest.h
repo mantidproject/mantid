@@ -120,14 +120,15 @@ public:
             boost::make_shared<DataObjects::TableWorkspace>());
     datatablews->addColumn("int", "Pt.");
     datatablews->addColumn("double", "2theta");
+    datatablews->addColumn("double", "m1");
     AnalysisDataService::Instance().addOrReplace("SpiceDataTable", datatablews);
 
     TableRow row0 = datatablews->appendRow();
-    row0 << 1 << 15.0;
+    row0 << 1 << 15.0 << -25.8;
     TableRow row1 = datatablews->appendRow();
-    row1 << 2 << -15.0;
+    row1 << 2 << -15.0 << -25.8;
     TableRow row2 = datatablews->appendRow();
-    row2 << 3 << 0.0;
+    row2 << 3 << 0.0 << -25.8;
 
     // Test 2theta = 15 degree
     LoadSpiceXML2DDet loader;
@@ -169,6 +170,16 @@ public:
     Kernel::V3D detlast = outws->getDetector(256 * 256 - 1)->getPos();
     Kernel::V3D detmiddle =
         outws->getDetector(256 / 2 * 256 + 256 / 2)->getPos();
+    Kernel::V3D detedgemiddle = outws->getDetector(256 * 256 / 2)->getPos();
+    std::cout << "\n";
+    std::cout << "Sample position: " << sample.X() << ", " << sample.Y() << ", "
+              << sample.Z() << "\n";
+    std::cout << "Source position: " << source.X() << ", " << source.Y() << ", "
+              << source.Z() << "\n";
+    std::cout << "Det Edge Middle: " << detedgemiddle.X() << ", "
+              << detedgemiddle.Y() << ", " << detedgemiddle.Z() << "\n";
+    std::cout << "Det (1, 1)     : " << det0pos.X() << ", " << det0pos.Y()
+              << ", " << det0pos.Z() << "\n";
 
     // center of the detector must be negative
     TS_ASSERT_LESS_THAN(detmiddle.X(), 0.0);
@@ -187,10 +198,11 @@ public:
 
     // 2theta value
     Kernel::V3D sample_source = sample - source;
+    std::cout << "Sample - Source = " << sample_source.X() << ", "
+              << sample_source.Y() << ", " << sample_source.Z() << "\n";
 
     Kernel::V3D det0_sample = det0pos - sample;
     double twotheta0 = det0_sample.angle(sample_source) * 180. / 3.14159265;
-    // FIXME - Verify this with Huibo!
     TS_ASSERT_DELTA(twotheta0, 11.6252, 0.0001);
 
     Kernel::V3D detTL_sample = detlast0 - sample;
@@ -199,6 +211,7 @@ public:
 
     Kernel::V3D det255_sample = det255pos - sample;
     double twotheta255 = det255_sample.angle(sample_source) * 180. / 3.14159265;
+    TS_ASSERT_DELTA(twotheta255, 19.5328, 0.0001);
 
     Kernel::V3D detlast_sample = detlast - sample;
     double twothetalast =
@@ -211,10 +224,17 @@ public:
         detmid_sample.angle(sample_source) * 180. / 3.1415926;
     TS_ASSERT_DELTA(twotheta_middle, 15.0, 0.02);
 
+    Kernel::V3D detedgemid_sample = detedgemiddle - sample;
+    double twotheta_edgemiddle =
+        detedgemid_sample.angle(sample_source) * 180. / 3.14159265;
+    TS_ASSERT_DELTA(twotheta_edgemiddle, 10.8864, 0.0001);
+
     TS_ASSERT_LESS_THAN(twotheta0, twotheta_middle);
     TS_ASSERT_LESS_THAN(twotheta_middle, twothetalast);
 
+    //-------------------------------------------------------------------------------
     // Case: 2theta = 0
+    //-------------------------------------------------------------------------------
     LoadSpiceXML2DDet loader2;
     loader2.initialize();
 
@@ -243,6 +263,8 @@ public:
     Kernel::V3D detlast2 = outws2->getDetector(256 * 256 - 1)->getPos();
     Kernel::V3D detmiddle2 =
         outws2->getDetector(256 / 2 * 256 + 256 / 2)->getPos();
+    std::cout << "Case 2: Middle Det " << detmiddle2.X() << ", "
+              << detmiddle2.Y() << ", " << detmiddle2.Z() << "\n";
 
     // detector distance
     double dist0b = sample2.distance(det0pos2);
@@ -261,11 +283,11 @@ public:
 
     detmid_sample = detmiddle2 - sample2;
     twotheta_middle = detmid_sample.angle(sample_source) * 180. / 3.1415926;
-    // FIXME - Justify with Huibo
-    TS_ASSERT_DELTA(twotheta_middle, 0.00, 0.03);
+    TS_ASSERT_DELTA(twotheta_middle, 0.0228, 0.0001);
 
     det0_sample = det0pos2 - sample2;
     double twotheta0_2 = det0_sample.angle(sample_source) * 180. / 3.14159265;
+    std::cout << "Case 2: 2theta at (1, 1) " << twotheta0_2 << "\n";
 
     detTL_sample = detlast0_2 - sample2;
     twotheta_tl = detTL_sample.angle(sample_source) * 180. / 3.14159265;
@@ -273,9 +295,22 @@ public:
     det255_sample = det255pos2 - sample2;
     double twotheta255_2 =
         det255_sample.angle(sample_source) * 180. / 3.14159265;
+    std::cout << "Case 2: 2theta at (1, 256) " << twotheta255_2 << "\n";
 
     detlast_sample = detlast2 - sample2;
     twothetalast = detlast_sample.angle(sample_source) * 180. / 3.14159265;
+    std::cout << "Case 2: 2theta at (256, 256) " << twothetalast << "\n";
+
+    Kernel::V3D det_edgemiddel_left =
+        outws2->getDetector(256 * 256 / 2)->getPos();
+    Kernel::V3D det_edgemiddel_right =
+        outws2->getDetector(256 * 256 / 2 + 255)->getPos();
+    Kernel::V3D det_edgemiddle_left_sample = det_edgemiddel_left - sample;
+    Kernel::V3D det_edgemiddle_right_sample = det_edgemiddel_right - sample;
+    double inplane1 = det_edgemiddle_left_sample.angle(sample_source);
+    double inplane2 = det_edgemiddle_right_sample.angle(sample_source);
+    std::cout << "In plain left  side = " << inplane1 * 180 / 3.1415926 << "\n";
+    std::cout << "In plain right side = " << inplane2 * 180 / 3.1415926 << "\n";
 
     TS_ASSERT_DELTA(twotheta0_2, twothetalast, 0.00001);
     TS_ASSERT_DELTA(twotheta0_2, twotheta_tl, 0.00001);
