@@ -1,16 +1,14 @@
 import numpy
 from wand.image import Image
-from wand.sequence import Sequence
 from wand.drawing import Drawing
 from wand.color import Color
-import PyQt4
 from PyQt4.QtCore import QByteArray, QBuffer
 
-def animate_slice(sv, name, start, end, filename, num_frames=10, font_size=24):
+def animate_slice(sliceviewer, name, start, end, filename, num_frames=10, font_size=24):
     """Generate an animated gif of a 2D slice moving through a third dimension.
 
     Args:
-        sv (SliceViewer): A sliceviewer instance.
+        sliceviewer (SliceViewer): A sliceviewer instance.
         name (str): The name of the third dimension to use.
         start (float): The starting value of the third dimension.
         end (float): The end value of the third dimension.
@@ -22,10 +20,10 @@ def animate_slice(sv, name, start, end, filename, num_frames=10, font_size=24):
     """
     #Generate all the individual frames
     images = []
-    for z in numpy.linspace(start, end, num_frames):
-        sv.setSlicePoint(name, z)
-        sv.refreshRebin()
-        qimg = sv.getImage().toImage()
+    for slice_point in numpy.linspace(start, end, num_frames):
+        sliceviewer.setSlicePoint(name, slice_point)
+        sliceviewer.refreshRebin()
+        qimg = sliceviewer.getImage().toImage()
         data = QByteArray()
         buf = QBuffer(data)
         qimg.save(buf, "PNG")
@@ -38,7 +36,7 @@ def animate_slice(sv, name, start, end, filename, num_frames=10, font_size=24):
         #Write the caption into the whitespace
         draw = Drawing()
         draw.font_size = font_size
-        draw.text(5, font_size,"%s = %g" % (name,z))
+        draw.text(5, font_size,"%s = %g" % (name,slice_point))
         draw(image)
         images.append(image)
     #Create a new image with the right dimensions
