@@ -6,14 +6,20 @@ from wand.color import Color
 import PyQt4
 from PyQt4.QtCore import QByteArray, QBuffer
 
-#sv : an instance of SliceViewer
-#name_z : the name of the dimension to animate through
-#start : the starting value for the given dimension
-#end : the ending value for the given dimension
-#filename : where to save the resulting gif on disk
-#num_frames : the number of frames in the animation
-#font_size: the size of the font used to label the z value
 def animate_slice(sv, name, start, end, filename, num_frames=10, font_size=24):
+    """Generate an animated gif of a 2D slice moving through a third dimension.
+
+    Args:
+        sv (SliceViewer): A sliceviewer instance.
+        name (str): The name of the third dimension to use.
+        start (float): The starting value of the third dimension.
+        end (float): The end value of the third dimension.
+        filename (str): The file to save the gif to.
+
+    Kwargs:
+        num_frames (int): The number of frames the gif should contain.
+        font_size: (int): The size of the caption.
+    """
     #Generate all the individual frames
     images = []
     for z in numpy.linspace(start, end, num_frames):
