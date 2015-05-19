@@ -19,7 +19,7 @@ which contains all the cluster edge faces required to draw the outer
 edge of all clusters within the workspace.
 
 You may optionally provide a FilterWorkspace, which is a
-`PeaksWorkspace <http://www.mantidproject.org/PeaksWorkspace>`_. If provided, the Peak locations are
+:ref:`PeaksWorkspace <PeaksWorkspace>`. If provided, the Peak locations are
 projected onto the InputWorkspace and the center locations are used to
 restrict the output to only include the clusters that are the union
 between the peak locations and the image clusters.

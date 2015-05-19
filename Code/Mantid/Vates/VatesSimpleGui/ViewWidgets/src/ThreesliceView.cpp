@@ -44,10 +44,10 @@ namespace
 
 ThreeSliceView::ThreeSliceView(QWidget *parent, RebinnedSourcesManager* rebinnedSourcesManager) : ViewBase(parent, rebinnedSourcesManager)
 {
-  this->ui.setupUi(this);
-  this->mainView = this->createRenderView(this->ui.mainRenderFrame,
+  this->m_ui.setupUi(this);
+  this->m_mainView = this->createRenderView(this->m_ui.mainRenderFrame,
                                           QString("OrthographicSliceView"));
-  pqActiveObjects::instance().setActiveView(this->mainView);
+  pqActiveObjects::instance().setActiveView(this->m_mainView);
 }
 
 ThreeSliceView::~ThreeSliceView()
@@ -60,12 +60,12 @@ void ThreeSliceView::destroyView()
   // Active source disappears in only this view, so set it from the
   // internal source before destroying view.
   pqActiveObjects::instance().setActiveSource(this->origSrc);
-  builder->destroy(this->mainView);
+  builder->destroy(this->m_mainView);
 }
 
 pqRenderView* ThreeSliceView::getView()
 {
-  return this->mainView.data();
+  return this->m_mainView.data();
 }
 
 void ThreeSliceView::render()
@@ -98,7 +98,7 @@ void ThreeSliceView::makeThreeSlice()
   this->origSrc = src;
 
   pqDataRepresentation *drep = builder->createDataRepresentation(\
-        this->origSrc->getOutputPort(0), this->mainView);
+        this->origSrc->getOutputPort(0), this->m_mainView);
   vtkSMPropertyHelper(drep->getProxy(), "Representation").Set("Slices");
   drep->getProxy()->UpdateVTKObjects();
   this->origRep = qobject_cast<pqPipelineRepresentation*>(drep);
@@ -106,12 +106,12 @@ void ThreeSliceView::makeThreeSlice()
 
 void ThreeSliceView::renderAll()
 {
-  this->mainView->render();
+  this->m_mainView->render();
 }
 
 void ThreeSliceView::resetDisplay()
 {
-  this->mainView->resetDisplay();
+  this->m_mainView->resetDisplay();
 }
 
 /*
@@ -128,7 +128,7 @@ void ThreeSliceView::correctColorScaleRange()
 
 void ThreeSliceView::resetCamera()
 {
-  this->mainView->resetCamera();
+  this->m_mainView->resetCamera();
 }
 
 }

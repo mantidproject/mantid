@@ -72,7 +72,7 @@ void SaveMask::exec() {
   if (!inpWS) {
     // extract the masking and use that
     Algorithm_sptr emAlg =
-        this->createChildAlgorithm("ExtractMasking", 0.0, 0.5, false);
+        this->createChildAlgorithm("ExtractMask", 0.0, 0.5, false);
     emAlg->setProperty("InputWorkspace", userInputWS);
     emAlg->setPropertyValue("OutputWorkspace", "tmp");
     emAlg->execute();

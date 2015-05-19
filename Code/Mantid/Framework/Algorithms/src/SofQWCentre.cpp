@@ -291,6 +291,9 @@ SofQWCentre::setUpOutputWorkspace(API::MatrixWorkspace_const_sptr inputWorkspace
   // Set the X axis title (for conversion to MD)
   outputWorkspace->getAxis(0)->title() = "Energy transfer";
 
+  outputWorkspace->setYUnit("");
+  outputWorkspace->setYUnitLabel("Intensity");
+
   return outputWorkspace;
 }
 

@@ -49,10 +49,10 @@ namespace Mantid
           
           /**
            * Get default color map
-           * @param viewSwitched If the view has switched or not.
+           * @param useCurrentColorMap If we should use the current color map.
            * @returns index The index of the default color map in the list of color maps.
            */
-          int getDefaultColorMapIndex(bool viewSwitched);
+          int getDefaultColorMapIndex(bool useCurrentColorMap);
 
           /**
            * Read in and store the available color maps

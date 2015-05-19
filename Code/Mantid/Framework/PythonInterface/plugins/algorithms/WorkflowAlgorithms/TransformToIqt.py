@@ -221,8 +221,16 @@ class TransformToIqt(PythonAlgorithm):
         """
         from IndirectCommon import CheckHistZero, CheckHistSame, CheckAnalysers
 
+        try:
+            CheckAnalysers(self._sample, self._resolution)
+        except ValueError:
+            # A genuine error the shows that the two runs are incompatible
+            raise
+        except:
+            # Checking could not be performed due to incomplete or no instrument
+            logger.warning('Could not check for matching analyser and reflection')
+
         # Process resolution data
-        CheckAnalysers(self._sample, self._resolution)
         num_res_hist = CheckHistZero(self._resolution)[0]
         if num_res_hist > 1:
             CheckHistSame(self._sample, 'Sample', self._resolution, 'Resolution')

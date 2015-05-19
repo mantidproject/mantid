@@ -35,8 +35,6 @@ public:
     TS_ASSERT( alg.isInitialized() );
   }
 
-
-  // TODO: Make this test useful
   void test_TofToLambda()
   {
      ConvertUnitsUsingDetectorTable myAlg;
@@ -45,7 +43,11 @@ public:
 
      const std::string workspaceName("_ws_testConvertUsingDetectorTable");
      int nBins = 10;
-     MatrixWorkspace_sptr WS = WorkspaceCreationHelper::Create2DWorkspaceBinned(2, nBins, 500.0, 50.0);
+//     MatrixWorkspace_sptr WS = WorkspaceCreationHelper::Create2DWorkspaceBinned(2, nBins, 500.0, 50.0);
+     MatrixWorkspace_sptr WS = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(2,nBins, false,
+                                                                                            false, true,
+                                                                                            "TESTY");
+
      WS->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
 
      AnalysisDataService::Instance().add(workspaceName,WS);
@@ -72,7 +74,6 @@ public:
       myAlg.setPropertyValue("OutputWorkspace", workspaceName);
       myAlg.setPropertyValue("Target", "Wavelength");
       myAlg.setProperty("DetectorParameters", pars);
-
       myAlg.execute();
 
       auto outWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(workspaceName);
@@ -83,8 +84,8 @@ public:
 //          }
 //      }
 
-      TS_ASSERT_DELTA( outWS->dataX(0)[0], 0.017982, 0.000001 );
-      TS_ASSERT_DELTA( outWS->dataX(0)[9], 0.034166, 0.000001 );
+      TS_ASSERT_DELTA( outWS->dataX(0)[0], 0.0, 0.000001 );
+      TS_ASSERT_DELTA( outWS->dataX(0)[9], 0.000323676, 0.000001 );
 //      TS_ASSERT_DELTA( outWS->dataX(1)[0], 0.179818, 0.000001 );
 //      TS_ASSERT_DELTA( outWS->dataX(1)[9], 0.017982, 0.000001 );
 
