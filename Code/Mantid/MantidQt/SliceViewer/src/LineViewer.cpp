@@ -962,25 +962,6 @@ int LineViewer::getPlotAxis() const { return m_lineOptions->getPlotAxis(); }
 // ==============================================================================================
 
 /**
- * Helper method to get the positive min value.
- * @param curveData : CurveData to look through the data of.
- * @param from : Start value
- * @return : Positive min value.
- */
-double getPositiveMin(const MantidQwtWorkspaceData &curveData,
-                      const double from) {
-  double yPositiveMin = from;
-  size_t n = curveData.size();
-  for (size_t i = 0; i < n; ++i) {
-    double y = curveData.y(i);
-    if (y > 0 && y < yPositiveMin) {
-      yPositiveMin = y;
-    }
-  }
-  return yPositiveMin;
-}
-
-/**
  * Set up the appropriate scale engine.
  * Uses the isLogScaled method to work out which scale engine to make.
  * @param curveData : Curve Data to read.

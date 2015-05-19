@@ -32,6 +32,7 @@ public:
   MOCK_CONST_METHOD0(firstRun, std::string());
   MOCK_CONST_METHOD0(lastRun, std::string());
   MOCK_CONST_METHOD0(log, std::string());
+  MOCK_CONST_METHOD0(function, std::string());
   MOCK_CONST_METHOD0(calculationType, std::string());
   MOCK_CONST_METHOD0(timeRange, boost::optional<PAIR_OF_DOUBLES>());
   MOCK_CONST_METHOD0(deadTimeType, std::string());
@@ -88,6 +89,7 @@ public:
     ON_CALL(*m_view, lastRun()).WillByDefault(Return("MUSR00015191.nxs"));
     ON_CALL(*m_view, calculationType()).WillByDefault(Return("Integral"));
     ON_CALL(*m_view, log()).WillByDefault(Return("sample_magn_field"));
+    ON_CALL(*m_view, function()).WillByDefault(Return("Last"));
     ON_CALL(*m_view, timeRange()).WillByDefault(Return(boost::make_optional(std::make_pair(-6.0,32.0))));
     ON_CALL(*m_view, deadTimeType()).WillByDefault(Return("None"));
     ON_CALL(*m_view, detectorGroupingType()).WillByDefault(Return("Auto"));
@@ -261,6 +263,20 @@ public:
                            QwtDataX(1, 1360, 1E-8), QwtDataX(2, 1370, 1E-8),
                            QwtDataY(0, 0.012884, 1E-6), QwtDataY(1, 0.022489, 1E-6),
                            QwtDataY(2, 0.038717, 1E-6))));
+    m_view->requestLoading();
+  }
+
+  void test_logFunction ()
+  {
+    ON_CALL(*m_view, function()).WillByDefault(Return("First"));
+    ON_CALL(*m_view, log()).WillByDefault(Return("Field_Danfysik"));
+    EXPECT_CALL(*m_view, setDataCurve(AllOf(Property(&QwtData::size,3),
+                                            QwtDataX(0, 1398.090, 1E-3),
+                                            QwtDataX(1, 1360.200, 1E-3),
+                                            QwtDataX(2, 1364.520, 1E-3),
+                                            QwtDataY(0, 0.15004, 1E-5),
+                                            QwtDataY(1, 0.14289, 1E-5),
+                                            QwtDataY(2, 0.12837, 1E-5))));
     m_view->requestLoading();
   }
 

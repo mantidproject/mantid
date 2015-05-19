@@ -8,6 +8,18 @@ namespace MantidQt
 {
   namespace API
   {
+    // Specifiers for ParaView filters
+    const QString MdConstants::MantidParaViewSplatterPlot = "MantidParaViewSplatterPlot";
+    const QString MdConstants::MantidParaViewSpecialCoordinates = "SpecialCoordinates";
+    const QString MdConstants::MDPeaksFilter = "MDPeaksFilter";
+    const QString MdConstants::MantidParaViewPeaksFilter = "MantidParaViewPeaksFilter";
+    const QString MdConstants::PeakDimensions = "Peak Dimensions";
+    const QString MdConstants::PeaksWorkspace = "PeaksWorkspace";
+    const QString MdConstants::Delimiter = "Delimiter";
+    const QString MdConstants::WorkspaceName = "WorkspaceName";
+    const QString MdConstants::ProbePoint = "ProbePoint";
+    const QString MdConstants::Threshold = "Threshold";
+
     MdConstants::MdConstants() : m_colorScaleStandardMax(0.1), m_logScaleDefaultValue(0.1)
     {
       initializeSettingsConstants();

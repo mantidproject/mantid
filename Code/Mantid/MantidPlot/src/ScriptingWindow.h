@@ -22,7 +22,7 @@ class QShowEvent;
 class QHideEvent;
 
 
-/** @class ScriptingWindow    
+/** @class ScriptingWindow
     This class displays a seperate window for editing and executing scripts
 */
 class ScriptingWindow : public QMainWindow
@@ -51,7 +51,7 @@ public:
   /// Executes whatever is in the current tab. Primarily useful for automatically
   /// running a script loaded with open
   void executeCurrentTab(const Script::ExecutionMode mode);
-  ///saves scripts file names to a string 
+  ///saves scripts file names to a string
   QString saveToString();
   ///Set whether to accept/reject close events
   void acceptCloseEvent(const bool value);
@@ -80,6 +80,8 @@ private slots:
   void populateExecMenu();
   /// Populate window menu
   void populateWindowMenu();
+  /// Populate help menu
+  void populateHelpMenu();
 
   /// Update window flags
   void updateWindowFlags();
@@ -101,6 +103,11 @@ private slots:
   /// Clear out any previous variable definitions in the current script
   void clearScriptVariables();
 
+  /// Opens help page for scripting window
+  void showHelp();
+  /// Opens help page for Python API
+  void showPythonHelp();
+
 private:
   /// Create menu bar
   void initMenus();
@@ -115,6 +122,8 @@ private:
   void initExecMenuActions();
   /// Create the window menu actions
   void initWindowMenuActions();
+  /// Create the help menu actions
+  void initHelpMenuActions();
 
   /// Returns the current execution mode
   Script::ExecutionMode getExecutionMode() const;
@@ -132,13 +141,13 @@ private:
   /// File menu
   QMenu *m_fileMenu;
   /// File menu actions
-  QAction *m_newTab, *m_openInCurTab, *m_openInNewTab, 
+  QAction *m_newTab, *m_openInCurTab, *m_openInNewTab,
     *m_save, *m_saveAs, *m_print, *m_closeTab;
   QMenu *m_recentScripts;
   /// Edit menu
   QMenu *m_editMenu;
   /// Edit menu actions
-  QAction *m_undo, *m_redo, *m_cut, *m_copy, *m_paste, *m_comment, *m_uncomment, 
+  QAction *m_undo, *m_redo, *m_cut, *m_copy, *m_paste, *m_comment, *m_uncomment,
     *m_tabsToSpaces, *m_spacesToTabs, *m_find;
   /// Run menu
   QMenu *m_runMenu;
@@ -154,8 +163,12 @@ private:
   QMenu *m_windowMenu;
   /// Window actions
   QAction *m_alwaysOnTop, *m_hide, *m_zoomIn, *m_zoomOut, *m_resetZoom,
-    *m_toggleProgress, *m_toggleFolding, *m_toggleWhitespace, 
+    *m_toggleProgress, *m_toggleFolding, *m_toggleWhitespace,
     *m_openConfigTabs, *m_selectFont;
+  /// Help menu
+  QMenu *m_helpMenu;
+  /// Help actions
+  QAction *m_showHelp, *m_showPythonHelp;
   /// Change scripting language
   QAction *m_scripting_lang;
   /// Flag to define whether we should accept a close event

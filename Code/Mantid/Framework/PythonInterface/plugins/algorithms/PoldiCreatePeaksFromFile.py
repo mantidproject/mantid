@@ -136,7 +136,7 @@ class PoldiCrystalFileParser(object):
 
 class PoldiCreatePeaksFromFile(PythonAlgorithm):
     def category(self):
-        return "SINQ\\POLDI"
+        return "SINQ\\Poldi"
 
     def name(self):
         return "PoldiLoadCrystalData"

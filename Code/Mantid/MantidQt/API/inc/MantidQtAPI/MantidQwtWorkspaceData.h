@@ -53,6 +53,9 @@ public:
   virtual double getYMax() const = 0;
   virtual QString getXAxisLabel() const = 0;
   virtual QString getYAxisLabel() const = 0;
+  static void calculateYMinAndMax(const std::vector<double> &yvalues,
+                                  double &yMin, double &yMax,
+                                  double &yMinPositive);
 
 protected:
   // Assignment operator (virtualized).

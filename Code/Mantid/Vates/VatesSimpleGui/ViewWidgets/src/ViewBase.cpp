@@ -52,7 +52,7 @@ namespace SimpleGui
  * @param rebinnedSourcesManager Pointer to a RebinnedSourcesManager
  */
 ViewBase::ViewBase(QWidget *parent, RebinnedSourcesManager* rebinnedSourcesManager) : QWidget(parent),
-                                      m_rebinnedSourcesManager(rebinnedSourcesManager), m_currentColorMapModel(NULL), m_temporaryWorkspaceIdentifier("rebinned_vsi")
+                                      m_rebinnedSourcesManager(rebinnedSourcesManager), m_currentColorMapModel(NULL), m_internallyRebinnedWorkspaceIdentifier("rebinned_vsi")
 {
 }
 
@@ -91,13 +91,10 @@ pqRenderView* ViewBase::createRenderView(QWidget* widget, QString viewName)
 
 /**
  * This function removes all filters of a given name: i.e. Slice.
- * @param builder the ParaView object builder
  * @param name the class name of the filters to remove
  */
-void ViewBase::destroyFilter(pqObjectBuilder *builder, const QString &name)
+void ViewBase::destroyFilter(const QString &name)
 {
-  (void) builder;
-
   pqServer *server = pqActiveObjects::instance().activeServer();
   pqServerManagerModel *smModel = pqApplicationCore::instance()->getServerManagerModel();
   QList<pqPipelineSource *> sources;
@@ -630,10 +627,10 @@ bool ViewBase::isMDHistoWorkspace(pqPipelineSource *src)
 }
 
 /**
- * This function checks if a pqPipelineSource is a temporary workspace.
- * @return true if the source is a temporary workspace;
+ * This function checks if a pqPipelineSource is an internally rebinned workspace.
+ * @return true if the source is an internally rebinned workspace;
  */
-bool ViewBase::isTemporaryWorkspace(pqPipelineSource *src)
+bool ViewBase::isInternallyRebinnedWorkspace(pqPipelineSource *src)
 {
   if (NULL == src)
   {
@@ -652,7 +649,7 @@ bool ViewBase::isTemporaryWorkspace(pqPipelineSource *src)
   QString wsName(vtkSMPropertyHelper(src->getProxy(),
                                     "WorkspaceName", true).GetAsString());
 
-  if (wsName.contains(m_temporaryWorkspaceIdentifier) && m_rebinnedSourcesManager->isRebinnedSourceBeingTracked(src))
+  if (wsName.contains(m_internallyRebinnedWorkspaceIdentifier) && m_rebinnedSourcesManager->isRebinnedSourceBeingTracked(src))
   {
     return true;
   }
@@ -770,11 +767,11 @@ bool ViewBase::hasWorkspaceType(const QString &wsTypeName)
 
 /**
  * This function sets the default colors for the background and connects a tracker for changes of the background color by the user.
- * @param viewSwitched If the view was switched or created.
+ * @param useCurrentColorSettings If the view was switched or created.
  */
-void ViewBase::setColorForBackground(bool viewSwitched)
+void ViewBase::setColorForBackground(bool useCurrentColorSettings)
 {
-  backgroundRgbProvider.setBackgroundColor(this->getView(), viewSwitched);
+  backgroundRgbProvider.setBackgroundColor(this->getView(), useCurrentColorSettings);
   backgroundRgbProvider.observe(this->getView());
 }
 
