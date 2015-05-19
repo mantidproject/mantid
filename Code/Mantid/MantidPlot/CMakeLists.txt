@@ -882,10 +882,19 @@ add_executable ( MantidPlot ${WIN_CONSOLE} MACOSX_BUNDLE ${ALL_SRC} src/main.cpp
 # Library dependencies
 target_link_libraries ( MantidPlot LINK_PRIVATE 
                         ${CORE_MANTIDLIBS}
-                        MantidQtAPI MantidWidgets MantidQtSliceViewer MantidQtFactory
+                        MantidQtAPI 
+						MantidWidgets 
+						MantidQtSliceViewer 
+						MantidQtFactory
                         MantidQtSpectrumViewer
-                        QtPropertyBrowser ${QT_LIBRARIES}
-                        ${QWT_LIBRARIES} ${QWTPLOT3D_LIBRARIES}
+                        QtPropertyBrowser 
+						${Boost_LIBRARIES}
+						${POCO_LIBRARIES}
+						${GSL_LIBRARIES}
+						${MUPARSER_LIBRARIES}
+						${QT_LIBRARIES}
+                        ${QWT_LIBRARIES} 
+						${QWTPLOT3D_LIBRARIES}
                         ${QSCINTILLA_LIBRARIES}
                         ${PYTHON_LIBRARIES}
                         ${ZLIB_LIBRARIES}

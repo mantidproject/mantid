@@ -108,6 +108,11 @@ find_package ( SIP REQUIRED )
 separate_arguments ( PYQT4_SIP_FLAGS )
 
 ###########################################################################
+# gsl is currently needed by Geometry, Algorithms, Curvefitting, & MantidPlot
+###########################################################################
+find_package ( GSL REQUIRED )
+
+###########################################################################
 # Add QtPropertyBrowser to build
 ###########################################################################
 add_subdirectory ( QtPropertyBrowser )
