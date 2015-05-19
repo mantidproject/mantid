@@ -4,6 +4,7 @@ set ( TEST_PY_FILES
       test/DirectReductionHelpersTest.py 
       test/DirectPropertyManagerTest.py     
       test/DirectEnergyConversionTest.py
+      test/ISISDirecInelasticConfigTest.py
       test/IndirectApplyCorrectionsTest.py
       test/IndirectCommonTests.py
       test/ReductionWrapperTest.py      
