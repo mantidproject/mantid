@@ -46,6 +46,11 @@ ${QT_LIBRARIES}
 ${MANTID_SUBPROJECT_LIBS}
 VatesSimpleGuiQtWidgets
 VatesSimpleGuiViewWidgets
+MantidQtAPI
+vtkRenderingFreeType
+vtkRenderingFreeTypeOpenGL
+${POCO_LIBRARIES}
+${Boost_LIBRARIES}
 )
 
 if (OSX_VERSION VERSION_GREATER 10.8)

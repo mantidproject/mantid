@@ -208,6 +208,10 @@ vtkFiltersExtraction
 vtkFiltersSources
 vtkPVVTKExtensionsDefault
 ${QWT_LIBRARIES}
+${POCO_LIBRARIES}
+${Boost_LIBRARIES}
+${JSONCPP_LIBRARIES}
+${NEXUS_LIBRARIES}
 )
 
 if (OSX_VERSION VERSION_GREATER 10.8)
@@ -224,7 +228,22 @@ if( CXXTEST_FOUND AND GMOCK_FOUND AND GTEST_FOUND )
                         ../../Framework/TestHelpers/src/MDEventsTestHelper.cpp 
                         ../../Framework/TestHelpers/src/StartFrameworkManager.cpp )
   cxxtest_add_test( VatesAPITest ${TEST_FILES} )
-  target_link_libraries( VatesAPITest LINK_PRIVATE VatesAPI DataHandling Kernel DataObjects ${GMOCK_LIBRARIES} ${GTEST_LIBRARIES} )
+  target_link_libraries( VatesAPITest LINK_PRIVATE 
+  ${MANTID_SUBPROJECT_LIBS} 
+  VatesAPI 
+  DataHandling 
+  Kernel 
+  DataObjects 
+  vtkCommonCore
+  vtkCommonDataModel
+  vtkIOLegacy
+  vtkFiltersExtraction
+  vtkFiltersSources
+  ${POCO_LIBRARIES}
+  ${Boost_LIBRARIES}
+  ${JSONCPP_LIBRARIES}
+  ${GMOCK_LIBRARIES} 
+  ${GTEST_LIBRARIES} )
   add_dependencies( AllTests VatesAPITest )
   # Add to the 'UnitTests' group in VS
   set_property ( TARGET VatesAPITest PROPERTY FOLDER "UnitTests" )

@@ -7,7 +7,9 @@ SERVER_MANAGER_SOURCES vtkScaleWorkspace.cxx)
 set_property( TARGET MantidParaViewScaleWorkspaceSMPlugin PROPERTY FOLDER "MantidVatesParaViewPlugins")
 
 target_link_libraries( MantidParaViewScaleWorkspaceSMPlugin LINK_PRIVATE 
-${MANTID_SUBPROJECT_LIBS} )
+${MANTID_SUBPROJECT_LIBS} 
+${JSONCPP_LIBRARIES}
+)
 
 if (OSX_VERSION VERSION_GREATER 10.8)
   set_target_properties ( MantidParaViewScaleWorkspaceSMPlugin PROPERTIES INSTALL_RPATH "@loader_path/../../Contents/Libraries;@loader_path/../../Contents/MacOS")

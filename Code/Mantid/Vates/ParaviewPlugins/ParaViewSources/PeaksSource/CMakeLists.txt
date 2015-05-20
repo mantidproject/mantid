@@ -8,7 +8,10 @@ ADD_PARAVIEW_PLUGIN(MantidParaViewPeaksSourceSMPlugin "1.0"
 set_property( TARGET MantidParaViewPeaksSourceSMPlugin PROPERTY FOLDER "MantidVatesParaViewPlugins" )
 
 target_link_libraries( MantidParaViewPeaksSourceSMPlugin LINK_PRIVATE 
-${MANTID_SUBPROJECT_LIBS} )
+${MANTID_SUBPROJECT_LIBS} 
+${POCO_LIBRARIES}
+${Boost_LIBRARIES}
+)
 
 if (OSX_VERSION VERSION_GREATER 10.8)
   set_target_properties ( MantidParaViewPeaksSourceSMPlugin PROPERTIES INSTALL_RPATH "@loader_path/../../Contents/Libraries;@loader_path/../../Contents/MacOS")
