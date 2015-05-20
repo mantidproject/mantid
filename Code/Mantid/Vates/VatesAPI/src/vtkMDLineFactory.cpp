@@ -29,7 +29,7 @@ namespace Mantid
     /**
     Constructor
     @param thresholdRange : Thresholding range functor
-    @param scalarName : Name to give to signal
+    @param normalizationOption : Normalization option to use
     */
     vtkMDLineFactory::vtkMDLineFactory(ThresholdRange_scptr thresholdRange, const VisualNormalization normalizationOption) : m_thresholdRange(thresholdRange), m_normalizationOption(normalizationOption)
     {
