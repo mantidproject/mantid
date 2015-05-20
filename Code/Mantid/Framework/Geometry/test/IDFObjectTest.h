@@ -9,7 +9,10 @@
 #include <Poco/DateTimeFormatter.h>
 #include <Poco/Thread.h>
 #include <Poco/SHA1Engine.h>
+#include <Poco/String.h>
 #include <Poco/DigestStream.h>
+
+#include <boost/regex.hpp>
 
 using Mantid::Geometry::IDFObject;
 using Mantid::Kernel::ConfigService;
@@ -118,10 +121,19 @@ public:
     filein.read(&contents[0], contents.size());
     filein.close();
 
+    //convert to unix line endings
+    static boost::regex eol("\\R"); // \R is Perl syntax for matching any EOL sequence
+    contents = boost::regex_replace(contents, eol, "\n"); // converts all to LF
+
+    //and trim
+    contents = Poco::trim(contents);
+
     SHA1Engine sha1;
     DigestOutputStream outstr(sha1);
     outstr << contents;
     outstr.flush(); // to pass everything to the digest engine
+
+
 
     auto head = path.getFileName();
     auto tail = DigestEngine::digestToHex(sha1.digest());
