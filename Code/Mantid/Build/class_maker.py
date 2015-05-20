@@ -367,6 +367,13 @@ def generate(subproject, classname, overwrite, args):
 
     print "\n   Files were added to Framework/%s/CMakeLists.txt !" % (subproject)
     print
+
+    if args.alg:
+        print "Note: if this is a WorkflowAlgorithm, please subclass DataProcessorAlgorithm"
+        print "Note: if this algorithm operates on a WorkspaceGroup, please override processGroups()"
+        print
+
+
 #    if not test_only:
 #        print "\tsrc/%s.cpp" % (classname)
 #        print "\tinc/Mantid%s/%s.h" % (subproject, classname)
