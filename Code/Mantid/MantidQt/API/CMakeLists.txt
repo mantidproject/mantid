@@ -15,6 +15,7 @@ set ( SRC_FILES
   src/MantidDialog.cpp
   src/MantidHelpInterface.cpp
   src/MantidQwtIMDWorkspaceData.cpp
+  src/MantidQwtWorkspaceData.cpp
   src/MantidWidget.cpp
   src/MdConstants.cpp
   src/MdPlottingCmapsProvider.cpp

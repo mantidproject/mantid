@@ -453,11 +453,6 @@ class LETReductionEvent2015Multirep(stresstesting.MantidStressTest):
     def requiredMemoryMB(self):
         """Far too slow for managed workspaces. They're tested in other places. Requires 20Gb"""
         return 20000
-    def skipTests(self):
-        '''
-        Skip this test for the time beeing
-        '''
-        return True
 
     def runTest(self):
         """
