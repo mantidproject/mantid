@@ -40,7 +40,7 @@ Output:
 
 .. testoutput:: ExISISIndirectDiffractionReductionSimple
 
-    Workspace name: irs21360_diffspec_red
+    Workspace name: IRS21360_diffspec_red
     Number of spectra: 1
     Number of bins: 1935
 
