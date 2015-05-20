@@ -127,7 +127,7 @@ class LoadData(ReductionStep):
             else:
                 logger.notice("Couldn't find specified mask file : " + str(basis_mask_filename))
 
-        if self._parameter_file != None:
+        if self._parameter_file is not None:
             LoadParameterFile(Workspace=output_ws,Filename= self._parameter_file)
 
         self._monitor_index = self._reducer._get_monitor_index(mtd[output_ws])
@@ -165,14 +165,22 @@ class LoadData(ReductionStep):
 
     def _load_data(self, filename, output_ws):
         if self._parameter_file is not None and "VESUVIO" in self._parameter_file:
-            loaded_ws = LoadVesuvio(Filename=filename, OutputWorkspace=output_ws, SpectrumList="1-198", **self._extra_load_opts)
+            loaded_ws = LoadVesuvio(Filename=os.path.basename(filename).replace("EVS", ""),
+                                    OutputWorkspace=output_ws,
+                                    SpectrumList="1-198",
+                                    **self._extra_load_opts)
         else:
-            # loaded_ws = Load(Filename=filename, OutputWorkspace=output_ws, LoadLogFiles=False, **self._extra_load_opts)
             if self._load_logs == True:
-                loaded_ws = Load(Filename=filename, OutputWorkspace=output_ws, LoadLogFiles=True, **self._extra_load_opts)
+                loaded_ws = Load(Filename=filename,
+                                 OutputWorkspace=output_ws,
+                                 LoadLogFiles=True,
+                                 **self._extra_load_opts)
                 logger.notice("Loaded sample logs")
             else:
-                loaded_ws = Load(Filename=filename, OutputWorkspace=output_ws, LoadLogFiles=False, **self._extra_load_opts)
+                loaded_ws = Load(Filename=filename,
+                                 OutputWorkspace=output_ws,
+                                 LoadLogFiles=False,
+                                 **self._extra_load_opts)
 
     def _sum_regular(self, wsname):
         merges = [[], []]

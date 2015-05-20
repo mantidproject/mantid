@@ -214,6 +214,10 @@ class LoadVesuvio(PythonAlgorithm):
             np.sqrt(dataE, dataE)
             foil_out.setX(ws_index, x_values)
 
+        ip_file = self.getPropertyValue(INST_PAR_PROP)
+        if len(ip_file) > 0:
+            self._load_ip_file(ip_file)
+
         if self._sumspectra:
             self._sum_all_spectra()
 
