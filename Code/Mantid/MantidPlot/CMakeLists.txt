@@ -898,6 +898,7 @@ target_link_libraries ( MantidPlot LINK_PRIVATE
                         ${QSCINTILLA_LIBRARIES}
                         ${PYTHON_LIBRARIES}
                         ${ZLIB_LIBRARIES}
+                        ${OPENGL_LIBRARIES}
 )
 
 if (WITH_ASAN)

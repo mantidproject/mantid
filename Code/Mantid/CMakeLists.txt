@@ -38,6 +38,15 @@ set ( CPACK_PACKAGE_NAME "mantid${CPACK_PACKAGE_SUFFIX}" )
 find_package ( Qt4 COMPONENTS QtCore QtGui QtOpenGL QtXml QtSvg Qt3Support REQUIRED )
 
 ###########################################################################
+# Find OpenGL
+###########################################################################
+find_package ( OpenGL REQUIRED )
+# FindOpenGL does not (as of CMake 2.6.4) take notice of the REQUIRED
+if ( NOT OPENGL_FOUND )
+  message ( FATAL_ERROR "OpenGL was not found." )
+endif ()
+
+###########################################################################
 # Set ParaView information since later items depend on it
 ###########################################################################
 include ( ParaViewSetup )
