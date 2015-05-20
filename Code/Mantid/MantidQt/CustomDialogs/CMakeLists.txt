@@ -83,6 +83,7 @@ target_link_libraries ( CustomDialogs LINK_PRIVATE
             ${QT_LIBRARIES}
             ${POCO_LIBRARIES}
             ${Boost_LIBRARIES}
+            ${OPENGL_LIBRARIES}
             )
 
 ###########################################################################
