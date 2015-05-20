@@ -29,6 +29,7 @@ std::string createSHA1(const std::string &data,
 
   SHA1Engine sha1;
   DigestOutputStream outstr(sha1);
+  outstr << header << data;
   outstr.flush(); // to pass everything to the digest engine
   return DigestEngine::digestToHex(sha1.digest());
 }
