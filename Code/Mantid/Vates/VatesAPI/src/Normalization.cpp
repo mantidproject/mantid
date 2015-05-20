@@ -48,7 +48,7 @@ Create iterators with correct normalization normalization to an IMDIterator.
 */
 Mantid::API::IMDIterator * createIteratorWithNormalization(
     const VisualNormalization normalizationOption,
-    Mantid::API::IMDEventWorkspace const * const ws) {
+    Mantid::API::IMDWorkspace const * const ws) {
 
   using namespace Mantid::API;
 

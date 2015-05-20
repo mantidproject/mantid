@@ -168,6 +168,10 @@ const char* vtkMDEWSource::GetInstrument()
   }
 }
 
+/**
+Set the normalization option. This is how the signal data will be normalized before viewing.
+@param option : Normalization option
+*/
 void vtkMDEWSource::SetNormalization(int option)
 {
   m_normalization = static_cast<Mantid::VATES::VisualNormalization>(option);

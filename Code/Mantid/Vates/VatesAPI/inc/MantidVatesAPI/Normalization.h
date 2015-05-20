@@ -9,6 +9,7 @@ namespace API {
 // Forward declarations
 class IMDIterator;
 class IMDNode;
+class IMDWorkspace;
 class IMDEventWorkspace;
 }
 
@@ -46,7 +47,7 @@ Determine which normalization function will be called on an IMDIterator of an IM
 */
 Mantid::API::IMDIterator * createIteratorWithNormalization(
     const VisualNormalization normalizationOption,
-    Mantid::API::IMDEventWorkspace const * const ws);
+    Mantid::API::IMDWorkspace const * const ws);
 
 }
 }
