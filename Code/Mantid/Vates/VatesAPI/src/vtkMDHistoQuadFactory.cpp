@@ -130,7 +130,7 @@ namespace Mantid
           {
             index = j + nBinsY*i;
             iterator->jumpTo(index);
-            signalScalar = iterator->getNormalizedSignal(); // Get signal normalized as per m_normalizationOption
+            signalScalar = static_cast<float>(iterator->getNormalizedSignal()); // Get signal normalized as per m_normalizationOption
 
             if (isSpecial( signalScalar ) || !m_thresholdRange->inRange(signalScalar))
             {

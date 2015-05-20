@@ -281,7 +281,7 @@ public:
   virtual bool isBox() const = 0;
 
   virtual signal_t getSignalByNEvents() const {
-    return this->getSignal()/this->getNPoints();
+    return this->getSignal()/static_cast<signal_t>(this->getNPoints());
   }
 
   // ----------------------------- Helper Methods
