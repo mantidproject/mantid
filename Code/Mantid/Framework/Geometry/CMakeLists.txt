@@ -383,7 +383,7 @@ set_property ( TARGET Geometry PROPERTY FOLDER "MantidFramework" )
 
 target_link_libraries ( Geometry ${MANTIDLIBS}  ${OPENGL_LIBRARIES} )
 
-if (NOT NO_OPENCASCADE)
+if (ENABLE_OPENCASCADE)
   target_link_libraries ( Geometry ${OPENCASCADE_LIBRARIES} )
 endif ()
 
