@@ -88,18 +88,18 @@ endif ()
 
 # ... and links to other required libs ...
 target_link_libraries ( mantidqtpython LINK_PRIVATE 
-	MantidQtAPI 
-	MantidQtSliceViewer 
-	MantidQtFactory 
-	MantidQtRefDetectorViewer
-	MantidWidgets
-	${CORE_MANTIDLIBS}
-	${POCO_LIBRARIES}
-	${Boost_LIBRARIES}
-	${QT_LIBRARIES} 
-	${QWT_LIBRARIES}
-	${PYTHON_LIBRARIES}
-	)
+            MantidQtAPI
+            MantidQtSliceViewer
+            MantidQtFactory
+            MantidQtRefDetectorViewer
+            MantidWidgets
+            ${CORE_MANTIDLIBS}
+            ${POCO_LIBRARIES}
+            ${Boost_LIBRARIES}
+            ${QT_LIBRARIES}
+            ${QWT_LIBRARIES}
+            ${PYTHON_LIBRARIES}
+            )
 
 
 

@@ -131,14 +131,14 @@ set_target_output_directory ( PythonAPIModule ${OUTPUT_DIR} .pyd )
 
 # Add the required dependencies
 target_link_libraries ( PythonAPIModule LINK_PRIVATE 
-		PythonGeometryModule 
-		PythonKernelModule 
-		API 
-		Kernel
-		Geometry
-		${PYTHON_LIBRARIES}
-		${POCO_LIBRARIES} 
-		${Boost_LIBRARIES} )
+            PythonGeometryModule
+            PythonKernelModule
+            API
+            Kernel
+            Geometry
+            ${PYTHON_LIBRARIES}
+            ${POCO_LIBRARIES}
+            ${Boost_LIBRARIES} )
 
 if (OSX_VERSION VERSION_GREATER 10.8)
   set_target_properties( PythonAPIModule PROPERTIES INSTALL_RPATH "@loader_path/../../../MacOS;@loader_path/../kernel/;@loader_path/../geometry/")

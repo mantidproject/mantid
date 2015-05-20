@@ -77,13 +77,13 @@ if (OSX_VERSION VERSION_GREATER 10.8)
 endif () 
 
 target_link_libraries ( CustomDialogs LINK_PRIVATE 
-		MantidQtAPI 
-		MantidWidgets
-		${CORE_MANTIDLIBS}
-		${QT_LIBRARIES}
-		${POCO_LIBRARIES}
-		${Boost_LIBRARIES}
-		)
+            MantidQtAPI
+            MantidWidgets
+            ${CORE_MANTIDLIBS}
+            ${QT_LIBRARIES}
+            ${POCO_LIBRARIES}
+            ${Boost_LIBRARIES}
+            )
 
 ###########################################################################
 # Installation settings

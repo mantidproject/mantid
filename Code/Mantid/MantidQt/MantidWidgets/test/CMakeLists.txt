@@ -3,14 +3,14 @@ if ( CXXTEST_FOUND )
 
   cxxtest_add_test ( MantidWidgetsTest ${TEST_FILES} )
   target_link_libraries( MantidWidgetsTest LINK_PRIVATE 
-			MantidWidgets 
-			API
-			Geometry
-			Kernel
-			${QT_LIBRARIES}
-			${Boost_LIBRARIES}
-			${POCO_LIBRARIES}
-			)
+            MantidWidgets
+            API
+            Geometry
+            Kernel
+            ${QT_LIBRARIES}
+            ${Boost_LIBRARIES}
+            ${POCO_LIBRARIES}
+            )
 
   # Add to the 'UnitTests' group in VS
   set_property( TARGET MantidWidgetsTest PROPERTY FOLDER "UnitTests" )

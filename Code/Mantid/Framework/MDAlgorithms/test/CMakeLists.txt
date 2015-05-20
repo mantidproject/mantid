@@ -15,21 +15,21 @@ if ( CXXTEST_FOUND )
 
   cxxtest_add_test ( MDAlgorithmsTest ${TEST_FILES} ${GMOCK_TEST_FILES})
   target_link_libraries( MDAlgorithmsTest LINK_PRIVATE 
-			API
-			DataHandling 
-			DataObjects
-			CurveFitting 
-			Geometry
-			Kernel
-			MDAlgorithms 
-			Nexus 
-			${Boost_LIBRARIES}
-			${POCO_LIBRARIES}
-			${MUPARSER_LIBRARIES}
-			${GMOCK_LIBRARIES} 
-			${GTEST_LIBRARIES} 
-			${NEXUS_LIBRARIES} 
-			${HDF5_LIBRARIES} )
+            API
+            DataHandling
+            DataObjects
+            CurveFitting
+            Geometry
+            Kernel
+            MDAlgorithms
+            Nexus
+            ${Boost_LIBRARIES}
+            ${POCO_LIBRARIES}
+            ${MUPARSER_LIBRARIES}
+            ${GMOCK_LIBRARIES}
+            ${GTEST_LIBRARIES}
+            ${NEXUS_LIBRARIES}
+            ${HDF5_LIBRARIES} )
 
   add_dependencies ( MDAlgorithmsTest DataHandling Algorithms CurveFitting )
   add_dependencies ( FrameworkTests MDAlgorithmsTest )

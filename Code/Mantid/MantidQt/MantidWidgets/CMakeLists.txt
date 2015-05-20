@@ -160,14 +160,14 @@ if (OSX_VERSION VERSION_GREATER 10.8)
 endif ()
 
 target_link_libraries ( MantidWidgets LINK_PRIVATE 
-	MantidQtAPI 
-	QtPropertyBrowser 
-	${CORE_MANTIDLIBS}
-    ${QT_LIBRARIES} ${QWT_LIBRARIES} 
-    ${QSCINTILLA_LIBRARIES}
-	${POCO_LIBRARIES}
-	${Boost_LIBRARIES} 
-    )
+            MantidQtAPI
+            QtPropertyBrowser
+            ${CORE_MANTIDLIBS}
+            ${QT_LIBRARIES} ${QWT_LIBRARIES}
+            ${QSCINTILLA_LIBRARIES}
+            ${POCO_LIBRARIES}
+            ${Boost_LIBRARIES}
+            )
 
 ###########################################################################
 # Testing

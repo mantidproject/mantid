@@ -380,16 +380,16 @@ endif ()
 find_Package(Threads)
 
 target_link_libraries ( CustomInterfaces LINK_PRIVATE 
-		MantidQtAPI 
-		MantidWidgets 
-		QtPropertyBrowser 
-		${CORE_MANTIDLIBS} 
-		${QT_LIBRARIES}
-		${QWT_LIBRARIES}
-		${POCO_LIBRARIES}
-		${Boost_LIBRARIES}
-		${JSONCPP_LIBRARIES}
-		${CMAKE_THREAD_LIBS_INIT})
+            MantidQtAPI
+            MantidWidgets
+            QtPropertyBrowser
+            ${CORE_MANTIDLIBS}
+            ${QT_LIBRARIES}
+            ${QWT_LIBRARIES}
+            ${POCO_LIBRARIES}
+            ${Boost_LIBRARIES}
+            ${JSONCPP_LIBRARIES}
+            ${CMAKE_THREAD_LIBS_INIT})
 
 ###########################################################################
 # Testing

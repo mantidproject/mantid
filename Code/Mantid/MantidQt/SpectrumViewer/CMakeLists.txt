@@ -83,13 +83,13 @@ if (OSX_VERSION VERSION_GREATER 10.8)
 endif ()
 # ... and links to other required libs
 target_link_libraries ( MantidQtSpectrumViewer LINK_PRIVATE 
-                        MantidQtAPI 
-						MantidWidgets 
-						${CORE_MANTIDLIBS}
-						${POCO_LIBRARIES}
-						${Boost_LIBRARIES}
-						${QT_LIBRARIES} 
-						${QWT_LIBRARIES} )
+            MantidQtAPI
+            MantidWidgets
+            ${CORE_MANTIDLIBS}
+            ${POCO_LIBRARIES}
+            ${Boost_LIBRARIES}
+            ${QT_LIBRARIES}
+            ${QWT_LIBRARIES} )
 
 
 ###########################################################################

@@ -14,14 +14,14 @@ if ( CXXTEST_FOUND )
 
   cxxtest_add_test ( GeometryTest ${TEST_FILES} ${GMOCK_TEST_FILES})
   target_link_libraries( GeometryTest LINK_PRIVATE 
-			Geometry
-			Kernel
-			${NEXUS_LIBRARIES}
-			${GSL_LIBRARIES}
-			${Boost_LIBRARIES}
-		    ${POCO_LIBRARIES}
-			${GMOCK_LIBRARIES} 
-			${GTEST_LIBRARIES} )
+            Geometry
+            Kernel
+            ${NEXUS_LIBRARIES}
+            ${GSL_LIBRARIES}
+            ${Boost_LIBRARIES}
+            ${POCO_LIBRARIES}
+            ${GMOCK_LIBRARIES}
+            ${GTEST_LIBRARIES} )
   
   add_dependencies ( FrameworkTests GeometryTest )
   # Add to the 'FrameworkTests' group in VS

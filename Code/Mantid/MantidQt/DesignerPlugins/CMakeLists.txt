@@ -45,16 +45,16 @@ set_target_properties( DesignerPlugins PROPERTIES EXCLUDE_FROM_ALL TRUE )
 
 # Set the library dependencies
 target_link_libraries ( DesignerPlugins LINK_PRIVATE 
-		MantidWidgets 
-		MantidQtSliceViewer 
-		MantidQtAPI
-		${QT_LIBRARIES}
-		${QWT_LIBRARIES}
-		${QSCINTILLA_LIBRARIES}
-		${CORE_MANTIDLIBS}
-		${POCO_LIBRARIES}
-		${Boost_LIBRARIES}
-		${QT_LIBRARIES} )
+            MantidWidgets
+            MantidQtSliceViewer
+            MantidQtAPI
+            ${QT_LIBRARIES}
+            ${QWT_LIBRARIES}
+            ${QSCINTILLA_LIBRARIES}
+            ${CORE_MANTIDLIBS}
+            ${POCO_LIBRARIES}
+            ${Boost_LIBRARIES}
+            ${QT_LIBRARIES} )
 
 # Clean up
 set ( LIB_NAME )

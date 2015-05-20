@@ -150,13 +150,13 @@ endif ()
 
 # ... and links to other required libs
 target_link_libraries ( MantidQtSliceViewer LINK_PRIVATE 
-		MantidQtAPI 
-		MantidWidgets
-		${CORE_MANTIDLIBS}
-		${POCO_LIBRARIES}
-		${Boost_LIBRARIES}
-		${QT_LIBRARIES} 
-		${QWT_LIBRARIES} )
+            MantidQtAPI
+            MantidWidgets
+            ${CORE_MANTIDLIBS}
+            ${POCO_LIBRARIES}
+            ${Boost_LIBRARIES}
+            ${QT_LIBRARIES}
+            ${QWT_LIBRARIES} )
 
 ###########################################################################
 # Unit tests setup
@@ -178,15 +178,15 @@ if ( CXXTEST_FOUND )
 
   cxxtest_add_test ( SliceViewerTest ${TEST_FILES} ${GMOCK_TEST_FILES} )
   target_link_libraries( SliceViewerTest LINK_PRIVATE 
-		MantidQtSliceViewer 
-		DataObjects 
-		Crystal 
-		${CORE_MANTIDLIBS}
-		${Boost_LIBRARIES}
-		${POCO_LIBRARIES}
-		${QT_LIBRARIES} 
-		${GMOCK_LIBRARIES} 
-		${GTEST_LIBRARIES} )
+            MantidQtSliceViewer
+            DataObjects
+            Crystal
+            ${CORE_MANTIDLIBS}
+            ${Boost_LIBRARIES}
+            ${POCO_LIBRARIES}
+            ${QT_LIBRARIES}
+            ${GMOCK_LIBRARIES}
+            ${GTEST_LIBRARIES} )
 
   add_dependencies( GUITests SliceViewerTest )
   # Add to the 'UnitTests' group in VS

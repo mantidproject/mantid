@@ -11,17 +11,17 @@ if ( CXXTEST_FOUND )
   )
   cxxtest_add_test ( CurveFittingTest ${TEST_FILES}  )
   target_link_libraries( CurveFittingTest LINK_PRIVATE 
-		CurveFitting
-		API
-		DataHandling 
-		DataObjects
-		Geometry
-		Kernel
-		${GSL_LIBRARIES}
-		${Boost_LIBRARIES}
-		${POCO_LIBRARIES}
-		${GMOCK_LIBRARIES} 
-		${GTEST_LIBRARIES})
+            CurveFitting
+            API
+            DataHandling
+            DataObjects
+            Geometry
+            Kernel
+            ${GSL_LIBRARIES}
+            ${Boost_LIBRARIES}
+            ${POCO_LIBRARIES}
+            ${GMOCK_LIBRARIES}
+            ${GTEST_LIBRARIES})
   add_dependencies ( CurveFittingTest Algorithms )
   add_dependencies ( FrameworkTests CurveFittingTest )
   # Test data

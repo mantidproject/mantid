@@ -9,14 +9,14 @@ if ( CXXTEST_FOUND )
 
   cxxtest_add_test ( PSISINQTest ${TEST_FILES} ${GMOCK_TEST_FILES})
   target_link_libraries ( PSISINQTest LINK_PRIVATE 
-			API
-			Geometry
-			Kernel
-			SINQ  
-			CurveFitting 
-			${MANTIDLIBS} 
-			${GMOCK_LIBRARIES} 
-			${GTEST_LIBRARIES} )
+            API
+            Geometry
+            Kernel
+            SINQ
+            CurveFitting
+            ${MANTIDLIBS}
+            ${GMOCK_LIBRARIES}
+            ${GTEST_LIBRARIES} )
 
   # Test data
   add_dependencies ( PSISINQTest StandardTestData )

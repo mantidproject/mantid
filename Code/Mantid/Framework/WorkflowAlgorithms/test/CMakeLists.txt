@@ -10,16 +10,16 @@ if ( CXXTEST_FOUND )
                         ../../TestHelpers/src/WorkspaceCreationHelper.cpp )
   cxxtest_add_test ( WorkflowAlgorithmsTest ${TEST_FILES} )
   target_link_libraries ( WorkflowAlgorithmsTest LINK_PRIVATE 
-			WorkflowAlgorithms 
-			API
-			Algorithms 
-			DataHandling 
-			DataObjects
-			Geometry
-			Kernel
-			${Boost_LIBRARIES}
-			${POCO_LIBRARIES}
-			)
+            WorkflowAlgorithms
+            API
+            Algorithms
+            DataHandling
+            DataObjects
+            Geometry
+            Kernel
+            ${Boost_LIBRARIES}
+            ${POCO_LIBRARIES}
+            )
   add_dependencies ( WorkflowAlgorithmsTest CurveFitting )
   add_dependencies ( FrameworkTests WorkflowAlgorithmsTest )
   # Test data

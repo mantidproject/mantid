@@ -33,16 +33,16 @@ set_target_output_directory ( PythonWorkspaceCreationHelper ${OUTPUT_DIR} .pyd )
 # Override folder
 set_property ( TARGET PythonWorkspaceCreationHelper PROPERTY FOLDER "UnitTests/Python" )
 target_link_libraries ( PythonWorkspaceCreationHelper LINK_PRIVATE 
-		PythonAPIModule 
-		DataObjects 
-		DataHandling
-		API
-		Kernel
-		Geometry
-		${PYTHON_LIBRARIES}
-		${Boost_LIBRARIES}
-		${POCO_LIBRARIES}
-		)
+            PythonAPIModule
+            DataObjects
+            DataHandling
+            API
+            Kernel
+            Geometry
+            ${PYTHON_LIBRARIES}
+            ${Boost_LIBRARIES}
+            ${POCO_LIBRARIES}
+            )
 
 # Overall testhelpers target
 add_custom_target ( testhelpers DEPENDS PythonWorkspaceCreationHelper )

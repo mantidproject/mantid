@@ -6,13 +6,13 @@ if ( CXXTEST_FOUND )
   
   cxxtest_add_test ( ScriptRepositoryTest ${TEST_FILES} ${GMOCK_TEST_FILES})   
   target_link_libraries( ScriptRepositoryTest LINK_PRIVATE 
-			API
-			Kernel
-			ScriptRepository 
-			${Boost_LIBRARIES}
-			${POCO_LIBRARIES}
-			${GMOCK_LIBRARIES} 
-			${GTEST_LIBRARIES}  )
+            API
+            Kernel
+            ScriptRepository
+            ${Boost_LIBRARIES}
+            ${POCO_LIBRARIES}
+            ${GMOCK_LIBRARIES}
+            ${GTEST_LIBRARIES}  )
 
   add_dependencies ( FrameworkTests ScriptRepositoryTest )
   # Add to the 'FrameworkTests' group in VS
