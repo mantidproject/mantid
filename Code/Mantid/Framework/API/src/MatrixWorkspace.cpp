@@ -1555,9 +1555,14 @@ signal_t MatrixWorkspace::getSignalAtCoord(
         switch (normalization) {
         case NoNormalization:
           return y;
-        case VolumeNormalization:
+        case VolumeNormalization: {
           // Divide the signal by the area
-          return y / (yBinSize * (X[i] - X[i - 1]));
+          auto volume = yBinSize * (X[i] - X[i - 1]);
+          if (volume == 0.0) {
+            return std::numeric_limits<double>::quiet_NaN();
+          }
+          return y / volume;
+        }
         case NumEventsNormalization:
           // Not yet implemented, may not make sense
           return y;

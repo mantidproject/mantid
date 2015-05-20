@@ -567,6 +567,11 @@ FitPeakOffsetResult GetDetOffsetsMultiPeaks::calculatePeakOffset(
   fr.numpeakstofit = 0;
   fr.numpeaksindrange = 0;
 
+  fr.highestpeakpos = 0.0;
+  fr.highestpeakdev = 0.0;
+  fr.resolution = 0.0;
+  fr.dev_resolution = 0.0;
+
   // Checks for empty and dead detectors
   if ((isEvent) && (eventW->getEventList(wi).empty())) {
     // empty detector will be masked

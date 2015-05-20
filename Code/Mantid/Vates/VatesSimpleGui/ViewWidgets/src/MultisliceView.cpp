@@ -113,11 +113,11 @@ static void GetOrientations(vtkSMSourceProxy* producer, vtkVector3d sliceNormals
 
 MultiSliceView::MultiSliceView(QWidget *parent, RebinnedSourcesManager* rebinnedSourcesManager) : ViewBase(parent, rebinnedSourcesManager)
 {
-  this->ui.setupUi(this);
-  pqRenderView *tmp = this->createRenderView(this->ui.renderFrame,
+  this->m_ui.setupUi(this);
+  pqRenderView *tmp = this->createRenderView(this->m_ui.renderFrame,
                                              QString("MultiSlice"));
-  this->mainView = qobject_cast<pqMultiSliceView *>(tmp);
-  QObject::connect(this->mainView,
+  this->m_mainView = qobject_cast<pqMultiSliceView *>(tmp);
+  QObject::connect(this->m_mainView,
                    SIGNAL(sliceClicked(int, double, int, int)),
                    this,
                    SLOT(checkSliceClicked(int,double,int,int)));
@@ -130,12 +130,12 @@ MultiSliceView::~MultiSliceView()
 void MultiSliceView::destroyView()
 {
   pqObjectBuilder *builder = pqApplicationCore::instance()->getObjectBuilder();
-  builder->destroy(this->mainView);
+  builder->destroy(this->m_mainView);
 }
 
 pqRenderView* MultiSliceView::getView()
 {
-  return qobject_cast<pqRenderView*>(this->mainView.data());
+  return qobject_cast<pqRenderView*>(this->m_mainView.data());
 }
 
 
@@ -147,7 +147,7 @@ void MultiSliceView::setupData()
   if (this->origSrc)
   {
     pqDataRepresentation *drep = builder->createDataRepresentation(\
-    this->origSrc->getOutputPort(0), this->mainView);
+    this->origSrc->getOutputPort(0), this->m_mainView);
     vtkSMPropertyHelper(drep->getProxy(), "Representation").Set("Slices");
     drep->getProxy()->UpdateVTKObjects();
   }
@@ -163,17 +163,17 @@ void MultiSliceView::render()
 
 void MultiSliceView::renderAll()
 {
-  this->mainView->render();
+  this->m_mainView->render();
 }
 
 void MultiSliceView::resetDisplay()
 {
-  this->mainView->resetDisplay();
+  this->m_mainView->resetDisplay();
 }
 
 void MultiSliceView::resetCamera()
 {
-  this->mainView->resetCamera();
+  this->m_mainView->resetCamera();
 }
 
 /**
@@ -205,15 +205,15 @@ void MultiSliceView::checkSliceViewCompat()
   QString wsName = this->getWorkspaceName();
   if (wsName.isEmpty())
   {
-    QObject::disconnect(this->mainView, 0, this, 0);
+    QObject::disconnect(this->m_mainView, 0, this, 0);
   }
 }
   
 void MultiSliceView::changedSlicePoint(Mantid::Kernel::VMD selectedPoint)
 {
-  vtkSMPropertyHelper(this->mainView->getProxy(),"XSlicesValues").Set(selectedPoint[0]);
-  this->mainView->getProxy()->UpdateVTKObjects();
-  this->mainView->render();
+  vtkSMPropertyHelper(this->m_mainView->getProxy(),"XSlicesValues").Set(selectedPoint[0]);
+  this->m_mainView->getProxy()->UpdateVTKObjects();
+  this->m_mainView->render();
 }
 
 /**

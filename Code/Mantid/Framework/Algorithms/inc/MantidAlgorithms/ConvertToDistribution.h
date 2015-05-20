@@ -64,6 +64,8 @@ private:
   void init();
   /// Execution code
   void exec();
+  /// Validate inputs
+  std::map<std::string, std::string> validateInputs();
 };
 
 } // namespace Algorithms

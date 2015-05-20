@@ -7,11 +7,59 @@ Muon ALC
 Overview
 --------
 
-The Muon ALC interface, which is short for Avoided Level Crossing, aims at 
-handling frequent analysis on e.g. HIFI. It uses simple point-and-click to 
-analyse a sequence of datasets collected with different parameter values, for 
-instance different magnetic fields, temperature, etc, and study how this 
-affects asymmetry. There are currently three steps in the analysis. 
+The Avoided Level Crossing (ALC) :math:`\mu SR` technique probes the energy levels of a
+muoniated radical system, and can be used to elucidate the regiochemistry of
+muonium addition, dynamic processes, and reaction kinetics, through measurement
+of the muon and proton hyperfine coupling interactions.
+
+Radical systems are formed during muon thermalisation, during which a portion of
+the implanted muons are able to capture electrons to form muonium (:math:`\mu+e`). Muonium
+adds to centres of unsaturation in a sample (double or triple bonds) to form a
+muoniated radical species. The spins of the muon, unpaired electron, and protons
+within the sample interact through the isotropic and anisotropic components of
+the hyperfine interaction, forming a quantised system, described by a series of
+discrete energy levels.
+
+In an ALC experiment the magnetic field is incrementally scanned, recording a
+specified number of positron events at each step. At certain fields, the energy
+levels in the muon and sample system become nearly degenerate, and are able to
+interact through the hyperfine coupling interaction. The spins oscillate between
+the two energy states resulting in a dip in the polarisation, observed as a
+resonance during the magnetic field scan. The three types of ALC resonance
+(referred to as :math:`\Delta 0`, :math:`\Delta 1`, and :math:`\Delta 2` resonances) are characterised by the selection
+rule :math:`\Delta M=0, \pm 1, \pm 2`, where :math:`M` is the sum of the mz quantum numbers of the spins
+of the muon, electron and proton. Isotropic hyperfine coupling interactions
+manifest as :math:`\Delta 0` resonances resulting from muon-nuclear spin flip-flop transitions.
+The :math:`\Delta 0` resonance field is dependent on the magnitude of both the muon and proton
+hyperfine interaction (:math:`A\mu` and :math:`Ak`, respectively) and can occur in gaseous, liquid,
+or solid phase samples. The muon spin flip transition that produces the :math:`\Delta 1`
+resonance only arises in the presence of anisotropy. Radical systems possessing
+complete anisotropy produce a single broad resonance and systems with axial or
+equatorial anisotropy produce an asymmetrical resonance line shape known as a
+powder pattern. The :math:`\Delta 2` resonance is also observed in radicals from anisotropic
+environments. However, these are rarely observed experimentally due to their
+characteristically weak intensity line shapes. The magnitude of the hyperfine
+interaction is characteristic of the muon binding site, and can result in an
+ALC resonance associated with each of the magnetically equivalent nuclei,
+for each muoniated radical isomer.
+
+The magnetic field position, the full width at half height (FWHH), and the
+resonance line shape are the important parameters to be extracted from the
+ALC spectrum. The field position of a resonance is related to the muon
+and/or nuclear hyperfine coupling constant. They often show strong temperature
+dependence and can reveal information regarding the structure of the investigated
+system. The FWHH of a resonance may indicate any motional dynamics present in the
+system, and can also be used to determine muonium addition rates. The anisotropic
+environments experienced by radicals in solid samples can produce a variety of
+'powder pattern' lineshapes, which are characteristic of the orientation of the
+effective hyperfine tensors relative to the magnetic field, and can thus
+indicate any reorientational motion present.
+
+In order to extract these parameters accurately from an ALC spectrum it is
+necessary to determine a baseline, perform a baseline subtraction and then
+fit the peaks. The Muon ALC interface integrates this sequence of
+operations hiding the complexity of the underlying algorithms.
+
 
 Data Loading
 ------------
@@ -40,6 +88,9 @@ Last
 
 Log
   Log value to use as X parameter
+
+Function
+  The function to apply to the time series log: Mean/Min/Max/First/Last
 
 Dead Time Correction
   Type of dead time corrections to apply. Options are *None*, in which case no 

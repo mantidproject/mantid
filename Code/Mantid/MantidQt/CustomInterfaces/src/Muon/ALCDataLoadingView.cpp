@@ -61,6 +61,11 @@ namespace CustomInterfaces
     return m_ui.log->currentText().toStdString();
   }
 
+  std::string ALCDataLoadingView::function() const
+  {
+    return m_ui.function->currentText().toStdString();
+  }
+
   std::string ALCDataLoadingView::calculationType() const
   {
     // XXX: "text" property of the buttons should be set correctly, as accepted by

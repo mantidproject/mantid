@@ -96,8 +96,8 @@ QMap<QString, QString> StandardView::g_actionToAlgName;
                                                                  m_cutMDAction(NULL),
                                                                  m_unbinAction(NULL)
 {
-  this->ui.setupUi(this);
-  this->cameraReset = false;
+  this->m_ui.setupUi(this);
+  this->m_cameraReset = false;
 
   // before setting the button-actions, register their algorithms
   if (0 == g_actionToAlgName.size()) {
@@ -110,7 +110,7 @@ QMap<QString, QString> StandardView::g_actionToAlgName;
   setupViewButtons();
 
   // Set the cut button to create a slice on the data
-  QObject::connect(this->ui.cutButton, SIGNAL(clicked()), this,
+  QObject::connect(this->m_ui.cutButton, SIGNAL(clicked()), this,
                    SLOT(onCutButtonClicked()));
 
   // Listen to a change in the active source, to adapt our rebin buttons
@@ -118,12 +118,12 @@ QMap<QString, QString> StandardView::g_actionToAlgName;
                    this, SLOT(activeSourceChangeListener(pqPipelineSource*)));
 
   // Set the scale button to create the ScaleWorkspace operator
-  QObject::connect(this->ui.scaleButton, SIGNAL(clicked()),
+  QObject::connect(this->m_ui.scaleButton, SIGNAL(clicked()),
                    this, SLOT(onScaleButtonClicked()));
 
-  this->view = this->createRenderView(this->ui.renderFrame);
+  this->m_view = this->createRenderView(this->m_ui.renderFrame);
 
-  QObject::connect(this->view.data(), SIGNAL(endRender()),
+  QObject::connect(this->m_view.data(), SIGNAL(endRender()),
                    this, SLOT(onRenderDone()));
 
 
@@ -137,7 +137,7 @@ void StandardView::setupViewButtons()
 {
 
   // Populate the rebin button
-  QMenuWithToolTip* rebinMenu = new QMenuWithToolTip(this->ui.rebinToolButton);
+  QMenuWithToolTip* rebinMenu = new QMenuWithToolTip(this->m_ui.rebinToolButton);
 
   m_binMDAction = new QAction(g_binMDLbl, rebinMenu);
   m_binMDAction->setToolTip(g_binMDToolTipTxt);
@@ -159,8 +159,8 @@ void StandardView::setupViewButtons()
   rebinMenu->addAction(m_cutMDAction);
   rebinMenu->addAction(m_unbinAction);
 
-  this->ui.rebinToolButton->setPopupMode(QToolButton::InstantPopup);
-  this->ui.rebinToolButton->setMenu(rebinMenu);
+  this->m_ui.rebinToolButton->setPopupMode(QToolButton::InstantPopup);
+  this->m_ui.rebinToolButton->setMenu(rebinMenu);
 
   QObject::connect(m_binMDAction, SIGNAL(triggered()),
                    this, SLOT(onRebin()), Qt::QueuedConnection);
@@ -179,12 +179,12 @@ void StandardView::destroyView()
 {
   pqObjectBuilder *builder = pqApplicationCore::instance()->getObjectBuilder();
   this->destroyFilter(QString("Slice"));
-  builder->destroy(this->view);
+  builder->destroy(this->m_view);
 }
 
 pqRenderView* StandardView::getView()
 {
-  return this->view.data();
+  return this->m_view.data();
 }
 
 void StandardView::render()
@@ -200,12 +200,12 @@ void StandardView::render()
 
   if (this->isPeaksWorkspace(this->origSrc))
   {
-    this->ui.cutButton->setEnabled(false);
+    this->m_ui.cutButton->setEnabled(false);
   }
 
   // Show the data
   pqDataRepresentation *drep = builder->createDataRepresentation(\
-        this->origSrc->getOutputPort(0), this->view);
+        this->origSrc->getOutputPort(0), this->m_view);
   QString reptype = "Surface";
   if (this->isPeaksWorkspace(this->origSrc))
   {
@@ -239,7 +239,7 @@ void StandardView::onCutButtonClicked()
 void StandardView::onScaleButtonClicked()
 {
   pqObjectBuilder *builder = pqApplicationCore::instance()->getObjectBuilder();
-  this->scaler = builder->createFilter("filters",
+  this->m_scaler = builder->createFilter("filters",
                                        "MantidParaViewScaleWorkspace",
                                        this->getPvActiveSrc());
 }
@@ -250,28 +250,28 @@ void StandardView::onScaleButtonClicked()
  */
 void StandardView::onRenderDone()
 {
-  if (this->cameraReset)
+  if (this->m_cameraReset)
   {
     this->resetCamera();
-    this->cameraReset = false;
+    this->m_cameraReset = false;
   }
 }
 
 void StandardView::renderAll()
 {
-  this->view->render();
+  this->m_view->render();
 }
 
 void StandardView::resetDisplay()
 {
-  this->view->resetDisplay();
-  this->view->forceRender();
+  this->m_view->resetDisplay();
+  this->m_view->forceRender();
 }
 
 void StandardView::resetCamera()
 {
-  this->view->resetCamera();
-  this->view->forceRender();
+  this->m_view->resetCamera();
+  this->m_view->forceRender();
 }
 
 /**
@@ -279,12 +279,12 @@ void StandardView::resetCamera()
  */
 void StandardView::updateUI()
 {
-  this->ui.cutButton->setEnabled(true);
+  this->m_ui.cutButton->setEnabled(true);
 }
 
 void StandardView::updateView()
 {
-  this->cameraReset = true;
+  this->m_cameraReset = true;
 }
 
 void StandardView::closeSubWindows()
@@ -362,7 +362,7 @@ void StandardView::allowUnbinOption(bool allow) {
 
 
 /**
-  * Listen for a change of the active source in order to check if the the 
+  * Listen for a change of the active source in order to check if the
   * active source is an MDEventSource for which we allow rebinning.
   */
 void StandardView::activeSourceChangeListener(pqPipelineSource* source)
