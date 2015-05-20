@@ -19,6 +19,7 @@ if ( CXXTEST_FOUND )
             Geometry
             Kernel
             ${QT_LIBRARIES}
+            ${QWT_LIBRARIES}
             ${Boost_LIBRARIES}
             ${POCO_LIBRARIES}
             ${GMOCK_LIBRARIES}
