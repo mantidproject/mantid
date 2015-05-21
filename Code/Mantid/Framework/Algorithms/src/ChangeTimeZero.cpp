@@ -11,7 +11,6 @@
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/DateTimeValidator.h"
 
-#include <iostream>
 #include <boost/lexical_cast.hpp>
 #include <boost/shared_ptr.hpp>
 
@@ -110,8 +109,7 @@ double ChangeTimeZero::getTimeShift(API::MatrixWorkspace_sptr ws) const {
   if (m_isDateAndTime) {
     DateAndTime desiredTime(timeOffset);
     DateAndTime originalTime(getStartTimeFromWorkspace(ws));
-    time_duration duration = desiredTime - originalTime;
-    timeShift = static_cast<double>(duration.seconds());
+    timeShift = DateAndTime::secondsFromDuration(desiredTime - originalTime);
   } else {
     timeShift = boost::lexical_cast<double>(timeOffset);
   }
@@ -149,10 +147,10 @@ void ChangeTimeZero::shiftTimeOfLogs(Mantid::API::MatrixWorkspace_sptr ws,
  * @param prop :: a time series log
  * @param timeShift :: the time shift in seconds
  */
-void ChangeTimeZero::shiftTimeInLogForTimeSeries(Mantid::API::MatrixWorkspace_sptr ws,
-                                 Mantid::Kernel::Property *prop,
-                                 double timeShift) {
-  auto timeSeries = dynamic_cast<Mantid::Kernel::ITimeSeriesProperty*>(prop);
+void ChangeTimeZero::shiftTimeInLogForTimeSeries(
+    Mantid::API::MatrixWorkspace_sptr ws, Mantid::Kernel::Property *prop,
+    double timeShift) {
+  auto timeSeries = dynamic_cast<Mantid::Kernel::ITimeSeriesProperty *>(prop);
   if (!timeSeries) {
     return;
   }
@@ -198,11 +196,11 @@ void ChangeTimeZero::shiftTimeOfNeutrons(Mantid::API::MatrixWorkspace_sptr ws,
   }
 
   // Use the change pulse time algorithm to change the neutron time stamp
-  IAlgorithm_sptr alg = createChildAlgorithm("CloneWorkspace");
+  auto alg = createChildAlgorithm("ChangePulsetime");
   alg->initialize();
   alg->setProperty("InputWorkspace", eventWs);
   alg->setProperty("OutputWorkspace", eventWs);
-  alg->setProperty("TimeShift", timeShift);
+  alg->setProperty("TimeOffset", timeShift);
   alg->execute();
 }
 
@@ -223,7 +221,14 @@ DateAndTime
 ChangeTimeZero::getStartTimeFromWorkspace(API::MatrixWorkspace_sptr ws) const {
   auto run = ws->run();
   // Check for the first good frame in the log
-  auto goodFrame = run.getTimeSeriesProperty<double>("proton_charge");
+  Mantid::Kernel::TimeSeriesProperty<double> *goodFrame = NULL;
+  try {
+    goodFrame = run.getTimeSeriesProperty<double>("proton_charge");
+  } catch (std::invalid_argument) {
+    throw std::invalid_argument("ChangeTimeZero: The log needs a proton_charge "
+                                "time series to determine the zero time.");
+  }
+
   DateAndTime startTime;
   if (goodFrame->size() > 0) {
     startTime = goodFrame->firstTime();
@@ -251,7 +256,7 @@ std::map<std::string, std::string> ChangeTimeZero::validateInputs() {
   if (!m_isDouble && !m_isDateAndTime) {
     invalidProperties.insert(
         std::make_pair("TimeOffset", "TimeOffset must either be a numeric "
-                                     "value or a IS8601 date-time stamp."));
+                                     "value or a ISO8601 date-time stamp."));
   }
 
   return invalidProperties;
