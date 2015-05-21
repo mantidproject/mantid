@@ -87,6 +87,9 @@ void GeneralisedSecondDifference::exec() {
 
   const int n_specs = spec_max - spec_min + 1;
   const int n_points = static_cast<int>(inputWS->dataY(0).size()) - 2 * n_av;
+  if (n_points<1) {
+    throw std::invalid_argument("Invalid (M,Z) values");
+  }
   // Create OuputWorkspace
   MatrixWorkspace_sptr out = WorkspaceFactory::Instance().create(
       inputWS, n_specs, n_points + 1, n_points);
