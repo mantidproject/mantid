@@ -131,8 +131,11 @@ class EnginXFitPeaksTest(unittest.TestCase):
                                     BinWidth=25)
         EditInstrumentGeometry(Workspace=sws, L2=[1.5], Polar=[90], PrimaryFlightPath=50)
         difc, zero = EnginXFitPeaks(sws, WorkspaceIndex=0, ExpectedPeaks=[0.4, 1.09])
-        self.assertAlmostEqual(difc, 17395.620526173196)
-        self.assertAlmostEqual(zero, 1050.3378284424373)
+        # fitting results on some platforms (OSX) are different by ~0.07%
+        expected_difc = 17395.620526173196
+        self.assertTrue(abs((expected_difc-difc)/expected_difc) < 1e-3)
+        expected_zero = 1050.3378284424373
+        self.assertTrue(abs((expected_zero-zero)/expected_zero) < 1e-3)
 
 
     def test_runs_ok_3peaks(self):
@@ -151,8 +154,10 @@ class EnginXFitPeaksTest(unittest.TestCase):
                                     BinWidth=25)
         EditInstrumentGeometry(Workspace=sws, L2=[1.5], Polar=[90], PrimaryFlightPath=50)
         difc, zero = EnginXFitPeaks(sws, WorkspaceIndex=0, ExpectedPeaks=[0.4, 0.83, 1.09])
-        self.assertAlmostEqual(difc, 17335.67250113934)
-        self.assertAlmostEqual(zero, 950.9440922621866)
+        expected_difc = 17335.67250113934
+        self.assertTrue(abs((expected_difc-difc)/expected_difc) < 1e-3)
+        expected_zero = 950.9440922621866
+        self.assertTrue(abs((expected_zero-zero)/expected_zero) < 1e-3)
 
 
 
