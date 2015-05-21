@@ -414,6 +414,7 @@ FindPeaks::findPeaksGivenStartingPoints(const std::vector<double> &peakcentres,
         g_log.warning() << "Given peak centre " << x_center
                         << " is out side of given data's range ("
                         << practical_x_min << ", " << practical_x_max << ").\n";
+        addNonFitRecord(spec, x_center);
       }
 
     } // loop through the peaks specified
