@@ -136,7 +136,7 @@ void ChangeTimeZero::shiftTimeOfLogs(Mantid::API::MatrixWorkspace_sptr ws,
 
     } else if (auto stringProperty =
                    dynamic_cast<PropertyWithValue<std::string> *>(prop)) {
-      shiftTimeOfLogForStringProperty(ws, stringProperty, timeShift);
+      shiftTimeOfLogForStringProperty(stringProperty, timeShift);
     }
   }
 }
@@ -165,18 +165,13 @@ void ChangeTimeZero::shiftTimeInLogForTimeSeries(
  * @param timeShift :: the time shift.
  */
 void ChangeTimeZero::shiftTimeOfLogForStringProperty(
-    MatrixWorkspace_sptr ws, PropertyWithValue<std::string> *logEntry,
-    double timeShift) {
+    PropertyWithValue<std::string> *logEntry, double timeShift) {
   // Parse the log entry and replace all ISO8601 strings with an adjusted value
   auto value = logEntry->value();
-
-  auto isDateTime = checkForDateTime(value);
-  if (isDateTime) {
+  if (auto isDateTime = checkForDateTime(value)) {
     DateAndTime dateTime(value);
     DateAndTime shiftedTime = dateTime + timeShift;
     logEntry->setValue(shiftedTime.toISO8601String());
-  } else {
-    // TODO: Write warning
   }
 }
 
@@ -188,8 +183,7 @@ void ChangeTimeZero::shiftTimeOfLogForStringProperty(
 void ChangeTimeZero::shiftTimeOfNeutrons(Mantid::API::MatrixWorkspace_sptr ws,
                                          double timeShift) {
   // If the matrix workspace is an event workspace we need to change the events
-  auto eventWs =
-      boost::dynamic_pointer_cast<Mantid::API::IEventWorkspace>(ws);
+  auto eventWs = boost::dynamic_pointer_cast<Mantid::API::IEventWorkspace>(ws);
 
   if (!eventWs) {
     return;

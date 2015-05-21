@@ -8,7 +8,6 @@
 #include "MantidKernel/DateTimeValidator.h"
 #include <boost/shared_ptr.hpp>
 
-
 namespace Mantid {
 namespace Algorithms {
 
@@ -50,7 +49,8 @@ private:
   /// Shift the time of the logs
   void shiftTimeOfLogs(Mantid::API::MatrixWorkspace_sptr ws, double timeShift);
   /// Get the date and time of the first good frame of a workspace
-  Mantid::Kernel::DateAndTime getStartTimeFromWorkspace(Mantid::API::MatrixWorkspace_sptr ws) const;
+  Mantid::Kernel::DateAndTime
+  getStartTimeFromWorkspace(Mantid::API::MatrixWorkspace_sptr ws) const;
   /// Can the string be transformed to double
   bool checkForDouble(std::string val);
   /// Can the string be transformed to a DateTime
@@ -58,13 +58,11 @@ private:
   /// Reset the flag values
   void resetFlags();
   /// Time shift the log of a double series property
-  void shiftTimeInLogForTimeSeries(
-      Mantid::API::MatrixWorkspace_sptr ws,
-      Mantid::Kernel::Property *logEntry,
-      double timeShift);
+  void shiftTimeInLogForTimeSeries(Mantid::API::MatrixWorkspace_sptr ws,
+                                   Mantid::Kernel::Property *logEntry,
+                                   double timeShift);
   /// Time shift the log of a string property
   void shiftTimeOfLogForStringProperty(
-      Mantid::API::MatrixWorkspace_sptr ws,
       Mantid::Kernel::PropertyWithValue<std::string> *logEntry,
       double timeShift);
   // Shift the time of the neutrons
@@ -83,7 +81,7 @@ private:
  */
 bool isTimeSeries(Mantid::Kernel::Property *prop) {
   auto isTimeSeries = false;
-  if (dynamic_cast<Mantid::Kernel::ITimeSeriesProperty*>(prop)) {
+  if (dynamic_cast<Mantid::Kernel::ITimeSeriesProperty *>(prop)) {
     isTimeSeries = true;
   }
   return isTimeSeries;
