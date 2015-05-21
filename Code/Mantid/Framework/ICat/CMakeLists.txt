@@ -92,7 +92,7 @@ set_property ( TARGET ICat PROPERTY FOLDER "MantidFramework" )
 
 include_directories ( inc )
 
-target_link_libraries ( ICat ${MANTIDLIBS} ${OPENSSL_LIBRARIES} )
+target_link_libraries ( ICat LINK_PRIVATE ${MANTIDLIBS} ${OPENSSL_LIBRARIES} )
 
 # Add the unit tests directory
 add_subdirectory ( test )

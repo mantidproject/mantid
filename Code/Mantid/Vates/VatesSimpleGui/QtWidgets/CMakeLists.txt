@@ -57,7 +57,7 @@ set_target_properties( VatesSimpleGuiQtWidgets PROPERTIES OUTPUT_NAME MantidVate
 # Add to the 'VatesSimpleGui' group in VS
 set_property( TARGET VatesSimpleGuiQtWidgets PROPERTY FOLDER MantidVatesSimpleGui )
 
-target_link_libraries( VatesSimpleGuiQtWidgets 
+target_link_libraries( VatesSimpleGuiQtWidgets  LINK_PRIVATE 
 ${POCO_LIBRARIES}
 ${QT_LIBRARIES}
 ${QWT_LIBRARIES}

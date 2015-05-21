@@ -7,9 +7,13 @@
 ###########################################################################
 # Set local dependencies
 ###########################################################################
+set ( old_boost ${Boost_LIBRARIES} )
+
 set ( Boost_LIBRARIES ) # Empty out the variable after previous use
 set ( Boost_USE_DEBUG_PYTHON TRUE )
 find_package ( Boost REQUIRED python )
+
+set ( Boost_LIBRARIES ${Boost_LIBRARIES} ${old_boost})
 
 include_directories ( SYSTEM ${PYTHON_INCLUDE_PATH} )
 

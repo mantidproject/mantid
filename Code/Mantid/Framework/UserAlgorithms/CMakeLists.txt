@@ -27,4 +27,4 @@ add_library ( UserAlgorithms EXCLUDE_FROM_ALL ${SRC_FILES} ${INC_FILES})
 # Add to the 'Framework' group in VS
 set_property ( TARGET UserAlgorithms PROPERTY FOLDER "MantidFramework" )
 
-target_link_libraries ( UserAlgorithms ${MANTIDLIBS} )
+target_link_libraries ( UserAlgorithms LINK_PRIVATE ${MANTIDLIBS} )
