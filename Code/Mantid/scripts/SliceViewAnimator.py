@@ -17,6 +17,14 @@ def animate_slice(sliceviewer, name, start, end, filename, num_frames=10, font_s
     Kwargs:
         num_frames (int): The number of frames the gif should contain.
         font_size: (int): The size of the caption.
+    
+    Example:
+        ws = CreateMDWorkspace(3, Extents=[-10,10,-10,10,-10,10], Names=["X","Y","Z"], Units=["u","u","u"])
+        FakeMDEventData(ws, PeakParams=[10000,0,0,0,1])
+        sv = plotSlice(ws)
+        #Resize and configure the slice viewer how you want the output to look
+        #This will create a gif iterating from Z = -1 to Z = 1
+        animate_slice(sv, "Z", -1, 1, "output.gif")
     """
     #Generate all the individual frames
     images = []
