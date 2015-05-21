@@ -56,7 +56,5 @@ class StatisticsOfTableWorkspaceTest(unittest.TestCase):
         self.assertEqual(stats.columnCount(), 2)
 
 
-StatisticsOfTableWorkspaceTest()
-
 if __name__ == '__main__':
     unittest.main()
