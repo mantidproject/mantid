@@ -37,10 +37,11 @@ const std::string CalculateChiSquared::summary() const {
 //----------------------------------------------------------------------------------------------
 /// Initialize the algorithm's properties.
 void CalculateChiSquared::initConcrete() {
-  declareProperty("DivideByDOF", false, "Flag to divide the chi^2 by the "
-                                        "number of degrees of freedom (NofData "
-                                        "- nOfParams).");
-  declareProperty("ChiSquared", 0.0, "Output value of chi squared.");
+  declareProperty("ChiSquared", 0.0, "Output value of chi squared.", Direction::Output);
+  declareProperty("ChiSquaredDividedByDOF", 0.0,
+                  "Output value of chi squared divided by the "
+                  "number of degrees of freedom (NofData "
+                  "- nOfParams).", Direction::Output);
 }
 
 //----------------------------------------------------------------------------------------------
@@ -70,25 +71,29 @@ void CalculateChiSquared::execConcrete() {
   }
   g_log.debug() << "Chi squared " << chiSquared << std::endl;
 
-  // Divide by the DOF
-  bool divideByDOF = getProperty("DivideByDOF");
-  if (divideByDOF) {
-    // Get the number of free fitting parameters
-    size_t nParams = 0;
-    for(size_t i = 0; i < m_function->nParams(); ++i) {
-      if ( !m_function->isFixed(i) ) nParams += 1;
-    }
-    double dof = static_cast<double>(domain->size()) - static_cast<double>(nParams);
-    g_log.debug() << "DOF " << dof << std::endl;
-    if (dof <= 0.0) {
-      dof = 1.0;
-      g_log.warning() << "DOF has a non-positive value, changing to 1,0." << std::endl;
-    }
-    chiSquared /= dof;
-    g_log.debug() << "Chi squared / DOF " << chiSquared << std::endl;
-  }
   // Store the result.
   setProperty("ChiSquared", chiSquared);
+
+  // Divide by the DOF
+  // Get the number of free fitting parameters
+  size_t nParams = 0;
+  for (size_t i = 0; i < m_function->nParams(); ++i) {
+    if (!m_function->isFixed(i))
+      nParams += 1;
+  }
+  double dof =
+      static_cast<double>(domain->size()) - static_cast<double>(nParams);
+  g_log.debug() << "DOF " << dof << std::endl;
+  if (dof <= 0.0) {
+    dof = 1.0;
+    g_log.warning() << "DOF has a non-positive value, changing to 1,0."
+                    << std::endl;
+  }
+  chiSquared /= dof;
+  g_log.debug() << "Chi squared / DOF " << chiSquared << std::endl;
+
+  // Store the result.
+  setProperty("ChiSquaredDividedByDOF", chiSquared);
 }
 
 } // namespace CurveFitting

@@ -133,7 +133,6 @@ public:
     Tester tester;
     tester.set1DFunction();
     tester.set1DSpectrumValues();
-    tester.setDivideByDOF();
     tester.runAlgorithm();
     tester.check1DSpectrum();
     TS_ASSERT_DELTA(tester.chiSquared, 236.5, 1.0);
@@ -143,7 +142,6 @@ public:
     Tester tester(1);
     tester.set1DFunction();
     tester.set1DSpectrumValues();
-    tester.setDivideByDOF();
     tester.runAlgorithm();
     tester.check1DSpectrum();
     TS_ASSERT_DELTA(tester.chiSquared, 184.0, 1.0);
@@ -153,7 +151,6 @@ public:
     Tester tester(3,3);
     tester.set1DFunction();
     tester.set1DSpectrumValues();
-    tester.setDivideByDOF();
     tester.runAlgorithm();
     tester.check1DSpectrum();
     TS_ASSERT_DELTA(tester.chiSquared, 5069.0, 1.0);
@@ -163,7 +160,6 @@ public:
     Tester tester(3,2);
     tester.set1DFunction();
     tester.set1DSpectrumValues();
-    tester.setDivideByDOF();
     tester.runAlgorithm();
     tester.check1DSpectrum();
     TS_ASSERT_DELTA(tester.chiSquared, 7151.0, 1.0);
@@ -187,7 +183,6 @@ private:
     double StartX;
     double EndX;
     bool ignoreInvalidData;
-    bool divideByDOF;
 
     void makeXValues() {
       size_t dlt = isHisto ? 1 : 0;
@@ -227,12 +222,13 @@ private:
   public:
     // algorithm output
     double chiSquared;
+    double chiSquaredDividedByDOF;
     bool isExecuted;
 
     Tester(size_t np = 3, size_t nd = 10, bool histo = true)
         : nParams(np), nData(nd), isHisto(histo), workspaceIndex(0), xMin(-10),
           xMax(10), StartX(EMPTY_DBL()), EndX(EMPTY_DBL()),
-          ignoreInvalidData(false), divideByDOF(false), chiSquared(-1), isExecuted(false) {
+          ignoreInvalidData(false), chiSquared(-1), chiSquaredDividedByDOF(-1), isExecuted(false) {
       makeXValues();
     }
 
@@ -243,7 +239,6 @@ private:
       TS_ASSERT_THROWS_NOTHING(alg.setProperty("Function", function));
       TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", workspace));
       TS_ASSERT_THROWS_NOTHING(alg.setProperty("IgnoreInvalidData", ignoreInvalidData));
-      TS_ASSERT_THROWS_NOTHING(alg.setProperty("DivideByDOF", divideByDOF));
       if (dynamic_cast<IFunction1D *>(function.get())) {
         TS_ASSERT_THROWS_NOTHING(alg.setProperty("WorkspaceIndex", workspaceIndex));
         TS_ASSERT_THROWS_NOTHING(alg.setProperty("StartX", StartX));
@@ -251,8 +246,10 @@ private:
       }
       TS_ASSERT_THROWS_NOTHING(alg.execute());
       isExecuted = alg.isExecuted();
-      if (isExecuted)
+      if (isExecuted) {
         chiSquared = alg.getProperty("ChiSquared");
+        chiSquaredDividedByDOF = alg.getProperty("ChiSquaredDividedByDOF");
+      }
     }
 
     void setXRange_All() {
@@ -276,10 +273,6 @@ private:
 
     void setIgnoreInvalidData() {
       ignoreInvalidData = true;
-    }
-
-    void setDivideByDOF() {
-      divideByDOF = true;
     }
 
     void set1DFunction() {
@@ -347,13 +340,12 @@ private:
           sum2 += tmp * tmp;
         }
       }
-      if (divideByDOF) {
-        double dof = double(nData) - double(nParams);
-        if (dof <= 0.0) dof = 1.0;
-        sum2 /= dof;
-      }
       TS_ASSERT_DIFFERS(sum2, 0);
       TS_ASSERT_DELTA(sum2, chiSquared, 1e-10);
+      double dof = double(nData) - double(nParams);
+      if (dof <= 0.0) dof = 1.0;
+      sum2 /= dof;
+      TS_ASSERT_DELTA(sum2, chiSquaredDividedByDOF, 1e-10);
     }
 
     void checkFailed() {
