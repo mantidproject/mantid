@@ -27,5 +27,16 @@ void ConvertToDistribution::exec() {
   WorkspaceHelpers::makeDistribution(workspace);
 }
 
+std::map<std::string, std::string> ConvertToDistribution::validateInputs() {
+  std::map<std::string, std::string> errors;
+
+  MatrixWorkspace_sptr workspace = getProperty("Workspace");
+  if (workspace->id() == "EventWorkspace")
+    errors["Workspace"] = "Event workspaces cannot be directly converted to "
+                          "distributions.";
+
+  return errors;
+}
+
 } // namespace Algorithms
 } // namespace Mantid

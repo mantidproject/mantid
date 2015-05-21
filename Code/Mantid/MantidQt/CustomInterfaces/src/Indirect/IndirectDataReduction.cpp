@@ -16,6 +16,7 @@
 #include "MantidQtCustomInterfaces/Indirect/ISISCalibration.h"
 #include "MantidQtCustomInterfaces/Indirect/ISISDiagnostics.h"
 #include "MantidQtCustomInterfaces/Indirect/ISISEnergyTransfer.h"
+#include "MantidQtCustomInterfaces/Indirect/ILLCalibration.h"
 #include "MantidQtCustomInterfaces/Indirect/ILLEnergyTransfer.h"
 
 #include <QDesktopServices>
@@ -127,6 +128,7 @@ void IndirectDataReduction::initLayout()
   addTab<IndirectSymmetrise>("Symmetrise");
   addTab<IndirectSqw>("S(Q, w)");
   addTab<IndirectMoments>("Moments");
+  addTab<ILLCalibration>("ILL Calibration");
   addTab<ILLEnergyTransfer>("ILL Energy Transfer");
 
   // Connect "?" (Help) Button
@@ -241,9 +243,9 @@ Mantid::API::MatrixWorkspace_sptr IndirectDataReduction::loadInstrumentIfNotExis
  *
  * @return Map of information ID to value
  */
-std::map<QString, QString> IndirectDataReduction::getInstrumentDetails()
+QMap<QString, QString> IndirectDataReduction::getInstrumentDetails()
 {
-  std::map<QString, QString> instDetails;
+  QMap<QString, QString> instDetails;
 
   std::string instrumentName = m_uiForm.iicInstrumentConfiguration->getInstrumentName().toStdString();
   std::string analyser = m_uiForm.iicInstrumentConfiguration->getAnalyserName().toStdString();
@@ -268,18 +270,25 @@ std::map<QString, QString> IndirectDataReduction::getInstrumentDetails()
   ipfElements.push_back("save-nexus-choice");
   ipfElements.push_back("save-ascii-choice");
   ipfElements.push_back("fold-frames-choice");
+  ipfElements.push_back("resolution");
 
   // In the IRIS IPF there is no fmica component
   if(instrumentName == "IRIS" && analyser == "fmica")
     analyser = "mica";
 
   if(m_instWorkspace == NULL)
+  {
+    g_log.warning("Instrument workspace not loaded");
     return instDetails;
+  }
 
   // Get the instrument
   auto instrument = m_instWorkspace->getInstrument();
   if(instrument == NULL)
+  {
+    g_log.warning("Instrument workspace has no instrument");
     return instDetails;
+  }
 
   // Get the analyser component
   auto component = instrument->getComponentByName(analyser);
@@ -324,7 +333,12 @@ QString IndirectDataReduction::getInstrumentParameterFrom(Mantid::Geometry::ICom
   QString value;
 
   if(!comp->hasParameter(param))
+  {
+    g_log.debug() << "Component " << comp->getName()
+                  << " has no parameter " << param
+                  << std::endl;
     return "";
+  }
 
   // Determine it's type and call the corresponding get function
   std::string paramType = comp->getParameterType(param);
@@ -485,7 +499,8 @@ void IndirectDataReduction::filterUiForFacility(QString facility)
   }
   else if(facility == "ILL")
   {
-    enabledTabs << "ILL Energy Transfer";
+    enabledTabs << "ILL Energy Transfer"
+                << "ILL Calibration";
     disabledInstruments << "IN10" << "IN13" << "IN16";
   }
 

@@ -19,12 +19,12 @@ namespace Mantid
       {
       }
 
-      int ColorMapManager::getDefaultColorMapIndex(bool viewSwitched)
+      int ColorMapManager::getDefaultColorMapIndex(bool useCurrentColorMap)
       {
         QString defaultColorMap;
 
-        // If the view has switched use the last color map index
-        if (viewSwitched)
+        // If the view has switched or the VSI is loaded use the last color map index
+        if (useCurrentColorMap)
         {
           defaultColorMap = m_mdSettings.getLastSessionColorMap();
         }

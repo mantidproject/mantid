@@ -61,6 +61,7 @@ private:
   void removeLayout(QWidget *widget);
   void createTable();
   void updatePeakWorkspaceColor();
+  void setPeakSourceColorToDefault();
   std::map<std::string, QColor> getColors();
   MantidQt::SliceViewer::PeakPalette m_peakPalette;
   boost::shared_ptr<CameraManager> m_cameraManager;

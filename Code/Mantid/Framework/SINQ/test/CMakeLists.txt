@@ -7,13 +7,17 @@ if ( CXXTEST_FOUND )
                         ../../TestHelpers/src/ComponentCreationHelper.cpp
                         ../../TestHelpers/src/WorkspaceCreationHelper.cpp )
 
-  if ( GMOCK_FOUND AND GTEST_FOUND )
-    cxxtest_add_test ( PSISINQTest ${TEST_FILES} ${GMOCK_TEST_FILES})
-    target_link_libraries ( PSISINQTest SINQ  CurveFitting ${MANTIDLIBS} ${GMOCK_LIBRARIES} ${GTEST_LIBRARIES} )
-  else ()
-    cxxtest_add_test ( PSISINQTest ${TEST_FILES} )
-    target_link_libraries ( PSISINQTest SINQ  CurveFitting ${MANTIDLIBS} )
-  endif()
+  cxxtest_add_test ( PSISINQTest ${TEST_FILES} ${GMOCK_TEST_FILES})
+  target_link_libraries ( PSISINQTest LINK_PRIVATE 
+            API
+            Geometry
+            Kernel
+            SINQ
+            CurveFitting
+            ${MANTIDLIBS}
+            ${GMOCK_LIBRARIES}
+            ${GTEST_LIBRARIES} )
+
   # Test data
   add_dependencies ( PSISINQTest StandardTestData )
 

@@ -15,11 +15,14 @@
       <value val="111" />
     </parameter>
 
-  </component-link>
+    <parameter name="Efixed">
+      <value val="2.082" />
+    </parameter>
 
-  <component-link name="silicon">
-    <parameter name="Efixed"> <value val="2.082" /> </parameter>
-    <parameter name="resolution"> <value val="0.0003" /> </parameter>
+    <parameter name="resolution">
+      <value val="0.0003" />
+    </parameter>
+
   </component-link>
 
 </parameter-file>

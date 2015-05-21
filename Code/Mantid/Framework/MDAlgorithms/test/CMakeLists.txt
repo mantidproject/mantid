@@ -13,13 +13,24 @@ if ( CXXTEST_FOUND )
                         ../../TestHelpers/src/WorkspaceCreationHelper.cpp
                          )
 
-  if ( GMOCK_FOUND AND GTEST_FOUND )
-    cxxtest_add_test ( MDAlgorithmsTest ${TEST_FILES} ${GMOCK_TEST_FILES})
-    target_link_libraries( MDAlgorithmsTest MDAlgorithms DataHandling CurveFitting Nexus ${GMOCK_LIBRARIES} ${GTEST_LIBRARIES} ${NEXUS_LIBRARIES} ${HDF5_LIBRARIES} )
-  else ()
-    cxxtest_add_test ( MDAlgorithmsTest ${TEST_FILES} )
-    target_link_libraries( MDAlgorithmsTest MDAlgorithms Nexus ${NEXUS_LIBRARIES} ${HDF5_LIBRARIES} )
-  endif ()
+  cxxtest_add_test ( MDAlgorithmsTest ${TEST_FILES} ${GMOCK_TEST_FILES})
+  target_link_libraries( MDAlgorithmsTest LINK_PRIVATE 
+            API
+            DataHandling
+            DataObjects
+            CurveFitting
+            Geometry
+            Kernel
+            MDAlgorithms
+            Nexus
+            ${Boost_LIBRARIES}
+            ${POCO_LIBRARIES}
+            ${MUPARSER_LIBRARIES}
+            ${GMOCK_LIBRARIES}
+            ${GTEST_LIBRARIES}
+            ${NEXUS_LIBRARIES}
+            ${HDF5_LIBRARIES} )
+
   add_dependencies ( MDAlgorithmsTest DataHandling Algorithms CurveFitting )
   add_dependencies ( FrameworkTests MDAlgorithmsTest )
   # Test data

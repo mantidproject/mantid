@@ -46,6 +46,7 @@ src/vtkDataSetToWsLocation.cpp
 src/vtkEllipsoidTransformer.cpp
 src/vtkMDLineFactory.cpp
 src/vtkMDQuadFactory.cpp
+src/vtkMD0DFactory.cpp
 src/vtkNullUnstructuredGrid.cpp
 src/vtkSplatterPlotFactory.cpp
 src/vtkMDHexFactory.cpp
@@ -113,6 +114,7 @@ inc/MantidVatesAPI/vtkEllipsoidTransformer.h
 inc/MantidVatesAPI/vtkMDLineFactory.h
 inc/MantidVatesAPI/vtkMDQuadFactory.h
 inc/MantidVatesAPI/vtkMDHexFactory.h
+inc/MantidVatesAPI/vtkMD0DFactory.h
 inc/MantidVatesAPI/vtkNullUnstructuredGrid.h
 inc/MantidVatesAPI/vtkSplatterPlotFactory.h
 inc/MantidVatesAPI/vtkPeakMarkerFactory.h
@@ -142,6 +144,7 @@ test/vtkMDHistoHex4DFactoryTest.h
 test/vtkMDHistoHexFactoryTest.h
 test/vtkMDHistoLineFactoryTest.h
 test/vtkMDHistoQuadFactoryTest.h
+test/vtkMD0DFactoryTest.h
 test/FieldDataToMetadataTest.h
 test/FilteringUpdateProgressActionTest.h
 test/LoadVTKTest.h
@@ -196,7 +199,7 @@ set_target_properties( VatesAPI PROPERTIES OUTPUT_NAME MantidVatesAPI )
 set_property( TARGET VatesAPI PROPERTY FOLDER "MantidVates" )
 
 
-target_link_libraries( VatesAPI
+target_link_libraries( VatesAPI LINK_PRIVATE 
 ${MANTID_SUBPROJECT_LIBS} 
 vtkCommonCore
 vtkCommonDataModel
@@ -205,6 +208,10 @@ vtkFiltersExtraction
 vtkFiltersSources
 vtkPVVTKExtensionsDefault
 ${QWT_LIBRARIES}
+${POCO_LIBRARIES}
+${Boost_LIBRARIES}
+${JSONCPP_LIBRARIES}
+${NEXUS_LIBRARIES}
 )
 
 if (OSX_VERSION VERSION_GREATER 10.8)
@@ -221,7 +228,22 @@ if( CXXTEST_FOUND AND GMOCK_FOUND AND GTEST_FOUND )
                         ../../Framework/TestHelpers/src/MDEventsTestHelper.cpp 
                         ../../Framework/TestHelpers/src/StartFrameworkManager.cpp )
   cxxtest_add_test( VatesAPITest ${TEST_FILES} )
-  target_link_libraries( VatesAPITest VatesAPI DataHandling Kernel DataObjects ${GMOCK_LIBRARIES} ${GTEST_LIBRARIES} )
+  target_link_libraries( VatesAPITest LINK_PRIVATE 
+  ${MANTID_SUBPROJECT_LIBS} 
+  VatesAPI 
+  DataHandling 
+  Kernel 
+  DataObjects 
+  vtkCommonCore
+  vtkCommonDataModel
+  vtkIOLegacy
+  vtkFiltersExtraction
+  vtkFiltersSources
+  ${POCO_LIBRARIES}
+  ${Boost_LIBRARIES}
+  ${JSONCPP_LIBRARIES}
+  ${GMOCK_LIBRARIES} 
+  ${GTEST_LIBRARIES} )
   add_dependencies( AllTests VatesAPITest )
   # Add to the 'UnitTests' group in VS
   set_property ( TARGET VatesAPITest PROPERTY FOLDER "UnitTests" )

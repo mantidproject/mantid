@@ -44,7 +44,7 @@ set_property ( TARGET RemoteJobManagers PROPERTY FOLDER "MantidFramework" )
 
 include_directories ( inc )
 
-target_link_libraries ( RemoteJobManagers ${MANTIDLIBS} ${GSL_LIBRARIES} )
+target_link_libraries ( RemoteJobManagers LINK_PRIVATE ${MANTIDLIBS} ${GSL_LIBRARIES} )
 
 # Add the unit tests directory
 add_subdirectory ( test )

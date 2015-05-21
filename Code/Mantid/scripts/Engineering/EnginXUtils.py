@@ -38,8 +38,7 @@ def getWsIndicesForBank(bank, ws):
         try:
             det = ws.getDetector(index)
             return det.getID() in detIDs
-        except:
+        except RuntimeError:
             return False
 
-    return filter(isIndexInBank, range(0, ws.getNumberHistograms()))
-
+    return [i for i in range(0, ws.getNumberHistograms()) if isIndexInBank(i)]

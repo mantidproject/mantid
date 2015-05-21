@@ -56,8 +56,7 @@ const std::string DownloadFile::summary() const {
 void DownloadFile::init() {
   declareProperty("Address", "",
                   boost::make_shared<MandatoryValidator<std::string>>(),
-                  "The address of the network resource to download. This "
-                  "should start http:// or https:// .",
+                  "The address of the network resource to download.",
                   Direction::InOut);
   declareProperty(new FileProperty("Filename", "", FileProperty::Save),
                   "The filename to save the download to.");
