@@ -76,7 +76,7 @@ void ChangeTimeZero::exec() {
 
 /**
  * Create a new output workspace if required
- * @param :: pointer to an input workspace
+ * @param input :: pointer to an input workspace
  * @returns :: pointer to the outputworkspace
  */
 API::MatrixWorkspace_sptr
@@ -215,7 +215,7 @@ void ChangeTimeZero::resetFlags() {
 /**
  * Extract the first good frame of a workspace
  * @param ws :: a workspace
- * @retruns The date and time of the first good frame
+ * @returns the date and time of the first good frame
  */
 DateAndTime
 ChangeTimeZero::getStartTimeFromWorkspace(API::MatrixWorkspace_sptr ws) const {

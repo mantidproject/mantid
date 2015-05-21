@@ -45,9 +45,7 @@ public:
   static ChangeTimeZeroTest *createSuite() { return new ChangeTimeZeroTest; }
   static void destroySuite(ChangeTimeZeroTest *suite) { delete suite; }
 
-  enum LogType { STANDARD, NOPROTONCHARGE };
-
-  ChangeTimeZeroTest::ChangeTimeZeroTest()
+  ChangeTimeZeroTest()
       : m_startTime("2010-01-01T00:00:00"),
         m_stringPropertyTime("2010-01-01T00:10:00"),
         m_dateTimeValidator(boost::make_shared<DateTimeValidator>()),
@@ -333,6 +331,8 @@ private:
   std::string m_stringSeriesID;
   std::string m_stringID;
   std::string m_comparisonWorkspaceName;
+
+  enum LogType { STANDARD, NOPROTONCHARGE };
 
   // act and assert
   void do_act_and_assert(double timeShiftDouble, std::string timeShift,
