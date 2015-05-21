@@ -92,8 +92,7 @@ public:
                       inputWorkspaceName, outputWorkspaceName);
 
     // Clean up
-    AnalysisDataService::Instance().remove(inputWorkspaceName);
-    AnalysisDataService::Instance().remove(outputWorkspaceName);
+    cleanUpWorkspaces(inputWorkspaceName, outputWorkspaceName);
   }
 
   void test_changed_time_for_standard_setting_and_relative_time_and_same_inOutWS_and_Workspace2D() {
@@ -316,8 +315,7 @@ public:
                       inputWorkspaceName, outputWorkspaceName);
 
     // Clean up
-    AnalysisDataService::Instance().remove(inputWorkspaceName);
-    AnalysisDataService::Instance().remove(outputWorkspaceName);
+    cleanUpWorkspaces(inputWorkspaceName, outputWorkspaceName);
   }
 
 private:

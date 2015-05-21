@@ -160,7 +160,6 @@ void ChangeTimeZero::shiftTimeInLogForTimeSeries(
 
 /**
  * Shift the times in a log of a string property
- * @param ws :: a matrix workspace
  * @param logEntry :: the string property
  * @param timeShift :: the time shift.
  */
@@ -168,7 +167,7 @@ void ChangeTimeZero::shiftTimeOfLogForStringProperty(
     PropertyWithValue<std::string> *logEntry, double timeShift) {
   // Parse the log entry and replace all ISO8601 strings with an adjusted value
   auto value = logEntry->value();
-  if (auto isDateTime = checkForDateTime(value)) {
+  if (checkForDateTime(value)) {
     DateAndTime dateTime(value);
     DateAndTime shiftedTime = dateTime + timeShift;
     logEntry->setValue(shiftedTime.toISO8601String());
