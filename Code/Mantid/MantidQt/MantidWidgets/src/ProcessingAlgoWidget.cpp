@@ -174,7 +174,7 @@ void ProcessingAlgoWidget::setSelectedAlgorithm(QString algo)
 }
 
 /// @return the text in the script editor
-QString ProcessingAlgoWidget::getScriptText() { return ui.editor->text(); };
+QString ProcessingAlgoWidget::getScriptText() { return ui.editor->text(); }
 /// Set the script editor text
 void ProcessingAlgoWidget::setScriptText(QString text) {
   ui.editor->setText(text);
