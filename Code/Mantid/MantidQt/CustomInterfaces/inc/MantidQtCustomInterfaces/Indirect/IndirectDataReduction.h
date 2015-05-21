@@ -78,7 +78,7 @@ namespace MantidQt
           std::string analyser = "", std::string reflection = "");
 
       std::vector<std::pair<std::string, std::vector<std::string> > > getInstrumentModes();
-      std::map<QString, QString> getInstrumentDetails();
+      QMap<QString, QString> getInstrumentDetails();
 
     signals:
       /// Emitted when the instrument setup is changed

@@ -97,10 +97,10 @@ private:
 
   QString getAlgNameFromMenuLabel(const QString &menuLbl);
 
-  bool cameraReset;
-  QPointer<pqPipelineSource> scaler; ///< Holder for the ScaleWorkspace
-  Ui::StandardView ui; ///< The standard view's UI form
-  QPointer<pqRenderView> view; ///< The main view
+  bool m_cameraReset;
+  QPointer<pqPipelineSource> m_scaler; ///< Holder for the ScaleWorkspace
+  Ui::StandardView m_ui; ///< The standard view's UI form
+  QPointer<pqRenderView> m_view; ///< The main view
 
   /// Set the rebin and unbin button visibility
   void setRebinAndUnbinButtons();

@@ -4,6 +4,11 @@ from mantid.simpleapi import *
 
 class EnginXCalibrateTest(stresstesting.MantidStressTest):
 
+    def __init__(self):
+        stresstesting.MantidStressTest.__init__(self)
+        self.difc = -1
+        self.zero = -1
+
     def runTest(self):
         positions = EnginXCalibrateFull(Filename = 'ENGINX00193749.nxs',
                                       Bank = 1,

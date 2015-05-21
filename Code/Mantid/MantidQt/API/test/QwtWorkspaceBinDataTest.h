@@ -72,7 +72,7 @@ public:
     QwtWorkspaceBinData data(*ws, 2, true);
     TS_ASSERT_DELTA( data.y(1), 5.0, 1e-6);
     TS_ASSERT_DELTA( data.e(1), 7.0, 1e-6);
-    TS_ASSERT_DELTA( data.y(2), 0.0, 1e-6);
+    TS_ASSERT_DELTA( data.y(2), 4.0, 1e-6);
     // Errors should also be zero-ed out.
     TS_ASSERT_DELTA( data.e(2), 0.0, 1e-6);
   }
