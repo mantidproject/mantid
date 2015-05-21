@@ -1478,6 +1478,7 @@ void FindPeaks::addInfoRow(const size_t spectrum,
 //----------------------------------------------------------------------------------------------
 /** Add the fit record (failure) to output workspace
   * @param spectrum :: spectrum where the peak is
+  * @param centre :: position of the peak centre
   */
 void FindPeaks::addNonFitRecord(const size_t spectrum, const double centre) {
   // Add a new row
