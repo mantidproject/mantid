@@ -2,7 +2,7 @@
 #include "MantidAlgorithms/CloneWorkspace.h"
 #include "MantidAlgorithms/ChangePulsetime.h"
 #include "MantidAPI/IMDIterator.h"
-#include "MantidDataObjects/EventWorkspace.h"
+#include "MantidAPI/IEventWorkspace.h"
 #include "MantidDataObjects/EventList.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/TimeSeriesProperty.h"
@@ -189,7 +189,7 @@ void ChangeTimeZero::shiftTimeOfNeutrons(Mantid::API::MatrixWorkspace_sptr ws,
                                          double timeShift) {
   // If the matrix workspace is an event workspace we need to change the events
   auto eventWs =
-      boost::dynamic_pointer_cast<Mantid::DataObjects::EventWorkspace>(ws);
+      boost::dynamic_pointer_cast<Mantid::API::IEventWorkspace>(ws);
 
   if (!eventWs) {
     return;
@@ -257,6 +257,22 @@ std::map<std::string, std::string> ChangeTimeZero::validateInputs() {
     invalidProperties.insert(
         std::make_pair("TimeOffset", "TimeOffset must either be a numeric "
                                      "value or a ISO8601 date-time stamp."));
+  }
+
+  // If we are dealing with an absolute time we need to ensure that the
+  // proton_charge entry exists
+  if (m_isDateAndTime) {
+    MatrixWorkspace_sptr ws = getProperty("InputWorkspace");
+    auto run = ws->run();
+    try {
+      run.getTimeSeriesProperty<double>("proton_charge");
+    } catch (std::invalid_argument) {
+      invalidProperties.insert(
+          std::make_pair("InputWorkspace",
+                         "A TimeOffset with an absolute time, requires the "
+                         "input workspace to have a proton_charge property in "
+                         "its log."));
+    }
   }
 
   return invalidProperties;

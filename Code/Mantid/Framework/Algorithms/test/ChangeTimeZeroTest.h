@@ -62,6 +62,7 @@ public:
     TS_ASSERT( alg.isInitialized() )
   }
 
+  // Workspace2D tests
   void test_changed_time_for_standard_setting_and_relative_time_and_differnt_inOutWS_and_Workspace2D() {
     // Arrange
     const std::string inputWorkspaceName = "inWS";
@@ -70,11 +71,11 @@ public:
     const double timeShiftDouble = 1000;
     Mantid::API::MatrixWorkspace_sptr ws =
         provideWorkspace2D(LogType::STANDARD, inputWorkspaceName);
-    
+
     // Act and assert
     do_act_and_assert(timeShiftDouble, timeShift, inputWorkspaceName,
                       outputWorkspaceName);
-    
+
     // Clean up
     cleanUpWorkspaces(inputWorkspaceName, outputWorkspaceName);
   }
@@ -129,6 +130,8 @@ public:
     cleanUpWorkspaces(inputWorkspaceName, outputWorkspaceName);
   }
 
+
+  // Absolute times and no proton charges
   void test_exception_is_thrown_for_missing_proton_charge_and_absolute_time() {
     // Arrange
     const std::string inputWorkspaceName = "inWS";
@@ -177,6 +180,8 @@ public:
   cleanUpWorkspaces(inputWorkspaceName, outputWorkspaceName);
 }
 
+
+  // EventWorkspaces tests
   void test_changed_time_for_standard_setting_and_relative_time_and_differnt_inOutWS_and_EventWorkspace() {
     // Arrange
     const std::string inputWorkspaceName = "inWS";
@@ -245,7 +250,9 @@ public:
     cleanUpWorkspaces(inputWorkspaceName, outputWorkspaceName);
   }
 
-  void test_changed_time_for_standard_setting_and_relative_negative_time_and_same_inOutWS_and_EventWorkspace() {
+
+  // Negative and fractional relative times
+  void test_changed_time_for_standard_setting_and_relative_negative_time_and_same_inOutWS() {
     // Arrange
     const std::string inputWorkspaceName = "inWS";
     const std::string outputWorkspaceName = inputWorkspaceName;
@@ -262,7 +269,7 @@ public:
     cleanUpWorkspaces(inputWorkspaceName, outputWorkspaceName);
   }
 
-  void test_changed_time_for_standard_setting_and_relative_fractional_time_and_same_inOutWS_and_EventWorkspace() {
+  void test_changed_time_for_standard_setting_and_relative_fractional_time_and_same_inOutWS() {
     // Arrange
     const std::string inputWorkspaceName = "inWS";
     const std::string outputWorkspaceName = inputWorkspaceName;
@@ -277,6 +284,43 @@ public:
 
     // Clean up
     cleanUpWorkspaces(inputWorkspaceName, outputWorkspaceName);
+  }
+
+
+  // WorkspaceSingleValue tests
+  void test_changed_time_for_standard_setting_and_relative_time_and_differnt_inOutWS_and_WorkspaceSingleValue() {
+    // Arrange
+    const std::string inputWorkspaceName = "inWS";
+    const std::string outputWorkspaceName = "outWS";
+    const std::string timeShift = "1000";
+    const double timeShiftDouble = 1000;
+    Mantid::API::MatrixWorkspace_sptr ws =
+      provideWorkspaceSingleValue(LogType::STANDARD, inputWorkspaceName);
+
+    // Act and assert
+    do_act_and_assert(timeShiftDouble, timeShift, inputWorkspaceName,
+                      outputWorkspaceName);
+
+    // Clean up
+    cleanUpWorkspaces(inputWorkspaceName, outputWorkspaceName);
+  }
+
+  void test_changed_time_for_standard_setting_and_absolute_time_and_differnt_inOutWS_and_WorkspaceSingleValue() {
+    // Arrange
+    const std::string inputWorkspaceName = "inWS";
+    const std::string outputWorkspaceName = "outWS";
+    const double timeShiftDouble = 1000;
+    DateAndTime abosluteTimeShift = m_startTime + timeShiftDouble;
+    Mantid::API::MatrixWorkspace_sptr ws =
+      provideWorkspaceSingleValue(LogType::STANDARD, inputWorkspaceName);
+
+    // Act and assert
+    do_act_and_assert(timeShiftDouble, abosluteTimeShift.toISO8601String(),
+                      inputWorkspaceName, outputWorkspaceName);
+
+    // Clean up
+    AnalysisDataService::Instance().remove(inputWorkspaceName);
+    AnalysisDataService::Instance().remove(outputWorkspaceName);
   }
 
 private:
@@ -420,7 +464,7 @@ private:
       TS_ASSERT(alg.isExecuted());
   }
 
-  // Provides a 2D workspace with a log
+  // Provides an EventWorkspace with a log
   Mantid::API::MatrixWorkspace_sptr provideEventWorkspace(LogType logType,
                                                        std::string wsName) {
    auto ws = WorkspaceCreationHelper::CreateEventWorkspaceWithStartTime(100, 100, 100,
@@ -432,6 +476,17 @@ private:
     createComparisonWorkspace(wsName);
     return ws;
   }
+
+  // Provides a WorkspaceSingleValue with a log
+  Mantid::API::MatrixWorkspace_sptr provideWorkspaceSingleValue(LogType logType,
+                                                       std::string wsName) {
+    auto ws = WorkspaceCreationHelper::CreateWorkspaceSingleValue(10);
+    // Add the logs
+    provideLogs(logType, ws);
+    AnalysisDataService::Instance().addOrReplace(wsName, ws);
+    return ws;
+  }
+
   // Provide the logs for matrix workspaces 
   void provideLogs(LogType logType, Mantid::API::MatrixWorkspace_sptr ws) {
     switch (logType) {
