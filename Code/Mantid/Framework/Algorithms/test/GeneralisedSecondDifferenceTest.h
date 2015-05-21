@@ -3,27 +3,29 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAlgorithms/GeneralisedSecondDifference.h"
+#include "MantidAPI/AlgorithmManager.h"
 #include <boost/assign.hpp>
 
-using namespace Mantid::Algorithms;
 using namespace Mantid::API;
 
 class GeneralisedSecondDifferenceTest : public CxxTest::TestSuite {
 
 public:
-  void testName() {
-    TS_ASSERT_EQUALS(gsd.name(), "GeneralisedSecondDifference");
-  }
-
-  void testCategory() { TS_ASSERT_EQUALS(gsd.category(), "Arithmetic"); }
-
   void testInit() {
-    TS_ASSERT_THROWS_NOTHING(gsd.initialize());
-    TS_ASSERT(gsd.isInitialized());
+
+    IAlgorithm_sptr gsd = Mantid::API::AlgorithmManager::Instance().create(
+        "GeneralisedSecondDifference", 1);
+
+    TS_ASSERT_EQUALS(gsd->name(), "GeneralisedSecondDifference");
+    TS_ASSERT_EQUALS(gsd->category(), "Arithmetic");
+    TS_ASSERT_THROWS_NOTHING(gsd->initialize());
+    TS_ASSERT(gsd->isInitialized());
   }
 
   void testExec() {
+
+    IAlgorithm_sptr gsd = Mantid::API::AlgorithmManager::Instance().create(
+      "GeneralisedSecondDifference", 1);
 
     std::vector<double> x =
         boost::assign::list_of(0)(1)(2)(3)(4)(5)(6)(7)(8)(9);
@@ -34,13 +36,13 @@ public:
     inputWs->dataY(0) = y;
     inputWs->dataX(0) = x;
 
-    gsd.setProperty("InputWorkspace", inputWs);
-    gsd.setProperty("M", "1");
-    gsd.setProperty("Z", "2");
-    gsd.setPropertyValue("OutputWorkspace", "secondDiff");
+    gsd->setProperty("InputWorkspace", inputWs);
+    gsd->setProperty("M", "1");
+    gsd->setProperty("Z", "2");
+    gsd->setPropertyValue("OutputWorkspace", "secondDiff");
 
-    gsd.execute();
-    TS_ASSERT(gsd.isExecuted());
+    gsd->execute();
+    TS_ASSERT(gsd->isExecuted());
 
     MatrixWorkspace_sptr outWs = Mantid::API::AnalysisDataService::Instance()
                                      .retrieveWS<MatrixWorkspace>("secondDiff");
@@ -60,8 +62,6 @@ public:
     Mantid::API::AnalysisDataService::Instance().remove("secondDiff");
   }
 
-private:
-  GeneralisedSecondDifference gsd;
 };
 
 #endif /* GENERALISEDSECONDDIFERENCETEST_H_ */
