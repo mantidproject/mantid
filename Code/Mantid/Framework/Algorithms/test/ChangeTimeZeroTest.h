@@ -160,7 +160,6 @@ public:
   // Arrange
   const std::string inputWorkspaceName = "inWS";
   const std::string outputWorkspaceName = inputWorkspaceName;
-  const double timeShiftDouble = 1000;
   const std::string timeShift = "1000";
   provideWorkspace2D(LogType::NOPROTONCHARGE, inputWorkspaceName);
 
@@ -423,7 +422,7 @@ private:
       auto events = eventList->getEvents();
       auto eventsDuplicate = eventListDuplicate->getEvents();
 
-      for (int i = 0; i < events.size(); ++i) {
+      for (unsigned int i = 0; i < events.size(); ++i) {
         double secs =
             DateAndTime::secondsFromDuration(events[i].pulseTime() - eventsDuplicate[i].pulseTime());
         // Don't print a message here, as we iterate over all events

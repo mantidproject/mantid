@@ -8,8 +8,6 @@
 #include "MantidKernel/DateTimeValidator.h"
 #include <boost/shared_ptr.hpp>
 
-// Forward declarations
-class Mantid::Kernel::DateAndTime;
 
 namespace Mantid {
 namespace Algorithms {
@@ -52,8 +50,7 @@ private:
   /// Shift the time of the logs
   void shiftTimeOfLogs(Mantid::API::MatrixWorkspace_sptr ws, double timeShift);
   /// Get the date and time of the first good frame of a workspace
-  Mantid::Kernel::DateAndTime
-  getStartTimeFromWorkspace(Mantid::API::MatrixWorkspace_sptr ws) const;
+  Mantid::Kernel::DateAndTime getStartTimeFromWorkspace(Mantid::API::MatrixWorkspace_sptr ws) const;
   /// Can the string be transformed to double
   bool checkForDouble(std::string val);
   /// Can the string be transformed to a DateTime
