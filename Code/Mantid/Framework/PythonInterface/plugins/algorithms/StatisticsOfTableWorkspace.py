@@ -59,7 +59,7 @@ class StatisticsOfTableWorkspace(PythonAlgorithm):
                 for statname in stats.keys():
                     stats[statname][name] = s[statname]
                 out_ws.addColumn('float', name)
-            except RuntimeError:
+            except ValueError:
                 logger.notice('Column \'%s\' is not numerical, skipping' % name)
                 pass
 
