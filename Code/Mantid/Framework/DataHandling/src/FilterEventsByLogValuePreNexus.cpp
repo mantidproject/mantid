@@ -740,13 +740,22 @@ void FilterEventsByLogValuePreNexus::doStatToEventLog(size_t mindex) {
       max_dt = temp_dt;
   }
 
-  double avg_dt = static_cast<double>(sum_dt) / static_cast<double>(nbins - 1);
+  if ( nbins - 1 ) {
+    double avg_dt = static_cast<double>(sum_dt) / static_cast<double>(nbins - 1);
+    g_log.information() << "Event log of map index " << mindex
+      << ": Avg(dt) = " << avg_dt * 1.0E-9
+      << ", Min(dt) = " << static_cast<double>(min_dt) * 1.0E-9
+      << ", Max(dt) = " << static_cast<double>(max_dt) * 1.0E-9
+      << "\n";
+  } else {
+    g_log.information() << "Event log of map index " << mindex
+      << ": Avg(dt) = " << sum_dt * 1.0E-9
+      << ", Min(dt) = " << static_cast<double>(min_dt) * 1.0E-9
+      << ", Max(dt) = " << static_cast<double>(max_dt) * 1.0E-9
+      << "\n";
 
-  g_log.information() << "Event log of map index " << mindex
-                      << ": Avg(dt) = " << avg_dt * 1.0E-9
-                      << ", Min(dt) = " << static_cast<double>(min_dt) * 1.0E-9
-                      << ", Max(dt) = " << static_cast<double>(max_dt) * 1.0E-9
-                      << "\n";
+  }
+
   g_log.information() << "Number of zero-interval eveng log = " << numzeros
                       << "\n";
 
