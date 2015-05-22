@@ -23,7 +23,9 @@ DECLARE_ALGORITHM(AppendGeometryToSNSNexus)
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
-AppendGeometryToSNSNexus::AppendGeometryToSNSNexus() {}
+AppendGeometryToSNSNexus::AppendGeometryToSNSNexus()
+    : m_makeNexusCopy(false), progress(), instrument_loaded_correctly(false),
+      logs_loaded_correctly(false) {}
 
 //----------------------------------------------------------------------------------------------
 /** Destructor
