@@ -213,6 +213,8 @@ bool Fit::setDataFromTable(Table *t, const QString& xColName, const QString& yCo
 
 void Fit::setDataCurve(int curve, double start, double end)
 {
+    if (!d_graph) return;
+
     if (d_n > 0)
 		delete[] d_w;
 
@@ -222,7 +224,7 @@ void Fit::setDataCurve(int curve, double start, double end)
     PlotCurve *plotCurve = dynamic_cast<PlotCurve *>(d_curve);
     DataCurve *dataCurve = dynamic_cast<DataCurve *>(d_curve);
     // if it is a DataCurve (coming from a Table)
-    if (d_graph && plotCurve && dataCurve && plotCurve->type() != Graph::Function)
+    if (plotCurve && dataCurve && plotCurve->type() != Graph::Function)
     {
         QList<DataCurve *> lst = (dynamic_cast<DataCurve *>(d_curve))->errorBarsList();
         foreach (DataCurve *c, lst){

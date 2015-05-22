@@ -670,8 +670,10 @@ void ColorPickerPopup::updateSelected()
 
   if (sender() && sender()->inherits("ColorPickerItem")) {
     ColorPickerItem *item = dynamic_cast<ColorPickerItem *>(sender());
-    lastSel = item->color();
-    emit selected(item->color());
+    if (item) {
+      lastSel = item->color();
+      emit selected(item->color());
+    }
   }
 
   hide();

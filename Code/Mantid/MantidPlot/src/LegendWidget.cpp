@@ -586,25 +586,25 @@ PlotCurve* LegendWidget::getCurve(const QString& s, int &point)
 {
 	point = -1;
 	PlotCurve *curve = 0;
-  Graph *g = dynamic_cast<Graph *>(d_plot->parent());
+  if (Graph *g = dynamic_cast<Graph *>(d_plot->parent())) {
+	  QStringList l = s.split(",");
+      if (l.count() == 2)
+		  point = l[1].toInt() - 1;
 
-	QStringList l = s.split(",");
-    if (l.count() == 2)
-		point = l[1].toInt() - 1;
-
-	if (!l.isEmpty()){
-		l = l[0].split(".");
-    	if (l.count() == 2){
-    		int cv = l[1].toInt() - 1;
-			Graph *layer = g->multiLayer()->layer(l[0].toInt());
-			if (layer && cv >= 0 && cv < layer->curves())
-        return dynamic_cast<PlotCurve*>(layer->curve(cv));
-		} else if (l.count() == 1){
-			int cv = l[0].toInt() - 1;
-			if (cv >= 0 || cv < g->curves())
-        return dynamic_cast<PlotCurve*>(g->curve(cv));
-		}
-	}
+	  if (!l.isEmpty()){
+		  l = l[0].split(".");
+    	  if (l.count() == 2){
+    		  int cv = l[1].toInt() - 1;
+			  Graph *layer = g->multiLayer()->layer(l[0].toInt());
+			  if (layer && cv >= 0 && cv < layer->curves())
+          return dynamic_cast<PlotCurve*>(layer->curve(cv));
+		  } else if (l.count() == 1){
+			  int cv = l[0].toInt() - 1;
+			  if (cv >= 0 || cv < g->curves())
+          return dynamic_cast<PlotCurve*>(g->curve(cv));
+		  }
+	  }
+  }
 	return curve;
 }
 
