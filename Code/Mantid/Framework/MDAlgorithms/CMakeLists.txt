@@ -367,7 +367,7 @@ endif ()
 set_property ( TARGET MDAlgorithms PROPERTY FOLDER "MantidFramework" )
 
 include_directories ( inc )
-target_link_libraries ( MDAlgorithms ${MANTIDLIBS} )
+target_link_libraries ( MDAlgorithms LINK_PRIVATE ${MANTIDLIBS} ${GSL_LIBRARIES} ${NEXUS_LIBRARIES}  )
 
 # Add the unit tests directory
 add_subdirectory ( test )

@@ -18,6 +18,8 @@ namespace
   BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Component_getStringParameter,Component::getStringParameter,1,2)
   BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Component_getIntParameter,Component::getIntParameter,1,2)
   BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Component_getParameterType,Component::getParameterType,1,2)
+  BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Component_getRotation,Component::getRotation,0,0)
+  BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Component_getRelativePos,Component::getRelativePos,0,0)
 
 
 }
@@ -35,6 +37,8 @@ void export_Component()
     .def("getRotationParameter", &Component::getRotationParameter, Component_getRotationParameter())
     .def("getStringParameter", &Component::getStringParameter, Component_getStringParameter())
     .def("getIntParameter", &Component::getIntParameter, Component_getIntParameter())
+    .def("getRotation", &Component::getRotation, Component_getRotation())
+    .def("getRelativePos", &Component::getRelativePos, Component_getRelativePos())
     // HACK -- python should return parameters regardless of type. this is untill rows below do not work
     .def("getParameterType", &Component::getParameterType, Component_getParameterType())
     //// this does not work for some obvious or not obvious reasons 

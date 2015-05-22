@@ -126,7 +126,7 @@ DECLARE_ALGORITHM(%s)
 const std::string %s::name() const { return "%s"; }
 
 /// Algorithm's version for identification. @see Algorithm::version
-int %s::version() const { return 1; };
+int %s::version() const { return 1; }
 
 /// Algorithm's category for identification. @see Algorithm::category
 const std::string %s::category() const {
@@ -136,7 +136,7 @@ const std::string %s::category() const {
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
 const std::string %s::summary() const {
   return "TODO: FILL IN A SUMMARY";
-};
+}
 
 //----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties.

@@ -148,7 +148,12 @@ set_property ( TARGET SINQ PROPERTY FOLDER "MantidFramework" )
 
 include_directories ( inc )
 
-target_link_libraries ( SINQ ${MANTIDLIBS} )
+# Have to link to winsock library on Windows
+if ( WIN32 )
+  set ( WINSOCK ws2_32 )
+endif ()
+
+target_link_libraries ( SINQ LINK_PRIVATE ${MANTIDLIBS} ${NEXUS_LIBRARIES} ${WINSOCK} )
 
 # Add the unit tests directory
 add_subdirectory ( test )

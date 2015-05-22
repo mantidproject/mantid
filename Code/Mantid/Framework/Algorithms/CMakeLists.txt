@@ -646,6 +646,7 @@ set ( TEST_FILES
 	FitPeakTest.h
 	FixGSASInstrumentFileTest.h
 	FlatPlateAbsorptionTest.h
+	GeneralisedSecondDifferenceTest.h
 	GenerateEventsFilterTest.h
 	GeneratePeaksTest.h
 	GeneratePythonScriptTest.h
@@ -782,7 +783,7 @@ set_property ( TARGET Algorithms PROPERTY FOLDER "MantidFramework" )
 
 include_directories ( inc )
 
-target_link_libraries ( Algorithms ${MANTIDLIBS} ${GSL_LIBRARIES} )
+target_link_libraries ( Algorithms LINK_PRIVATE ${MANTIDLIBS} ${GSL_LIBRARIES} )
 
 # Add the unit tests directory
 add_subdirectory ( test )
