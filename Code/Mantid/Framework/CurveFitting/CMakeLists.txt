@@ -358,7 +358,7 @@ set_property ( TARGET CurveFitting PROPERTY FOLDER "MantidFramework" )
 
 include_directories ( inc )
 
-target_link_libraries ( CurveFitting ${MANTIDLIBS} ${GSL_LIBRARIES} )
+target_link_libraries ( CurveFitting LINK_PRIVATE ${MANTIDLIBS} ${GSL_LIBRARIES} )
 
 # Add the unit tests directory
 add_subdirectory ( test )

@@ -96,7 +96,7 @@ set_property ( TARGET RemoteAlgorithms PROPERTY FOLDER "MantidFramework" )
 
 include_directories ( inc )
 
-target_link_libraries ( RemoteAlgorithms ${MANTIDLIBS} ${GSL_LIBRARIES} )
+target_link_libraries ( RemoteAlgorithms LINK_PRIVATE ${MANTIDLIBS} ${GSL_LIBRARIES} )
 
 # Add the unit tests directory
 add_subdirectory ( test )  # Note: No tests yet for many remote algorithms...
