@@ -16,14 +16,14 @@ class EnginXFocus(PythonAlgorithm):
         self.declareProperty(FileProperty("Filename", "", FileAction.Load),\
     		"Run to focus")
 
-        self.declareProperty(WorkspaceProperty("OutputWorkspace", "", Direction.Output),\
-    		"A workspace with focussed data")
+        self.declareProperty("Bank", 1, "Which bank to focus")
 
         self.declareProperty(ITableWorkspaceProperty("DetectorPositions", "", Direction.Input,\
                 PropertyMode.Optional),\
     		"Calibrated detector positions. If not specified, default ones are used.")
 
-        self.declareProperty("Bank", 1, "Which bank to focus")
+        self.declareProperty(WorkspaceProperty("OutputWorkspace", "", Direction.Output),\
+                             "A workspace with focussed data")
 
 
 

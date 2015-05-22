@@ -237,7 +237,7 @@ MDGeometry::getYDimension() const {
 boost::shared_ptr<const Mantid::Geometry::IMDDimension>
 MDGeometry::getZDimension() const {
   if (this->getNumDims() < 3)
-    throw std::runtime_error("Workspace does not have a X dimension.");
+    throw std::runtime_error("Workspace does not have a Z dimension.");
   return this->getDimension(2);
 }
 
