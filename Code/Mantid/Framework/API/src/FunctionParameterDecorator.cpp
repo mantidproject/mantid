@@ -1,5 +1,7 @@
 #include "MantidAPI/FunctionParameterDecorator.h"
 #include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/CompositeFunction.h"
+#include "MantidAPI/ParameterReference.h"
 
 namespace Mantid {
 namespace API {
@@ -172,7 +174,15 @@ size_t FunctionParameterDecorator::getParameterIndex(
     const ParameterReference &ref) const {
   throwIfNoFunctionSet();
 
-  return m_wrappedFunction->getParameterIndex(ref);
+  if(boost::dynamic_pointer_cast<CompositeFunction>(m_wrappedFunction)) {
+      return m_wrappedFunction->getParameterIndex(ref);
+  }
+
+  if(ref.getFunction() == this && ref.getIndex() < nParams()) {
+      return ref.getIndex();
+  }
+
+  return nParams();
 }
 
 size_t FunctionParameterDecorator::nAttributes() const {
@@ -288,8 +298,12 @@ void FunctionParameterDecorator::declareParameter(
   UNUSED_ARG(description);
 }
 
-/// Does nothing.
-void FunctionParameterDecorator::addTie(ParameterTie *tie) { UNUSED_ARG(tie); }
+/// Forwads addTie-call to the decorated function.
+void FunctionParameterDecorator::addTie(ParameterTie *tie) {
+    throwIfNoFunctionSet();
+
+    m_wrappedFunction->addTie(tie);
+}
 
 /**
  * @brief Function that is called before the decorated function is set

@@ -84,7 +84,7 @@ namespace CustomInterfaces
    *
    * @return Map of information ID to value
    */
-  std::map<QString, QString> IndirectDataReductionTab::getInstrumentDetails()
+  QMap<QString, QString> IndirectDataReductionTab::getInstrumentDetails()
   {
     return m_idrUI->getInstrumentDetails();
   }
