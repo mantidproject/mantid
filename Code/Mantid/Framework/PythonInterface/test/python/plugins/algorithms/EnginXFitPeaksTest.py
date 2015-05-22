@@ -133,9 +133,9 @@ class EnginXFitPeaksTest(unittest.TestCase):
         difc, zero = EnginXFitPeaks(sws, WorkspaceIndex=0, ExpectedPeaks=[0.4, 1.09])
         # fitting results on some platforms (OSX) are different by ~0.07%
         expected_difc = 17395.620526173196
-        self.assertTrue(abs((expected_difc-difc)/expected_difc) < 1e-3)
+        self.assertTrue(abs((expected_difc-difc)/expected_difc) < 5e-3)
         expected_zero = 1050.3378284424373
-        self.assertTrue(abs((expected_zero-zero)/expected_zero) < 1e-3)
+        self.assertTrue(abs((expected_zero-zero)/expected_zero) < 5e-3)
 
 
     def test_runs_ok_3peaks(self):
@@ -155,9 +155,10 @@ class EnginXFitPeaksTest(unittest.TestCase):
         EditInstrumentGeometry(Workspace=sws, L2=[1.5], Polar=[90], PrimaryFlightPath=50)
         difc, zero = EnginXFitPeaks(sws, WorkspaceIndex=0, ExpectedPeaks=[0.4, 0.83, 1.09])
         expected_difc = 17335.67250113934
-        self.assertLess(abs((expected_difc-difc)/expected_difc), 5e-3)
+        # assertLess would be nices, but only available in unittest >= 2.7
+        self.assertTrue(abs((expected_difc-difc)/expected_difc) < 5e-3)
         expected_zero = 950.9440922621866
-        self.assertLess(abs((expected_zero-zero)/expected_zero), 5e-3)
+        self.assertTrue(abs((expected_zero-zero)/expected_zero) < 5e-3)
 
 
 
