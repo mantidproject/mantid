@@ -5,8 +5,10 @@
 #include <boost/python/enum.hpp>
 #include <boost/python/scope.hpp>
 #include <boost/python/list.hpp>
+#include <boost/python/stl_iterator.hpp>
+#include <boost/python/make_constructor.hpp>
 
-using Mantid::Geometry::Group;
+using namespace Mantid::Geometry;
 using Mantid::Geometry::SymmetryOperation;
 
 using namespace boost::python;
@@ -21,6 +23,16 @@ namespace {
       }
 
       return pythonSymOps;
+    }
+
+    Group * constructGroupFromPythonList(const boost::python::list &symOpList) {
+        std::vector<SymmetryOperation> operations;
+
+        for(int i = 0; i < len(symOpList); ++i) {
+            operations.push_back(boost::python::extract<SymmetryOperation>(symOpList[i]));
+        }
+
+        return new Group(operations);
     }
 }
 
@@ -41,6 +53,7 @@ void export_Group()
   class_<Group>("Group")
       .def(init<std::string>("Construct a group from the provided initializer string."))
       .def(init<std::vector<SymmetryOperation> >("Construct a group from the provided symmetry operation list."))
+      .def("__init__", make_constructor(&constructGroupFromPythonList), "Construct a group from a python generated symmetry operation list.")
       .def("getOrder", &Group::order, "Returns the order of the group.")
       .def("getCoordinateSystem", &Group::getCoordinateSystem, "Returns the type of coordinate system to distinguish groups with hexagonal system definition.")
       .def("getSymmetryOperations", &Group::getSymmetryOperations, "Returns the symmetry operations contained in the group.")
