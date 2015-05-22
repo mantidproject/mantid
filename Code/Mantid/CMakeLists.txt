@@ -205,6 +205,15 @@ add_subdirectory ( docs )
 # System test data target
 add_subdirectory ( Testing/SystemTests/scripts )
 
+if (COVERALLS)
+  get_property(ALL_SRCS GLOBAL PROPERTY COVERAGE_SRCS)
+  coveralls_setup(
+    "${ALL_SRCS}"
+    OFF
+    "${CMAKE_SOURCE_DIR}/Build/CMake"
+  )
+endif ()
+
 ###########################################################################
 # Installation settings
 ###########################################################################

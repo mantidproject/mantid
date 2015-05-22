@@ -361,18 +361,10 @@ set ( TEST_FILES
 )
 
 if (COVERALLS)
-    set(COVERAGE_SRCS "")
-    foreach( loop_var ${SRCS_FILES} ${INC_FILES})
-            LIST(APPEND COVERAGE_SRCS "${CMAKE_CURRENT_SOURCE_DIR}/${loop_var}")
+    foreach( loop_var ${SRC_FILES} ${INC_FILES})
+      set_property(GLOBAL APPEND PROPERTY COVERAGE_SRCS "${CMAKE_CURRENT_SOURCE_DIR}/${loop_var}")
     endforeach(loop_var)
-    #Create the coveralls target.
-    coveralls_setup(
-        "${COVERAGE_SRCS}"
-         OFF
-         "${CMAKE_SOURCE_DIR}/Build/CMake"
-    )
 endif()
-
 
 if ( ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
     LIST( APPEND SRC_FILES src/NetworkProxyOSX.cpp )

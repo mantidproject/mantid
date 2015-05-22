@@ -12,6 +12,11 @@ set ( INC_FILES
 set ( TEST_FILES
 )
 
+if (COVERALLS)
+    foreach( loop_var ${SRC_FILES} ${INC_FILES})
+      set_property(GLOBAL APPEND PROPERTY COVERAGE_SRCS "${CMAKE_CURRENT_SOURCE_DIR}/${loop_var}")
+    endforeach(loop_var)
+endif()
 
 # Use a precompiled header where they are supported
 #enable_precompiled_headers( inc/MantidISISLiveData/PrecompiledHeader.h SRC_FILES )

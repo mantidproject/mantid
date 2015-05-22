@@ -11,6 +11,12 @@ set ( TEST_FILES BroadcastWorkspaceTest.h
                  GatherWorkspacesTest.h
 )
 
+if (COVERALLS)
+    foreach( loop_var ${SRC_FILES} ${INC_FILES})
+      set_property(GLOBAL APPEND PROPERTY COVERAGE_SRCS "${CMAKE_CURRENT_SOURCE_DIR}/${loop_var}")
+    endforeach(loop_var)
+endif()
+
 # Add the target for this directory
 add_library ( MPIAlgorithms ${SRC_FILES} ${INC_FILES} )
 # Set the name of the generated library
