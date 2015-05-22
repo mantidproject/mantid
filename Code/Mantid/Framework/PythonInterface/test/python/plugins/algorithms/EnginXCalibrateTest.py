@@ -56,8 +56,12 @@ class EnginXCalibrateTest(unittest.TestCase):
 
         difc, zero = EnginXCalibrate(Filename="ENGINX00228061.nxs",
                                      ExpectedPeaks=[1.6, 1.1, 1.8], Bank=2)
-        self.assertAlmostEqual(difc, 369367.57492582797)
-        self.assertAlmostEqual(zero, -223297.87349744083)
+        # There are platform specific differences in final parameter values
+        # For example, debian: 369367.57492582797; win7: 369242.28850305633
+        expected_difc = 369367.57492582797
+        self.assertLess(abs((expected_difc-difc)/expected_difc), 5e-3)
+        expected_zero = -223297.87349744083
+        self.assertLess(abs((expected_zero-zero)/expected_zero), 5e-3)
 
 
 

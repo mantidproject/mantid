@@ -52,7 +52,8 @@ class EnginXCalibrateFullTest(unittest.TestCase):
         # a correct fit is included in system tests
         tbl_name = 'det_peaks_tbl'
         det_peaks_tbl = CreateEmptyTableWorkspace()
-        self.assertRaises(EnginXCalibrateFull,
+        self.assertRaises(RuntimeError,
+                          EnginXCalibrateFull,
                           Filename="ENGINX00228061.nxs", Bank=2,
                           ExpectedPeaks='0.915, 1.257, 1.688',
                           DetectorPositions=tbl_name)
