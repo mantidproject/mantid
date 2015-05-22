@@ -227,9 +227,7 @@ bool Group::eachElementHasInverse() const {
  *
  * @return True if associativity holds
  */
-bool Group::associativityHolds() const {
-
-    return true;}
+bool Group::associativityHolds() const { return true; }
 
 /// Convenience operator* for directly multiplying groups using shared
 /// pointers.
