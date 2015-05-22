@@ -129,22 +129,13 @@ public:
     TS_ASSERT_DELTA(tester.chiSquared, 1450.39, 1.0);
   }
 
-  void test_1D_values_divide_by_dof() {
-    Tester tester;
-    tester.set1DFunction();
-    tester.set1DSpectrumValues();
-    tester.runAlgorithm();
-    tester.check1DSpectrum();
-    TS_ASSERT_DELTA(tester.chiSquared, 236.5, 1.0);
-  }
-
   void test_1D_values_divide_by_dof_fixed_params() {
     Tester tester(1);
     tester.set1DFunction();
     tester.set1DSpectrumValues();
     tester.runAlgorithm();
     tester.check1DSpectrum();
-    TS_ASSERT_DELTA(tester.chiSquared, 184.0, 1.0);
+    TS_ASSERT_DELTA(tester.chiSquared, 1655.0, 1.0);
   }
 
   void test_1D_values_divide_by_dof_zero() {
@@ -223,12 +214,16 @@ private:
     // algorithm output
     double chiSquared;
     double chiSquaredDividedByDOF;
+    double chiSquaredWeighted;
+    double chiSquaredWeightedDividedByDOF;
     bool isExecuted;
 
     Tester(size_t np = 3, size_t nd = 10, bool histo = true)
         : nParams(np), nData(nd), isHisto(histo), workspaceIndex(0), xMin(-10),
           xMax(10), StartX(EMPTY_DBL()), EndX(EMPTY_DBL()),
-          ignoreInvalidData(false), chiSquared(-1), chiSquaredDividedByDOF(-1), isExecuted(false) {
+          ignoreInvalidData(false), chiSquared(-1), chiSquaredDividedByDOF(-1),
+          chiSquaredWeighted(-1), chiSquaredWeightedDividedByDOF(-1),
+          isExecuted(false) {
       makeXValues();
     }
 
@@ -249,6 +244,8 @@ private:
       if (isExecuted) {
         chiSquared = alg.getProperty("ChiSquared");
         chiSquaredDividedByDOF = alg.getProperty("ChiSquaredDividedByDOF");
+        chiSquaredWeighted = alg.getProperty("ChiSquaredWeighted");
+        chiSquaredWeightedDividedByDOF = alg.getProperty("ChiSquaredWeightedDividedByDOF");
       }
     }
 
@@ -296,6 +293,7 @@ private:
       auto space = WorkspaceFactory::Instance().create("Workspace2D", nSpec,
                                                        nData + dn, nData);
       space->dataX(0).assign(xBins.begin(), xBins.end());
+      space->dataE(0).assign(nData, 10.0);
       workspace = space;
     }
 
@@ -327,25 +325,32 @@ private:
       TS_ASSERT(isExecuted);
       setDefaultXRange();
       double sum2 = 0.0;
+      double sum2w = 0.0;
       auto &yValues = dynamic_cast<MatrixWorkspace&>(*workspace).readY(workspaceIndex);
       auto &eValues = dynamic_cast<MatrixWorkspace&>(*workspace).readE(workspaceIndex);
+      double dof = - double(nParams);
       for (size_t i = 0; i < xValues.size(); ++i) {
         const double xValue = xValues[i];
         if (xValue >= StartX && xValue <= EndX && isGoodValue(yValues[i],eValues[i])) {
           FunctionDomain1DVector x(xValue);
           FunctionValues y(x);
           function->function(x, y);
-          const double tmp = yValues[i] - y[0];
+          double tmp = yValues[i] - y[0];
           //std::cerr << "test " << xValue << ' ' << yValues[i] << ' ' << y[0] << std::endl;
           sum2 += tmp * tmp;
+          tmp /= eValues[i];
+          sum2w += tmp * tmp;
+          dof += 1.0;
         }
       }
       TS_ASSERT_DIFFERS(sum2, 0);
       TS_ASSERT_DELTA(sum2, chiSquared, 1e-10);
-      double dof = double(nData) - double(nParams);
+      TS_ASSERT_DELTA(sum2w, chiSquaredWeighted, 1e-10);
       if (dof <= 0.0) dof = 1.0;
       sum2 /= dof;
+      sum2w /= dof;
       TS_ASSERT_DELTA(sum2, chiSquaredDividedByDOF, 1e-10);
+      TS_ASSERT_DELTA(sum2w, chiSquaredWeightedDividedByDOF, 1e-10);
     }
 
     void checkFailed() {
