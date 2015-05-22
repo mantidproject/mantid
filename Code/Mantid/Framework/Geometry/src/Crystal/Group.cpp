@@ -52,6 +52,12 @@ std::vector<SymmetryOperation> Group::getSymmetryOperations() const {
   return m_allOperations;
 }
 
+/// Returns true if the group contains the supplied operation.
+bool Group::containsOperation(const SymmetryOperation &operation) const {
+  return std::find(m_allOperations.begin(), m_allOperations.end(), operation) !=
+         m_allOperations.end();
+}
+
 /**
  * Multiplication operator of two groups.
  *
@@ -101,6 +107,39 @@ bool Group::operator!=(const Group &other) const {
   return !(this->operator==(other));
 }
 
+/// Checks whether a certain group axiom is fulfilled, can be used as a more
+/// fine-grained alternative to isGroup().
+bool Group::fulfillsAxiom(GroupAxiom axiom) const {
+  switch (axiom) {
+  case Closure:
+    return isClosed();
+  case Identity:
+    return hasIdentity();
+  case Inversion:
+    return eachElementHasInverse();
+  case Associativity:
+    return associativityHolds();
+  default:
+    return false;
+  }
+}
+
+/**
+ * Returns whether the group fulfills the four group axioms
+ *
+ * When a Group is constructed from a list of symmetry operations, no checks
+ * are performed whether this set of operations fulfills the four group axioms,
+ * i.e. whether it is a group at all. If you are not sure whether a set of
+ * symmetry operations is a group, construct one and look at the return value
+ * of this method.
+ *
+ * @return True if group axioms are fulfilled, false otherwise.
+ */
+bool Group::isGroup() const {
+  return isClosed() && hasIdentity() && eachElementHasInverse() &&
+         associativityHolds();
+}
+
 /// Assigns symmetry operations, throws std::invalid_argument if vector is
 /// empty.
 void Group::setSymmetryOperations(
@@ -131,7 +170,82 @@ Group::CoordinateSystem Group::getCoordinateSystemFromOperations(
   return Group::Orthogonal;
 }
 
-/// Convenience operator* for directly multiplying groups using shared pointers.
+/// Returns true if the group is closed, i.e. all elements of G * G are in G.
+bool Group::isClosed() const {
+  Group result = (*this) * (*this);
+
+  // If the order is different, there are additional or fewer elements
+  if (result.order() != order()) {
+    return false;
+  }
+
+  // Also, all operations need to be equal.
+  std::vector<SymmetryOperation> ops = result.getSymmetryOperations();
+  for (size_t i = 0; i < ops.size(); ++i) {
+    if (ops[i] != m_allOperations[i]) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+/// Returns true if the group has an identity element.
+bool Group::hasIdentity() const {
+  // Iterate through all operations
+  for (auto op = m_allOperations.begin(); op != m_allOperations.end(); ++op) {
+
+    // Combine op with each operation, until all operations are compared.
+    auto otherOp = m_allOperations.begin();
+    while (otherOp != m_allOperations.end() &&
+           (((*op) * (*otherOp)) == (*otherOp))) {
+      ++otherOp;
+    }
+
+    // If all operations have been compared, op leaves all operations unchanged.
+    if (otherOp == m_allOperations.end()) {
+      return true;
+    }
+  }
+
+  // At this point none of the operations has left all operations unchanged.
+  return false;
+}
+
+/// Returns true if the inverse of each element is in the group
+bool Group::eachElementHasInverse() const {
+  // Iterate through all operations, check that the inverse is in the group.
+  for (auto op = m_allOperations.begin(); op != m_allOperations.end(); ++op) {
+    if (!containsOperation((*op).inverse())) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+/// Checks that associativity holds, i.e. (a*b)*c == a*(b*c)
+bool Group::associativityHolds() const {
+  SymmetryOperation thirdOp =
+      SymmetryOperationFactory::Instance().createSymOp("-x,-y,-z");
+
+  for (auto op = m_allOperations.begin(); op != m_allOperations.end(); ++op) {
+    for (auto otherOp = m_allOperations.begin();
+         otherOp != m_allOperations.end(); ++otherOp) {
+      SymmetryOperation first = ((*op) * (*otherOp)) * thirdOp;
+      SymmetryOperation second = (*op) * ((*otherOp) * thirdOp);
+
+      if (first != second) {
+        return false;
+      }
+    }
+  }
+
+  return true;
+}
+
+/// Convenience operator* for directly multiplying groups using shared
+/// pointers.
 Group_const_sptr operator*(const Group_const_sptr &lhs,
                            const Group_const_sptr &rhs) {
   if (!lhs || !rhs) {

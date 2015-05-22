@@ -134,6 +134,13 @@ public:
     Hexagonal
   };
 
+  enum GroupAxiom {
+      Closure,
+      Identity,
+      Inversion,
+      Associativity
+  };
+
   Group();
   Group(const std::string &symmetryOperationString);
   Group(const std::vector<SymmetryOperation> &symmetryOperations);
@@ -145,6 +152,7 @@ public:
   size_t order() const;
   CoordinateSystem getCoordinateSystem() const;
   std::vector<SymmetryOperation> getSymmetryOperations() const;
+  bool containsOperation(const SymmetryOperation &operation) const;
 
   Group operator*(const Group &other) const;
 
@@ -153,12 +161,20 @@ public:
   bool operator==(const Group &other) const;
   bool operator!=(const Group &other) const;
 
+  bool fulfillsAxiom(GroupAxiom axiom) const;
+  bool isGroup() const;
+
 protected:
   void setSymmetryOperations(
       const std::vector<SymmetryOperation> &symmetryOperations);
 
   CoordinateSystem getCoordinateSystemFromOperations(
       const std::vector<SymmetryOperation> &symmetryOperations) const;
+
+  bool isClosed() const;
+  bool hasIdentity() const;
+  bool eachElementHasInverse() const;
+  bool associativityHolds() const;
 
   std::vector<SymmetryOperation> m_allOperations;
   std::set<SymmetryOperation> m_operationSet;
