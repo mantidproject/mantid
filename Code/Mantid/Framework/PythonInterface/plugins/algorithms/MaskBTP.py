@@ -53,13 +53,20 @@ class MaskBTP(mantid.api.PythonAlgorithm):
             self.instrument = ws.getInstrument()
             self.instname = self.instrument.getName()
 
-        instrumentList=["ARCS","CNCS","CORELLI","HYSPEC","MANDI","NOMAD","POWGEN","SEQUOIA","SNAP","SXD","TOPAZ","WISH"]
-        self.bankmin={"ARCS":1,"CNCS":1,"CORELLI":1,"HYSPEC":1,"MANDI":10,"NOMAD":1,"POWGEN":1,"SEQUOIA":38,"SNAP":1,"SXD":1,"TOPAZ":10,"WISH":1}
-        self.bankmax={"ARCS":115,"CNCS":50,"CORELLI":91,"HYSPEC":20,"MANDI":59,"NOMAD":99,"POWGEN":300,"SEQUOIA":150,"SNAP":18,"SXD":11,"TOPAZ":59,"WISH":10}
-        tubemin={"ARCS":1,"CNCS":1,"CORELLI":1,"HYSPEC":1,"MANDI":0,"NOMAD":1,"POWGEN":0,"SEQUOIA":1,"SNAP":0,"SXD":0,"TOPAZ":0,"WISH":1}
-        tubemax={"ARCS":8,"CNCS":8,"CORELLI":16,"HYSPEC":8,"MANDI":255,"NOMAD":8,"POWGEN":153,"SEQUOIA":8,"SNAP":255,"SXD":63,"TOPAZ":255,"WISH":152}
-        pixmin={"ARCS":1,"CNCS":1,"CORELLI":1,"HYSPEC":1,"MANDI":0,"NOMAD":1,"POWGEN":0,"SEQUOIA":1,"SNAP":0,"SXD":0,"TOPAZ":0,"WISH":1}
-        pixmax={"ARCS":128,"CNCS":128,"CORELLI":256,"HYSPEC":128,"MANDI":255,"NOMAD":128,"POWGEN":6,"SEQUOIA":128,"SNAP":255,"SXD":63,"TOPAZ":255,"WISH":512}
+        instrumentList=["ARCS","CNCS","CORELLI","HYSPEC",
+                        "MANDI","NOMAD","POWGEN","SEQUOIA","SNAP","SXD","TOPAZ","WISH"]
+        self.bankmin={"ARCS":1,"CNCS":1,"CORELLI":1,"HYSPEC":1,"MANDI":10,
+                      "NOMAD":1,"POWGEN":1,"SEQUOIA":38,"SNAP":1,"SXD":1,"TOPAZ":10,"WISH":1}
+        self.bankmax={"ARCS":115,"CNCS":50,"CORELLI":91,"HYSPEC":20,"MANDI":59,"NOMAD":99,"POWGEN":300,
+                      "SEQUOIA":150,"SNAP":18,"SXD":11,"TOPAZ":59,"WISH":10}
+        tubemin={"ARCS":1,"CNCS":1,"CORELLI":1,"HYSPEC":1,"MANDI":0,"NOMAD":1,
+                 "POWGEN":0,"SEQUOIA":1,"SNAP":0,"SXD":0,"TOPAZ":0,"WISH":1}
+        tubemax={"ARCS":8,"CNCS":8,"CORELLI":16,"HYSPEC":8,"MANDI":255,"NOMAD":8,
+                 "POWGEN":153,"SEQUOIA":8,"SNAP":255,"SXD":63,"TOPAZ":255,"WISH":152}
+        pixmin={"ARCS":1,"CNCS":1,"CORELLI":1,"HYSPEC":1,"MANDI":0,"NOMAD":1,"POWGEN":0,
+                "SEQUOIA":1,"SNAP":0,"SXD":0,"TOPAZ":0,"WISH":1}
+        pixmax={"ARCS":128,"CNCS":128,"CORELLI":256,"HYSPEC":128,"MANDI":255,
+                "NOMAD":128,"POWGEN":6,"SEQUOIA":128,"SNAP":255,"SXD":63,"TOPAZ":255,"WISH":512}
 
         try:
             instrumentList.index(self.instname)
@@ -109,7 +116,8 @@ class MaskBTP(mantid.api.PythonAlgorithm):
                                 try:
                                     pid=ep[int(t-tubemin[self.instname])][int(p-pixmin[self.instname])].getID()
                                 except:
-                                    raise RuntimeError("Problem finding pixel in bank="+str(b)+", tube="+str(t-tubemin[self.instname])+", pixel="+str(p-pixmin[self.instname]))
+                                    raise RuntimeError("Problem finding pixel in bank="+str(b)+\
+                                                       ", tube="+str(t-tubemin[self.instname])+", pixel="+str(p-pixmin[self.instname]))
                                 detlist.append(pid)
         if len(detlist)> 0:
             mantid.simpleapi.MaskDetectors(Workspace=ws,DetectorList=detlist)

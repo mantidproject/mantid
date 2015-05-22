@@ -136,7 +136,7 @@ class DSFinterp1DFit(IFunction1D):
                 raise ValueError(message)
             # check the regression type is valid
             if self._RegressionType not in self._RegressionTypes:
-                message = 'Regression type {0} not implemented. choose one of {1}'.format(self._RegressionType, 
+                message = 'Regression type {0} not implemented. choose one of {1}'.format(self._RegressionType,
                                                                                           ', '.join(self._RegressionTypes))
                 logger.error(message)
                 raise NotImplementedError(message)
