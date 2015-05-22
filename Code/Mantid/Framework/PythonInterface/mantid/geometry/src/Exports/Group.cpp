@@ -22,17 +22,6 @@ namespace {
 
       return pythonSymOps;
     }
-
-    boost::python::list getSymmetryOperations(Group &self) {
-      const std::vector<SymmetryOperation> &symOps = self.getSymmetryOperations();
-
-      boost::python::list pythonSymOps;
-      for (auto it = symOps.begin(); it != symOps.end(); ++it) {
-        pythonSymOps.append(*it);
-      }
-
-      return pythonSymOps;
-    }
 }
 
 // clang-format off
@@ -43,9 +32,11 @@ void export_Group()
       .value("Orthogonal", Group::Orthogonal)
       .value("Hexagonal", Group::Hexagonal);
 
-  class_<Group, boost::noncopyable>("Group", no_init)
+  class_<Group>("Group")
+      .def(init<std::string>("Construct a group from the provided initializer string."))
+      .def(init<std::vector<SymmetryOperation> >("Construct a group from the provided symmetry operation list."))
       .def("getOrder", &Group::order, "Returns the order of the group.")
       .def("getCoordinateSystem", &Group::getCoordinateSystem, "Returns the type of coordinate system to distinguish groups with hexagonal system definition.")
-      .def("getSymmetryOperations", &getSymmetryOperations, "Returns the symmetry operations contained in the group.")
+      .def("getSymmetryOperations", &Group::getSymmetryOperations, "Returns the symmetry operations contained in the group.")
       .def("getSymmetryOperationStrings", &getSymmetryOperationStrings, "Returns the x,y,z-strings for the contained symmetry operations.");
 }
