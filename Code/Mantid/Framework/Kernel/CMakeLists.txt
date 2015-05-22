@@ -360,6 +360,20 @@ set ( TEST_FILES
 	WriteLockTest.h
 )
 
+if (COVERALLS)
+    set(COVERAGE_SRCS "")
+    foreach( loop_var ${SRCS_FILES} ${INC_FILES})
+            LIST(APPEND COVERAGE_SRCS "${CMAKE_CURRENT_SOURCE_DIR}/${loop_var}")
+    endforeach(loop_var)
+    #Create the coveralls target.
+    coveralls_setup(
+        "${COVERAGE_SRCS}"
+         OFF
+         "${CMAKE_SOURCE_DIR}/Build/CMake"
+    )
+endif()
+
+
 if ( ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
     LIST( APPEND SRC_FILES src/NetworkProxyOSX.cpp )
     SET( NETWORK_LIBRARIES "-framework SystemConfiguration" "-framework CoreFoundation"  "-framework CoreServices")
@@ -376,7 +390,7 @@ if(UNITY_BUILD)
 endif(UNITY_BUILD)
 
 include_directories ( ${GSL_INCLUDE_DIR} )
-
+ 
 # Enable precompiled headers where supported (must be done before target is added)
 enable_precompiled_headers ( inc/MantidKernel/PrecompiledHeader.h SRC_FILES )
 # Add the target for this directory

@@ -74,6 +74,8 @@ IF(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 
 ENDIF()
 
+
+
 ###########################################################################
 # Set paths to Third_Party for Mac builds
 ###########################################################################
@@ -94,6 +96,14 @@ IF (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   include ( DarwinSetup )
 
 ENDIF()
+
+# We probably don't want this to run on every build.
+option(COVERALLS "Generate coveralls data" OFF)
+
+if (COVERALLS)
+    include(Coveralls)
+    coveralls_turn_on_coverage()
+endif()
 
 ###########################################################################
 # Call our setup script
