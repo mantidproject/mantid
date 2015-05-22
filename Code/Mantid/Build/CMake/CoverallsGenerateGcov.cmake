@@ -59,11 +59,22 @@ if (NOT PROJECT_ROOT)
 	message(FATAL_ERROR "Coveralls: Missing PROJECT_ROOT.")
 endif()
 
+
+file(READ "sources.txt" COVERAGE_SRCS)
+
+string(REGEX REPLACE "\n" ";" COVERAGE_SRCS ${COVERAGE_SRCS})
+string(STRIP "${COVERAGE_SRCS}" COVERAGE_SRCS)
+foreach(ITEM ${COVERAGE_SRCS})
+    message(STATUS "ITEM:${ITEM}")
+endforeach()
+message(STATUS "${COVERAGE_SRCS}")
+
+
 # Since it's not possible to pass a CMake list properly in the
 # "1;2;3" format to an external process, we have replaced the
 # ";" with "*", so reverse that here so we get it back into the
 # CMake list format.
-string(REGEX REPLACE "\\*" ";" COVERAGE_SRCS ${COVERAGE_SRCS})
+#string(REGEX REPLACE "\\*" ";" COVERAGE_SRCS ${COVERAGE_SRCS})
 
 find_program(GCOV_EXECUTABLE gcov)
 

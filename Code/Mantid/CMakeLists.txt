@@ -207,8 +207,16 @@ add_subdirectory ( Testing/SystemTests/scripts )
 
 if (COVERALLS)
   get_property(ALL_SRCS GLOBAL PROPERTY COVERAGE_SRCS)
+        set(SRCS_FILE "")
+        foreach (SRC ${ALL_SRCS})
+                set(SRCS_FILE "${SRCS_FILE}\n${SRC}")
+        endforeach()
+        #remove initial \n
+        string(SUBSTRING ${SRCS_FILE} 1 -1 SRCS_FILE)
+  set( SRCS_FILENAME "${CMAKE_CURRENT_BINARY_DIR}/sources.txt") 
+  file(WRITE ${SRCS_FILENAME} ${SRCS_FILE})
   coveralls_setup(
-    "${ALL_SRCS}"
+    ${SRCS_FILENAME}
     OFF
     "${CMAKE_SOURCE_DIR}/Build/CMake"
   )

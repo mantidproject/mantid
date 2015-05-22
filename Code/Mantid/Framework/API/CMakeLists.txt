@@ -405,7 +405,6 @@ set ( GMOCK_TEST_FILES
 
 if (COVERALLS)
     foreach( loop_var ${SRC_FILES} ${INC_FILES} )
-      message(STATUS "loop_var:${loop_var}")
       set_property(GLOBAL APPEND PROPERTY COVERAGE_SRCS "${CMAKE_CURRENT_SOURCE_DIR}/${loop_var}")
     endforeach(loop_var)
 endif()
