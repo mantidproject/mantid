@@ -65,13 +65,13 @@ public:
     // Arrange
     const std::string inputWorkspaceName = "inWS";
     const std::string outputWorkspaceName = "outWS";
-    const std::string timeShift = "1000";
-    const double timeShiftDouble = 1000;
+    const std::string absoluteTimeShift = "";
+    const double relativeTimeShift = 1000;
     Mantid::API::MatrixWorkspace_sptr ws =
         provideWorkspace2D(LogType::STANDARD, inputWorkspaceName);
 
     // Act and assert
-    do_act_and_assert(timeShiftDouble, timeShift, inputWorkspaceName,
+    do_act_and_assert(relativeTimeShift, absoluteTimeShift, inputWorkspaceName,
                       outputWorkspaceName);
 
     // Clean up
@@ -82,13 +82,15 @@ public:
     // Arrange
     const std::string inputWorkspaceName = "inWS";
     const std::string outputWorkspaceName = "outWS";
-    const double timeShiftDouble = 1000;
-    DateAndTime abosluteTimeShift = m_startTime + timeShiftDouble;
+    DateAndTime absoluteTimeShift(m_startTime);
+    absoluteTimeShift += 1000.0;
+    const double relativeTimeShift = 0.0;
+
     Mantid::API::MatrixWorkspace_sptr ws =
         provideWorkspace2D(LogType::STANDARD, inputWorkspaceName);
 
     // Act and assert
-    do_act_and_assert(timeShiftDouble, abosluteTimeShift.toISO8601String(),
+    do_act_and_assert(relativeTimeShift, absoluteTimeShift.toISO8601String(),
                       inputWorkspaceName, outputWorkspaceName);
 
     // Clean up
@@ -99,14 +101,14 @@ public:
     // Arrange
     const std::string inputWorkspaceName = "inWS";
     const std::string outputWorkspaceName = inputWorkspaceName;
-    const std::string timeShift = "1000";
-    const double timeShiftDouble = 1000;
+    const std::string absoluteTimeShift = "";
+    const double relativeTimeShift = 1000;
     Mantid::API::MatrixWorkspace_sptr ws =
         provideWorkspace2D(LogType::STANDARD, inputWorkspaceName);
 
     // Act and assert
-    do_act_and_assert(timeShiftDouble, timeShift, inputWorkspaceName,
-                      outputWorkspaceName);
+    do_act_and_assert(relativeTimeShift, absoluteTimeShift,
+                      inputWorkspaceName, outputWorkspaceName);
 
     // Clean up
     cleanUpWorkspaces(inputWorkspaceName, outputWorkspaceName);
@@ -116,12 +118,14 @@ public:
     // Arrange
     const std::string inputWorkspaceName = "inWS";
     const std::string outputWorkspaceName = inputWorkspaceName;
-    const double timeShiftDouble = 1000;
-    DateAndTime abosluteTimeShift = m_startTime + timeShiftDouble;
+    DateAndTime absoluteTimeShift(m_startTime);
+    absoluteTimeShift += 1000.0;
+    const double relativeTimeShift = 0.0;
     provideWorkspace2D(LogType::STANDARD, inputWorkspaceName);
 
     // Act and assert
-    do_act_and_assert(timeShiftDouble, abosluteTimeShift.toISO8601String(), inputWorkspaceName, outputWorkspaceName);
+    do_act_and_assert(relativeTimeShift, absoluteTimeShift.toISO8601String(),
+                      inputWorkspaceName, outputWorkspaceName);
 
     // Clean up
     cleanUpWorkspaces(inputWorkspaceName, outputWorkspaceName);
@@ -144,7 +148,7 @@ public:
     TS_ASSERT(alg.isInitialized())
     alg.setPropertyValue("InputWorkspace", inputWorkspaceName);
     alg.setPropertyValue("OutputWorkspace", outputWorkspaceName);
-    alg.setPropertyValue("TimeOffset", abosluteTimeShift.toISO8601String());
+    alg.setPropertyValue("AbsoluteTimeOffset", abosluteTimeShift.toISO8601String());
 
     // We expect to see an exception because we are using absolute times and there is no proton charge log
     TS_ASSERT_THROWS_ANYTHING(alg.execute());
@@ -154,10 +158,11 @@ public:
   }
 
   void test_no_exception_is_thrown_for_missing_proton_charge_and_relative_time() {
+
   // Arrange
   const std::string inputWorkspaceName = "inWS";
   const std::string outputWorkspaceName = inputWorkspaceName;
-  const std::string timeShift = "1000";
+  std::string timeShift = "1000";
   provideWorkspace2D(LogType::NOPROTONCHARGE, inputWorkspaceName);
 
   // Act
@@ -167,13 +172,14 @@ public:
   TS_ASSERT(alg.isInitialized())
   alg.setPropertyValue("InputWorkspace", inputWorkspaceName);
   alg.setPropertyValue("OutputWorkspace", outputWorkspaceName);
-  alg.setPropertyValue("TimeOffset", timeShift);
+  alg.setPropertyValue("RelativeTimeOffset", timeShift);
 
-  // We expect to see an exception because we are using absolute times and there is no proton charge log
+  // We expect to see no exception because we are using realative times
   TS_ASSERT_THROWS_NOTHING(alg.execute());
 
   // Clean up
   cleanUpWorkspaces(inputWorkspaceName, outputWorkspaceName);
+
 }
 
 
@@ -182,14 +188,14 @@ public:
     // Arrange
     const std::string inputWorkspaceName = "inWS";
     const std::string outputWorkspaceName = "outWS";
-    const std::string timeShift = "1000";
-    const double timeShiftDouble = 1000;
+    const std::string absoluteTimeShift = "";
+    const double relativeTimeShift = 1000;
     Mantid::API::MatrixWorkspace_sptr ws =
         provideEventWorkspace(LogType::STANDARD, inputWorkspaceName);
 
     // Act and assert
-    do_act_and_assert(timeShiftDouble, timeShift, inputWorkspaceName,
-                      outputWorkspaceName);
+    do_act_and_assert(relativeTimeShift, absoluteTimeShift,
+                      inputWorkspaceName, outputWorkspaceName);
 
     // Clean up
     cleanUpWorkspaces(inputWorkspaceName, outputWorkspaceName);
@@ -199,13 +205,14 @@ public:
     // Arrange
     const std::string inputWorkspaceName = "inWS";
     const std::string outputWorkspaceName = "outWS";
-    const double timeShiftDouble = 1000;
-    DateAndTime abosluteTimeShift = m_startTime + timeShiftDouble;
+    DateAndTime absoluteTimeShift(m_startTime);
+    absoluteTimeShift += 1000.0;
+    const double relativeTimeShift = 0.0;
     Mantid::API::MatrixWorkspace_sptr ws =
         provideEventWorkspace(LogType::STANDARD, inputWorkspaceName);
 
     // Act and assert
-    do_act_and_assert(timeShiftDouble, abosluteTimeShift.toISO8601String(),
+    do_act_and_assert(relativeTimeShift, absoluteTimeShift.toISO8601String(),
                       inputWorkspaceName, outputWorkspaceName);
 
     // Clean up
@@ -216,14 +223,14 @@ public:
     // Arrange
     const std::string inputWorkspaceName = "inWS";
     const std::string outputWorkspaceName = inputWorkspaceName;
-    const std::string timeShift = "1000";
-    const double timeShiftDouble = 1000;
+    const std::string absoluteTimeShift = "";
+    const double relativeTimeShift = 1000;
     Mantid::API::MatrixWorkspace_sptr ws =
         provideEventWorkspace(LogType::STANDARD, inputWorkspaceName);
 
     // Act and assert
-    do_act_and_assert(timeShiftDouble, timeShift, inputWorkspaceName,
-                      outputWorkspaceName);
+    do_act_and_assert(relativeTimeShift, absoluteTimeShift,
+                      inputWorkspaceName, outputWorkspaceName);
 
     // Clean up
     cleanUpWorkspaces(inputWorkspaceName, outputWorkspaceName);
@@ -233,14 +240,15 @@ public:
     // Arrange
     const std::string inputWorkspaceName = "inWS";
     const std::string outputWorkspaceName = inputWorkspaceName;
-    const std::string timeShift = "1000";
-    const double timeShiftDouble = 1000;
+    DateAndTime absoluteTimeShift(m_startTime);
+    absoluteTimeShift += 1000.0;
+    const double relativeTimeShift = 0.0;
     Mantid::API::MatrixWorkspace_sptr ws =
         provideEventWorkspace(LogType::STANDARD, inputWorkspaceName);
 
     // Act and assert
-    do_act_and_assert(timeShiftDouble, timeShift, inputWorkspaceName,
-                      outputWorkspaceName);
+    do_act_and_assert(relativeTimeShift, absoluteTimeShift.toISO8601String(),
+                      inputWorkspaceName, outputWorkspaceName);
 
     // Clean up
     cleanUpWorkspaces(inputWorkspaceName, outputWorkspaceName);
@@ -252,14 +260,14 @@ public:
     // Arrange
     const std::string inputWorkspaceName = "inWS";
     const std::string outputWorkspaceName = inputWorkspaceName;
-    const std::string timeShift = "-1000";
-    const double timeShiftDouble = -1000;
+    const std::string absoluteTimeShift = "";
+    const double relativeTimeShift = -1000;
     Mantid::API::MatrixWorkspace_sptr ws =
         provideEventWorkspace(LogType::STANDARD, inputWorkspaceName);
 
     // Act and assert
-    do_act_and_assert(timeShiftDouble, timeShift, inputWorkspaceName,
-                      outputWorkspaceName);
+    do_act_and_assert(relativeTimeShift, absoluteTimeShift,
+                      inputWorkspaceName, outputWorkspaceName);
 
     // Clean up
     cleanUpWorkspaces(inputWorkspaceName, outputWorkspaceName);
@@ -269,14 +277,14 @@ public:
     // Arrange
     const std::string inputWorkspaceName = "inWS";
     const std::string outputWorkspaceName = inputWorkspaceName;
-    const std::string timeShift = "1000.5";
-    const double timeShiftDouble = 1000.5;
+    const std::string absoluteTimeShift = "";
+    const double relativeTimeShift = 1020.5;
     Mantid::API::MatrixWorkspace_sptr ws =
         provideEventWorkspace(LogType::STANDARD, inputWorkspaceName);
 
     // Act and assert
-    do_act_and_assert(timeShiftDouble, timeShift, inputWorkspaceName,
-                      outputWorkspaceName);
+    do_act_and_assert(relativeTimeShift, absoluteTimeShift,
+                      inputWorkspaceName, outputWorkspaceName);
 
     // Clean up
     cleanUpWorkspaces(inputWorkspaceName, outputWorkspaceName);
@@ -288,14 +296,14 @@ public:
     // Arrange
     const std::string inputWorkspaceName = "inWS";
     const std::string outputWorkspaceName = "outWS";
-    const std::string timeShift = "1000";
-    const double timeShiftDouble = 1000;
+    const std::string absoluteTimeShift = "";
+    const double relativeTimeShift = 1000;
     Mantid::API::MatrixWorkspace_sptr ws =
       provideWorkspaceSingleValue(LogType::STANDARD, inputWorkspaceName);
 
     // Act and assert
-    do_act_and_assert(timeShiftDouble, timeShift, inputWorkspaceName,
-                      outputWorkspaceName);
+    do_act_and_assert(relativeTimeShift, absoluteTimeShift,
+                      inputWorkspaceName, outputWorkspaceName);
 
     // Clean up
     cleanUpWorkspaces(inputWorkspaceName, outputWorkspaceName);
@@ -305,13 +313,14 @@ public:
     // Arrange
     const std::string inputWorkspaceName = "inWS";
     const std::string outputWorkspaceName = "outWS";
-    const double timeShiftDouble = 1000;
-    DateAndTime abosluteTimeShift = m_startTime + timeShiftDouble;
+    DateAndTime absoluteTimeShift(m_startTime);
+    absoluteTimeShift += 1000.0;
+    const double relativeTimeShift = 0.0;
     Mantid::API::MatrixWorkspace_sptr ws =
       provideWorkspaceSingleValue(LogType::STANDARD, inputWorkspaceName);
 
     // Act and assert
-    do_act_and_assert(timeShiftDouble, abosluteTimeShift.toISO8601String(),
+    do_act_and_assert(relativeTimeShift, absoluteTimeShift.toISO8601String(),
                       inputWorkspaceName, outputWorkspaceName);
 
     // Clean up
@@ -333,7 +342,7 @@ private:
   enum LogType { STANDARD, NOPROTONCHARGE };
 
   // act and assert
-  void do_act_and_assert(double timeShiftDouble, std::string timeShift,
+  void do_act_and_assert(double relativeTimeShift, std::string absoluteTimeShift,
                          std::string inWsName, std::string outWsName) {
       // Act
       ChangeTimeZero alg;
@@ -341,12 +350,19 @@ private:
       TS_ASSERT(alg.isInitialized())
       alg.setPropertyValue("InputWorkspace", inWsName);
       alg.setPropertyValue("OutputWorkspace", outWsName);
-      alg.setPropertyValue("TimeOffset", timeShift);
+      alg.setPropertyValue("RelativeTimeOffset",  boost::lexical_cast<std::string>(relativeTimeShift));
+      alg.setPropertyValue("AbsoluteTimeOffset", absoluteTimeShift);
 
       // Assert
       TS_ASSERT_THROWS_NOTHING(alg.execute());
       TS_ASSERT(alg.isExecuted());
-      do_test_shift(outWsName, timeShiftDouble);
+
+      double timeShift = relativeTimeShift;
+      if (relativeTimeShift == 0.0) {
+        timeShift = DateAndTime::secondsFromDuration(DateAndTime(absoluteTimeShift) - m_startTime);
+      }
+
+      do_test_shift(outWsName, timeShift);
     }
 
   // perform the verification

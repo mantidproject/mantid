@@ -69,9 +69,11 @@ private:
   void shiftTimeOfNeutrons(Mantid::API::MatrixWorkspace_sptr ws,
                            double timeShift);
 
-  bool m_isDouble;
-  bool m_isDateAndTime;
+  bool m_isRelativeTimeShift;
+  bool m_isAbsoluteTimeShift;
   boost::shared_ptr<Mantid::Kernel::DateTimeValidator> m_dateTimeValidator;
+  const double m_defaultTimeShift;
+  const std::string m_defaultAbsoluteTimeShift;
 };
 
 /**

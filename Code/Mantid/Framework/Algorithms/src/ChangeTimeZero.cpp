@@ -28,8 +28,8 @@ using std::size_t;
 /** Constructor
  */
 ChangeTimeZero::ChangeTimeZero()
-    : m_isDouble(false), m_isDateAndTime(false),
-      m_dateTimeValidator(boost::make_shared<DateTimeValidator>()) {}
+    : m_isRelativeTimeShift(false), m_isAbsoluteTimeShift(false),
+      m_dateTimeValidator(boost::make_shared<DateTimeValidator>()), m_defaultTimeShift(0.0), m_defaultAbsoluteTimeShift("") {}
 
 //----------------------------------------------------------------------------------------------
 /** Destructor
@@ -45,8 +45,12 @@ void ChangeTimeZero::init() {
   declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace", "",
                                                          Direction::Input),
                   "An input workspace.");
-  declareProperty("TimeOffset", "",
-                  "A relative offset in seconds or an absolute time.");
+  declareProperty<double>("RelativeTimeOffset", m_defaultTimeShift,
+                  "A relative time offset in seconds.");
+
+  declareProperty("AbsoluteTimeOffset", m_defaultAbsoluteTimeShift,
+                  "An absolute time offset as an ISO8601 string.");
+
   declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace", "",
                                                          Direction::Output),
                   "An output workspace.");
@@ -102,16 +106,15 @@ ChangeTimeZero::createOutputWS(API::MatrixWorkspace_sptr input) {
  * @returns A time shift in seconds
  */
 double ChangeTimeZero::getTimeShift(API::MatrixWorkspace_sptr ws) const {
-  auto timeShift = 0.0;
-  std::string timeOffset = getProperty("TimeOffset");
-
+  auto timeShift = m_defaultTimeShift;
   // Check if we are dealing with an absolute time
-  if (m_isDateAndTime) {
+  if (m_isAbsoluteTimeShift) {
+    std::string timeOffset = getProperty("AbsoluteTimeOffset");
     DateAndTime desiredTime(timeOffset);
     DateAndTime originalTime(getStartTimeFromWorkspace(ws));
     timeShift = DateAndTime::secondsFromDuration(desiredTime - originalTime);
   } else {
-    timeShift = boost::lexical_cast<double>(timeOffset);
+    timeShift = getProperty("RelativeTimeOffset");
   }
   return timeShift;
 }
@@ -201,8 +204,8 @@ void ChangeTimeZero::shiftTimeOfNeutrons(Mantid::API::MatrixWorkspace_sptr ws,
  * Release the flag values for double input and date time input
  */
 void ChangeTimeZero::resetFlags() {
-  m_isDouble = false;
-  m_isDateAndTime = false;
+  m_isRelativeTimeShift = false;
+  m_isAbsoluteTimeShift = false;
 }
 
 /**
@@ -241,20 +244,36 @@ std::map<std::string, std::string> ChangeTimeZero::validateInputs() {
   resetFlags();
 
   // Check the time offset for either a value or a date time
-  std::string timeOffset = getProperty("TimeOffset");
+  double relativeTimeOffset = getProperty("RelativeTimeOffset");
+  std::string absoluteTimeOffset = getProperty("AbsoluteTimeOffset");
 
-  m_isDouble = checkForDouble(timeOffset);
-  m_isDateAndTime = checkForDateTime(timeOffset);
+  m_isRelativeTimeShift = relativeTimeOffset != m_defaultTimeShift;
+  auto absoluteTimeInput = absoluteTimeOffset != m_defaultAbsoluteTimeShift;
+  m_isAbsoluteTimeShift = absoluteTimeInput && checkForDateTime(absoluteTimeOffset);
 
-  if (!m_isDouble && !m_isDateAndTime) {
+  // If both inputs are being used, then return straight away.
+  if (m_isRelativeTimeShift && absoluteTimeInput ) {
     invalidProperties.insert(
-        std::make_pair("TimeOffset", "TimeOffset must either be a numeric "
-                                     "value or a ISO8601 date-time stamp."));
+          std::make_pair("RelativeTimeOffset",
+                         "You can either sepcify a relative time shift or an absolute time shift."));
+    invalidProperties.insert(
+          std::make_pair("AbsoluteTimeOffset",
+                         "You can either sepcify a relative time shift or an absolute time shift."));
+
+    return invalidProperties;
+  } else if (!m_isRelativeTimeShift && !m_isAbsoluteTimeShift) {
+    invalidProperties.insert(
+    std::make_pair("RelativeTimeOffset", "TimeOffset must either be a numeric "
+                                  "value or a ISO8601 date-time stamp."));
+    invalidProperties.insert(
+    std::make_pair("AbsoluteTimeOffset", "TimeOffset must either be a numeric "
+                                  "value or a ISO8601 date-time stamp."));
   }
+
 
   // If we are dealing with an absolute time we need to ensure that the
   // proton_charge entry exists
-  if (m_isDateAndTime) {
+  if (m_isAbsoluteTimeShift) {
     MatrixWorkspace_sptr ws = getProperty("InputWorkspace");
     auto run = ws->run();
     try {
