@@ -39,7 +39,9 @@ public:
   /// Default constructor
   PhaseQuadMuon()
       : API::Algorithm(), m_muLife(2.19703), m_bigNumber(1e10), m_tPulseOver(0),
-        m_pulseTail(182), m_poissonLim(30), m_pulseTwo(0.325){};
+        m_pulseTail(182), m_poissonLim(30), m_pulseTwo(0.325), m_nHist(0),
+        m_nData(0), m_res(0.0), m_meanLag(0.0), m_tValid(0), m_isDouble(false),
+        m_tMin(0.0){};
   /// Destructor
   virtual ~PhaseQuadMuon(){};
   /// Algorithm's name for identification overriding a virtual method
