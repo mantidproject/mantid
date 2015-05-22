@@ -77,16 +77,16 @@ private:
   bool m_makeNexusCopy;
 
   /// Algorithm progress keeper
-  API::Progress *progress;
+  API::Progress *m_progress;
 
   /// The workspace to load instrument and logs
   API::MatrixWorkspace_sptr ws;
 
   /// Was the instrument loaded?
-  bool instrument_loaded_correctly;
+  bool m_instrumentLoadedCorrectly;
 
   /// Were the logs loaded?
-  bool logs_loaded_correctly;
+  bool m_logsLoadedCorrectly;
 };
 
 } // namespace DataHandling
