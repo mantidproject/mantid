@@ -60,5 +60,5 @@ void export_Group()
       .def("getSymmetryOperationStrings", &getSymmetryOperationStrings, "Returns the x,y,z-strings for the contained symmetry operations.")
       .def("containsOperation", &Group::containsOperation, "Checks whether a SymmetryOperation is included in Group.")
       .def("isGroup", &Group::isGroup, "Checks whether the contained symmetry operations fulfill the group axioms.")
-      .def("fulfillAxiom", &Group::fulfillsAxiom, "Checks if the contained symmetry operations fulfill the specified group axiom.");
+      .def("fulfillsAxiom", &Group::fulfillsAxiom, "Checks if the contained symmetry operations fulfill the specified group axiom.");
 }
