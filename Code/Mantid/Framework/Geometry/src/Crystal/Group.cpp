@@ -190,26 +190,10 @@ bool Group::isClosed() const {
   return true;
 }
 
-/// Returns true if the group has an identity element.
+/// Returns true if the group has the identity element.
 bool Group::hasIdentity() const {
-  // Iterate through all operations
-  for (auto op = m_allOperations.begin(); op != m_allOperations.end(); ++op) {
-
-    // Combine op with each operation, until all operations are compared.
-    auto otherOp = m_allOperations.begin();
-    while (otherOp != m_allOperations.end() &&
-           (((*op) * (*otherOp)) == (*otherOp))) {
-      ++otherOp;
-    }
-
-    // If all operations have been compared, op leaves all operations unchanged.
-    if (otherOp == m_allOperations.end()) {
-      return true;
-    }
-  }
-
-  // At this point none of the operations has left all operations unchanged.
-  return false;
+  // Since the identity element does not change, this is an easy check.
+  return containsOperation(SymmetryOperation());
 }
 
 /// Returns true if the inverse of each element is in the group
@@ -224,25 +208,28 @@ bool Group::eachElementHasInverse() const {
   return true;
 }
 
-/// Checks that associativity holds, i.e. (a*b)*c == a*(b*c)
+/**
+ * Checks that associativity holds, i.e. (a*b)*c == a*(b*c)
+ *
+ * In fact, this method returns always true, because associativity is implicitly
+ * contained in the definition of the binary operator of SymmetryOperation:
+ *
+ *      (S1 * S2) * S3
+ *      = (W1*W2, W1*w2 + w1) * S3
+ *      = (W1*W2*W3, W1*W2*w3 + W1*w2 + w1)
+ *
+ *      S1 * (S2 * S3)
+ *      = S1 * (W2*W3, W2*w3 + w2)
+ *      = (W1*W2*W3, W1*W2*w3 + W1*w2 + w1)
+ *
+ * No matter what symmetry operations are chosen, this always holds. However,
+ * for completeness the method has been added anyway.
+ *
+ * @return True if associativity holds
+ */
 bool Group::associativityHolds() const {
-  SymmetryOperation thirdOp =
-      SymmetryOperationFactory::Instance().createSymOp("-x,-y,-z");
 
-  for (auto op = m_allOperations.begin(); op != m_allOperations.end(); ++op) {
-    for (auto otherOp = m_allOperations.begin();
-         otherOp != m_allOperations.end(); ++otherOp) {
-      SymmetryOperation first = ((*op) * (*otherOp)) * thirdOp;
-      SymmetryOperation second = (*op) * ((*otherOp) * thirdOp);
-
-      if (first != second) {
-        return false;
-      }
-    }
-  }
-
-  return true;
-}
+    return true;}
 
 /// Convenience operator* for directly multiplying groups using shared
 /// pointers.
