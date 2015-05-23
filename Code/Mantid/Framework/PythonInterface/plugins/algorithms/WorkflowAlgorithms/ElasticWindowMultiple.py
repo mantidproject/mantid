@@ -327,7 +327,7 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
                              'average': lambda x: x.mean()
                              }
             temp = value_action[self._sample_log_value](tmp)
-            logger.error('Temperature %f K found for run: %s' % (temp, run_name))
+            logger.debug('Temperature %d K found for run: %s' % (temp, run_name))
             return temp
 
         else:
