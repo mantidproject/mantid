@@ -62,7 +62,7 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class DLLExport AlignAndFocusPowder : public API::Algorithm {
 public:
-  /// Empty Constructor
+  /// Constructor
   AlignAndFocusPowder();
   /// Destructor
   virtual ~AlignAndFocusPowder();
