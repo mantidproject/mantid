@@ -25,7 +25,10 @@ DECLARE_ALGORITHM(MergeMDFiles)
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
-MergeMDFiles::MergeMDFiles() {}
+MergeMDFiles::MergeMDFiles()
+    : m_nDims(0), m_MDEventType(), m_fileBasedTargetWS(false), m_Filenames(),
+      m_EventLoader(), m_OutIWS(), totalEvents(0), totalLoaded(0), fileMutex(),
+      statsMutex(), prog(NULL) {}
 
 //----------------------------------------------------------------------------------------------
 /** Destructor
@@ -315,7 +318,7 @@ void MergeMDFiles::finalizeOutput(const std::string &outputFile) {
     // its dimensions
     bool old_data_there;
     // clang-format off
-    boost::scoped_ptr< ::NeXus::File> file(MDBoxFlatTree::createOrOpenMDWSgroup(
+    boost::scoped_ptr<::NeXus::File> file(MDBoxFlatTree::createOrOpenMDWSgroup(
         outputFile, m_nDims, m_MDEventType, false, old_data_there));
     // clang-format on
     this->progress(0.94, "Saving ws history and dimensions");

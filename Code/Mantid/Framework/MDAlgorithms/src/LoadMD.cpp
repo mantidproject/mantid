@@ -42,7 +42,8 @@ DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadMD)
 LoadMD::LoadMD()
     : m_numDims(0), // uninitialized incorrect value
       m_coordSystem(None),
-      m_BoxStructureAndMethadata(true) // this is faster but rarely needed.
+      m_BoxStructureAndMethadata(true), // this is faster but rarely needed.
+      m_saveMDVersion(false)
 {}
 
 //----------------------------------------------------------------------------------------------
@@ -159,11 +160,11 @@ void LoadMD::exec() {
   m_file->openGroup(entryName, "NXentry");
 
   // Check is SaveMD version 2 was used
-  SaveMDVersion = 0;
+  m_saveMDVersion = 0;
   if (m_file->hasAttr("SaveMDVersion"))
-    m_file->getAttr("SaveMDVersion", SaveMDVersion);
+    m_file->getAttr("SaveMDVersion", m_saveMDVersion);
 
-  if (SaveMDVersion == 2)
+  if (m_saveMDVersion == 2)
     this->loadDimensions2();
   else {
     // How many dimensions?
@@ -261,7 +262,7 @@ void LoadMD::loadHisto() {
 
   this->loadAffineMatricies(boost::dynamic_pointer_cast<IMDWorkspace>(ws));
 
-  if (SaveMDVersion == 2 )
+  if (m_saveMDVersion == 2 )
     m_file->openGroup("data","NXdata");
   // Load each data slab
   this->loadSlab("signal", ws->getSignalArray(), ws, ::NeXus::FLOAT64);
