@@ -5,6 +5,7 @@
 #include "MantidKernel/PropertyManager.h"
 
 #include <boost/python/register_ptr_to_python.hpp>
+#include <boost/weak_ptr.hpp>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;

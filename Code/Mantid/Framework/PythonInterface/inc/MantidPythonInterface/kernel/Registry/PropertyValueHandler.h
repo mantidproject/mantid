@@ -29,6 +29,7 @@
 namespace Mantid {
 namespace Kernel {
 // Forward declarations
+class DataItem;
 class IPropertyManager;
 class Property;
 }
@@ -43,7 +44,7 @@ namespace Registry {
  */
 struct DLLExport PropertyValueHandler {
   /// Virtual Destructor
-  virtual ~PropertyValueHandler(){};
+  virtual ~PropertyValueHandler() {};
   /// Overload to set the named property's value on the property manager
   virtual void set(Kernel::IPropertyManager *alg, const std::string &name,
                    const boost::python::object &value) const = 0;

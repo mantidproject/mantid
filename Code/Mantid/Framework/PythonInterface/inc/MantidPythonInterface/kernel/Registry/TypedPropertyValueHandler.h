@@ -26,6 +26,7 @@
 #include "MantidPythonInterface/kernel/Registry/DowncastRegistry.h"
 
 #include "MantidPythonInterface/kernel/IsNone.h" // includes object.hpp
+#include "MantidAPI/Workspace.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/IPropertyManager.h"
 
@@ -109,12 +110,20 @@ struct DLLExport TypedPropertyValueHandler<boost::shared_ptr<T>>
   void set(Kernel::IPropertyManager *alg, const std::string &name,
            const boost::python::object &value) const {
     using namespace boost::python;
-    using Registry::DowncastRegistry;
+    using Mantid::API::Workspace_sptr;
+    typedef boost::weak_ptr<Mantid::API::Workspace> Workspace_wptr;
 
-    const auto &entry =
-        DowncastRegistry::retrieve(call_method<std::string>(value.ptr(), "id"));
-    alg->setProperty<HeldType>(name, boost::dynamic_pointer_cast<T>(
-                                         entry.fromPythonAsSharedPtr(value)));
+    Workspace_sptr p;
+    extract<Workspace_wptr> weakExtract(value);
+    extract<Workspace_sptr> sharedExtract(value);
+    if(weakExtract.check()) {
+      p = weakExtract().lock();
+    } else if(sharedExtract.check()) {
+      p = sharedExtract();
+    } else {
+      throw std::runtime_error("Unable to add unknown object type to ADS");
+    }
+    alg->setProperty<HeldType>(name, boost::dynamic_pointer_cast<T>(p));
   }
 
   /**
@@ -147,6 +156,7 @@ struct DLLExport TypedPropertyValueHandler<boost::shared_ptr<T>>
     }
     return valueProp;
   }
+
 };
 }
 }

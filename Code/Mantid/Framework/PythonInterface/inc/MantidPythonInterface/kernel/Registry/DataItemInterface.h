@@ -24,7 +24,6 @@
 */
 #include "MantidPythonInterface/kernel/Registry/TypedPropertyValueHandler.h"
 #include "MantidPythonInterface/kernel/Registry/TypeRegistry.h"
-#include "MantidPythonInterface/kernel/Registry/DowncastRegistry.h"
 #include <boost/python/register_ptr_to_python.hpp>
 
 namespace Mantid {
@@ -37,9 +36,6 @@ namespace Registry {
  *    - Calls register_ptr_to_python<boost::shared_ptr<T>>
  *    - Calls register_ptr_to_python<boost::weak_ptr<T>>
  *    - Registers a new PropertyValueHandler for a boost::shared_ptr<T>
- *
- * ID strings can then be mapped to the template type by calling the
- * insert method.
  */
 template <typename IType> struct DLLExport DataItemInterface {
   typedef boost::shared_ptr<IType> IType_sptr;
@@ -57,7 +53,6 @@ template <typename IType> struct DLLExport DataItemInterface {
   /// Register a downcast for this ID
   DataItemInterface &castFromID(const std::string &id) {
     using namespace Registry;
-    DowncastRegistry::subscribe<IType>(id);
     return *this;
   }
 };

@@ -1,7 +1,7 @@
 #ifndef MANITD_PYTHONINTERFACE_TOWEAKPTRWITHDOWNCASTIMPL_H_
 #define MANITD_PYTHONINTERFACE_TOWEAKPTRWITHDOWNCASTIMPL_H_
 /**
-    Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+    Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory, NScD Oak Ridg
    National Laboratory & European Spallation Source
 
     This file is part of Mantid.

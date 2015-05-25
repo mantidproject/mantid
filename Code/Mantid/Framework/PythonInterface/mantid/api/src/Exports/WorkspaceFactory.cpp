@@ -1,14 +1,12 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/IPeaksWorkspace.h"
-#include "MantidPythonInterface/kernel/Policies/DowncastingPolicies.h"
 
 #include <boost/python/class.hpp>
 #include <boost/python/overloads.hpp>
 
 using namespace boost::python;
 using namespace Mantid::API;
-namespace Policies = Mantid::PythonInterface::Policies;
 
 namespace
 {
@@ -27,7 +25,7 @@ namespace
    *  @throw  std::out_of_range If invalid (0 or less) size arguments are given
    *  @throw  NotFoundException If the class is not registered in the factory
    **/
-  MatrixWorkspace_sptr createFromParentPtr(WorkspaceFactoryImpl & self, const MatrixWorkspace_sptr& parent,
+  Workspace_sptr createFromParentPtr(WorkspaceFactoryImpl & self, const MatrixWorkspace_sptr& parent,
       size_t NVectors = size_t(-1), size_t XLength = size_t(-1), size_t YLength = size_t(-1))
   {
     return self.create(parent, NVectors, XLength, YLength);
@@ -50,15 +48,14 @@ void export_WorkspaceFactory()
   typedef MatrixWorkspace_sptr (WorkspaceFactoryImpl::*createFromScratchPtr)
        (const std::string&,const size_t&, const size_t&, const size_t&) const;
 
-  class_<WorkspaceFactoryImpl,boost::noncopyable>("WorkspaceFactoryImpl", no_init)
+  class_<WorkspaceFactoryImpl, boost::noncopyable>("WorkspaceFactoryImpl", no_init)
     .def("create", &createFromParentPtr,
          createFromParent_Overload(createFromParentDoc,
                                    (arg("parent"), arg("NVectors")=-1,
                                     arg("XLength")=-1,
-                                    arg("YLength")=-1))[return_value_policy<Policies::ToSharedPtrWithDowncast>()])
+                                    arg("YLength")=-1)))
 
-    .def("create", (createFromScratchPtr)&WorkspaceFactoryImpl::create, 
-         return_value_policy<Policies::ToSharedPtrWithDowncast>(),
+    .def("create", (createFromScratchPtr)&WorkspaceFactoryImpl::create,
          createFromScratchDoc, (arg("className"), arg("NVectors"), arg("XLength"), arg("YLength")))
 
     .def("createTable", &WorkspaceFactoryImpl::createTable,
@@ -72,4 +69,3 @@ void export_WorkspaceFactory()
     .staticmethod("Instance")
   ;
 }
-

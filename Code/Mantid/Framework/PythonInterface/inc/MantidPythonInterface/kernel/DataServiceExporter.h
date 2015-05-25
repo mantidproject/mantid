@@ -23,8 +23,8 @@
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-#include "MantidPythonInterface/kernel/Policies/DowncastingPolicies.h"
 #include "MantidKernel/Exception.h"
+#include "MantidPythonInterface/kernel/WeakPtr.h"
 
 #include <boost/python/class.hpp>
 #include <boost/python/list.hpp>
@@ -38,9 +38,11 @@ namespace PythonInterface {
  * @tparam SvcType Type of DataService to export
  * @tparam SvcHeldType The type held within the DataService map
  */
-template <typename SvcType, typename SvcHeldType> struct DataServiceExporter {
-  /// typedef the type created by boost.python
+template <typename SvcType, typename SvcPtrType>
+struct DataServiceExporter {
+  // typedef the type created by boost.python
   typedef boost::python::class_<SvcType, boost::noncopyable> PythonType;
+  typedef boost::weak_ptr<typename SvcPtrType::element_type> WeakPtr;
 
   /**
    * Define the necessary boost.python framework to expor the templated
@@ -60,7 +62,6 @@ template <typename SvcType, typename SvcHeldType> struct DataServiceExporter {
   static PythonType define(const char *pythonClassName) {
     using namespace boost::python;
     using namespace Mantid::Kernel;
-    namespace Policies = Mantid::PythonInterface::Policies;
 
     auto classType =
         PythonType(pythonClassName, no_init)
@@ -73,7 +74,6 @@ template <typename SvcType, typename SvcHeldType> struct DataServiceExporter {
             .def("doesExist", &SvcType::doesExist,
                  "Returns True if the object is found in the service.")
             .def("retrieve", &DataServiceExporter::retrieveOrKeyError,
-                 return_value_policy<Policies::ToWeakPtrWithDowncast>(),
                  "Retrieve the named object. Raises an exception if the name "
                  "does not exist")
             .def("remove", &SvcType::remove, "Remove a named object")
@@ -86,8 +86,7 @@ template <typename SvcType, typename SvcHeldType> struct DataServiceExporter {
 
             // Make it act like a dictionary
             .def("__len__", &SvcType::size)
-            .def("__getitem__", &DataServiceExporter::retrieveOrKeyError,
-                 return_value_policy<Policies::ToWeakPtrWithDowncast>())
+            .def("__getitem__", &DataServiceExporter::retrieveOrKeyError)
             .def("__setitem__", &SvcType::addOrReplace)
             .def("__contains__", &SvcType::doesExist)
             .def("__delitem__", &SvcType::remove);
@@ -105,10 +104,10 @@ template <typename SvcType, typename SvcHeldType> struct DataServiceExporter {
    * @return A shared_ptr to the named object. If the name does not exist it
    * sets a KeyError error indicator.
    */
-  static SvcHeldType retrieveOrKeyError(SvcType &self,
-                                        const std::string &name) {
+  static WeakPtr retrieveOrKeyError(SvcType &self,
+                                    const std::string &name) {
     using namespace Mantid::Kernel;
-    SvcHeldType item;
+    SvcPtrType item;
     try {
       item = self.retrieve(name);
     } catch (Exception::NotFoundError &) {
@@ -117,7 +116,7 @@ template <typename SvcType, typename SvcHeldType> struct DataServiceExporter {
       PyErr_SetString(PyExc_KeyError, err.c_str());
       throw boost::python::error_already_set();
     }
-    return item;
+    return WeakPtr(item);
   }
 
   /**

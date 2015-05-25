@@ -8,6 +8,7 @@ set ( MODULE_TEMPLATE src/dataobjects.cpp.in )
 # -- Do NOT sort this list. The order defines the order in which the export
 #    definitions occur and some depend on their base classes being exported first --
 set ( EXPORT_FILES
+  src/Exports/TableWorkspace.cpp
   src/Exports/Workspace2D.cpp
 )
 
@@ -53,11 +54,11 @@ set_python_properties( PythonDataObjectsModule _dataobjects )
 set_target_output_directory ( PythonDataObjectsModule ${OUTPUT_DIR} .pyd )
 
 # Add the required dependencies
-target_link_libraries ( PythonDataObjectsModule PythonAPIModule PythonGeometryModule 
+target_link_libraries ( PythonDataObjectsModule PythonAPIModule PythonGeometryModule
                         PythonKernelModule DataObjects )
 
 if (OSX_VERSION VERSION_GREATER 10.8)
-  set_target_properties( PythonDataObjectsModule PROPERTIES 
+  set_target_properties( PythonDataObjectsModule PROPERTIES
                          INSTALL_RPATH "@loader_path/../../../MacOS;@loader_path/../kernel/;@loader_path/../geometry/;@loader_path/../api/")
 endif ()
 ###########################################################################
