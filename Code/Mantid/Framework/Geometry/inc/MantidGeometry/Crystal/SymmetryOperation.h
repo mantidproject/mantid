@@ -125,7 +125,7 @@ public:
   SymmetryOperation(const SymmetryOperation &other);
   SymmetryOperation &operator=(const SymmetryOperation &other);
 
-  virtual ~SymmetryOperation() {}
+  ~SymmetryOperation() {}
 
   const Kernel::IntMatrix &matrix() const;
   const V3R &vector() const;
