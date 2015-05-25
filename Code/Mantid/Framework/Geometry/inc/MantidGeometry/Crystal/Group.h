@@ -135,10 +135,10 @@ public:
   };
 
   enum GroupAxiom {
-      Closure,
-      Identity,
-      Inversion,
-      Associativity
+    Closure,
+    Identity,
+    Inversion,
+    Associativity
   };
 
   Group();
@@ -190,6 +190,14 @@ namespace GroupFactory {
 template <typename T>
 Group_const_sptr create(const std::string &initializationString) {
   return boost::make_shared<const T>(initializationString);
+}
+
+/// Creates a Group sub-class of type T if T has a constructor that takes a
+/// vector of SymmetryOperations.
+template <typename T>
+Group_const_sptr
+create(const std::vector<SymmetryOperation> &symmetryOperations) {
+  return boost::make_shared<const T>(symmetryOperations);
 }
 }
 
