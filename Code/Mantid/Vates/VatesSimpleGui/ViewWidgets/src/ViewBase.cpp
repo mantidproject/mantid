@@ -3,6 +3,7 @@
 #include "MantidVatesSimpleGuiViewWidgets/RebinnedSourcesManager.h"
 #include "MantidVatesAPI/ADSWorkspaceProvider.h"
 #include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidVatesAPI/BoxInfo.h"
 #if defined(__INTEL_COMPILER)
   #pragma warning disable 1170
 #endif
@@ -38,6 +39,7 @@
 #include <QPointer>
 #include <QSet>
 
+#include <boost/optional.hpp>
 #include <stdexcept>
 
 namespace Mantid
@@ -297,7 +299,10 @@ pqPipelineSource* ViewBase::setPluginSource(QString pluginName, QString wsName)
   // We are setting the recursion depth to 1 when we are dealing with MDEvent workspaces
   // with top level splitting, but this is not updated in the plugin line edit field. 
   // We do this here.
-  setRecursionDepthForTopLevelSplitting(src, wsName);
+  if (auto split = Mantid::VATES::findRecursionDepthForTopLevelSplitting(wsName.toStdString())) {
+    vtkSMPropertyHelper(src->getProxy(),
+              "Recursion Depth").Set(split.get());
+  }
   // WORKAROUND END
 
   // Update the source so that it retrieves the data from the Mantid workspace
@@ -903,28 +908,6 @@ void ViewBase::removeVisibilityListener() {
   {
     QObject::disconnect((*source), SIGNAL(visibilityChanged(pqPipelineSource*, pqDataRepresentation*)),
                          this, SLOT(onVisibilityChanged(pqPipelineSource*, pqDataRepresentation*)));
-  }
-}
-
-/**
- * Set the recursion depth to 1 when we are dealing with a workspace with top level splitting.
- * This is a workaround. The recusion depth is set in the plugin which loads the source. 
- * But this does not udpate the line edit field in the VSI. We therefore need to change this here.
- * Note that this is only a cosmetic change and will not cause the source to reload, as the 
- * recursion depth in the plugin is already set to 1.
- * @param source :: the newly created source
- * @param wsName :: the name of the workspace corresponding to the source
- */
-void ViewBase::setRecursionDepthForTopLevelSplitting(pqPipelineSource* source, QString wsName){
-  Mantid::VATES::ADSWorkspaceProvider<Mantid::API::IMDEventWorkspace> workspaceProvider;
-  auto workspace = boost::dynamic_pointer_cast<Mantid::API::IMDEventWorkspace>(workspaceProvider.fetchWorkspace(wsName.toStdString()));
-  if (workspace) {
-    auto boxController = workspace->getBoxController();
-    boost::optional<std::vector<size_t>> topLevelSplits = boxController->getSplitTopInto();
-    if (topLevelSplits) {
-      vtkSMPropertyHelper(source->getProxy(),
-                      "Recursion Depth").Set(1);
-    }
   }
 }
 

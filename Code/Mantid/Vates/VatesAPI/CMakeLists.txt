@@ -5,6 +5,7 @@ project( VatesAPI )
 
 set( SRC_FILES 
 src/ADSWorkspaceProvider.cpp
+src/BoxInfo.cpp
 src/Common.cpp
 src/CompositePeaksPresenterVsi.cpp
 src/ConcretePeaksPresenterVsi.cpp
@@ -61,6 +62,7 @@ src/SQWLoadingPresenter.cpp
 
 set( INC_FILES 
 inc/MantidVatesAPI/ADSWorkspaceProvider.h
+inc/MantidVatesAPI/BoxInfo.h
 inc/MantidVatesAPI/Common.h
 inc/MantidVatesAPI/CompositePeaksPresenterVsi.h
 inc/MantidVatesAPI/ConcretePeaksPresenterVsi.h
@@ -131,6 +133,7 @@ test/vtkDataSetToImplicitFunctionTest.h
 test/vtkDataSetToWsNameTest.h
 test/vtkDataSetToWsLocationTest.h
 test/ADSWorkspaceProviderTest.h
+test/BoxInfoTest.h
 test/DimensionPresenterTest.h
 test/EventNexusLoadingPresenterTest.h
 test/vtkDataSetFactoryTest.h
@@ -218,13 +221,13 @@ endif ()
 if( CXXTEST_FOUND AND GMOCK_FOUND AND GTEST_FOUND )
   include_directories ( SYSTEM ${CXXTEST_INCLUDE_DIR} ${GMOCK_INCLUDE_DIR} ${GTEST_INCLUDE_DIR} )
 
-  include_directories( inc ../../Framework/TestHelpers/inc ../../Framework/DataHandling/inc ../../Framework/DataObjects/inc)
+  include_directories( inc ../../Framework/TestHelpers/inc ../../Framework/DataHandling/inc ../../Framework/DataObjects/inc ../../Framework/MDAlgorithms/inc)
   set ( TESTHELPER_SRCS ../../Framework/TestHelpers/src/ComponentCreationHelper.cpp 
                         ../../Framework/TestHelpers/src/WorkspaceCreationHelper.cpp
                         ../../Framework/TestHelpers/src/MDEventsTestHelper.cpp 
                         ../../Framework/TestHelpers/src/StartFrameworkManager.cpp )
   cxxtest_add_test( VatesAPITest ${TEST_FILES} )
-  target_link_libraries( VatesAPITest VatesAPI DataHandling Kernel DataObjects ${GMOCK_LIBRARIES} ${GTEST_LIBRARIES} )
+  target_link_libraries( VatesAPITest VatesAPI DataHandling Kernel DataObjects MDAlgorithms ${GMOCK_LIBRARIES} ${GTEST_LIBRARIES} )
   add_dependencies( AllTests VatesAPITest )
   # Add to the 'UnitTests' group in VS
   set_property ( TARGET VatesAPITest PROPERTY FOLDER "UnitTests" )

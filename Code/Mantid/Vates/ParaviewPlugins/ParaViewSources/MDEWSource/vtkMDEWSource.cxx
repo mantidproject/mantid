@@ -9,7 +9,7 @@
 #include "vtkUnstructuredGrid.h"
 #include "vtkStreamingDemandDrivenPipeline.h"
 
-#include "MantidAPI/BoxController.h"
+#include "MantidVatesAPI/BoxInfo.h"
 #include "MantidVatesAPI/MDEWInMemoryLoadingPresenter.h"
 #include "MantidVatesAPI/MDLoadingViewAdapter.h"
 #include "MantidVatesAPI/ADSWorkspaceProvider.h"
@@ -19,6 +19,8 @@
 #include "MantidVatesAPI/vtkMD0DFactory.h"
 #include "MantidVatesAPI/FilteringUpdateProgressAction.h"
 #include "MantidVatesAPI/IgnoreZerosThresholdRange.h"
+
+#include <boost/optional.hpp>
 
 using namespace Mantid::VATES;
 
@@ -232,7 +234,9 @@ int vtkMDEWSource::RequestInformation(vtkInformation *vtkNotUsed(request), vtkIn
     else
     {
       // If the MDEvent workspace has had top level splitting applied to it, then use the a depth of 1
-      setDepthForWorkspaceWithTopLevelSplitting();
+      if (auto split = Mantid::VATES::findRecursionDepthForTopLevelSplitting(m_wsName)) {
+        SetDepth(split.get());
+      }
 
       m_presenter->executeLoadMetadata();
       setTimeRange(outputVector);
@@ -330,16 +334,3 @@ const char* vtkMDEWSource::GetWorkspaceName()
   return m_wsName.c_str();
 }
 
-void vtkMDEWSource::setDepthForWorkspaceWithTopLevelSplitting()
-{
-  // Fetch the workspace from the data analysis service
-  ADSWorkspaceProvider<Mantid::API::IMDEventWorkspace> workspaceProvider;
-  auto result = boost::dynamic_pointer_cast<Mantid::API::IMDEventWorkspace>(workspaceProvider.fetchWorkspace(m_wsName));
-  if (result) {
-    auto boxController = result->getBoxController();
-    boost::optional<std::vector<size_t>> topLevelSplits = boxController->getSplitTopInto();
-    if (topLevelSplits) {
-      SetDepth(1);
-    }
-  }
-}

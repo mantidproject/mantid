@@ -243,8 +243,6 @@ private:
   pqPipelineRepresentation *getRep();
   /// Collect time information for animation controls.
   void handleTimeInfo(vtkSMDoubleVectorProperty *dvp);
-  /// Set the recursion depth
-  void setRecursionDepthForTopLevelSplitting(pqPipelineSource* source, QString wsName);
 
   ColorUpdater colorUpdater; ///< Handle to the color updating delegator
   BackgroundRgbProvider backgroundRgbProvider; /// < Holds the manager for background color related tasks.

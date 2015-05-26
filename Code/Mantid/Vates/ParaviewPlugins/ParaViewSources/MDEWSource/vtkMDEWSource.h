@@ -100,6 +100,5 @@ private:
   vtkMDEWSource(const vtkMDEWSource&);
   void operator = (const vtkMDEWSource&);
   void setTimeRange(vtkInformationVector* outputVector);
-  void setDepthForWorkspaceWithTopLevelSplitting();
 };
 #endif
