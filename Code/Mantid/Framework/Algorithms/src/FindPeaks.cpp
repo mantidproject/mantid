@@ -1087,7 +1087,7 @@ int FindPeaks::findPeakBackground(const MatrixWorkspace_sptr &input,
         "No 7th column for use FindPeakBackground result or not. ");
 
   if (peaklisttablews->rowCount() > 0) {
-    int fitresult = peaklisttablews->Int(0, 6);
+    fitresult = peaklisttablews->Int(0, 6);
     g_log.information() << "fitresult=" << fitresult << "\n";
   }
 
@@ -1121,8 +1121,8 @@ int FindPeaks::findPeakBackground(const MatrixWorkspace_sptr &input,
       vecBkgdParamValues[2] = bg2;
 
       g_log.information()
-          << "Backgroun parameters (from FindPeakBackground) A0, A1, A2 = "
-          << bg0 << ", " << bg1 << ", " << bg2 << "\n";
+          << "Background parameters (from FindPeakBackground) A0=" << bg0
+          << ", A1=" << bg1 << ", A2=" << bg2 << "\n";
 
       vecpeakrange[0] = vecX[i_peakmin];
       vecpeakrange[1] = vecX[i_peakmax];
