@@ -74,7 +74,12 @@ set_property ( TARGET LiveData PROPERTY FOLDER "MantidFramework" )
 
 include_directories ( inc )
 
-target_link_libraries ( LiveData ${MANTIDLIBS} )
+# Have to link to winsock library on Windows
+if ( WIN32 )
+  set ( WINSOCK ws2_32 )
+endif ()
+
+target_link_libraries ( LiveData LINK_PRIVATE ${MANTIDLIBS} ${WINSOCK} )
 
 # Add the unit tests directory
 add_subdirectory ( test )

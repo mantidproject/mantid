@@ -122,6 +122,13 @@ void IMDWorkspace::getLinePlot(const Mantid::Kernel::VMD &start,
   // And the last point
   x.push_back((end - start).norm());
 }
+
+/**
+@return normalization preferred for visualization. Set to none for the generic case, but overriden elsewhere.
+*/
+MDNormalization IMDWorkspace::displayNormalization() const {
+  return NoNormalization;
+}
 }
 }
 

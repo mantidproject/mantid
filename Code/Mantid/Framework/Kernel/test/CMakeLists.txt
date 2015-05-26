@@ -8,7 +8,13 @@ if ( CXXTEST_FOUND )
   set ( TESTHELPER_SRCS ../../TestHelpers/src/NexusTestHelper.cpp ../../TestHelpers/src/LoggingCleaner.cpp )
 
   cxxtest_add_test ( KernelTest ${TEST_FILES} )
-  target_link_libraries( KernelTest Kernel ${GMOCK_LIBRARIES} ${GTEST_LIBRARIES} )
+  target_link_libraries( KernelTest LINK_PRIVATE 
+            Kernel
+            ${NEXUS_LIBRARIES}
+            ${Boost_LIBRARIES}
+            ${POCO_LIBRARIES}
+            ${GMOCK_LIBRARIES}
+            ${GTEST_LIBRARIES} )
   add_dependencies ( FrameworkTests KernelTest )
   # Test data
   add_dependencies ( KernelTest StandardTestData )
