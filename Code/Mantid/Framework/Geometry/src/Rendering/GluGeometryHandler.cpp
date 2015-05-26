@@ -20,7 +20,8 @@ GluGeometryHandler::GluGeometryHandler(boost::shared_ptr<Object> obj)
   Renderer = new GluGeometryRenderer();
 }
 
-GluGeometryHandler::GluGeometryHandler(Object *obj) : GeometryHandler(obj) {
+GluGeometryHandler::GluGeometryHandler(Object *obj)
+    : GeometryHandler(obj), radius(0.0), height(0.0), type(CUBOID) {
   Renderer = new GluGeometryRenderer();
 }
 
