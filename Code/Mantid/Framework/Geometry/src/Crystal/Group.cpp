@@ -52,6 +52,12 @@ std::vector<SymmetryOperation> Group::getSymmetryOperations() const {
   return m_allOperations;
 }
 
+/// Returns true if the group contains the supplied operation.
+bool Group::containsOperation(const SymmetryOperation &operation) const {
+  return std::find(m_allOperations.begin(), m_allOperations.end(), operation) !=
+         m_allOperations.end();
+}
+
 /**
  * Multiplication operator of two groups.
  *
@@ -101,6 +107,39 @@ bool Group::operator!=(const Group &other) const {
   return !(this->operator==(other));
 }
 
+/// Checks whether a certain group axiom is fulfilled, can be used as a more
+/// fine-grained alternative to isGroup().
+bool Group::fulfillsAxiom(GroupAxiom axiom) const {
+  switch (axiom) {
+  case Closure:
+    return isClosed();
+  case Identity:
+    return hasIdentity();
+  case Inversion:
+    return eachElementHasInverse();
+  case Associativity:
+    return associativityHolds();
+  default:
+    return false;
+  }
+}
+
+/**
+ * Returns whether the group fulfills the four group axioms
+ *
+ * When a Group is constructed from a list of symmetry operations, no checks
+ * are performed whether this set of operations fulfills the four group axioms,
+ * i.e. whether it is a group at all. If you are not sure whether a set of
+ * symmetry operations is a group, construct one and look at the return value
+ * of this method.
+ *
+ * @return True if group axioms are fulfilled, false otherwise.
+ */
+bool Group::isGroup() const {
+  return isClosed() && hasIdentity() && eachElementHasInverse() &&
+         associativityHolds();
+}
+
 /// Assigns symmetry operations, throws std::invalid_argument if vector is
 /// empty.
 void Group::setSymmetryOperations(
@@ -131,7 +170,67 @@ Group::CoordinateSystem Group::getCoordinateSystemFromOperations(
   return Group::Orthogonal;
 }
 
-/// Convenience operator* for directly multiplying groups using shared pointers.
+/// Returns true if the group is closed, i.e. all elements of G * G are in G.
+bool Group::isClosed() const {
+  Group result = (*this) * (*this);
+
+  // If the order is different, there are additional or fewer elements
+  if (result.order() != order()) {
+    return false;
+  }
+
+  // Also, all operations need to be equal.
+  std::vector<SymmetryOperation> ops = result.getSymmetryOperations();
+  for (size_t i = 0; i < ops.size(); ++i) {
+    if (ops[i] != m_allOperations[i]) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+/// Returns true if the group has the identity element.
+bool Group::hasIdentity() const {
+  // Since the identity element does not change, this is an easy check.
+  return containsOperation(SymmetryOperation());
+}
+
+/// Returns true if the inverse of each element is in the group
+bool Group::eachElementHasInverse() const {
+  // Iterate through all operations, check that the inverse is in the group.
+  for (auto op = m_allOperations.begin(); op != m_allOperations.end(); ++op) {
+    if (!containsOperation((*op).inverse())) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+/**
+ * Checks that associativity holds, i.e. (a*b)*c == a*(b*c)
+ *
+ * In fact, this method returns always true, because associativity is implicitly
+ * contained in the definition of the binary operator of SymmetryOperation:
+ *
+ *      (S1 * S2) * S3
+ *      = (W1*W2, W1*w2 + w1) * S3
+ *      = (W1*W2*W3, W1*W2*w3 + W1*w2 + w1)
+ *
+ *      S1 * (S2 * S3)
+ *      = S1 * (W2*W3, W2*w3 + w2)
+ *      = (W1*W2*W3, W1*W2*w3 + W1*w2 + w1)
+ *
+ * No matter what symmetry operations are chosen, this always holds. However,
+ * for completeness the method has been added anyway.
+ *
+ * @return True if associativity holds
+ */
+bool Group::associativityHolds() const { return true; }
+
+/// Convenience operator* for directly multiplying groups using shared
+/// pointers.
 Group_const_sptr operator*(const Group_const_sptr &lhs,
                            const Group_const_sptr &rhs) {
   if (!lhs || !rhs) {
