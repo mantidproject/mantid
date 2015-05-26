@@ -121,6 +121,7 @@ MultiLayer::MultiLayer(ApplicationWindow* parent, int layers, int rows, int cols
                          vert_align(VCenter),
                          d_scale_on_print(true),
                          d_print_cropmarks(false),
+                         d_close_on_empty(false),
                          d_is_waterfall_plot(false),
                          d_waterfall_fill_color(/*Invalid color*/)
 {
