@@ -39,8 +39,9 @@ namespace Algorithms {
   */
 FitOneSinglePeak::FitOneSinglePeak()
     : m_fitMethodSet(false), m_peakRangeSet(false), m_peakWidthSet(false),
-      m_peakWindowSet(false), m_usePeakPositionTolerance(false), m_wsIndex(0),
-      m_numFitCalls(0), m_sstream("") {}
+      m_peakWindowSet(false), m_usePeakPositionTolerance(false),
+      m_wsIndex(0), m_minimizer("Levenberg-MarquardtMD"), m_costFunction("Least squares"), m_numFitCalls(0), m_sstream("")
+ {}
 
 //----------------------------------------------------------------------------------------------
 /** Destructor for FitOneSinglePeak
@@ -662,8 +663,7 @@ double FitOneSinglePeak::fitFunctionSD(IFunction_sptr fitfunc,
   fit->setProperty("CalcErrors", true);
 
   // Execute fit and get result of fitting background
-  m_sstream << "FitSingleDomain: Fit " << fit->asString()
-            << "; StartX = " << xmin << ", EndX = " << xmax << ".\n";
+  m_sstream << "FitSingleDomain: " << fit->asString() << ".\n";
 
   fit->executeAsChildAlg();
   if (!fit->isExecuted()) {
