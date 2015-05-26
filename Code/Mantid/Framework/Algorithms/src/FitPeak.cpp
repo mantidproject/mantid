@@ -801,7 +801,7 @@ double FitOneSinglePeak::fitCompositeFunction(
   double backRwp = fitFunctionSD(bkgdfunc, dataws, wsindex, startx, endx, modecal);
   m_sstream << "Background: Pre-fit Goodness = " << backRwp << "\n";
   m_bestRwp = fitFunctionSD(compfunc, dataws, wsindex, startx, endx, modecal);
-  m_sstream << "Peak+Backgruond: Pre-fit Goodness = " << m_bestRwp << "\n";
+  m_sstream << "Peak+Background: Pre-fit Goodness = " << m_bestRwp << "\n";
 
   map<string, double> bkuppeakmap, bkupbkgdmap;
   push(peakfunc, bkuppeakmap);
