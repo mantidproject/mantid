@@ -24,6 +24,22 @@ using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using std::size_t;
 
+namespace {
+  /**
+ * General check if we are dealing with a time series
+ * @param prop :: the property which is being checked
+ * @return True if the proerpty is a time series, otherwise false.
+ */
+bool isTimeSeries(Mantid::Kernel::Property *prop) {
+  auto isTimeSeries = false;
+  if (dynamic_cast<Mantid::Kernel::ITimeSeriesProperty *>(prop)) {
+    isTimeSeries = true;
+  }
+  return isTimeSeries;
+}
+}
+
+
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
@@ -130,15 +146,12 @@ void ChangeTimeZero::shiftTimeOfLogs(Mantid::API::MatrixWorkspace_sptr ws,
   // 1. any time series: here we change the time values
   // 2. string properties: here we change the values if they are ISO8601 times
   auto logs = ws->run().getLogData();
-
   for (auto iter = logs.begin(); iter != logs.end(); ++iter) {
-    auto prop = ws->run().getLogData((*iter)->name());
-
-    if (isTimeSeries(prop)) {
-      shiftTimeInLogForTimeSeries(ws, prop, timeShift);
+    if (isTimeSeries(*iter)) {
+      shiftTimeInLogForTimeSeries(ws, *iter, timeShift);
 
     } else if (auto stringProperty =
-                   dynamic_cast<PropertyWithValue<std::string> *>(prop)) {
+                   dynamic_cast<PropertyWithValue<std::string> *>(*iter)) {
       shiftTimeOfLogForStringProperty(stringProperty, timeShift);
     }
   }
@@ -153,12 +166,10 @@ void ChangeTimeZero::shiftTimeOfLogs(Mantid::API::MatrixWorkspace_sptr ws,
 void ChangeTimeZero::shiftTimeInLogForTimeSeries(
     Mantid::API::MatrixWorkspace_sptr ws, Mantid::Kernel::Property *prop,
     double timeShift) {
-  auto timeSeries = dynamic_cast<Mantid::Kernel::ITimeSeriesProperty *>(prop);
-  if (!timeSeries) {
-    return;
+  if (auto timeSeries = dynamic_cast<Mantid::Kernel::ITimeSeriesProperty *>(prop)) {
+    auto newlog = timeSeries->cloneWithTimeShift(timeShift);
+    ws->mutableRun().addProperty(newlog, true);
   }
-  auto newlog = timeSeries->cloneWithTimeShift(timeShift);
-  ws->mutableRun().addProperty(newlog, true);
 }
 
 /**
