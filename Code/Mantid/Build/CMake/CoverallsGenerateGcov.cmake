@@ -152,10 +152,10 @@ message("GCDA files:")
 # Get a list of all the object directories needed by gcov
 # (The directories the .gcda files and .o files are found in)
 # and run gcov on those.
-foreach(GCDA ${GCDA_FILES})
-	message("Process: ${GCDA}")
-	message("------------------------------------------------------------------------------")
-	get_filename_component(GCDA_DIR ${GCDA} PATH)
+#foreach(GCDA ${GCDA_FILES})
+#	message("Process: ${GCDA}")
+#	message("------------------------------------------------------------------------------")
+#	get_filename_component(GCDA_DIR ${GCDA} PATH)
 
 	#
 	# The -p below refers to "Preserve path components",
@@ -171,11 +171,11 @@ foreach(GCDA ${GCDA_FILES})
 	#
 	# If -p is not specified then the file is named only "the_file.c.gcov"
 	#
-	execute_process(
-		COMMAND ${GCOV_EXECUTABLE} -p -o ${GCDA_DIR} ${GCDA}
-		WORKING_DIRECTORY ${COV_PATH}
-	)
-endforeach()
+#       execute_process(
+#		COMMAND ${GCOV_EXECUTABLE} -p -o ${GCDA_DIR} ${GCDA}
+#		WORKING_DIRECTORY ${COV_PATH}
+#	)
+#endforeach()
 
 # TODO: Make these be absolute path
 file(GLOB ALL_GCOV_FILES ${COV_PATH}/*.gcov)
@@ -316,7 +316,12 @@ foreach (GCOV_FILE ${GCOV_FILES})
 	set(GCOV_LINE_COUNT 1) # Line number for the .gcov.
 	set(DO_SKIP 0)
 	foreach (GCOV_LINE ${GCOV_LINES})
-		#message("${GCOV_LINE}")
+		message("${GCOV_LINE}")
+                #message("${GCOV_LINE}")
+                #string(LENGTH ${GCOV_LINE} GCOV_LENGTH)
+                #message("length(${GCOV_LENGTH})")
+                #string(SUBSTRING ${GCOV_LINE} 0 16 GCOV_LINE)
+                #message("${GCOV_LINE}")
 		# Example of what we're parsing:
 		# Hitcount  |Line | Source
 		# "        8:   26:        if (!allowed || (strlen(allowed) == 0))"
@@ -325,7 +330,6 @@ foreach (GCOV_FILE ${GCOV_FILES})
 			"\\1;\\2;\\3"
 			RES
 			"${GCOV_LINE}")
-
 		# Check if we should exclude lines using the Lcov syntax.
 		string(REGEX MATCH "LCOV_EXCL_START" START_SKIP "${GCOV_LINE}")
 		string(REGEX MATCH "LCOV_EXCL_END" END_SKIP "${GCOV_LINE}")
@@ -352,6 +356,11 @@ foreach (GCOV_FILE ${GCOV_FILES})
 			list(GET RES 0 HITCOUNT)
 			list(GET RES 1 LINE)
 			list(GET RES 2 SOURCE)
+
+                        message("HITCOUNT:${HITCOUNT}")
+                        message("LINE:${LINE}")
+                        message("SOURCE:${SOURCE}")
+
 
 			string(STRIP ${HITCOUNT} HITCOUNT)
 			string(STRIP ${LINE} LINE)
@@ -401,9 +410,10 @@ endforeach()
 # Loop through all files we couldn't find any coverage for
 # as well, and generate JSON for those as well with 0% coverage.
 foreach(NOT_COVERED_SRC ${COVERAGE_SRCS_REMAINING})
-
+        message(STATUS "NOT_COVERED:${NOT_COVERED_SRC}")
 	# Loads the source file as a list of lines.
 	file(STRINGS ${NOT_COVERED_SRC} SRC_LINES)
+        file(RELATIVE_PATH GCOV_SRC_REL_PATH "${PROJECT_ROOT}" "${NOT_COVERED_SRC}")
 
 	set(GCOV_FILE_COVERAGE "[")
 	set(GCOV_FILE_SOURCE "")
@@ -425,6 +435,7 @@ foreach(NOT_COVERED_SRC ${COVERAGE_SRCS_REMAINING})
 	# Generate the final JSON for this file.
 	message("Generate JSON for non-gcov file: ${NOT_COVERED_SRC}...")
 	string(CONFIGURE ${SRC_FILE_TEMPLATE} FILE_JSON)
+        message(STATUS "FILE_JSON:${FILE_JSON}")
 	set(JSON_GCOV_FILES "${JSON_GCOV_FILES}${FILE_JSON}, ")
 endforeach()
 
