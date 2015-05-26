@@ -2,6 +2,7 @@
 #define MANTID_GEOMETRY_COMPONENTHELPERS_H_
 
 #include "MantidGeometry/DllConfig.h"
+#include "MantidGeometry/Instrument.h"
 
 namespace Mantid {
 namespace Kernel {
@@ -61,6 +62,17 @@ MANTID_GEOMETRY_DLL void rotateComponent(const IComponent &comp,
                                          ParameterMap &pmap,
                                          const Kernel::Quat &rot,
                                          const TransformType positionType);
+
+MANTID_GEOMETRY_DLL Geometry::Instrument_sptr createMinimalInstrument(const Mantid::Kernel::V3D& sourcePos,
+                                                                      const Mantid::Kernel::V3D& samplePos,
+                                                                      const Mantid::Kernel::V3D& detectorPos );
+
+MANTID_GEOMETRY_DLL Object_sptr createSphere(double radius, const Kernel::V3D &centre,
+                                             const std::string &id);
+
+MANTID_GEOMETRY_DLL std::string sphereXML(double radius, const Kernel::V3D &centre, const std::string &id) ;
+
+
 }
 } // namespace Geometry
 } // namespace Mantid

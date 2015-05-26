@@ -2,7 +2,15 @@ if ( CXXTEST_FOUND )
   include_directories ( SYSTEM ${CXXTEST_INCLUDE_DIR} ${GMOCK_INCLUDE_DIR} ${GTEST_INCLUDE_DIR} )
 
   cxxtest_add_test ( MantidWidgetsTest ${TEST_FILES} )
-  target_link_libraries( MantidWidgetsTest MantidWidgets )
+  target_link_libraries( MantidWidgetsTest LINK_PRIVATE 
+            MantidWidgets
+            API
+            Geometry
+            Kernel
+            ${QT_LIBRARIES}
+            ${Boost_LIBRARIES}
+            ${POCO_LIBRARIES}
+            )
 
   # Add to the 'UnitTests' group in VS
   set_property( TARGET MantidWidgetsTest PROPERTY FOLDER "UnitTests" )

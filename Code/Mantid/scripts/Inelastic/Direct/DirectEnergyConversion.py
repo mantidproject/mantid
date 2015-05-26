@@ -1409,6 +1409,9 @@ class DirectEnergyConversion(object):
         # if normalized by monitor-2, range have to be established before
         # shifting the instrument
         self._mon2_norm_time_range = None
+        # WB may not have monitors. In this case the property have to be set to True
+        # and WB normalization will not fail but will run normalize by current
+        self.__in_white_normalization = False
         self._debug_mode = False
         self.spectra_masks = None
 

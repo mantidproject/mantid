@@ -19,7 +19,7 @@
 #include <pqServerManagerModel.h>
 #include <pqSMAdaptor.h>
 #include <vtkSMProxy.h>
-
+#include <vtkSMTransferFunctionProxy.h>
 #if defined(__INTEL_COMPILER)
   #pragma warning enable 1170
 #endif
@@ -177,6 +177,15 @@ void ColorUpdater::updateLookupTable(pqDataRepresentation* representation)
     // Set the logarithmic scale
     pqSMAdaptor::setElementProperty(lookupTable->getProxy()->GetProperty("UseLogScale"),
                                      this->logScaleState);
+
+    vtkSMProxy* proxy = representation->getProxy();
+    vtkSMProxy* lutProxy = pqSMAdaptor::getProxyProperty(proxy->GetProperty("LookupTable"));
+    vtkSMProxy* scalarOpacityFunctionProxy = lutProxy?pqSMAdaptor::getProxyProperty(lutProxy->GetProperty("ScalarOpacityFunction")) : NULL;
+
+    if (scalarOpacityFunctionProxy)
+    {
+      vtkSMTransferFunctionProxy::RescaleTransferFunction(scalarOpacityFunctionProxy, this->minScale, this->maxScale);
+    }
 
     // Need to set a lookup table lock here. This does not affect setScalarRange, 
     // but blocks setWholeScalarRange which gets called by ParaView overrides our

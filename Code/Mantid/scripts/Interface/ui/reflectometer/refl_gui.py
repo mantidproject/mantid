@@ -809,6 +809,12 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
                                 Qmin = min(w1.readX(0))
                                 Qmax = max(w2.readX(0))
 
+                                if len(self.tableMain.item(row, i * 5 + 3).text()) > 0:
+                                    Qmin = float(self.tableMain.item(row, i * 5 + 3).text())
+
+                                if len(self.tableMain.item(row, i * 5 + 4).text()) > 0:
+                                    Qmax = float(self.tableMain.item(row, i * 5 + 4).text())
+
                                 wcomb = combineDataMulti(wksp, outputwksp, overlapLow, overlapHigh, Qmin, Qmax, -dqq, 1, keep=True)
 
 

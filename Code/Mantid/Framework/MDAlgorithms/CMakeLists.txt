@@ -19,6 +19,7 @@ set ( SRC_FILES
 	src/ConvToMDHistoWS.cpp
 	src/ConvToMDSelector.cpp
 	src/ConvertCWPDMDToSpectra.cpp
+	src/ConvertCWSDExpToMomentum.cpp
 	src/ConvertMDHistoToMatrixWorkspace.cpp
 	src/ConvertSpiceDataToRealSpace.cpp
 	src/ConvertToDetectorFaceMD.cpp
@@ -136,6 +137,7 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/CompareMDWorkspaces.h
 	inc/MantidMDAlgorithms/ConvToMDBase.h
 	inc/MantidMDAlgorithms/ConvertCWPDMDToSpectra.h
+	inc/MantidMDAlgorithms/ConvertCWSDExpToMomentum.h
 	inc/MantidMDAlgorithms/ConvertMDHistoToMatrixWorkspace.h
 	inc/MantidMDAlgorithms/ConvertSpiceDataToRealSpace.h
 	inc/MantidMDAlgorithms/ConvertToDetectorFaceMD.h
@@ -252,6 +254,7 @@ set ( TEST_FILES
 	CloneMDWorkspaceTest.h
 	CompareMDWorkspacesTest.h
 	ConvertCWPDMDToSpectraTest.h
+	ConvertCWSDExpToMomentumTest.h
 	ConvertEventsToMDTest.h
 	ConvertMDHistoToMatrixWorkspaceTest.h
 	ConvertSpiceDataToRealSpaceTest.h
@@ -321,8 +324,8 @@ set ( TEST_FILES
 	ReflectometryTransformQxQzTest.h
 	ResolutionConvolvedCrossSectionTest.h
 	SaveIsawQvectorTest.h
-	SaveMDTest.h
 	SaveMD2Test.h
+	SaveMDTest.h
 	SaveZODSTest.h
 	SetMDUsingMaskTest.h
 	SimulateResolutionConvolvedModelTest.h
@@ -367,7 +370,7 @@ endif ()
 set_property ( TARGET MDAlgorithms PROPERTY FOLDER "MantidFramework" )
 
 include_directories ( inc )
-target_link_libraries ( MDAlgorithms ${MANTIDLIBS} )
+target_link_libraries ( MDAlgorithms LINK_PRIVATE ${MANTIDLIBS} ${GSL_LIBRARIES} ${NEXUS_LIBRARIES}  )
 
 # Add the unit tests directory
 add_subdirectory ( test )
