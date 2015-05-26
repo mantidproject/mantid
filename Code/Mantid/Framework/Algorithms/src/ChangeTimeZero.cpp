@@ -278,7 +278,7 @@ std::map<std::string, std::string> ChangeTimeZero::validateInputs() {
     auto run = ws->run();
     try {
       run.getTimeSeriesProperty<double>("proton_charge");
-    } catch (std::invalid_argument) {
+    } catch (...) {
       invalidProperties.insert(
           std::make_pair("InputWorkspace",
                          "A TimeOffset with an absolute time, requires the "
