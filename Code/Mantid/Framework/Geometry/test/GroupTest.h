@@ -220,6 +220,76 @@ public:
     TS_ASSERT(!lessThan(v7, v1));
   }
 
+  void testContainsOperation() {
+    Group group("x,y,z; -x,-y,-z");
+
+    std::vector<SymmetryOperation> ops = group.getSymmetryOperations();
+    TS_ASSERT(group.containsOperation(ops[0]));
+    TS_ASSERT(group.containsOperation(ops[1]));
+
+    SymmetryOperation mirror =
+        SymmetryOperationFactory::Instance().createSymOp("x,y,-z");
+
+    TS_ASSERT(!group.containsOperation(mirror));
+  }
+
+  void testGroupAxiomClosure() {
+    Group properGroup("x,y,z; -x,-y,-z; x,y,-z; -x,-y,z");
+    TS_ASSERT(properGroup.fulfillsAxiom(Group::Closure));
+
+    // Is not closed anymore
+    Group noClosure("x,y,z; -x,-y,-z; x,y,-z");
+    TS_ASSERT(!noClosure.fulfillsAxiom(Group::Closure));
+
+    // But the other axioms still hold
+    TS_ASSERT(noClosure.fulfillsAxiom(Group::Identity));
+    TS_ASSERT(noClosure.fulfillsAxiom(Group::Inversion));
+    TS_ASSERT(noClosure.fulfillsAxiom(Group::Associativity));
+  }
+
+  void testGroupAxiomIdentity() {
+    Group properGroup("x,y,z; -x,-y,-z; x,y,-z; -x,-y,z");
+    TS_ASSERT(properGroup.fulfillsAxiom(Group::Identity));
+
+    // Is does not have identity anymore
+    Group noIdentity("-x,-y,-z; x,y,-z");
+    TS_ASSERT(!noIdentity.fulfillsAxiom(Group::Identity));
+
+    // Closure is lost as well
+    TS_ASSERT(!noIdentity.fulfillsAxiom(Group::Closure));
+
+    // While the other two still hold
+    TS_ASSERT(noIdentity.fulfillsAxiom(Group::Inversion));
+    TS_ASSERT(noIdentity.fulfillsAxiom(Group::Associativity));
+  }
+
+  void testGroupAxiomInversion() {
+    Group properGroup("x,y,z; -x,-y,-z; x,y,-z; -x,-y,z");
+    TS_ASSERT(properGroup.fulfillsAxiom(Group::Inversion));
+
+    // Is does not have the identity anymore
+    Group noInversion("x,y,z; -y,x,z");
+    TS_ASSERT(!noInversion.fulfillsAxiom(Group::Inversion));
+
+    // Closure is lost as well
+    TS_ASSERT(!noInversion.fulfillsAxiom(Group::Closure));
+
+    // While the other two still hold
+    TS_ASSERT(noInversion.fulfillsAxiom(Group::Associativity));
+    TS_ASSERT(noInversion.fulfillsAxiom(Group::Identity));
+  }
+
+  void testIsGroup() {
+    Group properGroup("x,y,z; -x,-y,-z; x,y,-z; -x,-y,z");
+    TS_ASSERT(properGroup.isGroup());
+
+    Group noClosure("x,y,z; -x,-y,-z; x,y,-z");
+    TS_ASSERT(!noClosure.isGroup());
+
+    Group noIdentity("-x,-y,-z; x,y,-z; -x,-y,z");
+    TS_ASSERT(!noIdentity.isGroup());
+  }
+
   void testSmartPointerOperators() {
     // We take pointgroup -1
     std::vector<SymmetryOperation> inversion;
