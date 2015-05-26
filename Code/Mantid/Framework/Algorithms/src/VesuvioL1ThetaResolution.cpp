@@ -239,7 +239,33 @@ void VesuvioL1ThetaResolution::loadInstrument() {
   if(!parFilename.empty()) {
     g_log.information() << "Loading PAR file: " << parFilename << std::endl;
 
-    //TODO
+    // Get header format
+    std::map<int, std::string> headerFormats;
+    headerFormats[5] = "spectrum,theta,t0,-,R";
+    headerFormats[6] = "spectrum,-,theta,t0,-,R";
+
+    //TODO: get columns in first line
+    int numCols = 6;
+
+    std::string headerFormat = headerFormats[numCols];
+    if(headerFormat.empty()) {
+      std::stringstream error;
+      error << "Unrecognised PAR file header. Number of colums: " << numCols
+            << " (expected either 5 or 6.";
+      throw std::runtime_error(error.str());
+    }
+
+    // Update instrument
+    IAlgorithm_sptr updateInst = AlgorithmManager::Instance().create("UpdateInstrumentFromFile");
+    updateInst->initialize();
+    updateInst->setChild(true);
+    updateInst->setLogging(false);
+    updateInst->setProperty("Workspace", m_instWorkspace);
+    updateInst->setProperty("Filename", parFilename);
+    updateInst->setProperty("MoveMonitors", false);
+    updateInst->setProperty("IgnorePhi",true );
+    updateInst->setProperty("AsciiHeader", headerFormat);
+    updateInst->execute();
   }
 
   const int specIdxMin = static_cast<int>(m_instWorkspace->getIndexFromSpectrumNumber(getProperty("SpectrumMin")));
