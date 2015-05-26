@@ -38,6 +38,10 @@ class JacobianImpl : public Jacobian {
   gsl_matrix *m_J;
 
 public:
+
+  /// Default constructor
+  JacobianImpl() : Jacobian(), m_J(NULL) {};
+
   /// The index map
   std::map<int, int> m_map;
   /**  Set a value to a Jacobian matrix element.

@@ -25,6 +25,7 @@ using namespace API;
 // nothing here according to mantid
 FindDetectorsPar::FindDetectorsPar()
     : m_SizesAreLinear(false), m_nDetectors(0) {}
+
 FindDetectorsPar::~FindDetectorsPar() {}
 
 void FindDetectorsPar::init() {
