@@ -16,7 +16,7 @@ class Squares(PythonAlgorithm):
         self.declareProperty("Preamble", "", validator = StringMandatoryValidator(), doc = "Required preamble")
         self.declareProperty("Sum", False, doc = "If True, sum the squared values")
         self.declareProperty(FileProperty("OutputFile","", action=FileAction.Save, extensions=['txt']))
-        self.declareProperty(MatrixWorkspaceProperty("OutputWorkspace", "", direction = Direction.Output), 
+        self.declareProperty(MatrixWorkspaceProperty("OutputWorkspace", "", direction = Direction.Output),
                              "A workspace containing the squares")
 
     def PyExec(self):

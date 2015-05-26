@@ -41,7 +41,7 @@ class MaskBTP(mantid.api.PythonAlgorithm):
         self.declareProperty(mantid.kernel.IntArrayProperty(name="MaskedDetectors", direction=mantid.kernel.Direction.Output),
                              doc="List of  masked detectors")
 
-
+    #pylint: disable=too-many-branches
     def PyExec(self):
         ws = self.getProperty("Workspace").value
         self.instrument=None
@@ -154,6 +154,7 @@ class MaskBTP(mantid.api.PythonAlgorithm):
                 parsed.extend(elemlist)
         return parsed
 
+    #pylint: disable=too-many-branches,too-many-return-statements
     def _getEightPackHandle(self,banknum):
         """
         Helper function to return the handle to a given eightpack
@@ -195,7 +196,7 @@ class MaskBTP(mantid.api.PythonAlgorithm):
             if self.bankmin[self.instname]<=banknum<= self.bankmax[self.instname]:
                 try:
                     return self.instrument.getComponentByName("panel"+"%02d" % banknum)[0]
-                except:
+                except TypeError: #if not found, the return is None, so None[0] is a TypeError
                     return None
             else:
                 raise ValueError("Out of range index for "+str(self.instname)+" instrument bank numbers")

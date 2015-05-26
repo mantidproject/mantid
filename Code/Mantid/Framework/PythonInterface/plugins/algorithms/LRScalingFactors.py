@@ -53,15 +53,15 @@ class LRScalingFactors(PythonAlgorithm):
         self.declareProperty(FloatArrayProperty("TOFRange", [10000., 35000.],
                                                 FloatArrayLengthValidator(2),
                                                 direction=Direction.Input),
-                                                "TOF range to use")
+                             "TOF range to use")
         self.declareProperty(IntArrayProperty("SignalPeakPixelRange", [150, 160]),
-                                              "Pixel range defining the data peak")
+                             "Pixel range defining the data peak")
         self.declareProperty(IntArrayProperty("SignalBackgroundPixelRange", [147, 163]),
-                                              "Pixel range defining the background")
+                             "Pixel range defining the background")
         self.declareProperty(IntArrayProperty("LowResolutionPixelRange", [94, 160],
                                               IntArrayLengthValidator(2),
                                               direction=Direction.Input),
-                                              "Pixel range defining the region to use in the low-resolution direction")
+                             "Pixel range defining the region to use in the low-resolution direction")
         self.declareProperty("IncidentMedium", "Air", doc="Name of the incident medium")
         self.declareProperty("FrontSlitName", "S1", doc="Name of the front slit")
         self.declareProperty("BackSlitName", "Si", doc="Name of the back slit")
@@ -86,7 +86,7 @@ class LRScalingFactors(PythonAlgorithm):
             have_attenuator_info = True
         if have_attenuator_info is False:
             attenuators = len(data_runs)*[0]
-            
+
         # Get the slit information
         front_slit = self.getProperty("FrontSlitName").value
         back_slit = self.getProperty("BackSlitName").value
@@ -191,7 +191,7 @@ class LRScalingFactors(PythonAlgorithm):
                 and abs(previous_slits[2] - s2h) < self.tolerance \
                 and abs(previous_slits[3] - s2w) < self.tolerance:
                 is_reference = True
-                
+
                 # This signals an attenuation number change if we happen to need the info
                 if have_attenuator_info is False:
                     n_attenuator += 1
@@ -228,7 +228,7 @@ class LRScalingFactors(PythonAlgorithm):
                              OutputWorkspace = "ScalingRatio_%s" % n_attenuator)
                     references[n_attenuator]['diagnostics'] += " * %s" % references[n_attenuator-1]['diagnostics']
                 references[n_attenuator]['ratio_ws'] = "ScalingRatio_%s" % n_attenuator
-                
+
             # If this is not a reference run, compute F
             else:
                 # Divide by the reference for this number of attenuators
@@ -281,10 +281,10 @@ class LRScalingFactors(PythonAlgorithm):
                                         'LambdaRequested': wl,
                                         'S1H':s1h, 'S1W':s1w,
                                         'S2iH':s2h, 'S2iW':s2w,
-                                        'a':a, 'error_a': error_a, 
+                                        'a':a, 'error_a': error_a,
                                         'b':b, 'error_b': error_b,
-                                        'diagnostics': '%s / %s * %s' % (run, references[n_attenuator]['run'], references[n_attenuator]['diagnostics'])
-                                        })
+                                        'diagnostics': '%s / %s * %s' % (run, references[n_attenuator]['run'],
+                                                                         references[n_attenuator]['diagnostics'])})
             previous_ws = workspace_name
 
         # Log some useful information to track what happened
@@ -360,7 +360,7 @@ class LRScalingFactors(PythonAlgorithm):
         # Rebin TOF axis
         tof_range = self.getProperty("TOFRange").value
         tof_step = self.getProperty("TOFSteps").value
-        workspace = Rebin(InputWorkspace=workspace, Params=[tof_range[0], tof_step, tof_range[1]], 
+        workspace = Rebin(InputWorkspace=workspace, Params=[tof_range[0], tof_step, tof_range[1]],
                           PreserveEvents=False, OutputWorkspace=str(workspace))
 
         # Integrate over low resolution range
@@ -380,7 +380,7 @@ class LRScalingFactors(PythonAlgorithm):
         # and use 1 as the error on counts of zero. We normalize by the integrated
         # current _after_ the background subtraction so that the 1 doesn't have
         # to be changed to a 1/Charge.
-        workspace = NormaliseByCurrent(InputWorkspace=workspace, 
+        workspace = NormaliseByCurrent(InputWorkspace=workspace,
                                        OutputWorkspace=str(workspace))
 
         # Crop to only the selected peak region
@@ -394,3 +394,4 @@ class LRScalingFactors(PythonAlgorithm):
         return str(workspace)
 
 AlgorithmFactory.subscribe(LRScalingFactors)
+

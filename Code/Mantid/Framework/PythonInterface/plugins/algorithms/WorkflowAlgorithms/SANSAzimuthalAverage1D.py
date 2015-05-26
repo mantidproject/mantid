@@ -248,15 +248,15 @@ class SANSAzimuthalAverage1D(PythonAlgorithm):
         b = 1.0/npts
         nsteps = int(1+math.ceil(npts*math.log10(x_max/x_min)))
 
-        binning = str(x_min)
+        #binning = str(x_min)
         x_bound = x_min - ( x_min*math.pow(10,b) - x_min )/2.0
         binning2 = str(x_bound)
 
         x = x_min
-        for i in range(nsteps):
+        for dummy_i in range(nsteps):
             x_bound = 2*x-x_bound
             x *= math.pow(10,b)
-            binning += ",%g,%g" % (x,x)
+            #binning += ",%g,%g" % (x,x)
             binning2 += ",%g,%g" % (x_bound,x_bound)
 
         return binning2
