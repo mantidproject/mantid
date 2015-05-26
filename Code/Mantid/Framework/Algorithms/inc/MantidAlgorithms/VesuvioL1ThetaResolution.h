@@ -55,6 +55,7 @@ private:
 
   Mantid::API::MatrixWorkspace_sptr m_instWorkspace;
   Mantid::Geometry::IComponent_const_sptr m_sample;
+  Mantid::API::MatrixWorkspace_sptr m_outputWorkspace;
   Mantid::API::MatrixWorkspace_sptr m_l1DistributionWs;
   Mantid::API::MatrixWorkspace_sptr m_thetaDistributionWs;
 
