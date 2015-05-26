@@ -36,12 +36,17 @@ class EnginXFitPeaks(PythonAlgorithm):
     		doc = "Fitted Zero value")
 
     def PyExec(self):
-    	# Get expected peaks in TOF for the detector
-        expectedPeaksTof = self._expectedPeaksInTOF()
+        # Get peaks in dSpacing from file
+        expectedPeaksD = self._readInExpectedPeaks()
+
+        if expectedPeaksD < 1:
+            raise ValueError("Cannot run this algorithm without any input expected peaks")
+
+        # Get expected peaks in TOF for the detector
+        expectedPeaksTof = self._expectedPeaksInTOF(expectedPeaksD)
         # FindPeaks will returned a list of peaks sorted by the centre found. Sort the peaks as well,
         # so we can match them with fitted centres later.
         expectedPeaksTof = sorted(expectedPeaksTof)
-        expectedPeaksD = self._readInExpectedPeaks()
 
         # Find approximate peak positions, asumming Gaussian shapes
         findPeaksAlg = self.createChildAlgorithm('FindPeaks')
@@ -124,8 +129,16 @@ class EnginXFitPeaks(PythonAlgorithm):
             else:
                 print "using file"
                 expectedPeaksD = sorted(exPeakArray)
+
+            if None == expectedPeaksD:
+                raise ValueError("Could not read any expected peaks from file: %s" % updateFileName)
         else:
             expectedPeaksD = sorted(self.getProperty('ExpectedPeaks').value)
+            if None == expectedPeaksD:
+                raise ValueError("No expected peaks were given in the property 'ExpectedPeaks', "
+                                 "could not get default expected peaks, and 'ExpectedPeaksFromFile' "
+                                 "was not given either.")
+
         return expectedPeaksD
 
     def _getDefaultPeaks(self):
@@ -161,28 +174,56 @@ class EnginXFitPeaks(PythonAlgorithm):
         return (difc, zero)
 
 
-    def _expectedPeaksInTOF(self):
-        """ Converts expected peak dSpacing values to TOF values for the detector
-    	"""
-        ws = self.getProperty("InputWorkspace").value
+    def _expectedPeaksInTOF(self, expectedPeaks):
+        """
+        Converts expected peak dSpacing values to TOF values for the detector.
+        Implemented by using the algorithm ConvertUnits.
+
+        @param expectedPeaks :: vector of expected peaks in dSpacing
+
+        Returns:
+            a vector of ToF values corresponding to the input (dSpacing) vector.
+        """
+        convAlg = self.createChildAlgorithm('ConvertUnits')
+
+        outWsName = "_ws_in_tof"
         wsIndex = self.getProperty("WorkspaceIndex").value
 
-    	# Detector for specified spectrum
-        det = ws.getDetector(wsIndex)
+        # Create workspace just to convert dSpacing -> ToF, yvals are irrelevant
+        # this used to be calculated with:
+        # lambda d: 252.816 * 2 * (50 + detL2) * math.sin(detTwoTheta / 2.0) * d
+        yVals = [1] * (len(expectedPeaks) - 1)
+        # like: wsFrom = mantid.simpleapi.CreateWorkspace(UnitX='dSpacing', DataX=expectedPeaks, DataY=yVals)
+        createAlg = self.createChildAlgorithm("CreateWorkspace")
+        createAlg.setProperty("UnitX", 'dSpacing')
+        createAlg.setProperty("DataX", expectedPeaks)
+        createAlg.setProperty("DataY", yVals)
+        createAlg.setProperty("OutputWorkspace", outWsName)
+        createAlg.execute()
+        wsFrom = createAlg.getProperty("OutputWorkspace").value
 
-    	# Current detector parameters
-        detL2 = det.getDistance(ws.getInstrument().getSample())
-        detTwoTheta = ws.detectorTwoTheta(det)
+        # add instrument information like mantid.simpleapi.LoadInstrument(Workspace=wsFrom, InstrumentName='ENGIN-X')
+        instAlg = self.createChildAlgorithm("LoadInstrument")
+        instAlg.setProperty("Workspace", wsFrom)
+        instAlg.setProperty("InstrumentName", 'ENGIN-X')
+        instAlg.execute()
 
-    	# Function for converting dSpacing -> TOF for the detector
-        dSpacingToTof = lambda d: 252.816 * 2 * (50 + detL2) * math.sin(detTwoTheta / 2.0) * d
-        expectedPeaks = self._readInExpectedPeaks()
+        # And finally run ConvertUnits
+        convAlg.setProperty("InputWorkspace", wsFrom)
+        convAlg.setProperty("OutputWorkspace", outWsName)
+        targetUnits = 'TOF'
+        convAlg.setProperty("Target", targetUnits)
+        # default property "EMode" value 'Elastic'
+        convAlg.execute()
+        wsTo = convAlg.getProperty('OutputWorkspace').value
+        peaksToF = wsTo.dataX(0)
 
-    	# Expected peak positions in TOF for the detector
-        expectedPeaksTof = [dSpacingToTof(ep) for ep in expectedPeaks]
+        # clean up
+        delAlg = self.createChildAlgorithm("DeleteWorkspace")
+        delAlg.setProperty("Workspace", outWsName)
+        delAlg.execute()
 
-        return expectedPeaksTof
-
+        return peaksToF
 
     def _createFittedPeaksTable(self):
         """ Creates a table where to put peak fitting results to
