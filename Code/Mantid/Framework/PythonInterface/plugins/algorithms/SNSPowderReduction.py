@@ -98,14 +98,16 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         self.declareProperty(FloatArrayProperty("Binning", values=[0.,0.,0.],\
                              direction=Direction.Input), "Positive is linear bins, negative is logorithmic")
         self.declareProperty("ResampleX", 0,
-                             "Number of bins in x-axis. Non-zero value overrides \"Params\" property. Negative value means logorithmic binning.")
+                             "Number of bins in x-axis. Non-zero value overrides \"Params\" property. "+\
+                             "Negative value means logorithmic binning.")
         self.declareProperty("BinInDspace", True,
                              "If all three bin parameters a specified, whether they are in dspace (true) or time-of-flight (false)")
         self.declareProperty("StripVanadiumPeaks", True,
                              "Subtract fitted vanadium peaks from the known positions.")
         self.declareProperty("VanadiumFWHM", 7, "Default=7")
         self.declareProperty("VanadiumPeakTol", 0.05,
-                             "How far from the ideal position a vanadium peak can be during StripVanadiumPeaks. Default=0.05, negative turns off")
+                             "How far from the ideal position a vanadium peak can be during StripVanadiumPeaks. "\
+                             "Default=0.05, negative turns off")
         self.declareProperty("VanadiumSmoothParams", "20,2", "Default=20,2")
         self.declareProperty("BackgroundSmoothParams", "", "Default=off, suggested 20,2")
         self.declareProperty("FilterBadPulses", 95.,

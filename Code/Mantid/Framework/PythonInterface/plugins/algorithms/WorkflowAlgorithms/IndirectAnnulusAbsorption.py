@@ -124,27 +124,27 @@ class IndirectAnnulusAbsorption(DataProcessorAlgorithm):
 
                 SetSampleMaterial(can1_wave_ws, ChemicalFormula=self._can_chemical_formula, SampleNumberDensity=self._can_number_density)
                 AnnularRingAbsorption(InputWorkspace=can1_wave_ws,
-                              OutputWorkspace='__Acc1',
-                              SampleHeight=3.0,
-                              SampleThickness=can_thickness_1,
-                              CanInnerRadius=self._can_inner_radius,
-                              CanOuterRadius=self._sample_outer_radius,
-                              SampleChemicalFormula=self._can_chemical_formula,
-                              SampleNumberDensity=self._can_number_density,
-                              NumberOfWavelengthPoints=10,
-                              EventsPerPoint=self._events)
+                                      OutputWorkspace='__Acc1',
+                                      SampleHeight=3.0,
+                                      SampleThickness=can_thickness_1,
+                                      CanInnerRadius=self._can_inner_radius,
+                                      CanOuterRadius=self._sample_outer_radius,
+                                      SampleChemicalFormula=self._can_chemical_formula,
+                                      SampleNumberDensity=self._can_number_density,
+                                      NumberOfWavelengthPoints=10,
+                                      EventsPerPoint=self._events)
 
                 SetSampleMaterial(can2_wave_ws, ChemicalFormula=self._can_chemical_formula, SampleNumberDensity=self._can_number_density)
                 AnnularRingAbsorption(InputWorkspace=can2_wave_ws,
-                              OutputWorkspace='__Acc2',
-                              SampleHeight=3.0,
-                              SampleThickness=can_thickness_2,
-                              CanInnerRadius=self._sample_inner_radius,
-                              CanOuterRadius=self._can_outer_radius,
-                              SampleChemicalFormula=self._can_chemical_formula,
-                              SampleNumberDensity=self._can_number_density,
-                              NumberOfWavelengthPoints=10,
-                              EventsPerPoint=self._events)
+                                      OutputWorkspace='__Acc2',
+                                      SampleHeight=3.0,
+                                      SampleThickness=can_thickness_2,
+                                      CanInnerRadius=self._sample_inner_radius,
+                                      CanOuterRadius=self._can_outer_radius,
+                                      SampleChemicalFormula=self._can_chemical_formula,
+                                      SampleNumberDensity=self._can_number_density,
+                                      NumberOfWavelengthPoints=10,
+                                      EventsPerPoint=self._events)
 
                 Multiply(LHSWorkspace='__Acc1', RHSWorkspace='__Acc2', OutputWorkspace=self._acc_ws)
                 DeleteWorkspace('__Acc1')

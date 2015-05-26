@@ -10,8 +10,6 @@ from mantid.simpleapi import * # needed for Load
 
 class LoadLogPropertyTable(PythonAlgorithm):
 
-
-
     def summary(self):
         """ Return summary
         """
@@ -25,9 +23,13 @@ class LoadLogPropertyTable(PythonAlgorithm):
     # comment (separate function)
     # time series, take average for t>0 (if available)
     def PyInit(self):
-        self.declareProperty(FileProperty(name="FirstFile",defaultValue="",action=FileAction.Load,extensions = ["nxs","raw"]),"The first file to load from")
-        self.declareProperty(FileProperty(name="LastFile",defaultValue="",action=FileAction.Load,extensions = ["nxs","raw"]),"The Last file to load from, must be in the same directory, all files in between will also be used")
-        self.declareProperty(StringArrayProperty("LogNames",direction=Direction.Input),"The comma seperated list of properties to include. \nThe full list will be printed if an invalid value is used.")
+        self.declareProperty(FileProperty(name="FirstFile",defaultValue="",action=FileAction.Load,extensions = ["nxs","raw"]),
+                             "The first file to load from")
+        self.declareProperty(FileProperty(name="LastFile",defaultValue="",action=FileAction.Load,extensions = ["nxs","raw"]),
+                             "The Last file to load from, must be in the same directory, all files in between will also be used")
+        self.declareProperty(StringArrayProperty("LogNames",direction=Direction.Input),
+                             "The comma seperated list of properties to include. \n"+\
+                             "The full list will be printed if an invalid value is used.")
         self.declareProperty(WorkspaceProperty("OutputWorkspace","",Direction.Output),"Table of results")
 
     def category(self):
@@ -53,7 +55,7 @@ class LoadLogPropertyTable(PythonAlgorithm):
                 v=v.unfiltered()
             for tt in v.times:
                 times2.append((datetime.datetime(*(time.strptime(str(tt),"%Y-%m-%dT%H:%M:%S")[0:6]))-begin).total_seconds())
-        except:
+        except AttributeError:
             #print "probably not a time series"
             pass
 
@@ -66,6 +68,7 @@ class LoadLogPropertyTable(PythonAlgorithm):
             return (numpy.average(v.value[i:]),False,0)
         return (v.value,False,0)
 
+    #pylint: disable=too-many-branches
     def PyExec(self):
 
         file1=self.getProperty("FirstFile").value
@@ -100,7 +103,7 @@ class LoadLogPropertyTable(PythonAlgorithm):
             returnTuple=None
             try:
                 returnTuple=Load(Filename=thispath,OutputWorkspace="__CopyLogsTmp",SpectrumMin=1, SpectrumMax=1)
-            except:
+            except (ValueError,RuntimeError):
                 continue
 
             #check if the return type is atuple

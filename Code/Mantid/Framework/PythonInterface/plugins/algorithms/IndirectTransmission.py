@@ -59,7 +59,7 @@ class IndirectTransmission(PythonAlgorithm):
         self.declareProperty(WorkspaceProperty('OutputWorkspace', "", Direction.Output),
                              doc="The name of the output workspace.")
 
-
+    #pylint: disable=too-many-locals
     def PyExec(self):
         instrument_name = self.getPropertyValue('Instrument')
         analyser = self.getPropertyValue('Analyser')
@@ -142,7 +142,7 @@ class IndirectTransmission(PythonAlgorithm):
         # Build table of values
         for data in zip(output_names, output_values):
             table_ws.addRow(list(data))
-            logger.information(': '.join(map(str, list(data))))
+            logger.information(': '.join([str(d) for d in data]))
 
         # Remove idf/ipf workspace
         DeleteWorkspace(workspace)
@@ -165,14 +165,14 @@ class IndirectTransmission(PythonAlgorithm):
 
         except ValueError:
             # If that fails then get it by taking from group of all detectors
-            ws = mtd[workspace]
-            spectra_list = range(0, ws.getNumberHistograms())
+            wsHandle = mtd[workspace]
+            spectra_list = range(0, wsHandle.getNumberHistograms())
             GroupDetectors(InputWorkspace=workspace,
                            OutputWorkspace=workspace,
                            SpectraList=spectra_list)
-            ws = mtd[workspace]
-            det = ws.getDetector(0)
-            efixed = mtd[workspace].getEFixed(det.getID())
+            wsHandle = mtd[workspace]
+            det = wsHandle.getDetector(0)
+            efixed = wsHandle.getEFixed(det.getID())
 
         return efixed
 

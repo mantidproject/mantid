@@ -87,7 +87,7 @@ class HFIRSANSReduction(PythonAlgorithm):
         else:
             output_str += "Loaded %s\n" % data_file
             output_str += _load_data(data_file, workspace)
-            head, tail = os.path.split(data_file)
+            head, _ = os.path.split(data_file)
             if os.path.isdir(head):
                 self.default_output_dir = head
         return output_str
