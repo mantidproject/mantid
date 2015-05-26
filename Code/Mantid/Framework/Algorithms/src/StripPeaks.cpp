@@ -109,6 +109,8 @@ API::ITableWorkspace_sptr StripPeaks::findPeaks(API::MatrixWorkspace_sptr WS) {
   bool highbackground = getProperty("HighBackground");
   std::vector<double> peakpositions = getProperty("PeakPositions");
   double peakpostol = getProperty("PeakPositionTolerance");
+  if (peakpostol < 0.)
+      peakpostol = EMPTY_DBL();
 
   // Set up and execute algorithm
   bool showlog = true;
