@@ -10,6 +10,7 @@ using Kernel::V3D;
 *  effects across a spectrum
 *  @param ws :: the workspace that contains the neutron counts
 *  @param det :: the detector for which the calculations will be for
+*  @param extraLength :: extra length for gravity correction
 */
 GravitySANSHelper::GravitySANSHelper(API::MatrixWorkspace_const_sptr ws,
                                      Geometry::IDetector_const_sptr det,
