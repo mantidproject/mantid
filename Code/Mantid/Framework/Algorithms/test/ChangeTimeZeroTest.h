@@ -13,8 +13,6 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/DateTimeValidator.h"
 
-#include <iostream>
-
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::Algorithms;
@@ -110,7 +108,7 @@ Mantid::API::MatrixWorkspace_sptr provideWorkspace2D(LogType logType,
 
 // Provides a WorkspaceSingleValue with a log
 Mantid::API::MatrixWorkspace_sptr
-provideWorkspaceSingleValue(LogType logType, std::string wsName,
+provideWorkspaceSingleValue(LogType logType,
                             DateAndTime startTime, int length) {
   auto ws = WorkspaceCreationHelper::CreateWorkspaceSingleValue(10);
   // Add the logs
@@ -370,12 +368,11 @@ public:
   // WorkspaceSingleValue tests
   void test_changed_time_for_standard_setting_and_relative_time_and_differnt_inOutWS_and_WorkspaceSingleValue() {
     // Arrange
-    const std::string inputWorkspaceName = "inWS";
     const std::string outputWorkspaceName = "outWS";
     const std::string absoluteTimeShift = "";
     const double relativeTimeShift = 1000;
     Mantid::API::MatrixWorkspace_sptr ws =
-      provideWorkspaceSingleValue(LogType::STANDARD, inputWorkspaceName, m_startTime, m_length);
+      provideWorkspaceSingleValue(LogType::STANDARD, m_startTime, m_length);
 
     // Act and assert
     act_and_assert(relativeTimeShift, absoluteTimeShift,
@@ -384,13 +381,12 @@ public:
 
   void test_changed_time_for_standard_setting_and_absolute_time_and_differnt_inOutWS_and_WorkspaceSingleValue() {
     // Arrange
-    const std::string inputWorkspaceName = "inWS";
     const std::string outputWorkspaceName = "outWS";
     DateAndTime absoluteTimeShift(m_startTime);
     absoluteTimeShift += 1000.0;
     const double relativeTimeShift = 0.0;
     Mantid::API::MatrixWorkspace_sptr ws =
-      provideWorkspaceSingleValue(LogType::STANDARD, inputWorkspaceName, m_startTime, m_length);
+      provideWorkspaceSingleValue(LogType::STANDARD,m_startTime, m_length);
 
     // Act and assert
     act_and_assert(relativeTimeShift, absoluteTimeShift.toISO8601String(),
@@ -445,7 +441,7 @@ private:
     auto logs = ws->run().getLogData();
     // Go over each log and check the times
     for (auto iter = logs.begin(); iter != logs.end(); ++iter) {
-      if (isTimeSeries(*iter)) {
+      if (dynamic_cast<Mantid::Kernel::ITimeSeriesProperty *>(*iter)) {
         do_check_time_series(*iter, timeShift);
       } else if (dynamic_cast<PropertyWithValue<std::string> *>(*iter)) {
         do_check_property_with_string_value(*iter, timeShift);

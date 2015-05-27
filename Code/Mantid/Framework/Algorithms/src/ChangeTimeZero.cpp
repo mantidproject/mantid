@@ -24,6 +24,22 @@ using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using std::size_t;
 
+
+namespace {
+/**
+ * General check if we are dealing with a time series
+ * @param prop :: the property which is being checked
+ * @return True if the proerpty is a time series, otherwise false.
+ */
+bool isTimeSeries(Mantid::Kernel::Property *prop) {
+  auto isTimeSeries = false;
+  if (dynamic_cast<Mantid::Kernel::ITimeSeriesProperty *>(prop)) {
+    isTimeSeries = true;
+  }
+  return isTimeSeries;
+}
+}
+
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
