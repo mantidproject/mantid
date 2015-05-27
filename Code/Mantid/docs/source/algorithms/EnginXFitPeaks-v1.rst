@@ -56,8 +56,8 @@ Usage
 
 
    # Print the results
-   print "Difc: %.1f", difc
-   print "Zero: %.1f", zero
+   print "Difc: %.1f" % difc
+   print "Zero: %.1f" % zero
 
 Output:
 
