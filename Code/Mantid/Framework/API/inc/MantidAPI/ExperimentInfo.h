@@ -118,9 +118,9 @@ public:
   /// Saves this experiment description to the open NeXus file
   virtual void saveExperimentInfoNexus(::NeXus::File *file) const;
   /// Loads an experiment description from the open NeXus file
-  virtual void loadExperimentInfoNexus(::NeXus::File *file, std::string &parameterStr);
+  virtual void loadExperimentInfoNexus(const std::string& nxFilename, ::NeXus::File *file, std::string &parameterStr);
   /// Load the instrument from an open NeXus file.
-  virtual void loadInstrumentInfoNexus(::NeXus::File *file, std::string &parameterStr);
+  virtual void loadInstrumentInfoNexus(const std::string& nxFilename, ::NeXus::File *file, std::string &parameterStr);
 
   /// Load the sample and log info from an open NeXus file.
   virtual void loadSampleAndLogInfoNexus(::NeXus::File *file);

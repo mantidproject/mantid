@@ -15,7 +15,6 @@
 #include "MantidKernel/InstrumentInfo.h"
 #include "MantidKernel/Property.h"
 #include "MantidKernel/Strings.h"
-#include "MantidKernel/TimeSeriesProperty.h"
 
 #include <boost/algorithm/string.hpp>
 #include <boost/make_shared.hpp>
@@ -928,6 +927,7 @@ void ExperimentInfo::loadSampleAndLogInfoNexus(::NeXus::File *file) {
 //--------------------------------------------------------------------------------------------
 /** Load the object from an open NeXus file.
  * @param file :: open NeXus file
+ * @param nxFilename :: the filename of the nexus file
  * @param[out] parameterStr :: special string for all the parameters.
  *             Feed that to ExperimentInfo::readParameterMap() after the
  * instrument is done.
@@ -935,17 +935,19 @@ void ExperimentInfo::loadSampleAndLogInfoNexus(::NeXus::File *file) {
  * file and cannot
  *                                  be loaded from the IDF.
  */
-void ExperimentInfo::loadExperimentInfoNexus(::NeXus::File *file,
+void ExperimentInfo::loadExperimentInfoNexus(const std::string& nxFilename, 
+                                             ::NeXus::File *file,
                                              std::string &parameterStr) {
   // load sample and log info
   loadSampleAndLogInfoNexus(file);
 
-  loadInstrumentInfoNexus(file, parameterStr);
+  loadInstrumentInfoNexus(nxFilename, file, parameterStr);
 }
 
 //--------------------------------------------------------------------------------------------
 /** Load the instrument from an open NeXus file.
  * @param file :: open NeXus file
+ * @param nxFilename :: the filename of the nexus file
  * @param[out] parameterStr :: special string for all the parameters.
  *             Feed that to ExperimentInfo::readParameterMap() after the
  * instrument is done.
@@ -953,7 +955,8 @@ void ExperimentInfo::loadExperimentInfoNexus(::NeXus::File *file,
  * file and cannot
  *                                  be loaded from the IDF.
  */
-void ExperimentInfo::loadInstrumentInfoNexus(::NeXus::File *file,
+void ExperimentInfo::loadInstrumentInfoNexus(const std::string& nxFilename,
+                                             ::NeXus::File *file,
                                              std::string &parameterStr) {
   std::string instrumentName;
   std::string instrumentXml;
@@ -1003,13 +1006,13 @@ void ExperimentInfo::loadInstrumentInfoNexus(::NeXus::File *file,
     file->closeGroup();
   }
 
-  instrumentFilename = Strings::strip(instrumentFilename);
+  instrumentFilename = Strings::strip(instrumentFilename);;
   instrumentXml = Strings::strip(instrumentXml);
   instrumentName = Strings::strip(instrumentName);
   if (!instrumentXml.empty()) {
     // instrument xml is being loaded from the nxs file, set the instrumentFilename
     // to identify the Nexus file as the source of the data
-    instrumentFilename = instrumentFilename;
+    instrumentFilename = nxFilename;
     g_log.debug() << "Using instrument IDF XML text contained in nexus file.\n";
   }
   else

@@ -1,6 +1,5 @@
 #include "MantidGeometry/Instrument/IDFObject.h"
 #include "MantidKernel/ChecksumHelper.h"
-#include <Poco/DateTimeFormatter.h>
 #include <Poco/String.h>
 
 namespace Mantid {

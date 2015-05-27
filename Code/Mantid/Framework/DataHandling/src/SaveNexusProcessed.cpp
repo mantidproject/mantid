@@ -10,15 +10,12 @@
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidDataObjects/OffsetsWorkspace.h"
 #include "MantidKernel/ArrayProperty.h"
-#include "MantidKernel/ConfigService.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidNexus/NexusFileIO.h"
 #include <nexus/NeXusFile.hpp>
 #include <boost/regex.hpp>
 #include <boost/shared_ptr.hpp>
-#include <cmath>
 #include <Poco/File.h>
-#include <Poco/Path.h>
 
 using namespace Mantid::API;
 

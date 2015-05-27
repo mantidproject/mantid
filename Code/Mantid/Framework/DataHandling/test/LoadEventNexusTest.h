@@ -490,7 +490,6 @@ public:
 
     auto ws = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(outws);
     auto inst = ws->getInstrument();
-    TS_ASSERT( inst->getFilename().empty() ); // This is how we know we got it from inside the nexus file
     TS_ASSERT_EQUALS( inst->getName(), "HYSPECA" );
     TS_ASSERT_EQUALS( inst->getValidFromDate(), std::string("2011-Jul-20 17:02:48.437294000") );
     TS_ASSERT_EQUALS( inst->getNumberDetectors(), 20483 );
