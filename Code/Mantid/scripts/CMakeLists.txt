@@ -3,6 +3,7 @@
 add_subdirectory(FilterEvents)
 add_subdirectory(HFIRPowderReduction)
 add_subdirectory(Interface/ui)
+add_subdirectory(lib1to2/gui)
 add_subdirectory(PyChop)
 
 set ( TEST_PY_FILES 
