@@ -47,8 +47,7 @@ class IndirectCalibration(DataProcessorAlgorithm):
         self.declareProperty(name='Plot', defaultValue=False,
                              doc='Plot the calibration data as a spectra plot.')
 
-        self.declareProperty(WorkspaceProperty('OutputWorkspace', '',
-                             direction=Direction.Output),
+        self.declareProperty(WorkspaceProperty('OutputWorkspace', '', direction=Direction.Output),
                              doc='Output workspace for calibration data.')
 
 
@@ -85,8 +84,6 @@ class IndirectCalibration(DataProcessorAlgorithm):
 
 
     def PyExec(self):
-        from mantid import logger
-
         self._setup()
 
         runs = []
@@ -98,7 +95,7 @@ class IndirectCalibration(DataProcessorAlgorithm):
                     SpectrumMin=int(self._spec_range[0]), SpectrumMax=int(self._spec_range[1]),\
                     LoadLogFiles=False)
                 runs.append(root)
-            except Exception as exc:
+            except (RuntimeError,ValueError) as exc:
                 logger.error('Could not load raw file "%s": %s' % (in_file, str(exc)))
 
         calib_ws_name = 'calibration'

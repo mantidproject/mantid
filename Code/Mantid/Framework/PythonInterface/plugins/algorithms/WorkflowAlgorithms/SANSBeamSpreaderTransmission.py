@@ -57,6 +57,7 @@ class SANSBeamSpreaderTransmission(PythonAlgorithm):
         self.declareProperty("OutputMessage", "",
                              direction=Direction.Output, doc = "Output message")
 
+    #pylint: disable=too-many-locals,too-many-branches
     def PyExec(self):
         # Get the reduction property manager
         property_manager_name = self.getProperty("ReductionProperties").value
@@ -114,7 +115,6 @@ class SANSBeamSpreaderTransmission(PythonAlgorithm):
                         [direct_spread, direct_spreader_ws],
                         [sample_scatt, sample_scatt_ws],
                         [direct_scatt, direct_scatt_ws]]
-            dark_current_data = self.getPropertyValue("DarkCurrentFilename")
 
             for f in ws_names:
                 filepath = find_data(f[0], instrument=instrument)
@@ -228,7 +228,6 @@ class SANSBeamSpreaderTransmission(PythonAlgorithm):
         dark_current_data = self.getPropertyValue("DarkCurrentFilename")
         property_manager_name = self.getProperty("ReductionProperties").value
 
-        dark_current_property = "DefaultDarkCurrentAlgorithm"
         def _dark(workspace, dark_current_property):
             if property_manager.existsProperty(dark_current_property):
                 p=property_manager.getProperty(dark_current_property)

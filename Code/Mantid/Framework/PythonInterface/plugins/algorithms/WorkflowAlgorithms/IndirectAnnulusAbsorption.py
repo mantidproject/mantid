@@ -1,9 +1,28 @@
+#pylint: disable=no-init
 from mantid.simpleapi import *
 from mantid.api import DataProcessorAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty, PropertyMode, Progress, WorkspaceGroupProperty
 from mantid.kernel import StringMandatoryValidator, Direction, logger, IntBoundedValidator, FloatBoundedValidator
 
-
+#pylint: disable=too-many-instance-attributes
 class IndirectAnnulusAbsorption(DataProcessorAlgorithm):
+    _can_inner_radius = 0.0
+    _can_outer_radius = 0.0
+    _output_ws = None
+    _ass_ws = None
+    _can_ws_name = ''
+    _can_number_density = 0.
+    _can_chemical_formula = ''
+    _sample_outer_radius = 0.
+    _abs_ws = None
+    _events = 0
+    _use_can_corrections = False
+    _sample_ws_name = ''
+    _can_scale = 0.
+    _sample_chemical_formula = ''
+    _acc_ws = None
+    _plot = False
+    _sample_number_density = 0.
+    _sample_inner_radius = 0.
 
     def category(self):
         return "Workflow\\Inelastic;PythonAlgorithms;CorrectionFunctions\\AbsorptionCorrections;Workflow\\MIDAS"

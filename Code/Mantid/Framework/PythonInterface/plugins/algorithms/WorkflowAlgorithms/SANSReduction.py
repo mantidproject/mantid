@@ -22,7 +22,8 @@ class SANSReduction(PythonAlgorithm):
 
     def _py_init(self):
         self.declareProperty('Filename', '', doc='List of input file paths')
-        self.declareProperty('ReductionProperties', '__sans_reduction_properties', validator=StringMandatoryValidator(), doc='Property manager name for the reduction')
+        self.declareProperty('ReductionProperties', '__sans_reduction_properties', validator=StringMandatoryValidator(),
+                             doc='Property manager name for the reduction')
         self.declareProperty('OutputWorkspace', '', doc='Reduced workspace')
         self.declareProperty('OutputMessage', '', direction=Direction.Output, doc='Output message')
 
@@ -78,6 +79,7 @@ class SANSReduction(PythonAlgorithm):
             output_str += self._load_data(data_file, workspace, property_manager, property_manager_name)
         return output_str
 
+    #pylint: disable=too-many-locals,too-many-branches
     def _py_exec(self):
         filename = self.getProperty("Filename").value
         output_ws = self.getPropertyValue("OutputWorkspace")

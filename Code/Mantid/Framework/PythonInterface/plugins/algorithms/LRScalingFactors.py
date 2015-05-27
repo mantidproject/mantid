@@ -1,5 +1,4 @@
-#pylint: disable=invalid-name
-import numpy
+#pylint: disable=invalid-name, no-init
 import os
 from mantid.api import *
 from mantid.simpleapi import *
@@ -33,6 +32,7 @@ class LRScalingFactors(PythonAlgorithm):
         run: 55897, att: 2, s1: 1.05, s2: 0.35 --> F = 55897 / 55896 * 55895 / 55890
 
     """
+    tolerance=0.
     def category(self):
         return "Reflectometry\\SNS"
 
@@ -70,6 +70,7 @@ class LRScalingFactors(PythonAlgorithm):
                                           action=FileAction.Save,
                                           extensions=['cfg']))
 
+    #pylint: disable=too-many-locals,too-many-branches
     def PyExec(self):
         # Verify whether we have a sorted list of runs.
         data_runs = self.getProperty("DirectBeamRuns").value
@@ -154,7 +155,7 @@ class LRScalingFactors(PythonAlgorithm):
             try:
                 s2h = abs(workspace.getRun().getProperty("%sVHeight" % back_slit).value[0])
                 s2w = abs(workspace.getRun().getProperty("%sHWidth" % back_slit).value[0])
-            except:
+            except RuntimeError:
                 # For backward compatibility with old code
                 logger.error("Specified slit could not be found: %s  Trying S2" % back_slit)
                 s2h = abs(workspace.getRun().getProperty("S2VHeight").value[0])

@@ -12,7 +12,8 @@ class MuscatData(PythonAlgorithm):
         return "Calculates multiple scattering using a sample S(Q,w)."
 
     def PyInit(self):
-        self.declareProperty(name='Instrument',defaultValue='iris',validator=StringListValidator(['irs','iris','osi','osiris']), doc='Instrument')
+        self.declareProperty(name='Instrument',defaultValue='iris',
+                             validator=StringListValidator(['irs','iris','osi','osiris']), doc='Instrument')
         self.declareProperty(name='Analyser',defaultValue='graphite002',validator=StringListValidator(['graphite002','graphite004']))
         self.declareProperty(name='Geom',defaultValue='Flat',validator=StringListValidator(['Flat','Cyl']), doc='Sample geometry')
         self.declareProperty(name='SamNumber',defaultValue='',validator=StringMandatoryValidator(), doc='Sample data run number')
@@ -32,6 +33,7 @@ class MuscatData(PythonAlgorithm):
         self.declareProperty(name='Verbose',defaultValue=True, doc='Switch Verbose Off/On')
         self.declareProperty(name='Save',defaultValue=False, doc='Switch Save result to nxs file Off/On')
 
+    #pylint: disable=too-many-locals
     def PyExec(self):
         from IndirectImport import run_f2py_compatibility_test, is_supported_f2py_platform
 

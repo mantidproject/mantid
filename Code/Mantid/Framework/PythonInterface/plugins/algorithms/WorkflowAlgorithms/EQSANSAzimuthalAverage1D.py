@@ -66,7 +66,7 @@ class EQSANSAzimuthalAverage1D(PythonAlgorithm):
         log_binning = self.getProperty('LogBinning').value
         nbins = self.getProperty('NumberOfBins').value
         compute_resolution = self.getProperty('ComputeResolution').value
-        input_ws_name = self.getPropertyValue('InputWorkspace')
+        #input_ws_name = self.getPropertyValue('InputWorkspace')
         workspace = self.getProperty('InputWorkspace').value
         output_ws_name = self.getPropertyValue('OutputWorkspace')
         property_manager_name = self.getProperty('ReductionProperties').value
@@ -97,6 +97,7 @@ class EQSANSAzimuthalAverage1D(PythonAlgorithm):
 
         self.setProperty('OutputWorkspace', output_ws)
 
+    #pylint: disable=too-many-arguments
     def _call_sans_averaging(self, workspace, binning, nbins, log_binning,
                              property_manager_name, output_workspace):
         """
@@ -197,6 +198,7 @@ class EQSANSAzimuthalAverage1D(PythonAlgorithm):
 
         self.setProperty('OutputMessage', 'Performed radial averaging for two frames')
 
+    #pylint: disable=too-many-arguments
     def _process_frame(self, workspace, wl_min, wl_max, source_aperture_radius,
                        frame_ID='1', binning=None):
         """
@@ -242,7 +244,7 @@ class EQSANSAzimuthalAverage1D(PythonAlgorithm):
         alg.execute()
         output_ws = alg.getProperty("OutputWorkspace").value
 
-        (output_msg, output_iq, output_binning) = \
+        (dummy_output_msg, output_iq, output_binning) = \
             self._call_sans_averaging(output_ws, binning,
                                       nbins, log_binning,
                                       property_manager_name,
@@ -265,6 +267,7 @@ class EQSANSAzimuthalAverage1D(PythonAlgorithm):
 
         return output_iq
 
+    #pylint: disable=too-many-branches
     def _scale(self, ws_frame1, ws_frame2):
         """
             Scale frame 1 to overlap frame 2
@@ -283,7 +286,7 @@ class EQSANSAzimuthalAverage1D(PythonAlgorithm):
         for i in range(len(iq_f1)):
             if iq_f1[i] <= 0:
                 break
-                continue
+                #continue
             if qmin is None or q_f1[i] < qmin:
                 qmin = q_f1[i]
 
@@ -295,7 +298,7 @@ class EQSANSAzimuthalAverage1D(PythonAlgorithm):
         for i in range(len(iq_f2)):
             if iq_f2[i] <= 0:
                 break
-                continue
+                #continue
             if qmin2 is None or q_f2[i] < qmin2:
                 qmin2 = q_f2[i]
 

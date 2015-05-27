@@ -90,7 +90,8 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
         validator = FloatArrayBoundedValidator()
         validator.setLower(0.)
         self.declareProperty(FloatArrayProperty("PeakPositions", []),
-                             "Comma delimited d-space positions of reference peaks.  Use 1-3 for Cross Correlation.  Unlimited for many peaks option.")
+                             "Comma delimited d-space positions of reference peaks.  Use 1-3 for Cross Correlation.  "+\
+                             "Unlimited for many peaks option.")
         self.declareProperty("PeakWindowMax", 0.,
                              "Maximum window around a peak to search for it. Optional.")
         self.declareProperty(ITableWorkspaceProperty("FitwindowTableWorkspace", "", Direction.Input, PropertyMode.Optional),\
@@ -109,7 +110,8 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
         self.declareProperty("BackgroundType", "Flat", StringListValidator(['Flat', 'Linear', 'Quadratic']),
                              "Used only with CrossCorrelation=False")
         self.declareProperty(IntArrayProperty("DetectorsPeaks", []),
-                             "Comma delimited numbers of detector banks for each peak if using 2-3 peaks for Cross Correlation.  Default is all.")
+                             "Comma delimited numbers of detector banks for each peak if using 2-3 peaks for Cross Correlation. "+\
+                             "Default is all.")
         self.declareProperty("PeakHalfWidth", 0.05,
                              "Half width of d-space around peaks for Cross Correlation. Default is 0.05")
         self.declareProperty("CrossCorrelationPoints", 100,
@@ -119,7 +121,8 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
         self.declareProperty("DiffractionFocusWorkspace", False, "Diffraction focus by detectors.  Default is False")
         grouping = ["All", "Group", "Column", "bank"]
         self.declareProperty("GroupDetectorsBy", "All", StringListValidator(grouping),
-                             "Detector groups to use for future focussing: All detectors as one group, Groups (East,West for SNAP), Columns for SNAP, detector banks")
+                             "Detector groups to use for future focussing: All detectors as one group, "+\
+                             "Groups (East,West for SNAP), Columns for SNAP, detector banks")
         self.declareProperty("FilterBadPulses", True, "Filter out events measured while proton charge is more than 5% below average")
         self.declareProperty("FilterByTimeMin", 0.,
                              "Relative time to start filtering by in seconds. Applies only to sample.")
@@ -340,7 +343,7 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
             for ws in [str(wksp)+"cc3", str(wksp)+"offset3", str(wksp)+"mask3"]:
                 if AnalysisDataService.doesExist(ws):
                     AnalysisDataService.remove(ws)
-        (temp, numGroupedSpectra, numGroups) = CreateGroupingWorkspace(InputWorkspace=wksp, GroupDetectorsBy=self._grouping,\
+        (dummy, numGroupedSpectra, numGroups) = CreateGroupingWorkspace(InputWorkspace=wksp, GroupDetectorsBy=self._grouping,\
                                 OutputWorkspace=str(wksp)+"group")
         if (numGroupedSpectra==0) or (numGroups==0):
             raise RuntimeError("%d spectra will be in %d groups" % (numGroupedSpectra, numGroups))
@@ -389,7 +392,7 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
         if not "histo" in self.getProperty("Extension").value:
             wksp = Rebin(InputWorkspace=wksp, OutputWorkspace=wksp.name(),
                          Params=str(self._binning[0])+","+str((self._binning[1]))+","+str(self._binning[2]))
-        (temp, numGroupedSpectra, numGroups) = CreateGroupingWorkspace(InputWorkspace=wksp, GroupDetectorsBy=self._grouping,\
+        (dummy, numGroupedSpectra, numGroups) = CreateGroupingWorkspace(InputWorkspace=wksp, GroupDetectorsBy=self._grouping,\
                                 OutputWorkspace=str(wksp)+"group")
         if (numGroupedSpectra==0) or (numGroups==0):
             raise RuntimeError("%d spectra will be in %d groups" % (numGroupedSpectra, numGroups))
@@ -408,12 +411,14 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
         if resws is not None:
             resrange = self.getProperty("AllowedResRange").value
             if len(resrange) < 2:
-                raise NotImplementedError("With input of 'DetectorResolutionWorkspace', number of allowed resolution range must be equal to 2.")
+                raise NotImplementedError("With input of 'DetectorResolutionWorkspace', "+\
+                                          "number of allowed resolution range must be equal to 2.")
             reslowf = resrange[0]
             resupf = resrange[1]
             if reslowf >= resupf:
-                raise NotImplementedError("Allowed resolution range factor, lower boundary (%f) must be smaller than upper boundary (%f)."\
-                        % (reslowf, resupf))
+                raise NotImplementedError("Allowed resolution range factor, lower boundary "+\
+                                          "(%f) must be smaller than upper boundary (%f)."\
+                                          % (reslowf, resupf))
         else:
             reslowf = 0.0
             resupf = 0.0
@@ -458,7 +463,7 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
 
         return wksp
 
-    def _focus(self, wksp, calib):
+    def _focus(self, wksp, dummy_calib):
         if wksp is None:
             return None
         MaskDetectors(Workspace=wksp, MaskedWorkspace=str(wksp)+"mask")

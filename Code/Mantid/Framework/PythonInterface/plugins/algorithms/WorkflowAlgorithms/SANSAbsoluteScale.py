@@ -86,6 +86,7 @@ class SANSAbsoluteScale(PythonAlgorithm):
             self.setProperty("OutputMessage", msg)
             return
 
+    #pylint: disable=too-many-locals
     def _hfir_scaling(self, property_manager):
         property_manager_name = self.getProperty("ReductionProperties").value
         input_ws = self.getProperty("InputWorkspace").value
@@ -175,7 +176,7 @@ class SANSAbsoluteScale(PythonAlgorithm):
         alg.setProperty("Workspace", ref_ws)
         alg.setPropertyValue("ShapeXML", cylXML)
         alg.execute()
-        det_list = alg.getProperty("DetectorList").value
+        #det_list = alg.getProperty("DetectorList").value
         det_list_str = alg.getPropertyValue("DetectorList")
 
         det_count_ws_name = "__absolute_scale"

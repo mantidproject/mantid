@@ -29,6 +29,7 @@ def _execute(algorithm_str, parameters, is_name=True):
         Logger("TransmissionUtils").error(str(sys.exc_value))
     return alg
 
+#pylint: disable=too-many-locals
 def load_monitors(self, property_manager):
     """
         Load files necessary to compute transmission.
@@ -46,9 +47,9 @@ def load_monitors(self, property_manager):
         beam_center_y = beam_center_y_input
 
     # Get instrument to use with FileFinder
-    instrument = ''
-    if property_manager.existsProperty("InstrumentName"):
-        instrument = property_manager.getProperty("InstrumentName").value
+    #instrument = ''
+    #if property_manager.existsProperty("InstrumentName"):
+    #    instrument = property_manager.getProperty("InstrumentName").value
 
     # Get the data loader
     def _load_data(filename, output_ws):
@@ -294,9 +295,9 @@ def subtract_dark_current(self, workspace, property_manager):
     dark_current_data = self.getPropertyValue("DarkCurrentFilename")
     property_manager_name = self.getProperty("ReductionProperties").value
     # Get instrument to use with FileFinder
-    instrument = ''
-    if property_manager.existsProperty("InstrumentName"):
-        instrument = property_manager.getProperty("InstrumentName").value
+    #instrument = ''
+    #if property_manager.existsProperty("InstrumentName"):
+    #    instrument = property_manager.getProperty("InstrumentName").value
 
     dark_current_property = "DefaultDarkCurrentAlgorithm"
     def _dark(ws, dark_current_property, dark_current_file=None):

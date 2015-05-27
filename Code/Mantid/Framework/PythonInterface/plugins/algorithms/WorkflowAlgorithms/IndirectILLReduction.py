@@ -8,7 +8,7 @@ from mantid import config, logger, mtd
 import numpy as np
 import os.path
 
-
+#pylint: disable=too-many-instance-attributes
 class IndirectILLReduction(DataProcessorAlgorithm):
 
     _raw_workspace = None
@@ -24,7 +24,7 @@ class IndirectILLReduction(DataProcessorAlgorithm):
     _analyser = None
     _reflection = None
     _run_name = None
-
+    _calibration_workspace = None
 
     def category(self):
         return "Workflow\\MIDAS;Inelastic;PythonAlgorithms"

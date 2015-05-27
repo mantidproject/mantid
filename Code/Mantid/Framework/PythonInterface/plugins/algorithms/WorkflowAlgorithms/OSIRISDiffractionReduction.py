@@ -190,6 +190,7 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
 
         self.execDiffOnly(sampleRuns)
 
+    #pylint: disable=too-many-branches
     def execDiffOnly(self, sampleRuns):
         """
             Execute the algorithm in diffraction-only mode

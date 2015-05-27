@@ -17,6 +17,7 @@ else:
 COMPRESS_TOL_TOF = .01
 EVENT_WORKSPACE_ID = "EventWorkspace"
 
+#pylint: disable=too-many-instance-attributes
 class SNSPowderReduction(DataProcessorAlgorithm):
 
     _resampleX = None
@@ -58,7 +59,8 @@ class SNSPowderReduction(DataProcessorAlgorithm):
     def PyInit(self):
         sns = ConfigService.getFacility("SNS")
         instruments = []
-        for item in sns.instruments("Neutron Diffraction"): instruments.append(item.shortName())
+        for item in sns.instruments("Neutron Diffraction"):
+            instruments.append(item.shortName())
         self.declareProperty("Instrument", "PG3", StringListValidator(instruments), "Powder diffractometer's name")
         arrvalidator = IntArrayBoundedValidator()
         arrvalidator.setLower(0)
@@ -126,7 +128,8 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         self.declareProperty(infotableprop, "Name of table workspace containing information for splitters.")
 
         self.declareProperty("LowResolutionSpectraOffset", -1,
-                             "If larger and equal to 0, then process low resolution TOF and offset is the spectra number. Otherwise, ignored.")
+                             "If larger and equal to 0, then process low resolution TOF and offset is the spectra number. "+\
+                             "Otherwise, ignored.")
 
         self.declareProperty("NormalizeByCurrent", True, "Normalize by current")
 
@@ -397,8 +400,10 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                                                      Params=self._binning, ResampleX=self._resampleX, Dspacing=self._bin_in_dspace,
                                                      DMin=self._info["d_min"], DMax=self._info["d_max"],
                                                      TMin=self._info["tof_min"], TMax=self._info["tof_max"],
-                                                     RemovePromptPulseWidth=self._removePromptPulseWidth, CompressTolerance=COMPRESS_TOL_TOF,
-                                                     UnwrapRef=self._LRef, LowResRef=self._DIFCref, LowResSpectrumOffset=self._lowResTOFoffset,
+                                                     RemovePromptPulseWidth=self._removePromptPulseWidth,
+                                                     CompressTolerance=COMPRESS_TOL_TOF,
+                                                     UnwrapRef=self._LRef, LowResRef=self._DIFCref,
+                                                     LowResSpectrumOffset=self._lowResTOFoffset,
                                                      CropWavelengthMin=self._wavelengthMin, **(focuspos))
 
 
@@ -621,7 +626,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
 
             # Load chunk
             temp = self._loadData(runnumber, extension, filterWall, **chunk)
-            if isinstance(temp, mantid.api._api.IEventWorkspace) is True:
+            if isinstance(temp, mantid.api.IEventWorkspace) is True:
                 # Event workspace
                 self.log().debug("F1141C There are %d events after data is loaded in workspace %s." % (
                     temp.getNumberEvents(), str(temp)))
@@ -703,9 +708,10 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                     spec = temp.getSpectrum(iws)
                     self.log().debug("[DBx131] ws %d: spectrum ID = %d. " % (iws, spec.getSpectrumNo()))
 
-                if preserveEvents is True and isinstance(temp, mantid.api._api.IEventWorkspace) is True:
-                    self.log().information("After being aligned and focussed workspace %s; Number of events = %d of chunk %d " % (str(temp),\
-                        temp.getNumberEvents(), ichunk))
+                if preserveEvents is True and isinstance(temp, mantid.api.IEventWorkspace) is True:
+                    self.log().information("After being aligned and focussed workspace "+\
+                                           "%s; Number of events = %d of chunk %d " % (str(temp),\
+                                           temp.getNumberEvents(), ichunk))
 
                 # Rename and/or add to workspace of same splitter but different chunk
                 wkspname = wksp

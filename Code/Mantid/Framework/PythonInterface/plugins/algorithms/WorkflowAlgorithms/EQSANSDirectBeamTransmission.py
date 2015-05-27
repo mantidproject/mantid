@@ -129,6 +129,7 @@ class EQSANSDirectBeamTransmission(PythonAlgorithm):
             raw_name = ''
         return (output_msg, output_ws, trans_ws, trans_name, raw_ws, raw_name)
 
+    #pylint: disable=too-many-locals
     def _with_frame_skipping(self, workspace):
         """
             Perform transmission correction assuming frame-skipping
@@ -156,7 +157,7 @@ class EQSANSDirectBeamTransmission(PythonAlgorithm):
         if trans_ws is None:
             trans_ws_name = "__transmission_fit_"+input_ws_name
             # Load data files
-            sample_mon_ws, empty_mon_ws, first_det, output_str, monitor_det_ID = TransmissionUtils.load_monitors(self, property_manager)
+            sample_mon_ws, empty_mon_ws, first_det, _, _ = TransmissionUtils.load_monitors(self, property_manager)
 
             def _crop_and_compute(wl_min_prop, wl_max_prop, suffix):
                 # Get the wavelength band from the run properties

@@ -203,7 +203,8 @@ class sfCalculator(object):
             if self.y_axis_numerator[i] == 0:
                 self.y_axis_numerator[i] = 1
 
-            tmp_value = (float(self.y_axis_error_numerator[i]) / float(self.y_axis_numerator[i])) **2 + (float(self.y_axis_error_denominator[i]) / float(self.y_axis_denominator[i])) **2
+            tmp_value = (float(self.y_axis_error_numerator[i]) / float(self.y_axis_numerator[i])) **2 + \
+                        (float(self.y_axis_error_denominator[i]) / float(self.y_axis_denominator[i])) **2
             tmp_value = math.np.sqrt(tmp_value)
             new_y_axis_error_ratio[i] = self.y_axis_ratio[i]* tmp_value
         self.y_axis_error_ratio = new_y_axis_error_ratio
@@ -225,21 +226,21 @@ class sfCalculator(object):
         run full calculation for numerator or denominator
         """
         if bNumerator is True:
-            file = self.numerator
+            filen = self.numerator
 #            _id = self.id_numerator
             self.peak_pixel_min = self.n_peak_pixel_min
             self.peak_pixel_max = self.n_peak_pixel_max
             self.back_pixel_min = self.n_back_pixel_min
             self.back_pixel_max = self.n_back_pixel_max
         else:
-            file = self.denominator
+            filen = self.denominator
 #            _id = self.id_denominator
             self.peak_pixel_min = self.d_peak_pixel_min
             self.peak_pixel_max = self.d_peak_pixel_max
             self.back_pixel_min = self.d_back_pixel_min
             self.back_pixel_max = self.d_back_pixel_max
 
-        nexus_file_numerator = file
+        nexus_file_numerator = filen
         print '----> loading nexus file: ' + nexus_file_numerator
         EventDataWks = LoadEventNexus(Filename=nexus_file_numerator)
 
@@ -249,8 +250,8 @@ class sfCalculator(object):
             self.alpha_pixel_nbr = 304
             self.beta_pixel_nbr = 256
         else:
-            alpha_pixel_nbr = 256
-            beta_pixel_nbr = 304  #will be integrated over this dimension
+            self.alpha_pixel_nbr = 256
+            self.beta_pixel_nbr = 304  #will be integrated over this dimension
 
         proton_charge = self._getProtonCharge(EventDataWks)
         print '----> rebinning '
@@ -676,7 +677,8 @@ class sfCalculator(object):
         product.y_axis_ratio = new_y_axis_ratio
 
         ## replace code by
-        #product.y_axis_error_ratio = product.y_axis_ratio * np.sqrt((other.y_axis_error_ratio / other.y_axis_ratio)**2 + (self.y_axis_error_ratio / self.y_axis_ratio)**2)
+        #product.y_axis_error_ratio = product.y_axis_ratio * np.sqrt((other.y_axis_error_ratio / other.y_axis_ratio)**2 +\
+        #                             (self.y_axis_error_ratio / self.y_axis_ratio)**2)
         new_y_axis_error_ratio = np.zeros(sz)
         for i in range(sz):
 
@@ -686,7 +688,8 @@ class sfCalculator(object):
             if self.y_axis_ratio[i] == 0:
                 self.y_axis_ratio[i] = 1
 
-            tmp_product = (other.y_axis_error_ratio[i] / other.y_axis_ratio[i]) ** 2 + (self.y_axis_error_ratio[i] / self.y_axis_ratio[i]) ** 2
+            tmp_product = (other.y_axis_error_ratio[i] / other.y_axis_ratio[i]) ** 2 + \
+                          (self.y_axis_error_ratio[i] / self.y_axis_ratio[i]) ** 2
             tmp_product = math.np.sqrt(tmp_product)
             new_y_axis_error_ratio[i] = tmp_product * product.y_axis_ratio[i]
         product.y_axis_error_ratio = new_y_axis_error_ratio
@@ -1180,9 +1183,10 @@ def calculateAndFit(numerator='',
                     denominator='',
                     list_peak_back_numerator=None,
                     list_peak_back_denominator=None,
-                    list_objects=[],
+                    list_objects=None,
                     tof_range=None):
-
+    if list_objects==None:
+        list_objects=[]
     print '--> running calculate and fit algorithm'
 
     cal1 = sfCalculator(numerator=numerator,
@@ -1210,7 +1214,7 @@ def calculateAndFit(numerator='',
         cal1.fit()
         return cal1
 
-def help():
+def showhelp():
     """
         Here the user will have information about how the command line
         works
@@ -1344,7 +1348,7 @@ def calculate(string_runs=None,\
         #array of True/False flags that will allow us
         #to rescale the calculation on the first attenuator
         _first_A = []
-        for j in range(len(np.unique(list_attenuator))):
+        for dummy_j in range(len(np.unique(list_attenuator))):
             _first_A.append(True)
 
         #array of index of first attenuator
