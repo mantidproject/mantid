@@ -1,5 +1,6 @@
 
 # Subdirectories from which ui files need processing to py files
+add_subdirectory(FilterEvents)
 add_subdirectory(Interface/ui)
 add_subdirectory(PyChop)
 
