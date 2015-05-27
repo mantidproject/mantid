@@ -63,7 +63,7 @@ function(coveralls_setup _COVERAGE_SRCS _COVERALLS_UPLOAD)
 				-P "${_CMAKE_SCRIPT_PATH}/CoverallsClear.cmake"
 
 		# Run regression tests. Continue even if tests fail.
-		#COMMAND ${CMAKE_CTEST_COMMAND} --output-on-failure || true
+		COMMAND ${CMAKE_CTEST_COMMAND} --output-on-failure || true
 
 		# Generate Gcov and translate it into coveralls JSON.
 		# We do this by executing an external CMake script.

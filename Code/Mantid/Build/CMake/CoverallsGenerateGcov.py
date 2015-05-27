@@ -70,9 +70,9 @@ def main(argv):
         assert False, "PROJECT_ROOT is not defined"
 
     gcdaAllFiles = getAllFilesWithExtension(COV_PATH,".gcda")
-    #for gcdaFile in gcdaAllFiles:
-    #    gcdaDirectory = os.path.dirname(gcdaFile)
-    #    subprocess.check_call(["gcov","-p","-o",gcdaDirectory,gcdaFile],cwd=COV_PATH)
+    for gcdaFile in gcdaAllFiles:
+        gcdaDirectory = os.path.dirname(gcdaFile)
+        subprocess.check_call(["gcov","-p","-o",gcdaDirectory,gcdaFile],cwd=COV_PATH)
 
     gcovAllFiles = getAllFilesWithExtension(COV_PATH,".gcov")
 
