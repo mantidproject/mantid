@@ -1,6 +1,7 @@
 
 # Subdirectories from which ui files need processing to py files
 add_subdirectory(Interface/ui)
+add_subdirectory(PyChop)
 
 set ( TEST_PY_FILES 
       test/ConvertToWavelengthTest.py
