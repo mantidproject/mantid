@@ -1,4 +1,7 @@
 
+# Subdirectories from which ui files need processing to py files
+add_subdirectory(Interface/ui)
+
 set ( TEST_PY_FILES 
       test/ConvertToWavelengthTest.py
       test/DirectReductionHelpersTest.py 
@@ -15,6 +18,7 @@ set ( TEST_PY_FILES
       test/SettingsTest.py      
       test/ReductionSettingsTest.py
       )
+
 
 # python unit tests
 if (PYUNITTEST_FOUND)
