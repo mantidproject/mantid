@@ -188,6 +188,17 @@ void MantidHelpWindow::showWikiPage(const string &page)
 }
 
 /**
+ * Convenience method for HelpWindowImpl::showWikiPage(const string &).
+ *
+ * @param name The name of the wiki page to show. If this is empty show
+ * the wiki homepage.
+ */
+void MantidHelpWindow::showWikiPage(const QString &page)
+{
+    this->showWikiPage(page.toStdString());
+}
+
+/**
  * Show the help page for a particular algorithm. The page is picked
  * using matching naming conventions.
  *
@@ -215,7 +226,7 @@ void MantidHelpWindow::showAlgorithm(const string &name, const int version)
     else // qt-assistant disabled
     {
         if (name.empty())
-            this->showWikiPage("Category:Algorithms");
+            this->showWikiPage(std::string("Category:Algorithms"));
         else
             this->showWikiPage(name);
     }
@@ -256,7 +267,7 @@ void MantidHelpWindow::showConcept(const string &name)
     else // qt-assistant disabled
     {
         if (name.empty())
-            this->showWikiPage("Category:Concepts");
+            this->showWikiPage(std::string("Category:Concepts"));
         else
             this->showWikiPage(name);
     }
@@ -297,10 +308,22 @@ void MantidHelpWindow::showFitFunction(const std::string &name)
     else // qt-assistant disabled
     {
         if (name.empty())
-            this->showWikiPage("Category:Fit_functions");
+            this->showWikiPage(std::string("Category:Fit_functions"));
         else
             this->showWikiPage(name);
     }
+}
+
+/**
+ * Show the help page for a particular fit function. The page is
+ * picked using matching naming conventions.
+ *
+ * @param name The name of the fit function to show. If it is empty show
+ * the fit function index.
+ */
+void MantidHelpWindow::showFitFunction(const QString &name)
+{
+    this->showFitFunction(name.toStdString());
 }
 
 /**
