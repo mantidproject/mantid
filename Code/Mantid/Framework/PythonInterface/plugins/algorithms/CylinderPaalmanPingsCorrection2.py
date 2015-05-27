@@ -84,7 +84,7 @@ class CylinderPaalmanPingsCorrection(PythonAlgorithm):
                              validator=FloatBoundedValidator(0.0),
                              doc='Can outer radius')
 
-        self.declareProperty(name='StepSize', defaultValue=0.0,
+        self.declareProperty(name='StepSize', defaultValue=0.002,
                              validator=FloatBoundedValidator(0.0),
                              doc='Step size')
         self.declareProperty(name='BeamWidth', defaultValue=2.0,
@@ -106,6 +106,24 @@ class CylinderPaalmanPingsCorrection(PythonAlgorithm):
         self.declareProperty(WorkspaceGroupProperty('OutputWorkspace', '',
                              direction=Direction.Output),
                              doc='The output corrections workspace group')
+#------------------------------------------------------------------------------
+
+    def validateInputs(self):
+        self._setup()
+        issues = dict()
+
+        # Ensure that a can chemical formula is given when using a can workspace
+        if self._use_can:
+            can_chemical_formula = self.getPropertyValue('CanChemicalFormula')
+            if can_chemical_formula == '':
+                issues['CanChemicalFormula'] = 'Must provide a chemical foruma when providing a can workspace'
+
+        # Ensure there are enough steps
+        number_steps = int((self._sample_outer_radius - self._sample_inner_radius) / self._step_size)
+        if number_steps < 20:
+            issues['StepSize'] = 'Number of steps (%d) should be >= 20' % number_steps
+
+        return issues
 
 #------------------------------------------------------------------------------
 

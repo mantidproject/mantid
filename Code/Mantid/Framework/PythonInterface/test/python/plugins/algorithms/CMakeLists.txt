@@ -14,6 +14,7 @@ set ( TEST_PY_FILES
   IndirectCalibrationTest.py
   CreateWorkspaceTest.py
   CylinderPaalmanPingsCorrectionTest.py
+  CylinderPaalmanPingsCorrection2Test.py
   DakotaChiSquaredTest.py
   DensityOfStatesTest.py
   DSFinterpTest.py
