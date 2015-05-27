@@ -169,16 +169,13 @@ void ContourLinesEditor::insertLevel()
 		return;
 
 	int row = table->currentRow();
-	DoubleSpinBox *sb = dynamic_cast<DoubleSpinBox*>(table->cellWidget(row, 0));
-	if (!sb)
-		return;
+	DoubleSpinBox *sb = table_cellWidget<DoubleSpinBox>(row, 0);
 
 	QwtDoubleInterval range = d_spectrogram->data().range();
 	double current_value = sb->value();
 	double previous_value = range.minValue ();
-	sb = dynamic_cast<DoubleSpinBox*>(table->cellWidget(row - 1, 0));
-	if (sb)
-		previous_value = sb->value();
+	sb = table_cellWidget<DoubleSpinBox>(row - 1, 0);
+  previous_value = sb->value();
 
 	double val = 0.5*(current_value + previous_value);
 

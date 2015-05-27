@@ -155,7 +155,10 @@ QString FFT::fftCurve()
 			aMax = a;
 	}
 
-	ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(parent());
+  ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(parent());
+  if (!app) {
+    throw std::logic_error("Parent of FFTDialog is not ApplicationWindow as expected.");
+  }
 	QLocale locale = app->locale();
 	int prec = app->d_decimal_digits;
 
@@ -234,6 +237,9 @@ QString FFT::fftTable()
 	}
 
     ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(parent());
+    if (!app) {
+      throw std::logic_error("Parent of FFTDialog is not ApplicationWindow as expected.");
+    }
     QLocale locale = app->locale();
 	int prec = app->d_decimal_digits;
 
@@ -268,6 +274,9 @@ void FFT::output()
 void FFT::output(const QString &text)
 {
     ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(parent());
+    if (!app) {
+      throw std::logic_error("Parent of FFT is not ApplicationWindow as expected.");
+    }
     QString tableName = app->generateUniqueName(QString(objectName()));
     d_result_table = app->newHiddenTable(tableName, d_explanation, d_n, 5, text);
 

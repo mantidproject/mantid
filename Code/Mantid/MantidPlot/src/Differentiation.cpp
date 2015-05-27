@@ -72,6 +72,9 @@ void Differentiation::output()
 		result[i]=0.5*((d_y[i+1]-d_y[i])/(d_x[i+1]-d_x[i]) + (d_y[i]-d_y[i-1])/(d_x[i]-d_x[i-1]));
 
     ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(parent());
+    if (!app) {
+      throw std::logic_error("Parent of Differentiation is not ApplicationWindow as expected.");
+    }
     QLocale locale = app->locale();
     QString tableName = app->generateUniqueName(QString(objectName()));
     QString dataSet;

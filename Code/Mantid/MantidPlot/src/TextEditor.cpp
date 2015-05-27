@@ -112,9 +112,9 @@ void TextEditor::closeEvent(QCloseEvent *e)
         legend->setText(s);
         d_target->show();
         g->setSelectedText(NULL);
-      } else if (d_target->isA("PieLabel")){
+      } else if (auto pieLabel = dynamic_cast<PieLabel*>(d_target)){
         s = text();
-        dynamic_cast<PieLabel*>(d_target)->setCustomText(s);
+        pieLabel->setCustomText(s);
         d_target->show();
         g->setSelectedText(NULL);
       } else if (d_target->isA("QwtTextLabel")){
