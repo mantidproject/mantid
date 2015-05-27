@@ -1,6 +1,6 @@
 
 
 set( UI_FILES
-   refl_window.py   )
+   refl_window.ui   )
 
-UiToPy(${PYTHON_EXECUTABLE} ${PYQT4_PYUIC} UI_FILES)
+UiToPy( UI_FILES)
