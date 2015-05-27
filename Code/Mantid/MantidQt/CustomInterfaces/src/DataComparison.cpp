@@ -33,6 +33,9 @@ DataComparison::DataComparison(QWidget *parent) :
   UserSubWindow(parent),
   WorkspaceObserver(),
   m_plot(new QwtPlot(parent)),
+  m_zoomTool(NULL),
+  m_panTool(NULL),
+  m_magnifyTool(NULL),
   m_diffWorkspaceNames(qMakePair(QString(), QString()))
 {
   observeAfterReplace();

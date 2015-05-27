@@ -43,52 +43,53 @@
 
 RangeSelectorTool::RangeSelectorTool(Graph *graph, const QObject *status_target, const char *status_slot)
 	: QwtPlotPicker(graph->plotWidget()->canvas()),
-	PlotToolInterface(graph)
+          PlotToolInterface(graph), d_active_point(0), d_inactive_point(0), d_selected_curve(NULL),
+          d_enabled(false), d_visible(false)
 {
-	d_selected_curve = NULL;
-	for (int i=d_graph->curves(); i>=0; --i) {
-		d_selected_curve = d_graph->curve(i);
-		if (d_selected_curve && d_selected_curve->rtti() == QwtPlotItem::Rtti_PlotCurve
-				&& d_selected_curve->dataSize() > 0)
-			break;
-		d_selected_curve = NULL;
-	}
-	if (!d_selected_curve) {
-		QMessageBox::critical(d_graph, tr("MantidPlot - Warning"),
-				tr("All the curves on this plot are empty!"));
-		return;
-	}
+  d_selected_curve = NULL;
+  for (int i=d_graph->curves(); i>=0; --i) {
+    d_selected_curve = d_graph->curve(i);
+    if (d_selected_curve && d_selected_curve->rtti() == QwtPlotItem::Rtti_PlotCurve
+        && d_selected_curve->dataSize() > 0)
+      break;
+    d_selected_curve = NULL;
+  }
+  if (!d_selected_curve) {
+    QMessageBox::critical(d_graph, tr("MantidPlot - Warning"),
+                          tr("All the curves on this plot are empty!"));
+    return;
+  }
 
-    d_enabled = true;
-	d_visible = true;
-	d_active_point = 0;
-	d_inactive_point = d_selected_curve->dataSize() - 1;
-	int marker_size = 20;
+  d_enabled = true;
+  d_visible = true;
+  d_active_point = 0;
+  d_inactive_point = d_selected_curve->dataSize() - 1;
+  int marker_size = 20;
 
-	d_active_marker.setSymbol(QwtSymbol(QwtSymbol::Cross, QBrush(QColor(255,255,255,0)),//QBrush(QColor(255,255,0,128)),
-				QPen(Qt::red,2), QSize(marker_size,marker_size)));
-	d_active_marker.setLineStyle(QwtPlotMarker::VLine);
-	d_active_marker.setLinePen(QPen(Qt::red, 1, Qt::DashLine));
-	d_inactive_marker.setSymbol(QwtSymbol(QwtSymbol::Cross, QBrush(QColor(255,255,255,0)), //QBrush(QColor(255,255,0,128)),
-				QPen(Qt::black,2), QSize(marker_size,marker_size)));
-	d_inactive_marker.setLineStyle(QwtPlotMarker::VLine);
-	d_inactive_marker.setLinePen(QPen(Qt::black, 1, Qt::DashLine));
-	d_active_marker.setValue(d_selected_curve->x(d_active_point),
-			d_selected_curve->y(d_active_point));
-	d_inactive_marker.setValue(d_selected_curve->x(d_inactive_point),
-			d_selected_curve->y(d_inactive_point));
-	d_active_marker.attach(d_graph->plotWidget());
-	d_inactive_marker.attach(d_graph->plotWidget());
+  d_active_marker.setSymbol(QwtSymbol(QwtSymbol::Cross, QBrush(QColor(255,255,255,0)),//QBrush(QColor(255,255,0,128)),
+                                      QPen(Qt::red,2), QSize(marker_size,marker_size)));
+  d_active_marker.setLineStyle(QwtPlotMarker::VLine);
+  d_active_marker.setLinePen(QPen(Qt::red, 1, Qt::DashLine));
+  d_inactive_marker.setSymbol(QwtSymbol(QwtSymbol::Cross, QBrush(QColor(255,255,255,0)), //QBrush(QColor(255,255,0,128)),
+                                        QPen(Qt::black,2), QSize(marker_size,marker_size)));
+  d_inactive_marker.setLineStyle(QwtPlotMarker::VLine);
+  d_inactive_marker.setLinePen(QPen(Qt::black, 1, Qt::DashLine));
+  d_active_marker.setValue(d_selected_curve->x(d_active_point),
+                           d_selected_curve->y(d_active_point));
+  d_inactive_marker.setValue(d_selected_curve->x(d_inactive_point),
+                             d_selected_curve->y(d_inactive_point));
+  d_active_marker.attach(d_graph->plotWidget());
+  d_inactive_marker.attach(d_graph->plotWidget());
 
-	setTrackerMode(QwtPicker::AlwaysOn);
-	setSelectionFlags(QwtPicker::PointSelection | QwtPicker::ClickSelection);
-	d_graph->plotWidget()->canvas()->setCursor(QCursor(getQPixmap("vizor_xpm"), -1, -1));
-	d_graph->plotWidget()->canvas()->setFocus();
-	d_graph->plotWidget()->replot();
+  setTrackerMode(QwtPicker::AlwaysOn);
+  setSelectionFlags(QwtPicker::PointSelection | QwtPicker::ClickSelection);
+  d_graph->plotWidget()->canvas()->setCursor(QCursor(getQPixmap("vizor_xpm"), -1, -1));
+  d_graph->plotWidget()->canvas()->setFocus();
+  d_graph->plotWidget()->replot();
 
-	if (status_target)
-		connect(this, SIGNAL(statusText(const QString&)), status_target, status_slot);
-	emit statusText(tr("Click or use Ctrl+arrow key to select range (arrows select active cursor)!"));
+  if (status_target)
+    connect(this, SIGNAL(statusText(const QString&)), status_target, status_slot);
+  emit statusText(tr("Click or use Ctrl+arrow key to select range (arrows select active cursor)!"));
 }
 
 RangeSelectorTool::~RangeSelectorTool()

@@ -48,7 +48,7 @@
 #include <qwt_scale_widget.h>
 
 TextDialog::TextDialog(TextType type, QWidget* parent, Qt::WFlags fl)
-	: QDialog( parent, fl)
+  : QDialog( parent, fl)
 {
 	setAttribute(Qt::WA_DeleteOnClose);
 	setWindowTitle( tr( "MantidPlot - Text options" ) );
@@ -82,6 +82,7 @@ TextDialog::TextDialog(TextType type, QWidget* parent, Qt::WFlags fl)
 	buttonApply->setDefault( true );
 	topLayout->addWidget( buttonApply, 1, 3 );
 
+        alignmentBox = NULL;
 	if (textType != TextDialog::TextMarker){
 		topLayout->addWidget(new QLabel(tr("Alignment")), 2, 0);
 		alignmentBox = new QComboBox();
