@@ -11,12 +11,6 @@
 namespace Mantid {
 namespace Algorithms {
 
-/** This algorithm allows for shifting the absolute time of a workspace.
- * Both the logs and the time stamps of the data are changed.
- *
- * @author
- * @date 11/05/2015
- */
 class DLLExport ChangeTimeZero : public API::Algorithm {
 public:
   ChangeTimeZero();
@@ -43,38 +37,39 @@ private:
   void exec();
   /// Create the output workspace
   Mantid::API::MatrixWorkspace_sptr
-  createOutputWS(Mantid::API::MatrixWorkspace_sptr input);
+  createOutputWS(Mantid::API::MatrixWorkspace_sptr input, double startProgress, double stopProgress);
   /// Get the time shift
   double getTimeShift(API::MatrixWorkspace_sptr ws) const;
   /// Shift the time of the logs
-  void shiftTimeOfLogs(Mantid::API::MatrixWorkspace_sptr ws, double timeShift);
+  void shiftTimeOfLogs(Mantid::API::MatrixWorkspace_sptr ws, double timeShift, double startProgress,
+                                         double stopProgress);
   /// Get the date and time of the first good frame of a workspace
   Mantid::Kernel::DateAndTime
   getStartTimeFromWorkspace(Mantid::API::MatrixWorkspace_sptr ws) const;
   /// Can the string be transformed to double
-  bool checkForDouble(std::string val);
+  bool checkForDouble(std::string val) const;
   /// Can the string be transformed to a DateTime
-  bool checkForDateTime(std::string val);
-  /// Reset the flag values
-  void resetFlags();
+  bool checkForDateTime(const std::string& val) const;
+
   /// Time shift the log of a double series property
   void shiftTimeInLogForTimeSeries(Mantid::API::MatrixWorkspace_sptr ws,
                                    Mantid::Kernel::Property *logEntry,
-                                   double timeShift);
+                                   double timeShift) const;
   /// Time shift the log of a string property
   void shiftTimeOfLogForStringProperty(
       Mantid::Kernel::PropertyWithValue<std::string> *logEntry,
-      double timeShift);
+      double timeShift) const;
   // Shift the time of the neutrons
   void shiftTimeOfNeutrons(Mantid::API::MatrixWorkspace_sptr ws,
-                           double timeShift);
+                           double timeShift, double startProgress, double stopProgress);
 
-  bool m_isRelativeTimeShift;
-  bool m_isAbsoluteTimeShift;
-  boost::shared_ptr<Mantid::Kernel::DateTimeValidator> m_dateTimeValidator;
+  bool isRelativeTimeShift(double offset) const;
+  bool isAbsoluteTimeShift(const std::string &offset) const;
+
   const double m_defaultTimeShift;
   const std::string m_defaultAbsoluteTimeShift;
 };
+
 
 /**
  * General check if we are dealing with a time series
@@ -88,6 +83,7 @@ bool isTimeSeries(Mantid::Kernel::Property *prop) {
   }
   return isTimeSeries;
 }
+
 
 } // namespace Mantid
 } // namespace Algorithms
