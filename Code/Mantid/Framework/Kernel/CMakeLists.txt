@@ -382,7 +382,7 @@ if(UNITY_BUILD)
 endif(UNITY_BUILD)
 
 include_directories ( ${GSL_INCLUDE_DIR} )
- 
+
 # Enable precompiled headers where supported (must be done before target is added)
 enable_precompiled_headers ( inc/MantidKernel/PrecompiledHeader.h SRC_FILES )
 # Add the target for this directory
