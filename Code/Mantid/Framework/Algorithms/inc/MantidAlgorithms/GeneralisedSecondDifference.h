@@ -91,6 +91,8 @@ private:
   int m_z;
   /// Contains the value of the property m
   int m_m;
+  /// Progress reporting
+  API::Progress *m_progress;
 };
 
 } // Namespace Algorithms

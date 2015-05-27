@@ -39,8 +39,8 @@ namespace Algorithms {
 */
 class DLLExport Q1D2 : public API::Algorithm {
 public:
-  /// (Empty) Constructor
-  Q1D2() : API::Algorithm() {}
+  /// Default constructor
+  Q1D2();
   /// Virtual destructor
   virtual ~Q1D2() {}
   /// Algorithm's name
