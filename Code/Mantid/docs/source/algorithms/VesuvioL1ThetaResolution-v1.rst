@@ -10,35 +10,35 @@
 Description
 -----------
 
-TODO: Enter a full rst-markup description of your algorithm here.
+This algorithm calculates the resolution of the scattering angle (theta) and
+final flight path (L1) for a VESUVIO calibration provided by a PAR file.
 
+The calculation is performed using a Monte Carlo simulation that simulates
+the path of a neutron between a random point on the face of the sample to a
+random point on the face of each detector.
 
 Usage
 -----
-..  Try not to use files in your examples,
-    but if you cannot avoid it then the (small) files must be added to
-    autotestdata\UsageData and the following tag unindented
-    .. include:: ../usagedata-note.txt
 
 **Example - VesuvioL1ThetaResolution**
 
 .. testcode:: VesuvioL1ThetaResolutionExample
 
-   # Create a host workspace
-   ws = CreateWorkspace(DataX=range(0,3), DataY=(0,2))
-   or
-   ws = CreateSampleWorkspace()
+   resolution, l1_dist, theta_dist = VesuvioL1ThetaResolution()
 
-   wsOut = VesuvioL1ThetaResolution()
+   resolution_spec_names = resolution.getAxis(1).extractValues()
+   print "Resolution spectra: %s" % (', '.join(resolution_spec_names))
 
-   # Print the result
-   print "The output workspace has %i spectra" % wsOut.getNumberHistograms()
+   print "L1 distribution spectra count: %d" % (l1_dist.getNumberHistograms())
+   print "Theta distribution spectra count: %d" % (theta_dist.getNumberHistograms())
 
 Output:
 
 .. testoutput:: VesuvioL1ThetaResolutionExample
 
-  The output workspace has ?? spectra
+   Resolution spectra: l1_Mean, l1_StdDev, theta_Mean, theta_StdDev
+   L1 distribution spectra count: 196
+   Theta distribution spectra count: 196
 
 .. categories::
 

@@ -92,16 +92,16 @@ void VesuvioL1ThetaResolution::init() {
                   "Bin width for theta distribution.");
 
   declareProperty(
+      new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
+      "Output workspace containing mean and standard deviation of resolution per detector.");
+
+  declareProperty(
       new WorkspaceProperty<>("L1Distribution", "", Direction::Output, PropertyMode::Optional),
       "Distribution of lengths of the final flight path.");
 
   declareProperty(
       new WorkspaceProperty<>("ThetaDistribution", "", Direction::Output, PropertyMode::Optional),
       "Distribution of scattering angles.");
-
-  declareProperty(
-      new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),
-      "Output workspace containing mean and standard deviation of resolution per detector.");
 }
 
 //----------------------------------------------------------------------------------------------
