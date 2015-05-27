@@ -55,7 +55,7 @@ def load_monitors(self, property_manager):
     def _load_data(filename, output_ws):
         if not property_manager.existsProperty("LoadAlgorithm"):
             Logger("SANSDirectBeamTransmission").error("SANS reduction not set up properly: missing load algorithm")
-            raise RuntimeError, "SANS reduction not set up properly: missing load algorithm"
+            raise RuntimeError("SANS reduction not set up properly: missing load algorithm")
         p=property_manager.getProperty("LoadAlgorithm")
 
         alg_props = {"Filename": filename,

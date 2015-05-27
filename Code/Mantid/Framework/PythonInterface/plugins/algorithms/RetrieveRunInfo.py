@@ -116,7 +116,7 @@ class FileBackedWsIterator(object):
         # Validate.
         if not isinstance(filenames, list):
             raise TypeError("Expected a list.")
-        if not all([s._is_string for s in filenames]):
+        if not all([self._is_string(s) for s in filenames]):
             raise TypeError("Expected a list of strings.")
         if len(filenames) < 1:
             raise ValueError("Expected at least one filename.")

@@ -164,12 +164,12 @@ class EQSANSDirectBeamTransmission(PythonAlgorithm):
                 if workspace.getRun().hasProperty(wl_min_prop):
                     wl_min = workspace.getRun().getProperty(wl_min_prop).value
                 else:
-                    raise RuntimeError, "DirectBeamTransmission could not retrieve the %s property" % wl_min_prop
+                    raise RuntimeError("DirectBeamTransmission could not retrieve the %s property" % wl_min_prop)
 
                 if workspace.getRun().hasProperty(wl_max_prop):
                     wl_max = workspace.getRun().getProperty(wl_max_prop).value
                 else:
-                    raise RuntimeError, "DirectBeamTransmission could not retrieve the %s property" % wl_max_prop
+                    raise RuntimeError("DirectBeamTransmission could not retrieve the %s property" % wl_max_prop)
 
                 rebin_params = "%4.1f,%4.1f,%4.1f" % (wl_min, 0.1, wl_max)
                 alg = TransmissionUtils.simple_algorithm("Rebin",\

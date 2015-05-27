@@ -107,7 +107,7 @@ class LRScalingFactors(PythonAlgorithm):
                 peak_range[2*i] = x_min
                 peak_range[2*i+1] = x_max
         elif len(peak_range) < 2:
-            raise RuntimeError, "SignalPeakPixelRange should have a length of at least 2."
+            raise RuntimeError("SignalPeakPixelRange should have a length of at least 2.")
 
         if len(background_range)==2:
             x_min = int(background_range[0])
@@ -117,12 +117,12 @@ class LRScalingFactors(PythonAlgorithm):
                 background_range[2*i] = x_min
                 background_range[2*i+1] = x_max
         elif len(background_range) < 2:
-            raise RuntimeError, "SignalBackgroundPixelRange should have a length of at least 2."
+            raise RuntimeError("SignalBackgroundPixelRange should have a length of at least 2.")
 
         # Check that the peak range arrays are of the proper length
         if not (len(peak_range) == 2*len(data_runs) \
                 and len(background_range) == 2*len(data_runs)):
-            raise RuntimeError, "Supplied peak/background arrays should be of the same length as the run array."
+            raise RuntimeError("Supplied peak/background arrays should be of the same length as the run array.")
 
         # Slit information for the previous run (see loop below)
         previous_slits = None
@@ -166,7 +166,7 @@ class LRScalingFactors(PythonAlgorithm):
             if wavelength is None:
                 wavelength = wl
             elif abs(wl-wavelength) > 0.2:
-                raise RuntimeError, "Supplied runs don't have matching wavelengths."
+                raise RuntimeError("Supplied runs don't have matching wavelengths.")
 
             peak = [int(peak_range[2*i]), int(peak_range[2*i+1])]
             background = [int(background_range[2*i]), int(background_range[2*i+1])]
@@ -179,7 +179,7 @@ class LRScalingFactors(PythonAlgorithm):
             # attenuator.
             if have_attenuator_info is True:
                 if attenuators[i] < n_attenuator:
-                    raise RuntimeError, "Runs were not supplied in increasing number of attenuators."
+                    raise RuntimeError("Runs were not supplied in increasing number of attenuators.")
                 n_attenuator = attenuators[i]
 
             is_reference = False
@@ -203,7 +203,7 @@ class LRScalingFactors(PythonAlgorithm):
             # If the number of attenuators is zero, skip.
             if n_attenuator == 0:
                 if references.has_key(0):
-                    raise RuntimeError, "More than one run with zero attenuator was supplied."
+                    raise RuntimeError("More than one run with zero attenuator was supplied.")
                 references[0] = {'index': i,
                                  'run': run,
                                  'ref_ws': workspace_name,
@@ -235,7 +235,7 @@ class LRScalingFactors(PythonAlgorithm):
                 # Divide by the reference for this number of attenuators
                 # and multiply by the reference ratio
                 if not references.has_key(n_attenuator):
-                    raise RuntimeError, "No reference for %s attenuators: check run ordering." % n_attenuator
+                    raise RuntimeError("No reference for %s attenuators: check run ordering." % n_attenuator)
                 f_ws = "F_%s_%s" % (run, n_attenuator)
                 Divide(LHSWorkspace=workspace_name,
                        RHSWorkspace=references[n_attenuator]['ref_ws'],

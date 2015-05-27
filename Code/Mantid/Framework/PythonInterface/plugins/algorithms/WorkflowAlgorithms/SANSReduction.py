@@ -30,7 +30,7 @@ class SANSReduction(PythonAlgorithm):
     def _load_data(self, filename, output_ws, property_manager, property_manager_name):
         if not property_manager.existsProperty('LoadAlgorithm'):
             property_manager.existsProperty('LoadAlgorithm')
-            raise RuntimeError, 'SANS reduction not set up properly: missing load algorithm'
+            raise RuntimeError('SANS reduction not set up properly: missing load algorithm')
         else:
             property_manager.existsProperty('LoadAlgorithm')
         p = property_manager.getProperty('LoadAlgorithm')

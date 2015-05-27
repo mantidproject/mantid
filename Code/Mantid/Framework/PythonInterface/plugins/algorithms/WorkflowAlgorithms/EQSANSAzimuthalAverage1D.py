@@ -154,7 +154,7 @@ class EQSANSAzimuthalAverage1D(PythonAlgorithm):
         if workspace.getRun().hasProperty("wavelength_max"):
             wl_max_f1 = workspace.getRun().getProperty("wavelength_max").value
         if wl_min_f1 is None and wl_max_f1 is None:
-            raise RuntimeError, "Could not get the wavelength band for frame 1"
+            raise RuntimeError("Could not get the wavelength band for frame 1")
 
         # Second frame
         wl_min_f2 = None
@@ -164,7 +164,7 @@ class EQSANSAzimuthalAverage1D(PythonAlgorithm):
         if workspace.getRun().hasProperty("wavelength_max_frame2"):
             wl_max_f2 = workspace.getRun().getProperty("wavelength_max_frame2").value
         if wl_min_f2 is None and wl_max_f2 is None:
-            raise RuntimeError, "Could not get the wavelength band for frame 2"
+            raise RuntimeError("Could not get the wavelength band for frame 2")
 
         # Compute binning
         if independent_binning:
@@ -369,7 +369,7 @@ class EQSANSAzimuthalAverage1D(PythonAlgorithm):
                 beam_ctr_x = property_manager.getProperty("LatestBeamCenterX").value
                 beam_ctr_y = property_manager.getProperty("LatestBeamCenterY").value
             else:
-                raise RuntimeError, "No beam center information can be found on the data set"
+                raise RuntimeError("No beam center information can be found on the data set")
 
         # Q min is one pixel from the center, unless we have the beam trap size
         if workspace.getRun().hasProperty("beam-trap-diameter"):

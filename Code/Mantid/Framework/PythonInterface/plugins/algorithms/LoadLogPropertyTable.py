@@ -55,10 +55,9 @@ class LoadLogPropertyTable(PythonAlgorithm):
                 v=v.unfiltered()
             for tt in v.times:
                 times2.append((datetime.datetime(*(time.strptime(str(tt),"%Y-%m-%dT%H:%M:%S")[0:6]))-begin).total_seconds())
-        except AttributeError:
+        except:
             #print "probably not a time series"
             pass
-
         if name[0:8]=="Beamlog_" and (name.find("Counts")>0 or name.find("Frames")>0):
             i=bisect.bisect_right(times2,2) # allowance for "slow" clearing of DAE
             #print "returning max beam log, list cut 0:",i,":",len(times2)

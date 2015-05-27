@@ -86,7 +86,7 @@ class SANSBeamSpreaderTransmission(PythonAlgorithm):
         def _load_data(filename, output_ws):
             if not property_manager.existsProperty("LoadAlgorithm"):
                 Logger("SANSBeamSpreaderTransmission").error("SANS reduction not set up properly: missing load algorithm")
-                raise RuntimeError, "SANS reduction not set up properly: missing load algorithm"
+                raise RuntimeError("SANS reduction not set up properly: missing load algorithm")
             p=property_manager.getProperty("LoadAlgorithm")
             alg=Algorithm.fromString(p.valueAsStr)
             alg.setProperty("Filename", filename)

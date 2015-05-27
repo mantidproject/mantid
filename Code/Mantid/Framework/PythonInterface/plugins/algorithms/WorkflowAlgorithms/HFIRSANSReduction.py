@@ -31,7 +31,7 @@ class HFIRSANSReduction(PythonAlgorithm):
         #   Make sure we process a list of files written as a string
         def _load_data(filename, output_ws):
             if not property_manager.existsProperty("LoadAlgorithm"):
-                raise RuntimeError, "SANS reduction not set up properly: missing load algorithm"
+                raise RuntimeError("SANS reduction not set up properly: missing load algorithm")
             p=property_manager.getProperty("LoadAlgorithm")
             alg=Algorithm.fromString(p.valueAsStr)
             alg.setProperty("Filename", filename)

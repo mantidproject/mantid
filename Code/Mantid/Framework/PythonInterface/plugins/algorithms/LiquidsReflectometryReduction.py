@@ -291,7 +291,7 @@ class LiquidsReflectometryReduction(PythonAlgorithm):
 
         # Sanity check
         if sum(data_y) == 0:
-            raise RuntimeError, "The reflectivity is all zeros: check your peak selection"
+            raise RuntimeError("The reflectivity is all zeros: check your peak selection")
 
         # Avoid leaving trash behind
         for ws in ['ws_event_data', 'normalized_data', 'q_workspace']:
@@ -342,7 +342,7 @@ class LiquidsReflectometryReduction(PythonAlgorithm):
             error_msg = "Requested TOF range does not match data for %s: " % str(workspace)
             error_msg += "[%g, %g] found [%g, %g]" % (tof_range[0], tof_range[1],
                                                       tof_min, tof_max)
-            raise RuntimeError, error_msg
+            raise RuntimeError(error_msg)
 
         tof_step = self.getProperty("TOFSteps").value
         workspace = Rebin(InputWorkspace=workspace, Params=[0, tof_step, tof_max],
