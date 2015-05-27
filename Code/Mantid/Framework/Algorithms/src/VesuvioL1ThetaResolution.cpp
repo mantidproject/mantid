@@ -7,6 +7,9 @@
 #include "MantidKernel/Statistics.h"
 #include "MantidKernel/Unit.h"
 
+#include <fstream>
+
+#include <boost/algorithm/string/split.hpp>
 #include <boost/make_shared.hpp>
 #include <boost/random/variate_generator.hpp>
 #include <boost/random/uniform_real.hpp>
@@ -69,6 +72,9 @@ void VesuvioL1ThetaResolution::init() {
                                    FileProperty::FileAction::OptionalLoad,
                                    exts, Direction::Input),
                   "PAR file containing calibrated detector positions.");
+
+  declareProperty("SampleWidth", 3.0, positiveDouble,
+                  "With of sample in cm.");
 
   declareProperty("SpectrumMin", 3,
                   "Index of minimum spectrum");
@@ -153,6 +159,7 @@ void VesuvioL1ThetaResolution::exec() {
     std::stringstream report;
     report << "Detector " << det->getID();
     prog.report(report.str());
+    g_log.information() << "Detector " << det->getID() << std::endl;
 
     // Do simulation
     calculateDetector(det, l1, theta);
@@ -161,8 +168,7 @@ void VesuvioL1ThetaResolution::exec() {
     Statistics l1Stats = getStatistics(l1);
     Statistics thetaStats = getStatistics(theta);
 
-    g_log.information() << "Detector ID: " << det->getID() << std::endl
-                        << "l0: mean=" << l1Stats.mean << ", std.dev.="
+    g_log.information() << "l0: mean=" << l1Stats.mean << ", std.dev.="
                         << l1Stats.standard_deviation << std::endl
                         << "theta: mean=" << thetaStats.mean << ", std.dev.="
                         << thetaStats.standard_deviation << std::endl;
@@ -240,12 +246,21 @@ void VesuvioL1ThetaResolution::loadInstrument() {
     g_log.information() << "Loading PAR file: " << parFilename << std::endl;
 
     // Get header format
-    std::map<int, std::string> headerFormats;
+    std::map<size_t, std::string> headerFormats;
     headerFormats[5] = "spectrum,theta,t0,-,R";
     headerFormats[6] = "spectrum,-,theta,t0,-,R";
 
-    //TODO: get columns in first line
-    int numCols = 6;
+    std::ifstream parFile(parFilename);
+    if(!parFile) {
+      throw std::runtime_error("Cannot open PAR file");
+    }
+    std::string header;
+    getline(parFile, header);
+    g_log.debug() << "PAR file header: " << header << std::endl;
+    std::vector<std::string> headers;
+    boost::split(headers, header, boost::is_any_of("\t "), boost::token_compress_on);
+    size_t numCols = headers.size();
+    g_log.debug() << "PAR file columns: " << numCols << std::endl;
 
     std::string headerFormat = headerFormats[numCols];
     if(headerFormat.empty()) {
@@ -254,6 +269,7 @@ void VesuvioL1ThetaResolution::loadInstrument() {
             << " (expected either 5 or 6.";
       throw std::runtime_error(error.str());
     }
+    g_log.debug() << "PAR file header format: " << headerFormat << std::endl;
 
     // Update instrument
     IAlgorithm_sptr updateInst = AlgorithmManager::Instance().create("UpdateInstrumentFromFile");
@@ -294,13 +310,26 @@ void VesuvioL1ThetaResolution::calculateDetector(IDetector_const_sptr detector, 
   l1Values.reserve(numEvents);
   thetaValues.reserve(numEvents);
 
-  //TODO
-  const double detHeight = 25.0;
-  const double detWidth = 2.5;
-  const double beamWidth = 3.0;
+  double sampleWidth = getProperty("SampleWidth");
+  // If the sample is large fix the width to the approximate beam width
+  if(sampleWidth > 4.0)
+    sampleWidth = 4.0;
+
+  // Get detector dimensions
+  Geometry::Object_const_sptr pixelShape = detector->shape();
+  if (!pixelShape || !pixelShape->hasValidShape()) {
+    throw std::invalid_argument("Detector pixel has no defined shape!");
+  }
+  Geometry::BoundingBox detBounds = pixelShape->getBoundingBox();
+  V3D detBoxWidth = detBounds.width();
+  const double detWidth = detBoxWidth.X() * 100;
+  const double detHeight = detBoxWidth.Y() * 100;
+
+  g_log.debug() << "detWidth=" << detWidth << std::endl
+                << "detHeight=" << detHeight << std::endl;
 
   // Scattering angle in rad
-  const double theta = m_instWorkspace->detectorTwoTheta(detector);
+  const double theta = m_instWorkspace->detectorTwoTheta(IDetector_const_sptr(detector));
   if(theta == 0.0)
     return;
 
@@ -313,12 +342,12 @@ void VesuvioL1ThetaResolution::calculateDetector(IDetector_const_sptr detector, 
   // Get as many events as defined by NumEvents
   // This loop is not iteration limited but highly unlikely to ever become infinate
   while(l1Values.size() < static_cast<size_t>(numEvents)) {
-    const double xs = -beamWidth/2 + beamWidth*random();
+    const double xs = -sampleWidth/2 + sampleWidth*random();
     const double ys = 0.0;
-    const double zs = -beamWidth/2 + beamWidth*random();
-    const double rs = sqrt(pow(xs, 2) + pow(xs, 2));
+    const double zs = -sampleWidth/2 + sampleWidth*random();
+    const double rs = sqrt(pow(xs, 2) + pow(zs, 2));
 
-    if(rs <= beamWidth/2) {
+    if(rs <= sampleWidth/2) {
       const double a = -detWidth/2 + detWidth*random();
       const double xd = x0 - a*cos(theta);
       const double yd = y0 + a*sin(theta);
