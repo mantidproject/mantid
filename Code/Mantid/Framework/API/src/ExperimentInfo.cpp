@@ -1006,32 +1006,27 @@ void ExperimentInfo::loadInstrumentInfoNexus(::NeXus::File *file,
   instrumentFilename = Strings::strip(instrumentFilename);
   instrumentXml = Strings::strip(instrumentXml);
   instrumentName = Strings::strip(instrumentName);
-  if (instrumentXml.empty() && !instrumentName.empty()) {
-    // XML was not included or was empty.
-    // Use the instrument name to find the file
-    try {
-      std::string filename =
-          getInstrumentFilename(instrumentName, getWorkspaceStartDate());
-      // And now load the contents
-      instrumentFilename = filename;
-      instrumentXml = Strings::loadFile(filename);
-    } catch (std::exception &e) {
-      g_log.error() << "Error loading instrument IDF file for '"
-                    << instrumentName << "'.\n";
-      g_log.debug() << e.what() << std::endl;
-      throw;
-    }
-  } else {
-    if (!instrumentFilename.empty())
-      instrumentFilename = ConfigService::Instance().getInstrumentDirectory() +
-                           "/" + instrumentFilename;
+  if (!instrumentXml.empty()) {
+    // instrument xml is being loaded from the nxs file, set the instrumentFilename
+    // to identify the Nexus file as the source of the data
+    instrumentFilename = instrumentFilename;
     g_log.debug() << "Using instrument IDF XML text contained in nexus file.\n";
+  }
+  else
+  {
+    // XML was not included or was empty
+    // Use the instrument name to find the file
+    std::string filename =
+        getInstrumentFilename(instrumentName, getWorkspaceStartDate());
+    // And now load the contents
+    instrumentFilename = filename;
+    instrumentXml = loadInstrumentXML(instrumentFilename);
   }
 
   // ---------- Now parse that XML to make the instrument -------------------
   if (!instrumentXml.empty() && !instrumentName.empty()) {
-    InstrumentDefinitionParser parser;
-    parser.initialize(instrumentFilename, instrumentName, instrumentXml);
+    InstrumentDefinitionParser parser(instrumentFilename, instrumentName, instrumentXml);
+
     std::string instrumentNameMangled = parser.getMangledName();
     Instrument_sptr instr;
     // Check whether the instrument is already in the InstrumentDataService
@@ -1046,6 +1041,24 @@ void ExperimentInfo::loadInstrumentInfoNexus(::NeXus::File *file,
     }
     // Now set the instrument
     this->setInstrument(instr);
+  }
+}
+
+//-------------------------------------------------------------------------------------------------
+/** Loads the contents of a file and returns the string
+ *  The file is assumed to be an IDF, and already checked that 
+ *  the path is correct.
+ *
+ * @param filename :: the path to the file
+ */
+std::string ExperimentInfo::loadInstrumentXML(const std::string &filename) {
+  try {
+    return Strings::loadFile(filename);
+  } catch (std::exception &e) {
+    g_log.error() << "Error loading instrument IDF file: "
+                  << filename << ".\n";
+    g_log.debug() << e.what() << std::endl;
+    throw;
   }
 }
 

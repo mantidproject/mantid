@@ -127,7 +127,7 @@ void LoadInstrument::exec() {
     const PropertyWithValue<std::string> *xml =
       dynamic_cast<const PropertyWithValue<std::string> *>(InstrumentXML);
     if (xml) {
-      parser.initialize(m_filename, m_instName, *xml);
+      parser = InstrumentDefinitionParser(m_filename, m_instName, *xml);
     } else {
       throw std::invalid_argument("The instrument XML passed cannot be "
                                   "casted to a standard string.");
@@ -165,7 +165,7 @@ void LoadInstrument::exec() {
     m_instName = instrumentFile.substr(0, instrumentFile.find("_Def"));
 
     // Initialize the parser with the the XML text loaded from the IDF file
-    parser.initialize(m_filename, m_instName, Strings::loadFile(m_filename));
+    parser = InstrumentDefinitionParser(m_filename, m_instName, Strings::loadFile(m_filename));
   }
 
   // Find the mangled instrument name that includes the modified date

@@ -5,7 +5,6 @@
 #ifndef Q_MOC_RUN
 #include <boost/shared_ptr.hpp>
 #endif
-#include <Poco/Timestamp.h>
 #include <Poco/File.h>
 #include <Poco/Path.h>
 #include <stdexcept>
@@ -49,13 +48,11 @@ class DLLExport AbstractIDFObject {
 public:
   AbstractIDFObject() {}
   static const std::string expectedExtension();
-  virtual const Poco::Path &getParentDirectory() const = 0;
+  virtual const Poco::Path getParentDirectory() const = 0;
   virtual const Poco::Path &getFileFullPath() const = 0;
   virtual const std::string &getFileFullPathStr() const = 0;
   virtual std::string getFileNameOnly() const = 0;
   virtual std::string getExtension() const = 0;
-  virtual Poco::Timestamp getLastModified() const = 0;
-  virtual std::string getFormattedLastModified() const = 0;
   virtual std::string getMangledName() const = 0;
   virtual bool exists() const = 0;
   virtual ~AbstractIDFObject(){};
@@ -71,13 +68,11 @@ private:
 class DLLExport IDFObject : public AbstractIDFObject {
 public:
   IDFObject(const std::string &fileName);
-  virtual const Poco::Path &getParentDirectory() const;
+  virtual const Poco::Path getParentDirectory() const;
   virtual const Poco::Path &getFileFullPath() const;
   virtual const std::string &getFileFullPathStr() const;
   virtual std::string getFileNameOnly() const;
   virtual std::string getExtension() const;
-  virtual Poco::Timestamp getLastModified() const;
-  virtual std::string getFormattedLastModified() const;
   virtual std::string getMangledName() const;
   virtual bool exists() const;
   virtual ~IDFObject();
@@ -101,7 +96,7 @@ private:
 
 public:
   NullIDFObject() : m_emptyResponse("") {}
-  virtual const Poco::Path &getParentDirectory() const {
+  virtual const Poco::Path getParentDirectory() const {
     throw std::runtime_error("Not implemented on NullIDFObject");
   }
   virtual const Poco::Path &getFileFullPath() const {
@@ -112,12 +107,6 @@ public:
   }
   virtual std::string getFileNameOnly() const { return m_emptyResponse; }
   virtual std::string getExtension() const { return m_emptyResponse; }
-  virtual Poco::Timestamp getLastModified() const {
-    throw std::runtime_error("Not implemented on NullIDFObject");
-  }
-  virtual std::string getFormattedLastModified() const {
-    throw std::runtime_error("Not implemented on NullIDFObject");
-  }
   virtual std::string getMangledName() const {
     throw std::runtime_error("Not implemented on NullIDFObject");
   }

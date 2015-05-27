@@ -121,6 +121,7 @@ public:
   virtual void loadExperimentInfoNexus(::NeXus::File *file, std::string &parameterStr);
   /// Load the instrument from an open NeXus file.
   virtual void loadInstrumentInfoNexus(::NeXus::File *file, std::string &parameterStr);
+
   /// Load the sample and log info from an open NeXus file.
   virtual void loadSampleAndLogInfoNexus(::NeXus::File *file);
   /// Populate the parameter map given a string
@@ -164,6 +165,8 @@ private:
                              const Geometry::XMLInstrumentParameter &paramInfo,
                              const Run &runData);
 
+  //Loads the xml from an instrument file with some basic error handling
+  std::string loadInstrumentXML(const std::string& filename);
   /// Detector grouping information
   det2group_map m_detgroups;
   /// Mutex to protect against cow_ptr copying

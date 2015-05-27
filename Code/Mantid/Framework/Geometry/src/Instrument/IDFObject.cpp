@@ -33,7 +33,7 @@ IDFObject::~IDFObject() {}
 Gets the parent directory of the file.
 @return Parent directory path.
 */
-const Poco::Path &IDFObject::getParentDirectory() const {
+const Poco::Path IDFObject::getParentDirectory() const {
   return m_cacheParentDirectory;
 }
 
@@ -65,23 +65,6 @@ std::string IDFObject::getExtension() const {
     return ext;
   else
     return "." + ext;
-}
-
-/**
-Gets the last modified timestamp of the file.
-@return last modified timestamp.
-*/
-Poco::Timestamp IDFObject::getLastModified() const {
-  return m_defFile.getLastModified();
-}
-
-/**
-Gets a formatted string of the last modified timestamp.
-@return timestamp as a formatted string.
-*/
-std::string IDFObject::getFormattedLastModified() const {
-  return Poco::DateTimeFormatter::format(this->getLastModified(),
-                                         "%Y-%d-%mT%H:%M:%S");
 }
 
 /**
