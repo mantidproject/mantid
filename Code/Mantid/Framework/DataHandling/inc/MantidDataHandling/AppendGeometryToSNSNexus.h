@@ -76,9 +76,6 @@ private:
   /// Are we going to make a copy of the NeXus file to operate on ?
   bool m_makeNexusCopy;
 
-  /// Algorithm progress keeper
-  API::Progress *m_progress;
-
   /// The workspace to load instrument and logs
   API::MatrixWorkspace_sptr ws;
 

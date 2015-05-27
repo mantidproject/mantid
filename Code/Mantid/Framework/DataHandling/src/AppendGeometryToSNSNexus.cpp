@@ -24,7 +24,7 @@ DECLARE_ALGORITHM(AppendGeometryToSNSNexus)
 /** Constructor
  */
 AppendGeometryToSNSNexus::AppendGeometryToSNSNexus()
-    : m_makeNexusCopy(false), m_progress(), m_instrumentLoadedCorrectly(false),
+    : m_makeNexusCopy(false), m_instrumentLoadedCorrectly(false),
       m_logsLoadedCorrectly(false) {}
 
 //----------------------------------------------------------------------------------------------
@@ -162,7 +162,7 @@ void AppendGeometryToSNSNexus::exec() {
   // Get the number of histograms/detectors
   const size_t numDetectors = ws->getInstrument()->getDetectorIDs().size();
 
-  this->m_progress = new API::Progress(this, 0.0, 1.0, numDetectors);
+  API::Progress progress(this, 0.0, 1.0, numDetectors);
 
   // Get the instrument
   Geometry::Instrument_const_sptr instrument = ws->getInstrument();
@@ -252,7 +252,7 @@ void AppendGeometryToSNSNexus::exec() {
 
                 nxfile.closeGroup(); // close NXdetector
 
-                this->m_progress->report(dets.size());
+                progress.report(dets.size());
               } else {
                 throw std::runtime_error(
                     "Could not find any detectors for the bank named " +
