@@ -5,6 +5,7 @@ add_subdirectory(HFIRPowderReduction)
 add_subdirectory(Interface/ui)
 add_subdirectory(lib1to2/gui)
 add_subdirectory(PyChop)
+add_subdirectory(TofConverter)
 
 set ( TEST_PY_FILES 
       test/ConvertToWavelengthTest.py
