@@ -2,6 +2,10 @@
 #define MANTID_MDALGORITHMS_CONVERTCWSDEXPTOMOMENTUM_H_
 
 #include "MantidKernel/System.h"
+#include "MantidAPI/Algorithm.h"
+#include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidDataObjects/MDEventInserter.h"
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -29,10 +33,45 @@ namespace MDAlgorithms {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport ConvertCWSDExpToMomentum {
+class DLLExport ConvertCWSDExpToMomentum : API::Algorithm {
 public:
   ConvertCWSDExpToMomentum();
   virtual ~ConvertCWSDExpToMomentum();
+
+private:
+  void init();
+  void exec();
+
+  void addMDEvents();
+
+  void convertSpiceMatrixToMomentumMDEvents(API::MatrixWorkspace_sptr dataws,
+                                            const detid_t &startdetid,
+                                            const int runnumber);
+
+  API::IMDEventWorkspace_sptr createExperimentMDWorkspace();
+
+  bool getInputs(std::string &errmsg);
+
+  API::MatrixWorkspace_sptr loadSpiceData(const std::string &filename,
+                                          bool &loaded, std::string &errmsg);
+
+  void parseDetectorTable(std::vector<Kernel::V3D> &vec_detpos,
+                          std::vector<detid_t> &vec_detid);
+
+  API::ITableWorkspace_sptr m_expDataTableWS;
+  API::ITableWorkspace_sptr m_detectorListTableWS;
+  API::IMDEventWorkspace_sptr m_outputWS;
+
+  Kernel::V3D m_samplePos;
+  Kernel::V3D m_sourcePos;
+
+  size_t m_iColFilename;
+  size_t m_iColStartDetID;
+
+  size_t m_numBins;
+
+  std::vector<double> m_extentMins;
+  std::vector<double> m_extentMaxs;
 };
 
 } // namespace MDAlgorithms
