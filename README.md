@@ -11,3 +11,7 @@ Useful links
  * Issue tracking: http://trac.mantidproject.org/mantid/
  * Build server: http://builds.mantidproject.org
  * Developer site: http://developer.mantidproject.org
+
+#### Badges
+
+[![Coverage Status](https://coveralls.io/repos/mantidproject/mantid/badge.svg?branch=HEAD)](https://coveralls.io/r/mantidproject/mantid?branch=HEAD)
