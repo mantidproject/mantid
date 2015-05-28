@@ -78,6 +78,11 @@ SE log name
   The name of the sample environment log entry in the input files sample logs
   (defaults to sample).
 
+SE log value
+  The value to be taken from the "SE log name" data series (defaults to the
+  specified value in the intrument parameters file, and in the absence of such
+  specification, defaults to "last value")
+
 Plot Result
   If enabled will plot the result as a spectra plot.
 
