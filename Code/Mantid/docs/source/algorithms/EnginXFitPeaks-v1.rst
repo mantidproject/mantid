@@ -11,7 +11,7 @@ Description
 
 .. warning::
 
-   This algorithm is being developed for a specific instrument. It might get changed or even 
+   This algorithm is being developed for a specific instrument. It might get changed or even
    removed without a notification, should instrument scientists decide to do so.
 
 
@@ -50,20 +50,20 @@ Usage
 
    # Run the algorithm. Defaults are shown below. Files entered must be in .csv format and if both ExpectedPeaks and ExpectedPeaksFromFile are entered, the latter will be used.
    # difc, zero = EnginXFitPeaks(InputWorkspace = No default, WorkspaceIndex = None, ExpectedPeaks=[0.6, 1.9], ExpectedPeaksFromFile=None)
-   
-   difc, zero = EnginXFitPeaks(ws, 0, [0.6, 1.9])
-   
-   
+
+   difc, zero = EnginXFitPeaks(ws, 0, [0.65, 1.9])
+
+
 
    # Print the results
-   print "Difc:", difc
-   print "Zero:", zero
+   print "Difc: %.1f" % difc
+   print "Zero: %.1f" % zero
 
 Output:
 
 .. testoutput:: ExTwoPeaks
 
-   Difc: 49019.4561189
-   Zero: -58131.0062365
+   Difc: 18400.0
+   Zero: 46.0
 
 .. categories::

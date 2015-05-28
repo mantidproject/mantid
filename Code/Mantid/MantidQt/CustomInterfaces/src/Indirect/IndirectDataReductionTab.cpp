@@ -21,7 +21,7 @@ namespace CustomInterfaces
   /** Constructor
    */
   IndirectDataReductionTab::IndirectDataReductionTab(IndirectDataReduction *idrUI, QObject *parent) :
-    IndirectTab(parent), m_idrUI(idrUI)
+    IndirectTab(parent), m_idrUI(idrUI), m_tabRunning(false)
   {
     connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(tabExecutionComplete(bool)));
   }

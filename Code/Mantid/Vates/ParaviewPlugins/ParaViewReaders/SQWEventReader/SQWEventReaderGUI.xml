@@ -1,6 +1,0 @@
-<ParaViewReaders>
-  <Reader name="SQWEventReader"
-    extensions="sqw"
-    file_description="MD *.sqw format">
-  </Reader>
-</ParaViewReaders>

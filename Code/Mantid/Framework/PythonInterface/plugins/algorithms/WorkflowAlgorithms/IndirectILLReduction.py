@@ -334,11 +334,12 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         ConvertAxisByFormula(InputWorkspace=grouped_ws,
                              OutputWorkspace=red_ws,
                              Axis='X',
-                             Formula=formula,
-                             AxisTitle='Energy transfer',
-                             AxisUnits='meV')
+                             Formula=formula)
 
-        xnew = mtd[red_ws].readX(0)  # energy array
+        red_ws_p = mtd[red_ws]
+        red_ws_p.getAxis(0).setUnit('DeltaE')
+
+        xnew = red_ws_p.readX(0)  # energy array
         logger.information('Energy range : %f to %f' % (xnew[0], xnew[-1]))
 
         DeleteWorkspace(grouped_ws)

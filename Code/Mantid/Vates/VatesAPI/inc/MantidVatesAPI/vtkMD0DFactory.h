@@ -39,13 +39,7 @@ namespace Mantid
     public:
 
       /// Constructor
-      vtkMD0DFactory(ThresholdRange_scptr thresholdRange, const std::string& scalarName);
-
-      /// Assignment operator
-      vtkMD0DFactory& operator=(const vtkMD0DFactory& other);
-
-      /// Copy constructor.
-      vtkMD0DFactory(const vtkMD0DFactory& other);
+      vtkMD0DFactory();
 
       /// Destructor
       virtual ~vtkMD0DFactory();
@@ -63,9 +57,6 @@ namespace Mantid
     protected:
         virtual void validate() const;
 
-    private:
-      mutable ThresholdRange_scptr m_thresholdRange;
-      std::string m_scalarName;
     };
     
   }
