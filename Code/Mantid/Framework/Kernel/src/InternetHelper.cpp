@@ -163,11 +163,14 @@ int InternetHelper::sendRequest(const std::string &url,
   
   // send the request
   Poco::URI uri(url);
+  if (uri.getPath().empty())
+    uri=url+"/";
+
   int retval;
   if ((uri.getScheme() == "https") || (uri.getPort() == 443)) {
-    retval = sendHTTPSRequest(url, responseStream);
+    retval = sendHTTPSRequest(uri, responseStream);
   } else {
-    retval = sendHTTPRequest(url, responseStream);
+    retval = sendHTTPRequest(uri, responseStream);
   }
   return retval;
 }
@@ -196,25 +199,24 @@ void InternetHelper::logDebugRequestSending(const std::string &schemeName,
 * @param url the address to the network resource
 * @param responseStream The stream to fill with the reply on success
 **/
-int InternetHelper::sendHTTPRequest(const std::string &url,
+int InternetHelper::sendHTTPRequest(Poco::URI &uri,
                                     std::ostream &responseStream) {
   int retStatus = 0;
 
-  logDebugRequestSending("http", url);
+  logDebugRequestSending("http", uri.toString());
 
-  Poco::URI uri(url);
   // Configure Poco HTTP Client Session
   try {
     Poco::Net::HTTPClientSession session(uri.getHost(), uri.getPort());
     session.setTimeout(Poco::Timespan(getTimeout(), 0)); 
 
     // configure proxy
-    setupProxyOnSession(session, url);
+    setupProxyOnSession(session, uri.toString());
 
     // low level sending the request
     retStatus = this->sendRequestAndProcess(session, uri, responseStream);
   } catch (HostNotFoundException &ex) {
-    throwNotConnected(url, ex);
+    throwNotConnected(uri.toString(), ex);
   } catch (Poco::Exception &ex) {
     throw Exception::InternetError("Connection and request failed " +
                                    ex.displayText());
@@ -226,13 +228,12 @@ int InternetHelper::sendHTTPRequest(const std::string &url,
 * @param url the address to the network resource
 * @param responseStream The stream to fill with the reply on success
 **/
-int InternetHelper::sendHTTPSRequest(const std::string &url,
+int InternetHelper::sendHTTPSRequest(Poco::URI &uri,
                                      std::ostream &responseStream) {
   int retStatus = 0;
 
-  logDebugRequestSending("https", url);
+  logDebugRequestSending("https", uri.toString());
 
-  Poco::URI uri(url);
   try {
     // initialize ssl
     Poco::SharedPtr<InvalidCertificateHandler> certificateHandler =
@@ -264,7 +265,7 @@ int InternetHelper::sendHTTPSRequest(const std::string &url,
     // low level sending the request
     retStatus = this->sendRequestAndProcess(session, uri, responseStream);
   } catch (HostNotFoundException &ex) {
-    throwNotConnected(url, ex);
+    throwNotConnected(uri.toString(), ex);
   } catch (Poco::Exception &ex) {
     throw Exception::InternetError("Connection and request failed " +
                                    ex.displayText());

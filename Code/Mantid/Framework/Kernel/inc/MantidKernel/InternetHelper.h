@@ -147,9 +147,9 @@ public:
   sendRequest(const std::string &url, std::ostream &responseStream);
 
 protected:
-  virtual int sendHTTPSRequest(const std::string &url,
+  virtual int sendHTTPSRequest(Poco::URI &uri,
                                std::ostream &responseStream);
-  virtual int sendHTTPRequest(const std::string &url,
+  virtual int sendHTTPRequest(Poco::URI &uri,
                               std::ostream &responseStream);
   virtual int processErrorStates(const Poco::Net::HTTPResponse &res,
                                  std::istream &rs, const std::string &url);
