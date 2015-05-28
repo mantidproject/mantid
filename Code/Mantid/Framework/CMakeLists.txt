@@ -27,9 +27,6 @@ option(BUILD_MATLAB_DEPENDENCIES "Build Mantid-Matlab interface in the case of M
 # Look for dependencies - bail out if any necessary ones not found
 ###########################################################################
 
-# gsl is currently needed by Geometry, Algorithms & Curvefitting
-find_package ( GSL REQUIRED )
-
 check_include_files ( stdint.h stdint )
 if ( stdint )
   add_definitions ( -DHAVE_STDINT_H )

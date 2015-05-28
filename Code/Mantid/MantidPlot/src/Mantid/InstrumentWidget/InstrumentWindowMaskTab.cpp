@@ -62,7 +62,12 @@ InstrumentWindowMaskTab::InstrumentWindowMaskTab(InstrumentWindow* instrWindow):
 InstrumentWindowTab(instrWindow),
 m_activity(Select),
 m_hasMaskToApply(false),
-m_userEditing(true)
+m_userEditing(true),
+m_groupManager(NULL),
+m_stringManager(NULL),
+m_doubleManager(NULL),
+m_browser(NULL),
+m_left(NULL), m_top(NULL), m_right(NULL), m_bottom(NULL)
 {
 
   // main layout

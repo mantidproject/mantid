@@ -28,6 +28,7 @@ protected:
 private:
   vtkScaleWorkspace(const vtkScaleWorkspace&);
   void operator = (const vtkScaleWorkspace&);
+  void updateMetaData(vtkUnstructuredGrid *inputDataSet);
   double m_xScaling;
   double m_yScaling;
   double m_zScaling;

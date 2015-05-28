@@ -26,6 +26,7 @@ src/MetadataToFieldData.cpp
 src/MetadataToFieldData.cpp
 src/MetaDataExtractorUtils.cpp
 src/MetadataJsonManager.cpp
+src/Normalization.cpp
 src/NoThresholdRange.cpp
 src/ProgressAction.cpp
 src/SynchronisingGeometryPresenter.cpp
@@ -87,6 +88,7 @@ inc/MantidVatesAPI/MDLoadingViewAdapter.h
 inc/MantidVatesAPI/MedianAndBelowThresholdRange.h
 inc/MantidVatesAPI/MetaDataExtractorUtils.h
 inc/MantidVatesAPI/MetadataJsonManager.h
+inc/MantidVatesAPI/Normalization.h
 inc/MantidVatesAPI/IgnoreZerosThresholdRange.h
 inc/MantidVatesAPI/IMDDimensionComparitor.h
 inc/MantidVatesAPI/MetadataToFieldData.h
@@ -161,6 +163,7 @@ test/MDHWNexusLoadingPresenterTest.h
 test/MetaDataExtractorUtilsTest.h
 test/MetadataJsonManagerTest.h
 test/MetadataToFieldDataTest.h
+test/NormalizationTest.h
 test/SQWLoadingPresenterTest.h
 test/SynchronisingGeometryPresenterTest.h
 test/TimeStepToTimeStepTest.h
@@ -202,7 +205,7 @@ set_target_properties( VatesAPI PROPERTIES OUTPUT_NAME MantidVatesAPI )
 set_property( TARGET VatesAPI PROPERTY FOLDER "MantidVates" )
 
 
-target_link_libraries( VatesAPI
+target_link_libraries( VatesAPI LINK_PRIVATE 
 ${MANTID_SUBPROJECT_LIBS} 
 vtkCommonCore
 vtkCommonDataModel
@@ -211,6 +214,10 @@ vtkFiltersExtraction
 vtkFiltersSources
 vtkPVVTKExtensionsDefault
 ${QWT_LIBRARIES}
+${POCO_LIBRARIES}
+${Boost_LIBRARIES}
+${JSONCPP_LIBRARIES}
+${NEXUS_LIBRARIES}
 )
 
 if (OSX_VERSION VERSION_GREATER 10.8)
@@ -227,7 +234,22 @@ if( CXXTEST_FOUND AND GMOCK_FOUND AND GTEST_FOUND )
                         ../../Framework/TestHelpers/src/MDEventsTestHelper.cpp 
                         ../../Framework/TestHelpers/src/StartFrameworkManager.cpp )
   cxxtest_add_test( VatesAPITest ${TEST_FILES} )
-  target_link_libraries( VatesAPITest VatesAPI DataHandling Kernel DataObjects ${GMOCK_LIBRARIES} ${GTEST_LIBRARIES} )
+  target_link_libraries( VatesAPITest LINK_PRIVATE 
+  ${MANTID_SUBPROJECT_LIBS} 
+  VatesAPI 
+  DataHandling 
+  Kernel 
+  DataObjects 
+  vtkCommonCore
+  vtkCommonDataModel
+  vtkIOLegacy
+  vtkFiltersExtraction
+  vtkFiltersSources
+  ${POCO_LIBRARIES}
+  ${Boost_LIBRARIES}
+  ${JSONCPP_LIBRARIES}
+  ${GMOCK_LIBRARIES} 
+  ${GTEST_LIBRARIES} )
   add_dependencies( AllTests VatesAPITest )
   # Add to the 'UnitTests' group in VS
   set_property ( TARGET VatesAPITest PROPERTY FOLDER "UnitTests" )

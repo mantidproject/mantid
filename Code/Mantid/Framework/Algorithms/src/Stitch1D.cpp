@@ -501,8 +501,8 @@ void Stitch1D::exec() {
   const double intersectionMin = intesectionXRegion.get<0>();
   const double intersectionMax = intesectionXRegion.get<1>();
 
-  const double startOverlap = getStartOverlap(intersectionMin, intersectionMax);
-  const double endOverlap = getEndOverlap(intersectionMin, intersectionMax);
+  double startOverlap = getStartOverlap(intersectionMin, intersectionMax);
+  double endOverlap = getEndOverlap(intersectionMin, intersectionMax);
 
   if (startOverlap > endOverlap) {
     std::string message = boost::str(
@@ -517,6 +517,12 @@ void Stitch1D::exec() {
 
   const double &xMin = params.front();
   const double &xMax = params.back();
+
+  if (std::abs(xMin - startOverlap) < 1E-6)
+    startOverlap = xMin;
+
+  if (std::abs(xMax - endOverlap) < 1E-6)
+    endOverlap = xMax;
 
   if (startOverlap < xMin) {
     std::string message = boost::str(

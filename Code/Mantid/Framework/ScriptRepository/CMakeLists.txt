@@ -30,6 +30,6 @@ set ( LIBS ${MANTIDLIBS} )
 
 include_directories(inc)
 
-target_link_libraries(ScriptRepository ${LIBS})
+target_link_libraries(ScriptRepository LINK_PRIVATE ${LIBS})
 
 install (TARGETS ScriptRepository ${SYSTEM_PACKAGE_TARGET} DESTINATION ${PLUGINS_DIR} )
