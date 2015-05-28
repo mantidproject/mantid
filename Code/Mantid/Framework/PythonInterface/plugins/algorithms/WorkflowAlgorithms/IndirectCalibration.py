@@ -88,8 +88,6 @@ class IndirectCalibration(DataProcessorAlgorithm):
 
 
     def PyExec(self):
-        from mantid import logger
-        from IndirectCommon import getInstrRun
 
         self._setup()
 
@@ -106,9 +104,7 @@ class IndirectCalibration(DataProcessorAlgorithm):
                      LoadLogFiles=False)
 
                 runs.append(root)
-                self._run_numbers.append(str(getInstrRun(root)[1]))
-
-            except Exception as exc:
+            except (RuntimeError,ValueError) as exc:
                 logger.error('Could not load raw file "%s": %s' % (in_file, str(exc)))
 
         calib_ws_name = 'calibration'
@@ -192,13 +188,11 @@ class IndirectCalibration(DataProcessorAlgorithm):
         """
 
         # Add sample logs to output workspace
-        sample_logs = [
-                ('calib_peak_min', self._peak_range[0]),
-                ('calib_peak_max', self._peak_range[1]),
-                ('calib_back_min', self._back_range[0]),
-                ('calib_back_max', self._back_range[1]),
-                ('calib_run_numbers', ','.join(self._run_numbers))
-            ]
+        sample_logs = [('calib_peak_min', self._peak_range[0]),
+                       ('calib_peak_max', self._peak_range[1]),
+                       ('calib_back_min', self._back_range[0]),
+                       ('calib_back_max', self._back_range[1]),
+                       ('calib_run_numbers', ','.join(self._run_numbers))]
 
         if self._intensity_scale is not None:
             sample_logs.append(('calib_scale_factor', self._intensity_scale))

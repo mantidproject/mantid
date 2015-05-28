@@ -37,14 +37,14 @@ class ILLIN16BCalibration(DataProcessorAlgorithm):
                              doc='Comma separated list of input files')
 
         self.declareProperty(FloatArrayProperty(name='PeakRange', values=[0.0, 100.0],
-                             validator=FloatArrayMandatoryValidator()),
+                                                validator=FloatArrayMandatoryValidator()),
                              doc='Peak range in energy transfer')
 
         self.declareProperty(name='ScaleFactor', defaultValue=1.0,
                              doc='Intensity scaling factor')
 
         self.declareProperty(WorkspaceProperty('OutputWorkspace', '',
-                             direction=Direction.Output),
+                                               direction=Direction.Output),
                              doc='Output workspace for calibration data')
 
 

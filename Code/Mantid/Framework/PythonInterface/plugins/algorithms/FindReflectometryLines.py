@@ -51,22 +51,25 @@ class FindReflectometryLines(PythonAlgorithm):
         workspace_validator.add(WorkspaceUnitValidator("Wavelength"))
         workspace_validator.add(SpectraAxisValidator())
 
-        self.declareProperty(MatrixWorkspaceProperty("InputWorkspace", "", Direction.Input, workspace_validator), "Input Reflectometry Workspace")
+        self.declareProperty(MatrixWorkspaceProperty("InputWorkspace", "", Direction.Input, workspace_validator),
+                             "Input Reflectometry Workspace")
         self.declareProperty(ITableWorkspaceProperty("OutputWorkspace", "", Direction.Output), "Output Spectrum Numbers")
-        self.declareProperty(name="StartWavelength", defaultValue=0.0, validator=FloatBoundedValidator(lower=0.0),  doc="Start wavelength to use for x-axis cropping")
-        self.declareProperty(name="KeepIntermediateWorkspaces", defaultValue=False, doc="Keeps cropped and integrated workspaces in memory after usage.")
+        self.declareProperty(name="StartWavelength", defaultValue=0.0, validator=FloatBoundedValidator(lower=0.0),
+                             doc="Start wavelength to use for x-axis cropping")
+        self.declareProperty(name="KeepIntermediateWorkspaces", defaultValue=False,
+                             doc="Keeps cropped and integrated workspaces in memory after usage.")
 
     def PyExec(self):
-        from mantid.simpleapi import CropWorkspace, Integration, DeleteWorkspace
+        import mantid.simpleapi as ms
 
         in_ws = self.getPropertyValue("InputWorkspace")
         min_wavelength = self.getPropertyValue("StartWavelength")
         keep_workspaces = self.getPropertyValue("KeepIntermediateWorkspaces")
 
     	# Crop off lower wavelengths where the signal is also lower.
-        cropped_ws = CropWorkspace(InputWorkspace=in_ws,XMin=float(min_wavelength))
+        cropped_ws = ms.CropWorkspace(InputWorkspace=in_ws,XMin=float(min_wavelength))
     	# Integrate over the higher wavelengths after cropping.
-        summed_ws = Integration(InputWorkspace=cropped_ws)
+        summed_ws = ms.Integration(InputWorkspace=cropped_ws)
     	# Loop through each histogram, and fetch out each intensity value from the single bin to generate a list of all values.
         n_histograms = summed_ws.getNumberHistograms()
         y_data = np.empty([n_histograms])
@@ -95,8 +98,8 @@ class FindReflectometryLines(PythonAlgorithm):
             output_ws.addRow(peak_index_list)
 
         if int(keep_workspaces) == 0:
-            DeleteWorkspace(Workspace=cropped_ws)
-            DeleteWorkspace(Workspace=summed_ws)
+            ms.DeleteWorkspace(Workspace=cropped_ws)
+            ms.DeleteWorkspace(Workspace=summed_ws)
 
         self.setProperty("OutputWorkspace", output_ws)
 

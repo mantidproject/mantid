@@ -18,9 +18,9 @@ timeRegimeToDRange = {\
     17.09e4: tuple([10.4, 11.6]),\
     18.86e4: tuple([11.0, 12.5])}\
 
-""" A "wrapper" class for a map, which maps workspaces from their corresponding
-time regimes.
-"""
+# A "wrapper" class for a map, which maps workspaces from their corresponding
+#time regimes.
+
 class DRangeToWsMap(object):
 
     def __init__(self):
@@ -190,6 +190,7 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
 
         self.execDiffOnly(sampleRuns)
 
+    #pylint: disable=too-many-branches
     def execDiffOnly(self, sampleRuns):
         """
             Execute the algorithm in diffraction-only mode
