@@ -81,11 +81,9 @@ void ChangeTimeZero::exec() {
   // Create a new target workspace if it does not exist
   const double progressStartCreateOutputWs = 0.0;
   const double progressStopCreateOutputWs = 0.3;
-
+   
   MatrixWorkspace_sptr out_ws = createOutputWS(
       in_ws, progressStartCreateOutputWs, progressStopCreateOutputWs);
-
-  auto compare_ws = in_ws;
 
   // Get the time shift in seconds
   auto timeShift = getTimeShift(out_ws);
