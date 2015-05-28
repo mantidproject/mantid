@@ -6,6 +6,7 @@ import os
 import math
 import sys
 
+#pylint: disable=too-few-public-methods
 class REFLOptions(object):
     def __init__(self):
         from reduction_gui.reduction.reflectometer.refl_data_script import DataSets as REFLDataSets

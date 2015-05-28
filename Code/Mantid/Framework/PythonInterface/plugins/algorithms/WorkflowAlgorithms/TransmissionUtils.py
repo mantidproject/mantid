@@ -211,6 +211,7 @@ def load_monitors(self, property_manager):
 
     return sample_mon_ws, empty_mon_ws, first_det, output_str, monitor_det_ID
 
+#pylint: disable=too-many-arguments
 def calculate_transmission(self, sample_mon_ws, empty_mon_ws, first_det,
                            trans_output_workspace, monitor_det_ID=None):
     """

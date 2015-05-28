@@ -180,7 +180,8 @@ class RetrieveRunInfo(PythonAlgorithm):
         return 'Utility;PythonAlgorithms'
 
     def summary(self):
-        return "Given a range of run numbers and an output workspace name, will compile a table of info for each run of the instrument you have set as default."
+        return "Given a range of run numbers and an output workspace name, will compile a table of info for "+\
+               "each run of the instrument you have set as default."
 
     def PyInit(self):
         # Declare algorithm properties.

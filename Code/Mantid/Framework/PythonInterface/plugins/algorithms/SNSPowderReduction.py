@@ -14,12 +14,12 @@ else:
     HAVE_MPI = False
     mpiRank = 0 # simplify if clauses
 
-COMPRESS_TOL_TOF = .01
+
 EVENT_WORKSPACE_ID = "EventWorkspace"
 
 #pylint: disable=too-many-instance-attributes
 class SNSPowderReduction(DataProcessorAlgorithm):
-
+    COMPRESS_TOL_TOF = .01
     _resampleX = None
     _binning = None
     _bin_in_dspace = None
@@ -145,7 +145,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
 
         return
 
-
+    #pylint: disable=too-many-locals,too-many-branches,too-many-statements
     def PyExec(self):
         """ Main execution body
         """
@@ -203,9 +203,9 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         self._normalisebycurrent = self.getProperty("NormalizeByCurrent").value
 
         # Tolerance for compress TOF event
-        COMPRESS_TOL_TOF = float(self.getProperty("CompressTOFTolerance").value)
-        if COMPRESS_TOL_TOF < 0.:
-            COMPRESS_TOL_TOF = 0.01
+        self.COMPRESS_TOL_TOF = float(self.getProperty("CompressTOFTolerance").value)
+        if self.COMPRESS_TOL_TOF < 0.:
+            self.COMPRESS_TOL_TOF = 0.01
 
         # Process data
         workspacelist = [] # all data workspaces that will be converted to d-spacing in the end
@@ -264,7 +264,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                     samRun = api.Plus(LHSWorkspace=samRun, RHSWorkspace=temp, OutputWorkspace=samRun)
                     if samRun.id() == EVENT_WORKSPACE_ID:
                         samRun = api.CompressEvents(InputWorkspace=samRun, OutputWorkspace=samRun,\
-                                       Tolerance=COMPRESS_TOL_TOF) # 10ns
+                                       Tolerance=self.COMPRESS_TOL_TOF) # 10ns
                     api.DeleteWorkspace(str(temp))
                 # ENDIF
             # ENDFOR (processing each)
@@ -388,7 +388,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                     # compress events
                     if vanRun.id() == EVENT_WORKSPACE_ID:
                         vanRun = api.CompressEvents(InputWorkspace=vanRun, OutputWorkspace=vanRun,
-                                                    Tolerance=COMPRESS_TOL_TOF) # 10ns
+                                                    Tolerance=self.COMPRESS_TOL_TOF) # 10ns
 
                     # do the absorption correction
                     vanRun = api.ConvertUnits(InputWorkspace=vanRun, OutputWorkspace=vanRun, Target="TOF")
@@ -401,7 +401,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                                                      DMin=self._info["d_min"], DMax=self._info["d_max"],
                                                      TMin=self._info["tof_min"], TMax=self._info["tof_max"],
                                                      RemovePromptPulseWidth=self._removePromptPulseWidth,
-                                                     CompressTolerance=COMPRESS_TOL_TOF,
+                                                     CompressTolerance=self.COMPRESS_TOL_TOF,
                                                      UnwrapRef=self._LRef, LowResRef=self._DIFCref,
                                                      LowResSpectrumOffset=self._lowResTOFoffset,
                                                      CropWavelengthMin=self._wavelengthMin, **(focuspos))
@@ -436,7 +436,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                 samRun = api.Minus(LHSWorkspace=samRun, RHSWorkspace=canRun, OutputWorkspace=samRun)
                 if samRun.id() == EVENT_WORKSPACE_ID:
                     samRun = api.CompressEvents(InputWorkspace=samRun, OutputWorkspace=samRun,\
-                               Tolerance=COMPRESS_TOL_TOF) # 10ns
+                               Tolerance=self.COMPRESS_TOL_TOF) # 10ns
                 canRun = str(canRun)
             if vanRun is not None:
                 samRun = api.Divide(LHSWorkspace=samRun, RHSWorkspace=vanRun, OutputWorkspace=samRun)
@@ -448,7 +448,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
 
             if samRun.id() == EVENT_WORKSPACE_ID:
                 samRun = api.CompressEvents(InputWorkspace=samRun, OutputWorkspace=samRun,\
-                           Tolerance=COMPRESS_TOL_TOF) # 5ns/
+                           Tolerance=self.COMPRESS_TOL_TOF) # 5ns/
 
             # make sure there are no negative values - gsas hates them
             if self.getProperty("PushDataPositive").value != "None":
@@ -488,6 +488,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         self._focusPos['Polar'] = results[5]
         self._focusPos['Azimuthal'] = results[6]
 
+    #pylint: disable=too-many-branches
     def _loadData(self, runnumber, extension, filterWall=None, outname=None, **chunk):
         if  runnumber is None or runnumber <= 0:
             return None
@@ -529,7 +530,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
 
         # filter bad pulses
         if self._filterBadPulses > 0.:
-            isEventWS = isinstance(wksp, mantid.api._api.IEventWorkspace)
+            isEventWS = isinstance(wksp, mantid.api.IEventWorkspace)
             if isEventWS is True:
                 # Event workspace: record original number of events
                 numeventsbefore =  wksp.getNumberEvents()
@@ -569,6 +570,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         keys = [ str(key) + "=" + str(chunk[key]) for key in keys ]
         self.log().information("Working on chunk [" + ", ".join(keys) + "]")
 
+    #pylint: disable=too-many-arguments,too-many-locals,too-many-branches
     def _focusChunks(self, runnumber, extension, filterWall, calib, splitwksp=None, preserveEvents=True):
         """ Load, (optional) split and focus data in chunks
 
@@ -608,7 +610,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
 
         firstChunkList = []
         wksplist = []
-        for n in xrange(numwksp):
+        for dummy_n in xrange(numwksp):
             # In some cases, there will be 1 more splitted workspace (unfiltered)
             firstChunkList.append(True)
             wksplist.append(None)
@@ -701,7 +703,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                     Params=self._binning, ResampleX=self._resampleX, Dspacing=self._bin_in_dspace,\
                     DMin=self._info["d_min"], DMax=self._info["d_max"], TMin=self._info["tof_min"], TMax=self._info["tof_max"],\
                     PreserveEvents=preserveEvents,\
-                    RemovePromptPulseWidth=self._removePromptPulseWidth, CompressTolerance=COMPRESS_TOL_TOF,\
+                    RemovePromptPulseWidth=self._removePromptPulseWidth, CompressTolerance=self.COMPRESS_TOL_TOF,\
                     UnwrapRef=self._LRef, LowResRef=self._DIFCref, LowResSpectrumOffset=self._lowResTOFoffset,\
                     CropWavelengthMin=self._wavelengthMin, **(focuspos))
                 for iws in xrange(temp.getNumberHistograms()):
@@ -752,7 +754,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         for itemp in xrange(numwksp):
             if wksplist[itemp].id() == EVENT_WORKSPACE_ID:
                 wksplist[itemp] = api.CompressEvents(InputWorkspace=wksplist[itemp],\
-                    OutputWorkspace=wksplist[itemp], Tolerance=COMPRESS_TOL_TOF) # 100ns
+                    OutputWorkspace=wksplist[itemp], Tolerance=self.COMPRESS_TOL_TOF) # 100ns
 
             try:
                 if self._normalisebycurrent is True:
@@ -779,7 +781,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         if mtd.doesExist("characterizations"):
             # get the correct row of the table
 
-
+            #pylint: disable=unused-variable
             charac = api.PDDetermineCharacterizations(InputWorkspace=wksp,
                                                       Characterizations="characterizations",
                                                       ReductionProperties="__snspowderreduction",

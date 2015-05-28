@@ -830,7 +830,8 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
                 DeleteWorkspace(Workspace=ws_name + '_aclimax_save_temp')
 
             if 'davegrp' in self._save_formats:
-                ConvertSpectrumAxis(InputWorkspace=ws_name, OutputWorkspace=ws_name + '_davegrp_save_temp', Target='ElasticQ', EMode='Indirect')
+                ConvertSpectrumAxis(InputWorkspace=ws_name, OutputWorkspace=ws_name + '_davegrp_save_temp',
+                                    Target='ElasticQ', EMode='Indirect')
                 SaveDaveGrp(InputWorkspace=ws_name + '_davegrp_save_temp', Filename=ws_name + '.grp')
                 DeleteWorkspace(Workspace=ws_name + '_davegrp_save_temp')
 
