@@ -50,8 +50,12 @@ bool isHDFHandle(FILE *fileHandle, NexusDescriptor::Version version) {
   // HDF4 check requires 4 bytes,  HDF5 check requires 8 bytes
   // Use same buffer and waste a few bytes if only checking HDF4
   unsigned char buffer[8] = {'0', '0', '0', '0', '0', '0', '0', '0'};
-  std::fread(static_cast<void *>(&buffer), sizeof(unsigned char),
-             NexusDescriptor::HDF5SignatureSize, fileHandle);
+  if (NexusDescriptor::HDF5SignatureSize !=
+      std::fread(static_cast<void *>(&buffer), sizeof(unsigned char),
+                 NexusDescriptor::HDF5SignatureSize, fileHandle)) {
+    throw std::runtime_error("Error while reading file");
+  }
+
   // Number of bytes read doesn't matter as if it is not enough then the memory
   // simply won't match
   // as the buffer has been "zeroed"

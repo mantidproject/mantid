@@ -42,7 +42,10 @@ ExportDialog::ExportDialog(const QString& tableName, QWidget* parent, Qt::WFlags
 	setWindowTitle( tr( "MantidPlot - Export ASCII" ) );
 	setSizeGripEnabled( true );
 
-	ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(parent);
+  ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(parent);
+  if (!app) {
+    throw std::logic_error("Parent of FFTDialog is not ApplicationWindow as expected.");
+  }
 
 	QGridLayout *gl1 = new QGridLayout();
   gl1->addWidget(new QLabel(tr("Export From")), 0, 0);

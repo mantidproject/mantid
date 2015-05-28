@@ -43,67 +43,67 @@
 #include <QComboBox>
 
 PolynomFitDialog::PolynomFitDialog( QWidget* parent, Qt::WFlags fl )
-: QDialog( parent, fl )
+  : QDialog( parent, fl ), graph(NULL)
 {
     setName( "PolynomFitDialog" );
-	setWindowTitle(tr("MantidPlot - Polynomial Fit Options"));
+    setWindowTitle(tr("MantidPlot - Polynomial Fit Options"));
     setSizeGripEnabled( true );
 
     QGroupBox *gb1 = new QGroupBox();
-	QGridLayout *gl1 = new QGridLayout(gb1);
-	gl1->addWidget(new QLabel(tr("Polynomial Fit of")), 0, 0);
+    QGridLayout *gl1 = new QGridLayout(gb1);
+    gl1->addWidget(new QLabel(tr("Polynomial Fit of")), 0, 0);
 
-	boxName = new QComboBox();
+    boxName = new QComboBox();
     gl1->addWidget(boxName, 0, 1);
 
     gl1->addWidget(new QLabel( tr("Order (1 - 9, 1 = linear)")), 1, 0);
-	boxOrder = new QSpinBox();
+    boxOrder = new QSpinBox();
     boxOrder->setRange(1, 9);
-	boxOrder->setValue(2);
+    boxOrder->setValue(2);
     gl1->addWidget(boxOrder, 1, 1);
 
     gl1->addWidget(new QLabel( tr("Fit curve # pts")), 2, 0);
-	boxPoints = new QSpinBox();
+    boxPoints = new QSpinBox();
     boxPoints->setRange(1, 1000);
     boxPoints->setSingleStep(50);
     boxPoints->setSpecialValueText(tr("Not enough points"));
     gl1->addWidget(boxPoints, 2, 1);
 
     gl1->addWidget(new QLabel( tr("Fit curve Xmin")), 3, 0);
-	boxStart = new QLineEdit(tr("0"));
+    boxStart = new QLineEdit(tr("0"));
     gl1->addWidget(boxStart, 3, 1);
 
-    gl1->addWidget(	new QLabel( tr("Fit curve Xmax")), 4, 0);
-	boxEnd = new QLineEdit();
+    gl1->addWidget(new QLabel( tr("Fit curve Xmax")), 4, 0);
+    boxEnd = new QLineEdit();
     gl1->addWidget(boxEnd, 4, 1);
 
     gl1->addWidget(new QLabel( tr("Color")), 5, 0);
-	boxColor = new ColorBox();
-	boxColor->setColor(QColor(Qt::red));
+    boxColor = new ColorBox();
+    boxColor->setColor(QColor(Qt::red));
     gl1->addWidget(boxColor, 5, 1);
 
-	boxShowFormula = new QCheckBox(tr( "Show Formula on Graph?" ));
-	boxShowFormula->setChecked( false );
+    boxShowFormula = new QCheckBox(tr( "Show Formula on Graph?" ));
+    boxShowFormula->setChecked( false );
     gl1->addWidget(boxShowFormula, 6, 1);
     gl1->setRowStretch(7, 1);
 
-	buttonFit = new QPushButton(tr( "&Fit" ));
-	buttonFit->setDefault( true );
+    buttonFit = new QPushButton(tr( "&Fit" ));
+    buttonFit->setDefault( true );
 
-	buttonCancel = new QPushButton(tr( "&Close" ));
+    buttonCancel = new QPushButton(tr( "&Close" ));
 
     QVBoxLayout* vl = new QVBoxLayout();
     vl->addWidget(buttonFit);
     vl->addWidget(buttonCancel);
     vl->addStretch();
 
-	QHBoxLayout* hlayout = new QHBoxLayout(this);
-	hlayout->addWidget(gb1);
-	hlayout->addLayout(vl);
+    QHBoxLayout* hlayout = new QHBoxLayout(this);
+    hlayout->addWidget(gb1);
+    hlayout->addLayout(vl);
 
-	connect( buttonFit, SIGNAL( clicked() ), this, SLOT( fit() ) );
-	connect( buttonCancel, SIGNAL( clicked() ), this, SLOT( reject() ) );
-	connect( boxName, SIGNAL( activated(const QString&) ), this, SLOT(activateCurve(const QString&)));
+    connect( buttonFit, SIGNAL( clicked() ), this, SLOT( fit() ) );
+    connect( buttonCancel, SIGNAL( clicked() ), this, SLOT( reject() ) );
+    connect( boxName, SIGNAL( activated(const QString&) ), this, SLOT(activateCurve(const QString&)));
 }
 
 void PolynomFitDialog::fit()
@@ -125,7 +125,7 @@ void PolynomFitDialog::fit()
     {
         fitter->setColor(boxColor->currentItem());
         fitter->setOutputPrecision(app->fit_output_precision);
-		fitter->generateFunction(app->generateUniformFitPoints, app->fitPoints);
+	fitter->generateFunction(app->generateUniformFitPoints, app->fitPoints);
         fitter->fit();
         delete fitter;
 	}
