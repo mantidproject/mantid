@@ -1,8 +1,8 @@
 import unittest
 from mantid.kernel import *
 from mantid.api import *
-from mantid.simpleapi import CreateSampleWorkspace, Scale, DeleteWorkspace, CylinderPaalmanPingsCorrection, CreateSimulationWorkspace
-from IndirectImport import is_supported_f2py_platform
+from mantid.simpleapi import (CreateSampleWorkspace, Scale, DeleteWorkspace,
+                              CylinderPaalmanPingsCorrection)
 
 
 class CylinderPaalmanPingsCorrection2Test(unittest.TestCase):
@@ -86,10 +86,6 @@ class CylinderPaalmanPingsCorrection2Test(unittest.TestCase):
         Test simple run with sample workspace only.
         """
 
-        # Just pass if we can't actually run the algorithm
-        if not is_supported_f2py_platform():
-            return
-
         CylinderPaalmanPingsCorrection(OutputWorkspace=self._corrections_ws_name,
                                        SampleWorkspace=self._sample_ws,
                                        SampleChemicalFormula='H2-O',
@@ -106,10 +102,6 @@ class CylinderPaalmanPingsCorrection2Test(unittest.TestCase):
         """
         Test simple run with sample and can workspace.
         """
-
-        # Just pass if we can't actually run the algorithm
-        if not is_supported_f2py_platform():
-            return
 
         CylinderPaalmanPingsCorrection(OutputWorkspace=self._corrections_ws_name,
                                        SampleWorkspace=self._sample_ws,
@@ -132,10 +124,6 @@ class CylinderPaalmanPingsCorrection2Test(unittest.TestCase):
         Test simple run with sample and can workspace using the default values.
         """
 
-        # Just pass if we can't actually run the algorithm
-        if not is_supported_f2py_platform():
-            return
-
         CylinderPaalmanPingsCorrection(OutputWorkspace=self._corrections_ws_name,
                                        SampleWorkspace=self._sample_ws,
                                        SampleChemicalFormula='H2-O',
@@ -150,10 +138,6 @@ class CylinderPaalmanPingsCorrection2Test(unittest.TestCase):
         Tests that a workspace with a bin count equal to NumberWavelengths is created
         when interpolation is disabled.
         """
-
-        # Just pass if we can't actually run the algorithm
-        if not is_supported_f2py_platform():
-            return
 
         CylinderPaalmanPingsCorrection(OutputWorkspace=self._corrections_ws_name,
                                        SampleWorkspace=self._sample_ws,
