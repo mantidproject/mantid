@@ -73,13 +73,11 @@ class RefLReduction(PythonAlgorithm):
         self.declareProperty("IncidentMediumSelected", "", doc="Incident medium used for those runs")
         self.declareProperty("GeometryCorrectionFlag", False, doc="Use or not the geometry correction")
 
-    #pylint: disable=too-many-locals
+    #pylint: disable=too-many-locals, too-many-branches
     def PyExec(self):
 
         print '-- > starting new Reflectometer Reduction ...'
 
-        import numpy
-        import math
         from reduction.instruments.reflectometer import wks_utility
 
         #remove all previous workspaces

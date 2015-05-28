@@ -126,10 +126,8 @@ class IndirectResolution(DataProcessorAlgorithm):
         Handles adding logs, saving and plotting.
         """
 
-        sample_logs = [
-                ('res_back_start', self._background[0]),
-                ('res_back_end', self._background[1])
-            ]
+        sample_logs = [('res_back_start', self._background[0]),
+                       ('res_back_end', self._background[1])]
 
         if self._scale_factor != 1.0:
             sample_logs.append(('res_scale_factor', self._scale_factor))

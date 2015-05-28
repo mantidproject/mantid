@@ -1,4 +1,4 @@
-#pylint: disable=invalid-name,attribute-defined-outside-init,too-many-instance-attributes,too-many-branches
+#pylint: disable=invalid-name,attribute-defined-outside-init,too-many-instance-attributes,too-many-branches,no-init,deprecated-module
 from mantid.kernel import *
 from mantid.api import *
 from mantid.simpleapi import *
@@ -732,7 +732,7 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
             try:
                 short_inst_name = facility.instrument(inst_name).shortName()
                 break
-            except:
+            except RuntimeError:
                 pass
         logger.information('Short name for instrument %s is %s' % (inst_name, short_inst_name))
 

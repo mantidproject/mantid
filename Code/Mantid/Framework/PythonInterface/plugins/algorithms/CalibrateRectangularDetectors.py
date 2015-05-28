@@ -8,7 +8,7 @@ from mantid import config
 from mantid.kernel import Direction
 
 COMPRESS_TOL_TOF = .01
-
+#pylint: disable=too-many-instance-attributes
 class CalibrateRectangularDetectors(PythonAlgorithm):
 
     _instrument = None
@@ -208,20 +208,20 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
             @param runnumber: run number (integer)
             @param extension: file extension
         """
-        filter = {}
+        filterDict = {}
         if filterWall is not None:
             if filterWall[0] > 0.:
-                filter["FilterByTimeStart"] = filterWall[0]
+                filterDict["FilterByTimeStart"] = filterWall[0]
             if filterWall[1] > 0.:
-                filter["FilterByTimeStop"] = filterWall[1]
+                filterDict["FilterByTimeStop"] = filterWall[1]
 
         if  runnumber is None or runnumber <= 0:
             return None
 
         if extension.endswith("_event.nxs") or extension.endswith(".nxs.h5"):
-            wksp = self._loadEventNeXusData(runnumber, extension, **filter)
+            wksp = self._loadEventNeXusData(runnumber, extension, **filterDict)
         else:
-            wksp = self._loadPreNeXusData(runnumber, extension, **filter)
+            wksp = self._loadPreNeXusData(runnumber, extension, **filterDict)
 
         if self._filterBadPulses and not self.getProperty("CompressOnRead").value:
             wksp = FilterBadPulses(InputWorkspace=wksp, OutputWorkspace=wksp.name())
@@ -231,6 +231,7 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
                                   Tolerance=COMPRESS_TOL_TOF) # 100ns
         return wksp
 
+    #pylint: disable=too-many-branches
     def _cccalibrate(self, wksp, calib):
         if wksp is None:
             return None
@@ -366,6 +367,7 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
 
         return wksp
 
+    #pylint: disable=too-many-branches
     def _multicalibrate(self, wksp, calib):
         if wksp is None:
             return None
@@ -478,6 +480,7 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
         wksp = Rebin(InputWorkspace=wksp, OutputWorkspace=wksp.name(), Params=self._binning)
         return wksp
 
+    #pylint: disable=too-many-branches
     def PyExec(self):
         # get generic information
         SUFFIX = self.getProperty("Extension").value

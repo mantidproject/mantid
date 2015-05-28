@@ -540,6 +540,7 @@ class sfCalculator(object):
         sum_peak_error = math.np.sqrt(sum_peak_error)
         return [sum_peak, sum_peak_error]
 
+    #pylint: disable=unused-argument
     def  _removeBackground(self,
                            InputWorkspace=None,
                            from_peak= 0,
@@ -1157,7 +1158,7 @@ def getSlitsValueAndLambda(full_list_runs,
         _lambda_value = getLambdaValue(tmpWks)
         lambdaRequest[i] = _lambda_value
 
-def isRunsSorted(list_runs, S1H, S2H):
+def isRunsSorted(dummy_list_runs, S1H, S2H):
     """
     Make sure the files have been sorted
     """
@@ -1353,7 +1354,7 @@ def calculate(string_runs=None,\
 
         #array of index of first attenuator
         _index_first_A = []
-        for j in range(len(np.unique(list_attenuator))):
+        for dummy_j in range(len(np.unique(list_attenuator))):
             _index_first_A.append(-1)
 
         index_numerator = -1

@@ -35,6 +35,7 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
     _range_2_start = None
     _range_2_end = None
     _mtd_plot = None
+    _sample_log_value = ''
 
     def category(self):
         return 'Workflow\\Inelastic;PythonAlgorithms;Inelastic'
@@ -324,8 +325,7 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
             # Look for temperature in logs in workspace
             tmp = run[self._sample_log_name].value
             value_action = {'last value': lambda x: x[len(x)-1],
-                             'average': lambda x: x.mean()
-                             }
+                            'average': lambda x: x.mean()}
             temp = value_action[self._sample_log_value](tmp)
             logger.debug('Temperature %d K found for run: %s' % (temp, run_name))
             return temp

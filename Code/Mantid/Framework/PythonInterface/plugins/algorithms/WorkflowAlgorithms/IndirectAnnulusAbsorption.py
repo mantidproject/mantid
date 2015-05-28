@@ -86,7 +86,7 @@ class IndirectAnnulusAbsorption(DataProcessorAlgorithm):
                                                     optional=PropertyMode.Optional),
                              doc='The corrections workspace for scattering and absorptions in sample.')
 
-
+    #pylint: disable=too-many-branches
     def PyExec(self):
         from IndirectCommon import getEfixed
 
