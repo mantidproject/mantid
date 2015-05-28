@@ -3,6 +3,7 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidDataObjects/MDEventFactory.h"
+#include "MantidGeometry/Instrument/ComponentHelper.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -40,6 +41,9 @@ void ConvertCWSDExpToMomentum::init() {
 
   declareProperty(new ArrayProperty<double>("SamplePosition"),
                   "A vector of 3 doubles for position of sample.");
+
+  declareProperty(new ArrayProperty<double>("PixelDimension"),
+                  "A vector of 8 doubles to determine a cubic pixel's size.");
 }
 
 /**
@@ -53,6 +57,8 @@ void ConvertCWSDExpToMomentum::exec() {
     throw std::runtime_error(errmsg);
 
   // Create output MDEventWorkspace
+  std::vector<Kernel::V3D> vecDetPos;
+  std::vector<detid_t> vecDetID;
   m_outputWS = createExperimentMDWorkspace();
 
   // Add MDEventWorkspace
@@ -61,13 +67,16 @@ void ConvertCWSDExpToMomentum::exec() {
 
 API::IMDEventWorkspace_sptr
 ConvertCWSDExpToMomentum::createExperimentMDWorkspace() {
-  // Get detector list
+  // Get detector list from input table workspace
   std::vector<Kernel::V3D> vec_detpos;
   std::vector<detid_t> vec_detid;
   parseDetectorTable(vec_detpos, vec_detid);
 
   // FIXME - Should set create a solid instrument
-  Geometry::Instrument_sptr virtualinstrument;
+  Geometry::Instrument_sptr virtualinstrument = Geometry::ComponentHelper::createVirtualInstrument(m_sourcePos,
+                                                                                                   m_samplePos,
+                                                                                                   vec_detpos,
+                                                                                                   vec_detid);
 
   size_t m_nDimensions = 3;
   IMDEventWorkspace_sptr mdws =
@@ -81,11 +90,11 @@ ConvertCWSDExpToMomentum::createExperimentMDWorkspace() {
   vec_ID[1] = "y";
   vec_ID[2] = "z";
 
-  std::vector<std::string> vec_name(3);
-  vec_name[0] = "X";
-  vec_name[1] = "Y";
-  vec_name[2] = "Z";
-
+  std::vector<std::string> dimensionNames(3);
+  dimensionNames[0] = "Q_sample_x";
+  dimensionNames[1] = "Q_sample_y";
+  dimensionNames[2] = "Q_sample_z";
+  Mantid::Kernel::SpecialCoordinateSystem coordinateSystem = Mantid::Kernel::QSample;
   // Add dimensions
   for (size_t i = 0; i < m_nDimensions; ++i) {
     std::string id = vec_ID[i];
@@ -112,6 +121,8 @@ ConvertCWSDExpToMomentum::createExperimentMDWorkspace() {
       MDEW_MDEVENT_3);
 
   // FIXME - Add instrument?
+
+  mdws->setCoordinateSystem(coordinateSystem);
 
   return mdws;
 }

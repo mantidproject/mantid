@@ -139,6 +139,45 @@ Geometry::Instrument_sptr createMinimalInstrument(const Mantid::Kernel::V3D& sou
 }
 
 
+Geometry::Instrument_sptr createVirtualInstrument(Kernel::V3D sourcePos, Kernel::V3D samplePos,
+                                                  const std::vector<Kernel::V3D> vecdetpos,
+                                                  const std::vector<detid_t> vecdetid)
+{
+  Instrument_sptr instrument = boost::make_shared<Instrument>();
+  instrument->setReferenceFrame(
+      boost::make_shared<ReferenceFrame>(Mantid::Geometry::Y /*up*/, Mantid::Geometry::X /*along*/, Left, "0,0,0"));
+
+  // A source
+  ObjComponent *source = new ObjComponent("source");
+  source->setPos(sourcePos);
+  source->setShape(createSphere(0.01 /*1cm*/, V3D(0,0,0), "1"));
+  instrument->add(source);
+  instrument->markAsSource(source);
+
+  // A sample
+  ObjComponent *sample = new ObjComponent("some-surface-holder");
+  sample->setPos(samplePos);
+  sample->setShape(createSphere(0.01 /*1cm*/, V3D(0,0,0), "1"));
+  instrument->add(sample);
+  instrument->markAsSamplePos(sample);
+
+  // A detector
+  size_t numdets = vecdetpos.size();
+  for (size_t i = 0; i < numdets; ++i)
+  {
+    Detector *det = new Detector("point-detector", vecdetid[i] /*detector id*/, NULL);
+    det->setPos(vecdetpos[i]);
+    // FIXME - should be cubi... pixel
+    det->setShape(createSphere(0.01 /*1cm*/, V3D(0,0,0), "1"));
+    instrument->add(det);
+    instrument->markAsDetector(det);
+  }
+
+  return instrument;
+
+}
+
+
 /**
  * Create a sphere object
  */
