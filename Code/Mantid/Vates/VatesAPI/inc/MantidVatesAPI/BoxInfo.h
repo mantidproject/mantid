@@ -37,7 +37,7 @@ namespace Mantid
 
     /**
      * Function for finding an appropriate initial recursion depth.
-     * @param worksapceName :: name of the workspace
+     * @param workspaceName :: name of the workspace
      * @returns the appropriate recursion depth or nothing
      */
     boost::optional<int> DLLExport findRecursionDepthForTopLevelSplitting(const std::string &workspaceName);
