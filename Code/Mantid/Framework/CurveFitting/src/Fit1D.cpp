@@ -32,11 +32,7 @@ using API::Progress;
 using API::Jacobian;
 
 /// The implementation of Jacobian
-// cppcheck-suppress noConstructor
 class JacobianImpl : public Jacobian {
-  /// The pointer to the GSL's internal jacobian matrix
-  gsl_matrix *m_J;
-
 public:
 
   /// Default constructor
@@ -68,6 +64,10 @@ public:
   }
   /// Set the pointer to the GSL's jacobian
   void setJ(gsl_matrix *J) { m_J = J; }
+
+private:
+  /// The pointer to the GSL's internal jacobian matrix
+  gsl_matrix *m_J;
 };
 
 /// Structure to contain least squares data and used by GSL

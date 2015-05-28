@@ -77,7 +77,6 @@ struct tm getTimeValue(const std::string &sDate, std::string &error) {
   }
 
   timeinfo.tm_year = year - 1900;
-  timeinfo.tm_gmtoff = 0;
 
   return timeinfo;
 }

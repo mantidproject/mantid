@@ -831,17 +831,17 @@ int IntegratePeakTimeSlices::CalculateTimeChannelSpan(
  * close to the peak
  *
  * @param center  The position of the center of this plane
- * @param m_xvec    The direction the column values increase
- * @param m_yvec    The direction the row values increase
+ * @param xvec    The direction the column values increase
+ * @param yvec    The direction the row values increase
  * @param ROW     The row for this peak( 0 if undefined)
  * @param COL     The col for this peak( 0 if undefined)
- * @param m_NROWS   The number? of rows for this bANK
+ * @param NROWS   The number? of rows for this bANK
  * @param NCOLS    The number of columns for this bank
  * @param pixWidthx   The width of a pixel
  * @param pixHeighty  The height of a pixel
  * @param peak
  */
-void IntegratePeakTimeSlices::FindPlane(V3D &center, V3D &m_xvec, V3D &m_yvec,
+void IntegratePeakTimeSlices::FindPlane(V3D &center, V3D &xvec, V3D &yvec,
                                         double &ROW, double &COL, int &NROWS,
                                         int &NCOLS, double &pixWidthx,
                                         double &pixHeighty,
@@ -871,12 +871,12 @@ void IntegratePeakTimeSlices::FindPlane(V3D &center, V3D &m_xvec, V3D &m_yvec,
   Qt.rotate(xaxis0);
   xaxis0.normalize();
 
-  m_xvec.setX(xaxis0.X());
-  m_xvec.setY(xaxis0.Y());
-  m_xvec.setZ(xaxis0.Z());
-  m_yvec.setX(yaxis0.X());
-  m_yvec.setY(yaxis0.Y());
-  m_yvec.setZ(yaxis0.Z());
+  xvec.setX(xaxis0.X());
+  xvec.setY(xaxis0.Y());
+  xvec.setZ(xaxis0.Z());
+  yvec.setX(yaxis0.X());
+  yvec.setY(yaxis0.Y());
+  yvec.setZ(yaxis0.Z());
   ROW = peak.getRow();
   COL = peak.getCol();
   Geometry::Instrument_const_sptr inst = peak.getInstrument();
@@ -900,7 +900,7 @@ void IntegratePeakTimeSlices::FindPlane(V3D &center, V3D &m_xvec, V3D &m_yvec,
 
     return;
   }
-  // Get m_NROWS and NCOLS for other panels
+  // Get NROWS and NCOLS for other panels
   NROWS = NCOLS = -1;
 
   if (!inst)

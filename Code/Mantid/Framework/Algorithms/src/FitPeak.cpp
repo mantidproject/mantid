@@ -38,10 +38,11 @@ namespace Algorithms {
 /** Constructor for FitOneSinglePeak
   */
 FitOneSinglePeak::FitOneSinglePeak()
-    : m_fitMethodSet(false), m_peakRangeSet(false), m_peakWidthSet(false),
-      m_peakWindowSet(false), m_usePeakPositionTolerance(false), m_peakFunc(),
-      m_bkgdFunc(0), m_dataWS(), m_wsIndex(0), m_minFitX(0.), m_maxFitX(0.),
-      i_minFitX(0), i_maxFitX(0), m_minPeakX(0.), m_maxPeakX(0.), i_minPeakX(0),
+    : API::Algorithm(), m_fitMethodSet(false), m_peakRangeSet(false),
+      m_peakWidthSet(false), m_peakWindowSet(false),
+      m_usePeakPositionTolerance(false), m_peakFunc(), m_bkgdFunc(),
+      m_dataWS(), m_wsIndex(0), m_minFitX(0.), m_maxFitX(0.), i_minFitX(0),
+      i_maxFitX(0), m_minPeakX(0.), m_maxPeakX(0.), i_minPeakX(0),
       i_maxPeakX(0), m_bestPeakFunc(), m_bestBkgdFunc(), m_bkupPeakFunc(),
       m_bkupBkgdFunc(), m_fitErrorPeakFunc(), m_fitErrorBkgdFunc(),
       m_minimizer("Levenberg-MarquardtMD"), m_costFunction(), m_vecFWHM(),
