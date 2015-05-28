@@ -370,8 +370,13 @@ void LoadMD::doLoad(typename MDEventWorkspace<MDE, nd>::sptr ws) {
 
   prog->report("Opening file.");
   std::string title;
-  m_file->getAttr("title", title);
-  ws->setTitle("title");
+  try{
+    m_file->getAttr("title", title);
+  } catch (std::exception&)
+  {
+    //Leave the title blank if error on loading
+  }
+  ws->setTitle(title);
 
   // Load the WorkspaceHistory "process"
   ws->history().loadNexus(m_file.get());

@@ -6,19 +6,12 @@
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Workspace.h"
-#include "MantidAPI/WorkspaceGroup.h"
-#include "MantidAPI/WorkspaceOpOverloads.h"
-#include "MantidDataHandling/LoadInstrument.h"
 #include "MantidDataObjects/EventWorkspace.h"
-#include "MantidDataObjects/Workspace2D.h"
-#include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/Property.h"
-#include "MantidKernel/Timer.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidDataHandling/LoadEventNexus.h"
 #include <cxxtest/TestSuite.h>
 #include <iostream>
-#include <Poco/File.h>
 
 using namespace Mantid::Geometry;
 using namespace Mantid::API;
