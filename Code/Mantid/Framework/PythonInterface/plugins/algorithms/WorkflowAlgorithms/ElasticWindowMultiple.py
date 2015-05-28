@@ -57,7 +57,7 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
         self.declareProperty(name='SampleEnvironmentLogName', defaultValue='sample',
                              doc='Name of the sample environment log entry')
 
-        sampEnvLogVal_type = ['last value', 'average']
+        sampEnvLogVal_type = ['last_value', 'average']
         self.declareProperty('SampleEnvironmentLogValue', 'last value', StringListValidator(sampEnvLogVal_type),
                              doc='Value selection of the sample environment log entry')
 
@@ -323,9 +323,9 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
         if self._sample_log_name in run:
             # Look for temperature in logs in workspace
             tmp = run[self._sample_log_name].value
-            value_action = {'last value': lambda x: x[len(x)-1],
-                             'average': lambda x: x.mean()
-                             }
+            value_action = {'last_value': lambda x: x[len(x)-1],
+                            'average': lambda x: x.mean()
+                            }
             temp = value_action[self._sample_log_value](tmp)
             logger.debug('Temperature %d K found for run: %s' % (temp, run_name))
             return temp
