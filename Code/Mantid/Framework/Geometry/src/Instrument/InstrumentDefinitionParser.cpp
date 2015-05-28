@@ -11,11 +11,13 @@
 #include "MantidGeometry/Rendering/vtkGeometryCacheReader.h"
 #include "MantidGeometry/Rendering/vtkGeometryCacheWriter.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/ChecksumHelper.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/ProgressBase.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/Strings.h"
 
+#include <Poco/String.h>
 #include <Poco/DOM/Document.h>
 #include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/DOMWriter.h>
@@ -27,6 +29,7 @@
 
 #include <boost/make_shared.hpp>
 #include <boost/assign/list_of.hpp>
+#include <MantidKernel/ChecksumHelper.h>
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
@@ -151,19 +154,16 @@ void InstrumentDefinitionParser::initialize(
  *attribute of the XML contents
  * */
 std::string InstrumentDefinitionParser::getMangledName() {
+  
   // Use the file in preference if possible.
   if (this->m_xmlFile->exists()) {
     return m_xmlFile->getMangledName();
-  } else if (!pDoc.isNull()) {
-    std::string lastModified = pRootElem->getAttribute("last-modified");
-    if (lastModified.empty()) {
-      g_log.warning() << "The IDF that you are using doesn't contain a "
-                         "'last-modified' field. ";
-      g_log.warning() << "You may not get the correct definition file loaded."
-                      << std::endl;
-    }
-    return m_instName + lastModified;
-  } else {
+  } 
+  auto xml = Poco::trim(m_instrument->getXmlText());
+  if (!(xml.empty())) {
+    std::string checksum = Kernel::ChecksumHelper::sha1FromString(xml);
+    return m_instName + checksum;
+  } else  {
     throw std::runtime_error(
         "Call InstrumentDefinitionParser::initialize() before getMangledName.");
   }
