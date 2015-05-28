@@ -94,8 +94,8 @@ struct TCPStreamEventHeaderSetup {
   char inst_name[32]; ///< instrument name
 
   TCPStreamEventHeaderSetup()
-      : length(sizeof(TCPStreamEventHeaderSetup)), start_time(0), run_number(0),
-        run_state(0) {
+      : ChangedFields(), length(sizeof(TCPStreamEventHeaderSetup)),
+        start_time(0), run_number(0), run_state(0) {
     inst_name[0] = '\0';
   }
   bool isValid() const { return length >= sizeof(TCPStreamEventHeaderSetup); }

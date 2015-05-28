@@ -72,8 +72,8 @@ std::map<int, double> detScale = map_list_of(17, 1.092114823)(18, 0.869105443)(
 
 AnvredCorrection::AnvredCorrection()
     : API::Algorithm(), m_smu(0.), m_amu(0.), m_radius(0.), m_power_th(0.),
-      m_lamda_weight(), m_OnlySphericalAbsorption(false),
-      m_ReturnTransmissionOnly(false), m_useScaleFactors(false) {}
+      m_lamda_weight(), m_onlySphericalAbsorption(false),
+      m_returnTransmissionOnly(false), m_useScaleFactors(false) {}
 
 void AnvredCorrection::init() {
 
@@ -105,10 +105,10 @@ void AnvredCorrection::init() {
                   "input has events (default).\n"
                   "If false, then the workspace gets converted to a "
                   "Workspace2D histogram.");
-  declareProperty("m_OnlySphericalAbsorption", false,
+  declareProperty("OnlySphericalAbsorption", false,
                   "All corrections done if false (default).\n"
                   "If true, only the spherical absorption correction.");
-  declareProperty("m_ReturnTransmissionOnly", false,
+  declareProperty("ReturnTransmissionOnly", false,
                   "Corrections applied to data if false (default).\n"
                   "If true, only return the transmission coefficient.");
   declareProperty("PowerLambda", 4.0, "Power of lamda ");
@@ -122,19 +122,19 @@ void AnvredCorrection::init() {
 void AnvredCorrection::exec() {
   // Retrieve the input workspace
   m_inputWS = getProperty("InputWorkspace");
-  m_OnlySphericalAbsorption = getProperty("m_OnlySphericalAbsorption");
-  m_ReturnTransmissionOnly = getProperty("m_ReturnTransmissionOnly");
+  m_onlySphericalAbsorption = getProperty("OnlySphericalAbsorption");
+  m_returnTransmissionOnly = getProperty("ReturnTransmissionOnly");
   m_useScaleFactors = getProperty("DetectorBankScaleFactors");
-  if (!m_OnlySphericalAbsorption) {
+  if (!m_onlySphericalAbsorption) {
     const API::Run &run = m_inputWS->run();
     if (run.hasProperty("LorentzCorrection")) {
       Kernel::Property *prop = run.getProperty("LorentzCorrection");
       bool lorentzDone = boost::lexical_cast<bool, std::string>(prop->value());
       if (lorentzDone) {
-        m_OnlySphericalAbsorption = true;
+        m_onlySphericalAbsorption = true;
         g_log.warning()
             << "Lorentz Correction was already done for this "
-               "workspace.  m_OnlySphericalAbsorption was changed to "
+               "workspace.  OnlySphericalAbsorption was changed to "
                "true." << std::endl;
       }
     }
@@ -151,7 +151,7 @@ void AnvredCorrection::exec() {
   if (eventW)
     eventW->sortAll(TOF_SORT, NULL);
   if ((getProperty("PreserveEvents")) && (eventW != NULL) &&
-      !m_ReturnTransmissionOnly) {
+      !m_returnTransmissionOnly) {
     // Input workspace is an event workspace. Use the other exec method
     this->execEvent();
     this->cleanup();
@@ -233,7 +233,7 @@ void AnvredCorrection::exec() {
       double lambda = timeflight[0];
       timeflight.clear();
 
-      if (m_ReturnTransmissionOnly) {
+      if (m_returnTransmissionOnly) {
         Y[j] = 1.0 / this->getEventWeight(lambda, scattering);
       } else {
         double value = this->getEventWeight(lambda, scattering);
@@ -255,7 +255,7 @@ void AnvredCorrection::exec() {
   // set the absorption correction values in the run parameters
   API::Run &run = correctionFactors->mutableRun();
   run.addProperty<double>("Radius", m_radius, true);
-  if (!m_OnlySphericalAbsorption && !m_ReturnTransmissionOnly)
+  if (!m_onlySphericalAbsorption && !m_returnTransmissionOnly)
     run.addProperty<bool>("LorentzCorrection", 1, true);
   setProperty("OutputWorkspace", correctionFactors);
 }
@@ -372,7 +372,7 @@ void AnvredCorrection::execEvent() {
   // set the absorption correction values in the run parameters
   API::Run &run = correctionFactors->mutableRun();
   run.addProperty<double>("Radius", m_radius, true);
-  if (!m_OnlySphericalAbsorption && !m_ReturnTransmissionOnly)
+  if (!m_onlySphericalAbsorption && !m_returnTransmissionOnly)
     run.addProperty<bool>("LorentzCorrection", 1, true);
   setProperty("OutputWorkspace",
               boost::dynamic_pointer_cast<MatrixWorkspace>(correctionFactors));
@@ -429,7 +429,7 @@ double AnvredCorrection::getEventWeight(double lamda, double two_theta) {
   if (m_radius > 0)
     transinv = absor_sphere(two_theta, lamda);
   // Only Spherical absorption correction
-  if (m_OnlySphericalAbsorption || m_ReturnTransmissionOnly)
+  if (m_onlySphericalAbsorption || m_returnTransmissionOnly)
     return transinv;
 
   // Resolution of the lambda table

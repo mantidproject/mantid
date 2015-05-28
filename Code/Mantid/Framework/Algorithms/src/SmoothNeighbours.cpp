@@ -36,7 +36,10 @@ const std::string SmoothNeighbours::RECTANGULAR_GROUP = "Rectangular Detectors";
 const std::string SmoothNeighbours::INPUT_WORKSPACE = "InputWorkspace";
 
 SmoothNeighbours::SmoothNeighbours()
-    : API::Algorithm(), WeightedSum(new NullWeighting) {}
+    : API::Algorithm(), AdjX(0), AdjY(0), Edge(0), Radius(0.), nNeighbours(0),
+      WeightedSum(new NullWeighting), PreserveEvents(false),
+      expandSumAllPixels(false), outWI(0), inWS(), m_neighbours(),
+      m_prog(NULL) {}
 
 /** Initialisation method.
  *
