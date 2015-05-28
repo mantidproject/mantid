@@ -190,7 +190,7 @@ void MantidHelpWindow::showWikiPage(const string &page)
 /**
  * Convenience method for HelpWindowImpl::showWikiPage(const string &).
  *
- * @param name The name of the wiki page to show. If this is empty show
+ * @param page The name of the wiki page to show. If this is empty show
  * the wiki homepage.
  */
 void MantidHelpWindow::showWikiPage(const QString &page)
@@ -247,7 +247,7 @@ void MantidHelpWindow::showAlgorithm(const QString &name, const int version)
 
 
 /**
- * Show the help page for a particular concept. 
+ * Show the help page for a particular concept.
  *
  * @param name The name of the concept to show. If this is empty show
  * the concept index.
@@ -275,7 +275,7 @@ void MantidHelpWindow::showConcept(const string &name)
 
 
 /**
- * Show the help page for a particular concept. 
+ * Show the help page for a particular concept.
  *
  * @param name The name of the concept to show. If this is empty show
  * the concept index.
@@ -378,7 +378,7 @@ void MantidHelpWindow::findCollectionFile(std::string &binDir)
     m_collectionFile = "";
 
     QDir searchDir(QString::fromStdString(binDir));
-        
+
     // try next to the executable
     QString path = searchDir.absoluteFilePath(COLLECTION_FILE);
     g_log.debug() << "Trying \"" << path.toStdString() << "\"\n";
