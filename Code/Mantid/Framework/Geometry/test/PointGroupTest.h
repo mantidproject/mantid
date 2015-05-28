@@ -24,6 +24,8 @@ public:
     {
         PointGroup_sptr testedPointGroup = PointGroupFactory::Instance().createPointGroup(name);
 
+        TSM_ASSERT(name + ": Does not fulfill group axioms!", testedPointGroup->isGroup());
+
         std::vector<V3D> equivalents = testedPointGroup->getEquivalents(hkl);
         // check that the number of equivalent reflections is as expected.
         TSM_ASSERT_EQUALS(name + ": Expected " + boost::lexical_cast<std::string>(numEquiv) + " equivalents, got " + boost::lexical_cast<std::string>(equivalents.size()) + " instead.", equivalents.size(), numEquiv);

@@ -185,7 +185,8 @@ bool PluginFit::load(const QString& pluginName)
 
 void PluginFit::calculateFitCurveData(double *X, double *Y)
 {
-	if (d_gen_function && f_eval)
+  if (!f_eval) return;
+	if (d_gen_function)
 	{
 		double X0 = d_x[0];
 		double step = (d_x[d_n-1]-X0)/(d_points-1);

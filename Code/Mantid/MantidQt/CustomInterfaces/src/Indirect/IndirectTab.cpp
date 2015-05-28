@@ -195,9 +195,9 @@ namespace CustomInterfaces
   {
     QString pyInput = "from mantidplot import plotSpectrum\n";
 
-    pyInput += "plotSpectrum('";
+    pyInput += "plotSpectrum(['";
     pyInput += workspaceNames.join("','");
-    pyInput += "', ";
+    pyInput += "'], ";
     pyInput += QString::number(specIndex);
     pyInput += ")\n";
 
@@ -234,9 +234,9 @@ namespace CustomInterfaces
   {
     QString pyInput = "from mantidplot import plotSpectrum\n";
 
-    pyInput += "plotSpectrum('";
+    pyInput += "plotSpectrum(['";
     pyInput += workspaceNames.join("','");
-    pyInput += "', range(";
+    pyInput += "'], range(";
     pyInput += QString::number(specStart);
     pyInput += ",";
     pyInput += QString::number(specEnd);
@@ -296,9 +296,9 @@ namespace CustomInterfaces
   {
     QString pyInput = "from mantidplot import plotTimeBin\n";
 
-    pyInput += "plotTimeBin('";
+    pyInput += "plotTimeBin(['";
     pyInput += workspaceNames.join("','");
-    pyInput += "', ";
+    pyInput += "'], ";
     pyInput += QString::number(specIndex);
     pyInput += ")\n";
 

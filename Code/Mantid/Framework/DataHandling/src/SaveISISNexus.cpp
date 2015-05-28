@@ -37,7 +37,10 @@ using namespace Kernel;
 using namespace API;
 
 /// Empty default constructor
-SaveISISNexus::SaveISISNexus() : Algorithm() {}
+SaveISISNexus::SaveISISNexus()
+    : Algorithm(), m_isisRaw(), handle(), rawFile(), nper(0), nsp(0), ntc(0),
+      nmon(0), ndet(0), counts_link(), period_index_link(),
+      spectrum_index_link(), time_of_flight_link(), time_of_flight_raw_link() {}
 
 /** Initialisation method.
  *
