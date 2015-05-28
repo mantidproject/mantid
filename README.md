@@ -14,9 +14,4 @@ Useful links
 
 #### Badges
 
-| incremental | clean | systemtests | performancetests | doctest | cppcheck | pylint | doxygen |
-|:-----------:|:-----:|:-----------:|:----------------:|:-------:|----------|--------|---------|
-|[![Build Status](http://builds.mantidproject.org/buildStatus/icon?job=master_incremental)](http://builds.mantidproject.org/job/master_incremental)             |[![Build Status](http://builds.mantidproject.org/buildStatus/icon?job=master_clean)](http://builds.mantidproject.org/job/master_clean/)     |[![Build Status](http://builds.mantidproject.org/buildStatus/icon?job=master_systemtests)](http://builds.mantidproject.org/job/master_systemtests)             |[![Build Status](http://builds.mantidproject.org/buildStatus/icon?job=performance_tests_master)](http://builds.mantidproject.org/job/performance_tests_master)                  |[![Build Status](http://builds.mantidproject.org/buildStatus/icon?job=master_doctest)](http://builds.mantidproject.org/job/master_doctest)         |[![Build Status](http://builds.mantidproject.org/buildStatus/icon?job=cppcheck_master)](http://builds.mantidproject.org/job/cppcheck_master)           |[![Build Status](http://builds.mantidproject.org/buildStatus/icon?job=pylint_master)](http://builds.mantidproject.org/job/pylint_master)        |[![Build Status](http://builds.mantidproject.org/buildStatus/icon?job=doxygen_master)](http://builds.mantidproject.org/job/doxygen_master/)         |
-
-
 [![Coverage Status](https://coveralls.io/repos/mantidproject/mantid/badge.svg?branch=HEAD)](https://coveralls.io/r/mantidproject/mantid?branch=HEAD)
