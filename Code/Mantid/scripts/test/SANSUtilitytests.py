@@ -5,6 +5,7 @@ import re
 import mantid
 from mantid.simpleapi import *
 from mantid.api import mtd, WorkspaceGroup
+from mantid.kernel import DateAndTime, time_duration
 import SANSUtility as su
 import re
 
@@ -222,6 +223,133 @@ class TestLoadingAddedEventWorkspaceExtraction(unittest.TestCase):
         # Check when there is no special ending
         self.do_test_extraction(TEST_STRING_DATA, TEST_STRING_MON)
 
+
+
+class TestCombineWorkspacesFactory(unittest.TestCase):
+    _isOverlay = su.ISOVERLAY
+    _isNoOverlay = 'sdfsdf'
+    def test_that_factory_returns_overlay_class(self):
+        factory = su.CombineWorkspacesFactory()
+        alg = factory.create_add_algorithm(_isOverlay)
+        self.assertTrue(isinstance(alg, su.OverlayWorkspaces))
+
+    def test_that_factory_returns_overlay_class(self):
+        factory = su.CombineWorkspacesFactory()
+        alg = factory.create_add_algorithm(self._isNoOverlay)
+        self.assertTrue(isinstance(alg, su.PlusWorkspaces))
+
+
+class TestOverlayWorkspaces(unittest.TestCase):
+    def test_time_from_proton_charge_log_is_recovered(self):
+        # Arrange
+        names =['ws1', 'ws2']
+        out_ws_name = 'out_ws'
+
+        start_time_1 = "2010-01-01T00:00:00"
+        event_ws_1 = self._provide_event_ws(names[0],start_time_1, extra_time_shift = 0.0)
+
+        start_time_2 = "2012-01-01T00:00:00"
+        event_ws_2 = self._provide_event_ws(names[1],start_time_2, extra_time_shift = 0.0)
+
+        # Act
+        overlayWorkspaces = su.OverlayWorkspaces()
+        time_difference = overlayWorkspaces._extract_time_difference_in_seconds(event_ws_1, event_ws_2)
+
+        # Assert
+        expected_time_difference = time_duration.total_nanoseconds(DateAndTime(start_time_1)- DateAndTime(start_time_2))/1e9
+        self.assertEqual(time_difference, expected_time_difference)
+
+        # Clean up 
+        self._clean_up(names)
+        self._clean_up(out_ws_name)
+
+    def test_that_time_difference_adds_correct_optional_shift(self):
+         # Arrange
+        names =['ws1', 'ws2']
+        out_ws_name = 'out_ws'
+
+        start_time_1 = "2010-01-01T00:00:00"
+        event_ws_1 = self._provide_event_ws(names[0],start_time_1, extra_time_shift = 0.0)
+
+        # Extra shift in seconds
+        optional_time_shift = 1000
+        start_time_2 = "2012-01-01T00:00:00"
+        event_ws_2 = self._provide_event_ws(names[1],start_time_2, extra_time_shift = optional_time_shift)
+
+        # Act
+        overlayWorkspaces = su.OverlayWorkspaces()
+        time_difference = overlayWorkspaces._extract_time_difference_in_seconds(event_ws_1, event_ws_2)
+
+        # Assert
+        expected_time_difference = time_duration.total_nanoseconds(DateAndTime(start_time_1)- DateAndTime(start_time_2))/1e9
+        expected_time_difference -= optional_time_shift # Need to subtract as we add the time shift to the subtrahend
+        self.assertEqual(time_difference, expected_time_difference)
+
+        # Clean up 
+        self._clean_up(names)
+        self._clean_up(out_ws_name)
+
+    def test_error_is_raised_if_proton_charge_is_missing(self):
+        # Arrange
+        names =['ws1', 'ws2']
+        out_ws_name = 'out_ws'
+
+        start_time_1 = "2010-01-01T00:00:00"
+        event_ws_1 = self._provide_event_ws_custom(name = names[0], start_time = start_time_1, extra_time_shift = 0.0, proton_charge = False)
+
+        # Extra shift in seconds
+        start_time_2 = "2012-01-01T00:00:00"
+        event_ws_2 = self._provide_event_ws_custom(name = names[1], start_time = start_time_2, extra_time_shift = 0.0,proton_charge = False)
+
+        # Act and Assert
+        overlayWorkspaces = su.OverlayWorkspaces()
+        with self.assertRaises(RuntimeError):
+            overlayWorkspaces._extract_time_difference_in_seconds(event_ws_1, event_ws_2)
+
+        # Clean up 
+        self._clean_up(names)
+        self._clean_up(out_ws_name)
+
+    def test_correct_time_difference_is_extracted(self):
+        pass
+    def test_workspaces_are_normalized_by_proton_charge(self):
+        pass
+
+
+
+    def _provide_event_ws(self, name, start_time, extra_time_shift):
+        return self._provide_event_ws_custom(name = name, start_time = start_time, extra_time_shift = extra_time_shift,  proton_charge = True)
+
+    def _provide_event_ws_wo_proton_charge(self, name, start_time, extra_time_shift):
+        return self._provide_event_ws_custom(name = name, start_time = start_time, extra_time_shift = extra_time_shift,  proton_charge = False)
+
+    def _provide_event_ws_custom(self, name, start_time, extra_time_shift = 0.0, proton_charge = True, proton_charge_empty = False):
+         # Create the event workspace
+        ws = CreateSampleWorkspace(WorkspaceType= 'Event', OutputWorkspace = name)
+
+        # Add the proton_charge log entries
+        if proton_charge:
+            if proton_charge_empty:
+                self._addSampleLogEntry('proton_charge', ws, start_time, extra_time_shift)
+            else:
+                self._addSampleLogEntry('proton_charge', ws, start_time, extra_time_shift)
+
+        # Add some other time series log entry
+        self._addSampleLogEntry('time_series_2', ws, start_time, extra_time_shift)
+        return ws
+
+    def _addSampleLogEntry(self, log_name, ws, start_time, extra_time_shift):
+        for i in range(0, 100):
+            val = 10 + (i%5)/2 # This is just to create some variation
+            date = DateAndTime(start_time)
+            date +=  int(i*1e9)
+            date += int(extra_time_shift*1e9)
+            AddTimeSeriesLog(ws, Name=log_name, Time=date.__str__().strip(), Value=val)
+
+    def _clean_up(self,names):
+        for name in names:
+            if name in mtd.getObjectNames():
+                DeleteWorkspace(name)
 
 if __name__ == "__main__":
     unittest.main()

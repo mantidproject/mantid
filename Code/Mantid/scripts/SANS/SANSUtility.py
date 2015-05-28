@@ -5,6 +5,7 @@
 ########################################################
 from mantid.simpleapi import *
 from mantid.api import IEventWorkspace, MatrixWorkspace, WorkspaceGroup
+from mantid.kernel import time_duration
 import inspect
 import math
 import os
@@ -17,6 +18,8 @@ ADDED_EVENT_DATA_TAG = '_added_event_data'
 
 REG_DATA_NAME = '-add' + ADDED_EVENT_DATA_TAG + '[_1-9]*$'
 REG_DATA_MONITORS_NAME = '-add_monitors' + ADDED_EVENT_DATA_TAG + '[_1-9]*$'
+
+ISOVERLAY = 'isOverlay'
 
 def deprecated(obj):
     """
@@ -597,6 +600,50 @@ def get_full_path_for_added_event_data(file_name):
     full_path_name = os.path.join(path, base)
 
     return full_path_name
+
+
+class CombineWorkspacesFactory:
+    def create_add_algorithm(self,type):
+        if type == ISOVERLAY:
+            pass
+        else:
+            return PlusWorkspaces()
+
+class PlusWorkspaces:
+    def add(self, LHS_workspace, RHS_workspace, output_workspace, time_shift = 0.0):
+        Plus(LHSWorkspace=LHS_workspace,RHSWorkspace= RHS_workspace,OutputWorkspace= output_workspace)
+
+class OverlayWorkspaces:
+    def add(self, LHS_workspace, RHS_workspace, output_workspace, time_shift = 0.0):
+        rhs_ws = mtd[RHS_workspace]
+        lhs_ws = mtd[LHS_workspace]
+
+        # Find the time difference between LHS and RHS workspaces and add optional time shift
+        time_difference = _extract_time_difference_in_seconds(lhs_ws, rhs_ws)
+        total_time_shift = time_difference + time_shift
+
+        # Normalize by proton charge
+
+        # Create a temporary workspace with shifted time values from RHS
+        temp = none
+
+        # Add the LHS and shifted workspace
+        Plus(LHSWorkspace=LHS_workspace,RHSWorkspace= temp ,OutputWorkspace= output_workspace)
+
+    def _extract_time_difference_in_seconds(self, ws1, ws2):
+        # The times which need to be compared are the first entry in the proton charge log
+        time_1 = self._get_time_from_proton_charge_log(ws1)
+        time_2 = self._get_time_from_proton_charge_log(ws2)
+
+        return time_duration.total_nanoseconds(time_1- time_2)/1e9
+
+    def _get_time_from_proton_charge_log(self, ws):
+        times = ws.getRun().getProperty("proton_charge").times
+        if len(times) == 0:
+            raise ValueError("The proton charge does not have any time entry")
+
+        return times[0]
+
 
 ###############################################################################
 ######################### Start of Deprecated Code ############################
