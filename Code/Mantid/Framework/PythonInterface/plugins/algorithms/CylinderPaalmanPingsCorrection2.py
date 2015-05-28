@@ -57,16 +57,17 @@ class CylinderPaalmanPingsCorrection(PythonAlgorithm):
                              validator=ws_validator,
                              direction=Direction.Input),
                              doc="Name for the input Sample workspace.")
+
         self.declareProperty(name='SampleChemicalFormula', defaultValue='',
                              validator=StringMandatoryValidator(),
                              doc='Sample chemical formula')
-        self.declareProperty(name='SampleNumberDensity', defaultValue=0.0,
+        self.declareProperty(name='SampleNumberDensity', defaultValue=0.1,
                              validator=FloatBoundedValidator(0.0),
                              doc='Sample number density')
-        self.declareProperty(name='SampleInnerRadius', defaultValue=0.0,
+        self.declareProperty(name='SampleInnerRadius', defaultValue=0.05,
                              validator=FloatBoundedValidator(0.0),
                              doc='Sample inner radius')
-        self.declareProperty(name='SampleOuterRadius', defaultValue=0.0,
+        self.declareProperty(name='SampleOuterRadius', defaultValue=0.1,
                              validator=FloatBoundedValidator(0.0),
                              doc='Sample outer radius')
 
@@ -75,24 +76,28 @@ class CylinderPaalmanPingsCorrection(PythonAlgorithm):
                              validator=ws_validator,
                              direction=Direction.Input),
                              doc="Name for the input Can workspace.")
+
         self.declareProperty(name='CanChemicalFormula', defaultValue='',
                              doc='Can chemical formula')
-        self.declareProperty(name='CanNumberDensity', defaultValue=0.0,
+        self.declareProperty(name='CanNumberDensity', defaultValue=0.1,
                              validator=FloatBoundedValidator(0.0),
                              doc='Can number density')
-        self.declareProperty(name='CanOuterRadius', defaultValue=0.0,
+        self.declareProperty(name='CanOuterRadius', defaultValue=0.15,
                              validator=FloatBoundedValidator(0.0),
                              doc='Can outer radius')
+
+        self.declareProperty(name='BeamHeight', defaultValue=3.0,
+                             validator=FloatBoundedValidator(0.0),
+                             doc='Beam height')
+        self.declareProperty(name='BeamWidth', defaultValue=2.0,
+                             validator=FloatBoundedValidator(0.0),
+                             doc='Beam width')
 
         self.declareProperty(name='StepSize', defaultValue=0.002,
                              validator=FloatBoundedValidator(0.0),
                              doc='Step size')
-        self.declareProperty(name='BeamWidth', defaultValue=2.0,
-                             validator=FloatBoundedValidator(0.0),
-                             doc='Beam width')
-        self.declareProperty(name='BeamHeight', defaultValue=3.0,
-                             validator=FloatBoundedValidator(0.0),
-                             doc='Beam height')
+        self.declareProperty(name='Interpolate', defaultValue=True,
+                             doc='Interpolate the correction workspaces to match the sample workspace')
         self.declareProperty(name='NumberWavelengths', defaultValue=10,
                              validator=IntBoundedValidator(1),
                              doc='Number of wavelengths for calculation')
@@ -172,7 +177,8 @@ class CylinderPaalmanPingsCorrection(PythonAlgorithm):
             CreateWorkspace(OutputWorkspace=acc_ws, DataX=dataX, DataY=dataA4,
                             NSpec=len(self._angles), UnitX='Wavelength')
 
-        self._interpolate_corrections(workspaces)
+        if self._interpolate:
+            self._interpolate_corrections(workspaces)
         try:
             self. _copy_detector_table(workspaces)
         except RuntimeError:
@@ -250,6 +256,8 @@ class CylinderPaalmanPingsCorrection(PythonAlgorithm):
                       beam_height,
                       0.0,
                       beam_height]
+
+        self._interpolate = self.getProperty('Interpolate').value
         self._number_wavelengths = self.getProperty('NumberWavelengths').value
 
         self._emode = self.getPropertyValue('Emode')

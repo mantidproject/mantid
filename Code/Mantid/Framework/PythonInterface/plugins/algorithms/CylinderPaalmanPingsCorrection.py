@@ -79,14 +79,13 @@ class CylinderPaalmanPingsCorrection(PythonAlgorithm):
         self.declareProperty(name='CanOuterRadius', defaultValue=0.15,
                              doc='Can outer radius')
 
-        self.declareProperty(name='BeamHeight', defaultValue=0.1,
+        self.declareProperty(name='BeamHeight', defaultValue=3.0,
                              doc='Height of the beam at the sample.')
-        self.declareProperty(name='BeamWidth', defaultValue=0.1,
+        self.declareProperty(name='BeamWidth', defaultValue=2.0,
                              doc='Width of the beam at the sample.')
 
         self.declareProperty(name='StepSize', defaultValue=0.002,
                              doc='Step size for calculation')
-
         self.declareProperty(name='Interpolate', defaultValue=True,
                              doc='Interpolate the correction workspaces to match the sample workspace')
 
