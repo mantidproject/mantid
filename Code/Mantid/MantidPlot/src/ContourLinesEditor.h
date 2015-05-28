@@ -79,13 +79,7 @@ protected slots:
 private:
 	void updatePenColumn();
   template<class Widget>
-  Widget* table_cellWidget(int i, int j) const {
-    Widget *w = dynamic_cast<Widget*>(table->cellWidget(i, j));
-    if (!w) {
-      throw std::logic_error("Unexpected widget type in ContourLinesEditor.");
-    }
-    return w;
-  }
+  Widget* table_cellWidget(int i, int j) const;
 
 	//! Table displaying the values ranges in the first column and their corresponding pens in the second column
 	QTableWidget *table;

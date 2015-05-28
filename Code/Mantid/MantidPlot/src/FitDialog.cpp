@@ -1494,3 +1494,13 @@ QString FitDialog::parseFormula(const QString& s)
 	}
 	return formula;
 }
+
+template<class Widget>
+Widget* FitDialog::boxParams_cellWidget(int i, int j) const {
+  Widget *w = dynamic_cast<Widget*>(boxParams->cellWidget(i, j));
+  if (!w) {
+    throw std::logic_error("Unexpected widget type in FitDialog.");
+  }
+  return w;
+}
+

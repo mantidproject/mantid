@@ -116,13 +116,7 @@ private:
 	QStringList plugInNames();
 	QString parseFormula(const QString& s);
   template<class Widget>
-  Widget* boxParams_cellWidget(int i, int j) const {
-    Widget *w = dynamic_cast<Widget*>(boxParams->cellWidget(i, j));
-    if (!w) {
-      throw std::logic_error("Unexpected widget type in FitDialog.");
-    }
-    return w;
-  }
+  Widget* boxParams_cellWidget(int i, int j) const ;
 
     Fit *d_current_fit;
 	Graph *d_graph;

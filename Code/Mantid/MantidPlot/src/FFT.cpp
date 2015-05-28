@@ -72,12 +72,12 @@ void FFT::init ()
 
 QString FFT::fftCurve()
 {
-    int i, i2;
+  int i, i2;
 	int n2 = d_n/2;
-	double *amp = new double[d_n];
-	double *result = new double[2*d_n];
+	std::vector<double> amp(d_n);
+	std::vector<double> result(2*d_n);
 
-	if(!amp || !result){
+	if(amp.empty() || result.empty()){
     QMessageBox::critical(dynamic_cast<ApplicationWindow *>(parent()), tr("MantidPlot") + " - " + tr("Error"),
                         tr("Could not allocate memory, operation aborted!"));
         d_init_err = true;
@@ -98,14 +98,11 @@ QString FFT::fftCurve()
 			QMessageBox::critical(dynamic_cast<ApplicationWindow *>(parent()), tr("MantidPlot") + " - " + tr("Error"),
                         tr("Could not allocate memory, operation aborted!"));
             d_init_err = true;
-            // Cleanup variables before returning
-            delete [] amp;
-            delete [] result;
 			return "";
 		}
 
 		gsl_fft_real_transform(d_y, 1, d_n, real,work);
-		gsl_fft_halfcomplex_unpack (d_y, result, 1, d_n);
+    gsl_fft_halfcomplex_unpack (d_y, result.data(), 1, d_n);
 
 		gsl_fft_real_wavetable_free(real);
 		gsl_fft_real_workspace_free(work);
@@ -113,7 +110,7 @@ QString FFT::fftCurve()
         d_explanation = tr("Inverse") + " " + tr("FFT") + " " + tr("of") + " " + d_curve->title().text();
 		text = tr("Time");
 
-		gsl_fft_real_unpack (d_y, result, 1, d_n);
+    gsl_fft_real_unpack (d_y, result.data(), 1, d_n);
 		gsl_fft_complex_wavetable *wavetable = gsl_fft_complex_wavetable_alloc (d_n);
 		gsl_fft_complex_workspace *workspace = gsl_fft_complex_workspace_alloc (d_n);
 
@@ -121,13 +118,10 @@ QString FFT::fftCurve()
 			QMessageBox::critical(dynamic_cast<ApplicationWindow *>(parent()), tr("MantidPlot") + " - " + tr("Error"),
                         tr("Could not allocate memory, operation aborted!"));
             d_init_err = true;
-            // Cleanup local variables before returning
-            delete [] amp;
-            delete [] result;
 			return "";
 		}
 
-		gsl_fft_complex_inverse (result, 1, d_n, wavetable, workspace);
+		gsl_fft_complex_inverse (result.data(), 1, d_n, wavetable, workspace);
 		gsl_fft_complex_wavetable_free (wavetable);
 		gsl_fft_complex_workspace_free (workspace);
 	}
@@ -159,6 +153,7 @@ QString FFT::fftCurve()
   if (!app) {
     throw std::logic_error("Parent of FFTDialog is not ApplicationWindow as expected.");
   }
+
 	QLocale locale = app->locale();
 	int prec = app->d_decimal_digits;
 
@@ -174,9 +169,7 @@ QString FFT::fftCurve()
 			text += locale.toString(amp[i], 'g', prec)+"\t";
 		text += locale.toString(atan(result[i2+1]/result[i2]), 'g', prec)+"\n";
 	}
-	delete[] amp;
-	delete[] result;
-    return text;
+  return text;
 }
 
 QString FFT::fftTable()
