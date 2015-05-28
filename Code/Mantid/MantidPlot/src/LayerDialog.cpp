@@ -239,6 +239,7 @@ void LayerDialog::update()
 		if (dn < 0)
 		{// Customize new layers with user default settings
       ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parent());
+      if (!app) return;
 			for (int i = old_graphs+1; i <= graphs; i++)
 				app->setPreferences(multi_layer->layer(i));
 		}

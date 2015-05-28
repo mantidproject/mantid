@@ -1399,9 +1399,10 @@ void MultiLayer::dropOntoMatrixCurve(Graph *g, MantidMatrixCurve* originalCurve,
     for( ; setIt != it.value().end(); ++setIt)
     {
       try {
+        bool isDistribution = originalCurve ? originalCurve->isDistribution() : false;
         // If the current curve is plotted as a distribution then do so also here
         new MantidMatrixCurve(it.key(),g,(*setIt),MantidMatrixCurve::Spectrum, errorBars,
-                              originalCurve->isDistribution()); // The graph takes ownership
+                              isDistribution); // The graph takes ownership
       } catch (Mantid::Kernel::Exception::NotFoundError &) {
         // Get here if workspace name is invalid - shouldn't be possible, but just in case
       } catch (std::invalid_argument&) {
@@ -1706,8 +1707,9 @@ WaterfallFillDialog::WaterfallFillDialog(MultiLayer *parent, Graph *active_graph
   }
 
   // If sidelines previously enabled, check it.
-  PlotCurve *c = dynamic_cast<PlotCurve*>(active_graph->curve(0));
-  sideLinesBox->setChecked(c->sideLinesEnabled());
+  if (PlotCurve *c = dynamic_cast<PlotCurve*>(active_graph->curve(0))) {
+    sideLinesBox->setChecked(c->sideLinesEnabled());
+  }
 
   colourModeGroup->setEnabled(rSolidC->isChecked() && enableFillGroup->isChecked());
 
