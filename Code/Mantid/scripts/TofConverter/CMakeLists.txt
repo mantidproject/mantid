@@ -5,6 +5,5 @@ set( UI_FILES
   converter.ui
 )
 
-UiToPy( UI_FILES)
-
+UiToPy( UI_FILES CompileUITofConverter)
 

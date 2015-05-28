@@ -5,6 +5,5 @@ set( UI_FILES
   MainWindow.ui 
 )
 
-UiToPy( UI_FILES)
-
+UiToPy( UI_FILES CompileUIHFIRPowderReduction)
 

@@ -5,6 +5,5 @@ set( UI_FILES
   PyChop_LET_UI.ui 
 )
 
-UiToPy( UI_FILES)
-
+UiToPy( UI_FILES CompileUIPyChop)
 
