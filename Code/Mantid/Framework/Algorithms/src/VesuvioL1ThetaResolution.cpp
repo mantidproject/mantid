@@ -81,14 +81,14 @@ void VesuvioL1ThetaResolution::init() {
   declareProperty("SpectrumMax", 198,
                   "Index of maximum spectrum");
 
-  declareProperty("NumEvents", 10000, positiveInt,
+  declareProperty("NumEvents", 1000000, positiveInt,
                   "Number of scattering events");
   declareProperty("Seed", 123456789, positiveInt,
                   "Seed for random number generator");
 
-  declareProperty("L1BinWidth", 0.01, positiveDouble,
+  declareProperty("L1BinWidth", 0.05, positiveDouble,
                   "Bin width for L1 distribution.");
-  declareProperty("ThetaBinWidth", 0.01, positiveDouble,
+  declareProperty("ThetaBinWidth", 0.05, positiveDouble,
                   "Bin width for theta distribution.");
 
   declareProperty(
@@ -138,12 +138,31 @@ void VesuvioL1ThetaResolution::exec() {
 
   // Create output workspaces for distributions if required
   if(!l1DistributionWsName.empty()) {
-    m_l1DistributionWs = WorkspaceFactory::Instance().create("Workspace2D", numHist, numEvents, numEvents);
+    m_l1DistributionWs = WorkspaceFactory::Instance().create(m_instWorkspace, numHist, numEvents, numEvents);
+
+    // Set Y axis
     m_l1DistributionWs->setYUnitLabel("Events");
+
+    // Set X axis
+    auto xAxis = m_l1DistributionWs->getAxis(0);
+    xAxis->setUnit("Label");
+    auto labelUnit = boost::dynamic_pointer_cast<Units::Label>(xAxis->unit());
+    if(labelUnit)
+      labelUnit->setLabel("l1");
   }
+
   if(!thetaDistributionWsName.empty()) {
-    m_thetaDistributionWs = WorkspaceFactory::Instance().create("Workspace2D", numHist, numEvents, numEvents);
+    m_thetaDistributionWs = WorkspaceFactory::Instance().create(m_instWorkspace, numHist, numEvents, numEvents);
+
+    // Set Y axis
     m_thetaDistributionWs->setYUnitLabel("Events");
+
+    // Set X axis
+    auto xAxis = m_thetaDistributionWs->getAxis(0);
+    xAxis->setUnit("Label");
+    auto labelUnit = boost::dynamic_pointer_cast<Units::Label>(xAxis->unit());
+    if(labelUnit)
+      labelUnit->setLabel("theta");
   }
 
   // Set up progress reporting
@@ -159,7 +178,7 @@ void VesuvioL1ThetaResolution::exec() {
     std::stringstream report;
     report << "Detector " << det->getID();
     prog.report(report.str());
-    g_log.information() << "Detector " << det->getID() << std::endl;
+    g_log.information() << "Detector ID " << det->getID() << std::endl;
 
     // Do simulation
     calculateDetector(det, l1, theta);
@@ -193,6 +212,10 @@ void VesuvioL1ThetaResolution::exec() {
       std::copy(l1.begin(), l1.end(), x.begin());
 
       m_l1DistributionWs->dataY(i) = y;
+
+      auto spec = m_l1DistributionWs->getSpectrum(i);
+      spec->setSpectrumNo(specNo);
+      spec->addDetectorID(det->getID());
     }
 
     // Process data for theta distribution
@@ -204,6 +227,10 @@ void VesuvioL1ThetaResolution::exec() {
       std::copy(theta.begin(), theta.end(), x.begin());
 
       m_thetaDistributionWs->dataY(i) = y;
+
+      auto spec = m_thetaDistributionWs->getSpectrum(i);
+      spec->setSpectrumNo(specNo);
+      spec->addDetectorID(det->getID());
     }
   }
 

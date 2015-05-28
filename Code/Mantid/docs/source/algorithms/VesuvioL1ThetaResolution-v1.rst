@@ -24,7 +24,7 @@ Usage
 
 .. testcode:: VesuvioL1ThetaResolutionExample
 
-   resolution, l1_dist, theta_dist = VesuvioL1ThetaResolution()
+   resolution, l1_dist, theta_dist = VesuvioL1ThetaResolution(NumEvents=1000)
 
    resolution_spec_names = resolution.getAxis(1).extractValues()
    print "Resolution spectra: %s" % (', '.join(resolution_spec_names))
