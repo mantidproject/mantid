@@ -1,10 +1,25 @@
+#include <iostream>
+#include <vector>
+#include <set>
+#include <string>
+#include <boost/regex.hpp>
+#include <boost/shared_ptr.hpp>
+
 #include "PythonThreading.h"
 
+#include "MantidAPI/IPeaksWorkspace.h"
+#include "MantidKernel/DynamicFactory.h"
+#include "MantidKernel/Logger.h"
+#include "MantidKernel/ConfigService.h"
+#include "MantidKernel/InstrumentInfo.h"
+#include "MantidQtAPI/InterfaceManager.h"
+#include "MantidQtAPI/MdConstants.h"
+#include "MantidQtAPI/MdSettings.h"
 #include "MantidVatesSimpleGuiViewWidgets/MdViewerWidget.h"
-
 #include "MantidVatesSimpleGuiQtWidgets/ModeControlWidget.h"
 #include "MantidVatesSimpleGuiQtWidgets/RotationPointDialog.h"
 #include "MantidVatesSimpleGuiViewWidgets/BackgroundRgbProvider.h"
+#include "MantidVatesSimpleGuiViewWidgets/ColorMapEditorPanel.h"
 #include "MantidVatesSimpleGuiViewWidgets/ColorSelectionWidget.h"
 #include "MantidVatesSimpleGuiViewWidgets/MultisliceView.h"
 #include "MantidVatesSimpleGuiViewWidgets/SaveScreenshotReaction.h"
@@ -12,17 +27,10 @@
 #include "MantidVatesSimpleGuiViewWidgets/StandardView.h"
 #include "MantidVatesSimpleGuiViewWidgets/ThreesliceView.h"
 #include "MantidVatesSimpleGuiViewWidgets/TimeControlWidget.h"
-#include "MantidQtAPI/InterfaceManager.h"
-#include "MantidAPI/IPeaksWorkspace.h"
-#include "MantidKernel/DynamicFactory.h"
-#include "MantidKernel/Logger.h"
-#include "MantidKernel/ConfigService.h"
-#include "MantidKernel/InstrumentInfo.h"
+#include "MantidVatesSimpleGuiViewWidgets/VatesParaViewApplication.h"
 
 #include "boost/shared_ptr.hpp"
 #include "boost/scoped_ptr.hpp"
-#include "MantidQtAPI/MdConstants.h"
-#include "MantidQtAPI/MdSettings.h"
 
 // Have to deal with ParaView warnings and Intel compiler the hard way.
 #if defined(__INTEL_COMPILER)
@@ -47,15 +55,18 @@
 #include <pqServer.h>
 #include <pqServerManagerModel.h>
 #include <pqStatusBar.h>
+#include <vtkCamera.h>
+#include <vtkPVOrthographicSliceView.h>
+#include <vtkPVXMLElement.h>
 #include <vtkSMDoubleVectorProperty.h>
 #include <vtkSMPropertyHelper.h>
 #include <vtkSMProxyManager.h>
 #include <vtkSMProxy.h>
-#include <vtkSMViewProxy.h>
-#include <vtkSMSourceProxy.h>
 #include <vtkSMReaderFactory.h>
+#include <vtkSMRenderViewProxy.h>
+#include <vtkSMSourceProxy.h>
+#include <vtkSMViewProxy.h>
 #include <vtksys/SystemTools.hxx>
-
 #include <pqPipelineRepresentation.h>
 
 // Used for plugin mode
@@ -89,7 +100,6 @@
 #include <pqViewStreamingBehavior.h>
 #include <pqVerifyRequiredPluginBehavior.h>
 #include <pqSaveDataReaction.h>
-
 #if defined(__INTEL_COMPILER)
   #pragma warning enable 1170
 #endif
@@ -105,15 +115,7 @@
 #include <QUrl>
 #include <QWidget>
 #include <QMessageBox>
-
-#include <iostream>
-#include <vector>
-#include <set>
-#include <string>
-#include <boost/regex.hpp>
-#include <boost/shared_ptr.hpp>
-
-#include "MantidVatesSimpleGuiViewWidgets/VatesParaViewApplication.h"
+#include <QRect>
 
 namespace Mantid
 {
@@ -131,12 +133,38 @@ namespace
 
 REGISTER_VATESGUI(MdViewerWidget)
 
+MdViewerWidget::AllVSIViewsState::AllVSIViewsState(){
+  initialize();
+}
+
+/**
+ * Initializes the views states with new empty values. This can be
+ * used to contruct or to re-initialize (forget) the states.
+ */
+void MdViewerWidget::AllVSIViewsState::initialize()
+{
+  // these will be assigned from vtkSMProxy::SaveXMLState which
+  // allocates a new tree with vtkPVXMLElement::New();
+  stateStandard = vtkSmartPointer<vtkPVXMLElement>::New();
+  stateMulti = vtkSmartPointer<vtkPVXMLElement>::New();
+  stateThreeSlice = vtkSmartPointer<vtkPVXMLElement>::New();
+  stateSplatter = vtkSmartPointer<vtkPVXMLElement>::New();
+}
+
+MdViewerWidget::AllVSIViewsState::~AllVSIViewsState()
+{
+}
+
 /**
  * This constructor is used in the plugin mode operation of the VSI.
  */
 MdViewerWidget::MdViewerWidget() : VatesViewerInterface(), currentView(NULL),
-  dataLoader(NULL), hiddenView(NULL), lodAction(NULL), screenShot(NULL), viewLayout(NULL),
-  viewSettings(NULL), useCurrentColorSettings(false), initialView(ModeControlWidget::STANDARD), m_rebinAlgorithmDialogProvider(this), m_rebinnedWorkspaceIdentifier("_tempvsi")
+
+  hiddenView(NULL), viewSwitched(false), dataLoader(NULL), lodAction(NULL),
+  screenShot(NULL), viewLayout(NULL), viewSettings(NULL),
+  useCurrentColorSettings(false), initialView(ModeControlWidget::STANDARD),
+  m_rebinAlgorithmDialogProvider(this), m_rebinnedWorkspaceIdentifier("_tempvsi"),
+  m_colorMapEditorPanel(NULL), m_allViews()
 {
   //this will initialize the ParaView application if needed.
   VatesParaViewApplication::instance();
@@ -151,7 +179,7 @@ MdViewerWidget::MdViewerWidget() : VatesViewerInterface(), currentView(NULL),
   setAcceptDrops(true);
   // Connect the rebinned sources manager
   QObject::connect(&m_rebinnedSourcesManager, SIGNAL(switchSources(std::string, std::string)),
-                   this, SLOT(onSwitchSoures(std::string, std::string)));
+                   this, SLOT(onSwitchSources(std::string, std::string)));
 }
 
 /**
@@ -206,6 +234,13 @@ void MdViewerWidget::setupUiAndConnections()
                    SIGNAL(executeSwitchViews(ModeControlWidget::Views)),
                    this, SLOT(switchViews(ModeControlWidget::Views)));
 
+
+  // Setup rotation point button
+  QObject::connect(this->ui.resetViewsStateToAllData,
+                   SIGNAL(released()),
+                   this,
+                   SLOT(onResetViewToAll()));
+
   // Setup rotation point button
   QObject::connect(this->ui.resetCenterToPointButton,
                    SIGNAL(clicked()),
@@ -213,9 +248,12 @@ void MdViewerWidget::setupUiAndConnections()
                    SLOT(onRotationPoint()));
 
   /// Provide access to the color-editor panel for the application.
-  pqApplicationCore::instance()->registerManager(
-    "COLOR_EDITOR_PANEL", this->ui.colorMapEditorDock);
-  this->ui.colorMapEditorDock->hide();
+  if (!m_colorMapEditorPanel)
+  {
+    m_colorMapEditorPanel = new ColorMapEditorPanel(this);
+    m_colorMapEditorPanel->setUpPanel();
+  }
+
   //this->connect(this->ui.proxiesPanel,SIGNAL(changeFinished(vtkSMProxy*)),SLOT(panelChanged()));
   QAction* temp = new QAction(this);
   pqDeleteReaction* deleteHandler = new pqDeleteReaction(temp);
@@ -229,7 +267,7 @@ void MdViewerWidget::setupUiAndConnections()
   //this->ui.pipelineBrowser->enableAnnotationFilter(m_widgetName);
   //this->ui.pipelineBrowser->hide();
   g_log.warning("Annotation Name: " + m_widgetName.toStdString());
-  
+
   // Connect the rebinned sources manager
   QObject::connect(&m_rebinnedSourcesManager,
                    SIGNAL(triggerAcceptForNewFilters()),
@@ -241,7 +279,8 @@ void MdViewerWidget::panelChanged()
 {
     this->currentView->renderAll();
 }
-    
+
+
 /**
  * This function places the standard view to the main window, installs an
  * event filter, tweaks the UI layout for the view and calls the routine that
@@ -255,7 +294,7 @@ void MdViewerWidget::setupMainView()
   //vtkSMProxyManager::GetProxyManager()->GetReaderFactory()->RegisterPrototypes("sources");
 
   // Set the view at startup to STANDARD, the view will be changed, depending on the workspace
-  this->currentView = this->setMainViewWidget(this->ui.viewWidget, ModeControlWidget::STANDARD);
+  this->currentView = this->createAndSetMainViewWidget(this->ui.viewWidget, ModeControlWidget::STANDARD);
   this->initialView = ModeControlWidget::STANDARD;
   this->currentView->installEventFilter(this);
 
@@ -287,8 +326,8 @@ void MdViewerWidget::connectLoadDataReaction(QAction *action)
  * @param v the view mode to set on the main window
  * @return the requested view
  */
-ViewBase* MdViewerWidget::setMainViewWidget(QWidget *container,
-                                            ModeControlWidget::Views v)
+ViewBase* MdViewerWidget::createAndSetMainViewWidget(QWidget *container,
+                                                     ModeControlWidget::Views v)
 {
   ViewBase *view;
   switch(v)
@@ -317,6 +356,7 @@ ViewBase* MdViewerWidget::setMainViewWidget(QWidget *container,
     view = NULL;
     break;
   }
+
   return view;
 }
 
@@ -377,12 +417,17 @@ void MdViewerWidget::setParaViewComponentsForView()
 
   QObject::connect(this->currentView, SIGNAL(setViewsStatus(ModeControlWidget::Views, bool)),
                    this->ui.modeControlWidget, SLOT(enableViewButtons(ModeControlWidget::Views, bool)));
-  QObject::connect(this->currentView,
-                   SIGNAL(setViewStatus(ModeControlWidget::Views, bool)),
-                   this->ui.modeControlWidget,
-                   SLOT(enableViewButton(ModeControlWidget::Views, bool)));
+  // note the diff: Buttons <> Button
+  QObject::connect(this->currentView, SIGNAL(setViewStatus(ModeControlWidget::Views, bool)),
+                   this->ui.modeControlWidget, SLOT(enableViewButton(ModeControlWidget::Views, bool)));
+
 
   this->connectColorSelectionWidget();
+
+  // Connect the reset view state button, which is between the color selection widget and the ParaQ toolbars
+  QObject::connect(this->ui.resetViewsStateToAllData, SIGNAL(released()),
+                   this, SLOT(onResetViewsStateToAllData()));
+
 
   // Set animation (time) control widget <-> view signals/slots.
   QObject::connect(this->currentView,
@@ -429,7 +474,7 @@ void MdViewerWidget::onRebin(std::string algorithmType)
  * @param rebinnedWorkspaceName The name of the rebinned  workspace.
  * @param sourceType The type of the source.
  */
-void MdViewerWidget::onSwitchSoures(std::string rebinnedWorkspaceName, std::string sourceType)
+void MdViewerWidget::onSwitchSources(std::string rebinnedWorkspaceName, std::string sourceType)
 {
   // Create the rebinned workspace
   pqPipelineSource* rebinnedSource = prepareRebinnedWorkspace(rebinnedWorkspaceName, sourceType); 
@@ -455,6 +500,33 @@ void MdViewerWidget::onSwitchSoures(std::string rebinnedWorkspaceName, std::stri
   {
     g_log.warning() << error.what();
   }
+}
+
+/**
+ * This gives the user a simple way to reset the state and forget all
+ * the interactions to start anew. Resets to all data and resets the
+ * center point and direction/rotation/angle.
+ */
+void MdViewerWidget::onResetViewsStateToAllData()
+{
+  // forget alll the view saved states
+  m_allViews.initialize();
+
+  if (!this->currentView)
+    return;
+
+  // reset direction/rotation
+  pqRenderView* pqv = this->currentView->getView();
+  if (!pqv) {
+    g_log.warning() << "Serious inconsistency found: could not retrieve a pqRenderView while "
+      "trying to reset the state of the views.";
+    return;
+  }
+  pqv->resetViewDirection(0, 0, -1, 0, 0, 0);
+
+  // reset current view
+  this->currentView->resetDisplay(); // includes a resetCamera() or more
+  this->currentView->render();
 }
 
 /**
@@ -672,9 +744,9 @@ void MdViewerWidget::renderWorkspace(QString workspaceName, int workspaceType, s
   }
 
   // Load a new source plugin
-    pqPipelineSource* source = this->currentView->setPluginSource(sourcePlugin, workspaceName);
-    source->getProxy()->SetAnnotation(this->m_widgetName.toLatin1().data(), "1");
-    this->renderAndFinalSetup();
+  pqPipelineSource* source = this->currentView->setPluginSource(sourcePlugin, workspaceName);
+  source->getProxy()->SetAnnotation(this->m_widgetName.toLatin1().data(), "1");
+  this->renderAndFinalSetup();
 
   // Reset the current view to the correct initial view
   // Note that we can only reset if a source plugin exists.
@@ -686,6 +758,8 @@ void MdViewerWidget::renderWorkspace(QString workspaceName, int workspaceType, s
   {
      resetCurrentView(workspaceType, instrumentName);
   }
+
+  // save
 }
 
 /**
@@ -971,30 +1045,50 @@ void MdViewerWidget::switchViews(ModeControlWidget::Views v)
 {
   this->removeAllRebinning(v);
   this->viewSwitched = true;
+
+  // normally it will just close child SliceView windows
   this->currentView->closeSubWindows();
   this->disconnectDialogs();
-  this->hiddenView = this->setMainViewWidget(this->ui.viewWidget, v);
+
+  this->hiddenView = this->createAndSetMainViewWidget(this->ui.viewWidget, v);
   this->hiddenView->setColorScaleState(this->ui.colorSelectionWidget);
   this->hiddenView->hide();
   this->viewLayout->removeWidget(this->currentView);
+
+  // save all the current visual state before switching.
+  saveViewState(this->currentView);
   this->swapViews();
+
   this->viewLayout->addWidget(this->currentView);
   this->currentView->installEventFilter(this);
   this->currentView->show();
   this->hiddenView->hide();
   this->setParaViewComponentsForView();
   this->connectDialogs();
+
   this->hiddenView->close();
   this->hiddenView->destroyView();
   this->hiddenView->deleteLater();
-  this->setColorForBackground();
+
+  // Currently this render will do one or more resetCamera() and even
+  // resetDisplay() for different views, see for example
+  // StandardView::onRenderDone().
   this->currentView->render();
+  // so because of that, after render() we restore the view state =>
+  // visual glitch from initial/reset camera to restored camera. This
+  // should improved in the future but requires reorganization of
+  // ViewBase and the specialized VSI view classes (trac ticket #11739).
+  restoreViewState(this->currentView, v);
   this->currentView->setColorsForView(this->ui.colorSelectionWidget);
+  this->setColorForBackground();
   
   this->currentView->checkViewOnSwitch();
   this->updateAppState();
   this->initialView = v; 
+
+  // What about this?
   this->setDestroyedListener();
+
   this->currentView->setVisibilityListener();
 }
 
@@ -1003,8 +1097,12 @@ void MdViewerWidget::switchViews(ModeControlWidget::Views v)
  */
 void MdViewerWidget::swapViews()
 {
-  ViewBase *temp;
-  temp = this->currentView;
+  if (!this->currentView)
+    g_log.error("Inconsistency found when swapping views, the current view is NULL");
+  if (!this->hiddenView)
+    g_log.error("Inconsistency found when swapping views, the next view is NULL");
+
+  ViewBase *temp = this->currentView;
   this->currentView = this->hiddenView;
   this->hiddenView = temp;
 }
@@ -1036,6 +1134,8 @@ bool MdViewerWidget::eventFilter(QObject *obj, QEvent *ev)
       this->currentView->updateSettings();
       this->currentView->hide();
       this->useCurrentColorSettings = false;
+
+      this->m_colorMapEditorPanel->hide();
 
       return true;
     }
@@ -1357,7 +1457,7 @@ void MdViewerWidget::dragEnterEvent(QDragEnterEvent *e) {
 }
 
 /**
- * React to dropping a PeaksWorkspace ontot the VSI.
+ * React to dropping a PeaksWorkspace onto the VSI.
  * @param e Drop event.
  */
 void MdViewerWidget::dropEvent(QDropEvent *e) {
@@ -1412,6 +1512,124 @@ void MdViewerWidget::setColorMap()
 {
    // If it is not the first startup of the color map, then we want to use the current color map
   this->ui.colorSelectionWidget->loadColorMap(this->useCurrentColorSettings);
+}
+
+/**
+ * Save the state of a view. Normally you use this to save the state
+ * of the current view before switching to a different view, so when
+ * the user switches back to the original view its state can be
+ * restored. @see restoreViewState(). This class saves one state for
+ * every type of view. The state of a view includes the main
+ * properties of the camera (vtkCamera) namely Position, FocalPoint,
+ * ViewUp, ViewAngle, ClippingRange) and also properties of the
+ * pqRenderView (CenterOfRotation, CenterAxesVisibility, etc.). And
+ * for the slice views you'll also need to save the slices status.
+ *
+ * The state is saved using vtkSMProxy's saveXMLState which returns
+ * the XML tree that can be reloaded to reproduce the same state in
+ * another (render view) proxy. Note that the alternative
+ * GetFullState()/ methods do not seem to be usable in this way but is
+ * meant to support undo/do in ParaView.
+ *
+ * @param view A VSI view (subclass of ViewBase) which can be for
+ * example of types: standard, multislice, threeslice, splatter, its
+ * state will be saved
+ */
+void MdViewerWidget::saveViewState(ViewBase *view) {
+  if (!view)
+    return;
+
+  ModeControlWidget::Views vtype;
+  if (dynamic_cast<StandardView *>(view))
+    vtype = ModeControlWidget::STANDARD;
+  else if (dynamic_cast<MultiSliceView *>(view))
+    vtype = ModeControlWidget::MULTISLICE;
+  else if (dynamic_cast<ThreeSliceView *>(view))
+    vtype = ModeControlWidget::THREESLICE;
+  else if (dynamic_cast<SplatterPlotView *>(view))
+    vtype = ModeControlWidget::SPLATTERPLOT;
+  else {
+    g_log.warning() << "Trying to save the state of a view of unknown type. This seems to indicate a "
+      "severe state inconsistency.";
+    return;
+  }
+
+  switch(vtype)
+  {
+  case ModeControlWidget::STANDARD:
+  {
+    m_allViews.stateStandard.TakeReference(view->getView()->getRenderViewProxy()->SaveXMLState(NULL));
+  }
+  break;
+  case ModeControlWidget::THREESLICE:
+  {
+    m_allViews.stateThreeSlice.TakeReference(view->getView()->getRenderViewProxy()->SaveXMLState(NULL));
+  }
+  break;
+  case ModeControlWidget::MULTISLICE:
+  {
+    m_allViews.stateMulti.TakeReference(view->getView()->getRenderViewProxy()->SaveXMLState(NULL));
+  }
+  break;
+  case ModeControlWidget::SPLATTERPLOT:
+  {
+    m_allViews.stateSplatter.TakeReference(view->getView()->getRenderViewProxy()->SaveXMLState(NULL));
+  }
+  break;
+  default:
+    view = NULL;
+    break;
+  }
+}
+
+/**
+ * Restores the state of a view (if there's a saved state for this
+ * type of view, which should happen if the user has been in that view
+ * before and is switching back to it. @see saveViewState().
+ *
+ * @param view View where we want to restore the previous state
+ * @param vtype Type of view (standard, multislice, etc.)
+ */
+void MdViewerWidget::restoreViewState(ViewBase *view, ModeControlWidget::Views vtype) {
+  if (!view)
+    return;
+
+  int loaded = 0;
+
+  switch(vtype)
+  {
+  case ModeControlWidget::STANDARD:
+  {
+    if (m_allViews.stateStandard)
+      loaded = view->getView()->getRenderViewProxy()->LoadXMLState(m_allViews.stateStandard.GetPointer(), NULL);
+  }
+  break;
+  case ModeControlWidget::THREESLICE:
+  {
+    if (m_allViews.stateThreeSlice)
+      loaded = view->getView()->getRenderViewProxy()->LoadXMLState(m_allViews.stateThreeSlice.GetPointer(), NULL);
+  }
+  break;
+  case ModeControlWidget::MULTISLICE:
+  {
+    if (m_allViews.stateMulti)
+      loaded = view->getView()->getRenderViewProxy()->LoadXMLState(m_allViews.stateMulti.GetPointer(), NULL);
+  }
+  break;
+  case ModeControlWidget::SPLATTERPLOT:
+  {
+    if (m_allViews.stateSplatter)
+      loaded = view->getView()->getRenderViewProxy()->LoadXMLState(m_allViews.stateSplatter.GetPointer(), NULL);
+  }
+  break;
+  default:
+    view = NULL;
+    break;
+  }
+
+  if (!loaded)
+    g_log.warning() << "Failed to restore the state of the current view even though I thought I had "
+      "a state saved from before. The current state may not be consistent.";
 }
 
 } // namespace SimpleGui

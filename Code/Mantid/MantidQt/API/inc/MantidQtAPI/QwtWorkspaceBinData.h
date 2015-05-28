@@ -65,7 +65,6 @@ protected:
   QwtWorkspaceBinData& operator=(const QwtWorkspaceBinData&); // required by QwtData base class
 
 private:
-
   /// Initialize the object
   void init(const Mantid::API::MatrixWorkspace & workspace);
 
@@ -85,7 +84,14 @@ private:
 
   /// Indicates that the data is plotted on a log y scale
   bool m_logScale;
+
+  /// lowest y value
+  double m_minY;
+
   /// lowest positive y value
-  mutable double m_minPositive;
+  double m_minPositive;
+
+  /// highest y value
+  double m_maxY;
 };
 #endif

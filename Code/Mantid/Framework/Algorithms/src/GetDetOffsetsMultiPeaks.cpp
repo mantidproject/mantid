@@ -567,6 +567,11 @@ FitPeakOffsetResult GetDetOffsetsMultiPeaks::calculatePeakOffset(
   fr.numpeakstofit = 0;
   fr.numpeaksindrange = 0;
 
+  fr.highestpeakpos = 0.0;
+  fr.highestpeakdev = 0.0;
+  fr.resolution = 0.0;
+  fr.dev_resolution = 0.0;
+
   // Checks for empty and dead detectors
   if ((isEvent) && (eventW->getEventList(wi).empty())) {
     // empty detector will be masked
@@ -577,12 +582,21 @@ FitPeakOffsetResult GetDetOffsetsMultiPeaks::calculatePeakOffset(
     const MantidVec &Y = m_inputWS->readY(wi);
     const int YLength = static_cast<int>(Y.size());
     double sumY = 0.0;
-    for (int i = 0; i < YLength; i++)
+    size_t numNonEmptyBins = 0;
+    for (int i = 0; i < YLength; i++) {
       sumY += Y[i];
+      if (Y[i] > 0.)
+          numNonEmptyBins += 1;
+    }
     if (sumY < 1.e-30) {
       // Dead detector will be masked
       fr.offset = BAD_OFFSET;
       fr.fitoffsetstatus = "dead det";
+    }
+    if (numNonEmptyBins <= 3) {
+        // Another dead detector check
+        fr.offset = BAD_OFFSET;
+        fr.fitoffsetstatus = "dead det";
     }
   }
 
@@ -956,10 +970,13 @@ void GetDetOffsetsMultiPeaks::generatePeaksList(
 
   // Check
   size_t numrows = peakslist->rowCount();
-  if (numrows != peakPositionRef.size())
-    throw std::runtime_error("Number of peaks in PeaksList (from FindPeaks) is "
-                             "not same as number of "
-                             "referenced peaks' positions. ");
+  if (numrows != peakPositionRef.size()) {
+      std::stringstream msg;
+      msg << "Number of peaks in PeaksList (from FindPeaks="
+          << numrows << ") is not same as number of "
+          << "referenced peaks' positions (" << peakPositionRef.size() << ")";
+    throw std::runtime_error(msg.str());
+  }
 
   std::vector<double> vec_widthDivPos;
   std::vector<double> vec_offsets;
@@ -1176,7 +1193,7 @@ void GetDetOffsetsMultiPeaks::addInfoToReportWS(
     m_resolutionWS->dataE(wi)[0] = offsetresult.dev_resolution;
   } else {
     // Only add successfully calculated value
-    m_resolutionWS->dataY(wi)[0] = -0.0;
+    m_resolutionWS->dataY(wi)[0] = 0.0;
     m_resolutionWS->dataE(wi)[0] = 0.0;
   }
 
@@ -1212,7 +1229,7 @@ void GetDetOffsetsMultiPeaks::addInfoToReportWS(
 
     double numdelta = static_cast<double>(numpeaksfitted);
     double stddev = 0.;
-    if (numpeaksfitted > 1)
+    if (numpeaksfitted > 1.)
       stddev = sqrt(sumdelta2 / numdelta -
                     (sumdelta1 / numdelta) * (sumdelta1 / numdelta));
 

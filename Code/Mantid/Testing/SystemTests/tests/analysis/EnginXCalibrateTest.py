@@ -4,6 +4,11 @@ from mantid.simpleapi import *
 
 class EnginXCalibrateTest(stresstesting.MantidStressTest):
 
+    def __init__(self):
+        stresstesting.MantidStressTest.__init__(self)
+        self.difc = -1
+        self.zero = -1
+
     def runTest(self):
         positions = EnginXCalibrateFull(Filename = 'ENGINX00193749.nxs',
                                       Bank = 1,
@@ -21,8 +26,8 @@ class EnginXCalibrateTest(stresstesting.MantidStressTest):
             self.assertDelta(self.difc, 18405.4, 0.1)
             self.assertDelta(self.zero, 3.53, 0.05)
         else:
-            self.assertDelta(self.difc, 18404.522, 0.001)
-            self.assertDelta(self.zero, 4.426, 0.001)
+            self.assertDelta(self.difc, 18404.496, 0.001)
+            self.assertDelta(self.zero, 4.4345, 0.001)
 
     def cleanup(self):
         mtd.remove('positions')

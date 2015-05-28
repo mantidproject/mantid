@@ -6,6 +6,7 @@
 #include "MantidGeometry/Crystal/SymmetryOperation.h"
 #include "MantidGeometry/Crystal/SymmetryOperationSymbolParser.h"
 
+#include "MantidKernel/Exception.h"
 #include "MantidKernel/V3D.h"
 
 #include <boost/make_shared.hpp>
@@ -274,6 +275,38 @@ public:
         TS_ASSERT_EQUALS(fourFoldZ^1, fourFoldZ);
         TS_ASSERT_EQUALS(fourFoldZ^2, twoFoldZ);
         TS_ASSERT_EQUALS(fourFoldZ^4, identity);
+    }
+
+    void testStreamOperatorOut()
+    {
+        SymmetryOperation mirror("x,-y,z");
+
+        std::stringstream stream;
+        stream << mirror;
+
+        TS_ASSERT_EQUALS(stream.str(), "[x,-y,z]");
+    }
+
+    void testStreamOperatorIn()
+    {
+        std::stringstream stream;
+        stream << "[x,-y,z]";
+
+        SymmetryOperation mirror;
+        TS_ASSERT_DIFFERS(mirror.identifier(), "x,-y,z");
+
+        TS_ASSERT_THROWS_NOTHING(stream >> mirror);
+        TS_ASSERT_EQUALS(mirror.identifier(), "x,-y,z");
+
+        // no []
+        std::stringstream invalidBrackets;
+        invalidBrackets << "x,-y,z";
+        TS_ASSERT_THROWS(invalidBrackets >> mirror, std::runtime_error);
+
+        // invalid string
+        std::stringstream invalid;
+        invalid << "[someString]";
+        TS_ASSERT_THROWS(invalid >> mirror, Exception::ParseError);
     }
 
 private:

@@ -269,8 +269,6 @@ protected:
   //MantidMatrixFunction m_funct;
   int m_column_width;
 
-  QAction *m_actionShowX;
-
 private:
   //name of the underlying workspace
   std::string m_strName;

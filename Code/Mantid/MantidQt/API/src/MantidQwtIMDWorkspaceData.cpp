@@ -43,7 +43,10 @@ MantidQwtIMDWorkspaceData::MantidQwtIMDWorkspaceData(Mantid::API::IMDWorkspace_c
     Mantid::API::MDNormalization normalize,
     bool isDistribution)
  : m_workspace(workspace),
-   m_logScale(logScale), m_minPositive(0),
+   m_logScale(logScale),
+   m_minY(DBL_MAX),
+   m_minPositive(DBL_MAX),
+   m_maxY(-DBL_MAX),
    m_preview(false),
    m_start(start),
    m_end(end),
@@ -94,12 +97,13 @@ MantidQwtIMDWorkspaceData::MantidQwtIMDWorkspaceData(Mantid::API::IMDWorkspace_c
   }
   // And cache the X/Y values
   this->cacheLinePlot();
+
+  this->calculateMinMax();
 }
 
 //-----------------------------------------------------------------------------
 /// Copy constructor
-MantidQwtIMDWorkspaceData::MantidQwtIMDWorkspaceData(const MantidQwtIMDWorkspaceData& data) :
-  m_minPositive(0.0)
+MantidQwtIMDWorkspaceData::MantidQwtIMDWorkspaceData(const MantidQwtIMDWorkspaceData& data)
 {
   this->operator =(data);
 }
@@ -169,6 +173,13 @@ void MantidQwtIMDWorkspaceData::cacheLinePlot()
 //  std::cout << "Plotting from " << m_start << " to " << m_end << std::endl;
 }
 
+//-----------------------------------------------------------------------------
+/// Calculate the MinY and MaxY values
+void MantidQwtIMDWorkspaceData::calculateMinMax()
+{
+  calculateYMinAndMax(m_Y, m_minY, m_maxY, m_minPositive);
+}
+
 
 //-----------------------------------------------------------------------------
 /** Size of the data set
@@ -204,12 +215,11 @@ double MantidQwtIMDWorkspaceData::x(size_t i) const
 */
 double MantidQwtIMDWorkspaceData::y(size_t i) const
 {
-  Mantid::signal_t tmp = m_Y[i];
-  if (m_logScale && tmp <= 0.)
-  {
-    tmp = m_minPositive;
-  }
-  return tmp;
+  Mantid::signal_t val = m_Y[i];
+  if (m_logScale && val <= 0.)
+    return m_minPositive;
+  else
+    return val;
 }
 
 /// Returns the x position of the error bar for the i-th data point (bin)
@@ -244,17 +254,10 @@ size_t MantidQwtIMDWorkspaceData::esize() const
  */
 double MantidQwtIMDWorkspaceData::getYMin() const
 {
-  auto it = std::min_element(m_Y.begin(), m_Y.end());
-  double temp = 0;
-  if(it != m_Y.end())
-  {
-    temp = *it;
-  }
-  if (m_logScale && temp <= 0.)
-  {
-    temp = m_minPositive;
-  }
-  return temp;
+  if (m_logScale)
+    return m_minPositive;
+  else
+    return m_minY;
 }
 
 /**
@@ -263,17 +266,10 @@ double MantidQwtIMDWorkspaceData::getYMin() const
  */
 double MantidQwtIMDWorkspaceData::getYMax() const
 {
-  auto it = std::max_element(m_Y.begin(), m_Y.end());
-  double temp = 0;
-  if(it != m_Y.end())
-  {
-    temp = *it;
-  }
-  if (m_logScale && temp <= 0.)
-  {
-    temp = m_minPositive;
-  }
-  return temp;
+  if (m_logScale && m_maxY <= 0)
+    return m_minPositive;
+  else
+    return m_maxY;
 }
 
 void MantidQwtIMDWorkspaceData::setLogScale(bool on)
@@ -490,5 +486,3 @@ QString MantidQwtIMDWorkspaceData::getYAxisLabel() const
   }
   return "Unknown";
 }
-
-

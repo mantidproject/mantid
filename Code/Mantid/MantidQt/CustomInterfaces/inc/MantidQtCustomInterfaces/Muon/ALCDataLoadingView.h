@@ -53,6 +53,7 @@ namespace CustomInterfaces
     std::string firstRun() const;
     std::string lastRun() const;
     std::string log() const;
+    std::string function() const;
     std::string deadTimeType() const;
     std::string deadTimeFile() const;
     std::string detectorGroupingType() const;

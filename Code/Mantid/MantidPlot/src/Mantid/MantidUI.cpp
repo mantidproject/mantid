@@ -942,9 +942,8 @@ Table* MantidUI::importTableWorkspace(const QString& wsName, bool, bool makeVisi
 
 void MantidUI::showContextMenu(QMenu& cm, MdiSubWindow* w)
 {
-  if (w->isA("MantidMatrix"))
+  if (MantidMatrix * mm = dynamic_cast<MantidMatrix*>(w))
   {
-    MantidMatrix * mm = dynamic_cast<MantidMatrix*>(w);
 
     bool areSpectraSelected = mm->setSelectedRows();
     bool areColumnsSelected = mm->setSelectedColumns();

@@ -10,7 +10,15 @@ if ( CXXTEST_FOUND )
 
   # The actual test suite
   cxxtest_add_test ( ICatTest ${TEST_FILES} )
-  target_link_libraries( ICatTest ICat )
+  target_link_libraries( ICatTest LINK_PRIVATE 
+            ICat
+            API
+            DataObjects
+            Geometry
+            Kernel
+            ${Boost_LIBRARIES}
+            ${POCO_LIBRARIES}
+            )
   add_dependencies ( FrameworkTests ICatTest )
   
   # Add to the 'FrameworkTests' group in VS

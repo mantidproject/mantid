@@ -5,5 +5,6 @@
         <file>parallel_projection.png</file>
         <file>pvIcon.png</file>
         <file>pqEditColor24.png</file>
+        <file>resetViewToAll24.png</file>
     </qresource>
 </RCC>
