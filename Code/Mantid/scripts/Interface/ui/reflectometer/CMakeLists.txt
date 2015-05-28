@@ -10,4 +10,4 @@ refl_window.ui
 refm_reduction.ui
  )
 
-UiToPy( UI_FILES)
+UiToPy( UI_FILES CompileUIReflectometer)

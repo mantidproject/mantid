@@ -906,7 +906,7 @@ if (WITH_ASAN)
 endif ()
 
 # Plugin dependencies
-add_dependencies( MantidPlot mantidqtpython CompileUI )
+add_dependencies( MantidPlot mantidqtpython CompilePyUI )
 
 if (OSX_VERSION VERSION_GREATER 10.8)
   set_target_properties(MantidPlot PROPERTIES INSTALL_RPATH "@executable_path/")

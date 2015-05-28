@@ -5,6 +5,6 @@ set( UI_FILES
   mainwindow.ui 
 )
 
-UiToPy( UI_FILES)
+UiToPy( UI_FILES CompileUILib1To2)
 
 

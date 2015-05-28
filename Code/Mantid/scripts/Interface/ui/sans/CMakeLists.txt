@@ -11,4 +11,4 @@ set( UI_FILES
  trans_spreader.ui
  )
 
-UiToPy( UI_FILES)
+UiToPy( UI_FILES CompileUISANS)

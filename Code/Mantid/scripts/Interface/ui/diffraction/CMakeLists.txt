@@ -7,4 +7,4 @@ set( UI_FILES
  filter_info.ui
  )
 
-UiToPy( UI_FILES)
+UiToPy( UI_FILES CompileUIDiffraction )

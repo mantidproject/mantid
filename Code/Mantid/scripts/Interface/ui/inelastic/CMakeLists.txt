@@ -8,4 +8,4 @@ set( UI_FILES
  
 )
 
-UiToPy( UI_FILES)
+UiToPy( UI_FILES CompileUIInElastic)
