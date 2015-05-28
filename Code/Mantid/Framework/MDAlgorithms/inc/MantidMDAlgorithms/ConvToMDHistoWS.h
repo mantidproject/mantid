@@ -51,6 +51,9 @@ namespace MDAlgorithms {
 class ConvToMDHistoWS : public ConvToMDBase {
 
 public:
+  /// Default constructor
+  ConvToMDHistoWS();
+
   size_t
   initialize(const MDWSDescription &WSD,
              boost::shared_ptr<MDEventWSWrapper> inWSWrapper,

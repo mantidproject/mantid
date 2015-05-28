@@ -39,9 +39,14 @@ namespace Algorithms {
   */
 FitOneSinglePeak::FitOneSinglePeak()
     : m_fitMethodSet(false), m_peakRangeSet(false), m_peakWidthSet(false),
-      m_peakWindowSet(false), m_usePeakPositionTolerance(false),
-      m_wsIndex(0), m_minimizer("Levenberg-MarquardtMD"), m_costFunction("Least squares"), m_numFitCalls(0), m_sstream("")
- {}
+      m_peakWindowSet(false), m_usePeakPositionTolerance(false), m_peakFunc(),
+      m_bkgdFunc(0), m_dataWS(), m_wsIndex(0), m_minFitX(0.), m_maxFitX(0.),
+      i_minFitX(0), i_maxFitX(0), m_minPeakX(0.), m_maxPeakX(0.), i_minPeakX(0),
+      i_maxPeakX(0), m_bestPeakFunc(), m_bestBkgdFunc(), m_bkupPeakFunc(),
+      m_bkupBkgdFunc(), m_fitErrorPeakFunc(), m_fitErrorBkgdFunc(),
+      m_minimizer("Levenberg-MarquardtMD"), m_costFunction(), m_vecFWHM(),
+      m_peakPositionTolerance(0.), m_userPeakCentre(0.), m_bestRwp(0.),
+      m_finalGoodnessValue(0.), m_numFitCalls(0), m_sstream("") {}
 
 //----------------------------------------------------------------------------------------------
 /** Destructor for FitOneSinglePeak
@@ -798,7 +803,8 @@ double FitOneSinglePeak::fitCompositeFunction(
   // so far the best Rwp
   bool modecal = true;
   // FIXME - This is not a good practise...
-  double backRwp = fitFunctionSD(bkgdfunc, dataws, wsindex, startx, endx, modecal);
+  double backRwp =
+      fitFunctionSD(bkgdfunc, dataws, wsindex, startx, endx, modecal);
   m_sstream << "Background: Pre-fit Goodness = " << backRwp << "\n";
   m_bestRwp = fitFunctionSD(compfunc, dataws, wsindex, startx, endx, modecal);
   m_sstream << "Peak+Background: Pre-fit Goodness = " << m_bestRwp << "\n";
@@ -827,7 +833,8 @@ double FitOneSinglePeak::fitCompositeFunction(
     // Fit for composite function renders a better result
     goodness_final = goodness;
     processNStoreFitResult(goodness_final, true);
-  } else if (goodness > m_bestRwp && m_bestRwp < DBL_MAX && m_bestRwp <= backRwp) {
+  } else if (goodness > m_bestRwp && m_bestRwp < DBL_MAX &&
+             m_bestRwp <= backRwp) {
     // A worse result is got.  Revert to original function parameters
     m_sstream << "Fit peak/background composite function FAILS to render a "
                  "better solution. "
@@ -1015,10 +1022,20 @@ DECLARE_ALGORITHM(FitPeak)
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
-FitPeak::FitPeak() {
-  m_minimizer = "Levenberg-MarquardtMD";
-  m_bestRwp = DBL_MAX;
-}
+FitPeak::FitPeak()
+    : API::Algorithm(), m_dataWS(), m_wsIndex(0), m_peakFunc(), m_bkgdFunc(),
+      m_minFitX(0.), m_maxFitX(0.), m_minPeakX(0.), m_maxPeakX(0.),
+      i_minFitX(0), i_maxFitX(0), i_minPeakX(0), i_maxPeakX(0),
+      m_fitBkgdFirst(false), m_outputRawParams(false), m_userGuessedFWHM(0.),
+      m_userPeakCentre(0.), m_minGuessedPeakWidth(0), m_maxGuessedPeakWidth(0),
+      m_fwhmFitStep(0), m_fitWithStepPeakWidth(false),
+      m_usePeakPositionTolerance(false), m_peakPositionTolerance(0.),
+      m_peakParameterTableWS(), m_bkgdParameterTableWS(),
+      m_peakParameterNames(), m_bkgdParameterNames(),
+      m_minimizer("Levenberg-MarquardtMD"), m_bkupBkgdFunc(), m_bkupPeakFunc(),
+      m_bestPeakFunc(), m_bestBkgdFunc(), m_bestRwp(DBL_MAX),
+      m_finalGoodnessValue(0.), m_vecybkup(), m_vecebkup(), m_costFunction(),
+      m_lightWeightOutput(false) {}
 
 //----------------------------------------------------------------------------------------------
 /** Destructor
