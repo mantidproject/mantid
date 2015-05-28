@@ -44,6 +44,9 @@
 TranslateCurveTool::TranslateCurveTool(Graph *graph, ApplicationWindow *app, Direction dir, const QObject *status_target, const char *status_slot)
 	: PlotToolInterface(graph),
 	d_dir(dir),
+        d_sub_tool(NULL),
+        d_selected_curve(NULL),
+        d_curve_point(),
 	d_app(app)
 {
 	if (status_target)

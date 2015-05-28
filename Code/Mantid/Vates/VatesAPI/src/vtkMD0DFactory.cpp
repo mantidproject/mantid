@@ -17,10 +17,8 @@ namespace Mantid
   {
     /**
     Constructor
-    @param thresholdRange : Thresholding range functor
-    @param scalarName : Name to give to signal
     */
-    vtkMD0DFactory::vtkMD0DFactory(ThresholdRange_scptr thresholdRange, const std::string& scalarName) : m_thresholdRange(thresholdRange), m_scalarName(scalarName)
+    vtkMD0DFactory::vtkMD0DFactory()
     {
     }
 

@@ -109,9 +109,8 @@ protected:
 	QPushButton *buttonCancel;
 	QPushButton *buttonApply;
 	QPushButton *buttonDefault;
-	QComboBox *rotateBox;
 	QTextEdit *textEditBox;
-	QGroupBox *groupBox1, *groupBox2;
+	QGroupBox *groupBox1;
 	QComboBox *alignmentBox;
 	TextFormatButtons *formatButtons;
 	QSpinBox *boxBackgroundTransparency;

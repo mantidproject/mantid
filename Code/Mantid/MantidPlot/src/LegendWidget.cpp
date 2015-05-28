@@ -51,7 +51,8 @@ LegendWidget::LegendWidget(Plot *plot):QWidget(plot),
 	d_plot(plot),
 	d_frame (0),
 	d_angle(0),
-	d_fixed_coordinates(false)
+        d_x(0.), d_y(0.),
+        d_fixed_coordinates(false)
 {
 	setAttribute(Qt::WA_DeleteOnClose);
 

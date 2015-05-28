@@ -629,7 +629,7 @@ void NexusFileIO::writeNexusVectorColumn(
 int NexusFileIO::writeNexusTableWorkspace(
     const API::ITableWorkspace_const_sptr &itableworkspace,
     const char *group_name) const {
-  NXstatus status = 0;
+  NXstatus status = NX_ERROR;
 
   boost::shared_ptr<const TableWorkspace> tableworkspace =
       boost::dynamic_pointer_cast<const TableWorkspace>(itableworkspace);
@@ -637,7 +637,7 @@ int NexusFileIO::writeNexusTableWorkspace(
       boost::dynamic_pointer_cast<const PeaksWorkspace>(itableworkspace);
 
   if (!tableworkspace && !peakworkspace)
-    return ((status == NX_ERROR) ? 3 : 0);
+    return 3;
 
   // write data entry
   status = NXmakegroup(fileID, group_name, "NXdata");

@@ -62,13 +62,12 @@ private:
   ApplicationWindow* d_app;
   Graph *d_graph;
   ApplicationWindow::Analysis d_operation;
-	QString windowTitle;
+  QString windowTitle;
 
-    QPushButton* buttonOk;
-	QPushButton* buttonCancel;
-    QGroupBox* groupBox1;
-    QCheckBox* boxShowFormula;
-	QComboBox* boxName;
+  QPushButton* buttonOk;
+  QPushButton* buttonCancel;
+  QGroupBox* groupBox1;
+  QComboBox* boxName;
 };
 
 #endif

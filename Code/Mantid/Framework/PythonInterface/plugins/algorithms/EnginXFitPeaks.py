@@ -63,6 +63,8 @@ class EnginXFitPeaks(PythonAlgorithm):
             centre = row['centre']
             width = row['width']
             height = row['height']
+            if width <= 0.:
+                continue
 
             # Sigma value of the peak, assuming Gaussian shape
             sigma = width / (2 * math.sqrt(2 * math.log(2)))

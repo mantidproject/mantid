@@ -36,8 +36,8 @@ public:
 
       // Spectrum 1
       const double x = (X[i]+X[i+1])/2;
-      double funcVal = 2500*exp(-0.5*pow((x-3.14)/0.012,2));
-      funcVal += 1000*exp(-0.5*pow((x-1.22)/0.01,2));
+      double funcVal = 2500*exp(-0.5*pow((x-3.14)/0.022,2));
+      funcVal += 1000*exp(-0.5*pow((x-1.22)/0.02,2));
       Y1[i] = 5000 + funcVal;
       E1[i] = sqrt(Y1[i]);
     }

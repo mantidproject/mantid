@@ -45,9 +45,21 @@
 
 ContourLinesEditor::ContourLinesEditor(const QLocale& locale, int precision, QWidget* parent)
 				: QWidget(parent),
-				d_spectrogram(NULL),
-				d_locale(locale),
-				d_precision(precision)
+                                  table(NULL),
+                                  insertBtn(NULL),
+                                  deleteBtn(NULL),
+                                  d_spectrogram(NULL),
+                                  d_locale(locale),
+                                  d_precision(precision),
+                                  penDialog(NULL),
+                                  penColorBox(NULL),
+                                  penStyleBox(NULL),
+                                  penWidthBox(NULL),
+                                  applyAllColorBox(NULL),
+                                  applyAllWidthBox(NULL),
+                                  applyAllStyleBox(NULL),
+                                  d_pen_index(0),
+                                  d_pen_list()
 {
 	table = new QTableWidget();
 	table->setColumnCount(2);

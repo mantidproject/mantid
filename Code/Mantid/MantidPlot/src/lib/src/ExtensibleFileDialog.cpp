@@ -38,6 +38,7 @@ ExtensibleFileDialog::ExtensibleFileDialog(QWidget *parent, bool extended, Qt::W
   : QFileDialog(parent, flags)
 {
   d_extension = 0;
+  d_extension_row = 0;
 
   d_extension_toggle = new QPushButton();
   d_extension_toggle->setCheckable(true);
