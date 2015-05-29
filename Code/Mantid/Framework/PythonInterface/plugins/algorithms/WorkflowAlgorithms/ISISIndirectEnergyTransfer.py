@@ -1,4 +1,4 @@
-#pylint: disable=invalid-name,attribute-defined-outside-init,too-many-instance-attributes,too-many-branches
+#pylint: disable=invalid-name,attribute-defined-outside-init,too-many-instance-attributes,too-many-branches,no-init,deprecated-module
 from mantid.kernel import *
 from mantid.api import *
 from mantid.simpleapi import *
@@ -732,7 +732,7 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
             try:
                 short_inst_name = facility.instrument(inst_name).shortName()
                 break
-            except:
+            except RuntimeError:
                 pass
         logger.information('Short name for instrument %s is %s' % (inst_name, short_inst_name))
 
@@ -830,7 +830,8 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
                 DeleteWorkspace(Workspace=ws_name + '_aclimax_save_temp')
 
             if 'davegrp' in self._save_formats:
-                ConvertSpectrumAxis(InputWorkspace=ws_name, OutputWorkspace=ws_name + '_davegrp_save_temp', Target='ElasticQ', EMode='Indirect')
+                ConvertSpectrumAxis(InputWorkspace=ws_name, OutputWorkspace=ws_name + '_davegrp_save_temp',
+                                    Target='ElasticQ', EMode='Indirect')
                 SaveDaveGrp(InputWorkspace=ws_name + '_davegrp_save_temp', Filename=ws_name + '.grp')
                 DeleteWorkspace(Workspace=ws_name + '_davegrp_save_temp')
 

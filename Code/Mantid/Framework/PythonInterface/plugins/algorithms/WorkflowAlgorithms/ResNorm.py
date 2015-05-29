@@ -13,7 +13,9 @@ class ResNorm(PythonAlgorithm):
 
 
     def summary(self):
-        return "This algorithm creates a group 'normalisation' file by taking a resolution file and fitting it to all the groups in the resolution (vanadium) data file which has the same grouping as the sample data of interest."
+        return "This algorithm creates a group 'normalisation' file by taking a resolution file and fitting "+\
+               "it to all the groups in the resolution (vanadium) data file which has the same "+\
+               "grouping as the sample data of interest."
 
 
     def PyInit(self):

@@ -76,7 +76,15 @@ if (OSX_VERSION VERSION_GREATER 10.8)
   set_target_properties ( CustomDialogs PROPERTIES INSTALL_RPATH "@loader_path/../../../Contents/MacOS")
 endif () 
 
-target_link_libraries ( CustomDialogs MantidQtAPI MantidWidgets )
+target_link_libraries ( CustomDialogs LINK_PRIVATE 
+            MantidQtAPI
+            MantidWidgets
+            ${CORE_MANTIDLIBS}
+            ${QT_LIBRARIES}
+            ${POCO_LIBRARIES}
+            ${Boost_LIBRARIES}
+            ${OPENGL_LIBRARIES}
+            )
 
 ###########################################################################
 # Installation settings

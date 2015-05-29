@@ -282,29 +282,30 @@ void ScaleDetails::initWidgets()
     }
     else if (type == ScaleDraw::Time)
     {
-      ScaleDraw *sclDraw = dynamic_cast<ScaleDraw *>(d_plot->axisScaleDraw(m_mappedaxis));
-      QTime origin = sclDraw->dateTimeOrigin().time();
+      if (ScaleDraw *sclDraw = dynamic_cast<ScaleDraw *>(d_plot->axisScaleDraw(m_mappedaxis))) {
+        QTime origin = sclDraw->dateTimeOrigin().time();
 
-      m_dspnStart->hide();
-      m_dteStartDateTime->hide();
-      m_timStartTime->show();
-      m_timStartTime->setDisplayFormat(sclDraw->format());
-      m_timStartTime->setTime(origin.addMSecs((int) start));
+        m_dspnStart->hide();
+        m_dteStartDateTime->hide();
+        m_timStartTime->show();
+        m_timStartTime->setDisplayFormat(sclDraw->format());
+        m_timStartTime->setTime(origin.addMSecs((int) start));
 
-      m_dspnEnd->hide();
-      m_dteEndDateTime->hide();
-      m_timEndTime->show();
-      m_timEndTime->setDisplayFormat(sclDraw->format());
-      m_timEndTime->setTime(origin.addMSecs((int) end));
+        m_dspnEnd->hide();
+        m_dteEndDateTime->hide();
+        m_timEndTime->show();
+        m_timEndTime->setDisplayFormat(sclDraw->format());
+        m_timEndTime->setTime(origin.addMSecs((int) end));
 
-      m_cmbUnit->show();
-      m_cmbUnit->insertItem(tr("millisec."));
-      m_cmbUnit->insertItem(tr("sec."));
-      m_cmbUnit->insertItem(tr("min."));
-      m_cmbUnit->insertItem(tr("hours"));
-      m_cmbUnit->setCurrentIndex(1);
-      m_dspnStep->setValue(m_graph->axisStep(m_mappedaxis) / 1e3);
-      m_dspnStep->setSingleStep(1000);
+        m_cmbUnit->show();
+        m_cmbUnit->insertItem(tr("millisec."));
+        m_cmbUnit->insertItem(tr("sec."));
+        m_cmbUnit->insertItem(tr("min."));
+        m_cmbUnit->insertItem(tr("hours"));
+        m_cmbUnit->setCurrentIndex(1);
+        m_dspnStep->setValue(m_graph->axisStep(m_mappedaxis) / 1e3);
+        m_dspnStep->setSingleStep(1000);
+      }
     }
     else
     {

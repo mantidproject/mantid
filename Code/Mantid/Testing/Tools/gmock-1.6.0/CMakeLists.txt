@@ -83,10 +83,10 @@ include_directories("${gmock_SOURCE_DIR}/include"
 #endif()
 
 cxx_library(gmock "${cxx_strict}" src/gmock-all.cc)
-target_link_libraries(gmock gtest)
+target_link_libraries(gmock LINK_PRIVATE gtest)
 
 #cxx_library(gmock_main "${cxx_strict}" src/gmock_main.cc)
-#target_link_libraries(gmock_main gmock)
+#target_link_libraries(gmock_main LINK_PRIVATE gmock)
 
 
 ########################################################################

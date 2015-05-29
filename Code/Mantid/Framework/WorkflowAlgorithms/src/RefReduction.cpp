@@ -515,10 +515,7 @@ IEventWorkspace_sptr RefReduction::loadData(const std::string dataRun,
       if (instrument.compare("REF_M") == 0) {
         double det_distance =
             rawWS->getInstrument()->getDetector(0)->getPos().Z();
-        Mantid::Kernel::Property *prop =
-            rawWS->run().getProperty("SampleDetDis");
-        Mantid::Kernel::TimeSeriesProperty<double> *dp =
-            dynamic_cast<Mantid::Kernel::TimeSeriesProperty<double> *>(prop);
+        auto dp = rawWS->run().getTimeSeriesProperty<double>("SampleDetDis");
         double sdd = dp->getStatistics().mean / 1000.0;
         IAlgorithm_sptr mvAlg =
             createChildAlgorithm("MoveInstrumentComponent", 0.2, 0.25);
@@ -635,9 +632,7 @@ double RefReduction::calculateAngleREFM(MatrixWorkspace_sptr workspace) {
 
   double direct_beam_pix = getProperty("DirectPixel");
   if (isEmpty(direct_beam_pix)) {
-    Mantid::Kernel::Property *prop = workspace->run().getProperty("DIRPIX");
-    Mantid::Kernel::TimeSeriesProperty<double> *dp =
-        dynamic_cast<Mantid::Kernel::TimeSeriesProperty<double> *>(prop);
+    auto dp = workspace->run().getTimeSeriesProperty<double>("DIRPIX");
     direct_beam_pix = dp->getStatistics().mean;
   }
 
@@ -662,13 +657,10 @@ double RefReduction::calculateAngleREFM(MatrixWorkspace_sptr workspace) {
 }
 
 double RefReduction::calculateAngleREFL(MatrixWorkspace_sptr workspace) {
-  Mantid::Kernel::Property *prop = workspace->run().getProperty("ths");
-  Mantid::Kernel::TimeSeriesProperty<double> *dp =
-      dynamic_cast<Mantid::Kernel::TimeSeriesProperty<double> *>(prop);
+  auto dp = workspace->run().getTimeSeriesProperty<double>("ths");
   const double ths = dp->getStatistics().mean;
 
-  prop = workspace->run().getProperty("tthd");
-  dp = dynamic_cast<Mantid::Kernel::TimeSeriesProperty<double> *>(prop);
+  dp = workspace->run().getTimeSeriesProperty<double>("tthd");
   const double tthd = dp->getStatistics().mean;
 
   double offset = getProperty("AngleOffset");

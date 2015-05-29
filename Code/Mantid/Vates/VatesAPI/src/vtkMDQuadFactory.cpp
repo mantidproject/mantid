@@ -27,7 +27,7 @@ namespace Mantid
   namespace VATES
   {
     /// Constructor
-    vtkMDQuadFactory::vtkMDQuadFactory(ThresholdRange_scptr thresholdRange, const std::string& scalarName) : m_thresholdRange(thresholdRange), m_scalarName(scalarName)
+    vtkMDQuadFactory::vtkMDQuadFactory(ThresholdRange_scptr thresholdRange, const VisualNormalization normalizationOption) : m_thresholdRange(thresholdRange), m_normalizationOption(normalizationOption)
     {
     }
 
@@ -69,8 +69,8 @@ namespace Mantid
           masks[i_dim] = !bIntegrated; //TRUE for unmaksed, integrated dimensions are masked.
         }
 
-        //Ensure destruction in any event.
-        boost::scoped_ptr<IMDIterator> it(imdws->createIterator());
+        //Make iterator, which will use the desired normalization. Ensure destruction in any eventuality. 
+        boost::scoped_ptr<IMDIterator> it(createIteratorWithNormalization(m_normalizationOption, imdws.get()));
 
         // Create 4 points per box.
         vtkPoints *points = vtkPoints::New();
@@ -79,7 +79,7 @@ namespace Mantid
         // One scalar per box
         vtkFloatArray * signals = vtkFloatArray::New();
         signals->Allocate(it->getDataSize());
-        signals->SetName(m_scalarName.c_str());
+        signals->SetName(vtkDataSetFactory::ScalarName.c_str());
         signals->SetNumberOfComponents(1);
 
         size_t nVertexes;
@@ -107,11 +107,11 @@ namespace Mantid
         {
           progressUpdating.eventRaised(progressFactor * double(iBox));
 
-          Mantid::signal_t signal_normalized= it->getNormalizedSignal();
-          if (!isSpecial( signal_normalized ) && m_thresholdRange->inRange(signal_normalized))
+          Mantid::signal_t signal = it->getNormalizedSignal();
+          if (!isSpecial( signal ) && m_thresholdRange->inRange(signal))
           {
             useBox[iBox] = true;
-            signals->InsertNextValue(static_cast<float>(signal_normalized));
+            signals->InsertNextValue(static_cast<float>(signal));
 
             coord_t* coords = it->getVertexesArray(nVertexes, nNonIntegrated, masks);
             delete [] coords;

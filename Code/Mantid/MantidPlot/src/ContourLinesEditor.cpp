@@ -43,11 +43,25 @@
 #include <QPainter>
 #include <QGroupBox>
 
+#include <stdexcept>
+
 ContourLinesEditor::ContourLinesEditor(const QLocale& locale, int precision, QWidget* parent)
 				: QWidget(parent),
-				d_spectrogram(NULL),
-				d_locale(locale),
-				d_precision(precision)
+                                  table(NULL),
+                                  insertBtn(NULL),
+                                  deleteBtn(NULL),
+                                  d_spectrogram(NULL),
+                                  d_locale(locale),
+                                  d_precision(precision),
+                                  penDialog(NULL),
+                                  penColorBox(NULL),
+                                  penStyleBox(NULL),
+                                  penWidthBox(NULL),
+                                  applyAllColorBox(NULL),
+                                  applyAllWidthBox(NULL),
+                                  applyAllStyleBox(NULL),
+                                  d_pen_index(0),
+                                  d_pen_list()
 {
 	table = new QTableWidget();
 	table->setColumnCount(2);
@@ -169,16 +183,14 @@ void ContourLinesEditor::insertLevel()
 		return;
 
 	int row = table->currentRow();
-	DoubleSpinBox *sb = dynamic_cast<DoubleSpinBox*>(table->cellWidget(row, 0));
-	if (!sb)
-		return;
+	DoubleSpinBox *sb = table_cellWidget<DoubleSpinBox>(row, 0);
 
 	QwtDoubleInterval range = d_spectrogram->data().range();
 	double current_value = sb->value();
 	double previous_value = range.minValue ();
-	sb = dynamic_cast<DoubleSpinBox*>(table->cellWidget(row - 1, 0));
-	if (sb)
-		previous_value = sb->value();
+  sb = dynamic_cast<DoubleSpinBox*>(table->cellWidget(row - 1, 0));
+  if (sb)
+    previous_value = sb->value();
 
 	double val = 0.5*(current_value + previous_value);
 
@@ -409,4 +421,13 @@ ContourLinesEditor::~ContourLinesEditor()
 {
 	if(penDialog)
         delete penDialog;
+}
+
+template<class Widget>
+Widget* ContourLinesEditor::table_cellWidget(int i, int j) const {
+  Widget *w = dynamic_cast<Widget*>(table->cellWidget(i, j));
+  if (!w) {
+    throw std::logic_error("Unexpected widget type in ContourLinesEditor.");
+  }
+  return w;
 }
