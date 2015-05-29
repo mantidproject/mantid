@@ -351,7 +351,8 @@ void BinMD::binByIterating(typename MDEventWorkspace<MDE, nd>::sptr ws) {
 
     // Now the implicit function
     if (implicitFunction) {
-      prog->report("Applying implicit function.");
+      if (prog)
+        prog->report("Applying implicit function.");
       signal_t nan = std::numeric_limits<signal_t>::quiet_NaN();
       outWS->applyImplicitFunction(implicitFunction, nan, nan);
     }

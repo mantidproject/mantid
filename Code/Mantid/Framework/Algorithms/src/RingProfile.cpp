@@ -551,6 +551,9 @@ void RingProfile::getBinForPixel(const API::MatrixWorkspace_sptr ws,
 
   API::NumericAxis *oldAxis2 = dynamic_cast<API::NumericAxis *>(ws->getAxis(1));
   // assumption y position is the ws->getAxis(1)(spectrum_index)
+  if (!oldAxis2) {
+    throw std::logic_error("Failed to cast workspace axis to NumericAxis");
+  }
 
   // calculate ypos, the difference of y - centre and  the square of this
   // difference
