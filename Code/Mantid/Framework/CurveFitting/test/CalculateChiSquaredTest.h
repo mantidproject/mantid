@@ -180,7 +180,7 @@ private:
       xBins.resize(nData + dlt);
       double dx = (xMax - xMin) / double(xBins.size() - 1);
       for (size_t i = 0; i < xBins.size(); ++i) {
-        xBins[i] = xMin + i * dx;
+        xBins[i] = xMin + double(i) * dx;
       }
       if (isHisto) {
         xValues.resize(nData);
@@ -219,8 +219,8 @@ private:
     bool isExecuted;
 
     Tester(size_t np = 3, size_t nd = 10, bool histo = true)
-        : nParams(np), nData(nd), isHisto(histo), workspaceIndex(0), xMin(-10),
-          xMax(10), StartX(EMPTY_DBL()), EndX(EMPTY_DBL()),
+        : nParams(np), nData(nd), isHisto(histo), xMin(-10), xMax(10),
+          workspaceIndex(0), StartX(EMPTY_DBL()), EndX(EMPTY_DBL()),
           ignoreInvalidData(false), chiSquared(-1), chiSquaredDividedByDOF(-1),
           chiSquaredWeighted(-1), chiSquaredWeightedDividedByDOF(-1),
           isExecuted(false) {

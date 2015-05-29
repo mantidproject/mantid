@@ -171,64 +171,80 @@ def LoadDialog(*args, **kwargs):
 
 #---------------------------- Fit ---------------------------------------------
 
+def fitting_algorithm(f):
+    
+    function_name = f.__name__
+
+    def wrapper(*args, **kwargs):
+        """
+        Fit defines the interface to the fitting 562 within Mantid.
+        It can work with arbitrary data sources and therefore some options
+        are only available when the function & workspace type are known.
+
+        This simple wrapper takes the Function (as a string) & the InputWorkspace
+        as the first two arguments. The remaining arguments must be
+        specified by keyword.
+
+        Example:
+          Fit(Function='name=LinearBackground,A0=0.3', InputWorkspace=dataWS',
+              StartX='0.05',EndX='1.0',Output="Z1")
+        """
+        Function, InputWorkspace = _get_mandatory_args(function_name, ["Function", "InputWorkspace"], *args, **kwargs)
+        # Remove from keywords so it is not set twice
+        if "Function" in kwargs:
+            del kwargs['Function']
+        if "InputWorkspace" in kwargs:
+            del kwargs['InputWorkspace']
+
+        # Check for behaviour consistent with old API
+        if type(Function) == str and Function in _api.AnalysisDataService:
+            raise ValueError("Fit API has changed. The function must now come first in the argument list and the workspace second.")
+        # Create and execute
+        algm = _create_algorithm_object(function_name)
+        _set_logging_option(algm, kwargs)
+        algm.setProperty('Function', Function) # Must be set first
+        algm.setProperty('InputWorkspace', InputWorkspace)
+
+        # Set all workspace properties before others
+        for key in kwargs.keys():
+            if key.startswith('InputWorkspace_'):
+                algm.setProperty(key, kwargs[key])
+                del kwargs[key]
+
+        lhs = _kernel.funcreturns.lhs_info()
+        # Check for any properties that aren't known and warn they will not be used
+        for key in kwargs.keys():
+            if key not in algm:
+                logger.warning("You've passed a property (%s) to %s() that doesn't apply to any of the input workspaces." % (key,function_name))
+                del kwargs[key]
+        _set_properties(algm, **kwargs)
+        algm.execute()
+
+        return _gather_returns(function_name, lhs, algm)
+
+    # Have a better load signature for autocomplete
+    _signature = "\bFunction, InputWorkspace"
+    # Getting the code object for Load
+    _f = wrapper.func_code
+    # Creating a new code object nearly identical, but with the two variable names replaced
+    # by the property list.
+    _c = _f.__new__(_f.__class__, _f.co_argcount, _f.co_nlocals, _f.co_stacksize, _f.co_flags, _f.co_code, _f.co_consts, _f.co_names,\
+           (_signature, "kwargs"), _f.co_filename, _f.co_name, _f.co_firstlineno, _f.co_lnotab, _f.co_freevars)
+
+    # Replace the code object of the wrapper function
+    wrapper.func_code = _c
+    if not function_name in __SPECIALIZED_FUNCTIONS__:
+        __SPECIALIZED_FUNCTIONS__.append(function_name)
+    
+    return wrapper
+    
+@fitting_algorithm
 def Fit(*args, **kwargs):
-    """
-    Fit defines the interface to the fitting 562 within Mantid.
-    It can work with arbitrary data sources and therefore some options
-    are only available when the function & workspace type are known.
+    pass
 
-    This simple wrapper takes the Function (as a string) & the InputWorkspace
-    as the first two arguments. The remaining arguments must be
-    specified by keyword.
-
-    Example:
-      Fit(Function='name=LinearBackground,A0=0.3', InputWorkspace=dataWS',
-          StartX='0.05',EndX='1.0',Output="Z1")
-    """
-    Function, InputWorkspace = _get_mandatory_args('Fit', ["Function", "InputWorkspace"], *args, **kwargs)
-    # Remove from keywords so it is not set twice
-    if "Function" in kwargs:
-        del kwargs['Function']
-    if "InputWorkspace" in kwargs:
-        del kwargs['InputWorkspace']
-
-    # Check for behaviour consistent with old API
-    if type(Function) == str and Function in _api.AnalysisDataService:
-        raise ValueError("Fit API has changed. The function must now come first in the argument list and the workspace second.")
-    # Create and execute
-    algm = _create_algorithm_object('Fit')
-    _set_logging_option(algm, kwargs)
-    algm.setProperty('Function', Function) # Must be set first
-    algm.setProperty('InputWorkspace', InputWorkspace)
-
-    # Set all workspace properties before others
-    for key in kwargs.keys():
-        if key.startswith('InputWorkspace_'):
-            algm.setProperty(key, kwargs[key])
-            del kwargs[key]
-
-    lhs = _kernel.funcreturns.lhs_info()
-    # Check for any properties that aren't known and warn they will not be used
-    for key in kwargs.keys():
-        if key not in algm:
-            logger.warning("You've passed a property (%s) to Fit() that doesn't apply to any of the input workspaces." % key)
-            del kwargs[key]
-    _set_properties(algm, **kwargs)
-    algm.execute()
-
-    return _gather_returns('Fit', lhs, algm)
-
-# Have a better load signature for autocomplete
-_signature = "\bFunction, InputWorkspace"
-# Getting the code object for Load
-_f = Fit.func_code
-# Creating a new code object nearly identical, but with the two variable names replaced
-# by the property list.
-_c = _f.__new__(_f.__class__, _f.co_argcount, _f.co_nlocals, _f.co_stacksize, _f.co_flags, _f.co_code, _f.co_consts, _f.co_names,\
-       (_signature, "kwargs"), _f.co_filename, _f.co_name, _f.co_firstlineno, _f.co_lnotab, _f.co_freevars)
-
-# Replace the code object of the wrapper function
-Fit.func_code = _c
+@fitting_algorithm
+def CalculateChiSquared(*args, **kwargs):
+    pass
 
 def FitDialog(*args, **kwargs):
     """Popup a dialog for the Load algorithm. More help on the Load function
