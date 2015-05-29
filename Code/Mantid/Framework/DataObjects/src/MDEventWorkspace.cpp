@@ -799,6 +799,13 @@ TMDE(void MDEventWorkspace)::setCoordinateSystem(
   m_coordSystem = coordSystem;
 }
 
+/**
+Return the preferred normalization to use for visualization.
+*/
+TMDE(MDNormalization MDEventWorkspace)::displayNormalization() const {
+  return VolumeNormalization; // volume normalization preferred for display purposes.
+}
+
 } // namespace DataObjects
 
 } // namespace Mantid

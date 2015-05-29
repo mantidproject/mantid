@@ -11,6 +11,11 @@ set ( TEST_FILES
 	ScriptRepositoryTestImpl.h
 )
 
+if (COVERALLS)
+    foreach( loop_var ${SRCS_FILES} ${INC_FILES})
+      set_property(GLOBAL APPEND PROPERTY COVERAGE_SRCS "${CMAKE_CURRENT_SOURCE_DIR}/${loop_var}")
+    endforeach(loop_var)
+endif()
 
 # Add the target for this directory
 add_library ( ScriptRepository ${SRC_FILES} ${INC_FILES} )
@@ -30,6 +35,6 @@ set ( LIBS ${MANTIDLIBS} )
 
 include_directories(inc)
 
-target_link_libraries(ScriptRepository ${LIBS})
+target_link_libraries(ScriptRepository LINK_PRIVATE ${LIBS})
 
 install (TARGETS ScriptRepository ${SYSTEM_PACKAGE_TARGET} DESTINATION ${PLUGINS_DIR} )

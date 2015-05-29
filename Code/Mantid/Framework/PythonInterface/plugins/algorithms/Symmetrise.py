@@ -3,14 +3,12 @@ from mantid import logger, mtd
 from mantid.api import PythonAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty, \
                        ITableWorkspaceProperty, PropertyMode
 from mantid.kernel import Direction, IntArrayProperty
-from mantid.simpleapi import CreateWorkspace, CopyLogs, CopyInstrumentParameters, \
-                             SaveNexusProcessed, CreateEmptyTableWorkspace, RenameWorkspace
-
+import mantid.simpleapi as ms
 import math
 import os.path
 import numpy as np
 
-
+#pylint: disable=too-many-instance-attributes
 class Symmetrise(PythonAlgorithm):
 
     _sample = None
@@ -55,7 +53,7 @@ class Symmetrise(PythonAlgorithm):
                                                      Direction.Output, PropertyMode.Optional),
                              doc='Name to call the properties output table workspace.')
 
-
+    #pylint: disable=too-many-locals
     def PyExec(self):
         self._setup()
         temp_ws_name = '__symm_temp'
@@ -102,23 +100,21 @@ class Symmetrise(PythonAlgorithm):
         v_axis_data = mtd[self._sample].getAxis(1).extractValues()
 
         # Take the values we need from the original vertical axis
-        min_spectrum_index = mtd[self._sample].getIndexFromSpectrumNumber(
-                                int(self._spectra_range[0]))
-        max_spectrum_index = mtd[self._sample].getIndexFromSpectrumNumber(
-                                int(self._spectra_range[1]))
+        min_spectrum_index = mtd[self._sample].getIndexFromSpectrumNumber(int(self._spectra_range[0]))
+        max_spectrum_index = mtd[self._sample].getIndexFromSpectrumNumber(int(self._spectra_range[1]))
         new_v_axis_data = v_axis_data[min_spectrum_index:max_spectrum_index + 1]
 
         # Create an empty workspace with enough storage for the new data
         zeros = np.zeros(new_array_len * num_symm_spectra)
-        CreateWorkspace(OutputWorkspace=temp_ws_name,
-                        DataX=zeros, DataY=zeros, DataE=zeros,
-                        NSpec=int(num_symm_spectra),
-                        VerticalAxisUnit=v_unit, VerticalAxisValues=new_v_axis_data,
-                        UnitX=x_unit)
+        ms.CreateWorkspace(OutputWorkspace=temp_ws_name,
+                           DataX=zeros, DataY=zeros, DataE=zeros,
+                           NSpec=int(num_symm_spectra),
+                           VerticalAxisUnit=v_unit, VerticalAxisValues=new_v_axis_data,
+                           UnitX=x_unit)
 
         # Copy logs and properties from sample workspace
-        CopyLogs(InputWorkspace=self._sample, OutputWorkspace=temp_ws_name)
-        CopyInstrumentParameters(InputWorkspace=self._sample, OutputWorkspace=temp_ws_name)
+        ms.CopyLogs(InputWorkspace=self._sample, OutputWorkspace=temp_ws_name)
+        ms.CopyInstrumentParameters(InputWorkspace=self._sample, OutputWorkspace=temp_ws_name)
 
         # For each spectrum copy positive values to the negative
         output_spectrum_index = 0
@@ -157,7 +153,7 @@ class Symmetrise(PythonAlgorithm):
 
             logger.information('Symmetrise spectrum %d' % spectrum_no)
 
-        RenameWorkspace(InputWorkspace=temp_ws_name, OutputWorkspace=self._output_workspace)
+        ms.RenameWorkspace(InputWorkspace=temp_ws_name, OutputWorkspace=self._output_workspace)
 
         if self._save:
             self._save_output()
@@ -191,8 +187,7 @@ class Symmetrise(PythonAlgorithm):
 
             num_sample_spectra, _ = CheckHistZero(input_workspace_name)
             min_spectra_number = mtd[input_workspace_name].getSpectrum(0).getSpectrumNo()
-            max_spectra_number = mtd[input_workspace_name].getSpectrum(
-                                    num_sample_spectra - 1).getSpectrumNo()
+            max_spectra_number = mtd[input_workspace_name].getSpectrum(num_sample_spectra - 1).getSpectrumNo()
 
             if spec_min < min_spectra_number:
                 issues['SpectraRange'] = 'Minimum spectra must be greater than or equal to %d' % min_spectra_number
@@ -253,8 +248,7 @@ class Symmetrise(PythonAlgorithm):
         if len(self._spectra_range) == 0:
             num_sample_spectra, _ = CheckHistZero(self._sample)
             min_spectra_number = mtd[self._sample].getSpectrum(0).getSpectrumNo()
-            max_spectra_number = mtd[self._sample].getSpectrum(
-                                    num_sample_spectra - 1).getSpectrumNo()
+            max_spectra_number = mtd[self._sample].getSpectrum(num_sample_spectra - 1).getSpectrumNo()
             self._spectra_range = [min_spectra_number, max_spectra_number]
 
         self._output_workspace = self.getPropertyValue('OutputWorkspace')
@@ -307,7 +301,7 @@ class Symmetrise(PythonAlgorithm):
         """
         Creates a table workspace with values calculated in algorithm.
         """
-        props_table = CreateEmptyTableWorkspace(OutputWorkspace=self._props_output_workspace)
+        props_table = ms.CreateEmptyTableWorkspace(OutputWorkspace=self._props_output_workspace)
 
         props_table.addColumn('int', 'NegativeXMinIndex')
         props_table.addColumn('int', 'PositiveXMinIndex')
@@ -326,8 +320,8 @@ class Symmetrise(PythonAlgorithm):
         from IndirectCommon import getDefaultWorkingDirectory
         workdir = getDefaultWorkingDirectory()
         file_path = os.path.join(workdir, self._output_workspace + '.nxs')
-        SaveNexusProcessed(InputWorkspace=self._output_workspace,
-                           Filename=file_path)
+        ms.SaveNexusProcessed(InputWorkspace=self._output_workspace,
+                              Filename=file_path)
 
         logger.information('Output file : ' + file_path)
 

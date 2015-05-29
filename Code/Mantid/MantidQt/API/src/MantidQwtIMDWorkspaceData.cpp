@@ -8,7 +8,6 @@
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidGeometry/MDGeometry/MDTypes.h"
 #include <QStringBuilder>
-#include <boost/math/special_functions/fpclassify.hpp>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
@@ -45,6 +44,9 @@ MantidQwtIMDWorkspaceData::MantidQwtIMDWorkspaceData(Mantid::API::IMDWorkspace_c
     bool isDistribution)
  : m_workspace(workspace),
    m_logScale(logScale),
+   m_minY(DBL_MAX),
+   m_minPositive(DBL_MAX),
+   m_maxY(-DBL_MAX),
    m_preview(false),
    m_start(start),
    m_end(end),
@@ -175,37 +177,7 @@ void MantidQwtIMDWorkspaceData::cacheLinePlot()
 /// Calculate the MinY and MaxY values
 void MantidQwtIMDWorkspaceData::calculateMinMax()
 {
-  double curMin = m_Y[0];
-  double curMinPos = m_Y[0];
-  double curMax = m_Y[0];
-  for(size_t i = 1; i < m_Y.size(); ++i)
-  {
-    // skip NaNs
-    if ((boost::math::isnan)(m_Y[i]) || (boost::math::isinf)(m_Y[i]))
-      continue;
-
-    // Try and get rid any starting NaNs as soon as possible
-    if ((boost::math::isnan)(curMin) || (boost::math::isinf)(curMin))
-      curMin = m_Y[i];
-    if (m_Y[i] > 0 && (curMinPos <= 0 || (boost::math::isnan)(curMinPos) ||
-                       (boost::math::isinf)(curMinPos)))
-      curMinPos = m_Y[i];
-    if ((boost::math::isnan)(curMax) || (boost::math::isinf)(curMax))
-      curMax = m_Y[i];
-
-    // Update our values as appropriate
-    if (m_Y[i] < curMin)
-      curMin = m_Y[i];
-    if (m_Y[i] < curMinPos && m_Y[i] > 0)
-      curMinPos = m_Y[i];
-    if (m_Y[i] > curMax)
-      curMax = m_Y[i];
-  }
-
-  // Save the results
-  m_minY = curMin;
-  m_minPositive = curMinPos;
-  m_maxY = curMax;
+  calculateYMinAndMax(m_Y, m_minY, m_maxY, m_minPositive);
 }
 
 

@@ -4,6 +4,12 @@ set ( SRC_FILES
 
 set ( INC_FILES )
 
+if (COVERALLS)
+    foreach( loop_var ${SRC_FILES} ${INC_FILES})
+      set_property(GLOBAL APPEND PROPERTY COVERAGE_SRCS "${CMAKE_CURRENT_SOURCE_DIR}/${loop_var}")
+    endforeach(loop_var)
+endif()
+
 add_definitions ( -DIN_MANTID_MATLAB_API -DMATLAB_MEX_FILE=1 )
 
 include_directories ( inc )

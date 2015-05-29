@@ -10,13 +10,18 @@ if ( CXXTEST_FOUND )
                         ../../TestHelpers/src/NexusTestHelper.cpp
       )
   
-  if ( GMOCK_FOUND AND GTEST_FOUND )
-    cxxtest_add_test ( APITest ${TEST_FILES} ${GMOCK_TEST_FILES})
-    target_link_libraries( APITest API ${GMOCK_LIBRARIES} ${GTEST_LIBRARIES}  )
-  else ()
-    cxxtest_add_test ( APITest ${TEST_FILES} )
-    target_link_libraries( APITest API  )
-  endif()
+  cxxtest_add_test ( APITest ${TEST_FILES} ${GMOCK_TEST_FILES})
+  target_link_libraries( APITest LINK_PRIVATE 
+            API
+            Geometry
+            Kernel
+            Nexus
+            ${NEXUS_LIBRARIES}
+            ${Boost_LIBRARIES}
+            ${POCO_LIBRARIES}
+            ${GMOCK_LIBRARIES}
+            ${GTEST_LIBRARIES}  )
+
   add_dependencies ( FrameworkTests APITest )
   # Test data
   add_dependencies ( APITest StandardTestData )

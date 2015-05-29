@@ -65,7 +65,10 @@
     <value val="AnalyserReflection" />
 </parameter>
 <parameter name="Workflow.SE-log" type="string">
-    <value val="SetpointLP1" />
+    <value val="SensorA" />
+</parameter>
+<parameter name="Workflow.SE-log-value" type="string">
+    <value val="average" />
 </parameter>
 
 </component-link>

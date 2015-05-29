@@ -49,9 +49,9 @@ namespace MantidQt
       void setSelectedAlgorithm(QString algo);
 
       /// @return the text in the script editor
-      QString getScriptText() { return ui.editor->text(); };
+      QString getScriptText();
       /// Set the script editor text
-      void setScriptText(QString text) { ui.editor->setText(text); }
+      void setScriptText(QString text);
 
       void saveInput();
       /// Sets the AlgorithmInputHistory object recording the algorithm properties

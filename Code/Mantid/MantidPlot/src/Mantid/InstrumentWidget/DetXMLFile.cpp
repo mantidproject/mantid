@@ -39,6 +39,7 @@ DetXMLFile::DetXMLFile(const QList<int>& dets, Option opt, const QString& fname)
     if (dets.empty())
     {
       m_fileName = "";
+      m_delete = false;
       return;
     }
 

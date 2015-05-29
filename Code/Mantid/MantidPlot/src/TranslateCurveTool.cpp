@@ -44,6 +44,9 @@
 TranslateCurveTool::TranslateCurveTool(Graph *graph, ApplicationWindow *app, Direction dir, const QObject *status_target, const char *status_slot)
 	: PlotToolInterface(graph),
 	d_dir(dir),
+        d_sub_tool(NULL),
+        d_selected_curve(NULL),
+        d_curve_point(),
 	d_app(app)
 {
 	if (status_target)
@@ -60,29 +63,37 @@ TranslateCurveTool::TranslateCurveTool(Graph *graph, ApplicationWindow *app, Dir
 
 void TranslateCurveTool::selectCurvePoint(QwtPlotCurve *curve, int point_index)
 {
-  if (!d_sub_tool) return;
-	if(dynamic_cast<PlotCurve *>(curve)->type() != Graph::Function){
-		DataCurve *c = dynamic_cast<DataCurve *>(curve);
-		Table *t = c->table();
-		if (!t)
-			return;
-		
-	    if (d_dir == Horizontal && t->isReadOnlyColumn(t->colIndex(c->xColumnName()))){
-            QMessageBox::warning(d_app, tr("MantidPlot - Warning"),
-            tr("The column '%1' is read-only! Operation aborted!").arg(c->xColumnName()));
-			delete d_sub_tool;
-			d_graph->setActiveTool(NULL);
-			return;
-        } else if (d_dir == Vertical && t->isReadOnlyColumn(t->colIndex(c->title().text()))){
-            QMessageBox::warning(d_app, tr("MantidPlot - Warning"),
-            tr("The column '%1' is read-only! Operation aborted!").arg(c->title().text()));
-			delete d_sub_tool;
-			d_graph->setActiveTool(NULL);
-			return;
-        } 
-	}
-		
-	d_selected_curve = curve;
+  if (!d_sub_tool)
+    return;
+  DataCurve *c = dynamic_cast<DataCurve *>(curve);
+  if (c && c->type() != Graph::Function) {
+    
+    Table *t = c->table();
+    if (!t)
+      return;
+
+    if (d_dir == Horizontal &&
+        t->isReadOnlyColumn(t->colIndex(c->xColumnName()))) {
+      QMessageBox::warning(
+          d_app, tr("MantidPlot - Warning"),
+          tr("The column '%1' is read-only! Operation aborted!")
+              .arg(c->xColumnName()));
+      delete d_sub_tool;
+      d_graph->setActiveTool(NULL);
+      return;
+    } else if (d_dir == Vertical &&
+               t->isReadOnlyColumn(t->colIndex(c->title().text()))) {
+      QMessageBox::warning(
+          d_app, tr("MantidPlot - Warning"),
+          tr("The column '%1' is read-only! Operation aborted!")
+              .arg(c->title().text()));
+      delete d_sub_tool;
+      d_graph->setActiveTool(NULL);
+      return;
+    }
+  }
+
+  d_selected_curve = curve;
 	d_curve_point = QwtDoublePoint(curve->x(point_index), curve->y(point_index));
 	delete d_sub_tool;
 
@@ -101,12 +112,12 @@ void TranslateCurveTool::selectDestination(const QwtDoublePoint &point)
 
 	// Phase 3: execute the translation
 
-	if(dynamic_cast<PlotCurve *>(d_selected_curve)->type() == Graph::Function){
+	if(auto c = dynamic_cast<PlotCurve *>(d_selected_curve)){
+    if (c->type() == Graph::Function) {
 	    if (d_dir == Horizontal){
             QMessageBox::warning(d_app, tr("MantidPlot - Warning"),
             tr("This operation cannot be performed on function curves."));
-        } else {
-            FunctionCurve *func = dynamic_cast<FunctionCurve *>(d_selected_curve);
+        } else if (FunctionCurve *func = dynamic_cast<FunctionCurve *>(d_selected_curve)) {
             if (func->functionType() == FunctionCurve::Normal){
                 QString formula = func->formulas().first();
                 double d = point.y() - d_curve_point.y();
@@ -119,9 +130,9 @@ void TranslateCurveTool::selectDestination(const QwtDoublePoint &point)
         }
 	    d_graph->setActiveTool(NULL);
 	    return;
-    } else {
-      DataCurve *c = dynamic_cast<DataCurve *>(d_selected_curve);
-        double d;
+    }
+  } else if (DataCurve *c = dynamic_cast<DataCurve *>(d_selected_curve)) {
+    double d;
 		QString col_name;
 		switch(d_dir) {
 			case Vertical:

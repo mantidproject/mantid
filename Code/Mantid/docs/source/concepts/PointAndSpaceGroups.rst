@@ -307,7 +307,7 @@ Which produces the following output:
 
     The symmetry operation with highest order in space group no. 175 is: y,-x+y,z (k=6)
     The symmetry operation with highest order in space group no. 207 is: z,y,-x (k=4)
-    
+
 Another way to extract more information about the symmetry in a space group is to obtain the symmetry elements and arrange them by their characteristic axis:
 
 .. testcode:: ExGroupSymmetryElements
@@ -364,6 +364,58 @@ This prints the following information:
     [1,0,0]:  ['21', 'n']
     
 Looking up space group number 62 (:math:`Pnma` from the example) in ITA shows that the full Hermann-Mauguin symbol for that space group is :math:`P 2_1/n 2_1/m 2_1/a`. The short script gives us all of this information, since there are no translations (the primitive lattice translations are implicit) it must be a primitive lattice (:math:`P`) and all directions encoded in the HM-symbol contain a :math:`2_1` screw axis perpendicular to a glide or mirror plane.
+
+With the space group information it's also possible to derive information about site symmetry at specific coordinates and construct the site symmetry group, which is the sub-group of the point group that contains the symmetry operations of the space group that leave the point unchanged. In the following script, the site symmetry group of the :math:`6h` position (coordinates :math:`x, 2x, 1/4`) in space group :math:`P6_3/mmc` (no. 194) is determined:
+
+.. testcode:: ExSiteSymmetryGroup
+
+    from mantid.kernel import V3D
+    from mantid.geometry import SpaceGroupFactory, Group
+    import numpy as np
+
+    # Function that transforms coordinates to the interval [0, 1)
+    def getWrappedCoordinates(coordinates):
+        tmp = coordinates + V3D(1, 1, 1)
+        return V3D(np.fmod(tmp.X(), 1.0), np.fmod(tmp.Y(), 1.0), np.fmod(tmp.Z(), 1.0))
+
+    # Function that construct the site symmetry group
+    def getSiteSymmetryGroup(spaceGroup, point):
+        symOps = spaceGroup.getSymmetryOperations()
+
+        ops = []
+        for op in symOps:
+            transformed = getWrappedCoordinates(op.transformCoordinates(point))
+
+            # If the transformed coordinate is equivalent to the original, add it to the group
+            if transformed == point:
+                ops.append(op)
+
+        # Return group with symmetry operations that leave point unchanged
+        return Group(ops)
+
+    # Construct space group object
+    sg = SpaceGroupFactory.createSpaceGroup("P 63/m m c")
+
+    # Point on 6h-position, [x, 2x, 1/4]
+    point = V3D(0.31, 0.62, 0.25)
+
+    siteSymmGroup = getSiteSymmetryGroup(sg, point)
+
+    print "Site symmetry group fulfills group axioms:", siteSymmGroup.isGroup()
+    print "Order of site symmetry group:", siteSymmGroup.getOrder()
+    print "Order of space group:", sg.getOrder()
+    print "Site multiplicity:", sg.getOrder() / siteSymmGroup.getOrder()
+
+The script produces the following output:
+
+.. testoutput:: ExSiteSymmetryGroup
+
+    Site symmetry group fulfills group axioms: True
+    Order of site symmetry group: 4
+    Order of space group: 24
+    Site multiplicity: 6
+
+There are four symmmetry operations that leave the coordinates :math:`x,2x,1/4` unchanged, they fulfill the group axioms. Dividing the order of the space group by the order of the site symmetry group gives the correct site multiplicity 6. 
     
 .. [ITAPointGroups] International Tables for Crystallography (2006). Vol. A, ch. 10.1, p. 762
 

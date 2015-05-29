@@ -1071,8 +1071,6 @@ void MdViewerWidget::switchViews(ModeControlWidget::Views v)
   this->hiddenView->destroyView();
   this->hiddenView->deleteLater();
 
-  this->setColorForBackground();
-
   // Currently this render will do one or more resetCamera() and even
   // resetDisplay() for different views, see for example
   // StandardView::onRenderDone().
@@ -1083,6 +1081,8 @@ void MdViewerWidget::switchViews(ModeControlWidget::Views v)
   // ViewBase and the specialized VSI view classes (trac ticket #11739).
   restoreViewState(this->currentView, v);
   this->currentView->setColorsForView(this->ui.colorSelectionWidget);
+  this->setColorForBackground();
+  
   this->currentView->checkViewOnSwitch();
   this->updateAppState();
   this->initialView = v; 
