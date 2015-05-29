@@ -1890,6 +1890,9 @@ DateAndTime GenerateEventsFilter::findRunEnd() {
     Kernel::TimeSeriesProperty<double> *protonchargelog =
         dynamic_cast<Kernel::TimeSeriesProperty<double> *>(
             m_dataWS->run().getProperty("proton_charge"));
+    if (!protonchargelog) {
+      throw std::runtime_error("proton_charge log not found");
+    }
 
     if (protonchargelog->size() > 1) {
       Kernel::DateAndTime tmpendtime = protonchargelog->lastTime();

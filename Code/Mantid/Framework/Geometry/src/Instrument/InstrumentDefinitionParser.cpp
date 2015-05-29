@@ -1127,6 +1127,10 @@ void InstrumentDefinitionParser::appendAssembly(
       pType->getAttribute("outline") != "no") {
     Geometry::ObjCompAssembly *objAss =
         dynamic_cast<Geometry::ObjCompAssembly *>(ass);
+    if (!objAss) {
+      throw std::logic_error(
+          "Failed to cast ICompAssembly object to ObjCompAssembly");
+    }
     if (pType->getAttribute("object_created") == "no") {
       pType->setAttribute("object_created", "yes");
       boost::shared_ptr<Geometry::Object> obj = objAss->createOutline();
