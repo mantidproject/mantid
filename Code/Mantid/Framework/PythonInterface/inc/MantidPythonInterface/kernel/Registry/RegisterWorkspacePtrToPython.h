@@ -24,6 +24,8 @@
 */
 #include "MantidPythonInterface/kernel/Registry/TypedPropertyValueHandler.h"
 #include "MantidPythonInterface/kernel/Registry/TypeRegistry.h"
+#include "MantidPythonInterface/kernel/WeakPtr.h"
+
 #include <boost/python/register_ptr_to_python.hpp>
 
 namespace Mantid {
@@ -37,11 +39,11 @@ namespace Registry {
  *    - Calls register_ptr_to_python<boost::weak_ptr<T>>
  *    - Registers a new PropertyValueHandler for a boost::shared_ptr<T>
  */
-template <typename IType> struct DLLExport DataItemInterface {
+template <typename IType> struct DLLExport RegisterWorkspacePtrToPython {
   typedef boost::shared_ptr<IType> IType_sptr;
   typedef boost::weak_ptr<IType> IType_wptr;
   /// Constructor
-  DataItemInterface() {
+  RegisterWorkspacePtrToPython() {
     using namespace boost::python;
     using namespace Registry;
 
@@ -49,11 +51,6 @@ template <typename IType> struct DLLExport DataItemInterface {
     register_ptr_to_python<IType_wptr>();
     // properties can only ever store pointers to these
     TypeRegistry::subscribe<TypedPropertyValueHandler<IType_sptr>>();
-  }
-  /// Register a downcast for this ID
-  DataItemInterface &castFromID(const std::string &id) {
-    using namespace Registry;
-    return *this;
   }
 };
 }

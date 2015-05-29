@@ -15,5 +15,5 @@ class_<TableWorkspace, bases<Workspace>,
     ;
 
   // register pointers
-  DataItemInterface<TableWorkspace>();
+  RegisterWorkspacePtrToPython<TableWorkspace>();
 }

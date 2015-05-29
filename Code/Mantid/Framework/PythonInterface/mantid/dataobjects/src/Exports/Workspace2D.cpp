@@ -1,5 +1,5 @@
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidPythonInterface/kernel/Registry/DataItemInterface.h"
+#include "MantidPythonInterface/kernel/Registry/RegisterWorkspacePtrToPython.h"
 
 #include <boost/python/class.hpp>
 #include <boost/python/object/inheritance.hpp>
@@ -16,5 +16,5 @@ void export_Workspace2D()
     ;
 
   // register pointers
-  DataItemInterface<Workspace2D>();
+  RegisterWorkspacePtrToPython<Workspace2D>();
 }

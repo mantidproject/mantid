@@ -5,7 +5,7 @@
 #include "MantidPythonInterface/kernel/Converters/NDArrayToVector.h"
 #include "MantidPythonInterface/kernel/Converters/PySequenceToVector.h"
 #include "MantidPythonInterface/kernel/Converters/CloneToNumpy.h"
-#include "MantidPythonInterface/kernel/Registry/DataItemInterface.h"
+#include "MantidPythonInterface/kernel/Registry/RegisterWorkspacePtrToPython.h"
 #include "MantidPythonInterface/kernel/Policies/VectorToNumpy.h"
 
 #include <boost/python/class.hpp>
@@ -23,7 +23,7 @@
 #include <numpy/arrayobject.h>
 
 using namespace Mantid::API;
-using Mantid::PythonInterface::Registry::DataItemInterface;
+using Mantid::PythonInterface::Registry::RegisterWorkspacePtrToPython;
 using namespace boost::python;
 
 namespace
@@ -393,8 +393,6 @@ void export_ITableWorkspace()
 
   //-------------------------------------------------------------------------------------------------
 
-  DataItemInterface<ITableWorkspace>()
-    .castFromID("TableWorkspace")
-  ;
+  RegisterWorkspacePtrToPython<ITableWorkspace>();
 }
 

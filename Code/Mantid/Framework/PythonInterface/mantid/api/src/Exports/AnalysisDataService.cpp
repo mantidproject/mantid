@@ -1,21 +1,17 @@
+#include "MantidPythonInterface/api/ExtractWorkspace.h"
 #include "MantidPythonInterface/kernel/DataServiceExporter.h"
 #include "MantidPythonInterface/kernel/TrackingInstanceMethod.h"
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Workspace.h"
 
-#include <boost/python/call_method.hpp>
-#include <boost/weak_ptr.hpp>
-
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
-using Mantid::PythonInterface::DataServiceExporter;
-using Mantid::PythonInterface::TrackingInstanceMethod;
+using namespace Mantid::PythonInterface;
 using namespace boost::python;
 
 namespace {
 
-typedef boost::weak_ptr<Workspace> Workspace_wptr;
 
 /**
  * Add an item into the ADS, if it exists then an error is raised
@@ -25,19 +21,12 @@ typedef boost::weak_ptr<Workspace> Workspace_wptr;
  */
 void addItem(AnalysisDataServiceImpl &self, const std::string &name,
              const boost::python::object &item) {
-  extract<Workspace_wptr> weakExtract(item);
-  if(weakExtract.check()) {
-    self.add(name, weakExtract().lock());
-    return;
-  }
-
-  extract<Workspace_sptr> sharedExtract(item);
-  if(sharedExtract.check()) {
-    self.add(name, sharedExtract());
+  ExtractWorkspace extractWS(item);
+  if(extractWS.check()) {
+    self.add(name, extractWS());
   } else {
     throw std::runtime_error("Unable to add unknown object type to ADS");
   }
-
 }
 
 /**
@@ -48,17 +37,11 @@ void addItem(AnalysisDataServiceImpl &self, const std::string &name,
  */
 void addOrReplaceItem(AnalysisDataServiceImpl &self, const std::string &name,
                       const boost::python::object &item) {
-  extract<Workspace_wptr> weakExtract(item);
-  if(weakExtract.check()) {
-    self.add(name, weakExtract().lock());
-    return;
-  }
-
-  extract<Workspace_sptr> sharedExtract(item);
-  if(sharedExtract.check()) {
-    self.add(name, sharedExtract());
+  ExtractWorkspace extractWS(item);
+  if(extractWS.check()) {
+    self.addOrReplace(name, extractWS());
   } else {
-    throw std::runtime_error("Unable to add unknown object type to ADS");
+    throw std::runtime_error("Unable to add/replace unknown object type to ADS");
   }
 }
 

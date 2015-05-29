@@ -5,13 +5,13 @@
 #include "MantidPythonInterface/kernel/Converters/WrapWithNumpy.h"
 #include "MantidPythonInterface/kernel/Policies/RemoveConst.h"
 #include "MantidPythonInterface/kernel/Policies/VectorToNumpy.h"
-#include "MantidPythonInterface/kernel/Registry/DataItemInterface.h"
+#include "MantidPythonInterface/kernel/Registry/RegisterWorkspacePtrToPython.h"
 
 #include <boost/python/class.hpp>
-#include <boost/python/overloads.hpp>
 #include <boost/python/copy_const_reference.hpp>
 #include <boost/python/implicit.hpp>
 #include <boost/python/numeric.hpp>
+#include <boost/python/overloads.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
 
 using namespace Mantid::API;
@@ -241,5 +241,5 @@ void export_MatrixWorkspace()
          "CheckWorkspacesMatch algorithm")
     ;
 
-  DataItemInterface<MatrixWorkspace>();
+  RegisterWorkspacePtrToPython<MatrixWorkspace>();
 }

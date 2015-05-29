@@ -1,6 +1,6 @@
 #include "MantidAPI/Workspace.h"
 
-#include "MantidPythonInterface/kernel/Registry/DataItemInterface.h"
+#include "MantidPythonInterface/kernel/Registry/RegisterWorkspacePtrToPython.h"
 
 #include <boost/python/class.hpp>
 #include <boost/python/overloads.hpp>
@@ -46,5 +46,5 @@ void export_Workspace()
            "Return read-only access to the workspace history");
 
   // register pointers
-  DataItemInterface<Workspace>();
+  RegisterWorkspacePtrToPython<Workspace>();
 }
