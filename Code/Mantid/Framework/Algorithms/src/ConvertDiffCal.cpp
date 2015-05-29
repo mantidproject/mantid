@@ -11,6 +11,8 @@ namespace Algorithms {
 using Mantid::Kernel::Direction;
 using Mantid::API::IAlgorithm_sptr;
 using Mantid::API::ISpectrum;
+using Mantid::API::ITableWorkspace;
+using Mantid::API::ITableWorkspace_sptr;
 using Mantid::API::Progress;
 using Mantid::API::WorkspaceProperty;
 using Mantid::DataObjects::OffsetsWorkspace;
@@ -60,7 +62,7 @@ void ConvertDiffCal::init() {
             "OffsetsWorkspace", "", Direction::Input),
               "OffsetsWorkspace containing the calibration offsets.");
   declareProperty(
-      new WorkspaceProperty<TableWorkspace>("OutputWorkspace", "", Direction::Output),
+      new WorkspaceProperty<ITableWorkspace>("OutputWorkspace", "", Direction::Output),
       "An output workspace.");
 }
 
@@ -125,8 +127,6 @@ double calculateDIFC(OffsetsWorkspace_const_sptr offsetsWS, const size_t index) 
     return 1./factor;
 }
 
-
-
 //----------------------------------------------------------------------------------------------
 /** Execute the algorithm.
  */
@@ -134,16 +134,15 @@ void ConvertDiffCal::exec() {
   OffsetsWorkspace_const_sptr offsetsWS = getProperty("OffsetsWorkspace");
 
   // initial setup of new style config
-  TableWorkspace_sptr configWksp = boost::make_shared<TableWorkspace>();
+  ITableWorkspace_sptr configWksp = boost::make_shared<TableWorkspace>();
   configWksp->addColumn("int", "detid");
   configWksp->addColumn("double", "difc");
   configWksp->addColumn("double", "difa");
   configWksp->addColumn("double", "tzero");
-  setProperty("OutputWorkspace", configWksp);
 
   // create values in the table
   const size_t numberOfSpectra = offsetsWS->getNumberHistograms();
-  Progress progress(this, 0.0, 9.0, numberOfSpectra);
+  Progress progress(this, 0.0, 1.0, numberOfSpectra);
 
   for (size_t i = 0; i < numberOfSpectra; ++i) {
     API::TableRow newrow = configWksp->appendRow();
@@ -154,6 +153,17 @@ void ConvertDiffCal::exec() {
 
     progress.report();
   }
+
+  // sort the results
+  IAlgorithm_sptr sortTable = createChildAlgorithm("SortTableWorkspace");
+  sortTable->setProperty("InputWorkspace", configWksp);
+  sortTable->setProperty("OutputWorkspace", configWksp);
+  sortTable->setPropertyValue("Columns", "detid");
+  sortTable->executeAsChildAlg();
+
+  // copy over the results
+  configWksp = sortTable->getProperty("OutputWorkspace");
+  setProperty("OutputWorkspace", configWksp);
 }
 
 } // namespace Algorithms
