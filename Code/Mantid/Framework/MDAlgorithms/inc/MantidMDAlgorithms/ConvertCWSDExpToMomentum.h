@@ -33,10 +33,28 @@ namespace MDAlgorithms {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport ConvertCWSDExpToMomentum : API::Algorithm {
+class DLLExport ConvertCWSDExpToMomentum : public API::Algorithm {
 public:
   ConvertCWSDExpToMomentum();
   virtual ~ConvertCWSDExpToMomentum();
+
+  /// Algorithm's name
+  virtual const std::string name() const {
+    return "ConvertCWSDExpToMomentum";
+  }
+
+  /// Summary of algorithms purpose
+  virtual const std::string summary() const {
+    return "Load and convert a set of files in an HB3A experiment.";
+  }
+
+  /// Algorithm's version
+  virtual int version() const { return (1); }
+
+  /// Algorithm's category for identification
+  virtual const std::string category() const {
+    return "Diffraction;DataHandling\\Text";
+  }
 
 private:
   void init();
@@ -47,6 +65,9 @@ private:
   void convertSpiceMatrixToMomentumMDEvents(API::MatrixWorkspace_sptr dataws,
                                             const detid_t &startdetid,
                                             const int runnumber);
+
+  void convertToMomentum(const std::vector<double> &detPos, const double &wavelength,
+                         std::vector<Mantid::coord_t> &qSample);
 
   API::IMDEventWorkspace_sptr createExperimentMDWorkspace();
 
@@ -61,6 +82,7 @@ private:
   API::ITableWorkspace_sptr m_expDataTableWS;
   API::ITableWorkspace_sptr m_detectorListTableWS;
   API::IMDEventWorkspace_sptr m_outputWS;
+  Geometry::Instrument_sptr m_virtualInstrument;
 
   Kernel::V3D m_samplePos;
   Kernel::V3D m_sourcePos;
@@ -68,10 +90,9 @@ private:
   size_t m_iColFilename;
   size_t m_iColStartDetID;
 
-  size_t m_numBins;
-
   std::vector<double> m_extentMins;
   std::vector<double> m_extentMaxs;
+  std::vector<size_t> m_numBins;
 };
 
 } // namespace MDAlgorithms

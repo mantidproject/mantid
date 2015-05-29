@@ -265,6 +265,24 @@ void LoadSpiceXML2DDet::exec() {
   if (spicetablewsname.size() > 0) {
     setupSampleLogFromSpiceTable(outws, spicetablews, ptnumber);
   }
+  else
+  {
+    // Set up 2theta from _2theta
+    if (outws->run().hasProperty("_2theta"))
+    {
+      Kernel::DateAndTime anytime(1000);
+      double logvalue = atof(outws->run().getProperty("_2theta")->value().c_str());
+      g_log.information() << "Set 2theta from _2thea with value " << logvalue << "\n";
+      TimeSeriesProperty<double> *newlogproperty =
+          new TimeSeriesProperty<double>("2theta");
+      newlogproperty->addValue(anytime, logvalue);
+      outws->mutableRun().addProperty(newlogproperty);
+    }
+    else
+    {
+      g_log.warning("No 2theta is set up for loading instrument.");
+    }
+  }
 
   if (loadinstrument) {
     loadInstrument(outws, idffilename);
@@ -613,20 +631,9 @@ bool LoadSpiceXML2DDet::getHB3AWavelength(MatrixWorkspace_sptr dataws,
 
 void LoadSpiceXML2DDet::setXtoLabQ(API::MatrixWorkspace_sptr dataws,
                                    const double &wavelength) {
-  // Geometry information
-  // Kernel::V3D sourcepos = dataws->getInstrument()->getSource()->getPos();
-  // Kernel::V3D samplepos = dataws->getInstrument()->getSample()->getPos();
-  // Kernel::V3D sample_source_vector = sourcepos - samplepos;
 
   size_t numspec = dataws->getNumberHistograms();
   for (size_t iws = 0; iws < numspec; ++iws) {
-    /*
-    Kernel::V3D detpos = dataws->getDetector(iws)->getPos();
-    Kernel::V3D detpos_sample_vector = detpos - samplepos;
-    double scattering_rad = detpos_sample_vector.angle(sample_source_vector);
-    */
-
-    // double ki = 4*sin(scattering_rad*0.5)*M_PI/wavelength;
     double ki = 2. * M_PI / wavelength;
     dataws->dataX(iws)[0] = ki;
     dataws->dataX(iws)[1] = ki + 0.00001;
