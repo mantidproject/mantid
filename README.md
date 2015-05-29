@@ -15,3 +15,4 @@ Useful links
 #### Badges
 
 [![Coverage Status](https://coveralls.io/repos/mantidproject/mantid/badge.svg?branch=HEAD)](https://coveralls.io/r/mantidproject/mantid?branch=HEAD)
+[![Coverity Scan Build Status](https://img.shields.io/coverity/scan/335.svg)](https://scan.coverity.com/projects/335")
