@@ -1,6 +1,7 @@
 #pylint: disable=no-init,invalid-name
 from mantid.kernel import *
 from mantid.api import *
+from mantid.simpleapi import CreateEmptyTableWorkspace
 
 import math
 
@@ -27,7 +28,15 @@ class EnginXFitPeaks(PythonAlgorithm):
 
         self.declareProperty(FileProperty(name="ExpectedPeaksFromFile",defaultValue="",
                                           action=FileAction.OptionalLoad,extensions = [".csv"]),
-                             "Load from file a list of dSpacing values to be translated into TOF to find expected peaks.")
+                             "Load from file a list of dSpacing values to be translated into TOF to "
+                             "find expected peaks.")
+
+
+        self.declareProperty('OutputParametersTableName', '', direction=Direction.Input,
+                             doc = 'Name for a table workspace with the fitted values calculated by '
+                             'this algorithm (Difc and Zero parameters) for GSAS. At the moment '
+                             'these two parameters are added as two columns in a single row. If not given, '
+                             'the table workspaced is not created.')
 
         self.declareProperty("Difc", 0.0, direction = Direction.Output,\
     		doc = "Fitted Difc value")
@@ -55,6 +64,85 @@ class EnginXFitPeaks(PythonAlgorithm):
         if foundPeaks.rowCount() < len(expectedPeaksTof):
             raise Exception("Some peaks were not found")
 
+        difc, zero = self._fitAllPeaks(foundPeaks, expectedPeaksD)
+
+        self._produceOutputs(difc, zero)
+
+    def _readInExpectedPeaks(self):
+        """ Reads in expected peaks from the .csv file """
+        readInArray = []
+        exPeakArray = []
+        updateFileName = self.getPropertyValue("ExpectedPeaksFromFile")
+        if updateFileName != "":
+            with open(updateFileName) as f:
+                for line in f:
+                    readInArray.append([float(x) for x in line.split(',')])
+            for a in readInArray:
+                for b in a:
+                    exPeakArray.append(b)
+            if exPeakArray == []:
+                print "File could not be read. Defaults being used."
+                expectedPeaksD = sorted(self.getProperty('ExpectedPeaks').value)
+            else:
+                print "using file"
+                expectedPeaksD = sorted(exPeakArray)
+        else:
+            expectedPeaksD = sorted(self.getProperty('ExpectedPeaks').value)
+        return expectedPeaksD
+
+    def _getDefaultPeaks(self):
+        """ Gets default peaks for EnginX algorithm. Values from CeO2 """
+        defaultPeak = [3.1243, 2.7057, 1.9132, 1.6316, 1.5621, 1.3529, 1.2415,
+                       1.2100, 1.1046, 1.0414, 0.9566, 0.9147, 0.9019, 0.8556,
+                       0.8252, 0.8158, 0.7811]
+        return defaultPeak
+
+    def _produceOutputs(self, difc, zero):
+        """
+        Fills in the output properties as requested. NOTE: this method and the methods that this calls
+        might/should be merged with similar methods in other EnginX algorithms (like EnginXCalibrate)
+        and possibly moved into EnginXUtils.py. That depends on how the EnginX algorithms evolve overall.
+        In principle, when EnginXCalibrate is updated with a similar 'OutputParametersTableName' optional
+        output property, it should use the 'OutputParametersTableName' of this (EnginXFitPeaks) algorithm.
+
+        @param difc :: the difc GSAS parameter as fitted here
+        @param zero :: the zero GSAS parameter as fitted here
+        """
+        # mandatory outputs
+        self.setProperty('Difc', difc)
+        self.setProperty('Zero', zero)
+
+        # optional outputs
+        tblName = self.getPropertyValue("OutputParametersTableName")
+        if '' != tblName:
+            self._generateOutputParFitTable(tblName)
+
+    def _generateOutputParFitTable(self, name):
+        """
+        Produces a table workspace with the two fitted parameters
+        @param name :: the name to use for the table workspace that is created here
+        """
+        tbl = CreateEmptyTableWorkspace(OutputWorkspace=name)
+        tbl.addColumn('double', 'difc')
+        tbl.addColumn('double', 'zero')
+        tbl.addRow([float(self.getPropertyValue('difc')), float(self.getPropertyValue('zero'))])
+
+        self.log().information("Output parameters added into a table workspace: %s" % name)
+
+    def _fitAllPeaks(self, foundPeaks, expectedPeaksD):
+        """
+        This tries to fit as many peaks as there are in the list of expected peaks passed to the algorithm.
+        The parameters from the (Gaussian) peaks fitted by FindPeaks elsewhere (before calling this method)
+        are used as initial guesses.
+
+        @param foundPeaks :: list of peaks found by FindPeaks or similar algorithm
+        @param expectedPeaksD :: list of expected peaks provided as input to this algorithm (in dSpacing units)
+
+        @returns difc and zero parameters obtained from fitting a
+        linear background (in _fitDSpacingToTOF) to the peaks fitted
+        here individually
+
+        """
         fittedPeaks = self._createFittedPeaksTable()
 
         for i in range(foundPeaks.rowCount()):
@@ -103,39 +191,8 @@ class EnginXFitPeaks(PythonAlgorithm):
 
             fittedPeaks.addRow(fittedParams)
 
-        (difc, zero) = self._fitDSpacingToTOF(fittedPeaks)
-
-        self.setProperty('Difc', difc)
-        self.setProperty('Zero', zero)
-
-    def _readInExpectedPeaks(self):
-        """ Reads in expected peaks from the .csv file """
-        readInArray = []
-        exPeakArray = []
-        updateFileName = self.getPropertyValue("ExpectedPeaksFromFile")
-        if updateFileName != "":
-            with open(updateFileName) as f:
-                for line in f:
-                    readInArray.append([float(x) for x in line.split(',')])
-            for a in readInArray:
-                for b in a:
-                    exPeakArray.append(b)
-            if exPeakArray == []:
-                print "File could not be read. Defaults being used."
-                expectedPeaksD = sorted(self.getProperty('ExpectedPeaks').value)
-            else:
-                print "using file"
-                expectedPeaksD = sorted(exPeakArray)
-        else:
-            expectedPeaksD = sorted(self.getProperty('ExpectedPeaks').value)
-        return expectedPeaksD
-
-    def _getDefaultPeaks(self):
-        """ Gets default peaks for EnginX algorithm. Values from CeO2 """
-        defaultPeak = [3.1243, 2.7057, 1.9132, 1.6316, 1.5621, 1.3529, 1.2415,
-                       1.2100, 1.1046, 1.0414, 0.9566, 0.9147, 0.9019, 0.8556,
-                       0.8252, 0.8158, 0.7811]
-        return defaultPeak
+        difc, zero = self._fitDSpacingToTOF(fittedPeaks)
+        return (difc, zero)
 
     def _fitDSpacingToTOF(self, fittedPeaksTable):
         """ Fits a linear background to the dSpacing <-> TOF relationship and returns fitted difc
