@@ -39,7 +39,7 @@ public:
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
     TS_ASSERT( alg.isInitialized() )
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("OutputWorkspace", outWSName) );
-    TS_ASSERT_THROWS_NOTHING( alg.setProperty("NumEvents", 1000) );
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("NumEvents", 100) );
     TS_ASSERT_THROWS_NOTHING( alg.execute(); );
     TS_ASSERT( alg.isExecuted() );
 
@@ -47,24 +47,34 @@ public:
     TS_ASSERT_THROWS_NOTHING( ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outWSName) );
     TS_ASSERT(ws);
     if (!ws) return;
+    validateFullResolutionWorkspace(ws);
 
-    NumericAxis * xAxis = dynamic_cast<NumericAxis *>(ws->getAxis(0));
-    TS_ASSERT( xAxis );
-    if(xAxis)
-    {
-      TS_ASSERT_EQUALS( xAxis->length(), 196 );
-      TS_ASSERT_EQUALS( xAxis->getValue(0), 3 );
-      TS_ASSERT_EQUALS( xAxis->getValue(xAxis->length() - 1), 198 );
-      TS_ASSERT_EQUALS( xAxis->unit()->unitID(), "Label" );
-      TS_ASSERT_EQUALS( xAxis->unit()->caption(), "Spectrum Number" );
-    }
+    // Remove workspace from the data service.
+    AnalysisDataService::Instance().remove(outWSName);
+  }
 
-    TextAxis * vAxis = dynamic_cast<TextAxis *>(ws->getAxis(1));
-    TS_ASSERT( vAxis );
-    if(vAxis)
-    {
-      TS_ASSERT_EQUALS( vAxis->length(), 4 );
-    }
+  /**
+   * Tests execution with a PAR file.
+   */
+  void test_runPARFile()
+  {
+    // Name of the output workspace.
+    std::string outWSName("VesuvioL1ThetaResolutionTest_OutputWS");
+
+    VesuvioL1ThetaResolution alg;
+    TS_ASSERT_THROWS_NOTHING( alg.initialize() )
+    TS_ASSERT( alg.isInitialized() )
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("OutputWorkspace", outWSName) );
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("NumEvents", 100) );
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("PARFile", "IP0005.dat") );
+    TS_ASSERT_THROWS_NOTHING( alg.execute(); );
+    TS_ASSERT( alg.isExecuted() );
+
+    MatrixWorkspace_sptr ws;
+    TS_ASSERT_THROWS_NOTHING( ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outWSName) );
+    TS_ASSERT(ws);
+    if (!ws) return;
+    validateFullResolutionWorkspace(ws);
 
     // Remove workspace from the data service.
     AnalysisDataService::Instance().remove(outWSName);
@@ -93,7 +103,7 @@ public:
     TS_ASSERT_THROWS_NOTHING( ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(l1WSName) );
     TS_ASSERT(ws);
     if (!ws) return;
-    validateDistributionWorkspace(ws, "l1");
+    validateFullDistributionWorkspace(ws, "l1");
 
     // Remove workspace from the data service.
     AnalysisDataService::Instance().remove(outWSName);
@@ -114,7 +124,7 @@ public:
     TS_ASSERT( alg.isInitialized() )
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("OutputWorkspace", outWSName) );
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("ThetaDistribution", thetaWSName) );
-    TS_ASSERT_THROWS_NOTHING( alg.setProperty("NumEvents", 1000) );
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("NumEvents", 100) );
     TS_ASSERT_THROWS_NOTHING( alg.execute(); );
     TS_ASSERT( alg.isExecuted() );
 
@@ -122,14 +132,35 @@ public:
     TS_ASSERT_THROWS_NOTHING( ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(thetaWSName) );
     TS_ASSERT(ws);
     if (!ws) return;
-    validateDistributionWorkspace(ws, "theta");
+    validateFullDistributionWorkspace(ws, "theta");
 
     // Remove workspace from the data service.
     AnalysisDataService::Instance().remove(outWSName);
   }
 
 private:
-  void validateDistributionWorkspace(MatrixWorkspace_sptr ws, const std::string & label)
+  void validateFullResolutionWorkspace(MatrixWorkspace_sptr ws)
+  {
+    NumericAxis * xAxis = dynamic_cast<NumericAxis *>(ws->getAxis(0));
+    TS_ASSERT( xAxis );
+    if(xAxis)
+    {
+      TS_ASSERT_EQUALS( xAxis->length(), 196 );
+      TS_ASSERT_EQUALS( xAxis->getValue(0), 3 );
+      TS_ASSERT_EQUALS( xAxis->getValue(xAxis->length() - 1), 198 );
+      TS_ASSERT_EQUALS( xAxis->unit()->unitID(), "Label" );
+      TS_ASSERT_EQUALS( xAxis->unit()->caption(), "Spectrum Number" );
+    }
+
+    TextAxis * vAxis = dynamic_cast<TextAxis *>(ws->getAxis(1));
+    TS_ASSERT( vAxis );
+    if(vAxis)
+    {
+      TS_ASSERT_EQUALS( vAxis->length(), 4 );
+    }
+  }
+
+  void validateFullDistributionWorkspace(MatrixWorkspace_sptr ws, const std::string & label)
   {
     NumericAxis * xAxis = dynamic_cast<NumericAxis *>(ws->getAxis(0));
     TS_ASSERT( xAxis );

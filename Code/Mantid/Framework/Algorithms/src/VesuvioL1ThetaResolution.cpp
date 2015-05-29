@@ -10,6 +10,7 @@
 #include <fstream>
 
 #include <boost/algorithm/string/split.hpp>
+#include <boost/algorithm/string/trim.hpp>
 #include <boost/make_shared.hpp>
 #include <boost/random/variate_generator.hpp>
 #include <boost/random/uniform_real.hpp>
@@ -284,6 +285,7 @@ void VesuvioL1ThetaResolution::loadInstrument() {
     std::string header;
     getline(parFile, header);
     g_log.debug() << "PAR file header: " << header << std::endl;
+    boost::trim(header);
     std::vector<std::string> headers;
     boost::split(headers, header, boost::is_any_of("\t "), boost::token_compress_on);
     size_t numCols = headers.size();
@@ -309,6 +311,7 @@ void VesuvioL1ThetaResolution::loadInstrument() {
     updateInst->setProperty("IgnorePhi",true );
     updateInst->setProperty("AsciiHeader", headerFormat);
     updateInst->execute();
+    m_instWorkspace = updateInst->getProperty("Workspace");
   }
 
   const int specIdxMin = static_cast<int>(m_instWorkspace->getIndexFromSpectrumNumber(getProperty("SpectrumMin")));
