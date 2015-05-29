@@ -58,7 +58,8 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
                              doc='Name of the sample environment log entry')
 
         sampEnvLogVal_type = ['last_value', 'average']
-        self.declareProperty('SampleEnvironmentLogValue', 'last value', StringListValidator(sampEnvLogVal_type),
+        self.declareProperty('SampleEnvironmentLogValue', 'last_value',
+                             StringListValidator(sampEnvLogVal_type),
                              doc='Value selection of the sample environment log entry')
 
         self.declareProperty(WorkspaceProperty('OutputInQ', '', Direction.Output),
