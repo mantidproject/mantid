@@ -2,7 +2,7 @@
 #This is an extension of refl_columns.py as that is a auto-generated script form pyqt and shouldn't be edited
 #so this file provides any extra GUI tweaks not easily doable in the designer
 #for the time being this also includes non-GUI behaviour
-import refl_columns
+import ui_refl_columns
 from PyQt4 import QtCore, QtGui
 
 try:
@@ -10,7 +10,7 @@ try:
 except AttributeError:
     _fromUtf8 = lambda s: s
 
-class ReflChoose(QtGui.QDialog, refl_columns.Ui_chooseColumnsDialog):
+class ReflChoose(QtGui.QDialog, ui_refl_columns.Ui_chooseColumnsDialog):
 
 
     visiblestates = {}

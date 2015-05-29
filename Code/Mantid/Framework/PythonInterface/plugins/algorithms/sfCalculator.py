@@ -1,8 +1,6 @@
-#pylint: disable=invalid-name
-#from MantidFramework import *
-#from mantidsimple import *
+#pylint: disable=invalid-name,too-many-arguments,too-many-lines,too-many-instance-attributes, too-many-locals,too-many-branches
 from mantid.simpleapi import *
-from numpy import zeros, unique, arange, sqrt, size
+import numpy as np
 import os.path
 import math
 
@@ -177,8 +175,8 @@ class sfCalculator(object):
         ## code to replace this
         #self.y_axis_ratio = self.y_axis_numerator / self.y_axis_denominator
 
-        sz = size(self.y_axis_numerator)
-        new_y_axis_ratio = zeros(sz)
+        sz = np.size(self.y_axis_numerator)
+        new_y_axis_ratio = np.zeros(sz)
         for i in range(sz):
 
             if self.y_axis_denominator[i] == 0:
@@ -197,16 +195,17 @@ class sfCalculator(object):
 #                                     self.y_axis_numerator) ** 2 +
 #                                     (self.y_axis_error_denominator /
 #                                      self.y_axis_denominator) ** 2)
-#         self.y_axis_error_ratio = sqrt(self.y_axis_error_ratio)
+#         self.y_axis_error_ratio = np.sqrt(self.y_axis_error_ratio)
 #         self.y_axis_error_ratio *= self.y_axis_ratio
-        new_y_axis_error_ratio = zeros(sz)
+        new_y_axis_error_ratio = np.zeros(sz)
         for i in range(sz):
 
             if self.y_axis_numerator[i] == 0:
                 self.y_axis_numerator[i] = 1
 
-            tmp_value = (float(self.y_axis_error_numerator[i]) / float(self.y_axis_numerator[i])) **2 + (float(self.y_axis_error_denominator[i]) / float(self.y_axis_denominator[i])) **2
-            tmp_value = math.sqrt(tmp_value)
+            tmp_value = (float(self.y_axis_error_numerator[i]) / float(self.y_axis_numerator[i])) **2 + \
+                        (float(self.y_axis_error_denominator[i]) / float(self.y_axis_denominator[i])) **2
+            tmp_value = math.np.sqrt(tmp_value)
             new_y_axis_error_ratio[i] = self.y_axis_ratio[i]* tmp_value
         self.y_axis_error_ratio = new_y_axis_error_ratio
 
@@ -227,21 +226,21 @@ class sfCalculator(object):
         run full calculation for numerator or denominator
         """
         if bNumerator is True:
-            file = self.numerator
+            filen = self.numerator
 #            _id = self.id_numerator
             self.peak_pixel_min = self.n_peak_pixel_min
             self.peak_pixel_max = self.n_peak_pixel_max
             self.back_pixel_min = self.n_back_pixel_min
             self.back_pixel_max = self.n_back_pixel_max
         else:
-            file = self.denominator
+            filen = self.denominator
 #            _id = self.id_denominator
             self.peak_pixel_min = self.d_peak_pixel_min
             self.peak_pixel_max = self.d_peak_pixel_max
             self.back_pixel_min = self.d_back_pixel_min
             self.back_pixel_max = self.d_back_pixel_max
 
-        nexus_file_numerator = file
+        nexus_file_numerator = filen
         print '----> loading nexus file: ' + nexus_file_numerator
         EventDataWks = LoadEventNexus(Filename=nexus_file_numerator)
 
@@ -251,8 +250,8 @@ class sfCalculator(object):
             self.alpha_pixel_nbr = 304
             self.beta_pixel_nbr = 256
         else:
-            alpha_pixel_nbr = 256
-            beta_pixel_nbr = 304  #will be integrated over this dimension
+            self.alpha_pixel_nbr = 256
+            self.beta_pixel_nbr = 304  #will be integrated over this dimension
 
         proton_charge = self._getProtonCharge(EventDataWks)
         print '----> rebinning '
@@ -366,13 +365,13 @@ class sfCalculator(object):
         counts_vs_tof_error = mt.readE(0)[:]
 
 ## this is not use anymore as the integration is done in the previous step
-#         counts_vs_tof = zeros(len(x_axis)-1)
-#         counts_vs_tof_error = zeros(len(x_axis)-1)
+#         counts_vs_tof = np.zeros(len(x_axis)-1)
+#         counts_vs_tof_error = np.zeros(len(x_axis)-1)
 #
 #         for x in range(self.alpha_pixel_nbr):
 #             counts_vs_tof += mt.readY(x)[:]
 #             counts_vs_tof_error += mt.readE(x)[:] ** 2
-#         counts_vs_tof_error = sqrt(counts_vs_tof_error)
+#         counts_vs_tof_error = np.sqrt(counts_vs_tof_error)
 
 #
 #        #for DEBUGGING
@@ -417,9 +416,9 @@ class sfCalculator(object):
         print '-----> Create Integrated workspace '
         x_axis = InputWorkspace.readX(0)[:]
         x_size = to_pixel - from_pixel + 1
-        y_axis = zeros((self.alpha_pixel_nbr, len(x_axis) - 1))
-        y_error_axis = zeros((self.alpha_pixel_nbr, len(x_axis) - 1))
-        y_range = arange(x_size) + from_pixel
+        y_axis = np.zeros((self.alpha_pixel_nbr, len(x_axis) - 1))
+        y_error_axis = np.zeros((self.alpha_pixel_nbr, len(x_axis) - 1))
+        y_range = np.arange(x_size) + from_pixel
 
 #        for x in range(self.beta_pixel_nbr):
 #            for y in y_range:
@@ -449,7 +448,7 @@ class sfCalculator(object):
 
 #        #DEBUG
 #        f=open('/home/j35/myASCIIfromCode.txt','w')
-#        new_y_axis = zeros((len(x_axis)-1))
+#        new_y_axis = np.zeros((len(x_axis)-1))
 #
 #        for y in range(256):
 #            new_y_axis += y_axis[y,:]
@@ -464,7 +463,7 @@ class sfCalculator(object):
         ## so far, worsk perfectly (tested with portal vs Mantid vs Matlab
 
         y_axis = y_axis.flatten()
-        y_error_axis = sqrt(y_error_axis)
+        y_error_axis = np.sqrt(y_error_axis)
         #plot_y_error_axis = _y_error_axis #for output testing only
         #plt.imshow(plot_y_error_axis, aspect='auto', origin='lower')
         y_error_axis = y_error_axis.flatten()
@@ -502,7 +501,7 @@ class sfCalculator(object):
             dataDen = 1
 
         mean = dataNum / dataDen
-        mean_error = math.sqrt(dataDen)
+        mean_error = math.np.sqrt(dataDen)
 
         return (mean, mean_error)
 
@@ -511,7 +510,7 @@ class sfCalculator(object):
         # element (data is an array)
 
         sz = len(data)
-        new_data = zeros(sz)
+        new_data = np.zeros(sz)
         for i in range(sz):
             new_data[i] = data[i] - background
 
@@ -522,9 +521,9 @@ class sfCalculator(object):
         # a single value from an array
 
         sz = len(data_error)
-        new_data_error = zeros(sz)
+        new_data_error = np.zeros(sz)
         for i in range(sz):
-            new_data_error[i] = math.sqrt(data_error[i]**2 + background_error**2)
+            new_data_error[i] = math.np.sqrt(data_error[i]**2 + background_error**2)
 
         return new_data_error
 
@@ -538,9 +537,10 @@ class sfCalculator(object):
             sum_peak += peak[i]
             sum_peak_error += peak_error[i]**2
 
-        sum_peak_error = math.sqrt(sum_peak_error)
+        sum_peak_error = math.np.sqrt(sum_peak_error)
         return [sum_peak, sum_peak_error]
 
+    #pylint: disable=unused-argument
     def  _removeBackground(self,
                            InputWorkspace=None,
                            from_peak= 0,
@@ -556,21 +556,21 @@ class sfCalculator(object):
 
         # make big array of data
         if self.is_nexus_detector_rotated_flag:
-            data = zeros((304,nbr_tof))
-            error = zeros((304,nbr_tof))
+            data = np.zeros((304,nbr_tof))
+            error = np.zeros((304,nbr_tof))
             for x in range(304):
                 data[x,:] = InputWorkspace.readY(x)[:]
                 error[x,:] = InputWorkspace.readE(x)[:]
 
         else:
-            data = zeros((256,nbr_tof))
-            error = zeros((256,nbr_tof))
+            data = np.zeros((256,nbr_tof))
+            error = np.zeros((256,nbr_tof))
             for x in range(256):
                 data[x,:] = InputWorkspace.readY(x)[:]
                 error[x,:] = InputWorkspace.readE(x)[:]
 
-        peak_array = zeros(nbr_tof)
-        peak_array_error = zeros(nbr_tof)
+        peak_array = np.zeros(nbr_tof)
+        peak_array_error = np.zeros(nbr_tof)
 
         bMinBack = False
         bMaxBack = False
@@ -672,14 +672,15 @@ class sfCalculator(object):
         ## replace code by
         #product.y_axis_ratio = self.y_axis_ratio * other.y_axis_ratio
         sz = len(self.y_axis_ratio)
-        new_y_axis_ratio = zeros(sz)
+        new_y_axis_ratio = np.zeros(sz)
         for i in range(sz):
             new_y_axis_ratio[i] = self.y_axis_ratio[i] * other.y_axis_ratio[i]
         product.y_axis_ratio = new_y_axis_ratio
 
         ## replace code by
-        #product.y_axis_error_ratio = product.y_axis_ratio * sqrt((other.y_axis_error_ratio / other.y_axis_ratio)**2 + (self.y_axis_error_ratio / self.y_axis_ratio)**2)
-        new_y_axis_error_ratio = zeros(sz)
+        #product.y_axis_error_ratio = product.y_axis_ratio * np.sqrt((other.y_axis_error_ratio / other.y_axis_ratio)**2 +\
+        #                             (self.y_axis_error_ratio / self.y_axis_ratio)**2)
+        new_y_axis_error_ratio = np.zeros(sz)
         for i in range(sz):
 
             # make sure we don't divide b 0
@@ -688,8 +689,9 @@ class sfCalculator(object):
             if self.y_axis_ratio[i] == 0:
                 self.y_axis_ratio[i] = 1
 
-            tmp_product = (other.y_axis_error_ratio[i] / other.y_axis_ratio[i]) ** 2 + (self.y_axis_error_ratio[i] / self.y_axis_ratio[i]) ** 2
-            tmp_product = math.sqrt(tmp_product)
+            tmp_product = (other.y_axis_error_ratio[i] / other.y_axis_ratio[i]) ** 2 + \
+                          (self.y_axis_error_ratio[i] / self.y_axis_ratio[i]) ** 2
+            tmp_product = math.np.sqrt(tmp_product)
             new_y_axis_error_ratio[i] = tmp_product * product.y_axis_ratio[i]
         product.y_axis_error_ratio = new_y_axis_error_ratio
 
@@ -1156,12 +1158,12 @@ def getSlitsValueAndLambda(full_list_runs,
         _lambda_value = getLambdaValue(tmpWks)
         lambdaRequest[i] = _lambda_value
 
-def isRunsSorted(list_runs, S1H, S2H):
+def isRunsSorted(dummy_list_runs, S1H, S2H):
     """
     Make sure the files have been sorted
     """
     sz = len(S1H)
-    sTotal = zeros(sz)
+    sTotal = np.zeros(sz)
     for i in range(sz):
         sTotal[i] = S1H[i] + S2H[i]
 
@@ -1182,9 +1184,10 @@ def calculateAndFit(numerator='',
                     denominator='',
                     list_peak_back_numerator=None,
                     list_peak_back_denominator=None,
-                    list_objects=[],
+                    list_objects=None,
                     tof_range=None):
-
+    if list_objects==None:
+        list_objects=[]
     print '--> running calculate and fit algorithm'
 
     cal1 = sfCalculator(numerator=numerator,
@@ -1212,7 +1215,7 @@ def calculateAndFit(numerator='',
         cal1.fit()
         return cal1
 
-def help():
+def showhelp():
     """
         Here the user will have information about how the command line
         works
@@ -1293,7 +1296,7 @@ def calculate(string_runs=None,\
         list_attenuator = [0, 1, 1, 1, 1, 1]
 
     if list_peak_back is None:
-        list_peak_back = zeros((len(list_runs), 4))   #[peak_min, peak_max, back_min, back_max]
+        list_peak_back = np.zeros((len(list_runs), 4))   #[peak_min, peak_max, back_min, back_max]
 #        list_peak_back[9, ] = [128, 136, 120, 145]
 #        list_peak_back[11, ] = [125, 140, 115, 150]
 #        list_peak_back[10, ] = [128, 136, 120, 145]
@@ -1346,12 +1349,12 @@ def calculate(string_runs=None,\
         #array of True/False flags that will allow us
         #to rescale the calculation on the first attenuator
         _first_A = []
-        for j in range(len(unique(list_attenuator))):
+        for dummy_j in range(len(np.unique(list_attenuator))):
             _first_A.append(True)
 
         #array of index of first attenuator
         _index_first_A = []
-        for j in range(len(unique(list_attenuator))):
+        for dummy_j in range(len(np.unique(list_attenuator))):
             _index_first_A.append(-1)
 
         index_numerator = -1

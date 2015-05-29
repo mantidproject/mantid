@@ -44,7 +44,7 @@ class PoldiCompound(object):
 def raiseParseErrorException(message):
     raise ParseException(message)
 
-
+# pylint: disable=too-many-instance-attributes
 class PoldiCrystalFileParser(object):
     """Small parser for crystal structure files used at POLDI
 
@@ -135,6 +135,7 @@ class PoldiCrystalFileParser(object):
 
 
 class PoldiCreatePeaksFromFile(PythonAlgorithm):
+    _parser=None
     def category(self):
         return "SINQ\\Poldi"
 
@@ -216,6 +217,6 @@ try:
     from pyparsing import *
 
     AlgorithmFactory.subscribe(PoldiCreatePeaksFromFile)
-except:
+except ImportError:
     logger.debug('Failed to subscribe algorithm PoldiCreatePeaksFromFile; Python package pyparsing' \
                  'may be missing (https://pypi.python.org/pypi/pyparsing)')

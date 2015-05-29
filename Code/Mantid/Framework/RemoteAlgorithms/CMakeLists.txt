@@ -78,6 +78,12 @@ set ( TEST_FILES
 #)
 # No tests yet...
 
+if (COVERALLS)
+    foreach( loop_var ${SRC_FILES} ${INC_FILES})
+      set_property(GLOBAL APPEND PROPERTY COVERAGE_SRCS "${CMAKE_CURRENT_SOURCE_DIR}/${loop_var}")
+    endforeach(loop_var)
+endif()
+
 # Not for now, remember later if convenient: Add a precompiled header where they are supported
 # enable_precompiled_headers ( inc/MantidRemoteAlgorithms/PrecompiledHeader.h SRC_FILES )
 

@@ -237,11 +237,10 @@ class SaveVulcanGSS(PythonAlgorithm):
 
         # Get information on start/stop
         processtime = True
-        try:
+        if run.hasProperty("run_start") and run.hasProperty("duration"):
             runstart = run.getProperty("run_start").value
             duration = float(run.getProperty("duration").value)
-
-        except:
+        else:
             processtime = False
 
         if processtime is True:
@@ -255,7 +254,7 @@ class SaveVulcanGSS(PythonAlgorithm):
             delta = utctime-time0
             try:
                 total_nanosecond_start =  int(delta.total_seconds()*int(1.0E9)) + int(runstart_ns)
-            except:
+            except AttributeError:
                 total_seconds = delta.days*24*3600 + delta.seconds
                 total_nanosecond_start = total_seconds * int(1.0E9)  + int(runstart_ns)
             total_nanosecond_stop = total_nanosecond_start + int(duration*1.0E9)
@@ -327,7 +326,7 @@ class SaveVulcanGSS(PythonAlgorithm):
 
                 temp = "%12s%12s%12s" % (x_s, y_s, e_s)
 
-            except:
+            except TypeError:
                 temp = "%-80s\n" % (cline.rstrip())
 
             wbuf += "%-80s\n" % (temp)

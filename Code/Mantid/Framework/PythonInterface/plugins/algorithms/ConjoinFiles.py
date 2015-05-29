@@ -14,6 +14,7 @@ class ConjoinFiles(PythonAlgorithm):
     def summary(self):
         return "Conjoin two file-based workspaces."
 
+    #pylint: disable=too-many-arguments
     def __load(self, directory, instr, run, loader, exts, wksp):
         filename = None
         for ext in exts:
@@ -26,7 +27,7 @@ class ConjoinFiles(PythonAlgorithm):
                 self.log().information("Trying to load '%s'" % filename)
                 loader(Filename=filename, OutputWorkspace=wksp)
                 return
-            except Exception, e:
+            except (RuntimeError, IOError, ValueError) as e:
                 logger.information(str(e))
         raise RuntimeError("Failed to load run %s from file %s" % (str(run), filename))
 

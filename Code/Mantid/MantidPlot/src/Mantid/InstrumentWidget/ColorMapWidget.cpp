@@ -18,7 +18,7 @@
   * @param minPositiveValue A minimum positive value for the Log10 scale
   */
 ColorMapWidget::ColorMapWidget(int type,QWidget* parent,const double& minPositiveValue):
-QFrame(parent),m_minPositiveValue(minPositiveValue),m_dragging(false)
+  QFrame(parent), m_minPositiveValue(minPositiveValue), m_dragging(false), m_y(0), m_dtype()
 {
   m_scaleWidget = new QwtScaleWidget(QwtScaleDraw::RightScale);
   m_scaleWidget->setColorBarEnabled(true);

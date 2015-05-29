@@ -31,6 +31,7 @@ class USANSSimulation(PythonAlgorithm):
         self.declareProperty(MatrixWorkspaceProperty("OutputWorkspace", "", Direction.Output), "Output workspace")
         self.declareProperty(MatrixWorkspaceProperty("MonitorWorkspace", "", Direction.Output), "Output monitor workspace")
 
+    #pylint: disable=too-many-locals
     def PyExec(self):
         workspace = self.getPropertyValue("OutputWorkspace")
         out_ws = CreateSimulationWorkspace(Instrument="USANS",
