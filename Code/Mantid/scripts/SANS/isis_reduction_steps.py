@@ -2102,7 +2102,7 @@ class UserFile(ReductionStep):
             elif grav == 'OFF' or grav == 'FALSE':
                 reducer.to_Q.set_gravity(False, override=False)
             elif grav.startswith('LEXTRA'):
-                extra_length = grav[6:].strip()
+                extra_length = grav[7:].strip()
                 reducer.to_Q.set_extra_length(float(extra_length), override=False)
             else:
                 _issueWarning("Gravity flag incorrectly specified, disabling gravity correction")
