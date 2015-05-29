@@ -1,5 +1,5 @@
 import unittest
-from mantid.simpleapi import CreateWorkspace, _set_properties
+from mantid.simpleapi import CreateWorkspace, set_properties
 from mantid.api import (MatrixWorkspaceProperty, AlgorithmFactory, AlgorithmManager,
                         DataProcessorAlgorithm, PythonAlgorithm)
 from mantid.kernel import Direction
@@ -31,7 +31,7 @@ class ParentAlg(DataProcessorAlgorithm):
         alg.initialize()
         args = {}
         kwargs = {}
-        _set_properties(alg, *args, **kwargs)
+        set_properties(alg, *args, **kwargs)
         alg.execute()
 
 AlgorithmFactory.subscribe(ParentAlg)

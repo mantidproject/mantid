@@ -1,8 +1,9 @@
+#pylint: disable=no-init
 from mantid.simpleapi import *
 from mantid.api import DataProcessorAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty, WorkspaceGroupProperty, PropertyMode, Progress
 from mantid.kernel import StringMandatoryValidator, Direction, logger, FloatBoundedValidator, IntBoundedValidator
 
-
+#pylint: disable=too-many-instance-attributes
 class IndirectCylinderAbsorption(DataProcessorAlgorithm):
 
     _sample_ws_name = None
@@ -77,7 +78,7 @@ class IndirectCylinderAbsorption(DataProcessorAlgorithm):
                                                     optional=PropertyMode.Optional),
                              doc='The corrections workspace for scattering and absorptions in sample.')
 
-
+    #pylint: disable=too-many-branches
     def PyExec(self):
         from IndirectCommon import getEfixed
 
@@ -129,15 +130,15 @@ class IndirectCylinderAbsorption(DataProcessorAlgorithm):
 
                 SetSampleMaterial(can_wave_ws, ChemicalFormula=self._can_chemical_formula, SampleNumberDensity=self._can_number_density)
                 AnnularRingAbsorption(InputWorkspace=can_wave_ws,
-                              OutputWorkspace=self._acc_ws,
-                              SampleHeight=3.0,
-                              SampleThickness=can_thickness,
-                              CanInnerRadius=0.9*self._sample_radius,
-                              CanOuterRadius=1.1*self._can_radius,
-                              SampleChemicalFormula=self._can_chemical_formula,
-                              SampleNumberDensity=self._can_number_density,
-                              NumberOfWavelengthPoints=10,
-                              EventsPerPoint=self._events)
+                                      OutputWorkspace=self._acc_ws,
+                                      SampleHeight=3.0,
+                                      SampleThickness=can_thickness,
+                                      CanInnerRadius=0.9*self._sample_radius,
+                                      CanOuterRadius=1.1*self._can_radius,
+                                      SampleChemicalFormula=self._can_chemical_formula,
+                                      SampleNumberDensity=self._can_number_density,
+                                      NumberOfWavelengthPoints=10,
+                                      EventsPerPoint=self._events)
 
                 Divide(LHSWorkspace=can_wave_ws, RHSWorkspace=self._acc_ws, OutputWorkspace=can_wave_ws)
                 Minus(LHSWorkspace=sample_wave_ws, RHSWorkspace=can_wave_ws, OutputWorkspace=sample_wave_ws)

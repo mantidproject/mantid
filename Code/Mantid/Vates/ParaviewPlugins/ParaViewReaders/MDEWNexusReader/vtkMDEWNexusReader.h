@@ -1,6 +1,7 @@
 #ifndef _vtkMDEWNexusReader_h
 #define _vtkMDEWNexusReader_h
 #include "vtkUnstructuredGridAlgorithm.h"
+#include "MantidVatesAPI/Normalization.h"
 #include "MantidVatesAPI/MDEWEventNexusLoadingPresenter.h"
 #include "MantidKernel/MultiThreaded.h"
 
@@ -32,6 +33,8 @@ public:
   char* GetWorkspaceTypeName();
   /// Getter for the input geometry
   const char* GetInputGeometryXML();
+
+  void SetNormalization(int option);
 
 protected:
   vtkMDEWNexusReader();
@@ -70,5 +73,7 @@ private:
 
   //Cached workspace type name.
   std::string typeName;
+
+  Mantid::VATES::VisualNormalization m_normalization;
 };
 #endif

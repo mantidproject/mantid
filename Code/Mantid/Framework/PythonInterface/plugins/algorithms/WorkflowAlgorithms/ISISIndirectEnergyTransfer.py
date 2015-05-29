@@ -1,4 +1,4 @@
-#pylint: disable=invalid-name,attribute-defined-outside-init,too-many-instance-attributes,too-many-branches,no-init
+#pylint: disable=invalid-name,attribute-defined-outside-init,too-many-instance-attributes,too-many-branches,no-init,deprecated-module
 from mantid.kernel import *
 from mantid.api import *
 from mantid.simpleapi import *
@@ -40,7 +40,7 @@ class ISISIndirectEnergyTransfer(DataProcessorAlgorithm):
         self.declareProperty(name='Reflection', defaultValue='', doc='Reflection number for instrument setup during run.',
                              validator=StringListValidator(['002', '004', '006']))
 
-        self.declareProperty(IntArrayProperty(name='SpectraRange', values=[0, 1],validator=IntArrayMandatoryValidator()),
+        self.declareProperty(IntArrayProperty(name='SpectraRange', values=[0, 1], validator=IntArrayMandatoryValidator()),
                              doc='Comma separated range of spectra number to use.')
         self.declareProperty(FloatArrayProperty(name='BackgroundRange'),
                              doc='Range of background to subtact from raw data in time of flight.')

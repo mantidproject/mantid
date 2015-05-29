@@ -87,6 +87,12 @@ set ( TEST_PY_FILES
   SANSBeamFluxCorrectionTest.py 
 )
 
+if (COVERALLS)
+    foreach( loop_var ${SRC_FILES} ${INC_FILES})
+      set_property(GLOBAL APPEND PROPERTY COVERAGE_SRCS "${CMAKE_CURRENT_SOURCE_DIR}/${loop_var}")
+    endforeach(loop_var)
+endif()
+
 if(UNITY_BUILD)
   include(UnityBuild)
   enable_unity_build(WorkflowAlgorithms SRC_FILES SRC_UNITY_IGNORE_FILES 10)
@@ -109,7 +115,7 @@ set_property ( TARGET WorkflowAlgorithms PROPERTY FOLDER "MantidFramework" )
 
 include_directories ( inc ../Nexus/inc )
 
-target_link_libraries ( WorkflowAlgorithms ${MANTIDLIBS} Nexus ${GSL_LIBRARIES} )
+target_link_libraries ( WorkflowAlgorithms LINK_PRIVATE ${MANTIDLIBS} Nexus ${GSL_LIBRARIES} )
 
 # Add the unit tests directory
 add_subdirectory ( test )

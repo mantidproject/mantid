@@ -3,10 +3,12 @@ from mantid.kernel import *
 from mantid.api import *
 from mantid.simpleapi import *
 
+#pylint: disable=too-few-public-methods
 class QueryFlag(object):
     def isMasked(self, detector, dummy_yValue):
         return detector.isMasked()
 
+#pylint: disable=too-few-public-methods
 class QueryValue(object):
     def isMasked(self, dummy_detector, yValue):
         return yValue == 1
@@ -67,16 +69,16 @@ class MaskWorkspaceToCalFile(PythonAlgorithm):
                 detIDs = []
                 try:
                     detIDs = det.getDetectorIDs()
-                except:
+                except AttributeError:
                     detIDs = [det.getID()]
                 for did in detIDs:
                     calFile.write(self.FormatLine(i,did,0.0,group,group))
-            except:
+            except RuntimeError:
     			#no detector for this spectra
                 pass
         calFile.close()
 
-
+    #pylint: disable=too-many-arguments
     def FormatLine(self,number,UDET,offset,select,group):
         line = "{0:9d}{1:16d}{2:16.7f}{3:9d}{4:9d}\n".format(number,UDET,offset,select,group)
         return line

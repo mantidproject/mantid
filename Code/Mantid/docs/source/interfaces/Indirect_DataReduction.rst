@@ -184,17 +184,26 @@ workspace by default, with mirror mode enabled you will also get the left
 (*_left*) and right (*_right*) hand components of the data as separate
 workspaces.
 
+Note that when using a calibration workspace the grouping of the calibration
+workspace must match that being used in the energy transfer reduction, i.e. both
+processes use the same grouping file (or both use the default grouping).
+
 Options
 ~~~~~~~
 
 Input
   Used to select the raw data in *.nxs* format
 
+Calibration
+  Gives the option of applying a calibration workspace or NeXus file created
+  with the ILL Calibration tab or :ref:`ILLIN16BCalibration
+  <algm-ILLIN16BCalibration>` algorithm.
+
 Grouping
   Used to switch between grouping as per the IDF (*Default*) or grouping using a
-  mapping file (*Map FIle*).
+  mapping file (*Map File*).
 
-Mirror Mode
+Use Mirror Mode
   Enable to reduce data that has been captured with mirror mode enabled.
 
 Plot
@@ -270,6 +279,32 @@ Background Start & Background End
 
 Low, Width & High
   Binning parameters used to rebin the resolution curve.
+
+ILL Calibration
+---------------
+
+.. interface:: Data Reduction
+  :widget: tabILLCalibration
+
+This tab is used to create calibration workspaces for the IN16B spectrometer at
+the ILL using the :ref:`ILLIN16BCalibration <algm-ILLIN16BCalibration>`
+algorithm.
+
+Options
+~~~~~~~
+
+Grouping
+  Used to switch between grouping as per the IDF (*Default*) or grouping using a
+  mapping file (*Map File*).
+
+Peak Range
+  Sets the integreation range over the peak in :math:`meV`
+
+Scale Factor
+  Override the calculated scale factor
+
+Mirror Mode
+  Enable of the data uses mirror mode
 
 ISIS Diagnostics
 ----------------

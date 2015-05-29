@@ -210,7 +210,7 @@ ProxyInfo findHttpProxy(const std::string &targetURLString,
   ProxyInfo httpProxy;
   CFDictionaryRef dict = SCDynamicStoreCopyProxies(NULL);
   if (!dict) {
-    logger.debug("ScriptRepository SCDynamicStoreCopyProxies returned NULL");
+    logger.debug("NetworkProxyOSX SCDynamicStoreCopyProxies returned NULL");
   }
 
   // Query the proxy pac first.
@@ -235,7 +235,7 @@ ProxyInfo findHttpProxy(const std::string &targetURLString,
   }
 
   if (!foundHttpProxy) {
-    logger.debug("ScriptRepositry. No system HTTP Proxy set!");
+    logger.debug("NetworkProxyOSX. No system HTTP Proxy set!");
   }
 
   return httpProxy;

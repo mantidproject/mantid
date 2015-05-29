@@ -32,7 +32,7 @@ bool get_proxy_configuration_win(const std::string &target_url,
   // the loop is just to allow us to go out of this session whenever we want
   while (true) {
     // Use WinHttpOpen to obtain a session handle.
-    hSession = WinHttpOpen(L"ScriptRepository FindingProxy/1.0",
+    hSession = WinHttpOpen(L"NetworkProxyWin FindingProxy/1.0",
                            WINHTTP_ACCESS_TYPE_DEFAULT_PROXY,
                            WINHTTP_NO_PROXY_NAME, WINHTTP_NO_PROXY_BYPASS, 0);
     if (!hSession) {
@@ -162,7 +162,7 @@ ProxyInfo NetworkProxy::getHttpProxy(const std::string &targetURLString) {
     }
     proxyInfo = ProxyInfo(proxyServer, proxyPort, true);
   } else {
-    m_logger.information() << "ScriptRepository failed to find the proxy "
+    m_logger.information() << "NetworkProxyWin failed to find the proxy "
                               "information. It will attempt without proxy. "
                            << errmsg << std::endl;
   }

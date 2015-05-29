@@ -29,15 +29,19 @@ class MaskBTP(mantid.api.PythonAlgorithm):
         return "Algorithm to mask detectors in particular banks, tube, or pixels."
 
     def PyInit(self):
-        self.declareProperty(mantid.api.WorkspaceProperty("Workspace", "",direction=mantid.kernel.Direction.InOut, optional = mantid.api.PropertyMode.Optional), "Input workspace (optional)")
-        allowedInstrumentList=mantid.kernel.StringListValidator(["","ARCS","CNCS","CORELLI","HYSPEC","MANDI","NOMAD","POWGEN","SEQUOIA","SNAP","SXD","TOPAZ","WISH"])
-        self.declareProperty("Instrument","",validator=allowedInstrumentList,doc="One of the following instruments: ARCS, CNCS, CORELLI, HYSPEC, MANDI, NOMAD, POWGEN, SNAP, SEQUOIA, SXD, TOPAZ, WISH")
+        self.declareProperty(mantid.api.WorkspaceProperty("Workspace", "",direction=mantid.kernel.Direction.InOut,
+                                                          optional = mantid.api.PropertyMode.Optional), "Input workspace (optional)")
+        allowedInstrumentList=mantid.kernel.StringListValidator(["","ARCS","CNCS","CORELLI","HYSPEC","MANDI","NOMAD",
+                                                                 "POWGEN","SEQUOIA","SNAP","SXD","TOPAZ","WISH"])
+        self.declareProperty("Instrument","",validator=allowedInstrumentList,doc="One of the following instruments: ARCS, CNCS, "+\
+                             "CORELLI, HYSPEC, MANDI, NOMAD, POWGEN, SNAP, SEQUOIA, SXD, TOPAZ, WISH")
         self.declareProperty("Bank","",doc="Bank(s) to be masked. If empty, will apply to all banks")
         self.declareProperty("Tube","",doc="Tube(s) to be masked. If empty, will apply to all tubes")
         self.declareProperty("Pixel","",doc="Pixel(s) to be masked. If empty, will apply to all pixels")
-        self.declareProperty(mantid.kernel.IntArrayProperty(name="MaskedDetectors", direction=mantid.kernel.Direction.Output), doc="List of  masked detectors")
+        self.declareProperty(mantid.kernel.IntArrayProperty(name="MaskedDetectors", direction=mantid.kernel.Direction.Output),
+                             doc="List of  masked detectors")
 
-
+    #pylint: disable=too-many-branches
     def PyExec(self):
         ws = self.getProperty("Workspace").value
         self.instrument=None
@@ -53,13 +57,20 @@ class MaskBTP(mantid.api.PythonAlgorithm):
             self.instrument = ws.getInstrument()
             self.instname = self.instrument.getName()
 
-        instrumentList=["ARCS","CNCS","CORELLI","HYSPEC","MANDI","NOMAD","POWGEN","SEQUOIA","SNAP","SXD","TOPAZ","WISH"]
-        self.bankmin={"ARCS":1,"CNCS":1,"CORELLI":1,"HYSPEC":1,"MANDI":10,"NOMAD":1,"POWGEN":1,"SEQUOIA":38,"SNAP":1,"SXD":1,"TOPAZ":10,"WISH":1}
-        self.bankmax={"ARCS":115,"CNCS":50,"CORELLI":91,"HYSPEC":20,"MANDI":59,"NOMAD":99,"POWGEN":300,"SEQUOIA":150,"SNAP":18,"SXD":11,"TOPAZ":59,"WISH":10}
-        tubemin={"ARCS":1,"CNCS":1,"CORELLI":1,"HYSPEC":1,"MANDI":0,"NOMAD":1,"POWGEN":0,"SEQUOIA":1,"SNAP":0,"SXD":0,"TOPAZ":0,"WISH":1}
-        tubemax={"ARCS":8,"CNCS":8,"CORELLI":16,"HYSPEC":8,"MANDI":255,"NOMAD":8,"POWGEN":153,"SEQUOIA":8,"SNAP":255,"SXD":63,"TOPAZ":255,"WISH":152}
-        pixmin={"ARCS":1,"CNCS":1,"CORELLI":1,"HYSPEC":1,"MANDI":0,"NOMAD":1,"POWGEN":0,"SEQUOIA":1,"SNAP":0,"SXD":0,"TOPAZ":0,"WISH":1}
-        pixmax={"ARCS":128,"CNCS":128,"CORELLI":256,"HYSPEC":128,"MANDI":255,"NOMAD":128,"POWGEN":6,"SEQUOIA":128,"SNAP":255,"SXD":63,"TOPAZ":255,"WISH":512}
+        instrumentList=["ARCS","CNCS","CORELLI","HYSPEC",
+                        "MANDI","NOMAD","POWGEN","SEQUOIA","SNAP","SXD","TOPAZ","WISH"]
+        self.bankmin={"ARCS":1,"CNCS":1,"CORELLI":1,"HYSPEC":1,"MANDI":10,
+                      "NOMAD":1,"POWGEN":1,"SEQUOIA":38,"SNAP":1,"SXD":1,"TOPAZ":10,"WISH":1}
+        self.bankmax={"ARCS":115,"CNCS":50,"CORELLI":91,"HYSPEC":20,"MANDI":59,"NOMAD":99,"POWGEN":300,
+                      "SEQUOIA":150,"SNAP":18,"SXD":11,"TOPAZ":59,"WISH":10}
+        tubemin={"ARCS":1,"CNCS":1,"CORELLI":1,"HYSPEC":1,"MANDI":0,"NOMAD":1,
+                 "POWGEN":0,"SEQUOIA":1,"SNAP":0,"SXD":0,"TOPAZ":0,"WISH":1}
+        tubemax={"ARCS":8,"CNCS":8,"CORELLI":16,"HYSPEC":8,"MANDI":255,"NOMAD":8,
+                 "POWGEN":153,"SEQUOIA":8,"SNAP":255,"SXD":63,"TOPAZ":255,"WISH":152}
+        pixmin={"ARCS":1,"CNCS":1,"CORELLI":1,"HYSPEC":1,"MANDI":0,"NOMAD":1,"POWGEN":0,
+                "SEQUOIA":1,"SNAP":0,"SXD":0,"TOPAZ":0,"WISH":1}
+        pixmax={"ARCS":128,"CNCS":128,"CORELLI":256,"HYSPEC":128,"MANDI":255,
+                "NOMAD":128,"POWGEN":6,"SEQUOIA":128,"SNAP":255,"SXD":63,"TOPAZ":255,"WISH":512}
 
         try:
             instrumentList.index(self.instname)
@@ -109,7 +120,8 @@ class MaskBTP(mantid.api.PythonAlgorithm):
                                 try:
                                     pid=ep[int(t-tubemin[self.instname])][int(p-pixmin[self.instname])].getID()
                                 except:
-                                    raise RuntimeError("Problem finding pixel in bank="+str(b)+", tube="+str(t-tubemin[self.instname])+", pixel="+str(p-pixmin[self.instname]))
+                                    raise RuntimeError("Problem finding pixel in bank="+str(b)+\
+                                                       ", tube="+str(t-tubemin[self.instname])+", pixel="+str(p-pixmin[self.instname]))
                                 detlist.append(pid)
         if len(detlist)> 0:
             mantid.simpleapi.MaskDetectors(Workspace=ws,DetectorList=detlist)
@@ -142,6 +154,7 @@ class MaskBTP(mantid.api.PythonAlgorithm):
                 parsed.extend(elemlist)
         return parsed
 
+    #pylint: disable=too-many-branches,too-many-return-statements
     def _getEightPackHandle(self,banknum):
         """
         Helper function to return the handle to a given eightpack
@@ -183,7 +196,7 @@ class MaskBTP(mantid.api.PythonAlgorithm):
             if self.bankmin[self.instname]<=banknum<= self.bankmax[self.instname]:
                 try:
                     return self.instrument.getComponentByName("panel"+"%02d" % banknum)[0]
-                except:
+                except TypeError: #if not found, the return is None, so None[0] is a TypeError
                     return None
             else:
                 raise ValueError("Out of range index for "+str(self.instname)+" instrument bank numbers")

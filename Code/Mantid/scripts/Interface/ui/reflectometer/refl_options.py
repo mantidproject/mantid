@@ -1,5 +1,5 @@
 #pylint: disable=invalid-name
-import refl_options_window
+import ui_refl_options_window
 from PyQt4 import QtCore, QtGui
 
 try:
@@ -7,7 +7,7 @@ try:
 except AttributeError:
     _fromUtf8 = lambda s: s
 
-class ReflOptions(QtGui.QDialog, refl_options_window.Ui_OptionsDialog):
+class ReflOptions(QtGui.QDialog, ui_refl_options_window.Ui_OptionsDialog):
 
 
     """

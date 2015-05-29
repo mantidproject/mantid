@@ -336,18 +336,16 @@ set ( GMOCK_TEST_FILES
   MDGeometryXMLBuilderTest.h
 )
 
+if (COVERALLS)
+    foreach( loop_var ${SRC_FILES} ${INC_FILES})
+      set_property(GLOBAL APPEND PROPERTY COVERAGE_SRCS "${CMAKE_CURRENT_SOURCE_DIR}/${loop_var}")
+    endforeach(loop_var)
+endif()
 
 if(UNITY_BUILD)
   include(UnityBuild)
   enable_unity_build(Geometry SRC_FILES SRC_UNITY_IGNORE_FILES 10)
 endif(UNITY_BUILD)
-
-# Find 'local' dependencies
-find_package ( OpenGL REQUIRED )
-# FindOpenGL does not (as of CMake 2.6.4) take notice of the REQUIRED
-if ( NOT OPENGL_FOUND )
-  message ( FATAL_ERROR "OpenGL was not found." )
-endif ()
 
 # ===================== Open Cascade ===================
 if (ENABLE_OPENCASCADE)
@@ -381,10 +379,10 @@ endif ()
 # Add to the 'Framework' group in VS
 set_property ( TARGET Geometry PROPERTY FOLDER "MantidFramework" )
 
-target_link_libraries ( Geometry ${MANTIDLIBS}  ${OPENGL_LIBRARIES} )
+target_link_libraries ( Geometry LINK_PRIVATE ${MANTIDLIBS}  ${OPENGL_LIBRARIES} ${GSL_LIBRARIES} ${NEXUS_LIBRARIES} )
 
 if (NOT NO_OPENCASCADE)
-  target_link_libraries ( Geometry ${OPENCASCADE_LIBRARIES} )
+  target_link_libraries ( Geometry LINK_PRIVATE ${OPENCASCADE_LIBRARIES} )
 endif ()
 
 # Add the unit tests directory

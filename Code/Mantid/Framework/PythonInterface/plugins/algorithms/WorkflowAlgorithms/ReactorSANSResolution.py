@@ -72,7 +72,7 @@ class ReactorSANSResolution(PythonAlgorithm):
             for i in range(len(input_ws.readX(0))):
                 input_ws.dataDx(0)[i] = math.sqrt(res_factor+math.pow((input_ws.readX(0)[i]*d_wvl), 2)/6.0)
         else:
-            raise RuntimeError, "ReactorSANSResolution could not find all the run parameters needed to compute the resolution."
+            raise RuntimeError("ReactorSANSResolution could not find all the run parameters needed to compute the resolution.")
 
 
 AlgorithmFactory.subscribe(ReactorSANSResolution)
