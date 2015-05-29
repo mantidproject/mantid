@@ -38,7 +38,7 @@ public:
     const std::string data = "ChecksumHelperTest_testSha1FromFile Test this string out for size in a file";
     createFile(filename,data);
 
-    std::string response = ChecksumHelper::sha1FromFile(filename);
+    std::string response = ChecksumHelper::sha1FromFile(filename,false);
     TSM_ASSERT_EQUALS("The calculated SHA-1 hash is not as expected", "363cbe9c113b8bcba9e0aa94dbe45e67856ff26b", response);
     Poco::File(filename).remove();
   }

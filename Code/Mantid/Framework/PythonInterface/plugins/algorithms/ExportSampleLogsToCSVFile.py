@@ -445,15 +445,15 @@ class ExportSampleLogsToCSVFile(PythonAlgorithm):
 
         return
 
-def getLocalTimeShiftInSecond(utctime, localtimezone, logger = None):
+def getLocalTimeShiftInSecond(utctime, localtimezone, currentlogger = None):
     """ Calculate the difference between UTC time and local time of given
     DataAndTime
     """
     from datetime import datetime
     from dateutil import tz
 
-    if logger:
-        logger.information("Input UTC time = %s" % (str(utctime)))
+    if currentlogger:
+        currentlogger.information("Input UTC time = %s" % (str(utctime)))
 
     # Return early if local time zone is UTC
     if localtimezone == "UTC":
@@ -464,8 +464,8 @@ def getLocalTimeShiftInSecond(utctime, localtimezone, logger = None):
     to_zone = tz.gettz(localtimezone)
 
     t1str = (str(utctime)).split('.')[0].strip()
-    if logger:
-        logger.information("About to convert time string: %s" % t1str)
+    if currentlogger:
+        currentlogger.information("About to convert time string: %s" % t1str)
     try:
         if t1str.count("T") == 1:
             utc = datetime.strptime(t1str, '%Y-%m-%dT%H:%M:%S')

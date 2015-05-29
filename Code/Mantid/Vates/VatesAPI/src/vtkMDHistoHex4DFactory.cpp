@@ -17,8 +17,8 @@ namespace VATES
 {
 
   template<typename TimeMapper>
-  vtkMDHistoHex4DFactory<TimeMapper>::vtkMDHistoHex4DFactory(ThresholdRange_scptr thresholdRange, const std::string& scalarName, const double timestep)
-  : vtkMDHistoHexFactory(thresholdRange,  scalarName),
+  vtkMDHistoHex4DFactory<TimeMapper>::vtkMDHistoHex4DFactory(ThresholdRange_scptr thresholdRange, const VisualNormalization normalization, const double timestep)
+  : vtkMDHistoHexFactory(thresholdRange,  normalization),
     m_timestep(timestep)
   {
   }
@@ -33,7 +33,7 @@ namespace VATES
   {
     if(this != &other)
     {
-      this->m_scalarName = other.m_scalarName;
+      this->m_normalizationOption = other.m_normalizationOption;
       this->m_thresholdRange = other.m_thresholdRange;
       this->m_workspace = other.m_workspace;
       this->m_timestep = other.m_timestep;
@@ -95,7 +95,7 @@ namespace VATES
     else
     {
       // Create the mesh in a 4D mode
-      return this->create3Dor4D(m_timeMapper(m_timestep), true, progressUpdating);
+      return this->create3Dor4D(m_timeMapper(m_timestep), progressUpdating);
     }
   }
 

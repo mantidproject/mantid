@@ -53,7 +53,6 @@ signals:
 private:
   QPushButton* buttonOk;
   QPushButton* buttonCancel;
-  QPushButton* buttonHelp;
   QComboBox* boxType;
   QComboBox* boxOrder;
   QComboBox *columnsList;

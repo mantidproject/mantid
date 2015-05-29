@@ -95,6 +95,10 @@ void FilterBadPulses::exec() {
   Kernel::TimeSeriesProperty<double> *pcharge_log =
       dynamic_cast<Kernel::TimeSeriesProperty<double> *>(
           runlogs.getLogData(LOG_CHARGE_NAME));
+  if (!pcharge_log) {
+    throw std::logic_error("Failed to find \"" + LOG_CHARGE_NAME +
+                             "\" in sample logs");
+  }
   Kernel::TimeSeriesPropertyStatistics stats = pcharge_log->getStatistics();
 
   // check that the maximum value is greater than zero

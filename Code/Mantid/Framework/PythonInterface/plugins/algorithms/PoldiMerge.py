@@ -137,7 +137,7 @@ class PoldiMerge(PythonAlgorithm):
     def getPropertyValue(self, runProperty):
         try:
             return runProperty.value[0]
-        except:
+        except TypeError:
             return runProperty.value
 
     def handleError(self, error):

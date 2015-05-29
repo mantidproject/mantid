@@ -646,6 +646,7 @@ set ( TEST_FILES
 	FitPeakTest.h
 	FixGSASInstrumentFileTest.h
 	FlatPlateAbsorptionTest.h
+	GeneralisedSecondDifferenceTest.h
 	GenerateEventsFilterTest.h
 	GeneratePeaksTest.h
 	GeneratePythonScriptTest.h
@@ -765,6 +766,12 @@ set ( TEST_FILES
 )
 
 set ( TEST_PY_FILES NormaliseToUnityTest.py )
+
+if (COVERALLS)
+    foreach( loop_var ${SRC_FILES} ${INC_FILES})
+      set_property(GLOBAL APPEND PROPERTY COVERAGE_SRCS "${CMAKE_CURRENT_SOURCE_DIR}/${loop_var}")
+    endforeach(loop_var)
+endif()
 
 # Add a precompiled header where they are supported
 enable_precompiled_headers ( inc/MantidAlgorithms/PrecompiledHeader.h SRC_FILES )

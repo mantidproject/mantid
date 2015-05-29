@@ -659,8 +659,10 @@ void InstrumentActor::resetColors()
   }
   if (m_scene.getNumberOfActors() > 0)
   {
-    dynamic_cast<CompAssemblyActor*>(m_scene.getActor(0))->setColors();
-    invalidateDisplayLists();
+    if (auto actor = dynamic_cast<CompAssemblyActor*>(m_scene.getActor(0))) {
+      actor->setColors();
+      invalidateDisplayLists();
+    }
   }
   emit colorMapChanged();
 }

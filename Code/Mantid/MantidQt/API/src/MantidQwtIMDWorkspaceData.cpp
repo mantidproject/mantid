@@ -44,6 +44,9 @@ MantidQwtIMDWorkspaceData::MantidQwtIMDWorkspaceData(Mantid::API::IMDWorkspace_c
     bool isDistribution)
  : m_workspace(workspace),
    m_logScale(logScale),
+   m_minY(DBL_MAX),
+   m_minPositive(DBL_MAX),
+   m_maxY(-DBL_MAX),
    m_preview(false),
    m_start(start),
    m_end(end),

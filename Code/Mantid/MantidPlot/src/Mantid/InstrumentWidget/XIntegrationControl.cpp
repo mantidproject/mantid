@@ -24,6 +24,8 @@ m_resizingLeft(false),
 m_resizingRight(false),
 m_moving(false),
 m_changed(false),
+m_x(0),
+m_width(0),
 m_minimum(0.0),
 m_maximum(1.0)
 {
