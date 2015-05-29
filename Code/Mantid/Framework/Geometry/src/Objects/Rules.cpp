@@ -13,6 +13,7 @@
 #include <iterator>
 
 #include "MantidGeometry/Math/Triple.h"
+#include "MantidKernel/Exception.h"
 #include "MantidKernel/Matrix.h"
 #include "MantidKernel/V3D.h"
 #include "MantidGeometry/Surfaces/BaseVisit.h"
