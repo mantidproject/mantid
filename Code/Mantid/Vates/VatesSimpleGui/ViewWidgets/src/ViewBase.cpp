@@ -4,6 +4,7 @@
 #include "MantidVatesAPI/ADSWorkspaceProvider.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidVatesAPI/BoxInfo.h"
+#include "MantidKernel/WarningSuppressions.h"
 #if defined(__INTEL_COMPILER)
   #pragma warning disable 1170
 #endif
@@ -39,7 +40,6 @@
 #include <QPointer>
 #include <QSet>
 
-#pragma GCC diagnostic ignored "-Wstrict-aliasing"
 #include <boost/optional.hpp>
 #include <stdexcept>
 
@@ -279,6 +279,7 @@ pqPipelineRepresentation *ViewBase::getPvActiveRep()
   return qobject_cast<pqPipelineRepresentation *>(drep);
 }
 
+GCC_DIAG_OFF(strict-aliasing)
 /**
  * This function creates a ParaView source from a given plugin name and
  * workspace name. This is used in the plugin mode of the simple interface.

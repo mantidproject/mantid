@@ -21,8 +21,8 @@
 #include "MantidVatesAPI/vtkMD0DFactory.h"
 #include "MantidVatesAPI/FilteringUpdateProgressAction.h"
 #include "MantidVatesAPI/IgnoreZerosThresholdRange.h"
+#include "MantidKernel/WarningSuppressions.h"
 
-#pragma GCC diagnostic ignored "-Wstrict-aliasing"
 #include <boost/optional.hpp>
 
 using namespace Mantid::VATES;
@@ -235,6 +235,7 @@ int vtkMDEWSource::RequestData(vtkInformation *, vtkInformationVector **, vtkInf
   return 1;
 }
 
+GCC_DIAG_OFF(strict-aliasing)
 int vtkMDEWSource::RequestInformation(vtkInformation *vtkNotUsed(request), vtkInformationVector **vtkNotUsed(inputVector), vtkInformationVector *outputVector)
 {
   if(m_presenter == NULL && !m_wsName.empty())
