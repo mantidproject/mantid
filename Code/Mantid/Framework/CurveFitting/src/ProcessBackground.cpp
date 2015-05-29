@@ -9,7 +9,7 @@
 #include "MantidCurveFitting/Polynomial.h"
 #include "MantidCurveFitting/Chebyshev.h"
 #include "MantidDataObjects/TableWorkspace.h"
-#include "MantidAPI/IPeak.h"
+#include "MantidGeometry/Crystal/IPeak.h"
 #include "MantidAPI/TableRow.h"
 
 #include <boost/algorithm/string.hpp>

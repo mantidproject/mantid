@@ -279,7 +279,7 @@ void SCDPanelErrors::Check(DataObjects::PeaksWorkspace_sptr &pkwsp,
   }
 }
 
-Instrument_sptr SCDPanelErrors::getNewInstrument(const API::IPeak &peak) const {
+Instrument_sptr SCDPanelErrors::getNewInstrument(const Geometry::IPeak &peak) const {
 
   Geometry::Instrument_const_sptr instSave = peak.getInstrument();
   boost::shared_ptr<Geometry::ParameterMap> pmap(new ParameterMap());
@@ -349,7 +349,7 @@ Instrument_sptr SCDPanelErrors::getNewInstrument(const API::IPeak &peak) const {
   return instChange;
 }
 
-Peak SCDPanelErrors::createNewPeak(const API::IPeak &peak_old,
+Peak SCDPanelErrors::createNewPeak(const Geometry::IPeak &peak_old,
                                    Geometry::Instrument_sptr instrNew,
                                    double T0, double L0) {
   Geometry::Instrument_const_sptr inst = peak_old.getInstrument();

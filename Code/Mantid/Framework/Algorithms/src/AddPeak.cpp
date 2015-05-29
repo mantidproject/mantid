@@ -1,7 +1,7 @@
 #include "MantidAlgorithms/AddPeak.h"
 #include "MantidKernel/System.h"
 #include "MantidAPI/IPeaksWorkspace.h"
-#include "MantidAPI/IPeak.h"
+#include "MantidGeometry/Crystal/IPeak.h"
 #include "MantidAPI/MatrixWorkspace.h"
 
 using namespace Mantid::PhysicalConstants;
@@ -112,7 +112,7 @@ void AddPeak::exec() {
   Qy *= knorm;
   Qz *= knorm;
 
-  Mantid::API::IPeak *peak =
+  Mantid::Geometry::IPeak *peak =
       peaksWS->createPeak(Mantid::Kernel::V3D(Qx, Qy, Qz), l2);
   peak->setDetectorID(detID);
   peak->setGoniometerMatrix(runWS->run().getGoniometer().getR());

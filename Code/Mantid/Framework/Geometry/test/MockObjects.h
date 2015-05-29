@@ -5,17 +5,17 @@
  *      Author: spu92482
  */
 
-#ifndef MANTIDAPITEST_MOCKOBJECTS_H_
-#define MANTIDAPITEST_MOCKOBJECTS_H_
+#ifndef MANTIDGEOMETRYTEST_MOCKOBJECTS_H_
+#define MANTIDGEOMETRYTEST_MOCKOBJECTS_H_
 
-#include "MantidAPI/PeakTransform.h"
-#include "MantidAPI/PeakTransformFactory.h"
-#include "MantidAPI/IPeak.h"
+#include "MantidGeometry/Crystal/PeakTransform.h"
+#include "MantidGeometry/Crystal/PeakTransformFactory.h"
+#include "MantidGeometry/Crystal/IPeak.h"
 #include "MantidKernel/SpecialCoordinateSystem.h"
 #include <boost/regex.hpp>
 #include <gmock/gmock.h>
 
-using namespace Mantid::API;
+using namespace Mantid::Geometry;
 using namespace Mantid;
 using boost::regex;
 
@@ -37,7 +37,7 @@ namespace
     }
     MOCK_CONST_METHOD0(clone, PeakTransform_sptr());
     MOCK_CONST_METHOD1(transform, Mantid::Kernel::V3D(const Mantid::Kernel::V3D&));
-    MOCK_CONST_METHOD1(transformPeak, Mantid::Kernel::V3D(const Mantid::API::IPeak&));
+    MOCK_CONST_METHOD1(transformPeak, Mantid::Kernel::V3D(const Mantid::Geometry::IPeak&));
     MOCK_CONST_METHOD0(getFriendlyName, std::string());
     MOCK_CONST_METHOD0(getCoordinateSystem, Mantid::Kernel::SpecialCoordinateSystem());
   };
@@ -57,7 +57,7 @@ namespace
   /*------------------------------------------------------------
   Mock IPeak
   ------------------------------------------------------------*/
-  class MockIPeak : public Mantid::API::IPeak
+  class MockIPeak : public Mantid::Geometry::IPeak
   {
   public:
     MOCK_METHOD1(setInstrument,
@@ -161,4 +161,4 @@ namespace
 
 
 }
-#endif /* MANTIDAPITEST_MOCKOBJECTS_H_ */
+#endif /* MANTIDGEOMETRYTEST_MOCKOBJECTS_H_ */

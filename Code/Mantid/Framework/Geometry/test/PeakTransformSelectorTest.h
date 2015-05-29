@@ -2,11 +2,11 @@
 #define MANTIDAPI_PEAKTRANSFORMSELECTOR_TEST_H_
 
 #include <cxxtest/TestSuite.h>
-#include "MantidAPI/PeakTransform.h"
-#include "MantidAPI/PeakTransformSelector.h"
+#include "MantidGeometry/Crystal/PeakTransform.h"
+#include "MantidGeometry/Crystal/PeakTransformSelector.h"
 #include "MockObjects.h"
 
-using namespace Mantid::API;
+using namespace Mantid::Geometry;
 using namespace Mantid;
 using namespace testing;
 using boost::regex;

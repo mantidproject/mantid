@@ -1,10 +1,10 @@
-#include "MantidAPI/PeakTransformQSample.h"
+#include "MantidGeometry/Crystal/PeakTransformQSample.h"
 #include <boost/make_shared.hpp>
 
 using boost::regex;
 
 namespace Mantid {
-namespace API {
+namespace Geometry {
 
 PeakTransformQSample::PeakTransformQSample()
     : PeakTransform("Q_sample_x", "Q_sample_y", regex("^Q_sample_x.*$"),
@@ -47,7 +47,7 @@ PeakTransform_sptr PeakTransformQSample::clone() const {
 @return re-mapped coordinates.
 */
 Mantid::Kernel::V3D
-PeakTransformQSample::transformPeak(const Mantid::API::IPeak &peak) const {
+PeakTransformQSample::transformPeak(const Mantid::Geometry::IPeak &peak) const {
   return PeakTransform::transform(peak.getQSampleFrame());
 }
 

@@ -8,7 +8,7 @@
 #define INTEGRATEPEAKTIMESLICES_H_
 
 #include "MantidAPI/Algorithm.h"
-#include "MantidAPI/IPeak.h"
+#include "MantidGeometry/Crystal/IPeak.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -291,11 +291,11 @@ private:
   bool getNeighborPixIDs(boost::shared_ptr<Geometry::IComponent> comp,
                          Kernel::V3D &Center, double &Radius, int *&ArryofID);
 
-  int CalculateTimeChannelSpan(API::IPeak const &peak, const double dQ,
+  int CalculateTimeChannelSpan(Geometry::IPeak const &peak, const double dQ,
                                Mantid::MantidVec const &X, const int specNum,
                                int &Centerchan);
 
-  double CalculatePositionSpan(API::IPeak const &peak, const double dQ);
+  double CalculatePositionSpan(Geometry::IPeak const &peak, const double dQ);
 
   void InitializeColumnNamesInTableWorkspace(
       DataObjects::TableWorkspace_sptr &TabWS);
@@ -358,7 +358,7 @@ private:
   void FindPlane(Kernel::V3D &center, Kernel::V3D &xvec, Kernel::V3D &yvec,
                  double &ROW, double &COL, int &NROWS, int &NCOLS,
                  double &pixWidthx, double &pixHeighty,
-                 API::IPeak const &peak) const;
+                 Geometry::IPeak const &peak) const;
 
   int find(Mantid::MantidVec const &X, const double time);
 

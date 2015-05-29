@@ -1,15 +1,16 @@
-#ifndef MANTIDAPI_PEAKTRANSFORMQLAB_TEST_H_
-#define MANTIDAPI_PEAKTRANSFORMQLAB_TEST_H_
+#ifndef MANTIDGEOMETRY_PEAKTRANSFORMQSAMPLE_TEST_H_
+#define MANTIDGEOMETRY_PEAKTRANSFORMQSAMPLE_TEST_H_
 
 #include <cxxtest/TestSuite.h>
-#include "MantidAPI/PeakTransformQLab.h"
+#include "MantidGeometry/Crystal/PeakTransformQSample.h"
 #include "MockObjects.h"
 #include <boost/make_shared.hpp>
 
-using namespace Mantid::API;
+using namespace Mantid::Geometry;
 using namespace Mantid;
 using Mantid::Kernel::V3D;
 using namespace testing;
+
 
 namespace boost{
   template<class CharType, class CharTrait>
@@ -21,41 +22,41 @@ namespace boost{
   }
 }
 
-class PeakTransformQLabTest : public CxxTest::TestSuite
+class PeakTransformQSampleTest : public CxxTest::TestSuite
 {
 
 public:
 
   void test_throws_with_unknown_xLabel()
   {
-    TS_ASSERT_THROWS(PeakTransformQLab("?", "Q_lab_y"), PeakTransformException&);
+    TS_ASSERT_THROWS(PeakTransformQSample("?", "Q_sample_y"), PeakTransformException&);
   }
 
   void test_throws_with_unknown_yLabel()
   {
-    TS_ASSERT_THROWS(PeakTransformQLab("Q_lab_x", "?"), PeakTransformException&);
+    TS_ASSERT_THROWS(PeakTransformQSample("Q_sample_x", "?"), PeakTransformException&);
   }
 
   void test_default_transform()
   {
-    PeakTransformQLab transform; // Should be equivalent to constructing transform("Q_lab_x", "Q_lab_y")
+    PeakTransformQSample transform; // Should be equivalent to constructing transform("Q_sample_x", "Q_sample_y")
     V3D original(0, 1, 2);
     V3D transformed = transform.transform(original);
     TS_ASSERT_EQUALS(transformed.X(), original.X());
     TS_ASSERT_EQUALS(transformed.Y(), original.Y());
     TS_ASSERT_EQUALS(transformed.Z(), original.Z());
 
-    TSM_ASSERT("Wrong free peak axis.", boost::regex_match("Q_lab_z", transform.getFreePeakAxisRegex()));
+    TSM_ASSERT("Wrong free peak axis.", boost::regex_match("Q_sample_z", transform.getFreePeakAxisRegex()));
   }
 
-  void test_maps_to_q_lab_on_ipeak()
+  void test_maps_to_q_sample_on_ipeak()
   {
     // Create a peak.
     MockIPeak mockPeak;
-    EXPECT_CALL(mockPeak, getQLabFrame()).WillOnce(Return(V3D())); // Should RUN getQLabFrame!
+    EXPECT_CALL(mockPeak, getQSampleFrame()).WillOnce(Return(V3D())); // Should RUN getQSampleFrame!
 
     // Use the transform on the peak.
-    PeakTransformQLab transform("Q_lab_x", "Q_lab_y");
+    PeakTransformQSample transform("Q_sample_x", "Q_sample_y");
     transform.transformPeak(mockPeak);
 
     // Check that the transform read the right coordinates off the peak object.
@@ -64,80 +65,80 @@ public:
 
   void test_transformQxQyQz()
   {
-    PeakTransformQLab transform("Q_lab_x", "Q_lab_y");
+    PeakTransformQSample transform("Q_sample_x", "Q_sample_y");
     V3D original(0, 1, 2);
     V3D transformed = transform.transform(original);
     TS_ASSERT_EQUALS(transformed.X(), original.X());
     TS_ASSERT_EQUALS(transformed.Y(), original.Y());
     TS_ASSERT_EQUALS(transformed.Z(), original.Z());
 
-    TSM_ASSERT("Wrong free peak axis.", boost::regex_match("Q_lab_z", transform.getFreePeakAxisRegex()));
+    TSM_ASSERT("Wrong free peak axis.", boost::regex_match("Q_sample_z", transform.getFreePeakAxisRegex()));
   }
 
   void test_transformQxQzQy()
   {
-    PeakTransformQLab transform("Q_lab_x", "Q_lab_z");
+    PeakTransformQSample transform("Q_sample_x", "Q_sample_z");
     V3D original(0, 1, 2);
     V3D transformed = transform.transform(original);
-    TS_ASSERT_EQUALS(transformed.X(), original.X()); // X -> Q_lab_x
-    TS_ASSERT_EQUALS(transformed.Y(), original.Z()); // Y -> Q_lab_z
-    TS_ASSERT_EQUALS(transformed.Z(), original.Y()); // Z -> Q_lab_y
+    TS_ASSERT_EQUALS(transformed.X(), original.X()); // X -> Q_sample_x
+    TS_ASSERT_EQUALS(transformed.Y(), original.Z()); // Y -> Q_sample_z
+    TS_ASSERT_EQUALS(transformed.Z(), original.Y()); // Z -> Q_sample_y
 
-   TSM_ASSERT("Wrong free peak axis.",  boost::regex_match("Q_lab_y", transform.getFreePeakAxisRegex()));
+   TSM_ASSERT("Wrong free peak axis.",  boost::regex_match("Q_sample_y", transform.getFreePeakAxisRegex()));
   }
 
   void test_transformQzQyQx()
   {
-    PeakTransformQLab transform("Q_lab_z", "Q_lab_y");
+    PeakTransformQSample transform("Q_sample_z", "Q_sample_y");
     V3D original(0, 1, 2);
     V3D transformed = transform.transform(original);
-    TS_ASSERT_EQUALS(transformed.X(), original.Z()); // X -> Q_lab_z
-    TS_ASSERT_EQUALS(transformed.Y(), original.Y()); // Y -> Q_lab_y
-    TS_ASSERT_EQUALS(transformed.Z(), original.X()); // Z -> Q_lab_x
+    TS_ASSERT_EQUALS(transformed.X(), original.Z()); // X -> Q_sample_z
+    TS_ASSERT_EQUALS(transformed.Y(), original.Y()); // Y -> Q_sample_y
+    TS_ASSERT_EQUALS(transformed.Z(), original.X()); // Z -> Q_sample_x
 
-    TSM_ASSERT("Wrong free peak axis.", boost::regex_match("Q_lab_x", transform.getFreePeakAxisRegex()));
+    TSM_ASSERT("Wrong free peak axis.", boost::regex_match("Q_sample_x", transform.getFreePeakAxisRegex()));
   }
 
 void test_transformQzQxQy()
 {
-  PeakTransformQLab transform("Q_lab_z", "Q_lab_x");
+  PeakTransformQSample transform("Q_sample_z", "Q_sample_x");
   V3D original(0, 1, 2);
   V3D transformed = transform.transform(original);
-  TS_ASSERT_EQUALS(transformed.X(), original.Z()); // X -> Q_lab_z
-  TS_ASSERT_EQUALS(transformed.Y(), original.X()); // Y -> Q_lab_x
-  TS_ASSERT_EQUALS(transformed.Z(), original.Y()); // Z -> Q_lab_y
+  TS_ASSERT_EQUALS(transformed.X(), original.Z()); // X -> Q_sample_z
+  TS_ASSERT_EQUALS(transformed.Y(), original.X()); // Y -> Q_sample_x
+  TS_ASSERT_EQUALS(transformed.Z(), original.Y()); // Z -> Q_sample_y
 
-  TSM_ASSERT("Wrong free peak axis.", boost::regex_match("Q_lab_y", transform.getFreePeakAxisRegex()));
+  TSM_ASSERT("Wrong free peak axis.", boost::regex_match("Q_sample_y", transform.getFreePeakAxisRegex()));
 }
 
 void test_transformQyQzQx()
 {
-  PeakTransformQLab transform("Q_lab_y", "Q_lab_z");
+  PeakTransformQSample transform("Q_sample_y", "Q_sample_z");
   V3D original(0, 1, 2);
   V3D transformed = transform.transform(original);
   TS_ASSERT_EQUALS(transformed.X(), original.Y()); // X -> K
   TS_ASSERT_EQUALS(transformed.Y(), original.Z()); // Y -> L
   TS_ASSERT_EQUALS(transformed.Z(), original.X()); // Z -> H
 
-  TSM_ASSERT("Wrong free peak axis.", boost::regex_match("Q_lab_x", transform.getFreePeakAxisRegex()));
+  TSM_ASSERT("Wrong free peak axis.", boost::regex_match("Q_sample_x", transform.getFreePeakAxisRegex()));
 }
 
 void test_transformQyQxQz()
 {
-  PeakTransformQLab transform("Q_lab_y", "Q_lab_x");
+  PeakTransformQSample transform("Q_sample_y", "Q_sample_x");
   V3D original(0, 1, 2);
   V3D transformed = transform.transform(original);
   TS_ASSERT_EQUALS(transformed.X(), original.Y()); // X -> K
   TS_ASSERT_EQUALS(transformed.Y(), original.X()); // Y -> H
   TS_ASSERT_EQUALS(transformed.Z(), original.Z()); // Z -> L
 
-  TSM_ASSERT("Wrong free peak axis.", boost::regex_match("Q_lab_z", transform.getFreePeakAxisRegex()));
+  TSM_ASSERT("Wrong free peak axis.", boost::regex_match("Q_sample_z", transform.getFreePeakAxisRegex()));
 }
 
 void test_copy_construction()
 {
-  PeakTransformQLab A("Q_lab_x", "Q_lab_z");
-  PeakTransformQLab B(A);
+  PeakTransformQSample A("Q_sample_x", "Q_sample_z");
+  PeakTransformQSample B(A);
 
   // Test indirectly via what the transformations produce.
   V3D productA = A.transform(V3D(0, 1, 2));
@@ -152,8 +153,8 @@ void test_copy_construction()
 
 void test_assigment()
 {
-  PeakTransformQLab A("Q_lab_x", "Q_lab_z");
-  PeakTransformQLab B("Q_lab_y", "Q_lab_x");
+  PeakTransformQSample A("Q_sample_x", "Q_sample_z");
+  PeakTransformQSample B("Q_sample_y", "Q_sample_x");
   A = B;
 
   // Test indirectly via what the transformations produce.
@@ -168,10 +169,10 @@ void test_assigment()
 
 void test_clone()
 {
-  PeakTransformQLab A("Q_lab_x", "Q_lab_z");
+  PeakTransformQSample A("Q_sample_x", "Q_sample_z");
   PeakTransform_sptr clone = A.clone();
 
-  TSM_ASSERT("Clone product is the wrong type.", boost::dynamic_pointer_cast<PeakTransformQLab>(clone) != NULL);
+  TSM_ASSERT("Clone product is the wrong type.", boost::dynamic_pointer_cast<PeakTransformQSample>(clone) != NULL);
 
   // Test indirectly via what the transformations produce.
   V3D productA = A.transform(V3D(0, 1, 2));
@@ -187,14 +188,14 @@ void test_clone()
 void test_factory()
 {
   // Create the benchmark.
-  PeakTransform_sptr expectedProduct = boost::make_shared<PeakTransformQLab>("Q_lab_x", "Q_lab_y");
+  PeakTransform_sptr expectedProduct = boost::make_shared<PeakTransformQSample>("Q_sample_x", "Q_sample_y");
 
   // Use the factory to create a product.
-  PeakTransformQLabFactory factory;
+  PeakTransformQSampleFactory factory;
   PeakTransform_sptr product = factory.createDefaultTransform();
 
   // Check the type of the output product object.
-  TSM_ASSERT("Factory product is the wrong type.", boost::dynamic_pointer_cast<PeakTransformQLab>(product) != NULL);
+  TSM_ASSERT("Factory product is the wrong type.", boost::dynamic_pointer_cast<PeakTransformQSample>(product) != NULL);
 
   // Now test that the benchmark and the factory product are equivalent.
   // Test indirectly via what the transformations produce.
@@ -209,19 +210,18 @@ void test_factory()
 
 void test_getFriendlyName()
 {
-  PeakTransformQLab transform;
-  TS_ASSERT_EQUALS(PeakTransformQLab::name(), transform.getFriendlyName());
-  TS_ASSERT_EQUALS("Q (lab frame)", transform.getFriendlyName());
+  PeakTransformQSample transform;
+  TS_ASSERT_EQUALS(PeakTransformQSample::name(), transform.getFriendlyName());
+  TS_ASSERT_EQUALS("Q (sample frame)", transform.getFriendlyName());
 }
 
 void test_getCoordinateSystem()
 {
-  PeakTransformQLab transform;
-  TS_ASSERT_EQUALS(Mantid::Kernel::QLab, transform.getCoordinateSystem())
+  PeakTransformQSample transform;
+  TS_ASSERT_EQUALS(Mantid::Kernel::QSample, transform.getCoordinateSystem())
 }
-
 
 };
 #endif
 
-//end MANTIDAPI_PEAKTRANSFORMQLAB_TEST_H_
+//end MANTIDAPI_PEAKTRANSFORMQSAMPLE_TEST_H_

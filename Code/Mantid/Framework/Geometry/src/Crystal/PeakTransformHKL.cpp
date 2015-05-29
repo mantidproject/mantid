@@ -1,10 +1,10 @@
-#include "MantidAPI/PeakTransformHKL.h"
+#include "MantidGeometry/Crystal/PeakTransformHKL.h"
 #include <boost/make_shared.hpp>
 
 using boost::regex;
 
 namespace Mantid {
-namespace API {
+namespace Geometry {
 
 PeakTransformHKL::PeakTransformHKL()
     : PeakTransform("H", "K", regex("^(H.*)|(\\[H,0,0\\].*)$"),
@@ -48,7 +48,7 @@ PeakTransform_sptr PeakTransformHKL::clone() const {
 @return re-mapped coordinates.
 */
 Mantid::Kernel::V3D
-PeakTransformHKL::transformPeak(const Mantid::API::IPeak &peak) const {
+PeakTransformHKL::transformPeak(const Mantid::Geometry::IPeak &peak) const {
   return PeakTransform::transform(peak.getHKL());
 }
 

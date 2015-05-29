@@ -1,10 +1,10 @@
-#include "MantidAPI/PeakTransformQLab.h"
+#include "MantidGeometry/Crystal/PeakTransformQLab.h"
 #include <boost/make_shared.hpp>
 
 using boost::regex;
 
 namespace Mantid {
-namespace API {
+namespace Geometry {
 
 PeakTransformQLab::PeakTransformQLab()
     : PeakTransform("Q_lab_x", "Q_lab_y", regex("^Q_lab_x.*$"),
@@ -47,7 +47,7 @@ PeakTransform_sptr PeakTransformQLab::clone() const {
 @return re-mapped coordinates.
 */
 Mantid::Kernel::V3D
-PeakTransformQLab::transformPeak(const Mantid::API::IPeak &peak) const {
+PeakTransformQLab::transformPeak(const Mantid::Geometry::IPeak &peak) const {
   return PeakTransform::transform(peak.getQLabFrame());
 }
 

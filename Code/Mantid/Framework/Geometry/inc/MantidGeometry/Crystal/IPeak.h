@@ -1,7 +1,7 @@
 #ifndef MANTID_API_IPEAK_H_
 #define MANTID_API_IPEAK_H_
 
-#include "MantidAPI/DllConfig.h"
+#include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Crystal/PeakShape.h"
 #include "MantidKernel/Matrix.h"
@@ -10,14 +10,14 @@
 #include <boost/optional.hpp>
 
 namespace Mantid {
-namespace API {
+namespace Geometry {
 
 /** Structure describing a single-crystal peak
  *
  * @author Janik Zikovsky
  * @date 2011-04-15 13:24:07.963491
  */
-class MANTID_API_DLL IPeak {
+class MANTID_GEOMETRY_DLL IPeak {
 public:
   virtual ~IPeak();
 

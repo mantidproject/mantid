@@ -752,7 +752,7 @@ bool IntegratePeakTimeSlices::updateNeighbors(
  * NOTE: differentials of Q =mv*sin(scatAng/2)/2 were used to calculate this
  *  Also s=r*theta was used to transfer d ScatAng to distance on a bank.
  */
-double IntegratePeakTimeSlices::CalculatePositionSpan(API::IPeak const &peak,
+double IntegratePeakTimeSlices::CalculatePositionSpan(Geometry::IPeak const &peak,
                                                       const double dQ) {
 
   try {
@@ -796,7 +796,7 @@ double IntegratePeakTimeSlices::CalculatePositionSpan(API::IPeak const &peak,
  * @return The number of time channels around Centerchan to use
  */
 int IntegratePeakTimeSlices::CalculateTimeChannelSpan(
-    API::IPeak const &peak, const double dQ, Mantid::MantidVec const &X,
+    Geometry::IPeak const &peak, const double dQ, Mantid::MantidVec const &X,
     const int specNum, int &Centerchan) {
   UNUSED_ARG(specNum);
   double Q = peak.getQLabFrame().norm(); // getQ( peak)/2/M_PI;

@@ -1,11 +1,11 @@
-#ifndef MANTID_API_CONCRETEPEAKTRANSFORMFACTORY_H_
-#define MANTID_API_CONCRETEPEAKTRANSFORMFACTORY_H_
+#ifndef MANTID_GEOMETRY_CONCRETEPEAKTRANSFORMFACTORY_H_
+#define MANTID_GEOMETRY_CONCRETEPEAKTRANSFORMFACTORY_H_
 
-#include "MantidAPI/PeakTransformFactory.h"
+#include "MantidGeometry/Crystal/PeakTransformFactory.h"
 #include <boost/make_shared.hpp>
 
 namespace Mantid {
-namespace API {
+namespace Geometry {
 /**
 @class ConcretePeakTransformFactory
 Concrete PeakTransformFactory producing PeakTransforms of type provided by type

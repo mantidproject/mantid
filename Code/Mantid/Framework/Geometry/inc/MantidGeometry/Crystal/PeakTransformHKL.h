@@ -1,11 +1,12 @@
-#ifndef MANTID_API_PEAKTRANSFORMHKL_H_
-#define MANTID_API_PEAKTRANSFORMHKL_H_
+#ifndef MANTID_GEOMETRY_PEAKTRANSFORMHKL_H_
+#define MANTID_GEOMETRY_PEAKTRANSFORMHKL_H_
 
-#include "MantidAPI/PeakTransform.h"
-#include "MantidAPI/ConcretePeakTransformFactory.h"
+#include "MantidKernel/System.h"
+#include "MantidGeometry/Crystal/PeakTransform.h"
+#include "MantidGeometry/Crystal/ConcretePeakTransformFactory.h"
 
 namespace Mantid {
-namespace API {
+namespace Geometry {
 /**
 @class PeakTransformHKL
 Used to remap coordinates into a form consistent with an axis reordering.
@@ -27,7 +28,7 @@ public:
   /// Virtual constructor
   PeakTransform_sptr clone() const;
   /// Transform peak.
-  Mantid::Kernel::V3D transformPeak(const Mantid::API::IPeak &peak) const;
+  Mantid::Kernel::V3D transformPeak(const Mantid::Geometry::IPeak &peak) const;
   /// Getter for a friendly name to describe the transform type.
   virtual std::string getFriendlyName() const { return name(); }
   /// Getter for the special coordinate representation of this transform type.
@@ -39,4 +40,4 @@ typedef ConcretePeakTransformFactory<PeakTransformHKL> PeakTransformHKLFactory;
 }
 }
 
-#endif /* MANTID_API_CONCRETEPEAKSPRESENTERHKL_H_ */
+#endif /* MANTID_GEOMETRY_PEAKTRANSFORMHKL_H_ */
