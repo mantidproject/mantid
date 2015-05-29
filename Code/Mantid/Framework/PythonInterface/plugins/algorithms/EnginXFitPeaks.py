@@ -1,7 +1,7 @@
 #pylint: disable=no-init,invalid-name
 from mantid.kernel import *
 from mantid.api import *
-from mantid.simpleapi import CreateEmptyTableWorkspace
+import mantid.simpleapi as sapi
 
 import math
 
@@ -122,7 +122,7 @@ class EnginXFitPeaks(PythonAlgorithm):
         Produces a table workspace with the two fitted parameters
         @param name :: the name to use for the table workspace that is created here
         """
-        tbl = CreateEmptyTableWorkspace(OutputWorkspace=name)
+        tbl = sapi.CreateEmptyTableWorkspace(OutputWorkspace=name)
         tbl.addColumn('double', 'difc')
         tbl.addColumn('double', 'zero')
         tbl.addRow([float(self.getPropertyValue('difc')), float(self.getPropertyValue('zero'))])
