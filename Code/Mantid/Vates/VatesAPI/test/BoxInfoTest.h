@@ -1,13 +1,19 @@
 #ifndef VATES_API_BOX_INFO_TEST_H_
 #define VATES_API_BOX_INFO_TEST_H_
 
+
+
 #include <cxxtest/TestSuite.h>
+
+#pragma GCC diagnostic ignored "-Wstrict-aliasing"
 #include "MantidVatesAPI/BoxInfo.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/BoxController.h"
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 #include "MantidDataObjects/MDLeanEvent.h"
+
+
 
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
@@ -54,19 +60,10 @@ public:
     // Act
     auto result = Mantid::VATES::findRecursionDepthForTopLevelSplitting(wsName);
     // Assert
-    #if defined(__GNUC__)
-      #if (__GNUC__ >= 4 && __GNUC_MINOR__ >= 4 )
-        #pragma GCC diagnostic push
-        #pragma GCC diagnostic ignored "-Wstrict-aliasing"
-      #endif
-    #endif
+
     TSM_ASSERT("Should have recursion depth of 1 for top level splitting.",
                result.get() == 1);
-    #if defined(__GNUC__)
-      #if (__GNUC__ >= 4 && __GNUC_MINOR__ >= 4 )
-        #pragma GCC diagnostic pop
-      #endif
-    #endif
+
     // Clean up
     AnalysisDataService::Instance().remove(wsName);
   }
