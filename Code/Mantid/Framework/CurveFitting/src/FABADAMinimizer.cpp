@@ -436,19 +436,24 @@ void FABADAMinimizer::finalize() {
     par_def[j] = rc_chain_j[pos_min - red_conv_chain[nParams].begin()];
     std::sort(rc_chain_j.begin(), rc_chain_j.end());
     auto pos_par = std::find(rc_chain_j.begin(), rc_chain_j.end(), par_def[j]);
-    size_t sigma = static_cast<size_t>(0.34 * double(conv_length));
-
     auto pos_left = rc_chain_j.begin();
-    if (sigma < static_cast<size_t>(std::distance(pos_left, pos_par))) {
-      pos_left = pos_par - sigma;
-    }
-    // make sure the iterator is valid in any case
     auto pos_right = rc_chain_j.end() - 1;
-    if (sigma < static_cast<size_t>(std::distance(pos_par, pos_right))) {
-      pos_right = pos_par + sigma;
+    size_t sigma = static_cast<size_t>(0.34 * double(conv_length));
+    if (pos_par == rc_chain_j.end()) {
+      error_left[j] = *(pos_right - sigma);
+      error_rigth[j] = *pos_right;
+    } else {
+
+      if (sigma < static_cast<size_t>(std::distance(pos_left, pos_par))) {
+        pos_left = pos_par - sigma;
+      }
+      // make sure the iterator is valid in any case
+      if (sigma < static_cast<size_t>(std::distance(pos_par, pos_right))) {
+        pos_right = pos_par + sigma;
+      }
+      error_left[j] = *pos_left - *pos_par;
+      error_rigth[j] = *pos_right - *pos_par;
     }
-    error_left[j] = *pos_left - *pos_par;
-    error_rigth[j] = *pos_right - *pos_par;
   }
 
   const bool outputParametersTable = !getPropertyValue("Parameters").empty();
