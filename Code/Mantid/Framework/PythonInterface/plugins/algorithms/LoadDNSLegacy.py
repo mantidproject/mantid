@@ -1,3 +1,4 @@
+#pylint: disable=no-init
 from mantid.kernel import *
 from mantid.api import *
 import mantid.simpleapi as api
@@ -46,7 +47,6 @@ class LoadDNSLegacy(PythonAlgorithm):
     def PyExec(self):
         # Input
         filename = self.getPropertyValue("Filename")
-        outws = self.getPropertyValue("OutputWorkspace")
         pol = self.getPropertyValue("Polarisation")
 
         # load data array from the given file

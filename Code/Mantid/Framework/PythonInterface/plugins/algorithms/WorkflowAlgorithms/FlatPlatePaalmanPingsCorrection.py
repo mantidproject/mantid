@@ -6,7 +6,7 @@ from mantid.kernel import StringListValidator, StringMandatoryValidator, IntBoun
                           FloatBoundedValidator, Direction, logger, CompositeValidator
 import math, numpy as np
 
-
+#pylint: disable=too-many-instance-attributes
 class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
 
     _sample_ws_name = None
@@ -27,6 +27,7 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
     _angles = list()
     _waves = list()
     _elastic = 0.0
+    _interpolate=None
 
 
     def category(self):
@@ -41,8 +42,8 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
         ws_validator = CompositeValidator([WorkspaceUnitValidator('Wavelength'), InstrumentValidator()])
 
         self.declareProperty(MatrixWorkspaceProperty('SampleWorkspace', '',
-                             direction=Direction.Input,
-                             validator=ws_validator),
+                                                     direction=Direction.Input,
+                                                     validator=ws_validator),
                              doc='Name for the input sample workspace')
 
         self.declareProperty(name='SampleChemicalFormula', defaultValue='',
@@ -58,9 +59,9 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
                              doc='Sample angle in degrees')
 
         self.declareProperty(MatrixWorkspaceProperty('CanWorkspace', '',
-                             direction=Direction.Input,
-                             optional=PropertyMode.Optional,
-                             validator=ws_validator),
+                                                     direction=Direction.Input,
+                                                     optional=PropertyMode.Optional,
+                                                     validator=ws_validator),
                              doc="Name for the input container workspace")
 
         self.declareProperty(name='CanChemicalFormula', defaultValue='',
@@ -89,7 +90,7 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
                              doc='Analyser energy')
 
         self.declareProperty(WorkspaceGroupProperty('OutputWorkspace', '',
-                             direction=Direction.Output),
+                                                    direction=Direction.Output),
                              doc='The output corrections workspace group')
 
 
@@ -142,7 +143,7 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
             data_acc = np.append(data_acc, acc)
 
         sample_logs = {'sample_shape': 'flatplate', 'sample_filename': self._sample_ws_name,
-                        'sample_thickness': self._sample_thickness, 'sample_angle': self._sample_angle}
+                       'sample_thickness': self._sample_thickness, 'sample_angle': self._sample_angle}
         dataX = self._waves * num_angles
 
         # Create the output workspaces
@@ -388,7 +389,7 @@ class FlatPlatePaalmanPingsCorrection(PythonAlgorithm):
 
         return thick_sec_1, thick_sec_2
 
-
+    #pylint: disable=too-many-arguments
     def _calculate_can(self, ass, can_x_section, sample_sect_1, sample_sect_2, sec):
         """
         Calculates the A_s,sc, A_c,sc and A_c,c data.

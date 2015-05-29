@@ -45,7 +45,7 @@ def _count_monitors(raw_file):
 
         return mon_count, False
 
-
+#pylint: disable=too-many-instance-attributes
 class TimeSlice(PythonAlgorithm):
 
     _raw_files = None
@@ -128,7 +128,7 @@ class TimeSlice(PythonAlgorithm):
 
 
     def PyExec(self):
-        from IndirectCommon import CheckXrange
+        #from IndirectCommon import CheckXrange
 
         self._setup()
 
@@ -165,7 +165,7 @@ class TimeSlice(PythonAlgorithm):
                 from IndirectImport import import_mantidplot
                 mp = import_mantidplot()
                 mp.plotSpectrum(slice_file, 0)
-            except RuntimeError, e:
+            except RuntimeError:
                 # User clicked cancel on plot so don't do anything
                 pass
 

@@ -56,6 +56,9 @@ CurvesDialog::CurvesDialog( ApplicationWindow* app, Graph* g, Qt::WFlags fl )
     d_app(app),
     d_graph(g)
 {
+  if (!app) {
+    throw std::logic_error("Null ApplicationWindow pointer is passed to CurvesDialog.");
+  }
   setName( "CurvesDialog" );
   setWindowTitle( tr( "MantidPlot - Add/Remove curves" ) );
   setSizeGripEnabled(true);
@@ -197,7 +200,7 @@ void CurvesDialog::showCurveBtn(int)
   }
 
   PlotCurve *c = dynamic_cast<PlotCurve *>(it);
-  if (c->type() == Graph::Function)
+  if (c && c->type() == Graph::Function)
   {
     btnEditFunction->setEnabled(true);
     btnAssociations->setEnabled(false);
@@ -208,7 +211,7 @@ void CurvesDialog::showCurveBtn(int)
   btnAssociations->setEnabled(true);
 
   btnRange->setEnabled(true);
-  if (c->type() == Graph::ErrorBars)
+  if (c && c->type() == Graph::ErrorBars)
     btnRange->setEnabled(false);
 }
 
@@ -218,11 +221,8 @@ void CurvesDialog::showCurveRangeDialog()
   if (curve < 0)
     curve = 0;
 
-  if (d_app)
-  {
-    d_app->showCurveRangeDialog(d_graph, curve);
-    updateCurveRange();
-  }
+  d_app->showCurveRangeDialog(d_graph, curve);
+  updateCurveRange();
 }
 
 void CurvesDialog::showPlotAssociations()
@@ -233,8 +233,7 @@ void CurvesDialog::showPlotAssociations()
 
   close();
 
-  if (d_app)
-    d_app->showPlotAssociations(curve);
+  d_app->showPlotAssociations(curve);
 }
 
 void CurvesDialog::showFunctionDialog()
@@ -242,8 +241,7 @@ void CurvesDialog::showFunctionDialog()
   int currentRow = contents->currentRow();
   close();
 
-  if (d_app)
-    d_app->showFunctionDialog(d_graph, currentRow);
+  d_app->showFunctionDialog(d_graph, currentRow);
 }
 
 QSize CurvesDialog::sizeHint() const
@@ -284,39 +282,37 @@ void CurvesDialog::contextMenuEvent(QContextMenuEvent *e)
 
 void CurvesDialog::init()
 {
-  if (d_app){
-    bool currentFolderOnly = d_app->d_show_current_folder;
-    boxShowCurrentFolder->setChecked(currentFolderOnly);
-    showCurrentFolder(currentFolderOnly);
+  bool currentFolderOnly = d_app->d_show_current_folder;
+  boxShowCurrentFolder->setChecked(currentFolderOnly);
+  showCurrentFolder(currentFolderOnly);
 
-    QStringList matrices = d_app->matrixNames();
-    if (!matrices.isEmpty ()){
-      boxMatrixStyle->show();
-      available->addItems(matrices);
-    }
-
-    int style = d_app->defaultCurveStyle;
-    if (style == Graph::Line)
-      boxStyle->setCurrentItem(0);
-    else if (style == Graph::Scatter)
-      boxStyle->setCurrentItem(1);
-    else if (style == Graph::LineSymbols)
-      boxStyle->setCurrentItem(2);
-    else if (style == Graph::VerticalDropLines)
-      boxStyle->setCurrentItem(3);
-    else if (style == Graph::Spline)
-      boxStyle->setCurrentItem(4);
-    else if (style == Graph::VerticalSteps)
-      boxStyle->setCurrentItem(5);
-    else if (style == Graph::HorizontalSteps)
-      boxStyle->setCurrentItem(6);
-    else if (style == Graph::Area)
-      boxStyle->setCurrentItem(7);
-    else if (style == Graph::VerticalBars)
-      boxStyle->setCurrentItem(8);
-    else if (style == Graph::HorizontalBars)
-      boxStyle->setCurrentItem(9);
+  QStringList matrices = d_app->matrixNames();
+  if (!matrices.isEmpty ()){
+    boxMatrixStyle->show();
+    available->addItems(matrices);
   }
+
+  int style = d_app->defaultCurveStyle;
+  if (style == Graph::Line)
+    boxStyle->setCurrentItem(0);
+  else if (style == Graph::Scatter)
+    boxStyle->setCurrentItem(1);
+  else if (style == Graph::LineSymbols)
+    boxStyle->setCurrentItem(2);
+  else if (style == Graph::VerticalDropLines)
+    boxStyle->setCurrentItem(3);
+  else if (style == Graph::Spline)
+    boxStyle->setCurrentItem(4);
+  else if (style == Graph::VerticalSteps)
+    boxStyle->setCurrentItem(5);
+  else if (style == Graph::HorizontalSteps)
+    boxStyle->setCurrentItem(6);
+  else if (style == Graph::Area)
+    boxStyle->setCurrentItem(7);
+  else if (style == Graph::VerticalBars)
+    boxStyle->setCurrentItem(8);
+  else if (style == Graph::HorizontalBars)
+    boxStyle->setCurrentItem(9);
 
   QList<MdiSubWindow *> wList = d_app->windowsList();
   foreach(MdiSubWindow* w, wList)
@@ -377,9 +373,6 @@ void CurvesDialog::addCurves()
 
 bool CurvesDialog::addCurve(const QString& name)
 {
-  if (!d_app)
-    return false;
-
   QStringList matrices = d_app->matrixNames();
   if (matrices.contains(name)){
     Matrix *m = d_app->matrix(name);
@@ -530,9 +523,11 @@ void CurvesDialog::showCurveRange(bool on )
       if (!it)
         continue;
 
-      if (it->rtti() == QwtPlotItem::Rtti_PlotCurve && (dynamic_cast<PlotCurve *>(it))->type() != Graph::Function){
-        DataCurve *c = dynamic_cast<DataCurve *>(it);
-        lst << c->title().text() + "[" + QString::number(c->startRow()+1) + ":" + QString::number(c->endRow()+1) + "]";
+      auto plotCurve = dynamic_cast<PlotCurve *>(it);
+      if (plotCurve && plotCurve->type() != Graph::Function){
+        if (DataCurve *c = dynamic_cast<DataCurve *>(it)) {
+          lst << c->title().text() + "[" + QString::number(c->startRow()+1) + ":" + QString::number(c->endRow()+1) + "]";
+        }
       } else
         lst << it->title().text();
     }
@@ -552,8 +547,6 @@ void CurvesDialog::updateCurveRange()
 
 void CurvesDialog::showCurrentFolder(bool currentFolder)
 {
-  if (!d_app)
-    return;
 
   d_app->d_show_current_folder = currentFolder;
   available->clear();
@@ -566,10 +559,11 @@ void CurvesDialog::showCurrentFolder(bool currentFolder)
         if (!w->inherits("Table"))
           continue;
 
-        Table *t = dynamic_cast<Table *>(w);
-        for (int i=0; i < t->numCols(); i++){
-          if(t->colPlotDesignation(i) == Table::Y)
-            columns << QString(t->objectName()) + "_" + t->colLabel(i);
+        if (Table *t = dynamic_cast<Table *>(w)) {
+          for (int i=0; i < t->numCols(); i++){
+            if(t->colPlotDesignation(i) == Table::Y)
+              columns << QString(t->objectName()) + "_" + t->colLabel(i);
+          }
         }
       }
       available->addItems(columns);
@@ -581,18 +575,15 @@ void CurvesDialog::showCurrentFolder(bool currentFolder)
 
 void CurvesDialog::closeEvent(QCloseEvent* e)
 {
-  if (d_app)
+  d_app->d_add_curves_dialog_size = this->size();
+  // Need to reenable close-on-empty behaviour so
+  // that deleting workspaces causes the empty graphs to
+  // disappear
+  QList<MdiSubWindow *> wList = d_app->windowsList();
+  foreach(MdiSubWindow* w, wList)
   {
-    d_app->d_add_curves_dialog_size = this->size();
-    // Need to reenable close-on-empty behaviour so
-    // that deleting workspaces causes the empty graphs to
-    // disappear
-    QList<MdiSubWindow *> wList = d_app->windowsList();
-    foreach(MdiSubWindow* w, wList)
-    {
-      MultiLayer* ml = dynamic_cast<MultiLayer*>(w);
-      if( ml ) ml->setCloseOnEmpty(true);
-    }
+    MultiLayer* ml = dynamic_cast<MultiLayer*>(w);
+    if( ml ) ml->setCloseOnEmpty(true);
   }
 
   e->accept();

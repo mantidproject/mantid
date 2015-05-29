@@ -14,14 +14,21 @@ class MergeCalFiles(PythonAlgorithm):
         return "Combines the data from two Cal Files."
 
     def PyInit(self):
-        self.declareProperty(FileProperty("UpdateFile","", FileAction.Load, ['cal']), doc="The cal file containing the updates to merge into another file.")
-        self.declareProperty(FileProperty("MasterFile","", FileAction.Load, ['cal']), doc="The master file to be altered, the file must be sorted by UDET")
-        self.declareProperty(FileProperty("OutputFile","", FileAction.Save, ['cal']), doc="The file to contain the results")
+        self.declareProperty(FileProperty("UpdateFile","", FileAction.Load, ['cal']),
+                             doc="The cal file containing the updates to merge into another file.")
+        self.declareProperty(FileProperty("MasterFile","", FileAction.Load, ['cal']),
+                             doc="The master file to be altered, the file must be sorted by UDET")
+        self.declareProperty(FileProperty("OutputFile","", FileAction.Save, ['cal']),
+                             doc="The file to contain the results")
 
-        self.declareProperty("MergeOffsets", False, doc="If True, the offsets from file1 will be merged to the master file. Default: False")
-        self.declareProperty("MergeSelections", False, doc="If True, the selections from file1 will be merged to the master file. Default: False")
-        self.declareProperty("MergeGroups", False, doc="If True, the Groups from file1 will be merged to the master file. Default: False")
+        self.declareProperty("MergeOffsets", False, doc="If True, the offsets from file1 will be merged "+\
+                             "to the master file. Default: False")
+        self.declareProperty("MergeSelections", False, doc="If True, the selections from file1 will be merged "+\
+                             "to the master file. Default: False")
+        self.declareProperty("MergeGroups", False, doc="If True, the Groups from file1 will be merged to "+\
+                             "the master file. Default: False")
 
+    #pylint: disable=too-many-branches
     def PyExec(self):
     #extract settings
         mergeOffsets = self.getProperty("MergeOffsets").value
@@ -43,7 +50,6 @@ class MergeCalFiles(PythonAlgorithm):
         linesUpdated = 0
         linesUntouched = 0
         linesAdded = 0
-        linesInvalid=0
         for line in updateFile:
             if not self.IsComment(line):
         #process line
@@ -85,7 +91,8 @@ class MergeCalFiles(PythonAlgorithm):
                     outputFile.write(self.FormatLine(number,UDET,masterOffset,masterSelect,masterGroup))
                 except ValueError:
           #invalid line - ignore it
-                    linesInvalid += 1
+          #          linesInvalid += 1
+                    pass
 
     #add any lines at the end
         for UDET in updateDict.keys():
@@ -99,6 +106,7 @@ class MergeCalFiles(PythonAlgorithm):
         masterFile.close()
         outputFile.close()
 
+    #pylint: disable=too-many-arguments
     def DisplayMessage(self,mergeOffsets,mergeSelections,mergeGroups,fileName1,fileName2):
     #Log the settings string
         outputString = "Merging "
@@ -128,6 +136,7 @@ class MergeCalFiles(PythonAlgorithm):
             raise ValueError("invalid line: " + line)
         return (number,UDET,offset,select,group)
 
+    #pylint: disable=too-many-arguments
     def FormatLine(self,number,UDET,offset,select,group):
         line = "{0:9d}{1:16d}{2:16.7f}{3:9d}{4:9d}\n".format(number,UDET,offset,select,group)
         return line

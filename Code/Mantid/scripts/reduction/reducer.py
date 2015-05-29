@@ -103,7 +103,7 @@ def validate_loader(f):
                         kwargs[kwargs["AlternateName"]] = data_file
 
                     self.algorithm = alg
-                    simpleapi._set_properties(alg, *(), **kwargs)
+                    simpleapi.set_properties(alg, *(), **kwargs)
                     alg.execute()
                     if "OutputMessage" in propertyOrder:
                         return alg.getPropertyValue("OutputMessage")
@@ -240,7 +240,7 @@ def validate_step(f):
                         kwargs["OutputWorkspace"] = outputworkspace
 
                     self.algorithm = alg
-                    simpleapi._set_properties(alg,*(),**kwargs)
+                    simpleapi.set_properties(alg,*(),**kwargs)
                     alg.execute()
                     if "OutputMessage" in propertyOrder:
                         return alg.getPropertyValue("OutputMessage")
