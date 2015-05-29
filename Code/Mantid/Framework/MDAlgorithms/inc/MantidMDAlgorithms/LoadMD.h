@@ -103,7 +103,7 @@ private:
   bool m_BoxStructureAndMethadata;
 
   /// Version of SaveMD used to save the file
-  int SaveMDVersion ;
+  int m_saveMDVersion ;
 };
 
 } // namespace DataObjects

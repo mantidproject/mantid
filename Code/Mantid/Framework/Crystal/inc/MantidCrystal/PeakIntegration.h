@@ -68,7 +68,7 @@ private:
                     double qspan, DataObjects::PeaksWorkspace_sptr &Peaks,
                     const detid2index_map &pixel_to_wi);
 
-  bool IC; ///< Ikeida Carpenter fit of TOF
+  bool m_IC; ///< Ikeida Carpenter fit of TOF
 };
 
 } // namespace Algorithm

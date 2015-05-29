@@ -31,7 +31,8 @@ using boost::bind;
 
 /// Default constructor
 ConvertUnits::ConvertUnits()
-    : Algorithm(), m_numberOfSpectra(0), m_inputEvents(false) {}
+    : Algorithm(), m_numberOfSpectra(0), m_distribution(false),
+      m_inputEvents(false), m_inputUnit(), m_outputUnit() {}
 
 /// Destructor
 ConvertUnits::~ConvertUnits() {}

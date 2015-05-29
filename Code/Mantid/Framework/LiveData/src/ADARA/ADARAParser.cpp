@@ -8,7 +8,7 @@ using namespace ADARA;
 
 Parser::Parser(unsigned int initial_buffer_size, unsigned int max_pkt_size)
     : m_size(initial_buffer_size), m_max_size(max_pkt_size), m_len(0),
-      m_restart_offset(0), m_oversize_len(0) {
+      m_restart_offset(0), m_oversize_len(0), m_oversize_offset(0) {
   m_buffer = new uint8_t[initial_buffer_size];
 }
 

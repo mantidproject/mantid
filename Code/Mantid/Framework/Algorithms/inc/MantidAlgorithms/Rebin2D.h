@@ -86,9 +86,6 @@ protected:
   boost::shared_ptr<API::Progress> m_progress;
 
 private:
-  /// Flag for using a RebinnedOutput workspace
-  bool useFractionalArea;
-
   /// Initialise the properties
   void init();
   /// Run the algorithm
@@ -96,7 +93,8 @@ private:
   /// Setup the output workspace
   API::MatrixWorkspace_sptr
   createOutputWorkspace(API::MatrixWorkspace_const_sptr parent,
-                        MantidVec &newXBins, MantidVec &newYBins) const;
+                        MantidVec &newXBins, MantidVec &newYBins,
+                        const bool useFractionalArea) const;
 };
 
 } // namespace Algorithms

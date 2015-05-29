@@ -25,7 +25,8 @@ namespace MDAlgorithms {
 SlicingAlgorithm::SlicingAlgorithm()
     : m_transform(), m_transformFromOriginal(), m_transformToOriginal(),
       m_transformFromIntermediate(), m_transformToIntermediate(),
-      m_axisAligned(true), m_outD(0) // unititialized and should be invalid
+      m_axisAligned(true), m_outD(0), // unititialized and should be invalid
+      m_NormalizeBasisVectors(false)
 {}
 
 //----------------------------------------------------------------------------------------------

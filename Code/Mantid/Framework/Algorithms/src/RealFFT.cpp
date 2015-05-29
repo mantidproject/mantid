@@ -70,7 +70,7 @@ void RealFFT::init() {
 void RealFFT::exec() {
   API::MatrixWorkspace_sptr inWS = getProperty("InputWorkspace");
   std::string transform = getProperty("Transform");
-  IgnoreXBins = getProperty("IgnoreXBins");
+  bool IgnoreXBins = getProperty("IgnoreXBins");
 
   int spec = (transform == "Forward") ? getProperty("WorkspaceIndex") : 0;
 

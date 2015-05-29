@@ -75,8 +75,9 @@ Algorithm::Algorithm()
       m_isInitialized(false), m_isExecuted(false), m_isChildAlgorithm(false),
       m_recordHistoryForChild(false), m_alwaysStoreInADS(false),
       m_runningAsync(false), m_running(false), m_rethrow(false),
-      m_isAlgStartupLoggingEnabled(true), m_algorithmID(this),
-      m_singleGroup(-1), m_groupsHaveSimilarNames(false) {}
+      m_isAlgStartupLoggingEnabled(true), m_startChildProgress(0.),
+      m_endChildProgress(0.), m_algorithmID(this), m_singleGroup(-1),
+      m_groupsHaveSimilarNames(false) {}
 
 /// Virtual destructor
 Algorithm::~Algorithm() {
@@ -884,7 +885,8 @@ IAlgorithm_sptr Algorithm::fromString(const std::string &input) {
       } catch (boost::bad_lexical_cast &) {
       }
     }
-    IAlgorithm_sptr alg = AlgorithmManager::Instance().createUnmanaged(algName, version);
+    IAlgorithm_sptr alg =
+        AlgorithmManager::Instance().createUnmanaged(algName, version);
     alg->initialize();
     if (boost::regex_search(input, what, propExp, boost::match_not_null)) {
       std::string _propStr = what[1];
@@ -1305,11 +1307,12 @@ bool Algorithm::processGroups() {
         outputBaseName += ws->name();
 
         // Set the property using the name of that workspace
-        if (Property *prop = dynamic_cast<Property *>(m_inputWorkspaceProps[iwp])) {
+        if (Property *prop =
+                dynamic_cast<Property *>(m_inputWorkspaceProps[iwp])) {
           alg->setPropertyValue(prop->name(), ws->name());
         } else {
-          throw std::logic_error(
-              "Found a Workspace property which doesn't inherit from Property.");
+          throw std::logic_error("Found a Workspace property which doesn't "
+                                 "inherit from Property.");
         }
       } // not an empty (i.e. optional) input
     }   // for each InputWorkspace property
