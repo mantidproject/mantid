@@ -381,7 +381,7 @@ set_property ( TARGET Geometry PROPERTY FOLDER "MantidFramework" )
 
 target_link_libraries ( Geometry LINK_PRIVATE ${MANTIDLIBS}  ${OPENGL_LIBRARIES} ${GSL_LIBRARIES} ${NEXUS_LIBRARIES} )
 
-if (NOT NO_OPENCASCADE)
+if (ENABLE_OPENCASCADE)
   target_link_libraries ( Geometry LINK_PRIVATE ${OPENCASCADE_LIBRARIES} )
 endif ()
 
