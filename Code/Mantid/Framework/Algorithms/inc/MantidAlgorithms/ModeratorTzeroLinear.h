@@ -79,8 +79,8 @@ namespace Algorithms {
 */
 class DLLExport ModeratorTzeroLinear : public API::Algorithm {
 public:
-  /// (Empty) Constructor
-  ModeratorTzeroLinear() : API::Algorithm() {}
+  /// Default constructor
+  ModeratorTzeroLinear();
   /// Virtual destructor
   virtual ~ModeratorTzeroLinear() {}
   /// Algorithm's name

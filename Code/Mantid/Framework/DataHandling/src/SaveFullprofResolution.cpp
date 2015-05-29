@@ -25,7 +25,10 @@ DECLARE_ALGORITHM(SaveFullprofResolution)
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
-SaveFullprofResolution::SaveFullprofResolution() {}
+SaveFullprofResolution::SaveFullprofResolution()
+    : API::Algorithm(), m_profileParamMap(), m_profileTableWS(),
+      m_outIrfFilename(), m_bankID(-1), m_fpProfileNumber(-1), m_append(false) {
+}
 
 //----------------------------------------------------------------------------------------------
 /** Destructor

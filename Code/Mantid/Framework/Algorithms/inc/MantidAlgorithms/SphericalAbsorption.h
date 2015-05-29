@@ -116,11 +116,7 @@ private:
   int64_t x_step;  ///< The step in bin number between adjacent points
   int64_t m_emode; ///< The energy mode: 0 - elastic, 1 - direct, 2 - indirect
   double m_lambdaFixed; ///< The wavelength corresponding to the fixed energy,
-  /// if provided
-
-  typedef double (*expfunction)(
-      double);             ///< Typedef pointer to exponential function
-  expfunction EXPONENTIAL; ///< Pointer to exponential function
+                        /// if provided
 };
 
 } // namespace Algorithms

@@ -13,6 +13,9 @@ namespace Algorithms {
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(OneMinusExponentialCor)
 
+OneMinusExponentialCor::OneMinusExponentialCor()
+    : UnaryOperation(), m_c(0.), m_c1(0.), m_divide(false) {}
+
 void OneMinusExponentialCor::defineProperties() {
   auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0.0);

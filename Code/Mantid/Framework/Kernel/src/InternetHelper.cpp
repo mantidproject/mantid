@@ -163,11 +163,13 @@ int InternetHelper::sendRequest(const std::string &url,
   
   // send the request
   Poco::URI uri(url);
+  if (uri.getPath().empty())
+    uri=url+"/";
   int retval;
   if ((uri.getScheme() == "https") || (uri.getPort() == 443)) {
-    retval = sendHTTPSRequest(url, responseStream);
+    retval = sendHTTPSRequest(uri.toString(), responseStream);
   } else {
-    retval = sendHTTPRequest(url, responseStream);
+    retval = sendHTTPRequest(uri.toString(), responseStream);
   }
   return retval;
 }

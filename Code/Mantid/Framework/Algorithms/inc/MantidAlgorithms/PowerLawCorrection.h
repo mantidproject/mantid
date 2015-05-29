@@ -50,7 +50,7 @@ File change history is stored at: <https://github.com/mantidproject/mantid>
 class DLLExport PowerLawCorrection : public UnaryOperation {
 public:
   /// Default constructor
-  PowerLawCorrection() : UnaryOperation(){};
+  PowerLawCorrection();
   /// Destructor
   virtual ~PowerLawCorrection(){};
   /// Algorithm's name for identification
