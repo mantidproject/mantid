@@ -65,39 +65,48 @@ void Differentiation::init()
     d_min_points = 4;
 }
 
-void Differentiation::output()
-{
-    double *result = new double[d_n-1];
-	for (int i = 1; i < d_n-1; i++)
-		result[i]=0.5*((d_y[i+1]-d_y[i])/(d_x[i+1]-d_x[i]) + (d_y[i]-d_y[i-1])/(d_x[i]-d_x[i-1]));
+void Differentiation::output() {
+  std::vector<double> result(d_n - 1);
+  for (int i = 1; i < d_n - 1; i++)
+    result[i] = 0.5 * ((d_y[i + 1] - d_y[i]) / (d_x[i + 1] - d_x[i]) +
+                       (d_y[i] - d_y[i - 1]) / (d_x[i] - d_x[i - 1]));
 
-    ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(parent());
-    QLocale locale = app->locale();
-    QString tableName = app->generateUniqueName(QString(objectName()));
-    QString dataSet;
-	if (d_curve)
-		dataSet = d_curve->title().text();
-	else
-		dataSet = d_y_col_name;
+  ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(parent());
+  if (!app) {
+    throw std::logic_error(
+        "Parent of Differentiation is not ApplicationWindow as expected.");
+  }
+  QLocale locale = app->locale();
+  QString tableName = app->generateUniqueName(QString(objectName()));
+  QString dataSet;
+  if (d_curve)
+    dataSet = d_curve->title().text();
+  else
+    dataSet = d_y_col_name;
 
-    d_result_table = app->newHiddenTable(tableName, tr("Derivative") + " " + tr("of","Derivative of")  + " " + dataSet, d_n-2, 2);
-	for (int i = 1; i < d_n-1; i++) {
-		d_result_table->setText(i-1, 0, locale.toString(d_x[i], 'g', app->d_decimal_digits));
-		d_result_table->setText(i-1, 1, locale.toString(result[i], 'g', app->d_decimal_digits));
-	}
-    delete[] result;
+  d_result_table = app->newHiddenTable(
+      tableName,
+      tr("Derivative") + " " + tr("of", "Derivative of") + " " + dataSet,
+      d_n - 2, 2);
+  for (int i = 1; i < d_n - 1; i++) {
+    d_result_table->setText(
+        i - 1, 0, locale.toString(d_x[i], 'g', app->d_decimal_digits));
+    d_result_table->setText(
+        i - 1, 1, locale.toString(result[i], 'g', app->d_decimal_digits));
+  }
 
-	if (d_graphics_display){
-		if (!d_output_graph)
-			d_output_graph = createOutputGraph()->activeGraph();
+  if (d_graphics_display) {
+    if (!d_output_graph)
+      d_output_graph = createOutputGraph()->activeGraph();
 
-    	d_output_graph->insertCurve(d_result_table, tableName + "_2", 0);
-    	QString legend = "\\l(1)" + tr("Derivative") + " " + tr("of","Derivative of") + " " + dataSet;
-    	LegendWidget *l = d_output_graph->legend();
-		if (l){
-    		l->setText(legend);
-    		l->repaint();
-        } else
-            d_output_graph->newLegend(legend);
-	}
+    d_output_graph->insertCurve(d_result_table, tableName + "_2", 0);
+    QString legend = "\\l(1)" + tr("Derivative") + " " +
+                     tr("of", "Derivative of") + " " + dataSet;
+    LegendWidget *l = d_output_graph->legend();
+    if (l) {
+      l->setText(legend);
+      l->repaint();
+    } else
+      d_output_graph->newLegend(legend);
+  }
 }

@@ -53,7 +53,7 @@ namespace MantidWidgets
 */
 SelectWorkspacesDialog::SelectWorkspacesDialog(QWidget* parent, const std::string& typeFilter,
                                                const std::string& customButtonLabel) :
-QDialog(parent)
+  QDialog(parent), m_wsList(NULL), m_okButton(NULL), m_customButton(NULL)
 {
   setWindowTitle("MantidPlot - Select workspace");
   m_wsList = new QListWidget(parent);

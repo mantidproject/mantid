@@ -161,7 +161,7 @@ add_library ( PythonKernelModule ${SRC_FILES} ${INC_FILES} ${PYTHON_INSTALL_FILE
 set_python_properties( PythonKernelModule _kernel )
 set_target_output_directory ( PythonKernelModule ${OUTPUT_DIR} .pyd )
 # Add the required dependencies
-target_link_libraries ( PythonKernelModule Kernel ${Boost_LIBRARIES} ${PYTHON_LIBRARIES} ${PYTHON_DEPS} )
+target_link_libraries ( PythonKernelModule LINK_PRIVATE Kernel ${Boost_LIBRARIES} ${PYTHON_LIBRARIES} ${PYTHON_DEPS} ${POCO_LIBRARIES} )
 
 if (OSX_VERSION VERSION_GREATER 10.8)
   set_target_properties ( PythonKernelModule PROPERTIES INSTALL_RPATH "@loader_path/../../../MacOS")

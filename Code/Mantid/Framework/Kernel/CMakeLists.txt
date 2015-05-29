@@ -360,6 +360,12 @@ set ( TEST_FILES
 	WriteLockTest.h
 )
 
+if (COVERALLS)
+    foreach( loop_var ${SRC_FILES} ${INC_FILES})
+      set_property(GLOBAL APPEND PROPERTY COVERAGE_SRCS "${CMAKE_CURRENT_SOURCE_DIR}/${loop_var}")
+    endforeach(loop_var)
+endif()
+
 if ( ${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
     LIST( APPEND SRC_FILES src/NetworkProxyOSX.cpp )
     SET( NETWORK_LIBRARIES "-framework SystemConfiguration" "-framework CoreFoundation"  "-framework CoreServices")
@@ -395,16 +401,16 @@ set_property ( TARGET Kernel PROPERTY FOLDER "MantidFramework" )
 # For older gcc versions (<4.5) if we do not put stdc++ first then things crash when an exceptions are
 # thrown in Python.
 if ( GCC_COMPILER_VERSION AND GCC_COMPILER_VERSION VERSION_LESS "4.5" )
- target_link_libraries ( Kernel stdc++ )
+ target_link_libraries ( Kernel LINK_PRIVATE stdc++ )
 endif()
-target_link_libraries ( Kernel ${NEXUS_LIBRARIES} ${MANTIDLIBS} ${GSL_LIBRARIES} 
-                        ${NETWORK_LIBRARIES} ${JSONCPP_LIBRARIES})
+target_link_libraries ( Kernel LINK_PRIVATE ${NEXUS_LIBRARIES} ${GSL_LIBRARIES} ${MANTIDLIBS} ${NETWORK_LIBRARIES} )
+
 if (WITH_ASAN)
-  target_link_libraries ( Kernel -lasan )
+  target_link_libraries ( Kernel LINK_PRIVATE -lasan )
 endif ()
 
 if ( WIN32 )
-  target_link_libraries ( Kernel Psapi.lib ) # For memory usage queries
+  target_link_libraries ( Kernel LINK_PRIVATE Psapi.lib ) # For memory usage queries
 endif()
 
 # Add the unit tests directory

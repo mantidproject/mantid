@@ -44,52 +44,54 @@
 RenameWindowDialog::RenameWindowDialog(QWidget* parent, Qt::WFlags fl )
     : QDialog( parent, fl )
 {
-	setWindowTitle(tr("MantidPlot - Rename Window"));
+  setWindowTitle(tr("MantidPlot - Rename Window"));
 
-	QGridLayout * leftLayout = new QGridLayout();
-	QVBoxLayout * rightLayout = new QVBoxLayout();
+  QGridLayout * leftLayout = new QGridLayout();
+  QVBoxLayout * rightLayout = new QVBoxLayout();
 
-	groupBox1 = new QGroupBox(tr("Window Title"));
-	groupBox1->setLayout(leftLayout);
+  groupBox1 = new QGroupBox(tr("Window Title"));
+  groupBox1->setLayout(leftLayout);
 
-	boxName = new QRadioButton(tr("&Name (single word)"));
-	leftLayout->addWidget(boxName, 0, 0);
-	boxNameLine = new QLineEdit();
-	leftLayout->addWidget(boxNameLine, 0, 1);
-	setFocusProxy(boxNameLine);
+  boxName = new QRadioButton(tr("&Name (single word)"));
+  leftLayout->addWidget(boxName, 0, 0);
+  boxNameLine = new QLineEdit();
+  leftLayout->addWidget(boxNameLine, 0, 1);
+  setFocusProxy(boxNameLine);
 
-	boxLabel = new QRadioButton(tr("&Label"));
-	leftLayout->addWidget(boxLabel, 2, 0);
-	boxLabelEdit = new QTextEdit();
-	leftLayout->addWidget(boxLabelEdit, 1, 1, 3, 1);
-	boxLabelEdit->setMaximumHeight(100);
-	boxLabelEdit->setMinimumHeight(100);
+  boxLabel = new QRadioButton(tr("&Label"));
+  leftLayout->addWidget(boxLabel, 2, 0);
+  boxLabelEdit = new QTextEdit();
+  leftLayout->addWidget(boxLabelEdit, 1, 1, 3, 1);
+  boxLabelEdit->setMaximumHeight(100);
+  boxLabelEdit->setMinimumHeight(100);
 
-	boxBoth = new QRadioButton(tr("&Both Name and Label"));
-	leftLayout->addWidget(boxBoth, 4, 0);
+  boxBoth = new QRadioButton(tr("&Both Name and Label"));
+  leftLayout->addWidget(boxBoth, 4, 0);
 
-	buttons = new QButtonGroup(this);
-	buttons->addButton(boxName);
-	buttons->addButton(boxLabel);
-	buttons->addButton(boxBoth);
+  buttons = new QButtonGroup(this);
+  buttons->addButton(boxName);
+  buttons->addButton(boxLabel);
+  buttons->addButton(boxBoth);
 
-	buttonOk = new QPushButton(tr( "&OK" ));
-    buttonOk->setAutoDefault( true );
-    buttonOk->setDefault( true );
-	rightLayout->addWidget(buttonOk);
+  buttonOk = new QPushButton(tr( "&OK" ));
+  buttonOk->setAutoDefault( true );
+  buttonOk->setDefault( true );
+  rightLayout->addWidget(buttonOk);
 
-    buttonCancel = new QPushButton(tr( "&Cancel" ));
-    buttonCancel->setAutoDefault( true );
-	rightLayout->addWidget(buttonCancel);
-	rightLayout->addStretch();
+  buttonCancel = new QPushButton(tr( "&Cancel" ));
+  buttonCancel->setAutoDefault( true );
+  rightLayout->addWidget(buttonCancel);
+  rightLayout->addStretch();
 
-	QHBoxLayout * mainLayout = new QHBoxLayout(this);
-    mainLayout->addWidget(groupBox1);
-	mainLayout->addLayout(rightLayout);
+  QHBoxLayout * mainLayout = new QHBoxLayout(this);
+  mainLayout->addWidget(groupBox1);
+  mainLayout->addLayout(rightLayout);
 
-    // signals and slots connections
-    connect( buttonOk, SIGNAL( clicked() ), this, SLOT( accept() ) );
-    connect( buttonCancel, SIGNAL( clicked() ), this, SLOT( reject() ) );
+  window = NULL;
+
+  // signals and slots connections
+  connect( buttonOk, SIGNAL( clicked() ), this, SLOT( accept() ) );
+  connect( buttonCancel, SIGNAL( clicked() ), this, SLOT( reject() ) );
 }
 
 void RenameWindowDialog::setWidget(MdiSubWindow *w)

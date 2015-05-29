@@ -70,11 +70,7 @@ private:
 				//! Button "<->Z"
 				*buttonZ;
 				//! Button group defining the layout
-    QGroupBox*  groupBox1,
-				//! Button group defining the layout
-				*groupBox2,
-				//! Button group defining the layout
-				*groupBox3;
+    QGroupBox*  groupBox1;
 				//! Combo box to select the table
     QComboBox* boxTables;
 				//! List of the columns in the selected table

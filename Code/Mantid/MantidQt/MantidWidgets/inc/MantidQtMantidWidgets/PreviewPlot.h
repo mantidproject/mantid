@@ -120,7 +120,7 @@ namespace MantidWidgets
       size_t wsIndex;
 
       PlotCurveConfiguration():
-        curve(NULL), label(NULL) {}
+        curve(NULL), label(NULL), colour(), wsIndex(0) {}
     };
 
     void handleRemoveEvent(Mantid::API::WorkspacePreDeleteNotification_ptr pNf);

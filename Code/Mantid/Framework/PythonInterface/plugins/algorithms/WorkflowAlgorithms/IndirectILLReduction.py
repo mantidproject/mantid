@@ -8,7 +8,7 @@ from mantid import config, logger, mtd
 import numpy as np
 import os.path
 
-
+#pylint: disable=too-many-instance-attributes
 class IndirectILLReduction(DataProcessorAlgorithm):
 
     _raw_workspace = None
@@ -24,7 +24,7 @@ class IndirectILLReduction(DataProcessorAlgorithm):
     _analyser = None
     _reflection = None
     _run_name = None
-
+    _calibration_workspace = None
 
     def category(self):
         return "Workflow\\MIDAS;Inelastic;PythonAlgorithms"
@@ -36,8 +36,15 @@ class IndirectILLReduction(DataProcessorAlgorithm):
 
     def PyInit(self):
         # Input options
-        self.declareProperty(FileProperty('Run', '', action=FileAction.Load, extensions=["nxs"]),
+        self.declareProperty(FileProperty('Run', '',
+                                          action=FileAction.Load,
+                                          extensions=["nxs"]),
                              doc='File path of run.')
+
+        self.declareProperty(MatrixWorkspaceProperty("CalibrationWorkspace", "",
+                                                     optional=PropertyMode.Optional,
+                                                     direction=Direction.Input),
+                             doc="Workspace containing calibration intensities.")
 
         self.declareProperty(name='Analyser', defaultValue='silicon',
                              validator=StringListValidator(['silicon']),
@@ -48,7 +55,8 @@ class IndirectILLReduction(DataProcessorAlgorithm):
                              doc='Analyser reflection.')
 
         self.declareProperty(FileProperty('MapFile', '',
-                             action=FileAction.OptionalLoad, extensions=["xml"]),
+                                          action=FileAction.OptionalLoad,
+                                          extensions=["xml"]),
                              doc='Filename of the map file to use. If left blank the default will be used.')
 
         self.declareProperty(name='MirrorMode', defaultValue=False,
@@ -56,20 +64,22 @@ class IndirectILLReduction(DataProcessorAlgorithm):
 
         # Output workspace properties
         self.declareProperty(MatrixWorkspaceProperty("RawWorkspace", "",
-                             direction=Direction.Output),
+                                                     direction=Direction.Output),
                              doc="Name for the output raw workspace created.")
 
         self.declareProperty(MatrixWorkspaceProperty("ReducedWorkspace", "",
-                             direction=Direction.Output),
+                                                     direction=Direction.Output),
                              doc="Name for the output reduced workspace created. If mirror mode is used this will be the sum of both "
                              "the left and right hand workspaces.")
 
         self.declareProperty(MatrixWorkspaceProperty("LeftWorkspace", "",
-                             optional=PropertyMode.Optional, direction=Direction.Output),
+                                                     optional=PropertyMode.Optional,
+                                                     direction=Direction.Output),
                              doc="Name for the left workspace if mirror mode is used.")
 
         self.declareProperty(MatrixWorkspaceProperty("RightWorkspace", "",
-                             optional=PropertyMode.Optional, direction=Direction.Output),
+                                                     optional=PropertyMode.Optional,
+                                                     direction=Direction.Output),
                              doc="Name for the right workspace if mirror mode is used.")
 
         # Output options
@@ -101,6 +111,7 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         self.log().information('IndirectILLreduction')
 
         run_path = self.getPropertyValue('Run')
+        self._calibration_workspace = self.getPropertyValue('CalibrationWorkspace')
         self._raw_workspace = self.getPropertyValue('RawWorkspace')
         self._red_workspace = self.getPropertyValue('ReducedWorkspace')
         self._red_left_workspace = self.getPropertyValue('LeftWorkspace')
@@ -167,8 +178,10 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         ipf_path = os.path.join(idf_directory, ipf_name)
 
         LoadParameterFile(Workspace=self._raw_workspace, Filename=ipf_path)
-        AddSampleLog(Workspace=self._raw_workspace, LogName="facility",
-                     LogType="String", LogText="ILL")
+        AddSampleLog(Workspace=self._raw_workspace,
+                     LogName="facility",
+                     LogType="String",
+                     LogText="ILL")
 
         if self._map_file == '':
             # path name for default map file
@@ -182,12 +195,15 @@ class IndirectILLReduction(DataProcessorAlgorithm):
             logger.information('Map file : %s' % self._map_file)
 
         grouped_ws = self._run_name + '_group'
-        GroupDetectors(InputWorkspace=self._raw_workspace, OutputWorkspace=grouped_ws,
-                       MapFile=self._map_file, Behaviour='Average')
+        GroupDetectors(InputWorkspace=self._raw_workspace,
+                       OutputWorkspace=grouped_ws,
+                       MapFile=self._map_file,
+                       Behaviour='Average')
 
         monitor_ws = self._run_name + '_mon'
         ExtractSingleSpectrum(InputWorkspace=self._raw_workspace,
-                              OutputWorkspace=monitor_ws, WorkspaceIndex=0)
+                              OutputWorkspace=monitor_ws,
+                              WorkspaceIndex=0)
 
         if self._use_mirror_mode:
             output_workspaces = self._run_mirror_mode(monitor_ws, grouped_ws)
@@ -215,8 +231,12 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         #left half
         left_ws = self._run_name + '_left'
         left_mon_ws = left_ws + '_left_mon'
-        CropWorkspace(InputWorkspace=grouped_ws, OutputWorkspace=left_ws, XMax=x[mid_point - 1])
-        CropWorkspace(InputWorkspace=monitor_ws, OutputWorkspace=left_mon_ws, XMax=x[mid_point - 1])
+        CropWorkspace(InputWorkspace=grouped_ws,
+                      OutputWorkspace=left_ws,
+                      XMax=x[mid_point - 1])
+        CropWorkspace(InputWorkspace=monitor_ws,
+                      OutputWorkspace=left_mon_ws,
+                      XMax=x[mid_point - 1])
 
         self._calculate_energy(left_mon_ws, left_ws, self._red_left_workspace)
         xl = mtd[self._red_left_workspace].readX(0)
@@ -226,8 +246,12 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         #right half
         right_ws = self._run_name + '_right'
         right_mon_ws = right_ws + '_mon'
-        CropWorkspace(InputWorkspace=grouped_ws, OutputWorkspace=right_ws, Xmin=x[mid_point])
-        CropWorkspace(InputWorkspace=monitor_ws, OutputWorkspace=right_mon_ws, Xmin=x[mid_point])
+        CropWorkspace(InputWorkspace=grouped_ws,
+                      OutputWorkspace=right_ws,
+                      Xmin=x[mid_point])
+        CropWorkspace(InputWorkspace=monitor_ws,
+                      OutputWorkspace=right_mon_ws,
+                      Xmin=x[mid_point])
 
         self._calculate_energy(right_mon_ws, right_ws, self._red_right_workspace)
         xr = mtd[self._red_right_workspace].readX(0)
@@ -243,16 +267,20 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         nrmax = np.argmax(np.array(yr))
         xrmax = xr[nrmax]
         xshift = xlmax - xrmax
-        ScaleX(InputWorkspace=self._red_right_workspace, OutputWorkspace=self._red_right_workspace,
-               Factor=xshift, Operation='Add')
+        ScaleX(InputWorkspace=self._red_right_workspace,
+               OutputWorkspace=self._red_right_workspace,
+               Factor=xshift,
+               Operation='Add')
         RebinToWorkspace(WorkspaceToRebin=self._red_right_workspace,
                          WorkspaceToMatch=self._red_left_workspace,
                          OutputWorkspace=self._red_right_workspace)
 
         #sum both workspaces together
-        Plus(LHSWorkspace=self._red_left_workspace, RHSWorkspace=self._red_right_workspace,
+        Plus(LHSWorkspace=self._red_left_workspace,
+             RHSWorkspace=self._red_right_workspace,
              OutputWorkspace=self._red_workspace)
-        Scale(InputWorkspace=self._red_workspace, OutputWorkspace=self._red_workspace,
+        Scale(InputWorkspace=self._red_workspace,
+              OutputWorkspace=self._red_workspace,
               Factor=0.5, Operation='Multiply')
 
         DeleteWorkspace(monitor_ws)
@@ -270,25 +298,48 @@ class IndirectILLReduction(DataProcessorAlgorithm):
         @param red_ws :: name to call the reduced workspace
         """
         x_range = self._monitor_range(monitor_ws)
-        Scale(InputWorkspace=monitor_ws, OutputWorkspace=monitor_ws, Factor=0.001,
+        Scale(InputWorkspace=monitor_ws,
+              OutputWorkspace=monitor_ws,
+              Factor=0.001,
               Operation='Multiply')
 
-        CropWorkspace(InputWorkspace=monitor_ws, OutputWorkspace=monitor_ws,
-                      Xmin=x_range[0], XMax=x_range[1])
-        ScaleX(InputWorkspace=monitor_ws, OutputWorkspace=monitor_ws, Factor=-x_range[0],
-               Operation='Add')
-
-        CropWorkspace(InputWorkspace=grouped_ws, OutputWorkspace=grouped_ws, Xmin=x_range[0],
+        CropWorkspace(InputWorkspace=monitor_ws,
+                      OutputWorkspace=monitor_ws,
+                      Xmin=x_range[0],
                       XMax=x_range[1])
-        ScaleX(InputWorkspace=grouped_ws, OutputWorkspace=grouped_ws, Factor=-x_range[0],
+        ScaleX(InputWorkspace=monitor_ws,
+               OutputWorkspace=monitor_ws,
+               Factor=-x_range[0],
                Operation='Add')
 
-        Divide(LHSWorkspace=grouped_ws, RHSWorkspace=monitor_ws, OutputWorkspace=grouped_ws)
-        formula = self._energy_range(grouped_ws)
-        ConvertAxisByFormula(InputWorkspace=grouped_ws, OutputWorkspace=red_ws, Axis='X',
-                             Formula=formula, AxisTitle='Energy transfer', AxisUnits='meV')
+        CropWorkspace(InputWorkspace=grouped_ws,
+                      OutputWorkspace=grouped_ws,
+                      Xmin=x_range[0],
+                      XMax=x_range[1])
+        ScaleX(InputWorkspace=grouped_ws,
+               OutputWorkspace=grouped_ws,
+               Factor=-x_range[0],
+               Operation='Add')
 
-        xnew = mtd[red_ws].readX(0)  # energy array
+        # Apply the detector intensity calibration
+        if self._calibration_workspace != '':
+            Divide(LHSWorkspace=grouped_ws,
+                   RHSWorkspace=self._calibration_workspace,
+                   OutputWorkspace=grouped_ws)
+
+        Divide(LHSWorkspace=grouped_ws,
+               RHSWorkspace=monitor_ws,
+               OutputWorkspace=grouped_ws)
+        formula = self._energy_range(grouped_ws)
+        ConvertAxisByFormula(InputWorkspace=grouped_ws,
+                             OutputWorkspace=red_ws,
+                             Axis='X',
+                             Formula=formula)
+
+        red_ws_p = mtd[red_ws]
+        red_ws_p.getAxis(0).setUnit('DeltaE')
+
+        xnew = red_ws_p.readX(0)  # energy array
         logger.information('Energy range : %f to %f' % (xnew[0], xnew[-1]))
 
         DeleteWorkspace(grouped_ws)
