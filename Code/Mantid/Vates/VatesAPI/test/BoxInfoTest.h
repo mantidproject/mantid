@@ -54,9 +54,19 @@ public:
     // Act
     auto result = Mantid::VATES::findRecursionDepthForTopLevelSplitting(wsName);
     // Assert
+    #if defined(__GNUC__)
+      #if (__GNUC__ >= 4 && __GNUC_MINOR__ >= 4 )
+        #pragma GCC diagnostic push
+        #pragma GCC diagnostic ignored "-Wstrict-aliasing"
+      #endif
+    #endif
     TSM_ASSERT("Should have recursion depth of 1 for top level splitting.",
                result.get() == 1);
-
+    #if defined(__GNUC__)
+      #if (__GNUC__ >= 4 && __GNUC_MINOR__ >= 4 )
+        #pragma GCC diagnostic pop
+      #endif
+    #endif
     // Clean up
     AnalysisDataService::Instance().remove(wsName);
   }

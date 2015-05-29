@@ -299,10 +299,21 @@ pqPipelineSource* ViewBase::setPluginSource(QString pluginName, QString wsName)
   // We are setting the recursion depth to 1 when we are dealing with MDEvent workspaces
   // with top level splitting, but this is not updated in the plugin line edit field. 
   // We do this here.
+  #if defined(__GNUC__)
+    #if (__GNUC__ >= 4 && __GNUC_MINOR__ >= 4 )
+      #pragma GCC diagnostic push
+      #pragma GCC diagnostic ignored "-Wstrict-aliasing"
+    #endif
+  #endif
   if (auto split = Mantid::VATES::findRecursionDepthForTopLevelSplitting(wsName.toStdString())) {
     vtkSMPropertyHelper(src->getProxy(),
               "Recursion Depth").Set(split.get());
   }
+  #if defined(__GNUC__)
+    #if (__GNUC__ >= 4 && __GNUC_MINOR__ >= 4 )
+      #pragma GCC diagnostic pop
+    #endif
+  #endif
   // WORKAROUND END
 
   // Update the source so that it retrieves the data from the Mantid workspace

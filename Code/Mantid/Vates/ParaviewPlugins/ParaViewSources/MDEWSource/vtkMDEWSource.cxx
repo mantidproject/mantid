@@ -247,7 +247,19 @@ int vtkMDEWSource::RequestInformation(vtkInformation *vtkNotUsed(request), vtkIn
     {
       // If the MDEvent workspace has had top level splitting applied to it, then use the a depth of 1
       if (auto split = Mantid::VATES::findRecursionDepthForTopLevelSplitting(m_wsName)) {
+
+        #if defined(__GNUC__)
+          #if (__GNUC__ >= 4 && __GNUC_MINOR__ >= 4 )
+            #pragma GCC diagnostic push
+            #pragma GCC diagnostic ignored "-Wstrict-aliasing"
+          #endif
+        #endif
         SetDepth(split.get());
+        #if defined(__GNUC__)
+          #if (__GNUC__ >= 4 && __GNUC_MINOR__ >= 4 )
+            #pragma GCC diagnostic pop
+          #endif
+        #endif
       }
 
       m_presenter->executeLoadMetadata();
