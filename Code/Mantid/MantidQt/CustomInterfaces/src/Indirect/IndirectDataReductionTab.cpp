@@ -21,7 +21,7 @@ namespace CustomInterfaces
   /** Constructor
    */
   IndirectDataReductionTab::IndirectDataReductionTab(IndirectDataReduction *idrUI, QObject *parent) :
-    IndirectTab(parent), m_idrUI(idrUI)
+    IndirectTab(parent), m_idrUI(idrUI), m_tabRunning(false)
   {
     connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(tabExecutionComplete(bool)));
   }
@@ -84,7 +84,7 @@ namespace CustomInterfaces
    *
    * @return Map of information ID to value
    */
-  std::map<QString, QString> IndirectDataReductionTab::getInstrumentDetails()
+  QMap<QString, QString> IndirectDataReductionTab::getInstrumentDetails()
   {
     return m_idrUI->getInstrumentDetails();
   }

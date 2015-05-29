@@ -119,13 +119,19 @@ FindDialog::FindDialog( QWidget* parent, Qt::WFlags fl )
 
 void FindDialog::setStartPath()
 {
-	ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(parent());
+	ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parent());
+  if (!app) {
+    throw std::logic_error("Parent of FindDialog is not ApplicationWindow as expected.");
+  }
 	labelStart->setText(app->currentFolder()->path());
 }
 
 void FindDialog::accept()
 {
-	ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(parent());
+	ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parent());
+  if (!app) {
+    throw std::logic_error("Parent of FindDialog is not ApplicationWindow as expected.");
+  }
 	app->find(boxFind->currentText(), boxWindowNames->isChecked(), boxWindowLabels->isChecked(),
 			boxFolderNames->isChecked(), boxCaseSensitive->isChecked(), boxPartialMatch->isChecked(),
 			boxSubfolders->isChecked());

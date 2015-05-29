@@ -31,7 +31,8 @@ DECLARE_SUBWINDOW(MultiDatasetFit)
 /// Constructor
 /// @param parent :: The parent widget
 MultiDatasetFit::MultiDatasetFit(QWidget *parent)
-:UserSubWindow(parent)
+:UserSubWindow(parent), m_plotController(NULL), m_dataController(NULL), m_functionBrowser(NULL),
+ m_fitOptionsBrowser(NULL)
 {
 }
 

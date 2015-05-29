@@ -2,6 +2,7 @@
 #ifndef VTKDATASETFACTORYTEST_H_
 #define VTKDATASETFACTORYTEST_H_
 
+#include "MantidAPI/IMDWorkspace.h"
 #include "MantidVatesAPI/vtkDataSetFactory.h"
 #include "MantidVatesAPI/ProgressAction.h"
 #include <cxxtest/TestSuite.h>
@@ -120,7 +121,6 @@ public:
     TSM_ASSERT_EQUALS("Output not wired up correctly to ::create() method", "vtkStructuredGrid", std::string(product->GetClassName()));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&factory));
   }
-
 
 };
 

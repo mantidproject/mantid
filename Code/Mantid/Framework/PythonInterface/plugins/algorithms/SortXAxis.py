@@ -20,11 +20,9 @@ class SortXAxis(PythonAlgorithm):
 
 
     def PyInit(self):
-        self.declareProperty(MatrixWorkspaceProperty("InputWorkspace", defaultValue="",
-                             direction=Direction.Input),
+        self.declareProperty(MatrixWorkspaceProperty("InputWorkspace", defaultValue="", direction=Direction.Input),
                              doc="Input workspace")
-        self.declareProperty(MatrixWorkspaceProperty("OutputWorkspace", defaultValue="",
-                             direction=Direction.Output),
+        self.declareProperty(MatrixWorkspaceProperty("OutputWorkspace", defaultValue="", direction=Direction.Output),
                              doc="Sorted Output Workspace")
 
 

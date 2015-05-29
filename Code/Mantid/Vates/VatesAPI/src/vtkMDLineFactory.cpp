@@ -13,8 +13,14 @@
 #include <vtkLine.h>
 #include <vtkCellData.h>
 #include "MantidKernel/ReadLock.h"
+#include "MantidKernel/Logger.h"
 
 using namespace Mantid::API;
+
+namespace
+{
+  Mantid::Kernel::Logger g_log("vtkMDLineFactory");
+}
 
 namespace Mantid
 {
@@ -23,9 +29,9 @@ namespace Mantid
     /**
     Constructor
     @param thresholdRange : Thresholding range functor
-    @param scalarName : Name to give to signal
+    @param normalizationOption : Normalization option to use
     */
-    vtkMDLineFactory::vtkMDLineFactory(ThresholdRange_scptr thresholdRange, const std::string& scalarName) : m_thresholdRange(thresholdRange), m_scalarName(scalarName)
+    vtkMDLineFactory::vtkMDLineFactory(ThresholdRange_scptr thresholdRange, const VisualNormalization normalizationOption) : m_thresholdRange(thresholdRange), m_normalizationOption(normalizationOption)
     {
     }
 
@@ -48,6 +54,8 @@ namespace Mantid
       }
       else
       {
+        g_log.warning() << "Factory " << this->getFactoryTypeName() << " is being used. You are viewing data with less than three dimensions in the VSI. \n";
+
         IMDEventWorkspace_sptr imdws = doInitialize<IMDEventWorkspace, 1>(m_workspace);
         // Acquire a scoped read-only lock to the workspace (prevent segfault from algos modifying ws)
         Mantid::Kernel::ReadLock lock(*imdws);
@@ -66,7 +74,7 @@ namespace Mantid
         }
         
         //Ensure destruction in any event.
-        boost::scoped_ptr<IMDIterator> it(imdws->createIterator());
+        boost::scoped_ptr<IMDIterator> it(createIteratorWithNormalization(m_normalizationOption, imdws.get()));
 
         // Create 2 points per box.
         vtkPoints *points = vtkPoints::New();
@@ -75,7 +83,7 @@ namespace Mantid
         // One scalar per box
         vtkFloatArray * signals = vtkFloatArray::New();
         signals->Allocate(it->getDataSize());
-        signals->SetName(m_scalarName.c_str());
+        signals->SetName(vtkDataSetFactory::ScalarName.c_str());
         signals->SetNumberOfComponents(1);
 
         size_t nVertexes;
