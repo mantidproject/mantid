@@ -85,7 +85,7 @@ public:
     TS_ASSERT( alg.isInitialized() )
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("OutputWorkspace", outWSName) );
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("L1Distribution", l1WSName) );
-    TS_ASSERT_THROWS_NOTHING( alg.setProperty("NumEvents", 1000) );
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("NumEvents", 100) );
     TS_ASSERT_THROWS_NOTHING( alg.execute(); );
     TS_ASSERT( alg.isExecuted() );
 
@@ -93,23 +93,7 @@ public:
     TS_ASSERT_THROWS_NOTHING( ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(l1WSName) );
     TS_ASSERT(ws);
     if (!ws) return;
-
-    NumericAxis * xAxis = dynamic_cast<NumericAxis *>(ws->getAxis(0));
-    TS_ASSERT( xAxis );
-    if(xAxis)
-    {
-      TS_ASSERT_EQUALS( xAxis->unit()->unitID(), "Label" );
-      TS_ASSERT_EQUALS( xAxis->unit()->caption(), "l1" );
-    }
-
-    SpectraAxis * vAxis = dynamic_cast<SpectraAxis *>(ws->getAxis(1));
-    TS_ASSERT( vAxis );
-    if(vAxis)
-    {
-      TS_ASSERT_EQUALS( vAxis->length(), 196 );
-      TS_ASSERT_EQUALS( vAxis->getValue(0), 3 );
-      TS_ASSERT_EQUALS( vAxis->getValue(vAxis->length() - 1), 198 );
-    }
+    validateDistributionWorkspace(ws, "l1");
 
     // Remove workspace from the data service.
     AnalysisDataService::Instance().remove(outWSName);
@@ -138,13 +122,21 @@ public:
     TS_ASSERT_THROWS_NOTHING( ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(thetaWSName) );
     TS_ASSERT(ws);
     if (!ws) return;
+    validateDistributionWorkspace(ws, "theta");
 
+    // Remove workspace from the data service.
+    AnalysisDataService::Instance().remove(outWSName);
+  }
+
+private:
+  void validateDistributionWorkspace(MatrixWorkspace_sptr ws, const std::string & label)
+  {
     NumericAxis * xAxis = dynamic_cast<NumericAxis *>(ws->getAxis(0));
     TS_ASSERT( xAxis );
     if(xAxis)
     {
       TS_ASSERT_EQUALS( xAxis->unit()->unitID(), "Label" );
-      TS_ASSERT_EQUALS( xAxis->unit()->caption(), "theta" );
+      TS_ASSERT_EQUALS( xAxis->unit()->caption(), label );
     }
 
     SpectraAxis * vAxis = dynamic_cast<SpectraAxis *>(ws->getAxis(1));
@@ -156,8 +148,13 @@ public:
       TS_ASSERT_EQUALS( vAxis->getValue(vAxis->length() - 1), 198 );
     }
 
-    // Remove workspace from the data service.
-    AnalysisDataService::Instance().remove(outWSName);
+    auto firstSpecDetIDs = ws->getSpectrum(0)->getDetectorIDs();
+    TS_ASSERT_EQUALS( firstSpecDetIDs.size(), 1 );
+    TS_ASSERT_DIFFERS( firstSpecDetIDs.find(2101), firstSpecDetIDs.end() );
+
+    auto lastSpecDetIDs = ws->getSpectrum(ws->getNumberHistograms() - 1)->getDetectorIDs();
+    TS_ASSERT_EQUALS( lastSpecDetIDs.size(), 1 );
+    TS_ASSERT_DIFFERS( lastSpecDetIDs.find(3232), lastSpecDetIDs.end() );
   }
 
 };
