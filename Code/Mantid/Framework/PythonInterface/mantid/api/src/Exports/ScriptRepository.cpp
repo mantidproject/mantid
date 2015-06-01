@@ -77,9 +77,7 @@ namespace
   /** @endcond */
 }
 
-// clang-format off
 void export_ScriptRepository()
-// clang-format on
 {
 
   register_ptr_to_python<boost::shared_ptr<ScriptRepository>>();

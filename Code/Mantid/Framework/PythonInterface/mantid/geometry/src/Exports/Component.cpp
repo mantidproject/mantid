@@ -24,9 +24,7 @@ namespace
 
 }
 
-// clang-format off
 void export_Component()
-// clang-format on
 {
   class_<Component, bases<IComponent>, boost::noncopyable>("Component", no_init)
     .def("getParameterNames", &Component::getParameterNames, Component_getParameterNames())

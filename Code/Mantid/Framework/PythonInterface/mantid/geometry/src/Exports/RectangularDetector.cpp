@@ -11,9 +11,7 @@ using namespace boost::python;
  * Enables boost.python to automatically "cast" an object up to the
  * appropriate Detector leaf type 
  */
-// clang-format off
 void export_RectangularDetector()
-// clang-format on
 {
   register_ptr_to_python<boost::shared_ptr<RectangularDetector>>();
 
@@ -35,9 +33,7 @@ void export_RectangularDetector()
     ;
 }
 
-// clang-format off
 void export_RectangularDetectorPixel()
-// clang-format on
 {
   class_<RectangularDetectorPixel, bases<Detector>, boost::noncopyable>("RectangularDetectorPixel", no_init)
     ;

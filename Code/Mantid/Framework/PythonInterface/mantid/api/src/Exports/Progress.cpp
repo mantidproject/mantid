@@ -9,9 +9,7 @@ using Mantid::API::Algorithm;
 using Mantid::Kernel::ProgressBase;
 using namespace boost::python;
 
-// clang-format off
 void export_Progress()
-// clang-format on
 {
   class_<Progress,
          bases<ProgressBase>,

@@ -28,9 +28,7 @@ namespace //<unnamed>
   }
 }
 
-// clang-format off
 void export_UnitCell()
-// clang-format on
 {
   enum_<AngleUnits>("AngleUnits")
     .value("Degrees", angDegrees)

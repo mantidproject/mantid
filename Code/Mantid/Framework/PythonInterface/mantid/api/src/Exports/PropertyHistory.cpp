@@ -10,9 +10,7 @@ using Mantid::Kernel::PropertyHistory;
 using Mantid::API::IAlgorithm;
 using namespace boost::python;
 
-// clang-format off
 void export_PropertyHistory()
-// clang-format on
 {
   register_ptr_to_python<PropertyHistory*>();
 

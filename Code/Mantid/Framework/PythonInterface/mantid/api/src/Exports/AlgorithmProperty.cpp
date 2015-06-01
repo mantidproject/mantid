@@ -38,9 +38,7 @@ namespace
 
 }
 
-// clang-format off
 void export_AlgorithmProperty()
-// clang-format on
 {
   // AlgorithmProperty has base PropertyWithValue<boost::shared_ptr<IAlgorithm>>
   // which must be exported

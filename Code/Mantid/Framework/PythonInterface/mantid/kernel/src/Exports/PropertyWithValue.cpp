@@ -2,9 +2,7 @@
 
 using Mantid::PythonInterface::PropertyWithValueExporter;
 
-// clang-format off
 void export_BasicPropertyWithValueTypes()
-// clang-format on
 {
   // cut down copy-and-paste code
 #define EXPORT_PROP(CType, ExportName) \

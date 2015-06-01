@@ -19,9 +19,7 @@ namespace {
     }
 }
 
-// clang-format off
 void export_SymmetryElement()
-// clang-format on
 {
   register_ptr_to_python<boost::shared_ptr<SymmetryElement> >();  
   scope symmetryElementScope = class_<SymmetryElement, boost::noncopyable>("SymmetryElement", no_init);

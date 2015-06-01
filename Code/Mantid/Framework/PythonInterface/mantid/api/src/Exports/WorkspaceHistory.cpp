@@ -35,9 +35,7 @@ boost::python::object getHistoriesAsList(WorkspaceHistory& self)
   return names;
 }
 
-// clang-format off
 void export_WorkspaceHistory()
-// clang-format on
 {
   register_ptr_to_python<WorkspaceHistory*>();
 

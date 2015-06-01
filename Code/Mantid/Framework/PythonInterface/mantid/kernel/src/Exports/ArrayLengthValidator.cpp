@@ -34,9 +34,7 @@ namespace
   ;
 }
 
-// clang-format off
 void export_ArrayLengthValidator()
-// clang-format on
 {
   EXPORT_LENGTHVALIDATOR(double, Float);
   EXPORT_LENGTHVALIDATOR(long, Int);

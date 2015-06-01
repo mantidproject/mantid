@@ -36,9 +36,7 @@ namespace
 
 }
 
-// clang-format off
 void export_MDGeometry()
-// clang-format on
 {
   class_<MDGeometry,boost::noncopyable>("MDGeometry", no_init)
     .def("getNumDims", &MDGeometry::getNumDims, "Returns the number of dimensions present")

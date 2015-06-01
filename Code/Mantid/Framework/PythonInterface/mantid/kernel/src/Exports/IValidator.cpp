@@ -5,9 +5,7 @@
 using Mantid::Kernel::IValidator;
 using namespace boost::python;
 
-// clang-format off
 void export_IValidator()
-// clang-format on
 {
   register_ptr_to_python<boost::shared_ptr<IValidator>>();
 

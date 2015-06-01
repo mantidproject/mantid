@@ -140,9 +140,7 @@ namespace
 
 }
 
-// clang-format off
 void export_IMDHistoWorkspace()
-// clang-format on
 {
   // IMDHistoWorkspace class
   class_< IMDHistoWorkspace, bases<IMDWorkspace,MultipleExperimentInfos>, boost::noncopyable >("IMDHistoWorkspace", no_init)

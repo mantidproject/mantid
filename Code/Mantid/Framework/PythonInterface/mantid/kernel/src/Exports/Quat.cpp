@@ -19,9 +19,7 @@ using boost::python::return_value_policy;
 /**
  * Python exports of the Mantid::Kernel::Quat class.
  */
-// clang-format off
 void export_Quat()
-// clang-format on
 {
   boost::python::register_ptr_to_python<boost::shared_ptr<Quat> >();
 

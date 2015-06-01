@@ -6,9 +6,7 @@
 using Mantid::Kernel::DataItem;
 using namespace boost::python;
 
-// clang-format off
 void export_DataItem()
-// clang-format on
 {
   register_ptr_to_python<boost::shared_ptr<DataItem>>();
 

@@ -55,9 +55,7 @@ namespace
   }
 }
 
-// clang-format off
 void export_MultipleFileProperty()
-// clang-format on
 {
   typedef PropertyWithValue<HeldType> BaseClass;
   PropertyWithValueExporter<HeldType>::define("VectorVectorStringPropertyWithValue");

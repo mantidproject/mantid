@@ -14,9 +14,7 @@
 
 namespace Policies = Mantid::PythonInterface::Policies;
 
-// clang-format off
 void export_BinaryOperations()
-// clang-format on
 {
   using namespace Mantid::API;
   using boost::python::return_value_policy;

@@ -5,9 +5,7 @@
 using namespace Mantid::Kernel;
 using namespace boost::python;
 
-// clang-format off
 void export_EnabledWhenProperty()
-// clang-format on
 {
   // State enumeration
   enum_<ePropertyCriterion>("PropertyCriterion")

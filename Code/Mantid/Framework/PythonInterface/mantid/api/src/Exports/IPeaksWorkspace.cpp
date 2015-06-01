@@ -33,9 +33,7 @@ IPeak* createPeakQLabWithDistance(IPeaksWorkspace & self, const object& data, do
 
 }
 
-// clang-format off
 void export_IPeaksWorkspace()
-// clang-format on
 {
   // IPeaksWorkspace class
   class_< IPeaksWorkspace, bases<ITableWorkspace, ExperimentInfo>, boost::noncopyable >("IPeaksWorkspace", no_init)

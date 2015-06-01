@@ -8,9 +8,7 @@ using Mantid::API::FrameworkManagerImpl;
 using Mantid::API::FrameworkManager;
 using namespace boost::python;
 
-// clang-format off
 void export_FrameworkManager()
-// clang-format on
 {
   class_<FrameworkManagerImpl,boost::noncopyable>("FrameworkManagerImpl", no_init)
     .def("setNumOMPThreadsToConfigValue", &FrameworkManagerImpl::setNumOMPThreadsToConfigValue,

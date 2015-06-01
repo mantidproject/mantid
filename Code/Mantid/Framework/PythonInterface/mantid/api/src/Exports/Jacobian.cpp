@@ -5,9 +5,7 @@
 using Mantid::API::Jacobian;
 using namespace boost::python;
 
-// clang-format off
 void export_Jacobian()
-// clang-format on
 {
   register_ptr_to_python<Jacobian*>();
 

@@ -7,9 +7,7 @@ using Mantid::PythonInterface::TypedValidatorExporter;
 using namespace boost::python;
 
 /// This is the base TypedValidator for most of the WorkspaceValidators
-// clang-format off
 void export_MatrixWorkspaceValidator()
-// clang-format on
 {
   using Mantid::API::MatrixWorkspace_sptr;
   using Mantid::API::MatrixWorkspaceValidator;
@@ -46,9 +44,7 @@ void export_MatrixWorkspaceValidator()
           init<ArgType>(arg(ArgName)=DefaultValue, DocString))\
    ;
 
-// clang-format off
 void export_WorkspaceValidators()
-// clang-format on
 {
   using namespace Mantid::API;
   

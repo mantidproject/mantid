@@ -54,9 +54,7 @@ boost::python::object getPropertiesAsList(AlgorithmHistory& self)
   return names;
 }
 
-// clang-format off
 void export_AlgorithmHistory()
-// clang-format on
 {
   register_ptr_to_python<Mantid::API::AlgorithmHistory_sptr >();
 

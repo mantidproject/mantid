@@ -7,9 +7,7 @@
 using Mantid::PythonInterface::std_vector_exporter;
 using Mantid::PythonInterface::std_set_exporter;
 
-// clang-format off
 void exportStlContainers()
-// clang-format on
 {
     // Export some frequently used stl containers
   // std::vector

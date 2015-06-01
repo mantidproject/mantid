@@ -10,9 +10,7 @@ using Mantid::detid_t;
 using namespace boost::python;
 using Mantid::PythonInterface::Policies::RemoveConstSharedPtr;
 
-// clang-format off
 void export_Instrument()
-// clang-format on
 {
   register_ptr_to_python<boost::shared_ptr<Instrument>>();
 

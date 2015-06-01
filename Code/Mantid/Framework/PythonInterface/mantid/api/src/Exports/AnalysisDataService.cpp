@@ -65,9 +65,7 @@ namespace
 
 }
 
-// clang-format off
 void export_AnalysisDataService()
-// clang-format on
 {
   typedef DataServiceExporter<AnalysisDataServiceImpl, Workspace_sptr> ADSExporter;
   auto pythonClass = ADSExporter::define("AnalysisDataServiceImpl");

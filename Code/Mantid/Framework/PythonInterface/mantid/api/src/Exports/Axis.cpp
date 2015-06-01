@@ -78,9 +78,7 @@ namespace
 }
 
 
-// clang-format off
 void export_Axis()
-// clang-format on
 {
   register_ptr_to_python<Axis*>();
 
@@ -121,9 +119,7 @@ Axis* createNumericAxis(int length)
   return new Mantid::API::NumericAxis(length);
 }
 
-// clang-format off
 void export_NumericAxis()
-// clang-format on
 {
   /// Exported so that Boost.Python can give back a NumericAxis class when an Axis* is returned
   class_< NumericAxis, bases<Axis>, boost::noncopyable >("NumericAxis", no_init)
@@ -147,9 +143,7 @@ Axis* createBinEdgeAxis(int length)
   return new Mantid::API::BinEdgeAxis(length);
 }
 
-// clang-format off
 void export_BinEdgeAxis()
-// clang-format on
 {
   /// Exported so that Boost.Python can give back a BinEdgeAxis class when an Axis* is returned
   class_< BinEdgeAxis, bases<NumericAxis>, boost::noncopyable >("BinEdgeAxis", no_init)
@@ -174,9 +168,7 @@ Axis* createTextAxis(int length)
 }
 
 
-// clang-format off
 void export_TextAxis()
-// clang-format on
 {
   class_< TextAxis, bases<Axis>, boost::noncopyable >("TextAxis", no_init)
     .def("setLabel", & TextAxis::setLabel, "Set the label at the given entry")

@@ -2,9 +2,7 @@
 #include "MantidAPI/Workspace.h"
 #include <boost/python/enum.hpp>
 
-// clang-format off
 void export_WorkspaceProperty()
-// clang-format on
 {
   using Mantid::API::PropertyMode;
   // Property and Lock mode enums

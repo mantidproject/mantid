@@ -6,9 +6,7 @@ using Mantid::Kernel::UnitConversion;
 using Mantid::Kernel::DeltaEMode;
 using namespace boost::python;
 
-// clang-format off
 void export_UnitConversion()
-// clang-format on
 {
   // Function pointer typedef
   typedef double (*StringVersion)(const std::string & src, const std::string & dest,

@@ -36,9 +36,7 @@ namespace
   }
 }
 
-// clang-format off
 void export_CompositeValidator()
-// clang-format on
 {
   class_<CompositeValidator, bases<IValidator>, boost::noncopyable>("CompositeValidator")
     .def("__init__", make_constructor(&createCompositeValidator, default_call_policies(),

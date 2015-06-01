@@ -46,9 +46,7 @@ namespace
 
 }
 
-// clang-format off
 void export_UnitLabel()
-// clang-format on
 {
   class_<UnitLabel>("UnitLabel", no_init)
     .def("__init__",

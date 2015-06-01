@@ -36,9 +36,7 @@ namespace
   BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(getString_Overload, getString, 1, 2)
 }
 
-// clang-format off
 void export_ConfigService()
-// clang-format on
 {
   using Mantid::PythonInterface::std_vector_exporter;
 

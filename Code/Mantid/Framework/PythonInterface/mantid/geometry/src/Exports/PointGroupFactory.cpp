@@ -19,9 +19,7 @@ namespace {
     }
 }
 
-// clang-format off
 void export_PointGroupFactory()
-// clang-format on
 {
 
     class_<PointGroupFactoryImpl,boost::noncopyable>("PointGroupFactoryImpl", no_init)

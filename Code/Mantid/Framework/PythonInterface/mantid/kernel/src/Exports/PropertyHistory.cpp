@@ -9,9 +9,7 @@
 using Mantid::Kernel::PropertyHistory;
 using namespace boost::python;
 
-// clang-format off
 void export_PropertyHistory()
-// clang-format on
 {
   register_ptr_to_python<Mantid::Kernel::PropertyHistory_sptr>();
 
