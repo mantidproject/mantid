@@ -6,6 +6,7 @@
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidDataObjects/MDEventInserter.h"
+#include "MantidKernel/Matrix.h"
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -39,9 +40,7 @@ public:
   virtual ~ConvertCWSDExpToMomentum();
 
   /// Algorithm's name
-  virtual const std::string name() const {
-    return "ConvertCWSDExpToMomentum";
-  }
+  virtual const std::string name() const { return "ConvertCWSDExpToMomentum"; }
 
   /// Summary of algorithms purpose
   virtual const std::string summary() const {
@@ -66,8 +65,10 @@ private:
                                             const detid_t &startdetid,
                                             const int runnumber);
 
-  void convertToMomentum(const std::vector<double> &detPos, const double &wavelength,
-                         std::vector<Mantid::coord_t> &qSample);
+  void convertToMomentum(const std::vector<double> &detPos,
+                         const double &wavelength,
+                         std::vector<Mantid::coord_t> &qSample,
+                         const Kernel::DblMatrix &rotationMatrix);
 
   API::IMDEventWorkspace_sptr createExperimentMDWorkspace();
 
@@ -80,9 +81,9 @@ private:
                           std::vector<detid_t> &vec_detid);
 
   void setupTransferMatrix(API::MatrixWorkspace_sptr dataws,
-                           const double &omega,
-                           const double &phi,
-                           const double &chi);
+                           const double &omega, const double &phi,
+                           const double &chi,
+                           Kernel::DblMatrix &rotationMatrix);
 
   API::ITableWorkspace_sptr m_expDataTableWS;
   API::ITableWorkspace_sptr m_detectorListTableWS;

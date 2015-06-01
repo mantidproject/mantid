@@ -5,11 +5,14 @@ from mantid.api import *
 from mantid.kernel import *
 import os
 
+iColPtNumber = 0
+iCol2Theta = 10
+
+
 class CollectHB3AExperimentInfo(PythonAlgorithm):
     """ Python algorithm to export sample logs to spread sheet file
     for VULCAN
     """
-
     def category(self):
         """ Category
         """
@@ -30,48 +33,26 @@ class CollectHB3AExperimentInfo(PythonAlgorithm):
         # Format of the input should be 
         self.declareProperty("ExperimentNumber", -1, "Integer for experiment number.")
 
-        self.declareProperty(IntArrayProperty("ScanList", [], Direction.Input),
-                "List of scans of the experiment to be loaded.  It cannot be left blank.")
+        scanlistprop = mantid.kernel.IntArrayProperty("ScanList", [])
+        self.declareProperty(scanlistprop, "List of scans of the experiment to be loaded.  It cannot be left blank")
+        #self.declareProperty(IntArrayProperty("ScanList", [], Direction.Input),
+        #        "List of scans of the experiment to be loaded.  It cannot be left blank.")
 
-        self.declareProperty(InArrayProperty("PtLists", [], Direction.Input),
+        self.declareProperty(mantid.kernel.IntArrayProperty("PtLists", []),
                 "List of Pts to be loaded for scans specified by 'ScanList'. Each scan's Pt. must be started with -1 as a flag.  If no Pt. given, then all Pt. are all loaded.")
 
         self.declareProperty(FileProperty(name="DataDirectory",defaultValue="",action=FileAction.Directory))
 
         self.declareProperty("GetFileFromServer", False, "Obtain data file directly from neutrons.ornl.gov.")
 
-        self.declarerPoperty("Detector2ThetaTolerance", 0.01, "Tolerance of 2 detector's 2theta to consider as being at same position.")
+        self.declareProperty("Detector2ThetaTolerance", 0.01, "Tolerance of 2 detector's 2theta to consider as being at same position.")
 
+        tableprop = mantid.api.ITableWorkspaceProperty("OutputWorkspace", "", mantid.kernel.Direction.Output)
+        self.declareProperty(tableprop, "TableWorkspace for experiment number, scan, file name and starting detector IDs.")
 
-        ## Input workspace
-        #self.declareProperty(MatrixWorkspaceProperty("InputWorkspace", "", Direction.Input),
-        #                     "Name of data workspace containing sample logs to be exported. ")
+        tableprop2 = mantid.api.ITableWorkspaceProperty("DetectorTableWorkspace", "", mantid.kernel.Direction.Output)
+        self.declareProperty(tableprop2, "TableWorkspace for detector Id and information.")
 
-        ## Output file name
-        #self.declareProperty(FileProperty("OutputFilename", "", FileAction.Save, [".txt"]),
-        #                     "Name of the output sample environment log file name.")
-
-        ## Sample log names
-        #self.declareProperty(StringArrayProperty("SampleLogNames", values=[], direction=Direction.Input),
-        #                     "Names of sample logs to be exported in a same file.")
-
-        ## Header
-        #self.declareProperty("WriteHeaderFile", False, "Flag to generate a sample log header file.")
-
-        #self.declareProperty("Header", "", "String in the header file.")
-
-        ## Time zone
-        #timezones = ["UTC", "America/New_York", "Asia/Shanghai", "Australia/Sydney", "Europe/London", "GMT+0",\
-        #        "Europe/Paris", "Europe/Copenhagen"]
-
-        #description = "Sample logs recorded in NeXus files (in SNS) are in UTC time.  TimeZone " + \
-        #    "can allow the algorithm to output the log with local time."
-        #self.declareProperty("TimeZone", "America/New_York", StringListValidator(timezones), description)
-
-        ## Log time tolerance
-        #self.declareProperty("TimeTolerance", 0.01,
-        #                     "If any 2 log entries with log times within the time tolerance, " + \
-        #                     "they will be recorded in one line. Unit is second. ")
 
         return
 
@@ -83,7 +64,7 @@ class CollectHB3AExperimentInfo(PythonAlgorithm):
         self._getProperties()
 
         # Get scan list
-        self._getExpScanPtLDict()
+        self._getExpScanPtDict()
 
         # Get 2theta-(scan-pt) dictionary
         self._getDetectorPositionScanPtDict()
@@ -100,14 +81,15 @@ class CollectHB3AExperimentInfo(PythonAlgorithm):
 
     def _getExpScanPtDict(self):
         """ Get the scan-Pt. dictionary
-        """
-        for iscan in self._scanList:
+        """ 
+        for iscan in xrange(len(self._scanList)):
             # Loop over scan number
             scan = self._scanList[iscan]
 
             # Load data file
-            spicefilename = 'HB3A_Exp%04d_Scan%4d.dat' % (self._expNo, scan)
+            spicefilename = os.path.join(self._dataDir, 'HB3A_exp%04d_scan%04d.dat' % (self._expNumber, scan))
             spicetablews = self._loadSpiceFile(spicefilename)
+            self._spiceTableDict[scan] = spicetablews
             if spicetablews is None:
                 self.glog.warning("Unable to access Exp %d Scan %d's SPICE file %s." % (self._expNo, scan, spicefilename))
 
@@ -128,10 +110,11 @@ class CollectHB3AExperimentInfo(PythonAlgorithm):
     def _getProperties(self):
         """ Get properties from user input
         """
-        self._expNumber = getProperty("ExperimentNumer").value()
-        self._scanList = getProperty("ScanList").value()
-        rawptlist = self.getProperty("PtLists").value() 
-        self._tol2Theta = getProperty("2ThetaTolerance").value()
+        self._expNumber = self.getProperty("ExperimentNumber").value
+        self._scanList =  self.getProperty("ScanList").value
+        rawptlist = self.getProperty("PtLists").value
+        self._tol2Theta = self.getProperty("Detector2ThetaTolerance").value
+        self._dataDir = self.getProperty("DataDirectory").value
 
         # process Pt number
         self._ptListList = []
@@ -148,8 +131,13 @@ class CollectHB3AExperimentInfo(PythonAlgorithm):
         # ENDFOR
 
         # check
-        if len(self._ptListList) != self._scanList:
+        if len(self._ptListList) != len(self._scanList):
             raise RuntimeError("Number of sub Pt. list is not equal to number of scans.")
+
+        # Define class variable Scan-Pt. dictionary: Key scan number, Value list of pt numbers
+        self._scanPtDict = {}
+
+        self._spiceTableDict = {}
 
         return
 
@@ -164,7 +152,15 @@ class CollectHB3AExperimentInfo(PythonAlgorithm):
         # Scan every row of every SPICE table to get a dictionary with key as 2theta value
         for scannumber in self._spiceTableDict.keys():
             spicetable = self._spiceTableDict[scannumber]
-            for irow in xrange(len(spicetable.rowCount())):
+
+            # check column names
+            colnames = spicetable.getColumnNames()
+            if colnames[iColPtNumber].lower().startswith('pt') is False or \
+                    colnames[iCol2Theta].lower().startswith('2theta') is False:
+                        raise NotImplementedError("Colulmn %d is not Pt. but %s; OR Column %d is  not 2theta, but %s." % (
+                            iColPtNumber, colnames[iColPtNumber], iCol2Theta, colnames[iCol2Theta]))
+
+            for irow in xrange(spicetable.rowCount()):
                 ptnumber = spicetable.cell(irow, iColPtNumber)
                 twotheta = spicetable.cell(irow, iCol2Theta)
                 if self._2thetaScanPtDict.has_key(twotheta) is False:
@@ -180,7 +176,7 @@ class CollectHB3AExperimentInfo(PythonAlgorithm):
         twotheta_prev = twothetalist[0]
         for itt in xrange(1, len(twothetalist)):
             twotheta_curr = twothetalist[itt]
-            if twotheta_curr - twotheta_prev < self._2thetaTol:
+            if twotheta_curr - twotheta_prev < self._tol2Theta:
                 # two keys (2theta) are close enough, combine then 
                 self._2thetaScanPtDict[twotheta_prev].extend(self._2thetaScanPtDict[twotheta_curr][:]) 
                 del self._2thetaScanPtDict[twotehta] 
@@ -198,9 +194,11 @@ class CollectHB3AExperimentInfo(PythonAlgorithm):
         for twotheta in sorted(self._2thetaScanPtDict.keys()):
             if len(self._2thetaScanPtDict[twotheta]) == 0:
                 raise RuntimeError("Logic error to have empty list.")
+            else:
+                self.log().notice("[DB] Process pixels of detector centered at 2theta = %.5f." % (twotheta))
             
             # Load detector counts file (.xml)
-            scannumber, ptnumber = self._2thetaScanPtDict[twotehta] 
+            scannumber, ptnumber = self._2thetaScanPtDict[twotheta] 
             dataws = self._loadHB3ADetCountFile(scannumber, ptnumber)
 
             self._detStartID[twotheta] = self._newDetID
@@ -237,7 +235,10 @@ class CollectHB3AExperimentInfo(PythonAlgorithm):
     def _loadSpiceFile(self, spicefilename):
         """ Load SPICE file
         """
-        spicetablews, spicematrixws = api.LoadSpiceAscii(Filename=spicefilename)
+        outwsname = os.path.basename(spicefilename).split(".")[0]
+        self.log().notice("Loading SPICE file %s." % (spicefilename))
+        spicetablews, spicematrixws = api.LoadSpiceAscii(Filename=spicefilename, OutputWorkspace=outwsname)
+        self.log().notice("[DB] SPICE table workspace has %d rows."%(spicetablews.rowCount()))
 
         return spicetablews
 
