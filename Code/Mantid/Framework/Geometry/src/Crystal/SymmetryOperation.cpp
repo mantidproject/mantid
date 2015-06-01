@@ -271,5 +271,31 @@ Kernel::V3D getWrappedVector(const Kernel::V3D &vector) {
   return wrappedVector;
 }
 
+/// Stream output operator, writes the identifier to stream.
+std::ostream &operator<<(std::ostream &stream,
+                         const SymmetryOperation &operation) {
+  stream << "[" + operation.identifier() + "]";
+
+  return stream;
+}
+
+/// Reads identifier from stream and tries to parse as a symbol.
+std::istream &operator>>(std::istream &stream, SymmetryOperation &operation) {
+  std::string identifier;
+  std::getline(stream, identifier);
+
+  size_t i = identifier.find_first_of('[');
+  size_t j = identifier.find_last_of(']');
+
+  if (i == std::string::npos || j == std::string::npos) {
+    throw std::runtime_error(
+        "Cannot construct SymmetryOperation from identifier: " + identifier);
+  }
+
+  operation = SymmetryOperation(identifier.substr(i + 1, j - i - 1));
+
+  return stream;
+}
+
 } // namespace Geometry
 } // namespace Mantid

@@ -29,7 +29,7 @@ namespace Mantid
   namespace VATES
   {
 
-    vtkMDHistoLineFactory::vtkMDHistoLineFactory(ThresholdRange_scptr thresholdRange, const std::string& scalarName) : m_scalarName(scalarName),
+    vtkMDHistoLineFactory::vtkMDHistoLineFactory(ThresholdRange_scptr thresholdRange, const VisualNormalization normaliztionOption) : m_normalizationOption(normaliztionOption),
       m_thresholdRange(thresholdRange)
     {
     }
@@ -43,7 +43,7 @@ namespace Mantid
     {
       if(this != &other)
       {
-        this->m_scalarName = other.m_scalarName;
+        this->m_normalizationOption = other.m_normalizationOption;
         this->m_thresholdRange = other.m_thresholdRange;
         this->m_workspace = other.m_workspace;
       }
@@ -56,7 +56,7 @@ namespace Mantid
     */
     vtkMDHistoLineFactory::vtkMDHistoLineFactory(const vtkMDHistoLineFactory& other)
     {
-      this->m_scalarName = other.m_scalarName;
+      this->m_normalizationOption = other.m_normalizationOption;
       this->m_thresholdRange = other.m_thresholdRange;
       this->m_workspace = other.m_workspace;
     }
@@ -91,7 +91,7 @@ namespace Mantid
 
         vtkFloatArray * signal = vtkFloatArray::New();
         signal->Allocate(imageSize);
-        signal->SetName(m_scalarName.c_str());
+        signal->SetName(vtkDataSetFactory::ScalarName.c_str());
         signal->SetNumberOfComponents(1);
 
         UnstructuredPoint unstructPoint;

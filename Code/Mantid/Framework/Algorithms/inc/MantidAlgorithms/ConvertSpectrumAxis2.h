@@ -30,7 +30,7 @@ namespace Algorithms {
 class DLLExport ConvertSpectrumAxis2 : public API::Algorithm {
 public:
   /// (Empty) Constructor
-  ConvertSpectrumAxis2() : API::Algorithm() {}
+  ConvertSpectrumAxis2();
   /// Virtual destructor
   virtual ~ConvertSpectrumAxis2() {}
   /// Algorithm's name

@@ -156,7 +156,8 @@ namespace CustomInterfaces
   {
     // Get properties
     QString firstFile = m_uiForm.leRunNo->getFirstFilename();
-    QString filenames = m_uiForm.leRunNo->getFilenames().join(",");
+    QStringList filenameList = m_uiForm.leRunNo->getFilenames();
+    QString filenames = filenameList.join(",");
 
     auto instDetails = getInstrumentDetails();
     QString instDetectorRange = instDetails["spectra-min"] + "," + instDetails["spectra-max"];
@@ -168,7 +169,10 @@ namespace CustomInterfaces
     QString outputWorkspaceNameStem = firstFileInfo.baseName() + "_" + getInstrumentConfiguration()->getAnalyserName()
                                       + getInstrumentConfiguration()->getReflectionName();
 
-    QString calibrationWsName = outputWorkspaceNameStem + "_calib";
+    QString calibrationWsName = outputWorkspaceNameStem;
+    if(filenameList.size() > 1)
+        calibrationWsName += "_multi";
+    calibrationWsName += "_calib";
 
     // Configure the calibration algorithm
     IAlgorithm_sptr calibrationAlg = AlgorithmManager::Instance().create("IndirectCalibration");
@@ -209,7 +213,10 @@ namespace CustomInterfaces
     // Configure the resolution algorithm
     if(m_uiForm.ckCreateResolution->isChecked())
     {
-      QString resolutionWsName = outputWorkspaceNameStem + "_res";
+      QString resolutionWsName = outputWorkspaceNameStem;
+      if(filenameList.size() > 1)
+        resolutionWsName += "_multi";
+      resolutionWsName += "_res";
 
       QString resDetectorRange = QString::number(m_dblManager->value(m_properties["ResSpecMin"])) + ","
           + QString::number(m_dblManager->value(m_properties["ResSpecMax"]));
@@ -336,7 +343,7 @@ namespace CustomInterfaces
   void ISISCalibration::setDefaultInstDetails()
   {
     // Get spectra, peak and background details
-    std::map<QString, QString> instDetails = getInstrumentDetails();
+    QMap<QString, QString> instDetails = getInstrumentDetails();
 
     // Set the search instrument for runs
     m_uiForm.leRunNo->setInstrumentOverride(instDetails["instrument"]);

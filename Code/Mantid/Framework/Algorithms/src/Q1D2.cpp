@@ -23,6 +23,8 @@ using namespace Kernel;
 using namespace API;
 using namespace Geometry;
 
+Q1D2::Q1D2() : API::Algorithm(), m_dataWS(), m_doSolidAngle(false) {}
+
 void Q1D2::init() {
   auto dataVal = boost::make_shared<CompositeValidator>();
   dataVal->add<WorkspaceUnitValidator>("Wavelength");

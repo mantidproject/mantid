@@ -22,7 +22,7 @@ std::string PeaksIntersection::hklFrame() { return "HKL"; }
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
-PeaksIntersection::PeaksIntersection() {}
+PeaksIntersection::PeaksIntersection() : m_peakRadius(0.) {}
 
 //----------------------------------------------------------------------------------------------
 /** Destructor

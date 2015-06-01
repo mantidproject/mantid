@@ -58,7 +58,7 @@ private:
   double moment4(MantidVec &X, size_t n, double mean);
   void estimateBackground(const MantidVec &X, const MantidVec &Y,
                           const size_t i_min, const size_t i_max,
-                          const size_t p_min, const size_t p_max,
+                          const size_t p_min, const size_t p_max, const bool hasPeak,
                           double &out_bg0, double &out_bg1, double &out_bg2);
   struct cont_peak {
     size_t start;

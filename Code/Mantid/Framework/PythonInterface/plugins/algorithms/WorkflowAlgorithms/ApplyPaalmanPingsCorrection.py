@@ -186,7 +186,6 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
         whatever units the sample is in.
         """
 
-        instrument = mtd[self._sample_ws_name].getInstrument()
         unit_id = mtd[self._sample_ws_name].getAxis(0).getUnit().unitID()
         logger.information('x-unit is ' + unit_id)
 

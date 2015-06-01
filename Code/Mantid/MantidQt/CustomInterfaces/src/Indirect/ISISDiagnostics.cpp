@@ -211,7 +211,7 @@ namespace CustomInterfaces
   void ISISDiagnostics::setDefaultInstDetails()
   {
     // Get spectra, peak and background details
-    std::map<QString, QString> instDetails = getInstrumentDetails();
+    QMap<QString, QString> instDetails = getInstrumentDetails();
 
     // Set the search instrument for runs
     m_uiForm.dsInputFiles->setInstrumentOverride(instDetails["instrument"]);

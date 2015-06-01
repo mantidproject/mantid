@@ -9,6 +9,7 @@ from mantid.kernel import *
 
 
 #--------------------------------------------------------------------------------
+#pylint: disable=too-many-instance-attributes
 class RefinePowderDiffProfileSeq(PythonAlgorithm):
     """ Refine powder diffractometer profile by Le Bail algorithm sequentially
     """
@@ -50,7 +51,8 @@ class RefinePowderDiffProfileSeq(PythonAlgorithm):
         self.declareProperty(MatrixWorkspaceProperty("InputWorkspace", "", Direction.Input, PropertyMode.Optional),\
                 "Name of data workspace containing the diffraction pattern in .prf file. ")
 
-        self.declareProperty("WorkspaceIndex", 0, "Spectrum (workspace index starting from 0) of the data to refine against in input workspace.")
+        self.declareProperty("WorkspaceIndex", 0,
+                             "Spectrum (workspace index starting from 0) of the data to refine against in input workspace.")
 
         self.declareProperty(ITableWorkspaceProperty("SeqControlInfoWorkspace", "", Direction.InOut, PropertyMode.Optional),\
             "Name of table workspace containing sequential refinement information.")
@@ -203,8 +205,8 @@ class RefinePowderDiffProfileSeq(PythonAlgorithm):
 #--------------------------------------------------------------------
 #
 #--------------------------------------------------------------------
-
-class SeqRefineProfile:
+#pylint: disable=too-many-instance-attributes
+class SeqRefineProfile(object):
     """ A class to do sequential refinement on peak profile
 
     Use case:
@@ -264,7 +266,7 @@ class SeqRefineProfile:
 
         return
 
-
+    #pylint: disable=too-many-arguments
     def initSetup(self, dataws, wsindex, peaktype, profilews, braggpeakws, bkgdtype, bkgdparws, startx, endx):
         """ Set up the properties for LeBailFit as the first time including
         do a Le bail calculation based on the input parameters
@@ -359,6 +361,7 @@ class SeqRefineProfile:
 
         return
 
+    #pylint: disable=too-many-arguments
     def refine(self, dataws, wsindex, parametersToFit, numcycles, startx, endx, laststepindex):
         """ Refine parameters
         """
@@ -601,7 +604,7 @@ class SeqRefineProfile:
 
         # Set the record table workspace
         rectablews = mtd[self._recordwsname]
-        numrows = rectablews.rowCount()
+        #numrows = rectablews.rowCount()
         # currstep = numrows-1
 
         rectablews.setCell(self._currstep, 1, str(refiner.outprofilewsname))
@@ -673,7 +676,6 @@ def generateMCSetupTableProf9(wsname):
 def generateMCSetupTableProf10(wsname):
     """ Generate a Le Bail fit Monte Carlo random walk setup table
     """
-    import mantid.simpleapi as api
 
     tablews = api.CreateEmptyTableWorkspace(OutputWorkspace=str(wsname))
 
@@ -744,8 +746,8 @@ def resetParametersGroups(tablews):
         tablews.setCell(ir, 4, group)
         return
 
-
-class RefineProfileParameters:
+#pylint: disable=too-many-instance-attributes
+class RefineProfileParameters(object):
     """ Class to refine profile parameters ONE step
     """
 
@@ -779,6 +781,7 @@ class RefineProfileParameters:
 
         return
 
+    #pylint: disable=too-many-arguments
     def setInputs(self, datawsname, peaktype, profilewsname, braggpeakwsname, bkgdtype, bkgdparwsname):
         """
         """

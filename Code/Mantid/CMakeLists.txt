@@ -38,6 +38,15 @@ set ( CPACK_PACKAGE_NAME "mantid${CPACK_PACKAGE_SUFFIX}" )
 find_package ( Qt4 COMPONENTS QtCore QtGui QtOpenGL QtXml QtSvg Qt3Support REQUIRED )
 
 ###########################################################################
+# Find OpenGL
+###########################################################################
+find_package ( OpenGL REQUIRED )
+# FindOpenGL does not (as of CMake 2.6.4) take notice of the REQUIRED
+if ( NOT OPENGL_FOUND )
+  message ( FATAL_ERROR "OpenGL was not found." )
+endif ()
+
+###########################################################################
 # Set ParaView information since later items depend on it
 ###########################################################################
 include ( ParaViewSetup )
@@ -86,6 +95,14 @@ IF (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 
 ENDIF()
 
+# We probably don't want this to run on every build.
+option(COVERALLS "Generate coveralls data" OFF)
+
+if (COVERALLS)
+    include(Coveralls)
+    coveralls_turn_on_coverage()
+endif()
+
 ###########################################################################
 # Call our setup script
 ###########################################################################
@@ -106,6 +123,11 @@ endif()
 find_package ( PyQt4 REQUIRED )
 find_package ( SIP REQUIRED )
 separate_arguments ( PYQT4_SIP_FLAGS )
+
+###########################################################################
+# gsl is currently needed by Geometry, Algorithms, Curvefitting, & MantidPlot
+###########################################################################
+find_package ( GSL REQUIRED )
 
 ###########################################################################
 # Add QtPropertyBrowser to build
@@ -180,6 +202,23 @@ add_subdirectory ( docs )
 
 # System test data target
 add_subdirectory ( Testing/SystemTests/scripts )
+
+if (COVERALLS)
+  get_property(ALL_SRCS GLOBAL PROPERTY COVERAGE_SRCS)
+        set(SRCS_FILE "")
+        foreach (SRC ${ALL_SRCS})
+                set(SRCS_FILE "${SRCS_FILE}\n${SRC}")
+        endforeach()
+        #remove initial \n
+        string(SUBSTRING ${SRCS_FILE} 1 -1 SRCS_FILE)
+  set( SRCS_FILENAME "${CMAKE_CURRENT_BINARY_DIR}/sources.txt") 
+  file(WRITE ${SRCS_FILENAME} ${SRCS_FILE})
+  coveralls_setup(
+    ${SRCS_FILENAME}
+    OFF
+    "${CMAKE_SOURCE_DIR}/Build/CMake"
+  )
+endif ()
 
 ###########################################################################
 # Installation settings

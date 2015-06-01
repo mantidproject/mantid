@@ -206,8 +206,8 @@ private:
   /// Processing algorithm type
   bool m_useParallel;
 
-  std::vector<std::vector<Kernel::DateAndTime>> vecSplitterTimeSet;
-  std::vector<std::vector<int>> vecGroupIndexSet;
+  std::vector<std::vector<Kernel::DateAndTime>> m_vecSplitterTimeSet;
+  std::vector<std::vector<int>> m_vecGroupIndexSet;
 };
 
 } // namespace Algorithms

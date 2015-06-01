@@ -44,7 +44,7 @@ EventWorkspace.
 
 **Integraton for event workspaces refers to internal binning, provided by 
 :ref:`algm-Rebin` or load algorithm and may ignore limits, provided as algorithm 
-input. **  For example, attemtp to integrate loaded ISIS event workspace in the 
+input.**  For example, attemtp to integrate loaded ISIS event workspace in the 
 range [18000,20000] yields workspace inegrated in the range [0,200000],
 assuming the data were collected in the time range [0,20000]. This happens because
 the event data would have single hisogram workspace bin in range [0,20000].

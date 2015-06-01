@@ -228,8 +228,6 @@ private:
   enum { MaxRecentScripts = 5 };
   /// List of recent scripts, with most recent at the top
   QStringList m_recentScriptList;
-  /// Flag to indicate whether stdout should be redirected
-  bool m_capturePrint;
   /// A pointer to the Null object
   NullScriptFileInterpreter *m_nullScript;
   /// A pointer to the current interpreter

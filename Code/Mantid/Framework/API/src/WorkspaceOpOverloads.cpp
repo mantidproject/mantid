@@ -553,6 +553,12 @@ void WorkspaceHelpers::makeDistribution(MatrixWorkspace_sptr workspace,
   if (workspace->isDistribution() == forwards)
     return;
 
+  // If we're not able to get a writable reference to Y, then this is an event
+  // workspace, which we can't operate on.
+  if (workspace->id() == "EventWorkspace")
+    throw std::runtime_error("Event workspaces cannot be directly converted "
+                             "into distributions.");
+
   const size_t numberOfSpectra = workspace->getNumberHistograms();
 
   std::vector<double> widths(workspace->readX(0).size());

@@ -56,8 +56,8 @@ public:
   }
 
 private:
-  API::MatrixWorkspace_sptr inputW;  ///< A pointer to the input workspace
-  API::MatrixWorkspace_sptr outputW; ///< A pointer to the output workspace
+  API::MatrixWorkspace_sptr m_inputW; ///< A pointer to the input workspace
+
   // Overridden Algorithm methods
   void init();
   void exec();

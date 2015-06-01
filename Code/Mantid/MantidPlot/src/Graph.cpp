@@ -985,8 +985,9 @@ void Graph::updateSecondaryAxis(int axis)
 
   ScaleEngine *sc_engine = dynamic_cast<ScaleEngine *>(d_plot->axisScaleEngine(axis));
   if (sc_engine) {
-    ScaleEngine *a_engine = dynamic_cast<ScaleEngine *>(d_plot->axisScaleEngine(a));
-    sc_engine->clone(a_engine);
+    if (ScaleEngine *a_engine = dynamic_cast<ScaleEngine *>(d_plot->axisScaleEngine(a))) {
+      sc_engine->clone(a_engine);
+    }
   }
 
   /*QwtScaleEngine *qwtsc_engine = d_plot->axisScaleEngine(axis);
@@ -1153,17 +1154,18 @@ void Graph::setScale(int axis, double start, double end, double step,
     double stepBeforeBreak, double stepAfterBreak, int minTicksBeforeBreak,
     int minTicksAfterBreak, bool log10AfterBreak, int breakWidth, bool breakDecoration)
 {
-  ScaleEngine* se = dynamic_cast<ScaleEngine *>(d_plot->axisScaleEngine(axis));
-  se->setBreakRegion(left_break, right_break);
-  se->setBreakPosition(breakPos);
-  se->setBreakWidth(breakWidth);
-  se->drawBreakDecoration(breakDecoration);
-  se->setStepBeforeBreak(stepBeforeBreak);
-  se->setStepAfterBreak(stepAfterBreak);
-  se->setMinTicksBeforeBreak(minTicksBeforeBreak);
-  se->setMinTicksAfterBreak(minTicksAfterBreak);
-  se->setLog10ScaleAfterBreak(log10AfterBreak);
-  se->setAttribute(QwtScaleEngine::Inverted, inverted);
+  if (ScaleEngine* se = dynamic_cast<ScaleEngine *>(d_plot->axisScaleEngine(axis))){
+    se->setBreakRegion(left_break, right_break);
+    se->setBreakPosition(breakPos);
+    se->setBreakWidth(breakWidth);
+    se->drawBreakDecoration(breakDecoration);
+    se->setStepBeforeBreak(stepBeforeBreak);
+    se->setStepAfterBreak(stepAfterBreak);
+    se->setMinTicksBeforeBreak(minTicksBeforeBreak);
+    se->setMinTicksAfterBreak(minTicksAfterBreak);
+    se->setLog10ScaleAfterBreak(log10AfterBreak);
+    se->setAttribute(QwtScaleEngine::Inverted, inverted);
+  }
 
   setAxisScale(axis, start, end, type, step, majorTicks, minorTicks);
 
@@ -4214,7 +4216,7 @@ void Graph::copy(Graph* g)
         c_keys[i] = d_plot->insertCurve(c);
 
         QwtHistogram *cQH = dynamic_cast<QwtHistogram*>(c);
-        if (cQH)
+        if (cQH && h)
           cQH->copy(h);
       } else if (style == VectXYXY || style == VectXYAM) {
         VectorCurve::VectorStyle vs = VectorCurve::XYXY;

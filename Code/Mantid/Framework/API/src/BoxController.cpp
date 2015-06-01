@@ -36,8 +36,11 @@ BoxController *BoxController::clone() const {
 /*Private Copy constructor used in cloning */
 BoxController::BoxController(const BoxController &other)
     : nd(other.nd), m_maxId(other.m_maxId),
-      m_SplitThreshold(other.m_SplitThreshold), m_maxDepth(other.m_maxDepth),
-      m_splitInto(other.m_splitInto), m_splitTopInto(other.m_splitTopInto), m_numSplit(other.m_numSplit),
+      m_SplitThreshold(other.m_SplitThreshold),
+      m_significantEventsNumber(other.m_significantEventsNumber),
+      m_maxDepth(other.m_maxDepth), m_numEventsAtMax(other.m_numEventsAtMax),
+      m_splitInto(other.m_splitInto), m_splitTopInto(other.m_splitTopInto),
+      m_numSplit(other.m_numSplit), m_numTopSplit(other.m_numTopSplit),
       m_addingEvents_eventsPerTask(other.m_addingEvents_eventsPerTask),
       m_addingEvents_numTasksPerBlock(other.m_addingEvents_numTasksPerBlock),
       m_numMDBoxes(other.m_numMDBoxes),
@@ -166,13 +169,10 @@ std::string BoxController::toXMLString() const {
   pBoxElement->appendChild(element);
 
   element = pDoc->createElement("SplitTopInto");
-  if (m_splitTopInto)
-  {
+  if (m_splitTopInto) {
     vecStr = Kernel::Strings::join(this->m_splitTopInto.get().begin(),
                                    this->m_splitTopInto.get().end(), ",");
-  }
-  else
-  {
+  } else {
     vecStr = "";
   }
   text = pDoc->createTextNode(vecStr);
@@ -249,9 +249,11 @@ void BoxController::fromXMLString(const std::string &xml) {
   s = pBoxElement->getChildElement("SplitInto")->innerText();
   this->m_splitInto = splitStringIntoVector<size_t>(s);
 
-  // Need to make sure that we handle box controllers which did not have the SplitTopInto 
-  // attribute 
-  Poco::AutoPtr<NodeList> nodes = pBoxElement->getElementsByTagName("SplitTopInto");
+  // Need to make sure that we handle box controllers which did not have the
+  // SplitTopInto
+  // attribute
+  Poco::AutoPtr<NodeList> nodes =
+      pBoxElement->getElementsByTagName("SplitTopInto");
   if (nodes->length() > 0) {
     s = pBoxElement->getChildElement("SplitTopInto")->innerText();
     if (s.empty()) {
