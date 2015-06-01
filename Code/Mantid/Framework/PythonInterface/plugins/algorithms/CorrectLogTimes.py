@@ -20,7 +20,8 @@ class CorrectLogTimes(mantid.api.PythonAlgorithm):
         return "CorrectLogTimes"
 
     def summary(self):
-        return "This algorithm attempts to make the time series property logs start at the same time as the first time in the proton charge log."
+        return "This algorithm attempts to make the time series property logs start at the same time "+\
+               "as the first time in the proton charge log."
 
     def PyInit(self):
         self.declareProperty(mantid.api.WorkspaceProperty("Workspace", "",direction=mantid.kernel.Direction.InOut), "Input workspace")
@@ -50,6 +51,7 @@ class CorrectLogTimes(mantid.api.PythonAlgorithm):
             if x not in ['duration','proton_charge','start_time','run_title','run_start','run_number','gd_prtn_chrg','end_time']:
                 try:
                     self.ShiftTime(x)
+                #pylint: disable= bare-except
                 except:
                     pass
 

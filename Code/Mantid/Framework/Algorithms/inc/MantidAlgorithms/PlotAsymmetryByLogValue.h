@@ -60,7 +60,7 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 class DLLExport PlotAsymmetryByLogValue : public API::Algorithm {
 public:
   /// Default constructor
-  PlotAsymmetryByLogValue() : Algorithm(){};
+  PlotAsymmetryByLogValue();
   /// Destructor
   virtual ~PlotAsymmetryByLogValue(){};
   /// Algorithm's name for identification overriding a virtual method

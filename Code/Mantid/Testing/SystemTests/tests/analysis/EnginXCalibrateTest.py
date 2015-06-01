@@ -24,7 +24,7 @@ class EnginXCalibrateTest(stresstesting.MantidStressTest):
         if sys.platform == "darwin":
           # Mac fitting tests produce differences for some reason.
             self.assertDelta(self.difc, 18405.4, 0.1)
-            self.assertDelta(self.zero, 3.53, 0.05)
+            self.assertDelta(self.zero, 3.60, 0.05)
         else:
             self.assertDelta(self.difc, 18404.496, 0.001)
             self.assertDelta(self.zero, 4.4345, 0.001)

@@ -43,7 +43,8 @@ BoundaryConstraint::BoundaryConstraint(API::IFunction *fun,
                                        const std::string paramName,
                                        const double lowerBound, bool isDefault)
     : m_penaltyFactor(1000.0), m_parameterName(paramName),
-      m_hasLowerBound(true), m_hasUpperBound(false), m_lowerBound(lowerBound) {
+      m_hasLowerBound(true), m_hasUpperBound(false), m_lowerBound(lowerBound),
+      m_upperBound(-DBL_MAX) {
   reset(fun, fun->parameterIndex(paramName), isDefault);
 }
 

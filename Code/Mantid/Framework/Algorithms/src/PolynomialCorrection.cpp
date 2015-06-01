@@ -15,6 +15,10 @@ namespace Algorithms {
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(PolynomialCorrection)
 
+PolynomialCorrection::PolynomialCorrection()
+    : UnaryOperation(), m_coeffs(), m_polySize(), m_isOperationMultiply(false) {
+}
+
 void PolynomialCorrection::defineProperties() {
   // We need an array property for the coefficients of the polynomial: C0 + C1*x
   // + C2*x*x + ....

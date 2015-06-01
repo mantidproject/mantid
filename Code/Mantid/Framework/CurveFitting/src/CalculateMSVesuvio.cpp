@@ -263,6 +263,9 @@ void CalculateMSVesuvio::cacheInputs() {
       break;
   }
   // Bounding box in detector frame
+  if (!detPixel) {
+    throw std::runtime_error("Failed to get detector");
+  }
   Geometry::Object_const_sptr pixelShape = detPixel->shape();
   if (!pixelShape || !pixelShape->hasValidShape()) {
     throw std::invalid_argument("Detector pixel has no defined shape!");

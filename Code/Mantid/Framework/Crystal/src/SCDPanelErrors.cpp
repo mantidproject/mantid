@@ -77,6 +77,8 @@ SCDPanelErrors::SCDPanelErrors()
       m_endX(-1) {
   initializeAttributeList(m_attrNames);
 
+  SampleX = SampleY = SampleZ = 0.;
+
   a_set = b_set = c_set = alpha_set = beta_set = gamma_set = PeakName_set =
       BankNames_set = endX_set = startX_set = NGroups_set = sampleX_set =
           sampleY_set = sampleZ_set = false;

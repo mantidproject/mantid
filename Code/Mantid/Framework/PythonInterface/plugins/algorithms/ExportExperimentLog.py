@@ -6,6 +6,7 @@ import datetime
 import time
 import os
 
+#pylint: disable=too-many-instance-attributes
 class ExportExperimentLog(PythonAlgorithm):
 
     """ Algorithm to export experiment log
@@ -109,6 +110,7 @@ class ExportExperimentLog(PythonAlgorithm):
 
         return
 
+    #pylint: disable=too-many-branches
     def _processInputs(self):
         """ Process input properties
         """
@@ -123,7 +125,7 @@ class ExportExperimentLog(PythonAlgorithm):
         ops = self.getProperty("SampleLogOperation").value
 
         if len(self._sampleLogNames) != len(ops):
-            raise NotImplementedError("Size of sample log names and sample operations are unequal!")
+            raise RuntimeError("Size of sample log names and sample operations are unequal!")
         self._sampleLogOperations = []
         for i in xrange(len(self._sampleLogNames)):
             value = ops[i]
@@ -131,7 +133,7 @@ class ExportExperimentLog(PythonAlgorithm):
         # ENDFOR
 
         if len(self._headerTitles) > 0 and len(self._headerTitles) != len(self._sampleLogNames):
-            raise NotImplementedError("Input header titles have a different length to sample log names")
+            raise RuntimeError("Input header titles have a different length to sample log names")
 
         # Output file format
         self._fileformat = self.getProperty("FileFormat").value
@@ -151,7 +153,7 @@ class ExportExperimentLog(PythonAlgorithm):
         if os.path.exists(self._logfilename) is False:
             self._filemode = "new"
             if len(self._headerTitles) == 0:
-                raise NotImplementedError("Without specifying header title, unable to new a file.")
+                raise RuntimeError("Without specifying header title, unable to new a file.")
             self.log().debug("Log file %s does not exist. So file mode is NEW." % (self._logfilename))
         else:
             self._filemode = self.getProperty("FileMode").value
@@ -160,7 +162,7 @@ class ExportExperimentLog(PythonAlgorithm):
         # Examine the file mode
         if self._filemode == "new" or self._filemode == "append":
             if len(self._headerTitles) != len(self._sampleLogNames):
-                raise NotImplementedError("In mode new or append, there must be same number of sample titles and names")
+                raise RuntimeError("In mode new or append, there must be same number of sample titles and names")
 
         self.log().information("File mode is %s. " % (self._filemode))
 
@@ -188,7 +190,7 @@ class ExportExperimentLog(PythonAlgorithm):
         overridelist = self.getProperty("OverrideLogValue").value
         if len(self._headerTitles) > 0:
             if len(overridelist) % 2 != 0:
-                raise NotImplementedError("Number of items in OverrideLogValue must be even.")
+                raise RuntimeError("Number of items in OverrideLogValue must be even.")
             self._ovrdTitleValueDict = {}
             for i in xrange(len(overridelist)/2):
                 title = overridelist[2*i]
@@ -203,7 +205,7 @@ class ExportExperimentLog(PythonAlgorithm):
         """ Create a log file
         """
         if len(self._headerTitles) == 0:
-            raise NotImplementedError("No header title specified. Unable to write a new file.")
+            raise RuntimeError("No header title specified. Unable to write a new file.")
 
         wbuf = ""
         for ititle in xrange(len(self._headerTitles)):
@@ -217,7 +219,7 @@ class ExportExperimentLog(PythonAlgorithm):
             ofile.write(wbuf)
             ofile.close()
         except OSError as err:
-            raise NotImplementedError("Unable to write file %s. Check permission. Error message %s." % (
+            raise RuntimeError("Unable to write file %s. Check permission. Error message %s." % (
                 self._logfilename, str(err)))
 
         return
@@ -233,7 +235,7 @@ class ExportExperimentLog(PythonAlgorithm):
             lines = logfile.readlines()
             logfile.close()
         except OSError as err:
-            raise NotImplementedError("Unable to read existing log file %s. Error: %s." % (
+            raise RuntimeError("Unable to read existing log file %s. Error: %s." % (
                 self._logfilename, str(err)))
 
         # Find the title line: first none-empty line
@@ -273,7 +275,7 @@ class ExportExperimentLog(PythonAlgorithm):
         # Rename the old one: split path from file, new name, and rename
         fileName, fileExtension = os.path.splitext(self._logfilename)
 
-        now = datetime.datetime.now()
+        #now = datetime.datetime.now()
         nowstr = time.strftime("%Y_%B_%d_%H_%M")
 
         newfilename = fileName + "_" + nowstr + fileExtension
@@ -330,6 +332,7 @@ class ExportExperimentLog(PythonAlgorithm):
 
         return
 
+    #pylint: disable=too-many-branches
     def _orderRecordFile(self):
         """ Check and order (if necessary) record file
         by value of specified log by title
@@ -426,11 +429,10 @@ class ExportExperimentLog(PythonAlgorithm):
     def _reorderExistingFile(self):
         """ Re-order the columns of the existing experimental log file
         """
-        raise NotImplementedError("Too complicated")
-
-        return
+        raise RuntimeError("Too complicated")
 
 
+    #pylint: disable=too-many-branches
     def _getSampleLogsValue(self):
         """ From the workspace to get the value
         """
@@ -480,9 +482,9 @@ class ExportExperimentLog(PythonAlgorithm):
                 elif operationtype.lower() == "0":
                     propertyvalue = logproperty.value[0]
                 else:
-                    raise NotImplementedError("Operation %s for FloatTimeSeriesProperty %s is not supported." % (operationtype, logname))
+                    raise RuntimeError("Operation %s for FloatTimeSeriesProperty %s is not supported." % (operationtype, logname))
             else:
-                raise NotImplementedError("Class type %d is not supported." % (logclass))
+                raise RuntimeError("Class type %d is not supported." % (logclass))
 
             key = logname + "-" + operationtype
             valuedict[key] = propertyvalue
@@ -495,7 +497,6 @@ class ExportExperimentLog(PythonAlgorithm):
         """ Convert a UTC time in string to the local time in string
         and add
         """
-        from datetime import datetime
         from dateutil import tz
 
         # Make certain that the input is utc time string
@@ -533,8 +534,8 @@ class ExportExperimentLog(PythonAlgorithm):
                 srctimeformat = srctimeformat.split(".")[0]
             else:
                 # Un perceived situation
-                raise NotImplementedError("Is it possible to have time as %s?" % (utctimestr))
-            utctime = datetime.strptime(utctimestr, srctimeformat)
+                raise RuntimeError("Is it possible to have time as %s?" % (utctimestr))
+            utctime = datetime.datetime.strptime(utctimestr, srctimeformat)
         except ValueError as err:
             self.log().error("Unable to convert time string %s. Error message: %s" % (utctimestr, str(err)))
             raise err

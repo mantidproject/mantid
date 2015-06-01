@@ -83,6 +83,9 @@ void Fit::setDomainType() {
   Kernel::Property *prop = getPointerToProperty("Minimizer");
   auto minimizerProperty =
       dynamic_cast<Kernel::PropertyWithValue<std::string> *>(prop);
+  if (!minimizerProperty) {
+    throw std::logic_error("Failed to cast Property to PropertyWithValue");
+  }
   std::vector<std::string> minimizerOptions =
       API::FuncMinimizerFactory::Instance().getKeys();
   if (m_domainType != IDomainCreator::Simple) {

@@ -115,7 +115,7 @@ def Load(*args, **kwargs):
         if key not in algm:
             logger.warning("You've passed a property (%s) to Load() that doesn't apply to this file type." % key)
             del final_keywords[key]
-    _set_properties(algm, **final_keywords)
+    set_properties(algm, **final_keywords)
     algm.execute()
 
     # If a WorkspaceGroup was loaded then there will be a set of properties that have an underscore in the name
@@ -165,7 +165,7 @@ def LoadDialog(*args, **kwargs):
     if 'Message' not in arguments: arguments['Message']=''
 
     algm = _create_algorithm_object('Load')
-    _set_properties_dialog(algm,**arguments)
+    set_properties_dialog(algm,**arguments)
     algm.execute()
     return algm
 
@@ -213,7 +213,7 @@ def Fit(*args, **kwargs):
         if key not in algm:
             logger.warning("You've passed a property (%s) to Fit() that doesn't apply to any of the input workspaces." % key)
             del kwargs[key]
-    _set_properties(algm, **kwargs)
+    set_properties(algm, **kwargs)
     algm.execute()
 
     return _gather_returns('Fit', lhs, algm)
@@ -252,7 +252,7 @@ def FitDialog(*args, **kwargs):
     if 'Message' not in arguments: arguments['Message']=''
 
     algm = _create_algorithm_object('Fit')
-    _set_properties_dialog(algm,**arguments)
+    set_properties_dialog(algm,**arguments)
     algm.execute()
     return algm
 
@@ -348,7 +348,7 @@ def CutMD(*args, **kwargs):
 
     #Run the algorithm across the inputs and outputs
     for i in range(len(to_process)):
-        _set_properties(algm, **kwargs)
+        set_properties(algm, **kwargs)
         algm.setProperty('InputWorkspace', to_process[i])
         algm.setProperty('OutputWorkspace', out_names[i])
         algm.execute()
@@ -620,7 +620,7 @@ def _set_logging_option(algm_obj, kwargs):
         algm_obj.setLogging(kwargs[__LOGGING_KEYWORD__])
         del kwargs[__LOGGING_KEYWORD__]
 
-def _set_properties(alg_object, *args, **kwargs):
+def set_properties(alg_object, *args, **kwargs):
     """
         Set all of the properties of the algorithm
         :param alg_object: An initialised algorithm object
@@ -692,7 +692,7 @@ def _create_algorithm_function(algorithm, version, _algm_object):
         lhs_args = _get_args_from_lhs(lhs, algm)
         final_keywords = _merge_keywords_with_lhs(kwargs, lhs_args)
 
-        _set_properties(algm, *args, **final_keywords)
+        set_properties(algm, *args, **final_keywords)
         algm.execute()
         return _gather_returns(algorithm, lhs, algm)
 
@@ -812,7 +812,7 @@ def _find_parent_pythonalgorithm(frame):
 
 #-------------------------------------------------------------------------------------------------------------
 
-def _set_properties_dialog(algm_object, *args, **kwargs):
+def set_properties_dialog(algm_object, *args, **kwargs):
     """
     Set the properties all in one go assuming that you are preparing for a
     dialog box call. If the dialog is cancelled raise a runtime error, otherwise
@@ -892,7 +892,7 @@ def _create_algorithm_dialog(algorithm, version, _algm_object):
                 kwargs[item] = ""
 
         algm = _create_algorithm_object(algorithm, _version)
-        _set_properties_dialog(algm, *args, **kwargs) # throws if input cancelled
+        set_properties_dialog(algm, *args, **kwargs) # throws if input cancelled
         algm.execute()
         return algm
 

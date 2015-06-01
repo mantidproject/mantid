@@ -4,7 +4,7 @@ from mantid.api import *
 from mantid.kernel import *
 from mantid import logger
 
-
+#pylint: disable=too-many-instance-attributes
 class IndirectResolution(DataProcessorAlgorithm):
 
     _input_files = None
@@ -59,12 +59,13 @@ class IndirectResolution(DataProcessorAlgorithm):
                              doc='Save resolution workspace as a Nexus file')
 
         self.declareProperty(WorkspaceProperty('OutputWorkspace', '',
-                             direction=Direction.Output),
+                                               direction=Direction.Output),
                              doc='Output resolution workspace.')
 
 
     def PyExec(self):
-        from IndirectCommon import getWSprefix
+
+        #from IndirectCommon import getWSprefix
 
         self._setup()
 
@@ -125,10 +126,8 @@ class IndirectResolution(DataProcessorAlgorithm):
         Handles adding logs, saving and plotting.
         """
 
-        sample_logs = [
-                ('res_back_start', self._background[0]),
-                ('res_back_end', self._background[1])
-            ]
+        sample_logs = [('res_back_start', self._background[0]),
+                       ('res_back_end', self._background[1])]
 
         if self._scale_factor != 1.0:
             sample_logs.append(('res_scale_factor', self._scale_factor))

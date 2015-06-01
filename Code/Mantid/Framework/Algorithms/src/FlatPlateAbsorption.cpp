@@ -16,7 +16,8 @@ using namespace API;
 
 FlatPlateAbsorption::FlatPlateAbsorption()
     : AbsorptionCorrection(), m_slabHeight(0.0), m_slabWidth(0.0),
-      m_slabThickness(0.0) {}
+      m_slabThickness(0.0), m_numXSlices(0), m_numYSlices(0), m_numZSlices(0),
+      m_XSliceThickness(0), m_YSliceThickness(0), m_ZSliceThickness(0) {}
 
 void FlatPlateAbsorption::defineProperties() {
   auto mustBePositive = boost::make_shared<BoundedValidator<double>>();

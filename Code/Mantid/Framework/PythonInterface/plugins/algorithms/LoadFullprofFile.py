@@ -179,7 +179,8 @@ class LoadFullprofFile(PythonAlgorithm):
         # 2. Add rows
         for hkl in sorted(hkldict.keys()):
             pardict = hkldict[hkl]
-            tablews.addRow([hkl[0], hkl[1], hkl[2], pardict["alpha"], pardict["beta"], pardict["sigma2"], pardict["gamma2"], pardict["FWHM"], 1.0])
+            tablews.addRow([hkl[0], hkl[1], hkl[2], pardict["alpha"], pardict["beta"],
+                            pardict["sigma2"], pardict["gamma2"], pardict["FWHM"], 1.0])
         # ENDFOR
 
         return tablews
@@ -211,7 +212,7 @@ class LoadFullprofFile(PythonAlgorithm):
 
         return (tablews, dataws)
 
-
+    #pylint: disable=too-many-locals, too-many-branches
     def _parseFullprofPrfFile(self, filename):
         """ Parse Fullprof .prf file to a information dictionary and a data set (list of list)
         """
@@ -260,7 +261,7 @@ class LoadFullprofFile(PythonAlgorithm):
         for i in xrange(1, len(lines)):
             if lines[i].count("Yobs-Ycal") > 0:
                 firstline = i+1
-                dataheader = lines[i].strip()
+                #dataheader = lines[i].strip()
                 break
 
         if firstline < 0:
@@ -268,10 +269,10 @@ class LoadFullprofFile(PythonAlgorithm):
 
         # Parse header line: T.O.F. Yobs    Ycal    Yobs-Ycal       Backg   Bragg ...
         #     to determine how the data line look alike (==5 or >= 5)
-        headerterms = dataheader.split()
-        dataperline = 5
+        #headerterms = dataheader.split()
+        #dataperline = 5
         # TOF., ... h k l ...
-        reflectionperline = len(headerterms)-5+3
+        #reflectionperline = len(headerterms)-5+3
 
 
         # Parse data
@@ -322,8 +323,8 @@ class LoadFullprofFile(PythonAlgorithm):
                     count += 1
 
                     raise NotImplementedError("Need a sample line of this use case.")
-                    hklstr = line.split(")")[1].split(")")[0].strip()
-                    infodict[hklstr] = tofh
+                    #hklstr = line.split(")")[1].split(")")[0].strip()
+                    #infodict[hklstr] = tofh
                 # ENDIFELSE (terms)
             else:
                 self.log().warning("%d-th line (%s) is not well-defined." % (i, line))
@@ -354,19 +355,16 @@ class LoadFullprofFile(PythonAlgorithm):
         # Parse head
         iline = 0
         parseheader = True
-        title = ""
+        #title = ""
         while iline < len(rawlines) and parseheader is True:
             line = rawlines[iline].strip()
             if len(line) > 0:
-                if line.count("BANK") == 0:
-                    # header
-                    title += line + ", "
-                else:
+                if line.count("BANK") != 0:
                     # line information
                     terms = line.split()
                     if terms[0] != 'BANK':
                         raise NotImplementedError("First word must be 'BANK', but not %s" % (terms[0]))
-                    bankid = int(terms[1])
+                    #bankid = int(terms[1])
                     numdata = int(terms[2])
                     numlines = int(terms[3])
 
