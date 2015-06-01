@@ -15,7 +15,8 @@ using Kernel::Quat;
  * @param map :: a ParameterMap to parameterize the component
  */
 Component::Component(const IComponent *base, const ParameterMap *map)
-    : m_base(dynamic_cast<const Component *>(base)), m_map(map) {
+    : m_parent(NULL), m_base(dynamic_cast<const Component *>(base)),
+      m_map(map) {
   if (!m_base) {
     throw std::invalid_argument(
         "Component::Component() - Cannot construct a "

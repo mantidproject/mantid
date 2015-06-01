@@ -93,6 +93,7 @@ public:
 
   virtual boost::shared_ptr<IMDHistoWorkspace> clone() const = 0;
 
+
 protected:
   virtual const std::string toString() const;
 };

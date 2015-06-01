@@ -47,6 +47,7 @@ namespace IDA
     void unFixItem();
     void showTieCheckbox(QString);
     void updatePlotOptions();
+    void singleFitComplete(bool error);
 
   private:
     boost::shared_ptr<Mantid::API::CompositeFunction> createFunction(bool tieCentres=false);
@@ -58,6 +59,7 @@ namespace IDA
     void populateFunction(Mantid::API::IFunction_sptr func, Mantid::API::IFunction_sptr comp, QtProperty* group, const std::string & pref, bool tie);
     QString fitTypeString() const;
     QString backgroundString() const;
+    QString minimizerString(QString outputName) const;
 
     Ui::ConvFit m_uiForm;
     QtStringPropertyManager* m_stringManager;
@@ -66,6 +68,8 @@ namespace IDA
     Mantid::API::MatrixWorkspace_sptr m_cfInputWS;
     QString m_cfInputWSName;
     bool m_confitResFileType;
+    Mantid::API::IAlgorithm_sptr m_singleFitAlg;
+    QString m_singleFitOutputName;
 
   };
 } // namespace IDA

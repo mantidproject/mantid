@@ -404,7 +404,7 @@ void MantidSampleLogDialog::init()
       }
       treeItem->setText(2, QString::fromStdString( msg.str()) );
     }
-    else if( dynamic_cast<Mantid::Kernel::TimeSeriesProperty<std::string> *>(*pItr) )
+    else if(auto strSeries = dynamic_cast<Mantid::Kernel::TimeSeriesProperty<std::string> *>(*pItr) )
     {
       treeItem->setText(1, "str. series");
       treeItem->setData(1, Qt::UserRole, static_cast<int>(stringTSeries));
@@ -413,7 +413,7 @@ void MantidSampleLogDialog::init()
       if ((*pItr)->size() == 1)
       {
         //Print out the only entry
-        (dynamic_cast<Mantid::Kernel::TimeSeriesProperty<std::string> *>(*pItr))->nthValue(1);
+        strSeries->nthValue(1);
       }
       else
       {

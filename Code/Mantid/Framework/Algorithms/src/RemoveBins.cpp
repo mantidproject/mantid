@@ -17,7 +17,9 @@ using namespace API;
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(RemoveBins)
 
-RemoveBins::RemoveBins() : API::Algorithm(), m_rangeUnit() {}
+RemoveBins::RemoveBins()
+    : API::Algorithm(), m_inputWorkspace(), m_startX(DBL_MAX), m_endX(-DBL_MAX),
+      m_rangeUnit(), m_interpolate(false) {}
 
 /** Initialisation method. Declares properties to be used in algorithm.
  *

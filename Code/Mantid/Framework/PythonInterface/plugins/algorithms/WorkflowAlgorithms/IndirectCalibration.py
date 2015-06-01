@@ -1,4 +1,4 @@
-#pylint: disable=no-init
+#pylint: disable=no-init,too-many-instance-attributes
 from mantid.kernel import *
 from mantid.api import *
 from mantid.simpleapi import *
@@ -15,6 +15,7 @@ class IndirectCalibration(DataProcessorAlgorithm):
     _spec_range = None
     _intensity_scale = None
     _plot = None
+    _run_numbers = None
 
 
     def category(self):
@@ -29,16 +30,19 @@ class IndirectCalibration(DataProcessorAlgorithm):
         self.declareProperty(StringArrayProperty(name='InputFiles'),
                              doc='Comma separated list of input files')
 
-        self.declareProperty(IntArrayProperty(name='DetectorRange', values=[0, 1],\
-                             validator=IntArrayMandatoryValidator()),
+        self.declareProperty(IntArrayProperty(name='DetectorRange',
+                                              values=[0, 1],
+                                              validator=IntArrayMandatoryValidator()),
                              doc='Range of detectors.')
 
-        self.declareProperty(FloatArrayProperty(name='PeakRange', values=[0.0, 100.0],\
-                             validator=FloatArrayMandatoryValidator()),
+        self.declareProperty(FloatArrayProperty(name='PeakRange',
+                                                values=[0.0, 100.0],
+                                                validator=FloatArrayMandatoryValidator()),
                              doc='Time of flight range over the peak.')
 
-        self.declareProperty(FloatArrayProperty(name='BackgroundRange', values=[0.0, 1000.0],\
-                             validator=FloatArrayMandatoryValidator()),
+        self.declareProperty(FloatArrayProperty(name='BackgroundRange',
+                                                values=[0.0, 1000.0],
+                                                validator=FloatArrayMandatoryValidator()),
                              doc='Time of flight range over the background.')
 
         self.declareProperty(name='ScaleFactor', defaultValue=1.0,
@@ -48,9 +52,8 @@ class IndirectCalibration(DataProcessorAlgorithm):
                              doc='Plot the calibration data as a spectra plot.')
 
         self.declareProperty(WorkspaceProperty('OutputWorkspace', '',
-                             direction=Direction.Output),
+                                               direction=Direction.Output),
                              doc='Output workspace for calibration data.')
-
 
 
     def validateInputs(self):
@@ -85,59 +88,76 @@ class IndirectCalibration(DataProcessorAlgorithm):
 
 
     def PyExec(self):
-        from mantid import logger
 
         self._setup()
 
         runs = []
+        self._run_numbers = list()
         for in_file in self._input_files:
             (_, filename) = os.path.split(in_file)
             (root, _) = os.path.splitext(filename)
             try:
-                Load(Filename=in_file, OutputWorkspace=root,\
-                    SpectrumMin=int(self._spec_range[0]), SpectrumMax=int(self._spec_range[1]),\
-                    LoadLogFiles=False)
+                Load(Filename=in_file,
+                     OutputWorkspace=root,
+                     SpectrumMin=int(self._spec_range[0]),
+                     SpectrumMax=int(self._spec_range[1]),
+                     LoadLogFiles=False)
+
                 runs.append(root)
-            except Exception as exc:
+            except (RuntimeError,ValueError) as exc:
                 logger.error('Could not load raw file "%s": %s' % (in_file, str(exc)))
 
         calib_ws_name = 'calibration'
         if len(runs) > 1:
-            MergeRuns(InputWorkspaces=",".join(runs), OutputWorkspace=calib_ws_name)
+            MergeRuns(InputWorkspaces=",".join(runs),
+                      OutputWorkspace=calib_ws_name)
             factor = 1.0 / len(runs)
-            Scale(InputWorkspace=calib_ws_name, OutputWorkspace=calib_ws_name, Factor=factor)
+            Scale(InputWorkspace=calib_ws_name,
+                  OutputWorkspace=calib_ws_name,
+                  Factor=factor)
         else:
             calib_ws_name = runs[0]
 
-        CalculateFlatBackground(InputWorkspace=calib_ws_name, OutputWorkspace=calib_ws_name,
-                                StartX=self._back_range[0], EndX=self._back_range[1], Mode='Mean')
+        CalculateFlatBackground(InputWorkspace=calib_ws_name,
+                                OutputWorkspace=calib_ws_name,
+                                StartX=self._back_range[0],
+                                EndX=self._back_range[1],
+                                Mode='Mean')
 
         number_historgrams = mtd[calib_ws_name].getNumberHistograms()
-        ws_mask, num_zero_spectra = FindDetectorsOutsideLimits(InputWorkspace=calib_ws_name, OutputWorkspace='__temp_ws_mask')
+        ws_mask, num_zero_spectra = FindDetectorsOutsideLimits(InputWorkspace=calib_ws_name,
+                                                               OutputWorkspace='__temp_ws_mask')
         DeleteWorkspace(ws_mask)
 
-        Integration(InputWorkspace=calib_ws_name, OutputWorkspace=calib_ws_name,
-                    RangeLower=self._peak_range[0], RangeUpper=self._peak_range[1])
+        Integration(InputWorkspace=calib_ws_name,
+                    OutputWorkspace=calib_ws_name,
+                    RangeLower=self._peak_range[0],
+                    RangeUpper=self._peak_range[1])
 
-        temp_sum = SumSpectra(InputWorkspace=calib_ws_name, OutputWorkspace='__temp_sum')
+        temp_sum = SumSpectra(InputWorkspace=calib_ws_name,
+                              OutputWorkspace='__temp_sum')
         total = temp_sum.readY(0)[0]
         DeleteWorkspace(temp_sum)
 
         if self._intensity_scale is None:
             self._intensity_scale = 1 / (total / (number_historgrams - num_zero_spectra))
 
-        Scale(InputWorkspace=calib_ws_name, OutputWorkspace=calib_ws_name,
-              Factor=self._intensity_scale, Operation='Multiply')
-
-        RenameWorkspace(InputWorkspace=calib_ws_name, OutputWorkspace=self._out_ws)
+        Scale(InputWorkspace=calib_ws_name,
+              OutputWorkspace=self._out_ws,
+              Factor=self._intensity_scale,
+              Operation='Multiply')
 
         # Remove old workspaces
         if len(runs) > 1:
             for run in runs:
                 DeleteWorkspace(Workspace=run)
 
+        self._add_logs()
         self.setProperty('OutputWorkspace', self._out_ws)
-        self._post_process()
+
+        if self._plot:
+            from mantidplot import plotBin
+            plotBin(mtd[self._out_ws], 0)
 
 
     def _setup(self):
@@ -159,22 +179,24 @@ class IndirectCalibration(DataProcessorAlgorithm):
         self._plot = self.getProperty('Plot').value
 
 
-    def _post_process(self):
+    def _add_logs(self):
         """
-        Handles adding logs and plotting.
+        Handles adding sample logs.
         """
 
         # Add sample logs to output workspace
-        if self._intensity_scale is not None:
-            AddSampleLog(Workspace=self._out_ws, LogName='Scale Factor', LogType='Number', LogText=str(self._intensity_scale))
-        AddSampleLog(Workspace=self._out_ws, LogName='Peak Min', LogType='Number', LogText=str(self._peak_range[0]))
-        AddSampleLog(Workspace=self._out_ws, LogName='Peak Max', LogType='Number', LogText=str(self._peak_range[1]))
-        AddSampleLog(Workspace=self._out_ws, LogName='Back Min', LogType='Number', LogText=str(self._back_range[0]))
-        AddSampleLog(Workspace=self._out_ws, LogName='Back Max', LogType='Number', LogText=str(self._back_range[1]))
+        sample_logs = [('calib_peak_min', self._peak_range[0]),
+                       ('calib_peak_max', self._peak_range[1]),
+                       ('calib_back_min', self._back_range[0]),
+                       ('calib_back_max', self._back_range[1]),
+                       ('calib_run_numbers', ','.join(self._run_numbers))]
 
-        if self._plot:
-            from mantidplot import plotBin
-            plotBin(mtd[self._out_ws], 0)
+        if self._intensity_scale is not None:
+            sample_logs.append(('calib_scale_factor', self._intensity_scale))
+
+        AddSampleLogMultiple(Workspace=self._out_ws,
+                             LogNames=[log[0] for log in sample_logs],
+                             LogValues=[log[1] for log in sample_logs])
 
 
 # Register algorithm with Mantid

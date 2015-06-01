@@ -45,7 +45,7 @@ def _count_monitors(raw_file):
 
         return mon_count, False
 
-
+#pylint: disable=too-many-instance-attributes
 class TimeSlice(PythonAlgorithm):
 
     _raw_files = None
@@ -128,7 +128,7 @@ class TimeSlice(PythonAlgorithm):
 
 
     def PyExec(self):
-        from IndirectCommon import CheckXrange
+        #from IndirectCommon import CheckXrange
 
         self._setup()
 
@@ -165,7 +165,7 @@ class TimeSlice(PythonAlgorithm):
                 from IndirectImport import import_mantidplot
                 mp = import_mantidplot()
                 mp.plotSpectrum(slice_file, 0)
-            except RuntimeError, e:
+            except RuntimeError:
                 # User clicked cancel on plot so don't do anything
                 pass
 
@@ -234,8 +234,10 @@ class TimeSlice(PythonAlgorithm):
             calib_spec_max -= mon_count + 1
 
         # Crop the calibration workspace, excluding the monitors
-        CropWorkspace(InputWorkspace=self._calib_ws, OutputWorkspace=self._calib_ws,
-                      StartWorkspaceIndex=calib_spec_min, EndWorkspaceIndex=calib_spec_max)
+        CropWorkspace(InputWorkspace=self._calib_ws,
+                      OutputWorkspace=self._calib_ws,
+                      StartWorkspaceIndex=calib_spec_min,
+                      EndWorkspaceIndex=calib_spec_max)
 
 
     def _process_raw_file(self, raw_file):
@@ -248,7 +250,8 @@ class TimeSlice(PythonAlgorithm):
 
         # Crop the raw file to use the desired number of spectra
         # less one because CropWorkspace is zero based
-        CropWorkspace(InputWorkspace=raw_file, OutputWorkspace=raw_file,
+        CropWorkspace(InputWorkspace=raw_file,
+                      OutputWorkspace=raw_file,
                       StartWorkspaceIndex=int(self._spectra_range[0]) - 1,
                       EndWorkspaceIndex=int(self._spectra_range[1]) - 1)
 
@@ -263,16 +266,24 @@ class TimeSlice(PythonAlgorithm):
         slice_file = raw_file[:3].lower() + run + self._output_ws_name_suffix
 
         if self._background_range is None:
-            Integration(InputWorkspace=raw_file, OutputWorkspace=slice_file,
-                        RangeLower=self._peak_range[0], RangeUpper=self._peak_range[1],
-                        StartWorkspaceIndex=0, EndWorkspaceIndex=num_hist - 1)
+            Integration(InputWorkspace=raw_file,
+                        OutputWorkspace=slice_file,
+                        RangeLower=self._peak_range[0],
+                        RangeUpper=self._peak_range[1],
+                        StartWorkspaceIndex=0,
+                        EndWorkspaceIndex=num_hist - 1)
         else:
-            CalculateFlatBackground(InputWorkspace=raw_file, OutputWorkspace=slice_file,
-                                    StartX=self._background_range[0], EndX=self._background_range[1],
+            CalculateFlatBackground(InputWorkspace=raw_file,
+                                    OutputWorkspace=slice_file,
+                                    StartX=self._background_range[0],
+                                    EndX=self._background_range[1],
                                     Mode='Mean')
-            Integration(InputWorkspace=slice_file, OutputWorkspace=slice_file,
-                        RangeLower=self._peak_range[0], RangeUpper=self._peak_range[1],
-                        StartWorkspaceIndex=0, EndWorkspaceIndex=num_hist - 1)
+            Integration(InputWorkspace=slice_file,
+                        OutputWorkspace=slice_file,
+                        RangeLower=self._peak_range[0],
+                        RangeUpper=self._peak_range[1],
+                        StartWorkspaceIndex=0,
+                        EndWorkspaceIndex=num_hist - 1)
 
         return slice_file
 

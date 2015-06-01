@@ -44,7 +44,7 @@
 #include <QComboBox>
 
 PlotWizard::PlotWizard( QWidget* parent, Qt::WFlags fl )
-: QDialog( parent, fl )
+  : QDialog( parent, fl )
 {
 	setWindowTitle( tr("MantidPlot - Select Columns to Plot") );
 

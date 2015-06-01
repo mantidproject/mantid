@@ -69,7 +69,8 @@ FitMW::FitMW(Kernel::IPropertyManager *fit,
              FitMW::DomainType domainType)
     : API::IDomainCreator(
           fit, std::vector<std::string>(1, workspacePropertyName), domainType),
-      m_startX(EMPTY_DBL()), m_endX(EMPTY_DBL()), m_normalise(false) {
+      m_workspaceIndex(-1), m_startX(EMPTY_DBL()), m_endX(EMPTY_DBL()),
+      m_maxSize(0), m_normalise(false), m_startIndex(0) {
   if (m_workspacePropertyNames.empty()) {
     throw std::runtime_error("Cannot create FitMW: no workspace given");
   }
@@ -84,8 +85,8 @@ FitMW::FitMW(Kernel::IPropertyManager *fit,
  */
 FitMW::FitMW(FitMW::DomainType domainType)
     : API::IDomainCreator(NULL, std::vector<std::string>(), domainType),
-      m_startX(EMPTY_DBL()), m_endX(EMPTY_DBL()), m_maxSize(10),
-      m_normalise(false) {}
+      m_workspaceIndex(-1), m_startX(EMPTY_DBL()), m_endX(EMPTY_DBL()),
+      m_maxSize(10), m_normalise(false), m_startIndex(0) {}
 
 /**
  * Set all parameters

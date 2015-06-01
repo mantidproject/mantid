@@ -87,11 +87,7 @@ void getDefaultBeamCenter(API::MatrixWorkspace_sptr dataWS, double &pixel_x,
 }
 
 double getSourceToSampleDistance(API::MatrixWorkspace_sptr dataWS) {
-  Mantid::Kernel::Property *prop =
-      dataWS->run().getProperty("number-of-guides");
-  Mantid::Kernel::PropertyWithValue<int> *dp =
-      dynamic_cast<Mantid::Kernel::PropertyWithValue<int> *>(prop);
-  const int nguides = *dp;
+  const int nguides = dataWS->run().getPropertyValueAsType<int>("number-of-guides");
 
   std::vector<std::string> pars =
       dataWS->getInstrument()->getStringParameter("aperture-distances");

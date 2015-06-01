@@ -25,7 +25,7 @@ public:
 
   void testGetFactoryTypeName()
   {
-    vtkMDLineFactory factory(ThresholdRange_scptr(new NoThresholdRange), "signal");
+    vtkMDLineFactory factory(ThresholdRange_scptr(new NoThresholdRange),Mantid::VATES::VolumeNormalization);
     TS_ASSERT_EQUALS("vtkMDLineFactory", factory.getFactoryTypeName());
   }
 
@@ -35,7 +35,7 @@ public:
     EXPECT_CALL(*mockSuccessor, initialize(_)).Times(1);
     EXPECT_CALL(*mockSuccessor, getFactoryTypeName()).Times(1);
 
-    vtkMDLineFactory factory(ThresholdRange_scptr(new NoThresholdRange), "signal");
+    vtkMDLineFactory factory(ThresholdRange_scptr(new NoThresholdRange),Mantid::VATES::VolumeNormalization);
     factory.SetSuccessor(mockSuccessor);
 
     ITableWorkspace_sptr ws(new Mantid::DataObjects::TableWorkspace);
@@ -53,7 +53,7 @@ public:
     EXPECT_CALL(*mockSuccessor, create(Ref(progressUpdate))).Times(1).WillOnce(Return(vtkStructuredGrid::New()));
     EXPECT_CALL(*mockSuccessor, getFactoryTypeName()).Times(1);
 
-    vtkMDLineFactory factory(ThresholdRange_scptr(new NoThresholdRange), "signal");
+    vtkMDLineFactory factory(ThresholdRange_scptr(new NoThresholdRange),Mantid::VATES::VolumeNormalization);
     factory.SetSuccessor(mockSuccessor);
 
     ITableWorkspace_sptr ws(new Mantid::DataObjects::TableWorkspace);
@@ -65,7 +65,7 @@ public:
 
   void testOnInitaliseCannotDelegateToSuccessor()
   {
-    vtkMDLineFactory factory(ThresholdRange_scptr(new NoThresholdRange), "signal");
+    vtkMDLineFactory factory(ThresholdRange_scptr(new NoThresholdRange),Mantid::VATES::VolumeNormalization);
     //factory.SetSuccessor(mockSuccessor); No Successor set.
 
     ITableWorkspace_sptr ws(new Mantid::DataObjects::TableWorkspace);
@@ -76,7 +76,7 @@ public:
   {
     FakeProgressAction progressUpdate;
 
-    vtkMDLineFactory factory(ThresholdRange_scptr(new NoThresholdRange), "signal");
+    vtkMDLineFactory factory(ThresholdRange_scptr(new NoThresholdRange),Mantid::VATES::VolumeNormalization);
     //initialize not called!
     TS_ASSERT_THROWS(factory.create(progressUpdate), std::runtime_error);
   }
@@ -101,7 +101,7 @@ public:
 
     Workspace_sptr binned = Mantid::API::AnalysisDataService::Instance().retrieve("binned");
 
-    vtkMDLineFactory factory(ThresholdRange_scptr(new NoThresholdRange), "signal");
+    vtkMDLineFactory factory(ThresholdRange_scptr(new NoThresholdRange),Mantid::VATES::VolumeNormalization);
     factory.initialize(binned);
 
     vtkDataSet* product = factory.create(mockProgressAction);
@@ -151,7 +151,7 @@ public:
 
     Workspace_sptr binned = Mantid::API::AnalysisDataService::Instance().retrieve("binned");
 
-    vtkMDLineFactory factory(ThresholdRange_scptr(new NoThresholdRange), "signal");
+    vtkMDLineFactory factory(ThresholdRange_scptr(new NoThresholdRange),Mantid::VATES::VolumeNormalization);
     factory.initialize(binned);
 
     vtkDataSet* product = factory.create(progressAction);

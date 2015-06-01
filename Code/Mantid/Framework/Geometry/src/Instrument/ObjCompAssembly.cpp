@@ -173,9 +173,14 @@ int ObjCompAssembly::addCopy(IComponent *comp, const std::string &n) {
  * @return group.size()
  */
 int ObjCompAssembly::nelements() const {
-  if (m_map)
-    return dynamic_cast<const ObjCompAssembly *>(m_base)->nelements();
-  else
+  if (m_map) {
+    auto objCompAss = dynamic_cast<const ObjCompAssembly *>(m_base);
+    if (!objCompAss) {
+      throw std::logic_error(
+          "Failed to cast base component to ObjCompAssembly");
+    }
+    return objCompAss->nelements();
+  } else
     return static_cast<int>(group.size());
 }
 
@@ -194,9 +199,12 @@ boost::shared_ptr<IComponent> ObjCompAssembly::operator[](int i) const {
   }
 
   if (m_map) {
-    boost::shared_ptr<IComponent> child_base =
-        dynamic_cast<const ObjCompAssembly *>(m_base)->operator[](i);
-    return ParComponentFactory::create(child_base, m_map);
+    auto child_base = dynamic_cast<const ObjCompAssembly *>(m_base);
+    if (!child_base) {
+      throw std::logic_error(
+          "Failed to cast base component to ObjCompAssembly");
+    }
+    return ParComponentFactory::create(child_base->operator[](i), m_map);
   } else {
     // Unparamterized - return the normal one
     return boost::shared_ptr<IComponent>(group[i], NoDeleting());

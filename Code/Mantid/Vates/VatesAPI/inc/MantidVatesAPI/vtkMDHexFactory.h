@@ -4,9 +4,12 @@
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidDataObjects/MDEventFactory.h"
 #include "MantidDataObjects/MDEventWorkspace.h"
+#include "MantidVatesAPI/Normalization.h"
 #include "MantidVatesAPI/ThresholdRange.h"
-#include "MantidVatesAPI/vtkDataSetFactory.h"
 #include "MantidVatesAPI/TimeToTimeStep.h"
+#include "MantidVatesAPI/vtkDataSetFactory.h"
+
+
 #include <boost/shared_ptr.hpp>
 
 using Mantid::DataObjects::MDEventWorkspace;
@@ -49,7 +52,7 @@ class DLLExport vtkMDHexFactory : public vtkDataSetFactory
 public:
 
   /// Constructor
-  vtkMDHexFactory(ThresholdRange_scptr thresholdRange, const std::string& scalarName, const size_t maxDepth = 1000);
+  vtkMDHexFactory(ThresholdRange_scptr thresholdRange, const VisualNormalization normalizationOption, const size_t maxDepth = 1000);
 
   /// Destructor
   virtual ~vtkMDHexFactory();
@@ -82,8 +85,8 @@ private:
   /// Threshold range strategy.
   ThresholdRange_scptr m_thresholdRange;
 
-  /// Scalar name to provide on dataset.
-  const std::string m_scalarName;
+  /// Normalization option and info.
+  const VisualNormalization m_normalizationOption;
 
   /// Member workspace to generate vtkdataset from.
   Mantid::API::Workspace_sptr m_workspace;

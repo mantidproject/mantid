@@ -70,6 +70,9 @@ ImportASCIIDialog::ImportASCIIDialog(bool new_windows_only, QWidget * parent, bo
 
 	// get rembered option values
 	ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parent());
+  if (!app) {
+    throw std::logic_error("Parent of ImportASCIIDialog is not ApplicationWindow as expected.");
+  }
 	setLocale(app->locale());
 
 	d_strip_spaces->setChecked(app->strip_spaces);

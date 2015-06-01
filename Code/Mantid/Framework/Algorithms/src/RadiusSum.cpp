@@ -23,7 +23,8 @@ DECLARE_ALGORITHM(RadiusSum)
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
-RadiusSum::RadiusSum() {}
+RadiusSum::RadiusSum()
+    : centre(), num_bins(0), inputWS(), min_radius(0.), max_radius(0.) {}
 
 //----------------------------------------------------------------------------------------------
 /** Destructor

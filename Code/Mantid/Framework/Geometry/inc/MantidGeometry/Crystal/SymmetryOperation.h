@@ -125,7 +125,7 @@ public:
   SymmetryOperation(const SymmetryOperation &other);
   SymmetryOperation &operator=(const SymmetryOperation &other);
 
-  virtual ~SymmetryOperation() {}
+  ~SymmetryOperation() {}
 
   const Kernel::IntMatrix &matrix() const;
   const V3R &vector() const;
@@ -169,6 +169,11 @@ protected:
   V3R m_vector;
   std::string m_identifier;
 };
+
+MANTID_GEOMETRY_DLL std::ostream &operator<<(
+    std::ostream &stream, const SymmetryOperation &operation);
+MANTID_GEOMETRY_DLL std::istream &operator>>(std::istream &stream,
+                                             SymmetryOperation &operation);
 
 MANTID_GEOMETRY_DLL V3R getWrappedVector(const V3R &vector);
 MANTID_GEOMETRY_DLL Kernel::V3D getWrappedVector(const Kernel::V3D &vector);

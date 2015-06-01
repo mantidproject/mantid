@@ -6,13 +6,14 @@ import math
 
 class EnginXFitPeaks(PythonAlgorithm):
     def category(self):
-        return "Diffraction\Engineering;PythonAlgorithms"
+        return "Diffraction\\Engineering;PythonAlgorithms"
 
     def name(self):
         return "EnginXFitPeaks"
 
     def summary(self):
-        return "The algorithm fits an expected diffraction pattern to a workpace spectrum by performing single peak fits."
+        return ("The algorithm fits an expected diffraction pattern to a workpace spectrum by "
+                "performing single peak fits.")
 
     def PyInit(self):
         self.declareProperty(MatrixWorkspaceProperty("InputWorkspace", "", Direction.Input),\
@@ -24,7 +25,9 @@ class EnginXFitPeaks(PythonAlgorithm):
         self.declareProperty(FloatArrayProperty("ExpectedPeaks", (self._getDefaultPeaks())),\
     		"A list of dSpacing values to be translated into TOF to find expected peaks.")
 
-        self.declareProperty(FileProperty(name="ExpectedPeaksFromFile",defaultValue="",action=FileAction.OptionalLoad,extensions = [".csv"]),"Load from file a list of dSpacing values to be translated into TOF to find expected peaks.")
+        self.declareProperty(FileProperty(name="ExpectedPeaksFromFile",defaultValue="",
+                                          action=FileAction.OptionalLoad,extensions = [".csv"]),
+                             "Load from file a list of dSpacing values to be translated into TOF to find expected peaks.")
 
         self.declareProperty("Difc", 0.0, direction = Direction.Output,\
     		doc = "Fitted Difc value")
@@ -60,6 +63,8 @@ class EnginXFitPeaks(PythonAlgorithm):
             centre = row['centre']
             width = row['width']
             height = row['height']
+            if width <= 0.:
+                continue
 
             # Sigma value of the peak, assuming Gaussian shape
             sigma = width / (2 * math.sqrt(2 * math.log(2)))
@@ -127,7 +132,9 @@ class EnginXFitPeaks(PythonAlgorithm):
 
     def _getDefaultPeaks(self):
         """ Gets default peaks for EnginX algorithm. Values from CeO2 """
-        defaultPeak = [3.1243, 2.7057, 1.9132, 1.6316, 1.5621, 1.3529, 1.2415, 1.2100, 1.1046, 1.0414, 0.9566, 0.9147, 0.9019, 0.8556, 0.8252, 0.8158, 0.7811]
+        defaultPeak = [3.1243, 2.7057, 1.9132, 1.6316, 1.5621, 1.3529, 1.2415,
+                       1.2100, 1.1046, 1.0414, 0.9566, 0.9147, 0.9019, 0.8556,
+                       0.8252, 0.8158, 0.7811]
         return defaultPeak
 
     def _fitDSpacingToTOF(self, fittedPeaksTable):
@@ -174,7 +181,7 @@ class EnginXFitPeaks(PythonAlgorithm):
         expectedPeaks = self._readInExpectedPeaks()
 
     	# Expected peak positions in TOF for the detector
-        expectedPeaksTof = map(dSpacingToTof, expectedPeaks)
+        expectedPeaksTof = [dSpacingToTof(ep) for ep in expectedPeaks]
 
         return expectedPeaksTof
 

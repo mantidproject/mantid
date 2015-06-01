@@ -16,7 +16,8 @@ using namespace Kernel;
 using namespace API;
 
 /// Constructor
-UserFunction::UserFunction() : m_parser(new mu::Parser()), m_x_set(false) {}
+UserFunction::UserFunction()
+    : m_parser(new mu::Parser()), m_x(0.), m_x_set(false) {}
 
 /// Destructor
 UserFunction::~UserFunction() { delete m_parser; }

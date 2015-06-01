@@ -21,6 +21,12 @@ using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using namespace Mantid::DataObjects;
 
+ModeratorTzero::ModeratorTzero()
+    : Mantid::API::Algorithm(),
+      m_convfactor(0.5e+12 * Mantid::PhysicalConstants::NeutronMass /
+                   Mantid::PhysicalConstants::meV),
+      m_niter(1), m_tolTOF(0.), m_t1min(200.0) {}
+
 /// set attribute m_formula
 void ModeratorTzero::setFormula(const std::string &formula) {
   m_formula = formula;

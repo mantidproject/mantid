@@ -21,7 +21,10 @@ int IPowderDiffPeakFunction::s_peakRadius = 5;
  * property
   */
 IPowderDiffPeakFunction::IPowderDiffPeakFunction()
-    : LATTICEINDEX(9999), HEIGHTINDEX(9999) {
+    : m_centre(0.), m_dcentre(0.), m_fwhm(0.), m_hasNewParameterValue(false),
+      m_cellParamValueChanged(false), m_sortedProfileParameterNames(),
+      m_unitCell(), m_unitCellSize(0.), m_parameterValid(false), mH(0), mK(0),
+      mL(0), mHKLSet(false), LATTICEINDEX(9999), HEIGHTINDEX(9999) {
   // Set peak's radius from configuration
   int peakRadius;
   if (Kernel::ConfigService::Instance().getValue("curvefitting.peakRadius",

@@ -39,7 +39,6 @@ using namespace DataObjects;
 using namespace Geometry;
 using namespace Kernel;
 
-
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(ImportMDEventWorkspace)
 
@@ -74,7 +73,9 @@ const std::string ImportMDEventWorkspace::CommentLineStartFlag() { return "#"; }
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
-ImportMDEventWorkspace::ImportMDEventWorkspace() {}
+ImportMDEventWorkspace::ImportMDEventWorkspace()
+    : API::Algorithm(), m_file_data(), m_posDimStart(), m_posMDEventStart(),
+      m_IsFullDataObjects(false), m_nDimensions(0), m_nDataObjects(0) {}
 
 //----------------------------------------------------------------------------------------------
 /** Destructor

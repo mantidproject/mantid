@@ -66,10 +66,6 @@ private:
   // Overridden Algorithm methods
   void init();
   void exec();
-  /// Number to sum
-  int SumX;
-  /// Number to sum
-  int SumY;
 };
 
 } // namespace Algorithm
