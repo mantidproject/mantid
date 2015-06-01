@@ -39,6 +39,20 @@ namespace API {
 namespace {
 /// Separator for workspace types in workspaceMethodOnTypes member
 const std::string WORKSPACE_TYPES_SEPARATOR = ";";
+
+class WorkspacePropertyValueIs {
+public:
+  WorkspacePropertyValueIs(std::string value) : m_value(value) {};
+  bool operator()(IWorkspaceProperty * property) {
+    Property * prop = dynamic_cast<Property *>(property);
+    if (!prop)
+      return false;
+    return prop->value() == m_value;
+  }
+
+private:
+  std::string m_value;
+};
 }
 
 // Doxygen can't handle member specialization at the moment:
@@ -1324,8 +1338,22 @@ bool Algorithm::processGroups() {
               dynamic_cast<Property *>(m_pureOutputWorkspaceProps[owp])) {
         // Default name = "in1_in2_out"
         std::string outName = outputBaseName + "_" + prop->value();
+
+        Property * inputProperty = NULL;
+        WorkspacePropertyValueIs comp(prop->value());
+        auto inputProp = std::find_if(m_inputWorkspaceProps.begin(), m_inputWorkspaceProps.end(), comp);
+        if (inputProp != m_inputWorkspaceProps.end())
+          inputProperty = dynamic_cast<Property *>(*inputProp);
+
+        // Overwrite workspaces in any input property if they have the same
+        // name as an output (i.e. copy name button in algorithm dialog used)
+        // (only need to do this for a single input, multiple will be handled
+        // by ADS)
+        if (inputProperty && inputProperty->value() == prop->value())
+          outName = m_groups[inputProp - m_inputWorkspaceProps.begin()][entry]->name();
+
         // Except if all inputs had similar names, then the name is "out_1"
-        if (m_groupsHaveSimilarNames)
+        else if (m_groupsHaveSimilarNames)
           outName = prop->value() + "_" + Strings::toString(entry + 1);
 
         // Set in the output
