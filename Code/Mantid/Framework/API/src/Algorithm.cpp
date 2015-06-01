@@ -42,9 +42,9 @@ const std::string WORKSPACE_TYPES_SEPARATOR = ";";
 
 class WorkspacePropertyValueIs {
 public:
-  WorkspacePropertyValueIs(std::string value) : m_value(value) {};
-  bool operator()(IWorkspaceProperty * property) {
-    Property * prop = dynamic_cast<Property *>(property);
+  WorkspacePropertyValueIs(std::string value) : m_value(value){};
+  bool operator()(IWorkspaceProperty *property) {
+    Property *prop = dynamic_cast<Property *>(property);
     if (!prop)
       return false;
     return prop->value() == m_value;
@@ -1339,9 +1339,10 @@ bool Algorithm::processGroups() {
         // Default name = "in1_in2_out"
         std::string outName = outputBaseName + "_" + prop->value();
 
-        Property * inputProperty = NULL;
+        Property *inputProperty = NULL;
         WorkspacePropertyValueIs comp(prop->value());
-        auto inputProp = std::find_if(m_inputWorkspaceProps.begin(), m_inputWorkspaceProps.end(), comp);
+        auto inputProp = std::find_if(m_inputWorkspaceProps.begin(),
+                                      m_inputWorkspaceProps.end(), comp);
         if (inputProp != m_inputWorkspaceProps.end())
           inputProperty = dynamic_cast<Property *>(*inputProp);
 
@@ -1350,7 +1351,8 @@ bool Algorithm::processGroups() {
         // (only need to do this for a single input, multiple will be handled
         // by ADS)
         if (inputProperty && inputProperty->value() == prop->value())
-          outName = m_groups[inputProp - m_inputWorkspaceProps.begin()][entry]->name();
+          outName = m_groups[inputProp - m_inputWorkspaceProps.begin()][entry]
+                        ->name();
 
         // Except if all inputs had similar names, then the name is "out_1"
         else if (m_groupsHaveSimilarNames)
