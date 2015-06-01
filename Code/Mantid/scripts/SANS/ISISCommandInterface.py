@@ -1155,6 +1155,33 @@ def FindBeamCentre(rlow, rupp, MaxIter = 10, xstart = None, ystart = None, toler
 
     return XNEW, YNEW
 
+################################################################################
+# Input check functions
+
+# Check the input for time shifts when adding event files
+def check_time_shifts_for_added_event_files(number_of_files, time_shifts= ''):
+    time_shift_container = time_shifts.split(',')
+    message = ''
+    # If the time_shift_container then the user does not specify a shift
+    if len(time_shift_container)==0:
+        print message
+        return message
+
+    # Check if the time shift elements can be cast to float
+    for time_shift_element in time_shift_container:
+        try:
+            float(time_shift_element)
+        except:
+            message = 'Error: Elements of the time shift list cannot be converted to a numeric value, e.g ' + time_shift_element
+            print message
+            return message
+
+    if number_of_files -1 != len(time_shift_container):
+        message = 'Error: Expected N-1 time shifts for N files, but read ' + str(len(time_shift_container)) + ' time shifts for ' + str(number_of_files) + ' files.'
+        print message
+        return message
+
+
 ###############################################################################
 ######################### Start of Deprecated Code ############################
 ###############################################################################

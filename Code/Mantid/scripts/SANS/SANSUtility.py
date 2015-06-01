@@ -602,10 +602,26 @@ def get_full_path_for_added_event_data(file_name):
     return full_path_name
 
 
-class CombineWorkspacesFactory:
+class AddOperation(object):
+    def __init__(self,type, time_shifts):
+        super(AddOperation, self).__init__()
+        factory = CombineWorkspacesFactory()
+        self.adder = factory.create_add_algorithm(type)
+        self.time_shifter = TimeShifter(time_shifts)
+
+    def add(self, LHS_workspace, RHS_workspace, output_workspace, run_to_add):
+        current_time_shift = self.time_shifter.get_Nth_time_shift(run_to_add)
+        self.adder.add(LHS_workspace=LHS_workspace,
+                       RHS_workspace= RHS_workspace,
+                       output_workspace= output_workspace,
+                       time_shift = current_time_shift)
+
+class CombineWorkspacesFactory(object):
+    def __intit__():
+        super(CombineWorkspacesFactory, self).__init__()
     def create_add_algorithm(self,type):
         if type == ISOVERLAY:
-            pass
+            return OverlayWorspaces()
         else:
             return PlusWorkspaces()
 
@@ -625,7 +641,7 @@ class OverlayWorkspaces:
         # Normalize by proton charge
 
         # Create a temporary workspace with shifted time values from RHS
-        temp = none
+        temp = none #ChangeTimeZero(InputWorkspace=rhs_ws, OutputWorkspace='shifted', RelativeTimeOffset=time_shift)
 
         # Add the LHS and shifted workspace
         Plus(LHSWorkspace=LHS_workspace,RHSWorkspace= temp ,OutputWorkspace= output_workspace)
@@ -643,6 +659,23 @@ class OverlayWorkspaces:
             raise ValueError("The proton charge does not have any time entry")
 
         return times[0]
+
+class TimeShifter(object):
+    def __init__(self, time_shifts):
+        super(TimeShifter, self).__init__()
+        self._time_shifts = time_shifts
+    def get_Nth_time_shift(self, n):
+        if len(self._time_shifts) >= (n+1):
+            return self._cast_to_float(self._time_shifts[n])
+        else:
+            return 0.0
+    def _cast_to_float(self, element):
+        float_element = 0.0
+        try:
+            float_element = float(element)
+        except ValueError:
+            pass# Log here
+        return float_element
 
 
 ###############################################################################

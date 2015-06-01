@@ -16,6 +16,11 @@
 
 #include <algorithm>
 
+
+namespace {
+  enum BINOPTIONS {CUSTOMBINNING, FROMMONITORS, SAVEASEVENTDATA};
+}
+
 namespace MantidQt
 {
 namespace CustomInterfaces
@@ -48,7 +53,7 @@ const QString SANSAddFiles::OUT_MSG("Output Directory: ");
 
 SANSAddFiles::SANSAddFiles(QWidget *parent, Ui::SANSRunWindow *ParWidgets) :
   m_SANSForm(ParWidgets), parForm(parent), m_pythonRunning(false),
-  m_newOutDir(*this, &SANSAddFiles::changeOutputDir)
+  m_newOutDir(*this, &SANSAddFiles::changeOutputDir), m_customBinning("")
 {
   initLayout();
 
@@ -124,6 +129,10 @@ void SANSAddFiles::initLayout()
   // Track changes in the selection of the histogram option
   connect(m_SANSForm->comboBox_histogram_choice, SIGNAL(currentIndexChanged (int)), this, SLOT(onCurrentIndexChangedForHistogramChoice(int)));
 
+  // Track changes in the overlay options 
+  m_SANSForm->overlayCheckBox->setEnabled(false);
+  m_customBinning = m_SANSForm->eventToHistBinning->text();
+  connect(m_SANSForm->overlayCheckBox, SIGNAL(stateChanged(int)), this, SLOT(onStateChangedForOverlayCheckBox(int)));
 }
 /**
  * Restore previous input
@@ -243,6 +252,11 @@ void SANSAddFiles::add2Runs2Add()
 */
 void SANSAddFiles::runPythonAddFiles()
 {
+  // Check the validty of the input for the 
+  if (!checkValidityTimeShiftsForAddedEventFiles()) {
+    return;
+  }
+
   if (m_pythonRunning)
   {//it is only possible to run one python script at a time
     return;
@@ -294,19 +308,22 @@ void SANSAddFiles::runPythonAddFiles()
   QString lowMem = m_SANSForm->loadSeparateEntries->isChecked()?"True":"False";
   code_torun += ", lowMem="+lowMem;
 
+  QString overlay = m_SANSForm->overlayCheckBox->isChecked()?"True":"False";
   // In case of event data, check if the user either wants 
   // 0. Custom historgram binning
   // 1. A binning which is set by the data set
   // 2. To save the actual event data
   switch (m_SANSForm->comboBox_histogram_choice->currentIndex())
   {
-    case 0:
+    case CUSTOMBINNING:
       code_torun += ", binning='" + m_SANSForm->eventToHistBinning->text() + "'";
       break;
-    case 1:
+    case FROMMONITORS:
       break;
-    case 2:
+    case SAVEASEVENTDATA:
       code_torun += ", saveAsEvent=True";
+      code_torun += ", isOverlay=" + overlay;
+      code_torun += ", time_shifts='"+ m_SANSForm->eventToHistBinning->text() + "'";
       break;
     default:
       break;
@@ -432,14 +449,71 @@ void SANSAddFiles::enableSumming()
  */
 void SANSAddFiles::onCurrentIndexChangedForHistogramChoice(int index) 
 {
-  if (index == 0)
-  {
-    this->m_SANSForm->eventToHistBinning->setEnabled(true);
+  // Set the overlay checkbox enabled or disabled
+  // Set the input field enabled or disabled
+  switch(index) {
+    case CUSTOMBINNING: 
+      this->m_SANSForm->eventToHistBinning->setEnabled(true);
+      m_SANSForm->eventToHistBinning->setText(m_customBinning);
+      this->m_SANSForm->overlayCheckBox->setEnabled(false);
+      break;
+    case FROMMONITORS: 
+      this->m_SANSForm->eventToHistBinning->setEnabled(false);
+      this->m_SANSForm->overlayCheckBox->setEnabled(false);
+      break;
+    case SAVEASEVENTDATA: 
+      this->m_SANSForm->overlayCheckBox->setEnabled(true);
+      if (this->m_SANSForm->overlayCheckBox->isChecked()) {
+        this->m_SANSForm->eventToHistBinning->setEnabled(true);
+        m_customBinning = this->m_SANSForm->eventToHistBinning->text();
+        this->m_SANSForm->eventToHistBinning->setText("");
+      } else {
+        this->m_SANSForm->eventToHistBinning->setEnabled(false);
+      }
+      break;
+    default:
+      this->m_SANSForm->eventToHistBinning->setEnabled(false);
+      break;
   }
-  else
-  {
+}
+
+/**
+ * Reacts to changes of the overlay check box when adding event data
+ * @param state the state of the check box
+ */
+void SANSAddFiles::onStateChangedForOverlayCheckBox(int state) {
+  if (state) {
+    m_customBinning = this->m_SANSForm->eventToHistBinning->text();
+    this->m_SANSForm->eventToHistBinning->setText("");
+    this->m_SANSForm->eventToHistBinning->setEnabled(true);
+  } else {
     this->m_SANSForm->eventToHistBinning->setEnabled(false);
   }
+}
+
+/*
+ * Check the validity of the time shift input field for added event files
+ */
+bool SANSAddFiles::checkValidityTimeShiftsForAddedEventFiles() {
+  bool state = true;
+
+  if (m_SANSForm->comboBox_histogram_choice->currentIndex() == SAVEASEVENTDATA && m_SANSForm->overlayCheckBox->isChecked()) {
+    QString code_torun = "import ISISCommandInterface as i\n";
+    code_torun += "i.check_time_shifts_for_added_event_files(number_of_files=";
+    code_torun += QString::number(m_SANSForm->toAdd_List->count() - 1);
+    code_torun += ", time_shifts='" + m_SANSForm->eventToHistBinning->text() + "')\n";
+
+    QString status = runPythonCode(code_torun, false);
+    if (!status.isEmpty()) {
+      g_log.warning() << status.toStdString();
+    }
+
+    if (status.contains("Error")) {
+      state = false;
+    }
+  }
+
+  return state;
 }
 
 }//namespace CustomInterfaces

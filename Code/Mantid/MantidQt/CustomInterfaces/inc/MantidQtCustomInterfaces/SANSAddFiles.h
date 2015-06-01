@@ -36,6 +36,8 @@ private:
   QString m_outDir;
   ///The text that goes into the beginning of the output directory message
   static const QString OUT_MSG;
+  /// Cache for custom binning string
+  QString m_customBinning;
 
   Poco::NObserver<SANSAddFiles, Mantid::Kernel::ConfigValChangeNotification> m_newOutDir;
 
@@ -46,6 +48,7 @@ private:
   void setOutDir(std::string dir);
   void readSettings();
   void saveSettings();
+  bool checkValidityTimeShiftsForAddedEventFiles();
 
 private slots:
   ///insert another row into the files to sum table (tbRunsToAdd), in response to a click on the pbNewRow button
@@ -65,6 +68,8 @@ private slots:
   void enableSumming();
   /// reacts to changges of the combo box selection for the histogram options for event data
   void onCurrentIndexChangedForHistogramChoice(int index);
+  /// reacts to changes of the overlay check box
+  void onStateChangedForOverlayCheckBox(int);
 };
 
 }
