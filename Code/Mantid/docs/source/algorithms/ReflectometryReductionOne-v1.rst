@@ -17,6 +17,10 @@ on an input theta value.
 Historically the work performed by this algorithm was known as the Quick
 script.
 
+If :literal:`MonitorBackgroundWavelengthMin` and
+:literal:`MonitorBackgroundWavelengthMax` are both set to :literal:`0`, then
+background normalization will not be performed on the monitors.
+
 Workflow
 ########
 
