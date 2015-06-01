@@ -37,8 +37,8 @@
 
 class MANTID_SINQ_DLL MDHistoToWorkspace2D : public Mantid::API::Algorithm {
 public:
-  /// (Empty) Constructor
-  MDHistoToWorkspace2D() : Mantid::API::Algorithm() {}
+  /// Default constructor
+  MDHistoToWorkspace2D();
   /// Virtual destructor
   virtual ~MDHistoToWorkspace2D() {}
   /// Algorithm's name
@@ -60,8 +60,8 @@ private:
   /// Execution code
   void exec();
 
-  size_t rank;
-  size_t currentSpectra;
+  size_t m_rank;
+  size_t m_currentSpectra;
   size_t calculateNSpectra(Mantid::API::IMDHistoWorkspace_sptr inws);
   void recurseData(Mantid::API::IMDHistoWorkspace_sptr inWS,
                    Mantid::DataObjects::Workspace2D_sptr outWS,

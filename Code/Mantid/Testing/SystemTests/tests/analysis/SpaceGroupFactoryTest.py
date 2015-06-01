@@ -21,6 +21,10 @@ class SpaceGroupFactoryTest(stresstesting.MantidStressTest):
     def checkSpaceGroup(self, symbol):
         group = SpaceGroupFactory.createSpaceGroup(symbol)
 
+        self.assertTrue(group.isGroup(),
+                        ("Space group " + str(group.getNumber()) + " (" + symbol + ") does not "
+                        "fulfill group axioms"))
+
         groupOperations = set(group.getSymmetryOperationStrings())
         referenceOperations = self.spaceGroupData[group.getNumber()]
 

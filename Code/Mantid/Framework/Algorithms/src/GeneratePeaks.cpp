@@ -31,7 +31,14 @@ DECLARE_ALGORITHM(GeneratePeaks)
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
-GeneratePeaks::GeneratePeaks() {}
+GeneratePeaks::GeneratePeaks()
+    : m_peakFunction(), m_bkgdFunction(), m_vecPeakParamValues(),
+      m_vecBkgdParamValues(), m_SpectrumMap(), m_spectraSet(),
+      m_useAutoBkgd(false), m_funcParamWS(), inputWS(),
+      m_newWSFromParent(false), binParameters(), m_genBackground(false),
+      m_useRawParameter(false), m_maxChi2(0.), m_numPeakWidth(0.),
+      m_funcParameterNames(), i_height(-1), i_centre(-1), i_width(-1), i_a0(-1),
+      i_a1(-1), i_a2(-1), m_useFuncParamWS(false), m_wsIndex(-1) {}
 
 //----------------------------------------------------------------------------------------------
 /** Destructor

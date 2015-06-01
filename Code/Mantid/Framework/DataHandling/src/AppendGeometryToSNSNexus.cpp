@@ -23,7 +23,9 @@ DECLARE_ALGORITHM(AppendGeometryToSNSNexus)
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
-AppendGeometryToSNSNexus::AppendGeometryToSNSNexus() {}
+AppendGeometryToSNSNexus::AppendGeometryToSNSNexus()
+    : m_makeNexusCopy(false), m_instrumentLoadedCorrectly(false),
+      m_logsLoadedCorrectly(false) {}
 
 //----------------------------------------------------------------------------------------------
 /** Destructor
@@ -144,23 +146,23 @@ void AppendGeometryToSNSNexus::exec() {
   if (m_instrument == "HYSPEC" || m_instrument == "HYSPECA" ||
       m_instrument == "SNAP") {
     g_log.debug() << "Run LoadNexusLogs Child Algorithm." << std::endl;
-    logs_loaded_correctly = runLoadNexusLogs(m_filename, ws, this);
+    m_logsLoadedCorrectly = runLoadNexusLogs(m_filename, ws, this);
 
-    if (!logs_loaded_correctly)
+    if (!m_logsLoadedCorrectly)
       throw std::runtime_error("Failed to run LoadNexusLogs Child Algorithm.");
   }
 
   g_log.debug() << "Run LoadInstrument Child Algorithm." << std::endl;
-  instrument_loaded_correctly = runLoadInstrument(m_idf_filename, ws, this);
+  m_instrumentLoadedCorrectly = runLoadInstrument(m_idf_filename, ws, this);
 
-  if (!instrument_loaded_correctly)
+  if (!m_instrumentLoadedCorrectly)
     throw std::runtime_error("Failed to run LoadInstrument Child Algorithm.");
 
   // Get the number of detectors (just for progress reporting)
   // Get the number of histograms/detectors
   const size_t numDetectors = ws->getInstrument()->getDetectorIDs().size();
 
-  this->progress = new API::Progress(this, 0.0, 1.0, numDetectors);
+  API::Progress progress(this, 0.0, 1.0, numDetectors);
 
   // Get the instrument
   Geometry::Instrument_const_sptr instrument = ws->getInstrument();
@@ -250,7 +252,7 @@ void AppendGeometryToSNSNexus::exec() {
 
                 nxfile.closeGroup(); // close NXdetector
 
-                this->progress->report(dets.size());
+                progress.report(dets.size());
               } else {
                 throw std::runtime_error(
                     "Could not find any detectors for the bank named " +

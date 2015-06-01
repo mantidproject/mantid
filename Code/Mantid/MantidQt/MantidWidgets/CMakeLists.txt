@@ -145,7 +145,6 @@ set ( ALL_SRC ${SRC_FILES} ${MOCCED_FILES} )
 
 qt4_wrap_ui ( UI_HDRS ${UI_FILES} ) 
 
-find_package ( QScintilla REQUIRED )
 include_directories ( ${QSCINTILLA_INCLUDE_DIR} )
 add_definitions ( -DQSCINTILLA_DLL )     # Will only have an effect on Windows (as is desired)
 
@@ -160,10 +159,15 @@ if (OSX_VERSION VERSION_GREATER 10.8)
   set_target_properties ( MantidWidgets PROPERTIES INSTALL_RPATH "@loader_path/../MacOS")
 endif ()
 
-target_link_libraries ( MantidWidgets MantidQtAPI QtPropertyBrowser 
-    ${QT_LIBRARIES} ${QWT_LIBRARIES} 
-    ${QSCINTILLA_LIBRARIES}
-    )
+target_link_libraries ( MantidWidgets LINK_PRIVATE 
+            MantidQtAPI
+            QtPropertyBrowser
+            ${CORE_MANTIDLIBS}
+            ${QT_LIBRARIES} ${QWT_LIBRARIES}
+            ${QSCINTILLA_LIBRARIES}
+            ${POCO_LIBRARIES}
+            ${Boost_LIBRARIES}
+            )
 
 ###########################################################################
 # Testing

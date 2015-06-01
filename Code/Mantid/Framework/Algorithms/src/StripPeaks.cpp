@@ -14,7 +14,7 @@ DECLARE_ALGORITHM(StripPeaks)
 using namespace Kernel;
 using namespace API;
 
-StripPeaks::StripPeaks() : API::Algorithm() {}
+StripPeaks::StripPeaks() : API::Algorithm(), m_maxChiSq(0.) {}
 
 void StripPeaks::init() {
   declareProperty(
@@ -109,6 +109,8 @@ API::ITableWorkspace_sptr StripPeaks::findPeaks(API::MatrixWorkspace_sptr WS) {
   bool highbackground = getProperty("HighBackground");
   std::vector<double> peakpositions = getProperty("PeakPositions");
   double peakpostol = getProperty("PeakPositionTolerance");
+  if (peakpostol < 0.)
+    peakpostol = EMPTY_DBL();
 
   // Set up and execute algorithm
   bool showlog = true;
@@ -213,11 +215,41 @@ StripPeaks::removePeaks(API::MatrixWorkspace_const_sptr input,
                       << ". Error: Peak fit with too wide peak width" << width
                       << " denoted by chi^2 = " << chisq << " <= 0. \n";
     }
+    {
+      auto left = lower_bound(X.begin(), X.end(), centre);
+      double delta_d = (*left) - (*(left - 1));
+      if ((width / delta_d) < 1.) {
+        g_log.warning() << "StripPeaks():  Peak Index = " << i
+                        << " @ X = " << centre
+                        << "  Error: Peak fit with too narrow of peak "
+                        << "delta_d = " << delta_d
+                        << " sigma/delta_d = " << (width / delta_d) << "\n";
+        continue;
+      }
+    }
 
     g_log.information() << "Subtracting peak " << i << " from spectrum "
                         << peakslist->getRef<int>("spectrum", i)
                         << " at x = " << centre << " h = " << height
                         << " s = " << width << " chi2 = " << chisq << "\n";
+
+    { // log the background function
+      double a0 = 0.;
+      double a1 = 0.;
+      double a2 = 0.;
+      const std::vector<std::string> columnNames = peakslist->getColumnNames();
+      if (std::find(columnNames.begin(), columnNames.end(), "A0") !=
+          columnNames.end())
+        a0 = peakslist->getRef<double>("A0", i);
+      if (std::find(columnNames.begin(), columnNames.end(), "A1") !=
+          columnNames.end())
+        a1 = peakslist->getRef<double>("A1", i);
+      if (std::find(columnNames.begin(), columnNames.end(), "A2") !=
+          columnNames.end())
+        a2 = peakslist->getRef<double>("A2", i);
+      g_log.information() << "     background = " << a0 << " + " << a1
+                          << " x + " << a2 << " x^2\n";
+    }
 
     // Loop over the spectrum elements
     const int spectrumLength = static_cast<int>(Y.size());

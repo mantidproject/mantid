@@ -24,7 +24,7 @@ namespace Crystal {
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
-TOFExtinction::TOFExtinction() {}
+  TOFExtinction::TOFExtinction(): m_smu(0.), m_amu(0.), m_radius(0.) {}
 
 //----------------------------------------------------------------------------------------------
 /** Destructor
@@ -84,9 +84,9 @@ void TOFExtinction::exec() {
   if (m_sampleMaterial->totalScatterXSection(NeutronAtom::ReferenceLambda) !=
       0.0) {
     double rho = m_sampleMaterial->numberDensity();
-    smu = m_sampleMaterial->totalScatterXSection(NeutronAtom::ReferenceLambda) *
+    m_smu = m_sampleMaterial->totalScatterXSection(NeutronAtom::ReferenceLambda) *
           rho;
-    amu = m_sampleMaterial->absorbXSection(NeutronAtom::ReferenceLambda) * rho;
+    m_amu = m_sampleMaterial->absorbXSection(NeutronAtom::ReferenceLambda) * rho;
   } else {
     throw std::invalid_argument(
         "Could not retrieve LinearScatteringCoef from material");
@@ -94,7 +94,7 @@ void TOFExtinction::exec() {
   const API::Run &run = inPeaksW->run();
   if (run.hasProperty("Radius")) {
     Kernel::Property *prop = run.getProperty("Radius");
-    radius = boost::lexical_cast<double, std::string>(prop->value());
+    m_radius = boost::lexical_cast<double, std::string>(prop->value());
   } else {
     throw std::invalid_argument("Could not retrieve Radius from run object");
   }
@@ -369,9 +369,9 @@ double TOFExtinction::absor_sphere(double &twoth, double &wl) {
   //  order polynomial in excel. these values are given in the static array
   //  pc[][]
 
-  mu = smu + (amu / 1.8f) * wl;
+  mu = m_smu + (m_amu / 1.8f) * wl;
 
-  mur = mu * radius;
+  mur = mu * m_radius;
   if (mur < 0. || mur > 2.5) {
     std::ostringstream s;
     s << mur;

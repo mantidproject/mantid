@@ -32,7 +32,7 @@ DECLARE_ALGORITHM(SaveHKL)
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
-SaveHKL::SaveHKL() {}
+SaveHKL::SaveHKL(): m_smu(0.), m_amu(0.), m_radius(0.), m_power_th(0.) {}
 
 //----------------------------------------------------------------------------------------------
 /** Destructor
@@ -168,19 +168,19 @@ void SaveHKL::exec() {
   std::vector<std::vector<double>> spectra;
   std::vector<std::vector<double>> time;
   int iSpec = 0;
-  smu = getProperty("LinearScatteringCoef"); // in 1/cm
-  amu = getProperty("LinearAbsorptionCoef"); // in 1/cm
-  radius = getProperty("Radius");            // in cm
-  power_th = getProperty("PowerLambda");     // in cm
+  m_smu = getProperty("LinearScatteringCoef"); // in 1/cm
+  m_amu = getProperty("LinearAbsorptionCoef"); // in 1/cm
+  m_radius = getProperty("Radius");            // in cm
+  m_power_th = getProperty("PowerLambda");     // in cm
   const Material &sampleMaterial = peaksW->sample().getMaterial();
   if (sampleMaterial.totalScatterXSection(NeutronAtom::ReferenceLambda) !=
       0.0) {
     double rho = sampleMaterial.numberDensity();
-    if (smu == EMPTY_DBL())
-      smu = sampleMaterial.totalScatterXSection(NeutronAtom::ReferenceLambda) *
+    if (m_smu == EMPTY_DBL())
+      m_smu = sampleMaterial.totalScatterXSection(NeutronAtom::ReferenceLambda) *
             rho;
-    if (amu == EMPTY_DBL())
-      amu = sampleMaterial.absorbXSection(NeutronAtom::ReferenceLambda) * rho;
+    if (m_amu == EMPTY_DBL())
+      m_amu = sampleMaterial.absorbXSection(NeutronAtom::ReferenceLambda) * rho;
     g_log.notice() << "Sample number density = " << rho
                    << " atoms/Angstrom^3\n";
     g_log.notice() << "Cross sections for wavelength = "
@@ -193,28 +193,28 @@ void SaveHKL::exec() {
                    << " barns\n"
                    << "    Absorption = " << sampleMaterial.absorbXSection()
                    << " barns\n";
-  } else if (smu != EMPTY_DBL() && amu != EMPTY_DBL()) // Save input in Sample
+  } else if (m_smu != EMPTY_DBL() && m_amu != EMPTY_DBL()) // Save input in Sample
                                                        // with wrong atomic
                                                        // number and name
   {
     NeutronAtom neutron(static_cast<uint16_t>(EMPTY_DBL()),
-                        static_cast<uint16_t>(0), 0.0, 0.0, smu, 0.0, smu, amu);
+                        static_cast<uint16_t>(0), 0.0, 0.0, m_smu, 0.0, m_smu, m_amu);
     Object shape = peaksW->sample().getShape(); // copy
     shape.setMaterial(Material("SetInSaveHKL", neutron, 1.0));
     peaksW->mutableSample().setShape(shape);
   }
-  if (smu != EMPTY_DBL() && amu != EMPTY_DBL())
-    g_log.notice() << "LinearScatteringCoef = " << smu << " 1/cm\n"
-                   << "LinearAbsorptionCoef = " << amu << " 1/cm\n"
-                   << "Radius = " << radius << " cm\n"
-                   << "Power Lorentz corrections = " << power_th << " \n";
+  if (m_smu != EMPTY_DBL() && m_amu != EMPTY_DBL())
+    g_log.notice() << "LinearScatteringCoef = " << m_smu << " 1/cm\n"
+                   << "LinearAbsorptionCoef = " << m_amu << " 1/cm\n"
+                   << "Radius = " << m_radius << " cm\n"
+                   << "Power Lorentz corrections = " << m_power_th << " \n";
   API::Run &run = peaksW->mutableRun();
   if (run.hasProperty("Radius")) {
     Kernel::Property *prop = run.getProperty("Radius");
-    if (radius == EMPTY_DBL())
-      radius = boost::lexical_cast<double, std::string>(prop->value());
+    if (m_radius == EMPTY_DBL())
+      m_radius = boost::lexical_cast<double, std::string>(prop->value());
   } else {
-    run.addProperty<double>("Radius", radius, true);
+    run.addProperty<double>("Radius", m_radius, true);
   }
   if (correctPeaks) {
     std::vector<double> spec(11);
@@ -311,7 +311,7 @@ void SaveHKL::exec() {
       continue;
     }
     double transmission = 0;
-    if (smu != EMPTY_DBL() && amu != EMPTY_DBL()) {
+    if (m_smu != EMPTY_DBL() && m_amu != EMPTY_DBL()) {
       transmission = absor_sphere(scattering, lambda, tbar);
     }
 
@@ -354,7 +354,7 @@ void SaveHKL::exec() {
       double sp_ratio = eff_center / eff_R;       // slant path efficiency ratio
 
       double sinsqt = std::pow(lambda / (2.0 * dsp), 2);
-      double wl4 = std::pow(lambda, power_th);
+      double wl4 = std::pow(lambda, m_power_th);
       double cmonx = 1.0;
       if (p.getMonitorCount() > 0)
         cmonx = 100e6 / p.getMonitorCount();
@@ -463,7 +463,7 @@ void SaveHKL::exec() {
  *       in this paper, a is the transmission and a* = 1/a is
  *       the absorption correction.
  *
- *       input are the smu (scattering) and amu (absorption at 1.8 ang.)
+p *       input are the smu (scattering) and amu (absorption at 1.8 ang.)
  *       linear absorption coefficients, the radius r of the sample
  *       the theta angle and wavelength.
  *       the absorption (absn) and tbar are returned.
@@ -482,9 +482,9 @@ double SaveHKL::absor_sphere(double &twoth, double &wl, double &tbar) {
   //  order polynomial in excel. these values are given in the static array
   //  pc[][]
 
-  mu = smu + (amu / 1.8f) * wl;
+  mu = m_smu + (m_amu / 1.8f) * wl;
 
-  mur = mu * radius;
+  mur = mu * m_radius;
   if (mur < 0. || mur > 2.5) {
     std::ostringstream s;
     s << mur;

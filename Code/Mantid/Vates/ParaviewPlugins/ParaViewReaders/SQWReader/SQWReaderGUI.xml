@@ -1,6 +1,0 @@
-<ParaViewReaders>
-  <Reader name="SQWReader"
-    extensions="sqw_old"
-    file_description="MD *.sqw files. Identified as old So that default loading route for .sqw files is as MDEWs.">
-  </Reader>
-</ParaViewReaders>

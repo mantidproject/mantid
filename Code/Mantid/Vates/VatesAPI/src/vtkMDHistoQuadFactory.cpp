@@ -1,6 +1,7 @@
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidKernel/CPUTimer.h"
 #include "MantidDataObjects/MDHistoWorkspace.h"
+#include "MantidDataObjects/MDHistoWorkspaceIterator.h"
 #include "MantidAPI/NullCoordTransform.h"
 #include "MantidVatesAPI/vtkMDHistoQuadFactory.h"
 #include "MantidVatesAPI/Common.h"
@@ -15,9 +16,11 @@
 #include "MantidKernel/ReadLock.h"
 #include "MantidKernel/Logger.h"
 
+
 using Mantid::API::IMDWorkspace;
 using Mantid::Kernel::CPUTimer;
 using Mantid::DataObjects::MDHistoWorkspace;
+using Mantid::DataObjects::MDHistoWorkspaceIterator;
 
 namespace
 {
@@ -29,7 +32,7 @@ namespace Mantid
 
   namespace VATES
   {
-    vtkMDHistoQuadFactory::vtkMDHistoQuadFactory(ThresholdRange_scptr thresholdRange, const std::string& scalarName) : m_scalarName(scalarName), m_thresholdRange(thresholdRange)
+    vtkMDHistoQuadFactory::vtkMDHistoQuadFactory(ThresholdRange_scptr thresholdRange, const VisualNormalization normalizationOption) : m_normalizationOption(normalizationOption), m_thresholdRange(thresholdRange)
     {
     }
 
@@ -42,7 +45,7 @@ namespace Mantid
     {
       if(this != &other)
       {
-        this->m_scalarName = other.m_scalarName;
+        this->m_normalizationOption = other.m_normalizationOption;
         this->m_thresholdRange = other.m_thresholdRange;
         this->m_workspace = other.m_workspace;
       }
@@ -55,7 +58,7 @@ namespace Mantid
     */
     vtkMDHistoQuadFactory::vtkMDHistoQuadFactory(const vtkMDHistoQuadFactory& other)
     {
-      this->m_scalarName = other.m_scalarName;
+      this->m_normalizationOption = other.m_normalizationOption;
       this->m_thresholdRange = other.m_thresholdRange;
       this->m_workspace = other.m_workspace;
     }
@@ -95,7 +98,7 @@ namespace Mantid
 
         vtkFloatArray * signal = vtkFloatArray::New();
         signal->Allocate(imageSize);
-        signal->SetName(m_scalarName.c_str());
+        signal->SetName(vtkDataSetFactory::ScalarName.c_str());
         signal->SetNumberOfComponents(1);
 
         //The following represent actual calculated positions.
@@ -116,7 +119,8 @@ namespace Mantid
 
         double progressFactor = 0.5/double(nBinsX);
         double progressOffset = 0.5;
-
+        boost::scoped_ptr<MDHistoWorkspaceIterator> iterator(dynamic_cast<MDHistoWorkspaceIterator*>(createIteratorWithNormalization(m_normalizationOption, m_workspace.get())));
+    
         size_t index = 0;
         for (int i = 0; i < nBinsX; i++)
         {
@@ -125,7 +129,9 @@ namespace Mantid
           for (int j = 0; j < nBinsY; j++)
           {
             index = j + nBinsY*i;
-            signalScalar = static_cast<float>(m_workspace->getSignalNormalizedAt(i, j));
+            iterator->jumpTo(index);
+            signalScalar = static_cast<float>(iterator->getNormalizedSignal()); // Get signal normalized as per m_normalizationOption
+
             if (isSpecial( signalScalar ) || !m_thresholdRange->inRange(signalScalar))
             {
               // out of range

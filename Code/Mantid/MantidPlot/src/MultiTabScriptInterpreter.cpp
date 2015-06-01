@@ -1,6 +1,9 @@
 //-----------------------------------------------------
 // Includes
 //-----------------------------------------------------
+// std
+#include <stdexcept>
+
 #include "ApplicationWindow.h"
 #include "ScriptFileInterpreter.h"
 
@@ -22,9 +25,6 @@
 #include <QListWidget>
 #include <QSpinBox>
 #include <QFontDatabase>
-
-// std
-#include <stdexcept>
 
 //***************************************************************************
 //

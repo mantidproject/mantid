@@ -5,7 +5,7 @@ from mantid.api import *
 
 class EnginXCalibrate(PythonAlgorithm):
     def category(self):
-        return "Diffraction\Engineering;PythonAlgorithms"
+        return "Diffraction\\Engineering;PythonAlgorithms"
 
     def name(self):
         return "EnginXCalibrate"
@@ -22,7 +22,8 @@ class EnginXCalibrate(PythonAlgorithm):
 
         self.declareProperty("Bank", 1, "Which bank to calibrate")
 
-        self.declareProperty(ITableWorkspaceProperty("DetectorPositions", "", Direction.Input, PropertyMode.Optional),\
+        self.declareProperty(ITableWorkspaceProperty("DetectorPositions", "",\
+                Direction.Input, PropertyMode.Optional),\
     		"Calibrated detector positions. If not specified, default ones are used.")
 
         self.declareProperty("Difc", 0.0, direction = Direction.Output,\

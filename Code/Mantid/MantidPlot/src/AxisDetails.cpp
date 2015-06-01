@@ -373,7 +373,7 @@ bool AxisDetails::valid()
     }
   }
   Table *w = m_app->table(m_cmbColName->currentText());
-  return m_initialised && m_app && m_graph && !((m_cmbAxisType->currentIndex() == ScaleDraw::Text || m_cmbAxisType->currentIndex() == ScaleDraw::ColHeader) && !w);
+  return m_initialised && m_graph && !((m_cmbAxisType->currentIndex() == ScaleDraw::Text || m_cmbAxisType->currentIndex() == ScaleDraw::ColHeader) && !w);
 }
 
 /** Applies the grid paremeters to the graphs

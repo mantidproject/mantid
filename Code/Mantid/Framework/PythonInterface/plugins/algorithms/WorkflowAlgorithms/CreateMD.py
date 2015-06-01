@@ -29,9 +29,9 @@ class CreateMD(DataProcessorAlgorithm):
 
     def _set_goniometer(self, workspace):
 
-        axis0 =  ','.join(map(str, ['gl', 0, 0, 1, 1]))
-        axis1 =  ','.join(map(str, ['gs', 1, 0, 0, 1]))
-        axis2 =  ','.join(map(str, ['psi', 0, 1, 0, 1]))
+        axis0 =  'gl,0,0,1,1'
+        axis1 =  'gs,1,0,0,1'
+        axis2 =  'psi,0,1,0,1'
 
         set_goniometer = self.createChildAlgorithm('SetGoniometer')
         set_goniometer.setProperty('Workspace', workspace)
@@ -40,6 +40,7 @@ class CreateMD(DataProcessorAlgorithm):
         set_goniometer.setProperty('Axis2', axis2)
         set_goniometer.execute()
 
+    #pylint: disable=too-many-arguments
     def _set_ub(self, workspace, a, b, c, alpha, beta, gamma, u, v):
         set_ub = self.createChildAlgorithm('SetUB')
         set_ub.setProperty('Workspace', workspace)
@@ -88,6 +89,8 @@ class CreateMD(DataProcessorAlgorithm):
         merge_alg.setPropertyValue('OutputWorkspace', 'dummy')
         merge_alg.execute()
         return merge_alg.getProperty('OutputWorkspace').value
+
+    #pylint: disable=too-many-arguments
     def _single_run(self, input_workspace, emode, efix, psi, gl, gs, in_place, alatt=None, angdeg=None, u=None, v=None, out_mdws=None):
         ub_params = map(any, [alatt, angdeg, u, v])
         goniometer_params = [psi, gl, gs]
@@ -121,7 +124,7 @@ class CreateMD(DataProcessorAlgorithm):
 
     def PyInit(self):
         self.declareProperty(StringArrayProperty('DataSources',  values=[], direction=Direction.Input,
-                             validator=StringArrayMandatoryValidator()),
+                                                 validator=StringArrayMandatoryValidator()),
                              doc='Input workspaces to process, or filenames to load and process')
 
         self.declareProperty(FloatArrayProperty('EFix', values=[], direction=Direction.Input),
@@ -130,7 +133,7 @@ class CreateMD(DataProcessorAlgorithm):
         self.declareProperty('Emode', defaultValue='Direct',
                              validator=StringListValidator(self._possible_emodes()), direction=Direction.Input,
                              doc='Analysis mode ' + str(self._possible_emodes()) )
- 
+
         self.declareProperty(FloatArrayProperty('Alatt', values=[], validator=FloatArrayMandatoryValidator(),
                                                 direction=Direction.Input ), doc='Lattice parameters' )
 
@@ -204,7 +207,7 @@ class CreateMD(DataProcessorAlgorithm):
         if len(efix) > 1 and len(efix) != ws_entries:
             raise ValueError("Either specify a single EFix value, or as many as there are input datasources")
 
-
+    #pylint: disable=too-many-locals
     def PyExec(self):
 
         logger.warning('You are running algorithm %s that is the beta stage of development' % (self.name()))
@@ -255,7 +258,7 @@ class CreateMD(DataProcessorAlgorithm):
             ws = None
             if must_load:
                 # Strip off any file extensions, and call it _md_{n} where n avoids clashes in the dictionary
-                ws_name = "%s_md_%i" % ( os.path.splitext(data_source)[0] , counter )  
+                ws_name = "%s_md_%i" % ( os.path.splitext(data_source)[0] , counter )
                 ws = self._load_ws(data_source, ws_name)
                 to_merge_name = ws_name
             else:
@@ -264,9 +267,9 @@ class CreateMD(DataProcessorAlgorithm):
 
             do_in_place = in_place and counter > 0 # We cannot process in place until we have an output MDWorkspace to use.
             run_md = self._single_run(input_workspace=ws if in_place else ws, emode=emode, efix=efix_entry,
-                alatt=alatt, angdeg=angdeg, u=u, v=v, psi=psi_entry, gl=gl_entry, gs=gs_entry, in_place=do_in_place, out_mdws=run_md)
-                
-                
+                                      alatt=alatt, angdeg=angdeg, u=u, v=v, psi=psi_entry, gl=gl_entry,
+                                      gs=gs_entry, in_place=do_in_place, out_mdws=run_md)
+
             to_merge_names.append(to_merge_name)
 
             AnalysisDataService.addOrReplace(to_merge_name, run_md)

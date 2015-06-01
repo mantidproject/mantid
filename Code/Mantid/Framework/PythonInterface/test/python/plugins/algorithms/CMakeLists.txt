@@ -17,6 +17,10 @@ set ( TEST_PY_FILES
   DakotaChiSquaredTest.py
   DensityOfStatesTest.py
   DSFinterpTest.py
+  EnginXCalibrateFullTest.py
+  EnginXCalibrateTest.py
+  EnginXFitPeaksTest.py
+  EnginXFocusTest.py
   FilterLogByTimeTest.py
   FindReflectometryLinesTest.py
   FlatPlatePaalmanPingsCorrectionTest.py
@@ -27,6 +31,7 @@ set ( TEST_PY_FILES
   IndirectILLReductionTest.py
   IndirectTransmissionTest.py
   IndirectTransmissionMonitorTest.py
+  ILLIN16BCalibrationTest.py
   ISISIndirectEnergyTransferTest.py
   LoadDNSLegacyTest.py
   LoadFullprofFileTest.py
@@ -49,6 +54,7 @@ set ( TEST_PY_FILES
   SofQWMomentsTest.py
   SortDetectorsTest.py
   SortXAxisTest.py
+  StatisticsOfTableWorkspaceTest.py
   Stitch1DManyTest.py
   SuggestTibCNCSTest.py
   SuggestTibHYSPECTest.py
