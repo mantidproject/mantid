@@ -57,14 +57,7 @@ private:
   boost::shared_ptr<GeometryHandler> clone() const;
 
   /// The RectangularDetector object being plotted.
-  RectangularDetector *mRectDet;
-
-protected:
-  IObjComponent *ObjComp; ///< ObjComponent that uses this geometry handler
-  Object *Obj;            ///< Object that uses this geometry handler
-  bool boolTriangulated;  ///< state of the geometry triangulation
-  bool
-      boolIsInitialized; ///< state of the geometry initialization for rendering
+  RectangularDetector *m_rectDet;
 
 public:
   BitmapGeometryHandler(RectangularDetector *comp);

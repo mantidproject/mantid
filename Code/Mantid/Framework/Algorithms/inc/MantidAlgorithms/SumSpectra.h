@@ -58,7 +58,7 @@ namespace Algorithms {
 class DLLExport SumSpectra : public API::Algorithm {
 public:
   /// Default constructor
-  SumSpectra() : API::Algorithm(){};
+  SumSpectra();
   /// Destructor
   virtual ~SumSpectra(){};
   /// Algorithm's name for identification overriding a virtual method
@@ -100,13 +100,13 @@ private:
   /// The spectrum to finish the integration at
   int m_MaxSpec;
   /// Set true to keep monitors
-  bool keepMonitors;
+  bool m_keepMonitors;
   /// numberOfSpectra in the input
-  int numberOfSpectra;
+  int m_numberOfSpectra;
   /// Blocksize of the input workspace
-  int yLength;
+  int m_yLength;
   /// Set of indicies to sum
-  std::set<int> indices;
+  std::set<int> m_indices;
 
   // if calculateing additional workspace with specially weighted averages is
   // necessary

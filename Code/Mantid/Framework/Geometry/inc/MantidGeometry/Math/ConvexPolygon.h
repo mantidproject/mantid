@@ -91,7 +91,7 @@ public:
 
 protected:
   /// Default constructor
-  ConvexPolygon() : m_numVertices(0), m_head(NULL) {}
+  ConvexPolygon();
   /// Setup the meta-data
   void setup();
   /// The size of the polygon

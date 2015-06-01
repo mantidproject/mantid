@@ -49,7 +49,8 @@ FindPeaks::FindPeaks()
       m_stepGuessedPeakWidth(0), m_usePeakPositionTolerance(false),
       m_peakPositionTolerance(0.0), m_fitFunctions(), m_peakLeftIndexes(),
       m_peakRightIndexes(), m_minimizer("Levenberg-MarquardtMD"),
-      m_costFunction(), m_minHeight(0.0), m_useObsCentre(false) {}
+      m_costFunction(), m_minHeight(0.0), m_leastMaxObsY(0.),
+      m_useObsCentre(false) {}
 
 //----------------------------------------------------------------------------------------------
 /** Initialize and declare properties.

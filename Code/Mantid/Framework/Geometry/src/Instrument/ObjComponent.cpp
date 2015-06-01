@@ -46,9 +46,13 @@ ObjComponent::~ObjComponent() {}
 /** Return the shape of the component
  */
 const Object_const_sptr ObjComponent::shape() const {
-  if (m_map)
-    return dynamic_cast<const ObjComponent *>(m_base)->m_shape;
-  else
+  if (m_map) {
+    auto base = dynamic_cast<const ObjComponent *>(m_base);
+    if (!base) {
+      throw std::logic_error("Failed to cast base component to ObjComponent");
+    }
+    return base->m_shape;
+  } else
     return m_shape;
 }
 
