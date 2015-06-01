@@ -375,14 +375,15 @@ ReflectometryWorkflowBase::toLamMonitor(const MatrixWorkspace_sptr &toConvert,
   cropWorkspaceAlg->execute();
   monitorWS = cropWorkspaceAlg->getProperty("OutputWorkspace");
 
+  //If min&max are both 0, we won't do the flat background normalization.
+  if (backgroundMinMax.get<0>() == 0 && backgroundMinMax.get<1>() == 0)
+    return monitorWS;
+
   // Flat background correction
   auto correctMonitorsAlg =
       this->createChildAlgorithm("CalculateFlatBackground");
   correctMonitorsAlg->initialize();
   correctMonitorsAlg->setProperty("InputWorkspace", monitorWS);
-  correctMonitorsAlg->setProperty(
-      "WorkspaceIndexList",
-      boost::assign::list_of(0).convert_to_container<std::vector<int>>());
   correctMonitorsAlg->setProperty("StartX", backgroundMinMax.get<0>());
   correctMonitorsAlg->setProperty("EndX", backgroundMinMax.get<1>());
   correctMonitorsAlg->setProperty("SkipMonitors", false);
