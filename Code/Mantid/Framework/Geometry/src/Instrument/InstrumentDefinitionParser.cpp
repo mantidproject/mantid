@@ -461,24 +461,10 @@ void InstrumentDefinitionParser::appendLocations(
     Geometry::ICompAssembly *parent, const Poco::XML::Element *pLocElems,
     const Poco::XML::Element *pCompElem, IdList &idList) {
   // create detached <location> elements from <locations> element
-  const std::string xmlLocation = convertLocationsElement(pLocElems);
-
-  // parse converted <locations> output
-  DOMParser pLocationsParser;
-  Poco::AutoPtr<Document> pLocationsDoc;
-  try {
-    pLocationsDoc = pLocationsParser.parseString(xmlLocation);
-  } catch (...) {
-    throw Kernel::Exception::InstrumentDefinitionError(
-        "Unable to parse XML string", xmlLocation);
-  }
+  Poco::AutoPtr<Document> pLocationsDoc = convertLocationsElement(pLocElems);
 
   // Get pointer to root element
   const Element *pRootLocationsElem = pLocationsDoc->documentElement();
-  if (!pRootLocationsElem->hasChildNodes()) {
-    throw Kernel::Exception::InstrumentDefinitionError(
-        "No root element in XML string", xmlLocation);
-  }
 
   Poco::AutoPtr<NodeList> pNL_locInLocs =
       pRootLocationsElem->getElementsByTagName("location");
@@ -2556,10 +2542,11 @@ std::string InstrumentDefinitionParser::translateRotateXMLcuboid(
 /// notation for a sequence of \<location\> elements.
 /// This method return this sequence as a xml string
 /// @param pElem Input \<locations\> element
-/// @return XML string
+/// @return XML document containing \<location\> elements
 /// @throw InstrumentDefinitionError Thrown if issues with the content of XML
 /// instrument file
-std::string InstrumentDefinitionParser::convertLocationsElement(
+Poco::AutoPtr<Poco::XML::Document>
+InstrumentDefinitionParser::convertLocationsElement(
     const Poco::XML::Element *pElem) {
   // Number of <location> this <locations> element is shorthand for
   size_t nElements(0);
@@ -2636,25 +2623,22 @@ std::string InstrumentDefinitionParser::convertLocationsElement(
     }
   }
 
-  std::ostringstream xml;
-
-  Poco::XML::XMLWriter writer(xml, Poco::XML::XMLWriter::CANONICAL);
-  writer.startDocument();
-  writer.startElement("", "", "expansion-of-locations-element");
+  Poco::AutoPtr<Document> pDoc = new Document;
+  Poco::AutoPtr<Element> pRoot = pDoc->createElement("expansion-of-locations-element");
+  pDoc->appendChild(pRoot);
 
   for (size_t i = 0; i < nElements; ++i) {
-    Poco::XML::AttributesImpl attr;
+    Poco::AutoPtr<Element> pLoc = pDoc->createElement("location");
 
     if (!name.empty()) {
       // Add name with appropriate numeric postfix
-      attr.addAttribute(
-          "", "", "name", "",
+      pLoc->setAttribute("name",
           name + boost::lexical_cast<std::string>(nameCountStart + i));
     }
 
     // Copy values of all the attributes set
     for (auto it = attrValues.begin(); it != attrValues.end(); ++it) {
-      attr.addAttribute("", "", it->first, "",
+      pLoc->setAttribute(it->first,
                         boost::lexical_cast<std::string>(it->second));
 
       // If attribute has a step, increase the value by the step
@@ -2663,13 +2647,10 @@ std::string InstrumentDefinitionParser::convertLocationsElement(
       }
     }
 
-    writer.emptyElement("", "", "location", attr);
+    pRoot->appendChild(pLoc);
   }
 
-  writer.endElement("", "", "expansion-of-locations-element");
-  writer.endDocument();
-
-  return xml.str();
+  return pDoc;
 }
 
 /** Return a subelement of an XML element, but also checks that there exist
