@@ -122,7 +122,7 @@ SCDCalibratePanels::calcWorkspace(DataObjects::PeaksWorkspace_sptr &pwks,
 
   for (size_t k = 0; k < bankNames.size(); ++k) {
     for (int j = 0; j < pwks->getNumberPeaks(); ++j) {
-      const API::IPeak &peak = pwks->getPeak((int)j);
+      const Geometry::IPeak &peak = pwks->getPeak((int)j);
       if (std::find(bankNames.begin(), bankNames.end(), peak.getBankName()) !=
           bankNames.end())
         if (IndexingUtils::ValidIndex(peak.getHKL(), tolerance)) {
@@ -978,7 +978,7 @@ void SCDCalibratePanels::exec() {
   int BankNumDef = 200;
   for (size_t q = 0; q < nData; q += 3) {
     int pk = (int)xVals[q];
-    const API::IPeak &peak = peaksWs->getPeak(pk);
+    const Geometry::IPeak &peak = peaksWs->getPeak(pk);
 
     string bankName = peak.getBankName();
     size_t pos = bankName.find_last_not_of("0123456789");

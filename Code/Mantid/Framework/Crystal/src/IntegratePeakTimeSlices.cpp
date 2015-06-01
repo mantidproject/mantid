@@ -839,7 +839,7 @@ void IntegratePeakTimeSlices::FindPlane(V3D &center, V3D &xvec, V3D &yvec,
                                         double &ROW, double &COL, int &NROWS,
                                         int &NCOLS, double &pixWidthx,
                                         double &pixHeighty,
-                                        API::IPeak const &peak) const {
+                                        Geometry::IPeak const &peak) const {
 
   NROWS = NCOLS = -1;
   IDetector_const_sptr det = peak.getDetector();

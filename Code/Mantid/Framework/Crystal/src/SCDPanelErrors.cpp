@@ -1206,7 +1206,7 @@ SCDPanelErrors::calcWorkspace(DataObjects::PeaksWorkspace_sptr &pwks,
 
   for (size_t k = 0; k < bankNames.size(); ++k)
     for (size_t j = 0; j < pwks->rowCount(); ++j) {
-      API::IPeak &peak = pwks->getPeak((int)j);
+      Geometry::IPeak &peak = pwks->getPeak((int)j);
       if (peak.getBankName().compare(bankNames[k]) == 0)
         if (peak.getH() != 0 || peak.getK() != 0 || peak.getL() != 0)
           if (peak.getH() - floor(peak.getH()) < tolerance ||

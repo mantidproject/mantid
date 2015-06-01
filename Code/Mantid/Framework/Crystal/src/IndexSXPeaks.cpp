@@ -17,6 +17,7 @@ DECLARE_ALGORITHM(IndexSXPeaks)
 
 using namespace Geometry;
 using namespace API;
+using namespace Kernel;
 
 /** Initialisation method.
 *

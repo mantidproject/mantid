@@ -1,6 +1,6 @@
 #include "MantidQtSliceViewer/QPeaksTableModel.h"
 #include "MantidAPI/IPeaksWorkspace.h"
-#include "MantidAPI/IPeak.h"
+#include "MantidGeometry/Crystal/IPeak.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"
@@ -8,6 +8,7 @@
 #include <boost/lexical_cast.hpp>
 
 using namespace Mantid::API;
+using namespace Mantid::Geometry;
 using namespace boost;
 
 namespace MantidQt
@@ -56,7 +57,7 @@ namespace MantidQt
     const int QPeaksTableModel::COL_QLAB(18);
     const int QPeaksTableModel::COL_QSAMPLE(19);
 
-    void QPeaksTableModel::updateDataCache(const Mantid::API::IPeak& peak, const int row) const
+    void QPeaksTableModel::updateDataCache(const Mantid::Geometry::IPeak& peak, const int row) const
     {
       // if the index is what is already cached just return
       if (row == m_dataCachePeakIndex)
