@@ -10,35 +10,30 @@
 Description
 -----------
 
-TODO: Enter a full rst-markup description of your algorithm here.
-
+This algorithm converts old diffraction OffsetsWorkspaces to
+:ref:`calibration table <DiffractionCalibrationWorkspace>`. It uses the geometry of the OffsetsWorkspace to based the values of ``DIFC`` on.
 
 Usage
 -----
-..  Try not to use files in your examples,
-    but if you cannot avoid it then the (small) files must be added to
-    autotestdata\UsageData and the following tag unindented
-    .. include:: ../usagedata-note.txt
+
+.. include:: ../usagedata-note.txt
 
 **Example - ConvertDiffCal**
 
+The file needed for this example are not present in our standard usage
+data download due to its size. It be downloaded from
+`pg3_mantid_det.cal
+<http://198.74.56.37/ftp/external-data/MD5/e2b281817b76eadbc26a0a2617477e97>`_.
+
 .. testcode:: ConvertDiffCalExample
 
-   # Create a host workspace
-   ws = CreateWorkspace(DataX=range(0,3), DataY=(0,2))
-   or
-   ws = CreateSampleWorkspace()
-
-   wsOut = ConvertDiffCal()
-
-   # Print the result
-   print "The output workspace has %i spectra" % wsOut.getNumberHistograms()
-
-Output:
-
-.. testoutput:: ConvertDiffCalExample
-
-  The output workspace has ?? spectra
+   LoadCalFile(InstrumentName="PG3",
+               CalFilename="pg3_mantid_det.cal",
+               MakeGroupingWorkspace=False,
+               MakeOffsetsWorkspace=True,
+               MakeMaskWorkspace=False,
+               WorkspaceName="PG3")
+   PG3_cal=ConvertDiffCal(OffsetsWorkspace="PG3_offsets",
+                          OutputWorkspace="PG3_cal")
 
 .. categories::
-
