@@ -465,18 +465,23 @@ void InstrumentDefinitionParser::appendLocations(
 
   // Get pointer to root element
   const Element *pRootLocationsElem = pLocationsDoc->documentElement();
+  const bool assembly = isAssembly(pCompElem->getAttribute("type"));
 
-  Poco::AutoPtr<NodeList> pNL_locInLocs =
-      pRootLocationsElem->getElementsByTagName("location");
-  unsigned long pNL_locInLocs_length = pNL_locInLocs->length();
-  for (unsigned long iInLocs = 0; iInLocs < pNL_locInLocs_length; iInLocs++) {
-    const Element *pLocInLocsElem =
-        static_cast<Element *>(pNL_locInLocs->item(iInLocs));
-    if (isAssembly(pCompElem->getAttribute("type"))) {
-      appendAssembly(parent, pLocInLocsElem, pCompElem, idList);
-    } else {
-      appendLeaf(parent, pLocInLocsElem, pCompElem, idList);
+  Poco::XML::Element *pElem = dynamic_cast<Poco::XML::Element*>(pRootLocationsElem->firstChild());
+
+  while (pElem) {
+    if (pElem->tagName() != "location") {
+      pElem = dynamic_cast<Poco::XML::Element*>(pElem->nextSibling());
+      continue;
     }
+
+    if (assembly) {
+      appendAssembly(parent, pElem, pCompElem, idList);
+    } else {
+      appendLeaf(parent, pElem, pCompElem, idList);
+    }
+
+    pElem = dynamic_cast<Poco::XML::Element*>(pElem->nextSibling());
   }
 }
 
