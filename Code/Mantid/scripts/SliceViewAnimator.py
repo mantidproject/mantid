@@ -1,3 +1,5 @@
+#pylint: disable=too-many-arguments
+
 import numpy
 from wand.image import Image
 from wand.drawing import Drawing
