@@ -28,8 +28,6 @@ if __name__ == '__main__':
         print("ERROR: Specified repository location is not a directory.")
         exit()
 
-    # repolocation = '/home/scu/sources/git/mantidproject/mantid'
-
     organisations = ['STFC', 'ORNL', 'ESS', 'ILL', 'PSI', 'ANSTO', 'KITWARE', 'JUELICH', 'OTHERS']
 
     domains = {}
