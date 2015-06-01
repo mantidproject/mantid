@@ -79,6 +79,11 @@ private:
   void parseDetectorTable(std::vector<Kernel::V3D> &vec_detpos,
                           std::vector<detid_t> &vec_detid);
 
+  void setupTransferMatrix(API::MatrixWorkspace_sptr dataws,
+                           const double &omega,
+                           const double &phi,
+                           const double &chi);
+
   API::ITableWorkspace_sptr m_expDataTableWS;
   API::ITableWorkspace_sptr m_detectorListTableWS;
   API::IMDEventWorkspace_sptr m_outputWS;

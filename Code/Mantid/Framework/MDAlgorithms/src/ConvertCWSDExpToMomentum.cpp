@@ -5,6 +5,8 @@
 #include "MantidDataObjects/MDEventFactory.h"
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidGeometry/Instrument/ComponentHelper.h"
+#include "MantidMDAlgorithms/MDWSDescription.h"
+#include "MantidMDAlgorithms/MDWSTransform.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -154,6 +156,9 @@ ConvertCWSDExpToMomentum::createExperimentMDWorkspace() {
   return mdws;
 }
 
+/**
+  * Run number is determined by the row of the file in the input table workspace
+ */
 void ConvertCWSDExpToMomentum::addMDEvents() {
   MatrixWorkspace_sptr spicews;
 
@@ -178,6 +183,50 @@ void ConvertCWSDExpToMomentum::addMDEvents() {
     int runid = static_cast<int>(ir) + 1;
     convertSpiceMatrixToMomentumMDEvents(spicews, start_detid, runid);
   }
+
+  return;
+}
+
+void ConvertCWSDExpToMomentum::setupTransferMatrix(API::MatrixWorkspace_sptr dataws,
+                                                   const double &omega,
+                                                   const double &phi,
+                                                   const double &chi)
+{
+  // Set up MDWSDescription from MatrixWorkspace
+  MDWSDescription targetwsdescription;
+  std::vector<double> minVal(4,-3),maxVal(4,3);
+  targetwsdescription.setMinMax(minVal,maxVal);
+
+  targetwsdescription.buildFromMatrixWS(dataws, "Q3D", "Direct");
+
+  // Now it is in LabFrame
+  MDWSTransform transf;
+
+  std::string frameid = "Q_sample";
+  CnvrtToMD::TargetFrame targetframe = transf.getTargetFrame(frameid);
+  /*
+  bool foundtarget = transf.findTargetFrame(targetwsdescription);
+  if (!foundtarget)
+    throw std::runtime_error("Unable to convert to ...");
+    */
+
+  // SetGoniometer(fakews2d,0,0,0);
+  // set axis-0
+  dataws->mutableRun().mutableGoniometer().setRotationAngle(0, omega);
+  // set axis-1
+  dataws->mutableRun().mutableGoniometer().setRotationAngle(1, phi);
+  // set axis-2
+  dataws->mutableRun().mutableGoniometer().setRotationAngle(2, chi);
+  // TS_ASSERT_EQUALS(CnvrtToMD::SampleFrame,Transf.findTargetFrame(TargWSDescription));
+  // FIXME - How to define *pLattice?
+  Geometry::OrientedLattice *pLattice;
+  dataws->mutableSample().setOrientedLattice(pLattice);
+  // It should be in sample frame
+  // FIXME : TS_ASSERT_EQUALS(CnvrtToMD::HKLFrame,Transf.findTargetFrame(TargWSDescription));
+
+  CnvrtToMD::CoordScaling scaling(CnvrtToMD::NoScaling);
+  std::vector<double> matrix =
+      transf.getTransfMatrix(targetwsdescription, "Sample", "NoScaling");
 
   return;
 }
@@ -207,13 +256,11 @@ void ConvertCWSDExpToMomentum::convertSpiceMatrixToMomentumMDEvents(
     inserter.insertMDEvent(static_cast<float>(signal), static_cast<float>(error*error),
                            static_cast<uint16_t>(runnumber), detid,
                            momentum.data());
-    // m_outputWS->addExperimentInfo();
   }
 
   ExperimentInfo_sptr expinfo = boost::make_shared<ExperimentInfo>();
   expinfo->setInstrument(m_virtualInstrument);
   m_outputWS->addExperimentInfo(expinfo);
-
 }
 
 /// Examine input
@@ -275,7 +322,11 @@ bool ConvertCWSDExpToMomentum::getInputs(std::string &errmsg) {
 
 void ConvertCWSDExpToMomentum::convertToMomentum(const std::vector<double> &detPos, const double &wavelength, std::vector<coord_t> &qSample)
 {
-  // TODO/FIXME : Implement ASAP!
+  // FIXME - At this stage it is only for test on compiling purpose
+  return;
+
+
+
 
   return;
 }

@@ -56,6 +56,13 @@ public:
     IMDIterator *mditer = outws->createIterator();
     TS_ASSERT_EQUALS(mditer->getNumEvents(), 256*256);
 
+    size_t numexpinfo = outws->getNumExperimentInfo();
+    TS_ASSERT_EQUALS(numexpinfo, 1);
+
+    ExperimentInfo_const_sptr expinfo0 = outws->getExperimentInfo(0);
+    Geometry::Instrument_const_sptr instrument = expinfo0->getInstrument();
+    TS_ASSERT_EQUALS(instrument->getNumberDetectors(), 256);
+
   }
 
 
