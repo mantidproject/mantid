@@ -86,6 +86,8 @@ set ( INC_FILES
   ${HEADER_DIR}/kernel/Environment/Threading.h
   ${HEADER_DIR}/kernel/Environment/WrapperHelpers.h
   ${HEADER_DIR}/kernel/Policies/MatrixToNumpy.h
+  ${HEADER_DIR}/kernel/Policies/RemoveConst.h
+  ${HEADER_DIR}/kernel/Policies/ToWeakPtr.h
   ${HEADER_DIR}/kernel/Policies/VectorToNumpy.h
   ${HEADER_DIR}/kernel/Registry/PropertyValueHandler.h
   ${HEADER_DIR}/kernel/Registry/PropertyWithValueFactory.h
