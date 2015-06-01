@@ -8,11 +8,9 @@ using namespace boost::python;
 
 /**
  * Enables boost.python to automatically "cast" an object up to the
- * appropriate CompAssembly leaf type 
+ * appropriate CompAssembly leaf type
  */
-void export_CompAssembly()
-{
-  class_<CompAssembly, bases<ICompAssembly, Component>, boost::noncopyable>("CompAssembly", no_init)
-    ;
+void export_CompAssembly() {
+  class_<CompAssembly, bases<ICompAssembly, Component>, boost::noncopyable>(
+      "CompAssembly", no_init);
 }
-

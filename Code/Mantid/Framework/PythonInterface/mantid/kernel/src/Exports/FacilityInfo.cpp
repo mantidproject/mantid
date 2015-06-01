@@ -7,49 +7,62 @@ using Mantid::Kernel::FacilityInfo;
 using Mantid::Kernel::InstrumentInfo;
 using namespace boost::python;
 
-void export_FacilityInfo()
-{
+void export_FacilityInfo() {
 
-  register_ptr_to_python<FacilityInfo*>();
+  register_ptr_to_python<FacilityInfo *>();
 
   class_<FacilityInfo>("FacilityInfo", no_init)
 
-    .def("name", &FacilityInfo::name, return_value_policy<copy_const_reference>(),
-         "Returns name of the facility as definined in the Facilities.xml file")
+      .def("name", &FacilityInfo::name,
+           return_value_policy<copy_const_reference>(),
+           "Returns name of the facility as definined in the Facilities.xml "
+           "file")
 
-    .def("__str__", &FacilityInfo::name, return_value_policy<copy_const_reference>(),
-         "Returns name of the facility as definined in the Facilities.xml file")
+      .def("__str__", &FacilityInfo::name,
+           return_value_policy<copy_const_reference>(),
+           "Returns name of the facility as definined in the Facilities.xml "
+           "file")
 
-    .def("zeroPadding", &FacilityInfo::zeroPadding,
-         "Returns default zero padding for this facility")
+      .def("zeroPadding", &FacilityInfo::zeroPadding,
+           "Returns default zero padding for this facility")
 
-    .def("delimiter", &FacilityInfo::delimiter, return_value_policy<copy_const_reference>(),
-         "Returns the delimiter between the instrument name and the run number.")
+      .def("delimiter", &FacilityInfo::delimiter,
+           return_value_policy<copy_const_reference>(),
+           "Returns the delimiter between the instrument name and the run "
+           "number.")
 
-    .def("extensions", &FacilityInfo::extensions,
-         "Returns the list of file extensions that are considered as instrument data files.")
+      .def("extensions", &FacilityInfo::extensions,
+           "Returns the list of file extensions that are considered as "
+           "instrument data files.")
 
-    .def("preferredExtension",&FacilityInfo::preferredExtension, return_value_policy<copy_const_reference>(),
-         "Returns the extension that is preferred for this facility")
+      .def("preferredExtension", &FacilityInfo::preferredExtension,
+           return_value_policy<copy_const_reference>(),
+           "Returns the extension that is preferred for this facility")
 
-    .def("archiveSearch", &FacilityInfo::archiveSearch, return_value_policy<copy_const_reference>(),
-         "Return the archive search interface names")
+      .def("archiveSearch", &FacilityInfo::archiveSearch,
+           return_value_policy<copy_const_reference>(),
+           "Return the archive search interface names")
 
-    .def("instruments", (const std::vector<InstrumentInfo> & (FacilityInfo::*)()const)&FacilityInfo::instruments,
-         return_value_policy<copy_const_reference>(),
-         "Returns a list of instruments of this facility as defined in the Facilities.xml file")
+      .def("instruments",
+           (const std::vector<InstrumentInfo> &(FacilityInfo::*)() const) &
+               FacilityInfo::instruments,
+           return_value_policy<copy_const_reference>(),
+           "Returns a list of instruments of this facility as defined in the "
+           "Facilities.xml file")
 
-    .def("instruments", (std::vector<InstrumentInfo> (FacilityInfo::*)(const std::string&)const)&FacilityInfo::instruments,
-         "Returns a list of instruments of given technique")
+      .def("instruments", (std::vector<InstrumentInfo>(
+                              FacilityInfo::*)(const std::string &) const) &
+                              FacilityInfo::instruments,
+           "Returns a list of instruments of given technique")
 
-    .def("instrument", &FacilityInfo::instrument, return_value_policy<copy_const_reference>(),
-         "Returns the instrument with the given name")
+      .def("instrument", &FacilityInfo::instrument,
+           return_value_policy<copy_const_reference>(),
+           "Returns the instrument with the given name")
 
-    .def("liveListener", &FacilityInfo::liveListener, return_value_policy<copy_const_reference>(),
-         "Returns the name of the default live listener")
+      .def("liveListener", &FacilityInfo::liveListener,
+           return_value_policy<copy_const_reference>(),
+           "Returns the name of the default live listener")
 
-    .def("computeResources", &FacilityInfo::computeResources,
-         "Returns a vector of the available compute resources")
-   ;
+      .def("computeResources", &FacilityInfo::computeResources,
+           "Returns a vector of the available compute resources");
 }
-
