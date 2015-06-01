@@ -1,11 +1,12 @@
-#ifndef MANTID_API_PEAKTRANSFORMFACTORY_H_
-#define MANTID_API_PEAKTRANSFORMFACTORY_H_
+#ifndef MANTID_GEOMETRY_PEAKTRANSFORMFACTORY_H_
+#define MANTID_GEOMETRY_PEAKTRANSFORMFACTORY_H_
 
-#include "MantidAPI/PeakTransform.h"
+#include "MantidKernel/System.h"
+#include "MantidGeometry/Crystal/PeakTransform.h"
 #include <boost/shared_ptr.hpp>
 
 namespace Mantid {
-namespace API {
+namespace Geometry {
 /**
 @class PeakTransformFactory
 Abstract type defining Factory Method interface for generating PeakTransforms

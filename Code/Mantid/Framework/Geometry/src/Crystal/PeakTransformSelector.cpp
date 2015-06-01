@@ -1,8 +1,8 @@
-#include "MantidAPI/PeakTransformSelector.h"
+#include "MantidGeometry/Crystal/PeakTransformSelector.h"
 #include <stdexcept>
 
 namespace Mantid {
-namespace API {
+namespace Geometry {
 /// Constructor
 PeakTransformSelector::PeakTransformSelector() {}
 

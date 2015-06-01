@@ -1,7 +1,7 @@
-#include "MantidAPI/PeakTransform.h"
+#include "MantidGeometry/Crystal/PeakTransform.h"
 
 namespace Mantid {
-namespace API {
+namespace Geometry {
 PeakTransform::PeakTransform(const std::string &xPlotLabel,
                              const std::string &yPlotLabel,
                              const boost::regex &regexOne,
@@ -19,7 +19,6 @@ PeakTransform::PeakTransform(const std::string &xPlotLabel,
   const int SecondIndex = 1;
   const int ThirdIndex = 2;
 
-  Mantid::Kernel::V3D positionInCoordinateSystem;
   if (boost::regex_match(xLabel, m_FirstRegex) &&
       boost::regex_match(yLabel, m_SecondRegex)) // HKL
   {

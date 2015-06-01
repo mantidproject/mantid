@@ -1,12 +1,12 @@
-#ifndef SLICE_VIEWER_PEAKTRANSFORMHKL_TEST_H_
-#define SLICE_VIEWER_PEAKTRANSFORMHKL_TEST_H_
+#ifndef MANTIDGEOMETRY_PEAKTRANSFORMHKL_TEST_H_
+#define MANTIDGEOMETRY_PEAKTRANSFORMHKL_TEST_H_
 
 #include <cxxtest/TestSuite.h>
-#include "MantidAPI/PeakTransformHKL.h"
+#include "MantidGeometry/Crystal/PeakTransformHKL.h"
 #include "MockObjects.h"
 #include <boost/make_shared.hpp>
 
-using namespace Mantid::API;
+using namespace Mantid::Geometry;
 using Mantid::Kernel::V3D;
 using namespace testing;
 
@@ -288,5 +288,3 @@ void test_getCoordinateSystem()
 
 };
 #endif
-
-//end SLICE_VIEWER_PEAKTRANSFORMHKL_TEST_H_

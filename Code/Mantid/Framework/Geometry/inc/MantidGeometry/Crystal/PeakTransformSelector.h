@@ -1,11 +1,12 @@
-#ifndef MANTID_API_PEAKTRANSFORMSELECTOR_H_
-#define MANTID_API_PEAKTRANSFORMSELECTOR_H_
+#ifndef MANTID_GEOMETRY_PEAKTRANSFORMSELECTOR_H_
+#define MANTID_GEOMETRY_PEAKTRANSFORMSELECTOR_H_
 
-#include "MantidAPI/PeakTransformFactory.h"
+#include "MantidKernel/System.h"
+#include "MantidGeometry/Crystal/PeakTransformFactory.h"
 #include <set>
 
 namespace Mantid {
-namespace API {
+namespace Geometry {
 /**
 @class PeakTransformSelector
 Used to choose an appropriate PeakTransformFactory

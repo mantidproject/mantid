@@ -1,10 +1,10 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAPI/IPeak.h"
+#include "MantidGeometry/Crystal/IPeak.h"
 
 namespace Mantid {
-namespace API {
+namespace Geometry {
 
 using namespace Kernel;
 

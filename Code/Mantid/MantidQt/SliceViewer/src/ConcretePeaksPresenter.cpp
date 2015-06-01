@@ -2,7 +2,7 @@
 #include "MantidQtSliceViewer/UpdateableOnDemand.h"
 #include "MantidQtSliceViewer/ZoomableOnDemand.h"
 #include "MantidAPI/IPeaksWorkspace.h"
-#include "MantidAPI/IPeak.h"
+#include "MantidGeometry/Crystal/IPeak.h"
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/IAlgorithm.h"
@@ -114,7 +114,7 @@ void ConcretePeaksPresenter::checkWorkspaceCompatibilities(
 ConcretePeaksPresenter::ConcretePeaksPresenter(
     PeakOverlayViewFactory_sptr viewFactory, IPeaksWorkspace_sptr peaksWS,
     boost::shared_ptr<MDGeometry> mdWS,
-    Mantid::API::PeakTransformFactory_sptr transformFactory)
+    Mantid::Geometry::PeakTransformFactory_sptr transformFactory)
     : m_viewFactory(viewFactory), m_peaksWS(peaksWS),
       m_transformFactory(transformFactory),
       m_transform(transformFactory->createDefaultTransform()), m_slicePoint(),
@@ -263,7 +263,7 @@ bool ConcretePeaksPresenter::configureMappingTransform() {
     m_transform = temp;
     showAll();
     transformSucceeded = true;
-  } catch (PeakTransformException &) {
+  } catch (Mantid::Geometry::PeakTransformException &) {
     hideAll();
   }
   return transformSucceeded;

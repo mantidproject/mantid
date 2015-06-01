@@ -1,14 +1,14 @@
-#ifndef MANTID_API_PEAKTRANSFORM_H_
-#define MANTID_API_PEAKTRANSFORM_H_
+#ifndef MANTID_GEOMETRY_PEAKTRANSFORM_H_
+#define MANTID_GEOMETRY_PEAKTRANSFORM_H_
 
 #include "MantidKernel/V3D.h"
-#include "MantidAPI/IPeak.h"
+#include "MantidGeometry/Crystal/IPeak.h"
 #include <boost/regex.hpp>
 #include <boost/shared_ptr.hpp>
 #include "MantidKernel/SpecialCoordinateSystem.h"
 
 namespace Mantid {
-namespace API {
+namespace Geometry {
 /**
 @class PeakTransform
 Used to remap coordinates into a form consistent with an axis reordering.
@@ -24,7 +24,7 @@ public:
   transform(const Mantid::Kernel::V3D &original) const;
   /// Perform Transform
   virtual Mantid::Kernel::V3D
-  transformPeak(const Mantid::API::IPeak &peak) const = 0;
+  transformPeak(const Mantid::Geometry::IPeak &peak) const = 0;
   /// Perform reverse transform.
   Mantid::Kernel::V3D
   transformBack(const Mantid::Kernel::V3D &transformed) const;
@@ -69,4 +69,4 @@ public:
 }
 }
 
-#endif /* MANTID_API_CONCRETEPEAKSPRESENTER_H_ */
+#endif /* MANTID_GEOMETRY_PEAKTRANSFORM_H_ */
