@@ -241,7 +241,6 @@ private:
   }
 
   void do_test_unsorted(const MatrixWorkspace& outWS) {
-    auto &x = outWS.readX(0);
     auto &y = outWS.readY(0);
     double oldValue = 0.0;
     for(size_t i = 0; i < y.size(); ++i)
