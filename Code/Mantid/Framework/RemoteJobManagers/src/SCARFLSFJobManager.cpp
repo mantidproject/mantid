@@ -47,9 +47,9 @@ void SCARFLSFJobManager::authenticate(const std::string &username,
   m_transactions.clear();
 
   // Do the URI %-encoding, but component by component
-  std::string encodedUser = url_component_encode(username);
+  std::string encodedUser = urlComponentEncode(username);
   // Poco::URI::encode(username, ";,/?:@&=+$#", encodedUser);
-  std::string encodedPass = url_component_encode(password);
+  std::string encodedPass = urlComponentEncode(password);
   // Poco::URI::encode(password, ";,/?:@&=+$#", encodedPass);
 
   const std::string params =
@@ -219,7 +219,7 @@ void SCARFLSFJobManager::logout(const std::string &username) {
  *
  * @return uri-encoded string, as per RFC3986
  */
-std::string SCARFLSFJobManager::url_component_encode(const std::string &in) {
+std::string SCARFLSFJobManager::urlComponentEncode(const std::string &in) {
   std::ostringstream out;
   out.fill('0');
   out << std::hex;

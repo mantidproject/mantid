@@ -46,7 +46,7 @@ public:
 
 private:
   /// helper to encode uri components (SCARF username / passwords)
-  std::string url_component_encode(const std::string &in);
+  static std::string urlComponentEncode(const std::string &in);
 
   static std::string g_pingPath;
   static std::string g_logoutPath;
