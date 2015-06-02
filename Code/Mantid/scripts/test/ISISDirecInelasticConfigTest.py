@@ -1,5 +1,5 @@
 import os
-#os.environ["PATH"] = r"c:/Mantid/Code/builds/br_master/bin/Release;"+os.environ["PATH"]
+os.environ["PATH"] = r"c:/Mantid/Code/builds/br_master/bin/Release;"+os.environ["PATH"]
 import unittest
 import shutil
 import datetime
@@ -51,7 +51,7 @@ class ISISDirectInelasticConfigTest(unittest.TestCase):
         if not os.path.exists(self.userRootDir):
             os.makedirs(self.userRootDir)
 
-    def makeFakeSourceReductionFile(self,mcf):
+    def makeFakeSourceReductionFile(self,mcf,contents=None):
 
         instr_name = mcf._user.get_last_instrument()
 
@@ -61,10 +61,13 @@ class ISISDirectInelasticConfigTest(unittest.TestCase):
         
         file_name = mcf._sample_reduction_file(instr_name)
         full_file = os.path.join(file_path,file_name)
-        if not os.path.isfile(full_file):
-            fh=open(full_file,'w')
-            fh.write('#Test reduction file')
-            fh.close()
+        if os.path.isfile(full_file):
+            os.remove(full_file)
+        fh=open(full_file,'w')
+        fh.write('#Test reduction file\n')
+        fh.write('Contents={0}'.format(contents))
+        fh.close()
+        return full_file
 
 
     def tearDown(self):
@@ -181,7 +184,8 @@ class ISISDirectInelasticConfigTest(unittest.TestCase):
 
 
         rbnum2='RB1999000'
-        targetDir = config['defaultsave.directory']
+
+        targetDir = self.get_save_dir()
         rbdir2 = os.path.join(targetDir,self.userID,rbnum2)
         if not os.path.exists(rbdir2):
             os.makedirs(rbdir2)
@@ -200,7 +204,7 @@ class ISISDirectInelasticConfigTest(unittest.TestCase):
 
         mcf.init_user(self.userID,user)
 
-        self.makeFakeSourceReductionFile(mcf)
+        fake_source=self.makeFakeSourceReductionFile(mcf)
         self.assertEqual(len(mcf._dynamic_configuration),6)
         self.assertEqual(mcf._dynamic_configuration[1],'default.instrument=MERLIN')
 
@@ -226,7 +230,7 @@ class ISISDirectInelasticConfigTest(unittest.TestCase):
         user1.set_user_properties('MARI','20000124','CYCLE20001',rbdir2)
 
         mcf.init_user(user1ID,user1)
-        self.makeFakeSourceReductionFile(mcf)
+        source_file = self.makeFakeSourceReductionFile(mcf)
 
         mcf.generate_config()
         self.assertEqual(len(mcf._dynamic_configuration),6)
@@ -234,6 +238,20 @@ class ISISDirectInelasticConfigTest(unittest.TestCase):
         config_file = os.path.join(self.userRootDir,'.mantid','Mantid.user.properties')
         self.assertTrue(os.path.exists(os.path.join(user1RootDir,'.mantid')))
         self.assertTrue(os.path.exists(config_file))
+        #
+        # Check sample reduction file
+        #
+        full_rb_path = rbdir2
+        cycle_id = user1.get_last_cycleID()
+        instr = user1.get_last_instrument()
+        target_file = mcf._target_reduction_file(instr,cycle_id)
+        full_target_file = os.path.join(full_rb_path,target_file)
+        self.assertTrue(os.path.exists(full_target_file))
+        # target file does not need replacing
+        self.assertFalse(mcf.script_need_replacing(source_file,full_target_file))
+        # make new fake configuration file
+        new_source = self.makeFakeSourceReductionFile(mcf,'New')
+        self.assertTrue(mcf.script_need_replacing(new_source,full_target_file))
 
         #--------------------------------------------------------------------
         # clean up
