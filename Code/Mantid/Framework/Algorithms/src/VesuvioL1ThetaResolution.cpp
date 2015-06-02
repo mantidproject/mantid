@@ -415,7 +415,7 @@ MatrixWorkspace_sptr VesuvioL1ThetaResolution::processDistribution(MatrixWorkspa
   double xMin(DBL_MAX);
   double xMax(DBL_MIN);
   for(size_t i = 0; i < numHist; i++) {
-    const std::vector<double> x = ws->readX(i);
+    const std::vector<double>& x = ws->readX(i);
     if(x[0] < xMin)
       xMin = x[0];
     if(x[x.size()-1] > xMax)
@@ -436,11 +436,10 @@ MatrixWorkspace_sptr VesuvioL1ThetaResolution::processDistribution(MatrixWorkspa
   ws = rebin->getProperty("OutputWorkspace");
 
   for(size_t i = 0; i < numHist; i++) {
-    const std::vector<double> y = ws->readY(i);
+    const std::vector<double>& y = ws->readY(i);
     std::vector<double>& e = ws->dataE(i);
 
-    SquareRoot op;
-    std::transform(y.begin(), y.end(), e.begin(), op);
+    std::transform(y.begin(), y.end(), e.begin(), SquareRoot());
   }
 
   return ws;
