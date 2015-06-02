@@ -83,26 +83,26 @@ class ElasticWindowMultiple(DataProcessorAlgorithm):
     def validateInputs(self):
         issues = dict()
 
-        range_2_start = self.getPropertyValue('BackgroundRangeStart')
-        range_2_end = self.getPropertyValue('BackgroundRangeEnd')
+        background_range_start = self.getPropertyValue('BackgroundRangeStart')
+        background_range_end = self.getPropertyValue('BackgroundRangeEnd')
 
-        if range_2_start != '' and range_2_end == '':
-            issues['BackgroundRangeEnd'] = 'If range 2 start was given and range 2 end must also be provided.'
+        if background_range_start != '' and background_range_end == '':
+            issues['BackgroundRangeEnd'] = 'If background range start was given and background range end must also be provided.'
 
-        if range_2_start == '' and range_2_end != '':
-            issues['BackgroundRangeStart'] = 'If range 2 end was given and range 2 start must also be provided.'
+        if background_range_start == '' and background_range_end != '':
+            issues['BackgroundRangeStart'] = 'If background range end was given and background range start must also be provided.'
 
-        if range_2_start != '':
+        if background_range_start != '':
             try:
-                _ = float(range_2_start)
+                _ = float(background_range_start)
             except ValueError:
-                issues['BackgroundRangeStart'] = 'Range 2 start is not a double number'
+                issues['BackgroundRangeStart'] = 'Background range start is not a double number'
 
-        if range_2_end != '':
+        if background_range_end != '':
             try:
-                _ = float(range_2_end)
+                _ = float(background_range_end)
             except ValueError:
-                issues['BackgroundRangeEnd'] = 'Range 2 end is not a double number'
+                issues['BackgroundRangeEnd'] = 'Background range end is not a double number'
 
         return issues
 
