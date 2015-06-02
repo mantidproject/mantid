@@ -387,7 +387,7 @@ class AddOperationTest(unittest.TestCase):
         start_time_2 = "2012-01-01T01:10:00"
         ws2 = provide_event_ws(names[1],start_time_2, extra_time_shift = time_shift )
         # Create adder
-        adder = su.AddOperation(True, '')
+        adder = su.AddOperation(True, str(time_shift))
         # Act
         adder.add(ws1, ws2,out_ws_name, 0)
         out_ws = mtd[out_ws_name]

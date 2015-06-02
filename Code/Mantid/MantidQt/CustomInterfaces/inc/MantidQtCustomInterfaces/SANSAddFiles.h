@@ -38,6 +38,19 @@ private:
   static const QString OUT_MSG;
   /// Cache for custom binning string
   QString m_customBinning;
+  /// Text for label for custom binning
+  QString m_customBinningText;
+  /// Text for tooltip for custom binning
+  QString m_customBinningToolTip;
+  /// Text for label for save event data
+  QString m_saveEventDataText;
+  /// Text for tooltip for save event data
+  QString m_saveEventDataToolTip;
+  /// Set the bin field
+  void setHistogramUiLogic(QString label, QString toolTip, QString lineEditText,bool enabled);
+  /// Set the histo gram input enabled or disabled
+  void setInputEnabled(bool enabled);
+
 
   Poco::NObserver<SANSAddFiles, Mantid::Kernel::ConfigValChangeNotification> m_newOutDir;
 

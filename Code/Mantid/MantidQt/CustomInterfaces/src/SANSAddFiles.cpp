@@ -53,7 +53,10 @@ const QString SANSAddFiles::OUT_MSG("Output Directory: ");
 
 SANSAddFiles::SANSAddFiles(QWidget *parent, Ui::SANSRunWindow *ParWidgets) :
   m_SANSForm(ParWidgets), parForm(parent), m_pythonRunning(false),
-  m_newOutDir(*this, &SANSAddFiles::changeOutputDir), m_customBinning("")
+  m_newOutDir(*this, &SANSAddFiles::changeOutputDir), m_customBinning(""),
+  m_customBinningText("Bin Settings: "), m_customBinningToolTip("Sets the bin options for custom binning"),
+  m_saveEventDataText("Time Shifts: "),
+  m_saveEventDataToolTip("Set optional, comma-separated time shifts in seconds. You can either specify non or N-1 time shifts for N files")
 {
   initLayout();
 
@@ -453,26 +456,24 @@ void SANSAddFiles::onCurrentIndexChangedForHistogramChoice(int index)
   // Set the input field enabled or disabled
   switch(index) {
     case CUSTOMBINNING: 
-      this->m_SANSForm->eventToHistBinning->setEnabled(true);
-      m_SANSForm->eventToHistBinning->setText(m_customBinning);
-      this->m_SANSForm->overlayCheckBox->setEnabled(false);
+      m_SANSForm->overlayCheckBox->setEnabled(false);
+      setHistogramUiLogic(m_customBinningText, m_customBinningToolTip, m_customBinning, true);
       break;
-    case FROMMONITORS: 
-      this->m_SANSForm->eventToHistBinning->setEnabled(false);
-      this->m_SANSForm->overlayCheckBox->setEnabled(false);
+    case FROMMONITORS:
+      setHistogramUiLogic(m_customBinningText, m_customBinningToolTip, m_customBinning, false);
+      setInputEnabled(false);
       break;
-    case SAVEASEVENTDATA: 
-      this->m_SANSForm->overlayCheckBox->setEnabled(true);
-      if (this->m_SANSForm->overlayCheckBox->isChecked()) {
-        this->m_SANSForm->eventToHistBinning->setEnabled(true);
-        m_customBinning = this->m_SANSForm->eventToHistBinning->text();
-        this->m_SANSForm->eventToHistBinning->setText("");
-      } else {
-        this->m_SANSForm->eventToHistBinning->setEnabled(false);
-      }
+    case SAVEASEVENTDATA:
+      m_customBinning = this->m_SANSForm->eventToHistBinning->text();
+      m_SANSForm->eventToHistBinning->setText("");
+
+      setHistogramUiLogic(m_saveEventDataText, m_saveEventDataToolTip, "", true);
+      m_SANSForm->overlayCheckBox->setEnabled(true);
+
+      setInputEnabled(m_SANSForm->overlayCheckBox->isChecked());
       break;
     default:
-      this->m_SANSForm->eventToHistBinning->setEnabled(false);
+      setInputEnabled(false);
       break;
   }
 }
@@ -482,13 +483,7 @@ void SANSAddFiles::onCurrentIndexChangedForHistogramChoice(int index)
  * @param state the state of the check box
  */
 void SANSAddFiles::onStateChangedForOverlayCheckBox(int state) {
-  if (state) {
-    m_customBinning = this->m_SANSForm->eventToHistBinning->text();
-    this->m_SANSForm->eventToHistBinning->setText("");
-    this->m_SANSForm->eventToHistBinning->setEnabled(true);
-  } else {
-    this->m_SANSForm->eventToHistBinning->setEnabled(false);
-  }
+  setInputEnabled(state != 0);
 }
 
 /*
@@ -514,6 +509,35 @@ bool SANSAddFiles::checkValidityTimeShiftsForAddedEventFiles() {
   }
 
   return state;
+}
+
+/**
+ * Set the UI logic for the histogram binning and saving as event data bit.
+ * @param label :: the label of the line edit field.
+ * @param toolTip :: the tooltip text.
+ * @param lineEditText :: text for the line edit field
+ * @param enabled :: if the input should be enabled.
+ */
+void SANSAddFiles::setHistogramUiLogic(QString label, QString toolTip, QString lineEditText, bool enabled) {
+  // Line edit field
+  m_SANSForm->eventToHistBinning->setText(lineEditText);
+  m_SANSForm->eventToHistBinning->setToolTip(toolTip);
+
+  // Label for line edit field
+  m_SANSForm->labelBinning->setText(label);
+  m_SANSForm->labelBinning->setToolTip(toolTip);
+
+  setInputEnabled(enabled);
+}
+
+/**
+ * Enables or disables the line editr field for histograms and time shifts, as well 
+ * as the corresponding labels
+ * @param enabled :: is enabled or not
+ */
+void SANSAddFiles::setInputEnabled(bool enabled) {
+  m_SANSForm->eventToHistBinning->setEnabled(enabled);
+  m_SANSForm->labelBinning->setEnabled(enabled);
 }
 
 }//namespace CustomInterfaces
