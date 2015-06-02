@@ -27,8 +27,12 @@ To create a single group the list of spectra can be identified using a
 list of either spectrum numbers, detector IDs or workspace indices. The
 list should be set against the appropriate property.
 
+MapFile
+#######
+
 An input file allows the specification of many groups. The file has the
 following format::
+
  [number of groups in file]
  
  [first group's number]
@@ -88,19 +92,29 @@ In addition the following XML grouping format is also supported
 
 where is used to specify spectra IDs and detector IDs.
 
+GroupingPattern
+###############
+
 Grouping can also be specified using the GroupingPattern property. Its syntax
 is as follows:
 
-The pattern consists of a list of numbers that refer to spectra 0 to n-1 and various operators ',',':','+' and '-'.
+The pattern consists of a list of numbers that refer to workspace indexes and
+various operators: :literal:`,:+-`.
 
-To remove spectra, list those you want to keep. The ':' symbol indicates a continuous range of spectra, sparing you the need to list every spectrum.
-For example if you have 100 spectra (0 to 99) and want to remove the first and last 10 spectra along with spectrum 12,
-you would use the pattern '10,13:89'. This says keep spectrum 10 along with spectra 13 to 89 inclusive.
+To remove spectra, you list the workspace indexes that you want to keep. The
+:literal:`:` operator indicates a continuous range, sparing you the need to list
+every one. For example if you have 100 spectra (with workspace indexes from 0 to
+99) and want to remove the first and last 10 spectra along with the 12th, you
+would use the pattern :literal:`10,13:89`. This says keep workspace indices 10
+along with 13 to 89 inclusive.
 
-To add spectra, use '+' to add two spectra or '-' to add a range. For example you may with to add spectrum 10 to 12 and ignore the rest, you would use '10+12'.
-If you were adding five groups of 20, you would use '0-19,20-39,40-59,60-79,80-99'.
+To add spectra, use :literal:`+` to add two spectra or :literal:`-` to add a
+range. For example you may with to add 10 to 12 and ignore the rest, you would
+use :literal:`10+12`. If you were adding five groups of 20, you would use
+:literal:`0-19,20-39,40-59,60-79,80-99`.
 
-One could combine the two, for example '10+12,13:89' would list the sum of spectra 10 and 12 followed by spectra 13 to 89.
+One could combine the two, for example :literal:`10+12,13:89` would list the sum
+of 10 and 12 followed by 13 to 89.
 
 Previous Versions
 -----------------
