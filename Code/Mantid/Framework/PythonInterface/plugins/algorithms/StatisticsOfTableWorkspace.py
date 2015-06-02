@@ -65,9 +65,9 @@ class StatisticsOfTableWorkspace(PythonAlgorithm):
                 logger.notice('Column \'%s\' is not numerical, skipping' % name)
 
         for name, stat in stats.items():
-            st = dict(stat)
-            st['statistic'] = name
-            out_ws.addRow(st)
+            stat1 = dict(stat)
+            stat1['statistic'] = name
+            out_ws.addRow(stat1)
 
         self.setProperty('OutputWorkspace', out_ws_name)
 
