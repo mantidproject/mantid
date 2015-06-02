@@ -15,7 +15,6 @@
 #include "MantidKernel/InstrumentInfo.h"
 #include <QtGui>
 #include "MantidQtAPI/AlgorithmInputHistory.h"
-#include <Qsci/qscilexerpython.h>
 
 using namespace MantidQt::CustomDialogs;
 using namespace MantidQt::API;

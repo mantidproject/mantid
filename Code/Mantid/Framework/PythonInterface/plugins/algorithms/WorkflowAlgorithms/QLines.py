@@ -11,7 +11,8 @@ class QLines(PythonAlgorithm):
         return "Workflow\\MIDAS;PythonAlgorithms"
 
     def summary(self):
-        return "The program estimates the quasielastic components of each of the groups of spectra and requires the resolution file (.RES file) and optionally the normalisation file created by ResNorm."
+        return "The program estimates the quasielastic components of each of the groups of spectra and "+\
+               "requires the resolution file (.RES file) and optionally the normalisation file created by ResNorm."
 
     def PyInit(self):
         self.declareProperty(name='InputType',defaultValue='File',validator=StringListValidator(['File','Workspace']),
@@ -41,7 +42,8 @@ class QLines(PythonAlgorithm):
         self.declareProperty(name='SamBinning', defaultValue=1, doc='Binning value (integer) for sample. Default=1')
         self.declareProperty(name='ResBinning', defaultValue=1, doc='Binning value (integer) for resolution - QLd only. Default=1')
         self.declareProperty(name='Sequence',defaultValue=True, doc='Switch Sequence Off/On')
-        self.declareProperty(name='Plot',defaultValue='None',validator=StringListValidator(['None','ProbBeta','Intensity','FwHm','Fit','All']),
+        self.declareProperty(name='Plot',defaultValue='None',
+                             validator=StringListValidator(['None','ProbBeta','Intensity','FwHm','Fit','All']),
                              doc='Plot options')
         self.declareProperty(name='Verbose',defaultValue=True, doc='Switch Verbose Off/On')
         self.declareProperty(name='Save',defaultValue=False, doc='Switch Save result to nxs file Off/On')

@@ -4,7 +4,8 @@
 
 #include "ImportWorkspaceDlg.h"
 
-ImportWorkspaceDlg::ImportWorkspaceDlg(QWidget *parent, size_t num) : QDialog(parent), numHists(num),minValue(0),maxValue(100.)
+ImportWorkspaceDlg::ImportWorkspaceDlg(QWidget *parent, size_t num) :
+  QDialog(parent), numHists(num), lowerLimit(0), upperLimit(0), filtered(false), minValue(0), maxValue(100.)
 {
 	label = new QLabel(tr("Set Histogram Range to Load (Max Number = " + QString::number(numHists) + "):"));
 	

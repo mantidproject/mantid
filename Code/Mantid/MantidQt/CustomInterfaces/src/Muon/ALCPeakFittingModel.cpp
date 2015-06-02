@@ -19,7 +19,7 @@ namespace CustomInterfaces
 
   MatrixWorkspace_sptr ALCPeakFittingModel::exportWorkspace()
   {
-    if ( m_data && m_data->getNumberHistograms() == 3 ) {
+    if ( m_data && m_data->getNumberHistograms() > 2 ) {
 
       return boost::const_pointer_cast<MatrixWorkspace>(m_data);
 
@@ -54,11 +54,11 @@ namespace CustomInterfaces
     fit->setProperty("Function", peaks->asString());
     fit->setProperty("InputWorkspace", boost::const_pointer_cast<MatrixWorkspace>(m_data));
     fit->setProperty("CreateOutput", true);
+    fit->setProperty("OutputCompositeMembers", true);
     fit->execute();
 
     m_data = fit->getProperty("OutputWorkspace");
     m_parameterTable = fit->getProperty("OutputParameters");
-
     setFittedPeaks(static_cast<IFunction_sptr>(fit->getProperty("Function")));
   }
 

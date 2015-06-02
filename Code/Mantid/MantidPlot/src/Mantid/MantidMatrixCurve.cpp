@@ -143,7 +143,7 @@ void MantidMatrixCurve::init(Graph* g,bool distr,Graph::CurveType style)
 
   int lineWidth = 1;
   MultiLayer* ml = dynamic_cast<MultiLayer*>(g->parent()->parent()->parent());
-  if (style == Graph::Unspecified || (ml && ml->applicationWindow()->applyCurveStyleToMantid) )
+  if (ml && (style == Graph::Unspecified || ml->applicationWindow()->applyCurveStyleToMantid) )
   {
     applyStyleChoice(style, ml, lineWidth);
   }

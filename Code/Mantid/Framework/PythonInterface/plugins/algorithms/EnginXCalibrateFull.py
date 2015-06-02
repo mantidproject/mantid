@@ -5,7 +5,7 @@ import math
 
 class EnginXCalibrateFull(PythonAlgorithm):
     def category(self):
-        return "Diffraction\Engineering;PythonAlgorithms"
+        return "Diffraction\\Engineering;PythonAlgorithms"
 
     def name(self):
         return "EnginXCalibrateFull"
@@ -108,7 +108,8 @@ class EnginXCalibrateFull(PythonAlgorithm):
 
     		The two_theta and phi of the detector are preserved, L2 is changed.
     	"""
-        detL2 = det.getDistance(ws.getInstrument().getSample())
+        # This is how detL2 would be calculated
+        # detL2 = det.getDistance(ws.getInstrument().getSample())
         detTwoTheta = ws.detectorTwoTheta(det)
         detPhi = det.getPhi()
 

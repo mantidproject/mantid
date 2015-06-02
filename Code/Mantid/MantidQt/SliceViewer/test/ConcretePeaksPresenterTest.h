@@ -3,10 +3,10 @@
 
 #include <cxxtest/TestSuite.h>
 #include "MantidAPI/ExperimentInfo.h"
-#include "MantidAPI/IPeak.h"
+#include "MantidGeometry/Crystal/IPeak.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidKernel/SpecialCoordinateSystem.h"
-#include "MantidAPI/PeakTransformFactory.h"
+#include "MantidGeometry/Crystal/PeakTransformFactory.h"
 #include "MantidQtSliceViewer/ConcretePeaksPresenter.h"
 #include "MantidQtSliceViewer/PeakOverlayViewFactory.h"
 #include "MantidDataObjects/PeaksWorkspace.h"

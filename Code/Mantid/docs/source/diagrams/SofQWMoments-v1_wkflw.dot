@@ -1,0 +1,121 @@
+digraph SofQWMoments {
+  label="SofQWMoments Flowchart"
+  $global_style
+
+  subgraph descision {
+    $decision_style
+    NoScaleFactor [label="ScaleFactor is 1?"]
+    Save [label="Save?"]
+  }
+
+  subgraph params {
+    $param_style
+    Sample
+    ScaleFactor
+    EnergyMin
+    EnergyMax
+    OutputWorkspace
+  }
+
+  subgraph algorithms {
+    $algorithm_style
+    CropWorkspace
+    Scale
+    ConvertToPointData
+    CreateWorkspace
+    ConvertToHistogram
+    SaveNexusProcessed
+    GroupWorkspaces
+    Multiply_M1 [label="Multiply"]
+    Multiply_M2 [label="Multiply"]
+    Multiply_M3 [label="Multiply"]
+    Multiply_M4 [label="Multiply"]
+    Transpose_M0 [label="Transpose"]
+    Transpose_M1 [label="Transpose"]
+    Transpose_M2 [label="Transpose"]
+    Transpose_M4 [label="Transpose"]
+    ConvertUnits_M0 [label="ConvertUnits"]
+    ConvertUnits_M1 [label="ConvertUnits"]
+    ConvertUnits_M2 [label="ConvertUnits"]
+    ConvertUnits_M4 [label="ConvertUnits"]
+    ConvertToHistogram_M0 [label="ConvertToHistogram"]
+    ConvertToHistogram_M1 [label="ConvertToHistogram"]
+    ConvertToHistogram_M2 [label="ConvertToHistogram"]
+    ConvertToHistogram_M4 [label="ConvertToHistogram"]
+    ConvertToHistogram_M1_2 [label="ConvertToHistogram"]
+    ConvertToHistogram_M2_2 [label="ConvertToHistogram"]
+    ConvertToHistogram_M4_2 [label="ConvertToHistogram"]
+    Integration_M0 [label="Integration"]
+    Integration_M1 [label="Integration"]
+    Integration_M2 [label="Integration"]
+    Integration_M4 [label="Integration"]
+    Divide_M1 [label="Divide"]
+    Divide_M2 [label="Divide"]
+    Divide_M4 [label="Divide"]
+  }
+
+  Sample -> CropWorkspace
+  EnergyMin -> CropWorkspace
+  EnergyMax -> CropWorkspace
+  CropWorkspace -> NoScaleFactor
+  NoScaleFactor -> Scale [label="No"]
+  ScaleFactor -> Scale
+  Scale -> ConvertToPointData
+  NoScaleFactor -> ConvertToPointData [label="Yes"]
+  ConvertToPointData -> CreateWorkspace [label="X values"]
+
+  CreateWorkspace -> Multiply_M1 [label="M1"]
+  ConvertToPointData -> Multiply_M1
+
+  CreateWorkspace -> Multiply_M2 [label="M2"]
+  Multiply_M1 -> Multiply_M2
+
+  CreateWorkspace -> Multiply_M3
+  Multiply_M2 -> Multiply_M3
+
+  CreateWorkspace -> Multiply_M4 [label="M4"]
+  Multiply_M3 -> Multiply_M4
+
+  ConvertToPointData -> ConvertToHistogram [label="M0"]
+  ConvertToHistogram -> Integration_M0 [label="M0"]
+
+  Multiply_M1-> ConvertToHistogram_M1 [label="M1"]
+  ConvertToHistogram_M1 -> Integration_M1 [label="M1"]
+  Integration_M1 -> Divide_M1 [label="M1"]
+  Integration_M0 -> Divide_M1
+
+  Multiply_M2-> ConvertToHistogram_M2 [label="M2"]
+  ConvertToHistogram_M2 -> Integration_M2 [label="M2"]
+  Integration_M2 -> Divide_M2 [label="M2"]
+  Integration_M0 -> Divide_M2
+
+  Multiply_M4-> ConvertToHistogram_M4 [label="M4"]
+  ConvertToHistogram_M4 -> Integration_M4 [label="M4"]
+  Integration_M4 -> Divide_M4 [label="M4"]
+  Integration_M0 -> Divide_M4
+
+  Integration_M0 -> Transpose_M0 [label="M0"]
+  Transpose_M0 -> ConvertToHistogram_M0 [label="M0"]
+  ConvertToHistogram_M0 -> ConvertUnits_M0 [label="M0"]
+
+  Divide_M1 -> Transpose_M1 [label="M1"]
+  Transpose_M1 -> ConvertToHistogram_M1_2 [label="M1"]
+  ConvertToHistogram_M1_2 -> ConvertUnits_M1 [label="M1"]
+
+  Divide_M2 -> Transpose_M2 [label="M2"]
+  Transpose_M2 -> ConvertToHistogram_M2_2 [label="M2"]
+  ConvertToHistogram_M2_2 -> ConvertUnits_M2 [label="M2"]
+
+  Divide_M4 -> Transpose_M4 [label="M4"]
+  Transpose_M4 -> ConvertToHistogram_M4_2 [label="M4"]
+  ConvertToHistogram_M4_2 -> ConvertUnits_M4 [label="M4"]
+
+  ConvertUnits_M0 -> GroupWorkspaces [label="M0"]
+  ConvertUnits_M1 -> GroupWorkspaces [label="M1"]
+  ConvertUnits_M2 -> GroupWorkspaces [label="M2"]
+  ConvertUnits_M4 -> GroupWorkspaces [label="M4"]
+
+  GroupWorkspaces -> OutputWorkspace
+  GroupWorkspaces -> Save
+  Save -> SaveNexusProcessed [label="Yes"]
+}

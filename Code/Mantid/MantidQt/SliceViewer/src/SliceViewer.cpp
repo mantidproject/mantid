@@ -10,9 +10,9 @@
 #include "MantidAPI/CoordTransform.h"
 #include "MantidAPI/IMDIterator.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/PeakTransformHKL.h"
-#include "MantidAPI/PeakTransformQSample.h"
-#include "MantidAPI/PeakTransformQLab.h"
+#include "MantidGeometry/Crystal/PeakTransformHKL.h"
+#include "MantidGeometry/Crystal/PeakTransformQSample.h"
+#include "MantidGeometry/Crystal/PeakTransformQLab.h"
 #include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/IMDEventWorkspace.h"
@@ -838,7 +838,7 @@ void SliceViewer::setNormalization(Mantid::API::MDNormalization norm,
   m_actionNormalizeNumEvents->blockSignals(false);
 
   // Sync the normalization combobox.
-  this->ui.comboNormalization->setEnabled(false); // Avoid firing signals
+  this->ui.comboNormalization->blockSignals(true);
   if(norm == Mantid::API::NoNormalization) {
       this->ui.comboNormalization->setCurrentIndex(0);
   } else if (norm == Mantid::API::VolumeNormalization) {
@@ -846,7 +846,7 @@ void SliceViewer::setNormalization(Mantid::API::MDNormalization norm,
   } else {
       this->ui.comboNormalization->setCurrentIndex(2);
   }
-  this->ui.comboNormalization->setEnabled(true);
+  this->ui.comboNormalization->blockSignals(false);
 
   m_data->setNormalization(norm);
   if (update)

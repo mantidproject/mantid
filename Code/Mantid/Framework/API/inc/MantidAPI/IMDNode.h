@@ -279,6 +279,11 @@ public:
   // to avoid casting (which need also the number of dimensions) method say if
   // Node is a box. if not, it is gridbox
   virtual bool isBox() const = 0;
+
+  virtual signal_t getSignalByNEvents() const {
+    return this->getSignal()/static_cast<signal_t>(this->getNPoints());
+  }
+
   // ----------------------------- Helper Methods
   // --------------------------------------------------------
   //-----------------------------------------------------------------------------------------------

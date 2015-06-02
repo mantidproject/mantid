@@ -54,7 +54,7 @@ File change history is stored at: <https://github.com/mantidproject/mantid>
 class DLLExport OneMinusExponentialCor : public UnaryOperation {
 public:
   /// Default constructor
-  OneMinusExponentialCor() : UnaryOperation(){};
+  OneMinusExponentialCor();
   /// Destructor
   virtual ~OneMinusExponentialCor(){};
   /// Algorithm's name for identification

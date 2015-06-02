@@ -2,7 +2,7 @@
 #define MANTIDPLOT_PEAKMARKER2D_H_
 
 #include "Shape2D.h"
-#include "MantidAPI/IPeak.h"
+#include "MantidGeometry/Crystal/IPeak.h"
 
 class PeakOverlay;
 
@@ -38,8 +38,8 @@ public:
   Symbol getSymbol()const{return m_symbol;}
   void setSymbol(Symbol s){m_symbol=s;}
   Style getStyle() const;
-  void setPeak(const Mantid::API::IPeak& peak, int row = -1);
-  const Mantid::API::IPeak& getPeak() const;
+  void setPeak(const Mantid::Geometry::IPeak& peak, int row = -1);
+  const Mantid::Geometry::IPeak& getPeak() const;
   double getH()const{return m_h;}
   double getK()const{return m_k;}
   double getL()const{return m_l;}
