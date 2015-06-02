@@ -486,7 +486,7 @@ void AlignAndFocusPowder::exec() {
 
   if (m_offsetsWS) {
     g_log.information() << "running AlignDetectors\n";
-    API::IAlgorithm_sptr alignAlg = createChildAlgorithm("AlignDetectors");
+    API::IAlgorithm_sptr alignAlg = createChildAlgorithm("AlignDetectors", 1);
     alignAlg->setProperty("InputWorkspace", m_outputW);
     alignAlg->setProperty("OutputWorkspace", m_outputW);
     alignAlg->setProperty("OffsetsWorkspace", m_offsetsWS);
