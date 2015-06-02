@@ -164,6 +164,6 @@ if not "%JOB_NAME%"=="%JOB_NAME:pull_requests=%" (
 
   :: Remove Mantid
   cd %BUILD_DIR%
-  python !SYSTEMTESTS_DIR!\scripts\mantidinstaller.py uninstall %BUILD_DIR%
+  start "Uninstall Mantid" /B /WAIT python !SYSTEMTESTS_DIR!\scripts\mantidinstaller.py uninstall %BUILD_DIR%
   if !RETCODE! NEQ 0 exit /B 1
 )
