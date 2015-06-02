@@ -3,7 +3,7 @@ import platform
 import shutil
 import re
 import copy
-from datetime import date,time
+from datetime import date
 
 # the list of instruments this configuration is applicable to
 INELASTIC_INSTRUMENTS = ['MAPS','LET','MERLIN','MARI','HET']
@@ -76,11 +76,14 @@ class UserProperties(object):
     def check_input(self,instrument,start_date,cycle,rb_folder):
         """Verify that input is correct"""
         if not instrument in INELASTIC_INSTRUMENTS:
-            raise RuntimeError("Instrument {0} has to be one of ISIS inelastic instruments".format(instrument))
+            raise RuntimeError("Instrument {0} has to be one of "\
+                  "ISIS inelastic instruments".format(instrument))
         if not (isinstance(start_date,str) and len(start_date) == 8):
-            raise RuntimeError("Experiment start date {0} should be defined as a sting in the form YYYYMMDD but it is not".format(start_date))
+            raise RuntimeError("Experiment start date {0} should be defined as"\
+                  " a sting in the form YYYYMMDD but it is not".format(start_date))
         if not (isinstance(cycle,str) and len(cycle) == 10 and re.match('^CYCLE',cycle)) :
-            raise RuntimeError("Cycle {0} should have form CYCLEYYYYN where N-- the cycle's number in a year but it is not".format(cycle))
+            raise RuntimeError("Cycle {0} should have form CYCLEYYYYN where "\
+                  "N-- the cycle's number in a year but it is not".format(cycle))
         if not (os.path.exists(rb_folder) and os.path.isdir(rb_folder)):
             raise RuntimeError("Folder {0} have to exist".format(rb_folder))
 #
@@ -211,17 +214,21 @@ class MantidConfigDirectInelastic(object):
         # missing file should always be replaced
         if not os.path.isfile(target_script_name):
            return True
+        # if user already started -- do not replace his config
+        #except when changes are forced
+        now_is =  date.today()
+        start_date = self._user.get_start_date()
+        if now_is >start_date:
+            return False
+        #
         time_targ = os.path.getmtime(target_script_name)
-        targ_mod_date = date.fromtimestamp(time_targ)
+
         time_source = os.path.getmtime(source_script_name)
-        source_mod_date = date.fromtimestamp(time_source)
-        if targ_mod_date <source_mod_date:
+        # we may want better granularity in a future
+#       source_mod_date = date.fromtimestamp(time_source)
+#       targ_mod_date = date.fromtimestamp(time_targ)
+        if time_targ < time_source:
             return True
-        elif targ_mod_date == source_mod_date:
-            if time_targ<time_source:
-                return True
-            else:
-                return False
         else:
             return False
 #

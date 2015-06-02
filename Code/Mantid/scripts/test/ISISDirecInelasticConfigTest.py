@@ -227,7 +227,7 @@ class ISISDirectInelasticConfigTest(unittest.TestCase):
             os.makedirs(user1RootDir)
         #
         user1 = UserProperties()
-        user1.set_user_properties('MARI','20000124','CYCLE20001',rbdir2)
+        user1.set_user_properties('MARI','39990124','CYCLE39991',rbdir2)
 
         mcf.init_user(user1ID,user1)
         source_file = self.makeFakeSourceReductionFile(mcf)
