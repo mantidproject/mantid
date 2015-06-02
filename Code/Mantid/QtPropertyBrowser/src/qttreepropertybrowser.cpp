@@ -840,7 +840,11 @@ void QtTreePropertyBrowserPrivate::setColumnSizes(int s0, int s1, int s2)
   m_treeWidget->header()->setStretchLastSection(false);
   m_treeWidget->header()->resizeSection(0, s0);
   m_treeWidget->header()->resizeSection(1, s1);
-  m_treeWidget->header()->resizeSection(2, s2);
+  if (!m_options.isEmpty())
+  {
+    if (s2 < 0) s2 = s1;
+    m_treeWidget->header()->resizeSection(2, s2);
+  }
 }
 
 /**

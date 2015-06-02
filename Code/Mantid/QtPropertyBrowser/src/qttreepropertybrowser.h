@@ -153,7 +153,7 @@ public:
     bool propertiesWithoutValueMarked() const;
 
     void editItem(QtBrowserItem *item);
-    void setColumnSizes(int s0, int s1, int s2);
+    void setColumnSizes(int s0, int s1, int s2 = -1);
 
 Q_SIGNALS:
 

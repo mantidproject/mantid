@@ -148,9 +148,6 @@ void FunctionBrowser::createBrowser()
   WorkspaceEditorFactory* workspaceEditorFactory = new WorkspaceEditorFactory(this);
 
   m_browser = new QtTreePropertyBrowser(NULL,options);
-  if (m_multiDataset) {
-    m_browser->setColumnSizes(100, 100, 45);
-  }
   // assign factories to property managers
   m_browser->setFactoryForManager(m_parameterManager, parameterEditorFactory);
   m_browser->setFactoryForManager(m_attributeStringManager, lineEditFactory);
@@ -2182,6 +2179,16 @@ void FunctionBrowser::updateMultiDatasetParameters(const Mantid::API::IFunction&
     updateParameters( fun );
   }
 }
+
+/// Resize the browser's columns
+/// @param s0 :: New size for the first column (Parameter).
+/// @param s1 :: New size for the second column (Value).
+/// @param s2 :: New size for the third optional column (Global).
+void FunctionBrowser::setColumnSizes(int s0, int s1, int s2)
+{
+  m_browser->setColumnSizes(s0, s1, s2);
+}
+
 
 } // MantidWidgets
 } // MantidQt
