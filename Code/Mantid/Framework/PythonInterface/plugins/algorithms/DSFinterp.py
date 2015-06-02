@@ -1,6 +1,6 @@
 #pylint: disable=no-init,invalid-name
 from mantid.api import PythonAlgorithm, AlgorithmFactory
-from mantid.simpleapi import CloneWorkspace, mtd
+import mantid.simpleapi
 from mantid.kernel import StringListValidator, FloatArrayProperty, FloatArrayMandatoryValidator,\
     StringArrayProperty, StringArrayMandatoryValidator, Direction, logger, EnabledWhenProperty, PropertyCriterion
 
@@ -66,7 +66,7 @@ class DSFinterp(PythonAlgorithm):
       #logger.error(mesg)
             raise IndexError(mesg)
         for workspace in workspaces[1:]:
-            if not self.areWorkspacesCompatible(mtd[workspaces[0]],mtd[workspace]):
+            if not self.areWorkspacesCompatible(mantid.mtd[workspaces[0]],mantid.mtd[workspace]):
                 mesg = 'Workspace {0} incompatible with {1}'.format(workspace, workspaces[0])
                 logger.error(mesg)
                 raise ValueError(mesg)
@@ -77,7 +77,7 @@ class DSFinterp(PythonAlgorithm):
         dsfgroup = DsfGroup()
         for idsf in range(len(workspaces)):
             dsf = Dsf()
-            dsf.Load( mtd[workspaces[idsf]] )
+            dsf.Load( mantid.mtd[workspaces[idsf]] )
             if not self.getProperty('LoadErrors').value:
                 dsf.errors = None # do not incorporate error data
             dsf.SetFvalue( fvalues[idsf] )
@@ -106,9 +106,8 @@ class DSFinterp(PythonAlgorithm):
             logger.error(mesg)
             raise IndexError(mesg)
         for i in range(len(targetfvalues)):
-            outworkspace = outworkspaces[i]
             dsf = self.channelgroup( targetfvalues[i] )
-            outws = CloneWorkspace( mtd[workspaces[0]], OutputWorkspace=outworkspaces[i])
+            outws = mantid.simpleapi.CloneWorkspace( mantid.mtd[workspaces[0]], OutputWorkspace=outworkspaces[i])
             dsf.Save(outws) # overwrite dataY and dataE
 
 #############################################################################################
@@ -116,7 +115,7 @@ class DSFinterp(PythonAlgorithm):
 try:
     import dsfinterp
     AlgorithmFactory.subscribe(DSFinterp)
-except:
+except ImportError:
     logger.debug('Failed to subscribe algorithm DSFinterp; Python package dsfinterp'\
         'may be missing (https://pypi.python.org/pypi/dsfinterp)')
 

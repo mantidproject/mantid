@@ -1,5 +1,5 @@
 #include "MantidAPI/IPeaksWorkspace.h"
-#include "MantidAPI/IPeak.h"
+#include "MantidGeometry/Crystal/IPeak.h"
 #include "MantidPythonInterface/kernel/Registry/DataItemInterface.h"
 #include "MantidPythonInterface/kernel/Converters/PyObjectToV3D.h"
 #include <boost/python/class.hpp>
@@ -7,6 +7,7 @@
 #include <boost/optional.hpp>
 #include <boost/python/manage_new_object.hpp>
 
+using namespace Mantid::Geometry;
 using namespace Mantid::API;
 using Mantid::PythonInterface::Registry::DataItemInterface;
 using namespace boost::python;

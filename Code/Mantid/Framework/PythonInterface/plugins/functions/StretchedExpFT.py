@@ -31,7 +31,7 @@ import copy
 
 
 class StretchedExpFT(IFunction1D):
-
+    #pylint: disable=super-on-old-class
     def __init__(self):
         '''declare some constants'''
         super(StretchedExpFT, self).__init__()
@@ -98,7 +98,8 @@ class StretchedExpFT(IFunction1D):
         # override parameter values with optparms (used for the numerical derivative)
         if optparms:
             if self._parmset.issubset( set(optparms.keys()) ):
-                for name in self._parmset: p[name] = optparms[name]
+                for name in self._parmset:
+                    p[name] = optparms[name]
 
         de = (xvals[1]-xvals[0]) / 2 # increase the long-time range, increase the low-frequency resolution
         emax = max( abs(xvals) )
@@ -121,7 +122,8 @@ class StretchedExpFT(IFunction1D):
         p = self.validateParams()
         f0 = self.function1D(xvals)
         dp = {}
-        for (key,val) in p.items(): dp[key] = 0.1 * val #modify by ten percent
+        for (key,val) in p.items():
+            dp[key] = 0.1 * val #modify by ten percent
         for name in self._parmset:
             pp = copy.copy(p)
             pp[name] += dp[name]

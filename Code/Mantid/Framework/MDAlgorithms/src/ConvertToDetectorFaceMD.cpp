@@ -26,7 +26,8 @@ DECLARE_ALGORITHM(ConvertToDetectorFaceMD)
 /** Constructor
  */
 ConvertToDetectorFaceMD::ConvertToDetectorFaceMD()
-    : m_numXPixels(0), m_numYPixels(0) {}
+    : in_ws(), m_numXPixels(0), m_numYPixels(0), m_detID_to_WI(),
+      m_detID_to_WI_offset(0) {}
 
 //----------------------------------------------------------------------------------------------
 /** Destructor

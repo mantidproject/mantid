@@ -310,7 +310,9 @@ MDTransfQ3D::outputUnitID(Kernel::DeltaEMode::Type dEmode,
 }
 
 /// constructor;
-MDTransfQ3D::MDTransfQ3D() : m_isLorentzCorrected(false) {}
+MDTransfQ3D::MDTransfQ3D()
+    : m_isLorentzCorrected(false), m_SinThetaSqArray(NULL), SinThetaSq(),
+      m_SinThetaSq(0.) {}
 
 } // End MDAlgorighms namespace
 } // End Mantid namespace

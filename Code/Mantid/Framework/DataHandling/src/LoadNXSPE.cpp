@@ -242,7 +242,6 @@ void LoadNXSPE::exec() {
       WorkspaceFactory::Instance().create("Workspace2D", numSpectra,
                                           energies.size(), numBins));
   // Need to get hold of the parameter map
-  Geometry::ParameterMap &pmap = outputWS->instrumentParameters();
   outputWS->getAxis(0)->unit() = UnitFactory::Instance().create("DeltaE");
   outputWS->setYUnit("SpectraNumber");
 
@@ -290,6 +289,7 @@ void LoadNXSPE::exec() {
     instrument->markAsDetector(det);
   }
 
+  Geometry::ParameterMap &pmap = outputWS->instrumentParameters();
   std::vector<double>::iterator itdata = data.begin(), iterror = error.begin(),
                                 itdataend, iterrorend;
   API::Progress prog = API::Progress(this, 0.0, 0.9, numSpectra);
@@ -302,7 +302,7 @@ void LoadNXSPE::exec() {
     {
       outputWS->dataY(i) = std::vector<double>(numBins, 0);
       outputWS->dataE(i) = std::vector<double>(numBins, 0);
-      pmap.addBool(outputWS->getDetector(i).get(), "masked", true);
+      pmap.addBool(outputWS->getDetector(i)->getComponentID(), "masked", true);
     } else {
       outputWS->dataY(i) = std::vector<double>(itdata, itdataend);
       outputWS->dataE(i) = std::vector<double>(iterror, iterrorend);

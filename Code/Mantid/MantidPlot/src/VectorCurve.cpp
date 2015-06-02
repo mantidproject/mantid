@@ -35,14 +35,15 @@
 VectorCurve::VectorCurve(VectorStyle style, Table *t, const QString& xColName, const char *name,
 				const QString& endCol1, const QString& endCol2, int startRow, int endRow):
     DataCurve(t, xColName, name, startRow, endRow),
-	pen(QPen(Qt::black, 1, Qt::SolidLine)),
-	filledArrow (true),
-	d_style (style),
-	d_headLength (4),
-	d_headAngle (45),
-	d_position (Tail),
-	d_end_x_a (endCol1),
-	d_end_y_m (endCol2)
+    vectorEnd(NULL),
+    pen(QPen(Qt::black, 1, Qt::SolidLine)),
+    filledArrow(true),
+    d_style(style),
+    d_headLength(4),
+    d_headAngle(45),
+    d_position(Tail),
+    d_end_x_a(endCol1),
+    d_end_y_m(endCol2)
 {
 	if (style == XYXY)
 		setType(Graph::VectXYXY);

@@ -62,6 +62,8 @@ void ExtractMaskToTable::exec() {
     throw runtime_error("InputWorkspace cannot be cast to a MatrixWorkspace.");
   MaskWorkspace_const_sptr maskws =
       boost::dynamic_pointer_cast<const MaskWorkspace>(m_dataWS);
+
+  bool m_inputIsMask = false;
   if (maskws) {
     g_log.notice() << "InputWorkspace " << m_dataWS->name()
                    << " is a MaskWorkspace.\n";

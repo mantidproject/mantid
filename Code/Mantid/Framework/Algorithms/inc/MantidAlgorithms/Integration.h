@@ -86,21 +86,11 @@ private:
   API::MatrixWorkspace_const_sptr getInputWorkspace();
   /// Create the outputworkspace
   API::MatrixWorkspace_sptr
-  getOutputWorkspace(API::MatrixWorkspace_const_sptr inWS);
+  getOutputWorkspace(API::MatrixWorkspace_const_sptr inWS, const int minSpec,
+                     const int maxSpec);
 
   /// Input event workspace
   DataObjects::EventWorkspace_const_sptr inputEventWS;
-
-  /// The value in X to start the integration from
-  double m_MinRange;
-  /// The value in X to finish the integration at
-  double m_MaxRange;
-  /// The spectrum to start the integration from
-  int m_MinSpec;
-  /// The spectrum to finish the integration at
-  int m_MaxSpec;
-  /// Flag for including partial bins
-  bool m_IncPartBins;
 };
 
 } // namespace Algorithm

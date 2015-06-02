@@ -5,6 +5,7 @@ project( VatesAPI )
 
 set( SRC_FILES 
 src/ADSWorkspaceProvider.cpp
+src/BoxInfo.cpp
 src/Common.cpp
 src/CompositePeaksPresenterVsi.cpp
 src/ConcretePeaksPresenterVsi.cpp
@@ -62,6 +63,7 @@ src/SQWLoadingPresenter.cpp
 
 set( INC_FILES 
 inc/MantidVatesAPI/ADSWorkspaceProvider.h
+inc/MantidVatesAPI/BoxInfo.h
 inc/MantidVatesAPI/Common.h
 inc/MantidVatesAPI/CompositePeaksPresenterVsi.h
 inc/MantidVatesAPI/ConcretePeaksPresenterVsi.h
@@ -133,6 +135,7 @@ test/vtkDataSetToImplicitFunctionTest.h
 test/vtkDataSetToWsNameTest.h
 test/vtkDataSetToWsLocationTest.h
 test/ADSWorkspaceProviderTest.h
+test/BoxInfoTest.h
 test/DimensionPresenterTest.h
 test/EventNexusLoadingPresenterTest.h
 test/vtkDataSetFactoryTest.h
@@ -225,7 +228,7 @@ endif ()
 if( CXXTEST_FOUND AND GMOCK_FOUND AND GTEST_FOUND )
   include_directories ( SYSTEM ${CXXTEST_INCLUDE_DIR} ${GMOCK_INCLUDE_DIR} ${GTEST_INCLUDE_DIR} )
 
-  include_directories( inc ../../Framework/TestHelpers/inc ../../Framework/DataHandling/inc ../../Framework/DataObjects/inc)
+  include_directories( inc ../../Framework/TestHelpers/inc ../../Framework/DataHandling/inc ../../Framework/DataObjects/inc ../../Framework/MDAlgorithms/inc)
   set ( TESTHELPER_SRCS ../../Framework/TestHelpers/src/ComponentCreationHelper.cpp 
                         ../../Framework/TestHelpers/src/WorkspaceCreationHelper.cpp
                         ../../Framework/TestHelpers/src/MDEventsTestHelper.cpp 

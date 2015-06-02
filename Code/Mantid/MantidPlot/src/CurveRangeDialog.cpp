@@ -39,43 +39,43 @@
 #include <QSpinBox>
 
 CurveRangeDialog::CurveRangeDialog(QWidget* parent, Qt::WFlags fl )
-    : QDialog( parent, fl )
+  : QDialog( parent, fl ), d_curve(NULL), d_graph(NULL)
 {
-	setWindowTitle(tr("MantidPlot - Plot range"));
+    setWindowTitle(tr("MantidPlot - Plot range"));
     setName( "CurveRangeDialog" );
 
     QGroupBox *gb1 = new QGroupBox();
     QGridLayout *gl1 = new QGridLayout(gb1);
-	gl1->addWidget(new QLabel(tr("Data set: ")), 0, 0);
+    gl1->addWidget(new QLabel(tr("Data set: ")), 0, 0);
 
-	boxName = new QLabel();
-	gl1->addWidget(boxName, 0, 1);
+    boxName = new QLabel();
+    gl1->addWidget(boxName, 0, 1);
 
-	gl1->addWidget(new QLabel(tr("From row number")), 1, 0);
-	boxStart = new QSpinBox();
-	boxStart->setMinValue(1);
-	gl1->addWidget(boxStart, 1, 1);
+    gl1->addWidget(new QLabel(tr("From row number")), 1, 0);
+    boxStart = new QSpinBox();
+    boxStart->setMinValue(1);
+    gl1->addWidget(boxStart, 1, 1);
 
-	gl1->addWidget(new QLabel(tr("To row number")), 2, 0);
-	boxEnd = new QSpinBox();
-	boxEnd->setMinValue(1);
+    gl1->addWidget(new QLabel(tr("To row number")), 2, 0);
+    boxEnd = new QSpinBox();
+    boxEnd->setMinValue(1);
     gl1->addWidget(boxEnd, 2, 1);
     gl1->setRowStretch(3, 1);
 
-	buttonOK = new QPushButton(tr( "&OK" ));
+    buttonOK = new QPushButton(tr( "&OK" ));
     buttonOK->setDefault( true );
     buttonCancel = new QPushButton(tr( "&Close" ));
 
     QHBoxLayout *hl = new QHBoxLayout();
-	hl->addStretch();
- 	hl->addWidget(buttonOK);
-	hl->addWidget(buttonCancel);
+    hl->addStretch();
+    hl->addWidget(buttonOK);
+    hl->addWidget(buttonCancel);
 
     QVBoxLayout *vb = new QVBoxLayout(this);
     vb->addWidget(gb1);
     vb->addLayout(hl);
 
-	connect( buttonOK, SIGNAL( clicked() ), this, SLOT( accept() ) );
+    connect( buttonOK, SIGNAL( clicked() ), this, SLOT( accept() ) );
     connect( buttonCancel, SIGNAL( clicked() ), this, SLOT( reject() ) );
 }
 

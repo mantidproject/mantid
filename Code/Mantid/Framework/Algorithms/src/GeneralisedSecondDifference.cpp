@@ -20,8 +20,10 @@ using namespace API;
 /// Constructor
 GeneralisedSecondDifference::GeneralisedSecondDifference()
     : Algorithm(), m_Cij(0), m_Cij2(0), m_z(0), m_m(0) {}
+
 /// Destructor
 GeneralisedSecondDifference::~GeneralisedSecondDifference() {}
+
 /// Initialisation method.
 void GeneralisedSecondDifference::init() {
 
@@ -87,7 +89,7 @@ void GeneralisedSecondDifference::exec() {
 
   const int n_specs = spec_max - spec_min + 1;
   const int n_points = static_cast<int>(inputWS->dataY(0).size()) - 2 * n_av;
-  if (n_points<1) {
+  if (n_points < 1) {
     throw std::invalid_argument("Invalid (M,Z) values");
   }
   // Create OuputWorkspace
@@ -96,7 +98,8 @@ void GeneralisedSecondDifference::exec() {
 
   const int nsteps = 2 * n_av + 1;
 
-  m_progress = new Progress(this, 0.0, 1.0, (spec_max - spec_min));
+  boost::shared_ptr<API::Progress> progress =
+      boost::make_shared<API::Progress>(this, 0.0, 1.0, (spec_max - spec_min));
   for (int i = spec_min; i <= spec_max; i++) {
     int out_index = i - spec_min;
     out->getSpectrum(out_index)
@@ -121,7 +124,7 @@ void GeneralisedSecondDifference::exec() {
           std::inner_product(itInE, itInE + nsteps, m_Cij2.begin(), 0.0);
       (*itOutE) = sqrt(err2);
     }
-    m_progress->report();
+    progress->report();
   }
   setProperty("OutputWorkspace", out);
 

@@ -3,16 +3,18 @@
 
 #include "MantidKernel/System.h"
 #include "MantidKernel/V3D.h"
-#include "MantidAPI/PeakTransform.h"
+#include "MantidGeometry/Crystal/PeakTransform.h"
 #include "MantidQtSliceViewer/PeakOverlayView.h"
 #include <boost/shared_ptr.hpp>
 
 namespace Mantid
 {
-  namespace API
-  {
+  namespace Geometry {
     // Forward dec.
     class IPeak;
+  }
+  namespace API {
+    // Forward dec.
     class IPeaksWorkspace;
   }
 }
@@ -49,7 +51,7 @@ namespace MantidQt
     {
     public:
       /// Create a peak view from the index of a peak in the peaks workspace
-      virtual boost::shared_ptr<PeakOverlayView> createView(Mantid::API::PeakTransform_const_sptr transform) const = 0;
+      virtual boost::shared_ptr<PeakOverlayView> createView(Mantid::Geometry::PeakTransform_const_sptr transform) const = 0;
       /// Destructor
       virtual ~PeakOverlayViewFactory()
       {

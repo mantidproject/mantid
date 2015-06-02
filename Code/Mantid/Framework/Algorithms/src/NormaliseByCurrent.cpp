@@ -61,7 +61,11 @@ double NormaliseByCurrent::extractCharge(
     Property *chargeProperty = run.getLogData("proton_charge_by_period");
     ArrayProperty<double> *chargePropertyArray =
         dynamic_cast<ArrayProperty<double> *>(chargeProperty);
-    charge = chargePropertyArray->operator()()[periodNumber - 1];
+    if (chargePropertyArray) {
+      charge = chargePropertyArray->operator()()[periodNumber - 1];
+    } else {
+      throw std::runtime_error("Proton charge log not found.");
+    }
   } else {
     try {
       charge = inputWS->run().getProtonCharge();

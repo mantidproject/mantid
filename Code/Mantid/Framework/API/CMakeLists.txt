@@ -63,7 +63,6 @@ set ( SRC_FILES
 	src/IMDIterator.cpp
 	src/IMDWorkspace.cpp
 	src/IPawleyFunction.cpp
-	src/IPeak.cpp
 	src/IPeakFunction.cpp
 	src/IPeaksWorkspace.cpp
 	src/IPowderDiffPeakFunction.cpp
@@ -99,11 +98,6 @@ set ( SRC_FILES
 	src/ParameterReference.cpp
 	src/ParameterTie.cpp
 	src/PeakFunctionIntegrator.cpp
-	src/PeakTransform.cpp
-	src/PeakTransformHKL.cpp
-	src/PeakTransformQLab.cpp
-	src/PeakTransformQSample.cpp
-	src/PeakTransformSelector.cpp
 	src/Progress.cpp
 	src/Projection.cpp
 	src/PropertyManagerDataService.cpp
@@ -165,7 +159,6 @@ set ( INC_FILES
 	inc/MantidAPI/CompositeDomain.h
 	inc/MantidAPI/CompositeDomainMD.h
 	inc/MantidAPI/CompositeFunction.h
-	inc/MantidAPI/ConcretePeakTransformFactory.h
 	inc/MantidAPI/ConstraintFactory.h
 	inc/MantidAPI/CoordTransform.h
 	inc/MantidAPI/CostFunctionFactory.h
@@ -223,7 +216,6 @@ set ( INC_FILES
 	inc/MantidAPI/IMDWorkspace.h
 	inc/MantidAPI/IMaskWorkspace.h
 	inc/MantidAPI/IPawleyFunction.h
-	inc/MantidAPI/IPeak.h
 	inc/MantidAPI/IPeakFunction.h
 	inc/MantidAPI/IPeaksWorkspace.h
 	inc/MantidAPI/IPowderDiffPeakFunction.h
@@ -267,12 +259,6 @@ set ( INC_FILES
 	inc/MantidAPI/ParameterReference.h
 	inc/MantidAPI/ParameterTie.h
 	inc/MantidAPI/PeakFunctionIntegrator.h
-	inc/MantidAPI/PeakTransform.h
-	inc/MantidAPI/PeakTransformFactory.h
-	inc/MantidAPI/PeakTransformHKL.h
-	inc/MantidAPI/PeakTransformQLab.h
-	inc/MantidAPI/PeakTransformQSample.h
-	inc/MantidAPI/PeakTransformSelector.h
 	inc/MantidAPI/Progress.h
 	inc/MantidAPI/Projection.h
 	inc/MantidAPI/PropertyManagerDataService.h
@@ -370,10 +356,6 @@ set ( TEST_FILES
 	ParameterReferenceTest.h
 	ParameterTieTest.h
 	PeakFunctionIntegratorTest.h
-	PeakTransformHKLTest.h
-	PeakTransformQLabTest.h
-	PeakTransformQSampleTest.h
-	PeakTransformSelectorTest.h
 	ProjectionTest.h
 	PropertyManagerDataServiceTest.h
 	PropertyNexusTest.h
@@ -403,6 +385,11 @@ set ( GMOCK_TEST_FILES
 	MatrixWorkspaceTest.h
 )
 
+if (COVERALLS)
+    foreach( loop_var ${SRC_FILES} ${INC_FILES} )
+      set_property(GLOBAL APPEND PROPERTY COVERAGE_SRCS "${CMAKE_CURRENT_SOURCE_DIR}/${loop_var}")
+    endforeach(loop_var)
+endif()
 
 if(UNITY_BUILD)
   include(UnityBuild)

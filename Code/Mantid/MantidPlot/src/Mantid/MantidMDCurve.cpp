@@ -78,7 +78,7 @@ void MantidMDCurve::init(Graph* g, bool distr, Graph::CurveType style)
 
   int lineWidth = 1;
   MultiLayer* ml = dynamic_cast<MultiLayer*>(g->parent()->parent()->parent());
-  if (style == Graph::Unspecified || (ml && ml->applicationWindow()->applyCurveStyleToMantid) )
+  if (ml && (style == Graph::Unspecified || ml->applicationWindow()->applyCurveStyleToMantid) )
   {
     //FIXME: Style HorizontalSteps does NOT seem to be applied
     applyStyleChoice(style, ml, lineWidth);

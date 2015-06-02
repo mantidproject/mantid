@@ -35,8 +35,8 @@ namespace Algorithms {
 */
 class DLLExport TOFSANSResolution : public API::Algorithm {
 public:
-  /// (Empty) Constructor
-  TOFSANSResolution() : API::Algorithm() {}
+  /// Defatult constructor
+  TOFSANSResolution();
   /// Virtual destructor
   virtual ~TOFSANSResolution() {}
   /// Algorithm's name
@@ -59,7 +59,7 @@ private:
   /// Return the TOF resolution for a particular wavelength
   virtual double getTOFResolution(double wl);
   /// Wavelength resolution (constant for all wavelengths)
-  double wl_resolution;
+  double m_wl_resolution;
 };
 
 } // namespace Algorithms

@@ -269,6 +269,9 @@ void ConvertToReflectometryQ::exec() {
       Property *p = run.getLogData("stheta");
       auto incidentThetas =
           dynamic_cast<Mantid::Kernel::TimeSeriesProperty<double> *>(p);
+      if (!incidentThetas) {
+        throw std::runtime_error("stheta log not found");
+      }
       incidentTheta =
           incidentThetas->valuesAsVector().back(); // Not quite sure what to do
                                                    // with the time series for

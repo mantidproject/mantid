@@ -53,7 +53,8 @@ TextEditor::TextEditor(Graph *g): QTextEdit(g), d_target(NULL)
 	if (g->selectedText()){
 		d_target = g->selectedText();
 		setGeometry(d_target->geometry());
-		text = dynamic_cast<LegendWidget*>(d_target)->text();
+    auto legend = dynamic_cast<LegendWidget*>(d_target);
+		text = legend ? legend->text() : "";
 		d_target->hide();
 	} else if (g->titleSelected()){
 		d_target = g->plotWidget()->titleLabel();
@@ -104,38 +105,40 @@ void TextEditor::closeEvent(QCloseEvent *e)
   if(d_target != NULL)
   {
     Graph *g = dynamic_cast<Graph *>(parent());
-    QString s = QString();
-    if (d_target->isA("LegendWidget")){
-      s = text();
-      dynamic_cast<LegendWidget*>(d_target)->setText(s);
-      d_target->show();
-      g->setSelectedText(NULL);
-    } else if (d_target->isA("PieLabel")){
-      s = text();
-      dynamic_cast<PieLabel*>(d_target)->setCustomText(s);
-      d_target->show();
-      g->setSelectedText(NULL);
-    } else if (d_target->isA("QwtTextLabel")){
-      QwtText title = g->plotWidget()->title();
-      s = text();
-      if(s.isEmpty())
-        s = " ";
-      title.setText(s);			
-      g->plotWidget()->setTitle(title);
-    } else if (d_target->isA("QwtScaleWidget")){
-      QwtScaleWidget *scale = (QwtScaleWidget*)d_target;
-      QwtText title = scale->title();
-      s = text();
-      if(s.isEmpty())
-        s = " ";
-      title.setText(s);
-      scale->setTitle(title);
+    if (g) {
+      QString s = QString();
+      if (auto legend = dynamic_cast<LegendWidget*>(d_target)){
+        s = text();
+        legend->setText(s);
+        d_target->show();
+        g->setSelectedText(NULL);
+      } else if (auto pieLabel = dynamic_cast<PieLabel*>(d_target)){
+        s = text();
+        pieLabel->setCustomText(s);
+        d_target->show();
+        g->setSelectedText(NULL);
+      } else if (d_target->isA("QwtTextLabel")){
+        QwtText title = g->plotWidget()->title();
+        s = text();
+        if(s.isEmpty())
+          s = " ";
+        title.setText(s);			
+        g->plotWidget()->setTitle(title);
+      } else if (d_target->isA("QwtScaleWidget")){
+        QwtScaleWidget *scale = (QwtScaleWidget*)d_target;
+        QwtText title = scale->title();
+        s = text();
+        if(s.isEmpty())
+          s = " ";
+        title.setText(s);
+        scale->setTitle(title);
+      }
+
+      if (d_initial_text != s)
+        g->notifyChanges();
+
+      d_target->repaint();
     }
-
-    if (d_initial_text != s)
-      g->notifyChanges();
-
-    d_target->repaint();
   }
   e->accept();
 }

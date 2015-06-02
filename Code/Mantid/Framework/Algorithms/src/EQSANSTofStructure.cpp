@@ -25,6 +25,10 @@ using namespace Kernel;
 using namespace API;
 using namespace Geometry;
 
+EQSANSTofStructure::EQSANSTofStructure()
+    : API::Algorithm(), frame_tof0(0.), flight_path_correction(false),
+      low_tof_cut(0.), high_tof_cut(0.) {}
+
 void EQSANSTofStructure::init() {
   declareProperty(new WorkspaceProperty<EventWorkspace>(
                       "InputWorkspace", "", Direction::Input,
@@ -73,19 +77,23 @@ void EQSANSTofStructure::exec() {
   high_tof_cut = getProperty("HighTOFCut");
 
   // Calculate the frame width
-  double frequency = dynamic_cast<TimeSeriesProperty<double> *>(
-                         inputWS->run().getLogData("frequency"))
-                         ->getStatistics()
-                         .mean;
+  auto frequencyLog = dynamic_cast<TimeSeriesProperty<double> *>(
+      inputWS->run().getLogData("frequency"));
+  if (!frequencyLog) {
+    throw std::runtime_error("Frequency log not found.");
+  }
+  double frequency = frequencyLog->getStatistics().mean;
   double tof_frame_width = 1.0e6 / frequency;
 
   // Determine whether we need frame skipping or not by checking the chopper
   // speed
   bool frame_skipping = false;
-  const double chopper_speed = dynamic_cast<TimeSeriesProperty<double> *>(
-                                   inputWS->run().getLogData("Speed1"))
-                                   ->getStatistics()
-                                   .mean;
+  auto chopper_speedLog = dynamic_cast<TimeSeriesProperty<double> *>(
+      inputWS->run().getLogData("Speed1"));
+  if (!chopper_speedLog) {
+    throw std::runtime_error("Chopper speed log not found.");
+  }
+  const double chopper_speed = chopper_speedLog->getStatistics().mean;
   if (std::fabs(chopper_speed - frequency / 2.0) < 1.0)
     frame_skipping = true;
 
@@ -114,8 +122,10 @@ EQSANSTofStructure::execEvent(Mantid::DataObjects::EventWorkspace_sptr inputWS,
   // Get the nominal sample-to-detector distance (in mm)
   Mantid::Kernel::Property *prop =
       inputWS->run().getProperty("sample_detector_distance");
-  Mantid::Kernel::PropertyWithValue<double> *dp =
-      dynamic_cast<Mantid::Kernel::PropertyWithValue<double> *>(prop);
+  auto dp = dynamic_cast<Mantid::Kernel::PropertyWithValue<double> *>(prop);
+  if (!dp) {
+    throw std::runtime_error("sample_detector_distance log not found.");
+  }
   const double SDD = *dp / 1000.0;
 
   // Loop through the spectra and apply correction
@@ -204,10 +214,12 @@ double EQSANSTofStructure::getTofOffset(EventWorkspace_const_sptr inputWS,
   double chopper_frameskip_srcpulse_wl_1[4] = {0, 0, 0, 0};
 
   // Calculate the frame width
-  double frequency = dynamic_cast<TimeSeriesProperty<double> *>(
-                         inputWS->run().getLogData("frequency"))
-                         ->getStatistics()
-                         .mean;
+  auto frequencyLog = dynamic_cast<TimeSeriesProperty<double> *>(
+      inputWS->run().getLogData("frequency"));
+  if (!frequencyLog) {
+    throw std::runtime_error("Frequency log not found.");
+  }
+  double frequency = frequencyLog->getStatistics().mean;
   double tof_frame_width = 1.0e6 / frequency;
 
   double tmp_frame_width = tof_frame_width;
@@ -229,16 +241,20 @@ double EQSANSTofStructure::getTofOffset(EventWorkspace_const_sptr inputWS,
     // Read chopper information
     std::ostringstream phase_str;
     phase_str << "Phase" << i + 1;
-    chopper_set_phase[i] = dynamic_cast<TimeSeriesProperty<double> *>(
-                               inputWS->run().getLogData(phase_str.str()))
-                               ->getStatistics()
-                               .mean;
+    auto log = dynamic_cast<TimeSeriesProperty<double> *>(
+        inputWS->run().getLogData(phase_str.str()));
+    if (!log) {
+      throw std::runtime_error("Phase log not found.");
+    }
+    chopper_set_phase[i] = log->getStatistics().mean;
     std::ostringstream speed_str;
     speed_str << "Speed" << i + 1;
-    chopper_speed[i] = dynamic_cast<TimeSeriesProperty<double> *>(
-                           inputWS->run().getLogData(speed_str.str()))
-                           ->getStatistics()
-                           .mean;
+    log = dynamic_cast<TimeSeriesProperty<double> *>(
+        inputWS->run().getLogData(speed_str.str()));
+    if (!log) {
+      throw std::runtime_error("Speed log not found.");
+    }
+    chopper_speed[i] = log->getStatistics().mean;
 
     // Only process choppers with non-zero speed
     if (chopper_speed[i] <= 0)

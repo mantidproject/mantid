@@ -12,6 +12,9 @@ namespace Algorithms {
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(ExponentialCorrection)
 
+ExponentialCorrection::ExponentialCorrection()
+    : UnaryOperation(), m_c0(0.), m_c1(0.), m_divide(false) {}
+
 void ExponentialCorrection::defineProperties() {
   declareProperty(
       "C0", 1.0,
