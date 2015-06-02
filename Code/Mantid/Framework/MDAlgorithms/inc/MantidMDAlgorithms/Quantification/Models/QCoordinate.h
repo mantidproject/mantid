@@ -33,6 +33,11 @@ namespace MDAlgorithms {
  * the input parameter
  */
 class DLLExport QCoordinate : public ForegroundModel {
+
+public:
+  /// Default constructor
+  QCoordinate();
+
 private:
   /// String name of the model
   std::string name() const { return "QCoordinate"; }

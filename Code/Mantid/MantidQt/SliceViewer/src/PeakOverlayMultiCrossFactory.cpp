@@ -2,7 +2,7 @@
 #include "MantidQtSliceViewer/PeakOverlayMultiCross.h"
 #include "MantidQtSliceViewer/PhysicalCrossPeak.h"
 #include "MantidKernel/V3D.h"
-#include "MantidAPI/IPeak.h"
+#include "MantidGeometry/Crystal/IPeak.h"
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/IMDHistoWorkspace.h"

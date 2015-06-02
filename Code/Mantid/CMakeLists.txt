@@ -38,6 +38,15 @@ set ( CPACK_PACKAGE_NAME "mantid${CPACK_PACKAGE_SUFFIX}" )
 find_package ( Qt4 COMPONENTS QtCore QtGui QtOpenGL QtXml QtSvg Qt3Support REQUIRED )
 
 ###########################################################################
+# Find OpenGL
+###########################################################################
+find_package ( OpenGL REQUIRED )
+# FindOpenGL does not (as of CMake 2.6.4) take notice of the REQUIRED
+if ( NOT OPENGL_FOUND )
+  message ( FATAL_ERROR "OpenGL was not found." )
+endif ()
+
+###########################################################################
 # Set ParaView information since later items depend on it
 ###########################################################################
 include ( ParaViewSetup )
@@ -86,6 +95,14 @@ IF (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
 
 ENDIF()
 
+# We probably don't want this to run on every build.
+option(COVERALLS "Generate coveralls data" OFF)
+
+if (COVERALLS)
+    include(Coveralls)
+    coveralls_turn_on_coverage()
+endif()
+
 ###########################################################################
 # Call our setup script
 ###########################################################################
@@ -106,6 +123,11 @@ endif()
 find_package ( PyQt4 REQUIRED )
 find_package ( SIP REQUIRED )
 separate_arguments ( PYQT4_SIP_FLAGS )
+
+###########################################################################
+# gsl is currently needed by Geometry, Algorithms, Curvefitting, & MantidPlot
+###########################################################################
+find_package ( GSL REQUIRED )
 
 ###########################################################################
 # Add QtPropertyBrowser to build
@@ -181,6 +203,23 @@ add_subdirectory ( docs )
 # System test data target
 add_subdirectory ( Testing/SystemTests/scripts )
 
+if (COVERALLS)
+  get_property(ALL_SRCS GLOBAL PROPERTY COVERAGE_SRCS)
+        set(SRCS_FILE "")
+        foreach (SRC ${ALL_SRCS})
+                set(SRCS_FILE "${SRCS_FILE}\n${SRC}")
+        endforeach()
+        #remove initial \n
+        string(SUBSTRING ${SRCS_FILE} 1 -1 SRCS_FILE)
+  set( SRCS_FILENAME "${CMAKE_CURRENT_BINARY_DIR}/sources.txt") 
+  file(WRITE ${SRCS_FILENAME} ${SRCS_FILE})
+  coveralls_setup(
+    ${SRCS_FILENAME}
+    OFF
+    "${CMAKE_SOURCE_DIR}/Build/CMake"
+  )
+endif ()
+
 ###########################################################################
 # Installation settings
 ###########################################################################
@@ -239,7 +278,7 @@ if ( ENABLE_CPACK )
         # On RHEL6 we have to use an updated qscintilla to fix an auto complete bug
         set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES} qscintilla >= 2.4.6" )
         # On RHEL6 we are using SCL packages for Qt
-        set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},scl-utils,mantidlibs,mantidlibs-runtime,mantidlibs-qt,mantidlibs-qt-x11" )
+        set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},scl-utils,mantidlibs34,mantidlibs34-runtime,mantidlibs34-qt,mantidlibs34-qt-x11,mantidlibs34-qt-webkit" )
       else()
         set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES} qscintilla" )
       endif()
@@ -268,7 +307,7 @@ if ( ENABLE_CPACK )
                                      "libmuparser0debian1,"
                                      "ipython-qtconsole (>= 1.1),python-matplotlib,python-scipy,"
                                      "libpocofoundation9,libpocoutil9,libpoconet9,libpoconetssl9,libpococrypto9,libpocoxml9")
-        elseif( "${UNIX_CODENAME}" STREQUAL "trusty" )
+        elseif( "${UNIX_CODENAME}" STREQUAL "trusty" OR "${UNIX_CODENAME}" STREQUAL "utopic" OR "${UNIX_CODENAME}" STREQUAL "vivid")
           list ( APPEND DEPENDS_LIST ",libqscintilla2-11,"
                                      "liboce-foundation8,liboce-modeling8,"
                                      "libmuparser2,"

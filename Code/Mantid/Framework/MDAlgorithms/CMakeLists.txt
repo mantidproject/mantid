@@ -48,6 +48,7 @@ set ( SRC_FILES
 	src/Integrate3DEvents.cpp
 	src/IntegrateEllipsoids.cpp
 	src/IntegrateFlux.cpp
+	src/IntegrateMDHistoWorkspace.cpp
 	src/IntegratePeaksMD.cpp
 	src/IntegratePeaksMD2.cpp
 	src/InvalidParameter.cpp
@@ -101,6 +102,7 @@ set ( SRC_FILES
 	src/ReflectometryTransformQxQz.cpp
 	src/SaveIsawQvector.cpp
 	src/SaveMD.cpp
+	src/SaveMD2.cpp
 	src/SaveZODS.cpp
 	src/SetMDUsingMask.cpp
 	src/SliceMD.cpp
@@ -165,6 +167,7 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/Integrate3DEvents.h
 	inc/MantidMDAlgorithms/IntegrateEllipsoids.h
 	inc/MantidMDAlgorithms/IntegrateFlux.h
+	inc/MantidMDAlgorithms/IntegrateMDHistoWorkspace.h
 	inc/MantidMDAlgorithms/IntegratePeaksMD.h
 	inc/MantidMDAlgorithms/IntegratePeaksMD2.h
 	inc/MantidMDAlgorithms/InvalidParameter.h
@@ -218,6 +221,7 @@ set ( INC_FILES
 	inc/MantidMDAlgorithms/ReflectometryTransformQxQz.h
 	inc/MantidMDAlgorithms/SaveIsawQvector.h
 	inc/MantidMDAlgorithms/SaveMD.h
+	inc/MantidMDAlgorithms/SaveMD2.h
 	inc/MantidMDAlgorithms/SaveZODS.h
 	inc/MantidMDAlgorithms/SetMDUsingMask.h
 	inc/MantidMDAlgorithms/SliceMD.h
@@ -279,6 +283,7 @@ set ( TEST_FILES
 	Integrate3DEventsTest.h
 	IntegrateEllipsoidsTest.h
 	IntegrateFluxTest.h
+	IntegrateMDHistoWorkspaceTest.h
 	IntegratePeaksMD2Test.h
 	IntegratePeaksMDTest.h
 	InvalidParameterParserTest.h
@@ -317,6 +322,7 @@ set ( TEST_FILES
 	ResolutionConvolvedCrossSectionTest.h
 	SaveIsawQvectorTest.h
 	SaveMDTest.h
+	SaveMD2Test.h
 	SaveZODSTest.h
 	SetMDUsingMaskTest.h
 	SimulateResolutionConvolvedModelTest.h
@@ -340,6 +346,12 @@ set ( GMOCK_TEST_FILES
 	BinMDTest.h
 )
 
+if (COVERALLS)
+    foreach( loop_var ${SRC_FILES} ${INC_FILES})
+      set_property(GLOBAL APPEND PROPERTY COVERAGE_SRCS "${CMAKE_CURRENT_SOURCE_DIR}/${loop_var}")
+    endforeach(loop_var)
+endif()
+
 if(UNITY_BUILD)
   include(UnityBuild)
   enable_unity_build(MDAlgorithms SRC_FILES SRC_UNITY_IGNORE_FILES 10)
@@ -361,7 +373,7 @@ endif ()
 set_property ( TARGET MDAlgorithms PROPERTY FOLDER "MantidFramework" )
 
 include_directories ( inc )
-target_link_libraries ( MDAlgorithms ${MANTIDLIBS} )
+target_link_libraries ( MDAlgorithms LINK_PRIVATE ${MANTIDLIBS} ${GSL_LIBRARIES} ${NEXUS_LIBRARIES}  )
 
 # Add the unit tests directory
 add_subdirectory ( test )

@@ -599,7 +599,19 @@ EventWorkspace_sptr CreateEventWorkspace(int numPixels, int numBins,
                                          int numEvents, double x0,
                                          double binDelta, int eventPattern,
                                          int start_at_pixelID) {
-  DateAndTime run_start("2010-01-01T00:00:00");
+  return CreateEventWorkspaceWithStartTime(numPixels, numBins, numEvents, x0,
+                          binDelta, eventPattern, start_at_pixelID,
+                          DateAndTime("2010-01-01T00:00:00"));
+}
+
+/**
+ * Create event workspace with defined start date time
+ */
+EventWorkspace_sptr CreateEventWorkspaceWithStartTime(int numPixels, int numBins,
+                                                      int numEvents, double x0,
+                                                      double binDelta, int eventPattern,
+                                                      int start_at_pixelID,
+                                                      DateAndTime run_start) {
 
   // add one to the number of bins as this is histogram
   numBins++;
@@ -918,7 +930,7 @@ createProcessedInelasticWS(const std::vector<double> &L2,
 
   // detectors at L2, sample at 0 and source at -L2_min
   ws->setInstrument(
-      ComponentCreationHelper::createCylInstrumentWithDetInGivenPosisions(
+      ComponentCreationHelper::createCylInstrumentWithDetInGivenPositions(
           L2, polar, azimutal));
 
   for (int g = 0; g < static_cast<int>(numPixels); g++) {

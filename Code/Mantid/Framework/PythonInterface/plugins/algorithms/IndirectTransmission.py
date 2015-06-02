@@ -59,7 +59,7 @@ class IndirectTransmission(PythonAlgorithm):
         self.declareProperty(WorkspaceProperty('OutputWorkspace', "", Direction.Output),
                              doc="The name of the output workspace.")
 
-
+    #pylint: disable=too-many-locals
     def PyExec(self):
         instrument_name = self.getPropertyValue('Instrument')
         analyser = self.getPropertyValue('Analyser')
@@ -142,7 +142,7 @@ class IndirectTransmission(PythonAlgorithm):
         # Build table of values
         for data in zip(output_names, output_values):
             table_ws.addRow(list(data))
-            logger.information(': '.join(map(str, list(data))))
+            logger.information(': '.join([str(d) for d in data]))
 
         # Remove idf/ipf workspace
         DeleteWorkspace(workspace)
@@ -157,25 +157,22 @@ class IndirectTransmission(PythonAlgorithm):
         @param workspace Name of workspace to extract from
         @return Fixed energy value
         """
+        from IndirectCommon import getEfixed
 
-        ws = mtd[workspace]
-
-        # Try to get efixed from the parameters first
         try:
-            instrument = ws.getInstrument()
-            efixed = instrument.getNumberParameter('efixed-val')[0]
-        except IndexError:
-            efixed = 0.0
+            # Try to get efixed from the parameters first
+            efixed = getEfixed(workspace)
 
-        # If that fails then get it by taking from group of all detectors
-        if efixed == 0.0:
-            spectra_list = range(0, ws.getNumberHistograms())
+        except ValueError:
+            # If that fails then get it by taking from group of all detectors
+            wsHandle = mtd[workspace]
+            spectra_list = range(0, wsHandle.getNumberHistograms())
             GroupDetectors(InputWorkspace=workspace,
                            OutputWorkspace=workspace,
                            SpectraList=spectra_list)
-            ws = mtd[workspace]
-            det = ws.getDetector(0)
-            efixed = mtd[workspace].getEFixed(det.getID())
+            wsHandle = mtd[workspace]
+            det = wsHandle.getDetector(0)
+            efixed = wsHandle.getEFixed(det.getID())
 
         return efixed
 

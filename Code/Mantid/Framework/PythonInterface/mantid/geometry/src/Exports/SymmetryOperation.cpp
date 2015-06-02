@@ -2,6 +2,7 @@
 #include "MantidGeometry/Crystal/SymmetryOperation.h"
 #include "MantidPythonInterface/kernel/Converters/PyObjectToV3D.h"
 #include "MantidPythonInterface/kernel/Converters/PyObjectToMatrix.h"
+#include "MantidPythonInterface/kernel/StlExportDefinitions.h"
 
 #include <boost/python/class.hpp>
 #include <boost/python/enum.hpp>
@@ -10,6 +11,7 @@
 #include <boost/python/register_ptr_to_python.hpp>
 
 using Mantid::Geometry::SymmetryOperation;
+using Mantid::PythonInterface::std_vector_exporter;
 
 using namespace boost::python;
 
@@ -28,7 +30,9 @@ namespace //<unnamed>
   }
 }
 
+// clang-format off
 void export_SymmetryOperation()
+// clang-format on
 {
   register_ptr_to_python<boost::shared_ptr<SymmetryOperation> >();
 
@@ -38,5 +42,7 @@ void export_SymmetryOperation()
           .def("transformCoordinates", &applyToCoordinates, "Returns transformed coordinates. For transforming HKLs, use transformHKL.")
           .def("transformHKL", &applyToVector, "Returns transformed HKLs. For transformation of coordinates use transformCoordinates.")
           .def("apply", &applyToVector, "An alias for transformHKL.");
+
+  std_vector_exporter<Mantid::Geometry::SymmetryOperation>::wrap("std_vector_symmetryoperation");
 }
 

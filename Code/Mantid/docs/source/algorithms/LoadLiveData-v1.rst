@@ -22,7 +22,7 @@ Data Processing
 ###############
 
 -  Each time LoadLiveData is called, a chunk of data is loaded from the
-   `LiveListener <http://www.mantidproject.org/LiveListener>`_.
+   live listener.
 
    -  This consists of all the data collected since the previous call.
    -  The data is saved in a temporary :ref:`workspace <workspace>`.

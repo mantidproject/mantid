@@ -8,7 +8,9 @@ using Mantid::PythonInterface::IFunction1DAdapter;
 using Mantid::PythonInterface::IFunctionAdapter;
 using namespace boost::python;
 
+// clang-format off
 void export_IFunction1D()
+// clang-format on
 {
   /**
    * The Python held type, boost::shared_ptr<IFunction1DAdapter>, allows

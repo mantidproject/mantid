@@ -22,7 +22,9 @@ using namespace Kernel;
 using namespace API;
 
 /// Empty constructor
-SaveAscii2::SaveAscii2() : m_separatorIndex() {}
+SaveAscii2::SaveAscii2()
+    : m_separatorIndex(), m_nBins(0), m_sep(), m_writeDX(false),
+      m_writeID(false), m_isHistogram(false), m_isCommonBins(false), m_ws() {}
 
 /// Initialisation method.
 void SaveAscii2::init() {
@@ -117,8 +119,6 @@ void SaveAscii2::exec() {
   m_isHistogram = m_ws->isHistogramData();
   m_isCommonBins = m_ws->isCommonBins(); // checking for ragged workspace
   m_writeID = getProperty("WriteSpectrumID");
-  if (nSpectra != 1)
-    m_writeID = true;
 
   // Get the properties
   std::vector<int> spec_list = getProperty("SpectrumList");

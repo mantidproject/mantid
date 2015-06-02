@@ -14,7 +14,17 @@ if ( CXXTEST_FOUND )
   )
 
   cxxtest_add_test ( DataObjectsTest ${TEST_FILES} )
-  target_link_libraries( DataObjectsTest DataObjects ${GMOCK_LIBRARIES} ${GTEST_LIBRARIES})
+  target_link_libraries( DataObjectsTest LINK_PRIVATE 
+            API
+            DataObjects
+            Geometry
+            Kernel
+            ${NEXUS_LIBRARIES}
+            ${JSONCPP_LIBRARIES}
+            ${Boost_LIBRARIES}
+            ${POCO_LIBRARIES}
+            ${GMOCK_LIBRARIES}
+            ${GTEST_LIBRARIES})
   # Specify implicit dependency, but don't link to it
   add_dependencies ( DataObjectsTest UserAlgorithms )
   add_dependencies ( FrameworkTests DataObjectsTest )

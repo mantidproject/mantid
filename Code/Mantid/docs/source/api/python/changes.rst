@@ -7,7 +7,7 @@
 .. note::
 
    This page is intended for those users who have used Python in Mantid v1.x. For
-   new users, see the `getting started guides <http://www.mantidproject.org/Main_Page#Getting_Started>`_.
+   new users, see the `getting started guides <http://www.mantidproject.org/Main_Page>`_.
    	
 After feedback from the usage of Python within Mantid it was decided that 
 some changes to the API would be helpful to make general usage simpler. Unfortunately,
@@ -89,7 +89,7 @@ Changes
 * The *qti* module no longer exists. All user scripts should simply use the *mantidplot* module which contains
   all of the *qti* functionality but adds protection against crashes from closed windows.
 
-* There have also been changes with Python algorithm syntax. For this it will be most beneficial to read the new tutorial `here <http://www.mantidproject.org/Python_Algorithms_Documentation/>`_. 
+* There have also been changes with Python algorithm syntax.
 
 Automatic Migration
 -------------------

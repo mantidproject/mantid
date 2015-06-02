@@ -1,5 +1,6 @@
-#include "vtkBox.h"
 #include "vtkMDEWSource.h"
+
+#include "vtkBox.h"
 #include "vtkInformation.h"
 #include "vtkInformationVector.h"
 #include "vtkObjectFactory.h"
@@ -9,21 +10,27 @@
 #include "vtkUnstructuredGrid.h"
 #include "vtkStreamingDemandDrivenPipeline.h"
 
+#include "MantidVatesAPI/BoxInfo.h"
+#include "MantidAPI/IMDWorkspace.h"
 #include "MantidVatesAPI/MDEWInMemoryLoadingPresenter.h"
 #include "MantidVatesAPI/MDLoadingViewAdapter.h"
 #include "MantidVatesAPI/ADSWorkspaceProvider.h"
 #include "MantidVatesAPI/vtkMDHexFactory.h"
 #include "MantidVatesAPI/vtkMDQuadFactory.h"
 #include "MantidVatesAPI/vtkMDLineFactory.h"
+#include "MantidVatesAPI/vtkMD0DFactory.h"
 #include "MantidVatesAPI/FilteringUpdateProgressAction.h"
 #include "MantidVatesAPI/IgnoreZerosThresholdRange.h"
+#include "MantidKernel/WarningSuppressions.h"
+
+#include <boost/optional.hpp>
 
 using namespace Mantid::VATES;
 
 vtkStandardNewMacro(vtkMDEWSource)
 
 /// Constructor
-vtkMDEWSource::vtkMDEWSource() :  m_wsName(""), m_depth(1000), m_time(0), m_presenter(NULL), m_isStartup(true), m_startupTimeValue(0)
+vtkMDEWSource::vtkMDEWSource() :  m_wsName(""), m_depth(1000), m_time(0), m_presenter(NULL), m_normalization(AutoSelect)
 {
   this->SetNumberOfInputPorts(0);
   this->SetNumberOfOutputPorts(1);
@@ -165,6 +172,16 @@ const char* vtkMDEWSource::GetInstrument()
   }
 }
 
+/**
+Set the normalization option. This is how the signal data will be normalized before viewing.
+@param option : Normalization option
+*/
+void vtkMDEWSource::SetNormalization(int option)
+{
+  m_normalization = static_cast<Mantid::VATES::VisualNormalization>(option);
+  this->Modified();
+}
+
 
 int vtkMDEWSource::RequestData(vtkInformation *, vtkInformationVector **, vtkInformationVector *outputVector)
 {
@@ -174,17 +191,7 @@ int vtkMDEWSource::RequestData(vtkInformation *, vtkInformationVector **, vtkInf
     //get the info objects
     vtkInformation *outInfo = outputVector->GetInformationObject(0);
 
-    if (m_isStartup)
-    {
-      // This is part of a workaround for ParaView time steps. The time we get
-      // is the first time point for all sources, and not necessarily of this source.
-      // This causes problems when getting the time slice and we end up with an empty 
-      // data set. We therefore feed m_time the first time step of this source at 
-      // start up.
-      m_time = m_startupTimeValue;
-      m_isStartup = false;
-    }
-    else if (outInfo->Has(vtkStreamingDemandDrivenPipeline::UPDATE_TIME_STEP()))
+    if (outInfo->Has(vtkStreamingDemandDrivenPipeline::UPDATE_TIME_STEP()))
     {
       // usually only one actual step requested
       m_time =outInfo->Get(vtkStreamingDemandDrivenPipeline::UPDATE_TIME_STEP());
@@ -194,12 +201,14 @@ int vtkMDEWSource::RequestData(vtkInformation *, vtkInformationVector **, vtkInf
     FilterUpdateProgressAction<vtkMDEWSource> drawingProgressUpdate(this, "Drawing...");
 
     ThresholdRange_scptr thresholdRange(new IgnoreZerosThresholdRange());
-    vtkMDHexFactory* hexahedronFactory = new vtkMDHexFactory(thresholdRange, "signal");
-    vtkMDQuadFactory* quadFactory = new vtkMDQuadFactory(thresholdRange, "signal");
-    vtkMDLineFactory* lineFactory = new vtkMDLineFactory(thresholdRange, "signal");
+    vtkMD0DFactory* zeroDFactory = new vtkMD0DFactory;
+    vtkMDHexFactory* hexahedronFactory = new vtkMDHexFactory(thresholdRange, m_normalization);
+    vtkMDQuadFactory* quadFactory = new vtkMDQuadFactory(thresholdRange, m_normalization);
+    vtkMDLineFactory* lineFactory = new vtkMDLineFactory(thresholdRange, m_normalization);
 
     hexahedronFactory->SetSuccessor(quadFactory);
     quadFactory->SetSuccessor(lineFactory);
+    lineFactory->SetSuccessor(zeroDFactory);
 
     hexahedronFactory->setTime(m_time);
     vtkDataSet* product = m_presenter->execute(hexahedronFactory, loadingProgressUpdate, drawingProgressUpdate);
@@ -226,6 +235,7 @@ int vtkMDEWSource::RequestData(vtkInformation *, vtkInformationVector **, vtkInf
   return 1;
 }
 
+GCC_DIAG_OFF(strict-aliasing)
 int vtkMDEWSource::RequestInformation(vtkInformation *vtkNotUsed(request), vtkInformationVector **vtkNotUsed(inputVector), vtkInformationVector *outputVector)
 {
   if(m_presenter == NULL && !m_wsName.empty())
@@ -237,6 +247,11 @@ int vtkMDEWSource::RequestInformation(vtkInformation *vtkNotUsed(request), vtkIn
     }
     else
     {
+      // If the MDEvent workspace has had top level splitting applied to it, then use the a depth of 1
+      if (auto split = Mantid::VATES::findRecursionDepthForTopLevelSplitting(m_wsName)) {
+        SetDepth(split.get());
+      }
+
       m_presenter->executeLoadMetadata();
       setTimeRange(outputVector);
     }
@@ -265,9 +280,6 @@ void vtkMDEWSource::setTimeRange(vtkInformationVector* outputVector)
     double timeRange[2];
     timeRange[0] = timeStepValues.front();
     timeRange[1] = timeStepValues.back();
-
-    // This is part of a workaround to get the first time value of the current source.
-    m_startupTimeValue = timeRange[0];
 
     outInfo->Set(vtkStreamingDemandDrivenPipeline::TIME_RANGE(), timeRange, 2);
   }
@@ -335,3 +347,4 @@ const char* vtkMDEWSource::GetWorkspaceName()
 {
   return m_wsName.c_str();
 }
+

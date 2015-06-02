@@ -122,6 +122,20 @@
       </widget>
      </item>
      <item>
+      <widget class="QComboBox" name="leLogValue">
+       <item>
+        <property name="text">
+         <string>last_value</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>average</string>
+        </property>
+       </item>
+      </widget>
+     </item>
+     <item>
       <spacer name="horizontalSpacer_2">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>

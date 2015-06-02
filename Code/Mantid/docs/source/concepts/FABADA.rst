@@ -43,28 +43,44 @@ JumpAcceptanceRate
 FABADA Specific Outputs
 -----------------------
 
-PDF
+PDF (*required*)
   Probability Density Function for each fitted parameter and the cost function.
   This is output as a :ref:`MatrixWorkspace`.
 
-Chains
+Chains (*optional*)
   The value of each parameter and the cost function for each step taken.
   This is output as a :ref:`MatrixWorkspace`.
 
-ConvergedChain
+ConvergedChain (*optional*)
   A subset of Chains containing only the section after which the parameters have
   converged.
   This records the parameters at step intervals given by StepsBetweenValues.
   This is output as a :ref:`MatrixWorkspace`.
 
-CostFunctionTable
+CostFunctionTable (*optional*)
   Table containing the minimum and most probable values of the cost function as
   well as their reduced values.
   This is output as a TableWorkspace.
 
-Parameters
+Parameters (*optional*)
   Similar to the standard parameter table but also includes left and right
   errors for each parameter (cost function is not included).
   This is output as a TableWorkspace.
+
+Usage
+-----
+
+**Example: A simple example**
+
+.. code-block:: python
+
+  ws_data = Load(Filename='irs26176_graphite002_red.nxs')
+  ws_res = Load(Filename='irs26173_graphite002_res.nxs')
+  
+  function_str = 'composite=Convolution,FixResolution=tue,NumDeriv=false;name=Resolution,Workspace=ws_res,WorkspaceIndex=0;(composite=CompositeFunction,NumDeriv=true;name=Lorentzian,Amplitude=1,PeakCentre=0.01,FWHM=0.5;name=Lorentzian,Amplitude=1,PeakCentre=0.01,FWHM=0.5)'
+  minimizer_str = "FABADA,Chain Lengh=1000000,Steps between values=10,Convergence Criteria=0.01,PDF=pdf,Chains=chain,Converged chain=conv,Cost Function Table=CostFunction,Parameter Erros =Errors"
+  
+  Fit(Function = function_str,InputWorkspace=ws_data,WorkspaceIndex=3,StartX=-0.25,EndX=0.25,CreateOutput=True,Output = 'result',OutputCompositeMembers=True,MaxIterations=2000000, Minimizer=minimizer_str)   
+
 
 .. categories:: Concepts

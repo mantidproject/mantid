@@ -617,11 +617,7 @@ MultiLayer* MantidUI::plotMDList(const QStringList& wsNames, const int plotAxis,
 
       // Using information from the first graph
       if( i == 0 && isGraphNew )
-      {
-        g->setXAxisTitle(data->getXAxisLabel());
-        g->setYAxisTitle(data->getYAxisLabel());
         g->setAutoScale();
-      }
     }
 
   }
@@ -946,9 +942,8 @@ Table* MantidUI::importTableWorkspace(const QString& wsName, bool, bool makeVisi
 
 void MantidUI::showContextMenu(QMenu& cm, MdiSubWindow* w)
 {
-  if (w->isA("MantidMatrix"))
+  if (MantidMatrix * mm = dynamic_cast<MantidMatrix*>(w))
   {
-    MantidMatrix * mm = dynamic_cast<MantidMatrix*>(w);
 
     bool areSpectraSelected = mm->setSelectedRows();
     bool areColumnsSelected = mm->setSelectedColumns();
@@ -2532,6 +2527,9 @@ void MantidUI::importNumSeriesLog(const QString &wsName, const QString &logName,
     t->setNumericPrecision(16);   //it's the number of all digits
   }
 
+  // The time when the first data was recorded.
+  auto firstTime = time_value_map.begin()->first;
+
   //Make the column header with the units, if any
   QString column1 = label.section("-",1);
   if (logData->units() != "")
@@ -2546,6 +2544,7 @@ void MantidUI::importNumSeriesLog(const QString &wsName, const QString &logName,
     Mantid::Kernel::TimeSeriesProperty<bool>* f = 0;
     if (filter == 1 || filter ==3)
     {
+      // one of the filters is the running status
       try
       {
         f = dynamic_cast<Mantid::Kernel::TimeSeriesProperty<bool> *>(ws->run().getLogData("running"));
@@ -2557,6 +2556,15 @@ void MantidUI::importNumSeriesLog(const QString &wsName, const QString &logName,
           t->close();
           importNumSeriesLog(wsName,logName,0);
           return;
+        }
+        // If filter records start later than the data we add a value at the filter's front
+        if ( f->firstTime() > firstTime )
+        {
+          // add a "not running" value to the status filter
+          Mantid::Kernel::TimeSeriesProperty<bool> atStart("tmp");
+          atStart.addValue(firstTime,false);
+          atStart.addValue(f->firstTime(),f->firstValue());
+          flt.addFilter(atStart);
         }
       }
       catch(...)
@@ -2757,8 +2765,6 @@ void MantidUI::importNumSeriesLog(const QString &wsName, const QString &logName,
       g->setCurvePen(iFilterCurve, pn);
     }
   }
-  g->setXAxisTitle(t->colLabel(0));
-  g->setYAxisTitle(t->colLabel(1).section(".",0,0));
   g->setTitle(label);
   g->setAutoScale();
 
@@ -2981,8 +2987,6 @@ void MantidUI::setUpBinGraph(MultiLayer* ml, const QString& Name, Mantid::API::M
   {
     xtitle = MantidQt::API::PlotAxis(*workspace, 1).title();
   }
-  g->setXAxisTitle(xtitle);
-  g->setYAxisTitle(MantidQt::API::PlotAxis(false, *workspace).title());
 }
 
 /**
@@ -3208,8 +3212,6 @@ MultiLayer* MantidUI::plot1D(const QMultiMap<QString,int>& toPlot, bool spectrum
       return NULL;
     }
 
-    g->setXAxisTitle(firstCurve->mantidData()->getXAxisLabel());
-    g->setYAxisTitle(firstCurve->mantidData()->getYAxisLabel());
     g->setAutoScale();
     /* The 'setAutoScale' above is needed to make sure that the plot initially encompasses all the
      * data points. However, this has the side-effect suggested by its name: all the axes become
@@ -3391,9 +3393,6 @@ MultiLayer* MantidUI::drawSingleColorFillPlot(const QString & wsName, Graph::Cur
   appWindow()->setPreferences(plot);
 
   plot->setTitle(wsName);
-  using MantidQt::API::PlotAxis;
-  plot->setXAxisTitle(PlotAxis(*workspace, 0).title());
-  plot->setYAxisTitle(PlotAxis(*workspace, 1).title());
 
   Spectrogram *spgrm = new Spectrogram(wsName, workspace);
   plot->plotSpectrogram(spgrm, curveType);

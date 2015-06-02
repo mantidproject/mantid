@@ -32,6 +32,7 @@ set ( SRC_FILES
 	src/ChangeBinOffset.cpp
 	src/ChangeLogTime.cpp
 	src/ChangePulsetime.cpp
+	src/ChangeTimeZero.cpp
 	src/CheckWorkspacesMatch.cpp
 	src/ChopData.cpp
 	src/ClearInstrumentParameters.cpp
@@ -52,6 +53,7 @@ set ( SRC_FILES
 	src/ConvertToMatrixWorkspace.cpp
 	src/ConvertToPointData.cpp
 	src/ConvertUnits.cpp
+	src/ConvertUnitsUsingDetectorTable.cpp
 	src/CopyDetectorMapping.cpp
 	src/CopyInstrumentParameters.cpp
 	src/CopyLogs.cpp
@@ -99,6 +101,7 @@ set ( SRC_FILES
 	src/ExtractMask.cpp
 	src/ExtractMaskToTable.cpp
 	src/ExtractSingleSpectrum.cpp
+	src/ExtractSpectra.cpp
 	src/FFT.cpp
 	src/FFTDerivative.cpp
 	src/FFTSmooth.cpp
@@ -197,6 +200,7 @@ set ( SRC_FILES
 	src/RemoveBins.cpp
 	src/RemoveExpDecay.cpp
 	src/RemoveLowResTOF.cpp
+	src/RemoveMaskedSpectra.cpp
 	src/RemovePromptPulse.cpp
 	src/RemoveWorkspaceHistory.cpp
 	src/RenameWorkspace.cpp
@@ -289,6 +293,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/ChangeBinOffset.h
 	inc/MantidAlgorithms/ChangeLogTime.h
 	inc/MantidAlgorithms/ChangePulsetime.h
+	inc/MantidAlgorithms/ChangeTimeZero.h
 	inc/MantidAlgorithms/CheckWorkspacesMatch.h
 	inc/MantidAlgorithms/ChopData.h
 	inc/MantidAlgorithms/ClearInstrumentParameters.h
@@ -309,6 +314,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/ConvertToMatrixWorkspace.h
 	inc/MantidAlgorithms/ConvertToPointData.h
 	inc/MantidAlgorithms/ConvertUnits.h
+	inc/MantidAlgorithms/ConvertUnitsUsingDetectorTable.h
 	inc/MantidAlgorithms/CopyDetectorMapping.h
 	inc/MantidAlgorithms/CopyInstrumentParameters.h
 	inc/MantidAlgorithms/CopyLogs.h
@@ -356,6 +362,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/ExtractMask.h
 	inc/MantidAlgorithms/ExtractMaskToTable.h
 	inc/MantidAlgorithms/ExtractSingleSpectrum.h
+	inc/MantidAlgorithms/ExtractSpectra.h
 	inc/MantidAlgorithms/FFT.h
 	inc/MantidAlgorithms/FFTDerivative.h
 	inc/MantidAlgorithms/FFTSmooth.h
@@ -455,6 +462,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/RemoveBins.h
 	inc/MantidAlgorithms/RemoveExpDecay.h
 	inc/MantidAlgorithms/RemoveLowResTOF.h
+	inc/MantidAlgorithms/RemoveMaskedSpectra.h
 	inc/MantidAlgorithms/RemovePromptPulse.h
 	inc/MantidAlgorithms/RemoveWorkspaceHistory.h
 	inc/MantidAlgorithms/RenameWorkspace.h
@@ -557,6 +565,7 @@ set ( TEST_FILES
 	ChangeBinOffsetTest.h
 	ChangeLogTimeTest.h
 	ChangePulsetimeTest.h
+	ChangeTimeZeroTest.h
 	CheckWorkspacesMatchTest.h
 	ChopDataTest.h
 	ClearInstrumentParametersTest.h
@@ -577,6 +586,7 @@ set ( TEST_FILES
 	ConvertToMatrixWorkspaceTest.h
 	ConvertToPointDataTest.h
 	ConvertUnitsTest.h
+	ConvertUnitsUsingDetectorTableTest.h
 	CopyDetectorMappingTest.h
 	CopyInstrumentParametersTest.h
 	CopyLogsTest.h
@@ -620,6 +630,7 @@ set ( TEST_FILES
 	ExtractMaskTest.h
 	ExtractMaskToTableTest.h
 	ExtractSingleSpectrumTest.h
+	ExtractSpectraTest.h
 	FFTDerivativeTest.h
 	FFTSmooth2Test.h
 	FFTTest.h
@@ -638,6 +649,7 @@ set ( TEST_FILES
 	FitPeakTest.h
 	FixGSASInstrumentFileTest.h
 	FlatPlateAbsorptionTest.h
+	GeneralisedSecondDifferenceTest.h
 	GenerateEventsFilterTest.h
 	GeneratePeaksTest.h
 	GeneratePythonScriptTest.h
@@ -706,6 +718,7 @@ set ( TEST_FILES
 	RemoveBinsTest.h
 	RemoveExpDecayTest.h
 	RemoveLowResTOFTest.h
+	RemoveMaskedSpectraTest.h
 	RemovePromptPulseTest.h
 	RemoveWorkspaceHistoryTest.h
 	RenameWorkspaceTest.h
@@ -757,6 +770,12 @@ set ( TEST_FILES
 
 set ( TEST_PY_FILES NormaliseToUnityTest.py )
 
+if (COVERALLS)
+    foreach( loop_var ${SRC_FILES} ${INC_FILES})
+      set_property(GLOBAL APPEND PROPERTY COVERAGE_SRCS "${CMAKE_CURRENT_SOURCE_DIR}/${loop_var}")
+    endforeach(loop_var)
+endif()
+
 # Add a precompiled header where they are supported
 enable_precompiled_headers ( inc/MantidAlgorithms/PrecompiledHeader.h SRC_FILES )
 # Add the target for this directory
@@ -773,7 +792,7 @@ set_property ( TARGET Algorithms PROPERTY FOLDER "MantidFramework" )
 
 include_directories ( inc )
 
-target_link_libraries ( Algorithms ${MANTIDLIBS} ${GSL_LIBRARIES} )
+target_link_libraries ( Algorithms LINK_PRIVATE ${MANTIDLIBS} ${GSL_LIBRARIES} )
 
 # Add the unit tests directory
 add_subdirectory ( test )

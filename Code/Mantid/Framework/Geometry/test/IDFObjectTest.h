@@ -8,6 +8,11 @@
 #include <Poco/Path.h>
 #include <Poco/DateTimeFormatter.h>
 #include <Poco/Thread.h>
+#include <Poco/SHA1Engine.h>
+#include <Poco/String.h>
+#include <Poco/DigestStream.h>
+
+#include <boost/regex.hpp>
 
 using Mantid::Geometry::IDFObject;
 using Mantid::Kernel::ConfigService;
@@ -97,9 +102,41 @@ public:
   {
     const std::string filename = ConfigService::Instance().getInstrumentDirectory() + "/IDFs_for_UNIT_TESTING/IDF_for_UNIT_TESTING.xml";
     
-    Poco::File file(filename);
-    auto head = "IDF_for_UNIT_TESTING.xml";
-    auto tail = Poco::DateTimeFormatter::format(file.getLastModified(), "%Y-%d-%mT%H:%M:%S");
+    Poco::Path path(filename);
+
+    using Poco::DigestEngine;
+    using Poco::SHA1Engine;
+    using Poco::DigestOutputStream;
+
+    std::ifstream filein(filename.c_str(), std::ios::in | std::ios::binary);
+    if (!filein) {
+      TS_FAIL("Cannot open file: " + filename);
+      return;
+    }
+
+    std::string contents;
+    filein.seekg(0, std::ios::end);
+    contents.resize(filein.tellg());
+    filein.seekg(0, std::ios::beg);
+    filein.read(&contents[0], contents.size());
+    filein.close();
+
+    //convert to unix line endings
+    static boost::regex eol("\\R"); // \R is Perl syntax for matching any EOL sequence
+    contents = boost::regex_replace(contents, eol, "\n"); // converts all to LF
+
+    //and trim
+    contents = Poco::trim(contents);
+
+    SHA1Engine sha1;
+    DigestOutputStream outstr(sha1);
+    outstr << contents;
+    outstr.flush(); // to pass everything to the digest engine
+
+
+
+    auto head = path.getFileName();
+    auto tail = DigestEngine::digestToHex(sha1.digest());
     
     IDFObject obj(filename);
 

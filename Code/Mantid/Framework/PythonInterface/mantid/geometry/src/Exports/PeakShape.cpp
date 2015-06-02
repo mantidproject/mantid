@@ -6,7 +6,9 @@ using Mantid::Geometry::PeakShape;
 using namespace boost::python;
 
 
+// clang-format off
 void export_PeakShape()
+// clang-format on
 {
   register_ptr_to_python<Mantid::Geometry::PeakShape_sptr>();
 

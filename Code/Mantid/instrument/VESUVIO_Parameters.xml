@@ -137,7 +137,7 @@
     <value val="diffspec" />
   </parameter>
 
-  <!-- Monitor workflow parameters -->
+  <!-- Monitor 1 workflow parameters -->
   <parameter name="Workflow.Monitor1-SpectrumNumber" >
     <value val="0" />
   </parameter>
@@ -158,6 +158,30 @@
   </parameter>
 
   <parameter name="Workflow.Monitor1-ScalingFactor">
+    <value val="1e9" />
+  </parameter>
+
+  <!-- Monitor 2 workflow parameters -->
+  <parameter name="Workflow.Monitor2-SpectrumNumber" >
+    <value val="1" />
+  </parameter>
+
+  <!-- Area, thickness, attenuation and scale factor taken from TOSCA. -->
+  <!-- By lack of actual data and the fact the monitors would have been installed at -->
+  <!-- a similar time this is a reasonable guess. -->
+  <parameter name="Workflow.Monitor2-Area" >
+    <value val="5.391011e-5" />
+  </parameter>
+
+  <parameter name="Workflow.Monitor2-Thickness" >
+    <value val="0.013" />
+  </parameter>
+
+  <parameter name="Workflow.Monitor2-Attenuation" >
+    <value val="8.3" />
+  </parameter>
+
+  <parameter name="Workflow.Monitor2-ScalingFactor">
     <value val="1e9" />
   </parameter>
 

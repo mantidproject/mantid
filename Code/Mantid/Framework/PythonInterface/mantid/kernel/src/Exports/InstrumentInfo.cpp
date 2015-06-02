@@ -7,7 +7,9 @@
 using Mantid::Kernel::InstrumentInfo;
 using namespace boost::python;
 
+// clang-format off
 void export_InstrumentInfo()
+// clang-format on
 {
   using namespace Mantid::PythonInterface;
   std_vector_exporter<InstrumentInfo>::wrap("std_vector_InstrumentInfo");

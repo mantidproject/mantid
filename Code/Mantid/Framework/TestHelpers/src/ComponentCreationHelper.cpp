@@ -347,7 +347,7 @@ bool double_cmprsn(double x1, double x2) {
   }
 }
 Mantid::Geometry::Instrument_sptr
-createCylInstrumentWithDetInGivenPosisions(const std::vector<double> &L2,
+createCylInstrumentWithDetInGivenPositions(const std::vector<double> &L2,
                                            const std::vector<double> &polar,
                                            const std::vector<double> &azim) {
   boost::shared_ptr<Instrument> testInst(new Instrument("processed"));

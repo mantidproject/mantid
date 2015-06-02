@@ -28,7 +28,10 @@ DECLARE_ALGORITHM(GetTimeSeriesLogInformation)
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
-GetTimeSeriesLogInformation::GetTimeSeriesLogInformation() {}
+GetTimeSeriesLogInformation::GetTimeSeriesLogInformation()
+    : API::Algorithm(), m_dataWS(), mRunStartTime(), mFilterT0(), mFilterTf(),
+      m_intInfoMap(), m_dblInfoMap(), m_log(NULL), m_timeVec(), m_valueVec(),
+      m_starttime(), m_endtime(), m_ignoreNegativeTime(false) {}
 
 //----------------------------------------------------------------------------------------------
 /** Destructor

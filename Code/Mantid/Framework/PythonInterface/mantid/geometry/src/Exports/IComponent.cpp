@@ -2,6 +2,8 @@
 
 #include <boost/python/class.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
+#include <boost/python/copy_const_reference.hpp>
+#include <boost/python/return_value_policy.hpp>
 
 using Mantid::Geometry::IComponent;
 using namespace boost::python;
@@ -25,7 +27,9 @@ namespace
 
 }
 
+// clang-format off
 void export_IComponent()
+// clang-format on
 {
   register_ptr_to_python<boost::shared_ptr<IComponent>>();
 
@@ -35,6 +39,7 @@ void export_IComponent()
     .def("getName", &IComponent::getName, "Returns the name of the component")
     .def("getFullName", &IComponent::getFullName,"Returns full path name of component")
     .def("type", &IComponent::type, "Returns the type of the component represented as a string")
+    .def("getRelativeRot", &IComponent::getRelativeRot,return_value_policy<copy_const_reference>(), "Returns the relative rotation as a Quat")
     ;
 
 }

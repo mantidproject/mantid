@@ -5,6 +5,7 @@
 #include "MantidVatesSimpleGuiViewWidgets/ViewBase.h"
 #include "MantidVatesSimpleGuiViewWidgets/WidgetDllOption.h"
 
+#include <QMap>
 #include <QPointer>
 #include <QWidget>
 
@@ -18,6 +19,9 @@ namespace Vates
 {
 namespace SimpleGui
 {
+
+class RebinnedSourcesManager;
+
 /**
  *
  This class represents the initial view for the main program. It is meant to
@@ -51,7 +55,7 @@ class EXPORT_OPT_MANTIDVATES_SIMPLEGUI_VIEWWIDGETS StandardView : public ViewBas
 
 public:
   /// Default constructor.
-  StandardView(QWidget *parent = 0);
+  StandardView(QWidget *parent = 0, RebinnedSourcesManager* rebinnedSourcesManager = 0);
   /// Default destructor.
   virtual ~StandardView();
 
@@ -75,8 +79,6 @@ public:
   void closeSubWindows();
 
 public slots:
-  /// React when the visibility of a representation changes
-  void onSourceDestroyed();
   /// Listen to a change in the active source.
   void activeSourceChangeListener(pqPipelineSource* source);
 
@@ -88,26 +90,46 @@ protected slots:
   /// Invoke the ScaleWorkspace on the current dataset.
   void onScaleButtonClicked();
   /// On BinMD button clicked
-  void onBinMD();
-  /// On SliceMD button clicked
-  void onSliceMD();
+  void onRebin();
 
 private:
   Q_DISABLE_COPY(StandardView)
 
-  bool cameraReset;
-  QPointer<pqPipelineSource> scaler; ///< Holder for the ScaleWorkspace
-  Ui::StandardView ui; ///< The standard view's UI form
-  QPointer<pqRenderView> view; ///< The main view
+  QString getAlgNameFromMenuLabel(const QString &menuLbl);
+
+  bool m_cameraReset;
+  QPointer<pqPipelineSource> m_scaler; ///< Holder for the ScaleWorkspace
+  Ui::StandardView m_ui; ///< The standard view's UI form
+  QPointer<pqRenderView> m_view; ///< The main view
 
   /// Set the rebin and unbin button visibility
   void setRebinAndUnbinButtons();
   /// Set up the buttons
   void setupViewButtons();
+  ///  Give the user the ability to rebin
+  void allowRebinningOptions(bool allow);
+  ///  Allow the user the ability to unbin
+  void allowUnbinOption(bool allow);
 
   QAction* m_binMDAction;
   QAction* m_sliceMDAction;
+  QAction* m_cutMDAction;
   QAction* m_unbinAction;
+
+  // name to show for the rebin actions on the rebin menu
+  static QString g_binMDName;
+  static QString g_sliceMDName;
+  static QString g_cutMDName;
+  /// name + a bit of description
+  static QString g_binMDLbl;
+  static QString g_sliceMDLbl;
+  static QString g_cutMDLbl;
+  /// tool tip text for the rebin algorithm
+  static QString g_binMDToolTipTxt;
+  static QString g_sliceMDToolTipTxt;
+  static QString g_cutMDToolTipTxt;
+
+  static QMap<QString, QString> g_actionToAlgName;
 };
 
 } // SimpleGui

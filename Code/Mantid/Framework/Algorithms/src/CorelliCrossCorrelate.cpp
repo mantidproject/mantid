@@ -149,9 +149,13 @@ void CorelliCrossCorrelate::exec() {
 
   // Read in the TDC timings for the correlation chopper and apply the timing
   // offset.
-  std::vector<DateAndTime> tdc =
-      dynamic_cast<ITimeSeriesProperty *>(
-          inputWS->run().getLogData("chopper4_TDC"))->timesAsVector();
+  auto chopperTdc = dynamic_cast<ITimeSeriesProperty *>(
+      inputWS->run().getLogData("chopper4_TDC"));
+  if (!chopperTdc) {
+    throw std::runtime_error("chopper4_TDC not found");
+  }
+  std::vector<DateAndTime> tdc = chopperTdc->timesAsVector();
+
   int offset_int = getProperty("TimingOffset");
   const int64_t offset = static_cast<int64_t>(offset_int);
   for (unsigned long i = 0; i < tdc.size(); ++i)

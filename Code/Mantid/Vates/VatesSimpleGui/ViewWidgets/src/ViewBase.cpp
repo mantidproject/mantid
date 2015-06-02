@@ -1,6 +1,10 @@
 #include "MantidVatesSimpleGuiViewWidgets/ViewBase.h"
 #include "MantidVatesSimpleGuiViewWidgets/BackgroundRgbProvider.h"
-
+#include "MantidVatesSimpleGuiViewWidgets/RebinnedSourcesManager.h"
+#include "MantidVatesAPI/ADSWorkspaceProvider.h"
+#include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidVatesAPI/BoxInfo.h"
+#include "MantidKernel/WarningSuppressions.h"
 #if defined(__INTEL_COMPILER)
   #pragma warning disable 1170
 #endif
@@ -10,10 +14,11 @@
 #include <pqAnimationScene.h>
 #include <pqApplicationCore.h>
 #include <pqDataRepresentation.h>
+#include <pqDeleteReaction.h>
 #include <pqObjectBuilder.h>
-#include <pqPipelineSource.h>
 #include <pqPipelineFilter.h>
 #include <pqPipelineRepresentation.h>
+#include <pqPipelineSource.h>
 #include <pqPVApplicationCore.h>
 #include <pqRenderView.h>
 #include <pqScalarsToColors.h>
@@ -33,7 +38,9 @@
 #include <QDebug>
 #include <QHBoxLayout>
 #include <QPointer>
+#include <QSet>
 
+#include <boost/optional.hpp>
 #include <stdexcept>
 
 namespace Mantid
@@ -46,8 +53,10 @@ namespace SimpleGui
 /**
  * Default constructor.
  * @param parent the parent widget for the view
+ * @param rebinnedSourcesManager Pointer to a RebinnedSourcesManager
  */
-ViewBase::ViewBase(QWidget *parent) : QWidget(parent), m_currentColorMapModel(NULL), m_temporaryWorkspaceIdentifier("tempvsi")
+ViewBase::ViewBase(QWidget *parent, RebinnedSourcesManager* rebinnedSourcesManager) : QWidget(parent),
+                                      m_rebinnedSourcesManager(rebinnedSourcesManager), m_currentColorMapModel(NULL), m_internallyRebinnedWorkspaceIdentifier("rebinned_vsi")
 {
 }
 
@@ -86,24 +95,25 @@ pqRenderView* ViewBase::createRenderView(QWidget* widget, QString viewName)
 
 /**
  * This function removes all filters of a given name: i.e. Slice.
- * @param builder the ParaView object builder
  * @param name the class name of the filters to remove
  */
-void ViewBase::destroyFilter(pqObjectBuilder *builder, const QString &name)
+void ViewBase::destroyFilter(const QString &name)
 {
   pqServer *server = pqActiveObjects::instance().activeServer();
   pqServerManagerModel *smModel = pqApplicationCore::instance()->getServerManagerModel();
   QList<pqPipelineSource *> sources;
   QList<pqPipelineSource *>::Iterator source;
   sources = smModel->findItems<pqPipelineSource *>(server);
+  QSet<pqPipelineSource*> toDelete;
   for (source = sources.begin(); source != sources.end(); ++source)
   {
     const QString sourceName = (*source)->getSMName();
     if (sourceName.startsWith(name))
     {
-      builder->destroy(*source);
+    toDelete.insert(*source);
     }
   }
+  pqDeleteReaction::deleteSources(toDelete);
 }
 
 /**
@@ -269,6 +279,7 @@ pqPipelineRepresentation *ViewBase::getPvActiveRep()
   return qobject_cast<pqPipelineRepresentation *>(drep);
 }
 
+GCC_DIAG_OFF(strict-aliasing)
 /**
  * This function creates a ParaView source from a given plugin name and
  * workspace name. This is used in the plugin mode of the simple interface.
@@ -285,6 +296,16 @@ pqPipelineSource* ViewBase::setPluginSource(QString pluginName, QString wsName)
   src->getProxy()->SetAnnotation("MdViewerWidget0", "1");
   vtkSMPropertyHelper(src->getProxy(),
                       "Mantid Workspace Name").Set(wsName.toStdString().c_str());
+
+  // WORKAROUND BEGIN 
+  // We are setting the recursion depth to 1 when we are dealing with MDEvent workspaces
+  // with top level splitting, but this is not updated in the plugin line edit field. 
+  // We do this here.
+  if (auto split = Mantid::VATES::findRecursionDepthForTopLevelSplitting(wsName.toStdString())) {
+    vtkSMPropertyHelper(src->getProxy(),
+              "Recursion Depth").Set(split.get());
+  }
+  // WORKAROUND END
 
   // Update the source so that it retrieves the data from the Mantid workspace
   src->getProxy()->UpdateVTKObjects(); // Updates all the proxies
@@ -621,10 +642,10 @@ bool ViewBase::isMDHistoWorkspace(pqPipelineSource *src)
 }
 
 /**
- * This function checks if a pqPipelineSource is a temporary workspace.
- * @return true if the source is a temporary workspace;
+ * This function checks if a pqPipelineSource is an internally rebinned workspace.
+ * @return true if the source is an internally rebinned workspace;
  */
-bool ViewBase::isTemporaryWorkspace(pqPipelineSource *src)
+bool ViewBase::isInternallyRebinnedWorkspace(pqPipelineSource *src)
 {
   if (NULL == src)
   {
@@ -638,12 +659,12 @@ bool ViewBase::isTemporaryWorkspace(pqPipelineSource *src)
   {
     wsType = src->getSMName();
   }
-  
+
 
   QString wsName(vtkSMPropertyHelper(src->getProxy(),
                                     "WorkspaceName", true).GetAsString());
 
-  if (wsName.contains(m_temporaryWorkspaceIdentifier))
+  if (wsName.contains(m_internallyRebinnedWorkspaceIdentifier) && m_rebinnedSourcesManager->isRebinnedSourceBeingTracked(src))
   {
     return true;
   }
@@ -761,11 +782,11 @@ bool ViewBase::hasWorkspaceType(const QString &wsTypeName)
 
 /**
  * This function sets the default colors for the background and connects a tracker for changes of the background color by the user.
- * @param viewSwitched If the view was switched or created.
+ * @param useCurrentColorSettings If the view was switched or created.
  */
-void ViewBase::setColorForBackground(bool viewSwitched)
+void ViewBase::setColorForBackground(bool useCurrentColorSettings)
 {
-  backgroundRgbProvider.setBackgroundColor(this->getView(), viewSwitched);
+  backgroundRgbProvider.setBackgroundColor(this->getView(), useCurrentColorSettings);
   backgroundRgbProvider.observe(this->getView());
 }
 
@@ -891,8 +912,6 @@ void ViewBase::removeVisibilityListener() {
                          this, SLOT(onVisibilityChanged(pqPipelineSource*, pqDataRepresentation*)));
   }
 }
-
-
 
 } // namespace SimpleGui
 } // namespace Vates

@@ -1,8 +1,8 @@
-#include "MantidAPI/IPeak.h"
+#include "MantidGeometry/Crystal/IPeak.h"
 #include <boost/python/class.hpp>
 #include <boost/python/register_ptr_to_python.hpp>
 
-using Mantid::API::IPeak;
+using Mantid::Geometry::IPeak;
 using namespace boost::python;
 
 namespace {
@@ -31,7 +31,9 @@ void setQSampleFrame2(IPeak &peak, Mantid::Kernel::V3D qSampleFrame, double dist
 
 }
 
+// clang-format off
 void export_IPeak()
+// clang-format on
 {
   register_ptr_to_python<IPeak*>();
 

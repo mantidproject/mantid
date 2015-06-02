@@ -2,8 +2,9 @@
 from mantid.kernel import *
 from mantid.api import *
 import os
+import mantid.simpleapi as ms
 
-
+#pylint: disable=too-many-instance-attributes
 class JumpFit(PythonAlgorithm):
 
     _in_ws = None
@@ -47,16 +48,12 @@ class JumpFit(PythonAlgorithm):
 
 
     def PyExec(self):
-        from mantid.simpleapi import ExtractSingleSpectrum, Fit, CopyLogs, AddSampleLog, \
-                                     DeleteWorkspace
-        from mantid import logger, mtd
-
         self._setup()
 
         # Select the width we wish to fit
         spectrum_ws = "__" + self._in_ws
-        ExtractSingleSpectrum(InputWorkspace=self._in_ws, OutputWorkspace=spectrum_ws,
-                              WorkspaceIndex=self._width)
+        ms.ExtractSingleSpectrum(InputWorkspace=self._in_ws, OutputWorkspace=spectrum_ws,
+                                 WorkspaceIndex=self._width)
 
         logger.information('Cropping from Q= ' + str(self._q_min) + ' to ' + str(self._q_max))
         in_run = mtd[self._in_ws].getRun()
@@ -117,24 +114,24 @@ class JumpFit(PythonAlgorithm):
 
             self._out_name = self._in_ws[:ws_suffix_index] + '_' + self._jump_function + '_fit'
 
-        Fit(Function=function, InputWorkspace=spectrum_ws, CreateOutput=True, Output=self._out_name,
-            StartX=self._q_min, EndX=self._q_max)
+        ms.Fit(Function=function, InputWorkspace=spectrum_ws, CreateOutput=True, Output=self._out_name,
+               StartX=self._q_min, EndX=self._q_max)
         fit_workspace = self._out_name + '_Workspace'
 
         # Populate sample logs
-        CopyLogs(InputWorkspace=self._in_ws, OutputWorkspace=fit_workspace)
-        AddSampleLog(Workspace=fit_workspace, LogName="jump_function", LogType="String",
-                     LogText=self._jump_function)
-        AddSampleLog(Workspace=fit_workspace, LogName="q_min", LogType="Number",
-                     LogText=str(self._q_min))
-        AddSampleLog(Workspace=fit_workspace, LogName="q_max", LogType="Number",
-                     LogText=str(self._q_max))
+        ms.CopyLogs(InputWorkspace=self._in_ws, OutputWorkspace=fit_workspace)
+        ms.AddSampleLog(Workspace=fit_workspace, LogName="jump_function", LogType="String",
+                        LogText=self._jump_function)
+        ms.AddSampleLog(Workspace=fit_workspace, LogName="q_min", LogType="Number",
+                        LogText=str(self._q_min))
+        ms.AddSampleLog(Workspace=fit_workspace, LogName="q_max", LogType="Number",
+                        LogText=str(self._q_max))
 
         self._process_output(fit_workspace)
 
         self.setProperty('Output', self._out_name)
 
-        DeleteWorkspace(Workspace=spectrum_ws)
+        ms.DeleteWorkspace(Workspace=spectrum_ws)
 
 
     def _setup(self):
@@ -152,11 +149,10 @@ class JumpFit(PythonAlgorithm):
 
     def _process_output(self, workspace):
         if self._save:
-            from mantid.simpleapi import SaveNexusProcessed
             from IndirectCommon import getDefaultWorkingDirectory
             workdir = getDefaultWorkingDirectory()
             fit_path = os.path.join(workdir, workspace + '.nxs')
-            SaveNexusProcessed(InputWorkspace=workspace, Filename=fit_path)
+            ms.SaveNexusProcessed(InputWorkspace=workspace, Filename=fit_path)
 
             logger.information('Fit file is ' + fit_path)
 

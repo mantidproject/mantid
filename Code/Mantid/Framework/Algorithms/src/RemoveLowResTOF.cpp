@@ -24,7 +24,10 @@ using std::string;
 DECLARE_ALGORITHM(RemoveLowResTOF)
 
 /// Default constructor
-RemoveLowResTOF::RemoveLowResTOF() : m_progress(NULL) {}
+RemoveLowResTOF::RemoveLowResTOF()
+    : m_inputWS(), m_inputEvWS(), m_DIFCref(0.), m_K(0.), m_instrument(),
+      m_sample(), m_L1(0.), m_Tmin(0.), m_wavelengthMin(0.),
+      m_numberOfSpectra(0), m_progress(NULL), m_outputLowResTOF(false) {}
 
 /// Destructor
 RemoveLowResTOF::~RemoveLowResTOF() { delete m_progress; }

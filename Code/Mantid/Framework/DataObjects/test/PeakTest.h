@@ -99,7 +99,7 @@ public:
     p.setRunNumber(1234);
     p.addContributingDetID(10103);
 
-    const Mantid::API::IPeak & ipeak = p;
+    const Mantid::Geometry::IPeak & ipeak = p;
     Peak p2(ipeak);
     TS_ASSERT_EQUALS(p.getRow(), p2.getRow());
     TS_ASSERT_EQUALS(p.getCol(), p2.getCol());

@@ -37,6 +37,18 @@ Manage Directories
   Opens the Manage Directories dialog allowing you to change your search directories
   and default save directory and enable/disable data archive search.
 
+Bayesian
+--------
+
+There is the option to perform Bayesian data analysis on the I(Q, t) Fit ConvFit
+tabs on this interface by using the :ref:`FABADA` fitting minimizer, however in
+order to to use this you will need to use better starting parameters than the
+defaults provided by the interface.
+
+You may also experience issues where the starting parameters may give a reliable
+fit on one spectra but not others, in this case the best option is to reduce
+the number of spectra that are fitted in one operation.
+
 Elwin
 -----
 
@@ -59,13 +71,13 @@ Input File
   Specify a range of input files that are either reduced (*_red.nxs*) or
   :math:`S(Q, \omega)`.
 
-Range One
+Integration Range
   The energy range over which to integrate the values.
 
-Use Two Ranges
+Background Subtraction
   If checked a background will be calculated and subtracted from the raw data.
 
-Range Two
+Background Range
   The energy range over which a background is calculated which is subtracted from
   the raw data.
 
@@ -77,6 +89,11 @@ Normalise to Lowest Temp
 SE log name
   The name of the sample environment log entry in the input files sample logs
   (defaults to sample).
+
+SE log value
+  The value to be taken from the "SE log name" data series (defaults to the
+  specified value in the intrument parameters file, and in the absence of such
+  specification, defaults to "last value")
 
 Plot Result
   If enabled will plot the result as a spectra plot.
@@ -230,9 +247,24 @@ Plot Guess
   When checked a curve will be created on the plot window based on the bitting
   parameters.
 
+Max Iterations
+  The maximum number of iterations that can be carried out by the fitting
+  algorithm (automatically increased when FABADA is enabled).
+
 StartX & EndX
   The range of :math:`x` over which the fitting will be applied (blue lines on
   preview plot).
+
+Use FABADA
+  Select to enable use of the :ref:`FABADA` minimizer when performing the fit.
+
+Output Chain
+  Select to enable output of the FABADA chain when using FABADA as the fitting
+  minimizer.
+
+Chain Length
+  Number of further steps carried out by fitting algorithm once parameters have
+  converged (see :ref:`FABADA` documentation)
 
 Linear Background A0
   The constant amplitude of the background (horizontal green line on the preview
@@ -350,9 +382,24 @@ Plot Guess
   When checked a curve will be created on the plot window based on the bitting
   parameters.
 
+Max Iterations
+  The maximum number of iterations that can be carried out by the fitting
+  algorithm (automatically increased when FABADA is enabled).
+
 StartX & EndX
   The range of :math:`x` over which the fitting will be applied (blue lines on
   preview plot).
+
+Use FABADA
+  Select to enable use of the :ref:`FABADA` minimizer when performing the fit.
+
+Output Chain
+  Select to enable output of the FABADA chain when using FABADA as the fitting
+  minimizer.
+
+Chain Length
+  Number of further steps carried out by fitting algorithm once parameters have
+  converged (see :ref:`FABADA` documentation)
 
 A0 & A1 (background)
   The A0 and A1 parameters as they appear in the LinearBackground fir function,

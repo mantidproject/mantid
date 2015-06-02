@@ -106,7 +106,9 @@ void NexusFileIO::openNexusWrite(const std::string &fileName,
       throw Exception::FileError("Unable to open File:", fileName);
     }
     ::NeXus::File *file = new ::NeXus::File(fileID, true);
+    // clang-format off
     m_filehandle = boost::shared_ptr< ::NeXus::File>(file);
+    // clang-format on
   }
 
   //
@@ -627,7 +629,7 @@ void NexusFileIO::writeNexusVectorColumn(
 int NexusFileIO::writeNexusTableWorkspace(
     const API::ITableWorkspace_const_sptr &itableworkspace,
     const char *group_name) const {
-  NXstatus status = 0;
+  NXstatus status = NX_ERROR;
 
   boost::shared_ptr<const TableWorkspace> tableworkspace =
       boost::dynamic_pointer_cast<const TableWorkspace>(itableworkspace);
@@ -635,7 +637,7 @@ int NexusFileIO::writeNexusTableWorkspace(
       boost::dynamic_pointer_cast<const PeaksWorkspace>(itableworkspace);
 
   if (!tableworkspace && !peakworkspace)
-    return ((status == NX_ERROR) ? 3 : 0);
+    return 3;
 
   // write data entry
   status = NXmakegroup(fileID, group_name, "NXdata");
@@ -1032,7 +1034,9 @@ int NexusFileIO::getWorkspaceSize(int &numberOfSpectra, int &numberOfChannels,
 bool NexusFileIO::checkAttributeName(const std::string &target) const {
   // see if the given attribute name is in the current level
   // return true if it is.
+  // clang-format off
   const std::vector< ::NeXus::AttrInfo> infos = m_filehandle->getAttrInfos();
+  // clang-format on
   for (auto it = infos.begin(); it != infos.end(); ++it) {
     if (target.compare(it->name) == 0)
       return true;

@@ -456,7 +456,17 @@
            </widget>
           </item>
           <item row="0" column="1">
-           <widget class="QDoubleSpinBox" name="spAnnSampleInnerRadius"/>
+           <widget class="QDoubleSpinBox" name="spAnnSampleInnerRadius">
+            <property name="decimals">
+             <number>3</number>
+            </property>
+            <property name="maximum">
+             <double>9999.989999999999782</double>
+            </property>
+            <property name="singleStep">
+             <double>0.100000000000000</double>
+            </property>
+           </widget>
           </item>
          </layout>
         </widget>
@@ -677,9 +687,14 @@
   <tabstop>spFlatSampleAngle</tabstop>
   <tabstop>spFlatCanFrontThickness</tabstop>
   <tabstop>spFlatCanBackThickness</tabstop>
+  <tabstop>spCylSampleOuterRadius</tabstop>
+  <tabstop>spCylCanOuterRadius</tabstop>
   <tabstop>spCylBeamHeight</tabstop>
   <tabstop>spCylBeamWidth</tabstop>
   <tabstop>spCylStepSize</tabstop>
+  <tabstop>spAnnSampleInnerRadius</tabstop>
+  <tabstop>spAnnSampleOuterRadius</tabstop>
+  <tabstop>spAnnCanOuterRadius</tabstop>
   <tabstop>spAnnBeamHeight</tabstop>
   <tabstop>spAnnBeamWidth</tabstop>
   <tabstop>spAnnStepSize</tabstop>

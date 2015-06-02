@@ -10,9 +10,9 @@
 #include "MantidAPI/CoordTransform.h"
 #include "MantidAPI/IMDIterator.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/PeakTransformHKL.h"
-#include "MantidAPI/PeakTransformQSample.h"
-#include "MantidAPI/PeakTransformQLab.h"
+#include "MantidGeometry/Crystal/PeakTransformHKL.h"
+#include "MantidGeometry/Crystal/PeakTransformQSample.h"
+#include "MantidGeometry/Crystal/PeakTransformQLab.h"
 #include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/IMDEventWorkspace.h"
@@ -68,19 +68,22 @@ using MantidQt::API::AlgorithmRunner;
 namespace MantidQt {
 namespace SliceViewer {
 
-//------------------------------------------------------------------------------------
+const QString SliceViewer::NoNormalizationKey = "No";
+const QString SliceViewer::VolumeNormalizationKey = "Volume";
+const QString SliceViewer::NumEventsNormalizationKey = "# Events";
+
+//------------------------------------------------------------------------------
 /** Constructor */
 SliceViewer::SliceViewer(QWidget *parent)
     : QWidget(parent), m_ws(), m_firstWorkspaceOpen(false), m_dimensions(),
       m_data(NULL), m_X(), m_Y(), m_dimX(0), m_dimY(1), m_logColor(false),
       m_fastRender(true), m_rebinMode(false), m_rebinLocked(true),
-      m_mdSettings(new MantidQt::API::MdSettings()),
-      m_logger("SliceViewer"),
+      m_mdSettings(new MantidQt::API::MdSettings()), m_logger("SliceViewer"),
       m_peaksPresenter(boost::make_shared<CompositePeaksPresenter>(this)),
       m_proxyPeaksPresenter(
-      boost::make_shared<ProxyCompositePeaksPresenter>(m_peaksPresenter)),
-      m_peaksSliderWidget(NULL){
-      
+          boost::make_shared<ProxyCompositePeaksPresenter>(m_peaksPresenter)),
+      m_peaksSliderWidget(NULL) {
+
   ui.setupUi(this);
 
   m_inf = std::numeric_limits<double>::infinity();
@@ -118,10 +121,10 @@ SliceViewer::SliceViewer(QWidget *parent)
 
   initZoomer();
 
-  //hide unused buttons
-  ui.btnZoom->hide();  // hidden for a long time
-  ui.btnRebinLock->hide();  // now replaced by auto rebin mode
-  //ui.btnClearLine->hide();  // turning off line mode now removes line
+  // hide unused buttons
+  ui.btnZoom->hide();      // hidden for a long time
+  ui.btnRebinLock->hide(); // now replaced by auto rebin mode
+  // ui.btnClearLine->hide();  // turning off line mode now removes line
 
   // ----------- Toolbar button signals ----------------
   QObject::connect(ui.btnResetZoom, SIGNAL(clicked()), this, SLOT(resetZoom()));
@@ -136,6 +139,7 @@ SliceViewer::SliceViewer(QWidget *parent)
                    SLOT(autoRebin_toggled(bool)));
   QObject::connect(ui.btnPeakOverlay, SIGNAL(clicked()), this,
                    SLOT(peakOverlay_clicked()));
+
   // ----------- Other signals ----------------
   QObject::connect(m_colorBar, SIGNAL(colorBarDoubleClicked()), this,
                    SLOT(loadColorMapSlot()));
@@ -169,7 +173,7 @@ SliceViewer::SliceViewer(QWidget *parent)
   this->setAcceptDrops(true);
 }
 
-//------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 /// Destructor
 SliceViewer::~SliceViewer() {
   saveSettings();
@@ -177,21 +181,20 @@ SliceViewer::~SliceViewer() {
   // Don't delete Qt objects, I think these are auto-deleted
 }
 
-//------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 /** Load QSettings from .ini-type files */
 void SliceViewer::loadSettings() {
   QSettings settings;
   settings.beginGroup("Mantid/SliceViewer");
   bool scaleType = (bool)settings.value("LogColorScale", 0).toInt();
 
-  //Load Colormap. If the file is invalid the default stored colour map is used. If the 
-  // user selected a unified color map for the SliceViewer and the VSI, then this is loaded.
-  if (m_mdSettings != NULL && m_mdSettings->getUsageGeneralMdColorMap())
-  {
+  // Load Colormap. If the file is invalid the default stored colour map is
+  // used.
+  // If the user selected a unified color map for the SliceViewer and the VSI,
+  // then this is loaded.
+  if (m_mdSettings != NULL && m_mdSettings->getUsageGeneralMdColorMap()) {
     m_currentColorMapFile = m_mdSettings->getGeneralMdColorMapFile();
-  }
-  else
-  {
+  } else {
     m_currentColorMapFile = settings.value("ColormapFile", "").toString();
   }
 
@@ -213,7 +216,7 @@ void SliceViewer::loadSettings() {
   settings.endGroup();
 }
 
-//------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 /** Save settings for next time. */
 void SliceViewer::saveSettings() {
   QSettings settings;
@@ -224,11 +227,11 @@ void SliceViewer::saveSettings() {
   settings.setValue("TransparentZeros",
                     (m_actionTransparentZeros->isChecked() ? 1 : 0));
   settings.setValue("Normalization",
-                    static_cast<int>(this->getNormalization()));
+                      static_cast<int>(this->getNormalization()));
   settings.endGroup();
 }
 
-//------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 /** Create the menus */
 void SliceViewer::initMenus() {
   // ---------------------- Build the menu bar -------------------------
@@ -274,10 +277,9 @@ void SliceViewer::initMenus() {
   connect(action, SIGNAL(triggered()), this, SLOT(resetZoom()));
   {
     QIcon icon;
-    icon.addFile(QString::fromStdString(g_iconViewFull),
-                 QSize(), QIcon::Normal, QIcon::Off);
+    icon.addFile(QString::fromStdString(g_iconViewFull), QSize(), QIcon::Normal,
+                 QIcon::Off);
     action->setIcon(icon);
-
   }
   m_menuView->addAction(action);
 
@@ -314,7 +316,7 @@ void SliceViewer::initMenus() {
   m_syncRebinLock = new SyncedCheckboxes(action, ui.btnRebinLock, true);
   connect(m_syncRebinLock, SIGNAL(toggled(bool)), this,
           SLOT(RebinLock_toggled(bool)));
-  action->setVisible(false);  //hide this action
+  action->setVisible(false); // hide this action
   m_menuView->addAction(action);
 
   action = new QAction(QPixmap(), "Rebin Current View", this);
@@ -339,14 +341,15 @@ void SliceViewer::initMenus() {
 
   QActionGroup *group = new QActionGroup(this);
 
-  action = new QAction(QPixmap(), "No Normalization", this);
+  const QString normalization = " Normalization";
+  action = new QAction(QPixmap(), SliceViewer::NoNormalizationKey + normalization, this);
   m_menuView->addAction(action);
   action->setActionGroup(group);
   action->setCheckable(true);
   connect(action, SIGNAL(triggered()), this, SLOT(changeNormalizationNone()));
   m_actionNormalizeNone = action;
 
-  action = new QAction(QPixmap(), "Volume Normalization", this);
+  action = new QAction(QPixmap(), SliceViewer::VolumeNormalizationKey + normalization, this);
   m_menuView->addAction(action);
   action->setActionGroup(group);
   action->setCheckable(true);
@@ -354,13 +357,19 @@ void SliceViewer::initMenus() {
   connect(action, SIGNAL(triggered()), this, SLOT(changeNormalizationVolume()));
   m_actionNormalizeVolume = action;
 
-  action = new QAction(QPixmap(), "Num. Events Normalization", this);
+  action = new QAction(QPixmap(), SliceViewer::NumEventsNormalizationKey + normalization, this);
   m_menuView->addAction(action);
   action->setActionGroup(group);
   action->setCheckable(true);
   connect(action, SIGNAL(triggered()), this,
           SLOT(changeNormalizationNumEvents()));
   m_actionNormalizeNumEvents = action;
+
+  ui.comboNormalization->addItem(SliceViewer::NoNormalizationKey);
+  ui.comboNormalization->addItem(SliceViewer::VolumeNormalizationKey);
+  ui.comboNormalization->addItem(SliceViewer::NumEventsNormalizationKey);
+
+  connect(this->ui.comboNormalization, SIGNAL(currentIndexChanged(const QString&)), SLOT(onNormalizationChanged(const QString&)));
 
   // --------------- Color options Menu ----------------------------------------
   m_menuColorOptions = new QMenu("&ColorMap", this);
@@ -374,9 +383,8 @@ void SliceViewer::initMenus() {
   action->setIconVisibleInMenu(true);
   {
     QIcon icon;
-    icon.addFile(
-        QString::fromStdString(g_iconZoomPlus),
-        QSize(), QIcon::Normal, QIcon::Off);
+    icon.addFile(QString::fromStdString(g_iconZoomPlus), QSize(), QIcon::Normal,
+                 QIcon::Off);
     action->setIcon(icon);
   }
   m_menuColorOptions->addAction(action);
@@ -385,8 +393,8 @@ void SliceViewer::initMenus() {
   connect(action, SIGNAL(triggered()), this, SLOT(setColorScaleAutoFull()));
   {
     QIcon icon;
-    icon.addFile(QString::fromStdString(g_iconZoomMinus),
-                 QSize(), QIcon::Normal, QIcon::Off);
+    icon.addFile(QString::fromStdString(g_iconZoomMinus), QSize(),
+                 QIcon::Normal, QIcon::Off);
     action->setIcon(icon);
   }
   m_menuColorOptions->addAction(action);
@@ -452,7 +460,7 @@ void SliceViewer::initMenus() {
   bar->addMenu(m_menuHelp);
 }
 
-//------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 /** Intialize the zooming/panning tools */
 void SliceViewer::initZoomer() {
   //  QwtPlotZoomer * zoomer = new CustomZoomer(m_plot->canvas());
@@ -501,7 +509,7 @@ void SliceViewer::initZoomer() {
                    SLOT(showInfoAt(double, double)));
 }
 
-//------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 /** Programmatically show/hide the controls (sliders etc)
  *
  * @param visible :: true if you want to show the controls.
@@ -510,7 +518,7 @@ void SliceViewer::showControls(bool visible) {
   ui.frmControls->setVisible(visible);
 }
 
-//------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 /** Add (as needed) and update DimensionSliceWidget's. */
 void SliceViewer::updateDimensionSliceWidgets() {
   // Create all necessary widgets
@@ -577,7 +585,7 @@ void SliceViewer::updateDimensionSliceWidgets() {
   }
 }
 
-//------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 /** Set the displayed workspace. Updates UI.
  *
  * @param ws :: IMDWorkspace to show.
@@ -683,7 +691,7 @@ void SliceViewer::setWorkspace(Mantid::API::IMDWorkspace_sptr ws) {
   emit changedShownDim(m_dimX, m_dimY);
 }
 
-//------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 /** Set the workspace to view using its name.
  * The workspace should be a MDHistoWorkspace or a MDEventWorkspace,
  * with at least 2 dimensions.
@@ -704,11 +712,11 @@ void SliceViewer::setWorkspace(const QString &wsName) {
   this->setWorkspace(ws);
 }
 
-//------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 /** @return the workspace in the SliceViewer */
 Mantid::API::IMDWorkspace_sptr SliceViewer::getWorkspace() { return m_ws; }
 
-//------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 /** Load a color map from a file
  *
  * @param filename :: file to open; empty to ask via a dialog box.
@@ -731,12 +739,11 @@ void SliceViewer::loadColorMap(QString filename) {
   this->updateDisplay();
 }
 
-//=================================================================================================
-//========================================== SLOTS
-//================================================
-//=================================================================================================
+//==============================================================================
+//================================ SLOTS =======================================
+//==============================================================================
 
-//------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 /** Automatically sets the min/max of the color scale,
  * using the limits in the entire data set of the workspace
  * (every bin, even those not currently visible).
@@ -747,7 +754,7 @@ void SliceViewer::setColorScaleAutoFull() {
   this->updateDisplay();
 }
 
-//------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 /** Automatically sets the min/max of the color scale,
  * using the limits in the data that is currently visible
  * in the plot (only the bins in this slice and within the
@@ -759,14 +766,14 @@ void SliceViewer::setColorScaleAutoSlice() {
   this->updateDisplay();
 }
 
-//------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 /// Slot called when the ColorBarWidget changes the range of colors
 void SliceViewer::colorRangeChanged() {
   m_spect->setColorMap(m_colorBar->getColorMap());
   this->updateDisplay();
 }
 
-//------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 /** Set whether to display 0 signal as "transparent" color.
  *
  * @param transparent :: true if you want zeros to be transparent.
@@ -780,7 +787,7 @@ void SliceViewer::setTransparentZeros(bool transparent) {
   this->updateDisplay();
 }
 
-//------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 /// Slot called when changing the normalization menu
 void SliceViewer::changeNormalizationNone() {
   this->setNormalization(Mantid::API::NoNormalization, true);
@@ -794,7 +801,21 @@ void SliceViewer::changeNormalizationNumEvents() {
   this->setNormalization(Mantid::API::NumEventsNormalization, true);
 }
 
-//------------------------------------------------------------------------------------
+/**
+ * @brief Slot to handle change in normalization kicked-off from the combo box.
+ * @param normalizationKey : Text key for type of normalization switched to.
+ */
+void SliceViewer::onNormalizationChanged(const QString& normalizationKey) {
+  if (normalizationKey == SliceViewer::NoNormalizationKey) {
+      changeNormalizationNone();
+  } else if (normalizationKey == SliceViewer::VolumeNormalizationKey) {
+      changeNormalizationVolume();
+  } else {
+      changeNormalizationNumEvents();
+  }
+}
+
+//------------------------------------------------------------------------------
 /** Set the normalization mode for viewing the data
  *
  * @param norm :: MDNormalization enum. 0=none; 1=volume; 2=# of events
@@ -816,18 +837,29 @@ void SliceViewer::setNormalization(Mantid::API::MDNormalization norm,
   m_actionNormalizeVolume->blockSignals(false);
   m_actionNormalizeNumEvents->blockSignals(false);
 
+  // Sync the normalization combobox.
+  this->ui.comboNormalization->blockSignals(true);
+  if(norm == Mantid::API::NoNormalization) {
+      this->ui.comboNormalization->setCurrentIndex(0);
+  } else if (norm == Mantid::API::VolumeNormalization) {
+      this->ui.comboNormalization->setCurrentItem(1);
+  } else {
+      this->ui.comboNormalization->setCurrentIndex(2);
+  }
+  this->ui.comboNormalization->blockSignals(false);
+
   m_data->setNormalization(norm);
   if (update)
     this->updateDisplay();
 }
 
-//------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 /** @return the current normalization */
 Mantid::API::MDNormalization SliceViewer::getNormalization() const {
   return m_data->getNormalization();
 }
 
-//------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 /** Set the thickness (above and below the plane) for dynamic rebinning.
  *
  * @param dim :: index of the dimension to adjust
@@ -845,7 +877,7 @@ void SliceViewer::setRebinThickness(int dim, double thickness) {
   m_dimWidgets[dim]->setThickness(thickness);
 }
 
-//------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 /** Set the number of bins for dynamic rebinning.
  *
  * @param xBins :: number of bins in the viewed X direction
@@ -860,7 +892,7 @@ void SliceViewer::setRebinNumBins(int xBins, int yBins) {
   m_dimWidgets[m_dimY]->setNumBins(yBins);
 }
 
-//------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 /** Sets the SliceViewer in dynamic rebin mode.
  * In this mode, the current view area (see setXYLimits()) is used as the
  * limits to rebin.
@@ -877,22 +909,22 @@ void SliceViewer::setRebinMode(bool mode, bool locked) {
   m_syncRebinLock->toggle(locked);
 }
 
-//------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 /** When in dynamic rebinning mode, this refreshes the rebinned area to be the
  * currently viewed area. See setXYLimits(), setRebinNumBins(),
  * setRebinThickness()
  */
 void SliceViewer::refreshRebin() { this->rebinParamsChanged(); }
 
-//------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 /// Slot called when the btnDoLine button is checked/unchecked
 void SliceViewer::LineMode_toggled(bool checked) {
   m_lineOverlay->setShown(checked);
-  
+
   QIcon icon;
   if (checked) {
-    icon.addFile(QString::fromStdString(g_iconCutOn),
-              QSize(), QIcon::Normal, QIcon::On);
+    icon.addFile(QString::fromStdString(g_iconCutOn), QSize(), QIcon::Normal,
+                 QIcon::On);
     ui.btnDoLine->setIcon(icon);
     QString text;
     if (m_lineOverlay->getCreationMode())
@@ -902,18 +934,17 @@ void SliceViewer::LineMode_toggled(bool checked) {
     QToolTip::showText(ui.btnDoLine->mapToGlobal(ui.btnDoLine->pos()), text,
                        this);
   }
-  if (!checked)
-  {
-    //clear the old line
+  if (!checked) {
+    // clear the old line
     clearLine();
-    icon.addFile(QString::fromStdString(g_iconCut),
-          QSize(), QIcon::Normal, QIcon::Off);
+    icon.addFile(QString::fromStdString(g_iconCut), QSize(), QIcon::Normal,
+                 QIcon::Off);
     ui.btnDoLine->setIcon(icon);
   }
   emit showLineViewer(checked);
 }
 
-//------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 /** Toggle "line-drawing" mode (to draw 1D lines using the mouse)
  *
  * @param lineMode :: True to go into line mode, False to exit it.
@@ -922,20 +953,19 @@ void SliceViewer::toggleLineMode(bool lineMode) {
   // This should send events to start line mode
   m_syncLineMode->toggle(lineMode);
   m_lineOverlay->setCreationMode(false);
-
 }
 
-//------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 /// Slot called to clear the line in the line overlay
 void SliceViewer::clearLine() {
   m_lineOverlay->reset();
   m_plot->update();
 }
 
-//------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 /// Slot called when the snap to grid is checked
 void SliceViewer::SnapToGrid_toggled(bool checked) {
-  
+
   QIcon icon;
   if (checked) {
     SnapToGridDialog *dlg = new SnapToGridDialog(this);
@@ -944,25 +974,24 @@ void SliceViewer::SnapToGrid_toggled(bool checked) {
       m_lineOverlay->setSnapEnabled(true);
       m_lineOverlay->setSnapX(dlg->getSnapX());
       m_lineOverlay->setSnapY(dlg->getSnapY());
-      icon.addFile(QString::fromStdString(g_iconGridOn),
-                   QSize(), QIcon::Normal, QIcon::On);
+      icon.addFile(QString::fromStdString(g_iconGridOn), QSize(), QIcon::Normal,
+                   QIcon::On);
     } else {
       // Uncheck - the user clicked cancel
       ui.btnSnapToGrid->setChecked(false);
       m_lineOverlay->setSnapEnabled(false);
-      icon.addFile(QString::fromStdString(g_iconGrid),
-                   QSize(), QIcon::Normal, QIcon::Off);
+      icon.addFile(QString::fromStdString(g_iconGrid), QSize(), QIcon::Normal,
+                   QIcon::Off);
     }
   } else {
     m_lineOverlay->setSnapEnabled(false);
-    icon.addFile(QString::fromStdString(g_iconGrid),
-                  QSize(), QIcon::Normal, QIcon::Off);
+    icon.addFile(QString::fromStdString(g_iconGrid), QSize(), QIcon::Normal,
+                 QIcon::Off);
   }
   ui.btnSnapToGrid->setIcon(icon);
-  
 }
 
-//------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 /** Slot called when going into or out of dynamic rebinning mode */
 void SliceViewer::RebinMode_toggled(bool checked) {
   for (size_t d = 0; d < m_dimWidgets.size(); d++)
@@ -975,8 +1004,8 @@ void SliceViewer::RebinMode_toggled(bool checked) {
 
   QIcon icon;
   if (!m_rebinMode) {
-    icon.addFile(QString::fromStdString(g_iconRebin),
-                 QSize(), QIcon::Normal, QIcon::Off);
+    icon.addFile(QString::fromStdString(g_iconRebin), QSize(), QIcon::Normal,
+                 QIcon::Off);
     ui.btnRebinMode->setIcon(icon);
     // uncheck auto-rebin
     ui.btnAutoRebin->setChecked(false);
@@ -985,15 +1014,15 @@ void SliceViewer::RebinMode_toggled(bool checked) {
     this->m_data->setOverlayWorkspace(m_overlayWS);
     this->updateDisplay();
   } else {
-    icon.addFile(QString::fromStdString(g_iconRebinOn),
-              QSize(), QIcon::Normal, QIcon::On);
+    icon.addFile(QString::fromStdString(g_iconRebinOn), QSize(), QIcon::Normal,
+                 QIcon::On);
     ui.btnRebinMode->setIcon(icon);
     // Start the rebin
     this->rebinParamsChanged();
   }
 }
 
-//------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 /** Slot called when locking/unlocking the dynamically rebinned
  * overlaid workspace
  * @param checked :: DO lock the workspace in place
@@ -1005,7 +1034,7 @@ void SliceViewer::RebinLock_toggled(bool checked) {
     this->rebinParamsChanged();
 }
 
-//------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 /// Slot for zooming into
 void SliceViewer::zoomInSlot() { this->zoomBy(1.1); }
 
@@ -1043,7 +1072,7 @@ void SliceViewer::helpPeaksViewer() {
       QUrl(QString("http://www.mantidproject.org/") + helpPage));
 }
 
-//------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 /** Automatically resets the zoom view to full axes.
  * This will reset the XY limits to the full range of the workspace.
  * Use zoomBy() or setXYLimits() to modify the view range.
@@ -1059,7 +1088,7 @@ void SliceViewer::resetZoom() {
   updatePeaksOverlay();
 }
 
-//------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 /// SLOT to open a dialog to set the XY limits
 void SliceViewer::setXYLimitsDialog() {
   // Initialize the dialog with the current values
@@ -1077,7 +1106,7 @@ void SliceViewer::setXYLimitsDialog() {
   }
 }
 
-//------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 /** Slot to redraw when the slice point changes */
 void SliceViewer::updateDisplaySlot(int index, double value) {
   UNUSED_ARG(index)
@@ -1088,11 +1117,11 @@ void SliceViewer::updateDisplaySlot(int index, double value) {
     this->rebinParamsChanged();
 }
 
-//------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 /** SLOT to open a dialog to choose a file, load a color map from that file */
 void SliceViewer::loadColorMapSlot() { this->loadColorMap(QString()); }
 
-//------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 /** Grab the 2D view as an image. The image is rendered at the current window
  * size, with the color scale but without the text boxes for changing them.
  *
@@ -1122,7 +1151,7 @@ QPixmap SliceViewer::getImage() {
   return pix;
 }
 
-//------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 /** Copy the rendered 2D image to the clipboard
  */
 void SliceViewer::copyImageToClipboard() {
@@ -1148,7 +1177,7 @@ QString SliceViewer::ensurePngExtension(const QString &fname) const {
   return res;
 }
 
-//------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 /** Save the rendered 2D slice to an image file.
  *
  * @param filename :: full path to the file to save, including extension
@@ -1178,9 +1207,9 @@ void SliceViewer::saveImage(const QString &filename) {
   pix.save(finalName);
 }
 
-//=================================================================================================
-//=================================================================================================
-//=================================================================================================
+//==============================================================================
+//==============================================================================
+//==============================================================================
 /** Zoom in or out, keeping the center of the plot in the same position.
  *
  * @param factor :: double, if > 1 : zoom in by this factor.
@@ -1207,7 +1236,7 @@ void SliceViewer::zoomBy(double factor) {
   this->updatePeaksOverlay();
 }
 
-//------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 /** Manually set the center of the plot, in X Y coordinates.
  * This keeps the plot the same size as previously.
  * Use setXYLimits() to modify the size of the plot by setting the X/Y edges,
@@ -1226,7 +1255,7 @@ void SliceViewer::setXYCenter(double x, double y) {
                     y + halfWidthY);
 }
 
-//------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 /** Reset the axis and scale it
  *
  * @param axis :: int for X or Y
@@ -1237,7 +1266,7 @@ void SliceViewer::resetAxis(int axis, const IMDDimension_const_sptr &dim) {
   m_plot->setAxisTitle(axis, API::PlotAxis(*dim).title());
 }
 
-//------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 /// Find the full range of values in the workspace
 void SliceViewer::findRangeFull() {
   IMDWorkspace_sptr workspace_used = m_ws;
@@ -1258,7 +1287,7 @@ void SliceViewer::findRangeFull() {
       API::SignalRange(*workspace_used, this->getNormalization()).interval();
 }
 
-//------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 /** Find the full range of values ONLY in the currently visible
 part of the workspace */
 void SliceViewer::findRangeSlice() {
@@ -1310,7 +1339,7 @@ void SliceViewer::findRangeSlice() {
     m_colorRangeSlice = m_colorRangeFull;
 }
 
-//------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 /** Slot to show the mouse info at the mouse position
  *
  * @param x :: position of the mouse in plot coords
@@ -1354,7 +1383,7 @@ void SliceViewer::showInfoAt(double x, double y) {
   }
 }
 
-//------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 /** Update the 2D plot using all the current controls settings */
 void SliceViewer::updateDisplay(bool resetAxes) {
   if (!m_ws)
@@ -1433,7 +1462,7 @@ void SliceViewer::updateDisplay(bool resetAxes) {
   emit changedSlicePoint(m_slicePoint);
 }
 
-//------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 /** The user changed the shown dimension somewhere.
  *
  * @param index :: index of the dimension
@@ -1467,10 +1496,9 @@ void SliceViewer::changedShownDim(int index, int dim, int oldDim) {
   emit changedShownDim(m_dimX, m_dimY);
 }
 
-//=================================================================================================
-//========================================== PYTHON METHODS
-//=======================================
-//=================================================================================================
+//==============================================================================
+//================================ PYTHON METHODS ==============================
+//==============================================================================
 
 /** @return the name of the workspace selected, or a blank string
  * if no workspace is set.
@@ -1482,7 +1510,7 @@ QString SliceViewer::getWorkspaceName() const {
     return QString();
 }
 
-//------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 /** @return the index of the dimension that is currently
  * being shown as the X axis of the plot.
  */
@@ -1493,7 +1521,7 @@ int SliceViewer::getDimX() const { return int(m_dimX); }
  */
 int SliceViewer::getDimY() const { return int(m_dimY); }
 
-//------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 /** Set the index of the dimensions that will be shown as
  * the X and Y axis of the plot.
  * You cannot set both axes to be the same.
@@ -1531,7 +1559,7 @@ void SliceViewer::setXYDim(int indexX, int indexY) {
   emit changedShownDim(m_dimX, m_dimY);
 }
 
-//------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 /** Set the dimensions that will be shown as the X and Y axes
  *
  * @param dimX :: name of the X dimension. Must match the workspace dimension
@@ -1548,7 +1576,7 @@ void SliceViewer::setXYDim(const QString &dimX, const QString &dimY) {
   this->setXYDim(indexX, indexY);
 }
 
-//------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 /** Sets the slice point in the given dimension:
  * that is, what is the position of the plane in that dimension
  *
@@ -1565,7 +1593,7 @@ void SliceViewer::setSlicePoint(int dim, double value) {
   m_dimWidgets[dim]->setSlicePoint(value);
 }
 
-//------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 /** Returns the slice point in the given dimension
  *
  * @param dim :: index of the dimension
@@ -1580,7 +1608,7 @@ double SliceViewer::getSlicePoint(int dim) const {
   return m_slicePoint[dim];
 }
 
-//------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 /** Sets the slice point in the given dimension:
  * that is, what is the position of the plane in that dimension
  *
@@ -1597,7 +1625,7 @@ void SliceViewer::setSlicePoint(const QString &dim, double value) {
   return this->setSlicePoint(index, value);
 }
 
-//------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 /** Returns the slice point in the given dimension
  *
  * @param dim :: name of the dimension
@@ -1612,7 +1640,7 @@ double SliceViewer::getSlicePoint(const QString &dim) const {
   return this->getSlicePoint(index);
 }
 
-//------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 /** Set the color scale limits and log mode via a method call.
  *
  * @param min :: minimum value corresponding to the lowest color on the map
@@ -1632,7 +1660,7 @@ void SliceViewer::setColorScale(double min, double max, bool log) {
   this->colorRangeChanged();
 }
 
-//------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 /** Set the "background" color to use in the color map. Default is white.
  *
  * This is the color that is shown when:
@@ -1651,7 +1679,7 @@ void SliceViewer::setColorMapBackground(int r, int g, int b) {
   this->colorRangeChanged();
 }
 
-//------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 /** Set the minimum value corresponding to the lowest color on the map
  *
  * @param min :: minimum value corresponding to the lowest color on the map
@@ -1662,7 +1690,7 @@ void SliceViewer::setColorScaleMin(double min) {
   this->setColorScale(min, this->getColorScaleMax(), this->getColorScaleLog());
 }
 
-//------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 /** Set the maximum value corresponding to the lowest color on the map
  *
  * @param max :: maximum value corresponding to the lowest color on the map
@@ -1673,7 +1701,7 @@ void SliceViewer::setColorScaleMax(double max) {
   this->setColorScale(this->getColorScaleMin(), max, this->getColorScaleLog());
 }
 
-//------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 /** Set whether the color scale is logarithmic
  *
  * @param log :: true for a log color scale, false for linear
@@ -1684,7 +1712,7 @@ void SliceViewer::setColorScaleLog(bool log) {
   this->setColorScale(this->getColorScaleMin(), this->getColorScaleMax(), log);
 }
 
-//------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 /** @return the value that corresponds to the lowest color on the color map */
 double SliceViewer::getColorScaleMin() const {
   return m_colorBar->getMinimum();
@@ -1698,7 +1726,7 @@ double SliceViewer::getColorScaleMax() const {
 /** @return True if the color scale is in logarithmic mode */
 bool SliceViewer::getColorScaleLog() const { return m_colorBar->getLog(); }
 
-//------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 /** Sets whether the image should be rendered in "fast" mode, where
  * the workspace's resolution is used to guess how many pixels to render.
  *
@@ -1725,7 +1753,7 @@ void SliceViewer::setFastRender(bool fast) {
  */
 bool SliceViewer::getFastRender() const { return m_fastRender; }
 
-//------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 /** Set the limits in X and Y to be shown in the plot.
  * The X and Y values are in the units of their respective dimensions.
  * You can change the mapping from X/Y in the plot to specific
@@ -1749,7 +1777,7 @@ void SliceViewer::setXYLimits(double xleft, double xright, double ybottom,
   updatePeaksOverlay();
 }
 
-//------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 /** @return Returns the [left, right] limits of the view in the X axis. */
 QwtDoubleInterval SliceViewer::getXLimits() const {
   return m_plot->axisScaleDiv(m_spect->xAxis())->interval();
@@ -1760,7 +1788,7 @@ QwtDoubleInterval SliceViewer::getYLimits() const {
   return m_plot->axisScaleDiv(m_spect->yAxis())->interval();
 }
 
-//------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 /** Opens a workspace and sets the view and slice points
  * given the XML from the MultiSlice view in XML format.
  *
@@ -1944,7 +1972,7 @@ void SliceViewer::openFromXML(const QString &xml) {
     this->setSlicePoint(d, slicePoint[d]);
 }
 
-//------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 /** This slot is called when the dynamic rebinning parameters are changed.
  * It recalculates the dynamically rebinned workspace and plots it
  */
@@ -2017,7 +2045,7 @@ void SliceViewer::rebinParamsChanged() {
   // complete.
 }
 
-//--------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 /** Slot called by the observer when the BinMD call has completed.
  * This returns the execution to the main GUI thread, and
  * so can update the GUI.
@@ -2110,10 +2138,10 @@ void SliceViewer::disablePeakOverlays() {
   m_peaksPresenter->clear();
   emit showPeaksViewer(false);
   m_menuPeaks->setEnabled(false);
-  
+
   QIcon icon;
-  icon.addFile(QString::fromStdString(g_iconPeakList),
-                QSize(), QIcon::Normal, QIcon::Off);
+  icon.addFile(QString::fromStdString(g_iconPeakList), QSize(), QIcon::Normal,
+               QIcon::Off);
   ui.btnPeakOverlay->setIcon(icon);
   ui.btnPeakOverlay->setChecked(false);
 }
@@ -2188,10 +2216,10 @@ SliceViewer::setPeaksWorkspaces(const QStringList &list) {
   updatePeakOverlaySliderWidget();
   emit showPeaksViewer(true);
   m_menuPeaks->setEnabled(true);
-  
+
   QIcon icon;
-  icon.addFile(QString::fromStdString(g_iconPeakList),
-                 QSize(), QIcon::Normal, QIcon::Off);
+  icon.addFile(QString::fromStdString(g_iconPeakList), QSize(), QIcon::Normal,
+               QIcon::Off);
   ui.btnPeakOverlay->setIcon(icon);
   ui.btnPeakOverlay->setChecked(true);
   return m_proxyPeaksPresenter.get();
@@ -2204,8 +2232,9 @@ Allow user to choose a suitable input peaks workspace
 
 */
 void SliceViewer::peakOverlay_clicked() {
-  MantidQt::MantidWidgets::SelectWorkspacesDialog dlg(this, "PeaksWorkspace", "Remove All");
-  
+  MantidQt::MantidWidgets::SelectWorkspacesDialog dlg(this, "PeaksWorkspace",
+                                                      "Remove All");
+
   int ret = dlg.exec();
   if (ret == QDialog::Accepted) {
     QStringList list = dlg.getSelectedNames();
@@ -2215,18 +2244,18 @@ void SliceViewer::peakOverlay_clicked() {
     }
   }
   if (ret == MantidQt::MantidWidgets::SelectWorkspacesDialog::CustomButton) {
-        disablePeakOverlays();
+    disablePeakOverlays();
   }
   QIcon icon;
-  if (m_peaksPresenter->size()>0)  {
-    icon.addFile(QString::fromStdString(g_iconPeakListOn),
-                   QSize(), QIcon::Normal, QIcon::On);
+  if (m_peaksPresenter->size() > 0) {
+    icon.addFile(QString::fromStdString(g_iconPeakListOn), QSize(),
+                 QIcon::Normal, QIcon::On);
     ui.btnPeakOverlay->setIcon(icon);
     ui.btnPeakOverlay->setChecked(true);
-  }  else {
+  } else {
 
-    icon.addFile(QString::fromStdString(g_iconPeakList),
-                   QSize(), QIcon::Normal, QIcon::Off);
+    icon.addFile(QString::fromStdString(g_iconPeakList), QSize(), QIcon::Normal,
+                 QIcon::Off);
     ui.btnPeakOverlay->setIcon(icon);
     ui.btnPeakOverlay->setChecked(false);
   }

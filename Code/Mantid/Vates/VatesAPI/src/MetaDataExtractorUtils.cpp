@@ -49,7 +49,7 @@ namespace Mantid
           instrument = eventWorkspace->getExperimentInfo(0)->getInstrument()->getName();
         } else 
         {
-          g_log.warning() << "The event workspace does not have any instruments. \n";
+          g_log.notice() << "The event workspace does not have any instruments. \n";
 
           instrument = "";
         }
@@ -60,7 +60,7 @@ namespace Mantid
           instrument = histoWorkspace->getExperimentInfo(0)->getInstrument()->getName();
         } else
         {
-          g_log.warning() << "The histo workspace does not have any instruments. \n";
+          g_log.notice() << "The histo workspace does not have any instruments. \n";
 
           instrument = "";
         }

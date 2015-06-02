@@ -34,31 +34,31 @@
 #include <QLayout>
 
 ColorMapDialog::ColorMapDialog(QWidget* parent, Qt::WFlags fl)
-	: QDialog(parent, fl)
+  : QDialog(parent, fl), applyBtn(NULL), closeBtn(NULL), editor(NULL), d_matrix(NULL)
 {
-setObjectName( "ColorMapDialog" );
-setWindowTitle(tr("MantidPlot") + " - " + tr("Custom Color Map"));
-editor = new ColorMapEditor();
+  setObjectName( "ColorMapDialog" );
+  setWindowTitle(tr("MantidPlot") + " - " + tr("Custom Color Map"));
+  editor = new ColorMapEditor();
 	
-applyBtn = new QPushButton(tr("&Apply"));
-connect(applyBtn, SIGNAL(clicked()), this, SLOT(apply()));
+  applyBtn = new QPushButton(tr("&Apply"));
+  connect(applyBtn, SIGNAL(clicked()), this, SLOT(apply()));
 
-closeBtn = new QPushButton(tr("&Close"));
-connect(closeBtn, SIGNAL(clicked()), this, SLOT(reject()));
+  closeBtn = new QPushButton(tr("&Close"));
+  connect(closeBtn, SIGNAL(clicked()), this, SLOT(reject()));
 
-QHBoxLayout* hb = new QHBoxLayout();
-hb->setSpacing(5);
-hb->addStretch();
-hb->addWidget(applyBtn);
-hb->addWidget(closeBtn);
-hb->addStretch();
+  QHBoxLayout* hb = new QHBoxLayout();
+  hb->setSpacing(5);
+  hb->addStretch();
+  hb->addWidget(applyBtn);
+  hb->addWidget(closeBtn);
+  hb->addStretch();
 	
-QVBoxLayout* vl = new QVBoxLayout(this);
-vl->setSpacing(0);
-vl->addWidget(editor);	
-vl->addLayout(hb);
+  QVBoxLayout* vl = new QVBoxLayout(this);
+  vl->setSpacing(0);
+  vl->addWidget(editor);
+  vl->addLayout(hb);
 	
-setMaximumWidth(editor->width() + 20);
+  setMaximumWidth(editor->width() + 20);
 }
 
 void ColorMapDialog::setMatrix(Matrix *m)

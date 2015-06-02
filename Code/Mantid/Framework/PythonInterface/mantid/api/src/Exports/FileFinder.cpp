@@ -11,7 +11,9 @@ namespace {
   BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(getFullPathOverloader, getFullPath, 1, 2)
 }
 
+// clang-format off
 void export_FileFinder()
+// clang-format on
 {
   class_<FileFinderImpl, boost::noncopyable>("FileFinderImpl", no_init)
     .def("getFullPath", &FileFinderImpl::getFullPath,

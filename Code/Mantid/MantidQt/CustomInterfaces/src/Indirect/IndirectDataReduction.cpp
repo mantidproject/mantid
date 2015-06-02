@@ -16,6 +16,7 @@
 #include "MantidQtCustomInterfaces/Indirect/ISISCalibration.h"
 #include "MantidQtCustomInterfaces/Indirect/ISISDiagnostics.h"
 #include "MantidQtCustomInterfaces/Indirect/ISISEnergyTransfer.h"
+#include "MantidQtCustomInterfaces/Indirect/ILLCalibration.h"
 #include "MantidQtCustomInterfaces/Indirect/ILLEnergyTransfer.h"
 
 #include <QDesktopServices>
@@ -127,6 +128,7 @@ void IndirectDataReduction::initLayout()
   addTab<IndirectSymmetrise>("Symmetrise");
   addTab<IndirectSqw>("S(Q, w)");
   addTab<IndirectMoments>("Moments");
+  addTab<ILLCalibration>("ILL Calibration");
   addTab<ILLEnergyTransfer>("ILL Energy Transfer");
 
   // Connect "?" (Help) Button
@@ -207,6 +209,7 @@ Mantid::API::MatrixWorkspace_sptr IndirectDataReduction::loadInstrumentIfNotExis
     std::string parameterFilename = idfDirectory + instrumentName + "_Definition.xml";
     IAlgorithm_sptr loadAlg = AlgorithmManager::Instance().create("LoadEmptyInstrument");
     loadAlg->setChild(true);
+    loadAlg->setLogging(false);
     loadAlg->initialize();
     loadAlg->setProperty("Filename", parameterFilename);
     loadAlg->setProperty("OutputWorkspace", "__IDR_Inst");
@@ -219,6 +222,7 @@ Mantid::API::MatrixWorkspace_sptr IndirectDataReduction::loadInstrumentIfNotExis
       std::string ipfFilename = idfDirectory + instrumentName + "_" + analyser + "_" + reflection + "_Parameters.xml";
       IAlgorithm_sptr loadParamAlg = AlgorithmManager::Instance().create("LoadParameterFile");
       loadParamAlg->setChild(true);
+      loadParamAlg->setLogging(false);
       loadParamAlg->initialize();
       loadParamAlg->setProperty("Filename", ipfFilename);
       loadParamAlg->setProperty("Workspace", instWorkspace);
@@ -229,8 +233,10 @@ Mantid::API::MatrixWorkspace_sptr IndirectDataReduction::loadInstrumentIfNotExis
   }
   catch(std::exception &ex)
   {
-    g_log.error() << "Failed to load instrument with error: "
-                  << ex.what() << std::endl;
+    g_log.warning() << "Failed to load instrument with error: "
+                    << ex.what()
+                    << ". The current facility may not be fully supported."
+                    << std::endl;
     return MatrixWorkspace_sptr();
   }
 }
@@ -241,9 +247,9 @@ Mantid::API::MatrixWorkspace_sptr IndirectDataReduction::loadInstrumentIfNotExis
  *
  * @return Map of information ID to value
  */
-std::map<QString, QString> IndirectDataReduction::getInstrumentDetails()
+QMap<QString, QString> IndirectDataReduction::getInstrumentDetails()
 {
-  std::map<QString, QString> instDetails;
+  QMap<QString, QString> instDetails;
 
   std::string instrumentName = m_uiForm.iicInstrumentConfiguration->getInstrumentName().toStdString();
   std::string analyser = m_uiForm.iicInstrumentConfiguration->getAnalyserName().toStdString();
@@ -258,7 +264,7 @@ std::map<QString, QString> IndirectDataReduction::getInstrumentDetails()
   ipfElements.push_back("analysis-type");
   ipfElements.push_back("spectra-min");
   ipfElements.push_back("spectra-max");
-  ipfElements.push_back("efixed-val");
+  ipfElements.push_back("Efixed");
   ipfElements.push_back("peak-start");
   ipfElements.push_back("peak-end");
   ipfElements.push_back("back-start");
@@ -268,18 +274,25 @@ std::map<QString, QString> IndirectDataReduction::getInstrumentDetails()
   ipfElements.push_back("save-nexus-choice");
   ipfElements.push_back("save-ascii-choice");
   ipfElements.push_back("fold-frames-choice");
+  ipfElements.push_back("resolution");
 
   // In the IRIS IPF there is no fmica component
   if(instrumentName == "IRIS" && analyser == "fmica")
     analyser = "mica";
 
   if(m_instWorkspace == NULL)
+  {
+    g_log.warning("Instrument workspace not loaded");
     return instDetails;
+  }
 
   // Get the instrument
   auto instrument = m_instWorkspace->getInstrument();
   if(instrument == NULL)
+  {
+    g_log.warning("Instrument workspace has no instrument");
     return instDetails;
+  }
 
   // Get the analyser component
   auto component = instrument->getComponentByName(analyser);
@@ -294,7 +307,7 @@ std::map<QString, QString> IndirectDataReduction::getInstrumentDetails()
       QString value = getInstrumentParameterFrom(instrument, key);
 
       if(value.isEmpty() && component != NULL)
-        QString value = getInstrumentParameterFrom(component, key);
+        value = getInstrumentParameterFrom(component, key);
 
       instDetails[QString::fromStdString(key)] = value;
     }
@@ -324,7 +337,12 @@ QString IndirectDataReduction::getInstrumentParameterFrom(Mantid::Geometry::ICom
   QString value;
 
   if(!comp->hasParameter(param))
+  {
+    g_log.debug() << "Component " << comp->getName()
+                  << " has no parameter " << param
+                  << std::endl;
     return "";
+  }
 
   // Determine it's type and call the corresponding get function
   std::string paramType = comp->getParameterType(param);
@@ -346,7 +364,7 @@ void IndirectDataReduction::instrumentLoadingDone(bool error)
 {
   if(error)
   {
-    g_log.error("Instument loading failed! This instrument (or analyser/reflection configuration) may not be supported by the interface.");
+    g_log.warning("Instument loading failed! This instrument (or analyser/reflection configuration) may not be supported by the interface.");
     return;
   }
 }
@@ -485,7 +503,8 @@ void IndirectDataReduction::filterUiForFacility(QString facility)
   }
   else if(facility == "ILL")
   {
-    enabledTabs << "ILL Energy Transfer";
+    enabledTabs << "ILL Energy Transfer"
+                << "ILL Calibration";
     disabledInstruments << "IN10" << "IN13" << "IN16";
   }
 

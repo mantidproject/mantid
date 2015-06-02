@@ -588,8 +588,9 @@ void AlgHistoryTreeWidget::uncheckAllChildren(QTreeWidgetItem* item, int index)
 
 void AlgHistoryTreeWidget::treeSelectionChanged()
 {	
-  AlgHistoryItem* item = dynamic_cast<AlgHistoryItem*>(this->selectedItems()[0]);
-  emit updateAlgorithmHistoryWindow(item->getAlgorithmHistory());
+  if (AlgHistoryItem* item = dynamic_cast<AlgHistoryItem*>(this->selectedItems()[0])) {
+    emit updateAlgorithmHistoryWindow(item->getAlgorithmHistory());
+  }
 }
 
 void AlgHistoryTreeWidget::selectionChanged ( const QItemSelection & selected, const QItemSelection & deselected )

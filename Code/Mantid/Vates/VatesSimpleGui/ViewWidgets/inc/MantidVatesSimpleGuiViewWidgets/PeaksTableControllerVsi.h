@@ -5,7 +5,7 @@
 #include "MantidVatesSimpleGuiViewWidgets/CameraManager.h"
 #include "MantidVatesSimpleGuiViewWidgets/PeaksTabWidget.h"
 #include "MantidVatesAPI/CompositePeaksPresenterVsi.h"
-#include "MantidAPI/PeakTransformSelector.h"
+#include "MantidGeometry/Crystal/PeakTransformSelector.h"
 #include "MantidGeometry/Crystal/PeakShape.h"
 #include "MantidQtSliceViewer/PeakPalette.h"
 #include "MantidKernel/SpecialCoordinateSystem.h"
@@ -61,12 +61,13 @@ private:
   void removeLayout(QWidget *widget);
   void createTable();
   void updatePeakWorkspaceColor();
+  void setPeakSourceColorToDefault();
   std::map<std::string, QColor> getColors();
   MantidQt::SliceViewer::PeakPalette m_peakPalette;
   boost::shared_ptr<CameraManager> m_cameraManager;
   boost::shared_ptr<Mantid::VATES::CompositePeaksPresenterVsi> m_presenter;
   /// Object for choosing a PeakTransformFactory based on the workspace type.
-  Mantid::API::PeakTransformSelector m_peakTransformSelector;
+  Mantid::Geometry::PeakTransformSelector m_peakTransformSelector;
   PeaksTabWidget *m_peaksTabWidget;
   pqPipelineSource *m_peakMarker;
   Mantid::Kernel::SpecialCoordinateSystem m_coordinateSystem;

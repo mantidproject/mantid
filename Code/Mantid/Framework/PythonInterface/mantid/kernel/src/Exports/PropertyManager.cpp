@@ -26,7 +26,9 @@ namespace
 
 }
 
+// clang-format off
 void export_PropertyManager()
+// clang-format on
 {
   register_ptr_to_python<boost::shared_ptr<PropertyManager>>();
   class_<PropertyManager, bases<IPropertyManager>, boost::noncopyable>("PropertyManager")

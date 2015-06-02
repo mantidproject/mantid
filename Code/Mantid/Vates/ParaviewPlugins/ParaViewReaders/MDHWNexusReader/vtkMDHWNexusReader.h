@@ -1,7 +1,10 @@
 #ifndef _vtkMDHWNexusReader_h
 #define _vtkMDHWNexusReader_h
+
+
 #include "vtkUnstructuredGridAlgorithm.h"
 #include "MantidVatesAPI/MDHWNexusLoadingPresenter.h"
+#include "MantidVatesAPI/Normalization.h"
 #include "MantidKernel/MultiThreaded.h"
 
 class vtkImplicitFunction;
@@ -32,6 +35,8 @@ public:
   char* GetWorkspaceTypeName();
   /// Getter for the input geometry
   const char* GetInputGeometryXML();
+  /// Setter for the normalization
+  void SetNormalization(int option);
 
 protected:
   vtkMDHWNexusReader();
@@ -70,5 +75,8 @@ private:
 
   //Cached workspace type name.
   std::string typeName;
+
+  /// Normalization Option
+  Mantid::VATES::VisualNormalization m_normalizationOption;
 };
 #endif

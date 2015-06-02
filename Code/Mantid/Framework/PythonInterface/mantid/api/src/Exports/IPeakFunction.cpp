@@ -7,7 +7,9 @@ using Mantid::API::IPeakFunction;
 using Mantid::PythonInterface::IPeakFunctionAdapter;
 using namespace boost::python;
 
+// clang-format off
 void export_IPeakFunction()
+// clang-format on
 {
   class_<IPeakFunction, bases<IFunction1D>, boost::shared_ptr<IPeakFunctionAdapter>,
           boost::noncopyable>("IPeakFunction")

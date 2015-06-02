@@ -5,6 +5,7 @@
 #include "MantidVatesAPI/vtkDataSetFactory.h"
 #include "MantidAPI/IMDWorkspace.h"
 #include "vtkUnstructuredGrid.h"
+#include "MantidVatesAPI/Normalization.h"
 #include "MantidVatesAPI/ThresholdRange.h"
 #include "MantidDataObjects/MDHistoWorkspace.h"
 
@@ -43,7 +44,7 @@ namespace Mantid
     public:
 
       /// Constructor
-      vtkMDHistoLineFactory(ThresholdRange_scptr thresholdRange, const std::string& scalarName);
+      vtkMDHistoLineFactory(ThresholdRange_scptr thresholdRange, const VisualNormalization normalizationOption);
 
       /// Assignment operator
       vtkMDHistoLineFactory& operator=(const vtkMDHistoLineFactory& other);
@@ -74,7 +75,7 @@ namespace Mantid
 
       Mantid::DataObjects::MDHistoWorkspace_sptr m_workspace;
 
-      std::string m_scalarName;
+      VisualNormalization m_normalizationOption;
 
       mutable ThresholdRange_scptr m_thresholdRange;
     

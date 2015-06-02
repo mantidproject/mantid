@@ -1066,7 +1066,7 @@ API::Workspace_sptr LoadNexusProcessed::loadPeaksEntry(NXEntry &entry) {
   for (int r = 0; r < numberPeaks; r++) {
     Kernel::V3D v3d;
     v3d[2] = 1.0;
-    API::IPeak *p;
+    Geometry::IPeak *p;
     p = peakWS->createPeak(v3d);
     peakWS->addPeak(*p);
   }

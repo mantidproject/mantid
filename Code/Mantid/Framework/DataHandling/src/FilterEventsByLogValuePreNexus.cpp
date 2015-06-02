@@ -202,8 +202,15 @@ static string generateMappingfileName(EventWorkspace_sptr &wksp) {
 /** Constructor
 */
 FilterEventsByLogValuePreNexus::FilterEventsByLogValuePreNexus()
-    : Mantid::API::IFileLoader<Kernel::FileDescriptor>(), eventfile(NULL),
-      m_maxNumEvents(0) {}
+    : Mantid::API::IFileLoader<Kernel::FileDescriptor>(), proton_charge_tot(0),
+      detid_max(0), eventfile(NULL), num_events(0), num_pulses(0), numpixel(0),
+      num_good_events(0), num_error_events(0), num_bad_events(0),
+      num_wrongdetid_events(0), num_ignored_events(0), first_event(0),
+      m_maxNumEvents(0), using_mapping_file(false), loadOnlySomeSpectra(false),
+      longest_tof(0.0), shortest_tof(0.0), parallelProcessing(false),
+      pulsetimesincreasing(false), m_throwError(true), m_examEventLog(false),
+      m_pixelid2exam(0), m_numevents2write(0), m_freqHz(0), istep(0),
+      m_dbPixelID(0), m_useDBOutput(false), m_corretctTOF(false) {}
 
 //----------------------------------------------------------------------------------------------
 /** Desctructor
@@ -740,13 +747,22 @@ void FilterEventsByLogValuePreNexus::doStatToEventLog(size_t mindex) {
       max_dt = temp_dt;
   }
 
-  double avg_dt = static_cast<double>(sum_dt) / static_cast<double>(nbins - 1);
+  if ( nbins - 1 ) {
+    double avg_dt = static_cast<double>(sum_dt) / static_cast<double>(nbins - 1);
+    g_log.information() << "Event log of map index " << mindex
+      << ": Avg(dt) = " << avg_dt * 1.0E-9
+      << ", Min(dt) = " << static_cast<double>(min_dt) * 1.0E-9
+      << ", Max(dt) = " << static_cast<double>(max_dt) * 1.0E-9
+      << "\n";
+  } else {
+    g_log.information() << "Event log of map index " << mindex
+      << ": Avg(dt) = " << static_cast<double>(sum_dt) * 1.0E-9
+      << ", Min(dt) = " << static_cast<double>(min_dt) * 1.0E-9
+      << ", Max(dt) = " << static_cast<double>(max_dt) * 1.0E-9
+      << "\n";
 
-  g_log.information() << "Event log of map index " << mindex
-                      << ": Avg(dt) = " << avg_dt * 1.0E-9
-                      << ", Min(dt) = " << static_cast<double>(min_dt) * 1.0E-9
-                      << ", Max(dt) = " << static_cast<double>(max_dt) * 1.0E-9
-                      << "\n";
+  }
+
   g_log.information() << "Number of zero-interval eveng log = " << numzeros
                       << "\n";
 

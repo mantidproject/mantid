@@ -1,5 +1,5 @@
 #include "MantidAPI/IPeaksWorkspace.h"
-#include "MantidAPI/IPeak.h"
+#include "MantidGeometry/Crystal/IPeak.h"
 #include "MantidPythonInterface/kernel/Registry/DataItemInterface.h"
 #include "MantidPythonInterface/kernel/Converters/PyObjectToV3D.h"
 #include <boost/python/class.hpp>
@@ -7,6 +7,7 @@
 #include <boost/optional.hpp>
 #include <boost/python/manage_new_object.hpp>
 
+using namespace Mantid::Geometry;
 using namespace Mantid::API;
 using Mantid::PythonInterface::Registry::DataItemInterface;
 using namespace boost::python;
@@ -33,7 +34,9 @@ IPeak* createPeakQLabWithDistance(IPeaksWorkspace & self, const object& data, do
 
 }
 
+// clang-format off
 void export_IPeaksWorkspace()
+// clang-format on
 {
   // IPeaksWorkspace class
   class_< IPeaksWorkspace, bases<ITableWorkspace, ExperimentInfo>, boost::noncopyable >("IPeaksWorkspace", no_init)

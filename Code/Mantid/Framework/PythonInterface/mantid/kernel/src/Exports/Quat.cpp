@@ -2,8 +2,9 @@
 #include "MantidKernel/V3D.h"
 #include <boost/python/class.hpp>
 #include <boost/python/operators.hpp>
-#include <boost/python/return_value_policy.hpp>
 #include <boost/python/copy_const_reference.hpp>
+#include <boost/python/register_ptr_to_python.hpp>
+#include <boost/python/return_value_policy.hpp>
 
 using Mantid::Kernel::Quat;
 using Mantid::Kernel::V3D;
@@ -18,8 +19,12 @@ using boost::python::return_value_policy;
 /**
  * Python exports of the Mantid::Kernel::Quat class.
  */
+// clang-format off
 void export_Quat()
+// clang-format on
 {
+  boost::python::register_ptr_to_python<boost::shared_ptr<Quat> >();
+
   //Quat class
   class_< Quat >("Quat", "Quaternions are the 3D generalization of complex numbers. "
                  "Quaternions are used for roations in 3D spaces and often implemented for "

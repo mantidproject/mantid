@@ -25,7 +25,10 @@ DECLARE_ALGORITHM(MergeMDFiles)
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
-MergeMDFiles::MergeMDFiles() {}
+MergeMDFiles::MergeMDFiles()
+    : m_nDims(0), m_MDEventType(), m_fileBasedTargetWS(false), m_Filenames(),
+      m_EventLoader(), m_OutIWS(), totalEvents(0), totalLoaded(0), fileMutex(),
+      statsMutex(), prog(NULL) {}
 
 //----------------------------------------------------------------------------------------------
 /** Destructor
@@ -314,8 +317,10 @@ void MergeMDFiles::finalizeOutput(const std::string &outputFile) {
     // create or open WS group and put there additional information about WS and
     // its dimensions
     bool old_data_there;
+    // clang-format off
     boost::scoped_ptr< ::NeXus::File> file(MDBoxFlatTree::createOrOpenMDWSgroup(
         outputFile, m_nDims, m_MDEventType, false, old_data_there));
+    // clang-format on
     this->progress(0.94, "Saving ws history and dimensions");
     MDBoxFlatTree::saveWSGenericInfo(file.get(), m_OutIWS);
     // Save each ExperimentInfo to a spot in the file
@@ -348,6 +353,9 @@ void MergeMDFiles::exec() {
   // pDiskBuffer = NULL;
   MultipleFileProperty *multiFileProp =
       dynamic_cast<MultipleFileProperty *>(getPointerToProperty("Filenames"));
+  if (!multiFileProp) {
+    throw std::logic_error("Filenames property must have MultipleFileProperty type.");
+  }
   m_Filenames =
       MultipleFileProperty::flattenFileNames(multiFileProp->operator()());
   if (m_Filenames.size() == 0)

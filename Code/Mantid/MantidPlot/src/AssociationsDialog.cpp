@@ -135,43 +135,45 @@ void AssociationsDialog::changePlotAssociation(int curve, const QString& text)
   QStringList lst = text.split(",", QString::SkipEmptyParts);
   if (lst.count() == 1){
     c->setTitle(lst[0]);
-    if (graph->curveType(curve) == Graph::Box)
-      dynamic_cast<BoxCurve*>(c)->loadData();
-    else if (graph->curveType(curve) == Graph::Pie)
-      dynamic_cast<QwtPieCurve*>(c)->loadData();
+    if (auto b = dynamic_cast<BoxCurve*>(c))
+      b->loadData();
+    else if (auto p = dynamic_cast<QwtPieCurve*>(c))
+      p->loadData();
   } else if (lst.count() == 2){
     c->setXColumnName(lst[0].remove("(X)"));
     c->setTitle(lst[1].remove("(Y)"));
     c->loadData();
   } else if (lst.count() == 3){//curve with error bars
-    QwtErrorPlotCurve *er = dynamic_cast<QwtErrorPlotCurve *>(c);
-    QString xColName = lst[0].remove("(X)");
-    QString yColName = lst[1].remove("(Y)");
-    QString erColName = lst[2].remove("(xErr)").remove("(yErr)");
-    DataCurve *master_curve = graph->masterCurve(xColName, yColName);
-    if (!master_curve)
-      return;
+    if (QwtErrorPlotCurve *er = dynamic_cast<QwtErrorPlotCurve *>(c)) {
+      QString xColName = lst[0].remove("(X)");
+      QString yColName = lst[1].remove("(Y)");
+      QString erColName = lst[2].remove("(xErr)").remove("(yErr)");
+      DataCurve *master_curve = graph->masterCurve(xColName, yColName);
+      if (!master_curve)
+        return;
 
-    int type = QwtErrorPlotCurve::Vertical;
-    if (text.contains("(xErr)"))
-      type = QwtErrorPlotCurve::Horizontal;
-    er->setDirection(type);
-    er->setTitle(erColName);
-    if (master_curve != er->masterCurve())
-      er->setMasterCurve(master_curve);
-    else
-      er->loadData();
+      int type = QwtErrorPlotCurve::Vertical;
+      if (text.contains("(xErr)"))
+        type = QwtErrorPlotCurve::Horizontal;
+      er->setDirection(type);
+      er->setTitle(erColName);
+      if (master_curve != er->masterCurve())
+        er->setMasterCurve(master_curve);
+      else
+        er->loadData();
+    }
   } else if (lst.count() == 4) {
-    VectorCurve *v = dynamic_cast<VectorCurve *>(c);
-    v->setXColumnName(lst[0].remove("(X)"));
-    v->setTitle(lst[1].remove("(Y)"));
+    if (VectorCurve *v = dynamic_cast<VectorCurve *>(c)) {
+      v->setXColumnName(lst[0].remove("(X)"));
+      v->setTitle(lst[1].remove("(Y)"));
 
-    QString xEndCol = lst[2].remove("(X)").remove("(A)");
-    QString yEndCol = lst[3].remove("(Y)").remove("(M)");
-    if (v->vectorEndXAColName() != xEndCol || v->vectorEndYMColName() != yEndCol)
-      v->setVectorEnd(xEndCol, yEndCol);
-    else
-      v->loadData();
+      QString xEndCol = lst[2].remove("(X)").remove("(A)");
+      QString yEndCol = lst[3].remove("(Y)").remove("(M)");
+      if (v->vectorEndXAColName() != xEndCol || v->vectorEndYMColName() != yEndCol)
+        v->setVectorEnd(xEndCol, yEndCol);
+      else
+        v->loadData();
+    }
   }
   graph->notifyChanges();
 }
@@ -384,11 +386,12 @@ void AssociationsDialog::setGraph(Graph *g)
         if (it->rtti() != QwtPlotItem::Rtti_PlotCurve)
             continue;
 
-        if (dynamic_cast<const DataCurve *>(it)->type() != Graph::Function){
-            QString s = dynamic_cast<const DataCurve *>(it)->plotAssociation();
-            if (dynamic_cast<const DataCurve *>(it)->table()){
-                QString table = dynamic_cast<const DataCurve *>(it)->table()->objectName();
-                plotAssociationsList << table + ": " + s.remove(table + "_");
+        auto dataCurve = dynamic_cast<const DataCurve *>(it);
+        if (dataCurve && dataCurve->type() != Graph::Function){
+            QString s = dataCurve->plotAssociation();
+            if (auto table = dataCurve->table()){
+                QString tableName = table->objectName();
+                plotAssociationsList << tableName + ": " + s.remove(tableName + "_");
             }
         }
   }

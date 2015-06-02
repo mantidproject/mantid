@@ -123,11 +123,6 @@ Mantid::Geometry::PeakShape_const_sptr Integrate3DEvents::ellipseIntegrateEvents
   }
 
   std::vector<std::pair<double, V3D> > &some_events = event_lists[hkl_key];
-  for (size_t it = 0; it != some_events.size(); ++it) {
-    hkl_key = getHklKey2(some_events[it].second);
-    if (hkl_key != 0) // only save if hkl != (0,0,0)
-      peak_qs[hkl_key] = some_events[it].second;
-  }
 
   if (some_events.size() < 3) // if there are not enough events to
   {                           // find covariance matrix, return
@@ -423,7 +418,8 @@ void Integrate3DEvents::addEvent(std::pair<double, V3D> event_Q, bool hkl_integ)
  *
  */
 PeakShapeEllipsoid_const_sptr Integrate3DEvents::ellipseIntegrateEvents(
-    std::vector<std::pair<double, V3D> > const &ev_list, std::vector<V3D> const &directions,
+    std::vector<std::pair<double, Mantid::Kernel::V3D> > const &ev_list,
+    std::vector<Mantid::Kernel::V3D> const &directions,
     std::vector<double> const &sigmas, bool specify_size, double peak_radius,
     double back_inner_radius, double back_outer_radius,
     std::vector<double> &axes_radii, double &inti, double &sigi) {

@@ -18,13 +18,17 @@ namespace
   BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Component_getStringParameter,Component::getStringParameter,1,2)
   BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Component_getIntParameter,Component::getIntParameter,1,2)
   BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Component_getParameterType,Component::getParameterType,1,2)
+  BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Component_getRotation,Component::getRotation,0,0)
+  BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Component_getRelativePos,Component::getRelativePos,0,0)
   BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Component_getParamShortDescription,Component::getParamShortDescription,1,2)
   BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Component_getParamDescription,Component::getParamDescription,1,2)
 
 
 }
 
+// clang-format off
 void export_Component()
+// clang-format on
 {
   class_<Component, bases<IComponent>, boost::noncopyable>("Component", no_init)
     .def("getParameterNames", &Component::getParameterNames, Component_getParameterNames())
@@ -35,6 +39,9 @@ void export_Component()
     .def("getRotationParameter", &Component::getRotationParameter, Component_getRotationParameter())
     .def("getStringParameter", &Component::getStringParameter, Component_getStringParameter())
     .def("getIntParameter", &Component::getIntParameter, Component_getIntParameter())
+
+    .def("getRotation", &Component::getRotation, Component_getRotation())
+    .def("getRelativePos", &Component::getRelativePos, Component_getRelativePos())
     //
     .def("getParamShortDescription", &Component::getParamShortDescription, Component_getParamShortDescription())
     .def("getParamDescription", &Component::getParamDescription, Component_getParamDescription())
@@ -42,8 +49,7 @@ void export_Component()
     .def("getDescription", &Component::getDescription,"Return the description of current parameterized component")
     .def("setDescription", &Component::setDescription, "Set component's description, works only if the component is parameterized component")
 
-    // HACK -- python should return parameters regardless of type. this is until rows below do not work
-    .def("getParameterType", &Component::getParameterType, Component_getParameterType())
+    // HACK -- python should return parameters regardless of type. this is until rows below do not work    .def("getParameterType", &Component::getParameterType, Component_getParameterType())
     //// this does not work for some obvious or not obvious reasons 
     //.def("getParameter", &Component::getNumberParameter, Component_getNumberParameter())
     //.def("getParameter", &Component::getBoolParameter, Component_getBoolParameter())

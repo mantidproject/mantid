@@ -1,14 +1,16 @@
 #include "MantidCrystal/PeakClusterProjection.h"
 
-#include "MantidAPI/IPeak.h"
+#include "MantidGeometry/Crystal/IPeak.h"
+#include "MantidGeometry/Crystal//PeakTransformHKL.h"
+#include "MantidGeometry/Crystal//PeakTransformQLab.h"
+#include "MantidGeometry/Crystal//PeakTransformQSample.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/IMDEventWorkspace.h"
-#include "MantidAPI/PeakTransformHKL.h"
-#include "MantidAPI/PeakTransformQLab.h"
-#include "MantidAPI/PeakTransformQSample.h"
+
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
+using namespace Mantid::Geometry;
 
 namespace {
 /**
@@ -27,6 +29,9 @@ PeakTransform_sptr makePeakTransform(IMDWorkspace const *const mdWS) {
     peakTransformFactory = boost::make_shared<PeakTransformQSampleFactory>();
   } else if (mdCoordinates == Mantid::Kernel::HKL) {
     peakTransformFactory = boost::make_shared<PeakTransformHKLFactory>();
+  }
+  if (!peakTransformFactory) {
+    throw std::runtime_error("Failed to get a valid PeakTransformFactory");
   }
   const std::string xDim = mdWS->getDimension(0)->getName();
   const std::string yDim = mdWS->getDimension(1)->getName();
