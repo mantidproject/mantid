@@ -125,13 +125,13 @@ copy_files_to_dir ( "${PY_FILES}" ${CMAKE_CURRENT_SOURCE_DIR} ${OUTPUT_DIR}
 # Create the target for this directory
 #############################################################################################
 
-add_library ( PythonAPIModule ${MODULE_DEFINITION} ${EXPORT_FILES} ${SRC_FILES} ${INC_FILES}
+add_library ( PythonAPIModule ${EXPORT_FILES} ${MODULE_DEFINITION} ${SRC_FILES} ${INC_FILES}
               ${PYTHON_INSTALL_FILES} )
 set_python_properties( PythonAPIModule _api )
 set_target_output_directory ( PythonAPIModule ${OUTPUT_DIR} .pyd )
 
 # Add the required dependencies
-target_link_libraries ( PythonAPIModule LINK_PRIVATE 
+target_link_libraries ( PythonAPIModule LINK_PRIVATE
             PythonGeometryModule
             PythonKernelModule
             API
