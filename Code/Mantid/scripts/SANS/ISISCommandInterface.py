@@ -1160,12 +1160,12 @@ def FindBeamCentre(rlow, rupp, MaxIter = 10, xstart = None, ystart = None, toler
 
 # Check the input for time shifts when adding event files
 def check_time_shifts_for_added_event_files(number_of_files, time_shifts= ''):
+    # If there are no entries then proceed.
+    if not time_shifts or time_shifts.isspace():
+        return
+
     time_shift_container = time_shifts.split(',')
     message = ''
-    # If the time_shift_container then the user does not specify a shift
-    if len(time_shift_container)==0:
-        print message
-        return message
 
     # Check if the time shift elements can be cast to float
     for time_shift_element in time_shift_container:

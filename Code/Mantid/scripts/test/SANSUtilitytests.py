@@ -290,7 +290,9 @@ class AddOperationTest(unittest.TestCase):
             shift = time_duration.total_nanoseconds(DateAndTime(time1)- DateAndTime(time2))/1e9 - extra_time_shift
 
         # Check ws1 against output
-        self._assert_times(times1, times_out, shift)
+        # We shift the second workspace onto the first workspace
+        shift_ws1 = 0
+        self._assert_times(times1, times_out, shift_ws1)
         # Check ws2 against output
         self._assert_times(times2, times_out, shift)
         # Check overlapping times
@@ -298,7 +300,8 @@ class AddOperationTest(unittest.TestCase):
 
     def _assert_times(self, times_in, times_out, shift):
         for time in times_in:
-            # Add the shift in nanaoseconds to the DateAndTime object
+            # Add the shift in nanaoseconds to the DateAndTime object ( the plus operator is defined
+            # for nanoseconds)
             converted_time = time + int(shift*1e9)
             self.assertTrue(converted_time in times_out)
 
@@ -326,7 +329,7 @@ class AddOperationTest(unittest.TestCase):
         start_time_1 = "2010-01-01T00:00:00"
         ws1 = provide_event_ws_with_entries(names[0],start_time_1, extra_time_shift = 0.0)
         # Create event ws2
-        start_time_2 = "2010-01-01T00:00:00"
+        start_time_2 = "2012-01-01T00:10:00"
         ws2 = provide_event_ws(names[1],start_time_2, extra_time_shift = 0.0)
         # Create adder
         adder = su.AddOperation(isOverlay, '')
@@ -337,12 +340,11 @@ class AddOperationTest(unittest.TestCase):
         self.compare_added_workspaces(ws1, ws2, out_ws, start_time_1, start_time_2, extra_time_shift = 0.0, isOverlay = isOverlay)
 
     def test_two_files_are_added_correctly_for_overlay_on_and_inverted_times(self):
-        '''
         isOverlay = True
         names =['ws1', 'ws2']
         out_ws_name = 'out_ws'
         # Create event ws1
-        start_time_1 = "2012-01-01T00:00:00"
+        start_time_1 = "2012-01-01T00:10:00"
         ws1 = provide_event_ws_with_entries(names[0],start_time_1, extra_time_shift = 0.0)
         # Create event ws2
         start_time_2 = "2010-01-01T00:00:00"
@@ -354,7 +356,6 @@ class AddOperationTest(unittest.TestCase):
         out_ws = mtd[out_ws_name]
         # Assert
         self.compare_added_workspaces(ws1, ws2, out_ws, start_time_1, start_time_2, extra_time_shift = 0.0, isOverlay = isOverlay)
-        '''
 
     def test_two_files_are_added_correctly_for_overlay_off(self):
         isOverlay = False
@@ -375,7 +376,6 @@ class AddOperationTest(unittest.TestCase):
         self.compare_added_workspaces(ws1, ws2, out_ws, start_time_1, start_time_2, extra_time_shift = 0.0, isOverlay = isOverlay)
 
     def test_two_files_are_added_correctly_with_time_shift(self):
-        '''
         isOverlay = True
         names =['ws1', 'ws2']
         out_ws_name = 'out_ws'
@@ -384,7 +384,7 @@ class AddOperationTest(unittest.TestCase):
         start_time_1 = "2010-01-01T00:00:00"
         ws1 = provide_event_ws_with_entries(names[0],start_time_1, extra_time_shift = 0.0)
         # Create event ws2
-        start_time_2 = "2010-01-01T01:00:00"
+        start_time_2 = "2012-01-01T01:10:00"
         ws2 = provide_event_ws(names[1],start_time_2, extra_time_shift = time_shift )
         # Create adder
         adder = su.AddOperation(True, '')
@@ -393,7 +393,7 @@ class AddOperationTest(unittest.TestCase):
         out_ws = mtd[out_ws_name]
         # Assert
         self.compare_added_workspaces(ws1, ws2, out_ws, start_time_1, start_time_2, extra_time_shift = time_shift, isOverlay = isOverlay)
-        '''
+
 
     def test_multiple_files_are_overlayed_correctly(self):
         isOverlay = True
@@ -404,10 +404,10 @@ class AddOperationTest(unittest.TestCase):
         start_time_1 = "2010-01-01T00:00:00"
         ws1 = provide_event_ws_with_entries(names[0],start_time_1, extra_time_shift = 0.0)
         # Create event ws2
-        start_time_2 = "2010-01-01T00:00:00"
+        start_time_2 = "2012-01-01T00:00:00"
         ws2 = provide_event_ws(names[1],start_time_2, extra_time_shift = 0.0)
         # Create event ws3
-        start_time_3 = "2010-01-01T00:00:00"
+        start_time_3 = "2013-01-01T00:00:00"
         ws3 = provide_event_ws(names[2],start_time_3, extra_time_shift = 0.0)
         # Create adder
         adder = su.AddOperation(True, '')
@@ -420,16 +420,14 @@ class AddOperationTest(unittest.TestCase):
         self.compare_added_workspaces(out_ws, ws2, out_ws2, start_time_1, start_time_2, extra_time_shift = 0.0, isOverlay = isOverlay)
 
 class TestCombineWorkspacesFactory(unittest.TestCase):
-    _isOverlay = su.ISOVERLAY
-    _isNoOverlay = 'sdfsdf'
     def test_that_factory_returns_overlay_class(self):
         factory = su.CombineWorkspacesFactory()
-        alg = factory.create_add_algorithm(_isOverlay)
+        alg = factory.create_add_algorithm(True)
         self.assertTrue(isinstance(alg, su.OverlayWorkspaces))
 
     def test_that_factory_returns_overlay_class(self):
         factory = su.CombineWorkspacesFactory()
-        alg = factory.create_add_algorithm(self._isNoOverlay)
+        alg = factory.create_add_algorithm(False)
         self.assertTrue(isinstance(alg, su.PlusWorkspaces))
 
 class TestOverlayWorkspaces(unittest.TestCase):

@@ -19,8 +19,6 @@ ADDED_EVENT_DATA_TAG = '_added_event_data'
 REG_DATA_NAME = '-add' + ADDED_EVENT_DATA_TAG + '[_1-9]*$'
 REG_DATA_MONITORS_NAME = '-add_monitors' + ADDED_EVENT_DATA_TAG + '[_1-9]*$'
 
-ISOVERLAY = 'isOverlay'
-
 def deprecated(obj):
     """
     Decorator to apply to functions or classes that we think are not being (or
@@ -603,13 +601,32 @@ def get_full_path_for_added_event_data(file_name):
 
 
 class AddOperation(object):
-    def __init__(self,type, time_shifts):
+    """
+    The AddOperation allows to add two workspaces at a time.
+    """
+    def __init__(self,isOverlay, time_shifts):
+        """
+        The AddOperation requires to know if the workspaces are to 
+        be plainly added or to be overlayed. Additional time shifts can be
+        specified
+        @param isOverlay :: true if the operation is an overlay operation
+        @param time_shifts :: a string with comma-separted time shift values
+        """
         super(AddOperation, self).__init__()
         factory = CombineWorkspacesFactory()
-        self.adder = factory.create_add_algorithm(type)
+        self.adder = factory.create_add_algorithm(isOverlay)
         self.time_shifter = TimeShifter(time_shifts)
 
     def add(self, LHS_workspace, RHS_workspace, output_workspace, run_to_add):
+        """
+        Add two workspaces together and place the result into the outputWorkspace.
+        The user needs to specify which run is being added in order to determine
+        the correct time shift
+        @param LHS_workspace :: first workspace, this workspace is a reference workspace
+                                and hence never shifted
+        @param RHS_workspace :: second workspace which can be shifted in time
+        @param run_to_add :: the number of the nth added workspace
+        """
         current_time_shift = self.time_shifter.get_Nth_time_shift(run_to_add)
         self.adder.add(LHS_workspace=LHS_workspace,
                        RHS_workspace= RHS_workspace,
@@ -617,34 +634,64 @@ class AddOperation(object):
                        time_shift = current_time_shift)
 
 class CombineWorkspacesFactory(object):
+    """
+    Factory to determine how to add workspaces
+    """
     def __intit__():
         super(CombineWorkspacesFactory, self).__init__()
-    def create_add_algorithm(self,type):
-        if type == ISOVERLAY:
-            return OverlayWorspaces()
+    def create_add_algorithm(self, isOverlay):
+        """
+        @param isOverlay :: if true we provide the OverlayWorkspaces functionality
+        """
+        if isOverlay:
+            return OverlayWorkspaces()
         else:
             return PlusWorkspaces()
 
 class PlusWorkspaces:
+    """
+    Wrapper for the Plus algorithm
+    """
     def add(self, LHS_workspace, RHS_workspace, output_workspace, time_shift = 0.0):
+        """
+        @param LHS_workspace :: the first workspace
+        @param RHS_workspace :: the second workspace
+        @param output_workspace :: the output workspace
+        @param time_shift :: unused parameter
+        """
         Plus(LHSWorkspace=LHS_workspace,RHSWorkspace= RHS_workspace,OutputWorkspace= output_workspace)
 
 class OverlayWorkspaces:
+    """
+    Overlays (in time) a workspace  on top of another workspace. The two 
+    workspaces overlayed such that the first time entry of their proton_charge entry matches.
+    This overlap can be shifted by the specified time_shift in seconds
+    """
     def add(self, LHS_workspace, RHS_workspace, output_workspace, time_shift = 0.0):
-        rhs_ws = mtd[RHS_workspace]
-        lhs_ws = mtd[LHS_workspace]
-
+        """
+        @param LHS_workspace :: the first workspace
+        @param RHS_workspace :: the second workspace
+        @param output_workspace :: the output workspace
+        @param time_shift :: an additional time shift for the overlay procedure
+        """
+        rhs_ws = self._get_workspace(RHS_workspace)
+        lhs_ws = self._get_workspace(LHS_workspace)
         # Find the time difference between LHS and RHS workspaces and add optional time shift
-        time_difference = _extract_time_difference_in_seconds(lhs_ws, rhs_ws)
+        time_difference = self._extract_time_difference_in_seconds(lhs_ws, rhs_ws)
         total_time_shift = time_difference + time_shift
 
-        # Normalize by proton charge
+        # Normalize by proton charge -- Should we really be doing this? 
 
         # Create a temporary workspace with shifted time values from RHS
-        temp = none #ChangeTimeZero(InputWorkspace=rhs_ws, OutputWorkspace='shifted', RelativeTimeOffset=time_shift)
+        temp_ws_name = 'shifted'
+        temp = ChangeTimeZero(InputWorkspace=rhs_ws, OutputWorkspace=temp_ws_name, RelativeTimeOffset=total_time_shift)
 
         # Add the LHS and shifted workspace
         Plus(LHSWorkspace=LHS_workspace,RHSWorkspace= temp ,OutputWorkspace= output_workspace)
+
+        # Remove the shifted workspace
+        if (mtd.doesExist(temp_ws_name)):
+            mtd.remove(temp_ws_name)
 
     def _extract_time_difference_in_seconds(self, ws1, ws2):
         # The times which need to be compared are the first entry in the proton charge log
@@ -657,14 +704,28 @@ class OverlayWorkspaces:
         times = ws.getRun().getProperty("proton_charge").times
         if len(times) == 0:
             raise ValueError("The proton charge does not have any time entry")
-
         return times[0]
 
+    def _get_workspace(self, workspace):
+        if isinstance(workspace, MatrixWorkspace):
+            return workspace
+        elif isinstance(workspace, basestring) and mtd.doesExist(workspace):
+            return mtd[workspace]
+
+
 class TimeShifter(object):
+    """
+    The time shifter stores all time shifts for all runs which are to be added. If there is 
+    a mismatch the time shifts are set to 0.0 seconds.
+    """
     def __init__(self, time_shifts):
         super(TimeShifter, self).__init__()
         self._time_shifts = time_shifts
     def get_Nth_time_shift(self, n):
+        """
+        Retrieves the specified additional time shift for the nth addition in seconds.
+        @param n :: the nth addition
+        """
         if len(self._time_shifts) >= (n+1):
             return self._cast_to_float(self._time_shifts[n])
         else:
