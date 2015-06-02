@@ -5,8 +5,11 @@
 
 #include "MantidCurveFitting/SplineInterpolation.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidAPI/NumericAxis.h"
+#include "MantidAPI/TextAxis.h"
 
 using Mantid::CurveFitting::SplineInterpolation;
+using namespace Mantid::API;
 
 class SplineInterpolationTest : public CxxTest::TestSuite
 {
@@ -34,8 +37,6 @@ public:
 
   void testExec()
   {
-    using namespace Mantid::API;
-
     int order(2), spectra(1);
 
     //create binned workspaces
@@ -49,8 +50,6 @@ public:
 
   void testExecHistogramData()
   {
-    using namespace Mantid::API;
-
     int order(2), spectra(1);
 
     //create binned workspaces
@@ -64,8 +63,6 @@ public:
 
   void testExecMultipleSpectra()
   {
-    using namespace Mantid::API;
-
     int order(2), spectra(3);
 
     //create binned workspaces
@@ -77,16 +74,54 @@ public:
     checkOutput(alg);
   }
 
+  void testAxisCopy()
+  {
+    int order(2), spectra(3);
+
+    //create binned workspaces
+    MatrixWorkspace_sptr mws = WorkspaceCreationHelper::Create2DWorkspaceFromFunction(SplineFunc(), 1, 0, 20, 1, true);
+    MatrixWorkspace_sptr iws = WorkspaceCreationHelper::Create2DWorkspaceFromFunction(SplineFunc(), spectra, 0, 20, 1, true);
+
+    // Add an axis
+    TextAxis * vAxis = new TextAxis(spectra);
+    vAxis->setLabel(0, "a");
+    vAxis->setLabel(1, "b");
+    vAxis->setLabel(2, "c");
+    iws->replaceAxis(1, vAxis);
+
+    SplineInterpolation alg;
+    runAlgorithm(alg, order, iws, mws);
+    checkOutput(alg);
+
+    // Check the axis values are preserved
+    MatrixWorkspace_const_sptr ows = alg.getProperty("OutputWorkspace");
+    TextAxis * vAxisOut = dynamic_cast<TextAxis *>(ows->getAxis(1));
+    TS_ASSERT(vAxisOut);
+    if(vAxisOut)
+    {
+      TS_ASSERT_EQUALS(vAxisOut->label(0), "a");
+      TS_ASSERT_EQUALS(vAxisOut->label(1), "b");
+      TS_ASSERT_EQUALS(vAxisOut->label(2), "c");
+    }
+  }
+
   void checkOutput(const SplineInterpolation& alg) const
   {
-    using namespace Mantid::API;
-
     MatrixWorkspace_const_sptr ows = alg.getProperty("OutputWorkspace");
     WorkspaceGroup_const_sptr derivs = alg.getProperty("OutputWorkspaceDeriv");
 
     for (size_t i = 0; i < ows->getNumberHistograms(); ++i)
     {
       MatrixWorkspace_const_sptr derivsWs = boost::dynamic_pointer_cast<const MatrixWorkspace>(derivs->getItem(i));
+
+      NumericAxis * derivVAxis = dynamic_cast<NumericAxis *>(derivsWs->getAxis(1));
+      TS_ASSERT(derivVAxis);
+      if(derivVAxis)
+      {
+        for(size_t i = 0; i < derivsWs->getNumberHistograms(); i++)
+          TS_ASSERT_EQUALS((*derivVAxis)(i), i + 1);
+      }
+
       const auto & xs = ows->readX(i);
       const auto & ys = ows->readY(i);
       const auto & d1 = derivsWs->readY(0);
