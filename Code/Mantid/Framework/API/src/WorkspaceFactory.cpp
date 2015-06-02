@@ -132,7 +132,7 @@ void WorkspaceFactoryImpl::initializeFromParent(
     const size_t newAxisLength = child->getAxis(i)->length();
     const size_t oldAxisLength = parent->getAxis(i)->length();
 
-    if (!differentSize || newAxisLength == oldAxisLength) {
+    if (!differentSize && newAxisLength == oldAxisLength) {
       // Need to delete the existing axis created in init above
       delete child->m_axes[i];
       // Now set to a copy of the parent workspace's axis
