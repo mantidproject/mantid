@@ -24,6 +24,12 @@ using namespace Mantid::Geometry;
 
 namespace {
   Mantid::Kernel::Logger g_log("VesuvioL1ThetaResolution");
+
+  class SquareRoot
+  {
+    public:
+      double operator()(double x) { return sqrt(x); }
+  };
 }
 
 // Register the algorithm into the AlgorithmFactory
@@ -433,7 +439,8 @@ MatrixWorkspace_sptr VesuvioL1ThetaResolution::processDistribution(MatrixWorkspa
     const std::vector<double> y = ws->readY(i);
     std::vector<double>& e = ws->dataE(i);
 
-    std::transform(y.begin(), y.end(), e.begin(), sqrt);
+    SquareRoot op;
+    std::transform(y.begin(), y.end(), e.begin(), op);
   }
 
   return ws;
