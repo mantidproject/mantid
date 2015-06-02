@@ -47,6 +47,9 @@ std::vector<Py_intptr_t> countDimensions(const IMDHistoWorkspace &self) {
  */
 PyObject *getSignalArrayAsNumpyArray(IMDHistoWorkspace &self) {
   auto dims = countDimensions(self);
+  if (dims.empty()) {
+      throw std::runtime_error("Cannot extract signal array. All dimensions have been integrated out.");
+  }
   return WrapReadOnlyNumpy()(self.getSignalArray(),
                              static_cast<int>(dims.size()), &dims[0]);
 }
@@ -57,6 +60,9 @@ PyObject *getSignalArrayAsNumpyArray(IMDHistoWorkspace &self) {
  */
 PyObject *getErrorSquaredArrayAsNumpyArray(IMDHistoWorkspace &self) {
   auto dims = countDimensions(self);
+  if (dims.empty()) {
+      throw std::runtime_error("Cannot extract errors array. All dimensions have been integrated out.");
+  }
   return WrapReadOnlyNumpy()(self.getErrorSquaredArray(),
                              static_cast<int>(dims.size()), &dims[0]);
 }
@@ -67,6 +73,9 @@ PyObject *getErrorSquaredArrayAsNumpyArray(IMDHistoWorkspace &self) {
  */
 PyObject *getNumEventsArrayAsNumpyArray(IMDHistoWorkspace &self) {
   auto dims = countDimensions(self);
+  if (dims.empty()) {
+      throw std::runtime_error("Cannot extract events array. All dimensions have been integrated out.");
+  }
   return WrapReadOnlyNumpy()(self.getNumEventsArray(),
                              static_cast<int>(dims.size()), &dims[0]);
 }
