@@ -1,4 +1,4 @@
-#pylint: disable=invalid-name,too-many-branches
+#pylint: disable=invalid-name,too-many-branches,too-many-arguments,deprecated-module,no-name-in-module
 from mantid.api import WorkspaceGroup, AlgorithmManager
 from mantid import mtd, logger, config
 
@@ -7,7 +7,7 @@ import numpy as np
 
 #-------------------------------------------------------------------------------
 
-def load_files(data_files, ipf_filename, spec_min, spec_max, sum_files, load_opts=dict()):
+def load_files(data_files, ipf_filename, spec_min, spec_max, sum_files, load_opts=None):
     """
     Loads a set of files and extracts just the spectra we care about (i.e. detector range and monitor).
 
@@ -23,6 +23,9 @@ def load_files(data_files, ipf_filename, spec_min, spec_max, sum_files, load_opt
     from mantid.simpleapi import (Load, LoadVesuvio, LoadParameterFile,
                                   ChopData, ExtractSingleSpectrum,
                                   CropWorkspace)
+
+    if load_opts is None:
+        load_opts = {}
 
     workspace_names = []
 

@@ -1,13 +1,27 @@
+#pylint: disable=no-init,too-many-instance-attributes
+
 from mantid.simpleapi import *
 from mantid.api import *
 from mantid.kernel import *
 from mantid import config
 
 import os
-import numpy as np
 
 
 class ISISIndirectDiffractionReduction(DataProcessorAlgorithm):
+
+    _workspace_names = None
+    _chopped_data = None
+    _output_ws = None
+    _data_files = None
+    _instrument_name = None
+    _mode = None
+    _spectra_range = None
+    _grouping_method = None
+    _rebin_string = None
+    _ipf_filename = None
+    _sum_files = None
+
 
     def category(self):
         return 'Diffraction;PythonAlgorithms'
