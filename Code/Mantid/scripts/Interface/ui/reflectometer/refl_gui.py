@@ -32,7 +32,7 @@ except ImportError:
 
 
 
-class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
+class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
 
     current_instrument = None
     current_table = None
