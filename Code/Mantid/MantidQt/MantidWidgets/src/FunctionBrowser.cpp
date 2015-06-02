@@ -148,6 +148,9 @@ void FunctionBrowser::createBrowser()
   WorkspaceEditorFactory* workspaceEditorFactory = new WorkspaceEditorFactory(this);
 
   m_browser = new QtTreePropertyBrowser(NULL,options);
+  if (m_multiDataset) {
+    m_browser->setColumnSizes(100, 100, 45);
+  }
   // assign factories to property managers
   m_browser->setFactoryForManager(m_parameterManager, parameterEditorFactory);
   m_browser->setFactoryForManager(m_attributeStringManager, lineEditFactory);
