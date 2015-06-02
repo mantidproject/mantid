@@ -2,7 +2,7 @@
 
 from mantid.api import PythonAlgorithm, AlgorithmFactory, ITableWorkspaceProperty
 from mantid.kernel import Direction, Stats
-from mantid.simpleapi import CreateEmptyTableWorkspace
+import mantid.simpleapi as ms
 from mantid import mtd, logger
 import numpy as np
 
@@ -43,7 +43,7 @@ class StatisticsOfTableWorkspace(PythonAlgorithm):
         in_ws = mtd[self.getPropertyValue('InputWorkspace')]
         out_ws_name = self.getPropertyValue('OutputWorkspace')
 
-        out_ws = CreateEmptyTableWorkspace(OutputWOrkspace=out_ws_name)
+        out_ws = ms.CreateEmptyTableWorkspace(OutputWOrkspace=out_ws_name)
 
         out_ws.addColumn('str', 'statistic')
 
@@ -65,7 +65,7 @@ class StatisticsOfTableWorkspace(PythonAlgorithm):
                 logger.notice('Column \'%s\' is not numerical, skipping' % name)
 
         for name, stat in stats.items():
-            stat = dict(stat)
+            st = dict(stat)
             st['statistic'] = name
             out_ws.addRow(st)
 
