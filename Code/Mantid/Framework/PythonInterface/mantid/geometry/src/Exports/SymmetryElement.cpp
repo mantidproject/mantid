@@ -8,24 +8,24 @@ using namespace Mantid::Geometry;
 using namespace boost::python;
 
 namespace {
-    Mantid::Kernel::V3D getAxis(SymmetryElement & self)
-    {
-        try {
-            SymmetryElementWithAxis &axisElement = dynamic_cast<SymmetryElementWithAxis &>(self);
-            return Mantid::Kernel::V3D(axisElement.getAxis());
-        } catch(std::bad_cast) {
-            return Mantid::Kernel::V3D(0, 0, 0);
-        }
-    }
+Mantid::Kernel::V3D getAxis(SymmetryElement &self) {
+  try {
+    SymmetryElementWithAxis &axisElement =
+        dynamic_cast<SymmetryElementWithAxis &>(self);
+    return Mantid::Kernel::V3D(axisElement.getAxis());
+  } catch (std::bad_cast) {
+    return Mantid::Kernel::V3D(0, 0, 0);
+  }
+}
 }
 
-// clang-format off
-void export_SymmetryElement()
-// clang-format on
-{
-  register_ptr_to_python<boost::shared_ptr<SymmetryElement> >();  
-  scope symmetryElementScope = class_<SymmetryElement, boost::noncopyable>("SymmetryElement", no_init);
+void export_SymmetryElement() {
+  register_ptr_to_python<boost::shared_ptr<SymmetryElement>>();
+  scope symmetryElementScope =
+      class_<SymmetryElement, boost::noncopyable>("SymmetryElement", no_init);
   class_<SymmetryElement, boost::noncopyable>("SymmetryElement", no_init)
-      .def("getHMSymbol", &SymmetryElement::hmSymbol, "Returns the Hermann-Mauguin symbol for the element.")
-      .def("getAxis", &getAxis, "Returns the symmetry axis or [0,0,0] for identiy, inversion and translations.");
+      .def("getHMSymbol", &SymmetryElement::hmSymbol,
+           "Returns the Hermann-Mauguin symbol for the element.")
+      .def("getAxis", &getAxis, "Returns the symmetry axis or [0,0,0] for "
+                                "identiy, inversion and translations.");
 }
