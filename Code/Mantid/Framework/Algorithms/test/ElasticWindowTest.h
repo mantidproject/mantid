@@ -109,8 +109,8 @@ public:
     elwinAlg.initialize();
 
     TS_ASSERT_THROWS_NOTHING( elwinAlg.setProperty("InputWorkspace", "__ElasticWindowTest_sample") );
-    TS_ASSERT_THROWS_NOTHING( elwinAlg.setProperty("Range1Start", -0.1) );
-    TS_ASSERT_THROWS_NOTHING( elwinAlg.setProperty("Range1End", 0.1) );
+    TS_ASSERT_THROWS_NOTHING( elwinAlg.setProperty("IntegrationRangeStart", -0.1) );
+    TS_ASSERT_THROWS_NOTHING( elwinAlg.setProperty("IntegrationRangeEnd", 0.1) );
     TS_ASSERT_THROWS_NOTHING( elwinAlg.setProperty("OutputInQ", "__ElasticWindowTest_outputQ") );
     TS_ASSERT_THROWS_NOTHING( elwinAlg.setProperty("OutputInQSquared", "__ElasticWindowTest_outputQsq") );
 
@@ -133,8 +133,8 @@ public:
     elwinAlg.initialize();
 
     TS_ASSERT_THROWS_NOTHING( elwinAlg.setProperty("InputWorkspace", "__ElasticWindowTest_sample") );
-    TS_ASSERT_THROWS_NOTHING( elwinAlg.setProperty("Range1Start", -0.1) );
-    TS_ASSERT_THROWS_NOTHING( elwinAlg.setProperty("Range1End", 0.1) );
+    TS_ASSERT_THROWS_NOTHING( elwinAlg.setProperty("IntegrationRangeStart", -0.1) );
+    TS_ASSERT_THROWS_NOTHING( elwinAlg.setProperty("IntegrationRangeEnd", 0.1) );
     TS_ASSERT_THROWS_NOTHING( elwinAlg.setProperty("OutputInQ", "__ElasticWindowTest_outputQ") );
     TS_ASSERT_THROWS_NOTHING( elwinAlg.setProperty("OutputInQSquared", "__ElasticWindowTest_outputQsq") );
 
@@ -154,10 +154,10 @@ public:
     elwinAlg.initialize();
 
     TS_ASSERT_THROWS_NOTHING( elwinAlg.setProperty("InputWorkspace", "__ElasticWindowTest_sample") );
-    TS_ASSERT_THROWS_NOTHING( elwinAlg.setProperty("Range1Start", -0.04) );
-    TS_ASSERT_THROWS_NOTHING( elwinAlg.setProperty("Range1End", 0.04) );
-    TS_ASSERT_THROWS_NOTHING( elwinAlg.setProperty("Range2Start", 0.05) );
-    TS_ASSERT_THROWS_NOTHING( elwinAlg.setProperty("Range2End", 0.06) );
+    TS_ASSERT_THROWS_NOTHING( elwinAlg.setProperty("IntegrationRangeStart", -0.04) );
+    TS_ASSERT_THROWS_NOTHING( elwinAlg.setProperty("IntegrationRangeEnd", 0.04) );
+    TS_ASSERT_THROWS_NOTHING( elwinAlg.setProperty("BackgroundRangeStart", 0.05) );
+    TS_ASSERT_THROWS_NOTHING( elwinAlg.setProperty("BackgroundRangeEnd", 0.06) );
     TS_ASSERT_THROWS_NOTHING( elwinAlg.setProperty("OutputInQ", "__ElasticWindowTest_outputQ") );
     TS_ASSERT_THROWS_NOTHING( elwinAlg.setProperty("OutputInQSquared", "__ElasticWindowTest_outputQsq") );
 
