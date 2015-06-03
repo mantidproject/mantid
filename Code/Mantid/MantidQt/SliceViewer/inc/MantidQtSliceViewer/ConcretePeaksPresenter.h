@@ -57,6 +57,7 @@ public:
   virtual void zoomToPeak(const int index);
   virtual bool isHidden() const;
   virtual bool contentsDifferent(PeaksPresenter const *  other) const;
+  bool deletePeakAt(const double& x, const double& y);
 
 private:
   /// Peak overlay view.

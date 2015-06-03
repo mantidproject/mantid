@@ -3,6 +3,8 @@
 #include "MantidQtSliceViewer/ZoomableOnDemand.h"
 #include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidGeometry/Crystal/IPeak.h"
+#include "MantidGeometry/Crystal/PeakShape.h"
+#include "MantidDataObjects/PeakShapeBase.h"
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/IAlgorithm.h"
@@ -204,8 +206,7 @@ void ConcretePeaksPresenter::doFindPeaksInRegion() {
     }
     m_viewablePeaks = viewablePeaks;
 
-  }
-  else{
+  } else {
     // No peaks will be viewable
     m_viewablePeaks = std::vector<bool>();
   }
@@ -384,16 +385,15 @@ bool ConcretePeaksPresenter::isHidden() const { return m_isHidden; }
  * @param other
  * @return
  */
-bool ConcretePeaksPresenter::contentsDifferent(const PeaksPresenter *  other) const
-{
-    const SetPeaksWorkspaces otherWorkspaces =
-        other->presentedWorkspaces();
+bool
+ConcretePeaksPresenter::contentsDifferent(const PeaksPresenter *other) const {
+  const SetPeaksWorkspaces otherWorkspaces = other->presentedWorkspaces();
 
-    // Look for this workspace in the others workspace list.
-    auto iterator = otherWorkspaces.find(this->m_peaksWS);
+  // Look for this workspace in the others workspace list.
+  auto iterator = otherWorkspaces.find(this->m_peaksWS);
 
-    const bool different = (iterator == otherWorkspaces.end());
-    return different;
+  const bool different = (iterator == otherWorkspaces.end());
+  return different;
 }
 
 /**
@@ -451,7 +451,8 @@ void ConcretePeaksPresenter::setPeakSizeIntoProjection(const double fraction) {
 
 double ConcretePeaksPresenter::getPeakSizeOnProjection() const {
   double result = 0;
-  if (m_viewPeaks != NULL && (m_peaksWS->getNumberPeaks() > 0) && m_viewPeaks->positionOnly()) {
+  if (m_viewPeaks != NULL && (m_peaksWS->getNumberPeaks() > 0) &&
+      m_viewPeaks->positionOnly()) {
     result = m_viewPeaks->getOccupancyInView();
   }
   return result;
@@ -459,7 +460,8 @@ double ConcretePeaksPresenter::getPeakSizeOnProjection() const {
 
 double ConcretePeaksPresenter::getPeakSizeIntoProjection() const {
   double result = 0;
-  if (m_viewPeaks != NULL && (m_peaksWS->getNumberPeaks() > 0) && m_viewPeaks->positionOnly()) {
+  if (m_viewPeaks != NULL && (m_peaksWS->getNumberPeaks() > 0) &&
+      m_viewPeaks->positionOnly()) {
     result = m_viewPeaks->getOccupancyIntoView();
   }
   return result;
@@ -485,5 +487,71 @@ void ConcretePeaksPresenter::zoomToPeak(const int peakIndex) {
     zoomable->zoomToPeak(this, peakIndex);
   }
 }
+
+/**
+ * @brief Delete a peak corresponding to the current slice point, with x, y
+ * coords provided
+ * @param x : X coordinate
+ * @param y : Y coordinate
+ * @return True if one or more peak has been deleted
+ */
+bool ConcretePeaksPresenter::deletePeakAt(const double &x, const double &y) {
+
+  using namespace Mantid::Geometry;
+  std::vector<size_t> deletionIndexList;
+  for (int i = 0; i < m_peaksWS->getNumberPeaks(); ++i) {
+    // We only delete peaks we can see.
+    bool visible = this->m_viewablePeaks[i];
+    if (this->m_viewablePeaks[i]) {
+      const IPeak &peak = m_peaksWS->getPeak(i);
+      const PeakShape &shape = peak.getPeakShape();
+      if (auto realShape =
+              dynamic_cast<const Mantid::DataObjects::PeakShapeBase *>(
+                  &shape)) {
+        const double shapeRad = realShape->radius();
+        const V3D centre =
+            m_transform->transformPeak(peak); // Get the peak centre in whatever
+                                              // the coords frame and mapping
+                                              // is.
+        const double pointRad = std::sqrt( (x - centre.X()) * (x - centre.X()) +
+                                  (y - centre.Y()) * (y - centre.Y()) );
+        if (pointRad <= shapeRad) {
+          // Let's quickly check that the integration frame matches with our
+          // transform before we go-ahead.
+          if (shape.frame() == m_transform->getCoordinateSystem()) {
+
+            deletionIndexList.push_back(i);
+          }
+        }
+      }
+    }
+  }
+  // If we have things to remove, do that in one-step.
+  if (!deletionIndexList.empty()) {
+
+    Mantid::API::IPeaksWorkspace_sptr peaksWS =
+        boost::const_pointer_cast<Mantid::API::IPeaksWorkspace>(
+            this->m_peaksWS);
+    // Sort the Peaks in-place.
+    Mantid::API::IAlgorithm_sptr alg =
+        AlgorithmManager::Instance().create("DeleteTableRows");
+    alg->setChild(true);
+    alg->setRethrows(true);
+    alg->initialize();
+    alg->setProperty("TableWorkspace", peaksWS);
+    alg->setProperty("Rows", deletionIndexList);
+    alg->execute();
+
+    // Reproduce the views.
+    this->produceViews();
+
+    // Give the new views the current slice point.
+    m_viewPeaks->setSlicePoint(this->m_slicePoint.slicePoint(),
+                               m_viewablePeaks);
+  }
+
+  return !deletionIndexList.empty();
 }
 }
+}
+

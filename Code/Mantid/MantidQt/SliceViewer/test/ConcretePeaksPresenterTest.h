@@ -7,6 +7,8 @@
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidKernel/SpecialCoordinateSystem.h"
 #include "MantidGeometry/Crystal/PeakTransformFactory.h"
+#include "MantidDataObjects/Peak.h"
+#include "MantidDataObjects/PeakShapeSpherical.h"
 #include "MantidQtSliceViewer/ConcretePeaksPresenter.h"
 #include "MantidQtSliceViewer/PeakOverlayViewFactory.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
@@ -150,10 +152,20 @@ class ConcretePeaksPresenterTest : public CxxTest::TestSuite
   1) All constructor parameters can be overriden using methods with....() on the returned builder object
   2) The default builder has been set up to create a ubiquitious ConcretePeaksPresenter product.
   */
-  ConcretePeaksPresenterBuilder createStandardBuild(const int expectedNumberPeaks=5)
+  ConcretePeaksPresenterBuilder createStandardBuild(const int expectedNumberPeaks=5, const double radius=0.0, const SpecialCoordinateSystem frame=QLab)
   {
+    // Map enum to string.
+    std::string frame_str = "Q (lab frame)";
+    if(frame == HKL){
+        frame_str = "HKL";
+    } else if(frame == QSample) {
+        frame_str = "Q (sample frame)";
+    }
+
     // Create a mock view object that will be returned by the mock factory.
     auto mockView = boost::shared_ptr<NiceMock<MockPeakOverlayView> >(new NiceMock<MockPeakOverlayView>);
+    EXPECT_CALL(*mockView.get(), getRadius()).WillRepeatedly(Return(radius));
+
     
     // Create a widget factory mock
     auto pMockViewFactory = new MockPeakOverlayFactory;
@@ -172,7 +184,8 @@ class ConcretePeaksPresenterTest : public CxxTest::TestSuite
     auto pMockTransform = new NiceMock<MockPeakTransform>;
     PeakTransform_sptr mockTransform(pMockTransform);
     EXPECT_CALL(*pMockTransform, transformPeak(_)).WillRepeatedly(Return(V3D()));
-    EXPECT_CALL(*pMockTransform, getFriendlyName()).WillRepeatedly(Return("Q (lab frame)"));
+    EXPECT_CALL(*pMockTransform, getFriendlyName()).WillRepeatedly(Return(frame_str));
+    EXPECT_CALL(*pMockTransform, getCoordinateSystem()).WillRepeatedly(Return(frame));
 
     // Create a mock transform factory.
     auto pMockTransformFactory = new NiceMock<MockPeakTransformFactory>;
@@ -527,10 +540,50 @@ public:
     TS_ASSERT(Mock::VerifyAndClearExpectations(pMockView));
   }
 
+  void test_delete_peaks_delete_one_match() {
+      using namespace Mantid::DataObjects;
+
+      const double radius = 0.1;
+
+      auto concreteBuilder = createStandardBuild(2, radius, HKL);
+
+      // Custom peaks workspace
+      IPeaksWorkspace_sptr peaksWS = createPeaksWorkspace(2, radius);
+      IPeak& peakToDelete = peaksWS->getPeak(0);
+      peakToDelete.setHKL(0, 0, 0);
+      Peak* pPeakToDelete = dynamic_cast<Peak*>(&peakToDelete);
+      pPeakToDelete->setPeakShape(boost::make_shared<PeakShapeSpherical>(radius, HKL));
+      peaksWS->getPeak(1).setHKL(10, 10, 10);
+
+      concreteBuilder.withPeaksWorkspace(peaksWS); // Customise builder
+
+      ConcretePeaksPresenter_sptr presenter = concreteBuilder.create();
+
+
+      /*
+       * Create a viewing frustrum in natural coordinates
+      */
+      Top top(1.0);
+      Bottom bottom(-1.0);
+      Left left(-1.0);
+      Right right(1.0);
+      Front front(-1e6);
+      Back back(1e6);
+      SlicePoint slicePoint(0.0);
+      PeakBoundingBox frustrum(left, right, top, bottom, slicePoint, front, back); // psudo viewing frustrum.
+      presenter->updateWithSlicePoint(frustrum);
+
+      TSM_ASSERT("No peak in this region. Point outside of radius. Nothing to delete", !presenter->deletePeakAt(0.0, 0.0 + radius + 0.01));
+      TSM_ASSERT("No peak in this region. Point outside of radius. Nothing to delete", !presenter->deletePeakAt(0.0 + radius + 0.01, 0.0));
+
+      TSM_ASSERT_EQUALS("No peaks should have been removed yet", 2, peaksWS->getNumberPeaks());
+      TSM_ASSERT("Point sits on peak radius. We should delete peak.", presenter->deletePeakAt(0.0 + radius, 0));
+      TSM_ASSERT_EQUALS("One peaks should have been deleted", 1, peaksWS->getNumberPeaks());
+
+  }
+
   void doTestSorting(const bool sortAscending)
   {
-    FrameworkManager::Instance();
-
     const int expectedNumberOfPeaks = 1;
     auto concreteBuilder = createStandardBuild(expectedNumberOfPeaks);
 

@@ -136,7 +136,9 @@ set ( ALL_SRC ${SRC_FILES} ${MOCCED_FILES} )
 
 qt4_wrap_ui ( UI_HDRS ${UI_FILES} ) 
 
-include_directories ( ${CMAKE_CURRENT_BINARY_DIR} )
+include_directories ( ${CMAKE_CURRENT_BINARY_DIR})
+
+include_directories ( ../../Framework/DataObjects/inc )
 
 # For Windows:
 add_definitions ( -DIN_MANTIDQT_SLICEVIEWER )
@@ -152,6 +154,7 @@ endif ()
 target_link_libraries ( MantidQtSliceViewer LINK_PRIVATE 
             MantidQtAPI
             MantidWidgets
+            DataObjects
             ${CORE_MANTIDLIBS}
             ${POCO_LIBRARIES}
             ${Boost_LIBRARIES}
@@ -177,7 +180,7 @@ if ( CXXTEST_FOUND )
   )
 
   cxxtest_add_test ( SliceViewerTest ${TEST_FILES} ${GMOCK_TEST_FILES} )
-  target_link_libraries( SliceViewerTest LINK_PRIVATE 
+  target_link_libraries( SliceViewerTest LINK_PRIVATE
             MantidQtSliceViewer
             DataObjects
             Crystal
