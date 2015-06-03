@@ -1,23 +1,25 @@
+#pylint: disable=no-init
+
 from mantid.api import PythonAlgorithm, AlgorithmFactory, ITableWorkspaceProperty
 from mantid.kernel import Direction, Stats
-from mantid.simpleapi import CreateEmptyTableWorkspace
+import mantid.simpleapi as ms
 from mantid import mtd, logger
 import numpy as np
 
 
-def _stats_to_dict(s):
+def _stats_to_dict(stats):
     """
-    Converts a STatstics object to a dictionary.
-    @param s Statistics object to convertToWaterfall
+    Converts a Statstics object to a dictionary.
+    @param stats Statistics object to convertToWaterfall
     @return Dictionary of statistics
     """
-    d = dict()
-    d['standard_deviation'] = s.standard_deviation
-    d['maximum'] = s.maximum
-    d['minimum'] = s.minimum
-    d['mean'] = s.mean
-    d['median'] = s.median
-    return d
+    stat_dict = dict()
+    stat_dict['standard_deviation'] = stats.standard_deviation
+    stat_dict['maximum'] = stats.maximum
+    stat_dict['minimum'] = stats.minimum
+    stat_dict['mean'] = stats.mean
+    stat_dict['median'] = stats.median
+    return stat_dict
 
 
 class StatisticsOfTableWorkspace(PythonAlgorithm):
@@ -41,7 +43,7 @@ class StatisticsOfTableWorkspace(PythonAlgorithm):
         in_ws = mtd[self.getPropertyValue('InputWorkspace')]
         out_ws_name = self.getPropertyValue('OutputWorkspace')
 
-        out_ws = CreateEmptyTableWorkspace(OutputWOrkspace=out_ws_name)
+        out_ws = ms.CreateEmptyTableWorkspace(OutputWOrkspace=out_ws_name)
 
         out_ws.addColumn('str', 'statistic')
 
@@ -55,18 +57,17 @@ class StatisticsOfTableWorkspace(PythonAlgorithm):
 
         for name in in_ws.getColumnNames():
             try:
-                s = _stats_to_dict(Stats.getStatistics(np.array([float(v) for v in in_ws.column(name)])))
+                col_stats = _stats_to_dict(Stats.getStatistics(np.array([float(v) for v in in_ws.column(name)])))
                 for statname in stats.keys():
-                    stats[statname][name] = s[statname]
+                    stats[statname][name] = col_stats[statname]
                 out_ws.addColumn('float', name)
             except ValueError:
                 logger.notice('Column \'%s\' is not numerical, skipping' % name)
-                pass
 
-        for name, s in stats.items():
-            st = dict(s)
-            st['statistic'] = name
-            out_ws.addRow(st)
+        for name, stat in stats.items():
+            stat1 = dict(stat)
+            stat1['statistic'] = name
+            out_ws.addRow(stat1)
 
         self.setProperty('OutputWorkspace', out_ws_name)
 
