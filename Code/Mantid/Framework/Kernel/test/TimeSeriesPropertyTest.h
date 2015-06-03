@@ -822,6 +822,74 @@ public:
   }
 
   /*
+   * Test merge() with two partially overlapping workspaces
+   */
+  void test_Merge_with_partially_overlapping_workspaces()
+  {
+    // Arrange
+    TimeSeriesProperty<double> *p1 = new TimeSeriesProperty<double>("doubleProp1");
+    TimeSeriesProperty<double> *p2 = new TimeSeriesProperty<double>("doubleProp2");
+
+    Mantid::Kernel::DateAndTime t0_p1("2007-11-30T16:17:05");
+    Mantid::Kernel::DateAndTime t1_p1("2007-11-30T16:17:15");
+    Mantid::Kernel::DateAndTime t2_p1("2007-11-30T16:17:20");
+    Mantid::Kernel::DateAndTime t3_p1("2007-11-30T16:17:30");
+
+    Mantid::Kernel::DateAndTime t0_p2("2007-11-30T16:17:04");
+    Mantid::Kernel::DateAndTime t1_p2("2007-11-30T16:17:15");
+    Mantid::Kernel::DateAndTime t2_p2("2007-11-30T16:17:21");
+    Mantid::Kernel::DateAndTime t3_p2("2007-11-30T16:17:30");
+
+    TS_ASSERT_THROWS_NOTHING( p1->addValue(t0_p1,1.0));
+    TS_ASSERT_THROWS_NOTHING( p1->addValue(t1_p1,2.1));
+    TS_ASSERT_THROWS_NOTHING( p1->addValue(t2_p1,3.0));
+    TS_ASSERT_THROWS_NOTHING( p1->addValue(t3_p1,5.1));
+
+    TS_ASSERT_THROWS_NOTHING( p2->addValue(t0_p2,0.0) );
+    TS_ASSERT_THROWS_NOTHING( p2->addValue(t1_p2,2.2) );
+    TS_ASSERT_THROWS_NOTHING( p2->addValue(t2_p2,4.0) );
+    TS_ASSERT_THROWS_NOTHING( p2->addValue(t3_p2,5.2) );
+    // Act
+    p1->merge(p2);
+
+    // Assert
+    const int64_t shift = 1;
+    Mantid::Kernel::DateAndTime controlT0(t0_p2);
+    Mantid::Kernel::DateAndTime controlT1(t0_p1);
+    Mantid::Kernel::DateAndTime controlT2(t1_p1);
+    Mantid::Kernel::DateAndTime controlT3(t1_p2 + shift);
+    Mantid::Kernel::DateAndTime controlT4(t2_p1);
+    Mantid::Kernel::DateAndTime controlT5(t2_p2);
+    Mantid::Kernel::DateAndTime controlT6(t3_p1);
+    Mantid::Kernel::DateAndTime controlT7(t3_p2 + shift);
+
+    TS_ASSERT_EQUALS(p1->nthTime(0), controlT0)
+    TS_ASSERT_EQUALS(p1->nthTime(1), controlT1)
+    TS_ASSERT_EQUALS(p1->nthTime(2), controlT2)
+    TS_ASSERT_EQUALS(p1->nthTime(3), controlT3)
+    TS_ASSERT_EQUALS(p1->nthTime(4), controlT4)
+    TS_ASSERT_EQUALS(p1->nthTime(5), controlT5)
+    TS_ASSERT_EQUALS(p1->nthTime(6), controlT6)
+    TS_ASSERT_EQUALS(p1->nthTime(7), controlT7)
+
+    TS_ASSERT_DELTA(p1->getSingleValue(controlT0), 0.0, 1.0E-8);
+    TS_ASSERT_DELTA(p1->getSingleValue(controlT1), 1.0, 1.0E-8);
+    TS_ASSERT_DELTA(p1->getSingleValue(controlT2), 2.1, 1.0E-8);
+    TS_ASSERT_DELTA(p1->getSingleValue(controlT3), 2.2, 1.0E-8);
+    TS_ASSERT_DELTA(p1->getSingleValue(controlT4), 3.0, 1.0E-8);
+    TS_ASSERT_DELTA(p1->getSingleValue(controlT5), 4.0, 1.0E-8);
+    TS_ASSERT_DELTA(p1->getSingleValue(controlT6), 5.1, 1.0E-8);
+    TS_ASSERT_DELTA(p1->getSingleValue(controlT7), 5.2, 1.0E-8);
+
+    // Clean up
+    delete p1;
+    delete p2;
+
+    return;
+  }
+
+
+  /*
    * Test setName and getName
    */
   void test_Name()
@@ -1841,5 +1909,67 @@ private:
   TimeSeriesProperty<double> *dProp;
   TimeSeriesProperty<std::string> *sProp;
 };
+
+
+
+//-------------------------------------------------------------------
+// PERFORMANCE TESTS
+//-------------------------------------------------------------------
+namespace {
+TimeSeriesProperty<double>& execute_merge_time_series(TimeSeriesProperty<double> lhs, Property* rhs) {
+  return lhs.merge(rhs);
+}
+
+TimeSeriesProperty<double>& execute_add_time_series(TimeSeriesProperty<double> lhs, Property* rhs) {
+  return lhs.operator+=(rhs);
+}
+
+
+void populateTimeSeriesProperty(TimeSeriesProperty<double>& timeSeries, double value,  const unsigned int length) {
+  DateAndTime date("2010-01-01T00:00:00");
+  timeSeries.setUnits("mm");
+  for (int i = 0; i < length; i++) {
+    timeSeries.addValue(date + static_cast<double>(i), value);
+  }
+}
+}
+
+class TimeSeriesPropertyTestPerformance : public CxxTest::TestSuite {
+private:
+  TimeSeriesProperty<double> m_mergeTimeSeriesSet1;
+  TimeSeriesProperty<double> m_mergeTimeSeriesSet2;
+
+  TimeSeriesProperty<double> m_addTimeSeriesSet1;
+  TimeSeriesProperty<double> m_addTimeSeriesSet2;
+public:
+    // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static TimeSeriesPropertyTestPerformance *createSuite() { return new TimeSeriesPropertyTestPerformance; }
+  static void destroySuite(TimeSeriesPropertyTestPerformance *suite) { delete suite; }
+
+  TimeSeriesPropertyTestPerformance() : m_mergeTimeSeriesSet1("merge"),
+                                        m_mergeTimeSeriesSet2("merge"),
+                                        m_addTimeSeriesSet1("add"),
+                                        m_addTimeSeriesSet2("add"){
+    const unsigned int lengthMerge = 1000000;
+    populateTimeSeriesProperty(m_mergeTimeSeriesSet1, 1.0, lengthMerge);
+    populateTimeSeriesProperty(m_mergeTimeSeriesSet2, 2.0, lengthMerge);
+
+    const unsigned int lengthAdd = lengthMerge*5;
+    populateTimeSeriesProperty(m_addTimeSeriesSet1, 1.0, lengthAdd);
+    populateTimeSeriesProperty(m_addTimeSeriesSet2, 2.0, lengthAdd);
+  }
+
+  // Performance test the merge operation which shifts colliding time logs
+  void test_merge_time_series_logs() {
+    execute_merge_time_series(m_mergeTimeSeriesSet1, &m_mergeTimeSeriesSet2);
+  }
+
+  // Performance test the + operator which appends the logs
+  void test_add_time_series_log() {
+    execute_add_time_series(m_addTimeSeriesSet1, &m_addTimeSeriesSet2);
+  }
+};
+
 
 #endif /*TIMESERIESPROPERTYTEST_H_*/
