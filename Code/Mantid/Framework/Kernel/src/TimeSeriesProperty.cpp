@@ -226,7 +226,7 @@ void TimeSeriesProperty<TYPE>::filterByTime(const Kernel::DateAndTime &start,
 
   // 2. Determine index for start and remove  Note erase is [...)
   int istart = this->findIndex(start);
-  if (istart >= 0 && istart < m_values.size()) {
+  if (istart >= 0 && static_cast<size_t>(istart) < m_values.size()) {
     // "start time" is behind time-series's starting time
     iterhead = m_values.begin() + istart;
 
