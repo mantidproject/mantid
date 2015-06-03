@@ -36,6 +36,7 @@ class CylinderPaalmanPingsCorrection(PythonAlgorithm):
     _sig_a = None
     _density = None
     _radii = None
+    _interpolate = False
 
 #------------------------------------------------------------------------------
 
