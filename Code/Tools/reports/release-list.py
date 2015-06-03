@@ -3,6 +3,7 @@ from __future__ import (absolute_import, division, print_function, unicode_liter
 import csv
 import datetime
 import json
+import os
 import requests
 import subprocess
 import sys
@@ -101,11 +102,19 @@ if __name__ == '__main__':
         print("must supply repository location")
         print("usage: %s <git repo> [oauth]" % sys.argv[0])
         sys.exit(-1)
-    releases = getTags(sys.argv[1])
+
+    repolocation = sys.argv[1]
+    if not os.path.isdir(repolocation):
+        print("ERROR: Specified repository location is not a directory.")
+        sys.exit(-1)
+
     if len(sys.argv) > 2:
         oauth = sys.argv[2]
     else:
         oauth = None
+
+
+    releases = getTags(repolocation)
 
     today = datetime.datetime.now().strftime("%Y-%m-%d")
 
