@@ -1,11 +1,12 @@
 #pylint: disable=no-init,invalid-name
 from mantid.kernel import *
 from mantid.api import *
-import mantid.simpleapi as sapi
 
 import math
 
 class EnginXFitPeaks(PythonAlgorithm):
+    expectedDimType = 'Time-of-flight'
+
     def category(self):
         return "Diffraction\\Engineering;PythonAlgorithms"
 
@@ -46,28 +47,18 @@ class EnginXFitPeaks(PythonAlgorithm):
         # Get expected peaks in TOF for the detector
         inWS = self.getProperty("InputWorkspace").value
         dimType = inWS.getXDimension().getName()
-        expectedType = 'Time-of-flight'
-        if (expectedType != dimType):
+        if self.expectedDimType != dimType:
             raise ValueError("This algorithm expects a workspace with %s X dimension, but "
-                             "the X dimension of the input workspace is: '%s'" % (expectedType, dimType))
+                             "the X dimension of the input workspace is: '%s'" % (self.expectedDimType, dimType))
 
         wsIndex = self.getProperty("WorkspaceIndex").value
-        expectedPeaksTof = self._expectedPeaksInTOF(expectedPeaksD, inWS, wsIndex)
 
         # FindPeaks will return a list of peaks sorted by the centre found. Sort the peaks as well,
         # so we can match them with fitted centres later.
-        expectedPeaksTof = sorted(expectedPeaksTof)
+        expectedPeaksToF = sorted(self._expectedPeaksInTOF(expectedPeaksD, inWS, wsIndex))
 
-        # Find approximate peak positions, asumming Gaussian shapes
-        findPeaksAlg = self.createChildAlgorithm('FindPeaks')
-        findPeaksAlg.setProperty('InputWorkspace', inWS)
-        findPeaksAlg.setProperty('PeakPositions', expectedPeaksTof)
-        findPeaksAlg.setProperty('PeakFunction', 'Gaussian')
-        findPeaksAlg.setProperty('WorkspaceIndex', wsIndex)
-        findPeaksAlg.execute()
-        foundPeaks = findPeaksAlg.getProperty('PeaksList').value
-
-        if foundPeaks.rowCount() < len(expectedPeaksTof):
+        foundPeaks = self._peaksFromFindPeaks(inWS, expectedPeaksToF, wsIndex)
+        if foundPeaks.rowCount() < len(expectedPeaksToF):
             raise Exception("Some peaks were not found. found (len %d): %s"%(len(foundPeaks),foundPeaks))
 
         fittedPeaks = self._createFittedPeaksTable()
@@ -125,6 +116,27 @@ class EnginXFitPeaks(PythonAlgorithm):
 
         self.setProperty('Difc', difc)
         self.setProperty('Zero', zero)
+
+    def _peaksFromFindPeaks(self, inWS, expectedPeaksToF, wsIndex):
+        """
+        Use the algorithm FindPeaks to check that the expected peaks are there.
+
+        @param inWS data workspace
+        @param expectedPeaksToF vector/list of expected peak values
+        @param wsIndex workspace index
+
+        @return list of peaks found by FindPeaks. If there are no issues, the length
+        of this list should be the same as the number of expected peaks received.
+        """
+        # Find approximate peak positions, asumming Gaussian shapes
+        findPeaksAlg = self.createChildAlgorithm('FindPeaks')
+        findPeaksAlg.setProperty('InputWorkspace', inWS)
+        findPeaksAlg.setProperty('PeakPositions', expectedPeaksToF)
+        findPeaksAlg.setProperty('PeakFunction', 'Gaussian')
+        findPeaksAlg.setProperty('WorkspaceIndex', wsIndex)
+        findPeaksAlg.execute()
+        foundPeaks = findPeaksAlg.getProperty('PeaksList').value
+        return foundPeaks
 
     def _readInExpectedPeaks(self):
         """ Reads in expected peaks from the .csv file """
@@ -248,6 +260,10 @@ class EnginXFitPeaks(PythonAlgorithm):
         # note: this implicitly uses default property "EMode" value 'Elastic'
         goodExec = convAlg.execute()
 
+        if not goodExec:
+            raise RuntimeError("Conversion of units went wrong. Failed to run ConvertUnits for %d peaks: %s"
+                               % (len(expectedPeaks), expectedPeaks))
+
         wsTo = convAlg.getProperty('OutputWorkspace').value
         peaksToF = wsTo.readX(0)
         if len(peaksToF) != len(expectedPeaks):
@@ -267,7 +283,7 @@ class EnginXFitPeaks(PythonAlgorithm):
         """
         Converts from dSpacing to Time-of-flight, for one spectrum/detector. This method
         is here for exceptional cases that presently need clarification / further work,
-        here and elsewhere in Mantid, and should ideally be removed in favor of the more 
+        here and elsewhere in Mantid, and should ideally be removed in favor of the more
         general method that uses the algorithm ConvertUnits.
 
         @param dspValues to convert from dSpacing
