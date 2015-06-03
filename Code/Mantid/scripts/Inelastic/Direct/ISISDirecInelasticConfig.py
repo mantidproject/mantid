@@ -4,6 +4,7 @@ import shutil
 import re
 import copy
 from datetime import date
+import time
 
 # the list of instruments this configuration is applicable to
 INELASTIC_INSTRUMENTS = ['MAPS','LET','MERLIN','MARI','HET']
@@ -207,34 +208,26 @@ class MantidConfigDirectInelastic(object):
 #
     def script_need_replacing(self,source_script_name,target_script_name):
         """Method specifies conditions when existing reduction file should be replaced
-           by sample file
+           by a sample file.
         """
         if self._force_change_script:
             return True
-        # missing file should always be replaced
+        # non-existing file should always be replaced
         if not os.path.isfile(target_script_name):
            return True
-        # if user already started -- do not replace his config
-        #except when changes are forced
-        now_is =  date.today()
+        #Always replace sample file if it has not been touched
         start_date = self._user.get_start_date()
-        if now_is >start_date:
-            return False
-        #
-        time_targ = os.path.getmtime(target_script_name)
-
-        time_source = os.path.getmtime(source_script_name)
-        # we may want better granularity in a future
-#       source_mod_date = date.fromtimestamp(time_source)
-#       targ_mod_date = date.fromtimestamp(time_targ)
-        if time_targ < time_source:
+        # this time is set up to the file, copied from the repository
+        sample_file_time = time.mktime(start_date.timetuple())
+        targ_file_time  = os.path.getmtime(target_script_name)
+        if sample_file_time  ==  targ_file_time:
             return True
-        else:
+        else: # somebody have modified the target file. Leave it alone
             return False
 #
     def copy_reduction_sample(self,InstrName,CycleID,rb_folder):
-        """ Method copies sample reduction script from user script repository
-            to user folder.
+        """Method copies sample reduction script from user script repository
+           to user folder.
         """
 
         source_file = self._sample_reduction_file(InstrName)
@@ -254,8 +247,13 @@ class MantidConfigDirectInelastic(object):
             os.remove(full_target)
         shutil.copyfile(full_source,full_target)
         os.chmod(full_target,0777)
+
         if platform.system() != 'Windows':
             os.system('chown '+self._fedid+':'+self._fedid+' '+full_target)
+        # Set up the file  creation and modification dates to the users start date
+        start_date = self._user.get_start_date()
+        file_time = time.mktime(start_date.timetuple())
+        os.utime(full_target,(file_time,file_time))
 
 
     def get_data_folder_name(self,instr,cycle_ID):

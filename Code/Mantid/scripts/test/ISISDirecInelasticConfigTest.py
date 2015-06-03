@@ -227,7 +227,7 @@ class ISISDirectInelasticConfigTest(unittest.TestCase):
             os.makedirs(user1RootDir)
         #
         user1 = UserProperties()
-        user1.set_user_properties('MARI','39990124','CYCLE39991',rbdir2)
+        user1.set_user_properties('MARI','20990124','CYCLE20991',rbdir2)
 
         mcf.init_user(user1ID,user1)
         source_file = self.makeFakeSourceReductionFile(mcf)
@@ -247,11 +247,14 @@ class ISISDirectInelasticConfigTest(unittest.TestCase):
         target_file = mcf._target_reduction_file(instr,cycle_id)
         full_target_file = os.path.join(full_rb_path,target_file)
         self.assertTrue(os.path.exists(full_target_file))
-        # target file does not need replacing
+        # Fresh target file should always be replaced
+        self.assertTrue(mcf.script_need_replacing(source_file,full_target_file))
+        # modify target file access time:
+        access_time = os.path.getmtime(full_target_file)
+        now = time.time()
+        os.utime(full_target_file,(access_time ,now))
+        # should not replace modified target file
         self.assertFalse(mcf.script_need_replacing(source_file,full_target_file))
-        # make new fake configuration file
-        new_source = self.makeFakeSourceReductionFile(mcf,'New')
-        self.assertTrue(mcf.script_need_replacing(new_source,full_target_file))
 
         #--------------------------------------------------------------------
         # clean up
