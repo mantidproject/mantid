@@ -1,6 +1,7 @@
 #pylint: disable=no-init,invalid-name
 from mantid.kernel import *
 from mantid.api import *
+import mantid.simpleapi as sapi
 
 import math
 
@@ -43,31 +44,43 @@ class EnginXFitPeaks(PythonAlgorithm):
             raise ValueError("Cannot run this algorithm without any input expected peaks")
 
         # Get expected peaks in TOF for the detector
-        expectedPeaksTof = self._expectedPeaksInTOF(expectedPeaksD)
-        # FindPeaks will returned a list of peaks sorted by the centre found. Sort the peaks as well,
+        inWS = self.getProperty("InputWorkspace").value
+        dimType = inWS.getXDimension().getName()
+        expectedType = 'Time-of-flight'
+        if (expectedType != dimType):
+            raise ValueError("This algorithm expects a workspace with %s X dimension, but "
+                             "the X dimension of the input workspace is: '%s'" % (expectedType, dimType))
+
+        wsIndex = self.getProperty("WorkspaceIndex").value
+        expectedPeaksTof = self._expectedPeaksInTOF(expectedPeaksD, inWS, wsIndex)
+
+        # FindPeaks will return a list of peaks sorted by the centre found. Sort the peaks as well,
         # so we can match them with fitted centres later.
         expectedPeaksTof = sorted(expectedPeaksTof)
 
         # Find approximate peak positions, asumming Gaussian shapes
         findPeaksAlg = self.createChildAlgorithm('FindPeaks')
-        findPeaksAlg.setProperty('InputWorkspace', self.getProperty("InputWorkspace").value)
+        findPeaksAlg.setProperty('InputWorkspace', inWS)
         findPeaksAlg.setProperty('PeakPositions', expectedPeaksTof)
         findPeaksAlg.setProperty('PeakFunction', 'Gaussian')
-        findPeaksAlg.setProperty('WorkspaceIndex', self.getProperty("WorkspaceIndex").value)
+        findPeaksAlg.setProperty('WorkspaceIndex', wsIndex)
         findPeaksAlg.execute()
         foundPeaks = findPeaksAlg.getProperty('PeaksList').value
 
         if foundPeaks.rowCount() < len(expectedPeaksTof):
-            raise Exception("Some peaks were not found")
+            raise Exception("Some peaks were not found. found (len %d): %s"%(len(foundPeaks),foundPeaks))
 
         fittedPeaks = self._createFittedPeaksTable()
 
         for i in range(foundPeaks.rowCount()):
+
             row = foundPeaks.row(i)
             # Peak parameters estimated by FindPeaks
             centre = row['centre']
             width = row['width']
             height = row['height']
+            # Oh oh, this actually happens sometimes for some spectra of the system test dataset
+            # and it should be clarified when the role of FindPeaks etc. is fixed (trac ticket #10907)
             if width <= 0.:
                 continue
 
@@ -93,8 +106,8 @@ class EnginXFitPeaks(PythonAlgorithm):
             # Fit using predicted window and a proper function with approximated initital values
             fitAlg = self.createChildAlgorithm('Fit')
             fitAlg.setProperty('Function', 'name=LinearBackground;' + str(peak))
-            fitAlg.setProperty('InputWorkspace', self.getProperty("InputWorkspace").value)
-            fitAlg.setProperty('WorkspaceIndex', self.getProperty("WorkspaceIndex").value)
+            fitAlg.setProperty('InputWorkspace', inWS)
+            fitAlg.setProperty('WorkspaceIndex', wsIndex)
             fitAlg.setProperty('StartX', xMin)
             fitAlg.setProperty('EndX', xMax)
             fitAlg.setProperty('CreateOutput', True)
@@ -175,57 +188,107 @@ class EnginXFitPeaks(PythonAlgorithm):
 
         return (difc, zero)
 
-
-    def _expectedPeaksInTOF(self, expectedPeaks):
+    def _expectedPeaksInTOF(self, expectedPeaks, inWS, wsIndex):
         """
-        Converts expected peak dSpacing values to TOF values for the detector.
-        Implemented by using the algorithm ConvertUnits.
+        Converts expected peak dSpacing values to TOF values for the
+        detector. Implemented by using the Mantid algorithm ConvertUnits. A
+        simple user script to do what this function does would be
+        as follows:
 
-        @param expectedPeaks :: vector of expected peaks in dSpacing
+        yVals = [1] * (len(expectedPeaks) - 1)
+        wsFrom = sapi.CreateWorkspace(UnitX='dSpacing', DataX=expectedPeaks, DataY=yVals,
+                                      ParentWorkspace=inWS)
+        targetUnits = 'TOF'
+        wsTo = sapi.ConvertUnits(InputWorkspace=wsFrom, Target=targetUnits)
+        peaksToF = wsTo.dataX(0)
+        values = [peaksToF[i] for i in range(0,len(peaksToF))]
+
+        @param expectedPeaks :: vector of expected peaks, in dSpacing units
+        @param inWS :: input workspace with the relevant instrument/geometry
+        @param wsIndex spectrum index
 
         Returns:
-            a vector of ToF values corresponding to the input (dSpacing) vector.
+            a vector of ToF values converted from the input (dSpacing) vector.
+
         """
-        convAlg = self.createChildAlgorithm('ConvertUnits')
 
-        outWsName = "_ws_in_tof"
-        wsIndex = self.getProperty("WorkspaceIndex").value
+        # When receiving a (for example) focussed workspace we still do not know how
+        # to properly deal with it. CreateWorkspace won't copy the instrument sample
+        # and source even if given the option ParentWorkspace. Resort to old style
+        # hard-coded calculation.
+        # The present behavior of 'ConvertUnits' is to show an information log:
+        # "Unable to calculate sample-detector distance for 1 spectra. Masking spectrum"
+        # and silently produce a wrong output workspace. That might need revisiting.
+        if 1 == inWS.getNumberHistograms():
+            return self._doApproxHardCodedConvertUnitsToToF(expectedPeaks, inWS, wsIndex)
 
-        # Create workspace just to convert dSpacing -> ToF, yvals are irrelevant
+        # Create workspace just to convert dSpacing -> ToF, yVals are irrelevant
         # this used to be calculated with:
         # lambda d: 252.816 * 2 * (50 + detL2) * math.sin(detTwoTheta / 2.0) * d
+        # which is approximately what ConverUnits will do
+        # remember the -1, we must produce a histogram data workspace, which is what
+        # for example EnginXCalibrate expects
         yVals = [1] * (len(expectedPeaks) - 1)
-        # like: wsFrom = mantid.simpleapi.CreateWorkspace(UnitX='dSpacing', DataX=expectedPeaks, DataY=yVals)
+        # Do like: wsFrom = sapi.CreateWorkspace(UnitX='dSpacing', DataX=expectedPeaks, DataY=yVals,
+        #                                        ParentWorkspace=self.getProperty("InputWorkspace").value)
         createAlg = self.createChildAlgorithm("CreateWorkspace")
         createAlg.setProperty("UnitX", 'dSpacing')
         createAlg.setProperty("DataX", expectedPeaks)
         createAlg.setProperty("DataY", yVals)
-        createAlg.setProperty("OutputWorkspace", outWsName)
+        createAlg.setProperty("ParentWorkspace", inWS)
         createAlg.execute()
+
         wsFrom = createAlg.getProperty("OutputWorkspace").value
 
-        # add instrument information like mantid.simpleapi.LoadInstrument(Workspace=wsFrom, InstrumentName='ENGIN-X')
-        instAlg = self.createChildAlgorithm("LoadInstrument")
-        instAlg.setProperty("Workspace", wsFrom)
-        instAlg.setProperty("InstrumentName", 'ENGIN-X')
-        instAlg.execute()
-
-        # And finally run ConvertUnits
+        # finally convert units, like: sapi.ConvertUnits(InputWorkspace=wsFrom, Target=targetUnits)
+        convAlg = self.createChildAlgorithm("ConvertUnits")
         convAlg.setProperty("InputWorkspace", wsFrom)
-        convAlg.setProperty("OutputWorkspace", outWsName)
         targetUnits = 'TOF'
         convAlg.setProperty("Target", targetUnits)
-        # default property "EMode" value 'Elastic'
-        convAlg.execute()
+        # note: this implicitly uses default property "EMode" value 'Elastic'
+        goodExec = convAlg.execute()
+
         wsTo = convAlg.getProperty('OutputWorkspace').value
-        peaksToF = wsTo.dataX(0)
+        peaksToF = wsTo.readX(0)
+        if len(peaksToF) != len(expectedPeaks):
+            raise RuntimeError("Conversion of units went wrong. Converted %d peaks from the original "
+                               "list of %d peaks. The instrument definition might be incomplete for the "
+                               "original workspace / file."% (len(peaksToF), len(expectedPeaks)))
 
-        # clean up
-        delAlg = self.createChildAlgorithm("DeleteWorkspace")
-        delAlg.setProperty("Workspace", outWsName)
-        delAlg.execute()
+        ToFvalues = [peaksToF[i] for i in range(0,len(peaksToF))]
+        # catch potential failures because of geometry issues, etc.
+        if ToFvalues == expectedPeaks:
+            vals = self._doApproxHardCodedConvertUnitsToToF(expectedPeaks, inWS, wsIndex)
+            return vals
 
-        return peaksToF
+        return ToFvalues
+
+    def _doApproxHardCodedConvertUnitsToToF(self, dspValues, ws, wsIndex):
+        """
+        Converts from dSpacing to Time-of-flight, for one spectrum/detector. This method
+        is here for exceptional cases that presently need clarification / further work,
+        here and elsewhere in Mantid, and should ideally be removed in favor of the more 
+        general method that uses the algorithm ConvertUnits.
+
+        @param dspValues to convert from dSpacing
+        @param ws workspace with the appropriate instrument / geometry definition
+        @param wsIndex index of the spectrum
+
+        Return:
+        input values converted from dSpacing to ToF
+        """
+        det = ws.getDetector(wsIndex)
+
+        # Current detector parameters
+        detL2 = det.getDistance(ws.getInstrument().getSample())
+        detTwoTheta = ws.detectorTwoTheta(det)
+
+        # hard coded equation to convert dSpacing -> TOF for the single detector
+        dSpacingToTof = lambda d: 252.816 * 2 * (50 + detL2) * math.sin(detTwoTheta / 2.0) * d
+
+        # Values (in principle, expected peak positions) in TOF for the detector
+        ToFvalues = [dSpacingToTof(ep) for ep in dspValues]
+        return ToFvalues
 
     def _createFittedPeaksTable(self):
         """ Creates a table where to put peak fitting results to
