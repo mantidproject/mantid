@@ -275,7 +275,7 @@ public:
 
 protected:
   /// Handle the collision of two time series entries
-  virtual void handleTimeStampCollisions(TimeSeriesProperty &series);
+  virtual TimeSeriesProperty<TYPE>& handleTimeStampCollisions();
 
 private:
   /// Sort the property into increasing times

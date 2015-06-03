@@ -73,18 +73,16 @@ size_t TimeSeriesProperty<TYPE>::getMemorySize() const {
  */
 template <typename TYPE>
 TimeSeriesProperty<TYPE> &TimeSeriesProperty<TYPE>::merge(Property *rhs) {
-  TimeSeriesProperty<TYPE> & temp = operator+=(rhs);
-  handleTimeStampCollisions(temp);
-  return temp;
+  operator+=(rhs);
+  return handleTimeStampCollisions();
 }
 
 /**
  * Handle collisions, i.e. entries which have the same time stamp. If we
  * detect such an entry, then we shift it ny 1ns.
- * @param series :: takes the merged time series by reference and manipulates it
  */
 template <typename TYPE>
-void TimeSeriesProperty<TYPE>::handleTimeStampCollisions(TimeSeriesProperty<TYPE> &series) {
+TimeSeriesProperty<TYPE> & TimeSeriesProperty<TYPE>::handleTimeStampCollisions() {
   // We need to make sure that the entries are sorted
   sort();
 
@@ -95,12 +93,20 @@ void TimeSeriesProperty<TYPE>::handleTimeStampCollisions(TimeSeriesProperty<TYPE
   if (nextEntry != m_values.end()) { ++nextEntry; }
 
   for(nextEntry; nextEntry != m_values.end(); ++nextEntry) {
-    // Detect a collision and shift the time by 1ns
+    // Note: We need to take care of nextEntry values which
+    // can be smaller than currentEntry values due to
+    // consecutive collisions. For example, let's assume the
+    // time patter is 0ns0ns1ns1ns. Only checking for == 
+    // yields 0ns1ns2ns1ns.
     if (nextEntry->time() == currentEntry->time()) {
       nextEntry->setTime(nextEntry->time() + shift);
+    } else if (nextEntry->time() < currentEntry->time()) {
+      nextEntry->setTime(nextEntry->time() + 2*shift);
     }
     ++currentEntry;
   }
+
+  return *this;
 }
 
 

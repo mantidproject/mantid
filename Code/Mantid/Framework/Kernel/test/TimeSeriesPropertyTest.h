@@ -827,8 +827,8 @@ public:
   void test_Merge_with_partially_overlapping_workspaces()
   {
     // Arrange
-    TimeSeriesProperty<double> *p1 = new TimeSeriesProperty<double>("doubleProp1");
-    TimeSeriesProperty<double> *p2 = new TimeSeriesProperty<double>("doubleProp2");
+    TimeSeriesProperty<double> p1 = TimeSeriesProperty<double>("doubleProp1");
+    TimeSeriesProperty<double> p2 = TimeSeriesProperty<double>("doubleProp2");
 
     Mantid::Kernel::DateAndTime t0_p1("2007-11-30T16:17:05");
     Mantid::Kernel::DateAndTime t1_p1("2007-11-30T16:17:15");
@@ -840,17 +840,17 @@ public:
     Mantid::Kernel::DateAndTime t2_p2("2007-11-30T16:17:21");
     Mantid::Kernel::DateAndTime t3_p2("2007-11-30T16:17:30");
 
-    TS_ASSERT_THROWS_NOTHING( p1->addValue(t0_p1,1.0));
-    TS_ASSERT_THROWS_NOTHING( p1->addValue(t1_p1,2.1));
-    TS_ASSERT_THROWS_NOTHING( p1->addValue(t2_p1,3.0));
-    TS_ASSERT_THROWS_NOTHING( p1->addValue(t3_p1,5.1));
+    TS_ASSERT_THROWS_NOTHING( p1.addValue(t0_p1,1.0));
+    TS_ASSERT_THROWS_NOTHING( p1.addValue(t1_p1,2.1));
+    TS_ASSERT_THROWS_NOTHING( p1.addValue(t2_p1,3.0));
+    TS_ASSERT_THROWS_NOTHING( p1.addValue(t3_p1,5.1));
 
-    TS_ASSERT_THROWS_NOTHING( p2->addValue(t0_p2,0.0) );
-    TS_ASSERT_THROWS_NOTHING( p2->addValue(t1_p2,2.2) );
-    TS_ASSERT_THROWS_NOTHING( p2->addValue(t2_p2,4.0) );
-    TS_ASSERT_THROWS_NOTHING( p2->addValue(t3_p2,5.2) );
+    TS_ASSERT_THROWS_NOTHING( p2.addValue(t0_p2,0.0) );
+    TS_ASSERT_THROWS_NOTHING( p2.addValue(t1_p2,2.2) );
+    TS_ASSERT_THROWS_NOTHING( p2.addValue(t2_p2,4.0) );
+    TS_ASSERT_THROWS_NOTHING( p2.addValue(t3_p2,5.2) );
     // Act
-    p1->merge(p2);
+    p1.merge(&p2);
 
     // Assert
     const int64_t shift = 1;
@@ -863,29 +863,66 @@ public:
     Mantid::Kernel::DateAndTime controlT6(t3_p1);
     Mantid::Kernel::DateAndTime controlT7(t3_p2 + shift);
 
-    TS_ASSERT_EQUALS(p1->nthTime(0), controlT0)
-    TS_ASSERT_EQUALS(p1->nthTime(1), controlT1)
-    TS_ASSERT_EQUALS(p1->nthTime(2), controlT2)
-    TS_ASSERT_EQUALS(p1->nthTime(3), controlT3)
-    TS_ASSERT_EQUALS(p1->nthTime(4), controlT4)
-    TS_ASSERT_EQUALS(p1->nthTime(5), controlT5)
-    TS_ASSERT_EQUALS(p1->nthTime(6), controlT6)
-    TS_ASSERT_EQUALS(p1->nthTime(7), controlT7)
+    TS_ASSERT_EQUALS(p1.nthTime(0), controlT0)
+    TS_ASSERT_EQUALS(p1.nthTime(1), controlT1)
+    TS_ASSERT_EQUALS(p1.nthTime(2), controlT2)
+    TS_ASSERT_EQUALS(p1.nthTime(3), controlT3)
+    TS_ASSERT_EQUALS(p1.nthTime(4), controlT4)
+    TS_ASSERT_EQUALS(p1.nthTime(5), controlT5)
+    TS_ASSERT_EQUALS(p1.nthTime(6), controlT6)
+    TS_ASSERT_EQUALS(p1.nthTime(7), controlT7)
 
-    TS_ASSERT_DELTA(p1->getSingleValue(controlT0), 0.0, 1.0E-8);
-    TS_ASSERT_DELTA(p1->getSingleValue(controlT1), 1.0, 1.0E-8);
-    TS_ASSERT_DELTA(p1->getSingleValue(controlT2), 2.1, 1.0E-8);
-    TS_ASSERT_DELTA(p1->getSingleValue(controlT3), 2.2, 1.0E-8);
-    TS_ASSERT_DELTA(p1->getSingleValue(controlT4), 3.0, 1.0E-8);
-    TS_ASSERT_DELTA(p1->getSingleValue(controlT5), 4.0, 1.0E-8);
-    TS_ASSERT_DELTA(p1->getSingleValue(controlT6), 5.1, 1.0E-8);
-    TS_ASSERT_DELTA(p1->getSingleValue(controlT7), 5.2, 1.0E-8);
+    TS_ASSERT_DELTA(p1.getSingleValue(controlT0), 0.0, 1.0E-8);
+    TS_ASSERT_DELTA(p1.getSingleValue(controlT1), 1.0, 1.0E-8);
+    TS_ASSERT_DELTA(p1.getSingleValue(controlT2), 2.1, 1.0E-8);
+    TS_ASSERT_DELTA(p1.getSingleValue(controlT3), 2.2, 1.0E-8);
+    TS_ASSERT_DELTA(p1.getSingleValue(controlT4), 3.0, 1.0E-8);
+    TS_ASSERT_DELTA(p1.getSingleValue(controlT5), 4.0, 1.0E-8);
+    TS_ASSERT_DELTA(p1.getSingleValue(controlT6), 5.1, 1.0E-8);
+    TS_ASSERT_DELTA(p1.getSingleValue(controlT7), 5.2, 1.0E-8);
+  }
 
-    // Clean up
-    delete p1;
-    delete p2;
 
-    return;
+  /**
+   * Test merge() can handle repeated merges with overlapping workspaces
+   */
+  void test_multiple_merge_calls_with_overlapping_workspaces() {
+    // Arrange
+    const int64_t shift = 1;
+    TimeSeriesProperty<double> p1 = TimeSeriesProperty<double>("doubleProp1");
+    TimeSeriesProperty<double> p2 = TimeSeriesProperty<double>("doubleProp1");
+    TimeSeriesProperty<double> p3 = TimeSeriesProperty<double>("doubleProp1");
+
+    Mantid::Kernel::DateAndTime t0("2007-11-30T16:00:00");
+    Mantid::Kernel::DateAndTime t1(t0 + shift);
+    Mantid::Kernel::DateAndTime t2("2007-11-30T17:00:00");
+
+    TS_ASSERT_THROWS_NOTHING(p1.addValue(t0,1.0));
+    TS_ASSERT_THROWS_NOTHING(p1.addValue(t1,1.0));
+    TS_ASSERT_THROWS_NOTHING(p1.addValue(t2,1.0));
+
+    TS_ASSERT_THROWS_NOTHING(p2.addValue(t0,2.0));
+    TS_ASSERT_THROWS_NOTHING(p2.addValue(t1,2.0));
+    TS_ASSERT_THROWS_NOTHING(p2.addValue(t2,2.0));
+
+    TS_ASSERT_THROWS_NOTHING(p3.addValue(t0,3.0));
+    TS_ASSERT_THROWS_NOTHING(p3.addValue(t1,3.0));
+    TS_ASSERT_THROWS_NOTHING(p3.addValue(t2,3.0));
+
+    // Act 
+    p1.merge(&p2);
+    p1.merge(&p3);
+
+    // Assert
+    TS_ASSERT_EQUALS(p1.nthTime(0),t0)
+    TS_ASSERT_EQUALS(p1.nthTime(1),t0 + shift)
+    TS_ASSERT_EQUALS(p1.nthTime(2),t0 + 2*shift)
+    TS_ASSERT_EQUALS(p1.nthTime(3),t0 + 3*shift)
+    TS_ASSERT_EQUALS(p1.nthTime(4),t0 + 4*shift)
+    TS_ASSERT_EQUALS(p1.nthTime(5),t0 + 5*shift)
+    TS_ASSERT_EQUALS(p1.nthTime(6),t2)
+    TS_ASSERT_EQUALS(p1.nthTime(6),t2 + shift)
+    TS_ASSERT_EQUALS(p1.nthTime(6),t2 + 2*shift)
   }
 
 
