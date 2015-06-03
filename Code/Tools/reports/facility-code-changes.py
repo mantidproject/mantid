@@ -186,7 +186,7 @@ if __name__ == '__main__':
 
             args_commits = ['git', 'shortlog', '-sne', since, until]
             # print(args_commits)
-            sub2 = subprocess.Popen(args_commits, stdout=subprocess.PIPE, shell=True, close_fds=True, cwd=repolocation)
+            sub2 = subprocess.Popen(args_commits, stdout=subprocess.PIPE, close_fds=True, cwd=repolocation)
             commits = 0
             for line in sub2.stdout:
                 # print(line)
