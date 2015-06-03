@@ -27,7 +27,7 @@ Usage
 
 **Example:**
 
-.. code-block:: python
+.. testcode:: ExCylinderPaalmanPingsCorrection
 
     # Create a sample workspace
     sample = CreateSampleWorkspace(NumBanks=1, BankPixelWidth=1,
@@ -51,14 +51,13 @@ Usage
                                           BeamWidth=0.1,
                                           StepSize=0.002,
                                           Emode='Indirect',
-                                          Efixed=1.845,
-                                          Version=1)
+                                          Efixed=1.845)
 
     print 'Correction workspaces: %s' % (', '.join(corr.getNames()))
 
 Output:
 
-.. code-block:: none
+.. testoutput:: ExCylinderPaalmanPingsCorrection
 
     Correction workspaces: corr_ass, corr_assc, corr_acsc, corr_acc
 

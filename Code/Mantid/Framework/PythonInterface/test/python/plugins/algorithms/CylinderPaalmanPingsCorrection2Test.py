@@ -1,11 +1,11 @@
 import unittest
 from mantid.kernel import *
 from mantid.api import *
-from mantid.simpleapi import CreateSampleWorkspace, Scale, DeleteWorkspace, CylinderPaalmanPingsCorrection, CreateSimulationWorkspace
-from IndirectImport import is_supported_f2py_platform
+from mantid.simpleapi import (CreateSampleWorkspace, Scale, DeleteWorkspace,
+                              CylinderPaalmanPingsCorrection)
 
 
-class CylinderPaalmanPingsCorrectionTest(unittest.TestCase):
+class CylinderPaalmanPingsCorrection2Test(unittest.TestCase):
 
     def setUp(self):
         """
@@ -86,18 +86,13 @@ class CylinderPaalmanPingsCorrectionTest(unittest.TestCase):
         Test simple run with sample workspace only.
         """
 
-        # Just pass if we can't actually run the algorithm
-        if not is_supported_f2py_platform():
-            return
-
         CylinderPaalmanPingsCorrection(OutputWorkspace=self._corrections_ws_name,
                                        SampleWorkspace=self._sample_ws,
                                        SampleChemicalFormula='H2-O',
                                        SampleInnerRadius=0.05,
                                        SampleOuterRadius=0.1,
                                        Emode='Indirect',
-                                       Efixed=1.845,
-                                       Version=1)
+                                       Efixed=1.845)
 
         ass_ws_name = self._corrections_ws_name + '_ass'
         self. _verify_workspace(ass_ws_name)
@@ -107,10 +102,6 @@ class CylinderPaalmanPingsCorrectionTest(unittest.TestCase):
         """
         Test simple run with sample and can workspace.
         """
-
-        # Just pass if we can't actually run the algorithm
-        if not is_supported_f2py_platform():
-            return
 
         CylinderPaalmanPingsCorrection(OutputWorkspace=self._corrections_ws_name,
                                        SampleWorkspace=self._sample_ws,
@@ -123,8 +114,7 @@ class CylinderPaalmanPingsCorrectionTest(unittest.TestCase):
                                        BeamHeight=0.1,
                                        BeamWidth=0.1,
                                        Emode='Indirect',
-                                       Efixed=1.845,
-                                       Version=1)
+                                       Efixed=1.845)
 
         self._verify_workspaces_for_can()
 
@@ -134,16 +124,11 @@ class CylinderPaalmanPingsCorrectionTest(unittest.TestCase):
         Test simple run with sample and can workspace using the default values.
         """
 
-        # Just pass if we can't actually run the algorithm
-        if not is_supported_f2py_platform():
-            return
-
         CylinderPaalmanPingsCorrection(OutputWorkspace=self._corrections_ws_name,
                                        SampleWorkspace=self._sample_ws,
                                        SampleChemicalFormula='H2-O',
                                        CanWorkspace=self._can_ws,
-                                       CanChemicalFormula='V',
-                                       Version=1)
+                                       CanChemicalFormula='V')
 
         self._verify_workspaces_for_can()
 
@@ -154,17 +139,12 @@ class CylinderPaalmanPingsCorrectionTest(unittest.TestCase):
         when interpolation is disabled.
         """
 
-        # Just pass if we can't actually run the algorithm
-        if not is_supported_f2py_platform():
-            return
-
         CylinderPaalmanPingsCorrection(OutputWorkspace=self._corrections_ws_name,
                                        SampleWorkspace=self._sample_ws,
                                        SampleChemicalFormula='H2-O',
                                        CanWorkspace=self._can_ws,
                                        CanChemicalFormula='V',
-                                       Interpolate=False,
-                                       Version=1)
+                                       Interpolate=False)
 
         corrections_ws = mtd[self._corrections_ws_name]
 
@@ -190,8 +170,7 @@ class CylinderPaalmanPingsCorrectionTest(unittest.TestCase):
                           BeamHeight=0.1,
                           BeamWidth=0.1,
                           Emode='Indirect',
-                          Efixed=1.845,
-                          Version=1)
+                          Efixed=1.845)
 
 
 if __name__=="__main__":
