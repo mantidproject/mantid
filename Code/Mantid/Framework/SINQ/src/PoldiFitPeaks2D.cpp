@@ -617,6 +617,63 @@ std::string PoldiFitPeaks2D::getRefinedStartingCell(
 }
 
 /**
+ * @brief Returns a string with ties that is passed to Fit
+ *
+ * This method uses the GlobalParameters property, which may contain a comma-
+ * separated list of parameter names that should be the same for all peaks.
+ *
+ * Parameters that do not exist are silently ignored, but a warning is written
+ * to the log so that users have a chance to find typos.
+ *
+ * @param poldiFn :: Function with some parameters.
+ * @return :: String to pass to the Ties-property of Fit.
+ */
+std::string
+PoldiFitPeaks2D::getUserSpecifiedTies(const IFunction_sptr &poldiFn) {
+  std::string tieParameterList = getProperty("GlobalParameters");
+
+  if (!tieParameterList.empty()) {
+    std::vector<std::string> tieParameters;
+
+    boost::split(tieParameters, tieParameterList, boost::is_any_of(",;"));
+
+    std::vector<std::string> parameters = poldiFn->getParameterNames();
+
+    std::vector<std::string> tieComponents;
+    for (auto it = tieParameters.begin(); it != tieParameters.end(); ++it) {
+      if (!(*it).empty()) {
+        std::vector<std::string> matchedParameters;
+
+        for (auto parName = parameters.begin(); parName != parameters.end();
+             ++parName) {
+          if (boost::algorithm::ends_with(*parName, *it)) {
+            matchedParameters.push_back(*parName);
+          }
+        }
+
+        if (matchedParameters.size() > 1) {
+          std::string reference = matchedParameters.front();
+
+          for (auto par = matchedParameters.begin() + 1;
+               par != matchedParameters.end(); ++par) {
+            tieComponents.push_back(*par + "=" + reference);
+          }
+        } else {
+          g_log.warning("Function does not have a parameter called '" + *it +
+                        "', ignoring.");
+        }
+      }
+    }
+
+    if (tieComponents.size() > 0) {
+      return boost::algorithm::join(tieComponents, ",");
+    }
+  }
+
+  return "";
+}
+
+/**
  * Construct a PoldiPeakCollection from a Poldi2DFunction
  *
  * This method performs the opposite operation of getFunctionFromPeakCollection.
@@ -892,6 +949,10 @@ IAlgorithm_sptr PoldiFitPeaks2D::calculateSpectrum(
     mdFunction->addFunction(getFunctionFromPeakCollection(*pc));
   }
 
+  std::string ties = getUserSpecifiedTies(mdFunction);
+
+  std::cout << ties << std::endl;
+
   // And finally background terms
   addBackgroundTerms(mdFunction);
 
@@ -910,6 +971,7 @@ IAlgorithm_sptr PoldiFitPeaks2D::calculateSpectrum(
   fit->setProperty("MaxIterations", maxIterations);
 
   fit->setProperty("Minimizer", "Levenberg-MarquardtMD");
+  fit->setProperty("Ties", ties);
 
   // Setting the level to Notice to avoid problems with Levenberg-MarquardtMD.
   int oldLogLevel = g_log.getLevel();
@@ -1100,6 +1162,10 @@ void PoldiFitPeaks2D::init() {
                   "Profile function to use for integrating the peak profiles "
                   "before calculating the spectrum.");
 
+  declareProperty("GlobalParameters", "", "Comma-separated list of parameter "
+                                          "names that are identical for all "
+                                          "peaks.");
+
   declareProperty("PawleyFit", false,
                   "Instead of refining individual peaks, "
                   "refine a unit cell. Peaks must be "
@@ -1173,8 +1239,8 @@ void PoldiFitPeaks2D::exec() {
   std::vector<PoldiPeakCollection_sptr> integralPeaks =
       getCountPeakCollections(fitFunction);
 
-  for(size_t i = 0; i < peakCollections.size(); ++i) {
-      assignMillerIndices(peakCollections[i], integralPeaks[i]);
+  for (size_t i = 0; i < peakCollections.size(); ++i) {
+    assignMillerIndices(peakCollections[i], integralPeaks[i]);
   }
 
   // Get the calculated 2D workspace
