@@ -28,8 +28,6 @@ if __name__ == '__main__':
         print("ERROR: Specified repository location is not a directory.")
         exit()
 
-    # repolocation = '/home/scu/sources/git/mantidproject/mantid'
-
     organisations = ['STFC', 'ORNL', 'ESS', 'ILL', 'PSI', 'ANSTO', 'KITWARE', 'JUELICH', 'OTHERS']
 
     domains = {}
@@ -230,7 +228,7 @@ if __name__ == '__main__':
                 else:
                     removed_datarow[org] = facility_removed[date_key][org]
 
-                # print("In {0}, {1} has {2} commits".format(date_key, org, facility_commits[date_key][org]))
+                print("In {0}, {1} has {2} commits".format(date_key, org, facility_commits[date_key][org]))
 
             commits_writer.writerow(commits_datarow)
             changed_writer.writerow(changed_datarow)
