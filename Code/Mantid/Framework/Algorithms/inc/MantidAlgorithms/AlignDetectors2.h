@@ -53,17 +53,14 @@ public:
   virtual ~AlignDetectors2();
 
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "AlignDetectors"; };
+  virtual const std::string name() const;
   /// Summary of algorithms purpose
-  virtual const std::string summary() const {
-    return "Performs a unit change from TOF to dSpacing, correcting the X "
-           "values to account for small errors in the detector positions.";
-  }
+  virtual const std::string summary() const;
 
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return 2; };
+  virtual int version() const ;
   /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const { return "Diffraction"; }
+  virtual const std::string category() const;
 
   // ----- Useful static functions ------
   static std::map<detid_t, double> *calcTofToD_ConversionMap(

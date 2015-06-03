@@ -23,6 +23,17 @@ namespace Algorithms {
 // Register the algorithm into the algorithm factory
 DECLARE_ALGORITHM(AlignDetectors2)
 
+const std::string AlignDetectors2::name() const { return "AlignDetectors"; }
+
+int AlignDetectors2::version() const { return 2; }
+
+const std::string AlignDetectors2::category() const { return "Diffraction"; }
+
+const std::string AlignDetectors2::summary() const {
+  return "Performs a unit change from TOF to dSpacing, correcting the X "
+         "values to account for small errors in the detector positions.";
+}
+
 //-----------------------------------------------------------------------
 /**
  * Make a map of the conversion factors between tof and D-spacing
