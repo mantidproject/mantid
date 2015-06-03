@@ -65,10 +65,11 @@ private:
                                             const detid_t &startdetid,
                                             const int runnumber);
 
-  void convertToMomentum(const std::vector<double> &detPos,
-                         const double &wavelength,
-                         std::vector<Mantid::coord_t> &qSample,
-                         const Kernel::DblMatrix &rotationMatrix);
+  /// Convert |Q| with detector position to Q_sample
+  Kernel::V3D convertToMomentum(const std::vector<double> &detPos,
+                                const double &momentum,
+                                std::vector<Mantid::coord_t> &qSample,
+                                const Kernel::DblMatrix &rotationMatrix);
 
   API::IMDEventWorkspace_sptr createExperimentMDWorkspace();
 
@@ -99,6 +100,9 @@ private:
   std::vector<double> m_extentMins;
   std::vector<double> m_extentMaxs;
   std::vector<size_t> m_numBins;
+
+  /// Data directory
+  std::string m_dataDir;
 };
 
 } // namespace MDAlgorithms

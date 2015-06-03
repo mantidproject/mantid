@@ -7,6 +7,7 @@
 #include "MantidGeometry/Instrument/ComponentHelper.h"
 #include "MantidMDAlgorithms/MDWSDescription.h"
 #include "MantidMDAlgorithms/MDWSTransform.h"
+#include "MantidAPI/FileProperty.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -53,6 +54,11 @@ void ConvertCWSDExpToMomentum::init() {
 
   declareProperty(new ArrayProperty<double>("PixelDimension"),
                   "A vector of 8 doubles to determine a cubic pixel's size.");
+
+  declareProperty(
+      new FileProperty("Directory", ".", FileProperty::Directory),
+      "Directory where data files are if InputWorkspace gives data file name "
+      "as the base file name.");
 }
 
 /**
@@ -142,6 +148,7 @@ ConvertCWSDExpToMomentum::createExperimentMDWorkspace() {
             static_cast<coord_t>(m_extentMaxs[i]), m_numBins[i])));
   }
 
+  /*----- No use... just examples???
   // Add events
   // Creates a new instance of the MDEventInserter.
   MDEventWorkspace<MDEvent<3>, 3>::sptr MDEW_MDEVENT_3 =
@@ -151,6 +158,7 @@ ConvertCWSDExpToMomentum::createExperimentMDWorkspace() {
       MDEW_MDEVENT_3);
 
   // FIXME - Add instrument?
+  -------------------------------*/
 
   mdws->setCoordinateSystem(coordinateSystem);
 
@@ -166,13 +174,40 @@ void ConvertCWSDExpToMomentum::addMDEvents() {
   size_t numrows = m_expDataTableWS->rowCount();
   size_t numFileNotLoaded(0);
   for (size_t ir = 0; ir < numrows; ++ir) {
-    std::string filename =
+    std::string rawfilename =
         m_expDataTableWS->cell<std::string>(ir, m_iColFilename);
     detid_t start_detid = m_expDataTableWS->cell<detid_t>(ir, m_iColStartDetID);
 
     // Load data
     bool loaded;
     std::string errmsg;
+
+    // FIXME - Identify windows or linux
+    bool isWindows = true;
+    bool needSep = true;
+    if (m_dataDir.size() == 0) {
+      needSep = false;
+    } else {
+      if (m_dataDir.find('/') != std::string::npos) {
+        isWindows = false;
+        if (m_dataDir.back() != '/')
+          needSep = true;
+      } else {
+        if (m_dataDir.back() != '\\')
+          needSep = true;
+      }
+    }
+
+    std::stringstream filess;
+    filess << m_dataDir;
+    if (needSep)
+      if (isWindows)
+        filess << "\\";
+      else
+        filess << "/";
+    filess << rawfilename;
+    std::string filename(filess.str());
+
     spicews = loadSpiceData(filename, loaded, errmsg);
     if (!loaded) {
       g_log.error(errmsg);
@@ -225,11 +260,12 @@ void ConvertCWSDExpToMomentum::convertSpiceMatrixToMomentumMDEvents(
     // Get detector positions and signal
     double signal = dataws->readY(iws)[0];
     double error = dataws->readE(iws)[0];
-    double wavelength = dataws->readX(iws)[0];
+    double magQ = 0.5 * (dataws->readX(iws)[0] + dataws->readX(iws)[1]);
     // Create the MDEvent
     Kernel::V3D detpos = dataws->getDetector(iws)->getPos();
     std::vector<Mantid::coord_t> momentum(3);
-    convertToMomentum(detpos, wavelength, momentum, rotationMatrix);
+    Kernel::V3D qsample =
+        convertToMomentum(detpos, magQ, momentum, rotationMatrix);
     detid_t detid = dataws->getDetector(iws)->getID() + startdetid;
     // Insert
     inserter.insertMDEvent(
@@ -295,21 +331,27 @@ bool ConvertCWSDExpToMomentum::getInputs(std::string &errmsg) {
     m_samplePos.setZ(samplepos[2]);
   }
 
+  m_dataDir = getPropertyValue("Directory");
+
   errmsg = errss.str();
   return (errmsg.size() > 0);
 }
 
-void ConvertCWSDExpToMomentum::convertToMomentum(
-    const std::vector<double> &detPos, const double &wavelength,
+/// Convert to momentum
+Kernel::V3D ConvertCWSDExpToMomentum::convertToMomentum(
+    const std::vector<double> &detPos, const double &momentum,
     std::vector<coord_t> &qSample, const Kernel::DblMatrix &rotationMatrix) {
 
-  // TODO - Use detector position and wavelength/Q to calcualte Q_lab
-  Kernel::V3D q_lab;
+  // Use detector position and wavelength/Q to calcualte Q_lab
+  double x = detPos[0] * momentum;
+  double y = detPos[1] * momentum;
+  double z = detPos[2] * momentum;
+  Kernel::V3D q_lab(x, y, z);
 
   // TODO - Use matrix workspace
   Kernel::V3D q_sample = rotationMatrix * q_lab;
 
-  return;
+  return q_lab;
 }
 
 API::MatrixWorkspace_sptr
