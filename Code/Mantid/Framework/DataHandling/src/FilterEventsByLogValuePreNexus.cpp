@@ -774,11 +774,11 @@ void FilterEventsByLogValuePreNexus::doStatToEventLog(size_t mindex) {
 //-----------------------------------------------------------------------------
 /** Load the instrument geometry File
  *  @param eventfilename :: Used to pick the instrument.
- *  @param m_localWorkspace :: MatrixWorkspace in which to put the instrument
- * geometry
+ *  @param localWorkspace :: MatrixWorkspace in which to put the instrument
+ *  geometry
  */
 void FilterEventsByLogValuePreNexus::runLoadInstrument(
-    const std::string &eventfilename, MatrixWorkspace_sptr m_localWorkspace) {
+    const std::string &eventfilename, MatrixWorkspace_sptr localWorkspace) {
   // start by getting just the filename
   string instrument = Poco::Path(eventfilename).getFileName();
 
@@ -803,13 +803,13 @@ void FilterEventsByLogValuePreNexus::runLoadInstrument(
 
   // Now execute the Child Algorithm. Catch and log any error, but don't stop.
   loadInst->setPropertyValue("InstrumentName", instrument);
-  loadInst->setProperty<MatrixWorkspace_sptr>("Workspace", m_localWorkspace);
+  loadInst->setProperty<MatrixWorkspace_sptr>("Workspace", localWorkspace);
   loadInst->setProperty("RewriteSpectraMap", false);
   loadInst->executeAsChildAlg();
 
   // Populate the instrument parameters in this workspace - this works around a
   // bug
-  m_localWorkspace->populateInstrumentParameters();
+  localWorkspace->populateInstrumentParameters();
 }
 
 //----------------------------------------------------------------------------------------------
