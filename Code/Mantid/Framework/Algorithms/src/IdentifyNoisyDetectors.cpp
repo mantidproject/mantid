@@ -32,6 +32,12 @@ void IdentifyNoisyDetectors::exec() {
   const double rangeUpper = getProperty("RangeUpper");
   const double steps = rangeUpper - rangeLower;
 
+  if (0 == nHist)
+    throw std::runtime_error(
+        "Cannot run this algorithm on an input workspace without any spectra. "
+        "It does not seem to make sense and the calculations done here will "
+        "will cause a division by zero.");
+
   // Create the output workspace a single value for each spectra.
   MatrixWorkspace_sptr outputWs;
   outputWs = WorkspaceFactory::Instance().create(inputWS, nHist, 1, 1);
