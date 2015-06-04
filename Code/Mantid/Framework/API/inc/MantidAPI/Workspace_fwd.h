@@ -4,8 +4,7 @@
 namespace Mantid {
 namespace API {
 /**
-  This file provides forward declarations for
-  @link Mantid::API::Workspace
+  This file provides forward declarations for Mantid::API::Workspace
 
   Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
@@ -29,11 +28,11 @@ namespace API {
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
-/// forward declare of @link Mantid::API::Workspace
+/// forward declare of Mantid::API::Workspace
 class Workspace;
-/// shared pointer to @link Mantid::API::Workspace
+/// shared pointer to Mantid::API::Workspace
 typedef boost::shared_ptr<Workspace> Workspace_sptr;
-/// shared pointer to @link Mantid::API::Workspace (const version)
+/// shared pointer to Mantid::API::Workspace (const version)
 typedef boost::shared_ptr<const Workspace> Workspace_const_sptr;
 
 } // namespace API
