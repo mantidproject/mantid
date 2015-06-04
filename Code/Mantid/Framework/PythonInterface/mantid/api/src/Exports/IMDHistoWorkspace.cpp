@@ -28,8 +28,6 @@ std::vector<Py_intptr_t> countDimensions(const IMDHistoWorkspace &self) {
 
   // invert dimensions in C way, e.g. slowest changing ndim goes first
   for (size_t i = 0; i < ndims; ++i) {
-    if (self.getDimension(ndims - i - 1)->getNBins() >
-        1) // drop empty (integrated) dimesnions
       nd.push_back(self.getDimension(ndims - i - 1)->getNBins());
   }
 
@@ -38,7 +36,12 @@ std::vector<Py_intptr_t> countDimensions(const IMDHistoWorkspace &self) {
   for (size_t i = 0; i < ndims; ++i)
     dims[i] = static_cast<Py_intptr_t>(nd[i]);
 
-  return dims;
+
+  if (dims.empty()) {
+    throw std::runtime_error("Workspace has zero dimensions!");
+  } else {
+    return dims;
+  }
 }
 
 /**
