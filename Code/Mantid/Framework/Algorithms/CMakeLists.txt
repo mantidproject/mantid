@@ -252,6 +252,7 @@ set ( SRC_FILES
 	src/UnwrapMonitor.cpp
 	src/UnwrapSNS.cpp
 	src/UpdateScriptRepository.cpp
+	src/VesuvioL1ThetaResolution.cpp
 	src/WeightedMean.cpp
 	src/WeightedMeanOfWorkspace.cpp
 	src/WeightingStrategy.cpp
@@ -515,6 +516,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/UnwrapMonitor.h
 	inc/MantidAlgorithms/UnwrapSNS.h
 	inc/MantidAlgorithms/UpdateScriptRepository.h
+	inc/MantidAlgorithms/VesuvioL1ThetaResolution.h
 	inc/MantidAlgorithms/WeightedMean.h
 	inc/MantidAlgorithms/WeightedMeanOfWorkspace.h
 	inc/MantidAlgorithms/WeightingStrategy.h
@@ -763,6 +765,7 @@ set ( TEST_FILES
 	UnGroupWorkspaceTest.h
 	UnaryOperationTest.h
 	UnwrapSNSTest.h
+	VesuvioL1ThetaResolutionTest.h
 	WeightedMeanOfWorkspaceTest.h
 	WeightedMeanTest.h
 	WeightingStrategyTest.h
