@@ -11,6 +11,7 @@ digraph ReflectometryReductionOne {
     outputWorkspaceMT [label="OutputWorkspace"]
     thetaIn           [label="ThetaIn"]
     thetaOut          [label="ThetaOut"]
+    polyCorrection    [label="PolynomialCorrection"]
   }
 
   subgraph decisions {
@@ -21,6 +22,8 @@ digraph ReflectometryReductionOne {
     checkTransUnits [label="X axis in &lambda;?"]
     checkThetaIn    [label="ThetaIn given?"]
     checkCorDetPos  [label="Correct Detector Positions?"]
+    checkPoly       [label="PolynomialCorrection\nset?"]
+    checkCorrParam  [label="Instrument\nparameter\n'correction' set?"]
   }
 
   subgraph algorithms {
@@ -33,6 +36,8 @@ digraph ReflectometryReductionOne {
     divideTrans     [label="Divide\n(InputWorkspace / TransmissionWorkspace)"]
     intMon          [label="Integrate"]
     specRefPosCor   [label="SpecularReflectionPositionCorrect"]
+    polyCorr        [label="PolynomialCorrection"]
+    expCorr         [label="ExponentialCorrection"]
   }
 
   subgraph processes {
@@ -64,7 +69,14 @@ digraph ReflectometryReductionOne {
   divideDetMon      -> valInputDiv
   valInputDiv       -> checkTransRun
   checkTransRun     -> divideTrans      [label="Yes"]
-  checkTransRun     -> checkThetaIn     [label="No"]
+  checkTransRun     -> checkPoly        [label="No"]
+  polyCorrection    -> checkPoly
+  checkPoly         -> checkCorrParam   [label="Yes"]
+  checkCorrParam    -> polyCorr         [label="polynomial"]
+  checkCorrParam    -> expCorr          [label="exponential"]
+  polyCorr          -> checkThetaIn
+  expCorr           -> checkThetaIn
+  checkPoly         -> checkThetaIn     [label="No"]
   firstTransRun     -> checkTransUnits
   checkTransUnits   -> valTrans         [label="Yes"]
   checkTransUnits   -> createTransWS    [label="No"]
