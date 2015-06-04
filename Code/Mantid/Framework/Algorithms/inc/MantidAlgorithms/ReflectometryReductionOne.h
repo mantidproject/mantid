@@ -99,6 +99,10 @@ private:
       const OptionalDouble &stitchingEndOverlapQ, const double &wavelengthStep,
       const std::string &processingCommands);
 
+  /// Perform transmission correction by generating a polynomial
+  API::MatrixWorkspace_sptr
+  polynomialCorrection(API::MatrixWorkspace_sptr IvsLam);
+
   /// Verify spectrum maps
   void verifySpectrumMaps(API::MatrixWorkspace_const_sptr ws1,
                           API::MatrixWorkspace_const_sptr ws2,

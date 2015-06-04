@@ -192,6 +192,11 @@ void ReflectometryReductionOne::init() {
                                               Direction::Input),
                   "Enforces spectrum number checking prior to normalisation");
 
+  declareProperty(new PropertyWithValue<bool>("PolynomialCorrection", false,
+                                              Direction::Input),
+                  "If no transmission workspaces are provided, perform "
+                  "polynomial correction instead.");
+
   setPropertyGroup("FirstTransmissionRun", "Transmission");
   setPropertyGroup("SecondTransmissionRun", "Transmission");
   setPropertyGroup("Params", "Transmission");
@@ -442,6 +447,8 @@ void ReflectometryReductionOne::exec() {
 
   const bool correctDetectorPositions = getProperty("CorrectDetectorPositions");
 
+  const bool generatePolynomial = getProperty("PolynomialCorrection");
+
   MatrixWorkspace_sptr IvsLam; // Output workspace
   MatrixWorkspace_sptr IvsQ;   // Output workspace
 
@@ -514,6 +521,8 @@ void ReflectometryReductionOne::exec() {
         firstTransmissionRun.get(), secondTransmissionRun, stitchingStart,
         stitchingDelta, stitchingEnd, stitchingStartOverlap,
         stitchingEndOverlap, wavelengthStep, processingCommands);
+  } else if (generatePolynomial) {
+    IvsLam = polynomialCorrection(IvsLam);
   } else {
     g_log.warning("No transmission correction will be applied.");
   }
@@ -641,6 +650,73 @@ MatrixWorkspace_sptr ReflectometryReductionOne::transmissonCorrection(
   // Do normalization.
   MatrixWorkspace_sptr normalizedIvsLam = divide(IvsLam, denominator);
   return normalizedIvsLam;
+}
+
+/**
+ * Perform Transmission Corrections Using Polynomials.
+ * @param IvsLam : Run workspace which is to be normalized by the results of the
+ * transmission corrections.
+ * @return Normalized run workspace by the generated polynomial.
+ */
+MatrixWorkspace_sptr
+ReflectometryReductionOne::polynomialCorrection(MatrixWorkspace_sptr IvsLam) {
+
+  auto inst = IvsLam->getInstrument();
+
+  // Extract correction string from instrument
+  const std::vector<std::string> corrVec =
+      inst->getStringParameter("correction");
+  const std::string correctionStr = !corrVec.empty() ? corrVec[0] : "";
+
+  if (correctionStr.empty())
+    throw std::runtime_error("PolynomialCorrection enabled, but "
+                             "could not determine correction type from "
+                             "instrument. 'correction' instrument parameter "
+                             "was not found.");
+
+  const std::vector<std::string> polyVec =
+      inst->getStringParameter("polynomial");
+  const std::string polyStr = !polyVec.empty() ? polyVec[0] : "";
+
+  const std::vector<std::string> c0Vec = inst->getStringParameter("C0");
+  const std::string c0Str = !c0Vec.empty() ? c0Vec[0] : "";
+
+  const std::vector<std::string> c1Vec = inst->getStringParameter("C1");
+  const std::string c1Str = !c1Vec.empty() ? c1Vec[0] : "";
+
+  if (correctionStr == "polynomial" && polyStr.empty())
+    throw std::runtime_error("PolynomialCorrection enabled, but "
+                             "could not determine polynomial from "
+                             "instrument. 'polynomial' instrument parameter "
+                             "was not found.");
+
+  if (correctionStr == "exponential" && (c0Str.empty() || c1Str.empty()))
+    throw std::runtime_error("PolynomialCorrection enabled, but "
+                             "could not determine exponents from "
+                             "instrument. 'C0' or 'C1' instrument parameter "
+                             "was not found.");
+
+  IAlgorithm_sptr corrAlg;
+  if (correctionStr == "polynomial") {
+    // Run PolynomialCorrection
+    corrAlg = createChildAlgorithm("PolynomialCorrection");
+    corrAlg->initialize();
+    corrAlg->setProperty("Coefficients", polyStr);
+  } else if (correctionStr == "exponential") {
+    // Run ExponentialCorrection
+    corrAlg = createChildAlgorithm("ExponentialCorrection");
+    corrAlg->initialize();
+    corrAlg->setProperty("C0", c0Str);
+    corrAlg->setProperty("C1", c1Str);
+  } else {
+    throw std::runtime_error("Unknown correction type found in instrument: " +
+                             correctionStr);
+  }
+
+  corrAlg->setProperty("InputWorkspace", IvsLam);
+  corrAlg->setProperty("Operation", "Divide");
+  corrAlg->execute();
+  return corrAlg->getProperty("OutputWorkspace");
 }
 
 /**
