@@ -36,6 +36,8 @@ ProjectionSurface::ProjectionSurface(const InstrumentActor* rootActor):
     m_interactionMode(MoveMode),
     m_isLightingOn(false),
     m_peakLabelPrecision(2),
+    m_showPeakRows(false),
+    m_showPeakLabels(false),
     m_peakShapesStyle(0),
     m_viewChanged(true),
     m_redrawPicking(true)
