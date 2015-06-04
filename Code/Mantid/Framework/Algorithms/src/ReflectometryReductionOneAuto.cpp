@@ -152,6 +152,11 @@ void ReflectometryReductionOneAuto::init() {
                   "Strict checking between spectrum numbers in input "
                   "workspaces and transmission workspaces.");
 
+  declareProperty(new PropertyWithValue<bool>("PolynomialCorrection", false,
+                                              Direction::Input),
+                  "If no transmission workspaces are provided, perform "
+                  "polynomial correction instead.");
+
   // Polarization correction inputs --------------
   std::vector<std::string> propOptions;
   propOptions.push_back(noPolarizationCorrectionMode());
@@ -290,6 +295,7 @@ void ReflectometryReductionOneAuto::exec() {
 
   bool correct_positions = this->getProperty("CorrectDetectorPositions");
   bool strict_spectrum_checking = this->getProperty("StrictSpectrumChecking");
+  bool polynomial_correction = this->getProperty("PolynomialCorrection");
 
   // Pass the arguments and execute the main algorithm.
 
@@ -315,6 +321,7 @@ void ReflectometryReductionOneAuto::exec() {
                            wavelength_integration_max);
     refRedOne->setProperty("CorrectDetectorPositions", correct_positions);
     refRedOne->setProperty("StrictSpectrumChecking", strict_spectrum_checking);
+    refRedOne->setProperty("PolynomialCorrection", polynomial_correction );
 
     if (first_ws) {
       refRedOne->setProperty("FirstTransmissionRun", first_ws);
