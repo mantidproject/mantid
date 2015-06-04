@@ -66,7 +66,7 @@ private:
                                             const int runnumber);
 
   /// Convert |Q| with detector position to Q_sample
-  Kernel::V3D convertToMomentum(const std::vector<double> &detPos,
+  Kernel::V3D convertToMomentum(const Kernel::V3D &ki, const Kernel::V3D &detPos,
                                 const double &momentum,
                                 std::vector<Mantid::coord_t> &qSample,
                                 const Kernel::DblMatrix &rotationMatrix);
