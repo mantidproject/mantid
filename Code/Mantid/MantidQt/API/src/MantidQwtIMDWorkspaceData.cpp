@@ -117,6 +117,9 @@ MantidQwtIMDWorkspaceData& MantidQwtIMDWorkspaceData::operator=(const MantidQwtI
 {
   m_workspace = data.m_workspace;
   m_logScale = data.m_logScale;
+  m_minY = data.m_minY;
+  m_minPositive = data.m_minPositive;
+  m_maxY = data.m_maxY;
   m_preview = data.m_preview;
   m_start = data.m_start;
   m_end = data.m_end;
