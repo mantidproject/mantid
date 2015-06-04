@@ -1326,7 +1326,8 @@ void FindPeaks::estimateBackground(const MantidVec &X, const MantidVec &Y,
     y0 += Y[i_min + i];
 
     xf += X[i_max - i];
-    yf += Y[i_max - i];
+    // X has one more value than Y
+    yf += Y[i_max - i - 1];
   }
   x0 = x0 / static_cast<double>(numavg);
   y0 = y0 / static_cast<double>(numavg);

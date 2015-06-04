@@ -49,8 +49,6 @@ IndirectDiffractionReduction::IndirectDiffractionReduction(QWidget *parent) :
   m_settingsGroup("CustomInterfaces/DEMON"),
   m_batchAlgoRunner(new BatchAlgorithmRunner(parent))
 {
-  // Handles completion of the diffraction algorithm chain
-  connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(plotResults(bool)));
 }
 
 
@@ -140,6 +138,9 @@ void IndirectDiffractionReduction::demonRun()
  */
 void IndirectDiffractionReduction::plotResults(bool error)
 {
+  // Handles completion of the diffraction algorithm chain
+  disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(plotResults(bool)));
+
   // Nothing can be plotted
   if(error)
   {
@@ -290,6 +291,9 @@ void IndirectDiffractionReduction::runGenericReduction(QString instName, QString
 
   m_batchAlgoRunner->addAlgorithm(msgDiffReduction);
 
+  // Handles completion of the diffraction algorithm chain
+  connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(plotResults(bool)));
+
   m_batchAlgoRunner->executeBatchAsync();
 }
 
@@ -370,6 +374,9 @@ void IndirectDiffractionReduction::runOSIRISdiffonlyReduction()
   m_plotWorkspaces.clear();
   m_plotWorkspaces.push_back(tofWsName.toStdString());
   m_plotWorkspaces.push_back(drangeWsName.toStdString());
+
+  // Handles completion of the diffraction algorithm chain
+  connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this, SLOT(plotResults(bool)));
 
   m_batchAlgoRunner->executeBatchAsync();
 }
