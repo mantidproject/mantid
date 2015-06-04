@@ -6,6 +6,7 @@
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/TimeSeriesProperty.h"
 
 #include <boost/algorithm/string.hpp>
 
@@ -182,9 +183,12 @@ void LoadSpiceXML2DDet::init() {
       new FileProperty("Filename", "", FileProperty::FileAction::Load, xmlext),
       "XML file name for one scan including 2D detectors counts from SPICE");
 
-  declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace", "",
-                                                         Direction::Output),
-                  "Name of output matrix workspace. ");
+  declareProperty(
+      new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace", "",
+                                             Direction::Output),
+      "Name of output matrix workspace. "
+      "Output workspace will be an X by Y Workspace2D if instrument "
+      "is not loaded. ");
 
   declareProperty("DetectorLogName", "Detector",
                   "Log name for detector counts.");
@@ -193,6 +197,27 @@ void LoadSpiceXML2DDet::init() {
       new ArrayProperty<size_t>("DetectorGeometry"),
       "A size-2 unsigned integer array [X, Y] for detector geometry. "
       "Such that the detector contains X x Y pixels.");
+
+  declareProperty(
+      "LoadInstrument", true,
+      "Flag to load instrument to output workspace. "
+      "HFIR's HB3A will be loaded if InstrumentFileName is not specified.");
+
+  declareProperty(
+      new FileProperty("InstrumentFilename", "", FileProperty::OptionalLoad,
+                       ".xml"),
+      "The filename (including its full or relative path) of an instrument "
+      "definition file. The file extension must either be .xml or .XML when "
+      "specifying an instrument definition file. Note Filename or "
+      "InstrumentName must be specified but not both.");
+
+  declareProperty(
+      new WorkspaceProperty<ITableWorkspace>(
+          "SpiceTableWorkspace", "", Direction::Input, PropertyMode::Optional),
+      "Table workspace loaded from SPICE file by LoadSpiceAscii.");
+
+  declareProperty("PtNumber", 0,
+                  "Pt. value for the row to get sample log from. ");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -210,13 +235,47 @@ void LoadSpiceXML2DDet::exec() {
   size_t numpixelX = vec_pixelgeom[0];
   size_t numpixelY = vec_pixelgeom[1];
 
+  bool loadinstrument = getProperty("LoadInstrument");
+  std::string idffilename = getPropertyValue("InstrumentFilename");
+
   // Parse
   std::vector<SpiceXMLNode> vec_xmlnode;
   parseSpiceXML(xmlfilename, vec_xmlnode);
 
+  // Spice data in table workspace
+  std::string spicetablewsname = getPropertyValue("SpiceTableWorkspace");
+  ITableWorkspace_sptr spicetablews;
+  int ptnumber(0);
+  if (spicetablewsname.size() > 0) {
+    spicetablews = getProperty("SpiceTableWorkspace");
+    ptnumber = getProperty("PtNumber");
+  }
+
   // Create output workspace
-  MatrixWorkspace_sptr outws =
-      createMatrixWorkspace(vec_xmlnode, numpixelX, numpixelY, detlogname);
+  MatrixWorkspace_sptr outws;
+  if (loadinstrument) {
+    outws = createMatrixWorkspace(vec_xmlnode, numpixelX, numpixelY, detlogname,
+                                  true);
+  } else {
+    outws = createMatrixWorkspace(vec_xmlnode, numpixelX, numpixelY, detlogname,
+                                  false);
+  }
+
+  // Set up log
+  if (spicetablewsname.size() > 0) {
+    setupSampleLogFromSpiceTable(outws, spicetablews, ptnumber);
+  }
+
+  if (loadinstrument) {
+    loadInstrument(outws, idffilename);
+    if (spicetablewsname.size() > 0) {
+      double wavelength;
+      bool has_wavelength = getHB3AWavelength(outws, wavelength);
+      if (has_wavelength) {
+        setXtoLabQ(outws, wavelength);
+      }
+    }
+  }
 
   setProperty("OutputWorkspace", outws);
 }
@@ -325,16 +384,26 @@ void LoadSpiceXML2DDet::parseSpiceXML(const std::string &xmlfilename,
  * @param numpixelx :: number of pixel in x-direction
  * @param numpixely :: number of pixel in y-direction
  * @param detnodename :: the XML node's name for detector counts.
+ * @param loadinstrument :: flag to load instrument to output workspace or not.
  * @return
  */
 MatrixWorkspace_sptr LoadSpiceXML2DDet::createMatrixWorkspace(
     const std::vector<SpiceXMLNode> &vecxmlnode, const size_t &numpixelx,
-    const size_t &numpixely, const std::string &detnodename) {
+    const size_t &numpixely, const std::string &detnodename,
+    const bool &loadinstrument) {
 
   // Create matrix workspace
-  MatrixWorkspace_sptr outws = boost::dynamic_pointer_cast<MatrixWorkspace>(
-      WorkspaceFactory::Instance().create("Workspace2D", numpixely, numpixelx,
-                                          numpixelx));
+  MatrixWorkspace_sptr outws;
+
+  if (loadinstrument) {
+    size_t numspec = numpixelx * numpixely;
+    outws = boost::dynamic_pointer_cast<MatrixWorkspace>(
+        WorkspaceFactory::Instance().create("Workspace2D", numspec, 2, 1));
+  } else {
+    outws = boost::dynamic_pointer_cast<MatrixWorkspace>(
+        WorkspaceFactory::Instance().create("Workspace2D", numpixely, numpixelx,
+                                            numpixelx));
+  }
 
   // Go through all XML nodes to process
   size_t numxmlnodes = vecxmlnode.size();
@@ -386,12 +455,24 @@ MatrixWorkspace_sptr LoadSpiceXML2DDet::createMatrixWorkspace(
 
         for (size_t j = 0; j < veccounts.size(); ++j) {
           double y = atof(veccounts[j].c_str());
-          outws->dataX(irow)[j] = static_cast<double>(j);
-          outws->dataY(irow)[j] = y;
-          if (y > 0)
-            outws->dataE(irow)[j] = sqrt(y);
-          else
-            outws->dataE(irow)[j] = 1.0;
+
+          if (loadinstrument) {
+            size_t wsindex = irow * numpixelx + j;
+            outws->dataX(wsindex)[0] = static_cast<double>(wsindex);
+            outws->dataY(wsindex)[0] = y;
+            if (y > 0)
+              outws->dataE(wsindex)[0] = sqrt(y);
+            else
+              outws->dataE(wsindex)[0] = 1.0;
+
+          } else {
+            outws->dataX(irow)[j] = static_cast<double>(j);
+            outws->dataY(irow)[j] = y;
+            if (y > 0)
+              outws->dataE(irow)[j] = sqrt(y);
+            else
+              outws->dataE(irow)[j] = 1.0;
+          }
         }
 
         // Update irow
@@ -435,6 +516,151 @@ MatrixWorkspace_sptr LoadSpiceXML2DDet::createMatrixWorkspace(
   }
 
   return outws;
+}
+
+//----------------------------------------------------------------------------------------------
+/** Set up sample logs from table workspace loaded where SPICE data file is
+ * loaded
+ * @brief LoadSpiceXML2DDet::setupSampleLogFromSpiceTable
+ * @param matrixws
+ * @param spicetablews
+ * @param ptnumber
+ */
+void LoadSpiceXML2DDet::setupSampleLogFromSpiceTable(
+    MatrixWorkspace_sptr matrixws, ITableWorkspace_sptr spicetablews,
+    int ptnumber) {
+  size_t numrows = spicetablews->rowCount();
+  std::vector<std::string> colnames = spicetablews->getColumnNames();
+  // FIXME - Shouldn't give a better value?
+  Kernel::DateAndTime anytime(1000);
+
+  bool foundlog = false;
+  for (size_t ir = 0; ir < numrows; ++ir) {
+    int localpt = spicetablews->cell<int>(ir, 0);
+    if (localpt != ptnumber)
+      continue;
+
+    for (size_t ic = 1; ic < colnames.size(); ++ic) {
+      double logvalue = spicetablews->cell<double>(ir, ic);
+      std::string &logname = colnames[ic];
+      TimeSeriesProperty<double> *newlogproperty =
+          new TimeSeriesProperty<double>(logname);
+      newlogproperty->addValue(anytime, logvalue);
+      matrixws->mutableRun().addProperty(newlogproperty);
+    }
+
+    // Break as the experiment pointer is found
+    foundlog = true;
+    break;
+  }
+
+  if (!foundlog)
+    g_log.warning() << "Pt. " << ptnumber
+                    << " is not found.  Log is not loaded to output workspace."
+                    << "\n";
+
+  return;
+}
+
+bool LoadSpiceXML2DDet::getHB3AWavelength(MatrixWorkspace_sptr dataws,
+                                          double &wavelength) {
+  bool haswavelength(false);
+  wavelength = -1;
+
+  if (dataws->run().hasProperty("_m1")) {
+    Kernel::TimeSeriesProperty<double> *ts =
+        dynamic_cast<Kernel::TimeSeriesProperty<double> *>(
+            dataws->run().getProperty("_m1"));
+    if (ts && ts->size() > 0) {
+      double m1pos = ts->valuesAsVector()[0];
+      if (fabs(m1pos - (-25.870000)) < 0.2) {
+        wavelength = 1.003;
+        haswavelength = true;
+      } else {
+        g_log.warning() << "m1 position " << m1pos
+                        << " does not have defined mapping to "
+                        << "wavelength."
+                        << "\n";
+      }
+    } else if (!ts) {
+      g_log.warning("Log _m1 is not TimeSeriesProperty.  Treat it as a single "
+                    "value property.");
+      double m1pos = atof(dataws->run().getProperty("_m1")->value().c_str());
+      if (fabs(m1pos - (-25.870000)) < 0.2) {
+        wavelength = 1.003;
+        haswavelength = true;
+      } else {
+        g_log.warning() << "m1 position " << m1pos
+                        << " does not have defined mapping to "
+                        << "wavelength."
+                        << "\n";
+      }
+    } else {
+      g_log.error("Log _m1 is empty.");
+    }
+  } else {
+    g_log.warning() << "No _m1 log is found."
+                    << "\n";
+  }
+
+  if (!haswavelength)
+    g_log.warning("No wavelength is setup!");
+  else
+    g_log.notice() << "[DB] Wavelength = " << wavelength << "\n";
+
+  return haswavelength;
+}
+
+void LoadSpiceXML2DDet::setXtoLabQ(API::MatrixWorkspace_sptr dataws,
+                                   const double &wavelength) {
+  // Geometry information
+  // Kernel::V3D sourcepos = dataws->getInstrument()->getSource()->getPos();
+  // Kernel::V3D samplepos = dataws->getInstrument()->getSample()->getPos();
+  // Kernel::V3D sample_source_vector = sourcepos - samplepos;
+
+  size_t numspec = dataws->getNumberHistograms();
+  for (size_t iws = 0; iws < numspec; ++iws) {
+    /*
+    Kernel::V3D detpos = dataws->getDetector(iws)->getPos();
+    Kernel::V3D detpos_sample_vector = detpos - samplepos;
+    double scattering_rad = detpos_sample_vector.angle(sample_source_vector);
+    */
+
+    // double ki = 4*sin(scattering_rad*0.5)*M_PI/wavelength;
+    double ki = 2. * M_PI / wavelength;
+    dataws->dataX(iws)[0] = ki;
+    dataws->dataX(iws)[1] = ki + 0.00001;
+  }
+
+  dataws->getAxis(0)->setUnit("Momentum");
+
+  return;
+}
+
+//----------------------------------------------------------------------------------------------
+/** Load instrument
+ * @brief LoadSpiceXML2DDet::loadInstrument
+ * @param matrixws
+ * @param idffilename
+ */
+void LoadSpiceXML2DDet::loadInstrument(API::MatrixWorkspace_sptr matrixws,
+                                       const std::string &idffilename) {
+  // load instrument
+  API::IAlgorithm_sptr loadinst = createChildAlgorithm("LoadInstrument");
+  loadinst->initialize();
+  loadinst->setProperty("Workspace", matrixws);
+  if (idffilename.size() > 0) {
+    loadinst->setProperty("Filename", idffilename);
+  } else
+    loadinst->setProperty("InstrumentName", "HB3A");
+  loadinst->setProperty("RewriteSpectraMap", true);
+  loadinst->execute();
+  if (loadinst->isExecuted())
+    matrixws = loadinst->getProperty("Workspace");
+  else
+    g_log.error("Unable to load instrument to output workspace");
+
+  return;
 }
 
 } // namespace DataHandling

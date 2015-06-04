@@ -98,6 +98,7 @@ private:
 
   /// Output workspace
   API::MatrixWorkspace_sptr m_outputWS;
+  API::MatrixWorkspace_sptr m_qOutputWS;
 };
 
 } // namespace CurveFitting

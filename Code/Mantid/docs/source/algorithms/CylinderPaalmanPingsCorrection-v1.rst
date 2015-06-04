@@ -51,7 +51,8 @@ Usage
                                           BeamWidth=0.1,
                                           StepSize=0.002,
                                           Emode='Indirect',
-                                          Efixed=1.845)
+                                          Efixed=1.845,
+                                          Version=1)
 
     print 'Correction workspaces: %s' % (', '.join(corr.getNames()))
 
