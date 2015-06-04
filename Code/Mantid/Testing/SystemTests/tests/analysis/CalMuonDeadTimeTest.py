@@ -3,7 +3,7 @@ import stresstesting
 from mantid.simpleapi import *
 
 class CalMuonDeadTimeTest(stresstesting.MantidStressTest):
-    '''Tests the StepScan workflow algorithm'''
+    '''Tests the CalMuonDeadTime algorithm'''
 
     def runTest(self):
         Load(Filename='EMU30604.nxs',OutputWorkspace='EMU30604')
@@ -16,4 +16,5 @@ class CalMuonDeadTimeTest(stresstesting.MantidStressTest):
                         OutputWorkspace='EMUCalMuonDeadTime')
 
     def validate(self):
-        return 'EMUCalMuonDeadTime','EMUCalMuonDeadTime.nxs'
+        self.tolerance = 1E-3
+        return ('EMUCalMuonDeadTime','EMUCalMuonDeadTime.nxs')
