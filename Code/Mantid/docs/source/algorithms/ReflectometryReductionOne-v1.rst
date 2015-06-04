@@ -51,6 +51,17 @@ parameters associated with the transmission runs will also be required.
 If a single Transmission run is provided, then no stitching parameters
 will be needed.
 
+If no Transmission runs are provided, then polynomial correction can be
+performed instead. Polynomial correction is be enabled by setting the
+:literal:`PolynomialCorrection` property. If enabled, it looks at the instrument
+parameters for the :literal:`correction` parameter. If it is set to
+:literal:`polynomial`, then polynomial correction is performed using the
+:ref:`algm-PolynomialCorrection` algorithm, with the polynomial string taken
+from the instrument's :literal:`polynomial` parameter. If the
+:literal:`correction` parameter is set to :literal:`exponential` instead, then 
+the :Ref:`algm-ExponentialCorrection` algorithm is used, with C0 and C1 taken
+from the instrument parameters, :literal:`C0` and :literal:`C1`.
+
 Usage
 -----
 
