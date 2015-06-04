@@ -1,7 +1,7 @@
 #pylint: disable=no-init
 from mantid.kernel import *
 from mantid.api import *
-from mantid.simpleapi import LoadAscii
+import mantid.simpleapi
 import math
 
 class PearlMCAbsorption(PythonAlgorithm):
@@ -30,7 +30,7 @@ class PearlMCAbsorption(PythonAlgorithm):
 
         wkspace_name = self.getPropertyValue("OutputWorkspace")
         # Load the file
-        ascii_wkspace = LoadAscii(Filename=filename, OutputWorkspace=wkspace_name, Separator="Space", Unit=x_unit)
+        ascii_wkspace = mantid.simpleapi.LoadAscii(Filename=filename, OutputWorkspace=wkspace_name, Separator="Space", Unit=x_unit)
         if thickness is None:
             coeffs = ascii_wkspace
         else:

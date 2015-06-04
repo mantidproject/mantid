@@ -10,6 +10,7 @@
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 
 using Mantid::Crystal::AddPeakHKL;
+using Mantid::Geometry::IPeak;
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;

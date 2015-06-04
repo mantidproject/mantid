@@ -436,20 +436,22 @@ void QtColorPicker::setCurrentColor(const QColor &color)
 
     ColorPickerItem *item = popup->find(color);
     if (!item) {
-	insertColor(color, tr("Custom"));
-	item = popup->find(color);
+      insertColor(color, tr("Custom"));
+      item = popup->find(color);
     }
 
-    col = color;
-    setText(item->text());
+    if (item) {
+      col = color;
+      setText(item->text());
 
-    dirty = true;
+      dirty = true;
 
-    popup->hide();
-    repaint();
+      popup->hide();
+      repaint();
 
-    item->setSelected(true);
-    emit colorChanged(color);
+      item->setSelected(true);
+      emit colorChanged(color);
+    }
 }
 
 /*!
@@ -670,8 +672,10 @@ void ColorPickerPopup::updateSelected()
 
   if (sender() && sender()->inherits("ColorPickerItem")) {
     ColorPickerItem *item = dynamic_cast<ColorPickerItem *>(sender());
-    lastSel = item->color();
-    emit selected(item->color());
+    if (item) {
+      lastSel = item->color();
+      emit selected(item->color());
+    }
   }
 
   hide();

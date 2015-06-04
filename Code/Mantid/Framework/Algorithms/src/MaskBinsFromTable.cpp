@@ -24,7 +24,9 @@ DECLARE_ALGORITHM(MaskBinsFromTable)
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
-MaskBinsFromTable::MaskBinsFromTable() {}
+MaskBinsFromTable::MaskBinsFromTable()
+    : API::Algorithm(), id_xmin(-1), id_xmax(-1), id_spec(-1), id_dets(-1),
+      m_useDetectorID(false), m_useSpectrumID(false) {}
 
 //----------------------------------------------------------------------------------------------
 /** Destructor

@@ -18,7 +18,7 @@ find_package_handle_standard_args( Qwt DEFAULT_MSG QWT_LIBRARY QWT_INCLUDE_DIR )
 
 # Parse version string from qwt_global.h
 file ( STRINGS ${QWT_INCLUDE_DIR}/qwt_global.h QWT_VERSION 
-       REGEX "^#define[ \t]+QWT_VERSION_STR[ \t]+\"[0-9]+.[0-9]+.[0-9]+\"$" )
+       REGEX "^#define[ \t]+QWT_VERSION_STR[ \t]+\"[0-9]+.[0-9]+.[0-9]+(.*)?\"$" )
 if ( NOT QWT_VERSION )
     message ( FATAL_ERROR "Unrecognized Qwt version (cannot find QWT_VERSION_STR in qwt_global.h)" )
 endif()

@@ -134,7 +134,7 @@ private:
   double m_scattering; ///< The scattering cross-section in 1/m
   int64_t n_lambda;    ///< The number of points in wavelength, the rest is
   /// interpolated linearly
-  int64_t x_step;  ///< The step in bin number between adjacent points
+  int64_t m_xStep;  ///< The step in bin number between adjacent points
   int64_t m_emode; ///< The energy mode: 0 - elastic, 1 - direct, 2 - indirect
   double m_lambdaFixed; ///< The wavelength corresponding to the fixed energy,
   /// if provided

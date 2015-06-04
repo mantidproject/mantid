@@ -49,7 +49,8 @@ class Lorentz(IFunction1D):
             Evaluate the model
             @param xvals: numpy array of q-values
         """
-        return self.getParameterValue("Scale") / (1.0 + np.power(xvals*self.getParameterValue('Length'), 2)) + self.getParameterValue('Background')
+        return self.getParameterValue("Scale") / (1.0 + np.power(xvals*self.getParameterValue('Length'), 2)) +\
+               self.getParameterValue('Background')
 
     def functionDeriv1D(self, xvals, jacobian):
         """

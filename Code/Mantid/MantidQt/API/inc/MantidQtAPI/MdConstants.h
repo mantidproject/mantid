@@ -41,6 +41,18 @@ namespace MantidQt
     {
       public:
 
+        // MD ParaView plugin names
+        static const QString MantidParaViewSplatterPlot;
+        static const QString MantidParaViewSpecialCoordinates;
+        static const QString MDPeaksFilter;
+        static const QString MantidParaViewPeaksFilter;
+        static const QString PeakDimensions;
+        static const QString PeaksWorkspace;
+        static const QString Delimiter;
+        static const QString WorkspaceName;
+        static const QString ProbePoint;
+        static const QString Threshold;
+
         MdConstants();
 
         ~MdConstants();

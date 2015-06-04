@@ -115,6 +115,8 @@ private:
 	QStringList userFunctionNames();
 	QStringList plugInNames();
 	QString parseFormula(const QString& s);
+  template<class Widget>
+  Widget* boxParams_cellWidget(int i, int j) const ;
 
     Fit *d_current_fit;
 	Graph *d_graph;

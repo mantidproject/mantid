@@ -68,7 +68,6 @@ void SpatialGrouping::init() {
 void SpatialGrouping::exec() {
   inputWorkspace = getProperty("InputWorkspace");
   double searchDist = getProperty("SearchDistance");
-  m_pix = searchDist;
   int gridSize = getProperty("GridSize");
   size_t nNeighbours = (gridSize * gridSize) - 1;
 
@@ -114,7 +113,7 @@ void SpatialGrouping::exec() {
     Mantid::Geometry::BoundingBox bbox(empty, empty, empty, empty, empty,
                                        empty);
 
-    createBox(det, bbox);
+    createBox(det, bbox, searchDist);
 
     bool extend = true;
     while ((nNeighbours > nearest.size()) && extend) {
@@ -306,12 +305,17 @@ SpatialGrouping::sortByDistance(std::map<detid_t, Mantid::Kernel::V3D> &nearest,
 * Creates a bounding box representing the area in which to search for
 * neighbours, and a scaling vector representing the dimensions
 * of the detector
+*
 * @param det :: input detector
+*
 * @param bndbox :: reference to BoundingBox object (changed by this function)
+*
+* @param searchDist :: search distance in pixels, number of pixels to search
+* through for finding group
 */
 void
 SpatialGrouping::createBox(boost::shared_ptr<const Geometry::IDetector> det,
-                           Geometry::BoundingBox &bndbox) {
+                           Geometry::BoundingBox &bndbox, double searchDist) {
 
   // We may have DetectorGroups here
   // Unfortunately, IDetector doesn't contain the
@@ -328,7 +332,7 @@ SpatialGrouping::createBox(boost::shared_ptr<const Geometry::IDetector> det,
   double ymin = bbox.yMin();
   double zmin = bbox.zMin();
 
-  double factor = 2.0 * m_pix;
+  double factor = 2.0 * searchDist;
 
   growBox(xmin, xmax, factor);
   growBox(ymin, ymax, factor);

@@ -10,10 +10,10 @@ class ElasticWindowMultipleTest(stresstesting.MantidStressTest):
              OutputWorkspace='__ElWinMulti_InputWS')
 
         ElasticWindowMultiple(InputWorkspaces='__ElWinMulti_InputWS',
-                              Range1Start=-0.2,
-                              Range1End=0.2,
-                              Range2Start='-0.24',
-                              Range2End='-0.22',
+                              IntegrationRangeStart=-0.2,
+                              IntegrationRangeEnd=0.2,
+                              BackgroundRangeStart='-0.24',
+                              BackgroundRangeEnd='-0.22',
                               OutputInQ='eq',
                               OutputInQSquared='eq2',
                               OutputELF='elf',

@@ -85,7 +85,10 @@ ImageExportDialog::ImageExportDialog(QWidget * parent, bool vector_options, bool
 
 void ImageExportDialog::initAdvancedOptions()
 {
-		ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parent());
+	ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parent());
+  if (!app) {
+    throw std::logic_error("Parent of ImageExportDialog is not ApplicationWindow as expected.");
+  }
 	d_advanced_options = new QStackedWidget();
 
 	d_vector_options = new QGroupBox();

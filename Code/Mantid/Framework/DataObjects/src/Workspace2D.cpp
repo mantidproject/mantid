@@ -17,7 +17,7 @@ using std::size_t;
 DECLARE_WORKSPACE(Workspace2D)
 
 /// Constructor
-Workspace2D::Workspace2D() {}
+Workspace2D::Workspace2D(): m_noVectors(0) {}
 
 /// Destructor
 Workspace2D::~Workspace2D() {

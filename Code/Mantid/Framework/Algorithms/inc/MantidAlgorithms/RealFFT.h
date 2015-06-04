@@ -58,8 +58,6 @@ private:
   // Overridden Algorithm methods
   void init();
   void exec();
-
-  bool IgnoreXBins;
 };
 
 } // namespace Algorithm

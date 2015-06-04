@@ -23,6 +23,9 @@ using namespace Mantid::DataObjects;
 // A reference to the logger is provided by the base class, it is called g_log.
 // It is used to print out information, warning and error messages
 
+ModeratorTzeroLinear::ModeratorTzeroLinear()
+    : API::Algorithm(), m_gradient(0.), m_intercept(0.), m_instrument() {}
+
 const std::string ModeratorTzeroLinear::name() const {
   return "ModeratorTzeroLinear";
 }

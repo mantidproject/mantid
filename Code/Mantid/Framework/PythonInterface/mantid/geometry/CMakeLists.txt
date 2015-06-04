@@ -36,22 +36,23 @@ set ( EXPORT_FILES
   src/Exports/SymmetryOperationFactory.cpp
 )
 
-set ( SRC_FILES
-)
+#############################################################################################
+# Generate a source file from the export definitions and provided template
+#############################################################################################
+set ( MODULE_DEFINITION ${CMAKE_CURRENT_BINARY_DIR}/geometry.cpp )
+create_module ( ${MODULE_TEMPLATE} ${MODULE_DEFINITION} ${EXPORT_FILES} )
 
-set ( INC_FILES
-)
+#############################################################################################
+# Helper code
+#############################################################################################
+set ( SRC_FILES )
+
+set ( INC_FILES )
 
 set ( PY_FILES
   __init__.py
   _aliases.py
 )
-
-#############################################################################################
-# Generate a source file from the export definitions and provided template
-#############################################################################################
-create_module ( ${MODULE_TEMPLATE} ${CMAKE_CURRENT_BINARY_DIR}/geometry.cpp EXPORT_FILES
-                SRC_FILES )
 
 #############################################################################################
 # Copy over the pure Python files for the module
@@ -64,18 +65,25 @@ if(CMAKE_GENERATOR STREQUAL Xcode)
   set ( CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PYTHON_PKG_ROOT}/geometry )
 endif()
 
-copy_files_to_dir ( "${PY_FILES}" ${CMAKE_CURRENT_SOURCE_DIR} ${OUTPUT_DIR} 
+copy_files_to_dir ( "${PY_FILES}" ${CMAKE_CURRENT_SOURCE_DIR} ${OUTPUT_DIR}
                      PYTHON_INSTALL_FILES )
 
 #############################################################################################
 # Create the target for this directory
 #############################################################################################
 
-add_library ( PythonGeometryModule ${SRC_FILES} ${INC_FILES} ${PYTHON_INSTALL_FILES} )
+add_library ( PythonGeometryModule ${EXPORT_FILES} ${MODULE_DEFINITION} ${SRC_FILES} ${INC_FILES} ${PYTHON_INSTALL_FILES} )
 set_python_properties( PythonGeometryModule _geometry )
 set_target_output_directory ( PythonGeometryModule ${OUTPUT_DIR} .pyd )
 # Add the required dependencies
-target_link_libraries ( PythonGeometryModule PythonKernelModule Geometry )
+target_link_libraries ( PythonGeometryModule LINK_PRIVATE
+            PythonKernelModule
+            Geometry
+            Kernel
+            ${PYTHON_LIBRARIES}
+            ${POCO_LIBRARIES}
+            ${Boost_LIBRARIES}
+            )
 
 if (OSX_VERSION VERSION_GREATER 10.8)
   set_target_properties ( PythonGeometryModule PROPERTIES INSTALL_RPATH "@loader_path/../../../MacOS;@loader_path/../kernel/")

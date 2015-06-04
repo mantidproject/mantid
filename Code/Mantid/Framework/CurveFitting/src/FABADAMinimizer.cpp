@@ -51,7 +51,11 @@ DECLARE_FUNCMINIMIZER(FABADAMinimizer, FABADA)
 
 //----------------------------------------------------------------------------------------------
 /// Constructor
-FABADAMinimizer::FABADAMinimizer() {
+FABADAMinimizer::FABADAMinimizer()
+    : m_counter(0), m_numberIterations(0), m_changes(), m_jump(),
+      m_parameters(), m_chain(), m_chi2(0.), m_converged(false),
+      m_conv_point(0), m_par_converged(), m_lower(), m_upper(), m_bound(),
+      m_criteria(), m_max_iter(0) {
   declareProperty("ChainLength", static_cast<size_t>(10000),
                   "Length of the converged chain.");
   declareProperty("StepsBetweenValues", static_cast<size_t>(10),
@@ -64,17 +68,16 @@ FABADAMinimizer::FABADAMinimizer() {
   declareProperty(
       new API::WorkspaceProperty<>("PDF", "PDF", Kernel::Direction::Output),
       "The name to give the output workspace");
-  declareProperty(new API::WorkspaceProperty<>("Chains", "",
-                                               Kernel::Direction::Output),
-                  "The name to give the output workspace");
-  declareProperty(new API::WorkspaceProperty<>(
-                      "ConvergedChain", "",
-                      Kernel::Direction::Output, API::PropertyMode::Optional),
-                  "The name to give the output workspace");
   declareProperty(
-      new API::WorkspaceProperty<API::ITableWorkspace>(
-          "CostFunctionTable", "", Kernel::Direction::Output),
+      new API::WorkspaceProperty<>("Chains", "", Kernel::Direction::Output),
       "The name to give the output workspace");
+  declareProperty(new API::WorkspaceProperty<>("ConvergedChain", "",
+                                               Kernel::Direction::Output,
+                                               API::PropertyMode::Optional),
+                  "The name to give the output workspace");
+  declareProperty(new API::WorkspaceProperty<API::ITableWorkspace>(
+                      "CostFunctionTable", "", Kernel::Direction::Output),
+                  "The name to give the output workspace");
   declareProperty(new API::WorkspaceProperty<API::ITableWorkspace>(
                       "Parameters", "", Kernel::Direction::Output),
                   "The name to give the output workspace");
@@ -436,19 +439,24 @@ void FABADAMinimizer::finalize() {
     par_def[j] = rc_chain_j[pos_min - red_conv_chain[nParams].begin()];
     std::sort(rc_chain_j.begin(), rc_chain_j.end());
     auto pos_par = std::find(rc_chain_j.begin(), rc_chain_j.end(), par_def[j]);
-    size_t sigma = static_cast<size_t>(0.34 * double(conv_length));
-
     auto pos_left = rc_chain_j.begin();
-    if (sigma < static_cast<size_t>(std::distance(pos_left, pos_par))) {
-      pos_left = pos_par - sigma;
-    }
-    // make sure the iterator is valid in any case
     auto pos_right = rc_chain_j.end() - 1;
-    if (sigma < static_cast<size_t>(std::distance(pos_par, pos_right))) {
-      pos_right = pos_par + sigma;
+    size_t sigma = static_cast<size_t>(0.34 * double(conv_length));
+    if (pos_par == rc_chain_j.end()) {
+      error_left[j] = *(pos_right - sigma);
+      error_rigth[j] = *pos_right;
+    } else {
+
+      if (sigma < static_cast<size_t>(std::distance(pos_left, pos_par))) {
+        pos_left = pos_par - sigma;
+      }
+      // make sure the iterator is valid in any case
+      if (sigma < static_cast<size_t>(std::distance(pos_par, pos_right))) {
+        pos_right = pos_par + sigma;
+      }
+      error_left[j] = *pos_left - *pos_par;
+      error_rigth[j] = *pos_right - *pos_par;
     }
-    error_left[j] = *pos_left - *pos_par;
-    error_rigth[j] = *pos_right - *pos_par;
   }
 
   const bool outputParametersTable = !getPropertyValue("Parameters").empty();
@@ -571,7 +579,8 @@ void FABADAMinimizer::finalize() {
 
   // Read if necessary to show the workspace for the converged part of the
   // chain.
-  const bool outputConvergedChains = !getPropertyValue("ConvergedChain").empty();
+  const bool outputConvergedChains =
+      !getPropertyValue("ConvergedChain").empty();
 
   if (outputConvergedChains) {
     // Create the workspace for the converged part of the chain.
@@ -597,7 +606,8 @@ void FABADAMinimizer::finalize() {
   }
 
   // Read if necessary to show the workspace for the Chi square values.
-  const bool outputCostFunctionTable = !getPropertyValue("CostFunctionTable").empty();
+  const bool outputCostFunctionTable =
+      !getPropertyValue("CostFunctionTable").empty();
 
   if (outputCostFunctionTable) {
 

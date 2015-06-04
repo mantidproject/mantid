@@ -16,6 +16,7 @@ set ( TEST_PY_FILES
   SpaceGroupTest.py
   SymmetryElementTest.py
   SymmetryOperationTest.py
+  GroupTest.py
 )
 
 check_tests_valid ( ${CMAKE_CURRENT_SOURCE_DIR} ${TEST_PY_FILES} )

@@ -1,8 +1,9 @@
-#pylint: disable=no-init
+#pylint: disable=no-init, unused-variable
+# we need to disable unused_variable because ws.dataY(n) returns a reference  to the underlying c++ object
+# that can be modified inplace
 from mantid.kernel import *
 from mantid.api import *
-from mantid.simpleapi import (CropWorkspace, LoadEmptyInstrument, LoadRaw, Plus,
-                              DeleteWorkspace)
+import mantid.simpleapi as ms
 
 import copy
 import numpy as np
@@ -32,6 +33,7 @@ IP_HEADERS = {5:"spectrum,theta,t0,-,R", 6:"spectrum,-,theta,t0,-,R"}
 # Child Algorithm logging
 _LOGGING_ = False
 
+#pylint: disable=too-many-instance-attributes
 class LoadVesuvio(PythonAlgorithm):
 
     _ws_index = None
@@ -181,8 +183,8 @@ class LoadVesuvio(PythonAlgorithm):
             run_str = runs[0]
 
         all_spectra = [item for sublist in self._spectra for item in sublist]
-        LoadRaw(Filename=run_str, OutputWorkspace=SUMMED_WS, SpectrumList=all_spectra,
-                EnableLogging=_LOGGING_)
+        ms.LoadRaw(Filename=run_str, OutputWorkspace=SUMMED_WS, SpectrumList=all_spectra,
+                   EnableLogging=_LOGGING_)
         raw_group = mtd[SUMMED_WS]
         self._nperiods = raw_group.size()
         first_ws = raw_group[0]
@@ -217,7 +219,7 @@ class LoadVesuvio(PythonAlgorithm):
         if self._sumspectra:
             self._sum_all_spectra()
 
-        DeleteWorkspace(Workspace=SUMMED_WS)
+        ms.DeleteWorkspace(Workspace=SUMMED_WS)
         self._store_results()
 
 #----------------------------------------------------------------------------------------
@@ -231,7 +233,7 @@ class LoadVesuvio(PythonAlgorithm):
         inst_name = "VESUVIO"
         inst_dir = config.getInstrumentDirectory()
         inst_file = os.path.join(inst_dir, inst_name + "_Definition.xml")
-        __empty_vesuvio_ws = LoadEmptyInstrument(Filename=inst_file, EnableLogging=_LOGGING_)
+        __empty_vesuvio_ws = ms.LoadEmptyInstrument(Filename=inst_file, EnableLogging=_LOGGING_)
         empty_vesuvio = __empty_vesuvio_ws.getInstrument()
 
         def to_int_list(str_param):
@@ -277,7 +279,7 @@ class LoadVesuvio(PythonAlgorithm):
         self._forw_period_sum2 = to_range_tuple(self.forward_period_sum2)
         self._forw_foil_out_norm = to_range_tuple(self.forward_foil_out_norm)
 
-        DeleteWorkspace(__empty_vesuvio_ws,EnableLogging=_LOGGING_)
+        ms.DeleteWorkspace(__empty_vesuvio_ws,EnableLogging=_LOGGING_)
 
 #----------------------------------------------------------------------------------------
     def _retrieve_input(self):
@@ -342,22 +344,22 @@ class LoadVesuvio(PythonAlgorithm):
             else:
                 out_name, out_mon = SUMMED_WS+'tmp', SUMMED_MON + 'tmp'
             # Load data
-            LoadRaw(Filename=run, SpectrumList=spectra,
-                    OutputWorkspace=out_name, LoadMonitors='Exclude',EnableLogging=_LOGGING_)
-            LoadRaw(Filename=run,SpectrumList=self._mon_spectra,
-                    OutputWorkspace=out_mon,EnableLogging=_LOGGING_)
+            ms.LoadRaw(Filename=run, SpectrumList=spectra,
+                       OutputWorkspace=out_name, LoadMonitors='Exclude',EnableLogging=_LOGGING_)
+            ms.LoadRaw(Filename=run,SpectrumList=self._mon_spectra,
+                       OutputWorkspace=out_mon,EnableLogging=_LOGGING_)
             if index > 0: # sum
-                Plus(LHSWorkspace=SUMMED_WS, RHSWorkspace=out_name,
-                     OutputWorkspace=SUMMED_WS,EnableLogging=_LOGGING_)
-                Plus(LHSWorkspace=SUMMED_MON, RHSWorkspace=out_mon,
-                     OutputWorkspace=SUMMED_MON,EnableLogging=_LOGGING_)
-                DeleteWorkspace(out_name,EnableLogging=_LOGGING_)
-                DeleteWorkspace(out_mon,EnableLogging=_LOGGING_)
+                ms.Plus(LHSWorkspace=SUMMED_WS, RHSWorkspace=out_name,
+                        OutputWorkspace=SUMMED_WS,EnableLogging=_LOGGING_)
+                ms.Plus(LHSWorkspace=SUMMED_MON, RHSWorkspace=out_mon,
+                        OutputWorkspace=SUMMED_MON,EnableLogging=_LOGGING_)
+                ms.DeleteWorkspace(out_name,EnableLogging=_LOGGING_)
+                ms.DeleteWorkspace(out_mon,EnableLogging=_LOGGING_)
 
-        CropWorkspace(Inputworkspace= SUMMED_WS, OutputWorkspace= SUMMED_WS,
-                      XMax=self._tof_max,EnableLogging=_LOGGING_)
-        CropWorkspace(Inputworkspace= SUMMED_MON, OutputWorkspace= SUMMED_MON,
-                      XMax=self._mon_tof_max, EnableLogging=_LOGGING_)
+        ms.CropWorkspace(Inputworkspace= SUMMED_WS, OutputWorkspace= SUMMED_WS,
+                         XMax=self._tof_max,EnableLogging=_LOGGING_)
+        ms.CropWorkspace(Inputworkspace= SUMMED_MON, OutputWorkspace= SUMMED_MON,
+                         XMax=self._mon_tof_max, EnableLogging=_LOGGING_)
         return mtd[SUMMED_WS], mtd[SUMMED_MON]
 
 #----------------------------------------------------------------------------------------
@@ -528,6 +530,7 @@ class LoadVesuvio(PythonAlgorithm):
         return foil_out_periods, foil_thin_periods, foil_thick_periods
 
 #----------------------------------------------------------------------------------------
+    #pylint: disable=too-many-arguments
     def _sum_foils(self, foil_ws, mon_ws, sum_index, foil_periods, mon_periods=None):
         """
         Sums the counts from the given foil periods in the raw data group
@@ -608,8 +611,7 @@ class LoadVesuvio(PythonAlgorithm):
             values = foil_ws.dataY(wsindex)
             sum_values = np.sum(values[range_indices])
             if sum_values == 0.0:
-                self.getLogger().warning("No counts in %s foil spectrum %d." % (
-                                          foil_type,self._spectrum_no))
+                self.getLogger().warning("No counts in %s foil spectrum %d." % (foil_type,self._spectrum_no))
                 sum_values = 1.0
             norm_factor = (sum_out/sum_values)
             values *= norm_factor
@@ -783,9 +785,9 @@ class LoadVesuvio(PythonAlgorithm):
             Clean up the raw data files
         """
         if SUMMED_WS in mtd:
-            DeleteWorkspace(SUMMED_WS,EnableLogging=_LOGGING_)
+            ms.DeleteWorkspace(SUMMED_WS,EnableLogging=_LOGGING_)
         if SUMMED_MON in mtd:
-            DeleteWorkspace(SUMMED_MON,EnableLogging=_LOGGING_)
+            ms.DeleteWorkspace(SUMMED_MON,EnableLogging=_LOGGING_)
 
 #########################################################################################
 

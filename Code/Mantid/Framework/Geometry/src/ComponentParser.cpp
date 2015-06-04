@@ -70,6 +70,10 @@ void ComponentParser::endElement(const Poco::XML::XMLString &,
   if (!m_current.empty())
     current = m_current.back();
 
+  if (!current) {
+    throw std::runtime_error("Failed to find last component");
+  }
+
   if (localName == "pos") {
     V3D pos;
     pos.fromString(m_innerText);

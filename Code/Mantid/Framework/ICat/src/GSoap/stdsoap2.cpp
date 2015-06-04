@@ -2775,7 +2775,7 @@ struct soap_nlist *SOAP_FMAC2
         }
       }
     }
-    if (!p || !p->id)
+    if (!p->id)
       i = -1;
   }
   if (i >= 0)
@@ -4318,7 +4318,9 @@ again:
         soap->fclosesocket(soap, sk);
         return SOAP_INVALID_SOCKET;
       }
-      if (endpoint)
+      //if (endpoint) 
+      // flagged by coverity: useless check as soap_tag_cmp(...) would fail
+      // before reacing this point
         strncpy(soap->endpoint, endpoint,
                 sizeof(soap->endpoint) - 1); /* restore */
       soap->mode = m;
@@ -15664,7 +15666,7 @@ static int soap_try_connect_command(struct soap *soap, int http_command,
         soap->fpoll(soap)) {
       soap->error = SOAP_OK;
 #ifndef WITH_LEAN
-      if (!strncmp(endpoint, "soap.udp:", 9))
+      if (!endpoint || !strncmp(endpoint, "soap.udp:", 9))
         soap->omode |= SOAP_IO_UDP;
       else
 #endif
@@ -16739,9 +16741,10 @@ void SOAP_FMAC2 soap_stream_fault(struct soap *soap, std::ostream &os) {
     s = *soap_faultstring(soap);
     d = soap_check_faultdetail(soap);
     os << (soap->version ? "SOAP 1." : "Error ")
-       << (soap->version ? (int)soap->version : soap->error) << " fault: " << *c
-       << "[" << (v ? v : "no subcode") << "]" << std::endl << "\""
-       << (s ? s : "[no reason]") << "\"" << std::endl
+       << (soap->version ? (int)soap->version : soap->error)
+       << " fault: " << (*c ? *c : "")
+       << "[" << (v ? v : "no subcode") << "]" << std::endl
+       << "\"" << (s ? s : "[no reason]") << "\"" << std::endl
        << "Detail: " << (d ? d : "[no detail]") << std::endl;
   }
 }

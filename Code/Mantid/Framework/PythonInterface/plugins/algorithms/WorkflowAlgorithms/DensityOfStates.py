@@ -8,6 +8,7 @@ import re
 import os.path
 import math
 
+#pylint: disable=too-many-instance-attributes
 class DensityOfStates(PythonAlgorithm):
 
     _float_regex = None
@@ -116,7 +117,7 @@ class DensityOfStates(PythonAlgorithm):
         return issues
 
 #----------------------------------------------------------------------------------------
-
+    #pylint: disable=too-many-branches
     def PyExec(self):
         # Run the algorithm
         self._get_properties()
@@ -254,7 +255,8 @@ class DensityOfStates(PythonAlgorithm):
             for index in peaks:
                 for g in range(-n_gauss, n_gauss):
                     if index + g > 0:
-                        dos[index + g] += hist[index] * math.exp(-(g * self._bin_width) ** 2 / (2 * sigma ** 2)) / (math.sqrt(2 * math.pi) * sigma)
+                        dos[index + g] += hist[index] * math.exp(-(g * self._bin_width) ** 2 / (2 * sigma ** 2)) /\
+                                          (math.sqrt(2 * math.pi) * sigma)
 
         elif self._peak_func == "Lorentzian":
 
@@ -514,13 +516,13 @@ class DensityOfStates(PythonAlgorithm):
         @return weight for this block of values
         """
         # Found header block at start of frequencies
-        q1, q2, q3, weight = map(float, header_match.groups())
+        q1, q2, q3, weight = [float(x) for x in header_match.groups()]
         if block_count > 1 and sum([q1, q2, q3]) == 0:
             weight = 0.0
         return weight
 
 #----------------------------------------------------------------------------------------
-
+    #pylint: disable=too-many-branches
     def _parse_phonon_file_header(self, f_handle):
         """
         Read information from the header of a <>.phonon file
@@ -588,7 +590,7 @@ class DensityOfStates(PythonAlgorithm):
         for _ in xrange(self._num_branches):
             line = f_handle.readline()
             line_data = line.strip().split()[1:]
-            line_data = map(float, line_data)
+            line_data = [float(x) for x in line_data]
             yield line_data
 
         prog_reporter.report("Reading frequencies.")
@@ -605,7 +607,7 @@ class DensityOfStates(PythonAlgorithm):
 
             line_data = line.strip().split()
             vector_componets = line_data[2::2]
-            vector_componets = map(float, vector_componets)
+            vector_componets = [float(x) for x in vector_componets]
             vectors.append(vector_componets)
             prog_reporter.report("Reading eigenvectors.")
 
@@ -723,7 +725,7 @@ class DensityOfStates(PythonAlgorithm):
                 intensities.append(value)
 
             line_data = [freq] + intensities
-            line_data = map(float, line_data)
+            line_data = [float(x) for x in line_data]
             yield line_data
 
         prog_reporter.report("Reading frequencies.")
@@ -806,5 +808,5 @@ class DensityOfStates(PythonAlgorithm):
 try:
     import scipy.constants
     AlgorithmFactory.subscribe(DensityOfStates)
-except:
+except ImportError:
     logger.debug('Failed to subscribe algorithm DensityOfStates; The python package scipy may be missing.')

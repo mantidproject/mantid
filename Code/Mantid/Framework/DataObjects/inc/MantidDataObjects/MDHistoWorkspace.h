@@ -381,6 +381,9 @@ public:
   /// Virutal constructor.
   boost::shared_ptr<IMDHistoWorkspace> clone() const;
 
+  /// Preferred visual normalization method.
+  virtual Mantid::API::MDNormalization displayNormalization() const;
+
 private:
   void initVertexesArray();
 

@@ -36,7 +36,7 @@ class SofQWMoments(DataProcessorAlgorithm):
         self.declareProperty(WorkspaceGroupProperty("OutputWorkspace", "", Direction.Output),
                              doc="group_workspace workspace that includes all calculated moments.")
 
-
+    #pylint: disable=too-many-locals
     def PyExec(self):
         from IndirectCommon import CheckHistZero, CheckElimits, getDefaultWorkingDirectory
 
@@ -52,8 +52,7 @@ class SofQWMoments(DataProcessorAlgorithm):
 
         num_spectra,num_w = CheckHistZero(sample_workspace)
 
-        logger.information('Sample %s has %d Q values & %d w values' % (
-                            sample_workspace, num_spectra, num_w))
+        logger.information('Sample %s has %d Q values & %d w values' % (sample_workspace, num_spectra, num_w))
 
         x_data = np.asarray(mtd[sample_workspace].readX(0))
         CheckElimits(erange,x_data)

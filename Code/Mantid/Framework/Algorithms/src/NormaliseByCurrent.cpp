@@ -61,7 +61,11 @@ double NormaliseByCurrent::extractCharge(
     Property *chargeProperty = run.getLogData("proton_charge_by_period");
     ArrayProperty<double> *chargePropertyArray =
         dynamic_cast<ArrayProperty<double> *>(chargeProperty);
-    charge = chargePropertyArray->operator()()[periodNumber - 1];
+    if (chargePropertyArray) {
+      charge = chargePropertyArray->operator()()[periodNumber - 1];
+    } else {
+      throw std::runtime_error("Proton charge log not found.");
+    }
   } else {
     try {
       charge = inputWS->run().getProtonCharge();
@@ -89,18 +93,18 @@ void NormaliseByCurrent::exec() {
   g_log.information() << "Normalisation current: " << charge << " uamps"
                       << std::endl;
 
-  charge = 1.0 / charge; // Inverse of the charge to be multiplied by
+
+  double invcharge = 1.0 / charge; // Inverse of the charge to be multiplied by
 
   // The operator overloads properly take into account of both EventWorkspaces
   // and doing it in place or not.
-
   if (inputWS != outputWS) {
-    outputWS = inputWS * charge;
+    outputWS = inputWS * invcharge;
     setProperty("OutputWorkspace", outputWS);
   } else {
-    inputWS *= charge;
+    inputWS *= invcharge;
   }
-
+  outputWS->mutableRun().addLogData(new Kernel::PropertyWithValue<double>("NormalizationFactor", charge));
   outputWS->setYUnitLabel("Counts per microAmp.hour");
 }
 
