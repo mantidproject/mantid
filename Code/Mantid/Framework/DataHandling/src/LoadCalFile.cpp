@@ -194,6 +194,19 @@ void LoadCalFile::exec() {
   }
 
   LoadCalFile::readCalFile(CalFilename, groupWS, offsetsWS, maskWS);
+
+  if (MakeOffsetsWorkspace) {
+    auto alg = createChildAlgorithm("ConvertDiffCal");
+    alg->setProperty("OffsetsWorkspace", offsetsWS);
+    alg->executeAsChildAlg();
+    ITableWorkspace_sptr calWS = alg->getProperty("OutputWorkspace");
+    calWS->setTitle(title);
+    declareProperty(
+        new WorkspaceProperty<ITableWorkspace>(
+            "OutputCalWorkspace", WorkspaceName + "_cal", Direction::Output),
+        "Set the output Diffraction Calibration workspace, if any.");
+    setProperty("OutputCalWorkspace", calWS);
+  }
 }
 
 //-----------------------------------------------------------------------

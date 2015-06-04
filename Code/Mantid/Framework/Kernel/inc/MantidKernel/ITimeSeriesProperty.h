@@ -11,7 +11,7 @@ namespace Kernel {
 class DateAndTime;
 class SplittingInterval;
 class TimeInterval;
-
+class Property;
 /** A non-templated interface to a TimeSeriesProperty.
 
     Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
@@ -42,6 +42,10 @@ public:
   virtual void expandFilterToRange(std::vector<SplittingInterval> &split,
                                    double min, double max,
                                    const TimeInterval &range) const = 0;
+  // Provide a new instance of the ITimeSeriesProperty with shifted time values
+  // After trying to use return type covariance, but that showed Error C2908
+  // Using property seemed to be the most straightforward solution.
+  virtual Property* cloneWithTimeShift(const double timeShift) const = 0;
   /// Calculate the time-weighted average of a property in a filtered range
   virtual double
   averageValueInFilter(const std::vector<SplittingInterval> &filter) const = 0;
@@ -53,7 +57,6 @@ public:
   virtual void clear() = 0;
   /// Deletes all but the 'last entry' in the property
   virtual void clearOutdated() = 0;
-
   /// Virtual destructor
   virtual ~ITimeSeriesProperty() {}
 };

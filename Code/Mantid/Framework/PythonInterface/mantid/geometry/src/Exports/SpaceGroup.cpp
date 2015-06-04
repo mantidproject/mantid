@@ -16,33 +16,30 @@ using Mantid::Geometry::SymmetryOperation;
 using namespace boost::python;
 
 namespace //<unnamed>
-{
-  using namespace Mantid::PythonInterface;
+    {
+using namespace Mantid::PythonInterface;
 
-  boost::python::list getEquivalentPositions(SpaceGroup & self, const object& point)
-  {
-    const std::vector<Mantid::Kernel::V3D> &equivalents = self.getEquivalentPositions(Converters::PyObjectToV3D(point)());
+boost::python::list getEquivalentPositions(SpaceGroup &self,
+                                           const object &point) {
+  const std::vector<Mantid::Kernel::V3D> &equivalents =
+      self.getEquivalentPositions(Converters::PyObjectToV3D(point)());
 
-    boost::python::list pythonEquivalents;
-    for(auto it = equivalents.begin(); it != equivalents.end(); ++it) {
-        pythonEquivalents.append(*it);
-    }
-
-    return pythonEquivalents;
+  boost::python::list pythonEquivalents;
+  for (auto it = equivalents.begin(); it != equivalents.end(); ++it) {
+    pythonEquivalents.append(*it);
   }
 
+  return pythonEquivalents;
+}
 }
 
-// clang-format off
-void export_SpaceGroup()
-// clang-format on
-{
-  register_ptr_to_python<boost::shared_ptr<SpaceGroup> >();
+void export_SpaceGroup() {
+  register_ptr_to_python<boost::shared_ptr<SpaceGroup>>();
 
-  class_<SpaceGroup, boost::noncopyable, bases<Group> >("SpaceGroup", no_init)
-          .def("getNumber", &SpaceGroup::number)
-          .def("getHMSymbol", &SpaceGroup::hmSymbol)
-          .def("getEquivalentPositions", &getEquivalentPositions, "Returns an array with all symmetry equivalents of the supplied HKL.")
-          ;
+  class_<SpaceGroup, boost::noncopyable, bases<Group>>("SpaceGroup", no_init)
+      .def("getNumber", &SpaceGroup::number)
+      .def("getHMSymbol", &SpaceGroup::hmSymbol)
+      .def("getEquivalentPositions", &getEquivalentPositions,
+           "Returns an array with all symmetry equivalents of the supplied "
+           "HKL.");
 }
-
