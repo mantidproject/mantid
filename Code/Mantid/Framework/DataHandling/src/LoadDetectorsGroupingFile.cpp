@@ -65,8 +65,15 @@ void LoadDetectorsGroupingFile::exec() {
 
   std::string ext = Poco::toLower(inputFile.getExtension());
 
+  // The number of steps depends on the type of input file
+  // Set them to zero for the moment
+  Progress progress(this,0,1,0);
+
   if (ext == "xml") {
     // Deal with file as xml
+
+    progress.setNumSteps(6);
+    progress.report("Parsing XML file");
 
     // 1. Parse XML File
     LoadGroupXMLFile loader;
@@ -97,6 +104,8 @@ void LoadDetectorsGroupingFile::exec() {
       m_instrument = tempWS->getInstrument();
     }
 
+    progress.report("Checking detector IDs");
+
     // 2. Check if detector IDs are given
     if (!m_instrument) {
       std::map<int, std::vector<detid_t>>::iterator dit;
@@ -112,21 +121,29 @@ void LoadDetectorsGroupingFile::exec() {
     m_groupDetectorsMap = loader.getGroupDetectorsMap();
     m_groupSpectraMap = loader.getGroupSpectraMap();
 
+    progress.report("Creating output workspace");
+
     // 3. Create output workspace
     this->intializeGroupingWorkspace();
     m_groupWS->mutableRun().addProperty("Filename", inputFile.toString());
     setProperty("OutputWorkspace", m_groupWS);
+
+    progress.report("Setting geometry");
 
     // 4. Translate and set geometry
     this->setByComponents();
     this->setByDetectors();
     this->setBySpectrumIDs();
 
+    progress.report("Checking grouping description");
+
     // 5. Add grouping description, if specified
     if (loader.isGivenDescription()) {
       std::string description = loader.getDescription();
       m_groupWS->mutableRun().addProperty("Description", description);
     }
+
+    progress.report("Checking group names");
 
     // 6. Add group names, if user has specified any
     std::map<int, std::string> groupNamesMap = loader.getGroupNamesMap();
@@ -138,12 +155,19 @@ void LoadDetectorsGroupingFile::exec() {
   } else if (ext == "map") {
     // Deal with file as map
 
+    progress.setNumSteps(3);
+    progress.report("Parsing map file");
+
     // Load data from file
     LoadGroupMapFile loader(inputFile.toString(), g_log);
     loader.parseFile();
 
+    progress.report("Setting spectra map");
+
     // In .map files we are dealing with spectra numbers only.
     m_groupSpectraMap = loader.getGroupSpectraMap();
+
+    progress.report("Creating output workspace");
 
     // There is no way to specify instrument name in .map file
     generateNoInstrumentGroupWorkspace();
