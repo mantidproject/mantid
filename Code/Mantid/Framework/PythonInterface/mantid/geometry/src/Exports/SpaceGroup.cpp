@@ -34,12 +34,13 @@ boost::python::list getEquivalentPositions(SpaceGroup &self,
 }
 
 void export_SpaceGroup() {
-  register_ptr_to_python<boost::shared_ptr<SpaceGroup>>();
+  register_ptr_to_python<boost::shared_ptr<SpaceGroup> >();
 
-  class_<SpaceGroup, boost::noncopyable, bases<Group>>("SpaceGroup", no_init)
+  class_<SpaceGroup, boost::noncopyable, bases<Group> >("SpaceGroup", no_init)
       .def("getNumber", &SpaceGroup::number)
       .def("getHMSymbol", &SpaceGroup::hmSymbol)
       .def("getEquivalentPositions", &getEquivalentPositions,
            "Returns an array with all symmetry equivalents of the supplied "
-           "HKL.");
+           "HKL.")
+      .def("isAllowed", &SpaceGroup::isAllowed);
 }
