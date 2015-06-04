@@ -20,7 +20,7 @@ echo %sha1%
 :: Get or update the third party dependencies (basically just to get python)
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 cd %WORKSPACE%\Code
-call fetch_Third_Party win64
+call fetch_Third_Party --libs-only win64
 cd %WORKSPACE%
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
