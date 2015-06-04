@@ -63,20 +63,11 @@ class CollectHB3AExperimentInfo(PythonAlgorithm):
         # Read inputs
         self._getProperties()
 
+        # Create output workspaces
+        self._createOutputWorkspaces()
+
         # Get scan list
         self._getExpScanPtDict()
-
-        self._myPixelInfoTableWS = api.CreateEmptyTableWorkspace(OutputWorkspace=self.getPropertyValue('OutputWorkspace'))
-        self._myPixelInfoTableWS.addColumn("int", "DetectorID")
-        self._myPixelInfoTableWS.addColumn("double", "X")
-        self._myPixelInfoTableWS.addColumn("double", "Y")
-        self._myPixelInfoTableWS.addColumn("double", "Z")
-
-        self._myScanPtFileTableWS = api.CreateEmptyTableWorkspace(OutputWorkspace=self.getPropertyValue('DetectorTableWorkspace'))
-        self._myScanPtFileTableWS.addColumn("int", "Scan")
-        self._myScanPtFileTableWS.addColumn("int", "Pt")
-        self._myScanPtFileTableWS.addColumn("str", "Filename")
-        self._myScanPtFileTableWS.addColumn("int", "StartDetID")
 
         # Get 2theta-(scan-pt) dictionary
         self._getDetectorPositionScanPtDict()
@@ -100,6 +91,23 @@ class CollectHB3AExperimentInfo(PythonAlgorithm):
 
         return
 
+    def _createOutputWorkspaces(self):
+        """
+        """
+        self._myPixelInfoTableWS = api.CreateEmptyTableWorkspace(OutputWorkspace=self.getPropertyValue('OutputWorkspace'))
+        self._myPixelInfoTableWS.addColumn("int", "DetectorID")
+        self._myPixelInfoTableWS.addColumn("double", "X")
+        self._myPixelInfoTableWS.addColumn("double", "Y")
+        self._myPixelInfoTableWS.addColumn("double", "Z")
+        self._myPixelInfoTableWS.addColumn("int", "OriginalDetID")
+
+        self._myScanPtFileTableWS = api.CreateEmptyTableWorkspace(OutputWorkspace=self.getPropertyValue('DetectorTableWorkspace'))
+        self._myScanPtFileTableWS.addColumn("int", "Scan")
+        self._myScanPtFileTableWS.addColumn("int", "Pt")
+        self._myScanPtFileTableWS.addColumn("str", "Filename")
+        self._myScanPtFileTableWS.addColumn("int", "StartDetID")
+
+        return
 
     def _getExpScanPtDict(self):
         """ Get the scan-Pt. dictionary
@@ -246,7 +254,7 @@ class CollectHB3AExperimentInfo(PythonAlgorithm):
                 newdetid = self._currStartDetID + detector.getID()
                 if detector.getID() > maxdetid:
                     maxdetid = detector.getID()
-                self._myPixelInfoTableWS.addRow([newdetid, detpos.X(), detpos.Y(), detpos.Z()])
+                self._myPixelInfoTableWS.addRow([newdetid, detpos.X(), detpos.Y(), detpos.Z(), detector.getID()])
             # ENDFOR (iws)
 
             self._currStartDetID += maxdetid
