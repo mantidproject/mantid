@@ -605,7 +605,12 @@ CompositePeaksPresenter::getZoomedPeakPresenter() const {
  * @return a zoomed peak index.
  */
 int CompositePeaksPresenter::getZoomedPeakIndex() const {
-  return m_zoomedPeakIndex;
+    return m_zoomedPeakIndex;
+}
+
+void CompositePeaksPresenter::editCommand(EditMode editMode, boost::weak_ptr<const Mantid::API::IPeaksWorkspace> target)
+{
+    m_zoomablePlottingWidget->peakEditMode(editMode, target);
 }
 
 void CompositePeaksPresenter::updatePeaksWorkspace(

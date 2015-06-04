@@ -145,7 +145,12 @@ ProxyCompositePeaksPresenter::getZoomedPeakPresenter() const {
 }
 
 int ProxyCompositePeaksPresenter::getZoomedPeakIndex() const {
-  return m_compositePresenter->getZoomedPeakIndex();
+    return m_compositePresenter->getZoomedPeakIndex();
+}
+
+void ProxyCompositePeaksPresenter::editCommand(EditMode editMode, boost::weak_ptr<const Mantid::API::IPeaksWorkspace> target)
+{
+    m_compositePresenter->editCommand(editMode, target);
 }
 }
 }

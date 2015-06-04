@@ -11,6 +11,7 @@
 #include <stdexcept>
 #include <boost/shared_ptr.hpp>
 #include <boost/optional.hpp>
+#include <boost/weak_ptr.hpp>
 
 namespace Mantid {
 namespace API {
@@ -141,6 +142,8 @@ public:
       boost::shared_ptr<Mantid::API::IPeaksWorkspace> &changedPeaksWS);
   /// Determine if the presenter contents are different.
   bool contentsDifferent(PeaksPresenter const * other) const;
+  /// Enter the requested edit mode for the peaks workspace.
+  void editCommand(EditMode editMode, boost::weak_ptr<const Mantid::API::IPeaksWorkspace> target);
 private:
   /// Updateable on demand method.
   void updatePeaksWorkspace(

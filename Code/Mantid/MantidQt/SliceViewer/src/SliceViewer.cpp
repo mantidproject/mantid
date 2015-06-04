@@ -2409,5 +2409,13 @@ void SliceViewer::dropEvent(QDropEvent *e) {
   }
 }
 
+void SliceViewer::peakEditMode(EditMode editMode, boost::weak_ptr<const Mantid::API::IPeaksWorkspace> target) {
+    // Clear any other modes that might affect the cursor.
+
+    // Set the cursor.
+
+    // Make connections so that the ConcretePeaksPresenters can be updated
+
+
 } // namespace
 }

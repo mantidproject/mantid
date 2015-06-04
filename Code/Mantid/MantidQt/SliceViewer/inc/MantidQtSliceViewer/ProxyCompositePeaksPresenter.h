@@ -79,6 +79,8 @@ public:
   boost::optional<PeaksPresenter_sptr> getZoomedPeakPresenter() const;
   /// Get optional zoomed peak index.
   int getZoomedPeakIndex() const;
+  /// Set the edit mode.
+  void editCommand(EditMode editMode, boost::weak_ptr<const Mantid::API::IPeaksWorkspace> target);
 
 private:
   /// Wrapped composite to delegate to.
