@@ -33,7 +33,7 @@ Usage
 
 **Example - MDNormDirectSC**
 
-.. testcode:: MDNormDirectSCExample
+.. code-block:: python
 
     import mantid
     import os
@@ -68,20 +68,10 @@ Usage
     print "The normalization workspace shape is (%d, %d)" % histoShape
     print "Out of those elements, "+str(nonzero(histoNorm.getSignalArray())[0].size)+" are nonzero"
    
-.. testoutput:: MDNormDirectSCExample 
+.. code-block:: python 
 
     The normalization workspace shape is (100, 100)
     Out of those elements, 6712 are nonzero    
-
-.. testcleanup:: MDNormDirectSCExample
-
-   DeleteWorkspace(DGS_input_data)
-   DeleteWorkspace(DGS_output_data)
-   DeleteWorkspace(MDE)
-   DeleteWorkspace(histoData)
-   DeleteWorkspace(histoNorm)
-   DeleteWorkspace(normalized)
-
 
 The output would look like:
 

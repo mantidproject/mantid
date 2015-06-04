@@ -30,13 +30,14 @@ const int TabulatedFunction::defaultIndexValue = 0;
 TabulatedFunction::TabulatedFunction() : m_setupFinished(false) {
   declareParameter("Scaling", 1.0, "A scaling factor");
   declareParameter("Shift", 0.0, "Shift in the abscissa");
+  declareParameter("XScaling", 1.0, "Scaling factor in X");
   declareAttribute("FileName", Attribute("", true));
   declareAttribute("Workspace", Attribute(""));
   declareAttribute("WorkspaceIndex", Attribute(defaultIndexValue));
 }
 
 /// Evaluate the function for a list of arguments and given scaling factor
-void TabulatedFunction::eval(double scaling, double xshift, double *out,
+void TabulatedFunction::eval(double scaling, double xshift, double xscale, double *out,
                              const double *xValues, const size_t nData) const {
   if (nData == 0)
     return;
@@ -46,10 +47,11 @@ void TabulatedFunction::eval(double scaling, double xshift, double *out,
   if (size() == 0)
     return;
 
-  // shift the domain over which the function is defined
+  // shift and scale the domain over which the function is defined
   std::vector<double> xData(m_xData);
   for (std::vector<double>::iterator it = xData.begin(); it != xData.end();
        ++it) {
+    *it *= xscale;
     *it += xshift;
   }
 
@@ -100,7 +102,8 @@ void TabulatedFunction::function1D(double *out, const double *xValues,
                                    const size_t nData) const {
   const double scaling = getParameter("Scaling");
   const double xshift = getParameter("Shift");
-  eval(scaling, xshift, out, xValues, nData);
+  const double xscale = getParameter("XScaling");
+  eval(scaling, xshift, xscale, out, xValues, nData);
 }
 
 /**
@@ -115,23 +118,31 @@ void TabulatedFunction::functionDeriv1D(API::Jacobian *out,
                                         const size_t nData) {
   const double scaling = getParameter("Scaling");
   const double xshift = getParameter("Shift");
+  const double xscale = getParameter("XScaling");
   std::vector<double> tmp(nData);
   // derivative with respect to Scaling parameter
-  eval(1.0, xshift, tmp.data(), xValues, nData);
+  eval(1.0, xshift, xscale, tmp.data(), xValues, nData);
   for (size_t i = 0; i < nData; ++i) {
     out->set(i, 0, tmp[i]);
   }
 
-  // There is no unique definition for the partial derivative with respect
-  // to the Shift parameter. Here we take the central difference,
   const double dx =
       (xValues[nData - 1] - xValues[0]) / static_cast<double>(nData);
   std::vector<double> tmpplus(nData);
-  eval(scaling, xshift + dx, tmpplus.data(), xValues, nData);
   std::vector<double> tmpminus(nData);
-  eval(scaling, xshift - dx, tmpminus.data(), xValues, nData);
+
+  // There is no unique definition for the partial derivative with respect
+  // to the Shift parameter. Here we take the central difference,
+  eval(scaling, xshift + dx, xscale, tmpplus.data(), xValues, nData);
+  eval(scaling, xshift - dx, xscale, tmpminus.data(), xValues, nData);
   for (size_t i = 0; i < nData; ++i) {
     out->set(i, 1, (tmpplus[i] - tmpminus[i]) / (2 * dx));
+  }
+
+  eval(scaling, xshift, xscale + dx, tmpplus.data(), xValues, nData);
+  eval(scaling, xshift, xscale - dx, tmpminus.data(), xValues, nData);
+  for (size_t i = 0; i < nData; ++i) {
+    out->set(i, 2, (tmpplus[i] - tmpminus[i]) / (2 * dx));
   }
 }
 
