@@ -379,7 +379,7 @@ InstrumentDefinitionParser::parseXML(Kernel::ProgressBase *prog) {
           } else {
             appendLeaf(m_instrument.get(), pChildElem, pElem, idList);
           }
-        } else if (pChildElem->tagName() == "location") {
+        } else if (pChildElem->tagName() == "locations") {
           // append <locations> elements in <locations>
           appendLocations(m_instrument.get(), pChildElem, pElem, idList);
         }
