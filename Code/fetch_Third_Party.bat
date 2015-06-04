@@ -52,7 +52,7 @@ del CheckOS.txt
 del StringCheck.txt
 
 :: Check if user has overridden the value
-if NOT "%userarch"=="" (
+if NOT "%userarch%"=="" (
   set arch=!userarch!
 )
 echo Using architecture=%arch%
@@ -68,7 +68,7 @@ if /i "%fetchincludes%"=="1" (
   set incs=%url:mantid.git=%3rdpartyincludes.git
   :: Otherwise we need to clone
   echo Cloning Third_Party includes from !incs!
-  call !GitCmd! clone --depth=1 !incs! Third_Party/include
+  call !GitCmd! clone --depth 1 !incs! Third_Party/include
 )
 GOTO :DoLibs
 
@@ -93,7 +93,7 @@ if /i "%fetchlibs%"=="1" (
 
   :: Otherwise we need to clone
   echo Cloning Third_Party libraries from !libs!
-  call %GitCmd% clone --depth=1 !libs! Third_Party/lib/%arch%
+  call %GitCmd% clone --depth 1 !libs! Third_Party/lib/%arch%
 )
 exit /B 0
 
