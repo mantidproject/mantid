@@ -133,6 +133,11 @@ SmoothMD::hatSmooth(IMDHistoWorkspace_const_sptr toSmooth,
     boost::scoped_ptr<MDHistoWorkspaceIterator> iterator(
         dynamic_cast<MDHistoWorkspaceIterator *>(iterators[it]));
 
+    if (!iterator) {
+      throw std::logic_error(
+          "Failed to cast IMDIterator to MDHistoWorkspaceIterator");
+    }
+
     do {
       // Gets all vertex-touching neighbours
       size_t iteratorIndex = iterator->getLinearIndex();

@@ -8,7 +8,7 @@
 #define INTEGRATEPEAKTIMESLICES_H_
 
 #include "MantidAPI/Algorithm.h"
-#include "MantidAPI/IPeak.h"
+#include "MantidGeometry/Crystal/IPeak.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -248,36 +248,32 @@ private:
   void init();
   void exec();
 
-  Mantid::API::MatrixWorkspace_sptr
-      inputW; ///< A pointer to the input workspace, the data set
-  Mantid::DataObjects::TableWorkspace_sptr
-      outputW; ///< A pointer to the output workspace
+  bool m_EdgePeak;
 
-  bool EdgePeak;
+  std::string m_AttributeNames[20];
 
-  std::string AttributeNames[20];
+  std::string m_ParameterNames[7];
 
-  std::string ParameterNames[7];
+  boost::shared_ptr<DataModeHandler> m_AttributeValues;
+  double m_ParameterValues[7];
 
-  boost::shared_ptr<DataModeHandler> AttributeValues;
-  double ParameterValues[7];
+  Mantid::detid2index_map m_wi_to_detid_map;
 
-  Mantid::detid2index_map wi_to_detid_map;
+  int *m_NeighborIDs; // Stores IDs of nearest neighbors
+  double m_R0;        ///<for Weak Peaks, these can be set using info from close
 
-  int *NeighborIDs; // Stores IDs of nearest neighbors
-  double R0;        ///<for Weak Peaks, these can be set using info from close
-
-  Kernel::V3D center; ///< for Describing the Plane at the Peak
-  Kernel::V3D xvec;   ///< for Describing the Plane at the Peak
-  Kernel::V3D yvec;   ///< for Describing the Plane at the Peak
+  Kernel::V3D m_center; ///< for Describing the Plane at the Peak
+  Kernel::V3D m_xvec;   ///< for Describing the Plane at the Peak
+  Kernel::V3D m_yvec;   ///< for Describing the Plane at the Peak
   double
-      ROW; ///< for Describing the Row(or 0) describing the center of the  Peak
-  double COL; ///< for Describing the Column(or 0) describing the center of the
+      m_ROW; ///< for Describing the Row(or 0) describing the center of the Peak
+  double
+      m_COL; ///< for Describing the Column(or 0) describing the center of the
   /// Peak
-  double CellWidth;  ///< for Describing the Plane at the Peak
-  double CellHeight; ///< for Describing the Plane at the Peak
-  int NROWS;
-  int NCOLS;
+  double m_cellWidth;  ///< for Describing the Plane at the Peak
+  double m_cellHeight; ///< for Describing the Plane at the Peak
+  int m_NROWS;
+  int m_NCOLS;
 
   void SetUpData(API::MatrixWorkspace_sptr &Data,
                  API::MatrixWorkspace_const_sptr const &inpWkSpace,
@@ -291,11 +287,11 @@ private:
   bool getNeighborPixIDs(boost::shared_ptr<Geometry::IComponent> comp,
                          Kernel::V3D &Center, double &Radius, int *&ArryofID);
 
-  int CalculateTimeChannelSpan(API::IPeak const &peak, const double dQ,
+  int CalculateTimeChannelSpan(Geometry::IPeak const &peak, const double dQ,
                                Mantid::MantidVec const &X, const int specNum,
                                int &Centerchan);
 
-  double CalculatePositionSpan(API::IPeak const &peak, const double dQ);
+  double CalculatePositionSpan(Geometry::IPeak const &peak, const double dQ);
 
   void InitializeColumnNamesInTableWorkspace(
       DataObjects::TableWorkspace_sptr &TabWS);
@@ -358,7 +354,7 @@ private:
   void FindPlane(Kernel::V3D &center, Kernel::V3D &xvec, Kernel::V3D &yvec,
                  double &ROW, double &COL, int &NROWS, int &NCOLS,
                  double &pixWidthx, double &pixHeighty,
-                 API::IPeak const &peak) const;
+                 Geometry::IPeak const &peak) const;
 
   int find(Mantid::MantidVec const &X, const double time);
 
@@ -366,8 +362,7 @@ private:
   bool updateNeighbors(boost::shared_ptr<Geometry::IComponent> &comp,
                        Kernel::V3D CentPos, Kernel::V3D oldCenter,
                        double NewRadius, double &neighborRadius);
-
-  bool debug;
+  bool m_debug;
 };
 } // namespace Crystal
 } // namespace Mantid

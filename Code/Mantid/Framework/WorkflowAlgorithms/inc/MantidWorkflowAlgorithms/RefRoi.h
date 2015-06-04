@@ -37,8 +37,8 @@ namespace WorkflowAlgorithms {
 
 class DLLExport RefRoi : public API::Algorithm {
 public:
-  /// (Empty) Constructor
-  RefRoi() : API::Algorithm() {}
+  /// Constructor
+  RefRoi();
   /// Virtual destructor
   virtual ~RefRoi() {}
   /// Algorithm's name

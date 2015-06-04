@@ -109,8 +109,11 @@ QSize MatrixValuesDialog::sizeHint() const
 
 void MatrixValuesDialog::customEvent(QEvent *e)
 {
-    if (e->type() == SCRIPTING_CHANGE_EVENT)
-        scriptingChangeEvent(dynamic_cast<ScriptingChangeEvent*>(e));
+	if (e->type() == SCRIPTING_CHANGE_EVENT) {
+    if (auto sce = dynamic_cast<ScriptingChangeEvent*>(e)) {
+      scriptingChangeEvent(sce);
+    }
+  }
 }
 
 bool MatrixValuesDialog::apply()

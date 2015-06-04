@@ -24,7 +24,9 @@ using namespace Geometry;
 DECLARE_ALGORITHM(CorrectFlightPaths)
 
 // Constructor
-CorrectFlightPaths::CorrectFlightPaths() : API::Algorithm() {}
+CorrectFlightPaths::CorrectFlightPaths()
+    : API::Algorithm(), m_inputWS(), m_outputWS(), m_instrument(), m_sample(),
+      m_l2(0.), m_wavelength(0.) {}
 
 /** Initialisation method. Declares properties to be used in algorithm.
  *

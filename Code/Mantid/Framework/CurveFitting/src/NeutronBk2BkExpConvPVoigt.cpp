@@ -27,7 +27,11 @@ DECLARE_FUNCTION(NeutronBk2BkExpConvPVoigt)
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
-NeutronBk2BkExpConvPVoigt::NeutronBk2BkExpConvPVoigt() { mHKLSet = false; }
+NeutronBk2BkExpConvPVoigt::NeutronBk2BkExpConvPVoigt()
+    : API::IPowderDiffPeakFunction(), m_Alpha(), m_Beta(), m_Sigma2(),
+      m_Gamma(), m_eta(), m_N() {
+  mHKLSet = false;
+}
 
 //----------------------------------------------------------------------------------------------
 /** Destructor

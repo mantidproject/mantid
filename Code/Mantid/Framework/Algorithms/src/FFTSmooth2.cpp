@@ -60,7 +60,8 @@ void FFTSmooth2::init() {
  */
 void FFTSmooth2::exec() {
   m_inWS = getProperty("InputWorkspace");
-  IgnoreXBins = getProperty("IgnoreXBins");
+  /// Will we Allow Any X Bins?
+  bool ignoreXBins = getProperty("IgnoreXBins");
 
   // First spectrum in input
   int s0 = getProperty("WorkspaceIndex");
@@ -82,7 +83,7 @@ void FFTSmooth2::exec() {
 
   for (int spec = s0; spec < send; spec++) {
     // Save the starting x value so it can be restored after all transforms.
-    m_x0 = m_inWS->readX(spec)[0];
+    double x0 = m_inWS->readX(spec)[0];
 
     double dx = (m_inWS->readX(spec).back() - m_inWS->readX(spec).front()) /
                 (static_cast<double>(m_inWS->readX(spec).size()) - 1.0);
@@ -90,11 +91,11 @@ void FFTSmooth2::exec() {
       symmWS->dataX(0)[dn + i] = m_inWS->readX(spec)[i];
       symmWS->dataY(0)[dn + i] = m_inWS->readY(spec)[i];
 
-      symmWS->dataX(0)[dn - i] = m_x0 - dx * i;
+      symmWS->dataX(0)[dn - i] = x0 - dx * i;
       symmWS->dataY(0)[dn - i] = m_inWS->readY(spec)[i];
     }
     symmWS->dataY(0).front() = m_inWS->readY(spec).back();
-    symmWS->dataX(0).front() = m_x0 - dx * dn;
+    symmWS->dataX(0).front() = x0 - dx * dn;
     if (m_inWS->isHistogramData())
       symmWS->dataX(0).back() = m_inWS->readX(spec).back();
 
@@ -104,7 +105,7 @@ void FFTSmooth2::exec() {
     IAlgorithm_sptr fft = createChildAlgorithm("RealFFT", 0, 0.5);
     fft->setProperty("InputWorkspace", symmWS);
     fft->setProperty("WorkspaceIndex", 0);
-    fft->setProperty("IgnoreXBins", IgnoreXBins);
+    fft->setProperty("IgnoreXBins", ignoreXBins);
     try {
       fft->execute();
     } catch (...) {
@@ -170,7 +171,7 @@ void FFTSmooth2::exec() {
     // fft->setProperty("Real",0);
     // fft->setProperty("Imaginary",1);
     fft->setProperty("Transform", "Backward");
-    fft->setProperty("IgnoreXBins", IgnoreXBins);
+    fft->setProperty("IgnoreXBins", ignoreXBins);
     try {
       fft->execute();
     } catch (...) {
@@ -188,19 +189,19 @@ void FFTSmooth2::exec() {
     // after truncation)
     // but it doesn't work accurately enough, so commented out
     //// Correct the x values:
-    // m_x0 -= tmpWS->dataX(0)[dn];
+    // x0 -= tmpWS->dataX(0)[dn];
     // if (tmpWS->isHistogramData())
     //{// Align centres of the in and out histograms. I am not sure here
     //  double dX = m_inWS->readX(0)[1] - m_inWS->readX(0)[0];
     //  double dx = tmpWS->readX(0)[1] - tmpWS->readX(0)[0];
-    //  m_x0 += dX/2 - dx;
+    //  x0 += dX/2 - dx;
     //}
     // outWS->dataX(0).assign(tmpWS->readX(0).begin()+dn,tmpWS->readX(0).end());
     // outWS->dataY(0).assign(tmpWS->readY(0).begin()+dn,tmpWS->readY(0).end());
     //
     // std::transform( outWS->dataX(0).begin(), outWS->dataX(0).end(),
     // outWS->dataX(0).begin(),
-    //  std::bind2nd(std::plus<double>(), m_x0) );
+    //  std::bind2nd(std::plus<double>(), x0) );
 
     if (getProperty("AllSpectra")) {
       outWS->dataX(spec)

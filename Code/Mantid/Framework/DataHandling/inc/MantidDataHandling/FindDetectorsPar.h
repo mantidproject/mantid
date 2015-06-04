@@ -240,7 +240,9 @@ public:
   /// the detector's ID
   int64_t detID;
   // default detector ID -- -1 means undefined
-  DetParameters() : detID(-1) {}
+  DetParameters()
+      : azimutAngle(0.), polarAngle(0.), secondaryFlightPath(0.), azimWidth(0.),
+        polarWidth(0.), detID(-1) {}
 };
 
 /** helper class-collection to keep together the parameters, which characterize

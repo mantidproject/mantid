@@ -49,7 +49,8 @@ FindPeaks::FindPeaks()
       m_stepGuessedPeakWidth(0), m_usePeakPositionTolerance(false),
       m_peakPositionTolerance(0.0), m_fitFunctions(), m_peakLeftIndexes(),
       m_peakRightIndexes(), m_minimizer("Levenberg-MarquardtMD"),
-      m_costFunction(), m_minHeight(0.0), m_useObsCentre(false) {}
+      m_costFunction(), m_minHeight(0.0), m_leastMaxObsY(0.),
+      m_useObsCentre(false) {}
 
 //----------------------------------------------------------------------------------------------
 /** Initialize and declare properties.
@@ -1324,7 +1325,8 @@ void FindPeaks::estimateBackground(const MantidVec &X, const MantidVec &Y,
     y0 += Y[i_min + i];
 
     xf += X[i_max - i];
-    yf += Y[i_max - i];
+    // X has one more value than Y
+    yf += Y[i_max - i - 1];
   }
   x0 = x0 / static_cast<double>(numavg);
   y0 = y0 / static_cast<double>(numavg);

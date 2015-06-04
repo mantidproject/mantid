@@ -8,6 +8,7 @@ from PyQt4 import QtCore, QtGui
 from PyQt4.QtCore import Qt, pyqtSlot
 import __builtin__
 import mantid
+import mantidqtpython
 
 #-----------------------------------------------------------------------------
 #--------------------------- MultiThreaded Access ----------------------------
@@ -906,3 +907,27 @@ class TiledWindowProxy(QtProxyObject):
         Clear the content this TiledWindow.
         """
         threadsafe_call(self._getHeldObject().clear)
+
+def showHelpPage(page_name=None):
+    """Show a page in the help system"""
+    window = threadsafe_call(mantidqtpython.MantidQt.API.InterfaceManager().showHelpPage, page_name)
+
+def showWikiPage(page_name=None):
+    """Show a wiki page through the help system"""
+    window = threadsafe_call(mantidqtpython.MantidQt.API.InterfaceManager().showWikiPage, page_name)
+
+def showAlgorithmHelp(algorithm=None, version=-1):
+    """Show an algorithm help page"""
+    window = threadsafe_call(mantidqtpython.MantidQt.API.InterfaceManager().showAlgorithmHelp, algorithm, version)
+
+def showConceptHelp(name=None):
+    """Show a concept help page"""
+    window = threadsafe_call(mantidqtpython.MantidQt.API.InterfaceManager().showConceptHelp, name)
+
+def showFitFunctionHelp(name=None):
+    """Show a fit function help page"""
+    window = threadsafe_call(mantidqtpython.MantidQt.API.InterfaceManager().showFitFunctionHelp, name)
+
+def showCustomInterfaceHelp(name=None):
+    """Show a custom interface help page"""
+    window = threadsafe_call(mantidqtpython.MantidQt.API.InterfaceManager().showCustomInterfaceHelp, name)

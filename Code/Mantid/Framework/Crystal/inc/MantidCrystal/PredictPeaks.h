@@ -51,27 +51,27 @@ private:
   std::vector<Mantid::Geometry::ReflectionCondition_sptr> m_refConds;
 
   /// Run number of input workspace
-  int runNumber;
+  int m_runNumber;
   /// Min wavelength parameter
-  double wlMin;
+  double m_wlMin;
   /// Max wavelength parameter
-  double wlMax;
+  double m_wlMax;
   /// Instrument reference
-  Geometry::Instrument_const_sptr inst;
+  Geometry::Instrument_const_sptr m_inst;
   /// Output peaks workspace
-  Mantid::DataObjects::PeaksWorkspace_sptr pw;
+  Mantid::DataObjects::PeaksWorkspace_sptr m_pw;
   /// Counter of possible peaks
-  size_t numInRange;
+  size_t m_numInRange;
   /// Crystal applied
-  Geometry::OrientedLattice crystal;
+  Geometry::OrientedLattice m_crystal;
   /// Min D spacing to apply.
-  double minD;
+  double m_minD;
   /// Max D spacing to apply.
-  double maxD;
+  double m_maxD;
   /// HKL->Q matrix (Goniometer * UB)
-  Mantid::Kernel::DblMatrix mat;
+  Mantid::Kernel::DblMatrix m_mat;
   /// Goniometer rotation matrix
-  Mantid::Kernel::DblMatrix gonio;
+  Mantid::Kernel::DblMatrix m_gonio;
 };
 
 } // namespace Mantid

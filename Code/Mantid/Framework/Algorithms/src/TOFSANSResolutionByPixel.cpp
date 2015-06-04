@@ -10,7 +10,6 @@
 
 #include "boost/math/special_functions/fpclassify.hpp"
 
-
 namespace Mantid {
 namespace Algorithms {
 
@@ -21,6 +20,9 @@ using namespace Kernel;
 using namespace API;
 using namespace Geometry;
 using namespace DataObjects;
+
+TOFSANSResolutionByPixel::TOFSANSResolutionByPixel()
+    : API::Algorithm(), m_wl_resolution(0.) {}
 
 void TOFSANSResolutionByPixel::init() {
   declareProperty(new WorkspaceProperty<>(
@@ -39,7 +41,8 @@ void TOFSANSResolutionByPixel::init() {
   declareProperty(new WorkspaceProperty<>(
                       "SigmaModerator", "", Direction::Input,
                       boost::make_shared<WorkspaceUnitValidator>("Wavelength")),
-                  "Sigma moderator spread in units of microsec as a function of wavelenght.");
+                  "Sigma moderator spread in units of microsec as a function "
+                  "of wavelenght.");
 }
 
 /*
@@ -47,7 +50,7 @@ void TOFSANSResolutionByPixel::init() {
  */
 double TOFSANSResolutionByPixel::getTOFResolution(double wl) {
   UNUSED_ARG(wl);
-  return wl_resolution;
+  return m_wl_resolution;
 }
 
 void TOFSANSResolutionByPixel::exec() {
@@ -60,29 +63,26 @@ void TOFSANSResolutionByPixel::exec() {
   R1 /= 1000.0;
   R2 /= 1000.0;
 
-  const MatrixWorkspace_sptr sigmaModeratorVSwavelength = getProperty("SigmaModerator");
+  const MatrixWorkspace_sptr sigmaModeratorVSwavelength =
+      getProperty("SigmaModerator");
 
   // create interpolation table from sigmaModeratorVSwavelength
   Kernel::Interpolation lookUpTable;
 
   const MantidVec xInterpolate = sigmaModeratorVSwavelength->readX(0);
   const MantidVec yInterpolate = sigmaModeratorVSwavelength->readY(0);
-  
-  // prefer the input to be a pointworkspace and create interpolation function
-  if ( sigmaModeratorVSwavelength->isHistogramData() )
-  {
-    g_log.notice() << "mid-points of SigmaModerator histogram bins will be used for interpolation.";
 
-    for (size_t i = 0; i < xInterpolate.size()-1; ++i)
-    {
-      const double midpoint = xInterpolate[i+1] - xInterpolate[i];
+  // prefer the input to be a pointworkspace and create interpolation function
+  if (sigmaModeratorVSwavelength->isHistogramData()) {
+    g_log.notice() << "mid-points of SigmaModerator histogram bins will be "
+                      "used for interpolation.";
+
+    for (size_t i = 0; i < xInterpolate.size() - 1; ++i) {
+      const double midpoint = xInterpolate[i + 1] - xInterpolate[i];
       lookUpTable.addPoint(midpoint, yInterpolate[i]);
     }
-  }
-  else
-  {
-    for (size_t i = 0; i < xInterpolate.size(); ++i)
-    {
+  } else {
+    for (size_t i = 0; i < xInterpolate.size(); ++i) {
       lookUpTable.addPoint(xInterpolate[i], yInterpolate[i]);
     }
   }
@@ -137,15 +137,18 @@ void TOFSANSResolutionByPixel::exec() {
       // Calculate q. Alternatively q could be calculated using ConvertUnit
       const double q = factor / wl;
 
-      // wavelenght spread from bin assumed to be 
+      // wavelenght spread from bin assumed to be
       const double sigmaSpreadFromBin = xIn[j + 1] - xIn[j];
 
-      // wavelenght spread from moderatorm, converted from microseconds to wavelengths
-      const double sigmaModerator = lookUpTable.value(wl) * 3.9560 / (1000.0 * Lsum);
+      // wavelenght spread from moderatorm, converted from microseconds to
+      // wavelengths
+      const double sigmaModerator =
+          lookUpTable.value(wl) * 3.9560 / (1000.0 * Lsum);
 
       // calculate wavelenght resolution from moderator and histogram time bin
-      const double sigmaLambda = std::sqrt(sigmaSpreadFromBin*sigmaSpreadFromBin/12.0 + 
-                                           sigmaModerator*sigmaModerator);
+      const double sigmaLambda =
+          std::sqrt(sigmaSpreadFromBin * sigmaSpreadFromBin / 12.0 +
+                    sigmaModerator * sigmaModerator);
 
       // calculate sigmaQ for a given lambda and pixel
       const double sigmaOverLambdaTimesQ = q * sigmaLambda / wl;

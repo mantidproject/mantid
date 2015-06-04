@@ -65,7 +65,7 @@ public:
   void addMarker(PeakMarker2D* m);
   QList<PeakMarker2D*> getMarkersWithID(int detID)const;
   int getNumberPeaks()const;
-  Mantid::API::IPeak& getPeak(int);
+  Mantid::Geometry::IPeak& getPeak(int);
   /// Return PeaksWorkspace associated with this overlay.
   boost::shared_ptr<Mantid::API::IPeaksWorkspace> getPeaksWorkspace() {return m_peaksWorkspace;}
   /// set HKL precision

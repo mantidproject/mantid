@@ -185,7 +185,13 @@ double ConvertSpectrumAxis::getEfixed(IDetector_const_sptr detector,
         Kernel::Property *p = inputWS->run().getProperty("Ei");
         Kernel::PropertyWithValue<double> *doublep =
             dynamic_cast<Kernel::PropertyWithValue<double> *>(p);
-        efixed = (*doublep)();
+        if (doublep) {
+          efixed = (*doublep)();
+        } else {
+          efixed = 0.0;
+          g_log.warning() << "Efixed could not be found for detector "
+                          << detector->getID() << ", set to 0.0\n";
+        }
       } else {
         efixed = 0.0;
         g_log.warning() << "Efixed could not be found for detector "

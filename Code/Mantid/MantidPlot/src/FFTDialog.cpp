@@ -164,7 +164,10 @@ void FFTDialog::accept()
 	}
 
   ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(parent());
-    FFT *fft = NULL;
+  if (!app) {
+    throw std::logic_error("Parent of FFTDialog is not ApplicationWindow as expected.");
+  }
+  FFT *fft = NULL;
 	if (graph)
         fft = new FFT(app, graph, boxName->currentText());
 	else if (d_table){
@@ -173,14 +176,17 @@ void FFTDialog::accept()
 			boxReal->setFocus();
 			return;
 		}
-        fft = new FFT(app, d_table, boxReal->currentText(), boxImaginary->currentText());
+    fft = new FFT(app, d_table, boxReal->currentText(), boxImaginary->currentText());
 	}
+
+  if (fft) {
     fft->setInverseFFT(backwardBtn->isChecked());
     fft->setSampling(sampling);
     fft->normalizeAmplitudes(boxNormalize->isChecked());
     fft->shiftFrequencies(boxOrder->isChecked());
     fft->run();
     delete fft;
+  }
 	close();
 }
 
@@ -241,6 +247,9 @@ void FFTDialog::setTable(Table *t)
 void FFTDialog::setMatrix(Matrix *m)
 {
     ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(parent());
+    if (!app) {
+      throw std::logic_error("Parent of FFTDialog is not ApplicationWindow as expected.");
+    }
     QStringList lst = app->matrixNames();
     boxReal->addItems(lst);
     if (m){
@@ -254,6 +263,9 @@ void FFTDialog::setMatrix(Matrix *m)
 void FFTDialog::fftMatrix()
 {
     ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(parent());
+    if (!app) {
+      throw std::logic_error("Parent of FFTDialog is not ApplicationWindow as expected.");
+    }
     Matrix *mReal = app->matrix(boxReal->currentText());
     if (!mReal)
         return;

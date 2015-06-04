@@ -73,7 +73,7 @@ private:
   double DensityThresholdFactor;
 
   /// Max # of peaks
-  int64_t MaxPeaks;
+  int64_t m_maxPeaks;
 
   /// Flag to include the detectors within the peak
   bool m_addDetectors;
@@ -91,11 +91,11 @@ private:
   /// Instrument
   Mantid::Geometry::Instrument_const_sptr inst;
   /// Run number of the peaks
-  int runNumber;
+  int m_runNumber;
   /// Dimension type
   eDimensionType dimType;
   /// Goniometer matrix
-  Mantid::Kernel::Matrix<double> goniometer;
+  Mantid::Kernel::Matrix<double> m_goniometer;
 };
 
 } // namespace Mantid

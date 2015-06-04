@@ -179,6 +179,27 @@ public:
     TS_ASSERT_EQUALS(pmapA,pmapB);
   }
 
+  void testHelpString(){
+    ParameterMap pmapA;
+    std::string descr("Test description");
+    pmapA.addDouble(m_testInstrument.get(), "testDouble", 4.2,&descr);
+    auto parD= pmapA.getRecursive(m_testInstrument.get(),"testDouble");
+    TS_ASSERT_EQUALS(parD->getDescription(),descr);
+    TS_ASSERT_EQUALS(parD->getShortDescription(),"Test description");
+
+    parD->setDescription("Short description. LongDescription.");
+    TS_ASSERT_EQUALS(parD->getDescription(),"Short description. LongDescription.");
+    TS_ASSERT_EQUALS(parD->getShortDescription(),"Short description.");
+
+
+    descr = pmapA.getDescription("basic","testDouble");
+    TS_ASSERT_EQUALS(descr,"Short description. LongDescription.");
+    descr = pmapA.getShortDescription("basic","testDouble");
+    TS_ASSERT_EQUALS(descr,"Short description.");
+
+  }
+
+
 
   void testAdding_A_Parameter_That_Is_Not_Present_Puts_The_Parameter_In()
   {
@@ -229,33 +250,33 @@ public:
     // -- Specialized Helper Functions --
 
     // double
-    boost::function<void (ParameterMap*, const IComponent*,const std::string&,double)> faddDouble;
-    faddDouble = (void (ParameterMap::*)(const IComponent*,const std::string&,double))&ParameterMap::addDouble;
+    boost::function<void (ParameterMap*, const IComponent*,const std::string&,double, const std::string *const)> faddDouble;
+    faddDouble = (void (ParameterMap::*)(const IComponent*,const std::string&,double, const std::string *const ))&ParameterMap::addDouble;
     doCopyAndUpdateTestUsingAddHelpers(faddDouble, "name", 5.0, 4.0);
 
     // int
-    boost::function<void (ParameterMap*, const IComponent*,const std::string&,int)> faddInt;
-    faddInt = (void (ParameterMap::*)(const IComponent*,const std::string&,int))&ParameterMap::addInt;
+    boost::function<void (ParameterMap*, const IComponent*,const std::string&,int, const std::string *const)> faddInt;
+    faddInt = (void (ParameterMap::*)(const IComponent*,const std::string&,int, const std::string *const))&ParameterMap::addInt;
     doCopyAndUpdateTestUsingAddHelpers(faddInt, "name", 3, 5);
 
     // bool
-    boost::function<void (ParameterMap*, const IComponent*,const std::string&,bool)> faddBool;
-    faddBool = (void (ParameterMap::*)(const IComponent*,const std::string&,bool))&ParameterMap::addBool;
+    boost::function<void (ParameterMap*, const IComponent*,const std::string&,bool, const std::string *const)> faddBool;
+    faddBool = (void (ParameterMap::*)(const IComponent*,const std::string&,bool, const std::string  *const))&ParameterMap::addBool;
     doCopyAndUpdateTestUsingAddHelpers(faddBool, "name", true, false);
 
     // string
-    boost::function<void (ParameterMap*, const IComponent*,const std::string&,const std::string&)> faddStr;
-    faddStr = (void (ParameterMap::*)(const IComponent*,const std::string&,const std::string&))&ParameterMap::addString;
+    boost::function<void (ParameterMap*, const IComponent*,const std::string&,const std::string&, const std::string *const)> faddStr;
+    faddStr = (void (ParameterMap::*)(const IComponent*,const std::string&,const std::string&, const std::string *const))&ParameterMap::addString;
     doCopyAndUpdateTestUsingAddHelpers(faddStr, "name", std::string("first"), std::string("second"));
 
     // V3D
-    boost::function<void (ParameterMap*, const IComponent*,const std::string&,const V3D&)> faddV3D;
-    faddV3D = (void (ParameterMap::*)(const IComponent*,const std::string&,const V3D&))&ParameterMap::addV3D;
+    boost::function<void (ParameterMap*, const IComponent*,const std::string&,const V3D&, const std::string *const )> faddV3D;
+    faddV3D = (void (ParameterMap::*)(const IComponent*,const std::string&,const V3D&, const std::string* const ))&ParameterMap::addV3D;
     doCopyAndUpdateTestUsingAddHelpers(faddV3D, "name", V3D(1,2,3), V3D(4,5,6));
 
     // Quat
-    boost::function<void (ParameterMap*, const IComponent*,const std::string&,const Quat&)> faddQuat;
-    faddQuat = (void (ParameterMap::*)(const IComponent*,const std::string&,const Quat&))&ParameterMap::addQuat;
+    boost::function<void (ParameterMap*, const IComponent*,const std::string&,const Quat&, const std::string *const )> faddQuat;
+    faddQuat = (void (ParameterMap::*)(const IComponent*,const std::string&,const Quat&, const std::string *const))&ParameterMap::addQuat;
     doCopyAndUpdateTestUsingAddHelpers(faddQuat, "name", Quat(), Quat(45.0,V3D(0,0,1)));
   }
 
@@ -263,21 +284,21 @@ public:
   {
     // -- Specialized Helper Functions --
 
-    typedef boost::function<void (ParameterMap*, const IComponent*,const std::string&,const std::string &)> AddFuncHelper;
+    typedef boost::function<void (ParameterMap*, const IComponent*,const std::string&,const std::string &,const std::string *const)> AddFuncHelper;
 
     // double
     AddFuncHelper faddDouble;
-    faddDouble = (void (ParameterMap::*)(const IComponent*,const std::string&,const std::string &))&ParameterMap::addDouble;
+    faddDouble = (void (ParameterMap::*)(const IComponent*,const std::string&,const std::string &, const std::string *const))&ParameterMap::addDouble;
     doCopyAndUpdateTestUsingAddHelpersAsStrings<AddFuncHelper, double>(faddDouble, "name", 5.0, 4.0);
 
     // int
     AddFuncHelper faddInt;
-    faddInt = (void (ParameterMap::*)(const IComponent*,const std::string&,const std::string &))&ParameterMap::addInt;
+    faddInt = (void (ParameterMap::*)(const IComponent*,const std::string&,const std::string &, const std::string *const))&ParameterMap::addInt;
     doCopyAndUpdateTestUsingAddHelpersAsStrings<AddFuncHelper, int>(faddInt, "name", 3, 5);
 
     // bool
     AddFuncHelper faddBool;
-    faddBool = (void (ParameterMap::*)(const IComponent*,const std::string&,const std::string&))&ParameterMap::addBool;
+    faddBool = (void (ParameterMap::*)(const IComponent*,const std::string&,const std::string&, const std::string *const))&ParameterMap::addBool;
     doCopyAndUpdateTestUsingAddHelpersAsStrings<AddFuncHelper, bool>(faddBool, "name", true, false);
   }
 
@@ -571,7 +592,7 @@ private:
   {
     ParameterMap pmap;
     const std::string name = "Parameter";
-    pmap.add<ValueType>(type, m_testInstrument.get(), name, origValue);
+    pmap.add<ValueType>(type, m_testInstrument.get(), name, origValue,NULL);
 
     ParameterMap copy(pmap); // invoke copy constructor
 
@@ -593,7 +614,7 @@ private:
                                           const ValueType & origValue, const ValueType & newValue)
   {
     ParameterMap pmap;
-    addFunc(&pmap, m_testInstrument.get(), name, origValue);
+    addFunc(&pmap, m_testInstrument.get(), name, origValue,NULL);
 
     ParameterMap copy(pmap); // invoke copy constructor
 
@@ -601,7 +622,7 @@ private:
     auto parameter = copy.get(m_testInstrument.get(), name);
     TS_ASSERT_EQUALS(origValue, parameter->value<ValueType>());
     //change the value on the copy and it should NOT update on the original
-    addFunc(&copy, m_testInstrument.get(), name, newValue);
+    addFunc(&copy, m_testInstrument.get(), name, newValue,NULL);
 
     auto copyParameter = copy.get(m_testInstrument.get(), name);
     TS_ASSERT_EQUALS(newValue, copyParameter->value<ValueType>());
@@ -619,7 +640,7 @@ private:
     std::string newValue = boost::lexical_cast<std::string>(newTypedValue);
 
     ParameterMap pmap;
-    addFunc(&pmap, m_testInstrument.get(), name, origValue);
+    addFunc(&pmap, m_testInstrument.get(), name, origValue,NULL);
 
     ParameterMap copy(pmap); // invoke copy constructor
 
@@ -627,7 +648,7 @@ private:
     auto parameter = copy.get(m_testInstrument.get(), name);
     TS_ASSERT_EQUALS(origTypedValue, parameter->value<ValueType>());
     //change the value on the copy and it should NOT update on the original
-    addFunc(&copy, m_testInstrument.get(), name, newValue);
+    addFunc(&copy, m_testInstrument.get(), name, newValue,NULL);
 
     auto copyParameter = copy.get(m_testInstrument.get(), name);
     TS_ASSERT_EQUALS(newTypedValue, copyParameter->value<ValueType>());

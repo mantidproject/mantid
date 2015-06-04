@@ -24,6 +24,9 @@ using namespace API;
 using namespace Geometry;
 using namespace DataObjects;
 
+TOFSANSResolution::TOFSANSResolution()
+    : API::Algorithm(), m_wl_resolution(0.) {}
+
 void TOFSANSResolution::init() {
   declareProperty(
       new WorkspaceProperty<>(
@@ -60,7 +63,7 @@ void TOFSANSResolution::init() {
  */
 double TOFSANSResolution::getTOFResolution(double wl) {
   UNUSED_ARG(wl);
-  return wl_resolution;
+  return m_wl_resolution;
 }
 
 void TOFSANSResolution::exec() {
@@ -79,7 +82,7 @@ void TOFSANSResolution::exec() {
   pixel_size_y /= 1000.0;
   R1 /= 1000.0;
   R2 /= 1000.0;
-  wl_resolution = getProperty("DeltaT");
+  m_wl_resolution = getProperty("DeltaT");
 
   // Calculate the output binning
   const std::vector<double> binParams = getProperty("OutputBinning");

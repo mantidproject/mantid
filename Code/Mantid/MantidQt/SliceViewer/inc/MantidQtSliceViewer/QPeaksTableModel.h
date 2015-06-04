@@ -10,10 +10,12 @@
 // Forward declarations
 namespace Mantid
 {
-  namespace API
-  {
-    class IPeaksWorkspace;
+  namespace Geometry {
     class IPeak;
+  }
+
+  namespace API {
+    class IPeaksWorkspace; 
   }
 }
 
@@ -164,7 +166,7 @@ namespace MantidQt
       mutable int m_dataCachePeakIndex;
 
       QString findColumnName(const int colIndex) const;
-      void updateDataCache(const Mantid::API::IPeak& peak, const int row) const;
+      void updateDataCache(const Mantid::Geometry::IPeak& peak, const int row) const;
 
       /// Collection of data for viewing.
       boost::shared_ptr<const Mantid::API::IPeaksWorkspace> m_peaksWS;
