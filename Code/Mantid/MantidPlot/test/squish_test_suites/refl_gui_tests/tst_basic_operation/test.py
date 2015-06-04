@@ -72,7 +72,7 @@ def do_test_minimal(test_harness):
     column_index = 0
     
     # Fetch the table
-    tbl = waitForObject(":splitterList.tableMain_QTableWidget")
+    tbl = waitForObject("{name='tableMain' type='QTableWidget'}")
     
     # Set the run number
     tbl.item(row_index, column_index).setText(str(run_number))
@@ -102,7 +102,7 @@ def do_test_transmission(test_harness):
     row_index = 0
     
     # Fetch the table
-    tbl = waitForObject(":splitterList.tableMain_QTableWidget")
+    tbl = waitForObject("{name='tableMain' type='QTableWidget'}")
     
     # Set the run number
     tbl.item(row_index, 0).setText(str(run_number))
@@ -131,7 +131,7 @@ def do_test_reuse_transmission(test_harness):
     row_index = 0
     
     # Fetch the table
-    tbl = waitForObject(":splitterList.tableMain_QTableWidget")
+    tbl = waitForObject("{name='tableMain' type='QTableWidget'}")
     
     # Set the first run number
     tbl.item(row_index, 0).setText(str(run_number1))
@@ -166,7 +166,7 @@ def do_test_stitch_output(test_harness):
     row_index = 0
     
     # Fetch the table
-    tbl = waitForObject(":splitterList.tableMain_QTableWidget")
+    tbl = waitForObject("{name='tableMain' type='QTableWidget'}")
     
     # Set the stitched state
     ck_stitched = waitForObject(':tableMain_QCheckBox')
@@ -207,7 +207,7 @@ def do_test_three_runs(test_harness):
     row_index = 0
     
     # Fetch the table
-    tbl = waitForObject(":splitterList.tableMain_QTableWidget")
+    tbl = waitForObject("{name='tableMain' type='QTableWidget'}")
     
     # Set the first run number
     tbl.item(row_index, 0).setText(str(run_number1))

@@ -1,5 +1,7 @@
 #ifdef _MSC_VER
-  #pragma warning( disable: 4250 ) // Disable warning regarding inheritance via dominance, we have no way around it with the design
+#pragma warning(disable : 4250) // Disable warning regarding inheritance via
+                                // dominance, we have no way around it with the
+                                // design
 #endif
 
 #include "MantidKernel/IPropertyManager.h"
@@ -21,20 +23,14 @@ namespace Registry = Mantid::PythonInterface::Registry;
 
 using namespace boost::python;
 
-namespace
-{
+namespace {}
 
-}
-
-// clang-format off
-void export_PropertyManager()
-// clang-format on
-{
+void export_PropertyManager() {
   register_ptr_to_python<boost::shared_ptr<PropertyManager>>();
-  class_<PropertyManager, bases<IPropertyManager>, boost::noncopyable>("PropertyManager")
-   ;
+  class_<PropertyManager, bases<IPropertyManager>, boost::noncopyable>(
+      "PropertyManager");
 }
 
 #ifdef _MSC_VER
-  #pragma warning( default: 4250 )
+#pragma warning(default : 4250)
 #endif

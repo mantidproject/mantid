@@ -7,15 +7,10 @@
 using Mantid::API::CatalogSession;
 using namespace boost::python;
 
-// clang-format off
-void export_CatalogSession()
-// clang-format on
-{
-    register_ptr_to_python<boost::shared_ptr<CatalogSession> >();
+void export_CatalogSession() {
+  register_ptr_to_python<boost::shared_ptr<CatalogSession>>();
 
-
-    class_< CatalogSession, boost::noncopyable>("CatalogSession", no_init)
-      .def( "getSessionId", &CatalogSession::getSessionId, args("self"),
-          "Get the session id string.");
+  class_<CatalogSession, boost::noncopyable>("CatalogSession", no_init)
+      .def("getSessionId", &CatalogSession::getSessionId, args("self"),
+           "Get the session id string.");
 }
-
