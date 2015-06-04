@@ -1,5 +1,6 @@
 #pylint: disable=no-init
-from mantid.api import PythonAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty
+from mantid.api import (PythonAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty,
+                        WorkspaceGroup)
 from mantid.kernel import Direction
 from mantid.simpleapi import *
 
@@ -58,8 +59,13 @@ class ResNorm(PythonAlgorithm):
         if self._e_min > self._e_max:
             issues['EnergyMax'] = 'Must be less than EnergyMin'
 
+        res_ws = mtd[self._res_ws]
+        # Can't use a WorkspaceGroup for resolution
+        if isinstance(res_ws, WorkspaceGroup):
+            issues['ResolutionWorkspace'] = 'Must be a MatrixWorkspace'
+
         # Resolution should only have one histogram
-        if mtd[self._res_ws].getNumberHistograms() != 1:
+        elif mtd[self._res_ws].getNumberHistograms() != 1:
             issues['ResolutionWorkspace'] = 'Must have exactly one histogram'
 
         return issues
@@ -93,7 +99,7 @@ class ResNorm(PythonAlgorithm):
 
         fit_params = PlotPeakByLogValue(Input=input_str,
                                         OutputWorkspace=out_name,
-                                        Function='name=TabulatedFunction,Workspace=irs26173_graphite002_red,Scaling=1.0,Shift=0.0',
+                                        Function='name=TabulatedFunction,Workspace=irs26173_graphite002_red,Scaling=1.0,Shift=0,XScaling=0',
                                         FitType='Individual',
                                         PassWSIndexToFunction=True,
                                         CreateOutput=self._create_output,
@@ -143,7 +149,7 @@ class ResNorm(PythonAlgorithm):
 
         col_names = fit_params.getColumnNames()
 
-        vert_axis_values = ['Scaling', 'Shift']
+        vert_axis_values = ['Scaling', 'Shift', 'XScaling']
 
         y_values = []
         e_values = []
