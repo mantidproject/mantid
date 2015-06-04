@@ -42,5 +42,5 @@ void export_SpaceGroup() {
       .def("getEquivalentPositions", &getEquivalentPositions,
            "Returns an array with all symmetry equivalents of the supplied "
            "HKL.")
-      .def("isAllowed", &SpaceGroup::isAllowed);
+      .def("isAllowedReflection", &SpaceGroup::isAllowedReflection);
 }

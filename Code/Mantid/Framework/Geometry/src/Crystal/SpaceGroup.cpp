@@ -53,10 +53,12 @@ std::string SpaceGroup::hmSymbol() const { return m_hmSymbol; }
  * symmetry operations alone. For these situations, Geometry::CrystalStructure
  * can help.
  *
+ * [1] http://www.iucr.org/education/pamphlets/9/full-text
+ *
  * @param hkl :: HKL to be checked.
  * @return :: true if the reflection is allowed, false otherwise.
  */
-bool SpaceGroup::isAllowed(const Kernel::V3D &hkl) const {
+bool SpaceGroup::isAllowedReflection(const Kernel::V3D &hkl) const {
   for (auto op = m_allOperations.begin(); op != m_allOperations.end(); ++op) {
     if ((*op).hasTranslation()) {
 
