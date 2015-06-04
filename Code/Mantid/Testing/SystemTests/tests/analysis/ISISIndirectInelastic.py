@@ -742,7 +742,7 @@ class ISISIndirectInelasticElwinAndMSDFit(ISISIndirectInelasticBase):
         GroupWorkspaces(InputWorkspaces=self.files, OutputWorkspace=elwin_input)
 
         ElasticWindowMultiple(InputWorkspaces=elwin_input, Plot=False,
-                              Range1Start=self.eRange[0], Range1End=self.eRange[1],
+                              IntegrationRangeStart=self.eRange[0], IntegrationRangeEnd=self.eRange[1],
                               OutputInQ=elwin_results[0], OutputInQSquared=elwin_results[1],
                               OutputELF=elwin_results[2])
 

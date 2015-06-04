@@ -68,15 +68,14 @@ Usage
 
 **Example**
 
-.. testcode:: Ex
+.. code-block:: python
 
    updatedFileCount = DownloadInstrument()
    print("The number of files updated was " + str(updatedFileCount))
 
 Output:
 
-.. testoutput:: Ex
-   :options: +ELLIPSIS
+.. code-block:: python
 
    The number of files updated was ...
 

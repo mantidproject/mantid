@@ -37,14 +37,16 @@ create the necessary workspaces.
     print "Workspace 1 type =", ws[0].id()
     print "Workspace 2 type =", ws[1].id()
     print "Workspace 3 type =", ws[2].id()
+    print "Workspace 4 type =", ws[3].id()
 
 Output:
 
 .. testoutput:: ExInstrumentBase
 
-    Total number of workspaces = 3
+    Total number of workspaces = 4
     Workspace 1 type = GroupingWorkspace
     Workspace 2 type = OffsetsWorkspace
     Workspace 3 type = MaskWorkspace
+    Workspace 4 type = TableWorkspace
 
 .. categories::
