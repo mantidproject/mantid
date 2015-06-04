@@ -68,14 +68,14 @@ if /i "%fetchincludes%"=="1" (
   set incs=%url:mantid.git=%3rdpartyincludes.git
   :: Otherwise we need to clone
   echo Cloning Third_Party includes from !incs!
-  call !GitCmd! clone --depth 1 !incs! Third_Party/include
+  call !GitCmd! clone --depth=1 !incs! Third_Party/include
 )
 GOTO :DoLibs
 
 :argcheck
 if "%~1" NEQ "" (
-    if /i "%1"=="win32" set userarch=win32 & GOTO:argcheck_shift
-    if /i "%1"=="win64" set userarch=win64 & GOTO:argcheck_shift
+    if /i "%1"=="win32" set userarch=win32& GOTO:argcheck_shift
+    if /i "%1"=="win64" set userarch=win64& GOTO:argcheck_shift
     if /i "%1"=="--includes-only" set fetchlibs=0 & GOTO:argcheck_shift
     if /i "%1"=="--libs-only" set fetchincludes=0 & GOTO:argcheck_shift
     :argcheck_shift
@@ -93,7 +93,7 @@ if /i "%fetchlibs%"=="1" (
 
   :: Otherwise we need to clone
   echo Cloning Third_Party libraries from !libs!
-  call %GitCmd% clone --depth 1 !libs! Third_Party/lib/%arch%
+  call %GitCmd% clone --depth=1 !libs! Third_Party/lib/%arch%
 )
 exit /B 0
 
