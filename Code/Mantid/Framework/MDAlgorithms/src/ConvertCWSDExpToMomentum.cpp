@@ -260,17 +260,19 @@ void ConvertCWSDExpToMomentum::convertSpiceMatrixToMomentumMDEvents(
     // Get detector positions and signal
     double signal = dataws->readY(iws)[0];
     double error = dataws->readE(iws)[0];
-    double magQ = 0.5 * (dataws->readX(iws)[0] + dataws->readX(iws)[1]);
+    double momentum = 0.5 * (dataws->readX(iws)[0] + dataws->readX(iws)[1]);
     // Create the MDEvent
     Kernel::V3D detpos = dataws->getDetector(iws)->getPos();
-    std::vector<Mantid::coord_t> momentum(3);
-    Kernel::V3D qsample =
-        convertToMomentum(detpos, magQ, momentum, rotationMatrix);
+    std::vector<Mantid::coord_t> q_sample(3);
+    Kernel::V3D sourcePos = dataws->getInstrument()->getSource()->getPos();
+    Kernel::V3D ki = sourcePos/sourcePos.norm()*momentum;
+    Kernel::V3D qlab =
+        convertToMomentum(ki, detpos, momentum, q_sample, rotationMatrix);
     detid_t detid = dataws->getDetector(iws)->getID() + startdetid;
     // Insert
     inserter.insertMDEvent(
         static_cast<float>(signal), static_cast<float>(error * error),
-        static_cast<uint16_t>(runnumber), detid, momentum.data());
+        static_cast<uint16_t>(runnumber), detid, q_sample.data());
   }
 
   ExperimentInfo_sptr expinfo = boost::make_shared<ExperimentInfo>();
@@ -338,18 +340,19 @@ bool ConvertCWSDExpToMomentum::getInputs(std::string &errmsg) {
 }
 
 /// Convert to momentum
-Kernel::V3D ConvertCWSDExpToMomentum::convertToMomentum(
-    const std::vector<double> &detPos, const double &momentum,
+Kernel::V3D ConvertCWSDExpToMomentum::convertToMomentum(const Kernel::V3D &ki,
+    const Kernel::V3D &detPos, const double &momentum,
     std::vector<coord_t> &qSample, const Kernel::DblMatrix &rotationMatrix) {
 
   // Use detector position and wavelength/Q to calcualte Q_lab
-  double x = detPos[0] * momentum;
-  double y = detPos[1] * momentum;
-  double z = detPos[2] * momentum;
-  Kernel::V3D q_lab(x, y, z);
+  Kernel::V3D kf(detPos);
+  kf =  kf / detPos.norm() * momentum;
+  Kernel::V3D q_lab = ki - kf;
 
   // TODO - Use matrix workspace
   Kernel::V3D q_sample = rotationMatrix * q_lab;
+  qSample.resize(3);
+  qSample[0] = q_sample[0];
 
   return q_lab;
 }
