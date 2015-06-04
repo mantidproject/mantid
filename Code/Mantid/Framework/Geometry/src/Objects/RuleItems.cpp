@@ -544,8 +544,6 @@ int Union::simplify()
     @retval 0 if no work to do.
 */
 {
-  if (!commonType())
-    return 0;
   return 0;
 }
 
