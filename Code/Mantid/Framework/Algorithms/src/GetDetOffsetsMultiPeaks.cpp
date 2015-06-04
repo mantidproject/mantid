@@ -593,7 +593,7 @@ FitPeakOffsetResult GetDetOffsetsMultiPeaks::calculatePeakOffset(
     for (int i = 0; i < YLength; i++) {
       sumY += Y[i];
       if (Y[i] > 0.)
-          numNonEmptyBins += 1;
+        numNonEmptyBins += 1;
     }
     if (sumY < 1.e-30) {
       // Dead detector will be masked
@@ -601,9 +601,9 @@ FitPeakOffsetResult GetDetOffsetsMultiPeaks::calculatePeakOffset(
       fr.fitoffsetstatus = "dead det";
     }
     if (numNonEmptyBins <= 3) {
-        // Another dead detector check
-        fr.offset = BAD_OFFSET;
-        fr.fitoffsetstatus = "dead det";
+      // Another dead detector check
+      fr.offset = BAD_OFFSET;
+      fr.fitoffsetstatus = "dead det";
     }
   }
 
@@ -978,10 +978,10 @@ void GetDetOffsetsMultiPeaks::generatePeaksList(
   // Check
   size_t numrows = peakslist->rowCount();
   if (numrows != peakPositionRef.size()) {
-      std::stringstream msg;
-      msg << "Number of peaks in PeaksList (from FindPeaks="
-          << numrows << ") is not same as number of "
-          << "referenced peaks' positions (" << peakPositionRef.size() << ")";
+    std::stringstream msg;
+    msg << "Number of peaks in PeaksList (from FindPeaks=" << numrows
+        << ") is not same as number of "
+        << "referenced peaks' positions (" << peakPositionRef.size() << ")";
     throw std::runtime_error(msg.str());
   }
 
@@ -1318,9 +1318,26 @@ void GetDetOffsetsMultiPeaks::makeFitSummary() {
     }
   }
 
-  double avgchi2 = sumchi2 / static_cast<double>(numunmasked);
-  double wtavgchi2 =
-      weight_sumchi2 / static_cast<double>(weight_numfittedpeaks);
+  double avgchi2 = .0;
+  double wtavgchi2 = .0;
+  if (0 == numunmasked) {
+    g_log.warning()
+        << "Found 0 unmasked rows in the spectra info table. "
+           "Cannot calculate Chi-sq sensibly. it's value will be NaN"
+        << std::endl;
+    avgchi2 = nan("");
+  } else {
+    avgchi2 = sumchi2 / static_cast<double>(numunmasked);
+  }
+
+  if (0 == weight_numfittedpeaks) {
+    g_log.warning() << "Found 0 fitted peaks in the spectra info table. "
+                       "Cannot calculate the weighted average Chi-sq sensibly"
+                    << std::endl;
+    wtavgchi2 = nan("");
+  } else {
+    wtavgchi2 = weight_sumchi2 / static_cast<double>(weight_numfittedpeaks);
+  }
 
   g_log.notice() << "Unmasked spectra     = " << numunmasked << " \t"
                  << "Average chi-sq       = " << avgchi2 << " \t"
