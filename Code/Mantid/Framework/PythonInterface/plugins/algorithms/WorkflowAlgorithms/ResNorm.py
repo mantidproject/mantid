@@ -89,7 +89,7 @@ class ResNorm(PythonAlgorithm):
         v_values = van_ws.getAxis(1).extractValues()
         v_unit = van_ws.getAxis(1).getUnit().unitID()
 
-        padded_res_ws = self._pad_res_ws(num_hist)
+        padded_res_ws = self._process_res_ws(num_hist)
 
         input_str = ''
         for idx in range(num_hist):
@@ -114,25 +114,31 @@ class ResNorm(PythonAlgorithm):
             DeleteWorkspace(fit_params)
 
 
-    def _pad_res_ws(self, num_hist):
+    def _process_res_ws(self, num_hist):
         """
         Generate a resolution workspaes with the same number of histograms
-        as the vanadium run.
+        as the vanadium run, with area normalised to 1.
 
         @param num_hist Number of histograms required
         @return Padded workspace
         """
+
+        norm_res_ws = '__norm_to_unity'
+        NormaliseToUnity(InputWorkspace=self._res_ws,
+                         OutputWorkspace=norm_res_ws)
 
         ws_name = '__%s_%dspec' % (self._res_ws, num_hist)
 
         for idx in range(num_hist):
             input_ws_1 = ws_name
             if idx == 0:
-                input_ws_1 = self._res_ws
+                input_ws_1 = norm_res_ws
 
             AppendSpectra(InputWorkspace1=input_ws_1,
-                          InputWorkspace2=self._res_ws,
+                          InputWorkspace2=norm_res_ws,
                           OutputWorkspace=ws_name)
+
+        DeleteWorkspace(norm_res_ws)
 
         return mtd[ws_name]
 
