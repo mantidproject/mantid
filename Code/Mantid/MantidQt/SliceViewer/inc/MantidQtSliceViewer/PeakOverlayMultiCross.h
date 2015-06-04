@@ -87,6 +87,10 @@ namespace SliceViewer
     /// Get the background colour
     virtual QColor getBackgroundColour() const;
 
+    void peakDeletionMode();
+    void peakAdditionMode();
+    void peakDisplayMode();
+
   private:
 
     //QRect drawHandle(QPainter & painter, QPointF coords, QColor brush);
@@ -105,6 +109,7 @@ namespace SliceViewer
     QColor m_peakColour;
     /// Peaks in the workspace that are viewable in the present view.
     std::vector<bool> m_viewablePeaks;
+
   };
 
 

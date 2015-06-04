@@ -501,7 +501,6 @@ bool ConcretePeaksPresenter::deletePeakAt(const double &x, const double &y) {
   std::vector<size_t> deletionIndexList;
   for (int i = 0; i < m_peaksWS->getNumberPeaks(); ++i) {
     // We only delete peaks we can see.
-    bool visible = this->m_viewablePeaks[i];
     if (this->m_viewablePeaks[i]) {
       const IPeak &peak = m_peaksWS->getPeak(i);
       const PeakShape &shape = peak.getPeakShape();
@@ -552,6 +551,17 @@ bool ConcretePeaksPresenter::deletePeakAt(const double &x, const double &y) {
 
   return !deletionIndexList.empty();
 }
+
+void ConcretePeaksPresenter::peakEditMode(EditMode mode){
+    if(mode == DeletePeaks) {
+        m_viewPeaks->peakDeletionMode();
+    } else if(mode == AddPeaks){
+        m_viewPeaks->peakAdditionMode();
+    } else {
+        m_viewPeaks->peakDisplayMode();
+    }
+}
+
 }
 }
 

@@ -6,13 +6,6 @@
 #include <boost/shared_ptr.hpp>
 
 
-namespace Mantid {
-namespace API {
-// Forward declaration
-class IPeaksWorkspace;
-}
-}
-
 namespace MantidQt
 {
   namespace SliceViewer
@@ -51,8 +44,6 @@ namespace MantidQt
       virtual void zoomToRectangle(const PeakBoundingBox&) = 0;
       /// Zoom out
       virtual void resetView() = 0;
-      /// Enter edit mode
-      virtual void peakEditMode(EditMode editMode, boost::weak_ptr<const Mantid::API::IPeaksWorkspace> target) = 0;
       /// Detach
       virtual void detach() = 0;
       /// Destructor

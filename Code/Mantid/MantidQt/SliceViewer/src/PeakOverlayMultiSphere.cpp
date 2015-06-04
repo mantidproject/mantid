@@ -1,4 +1,5 @@
 #include "MantidQtSliceViewer/PeakOverlayMultiSphere.h"
+#include "MantidQtMantidWidgets/InputController.h"
 #include <qwt_plot.h>
 #include <qwt_plot_canvas.h>
 #include <qwt_scale_div.h>
@@ -18,13 +19,15 @@ namespace MantidQt
     /** Constructor
      */
     PeakOverlayMultiSphere::PeakOverlayMultiSphere(QwtPlot * plot, QWidget * parent, const VecPhysicalSphericalPeak& vecPhysicalPeaks , const QColor& peakColour, const QColor& backColour) :
-        QWidget(parent), m_plot(plot), m_physicalPeaks(vecPhysicalPeaks), m_peakColour(peakColour), m_backColour(backColour), m_showBackground(false)
+        QWidget(parent), m_plot(plot), m_physicalPeaks(vecPhysicalPeaks), m_peakColour(peakColour), m_backColour(backColour), m_showBackground(false), m_tool(NULL)
     {
       setAttribute(Qt::WA_NoMousePropagation, false);
+      setAttribute(Qt::WA_MouseTracking, true);
+
       this->setVisible(true);
       setUpdatesEnabled(true);
 
-      setAttribute(Qt::WA_TransparentForMouseEvents);
+      //setAttribute(Qt::WA_TransparentForMouseEvents);
     }
 
     //----------------------------------------------------------------------------------------------
@@ -211,6 +214,82 @@ namespace MantidQt
     QColor PeakOverlayMultiSphere::getForegroundColour() const
     {
       return m_peakColour;
+    }
+
+    void PeakOverlayMultiSphere::peakDeletionMode() {
+        m_tool = new MantidQt::MantidWidgets::InputControllerErase(this);
+    }
+
+    void PeakOverlayMultiSphere::peakAdditionMode() {
+        m_tool = new MantidQt::MantidWidgets::InputControllerPick(this);
+    }
+
+    void PeakOverlayMultiSphere::peakDisplayMode() {
+
+        m_tool = NULL;
+    }
+
+    void PeakOverlayMultiSphere::mousePressEvent(QMouseEvent* e)
+    {
+        if(m_tool) {
+          m_tool->mousePressEvent( e );
+        }else{
+            e->ignore();
+        }
+    }
+
+    void PeakOverlayMultiSphere::mouseMoveEvent(QMouseEvent* e)
+    {
+        if(m_tool) {
+          m_tool->mouseMoveEvent( e );
+        }else{
+            e->ignore();
+        }
+    }
+
+    void PeakOverlayMultiSphere::mouseReleaseEvent(QMouseEvent* e)
+    {
+        if(m_tool) {
+          m_tool->mouseReleaseEvent( e );
+        }else{
+            e->ignore();
+        }
+    }
+
+    void PeakOverlayMultiSphere::wheelEvent(QWheelEvent* e)
+    {
+        if(m_tool) {
+          m_tool->wheelEvent( e );
+        }else{
+            e->ignore();
+        }
+    }
+
+    void PeakOverlayMultiSphere::keyPressEvent(QKeyEvent* e)
+    {
+        if(m_tool) {
+          m_tool->keyPressEvent( e );
+        }else{
+            e->ignore();
+        }
+    }
+
+    void PeakOverlayMultiSphere::enterEvent(QEvent *e)
+    {
+        if(m_tool) {
+          m_tool->enterEvent( e );
+        }else{
+            e->ignore();
+        }
+    }
+
+    void PeakOverlayMultiSphere::leaveEvent(QEvent *e)
+    {
+        if(m_tool) {
+          m_tool->leaveEvent( e );
+        }else{
+            e->ignore();
+        }
     }
 
   } // namespace Mantid

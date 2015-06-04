@@ -941,6 +941,10 @@ public:
 
   }
 
+  void test_enter_edit_mode(){
+      TSM_ASSERT("TODO", false);
+  }
+
 
 
 };

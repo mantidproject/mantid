@@ -16,6 +16,11 @@
 
 namespace MantidQt
 {
+
+namespace MantidWidgets {
+class InputController;
+}
+
 namespace SliceViewer
 {
 
@@ -89,7 +94,19 @@ namespace SliceViewer
     /// Get the current foreground colour
     virtual QColor getForegroundColour() const;
 
+    void peakDeletionMode();
+    void peakAdditionMode();
+    void peakDisplayMode();
+
   private:
+
+    void mousePressEvent(QMouseEvent* e);
+    void mouseMoveEvent(QMouseEvent* e);
+    void mouseReleaseEvent(QMouseEvent* e);
+    void wheelEvent(QWheelEvent* e);
+    void keyPressEvent(QKeyEvent* e);
+    void enterEvent(QEvent *e);
+    void leaveEvent(QEvent *e);
 
     //QRect drawHandle(QPainter & painter, QPointF coords, QColor brush);
     void paintEvent(QPaintEvent *event);
@@ -111,6 +128,9 @@ namespace SliceViewer
     std::vector<bool> m_viewablePeaks;
     /// Show the background radius.
     bool m_showBackground;
+    /// Input controller.
+    MantidQt::MantidWidgets::InputController* m_tool;
+
   };
 
 

@@ -50,7 +50,10 @@ public:
       boost::shared_ptr<Mantid::API::IPeaksWorkspace> ) { /*Do nothing*/
   }
   virtual bool contentsDifferent(const PeaksPresenter * ) const { return true; }
+
+  void peakEditMode(EditMode){/*Do nothing*/}
 };
+
 }
 }
 

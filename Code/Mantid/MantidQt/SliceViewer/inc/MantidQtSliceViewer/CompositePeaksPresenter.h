@@ -84,6 +84,8 @@ public:
   virtual double getPeakSizeOnProjection() const;
   /// Get the peaks size into the current projection
   virtual double getPeakSizeIntoProjection() const;
+  /// Enter peak edit mode.
+  void peakEditMode(EditMode mode);
   /// Change the foreground representation for the peaks of this workspace
   void
   setForegroundColour(boost::shared_ptr<const Mantid::API::IPeaksWorkspace> ws,
@@ -175,6 +177,7 @@ private:
   boost::optional<PeaksPresenter_sptr> m_zoomedPresenter;
   /// index of peak zoomed in on.
   int m_zoomedPeakIndex;
+
 };
 }
 }

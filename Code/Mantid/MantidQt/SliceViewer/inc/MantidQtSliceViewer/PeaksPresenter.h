@@ -74,6 +74,7 @@ namespace SliceViewer
     virtual bool contentsDifferent(PeaksPresenter const * other) const = 0;
     virtual ~PeaksPresenter(){};
     virtual void reInitialize(boost::shared_ptr<Mantid::API::IPeaksWorkspace> peaksWS) = 0;
+    virtual void peakEditMode(EditMode mode) = 0;
   };
 
 

@@ -780,6 +780,10 @@ public:
 
   }
 
+  void test_test_apply_edit_mode_to_views(){
+      TSM_ASSERT("Not Done! TODO", false);
+  }
+
 
 };
 

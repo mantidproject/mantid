@@ -76,6 +76,12 @@ namespace MantidQt
       virtual QColor getBackgroundColour() const = 0;
       /// Get the current foreground colour
       virtual QColor getForegroundColour() const = 0;
+      /// Enter deletion mode
+      virtual void peakDeletionMode() = 0;
+      /// Enter addition mode
+      virtual void peakAdditionMode() = 0;
+      /// Enter normal view mode
+      virtual void peakDisplayMode() = 0;
       /// Destructor
       virtual ~PeakOverlayView()
       {

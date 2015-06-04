@@ -384,6 +384,20 @@ void CompositePeaksPresenter::setPeakSizeOnProjection(const double fraction) {
 }
 
 /**
+ * Enter a peak edit mode
+ * @param mode : Mode to enter.
+ */
+void CompositePeaksPresenter::peakEditMode(EditMode mode) {
+    if (useDefault()) {
+      return m_default->peakEditMode(mode);
+    }
+    for (auto presenterIterator = m_subjects.begin();
+         presenterIterator != m_subjects.end(); ++presenterIterator) {
+      (*presenterIterator)->peakEditMode(mode);
+    }
+}
+
+/**
  * Fraction of the z-range to use as the peak radius.
  * @param fraction to use as the peak radius
  */
@@ -610,7 +624,14 @@ int CompositePeaksPresenter::getZoomedPeakIndex() const {
 
 void CompositePeaksPresenter::editCommand(EditMode editMode, boost::weak_ptr<const Mantid::API::IPeaksWorkspace> target)
 {
-    m_zoomablePlottingWidget->peakEditMode(editMode, target);
+    if(auto ws = target.lock()){
+
+      auto it = this->getPresenterIteratorFromWorkspace(ws);
+      if(it!= m_subjects.end()){
+          (*it)->peakEditMode(editMode);
+      }
+     }
+    //m_zoomablePlottingWidget->peakEditMode(editMode, target);
 }
 
 void CompositePeaksPresenter::updatePeaksWorkspace(
@@ -658,3 +679,4 @@ void CompositePeaksPresenter::notifyWorkspaceChanged(
 }
 }
 }
+

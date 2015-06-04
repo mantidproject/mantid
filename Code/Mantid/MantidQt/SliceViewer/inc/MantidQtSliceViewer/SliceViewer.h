@@ -133,7 +133,6 @@ public:
   virtual void zoomToRectangle(const PeakBoundingBox& box);
   virtual void resetView();
   virtual void detach();
-  virtual void peakEditMode(EditMode editMode, boost::weak_ptr<const Mantid::API::IPeaksWorkspace> target);
 
   /* Methods associated with workspace observers. Driven by SliceViewerWindow */
   void peakWorkspaceChanged(const std::string& wsName, boost::shared_ptr<Mantid::API::IPeaksWorkspace>& changedPeaksWS);
@@ -363,6 +362,6 @@ private:
 };
 
 } // namespace SliceViewer
-} // namespace Mantid
+} // namespace MantidQt
 
 #endif // SLICEVIEWER_H

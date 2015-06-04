@@ -16,6 +16,7 @@ set ( SRC_FILES
     src/HintingLineEdit.cpp
     src/InstrumentSelector.cpp
     src/IndirectInstrumentConfig.cpp
+    src/InputController.cpp
     src/MantidHelpWindow.cpp
     src/MWDiag.cpp
     src/MWRunFiles.cpp
@@ -65,6 +66,7 @@ set ( MOC_FILES
     inc/MantidQtMantidWidgets/CatalogSelector.h
     inc/MantidQtMantidWidgets/InstrumentSelector.h
     inc/MantidQtMantidWidgets/IndirectInstrumentConfig.h
+    inc/MantidQtMantidWidgets/InputController.h
     inc/MantidQtMantidWidgets/MantidHelpWindow.h
     inc/MantidQtMantidWidgets/MessageDisplay.h
     inc/MantidQtMantidWidgets/MultifitSetupDialog.h

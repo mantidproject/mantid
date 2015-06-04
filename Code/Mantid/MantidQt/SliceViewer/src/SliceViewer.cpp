@@ -42,6 +42,7 @@
 #include "MantidQtSliceViewer/PeaksViewerOverlayDialog.h"
 #include "MantidQtSliceViewer/PeakOverlayViewFactorySelector.h"
 #include "MantidQtMantidWidgets/SelectWorkspacesDialog.h"
+#include "MantidQtMantidWidgets/InputController.h"
 
 #include <qwt_plot_panner.h>
 #include <Poco/AutoPtr.h>
@@ -82,7 +83,7 @@ SliceViewer::SliceViewer(QWidget *parent)
       m_peaksPresenter(boost::make_shared<CompositePeaksPresenter>(this)),
       m_proxyPeaksPresenter(
           boost::make_shared<ProxyCompositePeaksPresenter>(m_peaksPresenter)),
-      m_peaksSliderWidget(NULL) {
+      m_peaksSliderWidget(NULL){
 
   ui.setupUi(this);
 
@@ -2408,13 +2409,6 @@ void SliceViewer::dropEvent(QDropEvent *e) {
     }
   }
 }
-
-void SliceViewer::peakEditMode(EditMode editMode, boost::weak_ptr<const Mantid::API::IPeaksWorkspace> target) {
-    // Clear any other modes that might affect the cursor.
-
-    // Set the cursor.
-
-    // Make connections so that the ConcretePeaksPresenters can be updated
 
 
 } // namespace

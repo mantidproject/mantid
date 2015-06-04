@@ -213,5 +213,17 @@ namespace MantidQt
       return m_peakColour;
     }
 
+    void PeakOverlayMultiCross::peakDeletionMode() {
+
+    }
+
+    void PeakOverlayMultiCross::peakAdditionMode() {
+
+    }
+
+    void PeakOverlayMultiCross::peakDisplayMode() {
+
+    }
+
   } // namespace Mantid
 } // namespace SliceViewer
