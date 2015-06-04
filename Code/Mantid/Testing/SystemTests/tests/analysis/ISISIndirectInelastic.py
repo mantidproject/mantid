@@ -10,7 +10,7 @@ from mantid.simpleapi import *
 from mantid.api import FileFinder
 
 # Import our workflows.
-from IndirectDataAnalysis import furyfitSeq, furyfitMult, confitSeq, abscorFeeder
+from IndirectDataAnalysis import furyfitSeq, furyfitMult, confitSeq
 
 '''
 - TOSCA only supported by "Reduction" (the Energy Transfer tab of C2E).
