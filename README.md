@@ -8,7 +8,7 @@ Useful links
  * Homepage: http://www.mantidproject.org
  * Download: http://download.mantidproject.org
  * Asking for help: http://www.mantidproject.org/Contact
- * Issue tracking: http://trac.mantidproject.org/mantid/
+ * Issue tracking: https://github.com/mantidproject/mantid/issues
  * Build server: http://builds.mantidproject.org
  * Developer site: http://developer.mantidproject.org
 
