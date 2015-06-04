@@ -24,6 +24,10 @@ Usage
 
 .. testcode:: exElasticWindowMultiple
 
+    # This test needs the facility to be set to ISIS to load the IRIS instrument
+    facility = config['default.facility']
+    config['default.facility'] = 'ISIS'
+
     # Create some sample data
     widths = [15.0, 17.5, 20.0, 22.5, 25.0, 27.5, 30.0]
     for idx, fwhm in enumerate(widths):
@@ -66,6 +70,9 @@ Usage
     print 'ELF X axis: %s' % elf.getAxis(0).getUnit().caption()
     print 'ELF spectra count: %d' % elf.getNumberHistograms()
     print 'ELF bin count: %d' % elf.blocksize()
+
+    # Reset the facility to the original setting
+    config['default.facility'] = facility
 
 .. testoutput:: exElasticWindowMultiple
 
