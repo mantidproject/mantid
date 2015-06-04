@@ -305,6 +305,11 @@
       <technique>Triple Axis Spectroscopy</technique>
    </instrument> 
    
+   <instrument name="HB3A"> 
+      <technique>technique</technique>
+   </instrument> 
+   
+   
    <instrument name="GPSANS"> 
       <technique>Small Angle Scattering</technique>
    </instrument> 
