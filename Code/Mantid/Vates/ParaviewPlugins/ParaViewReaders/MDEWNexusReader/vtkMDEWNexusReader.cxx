@@ -33,7 +33,8 @@ vtkMDEWNexusReader::vtkMDEWNexusReader() :
   m_presenter(NULL),
   m_loadInMemory(false),
   m_depth(1),
-  m_time(0)
+  m_time(0),
+  m_normalization(0)
 {
   this->FileName = NULL;
   this->SetNumberOfInputPorts(0);
