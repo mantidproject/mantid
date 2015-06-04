@@ -14,11 +14,11 @@ class CylinderPaalmanPingsCorrectionTest(unittest.TestCase):
 
         # Create some test data
         sample = CreateSampleWorkspace(NumBanks=1,
-                                            BankPixelWidth=1,
-                                            XUnit='Wavelength',
-                                            XMin=6.8,
-                                            XMax=7.9,
-                                            BinWidth=0.1)
+                                       BankPixelWidth=1,
+                                       XUnit='Wavelength',
+                                       XMin=6.8,
+                                       XMax=7.9,
+                                       BinWidth=0.1)
         self._sample_ws = sample
 
         can = Scale(InputWorkspace=sample, Factor=1.2)
@@ -96,7 +96,8 @@ class CylinderPaalmanPingsCorrectionTest(unittest.TestCase):
                                        SampleInnerRadius=0.05,
                                        SampleOuterRadius=0.1,
                                        Emode='Indirect',
-                                       Efixed=1.845)
+                                       Efixed=1.845,
+                                       Version=1)
 
         ass_ws_name = self._corrections_ws_name + '_ass'
         self. _verify_workspace(ass_ws_name)
@@ -122,7 +123,8 @@ class CylinderPaalmanPingsCorrectionTest(unittest.TestCase):
                                        BeamHeight=0.1,
                                        BeamWidth=0.1,
                                        Emode='Indirect',
-                                       Efixed=1.845)
+                                       Efixed=1.845,
+                                       Version=1)
 
         self._verify_workspaces_for_can()
 
@@ -140,7 +142,8 @@ class CylinderPaalmanPingsCorrectionTest(unittest.TestCase):
                                        SampleWorkspace=self._sample_ws,
                                        SampleChemicalFormula='H2-O',
                                        CanWorkspace=self._can_ws,
-                                       CanChemicalFormula='V')
+                                       CanChemicalFormula='V',
+                                       Version=1)
 
         self._verify_workspaces_for_can()
 
@@ -160,7 +163,8 @@ class CylinderPaalmanPingsCorrectionTest(unittest.TestCase):
                                        SampleChemicalFormula='H2-O',
                                        CanWorkspace=self._can_ws,
                                        CanChemicalFormula='V',
-                                       Interpolate=False)
+                                       Interpolate=False,
+                                       Version=1)
 
         corrections_ws = mtd[self._corrections_ws_name]
 
@@ -186,7 +190,8 @@ class CylinderPaalmanPingsCorrectionTest(unittest.TestCase):
                           BeamHeight=0.1,
                           BeamWidth=0.1,
                           Emode='Indirect',
-                          Efixed=1.845)
+                          Efixed=1.845,
+                          Version=1)
 
 
 if __name__=="__main__":

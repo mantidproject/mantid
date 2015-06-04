@@ -7,11 +7,13 @@
 #include <boost/shared_ptr.hpp>
 
 namespace Mantid {
-namespace API {
+namespace Geometry{
 class IPeak;
+class PeakTransform;
+}
+namespace API {
 class IMDHistoWorkspace;
 class IMDEventWorkspace;
-class PeakTransform;
 }
 namespace Crystal {
 
@@ -51,11 +53,11 @@ public:
       boost::shared_ptr<Mantid::API::IMDEventWorkspace> &mdWS);
   /// Get the signal value at the peak center
   Mantid::signal_t
-  signalAtPeakCenter(const Mantid::API::IPeak &peak,
+  signalAtPeakCenter(const Mantid::Geometry::IPeak &peak,
                      Mantid::API::MDNormalization normalization =
                          Mantid::API::NoNormalization) const;
   /// Get the peak center
-  Mantid::Kernel::V3D peakCenter(const Mantid::API::IPeak &peak) const;
+  Mantid::Kernel::V3D peakCenter(const Mantid::Geometry::IPeak &peak) const;
   /// Destructor
   virtual ~PeakClusterProjection();
 
@@ -68,7 +70,7 @@ private:
   boost::shared_ptr<Mantid::API::IMDWorkspace> m_mdWS;
 
   /// Peak Transform
-  boost::shared_ptr<Mantid::API::PeakTransform> m_peakTransform;
+  boost::shared_ptr<Mantid::Geometry::PeakTransform> m_peakTransform;
 };
 
 } // namespace Crystal

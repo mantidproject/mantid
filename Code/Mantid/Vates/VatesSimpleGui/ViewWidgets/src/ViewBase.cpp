@@ -4,7 +4,10 @@
 #include "MantidVatesSimpleGuiViewWidgets/BackgroundRgbProvider.h"
 #include "MantidVatesSimpleGuiViewWidgets/ColorSelectionWidget.h"
 #include "MantidVatesSimpleGuiViewWidgets/RebinnedSourcesManager.h"
-
+#include "MantidVatesAPI/ADSWorkspaceProvider.h"
+#include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidVatesAPI/BoxInfo.h"
+#include "MantidKernel/WarningSuppressions.h"
 #if defined(__INTEL_COMPILER)
   #pragma warning disable 1170
 #endif
@@ -284,6 +287,7 @@ pqPipelineRepresentation *ViewBase::getPvActiveRep()
   return qobject_cast<pqPipelineRepresentation *>(drep);
 }
 
+GCC_DIAG_OFF(strict-aliasing)
 /**
  * This function creates a ParaView source from a given plugin name and
  * workspace name. This is used in the plugin mode of the simple interface.
@@ -300,6 +304,16 @@ pqPipelineSource* ViewBase::setPluginSource(QString pluginName, QString wsName)
   src->getProxy()->SetAnnotation("MdViewerWidget0", "1");
   vtkSMPropertyHelper(src->getProxy(),
                       "Mantid Workspace Name").Set(wsName.toStdString().c_str());
+
+  // WORKAROUND BEGIN 
+  // We are setting the recursion depth to 1 when we are dealing with MDEvent workspaces
+  // with top level splitting, but this is not updated in the plugin line edit field. 
+  // We do this here.
+  if (auto split = Mantid::VATES::findRecursionDepthForTopLevelSplitting(wsName.toStdString())) {
+    vtkSMPropertyHelper(src->getProxy(),
+              "Recursion Depth").Set(split.get());
+  }
+  // WORKAROUND END
 
   // Update the source so that it retrieves the data from the Mantid workspace
   src->getProxy()->UpdateVTKObjects(); // Updates all the proxies
@@ -906,8 +920,6 @@ void ViewBase::removeVisibilityListener() {
                          this, SLOT(onVisibilityChanged(pqPipelineSource*, pqDataRepresentation*)));
   }
 }
-
-
 
 } // namespace SimpleGui
 } // namespace Vates

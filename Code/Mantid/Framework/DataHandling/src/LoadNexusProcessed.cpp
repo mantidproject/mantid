@@ -1066,7 +1066,7 @@ API::Workspace_sptr LoadNexusProcessed::loadPeaksEntry(NXEntry &entry) {
   for (int r = 0; r < numberPeaks; r++) {
     Kernel::V3D v3d;
     v3d[2] = 1.0;
-    API::IPeak *p;
+    Geometry::IPeak *p;
     p = peakWS->createPeak(v3d);
     peakWS->addPeak(*p);
   }
@@ -1946,7 +1946,7 @@ void LoadNexusProcessed::loadBlock(NXDataSetTyped<double> &data,
     rb_workspace = boost::dynamic_pointer_cast<RebinnedOutput>(local_workspace);
   }
   xbins.load(static_cast<int>(blocksize), static_cast<int>(hist));
-  const int64_t nxbins(nchannels + 1);
+  const int64_t nxbins(xbins.dim1());
   double *xbin_start = xbins();
   double *xbin_end = xbin_start + nxbins;
   int64_t final(hist + blocksize);

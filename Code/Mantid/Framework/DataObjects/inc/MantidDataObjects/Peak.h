@@ -1,7 +1,7 @@
 #ifndef MANTID_DATAOBJECTS_PEAK_H_
 #define MANTID_DATAOBJECTS_PEAK_H_
 
-#include "MantidAPI/IPeak.h"
+#include "MantidGeometry/Crystal/IPeak.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/Matrix.h"
@@ -21,7 +21,7 @@ namespace DataObjects {
  * @author Janik Zikovsky
  * @date 2011-04-15 13:24:07.963491
  */
-class DLLExport Peak : public API::IPeak {
+class DLLExport Peak : public Geometry::IPeak {
 public:
   /// Allow PeakColumn class to directly access members.
   friend class PeakColumn;
@@ -47,7 +47,7 @@ public:
 
   // Construct a peak from a reference to the interface
 
-  explicit Peak(const API::IPeak &ipeak);
+  explicit Peak(const Geometry::IPeak &ipeak);
   virtual ~Peak();
 
   void setDetectorID(int id);

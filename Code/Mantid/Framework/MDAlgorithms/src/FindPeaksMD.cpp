@@ -405,8 +405,13 @@ void FindPeaksMD::findPeaks(typename MDEventWorkspace<MDE, nd>::sptr ws) {
 
       try {
         auto p = this->createPeak(Q, binCount);
-        if (m_addDetectors)
-          addDetectors(*p, *dynamic_cast<MDBoxBase<MDE, nd> *>(box));
+        if (m_addDetectors) {
+          auto mdBox = dynamic_cast<MDBoxBase<MDE, nd> *>(box);
+          if (!mdBox) {
+            throw std::runtime_error("Failed to cast box to MDBoxBase");
+          }
+          addDetectors(*p, *mdBox);
+        }
         if (p->getDetectorID() != -1) peakWS->addPeak(*p);
       } catch (std::exception &e) {
         g_log.notice() << "Error creating peak at " << Q << " because of '"

@@ -188,7 +188,7 @@ Peak::Peak(const Peak &other)
  * @param ipeak :: const reference to an IPeak object
  * @return
  */
-Peak::Peak(const API::IPeak &ipeak)
+Peak::Peak(const Geometry::IPeak &ipeak)
     : IPeak(ipeak), m_H(ipeak.getH()), m_K(ipeak.getK()), m_L(ipeak.getL()),
       m_intensity(ipeak.getIntensity()),
       m_sigmaIntensity(ipeak.getSigmaIntensity()),

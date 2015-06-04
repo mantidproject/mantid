@@ -1,7 +1,8 @@
 #include "MantidCurveFitting/LatticeDomainCreator.h"
 
+#include "MantidGeometry/Crystal/IPeak.h"
+
 #include "MantidAPI/ILatticeFunction.h"
-#include "MantidAPI/IPeak.h"
 #include "MantidAPI/LatticeDomain.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"
@@ -183,7 +184,7 @@ void LatticeDomainCreator::createDomainFromPeaksWorkspace(
   dSpacings.reserve(peakCount);
 
   for (size_t i = 0; i < peakCount; ++i) {
-    IPeak *currentPeak = workspace->getPeakPtr(static_cast<int>(i));
+    Geometry::IPeak *currentPeak = workspace->getPeakPtr(static_cast<int>(i));
     V3D hkl = currentPeak->getHKL();
 
     if (hkl != V3D(0, 0, 0)) {

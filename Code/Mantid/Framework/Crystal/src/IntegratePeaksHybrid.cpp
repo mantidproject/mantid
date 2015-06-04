@@ -186,7 +186,7 @@ void IntegratePeaksHybrid::exec() {
   for (int i = 0; i < peakWS->getNumberPeaks(); ++i) {
 
     PARALLEL_START_INTERUPT_REGION
-    IPeak &peak = peakWS->getPeak(i);
+    Geometry::IPeak &peak = peakWS->getPeak(i);
     const V3D center = projection.peakCenter(peak);
 
     auto binMDAlg = this->createChildAlgorithm("BinMD");

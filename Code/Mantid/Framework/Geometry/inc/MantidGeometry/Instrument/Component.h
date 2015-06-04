@@ -222,7 +222,20 @@ public:
     else
       return std::string("");
   }
+  /** Get this component parameter's description -- no recursive search within children*/
+  std::string getDescription() const;
 
+  /** Get description of a parameter attached to this component  */
+  std::string getParamDescription(const std::string &pname,
+                               bool recursive = true) const;
+
+  /** Get a component's parameter short description */
+  std::string getParamShortDescription(const std::string &pname,
+                               bool recursive = true) const;
+  /** Get a components's short description*/
+  std::string getShortDescription() const;
+  /**Set components description. Works for parameterized components only */
+  void setDescription(const std::string &descr);
   /**
   * Get a parameter defined as a bool
   * @param pname :: The name of the parameter

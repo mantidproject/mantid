@@ -1,6 +1,6 @@
 #include "MantidKernel/ListValidator.h"
 #include "MantidAPI/IPeaksWorkspace.h"
-#include "MantidAPI/IPeak.h"
+#include "MantidGeometry/Crystal/IPeak.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidCrystal/PeaksIntersection.h"
 #include "MantidDataObjects/TableWorkspace.h"

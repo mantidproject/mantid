@@ -9,36 +9,42 @@ using namespace boost::python;
 
 /**
  * Enables boost.python to automatically "cast" an object up to the
- * appropriate Detector leaf type 
+ * appropriate Detector leaf type
  */
-// clang-format off
-void export_RectangularDetector()
-// clang-format on
-{
+void export_RectangularDetector() {
   register_ptr_to_python<boost::shared_ptr<RectangularDetector>>();
 
-  class_<RectangularDetector, bases< CompAssembly, IObjComponent>, boost::noncopyable>("RectangularDetector", no_init)
-    .def("xpixels",&RectangularDetector::xpixels, "Returns the number of pixels in the X direction")
-    .def("ypixels",&RectangularDetector::ypixels, "Returns the number of pixels in the Y direction")
-    .def("xstep",&RectangularDetector::xstep, "Returns the step size in the X direction")
-    .def("ystep",&RectangularDetector::ystep, "Returns the step size in the Y direction")
-    .def("xsize",&RectangularDetector::xsize, "Returns the size in the X direction")
-    .def("ysize",&RectangularDetector::ysize, "Returns the size in the Y direction")
-    .def("xstart",&RectangularDetector::xstart, "Returns the start position in the X direction")
-    .def("ystart",&RectangularDetector::ystart, "Returns the start position in the Y direction")
-    .def("idstart",&RectangularDetector::idstart, "Returns the idstart")
-    .def("idfillbyfirst_y",&RectangularDetector::idfillbyfirst_y, "Returns the idfillbyfirst_y")
-    .def("idstepbyrow",&RectangularDetector::idstepbyrow, "Returns the idstepbyrow")
-    .def("idstep",&RectangularDetector::idstep, "Returns the idstep")
-    .def("minDetectorID",&RectangularDetector::minDetectorID, "Returns the minimum detector id")
-    .def("maxDetectorID",&RectangularDetector::maxDetectorID, "Returns the maximum detector id")
-    ;
+  class_<RectangularDetector, bases<CompAssembly, IObjComponent>,
+         boost::noncopyable>("RectangularDetector", no_init)
+      .def("xpixels", &RectangularDetector::xpixels,
+           "Returns the number of pixels in the X direction")
+      .def("ypixels", &RectangularDetector::ypixels,
+           "Returns the number of pixels in the Y direction")
+      .def("xstep", &RectangularDetector::xstep,
+           "Returns the step size in the X direction")
+      .def("ystep", &RectangularDetector::ystep,
+           "Returns the step size in the Y direction")
+      .def("xsize", &RectangularDetector::xsize,
+           "Returns the size in the X direction")
+      .def("ysize", &RectangularDetector::ysize,
+           "Returns the size in the Y direction")
+      .def("xstart", &RectangularDetector::xstart,
+           "Returns the start position in the X direction")
+      .def("ystart", &RectangularDetector::ystart,
+           "Returns the start position in the Y direction")
+      .def("idstart", &RectangularDetector::idstart, "Returns the idstart")
+      .def("idfillbyfirst_y", &RectangularDetector::idfillbyfirst_y,
+           "Returns the idfillbyfirst_y")
+      .def("idstepbyrow", &RectangularDetector::idstepbyrow,
+           "Returns the idstepbyrow")
+      .def("idstep", &RectangularDetector::idstep, "Returns the idstep")
+      .def("minDetectorID", &RectangularDetector::minDetectorID,
+           "Returns the minimum detector id")
+      .def("maxDetectorID", &RectangularDetector::maxDetectorID,
+           "Returns the maximum detector id");
 }
 
-// clang-format off
-void export_RectangularDetectorPixel()
-// clang-format on
-{
-  class_<RectangularDetectorPixel, bases<Detector>, boost::noncopyable>("RectangularDetectorPixel", no_init)
-    ;
+void export_RectangularDetectorPixel() {
+  class_<RectangularDetectorPixel, bases<Detector>, boost::noncopyable>(
+      "RectangularDetectorPixel", no_init);
 }

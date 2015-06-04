@@ -6,7 +6,7 @@
 #include "MantidDataObjects/PeakShapeSpherical.h"
 #include "MantidDataObjects/PeakShapeEllipsoid.h"
 #include "MantidKernel/SpecialCoordinateSystem.h"
-#include "MantidAPI/IPeak.h"
+#include "MantidGeometry/Crystal/IPeak.h"
 #include "MantidGeometry/Crystal/PeakShape.h"
 namespace Mantid {
 namespace VATES {

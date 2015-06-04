@@ -213,7 +213,11 @@ void PredictPeaks::exec() {
     }
   }
   // Find the run number
-  m_runNumber = inWS->getRunNumber();
+  if (inWS ) {
+    m_runNumber = inWS->getRunNumber();
+  } else {
+    throw std::runtime_error("Failed to get run number");
+  }
 
   m_wlMin = getProperty("WavelengthMin");
   m_wlMax = getProperty("WavelengthMax");
