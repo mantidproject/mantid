@@ -155,7 +155,7 @@ void ReflectometryReductionOneAuto::init() {
 
   std::vector<std::string> correctionAlgorithms = boost::assign::list_of(
       "None")("AutoDetect")("PolynomialCorrection")("ExponentialCorrection");
-  declareProperty("CorrectionAlgorithm", "None",
+  declareProperty("CorrectionAlgorithm", "AutoDetect",
                   boost::make_shared<StringListValidator>(correctionAlgorithms),
                   "The type of correction to perform.");
 
