@@ -68,12 +68,13 @@ if __name__ == '__main__':
                'debdepba@dasganma.tk': 'OTHERS',
                'matd10@yahoo.com': 'OTHERS',
                'diegomon93@gmail.com': 'OTHERS',
-               'mgt110@ic.ac.uk': 'OTHERS'
+               'mgt110@ic.ac.uk': 'OTHERS',
+               'granrothge@users.noreply.github.com': 'ORNL'
                }
 
     days_in_month = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
 
-    csvcommits = open('facility-commits.rubbish', 'w')
+    csvcommits = open('facility-commits.csv', 'w')
     csvchanged = open('facility-changed-files.csv', 'w')
     csvadded = open('facility-added-lines.csv', 'w')
     csvremoved = open('facility-removed-lines.csv', 'w')
@@ -184,22 +185,14 @@ if __name__ == '__main__':
                 if not found:
                     print("Email ({0}) couldn't be matched to a facility!".format(str(email_changes)))
 
-            args_commits = ['git', 'shortlog', '-sne', since, until]
+            args_commits = ['git', 'log', '--pretty=format:"%aE"', since, until]
             # print(args_commits)
             sub2 = subprocess.Popen(args_commits, stdout=subprocess.PIPE, close_fds=True, cwd=repolocation)
             commits = 0
             for line in sub2.stdout:
                 # print(line)
                 found = False
-                commits, person = [x.strip() for x in line.split("\t")]
-                commits = int(commits)
-                # Split up person into name and email
-                # get rid of the trailing '>' on the email
-                person = person.replace(">", "")
-                # split on the leading '<' on the email.
-                name, email_commits = [x.strip() for x in person.split("<")]
-                # data[date_key].append([commits, name, email_commits])
-
+                email_commits = line.replace('"','').strip()
                 found = False
                 # Assign each to a facility
                 for domain in domains.keys():
@@ -207,7 +200,7 @@ if __name__ == '__main__':
                         # ORNL didn't join until 2009
                         if domains[domain] == 'ORNL' and int(year) < 2009:
                             domain = 'stfc.ac.uk'
-                        facility_commits[date_key][domains[domain]] += commits
+                        facility_commits[date_key][domains[domain]] += 1
                         found = True
 
                 if not found:
