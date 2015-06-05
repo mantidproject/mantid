@@ -16,18 +16,39 @@ using namespace Mantid::API;
 using namespace Mantid::Algorithms;
 using namespace Mantid::DataObjects;
 
+
+namespace {
+  EventWorkspace_sptr execute_change_of_pulse_times(EventWorkspace_sptr in_ws, std::string timeOffset, std::string workspaceIndexList) {
+    // Create and run the algorithm
+    ChangePulsetime alg;
+    alg.initialize();
+    alg.setRethrows(true);
+    alg.setChild(true);
+    alg.setProperty("InputWorkspace", in_ws);
+    alg.setPropertyValue("OutputWorkspace", "out_ws");
+    alg.setPropertyValue("WorkspaceIndexList", workspaceIndexList);
+    alg.setPropertyValue("TimeOffset", timeOffset);
+    alg.execute();
+
+    // Get the result and return it
+    EventWorkspace_sptr out_ws = alg.getProperty("OutputWorkspace");
+    return out_ws;
+  }
+}
+
+//---------------------------------------------------------------------------------
+// Unit Tests
+//---------------------------------------------------------------------------------
 class ChangePulsetimeTest : public CxxTest::TestSuite
 {
 public:
-
-    
   void test_Init()
   {
     ChangePulsetime alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
     TS_ASSERT( alg.isInitialized() )
   }
-  
+
   void do_test(std::string in_ws_name, std::string out_ws_name, std::string WorkspaceIndexList)
   {
     ChangePulsetime alg;
@@ -103,11 +124,27 @@ public:
   {
     do_test("ChangePulsetimeTest_ws", "ChangePulsetimeTest_ws", "10-20");
   }
-
-
-
 };
 
+
+//---------------------------------------------------------------------------------
+// Performance Test
+//---------------------------------------------------------------------------------
+class ChangePulsetimeTestPerformance : public CxxTest::TestSuite
+{
+private:
+  EventWorkspace_sptr m_workspace;
+
+public:
+  void setUp() {
+    EventWorkspace_sptr in_ws = WorkspaceCreationHelper::CreateEventWorkspace2(30000, 30000);
+    m_workspace = in_ws;
+  }
+
+  void test_change_of_pulse_time() {
+    execute_change_of_pulse_times(m_workspace, "1000", "");
+  }
+};
 
 #endif /* MANTID_ALGORITHMS_CHANGEPULSETIMETEST_H_ */
 

@@ -113,7 +113,7 @@ int BinFinder::lastBinIndex() {
  */
 int BinFinder::bin(double x) {
   int index;
-  double min;
+  double min(boundaries[0]);
 
   // Too small?
   if (x < boundaries[0])

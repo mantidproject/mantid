@@ -25,8 +25,10 @@ using namespace Mantid;
 
 /// Default constructor
 MuonNexusReader::MuonNexusReader()
-    : nexus_instrument_name(), corrected_times(NULL), counts(NULL),
-      detectorGroupings(NULL) {}
+    : nexus_instrument_name(), nexus_samplename(), nexusLogCount(0),
+      startTime_time_t(), t_nsp1(0), t_ntc1(0), t_nper(0),
+      corrected_times(NULL), counts(NULL), detectorGroupings(NULL),
+      numDetectors(0) {}
 
 /// Destructor deletes temp storage
 MuonNexusReader::~MuonNexusReader() {

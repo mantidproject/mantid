@@ -25,7 +25,10 @@ DECLARE_ALGORITHM(MergeMDFiles)
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
-MergeMDFiles::MergeMDFiles() {}
+MergeMDFiles::MergeMDFiles()
+    : m_nDims(0), m_MDEventType(), m_fileBasedTargetWS(false), m_Filenames(),
+      m_EventLoader(), m_OutIWS(), totalEvents(0), totalLoaded(0), fileMutex(),
+      statsMutex(), prog(NULL) {}
 
 //----------------------------------------------------------------------------------------------
 /** Destructor
@@ -350,6 +353,9 @@ void MergeMDFiles::exec() {
   // pDiskBuffer = NULL;
   MultipleFileProperty *multiFileProp =
       dynamic_cast<MultipleFileProperty *>(getPointerToProperty("Filenames"));
+  if (!multiFileProp) {
+    throw std::logic_error("Filenames property must have MultipleFileProperty type.");
+  }
   m_Filenames =
       MultipleFileProperty::flattenFileNames(multiFileProp->operator()());
   if (m_Filenames.size() == 0)

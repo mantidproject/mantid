@@ -41,8 +41,11 @@
 #include <QLineEdit>
 #include <QComboBox>
 
-	ExpDecayDialog::ExpDecayDialog(int type, QWidget* parent, Qt::WFlags fl )
-: QDialog( parent, fl )
+ExpDecayDialog::ExpDecayDialog(int type, QWidget* parent, Qt::WFlags fl )
+  : QDialog( parent, fl ), fitter(NULL), graph(NULL),
+    buttonFit(NULL), buttonCancel(NULL), boxName(NULL), boxAmplitude(NULL),
+    boxFirst(NULL), boxSecond(NULL), boxThird(NULL), boxStart(NULL), boxYOffset(NULL),
+    thirdLabel(NULL), dampingLabel(NULL), boxColor(NULL)
 {
     setName( "ExpDecayDialog" );
 

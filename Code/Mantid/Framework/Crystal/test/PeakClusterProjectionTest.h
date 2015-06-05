@@ -8,7 +8,7 @@
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/IPeaksWorkspace.h"
-#include "MantidAPI/IPeak.h"
+#include "MantidGeometry/Crystal/IPeak.h"
 
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"

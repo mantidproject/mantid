@@ -62,7 +62,14 @@ DECLARE_ALGORITHM(FitPowderDiffPeaks)
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
-FitPowderDiffPeaks::FitPowderDiffPeaks() {}
+FitPowderDiffPeaks::FitPowderDiffPeaks()
+    : m_wsIndex(-1), m_tofMin(0.), m_tofMax(0.), m_useGivenTOFh(false),
+      m_confidentInInstrumentParameters(false), m_minimumHKL(),
+      m_numPeaksLowerToMin(-1), m_indexGoodFitPeaks(), m_chi2GoodFitPeaks(),
+      m_fitMode(ROBUSTFIT), m_genPeakStartingValue(HKLCALCULATION),
+      m_rightmostPeakHKL(), m_rightmostPeakLeftBound(0.),
+      m_rightmostPeakRightBound(0.), m_minPeakHeight(0.), m_unitCell(),
+      m_fitPeakBackgroundComposite(false) {}
 
 //----------------------------------------------------------------------------------------------
 /** Destructor

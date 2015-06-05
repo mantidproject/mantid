@@ -33,8 +33,8 @@ const double CHOPPER_LOCATION[4] = {5700., 7800., 9497., 9507.};
 
 class DLLExport EQSANSTofStructure : public API::Algorithm {
 public:
-  /// (Empty) Constructor
-  EQSANSTofStructure() : API::Algorithm() {}
+  /// Default constructor
+  EQSANSTofStructure();
   /// Virtual destructor
   virtual ~EQSANSTofStructure() {}
   /// Algorithm's name

@@ -12,7 +12,9 @@ namespace MDAlgorithms {
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(PreprocessDetectorsToMD)
 
-PreprocessDetectorsToMD::PreprocessDetectorsToMD(){}
+PreprocessDetectorsToMD::PreprocessDetectorsToMD()
+    : m_getEFixed(false), m_getIsMasked(false) {}
+
 //----------------------------------------------------------------------------------------------
 /** Initialize the algorithm's properties. */
 void PreprocessDetectorsToMD::init() {

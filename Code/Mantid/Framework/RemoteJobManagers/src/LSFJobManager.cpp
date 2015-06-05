@@ -680,6 +680,7 @@ int LSFJobManager::doSendRequestGetResponse(const Poco::URI &uri,
       session.setMethod(method);
     }
   }
+
   return session.sendRequest(uri.toString(), rss);
 }
 

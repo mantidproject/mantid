@@ -1505,6 +1505,7 @@ MantidTreeWidget::MantidTreeWidget(MantidDockWidget *w, MantidUI *mui)
 {
   setObjectName("WorkspaceTree");
   setSelectionMode(QAbstractItemView::ExtendedSelection);
+  setSortOrder(Qt::AscendingOrder);
   setAcceptDrops(true);
 }
 

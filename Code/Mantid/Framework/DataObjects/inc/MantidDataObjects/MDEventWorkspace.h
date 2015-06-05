@@ -162,6 +162,9 @@ public:
   /// and close back-up files.
   virtual void clearFileBacked(bool LoadFileBackedData);
 
+  /// Preferred visual normalization method.
+  virtual Mantid::API::MDNormalization displayNormalization() const;
+
 protected:
   /** MDBox containing all of the events in the workspace. */
   MDBoxBase<MDE, nd> *data;

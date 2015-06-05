@@ -109,7 +109,11 @@ SourceListPkt::SourceListPkt(const SourceListPkt &pkt) : Packet(pkt) {}
 /* ------------------------------------------------------------------------ */
 
 BankedEventPkt::BankedEventPkt(const uint8_t *data, uint32_t len)
-    : Packet(data, len), m_fields((const uint32_t *)payload()) {
+  : Packet(data, len), m_fields((const uint32_t *)payload()), m_curEvent(NULL),
+    m_lastFieldIndex(0), m_curFieldIndex(0), m_sourceStartIndex(0), m_bankCount(0),
+    m_TOFOffset(0), m_isCorrected(false), m_bankNum(0), m_bankStartIndex(0),
+    m_bankId(0), m_eventCount(0)
+{
   if (m_payload_len < (4 * sizeof(uint32_t)))
     throw invalid_packet("BankedEvent packet is too short");
 
@@ -117,8 +121,13 @@ BankedEventPkt::BankedEventPkt(const uint8_t *data, uint32_t len)
 }
 
 BankedEventPkt::BankedEventPkt(const BankedEventPkt &pkt)
-    : Packet(pkt), m_fields((const uint32_t *)payload()),
-      m_lastFieldIndex((payload_length() / 4) - 1) {}
+    : Packet(pkt), m_fields((const uint32_t *)payload()), m_curEvent(NULL),
+      m_lastFieldIndex(0), m_curFieldIndex(0), m_sourceStartIndex(0),
+      m_bankCount(0), m_TOFOffset(0), m_isCorrected(false), m_bankNum(0),
+      m_bankStartIndex(0), m_bankId(0), m_eventCount(0)
+{
+  m_lastFieldIndex = ((payload_length() / 4) - 1);
+}
 
 // The fact that events are wrapped up in banks which are wrapped up in source
 // sections is abstracted away (with the exception of checking the COR flag and
@@ -361,7 +370,7 @@ TransCompletePkt::TransCompletePkt(const uint8_t *data, uint32_t len)
 }
 
 TransCompletePkt::TransCompletePkt(const TransCompletePkt &pkt)
-    : Packet(pkt), m_reason(pkt.m_reason) {}
+    : Packet(pkt), m_status(VariableStatus::NOT_REPORTED), m_reason(pkt.m_reason) {}
 
 /* ------------------------------------------------------------------------ */
 

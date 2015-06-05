@@ -162,7 +162,7 @@ void IntegratePeaksUsingClusters::exec() {
   PARALLEL_FOR1(peakWS)
   for (int i = 0; i < peakWS->getNumberPeaks(); ++i) {
     PARALLEL_START_INTERUPT_REGION
-    IPeak &peak = peakWS->getPeak(i);
+    Geometry::IPeak &peak = peakWS->getPeak(i);
     const Mantid::signal_t signalValue = projection.signalAtPeakCenter(
         peak); // No normalization when extracting label ids!
     if (boost::math::isnan(signalValue)) {

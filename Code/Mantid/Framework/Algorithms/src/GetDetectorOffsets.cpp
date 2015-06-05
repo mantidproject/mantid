@@ -27,7 +27,9 @@ using std::size_t;
 using namespace DataObjects;
 
 /// Constructor
-GetDetectorOffsets::GetDetectorOffsets() : API::Algorithm() {}
+GetDetectorOffsets::GetDetectorOffsets()
+    : API::Algorithm(), m_Xmin(DBL_MAX), m_Xmax(-DBL_MIN), m_maxOffset(0.),
+      m_dreference(0.), m_dideal(0.), m_step(0.) {}
 
 /// Destructor
 GetDetectorOffsets::~GetDetectorOffsets() {}
@@ -95,13 +97,13 @@ void GetDetectorOffsets::init() {
  */
 void GetDetectorOffsets::exec() {
   inputW = getProperty("InputWorkspace");
-  Xmin = getProperty("XMin");
-  Xmax = getProperty("XMax");
-  maxOffset = getProperty("MaxOffset");
-  if (Xmin >= Xmax)
-    throw std::runtime_error("Must specify Xmin<Xmax");
-  dreference = getProperty("DReference");
-  step = getProperty("Step");
+  m_Xmin = getProperty("XMin");
+  m_Xmax = getProperty("XMax");
+  m_maxOffset = getProperty("MaxOffset");
+  if (m_Xmin >= m_Xmax)
+    throw std::runtime_error("Must specify m_Xmin<m_Xmax");
+  m_dreference = getProperty("DReference");
+  m_step = getProperty("Step");
 
   std::string mode = getProperty("OffsetMode");
   bool isAbsolute = false;
@@ -109,9 +111,9 @@ void GetDetectorOffsets::exec() {
     isAbsolute = true;
   }
 
-  dideal = getProperty("DIdeal");
+  m_dideal = getProperty("DIdeal");
 
-  int nspec = static_cast<int>(inputW->getNumberHistograms());
+  int64_t nspec = inputW->getNumberHistograms();
   // Create the output OffsetsWorkspace
   OffsetsWorkspace_sptr outputW(new OffsetsWorkspace(inputW->getInstrument()));
   // Create the output MaskWorkspace
@@ -128,7 +130,7 @@ void GetDetectorOffsets::exec() {
     // Fit the peak
     double offset = fitSpectra(wi, isAbsolute);
     double mask = 0.0;
-    if (std::abs(offset) > maxOffset) {
+    if (std::abs(offset) > m_maxOffset) {
       offset = 0.0;
       mask = 1.0;
     }
@@ -212,8 +214,8 @@ double GetDetectorOffsets::fitSpectra(const int64_t s, bool isAbsolbute) {
   fit_alg->setProperty<int>(
       "WorkspaceIndex",
       static_cast<int>(s)); // TODO what is the right thing to do here?
-  fit_alg->setProperty("StartX", Xmin);
-  fit_alg->setProperty("EndX", Xmax);
+  fit_alg->setProperty("StartX", m_Xmin);
+  fit_alg->setProperty("EndX", m_Xmax);
   fit_alg->setProperty("MaxIterations", 100);
 
   IFunction_sptr fun_ptr = createFunction(peakHeight, peakLoc);
@@ -228,14 +230,14 @@ double GetDetectorOffsets::fitSpectra(const int64_t s, bool isAbsolbute) {
   // std::vector<double> params = fit_alg->getProperty("Parameters");
   API::IFunction_sptr function = fit_alg->getProperty("Function");
   double offset = function->getParameter(3); // params[3]; // f1.PeakCentre
-  offset = -1. * offset * step / (dreference + offset * step);
+  offset = -1. * offset * m_step / (m_dreference + offset * m_step);
   // factor := factor * (1+offset) for d-spacemap conversion so factor cannot be
   // negative
 
   if (isAbsolbute) {
     // translated from(DIdeal - FittedPeakCentre)/(FittedPeakCentre)
     // given by Matt Tucker in ticket #10642
-    offset += (dideal - dreference) / dreference;
+    offset += (m_dideal - m_dreference) / m_dreference;
   }
   return offset;
 }

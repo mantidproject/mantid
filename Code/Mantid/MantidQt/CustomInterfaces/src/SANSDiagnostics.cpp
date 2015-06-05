@@ -1247,8 +1247,12 @@ namespace MantidQt
     ///save settings
     void SANSDiagnostics::saveSettings()
     {
-      m_dataDir = QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("datasearch.directories"));
-      m_dataDir = m_dataDir.split(";", QString::SkipEmptyParts)[0];
+      if( Mantid::Kernel::ConfigService::Instance().hasProperty("datasearch.directories") )
+      {
+        m_dataDir = QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("datasearch.directories"));
+        if( !m_dataDir.isEmpty() )
+          m_dataDir = m_dataDir.split(";", QString::SkipEmptyParts)[0];
+      }
       QSettings settings;
       m_settingsGroup="CustomInterfaces/SANSRunWindow/SANSDiagnostics";
       settings.beginGroup(m_settingsGroup);

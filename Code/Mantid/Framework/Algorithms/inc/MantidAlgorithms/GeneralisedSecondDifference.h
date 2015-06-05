@@ -83,16 +83,15 @@ private:
   void computePrefactors();
   /// Vector that contains the prefactor coefficients Cij in the range
   /// [-zm-1,zm+1]
-  std::vector<double> Cij;
+  std::vector<double> m_Cij;
   /// Vector that contains the prefactor coefficients Cij^2 in the range
   /// [-zm-1,zm+1]
-  std::vector<double> Cij2;
+  std::vector<double> m_Cij2;
   /// Contains the value of the property z
-  int z;
+  int m_z;
   /// Contains the value of the property m
-  int m;
+  int m_m;
   /// Progress reporting
-  API::Progress *m_progress;
 };
 
 } // Namespace Algorithms

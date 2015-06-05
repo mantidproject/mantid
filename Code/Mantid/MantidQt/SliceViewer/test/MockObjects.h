@@ -3,14 +3,14 @@
 
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/IPeaksWorkspace.h"
-#include "MantidAPI/PeakTransform.h"
-#include "MantidAPI/PeakTransformFactory.h"
+#include "MantidGeometry/Crystal/PeakTransform.h"
+#include "MantidGeometry/Crystal/PeakTransformFactory.h"
 #include "MantidQtSliceViewer/PeaksPresenter.h"
 #include "MantidQtSliceViewer/PeakOverlayView.h"
 #include "MantidQtSliceViewer/PeakOverlayViewFactory.h"
 #include "MantidQtSliceViewer/ZoomablePeaksView.h"
 #include "MantidQtSliceViewer/UpdateableOnDemand.h"
-#include "MantidAPI/IPeak.h"
+#include "MantidGeometry/Crystal/IPeak.h"
 #include "MantidKernel/UnitLabel.h"
 #include <boost/regex.hpp>
 #include <gmock/gmock.h>
@@ -18,6 +18,7 @@
 
 using namespace MantidQt::SliceViewer;
 using namespace Mantid::API;
+using namespace Mantid::Geometry;
 using namespace Mantid;
 using boost::regex;
 
@@ -81,7 +82,7 @@ namespace
   /*------------------------------------------------------------
   Mock Peak Transform
   ------------------------------------------------------------*/
-  class MockPeakTransform : public PeakTransform 
+  class MockPeakTransform : public Geometry::PeakTransform
   {
   public:
     MockPeakTransform()
@@ -93,7 +94,7 @@ namespace
     }
     MOCK_CONST_METHOD0(clone, PeakTransform_sptr());
     MOCK_CONST_METHOD1(transform, Mantid::Kernel::V3D(const Mantid::Kernel::V3D&));
-    MOCK_CONST_METHOD1(transformPeak, Mantid::Kernel::V3D(const Mantid::API::IPeak&)); 
+    MOCK_CONST_METHOD1(transformPeak, Mantid::Kernel::V3D(const Mantid::Geometry::IPeak&));
     MOCK_CONST_METHOD0(getFriendlyName, std::string());
     MOCK_CONST_METHOD0(getCoordinateSystem, Mantid::Kernel::SpecialCoordinateSystem());
   };
@@ -101,7 +102,7 @@ namespace
   /*------------------------------------------------------------
   Mock Peak Transform Factory
   ------------------------------------------------------------*/
-class MockPeakTransformFactory : public PeakTransformFactory 
+class MockPeakTransformFactory : public Geometry::PeakTransformFactory
 {
  public:
   MOCK_CONST_METHOD0(createDefaultTransform, PeakTransform_sptr());
@@ -154,7 +155,7 @@ class MockPeakTransformFactory : public PeakTransformFactory
   /*------------------------------------------------------------
   Mock IPeak
   ------------------------------------------------------------*/
-  class MockIPeak : public Mantid::API::IPeak 
+  class MockIPeak : public Mantid::Geometry::IPeak
   {
   public:
     MOCK_METHOD1(setInstrument,

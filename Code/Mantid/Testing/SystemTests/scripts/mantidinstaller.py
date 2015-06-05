@@ -157,12 +157,12 @@ class NSISInstaller(MantidInstaller):
             installer > 0 then the resulting start process exits with a return code
             of 1 so we can pick this up as a failure
         """        
-        run('start "Installer" /wait ' + self.mantidInstaller + ' /S')
+        run('start "Installer" /B /WAIT ' + self.mantidInstaller + ' /S')
 
     def do_uninstall(self):
         "Runs the uninstall exe"
         uninstall_path = 'C:/MantidInstall/Uninstall.exe'
-        run('start "Uninstaller" /wait ' + uninstall_path + ' /S')
+        run('start "Uninstaller" /B /WAIT ' + uninstall_path + ' /S')
 
 class DebInstaller(MantidInstaller):
     """Uses a deb package to install mantid

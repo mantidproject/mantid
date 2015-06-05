@@ -5,7 +5,7 @@
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidKernel/VectorHelper.h"
 #include "MantidKernel/ArrayProperty.h"
-#include "MantidAPI/IPeak.h"
+#include "MantidGeometry/Crystal/IPeak.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidKernel/BoundedValidator.h"
 
@@ -15,8 +15,9 @@ namespace Crystal {
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(IndexSXPeaks)
 
-using namespace Kernel;
+using namespace Geometry;
 using namespace API;
+using namespace Kernel;
 
 /** Initialisation method.
 *

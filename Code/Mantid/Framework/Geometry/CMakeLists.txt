@@ -9,10 +9,16 @@ set ( SRC_FILES
 	src/Crystal/CrystalStructure.cpp
 	src/Crystal/CyclicGroup.cpp
 	src/Crystal/Group.cpp
+        src/Crystal/IPeak.cpp
 	src/Crystal/IndexingUtils.cpp
 	src/Crystal/IsotropicAtomBraggScatterer.cpp
 	src/Crystal/NiggliCell.cpp
 	src/Crystal/OrientedLattice.cpp
+        src/Crystal/PeakTransform.cpp
+        src/Crystal/PeakTransformHKL.cpp
+        src/Crystal/PeakTransformQLab.cpp
+        src/Crystal/PeakTransformQSample.cpp
+        src/Crystal/PeakTransformSelector.cpp
 	src/Crystal/PointGroup.cpp
 	src/Crystal/PointGroupFactory.cpp
 	src/Crystal/ProductOfCyclicGroups.cpp
@@ -123,16 +129,24 @@ set ( INC_FILES
 	inc/MantidGeometry/Crystal/BraggScattererInCrystalStructure.h
 	inc/MantidGeometry/Crystal/CenteringGroup.h
 	inc/MantidGeometry/Crystal/CompositeBraggScatterer.h
+        inc/MantidGeometry/Crystal/ConcretePeakTransformFactory.h
 	inc/MantidGeometry/Crystal/ConventionalCell.h
 	inc/MantidGeometry/Crystal/CrystalStructure.h
 	inc/MantidGeometry/Crystal/CyclicGroup.h
 	inc/MantidGeometry/Crystal/Group.h
+        inc/MantidGeometry/Crystal/IPeak.h
 	inc/MantidGeometry/Crystal/IndexingUtils.h
 	inc/MantidGeometry/Crystal/IsotropicAtomBraggScatterer.h
 	inc/MantidGeometry/Crystal/NiggliCell.h
 	inc/MantidGeometry/Crystal/OrientedLattice.h
 	inc/MantidGeometry/Crystal/PeakShape.h
-	inc/MantidGeometry/Crystal/PointGroup.h
+	inc/MantidGeometry/Crystal/PeakTransform.h
+        inc/MantidGeometry/Crystal/PeakTransformFactory.h
+        inc/MantidGeometry/Crystal/PeakTransformHKL.h
+        inc/MantidGeometry/Crystal/PeakTransformQLab.h
+        inc/MantidGeometry/Crystal/PeakTransformQSample.h
+        inc/MantidGeometry/Crystal/PeakTransformSelector.h
+        inc/MantidGeometry/Crystal/PointGroup.h
 	inc/MantidGeometry/Crystal/PointGroupFactory.h
 	inc/MantidGeometry/Crystal/ProductOfCyclicGroups.h
 	inc/MantidGeometry/Crystal/ReducedCell.h
@@ -291,7 +305,11 @@ set ( TEST_FILES
 	ParObjComponentTest.h
 	ParameterMapTest.h
 	ParametrizedComponentTest.h
-	PlaneTest.h
+        PeakTransformHKLTest.h
+        PeakTransformQLabTest.h
+        PeakTransformQSampleTest.h
+        PeakTransformSelectorTest.h	
+        PlaneTest.h
 	PointGroupFactoryTest.h
 	PointGroupTest.h
 	PolygonEdgeTest.h
@@ -336,18 +354,16 @@ set ( GMOCK_TEST_FILES
   MDGeometryXMLBuilderTest.h
 )
 
+if (COVERALLS)
+    foreach( loop_var ${SRC_FILES} ${INC_FILES})
+      set_property(GLOBAL APPEND PROPERTY COVERAGE_SRCS "${CMAKE_CURRENT_SOURCE_DIR}/${loop_var}")
+    endforeach(loop_var)
+endif()
 
 if(UNITY_BUILD)
   include(UnityBuild)
   enable_unity_build(Geometry SRC_FILES SRC_UNITY_IGNORE_FILES 10)
 endif(UNITY_BUILD)
-
-# Find 'local' dependencies
-find_package ( OpenGL REQUIRED )
-# FindOpenGL does not (as of CMake 2.6.4) take notice of the REQUIRED
-if ( NOT OPENGL_FOUND )
-  message ( FATAL_ERROR "OpenGL was not found." )
-endif ()
 
 # ===================== Open Cascade ===================
 if (ENABLE_OPENCASCADE)
@@ -381,10 +397,10 @@ endif ()
 # Add to the 'Framework' group in VS
 set_property ( TARGET Geometry PROPERTY FOLDER "MantidFramework" )
 
-target_link_libraries ( Geometry ${MANTIDLIBS}  ${OPENGL_LIBRARIES} )
+target_link_libraries ( Geometry LINK_PRIVATE ${MANTIDLIBS}  ${OPENGL_LIBRARIES} ${GSL_LIBRARIES} ${NEXUS_LIBRARIES} )
 
-if (NOT NO_OPENCASCADE)
-  target_link_libraries ( Geometry ${OPENCASCADE_LIBRARIES} )
+if (ENABLE_OPENCASCADE)
+  target_link_libraries ( Geometry LINK_PRIVATE ${OPENCASCADE_LIBRARIES} )
 endif ()
 
 # Add the unit tests directory

@@ -60,13 +60,31 @@ namespace IDA
     // setupTreePropertyBrowser
     m_ffRangeManager = new QtDoublePropertyManager(m_parentWidget);
 
+    m_ffTree->setFactoryForManager(m_blnManager, m_blnEdFac);
     m_ffTree->setFactoryForManager(m_dblManager, m_dblEdFac);
     m_ffTree->setFactoryForManager(m_ffRangeManager, m_dblEdFac);
 
     m_properties["StartX"] = m_ffRangeManager->addProperty("StartX");
     m_ffRangeManager->setDecimals(m_properties["StartX"], NUM_DECIMALS);
     m_properties["EndX"] = m_ffRangeManager->addProperty("EndX");
-    m_ffRangeManager->setDecimals(m_properties["EndX"], NUM_DECIMALS);
+    m_dblManager->setDecimals(m_properties["EndX"], NUM_DECIMALS);
+    m_properties["MaxIterations"] = m_dblManager->addProperty("Max Iterations");
+    m_dblManager->setDecimals(m_properties["MaxIterations"], 0);
+    m_dblManager->setValue(m_properties["MaxIterations"], 500);
+
+    // FABADA
+    m_properties["FABADA"] = m_grpManager->addProperty("Bayesian");
+    m_properties["UseFABADA"] = m_blnManager->addProperty("Use FABADA");
+    m_properties["FABADA"]->addSubProperty(m_properties["UseFABADA"]);
+    m_properties["OutputFABADAChain"] = m_blnManager->addProperty("Output Chain");
+    m_properties["FABADAChainLength"] = m_dblManager->addProperty("Chain Length");
+    m_dblManager->setDecimals(m_properties["FABADAChainLength"], 0);
+    m_dblManager->setValue(m_properties["FABADAChainLength"], 10000);
+    m_properties["FABADAConvergenceCriteria"] = m_dblManager->addProperty("Convergence Criteria");
+    m_dblManager->setValue(m_properties["FABADAConvergenceCriteria"], 0.1);
+    m_properties["FABADAJumpAcceptanceRate"] = m_dblManager->addProperty("Acceptance Rate");
+    m_dblManager->setValue(m_properties["FABADAJumpAcceptanceRate"], 0.25);
+    m_ffTree->addProperty(m_properties["FABADA"]);
 
     connect(m_ffRangeManager, SIGNAL(valueChanged(QtProperty*, double)), this, SLOT(propertyChanged(QtProperty*, double)));
     connect(m_dblManager, SIGNAL(valueChanged(QtProperty*, double)), this, SLOT(propertyChanged(QtProperty*, double)));
@@ -113,6 +131,8 @@ namespace IDA
     // Set a custom handler for the QTreePropertyBrowser's ContextMenu event
     m_ffTree->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(m_ffTree, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(fitContextMenu(const QPoint &)));
+
+    connect(m_blnManager, SIGNAL(valueChanged(QtProperty *, bool)), this, SLOT(checkBoxUpdate(QtProperty *, bool)));
   }
 
   void IqtFit::run()
@@ -148,7 +168,9 @@ namespace IDA
       "plot = '" + m_uiForm.cbPlotType->currentText() + "'\n"
       "spec_min = " + specMin + "\n"
       "spec_max = " + specMax + "\n"
-      "spec_max = None\n";
+      "spec_max = None\n"
+      "minimizer = '" + minimizerString("$outputname_$wsindex") + "'\n"
+      "max_iterations = " + QString::number(m_dblManager->value(m_properties["MaxIterations"])) + "\n";
 
     if (constrainIntens) pyInput += "constrain_intens = True \n";
     else pyInput += "constrain_intens = False \n";
@@ -158,11 +180,11 @@ namespace IDA
 
     if( !constrainBeta )
     {
-      pyInput += "furyfitSeq(input, func, ftype, startx, endx, spec_min=spec_min, spec_max=spec_max, intensities_constrained=constrain_intens, Save=save, Plot=plot)\n";
+      pyInput += "furyfitSeq(input, func, ftype, startx, endx, spec_min=spec_min, spec_max=spec_max, intensities_constrained=constrain_intens, Save=save, Plot=plot, minimizer=minimizer, max_iterations=max_iterations)\n";
     }
     else
     {
-      pyInput += "furyfitMult(input, func, ftype, startx, endx, spec_min=spec_min, spec_max=spec_max, intensities_constrained=constrain_intens, Save=save, Plot=plot)\n";
+      pyInput += "furyfitMult(input, func, ftype, startx, endx, spec_min=spec_min, spec_max=spec_max, intensities_constrained=constrain_intens, Save=save, Plot=plot, minimizer=minimizer, max_iterations=max_iterations)\n";
     }
 
     QString pyOutput = runPythonCode(pyInput);
@@ -332,7 +354,9 @@ namespace IDA
 
     m_ffTree->addProperty(m_properties["StartX"]);
     m_ffTree->addProperty(m_properties["EndX"]);
+    m_ffTree->addProperty(m_properties["MaxIterations"]);
     m_ffTree->addProperty(m_properties["LinearBackground"]);
+    m_ffTree->addProperty(m_properties["FABADA"]);
 
     //option should only be available with a single stretched exponential
     m_uiForm.ckConstrainBeta->setEnabled((index == 2));
@@ -518,6 +542,31 @@ namespace IDA
     }
   }
 
+  void IqtFit::checkBoxUpdate(QtProperty * prop, bool checked)
+  {
+    if(prop == m_properties["UseFABADA"])
+    {
+      if(checked)
+      {
+        m_dblManager->setValue(m_properties["MaxIterations"], 20000);
+
+        m_properties["FABADA"]->addSubProperty(m_properties["OutputFABADAChain"]);
+        m_properties["FABADA"]->addSubProperty(m_properties["FABADAChainLength"]);
+        m_properties["FABADA"]->addSubProperty(m_properties["FABADAConvergenceCriteria"]);
+        m_properties["FABADA"]->addSubProperty(m_properties["FABADAJumpAcceptanceRate"]);
+      }
+      else
+      {
+        m_dblManager->setValue(m_properties["MaxIterations"], 500);
+
+        m_properties["FABADA"]->removeSubProperty(m_properties["OutputFABADAChain"]);
+        m_properties["FABADA"]->removeSubProperty(m_properties["FABADAChainLength"]);
+        m_properties["FABADA"]->removeSubProperty(m_properties["FABADAConvergenceCriteria"]);
+        m_properties["FABADA"]->removeSubProperty(m_properties["FABADAJumpAcceptanceRate"]);
+      }
+    }
+  }
+
   void IqtFit::constrainIntensities(CompositeFunction_sptr func)
   {
     std::string paramName = "f1.Intensity";
@@ -552,6 +601,38 @@ namespace IDA
       }
       break;
     }
+  }
+
+  /**
+   * Generates a string that defines the fitting minimizer based on the user
+   * options.
+   *
+   * @return Minimizer as a string
+   */
+  QString IqtFit::minimizerString(QString outputName) const
+  {
+    QString minimizer = "Levenberg-Marquardt";
+
+    if(m_blnManager->value(m_properties["UseFABADA"]))
+    {
+      minimizer = "FABADA";
+
+      int chainLength = static_cast<int>(m_dblManager->value(m_properties["FABADAChainLength"]));
+      minimizer += ",ChainLength=" + QString::number(chainLength);
+
+      double convergenceCriteria = m_dblManager->value(m_properties["FABADAConvergenceCriteria"]);
+      minimizer += ",ConvergenceCriteria=" + QString::number(convergenceCriteria);
+
+      double jumpAcceptanceRate = m_dblManager->value(m_properties["FABADAJumpAcceptanceRate"]);
+      minimizer += ",JumpAcceptanceRate=" + QString::number(jumpAcceptanceRate);
+
+      minimizer += ",PDF=" + outputName + "_PDF";
+
+      if(m_blnManager->value(m_properties["OutputFABADAChain"]))
+        minimizer += ",Chains=" + outputName + "_Chain";
+    }
+
+    return minimizer;
   }
 
   void IqtFit::singleFit()
@@ -592,23 +673,37 @@ namespace IDA
 
     QString pyInput = "from IndirectCommon import getWSprefix\nprint getWSprefix('%1')\n";
     pyInput = pyInput.arg(m_ffInputWSName);
-    QString outputNm = runPythonCode(pyInput).trimmed();
-    outputNm += QString("fury_") + ftype + m_uiForm.spPlotSpectrum->text();
-    std::string output = outputNm.toStdString();
+    m_singleFitOutputName = runPythonCode(pyInput).trimmed() +
+                            QString("fury_") +
+                            ftype +
+                            m_uiForm.spPlotSpectrum->text();
 
     // Create the Fit Algorithm
-    IAlgorithm_sptr alg = AlgorithmManager::Instance().create("Fit");
-    alg->initialize();
-    alg->setPropertyValue("Function", function->asString());
-    alg->setPropertyValue("InputWorkspace", m_ffInputWSName.toStdString());
-    alg->setProperty("WorkspaceIndex", m_uiForm.spPlotSpectrum->text().toInt());
-    alg->setProperty("StartX", m_ffRangeManager->value(m_properties["StartX"]));
-    alg->setProperty("EndX", m_ffRangeManager->value(m_properties["EndX"]));
-    alg->setProperty("Ties", m_ties.toStdString());
-    alg->setPropertyValue("Output", output);
-    alg->execute();
+    m_singleFitAlg = AlgorithmManager::Instance().create("Fit");
+    m_singleFitAlg->initialize();
+    m_singleFitAlg->setPropertyValue("Function", function->asString());
+    m_singleFitAlg->setPropertyValue("InputWorkspace", m_ffInputWSName.toStdString());
+    m_singleFitAlg->setProperty("WorkspaceIndex", m_uiForm.spPlotSpectrum->text().toInt());
+    m_singleFitAlg->setProperty("StartX", m_ffRangeManager->value(m_properties["StartX"]));
+    m_singleFitAlg->setProperty("EndX", m_ffRangeManager->value(m_properties["EndX"]));
+    m_singleFitAlg->setProperty("MaxIterations", static_cast<int>(m_dblManager->value(m_properties["MaxIterations"])));
+    m_singleFitAlg->setProperty("Minimizer", minimizerString(m_singleFitOutputName).toStdString());
+    m_singleFitAlg->setProperty("Ties", m_ties.toStdString());
+    m_singleFitAlg->setPropertyValue("Output", m_singleFitOutputName.toStdString());
 
-    if ( ! alg->isExecuted() )
+    connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)),
+            this, SLOT(singleFitComplete(bool)));
+
+    m_batchAlgoRunner->addAlgorithm(m_singleFitAlg);
+    m_batchAlgoRunner->executeBatchAsync();
+  }
+
+  void IqtFit::singleFitComplete(bool error)
+  {
+    disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)),
+               this, SLOT(singleFitComplete(bool)));
+
+    if(error)
     {
       QString msg = "There was an error executing the fitting algorithm. Please see the "
         "Results Log pane for more details.";
@@ -616,7 +711,7 @@ namespace IDA
       return;
     }
 
-    IFunction_sptr outputFunc = alg->getProperty("Function");
+    IFunction_sptr outputFunc = m_singleFitAlg->getProperty("Function");
 
     // Get params.
     QMap<QString,double> parameters;
@@ -631,6 +726,7 @@ namespace IDA
 
     m_ffRangeManager->setValue(m_properties["BackgroundA0"], parameters["f0.A0"]);
 
+    const int fitType = m_uiForm.cbFitType->currentIndex();
     if ( fitType != 2 )
     {
       // Exp 1
@@ -663,7 +759,7 @@ namespace IDA
     // Plot the guess first so that it is under the fit
     plotGuess(NULL);
     // Now show the fitted curve of the mini plot
-    m_uiForm.ppPlot->addSpectrum("Fit", outputNm+"_Workspace", 1, Qt::red);
+    m_uiForm.ppPlot->addSpectrum("Fit", m_singleFitOutputName + "_Workspace", 1, Qt::red);
 
     m_pythonExportWsName = "";
   }

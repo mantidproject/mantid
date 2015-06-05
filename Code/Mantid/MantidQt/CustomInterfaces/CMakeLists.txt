@@ -11,6 +11,7 @@ set ( SRC_FILES
   src/Indirect/DensityOfStates.cpp
 	src/Indirect/Elwin.cpp
 	src/Indirect/IDATab.cpp
+  src/Indirect/ILLCalibration.cpp
   src/Indirect/ILLEnergyTransfer.cpp
   src/Indirect/IndirectBayes.cpp
 	src/Indirect/IndirectBayesTab.cpp
@@ -103,6 +104,7 @@ set ( INC_FILES
 	inc/MantidQtCustomInterfaces/Indirect/ConvFit.h
   inc/MantidQtCustomInterfaces/Indirect/DensityOfStates.h
 	inc/MantidQtCustomInterfaces/Indirect/Elwin.h
+  inc/MantidQtCustomInterfaces/Indirect/ILLCalibration.h
   inc/MantidQtCustomInterfaces/Indirect/ILLEnergyTransfer.h
 	inc/MantidQtCustomInterfaces/Indirect/IndirectBayes.h
 	inc/MantidQtCustomInterfaces/Indirect/IndirectBayesTab.h
@@ -202,6 +204,7 @@ set ( MOC_FILES inc/MantidQtCustomInterfaces/Background.h
                 inc/MantidQtCustomInterfaces/Indirect/ConvFit.h
                 inc/MantidQtCustomInterfaces/Indirect/DensityOfStates.h
                 inc/MantidQtCustomInterfaces/Indirect/Elwin.h
+                inc/MantidQtCustomInterfaces/Indirect/ILLCalibration.h
                 inc/MantidQtCustomInterfaces/Indirect/ILLEnergyTransfer.h
                 inc/MantidQtCustomInterfaces/Indirect/IndirectBayes.h
                 inc/MantidQtCustomInterfaces/Indirect/IndirectBayesTab.h
@@ -278,6 +281,7 @@ set ( UI_FILES inc/MantidQtCustomInterfaces/DataComparison.ui
                inc/MantidQtCustomInterfaces/Indirect/ConvFit.ui
                inc/MantidQtCustomInterfaces/Indirect/DensityOfStates.ui
                inc/MantidQtCustomInterfaces/Indirect/Elwin.ui
+               inc/MantidQtCustomInterfaces/Indirect/ILLCalibration.ui
                inc/MantidQtCustomInterfaces/Indirect/ILLEnergyTransfer.ui
                inc/MantidQtCustomInterfaces/Indirect/IndirectBayes.ui
                inc/MantidQtCustomInterfaces/Indirect/IndirectDataAnalysis.ui
@@ -331,6 +335,7 @@ set ( TEST_FILES
   ALCBaselineModellingModelTest.h
   ALCBaselineModellingPresenterTest.h
   ALCDataLoadingPresenterTest.h
+  ALCPeakFittingModelTest.h
   ALCPeakFittingPresenterTest.h
   IO_MuonGroupingTest.h
   MuonAnalysisHelperTest.h
@@ -378,7 +383,17 @@ endif ()
 
 find_Package(Threads)
 
-target_link_libraries ( CustomInterfaces MantidQtAPI MantidWidgets QtPropertyBrowser ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries ( CustomInterfaces LINK_PRIVATE 
+            MantidQtAPI
+            MantidWidgets
+            QtPropertyBrowser
+            ${CORE_MANTIDLIBS}
+            ${QT_LIBRARIES}
+            ${QWT_LIBRARIES}
+            ${POCO_LIBRARIES}
+            ${Boost_LIBRARIES}
+            ${JSONCPP_LIBRARIES}
+            ${CMAKE_THREAD_LIBS_INIT})
 
 ###########################################################################
 # Testing

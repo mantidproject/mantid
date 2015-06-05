@@ -61,7 +61,7 @@ namespace SliceViewer
     /// Update the view.
     virtual void updateView();
     /// Move the position of the peak, by using a different configuration of the existing origin indexes.
-    void movePosition(Mantid::API::PeakTransform_sptr peakTransform);
+    void movePosition(Mantid::Geometry::PeakTransform_sptr peakTransform);
     /// Change foreground colour
     virtual void changeForegroundColour(const QColor);
     /// Change background colour

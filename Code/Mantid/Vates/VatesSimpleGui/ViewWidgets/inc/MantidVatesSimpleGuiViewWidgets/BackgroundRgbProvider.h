@@ -61,10 +61,10 @@ namespace Mantid
 
           /**
            * Set the Rgb values for the color of the view's background.
-           * @param viewSwitched Is this the initial loading or were the views switched?
+           * @param useCurrentBackgroundColor Is this the initial loading or were the views switched?
            * @param view The view which has its background color set.
            */
-          void setBackgroundColor(pqRenderView* view, bool viewSwitched);
+          void setBackgroundColor(pqRenderView* view, bool useCurrentBackgroundColor);
 
           /**
            * Listen to a change in the background color
@@ -80,23 +80,28 @@ namespace Mantid
        private:
           /**
           * Get the Rgb values for the color of the view's background from the user setting.
-          * @param viewSwitched Is this the initial loading or were the views switched?
+          * @param useCurrentBackgroundColor Is this the initial loading or were the views switched?
           * @returns A vector with the RGB values
           */
-          std::vector<double> getRgbFromSetting(bool viewSwitched);
+          std::vector<double> getRgbFromSetting(bool useCurrentBackgroundColor);
 
           /**
            * Get the Rgb values for the color of the view's background
-           * @param viewSwitched Is this the initial loading or were the views switched?
+           * @param useCurrentBackgroundColor Is this the initial loading or were the views switched?
            * @returns A vector with the RGB values
            */
-          std::vector<double> getRgb(bool viewSwitched);
+          std::vector<double> getRgb(bool useCurrentBackgroundColor);
 
           /**
            * Callback function for background color changing events
-           *@param caller Calling object.
+           * @param caller Calling object.
+           *
+           * @param eventID vtkCommand event ID for callbacks, not used here
+           * @param clientData vtk client data, not used here
+           * @param callData vtk call data, not used here
            */
-          static void backgroundColorChangeCallbackFunction(vtkObject* caller, long unsigned int, void*, void*);
+          static void backgroundColorChangeCallbackFunction(vtkObject* caller, long unsigned int eventID,
+                                                            void *clientData, void *callData);
 
           static QColor currentBackgroundColor;
 

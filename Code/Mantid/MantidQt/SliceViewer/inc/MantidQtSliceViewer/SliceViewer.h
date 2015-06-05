@@ -6,7 +6,7 @@
 #include "DllOption.h"
 #include "MantidAPI/IMDIterator.h"
 #include "MantidAPI/IMDWorkspace.h"
-#include "MantidAPI/PeakTransformSelector.h"
+#include "MantidGeometry/Crystal/PeakTransformSelector.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/VMD.h"
@@ -178,6 +178,7 @@ public slots:
   void changeNormalizationNone();
   void changeNormalizationVolume();
   void changeNormalizationNumEvents();
+  void onNormalizationChanged(const QString& normalizationKey);
 
   // Buttons or actions
   void clearLine();
@@ -352,7 +353,11 @@ private:
   DimensionSliceWidget* m_peaksSliderWidget;
 
   /// Object for choosing a PeakTransformFactory based on the workspace type.
-  Mantid::API::PeakTransformSelector m_peakTransformSelector;
+  Mantid::Geometry::PeakTransformSelector m_peakTransformSelector;
+
+  static const QString NoNormalizationKey;
+  static const QString VolumeNormalizationKey;
+  static const QString NumEventsNormalizationKey;
 
 };
 

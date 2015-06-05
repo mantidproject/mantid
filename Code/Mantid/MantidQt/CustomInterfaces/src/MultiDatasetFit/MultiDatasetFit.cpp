@@ -31,7 +31,8 @@ DECLARE_SUBWINDOW(MultiDatasetFit)
 /// Constructor
 /// @param parent :: The parent widget
 MultiDatasetFit::MultiDatasetFit(QWidget *parent)
-:UserSubWindow(parent)
+:UserSubWindow(parent), m_plotController(NULL), m_dataController(NULL), m_functionBrowser(NULL),
+ m_fitOptionsBrowser(NULL)
 {
 }
 
@@ -77,6 +78,7 @@ void MultiDatasetFit::initLayout()
   QSplitter* splitter = new QSplitter(Qt::Vertical,this);
 
   m_functionBrowser = new MantidQt::MantidWidgets::FunctionBrowser(NULL, true);
+  m_functionBrowser->setColumnSizes(100, 100, 45);
   splitter->addWidget( m_functionBrowser );
   connect(m_functionBrowser,SIGNAL(localParameterButtonClicked(const QString&)),this,SLOT(editLocalParameterValues(const QString&)));
   connect(m_functionBrowser,SIGNAL(functionStructureChanged()),this,SLOT(reset()));

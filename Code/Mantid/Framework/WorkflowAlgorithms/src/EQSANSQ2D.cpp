@@ -33,10 +33,7 @@ void EQSANSQ2D::init() {
 /// @param inputWS :: input workspace
 /// @param pname :: name of the property to retrieve
 double getRunProperty(MatrixWorkspace_sptr inputWS, const std::string &pname) {
-  Mantid::Kernel::Property *prop = inputWS->run().getProperty(pname);
-  Mantid::Kernel::PropertyWithValue<double> *dp =
-      dynamic_cast<Mantid::Kernel::PropertyWithValue<double> *>(prop);
-  return *dp;
+  return inputWS->run().getPropertyValueAsType<double>(pname);
 }
 
 /// Execute algorithm

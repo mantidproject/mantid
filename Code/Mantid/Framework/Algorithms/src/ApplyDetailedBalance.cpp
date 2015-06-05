@@ -62,13 +62,16 @@ void ApplyDetailedBalance::exec() {
   std::string Tstring = getProperty("Temperature");
   double Temp;
   try {
-    if (inputWS->run().hasProperty(Tstring))
-      Temp = (dynamic_cast<Kernel::TimeSeriesProperty<double> *>(
-                  inputWS->run().getProperty(Tstring)))
-                 ->getStatistics()
-                 .mean;
-    else
+    if (inputWS->run().hasProperty(Tstring)) {
+      if (auto log = dynamic_cast<Kernel::TimeSeriesProperty<double> *>(
+                  inputWS->run().getProperty(Tstring)) ) {
+        Temp = log->getStatistics().mean;
+      } else {
+        throw std::invalid_argument(Tstring + " is not a double-valued log.");
+      }
+    } else {
       Temp = boost::lexical_cast<double>(Tstring);
+    }
   } catch (...) {
     Tstring += " is not a valid log, nor is it a number";
     throw std::invalid_argument(Tstring);

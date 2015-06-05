@@ -2,8 +2,7 @@
 from mantid.api import AlgorithmFactory
 from mantid.api import PythonAlgorithm
 from mantid.kernel import Direction
-import mantid.simpleapi
-from mantid.simpleapi import mtd
+from mantid.simpleapi import *
 import datetime
 
 class ViewBOA(PythonAlgorithm):
@@ -25,29 +24,29 @@ class ViewBOA(PythonAlgorithm):
         CD = self.getProperty('CD-Distance').value
         self.log().error('Running LoadBOA for file number ' + str(num))
         rawfile = 'tmp' + str(num)
-        mantid.simpleapi.LoadSINQ('BOA',year,num, OutputWorkspace=rawfile)
+        LoadSINQ('BOA',year,num, OutputWorkspace=rawfile)
         raw = mtd[rawfile]
         ntimebin = raw.getDimension(0).getNBins()
         self.log().error(rawfile + ' has ' + str(ntimebin) + ' time bins')
 
         psdsum = 'psdsum' + str(num)
-        mantid.simpleapi.ProjectMD(rawfile,'X',0,ntimebin, OutputWorkspace=psdsum)
+        ProjectMD(rawfile,'X',0,ntimebin, OutputWorkspace=psdsum)
 
         ysum = 'ysum' + str(num)
         nx = raw.getDimension(1).getNBins()
-        mantid.simpleapi.ProjectMD(rawfile,'Y',0,nx, OutputWorkspace=ysum)
+        ProjectMD(rawfile,'Y',0,nx, OutputWorkspace=ysum)
 
         ny = raw.getDimension(2).getNBins()
-        tmp2 = mantid.simpleapi.InvertMDDim(ysum)
-        tmp3 = mantid.simpleapi.MDHistoToWorkspace2D(tmp2)
+        tmp2 = InvertMDDim(ysum)
+        tmp3 = MDHistoToWorkspace2D(tmp2)
 
         hist = 'histogram' + str(num)
-        mantid.simpleapi.GroupDetectors('tmp3','','','0-' + str(ny),'',False,'Sum',False, OutputWorkspace=hist)
+        GroupDetectors(InputWorkspace='tmp3', OutputWorkspace=hist, DetectorList='0-' + str(ny), PreserveEvents=False)
 
         self.TOFToLambda(hist,CD)
-        mantid.simpleapi.DeleteWorkspace(rawfile)
-        mantid.simpleapi.DeleteWorkspace(tmp2)
-        mantid.simpleapi.DeleteWorkspace(tmp3)
+        DeleteWorkspace(rawfile)
+        DeleteWorkspace(tmp2)
+        DeleteWorkspace(tmp3)
 
     def TOFToLambda(self, wsname, CD):
         ws2d = mtd[wsname]

@@ -361,6 +361,7 @@ private:
   bool entriesAreValid(ValMap & vals);
   bool runFilesAreValid();
   QString reduceSingleRun() const;
+  void setValidators();
 
   UserSubWindow * slicingWindow;
 

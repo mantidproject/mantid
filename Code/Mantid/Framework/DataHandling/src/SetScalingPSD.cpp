@@ -24,7 +24,7 @@ using namespace API;
 using namespace Geometry;
 
 /// Empty default constructor
-SetScalingPSD::SetScalingPSD() : Algorithm() {}
+SetScalingPSD::SetScalingPSD() : Algorithm(), m_scalingOption(0) {}
 
 /** Initialisation method.
  *
