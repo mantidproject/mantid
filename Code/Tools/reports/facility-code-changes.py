@@ -204,8 +204,6 @@ if __name__ == '__main__':
             f2reading = open('facility-commits-{0}.stdout'.format(date_key), 'r')
 
             for line in f2reading:
-                if len(line) is 0:
-                    continue
                 found = False
                 email_commits = line.replace('"','').strip()
                 found = False
