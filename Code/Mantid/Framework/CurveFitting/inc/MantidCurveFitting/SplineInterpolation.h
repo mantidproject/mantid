@@ -66,8 +66,9 @@ private:
 
   /// setup an output workspace using meta data from inws and taking a number of
   /// spectra
-  API::MatrixWorkspace_sptr setupOutputWorkspace(API::MatrixWorkspace_sptr inws,
-                                                 int size) const;
+  API::MatrixWorkspace_sptr
+  setupOutputWorkspace(API::MatrixWorkspace_sptr mws,
+                       API::MatrixWorkspace_sptr iws) const;
 
   /// convert a binned workspace to point data. Uses mean of the bins as point
   API::MatrixWorkspace_sptr
