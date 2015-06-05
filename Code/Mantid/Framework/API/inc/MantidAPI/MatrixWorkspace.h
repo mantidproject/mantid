@@ -12,6 +12,7 @@
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/ISpectrum.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/MatrixWSIndexCalculator.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
