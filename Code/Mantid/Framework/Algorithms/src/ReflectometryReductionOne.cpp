@@ -210,10 +210,10 @@ void ReflectometryReductionOne::init() {
       new PropertyWithValue<double>("C1", 0.0, Direction::Input),
       "C1 value to be passed to the ExponentialCorrection algorithm.");
 
-  setPropertyGroup("CorrectionAlgorithm", "Polynomial");
-  setPropertyGroup("Polynomial", "Polynomial");
-  setPropertyGroup("C0", "Polynomial");
-  setPropertyGroup("C1", "Polynomial");
+  setPropertyGroup("CorrectionAlgorithm", "Polynomial Corrections");
+  setPropertyGroup("Polynomial", "Polynomial Corrections");
+  setPropertyGroup("C0", "Polynomial Corrections");
+  setPropertyGroup("C1", "Polynomial Corrections");
 
   setPropertySettings("Polynomial", new Kernel::EnabledWhenProperty(
                                         "CorrectionAlgorithm", IS_EQUAL_TO,
