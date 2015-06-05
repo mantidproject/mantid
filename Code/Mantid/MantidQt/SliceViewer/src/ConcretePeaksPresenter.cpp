@@ -22,6 +22,43 @@ namespace SliceViewer {
 namespace {
 /// static logger
 Mantid::Kernel::Logger g_log("PeaksPresenter");
+
+/**
+ * makeVertexesFromBox. Convert a box into a form of vertexes that PeaksOnSurface understands.
+ * @param box : transformed PeakBoundingBox
+ * @return : vertex vector
+ */
+std::vector<std::vector<double> > makeVertexesFromBox(PeakBoundingBox &box) {
+
+  std::vector<std::vector<double> > vertexes(4);
+
+  std::vector<double> vertex1;
+  vertex1.push_back(box.left());
+  vertex1.push_back(box.bottom());
+  vertex1.push_back(box.slicePoint());
+  vertexes[0] = vertex1;
+
+  std::vector<double> vertex2;
+  vertex2.push_back(box.left());
+  vertex2.push_back(box.top());
+  vertex2.push_back(box.slicePoint());
+  vertexes[1] = vertex2;
+
+  std::vector<double> vertex3;
+  vertex3.push_back(box.right());
+  vertex3.push_back(box.top());
+  vertex3.push_back(box.slicePoint());
+  vertexes[2] = vertex3;
+
+  std::vector<double> vertex4;
+  vertex4.push_back(box.right());
+  vertex4.push_back(box.bottom());
+  vertex4.push_back(box.slicePoint());
+  vertexes[3] = vertex4;
+
+  return vertexes;
+}
+
 }
 
 /**
@@ -590,25 +627,7 @@ bool ConcretePeaksPresenter::deletePeaksIn(PeakBoundingBox box) {
         slicePoint /*Use the current slice position, previously unknown.*/);
     accurateBox.transformBox(m_transform);
 
-    std::vector<double> vertex1;
-    vertex1.push_back(accurateBox.left());
-    vertex1.push_back(accurateBox.bottom());
-    vertex1.push_back(accurateBox.slicePoint());
-
-    std::vector<double> vertex2;
-    vertex2.push_back(accurateBox.left());
-    vertex2.push_back(accurateBox.top());
-    vertex2.push_back(accurateBox.slicePoint());
-
-    std::vector<double> vertex3;
-    vertex3.push_back(accurateBox.right());
-    vertex3.push_back(accurateBox.top());
-    vertex3.push_back(accurateBox.slicePoint());
-
-    std::vector<double> vertex4;
-    vertex4.push_back(accurateBox.right());
-    vertex4.push_back(accurateBox.bottom());
-    vertex4.push_back(accurateBox.slicePoint());
+    std::vector<std::vector<double> > vertexes = makeVertexesFromBox(accurateBox);
 
     Mantid::API::IAlgorithm_sptr alg =
         AlgorithmManager::Instance().create("PeaksOnSurface");
@@ -617,10 +636,10 @@ bool ConcretePeaksPresenter::deletePeaksIn(PeakBoundingBox box) {
     alg->initialize();
     alg->setProperty("InputWorkspace", peaksWS);
     alg->setProperty("OutputWorkspace", peaksWS->name() + "_peaks_on_surface");
-    alg->setProperty("Vertex1", vertex1);
-    alg->setProperty("Vertex2", vertex2);
-    alg->setProperty("Vertex3", vertex3);
-    alg->setProperty("Vertex4", vertex4);
+    alg->setProperty("Vertex1", vertexes[0]);
+    alg->setProperty("Vertex2", vertexes[1]);
+    alg->setProperty("Vertex3", vertexes[2]);
+    alg->setProperty("Vertex4", vertexes[3]);
     alg->setProperty("PeakRadius",
                      effectiveRadius); // Effective radius or shape radius?
     alg->setPropertyValue("CoordinateFrame", m_transform->getFriendlyName());
