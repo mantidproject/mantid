@@ -272,7 +272,8 @@ void LoadSpiceXML2DDet::exec() {
     {
       Kernel::DateAndTime anytime(1000);
       double logvalue = atof(outws->run().getProperty("_2theta")->value().c_str());
-      g_log.information() << "Set 2theta from _2thea with value " << logvalue << "\n";
+      g_log.information() << "Set 2theta from _2theta with value " << logvalue
+                          << "\n";
       TimeSeriesProperty<double> *newlogproperty =
           new TimeSeriesProperty<double>("2theta");
       newlogproperty->addValue(anytime, logvalue);
@@ -286,12 +287,10 @@ void LoadSpiceXML2DDet::exec() {
 
   if (loadinstrument) {
     loadInstrument(outws, idffilename);
-    if (spicetablewsname.size() > 0) {
-      double wavelength;
-      bool has_wavelength = getHB3AWavelength(outws, wavelength);
-      if (has_wavelength) {
-        setXtoLabQ(outws, wavelength);
-      }
+    double wavelength;
+    bool has_wavelength = getHB3AWavelength(outws, wavelength);
+    if (has_wavelength) {
+      setXtoLabQ(outws, wavelength);
     }
   }
 
@@ -580,15 +579,27 @@ void LoadSpiceXML2DDet::setupSampleLogFromSpiceTable(
   return;
 }
 
+//----------------------------------------------------------------------------------------------
+/** Get wavelength if the instrument is HB3A
+ * @brief LoadSpiceXML2DDet::getHB3AWavelength
+ * @param dataws
+ * @param wavelength
+ * @return
+ */
 bool LoadSpiceXML2DDet::getHB3AWavelength(MatrixWorkspace_sptr dataws,
                                           double &wavelength) {
   bool haswavelength(false);
   wavelength = -1;
 
+  // FIXME - Now it only search for _m1.  In future,
+  //         it is better to searc both m1 and _m1
+
   if (dataws->run().hasProperty("_m1")) {
+    g_log.notice("[DB] Data workspace has property _m1!");
     Kernel::TimeSeriesProperty<double> *ts =
         dynamic_cast<Kernel::TimeSeriesProperty<double> *>(
             dataws->run().getProperty("_m1"));
+
     if (ts && ts->size() > 0) {
       double m1pos = ts->valuesAsVector()[0];
       if (fabs(m1pos - (-25.870000)) < 0.2) {

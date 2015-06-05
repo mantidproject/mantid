@@ -145,7 +145,7 @@ Geometry::Instrument_sptr createVirtualInstrument(Kernel::V3D sourcePos, Kernel:
 {
   Instrument_sptr instrument = boost::make_shared<Instrument>();
   instrument->setReferenceFrame(
-      boost::make_shared<ReferenceFrame>(Mantid::Geometry::Y /*up*/, Mantid::Geometry::X /*along*/, Left, "0,0,0"));
+      boost::make_shared<ReferenceFrame>(Mantid::Geometry::Y /*up*/, Mantid::Geometry::Z /*along*/, Right, "0,0,0"));
 
   // A source
   ObjComponent *source = new ObjComponent("source");

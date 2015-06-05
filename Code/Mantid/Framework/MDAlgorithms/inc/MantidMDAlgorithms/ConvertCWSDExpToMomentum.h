@@ -66,7 +66,9 @@ private:
                                             const int runnumber);
 
   /// Convert |Q| with detector position to Q_sample
-  Kernel::V3D convertToMomentum(const Kernel::V3D &ki, const Kernel::V3D &detPos,
+  Kernel::V3D convertToMomentum(const Kernel::V3D &samplePos,
+                                const Kernel::V3D &ki,
+                                const Kernel::V3D &detPos,
                                 const double &momentum,
                                 std::vector<Mantid::coord_t> &qSample,
                                 const Kernel::DblMatrix &rotationMatrix);
@@ -82,8 +84,6 @@ private:
                           std::vector<detid_t> &vec_detid);
 
   void setupTransferMatrix(API::MatrixWorkspace_sptr dataws,
-                           const double &omega, const double &phi,
-                           const double &chi,
                            Kernel::DblMatrix &rotationMatrix);
 
   API::ITableWorkspace_sptr m_expDataTableWS;
