@@ -121,7 +121,7 @@ if __name__ == '__main__':
             arg_changes = ['git', 'log', '--pretty=format:"%aE"', '--shortstat', since, until]
             sub = subprocess.Popen(arg_changes, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=repolocation)
             
-            sleep(1)
+            time.sleep(1)
 
             stdout, stderr = sub.communicate()
             output = stdout.split('\n')
