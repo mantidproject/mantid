@@ -286,7 +286,7 @@ public:
     // rather than asymmetry (Y values)
     const Mantid::MantidVec& X = outWs->readX(0);
 
-    TS_ASSERT_DELTA(X[0], 179.078620, 0.00001);
+    TS_ASSERT_DELTA(X[0], 178.740476, 0.00001);
     TS_ASSERT_DELTA(X[1], 178.849998, 0.00001);
 
     AnalysisDataService::Instance().remove(ws);

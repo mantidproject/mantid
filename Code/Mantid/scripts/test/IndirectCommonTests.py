@@ -69,7 +69,7 @@ class IndirectCommonTests(unittest.TestCase):
 
     def test_getEFixed_failure(self):
         ws = CreateSampleWorkspace()
-        self.assertRaises(IndexError, indirect_common.getEfixed, ws.name())
+        self.assertRaises(ValueError, indirect_common.getEfixed, ws.name())
 
     def test_getDefaultWorkingDirectory(self):
         config['defaultsave.directory'] = os.path.expanduser('~')

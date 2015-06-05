@@ -1,9 +1,17 @@
+#pylint: disable=no-init
 from mantid.simpleapi import *
 from mantid.api import *
 from mantid.kernel import *
 
 
 class MSDFit(DataProcessorAlgorithm):
+    _output_fit_ws = None
+    _spec_range = None
+    _x_range = None
+    _input_ws = None
+    _output_param_ws = None
+    _plot = None
+    _output_msd_ws = None
 
     def category(self):
         return 'Workflow\\MIDAS;PythonAlgorithms'
@@ -14,8 +22,7 @@ class MSDFit(DataProcessorAlgorithm):
 
 
     def PyInit(self):
-        self.declareProperty(MatrixWorkspaceProperty('InputWorkspace', '',
-                             direction=Direction.Input),
+        self.declareProperty(MatrixWorkspaceProperty('InputWorkspace', '',direction=Direction.Input),
                              doc='Sample input workspace')
 
         self.declareProperty(name='XStart', defaultValue=0.0,
@@ -31,24 +38,22 @@ class MSDFit(DataProcessorAlgorithm):
         self.declareProperty(name='Plot', defaultValue=False,
                              doc='Plots results after fit')
 
-        self.declareProperty(WorkspaceGroupProperty('OutputWorkspace', '',
-                             direction=Direction.Output),
+        self.declareProperty(WorkspaceGroupProperty('OutputWorkspace', '',direction=Direction.Output),
                              doc='Output mean squared displacement')
 
         self.declareProperty(ITableWorkspaceProperty('ParameterWorkspace', '',
-                             direction=Direction.Output,
-                             optional=PropertyMode.Optional),
+                                                     direction=Direction.Output,
+                                                     optional=PropertyMode.Optional),
                              doc='Output fit parameters table')
 
         self.declareProperty(WorkspaceGroupProperty('FitWorkspaces', '',
-                             direction=Direction.Output,
-                             optional=PropertyMode.Optional),
+                                                    direction=Direction.Output,
+                                                    optional=PropertyMode.Optional),
                              doc='Output fitted workspaces')
 
 
     def validateInputs(self):
         issues = dict()
-        tolerance = 1e-10
 
         workspace = self.getProperty('InputWorkspace').value
         x_data = workspace.readX(0)
@@ -91,8 +96,8 @@ class MSDFit(DataProcessorAlgorithm):
 
         # Fit line to each of the spectra
         function = 'name=LinearBackground, A0=0, A1=0'
-        input_params = [self._input_ws + ',i%d' % i for i in xrange(
-                        self._spec_range[0], self._spec_range[1] + 1)]
+        input_params = [self._input_ws + ',i%d' % i for i in xrange(self._spec_range[0],
+                                                                    self._spec_range[1] + 1)]
         input_params = ';'.join(input_params)
         PlotPeakByLogValue(Input=input_params, OutputWorkspace=self._output_msd_ws,
                            Function=function, StartX=self._x_range[0], EndX=self._x_range[1],

@@ -10,11 +10,14 @@
 
 namespace Mantid
 {
-  namespace API
-  {
+  namespace Geometry {
+    // Forward dec.
+    class PeakTransform;
+  }
+  namespace API{
     // Forward dec.
     class IPeaksWorkspace;
-    class PeakTransform;
+
   }
 }
 

@@ -25,8 +25,7 @@ class Mean(PythonAlgorithm):
                              direction=Direction.Input,
                              doc="Input workspaces. Comma separated workspace names")
 
-        self.declareProperty(MatrixWorkspaceProperty("OutputWorkspace", "",
-                             Direction.Output),
+        self.declareProperty(MatrixWorkspaceProperty("OutputWorkspace", "", Direction.Output),
                              doc="Output mean workspace")
 
 

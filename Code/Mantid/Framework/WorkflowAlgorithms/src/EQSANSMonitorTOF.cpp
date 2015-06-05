@@ -73,19 +73,15 @@ void EQSANSMonitorTOF::exec() {
   double source_to_monitor = (monitor_z - source_z) * 1000.0;
 
   // Calculate the frame width
-  double frequency = dynamic_cast<TimeSeriesProperty<double> *>(
-                         inputWS->run().getLogData("frequency"))
-                         ->getStatistics()
-                         .mean;
+  auto log = inputWS->run().getTimeSeriesProperty<double>("frequency");
+  double frequency = log->getStatistics().mean;
   double tof_frame_width = 1.0e6 / frequency;
 
   // Determine whether we need frame skipping or not by checking the chopper
   // speed
   bool frame_skipping = false;
-  const double chopper_speed = dynamic_cast<TimeSeriesProperty<double> *>(
-                                   inputWS->run().getLogData("Speed1"))
-                                   ->getStatistics()
-                                   .mean;
+  log = inputWS->run().getTimeSeriesProperty<double>("Speed1");
+  const double chopper_speed = log->getStatistics().mean;
   if (std::fabs(chopper_speed - frequency / 2.0) < 1.0)
     frame_skipping = true;
 
@@ -211,10 +207,8 @@ double EQSANSMonitorTOF::getTofOffset(MatrixWorkspace_const_sptr inputWS,
   double chopper_frameskip_srcpulse_wl_1[4] = {0, 0, 0, 0};
 
   // Calculate the frame width
-  double frequency = dynamic_cast<TimeSeriesProperty<double> *>(
-                         inputWS->run().getLogData("frequency"))
-                         ->getStatistics()
-                         .mean;
+  auto log = inputWS->run().getTimeSeriesProperty<double>("frequency");
+  double frequency = log->getStatistics().mean;
   double tof_frame_width = 1.0e6 / frequency;
 
   double tmp_frame_width = tof_frame_width;
@@ -236,16 +230,12 @@ double EQSANSMonitorTOF::getTofOffset(MatrixWorkspace_const_sptr inputWS,
     // Read chopper information
     std::ostringstream phase_str;
     phase_str << "Phase" << i + 1;
-    chopper_set_phase[i] = dynamic_cast<TimeSeriesProperty<double> *>(
-                               inputWS->run().getLogData(phase_str.str()))
-                               ->getStatistics()
-                               .mean;
+    log = inputWS->run().getTimeSeriesProperty<double>(phase_str.str());
+    chopper_set_phase[i] = log->getStatistics().mean;
     std::ostringstream speed_str;
     speed_str << "Speed" << i + 1;
-    chopper_speed[i] = dynamic_cast<TimeSeriesProperty<double> *>(
-                           inputWS->run().getLogData(speed_str.str()))
-                           ->getStatistics()
-                           .mean;
+    log = inputWS->run().getTimeSeriesProperty<double>(speed_str.str());
+    chopper_speed[i] = log->getStatistics().mean;
 
     // Only process choppers with non-zero speed
     if (chopper_speed[i] <= 0)

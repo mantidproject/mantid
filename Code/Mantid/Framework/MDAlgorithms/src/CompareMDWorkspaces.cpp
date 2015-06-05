@@ -32,7 +32,9 @@ DECLARE_ALGORITHM(CompareMDWorkspaces)
 //----------------------------------------------------------------------------------------------
 /** Constructor
 */
-CompareMDWorkspaces::CompareMDWorkspaces() {}
+CompareMDWorkspaces::CompareMDWorkspaces()
+    : inWS2(), m_result(), m_tolerance(0.0), m_CheckEvents(true),
+      m_CompareBoxID(true) {}
 
 //----------------------------------------------------------------------------------------------
 /** Destructor

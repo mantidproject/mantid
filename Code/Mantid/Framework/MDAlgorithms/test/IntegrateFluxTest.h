@@ -14,7 +14,7 @@ using namespace Mantid::API;
 
 namespace
 {
-  enum WorkspaceType { Tof, /*Weighted,*/ WeightedNoTime, Histogram, HistogramNonUniform, Distribution, PointData, PointDataNonUniform };
+  enum WorkspaceType { Tof, /*Weighted,*/ WeightedNoTime, Histogram, HistogramNonUniform, Distribution, PointData, PointDataNonUniform, Unsorted };
 
   struct TestingFunction
   {
@@ -95,6 +95,11 @@ public:
   {
     const size_t expectedNormalInterpolationSize = 1000;
     do_test_all(Tof,expectedNormalInterpolationSize);
+  }
+
+  void test_unsorted()
+  {
+    do_test_normal_case(Unsorted, 1.0);
   }
 
   void test_histogram()
@@ -182,6 +187,11 @@ private:
     TS_ASSERT(ws);
     if (!ws) return -1;
 
+    if (wsType == Unsorted) {
+      do_test_unsorted(*ws);
+      return 0;
+    }
+
     auto inWS = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>( inWSName );
     
     TS_ASSERT( ws->getAxis(0)->unit() == inWS->getAxis(0)->unit() );
@@ -229,6 +239,19 @@ private:
     // Remove workspace from the data service.
     AnalysisDataService::Instance().clear();
   }
+
+  void do_test_unsorted(const MatrixWorkspace& outWS) {
+    auto &y = outWS.readY(0);
+    double oldValue = 0.0;
+    for(size_t i = 0; i < y.size(); ++i)
+    {
+      if ( y[i] != 0.0 && y[i] != oldValue )
+      {
+        TS_ASSERT_DELTA( y[i] - oldValue, 51200, 1e-10 );
+        oldValue = y[i];
+      }
+    }
+  }
   
 private:
 
@@ -241,6 +264,9 @@ private:
       return;
     case Tof:
       createInputWorkspaceTOF(wsName);
+      return;
+    case Unsorted:
+      createInputWorkspaceUnsorted(wsName);
       return;
     case Histogram:
       createInputWorkspaceHistogram(wsName);
@@ -299,6 +325,29 @@ private:
     alg->setProperty("XMax",100.0);
     alg->setPropertyValue("XUnit","Momentum");
     alg->setProperty("BinWidth",1.0);
+    alg->setProperty("OutputWorkspace",wsName);
+    alg->execute();
+
+  }
+
+  void createInputWorkspaceUnsorted(const std::string& wsName)
+  {
+    auto alg = Mantid::API::AlgorithmManager::Instance().create("CreateSimulationWorkspace");
+    alg->initialize();
+    alg->setPropertyValue("Instrument","CNCS");
+    alg->setPropertyValue("BinParams","0,10,100");
+    alg->setProperty("OutputWorkspace",wsName);
+    alg->execute();
+
+    alg = Mantid::API::AlgorithmManager::Instance().create("ConvertToEventWorkspace");
+    alg->initialize();
+    alg->setPropertyValue("InputWorkspace",wsName);
+    alg->setProperty("OutputWorkspace",wsName);
+    alg->execute();
+
+    alg = Mantid::API::AlgorithmManager::Instance().create("SumSpectra");
+    alg->initialize();
+    alg->setPropertyValue("InputWorkspace",wsName);
     alg->setProperty("OutputWorkspace",wsName);
     alg->execute();
 

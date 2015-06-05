@@ -13,6 +13,11 @@ A workflow algorithm to perform a data reduction for Indirect ILL instruments.
 
 Note that currently only IN16B is supported.
 
+Workflow
+--------
+
+.. diagram:: IndirectILLReduction-v1_wkflw.dot
+
 Usage
 -----
 

@@ -337,6 +337,60 @@ public:
     TSM_ASSERT_DELTA("Wrong error value", std::sqrt(6.0 * (ws->getErrorAt(0) * ws->getErrorAt(0))), outWS->getErrorAt(0), 1e-4);
   }
 
+  void test_update_n_events_for_normalization() {
+
+      /*
+                    input
+      (x = 0) *|--|--|--|--|--|--|--|--|--|--|* (x = 10)
+                1  2  3  4  5  6  7  8  9  10    (signal values in bins)
+                1  2  3  4  5  6  7  8  9  10    (n_events in bins)
+
+                  output requested
+
+      (x = 0.75) *|--------------|* (x = 4.25)
+                1/4 , 1 , 1 , 1 , 1/4 = weights based on fraction overlap
+                1/4 + 2 + 3 + 4 + 5/4  (signal values in bins)
+                1/4 + 2 + 3 + 4 + 5/4  (n_events in bins)
+
+
+      */
+
+
+      using namespace Mantid::DataObjects;
+      MDHistoWorkspace_sptr ws = MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0 /*signal*/, 1 /*nd*/, 10 /*nbins*/, 10 /*max*/, 1.0 /*error sq*/);
+      // Fill signal and n-events as above
+      for(size_t i = 0; i < ws->getNPoints(); ++i) {
+        ws->setSignalAt(i, Mantid::signal_t(i+1));
+        ws->setNumEventsAt(i, Mantid::signal_t(i+1));
+        std::cout << "signal " << i+1 <<  "\t" << "nevents" <<  "\t" << "at" << "\t" << i << std::endl;
+      }
+
+      IntegrateMDHistoWorkspace alg;
+      alg.setChild(true);
+      alg.setRethrows(true);
+      alg.initialize();
+      alg.setProperty("InputWorkspace", ws);
+      const double min = 0.75;
+      const double max = 4.25;
+      alg.setProperty("P1Bin", boost::assign::list_of(min)(max).convert_to_container<std::vector<double> >());
+      alg.setPropertyValue("OutputWorkspace", "dummy");
+      alg.execute();
+      IMDHistoWorkspace_sptr outWS=alg.getProperty("OutputWorkspace");
+
+      // Quick check that output seems to have the right shape.
+      TSM_ASSERT_EQUALS("All integrated", 1, outWS->getNPoints());
+      auto dim = outWS->getDimension(0);
+      TS_ASSERT_EQUALS(min, dim->getMinimum());
+      TS_ASSERT_EQUALS(max, dim->getMaximum());
+
+      // Check the data. No accounting for normalization.
+      TSM_ASSERT_DELTA("Wrong integrated value", 1.0/4 + 2 + 3 + 4 + 5.0/4, outWS->getSignalAt(0), 1e-4);
+
+      Mantid::coord_t point[1] = {3.0}; // Roughly centre of the single output bin
+      TSM_ASSERT_DELTA("Number of events normalization. Weights for n-events used incorrectly.", 1.0, outWS->getSignalAtCoord(point, Mantid::API::NumEventsNormalization), 1e-4);
+      
+  }
+
 
 };
 

@@ -418,7 +418,8 @@ void Integrate3DEvents::addEvent(std::pair<double, V3D> event_Q, bool hkl_integ)
  *
  */
 PeakShapeEllipsoid_const_sptr Integrate3DEvents::ellipseIntegrateEvents(
-    std::vector<std::pair<double, V3D> > const &ev_list, std::vector<V3D> const &directions,
+    std::vector<std::pair<double, Mantid::Kernel::V3D> > const &ev_list,
+    std::vector<Mantid::Kernel::V3D> const &directions,
     std::vector<double> const &sigmas, bool specify_size, double peak_radius,
     double back_inner_radius, double back_outer_radius,
     std::vector<double> &axes_radii, double &inti, double &sigi) {

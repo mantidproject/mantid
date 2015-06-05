@@ -245,3 +245,34 @@ MantidHelpInterface *InterfaceManager::createHelpWindow() const
     return interface;
   }
 }
+
+void InterfaceManager::showHelpPage(const QString &url) {
+  auto window = createHelpWindow();
+  window->showPage(url);
+}
+
+void InterfaceManager::showWikiPage(const QString &page) {
+  auto window = createHelpWindow();
+  window->showWikiPage(page);
+}
+
+void InterfaceManager::showAlgorithmHelp(const QString &name,
+                                         const int version) {
+  auto window = createHelpWindow();
+  window->showAlgorithm(name, version);
+}
+
+void InterfaceManager::showConceptHelp(const QString &name) {
+  auto window = createHelpWindow();
+  window->showConcept(name);
+}
+
+void InterfaceManager::showFitFunctionHelp(const QString &name) {
+  auto window = createHelpWindow();
+  window->showFitFunction(name);
+}
+
+void InterfaceManager::showCustomInterfaceHelp(const QString &name) {
+  auto window = createHelpWindow();
+  window->showCustomInterface(name);
+}

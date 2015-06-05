@@ -808,8 +808,11 @@ void Matrix::insertColumn()
 
 void Matrix::customEvent(QEvent *e)
 {
-  if (e->type() == SCRIPTING_CHANGE_EVENT)
-    scriptingChangeEvent(dynamic_cast<ScriptingChangeEvent*>(e));
+  if (e->type() == SCRIPTING_CHANGE_EVENT){
+    if (auto sce = dynamic_cast<ScriptingChangeEvent*>(e)) {
+      scriptingChangeEvent(sce);
+    }
+  }
 }
 
 void Matrix::exportRasterImage(const QString& fileName, int quality)

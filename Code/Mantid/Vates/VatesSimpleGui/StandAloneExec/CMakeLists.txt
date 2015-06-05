@@ -40,12 +40,17 @@ add_executable( ${PROJECT_NAME} ${INCLUDE_FILES} ${SOURCE_FILES} ${MOC_SRCS} )
 
 include_directories( SYSTEM ${PARAVIEW_INCLUDE_DIRS} )
 
-target_link_libraries( ${PROJECT_NAME}
+target_link_libraries( ${PROJECT_NAME} LINK_PRIVATE 
 pqCore pqComponents pqApplicationComponents
 ${QT_LIBRARIES}
 ${MANTID_SUBPROJECT_LIBS}
 VatesSimpleGuiQtWidgets
 VatesSimpleGuiViewWidgets
+MantidQtAPI
+vtkRenderingFreeType
+vtkRenderingFreeTypeOpenGL
+${POCO_LIBRARIES}
+${Boost_LIBRARIES}
 )
 
 if (OSX_VERSION VERSION_GREATER 10.8)

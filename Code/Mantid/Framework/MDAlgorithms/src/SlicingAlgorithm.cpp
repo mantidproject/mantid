@@ -25,7 +25,8 @@ namespace MDAlgorithms {
 SlicingAlgorithm::SlicingAlgorithm()
     : m_transform(), m_transformFromOriginal(), m_transformToOriginal(),
       m_transformFromIntermediate(), m_transformToIntermediate(),
-      m_axisAligned(true), m_outD(0) // unititialized and should be invalid
+      m_axisAligned(true), m_outD(0), // unititialized and should be invalid
+      m_NormalizeBasisVectors(false)
 {}
 
 //----------------------------------------------------------------------------------------------
@@ -592,9 +593,12 @@ void SlicingAlgorithm::createAlignedTransform() {
         new DataObjects::CoordTransformAffine(inD, m_outD);
     tmp->setMatrix(mat);
     m_transformToOriginal = tmp;
-  } else
+  } else {
     // Changed # of dimensions - can't reverse the transform
     m_transformToOriginal = NULL;
+    g_log.warning("SlicingAlgorithm: Your slice will cause the output workspace to have less dimensions than the input. This will affect your ability to create subsequent slices.");
+  }
+   
 }
 
 //-----------------------------------------------------------------------------------------------

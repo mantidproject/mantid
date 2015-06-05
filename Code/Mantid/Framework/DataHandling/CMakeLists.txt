@@ -445,6 +445,11 @@ set ( TEST_FILES
 	XMLInstrumentParameterTest.h
 )
 
+if (COVERALLS)
+    foreach( loop_var ${SRC_FILES} ${INC_FILES})
+      set_property(GLOBAL APPEND PROPERTY COVERAGE_SRCS "${CMAKE_CURRENT_SOURCE_DIR}/${loop_var}")
+    endforeach(loop_var)
+endif()
 
 if(UNITY_BUILD)
   include(UnityBuild)
@@ -467,7 +472,7 @@ set_property ( TARGET DataHandling PROPERTY FOLDER "MantidFramework" )
 
 include_directories ( inc ../Nexus/inc ${HDF5_INCLUDE_DIRS})
 
-target_link_libraries ( DataHandling ${MANTIDLIBS} Nexus ${NEXUS_LIBRARIES} ${HDF5_LIBRARIES})
+target_link_libraries ( DataHandling LINK_PRIVATE ${MANTIDLIBS} Nexus ${NEXUS_LIBRARIES} ${HDF5_LIBRARIES} ${JSONCPP_LIBRARIES} )
 
 # Add the unit tests directory
 add_subdirectory ( test )

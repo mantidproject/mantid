@@ -326,8 +326,6 @@ private:
 
   /// The list of available facilities
   std::vector<FacilityInfo *> m_facilities;
-  /// Define a flag value for a removed property
-  const std::string m_removedFlag;
 
   /// local cache of proxy details
   Kernel::ProxyInfo m_proxyInfo;

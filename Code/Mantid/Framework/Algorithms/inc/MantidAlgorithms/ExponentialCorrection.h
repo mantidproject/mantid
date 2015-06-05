@@ -54,7 +54,7 @@ File change history is stored at: <https://github.com/mantidproject/mantid>
 class DLLExport ExponentialCorrection : public UnaryOperation {
 public:
   /// Default constructor
-  ExponentialCorrection() : UnaryOperation(){};
+  ExponentialCorrection();
   /// Destructor
   virtual ~ExponentialCorrection(){};
   /// Algorithm's name for identification

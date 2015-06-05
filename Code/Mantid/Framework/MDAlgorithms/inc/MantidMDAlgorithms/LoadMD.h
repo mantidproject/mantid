@@ -85,7 +85,9 @@ private:
   API::CoordTransform *loadAffineMatrix(std::string entry_name);
 
   /// Open file handle
+  // clang-format off
   boost::scoped_ptr< ::NeXus::File> m_file;
+  // clang-format on
 
   /// Name of that file
   std::string m_filename;
@@ -99,6 +101,9 @@ private:
   Kernel::SpecialCoordinateSystem m_coordSystem;
   /// load only the box structure with empty boxes but do not tload boxes events
   bool m_BoxStructureAndMethadata;
+
+  /// Version of SaveMD used to save the file
+  int m_saveMDVersion ;
 };
 
 } // namespace DataObjects

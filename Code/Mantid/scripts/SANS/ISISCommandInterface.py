@@ -171,9 +171,10 @@ def SetTransSpectrum(specNum, interp=False):
 def SetSampleOffset(value):
     ReductionSingleton().instrument.set_sample_offset(value)
 
-def Gravity(flag):
-    _printMessage('Gravity(' + str(flag) + ')')
+def Gravity(flag, extra_length = 0.0):
+    _printMessage('Gravity(' + str(flag) + ', '+ str(extra_length) + ')')
     ReductionSingleton().to_Q.set_gravity(flag)
+    ReductionSingleton().to_Q.set_extra_length(extra_length)
 
 def SetFrontDetRescaleShift(scale=1.0, shift=0.0, fitScale=False, fitShift=False, qMin=None, qMax=None):
     """

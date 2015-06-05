@@ -13,7 +13,7 @@ This algorithm takes a function after it has been optimized by the Fit algorithm
 
 Usage
 -----
-(*At the moment the algorithm works properly if run from C++ only.*)
+(*At the moment the algorithm works properly if run from C++ only.*)::
 
     import numpy as np
 
@@ -34,5 +34,5 @@ Usage
     # Calculate peak parameter error estimates for the two Lorentzians.
     params = EstimatePeakErrors(fun)
 
- 
+
 .. categories::

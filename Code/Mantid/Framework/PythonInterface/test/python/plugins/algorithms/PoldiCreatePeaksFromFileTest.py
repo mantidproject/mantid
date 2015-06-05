@@ -63,10 +63,10 @@ class PoldiCreatePeaksFromFileTest(unittest.TestCase):
         self._cleanWorkspaces([ws, ws_expected])
 
     def test_FileTwoCompounds(self):
-        # It's the same structure and the same reflections, just the structure factors are different
+        # Using two imaginary structures to check that two compounds are parsed correctly as well
         fileHelper = TemporaryFileHelper("""SiliconCarbon {
-                                                Lattice: 5.43 5.43 5.43 90.0 90.0 90.0
-                                                Spacegroup: F d -3 m
+                                                Lattice: 5.43 5.43 5.43 90.0 90.0 120.0
+                                                Spacegroup: P 63/m m c
                                                 Atoms: {
                                                     Si 0 0 0 0.9 0.05
                                                     C 0 0 0 0.1 0.05
@@ -76,7 +76,7 @@ class PoldiCreatePeaksFromFileTest(unittest.TestCase):
                                                 Lattice: 5.43 5.43 5.43 90.0 90.0 90.0
                                                 Spacegroup: F d -3 m
                                                 Atoms: {
-                                                    Si 0 0 0 1.0 0.05
+                                                    Si 1/2 1/2 0 1.0 0.05
                                                 }
                                             }""")
         ws = PoldiCreatePeaksFromFile(fileHelper.getName(), 0.7, 10.0)

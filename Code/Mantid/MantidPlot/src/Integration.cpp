@@ -174,6 +174,7 @@ int Integration::romberg()
 QString Integration::logInfo()
 {
   ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parent());
+  if (!app) return "";
     QLocale locale = app->locale();
     int prec = app->d_decimal_digits;
 

@@ -71,7 +71,12 @@ set ( EXPORT_FILES
   src/Exports/AlgorithmProperty.cpp
 )
 
-# Files containing additional helper code that are not related to exporting class/functions
+set ( MODULE_DEFINITION ${CMAKE_CURRENT_BINARY_DIR}/api.cpp )
+create_module ( ${MODULE_TEMPLATE} ${MODULE_DEFINITION} ${EXPORT_FILES} )
+
+#############################################################################################
+# Helper code
+#############################################################################################
 set ( SRC_FILES
   src/Algorithms/RunPythonScript.cpp
   src/FitFunctions/IFunctionAdapter.cpp
@@ -101,11 +106,6 @@ set ( PY_FILES
   _workspaceops.py
 )
 
-#############################################################################################
-# Generate a source file from the export definitions
-#############################################################################################
-create_module ( ${MODULE_TEMPLATE} ${CMAKE_CURRENT_BINARY_DIR}/api.cpp EXPORT_FILES
-                SRC_FILES )
 
 #############################################################################################
 # Copy over the pure Python files for the module
@@ -125,12 +125,21 @@ copy_files_to_dir ( "${PY_FILES}" ${CMAKE_CURRENT_SOURCE_DIR} ${OUTPUT_DIR}
 # Create the target for this directory
 #############################################################################################
 
-add_library ( PythonAPIModule ${SRC_FILES} ${INC_FILES} ${PYTHON_INSTALL_FILES} )
+add_library ( PythonAPIModule ${EXPORT_FILES} ${MODULE_DEFINITION} ${SRC_FILES} ${INC_FILES}
+              ${PYTHON_INSTALL_FILES} )
 set_python_properties( PythonAPIModule _api )
 set_target_output_directory ( PythonAPIModule ${OUTPUT_DIR} .pyd )
 
 # Add the required dependencies
-target_link_libraries ( PythonAPIModule PythonGeometryModule PythonKernelModule API )
+target_link_libraries ( PythonAPIModule LINK_PRIVATE
+            PythonGeometryModule
+            PythonKernelModule
+            API
+            Kernel
+            Geometry
+            ${PYTHON_LIBRARIES}
+            ${POCO_LIBRARIES}
+            ${Boost_LIBRARIES} )
 
 if (OSX_VERSION VERSION_GREATER 10.8)
   set_target_properties( PythonAPIModule PROPERTIES INSTALL_RPATH "@loader_path/../../../MacOS;@loader_path/../kernel/;@loader_path/../geometry/")

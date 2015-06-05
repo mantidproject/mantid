@@ -15,6 +15,9 @@
 #include "MantidVatesAPI/TimeToTimeStep.h"
 #include "MantidVatesAPI/vtkMDHistoHex4DFactory.h"
 #include "MantidVatesAPI/vtkMDHistoHexFactory.h"
+#include "MantidVatesAPI/vtkMDHistoQuadFactory.h"
+#include "MantidVatesAPI/vtkMDHistoLineFactory.h"
+#include "MantidVatesAPI/vtkMD0DFactory.h"
 #include "MantidVatesAPI/FilteringUpdateProgressAction.h"
 #include "MantidVatesAPI/IgnoreZerosThresholdRange.h"
 
@@ -23,7 +26,7 @@ using namespace Mantid::VATES;
 vtkStandardNewMacro(vtkMDHWSource)
 
 /// Constructor
-vtkMDHWSource::vtkMDHWSource() :  m_wsName(""), m_time(0), m_presenter(NULL)
+vtkMDHWSource::vtkMDHWSource() :  m_wsName(""), m_time(0), m_presenter(NULL), m_normalizationOption(AutoSelect)
 {
   this->SetNumberOfInputPorts(0);
   this->SetNumberOfOutputPorts(1);
@@ -151,6 +154,17 @@ const char* vtkMDHWSource::GetInstrument()
   }
 }
 
+/**
+Set the normalization option. This is how the signal data will be normalized before viewing.
+@param option : Normalization option
+*/
+void vtkMDHWSource::SetNormalization(int option)
+{
+  m_normalizationOption = static_cast<Mantid::VATES::VisualNormalization>(option);
+  this->Modified();
+}
+
+
 int vtkMDHWSource::RequestData(vtkInformation *, vtkInformationVector **, vtkInformationVector *outputVector)
 {
   if(m_presenter->canReadFile())
@@ -171,11 +185,18 @@ int vtkMDHWSource::RequestData(vtkInformation *, vtkInformationVector **, vtkInf
     ThresholdRange_scptr thresholdRange(new IgnoreZerosThresholdRange());
 
     /*
-    Will attempt to handle drawing in 4D case and then in 3D case if that fails.
+    Will attempt to handle drawing in 4D case and then in 3D case if that fails, and so on down to 1D
     */
-    vtkMDHistoHexFactory* successor = new vtkMDHistoHexFactory(thresholdRange, "signal");
-    vtkMDHistoHex4DFactory<TimeToTimeStep> *factory = new vtkMDHistoHex4DFactory<TimeToTimeStep>(thresholdRange, "signal", m_time);
-    factory->SetSuccessor(successor);
+    vtkMD0DFactory* zeroDFactory = new vtkMD0DFactory;
+    vtkMDHistoLineFactory* lineFactory = new vtkMDHistoLineFactory(thresholdRange, m_normalizationOption);
+    vtkMDHistoQuadFactory* quadFactory = new vtkMDHistoQuadFactory(thresholdRange, m_normalizationOption);
+    vtkMDHistoHexFactory* hexFactory = new vtkMDHistoHexFactory(thresholdRange, m_normalizationOption);
+    vtkMDHistoHex4DFactory<TimeToTimeStep> *factory = new vtkMDHistoHex4DFactory<TimeToTimeStep>(thresholdRange, m_normalizationOption, m_time);
+
+    factory->SetSuccessor(hexFactory);
+    hexFactory->SetSuccessor(quadFactory);
+    quadFactory->SetSuccessor(lineFactory);
+    lineFactory->SetSuccessor(zeroDFactory);
 
     vtkDataSet* product = m_presenter->execute(factory, loadingProgressUpdate, drawingProgressUpdate);
 

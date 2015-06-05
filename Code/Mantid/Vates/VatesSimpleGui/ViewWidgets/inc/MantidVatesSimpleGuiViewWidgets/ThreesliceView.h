@@ -97,9 +97,9 @@ private:
   /// Helper function that creates all three Cartesian orthogonal slices.
   void makeThreeSlice();
 
-  QPointer<pqRenderView> mainView; ///< The 3D view
+  QPointer<pqRenderView> m_mainView; ///< The 3D view
 
-  Ui::ThreeSliceView ui; ///< The three slice view's UI form
+  Ui::ThreeSliceView m_ui; ///< The three slice view's UI form
 };
 
 }

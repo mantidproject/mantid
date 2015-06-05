@@ -24,7 +24,7 @@ using namespace API;
 using namespace Geometry;
 
 /// Empty default constructor
-SetScalingPSD::SetScalingPSD() : Algorithm() {}
+SetScalingPSD::SetScalingPSD() : Algorithm(), m_scalingOption(0) {}
 
 /** Initialisation method.
  *
@@ -299,9 +299,15 @@ void SetScalingPSD::movePos(API::MatrixWorkspace_sptr &WS,
     prog.report();
   }
   g_log.debug() << "Range of scaling factors is " << minScale << " to "
-                << maxScale << "\n"
-                << "Average abs scaling fraction is " << aveScale / scaleCount
-                << "\n";
+                << maxScale << "\n";
+  if (0 != scaleCount) {
+    g_log.debug() << "Average abs scaling fraction is " << aveScale / scaleCount
+                  << "\n";
+  } else {
+    g_log.debug() << "Average abs scaling fraction cannot ba calculated "
+                     "because the scale count is 0! Its value before dividing "
+                     "by the count is " << aveScale << "\n";
+  }
   return;
 }
 

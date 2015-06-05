@@ -6,6 +6,7 @@ import os
 import math
 import sys
 
+#pylint: disable=too-few-public-methods
 class REFLOptions(object):
     def __init__(self):
         from reduction_gui.reduction.reflectometer.refl_data_script import DataSets as REFLDataSets
@@ -89,14 +90,14 @@ class REFLReprocess(PythonAlgorithm):
         for item in os.listdir(output_dir):
             if item.endswith('.txt') and \
                (len(filter_string)==0 or item.find(filter_string)>=0):
-                basename, ext = os.path.splitext(item)
+                basename, _ = os.path.splitext(item)
                 Load(Filename=os.path.join(output_dir, item), OutputWorkspace=basename)
                 (_name,_ts) = basename.split('_#')
                 CloneWorkspace(InputWorkspace=basename, OutputWorkspace=_name)
 
 
     def stitch_data(self, input_file, output_dir, q_min, q_step):
-        from LargeScaleStructures.data_stitching import DataSet, Stitcher, RangeSelector
+        from LargeScaleStructures.data_stitching import DataSet, Stitcher#, RangeSelector
         # Identify the data sets to stitch and order them
         workspace_list = []
         _list_name = []
@@ -119,7 +120,7 @@ class REFLReprocess(PythonAlgorithm):
         for item in workspace_list:
             data = DataSet(item)
             data.load(True, True)
-            x_min, x_max = data.get_range()
+            dummy_x_min, x_max = data.get_range()
             if x_max > q_max:
                 q_max = x_max
             s.append(data)

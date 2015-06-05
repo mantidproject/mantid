@@ -8,26 +8,25 @@
 using namespace Mantid::API;
 using namespace boost::python;
 
-boost::python::object getActiveSessionsAsList(CatalogManagerImpl& self)
-{
+boost::python::object getActiveSessionsAsList(CatalogManagerImpl &self) {
   boost::python::list sessions;
   const auto vecSessions = self.getActiveSessions();
-  for(auto itr = vecSessions.begin(); itr != vecSessions.end(); ++itr)
-  {
+  for (auto itr = vecSessions.begin(); itr != vecSessions.end(); ++itr) {
     sessions.append(*itr);
   }
   return sessions;
 }
 
-void export_CatalogManager()
-{
-  register_ptr_to_python<CatalogManagerImpl*>();
+void export_CatalogManager() {
+  register_ptr_to_python<CatalogManagerImpl *>();
 
-  class_<CatalogManagerImpl,boost::noncopyable>("CatalogManagerImpl", no_init)
-    .def("numberActiveSessions", &CatalogManagerImpl::numberActiveSessions, "Number of active sessions open")
-    .def("getActiveSessions", &getActiveSessionsAsList, "Get the active sessions")
-    .def("Instance", &CatalogManager::Instance, return_value_policy<reference_existing_object>(),
-          "Returns a reference to the CatalogManger singleton")
-    .staticmethod("Instance");
-
+  class_<CatalogManagerImpl, boost::noncopyable>("CatalogManagerImpl", no_init)
+      .def("numberActiveSessions", &CatalogManagerImpl::numberActiveSessions,
+           "Number of active sessions open")
+      .def("getActiveSessions", &getActiveSessionsAsList,
+           "Get the active sessions")
+      .def("Instance", &CatalogManager::Instance,
+           return_value_policy<reference_existing_object>(),
+           "Returns a reference to the CatalogManger singleton")
+      .staticmethod("Instance");
 }

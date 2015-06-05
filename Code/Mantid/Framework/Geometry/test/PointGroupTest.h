@@ -24,6 +24,8 @@ public:
     {
         PointGroup_sptr testedPointGroup = PointGroupFactory::Instance().createPointGroup(name);
 
+        TSM_ASSERT(name + ": Does not fulfill group axioms!", testedPointGroup->isGroup());
+
         std::vector<V3D> equivalents = testedPointGroup->getEquivalents(hkl);
         // check that the number of equivalent reflections is as expected.
         TSM_ASSERT_EQUALS(name + ": Expected " + boost::lexical_cast<std::string>(numEquiv) + " equivalents, got " + boost::lexical_cast<std::string>(equivalents.size()) + " instead.", equivalents.size(), numEquiv);
@@ -191,6 +193,38 @@ public:
   {
       PointGroup_sptr pg =PointGroupFactory::Instance().createPointGroup("m-3m");
       checkPointGroupPerformance(pg);
+  }
+
+  void testCrystalSystemNames()
+  {
+      TS_ASSERT_EQUALS(getCrystalSystemFromString("Cubic"), PointGroup::Cubic);
+      TS_ASSERT_EQUALS(getCrystalSystemFromString("cubic"), PointGroup::Cubic);
+      TS_ASSERT_EQUALS(getCrystalSystemFromString("CUBIC"), PointGroup::Cubic);
+      TS_ASSERT_EQUALS(getCrystalSystemFromString("CuBiC"), PointGroup::Cubic);
+
+      TS_ASSERT_EQUALS(getCrystalSystemFromString("Tetragonal"), PointGroup::Tetragonal);
+      TS_ASSERT_EQUALS(getCrystalSystemFromString("Hexagonal"), PointGroup::Hexagonal);
+      TS_ASSERT_EQUALS(getCrystalSystemFromString("Trigonal"), PointGroup::Trigonal);
+      TS_ASSERT_EQUALS(getCrystalSystemFromString("Orthorhombic"), PointGroup::Orthorhombic);
+      TS_ASSERT_EQUALS(getCrystalSystemFromString("Monoclinic"), PointGroup::Monoclinic);
+      TS_ASSERT_EQUALS(getCrystalSystemFromString("Triclinic"), PointGroup::Triclinic);
+
+      TS_ASSERT_THROWS(getCrystalSystemFromString("DoesNotExist"), std::invalid_argument);
+
+      TS_ASSERT_EQUALS(getCrystalSystemFromString(getCrystalSystemAsString(PointGroup::Cubic)),
+                       PointGroup::Cubic);
+      TS_ASSERT_EQUALS(getCrystalSystemFromString(getCrystalSystemAsString(PointGroup::Tetragonal)),
+                       PointGroup::Tetragonal);
+      TS_ASSERT_EQUALS(getCrystalSystemFromString(getCrystalSystemAsString(PointGroup::Hexagonal)),
+                       PointGroup::Hexagonal);
+      TS_ASSERT_EQUALS(getCrystalSystemFromString(getCrystalSystemAsString(PointGroup::Trigonal)),
+                       PointGroup::Trigonal);
+      TS_ASSERT_EQUALS(getCrystalSystemFromString(getCrystalSystemAsString(PointGroup::Orthorhombic)),
+                       PointGroup::Orthorhombic);
+      TS_ASSERT_EQUALS(getCrystalSystemFromString(getCrystalSystemAsString(PointGroup::Monoclinic)),
+                       PointGroup::Monoclinic);
+      TS_ASSERT_EQUALS(getCrystalSystemFromString(getCrystalSystemAsString(PointGroup::Triclinic)),
+                       PointGroup::Triclinic);
   }
 
 private:

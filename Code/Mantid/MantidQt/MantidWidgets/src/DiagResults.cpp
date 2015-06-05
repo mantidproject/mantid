@@ -24,8 +24,19 @@ namespace
   /// the total number of tests that results are reported for here
   const int NUMTESTS = 5;
   /// the list of tests that we display results for
-  const QString TESTS[NUMTESTS] =
+  const QString TESTS[5] =
   { "Hard mask", "First detector vanadium test", "Second detector vanadium test", "Background test", "PSD Bleed test"};
+
+  int find_test(const std::string &test_name){
+    int found = -1;
+    for(int i=0;i<5;i++){
+      if (TESTS[i].toStdString()==test_name){
+        found = i+1;
+        return found;
+      }
+    }
+    return found;
+  }
 }
 
 //----------------------
@@ -68,19 +79,28 @@ void DiagResults::updateResults(const QString & testSummary)
   }
 
   QStringList results = testSummary.split("\n");
+  int nTestStrings = results.length();
+  int end_count(0);
   // First result line is the header
-  for(int i = 1; i <= NUMTESTS; ++i)
+  for(int i = 0; i <= nTestStrings; ++i)
   {
     QString testName = results[i].section(":", 0, 1);
     std::string tn = testName.toStdString();
-    if (tn[0] == '=')continue;
-    QString fieldValues = results[i].section(":", 1);
-    QStringList columns = fieldValues.split(QRegExp("\\s+"), QString::SkipEmptyParts);
+    if (tn[0] == '='){
+      end_count++;
+      if (end_count>1)break;
+      else            continue;
+    }
+    QStringList NameValPair = results[i].split(":");
+    tn = NameValPair[0].toStdString();
+    QStringList columns = NameValPair[1].split(QRegExp("\\s+"), QString::SkipEmptyParts);
     Q_ASSERT(columns.size() == 2);
     QString status;
     if( columns[0] == "None" ) status = "N/A";
     else status = columns[1];
-    updateRow(i+1, status);
+    int test_ind = find_test(tn);
+    if (test_ind<0)continue;
+    updateRow(test_ind+1, status);
   }
   
 }

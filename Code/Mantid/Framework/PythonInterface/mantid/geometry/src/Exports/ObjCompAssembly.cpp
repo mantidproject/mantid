@@ -8,11 +8,9 @@ using Mantid::Geometry::ICompAssembly;
 using Mantid::Geometry::ObjComponent;
 using namespace boost::python;
 
-void export_ObjCompAssembly()
-{
+void export_ObjCompAssembly() {
   register_ptr_to_python<boost::shared_ptr<ObjCompAssembly>>();
 
-  class_<ObjCompAssembly, boost::python::bases<ICompAssembly, ObjComponent>, boost::noncopyable>("IObjCompAssembly", no_init)
-    ;
+  class_<ObjCompAssembly, boost::python::bases<ICompAssembly, ObjComponent>,
+         boost::noncopyable>("IObjCompAssembly", no_init);
 }
-

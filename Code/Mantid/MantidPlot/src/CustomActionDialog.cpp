@@ -195,7 +195,12 @@ void CustomActionDialog::updateDisplayList()
 {
 	itemsList->clear();
 
-    QList<QAction *> actionsList = (dynamic_cast<ApplicationWindow *>(parentWidget()))->customActionsList();
+  ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(parent());
+  if (!app) {
+    throw std::logic_error("Parent of CustomActionDialog is not ApplicationWindow as expected.");
+  }
+
+  QList<QAction *> actionsList = app->customActionsList();
 	foreach(QAction *action, actionsList){//add existing actions to the list widget
 	    QString text = action->text();
         QString shortcut = action->shortcut().toString();
@@ -263,7 +268,10 @@ bool CustomActionDialog::validUserInput()
 		folder = folderBox->text();
 	}
 
-	ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(parent());
+  ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(parent());
+  if (!app) {
+    throw std::logic_error("Parent of CustomActionDialog is not ApplicationWindow as expected.");
+  }
 	QList<QAction *>actions = app->customActionsList();
 
 	if (textBox->text().isEmpty()){
@@ -370,7 +378,10 @@ void CustomActionDialog::removeAction()
 	if (!action)
 		return;
 	
-    ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(parentWidget());
+    ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(parent());
+    if (!app) {
+      throw std::logic_error("Parent of CustomActionDialog is not ApplicationWindow as expected.");
+    }
     QFile f(app->customActionsDirPath + "/" + action->text() + ".qca");
     f.remove();
 	
@@ -394,7 +405,10 @@ void CustomActionDialog::saveCurrentAction()
 	if ((toolBarBtn->isChecked() && w->objectName() != toolBarBox->currentText()) || 
 		(menuBtn->isChecked() && w->objectName() != menuBox->currentText())){
 		//relocate action: create a new one and delete the old
-		ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(parent());
+    ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(parent());
+    if (!app) {
+      throw std::logic_error("Parent of CustomActionDialog is not ApplicationWindow as expected.");
+    }
 		QAction *newAction = new QAction(app);
 		customizeAction(newAction);			
 		if (toolBarBtn->isChecked()){
@@ -427,6 +441,9 @@ void CustomActionDialog::saveAction(QAction *action)
         return;
 
     ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(parent());
+    if (!app) {
+      throw std::logic_error("Parent of CustomActionDialog is not ApplicationWindow as expected.");
+    }
     QString fileName = app->customActionsDirPath + "/" + action->text() + ".qca";
     QFile f(fileName);
 	if (!f.open( QIODevice::WriteOnly)){

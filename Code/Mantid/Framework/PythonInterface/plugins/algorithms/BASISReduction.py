@@ -10,6 +10,7 @@ DEFAULT_RANGE = [6.24, 6.30]
 DEFAULT_MASK_GROUP_DIR = "/SNS/BSS/shared/autoreduce"
 DEFAULT_MASK_FILE = "BASIS_Mask.xml"
 
+#pylint: disable=too-many-instance-attributes
 class BASISReduction(PythonAlgorithm):
 
     _short_inst = None

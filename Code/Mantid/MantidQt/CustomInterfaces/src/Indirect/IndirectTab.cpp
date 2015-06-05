@@ -195,9 +195,9 @@ namespace CustomInterfaces
   {
     QString pyInput = "from mantidplot import plotSpectrum\n";
 
-    pyInput += "plotSpectrum('";
+    pyInput += "plotSpectrum(['";
     pyInput += workspaceNames.join("','");
-    pyInput += "', ";
+    pyInput += "'], ";
     pyInput += QString::number(specIndex);
     pyInput += ")\n";
 
@@ -234,9 +234,9 @@ namespace CustomInterfaces
   {
     QString pyInput = "from mantidplot import plotSpectrum\n";
 
-    pyInput += "plotSpectrum('";
+    pyInput += "plotSpectrum(['";
     pyInput += workspaceNames.join("','");
-    pyInput += "', range(";
+    pyInput += "'], range(";
     pyInput += QString::number(specStart);
     pyInput += ",";
     pyInput += QString::number(specEnd);
@@ -296,9 +296,9 @@ namespace CustomInterfaces
   {
     QString pyInput = "from mantidplot import plotTimeBin\n";
 
-    pyInput += "plotTimeBin('";
+    pyInput += "plotTimeBin(['";
     pyInput += workspaceNames.join("','");
-    pyInput += "', ";
+    pyInput += "'], ";
     pyInput += QString::number(specIndex);
     pyInput += ")\n";
 
@@ -394,10 +394,21 @@ namespace CustomInterfaces
     if(!inst)
       throw std::runtime_error("No instrument on workspace");
 
-    if(!inst->hasParameter("efixed-val"))
-      throw std::runtime_error("Instrument has no efixed parameter");
+    // Try to get the parameter form the base instrument
+    if(inst->hasParameter("Efixed"))
+      return inst->getNumberParameter("Efixed")[0];
 
-    return inst->getNumberParameter("efixed-val")[0];
+    // Try to get it form the analyser component
+    if(inst->hasParameter("analyser"))
+    {
+      std::string analyserName = inst->getStringParameter("analyser")[0];
+      auto analyserComp = inst->getComponentByName(analyserName);
+
+      if(analyserComp && analyserComp->hasParameter("Efixed"))
+        return analyserComp->getNumberParameter("Efixed")[0];
+    }
+
+    throw std::runtime_error("Instrument has no efixed parameter");
   }
 
 

@@ -94,7 +94,16 @@ _translations = {
     'Joachim Wuttke (o)'      : 'Wuttke, Joachim',
     'DiegoMonserrat'          : 'Monserrat, Diego',
     'Diego Monserrat'         : 'Monserrat, Diego',
-    'David Mannicke'          : 'Mannicke, David'
+    'David Mannicke'          : 'Mannicke, David',
+    'Garrett Granroth'        : 'Granroth, Garrett',
+    'Hahn'                    : 'Hahn, Steven',
+    'Marina Ganeva'           : 'Ganeva, Marina',
+    'Raquel Alvarez'          : 'Alvarez, Raquel',
+    'Raquel'                  : 'Alvarez, Raquel',
+    'jmborr'                  : 'Borreguero, Jose',
+    'Tobias Richter'          : 'Richter, Tobias',
+    'ianbush'                 : 'Bush, Ian',
+    'KarlPalmen'              : 'Palmen, Karl'
 }
 
 # Used to ensure a Git author does not appear in any of the DOIs.  This is NOT
@@ -104,6 +113,8 @@ _blacklist = [
     '',
     'unknown',
     'Yao, Marie',
+    'Utkarsh Ayachit',
+    'Chris Kerr',
 ]
 
 # The whitelist is used for sponsors / contributors who should be included,
@@ -112,7 +123,6 @@ _blacklist = [
 whitelist = [
     'Cottrell, Stephen',
     'Dillow, David',
-    'Granroth, Garrett',
     'Hagen, Mark',
     'Hillier, Adrian',
     'Heller, William',
@@ -124,6 +134,7 @@ whitelist = [
     'Proffen, Thomas',
     'Radaelli, Paolo',
     'Taylor, Jon',
+    'Granroth, Garrett'
 ]
 
 import subprocess

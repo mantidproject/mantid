@@ -55,5 +55,6 @@ class LRPrimaryFractionTest(stresstesting.MantidStressTest):
                                                                    reference[item_number][2], reference[item_number][3]))
                 return False
             item_number += 1
+        fd.close()
         os.remove(self.cfg_file)
         return True

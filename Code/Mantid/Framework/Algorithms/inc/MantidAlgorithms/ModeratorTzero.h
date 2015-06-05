@@ -72,12 +72,8 @@ namespace Algorithms {
 */
 class DLLExport ModeratorTzero : public Mantid::API::Algorithm {
 public:
-  /// (Empty) Constructor
-  ModeratorTzero()
-      : Mantid::API::Algorithm(),
-        m_convfactor(0.5e+12 * Mantid::PhysicalConstants::NeutronMass /
-                     Mantid::PhysicalConstants::meV),
-        m_niter(1), m_t1min(200.0) {}
+  /// Default constructor
+  ModeratorTzero();
   /// Virtual destructor
   virtual ~ModeratorTzero() {}
   /// Algorithm's name

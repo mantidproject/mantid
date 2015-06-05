@@ -36,7 +36,10 @@ PlotToolInterface(graph),
 m_fitPropertyBrowser(fitPropertyBrowser),
 m_mantidUI(mantidUI),
 m_wsName(),m_spec(),m_init(false),
-m_width_set(true),m_width(0),m_addingPeak(false),m_resetting(false),m_shouldBeNormalised(false)
+m_width_set(true), m_width(0), m_addingPeak(false), m_resetting(false),
+m_xMin(0.), m_xMax(0.),
+m_changingXMin(false), m_changingXMax(false),
+m_shouldBeNormalised(false)
 {
   d_graph->plotWidget()->canvas()->setCursor(Qt::pointingHandCursor);
 

@@ -21,7 +21,8 @@ from mantid.api import WorkspaceGroup, Workspace, IEventWorkspace
 from SANSUtility import (GetInstrumentDetails, MaskByBinRange,
                          isEventWorkspace, getFilePathFromWorkspace,
                          getWorkspaceReference, slice2histogram, getFileAndName,
-                         mask_detectors_with_masking_ws)
+                         mask_detectors_with_masking_ws, check_child_ws_for_name_and_type_for_added_eventdata,
+                         extract_child_ws_for_added_eventdata)
 import isis_instrument
 import isis_reducer
 from reducer_singleton import ReductionStep
@@ -53,7 +54,7 @@ class LoadRun(object):
             @param trans: set to true if the file is from a transmission run (default: False)
             @param reload: if to reload the workspace if it is already present
             @param entry: the entry number of the run, useful for multi-period files (default: load the entire file)
-    """
+        """
         super(LoadRun, self).__init__()
         self._data_file = run_spec
         self._is_trans = trans
@@ -146,16 +147,41 @@ class LoadRun(object):
 
         outWs = Load(self._data_file, **extra_options)
 
-        monitor_ws_name = workspace + "_monitors"
+        appendix = "_monitors"
 
-        if isinstance(outWs, IEventWorkspace):
-            LoadNexusMonitors(self._data_file, OutputWorkspace=monitor_ws_name)
-        else:
-            if monitor_ws_name in mtd:
-                DeleteWorkspace(monitor_ws_name)
+        # We need to check if we are dealing with a group workspace which is made up of added event data. Note that
+        # we can also have a group workspace which is associated with period data, which don't want to deal with here.
 
-        last_algorithm = outWs.getHistory().lastAlgorithm()
-        loader_name = last_algorithm.getProperty('LoaderName').value
+        added_event_data_flag = False
+        if isinstance(outWs, WorkspaceGroup) and check_child_ws_for_name_and_type_for_added_eventdata(outWs):
+            if self._period != self.UNSET_PERIOD:
+                raise RuntimeError("Trying to use multiperiod and added eventdata. This is currently not supported.")
+            extract_child_ws_for_added_eventdata(outWs, appendix)
+            added_event_data_flag = True
+            # Reload the outWs, it has changed from a group workspace to an event workspace
+            outWs = mtd[workspace]
+
+        monitor_ws_name = workspace + appendix
+
+        if not added_event_data_flag:
+            if isinstance(outWs, IEventWorkspace):
+                try:
+                    LoadNexusMonitors(self._data_file, OutputWorkspace=monitor_ws_name)
+                except ValueError, details:
+                    sanslog.warning('The file does not contain monitors. \n' +
+                                    'The normalization might behave differently than you expect.\n'
+                                   ' Further details: ' + str(details) + '\n')
+            else:
+                if monitor_ws_name in mtd:
+                    DeleteWorkspace(monitor_ws_name)
+
+        loader_name = ''
+        try:
+            last_algorithm = outWs.getHistory().lastAlgorithm()
+            loader_name = last_algorithm.getProperty('LoaderName').value
+        except RuntimeError, details:
+            sanslog.warning('Tried to get a loader name. But it seems that there is no loader name. Further info: ' + str(details))
+
         if loader_name == 'LoadRaw':
             self._loadSampleDetails(workspace)
 
@@ -163,7 +189,9 @@ class LoadRun(object):
             outWs = mtd[self._leaveSinglePeriod(outWs.name(), self._period)]
 
         self.periods_in_file = self._find_workspace_num_periods(workspace)
+
         self._wksp_name = workspace
+
 
     def _get_workspace_name(self, entry_num=None):
         """
@@ -1076,7 +1104,7 @@ class LoadSample(LoadRun):
 
     def execute(self, reducer, isSample):
         self._assignHelper(reducer)
-
+        
         if self.wksp_name == '':
             raise RuntimeError('Unable to load SANS sample run, cannot continue.')
 
@@ -1644,6 +1672,7 @@ class ConvertToQISIS(ReductionStep):
                      '2D' : 'Qxy'}
     # defines if Q1D should correct for gravity by default
     _DEFAULT_GRAV = False
+    _DEFAULT_EXTRA_LENGTH = 0.0
     def __init__(self, normalizations):
         """
             @param normalizations: CalculateNormISIS object contains the workspace, ReductionSteps or files require for the optional normalization arguments
@@ -1661,6 +1690,10 @@ class ConvertToQISIS(ReductionStep):
         self._use_gravity = self._DEFAULT_GRAV
         #used to implement a default setting for gravity that can be over written but doesn't over write
         self._grav_set = False
+        #can be used to add an additional length to the neutron path during the correction for gravity in the Q calcuation
+        self._grav_extra_length = self._DEFAULT_EXTRA_LENGTH
+        #used to implement a default setting for extra length for gravity; seee _grav_set
+        self._grav_extra_length_set = False
         #this should contain the rebin parameters
         self.binning = None
 
@@ -1705,6 +1738,26 @@ class ConvertToQISIS(ReductionStep):
             print msg
             sanslog.warning(msg)
 
+    def get_extra_length(self):
+        return self._grav_extra_length
+
+    def set_extra_length(self, extra_length, override=True):
+        """
+            Add extra length when correcting for gravity when calculating Q
+            @param extra_length : additional length for the gravity correction during the calculation of Q
+            @param override: over write the setting from a previous call to this method (default is True).
+                             This was added because of the way _set_gravity is layed out.
+        """
+        if override:
+            self._grav_extra_length_set = True
+
+        if (not self._grav_extra_length_set) or override:
+            self._grav_extra_length = extra_length
+        else:
+            msg = "User file can't override previous extra length setting for gravity correction; extra length remains " + str(self._grav_extra_length)
+            print msg
+            sanslog.warning(msg)
+
     def execute(self, reducer, workspace):
         """
         Calculate the normalization workspaces and then call the chosen Q conversion algorithm.
@@ -1726,9 +1779,9 @@ class ConvertToQISIS(ReductionStep):
 
         try:
             if self._Q_alg == 'Q1D':
-                Q1D(DetBankWorkspace=workspace,OutputWorkspace= workspace, OutputBinning=self.binning, WavelengthAdj=wave_adj, PixelAdj=pixel_adj, AccountForGravity=self._use_gravity, RadiusCut=self.r_cut*1000.0, WaveCut=self.w_cut, OutputParts=self.outputParts, WavePixelAdj = wavepixeladj)
+                Q1D(DetBankWorkspace=workspace,OutputWorkspace= workspace, OutputBinning=self.binning, WavelengthAdj=wave_adj, PixelAdj=pixel_adj, AccountForGravity=self._use_gravity, RadiusCut=self.r_cut*1000.0, WaveCut=self.w_cut, OutputParts=self.outputParts, WavePixelAdj = wavepixeladj, ExtraLength=self._grav_extra_length)
             elif self._Q_alg == 'Qxy':
-                Qxy(InputWorkspace=workspace,OutputWorkspace= workspace,MaxQxy= reducer.QXY2,DeltaQ= reducer.DQXY, WavelengthAdj=wave_adj, PixelAdj=pixel_adj, AccountForGravity=self._use_gravity, RadiusCut=self.r_cut*1000.0, WaveCut=self.w_cut, OutputParts=self.outputParts)
+                Qxy(InputWorkspace=workspace,OutputWorkspace= workspace,MaxQxy= reducer.QXY2,DeltaQ= reducer.DQXY, WavelengthAdj=wave_adj, PixelAdj=pixel_adj, AccountForGravity=self._use_gravity, RadiusCut=self.r_cut*1000.0, WaveCut=self.w_cut, OutputParts=self.outputParts, ExtraLength=self._grav_extra_length)
                 ReplaceSpecialValues(InputWorkspace=workspace,OutputWorkspace= workspace, NaNValue="0", InfinityValue="0")
             else:
                 raise NotImplementedError('The type of Q reduction has not been set, e.g. 1D or 2D')
@@ -2040,15 +2093,21 @@ class UserFile(ReductionStep):
                 # for /DET/FRONT and /DET/REAR commands
                 reducer.instrument.setDetector(det_specif)
 
+        # There are two entries for Gravity: 1. ON/OFF (TRUE/FALSE)
+        #                                    2. LEXTRA=xx.xx
         elif upper_line.startswith('GRAVITY'):
-            flag = upper_line[8:].strip()
-            if flag == 'ON' or flag == 'TRUE':
+            grav = upper_line[8:].strip()
+            if grav == 'ON' or grav == 'TRUE':
                 reducer.to_Q.set_gravity(True, override=False)
-            elif flag == 'OFF' or flag == 'FALSE':
+            elif grav == 'OFF' or grav == 'FALSE':
                 reducer.to_Q.set_gravity(False, override=False)
+            elif grav.startswith('LEXTRA'):
+                extra_length = grav[7:].strip()
+                reducer.to_Q.set_extra_length(float(extra_length), override=False)
             else:
                 _issueWarning("Gravity flag incorrectly specified, disabling gravity correction")
                 reducer.to_Q.set_gravity(False, override=False)
+                reducer.to_Q.set_extra_length(0.0, override=False)
 
         elif upper_line.startswith('FIT/TRANS/'):
             #check if the selector is passed:

@@ -103,6 +103,8 @@ public:
 
   virtual size_t getNumEvents() const;
 
+  virtual signal_t getNumEventsFraction() const;
+
   virtual uint16_t getInnerRunIndex(size_t index) const;
 
   virtual int32_t getInnerDetectorID(size_t index) const;

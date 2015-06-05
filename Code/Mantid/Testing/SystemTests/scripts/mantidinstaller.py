@@ -82,14 +82,14 @@ def run(cmd):
     """Run a command in a subprocess"""
     try:
         p = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True)
-        out = p.communicate()[0]
+        stdout, stderr = p.communicate()
         if p.returncode != 0:
-            raise Exception('Returned with code '+str(p.returncode)+'\n'+out)
+            raise Exception('Returned with code '+str(p.returncode)+'\n'+ stdout)
     except Exception,err:
         log('Error in subprocess %s:\n' % str(err))
         raise
-    log(out)
-    return out
+    log(stdout)
+    return stdout
     
 
 class MantidInstaller(object):
@@ -157,12 +157,12 @@ class NSISInstaller(MantidInstaller):
             installer > 0 then the resulting start process exits with a return code
             of 1 so we can pick this up as a failure
         """        
-        run('start "Installer" /wait ' + self.mantidInstaller + ' /S')
+        run('start "Installer" /B /WAIT ' + self.mantidInstaller + ' /S')
 
     def do_uninstall(self):
         "Runs the uninstall exe"
         uninstall_path = 'C:/MantidInstall/Uninstall.exe'
-        run('start "Uninstaller" /wait ' + uninstall_path + ' /S')
+        run('start "Uninstaller" /B /WAIT ' + uninstall_path + ' /S')
 
 class DebInstaller(MantidInstaller):
     """Uses a deb package to install mantid
@@ -207,12 +207,16 @@ class RPMInstaller(MantidInstaller):
         """Uses yum to run the install. Current user must be in sudoers
         """
         try:
+            run('sudo rpm -e ' + self.mantidInstaller)
+        except Exception:
+            # Assume it doesn't exist
+            pass
+        try:
             run('sudo yum -y install ' + self.mantidInstaller)
         except Exception, exc:
             # This reports an error if the same package is already installed
-            if 'is already installed' in str(exc):
+            if 'does not update installed package' in str(exc):
                 log("Current version is up-to-date, continuing.\n")
-                pass
             else:
                 raise
 
