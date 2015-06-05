@@ -438,7 +438,16 @@ Poldi2DFunction_sptr PoldiFitPeaks2D::getFunctionFromPeakCollection(
     return getFunctionPawley(profileFunctionName, peakCollection);
   }
 
-  return getFunctionIndividualPeaks(profileFunctionName, peakCollection);
+  // Only use ties for independent peaks.
+  Poldi2DFunction_sptr poldi2DFunction =
+      getFunctionIndividualPeaks(profileFunctionName, peakCollection);
+
+  std::string ties = getUserSpecifiedTies(poldi2DFunction);
+  if (!ties.empty()) {
+    poldi2DFunction->addTies(ties);
+  }
+
+  return poldi2DFunction;
 }
 
 /**
@@ -949,10 +958,6 @@ IAlgorithm_sptr PoldiFitPeaks2D::calculateSpectrum(
     mdFunction->addFunction(getFunctionFromPeakCollection(*pc));
   }
 
-  std::string ties = getUserSpecifiedTies(mdFunction);
-
-  std::cout << ties << std::endl;
-
   // And finally background terms
   addBackgroundTerms(mdFunction);
 
@@ -971,7 +976,6 @@ IAlgorithm_sptr PoldiFitPeaks2D::calculateSpectrum(
   fit->setProperty("MaxIterations", maxIterations);
 
   fit->setProperty("Minimizer", "Levenberg-MarquardtMD");
-  fit->setProperty("Ties", ties);
 
   // Setting the level to Notice to avoid problems with Levenberg-MarquardtMD.
   int oldLogLevel = g_log.getLevel();
@@ -1162,9 +1166,10 @@ void PoldiFitPeaks2D::init() {
                   "Profile function to use for integrating the peak profiles "
                   "before calculating the spectrum.");
 
-  declareProperty("GlobalParameters", "", "Comma-separated list of parameter "
-                                          "names that are identical for all "
-                                          "peaks.");
+  declareProperty("GlobalParameters", "",
+                  "Comma-separated list of parameter "
+                  "names that are identical for all "
+                  "peaks, is ignored when PawleyFit is selected.");
 
   declareProperty("PawleyFit", false,
                   "Instead of refining individual peaks, "
@@ -1203,6 +1208,11 @@ void PoldiFitPeaks2D::init() {
 
   declareProperty(new WorkspaceProperty<Workspace>(
       "RefinedCellParameters", "", Direction::Output, PropertyMode::Optional));
+
+  declareProperty(new WorkspaceProperty<Workspace>("RawFitParameters", "",
+                                                   Direction::Output,
+                                                   PropertyMode::Optional),
+                  "Table workspace that contains all raw fit parameters.");
 }
 
 /// Executes the algorithm
@@ -1298,6 +1308,14 @@ void PoldiFitPeaks2D::exec() {
     } else {
       g_log.warning() << "Warning: Cell parameter table is empty.";
     }
+  }
+
+  // Optionally output the raw fitting parameters.
+  Property *rawFitParameters = getPointerToProperty("RawFitParameters");
+  if (!rawFitParameters->isDefault()) {
+    ITableWorkspace_sptr parameters =
+        fitAlgorithm->getProperty("OutputParameters");
+    setProperty("RawFitParameters", parameters);
   }
 }
 
