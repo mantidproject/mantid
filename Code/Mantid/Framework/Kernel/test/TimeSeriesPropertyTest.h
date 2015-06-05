@@ -914,15 +914,25 @@ public:
     p1.merge(&p3);
 
     // Assert
-    TS_ASSERT_EQUALS(p1.nthTime(0),t0)
-    TS_ASSERT_EQUALS(p1.nthTime(1),t0 + shift)
-    TS_ASSERT_EQUALS(p1.nthTime(2),t0 + 2*shift)
-    TS_ASSERT_EQUALS(p1.nthTime(3),t0 + 3*shift)
-    TS_ASSERT_EQUALS(p1.nthTime(4),t0 + 4*shift)
-    TS_ASSERT_EQUALS(p1.nthTime(5),t0 + 5*shift)
-    TS_ASSERT_EQUALS(p1.nthTime(6),t2)
-    TS_ASSERT_EQUALS(p1.nthTime(6),t2 + shift)
-    TS_ASSERT_EQUALS(p1.nthTime(6),t2 + 2*shift)
+    Mantid::Kernel::DateAndTime controlT0(t0);
+    Mantid::Kernel::DateAndTime controlT1(t0 + shift);
+    Mantid::Kernel::DateAndTime controlT2(t0 + 2*shift);
+    Mantid::Kernel::DateAndTime controlT3(t0 + 3*shift);
+    Mantid::Kernel::DateAndTime controlT4(t0 + 4*shift);
+    Mantid::Kernel::DateAndTime controlT5(t0 + 5*shift);
+    Mantid::Kernel::DateAndTime controlT6(t2);
+    Mantid::Kernel::DateAndTime controlT7(t2 + shift);
+    Mantid::Kernel::DateAndTime controlT8(t2 + 2*shift);
+
+    TS_ASSERT_EQUALS(p1.nthTime(0),controlT0)
+    TS_ASSERT_EQUALS(p1.nthTime(1),controlT1)
+    TS_ASSERT_EQUALS(p1.nthTime(2),controlT2)
+    TS_ASSERT_EQUALS(p1.nthTime(3),controlT3)
+    TS_ASSERT_EQUALS(p1.nthTime(4),controlT4)
+    TS_ASSERT_EQUALS(p1.nthTime(5),controlT5)
+    TS_ASSERT_EQUALS(p1.nthTime(6),controlT6)
+    TS_ASSERT_EQUALS(p1.nthTime(7),controlT7)
+    TS_ASSERT_EQUALS(p1.nthTime(8),controlT8)
   }
 
 
