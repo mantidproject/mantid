@@ -23,6 +23,7 @@ class InputController;
 
 namespace SliceViewer
 {
+   class PeaksPresenter;
 
   /** Widget representing a peak sphere on the plot. Used for representing spherically integrated peaks.
     
@@ -54,7 +55,8 @@ namespace SliceViewer
 
   public:
     /// Constructor
-    PeakOverlayMultiSphere(QwtPlot * plot, QWidget * parent, const VecPhysicalSphericalPeak& vecPhysicalPeaks, const QColor& peakColour, const QColor& backColour);
+    PeakOverlayMultiSphere(PeaksPresenter* const presenter, QwtPlot * plot, QWidget * parent, const VecPhysicalSphericalPeak& vecPhysicalPeaks, const int plotXIndex, const int plotYIndex,
+                           const QColor& peakColour, const QColor& backColour);
     /// Destructor
     virtual ~PeakOverlayMultiSphere();
     /// Set the slice point at position.
@@ -116,10 +118,16 @@ namespace SliceViewer
     int height() const;
     int width() const;
 
+    /// PeaksPresenter presenter
+    PeaksPresenter* const m_presenter;
     /// QwtPlot containing this
     QwtPlot * m_plot;
     /// Physical peak object
     VecPhysicalSphericalPeak m_physicalPeaks;
+    /// Plot x index
+    const int m_plotXIndex;
+    /// Plot y index
+    const int m_plotYIndex;
     /// Peak colour
     QColor m_peakColour;
     /// Back colour
@@ -130,6 +138,10 @@ namespace SliceViewer
     bool m_showBackground;
     /// Input controller.
     MantidQt::MantidWidgets::InputController* m_tool;
+
+   private slots:
+
+    void erasePeaks(const QRect& rect);
 
   };
 

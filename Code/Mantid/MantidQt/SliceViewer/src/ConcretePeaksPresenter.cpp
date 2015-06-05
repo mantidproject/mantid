@@ -50,7 +50,7 @@ coordinateToString(Mantid::Kernel::SpecialCoordinateSystem coordSystem) {
  * All the views must be recreated.
  */
 void ConcretePeaksPresenter::produceViews() {
-  m_viewPeaks = m_viewFactory->createView(m_transform);
+  m_viewPeaks = m_viewFactory->createView(this, m_transform);
 }
 
 /**
@@ -560,6 +560,104 @@ void ConcretePeaksPresenter::peakEditMode(EditMode mode){
     } else {
         m_viewPeaks->peakDisplayMode();
     }
+}
+
+bool ConcretePeaksPresenter::deletePeaksIn(PeakBoundingBox box) {
+
+  std::vector<size_t> deletionIndexList;
+
+  // Don't bother to find peaks in the region if there are no peaks to find.
+  if (this->m_peaksWS->getNumberPeaks() >= 1) {
+
+    double effectiveRadius =
+        m_viewPeaks
+            ->getRadius(); // Effective radius of each peak representation.
+
+    Mantid::API::IPeaksWorkspace_sptr peaksWS =
+        boost::const_pointer_cast<Mantid::API::IPeaksWorkspace>(
+            this->m_peaksWS);
+
+    Left left(box.left());
+    Right right(box.right());
+    Bottom bottom(box.bottom());
+    Top top(box.top());
+    SlicePoint slicePoint(box.slicePoint());
+    if (slicePoint() < 0) { // indicates that it should not be used.
+         slicePoint = SlicePoint(m_slicePoint.slicePoint());
+    }
+    PeakBoundingBox accurateBox(
+        left, right, top, bottom,
+        slicePoint /*Use the current slice position, previously unknown.*/);
+    accurateBox.transformBox(m_transform);
+
+    std::vector<double> vertex1;
+    vertex1.push_back(accurateBox.left());
+    vertex1.push_back(accurateBox.bottom());
+    vertex1.push_back(accurateBox.slicePoint());
+
+    std::vector<double> vertex2;
+    vertex2.push_back(accurateBox.left());
+    vertex2.push_back(accurateBox.top());
+    vertex2.push_back(accurateBox.slicePoint());
+
+    std::vector<double> vertex3;
+    vertex3.push_back(accurateBox.right());
+    vertex3.push_back(accurateBox.top());
+    vertex3.push_back(accurateBox.slicePoint());
+
+    std::vector<double> vertex4;
+    vertex4.push_back(accurateBox.right());
+    vertex4.push_back(accurateBox.bottom());
+    vertex4.push_back(accurateBox.slicePoint());
+
+    Mantid::API::IAlgorithm_sptr alg =
+        AlgorithmManager::Instance().create("PeaksOnSurface");
+    alg->setChild(true);
+    alg->setRethrows(true);
+    alg->initialize();
+    alg->setProperty("InputWorkspace", peaksWS);
+    alg->setProperty("OutputWorkspace", peaksWS->name() + "_peaks_on_surface");
+    alg->setProperty("Vertex1", vertex1);
+    alg->setProperty("Vertex2", vertex2);
+    alg->setProperty("Vertex3", vertex3);
+    alg->setProperty("Vertex4", vertex4);
+    alg->setProperty("PeakRadius",
+                     effectiveRadius); // Effective radius or shape radius?
+    alg->setPropertyValue("CoordinateFrame", m_transform->getFriendlyName());
+    alg->execute();
+    ITableWorkspace_sptr outTable = alg->getProperty("OutputWorkspace");
+
+    for (size_t i = 0; i < outTable->rowCount(); ++i) {
+      const bool insideRegion = outTable->cell<Boolean>(i, 1);
+      if (insideRegion) {
+        deletionIndexList.push_back(i);
+      }
+    }
+    // If we have things to remove, do that in one-step.
+    if (!deletionIndexList.empty()) {
+
+      Mantid::API::IPeaksWorkspace_sptr peaksWS =
+          boost::const_pointer_cast<Mantid::API::IPeaksWorkspace>(
+              this->m_peaksWS);
+      // Sort the Peaks in-place.
+      Mantid::API::IAlgorithm_sptr alg =
+          AlgorithmManager::Instance().create("DeleteTableRows");
+      alg->setChild(true);
+      alg->setRethrows(true);
+      alg->initialize();
+      alg->setProperty("TableWorkspace", peaksWS);
+      alg->setProperty("Rows", deletionIndexList);
+      alg->execute();
+
+      // Reproduce the views.
+      this->produceViews();
+
+      // Give the new views the current slice point.
+      m_viewPeaks->setSlicePoint(this->m_slicePoint.slicePoint(),
+                                 m_viewablePeaks);
+    }
+  }
+  return !deletionIndexList.empty();
 }
 
 }

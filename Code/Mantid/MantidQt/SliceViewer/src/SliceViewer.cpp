@@ -2196,12 +2196,14 @@ SliceViewer::setPeaksWorkspaces(const QStringList &list) {
     // Candidate for overplotting as spherical peaks
     viewFactorySelector->registerCandidate(
         boost::make_shared<PeakOverlayMultiSphereFactory>(
-            peaksWS, m_plot, m_plot->canvas(), numberOfChildPresenters));
+            peaksWS, m_plot, m_plot->canvas(), m_spect->xAxis(),
+                    m_spect->yAxis(), numberOfChildPresenters));
     // Candiate for plotting as a markers of peak positions
     viewFactorySelector->registerCandidate(
         boost::make_shared<PeakOverlayMultiCrossFactory>(
             m_ws, transformFactory->createDefaultTransform(), peaksWS, m_plot,
-            m_plot->canvas(), numberOfChildPresenters));
+            m_plot->canvas(), m_spect->xAxis(),
+                    m_spect->yAxis(), numberOfChildPresenters));
     try {
       m_peaksPresenter->addPeaksPresenter(
           boost::make_shared<ConcretePeaksPresenter>(

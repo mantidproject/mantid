@@ -1,4 +1,5 @@
 #include "MantidQtSliceViewer/PeakOverlayMultiSphere.h"
+#include "MantidQtSliceViewer/PeaksPresenter.h"
 #include "MantidQtMantidWidgets/InputController.h"
 #include <qwt_plot.h>
 #include <qwt_plot_canvas.h>
@@ -18,8 +19,10 @@ namespace MantidQt
     //----------------------------------------------------------------------------------------------
     /** Constructor
      */
-    PeakOverlayMultiSphere::PeakOverlayMultiSphere(QwtPlot * plot, QWidget * parent, const VecPhysicalSphericalPeak& vecPhysicalPeaks , const QColor& peakColour, const QColor& backColour) :
-        QWidget(parent), m_plot(plot), m_physicalPeaks(vecPhysicalPeaks), m_peakColour(peakColour), m_backColour(backColour), m_showBackground(false), m_tool(NULL)
+    PeakOverlayMultiSphere::PeakOverlayMultiSphere(PeaksPresenter* const presenter, QwtPlot * plot, QWidget * parent, const VecPhysicalSphericalPeak& vecPhysicalPeaks, /// Plot x index
+                                                   const int plotXIndex, const int plotYIndex, const QColor& peakColour, const QColor& backColour) :
+        QWidget(parent), m_presenter(presenter), m_plot(plot), m_physicalPeaks(vecPhysicalPeaks), m_plotXIndex(plotXIndex), m_plotYIndex(plotYIndex),
+        m_peakColour(peakColour), m_backColour(backColour), m_showBackground(false), m_tool(NULL)
     {
       setAttribute(Qt::WA_NoMousePropagation, false);
       setAttribute(Qt::WA_MouseTracking, true);
@@ -35,6 +38,9 @@ namespace MantidQt
      */
     PeakOverlayMultiSphere::~PeakOverlayMultiSphere()
     {
+        if(m_tool){
+            delete m_tool;
+        }
     }
 
     void PeakOverlayMultiSphere::setSlicePoint(const double& z, const std::vector<bool>& viewablePeaks)
@@ -70,7 +76,22 @@ namespace MantidQt
     }
     int PeakOverlayMultiSphere::width() const
     {
-      return m_plot->canvas()->width();
+        return m_plot->canvas()->width();
+    }
+
+    void PeakOverlayMultiSphere::erasePeaks(const QRect &rect)
+    {
+        QwtScaleMap xMap = m_plot->canvasMap(m_plotXIndex);
+        QwtScaleMap yMap = m_plot->canvasMap(m_plotYIndex);
+
+        const Left left(xMap.invTransform(rect.left()));
+        const Right right(xMap.invTransform(rect.right()));
+        const Top top(yMap.invTransform(rect.top()));
+        const Bottom bottom(yMap.invTransform(rect.bottom()));
+        const SlicePoint slicePoint(-1); // Not required.
+
+        m_presenter->deletePeaksIn(PeakBoundingBox(left, right, top, bottom, slicePoint));
+
     }
 
     //----------------------------------------------------------------------------------------------
@@ -116,7 +137,13 @@ namespace MantidQt
           QPainterPath backgroundRadiusFill = backgroundOuterPath.subtracted(backgroundInnerPath);
           painter.fillPath(backgroundRadiusFill, m_backColour);
         }
+        painter.end();
       }
+      }
+      if(m_tool){
+          QPainter painter(this);
+          m_tool->onPaint(painter);
+          painter.end();
       }
     }
 
@@ -217,16 +244,24 @@ namespace MantidQt
     }
 
     void PeakOverlayMultiSphere::peakDeletionMode() {
-        m_tool = new MantidQt::MantidWidgets::InputControllerErase(this);
+        auto* temp = m_tool;
+        auto* eraseTool = new MantidQt::MantidWidgets::InputControllerErase(this);
+        connect(eraseTool,SIGNAL(erase(QRect)),this,SLOT(erasePeaks(QRect)));
+        m_tool = eraseTool;
+        delete temp;
     }
 
     void PeakOverlayMultiSphere::peakAdditionMode() {
+        auto* temp = m_tool;
         m_tool = new MantidQt::MantidWidgets::InputControllerPick(this);
+        delete temp;
     }
 
     void PeakOverlayMultiSphere::peakDisplayMode() {
-
-        m_tool = NULL;
+        if(m_tool){
+            delete m_tool;
+            m_tool = NULL;
+        }
     }
 
     void PeakOverlayMultiSphere::mousePressEvent(QMouseEvent* e)
@@ -242,6 +277,7 @@ namespace MantidQt
     {
         if(m_tool) {
           m_tool->mouseMoveEvent( e );
+          this->update(); // Calling update will cause redraw of the entire surface
         }else{
             e->ignore();
         }
@@ -251,6 +287,7 @@ namespace MantidQt
     {
         if(m_tool) {
           m_tool->mouseReleaseEvent( e );
+          this->update(); // Calling update will cause redraw of the entire surface
         }else{
             e->ignore();
         }

@@ -19,6 +19,7 @@ namespace MantidQt
 namespace SliceViewer
 {
 
+   class PeaksPresenter;
   /** Widget representing visible peaks in the plot. 
     
     @date 2013-06-10
@@ -49,7 +50,8 @@ namespace SliceViewer
 
   public:
     /// Constructor
-    PeakOverlayMultiCross(QwtPlot * plot, QWidget * parent, const VecPhysicalCrossPeak& vecPhysicalPeaks, const QColor& peakColour);
+    PeakOverlayMultiCross(PeaksPresenter* const peaksPresenter, QwtPlot * plot, QWidget * parent, const VecPhysicalCrossPeak& vecPhysicalPeaks, const int plotXIndex, const int plotYIndex,
+                          const QColor& peakColour);
     /// Destructor
     virtual ~PeakOverlayMultiCross();
     /// Set the slice point at position.
@@ -101,10 +103,16 @@ namespace SliceViewer
     int height() const;
     int width() const;
 
+    /// Owning presenter
+    PeaksPresenter* m_presenter;
     /// QwtPlot containing this
     QwtPlot * m_plot;
     /// Physical model of the spacial cross peaks
     VecPhysicalCrossPeak m_physicalPeaks;
+    /// Plot x index
+    const int m_plotXIndex;
+    /// Plot y index
+    const int m_plotYIndex;
     /// Peak colour
     QColor m_peakColour;
     /// Peaks in the workspace that are viewable in the present view.

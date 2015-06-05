@@ -622,16 +622,24 @@ int CompositePeaksPresenter::getZoomedPeakIndex() const {
     return m_zoomedPeakIndex;
 }
 
-void CompositePeaksPresenter::editCommand(EditMode editMode, boost::weak_ptr<const Mantid::API::IPeaksWorkspace> target)
-{
-    if(auto ws = target.lock()){
+void CompositePeaksPresenter::editCommand(
+    EditMode editMode,
+    boost::weak_ptr<const Mantid::API::IPeaksWorkspace> target) {
+  if (auto ws = target.lock()) {
 
-      auto it = this->getPresenterIteratorFromWorkspace(ws);
-      if(it!= m_subjects.end()){
-          (*it)->peakEditMode(editMode);
+    // Change the right subject to the desired edit mode.
+    auto targetIterator = this->getPresenterIteratorFromWorkspace(ws);
+    if (targetIterator != m_subjects.end()) {
+      (*targetIterator)->peakEditMode(editMode);
+    }
+    // Reset everything else.
+    for (auto it = m_subjects.begin(); it != m_subjects.end(); ++it) {
+      if (it != targetIterator) {
+        // All other subjects must be in a neutral edit mode.
+        (*it)->peakEditMode(None);
       }
-     }
-    //m_zoomablePlottingWidget->peakEditMode(editMode, target);
+    }
+  }
 }
 
 void CompositePeaksPresenter::updatePeaksWorkspace(
@@ -677,6 +685,19 @@ void CompositePeaksPresenter::notifyWorkspaceChanged(
     }
   }
 }
+
+bool CompositePeaksPresenter::deletePeaksIn(PeakBoundingBox box){
+    if (useDefault()) {
+      return m_default->deletePeaksIn(box);
+    }
+    // Forward the request onwards
+    bool result = false;
+    for (auto it = m_subjects.begin(); it != m_subjects.end(); ++it) {
+      result |= (*it)->deletePeaksIn(box);
+    }
+    return result;
+}
+
 }
 }
 

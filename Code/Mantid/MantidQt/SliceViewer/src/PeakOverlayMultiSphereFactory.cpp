@@ -1,5 +1,6 @@
 #include "MantidQtSliceViewer/PeakOverlayMultiSphereFactory.h"
 #include "MantidQtSliceViewer/PeakOverlayMultiSphere.h"
+#include "MantidQtSliceViewer/PeaksPresenter.h"
 #include <boost/make_shared.hpp>
 
 using namespace Mantid::API;
@@ -9,8 +10,8 @@ namespace MantidQt
   namespace SliceViewer
   {
 
-    PeakOverlayMultiSphereFactory::PeakOverlayMultiSphereFactory(IPeaksWorkspace_sptr peaksWS, QwtPlot * plot, QWidget * parent, const size_t colourNumber) :
-        PeakOverlayViewFactoryBase(plot, parent, colourNumber),
+    PeakOverlayMultiSphereFactory::PeakOverlayMultiSphereFactory(IPeaksWorkspace_sptr peaksWS, QwtPlot * plot, QWidget * parent, const int plotXIndex, const int plotYIndex, const size_t colourNumber) :
+        PeakOverlayViewFactoryBase(plot, parent, plotXIndex, plotYIndex, colourNumber),
         m_peakRadius(0),
         m_backgroundInnerRadius(0),
         m_backgroundOuterRadius(0),
@@ -46,7 +47,7 @@ namespace MantidQt
       }
     }
 
-    boost::shared_ptr<PeakOverlayView> PeakOverlayMultiSphereFactory::createView(Mantid::Geometry::PeakTransform_const_sptr transform) const
+    boost::shared_ptr<PeakOverlayView> PeakOverlayMultiSphereFactory::createView(PeaksPresenter* const presenter, Mantid::Geometry::PeakTransform_const_sptr transform) const
     {
       // Construct all physical peaks
       VecPhysicalSphericalPeak physicalPeaks(m_peaksWS->rowCount());
@@ -58,7 +59,7 @@ namespace MantidQt
       }
 
       // Make the overlay widget.
-      return boost::make_shared<PeakOverlayMultiSphere>(m_plot, m_parent, physicalPeaks, this->m_peakColour, this->m_backColour);
+      return boost::make_shared<PeakOverlayMultiSphere>(presenter, m_plot, m_parent, physicalPeaks, m_plotXIndex, m_plotYIndex, this->m_peakColour, this->m_backColour);
     }
 
     PeakOverlayMultiSphereFactory::~PeakOverlayMultiSphereFactory()

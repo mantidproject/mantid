@@ -75,6 +75,7 @@ namespace SliceViewer
     virtual ~PeaksPresenter(){};
     virtual void reInitialize(boost::shared_ptr<Mantid::API::IPeaksWorkspace> peaksWS) = 0;
     virtual void peakEditMode(EditMode mode) = 0;
+    virtual bool deletePeaksIn(PeakBoundingBox box) = 0;
   };
 
 

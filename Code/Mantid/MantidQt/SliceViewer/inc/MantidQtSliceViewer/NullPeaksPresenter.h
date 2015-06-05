@@ -2,6 +2,7 @@
 #define MANTID_SLICEVIEWER_NULLPEAKSPRESENTER_H_
 
 #include "MantidQtSliceViewer/PeaksPresenter.h"
+#include "MantidQtSliceViewer/PeakBoundingBox.h"
 
 namespace MantidQt {
 namespace SliceViewer {
@@ -52,6 +53,7 @@ public:
   virtual bool contentsDifferent(const PeaksPresenter * ) const { return true; }
 
   void peakEditMode(EditMode){/*Do nothing*/}
+  bool deletePeaksIn(PeakBoundingBox){/*Do nothing*/}
 };
 
 }

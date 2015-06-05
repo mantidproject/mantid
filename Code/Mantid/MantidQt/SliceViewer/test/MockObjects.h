@@ -66,8 +66,11 @@ namespace
     MOCK_METHOD1(reInitialize, void(boost::shared_ptr<Mantid::API::IPeaksWorkspace> peaksWS));
     MOCK_CONST_METHOD1(contentsDifferent,
           bool(const PeaksPresenter*  other));
+    MOCK_METHOD1(deletePeaksIn, bool(PeakBoundingBox));
+    MOCK_METHOD1(peakEditMode, void(EditMode mode));
     virtual ~MockPeaksPresenter(){}
   };
+
 
   /*------------------------------------------------------------
   Mock Peaks Presenter, with additional hooks for verifying destruction.
@@ -134,7 +137,11 @@ class MockPeakTransformFactory : public Geometry::PeakTransformFactory
     MOCK_CONST_METHOD0(isBackgroundShown, bool());
     MOCK_CONST_METHOD0(getForegroundColour, QColor());
     MOCK_CONST_METHOD0(getBackgroundColour, QColor());
-    ~MockPeakOverlayView(){}
+    MOCK_METHOD0(peakDeletionMode, void());
+    MOCK_METHOD0(peakAdditionMode, void());
+    MOCK_METHOD0(peakDisplayMode, void());
+
+    virtual ~MockPeakOverlayView(){}
   };
 
   /*------------------------------------------------------------
@@ -143,7 +150,7 @@ class MockPeakTransformFactory : public Geometry::PeakTransformFactory
   class MockPeakOverlayFactory : public PeakOverlayViewFactory
   {
   public:
-    MOCK_CONST_METHOD1(createView, boost::shared_ptr<PeakOverlayView>(PeakTransform_const_sptr));
+    MOCK_CONST_METHOD2(createView, boost::shared_ptr<PeakOverlayView>(PeaksPresenter*, PeakTransform_const_sptr));
     MOCK_CONST_METHOD0(getPlotXLabel, std::string());
     MOCK_CONST_METHOD0(getPlotYLabel, std::string());
     MOCK_METHOD0(updateView, void());

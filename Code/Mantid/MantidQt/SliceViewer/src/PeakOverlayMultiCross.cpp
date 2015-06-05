@@ -1,10 +1,12 @@
 #include "MantidQtSliceViewer/PeakOverlayMultiCross.h"
+#include "MantidQtSliceViewer/PeaksPresenter.h"
 #include <qwt_plot.h>
 #include <qwt_plot_canvas.h>
 #include <qwt_scale_div.h>
 #include <qpainter.h>
 #include <QPen>
 #include <QMouseEvent>
+
 
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
@@ -18,9 +20,13 @@ namespace MantidQt
     //----------------------------------------------------------------------------------------------
     /** Constructor
     */
-    PeakOverlayMultiCross::PeakOverlayMultiCross(QwtPlot * plot, QWidget * parent, const VecPhysicalCrossPeak&  vecPhysicalPeaks, const QColor& peakColour)
+    PeakOverlayMultiCross::PeakOverlayMultiCross(PeaksPresenter* const presenter, QwtPlot * plot, QWidget * parent,
+                                                 const VecPhysicalCrossPeak&  vecPhysicalPeaks, const int plotXIndex, const int plotYIndex, const QColor& peakColour)
       : QWidget( parent ),
+      m_presenter(presenter),
       m_plot(plot),
+      m_plotXIndex(plotXIndex),
+      m_plotYIndex(plotYIndex),
       m_physicalPeaks(vecPhysicalPeaks),
       m_peakColour(peakColour)
     {

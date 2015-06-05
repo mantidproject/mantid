@@ -171,7 +171,7 @@ class ConcretePeaksPresenterTest : public CxxTest::TestSuite
     auto pMockViewFactory = new MockPeakOverlayFactory;
     
     PeakOverlayViewFactory_sptr mockViewFactory = PeakOverlayViewFactory_sptr(pMockViewFactory);
-    EXPECT_CALL(*pMockViewFactory, createView(_)).WillRepeatedly(Return(mockView));
+    EXPECT_CALL(*pMockViewFactory, createView(_,_)).WillRepeatedly(Return(mockView));
     EXPECT_CALL(*pMockViewFactory, getPlotXLabel()).WillRepeatedly(Return("H"));
     EXPECT_CALL(*pMockViewFactory, getPlotYLabel()).WillRepeatedly(Return("K"));
 
@@ -227,7 +227,7 @@ public:
     // Mock View Factory for integrated peaks. We expect that this will never be used.
     auto pMockViewFactory = new MockPeakOverlayFactory;
     PeakOverlayViewFactory_sptr mockViewFactory(pMockViewFactory);
-    EXPECT_CALL(*pMockViewFactory, createView(_)).Times(1).WillRepeatedly(Return(mockView)); // Create a single widget/view for all peaks
+    EXPECT_CALL(*pMockViewFactory, createView(_,_)).Times(1).WillRepeatedly(Return(mockView)); // Create a single widget/view for all peaks
     EXPECT_CALL(*pMockViewFactory, getPlotXLabel()).WillOnce(Return("H"));
     EXPECT_CALL(*pMockViewFactory, getPlotYLabel()).WillOnce(Return("K"));
 
@@ -268,7 +268,7 @@ public:
     EXPECT_CALL(*pMockView, updateView()).Times(1); // Single view, for this presenter, will only update once.
     auto mockView = boost::shared_ptr<NiceMock<MockPeakOverlayView> >(pMockView);
     
-    EXPECT_CALL(*pMockViewFactory, createView(_)).WillRepeatedly(Return(mockView));
+    EXPECT_CALL(*pMockViewFactory, createView(_,_)).WillRepeatedly(Return(mockView));
     EXPECT_CALL(*pMockViewFactory, getPlotXLabel()).WillOnce(Return("H"));
     EXPECT_CALL(*pMockViewFactory, getPlotYLabel()).WillOnce(Return("K"));
 
@@ -310,7 +310,7 @@ public:
     EXPECT_CALL(*pMockView, setSlicePoint(slicePoint, _)).Times(1); // Only one widget for this presenter
     auto mockView = boost::shared_ptr<NiceMock<MockPeakOverlayView> >(pMockView);
 
-    EXPECT_CALL(*mockViewFactory, createView(_)).WillRepeatedly(Return(mockView));
+    EXPECT_CALL(*mockViewFactory, createView(_,_)).WillRepeatedly(Return(mockView));
     EXPECT_CALL(*mockViewFactory, getPlotXLabel()).WillOnce(Return("H"));
     EXPECT_CALL(*mockViewFactory, getPlotYLabel()).WillOnce(Return("K"));
 
@@ -354,7 +354,7 @@ public:
     EXPECT_CALL(*pMockView, hideView()).Times(expectedNumberPeaks);
     auto mockView = boost::shared_ptr<NiceMock<MockPeakOverlayView> >(pMockView);
 
-    EXPECT_CALL(*mockViewFactory, createView(_)).WillRepeatedly(Return(mockView));
+    EXPECT_CALL(*mockViewFactory, createView(_,_)).WillRepeatedly(Return(mockView));
     EXPECT_CALL(*mockViewFactory, getPlotXLabel()).WillOnce(Return("H"));
     EXPECT_CALL(*mockViewFactory, getPlotYLabel()).WillOnce(Return("K"));
 
@@ -394,7 +394,7 @@ public:
     EXPECT_CALL(*pMockView, hideView()).Times(expectedNumberPeaks); // This will be called automatically because the presenter won't be able to map Qx (below).
     auto mockView = boost::shared_ptr<NiceMock<MockPeakOverlayView> >(pMockView);
 
-    EXPECT_CALL(*mockViewFactory, createView(_)).WillRepeatedly(Return(mockView));
+    EXPECT_CALL(*mockViewFactory, createView(_,_)).WillRepeatedly(Return(mockView));
     EXPECT_CALL(*mockViewFactory, getPlotXLabel()).WillOnce(Return("Qx")); // Not either H, K or L
     EXPECT_CALL(*mockViewFactory, getPlotYLabel()).WillOnce(Return("K"));
     // Create an input MODEL Peaks workspace (INTEGRATED)
@@ -431,7 +431,7 @@ public:
     // Create a widget factory mock
     auto pMockViewFactory = new MockPeakOverlayFactory;
     PeakOverlayViewFactory_sptr mockViewFactory = PeakOverlayViewFactory_sptr(pMockViewFactory);
-    EXPECT_CALL(*pMockViewFactory, createView(_)).WillRepeatedly(Return(mockView));
+    EXPECT_CALL(*pMockViewFactory, createView(_,_)).WillRepeatedly(Return(mockView));
     EXPECT_CALL(*pMockViewFactory, getPlotXLabel()).WillRepeatedly(Return("H"));
     EXPECT_CALL(*pMockViewFactory, getPlotYLabel()).WillRepeatedly(Return("K"));
 
@@ -457,7 +457,7 @@ public:
     // Create a widget factory mock
     auto pMockViewFactory = new MockPeakOverlayFactory;
     PeakOverlayViewFactory_sptr mockViewFactory = PeakOverlayViewFactory_sptr(pMockViewFactory);
-    EXPECT_CALL(*pMockViewFactory, createView(_)).WillRepeatedly(Return(mockView));
+    EXPECT_CALL(*pMockViewFactory, createView(_,_)).WillRepeatedly(Return(mockView));
     EXPECT_CALL(*pMockViewFactory, getPlotXLabel()).WillRepeatedly(Return("H"));
     EXPECT_CALL(*pMockViewFactory, getPlotYLabel()).WillRepeatedly(Return("K"));
 
@@ -484,7 +484,7 @@ public:
     // Create a widget factory mock
     auto pMockViewFactory = new MockPeakOverlayFactory;
     PeakOverlayViewFactory_sptr mockViewFactory = PeakOverlayViewFactory_sptr(pMockViewFactory);
-    EXPECT_CALL(*pMockViewFactory, createView(_)).WillRepeatedly(Return(mockView));
+    EXPECT_CALL(*pMockViewFactory, createView(_,_)).WillRepeatedly(Return(mockView));
     EXPECT_CALL(*pMockViewFactory, getPlotXLabel()).WillRepeatedly(Return("H"));
     EXPECT_CALL(*pMockViewFactory, getPlotYLabel()).WillRepeatedly(Return("K"));
 
@@ -529,7 +529,7 @@ public:
     // Create a widget factory mock
     auto pMockViewFactory = new MockPeakOverlayFactory;
     PeakOverlayViewFactory_sptr mockViewFactory = PeakOverlayViewFactory_sptr(pMockViewFactory);
-    EXPECT_CALL(*pMockViewFactory, createView(_)).WillRepeatedly(Return(mockView));
+    EXPECT_CALL(*pMockViewFactory, createView(_,_)).WillRepeatedly(Return(mockView));
     EXPECT_CALL(*pMockViewFactory, getPlotXLabel()).WillRepeatedly(Return("H"));
     EXPECT_CALL(*pMockViewFactory, getPlotYLabel()).WillRepeatedly(Return("K"));
 
@@ -595,7 +595,7 @@ public:
     // Create a widget factory mock
     auto pMockViewFactory = new MockPeakOverlayFactory;
     PeakOverlayViewFactory_sptr mockViewFactory = PeakOverlayViewFactory_sptr(pMockViewFactory);
-    EXPECT_CALL(*pMockViewFactory, createView(_)).WillRepeatedly(Return(mockView));
+    EXPECT_CALL(*pMockViewFactory, createView(_,_)).WillRepeatedly(Return(mockView));
     EXPECT_CALL(*pMockViewFactory, getPlotXLabel()).WillRepeatedly(Return("H"));
     EXPECT_CALL(*pMockViewFactory, getPlotYLabel()).WillRepeatedly(Return("K"));
 
@@ -659,7 +659,7 @@ public:
     // Create a widget factory mock
     auto pMockViewFactory = new MockPeakOverlayFactory;
     PeakOverlayViewFactory_sptr mockViewFactory = PeakOverlayViewFactory_sptr(pMockViewFactory);
-    EXPECT_CALL(*pMockViewFactory, createView(_)).WillRepeatedly(Return(mockView));
+    EXPECT_CALL(*pMockViewFactory, createView(_,_)).WillRepeatedly(Return(mockView));
     EXPECT_CALL(*pMockViewFactory, getPlotXLabel()).WillRepeatedly(Return("H"));
     EXPECT_CALL(*pMockViewFactory, getPlotYLabel()).WillRepeatedly(Return("K"));
 
@@ -685,7 +685,7 @@ public:
     // Create a widget factory mock
     auto pMockViewFactory = new MockPeakOverlayFactory;
     PeakOverlayViewFactory_sptr mockViewFactory = PeakOverlayViewFactory_sptr(pMockViewFactory);
-    EXPECT_CALL(*pMockViewFactory, createView(_)).WillRepeatedly(Return(mockView));
+    EXPECT_CALL(*pMockViewFactory, createView(_,_)).WillRepeatedly(Return(mockView));
     EXPECT_CALL(*pMockViewFactory, getPlotXLabel()).WillRepeatedly(Return("H"));
     EXPECT_CALL(*pMockViewFactory, getPlotYLabel()).WillRepeatedly(Return("K"));
 
@@ -710,7 +710,7 @@ public:
       // Create a widget factory mock
       auto pMockViewFactory = new MockPeakOverlayFactory;
       PeakOverlayViewFactory_sptr mockViewFactory = PeakOverlayViewFactory_sptr(pMockViewFactory);
-      EXPECT_CALL(*pMockViewFactory, createView(_)).WillOnce(Return(mockView));
+      EXPECT_CALL(*pMockViewFactory, createView(_,_)).WillOnce(Return(mockView));
       EXPECT_CALL(*pMockViewFactory, getPlotXLabel()).WillRepeatedly(Return("H"));
       EXPECT_CALL(*pMockViewFactory, getPlotYLabel()).WillRepeatedly(Return("K"));
 
@@ -726,7 +726,7 @@ public:
       // We expect the peaks workspace object to be swapped.
       EXPECT_CALL(*pMockViewFactory, swapPeaksWorkspace(_)).Times(1);
       // We expect that createViews will be called again, because we'll have to create new representations for each peak
-      EXPECT_CALL(*pMockViewFactory, createView(_)).WillOnce(Return(mockView));
+      EXPECT_CALL(*pMockViewFactory, createView(_,_)).WillOnce(Return(mockView));
 
       // We force this concrete presenter to take a new peaks workspace to represent
       concretePresenter->reInitialize(newPeaksWorkspace);
@@ -781,10 +781,99 @@ public:
   }
 
   void test_test_apply_edit_mode_to_views(){
-      TSM_ASSERT("Not Done! TODO", false);
+      const int nPeaks = 1;
+
+      // Create a mock view object/product that will be returned by the mock factory.
+      auto pMockView = new NiceMock<MockPeakOverlayView>;
+      auto mockView = boost::shared_ptr<NiceMock<MockPeakOverlayView> >(pMockView);
+
+      // Create a widget factory mock
+      auto pMockViewFactory = new MockPeakOverlayFactory;
+      PeakOverlayViewFactory_sptr mockViewFactory = PeakOverlayViewFactory_sptr(pMockViewFactory);
+      EXPECT_CALL(*pMockViewFactory, createView(_,_)).WillRepeatedly(Return(mockView));
+      EXPECT_CALL(*pMockViewFactory, getPlotXLabel()).WillRepeatedly(Return("H"));
+      EXPECT_CALL(*pMockViewFactory, getPlotYLabel()).WillRepeatedly(Return("K"));
+
+      auto presenterBuilder = createStandardBuild(nPeaks); // Creates a default Concrete presenter product.
+      presenterBuilder.withViewFactory(mockViewFactory); // Change the view factories to deliver the expected mock object
+      auto concretePresenter = presenterBuilder.create();
+
+      // Deletion mode tests
+      EXPECT_CALL(*pMockView, peakDeletionMode()).Times(1);
+      concretePresenter->peakEditMode(DeletePeaks);
+
+      // Addition mode tests
+      EXPECT_CALL(*pMockView, peakAdditionMode()).Times(1);
+      concretePresenter->peakEditMode(AddPeaks);
+
+      // Neutral mode tests
+      EXPECT_CALL(*pMockView, peakDisplayMode()).Times(1);
+      concretePresenter->peakEditMode(MantidQt::SliceViewer::None);
+
+      TSM_ASSERT("MockView not used as expected.", Mock::VerifyAndClearExpectations(pMockView));
   }
 
 
+
+  //void test_deletePeaksIn(){TSM_ASSERT("Missing test", false);}
+
+  void makeSphericallyIntegrated(IPeak& peak, const double radius)
+  {
+      using namespace Mantid::DataObjects;
+      Peak* pPeak = dynamic_cast<Peak*>(&peak);
+      pPeak->setPeakShape(boost::make_shared<PeakShapeSpherical>(radius, HKL));
+  }
+
+  void test_delete_in() {
+      using namespace Mantid::DataObjects;
+
+      const int nPeaks = 3;
+      const double radius = 0.1;
+      auto concreteBuilder = createStandardBuild(nPeaks, radius, HKL);
+
+      // Custom peaks workspace
+      IPeaksWorkspace_sptr peaksWS = createPeaksWorkspace(nPeaks, radius);
+      // Customize a peak
+      IPeak& peakToDelete1 = peaksWS->getPeak(0);
+      peakToDelete1.setHKL(0,0,0);
+      makeSphericallyIntegrated(peakToDelete1, radius);
+      // Customize another peak
+      IPeak& peakToDelete2 = peaksWS->getPeak(0);
+      peakToDelete2.setHKL(1,0,0);
+      makeSphericallyIntegrated(peakToDelete2, radius);
+      // Customize another peak
+      peaksWS->getPeak(2).setHKL(10, 10, 10); // Not integrated, will be well out of range anyway.
+
+      /******************
+
+                              x (10,10,10)
+
+      -----------------------   cursor region = 0 to 1 and -0.5 to 0.5
+      |  x(0,0,0) x(1,0,0)  |
+      -----------------------
+
+      ******************/
+
+
+      concreteBuilder.withPeaksWorkspace(peaksWS); // Customise builder
+
+      ConcretePeaksPresenter_sptr presenter = concreteBuilder.create();
+
+      /*
+       * Create a Cursor region.
+      */
+      Top top(0.5);
+      Bottom bottom(-0.5);
+      Left left(0);
+      Right right(1);
+      SlicePoint slicePoint(0.0);
+      PeakBoundingBox cursorRegion(left, right, top, bottom, slicePoint); // psudo viewing frustrum.
+
+      TSM_ASSERT_EQUALS("No peaks should have been removed yet", 3, peaksWS->getNumberPeaks());
+      TSM_ASSERT("Point sits on peak radius. We should delete peak.", presenter->deletePeaksIn(cursorRegion));
+      TSM_ASSERT_EQUALS("One peaks should remain", 1, peaksWS->getNumberPeaks());
+
+  }
 };
 
 

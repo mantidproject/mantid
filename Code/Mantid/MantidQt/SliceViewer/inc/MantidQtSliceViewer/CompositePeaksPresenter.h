@@ -3,6 +3,7 @@
 
 #include "MantidQtSliceViewer/PeaksPresenter.h"
 #include "MantidQtSliceViewer/NullPeaksPresenter.h"
+#include "MantidQtSliceViewer/PeakBoundingBox.h"
 #include "MantidQtSliceViewer/PeakPalette.h"
 #include "MantidQtSliceViewer/ZoomablePeaksView.h"
 #include "MantidQtSliceViewer/UpdateableOnDemand.h"
@@ -63,6 +64,7 @@ public:
   virtual void reInitialize(
       boost::shared_ptr<Mantid::API::IPeaksWorkspace> ) { /*Do nothing*/
   }
+  virtual bool deletePeaksIn(PeakBoundingBox box);
 
   /// Constructor
   CompositePeaksPresenter(ZoomablePeaksView *const zoomablePlottingWidget,
@@ -177,8 +179,8 @@ private:
   boost::optional<PeaksPresenter_sptr> m_zoomedPresenter;
   /// index of peak zoomed in on.
   int m_zoomedPeakIndex;
-
 };
+
 }
 }
 

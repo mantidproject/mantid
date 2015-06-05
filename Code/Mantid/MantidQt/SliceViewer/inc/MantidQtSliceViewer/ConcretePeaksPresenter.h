@@ -58,7 +58,8 @@ public:
   virtual bool isHidden() const;
   virtual bool contentsDifferent(PeaksPresenter const *  other) const;
   bool deletePeakAt(const double& x, const double& y);
-  void peakEditMode(EditMode mode);
+  virtual void peakEditMode(EditMode mode);
+  virtual bool deletePeaksIn(PeakBoundingBox box);
 
 private:
   /// Peak overlay view.
@@ -101,8 +102,8 @@ private:
   void informOwnerUpdate();
   /// initialize the setup
   void initialize();
-
 };
+
 
 }
 }
