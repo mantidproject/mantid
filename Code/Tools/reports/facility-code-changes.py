@@ -7,7 +7,6 @@ import subprocess
 import csv
 import argparse
 import os
-import time
 
 if __name__ == '__main__':
     print("Generating some random metrics...\n")
@@ -117,14 +116,13 @@ if __name__ == '__main__':
             since = "--since='{0}-{1}-1'".format(str(year), str(month))
             until = "--before='{0}-{1}-{2}'".format(str(year), str(month), str(days_in_month[month-1]))
 
-            #
+            f = open(f = open('facility-file-changes-{0}.stdout'.format(date_key),'w'),'w')
             arg_changes = ['git', 'log', '--pretty=format:"%aE"', '--shortstat', since, until]
-            sub = subprocess.Popen(arg_changes, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=repolocation)
+            sub = subprocess.Popen(arg_changes, stdout=f, stderr=subprocess.PIPE, cwd=repolocation)
+            f.close()
             
-            time.sleep(1)
-
-            stdout, stderr = sub.communicate()
-            output = stdout.split('\n')
+            # stdout, stderr = sub.communicate()
+            # output = stdout.split('\n')
 
             date_key = str(year)+'-{0:02d}'.format(month)
 
@@ -132,6 +130,8 @@ if __name__ == '__main__':
             facility_changed[date_key] = {}
             facility_added[date_key] = {}
             facility_removed[date_key] = {}
+            
+            freading = open(facility-file-changes-{0}.stdout'.format(date_key),'r')
 
             # initialize facility counters
             for org in organisations:
@@ -140,15 +140,11 @@ if __name__ == '__main__':
                 facility_added[date_key][org] = 0
                 facility_removed[date_key][org] = 0
 
-            f = open('facility-file-changes-{0}.stdout'.format(date_key),'w')
-
-            for line in output:
+            for line in freading:
                 changed = 0
                 added = 0
                 removed = 0
                 
-                f.write(line+'\n')
-
                 # Is the line blank (or None)
                 if line is None or len(line) is 0:
                     # print("BLANK:'{0}'".format(str(line)))
@@ -195,7 +191,7 @@ if __name__ == '__main__':
                 if not found:
                     print("Email ({0}) couldn't be matched to a facility!".format(str(email_changes)))
 
-            f.close()
+            freading.close()
 
             args_commits = ['git', 'log', '--pretty=format:"%aE"', since, until]
             # print(args_commits)
