@@ -17,11 +17,6 @@ on an input theta value.
 Historically the work performed by this algorithm was known as the Quick
 script.
 
-Workflow
-########
-
-.. diagram:: ReflectometryReductionOne-v1_wkflw.dot
-
 Analysis Modes
 ##############
 
@@ -66,6 +61,11 @@ If the :literal:`CorrectionAlgorithm` property is set to
 :literal:`ExponentialCorrection`, then the :Ref:`algm-ExponentialCorrection`
 algorithm is used, with C0 and C1 taken from the :literal:`C0` and :literal:`C1`
 properties.
+
+Workflow
+########
+
+.. diagram:: ReflectometryReductionOne-v1_wkflw.dot
 
 Usage
 -----
