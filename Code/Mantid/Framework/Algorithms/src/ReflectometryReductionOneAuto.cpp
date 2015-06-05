@@ -362,50 +362,50 @@ void ReflectometryReductionOneAuto::exec() {
       refRedOne->setProperty("C1", getPropertyValue("C1"));
     } else if (correction_algorithm == "AutoDetect") {
       // Figure out what to do from the instrument
-      auto inst = in_ws->getInstrument();
+      try {
+        auto inst = in_ws->getInstrument();
 
-      const std::vector<std::string> corrVec =
-          inst->getStringParameter("correction");
-      const std::string correctionStr = !corrVec.empty() ? corrVec[0] : "";
+        const std::vector<std::string> corrVec =
+            inst->getStringParameter("correction");
+        const std::string correctionStr = !corrVec.empty() ? corrVec[0] : "";
 
-      if (correctionStr.empty())
-        throw std::runtime_error(
-            "CorrectionAlgorithm set to AutoDetect, but "
-            "could not determine correction type from "
-            "instrument. 'correction' instrument parameter "
-            "was not found.");
+        if (correctionStr.empty())
+          throw std::runtime_error(
+              "'correction' instrument parameter was not found.");
 
-      const std::vector<std::string> polyVec =
-          inst->getStringParameter("polynomial");
-      const std::string polyStr = !polyVec.empty() ? polyVec[0] : "";
+        const std::vector<std::string> polyVec =
+            inst->getStringParameter("polynomial");
+        const std::string polyStr = !polyVec.empty() ? polyVec[0] : "";
 
-      const std::vector<std::string> c0Vec = inst->getStringParameter("C0");
-      const std::string c0Str = !c0Vec.empty() ? c0Vec[0] : "";
+        const std::vector<std::string> c0Vec = inst->getStringParameter("C0");
+        const std::string c0Str = !c0Vec.empty() ? c0Vec[0] : "";
 
-      const std::vector<std::string> c1Vec = inst->getStringParameter("C1");
-      const std::string c1Str = !c1Vec.empty() ? c1Vec[0] : "";
+        const std::vector<std::string> c1Vec = inst->getStringParameter("C1");
+        const std::string c1Str = !c1Vec.empty() ? c1Vec[0] : "";
 
-      if (correctionStr == "polynomial" && polyStr.empty())
-        throw std::runtime_error(
-            "CorrectionAlgorithm set to AutoDetect, but "
-            "could not determine polynomial from "
-            "instrument. 'polynomial' instrument parameter "
-            "was not found.");
+        if (correctionStr == "polynomial" && polyStr.empty())
+          throw std::runtime_error(
+              "'polynomial' instrument parameter was not found.");
 
-      if (correctionStr == "exponential" && (c0Str.empty() || c1Str.empty()))
-        throw std::runtime_error(
-            "CorrectionAlgorithm set to AutoDetect, but "
-            "could not determine exponents from "
-            "instrument. 'C0' or 'C1' instrument parameter "
-            "was not found.");
+        if (correctionStr == "exponential" && (c0Str.empty() || c1Str.empty()))
+          throw std::runtime_error(
+              "'C0' or 'C1' instrument parameter was not found.");
 
-      if (correctionStr == "polynomial") {
-        refRedOne->setProperty("CorrectionAlgorithm", "PolynomialCorrection");
-        refRedOne->setProperty("Polynomial", polyStr);
-      } else if (correctionStr == "exponential") {
-        refRedOne->setProperty("CorrectionAlgorithm", "ExponentialCorrection");
-        refRedOne->setProperty("C0", c0Str);
-        refRedOne->setProperty("C1", c1Str);
+        if (correctionStr == "polynomial") {
+          refRedOne->setProperty("CorrectionAlgorithm", "PolynomialCorrection");
+          refRedOne->setProperty("Polynomial", polyStr);
+        } else if (correctionStr == "exponential") {
+          refRedOne->setProperty("CorrectionAlgorithm",
+                                 "ExponentialCorrection");
+          refRedOne->setProperty("C0", c0Str);
+          refRedOne->setProperty("C1", c1Str);
+        }
+
+      } catch (std::runtime_error &e) {
+        g_log.warning() << "Could not autodetect polynomial correction method. "
+                           "Polynomial correction will not be performed. "
+                           "Reason for failure: " << e.what() << std::endl;
+        refRedOne->setProperty("CorrectionAlgorithm", "None");
       }
 
     } else {
