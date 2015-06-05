@@ -116,7 +116,7 @@ if __name__ == '__main__':
             since = "--since='{0}-{1}-1'".format(str(year), str(month))
             until = "--before='{0}-{1}-{2}'".format(str(year), str(month), str(days_in_month[month-1]))
 
-            f = open(f = open('facility-file-changes-{0}.stdout'.format(date_key),'w'),'w')
+            f = open('facility-file-changes-{0}.stdout'.format(date_key),'w)
             arg_changes = ['git', 'log', '--pretty=format:"%aE"', '--shortstat', since, until]
             sub = subprocess.Popen(arg_changes, stdout=f, stderr=subprocess.PIPE, cwd=repolocation)
             f.close()
