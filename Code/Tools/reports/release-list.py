@@ -36,7 +36,22 @@ def getTags(repolocation):
         tag = tag.split()
         datestamp="%sT%s%s" % tuple(tag[:3])
         datestamp=datestamp.split('format:')[1]
-        datestamp = datetime.datetime.strptime(datestamp, "%Y-%m-%dT%H:%M:%S%z")
+
+        # grab out the timezone
+        tzd=0
+        if '+' in datestamp:
+            (datestamp, tzd) = (datestamp.split('+'))
+            tzd = int(.01*float(tzd))
+        elif datestamp.count('-') == 3:
+            tzd = "-"+datestamp.split('-')[-1]
+            datestamp = datestamp.replace(tzd,'')
+            tzd = int(.01*float(tzd))
+        tzd=datetime.timedelta(hours=tzd)
+
+        # parse the date and correct for timezone
+        datestamp = datetime.datetime.strptime(datestamp, "%Y-%m-%dT%H:%M:%S")
+        datestamp -= tzd
+
         tag = ' '.join(tag[3:])[:-1]
         tag = tag.replace('(','')
         tag = tag.replace(')','')
