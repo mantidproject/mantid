@@ -1972,10 +1972,10 @@ TimeSeriesProperty<double>& execute_add_time_series(TimeSeriesProperty<double> l
 }
 
 
-void populateTimeSeriesProperty(TimeSeriesProperty<double>& timeSeries, double value,  const unsigned int length) {
+void populateTimeSeriesProperty(TimeSeriesProperty<double>& timeSeries, double value,  unsigned int length) {
   DateAndTime date("2010-01-01T00:00:00");
   timeSeries.setUnits("mm");
-  for (int i = 0; i < length; i++) {
+  for (unsigned int i = 0; i < length; i++) {
     timeSeries.addValue(date + static_cast<double>(i), value);
   }
 }
@@ -1998,11 +1998,11 @@ public:
                                         m_mergeTimeSeriesSet2("merge"),
                                         m_addTimeSeriesSet1("add"),
                                         m_addTimeSeriesSet2("add"){
-    const unsigned int lengthMerge = 1000000;
+    unsigned int lengthMerge = 1000000;
     populateTimeSeriesProperty(m_mergeTimeSeriesSet1, 1.0, lengthMerge);
     populateTimeSeriesProperty(m_mergeTimeSeriesSet2, 2.0, lengthMerge);
 
-    const unsigned int lengthAdd = lengthMerge*5;
+    unsigned int lengthAdd = lengthMerge*5;
     populateTimeSeriesProperty(m_addTimeSeriesSet1, 1.0, lengthAdd);
     populateTimeSeriesProperty(m_addTimeSeriesSet2, 2.0, lengthAdd);
   }

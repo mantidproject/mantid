@@ -92,7 +92,7 @@ TimeSeriesProperty<TYPE> & TimeSeriesProperty<TYPE>::handleTimeStampCollisions()
   auto nextEntry = m_values.begin();
   if (nextEntry != m_values.end()) { ++nextEntry; }
 
-  for(nextEntry; nextEntry != m_values.end(); ++nextEntry) {
+  for(; nextEntry != m_values.end(); ++nextEntry) {
     // Note: We need to take care of nextEntry values which
     // can be smaller than currentEntry values due to
     // consecutive collisions. For example, let's assume the
