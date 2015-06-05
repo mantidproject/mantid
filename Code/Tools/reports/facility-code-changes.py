@@ -118,7 +118,7 @@ if __name__ == '__main__':
 
             #
             arg_changes = ['git', 'log', '--pretty=format:"%aE"', '--shortstat', since, until]
-            sub = subprocess.Popen(arg_changes, stdout=subprocess.PIPE, close_fds=True, cwd=repolocation)
+            sub = subprocess.Popen(arg_changes, stdout=subprocess.PIPE, cwd=repolocation)
 
             date_key = str(year)+'-{0:02d}'.format(month)
 
@@ -187,10 +187,15 @@ if __name__ == '__main__':
 
             args_commits = ['git', 'log', '--pretty=format:"%aE"', since, until]
             # print(args_commits)
-            sub2 = subprocess.Popen(args_commits, stdout=subprocess.PIPE, close_fds=True, cwd=repolocation)
+            sub2 = subprocess.Popen(args_commits, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=repolocation)
+            stdout, stderr = sub2.communicate()
             commits = 0
-            for line in sub2.stdout:
-                # print(line)
+            output = stdout.split('\n')
+            # f = open('facility-commits-{0}.stdout'.format(date_key),'w')
+            for line in output:
+                # f.write(line+'\n')
+                if len(line) is 0:
+                    continue
                 found = False
                 email_commits = line.replace('"','').strip()
                 found = False
@@ -205,6 +210,8 @@ if __name__ == '__main__':
 
                 if not found:
                     print("Email for commits ({0}) couldn't be matched to a facility!".format(str(email_commits)))
+
+            # f.close()
 
             commits_datarow = {'date': date_key+"-01"}
             changed_datarow = {'date': date_key+"-01"}
@@ -232,5 +239,7 @@ if __name__ == '__main__':
     csvchanged.close()
     csvadded.close()
     csvremoved.close()
+
+
 
     print("All done!\n")
