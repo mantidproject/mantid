@@ -31,6 +31,12 @@ boost::python::list getEquivalentPositions(SpaceGroup &self,
 
   return pythonEquivalents;
 }
+
+bool isAllowedReflection(SpaceGroup &self, const object &hkl) {
+    const Mantid::Kernel::V3D &hklV3d = Converters::PyObjectToV3D(hkl)();
+
+    return self.isAllowedReflection(hklV3d);
+}
 }
 
 void export_SpaceGroup() {
@@ -42,5 +48,5 @@ void export_SpaceGroup() {
       .def("getEquivalentPositions", &getEquivalentPositions,
            "Returns an array with all symmetry equivalents of the supplied "
            "HKL.")
-      .def("isAllowedReflection", &SpaceGroup::isAllowedReflection);
+      .def("isAllowedReflection", &isAllowedReflection);
 }
