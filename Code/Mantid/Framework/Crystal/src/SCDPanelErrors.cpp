@@ -586,7 +586,7 @@ double SCDPanelErrors::checkForNonsenseParameters() const {
     r += fabs(ry) * .02;
 
   if (fabs(rz) > 15.)
-    r += fabs(ry) * .02;
+    r += fabs(rz) * .02;
 
   return 5. * r;
 }
