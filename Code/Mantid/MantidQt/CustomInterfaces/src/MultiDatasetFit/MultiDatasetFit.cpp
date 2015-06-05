@@ -16,8 +16,7 @@
 namespace{
   // tool options pages
   const int zoomToolPage  = 0;
-  const int panToolPage   = 1;
-  const int rangeToolPage = 2;
+  const int rangeToolPage = 1;
 }
 
 namespace MantidQt
@@ -63,7 +62,7 @@ void MultiDatasetFit::initLayout()
   connect(m_dataController,SIGNAL(hasSelection(bool)),  m_uiForm.btnRemove, SLOT(setEnabled(bool)));
   connect(m_uiForm.btnAddWorkspace,SIGNAL(clicked()),m_dataController,SLOT(addWorkspace()));
   connect(m_uiForm.btnRemove,SIGNAL(clicked()),m_dataController,SLOT(removeSelectedSpectra()));
-  connect(m_uiForm.cb_applyRangeToAll,SIGNAL(toggled(bool)),m_dataController,SLOT(setFittingRangeGlobal(bool)));
+  connect(m_uiForm.cbApplyRangeToAll,SIGNAL(toggled(bool)),m_dataController,SLOT(setFittingRangeGlobal(bool)));
 
   m_plotController = new MDF::PlotController(this,
                                         m_uiForm.plot,
@@ -381,7 +380,7 @@ void MultiDatasetFit::enableZoom()
 void MultiDatasetFit::enablePan()
 {
   m_plotController->enablePan();
-  m_uiForm.toolOptions->setCurrentIndex(panToolPage);
+  m_uiForm.toolOptions->setCurrentIndex(zoomToolPage);
 }
 
 /// Enable the fitting range selection tool.
@@ -438,8 +437,10 @@ void MultiDatasetFit::loadSettings()
   QSettings settings;
   settings.beginGroup("Mantid/MultiDatasetFit");
   m_fitOptionsBrowser->loadSettings( settings );
-  bool showDataErrors = settings.value("ShowDataErrors",false).asBool();
-  m_uiForm.cbShowDataErrors->setChecked(showDataErrors);
+  bool option = settings.value("ShowDataErrors",false).asBool();
+  m_uiForm.cbShowDataErrors->setChecked(option);
+  option = settings.value("ApplyRangeToAll",false).asBool();
+  m_uiForm.cbApplyRangeToAll->setChecked(option);
 }
 
 /// Save settings
@@ -449,6 +450,7 @@ void MultiDatasetFit::saveSettings() const
   settings.beginGroup("Mantid/MultiDatasetFit");
   m_fitOptionsBrowser->saveSettings( settings );
   settings.setValue("ShowDataErrors",m_uiForm.cbShowDataErrors->isChecked());
+  settings.setValue("ApplyRangeToAll",m_uiForm.cbApplyRangeToAll->isChecked());
 }
 
 } // CustomInterfaces

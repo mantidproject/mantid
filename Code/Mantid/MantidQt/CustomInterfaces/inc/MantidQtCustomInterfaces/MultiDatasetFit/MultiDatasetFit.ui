@@ -227,14 +227,13 @@
              </item>
             </layout>
            </widget>
-           <widget class="QWidget" name="PanPage"/>
            <widget class="QWidget" name="RangePage">
             <layout class="QHBoxLayout" name="horizontalLayout_5">
              <property name="margin">
               <number>0</number>
              </property>
              <item>
-              <widget class="QCheckBox" name="cb_applyRangeToAll">
+              <widget class="QCheckBox" name="cbApplyRangeToAll">
                <property name="text">
                 <string>Apply to all spectra</string>
                </property>
