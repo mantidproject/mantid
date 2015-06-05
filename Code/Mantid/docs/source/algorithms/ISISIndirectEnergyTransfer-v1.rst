@@ -12,6 +12,11 @@ Description
 Performs a reduction from raw time of flight to energy transfer for an inelastic
 indirect geometry instrument at ISIS.
 
+Workflow
+--------
+
+.. diagram:: ISISIndirectEnergyTransfer-v1_wkflw.dot
+
 Usage
 -----
 

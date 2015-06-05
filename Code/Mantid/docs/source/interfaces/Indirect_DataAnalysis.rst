@@ -49,6 +49,26 @@ You may also experience issues where the starting parameters may give a reliable
 fit on one spectra but not others, in this case the best option is to reduce
 the number of spectra that are fitted in one operation.
 
+In both I(Q, t) Fit and ConvFit the following options are available when fitting
+using FABADA:
+
+Output Chain
+  Select to enable output of the FABADA chain when using FABADA as the fitting
+  minimizer.
+
+Chain Length
+  Number of further steps carried out by fitting algorithm once parameters have
+  converged (see *ChainLength* is :ref:`FABADA` documentation)
+
+Convergence Criteria
+  The minimum variation in the cost function before the parameters are
+  considered to have converged (see *ConvergenceCriteria* in :ref:`FABADA`
+  documentation)
+
+Acceptance Rate
+  The desired percentage acceptance of new parameters (see *JumpAcceptanceRate*
+  in :ref:`FABADA` documentation)
+
 Elwin
 -----
 
@@ -258,14 +278,6 @@ StartX & EndX
 Use FABADA
   Select to enable use of the :ref:`FABADA` minimizer when performing the fit.
 
-Output Chain
-  Select to enable output of the FABADA chain when using FABADA as the fitting
-  minimizer.
-
-Chain Length
-  Number of further steps carried out by fitting algorithm once parameters have
-  converged (see :ref:`FABADA` documentation)
-
 Linear Background A0
   The constant amplitude of the background (horizontal green line on the preview
   plot).
@@ -392,14 +404,6 @@ StartX & EndX
 
 Use FABADA
   Select to enable use of the :ref:`FABADA` minimizer when performing the fit.
-
-Output Chain
-  Select to enable output of the FABADA chain when using FABADA as the fitting
-  minimizer.
-
-Chain Length
-  Number of further steps carried out by fitting algorithm once parameters have
-  converged (see :ref:`FABADA` documentation)
 
 A0 & A1 (background)
   The A0 and A1 parameters as they appear in the LinearBackground fir function,
