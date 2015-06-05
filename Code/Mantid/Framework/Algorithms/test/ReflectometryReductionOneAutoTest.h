@@ -143,7 +143,7 @@ public:
     alg->setProperty("MonitorBackgroundWavelengthMax", 1.0);
     alg->setProperty("MonitorIntegrationWavelengthMin", 0.0);
     alg->setProperty("MonitorIntegrationWavelengthMax", 1.0);
-    alg->setPropertyValue("ProcessingInstructions", "0, 1");
+    alg->setPropertyValue("ProcessingInstructions", "0");
     alg->setPropertyValue("OutputWorkspace", outWSQName);
     alg->setPropertyValue("OutputWorkspaceWavelength", outWSLamName);
     alg->setRethrows(true);
@@ -263,13 +263,6 @@ public:
     TS_ASSERT_THROWS(alg->execute(), std::invalid_argument);
   }
 
-  void test_workspace_index_list_min_max_pairs_throw_if_min_greater_than_max()
-  {
-    auto alg = construct_standard_algorithm();
-    alg->setProperty("ProcessingInstructions", "1, 0"); //1 > 0.
-    TS_ASSERT_THROWS(alg->execute(), std::out_of_range);
-  }
-
   void test_cannot_set_direct_beam_region_of_interest_without_multidetector_run()
   {
     auto alg = construct_standard_algorithm();
@@ -304,14 +297,14 @@ public:
   {
     auto alg = construct_standard_algorithm();
     alg->setProperty("DetectorComponentName", "made-up");
-    TS_ASSERT_THROWS(alg->execute(), std::out_of_range);
+    TS_ASSERT_THROWS(alg->execute(), std::runtime_error);
   }
 
   void test_bad_sample_component_name_throws()
   {
     auto alg = construct_standard_algorithm();
     alg->setProperty("SampleComponentName", "made-up");
-    TS_ASSERT_THROWS(alg->execute(), std::out_of_range);
+    TS_ASSERT_THROWS(alg->execute(), std::runtime_error);
   }
 
 
