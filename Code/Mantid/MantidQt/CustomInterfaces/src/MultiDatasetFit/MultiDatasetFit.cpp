@@ -74,6 +74,7 @@ void MultiDatasetFit::initLayout()
   connect(m_dataController,SIGNAL(dataTableUpdated()),m_plotController,SLOT(tableUpdated()));
   connect(m_dataController,SIGNAL(dataSetUpdated(int)),m_plotController,SLOT(updateRange(int)));
   connect(m_plotController,SIGNAL(fittingRangeChanged(int, double, double)),m_dataController,SLOT(setFittingRange(int, double, double)));
+  connect(m_uiForm.cbShowDataErrors,SIGNAL(toggled(bool)),m_plotController,SLOT(showDataErrors(bool)));
 
   QSplitter* splitter = new QSplitter(Qt::Vertical,this);
 
@@ -437,6 +438,8 @@ void MultiDatasetFit::loadSettings()
   QSettings settings;
   settings.beginGroup("Mantid/MultiDatasetFit");
   m_fitOptionsBrowser->loadSettings( settings );
+  bool showDataErrors = settings.value("ShowDataErrors",false).asBool();
+  m_uiForm.cbShowDataErrors->setChecked(showDataErrors);
 }
 
 /// Save settings
@@ -445,6 +448,7 @@ void MultiDatasetFit::saveSettings() const
   QSettings settings;
   settings.beginGroup("Mantid/MultiDatasetFit");
   m_fitOptionsBrowser->saveSettings( settings );
+  settings.setValue("ShowDataErrors",m_uiForm.cbShowDataErrors->isChecked());
 }
 
 } // CustomInterfaces

@@ -1,4 +1,5 @@
 #include "MantidQtCustomInterfaces/MultiDatasetFit/MDFDatasetPlotData.h"
+#include "MantidQtCustomInterfaces/MultiDatasetFit/MDFErrorCurve.h"
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -21,6 +22,7 @@ namespace MDF
 ///    If empty - ignore this workspace.
 DatasetPlotData::DatasetPlotData(const QString& wsName, int wsIndex, const QString& outputWSName):
   m_dataCurve(new QwtPlotCurve(wsName + QString(" (%1)").arg(wsIndex))),
+  m_dataErrorCurve(NULL),
   m_calcCurve(NULL),
   m_diffCurve(NULL)
 {
@@ -66,6 +68,11 @@ DatasetPlotData::~DatasetPlotData()
 {
   m_dataCurve->detach();
   delete m_dataCurve;
+  if ( m_dataErrorCurve )
+  {
+    m_dataErrorCurve->detach();
+    delete m_dataErrorCurve;
+  }
   if ( m_calcCurve )
   {
     m_calcCurve->detach();
@@ -97,6 +104,13 @@ void DatasetPlotData::setData(const Mantid::API::MatrixWorkspace *ws, int wsInde
   }
   m_dataCurve->setData( xValues.data(), ws->readY(wsIndex).data(), static_cast<int>(xValues.size()) );
 
+  if (m_dataErrorCurve)
+  {
+    m_dataErrorCurve->detach();
+    delete m_dataErrorCurve;
+  }
+  m_dataErrorCurve = new ErrorCurve(m_dataCurve, ws->readE(wsIndex));
+
   if ( haveFitCurves )
   {
     auto xBegin = std::lower_bound(xValues.begin(),xValues.end(), outputWS->readX(1).front());
@@ -119,6 +133,14 @@ void DatasetPlotData::setData(const Mantid::API::MatrixWorkspace *ws, int wsInde
 void DatasetPlotData::show(QwtPlot *plot)
 {
   m_dataCurve->attach(plot);
+  if (m_showDataErrorBars)
+  {
+    m_dataErrorCurve->attach(plot);
+  }
+  else
+  {
+    m_dataErrorCurve->detach();
+  }
   if ( m_calcCurve )
   {
     m_calcCurve->attach(plot);
@@ -133,6 +155,7 @@ void DatasetPlotData::show(QwtPlot *plot)
 void DatasetPlotData::hide()
 {
   m_dataCurve->detach();
+  m_dataErrorCurve->detach();
   if ( m_calcCurve )
   {
     m_calcCurve->detach();
@@ -156,6 +179,12 @@ QwtDoubleRect DatasetPlotData::boundingRect() const
     rect = rect.united( m_diffCurve->boundingRect() );
   }
   return rect;
+}
+
+/// Toggle the error bars on the data curve.
+void DatasetPlotData::showDataErrorBars(bool on)
+{
+  m_showDataErrorBars = on;
 }
 
 } // MDF

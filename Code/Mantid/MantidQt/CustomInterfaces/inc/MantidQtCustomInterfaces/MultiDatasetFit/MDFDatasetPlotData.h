@@ -24,6 +24,7 @@ namespace CustomInterfaces
 {
 namespace MDF
 {
+class ErrorCurve;
 
 /**
  * Contains graphics for a single data set: fitting data, claculated result, difference.
@@ -36,6 +37,7 @@ public:
   void show(QwtPlot *plot);
   void hide();
   QwtDoubleRect boundingRect() const;
+  void showDataErrorBars(bool on);
 private:
   // no copying
   DatasetPlotData(const DatasetPlotData&);
@@ -43,10 +45,14 @@ private:
   void setData(const Mantid::API::MatrixWorkspace *ws, int wsIndex, const Mantid::API::MatrixWorkspace *outputWS);
   /// Curve object for the fit data (spectrum).
   QwtPlotCurve *m_dataCurve;
+  /// Error bar curve for the data
+  ErrorCurve *m_dataErrorCurve;
   /// Curve object for the calculated spectrum after a fit.
   QwtPlotCurve *m_calcCurve;
   /// Curve object for the difference spectrum.
   QwtPlotCurve *m_diffCurve;
+
+  bool m_showDataErrorBars; ///< Flag to show/hide the data error bars
 };
 
 } // MDF
