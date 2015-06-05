@@ -73,8 +73,36 @@ size_t TimeSeriesProperty<TYPE>::getMemorySize() const {
  */
 template <typename TYPE>
 TimeSeriesProperty<TYPE> &TimeSeriesProperty<TYPE>::merge(Property *rhs) {
-  return operator+=(rhs);
+  TimeSeriesProperty<TYPE> & temp = operator+=(rhs);
+  handleTimeStampCollisions(temp);
+  return temp;
 }
+
+/**
+ * Handle collisions, i.e. entries which have the same time stamp. If we
+ * detect such an entry, then we shift it ny 1ns.
+ * @param series :: takes the merged time series by reference and manipulates it
+ */
+template <typename TYPE>
+void TimeSeriesProperty<TYPE>::handleTimeStampCollisions(TimeSeriesProperty<TYPE> &series) {
+  // We need to make sure that the entries are sorted
+  sort();
+
+  // Iterate once over the log
+  const int64_t shift = 1;
+  auto currentEntry = m_values.begin();
+  auto nextEntry = m_values.begin();
+  if (nextEntry != m_values.end()) { ++nextEntry; }
+
+  for(nextEntry; nextEntry != m_values.end(); ++nextEntry) {
+    // Detect a collision and shift the time by 1ns
+    if (nextEntry->time() == currentEntry->time()) {
+      nextEntry->setTime(nextEntry->time() + shift);
+    }
+    ++currentEntry;
+  }
+}
+
 
 /**
  * Add the value of another property
