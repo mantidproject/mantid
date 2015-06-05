@@ -1869,7 +1869,7 @@ void SANSRunWindow::selectDataDir()
  */
 void SANSRunWindow::selectUserFile()
 {
-  if( !browseForFile("Select a user file", m_uiForm.userfile_edit) )
+  if( !browseForFile("Select a user file", m_uiForm.userfile_edit, "Text files (*.txt)") )
   {
     return;
   }
