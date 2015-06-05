@@ -131,7 +131,7 @@ if __name__ == '__main__':
             facility_added[date_key] = {}
             facility_removed[date_key] = {}
             
-            freading = open(facility-file-changes-{0}.stdout'.format(date_key),'r')
+            freading = open('facility-file-changes-{0}.stdout'.format(date_key),'r')
 
             # initialize facility counters
             for org in organisations:
