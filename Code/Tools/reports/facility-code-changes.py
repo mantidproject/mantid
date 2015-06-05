@@ -73,7 +73,7 @@ if __name__ == '__main__':
 
     days_in_month = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
 
-    csvcommits = open('facility-commits.csv', 'w')
+    csvcommits = open('facility-commits.rubbish', 'w')
     csvchanged = open('facility-changed-files.csv', 'w')
     csvadded = open('facility-added-lines.csv', 'w')
     csvremoved = open('facility-removed-lines.csv', 'w')
