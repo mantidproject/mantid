@@ -118,7 +118,10 @@ if __name__ == '__main__':
 
             #
             arg_changes = ['git', 'log', '--pretty=format:"%aE"', '--shortstat', since, until]
-            sub = subprocess.Popen(arg_changes, stdout=subprocess.PIPE, cwd=repolocation)
+            sub = subprocess.Popen(arg_changes, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=repolocation)
+
+            stdout, stderr = sub.communicate()
+            output = stdout.split('\n')
 
             date_key = str(year)+'-{0:02d}'.format(month)
 
@@ -134,13 +137,16 @@ if __name__ == '__main__':
                 facility_added[date_key][org] = 0
                 facility_removed[date_key][org] = 0
 
-            for line in sub.stdout:
+            # f = open('facility-file-changes-{0}.stdout'.format(date_key),'w')
+
+            for line in output:
                 changed = 0
                 added = 0
                 removed = 0
+                # f.write(line+'\n')
 
                 # Is the line blank (or None)
-                if line is None:
+                if line is None or len(line) is 0:
                     # print("BLANK:'{0}'".format(str(line)))
                     continue
                 if len(line.strip().replace('\n', '')) == 0:
@@ -185,14 +191,16 @@ if __name__ == '__main__':
                 if not found:
                     print("Email ({0}) couldn't be matched to a facility!".format(str(email_changes)))
 
+            # f.close()
+
             args_commits = ['git', 'log', '--pretty=format:"%aE"', since, until]
             # print(args_commits)
             sub2 = subprocess.Popen(args_commits, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=repolocation)
-            stdout, stderr = sub2.communicate()
+            stdout2, stderr2 = sub2.communicate()
             commits = 0
-            output = stdout.split('\n')
+            output2 = stdout2.split('\n')
             # f = open('facility-commits-{0}.stdout'.format(date_key),'w')
-            for line in output:
+            for line in output2:
                 # f.write(line+'\n')
                 if len(line) is 0:
                     continue
