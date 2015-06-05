@@ -192,16 +192,18 @@ if __name__ == '__main__':
                     print("Email ({0}) couldn't be matched to a facility!".format(str(email_changes)))
 
             freading.close()
-
+            
+            f2 = open('facility-commits-{0}.stdout'.format(date_key),'w')
             args_commits = ['git', 'log', '--pretty=format:"%aE"', since, until]
             # print(args_commits)
-            sub2 = subprocess.Popen(args_commits, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=repolocation)
-            stdout2, stderr2 = sub2.communicate()
+            sub2 = subprocess.Popen(args_commits, stdout=f2, stderr=subprocess.PIPE, cwd=repolocation)
             commits = 0
-            output2 = stdout2.split('\n')
-            f2 = open('facility-commits-{0}.stdout'.format(date_key),'w')
-            for line in output2:
-                f2.write(line+'\n')
+            
+            f2.close()
+            
+            f2reading = open('facility-commits-{0}.stdout'.format(date_key), 'r')
+
+            for line in f2reading:
                 if len(line) is 0:
                     continue
                 found = False
@@ -219,7 +221,7 @@ if __name__ == '__main__':
                 if not found:
                     print("Email for commits ({0}) couldn't be matched to a facility!".format(str(email_commits)))
 
-            f2.close()
+            f2reading.close()
 
             commits_datarow = {'date': date_key+"-01"}
             changed_datarow = {'date': date_key+"-01"}
