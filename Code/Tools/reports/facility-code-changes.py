@@ -137,13 +137,14 @@ if __name__ == '__main__':
                 facility_added[date_key][org] = 0
                 facility_removed[date_key][org] = 0
 
-            # f = open('facility-file-changes-{0}.stdout'.format(date_key),'w')
+            f = open('facility-file-changes-{0}.stdout'.format(date_key),'w')
 
             for line in output:
                 changed = 0
                 added = 0
                 removed = 0
-                # f.write(line+'\n')
+                
+                f.write(line+'\n')
 
                 # Is the line blank (or None)
                 if line is None or len(line) is 0:
@@ -191,7 +192,7 @@ if __name__ == '__main__':
                 if not found:
                     print("Email ({0}) couldn't be matched to a facility!".format(str(email_changes)))
 
-            # f.close()
+            f.close()
 
             args_commits = ['git', 'log', '--pretty=format:"%aE"', since, until]
             # print(args_commits)
@@ -199,9 +200,9 @@ if __name__ == '__main__':
             stdout2, stderr2 = sub2.communicate()
             commits = 0
             output2 = stdout2.split('\n')
-            # f = open('facility-commits-{0}.stdout'.format(date_key),'w')
+            f2 = open('facility-commits-{0}.stdout'.format(date_key),'w')
             for line in output2:
-                # f.write(line+'\n')
+                f2.write(line+'\n')
                 if len(line) is 0:
                     continue
                 found = False
@@ -219,7 +220,7 @@ if __name__ == '__main__':
                 if not found:
                     print("Email for commits ({0}) couldn't be matched to a facility!".format(str(email_commits)))
 
-            # f.close()
+            f2.close()
 
             commits_datarow = {'date': date_key+"-01"}
             changed_datarow = {'date': date_key+"-01"}
