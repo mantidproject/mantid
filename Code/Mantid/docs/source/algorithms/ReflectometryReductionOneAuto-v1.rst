@@ -119,4 +119,34 @@ Output:
     The first four IvsQ Y values are: [ 3.2358089327e-05 , 5.36730688015e-05 , 4.84784245605e-05 , 5.45733934596e-05 ]
     Theta out is the same as theta in: 0.7
 
+**Example - Polynomial correction**
+
+.. testcode:: ExReflRedOneAutoPoly
+
+    run = Load(Filename='INTER00013460.nxs')
+    # Set up some paramters, allowing the algorithm to automatically detect the correction to use
+    SetInstrumentParameter(run, "correction", Value="polynomial")
+    SetInstrumentParameter(run, "polynomial", Value="0,0.5,1,2,3")
+
+    IvsQ, IvsLam, thetaOut = ReflectometryReductionOneAuto(InputWorkspace=run, ThetaIn=0.7)
+
+    def findByName(histories, name):
+        return filter(lambda x: x.name() == name, histories)[0]
+
+    # Find the PolynomialCorrection entry in the workspace's history
+    algHist = IvsLam.getHistory()
+    refRedOneAutoHist = findByName(algHist.getAlgorithmHistories(), "ReflectometryReductionOneAuto")
+    refRedOneHist = findByName(refRedOneAutoHist.getChildHistories(), "ReflectometryReductionOne")
+    polyCorHist = findByName(refRedOneHist.getChildHistories(), "PolynomialCorrection")
+
+    coefProp = findByName(polyCorHist.getProperties(), "Coefficients")
+
+    print "Coefficients: '" + coefProp.value() + "'"
+
+Output:
+
+.. testoutput:: ExReflRedOneAutoPoly
+
+    Coefficients: '0,0.5,1,2,3'
+
 .. categories::
