@@ -2,6 +2,7 @@
 
 #include <QPainter>
 #include <qwt_scale_map.h>
+#include <stdexcept>
 
 namespace MantidQt
 {
@@ -39,8 +40,6 @@ ErrorCurve::ErrorCurve(const QwtPlotCurve* dataCurve, const std::vector<double>&
 
 /// Set error bars
 /// @param errors :: A pointer to an array with error bars.
-/// @param n :: Number of error values. Must be the same as the number of data
-///    in the parent data curve.
 void ErrorCurve::setErrorBars(const std::vector<double>& errors)
 {
   if (errors.size() != m_x.size())
@@ -53,13 +52,13 @@ void ErrorCurve::setErrorBars(const std::vector<double>& errors)
 /// Draw this curve
 void ErrorCurve::draw(QPainter *painter, 
       const QwtScaleMap &xMap, const QwtScaleMap &yMap,
-      const QRect &canvasRect) const
+      const QRect &) const
 {
   if (m_e.empty()) return;
   painter->save();
   painter->setPen(m_pen);
   int n = static_cast<int>(m_x.size());
-  const double dx = 4;
+  const int dx = 4;
 
   for (int i = 0; i < n; ++i)
   {
