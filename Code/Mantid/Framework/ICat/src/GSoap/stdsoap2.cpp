@@ -2382,7 +2382,7 @@ int SOAP_FMAC2 soap_resolve(struct soap *soap) {
                                         "location=%p level=%u,%u id='%s'\n",
                                 ip->type, p, ip->level, fp->level, ip->id));
             while (ip->level < k) {
-              void **q = (void **)soap_malloc(soap, sizeof(void *));
+              void **q = (void **)soap_malloc(soap, sizeof(q));
               if (!q)
                 return soap->error;
               *q = p;
@@ -12354,7 +12354,7 @@ short *SOAP_FMAC2 soap_inshort(struct soap *soap, const char *tag, short *p,
 SOAP_FMAC1
 const char *SOAP_FMAC2 soap_float2s(struct soap *soap, float n) {
   char *s;
-  if (soap_isnan((double)n))
+  if (soap_isnan(n))
     return "NaN";
   if (soap_ispinff(n))
     return "INF";
@@ -12506,11 +12506,11 @@ float *SOAP_FMAC2 soap_infloat(struct soap *soap, const char *tag, float *p,
 SOAP_FMAC1
 const char *SOAP_FMAC2 soap_double2s(struct soap *soap, double n) {
   char *s;
-  if (soap_isnan(n))
+  if (soap_isnan(static_cast<float>(n)))
     return "NaN";
-  if (soap_ispinfd(n))
+  if (soap_ispinfd(static_cast<float>(n)))
     return "INF";
-  if (soap_isninfd(n))
+  if (soap_isninfd(static_cast<float>(n)))
     return "-INF";
   s = soap->tmpbuf;
 #if defined(HAVE_SPRINTF_L)
