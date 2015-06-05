@@ -660,16 +660,23 @@ PoldiFitPeaks2D::getUserSpecifiedTies(const IFunction_sptr &poldiFn) {
           }
         }
 
-        if (matchedParameters.size() > 1) {
+        switch (matchedParameters.size()) {
+        case 0:
+          g_log.warning("Function does not have a parameter called '" + *it +
+                        "', ignoring.");
+          break;
+        case 1:
+          g_log.warning("There is only one peak, no ties necessary.");
+          break;
+        default: {
           std::string reference = matchedParameters.front();
 
           for (auto par = matchedParameters.begin() + 1;
                par != matchedParameters.end(); ++par) {
             tieComponents.push_back(*par + "=" + reference);
           }
-        } else {
-          g_log.warning("Function does not have a parameter called '" + *it +
-                        "', ignoring.");
+          break;
+        }
         }
       }
     }
@@ -685,7 +692,8 @@ PoldiFitPeaks2D::getUserSpecifiedTies(const IFunction_sptr &poldiFn) {
 /**
  * Construct a PoldiPeakCollection from a Poldi2DFunction
  *
- * This method performs the opposite operation of getFunctionFromPeakCollection.
+ * This method performs the opposite operation of
+ *getFunctionFromPeakCollection.
  * It takes a function, checks if it's of the proper type and turns the
  * information into a PoldiPeakCollection.
  *
@@ -1106,7 +1114,8 @@ void PoldiFitPeaks2D::setTimeTransformer(
  * data (0 spectra or less than 2 x-values), the method throws an
  * std::invalid_argument-exception Otherwise it calls setDeltaT.
  *
- * @param matrixWorkspace :: MatrixWorkspace with at least one spectrum with at
+ * @param matrixWorkspace :: MatrixWorkspace with at least one spectrum with
+ *at
  *                           least two x-values.
  */
 void PoldiFitPeaks2D::setDeltaTFromWorkspace(
