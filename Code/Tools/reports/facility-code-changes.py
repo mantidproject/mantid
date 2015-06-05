@@ -115,7 +115,9 @@ if __name__ == '__main__':
             print("Getting stats for {0}-{1:02d}".format(str(year), month))
             since = "--since='{0}-{1}-1'".format(str(year), str(month))
             until = "--before='{0}-{1}-{2}'".format(str(year), str(month), str(days_in_month[month-1]))
-
+            
+            date_key = str(year)+'-{0:02d}'.format(month)
+            
             f = open('facility-file-changes-{0}.stdout'.format(date_key),'w')
             arg_changes = ['git', 'log', '--pretty=format:"%aE"', '--shortstat', since, until]
             sub = subprocess.Popen(arg_changes, stdout=f, stderr=subprocess.PIPE, cwd=repolocation)
@@ -123,8 +125,6 @@ if __name__ == '__main__':
             
             # stdout, stderr = sub.communicate()
             # output = stdout.split('\n')
-
-            date_key = str(year)+'-{0:02d}'.format(month)
 
             facility_commits[date_key] = {}
             facility_changed[date_key] = {}
