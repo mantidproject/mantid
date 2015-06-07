@@ -1,6 +1,5 @@
-# pylint: disable=no-init
+# pylint: disable=no-init,invalid-name
 import stresstesting
-import re
 from mantid.simpleapi import *
 from mantid.geometry import *
 
