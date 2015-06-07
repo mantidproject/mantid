@@ -288,8 +288,8 @@ Very similar constructions are available in C++ as well, as shown in the API doc
 Other ways of using groups in Mantid
 ------------------------------------
 
-Retrieving information space group symmetry
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Retrieving information about space group symmetry
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The previous two sections demonstrated how to perform common tasks using point and space groups in Mantid. With the available Python tools it is however possible to obtain other information as well. One useful method that both PointGroup and SpaceGroup expose is to query the symmetry operations of the group, although in string format:
 
@@ -457,10 +457,21 @@ Building on the example above which showed how to check whether a reflection is 
 .. testcode:: ExSpaceGroupCheck
 
     from mantid.geometry import SpaceGroupFactory
+    from collections import Counter
 
-    # Small helper function that checks if the "observation status" of a reflection is compatible with the space group.
+    # Small helper function that distinguishes three cases:
+    #   0: The reflection is observed and allowed or not observed and not allowed
+    #  -1: The reflection is allowed, but not observed - additional reflection condition is present
+    #   1: The reflection is observed, but not allowed - systematic absence violation
     def conditionsMatch(spaceGroup, hkl, isObserved):
-        return spaceGroup.isAllowedReflection(hkl) == isObserved
+        isAllowed = spaceGroup.isAllowedReflection(hkl)
+
+        if isAllowed == isObserved:
+            return 0
+        elif isAllowed and not isObserved:
+            return -1
+        else:
+            return 1
 
     # List of reflections with "observation status" from a hypothetical experiment.
     reflections = [([1,0,0], False), ([1,1,0], False), ([1,1,1], True), ([2,0,0], False), ([2,1,0], False), ([2,1,1], False),
@@ -489,35 +500,36 @@ Building on the example above which showed how to check whether a reflection is 
         # For each (hkl, observed) pair obtain whether this matches the space group's conditions
         conditionsMatchList = [conditionsMatch(sgObject, x[0], x[1]) for x in reflections]
 
-        # The new list contains "True" for each match of observation status and space group reflection conditions
-        # The number of occurences of "True" describes how many observations/absences are explained by this space group
-        spaceGroupMatchList.append((sgSymbol, conditionsMatchList.count(True)))
+        # In this list, each reflection has a dictionary with frequency of the values 0, -1 and 1
+        # (see the helper function defined above).
+        spaceGroupMatchList.append((sgSymbol, Counter(conditionsMatchList)))
 
-    # Sort the list in descending order according to the number of matched observations/absences
-    spaceGroupMatchList.sort(key=lambda x: x[1], reverse=True)
+    # Sort the list according to abscence violations and additional reflection conditions
+    spaceGroupMatchList.sort(key=lambda x: (x[1][1], x[1][-1]))
 
     # Print some information about the most likely matches
-    print "5 space groups that explain most observations:"
+    print "5 best matching space groups:"
 
     for sgPair in spaceGroupMatchList[:5]:
-        print "    {}: {}/{} ({:.1f}%)".format(sgPair[0], sgPair[1], reflectionCount, sgPair[1] / float(reflectionCount) * 100.0)
+        sgStatus = sgPair[1]
+        print "    {}: {} absence violations, {: >2} additional absences, {: >2} matches".format(sgPair[0], sgStatus[1], sgStatus[-1], sgStatus[0])
 
-    print "The most likely space group is:", spaceGroupMatchList[0][0]
+    print "The best matching space group is:", spaceGroupMatchList[0][0]
 
 The script should produce the following output:
 
 .. testoutput:: ExSpaceGroupCheck
 
     There are 54 reflections to consider.
-    5 space groups that explain most observations:
-        F d -3 m: 51/54 (94.4%)
-        F m -3 m: 48/54 (88.9%)
-        F d -3 c: 45/54 (83.3%)
-        F m -3 c: 42/54 (77.8%)
-        I a -3 d: 37/54 (68.5%)
-    The most likely space group is: F d -3 m
+    5 space groups with best match:
+        F d -3 m: 0 absence violations,  3 additional absences, 51 matches
+        F m -3 m: 0 absence violations,  6 additional absences, 48 matches
+        P n -3 m: 0 absence violations, 31 additional absences, 23 matches
+        P m -3 m: 0 absence violations, 42 additional absences, 12 matches
+        F d -3 c: 6 absence violations,  3 additional absences, 45 matches
+    The best matching space group is: F d -3 m
 
-In this case, the script gave the right answer, because the list of reflections was created using the crystal structure of silicon, which, as mentioned above, belongs to space group type :math:`Fd\bar{3}m`. The systematic absences derived from the symmetry operations explain all observations (and absences) expcept three. These are caused by the Si-atom on a special position.
+In this case, the script gave the right answer, because the list of reflections was created using the crystal structure of silicon, which, as mentioned above, belongs to space group type :math:`Fd\bar{3}m`. The systematic absences derived from the symmetry operations explain all observations (and absences) expcept three. These are caused by the Si-atom on a special position. The presence of atoms in special positions can lead to incorrect determination of the space group because the introduced additional reflection conditions may match those of a different space group.
 
 .. [ITAPointGroups] International Tables for Crystallography (2006). Vol. A, ch. 10.1, p. 762
 
