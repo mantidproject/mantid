@@ -61,9 +61,13 @@ std::string SpaceGroup::hmSymbol() const { return m_hmSymbol; }
 bool SpaceGroup::isAllowedReflection(const Kernel::V3D &hkl) const {
   for (auto op = m_allOperations.begin(); op != m_allOperations.end(); ++op) {
     if ((*op).hasTranslation()) {
-
-      // Do transformation only if necessary
-      if ((fmod(hkl.scalar_prod((*op).vector()), 1.0) != 0) &&
+      /* Floating point precision problem:
+       *    (H . v) % 1.0 is not always exactly 0, so instead:
+       *    | [(H . v) + delta] % 1.0 | > 1e-14 is checked
+       * The transformation is only performed if necessary.
+       */
+      if ((fabs(fmod(fabs(hkl.scalar_prod((*op).vector())) + 1e-15, 1.0)) >
+           1e-14) &&
           ((*op).transformHKL(hkl) == hkl)) {
         return false;
       }
