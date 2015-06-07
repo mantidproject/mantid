@@ -281,7 +281,7 @@ Because space group :math:`Fddd` contains diamond glide planes, only :math:`00l`
     [0,0,6] is allowed: False
     [0,0,8] is allowed: True
 
-:ref:`Below <Space group check>` is a more elaborate example which shows one possibility to find a likely candidate space group for a list of reflections. Please note that these reflection conditions only covers the ones listed for the "general position" in ITA. When atoms are located on special positions, there may be additional conditions that need to be fulfilled. A notable example is the :math:`222`-reflection in Silicon. It is forbidden because the silicon atom is located on the :math:`8a` position, which introduces additional reflection conditions.
+:ref:`Below <SpaceGroupCheck>` is a more elaborate example which shows one possibility to find a likely candidate space group for a list of reflections. Please note that these reflection conditions only covers the ones listed for the "general position" in ITA. When atoms are located on special positions, there may be additional conditions that need to be fulfilled. A notable example is the :math:`222`-reflection in Silicon. It is forbidden because the silicon atom is located on the :math:`8a` position, which introduces additional reflection conditions.
     
 Very similar constructions are available in C++ as well, as shown in the API documentation.
     
@@ -448,7 +448,8 @@ The script produces the following output:
 
 There are four symmmetry operations that leave the coordinates :math:`x,2x,1/4` unchanged, they fulfill the group axioms. Dividing the order of the space group by the order of the site symmetry group gives the correct site multiplicity 6.
 
-.. _Space group check:
+.. _SpaceGroupCheck:
+
 Checking a list of unique reflections for possible space groups
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -521,7 +522,7 @@ The script should produce the following output:
 .. testoutput:: ExSpaceGroupCheck
 
     There are 54 reflections to consider.
-    5 space groups with best match:
+    5 best matching space groups:
         F d -3 m: 0 absence violations,  3 additional absences, 51 matches
         F m -3 m: 0 absence violations,  6 additional absences, 48 matches
         P n -3 m: 0 absence violations, 31 additional absences, 23 matches
