@@ -105,7 +105,7 @@ PointGroupFactoryImpl::subscribePointGroup(const std::string &hmSymbol,
  * space groups. Point groups don't have translational symmetry, which
  * is reflected in the symbol as well. To get the symbol of the point group
  * a certain space group belongs to, some simple string replacements are enough:
- *  1. Replace screw axes ( (2|3|4|6)[1|2|3|5] ) with rotations (first number).
+ *  1. Replace screw axes ( (2|3|4|6)[1|2|3|4|5] ) with rotations (first number).
  *  2. Replace glide planes (a|b|c|d|e|g|n) with mirror planes (m)
  *  3. Remove centering symbol.
  *  4. Remove origin choice ( :(1|2) )
@@ -126,7 +126,7 @@ std::string PointGroupFactoryImpl::pointGroupSymbolFromSpaceGroupSymbol(
 
   std::string noSpaces = boost::algorithm::erase_all_copy(noCentering, " ");
 
-  if (noSpaces.substr(0, 1) == "1" &&
+  if (noSpaces.substr(0, 1) == "1" && noSpaces.size() > 2 &&
       noSpaces.substr(noSpaces.size() - 1, 1) == "1") {
     noSpaces = noSpaces.substr(1, noSpaces.size() - 2);
   }
@@ -162,7 +162,7 @@ PointGroup_sptr PointGroupFactoryImpl::constructFromPrototype(
 /// Private default constructor.
 PointGroupFactoryImpl::PointGroupFactoryImpl()
     : m_generatorMap(), m_crystalSystemMap(),
-      m_screwAxisRegex("(2|3|4|6)[1|2|3|5]"),
+      m_screwAxisRegex("(2|3|4|6)[1|2|3|4|5]"),
       m_glidePlaneRegex("a|b|c|d|e|g|n"), m_centeringRegex("[A-Z]"),
       m_originChoiceRegex(":(1|2)") {
   Kernel::LibraryManager::Instance();
