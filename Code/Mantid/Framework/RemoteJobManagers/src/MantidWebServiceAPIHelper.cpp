@@ -159,6 +159,8 @@ std::istream &MantidWebServiceAPIHelper::httpPost(
   return respStream;
 }
 
+void MantidWebServiceAPIHelper::clearSessionCookies() { g_cookies.clear(); }
+
 // Wrappers for a lot of the boilerplate code needed to perform an HTTPS GET or
 // POST
 void MantidWebServiceAPIHelper::initGetRequest(Poco::Net::HTTPRequest &req,

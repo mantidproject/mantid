@@ -92,7 +92,8 @@ void SubmitRemoteJob2::exec() {
     throw std::runtime_error("Could not set the output property JobID with the "
                              "ID value returned from the compute resource: '" +
                              jid + "'. This looks as if there has been "
-                                   "an error in the job submission.");
+                                   "an error in the job submission. Error "
+                             "description: " + e.what());
   }
   g_log.information() << "Job submitted.  Job ID =  " << jid
                       << " on (remote) compute resource " << comp << std::endl;

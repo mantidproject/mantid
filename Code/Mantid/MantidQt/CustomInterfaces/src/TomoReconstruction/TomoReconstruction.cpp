@@ -610,6 +610,8 @@ bool TomoReconstruction::doPing() {
   try {
     alg->execute();
     tid = alg->getPropertyValue("TransactionID");
+    g_log.information() << "Pinged succesfully. Checked that a transaction could "
+      "be created, with ID: " << tid << std::endl;
   } catch (std::runtime_error &e) {
     throw std::runtime_error("Error. Failed to ping and start a transaction on "
                              "the remote resource." +

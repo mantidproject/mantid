@@ -93,7 +93,7 @@ public:
   const std::string &getDisplayName() const { return m_displayName; }
 
   // forget authentication token / cookie
-  void clearSessionCookies() { g_cookies.clear(); }
+  void clearSessionCookies();
 
 private:
   // Wraps up some of the boilerplate code needed to execute HTTP GET and POST

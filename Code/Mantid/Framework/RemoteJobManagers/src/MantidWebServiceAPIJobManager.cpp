@@ -76,6 +76,8 @@ void MantidWebServiceAPIJobManager::authenticate(const std::string &username,
  * @param username Username on the remote resource.
  */
 void MantidWebServiceAPIJobManager::logout(const std::string &username) {
+  UNUSED_ARG(username);
+
   clearSessionCookies();
 }
 
