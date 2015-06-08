@@ -5,10 +5,6 @@ from mantid.api import *
 from mantid.kernel import *
 import os
 
-iColPtNumber = 0
-iCol2Theta = 10
-
-
 class CollectHB3AExperimentInfo(PythonAlgorithm):
     """ Python algorithm to export sample logs to spread sheet file
     for VULCAN
@@ -190,10 +186,11 @@ class CollectHB3AExperimentInfo(PythonAlgorithm):
 
             # check column names
             colnames = spicetable.getColumnNames()
-            if colnames[iColPtNumber].lower().startswith('pt') is False or \
-                    colnames[iCol2Theta].lower().startswith('2theta') is False:
-                        raise NotImplementedError("Colulmn %d is not Pt. but %s; OR Column %d is  not 2theta, but %s." % (
-                            iColPtNumber, colnames[iColPtNumber], iCol2Theta, colnames[iCol2Theta]))
+            try:
+                iColPtNumber = colnames.index('Pt.')
+                iCol2Theta = colnames.index('2theta')
+            except IndexError as e:
+                raise IndexError("Either Pt. or 2theta is not found in columns: %d"%(str(e)))
 
             for irow in xrange(spicetable.rowCount()):
                 ptnumber = spicetable.cell(irow, iColPtNumber)
