@@ -53,7 +53,7 @@ public:
   virtual bool contentsDifferent(const PeaksPresenter * ) const { return true; }
 
   void peakEditMode(EditMode){/*Do nothing*/}
-  bool deletePeaksIn(PeakBoundingBox){/*Do nothing*/}
+  bool deletePeaksIn(PeakBoundingBox){return false;/*Do nothing. Delete nothing.*/}
 };
 
 }

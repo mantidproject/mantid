@@ -15,6 +15,7 @@
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
+using namespace Mantid::Geometry;
 using Mantid::Geometry::IMDDimension_const_sptr;
 
 namespace MantidQt {
@@ -28,37 +29,30 @@ Mantid::Kernel::Logger g_log("PeaksPresenter");
  * @param box : transformed PeakBoundingBox
  * @return : vertex vector
  */
-std::vector<std::vector<double> > makeVertexesFromBox(PeakBoundingBox &box) {
+std::vector<std::vector<double> > makeVertexesFromBox(const PeakBoundingBox &box, Mantid::Geometry::PeakTransform const * const transform) {
 
-  std::vector<std::vector<double> > vertexes(4);
+  typedef std::vector<double> DoubleVec;
+  // Make vertexes in a counter clockwise ordering
+  std::vector<DoubleVec > vertexes(4);
 
-  std::vector<double> vertex1;
-  vertex1.push_back(box.left());
-  vertex1.push_back(box.bottom());
-  vertex1.push_back(box.slicePoint());
-  vertexes[0] = vertex1;
+  V3D plotVertex1(box.left(), box.bottom(), box.slicePoint());
+  V3D vertex1 = transform->transformBack(plotVertex1);
 
-  std::vector<double> vertex2;
-  vertex2.push_back(box.left());
-  vertex2.push_back(box.top());
-  vertex2.push_back(box.slicePoint());
-  vertexes[1] = vertex2;
+  V3D plotVertex2(box.left(), box.top(), box.slicePoint());
+  V3D vertex2 = transform->transformBack(plotVertex2);
 
-  std::vector<double> vertex3;
-  vertex3.push_back(box.right());
-  vertex3.push_back(box.top());
-  vertex3.push_back(box.slicePoint());
-  vertexes[2] = vertex3;
+  V3D plotVertex3(box.right(), box.top(), box.slicePoint());
+  V3D vertex3 = transform->transformBack(plotVertex3);
 
-  std::vector<double> vertex4;
-  vertex4.push_back(box.right());
-  vertex4.push_back(box.bottom());
-  vertex4.push_back(box.slicePoint());
-  vertexes[3] = vertex4;
+  V3D plotVertex4(box.right(), box.bottom(), box.slicePoint());
+  V3D vertex4 = transform->transformBack(plotVertex4);
 
+  vertexes[0]=vertex1;
+  vertexes[1]=vertex2;
+  vertexes[2]=vertex3;
+  vertexes[3]=vertex4;
   return vertexes;
 }
-
 }
 
 /**
@@ -208,45 +202,14 @@ void ConcretePeaksPresenter::update() { m_viewPeaks->updateView(); }
  *user changes the effective radius of the peaks markers.
  */
 void ConcretePeaksPresenter::doFindPeaksInRegion() {
-  PeakBoundingBox transformedViewableRegion =
-      m_slicePoint.makeSliceBox(1e-6); // TODO, could actually be calculated as
-                                       // a single plane with z = 0 thickness.
-  transformedViewableRegion.transformBox(m_transform);
 
-  // Don't bother to find peaks in the region if there are no peaks to find.
-  if (this->m_peaksWS->getNumberPeaks() >= 1) {
-
-    double effectiveRadius =
-        m_viewPeaks
-            ->getRadius(); // Effective radius of each peak representation.
-
-    Mantid::API::IPeaksWorkspace_sptr peaksWS =
-        boost::const_pointer_cast<Mantid::API::IPeaksWorkspace>(
-            this->m_peaksWS);
-
-    Mantid::API::IAlgorithm_sptr alg =
-        AlgorithmManager::Instance().create("PeaksInRegion");
-    alg->setChild(true);
-    alg->setRethrows(true);
-    alg->initialize();
-    alg->setProperty("InputWorkspace", peaksWS);
-    alg->setProperty("OutputWorkspace", peaksWS->name() + "_peaks_in_region");
-    alg->setProperty("Extents", transformedViewableRegion.toExtents());
-    alg->setProperty("CheckPeakExtents", true);
-    alg->setProperty("PeakRadius", effectiveRadius);
-    alg->setPropertyValue("CoordinateFrame", m_transform->getFriendlyName());
-    alg->execute();
-    ITableWorkspace_sptr outTable = alg->getProperty("OutputWorkspace");
-    std::vector<bool> viewablePeaks(outTable->rowCount());
-    for (size_t i = 0; i < outTable->rowCount(); ++i) {
-      viewablePeaks[i] = outTable->cell<Boolean>(i, 1);
-    }
-    m_viewablePeaks = viewablePeaks;
-
-  } else {
-    // No peaks will be viewable
-    m_viewablePeaks = std::vector<bool>();
+  auto indexes = findVisiblePeakIndexes(m_slicePoint);
+  std::vector<bool> visible(this->m_peaksWS->getNumberPeaks(), false); // assume all invisible
+  for (size_t i = 0; i < indexes.size(); ++i) {
+      visible[indexes[i]] = true; // make the visible indexes visible. Masking type operation.
   }
+  m_viewablePeaks = visible;
+
   m_viewPeaks->setSlicePoint(m_slicePoint.slicePoint(), m_viewablePeaks);
 }
 
@@ -601,8 +564,51 @@ void ConcretePeaksPresenter::peakEditMode(EditMode mode){
 
 bool ConcretePeaksPresenter::deletePeaksIn(PeakBoundingBox box) {
 
-  std::vector<size_t> deletionIndexList;
+  Left left(box.left());
+  Right right(box.right());
+  Bottom bottom(box.bottom());
+  Top top(box.top());
+  SlicePoint slicePoint(box.slicePoint());
+  if (slicePoint() < 0) { // indicates that it should not be used.
+    slicePoint = SlicePoint(m_slicePoint.slicePoint());
+  }
 
+  PeakBoundingBox accurateBox(
+      left, right, top, bottom,
+      slicePoint /*Use the current slice position, previously unknown.*/);
+  accurateBox.transformBox(m_transform);
+
+  std::vector<size_t> deletionIndexList = findVisiblePeakIndexes(accurateBox);
+
+  // If we have things to remove, do that in one-step.
+  if (!deletionIndexList.empty()) {
+
+    Mantid::API::IPeaksWorkspace_sptr peaksWS =
+        boost::const_pointer_cast<Mantid::API::IPeaksWorkspace>(
+            this->m_peaksWS);
+    // Sort the Peaks in-place.
+    Mantid::API::IAlgorithm_sptr alg =
+        AlgorithmManager::Instance().create("DeleteTableRows");
+    alg->setChild(true);
+    alg->setRethrows(true);
+    alg->initialize();
+    alg->setProperty("TableWorkspace", peaksWS);
+    alg->setProperty("Rows", deletionIndexList);
+    alg->execute();
+
+    // Reproduce the views.
+    this->produceViews();
+
+    // Give the new views the current slice point.
+    m_viewPeaks->setSlicePoint(this->m_slicePoint.slicePoint(),
+                               m_viewablePeaks);
+  }
+  return !deletionIndexList.empty();
+}
+
+std::vector<size_t>
+ConcretePeaksPresenter::findVisiblePeakIndexes(const PeakBoundingBox &box) {
+  std::vector<size_t> indexes;
   // Don't bother to find peaks in the region if there are no peaks to find.
   if (this->m_peaksWS->getNumberPeaks() >= 1) {
 
@@ -614,20 +620,8 @@ bool ConcretePeaksPresenter::deletePeaksIn(PeakBoundingBox box) {
         boost::const_pointer_cast<Mantid::API::IPeaksWorkspace>(
             this->m_peaksWS);
 
-    Left left(box.left());
-    Right right(box.right());
-    Bottom bottom(box.bottom());
-    Top top(box.top());
-    SlicePoint slicePoint(box.slicePoint());
-    if (slicePoint() < 0) { // indicates that it should not be used.
-         slicePoint = SlicePoint(m_slicePoint.slicePoint());
-    }
-    PeakBoundingBox accurateBox(
-        left, right, top, bottom,
-        slicePoint /*Use the current slice position, previously unknown.*/);
-    accurateBox.transformBox(m_transform);
-
-    std::vector<std::vector<double> > vertexes = makeVertexesFromBox(accurateBox);
+    std::vector<std::vector<double>> vertexes =
+        makeVertexesFromBox(box, m_transform.get());
 
     Mantid::API::IAlgorithm_sptr alg =
         AlgorithmManager::Instance().create("PeaksOnSurface");
@@ -649,35 +643,14 @@ bool ConcretePeaksPresenter::deletePeaksIn(PeakBoundingBox box) {
     for (size_t i = 0; i < outTable->rowCount(); ++i) {
       const bool insideRegion = outTable->cell<Boolean>(i, 1);
       if (insideRegion) {
-        deletionIndexList.push_back(i);
+        indexes.push_back(i);
       }
     }
-    // If we have things to remove, do that in one-step.
-    if (!deletionIndexList.empty()) {
-
-      Mantid::API::IPeaksWorkspace_sptr peaksWS =
-          boost::const_pointer_cast<Mantid::API::IPeaksWorkspace>(
-              this->m_peaksWS);
-      // Sort the Peaks in-place.
-      Mantid::API::IAlgorithm_sptr alg =
-          AlgorithmManager::Instance().create("DeleteTableRows");
-      alg->setChild(true);
-      alg->setRethrows(true);
-      alg->initialize();
-      alg->setProperty("TableWorkspace", peaksWS);
-      alg->setProperty("Rows", deletionIndexList);
-      alg->execute();
-
-      // Reproduce the views.
-      this->produceViews();
-
-      // Give the new views the current slice point.
-      m_viewPeaks->setSlicePoint(this->m_slicePoint.slicePoint(),
-                                 m_viewablePeaks);
-    }
   }
-  return !deletionIndexList.empty();
+  return indexes;
 }
+
+
 
 }
 }
