@@ -188,6 +188,13 @@ public:
   //-------------------------------------------------------------------------
   /** The function used to satisfy IMDNode interface but the physical meaning is
    * unclear */
+  void calculateCentroid(coord_t * /*centroid*/, const int /*runindex*/) const {
+    throw(std::runtime_error("This function should not be called on MDGridBox "
+                             "(as its meaning for MDbox is dubious too)"));
+  }
+  //-------------------------------------------------------------------------
+  /** The function used to satisfy IMDNode interface but the physical meaning is
+   * unclear */
   coord_t *getCentroid() const {
     throw(std::runtime_error("This function should not be called on MDGridBox "
                              "(as its meaning for MDbox is dubious too)"));

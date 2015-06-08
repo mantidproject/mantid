@@ -39,12 +39,17 @@ Outline of algorithm
 Input Workspaces
 ################
 
-??? input MDEventWorkspaces are required. 
+Two TableWorkspaces, which contain experiment information, are required. 
 
-{\it InputWorkspace} is ....
+**InputWorkspace** is a TableWorkspace containing the data files names to be loaded for the experiment. 
+It is required to have 4 columns.  
+They are *Scan*, *Pt*, *Filename* and *StartDetID* respectively. 
 
+A typical HB3A experiment consists of multiple scans, each of which contains multiple measurement point (i.e., Pt). 
+*FileName* is the XML data file for 2D detector information for a specific Scan/Pt pair. 
+*StartDetID* is the starting detector ID of a specific Scan/Pt mapped to the virtual instrument. 
 
-These two MDEventWorkspace should have the same number of runs and same number of MDEvent.  
+**DetectorTableWorkspace** is the TableWorkspace 
 
 
 Outputs
@@ -199,7 +204,7 @@ Experimental data with different neutron wavelengths can be binned together to d
 Usage
 -----
 
-**Example - reduce a SPICE file for HB2A to Fullprof file:**
+**Example - convert SPICE file for HB3A to Fullprof file:**
 
 .. testcode:: ExReduceHB2AToFullprof
 
@@ -211,47 +216,17 @@ Usage
         OutputWorkspace='Exp0231DataTable', 
         RunInfoWorkspace='Exp0231ParentWS')
 
-  # load for HB2A 
-  ConvertSpiceDataToRealSpace(InputWorkspace='Exp0231DataTable', 
-        RunInfoWorkspace='Exp0231ParentWS', 
-        OutputWorkspace='Exp0231DataMD', 
-        OutputMonitorWorkspace='Exp0231MonitorMD')
-
-  # Convert from real-space MD to Fullprof data
-  ConvertCWPDMDToSpectra(
-        InputWorkspace = 'Exp0231DataMD',
-        InputMonitorWorkspace = 'Exp0231MonitorMD',
-        OutputWorkspace = 'Exp0231Reduced',
-        BinningParams = '5, 0.1, 150',
-        UnitOutput = '2theta',
-        ScaleFactor = 100.,
-        LinearInterpolateZeroCounts = True
-        )
 
   # output
-  ws = mtd["Exp0231Reduced"]
-  
-  vecx = ws.readX(0)
-  vecy = ws.readY(0)
-  vece = ws.readE(0)
-
-  for i in [100, 100, 1101, 1228]:
-    print "2theta = %-5f, Y = %-5f, E = %-5f" % (vecx[i], vecy[i], vece[i])
 
 .. testcleanup::  ExReduceHB2AToFullprof
 
   DeleteWorkspace('Exp0231DataTable')
-  DeleteWorkspace('Exp0231ParentWS')
-  DeleteWorkspace('Exp0231DataMD')
-  DeleteWorkspace('Exp0231MonitorMD')
 
 Output:
 
 .. testoutput:: ExReduceHB2AToFullprof
 
   2theta = 15.000000, Y = 0.386563, E = 0.024744
-  2theta = 15.000000, Y = 0.386563, E = 0.024744
-  2theta = 115.100000, Y = 1.846279, E = 0.054287
-  2theta = 127.800000, Y = 0.237738, E = 0.027303
 
 .. categories::

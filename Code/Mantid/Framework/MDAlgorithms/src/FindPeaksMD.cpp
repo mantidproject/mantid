@@ -392,6 +392,13 @@ void FindPeaksMD::findPeaks(typename MDEventWorkspace<MDE, nd>::sptr ws) {
       const coord_t *boxCenter = box->getCentroid();
   #endif
 
+        if (false) {
+          // FIXME - Test for compiling
+          coord_t *boxcentre2;
+          int thisrunindex = ei->getRunNumber();
+          box->calculateCentroid(boxcentre2, thisrunindex);
+        }
+
       // Q of the centroid of the box
       V3D Q(boxCenter[0], boxCenter[1], boxCenter[2]);
 

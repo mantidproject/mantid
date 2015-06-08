@@ -45,6 +45,8 @@ public:
     testalg.setProperty("SamplePosition", m_samplePos);
     testalg.setProperty("PixelDimension", m_pixelDimension);
     testalg.setProperty("OutputWorkspace", "QSampleMDEvents");
+    testalg.setProperty("IsBaseName", false);
+    testalg.setProperty("Directory", ".");
 
     testalg.execute();
     TS_ASSERT(testalg.isExecuted());
@@ -54,7 +56,7 @@ public:
     TS_ASSERT(outws);
 
     IMDIterator *mditer = outws->createIterator();
-    TS_ASSERT_EQUALS(mditer->getNumEvents(), 256*256);
+    TS_ASSERT_EQUALS(mditer->getNumEvents(), 7400);
 
     size_t numexpinfo = outws->getNumExperimentInfo();
     TS_ASSERT_EQUALS(numexpinfo, 1);
@@ -63,6 +65,7 @@ public:
     Geometry::Instrument_const_sptr instrument = expinfo0->getInstrument();
     TS_ASSERT_EQUALS(instrument->getNumberDetectors(), 256);
 
+    return;
   }
 
 
