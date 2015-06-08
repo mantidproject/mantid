@@ -42,7 +42,7 @@ const std::string WORKSPACE_TYPES_SEPARATOR = ";";
 
 class WorkspacePropertyValueIs {
 public:
-  WorkspacePropertyValueIs(std::string value) : m_value(value){};
+  WorkspacePropertyValueIs(const std::string& value) : m_value(value){};
   bool operator()(IWorkspaceProperty *property) {
     Property *prop = dynamic_cast<Property *>(property);
     if (!prop)
@@ -51,7 +51,7 @@ public:
   }
 
 private:
-  std::string m_value;
+  const std::string& m_value;
 };
 }
 
