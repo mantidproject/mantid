@@ -1363,13 +1363,19 @@ void translateRange(const std::string &instructions,
   // add a group per spectra
   std::vector<std::string> spectra;
   boost::split(spectra, instructions, boost::is_any_of(":"));
+  if (spectra.size() != 2)
+    throw std::runtime_error("Malformed range (:) operation.");
+  // fetch the start and stop spectra
+  int first = boost::lexical_cast<int>(spectra[0]);
+  int last = boost::lexical_cast<int>(spectra[1]);
+  // swap if they're back to front
+  if (first > last)
+    std::swap(first, last);
 
-  for (auto sIt = spectra.begin(); sIt != spectra.end(); ++sIt) {
-    std::string spectrum = *sIt;
-    // remove leading/trailing whitespace
-    boost::trim(spectrum);
+  // add all the spectra in the range to separate output groups
+  for (int i = first; i <= last; ++i) {
     // create group of size 1 with the spectrum in it
-    std::vector<int> newGroup(1, boost::lexical_cast<int>(spectrum));
+    std::vector<int> newGroup(1, i);
     // and add it to output
     outGroups.push_back(newGroup);
   }
