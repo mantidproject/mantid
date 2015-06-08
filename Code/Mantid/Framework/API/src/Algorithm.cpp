@@ -1339,18 +1339,16 @@ bool Algorithm::processGroups() {
         // Default name = "in1_in2_out"
         std::string outName = outputBaseName + "_" + prop->value();
 
-        Property *inputProperty = NULL;
         WorkspacePropertyValueIs comp(prop->value());
         auto inputProp = std::find_if(m_inputWorkspaceProps.begin(),
                                       m_inputWorkspaceProps.end(), comp);
-        if (inputProp != m_inputWorkspaceProps.end())
-          inputProperty = dynamic_cast<Property *>(*inputProp);
 
         // Overwrite workspaces in any input property if they have the same
         // name as an output (i.e. copy name button in algorithm dialog used)
         // (only need to do this for a single input, multiple will be handled
         // by ADS)
-        if (inputProperty && inputProperty->value() == prop->value())
+        if (inputProp != m_inputWorkspaceProps.end() &&
+            dynamic_cast<Property *>(*inputProp)->value() == prop->value())
           outName = m_groups[inputProp - m_inputWorkspaceProps.begin()][entry]
                         ->name();
 
