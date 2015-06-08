@@ -223,7 +223,11 @@ void PlotController::zoomToRange()
   QwtDoubleRect rect = m_zoomer->zoomRect();
   rect.setX( m_rangeSelector->getMinimum() );
   rect.setRight( m_rangeSelector->getMaximum() );
-  m_zoomer->zoom( rect );
+  // In case the scales were set by the panning tool we need to
+  // reset the zoomer first.
+  m_zoomer->zoom(-1);
+  // Set new zoom level.
+  m_zoomer->zoom(rect);
 }
 
 /// Disable all plot tools. It is a helper method 
