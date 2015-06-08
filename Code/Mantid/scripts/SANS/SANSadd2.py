@@ -70,10 +70,8 @@ def add_runs(runs, inst='sans2d', defType='.nxs', rawTypes=('.raw', '.s*', 'add'
                     return ""
 
                 adder.add(LHS_workspace='AddFilesSumTempory',RHS_workspace= 'AddFilesNewTempory',output_workspace= 'AddFilesSumTempory', run_to_add = counter_run)
-                #Plus(LHSWorkspace='AddFilesSumTempory',RHSWorkspace= 'AddFilesNewTempory',OutputWorkspace= 'AddFilesSumTempory')
                 if isFirstDataSetEvent:
                     adder.add(LHS_workspace='AddFilesSumTempory_monitors',RHS_workspace= 'AddFilesNewTempory_monitors',output_workspace= 'AddFilesSumTempory_monitors', run_to_add = counter_run)
-                    #Plus(LHSWorkspace='AddFilesSumTempory_monitors',RHSWorkspace= 'AddFilesNewTempory_monitors',OutputWorkspace= 'AddFilesSumTempory_monitors')
                 DeleteWorkspace("AddFilesNewTempory")
                 if isFirstDataSetEvent:
                     DeleteWorkspace("AddFilesNewTempory_monitors")
