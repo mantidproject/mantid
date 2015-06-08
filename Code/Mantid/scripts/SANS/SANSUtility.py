@@ -684,8 +684,8 @@ class OverlayWorkspaces:
 
         # Create a temporary workspace with shifted time values from RHS, if the shift is necesary
         temp = rhs_ws
+        temp_ws_name = 'shifted'
         if total_time_shift != 0.0:
-            temp_ws_name = 'shifted'
             temp = ChangeTimeZero(InputWorkspace=rhs_ws, OutputWorkspace=temp_ws_name, RelativeTimeOffset=total_time_shift)
 
         # Add the LHS and shifted workspace
