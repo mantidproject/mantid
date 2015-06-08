@@ -46,14 +46,13 @@ std::string SpaceGroup::hmSymbol() const { return m_hmSymbol; }
  * Space groups that contain translational symmetry cause certain reflections
  * to be absent due to the contributions of symmetry equivalent atoms to the
  * structure factor cancelling out. This method implements the procedure
- * described in the IUCr teaching pamphlet no. 9 [1] to check whether a
- * reflection is allowed or not according to the symmetry operations in the
- * space group. Please note that certain arrangements of atoms can lead to
- * additional conditions that can not be determined using a space group's
- * symmetry operations alone. For these situations, Geometry::CrystalStructure
- * can help.
+ * described in ITA [1] to check whether a reflection is allowed or not
+ * according to the symmetry operations in the space group. Please note that
+ * certain arrangements of atoms can lead to additional conditions that can not
+ * be determined using a space group's symmetry operations alone. For these
+ * situations, Geometry::CrystalStructure can help.
  *
- * [1] http://www.iucr.org/education/pamphlets/9/full-text
+ * [1] International Tables for Crystallography (2006). Vol. A, ch. 12.3, p. 832
  *
  * @param hkl :: HKL to be checked.
  * @return :: true if the reflection is allowed, false otherwise.
@@ -66,8 +65,8 @@ bool SpaceGroup::isAllowedReflection(const Kernel::V3D &hkl) const {
        *    | [(H . v) + delta] % 1.0 | > 1e-14 is checked
        * The transformation is only performed if necessary.
        */
-      if ((fabs(fmod(fabs(hkl.scalar_prod((*op).vector())) + 1e-15, 1.0)) >
-           1e-14) &&
+      if ((fabs(fmod(fabs(hkl.scalar_prod((*op).reducedVector())) + 1e-15,
+                     1.0)) > 1e-14) &&
           ((*op).transformHKL(hkl) == hkl)) {
         return false;
       }

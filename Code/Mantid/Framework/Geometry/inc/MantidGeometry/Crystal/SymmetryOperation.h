@@ -129,6 +129,7 @@ public:
 
   const Kernel::IntMatrix &matrix() const;
   const V3R &vector() const;
+  V3R reducedVector() const;
 
   size_t order() const;
   std::string identifier() const;

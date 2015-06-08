@@ -83,14 +83,7 @@ bool SymmetryElementInversionGenerator::canProcess(
  */
 V3R SymmetryElementWithAxisGenerator::determineTranslation(
     const SymmetryOperation &operation) const {
-  Kernel::IntMatrix translationMatrix(3, 3, false);
-
-  for (size_t i = 0; i < operation.order(); ++i) {
-    translationMatrix += (operation ^ i).matrix();
-  }
-
-  return (translationMatrix * operation.vector()) *
-         RationalNumber(1, static_cast<int>(operation.order()));
+  return operation.reducedVector();
 }
 
 /**
@@ -182,8 +175,8 @@ V3R SymmetryElementWithAxisGenerator::determineAxis(
 
   double sumOfElements = eigenVector.X() + eigenVector.Y() + eigenVector.Z();
 
-  if(sumOfElements < 0) {
-      eigenVector *= -1.0;
+  if (sumOfElements < 0) {
+    eigenVector *= -1.0;
   }
 
   gsl_matrix_free(eigenMatrix);

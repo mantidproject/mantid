@@ -81,6 +81,17 @@ const Kernel::IntMatrix &SymmetryOperation::matrix() const { return m_matrix; }
 /// Returns a const reference to the internall stored vector
 const V3R &SymmetryOperation::vector() const { return m_vector; }
 
+V3R SymmetryOperation::reducedVector() const {
+  Kernel::IntMatrix translationMatrix(3, 3, false);
+
+  for (size_t i = 0; i < order(); ++i) {
+    translationMatrix += ((*this) ^ i).matrix();
+  }
+
+  return (translationMatrix * m_vector) *
+         RationalNumber(1, static_cast<int>(order()));
+}
+
 /**
  * Returns the order of the symmetry operation
  *
