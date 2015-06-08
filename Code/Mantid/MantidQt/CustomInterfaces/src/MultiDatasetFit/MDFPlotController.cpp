@@ -57,32 +57,12 @@ PlotController::PlotController(MultiDatasetFit *parent, QwtPlot *plot,
   connect(m_rangeSelector,SIGNAL(selectionChanged(double, double)),this,SLOT(updateFittingRange(double, double)));
 
   disableAllTools();
-
-  m_plot->canvas()->installEventFilter(this);
-  
 }
 
 /// Destructor.
 PlotController::~PlotController()
 {
   m_plotData.clear();
-}
-
-/// Event fiter for intercepting mouse events of the plot
-bool PlotController::eventFilter(QObject *, QEvent *evn)
-{
-  if ( evn->type() == QEvent::MouseButtonDblClick )
-  {
-    if ( isRangeSelectorEnabled() )
-    {
-      resetRange();
-    }
-    else if ( isZoomEnabled() )
-    {
-      zoomToRange();
-    }
-  }
-  return false;
 }
 
 /// Slot. Respond to changes in the data table.
