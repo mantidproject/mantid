@@ -545,17 +545,20 @@ std::string LSFJobManager::submitRemoteJob(const std::string &transactionID,
           << "Submitted job but got a a response that seems to contain "
              "an error message : " << extractPACErrMsg(ss.str()) << std::endl;
     } else {
-      g_log.notice() << "Submitted job successfully." << std::endl;
-      g_log.debug() << "Response from server: " << resp << std::endl;
       // get job id number
-      if (std::string::npos != resp.find("<id>")) {
-        jobID = resp.substr(resp.rfind("<id>") + 1);
+      const std::string idTag = "<id>";
+      if (std::string::npos != resp.find(idTag)) {
+        jobID = resp.substr(resp.rfind(idTag) + idTag.length());
         jobID = jobID.substr(0, jobID.find('<'));
       } else {
         // default if badly formed string returned / unable to parse ID from
         // response
         jobID = "0";
       }
+      g_log.notice() << "Submitted job successfully. It got ID: " << jobID
+                     << std::endl;
+      g_log.debug() << "Response from server after submission: " << resp
+                    << std::endl;
     }
   } else {
     throw std::runtime_error(

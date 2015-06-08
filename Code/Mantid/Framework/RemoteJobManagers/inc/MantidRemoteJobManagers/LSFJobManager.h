@@ -49,6 +49,9 @@ public:
   virtual void authenticate(const std::string &username,
                             const std::string &password) = 0;
 
+  /// Most likely the logout method specific to SCARFLSF would be valid here
+  virtual void logout(const std::string &username) = 0;
+
   virtual void abortRemoteJob(const std::string &jobID);
 
   virtual std::string

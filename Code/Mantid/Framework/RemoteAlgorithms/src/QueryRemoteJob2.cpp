@@ -72,7 +72,7 @@ void QueryRemoteJob2::init() {
                   "and implementation dependent)",
                   Direction::Output);
 
-  declareProperty("CommandLine", nullValidator,
+  declareProperty("CommandLine", "", nullValidator,
                   "The command line run by this job on the remote compute "
                   "resource machine(s), which in some cases may provide "
                   "additional low level information on the environment used "

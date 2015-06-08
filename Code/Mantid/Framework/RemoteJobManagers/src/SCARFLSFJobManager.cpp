@@ -83,7 +83,7 @@ void SCARFLSFJobManager::authenticate(const std::string &username,
     token_str = "platform_token=" + token_str;
     // insert in the token stash
     UsernameToken tok(username, Token(url, token_str));
-    m_tokenStash.insert(tok); // the password is never stored
+    g_tokenStash.insert(tok); // the password is never stored
     g_log.notice() << "Got authentication token for user '" + username +
                           "'. You are now logged in " << std::endl;
   } else {
@@ -146,8 +146,8 @@ bool SCARFLSFJobManager::ping() {
  * successfully logged in).
  *
  * As the authentication method is specific to SCARF, this logout
- * method has been placed here as specific to SCARF too. Probably it
- * is general to other LSF systems without any/much changes.
+ * method has been placed here as specific to SCARF too. Most likely
+ * it is general to other LSF systems without any/much changes.
  *
  * @param username Username to use (should have authenticated
  * before). Leave it empty to log out the last (maybe only) user that

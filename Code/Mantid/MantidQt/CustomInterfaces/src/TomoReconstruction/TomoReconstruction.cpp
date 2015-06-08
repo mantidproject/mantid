@@ -578,20 +578,19 @@ void TomoReconstruction::doLogin(const std::string &pw) {
 }
 
 void TomoReconstruction::doLogout() {
-  // TODO: once the remote algorithms are rearranged into the
-  // 'RemoteJobManager' design, this will use...
-  // auto alg = Algorithm::fromString("???"); - need an alg for this
-  auto alg = Algorithm::fromString("SCARFTomoReconstruction");
+  const std::string comp = getComputeResource();
+  auto alg = Algorithm::fromString("Logout");
   alg->initialize();
-  const std::string user = getUsername();
-  alg->setPropertyValue("UserName", user);
-  alg->setPropertyValue("Action", "LogOut");
+  alg->setProperty("ComputeResource", comp);
+  alg->setProperty("UserName", getUsername());
+
   try {
     alg->execute();
   } catch (std::runtime_error &e) {
     throw std::runtime_error(
         "Error when trying to log out from the remote compute resource " +
-        getComputeResource() + " with username " + user + ": " + e.what());
+        getComputeResource() + " with username " + getUsername() + ": " +
+        e.what());
   }
 }
 
@@ -602,20 +601,21 @@ void TomoReconstruction::doLogout() {
  * @return True if ping succeeded
  */
 bool TomoReconstruction::doPing() {
-  // TODO: once the remote algorithms are rearranged into the
-  // 'RemoteJobManager' design, this will use...
-  // auto alg = Algorithm::fromString("???");
-  auto alg = Algorithm::fromString("SCARFTomoReconstruction");
+  // This actually does more than a simple ping. Ping and check that a
+  // transaction can be created succesfully
+  auto alg = Algorithm::fromString("StartRemoteTransaction");
   alg->initialize();
-  alg->setPropertyValue("UserName", getUsername());
-  alg->setPropertyValue("Action", "Ping");
+  alg->setProperty("ComputeResource", getComputeResource());
+  std::string tid;
   try {
     alg->execute();
+    tid = alg->getPropertyValue("TransactionID");
   } catch (std::runtime_error &e) {
-    throw std::runtime_error(
-        "Error when trying to ping the remote compute resource " +
-        getComputeResource() + ": " + e.what());
+    throw std::runtime_error("Error. Failed to ping and start a transaction on "
+                             "the remote resource." +
+                             std::string(e.what()));
   }
+
   return true;
 }
 
@@ -633,7 +633,7 @@ void TomoReconstruction::doSubmitReconstructionJob() {
     return;
   }
 
-  std::string comp = getComputeResource();
+  const std::string comp = getComputeResource();
 
   // with SCARF we use one (pseudo)-transaction for every submission
   auto transAlg = Algorithm::fromString("StartRemoteTransaction");
@@ -675,7 +675,7 @@ void TomoReconstruction::doSubmitReconstructionJob() {
  */
 void TomoReconstruction::makeRunnableWithOptions(std::string &run,
                                                  std::string &opt) {
-  std::string comp =
+  const std::string comp =
       m_ui.comboBox_run_compute_resource->currentText().toStdString();
 
   checkDataPathsSet();
@@ -728,7 +728,7 @@ void TomoReconstruction::makeRunnableWithOptions(std::string &run,
 }
 
 void TomoReconstruction::doCancelJob(const std::string &id) {
-  std::string comp = getComputeResource();
+  const std::string comp = getComputeResource();
 
   auto algJob = Algorithm::fromString("AbortRemoteJob");
   algJob->initialize();

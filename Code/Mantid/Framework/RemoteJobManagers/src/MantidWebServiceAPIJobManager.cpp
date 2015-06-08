@@ -62,6 +62,24 @@ void MantidWebServiceAPIJobManager::authenticate(const std::string &username,
 }
 
 /**
+ * Log out from the remote compute resource, which in the API v1. is
+ * not defined so it is just a no-op in the sense that it does not
+ * interact with the server. The current session cookie(s) is cleared
+ * though, so authentication would be required to start transactions
+ * again.
+ *
+ * Note that jobs that are currently running will not be affected by a logout.
+ * This method does not stop the remote transactions that might have been
+ * started, as that would imply more than simply logging out (removing files,
+ * stopping jobs, etc.) .
+ *
+ * @param username Username on the remote resource.
+ */
+void MantidWebServiceAPIJobManager::logout(const std::string &username) {
+  clearSessionCookies();
+}
+
+/**
  * Download a file from a remote compute resource
  *
  * @param transactionID ID of the transaction that owns the file
@@ -308,7 +326,7 @@ MantidWebServiceAPIJobManager::queryRemoteJob(const std::string &jobID) const {
   }
 
   // in principle not required for/provided by the Mantid remote job submission
-  // which always implicitly run something like 'MantidPlot -xq ScriptName'
+  // which always implicitly runs something like 'MantidPlot -xq ScriptName'
   info.cmdLine = "Not available";
 
   return info;
