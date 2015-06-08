@@ -40,26 +40,20 @@ namespace CustomInterfaces
     fit->execute();
 
     MatrixWorkspace_sptr fitOutput = fit->getProperty("OutputWorkspace");
+    m_parameterTable = fit->getProperty("OutputParameters");
 
-    IAlgorithm_sptr extract = AlgorithmManager::Instance().create("ExtractSingleSpectrum");
-    extract->setChild(true);
-    extract->setProperty("InputWorkspace", fitOutput);
-    extract->setProperty("WorkspaceIndex", 2);
-    extract->setProperty("OutputWorkspace", "__NotUsed__");
-    extract->execute();
+    enableDisabledPoints(fitOutput,m_data);
 
-    setCorrectedData(extract->getProperty("OutputWorkspace"));
-    setFittedFunction(FunctionFactory::Instance().createInitialized(funcToFit->asString()));
+    setCorrectedData(fitOutput);
+    setFittedFunction(funcToFit);
     m_sections = sections;
+
   }
 
   void ALCBaselineModellingModel::setData(MatrixWorkspace_const_sptr data)
   {
     m_data = data;
     emit dataChanged();
-
-    setCorrectedData(MatrixWorkspace_const_sptr());
-    setFittedFunction(IFunction_const_sptr());
   }
 
   /**
@@ -102,76 +96,70 @@ namespace CustomInterfaces
     }
   }
 
+  /**
+   * Enable points that were disabled for fit
+   * @param destWs :: Workspace to enable points in
+   * @param sourceWs :: Workspace with original errors
+   */
+  void ALCBaselineModellingModel::enableDisabledPoints (MatrixWorkspace_sptr destWs, MatrixWorkspace_const_sptr sourceWs)
+  {
+    // Unwanted points were disabled by setting their errors to very high values.
+    // We recover here the original errors stored in sourceWs
+    destWs->dataE(0) = sourceWs->readE(0);
+  }
+
   MatrixWorkspace_sptr ALCBaselineModellingModel::exportWorkspace()
   {
-    IAlgorithm_sptr clone = AlgorithmManager::Instance().create("CloneWorkspace");
-    clone->setChild(true);
-    clone->setProperty("InputWorkspace", boost::const_pointer_cast<MatrixWorkspace>(m_data));
-    clone->setProperty("OutputWorkspace", "__NotUsed");
-    clone->execute();
+    if ( m_data && m_data->getNumberHistograms() == 3 ) {
 
-    Workspace_sptr cloneResult = clone->getProperty("OutputWorkspace");
+      // Export results only if data have been fit, that is,
+      // if m_data has three histograms
+      return boost::const_pointer_cast<MatrixWorkspace>(m_data);
 
-    Workspace_sptr baseline = ALCHelper::createWsFromFunction(m_fittedFunction, m_data->readX(0));
-
-    IAlgorithm_sptr join1 = AlgorithmManager::Instance().create("ConjoinWorkspaces");
-    join1->setChild(true);
-    join1->setProperty("InputWorkspace1", cloneResult);
-    join1->setProperty("InputWorkspace2", baseline);
-    join1->setProperty("CheckOverlapping", false);
-    join1->execute();
-
-    MatrixWorkspace_sptr join1Result = join1->getProperty("InputWorkspace1");
-
-    IAlgorithm_sptr join2 = AlgorithmManager::Instance().create("ConjoinWorkspaces");
-    join2->setChild(true);
-    join2->setProperty("InputWorkspace1", join1Result);
-    join2->setProperty("InputWorkspace2", boost::const_pointer_cast<MatrixWorkspace>(m_correctedData));
-    join2->setProperty("CheckOverlapping", false);
-    join2->execute();
-
-    MatrixWorkspace_sptr result = join2->getProperty("InputWorkspace1");
-
-    TextAxis* yAxis = new TextAxis(result->getNumberHistograms());
-    yAxis->setLabel(0,"Data");
-    yAxis->setLabel(1,"Baseline");
-    yAxis->setLabel(2,"Corrected");
-    result->replaceAxis(1,yAxis);
-
-    return result;
+    } else {
+    
+      return MatrixWorkspace_sptr();
+    }
   }
 
   ITableWorkspace_sptr ALCBaselineModellingModel::exportSections()
   {
-    ITableWorkspace_sptr table = WorkspaceFactory::Instance().createTable("TableWorkspace");
+    if ( !m_sections.empty() ) {
 
-    table->addColumn("double", "Start X");
-    table->addColumn("double", "End X");
+      ITableWorkspace_sptr table = WorkspaceFactory::Instance().createTable("TableWorkspace");
 
-    for(auto it = m_sections.begin(); it != m_sections.end(); ++it)
-    {
-      TableRow newRow = table->appendRow();
-      newRow << it->first << it->second;
+      table->addColumn("double", "Start X");
+      table->addColumn("double", "End X");
+
+      for(auto it = m_sections.begin(); it != m_sections.end(); ++it)
+      {
+        TableRow newRow = table->appendRow();
+        newRow << it->first << it->second;
+      }
+
+      return table;
+
+    } else {
+
+      return ITableWorkspace_sptr();
     }
-
-    return table;
   }
 
   ITableWorkspace_sptr ALCBaselineModellingModel::exportModel()
   {
-    ITableWorkspace_sptr table = WorkspaceFactory::Instance().createTable("TableWorkspace");
+    if ( m_parameterTable ) {
 
-    table->addColumn("str", "Function");
+      return m_parameterTable;
 
-    TableRow newRow = table->appendRow();
-    newRow << m_fittedFunction->asString();
-
-    return table;
+    } else {
+      
+      return ITableWorkspace_sptr();
+    }
   }
 
   void ALCBaselineModellingModel::setCorrectedData(MatrixWorkspace_const_sptr data)
   {
-    m_correctedData = data;
+    m_data = data;
     emit correctedDataChanged();
   }
 
@@ -179,6 +167,30 @@ namespace CustomInterfaces
   {
     m_fittedFunction = function;
     emit fittedFunctionChanged();
+  }
+
+  MatrixWorkspace_const_sptr ALCBaselineModellingModel::data() const
+  {
+    IAlgorithm_sptr extract = AlgorithmManager::Instance().create("ExtractSingleSpectrum");
+    extract->setChild(true);
+    extract->setProperty("InputWorkspace", boost::const_pointer_cast<MatrixWorkspace>(m_data));
+    extract->setProperty("WorkspaceIndex", 0);
+    extract->setProperty("OutputWorkspace", "__NotUsed__");
+    extract->execute();
+    MatrixWorkspace_const_sptr result = extract->getProperty("OutputWorkspace");
+    return result;
+  }
+
+  MatrixWorkspace_const_sptr ALCBaselineModellingModel::correctedData() const
+  {
+    IAlgorithm_sptr extract = AlgorithmManager::Instance().create("ExtractSingleSpectrum");
+    extract->setChild(true);
+    extract->setProperty("InputWorkspace", boost::const_pointer_cast<MatrixWorkspace>(m_data));
+    extract->setProperty("WorkspaceIndex", 2);
+    extract->setProperty("OutputWorkspace", "__NotUsed__");
+    extract->execute();
+    MatrixWorkspace_const_sptr result = extract->getProperty("OutputWorkspace");
+    return result;
   }
 
 } // namespace CustomInterfaces

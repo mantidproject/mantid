@@ -2,8 +2,8 @@
 import stresstesting
 from mantid.simpleapi import *
 
-''' Simply tests that our LoadRaw and LoadISISNexus algorithms produce the same workspace'''
 class RawVNexus(stresstesting.MantidStressTest):
+    ''' Simply tests that our LoadRaw and LoadISISNexus algorithms produce the same workspace'''
 
     def runTest(self):
         Raw = LoadRaw(Filename='SANS2D00000808.raw')

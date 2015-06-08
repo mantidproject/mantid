@@ -129,6 +129,14 @@ Property *LinearInterpolateZeroCounts* is used to set the flag to do linear inte
 The linear interpolation will be only applied to those zero-count bins within
 the measuring range. 
 
+Excluding detectors
+###################
+
+Detectors can be excluded from conversion process.  
+They can be specified by their *Detector ID*s via property *ExcludedDetectorIDs*.  
+If a detector is specified as being excluded, 
+all of its counts of all runs (pts) will be taken out of binning process. 
+
 
 Workflow
 --------

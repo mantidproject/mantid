@@ -60,7 +60,7 @@ namespace CustomInterfaces
     void setDataCurve(const QwtData& data);
     void setCorrectedCurve(const QwtData& data);
     void setBaselineCurve(const QwtData& data);
-    void setFunction(const QString& func);
+    void setFunction(Mantid::API::IFunction_const_sptr func);
     void setNoOfSectionRows(int rows);
     void setSectionRow(int row, SectionRow values);
     void addSectionSelector(int index, SectionSelector values);

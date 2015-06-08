@@ -86,8 +86,11 @@ Background Removal
   Allows removal of a background given a time-of-flight range.
 
 Plot Time
-  When clicked create a time plot of the spectra range defined in the Spectra
-  Min and Spectra Max selectors.
+  Creates a time of flight plot of the grouping of the spectra in the range
+  defined in the Plot Time section, to include a single spectrum set the Spectra
+  Min and Spectra Max selectors to the same value. Note that this first rebins
+  the sample input to ensure that each detector spectrum has the same binning in
+  order to be grouped into a single spectrum.
 
 Detailed Balance
   Gives the option to perform an exponential correction on the data once it has
@@ -181,17 +184,26 @@ workspace by default, with mirror mode enabled you will also get the left
 (*_left*) and right (*_right*) hand components of the data as separate
 workspaces.
 
+Note that when using a calibration workspace the grouping of the calibration
+workspace must match that being used in the energy transfer reduction, i.e. both
+processes use the same grouping file (or both use the default grouping).
+
 Options
 ~~~~~~~
 
 Input
   Used to select the raw data in *.nxs* format
 
+Calibration
+  Gives the option of applying a calibration workspace or NeXus file created
+  with the ILL Calibration tab or :ref:`ILLIN16BCalibration
+  <algm-ILLIN16BCalibration>` algorithm.
+
 Grouping
   Used to switch between grouping as per the IDF (*Default*) or grouping using a
-  mapping file (*Map FIle*).
+  mapping file (*Map File*).
 
-Mirror Mode
+Use Mirror Mode
   Enable to reduce data that has been captured with mirror mode enabled.
 
 Plot
@@ -268,6 +280,32 @@ Background Start & Background End
 Low, Width & High
   Binning parameters used to rebin the resolution curve.
 
+ILL Calibration
+---------------
+
+.. interface:: Data Reduction
+  :widget: tabILLCalibration
+
+This tab is used to create calibration workspaces for the IN16B spectrometer at
+the ILL using the :ref:`ILLIN16BCalibration <algm-ILLIN16BCalibration>`
+algorithm.
+
+Options
+~~~~~~~
+
+Grouping
+  Used to switch between grouping as per the IDF (*Default*) or grouping using a
+  mapping file (*Map File*).
+
+Peak Range
+  Sets the integreation range over the peak in :math:`meV`
+
+Scale Factor
+  Override the calculated scale factor
+
+Mirror Mode
+  Enable of the data uses mirror mode
+
 ISIS Diagnostics
 ----------------
 
@@ -290,6 +328,10 @@ Input
 Use Calibration
   Allows you to select either a calibrtion file or workspace to apply to the raw
   files.
+
+Preview Spectrum
+  Allows selection of the spectrum to be shown in the preview plot to the right
+  of the Time Slice section.
 
 Spectra Min & Spectra Max
   Allows selection of the range of detectors you are interested in, this is

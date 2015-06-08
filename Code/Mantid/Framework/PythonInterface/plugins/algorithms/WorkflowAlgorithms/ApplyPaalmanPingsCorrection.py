@@ -1,3 +1,4 @@
+#pylint: disable=no-init,too-many-instance-attributes
 from mantid.simpleapi import *
 from mantid.api import PythonAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty, WorkspaceGroupProperty, \
                        PropertyMode, MatrixWorkspace
@@ -27,23 +28,21 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
 
 
     def PyInit(self):
-        self.declareProperty(MatrixWorkspaceProperty('SampleWorkspace', '',
-                             direction=Direction.Input),
+        self.declareProperty(MatrixWorkspaceProperty('SampleWorkspace', '', direction=Direction.Input),
                              doc='Name for the input Sample workspace.')
 
         self.declareProperty(WorkspaceGroupProperty('CorrectionsWorkspace', '',
-                             optional=PropertyMode.Optional, direction=Direction.Input),
+                                                    optional=PropertyMode.Optional, direction=Direction.Input),
                              doc='Name for the input Corrections workspace.')
 
         self.declareProperty(MatrixWorkspaceProperty('CanWorkspace', '',
-                             optional=PropertyMode.Optional, direction=Direction.Input),
+                                                     optional=PropertyMode.Optional, direction=Direction.Input),
                              doc='Name for the input Can workspace.')
 
         self.declareProperty(name='CanScaleFactor', defaultValue=1.0,
                              doc='Factor to scale the can data')
 
-        self.declareProperty(MatrixWorkspaceProperty('OutputWorkspace', '',
-                             direction=Direction.Output),
+        self.declareProperty(MatrixWorkspaceProperty('OutputWorkspace', '', direction=Direction.Output),
                              doc='The output corrections workspace.')
 
 
@@ -187,7 +186,6 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
         whatever units the sample is in.
         """
 
-        instrument = mtd[self._sample_ws_name].getInstrument()
         unit_id = mtd[self._sample_ws_name].getAxis(0).getUnit().unitID()
         logger.information('x-unit is ' + unit_id)
 
@@ -206,7 +204,8 @@ class ApplyPaalmanPingsCorrection(PythonAlgorithm):
                     efixed = 0.0
                 elif unit_id == 'DeltaE':
                     emode = 'Indirect'
-                    efixed = instrument.getNumberParameter('efixed-val')[0]
+                    from IndirectCommon import getEfixed
+                    efixed = getEfixed(mtd[self._sample_ws_name])
                 else:
                     raise ValueError('Unit %s in sample workspace is not supported' % unit_id)
 

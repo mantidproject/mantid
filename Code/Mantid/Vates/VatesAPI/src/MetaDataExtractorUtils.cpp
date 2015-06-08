@@ -49,7 +49,7 @@ namespace Mantid
           instrument = eventWorkspace->getExperimentInfo(0)->getInstrument()->getName();
         } else 
         {
-          g_log.warning() << "The event workspace does not have any instruments. \n";
+          g_log.notice() << "The event workspace does not have any instruments. \n";
 
           instrument = "";
         }
@@ -60,7 +60,7 @@ namespace Mantid
           instrument = histoWorkspace->getExperimentInfo(0)->getInstrument()->getName();
         } else
         {
-          g_log.warning() << "The histo workspace does not have any instruments. \n";
+          g_log.notice() << "The histo workspace does not have any instruments. \n";
 
           instrument = "";
         }
@@ -81,11 +81,7 @@ namespace Mantid
     QwtDoubleInterval MetaDataExtractorUtils::getMinAndMax(Mantid::API::IMDWorkspace_sptr workspace)
     {
       if (!workspace)
-      {
         throw std::invalid_argument("The workspace is empty.");
-        
-        return QwtDoubleInterval(defaultMin,defaultMax);
-      }
 
       auto iterators = workspace->createIterators(PARALLEL_GET_MAX_THREADS, 0);
 

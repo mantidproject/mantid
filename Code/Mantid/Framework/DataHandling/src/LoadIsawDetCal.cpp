@@ -199,9 +199,11 @@ void LoadIsawDetCal::exec() {
     std::ostringstream Detbank;
     Detbank << "bank" << id;
     // Loop through detectors to match names with number from DetCal file
+    idnum = -1;
     for (int i = 0; i < static_cast<int>(detList.size()); i++)
       if (detList[i]->getName().compare(Detbank.str()) == 0)
         idnum = i;
+    if (idnum < 0) continue;
     det = detList[idnum];
     if (det) {
       IAlgorithm_sptr alg1 = createChildAlgorithm("ResizeRectangularDetector");

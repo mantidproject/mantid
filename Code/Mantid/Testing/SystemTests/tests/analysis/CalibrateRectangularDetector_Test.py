@@ -1,21 +1,17 @@
-#pylint: disable=invalid-name,no-init
+#pylint: disable=invalid-name,no-init,attribute-defined-outside-init
 import stresstesting
 from mantid.simpleapi import *
-from time import strftime
 import os
 
 def _skip_test():
     """Helper function to determine if we run the test"""
     import platform
 
-    # Only runs on RHEL6 at the moment
-    if "Linux" not in platform.platform():
+    # don't run on rhel6
+    if "redhat-6" in platform.platform():
         return True
-    flavour = platform.linux_distribution()[2]
-    if flavour == 'Santiago': # Codename for RHEL6
-        return False # Do not skip
-    else:
-        return True
+    # run on any other linux
+    return ("Linux" not in platform.platform())
 
 class PG3Calibration(stresstesting.MantidStressTest):
     def cleanup(self):

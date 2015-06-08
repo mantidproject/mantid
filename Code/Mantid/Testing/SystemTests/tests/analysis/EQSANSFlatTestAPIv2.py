@@ -1,6 +1,5 @@
-#pylint: disable=no-init
+#pylint: disable=no-init,attribute-defined-outside-init
 import stresstesting
-import mantid
 from mantid.simpleapi import *
 from reduction_workflow.instruments.sans.sns_command_interface import *
 

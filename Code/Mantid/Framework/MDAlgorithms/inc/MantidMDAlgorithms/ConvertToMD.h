@@ -87,7 +87,7 @@ protected: // for testing, otherwise private:
   bool doWeNeedNewTargetWorkspace(API::IMDEventWorkspace_sptr spws);
   /**Create new MD workspace using existing parameters for algorithm */
   API::IMDEventWorkspace_sptr
-  createNewMDWorkspace(const MDAlgorithms::MDWSDescription &NewMDWSDescription);
+  createNewMDWorkspace(const MDAlgorithms::MDWSDescription &targWSDescr);
 
   bool buildTargetWSDescription(API::IMDEventWorkspace_sptr spws,
                                 const std::string &Q_mod_req,
@@ -114,8 +114,8 @@ protected: // for testing, otherwise private:
                   const std::vector<std::string> &otherDim,
                   std::vector<double> &minVal, std::vector<double> &maxVal);
 
-  /// Splits the initial box at level 0 into a defined number of subboxes for the the first level.
-  void performInitialSplitting(API::IMDEventWorkspace_sptr spws, Mantid::API::BoxController_sptr bc);
+  /// Sets up the top level splitting, i.e. of level 0, for the box controller
+  void setupTopLevelSplitting(Mantid::API::BoxController_sptr bc);
 };
 
 } // namespace Mantid

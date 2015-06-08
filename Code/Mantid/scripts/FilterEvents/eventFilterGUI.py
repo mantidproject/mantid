@@ -1,7 +1,7 @@
-#pylint: disable=invalid-name
+#pylint: disable=invalid-name, too-many-lines, too-many-instance-attributes
 import numpy
 
-from FilterEvents.Ui_MainWindow import Ui_MainWindow #import line for the UI python class
+from FilterEvents.ui_MainWindow import Ui_MainWindow #import line for the UI python class
 from PyQt4 import QtCore, QtGui
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
@@ -33,7 +33,7 @@ class MyPopErrorMsg(QWidget):
     def __init__(self):
         """ Init
         """
-        import FilterEvents.Ui_ErrorMessage as errui
+        import FilterEvents.ui_ErrorMessage as errui
         QWidget.__init__(self)
 
 
@@ -61,7 +61,7 @@ class MyPopErrorMsg(QWidget):
     def XpaintEvent(self, _):
         """ ???
         """
-        import FilterEvents.Ui_ErrorMessage as errui
+        import FilterEvents.ui_ErrorMessage as errui
 
         self.ui = errui.Ui_Dialog()
         self.ui.setupUi(self)
@@ -73,7 +73,7 @@ class MainWindow(QtGui.QMainWindow):
 
     Copy to ui.setupUI
 
-    # Version 3.0 + Import for Ui_MainWindow.py
+    # Version 3.0 + Import for ui_MainWindow.py
         from MplFigureCanvas import Qt4MplCanvas
 
         # Replace 'self.graphicsView = QtGui.QtGraphicsView' with the following
@@ -123,7 +123,7 @@ class MainWindow(QtGui.QMainWindow):
         self.centralwidget = QtGui.QWidget(self)
 
         # UI Window (from Qt Designer)
-        self.ui = Ui_MainWindow()
+        self.ui = ui_MainWindow()
         self.ui.setupUi(self)
 
         # Do initialize plotting
@@ -292,8 +292,6 @@ class MainWindow(QtGui.QMainWindow):
     def computeMock(self):
         """ Compute vecx and vecy as mocking
         """
-        import random, math
-
         x0 = 0.
         xf = 1.
         dx = 0.1
@@ -672,10 +670,10 @@ class MainWindow(QtGui.QMainWindow):
         filename = str(self.ui.lineEdit.text())
 
         # Find out it is relative path or absolute path
-        if os.path.abspath(filename) == filename:
-            isabspath = True
-        else:
-            isabspath = False
+        #if os.path.abspath(filename) == filename:
+        #    isabspath = True
+        #else:
+        #    isabspath = False
 
         dataws = self._loadFile(str(filename))
         if dataws is None:
@@ -1018,12 +1016,6 @@ class MainWindow(QtGui.QMainWindow):
 
         title = str(self.ui.lineEdit_title.text())
 
-        """ Debug
-        for k in kwargs.keys():
-            print k, kwargs[k], type(kwargs[k])
-        print "Input workspace = ", str(self._dataWS)
-         END DB """
-
         splitws, infows = api.GenerateEventsFilter(\
                 InputWorkspace      = self._dataWS,\
                 UnitOfTime          = "Seconds",\
@@ -1171,7 +1163,7 @@ class MainWindow(QtGui.QMainWindow):
         tablewsnames = []
         for wsname in wsnames:
             wksp = AnalysisDataService.retrieve(wsname)
-            if isinstance(wksp, mantid.api._api.ITableWorkspace):
+            if isinstance(wksp, mantid.api.ITableWorkspace):
                 tablewsnames.append(wsname)
         # ENDFOR
 

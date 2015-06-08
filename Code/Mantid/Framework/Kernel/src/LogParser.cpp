@@ -7,10 +7,7 @@
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 
-#include <algorithm>
 #include <fstream>
-#include <limits>
-#include <sstream>
 
 // constants for the new style icp event commands
 const char *START_COLLECTION = "START_COLLECTION";
@@ -251,6 +248,9 @@ LogParser::LogParser(const Kernel::Property *log) : m_nOfPeriods(1) {
 Kernel::TimeSeriesProperty<bool> *LogParser::createPeriodLog(int period) const {
   Kernel::TimeSeriesProperty<int> *periods =
       dynamic_cast<Kernel::TimeSeriesProperty<int> *>(m_periods.get());
+  if (!periods) {
+    throw std::logic_error("Failed to cast periods to TimeSeriesProperty");
+  }
   std::ostringstream ostr;
   ostr << period;
   Kernel::TimeSeriesProperty<bool> *p =

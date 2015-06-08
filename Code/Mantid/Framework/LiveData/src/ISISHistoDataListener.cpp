@@ -17,7 +17,9 @@
 #ifdef GCC_VERSION
 // Avoid compiler warnings on gcc from unused static constants in
 // isisds_command.h
+// clang-format off
 GCC_DIAG_OFF(unused-variable)
+// clang-format on
 #endif
 #include "LoadDAE/idc.h"
 
@@ -43,6 +45,7 @@ Kernel::Logger g_log("ISISHistoDataListener");
 /// Constructor
 ISISHistoDataListener::ISISHistoDataListener()
     : ILiveListener(), isInitilized(false), m_daeHandle(NULL),
+      m_numberOfPeriods(0), m_totalNumberOfSpectra(0),
       m_timeRegime(-1) {
   declareProperty(new Kernel::ArrayProperty<specid_t>("SpectraList"),
                   "An optional list of spectra to load. If blank, all "

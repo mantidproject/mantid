@@ -1,8 +1,5 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/ThreadSafeLogStream.h"
-#include <Poco/Logger.h>
-#include <Poco/Message.h>
-#include <Poco/Mutex.h>
 
 #ifdef _MSC_VER
 // Disable a flood of warnings about inheriting from std streams

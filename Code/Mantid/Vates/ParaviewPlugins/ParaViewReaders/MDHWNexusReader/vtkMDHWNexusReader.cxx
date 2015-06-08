@@ -9,6 +9,7 @@
 #include "vtkFloatArray.h"
 #include "vtkStreamingDemandDrivenPipeline.h"
 #include "vtkPVClipDataSet.h"
+#include "vtkPVInformationKeys.h"
 #include "vtkBox.h"
 #include "vtkUnstructuredGrid.h"
 
@@ -28,7 +29,8 @@ vtkMDHWNexusReader::vtkMDHWNexusReader() :
   m_presenter(NULL),
   m_loadInMemory(false),
   m_depth(1),
-  m_time(0)
+  m_time(0),
+  m_normalizationOption(AutoSelect)
 {
   this->FileName = NULL;
   this->SetNumberOfInputPorts(0);
@@ -99,6 +101,16 @@ const char* vtkMDHWNexusReader::GetInputGeometryXML()
   }
 }
 
+/**
+Set the normalization option. This is how the signal data will be normalized before viewing.
+@param option : Normalization option
+*/
+void vtkMDHWNexusReader::SetNormalization(int option)
+{
+  m_normalizationOption = static_cast<Mantid::VATES::VisualNormalization>(option);
+  this->Modified();
+}
+
 int vtkMDHWNexusReader::RequestData(vtkInformation * vtkNotUsed(request), vtkInformationVector ** vtkNotUsed(inputVector), vtkInformationVector *outputVector)
 {
 
@@ -120,8 +132,8 @@ int vtkMDHWNexusReader::RequestData(vtkInformation * vtkNotUsed(request), vtkInf
 
   // Will attempt to handle drawing in 4D case and then in 3D case
   // if that fails.
-  vtkMDHistoHexFactory* successor = new vtkMDHistoHexFactory(thresholdRange, "signal");
-  vtkMDHistoHex4DFactory<TimeToTimeStep> *factory = new vtkMDHistoHex4DFactory<TimeToTimeStep>(thresholdRange, "signal", m_time);
+  vtkMDHistoHexFactory* successor = new vtkMDHistoHexFactory(thresholdRange, m_normalizationOption);
+  vtkMDHistoHex4DFactory<TimeToTimeStep> *factory = new vtkMDHistoHex4DFactory<TimeToTimeStep>(thresholdRange, m_normalizationOption, m_time);
   factory->SetSuccessor(successor);
 
   vtkDataSet* product = m_presenter->execute(factory, loadingProgressAction, drawingProgressAction);
@@ -208,7 +220,7 @@ void vtkMDHWNexusReader::setTimeRange(vtkInformationVector* outputVector)
   if(m_presenter->hasTDimensionAvailable())
   {
     vtkInformation *outInfo = outputVector->GetInformationObject(0);
-    outInfo->Set(vtkStreamingDemandDrivenPipeline::TIME_LABEL_ANNOTATION(),
+    outInfo->Set(vtkPVInformationKeys::TIME_LABEL_ANNOTATION(),
                  m_presenter->getTimeStepLabel().c_str());
     std::vector<double> timeStepValues = m_presenter->getTimeStepValues();
     outInfo->Set(vtkStreamingDemandDrivenPipeline::TIME_STEPS(), &timeStepValues[0],

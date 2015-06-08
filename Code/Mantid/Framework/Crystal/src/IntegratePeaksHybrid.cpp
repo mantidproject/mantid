@@ -41,23 +41,16 @@
 #include "MantidCrystal/ICluster.h"
 #include "MantidCrystal/PeakClusterProjection.h"
 
-#include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/IMDIterator.h"
-#include "MantidAPI/WorkspaceProperty.h"
-#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
-#include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 
-#include <boost/make_shared.hpp>
 #include <boost/format.hpp>
-#include <boost/algorithm/string.hpp>
 #include <boost/math/special_functions/fpclassify.hpp>
-#include <cmath>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -193,7 +186,7 @@ void IntegratePeaksHybrid::exec() {
   for (int i = 0; i < peakWS->getNumberPeaks(); ++i) {
 
     PARALLEL_START_INTERUPT_REGION
-    IPeak &peak = peakWS->getPeak(i);
+    Geometry::IPeak &peak = peakWS->getPeak(i);
     const V3D center = projection.peakCenter(peak);
 
     auto binMDAlg = this->createChildAlgorithm("BinMD");

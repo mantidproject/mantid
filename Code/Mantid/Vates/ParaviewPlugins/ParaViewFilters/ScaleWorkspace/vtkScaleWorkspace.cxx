@@ -19,6 +19,8 @@ vtkScaleWorkspace::vtkScaleWorkspace() :
   m_xScaling(1),
   m_yScaling(1),
   m_zScaling(1),
+  m_minValue(0.1),
+  m_maxValue(0.1),
   m_specialCoordinates(-1),
   m_metadataJsonManager(new MetadataJsonManager()),
   m_vatesConfigurations(new VatesConfigurations())
@@ -43,6 +45,10 @@ int vtkScaleWorkspace::RequestData(vtkInformation*, vtkInformationVector **input
   vtkDataSetToScaledDataSet scaler(inputDataSet, outputDataSet);
   scaler.initialize(m_xScaling, m_yScaling, m_zScaling);
   scaler.execute();
+
+  // Need to call an update on the meta data, as it is not guaranteed that RequestInformation will be called
+  // before we access the metadata.
+  updateMetaData(inputDataSet);
   return 1;
 }
 
@@ -51,20 +57,7 @@ int vtkScaleWorkspace::RequestInformation(vtkInformation*, vtkInformationVector*
   // Set the meta data 
   vtkInformation *inInfo = inputVector[0]->GetInformationObject(0);
   vtkUnstructuredGrid *inputDataSet = vtkUnstructuredGrid::SafeDownCast(inInfo->Get(vtkDataObject::DATA_OBJECT()));
-
-  vtkFieldData* fieldData = inputDataSet->GetFieldData();
-  
-  // Extract information for meta data in Json format.
-  FieldDataToMetadata fieldDataToMetadata;
-
-  std::string jsonString = fieldDataToMetadata(fieldData, m_vatesConfigurations->getMetadataIdJson());
-  m_metadataJsonManager->readInSerializedJson(jsonString);
-
-  m_minValue = m_metadataJsonManager->getMinValue();
-  m_maxValue = m_metadataJsonManager->getMaxValue();
-  m_instrument = m_metadataJsonManager->getInstrument();
-  m_specialCoordinates = m_metadataJsonManager->getSpecialCoordinates();
-
+  updateMetaData(inputDataSet);
   return 1;
 }
 
@@ -144,4 +137,23 @@ const char* vtkScaleWorkspace::GetInstrument()
 int vtkScaleWorkspace::GetSpecialCoordinates()
 {
   return m_specialCoordinates;
+}
+
+/**
+ * Update the metadata fields of the plugin based on the information of the inputDataSet
+ * @param inputDataSet :: the input data set.
+ */
+void vtkScaleWorkspace::updateMetaData(vtkUnstructuredGrid *inputDataSet) {
+  vtkFieldData* fieldData = inputDataSet->GetFieldData();
+  
+  // Extract information for meta data in Json format.
+  FieldDataToMetadata fieldDataToMetadata;
+
+  std::string jsonString = fieldDataToMetadata(fieldData, m_vatesConfigurations->getMetadataIdJson());
+  m_metadataJsonManager->readInSerializedJson(jsonString);
+
+  m_minValue = m_metadataJsonManager->getMinValue();
+  m_maxValue = m_metadataJsonManager->getMaxValue();
+  m_instrument = m_metadataJsonManager->getInstrument();
+  m_specialCoordinates = m_metadataJsonManager->getSpecialCoordinates();
 }

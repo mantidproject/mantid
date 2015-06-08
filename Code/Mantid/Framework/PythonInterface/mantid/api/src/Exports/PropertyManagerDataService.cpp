@@ -15,16 +15,15 @@ using namespace boost::python;
 /// Weak pointer to DataItem typedef
 typedef boost::weak_ptr<PropertyManager> PropertyManager_wptr;
 
-void export_PropertyManagerDataService()
-{
+void export_PropertyManagerDataService() {
 
   register_ptr_to_python<PropertyManager_wptr>();
 
-  typedef DataServiceExporter<PropertyManagerDataServiceImpl, PropertyManager_sptr> PMDExporter;
+  typedef DataServiceExporter<PropertyManagerDataServiceImpl,
+                              PropertyManager_sptr> PMDExporter;
   auto pmdType = PMDExporter::define("PropertyManagerDataServiceImpl");
-  
+
   // Instance method
-  TrackingInstanceMethod<PropertyManagerDataService, PMDExporter::PythonType>::define(pmdType);
-
+  TrackingInstanceMethod<PropertyManagerDataService,
+                         PMDExporter::PythonType>::define(pmdType);
 }
-

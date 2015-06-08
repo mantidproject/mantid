@@ -12,6 +12,9 @@ namespace Algorithms {
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(PowerLawCorrection)
 
+PowerLawCorrection::PowerLawCorrection()
+    : UnaryOperation(), m_c0(0.), m_c1(0.) {}
+
 void PowerLawCorrection::defineProperties() {
   // We need an array property for the coefficients of the PowerLaw: C0*X^C1
   declareProperty("C0", 1.0,

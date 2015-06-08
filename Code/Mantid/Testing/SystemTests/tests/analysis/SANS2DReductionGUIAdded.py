@@ -1,6 +1,5 @@
 #pylint: disable=invalid-name
 import sys
-import os
 
 if __name__ == "__main__":
   # it is just to allow running this test in Mantid, allowing the following import
@@ -8,9 +7,6 @@ if __name__ == "__main__":
 
 from mantid.simpleapi import *
 import ISISCommandInterface as i
-import isis_reducer
-import isis_instrument
-import isis_reduction_steps
 import copy
 import SANS2DReductionGUI as sansgui
 

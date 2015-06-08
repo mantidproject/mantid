@@ -65,6 +65,8 @@ namespace VATES
   m_buildSortedList(true), m_wsName(""), dataSet(NULL),
   slice(false), sliceMask(NULL), sliceImplicitFunction(NULL),
   m_time(0.0),
+  m_minValue(0.1),
+  m_maxValue(0.1),
   m_metaDataExtractor(new MetaDataExtractorUtils()),
   m_metadataJsonManager(new MetadataJsonManager()),
   m_vatesConfigurations(new VatesConfigurations())
@@ -379,7 +381,7 @@ namespace VATES
     bool do4D = doMDHisto4D(workspace);
 
     // Get the transformation that takes the points in the TRANSFORMED space back into the ORIGINAL (not-rotated) space.
-    Mantid::API::CoordTransform* transform = NULL;
+    Mantid::API::CoordTransform const* transform = NULL;
     if (m_useTransform)
     {
      transform = workspace->getTransformToOriginal();
@@ -683,6 +685,7 @@ namespace VATES
     // Create a new field data array 
     MetadataToFieldData convertMtoF;
     vtkFieldData* outputFD = vtkFieldData::New();
+    outputFD->ShallowCopy(fieldData);
     convertMtoF(outputFD, xmlString, XMLDefinitions::metaDataId().c_str());
     convertMtoF(outputFD, jsonString, m_vatesConfigurations->getMetadataIdJson().c_str());
     dataSet->SetFieldData(outputFD);

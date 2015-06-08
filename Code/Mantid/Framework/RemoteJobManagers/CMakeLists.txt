@@ -1,14 +1,22 @@
 set( SRC_FILES
+  src/MantidWebServiceAPIHelper.cpp
+  src/MantidWebServiceAPIJobManager.cpp
   src/LSFJobManager.cpp
   src/SCARFLSFJobManager.cpp
+  src/SimpleJSON.cpp
 )
 
 set( INC_FILES
+  inc/MantidRemoteJobManagers/MantidWebServiceAPIHelper.h
+  inc/MantidRemoteJobManagers/MantidWebServiceAPIJobManager.h
   inc/MantidRemoteJobManagers/LSFJobManager.h
   inc/MantidRemoteJobManagers/SCARFLSFJobManager.h
+  inc/MantidRemoteJobManagers/SimpleJSON.h
 )
 
 set ( TEST_FILES
+  MantidWebServiceAPIHelperTest.h
+  MantidWebServiceAPIJobManagerTest.h
   LSFJobManagerTest.h
   SCARFLSFJobManagerTest.h
 )
@@ -17,6 +25,12 @@ set ( TEST_FILES
 #
 #)
 # No Python tests yet...
+
+if (COVERALLS)
+    foreach( loop_var ${SRC_FILES} ${INC_FILES})
+      set_property(GLOBAL APPEND PROPERTY COVERAGE_SRCS "${CMAKE_CURRENT_SOURCE_DIR}/${loop_var}")
+    endforeach(loop_var)
+endif()
 
 # Not for now, remember later if convenient: Add a precompiled header where they are supported
 # enable_precompiled_headers ( inc/MantidRemoteJobManagers/PrecompiledHeader.h SRC_FILES )
@@ -36,7 +50,7 @@ set_property ( TARGET RemoteJobManagers PROPERTY FOLDER "MantidFramework" )
 
 include_directories ( inc )
 
-target_link_libraries ( RemoteJobManagers ${MANTIDLIBS} ${GSL_LIBRARIES} )
+target_link_libraries ( RemoteJobManagers LINK_PRIVATE ${MANTIDLIBS} ${GSL_LIBRARIES} )
 
 # Add the unit tests directory
 add_subdirectory ( test )

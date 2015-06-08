@@ -43,10 +43,10 @@ using namespace Kernel;
  * Constructor
  */
 MonteCarloAbsorption::MonteCarloAbsorption()
-    : m_samplePos(), m_sourcePos(), m_blocks(), m_blkHalfX(0.0),
-      m_blkHalfY(0.0), m_blkHalfZ(0.0), m_rngs(0), m_inputWS(),
-      m_sampleShape(NULL), m_container(NULL), m_numberOfPoints(0),
-      m_xStepSize(0), m_numberOfEvents(300) {}
+    : m_samplePos(), m_sourcePos(), m_numVolumeElements(0), m_blocks(),
+      m_blkHalfX(0.0), m_blkHalfY(0.0), m_blkHalfZ(0.0), m_rngs(0), m_inputWS(),
+      m_sampleShape(NULL), m_sampleMaterial(NULL), m_container(NULL),
+      m_numberOfPoints(0), m_xStepSize(0), m_numberOfEvents(300) {}
 
 /**
  * Destructor
@@ -195,6 +195,11 @@ void MonteCarloAbsorption::doSimulation(const IDetector *const detector,
       ++numDetected;
     }
   }
+
+  if (0 == numDetected)
+    throw std::runtime_error(
+        "Unexpected inconsistency found while running simulation: the number "
+        "of events detected is 0.");
 
   // Attenuation factor is simply the average value
   attenFactor /= numDetected;

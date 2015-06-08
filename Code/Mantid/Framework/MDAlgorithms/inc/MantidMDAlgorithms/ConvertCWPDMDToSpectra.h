@@ -136,7 +136,8 @@ private:
       API::IMDEventWorkspace_const_sptr dataws,
       API::IMDEventWorkspace_const_sptr monitorws, const std::string targetunit,
       const std::map<int, double> &map_runwavelength, const double xmin,
-      const double xmax, const double binsize, bool dolinearinterpolation);
+      const double xmax, const double binsize, bool dolinearinterpolation,
+      const std::vector<detid_t> &vec_excludeddets);
 
   /// Find the binning boundary according to detectors' positions
   void findXBoundary(API::IMDEventWorkspace_const_sptr dataws,
@@ -147,7 +148,8 @@ private:
   /// Bin signals to its 2theta position
   void binMD(API::IMDEventWorkspace_const_sptr mdws, const char &unitbit,
              const std::map<int, double> &map_runlambda,
-             const std::vector<double> &vecx, std::vector<double> &vecy);
+             const std::vector<double> &vecx, std::vector<double> &vecy,
+             const std::vector<detid_t> &vec_excludedet);
 
   /// Do linear interpolation to zero counts if bin is too small
   void linearInterpolation(API::MatrixWorkspace_sptr matrixws,
@@ -165,6 +167,9 @@ private:
   /// Convert units from 2theta to d-spacing or Q
   void convertUnits(API::MatrixWorkspace_sptr matrixws,
                     const std::string &targetunit, const double &wavelength);
+
+  bool isExcluded(const std::vector<detid_t> &vec_excludedet,
+                  const detid_t detid);
 
   /// Infinitesimal value
   double m_infitesimal;

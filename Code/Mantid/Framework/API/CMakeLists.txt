@@ -56,13 +56,13 @@ set ( SRC_FILES
 	src/IFunction1DSpectrum.cpp
 	src/IFunctionMD.cpp
 	src/IFunctionMW.cpp
+	src/ILatticeFunction.cpp
 	src/ILiveListener.cpp
 	src/IMDEventWorkspace.cpp
 	src/IMDHistoWorkspace.cpp
 	src/IMDIterator.cpp
 	src/IMDWorkspace.cpp
 	src/IPawleyFunction.cpp
-	src/IPeak.cpp
 	src/IPeakFunction.cpp
 	src/IPeaksWorkspace.cpp
 	src/IPowderDiffPeakFunction.cpp
@@ -76,6 +76,7 @@ set ( SRC_FILES
 	src/ImplicitFunctionParserFactory.cpp
 	src/InstrumentDataService.cpp
 	src/JointDomain.cpp
+	src/LatticeDomain.cpp
 	src/LinearScale.cpp
 	src/LiveListenerFactory.cpp
 	src/LogManager.cpp
@@ -97,11 +98,6 @@ set ( SRC_FILES
 	src/ParameterReference.cpp
 	src/ParameterTie.cpp
 	src/PeakFunctionIntegrator.cpp
-	src/PeakTransform.cpp
-	src/PeakTransformHKL.cpp
-	src/PeakTransformQLab.cpp
-	src/PeakTransformQSample.cpp
-	src/PeakTransformSelector.cpp
 	src/Progress.cpp
 	src/Projection.cpp
 	src/PropertyManagerDataService.cpp
@@ -163,7 +159,6 @@ set ( INC_FILES
 	inc/MantidAPI/CompositeDomain.h
 	inc/MantidAPI/CompositeDomainMD.h
 	inc/MantidAPI/CompositeFunction.h
-	inc/MantidAPI/ConcretePeakTransformFactory.h
 	inc/MantidAPI/ConstraintFactory.h
 	inc/MantidAPI/CoordTransform.h
 	inc/MantidAPI/CostFunctionFactory.h
@@ -204,6 +199,7 @@ set ( INC_FILES
 	inc/MantidAPI/IDomainCreator.h
 	inc/MantidAPI/IEventList.h
 	inc/MantidAPI/IEventWorkspace.h
+	inc/MantidAPI/IEventWorkspace_fwd.h
 	inc/MantidAPI/IFileLoader.h
 	inc/MantidAPI/IFuncMinimizer.h
 	inc/MantidAPI/IFunction.h
@@ -212,22 +208,26 @@ set ( INC_FILES
 	inc/MantidAPI/IFunctionMD.h
 	inc/MantidAPI/IFunctionMW.h
 	inc/MantidAPI/IFunctionWithLocation.h
+	inc/MantidAPI/ILatticeFunction.h
 	inc/MantidAPI/ILiveListener.h
 	inc/MantidAPI/IMDEventWorkspace.h
+	inc/MantidAPI/IMDEventWorkspace_fwd.h
 	inc/MantidAPI/IMDHistoWorkspace.h
+	inc/MantidAPI/IMDHistoWorkspace_fwd.h
 	inc/MantidAPI/IMDIterator.h
 	inc/MantidAPI/IMDNode.h
 	inc/MantidAPI/IMDWorkspace.h
 	inc/MantidAPI/IMaskWorkspace.h
 	inc/MantidAPI/IPawleyFunction.h
-	inc/MantidAPI/IPeak.h
 	inc/MantidAPI/IPeakFunction.h
 	inc/MantidAPI/IPeaksWorkspace.h
+	inc/MantidAPI/IPeaksWorkspace_fwd.h
 	inc/MantidAPI/IPowderDiffPeakFunction.h
 	inc/MantidAPI/IRemoteJobManager.h
 	inc/MantidAPI/ISpectrum.h
 	inc/MantidAPI/ISplittersWorkspace.h
 	inc/MantidAPI/ITableWorkspace.h
+	inc/MantidAPI/ITableWorkspace_fwd.h
 	inc/MantidAPI/ITransformScale.h
 	inc/MantidAPI/IWorkspaceProperty.h
 	inc/MantidAPI/IkedaCarpenterModerator.h
@@ -242,6 +242,7 @@ set ( INC_FILES
 	inc/MantidAPI/InstrumentDataService.h
 	inc/MantidAPI/Jacobian.h
 	inc/MantidAPI/JointDomain.h
+	inc/MantidAPI/LatticeDomain.h
 	inc/MantidAPI/LinearScale.h
 	inc/MantidAPI/LiveListenerFactory.h
 	inc/MantidAPI/LogManager.h
@@ -249,6 +250,7 @@ set ( INC_FILES
 	inc/MantidAPI/MDGeometry.h
 	inc/MantidAPI/MatrixWSIndexCalculator.h
 	inc/MantidAPI/MatrixWorkspace.h
+	inc/MantidAPI/MatrixWorkspace_fwd.h
 	inc/MantidAPI/MatrixWorkspaceMDIterator.h
 	inc/MantidAPI/MemoryManager.h
 	inc/MantidAPI/ModeratorModel.h
@@ -263,12 +265,6 @@ set ( INC_FILES
 	inc/MantidAPI/ParameterReference.h
 	inc/MantidAPI/ParameterTie.h
 	inc/MantidAPI/PeakFunctionIntegrator.h
-	inc/MantidAPI/PeakTransform.h
-	inc/MantidAPI/PeakTransformFactory.h
-	inc/MantidAPI/PeakTransformHKL.h
-	inc/MantidAPI/PeakTransformQLab.h
-	inc/MantidAPI/PeakTransformQSample.h
-	inc/MantidAPI/PeakTransformSelector.h
 	inc/MantidAPI/Progress.h
 	inc/MantidAPI/Projection.h
 	inc/MantidAPI/PropertyManagerDataService.h
@@ -293,6 +289,7 @@ set ( INC_FILES
 	inc/MantidAPI/VectorParameter.h
 	inc/MantidAPI/VectorParameterParser.h
 	inc/MantidAPI/Workspace.h
+	inc/MantidAPI/Workspace_fwd.h
 	inc/MantidAPI/WorkspaceFactory.h
 	inc/MantidAPI/WorkspaceGroup.h
 	inc/MantidAPI/WorkspaceHistory.h
@@ -340,6 +337,7 @@ set ( TEST_FILES
 	IFunction1DSpectrumTest.h
 	IFunction1DTest.h
 	IFunctionMDTest.h
+	ILatticeFunctionTest.h
 	ILiveListenerTest.h
 	IMDWorkspaceTest.h
 	ISpectrumTest.h
@@ -348,6 +346,7 @@ set ( TEST_FILES
 	ImplicitFunctionParserFactoryTest.h
 	IncreasingAxisValidatorTest.h
 	InstrumentDataServiceTest.h
+	LatticeDomainTest.h
 	LiveListenerFactoryTest.h
 	LogManagerTest.h
 	MDGeometryTest.h
@@ -364,10 +363,6 @@ set ( TEST_FILES
 	ParameterReferenceTest.h
 	ParameterTieTest.h
 	PeakFunctionIntegratorTest.h
-	PeakTransformHKLTest.h
-	PeakTransformQLabTest.h
-	PeakTransformQSampleTest.h
-	PeakTransformSelectorTest.h
 	ProjectionTest.h
 	PropertyManagerDataServiceTest.h
 	PropertyNexusTest.h
@@ -397,6 +392,11 @@ set ( GMOCK_TEST_FILES
 	MatrixWorkspaceTest.h
 )
 
+if (COVERALLS)
+    foreach( loop_var ${SRC_FILES} ${INC_FILES} )
+      set_property(GLOBAL APPEND PROPERTY COVERAGE_SRCS "${CMAKE_CURRENT_SOURCE_DIR}/${loop_var}")
+    endforeach(loop_var)
+endif()
 
 if(UNITY_BUILD)
   include(UnityBuild)
@@ -413,7 +413,7 @@ enable_precompiled_headers( inc/MantidAPI/PrecompiledHeader.h SRC_FILES )
 # Add the target for this directory
 add_library ( API ${SRC_FILES} ${INC_FILES})
 # Set the name of the generated library
-set_target_properties ( API PROPERTIES OUTPUT_NAME MantidAPI 
+set_target_properties ( API PROPERTIES OUTPUT_NAME MantidAPI
                                        COMPILE_DEFINITIONS IN_MANTID_API )
 
 if (OSX_VERSION VERSION_GREATER 10.8)
@@ -423,7 +423,7 @@ endif ()
 # Add to the 'Framework' group in VS
 set_property ( TARGET API PROPERTY FOLDER "MantidFramework" )
 
-target_link_libraries ( API ${MANTIDLIBS} ${WINSOCK} ${NEXUS_LIBRARIES} )
+target_link_libraries ( API LINK_PRIVATE ${MANTIDLIBS} ${GSL_LIBRARIES} ${NEXUS_LIBRARIES} ${WINSOCK} )
 
 # Add the unit tests directory
 add_subdirectory ( test )

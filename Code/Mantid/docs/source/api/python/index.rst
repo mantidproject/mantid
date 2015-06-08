@@ -6,7 +6,7 @@
 
 The following pages document the Python bindings to the Mantid C++ libraries.
 
-If you are new to Python in Mantid then we advise first looking at our `Mantid training courses <http://www.mantidproject.org/Main_Page#Getting_Started>`_.
+If you are new to Python in Mantid then we advise first looking at our `Mantid training courses <http://www.mantidproject.org/Main_Page>`_.
 
 Reference
 ---------
@@ -24,13 +24,13 @@ Changes between version 1.0 and 2.0 of the API are described :ref:`here <pythona
 
    changes
 
-Future plotting interface
--------------------------
+Matplotlib-like plotting interface
+----------------------------------
 
 .. toctree::
    :maxdepth: 1
 
-   mantidplot.future.pyplot <mantidplot/future/pyplot/index>
+   mantidplot.pyplot <mantidplot/pyplot/index>
 
 Techniques
 ----------

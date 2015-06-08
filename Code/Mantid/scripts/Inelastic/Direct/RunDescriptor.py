@@ -25,10 +25,34 @@ class RunList(object):
         if not isinstance(runs_to_add,list):
             raise KeyError('Can only set list of run numbers to add')
         runs = []
+        if fnames or len(fnames)>0:
+            fnames_given=True
+            local_fnames=fnames
+        else:
+            fnames_given=False
+            local_fnames=[]
+        if fext:
+            fext_given=True
+            local_fext=fext
+        else:
+            fext_given=False
+            local_fext=[]
+
         for item in runs_to_add:
-            runs.append(int(item))
+            if isinstance(item,str):
+                file_path,run_num,fext = prop_helpers.parse_run_file_name(item)
+                runs.append(run_num)
+                if not fnames_given:
+                    local_fnames.append(file_path)
+                if not fext_given:
+                    if not fext is None:
+                        if len(fext)==0:
+                            fext=None
+                    local_fext.append(fext)
+            else:
+                runs.append(int(item))
         self._run_numbers = runs
-        self._set_fnames(fnames,fext)
+        self._set_fnames(local_fnames,local_fext)
 #--------------------------------------------------------------------------------------------------
     def set_cashed_sum_ws(self,ws,new_ws_name=None):
         """Store the name of a workspace in the class
@@ -820,7 +844,7 @@ class RunDescriptor(PropDescriptor):
             except:
                 try:
                     monws_name = mon_ws.name()
-                except: 
+                except:
                     monws_name = 'None'
                 RunDescriptor._logger('*** Monitor workspace {0} does not have monitor with ID {1}. Monitor workspace set to None'.\
                                           format(monws_name,monID),'warning')
@@ -950,13 +974,26 @@ class RunDescriptor(PropDescriptor):
         else:
             mon_load_option = 'Separate'
         #
+        nxs_file=False
+        file,ext = os.path.splitext(data_file)
+        if ext == '.nxs':
+            nxs_file = True
         try: # Hack: LoadEventNexus does not understand Separate at the moment and throws.
             # And event loader always loads monitors separately
             Load(Filename=data_file, OutputWorkspace=ws_name,LoadMonitors = mon_load_option)
         except ValueError:
             #mon_load_option =str(int(load_mon_with_workspace))
             Load(Filename=data_file, OutputWorkspace=ws_name,LoadMonitors = '1',MonitorsAsEvents='0')
-
+        #HACK >>> , necessary until #11565 is fixed
+        if nxs_file :
+           instr_name = RunDescriptor._holder.instr_name
+           if instr_name == 'LET' and self._run_number>14151 and self._run_number<14382:
+                FrameworkManager.clearInstruments()
+                idf_file = api.ExperimentInfo.getInstrumentFilename(instr_name)
+                idf_path,tile = os.path.split(idf_file)
+                idf_file = os.path.join(idf_path,'LET_Definition.xml')
+                LoadInstrument(ws_name,idf_file,RewriteSpectraMap='0')
+        #HACK<<<
         RunDescriptor._logger("Loaded {0}".format(data_file),'information')
 
         loaded_ws = mtd[ws_name]
@@ -1034,6 +1071,41 @@ class RunDescriptor(PropDescriptor):
             CopyInstrumentParameters(InputWorkspace=ws_calibration,OutputWorkspace=loaded_ws)
             AddSampleLog(Workspace=loaded_ws,LogName="calibrated",LogText=str(ws_calibration))
 #--------------------------------------------------------------------------------------------------------------------
+    def export_normalization(self,other_workspace):
+        """Method applies normalization, present on current workspace to other_workspace provided
+           as argument.
+
+           If other workspace is already normalized, the method modifies that normalization to match
+           the normalization of current workspace
+
+           WARNING! this operation makes sense in special circumstances only (e.g. the initial workspace
+           has been split in parts)
+        """
+        source_ws = self.get_workspace()
+
+        if isinstance(other_workspace,api.MatrixWorkspace):
+            targ_ws = other_workspace
+        else:
+            targ_ws = mtd[other_workspace]
+
+        if not 'NormalizationFactor' in source_ws.getRun():
+            raise RuntimeError(""" Can not change normalization of target workspace {0}
+                               as source workspace {1} is not normalized"""\
+                               .format(source_ws.name(),targ_ws.name()))
+        TargFactor = source_ws.getRun().getLogData('NormalizationFactor').value
+        if 'NormalizationFactor' in targ_ws.getRun():
+            OldFactor = targ_ws.getRun().getLogData('NormalizationFactor').value
+            if abs(OldFactor-TargFactor)<1.e-5: # Already normalized
+                return
+
+            NormFactor=TargFactor/OldFactor
+            other_workspace/=NormFactor
+        else:
+            other_workspace/=TargFactor
+        AddSampleLog(other_workspace,LogName='NormalizationFactor',LogText=str(TargFactor),LogType='Number')
+
+
+#--------------------------------------------------------------------------------------------------------------------
     @staticmethod
     def copy_spectrum2monitors(data_ws,mon_ws,spectraID):
         """
@@ -1053,7 +1125,7 @@ class RunDescriptor(PropDescriptor):
         except:
             try:
                 ws_index = data_ws.getIndexFromSpectrumNumber(spectraID)
-            except: 
+            except:
                 raise RuntimeError('*** Error: Can not retrieve spectra with ID {0} from source workspace: {1}'.\
                                     format(spectraID,data_ws.name()))
 
@@ -1376,9 +1448,9 @@ class RunDescriptorDependent(RunDescriptor):
 
     def get_ws_clone(self,clone_name='ws_clone'):
         if self._has_own_value:
-            return super(RunDescriptorDependent,self).get_ws_clone()
+            return super(RunDescriptorDependent,self).get_ws_clone(clone_name)
         else:
-            return self._host.get_ws_clone()
+            return self._host.get_ws_clone(clone_name)
 
     def chop_ws_part(self,origin,tof_range,rebin,chunk_num,n_chunks):
         if self._has_own_value:
@@ -1436,16 +1508,24 @@ class RunDescriptorDependent(RunDescriptor):
             return super(RunDescriptorDependent,self).clear_monitors()
         else:
             return self._host.clear_monitors()
+
     def get_masking(self,noutputs=None):
         if self._has_own_value:
             return super(RunDescriptorDependent,self).get_masking(noutputs)
         else:
             return self._host.get_masking(noutputs)
+
     def add_masked_ws(self,masked_ws):
         if self._has_own_value:
             return super(RunDescriptorDependent,self).add_masked_ws(masked_ws)
         else:
             return self._host.add_masked_ws(masked_ws)
+
+    def export_normalization(self,other_workspace):
+        if self._has_own_value:
+            return super(RunDescriptorDependent,self).export_normalization(other_workspace)
+        else:
+            return self._host.export_normalization(other_workspace)
 #--------------------------------------------------------------------------------------------------------------------
 #--------------------------------------------------------------------------------------------------------------------
 def build_run_file_name(run_num,inst,file_path='',fext=''):

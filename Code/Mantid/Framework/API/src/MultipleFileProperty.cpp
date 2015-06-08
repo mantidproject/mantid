@@ -188,7 +188,6 @@ MultipleFileProperty::setValueAsSingleFile(const std::string &propValue) {
     std::vector<std::vector<std::string>> result;
     toValue(slaveFileProp(), result, "", "");
     PropertyWithValue<std::vector<std::vector<std::string>>>::operator=(result);
-    return "";
   } catch (std::invalid_argument &except) {
     g_log.debug() << "Could not set property " << name() << ": "
                   << except.what();

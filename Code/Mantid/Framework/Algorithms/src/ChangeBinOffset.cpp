@@ -18,7 +18,8 @@ DECLARE_ALGORITHM(ChangeBinOffset)
 /**
  * Default constructor
  */
-ChangeBinOffset::ChangeBinOffset() : API::Algorithm(), m_progress(NULL) {}
+ChangeBinOffset::ChangeBinOffset()
+    : API::Algorithm(), m_progress(NULL), offset(0.), wi_min(0), wi_max(0) {}
 
 /**
  * Destructor

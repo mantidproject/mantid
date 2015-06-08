@@ -1,4 +1,4 @@
-#pylint: disable=no-init,invalid-name
+#pylint: disable=no-init,invalid-name,too-many-instance-attributes
 from mantid.api import *
 from mantid.kernel import *
 import os
@@ -182,7 +182,7 @@ class ExportSampleLogsToCSVFile(PythonAlgorithm):
             ofile = open(self._outputfilename, "w")
             ofile.write(wbuf)
             ofile.close()
-        except IOError as err:
+        except IOError:
             raise NotImplementedError("Unable to write file %s. Check permission." % (self._outputfilename))
 
         return
@@ -232,7 +232,7 @@ class ExportSampleLogsToCSVFile(PythonAlgorithm):
 
         wbuf = ""
         currtimeindexes = []
-        for i in xrange(len(logtimeslist)):
+        for dummy_i in xrange(len(logtimeslist)):
             currtimeindexes.append(0)
         nextlogindexes = []
 
@@ -271,7 +271,7 @@ class ExportSampleLogsToCSVFile(PythonAlgorithm):
             ofile = open(self._outputfilename, "w")
             ofile.write(wbuf)
             ofile.close()
-        except IOError as err:
+        except IOError:
             raise NotImplementedError("Unable to write file %s. Check permission." % (self._outputfilename))
 
         return
@@ -334,7 +334,6 @@ class ExportSampleLogsToCSVFile(PythonAlgorithm):
         wbuf = "%.6f\t%.6f\t" % (abstime, reltime)
 
         # Log valuess
-        tmplogvalues = []
         for i in xrange(len(logvaluelist)):
             timeindex = currtimeindexes[i]
             if not i in nexttimelogindexes:
@@ -446,15 +445,15 @@ class ExportSampleLogsToCSVFile(PythonAlgorithm):
 
         return
 
-def getLocalTimeShiftInSecond(utctime, localtimezone, logger = None):
+def getLocalTimeShiftInSecond(utctime, localtimezone, currentlogger = None):
     """ Calculate the difference between UTC time and local time of given
     DataAndTime
     """
     from datetime import datetime
     from dateutil import tz
 
-    if logger:
-        logger.information("Input UTC time = %s" % (str(utctime)))
+    if currentlogger:
+        currentlogger.information("Input UTC time = %s" % (str(utctime)))
 
     # Return early if local time zone is UTC
     if localtimezone == "UTC":
@@ -465,8 +464,8 @@ def getLocalTimeShiftInSecond(utctime, localtimezone, logger = None):
     to_zone = tz.gettz(localtimezone)
 
     t1str = (str(utctime)).split('.')[0].strip()
-    if logger:
-        logger.information("About to convert time string: %s" % t1str)
+    if currentlogger:
+        currentlogger.information("About to convert time string: %s" % t1str)
     try:
         if t1str.count("T") == 1:
             utc = datetime.strptime(t1str, '%Y-%m-%dT%H:%M:%S')

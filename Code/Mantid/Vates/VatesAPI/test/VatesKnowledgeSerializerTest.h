@@ -55,7 +55,7 @@ void testNoLocationDoesNotThrow()
   EXPECT_CALL(*pImpFunction, toXMLString()).Times(1).WillRepeatedly(testing::Return("<ImplicitFunction/>"));
   Mantid::Geometry::MDImplicitFunction_sptr impFunction(pImpFunction);
   
-  VatesKnowledgeSerializer generator(LocationNotRequired); //Location is not required.
+  VatesKnowledgeSerializer generator; //Location is not required.
   generator.setImplicitFunction(impFunction);
   generator.setWorkspace(workspace);
 

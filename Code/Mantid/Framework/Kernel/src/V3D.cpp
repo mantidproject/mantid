@@ -1,14 +1,11 @@
 #include <iostream>
 #include <cmath>
-#include <math.h>
 #include <float.h>
 #include <vector>
-#include <cstdlib>
 
 #include "MantidKernel/V3D.h"
 #include "MantidKernel/Tolerance.h"
 #include "MantidKernel/Exception.h"
-#include <sstream>
 #include "MantidKernel/Quat.h"
 #include <boost/math/common_factor.hpp>
 

@@ -11,6 +11,7 @@
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
 
+#include "MantidDataObjects/FakeMD.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/MDEventWorkspace.h"
 
@@ -125,22 +126,21 @@ createDiffractionEventWorkspace(int numEvents, int numPixels, int numBins) {
  * @param wsName :: name of the workspace in ADS
  * @param numEvents :: number of events in the target workspace distributed
  *randomly if numEvents>0 or regularly & homogeneously if numEvents<0
- * coord :: Required coordinate system
+ * @param coord :: Required coordinate system
  * @return MDEW sptr
  */
 MDEventWorkspace3Lean::sptr makeFakeMDEventWorkspace(const std::string &wsName,
                                                      long numEvents, Kernel::SpecialCoordinateSystem coord) {
   // ---------- Make a file-backed MDEventWorkspace -----------------------
-  std::string snEvents = boost::lexical_cast<std::string>(numEvents);
   MDEventWorkspace3Lean::sptr ws1 =
       MDEventsTestHelper::makeMDEW<3>(10, 0.0, 10.0, 0);
   ws1->setCoordinateSystem(coord);
   ws1->getBoxController()->setSplitThreshold(100);
   API::AnalysisDataService::Instance().addOrReplace(
       wsName, boost::dynamic_pointer_cast<Mantid::API::IMDEventWorkspace>(ws1));
-  FrameworkManager::Instance().exec("FakeMDEventData", 6, "InputWorkspace",
-                                    wsName.c_str(), "UniformParams",
-                                    snEvents.c_str(), "RandomizeSignal", "1");
+  FakeMD dataFaker(std::vector<double>(1, static_cast<double>(numEvents)),
+                   std::vector<double>(), 0, true);
+  dataFaker.fill(ws1);
   return boost::dynamic_pointer_cast<MDEventWorkspace3Lean>(
       API::AnalysisDataService::Instance().retrieve(wsName));
 }
@@ -151,9 +151,9 @@ MDEventWorkspace3Lean::sptr makeFakeMDEventWorkspace(const std::string &wsName,
 !!!!*/
 MDBox<MDLeanEvent<1>, 1> *makeMDBox1(size_t splitInto,
                                      BoxController *splitter) {
-  if (!splitter)
+  if (!splitter) {
     splitter = (new BoxController(1));
-
+  }
   // Split at 5 events
   splitter->setSplitThreshold(5);
   // Splits into 10 boxes

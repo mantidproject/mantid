@@ -7,8 +7,8 @@
 |=============================================================================|=======|
 1                                                                            80   <tab>
 '''
-import sys, os
-import dis, inspect, opcode
+import os
+import inspect, opcode
 def ls():
     print os.getcwd()
     files=os.listdir(os.getcwd())

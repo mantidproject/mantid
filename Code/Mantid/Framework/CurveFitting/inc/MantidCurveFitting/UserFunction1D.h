@@ -74,7 +74,7 @@ class UserFunction1D : public Fit1D {
 public:
   /// Constructor
   UserFunction1D()
-      : m_x_set(false), m_parameters(new double[100]), m_nPars(0){};
+      : m_x(0.0), m_x_set(false), m_parameters(new double[100]), m_nPars(0){};
   /// Destructor
   virtual ~UserFunction1D(){};
   /// Algorithm's name for identification overriding a virtual method

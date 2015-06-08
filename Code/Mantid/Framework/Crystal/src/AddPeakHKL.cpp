@@ -1,9 +1,10 @@
 #include "MantidCrystal/AddPeakHKL.h"
+
+#include "MantidGeometry/Crystal/IPeak.h"
+
 #include "MantidAPI/IPeaksWorkspace.h"
-#include "MantidAPI/IPeak.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/ArrayLengthValidator.h"
-#include "MantidKernel/V3D.h"
 
 namespace Mantid
 {
@@ -63,7 +64,7 @@ namespace Crystal
   {
     IPeaksWorkspace_sptr peakWS = this->getProperty("Workspace");
     const std::vector<double> hklValue = this->getProperty("HKL");
-    IPeak * peak = peakWS->createPeakHKL(V3D(hklValue[0], hklValue[1], hklValue[2]));
+    Mantid::Geometry::IPeak * peak = peakWS->createPeakHKL(V3D(hklValue[0], hklValue[1], hklValue[2]));
     peakWS->addPeak(*peak);
     delete peak;
   }

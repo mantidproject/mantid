@@ -88,9 +88,7 @@ namespace MantidQt
       if(error || !plot)
         return;
 
-      // Plot the output workspace group
-      QString pyInput = "plotSpectrum('" + m_outWsName + "', 0)\n";
-      emit runAsPythonScript(pyInput);
+      plotSpectrum(m_outWsName);
     }
 
     /**

@@ -165,6 +165,8 @@ private:
 
   void showAllLabelControls(bool show = true);
 
+  void setColorMapName();
+
   double aspect_ratio;
 
   QFont titleFont, legendFont, axesFont, numbersFont;
@@ -179,11 +181,12 @@ private:
 
   QPushButton *btnTitle, *btnAxesLabels, *btnAxesNumbers, *btnLegend;
   ColorMapEditor *colorMapEditor;
+  QLabel *mLabelCurrentColormap;
   QPushButton* mSelectColormap;
   QString mCurrentColorMap;
   QWidget *curvePlotTypeBox, *layerPage, *layerGeometryPage, *piePage, *fontsPage, *printPage, *contourLinesPage;
   QTreeWidget* listBox;
-  QCheckBox *boxAntialiasing, *boxAll, *boxScaleLayers, *boxPrintCrops;
+  QCheckBox *boxAntialiasing, *boxAll, *boxScaleLayers, *boxPrintCrops, *boxSetCMapAsDefault;
   ColorButton *boxBorderColor, *boxBackgroundColor, *boxCanvasColor, *boxCanvasFrameColor;
   QSpinBox *boxBackgroundTransparency, *boxCanvasTransparency, *boxBorderWidth, *boxMargin, *boxCanvasFrameWidth;
   QSpinBox *boxRadius;

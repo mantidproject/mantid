@@ -7,9 +7,13 @@
 ###########################################################################
 # Set local dependencies
 ###########################################################################
+set ( old_boost ${Boost_LIBRARIES} )
+
 set ( Boost_LIBRARIES ) # Empty out the variable after previous use
 set ( Boost_USE_DEBUG_PYTHON TRUE )
 find_package ( Boost REQUIRED python )
+
+set ( Boost_LIBRARIES ${Boost_LIBRARIES} ${old_boost})
 
 include_directories ( SYSTEM ${PYTHON_INCLUDE_PATH} )
 
@@ -21,37 +25,42 @@ add_definitions ( -DBOOST_DEBUG_PYTHON -DBOOST_PYTHON_NO_LIB -DNPY_NO_DEPRECATED
 set ( PYTHON_DEPS ${MPI_CXX_LIBRARIES} )
 
 ####################################################################################
-# A macro for generating the exports
-#  - MODULE_TEMPLATE: The file containing the @EXPORT_FUNCTIONS@ and @EXPORT_DECALRE@ flags to replace
+# A function for generating the exports
+#  - MODULE_TEMPLATE: The file containing the @EXPORT_FUNCTIONS@ and @EXPORT_DECLARE@ flags to replace
 #  - OUTPUT_FILE: The path to the generated output file
-#  - EXPORT_FILES: The variable containing the files to be processed
-#  - SRC_FILES: The variable containing the list of sources. Used to append the generated file.
+#  - ... The list of export files
 ####################################################################################
-MACRO( CREATE_MODULE MODULE_TEMPLATE OUTPUT_FILE EXPORT_FILES SRCS )
-  set ( EXPORT_DECLARE )
-  set ( EXPORT_FUNCTIONS )
-  foreach( CPPFILE ${${EXPORT_FILES}} )
-    file( STRINGS ${CPPFILE} EXPORTS REGEX "void *export.*()" )
-    foreach( EXPORT ${EXPORTS} )
-      string ( STRIP "${EXPORT}" EXPORT )
-      set ( EXPORT_DECLARE "${EXPORT_DECLARE}\n${EXPORT};" )
-      string( REGEX REPLACE "void " "" EXPORT "${EXPORT}" )
-      set ( EXPORT_FUNCTIONS "${EXPORT_FUNCTIONS}\n${EXPORT};" )
-    endforeach(EXPORT ${EXPORTS})
-  endforeach( CPPFILE ${${EXPORT_FILES}} )
-  string( STRIP "${EXPORT_DECLARE}" EXPORT_DECLARE )
-  string( STRIP "${EXPORT_FUNCTIONS}" EXPORT_FUNCTIONS )
+function ( CREATE_MODULE MODULE_TEMPLATE OUTPUT_FILE )
+  set ( _fwd_declarations )
+  set ( _function_calls )
+  foreach( _cppfile ${ARGN} )
+    # pull out all functions named 'void export...'
+    file ( STRINGS ${_cppfile} _definitions REGEX "( *)?void *export.*().*" )
+    foreach ( _func_definition ${_definitions} )
+      # create a forward declaration and function call
+      string ( STRIP "${_func_definition}" _func_definition )
+      string ( REGEX REPLACE "(void *export.*\\(\\)).*" "\\1" _func_declaration "${_func_definition}" )
+      # add to list of declarations
+      set ( _fwd_declarations "${_fwd_declarations}\n${_func_declaration}\;" )
+      # strip void and add to call list
+      string( REGEX REPLACE "void *" "" _func_call "${_func_declaration}" )
+      set ( _function_calls "${_function_calls}\n${_func_call}\;" )
+    endforeach ()
+  endforeach ()
+  string ( STRIP "${_fwd_declarations}" _fwd_declarations )
+  string ( STRIP "${_function_calls}" _function_calls )
 
   # Configure the final file
+  set ( EXPORT_DECLARE ${_fwd_declarations} )
+  set ( EXPORT_FUNCTIONS ${_function_calls} )
+
   configure_file( ${MODULE_TEMPLATE} ${OUTPUT_FILE} )
-  # Set the sources
-  LIST ( APPEND ${SRCS} ${${EXPORT_FILES}} ${OUTPUT_FILE} )
-ENDMACRO( )
+endfunction ()
 
 ####################################################################################
 # A function for setting the correct properties on the individual targets
 ####################################################################################
-FUNCTION( SET_PYTHON_PROPERTIES TARGET TARGET_NAME )
+function ( SET_PYTHON_PROPERTIES TARGET TARGET_NAME )
   # No library prefixes
   set_target_properties( ${TARGET} PROPERTIES PREFIX "" )
   # Library name needs to end in .pyd for Windows
@@ -70,7 +79,7 @@ FUNCTION( SET_PYTHON_PROPERTIES TARGET TARGET_NAME )
   endif ()
   # Group within VS
   set_property ( TARGET ${TARGET} PROPERTY FOLDER "MantidFramework/Python" )
-ENDFUNCTION()
+endfunction()
 
 ###########################################################################
 # mantid package

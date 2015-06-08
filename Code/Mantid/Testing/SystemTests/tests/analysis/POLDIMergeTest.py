@@ -3,8 +3,9 @@ import stresstesting
 from mantid.simpleapi import *
 import numpy as np
 
-'''This test checks that the results of PoldiMerge match the expected outcome.'''
 class POLDIMergeTest(stresstesting.MantidStressTest):
+    '''This test checks that the results of PoldiMerge match the expected outcome.'''
+
     def runTest(self):
         self.testHappyCase()
         self.testDifferentTimings()

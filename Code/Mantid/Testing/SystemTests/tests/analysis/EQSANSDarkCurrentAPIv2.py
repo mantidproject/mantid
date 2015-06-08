@@ -1,6 +1,5 @@
-#pylint: disable=no-init
+#pylint: disable=no-init,attribute-defined-outside-init
 import stresstesting
-import mantid
 from mantid.simpleapi import *
 from reduction_workflow.instruments.sans.sns_command_interface import *
 from mantid.api import *
@@ -17,7 +16,7 @@ class EQSANSDarkCurrent(stresstesting.MantidStressTest):
 
     """
         Analysis Tests for EQSANS
-        Testing that the I(Q) output of is correct 
+        Testing that the I(Q) output of is correct
     """
 
     def runTest(self):
@@ -48,4 +47,4 @@ class EQSANSDarkCurrent(stresstesting.MantidStressTest):
         self.disableChecking.append('Axes')
 
         return "EQSANS_1466_event_Iq", 'EQSANSDarkCurrent.nxs'
-    
+

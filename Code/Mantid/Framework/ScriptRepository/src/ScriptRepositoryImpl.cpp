@@ -1206,7 +1206,7 @@ void ScriptRepositoryImpl::setIgnorePatterns(const std::string &patterns) {
  */
 std::string ScriptRepositoryImpl::ignorePatterns(void) {
   ConfigServiceImpl &config = ConfigService::Instance();
-  std::string ignore_string = config.getString("ScriptRepositoryIgnore", "");
+  std::string ignore_string = config.getString("ScriptRepositoryIgnore", false);
   return ignore_string;
 }
 
@@ -1306,7 +1306,11 @@ void ScriptRepositoryImpl::doDownloadFile(const std::string &url_file,
   // Configure Poco HTTP Client Session
   try {
     Kernel::InternetHelper inetHelper;
-    inetHelper.setTimeout(3); // 3 seconds
+    int timeout;
+    if (!ConfigService::Instance().getValue("network.scriptrepo.timeout",timeout)) {
+      timeout = 5; // the default value if the key is not found
+    }
+    inetHelper.setTimeout(timeout);
     
     //std::stringstream ss;
     int status = inetHelper.downloadFile(url_file,local_file_path);
@@ -1550,7 +1554,6 @@ std::string ScriptRepositoryImpl::printStatus(SCRIPTSTATUS st) {
   default:
     return "FAULT: INVALID STATUS";
   }
-  return "FAULT: INVALID STATUS";
 }
 /**
  @todo describe

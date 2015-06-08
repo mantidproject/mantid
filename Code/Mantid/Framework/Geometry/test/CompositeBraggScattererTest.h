@@ -34,8 +34,8 @@ public:
         TS_ASSERT_THROWS_NOTHING(CompositeBraggScatterer_sptr scatterer = CompositeBraggScatterer::create());
 
         std::vector<BraggScatterer_sptr> scatterers;
-        scatterers.push_back(getInitializedScatterer("Si", V3D(0.35, 0, 0)));
-        scatterers.push_back(getInitializedScatterer("Si", V3D(0.25, 0.25, 0.25)));
+        scatterers.push_back(getInitializedScatterer("Si", "0.35, 0, 0"));
+        scatterers.push_back(getInitializedScatterer("Si", "1/4, 1/4, 1/4"));
 
         CompositeBraggScatterer_sptr scatterer = CompositeBraggScatterer::create(scatterers);
         TS_ASSERT_EQUALS(scatterer->nScatterers(), 2);
@@ -64,7 +64,7 @@ public:
         CompositeBraggScatterer_sptr scatterer = CompositeBraggScatterer::create();
         TS_ASSERT_EQUALS(scatterer->propertyCount(), 0);
 
-        IsotropicAtomBraggScatterer_sptr siOne = getInitializedScatterer("Si", V3D(0, 0, 0));
+        IsotropicAtomBraggScatterer_sptr siOne = getInitializedScatterer("Si", "[0, 0, 0]");
         TS_ASSERT_DIFFERS(siOne->getSpaceGroup()->hmSymbol(), spaceGroup->hmSymbol());
 
         size_t oldCount = scatterer->nScatterers();
@@ -128,7 +128,7 @@ public:
         SpaceGroup_const_sptr spaceGroup = SpaceGroupFactory::Instance().createSpaceGroup("P 1 2/m 1");
 
         CompositeBraggScatterer_sptr coll = CompositeBraggScatterer::create();
-        coll->addScatterer(getInitializedScatterer("Si", V3D(0.2, 0.3, 0.4), 0.01267));
+        coll->addScatterer(getInitializedScatterer("Si", "[0.2, 0.3, 0.4]", 0.01267));
 
         coll->setProperty("SpaceGroup", spaceGroup->hmSymbol());
         coll->setProperty("UnitCell", unitCellToStr(cell));
@@ -146,7 +146,7 @@ public:
     }
 
 private:
-    IsotropicAtomBraggScatterer_sptr getInitializedScatterer(const std::string &element, const V3D &position, double U = 0.0, double occ = 1.0)
+    IsotropicAtomBraggScatterer_sptr getInitializedScatterer(const std::string &element, const std::string &position, double U = 0.0, double occ = 1.0)
     {
         IsotropicAtomBraggScatterer_sptr scatterer = boost::make_shared<IsotropicAtomBraggScatterer>();
         scatterer->initialize();
@@ -161,8 +161,8 @@ private:
     CompositeBraggScatterer_sptr getCompositeScatterer()
     {
         std::vector<BraggScatterer_sptr> scatterers;
-        scatterers.push_back(getInitializedScatterer("Si", V3D(0.35, 0, 0)));
-        scatterers.push_back(getInitializedScatterer("Si", V3D(0.25, 0.25, 0.25)));
+        scatterers.push_back(getInitializedScatterer("Si", "[0.35, 0, 0]"));
+        scatterers.push_back(getInitializedScatterer("Si", "1/4, 1/4, 1/4"));
 
         return CompositeBraggScatterer::create(scatterers);
     }

@@ -1,6 +1,6 @@
 #pylint: disable=no-init
 from stresstesting import MantidStressTest
-from mantid.simpleapi import MaskDetectors, mtd, config
+from mantid.simpleapi import MaskDetectors, config
 import Direct.DirectEnergyConversion as reduction
 import os
 
@@ -51,7 +51,7 @@ class DirectInelasticDiagnostic(MantidStressTest):
             if sample_ws.getDetector(index).isMasked():
                 spec_no = sample_ws.getSpectrum(index).getSpectrumNo()
                 handle.write(str(spec_no) + '\n')
-        handle.close
+        handle.close()
 
     def cleanup(self):
         if os.path.exists(self.saved_diag_file):

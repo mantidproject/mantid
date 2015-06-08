@@ -73,6 +73,7 @@ void ChangePulsetime::exec() {
 
   double timeOffset = getProperty("TimeOffset");
 
+  Progress prog(this, 0.0, 1.0, num_to_do);
   PARALLEL_FOR_NO_WSP_CHECK()
   for (int64_t i = 0; i < num_to_do; i++) {
     // What workspace index?
@@ -84,6 +85,8 @@ void ChangePulsetime::exec() {
 
     // Call the method on the event list
     out_ws->getEventList(wi).addPulsetime(timeOffset);
+
+    prog.report(name());
   }
 
   setProperty("OutputWorkspace", out_ws);

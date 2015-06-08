@@ -248,6 +248,81 @@ public:
   }
 
   //----------------------------------------------------------------------------------------------
+  /** Unit test to reduce/bin the HB2A data with excluded detectors
+   * @brief test_ReduceHB2AData
+   */
+  void test_ExcludeDetectors() {
+    // Set up
+    std::vector<int> vecExcludedDetID;
+    vecExcludedDetID.push_back(10);
+    for (int i = 20; i < 30; ++i)
+      vecExcludedDetID.push_back(i);
+    vecExcludedDetID.push_back(49);
+
+    // Init
+    ConvertCWPDMDToSpectra alg;
+    alg.initialize();
+
+    // Set properties
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("InputWorkspace", m_dataMD->name()));
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("InputMonitorWorkspace", m_monitorMD->name()));
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("BinningParams", "0, 0.1, 120."));
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setProperty("LinearInterpolateZeroCounts", false));
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setProperty("ExcludedDetectorIDs", vecExcludedDetID));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("ScaleFactor", 65000.0));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("OutputWorkspace", "ReducedData"));
+
+    // Execute
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+
+    // Get ouput
+    MatrixWorkspace_sptr outws = boost::dynamic_pointer_cast<MatrixWorkspace>(
+        AnalysisDataService::Instance().retrieve("ReducedData"));
+    TS_ASSERT(outws);
+
+    // Check output
+    TS_ASSERT_EQUALS(outws->getNumberHistograms(), 1);
+
+    // X, Y and E values
+    const Mantid::MantidVec &vecX = outws->readX(0);
+    const Mantid::MantidVec &vecY = outws->readY(0);
+    const Mantid::MantidVec &vecE = outws->readE(0);
+
+    TS_ASSERT_DELTA(vecX.front(), 0.0, 0.0001);
+    TS_ASSERT_DELTA(vecX.back(), 120.0, 0.0001);
+
+    // X around 80 belongs to the detetors that are excluded.
+    double y800 = vecY[800];
+    TS_ASSERT_DELTA(y800, 0, 0.0001);
+
+    double y1101 = vecY[1101];
+    double e1101 = vecE[1101];
+    TS_ASSERT_DELTA(y1101, 186.0716, 0.0001);
+    TS_ASSERT(e1101 > sqrt(y1101));
+    TS_ASSERT(e1101 < sqrt(y1101 * 1.05));
+
+    // Sample logs: temperature
+    TimeSeriesProperty<double> *tempbseries =
+        dynamic_cast<TimeSeriesProperty<double> *>(
+            outws->run().getProperty("temp_b"));
+    TS_ASSERT(tempbseries);
+    TS_ASSERT_EQUALS(tempbseries->size(), 61);
+    DateAndTime t0 = tempbseries->nthTime(0);
+    DateAndTime t3 = tempbseries->nthTime(3);
+    TS_ASSERT_EQUALS(
+        (t3.totalNanoseconds() - t0.totalNanoseconds()) / 1000000000, 90);
+
+    // Clean
+    AnalysisDataService::Instance().remove("ReducedData");
+  }
+
+  //----------------------------------------------------------------------------------------------
   /** Clean the testing workspaces
    */
   void test_Clean() {

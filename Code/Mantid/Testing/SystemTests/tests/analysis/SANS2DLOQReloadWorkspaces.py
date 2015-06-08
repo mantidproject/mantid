@@ -1,9 +1,7 @@
 #pylint: disable=invalid-name,no-init
 import stresstesting
 from mantid.simpleapi import *
-from mantid.api import Workspace
 from ISISCommandInterface import *
-import numpy
 import unittest
 
 ## export PYTHONPATH=/apps/workspace/mantid_debug/bin/:/apps/mantid/systemtests/StressTestFramework/:/apps/mantid/mantid/Code/Mantid/scripts/SANS/:/apps/mantid/mantid/Code/Mantid/scripts/reduction

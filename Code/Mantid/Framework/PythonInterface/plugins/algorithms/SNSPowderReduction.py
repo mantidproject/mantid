@@ -14,11 +14,12 @@ else:
     HAVE_MPI = False
     mpiRank = 0 # simplify if clauses
 
-COMPRESS_TOL_TOF = .01
+
 EVENT_WORKSPACE_ID = "EventWorkspace"
 
+#pylint: disable=too-many-instance-attributes
 class SNSPowderReduction(DataProcessorAlgorithm):
-
+    COMPRESS_TOL_TOF = .01
     _resampleX = None
     _binning = None
     _bin_in_dspace = None
@@ -58,7 +59,8 @@ class SNSPowderReduction(DataProcessorAlgorithm):
     def PyInit(self):
         sns = ConfigService.getFacility("SNS")
         instruments = []
-        for item in sns.instruments("Neutron Diffraction"): instruments.append(item.shortName())
+        for item in sns.instruments("Neutron Diffraction"):
+            instruments.append(item.shortName())
         self.declareProperty("Instrument", "PG3", StringListValidator(instruments), "Powder diffractometer's name")
         arrvalidator = IntArrayBoundedValidator()
         arrvalidator.setLower(0)
@@ -98,14 +100,16 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         self.declareProperty(FloatArrayProperty("Binning", values=[0.,0.,0.],\
                              direction=Direction.Input), "Positive is linear bins, negative is logorithmic")
         self.declareProperty("ResampleX", 0,
-                             "Number of bins in x-axis. Non-zero value overrides \"Params\" property. Negative value means logorithmic binning.")
+                             "Number of bins in x-axis. Non-zero value overrides \"Params\" property. "+\
+                             "Negative value means logorithmic binning.")
         self.declareProperty("BinInDspace", True,
                              "If all three bin parameters a specified, whether they are in dspace (true) or time-of-flight (false)")
         self.declareProperty("StripVanadiumPeaks", True,
                              "Subtract fitted vanadium peaks from the known positions.")
         self.declareProperty("VanadiumFWHM", 7, "Default=7")
         self.declareProperty("VanadiumPeakTol", 0.05,
-                             "How far from the ideal position a vanadium peak can be during StripVanadiumPeaks. Default=0.05, negative turns off")
+                             "How far from the ideal position a vanadium peak can be during StripVanadiumPeaks. "\
+                             "Default=0.05, negative turns off")
         self.declareProperty("VanadiumSmoothParams", "20,2", "Default=20,2")
         self.declareProperty("BackgroundSmoothParams", "", "Default=off, suggested 20,2")
         self.declareProperty("FilterBadPulses", 95.,
@@ -124,7 +128,8 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         self.declareProperty(infotableprop, "Name of table workspace containing information for splitters.")
 
         self.declareProperty("LowResolutionSpectraOffset", -1,
-                             "If larger and equal to 0, then process low resolution TOF and offset is the spectra number. Otherwise, ignored.")
+                             "If larger and equal to 0, then process low resolution TOF and offset is the spectra number. "+\
+                             "Otherwise, ignored.")
 
         self.declareProperty("NormalizeByCurrent", True, "Normalize by current")
 
@@ -140,7 +145,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
 
         return
 
-
+    #pylint: disable=too-many-locals,too-many-branches,too-many-statements
     def PyExec(self):
         """ Main execution body
         """
@@ -198,9 +203,9 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         self._normalisebycurrent = self.getProperty("NormalizeByCurrent").value
 
         # Tolerance for compress TOF event
-        COMPRESS_TOL_TOF = float(self.getProperty("CompressTOFTolerance").value)
-        if COMPRESS_TOL_TOF < 0.:
-            COMPRESS_TOL_TOF = 0.01
+        self.COMPRESS_TOL_TOF = float(self.getProperty("CompressTOFTolerance").value)
+        if self.COMPRESS_TOL_TOF < 0.:
+            self.COMPRESS_TOL_TOF = 0.01
 
         # Process data
         workspacelist = [] # all data workspaces that will be converted to d-spacing in the end
@@ -259,7 +264,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                     samRun = api.Plus(LHSWorkspace=samRun, RHSWorkspace=temp, OutputWorkspace=samRun)
                     if samRun.id() == EVENT_WORKSPACE_ID:
                         samRun = api.CompressEvents(InputWorkspace=samRun, OutputWorkspace=samRun,\
-                                       Tolerance=COMPRESS_TOL_TOF) # 10ns
+                                       Tolerance=self.COMPRESS_TOL_TOF) # 10ns
                     api.DeleteWorkspace(str(temp))
                 # ENDIF
             # ENDFOR (processing each)
@@ -383,7 +388,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                     # compress events
                     if vanRun.id() == EVENT_WORKSPACE_ID:
                         vanRun = api.CompressEvents(InputWorkspace=vanRun, OutputWorkspace=vanRun,
-                                                    Tolerance=COMPRESS_TOL_TOF) # 10ns
+                                                    Tolerance=self.COMPRESS_TOL_TOF) # 10ns
 
                     # do the absorption correction
                     vanRun = api.ConvertUnits(InputWorkspace=vanRun, OutputWorkspace=vanRun, Target="TOF")
@@ -395,8 +400,10 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                                                      Params=self._binning, ResampleX=self._resampleX, Dspacing=self._bin_in_dspace,
                                                      DMin=self._info["d_min"], DMax=self._info["d_max"],
                                                      TMin=self._info["tof_min"], TMax=self._info["tof_max"],
-                                                     RemovePromptPulseWidth=self._removePromptPulseWidth, CompressTolerance=COMPRESS_TOL_TOF,
-                                                     UnwrapRef=self._LRef, LowResRef=self._DIFCref, LowResSpectrumOffset=self._lowResTOFoffset,
+                                                     RemovePromptPulseWidth=self._removePromptPulseWidth,
+                                                     CompressTolerance=self.COMPRESS_TOL_TOF,
+                                                     UnwrapRef=self._LRef, LowResRef=self._DIFCref,
+                                                     LowResSpectrumOffset=self._lowResTOFoffset,
                                                      CropWavelengthMin=self._wavelengthMin, **(focuspos))
 
 
@@ -429,7 +436,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                 samRun = api.Minus(LHSWorkspace=samRun, RHSWorkspace=canRun, OutputWorkspace=samRun)
                 if samRun.id() == EVENT_WORKSPACE_ID:
                     samRun = api.CompressEvents(InputWorkspace=samRun, OutputWorkspace=samRun,\
-                               Tolerance=COMPRESS_TOL_TOF) # 10ns
+                               Tolerance=self.COMPRESS_TOL_TOF) # 10ns
                 canRun = str(canRun)
             if vanRun is not None:
                 samRun = api.Divide(LHSWorkspace=samRun, RHSWorkspace=vanRun, OutputWorkspace=samRun)
@@ -441,7 +448,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
 
             if samRun.id() == EVENT_WORKSPACE_ID:
                 samRun = api.CompressEvents(InputWorkspace=samRun, OutputWorkspace=samRun,\
-                           Tolerance=COMPRESS_TOL_TOF) # 5ns/
+                           Tolerance=self.COMPRESS_TOL_TOF) # 5ns/
 
             # make sure there are no negative values - gsas hates them
             if self.getProperty("PushDataPositive").value != "None":
@@ -481,6 +488,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         self._focusPos['Polar'] = results[5]
         self._focusPos['Azimuthal'] = results[6]
 
+    #pylint: disable=too-many-branches
     def _loadData(self, runnumber, extension, filterWall=None, outname=None, **chunk):
         if  runnumber is None or runnumber <= 0:
             return None
@@ -522,7 +530,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
 
         # filter bad pulses
         if self._filterBadPulses > 0.:
-            isEventWS = isinstance(wksp, mantid.api._api.IEventWorkspace)
+            isEventWS = isinstance(wksp, mantid.api.IEventWorkspace)
             if isEventWS is True:
                 # Event workspace: record original number of events
                 numeventsbefore =  wksp.getNumberEvents()
@@ -562,6 +570,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         keys = [ str(key) + "=" + str(chunk[key]) for key in keys ]
         self.log().information("Working on chunk [" + ", ".join(keys) + "]")
 
+    #pylint: disable=too-many-arguments,too-many-locals,too-many-branches
     def _focusChunks(self, runnumber, extension, filterWall, calib, splitwksp=None, preserveEvents=True):
         """ Load, (optional) split and focus data in chunks
 
@@ -601,7 +610,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
 
         firstChunkList = []
         wksplist = []
-        for n in xrange(numwksp):
+        for dummy_n in xrange(numwksp):
             # In some cases, there will be 1 more splitted workspace (unfiltered)
             firstChunkList.append(True)
             wksplist.append(None)
@@ -619,7 +628,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
 
             # Load chunk
             temp = self._loadData(runnumber, extension, filterWall, **chunk)
-            if isinstance(temp, mantid.api._api.IEventWorkspace) is True:
+            if isinstance(temp, mantid.api.IEventWorkspace) is True:
                 # Event workspace
                 self.log().debug("F1141C There are %d events after data is loaded in workspace %s." % (
                     temp.getNumberEvents(), str(temp)))
@@ -694,16 +703,17 @@ class SNSPowderReduction(DataProcessorAlgorithm):
                     Params=self._binning, ResampleX=self._resampleX, Dspacing=self._bin_in_dspace,\
                     DMin=self._info["d_min"], DMax=self._info["d_max"], TMin=self._info["tof_min"], TMax=self._info["tof_max"],\
                     PreserveEvents=preserveEvents,\
-                    RemovePromptPulseWidth=self._removePromptPulseWidth, CompressTolerance=COMPRESS_TOL_TOF,\
+                    RemovePromptPulseWidth=self._removePromptPulseWidth, CompressTolerance=self.COMPRESS_TOL_TOF,\
                     UnwrapRef=self._LRef, LowResRef=self._DIFCref, LowResSpectrumOffset=self._lowResTOFoffset,\
                     CropWavelengthMin=self._wavelengthMin, **(focuspos))
                 for iws in xrange(temp.getNumberHistograms()):
                     spec = temp.getSpectrum(iws)
                     self.log().debug("[DBx131] ws %d: spectrum ID = %d. " % (iws, spec.getSpectrumNo()))
 
-                if preserveEvents is True and isinstance(temp, mantid.api._api.IEventWorkspace) is True:
-                    self.log().information("After being aligned and focussed workspace %s; Number of events = %d of chunk %d " % (str(temp),\
-                        temp.getNumberEvents(), ichunk))
+                if preserveEvents is True and isinstance(temp, mantid.api.IEventWorkspace) is True:
+                    self.log().information("After being aligned and focussed workspace "+\
+                                           "%s; Number of events = %d of chunk %d " % (str(temp),\
+                                           temp.getNumberEvents(), ichunk))
 
                 # Rename and/or add to workspace of same splitter but different chunk
                 wkspname = wksp
@@ -744,7 +754,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         for itemp in xrange(numwksp):
             if wksplist[itemp].id() == EVENT_WORKSPACE_ID:
                 wksplist[itemp] = api.CompressEvents(InputWorkspace=wksplist[itemp],\
-                    OutputWorkspace=wksplist[itemp], Tolerance=COMPRESS_TOL_TOF) # 100ns
+                    OutputWorkspace=wksplist[itemp], Tolerance=self.COMPRESS_TOL_TOF) # 100ns
 
             try:
                 if self._normalisebycurrent is True:
@@ -771,7 +781,7 @@ class SNSPowderReduction(DataProcessorAlgorithm):
         if mtd.doesExist("characterizations"):
             # get the correct row of the table
 
-
+            #pylint: disable=unused-variable
             charac = api.PDDetermineCharacterizations(InputWorkspace=wksp,
                                                       Characterizations="characterizations",
                                                       ReductionProperties="__snspowderreduction",

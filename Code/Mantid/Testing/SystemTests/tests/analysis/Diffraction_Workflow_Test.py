@@ -111,7 +111,8 @@ class Diffraction_Workflow_Test(stresstesting.MantidStressTest):
         self.assertDelta( ol.gamma(), 90, 0.4, "Correct lattice angle gamma value not found.")
 
         # Go to HKL
-        ConvertToDiffractionMDWorkspace(InputWorkspace='TOPAZ_3132',OutputWorkspace='TOPAZ_3132_HKL',OutputDimensions='HKL',LorentzCorrection='1',SplitInto='2',SplitThreshold='150')
+        ConvertToDiffractionMDWorkspace(InputWorkspace='TOPAZ_3132',OutputWorkspace='TOPAZ_3132_HKL',
+                                        OutputDimensions='HKL',LorentzCorrection='1',SplitInto='2',SplitThreshold='150')
 
 
         # Bin to a line (H=0 to 6, L=3, K=3)
@@ -130,10 +131,12 @@ class Diffraction_Workflow_Test(stresstesting.MantidStressTest):
         # Now do the same peak finding with Q in the sample frame
 
 
-        ConvertToDiffractionMDWorkspace(InputWorkspace='TOPAZ_3132',OutputWorkspace='TOPAZ_3132_QSample',OutputDimensions='Q (sample frame)',LorentzCorrection='1',SplitInto='2',SplitThreshold='150')
+        ConvertToDiffractionMDWorkspace(InputWorkspace='TOPAZ_3132',OutputWorkspace='TOPAZ_3132_QSample',
+                                        OutputDimensions='Q (sample frame)',LorentzCorrection='1',SplitInto='2',SplitThreshold='150')
         FindPeaksMD(InputWorkspace='TOPAZ_3132_QSample',PeakDistanceThreshold='0.12',MaxPeaks='200',OutputWorkspace='peaks_QSample')
         FindUBUsingFFT(PeaksWorkspace='peaks_QSample',MinD='2',MaxD='16')
-        CopySample(InputWorkspace='peaks_QSample',OutputWorkspace='TOPAZ_3132',CopyName='0',CopyMaterial='0',CopyEnvironment='0',CopyShape='0')
+        CopySample(InputWorkspace='peaks_QSample',OutputWorkspace='TOPAZ_3132',CopyName='0',CopyMaterial='0',
+                   CopyEnvironment='0',CopyShape='0')
 
         # Index the peaks and check
         results = IndexPeaks(PeaksWorkspace='peaks_QSample')
@@ -159,7 +162,8 @@ class Diffraction_Workflow_Test(stresstesting.MantidStressTest):
         for c in xrange(3):
             # This compares each column, allowing old == new OR old == -new
             if not numpy.all(diff[:,c]) :
-                raise Exception("More than 0.001 difference between UB matrices: Q (lab frame):\n%s\nQ (sample frame):\n%s" % (originalUB, newUB) )
+                raise Exception("More than 0.001 difference between UB matrices: Q (lab frame):\n%s\nQ (sample frame):\n%s" % (
+                                originalUB, newUB) )
 
         # load output hkl file and the golden one
         LoadHKL(Filename="TOPAZ_3132.hkl", OutputWorkspace="TOPAZ_3132")

@@ -90,7 +90,7 @@
            </size>
           </property>
           <property name="decimals">
-           <number>4</number>
+           <number>5</number>
           </property>
           <property name="minimum">
            <double>-1000.000000000000000</double>
@@ -156,7 +156,7 @@
            </size>
           </property>
           <property name="decimals">
-           <number>4</number>
+           <number>5</number>
           </property>
           <property name="minimum">
            <double>-1000.000000000000000</double>
@@ -242,7 +242,7 @@
            </size>
           </property>
           <property name="decimals">
-           <number>4</number>
+           <number>5</number>
           </property>
           <property name="minimum">
            <double>0.000000000000000</double>
@@ -287,7 +287,7 @@
            </sizepolicy>
           </property>
           <property name="decimals">
-           <number>4</number>
+           <number>5</number>
           </property>
           <property name="minimum">
            <double>-1000.000000000000000</double>
@@ -309,7 +309,7 @@
            </sizepolicy>
           </property>
           <property name="decimals">
-           <number>4</number>
+           <number>5</number>
           </property>
           <property name="minimum">
            <double>0.000000000000000</double>
@@ -331,7 +331,7 @@
            </sizepolicy>
           </property>
           <property name="decimals">
-           <number>4</number>
+           <number>5</number>
           </property>
           <property name="minimum">
            <double>-1000.000000000000000</double>
@@ -369,12 +369,12 @@
           </property>
           <item>
            <property name="text">
-            <string>Parallelepiped (SofQW2)</string>
+            <string>Parallelepiped</string>
            </property>
           </item>
           <item>
            <property name="text">
-            <string>Parallelepiped/Fractional Area (SofQW3)</string>
+            <string>Parallelepiped/Fractional Area</string>
            </property>
           </item>
          </widget>
@@ -473,6 +473,18 @@
    <header>MantidQtMantidWidgets/DataSelector.h</header>
   </customwidget>
  </customwidgets>
+ <tabstops>
+  <tabstop>cbRebinType</tabstop>
+  <tabstop>spQLow</tabstop>
+  <tabstop>spQWidth</tabstop>
+  <tabstop>spQHigh</tabstop>
+  <tabstop>ckRebinInEnergy</tabstop>
+  <tabstop>spELow</tabstop>
+  <tabstop>spEWidth</tabstop>
+  <tabstop>spEHigh</tabstop>
+  <tabstop>cbPlotType</tabstop>
+  <tabstop>ckSave</tabstop>
+ </tabstops>
  <resources/>
  <connections>
   <connection>

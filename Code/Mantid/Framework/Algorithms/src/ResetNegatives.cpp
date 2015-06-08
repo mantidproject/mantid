@@ -67,8 +67,8 @@ void ResetNegatives::exec() {
   for (int64_t i = 0; i < nHist; i++) {
     if (minWS->readY(i)[0] < 0) {
       hasNegative = true;
+      break;
     }
-    break;
   }
 
   // get out early if there is nothing to do

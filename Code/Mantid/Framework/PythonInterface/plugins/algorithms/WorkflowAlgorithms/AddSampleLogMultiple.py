@@ -16,7 +16,7 @@ class AddSampleLogMultiple(PythonAlgorithm):
 
     def PyInit(self):
         self.declareProperty(WorkspaceProperty('Workspace', '', direction=Direction.InOut),
-                doc='Workspace to add logs to')
+                             doc='Workspace to add logs to')
 
         self.declareProperty(StringArrayProperty('LogNames', ''),
                              doc='Comma separated list of log names')

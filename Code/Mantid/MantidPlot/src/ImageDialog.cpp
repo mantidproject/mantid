@@ -33,7 +33,7 @@
 #include <QLabel>
 
 ImageDialog::ImageDialog( QWidget* parent, Qt::WFlags fl )
-    : QDialog( parent, fl )
+  : QDialog( parent, fl ), aspect_ratio(1.)
 {
 	setName( "ImageDialog" );
 	setWindowTitle( tr( "MantidPlot - Image Geometry" ) );

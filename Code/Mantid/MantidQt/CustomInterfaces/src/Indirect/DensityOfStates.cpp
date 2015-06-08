@@ -163,12 +163,7 @@ namespace CustomInterfaces
 
     // Handle spectra plotting
     if(m_uiForm.ckPlot->isChecked())
-    {
-      QString pyInput = "from mantidplot import plotSpectrum, plot2D\n"
-        "plotSpectrum('" + m_outputWsName + "', 0)\n";
-
-      runPythonCode(pyInput);
-    }
+      plotSpectrum(m_outputWsName);
   }
 
 

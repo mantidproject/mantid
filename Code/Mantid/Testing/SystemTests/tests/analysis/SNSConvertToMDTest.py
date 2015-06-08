@@ -1,7 +1,5 @@
 #pylint: disable=invalid-name,no-init
 import stresstesting
-import numpy
-import os
 from mantid.simpleapi import *
 
 ######################################################################
@@ -83,7 +81,7 @@ def validateMD(result,reference,tol=1.e-5,class_name='dummy',mismatchName=None):
       #elf.disableChecking.append('Instrument')
 
     valNames = [result,reference]
-    from mantid.simpleapi import Load,CompareMDWorkspaces,FrameworkManager,SaveNexus
+    from mantid.simpleapi import Load
 
     if not reference in mtd:
         Load(Filename=reference,OutputWorkspace=valNames[1])

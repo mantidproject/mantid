@@ -6,15 +6,14 @@
 #include <vtkFieldData.h>
 #include <vtkStringArray.h>
 
+#include "vtkPVChangeOfBasisHelper.h"
+
 #include <boost/math/special_functions/fpclassify.hpp>
 
-//using namespace Mantid::Geometry;
-namespace Mantid
-{
-namespace VATES
-{
-std::string makeAxisTitle(Dimension_const_sptr dim)
-{
+// using namespace Mantid::Geometry;
+namespace Mantid {
+namespace VATES {
+std::string makeAxisTitle(Dimension_const_sptr dim) {
   std::string title = dim->getName();
   title += " (";
   title += dim->getUnits();
@@ -22,10 +21,8 @@ std::string makeAxisTitle(Dimension_const_sptr dim)
   return title;
 }
 
-void setAxisLabel(std::string metadataLabel,
-                  std::string labelString,
-                  vtkFieldData *fieldData)
-{
+void setAxisLabel(std::string metadataLabel, std::string labelString,
+                  vtkFieldData *fieldData) {
   vtkNew<vtkStringArray> axisTitle;
   axisTitle->SetName(metadataLabel.c_str());
   axisTitle->SetNumberOfComponents(1);
@@ -34,8 +31,7 @@ void setAxisLabel(std::string metadataLabel,
   fieldData->AddArray(axisTitle.GetPointer());
 }
 
-bool isSpecial(double value)
-{
+bool isSpecial(double value) {
   return boost::math::isnan(value) || boost::math::isinf(value);
 }
 

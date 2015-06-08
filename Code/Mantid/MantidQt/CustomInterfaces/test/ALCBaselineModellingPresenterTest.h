@@ -34,7 +34,7 @@ public:
   MOCK_METHOD1(setDataCurve, void(const QwtData&));
   MOCK_METHOD1(setCorrectedCurve, void(const QwtData&));
   MOCK_METHOD1(setBaselineCurve, void(const QwtData&));
-  MOCK_METHOD1(setFunction, void(const QString&));
+  MOCK_METHOD1(setFunction, void(IFunction_const_sptr));
 
   MOCK_CONST_METHOD0(noOfSectionRows, int());
   MOCK_METHOD1(setNoOfSectionRows, void(int));
@@ -152,12 +152,6 @@ public:
                                             QwtDataX(0, 1, 1E-8), QwtDataX(2, 3, 1E-8),
                                             QwtDataY(0, 2, 1E-8), QwtDataY(2, 4, 1E-8))));
 
-    // Data changed -> clear sections
-    EXPECT_CALL(*m_view, setNoOfSectionRows(0));
-    EXPECT_CALL(*m_view, deleteSectionSelector(0));
-    EXPECT_CALL(*m_view, deleteSectionSelector(1));
-    EXPECT_CALL(*m_view, deleteSectionSelector(2));
-
     m_model->changeData();
   }
 
@@ -188,8 +182,6 @@ public:
     ON_CALL(*m_model, fittedFunction()).WillByDefault(Return(f));
     ON_CALL(*m_model, data()).WillByDefault(Return(createTestWs(3)));
 
-    EXPECT_CALL(*m_view, setFunction(QString::fromStdString(f->asString())));
-
     EXPECT_CALL(*m_view, setBaselineCurve(AllOf(Property(&QwtData::size, 3),
                                                 QwtDataX(0, 1, 1E-8), QwtDataX(2, 3, 1E-8),
                                                 QwtDataY(0, 5, 1E-8), QwtDataY(2, 5, 1E-8))));
@@ -201,7 +193,7 @@ public:
   {
     ON_CALL(*m_model, fittedFunction()).WillByDefault(Return(IFunction_const_sptr()));
 
-    EXPECT_CALL(*m_view, setFunction(QString("")));
+    EXPECT_CALL(*m_view, setFunction(IFunction_const_sptr()));
     EXPECT_CALL(*m_view, setBaselineCurve(Property(&QwtData::size, 0)));
 
     m_model->changeFittedFunction();

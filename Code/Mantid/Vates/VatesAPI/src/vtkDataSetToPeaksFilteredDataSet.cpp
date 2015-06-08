@@ -1,5 +1,5 @@
 #include "MantidVatesAPI/vtkDataSetToPeaksFilteredDataSet.h"
-#include "MantidAPI/IPeak.h"
+#include "MantidGeometry/Crystal/IPeak.h"
 #include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidDataObjects/NoShape.h"
 #include "MantidDataObjects/PeakShapeEllipsoid.h"
@@ -178,7 +178,7 @@ namespace VATES
 
   /**
    * Get the peaks information which is the position and the largest radius of the peak.
-   * @param A list of peaks workspaces
+   * @param peaksWorkspaces A list of peaks workspaces
    * @returns A list of pair information which contains the position and the radius.
    */
   std::vector<std::pair<Mantid::Kernel::V3D, double>> vtkDataSetToPeaksFilteredDataSet::getPeaksInfo(std::vector<Mantid::API::IPeaksWorkspace_sptr> peaksWorkspaces)
@@ -193,7 +193,7 @@ namespace VATES
       // Iterate over all peaks for the workspace
       for (int i = 0; i < numPeaks ; i++)
       {
-        Mantid::API::IPeak* peak = (*it)->getPeakPtr(i);
+        Mantid::Geometry::IPeak* peak = (*it)->getPeakPtr(i);
 
         addSinglePeak(peak, coordinateSystem, peaksInfo);
       }
@@ -207,9 +207,8 @@ GCC_DIAG_OFF(strict-aliasing)
    * @param peak The peak from which the information will be extracted.
    * @param coordinateSystem The coordinate system in which the peaks position should be retrieved.
    * @param peaksInfo A reference to the vector containing peak information.
-   * @param index The index of the peak in the peaksInfo vector.
    */
-  void vtkDataSetToPeaksFilteredDataSet::addSinglePeak(Mantid::API::IPeak* peak, const Mantid::Kernel::SpecialCoordinateSystem coordinateSystem, std::vector<std::pair<Mantid::Kernel::V3D, double>>& peaksInfo)
+  void vtkDataSetToPeaksFilteredDataSet::addSinglePeak(Mantid::Geometry::IPeak* peak, const Mantid::Kernel::SpecialCoordinateSystem coordinateSystem, std::vector<std::pair<Mantid::Kernel::V3D, double>>& peaksInfo)
   {
     double radius = m_defaultRadius;
     const Mantid::Geometry::PeakShape& shape = peak->getPeakShape();

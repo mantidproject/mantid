@@ -54,6 +54,37 @@ public:
     TS_ASSERT_DELTA( binSizes[1], 0.1, 1e-6);
   }
 
+  void test_clear_transforms_to_original()
+  {
+      MDGeometry geometry;
+      geometry.setTransformToOriginal(new NullCoordTransform, 0);
+      geometry.setTransformToOriginal(new NullCoordTransform, 1);
+      TS_ASSERT_EQUALS(2, geometry.getNumberTransformsToOriginal());
+      TS_ASSERT_THROWS_NOTHING(geometry.clearTransforms());
+      TSM_ASSERT_EQUALS("Should have no transforms", 0, geometry.getNumberTransformsToOriginal());
+  }
+
+  void test_clear_transforms_from_original()
+  {
+      MDGeometry geometry;
+      geometry.setTransformFromOriginal(new NullCoordTransform, 0);
+      geometry.setTransformFromOriginal(new NullCoordTransform, 1);
+      TS_ASSERT_EQUALS(2, geometry.getNumberTransformsFromOriginal());
+      TS_ASSERT_THROWS_NOTHING(geometry.clearTransforms());
+      TSM_ASSERT_EQUALS("Should have no transforms", 0, geometry.getNumberTransformsFromOriginal());
+  }
+
+  void test_clear_original_workspaces()
+  {
+      MDGeometry geometry;
+      boost::shared_ptr<WorkspaceTester> ws0(new WorkspaceTester());
+      boost::shared_ptr<WorkspaceTester> ws1(new WorkspaceTester());
+      geometry.setOriginalWorkspace(ws0, 0);
+      geometry.setOriginalWorkspace(ws1, 1);
+      TS_ASSERT_EQUALS(2, geometry.numOriginalWorkspaces());
+      TS_ASSERT_THROWS_NOTHING(geometry.clearOriginalWorkspaces());
+      TS_ASSERT_EQUALS(0, geometry.numOriginalWorkspaces());
+  }
 
   void test_copy_constructor()
   {

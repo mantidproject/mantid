@@ -353,7 +353,6 @@ public:
                        << except.what();
       return except.what();
     }
-    return "";
   }
 
   /**

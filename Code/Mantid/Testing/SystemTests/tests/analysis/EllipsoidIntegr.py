@@ -3,14 +3,7 @@
 #
 #  Integrates a run using the ellipsoid technique
 
-import os
-import sys
-import shutil
-import time
-
 import stresstesting
-import numpy
-
 
 from mantid.api import *
 #sys.path.append("/home/ruth/GIT_MantidBuild/bin/")

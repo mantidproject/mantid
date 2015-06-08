@@ -1,4 +1,4 @@
-#pylint: disable=no-init,invalid-name
+#pylint: disable=no-init,invalid-name,too-many-locals,too-many-branches
 from mantid.api import *
 from mantid.kernel import *
 import math
@@ -78,11 +78,11 @@ class SANSAzimuthalAverage1D(PythonAlgorithm):
             x = workspace.dataX(1)
             x_length = len(x)
             if x_length < 2:
-                raise RuntimeError, "Azimuthal averaging expects at least one wavelength bin"
+                raise RuntimeError("Azimuthal averaging expects at least one wavelength bin")
             wavelength_max = (x[x_length-2]+x[x_length-1])/2.0
             wavelength_min = (x[0]+x[1])/2.0
             if wavelength_min==0 or wavelength_max==0:
-                raise RuntimeError, "Azimuthal averaging needs positive wavelengths"
+                raise RuntimeError("Azimuthal averaging needs positive wavelengths")
             qmin, qstep, qmax = self._get_binning(workspace, wavelength_min, wavelength_max)
             align = self.getProperty("AlignWithDecades").value
             log_binning = self.getProperty("LogBinning").value
@@ -210,7 +210,7 @@ class SANSAzimuthalAverage1D(PythonAlgorithm):
                     beam_ctr_x = property_manager.getProperty("LatestBeamCenterX").value
                     beam_ctr_y = property_manager.getProperty("LatestBeamCenterY").value
                 else:
-                    raise RuntimeError, "No beam center information can be found on the data set"
+                    raise RuntimeError("No beam center information can be found on the data set")
 
             # Q min is one pixel from the center, unless we have the beam trap size
             if workspace.getRun().hasProperty("beam-trap-diameter"):
@@ -248,15 +248,15 @@ class SANSAzimuthalAverage1D(PythonAlgorithm):
         b = 1.0/npts
         nsteps = int(1+math.ceil(npts*math.log10(x_max/x_min)))
 
-        binning = str(x_min)
+        #binning = str(x_min)
         x_bound = x_min - ( x_min*math.pow(10,b) - x_min )/2.0
         binning2 = str(x_bound)
 
         x = x_min
-        for i in range(nsteps):
+        for dummy_i in range(nsteps):
             x_bound = 2*x-x_bound
             x *= math.pow(10,b)
-            binning += ",%g,%g" % (x,x)
+            #binning += ",%g,%g" % (x,x)
             binning2 += ",%g,%g" % (x_bound,x_bound)
 
         return binning2

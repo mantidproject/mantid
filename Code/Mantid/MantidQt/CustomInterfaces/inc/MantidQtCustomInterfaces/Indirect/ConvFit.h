@@ -29,6 +29,7 @@ namespace IDA
     void typeSelection(int index);
     void bgTypeSelection(int index);
     void newDataLoaded(const QString wsName);
+    void extendResolutionWorkspace();
     void updatePlot();
     void plotGuess();
     void singleFit();
@@ -45,15 +46,20 @@ namespace IDA
     void fixItem();
     void unFixItem();
     void showTieCheckbox(QString);
+    void updatePlotOptions();
+    void singleFitComplete(bool error);
 
   private:
     boost::shared_ptr<Mantid::API::CompositeFunction> createFunction(bool tieCentres=false);
     double getInstrumentResolution(std::string workspaceName);
     QtProperty* createLorentzian(const QString &);
+    QtProperty* createDiffSphere(const QString &);
+    QtProperty* createDiffRotDiscreteCircle(const QString &);
     void createTemperatureCorrection(Mantid::API::CompositeFunction_sptr product);
     void populateFunction(Mantid::API::IFunction_sptr func, Mantid::API::IFunction_sptr comp, QtProperty* group, const std::string & pref, bool tie);
     QString fitTypeString() const;
     QString backgroundString() const;
+    QString minimizerString(QString outputName) const;
 
     Ui::ConvFit m_uiForm;
     QtStringPropertyManager* m_stringManager;
@@ -62,6 +68,8 @@ namespace IDA
     Mantid::API::MatrixWorkspace_sptr m_cfInputWS;
     QString m_cfInputWSName;
     bool m_confitResFileType;
+    Mantid::API::IAlgorithm_sptr m_singleFitAlg;
+    QString m_singleFitOutputName;
 
   };
 } // namespace IDA

@@ -7,11 +7,13 @@
 #include "MantidDataObjects/MDEventFactory.h"
 #include <Poco/File.h>
 
+// clang-format off
 #if defined(__GLIBCXX__) && __GLIBCXX__ >= 20100121 // libstdc++-4.4.3
 typedef std::unique_ptr< ::NeXus::File> file_holder_type;
 #else
 typedef std::auto_ptr< ::NeXus::File> file_holder_type;
 #endif
+// clang-format on
 
 namespace Mantid {
 namespace DataObjects {
@@ -798,7 +800,7 @@ MDBoxFlatTree::saveAffineTransformMatricies(::NeXus::File *const file,
  * @param entry_name : the tag in the NeXus file to save under
  */
 void MDBoxFlatTree::saveAffineTransformMatrix(::NeXus::File *const file,
-                                              API::CoordTransform *transform,
+                                              API::CoordTransform const *transform,
                                               std::string entry_name) {
   Kernel::Matrix<coord_t> matrix = transform->makeAffineMatrix();
   g_log.debug() << "TRFM: " << matrix.str() << std::endl;

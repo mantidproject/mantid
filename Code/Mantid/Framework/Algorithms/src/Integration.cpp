@@ -71,11 +71,17 @@ public:
  */
 void Integration::exec() {
   // Try and retrieve the optional properties
-  m_MinRange = getProperty("RangeLower");
-  m_MaxRange = getProperty("RangeUpper");
-  m_MinSpec = getProperty("StartWorkspaceIndex");
-  m_MaxSpec = getProperty("EndWorkspaceIndex");
-  m_IncPartBins = getProperty("IncludePartialBins");
+
+  /// The value in X to start the integration from
+  double minRange = getProperty("RangeLower");
+  /// The value in X to finish the integration at
+  double maxRange = getProperty("RangeUpper");
+  /// The spectrum to start the integration from
+  int minSpec = getProperty("StartWorkspaceIndex");
+  /// The spectrum to finish the integration at
+  int maxSpec = getProperty("EndWorkspaceIndex");
+  /// Flag for including partial bins
+  bool incPartBins = getProperty("IncludePartialBins");
 
   // Get the input workspace
   MatrixWorkspace_const_sptr localworkspace = this->getInputWorkspace();
@@ -84,38 +90,38 @@ void Integration::exec() {
       static_cast<int>(localworkspace->getNumberHistograms());
 
   // Check 'StartSpectrum' is in range 0-numberOfSpectra
-  if (m_MinSpec > numberOfSpectra) {
+  if (minSpec > numberOfSpectra) {
     g_log.warning("StartSpectrum out of range! Set to 0.");
-    m_MinSpec = 0;
+    minSpec = 0;
   }
-  if (isEmpty(m_MaxSpec))
-    m_MaxSpec = numberOfSpectra - 1;
-  if (m_MaxSpec > numberOfSpectra - 1 || m_MaxSpec < m_MinSpec) {
+  if (isEmpty(maxSpec))
+    maxSpec = numberOfSpectra - 1;
+  if (maxSpec > numberOfSpectra - 1 || maxSpec < minSpec) {
     g_log.warning("EndSpectrum out of range! Set to max detector number");
-    m_MaxSpec = numberOfSpectra;
+    maxSpec = numberOfSpectra;
   }
-  if (m_MinRange > m_MaxRange) {
+  if (minRange > maxRange) {
     g_log.warning("Range_upper is less than Range_lower. Will integrate up to "
                   "frame maximum.");
-    m_MaxRange = 0.0;
+    maxRange = 0.0;
   }
 
   // Create the 2D workspace (with 1 bin) for the output
   MatrixWorkspace_sptr outputWorkspace =
-      this->getOutputWorkspace(localworkspace);
+      this->getOutputWorkspace(localworkspace, minSpec, maxSpec);
 
   bool is_distrib = outputWorkspace->isDistribution();
-  Progress progress(this, 0, 1, m_MaxSpec - m_MinSpec + 1);
+  Progress progress(this, 0, 1, maxSpec - minSpec + 1);
 
   const bool axisIsText = localworkspace->getAxis(1)->isText();
   const bool axisIsNumeric = localworkspace->getAxis(1)->isNumeric();
 
   // Loop over spectra
   PARALLEL_FOR2(localworkspace, outputWorkspace)
-  for (int i = m_MinSpec; i <= m_MaxSpec; ++i) {
+  for (int i = minSpec; i <= maxSpec; ++i) {
     PARALLEL_START_INTERUPT_REGION
     // Workspace index on the output
-    const int outWI = i - m_MinSpec;
+    const int outWI = i - minSpec;
 
     // Copy Axis values from previous workspace
     if (axisIsText) {
@@ -147,23 +153,23 @@ void Integration::exec() {
     // values
     // regardless of whether they're 'in range' for this spectrum
     // Have to do this here, ahead of the 'continue' a bit down from here.
-    if (m_IncPartBins) {
-      outSpec->dataX()[0] = m_MinRange;
-      outSpec->dataX()[1] = m_MaxRange;
+    if (incPartBins) {
+      outSpec->dataX()[0] = minRange;
+      outSpec->dataX()[1] = maxRange;
     }
 
     // Find the range [min,max]
     MantidVec::const_iterator lowit, highit;
-    if (m_MinRange == EMPTY_DBL()) {
+    if (minRange == EMPTY_DBL()) {
       lowit = X.begin();
     } else {
-      lowit = std::lower_bound(X.begin(), X.end(), m_MinRange, tolerant_less());
+      lowit = std::lower_bound(X.begin(), X.end(), minRange, tolerant_less());
     }
 
-    if (m_MaxRange == EMPTY_DBL()) {
+    if (maxRange == EMPTY_DBL()) {
       highit = X.end();
     } else {
-      highit = std::upper_bound(lowit, X.end(), m_MaxRange, tolerant_less());
+      highit = std::upper_bound(lowit, X.end(), maxRange, tolerant_less());
     }
 
     // If range specified doesn't overlap with this spectrum then bail out
@@ -204,11 +210,11 @@ void Integration::exec() {
     }
     // If partial bins are included, set integration range to exact range
     // given and add on contributions from partial bins either side of range.
-    if (m_IncPartBins) {
+    if (incPartBins) {
       if (distmin > 0) {
         const double lower_bin = *lowit;
         const double prev_bin = *(lowit - 1);
-        double fraction = (lower_bin - m_MinRange);
+        double fraction = (lower_bin - minRange);
         if (!is_distrib) {
           fraction /= (lower_bin - prev_bin);
         }
@@ -220,7 +226,7 @@ void Integration::exec() {
       if (highit < X.end() - 1) {
         const double upper_bin = *highit;
         const double next_bin = *(highit + 1);
-        double fraction = (m_MaxRange - upper_bin);
+        double fraction = (maxRange - upper_bin);
         if (!is_distrib) {
           fraction /= (next_bin - upper_bin);
         }
@@ -272,8 +278,7 @@ MatrixWorkspace_const_sptr Integration::getInputWorkspace() {
   }
 
   // To integrate point data it will be converted to histograms
-  if ( !temp->isHistogramData() )
-  {
+  if (!temp->isHistogramData()) {
     auto alg = this->createChildAlgorithm("ConvertToHistogram");
     alg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", temp);
     std::string outName = "_" + temp->getName() + "_histogram";
@@ -290,18 +295,24 @@ MatrixWorkspace_const_sptr Integration::getInputWorkspace() {
  * This function creates the output workspace. In the case of a RebinnedOutput
  * workspace, the resulting workspace only needs to be a Workspace2D to handle
  * the integration. Other workspaces are handled normally.
+ *
+ * @param inWS input workspace to integrate
+ * @param minSpec minimum spectrum to integrate
+ * @param maxSpec maximum spectrum to integrate
+ *
  * @return the output workspace
  */
 MatrixWorkspace_sptr
-Integration::getOutputWorkspace(MatrixWorkspace_const_sptr inWS) {
+Integration::getOutputWorkspace(MatrixWorkspace_const_sptr inWS,
+                                const int minSpec, const int maxSpec) {
   if (inWS->id() == "RebinnedOutput") {
     MatrixWorkspace_sptr outWS = API::WorkspaceFactory::Instance().create(
-        "Workspace2D", m_MaxSpec - m_MinSpec + 1, 2, 1);
+        "Workspace2D", maxSpec - minSpec + 1, 2, 1);
     API::WorkspaceFactory::Instance().initializeFromParent(inWS, outWS, true);
     return outWS;
   } else {
-    return API::WorkspaceFactory::Instance().create(
-        inWS, m_MaxSpec - m_MinSpec + 1, 2, 1);
+    return API::WorkspaceFactory::Instance().create(inWS, maxSpec - minSpec + 1,
+                                                    2, 1);
   }
 }
 

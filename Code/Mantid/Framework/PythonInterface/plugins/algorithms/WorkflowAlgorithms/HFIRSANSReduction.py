@@ -1,4 +1,4 @@
-#pylint: disable=no-init,invalid-name
+#pylint: disable=no-init,invalid-name,too-many-branches
 import mantid.simpleapi as api
 from mantid.api import *
 from mantid.kernel import *
@@ -31,7 +31,7 @@ class HFIRSANSReduction(PythonAlgorithm):
         #   Make sure we process a list of files written as a string
         def _load_data(filename, output_ws):
             if not property_manager.existsProperty("LoadAlgorithm"):
-                raise RuntimeError, "SANS reduction not set up properly: missing load algorithm"
+                raise RuntimeError("SANS reduction not set up properly: missing load algorithm")
             p=property_manager.getProperty("LoadAlgorithm")
             alg=Algorithm.fromString(p.valueAsStr)
             alg.setProperty("Filename", filename)
@@ -59,7 +59,7 @@ class HFIRSANSReduction(PythonAlgorithm):
                 if i==0:
                     output_str += _load_data(data_file[i], workspace)
                     # Use the first file location as the default output directory
-                    head, tail = os.path.split(data_file[0])
+                    head, dummy_tail = os.path.split(data_file[0])
                     if os.path.isdir(head):
                         self.default_output_dir = head
                 else:
@@ -87,7 +87,7 @@ class HFIRSANSReduction(PythonAlgorithm):
         else:
             output_str += "Loaded %s\n" % data_file
             output_str += _load_data(data_file, workspace)
-            head, tail = os.path.split(data_file)
+            head, _ = os.path.split(data_file)
             if os.path.isdir(head):
                 self.default_output_dir = head
         return output_str

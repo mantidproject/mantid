@@ -585,9 +585,12 @@
            </widget>
           </item>
           <item>
-           <spacer name="horizontalSpacer">
+           <spacer name="horizontalSpacer_6">
             <property name="orientation">
              <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeType">
+             <enum>QSizePolicy::Expanding</enum>
             </property>
             <property name="sizeHint" stdset="0">
              <size>
@@ -604,6 +607,9 @@
             </property>
             <property name="fieldGrowthPolicy">
              <enum>QFormLayout::FieldsStayAtSizeHint</enum>
+            </property>
+            <property name="verticalSpacing">
+             <number>0</number>
             </property>
             <item row="0" column="0">
              <widget class="QLabel" name="label">
@@ -630,6 +636,7 @@
                <string notr="true">QLabel {
  background-color : rgb(255, 255, 186);
  color : black; 
+ font: 10px;
 }</string>
               </property>
               <property name="frameShape">
@@ -668,6 +675,7 @@
                <string notr="true">QLabel {
  background-color : rgb(255, 255, 186);
  color : black; 
+ font: 10px;
 }</string>
               </property>
               <property name="frameShape">
@@ -683,8 +691,11 @@
             </item>
             <item row="2" column="0">
              <widget class="QLabel" name="label_3">
+              <property name="toolTip">
+               <string/>
+              </property>
               <property name="text">
-               <string>z=</string>
+               <string>Intensity=</string>
               </property>
              </widget>
             </item>
@@ -706,6 +717,7 @@
                <string notr="true">QLabel {
  background-color : rgb(255, 255, 186);
  color : black; 
+ font: 10px;
 }</string>
               </property>
               <property name="frameShape">
@@ -716,6 +728,43 @@
               </property>
               <property name="alignment">
                <set>Qt::AlignCenter</set>
+              </property>
+             </widget>
+            </item>
+            <item row="3" column="0">
+             <widget class="QLabel" name="label_4">
+              <property name="text">
+               <string>Norm=</string>
+              </property>
+             </widget>
+            </item>
+            <item row="3" column="1">
+             <widget class="QComboBox" name="comboNormalization">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="minimumSize">
+               <size>
+                <width>70</width>
+                <height>0</height>
+               </size>
+              </property>
+              <property name="font">
+               <font>
+                <pointsize>-1</pointsize>
+                <weight>50</weight>
+                <italic>false</italic>
+                <bold>false</bold>
+               </font>
+              </property>
+              <property name="toolTip">
+               <string>Normalization option</string>
+              </property>
+              <property name="styleSheet">
+               <string notr="true">font: 10px;</string>
               </property>
              </widget>
             </item>

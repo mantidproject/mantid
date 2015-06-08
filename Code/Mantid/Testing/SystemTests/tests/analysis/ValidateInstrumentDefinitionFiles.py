@@ -1,6 +1,6 @@
+#pylint: disable=no-init
 from mantid import config
 import os
-import re
 import stresstesting
 import glob
 
@@ -9,10 +9,12 @@ EXPECTED_EXT = '.expected'
 
 class ValidateInstrumentDefinitionFiles(stresstesting.MantidStressTest):
 
+    xsdFile=''
+
     def skipTests(self):
         try:
-            import genxmlif
-            import minixsv
+            from genxmlif import GenXmlIfError
+            from minixsv import pyxsval
         except ImportError:
             return True
         return False
@@ -32,9 +34,7 @@ class ValidateInstrumentDefinitionFiles(stresstesting.MantidStressTest):
 
     def runTest(self):
         """Main entry point for the test suite"""
-        from genxmlif import GenXmlIfError
         from minixsv import pyxsval
-
         # need to extend minixsv library to add method for that forces it to
         # validate against local schema when the xml file itself has
         # reference to schema online. The preference is to systemtest against
@@ -55,7 +55,7 @@ class ValidateInstrumentDefinitionFiles(stresstesting.MantidStressTest):
                     xsdTreeWrapper.unlink()
                 return inputTreeWrapper
 
-        def parseAndValidateXmlInputForceReadFile (inputFile, xsdFile=None, **kw):
+        def parseAndValidateXmlInputForceReadFile(inputFile, xsdFile=None, **kw):
             myXsValidator = MyXsValidator(**kw)
             # parse XML input file
             inputTreeWrapper = myXsValidator.parse (inputFile)
@@ -90,3 +90,9 @@ class ValidateInstrumentDefinitionFiles(stresstesting.MantidStressTest):
                                    % (len(failed), len(files)))
         else:
             print "Succesfully Validated %d files" % len(files)
+
+if __name__ == '__main__':
+
+    valid = ValidateInstrumentDefinitionFiles()
+    valid.runTest()
+

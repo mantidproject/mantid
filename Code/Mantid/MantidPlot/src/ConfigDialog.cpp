@@ -83,6 +83,7 @@ Description          : Preferences dialog
 
 #include <limits>
 
+using Mantid::Kernel::ConfigService;
 
 ConfigDialog::ConfigDialog( QWidget* parent, Qt::WFlags fl )
   : QDialog( parent, fl )
@@ -253,6 +254,9 @@ void ConfigDialog::initTablesPage()
 void ConfigDialog::initPlotsPage()
 {
   ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parentWidget());
+  if (!app) {
+    throw std::logic_error("Parent of ConfigDialog is not ApplicationWindow as expected.");
+  }
 
   plotsTabWidget = new QTabWidget();
 
@@ -363,6 +367,9 @@ void ConfigDialog::showFrameWidth(bool ok)
 void ConfigDialog::initPlots3DPage()
 {
   ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parentWidget());
+  if (!app) {
+    throw std::logic_error("Parent of ConfigDialog is not ApplicationWindow as expected.");
+  }
   plots3D = new QWidget();
 
   QGroupBox * topBox = new QGroupBox();
@@ -677,23 +684,21 @@ void ConfigDialog::initMantidPage()
   //Ignore paraview.
   ckIgnoreParaView = new QCheckBox("Ignore ParaView");
   ckIgnoreParaView->setToolTip("Don't bother me with anything to do with ParaView.\nRequires restart of MantidPlot to take effect.");
-  Mantid::Kernel::ConfigServiceImpl& conf = Mantid::Kernel::ConfigService::Instance();
+  auto& cfgSvc = ConfigService::Instance();
   const std::string ignoreParaViewProperty = "paraview.ignore";
-  bool ignoreParaView = conf.hasProperty(ignoreParaViewProperty) && bool(atoi(conf.getString(ignoreParaViewProperty).c_str()));
+  bool ignoreParaView =  cfgSvc.hasProperty(ignoreParaViewProperty) && bool(atoi(cfgSvc.getString(ignoreParaViewProperty).c_str()));
   ckIgnoreParaView->setChecked(ignoreParaView);
   grid->addWidget(ckIgnoreParaView, 3, 0);
 
   // Populate boxes
-  Mantid::Kernel::ConfigServiceImpl & mantid_config = Mantid::Kernel::ConfigService::Instance();
-
-  auto faclist = mantid_config.getFacilityNames();
+  auto faclist =  cfgSvc.getFacilityNames();
   for ( auto it = faclist.begin(); it != faclist.end(); ++it )
   {
     facility->addItem(QString::fromStdString(*it));
   }
 
   // Set default property
-  QString property = QString::fromStdString(mantid_config.getFacility().name());
+  QString property = QString::fromStdString( cfgSvc.getFacility().name());
   int index = facility->findText(property);
   if( index < 0 )
   {
@@ -723,19 +728,19 @@ void ConfigDialog::initMdPlottingPage()
   // VSI tab
   initMdPlottingVsiTab();
 
-  // Set the connections 
+  // Set the connections
   setupMdPlottingConnections();
 
   // Update the visibility of the Vsi tab if the General Md Color Map was selected the last time
   if (m_mdSettings.getUsageGeneralMdColorMap())
   {
-    changeUsageGeneralMdColorMap(true);
+    changeUsageGeneralMdColorMap();
   }
 
   // Update the visibility of the Vsi tab if the last session checkbox was selected.
   if (m_mdSettings.getUsageLastSession())
   {
-    changeUsageLastSession(true);
+    changeUsageLastSession();
   }
 }
 
@@ -752,7 +757,6 @@ void ConfigDialog::initMdPlottingGeneralTab()
   mdPlottingTabWidget->addTab(mdPlottingGeneralPage, QString());
 
   // Color Map
-  mdPlottingGeneralFrame->setTitle("Use common Color Map for Slice Viewer and VSI");
   mdPlottingGeneralFrame->setCheckable(true);
   mdPlottingGeneralFrame->setChecked(m_mdSettings.getUsageGeneralMdColorMap());
 
@@ -795,38 +799,40 @@ void ConfigDialog::initMdPlottingVsiTab()
 {
   vsiPage = new QWidget();
   QVBoxLayout *vsiTabLayout = new QVBoxLayout(vsiPage);
-  QGroupBox *frame = new QGroupBox();
-  vsiTabLayout->addWidget(frame);
-  QGridLayout *grid = new QGridLayout(frame);
-  mdPlottingTabWidget->addTab(vsiPage, QString());
 
-  // Usage of the last setting
-  vsiLastSession = new QCheckBox();
-  lblVsiLastSession = new QLabel();
-  grid->addWidget(lblVsiLastSession , 0, 0);
-  grid->addWidget(vsiLastSession , 0, 1);
-  vsiLastSession->setChecked(m_mdSettings.getUsageLastSession());
+  // Initial View when loading into the VSI
+  QGroupBox *frameTop = new QGroupBox();
+  vsiTabLayout->addWidget(frameTop);
+  QGridLayout *gridTop = new QGridLayout(frameTop);
+  vsiInitialView = new QComboBox();
+
+  lblVsiInitialView = new QLabel();
+  gridTop->addWidget(lblVsiInitialView, 0, 0);
+  gridTop->addWidget(vsiInitialView, 0, 1);
+
+  mdPlottingVsiFrameBottom = new QGroupBox();
+  mdPlottingVsiFrameBottom->setCheckable(true);
+  mdPlottingVsiFrameBottom->setChecked(!m_mdSettings.getUsageLastSession());
+
+  vsiTabLayout->addWidget(mdPlottingVsiFrameBottom);
+  QGridLayout *grid = new QGridLayout(mdPlottingVsiFrameBottom);
+
+  mdPlottingTabWidget->addTab(vsiPage, QString());
 
   // Color Map
   vsiDefaultColorMap = new QComboBox();
   lblVsiDefaultColorMap = new QLabel();
-  grid->addWidget(lblVsiDefaultColorMap, 1, 0);
-  grid->addWidget(vsiDefaultColorMap, 1, 1);
+  grid->addWidget(lblVsiDefaultColorMap, 0, 0);
+  grid->addWidget(vsiDefaultColorMap, 0, 1);
 
   // Background Color
   vsiDefaultBackground = new ColorButton();
   lblVsiDefaultBackground = new QLabel();
-  grid->addWidget(lblVsiDefaultBackground, 2, 0);
-  grid->addWidget(vsiDefaultBackground, 2, 1);
+  grid->addWidget(lblVsiDefaultBackground, 1, 0);
+  grid->addWidget(vsiDefaultBackground, 1, 1);
 
   const QColor backgroundColor = m_mdSettings.getUserSettingBackgroundColor();
   vsiDefaultBackground->setColor(backgroundColor);
-
-  // Initial View when loading into the VSI
-  vsiInitialView = new QComboBox();
-  lblVsiInitialView = new QLabel();
-  grid->addWidget(lblVsiInitialView, 3, 0);
-  grid->addWidget(vsiInitialView, 3, 1);
 
   grid->setRowStretch(4,1);
 
@@ -858,48 +864,48 @@ void ConfigDialog::initMdPlottingVsiTab()
 
   int indexInitialView = vsiInitialView->findData(m_mdSettings.getUserSettingInitialView(), Qt::DisplayRole);
 
-  if (index != -1)
+  if (indexInitialView != -1)
   {
     vsiInitialView->setCurrentIndex(indexInitialView);
   }
 }
 
 /**
- * Set up the connections for Md Plotting 
+ * Set up the connections for Md Plotting
  */
 void ConfigDialog::setupMdPlottingConnections()
 {
-  QObject::connect(this->mdPlottingGeneralFrame, SIGNAL(toggled(bool)), this, SLOT(changeUsageGeneralMdColorMap(bool)));
-  QObject::connect(this->vsiLastSession, SIGNAL(toggled(bool)), this, SLOT(changeUsageLastSession(bool)));
+  QObject::connect(this->mdPlottingGeneralFrame, SIGNAL(toggled(bool)), this, SLOT(changeUsageGeneralMdColorMap()));
+  QObject::connect(this->mdPlottingVsiFrameBottom, SIGNAL(toggled(bool)), this, SLOT(changeUsageLastSession()));
 }
 
 /**
  * Handle a change of the General Md Color Map selection.
- * @param The state of the general MD color map checkbox
  */
-void ConfigDialog::changeUsageGeneralMdColorMap(bool state)
+void ConfigDialog::changeUsageGeneralMdColorMap()
 {
-  // Set the visibility of the default color map of the VSI
-  vsiDefaultColorMap->setDisabled(state);
-  lblVsiDefaultColorMap->setDisabled(state);
+  // If the general color map setting is turned off and the vsi colormap is turned on
+  // then we set the default color map to enabled, else we disable it
+  bool isDefaultColorMapSelectable = (!mdPlottingGeneralFrame->isChecked() && mdPlottingVsiFrameBottom->isChecked());
+
+  vsiDefaultColorMap->setEnabled(isDefaultColorMapSelectable);
+  lblVsiDefaultColorMap->setEnabled(isDefaultColorMapSelectable);
+  //vsiDefaultColorMap->setEnabled(true);
+  //lblVsiDefaultColorMap->setEnabled(true);
 }
 
 /**
  * Handle a change of the Last Session selection.
-  * @param The state of the last session checkbox.
+  * @param isDefaultColorMapVsiChecked The state of the vsi default checkbox.
  */
-void ConfigDialog::changeUsageLastSession(bool state)
+void ConfigDialog::changeUsageLastSession()
 {
-  // Set the visibility of the default color map of the VSI
-  if (!mdPlottingGeneralFrame->isChecked())
-  {
-    vsiDefaultColorMap->setDisabled(state);
-    lblVsiDefaultColorMap->setDisabled(state);
-  }
+  // Set the color map of the VSI default
+  changeUsageGeneralMdColorMap();
 
   // Set the visibility of the background color button of the VSI
-  vsiDefaultBackground->setDisabled(state);
-  lblVsiDefaultBackground->setDisabled(state);
+  vsiDefaultBackground->setEnabled(mdPlottingVsiFrameBottom->isChecked());
+  lblVsiDefaultBackground->setEnabled(mdPlottingVsiFrameBottom->isChecked());
 }
 
 
@@ -986,7 +992,7 @@ void ConfigDialog::initSendToProgramTab()
   //Add buttons to the bottom of the widget
   deleteButton = new QPushButton(tr("Delete"));
   deleteButton->setEnabled(false);
-  connect(deleteButton, SIGNAL(clicked()), this, SLOT(deleteDialog()));    
+  connect(deleteButton, SIGNAL(clicked()), this, SLOT(deleteDialog()));
   editButton = new QPushButton(tr("Edit..."));
   editButton->setEnabled(false);
   connect(editButton, SIGNAL(clicked()), this, SLOT(editDialog()));
@@ -1021,7 +1027,7 @@ void ConfigDialog::enableButtons()
   QList<QTreeWidgetItem *> selectedItems = treePrograms->selectedItems();
   //Set the buttons on whether the conditions are met. Reducing the amount of user errors
   if (selectedItems.size() == 0)
-  {  
+  {
     deleteButton->setEnabled(false);
     editButton->setEnabled(false);
   }
@@ -1124,7 +1130,7 @@ void ConfigDialog::deleteDialog()
     {
       //For each program selected, remove all details from the user.properties file;
       for (int i = 0; i<selectedItems.size(); ++i)
-      {      
+      {
         m_sendToSettings.erase(selectedItems[i]->text(0).toStdString());
       }
       //clear the tree and repopulate it without the programs that have just been deleted
@@ -1163,8 +1169,8 @@ void ConfigDialog::updateProgramTree()
   //Store into a map ready to go into config service when apply is clicked
   std::map<std::string, std::map<std::string,std::string> >::const_iterator itr = m_sendToSettings.begin();
   for( ; itr != m_sendToSettings.end(); ++itr)
-  {    
-    //creating the map of kvps needs to happen first as createing the item requires them. 
+  {
+    //creating the map of kvps needs to happen first as createing the item requires them.
     std::map<std::string, std::string> programKeysAndDetails = itr->second;
 
     //Populate list
@@ -1189,11 +1195,11 @@ void ConfigDialog::updateChildren(std::map<std::string, std::string> &programKey
 
 void ConfigDialog::updateSendToTab()
 {
-  Mantid::Kernel::ConfigServiceImpl& mantid_config = Mantid::Kernel::ConfigService::Instance();
+  Mantid::Kernel::ConfigServiceImpl&  cfgSvc = Mantid::Kernel::ConfigService::Instance();
 
   //Add new values to the config service
   std::map<std::string, std::map<std::string,std::string> >::const_iterator itr = m_sendToSettings.begin();
-  std::vector<std::string> programNames = mantid_config.getKeys("workspace.sendto.name");
+  std::vector<std::string> programNames =  cfgSvc.getKeys("workspace.sendto.name");
 
   for( ; itr != m_sendToSettings.end(); ++itr)
   {
@@ -1206,7 +1212,7 @@ void ConfigDialog::updateSendToTab()
       }
     }
 
-    mantid_config.setString("workspace.sendto.name." + itr->first , "0");
+     cfgSvc.setString("workspace.sendto.name." + itr->first , "0");
 
     std::map<std::string, std::string> programKeysAndDetails = itr->second;
 
@@ -1215,8 +1221,8 @@ void ConfigDialog::updateSendToTab()
     for( ; pItr != programKeysAndDetails.end(); ++pItr)
     {
       if(pItr->second != "")
-        mantid_config.setString("workspace.sendto." + itr->first + "." + pItr->first, pItr->second);
-    }  
+         cfgSvc.setString("workspace.sendto." + itr->first + "." + pItr->first, pItr->second);
+    }
   }
 
   //Delete the keys that are in the config but not in the temporary m_sendToSettings map
@@ -1224,11 +1230,11 @@ void ConfigDialog::updateSendToTab()
   {
     if (programNames[i] != "")
     {
-      mantid_config.remove("workspace.sendto.name." + programNames[i]);
-      std::vector<std::string> programKeys = mantid_config.getKeys("workspace.sendto." + programNames[i]);
+       cfgSvc.remove("workspace.sendto.name." + programNames[i]);
+      std::vector<std::string> programKeys =  cfgSvc.getKeys("workspace.sendto." + programNames[i]);
       for (size_t j = 0; j<programKeys.size(); ++j)
       {
-        mantid_config.remove("workspace.sendto." + programNames[i] + "." +  programKeys[j]);
+         cfgSvc.remove("workspace.sendto." + programNames[i] + "." +  programKeys[j]);
       }
     }
   }
@@ -1415,7 +1421,7 @@ void ConfigDialog::initCurveFittingTab()
   backgroundFunctions->addItem("None");
   Mantid::API::FunctionFactoryImpl & function_creator = Mantid::API::FunctionFactory::Instance();
   std::vector<std::string> allfunctions = function_creator.getKeys();
-  size_t nfuncs = allfunctions.size(); 
+  size_t nfuncs = allfunctions.size();
   for( size_t i = 0; i < nfuncs; ++i )
   {
     std::string name = allfunctions[i];
@@ -1431,6 +1437,9 @@ void ConfigDialog::initCurveFittingTab()
   }
 
   ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parentWidget());
+  if (!app) {
+    throw std::logic_error("Parent of ConfigDialog is not ApplicationWindow as expected.");
+  }
 
   // Set the correct default property
   QString setting = app->mantidUI->fitFunctionBrowser()->getAutoBackgroundString();
@@ -1505,6 +1514,9 @@ void ConfigDialog::initCurveFittingTab()
 void ConfigDialog::initOptionsPage()
 {
   ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parentWidget());
+  if (!app) {
+    throw std::logic_error("Parent of ConfigDialog is not ApplicationWindow as expected.");
+  }
 
   plotOptions = new QWidget();
 
@@ -1546,7 +1558,7 @@ void ConfigDialog::initOptionsPage()
   boxDistribution = new QCheckBox();
   boxDistribution->setChecked(app->autoDistribution1D);
   optionsLayout->addWidget( boxDistribution, 3, 0);
-  
+
   labelFrameWidth = new QLabel();
   optionsLayout->addWidget( labelFrameWidth, 4, 0 );
   boxFrameWidth= new QSpinBox();
@@ -1692,6 +1704,9 @@ void ConfigDialog::initAxesPage()
 void ConfigDialog::initCurvesPage()
 {
   ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parentWidget());
+  if (!app) {
+    throw std::logic_error("Parent of ConfigDialog is not ApplicationWindow as expected.");
+  }
 
   curves = new QWidget();
 
@@ -1743,6 +1758,9 @@ void ConfigDialog::initCurvesPage()
 void ConfigDialog::initFittingPage()
 {
   ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parentWidget());
+  if (!app) {
+    throw std::logic_error("Parent of ConfigDialog is not ApplicationWindow as expected.");
+  }
   fitPage = new QWidget();
 
   groupBoxFittingCurve = new QGroupBox();
@@ -1821,6 +1839,9 @@ void ConfigDialog::initFittingPage()
 void ConfigDialog::initConfirmationsPage()
 {
   ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parentWidget());
+  if (!app) {
+    throw std::logic_error("Parent of ConfigDialog is not ApplicationWindow as expected.");
+  }
   confirm = new QWidget();
 
   groupBoxConfirm = new QGroupBox();
@@ -1913,6 +1934,9 @@ void ConfigDialog::languageChange()
 {
   setWindowTitle( tr( "MantidPlot - Choose default settings" ) ); //Mantid
   ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parentWidget());
+  if (!app) {
+    throw std::logic_error("Parent of ConfigDialog is not ApplicationWindow as expected.");
+  }
 
   // pages list
   itemsList->clear();
@@ -2189,13 +2213,39 @@ void ConfigDialog::languageChange()
 
   // MDPlotting change
   mdPlottingTabWidget->setTabText(mdPlottingTabWidget->indexOf(vsiPage), tr("VSI"));
-  lblVsiDefaultColorMap->setText(tr("Default Color Map"));
-  lblVsiDefaultBackground->setText(tr("Background Color"));
-  lblVsiLastSession->setText(tr("Use the settings of the last VSI session"));
-  lblVsiInitialView->setText(tr("Initial View"));
-
   mdPlottingTabWidget->setTabText(mdPlottingTabWidget->indexOf(mdPlottingGeneralPage), tr("General"));
-  lblGeneralDefaultColorMap->setText(tr("General Color Map"));
+
+  // Vsi background color
+  QString vsiDefaultBackgroundToolTipText = "Sets the default background color when a new instance of the VSI is opened.";
+  vsiDefaultBackground->setToolTip(vsiDefaultBackgroundToolTipText);
+  lblVsiDefaultBackground->setToolTip(vsiDefaultBackgroundToolTipText);
+  lblVsiDefaultBackground->setText(tr("Background color"));
+
+  // Vsi initial view
+  QString vsiInitialViewToolTipText = "Sets the initial view when loading a new source into the VSI.";
+  lblVsiInitialView->setText(tr("Initial view"));
+  vsiInitialView->setToolTip(vsiInitialViewToolTipText);
+  lblVsiInitialView->setToolTip(vsiInitialViewToolTipText);
+
+  // VSI master default
+  QString vsiMasterDefaultToolTipText = "User master defaults for the color map and the background color. If not checked the settings of the last session are used.";
+  mdPlottingVsiFrameBottom->setTitle(tr("Use defaults for color map and background color"));
+  mdPlottingVsiFrameBottom->setToolTip(vsiMasterDefaultToolTipText);
+
+  // Vsi default color map
+  QString vsiDefaultColorMapToolTipText = "Sets the default color map when a new instance of the VSI is opened.";
+  vsiDefaultColorMap->setToolTip(vsiDefaultColorMapToolTipText);
+  lblVsiDefaultColorMap->setToolTip(vsiDefaultColorMapToolTipText);
+  lblVsiDefaultColorMap->setText(tr("Default color map"));
+
+  // General plotting tab
+  QString vsiGeneralDefaultColorMapToolTipText = "Sets the default color map for both the Slice Viewer and the VSI.";
+  mdPlottingGeneralColorMap->setToolTip(vsiGeneralDefaultColorMapToolTipText);
+  lblGeneralDefaultColorMap->setToolTip(vsiGeneralDefaultColorMapToolTipText);
+  lblGeneralDefaultColorMap->setText(tr("Default color map"));
+
+  mdPlottingGeneralFrame->setTitle("Use same default color map for Slice Viewer and VSI");
+  mdPlottingGeneralFrame->setToolTip("The specifed color map will be available for the Slice Viewer and the VSI when a new instance of either is started.");
 }
 
 void ConfigDialog::accept()
@@ -2231,6 +2281,9 @@ void ConfigDialog::apply()
   app->d_in_place_editing = !boxLabelsEditing->isChecked();
   app->titleOn=boxTitle->isChecked();
   app->autoDistribution1D = boxDistribution->isChecked();
+  // Sync with config service
+  ConfigService::Instance().setString("graph1d.autodistribution",
+                                      boxDistribution->isChecked() ? "On" : "Off");
   if (boxFrame->isChecked())
     app->canvasFrameWidth = boxFrameWidth->value();
   else
@@ -2334,10 +2387,10 @@ void ConfigDialog::apply()
       QList<MdiSubWindow *> windows = app->windowsList();
       foreach(MdiSubWindow *w, windows){
         w->setLocale(locale);
-        if(w->isA("Table"))
-          (dynamic_cast<Table *>(w))->updateDecimalSeparators();
-        else if(w->isA("Matrix"))
-          (dynamic_cast<Matrix *>(w))->resetView();
+        if(auto table = dynamic_cast<Table *>(w))
+          table->updateDecimalSeparators();
+        else if(auto matrix = dynamic_cast<Matrix *>(w))
+          matrix->resetView();
       }
       app->modifiedProject();
       QApplication::restoreOverrideCursor();
@@ -2402,12 +2455,12 @@ void ConfigDialog::apply()
   // resize the list to the maximum width
   itemsList->resize(itemsList->maximumWidth(),itemsList->height());
 
-  //Mantid 
-  Mantid::Kernel::ConfigServiceImpl& mantid_config = Mantid::Kernel::ConfigService::Instance();
+  //Mantid
+  Mantid::Kernel::ConfigServiceImpl&  cfgSvc = Mantid::Kernel::ConfigService::Instance();
 
-  mantid_config.setString("default.facility", facility->currentText().toStdString());
-  mantid_config.setString("default.instrument", defInstr->currentText().toStdString());
-  mantid_config.setString("paraview.ignore", QString::number(ckIgnoreParaView->isChecked()).toStdString());
+   cfgSvc.setString("default.facility", facility->currentText().toStdString());
+   cfgSvc.setString("default.instrument", defInstr->currentText().toStdString());
+   cfgSvc.setString("paraview.ignore", QString::number(ckIgnoreParaView->isChecked()).toStdString());
 
 
   updateDirSearchSettings();
@@ -2417,11 +2470,11 @@ void ConfigDialog::apply()
 
   try
   {
-    mantid_config.saveConfig(mantid_config.getUserFilename());
+     cfgSvc.saveConfig( cfgSvc.getUserFilename());
   }
   catch(std::runtime_error&)
   {
-    QMessageBox::warning(this, "MantidPlot", 
+    QMessageBox::warning(this, "MantidPlot",
       "Unable to update Mantid user properties file.\n"
       "Configuration will not be saved.");
   }
@@ -2435,9 +2488,9 @@ void ConfigDialog::apply()
  */
 void ConfigDialog::updateMdPlottingSettings()
 {
-  //////// GENERAL TAB 
+  //////// GENERAL TAB
 
-  // Read the common color map check box 
+  // Read the common color map check box
   if (mdPlottingGeneralFrame->isChecked())
   {
     m_mdSettings.setUsageGeneralMdColorMap(true);
@@ -2463,10 +2516,14 @@ void ConfigDialog::updateMdPlottingSettings()
     m_mdSettings.setUserSettingColorMap(vsiDefaultColorMap->currentText());
   }
 
-  // Read if the usage of the last color map should be performed
-  if (vsiLastSession)
+  // Read if the usage of the last color map and background color should be performed
+  if (mdPlottingVsiFrameBottom->isChecked())
   {
-    m_mdSettings.setUsageLastSession(vsiLastSession->isChecked());
+    m_mdSettings.setUsageLastSession(false);
+  }
+  else
+  {
+    m_mdSettings.setUsageLastSession(true);
   }
 
   // Read the background selection
@@ -2484,25 +2541,25 @@ void ConfigDialog::updateMdPlottingSettings()
 
 void ConfigDialog::updateDirSearchSettings()
 {
-  Mantid::Kernel::ConfigServiceImpl& mantid_config = Mantid::Kernel::ConfigService::Instance();
+  Mantid::Kernel::ConfigServiceImpl&  cfgSvc = Mantid::Kernel::ConfigService::Instance();
 
   QString setting = lePythonScriptsDirs->text();
   setting.replace('\\','/');
-  mantid_config.setString("pythonscripts.directories",setting.toStdString());
+   cfgSvc.setString("pythonscripts.directories",setting.toStdString());
 
   setting = lePythonPluginsDirs->text();
   setting.replace('\\','/');
-  mantid_config.setString("user.python.plugins.directories",setting.toStdString());
+   cfgSvc.setString("user.python.plugins.directories",setting.toStdString());
 
   setting = leInstrumentDir->text();
   setting.replace('\\','/');
-  mantid_config.setString("instrumentDefinition.directory",setting.toStdString());
+   cfgSvc.setString("instrumentDefinition.directory",setting.toStdString());
 
 }
 
 void ConfigDialog::updateCurveFitSettings()
 {
-  Mantid::Kernel::ConfigServiceImpl& mantid_config = Mantid::Kernel::ConfigService::Instance();
+  Mantid::Kernel::ConfigServiceImpl&  cfgSvc = Mantid::Kernel::ConfigService::Instance();
 
   // Form setting string from function name and parameters
   QString fname = backgroundFunctions->currentText();
@@ -2515,54 +2572,58 @@ void ConfigDialog::updateCurveFitSettings()
   }
 
   ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parentWidget());
+  if (!app) {
+    throw std::logic_error("Parent of ConfigDialog is not ApplicationWindow as expected.");
+  }
 
-  //mantid_config.setString("curvefitting.autoBackground", setting);
+  // cfgSvc.setString("curvefitting.autoBackground", setting);
   app->mantidUI->fitFunctionBrowser()->setAutoBackgroundName(QString::fromStdString(setting));
 
   setting = defaultPeakShape->currentText().toStdString();
-  //mantid_config.setString("curvefitting.defaultPeak", setting);
+  // cfgSvc.setString("curvefitting.defaultPeak", setting);
   app->mantidUI->fitFunctionBrowser()->setDefaultPeakType(setting);
 
   setting = QString::number(findPeaksFWHM->value()).toStdString();
-  mantid_config.setString("curvefitting.findPeaksFWHM", setting);
+   cfgSvc.setString("curvefitting.findPeaksFWHM", setting);
 
   setting = QString::number(findPeaksTolerance->value()).toStdString();
-  mantid_config.setString("curvefitting.findPeaksTolerance", setting);
+   cfgSvc.setString("curvefitting.findPeaksTolerance", setting);
 
   setting = QString::number(peakRadius->value()).toStdString();
-  mantid_config.setString("curvefitting.peakRadius", setting);
+   cfgSvc.setString("curvefitting.peakRadius", setting);
 
   app->mantidUI->fitFunctionBrowser()->setDecimals(decimals->value());
 }
 
 void ConfigDialog::updateMantidOptionsTab()
 {
-  Mantid::Kernel::ConfigServiceImpl& mantid_config = Mantid::Kernel::ConfigService::Instance();
+  auto& cfgSvc = ConfigService::Instance();
 
   // re-use plot instances (spectra, slice, color-fill, etc.)
   QString reusePlotInst = m_reusePlotInstances->isChecked()? "On" : "Off";
-  mantid_config.setString("MantidOptions.ReusePlotInstances",reusePlotInst.toStdString());
+   cfgSvc.setString("MantidOptions.ReusePlotInstances",reusePlotInst.toStdString());
 
   //invisible workspaces options
   QString showinvisible_ws = m_invisibleWorkspaces->isChecked()? "1" : "0";
-  mantid_config.setString("MantidOptions.InvisibleWorkspaces",showinvisible_ws.toStdString());
+   cfgSvc.setString("MantidOptions.InvisibleWorkspaces",showinvisible_ws.toStdString());
 
   //OpenGL option
   QString setting = m_useOpenGL->isChecked() ? "On" : "Off";
-  mantid_config.setString("MantidOptions.InstrumentView.UseOpenGL",setting.toStdString());
+   cfgSvc.setString("MantidOptions.InstrumentView.UseOpenGL",setting.toStdString());
 
   //Hidden categories
   QString hiddenCategories = buildHiddenCategoryString().join(";");
 
   //store it if it has changed
   std::string hiddenCategoryString = hiddenCategories.toStdString();
-  if (hiddenCategoryString != mantid_config.getString("algorithms.categories.hidden"))
+  if (hiddenCategoryString !=  cfgSvc.getString("algorithms.categories.hidden"))
   {
-    mantid_config.setString("algorithms.categories.hidden",hiddenCategoryString);
+     cfgSvc.setString("algorithms.categories.hidden",hiddenCategoryString);
 
     //update the algorithm tree
-    ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parentWidget());
-    app->mantidUI->updateAlgorithms();
+    if (ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parentWidget())) {
+      app->mantidUI->updateAlgorithms();
+    }
   }
 }
 
@@ -2769,6 +2830,9 @@ void ConfigDialog::gotoMantidDirectories()
 void ConfigDialog::switchToLanguage(int param)
 {
   ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parentWidget());
+  if (!app) {
+    throw std::logic_error("Parent of ConfigDialog is not ApplicationWindow as expected.");
+  }
   app->switchToLanguage(param);
   languageChange();
 }
@@ -2896,5 +2960,3 @@ void ConfigDialog::addInstrumentDir()
     leInstrumentDir->setText(dir);
   }
 }
-
-

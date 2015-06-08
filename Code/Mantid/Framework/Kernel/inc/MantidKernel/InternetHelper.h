@@ -172,6 +172,7 @@ private:
   Kernel::ProxyInfo m_proxyInfo;
   bool m_isProxySet;
   int m_timeout;
+  bool m_isTimeoutSet;
   std::streamsize m_contentLength;
   std::string m_method;
   std::string m_contentType;

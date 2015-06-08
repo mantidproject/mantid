@@ -13,6 +13,7 @@
 #include <iterator>
 
 #include "MantidGeometry/Math/Triple.h"
+#include "MantidKernel/Exception.h"
 #include "MantidKernel/Matrix.h"
 #include "MantidKernel/V3D.h"
 #include "MantidGeometry/Surfaces/BaseVisit.h"
@@ -416,6 +417,9 @@ int Rule::removeItem(Rule *&TRule, const int SurfN)
     } else // Basic surf object
     {
       SurfPoint *SX = dynamic_cast<SurfPoint *>(Ptr);
+      if (!SX) {
+        throw std::logic_error("Failed to cast Rule object to SurfPoint");
+      }
       SX->setKeyN(0);
       SX->setKey(0);
       return cnt + 1;

@@ -9,107 +9,93 @@ using namespace Mantid::API;
 
 // Just a minimal implementation of IRemoteJobManager, sufficient for the
 // factory
-class TestJM : public IRemoteJobManager {
+// TODO: use gmock for this
+class FakeJM : public IRemoteJobManager {
 public:
-  virtual void authenticate(const std::string &username,
-                            const std::string &password) {
-    UNUSED_ARG(username);
-    UNUSED_ARG(password);
-  }
+  virtual void authenticate(const std::string & /*username*/,
+                            const std::string & /*password*/) {}
 
-  virtual std::string
-  submitRemoteJob(const std::string &transactionID, const std::string &runnable,
-                  const std::string &param, const std::string &taskName = "",
-                  const int numNodes = 1, const int coresPerNode = 1) {
-    UNUSED_ARG(transactionID);
-    UNUSED_ARG(runnable);
-    UNUSED_ARG(param);
-    UNUSED_ARG(taskName);
-    UNUSED_ARG(numNodes);
-    UNUSED_ARG(coresPerNode);
+  virtual std::string submitRemoteJob(const std::string & /*transactionID*/,
+                                      const std::string & /*runnable*/,
+                                      const std::string & /*param*/,
+                                      const std::string & /*taskName*/ = "",
+                                      const int /*numNodes*/ = 1,
+                                      const int /*coresPerNode*/ = 1) {
     return "";
   }
 
-  virtual void downloadRemoteFile(const std::string &transactionID,
-                                  const std::string &remoteFileName,
-                                  const std::string &localFileName) {
-    UNUSED_ARG(transactionID);
-    UNUSED_ARG(remoteFileName);
-    UNUSED_ARG(localFileName);
-  }
+  virtual void downloadRemoteFile(const std::string & /*transactionID*/,
+                                  const std::string & /*remoteFileName*/,
+                                  const std::string & /*localFileName*/) {}
 
   virtual std::vector<RemoteJobInfo> queryAllRemoteJobs() const {
     return std::vector<RemoteJobInfo>();
   }
 
   virtual std::vector<std::string>
-  queryRemoteFile(const std::string &transactionID) const {
-    UNUSED_ARG(transactionID);
+  queryRemoteFile(const std::string & /*transactionID*/) const {
     return std::vector<std::string>();
   }
 
-  virtual RemoteJobInfo queryRemoteJob(const std::string &jobID) const {
-    UNUSED_ARG(jobID);
+  virtual RemoteJobInfo queryRemoteJob(const std::string & /*jobID*/) const {
     return RemoteJobInfo();
   }
 
   virtual std::string startRemoteTransaction() { return ""; }
 
-  virtual void stopRemoteTransaction(const std::string &transactionID) {
-    UNUSED_ARG(transactionID);
-  }
+  virtual void stopRemoteTransaction(const std::string & /*transactionID*/) {}
 
-  virtual void abortRemoteJob(const std::string &jobID) { UNUSED_ARG(jobID); }
+  virtual void abortRemoteJob(const std::string & /*jobID*/) {}
 
-  virtual void uploadRemoteFile(const std::string &transactionID,
-                                const std::string &remoteFileName,
-                                const std::string &localFileName) {
-    UNUSED_ARG(transactionID);
-    UNUSED_ARG(remoteFileName);
-    UNUSED_ARG(localFileName);
-  }
+  virtual void uploadRemoteFile(const std::string & /*transactionID*/,
+                                const std::string & /*remoteFileName*/,
+                                const std::string & /*localFileName*/) {}
 };
 
-class TestJMDeriv : public TestJM {};
+class FakeJMDeriv : public FakeJM {};
 
-class TestJM3 : public TestJMDeriv {};
+class FakeJM3 : public FakeJMDeriv {};
 
-DECLARE_REMOTEJOBMANAGER(TestJM)
-DECLARE_REMOTEJOBMANAGER(TestJMDeriv)
-DECLARE_REMOTEJOBMANAGER(TestJM3)
+DECLARE_REMOTEJOBMANAGER(FakeJM)
+DECLARE_REMOTEJOBMANAGER(FakeJMDeriv)
+DECLARE_REMOTEJOBMANAGER(FakeJM3)
 
 class RemoteJobManagerFactoryTest : public CxxTest::TestSuite {
 public:
   void test_unsubscribeDeclared() {
     // subscribed with DECLARE_...
     TS_ASSERT_THROWS_NOTHING(
-        Mantid::API::RemoteJobManagerFactory::Instance().unsubscribe("TestJM"));
+        Mantid::API::RemoteJobManagerFactory::Instance().unsubscribe("FakeJM"));
     TS_ASSERT_THROWS_NOTHING(
         Mantid::API::RemoteJobManagerFactory::Instance().unsubscribe(
-            "TestJMDeriv"));
+            "FakeJMDeriv"));
     TS_ASSERT_THROWS_NOTHING(
         Mantid::API::RemoteJobManagerFactory::Instance().unsubscribe(
-            "TestJM3"));
+            "FakeJM3"));
   }
 
   void test_unsubscribed() {
     IRemoteJobManager_sptr jobManager;
-    TS_ASSERT_THROWS(
+    TSM_ASSERT_THROWS(
+        "create() with inexistent and unsubscribed class should "
+        "throw",
         jobManager = RemoteJobManagerFactory::Instance().create("Inexistent"),
         std::runtime_error);
 
-    TS_ASSERT_THROWS(jobManager =
-                         RemoteJobManagerFactory::Instance().create("TestJM"),
-                     std::runtime_error);
+    TSM_ASSERT_THROWS("create() with unsubscribed class should throw",
+                      jobManager =
+                          RemoteJobManagerFactory::Instance().create("FakeJM"),
+                      std::runtime_error);
   }
 
   // minimal positive test
-  void test_createTestJM() {
-    TS_ASSERT_THROWS_NOTHING(
-        RemoteJobManagerFactory::Instance().subscribe<TestJM>("TestJM"));
+  void test_createFakeJM() {
+    RemoteJobManagerFactory::Instance().subscribe<FakeJM>("FakeJM");
     // throws not found cause it is not in facilities.xml, but otherwise fine
-    TS_ASSERT_THROWS(
-        jm = Mantid::API::RemoteJobManagerFactory::Instance().create("TestJM"),
+    TSM_ASSERT_THROWS(
+        "create() with class name that is not defined in facilities should "
+        "throw",
+        jm = Mantid::API::RemoteJobManagerFactory::Instance().create("FakeJM"),
         Mantid::Kernel::Exception::NotFoundError);
   }
 
@@ -117,46 +103,46 @@ public:
     // a bit of stress, unsubscribe after being subscribed with DECLARE_...,
     // then subscribe and the unsubscribe again
     TS_ASSERT_THROWS_NOTHING(
-        Mantid::API::RemoteJobManagerFactory::Instance().unsubscribe("TestJM"));
+        Mantid::API::RemoteJobManagerFactory::Instance().unsubscribe("FakeJM"));
     TS_ASSERT_THROWS_NOTHING(
-        Mantid::API::RemoteJobManagerFactory::Instance().subscribe<TestJM>(
-            "TestJM"));
+        Mantid::API::RemoteJobManagerFactory::Instance().subscribe<FakeJM>(
+            "FakeJM"));
 
     std::vector<std::string> keys =
         Mantid::API::RemoteJobManagerFactory::Instance().getKeys();
     size_t count = keys.size();
 
     TS_ASSERT_THROWS(
-        Mantid::API::RemoteJobManagerFactory::Instance().subscribe<TestJM>(
-            "TestJM"),
+        Mantid::API::RemoteJobManagerFactory::Instance().subscribe<FakeJM>(
+            "FakeJM"),
         std::runtime_error);
     TS_ASSERT_THROWS_NOTHING(
-        Mantid::API::RemoteJobManagerFactory::Instance().unsubscribe("TestJM"));
+        Mantid::API::RemoteJobManagerFactory::Instance().unsubscribe("FakeJM"));
     TS_ASSERT_THROWS_NOTHING(
-        Mantid::API::RemoteJobManagerFactory::Instance().subscribe<TestJM>(
-            "TestJM"));
+        Mantid::API::RemoteJobManagerFactory::Instance().subscribe<FakeJM>(
+            "FakeJM"));
 
     TS_ASSERT_THROWS_NOTHING(
-        Mantid::API::RemoteJobManagerFactory::Instance().subscribe<TestJMDeriv>(
-            "TestJMDeriv"));
+        Mantid::API::RemoteJobManagerFactory::Instance().subscribe<FakeJMDeriv>(
+            "FakeJMDeriv"));
     TS_ASSERT_THROWS_NOTHING(
-        Mantid::API::RemoteJobManagerFactory::Instance().subscribe<TestJMDeriv>(
-            "TestJM3"));
+        Mantid::API::RemoteJobManagerFactory::Instance().subscribe<FakeJMDeriv>(
+            "FakeJM3"));
 
     TS_ASSERT(
-        Mantid::API::RemoteJobManagerFactory::Instance().exists("TestJM"));
+        Mantid::API::RemoteJobManagerFactory::Instance().exists("FakeJM"));
     TS_ASSERT(
-        Mantid::API::RemoteJobManagerFactory::Instance().exists("TestJMDeriv"));
+        Mantid::API::RemoteJobManagerFactory::Instance().exists("FakeJMDeriv"));
     TS_ASSERT(
-        Mantid::API::RemoteJobManagerFactory::Instance().exists("TestJM3"));
+        Mantid::API::RemoteJobManagerFactory::Instance().exists("FakeJM3"));
 
     // these are not in the facilities file
     TS_ASSERT_THROWS(
-        jm = Mantid::API::RemoteJobManagerFactory::Instance().create("TestJM"),
+        jm = Mantid::API::RemoteJobManagerFactory::Instance().create("FakeJM"),
         std::runtime_error);
     TS_ASSERT_THROWS(
         jm = Mantid::API::RemoteJobManagerFactory::Instance().create(
-            "TestJMDeriv"),
+            "FakeJMDeriv"),
         std::runtime_error);
 
     keys = Mantid::API::RemoteJobManagerFactory::Instance().getKeys();
@@ -165,13 +151,13 @@ public:
     TS_ASSERT_EQUALS(count + 2, after);
 
     TS_ASSERT_THROWS_NOTHING(
-        Mantid::API::RemoteJobManagerFactory::Instance().unsubscribe("TestJM"));
+        Mantid::API::RemoteJobManagerFactory::Instance().unsubscribe("FakeJM"));
     TS_ASSERT_THROWS_NOTHING(
         Mantid::API::RemoteJobManagerFactory::Instance().unsubscribe(
-            "TestJMDeriv"));
+            "FakeJMDeriv"));
     TS_ASSERT_THROWS_NOTHING(
         Mantid::API::RemoteJobManagerFactory::Instance().unsubscribe(
-            "TestJM3"));
+            "FakeJM3"));
 
     keys = Mantid::API::RemoteJobManagerFactory::Instance().getKeys();
     size_t newCount = keys.size();
@@ -185,16 +171,19 @@ public:
     const Mantid::Kernel::FacilityInfo &prevFac =
         Mantid::Kernel::ConfigService::Instance().getFacility();
 
-    Mantid::Kernel::ConfigService::Instance().setFacility("ISIS");
-    TS_ASSERT_THROWS(
-        jm = Mantid::API::RemoteJobManagerFactory::Instance().create("Fermi"),
+    Mantid::Kernel::ConfigService::Instance().setFacility(ISISFac);
+    TSM_ASSERT_THROWS(
+        "create() with " + FermiName + "in a facility other than " + SNSFac +
+            " should fail",
+        jm = Mantid::API::RemoteJobManagerFactory::Instance().create(FermiName),
         Mantid::Kernel::Exception::NotFoundError);
 
-    Mantid::Kernel::ConfigService::Instance().setFacility("SNS");
-    TS_ASSERT_THROWS(
+    Mantid::Kernel::ConfigService::Instance().setFacility(SNSFac);
+    TSM_ASSERT_THROWS(
+        "create() with " + SCARFName + "in a facility other than " + ISISFac +
+            " should fail",
         Mantid::API::IRemoteJobManager_sptr jobManager =
-            Mantid::API::RemoteJobManagerFactory::Instance().create(
-                "SCARF@STFC"),
+            Mantid::API::RemoteJobManagerFactory::Instance().create(SCARFName),
         Mantid::Kernel::Exception::NotFoundError);
 
     // restore facility, always do this at the end
@@ -209,18 +198,26 @@ public:
         Mantid::Kernel::ConfigService::Instance().getFacility();
 
     Mantid::Kernel::ConfigService::Instance().setFacility("SNS");
-    // TODO: at the moment this throws a NotFoundError for Fermi
-    // because the RemoteJobManager class for the Mantid web service
-    // API is missing and there is no DECLARE_REMOTEJOBMANAGER for
-    // it. Change this (move to the MantidAPIWebServiceJobManager unit test)
-    // when that is done (ticket #11391 etc.)
-    TS_ASSERT_THROWS(
+
+    // These two create should throw a NotFoundError because the
+    // RemoteJobManager classes are missing and have not done a
+    // DECLARE_REMOTEJOBMANAGER. A positive test is done in the tests
+    // of the job managers
+    TSM_ASSERT_THROWS(
+        "create() with " + FermiName +
+            " should throw because its job manager is not declared",
         Mantid::API::IRemoteJobManager_sptr jobManager =
             Mantid::API::RemoteJobManagerFactory::Instance().create("Fermi"),
         Mantid::Kernel::Exception::NotFoundError);
-    // Important: don't feel tempted to use this job manager, it will
-    // interact/send jobs to the actual cluster and will only work
-    // within SNS.
+
+    Mantid::Kernel::ConfigService::Instance().setFacility("ISIS");
+    TSM_ASSERT_THROWS(
+        "create() with " + SCARFName +
+            " should throw because its job manager is not declared",
+        Mantid::API::IRemoteJobManager_sptr jobManager =
+            Mantid::API::RemoteJobManagerFactory::Instance().create(
+                "SCARF@STFC"),
+        Mantid::Kernel::Exception::NotFoundError);
 
     // restore facility, always do this at the end
     Mantid::Kernel::ConfigService::Instance().setFacility(prevFac.name());
@@ -228,6 +225,16 @@ public:
 
 private:
   Mantid::API::IRemoteJobManager_sptr jm;
+
+  static const std::string SNSFac;
+  static const std::string ISISFac;
+  static const std::string FermiName;
+  static const std::string SCARFName;
 };
+
+const std::string RemoteJobManagerFactoryTest::SNSFac = "SNS";
+const std::string RemoteJobManagerFactoryTest::ISISFac = "ISIS";
+const std::string RemoteJobManagerFactoryTest::FermiName = "Fermi";
+const std::string RemoteJobManagerFactoryTest::SCARFName = "SCARF@STFC";
 
 #endif /* REMOTEJOBMANAGERFACTORYTEST_H_ */

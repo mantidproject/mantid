@@ -245,7 +245,7 @@ public:
    * @param numPoints :: number of vertexes in the array.
    * @return eContact enum value
    */
-  eContact boxContact(const coord_t *vertexes, const size_t numPoints) {
+  eContact boxContact(const coord_t *vertexes, const size_t numPoints) const {
     // For speed, we can stop looking when we know the box CANNOT be fully
     // contained.
     bool lookForFullyContained = true;

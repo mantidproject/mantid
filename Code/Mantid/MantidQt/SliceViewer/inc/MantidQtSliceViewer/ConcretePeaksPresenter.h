@@ -1,7 +1,7 @@
 #ifndef MANTID_SLICEVIEWER_CONCRETEPEAKSPRESENTER_H_
 #define MANTID_SLICEVIEWER_CONCRETEPEAKSPRESENTER_H_
-#include "MantidAPI/PeakTransform.h"
-#include "MantidAPI/PeakTransformFactory.h"
+#include "MantidGeometry/Crystal/PeakTransform.h"
+#include "MantidGeometry/Crystal/PeakTransformFactory.h"
 #include "MantidQtSliceViewer/PeaksPresenter.h"
 #include "MantidQtSliceViewer/PeakOverlayViewFactory.h"
 #include "MantidAPI/MDGeometry.h"
@@ -31,7 +31,7 @@ public:
       PeakOverlayViewFactory_sptr viewFactory,
       Mantid::API::IPeaksWorkspace_sptr peaksWS,
       boost::shared_ptr<Mantid::API::MDGeometry> mdWS,
-      Mantid::API::PeakTransformFactory_sptr transformFactory);
+      Mantid::Geometry::PeakTransformFactory_sptr transformFactory);
   void reInitialize(Mantid::API::IPeaksWorkspace_sptr peaksWS);
   virtual ~ConcretePeaksPresenter();
   virtual void update();
@@ -66,9 +66,9 @@ private:
   /// Peaks workspace.
   boost::shared_ptr<const Mantid::API::IPeaksWorkspace> m_peaksWS;
   /// Transform factory
-  boost::shared_ptr<Mantid::API::PeakTransformFactory> m_transformFactory;
+  boost::shared_ptr<Mantid::Geometry::PeakTransformFactory> m_transformFactory;
   /// Peak transformer
-  Mantid::API::PeakTransform_sptr m_transform;
+  Mantid::Geometry::PeakTransform_sptr m_transform;
   /// current slicing point.
   PeakBoundingBox m_slicePoint;
   /// Viewable Peaks

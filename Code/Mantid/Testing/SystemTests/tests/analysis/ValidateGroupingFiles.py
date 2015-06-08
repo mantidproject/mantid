@@ -1,6 +1,6 @@
+#pylint: disable=no-init
 from mantid import config
 import os
-import re
 import stresstesting
 import glob
 

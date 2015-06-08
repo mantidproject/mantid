@@ -2,6 +2,8 @@
 
 #include "MantidQtAPI/HelpWindow.h"
 
+#include <QMessageBox>
+
 #include <qwt_symbol.h>
 
 namespace MantidQt
@@ -76,9 +78,16 @@ void ALCPeakFittingView::setFunction(const IFunction_const_sptr& newFunction)
 {
   if (newFunction)
   {
-    // String convertion hassle to avoid const-casting - Function Browser should really accept const
-    // pointer
-    m_ui.peaks->setFunction(QString::fromStdString(newFunction->asString()));
+    size_t nParams = newFunction->nParams();
+    for (size_t i=0; i<nParams; i++) {
+
+      QString name = QString::fromStdString(newFunction->parameterName(i));
+      double value = newFunction->getParameter(i);
+      double error = newFunction->getError(i);
+
+      m_ui.peaks->setParameter(name,value);
+      m_ui.peaks->setParamError(name,error);
+    }
   }
   else
   {
@@ -107,6 +116,11 @@ void ALCPeakFittingView::setPeakPicker(const IPeakFunction_const_sptr& peak)
 void ALCPeakFittingView::help()
 {
   MantidQt::API::HelpWindow::showCustomInterface(NULL, QString("Muon_ALC"));
+}
+
+void ALCPeakFittingView::displayError(const QString& message)
+{
+  QMessageBox::critical(m_widget, "Error", message);
 }
 
 } // namespace CustomInterfaces

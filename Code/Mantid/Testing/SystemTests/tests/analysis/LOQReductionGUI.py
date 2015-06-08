@@ -1,9 +1,7 @@
+#pylint: disable=attribute-defined-outside-init
 import stresstesting
 from mantid.simpleapi import *
-import isis_reducer
 import ISISCommandInterface as i
-import isis_instrument
-import isis_reduction_steps
 
 MASKFILE = FileFinder.getFullPath('MaskLOQData.txt')
 BATCHFILE = FileFinder.getFullPath('loq_batch_mode_reduction.csv')

@@ -109,15 +109,24 @@ namespace CustomInterfaces
     m_ui.dataPlot->replot();
   }
 
-  void ALCBaselineModellingView::setFunction(const QString& func)
+  void ALCBaselineModellingView::setFunction(IFunction_const_sptr func)
   {
-    if (func.isEmpty())
+    if (!func)
     {
       m_ui.function->clear();
     }
     else
     {
-      m_ui.function->setFunction(func);
+      size_t nParams = func->nParams();
+      for (size_t i=0; i<nParams; i++) {
+
+        QString name = QString::fromStdString(func->parameterName(i));
+        double value = func->getParameter(i);
+        double error = func->getError(i);
+
+        m_ui.function->setParameter(name,value);
+        m_ui.function->setParamError(name,error);
+      }
     }
   }
 

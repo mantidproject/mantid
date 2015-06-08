@@ -3,8 +3,21 @@
 
 #include <boost/regex.hpp>
 #include <boost/make_shared.hpp>
+#include <boost/algorithm/string.hpp>
 #include "MantidKernel/ListValidator.h"
 #include "MantidGeometry/Crystal/SpaceGroupFactory.h"
+
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable : 4005)
+#endif
+
+#include <muParser.h>
+
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
+
 
 namespace Mantid {
 namespace Geometry {
@@ -69,7 +82,7 @@ void BraggScattererInCrystalStructure::declareProperties() {
   setSpaceGroup(SpaceGroupFactory::Instance().createSpaceGroup("P 1"));
 
   declareProperty(
-      new Kernel::PropertyWithValue<V3D>("Position", V3D(0.0, 0.0, 0.0)),
+      new Kernel::PropertyWithValue<std::string>("Position", "[0, 0, 0]"),
       "Position of the scatterer");
 
   IValidator_sptr unitCellStringValidator =
@@ -81,7 +94,7 @@ void BraggScattererInCrystalStructure::declareProperties() {
   exposePropertyToComposite("UnitCell");
 
   IValidator_sptr spaceGroupValidator =
-      boost::make_shared<ListValidator<std::string>>(
+      boost::make_shared<ListValidator<std::string> >(
           SpaceGroupFactory::Instance().subscribedSpaceGroupSymbols());
   declareProperty(new Kernel::PropertyWithValue<std::string>(
                       "SpaceGroup", "P 1", spaceGroupValidator),
@@ -89,6 +102,33 @@ void BraggScattererInCrystalStructure::declareProperties() {
   exposePropertyToComposite("SpaceGroup");
 
   declareScattererProperties();
+}
+
+V3D BraggScattererInCrystalStructure::getPositionFromString(
+    const std::string &positionString) const {
+  std::string positionStringClean = positionString;
+  positionStringClean.erase(std::remove_if(positionStringClean.begin(),
+                                           positionStringClean.end(),
+                                           boost::is_any_of("[]")),
+                            positionStringClean.end());
+
+  std::vector<std::string> numberParts;
+  boost::split(numberParts, positionStringClean, boost::is_any_of(","));
+
+  if (numberParts.size() != 3) {
+    throw std::invalid_argument("Cannot parse '" + positionString +
+                                "' as a position.");
+  }
+
+  mu::Parser parser;
+
+  V3D position;
+  for (size_t i = 0; i < numberParts.size(); ++i) {
+    parser.SetExpr(numberParts[i]);
+    position[i] = parser.Eval();
+  }
+
+  return position;
 }
 
 /**
@@ -105,9 +145,9 @@ void BraggScattererInCrystalStructure::declareProperties() {
 void BraggScattererInCrystalStructure::afterPropertySet(
     const std::string &propertyName) {
   if (propertyName == "Position") {
-    PropertyWithValue<V3D> *position = dynamic_cast<PropertyWithValue<V3D> *>(
-        getPointerToProperty("Position"));
-    setPosition((*position)());
+    std::string position = getProperty("Position");
+
+    setPosition(getPositionFromString(position));
   } else if (propertyName == "SpaceGroup") {
     setSpaceGroup(SpaceGroupFactory::Instance().createSpaceGroup(
         getProperty("SpaceGroup")));
@@ -124,7 +164,7 @@ void BraggScattererInCrystalStructure::recalculateEquivalentPositions() {
   m_equivalentPositions.clear();
 
   if (m_spaceGroup) {
-    m_equivalentPositions = m_spaceGroup * m_position;
+    m_equivalentPositions = m_spaceGroup->getEquivalentPositions(m_position);
   } else {
     m_equivalentPositions.push_back(m_position);
   }

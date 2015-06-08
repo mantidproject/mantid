@@ -22,4 +22,4 @@ class CRISPLoadingTest(LoadAndCheckBase):
         return "CSP85423_1Integrated.nxs"
 
     def get_expected_instrument_name(self):
-        return "CRISP" 
+        return "CRISP"

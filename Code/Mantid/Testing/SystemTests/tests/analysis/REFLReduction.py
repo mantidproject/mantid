@@ -1,4 +1,4 @@
-#pylint: disable=no-init
+#pylint: disable=no-init,attribute-defined-outside-init
 import stresstesting
 from mantid import *
 from mantid.simpleapi import *
@@ -7,7 +7,7 @@ class REFLReduction(stresstesting.MantidStressTest):
     def runTest(self):
         #TODO: The reduction algorithm should not require an absolute path
         scaling_factor_file = FileFinder.getFullPath("directBeamDatabaseFall2014_IPTS_11601_2.cfg")
-        
+
         RefLReduction(RunNumbers=[119814],
                       NormalizationRunNumber=119690,
                       SignalPeakPixelRange=[154, 166],

@@ -1,12 +1,7 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidCrystal/LoadIsawUB.h"
-#include "MantidKernel/Matrix.h"
-#include "MantidKernel/Strings.h"
-#include "MantidKernel/System.h"
 #include <fstream>
-#include <iosfwd>
 #include <MantidGeometry/Crystal/OrientedLattice.h>
-#include <MantidGeometry/Crystal/UnitCell.h>
 #include "MantidAPI/IMDEventWorkspace.h"
 
 using namespace Mantid::Kernel::Strings;

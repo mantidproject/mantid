@@ -37,7 +37,9 @@ class USANSReduction(PythonAlgorithm):
 
         self.declareProperty(MatrixWorkspaceProperty("OutputWorkspace", "", Direction.Output), "Output workspace")
 
+    #pylint: disable= too-few-public-methods
     class DataFile(object):
+        #pylint: disable= too-many-arguments
         def __init__(self, workspace, monitor, empty, empty_monitor, is_scan=False, max_index=1):
             self.workspace = workspace
             self.monitor = monitor
@@ -155,8 +157,10 @@ class USANSReduction(PythonAlgorithm):
                     self.iq_output[i_wl][point+index_offset] = i_q.dataY(0)[0]
                     self.iq_err_output[i_wl][point+index_offset] = i_q.dataE(0)[0]
                 except:
-                    Logger("USANSReduction").error("Exception caught for %s on peak %s, point %s. Offset=%s" % (file_info.workspace, i_wl, point, index_offset))
-                    Logger("USANSReduction").error("Array: %s x %s    Data: %s" % (len(self.wl_list), self.total_points, file_info.max_index))
+                    Logger("USANSReduction").error("Exception caught for "+\
+                                                   "%s on peak %s, point %s. Offset=%s" % (file_info.workspace, i_wl, point, index_offset))
+                    Logger("USANSReduction").error("Array: "+
+                                                   "%s x %s    Data: %s" % (len(self.wl_list), self.total_points, file_info.max_index))
                     Logger("USANSReduction").error(sys.exc_value)
         return file_info.max_index
 
@@ -228,6 +232,7 @@ class USANSReduction(PythonAlgorithm):
                                  OutputWorkspace=output_ws_name)
         self.setProperty("OutputWorkspace", out_ws)
 
+    #pylint: disable=too-many-arguments
     def _get_intensity(self, sample, empty, sample_monitor, empty_monitor, tof_min, tof_max):
         # Number of pixels we are dealing with
         nspecs = sample.getNumberHistograms()

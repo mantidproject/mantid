@@ -3,10 +3,11 @@ import stresstesting
 from mantid.simpleapi import *
 import numpy as np
 
-'''Checking results of PoldiFitPeaks1D.'''
 class POLDIFitPeaks1DTest(stresstesting.MantidStressTest):
-  # The errors of fitted parameters in version 2 are a bit small
-  # because of the "fabricated data", so a larger margin has to be allowed.
+    '''Checking results of PoldiFitPeaks1D.'''
+
+    # The errors of fitted parameters in version 2 are a bit small
+    # because of the "fabricated data", so a larger margin has to be allowed.
     versionDeltas = {1: 2.0e-4, 2: 1.5e-3}
     errorMultiplier = {1: 1.0, 2: 4.0}
 

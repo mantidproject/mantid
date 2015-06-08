@@ -30,10 +30,10 @@ class LRPrimaryFraction(PythonAlgorithm):
 
     def PyExec(self):
         workspace = self.getProperty("InputWorkspace").value
-        
+
         # Background offset in number of pixels
         bck_width = self.getProperty("BackgroundWidth").value
-        
+
         # Signal region
         [peak_from_pixel, peak_to_pixel] = self.getProperty("SignalRange").value
 
@@ -60,12 +60,14 @@ class LRPrimaryFraction(PythonAlgorithm):
         avg_bck = 0
         avg_bck_err = 0
         for i in range(bck_from_pixel, peak_from_pixel):
-            if data_e[i] == 0: data_e[i] = 1.0
+            if data_e[i] == 0:
+                data_e[i] = 1.0
             avg_bck += data_y[i] / data_e[i] / data_e[i]
             avg_bck_err += 1.0 / data_e[i] / data_e[i]
 
         for i in range(peak_to_pixel+1, bck_to_pixel+1):
-            if data_e[i] == 0: data_e[i] = 1
+            if data_e[i] == 0:
+                data_e[i] = 1
             avg_bck += data_y[i] / data_e[i] / data_e[i]
             avg_bck_err += 1.0 / data_e[i] / data_e[i]
 
@@ -78,7 +80,8 @@ class LRPrimaryFraction(PythonAlgorithm):
         specular_counts_err = 0
         for i in range(peak_from_pixel, peak_to_pixel+1):
             specular_counts += data_y[i] - avg_bck
-            if data_e[i] == 0: data_e[i] = 1.0
+            if data_e[i] == 0:
+                data_e[i] = 1.0
             specular_counts_err += data_e[i] * data_e[i] + avg_bck_err * avg_bck_err
         specular_counts_err = math.sqrt(specular_counts_err)
 
@@ -87,7 +90,7 @@ class LRPrimaryFraction(PythonAlgorithm):
         # Specular ratio
         r = specular_counts / total_counts
         r_err = r * math.sqrt(specular_counts_err * specular_counts_err / specular_counts / specular_counts) + 1.0/total_counts
-        
+
         self.setProperty("ScalingFactor", [r, r_err])
 
         logger.information("Total counts:       %s" % total_counts)

@@ -74,11 +74,6 @@ private:
   API::MatrixWorkspace_sptr m_unfilteredWS;
   /// Temporary workspace for keeping the filtered spectrum
   API::MatrixWorkspace_sptr m_filteredWS;
-  /// Variable for storing the lowest x value
-  double m_x0;
-
-  /// Will we Allow Any X Bins?
-  bool IgnoreXBins;
 };
 
 } // namespace Algorithm

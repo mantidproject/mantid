@@ -2,6 +2,9 @@
   <!-- Begin SplatterPlot -->
   <ProxyGroup name="filters">
     <SourceProxy name="MantidParaViewSplatterPlot" class="vtkSplatterPlot" label="MD Scatter Plot">
+      <Hints>
+        <ShowInMenu category="Mantid" icon=":/Splatter.png"/>
+      </Hints>
       <InputProperty
         name="Input"
         command="SetInputConnection">

@@ -64,52 +64,61 @@ public:
 
   std::map<std::string, std::string> validateInputs();
 
-  boost::shared_ptr<Kernel::DblMatrix> getLocalCovarianceMatrix(
-      const boost::shared_ptr<const Kernel::DblMatrix> &covarianceMatrix,
-      size_t parameterOffset, size_t nParams) const;
+  bool checkGroups() { return false; }
 
 protected:
+  // Workspace handling
+  std::vector<PoldiPeakCollection_sptr> getPeakCollectionsFromInput() const;
+
+  PoldiPeakCollection_sptr
+  getPeakCollection(const DataObjects::TableWorkspace_sptr &peakTable) const;
+
+  // Peak integration and transformations
+  std::vector<PoldiPeakCollection_sptr> getNormalizedPeakCollections(
+      const std::vector<PoldiPeakCollection_sptr> &peakCollections) const;
+
+  PoldiPeakCollection_sptr getIntegratedPeakCollection(
+      const PoldiPeakCollection_sptr &rawPeakCollection) const;
+  PoldiPeakCollection_sptr getNormalizedPeakCollection(
+      const PoldiPeakCollection_sptr &peakCollection) const;
+
+  std::vector<PoldiPeakCollection_sptr>
+  getCountPeakCollections(const API::IFunction_sptr &fitFunction);
+  PoldiPeakCollection_sptr
+  getCountPeakCollection(const PoldiPeakCollection_sptr &peakCollection) const;
+
+  // Conversion between peaks and functions
+  PoldiPeak_sptr
+  getPeakFromPeakFunction(API::IPeakFunction_sptr profileFunction,
+                          const Kernel::V3D &hkl);
+
+  // Conversion between peak collections and functions
+  Poldi2DFunction_sptr
+  getFunctionFromPeakCollection(const PoldiPeakCollection_sptr &peakCollection);
+
   Poldi2DFunction_sptr getFunctionIndividualPeaks(
       std::string profileFunctionName,
       const PoldiPeakCollection_sptr &peakCollection) const;
 
   Poldi2DFunction_sptr
   getFunctionPawley(std::string profileFunctionName,
-                    const PoldiPeakCollection_sptr &peakCollection) const;
+                    const PoldiPeakCollection_sptr &peakCollection);
 
-  PoldiPeak_sptr
-  getPeakFromPeakFunction(API::IPeakFunction_sptr profileFunction,
-                          const Kernel::V3D &hkl);
-
-  API::ITableWorkspace_sptr
-  getRefinedCellParameters(const API::IFunction_sptr &fitFunction) const;
+  std::string
+  getRefinedStartingCell(const std::string &initialCell,
+                         const std::string &crystalSystem,
+                         const PoldiPeakCollection_sptr &peakCollection);
 
   PoldiPeakCollection_sptr
-  getPeakCollection(const DataObjects::TableWorkspace_sptr &peakTable) const;
-  PoldiPeakCollection_sptr getIntegratedPeakCollection(
-      const PoldiPeakCollection_sptr &rawPeakCollection) const;
-  PoldiPeakCollection_sptr getNormalizedPeakCollection(
-      const PoldiPeakCollection_sptr &peakCollection) const;
-  PoldiPeakCollection_sptr
-  getCountPeakCollection(const PoldiPeakCollection_sptr &peakCollection) const;
+  getPeakCollectionFromFunction(const API::IFunction_sptr &fitFunction);
 
   void assignMillerIndices(const PoldiPeakCollection_sptr &from,
                            PoldiPeakCollection_sptr &to) const;
 
-  PoldiPeakCollection_sptr
-  getPeakCollectionFromFunction(const API::IFunction_sptr &fitFunction);
-  Poldi2DFunction_sptr getFunctionFromPeakCollection(
-      const PoldiPeakCollection_sptr &peakCollection) const;
-  void addBackgroundTerms(Poldi2DFunction_sptr poldi2DFunction) const;
+  void assignCrystalData(PoldiPeakCollection_sptr &normalizedPeakCollection,
+                         const PoldiPeakCollection_sptr &peakCollection) const;
 
-  API::IAlgorithm_sptr
-  calculateSpectrum(const PoldiPeakCollection_sptr &peakCollection,
-                    const API::MatrixWorkspace_sptr &matrixWorkspace);
-  API::MatrixWorkspace_sptr
-  getWorkspace(const API::IAlgorithm_sptr &fitAlgorithm) const;
-  API::IFunction_sptr
-  getFunction(const API::IAlgorithm_sptr &fitAlgorithm) const;
-
+  // Extraction of 1D spectrum and cell
   API::MatrixWorkspace_sptr
   get1DSpectrum(const API::IFunction_sptr &fitFunction,
                 const API::MatrixWorkspace_sptr &workspace) const;
@@ -118,6 +127,26 @@ protected:
   getQSpectrum(const API::FunctionDomain1D &domain,
                const API::FunctionValues &values) const;
 
+  API::ITableWorkspace_sptr
+  getRefinedCellParameters(const API::IFunction_sptr &fitFunction) const;
+
+  // Interacting with Fit
+  API::IAlgorithm_sptr calculateSpectrum(
+      const std::vector<PoldiPeakCollection_sptr> &peakCollections,
+      const API::MatrixWorkspace_sptr &matrixWorkspace);
+
+  API::MatrixWorkspace_sptr
+  getWorkspace(const API::IAlgorithm_sptr &fitAlgorithm) const;
+  API::IFunction_sptr
+  getFunction(const API::IAlgorithm_sptr &fitAlgorithm) const;
+
+  void addBackgroundTerms(Poldi2DFunction_sptr poldi2DFunction) const;
+
+  boost::shared_ptr<Kernel::DblMatrix> getLocalCovarianceMatrix(
+      const boost::shared_ptr<const Kernel::DblMatrix> &covarianceMatrix,
+      size_t parameterOffset, size_t nParams) const;
+
+  // Poldi instrument book-keeping
   void setPoldiInstrument(const PoldiInstrumentAdapter_sptr &instrument);
   void setTimeTransformerFromInstrument(
       const PoldiInstrumentAdapter_sptr &poldiInstrument);
@@ -127,8 +156,6 @@ protected:
   void setDeltaTFromWorkspace(const API::MatrixWorkspace_sptr &matrixWorkspace);
   void setDeltaT(double newDeltaT);
   bool isValidDeltaT(double deltaT) const;
-
-  void throwOnInsufficientState();
 
   PoldiInstrumentAdapter_sptr m_poldiInstrument;
   PoldiTimeTransformer_sptr m_timeTransformer;

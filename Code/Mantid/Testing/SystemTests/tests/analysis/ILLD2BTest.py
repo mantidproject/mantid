@@ -38,8 +38,6 @@ class ILLD2BLoadTest(unittest.TestCase):
         self.assertTrue(name in mtd)
         self.assertTrue(type(mtd[name]) == IMDEventWorkspace)
 
-
-
 #====================================================================================
 
 class ILLD2BTest(stresstesting.MantidStressTest):

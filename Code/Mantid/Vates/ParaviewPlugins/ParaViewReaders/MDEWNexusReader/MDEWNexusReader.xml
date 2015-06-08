@@ -2,6 +2,15 @@
   <!-- Begin MDEWNexusReader -->
   <ProxyGroup name="sources">
     <SourceProxy name="MDEWNexusReader" class="vtkMDEWNexusReader">
+        <IntVectorProperty name="Normalization" number_of_elements="1" command="SetNormalization" default_values="3">
+            <EnumerationDomain name="enum"> 
+                <Entry text="None" value="0"/> 
+                <Entry text="Volume" value="1"/> 
+                <Entry text="Number of Events" value="2"/> 
+                <Entry text="Auto Select" value="3"/> 
+            </EnumerationDomain> 
+        <Documentation>Set the normalization type</Documentation> 
+        </IntVectorProperty>
 	    <StringVectorProperty
          name="WorkspaceTypeName"
          command="GetWorkspaceTypeName"
@@ -48,6 +57,11 @@
         information_only="1"
         si_class="vtkSITimeLabelProperty">
       </StringVectorProperty>
+      <Hints>
+        <ReaderFactory
+          extensions="nxs"
+          file_description="MDEW Nexus File" />
+      </Hints>
     </SourceProxy>
   </ProxyGroup>
   <!-- End MDEWNexusReader -->

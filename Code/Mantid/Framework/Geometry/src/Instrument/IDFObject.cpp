@@ -1,5 +1,7 @@
 #include "MantidGeometry/Instrument/IDFObject.h"
+#include "MantidKernel/ChecksumHelper.h"
 #include <Poco/DateTimeFormatter.h>
+#include <Poco/String.h>
 
 namespace Mantid {
 namespace Geometry {
@@ -87,7 +89,9 @@ Gets the idf file as a mangled name.
 @return the idf file as a mangled name.
 */
 std::string IDFObject::getMangledName() const {
-  return this->getFileNameOnly() + this->getFormattedLastModified();
+  std::string idfText = Kernel::ChecksumHelper::loadFile(getFileFullPathStr(),true);
+  std::string checksum = Kernel::ChecksumHelper::sha1FromString(Poco::trim(idfText));
+  return this->getFileNameOnly() + checksum;
 }
 
 /**

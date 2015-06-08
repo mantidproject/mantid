@@ -1,9 +1,11 @@
-#pylint: disable=no-init
+#pylint: disable=no-init,attribute-defined-outside-init
 import stresstesting
 from mantid import *
 from mantid.simpleapi import *
 
 class LRPrimaryFractionTest(stresstesting.MantidStressTest):
+    scaling_factor = None
+
     def runTest(self):
         workspace = LoadEventNexus(Filename="REF_L_123711")
         self.scaling_factor = LRPrimaryFraction(InputWorkspace=workspace)
@@ -19,6 +21,8 @@ class LRPrimaryFractionTest(stresstesting.MantidStressTest):
         return True
 
 class LRPrimaryFractionWithRangeTest(stresstesting.MantidStressTest):
+    scaling_factor = None
+
     def runTest(self):
         workspace = LoadEventNexus(Filename="REF_L_119816")
         self.scaling_factor = LRPrimaryFraction(InputWorkspace=workspace,
@@ -38,7 +42,7 @@ class ApplyToReducedDataTest(stresstesting.MantidStressTest):
     def runTest(self):
         #TODO: The reduction algorithm should not require an absolute path
         scaling_factor_file = FileFinder.getFullPath("directBeamDatabaseFall2014_IPTS_11601_2.cfg")
-        
+
         LiquidsReflectometryReduction(RunNumbers=[119816],
                                       NormalizationRunNumber=119692,
                                       SignalPeakPixelRange=[155, 165],
@@ -79,7 +83,7 @@ class ApplyToReducedDataTest(stresstesting.MantidStressTest):
         data_e = mtd["reflectivity_119816"].dataE(0)
         data_e[0] = 1.0
         data_e[len(data_e)-1] = 1.0
-        
+
         self.disableChecking.append('Instrument')
         self.disableChecking.append('Sample')
         self.disableChecking.append('SpectraMap')

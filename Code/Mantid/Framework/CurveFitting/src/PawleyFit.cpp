@@ -72,6 +72,8 @@ void PawleyFit::addHKLsToFunction(PawleyFunction_sptr &pawleyFn,
   pawleyFn->clearPeaks();
 
   try {
+    V3DFromHKLColumnExtractor extractor;
+
     Column_const_sptr hklColumn = tableWs->getColumn("HKL");
     Column_const_sptr dColumn = tableWs->getColumn("d");
     Column_const_sptr intensityColumn = tableWs->getColumn("Intensity");
@@ -79,7 +81,7 @@ void PawleyFit::addHKLsToFunction(PawleyFunction_sptr &pawleyFn,
 
     for (size_t i = 0; i < tableWs->rowCount(); ++i) {
       try {
-        V3D hkl = getHKLFromColumn(i, hklColumn);
+        V3D hkl = extractor(hklColumn, i);
 
         double d = (*dColumn)[i];
         double center = getTransformedCenter(d, unit);
@@ -100,36 +102,6 @@ void PawleyFit::addHKLsToFunction(PawleyFunction_sptr &pawleyFn,
     throw std::runtime_error("Can not process table, the following columns are "
                              "required: HKL, d, Intensity, FWHM (rel.)");
   }
-}
-
-/// Tries to extract Miller indices as V3D from column.
-V3D PawleyFit::getHKLFromColumn(size_t i,
-                                const Column_const_sptr &hklColumn) const {
-  if (hklColumn->type() == "V3D") {
-    return hklColumn->cell<V3D>(i);
-  }
-
-  return getHkl(hklColumn->cell<std::string>(i));
-}
-
-/// Try to extract a V3D from the given string with different separators.
-V3D PawleyFit::getHkl(const std::string &hklString) const {
-  auto delimiters = boost::is_any_of(" ,[];");
-
-  std::string workingCopy = boost::trim_copy_if(hklString, delimiters);
-  std::vector<std::string> indicesStr;
-  boost::split(indicesStr, workingCopy, delimiters);
-
-  if (indicesStr.size() != 3) {
-    throw std::invalid_argument("Input string cannot be parsed as HKL.");
-  }
-
-  V3D hkl;
-  hkl.setX(boost::lexical_cast<double>(indicesStr[0]));
-  hkl.setY(boost::lexical_cast<double>(indicesStr[1]));
-  hkl.setZ(boost::lexical_cast<double>(indicesStr[2]));
-
-  return hkl;
 }
 
 /// Creates a table containing the cell parameters stored in the supplied
@@ -399,6 +371,50 @@ void PawleyFit::exec() {
               getPeakParametersFromFunction(pawleyFn));
 
   setProperty("ReducedChiSquare", chiSquare);
+}
+
+/// Tries to extract Miller indices as V3D from column.
+V3D V3DFromHKLColumnExtractor::operator()(const Column_const_sptr &hklColumn,
+                                          size_t i) const {
+  if (hklColumn->type() == "V3D") {
+    return getHKLFromV3DColumn(hklColumn, i);
+  }
+
+  return getHKLFromStringColumn(hklColumn, i);
+}
+
+/// Returns the i-th cell of a V3D column.
+V3D V3DFromHKLColumnExtractor::getHKLFromV3DColumn(
+    const Column_const_sptr &hklColumn, size_t i) const {
+  return hklColumn->cell<V3D>(i);
+}
+
+/// Pass the cell value as string to getHKLFromString.
+V3D V3DFromHKLColumnExtractor::getHKLFromStringColumn(
+    const Column_const_sptr &hklColumn, size_t i) const {
+
+  return getHKLFromString(hklColumn->cell<std::string>(i));
+}
+
+/// Try to extract a V3D from the given string with different separators.
+V3D V3DFromHKLColumnExtractor::getHKLFromString(const std::string &hklString)
+    const {
+  auto delimiters = boost::is_any_of(" ,[];");
+
+  std::string workingCopy = boost::trim_copy_if(hklString, delimiters);
+  std::vector<std::string> indicesStr;
+  boost::split(indicesStr, workingCopy, delimiters);
+
+  if (indicesStr.size() != 3) {
+    throw std::invalid_argument("Input string cannot be parsed as HKL.");
+  }
+
+  V3D hkl;
+  hkl.setX(boost::lexical_cast<double>(indicesStr[0]));
+  hkl.setY(boost::lexical_cast<double>(indicesStr[1]));
+  hkl.setZ(boost::lexical_cast<double>(indicesStr[2]));
+
+  return hkl;
 }
 
 } // namespace CurveFitting

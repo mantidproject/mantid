@@ -6,6 +6,7 @@ from mantid.simpleapi import *
 
 import numpy as np
 
+
 class PoldiMergeTest(unittest.TestCase):
     def __init__(self, *args):
         unittest.TestCase.__init__(self, *args)
@@ -38,8 +39,9 @@ class PoldiMergeTest(unittest.TestCase):
 
             self.goodTimingBadProperties.getRun().addProperty(p, badProperty, True)
 
-    def __runMerge__(self, workspaceNames):
-        return PoldiMerge(WorkspaceNames=workspaceNames, OutputWorkspace="PoldiMergeOutput", CheckInstruments=False)
+    def __runMerge__(self, workspaceNames, checkInstruments=False):
+        return PoldiMerge(WorkspaceNames=workspaceNames, OutputWorkspace="PoldiMergeOutput",
+                          CheckInstruments=checkInstruments)
 
     def test_happyCase(self):
         output = self.__runMerge__("Base,GoodTiming")
@@ -84,12 +86,13 @@ class PoldiMergeTest(unittest.TestCase):
         self.assertFalse(AnalysisDataService.doesExist("PoldiMergeOutput"))
 
     def test_badProperties(self):
-        self.assertRaises(RuntimeError, lambda: self.__runMerge__("Base,GoodTimingBadProperties"))
+        self.assertRaises(RuntimeError, lambda: self.__runMerge__("Base,GoodTimingBadProperties", True))
         self.assertFalse(AnalysisDataService.doesExist("PoldiMergeOutput"))
 
     def test_badName(self):
         self.assertRaises(RuntimeError, lambda: self.__runMerge__("Base,NotExisting"))
         self.assertFalse(AnalysisDataService.doesExist("PoldiMergeOutput"))
+
 
 if __name__ == '__main__':
     unittest.main()

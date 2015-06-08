@@ -121,6 +121,16 @@ private:
                    const std::map<std::string, std::vector<double> > &logvecmap,
                    const std::vector<Kernel::DateAndTime> &vectimes);
 
+  /// Parse detector efficiency table workspace to map
+  void
+  parseDetectorEfficiencyTable(DataObjects::TableWorkspace_sptr detefftablews,
+                               std::map<detid_t, double> &deteffmap);
+
+  /// Apply the detector's efficiency correction to
+  void
+  correctByDetectorEfficiency(std::vector<API::MatrixWorkspace_sptr> vec_ws2d,
+                              const std::map<detid_t, double> &detEffMap);
+
   /// Name of instrument
   std::string m_instrumentName;
 

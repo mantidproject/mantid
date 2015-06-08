@@ -59,7 +59,11 @@ class InterfaceDirective(BaseDirective):
         if not os.path.exists(screenshots_dir):
             os.makedirs(screenshots_dir)
 
-        return custominterface_screenshot(self.interface_name(), screenshots_dir, widget_name = widget_name)
+        try:
+            return custominterface_screenshot(self.interface_name(), screenshots_dir, widget_name = widget_name)
+        except RuntimeError:
+            # Assume GUI is not available
+            return None
 
     def _insert_screenshot_link(self, picture, align=None, width=None):
         """

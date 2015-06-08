@@ -28,8 +28,8 @@ class TemporaryFileHelper(object):
     """
     tempFile = None
 
-    def __init__(self, fileContent=""):
-        self.tempFile = NamedTemporaryFile('r+', delete=False)
+    def __init__(self, fileContent="", extension=""):
+        self.tempFile = NamedTemporaryFile('r+', delete=False, suffix=extension)
 
         if fileContent:
             self._setFileContent(fileContent)

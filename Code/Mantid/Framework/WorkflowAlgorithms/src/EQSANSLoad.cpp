@@ -515,7 +515,13 @@ void EQSANSLoad::exec() {
     // Get monitor workspace as necessary
     std::string mon_wsname = getPropertyValue("OutputWorkspace") + "_monitors";
     if (loadMonitors && loadAlg->existsProperty("MonitorWorkspace")) {
-      MatrixWorkspace_sptr monWS = loadAlg->getProperty("MonitorWorkspace");
+      Workspace_sptr monWSOutput = loadAlg->getProperty("MonitorWorkspace");
+      MatrixWorkspace_sptr monWS = boost::dynamic_pointer_cast<MatrixWorkspace>(monWSOutput);
+      if ((monWSOutput) && (!monWS)) {
+        //this was a group workspace - EQSansLoad does not support multi period data yet
+        throw Exception::NotImplementedError(
+          "The file contains multi period data, support for this is not implemented in EQSANSLoad yet");
+      }
       declareProperty(new WorkspaceProperty<>("MonitorWorkspace", mon_wsname,
                                               Direction::Output),
                       "Monitors from the Event NeXus file");
@@ -587,10 +593,7 @@ void EQSANSLoad::exec() {
   int run_number = 0;
   std::string config_file = "";
   if (dataWS->run().hasProperty("run_number")) {
-    Mantid::Kernel::Property *prop = dataWS->run().getProperty("run_number");
-    Mantid::Kernel::PropertyWithValue<std::string> *dp =
-        dynamic_cast<Mantid::Kernel::PropertyWithValue<std::string> *>(prop);
-    const std::string run_str = *dp;
+    const std::string run_str = dataWS->run().getPropertyValueAsType<std::string>("run_number");
     Poco::NumberParser::tryParse(run_str, run_number);
     // Find a proper config file
     config_file = findConfigFile(run_number);

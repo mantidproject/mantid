@@ -1,4 +1,4 @@
-#pylint: disable=invalid-name
+#pylint: disable=invalid-name,attribute-defined-outside-init
 """
 These tests ensure that all the steps that the SANS Interface GUI performs to reduce SANS data
 on the SANS2D instrument is avalailable and is conforming to this test.
@@ -14,7 +14,6 @@ Test was first created to apply to Mantid Release 3.0.
 """
 
 import sys
-import os
 
 if __name__ == "__main__":
   # it is just to allow running this test in Mantid, allowing the following import

@@ -26,25 +26,25 @@ void ElasticWindow::init() {
   declareProperty(
       new WorkspaceProperty<>("OutputInQSquared", "", Direction::Output),
       "The name for output workspace with the X axis in units of Q^2.");
-  declareProperty("Range1Start", EMPTY_DBL(),
+  declareProperty("IntegrationRangeStart", EMPTY_DBL(),
                   boost::make_shared<MandatoryValidator<double>>(),
                   "Start Point of Range 1");
-  declareProperty("Range1End", EMPTY_DBL(),
+  declareProperty("IntegrationRangeEnd", EMPTY_DBL(),
                   boost::make_shared<MandatoryValidator<double>>(),
                   "End Point of Range 1");
-  declareProperty("Range2Start", EMPTY_DBL(), "Start Point of Range 2",
+  declareProperty("BackgroundRangeStart", EMPTY_DBL(), "Start Point of Range 2",
                   Direction::Input);
-  declareProperty("Range2End", EMPTY_DBL(), "End Point of Range 2.",
+  declareProperty("BackgroundRangeEnd", EMPTY_DBL(), "End Point of Range 2.",
                   Direction::Input);
 }
 
 void ElasticWindow::exec() {
   MatrixWorkspace_sptr inputWorkspace = getProperty("InputWorkspace");
 
-  double enR1S = getProperty("Range1Start");
-  double enR1E = getProperty("Range1End");
-  double enR2S = getProperty("Range2Start");
-  double enR2E = getProperty("Range2End");
+  double intRangeStart = getProperty("IntegrationRangeStart");
+  double intRangeEnd = getProperty("IntegrationRangeEnd");
+  double bgRangeStart = getProperty("BackgroundRangeStart");
+  double bgRangeEnd = getProperty("BackgroundRangeEnd");
 
   // Create the output workspaces
   MatrixWorkspace_sptr integWS;
@@ -62,7 +62,7 @@ void ElasticWindow::exec() {
 
   // Determine if we need to use the second time range...
   const bool backgroundSubtraction =
-      !((enR2S == enR2E) && (enR2S == EMPTY_DBL()));
+      !((bgRangeStart == bgRangeEnd) && (bgRangeStart == EMPTY_DBL()));
   g_log.information() << "Use background subtraction: " << backgroundSubtraction
                       << std::endl;
 
@@ -80,8 +80,8 @@ void ElasticWindow::exec() {
     IAlgorithm_sptr flatBG = createChildAlgorithm(
         "CalculateFlatBackground", startProgress, endProgress, childAlgLogging);
     flatBG->setProperty<MatrixWorkspace_sptr>("InputWorkspace", inputWorkspace);
-    flatBG->setProperty<double>("StartX", enR2S);
-    flatBG->setProperty<double>("EndX", enR2E);
+    flatBG->setProperty<double>("StartX", bgRangeStart);
+    flatBG->setProperty<double>("EndX", bgRangeEnd);
     flatBG->setPropertyValue("Mode", "Mean");
     flatBG->setPropertyValue("OutputWorkspace", "flatBG");
     flatBG->execute();
@@ -93,8 +93,8 @@ void ElasticWindow::exec() {
     IAlgorithm_sptr integ = createChildAlgorithm("Integration", startProgress,
                                                  endProgress, childAlgLogging);
     integ->setProperty<MatrixWorkspace_sptr>("InputWorkspace", flatBGws);
-    integ->setProperty<double>("RangeLower", enR1S);
-    integ->setProperty<double>("RangeUpper", enR1E);
+    integ->setProperty<double>("RangeLower", intRangeStart);
+    integ->setProperty<double>("RangeUpper", intRangeEnd);
     integ->setPropertyValue("OutputWorkspace", "integ");
     integ->execute();
 
@@ -104,8 +104,8 @@ void ElasticWindow::exec() {
     IAlgorithm_sptr integ = createChildAlgorithm("Integration", startProgress,
                                                  endProgress, childAlgLogging);
     integ->setProperty<MatrixWorkspace_sptr>("InputWorkspace", inputWorkspace);
-    integ->setProperty<double>("RangeLower", enR1S);
-    integ->setProperty<double>("RangeUpper", enR1E);
+    integ->setProperty<double>("RangeLower", intRangeStart);
+    integ->setProperty<double>("RangeUpper", intRangeEnd);
     integ->setPropertyValue("OutputWorkspace", "integ");
     integ->execute();
 

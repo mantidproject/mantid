@@ -342,11 +342,7 @@ IDetector_const_sptr InstrumentActor::getDetector(size_t i) const
     // Call the local getInstrument, NOT the one on the workspace
     return this->getInstrument()->getDetector(m_detIDs.at(i));
   }
-  catch(...)
-  {
-    return IDetector_const_sptr();
-  }
-  // Add line that can never be reached to quiet compiler complaints
+  catch(...) { };
   return IDetector_const_sptr();
 }
 
@@ -663,8 +659,10 @@ void InstrumentActor::resetColors()
   }
   if (m_scene.getNumberOfActors() > 0)
   {
-    dynamic_cast<CompAssemblyActor*>(m_scene.getActor(0))->setColors();
-    invalidateDisplayLists();
+    if (auto actor = dynamic_cast<CompAssemblyActor*>(m_scene.getActor(0))) {
+      actor->setColors();
+      invalidateDisplayLists();
+    }
   }
   emit colorMapChanged();
 }

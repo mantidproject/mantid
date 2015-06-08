@@ -146,14 +146,15 @@ namespace IDA
     elwinMultAlg->setProperty("OutputELF", elfWorkspace.toStdString());
 
     elwinMultAlg->setProperty("SampleEnvironmentLogName", m_uiForm.leLogName->text().toStdString());
+    elwinMultAlg->setProperty("SampleEnvironmentLogValue", m_uiForm.leLogValue->currentText().toStdString());
 
-    elwinMultAlg->setProperty("Range1Start", m_dblManager->value(m_properties["IntegrationStart"]));
-    elwinMultAlg->setProperty("Range1End", m_dblManager->value(m_properties["IntegrationEnd"]));
+    elwinMultAlg->setProperty("IntegrationRangeStart", m_dblManager->value(m_properties["IntegrationStart"]));
+    elwinMultAlg->setProperty("IntegrationRangeEnd", m_dblManager->value(m_properties["IntegrationEnd"]));
 
     if(m_blnManager->value(m_properties["BackgroundSubtraction"]))
     {
-      elwinMultAlg->setProperty("Range2Start", boost::lexical_cast<std::string>(m_dblManager->value(m_properties["IntegrationStart"])));
-      elwinMultAlg->setProperty("Range2End", boost::lexical_cast<std::string>(m_dblManager->value(m_properties["IntegrationEnd"])));
+      elwinMultAlg->setProperty("BackgroundRangeStart", boost::lexical_cast<std::string>(m_dblManager->value(m_properties["BackgroundStart"])));
+      elwinMultAlg->setProperty("BackgroundRangeEnd", boost::lexical_cast<std::string>(m_dblManager->value(m_properties["BackgroundEnd"])));
     }
 
     if(m_blnManager->value(m_properties["Normalise"]))
@@ -261,15 +262,25 @@ namespace IDA
   void Elwin::setDefaultSampleLog(Mantid::API::MatrixWorkspace_const_sptr ws)
   {
     auto inst = ws->getInstrument();
+    // Set sample environment log name
     auto log = inst->getStringParameter("Workflow.SE-log");
     QString logName("sample");
-
     if(log.size() > 0)
     {
       logName = QString::fromStdString(log[0]);
     }
-
     m_uiForm.leLogName->setText(logName);
+    // Set sample environment log value
+    auto logval = inst->getStringParameter("Workflow.SE-log-value");
+    if(logval.size() > 0)
+    {
+      auto logValue = QString::fromStdString(logval[0]);
+      int  index = m_uiForm.leLogValue->findText(logValue);
+      if (index >= 0)
+      {
+        m_uiForm.leLogValue->setCurrentIndex(index);
+      }
+    }
   }
 
   /**

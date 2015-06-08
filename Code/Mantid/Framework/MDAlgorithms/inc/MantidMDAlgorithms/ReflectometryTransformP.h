@@ -18,6 +18,7 @@ protected:
 
   CalculateReflectometryPBase(const double &thetaIncident) {
     m_sinThetaInitial = sin(M_PI / 180.0 * thetaIncident);
+    m_sinThetaFinal = -DBL_MAX;
   }
   ~CalculateReflectometryPBase() {}
 

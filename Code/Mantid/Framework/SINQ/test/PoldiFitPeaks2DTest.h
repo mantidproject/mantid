@@ -322,6 +322,39 @@ public:
         TS_ASSERT_EQUALS(funConstant->nFunctions(), 1);
     }
 
+    void testGetRefinedStartingCell() {
+        // Get Silicon peaks for testing
+        PoldiPeakCollection_sptr peaks = PoldiPeakCollectionHelpers::createPoldiPeakCollectionNormalized();
+
+        TestablePoldiFitPeaks2D alg;
+
+        std::string refinedCell;
+        TS_ASSERT_THROWS_NOTHING(
+                    refinedCell = alg.getRefinedStartingCell(
+                                        "5.4 5.4 5.4 90 90 90",
+                                        "Cubic", peaks));
+
+        UnitCell cell = strToUnitCell(refinedCell);
+        TS_ASSERT_DELTA(cell.a(), 5.43111972, 1e-8);
+
+        // With less accurate starting parameters the result should not change
+        TS_ASSERT_THROWS_NOTHING(
+                    refinedCell = alg.getRefinedStartingCell(
+                                        "5 5 5 90 90 90",
+                                        "Cubic", peaks));
+
+        cell = strToUnitCell(refinedCell);
+        TS_ASSERT_DELTA(cell.a(), 5.43111972, 1e-8);
+
+        // Adding an unindexed peak should make the function return the initial
+        peaks->addPeak(PoldiPeak::create(UncertainValue(1.0)));
+        TS_ASSERT_THROWS_NOTHING(
+                    refinedCell = alg.getRefinedStartingCell(
+                                        "5 5 5 90 90 90",
+                                        "Cubic", peaks));
+        TS_ASSERT_EQUALS(refinedCell, "5 5 5 90 90 90");
+    }
+
 private:
     PoldiInstrumentAdapter_sptr m_instrument;
     PoldiTimeTransformer_sptr m_timeTransformer;

@@ -14,26 +14,34 @@ class Quest(PythonAlgorithm):
         return "This is a variation of the stretched exponential option of Quasi."
 
     def PyInit(self):
-        self.declareProperty(name='InputType',defaultValue='File',validator=StringListValidator(['File','Workspace']), doc='Origin of data input - File (.nxs) or Workspace')
-        self.declareProperty(name='Instrument',defaultValue='iris',validator=StringListValidator(['irs','iris','osi','osiris']), doc='Instrument')
-        self.declareProperty(name='Analyser',defaultValue='graphite002',validator=StringListValidator(['graphite002','graphite004']), doc='Analyser & reflection')
+        self.declareProperty(name='InputType',defaultValue='File',validator=StringListValidator(['File','Workspace']),
+                             doc='Origin of data input - File (.nxs) or Workspace')
+        self.declareProperty(name='Instrument',defaultValue='iris',validator=StringListValidator(['irs','iris','osi','osiris']),
+                             doc='Instrument')
+        self.declareProperty(name='Analyser',defaultValue='graphite002',validator=StringListValidator(['graphite002','graphite004']),
+                             doc='Analyser & reflection')
         self.declareProperty(name='SamNumber',defaultValue='',validator=StringMandatoryValidator(), doc='Sample run number')
-        self.declareProperty(name='ResInputType',defaultValue='File',validator=StringListValidator(['File','Workspace']), doc='Origin of res input - File (_res.nxs) or Workspace')
+        self.declareProperty(name='ResInputType',defaultValue='File',validator=StringListValidator(['File','Workspace']),
+                             doc='Origin of res input - File (_res.nxs) or Workspace')
         self.declareProperty(name='ResNumber',defaultValue='',validator=StringMandatoryValidator(), doc='Resolution run number')
-        self.declareProperty(name='ResNormInputType',defaultValue='File',validator=StringListValidator(['File','Workspace']), doc='Origin of ResNorm input - File (_red.nxs) or Workspace')
+        self.declareProperty(name='ResNormInputType',defaultValue='File',validator=StringListValidator(['File','Workspace']),
+                             doc='Origin of ResNorm input - File (_red.nxs) or Workspace')
         self.declareProperty(name='ResNormNumber',defaultValue='',validator=StringMandatoryValidator(), doc='ResNorm run number')
         self.declareProperty(name='ElasticOption',defaultValue=True, doc='Include elastic peak in fit')
-        self.declareProperty(name='BackgroundOption',defaultValue='Sloping',validator=StringListValidator(['Sloping','Flat','Zero']), doc='Form of background to fit')
+        self.declareProperty(name='BackgroundOption',defaultValue='Sloping',validator=StringListValidator(['Sloping','Flat','Zero']),
+                             doc='Form of background to fit')
         self.declareProperty(name='EnergyMin', defaultValue=-0.5, doc='Minimum energy for fit. Default=-0.5')
         self.declareProperty(name='EnergyMax', defaultValue=0.5, doc='Maximum energy for fit. Default=0.5')
         self.declareProperty(name='SamBinning', defaultValue=1, doc='Binning value(integer) for sample. Default=1')
         self.declareProperty(name='NumberSigma', defaultValue=50, doc='Number of sigma values. Default=50')
         self.declareProperty(name='NumberBeta', defaultValue=30, doc='Number of beta values. Default=30')
         self.declareProperty(name='Sequence',defaultValue=True, doc='Switch Sequence Off/On')
-        self.declareProperty(name='Plot',defaultValue='None',validator=StringListValidator(['None','Sigma','Beta','All']), doc='Plot options')
+        self.declareProperty(name='Plot',defaultValue='None',validator=StringListValidator(['None','Sigma','Beta','All']),
+                             doc='Plot options')
         self.declareProperty(name='Verbose',defaultValue=True, doc='Switch Verbose Off/On')
         self.declareProperty(name='Save',defaultValue=False, doc='Switch Save result to nxs file Off/On')
 
+    #pylint: disable=too-many-locals,too-many-branches
     def PyExec(self):
         from IndirectImport import run_f2py_compatibility_test, is_supported_f2py_platform
 

@@ -57,7 +57,7 @@ namespace Algorithms {
 class DLLExport MaxMin : public API::Algorithm {
 public:
   /// Default constructor
-  MaxMin() : API::Algorithm(){};
+  MaxMin() : API::Algorithm() {};
   /// Destructor
   virtual ~MaxMin(){};
   /// Algorithm's name for identification overriding a virtual method
@@ -76,17 +76,6 @@ private:
   // Overridden Algorithm methods
   void init();
   void exec();
-
-  /// The flag to show minimum
-  bool showMin;
-  /// The value in X to start the search from
-  double m_MinRange;
-  /// The value in X to finish the search at
-  double m_MaxRange;
-  /// The spectrum to start the integration from
-  int m_MinSpec;
-  /// The spectrum to finish the integration at
-  int m_MaxSpec;
 };
 
 } // namespace Algorithm

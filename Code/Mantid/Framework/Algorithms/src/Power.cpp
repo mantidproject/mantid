@@ -13,7 +13,7 @@ namespace Algorithms {
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(Power)
 
-Power::Power() : UnaryOperation() { this->useHistogram = true; }
+Power::Power() : UnaryOperation(), m_exponent(0.) { this->useHistogram = true; }
 
 ///////////////////////////////////
 

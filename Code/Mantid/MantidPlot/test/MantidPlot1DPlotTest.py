@@ -74,7 +74,7 @@ class MantidPlot1DPlotTest(unittest.TestCase):
             t.setCell(3, i, i+2)
             t.setCell(4, i, i+4)
 
-        g = plot(t, (2,3,4), Layer.Line)
+        g = pymantidplot.qtiplot.plot(t, (2,3,4), Layer.Line)
         self.g = g
         l = g.activeLayer() # Plot columns 2, 3 and 4
         for i in range(0, l.numCurves()):

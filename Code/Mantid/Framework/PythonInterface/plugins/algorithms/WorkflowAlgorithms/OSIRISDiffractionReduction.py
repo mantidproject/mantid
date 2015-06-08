@@ -18,9 +18,9 @@ timeRegimeToDRange = {\
     17.09e4: tuple([10.4, 11.6]),\
     18.86e4: tuple([11.0, 12.5])}\
 
-""" A "wrapper" class for a map, which maps workspaces from their corresponding
-time regimes.
-"""
+# A "wrapper" class for a map, which maps workspaces from their corresponding
+#time regimes.
+
 class DRangeToWsMap(object):
 
     def __init__(self):
@@ -121,8 +121,8 @@ def getIntersectionsOfRanges(rangeList):
     at the same point.  Also, all ranges should obey range[0] <= range[1].
     """
     # Sanity check.
-    for range in rangeList:
-        assert len(range) == 2, "Unable to find the intersection of a malformed range."
+    for myrange in rangeList:
+        assert len(myrange) == 2, "Unable to find the intersection of a malformed range."
 
     # Find all combinations of ranges, and see where they intersect.
     rangeCombos = list(itertools.combinations(rangeList, 2))
@@ -137,8 +137,8 @@ def getIntersectionsOfRanges(rangeList):
     return intersections
 
 def isInRanges(rangeList, n):
-    for range in rangeList:
-        if range[0] < n < range[1]:
+    for myrange in rangeList:
+        if myrange[0] < n < myrange[1]:
             return True
     return False
 
@@ -157,18 +157,21 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
         return 'Diffraction;PythonAlgorithms'
 
     def summary(self):
-        return "This Python algorithm performs the operations necessary for the reduction of diffraction data from the Osiris instrument at ISIS \
-              into dSpacing, by correcting for the monitor and linking the various d-ranges together."
+        return "This Python algorithm performs the operations necessary for the reduction of diffraction data "+\
+                "from the Osiris instrument at ISIS "+\
+                "into dSpacing, by correcting for the monitor and linking the various d-ranges together."
 
     def PyInit(self):
-        runs_desc='The list of run numbers that are part of the sample run. \
-                   There should be five of these in most cases. Enter them as comma separated values.'
+        runs_desc='The list of run numbers that are part of the sample run. '+\
+                  'There should be five of these in most cases. Enter them as comma separated values.'
         self.declareProperty('Sample', '', doc=runs_desc)
         self.declareProperty('Vanadium', '', doc=runs_desc)
         self.declareProperty(FileProperty('CalFile', '', action=FileAction.Load),
-                             doc='Filename of the .cal file to use in the [[AlignDetectors]] and [[DiffractionFocussing]] child algorithms.')
+                             doc='Filename of the .cal file to use in the [[AlignDetectors]] and '+\
+                                 '[[DiffractionFocussing]] child algorithms.')
         self.declareProperty(MatrixWorkspaceProperty('OutputWorkspace', '', Direction.Output),
-                             doc="Name to give the output workspace. If no name is provided, one will be generated based on the run numbers.")
+                             doc="Name to give the output workspace. If no name is provided, "+\
+                                 "one will be generated based on the run numbers.")
 
         self._cal = None
         self._outputWsName = None
@@ -187,6 +190,7 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
 
         self.execDiffOnly(sampleRuns)
 
+    #pylint: disable=too-many-branches
     def execDiffOnly(self, sampleRuns):
         """
             Execute the algorithm in diffraction-only mode
@@ -196,8 +200,8 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
         self._vans = self.findRuns(self.getPropertyValue("Vanadium"))
 
         # Load all sample and vanadium files, and add the resulting workspaces to the DRangeToWsMaps.
-        for file in self._sams + self._vans:
-            Load(Filename=file, OutputWorkspace=file, SpectrumMin=3, SpectrumMax=962)
+        for fileName in self._sams + self._vans:
+            Load(Filename=fileName, OutputWorkspace=fileName, SpectrumMin=3, SpectrumMax=962)
         for sam in self._sams:
             self._samMap.addWs(sam)
         for van in self._vans:
@@ -255,13 +259,16 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
         intersections = getIntersectionsOfRanges(self._samMap.getMap().keys())
 
         dataX = result.dataX(0)
-        dataY = []; dataE = []
+        dataY = []
+        dataE = []
         for i in range(0, len(dataX)-1):
             x = ( dataX[i] + dataX[i+1] ) / 2.0
             if isInRanges(intersections, x):
-                dataY.append(2); dataE.append(2)
+                dataY.append(2)
+                dataE.append(2)
             else:
-                dataY.append(1); dataE.append(1)
+                dataY.append(1)
+                dataE.append(1)
 
         # apply scalar data to result workspace
         for i in range(0, result.getNumberHistograms()):

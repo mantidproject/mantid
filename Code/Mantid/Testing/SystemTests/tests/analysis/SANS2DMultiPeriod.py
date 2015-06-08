@@ -4,9 +4,7 @@ import stresstesting
 from mantid.simpleapi import *
 from ISISCommandInterface import *
 from mantid.simpleapi import *
-from mantid import config
 from SANSBatchMode import *
-import os.path
 
 # test batch mode with sans2d and selecting a period in batch mode
 class SANS2DMultiPeriodSingle(stresstesting.MantidStressTest):
@@ -46,4 +44,4 @@ class SANS2DMultiPeriodBatch(SANS2DMultiPeriodSingle):
 
         BatchReduce(csv_file, 'nxs', saveAlgs={})
         self.reduced = '5512_SANS2DBatch'
-    
+

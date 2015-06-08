@@ -65,13 +65,14 @@ class ReactorSANSResolution(PythonAlgorithm):
             and source_sample_distance is not None and sample_detector_distance is not None:
             k = 2.0*math.pi/wvl
             res_factor = math.pow(k*source_apert_radius/source_sample_distance, 2)
-            res_factor += (math.pow(k*sample_apert_radius*(source_sample_distance+sample_detector_distance)/(source_sample_distance*sample_detector_distance), 2)/4.0)
+            res_factor += (math.pow(k*sample_apert_radius*(source_sample_distance+sample_detector_distance)/
+                                    (source_sample_distance*sample_detector_distance), 2)/4.0)
             res_factor += math.pow(k*pixel_size_x/sample_detector_distance, 2)/12.0
 
             for i in range(len(input_ws.readX(0))):
                 input_ws.dataDx(0)[i] = math.sqrt(res_factor+math.pow((input_ws.readX(0)[i]*d_wvl), 2)/6.0)
         else:
-            raise RuntimeError, "ReactorSANSResolution could not find all the run parameters needed to compute the resolution."
+            raise RuntimeError("ReactorSANSResolution could not find all the run parameters needed to compute the resolution.")
 
 
 AlgorithmFactory.subscribe(ReactorSANSResolution)

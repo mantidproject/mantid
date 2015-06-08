@@ -12,6 +12,7 @@ set ( SRC_FILES
 	src/BivariateNormal.cpp
 	src/Bk2BkExpConvPV.cpp
 	src/BoundaryConstraint.cpp
+	src/CalculateChiSquared.cpp
 	src/CalculateGammaBackground.cpp
 	src/CalculateMSVesuvio.cpp
 	src/Chebyshev.cpp
@@ -24,6 +25,7 @@ set ( SRC_FILES
 	src/CostFuncFitting.cpp
 	src/CostFuncLeastSquares.cpp
 	src/CostFuncRwp.cpp
+	src/CostFuncUnweightedLeastSquares.cpp
 	src/CubicSpline.cpp
 	src/DampingMinimizer.cpp
 	src/DeltaFunction.cpp
@@ -52,7 +54,10 @@ set ( SRC_FILES
 	src/Gaussian.cpp
 	src/GaussianComptonProfile.cpp
 	src/GramCharlierComptonProfile.cpp
+	src/IFittingAlgorithm.cpp
 	src/IkedaCarpenterPV.cpp
+	src/LatticeDomainCreator.cpp
+	src/LatticeFunction.cpp
 	src/LeBailFit.cpp
 	src/LeBailFunction.cpp
 	src/LevenbergMarquardtMDMinimizer.cpp
@@ -123,6 +128,7 @@ set ( INC_FILES
 	inc/MantidCurveFitting/BivariateNormal.h
 	inc/MantidCurveFitting/Bk2BkExpConvPV.h
 	inc/MantidCurveFitting/BoundaryConstraint.h
+	inc/MantidCurveFitting/CalculateChiSquared.h
 	inc/MantidCurveFitting/CalculateGammaBackground.h
 	inc/MantidCurveFitting/CalculateMSVesuvio.h
 	inc/MantidCurveFitting/Chebyshev.h
@@ -135,6 +141,7 @@ set ( INC_FILES
 	inc/MantidCurveFitting/CostFuncFitting.h
 	inc/MantidCurveFitting/CostFuncLeastSquares.h
 	inc/MantidCurveFitting/CostFuncRwp.h
+	inc/MantidCurveFitting/CostFuncUnweightedLeastSquares.h
 	inc/MantidCurveFitting/CubicSpline.h
 	inc/MantidCurveFitting/DampingMinimizer.h
 	inc/MantidCurveFitting/DeltaFunction.h
@@ -144,7 +151,7 @@ set ( INC_FILES
 	inc/MantidCurveFitting/DllConfig.h
 	inc/MantidCurveFitting/DynamicKuboToyabe.h
 	inc/MantidCurveFitting/EndErfc.h
-    inc/MantidCurveFitting/EstimatePeakErrors.h
+	inc/MantidCurveFitting/EstimatePeakErrors.h
 	inc/MantidCurveFitting/ExpDecay.h
 	inc/MantidCurveFitting/ExpDecayMuon.h
 	inc/MantidCurveFitting/ExpDecayOsc.h
@@ -166,8 +173,11 @@ set ( INC_FILES
 	inc/MantidCurveFitting/Gaussian.h
 	inc/MantidCurveFitting/GaussianComptonProfile.h
 	inc/MantidCurveFitting/GramCharlierComptonProfile.h
+	inc/MantidCurveFitting/IFittingAlgorithm.h
 	inc/MantidCurveFitting/IkedaCarpenterPV.h
 	inc/MantidCurveFitting/Jacobian.h
+	inc/MantidCurveFitting/LatticeDomainCreator.h
+	inc/MantidCurveFitting/LatticeFunction.h
 	inc/MantidCurveFitting/LeBailFit.h
 	inc/MantidCurveFitting/LeBailFunction.h
 	inc/MantidCurveFitting/LevenbergMarquardtMDMinimizer.h
@@ -234,6 +244,7 @@ set ( TEST_FILES
 	BivariateNormalTest.h
 	Bk2BkExpConvPVTest.h
 	BoundaryConstraintTest.h
+	CalculateChiSquaredTest.h
 	CalculateGammaBackgroundTest.h
 	CalculateMSVesuvioTest.h
 	ChebyshevTest.h
@@ -244,6 +255,7 @@ set ( TEST_FILES
 	ConvertToYSpaceTest.h
 	ConvolutionTest.h
 	ConvolveWorkspacesTest.h
+	CostFuncUnweightedLeastSquaresTest.h
 	CubicSplineTest.h
 	DampingMinimizerTest.h
 	DeltaFunctionTest.h
@@ -251,7 +263,7 @@ set ( TEST_FILES
 	DiffSphereTest.h
 	DynamicKuboToyabeTest.h
 	EndErfcTest.h
-    EstimatePeakErrorsTest.h
+	EstimatePeakErrorsTest.h
 	ExpDecayMuonTest.h
 	ExpDecayOscTest.h
 	ExpDecayTest.h
@@ -274,6 +286,8 @@ set ( TEST_FILES
 	IPeakFunctionCentreParameterNameTest.h
 	IPeakFunctionIntensityTest.h
 	IkedaCarpenterPVTest.h
+	LatticeDomainCreatorTest.h
+	LatticeFunctionTest.h
 	LeBailFitTest.h
 	LeBailFunctionTest.h
 	LeastSquaresTest.h
@@ -326,6 +340,11 @@ set ( TEST_FILES
 	VoigtTest.h
 )
 
+if (COVERALLS)
+    foreach( loop_var ${SRC_FILES} ${INC_FILES})
+      set_property(GLOBAL APPEND PROPERTY COVERAGE_SRCS "${CMAKE_CURRENT_SOURCE_DIR}/${loop_var}")
+    endforeach(loop_var)
+endif()
 
 if(UNITY_BUILD)
   include(UnityBuild)
@@ -349,7 +368,7 @@ set_property ( TARGET CurveFitting PROPERTY FOLDER "MantidFramework" )
 
 include_directories ( inc )
 
-target_link_libraries ( CurveFitting ${MANTIDLIBS} ${GSL_LIBRARIES} )
+target_link_libraries ( CurveFitting LINK_PRIVATE ${MANTIDLIBS} ${GSL_LIBRARIES} )
 
 # Add the unit tests directory
 add_subdirectory ( test )

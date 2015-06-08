@@ -8,7 +8,8 @@ class ReflectometryQuickMultiDetector(stresstesting.MantidStressTest):
     This is a system test for the top-level quick routines. Quick is the name given to the
     ISIS reflectometry reduction scripts.
 
-    This test uses the multidetector functionality within the script. No transmission runs are passed, so it uses correction algorithms instead.
+    This test uses the multidetector functionality within the script.
+    No transmission runs are passed, so it uses correction algorithms instead.
     """
 
     def runTest(self):
@@ -18,8 +19,10 @@ class ReflectometryQuickMultiDetector(stresstesting.MantidStressTest):
 
         first_ws = ws[0]
 
-        quick.quick_explicit(first_ws, i0_monitor_index=0, lambda_min=0.8, lambda_max=14.5,  background_min=0.8, background_max=14.5, int_min=0.8, int_max=14.5,
-                   point_detector_start=0, point_detector_stop=245, multi_detector_start=1, theta=0, pointdet=False,  roi=[74,74])
+        quick.quick_explicit(first_ws, i0_monitor_index=0, lambda_min=0.8, lambda_max=14.5,  background_min=0.8,
+                             background_max=14.5, int_min=0.8, int_max=14.5,
+                             point_detector_start=0, point_detector_stop=245, multi_detector_start=1, theta=0,
+                             pointdet=False,  roi=[74,74])
 
     def validate(self):
         self.disableChecking.append('Instrument')

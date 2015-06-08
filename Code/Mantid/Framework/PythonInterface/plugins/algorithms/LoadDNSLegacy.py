@@ -1,3 +1,4 @@
+#pylint: disable=no-init
 from mantid.kernel import *
 from mantid.api import *
 import mantid.simpleapi as api
@@ -46,7 +47,6 @@ class LoadDNSLegacy(PythonAlgorithm):
     def PyExec(self):
         # Input
         filename = self.getPropertyValue("Filename")
-        outws = self.getPropertyValue("OutputWorkspace")
         pol = self.getPropertyValue("Polarisation")
 
         # load data array from the given file
@@ -64,8 +64,9 @@ class LoadDNSLegacy(PythonAlgorithm):
         metadata = DNSdata()
         metadata.read_legacy(filename)
         run = __temporary_workspace__.mutableRun()
-        run.setStartAndEndTime(DateAndTime(metadata.start_time), \
-                DateAndTime(metadata.end_time))
+        if metadata.start_time and metadata.end_time:
+            run.setStartAndEndTime(DateAndTime(metadata.start_time), \
+                    DateAndTime(metadata.end_time))
         # add name of file as a run title
         fname = os.path.splitext(os.path.split(filename)[1])[0]
         run.addProperty('run_title', fname, True)

@@ -2,6 +2,8 @@
 #define _vtkMDEWSource_h
 
 #include "vtkUnstructuredGridAlgorithm.h"
+#include "MantidVatesAPI/Normalization.h"
+#include "MantidVatesAPI/vtkDataSetFactory.h"
 #include <string>
 
 namespace Mantid
@@ -45,11 +47,12 @@ class VTK_EXPORT vtkMDEWSource : public vtkUnstructuredGridAlgorithm
 {
 public:
   static vtkMDEWSource *New();
-  vtkTypeMacro(vtkMDEWSource, vtkUnstructuredGridAlgorithm);
+  vtkTypeMacro(vtkMDEWSource, vtkUnstructuredGridAlgorithm)
   void PrintSelf(ostream& os, vtkIndent indent);
   
   void SetWsName(std::string wsName);
   void SetDepth(int depth);
+  void SetNormalization(int option);
 
   //------- MDLoadingView methods ----------------
   virtual double getTime() const;
@@ -97,16 +100,8 @@ private:
   /// Cached typename.
   std::string typeName;
 
-
-  // This is part of a workaround for a ParaView providing not the start time of 
-  // of current data set. 
-  ///Startup flag
-  bool m_isStartup;
-
-  // This is part of a workaround for a ParaView providing not the start time of 
-  // of current data set. 
-  /// Startup time value
-  double m_startupTimeValue;
+  /// Normalization option
+  Mantid::VATES::VisualNormalization m_normalization;
 
   vtkMDEWSource(const vtkMDEWSource&);
   void operator = (const vtkMDEWSource&);

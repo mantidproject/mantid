@@ -19,7 +19,11 @@ DECLARE_ALGORITHM(RefinePowderInstrumentParameters3)
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
-RefinePowderInstrumentParameters3::RefinePowderInstrumentParameters3() {}
+RefinePowderInstrumentParameters3::RefinePowderInstrumentParameters3()
+    : m_dataWS(), m_wsIndex(-1), m_paramTable(), m_fitMode(MONTECARLO),
+      m_stdMode(CONSTANT), m_numWalkSteps(-1), m_randomSeed(-1),
+      m_profileParameters(), m_positionFunc(), m_dampingFactor(0.),
+      m_bestChiSq(0.), m_bestChiSqStep(-1), m_bestChiSqGroup(-1) {}
 
 //----------------------------------------------------------------------------------------------
 /** Destructor

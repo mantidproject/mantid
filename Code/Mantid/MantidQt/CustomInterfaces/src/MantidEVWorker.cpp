@@ -8,7 +8,7 @@
 #include "MantidAPI/IEventWorkspace.h"
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/IPeaksWorkspace.h"
-#include "MantidAPI/IPeak.h"
+#include "MantidGeometry/Crystal/IPeak.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidKernel/EmptyValues.h"
 #include "MantidKernel/Logger.h"
@@ -20,6 +20,7 @@ namespace CustomInterfaces
 {
 
 using namespace Mantid::Kernel;
+using namespace Mantid::Geometry;
 using namespace Mantid::API;
 
 namespace
@@ -306,7 +307,7 @@ bool MantidEVWorker::findPeaks( const std::string & ev_ws_name,
 		IPeaksWorkspace_sptr peaks_ws = ADS.retrieveWS<IPeaksWorkspace>(peaks_ws_name);
 		for (int iPeak=0; iPeak < peaks_ws->getNumberPeaks(); iPeak++)
 		{
-		  Mantid::API::IPeak& peak = peaks_ws->getPeak( iPeak);
+		  Mantid::Geometry::IPeak& peak = peaks_ws->getPeak( iPeak);
 		  if (use_monitor_counts)
 			peak.setMonitorCount( monitor_count );
 		  else
@@ -452,6 +453,7 @@ bool MantidEVWorker::saveIsawPeaks( const std::string & peaks_ws_name,
  *
  *  @param peaks_ws_name   The name of the peaks workspace to save.
  *  @param file_name       The name of the NeXus file to write to.
+ *  @param append
  *
  *  @return true if SaveNexusPeaks completed successfully.
  */

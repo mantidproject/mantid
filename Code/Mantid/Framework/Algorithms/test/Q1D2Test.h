@@ -255,7 +255,7 @@ public:
     
     Mantid::API::AnalysisDataService::Instance().remove(outputWS);
   }
-  
+
   void testCuts()
   {
     Mantid::Algorithms::Q1D2 Q1D;

@@ -5,7 +5,6 @@ from mantid.simpleapi import *
 from mantid.api import Workspace,IEventWorkspace
 
 from Direct.PropertyManager import PropertyManager
-from Direct.RunDescriptor   import RunDescriptor
 import ISIS_MariReduction as mr
 
 #----------------------------------------------------------------------
@@ -81,8 +80,8 @@ class ISIS_ReductionWrapperValidate(stresstesting.MantidStressTest):
 
     def runTest(self):
        # prepare reduction variable
-        # At the moment MARI reduction differs from it original by 
-        # less then 1% due to changes in the procedure. At the moment 
+        # At the moment MARI reduction differs from it original by
+        # less then 1% due to changes in the procedure. At the moment
         # we have to account for this but when we make it the same,
         # the code below should be commented. Meanwhile it tests workspace
         # workflow
@@ -164,7 +163,7 @@ class ISISLoadFilesRAW(stresstesting.MantidStressTest):
         self.assertEqual(ws.getNumberHistograms(),41472)
         self.assertEqual(mon_ws.getNumberHistograms(),4)
 
-        
+
         #
         self.valid = True
 

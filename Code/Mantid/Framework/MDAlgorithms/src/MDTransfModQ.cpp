@@ -4,7 +4,9 @@
 namespace Mantid {
 namespace MDAlgorithms {
 // register the class, whith conversion factory under ModQ name
+// clang-format off
 DECLARE_MD_TRANSFID(MDTransfModQ, |Q|)
+// clang-format on
 
 /**method calculates the units, the transformation expects the input ws to be
 in. If the input ws is in different units,
@@ -406,7 +408,7 @@ MDTransfModQ::MDTransfModQ()
       m_Ki(1.), m_Ei(1.), m_pEfixedArray(NULL), m_pDetMasks(NULL) {}
 
 std::vector<std::string> MDTransfModQ::getEmodes() const {
-  return Kernel::DeltaEMode().availableTypes();
+  return Kernel::DeltaEMode::availableTypes();
 }
 } // End MDAlgorighms namespace
 } // End Mantid namespace

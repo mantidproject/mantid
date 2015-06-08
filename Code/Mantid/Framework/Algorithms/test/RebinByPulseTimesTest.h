@@ -154,7 +154,9 @@ public:
 //=====================================================================================
 // Performance Tests
 //=====================================================================================
+// clang-format off
 class RebinByPulseTimesTestPerformance : public CxxTest::TestSuite, public RebinByTimeBaseTestPerformance<RebinByPulseTimes>
+// clang-format on
 {
 
 public:

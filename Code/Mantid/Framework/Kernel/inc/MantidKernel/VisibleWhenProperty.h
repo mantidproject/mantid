@@ -44,30 +44,23 @@ public:
    * (as string) to check for
    */
   VisibleWhenProperty(std::string otherPropName, ePropertyCriterion when,
-                      std::string value = "")
-      : EnabledWhenProperty(otherPropName, when, value) {}
+                      std::string value = "");
 
   /// Destructor
-  virtual ~VisibleWhenProperty() {}
+  virtual ~VisibleWhenProperty();
 
   //--------------------------------------------------------------------------------------------
   /// Return true always
-  virtual bool isEnabled(const IPropertyManager *) const { return true; }
+  virtual bool isEnabled(const IPropertyManager *) const;
 
   //--------------------------------------------------------------------------------------------
   /// Return true/false based on whether the other property satisfies the
   /// criterion
-  virtual bool isVisible(const IPropertyManager *algo) const {
-    return this->fulfillsCriterion(algo);
-  }
+  virtual bool isVisible(const IPropertyManager *algo) const;
 
   //--------------------------------------------------------------------------------------------
   /// Make a copy of the present type of validator
-  virtual IPropertySettings *clone() {
-    VisibleWhenProperty *out = new VisibleWhenProperty(
-        this->m_otherPropName, this->m_when, this->m_value);
-    return out;
-  }
+  virtual IPropertySettings *clone();
 };
 
 } // namespace Kernel

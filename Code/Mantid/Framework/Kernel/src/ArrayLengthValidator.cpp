@@ -1,5 +1,4 @@
 #include "MantidKernel/ArrayLengthValidator.h"
-#include "MantidKernel/System.h"
 
 using namespace Mantid::Kernel;
 

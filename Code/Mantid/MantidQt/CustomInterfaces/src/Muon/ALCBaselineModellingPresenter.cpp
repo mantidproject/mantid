@@ -31,7 +31,6 @@ namespace CustomInterfaces
 
     // Model updates
     connect(m_model, SIGNAL(dataChanged()), SLOT(updateDataCurve()));
-    connect(m_model, SIGNAL(dataChanged()), SLOT(clearSections()));
     connect(m_model, SIGNAL(correctedDataChanged()), SLOT(updateCorrectedCurve()));
     connect(m_model, SIGNAL(fittedFunctionChanged()), SLOT(updateFunction()));
     connect(m_model, SIGNAL(fittedFunctionChanged()), SLOT(updateBaselineCurve()));
@@ -202,23 +201,12 @@ namespace CustomInterfaces
   {
     if (IFunction_const_sptr fittedFunc = m_model->fittedFunction())
     {
-      QString funcString = QString::fromStdString(fittedFunc->asString());
-      m_view->setFunction(funcString);
+      m_view->setFunction(fittedFunc);
     }
     else
     {
-      m_view->setFunction(QString(""));
+      m_view->setFunction(IFunction_const_sptr());
     }
-  }
-
-  void ALCBaselineModellingPresenter::clearSections()
-  {
-    for (int i = 0; i < m_view->noOfSectionRows(); ++i)
-    {
-      m_view->deleteSectionSelector(i);
-    }
-
-    m_view->setNoOfSectionRows(0);
   }
 
 } // namespace CustomInterfaces
