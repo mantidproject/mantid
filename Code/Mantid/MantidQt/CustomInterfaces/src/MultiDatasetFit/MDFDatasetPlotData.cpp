@@ -24,7 +24,8 @@ DatasetPlotData::DatasetPlotData(const QString& wsName, int wsIndex, const QStri
   m_dataCurve(new QwtPlotCurve(wsName + QString(" (%1)").arg(wsIndex))),
   m_dataErrorCurve(NULL),
   m_calcCurve(NULL),
-  m_diffCurve(NULL)
+  m_diffCurve(NULL),
+  m_showDataErrorBars(false)
 {
   // get the data workspace
   auto ws = Mantid::API::AnalysisDataService::Instance().retrieveWS<Mantid::API::MatrixWorkspace>( wsName.toStdString() );
