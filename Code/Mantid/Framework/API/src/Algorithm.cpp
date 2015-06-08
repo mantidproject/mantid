@@ -1347,8 +1347,7 @@ bool Algorithm::processGroups() {
         // name as an output (i.e. copy name button in algorithm dialog used)
         // (only need to do this for a single input, multiple will be handled
         // by ADS)
-        if (inputProp != m_inputWorkspaceProps.end() &&
-            dynamic_cast<Property *>(*inputProp)->value() == prop->value())
+        if (inputProp != m_inputWorkspaceProps.end())
           outName = m_groups[inputProp - m_inputWorkspaceProps.begin()][entry]
                         ->name();
 
