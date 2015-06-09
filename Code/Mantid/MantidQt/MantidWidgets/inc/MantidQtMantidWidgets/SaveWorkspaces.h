@@ -55,6 +55,8 @@ namespace MantidQt
 
     signals:
       void closing();
+      void createZeroErrorFreeWorkspace(QString& originalWorkspace, QString& zeroFreeWorkspace);
+      void deleteZeroErrorFreeWorkspace(QString& zeroFreeWorkspace);
 
     private:
       QLineEdit *m_fNameEdit;
@@ -75,6 +77,8 @@ namespace MantidQt
       void addButtonsDisab(int row);
       void closeEvent(QCloseEvent *event);
       QString saveList(const QList<QListWidgetItem*> & list, const QString & algorithm, QString fileBase, bool toAppend);
+      QHash<QString, QString> provideZeroFreeWorkspaces(const QListWidget * workspaces);
+      void removeZeroFreeWorkspaces(QHash<QString, QString> workspaces);
 
     private slots:
       void saveSel();

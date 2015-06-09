@@ -1157,7 +1157,13 @@ def FindBeamCentre(rlow, rupp, MaxIter = 10, xstart = None, ystart = None, toler
 
 
 ###################### Utility functions ####################################################
-def CreateZeroFreeClonedWorkspace(input_workspace_name, output_workspace_name):
+def CreateZeroErrorFreeClonedWorkspace(input_workspace_name, output_workspace_name):
+    """
+        Creates a zero-error-free workspace
+        @param input_workspace_name :  name of the workspace which might contain zero-error values
+        @param output_workspace_name : name of the workspace which will have no zero-error values
+        @return: success message
+    """
     # Load the input workspace
     if not input_workspace_name in mtd:
         message = 'Failed to create a zero error free cloned workspace: The input workspace does not seem to exist.'
@@ -1183,6 +1189,24 @@ def CreateZeroFreeClonedWorkspace(input_workspace_name, output_workspace_name):
 
     print message
     return message
+
+def DeleteZeroErrorFreeClonedWorkspace(input_workspace_name):
+    """
+        Deletes a zero-error-free workspace
+        @param input_workspace_name :  name of the workspace which might contain zero-error values
+        @return: success message
+    """
+    message = ""
+
+    if input_workspace_name in mtd:
+        DeleteWorkspace(Workspace=input_workspace_name)
+        message = 'Sucess'
+    else:
+        message = 'Failed to delete a zero-error free workspace'
+
+    print message
+    return message
+
 
 ###############################################################################
 ######################### Start of Deprecated Code ############################

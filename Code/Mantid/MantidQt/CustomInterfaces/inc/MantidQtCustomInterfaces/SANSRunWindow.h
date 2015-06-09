@@ -206,6 +206,10 @@ private:
   public slots:
      /// apply mask
   void applyMask(const QString& wsName,bool time_pixel);
+  /// Create a zero error free clone for the specified workspace
+  void createZeroErrorFreeClone(QString& originalWorkspaceName,QString& clonedWorkspaceName);
+  /// Destroy a zero error free cloned workspace
+  void deleteZeroErrorFreeClone(QString& clonedWorkspaceName);
 
 private slots:
   /// phi masking has changed 
@@ -362,8 +366,6 @@ private:
   bool runFilesAreValid();
   QString reduceSingleRun() const;
   void setValidators();
-
-  void createZeroErrorFreeClone(QString originalWorkspaceName,QString clonedWorkspaceName);
 
   UserSubWindow * slicingWindow;
 

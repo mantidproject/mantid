@@ -306,6 +306,9 @@ QString SaveWorkspaces::getSaveAlgExt(const QString & algName)
 */
 void SaveWorkspaces::saveSel()
 {
+  // For each selected workspace, provide an zero-error free clone
+  QHash<QString, QString> workspaces = provideZeroFreeWorkspaces(m_workspaces);
+
   QString saveCommands;
   for(SavFormatsConstIt i = m_savFormats.begin(); i != m_savFormats.end(); ++i)
   {//the key to a pointer to the check box that the user may have clicked
@@ -335,7 +338,10 @@ void SaveWorkspaces::saveSel()
   }//end loop over formats
 
   saveCommands += "print 'success'";
-  QString status(runPythonCode(saveCommands).trimmed()); 
+  QString status(runPythonCode(saveCommands).trimmed());
+
+  removeZeroFreeWorkspaces(workspaces);
+
   if ( status != "success" )
   {
     QMessageBox::critical(this, "Error saving workspace", "One of the workspaces could not be saved in one of the selected formats");
@@ -373,5 +379,34 @@ void SaveWorkspaces::saveFileBrowse()
     
     QString directory = QFileInfo(oFile).path();
     prevValues.setValue("dir", directory);
+  }
+}
+
+/**
+ * Goes through all selected workspaces and maps them to a zero-error free clone
+ * @param workspaces :: a QListWIdget which contains the selected workspaces
+ * @returns a hash which maps the original workspace to the zero-error free workspace
+ */
+QHash<QString, QString> SaveWorkspaces::provideZeroFreeWorkspaces(const QListWidget * workspaces) {
+  auto wsList = workspaces->selectedItems();
+  QHash<QString, QString> workspaceMap;
+  for (auto it = wsList.begin(); it != wsList.end(); ++it) {
+    auto wsName = (*it)->text();
+    auto cloneName = wsName + "_clone";
+    emit createZeroErrorFreeWorkspace(wsName, cloneName);
+    workspaceMap.insert(wsName, cloneName);
+  }
+
+  return workspaceMap;
+}
+
+/**
+ * Remove all the zero-error free workspaces
+ * @param workspaces :: a map containing the names of all zero-error-free workspaces.
+ */
+void SaveWorkspaces::removeZeroFreeWorkspaces(QHash<QString, QString> workspaces) {
+  auto zeroFreeWorkspaceNames = workspaces.values();
+  for (auto it = zeroFreeWorkspaceNames.begin(); it != zeroFreeWorkspaceNames.end(); ++it) {
+    emit deleteZeroErrorFreeWorkspace((*it));
   }
 }

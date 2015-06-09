@@ -262,7 +262,7 @@ class TestSans2DIsisRemoveZeroErrors(unittest.TestCase):
         ws_name = 'original'
         ws_clone_name = 'clone'
         # Act
-        message = i.CreateZeroFreeClonedWorkspace(input_workspace_name = ws_name, output_workspace_name = ws_clone_name)
+        message = i.CreateZeroErrorFreeClonedWorkspace(input_workspace_name = ws_name, output_workspace_name = ws_clone_name)
         # Assert
         message.strip()
         self.assertTrue(not message.startswith('Success'))
@@ -273,7 +273,7 @@ class TestSans2DIsisRemoveZeroErrors(unittest.TestCase):
         ws_clone_name = 'clone'
         self._setup_workspace(ws_name, 'Event')
         # Act
-        message = i.CreateZeroFreeClonedWorkspace(input_workspace_name = ws_name, output_workspace_name = ws_clone_name)
+        message = i.CreateZeroErrorFreeClonedWorkspace(input_workspace_name = ws_name, output_workspace_name = ws_clone_name)
         # Assert
         message.strip()
         self.assertTrue(not message.startswith('Success'))
@@ -282,14 +282,13 @@ class TestSans2DIsisRemoveZeroErrors(unittest.TestCase):
         self._removeWorkspace(ws_name)
         self.assertTrue(not ws_name in mtd)
 
-
     def test_that_zeros_are_removed_correctly(self):
         # Arrange
         ws_name = 'original'
         ws_clone_name = 'clone'
         self._setup_workspace(ws_name, 'Histogram')
         # Act
-        message = i.CreateZeroFreeClonedWorkspace(input_workspace_name = ws_name, output_workspace_name = ws_clone_name)
+        message = i.CreateZeroErrorFreeClonedWorkspace(input_workspace_name = ws_name, output_workspace_name = ws_clone_name)
         # Assert
         message.strip()
         self.assertTrue(message.startswith('Success'))
@@ -299,6 +298,26 @@ class TestSans2DIsisRemoveZeroErrors(unittest.TestCase):
         self._removeWorkspace(ws_clone_name)
         self.assertTrue(not ws_name in mtd)
         self.assertTrue(not ws_clone_name in mtd)
+
+    def test_that_deletion_of_non_existent_ws_creates_error_message(self):
+        # Arrange
+        ws_name = 'ws'
+        # Act
+        message = i.DeleteZeroErrorFreeClonedWorkspace(input_workspace_name = ws_name)
+        # Assert
+        message.strip()
+        self.assertTrue(not message.startswith('Success'))
+
+    def test_that_deletion_of_extent_ws_is_successful(self):
+        # Arrange
+        ws_name = 'ws'
+        self._setup_workspace(ws_name, 'Histogram')
+        # Act + Assert
+        self.assertTrue(ws_name in mtd)
+        message = i.DeleteZeroErrorFreeClonedWorkspace(input_workspace_name = ws_name)
+        message.strip()
+        self.assertTrue(not message.startswith('Success'))
+        self.assertTrue(not ws_name in mtd)
 
 if __name__ == '__main__':
     unittest.main()

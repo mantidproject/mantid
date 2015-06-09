@@ -429,6 +429,9 @@ void SANSRunWindow::saveWorkspacesDialog()
   //we need know if we have a pointer to a valid window or not
   connect(m_saveWorkspaces, SIGNAL(closing()),
     this, SLOT(saveWorkspacesClosed()));
+  // Connect the request for a zero-error-free workspace
+  connect(m_saveWorkspaces, SIGNAL(createZeroErrorFreeWorkspace(QString& , QString&)),
+          this, SLOT(createZeroErrorFreeClone(QString&, QString&)));
   m_uiForm.saveSel_btn->setEnabled(false);
   m_saveWorkspaces->show();
 }
@@ -3825,19 +3828,37 @@ void SANSRunWindow::setValidators()
  * @param clonedWorkspaceName :: The name of cloned workspace which should have its zero erros removed.
  * @returns The name of the cloned workspace
  */
-void SANSRunWindow::createZeroErrorFreeClone(QString originalWorkspaceName, QString clonedWorkspaceName) {
+void SANSRunWindow::createZeroErrorFreeClone(QString& originalWorkspaceName, QString& clonedWorkspaceName) {
   if (workspaceExists(originalWorkspaceName)) {
     // Run the python script which creates the cloned workspace
-    QString clonedWorkspaceName = originalWorkspaceName + "_cloned_temp";
-    QString pythonCode("print i.CreateZeroErrorFreeClonedWorkspace(InputWorkspace=");
+    QString pythonCode("print i.CreateZeroErrorFreeClonedWorkspace(input_workspace_name=");
     pythonCode += originalWorkspaceName + ",";
-    pythonCode += "OutputWorkspace=" + clonedWorkspaceName + ")";
+    pythonCode += " output_workspace_name=" + clonedWorkspaceName + ")";
 
     QString result(runPythonCode(pythonCode, false));
     result.trimmed();
 
     if (!result.startsWith("Success")) {
       QMessageBox::critical(this, "Error creating a zerror error free cloned workspace", result);
+    }
+  }
+}
+
+/**
+ * Destroy a zero-error free workspace clone.
+ * @param clonedWorkspaceName :: The name of cloned workspace which should have its zero erros removed.
+ */
+void SANSRunWindow::deleteZeroErrorFreeClone(QString& clonedWorkspaceName) {
+  if (workspaceExists(clonedWorkspaceName)) {
+    // Run the python script which destroys the cloned workspace
+    QString pythonCode("print i.DeleteZeroErrorFreeClonedWorkspace(input_workspace_name=");
+    pythonCode += clonedWorkspaceName + ")";
+
+    QString result(runPythonCode(pythonCode, false));
+    result.trimmed();
+
+    if (!result.startsWith("Success")) {
+      QMessageBox::critical(this, "Error deleting a zerror error free cloned workspace", result);
     }
   }
 }
