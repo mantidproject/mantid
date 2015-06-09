@@ -548,7 +548,7 @@ void ReflectometryReductionOne::exec() {
         stitchingDelta, stitchingEnd, stitchingStartOverlap,
         stitchingEndOverlap, wavelengthStep, processingCommands);
   } else if (getPropertyValue("CorrectionAlgorithm") != "None") {
-    IvsLam = polynomialCorrection(IvsLam);
+    IvsLam = algorithmicCorrection(IvsLam);
   } else {
     g_log.warning("No transmission correction will be applied.");
   }
@@ -679,13 +679,13 @@ MatrixWorkspace_sptr ReflectometryReductionOne::transmissonCorrection(
 }
 
 /**
- * Perform Transmission Corrections Using Polynomials.
+ * Perform transmission correction using alternative correction algorithms.
  * @param IvsLam : Run workspace which is to be normalized by the results of the
  * transmission corrections.
- * @return Normalized run workspace by the generated polynomial.
+ * @return Corrected workspace
  */
 MatrixWorkspace_sptr
-ReflectometryReductionOne::polynomialCorrection(MatrixWorkspace_sptr IvsLam) {
+ReflectometryReductionOne::algorithmicCorrection(MatrixWorkspace_sptr IvsLam) {
 
   const std::string corrAlgName = getProperty("CorrectionAlgorithm");
 
