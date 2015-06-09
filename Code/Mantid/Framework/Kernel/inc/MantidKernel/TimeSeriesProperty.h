@@ -273,6 +273,10 @@ public:
   /// Stringize the property
   std::string toString() const;
 
+protected:
+  /// Handle the collision of two time series entries
+  virtual TimeSeriesProperty<TYPE>& handleTimeStampCollisions();
+
 private:
   /// Sort the property into increasing times
   void sort() const;
