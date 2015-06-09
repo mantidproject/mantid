@@ -47,6 +47,20 @@ Output Worskpaces
 
 The output from this algorithm is a MatrixWorskpaces. 
 
+MatrixWorskpace with instrument loaded
+++++++++++++++++++++++++++++++++++++++
+
+For a 2D detector with :math:`n\times m` pixels, the output MatrixWorkspace
+will have :math:`n \times m` spectrum.
+Each spectrum has 1 data point corresponding to 1 detector's count.  
+
+All experiment information, sample environment devices' readings and monitor counts,
+which are recorded in XML files,
+are converted to the properties in output MatrixWorkspace's sample log. 
+
+MatrixWorkspace without instrument loaded
++++++++++++++++++++++++++++++++++++++++++
+
 For a 2D detector with :math:`n\times m` pixels, the output MatrixWorkspace
 will have :math:`n` spectrum, each of which has a vector of length equal to :math:`m`. 
 It can be mapped to the raw data as :math:`WS.readY(i)[j] = X(i+1,j+1)`. 
@@ -61,15 +75,12 @@ Workflow
 
 Algorithm *LoadSpiceXML2DDet* is one of a series of algorithms that are implemented to 
 reduced HFIR HB3A data collected from Anger camera. 
-It will be called at the first step in the complete workflow.  
-
-Instrument will not be loaded to its output workspace. 
-
+It will be called next to *LoadSpiceAscii* to load the detector's reading. 
 
 Usage
 -----
 
-**Example - load a HB3A SPICE .xml file:**
+**Example - load a HB3A SPICE .xml file without loading instrument:**
 
 .. testcode:: ExLoadHB3AXMLData
 

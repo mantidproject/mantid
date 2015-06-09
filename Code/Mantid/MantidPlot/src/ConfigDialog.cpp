@@ -254,6 +254,9 @@ void ConfigDialog::initTablesPage()
 void ConfigDialog::initPlotsPage()
 {
   ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parentWidget());
+  if (!app) {
+    throw std::logic_error("Parent of ConfigDialog is not ApplicationWindow as expected.");
+  }
 
   plotsTabWidget = new QTabWidget();
 
@@ -364,6 +367,9 @@ void ConfigDialog::showFrameWidth(bool ok)
 void ConfigDialog::initPlots3DPage()
 {
   ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parentWidget());
+  if (!app) {
+    throw std::logic_error("Parent of ConfigDialog is not ApplicationWindow as expected.");
+  }
   plots3D = new QWidget();
 
   QGroupBox * topBox = new QGroupBox();
@@ -858,7 +864,7 @@ void ConfigDialog::initMdPlottingVsiTab()
 
   int indexInitialView = vsiInitialView->findData(m_mdSettings.getUserSettingInitialView(), Qt::DisplayRole);
 
-  if (index != -1)
+  if (indexInitialView != -1)
   {
     vsiInitialView->setCurrentIndex(indexInitialView);
   }
@@ -1431,6 +1437,9 @@ void ConfigDialog::initCurveFittingTab()
   }
 
   ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parentWidget());
+  if (!app) {
+    throw std::logic_error("Parent of ConfigDialog is not ApplicationWindow as expected.");
+  }
 
   // Set the correct default property
   QString setting = app->mantidUI->fitFunctionBrowser()->getAutoBackgroundString();
@@ -1505,6 +1514,9 @@ void ConfigDialog::initCurveFittingTab()
 void ConfigDialog::initOptionsPage()
 {
   ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parentWidget());
+  if (!app) {
+    throw std::logic_error("Parent of ConfigDialog is not ApplicationWindow as expected.");
+  }
 
   plotOptions = new QWidget();
 
@@ -1692,6 +1704,9 @@ void ConfigDialog::initAxesPage()
 void ConfigDialog::initCurvesPage()
 {
   ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parentWidget());
+  if (!app) {
+    throw std::logic_error("Parent of ConfigDialog is not ApplicationWindow as expected.");
+  }
 
   curves = new QWidget();
 
@@ -1743,6 +1758,9 @@ void ConfigDialog::initCurvesPage()
 void ConfigDialog::initFittingPage()
 {
   ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parentWidget());
+  if (!app) {
+    throw std::logic_error("Parent of ConfigDialog is not ApplicationWindow as expected.");
+  }
   fitPage = new QWidget();
 
   groupBoxFittingCurve = new QGroupBox();
@@ -1821,6 +1839,9 @@ void ConfigDialog::initFittingPage()
 void ConfigDialog::initConfirmationsPage()
 {
   ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parentWidget());
+  if (!app) {
+    throw std::logic_error("Parent of ConfigDialog is not ApplicationWindow as expected.");
+  }
   confirm = new QWidget();
 
   groupBoxConfirm = new QGroupBox();
@@ -1913,6 +1934,9 @@ void ConfigDialog::languageChange()
 {
   setWindowTitle( tr( "MantidPlot - Choose default settings" ) ); //Mantid
   ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parentWidget());
+  if (!app) {
+    throw std::logic_error("Parent of ConfigDialog is not ApplicationWindow as expected.");
+  }
 
   // pages list
   itemsList->clear();
@@ -2363,10 +2387,10 @@ void ConfigDialog::apply()
       QList<MdiSubWindow *> windows = app->windowsList();
       foreach(MdiSubWindow *w, windows){
         w->setLocale(locale);
-        if(w->isA("Table"))
-          (dynamic_cast<Table *>(w))->updateDecimalSeparators();
-        else if(w->isA("Matrix"))
-          (dynamic_cast<Matrix *>(w))->resetView();
+        if(auto table = dynamic_cast<Table *>(w))
+          table->updateDecimalSeparators();
+        else if(auto matrix = dynamic_cast<Matrix *>(w))
+          matrix->resetView();
       }
       app->modifiedProject();
       QApplication::restoreOverrideCursor();
@@ -2548,6 +2572,9 @@ void ConfigDialog::updateCurveFitSettings()
   }
 
   ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parentWidget());
+  if (!app) {
+    throw std::logic_error("Parent of ConfigDialog is not ApplicationWindow as expected.");
+  }
 
   // cfgSvc.setString("curvefitting.autoBackground", setting);
   app->mantidUI->fitFunctionBrowser()->setAutoBackgroundName(QString::fromStdString(setting));
@@ -2594,8 +2621,9 @@ void ConfigDialog::updateMantidOptionsTab()
      cfgSvc.setString("algorithms.categories.hidden",hiddenCategoryString);
 
     //update the algorithm tree
-    ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parentWidget());
-    app->mantidUI->updateAlgorithms();
+    if (ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parentWidget())) {
+      app->mantidUI->updateAlgorithms();
+    }
   }
 }
 
@@ -2802,6 +2830,9 @@ void ConfigDialog::gotoMantidDirectories()
 void ConfigDialog::switchToLanguage(int param)
 {
   ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parentWidget());
+  if (!app) {
+    throw std::logic_error("Parent of ConfigDialog is not ApplicationWindow as expected.");
+  }
   app->switchToLanguage(param);
   languageChange();
 }

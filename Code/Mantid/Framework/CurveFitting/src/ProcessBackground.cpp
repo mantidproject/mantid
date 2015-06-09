@@ -9,7 +9,7 @@
 #include "MantidCurveFitting/Polynomial.h"
 #include "MantidCurveFitting/Chebyshev.h"
 #include "MantidDataObjects/TableWorkspace.h"
-#include "MantidAPI/IPeak.h"
+#include "MantidGeometry/Crystal/IPeak.h"
 #include "MantidAPI/TableRow.h"
 
 #include <boost/algorithm/string.hpp>
@@ -32,7 +32,9 @@ DECLARE_ALGORITHM(ProcessBackground)
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
-ProcessBackground::ProcessBackground() {}
+ProcessBackground::ProcessBackground()
+    : m_dataWS(), m_outputWS(), m_wsIndex(-1), m_lowerBound(DBL_MAX),
+      m_upperBound(DBL_MIN), m_bkgdType(), m_numFWHM(-1.) {}
 
 //----------------------------------------------------------------------------------------------
 /** Destructor

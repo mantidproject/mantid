@@ -1,7 +1,7 @@
 #pylint: disable=invalid-name, too-many-lines, too-many-instance-attributes
 import numpy
 
-from FilterEvents.Ui_MainWindow import Ui_MainWindow #import line for the UI python class
+from FilterEvents.ui_MainWindow import Ui_MainWindow #import line for the UI python class
 from PyQt4 import QtCore, QtGui
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
@@ -33,7 +33,7 @@ class MyPopErrorMsg(QWidget):
     def __init__(self):
         """ Init
         """
-        import FilterEvents.Ui_ErrorMessage as errui
+        import FilterEvents.ui_ErrorMessage as errui
         QWidget.__init__(self)
 
 
@@ -61,7 +61,7 @@ class MyPopErrorMsg(QWidget):
     def XpaintEvent(self, _):
         """ ???
         """
-        import FilterEvents.Ui_ErrorMessage as errui
+        import FilterEvents.ui_ErrorMessage as errui
 
         self.ui = errui.Ui_Dialog()
         self.ui.setupUi(self)
@@ -73,7 +73,7 @@ class MainWindow(QtGui.QMainWindow):
 
     Copy to ui.setupUI
 
-    # Version 3.0 + Import for Ui_MainWindow.py
+    # Version 3.0 + Import for ui_MainWindow.py
         from MplFigureCanvas import Qt4MplCanvas
 
         # Replace 'self.graphicsView = QtGui.QtGraphicsView' with the following
@@ -123,7 +123,7 @@ class MainWindow(QtGui.QMainWindow):
         self.centralwidget = QtGui.QWidget(self)
 
         # UI Window (from Qt Designer)
-        self.ui = Ui_MainWindow()
+        self.ui = ui_MainWindow()
         self.ui.setupUi(self)
 
         # Do initialize plotting

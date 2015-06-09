@@ -44,12 +44,14 @@ class RefLReduction(PythonAlgorithm):
                                               IntArrayLengthValidator(2), direction=Direction.Input),
                              "Pixel range defining the background for the normalization")
         self.declareProperty("LowResDataAxisPixelRangeFlag", True,
-                             doc="If true, the low resolution direction of the data will be cropped according to the lowResDataAxisPixelRange property")
+                             doc="If true, the low resolution direction of the data will be cropped according "+\
+                             "to the lowResDataAxisPixelRange property")
         self.declareProperty(IntArrayProperty("LowResDataAxisPixelRange", [115,210],
                                               IntArrayLengthValidator(2), direction=Direction.Input),
                              "Pixel range to use in the low resolution direction of the data")
         self.declareProperty("LowResNormAxisPixelRangeFlag", True,
-                             doc="If true, the low resolution direction of the normalization run will be cropped according to the LowResNormAxisPixelRange property")
+                             doc="If true, the low resolution direction of the normalization run will be cropped "+\
+                             "according to the LowResNormAxisPixelRange property")
         self.declareProperty(IntArrayProperty("LowResNormAxisPixelRange", [115,210],
                                               IntArrayLengthValidator(2), direction=Direction.Input),
                              "Pixel range to use in the low resolution direction of the normalizaion run")
@@ -71,16 +73,13 @@ class RefLReduction(PythonAlgorithm):
         self.declareProperty("IncidentMediumSelected", "", doc="Incident medium used for those runs")
         self.declareProperty("GeometryCorrectionFlag", False, doc="Use or not the geometry correction")
 
+    #pylint: disable=too-many-locals, too-many-branches
     def PyExec(self):
 
         print '-- > starting new Reflectometer Reduction ...'
 
-        import os
-        import numpy
-        import math
         from reduction.instruments.reflectometer import wks_utility
 
-        from mantid import mtd
         #remove all previous workspaces
         list_mt = mtd.getObjectNames()
         for _mt in list_mt:
@@ -233,7 +232,8 @@ class RefLReduction(PythonAlgorithm):
                                                             is_nexus_detector_rotated_flag)
 
 #        #DEBUG ONLY
-#        wks_utility.ouput_big_ascii_file('/mnt/hgfs/j35/Matlab/DebugMantid/Strange0ValuesToData/data_file_after_low_resolution_integration.txt',
+#        wks_utility.ouput_big_ascii_file(
+#'/mnt/hgfs/j35/Matlab/DebugMantid/Strange0ValuesToData/data_file_after_low_resolution_integration.txt',
 #                                         data_tof_axis,
 #                                         data_y_axis,
 #                                         data_y_error_axis)
@@ -320,12 +320,12 @@ class RefLReduction(PythonAlgorithm):
 
         # apply Scaling factor
         [tof_axis_full, y_axis, y_error_axis, isSFfound] = wks_utility.applyScalingFactor(tof_axis_full,
-                                                                               final_data_y_axis,
-                                                                               final_data_y_error_axis,
-                                                                               incidentMedium,
-                                                                               sfFile,
-                                                                               slitsValuePrecision,
-                                                                               slitsWidthFlag)
+                                                                                          final_data_y_axis,
+                                                                                          final_data_y_error_axis,
+                                                                                          incidentMedium,
+                                                                                          sfFile,
+                                                                                          slitsValuePrecision,
+                                                                                          slitsWidthFlag)
 
 #        #DEBUG ONLY
 #        wks_utility.ouput_big_ascii_file('/mnt/hgfs/j35/Matlab/DebugMantid/Strange0ValuesToData/after_applying_scaling_factor.txt',

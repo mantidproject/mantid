@@ -2,6 +2,7 @@
 #define MANTID_API_IMDHISTOWORKSPACE_H_
 
 #include "MantidKernel/System.h"
+#include "MantidAPI/IMDHistoWorkspace_fwd.h"
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/MultipleExperimentInfos.h"
 
@@ -93,14 +94,10 @@ public:
 
   virtual boost::shared_ptr<IMDHistoWorkspace> clone() const = 0;
 
+
 protected:
   virtual const std::string toString() const;
 };
-
-/// Shared pointer to the IMDWorkspace base class
-typedef boost::shared_ptr<IMDHistoWorkspace> IMDHistoWorkspace_sptr;
-/// Shared pointer to the IMDWorkspace base class (const version)
-typedef boost::shared_ptr<const IMDHistoWorkspace> IMDHistoWorkspace_const_sptr;
 
 } // namespace API
 } // namespace Mantid

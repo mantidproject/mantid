@@ -69,6 +69,13 @@ ConvexPolygon::ConvexPolygon(const ConvexPolygon &rhs) {
 }
 
 /**
+ * Default (no parameters) constructor
+ */
+ConvexPolygon::ConvexPolygon()
+    : m_numVertices(0), m_head(NULL), m_lowestX(0.), m_highestX(0.),
+      m_lowestY(0.), m_highestY(0.) {}
+
+/**
  * Destructor
  */
 ConvexPolygon::~ConvexPolygon() {

@@ -23,7 +23,10 @@ using Kernel::Exception::NotFoundError;
 using std::size_t;
 
 /// Default constructor
-UnwrapSNS::UnwrapSNS() : m_progress(NULL) {}
+UnwrapSNS::UnwrapSNS()
+    : m_conversionConstant(0.), m_inputWS(), m_inputEvWS(), m_LRef(0.),
+      m_L1(0.), m_Tmin(0.), m_Tmax(0.), m_frameWidth(0.), m_numberOfSpectra(0),
+      m_XSize(0), m_progress(NULL) {}
 
 /// Destructor
 UnwrapSNS::~UnwrapSNS() {

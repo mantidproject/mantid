@@ -40,20 +40,20 @@ void MultiplyRange::init() {
 void MultiplyRange::exec() {
   // Get the input workspace and other properties
   MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
-  m_startBin = getProperty("StartBin");
-  m_endBin = getProperty("EndBin");
-  m_factor = getProperty("Factor");
+  int startBin = getProperty("StartBin");
+  int endBin = getProperty("EndBin");
+  double factor = getProperty("Factor");
 
   // A few checks on the input properties
   const int specSize = static_cast<int>(inputWS->blocksize());
-  if (isEmpty(m_endBin))
-    m_endBin = specSize - 1;
+  if (isEmpty(endBin))
+    endBin = specSize - 1;
 
-  if (m_endBin >= specSize) {
+  if (endBin >= specSize) {
     g_log.error("EndBin out of range!");
     throw std::out_of_range("EndBin out of range!");
   }
-  if (m_endBin < m_startBin) {
+  if (endBin < startBin) {
     g_log.error("StartBin must be less than or equal to EndBin");
     throw std::out_of_range("StartBin must be less than or equal to EndBin");
   }
@@ -81,12 +81,12 @@ void MultiplyRange::exec() {
     MantidVec &newE = outputWS->dataE(i);
 
     // Now multiply the requested range
-    std::transform(newY.begin() + m_startBin, newY.begin() + m_endBin + 1,
-                   newY.begin() + m_startBin,
-                   std::bind2nd(std::multiplies<double>(), m_factor));
-    std::transform(newE.begin() + m_startBin, newE.begin() + m_endBin + 1,
-                   newE.begin() + m_startBin,
-                   std::bind2nd(std::multiplies<double>(), m_factor));
+    std::transform(newY.begin() + startBin, newY.begin() + endBin + 1,
+                   newY.begin() + startBin,
+                   std::bind2nd(std::multiplies<double>(), factor));
+    std::transform(newE.begin() + startBin, newE.begin() + endBin + 1,
+                   newE.begin() + startBin,
+                   std::bind2nd(std::multiplies<double>(), factor));
 
     progress.report();
     PARALLEL_END_INTERUPT_REGION

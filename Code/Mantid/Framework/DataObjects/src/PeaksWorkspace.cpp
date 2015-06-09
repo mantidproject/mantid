@@ -164,7 +164,7 @@ void PeaksWorkspace::removePeak(const int peakNum) {
 /** Add a peak to the list
  * @param ipeak :: Peak object to add (copy) into this.
  */
-void PeaksWorkspace::addPeak(const API::IPeak &ipeak) {
+void PeaksWorkspace::addPeak(const Geometry::IPeak &ipeak) {
   if (dynamic_cast<const Peak *>(&ipeak)) {
     peaks.push_back((const Peak &)ipeak);
   } else {
@@ -205,7 +205,7 @@ const Peak &PeaksWorkspace::getPeak(const int peakNum) const {
  * detector. You do NOT need to explicitly provide this distance.
  * @return a pointer to a new Peak object.
  */
-API::IPeak *
+Geometry::IPeak *
 PeaksWorkspace::createPeak(Kernel::V3D QLabFrame,
                            boost::optional<double> detectorDistance) const {
   return new Peak(this->getInstrument(), QLabFrame, detectorDistance);
@@ -304,7 +304,7 @@ PeaksWorkspace::peakInfo(Kernel::V3D qFrame, bool labCoords) const {
 
   try {
 
-    API::IPeak *peak = createPeak(Qlab);
+    Geometry::IPeak *peak = createPeak(Qlab);
 
     if (sample().hasOrientedLattice()) {
 

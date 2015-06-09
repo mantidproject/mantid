@@ -94,8 +94,8 @@ struct TCPStreamEventHeaderSetup {
   char inst_name[32]; ///< instrument name
 
   TCPStreamEventHeaderSetup()
-      : length(sizeof(TCPStreamEventHeaderSetup)), start_time(0), run_number(0),
-        run_state(0) {
+      : ChangedFields(), length(sizeof(TCPStreamEventHeaderSetup)),
+        start_time(0), run_number(0), run_state(0) {
     inst_name[0] = '\0';
   }
   bool isValid() const { return length >= sizeof(TCPStreamEventHeaderSetup); }
@@ -126,7 +126,8 @@ struct TCPStreamEventHeaderNeutron {
   uint32_t nevents;    ///< number of TCPStreamEvent() structures in this packet
 
   TCPStreamEventHeaderNeutron()
-      : length(sizeof(TCPStreamEventHeaderNeutron)), nevents(0) {}
+      : length(sizeof(TCPStreamEventHeaderNeutron)), frame_number(0), period(0),
+        protons(0), frame_time_zero(0), nevents(0) {}
   bool isValid() const { return length >= sizeof(TCPStreamEventHeaderNeutron); }
 };
 

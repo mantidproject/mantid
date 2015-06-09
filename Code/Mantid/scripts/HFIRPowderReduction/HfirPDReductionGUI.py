@@ -7,7 +7,7 @@
 import numpy
 import os
 
-from Ui_MainWindow import Ui_MainWindow #import line for the UI python class
+from ui_MainWindow import Ui_MainWindow #import line for the UI python class
 from PyQt4 import QtCore, QtGui
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
@@ -42,7 +42,7 @@ class MainWindow(QtGui.QMainWindow):
     """
 
     # Copy to ui.setupUI
-    # # Version 3.0 + Import for Ui_MainWindow.py
+    # # Version 3.0 + Import for ui_MainWindow.py
     #     from MplFigureCanvas import Qt4MplCanvas
 
     #     # Replace 'self.graphicsView = QtGui.QtGraphicsView' with the following

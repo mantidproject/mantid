@@ -55,7 +55,6 @@ protected:
     QComboBox* boxPolarRadius;
     QComboBox* boxPolarTheta;
     QComboBox* boxType;
-    QLabel* textFunction;
     QLineEdit* boxFrom;
     QLineEdit* boxTo;
 	QLineEdit* boxParameter;

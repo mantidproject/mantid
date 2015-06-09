@@ -37,6 +37,7 @@ public:
       m_fileIO(boost::shared_ptr<API::IBoxControllerIO>()) {
     // TODO: Smarter ways to determine all of these values
     m_maxDepth = 5;
+    m_numEventsAtMax = 0;
     m_addingEvents_eventsPerTask = 1000;
     m_significantEventsNumber = 10000000;
     m_addingEvents_numTasksPerBlock =

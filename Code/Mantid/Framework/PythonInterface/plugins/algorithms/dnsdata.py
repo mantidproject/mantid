@@ -80,7 +80,7 @@ class DNSdata(object):
             except:
                 raise ValueError("The file %s does not contain valid DNS data format." % filename)
             # parse block 1 (general information)
-            b1splitted = map(str.strip, blocks[1].split('#'))
+            b1splitted = [s.strip() for s in blocks[1].split('#')]
             b1rest = [el for el in b1splitted]
             r_user = re.compile("User:\s*(?P<name>.*?$)")
             r_sample = re.compile("Sample:\s*(?P<sample>.*?$)")
@@ -109,7 +109,7 @@ class DNSdata(object):
 
             # parse block 2 (wavelength and mochromator angle)
             # for the moment, only theta and lambda are needed
-            b2splitted = map(str.strip, blocks[2].split('#'))
+            b2splitted = [s.strip() for s in blocks[2].split('#')]
             # assume that theta and lambda are always on the fixed positions
             # assume theta is give in degree, lambda in nm
             line = b2splitted[2].split()
@@ -118,7 +118,7 @@ class DNSdata(object):
             self.incident_energy = float(line[4])
 
             # parse block 3 (motors position)
-            b3splitted = map(str.strip, blocks[3].split('#'))
+            b3splitted = [s.strip() for s in blocks[3].split('#')]
             self.monochromator_position = float(b3splitted[2].split()[1])
             # DeteRota, angle of rotation of detector bank
             self.deterota = float(b3splitted[3].split()[1])
@@ -149,7 +149,7 @@ class DNSdata(object):
             self.polarizer_rotation = float(b3splitted[20].split()[1])
 
             # parse block 4 (B-fields), only currents in A are taken
-            b4splitted = map(str.strip, blocks[4].split('#'))
+            b4splitted = [s.strip() for s in blocks[4].split('#')]
             self.flipper_precession_current = float(b4splitted[2].split()[1])
             self.flipper_z_compensation_current = float(b4splitted[3].split()[1])
             self.a_coil_current = float(b4splitted[4].split()[1])
@@ -160,13 +160,13 @@ class DNSdata(object):
 
             # parse block 5 (Temperatures)
             # assume: T1=cold_head_temperature, T2=sample_temperature
-            b5splitted = map(str.strip, blocks[5].split('#'))
+            b5splitted = [s.strip() for s in blocks[5].split('#')]
             self.t1 = float(b5splitted[2].split()[1])
             self.t2 = float(b5splitted[3].split()[1])
             self.tsp = float(b5splitted[4].split()[1])
 
             # parse block 6 (TOF parameters)
-            b6splitted = map(str.strip, blocks[6].split('#'))
+            b6splitted = [s.strip() for s in blocks[6].split('#')]
             self.tof_channel_number = int(b6splitted[2].split()[2])
             if self.tof_channel_number > 1:
                 self.tof_channel_width = float(b6splitted[3].split()[3])
@@ -179,7 +179,7 @@ class DNSdata(object):
 
             # parse block 7 (Time and monitor)
             # assume everything to be at the fixed positions
-            b7splitted = map(str.strip, blocks[7].split('#'))
+            b7splitted = [s.strip() for s in blocks[7].split('#')]
             # duration
             line = b7splitted[2].split()
             self.duration = float(line[1]) # assume seconds [TODO]: check

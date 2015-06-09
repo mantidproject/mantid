@@ -87,7 +87,16 @@ namespace MantidWidgets
  */
 FitPropertyBrowser::FitPropertyBrowser(QWidget *parent, QObject* mantidui):
   QDockWidget("Fit Function",parent),
+  m_workspaceIndex(NULL),
+  m_startX(NULL),
+  m_endX(NULL),
+  m_output(NULL),
+  m_minimizer(NULL),
+  m_ignoreInvalidData(NULL),
+  m_costFunction(NULL),
+  m_maxIterations(NULL),
   m_logValue(NULL),
+  m_plotDiff(NULL),
   m_plotCompositeMembers(NULL),
   m_convolveMembers(NULL),
   m_rawData(NULL),

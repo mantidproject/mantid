@@ -44,7 +44,7 @@ CreateMD steps use :ref:`algm-ConvertToMDMinMaxGlobal` to determine the min and 
 **Single Conversion Example**
 ##########################################
 
-.. testcode:: SingleConversion
+.. code-block:: python
 
    # Create some input data.
    current_ws = CreateSimulationWorkspace(Instrument='MAR', BinParams=[-3,1,3], UnitX='DeltaE')
@@ -62,7 +62,7 @@ CreateMD steps use :ref:`algm-ConvertToMDMinMaxGlobal` to determine the min and 
 Output
 ^^^^^^
 
-.. testoutput:: SingleConversion
+.. code-block:: python
 
    [H,0,0]
    [0,K,0]
@@ -72,7 +72,7 @@ Output
 **Multi Conversion Example**
 ##########################################
 
-.. testcode:: MultiConversion
+.. code-block:: python
 
    # Create multiple runs 
    input_runs = list()
@@ -98,7 +98,7 @@ Output
 Output
 ^^^^^^
 
-.. testoutput:: MultiConversion
+.. code-block:: python
 
    [H,0,0]
    [0,K,0]
@@ -108,7 +108,7 @@ Output
 **Multi Conversion Example InPlace**
 ##########################################
 
-.. testcode:: MultiConversionInPlace
+.. code-block:: python
 
    # Create multiple runs 
    input_runs = list()
@@ -134,7 +134,7 @@ Output
 Output
 ^^^^^^
 
-.. testoutput:: MultiConversionInPlace
+.. code-block:: python
 
    [H,0,0]
    [0,K,0]

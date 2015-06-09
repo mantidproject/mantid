@@ -35,7 +35,7 @@ using namespace Kernel;
 FitMD::FitMD()
     : API::IDomainCreator(NULL, std::vector<std::string>(),
                           IDomainCreator::Simple),
-      m_startIndex(0), m_count(0) {}
+      m_maxSize(0), m_startIndex(0), m_count(0) {}
 
 /**
  * Constructor
@@ -44,7 +44,7 @@ FitMD::FitMD(IPropertyManager *fit, const std::string &workspacePropertyName,
              IDomainCreator::DomainType domainType)
     : API::IDomainCreator(
           fit, std::vector<std::string>(1, workspacePropertyName), domainType),
-      m_startIndex(0), m_count(0) {
+      m_maxSize(0), m_startIndex(0), m_count(0) {
   if (domainType != IDomainCreator::Simple) {
     throw std::runtime_error("FitMD only supports simple domains");
   }

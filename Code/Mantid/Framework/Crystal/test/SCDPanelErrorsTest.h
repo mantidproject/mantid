@@ -13,7 +13,7 @@
 #include "MantidCrystal/SCDPanelErrors.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidAPI/IPeak.h"
+#include "MantidGeometry/Crystal/IPeak.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidCrystal/SCDPanelErrors.h"
 #include "MantidGeometry/Instrument.h"

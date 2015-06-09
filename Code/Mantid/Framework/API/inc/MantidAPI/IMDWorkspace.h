@@ -130,6 +130,9 @@ public:
         "This method is not generally implemented ");
   }
 
+  // Preferred normalization to use for display
+  virtual MDNormalization displayNormalization() const;
+
 protected:
   virtual const std::string toString() const;
 };

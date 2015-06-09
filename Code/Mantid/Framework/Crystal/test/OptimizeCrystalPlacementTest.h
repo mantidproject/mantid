@@ -101,7 +101,7 @@ public:
     for (int i = 0; i < peaks1->getNumberPeaks(); ++i)
       if (peaks1->getPeak(i).getRunNumber() == 5638)
       {
-        API::IPeak& peak = peaks1->getPeak(i);
+        Geometry::IPeak& peak = peaks1->getPeak(i);
         if (Gon == ZMat)
         {
           origGon5638 = peak.getGoniometerMatrix();
@@ -160,7 +160,7 @@ public:
 
     for (int i = 0; i < peaks1->getNumberPeaks(); ++i)
     {
-      API::IPeak & peak = peaks1->getPeak(i);
+      Geometry::IPeak & peak = peaks1->getPeak(i);
       int RunNum = peak.getRunNumber();
 
       Kernel::Matrix<double> GG;
@@ -234,7 +234,7 @@ public:
   void test_SamplePosition()
   {
     init();
-    API::IPeak & peak = peaks1->getPeak(0);
+    Geometry::IPeak & peak = peaks1->getPeak(0);
     boost::shared_ptr<const Geometry::Instrument> Inst = peak.getInstrument();
     Kernel::V3D SampPos(.0003, -.00025, .00015);
 

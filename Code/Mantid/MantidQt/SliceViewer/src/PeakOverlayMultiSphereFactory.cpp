@@ -46,13 +46,13 @@ namespace MantidQt
       }
     }
 
-    boost::shared_ptr<PeakOverlayView> PeakOverlayMultiSphereFactory::createView(Mantid::API::PeakTransform_const_sptr transform) const
+    boost::shared_ptr<PeakOverlayView> PeakOverlayMultiSphereFactory::createView(Mantid::Geometry::PeakTransform_const_sptr transform) const
     {
       // Construct all physical peaks
       VecPhysicalSphericalPeak physicalPeaks(m_peaksWS->rowCount());
       for(size_t i = 0; i < physicalPeaks.size(); ++i)
       {
-        const IPeak& peak = m_peaksWS->getPeak(static_cast<int>(i));
+        const Mantid::Geometry::IPeak& peak = m_peaksWS->getPeak(static_cast<int>(i));
         auto position = transform->transformPeak(peak);
         physicalPeaks[i] = boost::make_shared<PhysicalSphericalPeak>(position, m_peakRadius[i], m_backgroundInnerRadius[i], m_backgroundOuterRadius[i]);
       }

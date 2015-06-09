@@ -1,5 +1,6 @@
-#include "vtkBox.h"
 #include "vtkMDEWSource.h"
+
+#include "vtkBox.h"
 #include "vtkInformation.h"
 #include "vtkInformationVector.h"
 #include "vtkObjectFactory.h"
@@ -9,6 +10,8 @@
 #include "vtkUnstructuredGrid.h"
 #include "vtkStreamingDemandDrivenPipeline.h"
 
+#include "MantidVatesAPI/BoxInfo.h"
+#include "MantidAPI/IMDWorkspace.h"
 #include "MantidVatesAPI/MDEWInMemoryLoadingPresenter.h"
 #include "MantidVatesAPI/MDLoadingViewAdapter.h"
 #include "MantidVatesAPI/ADSWorkspaceProvider.h"
@@ -18,13 +21,16 @@
 #include "MantidVatesAPI/vtkMD0DFactory.h"
 #include "MantidVatesAPI/FilteringUpdateProgressAction.h"
 #include "MantidVatesAPI/IgnoreZerosThresholdRange.h"
+#include "MantidKernel/WarningSuppressions.h"
+
+#include <boost/optional.hpp>
 
 using namespace Mantid::VATES;
 
 vtkStandardNewMacro(vtkMDEWSource)
 
 /// Constructor
-vtkMDEWSource::vtkMDEWSource() :  m_wsName(""), m_depth(1000), m_time(0), m_presenter(NULL)
+vtkMDEWSource::vtkMDEWSource() :  m_wsName(""), m_depth(1000), m_time(0), m_presenter(NULL), m_normalization(AutoSelect)
 {
   this->SetNumberOfInputPorts(0);
   this->SetNumberOfOutputPorts(1);
@@ -166,6 +172,16 @@ const char* vtkMDEWSource::GetInstrument()
   }
 }
 
+/**
+Set the normalization option. This is how the signal data will be normalized before viewing.
+@param option : Normalization option
+*/
+void vtkMDEWSource::SetNormalization(int option)
+{
+  m_normalization = static_cast<Mantid::VATES::VisualNormalization>(option);
+  this->Modified();
+}
+
 
 int vtkMDEWSource::RequestData(vtkInformation *, vtkInformationVector **, vtkInformationVector *outputVector)
 {
@@ -185,10 +201,10 @@ int vtkMDEWSource::RequestData(vtkInformation *, vtkInformationVector **, vtkInf
     FilterUpdateProgressAction<vtkMDEWSource> drawingProgressUpdate(this, "Drawing...");
 
     ThresholdRange_scptr thresholdRange(new IgnoreZerosThresholdRange());
-    vtkMD0DFactory* zeroDFactory = new vtkMD0DFactory(thresholdRange, "signal");
-    vtkMDHexFactory* hexahedronFactory = new vtkMDHexFactory(thresholdRange, "signal");
-    vtkMDQuadFactory* quadFactory = new vtkMDQuadFactory(thresholdRange, "signal");
-    vtkMDLineFactory* lineFactory = new vtkMDLineFactory(thresholdRange, "signal");
+    vtkMD0DFactory* zeroDFactory = new vtkMD0DFactory;
+    vtkMDHexFactory* hexahedronFactory = new vtkMDHexFactory(thresholdRange, m_normalization);
+    vtkMDQuadFactory* quadFactory = new vtkMDQuadFactory(thresholdRange, m_normalization);
+    vtkMDLineFactory* lineFactory = new vtkMDLineFactory(thresholdRange, m_normalization);
 
     hexahedronFactory->SetSuccessor(quadFactory);
     quadFactory->SetSuccessor(lineFactory);
@@ -219,6 +235,7 @@ int vtkMDEWSource::RequestData(vtkInformation *, vtkInformationVector **, vtkInf
   return 1;
 }
 
+GCC_DIAG_OFF(strict-aliasing)
 int vtkMDEWSource::RequestInformation(vtkInformation *vtkNotUsed(request), vtkInformationVector **vtkNotUsed(inputVector), vtkInformationVector *outputVector)
 {
   if(m_presenter == NULL && !m_wsName.empty())
@@ -230,6 +247,11 @@ int vtkMDEWSource::RequestInformation(vtkInformation *vtkNotUsed(request), vtkIn
     }
     else
     {
+      // If the MDEvent workspace has had top level splitting applied to it, then use the a depth of 1
+      if (auto split = Mantid::VATES::findRecursionDepthForTopLevelSplitting(m_wsName)) {
+        SetDepth(split.get());
+      }
+
       m_presenter->executeLoadMetadata();
       setTimeRange(outputVector);
     }
@@ -325,3 +347,4 @@ const char* vtkMDEWSource::GetWorkspaceName()
 {
   return m_wsName.c_str();
 }
+
