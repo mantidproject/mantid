@@ -211,6 +211,7 @@ private:
   /// Destroy a zero error free cloned workspace
   void deleteZeroErrorFreeClone(QString& clonedWorkspaceName);
 
+
 private slots:
   /// phi masking has changed 
   void phiMaskingChanged();

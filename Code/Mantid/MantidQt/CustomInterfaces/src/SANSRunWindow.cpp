@@ -435,6 +435,11 @@ void SANSRunWindow::saveWorkspacesDialog()
   // Connect the request for deleting a zero-error-free workspace
   connect(m_saveWorkspaces, SIGNAL(deleteZeroErrorFreeWorkspace(QString&)),
          this, SLOT(deleteZeroErrorFreeClone(QString&) ));
+  // Connect to change in the zero-error removal checkbox
+  connect(m_uiForm.zeroErrorCheckBox, SIGNAL(stateChanged(int)),
+          m_saveWorkspaces, SLOT(onSaveAsZeroErrorFreeChanged(int)));
+
+
   m_uiForm.saveSel_btn->setEnabled(false);
   m_saveWorkspaces->show();
 }
@@ -2800,6 +2805,17 @@ void SANSRunWindow::handleDefSaveClick()
     QMessageBox::warning(this, "Filename required", "A filename must be entered into the text box above to save this file");
   }
 
+  // If we save with a zero-error-free correction we need to swap the 
+  QString workspaceNameBuffer = m_outputWS;
+  if (m_uiForm.zeroErrorCheckBox->isChecked()) {
+    QString clonedWorkspaceName = m_outputWS + "_cloned_temp";
+    createZeroErrorFreeClone(m_outputWS, clonedWorkspaceName);
+    if (AnalysisDataService::Instance().doesExist(clonedWorkspaceName.toStdString())) {
+      m_outputWS = clonedWorkspaceName;
+    }
+  }
+
+
   const QStringList algs(getSaveAlgs());
   QString saveCommand;
   for(QStringList::const_iterator alg = algs.begin(); alg != algs.end(); ++alg)
@@ -2847,6 +2863,14 @@ void SANSRunWindow::handleDefSaveClick()
 
   saveCommand += "print 'success'\n";
   QString result = runPythonCode(saveCommand).trimmed();
+
+  // Revert changes and delete the zero-free workspace
+  if (this->m_uiForm.zeroErrorCheckBox->isChecked()) {
+    deleteZeroErrorFreeClone(m_outputWS);
+  }
+  m_outputWS = workspaceNameBuffer;
+
+
   if ( result != "success" )
   {
     QMessageBox::critical(this, "Error saving workspace", "Problem encountered saving workspace, does it still exist. There may be more information in the results console?");
@@ -3865,6 +3889,7 @@ void SANSRunWindow::deleteZeroErrorFreeClone(QString& clonedWorkspaceName) {
     }
   }
 }
+
 
 } //namespace CustomInterfaces
 

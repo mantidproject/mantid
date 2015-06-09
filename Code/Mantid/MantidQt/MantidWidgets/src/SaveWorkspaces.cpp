@@ -424,3 +424,15 @@ void SaveWorkspaces::removeZeroFreeWorkspaces(QHash<QString, QString> workspaces
     emit deleteZeroErrorFreeWorkspace((*it));
   }
 }
+
+/**
+ * Reacts to a user change wether the workspace is to be saved as zero-error-free or not
+ * @param state :: 0 if we don't save with the zero-error correction, otherwise anything else
+ */
+void SaveWorkspaces::onSaveAsZeroErrorFreeChanged(int state) {
+  if (state == 0) {
+    m_saveAsZeroErrorFree = false;
+  } else {
+    m_saveAsZeroErrorFree = true;
+  }
+}

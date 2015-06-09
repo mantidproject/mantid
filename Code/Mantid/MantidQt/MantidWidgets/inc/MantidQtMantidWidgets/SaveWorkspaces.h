@@ -52,6 +52,8 @@ namespace MantidQt
       void initLayout();
       ///Returns the save extension expected the name algorithm
       static QString getSaveAlgExt(const QString & algName);
+    public slots:
+      void onSaveAsZeroErrorFreeChanged(int state);
 
     signals:
       void closing();
