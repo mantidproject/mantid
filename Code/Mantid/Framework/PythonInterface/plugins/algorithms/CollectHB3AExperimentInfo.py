@@ -9,6 +9,30 @@ class CollectHB3AExperimentInfo(PythonAlgorithm):
     """ Python algorithm to export sample logs to spread sheet file
     for VULCAN
     """
+    def __init__(self):
+        """ Init
+        """
+        PythonAlgorithm.__init__(self)
+
+        self._myPixelInfoTableWS = None
+        self._myScanPtFileTableWS = None
+        self._expNumber = -1
+        self._scanList = None 
+        self._tol2Theta = None 
+        self._dataDir = None 
+        self._ptListList = None
+
+        # Define class variable Scan-Pt. dictionary: Key scan number, Value list of pt numbers
+        self._scanPtDict = {}
+        self._spiceTableDict = {}
+        self._detStartID = {}
+        self._2thetaScanPtDict = {}
+        self._scanPt2ThetaDict = {}
+
+        self._currStartDetID = -999999999
+
+        return
+
     def category(self):
         """ Category
         """
@@ -26,7 +50,7 @@ class CollectHB3AExperimentInfo(PythonAlgorithm):
         """ Declare properties
         """
         # Input scan files
-        # Format of the input should be 
+        # Format of the input should be
         self.declareProperty("ExperimentNumber", -1, "Integer for experiment number.")
 
         scanlistprop = mantid.kernel.IntArrayProperty("ScanList", [])
@@ -34,8 +58,10 @@ class CollectHB3AExperimentInfo(PythonAlgorithm):
         #self.declareProperty(IntArrayProperty("ScanList", [], Direction.Input),
         #        "List of scans of the experiment to be loaded.  It cannot be left blank.")
 
-        self.declareProperty(mantid.kernel.IntArrayProperty("PtLists", []),
-                "List of Pts to be loaded for scans specified by 'ScanList'. Each scan's Pt. must be started with -1 as a flag.  If no Pt. given, then all Pt. are all loaded.")
+        pd = "List of Pts to be loaded for scans specified by 'ScanList'. \
+                Each scan's Pt. must be started with -1 as a flag.  \
+                If no Pt. given, then all Pt. are all loaded."
+        self.declareProperty(mantid.kernel.IntArrayProperty("PtLists", []), pd)
 
         self.declareProperty(FileProperty(name="DataDirectory",defaultValue="",action=FileAction.Directory))
 
@@ -73,9 +99,8 @@ class CollectHB3AExperimentInfo(PythonAlgorithm):
 
         # Set up ScanPtFileTable
         for scannumber in sorted(self._scanPtDict.keys()):
-            spicetable = self._spiceTableDict[scannumber]
             for ptnumber in sorted(self._scanPtDict[scannumber]):
-                print self._scanPt2ThetaDict.keys()
+                self.log().debug("Keys for scanPt2ThetaDict: %s." %(str(self._scanPt2ThetaDict.keys())))
                 twotheta = self._scanPt2ThetaDict[(scannumber, ptnumber)]
                 startdetid = self._detStartID[twotheta]
                 datafilename = 'HB3A_exp%d_scan%04d_%04d.xml'%(self._expNumber, scannumber, ptnumber)
@@ -107,7 +132,7 @@ class CollectHB3AExperimentInfo(PythonAlgorithm):
 
     def _getExpScanPtDict(self):
         """ Get the scan-Pt. dictionary
-        """ 
+        """
         for iscan in xrange(len(self._scanList)):
             # Loop over scan number
             scan = self._scanList[iscan]
@@ -160,16 +185,6 @@ class CollectHB3AExperimentInfo(PythonAlgorithm):
         if len(self._ptListList) != len(self._scanList):
             raise RuntimeError("Number of sub Pt. list is not equal to number of scans.")
 
-        # Define class variable Scan-Pt. dictionary: Key scan number, Value list of pt numbers
-        self._scanPtDict = {}
-
-        self._spiceTableDict = {} 
-        
-        self._detStartID = {}
-
-        self._2thetaScanPtDict = {} 
-        
-        self._scanPt2ThetaDict = {}
 
         return
 
@@ -210,8 +225,8 @@ class CollectHB3AExperimentInfo(PythonAlgorithm):
         for itt in xrange(1, len(twothetalist)):
             twotheta_curr = twothetalist[itt]
             if twotheta_curr - twotheta_prev < self._tol2Theta:
-                # two keys (2theta) are close enough, combine then 
-                self._2thetaScanPtDict[twotheta_prev].extend(self._2thetaScanPtDict[twotheta_curr][:]) 
+                # two keys (2theta) are close enough, combine then
+                self._2thetaScanPtDict[twotheta_prev].extend(self._2thetaScanPtDict[twotheta_curr][:])
                 del self._2thetaScanPtDict[twotehta]
             else:
                 # advanced to current 2theta and no more operation is required
@@ -232,12 +247,11 @@ class CollectHB3AExperimentInfo(PythonAlgorithm):
                 raise RuntimeError("Logic error to have empty list.")
             else:
                 self.log().notice("[DB] Process pixels of detector centered at 2theta = %.5f." % (twotheta))
-            
+
             # Load detector counts file (.xml)
-            self.log().notice("[DB] Processing detector @ 2theta = %.5f, " % (twotheta))
-            # print self._2thetaScanPtDict[twotheta] 
+            self.log().debug("Processing detector @ 2theta = %.5f, " % (twotheta))
             scannumber, ptnumber = self._2thetaScanPtDict[twotheta][0]
-            print "[DB] self._2thetaScanPtDict: ",  self._2thetaScanPtDict[twotheta]
+            self.log().debug("self._2thetaScanPtDict: %s"%(self._2thetaScanPtDict[twotheta]))
             dataws = self._loadHB3ADetCountFile(scannumber, ptnumber)
 
             self._scanPt2ThetaDict[(scannumber, ptnumber)] = twotheta
@@ -279,7 +293,8 @@ class CollectHB3AExperimentInfo(PythonAlgorithm):
         outwsname = os.path.basename(spicefilename).split(".")[0]
         self.log().notice("Loading SPICE file %s." % (spicefilename))
         spicetablews, spicematrixws = api.LoadSpiceAscii(Filename=spicefilename, OutputWorkspace=outwsname)
-        self.log().notice("[DB] SPICE table workspace has %d rows."%(spicetablews.rowCount()))
+        self.log().debug("SPICE table workspace has %d rows."%(spicetablews.rowCount()))
+        self.log().debug("SPICE matrix workspace %s is ignored."%(str(spicematrixws)))
 
         return spicetablews
 

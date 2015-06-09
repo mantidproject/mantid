@@ -416,6 +416,7 @@ TMDE(void MDBox)::calculateCentroid(coord_t *centroid) const {
 //-----------------------------------------------------------------------------------------------
 /** Calculate the centroid of this box.
  * @param centroid [out] :: nd-sized array that will be set to the centroid.
+ * @param runindex [in] :: run index used to filter the events.
  */
 TMDE(void MDBox)::calculateCentroid(coord_t *centroid,
                                     const int runindex) const {
