@@ -4,6 +4,7 @@
 #include "MantidAPI/BoxController.h"
 #include "MantidAPI/DllConfig.h"
 #include "MantidAPI/ExperimentInfo.h"
+#include "MantidAPI/IMDEventWorkspace_fwd.h"
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MultipleExperimentInfos.h"
@@ -86,12 +87,6 @@ protected:
   /// updated (by calling SaveMD(UpdateFileBackEnd=1) )
   bool m_fileNeedsUpdating;
 };
-
-/// Shared pointer to a generic IMDEventWorkspace
-typedef boost::shared_ptr<IMDEventWorkspace> IMDEventWorkspace_sptr;
-
-/// Shared pointer to a generic const IMDEventWorkspace
-typedef boost::shared_ptr<const IMDEventWorkspace> IMDEventWorkspace_const_sptr;
 
 } // namespace MDEvents
 

@@ -39,7 +39,7 @@ void HasUB::init() {
       new WorkspaceProperty<Workspace>("Workspace", "", Direction::Input),
       "Workspace to clear the UB from.");
   declareProperty(
-      new PropertyWithValue<bool>("HasUB", "", Direction::Output),
+      new PropertyWithValue<bool>("HasUB", false, Direction::Output),
       "Indicates action performed, or predicted to perform if DryRun.");
 }
 

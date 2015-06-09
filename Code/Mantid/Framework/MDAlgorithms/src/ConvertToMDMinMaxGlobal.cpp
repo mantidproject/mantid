@@ -80,7 +80,7 @@ void ConvertToMDMinMaxGlobal::init() {
       "The modes names are **CopyToMD**, **|Q|** and **Q3D**",
       Direction::InOut);
   /// temporary, until dEMode is not properly defined on Workspace
-  std::vector<std::string> dE_modes = Kernel::DeltaEMode().availableTypes();
+  std::vector<std::string> dE_modes = Kernel::DeltaEMode::availableTypes();
   declareProperty("dEAnalysisMode", dE_modes[Kernel::DeltaEMode::Direct],
                   boost::make_shared<StringListValidator>(dE_modes),
                   "You can analyze neutron energy transfer in **Direct**, "

@@ -218,16 +218,22 @@
              <property name="margin">
               <number>0</number>
              </property>
+             <item>
+              <widget class="QCheckBox" name="cbShowDataErrors">
+               <property name="text">
+                <string>Show data errors</string>
+               </property>
+              </widget>
+             </item>
             </layout>
            </widget>
-           <widget class="QWidget" name="PanPage"/>
            <widget class="QWidget" name="RangePage">
             <layout class="QHBoxLayout" name="horizontalLayout_5">
              <property name="margin">
               <number>0</number>
              </property>
              <item>
-              <widget class="QCheckBox" name="cb_applyRangeToAll">
+              <widget class="QCheckBox" name="cbApplyRangeToAll">
                <property name="text">
                 <string>Apply to all spectra</string>
                </property>
@@ -293,7 +299,7 @@
   <tabstop>cbPlotSelector</tabstop>
  </tabstops>
  <resources>
-  <include location="../../icons/CustomInterfacesIcons.qrc"/>
+  <include location="../../../icons/CustomInterfacesIcons.qrc"/>
  </resources>
  <connections/>
 </ui>

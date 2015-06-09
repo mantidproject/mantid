@@ -192,7 +192,7 @@ typedef std::vector<SXPeak> peakvector;
 class DLLExport FindSXPeaks : public API::Algorithm {
 public:
   /// Default constructor
-  FindSXPeaks() : API::Algorithm(){};
+  FindSXPeaks();
   /// Destructor
   virtual ~FindSXPeaks(){};
   /// Algorithm's name for identification overriding a virtual method

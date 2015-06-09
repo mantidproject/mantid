@@ -11,12 +11,12 @@ namespace Geometry {
 using Kernel::V3D;
 
 GluGeometryHandler::GluGeometryHandler(IObjComponent *comp)
-    : GeometryHandler(comp) {
+    : GeometryHandler(comp), radius(0.0), height(0.0), type(CUBOID)  {
   Renderer = new GluGeometryRenderer();
 }
 
 GluGeometryHandler::GluGeometryHandler(boost::shared_ptr<Object> obj)
-    : GeometryHandler(obj) {
+    : GeometryHandler(obj), radius(0.0), height(0.0), type(CUBOID)  {
   Renderer = new GluGeometryRenderer();
 }
 

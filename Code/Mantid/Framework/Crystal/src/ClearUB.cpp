@@ -40,7 +40,7 @@ void ClearUB::init() {
       new WorkspaceProperty<Workspace>("Workspace", "", Direction::InOut),
       "Workspace to clear the UB from.");
   declareProperty(
-      new PropertyWithValue<bool>("DoesClear", "", Direction::Output),
+      new PropertyWithValue<bool>("DoesClear", false, Direction::Output),
       "Indicates action performed. DoesClear returns true only if one or more "
       "OrientedLattices have been removed.");
 }
