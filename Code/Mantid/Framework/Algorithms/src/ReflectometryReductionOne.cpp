@@ -689,17 +689,13 @@ ReflectometryReductionOne::polynomialCorrection(MatrixWorkspace_sptr IvsLam) {
 
   const std::string corrAlgName = getProperty("CorrectionAlgorithm");
 
-  const std::string polynomial = getProperty("Polynomial");
-  const std::string c0 = getProperty("C0");
-  const std::string c1 = getProperty("C1");
-
   IAlgorithm_sptr corrAlg = createChildAlgorithm(corrAlgName);
   corrAlg->initialize();
   if (corrAlgName == "PolynomialCorrection") {
-    corrAlg->setProperty("Coefficients", polynomial);
+    corrAlg->setPropertyValue("Coefficients", getPropertyValue("Polynomial"));
   } else if (corrAlgName == "ExponentialCorrection") {
-    corrAlg->setProperty("C0", c0);
-    corrAlg->setProperty("C1", c1);
+    corrAlg->setPropertyValue("C0", getPropertyValue("C0"));
+    corrAlg->setPropertyValue("C1", getPropertyValue("C1"));
   } else {
     throw std::runtime_error("Unknown correction algorithm: " + corrAlgName);
   }
