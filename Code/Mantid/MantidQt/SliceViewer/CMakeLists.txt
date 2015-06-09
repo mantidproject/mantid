@@ -42,7 +42,8 @@ set ( INC_FILES
 	inc/MantidQtSliceViewer/LinePlotOptions.h
 	inc/MantidQtSliceViewer/LineViewer.h
 	inc/MantidQtSliceViewer/NullPeaksPresenter.h
-	inc/MantidQtSliceViewer/PeakBoundingBox.h
+	inc/MantidQtSliceViewer/PeakEditMode.h
+        inc/MantidQtSliceViewer/PeakBoundingBox.h
 	inc/MantidQtSliceViewer/PeakOverlayMultiCross.h
 	inc/MantidQtSliceViewer/PeakOverlayMultiCrossFactory.h
 	inc/MantidQtSliceViewer/PeakOverlayMultiSphere.h

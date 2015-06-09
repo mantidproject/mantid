@@ -1,4 +1,5 @@
 #include "MantidQtSliceViewer/ConcretePeaksPresenter.h"
+#include "MantidQtSliceViewer/PeakEditMode.h"
 #include "MantidQtSliceViewer/UpdateableOnDemand.h"
 #include "MantidQtSliceViewer/ZoomableOnDemand.h"
 #include "MantidAPI/IPeaksWorkspace.h"
@@ -81,7 +82,16 @@ coordinateToString(Mantid::Kernel::SpecialCoordinateSystem coordSystem) {
  * All the views must be recreated.
  */
 void ConcretePeaksPresenter::produceViews() {
-  m_viewPeaks = m_viewFactory->createView(this, m_transform);
+
+  PeakOverlayView_sptr newView = m_viewFactory->createView(this, m_transform);
+  PeakOverlayView_sptr oldView = m_viewPeaks;
+  if (oldView) {
+    newView->takeSettingsFrom(oldView.get());
+  }
+  m_viewPeaks = newView;
+
+  // We reapply any cached edit mode settings we had before.
+  this->peakEditMode(m_editMode);
 }
 
 /**
@@ -151,7 +161,7 @@ ConcretePeaksPresenter::ConcretePeaksPresenter(
     : m_viewFactory(viewFactory), m_peaksWS(peaksWS),
       m_transformFactory(transformFactory),
       m_transform(transformFactory->createDefaultTransform()), m_slicePoint(),
-      m_owningPresenter(NULL), m_isHidden(false) {
+      m_owningPresenter(NULL), m_isHidden(false), m_editMode(SliceViewer::None) {
   // Check that the workspaces appear to be compatible. Log if otherwise.
   checkWorkspaceCompatibilities(mdWS);
 
@@ -195,6 +205,21 @@ void ConcretePeaksPresenter::initialize() {
 void ConcretePeaksPresenter::update() { m_viewPeaks->updateView(); }
 
 /**
+ * Set/update the internal visible peak mask list.
+ * @param indexes : Indexes of peaks that can be seen.
+ */
+void ConcretePeaksPresenter::setVisiblePeaks(const std::vector<size_t>& indexes)
+{
+    std::vector<bool> visible(this->m_peaksWS->getNumberPeaks(), false); // assume all invisible
+    for (size_t i = 0; i < indexes.size(); ++i) {
+        visible[indexes[i]] = true; // make the visible indexes visible. Masking type operation.
+    }
+    m_viewablePeaks = visible;
+
+    m_viewPeaks->setSlicePoint(m_slicePoint.slicePoint(), m_viewablePeaks);
+}
+
+/**
  * Find the peaks in the region.
  * Update the view with all those peaks that could be viewable.
  *
@@ -204,13 +229,7 @@ void ConcretePeaksPresenter::update() { m_viewPeaks->updateView(); }
 void ConcretePeaksPresenter::doFindPeaksInRegion() {
 
   auto indexes = findVisiblePeakIndexes(m_slicePoint);
-  std::vector<bool> visible(this->m_peaksWS->getNumberPeaks(), false); // assume all invisible
-  for (size_t i = 0; i < indexes.size(); ++i) {
-      visible[indexes[i]] = true; // make the visible indexes visible. Masking type operation.
-  }
-  m_viewablePeaks = visible;
-
-  m_viewPeaks->setSlicePoint(m_slicePoint.slicePoint(), m_viewablePeaks);
+  setVisiblePeaks(indexes);
 }
 
 /**
@@ -488,70 +507,6 @@ void ConcretePeaksPresenter::zoomToPeak(const int peakIndex) {
   }
 }
 
-/**
- * @brief Delete a peak corresponding to the current slice point, with x, y
- * coords provided
- * @param x : X coordinate
- * @param y : Y coordinate
- * @return True if one or more peak has been deleted
- */
-bool ConcretePeaksPresenter::deletePeakAt(const double &x, const double &y) {
-
-  using namespace Mantid::Geometry;
-  std::vector<size_t> deletionIndexList;
-  for (int i = 0; i < m_peaksWS->getNumberPeaks(); ++i) {
-    // We only delete peaks we can see.
-    if (this->m_viewablePeaks[i]) {
-      const IPeak &peak = m_peaksWS->getPeak(i);
-      const PeakShape &shape = peak.getPeakShape();
-      if (auto realShape =
-              dynamic_cast<const Mantid::DataObjects::PeakShapeBase *>(
-                  &shape)) {
-        const double shapeRad = realShape->radius();
-        const V3D centre =
-            m_transform->transformPeak(peak); // Get the peak centre in whatever
-                                              // the coords frame and mapping
-                                              // is.
-        const double pointRad = std::sqrt( (x - centre.X()) * (x - centre.X()) +
-                                  (y - centre.Y()) * (y - centre.Y()) );
-        if (pointRad <= shapeRad) {
-          // Let's quickly check that the integration frame matches with our
-          // transform before we go-ahead.
-          if (shape.frame() == m_transform->getCoordinateSystem()) {
-
-            deletionIndexList.push_back(i);
-          }
-        }
-      }
-    }
-  }
-  // If we have things to remove, do that in one-step.
-  if (!deletionIndexList.empty()) {
-
-    Mantid::API::IPeaksWorkspace_sptr peaksWS =
-        boost::const_pointer_cast<Mantid::API::IPeaksWorkspace>(
-            this->m_peaksWS);
-    // Sort the Peaks in-place.
-    Mantid::API::IAlgorithm_sptr alg =
-        AlgorithmManager::Instance().create("DeleteTableRows");
-    alg->setChild(true);
-    alg->setRethrows(true);
-    alg->initialize();
-    alg->setProperty("TableWorkspace", peaksWS);
-    alg->setProperty("Rows", deletionIndexList);
-    alg->execute();
-
-    // Reproduce the views.
-    this->produceViews();
-
-    // Give the new views the current slice point.
-    m_viewPeaks->setSlicePoint(this->m_slicePoint.slicePoint(),
-                               m_viewablePeaks);
-  }
-
-  return !deletionIndexList.empty();
-}
-
 void ConcretePeaksPresenter::peakEditMode(EditMode mode){
     if(mode == DeletePeaks) {
         m_viewPeaks->peakDeletionMode();
@@ -560,6 +515,8 @@ void ConcretePeaksPresenter::peakEditMode(EditMode mode){
     } else {
         m_viewPeaks->peakDisplayMode();
     }
+    // Cache the current edit mode.
+    m_editMode = mode;
 }
 
 bool ConcretePeaksPresenter::deletePeaksIn(PeakBoundingBox box) {
@@ -576,12 +533,12 @@ bool ConcretePeaksPresenter::deletePeaksIn(PeakBoundingBox box) {
   PeakBoundingBox accurateBox(
       left, right, top, bottom,
       slicePoint /*Use the current slice position, previously unknown.*/);
-  accurateBox.transformBox(m_transform);
 
   std::vector<size_t> deletionIndexList = findVisiblePeakIndexes(accurateBox);
 
   // If we have things to remove, do that in one-step.
   if (!deletionIndexList.empty()) {
+
 
     Mantid::API::IPeaksWorkspace_sptr peaksWS =
         boost::const_pointer_cast<Mantid::API::IPeaksWorkspace>(
@@ -595,6 +552,9 @@ bool ConcretePeaksPresenter::deletePeaksIn(PeakBoundingBox box) {
     alg->setProperty("TableWorkspace", peaksWS);
     alg->setProperty("Rows", deletionIndexList);
     alg->execute();
+
+    // Refind visible peaks.
+    doFindPeaksInRegion();
 
     // Reproduce the views.
     this->produceViews();

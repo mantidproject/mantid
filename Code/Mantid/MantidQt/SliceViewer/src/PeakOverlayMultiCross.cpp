@@ -25,9 +25,9 @@ namespace MantidQt
       : QWidget( parent ),
       m_presenter(presenter),
       m_plot(plot),
+      m_physicalPeaks(vecPhysicalPeaks),
       m_plotXIndex(plotXIndex),
       m_plotYIndex(plotYIndex),
-      m_physicalPeaks(vecPhysicalPeaks),
       m_peakColour(peakColour)
     {
       setAttribute(Qt::WA_NoMousePropagation, false);
@@ -229,6 +229,15 @@ namespace MantidQt
 
     void PeakOverlayMultiCross::peakDisplayMode() {
 
+    }
+
+    void PeakOverlayMultiCross::takeSettingsFrom(const PeakOverlayView * const source)
+    {
+        this->changeForegroundColour(source->getForegroundColour());
+        this->changeBackgroundColour(source->getBackgroundColour());
+        this->changeOccupancyIntoView(source->getOccupancyIntoView());
+        this->changeOccupancyInView(source->getOccupancyInView());
+        this->showBackgroundRadius(source->isBackgroundShown());
     }
 
   } // namespace Mantid

@@ -7,6 +7,8 @@
 #include <qpainter.h>
 #include <QPen>
 #include <QMouseEvent>
+#include <QApplication>
+#
 
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
@@ -22,7 +24,7 @@ namespace MantidQt
     PeakOverlayMultiSphere::PeakOverlayMultiSphere(PeaksPresenter* const presenter, QwtPlot * plot, QWidget * parent, const VecPhysicalSphericalPeak& vecPhysicalPeaks, /// Plot x index
                                                    const int plotXIndex, const int plotYIndex, const QColor& peakColour, const QColor& backColour) :
         QWidget(parent), m_presenter(presenter), m_plot(plot), m_physicalPeaks(vecPhysicalPeaks), m_plotXIndex(plotXIndex), m_plotYIndex(plotYIndex),
-        m_peakColour(peakColour), m_backColour(backColour), m_showBackground(false), m_tool(NULL)
+        m_peakColour(peakColour), m_backColour(backColour), m_showBackground(false), m_tool(NULL), m_defaultCursor(plot->cursor())
     {
       setAttribute(Qt::WA_NoMousePropagation, false);
       setAttribute(Qt::WA_MouseTracking, true);
@@ -38,9 +40,7 @@ namespace MantidQt
      */
     PeakOverlayMultiSphere::~PeakOverlayMultiSphere()
     {
-        if(m_tool){
-            delete m_tool;
-        }
+        this->peakDisplayMode();
     }
 
     void PeakOverlayMultiSphere::setSlicePoint(const double& z, const std::vector<bool>& viewablePeaks)
@@ -210,12 +210,12 @@ namespace MantidQt
 
     double PeakOverlayMultiSphere::getOccupancyInView() const
     {
-      throw std::runtime_error("PeakOverlaySphere::getOccupancyInView() not implemented");
+      return -1.0;
     }
 
     double PeakOverlayMultiSphere::getOccupancyIntoView() const
     {
-      throw std::runtime_error("PeakOverlaySphere::getOccupancyIntoView() not implemented");
+      return -1.0;
     }
 
     bool PeakOverlayMultiSphere::positionOnly() const
@@ -244,24 +244,35 @@ namespace MantidQt
     }
 
     void PeakOverlayMultiSphere::peakDeletionMode() {
+        QApplication::restoreOverrideCursor();
         auto* temp = m_tool;
         auto* eraseTool = new MantidQt::MantidWidgets::InputControllerErase(this);
-        connect(eraseTool,SIGNAL(erase(QRect)),this,SLOT(erasePeaks(QRect)));
+        connect(eraseTool,SIGNAL(erase(QRect)),this,SLOT(erasePeaks(QRect)), Qt::QueuedConnection);
         m_tool = eraseTool;
         delete temp;
     }
 
     void PeakOverlayMultiSphere::peakAdditionMode() {
+        QApplication::restoreOverrideCursor();
         auto* temp = m_tool;
         m_tool = new MantidQt::MantidWidgets::InputControllerPick(this);
         delete temp;
     }
 
     void PeakOverlayMultiSphere::peakDisplayMode() {
+        QApplication::restoreOverrideCursor();
         if(m_tool){
             delete m_tool;
             m_tool = NULL;
+            m_plot->setCursor(m_defaultCursor);
         }
+    }
+
+    void PeakOverlayMultiSphere::takeSettingsFrom(const PeakOverlayView * const source)
+    {
+        this->changeForegroundColour(source->getForegroundColour());
+        this->changeBackgroundColour(source->getBackgroundColour());
+        this->showBackgroundRadius(source->isBackgroundShown());
     }
 
     void PeakOverlayMultiSphere::mousePressEvent(QMouseEvent* e)
@@ -277,17 +288,16 @@ namespace MantidQt
     {
         if(m_tool) {
           m_tool->mouseMoveEvent( e );
-          this->update(); // Calling update will cause redraw of the entire surface
-        }else{
-            e->ignore();
+          this->update();
         }
+        e->ignore();
+
     }
 
     void PeakOverlayMultiSphere::mouseReleaseEvent(QMouseEvent* e)
     {
         if(m_tool) {
           m_tool->mouseReleaseEvent( e );
-          this->update(); // Calling update will cause redraw of the entire surface
         }else{
             e->ignore();
         }

@@ -82,6 +82,8 @@ namespace MantidQt
       virtual void peakAdditionMode() = 0;
       /// Enter normal view mode
       virtual void peakDisplayMode() = 0;
+      /// Take settings from.
+      virtual void takeSettingsFrom(PeakOverlayView const * const) = 0;
       /// Destructor
       virtual ~PeakOverlayView()
       {

@@ -57,7 +57,6 @@ public:
   virtual void zoomToPeak(const int index);
   virtual bool isHidden() const;
   virtual bool contentsDifferent(PeaksPresenter const *  other) const;
-  bool deletePeakAt(const double& x, const double& y);
   virtual void peakEditMode(EditMode mode);
   virtual bool deletePeaksIn(PeakBoundingBox box);
 
@@ -80,6 +79,9 @@ private:
   UpdateableOnDemand *m_owningPresenter;
   /// Flag to indicate that this is hidden.
   bool m_isHidden;
+  /// Flag to indicate the current edit mode.
+  EditMode m_editMode;
+
   /// Configure peak transformations
   bool configureMappingTransform();
   /// Hide all views
@@ -104,6 +106,8 @@ private:
   void initialize();
   /// Find visible peak indexes. Those inside the bounding box, or interacting with the edges of the box.
   std::vector<size_t> findVisiblePeakIndexes(const PeakBoundingBox &box);
+  /// Set the visible peak list.
+  void setVisiblePeaks(const std::vector<size_t>& indexes);
 };
 
 

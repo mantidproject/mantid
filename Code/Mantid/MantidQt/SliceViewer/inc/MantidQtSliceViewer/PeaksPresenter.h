@@ -3,8 +3,10 @@
 
 #include "DllOption.h"
 #include <boost/shared_ptr.hpp>
+#include "MantidQtSliceViewer/PeakEditMode.h"
 #include "MantidQtSliceViewer/PeakPalette.h"
 #include "MantidQtSliceViewer/PeakBoundingBox.h"
+
 #include <set>
 #include <QObject>
 
@@ -33,11 +35,6 @@ namespace SliceViewer
 
   // Alias
   typedef std::set<boost::shared_ptr<const Mantid::API::IPeaksWorkspace> > SetPeaksWorkspaces;
-
-  // Possible edit modes.
-  enum EditMode { None = 0,
-                  AddPeaks = 1,
-                  DeletePeaks = 2};
 
   /*---------------------------------------------------------
   Abstract PeaksPresenter.

@@ -140,7 +140,7 @@ class MockPeakTransformFactory : public Geometry::PeakTransformFactory
     MOCK_METHOD0(peakDeletionMode, void());
     MOCK_METHOD0(peakAdditionMode, void());
     MOCK_METHOD0(peakDisplayMode, void());
-
+    MOCK_METHOD1(takeSettingsFrom, void(PeakOverlayView const * const));
     virtual ~MockPeakOverlayView(){}
   };
 

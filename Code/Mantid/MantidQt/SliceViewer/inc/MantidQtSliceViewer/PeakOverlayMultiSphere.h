@@ -7,6 +7,7 @@
 #include <q3iconview.h>
 #include <QtCore/QtCore>
 #include <QtGui/qwidget.h>
+#include <QtGui/QCursor>
 #include <qwt_plot.h>
 #include <qpainter.h>
 #include <qcolor.h>
@@ -95,10 +96,14 @@ namespace SliceViewer
     virtual QColor getBackgroundColour() const;
     /// Get the current foreground colour
     virtual QColor getForegroundColour() const;
-
+    /// Enter peak deletion mode.
     void peakDeletionMode();
+    /// Enter peak addition mode
     void peakAdditionMode();
+    /// Enter display mode
     void peakDisplayMode();
+    /// Take settings from another view
+    void takeSettingsFrom(const PeakOverlayView * const);
 
   private:
 
@@ -138,10 +143,15 @@ namespace SliceViewer
     bool m_showBackground;
     /// Input controller.
     MantidQt::MantidWidgets::InputController* m_tool;
+    /// Original default cursor
+    const QCursor m_defaultCursor;
 
    private slots:
 
     void erasePeaks(const QRect& rect);
+
+
+
 
   };
 

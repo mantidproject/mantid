@@ -88,10 +88,14 @@ namespace SliceViewer
     virtual QColor getForegroundColour() const;
     /// Get the background colour
     virtual QColor getBackgroundColour() const;
-
+    /// Enter peak deletion mode.
     void peakDeletionMode();
+    /// Enter peak addition mode
     void peakAdditionMode();
+    /// Enter display mode
     void peakDisplayMode();
+    /// Take settings from another view
+    void takeSettingsFrom(const PeakOverlayView * const);
 
   private:
 
@@ -117,6 +121,8 @@ namespace SliceViewer
     QColor m_peakColour;
     /// Peaks in the workspace that are viewable in the present view.
     std::vector<bool> m_viewablePeaks;
+
+
 
   };
 

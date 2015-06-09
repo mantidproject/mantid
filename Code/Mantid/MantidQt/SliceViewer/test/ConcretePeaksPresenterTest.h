@@ -540,48 +540,6 @@ public:
     TS_ASSERT(Mock::VerifyAndClearExpectations(pMockView));
   }
 
-  void test_delete_peaks_delete_one_match() {
-      using namespace Mantid::DataObjects;
-
-      const double radius = 0.1;
-
-      auto concreteBuilder = createStandardBuild(2, radius, HKL);
-
-      // Custom peaks workspace
-      IPeaksWorkspace_sptr peaksWS = createPeaksWorkspace(2, radius);
-      IPeak& peakToDelete = peaksWS->getPeak(0);
-      peakToDelete.setHKL(0, 0, 0);
-      Peak* pPeakToDelete = dynamic_cast<Peak*>(&peakToDelete);
-      pPeakToDelete->setPeakShape(boost::make_shared<PeakShapeSpherical>(radius, HKL));
-      peaksWS->getPeak(1).setHKL(10, 10, 10);
-
-      concreteBuilder.withPeaksWorkspace(peaksWS); // Customise builder
-
-      ConcretePeaksPresenter_sptr presenter = concreteBuilder.create();
-
-
-      /*
-       * Create a viewing frustrum in natural coordinates
-      */
-      Top top(1.0);
-      Bottom bottom(-1.0);
-      Left left(-1.0);
-      Right right(1.0);
-      Front front(-1e6);
-      Back back(1e6);
-      SlicePoint slicePoint(0.0);
-      PeakBoundingBox frustrum(left, right, top, bottom, slicePoint, front, back); // psudo viewing frustrum.
-      presenter->updateWithSlicePoint(frustrum);
-
-      TSM_ASSERT("No peak in this region. Point outside of radius. Nothing to delete", !presenter->deletePeakAt(0.0, 0.0 + radius + 0.01));
-      TSM_ASSERT("No peak in this region. Point outside of radius. Nothing to delete", !presenter->deletePeakAt(0.0 + radius + 0.01, 0.0));
-
-      TSM_ASSERT_EQUALS("No peaks should have been removed yet", 2, peaksWS->getNumberPeaks());
-      TSM_ASSERT("Point sits on peak radius. We should delete peak.", presenter->deletePeakAt(0.0 + radius, 0));
-      TSM_ASSERT_EQUALS("One peaks should have been deleted", 1, peaksWS->getNumberPeaks());
-
-  }
-
   void doTestSorting(const bool sortAscending)
   {
     const int expectedNumberOfPeaks = 1;
@@ -593,7 +551,7 @@ public:
     EXPECT_CALL(*pMockView, setSlicePoint(_,_)).Times(1); // Expect that the slice point will be re-set upon sorting.
 
     // Create a widget factory mock
-    auto pMockViewFactory = new MockPeakOverlayFactory;
+    auto pMockViewFactory = new NiceMock<MockPeakOverlayFactory>;
     PeakOverlayViewFactory_sptr mockViewFactory = PeakOverlayViewFactory_sptr(pMockViewFactory);
     EXPECT_CALL(*pMockViewFactory, createView(_,_)).WillRepeatedly(Return(mockView));
     EXPECT_CALL(*pMockViewFactory, getPlotXLabel()).WillRepeatedly(Return("H"));
