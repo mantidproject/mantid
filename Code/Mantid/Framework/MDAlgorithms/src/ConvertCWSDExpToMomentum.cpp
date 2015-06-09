@@ -169,18 +169,17 @@ ConvertCWSDExpToMomentum::createExperimentMDWorkspace() {
  */
 void ConvertCWSDExpToMomentum::addMDEvents() {
   MatrixWorkspace_sptr spicews;
-  // Determine system
-  bool isWindows(false);
-#if _WIN64
-  isWindows = true;
-#endif
-#if _WIND32
-  isWindows = true;
-#endif
 
   // Check whether to add / or \ to m_dataDir
   std::string sep("");
   if (m_dataDir.size() > 0) {
+    // Determine system
+    bool isWindows(false);
+#if _WIN64
+    isWindows = true;
+#elif _WIND32
+    isWindows = true;
+#endif
     if (isWindows && m_dataDir.back() != '\\') {
       sep = "\\";
     } else if (!isWindows && m_dataDir.back() != '/')

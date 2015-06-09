@@ -138,11 +138,10 @@ Geometry::Instrument_sptr createMinimalInstrument(const Mantid::Kernel::V3D& sou
     return instrument;
 }
 
-
-Geometry::Instrument_sptr createVirtualInstrument(Kernel::V3D sourcePos, Kernel::V3D samplePos,
-                                                  const std::vector<Kernel::V3D> vecdetpos,
-                                                  const std::vector<detid_t> vecdetid)
-{
+Geometry::Instrument_sptr
+createVirtualInstrument(Kernel::V3D sourcePos, Kernel::V3D samplePos,
+                        const std::vector<Kernel::V3D> &vecdetpos,
+                        const std::vector<detid_t> &vecdetid) {
   Instrument_sptr instrument = boost::make_shared<Instrument>();
   instrument->setReferenceFrame(
       boost::make_shared<ReferenceFrame>(Mantid::Geometry::Y /*up*/, Mantid::Geometry::Z /*along*/, Right, "0,0,0"));
