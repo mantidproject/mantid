@@ -10,7 +10,7 @@
 #include <boost/function.hpp>
 
 namespace Mantid {
-namespace API {
+namespace Geometry {
 class IPeak;
 }
 namespace Crystal {
@@ -51,7 +51,7 @@ private:
   /// MD coordinates to use
   Mantid::Kernel::SpecialCoordinateSystem m_mdCoordinates;
   /// Pointer to member function used for coordinate determination.
-  boost::function<Mantid::Kernel::V3D(const Mantid::API::IPeak *)>
+  boost::function<Mantid::Kernel::V3D(const Mantid::Geometry::IPeak *)>
       m_coordFunction;
 
 public:

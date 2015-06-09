@@ -864,7 +864,7 @@ void ConfigDialog::initMdPlottingVsiTab()
 
   int indexInitialView = vsiInitialView->findData(m_mdSettings.getUserSettingInitialView(), Qt::DisplayRole);
 
-  if (index != -1)
+  if (indexInitialView != -1)
   {
     vsiInitialView->setCurrentIndex(indexInitialView);
   }

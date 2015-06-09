@@ -64,10 +64,10 @@ LeBailFit::LeBailFit()
       m_indicatePeakHeight(0.), m_MCGroups(), m_numMCGroups(0), m_bestRwp(0.),
       m_bestRp(0.), m_bestParameters(), m_bestBackgroundData(), m_bestMCStep(0),
       m_numMinimizeSteps(0), m_Temperature(DBL_MIN), m_useAnnealing(false),
-      m_minimumPeakHeight(DBL_MAX), m_tolerateInputDupHKL2Peaks(false),
-      m_bkgdParameterNames(), m_numberBkgdParameters(0),
-      m_bkgdParameterBuffer(), m_bestBkgdParams(), m_roundBkgd(0),
-      m_bkgdParameterStepVec(), m_peakCentreTol(0.) {}
+      m_walkStyle(RANDOMWALK), m_minimumPeakHeight(DBL_MAX),
+      m_tolerateInputDupHKL2Peaks(false), m_bkgdParameterNames(),
+      m_numberBkgdParameters(0), m_bkgdParameterBuffer(), m_bestBkgdParams(),
+      m_roundBkgd(0), m_bkgdParameterStepVec(), m_peakCentreTol(0.) {}
 
 //----------------------------------------------------------------------------------------------
 /** Destructor

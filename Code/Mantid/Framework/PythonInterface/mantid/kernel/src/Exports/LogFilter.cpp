@@ -8,16 +8,13 @@ using Mantid::Kernel::Property;
 
 using namespace boost::python;
 
-// clang-format off
-void export_LogFilter()
-// clang-format on
-{
-  class_<LogFilter,boost::noncopyable>("LogFilter", 
-                                        init<const Property*>("Creates a log filter using the log to be filtered"))
-    .def("data", &LogFilter::data, return_value_policy<return_by_value>(), 
-         "Returns a time series property filtered on current filter property")
+void export_LogFilter() {
+  class_<LogFilter, boost::noncopyable>(
+      "LogFilter", init<const Property *>(
+                       "Creates a log filter using the log to be filtered"))
+      .def("data", &LogFilter::data, return_value_policy<return_by_value>(),
+           "Returns a time series property filtered on current filter property")
 
-    .def("addFilter", &LogFilter::addFilter, "Adds a filter to the current list")
-    ;
+      .def("addFilter", &LogFilter::addFilter,
+           "Adds a filter to the current list");
 }
-

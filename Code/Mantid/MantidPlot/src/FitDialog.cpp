@@ -1039,7 +1039,7 @@ void FitDialog::accept()
 
 	QString curve = boxCurve->currentText();
 	QStringList curvesList = d_graph->curvesList();
-	if (curvesList.contains(curve) <= 0){
+	if (!curvesList.contains(curve)){
 		QMessageBox::critical(app, tr("MantidPlot - Warning"),
 				tr("The curve <b> %1 </b> doesn't exist anymore! Operation aborted!").arg(curve));
 		boxCurve->clear();

@@ -67,7 +67,7 @@ void MDWSDescription::buildFromMatrixWS(
 
   // check and get energy conversion mode;
 
-  m_Emode = Kernel::DeltaEMode().fromString(dEMode);
+  m_Emode = Kernel::DeltaEMode::fromString(dEMode);
 
   // get raw pointer to Q-transformation (do not delete this pointer, its held
   // by MDTransfFactory!)
@@ -326,7 +326,7 @@ bool MDWSDescription::isPowder() const {
 
 /** Returns symbolic representation of current Emode */
 std::string MDWSDescription::getEModeStr() const {
-  return Kernel::DeltaEMode().asString(m_Emode);
+  return Kernel::DeltaEMode::asString(m_Emode);
 }
 
 /** function extracts the coordinates from additional workspace properties and

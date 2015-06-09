@@ -5,9 +5,9 @@
 #include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/PeakTransformHKL.h"
-#include "MantidAPI/PeakTransformQSample.h"
-#include "MantidAPI/PeakTransformQLab.h"
+#include "MantidGeometry/Crystal/PeakTransformHKL.h"
+#include "MantidGeometry/Crystal/PeakTransformQSample.h"
+#include "MantidGeometry/Crystal/PeakTransformQLab.h"
 #include "MantidKernel/V3D.h"
 #include "MantidKernel/SpecialCoordinateSystem.h"
 #include "MantidKernel/Logger.h"
@@ -75,11 +75,11 @@ PeaksTableControllerVsi::PeaksTableControllerVsi(
       m_presenter(new Mantid::VATES::CompositePeaksPresenterVsi()),
       m_peaksTabWidget(NULL), m_peakMarker(NULL), m_coordinateSystem(Mantid::Kernel::SpecialCoordinateSystem::QLab) {
   m_peakTransformSelector.registerCandidate(
-      boost::make_shared<Mantid::API::PeakTransformHKLFactory>());
+      boost::make_shared<Mantid::Geometry::PeakTransformHKLFactory>());
   m_peakTransformSelector.registerCandidate(
-      boost::make_shared<Mantid::API::PeakTransformQSampleFactory>());
+      boost::make_shared<Mantid::Geometry::PeakTransformQSampleFactory>());
   m_peakTransformSelector.registerCandidate(
-      boost::make_shared<Mantid::API::PeakTransformQLabFactory>());
+      boost::make_shared<Mantid::Geometry::PeakTransformQLabFactory>());
 }
 
 PeaksTableControllerVsi::~PeaksTableControllerVsi() {
@@ -148,9 +148,9 @@ void PeaksTableControllerVsi::addWorkspace(
         Mantid::API::AnalysisDataService::Instance()
             .retrieveWS<Mantid::API::IPeaksWorkspace>(wsName);
 
-    Mantid::API::PeakTransformFactory_sptr transformFactory =
+    Mantid::Geometry::PeakTransformFactory_sptr transformFactory =
         m_peakTransformSelector.makeChoice(dimInfo[0], dimInfo[1]);
-    Mantid::API::PeakTransform_sptr transform =
+    Mantid::Geometry::PeakTransform_sptr transform =
         transformFactory->createTransform(dimInfo[0], dimInfo[1]);
     std::string frame = transform->getFriendlyName();
 
