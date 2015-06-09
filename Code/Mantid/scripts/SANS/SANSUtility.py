@@ -18,6 +18,8 @@ ADDED_EVENT_DATA_TAG = '_added_event_data'
 REG_DATA_NAME = '-add' + ADDED_EVENT_DATA_TAG + '[_1-9]*$'
 REG_DATA_MONITORS_NAME = '-add_monitors' + ADDED_EVENT_DATA_TAG + '[_1-9]*$'
 
+ZERO_ERROR_DEFAULT = 1e6
+
 def deprecated(obj):
     """
     Decorator to apply to functions or classes that we think are not being (or
@@ -597,6 +599,22 @@ def get_full_path_for_added_event_data(file_name):
     full_path_name = os.path.join(path, base)
 
     return full_path_name
+
+
+def removeZeroErrorsFromWorkspace(ws):
+    '''
+    Removes the zero errors from a Matrix workspace
+    @param ws :: The input workspace
+    '''
+    # Make sure we are dealing with a MatrixWorkspace
+    if not isinstance(ws, MatrixWorkspace) or isinstance(ws,IEventWorkspace):
+        raise ValueError('Cannot remove zero errors from a workspace which is not of type MatrixWorkspace.')
+    # Iterate over the workspace and replace the zero values with a large default value
+    numSpectra = ws.getNumberHistograms()
+    errors = ws.dataE
+    for index in range(0,numSpectra):
+        spectrum = errors(index)
+        spectrum[spectrum <= 0.0] = ZERO_ERROR_DEFAULT
 
 ###############################################################################
 ######################### Start of Deprecated Code ############################

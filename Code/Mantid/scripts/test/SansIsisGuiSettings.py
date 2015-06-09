@@ -244,5 +244,61 @@ class Sans2DIsisGuiSettings(unittest.TestCase):
         self.checkFloat(tofs[1], 65000)
 
 
+class TestSans2DIsisRemoveZeroErrors(unittest.TestCase):
+    def _setup_workspace(self, name, type):
+        ws = CreateSampleWorkspace(OutputWorkspace = name, WorkspaceType=type, Function='One Peak',NumBanks=1,BankPixelWidth=2,NumEvents=0,XMin=0.5,XMax=1,BinWidth=1,PixelSpacing=1,BankDistanceFromSample=1)
+        if type == 'Histogram':
+            errors = ws.dataE
+            # For first and third spectra set to 0.0
+            errors(0)[0] = 0.0
+            errors(2)[0] = 0.0
+
+    def _removeWorkspace(self, name):
+        if name in mtd:
+            mtd.remove(name)
+
+    def test_that_non_existent_ws_creates_error_message(self):
+        # Arrange
+        ws_name = 'original'
+        ws_clone_name = 'clone'
+        # Act
+        message = i.CreateZeroFreeClonedWorkspace(input_workspace_name = ws_name, output_workspace_name = ws_clone_name)
+        # Assert
+        message.strip()
+        self.assertTrue(not message.startswith('Success'))
+
+    def test_that_bad_zero_error_removal_creates_error_message(self):
+        # Arrange
+        ws_name = 'original'
+        ws_clone_name = 'clone'
+        self._setup_workspace(ws_name, 'Event')
+        # Act
+        message = i.CreateZeroFreeClonedWorkspace(input_workspace_name = ws_name, output_workspace_name = ws_clone_name)
+        # Assert
+        message.strip()
+        self.assertTrue(not message.startswith('Success'))
+        self.assertTrue(not ws_clone_name in mtd)
+
+        self._removeWorkspace(ws_name)
+        self.assertTrue(not ws_name in mtd)
+
+
+    def test_that_zeros_are_removed_correctly(self):
+        # Arrange
+        ws_name = 'original'
+        ws_clone_name = 'clone'
+        self._setup_workspace(ws_name, 'Histogram')
+        # Act
+        message = i.CreateZeroFreeClonedWorkspace(input_workspace_name = ws_name, output_workspace_name = ws_clone_name)
+        # Assert
+        message.strip()
+        self.assertTrue(message.startswith('Success'))
+        self.assertTrue(mtd[ws_name] != mtd[ws_clone_name])
+
+        self._removeWorkspace(ws_name)
+        self._removeWorkspace(ws_clone_name)
+        self.assertTrue(not ws_name in mtd)
+        self.assertTrue(not ws_clone_name in mtd)
+
 if __name__ == '__main__':
     unittest.main()

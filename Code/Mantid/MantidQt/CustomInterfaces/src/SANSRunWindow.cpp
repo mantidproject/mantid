@@ -3819,6 +3819,29 @@ void SANSRunWindow::setValidators()
   m_uiForm.gravity_extra_length_line_edit->setValidator(mustBeDouble);
 }
 
+/**
+ * Create a zero-error free workspace clone
+ * @param originalWorkspaceName :: The name of the original workspace which might contain errors with 0 value.
+ * @param clonedWorkspaceName :: The name of cloned workspace which should have its zero erros removed.
+ * @returns The name of the cloned workspace
+ */
+void SANSRunWindow::createZeroErrorFreeClone(QString originalWorkspaceName, QString clonedWorkspaceName) {
+  if (workspaceExists(originalWorkspaceName)) {
+    // Run the python script which creates the cloned workspace
+    QString clonedWorkspaceName = originalWorkspaceName + "_cloned_temp";
+    QString pythonCode("print i.CreateZeroErrorFreeClonedWorkspace(InputWorkspace=");
+    pythonCode += originalWorkspaceName + ",";
+    pythonCode += "OutputWorkspace=" + clonedWorkspaceName + ")";
+
+    QString result(runPythonCode(pythonCode, false));
+    result.trimmed();
+
+    if (!result.startsWith("Success")) {
+      QMessageBox::critical(this, "Error creating a zerror error free cloned workspace", result);
+    }
+  }
+}
+
 } //namespace CustomInterfaces
 
 } //namespace MantidQt

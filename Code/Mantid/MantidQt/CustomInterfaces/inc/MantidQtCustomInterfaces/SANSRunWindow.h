@@ -363,6 +363,8 @@ private:
   QString reduceSingleRun() const;
   void setValidators();
 
+  void createZeroErrorFreeClone(QString originalWorkspaceName,QString clonedWorkspaceName);
+
   UserSubWindow * slicingWindow;
 
 };
