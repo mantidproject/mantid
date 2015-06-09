@@ -742,31 +742,37 @@ void LoadMuonNexus1::addGoodFrames(DataObjects::Workspace2D_sptr localWorkspace,
 
   // Get handle to nexus file
   ::NeXus::File handle(m_filename, NXACC_READ);
-  handle.openPath("run/instrument/beam/");
-  handle.openData("frames_period_daq");
 
-  ::NeXus::Info info = handle.getInfo();
-  // Check that frames_period_daq contains values for
-  // every period
-  if (period >= info.dims[0]) {
+  try {
 
-    throw std::runtime_error("goodfrm not found for period " + period);
-  }
-  // read frames_period_daq
-  boost::scoped_array<int> dataVals(new int[info.dims[0]]);
-  handle.getData(dataVals.get());
+    handle.openPath("run/instrument/beam/");
+    handle.openData("frames_period_daq");
 
-  auto &run = localWorkspace->mutableRun();
-  if (period == 0) {
-    // If this is the first period
-    // localWorkspace will not contain goodfrm
-    run.addProperty("goodfrm", dataVals[0]);
+    ::NeXus::Info info = handle.getInfo();
+    // Check that frames_period_daq contains values for
+    // every period
+    if (period >= info.dims[0]) {
 
-  } else {
-    // If period > 0, we need to remove
-    // previous goodfrm log value
-    run.removeLogData("goodfrm");
-    run.addProperty("goodfrm", dataVals[period]);
+      throw std::runtime_error("goodfrm not found for period " + period);
+    }
+    // read frames_period_daq
+    boost::scoped_array<int> dataVals(new int[info.dims[0]]);
+    handle.getData(dataVals.get());
+
+    auto &run = localWorkspace->mutableRun();
+    if (period == 0) {
+      // If this is the first period
+      // localWorkspace will not contain goodfrm
+      run.addProperty("goodfrm", dataVals[0]);
+
+    } else {
+      // If period > 0, we need to remove
+      // previous goodfrm log value
+      run.removeLogData("goodfrm");
+      run.addProperty("goodfrm", dataVals[period]);
+    }
+  } catch (::NeXus::Exception &) {
+    g_log.warning("Could not read /run/instrument/beam/frames_period_daq");
   }
 
   handle.close();
