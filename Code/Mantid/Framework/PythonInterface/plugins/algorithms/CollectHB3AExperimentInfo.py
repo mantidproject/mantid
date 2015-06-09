@@ -17,9 +17,9 @@ class CollectHB3AExperimentInfo(PythonAlgorithm):
         self._myPixelInfoTableWS = None
         self._myScanPtFileTableWS = None
         self._expNumber = -1
-        self._scanList = None 
-        self._tol2Theta = None 
-        self._dataDir = None 
+        self._scanList = None
+        self._tol2Theta = None
+        self._dataDir = None
         self._ptListList = None
 
         # Define class variable Scan-Pt. dictionary: Key scan number, Value list of pt numbers
