@@ -1200,7 +1200,7 @@ def DeleteZeroErrorFreeClonedWorkspace(input_workspace_name):
 
     if input_workspace_name in mtd:
         DeleteWorkspace(Workspace=input_workspace_name)
-        message = 'Sucess'
+        message = 'Success'
     else:
         message = 'Failed to delete a zero-error free workspace'
 

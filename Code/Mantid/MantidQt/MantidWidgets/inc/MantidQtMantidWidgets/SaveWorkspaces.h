@@ -48,7 +48,7 @@ namespace MantidQt
 
     public: 
       SaveWorkspaces(QWidget *parent, const QString & suggFname,
-        QHash<const QCheckBox * const, QString> & defSavs);
+        QHash<const QCheckBox * const, QString> & defSavs, bool saveAsZeroErrorFree);
       void initLayout();
       ///Returns the save extension expected the name algorithm
       static QString getSaveAlgExt(const QString & algName);
@@ -63,6 +63,7 @@ namespace MantidQt
       QListWidget *m_workspaces;
       QCheckBox *m_append;
       QString m_lastName;
+      bool m_saveAsZeroErrorFree;
 
       QHash<QCheckBox * const, QString> m_savFormats;
       typedef QHash<QCheckBox * const, QString>::const_iterator SavFormatsConstIt;
@@ -76,7 +77,7 @@ namespace MantidQt
 
       void addButtonsDisab(int row);
       void closeEvent(QCloseEvent *event);
-      QString saveList(const QList<QListWidgetItem*> & list, const QString & algorithm, QString fileBase, bool toAppend);
+      QString saveList(const QList<QListWidgetItem*> & list, const QString & algorithm, QString fileBase, bool toAppend, QHash<QString, QString> workspaceMap);
       QHash<QString, QString> provideZeroFreeWorkspaces(const QListWidget * workspaces);
       void removeZeroFreeWorkspaces(QHash<QString, QString> workspaces);
 

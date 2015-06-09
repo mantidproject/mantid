@@ -93,7 +93,7 @@
        <string notr="true"/>
       </property>
       <property name="currentIndex">
-       <number>1</number>
+       <number>0</number>
       </property>
       <property name="elideMode">
        <enum>Qt::ElideNone</enum>
@@ -834,6 +834,14 @@
               <widget class="QCheckBox" name="saveNIST_Qxy_check">
                <property name="text">
                 <string>NIST Qxy</string>
+               </property>
+              </widget>
+             </item>
+             <item row="4" column="0">
+              <widget class="QCheckBox" name="zeroErrorCheckBox">
+               <property name="text">
+                <string>Remove 
+Zero Error</string>
                </property>
               </widget>
              </item>

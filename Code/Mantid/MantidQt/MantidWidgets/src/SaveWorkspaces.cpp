@@ -32,8 +32,8 @@ using namespace Mantid::API;
  *  @param suggFname :: sets the initial entry in the filename box
  *  @param defSavs :: sets which boxes are ticked
  */
-SaveWorkspaces::SaveWorkspaces(QWidget *parent, const QString & suggFname, QHash<const QCheckBox * const, QString> & defSavs) :
-  API::MantidDialog(parent)
+SaveWorkspaces::SaveWorkspaces(QWidget *parent, const QString & suggFname, QHash<const QCheckBox * const, QString> & defSavs, bool saveAsZeroErrorFree) :
+  API::MantidDialog(parent), m_saveAsZeroErrorFree(saveAsZeroErrorFree)
 {
   setAttribute(Qt::WA_DeleteOnClose);
   setWindowTitle("Save Workspaces");
@@ -213,7 +213,7 @@ void SaveWorkspaces::closeEvent(QCloseEvent* event)
   emit closing();
   event->accept();
 }
-QString SaveWorkspaces::saveList(const QList<QListWidgetItem*> & wspaces, const QString & algorithm, QString fileBase, bool toAppend)
+QString SaveWorkspaces::saveList(const QList<QListWidgetItem*> & wspaces, const QString & algorithm, QString fileBase, bool toAppend, QHash<QString, QString> workspaceMap)
 {
   if ( wspaces.count() < 1 )
   {
@@ -229,7 +229,11 @@ QString SaveWorkspaces::saveList(const QList<QListWidgetItem*> & wspaces, const 
   QString saveCommands;
   for (int j =0; j < wspaces.count(); ++j)
   {
-    saveCommands += algorithm + "('"+wspaces[j]->text()+"','";
+    if (workspaceMap.count(wspaces[j]->text())) {
+      saveCommands += algorithm + "('"+ workspaceMap[wspaces[j]->text()]+"','";
+    } else {
+      saveCommands += algorithm + "('"+ wspaces[j]->text()+"','";
+    }
 
     QString outFile = fileBase;
     if (outFile.isEmpty())
@@ -307,7 +311,7 @@ QString SaveWorkspaces::getSaveAlgExt(const QString & algName)
 void SaveWorkspaces::saveSel()
 {
   // For each selected workspace, provide an zero-error free clone
-  QHash<QString, QString> workspaces = provideZeroFreeWorkspaces(m_workspaces);
+  QHash<QString, QString> workspaceMap = provideZeroFreeWorkspaces(m_workspaces);
 
   QString saveCommands;
   for(SavFormatsConstIt i = m_savFormats.begin(); i != m_savFormats.end(); ++i)
@@ -327,7 +331,7 @@ void SaveWorkspaces::saveSel()
       try
       {
         saveCommands += saveList(m_workspaces->selectedItems(), i.value(),
-          m_fNameEdit->text(), toAppend);
+          m_fNameEdit->text(), toAppend, workspaceMap);
       }
       catch(std::logic_error &)
       {
@@ -340,7 +344,9 @@ void SaveWorkspaces::saveSel()
   saveCommands += "print 'success'";
   QString status(runPythonCode(saveCommands).trimmed());
 
-  removeZeroFreeWorkspaces(workspaces);
+  if (m_saveAsZeroErrorFree) {
+    removeZeroFreeWorkspaces(workspaceMap);
+  }
 
   if ( status != "success" )
   {
@@ -383,7 +389,9 @@ void SaveWorkspaces::saveFileBrowse()
 }
 
 /**
- * Goes through all selected workspaces and maps them to a zero-error free clone
+ * Goes through all selected workspaces and maps them to a zero-error free clone,
+ * if the user has selected to do this otherwise the value of the hash is set to
+ * the same as the key
  * @param workspaces :: a QListWIdget which contains the selected workspaces
  * @returns a hash which maps the original workspace to the zero-error free workspace
  */
@@ -392,9 +400,15 @@ QHash<QString, QString> SaveWorkspaces::provideZeroFreeWorkspaces(const QListWid
   QHash<QString, QString> workspaceMap;
   for (auto it = wsList.begin(); it != wsList.end(); ++it) {
     auto wsName = (*it)->text();
-    auto cloneName = wsName + "_clone";
-    emit createZeroErrorFreeWorkspace(wsName, cloneName);
-    workspaceMap.insert(wsName, cloneName);
+    auto cloneName = wsName;
+    if (m_saveAsZeroErrorFree) {
+       cloneName += "_clone_temp";
+       emit createZeroErrorFreeWorkspace(wsName, cloneName);
+    }
+
+    if (AnalysisDataService::Instance().doesExist(cloneName.toStdString())) {
+      workspaceMap.insert(wsName, cloneName);
+    }
   }
 
   return workspaceMap;

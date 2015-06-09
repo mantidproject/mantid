@@ -422,7 +422,7 @@ void SANSRunWindow::saveWorkspacesDialog()
 {
   //Qt::WA_DeleteOnClose must be set for the dialog to aviod a memory leak
   m_saveWorkspaces =
-    new SaveWorkspaces(this, m_uiForm.outfile_edit->text(), m_savFormats);
+    new SaveWorkspaces(this, m_uiForm.outfile_edit->text(), m_savFormats, m_uiForm.zeroErrorCheckBox->isChecked());
   //this dialog sometimes needs to run Python, pass this to Mantidplot via our runAsPythonScript() signal
   connect(m_saveWorkspaces, SIGNAL(runAsPythonScript(const QString&, bool)),
     this, SIGNAL(runAsPythonScript(const QString&, bool)));
@@ -432,6 +432,9 @@ void SANSRunWindow::saveWorkspacesDialog()
   // Connect the request for a zero-error-free workspace
   connect(m_saveWorkspaces, SIGNAL(createZeroErrorFreeWorkspace(QString& , QString&)),
           this, SLOT(createZeroErrorFreeClone(QString&, QString&)));
+  // Connect the request for deleting a zero-error-free workspace
+  connect(m_saveWorkspaces, SIGNAL(deleteZeroErrorFreeWorkspace(QString&)),
+         this, SLOT(deleteZeroErrorFreeClone(QString&) ));
   m_uiForm.saveSel_btn->setEnabled(false);
   m_saveWorkspaces->show();
 }
@@ -3831,9 +3834,9 @@ void SANSRunWindow::setValidators()
 void SANSRunWindow::createZeroErrorFreeClone(QString& originalWorkspaceName, QString& clonedWorkspaceName) {
   if (workspaceExists(originalWorkspaceName)) {
     // Run the python script which creates the cloned workspace
-    QString pythonCode("print i.CreateZeroErrorFreeClonedWorkspace(input_workspace_name=");
-    pythonCode += originalWorkspaceName + ",";
-    pythonCode += " output_workspace_name=" + clonedWorkspaceName + ")";
+    QString pythonCode("print i.CreateZeroErrorFreeClonedWorkspace(input_workspace_name='");
+    pythonCode += originalWorkspaceName + "',";
+    pythonCode += " output_workspace_name='" + clonedWorkspaceName + "')";
 
     QString result(runPythonCode(pythonCode, false));
     result.trimmed();
@@ -3851,8 +3854,8 @@ void SANSRunWindow::createZeroErrorFreeClone(QString& originalWorkspaceName, QSt
 void SANSRunWindow::deleteZeroErrorFreeClone(QString& clonedWorkspaceName) {
   if (workspaceExists(clonedWorkspaceName)) {
     // Run the python script which destroys the cloned workspace
-    QString pythonCode("print i.DeleteZeroErrorFreeClonedWorkspace(input_workspace_name=");
-    pythonCode += clonedWorkspaceName + ")";
+    QString pythonCode("print i.DeleteZeroErrorFreeClonedWorkspace(input_workspace_name='");
+    pythonCode += clonedWorkspaceName + "')";
 
     QString result(runPythonCode(pythonCode, false));
     result.trimmed();
