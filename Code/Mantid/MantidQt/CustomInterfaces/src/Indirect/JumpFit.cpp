@@ -76,9 +76,8 @@ bool JumpFit::validate() {
  * script that runs JumpFit
  */
 void JumpFit::run() {
-  bool save = m_uiForm.chkSave->isChecked();
   bool plot = m_uiForm.chkPlot->isChecked();
-
+  bool save = m_uiForm.chkSave->isChecked();
   runImpl(plot, save);
 }
 
@@ -91,7 +90,6 @@ void JumpFit::runPreviewAlgorithm() { runImpl(); }
 /**
  * Runs algorithm.
  *
- * @param plot Enable/disable plotting
  * @param save Enable/disable saving
  */
 void JumpFit::runImpl(bool plot, bool save) {
@@ -99,9 +97,14 @@ void JumpFit::runImpl(bool plot, bool save) {
   if (!m_uiForm.dsSample->isValid())
     return;
 
+  if (m_batchAlgoRunner->queueLength() > 1)
+    return;
+
   // Fit function to use
   QString functionName = m_uiForm.cbFunction->currentText();
   QString functionString = "name=" + functionName;
+
+  // TODO
   switch (m_uiForm.cbFunction->currentIndex()) {
   case 0:
     functionString += ",Tau=1.0,L=1.5";
@@ -120,25 +123,35 @@ void JumpFit::runImpl(bool plot, bool save) {
   std::string widthText = m_uiForm.cbWidth->currentText().toStdString();
   int width = m_spectraList[widthText];
   QString sample = m_uiForm.dsSample->getCurrentDataName();
-  QString outputName = sample + "_" + functionName + "_fit";
+  QString outputName =
+      getWorkspaceBasename(sample) + "_" + functionName + "_fit";
 
-  fitAlg = AlgorithmManager::Instance().create("Fit");
-  fitAlg->initialize();
+  m_fitAlg = AlgorithmManager::Instance().create("Fit");
+  m_fitAlg->initialize();
 
-  fitAlg->setProperty("Function", functionString.toStdString());
-  fitAlg->setProperty("InputWorkspace", sample.toStdString());
-  fitAlg->setProperty("WorkspaceIndex", width);
-  fitAlg->setProperty("IgnoreInvalidData", true);
-  fitAlg->setProperty("StartX", m_dblManager->value(m_properties["QMin"]));
-  fitAlg->setProperty("EndX", m_dblManager->value(m_properties["QMax"]));
-  fitAlg->setProperty("CreateOutput", true);
-  fitAlg->setProperty("Output", outputName.toStdString());
+  m_fitAlg->setProperty("Function", functionString.toStdString());
+  m_fitAlg->setProperty("InputWorkspace", sample.toStdString());
+  m_fitAlg->setProperty("WorkspaceIndex", width);
+  m_fitAlg->setProperty("IgnoreInvalidData", true);
+  m_fitAlg->setProperty("StartX", m_dblManager->value(m_properties["QMin"]));
+  m_fitAlg->setProperty("EndX", m_dblManager->value(m_properties["QMax"]));
+  m_fitAlg->setProperty("CreateOutput", true);
+  m_fitAlg->setProperty("Output", outputName.toStdString());
 
-  if (m_batchAlgoRunner->queueLength() < 1) {
-    m_batchAlgoRunner->addAlgorithm(fitAlg);
+  m_batchAlgoRunner->addAlgorithm(m_fitAlg);
 
-    m_batchAlgoRunner->executeBatchAsync();
+  // Add save step if required
+  if (save) {
+    QString outWsName = outputName + "_Workspace";
+    addSaveWorkspaceToQueue(outWsName);
   }
+
+  // Process plotting in MantidPlot
+  if (plot)
+    connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
+            SLOT(plotFitResult(bool)));
+
+  m_batchAlgoRunner->executeBatchAsync();
 }
 
 /**
@@ -151,22 +164,48 @@ void JumpFit::fitAlgDone(bool error) {
   if (error)
     return;
 
-  std::string outWsName = fitAlg->getPropertyValue("Output") + "_Workspace";
+  // Get output workspace name
+  std::string outWsName = m_fitAlg->getPropertyValue("Output") + "_Workspace";
+
+  // Get the output workspace group
   MatrixWorkspace_sptr outputWorkspace =
       AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outWsName);
   TextAxis *axis = dynamic_cast<TextAxis *>(outputWorkspace->getAxis(1));
 
+  // Find the fit and diff curves (data should already be plotted)
   for (unsigned int histIndex = 0;
        histIndex < outputWorkspace->getNumberHistograms(); histIndex++) {
     QString specName = QString::fromStdString(axis->label(histIndex));
 
+    // Fit curve is red
     if (specName == "Calc")
       m_uiForm.ppPlot->addSpectrum("Fit", outputWorkspace, histIndex, Qt::red);
 
+    // Difference curve is green
     if (specName == "Diff")
       m_uiForm.ppPlot->addSpectrum("Diff", outputWorkspace, histIndex,
                                    Qt::green);
   }
+}
+
+/**
+ * Handles plotting of results within MantidPlot plots
+ *
+ * @param error If the algorithm failed
+ */
+void JumpFit::plotFitResult(bool error) {
+  disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
+             SLOT(plotFitResult(bool)));
+
+  // Ignore errors
+  if (error)
+    return;
+
+  // Get output workspace name
+  std::string outWsName = m_fitAlg->getPropertyValue("Output") + "_Workspace";
+
+  // Plot in MantidPlot
+  plotSpectrum(QString::fromStdString(outWsName), 0, 2);
 }
 
 /**
