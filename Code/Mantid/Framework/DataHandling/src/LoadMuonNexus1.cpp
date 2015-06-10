@@ -21,6 +21,7 @@
 #include "MantidNexus/MuonNexusReader.h"
 #include "MantidNexus/NexusClasses.h"
 #include <nexus/NeXusFile.hpp>
+#include <nexus/NeXusException.hpp>
 #include "MantidAPI/SpectrumDetectorMapping.h"
 
 #include <Poco/Path.h>
@@ -752,8 +753,9 @@ void LoadMuonNexus1::addGoodFrames(DataObjects::Workspace2D_sptr localWorkspace,
     // Check that frames_period_daq contains values for
     // every period
     if (period >= info.dims[0]) {
-
-      throw std::runtime_error("goodfrm not found for period " + period);
+      std::ostringstream error;
+      error << "goodfrm not found for period " << period;
+      throw std::runtime_error(error.str());
     }
     // read frames_period_daq
     boost::scoped_array<int> dataVals(new int[info.dims[0]]);
