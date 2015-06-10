@@ -71,6 +71,14 @@ void QueryRemoteJob2::init() {
                   "The date & time the job finished (availability is optional "
                   "and implementation dependent)",
                   Direction::Output);
+
+  declareProperty("CommandLine", "", nullValidator,
+                  "The command line run by this job on the remote compute "
+                  "resource machine(s), which in some cases may provide "
+                  "additional low level information on the environment used "
+                  "(modules loaded, exact versions (paths) of scripts being "
+                  "run, etc.)",
+                  Direction::Output);
 }
 
 void QueryRemoteJob2::exec() {
@@ -88,6 +96,7 @@ void QueryRemoteJob2::exec() {
   setProperty("SubmitDate", info.submitDate.toISO8601String());
   setProperty("StartDate", info.startDate.toISO8601String());
   setProperty("CompletionDate", info.completionTime.toISO8601String());
+  setProperty("CommandLine", info.cmdLine);
 }
 
 } // end namespace RemoteAlgorithms
