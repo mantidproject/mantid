@@ -50,11 +50,10 @@ void EvaluateFunction::execConcrete() {
   m_function->function(*domain, *values);
 
   // Gnegerate the output workspace
-  auto outputWS = m_domainCreator->createOutputWorkspace(getPropertyValue("OutputWorkspace"),
-    m_function, domain, values);
+  auto outputWS = m_domainCreator->createOutputWorkspace("", m_function, domain, values, "");
 
   // Store the result.
-  //setProperty("OutputWorkspace", outputWS);
+  setProperty("OutputWorkspace", outputWS);
 }
 
 } // namespace CurveFitting
