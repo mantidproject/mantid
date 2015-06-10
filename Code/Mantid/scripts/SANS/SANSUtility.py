@@ -601,6 +601,39 @@ def get_full_path_for_added_event_data(file_name):
     return full_path_name
 
 
+def create_zero_error_free_workspace(input_workspace_name, output_workspace_name):
+    '''
+    Creates a cloned workspace where all zero-error values have been replaced with a large value
+    @param input_workspace_name :: The input workspace name
+    @param output_workspace_name :: The output workspace name
+    @returns a message and a completion flag
+    '''
+    # Load the input workspace
+    message = ""
+    complete = False
+    if not input_workspace_name in mtd:
+        message = 'Failed to create a zero error free cloned workspace: The input workspace does not seem to exist.'
+        return message, complete
+
+    # Create a cloned workspace
+    ws_in = mtd[input_workspace_name]
+
+    # Remove all zero errors from the cloned workspace
+    CloneWorkspace(InputWorkspace=ws_in, OutputWorkspace=output_workspace_name)
+    if not output_workspace_name in mtd:
+        message = 'Failed to create a zero error free cloned workspace: A clone could not be created.'
+        return message, complete
+
+    ws_out = mtd[output_workspace_name]
+    try:
+        removeZeroErrorsFromWorkspace(ws_out)
+        complete = True
+    except:
+        DeleteWorkspace(Workspace=output_workspace_name)
+        message = 'Failed to create a zero error free cloned workspace: Could not remove the zero errors.'
+
+    return message, complete
+
 def removeZeroErrorsFromWorkspace(ws):
     '''
     Removes the zero errors from a Matrix workspace
@@ -615,6 +648,20 @@ def removeZeroErrorsFromWorkspace(ws):
     for index in range(0,numSpectra):
         spectrum = errors(index)
         spectrum[spectrum <= 0.0] = ZERO_ERROR_DEFAULT
+
+def delete_zero_error_free_workspace(input_workspace_name):
+    '''
+    Deletes the zero-error free workspace
+    @param ws :: The input workspace
+    '''
+    complete = False
+    message = ""
+    if input_workspace_name in mtd:
+        DeleteWorkspace(Workspace=input_workspace_name)
+        complete = True
+    else:
+        message = 'Failed to delete a zero-error free workspace'
+    return message, complete
 
 ###############################################################################
 ######################### Start of Deprecated Code ############################

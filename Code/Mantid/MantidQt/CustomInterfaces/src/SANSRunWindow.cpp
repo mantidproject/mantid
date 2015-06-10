@@ -148,6 +148,12 @@ namespace
       settings->setProperty(name, value);
   }
 }
+
+//----------------------------------------------
+// Static key strings
+//----------------------------------------------
+const QString SANSRunWindow::m_pythonSuccessKeyword  = "success";
+
 //----------------------------------------------
 // Public member functions
 //----------------------------------------------
@@ -3861,11 +3867,11 @@ void SANSRunWindow::createZeroErrorFreeClone(QString& originalWorkspaceName, QSt
     QString pythonCode("print i.CreateZeroErrorFreeClonedWorkspace(input_workspace_name='");
     pythonCode += originalWorkspaceName + "',";
     pythonCode += " output_workspace_name='" + clonedWorkspaceName + "')";
-
+    pythonCode += "print '" + m_pythonSuccessKeyword + "'\n";
     QString result(runPythonCode(pythonCode, false));
     result.trimmed();
 
-    if (!result.startsWith("Success")) {
+    if (result != m_pythonSuccessKeyword) {
       QMessageBox::critical(this, "Error creating a zerror error free cloned workspace", result);
     }
   }
@@ -3880,11 +3886,11 @@ void SANSRunWindow::deleteZeroErrorFreeClone(QString& clonedWorkspaceName) {
     // Run the python script which destroys the cloned workspace
     QString pythonCode("print i.DeleteZeroErrorFreeClonedWorkspace(input_workspace_name='");
     pythonCode += clonedWorkspaceName + "')";
-
+    pythonCode += "print '" + m_pythonSuccessKeyword + "'\n";
     QString result(runPythonCode(pythonCode, false));
     result.trimmed();
 
-    if (!result.startsWith("Success")) {
+    if (result != m_pythonSuccessKeyword) {
       QMessageBox::critical(this, "Error deleting a zerror error free cloned workspace", result);
     }
   }

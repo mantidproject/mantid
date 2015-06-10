@@ -1164,31 +1164,10 @@ def CreateZeroErrorFreeClonedWorkspace(input_workspace_name, output_workspace_na
         @param output_workspace_name : name of the workspace which will have no zero-error values
         @return: success message
     """
-    # Load the input workspace
-    if not input_workspace_name in mtd:
-        message = 'Failed to create a zero error free cloned workspace: The input workspace does not seem to exist.'
-        print message
-        return message
-    # Create a cloned workspace
-    ws_in = mtd[input_workspace_name]
-
-    # Remove all zero errors from the cloned workspace
-    CloneWorkspace(InputWorkspace=ws_in, OutputWorkspace=output_workspace_name)
-    if not output_workspace_name in mtd:
-        message = 'Failed to create a zero error free cloned workspace: A clone could not be created.'
-        print message
-        return message
-
-    ws_out = mtd[output_workspace_name]
-    try:
-        su.removeZeroErrorsFromWorkspace(ws_out)
-        message = 'Success'
-    except:
-        DeleteWorkspace(Workspace=output_workspace_name)
-        message = 'Failed to create a zero error free cloned workspace: Could not remove the zero errors.'
-
+    message, complete = su.create_zero_error_free_workspace(input_workspace_name = input_workspace_name, output_workspace_name = output_workspace_name)
     print message
     return message
+
 
 def DeleteZeroErrorFreeClonedWorkspace(input_workspace_name):
     """
@@ -1196,14 +1175,7 @@ def DeleteZeroErrorFreeClonedWorkspace(input_workspace_name):
         @param input_workspace_name :  name of the workspace which might contain zero-error values
         @return: success message
     """
-    message = ""
-
-    if input_workspace_name in mtd:
-        DeleteWorkspace(Workspace=input_workspace_name)
-        message = 'Success'
-    else:
-        message = 'Failed to delete a zero-error free workspace'
-
+    message, complete = su.delete_zero_error_free_workspace(input_workspace_name = input_workspace_name)
     print message
     return message
 

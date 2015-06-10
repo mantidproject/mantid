@@ -353,6 +353,8 @@ private:
   QAction *m_batch_clear;
   //Time/Pixel mask string
   QString m_maskScript;
+  // Success keyword
+  static const QString m_pythonSuccessKeyword;
 
   /// Stores the URL of each tab's help page.
   QMap<Tab, QString> m_helpPageUrls;
