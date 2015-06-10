@@ -11,7 +11,7 @@
 #include "MantidKernel/SingletonHolder.h"
 #include "MantidKernel/Matrix.h"
 
-#include "MantidNexus/NexusClasses.h"
+//#include "MantidNexus/NexusClasses.h"
 #include "MantidAPI/FileFinder.h"
 
 #include "MantidTestHelpers/ComponentCreationHelper.h"
@@ -689,16 +689,15 @@ public:
   {
      ExperimentInfo ei;
 
-    // We need a ISIS Nexus file with IDF embedded in it.
-    // Hopefully a shorter such file will later be available.
+    // We get an instrument group from a test file in the form that would occur in an ISIS Nexus file
 
     // Create the root Nexus class
-    std::string path = FileFinder::Instance().getFullPath("LET00014305.nxs");
-    Mantid::NeXus::NXRoot root(path);
+    std::string path = FileFinder::Instance().getFullPath("LOQInstrument.h5");
+
    
     // Get nexus file for this and move it to ISIS Nexus group 'raw_data_1'
-    ::NeXus::File nxFile = new ::NeXus::File(root.m_fileID, NXACC_READ);
-    nxFile.openPath("raw_data_1");
+    // ::NeXus::File nxFile = new ::NeXus::File(root.m_fileID, NXACC_READ);
+    ::NeXus::File nxFile(path, NXACC_READ);
 
     std::string params;
 
