@@ -745,6 +745,17 @@ public:
     AnalysisDataService::Instance().remove(outputws);
  }
 
+  void test_invalid_grouping_patterns_throw()
+  {
+    GroupDetectors2 groupAlg;
+    groupAlg.initialize();
+    groupAlg.setRethrows(true);
+    groupAlg.setPropertyValue("InputWorkspace", inputWS);
+    groupAlg.setPropertyValue("OutputWorkspace", outputBase);
+    groupAlg.setPropertyValue("GroupingPattern", "-1, 0");
+    TS_ASSERT_THROWS(groupAlg.execute(), std::invalid_argument);
+  }
+
   private:
     const std::string inputWS, outputBase, inputFile;
     enum constants { NHIST = 6, NBINS = 4 };
