@@ -753,7 +753,10 @@ public:
     groupAlg.setPropertyValue("InputWorkspace", inputWS);
     groupAlg.setPropertyValue("OutputWorkspace", outputBase);
     groupAlg.setPropertyValue("GroupingPattern", "-1, 0");
-    TS_ASSERT_THROWS(groupAlg.execute(), std::invalid_argument);
+    //Check that the GroupingPattern was recognised as invalid
+    TS_ASSERT(!groupAlg.validateInputs()["GroupingPattern"].empty());
+    //And that we're not allowed to run
+    TS_ASSERT_THROWS(groupAlg.execute(), std::runtime_error);
   }
 
   private:

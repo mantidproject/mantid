@@ -128,6 +128,9 @@ public:
   /// Algorithm's category for identification overriding a virtual method
   virtual const std::string category() const { return "Transforms\\Grouping"; }
 
+  /// Validate inputs
+  virtual std::map<std::string, std::string> validateInputs();
+
 private:
   /// provides a function that expands pairs of integers separated with a hyphen
   /// into a list of all the integers between those values
