@@ -19,6 +19,7 @@ PeakOverlayInteractive::PeakOverlayInteractive(
 
   setAttribute(Qt::WA_NoMousePropagation, false);
   setAttribute(Qt::WA_MouseTracking, true);
+  setAttribute(Qt::WA_TransparentForMouseEvents, true);
 
   this->setVisible(true);
   setUpdatesEnabled(true);
@@ -43,6 +44,7 @@ void PeakOverlayInteractive::paintEvent(QPaintEvent *event) {
 }
 
 void PeakOverlayInteractive::peakDeletionMode() {
+    setAttribute(Qt::WA_TransparentForMouseEvents, false);
     QApplication::restoreOverrideCursor();
     auto* temp = m_tool;
     auto* eraseTool = new MantidQt::MantidWidgets::InputControllerErase(this);
@@ -52,6 +54,7 @@ void PeakOverlayInteractive::peakDeletionMode() {
 }
 
 void PeakOverlayInteractive::peakAdditionMode() {
+   setAttribute(Qt::WA_TransparentForMouseEvents, false);
     QApplication::restoreOverrideCursor();
     auto* temp = m_tool;
     auto* addTool = new MantidQt::MantidWidgets::InputControllerPick(this);
@@ -61,6 +64,7 @@ void PeakOverlayInteractive::peakAdditionMode() {
 }
 
 void PeakOverlayInteractive::peakDisplayMode() {
+    setAttribute(Qt::WA_TransparentForMouseEvents, true);
     QApplication::restoreOverrideCursor();
     if(m_tool){
         delete m_tool;
