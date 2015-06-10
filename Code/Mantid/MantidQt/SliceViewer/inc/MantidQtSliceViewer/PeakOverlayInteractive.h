@@ -80,8 +80,6 @@ protected:
 private:
   /// Input controller.
   MantidQt::MantidWidgets::InputController *m_tool;
-  /// Original default cursor
-  const QCursor m_defaultCursor;
 
   void mousePressEvent(QMouseEvent* e);
   void mouseMoveEvent(QMouseEvent* e);

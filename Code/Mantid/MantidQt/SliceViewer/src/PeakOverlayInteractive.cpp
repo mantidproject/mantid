@@ -65,7 +65,6 @@ void PeakOverlayInteractive::peakDisplayMode() {
     if(m_tool){
         delete m_tool;
         m_tool = NULL;
-        m_plot->setCursor(m_defaultCursor);
     }
 }
 
