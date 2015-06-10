@@ -182,7 +182,7 @@ void ConvertCWSDExpToMomentum::addMDEvents() {
 #endif
     if (isWindows && *m_dataDir.rbegin() != '\\') {
       sep = "\\";
-    } else if (!isWindows && *m_dataDir.rbegin != '/')
+    } else if (!isWindows && *m_dataDir.rbegin() != '/')
       sep = "/";
   }
 
