@@ -69,7 +69,7 @@ bool canAddPeaksTo(IPeaksWorkspace const * const peaksWS,  Mantid::Kernel::Speci
      - PeaksWS Must not be integrated, because we have no concept of radius until each individual peak is integrated.
      - The MDWorkspace must be in the HKL frame otherwise we cannot interpret plot cursor coordinates.
      */
-    return peaksWS->sample().hasOrientedLattice() && !peaksWS->hasIntegratedPeaks() && frame == HKL;
+  return peaksWS->sample().hasOrientedLattice() && !peaksWS->hasIntegratedPeaks() && frame == Mantid::Kernel::HKL;
 }
 
 }

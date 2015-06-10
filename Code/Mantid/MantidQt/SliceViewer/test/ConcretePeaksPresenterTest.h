@@ -156,7 +156,7 @@ class ConcretePeaksPresenterTest : public CxxTest::TestSuite
   {
     // Map enum to string.
     std::string frame_str = "Q (lab frame)";
-    if(frame == HKL){
+    if(frame == Mantid::Kernel::HKL){
         frame_str = "HKL";
     } else if(frame == QSample) {
         frame_str = "Q (sample frame)";
@@ -784,7 +784,7 @@ public:
   {
       using namespace Mantid::DataObjects;
       Peak* pPeak = dynamic_cast<Peak*>(&peak);
-      pPeak->setPeakShape(boost::make_shared<PeakShapeSpherical>(radius, HKL));
+      pPeak->setPeakShape(boost::make_shared<PeakShapeSpherical>(radius, Mantid::Kernel::HKL));
   }
 
   void test_delete_in() {
@@ -792,7 +792,7 @@ public:
 
       const int nPeaks = 3;
       const double radius = 0.1;
-      auto concreteBuilder = createStandardBuild(nPeaks, radius, HKL);
+      auto concreteBuilder = createStandardBuild(nPeaks, radius, Mantid::Kernel::HKL);
 
       // Custom peaks workspace
       IPeaksWorkspace_sptr peaksWS = createPeaksWorkspace(nPeaks, radius);

@@ -1,6 +1,7 @@
 #ifndef MANTID_MANTIDWIDGETS_INPUTCONTROLLER_H
 #define MANTID_MANTIDWIDGETS_INPUTCONTROLLER_H
 
+#include "WidgetDllOption.h"
 #include <QObject>
 #include <QRect>
 #include <QColor>
@@ -26,7 +27,7 @@ namespace MantidWidgets {
     on the surface.
 
   */
-class InputController : public QObject {
+class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS InputController : public QObject {
   Q_OBJECT
 public:
   explicit InputController(QObject *parent, bool contextAllowed = true);
@@ -64,7 +65,7 @@ private:
     translation, rotation and zooming.
 
   */
-class InputController3DMove : public InputController {
+class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS InputController3DMove : public InputController {
   Q_OBJECT
 
 public:
@@ -99,7 +100,7 @@ private:
 /**
     Controller for picking detectors.
   */
-class InputControllerPick : public InputController {
+class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS InputControllerPick : public InputController {
   Q_OBJECT
 
 public:
@@ -122,7 +123,7 @@ private:
 /**
     Controller for drawing mask shapes.
   */
-class InputControllerDrawShape : public InputController {
+class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS InputControllerDrawShape : public InputController {
   Q_OBJECT
 
 public:
@@ -176,7 +177,7 @@ private:
 /**
     Controller for moving the instrument on an unwrapped surface.
   */
-class InputControllerMoveUnwrapped : public InputController {
+class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS InputControllerMoveUnwrapped : public InputController {
   Q_OBJECT
 
 public:
@@ -198,7 +199,7 @@ private:
 /**
     Controller for moving the instrument on an unwrapped surface.
   */
-class InputControllerErase : public InputController {
+class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS InputControllerErase : public InputController {
   Q_OBJECT
 
 public:
