@@ -141,7 +141,6 @@ const std::string ExperimentInfo::toString() const {
 */
 void ExperimentInfo::setInstrument(const Instrument_const_sptr &instr) {
   if (instr->isParametrized()) {
-    g_log.notice("[DB] ExperimentInfo.setInstrument as being isParametrized.");
     sptr_instrument = instr->baseInstrument();
     m_parmap = instr->getParameterMap();
   } else {
