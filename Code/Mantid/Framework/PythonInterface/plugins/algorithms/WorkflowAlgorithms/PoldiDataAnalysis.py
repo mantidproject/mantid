@@ -44,6 +44,14 @@ class PoldiDataAnalysis(PythonAlgorithm):
         self.declareProperty("MinimumPeakSeparation", 10, direction=Direction.Input,
                              doc='Minimum number of points between neighboring peaks.')
 
+        self.declareProperty("MinimumPeakHeight", 0.0, direction=Direction.Input,
+                             doc=('Minimum height of peaks. If it is left at 0, the minimum peak height is calculated'
+                                 'from background noise.'))
+
+        self.declareProperty("ScatteringContributions", "1", direction=Direction.Input,
+                             doc=('If there is more than one compound, you may supply estimates of their scattering '
+                                  'contributions, which sometimes improves indexing.'))
+
         self.declareProperty(WorkspaceProperty("ExpectedPeaks", defaultValue="", direction=Direction.Input),
                              doc='TableWorkspace or WorkspaceGroup with expected peaks used for indexing.')
 
@@ -155,6 +163,7 @@ class PoldiDataAnalysis(PythonAlgorithm):
         PoldiPeakSearch(InputWorkspace=correlationWorkspace,
                         MaximumPeakNumber=self.getProperty('MaximumPeakNumber').value,
                         MinimumPeakSeparation=self.getProperty('MinimumPeakSeparation').value,
+                        MinimumPeakHeight=self.getProperty('MinimumPeakHeight').value,
                         OutputWorkspace=peaksName)
 
         return AnalysisDataService.retrieve(peaksName)
@@ -177,6 +186,7 @@ class PoldiDataAnalysis(PythonAlgorithm):
 
         PoldiIndexKnownCompounds(InputWorkspace=peaks,
                                  CompoundWorkspaces=self.expectedPeaks,
+                                 ScatteringContributions=self.getProperty("ScatteringContributions").value,
                                  OutputWorkspace=indexedPeaksName)
 
         indexedPeaks = AnalysisDataService.retrieve(indexedPeaksName)
