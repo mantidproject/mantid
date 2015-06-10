@@ -1,4 +1,5 @@
 #include "MantidQtSliceViewer/PeakOverlayMultiSphere.h"
+#include "MantidKernel/WarningSuppressions.h"
 #include <qwt_plot.h>
 #include <qwt_plot_canvas.h>
 #include <qwt_scale_div.h>
@@ -14,7 +15,18 @@ namespace MantidQt
   {
 
     //----------------------------------------------------------------------------------------------
-    /** Constructor
+
+
+  /**
+     * Constructor
+     * @param presenter : controller
+     * @param plot : plot
+     * @param parent : plot-canvas
+     * @param vecPhysicalPeaks : List of physical peaks to show
+     * @param plotXIndex : plot x-index
+     * @param plotYIndex : plot y-index
+     * @param peakColour : peak colour
+     * @param backColour : background colour
      */
     PeakOverlayMultiSphere::PeakOverlayMultiSphere(PeaksPresenter* const presenter, QwtPlot * plot, QWidget * parent, const VecPhysicalSphericalPeak& vecPhysicalPeaks, /// Plot x index
                                                    const int plotXIndex, const int plotYIndex, const QColor& peakColour, const QColor& backColour) :
