@@ -480,7 +480,6 @@ Building on the example above which showed how to check whether a reflection is 
         uniqueValues = set(values)
         for val in uniqueValues:
             frequencyDict[val] = values.count(val)
-            print val, values.count(val)
 
         return frequencyDict
 
@@ -515,7 +514,6 @@ Building on the example above which showed how to check whether a reflection is 
         # (see the helper functions defined above).
         spaceGroupMatchList.append((sgSymbol, getValueFrequencies(conditionsMatchList)))
 
-    print spaceGroupMatchList
     # Sort the list according to abscence violations and additional reflection conditions
     spaceGroupMatchList.sort(key=lambda x: (x[1].get(1, 0), x[1].get(-1, 0)))
 
