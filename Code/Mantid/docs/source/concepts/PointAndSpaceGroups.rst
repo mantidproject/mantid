@@ -458,7 +458,6 @@ Building on the example above which showed how to check whether a reflection is 
 .. testcode:: ExSpaceGroupCheck
 
     from mantid.geometry import SpaceGroupFactory
-    from collections import Counter
 
     # Small helper function that distinguishes three cases:
     #   0: The reflection is observed and allowed or not observed and not allowed
@@ -473,6 +472,17 @@ Building on the example above which showed how to check whether a reflection is 
             return -1
         else:
             return 1
+
+    # Small helper function that returns the frequency of values in a list. Can be replaced with Counter from collections in Python >= 2.7
+    def getValueFrequencies(values):
+        frequencyDict = {}
+
+        uniqueValues = set(values)
+        for val in uniqueValues:
+            frequencyDict[val] = values.count(val)
+            print val, values.count(val)
+
+        return frequencyDict
 
     # List of reflections with "observation status" from a hypothetical experiment.
     reflections = [([1,0,0], False), ([1,1,0], False), ([1,1,1], True), ([2,0,0], False), ([2,1,0], False), ([2,1,1], False),
@@ -502,18 +512,19 @@ Building on the example above which showed how to check whether a reflection is 
         conditionsMatchList = [conditionsMatch(sgObject, x[0], x[1]) for x in reflections]
 
         # In this list, each reflection has a dictionary with frequency of the values 0, -1 and 1
-        # (see the helper function defined above).
-        spaceGroupMatchList.append((sgSymbol, Counter(conditionsMatchList)))
+        # (see the helper functions defined above).
+        spaceGroupMatchList.append((sgSymbol, getValueFrequencies(conditionsMatchList)))
 
+    print spaceGroupMatchList
     # Sort the list according to abscence violations and additional reflection conditions
-    spaceGroupMatchList.sort(key=lambda x: (x[1][1], x[1][-1]))
+    spaceGroupMatchList.sort(key=lambda x: (x[1].get(1, 0), x[1].get(-1, 0)))
 
     # Print some information about the most likely matches
     print "5 best matching space groups:"
 
     for sgPair in spaceGroupMatchList[:5]:
         sgStatus = sgPair[1]
-        print "    {}: {} absence violations, {: >2} additional absences, {: >2} matches".format(sgPair[0], sgStatus[1], sgStatus[-1], sgStatus[0])
+        print "    {}: {} absence violations, {: >2} additional absences, {: >2} matches".format(sgPair[0], sgStatus.get(1, 0), sgStatus.get(-1, 0), sgStatus.get(0, 0))
 
     print "The best matching space group is:", spaceGroupMatchList[0][0]
 
