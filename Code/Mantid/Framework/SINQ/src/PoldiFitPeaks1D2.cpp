@@ -317,30 +317,40 @@ int PoldiFitPeaks1D2::getBestChebyshevPolynomialDegree(
   double chiSquareMin = 1e10;
   int nMin = -1;
 
-  while ((n < 3)) {
-    IAlgorithm_sptr fit = getFitAlgorithm(dataWorkspace, range, n);
-    bool fitSuccess = fit->execute();
+  try {
+    while ((n < 3)) {
+      IAlgorithm_sptr fit = getFitAlgorithm(dataWorkspace, range, n);
+      bool fitSuccess = fit->execute();
 
-    if (fitSuccess) {
-      ITableWorkspace_sptr fitCharacteristics =
-          fit->getProperty("OutputParameters");
-      TableRow row =
-          fitCharacteristics->getRow(fitCharacteristics->rowCount() - 1);
+      if (fitSuccess) {
+        ITableWorkspace_sptr fitCharacteristics =
+            fit->getProperty("OutputParameters");
+        TableRow row =
+            fitCharacteristics->getRow(fitCharacteristics->rowCount() - 1);
 
-      double chiSquare = row.Double(1);
+        double chiSquare = row.Double(1);
 
-      if (fabs(chiSquare - 1) < fabs(chiSquareMin - 1)) {
-        chiSquareMin = chiSquare;
-        nMin = n;
+        if (fabs(chiSquare - 1) < fabs(chiSquareMin - 1)) {
+          chiSquareMin = chiSquare;
+          nMin = n;
+        }
       }
-    }
 
-    ++n;
+      ++n;
+    }
+  }
+  catch (std::runtime_error) {
+    nMin = -1;
   }
 
-  g_log.information() << "Chi^2 for range [" << range->getXStart() << " - "
-                      << range->getXEnd() << "] is minimal at n = " << nMin
-                      << " with Chi^2 = " << chiSquareMin << std::endl;
+  if (nMin == -1) {
+    g_log.information() << "Range [" << range->getXStart() << " - "
+                        << range->getXEnd() << "] is excluded.";
+  } else {
+    g_log.information() << "Chi^2 for range [" << range->getXStart() << " - "
+                        << range->getXEnd() << "] is minimal at n = " << nMin
+                        << " with Chi^2 = " << chiSquareMin << std::endl;
+  }
 
   return nMin;
 }
