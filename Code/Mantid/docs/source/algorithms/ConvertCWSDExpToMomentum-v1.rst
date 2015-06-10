@@ -49,13 +49,18 @@ A typical HB3A experiment consists of multiple scans, each of which contains mul
 *FileName* is the XML data file for 2D detector information for a specific Scan/Pt pair. 
 *StartDetID* is the starting detector ID of a specific Scan/Pt mapped to the virtual instrument. 
 
-**DetectorTableWorkspace** is the TableWorkspace 
+**DetectorTableWorkspace** is a TableWorkspace that list the parameters of all detector pixels belonged 
+to the virtual instrument. 
+The parameters include detector ID in virtual instrument, detector's position in cartesian coordinate,
+and detector's original detector ID. 
 
 
 Outputs
 #######
 
-The output is an MDEventWorkspace ... 
+The output is an MDEventWorkspace that stores the data of an HB3A experiment.  
+Every non-zero count recorded by detector is converted to an MDEvent in the 
+output workspace. 
 
 
 MDEvent

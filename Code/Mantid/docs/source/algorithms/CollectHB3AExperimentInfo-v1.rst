@@ -12,35 +12,39 @@ Description
 This algorithm is to create input workspaces to ConvertCWSDExpToMomentum for 
 HB3A (four-circle single crystal diffractometer in HFIR). 
 
-Format of Instrument parameter TableWorkspace
-#############################################
 
-Instrument parameter TableWorkspace contains all the peak profile
-parameters imported from Fullprof .irf file.
+Inputs
+======
 
-Presently these are the peak profiles supported
 
-``* Thermal neutron back to back exponential convoluted with pseudo-voigt (profile No. 10 in Fullprof)``
+OutputWorkspaces
+================
 
-Each row in TableWorkspace corresponds to one profile parameter.
+Two TableWorkspaces, which contain experiment information, are returned. 
 
-Columns include Name, Value, FitOrTie, Min, Max and StepSize.
+**InputWorkspace** is a TableWorkspace containing the data files names to be loaded for the experiment. 
+It is required to have 4 columns.  
+They are *Scan*, *Pt*, *Filename* and *StartDetID* respectively. 
 
-Format of reflection TableWorkspace
-###################################
+A typical HB3A experiment consists of multiple scans, each of which contains multiple measurement point (i.e., Pt). 
+*FileName* is the XML data file for 2D detector information for a specific Scan/Pt pair. 
+*StartDetID* is the starting detector ID of a specific Scan/Pt mapped to the virtual instrument. 
 
-Each row of this workspace corresponds to one diffraction peak. The
-information contains the peak's Miller index and (local) peak profile
-parameters of this peak. For instance of a back-to-back exponential
-convoluted with Gaussian peak, the peak profile parameters include
-Alpha, Beta, Sigma, centre and height.
+**DetectorTableWorkspace** is a TableWorkspace that list the parameters of all detector pixels belonged 
+to the virtual instrument. 
+The parameters include detector ID in virtual instrument, detector's position in cartesian coordinate,
+and detector's original detector ID. 
+
+
+
 
 How to use algorithm with other algorithms
 ------------------------------------------
 
-This algorithm is designed to work with other algorithms to do Le Bail
-fit. The introduction can be found in the wiki page of `Le Bail
-Fit <Le Bail Fit>`__.
+Algorithm *CollectHB3AExperimentInfo* is designed to provide input information for algorithm
+*ConvertCWSDExpToMomentum*, whose output will be used to calculated UB matrix and integrate
+single cystal peaks. 
+
 
 Usage
 -----
