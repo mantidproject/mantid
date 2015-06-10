@@ -180,9 +180,9 @@ void ConvertCWSDExpToMomentum::addMDEvents() {
 #elif _WIND32
     isWindows = true;
 #endif
-    if (isWindows && m_dataDir.back() != '\\') {
+    if (isWindows && *m_dataDir.rbegin() != '\\') {
       sep = "\\";
-    } else if (!isWindows && m_dataDir.back() != '/')
+    } else if (!isWindows && *m_dataDir.rbegin != '/')
       sep = "/";
   }
 
@@ -220,7 +220,8 @@ void ConvertCWSDExpToMomentum::addMDEvents() {
   }
 
   // Set box extentes
-  typename std::vector<API::IMDNode *> boxes;
+  // typename std::vector<API::IMDNode *> boxes;
+  std::vector<API::IMDNode *> boxes;
 
   // Set extents for all MDBoxes
   progress(0.90, "Set up MDBoxes' dimensions. ");
