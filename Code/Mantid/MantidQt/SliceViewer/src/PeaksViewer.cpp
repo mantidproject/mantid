@@ -56,9 +56,10 @@ void PeaksViewer::setPresenter(
     Mantid::API::IPeaksWorkspace_const_sptr ws = *it;
     auto backgroundColour = m_presenter->getBackgroundColour(ws);
     auto foregroundColour = m_presenter->getForegroundColour(ws);
+    bool canAddPeaks = m_presenter->hasPeakAddModeFor(ws);
 
     auto widget = new PeaksWorkspaceWidget(
-        ws, coordinateSystem, foregroundColour, backgroundColour, ws->getSpecialCoordinateSystem() == Mantid::Kernel::HKL ,  this);
+        ws, coordinateSystem, foregroundColour, backgroundColour, canAddPeaks ,  this);
 
     connect(widget, SIGNAL(peakColourChanged(
                         Mantid::API::IPeaksWorkspace_const_sptr, QColor)),
@@ -258,7 +259,6 @@ void PeaksViewer::performUpdate() {
     // Now find the PeaksWorkspaceWidget corresponding to this workspace name.
     QList<PeaksWorkspaceWidget *> children =
         qFindChildren<PeaksWorkspaceWidget *>(this);
-    Mantid::API::IPeaksWorkspace_sptr targetPeaksWorkspace;
     for (int i = 0; i < children.size(); ++i) {
       PeaksWorkspaceWidget *candidateWidget = children.at(i);
       Mantid::API::IPeaksWorkspace_const_sptr candidateWorkspace =
@@ -277,6 +277,8 @@ void PeaksViewer::performUpdate() {
           }
         }
       }
+      // We also update the widget in case the workspace has changed for added/deleted peaks
+      candidateWidget->workspaceUpdate();
     }
   }
 }

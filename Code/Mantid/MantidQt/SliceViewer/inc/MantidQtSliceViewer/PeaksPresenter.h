@@ -12,6 +12,11 @@
 
 namespace Mantid
 {
+  namespace Kernel{
+    // Forward dec
+    class V3D;
+  }
+
   namespace Geometry {
     // Forward dec.
     class PeakTransform;
@@ -69,10 +74,12 @@ namespace SliceViewer
     virtual void zoomToPeak(const int peakIndex) = 0;
     virtual bool isHidden() const = 0;
     virtual bool contentsDifferent(PeaksPresenter const * other) const = 0;
-    virtual ~PeaksPresenter(){};
     virtual void reInitialize(boost::shared_ptr<Mantid::API::IPeaksWorkspace> peaksWS) = 0;
     virtual void peakEditMode(EditMode mode) = 0;
-    virtual bool deletePeaksIn(PeakBoundingBox box) = 0;
+    virtual bool deletePeaksIn(PeakBoundingBox plotCoordsBox) = 0;
+    virtual bool addPeakAt(double plotCoordsPointX, double plotCoordsPointY) =0;
+    virtual bool hasPeakAddMode() const = 0;
+    virtual ~PeaksPresenter(){};
   };
 
 

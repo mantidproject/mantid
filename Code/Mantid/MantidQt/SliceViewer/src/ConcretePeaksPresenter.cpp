@@ -2,6 +2,8 @@
 #include "MantidQtSliceViewer/PeakEditMode.h"
 #include "MantidQtSliceViewer/UpdateableOnDemand.h"
 #include "MantidQtSliceViewer/ZoomableOnDemand.h"
+#include "MantidKernel/V3D.h"
+#include "MantidAPI/MultipleExperimentInfos.h"
 #include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidGeometry/Crystal/IPeak.h"
 #include "MantidGeometry/Crystal/PeakShape.h"
@@ -54,6 +56,22 @@ std::vector<std::vector<double> > makeVertexesFromBox(const PeakBoundingBox &box
   vertexes[3]=vertex4;
   return vertexes;
 }
+
+/**
+ * Determine if we can add peaks a peaks workspace.
+ * @param peaksWS : To possibly add to
+ * @param frame : Frame of base MDWorkspace
+ * @return True only if we can add to the peaks workspace.
+ */
+bool canAddPeaksTo(IPeaksWorkspace const * const peaksWS,  Mantid::Kernel::SpecialCoordinateSystem frame){
+    /*
+     - PeaksWS Must have an oriented lattice, otherwise we can't add a self-consistent peak.
+     - PeaksWS Must not be integrated, because we have no concept of radius until each individual peak is integrated.
+     - The MDWorkspace must be in the HKL frame otherwise we cannot interpret plot cursor coordinates.
+     */
+    return peaksWS->sample().hasOrientedLattice() && !peaksWS->hasIntegratedPeaks() && frame == HKL;
+}
+
 }
 
 /**
@@ -74,6 +92,7 @@ coordinateToString(Mantid::Kernel::SpecialCoordinateSystem coordSystem) {
     return "Unknown";
   }
 }
+
 
 /**
  * Produce the views for the internally held peaks workspace.
@@ -161,9 +180,11 @@ ConcretePeaksPresenter::ConcretePeaksPresenter(
     : m_viewFactory(viewFactory), m_peaksWS(peaksWS),
       m_transformFactory(transformFactory),
       m_transform(transformFactory->createDefaultTransform()), m_slicePoint(),
-      m_owningPresenter(NULL), m_isHidden(false), m_editMode(SliceViewer::None) {
+      m_owningPresenter(NULL), m_isHidden(false), m_editMode(SliceViewer::None), m_hasAddPeaksMode(canAddPeaksTo(peaksWS.get(), m_transform->getCoordinateSystem())) {
   // Check that the workspaces appear to be compatible. Log if otherwise.
   checkWorkspaceCompatibilities(mdWS);
+
+
 
   this->initialize();
 }
@@ -534,6 +555,7 @@ bool ConcretePeaksPresenter::deletePeaksIn(PeakBoundingBox box) {
       left, right, top, bottom,
       slicePoint /*Use the current slice position, previously unknown.*/);
 
+  // Tranform box from plot coordinates into orderd HKL, Qx,Qy,Qz etc, then find the visible peaks.
   std::vector<size_t> deletionIndexList = findVisiblePeakIndexes(accurateBox);
 
   // If we have things to remove, do that in one-step.
@@ -553,17 +575,51 @@ bool ConcretePeaksPresenter::deletePeaksIn(PeakBoundingBox box) {
     alg->setProperty("Rows", deletionIndexList);
     alg->execute();
 
-    // Refind visible peaks.
-    doFindPeaksInRegion();
-
-    // Reproduce the views.
+    // Reproduce the views. Proxy representations recreated for all peaks.
     this->produceViews();
 
-    // Give the new views the current slice point.
-    m_viewPeaks->setSlicePoint(this->m_slicePoint.slicePoint(),
-                               m_viewablePeaks);
+    // Refind visible peaks and Set the proxy representations to be visible or not.
+    doFindPeaksInRegion();
+
+    // Upstream controls need to be regenerated.
+    this->informOwnerUpdate();
   }
   return !deletionIndexList.empty();
+}
+
+bool ConcretePeaksPresenter::addPeakAt(double plotCoordsPointX, double plotCoordsPointY)
+{
+    V3D plotCoordsPoint(plotCoordsPointX, plotCoordsPointY, m_slicePoint.slicePoint());
+    V3D hkl = m_transform->transformBack(plotCoordsPoint);
+
+    Mantid::API::IPeaksWorkspace_sptr peaksWS =
+        boost::const_pointer_cast<Mantid::API::IPeaksWorkspace>(
+            this->m_peaksWS);
+
+    Mantid::API::IAlgorithm_sptr alg =
+        AlgorithmManager::Instance().create("AddPeakHKL");
+    alg->setChild(true);
+    alg->setRethrows(true);
+    alg->initialize();
+    alg->setProperty("Workspace", peaksWS);
+    alg->setProperty("HKL", std::vector<double>(hkl));
+    alg->execute();
+
+    // Reproduce the views. Proxy representations recreated for all peaks.
+    this->produceViews();
+
+    // Refind visible peaks and Set the proxy representations to be visible or not.
+    doFindPeaksInRegion();
+
+    // Upstream controls need to be regenerated.
+    this->informOwnerUpdate();
+
+    return alg->isExecuted();
+}
+
+bool ConcretePeaksPresenter::hasPeakAddMode() const
+{
+    return m_hasAddPeaksMode;
 }
 
 std::vector<size_t>

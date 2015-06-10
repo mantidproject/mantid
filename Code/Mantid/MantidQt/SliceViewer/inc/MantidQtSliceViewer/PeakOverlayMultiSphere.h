@@ -147,12 +147,8 @@ namespace SliceViewer
     const QCursor m_defaultCursor;
 
    private slots:
-
     void erasePeaks(const QRect& rect);
-
-
-
-
+    void addPeakAt(int coordX, int coordY);
   };
 
 

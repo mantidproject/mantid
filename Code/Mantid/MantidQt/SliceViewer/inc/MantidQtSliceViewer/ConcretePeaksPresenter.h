@@ -58,7 +58,9 @@ public:
   virtual bool isHidden() const;
   virtual bool contentsDifferent(PeaksPresenter const *  other) const;
   virtual void peakEditMode(EditMode mode);
-  virtual bool deletePeaksIn(PeakBoundingBox box);
+  virtual bool deletePeaksIn(PeakBoundingBox plotCoordsBox);
+  virtual bool addPeakAt(double plotCoordsPointX, double plotCoordsPointY);
+  virtual bool hasPeakAddMode() const;
 
 private:
   /// Peak overlay view.
@@ -81,6 +83,8 @@ private:
   bool m_isHidden;
   /// Flag to indicate the current edit mode.
   EditMode m_editMode;
+  /// Can we add to this peaks workspace
+  bool m_hasAddPeaksMode;
 
   /// Configure peak transformations
   bool configureMappingTransform();

@@ -65,6 +65,7 @@ public:
       boost::shared_ptr<Mantid::API::IPeaksWorkspace> ) { /*Do nothing*/
   }
   virtual bool deletePeaksIn(PeakBoundingBox box);
+  virtual bool addPeakAt(double plotCoordsPointX, double plotCoordsPointY);
 
   /// Constructor
   CompositePeaksPresenter(ZoomablePeaksView *const zoomablePlottingWidget,
@@ -148,6 +149,10 @@ public:
   bool contentsDifferent(PeaksPresenter const * other) const;
   /// Enter the requested edit mode for the peaks workspace.
   void editCommand(EditMode editMode, boost::weak_ptr<const Mantid::API::IPeaksWorkspace> target);
+  /// Can we add peaks to this peaks workspace.
+  bool hasPeakAddModeFor(boost::weak_ptr<const Mantid::API::IPeaksWorkspace> target);
+  /// Can we add peaks
+  bool hasPeakAddMode() const;
 private:
   /// Updateable on demand method.
   void updatePeaksWorkspace(

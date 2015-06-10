@@ -79,6 +79,18 @@ namespace MantidQt
         return m_plot->canvas()->width();
     }
 
+    void PeakOverlayMultiSphere::addPeakAt(int coordX, int coordY) {
+
+        QwtScaleMap xMap = m_plot->canvasMap(m_plotXIndex);
+        QwtScaleMap yMap = m_plot->canvasMap(m_plotYIndex);
+
+        const double plotX = xMap.invTransform(double(coordX));
+        const double plotY = yMap.invTransform(double(coordY));
+
+        m_presenter->addPeakAt(plotX, plotY);
+    }
+
+
     void PeakOverlayMultiSphere::erasePeaks(const QRect &rect)
     {
         QwtScaleMap xMap = m_plot->canvasMap(m_plotXIndex);
@@ -255,7 +267,9 @@ namespace MantidQt
     void PeakOverlayMultiSphere::peakAdditionMode() {
         QApplication::restoreOverrideCursor();
         auto* temp = m_tool;
-        m_tool = new MantidQt::MantidWidgets::InputControllerPick(this);
+        auto* addTool = new MantidQt::MantidWidgets::InputControllerPick(this);
+        connect(addTool,SIGNAL(pickPointAt(int,int)),this,SLOT(addPeakAt(int,int)));
+        m_tool = addTool;
         delete temp;
     }
 

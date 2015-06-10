@@ -152,5 +152,10 @@ void ProxyCompositePeaksPresenter::editCommand(EditMode editMode, boost::weak_pt
 {
     m_compositePresenter->editCommand(editMode, target);
 }
+
+bool ProxyCompositePeaksPresenter::hasPeakAddModeFor(boost::weak_ptr<const Mantid::API::IPeaksWorkspace> target){
+    return m_compositePresenter->hasPeakAddModeFor(target);
+}
+
 }
 }

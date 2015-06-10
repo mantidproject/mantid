@@ -1,9 +1,11 @@
 #include "MantidQtSliceViewer/PeakOverlayMultiSphereFactory.h"
 #include "MantidQtSliceViewer/PeakOverlayMultiSphere.h"
 #include "MantidQtSliceViewer/PeaksPresenter.h"
+#include "MantidDataObjects/PeakShapeSpherical.h"
 #include <boost/make_shared.hpp>
 
 using namespace Mantid::API;
+using namespace Mantid::DataObjects;
 
 namespace MantidQt
 {
@@ -18,7 +20,7 @@ namespace MantidQt
         m_peaksWS(peaksWS),
         m_FOM(0)
     {
-      if (m_peaksWS->hasIntegratedPeaks())
+      if (m_peaksWS->hasIntegratedPeaks()) // TODO depends on the shape.
       {
     	  try
     	  {
@@ -54,9 +56,25 @@ namespace MantidQt
       for(size_t i = 0; i < physicalPeaks.size(); ++i)
       {
         const Mantid::Geometry::IPeak& peak = m_peaksWS->getPeak(static_cast<int>(i));
+        const Mantid::Geometry::PeakShape& peakShape = peak.getPeakShape();
         auto position = transform->transformPeak(peak);
-        physicalPeaks[i] = boost::make_shared<PhysicalSphericalPeak>(position, m_peakRadius[i], m_backgroundInnerRadius[i], m_backgroundOuterRadius[i]);
-      }
+        if(const PeakShapeSpherical* sphericalShape = dynamic_cast<const PeakShapeSpherical*>(&peakShape)){
+            auto radius = sphericalShape->radius();
+            auto optOuterRadius = sphericalShape->backgroundOuterRadius();
+            auto optInnerRadius = sphericalShape->backgroundInnerRadius();
+
+            auto outerRadius = optOuterRadius.is_initialized() ? optOuterRadius.get() : radius;
+            auto innerRadius = optInnerRadius.is_initialized() ? optInnerRadius.get() : radius;
+
+            physicalPeaks[i] = boost::make_shared<PhysicalSphericalPeak>(position, radius, innerRadius, outerRadius);
+
+        } else {
+            // This method of doing things is effectivlely deprecated now since we have the PeakShape. I will eventually strip this out.
+            physicalPeaks[i] = boost::make_shared<PhysicalSphericalPeak>(position, m_peakRadius[i], m_backgroundInnerRadius[i], m_backgroundOuterRadius[i]);
+
+        }
+
+       }
 
       // Make the overlay widget.
       return boost::make_shared<PeakOverlayMultiSphere>(presenter, m_plot, m_parent, physicalPeaks, m_plotXIndex, m_plotYIndex, this->m_peakColour, this->m_backColour);

@@ -234,6 +234,7 @@ public:
     // Create a mock transform object.
     auto pMockTransform = new NiceMock<MockPeakTransform>;
     PeakTransform_sptr mockTransform(pMockTransform);
+    EXPECT_CALL(*pMockTransform, getCoordinateSystem()).WillRepeatedly(Return(Mantid::Kernel::QLab));
 
     // Create a mock transform factory.
     auto pMockTransformFactory = new NiceMock<MockPeakTransformFactory>;
@@ -281,6 +282,7 @@ public:
     auto pMockTransform = new NiceMock<MockPeakTransform>;
     PeakTransform_sptr mockTransform(pMockTransform);
     EXPECT_CALL(*pMockTransform, transformPeak(_)).WillRepeatedly(Return(V3D()));
+    EXPECT_CALL(*pMockTransform, getCoordinateSystem()).WillRepeatedly(Return(Mantid::Kernel::QLab));
 
     // Create a mock transform factory.
     auto pMockTransformFactory = new NiceMock<MockPeakTransformFactory>;
@@ -322,6 +324,7 @@ public:
     // Create a mock transform object.
     auto pMockTransform = new NiceMock<MockPeakTransform>;
     PeakTransform_sptr mockTransform(pMockTransform);
+    EXPECT_CALL(*pMockTransform, getCoordinateSystem()).WillRepeatedly(Return(Mantid::Kernel::HKL));
     EXPECT_CALL(*pMockTransform, getFriendlyName()).WillOnce(Return("HKL"));
     EXPECT_CALL(*pMockTransform, transformPeak(_)).WillRepeatedly(Return(V3D()));
 
@@ -371,6 +374,7 @@ public:
     // Create a mock transform factory.
     auto pMockTransformFactory = new NiceMock<MockPeakTransformFactory>;
     PeakTransformFactory_sptr peakTransformFactory(pMockTransformFactory);
+    EXPECT_CALL(*pMockTransform, getCoordinateSystem()).WillRepeatedly(Return(Mantid::Kernel::QLab));
     EXPECT_CALL(*pMockTransformFactory, createDefaultTransform()).WillOnce(Return(mockTransform));
     EXPECT_CALL(*pMockTransformFactory, createTransform(_,_)).WillOnce(Return(mockTransform));
 
@@ -405,6 +409,7 @@ public:
      // Create a mock transform object.
     auto pMockTransform = new NiceMock<MockPeakTransform>;
     PeakTransform_sptr mockTransform(pMockTransform);
+    EXPECT_CALL(*pMockTransform, getCoordinateSystem()).WillRepeatedly(Return(Mantid::Kernel::QLab));
     EXPECT_CALL(*pMockTransform, transformPeak(_)).WillRepeatedly(Return(V3D()));
 
     // Create a mock transform factory.
@@ -830,8 +835,14 @@ public:
       TSM_ASSERT_EQUALS("No peaks should have been removed yet", 3, peaksWS->getNumberPeaks());
       TSM_ASSERT("Point sits on peak radius. We should delete peak.", presenter->deletePeaksIn(cursorRegion));
       TSM_ASSERT_EQUALS("One peaks should remain", 1, peaksWS->getNumberPeaks());
-
   }
+
+  void test_haspeakaddmode(){
+      auto builder = createStandardBuild(5/*N Peaks*/, 1.0/*radius*/, QLab /*CHOSEN FRAME*/);
+      ConcretePeaksPresenter_sptr concretePeaksPresenter = builder.create();
+      TSM_ASSERT("No peak add mode. As is not in the HKL frame", !concretePeaksPresenter->hasPeakAddMode());
+  }
+
 };
 
 

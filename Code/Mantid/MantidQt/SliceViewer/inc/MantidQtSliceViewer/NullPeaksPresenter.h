@@ -54,6 +54,8 @@ public:
 
   void peakEditMode(EditMode){/*Do nothing*/}
   bool deletePeaksIn(PeakBoundingBox){return false;/*Do nothing. Delete nothing.*/}
+  bool addPeakAt(double, double){return false;/*Do nothing. Add nothing.*/}
+  bool hasPeakAddMode() const {return false; /*Do nothing.*/}
 };
 
 }

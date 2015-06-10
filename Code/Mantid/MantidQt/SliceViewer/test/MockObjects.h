@@ -67,7 +67,9 @@ namespace
     MOCK_CONST_METHOD1(contentsDifferent,
           bool(const PeaksPresenter*  other));
     MOCK_METHOD1(deletePeaksIn, bool(PeakBoundingBox));
-    MOCK_METHOD1(peakEditMode, void(EditMode mode));
+    MOCK_METHOD1(peakEditMode, void(EditMode));
+    MOCK_METHOD2(addPeakAt, bool(double, double));
+    MOCK_CONST_METHOD0(hasPeakAddMode, bool());
     virtual ~MockPeaksPresenter(){}
   };
 

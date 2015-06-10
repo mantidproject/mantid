@@ -81,6 +81,8 @@ public:
   int getZoomedPeakIndex() const;
   /// Set the edit mode.
   void editCommand(EditMode editMode, boost::weak_ptr<const Mantid::API::IPeaksWorkspace> target);
+  /// Can we add HKL peaks to this workspace.
+  bool hasPeakAddModeFor(boost::weak_ptr<const Mantid::API::IPeaksWorkspace> target);
 
 private:
   /// Wrapped composite to delegate to.
