@@ -89,11 +89,12 @@ private:
   void enterEvent(QEvent *e);
   void leaveEvent(QEvent *e);
 
-  //QRect drawHandle(QPainter & painter, QPointF coords, QColor brush);
   void paintEvent(QPaintEvent *event);
 
   // Call do paint on sub-classes
   virtual void doPaintPeaks(QPaintEvent *event) = 0;
+
+  void captureMouseEvents(bool capture);
 
 private slots:
 
