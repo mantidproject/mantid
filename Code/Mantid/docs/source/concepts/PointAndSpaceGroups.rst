@@ -522,7 +522,7 @@ Building on the example above which showed how to check whether a reflection is 
 
     for sgPair in spaceGroupMatchList[:5]:
         sgStatus = sgPair[1]
-        print "    {}: {} absence violations, {: >2} additional absences, {: >2} matches".format(sgPair[0], sgStatus.get(1, 0), sgStatus.get(-1, 0), sgStatus.get(0, 0))
+        print "    {0}: {1} absence violations, {2: >2} additional absences, {3: >2} matches".format(sgPair[0], sgStatus.get(1, 0), sgStatus.get(-1, 0), sgStatus.get(0, 0))
 
     print "The best matching space group is:", spaceGroupMatchList[0][0]
 
