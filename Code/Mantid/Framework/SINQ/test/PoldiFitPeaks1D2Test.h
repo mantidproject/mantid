@@ -237,6 +237,34 @@ public:
     TS_ASSERT(!firstRange.overlaps(secondRange, 0.55));
   }
 
+  void testPeakIsAcceptable() {
+      TestablePoldiFitPeaks1D2 poldiPeakFit;
+
+      // The testpeak is acceptable
+      TS_ASSERT(poldiPeakFit.peakIsAcceptable(m_testPeak));
+
+      // Peaks with certain properties are rejected
+      // 1. negative intensity
+      PoldiPeak_sptr negativeIntensity = m_testPeak->clone();
+      negativeIntensity->setIntensity(UncertainValue(-190.0));
+      TS_ASSERT(!poldiPeakFit.peakIsAcceptable(negativeIntensity));
+
+      // 2. FWHM too large (rel. > 0.02)
+      PoldiPeak_sptr tooBroad = m_testPeak->clone();
+      tooBroad->setFwhm(UncertainValue(0.021), PoldiPeak::Relative);
+      TS_ASSERT(!poldiPeakFit.peakIsAcceptable(tooBroad));
+
+      // 3. FWHM too small (rel. < 0.001)
+      PoldiPeak_sptr tooNarrow = m_testPeak->clone();
+      tooNarrow->setFwhm(UncertainValue(0.0009), PoldiPeak::Relative);
+      TS_ASSERT(!poldiPeakFit.peakIsAcceptable(tooNarrow));
+
+      // 4. Position precision is too low. (rel error > 1e-3)
+      PoldiPeak_sptr lowPrecision = m_testPeak->clone();
+      lowPrecision->setD(UncertainValue(1, 0.0011));
+      TS_ASSERT(!poldiPeakFit.peakIsAcceptable(lowPrecision));
+  }
+
   void testGetBestChebyshevPolynomialDegree() {
     TestablePoldiFitPeaks1D2 poldiFitPeaks;
     poldiFitPeaks.initialize();
