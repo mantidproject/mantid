@@ -494,10 +494,11 @@ public:
 
     //Get results
     MatrixWorkspace_sptr outWSLam = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outWSLamName);
-    MatrixWorkspace_sptr outWSQ = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(outWSQName);
 
     //Check results (10 / 5 = 2)
-    TS_ASSERT_EQUALS(outWSLam->readY(0)[0], 2);
+    TS_ASSERT_DELTA(outWSLam->readY(0)[0], 2, 1e-5);
+    TS_ASSERT_DELTA(outWSLam->readX(0)[0], 0, 1e-5);
+    TS_ASSERT_DELTA(outWSLam->readX(0)[1], 1, 1e-5);
 
     // Remove workspace from the data service.
     AnalysisDataService::Instance().remove(inWSName);
