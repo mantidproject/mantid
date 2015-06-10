@@ -34,7 +34,7 @@ class LiquidsReflectometryReduction(PythonAlgorithm):
     def PyInit(self):
         #TODO: Revisit the choice of names when we are entirely rid of the old code.
         self.declareProperty(StringArrayProperty("RunNumbers"), "List of run numbers to process")
-        self.declareProperty("NormalizationRunNumber", "0", "Run number of the normalization run to use")
+        self.declareProperty("NormalizationRunNumber", 0, "Run number of the normalization run to use")
         self.declareProperty(IntArrayProperty("SignalPeakPixelRange", [123, 137],
                                               IntArrayLengthValidator(2), direction=Direction.Input),
                              "Pixel range defining the data peak")
@@ -168,13 +168,9 @@ class LiquidsReflectometryReduction(PythonAlgorithm):
         # ----- Normalization -------------------------------------------------
         perform_normalization = self.getProperty("NormFlag").value
         if perform_normalization:
-            # Load normalization (assume a run number first, then try as a file path)
-            try:
-                ws_event_norm = LoadEventNexus("REF_L_%s" % normalizationRunNumber,
-                                               OutputWorkspace="REF_L_%s" % normalizationRunNumber)
-            except:
-                ws_event_norm = LoadEventNexus(normalizationRunNumber,
-                                               OutputWorkspace="REF_L_%s" % normalizationRunNumber)
+            # Load normalization
+            ws_event_norm = LoadEventNexus("REF_L_%s" % normalizationRunNumber,
+                                           OutputWorkspace="REF_L_%s" % normalizationRunNumber)
             crop_request = self.getProperty("LowResNormAxisPixelRangeFlag").value
             low_res_range = self.getProperty("LowResNormAxisPixelRange").value
             bck_request = self.getProperty("SubtractNormBackground").value
