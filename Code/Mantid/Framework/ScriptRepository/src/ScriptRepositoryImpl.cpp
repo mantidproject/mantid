@@ -1206,7 +1206,7 @@ void ScriptRepositoryImpl::setIgnorePatterns(const std::string &patterns) {
  */
 std::string ScriptRepositoryImpl::ignorePatterns(void) {
   ConfigServiceImpl &config = ConfigService::Instance();
-  std::string ignore_string = config.getString("ScriptRepositoryIgnore", "");
+  std::string ignore_string = config.getString("ScriptRepositoryIgnore", false);
   return ignore_string;
 }
 

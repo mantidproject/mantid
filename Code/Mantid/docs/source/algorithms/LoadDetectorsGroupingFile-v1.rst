@@ -187,4 +187,47 @@ Output:
    Detector bank23(4,4), with ID 28786, in spectrum 2500 belongs to group 1
    Detector bank27(9,0), with ID 33822, in spectrum 5000 belongs to group 2
 
+**Example - Loading from map file:**
+
+.. testcode:: LoadDetectorsGroupingFileMap
+
+    # create some grouping file
+    import mantid
+    filename=mantid.config.getString("defaultsave.directory")+"test.map"
+    f=open(filename,'w')
+    f.write('3\n')
+    f.write('1\n')
+    f.write('64\n')
+    f.write('1 - 64\n')
+    f.write('2\n')
+    f.write('60\n')
+    f.write('65 - 124\n')
+    f.write('3\n')
+    f.write('60\n')
+    f.write('125 - 184\n')
+    f.close()
+
+    #load the grouping file
+    ws=LoadDetectorsGroupingFile("test.map")
+
+    #check some values
+    print "Spectrum 0 belongs to group", ws.readY(0)[0]
+    print "Spectrum 65 belongs to group", ws.readY(65)[0]
+    print "Spectrum 125 belongs to group", ws.readY(125)[0]
+
+.. testcleanup:: LoadDetectorsGroupingFileMap
+
+   DeleteWorkspace(ws)
+   import os,mantid
+   filename=mantid.config.getString("defaultsave.directory")+"test.map"
+   os.remove(filename)
+
+Output:
+
+.. testoutput:: LoadDetectorsGroupingFileMap
+
+   Spectrum 0 belongs to group 1.0
+   Spectrum 65 belongs to group 2.0
+   Spectrum 125 belongs to group 3.0
+
 .. categories::

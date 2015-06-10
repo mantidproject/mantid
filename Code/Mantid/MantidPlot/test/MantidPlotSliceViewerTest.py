@@ -174,7 +174,28 @@ class MantidPlotSliceViewerTest(unittest.TestCase):
         # Now clear the PeaksOverlays
         sv.clearPeaksWorkspaces()
 
+    def test_integrateMDHistoWorkspace(self):
+        CreateMDWorkspace(Dimensions=4, Extents='-10,10,-10,10,-10,10,-10,10', Names='a,b,c,d', Units='u,u,u,u', OutputWorkspace='ws')
+        FakeMDEventData(InputWorkspace='ws', PeakParams='10000,0,0,0,0,1')
+        CutMD(InputWorkspace='ws', P1Bin='1', P2Bin='1', P3Bin='1', P4Bin='1', OutputWorkspace='ws2', NoPix=True)
 
+        svw = plotSlice('ws2')
+        sv = svw.getSlicer()
+        lv = svw.getLiner()
+        lv.setStartXY(-3, 0)
+        lv.setEndXY(3, 0)
+        lv.setPlanarWidth(2)
+        lv.apply()
+
+        time.sleep(1)
+        lws = mtd['ws2_line']
+        ranHisto = False
+        for alg in lws.getHistory():
+            if alg.name() == "IntegrateMDHistoWorkspace":
+                ranHisto = True
+                break
+
+        self.assertTrue(ranHisto, "IntegrateMDHistoWorkspace was used when possible")
 
 # Run the unit tests
 mantidplottests.runTests(MantidPlotSliceViewerTest)

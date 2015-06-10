@@ -68,7 +68,8 @@ if __name__ == '__main__':
                'debdepba@dasganma.tk': 'OTHERS',
                'matd10@yahoo.com': 'OTHERS',
                'diegomon93@gmail.com': 'OTHERS',
-               'mgt110@ic.ac.uk': 'OTHERS'
+               'mgt110@ic.ac.uk': 'OTHERS',
+               'granrothge@users.noreply.github.com': 'ORNL'
                }
 
     days_in_month = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
@@ -114,17 +115,23 @@ if __name__ == '__main__':
             print("Getting stats for {0}-{1:02d}".format(str(year), month))
             since = "--since='{0}-{1}-1'".format(str(year), str(month))
             until = "--before='{0}-{1}-{2}'".format(str(year), str(month), str(days_in_month[month-1]))
-
-            #
-            arg_changes = ['git', 'log', '--pretty=format:"%aE"', '--shortstat', since, until]
-            sub = subprocess.Popen(arg_changes, stdout=subprocess.PIPE, close_fds=True, cwd=repolocation)
-
+            
             date_key = str(year)+'-{0:02d}'.format(month)
+            
+            f = open('facility-file-changes-{0}.stdout'.format(date_key),'w')
+            arg_changes = ['git', 'log', '--pretty=format:"%aE"', '--shortstat', since, until]
+            sub = subprocess.Popen(arg_changes, stdout=f, stderr=subprocess.PIPE, cwd=repolocation)
+            f.close()
+            
+            # stdout, stderr = sub.communicate()
+            # output = stdout.split('\n')
 
             facility_commits[date_key] = {}
             facility_changed[date_key] = {}
             facility_added[date_key] = {}
             facility_removed[date_key] = {}
+            
+            freading = open('facility-file-changes-{0}.stdout'.format(date_key),'r')
 
             # initialize facility counters
             for org in organisations:
@@ -133,13 +140,13 @@ if __name__ == '__main__':
                 facility_added[date_key][org] = 0
                 facility_removed[date_key][org] = 0
 
-            for line in sub.stdout:
+            for line in freading:
                 changed = 0
                 added = 0
                 removed = 0
-
+                
                 # Is the line blank (or None)
-                if line is None:
+                if line is None or len(line) is 0:
                     # print("BLANK:'{0}'".format(str(line)))
                     continue
                 if len(line.strip().replace('\n', '')) == 0:
@@ -184,22 +191,21 @@ if __name__ == '__main__':
                 if not found:
                     print("Email ({0}) couldn't be matched to a facility!".format(str(email_changes)))
 
-            args_commits = ['git', 'shortlog', '-sne', since, until]
+            freading.close()
+            
+            f2 = open('facility-commits-{0}.stdout'.format(date_key),'w')
+            args_commits = ['git', 'log', '--pretty=format:"%aE"', since, until]
             # print(args_commits)
-            sub2 = subprocess.Popen(args_commits, stdout=subprocess.PIPE, close_fds=True, cwd=repolocation)
+            sub2 = subprocess.Popen(args_commits, stdout=f2, stderr=subprocess.PIPE, cwd=repolocation)
             commits = 0
-            for line in sub2.stdout:
-                # print(line)
-                found = False
-                commits, person = [x.strip() for x in line.split("\t")]
-                commits = int(commits)
-                # Split up person into name and email
-                # get rid of the trailing '>' on the email
-                person = person.replace(">", "")
-                # split on the leading '<' on the email.
-                name, email_commits = [x.strip() for x in person.split("<")]
-                # data[date_key].append([commits, name, email_commits])
+            
+            f2.close()
+            
+            f2reading = open('facility-commits-{0}.stdout'.format(date_key), 'r')
 
+            for line in f2reading:
+                found = False
+                email_commits = line.replace('"','').strip()
                 found = False
                 # Assign each to a facility
                 for domain in domains.keys():
@@ -207,11 +213,13 @@ if __name__ == '__main__':
                         # ORNL didn't join until 2009
                         if domains[domain] == 'ORNL' and int(year) < 2009:
                             domain = 'stfc.ac.uk'
-                        facility_commits[date_key][domains[domain]] += commits
+                        facility_commits[date_key][domains[domain]] += 1
                         found = True
 
                 if not found:
                     print("Email for commits ({0}) couldn't be matched to a facility!".format(str(email_commits)))
+
+            f2reading.close()
 
             commits_datarow = {'date': date_key+"-01"}
             changed_datarow = {'date': date_key+"-01"}
@@ -228,7 +236,7 @@ if __name__ == '__main__':
                 else:
                     removed_datarow[org] = facility_removed[date_key][org]
 
-                print("In {0}, {1} has {2} commits".format(date_key, org, facility_commits[date_key][org]))
+                # print("In {0}, {1} has {2} commits".format(date_key, org, facility_commits[date_key][org]))
 
             commits_writer.writerow(commits_datarow)
             changed_writer.writerow(changed_datarow)
@@ -239,5 +247,7 @@ if __name__ == '__main__':
     csvchanged.close()
     csvadded.close()
     csvremoved.close()
+
+
 
     print("All done!\n")

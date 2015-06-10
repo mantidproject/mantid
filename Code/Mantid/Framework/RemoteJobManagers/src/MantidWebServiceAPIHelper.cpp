@@ -17,7 +17,7 @@
 namespace Mantid {
 namespace RemoteJobManagers {
 
-std::vector<Poco::Net::HTTPCookie> MantidWebServiceAPIHelper::m_cookies;
+std::vector<Poco::Net::HTTPCookie> MantidWebServiceAPIHelper::g_cookies;
 
 MantidWebServiceAPIHelper::MantidWebServiceAPIHelper()
     : m_session(
@@ -64,7 +64,7 @@ std::istream &MantidWebServiceAPIHelper::httpGet(
   std::vector<Poco::Net::HTTPCookie> newCookies;
   m_response.getCookies(newCookies);
   if (newCookies.size() > 0) {
-    m_cookies = newCookies;
+    g_cookies = newCookies;
   }
 
   return respStream;
@@ -153,11 +153,13 @@ std::istream &MantidWebServiceAPIHelper::httpPost(
   std::vector<Poco::Net::HTTPCookie> newCookies;
   m_response.getCookies(newCookies);
   if (newCookies.size() > 0) {
-    m_cookies = newCookies;
+    g_cookies = newCookies;
   }
 
   return respStream;
 }
+
+void MantidWebServiceAPIHelper::clearSessionCookies() { g_cookies.clear(); }
 
 // Wrappers for a lot of the boilerplate code needed to perform an HTTPS GET or
 // POST
@@ -226,8 +228,8 @@ void MantidWebServiceAPIHelper::initHTTPRequest(Poco::Net::HTTPRequest &req,
 // Converts the vector of HTTPCookie objects into a NameValueCollection
 Poco::Net::NameValueCollection MantidWebServiceAPIHelper::getCookies() const {
   Poco::Net::NameValueCollection nvc;
-  std::vector<Poco::Net::HTTPCookie>::const_iterator it = m_cookies.begin();
-  while (it != m_cookies.end()) {
+  std::vector<Poco::Net::HTTPCookie>::const_iterator it = g_cookies.begin();
+  while (it != g_cookies.end()) {
     nvc.add((*it).getName(), (*it).getValue());
     ++it;
   }

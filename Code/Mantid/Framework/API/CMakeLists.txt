@@ -199,6 +199,7 @@ set ( INC_FILES
 	inc/MantidAPI/IDomainCreator.h
 	inc/MantidAPI/IEventList.h
 	inc/MantidAPI/IEventWorkspace.h
+	inc/MantidAPI/IEventWorkspace_fwd.h
 	inc/MantidAPI/IFileLoader.h
 	inc/MantidAPI/IFuncMinimizer.h
 	inc/MantidAPI/IFunction.h
@@ -210,7 +211,9 @@ set ( INC_FILES
 	inc/MantidAPI/ILatticeFunction.h
 	inc/MantidAPI/ILiveListener.h
 	inc/MantidAPI/IMDEventWorkspace.h
+	inc/MantidAPI/IMDEventWorkspace_fwd.h
 	inc/MantidAPI/IMDHistoWorkspace.h
+	inc/MantidAPI/IMDHistoWorkspace_fwd.h
 	inc/MantidAPI/IMDIterator.h
 	inc/MantidAPI/IMDNode.h
 	inc/MantidAPI/IMDWorkspace.h
@@ -218,11 +221,13 @@ set ( INC_FILES
 	inc/MantidAPI/IPawleyFunction.h
 	inc/MantidAPI/IPeakFunction.h
 	inc/MantidAPI/IPeaksWorkspace.h
+	inc/MantidAPI/IPeaksWorkspace_fwd.h
 	inc/MantidAPI/IPowderDiffPeakFunction.h
 	inc/MantidAPI/IRemoteJobManager.h
 	inc/MantidAPI/ISpectrum.h
 	inc/MantidAPI/ISplittersWorkspace.h
 	inc/MantidAPI/ITableWorkspace.h
+	inc/MantidAPI/ITableWorkspace_fwd.h
 	inc/MantidAPI/ITransformScale.h
 	inc/MantidAPI/IWorkspaceProperty.h
 	inc/MantidAPI/IkedaCarpenterModerator.h
@@ -245,6 +250,7 @@ set ( INC_FILES
 	inc/MantidAPI/MDGeometry.h
 	inc/MantidAPI/MatrixWSIndexCalculator.h
 	inc/MantidAPI/MatrixWorkspace.h
+	inc/MantidAPI/MatrixWorkspace_fwd.h
 	inc/MantidAPI/MatrixWorkspaceMDIterator.h
 	inc/MantidAPI/MemoryManager.h
 	inc/MantidAPI/ModeratorModel.h
@@ -283,6 +289,7 @@ set ( INC_FILES
 	inc/MantidAPI/VectorParameter.h
 	inc/MantidAPI/VectorParameterParser.h
 	inc/MantidAPI/Workspace.h
+	inc/MantidAPI/Workspace_fwd.h
 	inc/MantidAPI/WorkspaceFactory.h
 	inc/MantidAPI/WorkspaceGroup.h
 	inc/MantidAPI/WorkspaceHistory.h
@@ -406,7 +413,7 @@ enable_precompiled_headers( inc/MantidAPI/PrecompiledHeader.h SRC_FILES )
 # Add the target for this directory
 add_library ( API ${SRC_FILES} ${INC_FILES})
 # Set the name of the generated library
-set_target_properties ( API PROPERTIES OUTPUT_NAME MantidAPI 
+set_target_properties ( API PROPERTIES OUTPUT_NAME MantidAPI
                                        COMPILE_DEFINITIONS IN_MANTID_API )
 
 if (OSX_VERSION VERSION_GREATER 10.8)

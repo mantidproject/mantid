@@ -66,7 +66,7 @@ void FirstTimeSetup::initLayout()
   connect(m_uiForm.cbFacility, SIGNAL(currentIndexChanged(const QString&)), this, SLOT(facilitySelected(const QString &)));
 
   //set chkAllowUsageData
-  std::string isUsageReportEnabled = config.getString("usagereports.enabled", "1");
+  std::string isUsageReportEnabled = config.getString("usagereports.enabled", true);
   if (isUsageReportEnabled == "0")
   {
     m_uiForm.chkAllowUsageData->setChecked(false);

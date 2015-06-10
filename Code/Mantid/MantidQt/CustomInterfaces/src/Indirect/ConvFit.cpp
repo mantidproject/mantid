@@ -91,6 +91,10 @@ namespace IDA
     m_properties["FABADAChainLength"] = m_dblManager->addProperty("Chain Length");
     m_dblManager->setDecimals(m_properties["FABADAChainLength"], 0);
     m_dblManager->setValue(m_properties["FABADAChainLength"], 10000);
+    m_properties["FABADAConvergenceCriteria"] = m_dblManager->addProperty("Convergence Criteria");
+    m_dblManager->setValue(m_properties["FABADAConvergenceCriteria"], 0.1);
+    m_properties["FABADAJumpAcceptanceRate"] = m_dblManager->addProperty("Acceptance Rate");
+    m_dblManager->setValue(m_properties["FABADAJumpAcceptanceRate"], 0.25);
     m_cfTree->addProperty(m_properties["FABADA"]);
 
     // Background type
@@ -843,6 +847,13 @@ namespace IDA
 
       int chainLength = static_cast<int>(m_dblManager->value(m_properties["FABADAChainLength"]));
       minimizer += ",ChainLength=" + QString::number(chainLength);
+
+      double convergenceCriteria = m_dblManager->value(m_properties["FABADAConvergenceCriteria"]);
+      minimizer += ",ConvergenceCriteria=" + QString::number(convergenceCriteria);
+
+      double jumpAcceptanceRate = m_dblManager->value(m_properties["FABADAJumpAcceptanceRate"]);
+      minimizer += ",JumpAcceptanceRate=" + QString::number(jumpAcceptanceRate);
+
       minimizer += ",PDF=" + outputName + "_PDF";
 
       if(m_blnManager->value(m_properties["OutputFABADAChain"]))
@@ -1314,6 +1325,8 @@ namespace IDA
 
         m_properties["FABADA"]->addSubProperty(m_properties["OutputFABADAChain"]);
         m_properties["FABADA"]->addSubProperty(m_properties["FABADAChainLength"]);
+        m_properties["FABADA"]->addSubProperty(m_properties["FABADAConvergenceCriteria"]);
+        m_properties["FABADA"]->addSubProperty(m_properties["FABADAJumpAcceptanceRate"]);
       }
       else
       {
@@ -1321,6 +1334,8 @@ namespace IDA
 
         m_properties["FABADA"]->removeSubProperty(m_properties["OutputFABADAChain"]);
         m_properties["FABADA"]->removeSubProperty(m_properties["FABADAChainLength"]);
+        m_properties["FABADA"]->removeSubProperty(m_properties["FABADAConvergenceCriteria"]);
+        m_properties["FABADA"]->removeSubProperty(m_properties["FABADAJumpAcceptanceRate"]);
       }
     }
   }
