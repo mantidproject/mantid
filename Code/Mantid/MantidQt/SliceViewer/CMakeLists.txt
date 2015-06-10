@@ -8,6 +8,7 @@ set ( SRC_FILES
 	src/LineViewer.cpp
 	src/PeakBoundingBox.cpp
 	src/PeaksViewerOverlayDialog.cpp
+        src/PeakOverlayInteractive.cpp
 	src/PeakOverlayMultiCross.cpp
 	src/PeakOverlayMultiCrossFactory.cpp
 	src/PeakOverlayMultiSphere.cpp
@@ -44,6 +45,7 @@ set ( INC_FILES
 	inc/MantidQtSliceViewer/NullPeaksPresenter.h
 	inc/MantidQtSliceViewer/PeakEditMode.h
         inc/MantidQtSliceViewer/PeakBoundingBox.h
+        inc/MantidQtSliceViewer/PeakOverlayInteractive.h
 	inc/MantidQtSliceViewer/PeakOverlayMultiCross.h
 	inc/MantidQtSliceViewer/PeakOverlayMultiCrossFactory.h
 	inc/MantidQtSliceViewer/PeakOverlayMultiSphere.h
@@ -78,6 +80,7 @@ set ( MOC_FILES
 	inc/MantidQtSliceViewer/LineOverlay.h
 	inc/MantidQtSliceViewer/LineViewer.h
 	inc/MantidQtSliceViewer/LinePlotOptions.h
+        inc/MantidQtSliceViewer/PeakOverlayInteractive.h
  	inc/MantidQtSliceViewer/PeakOverlayMultiCross.h
 	inc/MantidQtSliceViewer/PeakOverlayMultiSphere.h
 	inc/MantidQtSliceViewer/PeaksTableColumnsDialog.h

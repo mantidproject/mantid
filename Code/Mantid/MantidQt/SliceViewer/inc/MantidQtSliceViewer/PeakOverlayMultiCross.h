@@ -1,18 +1,12 @@
 #ifndef MANTID_SLICEVIEWER_PEAKOVERLAYMULTICROSS_H_
 #define MANTID_SLICEVIEWER_PEAKOVERLAYMULTICROSS_H_
 
+#include "MantidQtSliceViewer/PeakOverlayInteractive.h"
 #include "DllOption.h"
-#include "MantidKernel/System.h"
-#include "MantidKernel/V3D.h"
-#include <q3iconview.h>
-#include <QtCore/QtCore>
-#include <QtGui/qwidget.h>
-#include <qwt_plot.h>
-#include <qpainter.h>
-#include <qcolor.h>
-#include "MantidQtSliceViewer/PeakOverlayView.h"
 #include "MantidQtSliceViewer/PhysicalCrossPeak.h"
 
+class QPaintEvent;
+class QwtPlot;
 
 namespace MantidQt
 {
@@ -50,7 +44,7 @@ namespace SliceViewer
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-  class EXPORT_OPT_MANTIDQT_SLICEVIEWER PeakOverlayMultiCross : public QWidget, public PeakOverlayView
+  class EXPORT_OPT_MANTIDQT_SLICEVIEWER PeakOverlayMultiCross : public PeakOverlayInteractive
   {
     Q_OBJECT
 
@@ -94,56 +88,21 @@ namespace SliceViewer
     virtual QColor getForegroundColour() const;
     /// Get the background colour
     virtual QColor getBackgroundColour() const;
-    /// Enter peak deletion mode.
-    void peakDeletionMode();
-    /// Enter peak addition mode
-    void peakAdditionMode();
-    /// Enter display mode
-    void peakDisplayMode();
+
     /// Take settings from another view
-    void takeSettingsFrom(const PeakOverlayView * const);
+    virtual void takeSettingsFrom(const PeakOverlayView * const);
 
   private:
 
-    void mousePressEvent(QMouseEvent* e);
-    void mouseMoveEvent(QMouseEvent* e);
-    void mouseReleaseEvent(QMouseEvent* e);
-    void wheelEvent(QWheelEvent* e);
-    void keyPressEvent(QKeyEvent* e);
-    void enterEvent(QEvent *e);
-    void leaveEvent(QEvent *e);
+    /// Pure virtual on PeakOverlayInteractive
+    virtual void doPaintPeaks(QPaintEvent*);
 
-    //QRect drawHandle(QPainter & painter, QPointF coords, QColor brush);
-    void paintEvent(QPaintEvent *event);
-
-    QSize sizeHint() const;
-    QSize size() const;
-    int height() const;
-    int width() const;
-
-    /// Owning presenter
-    PeaksPresenter* m_presenter;
-    /// QwtPlot containing this
-    QwtPlot * m_plot;
     /// Physical model of the spacial cross peaks
     VecPhysicalCrossPeak m_physicalPeaks;
-    /// Plot x index
-    const int m_plotXIndex;
-    /// Plot y index
-    const int m_plotYIndex;
     /// Peak colour
     QColor m_peakColour;
     /// Peaks in the workspace that are viewable in the present view.
     std::vector<bool> m_viewablePeaks;
-    /// Input controller.
-    MantidQt::MantidWidgets::InputController* m_tool;
-    /// Original default cursor
-    const QCursor m_defaultCursor;
-
-  private slots:
-
-    void addPeakAt(int coordX, int coordY);
-    void erasePeaks(const QRect &rect);
 
   };
 

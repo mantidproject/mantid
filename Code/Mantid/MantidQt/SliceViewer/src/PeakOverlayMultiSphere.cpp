@@ -1,14 +1,9 @@
 #include "MantidQtSliceViewer/PeakOverlayMultiSphere.h"
-#include "MantidQtSliceViewer/PeaksPresenter.h"
-#include "MantidQtMantidWidgets/InputController.h"
 #include <qwt_plot.h>
 #include <qwt_plot_canvas.h>
 #include <qwt_scale_div.h>
 #include <qpainter.h>
 #include <QPen>
-#include <QMouseEvent>
-#include <QApplication>
-#
 
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
@@ -23,16 +18,10 @@ namespace MantidQt
      */
     PeakOverlayMultiSphere::PeakOverlayMultiSphere(PeaksPresenter* const presenter, QwtPlot * plot, QWidget * parent, const VecPhysicalSphericalPeak& vecPhysicalPeaks, /// Plot x index
                                                    const int plotXIndex, const int plotYIndex, const QColor& peakColour, const QColor& backColour) :
-        QWidget(parent), m_presenter(presenter), m_plot(plot), m_physicalPeaks(vecPhysicalPeaks), m_plotXIndex(plotXIndex), m_plotYIndex(plotYIndex),
-        m_peakColour(peakColour), m_backColour(backColour), m_showBackground(false), m_tool(NULL), m_defaultCursor(plot->cursor())
+        PeakOverlayInteractive(presenter, plot, plotXIndex, plotYIndex, parent), m_physicalPeaks(vecPhysicalPeaks),
+        m_peakColour(peakColour), m_backColour(backColour), m_showBackground(false)
     {
-      setAttribute(Qt::WA_NoMousePropagation, false);
-      setAttribute(Qt::WA_MouseTracking, true);
 
-      this->setVisible(true);
-      setUpdatesEnabled(true);
-
-      //setAttribute(Qt::WA_TransparentForMouseEvents);
     }
 
     //----------------------------------------------------------------------------------------------
@@ -40,7 +29,6 @@ namespace MantidQt
      */
     PeakOverlayMultiSphere::~PeakOverlayMultiSphere()
     {
-        this->peakDisplayMode();
     }
 
     void PeakOverlayMultiSphere::setSlicePoint(const double& z, const std::vector<bool>& viewablePeaks)
@@ -57,57 +45,8 @@ namespace MantidQt
     }
 
     //----------------------------------------------------------------------------------------------
-    /// Return the recommended size of the widget
-    QSize PeakOverlayMultiSphere::sizeHint() const
-    {
-      //TODO: Is there a smarter way to find the right size?
-      return QSize(20000, 20000);
-      // Always as big as the canvas
-      //return m_plot->canvas()->size();
-    }
-
-    QSize PeakOverlayMultiSphere::size() const
-    {
-      return m_plot->canvas()->size();
-    }
-    int PeakOverlayMultiSphere::height() const
-    {
-      return m_plot->canvas()->height();
-    }
-    int PeakOverlayMultiSphere::width() const
-    {
-        return m_plot->canvas()->width();
-    }
-
-    void PeakOverlayMultiSphere::addPeakAt(int coordX, int coordY) {
-
-        QwtScaleMap xMap = m_plot->canvasMap(m_plotXIndex);
-        QwtScaleMap yMap = m_plot->canvasMap(m_plotYIndex);
-
-        const double plotX = xMap.invTransform(double(coordX));
-        const double plotY = yMap.invTransform(double(coordY));
-
-        m_presenter->addPeakAt(plotX, plotY);
-    }
-
-
-    void PeakOverlayMultiSphere::erasePeaks(const QRect &rect)
-    {
-        QwtScaleMap xMap = m_plot->canvasMap(m_plotXIndex);
-        QwtScaleMap yMap = m_plot->canvasMap(m_plotYIndex);
-
-        const Left left(xMap.invTransform(rect.left()));
-        const Right right(xMap.invTransform(rect.right()));
-        const Top top(yMap.invTransform(rect.top()));
-        const Bottom bottom(yMap.invTransform(rect.bottom()));
-        const SlicePoint slicePoint(-1); // Not required.
-
-        m_presenter->deletePeaksIn(PeakBoundingBox(left, right, top, bottom, slicePoint));
-    }
-
-    //----------------------------------------------------------------------------------------------
     /// Paint the overlay
-    void PeakOverlayMultiSphere::paintEvent(QPaintEvent * /*event*/)
+    void PeakOverlayMultiSphere::doPaintPeaks(QPaintEvent * /*event*/)
     {
       for(size_t i = 0; i < m_viewablePeaks.size(); ++i)
       {
@@ -150,11 +89,6 @@ namespace MantidQt
         }
         painter.end();
       }
-      }
-      if(m_tool){
-          QPainter painter(this);
-          m_tool->onPaint(painter);
-          painter.end();
       }
     }
 
@@ -254,102 +188,12 @@ namespace MantidQt
       return m_peakColour;
     }
 
-    void PeakOverlayMultiSphere::peakDeletionMode() {
-        QApplication::restoreOverrideCursor();
-        auto* temp = m_tool;
-        auto* eraseTool = new MantidQt::MantidWidgets::InputControllerErase(this);
-        connect(eraseTool,SIGNAL(erase(QRect)),this,SLOT(erasePeaks(QRect)), Qt::QueuedConnection);
-        m_tool = eraseTool;
-        delete temp;
-    }
-
-    void PeakOverlayMultiSphere::peakAdditionMode() {
-        QApplication::restoreOverrideCursor();
-        auto* temp = m_tool;
-        auto* addTool = new MantidQt::MantidWidgets::InputControllerPick(this);
-        connect(addTool,SIGNAL(pickPointAt(int,int)),this,SLOT(addPeakAt(int,int)));
-        m_tool = addTool;
-        delete temp;
-    }
-
-    void PeakOverlayMultiSphere::peakDisplayMode() {
-        QApplication::restoreOverrideCursor();
-        if(m_tool){
-            delete m_tool;
-            m_tool = NULL;
-            m_plot->setCursor(m_defaultCursor);
-        }
-    }
 
     void PeakOverlayMultiSphere::takeSettingsFrom(const PeakOverlayView * const source)
     {
         this->changeForegroundColour(source->getForegroundColour());
         this->changeBackgroundColour(source->getBackgroundColour());
         this->showBackgroundRadius(source->isBackgroundShown());
-    }
-
-    void PeakOverlayMultiSphere::mousePressEvent(QMouseEvent* e)
-    {
-        if(m_tool) {
-          m_tool->mousePressEvent( e );
-        }else{
-            e->ignore();
-        }
-    }
-
-    void PeakOverlayMultiSphere::mouseMoveEvent(QMouseEvent* e)
-    {
-        if(m_tool) {
-          m_tool->mouseMoveEvent( e );
-          this->update();
-        }
-        e->ignore();
-
-    }
-
-    void PeakOverlayMultiSphere::mouseReleaseEvent(QMouseEvent* e)
-    {
-        if(m_tool) {
-          m_tool->mouseReleaseEvent( e );
-        }else{
-            e->ignore();
-        }
-    }
-
-    void PeakOverlayMultiSphere::wheelEvent(QWheelEvent* e)
-    {
-        if(m_tool) {
-          m_tool->wheelEvent( e );
-        }else{
-            e->ignore();
-        }
-    }
-
-    void PeakOverlayMultiSphere::keyPressEvent(QKeyEvent* e)
-    {
-        if(m_tool) {
-          m_tool->keyPressEvent( e );
-        }else{
-            e->ignore();
-        }
-    }
-
-    void PeakOverlayMultiSphere::enterEvent(QEvent *e)
-    {
-        if(m_tool) {
-          m_tool->enterEvent( e );
-        }else{
-            e->ignore();
-        }
-    }
-
-    void PeakOverlayMultiSphere::leaveEvent(QEvent *e)
-    {
-        if(m_tool) {
-          m_tool->leaveEvent( e );
-        }else{
-            e->ignore();
-        }
     }
 
   } // namespace Mantid
