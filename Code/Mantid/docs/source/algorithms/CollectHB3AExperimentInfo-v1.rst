@@ -16,6 +16,11 @@ HB3A (four-circle single crystal diffractometer in HFIR).
 Inputs
 ======
 
+The inputs required by algorithm *ConvertHB3AExperimentInfo* are the experiment number, scan numbers
+and selected Pt. numbers. 
+By these parameters, the algorithm can determine the names of the data files and generate a list of 
+detectors for downstream algorithm to create virutal instrument. 
+
 
 OutputWorkspaces
 ================
@@ -36,8 +41,6 @@ The parameters include detector ID in virtual instrument, detector's position in
 and detector's original detector ID. 
 
 
-
-
 How to use algorithm with other algorithms
 ------------------------------------------
 
@@ -49,35 +52,36 @@ single cystal peaks.
 Usage
 -----
 
-**Example - create inputs for LeBail fit of Pg3:**
+**Example - Collect HB3A experiment information for Exp No.355:**
 
-.. testcode:: ExCreateLBInputs
+.. testcode:: ExCollect355Info
 
-  CreateLeBailFitInput(ReflectionsFile=r'LB4854b3.hkl',		
-	FullprofParameterFile=r'2013A_HR60b3.irf',	
-	Bank='3',
-	LatticeConstant='4.1568899999999998',		
-	InstrumentParameterWorkspace='PG3_Bank3_ParTable',	
-	BraggPeakParameterWorkspace='LaB6_HKL_Table')	
+  CollectHB3AExperimentInfo(ExperimentNumber=355,ScanList=[11,38],PtLists=[-1,11,-1,12],
+      DataDirectory='',
+      Detector2ThetaTolerance=0.01,
+      OutputWorkspace='ExpInfoTable', DetectorTableWorkspace='VirtualInstrumentTable')
+    
+  # Examine
+  expinfows = mtd['ExpInfoTable']
+  virtualdetws = mtd['VirtualInstrumentTable']
 
-  # Examine 
-  partablews = mtd["PG3_Bank3_ParTable"]
-  braggtablews = mtd["LaB6_HKL_Table"]
-  print "Number Bragg peaks from .hkl file is %d.  Number of peak profile parameters is %d." % (braggtablews.rowCount(), partablews.rowCount())
+  print 'Number of input files = %d' % (expinfows.rowCount())
+  print 'Number of detectors in virtual instrument = %d'%(virtualdetws.rowCount())
+  print 'Virtual detectors are from ID = %d to ID = %d'%(virtualdetws.cell(0,0), virtualdetws.cell(131072-1,0))
 
 
-.. testcleanup:: ExCreateLBInputs
+.. testcleanup:: ExCollect355Info
 
-  DeleteWorkspace(partablews)
-  DeleteWorkspace(braggtablews)
+  DeleteWorkspace(expinfows)
+  DeleteWorkspace(virtualdetws)
 
 
 Output:
 
-.. testoutput:: ExCreateLBInputs
+.. testoutput:: ExCollect355Info 
 
-  GeneraateHKL? =  False
-  Number Bragg peaks from .hkl file is 76.  Number of peak profile parameters is 30.
-
+  Number of input files = 2
+  Number of detectors in virtual instrument = 131072
+  Virtual detectors are from ID = 1 to ID = 131072
 
 .. categories::
