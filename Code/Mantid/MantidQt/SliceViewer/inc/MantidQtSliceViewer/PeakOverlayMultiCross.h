@@ -16,6 +16,12 @@
 
 namespace MantidQt
 {
+
+namespace MantidWidgets {
+// Forward declaration
+class InputController;
+}
+
 namespace SliceViewer
 {
 
@@ -99,6 +105,14 @@ namespace SliceViewer
 
   private:
 
+    void mousePressEvent(QMouseEvent* e);
+    void mouseMoveEvent(QMouseEvent* e);
+    void mouseReleaseEvent(QMouseEvent* e);
+    void wheelEvent(QWheelEvent* e);
+    void keyPressEvent(QKeyEvent* e);
+    void enterEvent(QEvent *e);
+    void leaveEvent(QEvent *e);
+
     //QRect drawHandle(QPainter & painter, QPointF coords, QColor brush);
     void paintEvent(QPaintEvent *event);
 
@@ -121,8 +135,15 @@ namespace SliceViewer
     QColor m_peakColour;
     /// Peaks in the workspace that are viewable in the present view.
     std::vector<bool> m_viewablePeaks;
+    /// Input controller.
+    MantidQt::MantidWidgets::InputController* m_tool;
+    /// Original default cursor
+    const QCursor m_defaultCursor;
 
+  private slots:
 
+    void addPeakAt(int coordX, int coordY);
+    void erasePeaks(const QRect &rect);
 
   };
 

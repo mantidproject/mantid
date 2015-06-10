@@ -628,9 +628,16 @@ ConcretePeaksPresenter::findVisiblePeakIndexes(const PeakBoundingBox &box) {
   // Don't bother to find peaks in the region if there are no peaks to find.
   if (this->m_peaksWS->getNumberPeaks() >= 1) {
 
-    double effectiveRadius =
+    double radius =
         m_viewPeaks
             ->getRadius(); // Effective radius of each peak representation.
+
+    /*
+     If we are position only, there is really no proper radius. This should really be handled internally by the PeakIntersection algorithm.
+    */
+    if(m_viewPeaks->positionOnly()){
+        radius =1e-6;
+    }
 
     Mantid::API::IPeaksWorkspace_sptr peaksWS =
         boost::const_pointer_cast<Mantid::API::IPeaksWorkspace>(
@@ -651,7 +658,7 @@ ConcretePeaksPresenter::findVisiblePeakIndexes(const PeakBoundingBox &box) {
     alg->setProperty("Vertex3", vertexes[2]);
     alg->setProperty("Vertex4", vertexes[3]);
     alg->setProperty("PeakRadius",
-                     effectiveRadius); // Effective radius or shape radius?
+                     radius);
     alg->setPropertyValue("CoordinateFrame", m_transform->getFriendlyName());
     alg->execute();
     ITableWorkspace_sptr outTable = alg->getProperty("OutputWorkspace");

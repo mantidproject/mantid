@@ -1,11 +1,13 @@
 #include "MantidQtSliceViewer/PeakOverlayMultiCross.h"
 #include "MantidQtSliceViewer/PeaksPresenter.h"
+#include "MantidQtMantidWidgets/InputController.h"
 #include <qwt_plot.h>
 #include <qwt_plot_canvas.h>
 #include <qwt_scale_div.h>
 #include <qpainter.h>
 #include <QPen>
 #include <QMouseEvent>
+#include <QApplication>
 
 
 using namespace Mantid::Kernel;
@@ -28,13 +30,16 @@ namespace MantidQt
       m_physicalPeaks(vecPhysicalPeaks),
       m_plotXIndex(plotXIndex),
       m_plotYIndex(plotYIndex),
-      m_peakColour(peakColour)
+      m_peakColour(peakColour),
+      m_tool(NULL), m_defaultCursor(plot->cursor())
     {
       setAttribute(Qt::WA_NoMousePropagation, false);
+      setAttribute(Qt::WA_MouseTracking, true);
+
       this->setVisible(true);
       setUpdatesEnabled(true);
 
-      setAttribute(Qt::WA_TransparentForMouseEvents);
+      //setAttribute(Qt::WA_TransparentForMouseEvents);
     }
 
     //----------------------------------------------------------------------------------------------
@@ -42,6 +47,7 @@ namespace MantidQt
     */
     PeakOverlayMultiCross::~PeakOverlayMultiCross()
     {
+        this->peakDisplayMode();
     }
 
     //----------------------------------------------------------------------------------------------
@@ -114,7 +120,13 @@ namespace MantidQt
 
           painter.drawLine(bottomL, topR);
           painter.drawLine(bottomR, topL);
+          painter.end();
         }
+      }
+      if(m_tool){
+          QPainter painter(this);
+          m_tool->onPaint(painter);
+          painter.end();
       }
     }
 
@@ -219,18 +231,6 @@ namespace MantidQt
       return m_peakColour;
     }
 
-    void PeakOverlayMultiCross::peakDeletionMode() {
-
-    }
-
-    void PeakOverlayMultiCross::peakAdditionMode() {
-
-    }
-
-    void PeakOverlayMultiCross::peakDisplayMode() {
-
-    }
-
     void PeakOverlayMultiCross::takeSettingsFrom(const PeakOverlayView * const source)
     {
         this->changeForegroundColour(source->getForegroundColour());
@@ -238,6 +238,124 @@ namespace MantidQt
         this->changeOccupancyIntoView(source->getOccupancyIntoView());
         this->changeOccupancyInView(source->getOccupancyInView());
         this->showBackgroundRadius(source->isBackgroundShown());
+    }
+
+    void PeakOverlayMultiCross::peakDeletionMode() {
+        QApplication::restoreOverrideCursor();
+        auto* temp = m_tool;
+        auto* eraseTool = new MantidQt::MantidWidgets::InputControllerErase(this);
+        connect(eraseTool,SIGNAL(erase(QRect)),this,SLOT(erasePeaks(QRect)), Qt::QueuedConnection);
+        m_tool = eraseTool;
+        delete temp;
+    }
+
+    void PeakOverlayMultiCross::peakAdditionMode() {
+        QApplication::restoreOverrideCursor();
+        auto* temp = m_tool;
+        auto* addTool = new MantidQt::MantidWidgets::InputControllerPick(this);
+        connect(addTool,SIGNAL(pickPointAt(int,int)),this,SLOT(addPeakAt(int,int)));
+        m_tool = addTool;
+        delete temp;
+    }
+
+    void PeakOverlayMultiCross::peakDisplayMode() {
+        QApplication::restoreOverrideCursor();
+        if(m_tool){
+            delete m_tool;
+            m_tool = NULL;
+            m_plot->setCursor(m_defaultCursor);
+        }
+    }
+
+    void PeakOverlayMultiCross::mousePressEvent(QMouseEvent* e)
+    {
+        if(m_tool) {
+          m_tool->mousePressEvent( e );
+        }else{
+            e->ignore();
+        }
+    }
+
+    void PeakOverlayMultiCross::mouseMoveEvent(QMouseEvent* e)
+    {
+        if(m_tool) {
+          m_tool->mouseMoveEvent( e );
+          this->update();
+        }
+        e->ignore();
+
+    }
+
+    void PeakOverlayMultiCross::mouseReleaseEvent(QMouseEvent* e)
+    {
+        if(m_tool) {
+          m_tool->mouseReleaseEvent( e );
+        }else{
+            e->ignore();
+        }
+    }
+
+    void PeakOverlayMultiCross::wheelEvent(QWheelEvent* e)
+    {
+        if(m_tool) {
+          m_tool->wheelEvent( e );
+        }else{
+            e->ignore();
+        }
+    }
+
+    void PeakOverlayMultiCross::keyPressEvent(QKeyEvent* e)
+    {
+        if(m_tool) {
+          m_tool->keyPressEvent( e );
+        }else{
+            e->ignore();
+        }
+    }
+
+    void PeakOverlayMultiCross::enterEvent(QEvent *e)
+    {
+        if(m_tool) {
+          m_tool->enterEvent( e );
+        }else{
+            e->ignore();
+        }
+    }
+
+    void PeakOverlayMultiCross::leaveEvent(QEvent *e)
+    {
+        if(m_tool) {
+          m_tool->leaveEvent( e );
+        }else{
+            e->ignore();
+        }
+    }
+
+    void PeakOverlayMultiCross::addPeakAt(int coordX, int coordY) {
+
+        QwtScaleMap xMap = m_plot->canvasMap(m_plotXIndex);
+        QwtScaleMap yMap = m_plot->canvasMap(m_plotYIndex);
+
+        const double plotX = xMap.invTransform(double(coordX));
+        const double plotY = yMap.invTransform(double(coordY));
+
+        m_presenter->addPeakAt(plotX, plotY);
+    }
+
+
+    void PeakOverlayMultiCross::erasePeaks(const QRect &rect)
+    {
+        QwtScaleMap xMap = m_plot->canvasMap(m_plotXIndex);
+        QwtScaleMap yMap = m_plot->canvasMap(m_plotYIndex);
+
+        const Left left(xMap.invTransform(rect.left()));
+        const Right right(xMap.invTransform(rect.right()));
+        const Top top(yMap.invTransform(rect.top()));
+        const Bottom bottom(yMap.invTransform(rect.bottom()));
+        const SlicePoint slicePoint(-1); // Not required.
+
+        m_presenter->deletePeaksIn(PeakBoundingBox(left, right, top, bottom, slicePoint));
+
     }
 
   } // namespace Mantid

@@ -103,7 +103,6 @@ namespace MantidQt
         const SlicePoint slicePoint(-1); // Not required.
 
         m_presenter->deletePeaksIn(PeakBoundingBox(left, right, top, bottom, slicePoint));
-
     }
 
     //----------------------------------------------------------------------------------------------
