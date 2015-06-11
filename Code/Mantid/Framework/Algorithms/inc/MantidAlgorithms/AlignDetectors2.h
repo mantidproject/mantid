@@ -72,6 +72,7 @@ private:
   void execEvent();
 
   void loadCalFile(API::MatrixWorkspace_sptr inputWS, const std::string & filename);
+  void getCalibrationWS(API::MatrixWorkspace_sptr inputWS);
 
   Mantid::API::ITableWorkspace_sptr m_calibrationWS;
 

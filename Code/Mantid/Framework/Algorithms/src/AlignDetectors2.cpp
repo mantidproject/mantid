@@ -185,23 +185,42 @@ void AlignDetectors2::init() {
           "CalibrationWorkspace", "", Direction::Input, PropertyMode::Optional),
       "Optional: A Workspace containing the calibration information. Either "
       "this or CalibrationFile needs to be specified.");
+
+  declareProperty(
+      new WorkspaceProperty<OffsetsWorkspace>(
+          "OffsetsWorkspace", "", Direction::Input, PropertyMode::Optional),
+      "Optional: A OffsetsWorkspace containing the calibration offsets. Either "
+      "this or CalibrationFile needs to be specified.");
+
+  // make group associations.
+  std::string calibrationGroup("Calibration");
+  setPropertyGroup("CalibrationFile", calibrationGroup);
+  setPropertyGroup("CalibrationWorkspace", calibrationGroup);
+  setPropertyGroup("OffsetsWorkspace", calibrationGroup);
 }
 
 std::map<std::string, std::string> AlignDetectors2::validateInputs() {
     std::map<std::string, std::string> result;
 
+    int numWays = 0;
+
     const std::string calFileName = getProperty("CalibrationFile");
-    bool haveCalFile = (!calFileName.empty());
+    if (!calFileName.empty()) numWays+=1;
 
     ITableWorkspace_const_sptr calibrationWS = getProperty("CalibrationWorkspace");
-    bool haveCalWksp = bool(calibrationWS);
+    if(bool(calibrationWS)) numWays+=1;
+
+    OffsetsWorkspace_const_sptr offsetsWS = getProperty("OffsetsWorkspace");
+    if(bool(offsetsWS)) numWays+=1;
 
     std::string message;
-    if (haveCalFile && haveCalWksp) {
-        message = "You must specify either CalibrationFile or "
-                  "CalibrationWorkspace but not both.";
-    } else if ((!haveCalFile) && (!haveCalWksp)) {
-        message = "You must specify either CalibrationFile or CalibrationWorkspace.";
+    if (numWays == 0) {
+        message = "You must specify only one of CalibrationFile, "
+                  "CalibrationWorkspace, OffsetsWorkspace.";
+    }
+    if (numWays > 1) {
+        message = "You must specify one of CalibrationFile, "
+                  "CalibrationWorkspace, OffsetsWorkspace.";
     }
 
     if (!message.empty()) {
@@ -242,6 +261,24 @@ void AlignDetectors2::loadCalFile(MatrixWorkspace_sptr inputWS, const std::strin
   }
 }
 
+void AlignDetectors2::getCalibrationWS(MatrixWorkspace_sptr inputWS) {
+    const std::string calFileName = getPropertyValue("CalibrationFile");
+    if (!calFileName.empty()) {
+      progress(0.0, "Reading calibration file");
+      loadCalFile(inputWS, calFileName);
+    } else {
+      m_calibrationWS = getProperty("CalibrationWorkspace");
+      if (!m_calibrationWS) {
+          OffsetsWorkspace_sptr offsetsWS = getProperty("OffsetsWorkspace");
+          auto alg = createChildAlgorithm("ConvertDiffCal");
+          alg->setProperty("OffsetsWorkspace", offsetsWS);
+          alg->executeAsChildAlg();
+          m_calibrationWS = alg->getProperty("OutputWorkspace");
+          m_calibrationWS->setTitle(offsetsWS->getTitle());
+      }
+    }
+}
+
 void setXAxisUnits(API::MatrixWorkspace_sptr outputWS) {
     outputWS->getAxis(0)->unit() = UnitFactory::Instance().create("dSpacing");
 }
@@ -257,13 +294,7 @@ void AlignDetectors2::exec() {
   // Get the input workspace
   MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
 
-  const std::string calFileName = getPropertyValue("CalibrationFile");
-  if (!calFileName.empty()) {
-    progress(0.0, "Reading calibration file");
-    loadCalFile(inputWS, calFileName);
-  } else {
-    m_calibrationWS = getProperty("CalibrationWorkspace");
-  }
+  this->getCalibrationWS(inputWS);
 
   // Initialise the progress reporting object
   m_numberOfSpectra = static_cast<int64_t>(inputWS->getNumberHistograms());
