@@ -83,7 +83,6 @@ namespace MantidQt
       // Make the overlay widget.
       return boost::make_shared<PeakOverlayMultiSphere>(presenter, m_plot, m_parent, physicalPeaks, m_plotXIndex, m_plotYIndex, this->m_peakColour, this->m_backColour);
     }
-    GCC_DIAG_ON(strict-aliasing)
 
     PeakOverlayMultiSphereFactory::~PeakOverlayMultiSphereFactory()
     {
