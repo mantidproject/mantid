@@ -2,7 +2,7 @@
 #define MANTID_MDALGORITHMS_WS_DESCRIPTION_H
 
 #include "MantidAPI/LogManager.h"
-#include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidAPI/IMDEventWorkspace_fwd.h"
 #include "MantidAPI/MatrixWorkspace.h"
 
 #include "MantidGeometry/Crystal/OrientedLattice.h"
