@@ -5,6 +5,9 @@
 #include "MantidQtSliceViewer/PhysicalSphericalPeak.h"
 #include "DllOption.h"
 
+class QwtPlot;
+class QWidget;
+
 namespace MantidQt
 {
 

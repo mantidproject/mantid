@@ -28,12 +28,11 @@ namespace MantidQt
      * @param peakColour : peak colour
      * @param backColour : background colour
      */
-    PeakOverlayMultiSphere::PeakOverlayMultiSphere(PeaksPresenter* const presenter, QwtPlot * plot, QWidget * parent, const VecPhysicalSphericalPeak& vecPhysicalPeaks, /// Plot x index
+    PeakOverlayMultiSphere::PeakOverlayMultiSphere(PeaksPresenter* const presenter, QwtPlot * plot, QWidget * parent, const VecPhysicalSphericalPeak& vecPhysicalPeaks,
                                                    const int plotXIndex, const int plotYIndex, const QColor& peakColour, const QColor& backColour) :
         PeakOverlayInteractive(presenter, plot, plotXIndex, plotYIndex, parent), m_physicalPeaks(vecPhysicalPeaks),
         m_peakColour(peakColour), m_backColour(backColour), m_showBackground(false)
     {
-
     }
 
     //----------------------------------------------------------------------------------------------
