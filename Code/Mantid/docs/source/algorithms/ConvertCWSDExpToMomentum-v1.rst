@@ -104,134 +104,50 @@ There is only one *virtual* instrument and *N* ExperimentInfo.
 *N* is the total number of experiment points in the *experiment*. 
 
 
-Sample Logs
-###########
-
-
-
-Target Units
-############
-
-Three units are supported by this algorithm via property *UnitOutput*.  
-They are :math:`2\theta`, dSpacing and MomentumTransfer(Q). 
-
-The following equations are used to convert the units. 
-
-.. math:: \lambda = 2d\sin(\theta)
-
-.. math:: d = \frac{4\pi}{Q}
-
-Therefore neutron wavelength :math:`\lambda` must be given either in sample log or via input property
-if the unit of the output workspace is targeted to be dSpacing or MomentumTransfer. 
-
-
-Binning, Normalization and Error
-################################
-
-According to the input binning parameters, the bins in :math:`2\theta` are created as
-:math:`2\theta_{min}, 2\theta_{min}+\Delta, 2\theta_{min}+2\Delta, \cdots`. 
-
-If the unit of ouput workspace is specified as dSpacing or MomentrumTransfer,
-then the bins should be created as :math:`d_{min}, d_{min}+\Delta, d_{min}+2\Delta, \cdots, d_{max}`
-or :math:`q_{min}, q_{min}+\Delta, \cdots, q_{max}` respectively. 
-
-For each detector, if its position falls between :math:`2\theta_i` and :math:`2\theta_{i+1}`,,
-:math:`d_i` and :math:`d_{i+1}`, or :math:`Q_i` and :math:`Q_{i+1}`, 
-then its counts is added to :math:`Y_i` and the corresponding monitor counts is added to 
-:math:`M_i`. 
-
-The singals on these bins are normalized by its monitor counts, such that 
-
-.. math:: y_i = \frac{Y_i}{M_i}
-
-
-The error (i.e., standard deviation) is defined as 
-
-.. math:: \frac{\Delta y_i}{y_i} = \sqrt{(\frac{\Delta Y_i}{Y_i})^2 + (\frac{\Delta M_i}{M_i})^2}
-
-Scaling
-#######
-
-The normalized histogram can be scaled up by a factor specified by  *ScaleFactor*. 
-In most cases, the scaling factor is equal to average monitor counts of all measurements. 
-
-If the scaling factor is specified, then
-the standard error of data point :math:`i` will be converted to 
-
-.. math:: \sigma^{(s)}_i = f \times \sigma^{(n)}_i
-
-where :math:`f` is the scaling factor, :math:`\sigma^{(n)}_i` is the standard error of the normalized signal
-of data point :math:`i`, and 
-:math:`\sigma^{(s)}_i` is the standard error of the signal scaled up. 
-
-Linear Interpolation
-####################
-
-If a user specifies a bin size that is smaller than the resolution of the instrument, 
-then it is very likely to occur that some bins have zero count, while their neighboring
-bins have counts that are significantly larger than noise. 
-In this case, an option to do linear interpolation to the zero count bins 
-in the histogram is provided. 
-Property *LinearInterpolateZeroCounts* is used to set the flag to do linear interpolation. 
-
-The linear interpolation will be only applied to those zero-count bins within
-the measuring range. 
-
-Excluding detectors
-###################
-
-Detectors can be excluded from conversion process.  
-They can be specified by their *Detector ID*s via property *ExcludedDetectorIDs*.  
-If a detector is specified as being excluded, 
-all of its counts of all runs (pts) will be taken out of binning process. 
-
-
-Workflow
---------
-
-This algorithm is the third step to reduce powder diffraction data from a SPICE file.
-Following algorithm *LoadSpiceAscii*, which loads SPICE file to a TableWorkspace
-and {\it ConvertSpiceToRealSpace}, which converts the TableWorkspace to MDEvnetWorkspace 
-that is able to reflect all the information of the epxeriment,
-{\it ConvertCWPDMDToSpectra} goes through all the detectors' counts and rebins the data. 
-
-An Example
-##########
-
-1. LoadSpiceAscii
-2. ConvertSpiceToRealSpace
-3. Merge a few data MDWorkspaces together; merge the corresponding monitor MDWorkspaces together;
-4. ConvertCWPDMDToSpectra. 
-
-Experimental data with different neutron wavelengths can be binned together to d-spacing or momentum transfer space. 
-
-
 Usage
 -----
 
 **Example - convert SPICE file for HB3A to Fullprof file:**
 
-.. testcode:: ExReduceHB2AToFullprof
+.. testcode:: ExConvertHB3AToMD
 
-  # create table workspace and parent log workspace
-  LoadSpiceAscii(Filename='HB2A_exp0231_scan0001.dat', 
-        IntegerSampleLogNames="Sum of Counts, scan, mode, experiment_number",
-        FloatSampleLogNames="samplemosaic, preset_value, Full Width Half-Maximum, Center of Mass", 
-        DateAndTimeLog='date,MM/DD/YYYY,time,HH:MM:SS AM', 
-        OutputWorkspace='Exp0231DataTable', 
-        RunInfoWorkspace='Exp0231ParentWS')
+  # Create input table workspaces for experiment information and virtual instrument parameters
+  CollectHB3AExperimentInfo(ExperimentNumber='355', ScanList='11', PtLists='-1,11', 
+      DataDirectory='',
+      OutputWorkspace='ExpInfoTable', DetectorTableWorkspace='VirtualInstrumentTable')
 
+  # Convert to MDWorkspace
+  ConvertCWSDExpToMomentum(InputWorkspace='ExpInfoTable', DetectorTableWorkspace='VirtualInstrumentTable', 
+      OutputWorkspace='QSampleMD', SourcePosition='0,0,2', SamplePosition='0,0,0', PixelDimension='1,2,2,3,3,4,3,3', 
+      Directory='')
 
-  # output
+  # Find peak in the MDEventWorkspace
+  FindPeaksMD(InputWorkspace='QSampleMD', DensityThresholdFactor=0.10000000000000001, 
+      OutputWorkspace='PeakTable')
+  
+  # Examine
+  mdws = mtd['QSampleMD']
+  print 'Output MDEventWorkspace has %d events.'%(mdws.getNEvents())
+  peakws = mtd['PeakTable']
+  print  'There are %d peaks found in output MDWorkspace'%(peakws.getNumberPeaks())
+  peak = peakws.getPeak(0)
+  qsample = peak.getQSampleFrame()
+  print 'In Q-sample frame, center of peak 0 is at (%.5f, %.5f, %.5f) at detector with ID %d'%(
+      qsample.X(), qsample.Y(), qsample.Z(), peak.getDetectorID())
+    
+.. testcleanup::  ExConvertHB3AToMD
 
-.. testcleanup::  ExReduceHB2AToFullprof
-
-  DeleteWorkspace('Exp0231DataTable')
+  DeleteWorkspace(Workspace='QSampleMD')
+  DeleteWorkspace(Workspace='ExpInfoTable')
+  DeleteWorkspace(Workspace='VirtualInstrumentTable')
+  DeleteWorkspace(Workspace='PeakTable')
 
 Output:
 
-.. testoutput:: ExReduceHB2AToFullprof
+.. testoutput:: ExConvertHB3AToMD
 
-  2theta = 15.000000, Y = 0.386563, E = 0.024744
+  Output MDEventWorkspace has 397 events.
+  There are 1 peaks found in output MDWorkspace
+  In Q-sample frame, center of peak 0 is at (-6.95467, -0.06937, 8.14106) at detector with ID 29072
 
 .. categories::
