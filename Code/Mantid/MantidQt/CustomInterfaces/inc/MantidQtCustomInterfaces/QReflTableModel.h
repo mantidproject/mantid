@@ -1,7 +1,7 @@
 #ifndef MANTID_CUSTOMINTERFACES_QREFLTABLEMODEL_H_
 #define MANTID_CUSTOMINTERFACES_QREFLTABLEMODEL_H_
 
-#include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/ITableWorkspace_fwd.h"
 #include <QAbstractTableModel>
 #include <boost/shared_ptr.hpp>
 #include <map>

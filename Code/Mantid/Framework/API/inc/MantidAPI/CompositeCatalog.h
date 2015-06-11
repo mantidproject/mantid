@@ -3,6 +3,9 @@
 
 #include "MantidAPI/ICatalog.h"
 
+#include <list>
+#include <set>
+
 namespace Mantid {
 namespace API {
 /**

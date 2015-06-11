@@ -4,6 +4,7 @@
 #include "MantidAlgorithms/PhaseQuadMuon.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/IFileLoader.h"
+#include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/FrameworkManager.h"
 

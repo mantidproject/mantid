@@ -10,7 +10,7 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidGeometry/Crystal/IPeak.h"
 #include "MantidDataObjects/TableWorkspace.h"
-#include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"

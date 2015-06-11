@@ -5,7 +5,7 @@
 #include "MantidKernel/Exception.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidAPI/AnalysisDataService.h"
 
 //STL 

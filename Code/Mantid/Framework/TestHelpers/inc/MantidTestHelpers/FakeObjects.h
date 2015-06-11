@@ -19,7 +19,7 @@
  */
 
 #include "MantidAPI/ISpectrum.h"
-#include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/cow_ptr.h"
 #include "MantidAPI/RefAxis.h"

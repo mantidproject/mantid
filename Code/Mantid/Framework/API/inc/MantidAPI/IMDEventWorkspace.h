@@ -6,7 +6,7 @@
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/IMDEventWorkspace_fwd.h"
 #include "MantidAPI/IMDWorkspace.h"
-#include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidAPI/MultipleExperimentInfos.h"
 #include "MantidAPI/Workspace.h"
 #include "MantidAPI/IMDNode.h"
