@@ -37,7 +37,7 @@
 
 #include "MantidSINQ/DllConfig.h"
 #include "MantidAPI/Algorithm.h"
-#include "MantidAPI/IMDHistoWorkspace.h"
+#include "MantidAPI/IMDHistoWorkspace_fwd.h"
 
 class MANTID_SINQ_DLL SINQTranspose3D : public Mantid::API::Algorithm {
 public:
