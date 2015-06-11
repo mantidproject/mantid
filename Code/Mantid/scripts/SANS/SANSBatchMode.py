@@ -101,7 +101,7 @@ def addRunToStore(parts, run_store):
     run_store.append(inputdata)
     return 0
 
-def BatchReduce(filename, format, plotresults=False, saveAlgs={'SaveRKH':'txt'},verbose=False, centreit=False, reducer=None, combineDet=None):
+def BatchReduce(filename, format, plotresults=False, saveAlgs={'SaveRKH':'txt'},verbose=False, centreit=False, reducer=None, combineDet=None, save_as_zero_error_free=False):
     """
         @param filename: the CSV file with the list of runs to analyse
         @param format: type of file to load, nxs for Nexus, etc.
@@ -232,7 +232,7 @@ def BatchReduce(filename, format, plotresults=False, saveAlgs={'SaveRKH':'txt'},
 
             # If we want to remove zero-errors, we map the original workspace to a cleaned workspace clone, 
             # else we map it to itself. 
-            save_names_dict = getMappedWorkspaces(save_names, save_as_zero_error_free)
+            save_names_dict = get_mapped_workspaces(save_names, save_as_zero_error_free)
 
             for algor in saveAlgs.keys():
                 for workspace_name in save_names:
@@ -369,7 +369,7 @@ def delete_workspaces(workspaces):
                 #we're only deleting to save memory, if the workspace really won't delete leave it
                 pass
 
-def getMappedWorkspaces(save_names, save_as_zero_error_free):
+def get_mapped_workspaces(save_names, save_as_zero_error_free):
     """
         Get a workspace name map, which maps from the original
         workspace to a zero-error-free cloned workspace if
@@ -393,6 +393,10 @@ def getMappedWorkspaces(save_names, save_as_zero_error_free):
     return workspace_dictionary
 
 def delete_cloned_workspaces(save_names_dict):
+    """
+        If there are cloned workspaces in the worksapce map, then they are deleted
+        @param save_names_dict: a workspace name map
+    """
     to_delete =[]
     for key in save_names_dict:
         if key != save_names_dict[key]:

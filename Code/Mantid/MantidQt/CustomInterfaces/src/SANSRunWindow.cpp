@@ -2467,6 +2467,9 @@ void SANSRunWindow::handleReduceButtonClick(const QString & typeStr)
 
     py_code += "combineDet=";
     py_code += combineDetOption;
+    py_code += ",";
+    py_code += "' save_as_zero_error_free=";
+    py_code += m_uiForm.zeroErrorCheckBox->isChecked() ? "True" : "False";
     py_code += ")";
   }
 

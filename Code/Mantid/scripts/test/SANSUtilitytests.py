@@ -303,7 +303,7 @@ class TestRemoveZeroErrorsFromWorkspace(unittest.TestCase):
         ws = mtd[ws_name]
 
         # Act and Assert
-        self.assertRaises(ValueError, su.removeZeroErrorsFromWorkspace, ws)
+        self.assertRaises(ValueError, su.remove_zero_errors_from_workspace, ws)
 
         self._removeWorkspace(ws_name)
         self.assertTrue(not ws_name in mtd)
@@ -322,7 +322,7 @@ class TestRemoveZeroErrorsFromWorkspace(unittest.TestCase):
         self.assertTrue(errors(2)[0] == 0.0)
         self.assertTrue(errors(3)[0] != 0.0)
 
-        su.removeZeroErrorsFromWorkspace(ws)
+        su.remove_zero_errors_from_workspace(ws)
 
         self.assertTrue(errors(0)[0] == su.ZERO_ERROR_DEFAULT)
         self.assertTrue(errors(1)[0] != 0.0)

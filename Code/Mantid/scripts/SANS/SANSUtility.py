@@ -626,7 +626,7 @@ def create_zero_error_free_workspace(input_workspace_name, output_workspace_name
 
     ws_out = mtd[output_workspace_name]
     try:
-        removeZeroErrorsFromWorkspace(ws_out)
+        remove_zero_errors_from_workspace(ws_out)
         complete = True
     except:
         DeleteWorkspace(Workspace=output_workspace_name)
@@ -634,7 +634,7 @@ def create_zero_error_free_workspace(input_workspace_name, output_workspace_name
 
     return message, complete
 
-def removeZeroErrorsFromWorkspace(ws):
+def remove_zero_errors_from_workspace(ws):
     '''
     Removes the zero errors from a Matrix workspace
     @param ws :: The input workspace
