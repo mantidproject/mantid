@@ -201,15 +201,16 @@ private:
   int addBatchLine(QString csv_line, QString separator = "");
   ///Save the batch file
   QString saveBatchGrid(const QString & filename = "");
+  /// Check that the workspace can have the zero errors removed
+  bool isValidWsForRemovingZeroErrors(const QString& originalWorkspaceName);
   //@}
- 
   public slots:
      /// apply mask
   void applyMask(const QString& wsName,bool time_pixel);
   /// Create a zero error free clone for the specified workspace
-  void createZeroErrorFreeClone(QString& originalWorkspaceName,QString& clonedWorkspaceName);
+  void createZeroErrorFreeClone(const QString& originalWorkspaceName, const QString& clonedWorkspaceName);
   /// Destroy a zero error free cloned workspace
-  void deleteZeroErrorFreeClone(QString& clonedWorkspaceName);
+  void deleteZeroErrorFreeClone(const QString& clonedWorkspaceName);
 
 
 private slots:

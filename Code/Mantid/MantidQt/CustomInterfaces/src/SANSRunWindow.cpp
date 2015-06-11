@@ -3859,13 +3859,14 @@ void SANSRunWindow::setValidators()
 }
 
 /**
- * Create a zero-error free workspace clone
+ * Create a zero-error free workspace clone of a reduced workspace, ie one which has been through either
+ * Q1D or Qxy
  * @param originalWorkspaceName :: The name of the original workspace which might contain errors with 0 value.
  * @param clonedWorkspaceName :: The name of cloned workspace which should have its zero erros removed.
  * @returns The name of the cloned workspace
  */
-void SANSRunWindow::createZeroErrorFreeClone(QString& originalWorkspaceName, QString& clonedWorkspaceName) {
-  if (workspaceExists(originalWorkspaceName)) {
+void SANSRunWindow::createZeroErrorFreeClone(const QString& originalWorkspaceName, const QString& clonedWorkspaceName) {
+  if (workspaceExists(originalWorkspaceName) && isValidWsForRemovingZeroErrors(originalWorkspaceName)) {
     // Run the python script which creates the cloned workspace
     QString pythonCode("print i.CreateZeroErrorFreeClonedWorkspace(input_workspace_name='");
     pythonCode += originalWorkspaceName + "',";
@@ -3873,7 +3874,6 @@ void SANSRunWindow::createZeroErrorFreeClone(QString& originalWorkspaceName, QSt
     pythonCode += "print '" + m_pythonSuccessKeyword + "'\n";
     QString result(runPythonCode(pythonCode, false));
     result.trimmed();
-
     if (result != m_pythonSuccessKeyword) {
       QMessageBox::critical(this, "Error creating a zerror error free cloned workspace", result);
     }
@@ -3884,7 +3884,7 @@ void SANSRunWindow::createZeroErrorFreeClone(QString& originalWorkspaceName, QSt
  * Destroy a zero-error free workspace clone.
  * @param clonedWorkspaceName :: The name of cloned workspace which should have its zero erros removed.
  */
-void SANSRunWindow::deleteZeroErrorFreeClone(QString& clonedWorkspaceName) {
+void SANSRunWindow::deleteZeroErrorFreeClone(const QString& clonedWorkspaceName) {
   if (workspaceExists(clonedWorkspaceName)) {
     // Run the python script which destroys the cloned workspace
     QString pythonCode("print i.DeleteZeroErrorFreeClonedWorkspace(input_workspace_name='");
@@ -3892,11 +3892,28 @@ void SANSRunWindow::deleteZeroErrorFreeClone(QString& clonedWorkspaceName) {
     pythonCode += "print '" + m_pythonSuccessKeyword + "'\n";
     QString result(runPythonCode(pythonCode, false));
     result.trimmed();
-
     if (result != m_pythonSuccessKeyword) {
       QMessageBox::critical(this, "Error deleting a zerror error free cloned workspace", result);
     }
   }
+}
+
+/**
+ * Check if the workspace can have a zero error correction performed on it
+ * @param wsName :: The name of the workspace.
+ */
+bool SANSRunWindow::isValidWsForRemovingZeroErrors(const QString& wsName) {
+    QString pythonCode("print i.IsValidWsForRemovingZeroErrors(input_workspace_name='");
+    pythonCode += wsName + "')";
+    pythonCode += "print '" + m_pythonSuccessKeyword + "'\n";
+    QString result(runPythonCode(pythonCode, false));
+    result.trimmed();
+    bool isValid = true;
+    if (result != m_pythonSuccessKeyword) {
+      QMessageBox::critical(this, "Not a valid workspace for zero error replacement.", result);
+      isValid = false;
+    }
+    return isValid;
 }
 
 

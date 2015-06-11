@@ -223,7 +223,7 @@ class TestLoadingAddedEventWorkspaceExtraction(unittest.TestCase):
         self.do_test_extraction(TEST_STRING_DATA, TEST_STRING_MON)
 
 
-class TestCreateZeroErrorFreeWorkspace(unittest.TestCase):
+class TestZeroErrorFreeWorkspace(unittest.TestCase):
     def _setup_workspace(self, name, type):
         ws = CreateSampleWorkspace(OutputWorkspace = name, WorkspaceType=type, Function='One Peak',NumBanks=1,BankPixelWidth=2,NumEvents=0,XMin=0.5,XMax=1,BinWidth=1,PixelSpacing=1,BankDistanceFromSample=1)
         if type == 'Histogram':
@@ -282,24 +282,11 @@ class TestCreateZeroErrorFreeWorkspace(unittest.TestCase):
         self.assertTrue(not ws_name in mtd)
         self.assertTrue(not ws_clone_name in mtd)
 
-class TestRemoveZeroErrorsFromWorkspace(unittest.TestCase):
-    def _setup_workspace(self, type,name):
-        ws = CreateSampleWorkspace(OutputWorkspace = name, WorkspaceType=type, Function='One Peak',NumBanks=1,BankPixelWidth=2,NumEvents=0,XMin=0.5,XMax=1,BinWidth=1,PixelSpacing=1,BankDistanceFromSample=1)
-        if type == 'Histogram':
-            errors = ws.dataE
-            # For first and third spectra set to 0.0
-            errors(0)[0] = 0.0
-            errors(2)[0] = 0.0
-
-    def _removeWorkspace(self, name):
-        if name in mtd:
-            mtd.remove(name)
-
     def test_throws_for_non_Workspace2D(self):
         # Arrange
         ws_name = 'test'
         type ='Event'
-        self._setup_workspace(type, ws_name)
+        self._setup_workspace(ws_name, type)
         ws = mtd[ws_name]
 
         # Act and Assert
@@ -312,7 +299,7 @@ class TestRemoveZeroErrorsFromWorkspace(unittest.TestCase):
         # Arrange
         ws_name = 'test'
         type ='Histogram'
-        self._setup_workspace(type, ws_name)
+        self._setup_workspace(ws_name, type)
         ws = mtd[ws_name]
 
         # Act and Assert
@@ -333,16 +320,6 @@ class TestRemoveZeroErrorsFromWorkspace(unittest.TestCase):
 
         self._removeWorkspace(ws_name)
         self.assertTrue(not ws_name in mtd)
-
-
-class TestDeleteZeroErrors(unittest.TestCase):
-    def _setup_workspace(self, name, type):
-        ws = CreateSampleWorkspace(OutputWorkspace = name, WorkspaceType=type, Function='One Peak',NumBanks=1,BankPixelWidth=2,NumEvents=0,XMin=0.5,XMax=1,BinWidth=1,PixelSpacing=1,BankDistanceFromSample=1)
-        if type == 'Histogram':
-            errors = ws.dataE
-            # For first and third spectra set to 0.0
-            errors(0)[0] = 0.0
-            errors(2)[0] = 0.0
 
     def test_that_deletion_of_non_existent_ws_creates_error_message(self):
         # Arrange
@@ -365,6 +342,21 @@ class TestDeleteZeroErrors(unittest.TestCase):
         self.assertTrue(not message)
         self.assertTrue(complete)
         self.assertTrue(not ws_name in mtd)
+
+    def test_non_Q1D_and_Qxy_history_is_not_valid_and_produces_error_message(self):
+        # Arrange
+        ws_name = 'ws'
+        self._setup_workspace(ws_name, 'Histogram')
+        # Act
+        message, complete = su.is_valid_ws_for_removing_zero_errors(input_workspace_name = ws_name)
+        # Assert
+        message.strip()
+        self.assertTrue(message)
+        self.assertTrue(not complete)
+
+        self._removeWorkspace(ws_name)
+        self.assertTrue(not ws_name in mtd)
+
 
 if __name__ == "__main__":
     unittest.main()

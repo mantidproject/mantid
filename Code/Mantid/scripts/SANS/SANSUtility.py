@@ -663,6 +663,33 @@ def delete_zero_error_free_workspace(input_workspace_name):
         message = 'Failed to delete a zero-error free workspace'
     return message, complete
 
+def is_valid_ws_for_removing_zero_errors(input_workspace_name):
+    '''
+    Check if a workspace has been created via Q1D or Qxy
+    @param ws :: The input workspace
+    '''
+    isValid = False
+    message = ""
+    ws = mtd[input_workspace_name]
+
+    try:
+        worksapceHistory= ws.getHistory()
+        histories = worksapceHistory.getAlgorithmHistories()
+        for history in histories:
+            name = history.name()
+            if name == 'Q1D' or name == 'Qxy':
+                isValid = True
+                break
+    except:
+        isValid = False
+        message = "Issue checking history of workspace for zero erro removal."
+
+    if not isValid:
+        message = "Workspace does not seem valid for zero erro removal. It must have been reduced with Q1D or Qxy."
+
+    return message, isValid
+
+
 ###############################################################################
 ######################### Start of Deprecated Code ############################
 ###############################################################################
