@@ -64,8 +64,10 @@ namespace MantidQt
             auto optOuterRadius = sphericalShape->backgroundOuterRadius();
             auto optInnerRadius = sphericalShape->backgroundInnerRadius();
 
+            GCC_DIAG_OFF(strict-aliasing)
             auto outerRadius = optOuterRadius.is_initialized() ? optOuterRadius.get() : radius;
             auto innerRadius = optInnerRadius.is_initialized() ? optInnerRadius.get() : radius;
+            GCC_DIAG_ON(strict-aliasing)
 
             physicalPeaks[i] = boost::make_shared<PhysicalSphericalPeak>(position, radius, innerRadius, outerRadius);
 
