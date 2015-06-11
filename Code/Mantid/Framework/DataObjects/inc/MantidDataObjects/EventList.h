@@ -5,7 +5,7 @@
 #include <time.h>
 #endif
 #include "MantidAPI/IEventList.h"
-#include "MantidAPI/IEventWorkspace.h" // get EventType declaration
+#include "MantidAPI/IEventWorkspace_fwd.h" // get EventType declaration
 #include "MantidAPI/MatrixWorkspace.h" // get MantidVec declaration
 #include "MantidDataObjects/Events.h"
 #include "MantidDataObjects/EventWorkspaceMRU.h"
