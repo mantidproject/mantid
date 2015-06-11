@@ -681,8 +681,8 @@ void LSFJobManager::uploadRemoteFile(const std::string &transactionID,
  *
  * @returns Application name (server specific, contact your
  * admin). This generic implementation ignores the inputs and always
- * returns the 'generic' app name. This will go in the in the
- * <AppName> parameter of the RESTful queries.
+ * returns the 'generic' app name which should be available in any LSF
+ * system. This will go in the <AppName> parameter of the RESTful queries.
  */
 std::string
 LSFJobManager::guessJobSubmissionAppName(const std::string &runnablePath,
