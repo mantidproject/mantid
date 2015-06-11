@@ -29,7 +29,7 @@ class ReflectionCheckingTest(stresstesting.MantidStressTest):
             self.assertDelta(float(currentPeak['d']), reference[1], 1e-4)
 
             fSquaredReference = reference[2] ** 2 * reference[3]
-            print fSquaredReference, float(currentPeak['Intensity'])
+            print reference[0], fSquaredReference, float(currentPeak['Intensity'])
             self.assertDelta(float(currentPeak['Intensity']) / fSquaredReference, 1.0, structureFactorPrecision)
 
 
@@ -42,7 +42,7 @@ class POLDICreatePeaksFromCellTestSiO2(ReflectionCheckingTest):
         1: ([1, 0, -1], 3.34393, 22.1494, 6),
         14: ([0, 0, 3], 1.80193, 8.70574, 2),
         40: ([2, 2, 0], 1.22857, 14.4884, 3),
-        117: ([4, -1, -4], 0.88902, 9.14321, 6)
+        115: ([4, -1, 4], 0.88902, 9.14321, 6)
     }
 
     def runTest(self):
@@ -92,7 +92,7 @@ class POLDICreatePeaksFromCellTestFeTiO3(ReflectionCheckingTest):
         0: ([0, 0, 3], 4.6970, 2.0748, 2),
         1: ([1, 0, 1], 4.20559, 1.60512, 6),
         3: ([1, 0, 4], 2.75153, 76.1855, 6),
-        107: ([5, -4, -6], 0.88986, 100.244, 6)
+        106: ([5, -4, 6], 0.88986, 100.244, 6)
     }
 
 
