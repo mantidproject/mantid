@@ -62,7 +62,7 @@ void ConvertCWSDExpToMomentum::init() {
                                       "base name without directory.");
 
   declareProperty(
-      new FileProperty("Directory", "", FileProperty::Directory),
+      new FileProperty("Directory", "", FileProperty::OptionalDirectory),
       "Directory where data files are if InputWorkspace gives data file name "
       "as the base file name as indicated by 'IsBaseName'.");
 }
