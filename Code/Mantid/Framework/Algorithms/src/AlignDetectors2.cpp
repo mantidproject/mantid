@@ -127,7 +127,7 @@ namespace { // anonymous namespace
             for (auto detId = detIds.begin(); detId != detIds.end(); ++detId) {
                 auto rowIter = m_detidToRow.find(*detId);
                 if (rowIter != m_detidToRow.end()) { // skip if not found
-                    rows.emplace(rowIter->second);
+                    rows.insert(rowIter->second);
                 }
             }
             return rows;
