@@ -4,6 +4,7 @@
 #include "MantidKernel/DateAndTime.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/ISpectrum.h"
+#include <functional>
 
 namespace Mantid {
 namespace API {
