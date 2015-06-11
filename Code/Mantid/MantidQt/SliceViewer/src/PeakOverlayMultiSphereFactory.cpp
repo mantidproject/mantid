@@ -1,5 +1,6 @@
 #include "MantidQtSliceViewer/PeakOverlayMultiSphereFactory.h"
 #include "MantidQtSliceViewer/PeakOverlayMultiSphere.h"
+#include "MantidAPI/IPeaksWorkspace.h"
 #include <boost/make_shared.hpp>
 
 using namespace Mantid::API;

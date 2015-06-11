@@ -6,6 +6,7 @@
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
+#include "MantidAPI/IPeaksWorkspace.h"
 #include <boost/make_shared.hpp>
 #include <boost/regex.hpp>
 

@@ -1,5 +1,6 @@
 #include "MantidQtAPI/SignalRange.h"
 #include "MantidAPI/IMDIterator.h"
+#include "MantidKernel/MultiThreaded.h"
 
 namespace MantidQt
 {

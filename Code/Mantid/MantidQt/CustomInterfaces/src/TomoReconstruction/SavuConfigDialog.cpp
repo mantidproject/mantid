@@ -1,6 +1,7 @@
 #include "MantidQtAPI/AlgorithmInputHistory.h"
 #include "MantidQtAPI/AlgorithmRunner.h"
 #include "MantidQtCustomInterfaces/TomoReconstruction/TomoReconstruction.h"
+#include "MantidAPI/ITableWorkspace.h"
 
 #include <boost/lexical_cast.hpp>
 
