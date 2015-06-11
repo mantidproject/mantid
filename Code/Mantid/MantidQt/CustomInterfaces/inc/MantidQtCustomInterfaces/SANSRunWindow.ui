@@ -839,8 +839,11 @@
              </item>
              <item row="4" column="0">
               <widget class="QCheckBox" name="zeroErrorCheckBox">
+               <property name="toolTip">
+                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Errors with a value of 0 will be inflated to have to a value of 10^6. Only reduced workspaces can have this method applied to them. &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+               </property>
                <property name="text">
-                <string>Remove 
+                <string>Inflate
 Zero Error</string>
                </property>
               </widget>

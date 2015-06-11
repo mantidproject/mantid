@@ -682,10 +682,10 @@ def is_valid_ws_for_removing_zero_errors(input_workspace_name):
                 break
     except:
         isValid = False
-        message = "Issue checking history of workspace for zero erro removal."
+        message = "Issue checking history of workspace for zero error removal."
 
     if not isValid:
-        message = "Workspace does not seem valid for zero erro removal. It must have been reduced with Q1D or Qxy."
+        message = "Workspace does not seem valid for zero error removal. It must have been reduced with Q1D or Qxy."
 
     return message, isValid
 

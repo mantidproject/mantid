@@ -1165,8 +1165,10 @@ def CreateZeroErrorFreeClonedWorkspace(input_workspace_name, output_workspace_na
         @return: success message
     """
     message, complete = su.create_zero_error_free_workspace(input_workspace_name = input_workspace_name, output_workspace_name = output_workspace_name)
-    print message
-    return message
+    if not complete:
+        return message
+    else:
+        return ""
 
 
 def DeleteZeroErrorFreeClonedWorkspace(input_workspace_name):
@@ -1176,8 +1178,11 @@ def DeleteZeroErrorFreeClonedWorkspace(input_workspace_name):
         @return: success message
     """
     message, complete = su.delete_zero_error_free_workspace(input_workspace_name = input_workspace_name)
-    print message
-    return message
+    if not complete:
+        return message
+    else:
+        return ""
+
 
 def IsValidWsForRemovingZeroErrors(input_workspace_name):
     """
@@ -1186,9 +1191,11 @@ def IsValidWsForRemovingZeroErrors(input_workspace_name):
         @param input_workspace_name :  name of the input workspace
         @return: success message
     """
-    message, complete = su.is_valid_ws_for_removing_zero_errors(input_workspace_name = input_workspace_name)
-    print message
-    return message
+    message, valid = su.is_valid_ws_for_removing_zero_errors(input_workspace_name = input_workspace_name)
+    if not valid:
+        return message
+    else:
+        return ""
 
 ###############################################################################
 ######################### Start of Deprecated Code ############################
