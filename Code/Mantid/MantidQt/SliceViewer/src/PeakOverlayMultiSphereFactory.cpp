@@ -50,6 +50,7 @@ namespace MantidQt
       }
     }
 
+    GCC_DIAG_OFF(strict-aliasing)
     boost::shared_ptr<PeakOverlayView> PeakOverlayMultiSphereFactory::createView(PeaksPresenter* const presenter, Mantid::Geometry::PeakTransform_const_sptr transform) const
     {
       // Construct all physical peaks
@@ -64,10 +65,10 @@ namespace MantidQt
             auto optOuterRadius = sphericalShape->backgroundOuterRadius();
             auto optInnerRadius = sphericalShape->backgroundInnerRadius();
 
-            GCC_DIAG_OFF(strict-aliasing)
+
             auto outerRadius = optOuterRadius.is_initialized() ? optOuterRadius.get() : radius;
             auto innerRadius = optInnerRadius.is_initialized() ? optInnerRadius.get() : radius;
-            GCC_DIAG_ON(strict-aliasing)
+
 
             physicalPeaks[i] = boost::make_shared<PhysicalSphericalPeak>(position, radius, innerRadius, outerRadius);
 
@@ -82,6 +83,7 @@ namespace MantidQt
       // Make the overlay widget.
       return boost::make_shared<PeakOverlayMultiSphere>(presenter, m_plot, m_parent, physicalPeaks, m_plotXIndex, m_plotYIndex, this->m_peakColour, this->m_backColour);
     }
+    GCC_DIAG_ON(strict-aliasing)
 
     PeakOverlayMultiSphereFactory::~PeakOverlayMultiSphereFactory()
     {
