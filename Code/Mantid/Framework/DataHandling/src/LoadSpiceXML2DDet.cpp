@@ -265,15 +265,32 @@ void LoadSpiceXML2DDet::exec() {
   if (spicetablewsname.size() > 0) {
     setupSampleLogFromSpiceTable(outws, spicetablews, ptnumber);
   }
+  else
+  {
+    // Set up 2theta from _2theta
+    if (outws->run().hasProperty("_2theta"))
+    {
+      Kernel::DateAndTime anytime(1000);
+      double logvalue = atof(outws->run().getProperty("_2theta")->value().c_str());
+      g_log.information() << "Set 2theta from _2theta with value " << logvalue
+                          << "\n";
+      TimeSeriesProperty<double> *newlogproperty =
+          new TimeSeriesProperty<double>("2theta");
+      newlogproperty->addValue(anytime, logvalue);
+      outws->mutableRun().addProperty(newlogproperty);
+    }
+    else
+    {
+      g_log.warning("No 2theta is set up for loading instrument.");
+    }
+  }
 
   if (loadinstrument) {
     loadInstrument(outws, idffilename);
-    if (spicetablewsname.size() > 0) {
-      double wavelength;
-      bool has_wavelength = getHB3AWavelength(outws, wavelength);
-      if (has_wavelength) {
-        setXtoLabQ(outws, wavelength);
-      }
+    double wavelength;
+    bool has_wavelength = getHB3AWavelength(outws, wavelength);
+    if (has_wavelength) {
+      setXtoLabQ(outws, wavelength);
     }
   }
 
@@ -562,15 +579,27 @@ void LoadSpiceXML2DDet::setupSampleLogFromSpiceTable(
   return;
 }
 
+//----------------------------------------------------------------------------------------------
+/** Get wavelength if the instrument is HB3A
+ * @brief LoadSpiceXML2DDet::getHB3AWavelength
+ * @param dataws
+ * @param wavelength
+ * @return
+ */
 bool LoadSpiceXML2DDet::getHB3AWavelength(MatrixWorkspace_sptr dataws,
                                           double &wavelength) {
   bool haswavelength(false);
   wavelength = -1;
 
+  // FIXME - Now it only search for _m1.  In future,
+  //         it is better to searc both m1 and _m1
+
   if (dataws->run().hasProperty("_m1")) {
+    g_log.notice("[DB] Data workspace has property _m1!");
     Kernel::TimeSeriesProperty<double> *ts =
         dynamic_cast<Kernel::TimeSeriesProperty<double> *>(
             dataws->run().getProperty("_m1"));
+
     if (ts && ts->size() > 0) {
       double m1pos = ts->valuesAsVector()[0];
       if (fabs(m1pos - (-25.870000)) < 0.2) {
@@ -613,20 +642,9 @@ bool LoadSpiceXML2DDet::getHB3AWavelength(MatrixWorkspace_sptr dataws,
 
 void LoadSpiceXML2DDet::setXtoLabQ(API::MatrixWorkspace_sptr dataws,
                                    const double &wavelength) {
-  // Geometry information
-  // Kernel::V3D sourcepos = dataws->getInstrument()->getSource()->getPos();
-  // Kernel::V3D samplepos = dataws->getInstrument()->getSample()->getPos();
-  // Kernel::V3D sample_source_vector = sourcepos - samplepos;
 
   size_t numspec = dataws->getNumberHistograms();
   for (size_t iws = 0; iws < numspec; ++iws) {
-    /*
-    Kernel::V3D detpos = dataws->getDetector(iws)->getPos();
-    Kernel::V3D detpos_sample_vector = detpos - samplepos;
-    double scattering_rad = detpos_sample_vector.angle(sample_source_vector);
-    */
-
-    // double ki = 4*sin(scattering_rad*0.5)*M_PI/wavelength;
     double ki = 2. * M_PI / wavelength;
     dataws->dataX(iws)[0] = ki;
     dataws->dataX(iws)[1] = ki + 0.00001;
