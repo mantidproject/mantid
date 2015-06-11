@@ -39,6 +39,25 @@ TimeSeriesProperty<TYPE> *TimeSeriesProperty<TYPE>::clone() const {
 }
 
 /**
+ * "Virutal copy constructor with a time shift
+ * @param timeShift :: a time shift in seconds
+ */
+template <typename TYPE>
+Property *
+TimeSeriesProperty<TYPE>::cloneWithTimeShift(const double timeShift) const {
+  auto timeSeriesProperty = this->clone();
+  auto values = timeSeriesProperty->valuesAsVector();
+  auto times = timeSeriesProperty->timesAsVector();
+  // Shift the time
+  for (auto it = times.begin(); it != times.end(); ++it) {
+    (*it) += timeShift;
+  }
+  timeSeriesProperty->clear();
+  timeSeriesProperty->addValues(times, values);
+  return timeSeriesProperty;
+}
+
+/**
  * Return the memory used by the property, in bytes
  * */
 template <typename TYPE>
@@ -207,7 +226,7 @@ void TimeSeriesProperty<TYPE>::filterByTime(const Kernel::DateAndTime &start,
 
   // 2. Determine index for start and remove  Note erase is [...)
   int istart = this->findIndex(start);
-  if (istart >= 0) {
+  if (istart >= 0 && static_cast<size_t>(istart) < m_values.size()) {
     // "start time" is behind time-series's starting time
     iterhead = m_values.begin() + istart;
 
@@ -229,7 +248,7 @@ void TimeSeriesProperty<TYPE>::filterByTime(const Kernel::DateAndTime &start,
       m_values[0].setTime(start);
     }
   } else {
-    // "start time" is before time-series's starting time: do nothing
+    // "start time" is before/after time-series's starting time: do nothing
     ;
   }
 
@@ -347,9 +366,9 @@ void TimeSeriesProperty<TYPE>::filterByTimes(
  *type.
  */
 template <typename TYPE>
-void
-TimeSeriesProperty<TYPE>::splitByTime(std::vector<SplittingInterval> &splitter,
-                                      std::vector<Property *> outputs) const {
+void TimeSeriesProperty<TYPE>::splitByTime(
+    std::vector<SplittingInterval> &splitter,
+    std::vector<Property *> outputs) const {
   // 0. Sort if necessary
   sort();
 
@@ -1485,8 +1504,8 @@ Kernel::DateAndTime TimeSeriesProperty<TYPE>::nthTime(int n) const {
    @param filter :: The filter mask to apply
  */
 template <typename TYPE>
-void
-TimeSeriesProperty<TYPE>::filterWith(const TimeSeriesProperty<bool> *filter) {
+void TimeSeriesProperty<TYPE>::filterWith(
+    const TimeSeriesProperty<bool> *filter) {
   // 1. Clear the current
   m_filter.clear();
   m_filterQuickRef.clear();

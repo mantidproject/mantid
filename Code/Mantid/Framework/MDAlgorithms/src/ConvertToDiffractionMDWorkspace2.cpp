@@ -204,7 +204,7 @@ void ConvertToDiffractionMDWorkspace2::exec() {
   }
   Convert->setPropertyValue("QDimensions", "Q3D");
 
-  std::vector<std::string> dE_modes = Kernel::DeltaEMode().availableTypes();
+  std::vector<std::string> dE_modes = Kernel::DeltaEMode::availableTypes();
   Convert->setPropertyValue("dEAnalysisMode",
                             dE_modes[Kernel::DeltaEMode::Elastic]);
 

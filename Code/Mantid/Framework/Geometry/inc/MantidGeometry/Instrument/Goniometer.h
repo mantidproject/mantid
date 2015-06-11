@@ -61,7 +61,8 @@ struct GoniometerAxis {
                  double initangle, int initsense, int initangleunit)
       : name(initname), rotationaxis(initrotationaxis), angle(initangle),
         sense(initsense), angleunit(initangleunit) {}
-  GoniometerAxis() : name("") {}
+  GoniometerAxis()
+      : name(""), rotationaxis(), angle(0.), sense(0), angleunit(0) {}
 
   void saveNexus(::NeXus::File *file, const std::string &group) const;
   void loadNexus(::NeXus::File *file, const std::string &group);

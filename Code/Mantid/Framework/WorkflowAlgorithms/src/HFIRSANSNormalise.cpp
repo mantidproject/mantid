@@ -40,10 +40,7 @@ void HFIRSANSNormalise::exec() {
 
   // Get the monitor or timer
   boost::algorithm::to_lower(normalisation);
-  Mantid::Kernel::Property *prop = inputWS->run().getProperty(normalisation);
-  Mantid::Kernel::PropertyWithValue<double> *dp =
-      dynamic_cast<Mantid::Kernel::PropertyWithValue<double> *>(prop);
-  double norm_count = *dp;
+  double norm_count = inputWS->run().getPropertyValueAsType<double>(normalisation);
 
   double factor;
   if (boost::iequals(normalisation, "monitor")) {

@@ -5,6 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidKernel/DataItem.h"
+#include "MantidAPI/Workspace_fwd.h"
 #include "MantidAPI/WorkspaceHistory.h"
 #include "MantidAPI/DllConfig.h"
 #include "MantidKernel/Exception.h"
@@ -97,11 +98,6 @@ private:
 
   friend class AnalysisDataServiceImpl;
 };
-
-/// shared pointer to the workspace base class
-typedef boost::shared_ptr<Workspace> Workspace_sptr;
-/// shared pointer to the workspace base class (const version)
-typedef boost::shared_ptr<const Workspace> Workspace_const_sptr;
 
 } // namespace API
 } // namespace Mantid

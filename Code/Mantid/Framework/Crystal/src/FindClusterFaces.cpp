@@ -7,13 +7,14 @@
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/IMDIterator.h"
 #include "MantidAPI/IPeaksWorkspace.h"
-#include "MantidAPI/IPeak.h"
+#include "MantidGeometry/Crystal/IPeak.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/TableRow.h"
 
 #include "MantidCrystal/PeakClusterProjection.h"
 
 using namespace Mantid::Kernel;
+using namespace Mantid::Geometry;
 using namespace Mantid::API;
 
 namespace {
@@ -48,7 +49,7 @@ createOptionalLabelFilter(size_t dimensionality, int emptyLabelId,
     PeakClusterProjection projection(clusterImage);
 
     for (int i = 0; i < filterWorkspace->getNumberPeaks(); ++i) {
-      IPeak &peak = filterWorkspace->getPeak(i);
+      Mantid::Geometry::IPeak &peak = filterWorkspace->getPeak(i);
       const int labelIdAtPeakCenter =
           static_cast<int>(projection.signalAtPeakCenter(peak));
       if (labelIdAtPeakCenter > emptyLabelId) {

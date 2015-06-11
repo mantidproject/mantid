@@ -45,7 +45,8 @@ public:
   /// Default constructor
   BoundaryConstraint()
       : API::IConstraint(), m_penaltyFactor(1000.0), m_parameterName(""),
-        m_hasLowerBound(false), m_hasUpperBound(false) {}
+        m_hasLowerBound(false), m_hasUpperBound(false), m_lowerBound(DBL_MAX),
+        m_upperBound(-DBL_MAX) {}
 
   /// Constructor with no boundary arguments
   BoundaryConstraint(const std::string &paramName)

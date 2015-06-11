@@ -37,6 +37,7 @@ namespace IDA
     m_uiForm.setupUi(parent);
   }
 
+
   void ConvFit::setup()
   {
     // Create Property Managers
@@ -66,6 +67,13 @@ namespace IDA
     m_cfTree->addProperty(m_properties["Convolve"]);
     m_blnManager->setValue(m_properties["Convolve"], true);
 
+    // Max iterations option
+    m_properties["MaxIterations"] = m_dblManager->addProperty("Max Iterations");
+    m_dblManager->setDecimals(m_properties["MaxIterations"], 0);
+    m_dblManager->setValue(m_properties["MaxIterations"], 500);
+    m_cfTree->addProperty(m_properties["MaxIterations"]);
+
+    // Fitting range
     m_properties["FitRange"] = m_grpManager->addProperty("Fitting Range");
     m_properties["StartX"] = m_dblManager->addProperty("StartX");
     m_dblManager->setDecimals(m_properties["StartX"], NUM_DECIMALS);
@@ -75,6 +83,21 @@ namespace IDA
     m_properties["FitRange"]->addSubProperty(m_properties["EndX"]);
     m_cfTree->addProperty(m_properties["FitRange"]);
 
+    // FABADA
+    m_properties["FABADA"] = m_grpManager->addProperty("Bayesian");
+    m_properties["UseFABADA"] = m_blnManager->addProperty("Use FABADA");
+    m_properties["FABADA"]->addSubProperty(m_properties["UseFABADA"]);
+    m_properties["OutputFABADAChain"] = m_blnManager->addProperty("Output Chain");
+    m_properties["FABADAChainLength"] = m_dblManager->addProperty("Chain Length");
+    m_dblManager->setDecimals(m_properties["FABADAChainLength"], 0);
+    m_dblManager->setValue(m_properties["FABADAChainLength"], 10000);
+    m_properties["FABADAConvergenceCriteria"] = m_dblManager->addProperty("Convergence Criteria");
+    m_dblManager->setValue(m_properties["FABADAConvergenceCriteria"], 0.1);
+    m_properties["FABADAJumpAcceptanceRate"] = m_dblManager->addProperty("Acceptance Rate");
+    m_dblManager->setValue(m_properties["FABADAJumpAcceptanceRate"], 0.25);
+    m_cfTree->addProperty(m_properties["FABADA"]);
+
+    // Background type
     m_properties["LinearBackground"] = m_grpManager->addProperty("Background");
     m_properties["BGA0"] = m_dblManager->addProperty("A0");
     m_dblManager->setDecimals(m_properties["BGA0"], NUM_DECIMALS);
@@ -92,6 +115,7 @@ namespace IDA
     m_properties["DeltaFunction"]->addSubProperty(m_properties["UseDeltaFunc"]);
     m_cfTree->addProperty(m_properties["DeltaFunction"]);
 
+    // Fit functions
     m_properties["Lorentzian1"] = createLorentzian("Lorentzian 1");
     m_properties["Lorentzian2"] = createLorentzian("Lorentzian 2");
     m_properties["DiffSphere"] = createDiffSphere("Diffusion Sphere");
@@ -148,6 +172,7 @@ namespace IDA
     updatePlotOptions();
   }
 
+
   void ConvFit::run()
   {
     if ( m_cfInputWS == NULL )
@@ -173,6 +198,7 @@ namespace IDA
     QString enX = m_properties["EndX"]->valueText();
     QString specMin = m_uiForm.spSpectraMin->text();
     QString specMax = m_uiForm.spSpectraMax->text();
+    int maxIterations = static_cast<int>(m_dblManager->value(m_properties["MaxIterations"]));
 
     QString pyInput =
       "from IndirectDataAnalysis import confitSeq\n"
@@ -184,6 +210,8 @@ namespace IDA
       "ties = " + ties + "\n"
       "specMin = " + specMin + "\n"
       "specMax = " + specMax + "\n"
+      "max_iterations = " + QString::number(maxIterations) + "\n"
+      "minimizer = '" + minimizerString("$outputname_$wsindex") + "'\n"
       "save = " + (m_uiForm.ckSave->isChecked() ? "True\n" : "False\n");
 
     if ( m_blnManager->value(m_properties["Convolve"]) ) pyInput += "convolve = True\n";
@@ -203,7 +231,7 @@ namespace IDA
     pyInput +=
       "bg = '" + bgType + "'\n"
       "ftype = '" + fitType + "'\n"
-      "confitSeq(input, func, startx, endx, ftype, bg, temp, specMin, specMax, convolve, Plot=plot, Save=save)\n";
+      "confitSeq(input, func, startx, endx, ftype, bg, temp, specMin, specMax, convolve, max_iterations=max_iterations, minimizer=minimizer, Plot=plot, Save=save)\n";
 
     QString pyOutput = runPythonCode(pyInput);
 
@@ -214,6 +242,7 @@ namespace IDA
 
     updatePlot();
   }
+
 
   /**
    * Validates the user's inputs in the ConvFit tab.
@@ -273,6 +302,7 @@ namespace IDA
     updatePlot();
   }
 
+
   /**
    * Create a resolution workspace with the same number of histograms as in the sample.
    *
@@ -311,6 +341,7 @@ namespace IDA
     }
   }
 
+
   namespace
   {
     ////////////////////////////
@@ -333,6 +364,7 @@ namespace IDA
       return prefix.str();
     }
 
+
     /**
      * Takes an index, a sub index and a name, and constructs a double level
      * (nested) parameter name for use with function ties, etc.
@@ -350,6 +382,7 @@ namespace IDA
       return prefix.str();
     }
   }
+
 
   /**
    * Creates a function to carry out the fitting in the "ConvFit" tab.  The function consists
@@ -562,6 +595,7 @@ namespace IDA
     return comp;
   }
 
+
   void ConvFit::createTemperatureCorrection(CompositeFunction_sptr product)
   {
     //create temperature correction function to multiply with the lorentzians
@@ -581,6 +615,7 @@ namespace IDA
     product->tie("f0.Temp", temperature.toStdString());
     product->applyTies();
   }
+
 
   double ConvFit::getInstrumentResolution(std::string workspaceName)
   {
@@ -634,6 +669,7 @@ namespace IDA
     return resolution;
   }
 
+
   QtProperty* ConvFit::createLorentzian(const QString & name)
   {
     QtProperty* lorentzGroup = m_grpManager->addProperty(name);
@@ -654,6 +690,7 @@ namespace IDA
 
     return lorentzGroup;
   }
+
 
   QtProperty* ConvFit::createDiffSphere(const QString & name)
   {
@@ -676,6 +713,7 @@ namespace IDA
 
     return diffSphereGroup;
   }
+
 
   QtProperty* ConvFit::createDiffRotDiscreteCircle(const QString & name)
   {
@@ -704,6 +742,7 @@ namespace IDA
     return diffRotDiscreteCircleGroup;
   }
 
+
   void ConvFit::populateFunction(IFunction_sptr func, IFunction_sptr comp, QtProperty* group, const std::string & pref, bool tie)
   {
     // Get subproperties of group and apply them as parameters on the function object
@@ -731,6 +770,7 @@ namespace IDA
       }
     }
   }
+
 
   /**
    * Generate a string to describe the fit type selected by the user.
@@ -765,6 +805,7 @@ namespace IDA
     return fitType;
   }
 
+
   /**
    * Generate a string to describe the background selected by the user.
    * Used when naming the resultant workspaces.
@@ -788,6 +829,40 @@ namespace IDA
         return "";
     }
   }
+
+
+  /**
+   * Generates a string that defines the fitting minimizer based on the user
+   * options.
+   *
+   * @return Minimizer as a string
+   */
+  QString ConvFit::minimizerString(QString outputName) const
+  {
+    QString minimizer = "Levenberg-Marquardt";
+
+    if(m_blnManager->value(m_properties["UseFABADA"]))
+    {
+      minimizer = "FABADA";
+
+      int chainLength = static_cast<int>(m_dblManager->value(m_properties["FABADAChainLength"]));
+      minimizer += ",ChainLength=" + QString::number(chainLength);
+
+      double convergenceCriteria = m_dblManager->value(m_properties["FABADAConvergenceCriteria"]);
+      minimizer += ",ConvergenceCriteria=" + QString::number(convergenceCriteria);
+
+      double jumpAcceptanceRate = m_dblManager->value(m_properties["FABADAJumpAcceptanceRate"]);
+      minimizer += ",JumpAcceptanceRate=" + QString::number(jumpAcceptanceRate);
+
+      minimizer += ",PDF=" + outputName + "_PDF";
+
+      if(m_blnManager->value(m_properties["OutputFABADAChain"]))
+        minimizer += ",Chains=" + outputName + "_Chain";
+    }
+
+    return minimizer;
+  }
+
 
   void ConvFit::typeSelection(int index)
   {
@@ -833,6 +908,7 @@ namespace IDA
     updatePlotOptions();
   }
 
+
   void ConvFit::bgTypeSelection(int index)
   {
     if ( index == 2 )
@@ -844,6 +920,7 @@ namespace IDA
       m_properties["LinearBackground"]->removeSubProperty(m_properties["BGA1"]);
     }
   }
+
 
   void ConvFit::updatePlot()
   {
@@ -894,6 +971,7 @@ namespace IDA
         m_uiForm.ppPlot->addSpectrum("Fit", ws, 1, Qt::red);
     }
   }
+
 
   void ConvFit::plotGuess()
   {
@@ -958,6 +1036,7 @@ namespace IDA
     m_uiForm.ppPlot->addSpectrum("Guess", guessWs, 0, Qt::green);
   }
 
+
   void ConvFit::singleFit()
   {
     if(!validate())
@@ -978,24 +1057,42 @@ namespace IDA
       g_log.error("No fit type defined!");
     }
 
-    QString outputNm = runPythonCode(QString("from IndirectCommon import getWSprefix\nprint getWSprefix('") + m_cfInputWSName + QString("')\n")).trimmed();
-    outputNm += QString("conv_") + fitType + bgType + m_uiForm.spPlotSpectrum->text();
-    std::string output = outputNm.toStdString();
+    m_singleFitOutputName = runPythonCode(QString("from IndirectCommon import getWSprefix\nprint getWSprefix('") + m_cfInputWSName + QString("')\n")).trimmed();
+    m_singleFitOutputName += QString("conv_") + fitType + bgType + m_uiForm.spPlotSpectrum->text();
+    int maxIterations = static_cast<int>(m_dblManager->value(m_properties["MaxIterations"]));
 
-    IAlgorithm_sptr alg = AlgorithmManager::Instance().create("Fit");
-    alg->initialize();
-    alg->setPropertyValue("Function", function->asString());
-    alg->setPropertyValue("InputWorkspace", m_cfInputWSName.toStdString());
-    alg->setProperty<int>("WorkspaceIndex", m_uiForm.spPlotSpectrum->text().toInt());
-    alg->setProperty<double>("StartX", m_dblManager->value(m_properties["StartX"]));
-    alg->setProperty<double>("EndX", m_dblManager->value(m_properties["EndX"]));
-    alg->setProperty("Output", output);
-    alg->setProperty("CreateOutput", true);
-    alg->setProperty("OutputCompositeMembers", true);
-    alg->setProperty("ConvolveMembers", true);
-    alg->execute();
+    m_singleFitAlg = AlgorithmManager::Instance().create("Fit");
+    m_singleFitAlg->initialize();
+    m_singleFitAlg->setPropertyValue("Function", function->asString());
+    m_singleFitAlg->setPropertyValue("InputWorkspace", m_cfInputWSName.toStdString());
+    m_singleFitAlg->setProperty<int>("WorkspaceIndex", m_uiForm.spPlotSpectrum->text().toInt());
+    m_singleFitAlg->setProperty<double>("StartX", m_dblManager->value(m_properties["StartX"]));
+    m_singleFitAlg->setProperty<double>("EndX", m_dblManager->value(m_properties["EndX"]));
+    m_singleFitAlg->setProperty("Output", m_singleFitOutputName.toStdString());
+    m_singleFitAlg->setProperty("CreateOutput", true);
+    m_singleFitAlg->setProperty("OutputCompositeMembers", true);
+    m_singleFitAlg->setProperty("ConvolveMembers", true);
+    m_singleFitAlg->setProperty("MaxIterations", maxIterations);
+    m_singleFitAlg->setProperty("Minimizer", minimizerString(m_singleFitOutputName).toStdString());
 
-    if ( ! alg->isExecuted() )
+    m_batchAlgoRunner->addAlgorithm(m_singleFitAlg);
+    connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)),
+            this, SLOT(singleFitComplete(bool)));
+    m_batchAlgoRunner->executeBatchAsync();
+  }
+
+
+  /**
+   * Handle completion of the fit algorithm for single fit.
+   *
+   * @param error If the fit algorithm failed
+   */
+  void ConvFit::singleFitComplete(bool error)
+  {
+    disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)),
+               this, SLOT(singleFitComplete(bool)));
+
+    if(error)
     {
       showMessageBox("Fit algorithm failed.");
       return;
@@ -1003,9 +1100,9 @@ namespace IDA
 
     // Plot the line on the mini plot
     m_uiForm.ppPlot->removeSpectrum("Guess");
-    m_uiForm.ppPlot->addSpectrum("Fit", outputNm+"_Workspace", 1, Qt::red);
+    m_uiForm.ppPlot->addSpectrum("Fit", m_singleFitOutputName+"_Workspace", 1, Qt::red);
 
-    IFunction_sptr outputFunc = alg->getProperty("Function");
+    IFunction_sptr outputFunc = m_singleFitAlg->getProperty("Function");
 
     // Get params.
     QMap<QString,double> parameters;
@@ -1130,6 +1227,7 @@ namespace IDA
     m_pythonExportWsName = "";
   }
 
+
   /**
    * Handles the user entering a new minimum spectrum index.
    *
@@ -1141,6 +1239,7 @@ namespace IDA
   {
     m_uiForm.spSpectraMax->setMinimum(value);
   }
+
 
   /**
    * Handles the user entering a new maximum spectrum index.
@@ -1154,15 +1253,18 @@ namespace IDA
     m_uiForm.spSpectraMin->setMaximum(value);
   }
 
+
   void ConvFit::minChanged(double val)
   {
     m_dblManager->setValue(m_properties["StartX"], val);
   }
 
+
   void ConvFit::maxChanged(double val)
   {
     m_dblManager->setValue(m_properties["EndX"], val);
   }
+
 
   void ConvFit::hwhmChanged(double val)
   {
@@ -1176,10 +1278,12 @@ namespace IDA
     hwhmRangeSelector->blockSignals(false);
   }
 
+
   void ConvFit::backgLevel(double val)
   {
     m_dblManager->setValue(m_properties["BGA0"], val);
   }
+
 
   void ConvFit::updateRS(QtProperty* prop, double val)
   {
@@ -1196,6 +1300,7 @@ namespace IDA
     }
   }
 
+
   void ConvFit::hwhmUpdateRS(double val)
   {
     const double peakCentre = m_dblManager->value(m_properties["Lorentzian 1.PeakCentre"]);
@@ -1204,13 +1309,37 @@ namespace IDA
     hwhmRangeSelector->setMaximum(peakCentre+val/2);
   }
 
+
   void ConvFit::checkBoxUpdate(QtProperty* prop, bool checked)
   {
     UNUSED_ARG(checked);
 
     if(prop == m_properties["UseDeltaFunc"])
       updatePlotOptions();
+    else if(prop == m_properties["UseFABADA"])
+    {
+      if(checked)
+      {
+        // FABADA needs a much higher iteration limit
+        m_dblManager->setValue(m_properties["MaxIterations"], 20000);
+
+        m_properties["FABADA"]->addSubProperty(m_properties["OutputFABADAChain"]);
+        m_properties["FABADA"]->addSubProperty(m_properties["FABADAChainLength"]);
+        m_properties["FABADA"]->addSubProperty(m_properties["FABADAConvergenceCriteria"]);
+        m_properties["FABADA"]->addSubProperty(m_properties["FABADAJumpAcceptanceRate"]);
+      }
+      else
+      {
+        m_dblManager->setValue(m_properties["MaxIterations"], 500);
+
+        m_properties["FABADA"]->removeSubProperty(m_properties["OutputFABADAChain"]);
+        m_properties["FABADA"]->removeSubProperty(m_properties["FABADAChainLength"]);
+        m_properties["FABADA"]->removeSubProperty(m_properties["FABADAConvergenceCriteria"]);
+        m_properties["FABADA"]->removeSubProperty(m_properties["FABADAJumpAcceptanceRate"]);
+      }
+    }
   }
+
 
   void ConvFit::fitContextMenu(const QPoint &)
   {
@@ -1254,6 +1383,7 @@ namespace IDA
     menu->popup(QCursor::pos());
   }
 
+
   void ConvFit::fixItem()
   {
     QtBrowserItem* item = m_cfTree->currentItem();
@@ -1271,6 +1401,7 @@ namespace IDA
 
     item->parent()->property()->removeSubProperty(prop);
   }
+
 
   void ConvFit::unFixItem()
   {
@@ -1291,10 +1422,12 @@ namespace IDA
     delete prop;
   }
 
+
   void ConvFit::showTieCheckbox(QString fitType)
   {
     m_uiForm.ckTieCentres->setVisible( fitType == "Two Lorentzians" );
   }
+
 
   void ConvFit::updatePlotOptions()
   {

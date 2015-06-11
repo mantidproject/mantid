@@ -1,10 +1,14 @@
+#pylint: disable=no-init,too-many-locals,too-many-instance-attributes
+
 from mantid.simpleapi import *
-from mantid.api import PythonAlgorithm, AlgorithmFactory, PropertyMode, MatrixWorkspaceProperty, \
-                       WorkspaceGroupProperty, InstrumentValidator, WorkspaceUnitValidator
-from mantid.kernel import StringListValidator, StringMandatoryValidator, IntBoundedValidator, \
-                          FloatBoundedValidator, Direction, logger, CompositeValidator
+from mantid.api import (PythonAlgorithm, AlgorithmFactory, PropertyMode, MatrixWorkspaceProperty,
+                        WorkspaceGroupProperty, InstrumentValidator, WorkspaceUnitValidator)
+from mantid.kernel import (StringListValidator, StringMandatoryValidator,
+                           FloatBoundedValidator, Direction, logger, CompositeValidator)
 from mantid import config
-import math, os.path, numpy as np
+
+import math
+import numpy as np
 
 
 class CylinderPaalmanPingsCorrection(PythonAlgorithm):
@@ -24,15 +28,23 @@ class CylinderPaalmanPingsCorrection(PythonAlgorithm):
     _emode = None
     _efixed = 0.0
     _output_ws_name = None
+    _use_can = None
+    _beam_height = None
+    _beam_width = None
+    _interpolate = None
+    _angles = None
+    _waves = None
+    _elastic = None
 
+#------------------------------------------------------------------------------
 
     def category(self):
         return "Workflow\\MIDAS;PythonAlgorithms;CorrectionFunctions\\AbsorptionCorrections"
 
-
     def summary(self):
         return "Calculates absorption corrections for a cylindrical or annular sample using Paalman & Pings format."
 
+#------------------------------------------------------------------------------
 
     def PyInit(self):
         ws_validator = CompositeValidator([WorkspaceUnitValidator('Wavelength'), InstrumentValidator()])
@@ -67,14 +79,13 @@ class CylinderPaalmanPingsCorrection(PythonAlgorithm):
         self.declareProperty(name='CanOuterRadius', defaultValue=0.15,
                              doc='Can outer radius')
 
-        self.declareProperty(name='BeamHeight', defaultValue=0.1,
+        self.declareProperty(name='BeamHeight', defaultValue=3.0,
                              doc='Height of the beam at the sample.')
-        self.declareProperty(name='BeamWidth', defaultValue=0.1,
+        self.declareProperty(name='BeamWidth', defaultValue=2.0,
                              doc='Width of the beam at the sample.')
 
         self.declareProperty(name='StepSize', defaultValue=0.002,
                              doc='Step size for calculation')
-
         self.declareProperty(name='Interpolate', defaultValue=True,
                              doc='Interpolate the correction workspaces to match the sample workspace')
 
@@ -88,6 +99,7 @@ class CylinderPaalmanPingsCorrection(PythonAlgorithm):
                              direction=Direction.Output),
                              doc='The output corrections workspace group')
 
+#------------------------------------------------------------------------------
 
     def PyExec(self):
 
@@ -211,6 +223,7 @@ class CylinderPaalmanPingsCorrection(PythonAlgorithm):
         GroupWorkspaces(InputWorkspaces=','.join(workspaces), OutputWorkspace=self._output_ws_name)
         self.setPropertyValue('OutputWorkspace', self._output_ws_name)
 
+#------------------------------------------------------------------------------
 
     def validateInputs(self):
         self._setup()
@@ -229,6 +242,7 @@ class CylinderPaalmanPingsCorrection(PythonAlgorithm):
 
         return issues
 
+#------------------------------------------------------------------------------
 
     def _setup(self):
         """
@@ -264,6 +278,7 @@ class CylinderPaalmanPingsCorrection(PythonAlgorithm):
 
         self._output_ws_name = self.getPropertyValue('OutputWorkspace')
 
+#------------------------------------------------------------------------------
 
     def _get_angles(self):
         """
@@ -280,6 +295,7 @@ class CylinderPaalmanPingsCorrection(PythonAlgorithm):
             two_theta = detector.getTwoTheta(sample_pos, beam_pos) * 180.0 / math.pi  # calc angle
             self._angles.append(two_theta)
 
+#------------------------------------------------------------------------------
 
     def _wave_range(self):
         wave_range = '__WaveRange'
@@ -302,6 +318,7 @@ class CylinderPaalmanPingsCorrection(PythonAlgorithm):
         logger.information('Elastic lambda %f' % self._elastic)
         DeleteWorkspace(wave_range)
 
+#------------------------------------------------------------------------------
 
     def _interpolate_corrections(self, workspaces):
         """
@@ -311,12 +328,13 @@ class CylinderPaalmanPingsCorrection(PythonAlgorithm):
         @param workspaces List of correction workspaces to interpolate
         """
 
-        for ws in workspaces:
+        for wrksp in workspaces:
             SplineInterpolation(WorkspaceToMatch=self._sample_ws_name,
-                                WorkspaceToInterpolate=ws,
-                                OutputWorkspace=ws,
+                                WorkspaceToInterpolate=wrksp,
+                                OutputWorkspace=wrksp,
                                 OutputWorkspaceDeriv='')
 
+#------------------------------------------------------------------------------
 
     def _copy_detector_table(self, workspaces):
         """
@@ -327,22 +345,23 @@ class CylinderPaalmanPingsCorrection(PythonAlgorithm):
 
         instrument = mtd[self._sample_ws_name].getInstrument().getName()
 
-        for ws in workspaces:
-            LoadInstrument(Workspace=ws,
+        for wrksp in workspaces:
+            LoadInstrument(Workspace=wrksp,
                            InstrumentName=instrument)
 
             CopyDetectorMapping(WorkspaceToMatch=self._sample_ws_name,
-                                WorkspaceToRemap=ws,
+                                WorkspaceToRemap=wrksp,
                                 IndexBySpectrumNumber=True)
 
+#------------------------------------------------------------------------------
 
-    def _add_sample_logs(self, ws, sample_logs):
+    def _add_sample_logs(self, wrksp, sample_logs):
         """
         Add a dictionary of logs to a workspace.
 
         The type of the log is inferred by the type of the value passed to the log.
 
-        @param ws - workspace to add logs too.
+        @param wrksp - workspace to add logs too.
         @param sample_logs - dictionary of logs to append to the workspace.
         """
 
@@ -354,8 +373,9 @@ class CylinderPaalmanPingsCorrection(PythonAlgorithm):
             else:
                 log_type = 'String'
 
-            AddSampleLog(Workspace=ws, LogName=key, LogType=log_type, LogText=str(value))
+            AddSampleLog(Workspace=wrksp, LogName=key, LogType=log_type, LogText=str(value))
 
+#------------------------------------------------------------------------------
 
 # Register algorithm with Mantid
 AlgorithmFactory.subscribe(CylinderPaalmanPingsCorrection)

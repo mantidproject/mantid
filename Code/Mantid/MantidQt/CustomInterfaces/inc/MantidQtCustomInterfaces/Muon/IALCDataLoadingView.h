@@ -53,6 +53,10 @@ namespace CustomInterfaces
     /// @return Log name
     virtual std::string log() const = 0;
 
+    /// Returns the function to apply
+    /// @return Log function
+    virtual std::string function() const = 0;
+
     /// @return dead time correction type to use
     virtual std::string deadTimeType() const = 0;
 

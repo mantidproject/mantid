@@ -247,16 +247,17 @@ public:
     explicit Attribute(const std::string &str, bool quoteValue = false)
         : m_data(str), m_quoteValue(quoteValue) {}
     /// Create int attribute
-    explicit Attribute(const int &i) : m_data(i) {}
+    explicit Attribute(const int &i) : m_data(i), m_quoteValue(false) {}
     /// Create double attribute
-    explicit Attribute(const double &d) : m_data(d) {}
+    explicit Attribute(const double &d) : m_data(d), m_quoteValue(false) {}
     /// Create bool attribute
-    explicit Attribute(const bool &b) : m_data(b) {}
+    explicit Attribute(const bool &b) : m_data(b), m_quoteValue(false) {}
     /// Create string attribute
     explicit Attribute(const char *c)
         : m_data(std::string(c)), m_quoteValue(false) {}
     /// Create vector attribute
-    explicit Attribute(const std::vector<double> &v) : m_data(v) {}
+    explicit Attribute(const std::vector<double> &v)
+        : m_data(v), m_quoteValue(false) {}
 
     /// Apply an attribute visitor
     template <typename T> T apply(AttributeVisitor<T> &v) {
@@ -550,6 +551,7 @@ protected:
 
   friend class ParameterTie;
   friend class CompositeFunction;
+  friend class FunctionParameterDecorator;
 
   /// Flag to hint that the function is being used in parallel computations
   bool m_isParallel;

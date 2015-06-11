@@ -770,6 +770,54 @@ public:
     }
   }
 
+  /// Rewrite first input group
+  void test_processGroups_rewriteFirstGroup()
+  {
+      Mantid::API::AnalysisDataService::Instance().clear();
+    WorkspaceGroup_sptr group = do_test_groups("D", "D1,D2,D3",
+        "B", "B1,B2,B3",   "C", "C1,C2,C3");
+
+    TS_ASSERT_EQUALS( ws1->name(), "D1" );
+    TS_ASSERT_EQUALS( ws1->getTitle(), "D1+B1+C1" );
+    TS_ASSERT_EQUALS( ws1->readY(0)[0], 234 );
+    TS_ASSERT_EQUALS( ws2->name(), "D2" );
+    TS_ASSERT_EQUALS( ws2->getTitle(), "D2+B2+C2" );
+    TS_ASSERT_EQUALS( ws3->name(), "D3" );
+    TS_ASSERT_EQUALS( ws3->getTitle(), "D3+B3+C3" );
+  }
+
+  /// Rewrite second group
+  void test_processGroups_rewriteSecondGroup()
+  {
+      Mantid::API::AnalysisDataService::Instance().clear();
+    WorkspaceGroup_sptr group = do_test_groups("A", "A1,A2,A3",
+        "D", "D1,D2,D3",   "C", "C1,C2,C3");
+
+    TS_ASSERT_EQUALS( ws1->name(), "D1" );
+    TS_ASSERT_EQUALS( ws1->getTitle(), "A1+D1+C1" );
+    TS_ASSERT_EQUALS( ws1->readY(0)[0], 234 );
+    TS_ASSERT_EQUALS( ws2->name(), "D2" );
+    TS_ASSERT_EQUALS( ws2->getTitle(), "A2+D2+C2" );
+    TS_ASSERT_EQUALS( ws3->name(), "D3" );
+    TS_ASSERT_EQUALS( ws3->getTitle(), "A3+D3+C3" );
+  }
+
+  /// Rewrite multiple group
+  void test_processGroups_rewriteMultipleGroup()
+  {
+      Mantid::API::AnalysisDataService::Instance().clear();
+    WorkspaceGroup_sptr group = do_test_groups("A", "A1,A2,A3",
+        "D", "D1,D2,D3",   "D", "D1,D2,D3");
+
+    TS_ASSERT_EQUALS( ws1->name(), "D1" );
+    TS_ASSERT_EQUALS( ws1->getTitle(), "A1+D1+D1" );
+    TS_ASSERT_EQUALS( ws1->readY(0)[0], 234 );
+    TS_ASSERT_EQUALS( ws2->name(), "D2" );
+    TS_ASSERT_EQUALS( ws2->getTitle(), "A2+D2+D2" );
+    TS_ASSERT_EQUALS( ws3->name(), "D3" );
+    TS_ASSERT_EQUALS( ws3->getTitle(), "A3+D3+D3" );
+  }
+
 private:
   IAlgorithm_sptr runFromString(const std::string & input)
   {

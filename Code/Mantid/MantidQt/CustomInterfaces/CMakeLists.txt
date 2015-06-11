@@ -11,6 +11,7 @@ set ( SRC_FILES
   src/Indirect/DensityOfStates.cpp
 	src/Indirect/Elwin.cpp
 	src/Indirect/IDATab.cpp
+  src/Indirect/ILLCalibration.cpp
   src/Indirect/ILLEnergyTransfer.cpp
   src/Indirect/IndirectBayes.cpp
 	src/Indirect/IndirectBayesTab.cpp
@@ -51,6 +52,7 @@ set ( SRC_FILES
     src/MultiDatasetFit/MDFLocalParameterEditor.cpp
     src/MultiDatasetFit/MDFLocalParameterItemDelegate.cpp
     src/MultiDatasetFit/MDFEditLocalParameterDialog.cpp
+    src/MultiDatasetFit/MDFErrorCurve.cpp
 	src/Muon/ALCBaselineModellingModel.cpp
 	src/Muon/ALCBaselineModellingPresenter.cpp
 	src/Muon/ALCBaselineModellingView.cpp
@@ -103,6 +105,7 @@ set ( INC_FILES
 	inc/MantidQtCustomInterfaces/Indirect/ConvFit.h
   inc/MantidQtCustomInterfaces/Indirect/DensityOfStates.h
 	inc/MantidQtCustomInterfaces/Indirect/Elwin.h
+  inc/MantidQtCustomInterfaces/Indirect/ILLCalibration.h
   inc/MantidQtCustomInterfaces/Indirect/ILLEnergyTransfer.h
 	inc/MantidQtCustomInterfaces/Indirect/IndirectBayes.h
 	inc/MantidQtCustomInterfaces/Indirect/IndirectBayesTab.h
@@ -145,6 +148,7 @@ set ( INC_FILES
     inc/MantidQtCustomInterfaces/MultiDatasetFit/MDFLocalParameterEditor.h
     inc/MantidQtCustomInterfaces/MultiDatasetFit/MDFLocalParameterItemDelegate.h
     inc/MantidQtCustomInterfaces/MultiDatasetFit/MDFEditLocalParameterDialog.h
+    inc/MantidQtCustomInterfaces/MultiDatasetFit/MDFErrorCurve.h
 	inc/MantidQtCustomInterfaces/Muon/ALCBaselineModellingModel.h
 	inc/MantidQtCustomInterfaces/Muon/ALCBaselineModellingPresenter.h
 	inc/MantidQtCustomInterfaces/Muon/ALCBaselineModellingView.h
@@ -202,6 +206,7 @@ set ( MOC_FILES inc/MantidQtCustomInterfaces/Background.h
                 inc/MantidQtCustomInterfaces/Indirect/ConvFit.h
                 inc/MantidQtCustomInterfaces/Indirect/DensityOfStates.h
                 inc/MantidQtCustomInterfaces/Indirect/Elwin.h
+                inc/MantidQtCustomInterfaces/Indirect/ILLCalibration.h
                 inc/MantidQtCustomInterfaces/Indirect/ILLEnergyTransfer.h
                 inc/MantidQtCustomInterfaces/Indirect/IndirectBayes.h
                 inc/MantidQtCustomInterfaces/Indirect/IndirectBayesTab.h
@@ -278,6 +283,7 @@ set ( UI_FILES inc/MantidQtCustomInterfaces/DataComparison.ui
                inc/MantidQtCustomInterfaces/Indirect/ConvFit.ui
                inc/MantidQtCustomInterfaces/Indirect/DensityOfStates.ui
                inc/MantidQtCustomInterfaces/Indirect/Elwin.ui
+               inc/MantidQtCustomInterfaces/Indirect/ILLCalibration.ui
                inc/MantidQtCustomInterfaces/Indirect/ILLEnergyTransfer.ui
                inc/MantidQtCustomInterfaces/Indirect/IndirectBayes.ui
                inc/MantidQtCustomInterfaces/Indirect/IndirectDataAnalysis.ui
@@ -379,7 +385,17 @@ endif ()
 
 find_Package(Threads)
 
-target_link_libraries ( CustomInterfaces MantidQtAPI MantidWidgets QtPropertyBrowser ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries ( CustomInterfaces LINK_PRIVATE 
+            MantidQtAPI
+            MantidWidgets
+            QtPropertyBrowser
+            ${CORE_MANTIDLIBS}
+            ${QT_LIBRARIES}
+            ${QWT_LIBRARIES}
+            ${POCO_LIBRARIES}
+            ${Boost_LIBRARIES}
+            ${JSONCPP_LIBRARIES}
+            ${CMAKE_THREAD_LIBS_INIT})
 
 ###########################################################################
 # Testing

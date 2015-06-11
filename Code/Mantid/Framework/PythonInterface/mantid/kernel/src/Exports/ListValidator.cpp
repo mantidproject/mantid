@@ -13,37 +13,32 @@ using Mantid::Kernel::IValidator;
 namespace Converters = Mantid::PythonInterface::Converters;
 using namespace boost::python;
 
-namespace
-{
+namespace {
 
-   /**
-     * Factory function to allow the allowed values to be specified as a python list
-     * @param allowedValues :: The list of allowed values
-     * @return A new ListValidator instance
-     */
-    template<typename T>
-    ListValidator<T> * createListValidator(const boost::python::list & allowedValues)
-    {
-      return new ListValidator<T>(Converters::PySequenceToVector<T>(allowedValues)());
-    }    
-
-
-  #define EXPORT_LISTVALIDATOR(type, prefix) \
-    class_<ListValidator<type>, bases<IValidator>, \
-           boost::noncopyable>(#prefix"ListValidator") \
-      .def("__init__", make_constructor(&createListValidator<type>, default_call_policies(), \
-                                        arg("allowedValues"))) \
-      .def("addAllowedValue", &ListValidator<type>::addAllowedValue, \
-           "Adds a value to the list of accepted values") \
-      ;
-
+/**
+  * Factory function to allow the allowed values to be specified as a python
+ * list
+  * @param allowedValues :: The list of allowed values
+  * @return A new ListValidator instance
+  */
+template <typename T>
+ListValidator<T> *
+createListValidator(const boost::python::list &allowedValues) {
+  return new ListValidator<T>(
+      Converters::PySequenceToVector<T>(allowedValues)());
 }
 
-// clang-format off
-void export_ListValidator()
-// clang-format on
-{
+#define EXPORT_LISTVALIDATOR(type, prefix)                                     \
+  class_<ListValidator<type>, bases<IValidator>, boost::noncopyable>(          \
+      #prefix "ListValidator")                                                 \
+      .def("__init__",                                                         \
+           make_constructor(&createListValidator<type>,                        \
+                            default_call_policies(), arg("allowedValues")))    \
+      .def("addAllowedValue", &ListValidator<type>::addAllowedValue,           \
+           "Adds a value to the list of accepted values");
+}
+
+void export_ListValidator() {
   EXPORT_LISTVALIDATOR(std::string, String);
   EXPORT_LISTVALIDATOR(long, Int);
 }
-

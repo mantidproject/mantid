@@ -232,7 +232,7 @@ Kernel::V3D Torus::surfaceNormal(const Kernel::V3D &Pt) const
 double Torus::distance(const Kernel::V3D &Pt) const
 /**
   Calculates the distance from the point to the Torus
-  does not calculate the point on the Torusthat is closest
+  does not calculate the point on the Torus that is closest
   @param Pt :: Point to calcuate from
 
   - normalise to a cone vertex at the origin
@@ -244,7 +244,7 @@ double Torus::distance(const Kernel::V3D &Pt) const
   const Kernel::V3D Px = Pt - Centre;
   // test is the centre to point distance is zero
   if (Px.norm() < Tolerance)
-    return Px.norm();
+    return 0;
   return Px.norm();
 }
 

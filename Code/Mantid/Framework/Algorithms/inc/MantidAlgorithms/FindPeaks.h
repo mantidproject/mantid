@@ -142,13 +142,13 @@ private:
                   const bool isoutputraw, const double mincost);
 
   /// Add the fit record (failure) to output workspace
-  void addNonFitRecord(const size_t spectrum);
+  void addNonFitRecord(const size_t spectrum, const double centre);
 
   /// Create peak and background functions
   void createFunctions();
 
   /// Find peak background
-  bool findPeakBackground(const API::MatrixWorkspace_sptr &input, int spectrum,
+  int findPeakBackground(const API::MatrixWorkspace_sptr &input, int spectrum,
                           size_t i_min, size_t i_max,
                           std::vector<double> &vecBkgdParamValues,
                           std::vector<double> &vecpeakrange);
@@ -182,7 +182,8 @@ private:
                      const API::IBackgroundFunction_sptr backgroundfunction,
                      const std::vector<double> &vec_fitwindow,
                      const std::vector<double> &vec_peakrange,
-                     int minGuessedFWHM, int maxGuessFWHM, int guessedFWHMStep);
+                     int minGuessedFWHM, int maxGuessFWHM, int guessedFWHMStep,
+                     int estBackResult=0);
 
   std::vector<std::string> m_peakParameterNames;
   std::vector<std::string> m_bkgdParameterNames;
@@ -208,6 +209,7 @@ private:
   /// parameters or effective (centre, width, height)
   std::size_t
       m_numTableParams; //<Number of parameters in the output table workspace
+  std::size_t m_centreIndex; //< Column in output table of peak centre
   std::string m_peakFuncType;   //< The name of the peak function to fit
   std::string m_backgroundType; //< The type of background to fit
 

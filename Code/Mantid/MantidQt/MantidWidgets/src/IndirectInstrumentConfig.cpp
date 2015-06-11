@@ -24,7 +24,9 @@ namespace MantidQt
 
     IndirectInstrumentConfig::IndirectInstrumentConfig(QWidget *parent): API::MantidWidget(parent),
       m_algRunner(),
-      m_disabledInstruments()
+      m_disabledInstruments(),
+      m_removeDiffraction(false),
+      m_forceDiffraction(false)
     {
       m_uiForm.setupUi(this);
 

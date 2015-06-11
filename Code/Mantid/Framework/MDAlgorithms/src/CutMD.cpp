@@ -4,8 +4,14 @@
 #include "MantidAPI/Projection.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/ListValidator.h"
 #include "MantidKernel/Matrix.h"
 #include "MantidKernel/System.h"
+
+#include <boost/make_shared.hpp>
+#include <boost/regex.hpp>
+#include <boost/algorithm/string.hpp>
+
 
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
@@ -47,7 +53,7 @@ DblMatrix scaleProjection(const DblMatrix &inMatrix,
         orientedLattice.dstar(inMatrix[i][0], inMatrix[i][1], inMatrix[i][2]);
     if (inUnits[i] == outUnits[i])
       continue;
-    else if (inUnits[i] == "a") {
+    else if (inUnits[i] == Mantid::MDAlgorithms::CutMD::InvAngstromSymbol) {
       // inv angstroms to rlu
       for (size_t j = 0; j < numDims; ++j)
         ret[i][j] *= dStar;
@@ -178,6 +184,34 @@ std::vector<std::string> labelProjection(const DblMatrix &projection) {
   }
   return ret;
 }
+
+/**
+Determine the original q units. Assumes first 3 dimensions by index are r,l,d
+@param inws : Input workspace to extract dimension info from
+@param logger : logging object
+@return vector of markers
+*/
+std::vector<std::string> findOriginalQUnits(IMDWorkspace const *const inws,
+                                            Mantid::Kernel::Logger &logger) {
+  std::vector<std::string> unitMarkers(3);
+  for (size_t i = 0; i < inws->getNumDims() && i < 3; ++i) {
+    auto units = inws->getDimension(i)->getUnits();
+    const boost::regex re("A\\^-1", boost::regex::icase);
+    // Does the unit label look like it's in Angstroms?
+    std::string unitMarker;
+    if (boost::regex_match(units.ascii(), re)) {
+      unitMarker = Mantid::MDAlgorithms::CutMD::InvAngstromSymbol;
+    } else {
+      unitMarker = Mantid::MDAlgorithms::CutMD::RLUSymbol;
+    }
+    unitMarkers[i] = unitMarker;
+    logger.debug() << "In dimension with index " << i << " and units "
+                   << units.ascii() << " taken to be of type " << unitMarker
+                   << std::endl;
+  }
+  return unitMarkers;
+}
+
 } // anonymous namespace
 
 namespace Mantid {
@@ -185,6 +219,12 @@ namespace MDAlgorithms {
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(CutMD)
+
+const std::string CutMD::InvAngstromSymbol = "a";
+const std::string CutMD::RLUSymbol = "r";
+const std::string CutMD::AutoMethod = "Auto";
+const std::string CutMD::RLUMethod = "RLU";
+const std::string CutMD::InvAngstromMethod = "Q in A^-1";
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
@@ -221,6 +261,23 @@ void CutMD::init() {
                                   "as output. True to create an "
                                   "MDHistoWorkspace as output. This is DND "
                                   "only in Horace terminology.");
+
+  std::vector<std::string> propOptions;
+  propOptions.push_back(AutoMethod);
+  propOptions.push_back(RLUMethod);
+  propOptions.push_back(InvAngstromMethod);
+  char buffer[1024];
+  std::sprintf(buffer, "How will the Q units of the input workspace be interpreted? This property will disappear in future versions of Mantid\n"
+      "%s : Figure it out based on the label units\n"
+      "%s : Force them to be rlu\n"
+      "%s : Force them to be inverse angstroms", AutoMethod.c_str(), RLUMethod.c_str(), InvAngstromMethod.c_str());
+
+  std::string help(buffer);
+  boost::algorithm::trim(help);
+  declareProperty(
+    "InterpretQDimensionUnits", AutoMethod,
+      boost::make_shared<StringListValidator>(propOptions), help
+      );
 }
 
 void CutMD::exec() {
@@ -293,8 +350,18 @@ void CutMD::exec() {
 
     std::vector<std::string> targetUnits(3);
     for (size_t i = 0; i < 3; ++i)
-      targetUnits[i] = projection.getUnit(i) == RLU ? "r" : "a";
-    std::vector<std::string> originUnits(3, "r"); // TODO. This is a hack!
+      targetUnits[i] =
+          projection.getUnit(i) == RLU ? RLUSymbol : InvAngstromSymbol;
+    
+    const std::string determineUnitsMethod = this->getProperty("InterpretQDimensionUnits");
+    std::vector<std::string> originUnits; 
+    if ( determineUnitsMethod == AutoMethod ) {
+        originUnits = findOriginalQUnits(inWS.get(), g_log);
+    } else if (determineUnitsMethod == RLUMethod ) {
+      originUnits = std::vector<std::string>(3, RLUSymbol);
+    } else{
+      originUnits = std::vector<std::string>(3, InvAngstromSymbol);
+    }
 
     DblMatrix scaledProjectionMatrix =
         scaleProjection(projectionMatrix, originUnits, targetUnits, eventInWS);
@@ -333,7 +400,7 @@ void CutMD::exec() {
     }
 
     // Make labels
-    std::vector<std::string> labels = labelProjection(projectionMatrix);
+    std::vector<std::string> labels = labelProjection(scaledProjectionMatrix);
 
     // Either run RebinMD or SliceMD
     const std::string cutAlgName = noPix ? "BinMD" : "SliceMD";
@@ -356,7 +423,8 @@ void CutMD::exec() {
 
         std::vector<std::string> vec(numDims, "0");
         for (size_t j = 0; j < 3; ++j)
-          vec[j] = boost::lexical_cast<std::string>(projectionMatrix[i][j]);
+          vec[j] =
+              boost::lexical_cast<std::string>(scaledProjectionMatrix[i][j]);
         vecStr = boost::algorithm::join(vec, ", ");
       } else {
         // Always orthogonal

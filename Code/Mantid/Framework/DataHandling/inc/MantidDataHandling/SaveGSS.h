@@ -62,8 +62,8 @@ namespace DataHandling {
   */
 class DLLExport SaveGSS : public Mantid::API::Algorithm {
 public:
-  /// (Empty) Constructor
-  SaveGSS() : Mantid::API::Algorithm() {}
+  /// Constructor
+  SaveGSS();
   /// Virtual destructor
   virtual ~SaveGSS() {}
   /// Algorithm's name

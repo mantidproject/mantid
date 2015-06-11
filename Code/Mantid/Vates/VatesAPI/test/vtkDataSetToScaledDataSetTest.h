@@ -2,6 +2,7 @@
 #define MANTID_VATESAPI_VTKDATASETTOSCALEDDATASETTEST_H_
 
 #include "MantidTestHelpers/MDEventsTestHelper.h"
+#include "MantidAPI/IMDWorkspace.h"
 #include "MantidVatesAPI/FieldDataToMetadata.h"
 #include "MantidVatesAPI/MetadataJsonManager.h"
 #include "MantidVatesAPI/MetadataToFieldData.h"
@@ -33,7 +34,7 @@ private:
                                                                      10.0,
                                                                      1);
     vtkMDHexFactory factory(ThresholdRange_scptr(new NoThresholdRange),
-                            "signal");
+                            VolumeNormalization);
     factory.initialize(ws);
     return vtkUnstructuredGrid::SafeDownCast(factory.create(progressUpdate));
   }

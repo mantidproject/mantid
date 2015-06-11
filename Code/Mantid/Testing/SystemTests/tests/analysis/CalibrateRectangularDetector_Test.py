@@ -7,7 +7,10 @@ def _skip_test():
     """Helper function to determine if we run the test"""
     import platform
 
-    # Only runs on RHEL6 at the moment
+    # don't run on rhel6
+    if "redhat-6" in platform.platform():
+        return True
+    # run on any other linux
     return ("Linux" not in platform.platform())
 
 class PG3Calibration(stresstesting.MantidStressTest):

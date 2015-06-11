@@ -16,8 +16,7 @@
 namespace{
   // tool options pages
   const int zoomToolPage  = 0;
-  const int panToolPage   = 1;
-  const int rangeToolPage = 2;
+  const int rangeToolPage = 1;
 }
 
 namespace MantidQt
@@ -31,7 +30,8 @@ DECLARE_SUBWINDOW(MultiDatasetFit)
 /// Constructor
 /// @param parent :: The parent widget
 MultiDatasetFit::MultiDatasetFit(QWidget *parent)
-:UserSubWindow(parent)
+:UserSubWindow(parent), m_plotController(NULL), m_dataController(NULL), m_functionBrowser(NULL),
+ m_fitOptionsBrowser(NULL)
 {
 }
 
@@ -62,7 +62,7 @@ void MultiDatasetFit::initLayout()
   connect(m_dataController,SIGNAL(hasSelection(bool)),  m_uiForm.btnRemove, SLOT(setEnabled(bool)));
   connect(m_uiForm.btnAddWorkspace,SIGNAL(clicked()),m_dataController,SLOT(addWorkspace()));
   connect(m_uiForm.btnRemove,SIGNAL(clicked()),m_dataController,SLOT(removeSelectedSpectra()));
-  connect(m_uiForm.cb_applyRangeToAll,SIGNAL(toggled(bool)),m_dataController,SLOT(setFittingRangeGlobal(bool)));
+  connect(m_uiForm.cbApplyRangeToAll,SIGNAL(toggled(bool)),m_dataController,SLOT(setFittingRangeGlobal(bool)));
 
   m_plotController = new MDF::PlotController(this,
                                         m_uiForm.plot,
@@ -73,10 +73,12 @@ void MultiDatasetFit::initLayout()
   connect(m_dataController,SIGNAL(dataTableUpdated()),m_plotController,SLOT(tableUpdated()));
   connect(m_dataController,SIGNAL(dataSetUpdated(int)),m_plotController,SLOT(updateRange(int)));
   connect(m_plotController,SIGNAL(fittingRangeChanged(int, double, double)),m_dataController,SLOT(setFittingRange(int, double, double)));
+  connect(m_uiForm.cbShowDataErrors,SIGNAL(toggled(bool)),m_plotController,SLOT(showDataErrors(bool)));
 
   QSplitter* splitter = new QSplitter(Qt::Vertical,this);
 
   m_functionBrowser = new MantidQt::MantidWidgets::FunctionBrowser(NULL, true);
+  m_functionBrowser->setColumnSizes(100, 100, 45);
   splitter->addWidget( m_functionBrowser );
   connect(m_functionBrowser,SIGNAL(localParameterButtonClicked(const QString&)),this,SLOT(editLocalParameterValues(const QString&)));
   connect(m_functionBrowser,SIGNAL(functionStructureChanged()),this,SLOT(reset()));
@@ -378,7 +380,7 @@ void MultiDatasetFit::enableZoom()
 void MultiDatasetFit::enablePan()
 {
   m_plotController->enablePan();
-  m_uiForm.toolOptions->setCurrentIndex(panToolPage);
+  m_uiForm.toolOptions->setCurrentIndex(zoomToolPage);
 }
 
 /// Enable the fitting range selection tool.
@@ -435,6 +437,10 @@ void MultiDatasetFit::loadSettings()
   QSettings settings;
   settings.beginGroup("Mantid/MultiDatasetFit");
   m_fitOptionsBrowser->loadSettings( settings );
+  bool option = settings.value("ShowDataErrors",false).asBool();
+  m_uiForm.cbShowDataErrors->setChecked(option);
+  option = settings.value("ApplyRangeToAll",false).asBool();
+  m_uiForm.cbApplyRangeToAll->setChecked(option);
 }
 
 /// Save settings
@@ -443,6 +449,8 @@ void MultiDatasetFit::saveSettings() const
   QSettings settings;
   settings.beginGroup("Mantid/MultiDatasetFit");
   m_fitOptionsBrowser->saveSettings( settings );
+  settings.setValue("ShowDataErrors",m_uiForm.cbShowDataErrors->isChecked());
+  settings.setValue("ApplyRangeToAll",m_uiForm.cbApplyRangeToAll->isChecked());
 }
 
 } // CustomInterfaces

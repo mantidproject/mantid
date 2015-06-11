@@ -9,6 +9,8 @@ class pqColorMapModel;
 class pqDataRepresentation;
 class pqPipelineRepresentation;
 
+class vtkObject;
+
 namespace Mantid
 {
 namespace Vates
@@ -91,13 +93,24 @@ public:
   /// Update the internal state.
   void updateState(ColorSelectionWidget *cs);
 
+  /// To update the VSI min/mas lineEdits when the user uses the Paraview color editor
+  void observeColorScaleEdited(pqPipelineRepresentation *repr, ColorSelectionWidget *cs);
+
 private:
+  /// vtkcallback function for color change events coming from the Paraview color editor
+  static void colorScaleEditedCallbackFunc(vtkObject* caller, long unsigned int eventID,
+                                           void *clientData, void *callData);
+  /// vtk callback function for user clicks on log-scale in the Paraview color editor
+  static void logScaleClickedCallbackFunc(vtkObject* caller, long unsigned int eventID,
+                                           void *clientData, void *callData);
+
   void updateLookupTable(pqDataRepresentation* representation); ///< Updates the lookup tables.
-  bool autoScaleState; ///< Holder for the auto scaling state
-  bool logScaleState; ///< Holder for the log scaling state
-  double minScale; ///< Holder for the minimum color range state
-  double maxScale; ///< Holder for the maximum color range state
-  AutoScaleRangeGenerator autoScaleRangeGenerator; ///< Holds a range generator for auto scale.
+
+  bool m_autoScaleState; ///< Holder for the auto scaling state
+  bool m_logScaleState; ///< Holder for the log scaling state
+  double m_minScale; ///< Holder for the minimum color range state
+  double m_maxScale; ///< Holder for the maximum color range state
+  AutoScaleRangeGenerator m_autoScaleRangeGenerator; ///< Holds a range generator for auto scale.
 };
 
 }

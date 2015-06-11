@@ -54,7 +54,7 @@ namespace Algorithms {
 class DLLExport ReplaceSpecialValues : public UnaryOperation {
 public:
   /// Default constructor
-  ReplaceSpecialValues() : UnaryOperation() {}
+  ReplaceSpecialValues();
   /// Destructor
   virtual ~ReplaceSpecialValues() {}
   /// Algorithm's name for identification

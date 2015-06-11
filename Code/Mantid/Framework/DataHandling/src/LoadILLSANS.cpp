@@ -265,7 +265,8 @@ LoadILLSANS::loadDataIntoWorkspaceFromMonitors(NeXus::NXEntry &firstEntry,
 
       // Add average monitor counts to a property:
       double averageMonitorCounts =
-          std::accumulate(data(), data() + data.dim2(), 0) / data.dim2();
+          std::accumulate(data(), data() + data.dim2(), 0) /
+          static_cast<double>(data.dim2());
       // make sure the monitor has values!
       if (averageMonitorCounts > 0) {
         API::Run &runDetails = m_localWorkspace->mutableRun();
@@ -586,8 +587,7 @@ void LoadILLSANS::loadMetaData(const NeXus::NXEntry &entry,
  */
 double LoadILLSANS::calculateQ(const double lambda,
                                const double twoTheta) const {
-  return (4 * M_PI * std::sin(twoTheta * (M_PI / 180) / 2)) /
-         (lambda);
+  return (4 * M_PI * std::sin(twoTheta * (M_PI / 180) / 2)) / (lambda);
 }
 
 std::pair<double, double> LoadILLSANS::calculateQMaxQMin() {

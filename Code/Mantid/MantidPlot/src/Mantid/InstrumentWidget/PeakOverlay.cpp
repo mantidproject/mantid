@@ -192,7 +192,7 @@ void PeakOverlay::createMarkers(const PeakMarker2D::Style& style)
   this->clear();
   for(int i = 0; i < nPeaks; ++i)
   {
-    Mantid::API::IPeak& peak = getPeak(i);
+    Mantid::Geometry::IPeak& peak = getPeak(i);
     const Mantid::Kernel::V3D & pos = peak.getDetPos();
     // Project the peak (detector) position onto u,v coords
     double u,v, uscale, vscale;
@@ -288,7 +288,7 @@ int PeakOverlay::getNumberPeaks()const
  * @param i :: Peak index.
  * @return A reference to the peak.
  */
-Mantid::API::IPeak& PeakOverlay::getPeak(int i)
+Mantid::Geometry::IPeak& PeakOverlay::getPeak(int i)
 {
   return m_peaksWorkspace->getPeak(i);
 }
@@ -345,7 +345,7 @@ void PeakOverlay::setPeakVisibility(double xmin, double xmax, QString units)
     {
         PeakMarker2D* marker = dynamic_cast<PeakMarker2D*>(shape);
         if (!marker) continue;
-        Mantid::API::IPeak& peak = getPeak(marker->getRow());
+        Mantid::Geometry::IPeak& peak = getPeak(marker->getRow());
         double x = 0.0;
         switch (xUnits)
         {

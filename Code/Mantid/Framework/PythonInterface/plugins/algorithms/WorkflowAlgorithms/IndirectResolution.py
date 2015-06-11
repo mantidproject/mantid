@@ -4,7 +4,7 @@ from mantid.api import *
 from mantid.kernel import *
 from mantid import logger
 
-
+#pylint: disable=too-many-instance-attributes
 class IndirectResolution(DataProcessorAlgorithm):
 
     _input_files = None
@@ -18,6 +18,7 @@ class IndirectResolution(DataProcessorAlgorithm):
     _scale_factor = None
     _plot = None
     _save = None
+
 
     def category(self):
         return 'Workflow\\Inelastic;PythonAlgorithms;Inelastic'
@@ -58,11 +59,14 @@ class IndirectResolution(DataProcessorAlgorithm):
                              doc='Save resolution workspace as a Nexus file')
 
         self.declareProperty(WorkspaceProperty('OutputWorkspace', '',
-                             direction=Direction.Output),
+                                               direction=Direction.Output),
                              doc='Output resolution workspace.')
 
+
     def PyExec(self):
-        from IndirectCommon import getWSprefix
+
+        #from IndirectCommon import getWSprefix
+
         self._setup()
 
         ISISIndirectEnergyTransfer(Instrument=self._instrument,
@@ -77,13 +81,20 @@ class IndirectResolution(DataProcessorAlgorithm):
         icon_ws = mtd['__et_ws_group'].getItem(0).getName()
 
         if self._scale_factor != 1.0:
-            Scale(InputWorkspace=icon_ws, OutputWorkspace=icon_ws, Factor=self._scale_factor)
+            Scale(InputWorkspace=icon_ws,
+                  OutputWorkspace=icon_ws,
+                  Factor=self._scale_factor)
 
-        CalculateFlatBackground(InputWorkspace=icon_ws, OutputWorkspace=self._out_ws,
-                                StartX=self._background[0], EndX=self._background[1],
-                                Mode='Mean', OutputMode='Subtract Background')
+        CalculateFlatBackground(InputWorkspace=icon_ws,
+                                OutputWorkspace=self._out_ws,
+                                StartX=self._background[0],
+                                EndX=self._background[1],
+                                Mode='Mean',
+                                OutputMode='Subtract Background')
 
-        Rebin(InputWorkspace=self._out_ws, OutputWorkspace=self._out_ws, Params=self._rebin_string)
+        Rebin(InputWorkspace=self._out_ws,
+              OutputWorkspace=self._out_ws,
+              Params=self._rebin_string)
 
         self._post_process()
         self.setProperty('OutputWorkspace', self._out_ws)
@@ -115,31 +126,25 @@ class IndirectResolution(DataProcessorAlgorithm):
         Handles adding logs, saving and plotting.
         """
 
-        use_scale_factor = self._scale_factor == 1.0
-        AddSampleLog(Workspace=self._out_ws, LogName='scale',
-                     LogType='String', LogText=str(use_scale_factor))
-        if use_scale_factor:
-            AddSampleLog(Workspace=self._out_ws, LogName='scale_factor',
-                         LogType='Number', LogText=str(self._scale_factor))
+        sample_logs = [('res_back_start', self._background[0]),
+                       ('res_back_end', self._background[1])]
 
-        AddSampleLog(Workspace=self._out_ws, LogName='back_start',
-                     LogType='Number', LogText=str(self._background[0]))
-        AddSampleLog(Workspace=self._out_ws, LogName='back_end',
-                     LogType='Number', LogText=str(self._background[1]))
+        if self._scale_factor != 1.0:
+            sample_logs.append(('res_scale_factor', self._scale_factor))
 
         rebin_params = self._rebin_string.split(',')
         if len(rebin_params) == 3:
-            AddSampleLog(Workspace=self._out_ws, LogName='rebin_low',
-                         LogType='Number', LogText=rebin_params[0])
-            AddSampleLog(Workspace=self._out_ws, LogName='rebin_width',
-                         LogType='Number', LogText=rebin_params[1])
-            AddSampleLog(Workspace=self._out_ws, LogName='rebin_high',
-                         LogType='Number', LogText=rebin_params[2])
+            sample_logs.append(('rebin_low', rebin_params[0]))
+            sample_logs.append(('rebin_width', rebin_params[1]))
+            sample_logs.append(('rebin_high', rebin_params[2]))
+
+        AddSampleLogMultiple(Workspace=self._out_ws,
+                             LogNames=[log[0] for log in sample_logs],
+                             LogValues=[log[1] for log in sample_logs])
 
         self.setProperty('OutputWorkspace', self._out_ws)
 
         if self._save:
-            logger.information("Resolution file saved to default save directory.")
             SaveNexusProcessed(InputWorkspace=self._out_ws, Filename=self._out_ws + '.nxs')
 
         if self._plot:

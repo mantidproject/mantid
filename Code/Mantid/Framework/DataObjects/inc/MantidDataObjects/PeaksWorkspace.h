@@ -104,11 +104,11 @@ public:
 
   int getNumberPeaks() const;
   void removePeak(int peakNum);
-  void addPeak(const API::IPeak &ipeak);
+  void addPeak(const Geometry::IPeak &ipeak);
   Peak &getPeak(int peakNum);
   const Peak &getPeak(int peakNum) const;
 
-  API::IPeak *createPeak(Kernel::V3D QFrame,
+  Geometry::IPeak *createPeak(Kernel::V3D QFrame,
                          boost::optional<double> detectorDistance =
                              boost::optional<double>()) const;
   std::vector<std::pair<std::string, std::string>>

@@ -115,11 +115,13 @@ void DataPickerTool::setSelection(QwtPlotCurve *curve, int point_index)
   }
 
   setAxis(d_selected_curve->xAxis(), d_selected_curve->yAxis());
+  auto plotCurve = dynamic_cast<PlotCurve *>(d_selected_curve);
+  auto dataCurve = dynamic_cast<DataCurve*>(d_selected_curve);
 
   d_restricted_move_pos = QPoint(plot()->transform(xAxis(), d_selected_curve->x(d_selected_point)),
     plot()->transform(yAxis(), d_selected_curve->y(d_selected_point)));
 
-  if (dynamic_cast<PlotCurve *>(d_selected_curve)->type() == Graph::Function) 
+  if (plotCurve && plotCurve->type() == Graph::Function) 
   {
     QLocale locale = d_app->locale();
     emit statusText(QString("%1[%2]: x=%3; y=%4")
@@ -128,12 +130,12 @@ void DataPickerTool::setSelection(QwtPlotCurve *curve, int point_index)
       .arg(locale.toString(d_selected_curve->x(d_selected_point), 'G', d_app->d_decimal_digits))
       .arg(locale.toString(d_selected_curve->y(d_selected_point), 'G', d_app->d_decimal_digits)));
   }
-  else if (dynamic_cast<DataCurve*>(d_selected_curve))
+  else if (dataCurve)
   {
-    int row = dynamic_cast<DataCurve*>(d_selected_curve)->tableRow(d_selected_point);
+    int row = dataCurve->tableRow(d_selected_point);
 
-    Table *t = dynamic_cast<DataCurve*>(d_selected_curve)->table();
-    int xCol = t->colIndex(dynamic_cast<DataCurve*>(d_selected_curve)->xColumnName());
+    Table *t = dataCurve->table();
+    int xCol = t->colIndex(dataCurve->xColumnName());
     int yCol = t->colIndex(d_selected_curve->title().text());
 
     emit statusText(QString("%1[%2]: x=%3; y=%4")
@@ -164,14 +166,17 @@ bool DataPickerTool::eventFilter(QObject *obj, QEvent *event)
     event->accept();
     return true;
 
-  case QEvent::MouseMove:
-    if ( dynamic_cast<QMouseEvent *>(event)->modifiers() == Qt::ControlModifier )
-      d_move_mode = Vertical;
-    else if ( dynamic_cast<QMouseEvent *>(event)->modifiers() == Qt::AltModifier )
-      d_move_mode = Horizontal;
-    else
-      d_move_mode = Free;
-    break;
+  case QEvent::MouseMove: 
+    if (auto mouseEvent = dynamic_cast<QMouseEvent *>(event))
+    {
+      if ( mouseEvent->modifiers() == Qt::ControlModifier )
+        d_move_mode = Vertical;
+      else if ( mouseEvent->modifiers() == Qt::AltModifier )
+        d_move_mode = Horizontal;
+      else
+        d_move_mode = Free;
+      break;
+    }
 
   default:
     break;

@@ -1131,6 +1131,8 @@ void MantidMatrixModel::setup(const Mantid::API::MatrixWorkspace* ws,
   m_workspace = ws;
   m_rows = rows;
   m_cols = cols;
+  m_colNumCorr = 1;
+  m_endRow = m_rows - 1;
   m_startRow = start >= 0? start : 0;
   m_mon_color = QColor(255,255,204);
   if (ws->blocksize() != 0)

@@ -57,8 +57,6 @@ class SANSMask(PythonAlgorithm):
         self._mask_detector_side(workspace, facility)
 
         # Mask edges
-        edge_str = self.getPropertyValue("MaskedEdges")
-
         edges = self.getProperty("MaskedEdges").value
         if len(edges)==4:
             if facility.upper() == "HFIR":

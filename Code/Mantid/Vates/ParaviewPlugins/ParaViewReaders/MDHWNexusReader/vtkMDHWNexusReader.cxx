@@ -29,7 +29,8 @@ vtkMDHWNexusReader::vtkMDHWNexusReader() :
   m_presenter(NULL),
   m_loadInMemory(false),
   m_depth(1),
-  m_time(0)
+  m_time(0),
+  m_normalizationOption(AutoSelect)
 {
   this->FileName = NULL;
   this->SetNumberOfInputPorts(0);
@@ -100,6 +101,16 @@ const char* vtkMDHWNexusReader::GetInputGeometryXML()
   }
 }
 
+/**
+Set the normalization option. This is how the signal data will be normalized before viewing.
+@param option : Normalization option
+*/
+void vtkMDHWNexusReader::SetNormalization(int option)
+{
+  m_normalizationOption = static_cast<Mantid::VATES::VisualNormalization>(option);
+  this->Modified();
+}
+
 int vtkMDHWNexusReader::RequestData(vtkInformation * vtkNotUsed(request), vtkInformationVector ** vtkNotUsed(inputVector), vtkInformationVector *outputVector)
 {
 
@@ -121,8 +132,8 @@ int vtkMDHWNexusReader::RequestData(vtkInformation * vtkNotUsed(request), vtkInf
 
   // Will attempt to handle drawing in 4D case and then in 3D case
   // if that fails.
-  vtkMDHistoHexFactory* successor = new vtkMDHistoHexFactory(thresholdRange, "signal");
-  vtkMDHistoHex4DFactory<TimeToTimeStep> *factory = new vtkMDHistoHex4DFactory<TimeToTimeStep>(thresholdRange, "signal", m_time);
+  vtkMDHistoHexFactory* successor = new vtkMDHistoHexFactory(thresholdRange, m_normalizationOption);
+  vtkMDHistoHex4DFactory<TimeToTimeStep> *factory = new vtkMDHistoHex4DFactory<TimeToTimeStep>(thresholdRange, m_normalizationOption, m_time);
   factory->SetSuccessor(successor);
 
   vtkDataSet* product = m_presenter->execute(factory, loadingProgressAction, drawingProgressAction);

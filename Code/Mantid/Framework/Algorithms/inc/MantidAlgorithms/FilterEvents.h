@@ -130,12 +130,12 @@ private:
   std::vector<double> m_detTofOffsets;
   std::vector<double> m_detTofShifts;
 
-  bool mFilterByPulseTime;
+  bool m_FilterByPulseTime;
 
   DataObjects::TableWorkspace_sptr m_informationWS;
   bool m_hasInfoWS;
 
-  double mProgress;
+  double m_progress;
 
   void getTimeSeriesLogNames(std::vector<std::string> &lognames);
 

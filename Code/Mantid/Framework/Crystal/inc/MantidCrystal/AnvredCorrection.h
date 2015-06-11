@@ -131,14 +131,14 @@ private:
   void scale_exec(int &bank, double &lambda, double &depth, double &pathlength,
                   double &value);
 
-  double smu;                       ///< linear scattering coefficient in 1/cm
-  double amu;                       ///< linear absoprtion coefficient in 1/cm
-  double radius;                    ///< sample radius in cm
-  double power_th;                  ///< Power of lamda in BuildLamdaWeights
-  std::vector<double> lamda_weight; ///< lmabda weights
-  bool OnlySphericalAbsorption;
-  bool ReturnTransmissionOnly;
-  bool useScaleFactors;
+  double m_smu;                       ///< linear scattering coefficient in 1/cm
+  double m_amu;                       ///< linear absoprtion coefficient in 1/cm
+  double m_radius;                    ///< sample radius in cm
+  double m_power_th;                  ///< Power of lamda in BuildLamdaWeights
+  std::vector<double> m_lamda_weight; ///< lmabda weights
+  bool m_onlySphericalAbsorption;
+  bool m_returnTransmissionOnly;
+  bool m_useScaleFactors;
 };
 
 } // namespace Crystal

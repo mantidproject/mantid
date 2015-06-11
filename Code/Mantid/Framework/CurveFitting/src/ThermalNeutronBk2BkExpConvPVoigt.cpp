@@ -30,7 +30,9 @@ DECLARE_FUNCTION(ThermalNeutronBk2BkExpConvPVoigt)
 /** Constructor
 */
 ThermalNeutronBk2BkExpConvPVoigt::ThermalNeutronBk2BkExpConvPVoigt()
-    : IPowderDiffPeakFunction() {
+    : IPowderDiffPeakFunction(), m_Alpha(0.), m_Beta(0.), m_Sigma2(0.),
+      m_Gamma(0.), m_eta(0.), m_N(0.), m_cancel(false),
+      m_parallelException(false), m_dspaceCalculated(false) {
   mHKLSet = false;
 }
 

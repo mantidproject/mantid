@@ -58,7 +58,7 @@ void RemoveBackground::init() {
       "but actually useful mainly for removing background while rebinning an "
       "event workspace in the units different from TOF.");
 
-  std::vector<std::string> dE_modes = Kernel::DeltaEMode().availableTypes();
+  std::vector<std::string> dE_modes = Kernel::DeltaEMode::availableTypes();
   declareProperty("EMode", dE_modes[Kernel::DeltaEMode::Direct],
                   boost::make_shared<Kernel::StringListValidator>(dE_modes),
                   "The energy conversion mode used to define the conversion "
@@ -100,7 +100,7 @@ void RemoveBackground::exec() {
   //
   int eMode; // in convert units emode is still integer
   const std::string emodeStr = getProperty("EMode");
-  eMode = static_cast<int>(Kernel::DeltaEMode().fromString(emodeStr));
+  eMode = static_cast<int>(Kernel::DeltaEMode::fromString(emodeStr));
 
   // Removing background in-place
   bool inPlace = (inputWS == outputWS);

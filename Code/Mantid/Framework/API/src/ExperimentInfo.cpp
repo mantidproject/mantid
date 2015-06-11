@@ -145,6 +145,7 @@ void ExperimentInfo::setInstrument(const Instrument_const_sptr &instr) {
     m_parmap = instr->getParameterMap();
   } else {
     sptr_instrument = instr;
+    m_parmap = boost::make_shared<ParameterMap>();
   }
 }
 
@@ -290,7 +291,7 @@ void ExperimentInfo::populateInstrumentParameters() {
         }
         if (rtpValues.haveRadius) // Just overwrite x,y,z
         {
-          // convert spherical coordinates to cartesian coordinate values
+          // convert spherical coordinates to Cartesian coordinate values
           double x = rtpValues.radius * std::sin(rtpValues.theta) *
                      std::cos(rtpValues.phi);
           paramMap.addPositionCoordinate(paramInfo->m_component, "x", x);
@@ -1122,13 +1123,17 @@ void ExperimentInfo::populateWithParameter(
   ParameterValue paramValue(paramInfo,
                             runData); // Defines implicit conversion operator
 
+  const std::string * pDescription=NULL;
+  if(!paramInfo.m_description.empty())
+      pDescription = &paramInfo.m_description;
+
   // Some names are special. Values should be convertible to double
   if (name.compare("x") == 0 || name.compare("y") == 0 ||
       name.compare("z") == 0) {
     paramMap.addPositionCoordinate(paramInfo.m_component, name, paramValue);
   } else if (name.compare("rot") == 0 || name.compare("rotx") == 0 ||
              name.compare("roty") == 0 || name.compare("rotz") == 0) {
-    paramMap.addRotationParam(paramInfo.m_component, name, paramValue);
+    paramMap.addRotationParam(paramInfo.m_component, name, paramValue,pDescription);
   } else if (category.compare("fitting") == 0) {
     std::ostringstream str;
     str << paramInfo.m_value << " , " << paramInfo.m_fittingFunction << " , "
@@ -1137,16 +1142,15 @@ void ExperimentInfo::populateWithParameter(
         << " , " << paramInfo.m_tie << " , " << paramInfo.m_formula << " , "
         << paramInfo.m_formulaUnit << " , " << paramInfo.m_resultUnit << " , "
         << (*(paramInfo.m_interpolation));
-    paramMap.add("fitting", paramInfo.m_component, name, str.str());
+    paramMap.add("fitting", paramInfo.m_component, name, str.str(),pDescription);
   } else if (category.compare("string") == 0) {
-    paramMap.addString(paramInfo.m_component, name, paramInfo.m_value);
+    paramMap.addString(paramInfo.m_component, name, paramInfo.m_value,pDescription);
   } else if (category.compare("bool") == 0) {
-    paramMap.addBool(paramInfo.m_component, name, paramValue);
+    paramMap.addBool(paramInfo.m_component, name, paramValue,pDescription);
   } else if (category.compare("int") == 0) {
-    paramMap.addInt(paramInfo.m_component, name, paramValue);
-  } else // assume double
-  {
-    paramMap.addDouble(paramInfo.m_component, name, paramValue);
+    paramMap.addInt(paramInfo.m_component, name, paramValue,pDescription);
+  } else{ // assume double
+    paramMap.addDouble(paramInfo.m_component, name, paramValue,pDescription);
   }
 }
 

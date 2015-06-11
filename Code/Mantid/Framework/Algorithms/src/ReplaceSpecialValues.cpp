@@ -16,6 +16,12 @@ namespace Algorithms {
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(ReplaceSpecialValues)
 
+ReplaceSpecialValues::ReplaceSpecialValues()
+    : UnaryOperation(), m_NaNValue(0.), m_NaNError(0.), m_InfiniteValue(0.),
+      m_InfiniteError(0.), m_bigThreshold(0.), m_bigValue(0.), m_bigError(0.),
+      m_performNaNCheck(false), m_performInfiniteCheck(false),
+      m_performBigCheck(false) {}
+
 void ReplaceSpecialValues::defineProperties() {
   declareProperty("NaNValue", Mantid::EMPTY_DBL(),
                   "The value used to replace occurrances of NaN "
