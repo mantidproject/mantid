@@ -26,9 +26,17 @@ namespace MantidQt
                                                  const VecPhysicalCrossPeak&  vecPhysicalPeaks, const int plotXIndex, const int plotYIndex, const QColor& peakColour)
       : PeakOverlayInteractive ( presenter, plot, plotXIndex, plotYIndex, parent ),
       m_physicalPeaks(vecPhysicalPeaks),
-      m_peakColour(peakColour)
+      m_peakColour(peakColour),
+      m_cachedOccupancyIntoView(0),
+      m_cachedOccupancyInView(0)
     {
-
+        if(vecPhysicalPeaks.size() > 0)
+        {
+            // Cache the occupancy if we can, that way if all physical peaks are removed, we still keep the occupancy settings.
+            VecPhysicalCrossPeak::value_type firstPhysicalPeak = vecPhysicalPeaks.front();
+            m_cachedOccupancyIntoView = firstPhysicalPeak->getOccupancyIntoView();
+            m_cachedOccupancyInView = firstPhysicalPeak->getOccupancyInView();
+        }
     }
 
     //----------------------------------------------------------------------------------------------
@@ -149,6 +157,7 @@ namespace MantidQt
       {
         m_physicalPeaks[i]->setOccupancyInView(fraction);
       }
+      m_cachedOccupancyInView = fraction;
     }
 
     /**
@@ -161,16 +170,17 @@ namespace MantidQt
       {
         m_physicalPeaks[i]->setOccupancyIntoView(fraction);
       }
+      m_cachedOccupancyIntoView = fraction;
     }
 
     double PeakOverlayMultiCross::getOccupancyInView() const
     {
-      return m_physicalPeaks[0]->getOccupancyInView();
+      return m_cachedOccupancyInView;
     }
 
     double PeakOverlayMultiCross::getOccupancyIntoView() const
     {
-      return m_physicalPeaks[0]->getOccupancyIntoView();
+      return m_cachedOccupancyIntoView;
     }
 
     bool PeakOverlayMultiCross::positionOnly() const

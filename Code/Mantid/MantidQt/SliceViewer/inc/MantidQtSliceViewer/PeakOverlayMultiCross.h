@@ -103,6 +103,10 @@ namespace SliceViewer
     QColor m_peakColour;
     /// Peaks in the workspace that are viewable in the present view.
     std::vector<bool> m_viewablePeaks;
+    /// Cached occupancy into the view
+    double m_cachedOccupancyIntoView;
+    /// Cached occupancy onto view
+    double m_cachedOccupancyInView;
 
   };
 
