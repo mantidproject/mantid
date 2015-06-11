@@ -232,10 +232,29 @@ std::string SCARFLSFJobManager::urlComponentEncode(const std::string &in) {
       out << c;
     } else {
       // Any non unreserved is pct-escaped
-      out << '%' << std::setw(2) << int((unsigned char) c);
+      out << '%' << std::setw(2) << int((unsigned char)c);
     }
   }
   return out.str();
+}
+
+std::string
+SCARFLSFJobManager::guessJobSubmissionAppName(const std::string &runnablePath,
+                                              const std::string &jobOptions)
+{
+  // Two applications are for now registered and being used on SCARF:
+  //  TOMOPY_0_0_3, PYASTRATOOLBOX_1_1
+  std::string appName = "TOMOPY_0_0_3";
+
+  // Basic guess of the app that we might really need. Not
+  // fixed/unstable at the moment
+  if (runnablePath.find("astra-2d-FBP") != std::string::npos
+      ||
+      runnablePath.find("astra-3d-SIRT3D") != std::string::npos ) {
+    appName = "PYASTRATOOLBOX_1_1";
+  }
+
+  return appName;
 }
 
 } // end namespace RemoteJobManagers

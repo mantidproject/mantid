@@ -511,7 +511,7 @@ std::string LSFJobManager::submitRemoteJob(const std::string &transactionID,
   // /work/imat/webservice_test/tomopy/imat_recon_FBP.py;INPUT_ARGS=
   // /work/imat/scripts/test_;JOB_NAME=01_test_job;OUTPUT_FILE=%J.output;ERROR_FILE=
   // %J.error"
-  const std::string appName = "TOMOPY_0_0_3";
+  const std::string appName = guessJobSubmissionAppName(runnable, param);
   // this gets executed (for example via 'exec' or 'python', depending on the
   // appName
   const std::string boundary = "bqJky99mlBWa-ZuqjC53mG6EzbmlxB";
@@ -645,6 +645,52 @@ void LSFJobManager::uploadRemoteFile(const std::string &transactionID,
         fullURL.toString() + ". Please check your username, credentials, "
                              "and parameters.");
   }
+}
+
+/**
+ * Define or guess the application name (AppName) for a job
+ * submission. This is an LSF concept that is used for example to
+ * define different application templates (or submission forms) when
+ * using the web portal interface. In that interface, compute resource
+ * admins can define application specific forms (job submission
+ * templates). An application name normally comes with specific
+ * (default) values for job options (like output file names, job
+ * queue, processors/memory limits, etc.) and specific commands to set
+ * environment variables (like additional library paths or python
+ * packages paths, etc.). For example, there could be a 'Mantid' app
+ * name that would be associated with the appropriate environment
+ * variables, etc. on the remote compute resource.
+ *
+ * This generic implementation for any LSF compute resource / job
+ * manager just returns the 'generic' application name which should
+ * always be available but might well not be the most appropriate for
+ * your particular applications. Depending on the server settings
+ * you'll need to specify particular application names so that LSF
+ * runs the appropriate environment configuration commands. For an
+ * example of specialized definition/guess of different app names see
+ * the SCARF LSF derived class.
+ *
+ * @param runnablePath path to the runnable (script, binary, etc.) that will
+ * be run in a job submission - this can be used to guess what app name/
+ * type is needed.
+ *
+ * @param jobOptions options submitted with the runnable (which can be
+ * command line options, content of a script, etc.) - this info can also be
+ * useful to define the AppName (to find out for example that a particular
+ * tool version is required)
+ *
+ * @returns Application name (server specific, contact your
+ * admin). This generic implementation ignores the inputs and always
+ * returns the 'generic' app name. This will go in the in the
+ * <AppName> parameter of the RESTful queries.
+ */
+std::string
+LSFJobManager::guessJobSubmissionAppName(const std::string &runnablePath,
+                                         const std::string &jobOptions) {
+  UNUSED_ARG(runnablePath);
+  UNUSED_ARG(jobOptions);
+
+  return "generic";
 }
 
 /**
