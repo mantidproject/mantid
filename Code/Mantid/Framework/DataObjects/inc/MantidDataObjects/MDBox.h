@@ -169,6 +169,7 @@ public:
    * coordinates */
   void refreshCache(Kernel::ThreadScheduler * /*ts*/ = NULL);
   void calculateCentroid(coord_t *centroid) const;
+  void calculateCentroid(coord_t *centroid, const int runindex) const;
   coord_t *getCentroid() const;
   void calculateDimensionStats(MDDimensionStats *stats) const;
   void integrateSphere(Mantid::API::CoordTransform &radiusTransform,

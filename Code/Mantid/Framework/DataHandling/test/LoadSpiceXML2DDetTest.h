@@ -359,6 +359,86 @@ public:
     AnalysisDataService::Instance().remove("Exp0335_S0038B");
     AnalysisDataService::Instance().remove("Exp0335_S0038");
   }
+
+
+  void test_LoadHB3AXMLInstrumentNoTable()
+  {
+    // Test 2theta = 15 degree
+    LoadSpiceXML2DDet loader;
+    loader.initialize();
+
+    const std::string filename("HB3A_exp355_scan0001_0522.xml");
+    TS_ASSERT_THROWS_NOTHING(loader.setProperty("Filename", filename));
+    TS_ASSERT_THROWS_NOTHING(
+          loader.setProperty("OutputWorkspace", "Exp0335_S0038"));
+    std::vector<size_t> sizelist(2);
+    sizelist[0] = 256;
+    sizelist[1] = 256;
+    loader.setProperty("DetectorGeometry", sizelist);
+    loader.setProperty("LoadInstrument", true);
+
+    loader.execute();
+    TS_ASSERT(loader.isExecuted());
+
+    // Get data
+    MatrixWorkspace_sptr outws = boost::dynamic_pointer_cast<MatrixWorkspace>(
+          AnalysisDataService::Instance().retrieve("Exp0335_S0038"));
+    TS_ASSERT(outws);
+    TS_ASSERT_EQUALS(outws->getNumberHistograms(), 256 * 256);
+
+    // Value
+    TS_ASSERT_DELTA(outws->readY(255)[0], 1.0, 0.0001);
+    TS_ASSERT_DELTA(outws->readY(253 * 256 + 9)[0], 1.0, 0.00001);
+
+    // Instrument
+    TS_ASSERT(outws->getInstrument());
+
+    Kernel::V3D source = outws->getInstrument()->getSource()->getPos();
+    Kernel::V3D sample = outws->getInstrument()->getSample()->getPos();
+    Kernel::V3D det0pos = outws->getDetector(0)->getPos();
+    Kernel::V3D det255pos = outws->getDetector(255)->getPos();
+    Kernel::V3D detlast0 = outws->getDetector(256 * 255)->getPos();
+    Kernel::V3D detlast = outws->getDetector(256 * 256 - 1)->getPos();
+    Kernel::V3D detmiddle =
+        outws->getDetector(256 / 2 * 256 + 256 / 2)->getPos();
+    Kernel::V3D detedgemiddle = outws->getDetector(256 * 256 / 2)->getPos();
+    std::cout << "\n";
+    std::cout << "Sample position: " << sample.X() << ", " << sample.Y() << ", "
+              << sample.Z() << "\n";
+    std::cout << "Source position: " << source.X() << ", " << source.Y() << ", "
+              << source.Z() << "\n";
+    std::cout << "Det Edge Middle: " << detedgemiddle.X() << ", "
+              << detedgemiddle.Y() << ", " << detedgemiddle.Z() << "\n";
+    std::cout << "Det (1, 1)     : " << det0pos.X() << ", " << det0pos.Y()
+              << ", " << det0pos.Z() << "\n";
+
+    // center of the detector must be negative
+    TS_ASSERT_LESS_THAN(detmiddle.X(), 0.0);
+
+    // detector distance
+    double dist0 = sample.distance(det0pos);
+    double dist255 = sample.distance(det255pos);
+    double distlast = sample.distance(detlast);
+    double distlast0 = sample.distance(detlast0);
+    double distmiddle = sample.distance(detmiddle);
+
+    TS_ASSERT_DELTA(dist0, dist255, 0.0001);
+    TS_ASSERT_DELTA(dist0, distlast, 0.0001);
+    TS_ASSERT_DELTA(dist0, distlast0, 0.0001);
+    TS_ASSERT_DELTA(distmiddle, 0.3518, 0.000001);
+
+    // 2theta value
+    Kernel::V3D sample_source = sample - source;
+    std::cout << "Sample - Source = " << sample_source.X() << ", "
+              << sample_source.Y() << ", " << sample_source.Z() << "\n";
+
+
+    Kernel::V3D detmid_sample = detmiddle - sample;
+    double twotheta_middle =
+        detmid_sample.angle(sample_source) * 180. / 3.1415926;
+    TS_ASSERT_DELTA(twotheta_middle, 42.70975, 0.02);
+  }
+
 };
 
 #endif /* MANTID_DATAHANDLING_LOADSPICEXML2DDETTEST_H_ */
