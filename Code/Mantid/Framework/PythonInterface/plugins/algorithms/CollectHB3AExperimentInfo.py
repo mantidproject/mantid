@@ -63,7 +63,7 @@ class CollectHB3AExperimentInfo(PythonAlgorithm):
                 If no Pt. given, then all Pt. are all loaded."
         self.declareProperty(mantid.kernel.IntArrayProperty("PtLists", []), pd)
 
-        self.declareProperty(FileProperty(name="DataDirectory",defaultValue="",action=FileAction.Directory))
+        self.declareProperty(FileProperty(name="DataDirectory",defaultValue="",action=FileAction.OptionalDirectory))
 
         self.declareProperty("GetFileFromServer", False, "Obtain data file directly from neutrons.ornl.gov.")
 
