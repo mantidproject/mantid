@@ -9,8 +9,7 @@ if ( CXXTEST_FOUND )
                         ../../TestHelpers/src/BoxControllerDummyIO.cpp
                         ../../TestHelpers/src/NexusTestHelper.cpp
       )
-  
-  endif()
+  cxxtest_add_test ( APITest ${TEST_FILES} ${GMOCK_TEST_FILES})
   target_link_libraries( APITest LINK_PRIVATE 
             API
             Geometry
