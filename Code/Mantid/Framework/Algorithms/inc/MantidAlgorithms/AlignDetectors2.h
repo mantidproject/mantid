@@ -2,7 +2,7 @@
 #define MANTID_ALGORITHMS_ALIGNDETECTORS2_H_
 
 #include "MantidAPI/Algorithm.h"
-#include "MantidDataObjects/EventWorkspace.h"
+#include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidDataObjects/OffsetsWorkspace.h"
 #include "MantidKernel/System.h"
 
@@ -52,20 +52,17 @@ public:
   AlignDetectors2();
   virtual ~AlignDetectors2();
 
-  /// Algorithm's name for identification overriding a virtual method
+  /// Algorithms name for identification. @see Algorithm::name
   virtual const std::string name() const;
-  /// Summary of algorithms purpose
+  /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
   virtual const std::string summary() const;
 
-  /// Algorithm's version for identification overriding a virtual method
+  /// Algorithm's version for identification. @see Algorithm::version
   virtual int version() const ;
-  /// Algorithm's category for identification overriding a virtual method
+  /// Algorithm's category for identification. @see Algorithm::category
   virtual const std::string category() const;
-
-  // ----- Useful static functions ------
-  static std::map<detid_t, double> *calcTofToD_ConversionMap(
-      Mantid::API::MatrixWorkspace_const_sptr inputWS,
-      Mantid::DataObjects::OffsetsWorkspace_sptr offsetsWS);
+  /// Cross-check properties with each other @see IAlgorithm::validateInputs
+  virtual std::map<std::string, std::string> validateInputs();
 
 private:
   // Implement abstract Algorithm methods
@@ -74,11 +71,13 @@ private:
 
   void execEvent();
 
-  // void execTOFEvent(std::string calfilename,
-  // Mantid::API::MatrixWorkspace_const_sptr inputWS);
+  void loadCalFile(API::MatrixWorkspace_sptr inputWS, const std::string & filename);
 
-  /// Pointer for an event workspace
-  Mantid::DataObjects::EventWorkspace_const_sptr eventW;
+  Mantid::API::ITableWorkspace_sptr m_calibrationWS;
+
+  /// number of spectra in input workspace
+  int64_t m_numberOfSpectra;
+
 
   /// Map of conversion factors for TOF to d-Spacing conversion
   std::map<detid_t, double> *tofToDmap;
