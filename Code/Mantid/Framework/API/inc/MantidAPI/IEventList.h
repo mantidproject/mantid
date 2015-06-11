@@ -58,6 +58,8 @@ public:
   virtual double integrate(const double minX, const double maxX,
                            const bool entireRange) const = 0;
   /// Convert the TOF values
+  virtual void convertTof(std::function<double(double)> func, const int sorting=0) = 0;
+  /// Convert the TOF values
   virtual void convertTof(const double factor, const double offset = 0.) = 0;
   /// Scale the TOF values by a constant
   virtual void scaleTof(const double factor) = 0;
