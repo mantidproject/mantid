@@ -692,7 +692,7 @@ public:
     // We get an instrument group from a test file in the form that would occur in an ISIS Nexus file
 
     // Create the root Nexus class
-    std::string path = FileFinder::Instance().getFullPath("LOQInstrument.h5");
+    std::string path = FileFinder::Instance().getFullPath("LOQinstrument.h5");
 
    
     // Get nexus file for this and move it to ISIS Nexus group 'raw_data_1'
