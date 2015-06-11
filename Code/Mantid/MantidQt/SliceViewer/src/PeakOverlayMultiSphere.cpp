@@ -1,5 +1,4 @@
 #include "MantidQtSliceViewer/PeakOverlayMultiSphere.h"
-#include "MantidKernel/WarningSuppressions.h"
 #include <qwt_plot.h>
 #include <qwt_plot_canvas.h>
 #include <qwt_scale_div.h>
