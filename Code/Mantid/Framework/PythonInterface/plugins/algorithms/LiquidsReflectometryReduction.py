@@ -116,7 +116,7 @@ class LiquidsReflectometryReduction(PythonAlgorithm):
             # The standard mode of operation is to give a run number as input
             try:
                 data_file = FileFinder.findRuns("REF_L%s" % item)[0]
-            except:
+            except RuntimeError:
                 # Allow for a file name or file path as input
                 data_file = FileFinder.findRuns(item)[0]
             file_list.append(data_file)
