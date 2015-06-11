@@ -1,4 +1,4 @@
-#include "InputController.h"
+#include "MantidQtMantidWidgets/InputController.h"
 
 #include <QMouseEvent>
 #include <QPainter>
@@ -7,6 +7,9 @@
 #include <QApplication>
 
 #include <iostream>
+
+namespace MantidQt {
+namespace MantidWidgets {
 
 //--------------------------------------------------------------------------------
 
@@ -417,5 +420,7 @@ void InputControllerErase::drawCursor()
     painter.drawRect( QRect( 0, 0, m_size, m_size ) );
 
     m_rect.setSize( QSize(m_size,m_size) );
+}
+}
 }
 

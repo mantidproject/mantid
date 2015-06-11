@@ -3,6 +3,7 @@
 
 #include "MantidQtSliceViewer/PeaksPresenter.h"
 #include "MantidQtSliceViewer/NullPeaksPresenter.h"
+#include "MantidQtSliceViewer/PeakBoundingBox.h"
 #include "MantidQtSliceViewer/PeakPalette.h"
 #include "MantidQtSliceViewer/ZoomablePeaksView.h"
 #include "MantidQtSliceViewer/UpdateableOnDemand.h"
@@ -11,6 +12,7 @@
 #include <stdexcept>
 #include <boost/shared_ptr.hpp>
 #include <boost/optional.hpp>
+#include <boost/weak_ptr.hpp>
 
 namespace Mantid {
 namespace API {
@@ -62,6 +64,8 @@ public:
   virtual void reInitialize(
       boost::shared_ptr<Mantid::API::IPeaksWorkspace> ) { /*Do nothing*/
   }
+  virtual bool deletePeaksIn(PeakBoundingBox box);
+  virtual bool addPeakAt(double plotCoordsPointX, double plotCoordsPointY);
 
   /// Constructor
   CompositePeaksPresenter(ZoomablePeaksView *const zoomablePlottingWidget,
@@ -83,6 +87,8 @@ public:
   virtual double getPeakSizeOnProjection() const;
   /// Get the peaks size into the current projection
   virtual double getPeakSizeIntoProjection() const;
+  /// Enter peak edit mode.
+  void peakEditMode(EditMode mode);
   /// Change the foreground representation for the peaks of this workspace
   void
   setForegroundColour(boost::shared_ptr<const Mantid::API::IPeaksWorkspace> ws,
@@ -141,6 +147,12 @@ public:
       boost::shared_ptr<Mantid::API::IPeaksWorkspace> &changedPeaksWS);
   /// Determine if the presenter contents are different.
   bool contentsDifferent(PeaksPresenter const * other) const;
+  /// Enter the requested edit mode for the peaks workspace.
+  void editCommand(EditMode editMode, boost::weak_ptr<const Mantid::API::IPeaksWorkspace> target);
+  /// Can we add peaks to this peaks workspace.
+  bool hasPeakAddModeFor(boost::weak_ptr<const Mantid::API::IPeaksWorkspace> target);
+  /// Can we add peaks
+  bool hasPeakAddMode() const;
 private:
   /// Updateable on demand method.
   void updatePeaksWorkspace(
@@ -173,6 +185,7 @@ private:
   /// index of peak zoomed in on.
   int m_zoomedPeakIndex;
 };
+
 }
 }
 
