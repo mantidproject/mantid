@@ -4,6 +4,7 @@
 #include "MantidAPI/Column.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/ITableWorkspace.h"
 
 #include <QApplication>
 #include <QMessageBox>
