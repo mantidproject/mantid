@@ -696,12 +696,10 @@ public:
 
    
     // Get nexus file for this and move it to ISIS Nexus group 'raw_data_1'
-    // ::NeXus::File nxFile = new ::NeXus::File(root.m_fileID, NXACC_READ);
     ::NeXus::File nxFile(path, NXACC_READ);
 
-    std::string params;
-
     // Load the Nexus IDF info
+    std::string params;
     TS_ASSERT_THROWS_NOTHING(ei.loadInstrumentInfoNexus( &nxFile, params));
 
   }
