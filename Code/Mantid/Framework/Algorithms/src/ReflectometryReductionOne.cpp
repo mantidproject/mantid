@@ -168,6 +168,9 @@ void ReflectometryReductionOne::init() {
                                                 Direction::Output),
                   "Calculated final theta in degrees.");
 
+  declareProperty("NormalizeByIntegratedMonitors", true,
+                  "Normalize by dividing by the integrated monitors.");
+
   declareProperty(new PropertyWithValue<bool>("CorrectDetectorPositions", true,
                                               Direction::Input),
                   "Correct detector positions using ThetaIn (if given)");
@@ -190,7 +193,7 @@ void ReflectometryReductionOne::init() {
 
   declareProperty(new PropertyWithValue<bool>("StrictSpectrumChecking", true,
                                               Direction::Input),
-                  "Enforces spectrum number checking prior to normalisation");
+                  "Enforces spectrum number checking prior to normalization");
 
   std::vector<std::string> correctionAlgorithms = boost::assign::list_of(
       "None")("PolynomialCorrection")("ExponentialCorrection");
@@ -519,20 +522,26 @@ void ReflectometryReductionOne::exec() {
         detectorWS = divide(detectorWS, regionOfDirectBeamWS);
       }
     }
-    auto integrationAlg = this->createChildAlgorithm("Integration");
-    integrationAlg->initialize();
-    integrationAlg->setProperty("InputWorkspace", monitorWS);
-    integrationAlg->setProperty("RangeLower",
-                                monitorIntegrationWavelengthInterval.get<0>());
-    integrationAlg->setProperty("RangeUpper",
-                                monitorIntegrationWavelengthInterval.get<1>());
-    integrationAlg->execute();
-    MatrixWorkspace_sptr integratedMonitor =
-        integrationAlg->getProperty("OutputWorkspace");
 
-    IvsLam = divide(
-        detectorWS,
-        integratedMonitor); // Normalize by the integrated monitor counts.
+    const bool normalizeByIntMon = getProperty("NormalizeByIntegratedMonitors");
+    if (normalizeByIntMon) {
+      auto integrationAlg = this->createChildAlgorithm("Integration");
+      integrationAlg->initialize();
+      integrationAlg->setProperty("InputWorkspace", monitorWS);
+      integrationAlg->setProperty(
+          "RangeLower", monitorIntegrationWavelengthInterval.get<0>());
+      integrationAlg->setProperty(
+          "RangeUpper", monitorIntegrationWavelengthInterval.get<1>());
+      integrationAlg->execute();
+      MatrixWorkspace_sptr integratedMonitor =
+          integrationAlg->getProperty("OutputWorkspace");
+
+      IvsLam = divide(
+          detectorWS,
+          integratedMonitor); // Normalize by the integrated monitor counts.
+    } else {
+      IvsLam = divide(detectorWS, monitorWS);
+    }
   } else {
     // Neither TOF or Lambda? Abort.
     throw std::invalid_argument(

@@ -22,6 +22,7 @@ digraph ReflectometryReductionOne {
     checkTransUnits [label="X axis in &lambda;?"]
     checkThetaIn    [label="ThetaIn given?"]
     checkCorDetPos  [label="Correct Detector Positions?"]
+    checkNormDetMon [label="Normalize by\nIntegrated Monitors?"]
     checkCorrAlg    [label="CorrectionAlgorithm?"]
   }
 
@@ -49,7 +50,6 @@ digraph ReflectometryReductionOne {
     valMon          [label="I&#8320;(&lambda;)"]
     valDet          [label="I(&lambda;)"]
     valIntegrated   [label="&Sigma; I&#8320;(&lambda;)"]
-    valInputDiv     [label="I(&lambda;) / &Sigma;I&#8320;(&lambda;)"]
     valTrans        [label="It(&lambda;) / &Sigma;I&#8320;t(&lambda;)"]
   }
 
@@ -58,15 +58,16 @@ digraph ReflectometryReductionOne {
   checkXUnit        -> convertToWL      [label="No"]
   convertToWL       -> valMon           [label="Monitors"]
   convertToWL       -> valDet           [label="Detectors"]
-  valMon            -> intMon
+  valMon            -> checkNormDetMon
+  checkNormDetMon   -> intMon           [label="Yes"]
+  checkNormDetMon   -> divideDetMon     [label="No"]
   valDet            -> checkMultDet
   intMon            -> valIntegrated
   valIntegrated     -> divideDetMon
   checkMultDet      -> directBeamNorm   [label="Yes"]
   checkMultDet      -> divideDetMon     [label="No"]
   directBeamNorm    -> divideDetMon
-  divideDetMon      -> valInputDiv
-  valInputDiv       -> checkTransRun
+  divideDetMon      -> checkTransRun
   checkTransRun     -> checkCorrAlg     [label="No"]
   checkTransRun     -> divideTrans      [label="Yes"]
   corrAlg           -> checkCorrAlg

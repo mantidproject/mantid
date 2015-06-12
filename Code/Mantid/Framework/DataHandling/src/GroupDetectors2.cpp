@@ -1383,6 +1383,26 @@ void translateRange(const std::string &instructions,
 } // anonymous namespace
 
 /**
+ * Used to validate the inputs for GroupDetectors2
+ *
+ * @returns : A map of the invalid property names to what the problem is.
+ */
+std::map<std::string, std::string> GroupDetectors2::validateInputs() {
+  std::map<std::string, std::string> errors;
+
+  const std::string pattern = getPropertyValue("GroupingPattern");
+
+  boost::regex re(
+      "^\\s*[0-9]+\\s*$|^(\\s*,*[0-9]+(\\s*(,|:|\\+|\\-)\\s*)*[0-9]*)*$");
+  if (!pattern.empty() && !boost::regex_match(pattern, re)) {
+    errors["GroupingPattern"] =
+        "GroupingPattern is not well formed: " + pattern;
+  }
+
+  return errors;
+}
+
+/**
  * Translate the PerformIndexOperations processing instructions into a format
  * usable by GroupDetectors.
  *
@@ -1391,15 +1411,6 @@ void translateRange(const std::string &instructions,
  */
 void GroupDetectors2::translateInstructions(const std::string &instructions,
                                             std::stringstream &commands) {
-
-  // first check that the instructions/pattern makes sense
-  boost::regex re(
-      "^\\s*[0-9]+\\s*$|^(\\s*,*[0-9]+(\\s*(,|:|\\+|\\-)\\s*)*[0-9]*)*$");
-  if (!boost::regex_match(instructions, re)) {
-    throw std::invalid_argument("GroupingPattern is not well formed: " +
-                                instructions);
-  }
-
   // vector of groups, each group being a vector of its spectra
   std::vector<std::vector<int>> outGroups;
 
