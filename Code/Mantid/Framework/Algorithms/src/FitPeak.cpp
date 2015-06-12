@@ -649,7 +649,10 @@ double FitOneSinglePeak::calChiSquareSD(IFunction_sptr fitfunc,
   }
 
   // Retrieve result
-  double chi2 = fit->getProperty("ChiSquaredDividedByDOF");
+  // double chi2 = fit->getProperty("ChiSquaredDividedByDOF");
+  double chi2 = fit->getProperty("ChiSquared");
+  // g_log.notice() << "[DELETE DB] Chi2/DOF = " << chi2 << ", Chi2 = " <<
+  // chi2_2 << "\n";
 
   return chi2;
 }
