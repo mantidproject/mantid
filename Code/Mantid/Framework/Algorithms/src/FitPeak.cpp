@@ -838,7 +838,7 @@ double FitOneSinglePeak::fitCompositeFunction(
 
   // Do calculation for starting chi^2/Rwp: as the assumption that the input the
   // so far the best Rwp
-  bool modecal = true;
+  // bool modecal = true;
   // FIXME - This is not a good practise...
   double backRwp = calChiSquareSD(bkgdfunc, dataws, wsindex, startx, endx);
   //    fitFunctionSD(bkgdfunc, dataws, wsindex, startx, endx, modecal);
@@ -854,7 +854,7 @@ double FitOneSinglePeak::fitCompositeFunction(
   storeFunctionError(bkgdfunc, m_fitErrorBkgdFunc);
 
   // Fit
-  modecal = false;
+  bool modecal = false;
   double goodness =
       fitFunctionSD(compfunc, dataws, wsindex, startx, endx, modecal);
   string errorreason;
