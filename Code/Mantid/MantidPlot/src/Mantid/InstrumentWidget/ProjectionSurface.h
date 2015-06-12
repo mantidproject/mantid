@@ -27,10 +27,14 @@ namespace Mantid{
     class IPeaksWorkspace;
   }
 }
+namespace MantidQt {
+   namespace MantidWidgets {
+    class InputController;
+    }
+}
 
 class GLColor;
 class MantidGLWidget;
-class InputController;
 
 class QMouseEvent;
 class QWheelEvent;
@@ -245,7 +249,7 @@ protected:
   QRect selectionRect()const;
   RectF selectionRectUV()const;
   size_t getPickID(int x, int y)const;
-  void setInputController(int mode, InputController* controller);
+  void setInputController(int mode, MantidQt::MantidWidgets::InputController* controller);
   void setPeakVisibility() const;
 
   //-----------------------------------
@@ -270,9 +274,9 @@ protected:
 
 private:
   /// Get the current input controller
-  InputController* getController() const;
+  MantidQt::MantidWidgets::InputController* getController() const;
 
-  QMap<int,InputController*> m_inputControllers; ///< controllers for mouse and keyboard input
+  QMap<int,MantidQt::MantidWidgets::InputController*> m_inputControllers; ///< controllers for mouse and keyboard input
   /// Set when the image must be redrawn
   mutable bool m_viewChanged;
   /// Set when the picking image must be redrawn regardless of the interaction mode

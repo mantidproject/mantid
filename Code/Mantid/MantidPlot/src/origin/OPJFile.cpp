@@ -526,7 +526,7 @@ int OPJFile::ParseFormatOld() {
 
   int POS = int(ftell(f)-11);
   fprintf(debug,"\nHEADER SECTION\n");
-  fprintf(debug," nr_spreads = %d\n",SPREADSHEET.size());
+  fprintf(debug," nr_spreads = %zu\n",SPREADSHEET.size());
   fprintf(debug," [position @ 0x%X]\n",POS);
   fflush(debug);
 
@@ -623,7 +623,7 @@ int OPJFile::ParseFormatOld() {
   fflush(debug);
 
   /////////////// COLUMN Types ///////////////////////////////////////////
-  fprintf(debug,"     Spreadsheet has %d columns\n",SPREADSHEET[spread].column.size());
+  fprintf(debug,"     Spreadsheet has %zu columns\n",SPREADSHEET[spread].column.size());
   for (unsigned int j=0;j<SPREADSHEET[spread].column.size();j++) {
     fprintf(debug,"     reading COLUMN %d/%zd type\n",j+1,SPREADSHEET[spread].column.size());
     fflush(debug);

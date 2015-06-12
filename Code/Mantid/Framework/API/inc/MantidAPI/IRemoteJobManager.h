@@ -99,6 +99,12 @@ public:
     /// Date-time the job finished. No particular format can be
     /// assumed
     Mantid::Kernel::DateAndTime completionTime;
+    /// Command line for this job (when running a command ideally this
+    /// would be provided by the underlying job scheduling
+    /// mechanism). As examples, Platform LSF provides this. For the
+    /// Mantid remote job submission API it probably doesn't add any
+    /// important information.
+    std::string cmdLine;
   };
 
   /**
@@ -115,6 +121,19 @@ public:
    */
   virtual void authenticate(const std::string &username,
                             const std::string &password) = 0;
+
+  /**
+   * Logout from the remote resource (close session). Depending on the
+   * underlying scheduler and authentication system this may have
+   * different implementations and effects. In some cases, like the
+   * Mantid Remote Job Submission API v1, this may not send any
+   * request to the remote.
+   *
+   * @param username Username on the remote resource.
+   *
+   * @throws std::runtime_error If the operation fails
+   */
+  virtual void logout(const std::string &username) = 0;
 
   /**
    * Submit a job (and implicitly request to start it) within a

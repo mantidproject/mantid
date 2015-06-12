@@ -47,7 +47,7 @@ void ReflectometryWorkflowBase::initIndexInputs() {
   declareProperty(new PropertyWithValue<int>("I0MonitorIndex",
                                              Mantid::EMPTY_INT(),
                                              mandatoryWorkspaceIndex),
-                  "I0 monitor index");
+                  "I0 monitor workspace index");
 
   declareProperty(new PropertyWithValue<std::string>(
                       "ProcessingInstructions", "",
@@ -360,7 +360,6 @@ ReflectometryWorkflowBase::toLamMonitor(const MatrixWorkspace_sptr &toConvert,
   convertUnitsAlg->initialize();
   convertUnitsAlg->setProperty("InputWorkspace", toConvert);
   convertUnitsAlg->setProperty("Target", "Wavelength");
-  convertUnitsAlg->setProperty("AlignBins", true);
   convertUnitsAlg->execute();
 
   // Crop the to the monitor index.
@@ -374,14 +373,15 @@ ReflectometryWorkflowBase::toLamMonitor(const MatrixWorkspace_sptr &toConvert,
   cropWorkspaceAlg->execute();
   monitorWS = cropWorkspaceAlg->getProperty("OutputWorkspace");
 
+  //If min&max are both 0, we won't do the flat background normalization.
+  if (backgroundMinMax.get<0>() == 0 && backgroundMinMax.get<1>() == 0)
+    return monitorWS;
+
   // Flat background correction
   auto correctMonitorsAlg =
       this->createChildAlgorithm("CalculateFlatBackground");
   correctMonitorsAlg->initialize();
   correctMonitorsAlg->setProperty("InputWorkspace", monitorWS);
-  correctMonitorsAlg->setProperty(
-      "WorkspaceIndexList",
-      boost::assign::list_of(0).convert_to_container<std::vector<int>>());
   correctMonitorsAlg->setProperty("StartX", backgroundMinMax.get<0>());
   correctMonitorsAlg->setProperty("EndX", backgroundMinMax.get<1>());
   correctMonitorsAlg->setProperty("SkipMonitors", false);
@@ -407,23 +407,21 @@ ReflectometryWorkflowBase::toLamDetector(const std::string &processingCommands,
                                          const double &wavelengthStep) {
   // Process the input workspace according to the processingCommands to get a
   // detector workspace
-  auto performIndexAlg = this->createChildAlgorithm("GroupDetectors");
-  performIndexAlg->initialize();
-  performIndexAlg->setProperty("GroupingPattern", processingCommands);
-  performIndexAlg->setProperty("InputWorkspace", toConvert);
-  performIndexAlg->execute();
-  MatrixWorkspace_sptr detectorWS =
-      performIndexAlg->getProperty("OutputWorkspace");
-
-  // Now convert units. Do this after the conjoining step otherwise the x bins
-  // will not match up.
   auto convertUnitsAlg = this->createChildAlgorithm("ConvertUnits");
   convertUnitsAlg->initialize();
-  convertUnitsAlg->setProperty("InputWorkspace", detectorWS);
+  convertUnitsAlg->setProperty("InputWorkspace", toConvert);
   convertUnitsAlg->setProperty("Target", "Wavelength");
   convertUnitsAlg->setProperty("AlignBins", true);
   convertUnitsAlg->execute();
-  detectorWS = convertUnitsAlg->getProperty("OutputWorkspace");
+  MatrixWorkspace_sptr detectorWS =
+      convertUnitsAlg->getProperty("OutputWorkspace");
+
+  auto performIndexAlg = this->createChildAlgorithm("GroupDetectors");
+  performIndexAlg->initialize();
+  performIndexAlg->setProperty("GroupingPattern", processingCommands);
+  performIndexAlg->setProperty("InputWorkspace", detectorWS);
+  performIndexAlg->execute();
+  detectorWS = performIndexAlg->getProperty("OutputWorkspace");
 
   // Crop out the lambda x-ranges now that the workspace is in wavelength.
   auto cropWorkspaceAlg = this->createChildAlgorithm("CropWorkspace");

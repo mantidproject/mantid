@@ -334,6 +334,10 @@ public:
         "upload file when logged in, with a wrong transaction ID, should throw",
         jm.uploadRemoteFile("wrong_transID", "remote_fname", "local_fname"),
         std::invalid_argument);
+
+    // logout for the next tests
+    TSM_ASSERT_THROWS_NOTHING("successful logout should not throw",
+                              jm.logout(goodUsername));
   }
 
   /// Login is required before running any other command with SCARF (except
@@ -359,6 +363,10 @@ public:
     MockedGoodLoginResponse_SCARFLSFJM login;
     TSM_ASSERT_THROWS_NOTHING("successful authentication should not throw",
                               login.authenticate(goodUsername, goodPassword));
+
+    // logout for the next tests
+    TSM_ASSERT_THROWS_NOTHING("successful logout should not throw",
+                              login.logout(goodUsername));
   }
 
   void test_startRemoteTransaction() {
@@ -370,13 +378,17 @@ public:
     TSM_ASSERT_THROWS("start transaction should throw when not logged in",
                       tid = jm->startRemoteTransaction(), std::runtime_error);
 
+    const std::string user = "user";
     TSM_ASSERT_THROWS_NOTHING("successful authentication should not throw",
-                              jm->authenticate("user", "pass"));
+                              jm->authenticate(user, "pass"));
     TSM_ASSERT_THROWS_NOTHING(
         "start transaction should not throw when logged in",
         tid = jm->startRemoteTransaction());
     TSM_ASSERT("a successful start transaction should not return an empty ID",
                tid != "");
+    // logout for the next tests
+    TSM_ASSERT_THROWS_NOTHING("successful logout should not throw",
+                              jm->logout(user));
   }
 
   void test_stopRemoteTransaction() {
@@ -384,8 +396,9 @@ public:
     TSM_ASSERT("dynamical allocation of job manager should not fail",
                jm = boost::make_shared<MockedGoodLoginResponse_SCARFLSFJM>());
 
+    const std::string user = "user";
     TSM_ASSERT_THROWS_NOTHING("successful authentication should not throw",
-                              jm->authenticate("user", "pass"));
+                              jm->authenticate(user, "pass"));
     std::string tid;
     TSM_ASSERT_THROWS_NOTHING(
         "start remote transaction should not throw when logged in",
@@ -404,6 +417,9 @@ public:
     TSM_ASSERT_THROWS("stop transaction with an ID of a transaction already "
                       "stopped should throw",
                       jm->stopRemoteTransaction(tid), std::invalid_argument);
+    // logout for the next tests
+    TSM_ASSERT_THROWS_NOTHING("successful logout should not throw",
+                              jm->logout(user));
   }
 
   void test_submit() {
@@ -430,8 +446,9 @@ public:
 
   void test_download() {
     MockedGoodLoginResponse_SCARFLSFJM jm;
+    const std::string user = "user";
     TSM_ASSERT_THROWS_NOTHING("successful authentication should not throw",
-                              jm.authenticate("user", "pass"));
+                              jm.authenticate(user, "pass"));
     std::string tid;
     TSM_ASSERT_THROWS_NOTHING("successful start transaction should not throw",
                               tid = jm.startRemoteTransaction());
@@ -453,6 +470,10 @@ public:
     TSM_ASSERT(
         "this fake job manager for testing should not create downloaded files",
         !Poco::File(localName).exists());
+
+    // logout for the next tests
+    TSM_ASSERT_THROWS_NOTHING("successful logout should not throw",
+                              jm.logout(user));
   }
 
   void test_queryStatus() {
@@ -478,8 +499,9 @@ public:
     std::string id("id0001");
     std::string name("name1");
     MockedGoodJobStatus_SCARFLSFJM jm(id, name);
+    const std::string user = "user";
     TSM_ASSERT_THROWS_NOTHING("successful authentication should not throw",
-                              jm.authenticate("user", "password"));
+                              jm.authenticate(user, "password"));
     TSM_ASSERT_THROWS_NOTHING("successful query all jobs should not throw",
                               infos = jm.queryAllRemoteJobs());
     std::string tid;
@@ -499,12 +521,17 @@ public:
                         "the name obtained when submitting the job",
                         infos[0].name, name);
     }
+
+    // logout for the next tests
+    TSM_ASSERT_THROWS_NOTHING("successful logout should not throw",
+                              jm.logout(user));
   }
 
   void test_queryRemoteFile() {
     MockedGoodLoginResponse_SCARFLSFJM jm;
+    const std::string user = "user";
     TSM_ASSERT_THROWS_NOTHING("successful authentication should not throw",
-                              jm.authenticate("user", "pass"));
+                              jm.authenticate(user, "pass"));
     std::string tid;
     TSM_ASSERT_THROWS_NOTHING("successful start transaction should not throw",
                               tid = jm.startRemoteTransaction());
@@ -521,6 +548,10 @@ public:
     TSM_ASSERT_THROWS_NOTHING("successful query remote file with correct "
                               "transaction ID should not throw",
                               jm.queryRemoteFile(tid));
+
+    // logout for the next tests
+    TSM_ASSERT_THROWS_NOTHING("successful logout should not throw",
+                              jm.logout(user));
   }
 
   void test_queryStatusByID() {
@@ -569,12 +600,12 @@ public:
     MockedSCARFLSFJM jmFail;
     std::string tid("trans001");
     TSM_ASSERT_THROWS("stop transaction without logging in should throw",
-                      jmFail.stopRemoteTransaction(tid), std::runtime_error);
+                      jmFail.stopRemoteTransaction(tid), std::invalid_argument);
 
     MockedErrorResponse_SCARFLSFJM err;
     TSM_ASSERT_THROWS(
         "stop transaction with error response from server should throw",
-        err.stopRemoteTransaction(tid), std::runtime_error);
+        err.stopRemoteTransaction(tid), std::invalid_argument);
     TSM_ASSERT_THROWS(
         "authenticate with error response from server should throw",
         err.authenticate("user", "pass"), std::runtime_error);
