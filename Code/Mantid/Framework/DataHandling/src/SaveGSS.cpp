@@ -24,6 +24,8 @@ DECLARE_ALGORITHM(SaveGSS)
 const std::string RALF("RALF");
 const std::string SLOG("SLOG");
 
+SaveGSS::SaveGSS() : Mantid::API::Algorithm(), m_useSpecAsBank(false) {}
+
 //---------------------------------------------------
 // Private member functions
 //---------------------------------------------------

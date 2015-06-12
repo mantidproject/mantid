@@ -23,7 +23,9 @@ using std::size_t;
 namespace Mantid {
 namespace Algorithms {
 BinaryOperation::BinaryOperation()
-    : API::Algorithm(), m_ClearRHSWorkspace(false),
+    : API::Algorithm(), m_lhs(), m_elhs(), m_rhs(), m_erhs(), m_out(), m_eout(),
+      m_AllowDifferentNumberSpectra(false), m_ClearRHSWorkspace(false),
+      m_matchXSize(false), m_flipSides(false), m_keepEventWorkspace(false),
       m_useHistogramForRhsEventWorkspace(false),
       m_do2D_even_for_SingleColumn_on_rhs(false), m_indicesToMask(),
       m_progress(NULL) {}

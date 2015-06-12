@@ -6,18 +6,13 @@
 using Mantid::Kernel::IPropertySettings;
 using namespace boost::python;
 
-// clang-format off
-void export_IPropertySettings()
-// clang-format on
-{
-  register_ptr_to_python<IPropertySettings*>();
+void export_IPropertySettings() {
+  register_ptr_to_python<IPropertySettings *>();
 
-  class_<IPropertySettings,boost::noncopyable>("IPropertySettings", no_init)
-    .def("isEnabled", &IPropertySettings::isEnabled,
-         "Is the property to be shown as enabled in the GUI. Default true.")
+  class_<IPropertySettings, boost::noncopyable>("IPropertySettings", no_init)
+      .def("isEnabled", &IPropertySettings::isEnabled,
+           "Is the property to be shown as enabled in the GUI. Default true.")
 
-    .def("isVisible", &IPropertySettings::isVisible,
-         "Is the property to be shown in the GUI? Default true.")
-         ;
+      .def("isVisible", &IPropertySettings::isVisible,
+           "Is the property to be shown in the GUI? Default true.");
 }
-

@@ -43,13 +43,14 @@ FindPeaks::FindPeaks()
       m_bkgdOrder(0), m_outPeakTableWS(), m_progress(NULL), m_dataWS(),
       m_inputPeakFWHM(0), m_wsIndex(0), singleSpectrum(false),
       m_highBackground(false), m_rawPeaksTable(false), m_numTableParams(0),
-      m_peakFuncType(""), m_backgroundType(""), m_vecPeakCentre(),
-      m_vecFitWindows(), m_backgroundFunction(), m_peakFunction(),
-      m_minGuessedPeakWidth(0), m_maxGuessedPeakWidth(0),
-      m_stepGuessedPeakWidth(0), m_usePeakPositionTolerance(false),
-      m_peakPositionTolerance(0.0), m_fitFunctions(), m_peakLeftIndexes(),
-      m_peakRightIndexes(), m_minimizer("Levenberg-MarquardtMD"),
-      m_costFunction(), m_minHeight(0.0), m_useObsCentre(false) {}
+      m_centreIndex(1) /* for Gaussian */, m_peakFuncType(""),
+      m_backgroundType(""), m_vecPeakCentre(), m_vecFitWindows(),
+      m_backgroundFunction(), m_peakFunction(), m_minGuessedPeakWidth(0),
+      m_maxGuessedPeakWidth(0), m_stepGuessedPeakWidth(0),
+      m_usePeakPositionTolerance(false), m_peakPositionTolerance(0.0),
+      m_fitFunctions(), m_peakLeftIndexes(), m_peakRightIndexes(),
+      m_minimizer("Levenberg-MarquardtMD"), m_costFunction(), m_minHeight(0.0),
+      m_leastMaxObsY(0.), m_useObsCentre(false) {}
 
 //----------------------------------------------------------------------------------------------
 /** Initialize and declare properties.
@@ -297,15 +298,15 @@ void FindPeaks::generateOutputPeakParameterTable() {
     size_t numbkgdpars = m_backgroundFunction->nParams();
     m_numTableParams = numpeakpars + numbkgdpars;
     if (m_peakFuncType == "Gaussian")
-      m_centre_index = 1;
+      m_centreIndex = 1;
     else if (m_peakFuncType == "LogNormal")
-      m_centre_index = 1;
+      m_centreIndex = 1;
     else if (m_peakFuncType == "Lorentzian")
-      m_centre_index = 1;
+      m_centreIndex = 1;
     else if (m_peakFuncType == "PseudoVoigt")
-      m_centre_index = 2;
+      m_centreIndex = 2;
     else
-      m_centre_index = m_numTableParams; // bad value
+      m_centreIndex = m_numTableParams; // bad value
 
     for (size_t i = 0; i < numpeakpars; ++i)
       m_outPeakTableWS->addColumn("double", m_peakParameterNames[i]);
@@ -315,7 +316,7 @@ void FindPeaks::generateOutputPeakParameterTable() {
   } else {
     // Output centre, weight, height, A0, A1 and A2
     m_numTableParams = 6;
-    m_centre_index = 0;
+    m_centreIndex = 0;
     m_outPeakTableWS->addColumn("double", "centre");
     m_outPeakTableWS->addColumn("double", "width");
     m_outPeakTableWS->addColumn("double", "height");
@@ -376,7 +377,7 @@ FindPeaks::findPeaksGivenStartingPoints(const std::vector<double> &peakcentres,
       }
       g_log.notice()
           << "Finding peaks from giving starting point, with interval i_min = "
-          << i_min << " i_max = " << i_max << "\n";
+          << i_min << " i_max = " << i_max << std::endl;
       practical_x_max = vecX[i_max];
     }
     g_log.information() << "practical x-range = [" << practical_x_min << " -> "
@@ -1328,7 +1329,8 @@ void FindPeaks::estimateBackground(const MantidVec &X, const MantidVec &Y,
     y0 += Y[i_min + i];
 
     xf += X[i_max - i];
-    yf += Y[i_max - i];
+    // X has one more value than Y
+    yf += Y[i_max - i - 1];
   }
   x0 = x0 / static_cast<double>(numavg);
   y0 = y0 / static_cast<double>(numavg);
@@ -1469,9 +1471,10 @@ void FindPeaks::addInfoRow(const size_t spectrum,
       a2 = bkgdfunction->getParameter("A2");
 
     t << a0 << a1 << a2;
+
     g_log.notice() << "Peak parameters found: cen=" << peakcentre
                    << " fwhm=" << fwhm << " height=" << height << " a0=" << a0
-                   << " a0=" << a1 << " a2=" << a2;
+                   << " a1=" << a1 << " a2=" << a2;
   }
   g_log.notice() << " chsq=" << mincost << "\n";
   // Minimum cost function value
@@ -1495,7 +1498,7 @@ void FindPeaks::addNonFitRecord(const size_t spectrum, const double centre) {
 
   // Parameters
   for (std::size_t i = 0; i < m_numTableParams; i++) {
-    if (i == m_centre_index)
+    if (i == m_centreIndex)
       t << centre;
     else
       t << 0.;

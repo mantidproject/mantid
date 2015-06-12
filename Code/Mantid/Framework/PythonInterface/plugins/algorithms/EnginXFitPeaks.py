@@ -27,7 +27,7 @@ class EnginXFitPeaks(PythonAlgorithm):
 
         self.declareProperty(FileProperty(name="ExpectedPeaksFromFile",defaultValue="",
                                           action=FileAction.OptionalLoad,extensions = [".csv"]),
-                "Load from file a list of dSpacing values to be translated into TOF to find expected peaks.")
+                             "Load from file a list of dSpacing values to be translated into TOF to find expected peaks.")
 
         self.declareProperty("Difc", 0.0, direction = Direction.Output,\
     		doc = "Fitted Difc value")

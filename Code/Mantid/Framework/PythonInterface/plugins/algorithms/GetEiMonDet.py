@@ -3,7 +3,7 @@ from mantid.api import PythonAlgorithm, AlgorithmFactory,WorkspaceProperty
 from mantid.kernel import Direction,IntBoundedValidator,FloatBoundedValidator
 import mantid.simpleapi
 import mantid
-from numpy import array,where
+import numpy as np
 
 class GetEiMonDet(PythonAlgorithm):
     """ Get incident energy from a monitor and some detectors
@@ -30,7 +30,8 @@ class GetEiMonDet(PythonAlgorithm):
         self.declareProperty(WorkspaceProperty("MonitorWorkspace","", Direction.Input),"Workspace containing data from monitor(s)")
         self.declareProperty("EnergyGuess",-1.,FloatBoundedValidator(lower=0.),"Incident energy guess")
         self.declareProperty("MonitorSpectrumNumber",-1,IntBoundedValidator(lower=1),"Spectrum number of the monitor")
-        self.declareProperty("MaximumDistanceFraction",1.02,FloatBoundedValidator(lower=1.0001),"Maximum distance for detectors to be considered, as fraction of minimum distance (default = 1.02)")
+        self.declareProperty("MaximumDistanceFraction",1.02,FloatBoundedValidator(lower=1.0001),
+                             "Maximum distance for detectors to be considered, as fraction of minimum distance (default = 1.02)")
         self.declareProperty("IncidentEnergy",0.0,Direction.Output)
         self.declareProperty("FirstMonitorPeak",0.0,Direction.Output)
         self.declareProperty("FirstMonitorIndex",0,Direction.Output)
@@ -51,10 +52,9 @@ class GetEiMonDet(PythonAlgorithm):
         for i in range(__w.getNumberHistograms()):
             det=__w.getDetector(i)
             dist.append(det.getDistance(sample))
-        dist=array(dist)
+        dist=np.array(dist)
         dfrac=float(self.getProperty("MaximumDistanceFraction").value)
-        inds=where(dist<dist.min()*dfrac)
-        dist1=dist[inds]
+        inds=np.where(dist<dist.min()*dfrac)
         #group detectors, rebin, and append spectra to monitors
         gd=mantid.api.AlgorithmManager.createUnmanaged('GroupDetectors')
         gd.setChild(True)
@@ -67,7 +67,6 @@ class GetEiMonDet(PythonAlgorithm):
         gd.setProperty("PreserveEvents",'1')
         gd.execute()
 
-        #mantid.simpleapi.GroupDetectors(InputWorkspace=__w.getName(),OutputWorkspace='__sum',WorkspaceIndexList=inds[0],PreserveEvents='1')
         rw=mantid.api.AlgorithmManager.createUnmanaged("RebinToWorkspace")
         rw.setChild(True)
         rw.initialize()
@@ -80,7 +79,6 @@ class GetEiMonDet(PythonAlgorithm):
         rw.execute()
 
 
-        #mantid.simpleapi.RebinToWorkspace(WorkspaceToRebin='__sum',WorkspaceToMatch=__w_mon.getName(),OutputWorkspace='__sum',PreserveEvents='0')
         ap=mantid.api.AlgorithmManager.createUnmanaged("AppendSpectra")
         ap.setChild(True)
         ap.setLogging(False)
@@ -90,9 +88,6 @@ class GetEiMonDet(PythonAlgorithm):
         ap.setProperty("InputWorkspace2",'__sum')
         ap.setProperty("OutputWorkspace",'__app')
         ap.execute()
-
-        #mantid.simpleapi.AppendSpectra(InputWorkspace1=__w_mon.getName(),InputWorkspace2='__sum',OutputWorkspace='__app')
-
 
         #move detector along the beam, in the positive Z direction
         __app=mantid.mtd['__app']

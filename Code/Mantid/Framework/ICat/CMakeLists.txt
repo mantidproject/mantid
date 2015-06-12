@@ -65,6 +65,12 @@ set ( TEST_FILES
 	CompositeCatalogTest.h
 )
 
+if (COVERALLS)
+    foreach( loop_var ${SRC_FILES} ${INC_FILES})
+      set_property(GLOBAL APPEND PROPERTY COVERAGE_SRCS "${CMAKE_CURRENT_SOURCE_DIR}/${loop_var}")
+    endforeach(loop_var)
+endif()
+
 if(UNITY_BUILD)
   include(UnityBuild)
   enable_unity_build(ICat SRC_FILES SRC_UNITY_IGNORE_FILES 10)

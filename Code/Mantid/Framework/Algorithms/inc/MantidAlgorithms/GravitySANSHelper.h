@@ -36,7 +36,8 @@ public:
   GravitySANSHelper()
       : m_beamLineNorm(-1), m_dropPerAngstrom2(-1), m_cachedDrop(-1) {}
   GravitySANSHelper(API::MatrixWorkspace_const_sptr ws,
-                    Geometry::IDetector_const_sptr det);
+                    Geometry::IDetector_const_sptr det,
+                    const double extraLength = 0.0);
   double calcSinTheta(const double wavAngstroms) const;
   double calcComponents(const double wavAngstroms, double &xFrac,
                         double &yFrac) const;
@@ -71,6 +72,11 @@ private:
   double gravitationalDrop(const double wav) const {
     return m_dropPerAngstrom2 * wav * wav;
   }
+
+ double gravitationalDrop(API::MatrixWorkspace_const_sptr ws,
+                          Geometry::IDetector_const_sptr det,
+                          const double waveLength,
+                          const double extraLength) const;
   double calcSinTheta() const;
 };
 }

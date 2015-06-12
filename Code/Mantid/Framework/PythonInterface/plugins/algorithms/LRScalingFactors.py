@@ -1,5 +1,4 @@
-#pylint: disable=invalid-name
-import numpy
+#pylint: disable=invalid-name, no-init
 import os
 from mantid.api import *
 from mantid.simpleapi import *
@@ -33,6 +32,7 @@ class LRScalingFactors(PythonAlgorithm):
         run: 55897, att: 2, s1: 1.05, s2: 0.35 --> F = 55897 / 55896 * 55895 / 55890
 
     """
+    tolerance=0.
     def category(self):
         return "Reflectometry\\SNS"
 
@@ -53,15 +53,15 @@ class LRScalingFactors(PythonAlgorithm):
         self.declareProperty(FloatArrayProperty("TOFRange", [10000., 35000.],
                                                 FloatArrayLengthValidator(2),
                                                 direction=Direction.Input),
-                                                "TOF range to use")
+                             "TOF range to use")
         self.declareProperty(IntArrayProperty("SignalPeakPixelRange", [150, 160]),
-                                              "Pixel range defining the data peak")
+                             "Pixel range defining the data peak")
         self.declareProperty(IntArrayProperty("SignalBackgroundPixelRange", [147, 163]),
-                                              "Pixel range defining the background")
+                             "Pixel range defining the background")
         self.declareProperty(IntArrayProperty("LowResolutionPixelRange", [94, 160],
                                               IntArrayLengthValidator(2),
                                               direction=Direction.Input),
-                                              "Pixel range defining the region to use in the low-resolution direction")
+                             "Pixel range defining the region to use in the low-resolution direction")
         self.declareProperty("IncidentMedium", "Air", doc="Name of the incident medium")
         self.declareProperty("FrontSlitName", "S1", doc="Name of the front slit")
         self.declareProperty("BackSlitName", "Si", doc="Name of the back slit")
@@ -70,6 +70,7 @@ class LRScalingFactors(PythonAlgorithm):
                                           action=FileAction.Save,
                                           extensions=['cfg']))
 
+    #pylint: disable=too-many-locals,too-many-branches
     def PyExec(self):
         # Verify whether we have a sorted list of runs.
         data_runs = self.getProperty("DirectBeamRuns").value
@@ -86,7 +87,7 @@ class LRScalingFactors(PythonAlgorithm):
             have_attenuator_info = True
         if have_attenuator_info is False:
             attenuators = len(data_runs)*[0]
-            
+
         # Get the slit information
         front_slit = self.getProperty("FrontSlitName").value
         back_slit = self.getProperty("BackSlitName").value
@@ -106,7 +107,7 @@ class LRScalingFactors(PythonAlgorithm):
                 peak_range[2*i] = x_min
                 peak_range[2*i+1] = x_max
         elif len(peak_range) < 2:
-            raise RuntimeError, "SignalPeakPixelRange should have a length of at least 2."
+            raise RuntimeError("SignalPeakPixelRange should have a length of at least 2.")
 
         if len(background_range)==2:
             x_min = int(background_range[0])
@@ -116,12 +117,12 @@ class LRScalingFactors(PythonAlgorithm):
                 background_range[2*i] = x_min
                 background_range[2*i+1] = x_max
         elif len(background_range) < 2:
-            raise RuntimeError, "SignalBackgroundPixelRange should have a length of at least 2."
+            raise RuntimeError("SignalBackgroundPixelRange should have a length of at least 2.")
 
         # Check that the peak range arrays are of the proper length
         if not (len(peak_range) == 2*len(data_runs) \
                 and len(background_range) == 2*len(data_runs)):
-            raise RuntimeError, "Supplied peak/background arrays should be of the same length as the run array."
+            raise RuntimeError("Supplied peak/background arrays should be of the same length as the run array.")
 
         # Slit information for the previous run (see loop below)
         previous_slits = None
@@ -154,7 +155,7 @@ class LRScalingFactors(PythonAlgorithm):
             try:
                 s2h = abs(workspace.getRun().getProperty("%sVHeight" % back_slit).value[0])
                 s2w = abs(workspace.getRun().getProperty("%sHWidth" % back_slit).value[0])
-            except:
+            except RuntimeError:
                 # For backward compatibility with old code
                 logger.error("Specified slit could not be found: %s  Trying S2" % back_slit)
                 s2h = abs(workspace.getRun().getProperty("S2VHeight").value[0])
@@ -165,7 +166,7 @@ class LRScalingFactors(PythonAlgorithm):
             if wavelength is None:
                 wavelength = wl
             elif abs(wl-wavelength) > 0.2:
-                raise RuntimeError, "Supplied runs don't have matching wavelengths."
+                raise RuntimeError("Supplied runs don't have matching wavelengths.")
 
             peak = [int(peak_range[2*i]), int(peak_range[2*i+1])]
             background = [int(background_range[2*i]), int(background_range[2*i+1])]
@@ -178,7 +179,7 @@ class LRScalingFactors(PythonAlgorithm):
             # attenuator.
             if have_attenuator_info is True:
                 if attenuators[i] < n_attenuator:
-                    raise RuntimeError, "Runs were not supplied in increasing number of attenuators."
+                    raise RuntimeError("Runs were not supplied in increasing number of attenuators.")
                 n_attenuator = attenuators[i]
 
             is_reference = False
@@ -191,7 +192,7 @@ class LRScalingFactors(PythonAlgorithm):
                 and abs(previous_slits[2] - s2h) < self.tolerance \
                 and abs(previous_slits[3] - s2w) < self.tolerance:
                 is_reference = True
-                
+
                 # This signals an attenuation number change if we happen to need the info
                 if have_attenuator_info is False:
                     n_attenuator += 1
@@ -202,7 +203,7 @@ class LRScalingFactors(PythonAlgorithm):
             # If the number of attenuators is zero, skip.
             if n_attenuator == 0:
                 if references.has_key(0):
-                    raise RuntimeError, "More than one run with zero attenuator was supplied."
+                    raise RuntimeError("More than one run with zero attenuator was supplied.")
                 references[0] = {'index': i,
                                  'run': run,
                                  'ref_ws': workspace_name,
@@ -228,13 +229,13 @@ class LRScalingFactors(PythonAlgorithm):
                              OutputWorkspace = "ScalingRatio_%s" % n_attenuator)
                     references[n_attenuator]['diagnostics'] += " * %s" % references[n_attenuator-1]['diagnostics']
                 references[n_attenuator]['ratio_ws'] = "ScalingRatio_%s" % n_attenuator
-                
+
             # If this is not a reference run, compute F
             else:
                 # Divide by the reference for this number of attenuators
                 # and multiply by the reference ratio
                 if not references.has_key(n_attenuator):
-                    raise RuntimeError, "No reference for %s attenuators: check run ordering." % n_attenuator
+                    raise RuntimeError("No reference for %s attenuators: check run ordering." % n_attenuator)
                 f_ws = "F_%s_%s" % (run, n_attenuator)
                 Divide(LHSWorkspace=workspace_name,
                        RHSWorkspace=references[n_attenuator]['ref_ws'],
@@ -281,10 +282,10 @@ class LRScalingFactors(PythonAlgorithm):
                                         'LambdaRequested': wl,
                                         'S1H':s1h, 'S1W':s1w,
                                         'S2iH':s2h, 'S2iW':s2w,
-                                        'a':a, 'error_a': error_a, 
+                                        'a':a, 'error_a': error_a,
                                         'b':b, 'error_b': error_b,
-                                        'diagnostics': '%s / %s * %s' % (run, references[n_attenuator]['run'], references[n_attenuator]['diagnostics'])
-                                        })
+                                        'diagnostics': '%s / %s * %s' % (run, references[n_attenuator]['run'],
+                                                                         references[n_attenuator]['diagnostics'])})
             previous_ws = workspace_name
 
         # Log some useful information to track what happened
@@ -360,7 +361,7 @@ class LRScalingFactors(PythonAlgorithm):
         # Rebin TOF axis
         tof_range = self.getProperty("TOFRange").value
         tof_step = self.getProperty("TOFSteps").value
-        workspace = Rebin(InputWorkspace=workspace, Params=[tof_range[0], tof_step, tof_range[1]], 
+        workspace = Rebin(InputWorkspace=workspace, Params=[tof_range[0], tof_step, tof_range[1]],
                           PreserveEvents=False, OutputWorkspace=str(workspace))
 
         # Integrate over low resolution range
@@ -380,7 +381,7 @@ class LRScalingFactors(PythonAlgorithm):
         # and use 1 as the error on counts of zero. We normalize by the integrated
         # current _after_ the background subtraction so that the 1 doesn't have
         # to be changed to a 1/Charge.
-        workspace = NormaliseByCurrent(InputWorkspace=workspace, 
+        workspace = NormaliseByCurrent(InputWorkspace=workspace,
                                        OutputWorkspace=str(workspace))
 
         # Crop to only the selected peak region
@@ -394,3 +395,4 @@ class LRScalingFactors(PythonAlgorithm):
         return str(workspace)
 
 AlgorithmFactory.subscribe(LRScalingFactors)
+

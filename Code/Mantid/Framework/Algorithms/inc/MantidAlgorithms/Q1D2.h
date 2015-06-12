@@ -39,8 +39,8 @@ namespace Algorithms {
 */
 class DLLExport Q1D2 : public API::Algorithm {
 public:
-  /// (Empty) Constructor
-  Q1D2() : API::Algorithm() {}
+  /// Default constructor
+  Q1D2();
   /// Virtual destructor
   virtual ~Q1D2() {}
   /// Algorithm's name
@@ -87,7 +87,8 @@ private:
                   const MantidVec::iterator theNorms,
                   const MantidVec::iterator errorSquared) const;
   void convertWavetoQ(const size_t specInd, const bool doGravity,
-                      const size_t offset, MantidVec::iterator Qs) const;
+                      const size_t offset, MantidVec::iterator Qs,
+                      const double extraLength) const;
   void getQBinPlus1(const MantidVec &OutQs, const double QToFind,
                     MantidVec::const_iterator &loc) const;
   void normalize(const MantidVec &normSum, const MantidVec &normError2,

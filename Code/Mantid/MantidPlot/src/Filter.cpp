@@ -59,13 +59,17 @@ Filter::Filter( ApplicationWindow *parent, Table *t, const QString& name)
 
 void Filter::init()
 {
+	ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parent());
+  if (!app) {
+    throw std::logic_error("Parent of qtiplot's Filter is not ApplicationWindow as expected.");
+  }
 	d_n = 0;
 	d_curveColorIndex = 1;
 	d_tolerance = 1e-4;
 	d_points = 100;
 	d_max_iterations = 1000;
 	d_curve = 0;
-	d_prec = dynamic_cast<ApplicationWindow *>(parent())->fit_output_precision;
+	d_prec = app->fit_output_precision;
 	d_init_err = false;
     d_sort_data = true;
     d_min_points = 2;
@@ -200,7 +204,11 @@ bool Filter::run()
 		return false;
 
 	if (d_n < 0){
-		QMessageBox::critical(dynamic_cast<ApplicationWindow *>(parent()), tr("MantidPlot") + " - " + tr("Error"),
+	  ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parent());
+    if (!app) {
+      throw std::logic_error("Parent of Filter is not ApplicationWindow as expected.");
+    }
+		QMessageBox::critical(app, tr("MantidPlot") + " - " + tr("Error"),
 				tr("You didn't specify a valid data set for this operation!"));
 		return false;
 	}
@@ -208,7 +216,11 @@ bool Filter::run()
 	QApplication::setOverrideCursor(Qt::WaitCursor);
 
     output();//data analysis and output
-    dynamic_cast<ApplicationWindow *>(parent())->updateLog(logInfo());
+	  ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parent());
+    if (!app) {
+      throw std::logic_error("Parent of Filter is not ApplicationWindow as expected.");
+    }
+    app->updateLog(logInfo());
 
 	QApplication::restoreOverrideCursor();
     return true;
@@ -315,7 +327,10 @@ int Filter::curveRange(QwtPlotCurve *c, double start, double end, int *iStart, i
 
 QwtPlotCurve* Filter::addResultCurve(double *x, double *y)
 {
-    ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(parent());
+	  ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parent());
+    if (!app) {
+      throw std::logic_error("Parent of Filter is not ApplicationWindow as expected.");
+    }
     QLocale locale = app->locale();
     const QString tableName = app->generateUniqueName(QString(objectName()));
 	QString dataSet;
@@ -358,7 +373,11 @@ void Filter::enableGraphicsDisplay(bool on, Graph *g)
 
 MultiLayer * Filter::createOutputGraph()
 {
-  MultiLayer *ml = dynamic_cast<ApplicationWindow *>(parent())->newGraph(objectName() + tr("Plot"));
+	  ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parent());
+    if (!app) {
+      throw std::logic_error("Parent of Filter is not ApplicationWindow as expected.");
+    }
+    MultiLayer *ml = app->newGraph(objectName() + tr("Plot"));
    	d_output_graph = ml->activeGraph();
 	return ml;
 }
@@ -404,7 +423,11 @@ bool Filter::setDataFromTable(Table *t, const QString& xColName, const QString& 
 	}
 
 	if (size < d_min_points){
-		QMessageBox::critical(dynamic_cast<ApplicationWindow *>(parent()), tr("MantidPlot") + " - " + tr("Error"),
+	  ApplicationWindow *app = dynamic_cast<ApplicationWindow *>(this->parent());
+    if (!app) {
+      throw std::logic_error("Parent of Filter is not ApplicationWindow as expected.");
+    }
+		QMessageBox::critical(app, tr("MantidPlot") + " - " + tr("Error"),
 				tr("You need at least %1 points in order to perform this operation!").arg(d_min_points));
         return false;
 	}

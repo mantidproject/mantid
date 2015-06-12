@@ -1,0 +1,84 @@
+#!/bin/bash -ex
+###############################################################################
+# LINUX/MAC SCRIPT TO DRIVE THE JENKINS DOCUMENTATION TESTS OF MANTID.
+#
+# Notes:
+#
+# WORKSPACE, JOB_NAME, NODE_LABEL GIT_COMMIT are environment variables that
+# are set by Jenkins. The last one corresponds to any labels set on a slave.
+# MANTID_DATA_STORE should be set in the configuration of each
+# slave.
+###############################################################################
+
+###############################################################################
+# Print out the versions of things we are using
+###############################################################################
+cmake --version
+
+#####################################################################################
+# Find and install package
+#####################################################################################
+python $WORKSPACE/Code/Mantid/Testing/SystemTests/scripts/mantidinstaller.py install $WORKSPACE
+
+###############################################################################
+# Set up the location for the local object store outside of the build and
+# source tree, which can be shared by multiple builds.
+# It defaults to a MantidExternalData directory within the HOME directory.
+# It can be overridden by setting the MANTID_DATA_STORE environment variable.
+###############################################################################
+if [ -z "$MANTID_DATA_STORE" ]; then
+  export MANTID_DATA_STORE=$HOME/MantidExternalData
+fi
+
+###############################################################################
+# RHEL6 setup steps - nodes must have a "rhel6" label set (in lowercase)
+###############################################################################
+if [[ ${NODE_LABELS} == *rhel6* ]]; then
+  SCL_ON_RHEL6="scl enable mantidlibs34"
+  ON_RHEL6=true
+else
+  SCL_ON_RHEL6="eval"
+fi
+
+###############################################################################
+# Create the build directory if it doesn't exist
+###############################################################################
+[ -d $WORKSPACE/build ] || mkdir $WORKSPACE/build
+cd $WORKSPACE/build
+
+###############################################################################
+# CMake configuration. We only need a minimal configuration as we will actually
+# just run from the package
+###############################################################################
+$SCL_ON_RHEL6 "cmake -DMANTID_DATA_STORE=${MANTID_DATA_STORE} ../Code/Mantid"
+
+###############################################################################
+# Build step
+###############################################################################
+$SCL_ON_RHEL6 "cmake --build . -- StandardTestData"
+
+#####################################################################################
+# Run tests
+#####################################################################################
+# Create clean user properties with UsageData search path
+userprops=~/.mantid/Mantid.user.properties
+rm -f $userprops
+
+data_binary_root=${WORKSPACE}/build/ExternalData
+testdata_dir=${data_binary_root}/Testing/Data
+instrument_dir=${WORKSPACE}/Code/Mantid/instrument
+echo "datasearch.directories=${testdata_dir}/DocTest;${testdata_dir}/UnitTest;${instrument_dir}" > $userprops
+echo "UpdateInstrumentDefinitions.OnStartup = 0" >> $userprops
+echo "usagereports.enabled = 0" >> $userprops
+
+set +e #don't immediately exit on failure so that we can remove the package
+/opt/mantidnightly/bin/MantidPlot -xq docs/runsphinx_doctest.py
+status=$?
+set -e #exit on failures from now on
+
+#####################################################################################
+# Remove package
+#####################################################################################
+python $WORKSPACE/Code/Mantid/Testing/SystemTests/scripts/mantidinstaller.py uninstall $WORKSPACE
+
+exit $status

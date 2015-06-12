@@ -3,6 +3,7 @@
 
 #include "MantidKernel/System.h"
 #include "MantidAPI/DataProcessorAlgorithm.h"
+#include "MantidAPI/DeprecatedAlgorithm.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -31,7 +32,8 @@ namespace Algorithms {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport PerformIndexOperations : public API::DataProcessorAlgorithm {
+class DLLExport PerformIndexOperations : public API::DataProcessorAlgorithm,
+                                         public API::DeprecatedAlgorithm {
 public:
   PerformIndexOperations();
   virtual ~PerformIndexOperations();

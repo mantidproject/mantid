@@ -1,0 +1,128 @@
+digraph IndirectILLReduction {
+  label="IndirectILLReduction Flowchart"
+  /* $global_style */
+
+  subgraph values{
+    /* $value_style */
+    CE_End          [label="Reduced Workspace"]
+    MM_End          [label="Reduced Workspace"]
+    MM_ScaleFactor  [label="0.5"]
+  }
+
+  subgraph descision {
+    /* $decision_style */
+    Save_Red                      [label="Save?"]
+    Save_LeftRed                  [label="Save?"]
+    Save_RightRed                 [label="Save?"]
+    CE_HaveCalibrationWorkspace   [label="Have Calibration Workspace?"]
+  }
+
+  subgraph params {
+    /* $param_style */
+    Run
+    Analyser
+    Reflection
+    CalibrationWorkspace
+    MapFile
+    MirrorMode
+    RawWorkspace
+    ReducedWorkspace
+    LeftWorkspace
+    RightWorkspace
+  }
+
+  subgraph algorithms {
+    /* $algorithm_style */
+    LoadILLIndirect
+    LoadParameterFile
+    GroupDetectors
+    ExtractSingleSpectrum
+    SaveNexusProcessed
+
+    CE_Scale_Monitor                [label="Scale"]
+    CE_ScaleX_Monitor               [label="ScaleX"]
+    CE_ScaleX_Detector              [label="ScaleX"]
+    CE_CropWorkspace_Monitor        [label="CropWorkspace"]
+    CE_CropWorkspace_Detector       [label="CropWorkspace"]
+    CE_DivideCalibration            [label="Divide"]
+    CE_Divide                       [label="Divide"]
+    CE_ConvertAxisByFormula         [label="ConvertAxisByFormula"]
+
+    MM_CropWorkspace_LeftDetector   [label="CropWorkspace"]
+    MM_CropWorkspace_LeftMonitor    [label="CropWorkspace"]
+    MM_CropWorkspace_RightDetector  [label="CropWorkspace"]
+    MM_CropWorkspace_RightMonitor   [label="CropWorkspace"]
+    MM_ScaleX_RightRed              [label="ScaleX"]
+    MM_RebinToWorkspace_RightRed    [label="RebinToWorkspace"]
+    MM_Plus                         [label="Plus"]
+    MM_Scale                        [label="Scale"]
+    MM_SaveNexusProcessed_LeftRed   [label="SaveNexusProcessed"]
+    MM_SaveNexusProcessed_RightRed  [label="SaveNexusProcessed"]
+  }
+
+  CE_Start          [label="Calculate Energy"]
+  MM_Start          [label="Mirror Mode"]
+
+  CE_Normal         [label="Calculate Energy"]
+  CE_Mirror_Right   [label="Calculate Energy (Right)"]
+  CE_Mirror_Left    [label="Calculate Energy (Left)"]
+  RunMirrorMode     [label="Mirror Mode"]
+
+  subgraph calculate_energy {
+    CE_Start                      -> CE_Scale_Monitor           [label="Monitor WS"]
+    CE_Scale_Monitor              -> CE_CropWorkspace_Monitor
+    CE_CropWorkspace_Monitor      -> CE_ScaleX_Monitor
+    CE_Start                      -> CE_CropWorkspace_Detector  [label="Detector WS"]
+    CE_CropWorkspace_Detector     -> CE_ScaleX_Detector
+    CE_ScaleX_Detector            -> CE_HaveCalibrationWorkspace
+    CE_HaveCalibrationWorkspace   -> CE_DivideCalibration       [label="Yes"]
+    CalibrationWorkspace          -> CE_DivideCalibration
+    CE_DivideCalibration          -> CE_Divide
+    CE_HaveCalibrationWorkspace   -> CE_Divide                  [label="No"]
+    CE_ScaleX_Monitor             -> CE_Divide
+    CE_Divide                     -> CE_ConvertAxisByFormula
+    CE_ConvertAxisByFormula       -> CE_End
+  }
+
+  subgraph mirror_mode {
+    MM_Start                        -> MM_CropWorkspace_LeftDetector    [label="Detector WS"]
+    MM_Start                        -> MM_CropWorkspace_LeftMonitor     [label="Monitor WS"]
+    MM_Start                        -> MM_CropWorkspace_RightDetector   [label="Detector WS"]
+    MM_Start                        -> MM_CropWorkspace_RightMonitor    [label="Monitor WS"]
+    MM_CropWorkspace_LeftDetector   -> CE_Mirror_Left
+    MM_CropWorkspace_LeftMonitor    -> CE_Mirror_Left
+    MM_CropWorkspace_RightDetector  -> CE_Mirror_Right
+    MM_CropWorkspace_RightMonitor   -> CE_Mirror_Right
+    CE_Mirror_Right                 -> MM_ScaleX_RightRed
+    CE_Mirror_Left                  -> MM_RebinToWorkspace_RightRed
+    CE_Mirror_Left                  -> Save_LeftRed
+    CE_Mirror_Left                  -> LeftWorkspace
+    Save_LeftRed                    -> MM_SaveNexusProcessed_LeftRed    [label="Yes"]
+    MM_ScaleX_RightRed              -> MM_RebinToWorkspace_RightRed
+    MM_RebinToWorkspace_RightRed    -> RightWorkspace
+    RightWorkspace                  -> Save_RightRed
+    Save_RightRed                   -> MM_SaveNexusProcessed_RightRed   [label="Yes"]
+    CE_Mirror_Left                  -> MM_Plus
+    MM_RebinToWorkspace_RightRed    -> MM_Plus
+    MM_Plus                         -> MM_Scale
+    MM_ScaleFactor                  -> MM_Scale                         [label="Factor"]
+    MM_Scale                        -> MM_End
+  }
+
+  Run                   -> LoadILLIndirect
+  LoadILLIndirect       -> RawWorkspace
+  LoadILLIndirect       -> LoadParameterFile
+  Analyser              -> LoadParameterFile
+  Reflection            -> LoadParameterFile
+  LoadParameterFile     -> GroupDetectors
+  MapFile               -> GroupDetectors
+  GroupDetectors        -> MirrorMode             [label="Detector WS"]
+  LoadParameterFile     -> ExtractSingleSpectrum
+  ExtractSingleSpectrum -> MirrorMode             [label="Monitor WS"]
+  MirrorMode            -> CE_Normal              [label="No"]
+  CE_Normal             -> ReducedWorkspace
+  MirrorMode            -> RunMirrorMode          [label="Yes"]
+  RunMirrorMode         -> ReducedWorkspace
+  ReducedWorkspace      -> Save_Red
+  Save_Red              -> SaveNexusProcessed     [label="Yes"]
+}

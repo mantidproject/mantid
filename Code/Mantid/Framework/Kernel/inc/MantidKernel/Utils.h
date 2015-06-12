@@ -299,7 +299,7 @@ isNeighbourOfSubject(const size_t ndims, const size_t neighbour_linear_index,
     const long double subj = static_cast<long double>(subject_indices[ind]);
     const long double neigh = static_cast<long double>(neigh_index);
     const long double diff = std::abs(subj - neigh);
-    if (diff > widths[ind] / 2)
+    if (diff > (widths[ind] >> 1))
       return false;
   }
   return true;

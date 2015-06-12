@@ -87,7 +87,7 @@ public:
         "-y,x-y,z; y,x,-z; -x,-y,-z");
     Group_const_sptr centering = GroupFactory::create<CenteringGroup>("R");
 
-    SpaceGroup spaceGroup(167, "R-3m", *(group * centering));
+    SpaceGroup spaceGroup(167, "R-3c", *(group * centering));
 
     std::vector<V3D> byOperator = spaceGroup * V3D(0.5, 0.0, 0.0);
     for (size_t i = 0; i < byOperator.size(); ++i) {
@@ -104,6 +104,55 @@ public:
     for (size_t i = 0; i < byEquivalents.size(); ++i) {
       TS_ASSERT_EQUALS(byOperator[i], byEquivalents[i]);
     }
+  }
+
+  void testIsAllowedReflectionR3m() {
+    /* This is just a check that isAllowedReflection behaves correctly,
+     * there is a system test in place that checks more examples.
+     *
+     * This test uses space group 167, R-3c, like above.
+     */
+    Group_const_sptr group = GroupFactory::create<ProductOfCyclicGroups>(
+        "-y,x-y,z; y,x,-z; -x,-y,-z");
+    Group_const_sptr centering = GroupFactory::create<CenteringGroup>("R");
+
+    SpaceGroup spaceGroup(167, "R-3c", *(group * centering));
+
+    // Reflections hkl: -h + k + l = 3n
+    V3D goodHKL(1, 4, 3); // -1 + 4 + 3 = 6 = 3 * 2
+    V3D badHKL(2, 4, 3);  // -2 + 4 + 3 = 5
+    TS_ASSERT(spaceGroup.isAllowedReflection(goodHKL));
+    TS_ASSERT(!spaceGroup.isAllowedReflection(badHKL));
+
+    // Reflections hk0: -h + k = 3n
+    V3D goodHK0(3, 9, 0); // -3 + 9 = 6 = 3 * 2
+    V3D badHK0(4, 9, 0);  // -4 + 9 = 5
+    TS_ASSERT(spaceGroup.isAllowedReflection(goodHK0));
+    TS_ASSERT(!spaceGroup.isAllowedReflection(badHK0));
+
+    // Reflections hhl: l = 3n
+    V3D goodHHL(1, 1, 6); // 6 = 3 * 2
+    V3D badHHL(1, 1, 7);
+    TS_ASSERT(spaceGroup.isAllowedReflection(goodHHL));
+    TS_ASSERT(!spaceGroup.isAllowedReflection(badHHL));
+
+    // Reflections h-hl: h + l = 3n
+    V3D goodHmHL(3, -3, 6); // 3 + 9 = 9 = 3 * 3
+    V3D badHmHL(3, -3, 7); // 3 + 7 = 10
+    TS_ASSERT(spaceGroup.isAllowedReflection(goodHmHL));
+    TS_ASSERT(!spaceGroup.isAllowedReflection(badHmHL));
+
+    // Reflections 000l: l = 3n
+    V3D good00L(0, 0, 6); // 6 = 3 * 2
+    V3D bad00L(0, 0, 7);
+    TS_ASSERT(spaceGroup.isAllowedReflection(good00L));
+    TS_ASSERT(!spaceGroup.isAllowedReflection(bad00L));
+
+    // Reflections h-h0: h = 3n
+    V3D goodHH0(3, -3, 0); // 3 = 3 * 1
+    V3D badHH0(4, -4, 0);
+    TS_ASSERT(spaceGroup.isAllowedReflection(goodHH0));
+    TS_ASSERT(!spaceGroup.isAllowedReflection(badHH0));
   }
 
 private:

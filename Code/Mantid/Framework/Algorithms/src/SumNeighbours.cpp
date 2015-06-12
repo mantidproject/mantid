@@ -56,8 +56,8 @@ void SumNeighbours::init() {
  */
 void SumNeighbours::exec() {
   // Try and retrieve the optional properties
-  SumX = getProperty("SumX");
-  SumY = getProperty("SumY");
+  int SumX = getProperty("SumX");
+  int SumY = getProperty("SumY");
 
   // Get the input workspace
   Mantid::API::MatrixWorkspace_sptr inWS = getProperty("InputWorkspace");

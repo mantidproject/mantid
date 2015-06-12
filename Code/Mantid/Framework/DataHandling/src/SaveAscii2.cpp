@@ -22,7 +22,9 @@ using namespace Kernel;
 using namespace API;
 
 /// Empty constructor
-SaveAscii2::SaveAscii2() : m_separatorIndex() {}
+SaveAscii2::SaveAscii2()
+    : m_separatorIndex(), m_nBins(0), m_sep(), m_writeDX(false),
+      m_writeID(false), m_isHistogram(false), m_isCommonBins(false), m_ws() {}
 
 /// Initialisation method.
 void SaveAscii2::init() {

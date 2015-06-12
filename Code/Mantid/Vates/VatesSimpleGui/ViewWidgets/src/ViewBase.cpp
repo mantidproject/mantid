@@ -1,7 +1,13 @@
+#include <stdexcept>
+
 #include "MantidVatesSimpleGuiViewWidgets/ViewBase.h"
 #include "MantidVatesSimpleGuiViewWidgets/BackgroundRgbProvider.h"
+#include "MantidVatesSimpleGuiViewWidgets/ColorSelectionWidget.h"
 #include "MantidVatesSimpleGuiViewWidgets/RebinnedSourcesManager.h"
-
+#include "MantidVatesAPI/ADSWorkspaceProvider.h"
+#include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidVatesAPI/BoxInfo.h"
+#include "MantidKernel/WarningSuppressions.h"
 #if defined(__INTEL_COMPILER)
   #pragma warning disable 1170
 #endif
@@ -32,12 +38,9 @@
   #pragma warning enable 1170
 #endif
 
-#include <QDebug>
 #include <QHBoxLayout>
 #include <QPointer>
 #include <QSet>
-
-#include <stdexcept>
 
 namespace Mantid
 {
@@ -219,7 +222,11 @@ void ViewBase::setColorScaleState(ColorSelectionWidget *cs)
 
 /**
  * This function checks the current state from the color updater and
- * processes the necessary color changes.
+ * processes the necessary color changes. Similarly to
+ * setColorForBackground(), this method sets a Vtk callback for
+ * changes to the color map made by the user in the Paraview color
+ * editor.
+ *
  * @param colorScale A pointer to the colorscale widget.
  */
 void ViewBase::setColorsForView(ColorSelectionWidget *colorScale)
@@ -240,6 +247,11 @@ void ViewBase::setColorsForView(ColorSelectionWidget *colorScale)
   {
     this->onLogScale(true);
   }
+
+  // This installs the callback as soon as we have colors for this
+  // view. It needs to keep an eye on whether the user edits the color
+  // map for this (new?) representation in the pqColorToolbar.
+  colorUpdater.observeColorScaleEdited(this->getRep(), colorScale);
 }
 
 /**
@@ -275,6 +287,7 @@ pqPipelineRepresentation *ViewBase::getPvActiveRep()
   return qobject_cast<pqPipelineRepresentation *>(drep);
 }
 
+GCC_DIAG_OFF(strict-aliasing)
 /**
  * This function creates a ParaView source from a given plugin name and
  * workspace name. This is used in the plugin mode of the simple interface.
@@ -291,6 +304,16 @@ pqPipelineSource* ViewBase::setPluginSource(QString pluginName, QString wsName)
   src->getProxy()->SetAnnotation("MdViewerWidget0", "1");
   vtkSMPropertyHelper(src->getProxy(),
                       "Mantid Workspace Name").Set(wsName.toStdString().c_str());
+
+  // WORKAROUND BEGIN 
+  // We are setting the recursion depth to 1 when we are dealing with MDEvent workspaces
+  // with top level splitting, but this is not updated in the plugin line edit field. 
+  // We do this here.
+  if (auto split = Mantid::VATES::findRecursionDepthForTopLevelSplitting(wsName.toStdString())) {
+    vtkSMPropertyHelper(src->getProxy(),
+              "Recursion Depth").Set(split.get());
+  }
+  // WORKAROUND END
 
   // Update the source so that it retrieves the data from the Mantid workspace
   src->getProxy()->UpdateVTKObjects(); // Updates all the proxies
@@ -897,8 +920,6 @@ void ViewBase::removeVisibilityListener() {
                          this, SLOT(onVisibilityChanged(pqPipelineSource*, pqDataRepresentation*)));
   }
 }
-
-
 
 } // namespace SimpleGui
 } // namespace Vates

@@ -1,8 +1,9 @@
 #pylint: disable=no-init,invalid-name
 from mantid.api import PythonAlgorithm, AlgorithmFactory
 from mantid.kernel import FloatBoundedValidator,Direction
-from numpy import sqrt,floor
+import numpy as np
 
+#pylint: disable=too-few-public-methods
 class Interval(object):
     """Simple class that provides check for overlapping intervals
     """
@@ -47,8 +48,9 @@ class SuggestTibCNCS(PythonAlgorithm):
         return
 
     def e2v(self,energy):
-        return sqrt(energy/5.227e-6)
+        return np.sqrt(energy/5.227e-6)
 
+    #pylint: disable=too-many-branches
     def PyExec(self):
         """ Main execution body
         """
@@ -64,7 +66,7 @@ class SuggestTibCNCS(PythonAlgorithm):
         tinf=1e6*(36.262)/self.e2v(energy)
         if tinf<tmin:
             tinf+=frame
-        tpulse=frame*floor(tmax/frame)
+        tpulse=frame*np.floor(tmax/frame)
 
         #check for TIB
         dtib=3500. # default length of TIB range
@@ -82,8 +84,10 @@ class SuggestTibCNCS(PythonAlgorithm):
 
         intervalList=[]
         intervalList.append(Interval(tinf-dtinfminus,tinf)) #interval close to t_inf, on the lower side
-        intervalList.append(Interval(tmin,tmin)) #intervaldenoting frame edge. This will make sure that one cannot get an interval overlapping t_min
-        intervalList.append(Interval(tinf-frame,tinf-frame+dtinfplus))  #interval close to t_inf, on the upper side, but moved one frame down
+        #intervaldenoting frame edge. This will make sure that one cannot get an interval overlapping t_min
+        intervalList.append(Interval(tmin,tmin))
+        #interval close to t_inf, on the upper side, but moved one frame down
+        intervalList.append(Interval(tinf-frame,tinf-frame+dtinfplus))
 
         if tpulse+dtpulseplus<tmax:
             itpulse=Interval(tpulse-dtpulseminus,tpulse+dtpulseplus)

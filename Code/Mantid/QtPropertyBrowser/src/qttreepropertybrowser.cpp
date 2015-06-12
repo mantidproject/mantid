@@ -185,6 +185,7 @@ public:
     QTreeWidgetItem *editedItem() const;
 
     const QStringList& options() const {return m_options;}
+    void setColumnSizes(int s0, int s1, int s2);
 
 private:
     void updateItem(QTreeWidgetItem *item);
@@ -833,6 +834,19 @@ void QtTreePropertyBrowserPrivate::editItem(QtBrowserItem *browserItem)
     }
 }
 
+void QtTreePropertyBrowserPrivate::setColumnSizes(int s0, int s1, int s2)
+{
+  m_treeWidget->header()->setResizeMode(QHeaderView::Interactive);
+  m_treeWidget->header()->setStretchLastSection(false);
+  m_treeWidget->header()->resizeSection(0, s0);
+  m_treeWidget->header()->resizeSection(1, s1);
+  if (!m_options.isEmpty())
+  {
+    if (s2 < 0) s2 = s1;
+    m_treeWidget->header()->resizeSection(2, s2);
+  }
+}
+
 /**
     \class QtTreePropertyBrowser
 
@@ -1190,6 +1204,11 @@ void QtTreePropertyBrowser::itemChanged(QtBrowserItem *item)
 void QtTreePropertyBrowser::editItem(QtBrowserItem *item)
 {
     d_ptr->editItem(item);
+}
+
+void QtTreePropertyBrowser::setColumnSizes(int s0, int s1, int s2)
+{
+  d_ptr->setColumnSizes(s0, s1, s2);
 }
 
 #if QT_VERSION >= 0x040400

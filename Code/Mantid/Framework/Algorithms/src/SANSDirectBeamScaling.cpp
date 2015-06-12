@@ -134,6 +134,12 @@ void SANSDirectBeamScaling::exec() {
     }
     progress.report("Absolute Scaling");
   }
+  if (0 == nPixels)
+    throw std::runtime_error(
+        "The number of pixels found is 0 which seems to "
+        "indicate that something went wrong. Does the "
+        "input workspace have any histogram, and valid pixels for them?");
+
   // Get the average SDD for the counted pixels, and transform to mm.
   sdd = sdd / nPixels * 1000.0;
   error = std::sqrt(error);

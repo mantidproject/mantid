@@ -32,13 +32,12 @@ namespace MDF
 {
 
 /// Constructor
-PlotController::PlotController(MultiDatasetFit *parent, 
-                               QwtPlot *plot, 
-                               QTableWidget *table, 
-                               QComboBox *plotSelector, 
-                               QPushButton *prev, 
-                               QPushButton *next):
-  QObject(parent),m_plot(plot),m_table(table),m_plotSelector(plotSelector),m_prevPlot(prev),m_nextPlot(next),m_currentIndex(-1)
+PlotController::PlotController(MultiDatasetFit *parent, QwtPlot *plot,
+                               QTableWidget *table, QComboBox *plotSelector,
+                               QPushButton *prev, QPushButton *next)
+    : QObject(parent), m_plot(plot), m_table(table),
+      m_plotSelector(plotSelector), m_prevPlot(prev), m_nextPlot(next),
+      m_currentIndex(-1), m_showDataErrors(false)
 {
   connect(prev,SIGNAL(clicked()),this,SLOT(prevPlot()));
   connect(next,SIGNAL(clicked()),this,SLOT(nextPlot()));
@@ -129,6 +128,8 @@ void PlotController::nextPlot()
 /// @param index :: Index of a dataset.
 boost::shared_ptr<DatasetPlotData> PlotController::getData(int index)
 {
+  auto data = boost::shared_ptr<DatasetPlotData>();
+  if (index < 0) return data;
   if ( !m_plotData.contains(index) )
   {
     QString wsName = m_table->item( index, wsColumn )->text();
@@ -140,9 +141,8 @@ boost::shared_ptr<DatasetPlotData> PlotController::getData(int index)
     }
     try
     {
-      auto value = boost::make_shared<DatasetPlotData>( wsName, wsIndex, outputWorkspaceName );
-      m_plotData.insert(index, value );
-      return value;
+      data = boost::make_shared<DatasetPlotData>( wsName, wsIndex, outputWorkspaceName );
+      m_plotData.insert(index, data );
     }
     catch(std::exception& e)
     {
@@ -150,11 +150,19 @@ boost::shared_ptr<DatasetPlotData> PlotController::getData(int index)
       clear();
       owner()->checkSpectra();
       m_plot->replot();
-      return boost::shared_ptr<DatasetPlotData>();
     }
   }
+  else
+  {
+    data = m_plotData[index];
+  }
 
-  return m_plotData[index];
+  if (data)
+  {
+    data->showDataErrorBars(m_showDataErrors);
+  }
+
+  return data;
 }
 
 /// Plot a data set.
@@ -322,6 +330,17 @@ void PlotController::updateRange(int index)
 }
 
 MultiDatasetFit *PlotController::owner() const {return static_cast<MultiDatasetFit*>(parent());}
+
+/// Toggle display of the data error bars.
+void PlotController::showDataErrors(bool on)
+{
+  m_showDataErrors = on;
+  if (auto data = getData(m_currentIndex))
+  {
+    data->show(m_plot);
+    m_plot->replot();
+  }
+}
 
 } // MDF
 } // CustomInterfaces

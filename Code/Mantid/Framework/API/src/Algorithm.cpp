@@ -39,6 +39,20 @@ namespace API {
 namespace {
 /// Separator for workspace types in workspaceMethodOnTypes member
 const std::string WORKSPACE_TYPES_SEPARATOR = ";";
+
+class WorkspacePropertyValueIs {
+public:
+  WorkspacePropertyValueIs(const std::string& value) : m_value(value){};
+  bool operator()(IWorkspaceProperty *property) {
+    Property *prop = dynamic_cast<Property *>(property);
+    if (!prop)
+      return false;
+    return prop->value() == m_value;
+  }
+
+private:
+  const std::string& m_value;
+};
 }
 
 // Doxygen can't handle member specialization at the moment:
@@ -75,8 +89,9 @@ Algorithm::Algorithm()
       m_isInitialized(false), m_isExecuted(false), m_isChildAlgorithm(false),
       m_recordHistoryForChild(false), m_alwaysStoreInADS(false),
       m_runningAsync(false), m_running(false), m_rethrow(false),
-      m_isAlgStartupLoggingEnabled(true), m_algorithmID(this),
-      m_singleGroup(-1), m_groupsHaveSimilarNames(false) {}
+      m_isAlgStartupLoggingEnabled(true), m_startChildProgress(0.),
+      m_endChildProgress(0.), m_algorithmID(this), m_singleGroup(-1),
+      m_groupsHaveSimilarNames(false) {}
 
 /// Virtual destructor
 Algorithm::~Algorithm() {
@@ -884,7 +899,8 @@ IAlgorithm_sptr Algorithm::fromString(const std::string &input) {
       } catch (boost::bad_lexical_cast &) {
       }
     }
-    IAlgorithm_sptr alg = AlgorithmManager::Instance().createUnmanaged(algName, version);
+    IAlgorithm_sptr alg =
+        AlgorithmManager::Instance().createUnmanaged(algName, version);
     alg->initialize();
     if (boost::regex_search(input, what, propExp, boost::match_not_null)) {
       std::string _propStr = what[1];
@@ -1305,27 +1321,48 @@ bool Algorithm::processGroups() {
         outputBaseName += ws->name();
 
         // Set the property using the name of that workspace
-        Property *prop = dynamic_cast<Property *>(m_inputWorkspaceProps[iwp]);
-        alg->setPropertyValue(prop->name(), ws->name());
+        if (Property *prop =
+                dynamic_cast<Property *>(m_inputWorkspaceProps[iwp])) {
+          alg->setPropertyValue(prop->name(), ws->name());
+        } else {
+          throw std::logic_error("Found a Workspace property which doesn't "
+                                 "inherit from Property.");
+        }
       } // not an empty (i.e. optional) input
     }   // for each InputWorkspace property
 
     std::vector<std::string> outputWSNames(m_pureOutputWorkspaceProps.size());
     // ---------- Set all the output workspaces ----------------------------
     for (size_t owp = 0; owp < m_pureOutputWorkspaceProps.size(); owp++) {
-      Property *prop =
-          dynamic_cast<Property *>(m_pureOutputWorkspaceProps[owp]);
+      if (Property *prop =
+              dynamic_cast<Property *>(m_pureOutputWorkspaceProps[owp])) {
+        // Default name = "in1_in2_out"
+        std::string outName = outputBaseName + "_" + prop->value();
 
-      // Default name = "in1_in2_out"
-      std::string outName = outputBaseName + "_" + prop->value();
-      // Except if all inputs had similar names, then the name is "out_1"
-      if (m_groupsHaveSimilarNames)
-        outName = prop->value() + "_" + Strings::toString(entry + 1);
+        WorkspacePropertyValueIs comp(prop->value());
+        auto inputProp = std::find_if(m_inputWorkspaceProps.begin(),
+                                      m_inputWorkspaceProps.end(), comp);
 
-      // Set in the output
-      alg->setPropertyValue(prop->name(), outName);
+        // Overwrite workspaces in any input property if they have the same
+        // name as an output (i.e. copy name button in algorithm dialog used)
+        // (only need to do this for a single input, multiple will be handled
+        // by ADS)
+        if (inputProp != m_inputWorkspaceProps.end())
+          outName = m_groups[inputProp - m_inputWorkspaceProps.begin()][entry]
+                        ->name();
 
-      outputWSNames[owp] = outName;
+        // Except if all inputs had similar names, then the name is "out_1"
+        else if (m_groupsHaveSimilarNames)
+          outName = prop->value() + "_" + Strings::toString(entry + 1);
+
+        // Set in the output
+        alg->setPropertyValue(prop->name(), outName);
+
+        outputWSNames[owp] = outName;
+      } else {
+        throw std::logic_error(
+            "Found a Workspace property which doesn't inherit from Property.");
+      }
     } // for each OutputWorkspace property
 
     // ------------ Execute the algo --------------

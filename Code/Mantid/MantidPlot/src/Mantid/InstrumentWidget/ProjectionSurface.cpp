@@ -2,11 +2,12 @@
 #include "GLColor.h"
 #include "MantidGLWidget.h"
 #include "OpenGLError.h"
-#include "InputController.h"
+
 
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Objects/Object.h"
 #include "MantidAPI/IPeaksWorkspace.h"
+#include "MantidQtMantidWidgets/InputController.h"
 
 #include <QRgb>
 #include <QSet>
@@ -22,6 +23,7 @@
 #include "MantidKernel/V3D.h"
 
 using Mantid::Kernel::V3D;
+using namespace MantidQt::MantidWidgets;
 
 /**
   * The constructor.
@@ -36,6 +38,8 @@ ProjectionSurface::ProjectionSurface(const InstrumentActor* rootActor):
     m_interactionMode(MoveMode),
     m_isLightingOn(false),
     m_peakLabelPrecision(2),
+    m_showPeakRows(false),
+    m_showPeakLabels(false),
     m_peakShapesStyle(0),
     m_viewChanged(true),
     m_redrawPicking(true)

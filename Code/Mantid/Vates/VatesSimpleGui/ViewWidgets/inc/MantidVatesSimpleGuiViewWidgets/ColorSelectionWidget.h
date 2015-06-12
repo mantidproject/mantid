@@ -67,14 +67,27 @@ public:
   double getMaxRange();
   /// Load the default color map
   void loadColorMap(bool viewSwitched);
+  /// Programmatically enable/disable auto scaling of color range
+  void setAutoScale(bool autoScale);
+  /// Set min smaller max, can be used to programmatically set the widgets
+  void setMinMax(double& min, double& max);
+  /// Others need to know if this widget is in the process of updating colors at user's request
+  bool inProcessUserRequestedAutoScale() { return m_inProcessUserRequestedAutoScale; };
+  /// To effectively block callbacks from external (Paraview) color changes
+  void ignoreColorChangeCallbacks(bool ignore);
+  bool isIgnoringColorCallbacks();
 
 public slots:
   /// Set state for all control widgets.
   void enableControls(bool state);
   /// Reset the widget's state.
   void reset();
-  /// Set the color scale range into the range widgets.
+  /// Set the color scale range into the range widgets (only in autoscale mode).
   void setColorScaleRange(double min, double max);
+  /// Slot for when the user clicks on the auto-scale check box
+  void autoCheckBoxClicked(bool wasOnn);
+  /// Set log scaling button
+  void onSetLogScale(bool state);
 
 signals:
   /**
@@ -100,16 +113,14 @@ signals:
   void logScale(int state);
 
 protected slots:
-  /// Set state of the automatic scaling checkbox.
-  void autoOrManualScaling(int state);
   /// Get the new color scale range.
   void getColorScaleRange();
   /// Show available color presets.
   void loadPreset();
   /// Set log color scaling.
   void useLogScaling(int state);
-  /// Set log scaling button
-  void onSetLogScale(bool state);
+  /// Set log color scaling, on user click
+  void useLogScalingClicked(bool wasOn);
 
 private:
   /// Add color maps from XML files.
@@ -123,7 +134,7 @@ private:
   void setEditorStatus(bool status);
   /// Set up the behaviour for with or without log scale.
   void setupLogScale(int state);
-  /// Set min smaller max 
+  /// Set min smaller max, can be used to programmatically set the widgets
   void setMinSmallerMax(double& min, double& max);
 
   boost::scoped_ptr<ColorMapManager> colorMapManager; ///< Keeps track of the available color maps.
@@ -135,8 +146,12 @@ private:
 
   MantidQt::API::MdConstants m_mdConstants;
 
-  pqColorPresetManager *presets; ///< Dialog for choosing color presets
-  Ui::ColorSelectionWidgetClass ui; ///< The mode control widget's UI form
+  pqColorPresetManager *m_presets; ///< Dialog for choosing color presets
+  Ui::ColorSelectionWidgetClass m_ui; ///< The mode control widget's UI form
+  bool m_ignoreColorChangeCallbacks; ///< Effectively blocks/disables callbacks
+
+  /// this is a flag that is set while updating the color scale triggered by the user clicking on the auto-scale box
+  bool m_inProcessUserRequestedAutoScale;
 };
 
 } // SimpleGui

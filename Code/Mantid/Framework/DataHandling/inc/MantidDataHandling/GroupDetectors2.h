@@ -5,14 +5,10 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
-#include "MantidKernel/System.h"
-#include <climits>
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/GroupingWorkspace.h"
 
 #include <map>
-
-#include <Poco/SAX/ContentHandler.h>
 
 namespace Mantid {
 namespace DataHandling {
@@ -170,6 +166,9 @@ private:
   /// read in the input parameters and see what findout what will be to grouped
   void getGroups(API::MatrixWorkspace_const_sptr workspace,
                  std::vector<int64_t> &unUsedSpec);
+  /// read in a list of instructions and output commands in .map file format
+  void translateInstructions(const std::string &instructions,
+                             std::stringstream &commands);
   /// gets the list of spectra _index_ _numbers_ from a file of _spectra_
   /// _numbers_
   void processFile(std::string fname, API::MatrixWorkspace_const_sptr workspace,
@@ -189,8 +188,9 @@ private:
   /// possible), white space and # comments ignored
   int readInt(std::string line);
 
-  void readFile(spec2index_map &specs2index, std::ifstream &File,
-                size_t &lineNum, std::vector<int64_t> &unUsedSpec);
+  void readFile(spec2index_map &specs2index, std::istream &File,
+                size_t &lineNum, std::vector<int64_t> &unUsedSpec,
+                bool ignoreGroupNumber);
 
   /// used while reading the file reads reads spectra numbers from the string
   /// and returns spectra indexes
@@ -251,8 +251,8 @@ private:
   /// reading it will take this percentage of the
   /// algorithm execution time
   static const int INTERVAL = 128; ///< copy this many histograms and then check
-  /// for an algorithm notification and update
-  /// the progress bar
+                                   /// for an algorithm notification and update
+                                   /// the progress bar
 };
 
 } // namespace DataHandling

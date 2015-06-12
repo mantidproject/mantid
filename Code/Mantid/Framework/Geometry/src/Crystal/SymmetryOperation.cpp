@@ -11,7 +11,7 @@ namespace Geometry {
 SymmetryOperation::SymmetryOperation()
     : m_order(1), m_matrix(Kernel::IntMatrix(3, 3, true)),
       m_inverseMatrix(Kernel::IntMatrix(3, 3, true)), m_vector(),
-      m_identifier() {
+      m_reducedVector(), m_identifier() {
   m_identifier = SymmetryOperationSymbolParser::getNormalizedIdentifier(
       m_matrix, m_vector);
 }
@@ -44,7 +44,8 @@ SymmetryOperation::SymmetryOperation(const Kernel::IntMatrix &matrix,
 SymmetryOperation::SymmetryOperation(const SymmetryOperation &other)
     : m_order(other.m_order), m_matrix(other.m_matrix),
       m_inverseMatrix(other.m_inverseMatrix), m_vector(other.m_vector),
-      m_identifier(other.m_identifier) {}
+      m_reducedVector(other.m_reducedVector), m_identifier(other.m_identifier) {
+}
 
 /// Assignment operator
 SymmetryOperation &SymmetryOperation::
@@ -53,6 +54,7 @@ operator=(const SymmetryOperation &other) {
   m_matrix = other.m_matrix;
   m_inverseMatrix = other.m_inverseMatrix;
   m_vector = other.m_vector;
+  m_reducedVector = other.m_reducedVector;
   m_identifier = other.m_identifier;
 
   return *this;
@@ -69,10 +71,11 @@ void SymmetryOperation::init(const Kernel::IntMatrix &matrix,
   m_inverseMatrix = m_inverseMatrix.Transpose();
 
   m_vector = getWrappedVector(vector);
-
   m_order = getOrderFromMatrix(m_matrix);
   m_identifier = SymmetryOperationSymbolParser::getNormalizedIdentifier(
       m_matrix, m_vector);
+
+  m_reducedVector = getReducedVector(m_matrix, m_vector);
 }
 
 /// Returns a const reference to the internally stored matrix
@@ -80,6 +83,32 @@ const Kernel::IntMatrix &SymmetryOperation::matrix() const { return m_matrix; }
 
 /// Returns a const reference to the internall stored vector
 const V3R &SymmetryOperation::vector() const { return m_vector; }
+
+/**
+ * @brief SymmetryOperation::reducedVector
+ *
+ * According to ITA, 11.2, the translation component of a symmetry operation
+ * can be termined with the following algorithm. First, a matrix \f$W\f$ is
+ * calculated using the symmetry operation \f$S\f$ and its powers up to its
+ * order \f$k\f$, adding the matrices of the resulting operations:
+ *
+ * \f[
+ *  W = W_1(S^0) + W_2(S^1) + \dots + W_k(S^{k-1})
+ * \f]
+ *
+ * The translation vector is then calculation from the vector \f$w\f$ of the
+ * operation:
+ *
+ * \f[
+ *  t = \frac{1}{k}\cdot (W \times w)
+ * \f]
+ *
+ * For operations which do not have translation components, this algorithm
+ * returns a 0-vector.
+ *
+ * @return Translation vector.
+ */
+const V3R &SymmetryOperation::reducedVector() const { return m_reducedVector; }
 
 /**
  * Returns the order of the symmetry operation
@@ -229,6 +258,24 @@ SymmetryOperation::getOrderFromMatrix(const Kernel::IntMatrix &matrix) const {
   }
 
   throw std::runtime_error("There is something wrong with supplied matrix.");
+}
+
+V3R SymmetryOperation::getReducedVector(const Kernel::IntMatrix &matrix,
+                                        const V3R &vector) const {
+  Kernel::IntMatrix translationMatrix(3, 3, false);
+
+  for (size_t i = 0; i < order(); ++i) {
+    Kernel::IntMatrix tempMatrix(3, 3, true);
+
+    for (size_t j = 0; j < i; ++j) {
+      tempMatrix *= matrix;
+    }
+
+    translationMatrix += tempMatrix;
+  }
+
+  return (translationMatrix * vector) *
+         RationalNumber(1, static_cast<int>(order()));
 }
 
 /**

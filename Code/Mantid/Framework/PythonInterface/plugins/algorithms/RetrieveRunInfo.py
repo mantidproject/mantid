@@ -18,9 +18,9 @@ class Intervals(object):
 
     #Factory.
     @classmethod
-    def fromString(cls, string):
+    def fromString(cls, mystring):
         # Tokenise on commas.
-        intervalTokens = string.split(",")
+        intervalTokens = mystring.split(",")
 
         # Call parseRange on each tokenised range.
         numbers = [_parseIntervalToken(intervalToken) for intervalToken in intervalTokens]
@@ -64,7 +64,7 @@ class Intervals(object):
         newObj._intervals = self._intervals + other._intervals
         return newObj
 
-    """ TODO: At the moment this is just a generator.  Implement a proper iterator. """
+    # TODO: At the moment this is just a generator.  Implement a proper iterator.
     # So that we can type "for i in Intervals( (0, 2), (4, 5) ):"
     def __iter__(self):
         for interval in self._intervals:
@@ -105,7 +105,7 @@ def sumWsList(wsList, summedWsName = None):
 
     return mtd[summedWsName]
 
-
+#pylint: disable=too-few-public-methods
 class FileBackedWsIterator(object):
     ''' An iterator to iterate over workspaces.  Each filename in the list
     provided is loaded into a workspace, validated by the given ws_validator,
@@ -116,7 +116,7 @@ class FileBackedWsIterator(object):
         # Validate.
         if not isinstance(filenames, list):
             raise TypeError("Expected a list.")
-        if not all(map(self._is_string, filenames)):
+        if not all([self._is_string(s) for s in filenames]):
             raise TypeError("Expected a list of strings.")
         if len(filenames) < 1:
             raise ValueError("Expected at least one filename.")
@@ -180,7 +180,8 @@ class RetrieveRunInfo(PythonAlgorithm):
         return 'Utility;PythonAlgorithms'
 
     def summary(self):
-        return "Given a range of run numbers and an output workspace name, will compile a table of info for each run of the instrument you have set as default."
+        return "Given a range of run numbers and an output workspace name, will compile a table of info for "+\
+               "each run of the instrument you have set as default."
 
     def PyInit(self):
         # Declare algorithm properties.
