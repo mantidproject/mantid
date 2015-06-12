@@ -32,7 +32,15 @@ DECLARE_ALGORITHM(FilterEvents)
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
-FilterEvents::FilterEvents() {}
+FilterEvents::FilterEvents()
+    : m_eventWS(), m_splittersWorkspace(), m_matrixSplitterWS(),
+      m_detCorrectWorkspace(), m_useTableSplitters(false), m_workGroupIndexes(),
+      m_splitters(), m_outputWS(), m_wsNames(), m_detTofOffsets(),
+      m_detTofShifts(), m_FilterByPulseTime(false), m_informationWS(),
+      m_hasInfoWS(), m_progress(0.), m_outputWSNameBase(), m_toGroupWS(false),
+      m_vecSplitterTime(), m_vecSplitterGroup(), m_splitSampleLogs(false),
+      m_useDBSpectrum(false), m_dbWSIndex(-1), m_tofCorrType(),
+      m_specSkipType(), m_vecSkip() {}
 
 //----------------------------------------------------------------------------------------------
 /** Destructor
@@ -54,10 +62,11 @@ void FilterEvents::init() {
   declareProperty("OutputWorkspaceBaseName", "OutputWorkspace",
                   "The base name to use for the output workspace");
 
-  declareProperty(
-      new WorkspaceProperty<TableWorkspace>(
-          "InformationWorkspace", "", Direction::Input, PropertyMode::Optional),
-      "Optional output for the information of each splitter workspace index.");
+  declareProperty(new WorkspaceProperty<TableWorkspace>("InformationWorkspace",
+                                                        "", Direction::Input,
+                                                        PropertyMode::Optional),
+                  "Optional output for the information of each splitter "
+                  "workspace index.");
 
   declareProperty(
       new WorkspaceProperty<MatrixWorkspace>("OutputTOFCorrectionWorkspace",
@@ -114,10 +123,10 @@ void FilterEvents::init() {
                   boost::make_shared<StringListValidator>(spec_no_det),
                   "Approach to deal with spectrum without detectors. ");
 
-  declareProperty(
-      "SplitSampleLogs", true,
-      "If selected, all sample logs will be splitted by the  "
-      "event splitters.  It is not recommended for fast event log splitters. ");
+  declareProperty("SplitSampleLogs", true,
+                  "If selected, all sample logs will be splitted by the  "
+                  "event splitters.  It is not recommended for fast event "
+                  "log splitters. ");
 
   declareProperty("NumberOutputWS", 0,
                   "Number of output output workspace splitted. ",
@@ -144,26 +153,26 @@ void FilterEvents::exec() {
   examineEventWS();
 
   // Parse splitters
-  mProgress = 0.0;
-  progress(mProgress, "Processing SplittersWorkspace.");
+  m_progress = 0.0;
+  progress(m_progress, "Processing SplittersWorkspace.");
   if (m_useTableSplitters)
     processSplittersWorkspace();
   else
     processMatrixSplitterWorkspace();
 
   // Create output workspaces
-  mProgress = 0.1;
-  progress(mProgress, "Create Output Workspaces.");
+  m_progress = 0.1;
+  progress(m_progress, "Create Output Workspaces.");
   createOutputWorkspaces();
 
   // Optionall import corrections
-  mProgress = 0.20;
-  progress(mProgress, "Importing TOF corrections. ");
+  m_progress = 0.20;
+  progress(m_progress, "Importing TOF corrections. ");
   setupDetectorTOFCalibration();
 
   // Filter Events
-  mProgress = 0.30;
-  progress(mProgress, "Filter Events.");
+  m_progress = 0.30;
+  progress(m_progress, "Filter Events.");
   double progressamount;
   if (m_toGroupWS)
     progressamount = 0.6;
@@ -176,8 +185,8 @@ void FilterEvents::exec() {
 
   // Optional to group detector
   if (m_toGroupWS) {
-    mProgress = 0.9;
-    progress(mProgress, "Group workspaces");
+    m_progress = 0.9;
+    progress(m_progress, "Group workspaces");
 
     std::string groupname = m_outputWSNameBase;
     API::IAlgorithm_sptr groupws =
@@ -200,8 +209,8 @@ void FilterEvents::exec() {
   }
   setProperty("OutputWorkspaceNames", outputwsnames);
 
-  mProgress = 1.0;
-  progress(mProgress, "Completed");
+  m_progress = 1.0;
+  progress(m_progress, "Completed");
 
   return;
 }
@@ -243,7 +252,7 @@ void FilterEvents::processProperties() {
     m_hasInfoWS = true;
 
   m_outputWSNameBase = this->getPropertyValue("OutputWorkspaceBaseName");
-  mFilterByPulseTime = this->getProperty("FilterByPulseTime");
+  m_FilterByPulseTime = this->getProperty("FilterByPulseTime");
 
   m_toGroupWS = this->getProperty("GroupWorkspaces");
 
@@ -377,8 +386,8 @@ void FilterEvents::processSplittersWorkspace() {
     if (inorder && i > 0 && m_splitters[i] < m_splitters[i - 1])
       inorder = false;
   }
-  mProgress = 0.05;
-  progress(mProgress);
+  m_progress = 0.05;
+  progress(m_progress);
 
   // 3. Order if not ordered and add workspace for events excluded
   if (!inorder) {
@@ -482,7 +491,8 @@ void FilterEvents::createOutputWorkspaces() {
         add2output = false;
     }
 
-    // Generate one of the output workspaces & Copy geometry over. But we don't
+    // Generate one of the output workspaces & Copy geometry over. But we
+    // don't
     // copy the data.
     DataObjects::EventWorkspace_sptr optws =
         boost::dynamic_pointer_cast<DataObjects::EventWorkspace>(
@@ -537,8 +547,8 @@ void FilterEvents::createOutputWorkspaces() {
                     << "\n";
 
       // Update progress report
-      mProgress = 0.1 + 0.1 * wsgindex / numnewws;
-      progress(mProgress, "Creating output workspace");
+      m_progress = 0.1 + 0.1 * wsgindex / numnewws;
+      progress(m_progress, "Creating output workspace");
       wsgindex += 1.;
     } // If add workspace to output
 
@@ -935,7 +945,7 @@ void FilterEvents::filterEventsBySplitters(double progressamount) {
 
       // Perform the filtering (using the splitting function and just one
       // output)
-      if (mFilterByPulseTime) {
+      if (m_FilterByPulseTime) {
         input_el.splitByPulseTime(m_splitters, outputs);
       } else if (m_tofCorrType != NoneCorrect) {
         input_el.splitByFullTime(m_splitters, outputs, true,
@@ -974,7 +984,7 @@ void FilterEvents::filterEventsBySplitters(double progressamount) {
     Kernel::TimeSplitterType splitters;
     generateSplitters(wsindex, splitters);
 
-    g_log.debug() << "[FilterEvents D1215]: Output orkspace Index " << wsindex
+    g_log.debug() << "[FilterEvents D1215]: Output workspace Index " << wsindex
                   << ": Name = " << opws->name()
                   << "; Number of splitters = " << splitters.size() << ".\n";
 
@@ -1042,7 +1052,7 @@ void FilterEvents::filterEventsByVectorSplitters(double progressamount) {
       // Perform the filtering (using the splitting function and just one
       // output)
       std::string logmessage("");
-      if (mFilterByPulseTime) {
+      if (m_FilterByPulseTime) {
         throw runtime_error(
             "It is not a good practice to split fast event by pulse time. ");
       } else if (m_tofCorrType != NoneCorrect) {
@@ -1073,7 +1083,8 @@ void FilterEvents::filterEventsByVectorSplitters(double progressamount) {
 }
 
 //----------------------------------------------------------------------------------------------
-/** Generate splitters for specified workspace index as a subset of m_splitters
+/** Generate splitters for specified workspace index as a subset of
+ * m_splitters
  */
 void FilterEvents::generateSplitters(int wsindex,
                                      Kernel::TimeSplitterType &splitters) {

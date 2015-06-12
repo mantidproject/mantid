@@ -134,7 +134,7 @@ public:
      * @return The new peak with the new instrument( adjusted with the
     *parameters) and time adjusted.
      */
-  static DataObjects::Peak createNewPeak(const API::IPeak &peak_old,
+  static DataObjects::Peak createNewPeak(const Geometry::IPeak &peak_old,
                                          Geometry::Instrument_sptr instrNew,
                                          double T0, double L0);
 
@@ -155,7 +155,7 @@ protected:
      *
      * @return A new instrument with the parameters applied.
      */
-  Geometry::Instrument_sptr getNewInstrument(const API::IPeak &peak) const;
+  Geometry::Instrument_sptr getNewInstrument(const Geometry::IPeak &peak) const;
 
 private:
   /**

@@ -4,7 +4,7 @@
 #include <cxxtest/TestSuite.h>
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidCrystal/FindSXPeaks.h"
-#include "MantidAPI/IPeak.h"
+#include "MantidGeometry/Crystal/IPeak.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Crystal;

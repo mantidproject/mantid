@@ -75,8 +75,7 @@ void SubmitRemoteJob2::exec() {
   // Put the algorithm execution code here...
   const std::string comp = getPropertyValue("ComputeResource");
   Mantid::API::IRemoteJobManager_sptr jm =
-      Mantid::API::RemoteJobManagerFactory::Instance().create(
-          comp);
+      Mantid::API::RemoteJobManagerFactory::Instance().create(comp);
 
   const std::string tid = getPropertyValue("TransactionID");
   const std::string runnable = getPropertyValue("ScriptName");
@@ -84,11 +83,20 @@ void SubmitRemoteJob2::exec() {
   const std::string displayName = getPropertyValue("TaskName");
   const int nodes = getProperty("NumNodes");
   const int cores = getProperty("CoresPerNode");
-  std::string jid = jm->submitRemoteJob(tid, runnable, params, displayName, nodes, cores);
+  std::string jid =
+      jm->submitRemoteJob(tid, runnable, params, displayName, nodes, cores);
 
-  setPropertyValue("JobID", jid);
-  g_log.information() << "Job submitted.  Job ID =  "
-                      << jid << " on (remote) compute resource " << comp << std::endl;
+  try {
+    setProperty("JobID", jid);
+  } catch (std::exception &e) {
+    throw std::runtime_error("Could not set the output property JobID with the "
+                             "ID value returned from the compute resource: '" +
+                             jid + "'. This looks as if there has been "
+                                   "an error in the job submission. Error "
+                             "description: " + e.what());
+  }
+  g_log.information() << "Job submitted.  Job ID =  " << jid
+                      << " on (remote) compute resource " << comp << std::endl;
 }
 
 } // end namespace RemoteAlgorithms

@@ -19,6 +19,7 @@ namespace MantidQt {
 namespace SliceViewer {
 /// Forward dec.
 class ProxyCompositePeaksPresenter;
+class PeaksWorkspaceWidget;
 
 /**
 
@@ -40,6 +41,8 @@ public:
   void hide();
   ~PeaksViewer();
   bool hasThingsToShow() const;
+  void clearPeaksModeRequest(PeaksWorkspaceWidget const * const originWidget, const bool on);
+  void addPeaksModeRequest(PeaksWorkspaceWidget const * const originWidget, const bool on);
 
 public slots:
   void onPeakColourChanged(Mantid::API::IPeaksWorkspace_const_sptr, QColor);

@@ -5,6 +5,7 @@ set( SRC_FILES
   src/Authenticate2.cpp
   src/DownloadRemoteFile.cpp
   src/DownloadRemoteFile2.cpp
+  src/Logout2.cpp
   src/QueryAllRemoteJobs.cpp
   src/QueryAllRemoteJobs2.cpp
   src/QueryRemoteFile.cpp
@@ -30,6 +31,7 @@ set( INC_FILES
   inc/MantidRemoteAlgorithms/Authenticate2.h
   inc/MantidRemoteAlgorithms/DownloadRemoteFile.h
   inc/MantidRemoteAlgorithms/DownloadRemoteFile2.h
+  inc/MantidRemoteAlgorithms/Logout2.h
   inc/MantidRemoteAlgorithms/QueryAllRemoteJobs.h
   inc/MantidRemoteAlgorithms/QueryAllRemoteJobs2.h
   inc/MantidRemoteAlgorithms/QueryRemoteFile.h
@@ -55,6 +57,7 @@ set ( TEST_FILES
   Authenticate2Test.h
   DownloadRemoteFileTest.h
   DownloadRemoteFile2Test.h
+  Logout2Test.h
   QueryAllRemoteJobsTest.h
   QueryAllRemoteJobs2Test.h
   QueryRemoteFileTest.h

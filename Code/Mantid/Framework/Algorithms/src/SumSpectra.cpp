@@ -17,6 +17,11 @@ using namespace Kernel;
 using namespace API;
 using namespace DataObjects;
 
+SumSpectra::SumSpectra()
+    : API::Algorithm(), m_outSpecId(0), m_MinSpec(0), m_MaxSpec(0),
+      m_keepMonitors(false), m_numberOfSpectra(0), m_yLength(0), m_indices(),
+      m_CalculateWeightedSum(false) {}
+
 /** Initialisation method.
  *
  */
@@ -71,16 +76,16 @@ void SumSpectra::exec() {
   m_MaxSpec = getProperty("EndWorkspaceIndex");
   const std::vector<int> indices_list = getProperty("ListOfWorkspaceIndices");
 
-  keepMonitors = getProperty("IncludeMonitors");
+  m_keepMonitors = getProperty("IncludeMonitors");
 
   // Get the input workspace
   MatrixWorkspace_const_sptr localworkspace = getProperty("InputWorkspace");
 
-  numberOfSpectra = static_cast<int>(localworkspace->getNumberHistograms());
-  this->yLength = static_cast<int>(localworkspace->blocksize());
+  m_numberOfSpectra = static_cast<int>(localworkspace->getNumberHistograms());
+  this->m_yLength = static_cast<int>(localworkspace->blocksize());
 
-  // Check 'StartSpectrum' is in range 0-numberOfSpectra
-  if (m_MinSpec > numberOfSpectra) {
+  // Check 'StartSpectrum' is in range 0-m_numberOfSpectra
+  if (m_MinSpec > m_numberOfSpectra) {
     g_log.warning("StartWorkspaceIndex out of range! Set to 0.");
     m_MinSpec = 0;
   }
@@ -88,23 +93,23 @@ void SumSpectra::exec() {
   if (indices_list.empty()) {
     // If no list was given and no max, just do all.
     if (isEmpty(m_MaxSpec))
-      m_MaxSpec = numberOfSpectra - 1;
+      m_MaxSpec = m_numberOfSpectra - 1;
   }
 
   // Something for m_MaxSpec was given but it is out of range?
   if (!isEmpty(m_MaxSpec) &&
-      (m_MaxSpec > numberOfSpectra - 1 || m_MaxSpec < m_MinSpec)) {
+      (m_MaxSpec > m_numberOfSpectra - 1 || m_MaxSpec < m_MinSpec)) {
     g_log.warning("EndWorkspaceIndex out of range! Set to max Workspace Index");
-    m_MaxSpec = numberOfSpectra;
+    m_MaxSpec = m_numberOfSpectra;
   }
 
   // Make the set of indices to sum up from the list
-  this->indices.insert(indices_list.begin(), indices_list.end());
+  this->m_indices.insert(indices_list.begin(), indices_list.end());
 
   // And add the range too, if any
   if (!isEmpty(m_MaxSpec)) {
     for (int i = m_MinSpec; i <= m_MaxSpec; i++)
-      this->indices.insert(i);
+      this->m_indices.insert(i);
   }
 
   // determine the output spectrum id
@@ -119,21 +124,22 @@ void SumSpectra::exec() {
       boost::dynamic_pointer_cast<const EventWorkspace>(localworkspace);
   if (eventW) {
     m_CalculateWeightedSum = false;
-    this->execEvent(eventW, this->indices);
+    this->execEvent(eventW, this->m_indices);
   } else {
     //-------Workspace 2D mode -----
 
     // Create the 2D workspace for the output
     MatrixWorkspace_sptr outputWorkspace =
         API::WorkspaceFactory::Instance().create(
-            localworkspace, 1, localworkspace->readX(0).size(), this->yLength);
+            localworkspace, 1, localworkspace->readX(0).size(),
+            this->m_yLength);
     size_t numSpectra(0); // total number of processed spectra
     size_t numMasked(0);  // total number of the masked and skipped spectra
     size_t numZeros(0);   // number of spectra which have 0 value in the first
     // column (used in special cases of evaluating how good
     // Puasonian statistics is)
 
-    Progress progress(this, 0, 1, this->indices.size());
+    Progress progress(this, 0, 1, this->m_indices.size());
 
     // This is the (only) output spectrum
     ISpectrum *outSpec = outputWorkspace->getSpectrum(0);
@@ -184,13 +190,13 @@ specid_t
 SumSpectra::getOutputSpecId(MatrixWorkspace_const_sptr localworkspace) {
   // initial value
   specid_t specId =
-      localworkspace->getSpectrum(*(this->indices.begin()))->getSpectrumNo();
+      localworkspace->getSpectrum(*(this->m_indices.begin()))->getSpectrumNo();
 
   // the total number of spectra
   int totalSpec = static_cast<int>(localworkspace->getNumberHistograms());
 
   specid_t temp;
-  for (auto it = this->indices.begin(); it != this->indices.end(); ++it) {
+  for (auto it = this->m_indices.begin(); it != this->m_indices.end(); ++it) {
     if (*(it) < totalSpec) {
       temp = localworkspace->getSpectrum(*(it))->getSpectrumNo();
       if (temp < specId)
@@ -233,10 +239,10 @@ void SumSpectra::doWorkspace2D(MatrixWorkspace_const_sptr localworkspace,
   // Loop over spectra
   std::set<int>::iterator it;
   // for (int i = m_MinSpec; i <= m_MaxSpec; ++i)
-  for (it = this->indices.begin(); it != this->indices.end(); ++it) {
+  for (it = this->m_indices.begin(); it != this->m_indices.end(); ++it) {
     int i = *it;
     // Don't go outside the range.
-    if ((i >= this->numberOfSpectra) || (i < 0)) {
+    if ((i >= this->m_numberOfSpectra) || (i < 0)) {
       g_log.error() << "Invalid index " << i
                     << " was specified. Sum was aborted.\n";
       break;
@@ -246,7 +252,7 @@ void SumSpectra::doWorkspace2D(MatrixWorkspace_const_sptr localworkspace,
       // Get the detector object for this spectrum
       Geometry::IDetector_const_sptr det = localworkspace->getDetector(i);
       // Skip monitors, if the property is set to do so
-      if (!keepMonitors && det->isMonitor())
+      if (!m_keepMonitors && det->isMonitor())
         continue;
       // Skip masked detectors
       if (det->isMasked()) {
@@ -262,7 +268,7 @@ void SumSpectra::doWorkspace2D(MatrixWorkspace_const_sptr localworkspace,
     const MantidVec &YValues = localworkspace->readY(i);
     const MantidVec &YErrors = localworkspace->readE(i);
     if (m_CalculateWeightedSum) {
-      for (int k = 0; k < this->yLength; ++k) {
+      for (int k = 0; k < this->m_yLength; ++k) {
         if (YErrors[k] != 0) {
           double errsq = YErrors[k] * YErrors[k];
           YError[k] += errsq;
@@ -273,7 +279,7 @@ void SumSpectra::doWorkspace2D(MatrixWorkspace_const_sptr localworkspace,
         }
       }
     } else {
-      for (int k = 0; k < this->yLength; ++k) {
+      for (int k = 0; k < this->m_yLength; ++k) {
         YSum[k] += YValues[k];
         YError[k] += YErrors[k] * YErrors[k];
       }
@@ -348,10 +354,10 @@ void SumSpectra::doRebinnedOutput(MatrixWorkspace_sptr outputWorkspace,
   // Loop over spectra
   std::set<int>::iterator it;
   // for (int i = m_MinSpec; i <= m_MaxSpec; ++i)
-  for (it = indices.begin(); it != indices.end(); ++it) {
+  for (it = m_indices.begin(); it != m_indices.end(); ++it) {
     int i = *it;
     // Don't go outside the range.
-    if ((i >= numberOfSpectra) || (i < 0)) {
+    if ((i >= m_numberOfSpectra) || (i < 0)) {
       g_log.error() << "Invalid index " << i
                     << " was specified. Sum was aborted.\n";
       break;
@@ -361,7 +367,7 @@ void SumSpectra::doRebinnedOutput(MatrixWorkspace_sptr outputWorkspace,
       // Get the detector object for this spectrum
       Geometry::IDetector_const_sptr det = localworkspace->getDetector(i);
       // Skip monitors, if the property is set to do so
-      if (!keepMonitors && det->isMonitor())
+      if (!m_keepMonitors && det->isMonitor())
         continue;
       // Skip masked detectors
       if (det->isMasked()) {
@@ -379,7 +385,7 @@ void SumSpectra::doRebinnedOutput(MatrixWorkspace_sptr outputWorkspace,
     const MantidVec &FracArea = inWS->readF(i);
 
     if (m_CalculateWeightedSum) {
-      for (int k = 0; k < this->yLength; ++k) {
+      for (int k = 0; k < this->m_yLength; ++k) {
         if (YErrors[k] != 0) {
           double errsq = YErrors[k] * YErrors[k] * FracArea[k] * FracArea[k];
           YError[k] += errsq;
@@ -392,7 +398,7 @@ void SumSpectra::doRebinnedOutput(MatrixWorkspace_sptr outputWorkspace,
         }
       }
     } else {
-      for (int k = 0; k < this->yLength; ++k) {
+      for (int k = 0; k < this->m_yLength; ++k) {
         YSum[k] += YValues[k] * FracArea[k];
         YError[k] += YErrors[k] * YErrors[k] * FracArea[k] * FracArea[k];
         FracSum[k] += FracArea[k];
@@ -449,7 +455,7 @@ void SumSpectra::execEvent(EventWorkspace_const_sptr localworkspace,
   for (it = indices.begin(); it != indices.end(); ++it) {
     int i = *it;
     // Don't go outside the range.
-    if ((i >= numberOfSpectra) || (i < 0)) {
+    if ((i >= m_numberOfSpectra) || (i < 0)) {
       g_log.error() << "Invalid index " << i
                     << " was specified. Sum was aborted.\n";
       break;
@@ -459,7 +465,7 @@ void SumSpectra::execEvent(EventWorkspace_const_sptr localworkspace,
       // Get the detector object for this spectrum
       Geometry::IDetector_const_sptr det = localworkspace->getDetector(i);
       // Skip monitors, if the property is set to do so
-      if (!keepMonitors && det->isMonitor())
+      if (!m_keepMonitors && det->isMonitor())
         continue;
       // Skip masked detectors
       if (det->isMasked()) {

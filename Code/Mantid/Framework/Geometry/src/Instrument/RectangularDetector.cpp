@@ -21,8 +21,10 @@ using Kernel::Matrix;
 /** Empty constructor
  */
 RectangularDetector::RectangularDetector()
-    : CompAssembly(), IObjComponent(NULL), m_minDetId(0), m_maxDetId(0) {
+    : CompAssembly(), IObjComponent(NULL), m_rectBase(NULL), m_minDetId(0),
+      m_maxDetId(0) {
 
+  init();
   setGeometryHandler(new BitmapGeometryHandler(this));
 }
 
@@ -34,6 +36,7 @@ RectangularDetector::RectangularDetector(const RectangularDetector *base,
                                          const ParameterMap *map)
     : CompAssembly(base, map), IObjComponent(NULL), m_rectBase(base),
       m_minDetId(0), m_maxDetId(0) {
+  init();
   setGeometryHandler(new BitmapGeometryHandler(this));
 }
 
@@ -48,11 +51,24 @@ RectangularDetector::RectangularDetector(const RectangularDetector *base,
  */
 RectangularDetector::RectangularDetector(const std::string &n,
                                          IComponent *reference)
-    : CompAssembly(n, reference), IObjComponent(NULL), m_minDetId(0),
-      m_maxDetId(0) {
-
+    : CompAssembly(n, reference), IObjComponent(NULL), m_rectBase(NULL),
+      m_minDetId(0), m_maxDetId(0) {
+  init();
   this->setName(n);
   setGeometryHandler(new BitmapGeometryHandler(this));
+}
+
+void RectangularDetector::init() {
+  m_xpixels = m_ypixels = 0;
+  m_xsize = m_ysize = 0;
+  m_xstart = m_ystart = 0;
+  m_xstep = m_ystep = 0;
+  m_textureID = 0;
+  m_minDetId = m_maxDetId = 0;
+  m_idstart = 0;
+  m_idfillbyfirst_y = false;
+  m_idstepbyrow = 0;
+  m_idstep = 0;
 }
 
 /** Destructor
@@ -634,11 +650,11 @@ void RectangularDetector::getTextureSize(int &xsize, int &ysize) const {
 /** Set the texture ID to use when rendering the RectangularDetector
  */
 void RectangularDetector::setTextureID(unsigned int textureID) {
-  mTextureID = textureID;
+  m_textureID = textureID;
 }
 
 /** Return the texture ID to be used in plotting . */
-unsigned int RectangularDetector::getTextureID() const { return mTextureID; }
+unsigned int RectangularDetector::getTextureID() const { return m_textureID; }
 
 /**
  * Draws the objcomponent, If the handler is not set then this function does

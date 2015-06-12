@@ -20,8 +20,8 @@ using namespace API;
 using namespace DataObjects;
 
 LoadTOFRawNexus::LoadTOFRawNexus(): m_numPixels(0), m_signalNo(0), pulseTimes(0),
-    m_numBins(0), m_spec_min(0), m_dataField(""), m_axisField(""), m_xUnits(""),
-    m_fileMutex(), m_assumeOldFile(false) {
+    m_numBins(0), m_spec_min(0), m_spec_max(0), m_dataField(""), m_axisField(""),
+    m_xUnits(""), m_fileMutex(), m_assumeOldFile(false) {
 }
 
 //-------------------------------------------------------------------------------------------------

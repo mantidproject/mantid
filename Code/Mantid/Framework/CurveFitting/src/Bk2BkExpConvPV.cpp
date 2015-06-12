@@ -1,9 +1,10 @@
+#include <cmath>
+
 #include "MantidCurveFitting/Bk2BkExpConvPV.h"
 #include "MantidKernel/System.h"
 #include "MantidAPI/FunctionFactory.h"
-#include <cmath>
-#include <gsl/gsl_sf_erf.h>
 
+#include <gsl/gsl_sf_erf.h>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -22,7 +23,7 @@ DECLARE_FUNCTION(Bk2BkExpConvPV)
 // ----------------------------
 /** Constructor and Desctructor
  */
-Bk2BkExpConvPV::Bk2BkExpConvPV() : mFWHM(0.0) {}
+Bk2BkExpConvPV::Bk2BkExpConvPV() : mFWHM(0.0), mLowTOF(0.0), mUpperTOF(0.0) {}
 
 Bk2BkExpConvPV::~Bk2BkExpConvPV() {}
 

@@ -75,8 +75,10 @@ void DerivMinimizer::fundfun(const gsl_vector *x, void *params, double *f,
 
 /// Constructor
 DerivMinimizer::DerivMinimizer()
-    : m_gslSolver(NULL), m_stopGradient(1e-3), m_stepSize(0.1),
-      m_tolerance(0.0001) {}
+    : m_gslSolver(NULL), m_x(NULL), m_stopGradient(1e-3), m_stepSize(0.1),
+      m_tolerance(0.0001) {
+  initGSLMMin();
+}
 
 /**
  * Constructor.
@@ -84,8 +86,18 @@ DerivMinimizer::DerivMinimizer()
  * @param tolerance :: Tolerance.
  */
 DerivMinimizer::DerivMinimizer(const double stepSize, const double tolerance)
-    : m_gslSolver(NULL), m_stopGradient(1e-3), m_stepSize(stepSize),
-      m_tolerance(tolerance) {}
+    : m_gslSolver(NULL), m_x(NULL), m_stopGradient(1e-3), m_stepSize(stepSize),
+      m_tolerance(tolerance) {
+  initGSLMMin();
+}
+
+void DerivMinimizer::initGSLMMin() {
+  m_gslMultiminContainer.f = NULL;
+  m_gslMultiminContainer.df = NULL;
+  m_gslMultiminContainer.fdf = NULL;
+  m_gslMultiminContainer.n = 0;
+  m_gslMultiminContainer.params = NULL;
+}
 
 /**
  * Destructor.

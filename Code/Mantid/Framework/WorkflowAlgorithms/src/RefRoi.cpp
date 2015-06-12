@@ -18,6 +18,10 @@ using namespace API;
 using namespace Geometry;
 using namespace DataObjects;
 
+RefRoi::RefRoi()
+    : API::Algorithm(), m_xMin(0), m_xMax(0), m_yMin(0), m_yMax(0),
+      m_nXPixel(0), m_nYPixel(0) {}
+
 void RefRoi::init() {
   declareProperty(
       new WorkspaceProperty<>("InputWorkspace", "", Direction::Input,
@@ -43,17 +47,15 @@ void RefRoi::init() {
       "SumPixels", false,
       "If true, all the pixels will be summed,"
       " so that the resulting workspace will be a single histogram");
-  declareProperty(
-      "NormalizeSum", false,
-      "If true, and SumPixels is true, the"
-      " resulting histogram will be divided by the number of pixels in the ROI");
-  declareProperty(
-      "AverageOverIntegratedAxis", false,
-      "If true, and SumPixels and NormalizeSum are true, the"
-      " resulting histogram will also be divided by the number of pixels integrated over");
-  declareProperty(
-      "ErrorWeighting", false,
-      "If true, error weighting will be used when normalizing");
+  declareProperty("NormalizeSum", false, "If true, and SumPixels is true, the"
+                                         " resulting histogram will be divided "
+                                         "by the number of pixels in the ROI");
+  declareProperty("AverageOverIntegratedAxis", false,
+                  "If true, and SumPixels and NormalizeSum are true, the"
+                  " resulting histogram will also be divided by the number of "
+                  "pixels integrated over");
+  declareProperty("ErrorWeighting", false,
+                  "If true, error weighting will be used when normalizing");
   declareProperty(
       "IntegrateY", true,
       "If true, the Y direction will be"
@@ -193,7 +195,8 @@ void RefRoi::extract2D() {
     if (sum_pixels && normalize && error_weighting) {
       for (size_t t = 0; t < YOut.size(); t++) {
         size_t t_index = convert_to_q ? YOut.size() - 1 - t : t;
-        double error_squared = error_vector[t_index] == 0 ? 1 : error_vector[t_index];
+        double error_squared =
+            error_vector[t_index] == 0 ? 1 : error_vector[t_index];
         YOut[t] += signal_vector[t_index] / error_squared;
         EOut[t] += 1.0 / error_squared;
       }
@@ -216,11 +219,13 @@ void RefRoi::extract2D() {
       if (sum_pixels && normalize) {
         if (error_weighting) {
           YOut[t] = YOut[t] / EOut[t] / n_integrated;
-          EOut[t] = sqrt(1.0/EOut[t]) / n_integrated;
+          EOut[t] = sqrt(1.0 / EOut[t]) / n_integrated;
         } else {
           EOut[t] = sqrt(EOut[t]);
-          YOut[t] = YOut[t] / (main_axis_max - main_axis_min + 1) / n_integrated;
-          EOut[t] = EOut[t] / (main_axis_max - main_axis_min + 1) / n_integrated;
+          YOut[t] =
+              YOut[t] / (main_axis_max - main_axis_min + 1) / n_integrated;
+          EOut[t] =
+              EOut[t] / (main_axis_max - main_axis_min + 1) / n_integrated;
         }
       } else {
         EOut[t] = sqrt(EOut[t]);

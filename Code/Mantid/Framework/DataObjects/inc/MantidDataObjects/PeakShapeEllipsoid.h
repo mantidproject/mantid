@@ -67,6 +67,9 @@ namespace DataObjects
     /// Get the peak shape
     std::string shapeName() const;
 
+    /// PeakBase interface
+    double radius() const;
+
     static const std::string ellipsoidShapeName();
 
   private:
