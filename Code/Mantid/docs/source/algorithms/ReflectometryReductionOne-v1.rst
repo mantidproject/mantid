@@ -21,11 +21,6 @@ If :literal:`MonitorBackgroundWavelengthMin` and
 :literal:`MonitorBackgroundWavelengthMax` are both set to :literal:`0`, then
 background normalization will not be performed on the monitors.
 
-Workflow
-########
-
-.. diagram:: ReflectometryReductionOne-v1_wkflw.dot
-
 Analysis Modes
 ##############
 
@@ -54,6 +49,27 @@ workspace. If two Transmission runs are provided then the Stitching
 parameters associated with the transmission runs will also be required.
 If a single Transmission run is provided, then no stitching parameters
 will be needed.
+
+
+Polynomial Correction
+#####################
+
+If no Transmission runs are provided, then polynomial correction can be
+performed instead. Polynomial correction is enabled by setting the
+:literal:`CorrectionAlgorithm` property. If set to
+:literal:`PolynomialCorrection` it runs the :ref:`algm-PolynomialCorrection`
+algorithm, with this algorithms :literal:`Polynomial` property used as its
+:literal:`Coefficients` property.
+
+If the :literal:`CorrectionAlgorithm` property is set to
+:literal:`ExponentialCorrection`, then the :Ref:`algm-ExponentialCorrection`
+algorithm is used, with C0 and C1 taken from the :literal:`C0` and :literal:`C1`
+properties.
+
+Workflow
+########
+
+.. diagram:: ReflectometryReductionOne-v1_wkflw.dot
 
 Usage
 -----

@@ -9,7 +9,8 @@ namespace MantidQt
   namespace SliceViewer
   {
 
-    PeakOverlayViewFactoryBase::PeakOverlayViewFactoryBase(QwtPlot * plot, QWidget * parent, const size_t workspaceNumber) : PeakOverlayViewFactory(), m_plot(plot), m_parent(parent)
+    PeakOverlayViewFactoryBase::PeakOverlayViewFactoryBase(QwtPlot * plot, QWidget * parent, const int plotXIndex, const int plotYIndex, const size_t workspaceNumber) : PeakOverlayViewFactory(), m_plot(plot), m_parent(parent),
+        m_plotXIndex(plotXIndex), m_plotYIndex(plotYIndex)
     {
       if(!plot)
         throw std::invalid_argument("PeakOverlayViewFactoryBase plot is null");

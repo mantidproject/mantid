@@ -30,6 +30,11 @@ namespace {
 Mantid::Kernel::Logger g_log("LSFJobManager");
 }
 
+std::map<std::string, LSFJobManager::Token> LSFJobManager::g_tokenStash;
+std::map<std::string, LSFJobManager::Transaction> LSFJobManager::g_transactions;
+
+std::string LSFJobManager::g_acceptType = "text/plain,application/xml,text/xml";
+
 std::string LSFJobManager::g_killPathBase =
     "webservice/pacclient/jobOperation/kill/";
 
@@ -48,12 +53,10 @@ std::string LSFJobManager::g_downloadOneBasePath = "webservice/pacclient/file/";
 std::string LSFJobManager::g_downloadAllJobFilesBasePath =
     "webservice/pacclient/jobfiles/";
 
-std::string LSFJobManager::g_acceptType = "text/plain,application/xml,text/xml";
-
 using namespace Mantid::Kernel;
 
 void LSFJobManager::abortRemoteJob(const std::string &jobID) {
-  if (m_tokenStash.empty()) {
+  if (g_tokenStash.empty()) {
     throw std::runtime_error(
         "Abort job failed because you do not seem to have logged "
         "in.");
@@ -64,7 +67,7 @@ void LSFJobManager::abortRemoteJob(const std::string &jobID) {
   }
 
   // only support for single-user
-  Token tok = m_tokenStash.begin()->second;
+  Token tok = g_tokenStash.begin()->second;
 
   const std::string token = tok.m_token_str;
   const Poco::URI fullURL = makeFullURI(tok.m_url, g_killPathBase, jobID);
@@ -118,12 +121,12 @@ void LSFJobManager::abortRemoteJob(const std::string &jobID) {
 void LSFJobManager::downloadRemoteFile(const std::string &transactionID,
                                        const std::string &remoteFileName,
                                        const std::string &localFileName) {
-  auto it = m_transactions.find(transactionID);
-  if (m_transactions.end() == it)
+  auto it = g_transactions.find(transactionID);
+  if (g_transactions.end() == it)
     throw std::invalid_argument("Could not find a transaction with ID: " +
                                 transactionID);
 
-  if (m_tokenStash.empty()) {
+  if (g_tokenStash.empty()) {
     throw std::runtime_error(
         "File download failed. You do not seem to have logged in.");
   }
@@ -136,7 +139,7 @@ void LSFJobManager::downloadRemoteFile(const std::string &transactionID,
   }
 
   // only support for single-user
-  Token tok = m_tokenStash.begin()->second;
+  Token tok = g_tokenStash.begin()->second;
 
   // assume that the last job is what we want
   const std::string jobId = jobIDs.back();
@@ -159,13 +162,13 @@ void LSFJobManager::downloadRemoteFile(const std::string &transactionID,
  */
 std::vector<Mantid::API::IRemoteJobManager::RemoteJobInfo>
 LSFJobManager::queryAllRemoteJobs() const {
-  if (m_tokenStash.empty()) {
+  if (g_tokenStash.empty()) {
     throw std::runtime_error(
         "Job status query failed. You do not seem to have logged "
         "in.");
   }
   // only support for single-user
-  Token tok = m_tokenStash.begin()->second;
+  Token tok = g_tokenStash.begin()->second;
 
   // Job query status, needs these headers:
   // headers = {'Content-Type': 'application/xml', 'Cookie': token,
@@ -225,16 +228,16 @@ LSFJobManager::queryAllRemoteJobs() const {
  */
 std::vector<std::string>
 LSFJobManager::queryRemoteFile(const std::string &transactionID) const {
-  auto it = m_transactions.find(transactionID);
-  if (m_transactions.end() == it)
+  auto it = g_transactions.find(transactionID);
+  if (g_transactions.end() == it)
     throw std::invalid_argument("Could not find a transaction with ID: " +
                                 transactionID);
-  if (m_tokenStash.empty()) {
+  if (g_tokenStash.empty()) {
     throw std::runtime_error(
         "Remote file names query failed. You do not seem to have logged in.");
   }
   // only support for single-user
-  Token tok = m_tokenStash.begin()->second;
+  Token tok = g_tokenStash.begin()->second;
 
   std::vector<std::string> jobIDs = it->second.jobIDs;
   if (jobIDs.empty()) {
@@ -311,7 +314,7 @@ LSFJobManager::queryRemoteFile(const std::string &transactionID) const {
  */
 Mantid::API::IRemoteJobManager::RemoteJobInfo
 LSFJobManager::queryRemoteJob(const std::string &jobID) const {
-  if (m_tokenStash.empty()) {
+  if (g_tokenStash.empty()) {
     throw std::runtime_error(
         "Job status query failed. You do not seem to have logged "
         "in.");
@@ -322,7 +325,7 @@ LSFJobManager::queryRemoteJob(const std::string &jobID) const {
   }
 
   // only support for single-user
-  Token tok = m_tokenStash.begin()->second;
+  Token tok = g_tokenStash.begin()->second;
 
   // Job query status, needs these headers:
   // headers = {'Content-Type': 'application/xml', 'Cookie': token,
@@ -406,17 +409,17 @@ LSFJobManager::queryRemoteJob(const std::string &jobID) const {
  * @throw std::runtime_error if there is another issue (like not logged in)
  */
 std::string LSFJobManager::startRemoteTransaction() {
-  if (m_tokenStash.empty()) {
+  if (g_tokenStash.empty()) {
     throw std::runtime_error(
         "Transaction start operation failed. You do not seem to have logged "
         "in.");
   }
 
-  size_t idx = m_transactions.size();
+  size_t idx = g_transactions.size();
   std::string tid =
       std::string("LSFTrans_") + boost::lexical_cast<std::string>(idx + 1);
 
-  auto ret = m_transactions.insert(
+  auto ret = g_transactions.insert(
       std::pair<std::string, Transaction>(tid, LSFJobManager::Transaction()));
 
   // not inserted
@@ -442,15 +445,15 @@ std::string LSFJobManager::startRemoteTransaction() {
  * @throw std::runtime_error if there is another issue (like not logged in)
  */
 void LSFJobManager::stopRemoteTransaction(const std::string &transactionID) {
-  if (m_tokenStash.empty()) {
+  if (g_tokenStash.empty()) {
     throw std::runtime_error(
         "Transaction stop operation failed. You do not seem to have logged "
         "in.");
   }
 
-  auto it = m_transactions.find(transactionID);
+  auto it = g_transactions.find(transactionID);
 
-  if (m_transactions.end() == it)
+  if (g_transactions.end() == it)
     throw std::invalid_argument("Could not find a transaction with ID: " +
                                 transactionID);
 
@@ -460,7 +463,7 @@ void LSFJobManager::stopRemoteTransaction(const std::string &transactionID) {
   for (size_t i = 0; i < jobs.size(); i++) {
     abortRemoteJob(jobs[i]);
   }
-  m_transactions.erase(it);
+  g_transactions.erase(it);
 }
 
 /**
@@ -491,7 +494,7 @@ std::string LSFJobManager::submitRemoteJob(const std::string &transactionID,
                                            const std::string &taskName,
                                            const int numNodes,
                                            const int coresPerNode) {
-  if (m_tokenStash.empty()) {
+  if (g_tokenStash.empty()) {
     throw std::runtime_error(
         "Job submission failed. You do not seem to have logged in.");
   }
@@ -500,7 +503,7 @@ std::string LSFJobManager::submitRemoteJob(const std::string &transactionID,
                                 transactionID);
   }
   // only support for single-user
-  Token tok = m_tokenStash.begin()->second;
+  Token tok = g_tokenStash.begin()->second;
 
   // Job submit query, requires specific parameters for LSF submit
   // Example params passed to python submit utility:
@@ -534,7 +537,7 @@ std::string LSFJobManager::submitRemoteJob(const std::string &transactionID,
         "Error while sending HTTP request to submit a job: " +
         std::string(ie.what()));
   }
-  std::string jobID = "not found";
+  std::string jobID = "";
   if (Mantid::Kernel::InternetHelper::HTTP_OK == code) {
     std::string resp = ss.str();
     if (std::string::npos != resp.find("<errMsg>")) {
@@ -542,16 +545,20 @@ std::string LSFJobManager::submitRemoteJob(const std::string &transactionID,
           << "Submitted job but got a a response that seems to contain "
              "an error message : " << extractPACErrMsg(ss.str()) << std::endl;
     } else {
-      g_log.notice() << "Submitted job successfully." << std::endl;
-      g_log.debug() << "Response from server: " << resp << std::endl;
       // get job id number
-      if (std::string::npos != resp.find("<id>")) {
-        jobID = resp.substr(resp.rfind("<id>") + 1);
+      const std::string idTag = "<id>";
+      if (std::string::npos != resp.find(idTag)) {
+        jobID = resp.substr(resp.rfind(idTag) + idTag.length());
         jobID = jobID.substr(0, jobID.find('<'));
       } else {
-        // default if badly formed string returned
+        // default if badly formed string returned / unable to parse ID from
+        // response
         jobID = "0";
       }
+      g_log.notice() << "Submitted job successfully. It got ID: " << jobID
+                     << std::endl;
+      g_log.debug() << "Response from server after submission: " << resp
+                    << std::endl;
     }
   } else {
     throw std::runtime_error(
@@ -565,10 +572,11 @@ std::string LSFJobManager::submitRemoteJob(const std::string &transactionID,
     int iid = boost::lexical_cast<int>(jobID);
     addJobInTransaction(jobID);
     g_log.debug() << "Submitted job, got ID: " << iid << std::endl;
-  } catch (std::runtime_error) {
-    g_log.warning()
-        << "The job has been succesfully submitted but the code returned does "
-           "not seem well formed." << std::endl;
+  } catch (std::exception &e) {
+    g_log.warning() << "The job has been submitted but the code returned does "
+                       "not seem well formed: '" +
+                           jobID + "'. Detailed error: " +
+                           e.what() << std::endl;
   }
 
   return jobID;
@@ -592,7 +600,7 @@ std::string LSFJobManager::submitRemoteJob(const std::string &transactionID,
 void LSFJobManager::uploadRemoteFile(const std::string &transactionID,
                                      const std::string &remoteFileName,
                                      const std::string &localFileName) {
-  if (m_tokenStash.empty()) {
+  if (g_tokenStash.empty()) {
     throw std::runtime_error(
         "File upload failed. You do not seem to have logged in.");
   }
@@ -601,7 +609,7 @@ void LSFJobManager::uploadRemoteFile(const std::string &transactionID,
                                 transactionID);
   }
   // only support for single-user
-  Token tok = m_tokenStash.begin()->second;
+  Token tok = g_tokenStash.begin()->second;
 
   // File upload, needs these headers:
   // headers = {'Content-Type': 'multipart/mixed; boundary='+boundary,
@@ -765,14 +773,19 @@ LSFJobManager::genOutputStatusInfo(const std::string &resp,
       info.back().status = "Unknown!";
     }
 
-    Poco::XML::Element *cmd = el->getChildElement("cmd");
-    if (cmd) {
-      info.back().runnableName = cmd->innerText();
-    } else {
-      info.back().runnableName = "Unknown!";
-    }
+    // there is no safe simple way to extract the script/binary from command
+    // lines with potentially several 'load module' and other set-environment
+    // instructions. The whole command line is used below for 'Commandline'
+    info.back().runnableName = "Not available";
 
     info.back().transactionID = "no ID";
+
+    Poco::XML::Element *cmd = el->getChildElement("cmd");
+    if (cmd) {
+      info.back().cmdLine = cmd->innerText();
+    } else {
+      info.back().cmdLine = "Not available";
+    }
   }
 
   return info;
@@ -1281,9 +1294,9 @@ LSFJobManager::makeHeaders(const std::string &contentType,
  * being stopped.
  */
 bool LSFJobManager::findTransaction(const std::string &id) const {
-  auto it = m_transactions.find(id);
+  auto it = g_transactions.find(id);
 
-  return (it != m_transactions.end() && !it->second.stopped);
+  return (it != g_transactions.end() && !it->second.stopped);
 }
 
 /**
@@ -1293,9 +1306,9 @@ bool LSFJobManager::findTransaction(const std::string &id) const {
 *
 */
 void LSFJobManager::addJobInTransaction(const std::string &jobID) {
-  if (m_transactions.size() <= 0)
+  if (g_transactions.size() <= 0)
     return;
-  auto &jobs = m_transactions.rbegin()->second.jobIDs;
+  auto &jobs = g_transactions.rbegin()->second.jobIDs;
   auto it = std::find(jobs.begin(), jobs.end(), jobID);
   if (jobs.end() == it)
     jobs.push_back(jobID);

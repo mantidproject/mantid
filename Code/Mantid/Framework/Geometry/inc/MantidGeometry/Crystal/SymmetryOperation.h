@@ -129,6 +129,7 @@ public:
 
   const Kernel::IntMatrix &matrix() const;
   const V3R &vector() const;
+  const V3R &reducedVector() const;
 
   size_t order() const;
   std::string identifier() const;
@@ -162,11 +163,14 @@ protected:
   void init(const Kernel::IntMatrix &matrix, const V3R &vector);
 
   size_t getOrderFromMatrix(const Kernel::IntMatrix &matrix) const;
+  V3R getReducedVector(const Kernel::IntMatrix &matrix,
+                       const V3R &vector) const;
 
   size_t m_order;
   Kernel::IntMatrix m_matrix;
   Kernel::IntMatrix m_inverseMatrix;
   V3R m_vector;
+  V3R m_reducedVector;
   std::string m_identifier;
 };
 
