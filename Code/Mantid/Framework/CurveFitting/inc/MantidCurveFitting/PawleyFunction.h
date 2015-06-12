@@ -4,7 +4,7 @@
 #include "MantidKernel/System.h"
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/IPawleyFunction.h"
-#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/IPeakFunction.h"
 #include "MantidAPI/ParamFunction.h"
 

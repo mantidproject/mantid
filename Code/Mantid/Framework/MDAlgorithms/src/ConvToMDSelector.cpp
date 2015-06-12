@@ -1,5 +1,6 @@
 #include "MantidMDAlgorithms/ConvToMDSelector.h"
 
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidMDAlgorithms/ConvToMDEventsWS.h"

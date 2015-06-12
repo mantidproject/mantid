@@ -1,7 +1,7 @@
 #ifndef MANTID_MDALGORITHMS_IMD_TRANSFORMATION_H
 #define MANTID_MDALGORITHMS_IMD_TRANSFORMATION_H
 
-#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
 
 #include "MantidGeometry/MDGeometry/MDTypes.h"
 

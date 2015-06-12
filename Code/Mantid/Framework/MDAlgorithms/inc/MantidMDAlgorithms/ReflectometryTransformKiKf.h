@@ -6,7 +6,7 @@
 #include "MantidKernel/ClassMacros.h"
 
 #include "MantidAPI/IMDEventWorkspace_fwd.h"
-#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
 
 #include "MantidMDAlgorithms/ReflectometryTransform.h"
 

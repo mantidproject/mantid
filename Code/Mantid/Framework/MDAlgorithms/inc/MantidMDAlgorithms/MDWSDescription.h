@@ -10,6 +10,7 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/PropertyManager.h"
+#include "MantidKernel/SpecialCoordinateSystem.h"
 
 #include "MantidDataObjects/MDEvent.h"
 #include "MantidDataObjects/TableWorkspace.h"
