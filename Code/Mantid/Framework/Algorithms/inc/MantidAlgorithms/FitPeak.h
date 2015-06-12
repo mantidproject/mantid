@@ -113,6 +113,11 @@ private:
                        API::MatrixWorkspace_sptr dataws, size_t wsindex,
                        double xmin, double xmax, bool calmode);
 
+  /// Calculate chi-square of a single domain function
+  double calChiSquareSD(API::IFunction_sptr fitfunc,
+                        API::MatrixWorkspace_sptr dataws, size_t wsindex,
+                        double xmin, double xmax);
+
   /// Fit peak and background composite function
   double fitCompositeFunction(API::IPeakFunction_sptr peakfunc,
                               API::IBackgroundFunction_sptr bkgdfunc,

@@ -619,6 +619,41 @@ void FitOneSinglePeak::pop(const std::map<std::string, double> &funcparammap,
   return;
 }
 
+double FitOneSinglePeak::calChiSquareSD(IFunction_sptr fitfunc,
+                                        MatrixWorkspace_sptr dataws,
+                                        size_t wsindex, double xmin,
+                                        double xmax) {
+  // Set up sub algorithm fit
+  IAlgorithm_sptr fit;
+  try {
+    fit = createChildAlgorithm("CalculateChiSquared", -1, -1, false);
+  }
+  catch (Exception::NotFoundError &) {
+    std::stringstream errss;
+    errss << "The FitPeak algorithm requires the CurveFitting library";
+    g_log.error(errss.str());
+    throw std::runtime_error(errss.str());
+  }
+
+  // Set the properties
+  fit->setProperty("Function", fitfunc);
+  fit->setProperty("InputWorkspace", dataws);
+  fit->setProperty("WorkspaceIndex", static_cast<int>(wsindex));
+  fit->setProperty("StartX", xmin);
+  fit->setProperty("EndX", xmax);
+
+  fit->executeAsChildAlg();
+  if (!fit->isExecuted()) {
+    g_log.error("Fit for background is not executed. ");
+    throw std::runtime_error("Fit for background is not executed. ");
+  }
+
+  // Retrieve result
+  double chi2 = fit->getProperty("ChiSquaredDividedByDOF");
+
+  return chi2;
+}
+
 //----------------------------------------------------------------------------------------------
 /** Fit function in single domain
   * @exception :: (1) Fit cannot be called. (2) Fit.isExecuted is false (cannot
@@ -640,6 +675,7 @@ double FitOneSinglePeak::fitFunctionSD(IFunction_sptr fitfunc,
       fitfunc->fix(i);
 
     maxiteration = 1;
+    throw std::runtime_error("Calcualtion mode is disabled");
   } else {
     // Unfix all parameters
     for (size_t i = 0; i < fitfunc->nParams(); ++i)
@@ -804,10 +840,11 @@ double FitOneSinglePeak::fitCompositeFunction(
   // so far the best Rwp
   bool modecal = true;
   // FIXME - This is not a good practise...
-  double backRwp =
-      fitFunctionSD(bkgdfunc, dataws, wsindex, startx, endx, modecal);
+  double backRwp = calChiSquareSD(bkgdfunc, dataws, wsindex, startx, endx);
+  //    fitFunctionSD(bkgdfunc, dataws, wsindex, startx, endx, modecal);
   m_sstream << "Background: Pre-fit Goodness = " << backRwp << "\n";
-  m_bestRwp = fitFunctionSD(compfunc, dataws, wsindex, startx, endx, modecal);
+  m_bestRwp = calChiSquareSD(compfunc, dataws, wsindex, startx, endx);
+  // fitFunctionSD(compfunc, dataws, wsindex, startx, endx, modecal);
   m_sstream << "Peak+Background: Pre-fit Goodness = " << m_bestRwp << "\n";
 
   map<string, double> bkuppeakmap, bkupbkgdmap;
