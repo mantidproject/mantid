@@ -36,9 +36,9 @@ algorithm will perform one of three possible transformations.
 
 where
 
-:math:`Q_x = \frac{2\pi}{\lambda}(sin\theta_f + sin\theta_i)`
+:math:`Q_x = \frac{2\pi}{\lambda}(cos\theta_f - cos\theta_i)`
 
-:math:`Q_z = \frac{2\pi}{\lambda}(cos\theta_f - cos\theta_i)`
+:math:`Q_z = \frac{2\pi}{\lambda}(sin\theta_f + sin\theta_i)`
 
 :math:`K_i = \frac{2\pi}{\lambda}sin\theta_i`
 
