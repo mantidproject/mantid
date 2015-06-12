@@ -31,7 +31,7 @@ using Geometry::ParameterMap;
 using Geometry::Track;
 
 namespace {
-const size_t MAX_SCATTER_PT_TRIES = 25;
+const size_t MAX_SCATTER_PT_TRIES = 100;
 /// Conversion constant
 const double MASS_TO_MEV =
     0.5 * PhysicalConstants::NeutronMass / PhysicalConstants::meV;
