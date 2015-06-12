@@ -17,8 +17,8 @@ How does it work?
 The Instrument data service is similar to all of the other :ref:`Data Services <Data Service>`
 in mantid and is implemented as a simple dictionary object holding keys referring to shared pointers to the base
 instrument definitions.  The key is a compound string made up of the Instrument name with a sha1 hash of the text
-of the instrument definition appended.  For those detail minded among you, the has is derived specifically by 
-first converting any lines endings within the definition to linux line endings, and then trimming any white space 
+of the instrument definition appended.  For those detail minded among you, the has is derived specifically by
+first converting any lines endings within the definition to linux line endings, and then trimming any white space
 from the start and end of the definition before calculating the sha1 checksum.
 
 Extracting an instrument from the Instrument Data Service
@@ -33,10 +33,10 @@ workspace.
 **Example: Getting the instrument from a workspace**
 
 .. testcode:: GetInstrument
-                
+
     ws = CreateSampleWorkspace("Event",NumBanks=1,BankPixelWidth=1)
     inst = ws.getInstrument()
-    inst.getSource().getPos()
+    print inst.getSource().getPos()
 
 Output:
 
