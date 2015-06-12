@@ -1,4 +1,6 @@
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/IFunction.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/TextAxis.h"
 #include "MantidQtCustomInterfaces/Indirect/JumpFit.h"
@@ -22,6 +24,7 @@ JumpFit::JumpFit(QWidget *parent) : IndirectBayesTab(parent) {
   // Add the properties browser to the ui form
   m_uiForm.treeSpace->addWidget(m_propTree);
 
+  // Fitting range
   m_properties["QMin"] = m_dblManager->addProperty("QMin");
   m_properties["QMax"] = m_dblManager->addProperty("QMax");
 
@@ -30,6 +33,10 @@ JumpFit::JumpFit(QWidget *parent) : IndirectBayesTab(parent) {
 
   m_propTree->addProperty(m_properties["QMin"]);
   m_propTree->addProperty(m_properties["QMax"]);
+
+  // Fitting function
+  m_properties["FitFunction"] = m_grpManager->addProperty("Fitting Parameters");
+  m_propTree->addProperty(m_properties["FitFunction"]);
 
   m_uiForm.cbWidth->setEnabled(false);
 
@@ -43,6 +50,12 @@ JumpFit::JumpFit(QWidget *parent) : IndirectBayesTab(parent) {
   // Connect algorithm runner to completion handler function
   connect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,
           SLOT(fitAlgDone(bool)));
+
+  // Update fit parameters in browser when function is selected
+  connect(m_uiForm.cbFunction, SIGNAL(currentIndexChanged(const QString &)),
+          this, SLOT(fitFunctionSelected(const QString &)));
+
+  fitFunctionSelected(m_uiForm.cbFunction->currentText());
 }
 
 void JumpFit::setup() {}
@@ -104,20 +117,17 @@ void JumpFit::runImpl(bool plot, bool save) {
   QString functionName = m_uiForm.cbFunction->currentText();
   QString functionString = "name=" + functionName;
 
-  // TODO
-  switch (m_uiForm.cbFunction->currentIndex()) {
-  case 0:
-    functionString += ",Tau=1.0,L=1.5";
-    break;
-  case 1:
-    functionString += ",Tau=1.0,L=1.5";
-    break;
-  case 2:
-    functionString += ",D=1.5";
-    break;
-  case 3:
-    functionString += ",Tau=1.0,L=1.5";
-    break;
+  // Build function string
+  QStringList parameters = getFunctionParameters(functionName);
+  for (auto it = parameters.begin(); it != parameters.end(); ++it) {
+    QString parameterName = *it;
+
+    // Get the value form double manager
+    QString name = "parameter_" + *it;
+    double value = m_dblManager->value(m_properties[name]);
+    QString parameterValue = QString::number(value);
+
+    functionString += "," + parameterName + "=" + parameterValue;
   }
 
   std::string widthText = m_uiForm.cbWidth->currentText().toStdString();
@@ -126,6 +136,7 @@ void JumpFit::runImpl(bool plot, bool save) {
   QString outputName =
       getWorkspaceBasename(sample) + "_" + functionName + "_fit";
 
+  // Setup fit algorithm
   m_fitAlg = AlgorithmManager::Instance().create("Fit");
   m_fitAlg->initialize();
 
@@ -164,8 +175,10 @@ void JumpFit::fitAlgDone(bool error) {
   if (error)
     return;
 
+  std::string outName = m_fitAlg->getPropertyValue("Output");
+
   // Get output workspace name
-  std::string outWsName = m_fitAlg->getPropertyValue("Output") + "_Workspace";
+  std::string outWsName = outName + "_Workspace";
 
   // Get the output workspace group
   MatrixWorkspace_sptr outputWorkspace =
@@ -186,6 +199,31 @@ void JumpFit::fitAlgDone(bool error) {
       m_uiForm.ppPlot->addSpectrum("Diff", outputWorkspace, histIndex,
                                    Qt::green);
   }
+
+  // Update parameters in UI
+  std::string paramTableName = outName + "_Parameters";
+
+  ITableWorkspace_sptr paramTable =
+      AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(
+          paramTableName);
+
+  // Don't run the algorithm when updating parameter values
+  disconnect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
+             SLOT(runPreviewAlgorithm()));
+
+  for (auto it = m_properties.begin(); it != m_properties.end(); ++it) {
+    QString propName(it.key());
+    if (propName.startsWith("parameter_")) {
+      size_t row(0), col(0);
+      paramTable->find(propName.split("_")[1].toStdString(), row, col);
+      col++;
+      double value = paramTable->cell<double>(row, col);
+      m_dblManager->setValue(m_properties[propName], value);
+    }
+  }
+
+  connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
+          SLOT(runPreviewAlgorithm()));
 }
 
 /**
@@ -381,5 +419,53 @@ void JumpFit::updateProperties(QtProperty *prop, double val) {
                      val);
   }
 }
+
+/**
+ * Gets a list of parameters for a given fit function.
+ *
+ * @return List fo parameters
+ */
+QStringList JumpFit::getFunctionParameters(const QString &functionName) {
+  QStringList parameters;
+
+  IFunction_sptr func =
+      FunctionFactory::Instance().createFunction(functionName.toStdString());
+
+  for (size_t i = 0; i < func->nParams(); i++)
+    parameters << QString::fromStdString(func->parameterName(i));
+
+  return parameters;
+}
+
+/**
+ * Handles a new fit function being selected.
+ *
+ * @param functionName Name of new fit function
+ */
+void JumpFit::fitFunctionSelected(const QString &functionName) {
+  m_uiForm.cbFunction->blockSignals(true);
+
+  // Remove current parameter elements
+  for (auto it = m_properties.begin(); it != m_properties.end();) {
+    if (it.key().startsWith("parameter_")) {
+      delete it.value();
+      m_properties.erase(it);
+    } else {
+      ++it;
+    }
+  }
+
+  // Add new parameter elements
+  QStringList parameters = getFunctionParameters(functionName);
+  for (auto it = parameters.begin(); it != parameters.end(); ++it) {
+    QString name = "parameter_" + *it;
+    m_properties[name] = m_dblManager->addProperty(*it);
+    m_dblManager->setValue(m_properties[name], 1.0);
+    m_properties["FitFunction"]->addSubProperty(m_properties[name]);
+  }
+
+  m_uiForm.cbFunction->blockSignals(false);
+}
+
 } // namespace CustomInterfaces
 } // namespace MantidQt
