@@ -38,11 +38,11 @@ private slots:
   /// Handles running preview algorithm
   void runPreviewAlgorithm();
   /// Handles a fit algorithm being selected
-  void fitFunctionSelected(const QString & functionName);
+  void fitFunctionSelected(const QString &functionName);
 
 private:
   /// Gets a list of parameter names for a given fit function
-  QStringList getFunctionParameters(const QString & functionName);
+  QStringList getFunctionParameters(const QString &functionName);
 
   // The UI form
   Ui::JumpFit m_uiForm;
