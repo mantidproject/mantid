@@ -250,7 +250,7 @@ class MantidConfigDirectInelastic(object):
 
         if platform.system() != 'Windows':
             os.system('chown '+self._fedid+':'+self._fedid+' '+full_target)
-        # Set up the file  creation and modification dates to the users start date
+        # Set up the file creation and modification dates to the users start date
         start_date = self._user.get_start_date()
         file_time = time.mktime(start_date.timetuple())
         os.utime(full_target,(file_time,file_time))
@@ -262,8 +262,10 @@ class MantidConfigDirectInelastic(object):
            The agreement on the naming as currently in ISIS:
            e.g: /archive/NDXMERLIN/Instrument/data/cycle_08_1
         """
+        # cycle folder have short form without leading numbers
+        cycle_fold_n =int(cycle_ID[0])-2000
         folder = os.path.join(self._root_data_folder,'NDX'+instr.upper(),\
-                              'Instrument/data/cycle_'+str(cycle_ID[0])+'_'+str(cycle_ID[1]))
+                              "Instrument/data/cycle_{0:02}_{1}".format(cycle_fold_n,str(cycle_ID[1])))
         return folder
 
     def is_inelastic(self,instr_name):
