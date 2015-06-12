@@ -52,6 +52,8 @@ public:
   std::string algorithmName() const;
   /// Get the version of the algorithm used to make this shape
   int algorithmVersion() const;
+  /// Radius
+  virtual double radius() const = 0;
 
 protected:
   /// Copy constructor

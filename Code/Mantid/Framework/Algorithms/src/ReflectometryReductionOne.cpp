@@ -192,6 +192,39 @@ void ReflectometryReductionOne::init() {
                                               Direction::Input),
                   "Enforces spectrum number checking prior to normalisation");
 
+  std::vector<std::string> correctionAlgorithms = boost::assign::list_of(
+      "None")("PolynomialCorrection")("ExponentialCorrection");
+  declareProperty("CorrectionAlgorithm", "None",
+                  boost::make_shared<StringListValidator>(correctionAlgorithms),
+                  "The type of correction to perform.");
+
+  declareProperty(new ArrayProperty<double>("Polynomial"),
+                  "Coefficients to be passed to the PolynomialCorrection"
+                  " algorithm.");
+
+  declareProperty(
+      new PropertyWithValue<double>("C0", 0.0, Direction::Input),
+      "C0 value to be passed to the ExponentialCorrection algorithm.");
+
+  declareProperty(
+      new PropertyWithValue<double>("C1", 0.0, Direction::Input),
+      "C1 value to be passed to the ExponentialCorrection algorithm.");
+
+  setPropertyGroup("CorrectionAlgorithm", "Polynomial Corrections");
+  setPropertyGroup("Polynomial", "Polynomial Corrections");
+  setPropertyGroup("C0", "Polynomial Corrections");
+  setPropertyGroup("C1", "Polynomial Corrections");
+
+  setPropertySettings("Polynomial", new Kernel::EnabledWhenProperty(
+                                        "CorrectionAlgorithm", IS_EQUAL_TO,
+                                        "PolynomialCorrection"));
+  setPropertySettings(
+      "C0", new Kernel::EnabledWhenProperty("CorrectionAlgorithm", IS_EQUAL_TO,
+                                            "ExponentialCorrection"));
+  setPropertySettings(
+      "C1", new Kernel::EnabledWhenProperty("CorrectionAlgorithm", IS_EQUAL_TO,
+                                            "ExponentialCorrection"));
+
   setPropertyGroup("FirstTransmissionRun", "Transmission");
   setPropertyGroup("SecondTransmissionRun", "Transmission");
   setPropertyGroup("Params", "Transmission");
@@ -514,6 +547,8 @@ void ReflectometryReductionOne::exec() {
         firstTransmissionRun.get(), secondTransmissionRun, stitchingStart,
         stitchingDelta, stitchingEnd, stitchingStartOverlap,
         stitchingEndOverlap, wavelengthStep, processingCommands);
+  } else if (getPropertyValue("CorrectionAlgorithm") != "None") {
+    IvsLam = algorithmicCorrection(IvsLam);
   } else {
     g_log.warning("No transmission correction will be applied.");
   }
@@ -641,6 +676,35 @@ MatrixWorkspace_sptr ReflectometryReductionOne::transmissonCorrection(
   // Do normalization.
   MatrixWorkspace_sptr normalizedIvsLam = divide(IvsLam, denominator);
   return normalizedIvsLam;
+}
+
+/**
+ * Perform transmission correction using alternative correction algorithms.
+ * @param IvsLam : Run workspace which is to be normalized by the results of the
+ * transmission corrections.
+ * @return Corrected workspace
+ */
+MatrixWorkspace_sptr
+ReflectometryReductionOne::algorithmicCorrection(MatrixWorkspace_sptr IvsLam) {
+
+  const std::string corrAlgName = getProperty("CorrectionAlgorithm");
+
+  IAlgorithm_sptr corrAlg = createChildAlgorithm(corrAlgName);
+  corrAlg->initialize();
+  if (corrAlgName == "PolynomialCorrection") {
+    corrAlg->setPropertyValue("Coefficients", getPropertyValue("Polynomial"));
+  } else if (corrAlgName == "ExponentialCorrection") {
+    corrAlg->setPropertyValue("C0", getPropertyValue("C0"));
+    corrAlg->setPropertyValue("C1", getPropertyValue("C1"));
+  } else {
+    throw std::runtime_error("Unknown correction algorithm: " + corrAlgName);
+  }
+
+  corrAlg->setProperty("InputWorkspace", IvsLam);
+  corrAlg->setProperty("Operation", "Divide");
+  corrAlg->execute();
+
+  return corrAlg->getProperty("OutputWorkspace");
 }
 
 /**
