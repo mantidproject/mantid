@@ -242,6 +242,8 @@ std::string
 SCARFLSFJobManager::guessJobSubmissionAppName(const std::string &runnablePath,
                                               const std::string &jobOptions)
 {
+  UNUSED_ARG(jobOptions);
+
   // Two applications are for now registered and being used on SCARF:
   //  TOMOPY_0_0_3, PYASTRATOOLBOX_1_1
   std::string appName = "TOMOPY_0_0_3";
