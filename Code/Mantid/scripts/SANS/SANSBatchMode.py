@@ -258,10 +258,10 @@ def BatchReduce(filename, format, plotresults=False, saveAlgs={'SaveRKH':'txt'},
                     elif algor == "SaveRKH":
                         SaveRKH(save_names_dict[workspace_name], workspace_name+ext, Append=False)
                     else:
-                        exec(algor+'(' + save_names_dict[workspace_name] + ', workspace_name+ext)')
+                        exec(algor+"('" + save_names_dict[workspace_name] + "', workspace_name+ext)")
             # If we performed a zero-error correction, then we should get rid of the cloned workspaces
-            if save_as_zero_error_free:
-                delete_cloned_workspaces(save_names_dict)
+            #if save_as_zero_error_free:
+            #    delete_cloned_workspaces(save_names_dict)
 
         if plotresults == 1:
             for final_name in names:
@@ -379,7 +379,7 @@ def get_mapped_workspaces(save_names, save_as_zero_error_free):
         @param save_as_zero_error_free : if the user wants the zero-errors removed
         @returns a map of workspaces
     """
-    workspace_dictionary = []
+    workspace_dictionary = {}
     for name in save_names:
         if save_as_zero_error_free:
             cloned_name = name + '_cloned_temp'
