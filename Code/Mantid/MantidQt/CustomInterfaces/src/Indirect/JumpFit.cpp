@@ -110,7 +110,7 @@ void JumpFit::runImpl(bool plot, bool save) {
   if (!m_uiForm.dsSample->isValid())
     return;
 
-  if (m_batchAlgoRunner->queueLength() > 1)
+  if (m_batchAlgoRunner->queueLength() > 0)
     return;
 
   // Fit function to use
@@ -266,8 +266,6 @@ void JumpFit::handleSampleInputReady(const QString &filename) {
   // Disable things that run the preview algorithm
   disconnect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
              SLOT(runPreviewAlgorithm()));
-  disconnect(m_uiForm.cbFunction, SIGNAL(currentIndexChanged(const QString &)),
-             this, SLOT(runPreviewAlgorithm()));
   disconnect(m_uiForm.cbWidth, SIGNAL(currentIndexChanged(const QString &)),
              this, SLOT(runPreviewAlgorithm()));
 
@@ -320,8 +318,6 @@ void JumpFit::handleSampleInputReady(const QString &filename) {
   // Re-enable things that run the preview algorithm
   connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
           SLOT(runPreviewAlgorithm()));
-  connect(m_uiForm.cbFunction, SIGNAL(currentIndexChanged(const QString &)),
-          this, SLOT(runPreviewAlgorithm()));
   connect(m_uiForm.cbWidth, SIGNAL(currentIndexChanged(const QString &)), this,
           SLOT(runPreviewAlgorithm()));
 }
@@ -443,8 +439,6 @@ QStringList JumpFit::getFunctionParameters(const QString &functionName) {
  * @param functionName Name of new fit function
  */
 void JumpFit::fitFunctionSelected(const QString &functionName) {
-  m_uiForm.cbFunction->blockSignals(true);
-
   // Remove current parameter elements
   for (auto it = m_properties.begin(); it != m_properties.end();) {
     if (it.key().startsWith("parameter_")) {
@@ -455,6 +449,10 @@ void JumpFit::fitFunctionSelected(const QString &functionName) {
     }
   }
 
+  // Don't run the algorithm when updating parameter values
+  disconnect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
+             SLOT(runPreviewAlgorithm()));
+
   // Add new parameter elements
   QStringList parameters = getFunctionParameters(functionName);
   for (auto it = parameters.begin(); it != parameters.end(); ++it) {
@@ -464,7 +462,10 @@ void JumpFit::fitFunctionSelected(const QString &functionName) {
     m_properties["FitFunction"]->addSubProperty(m_properties[name]);
   }
 
-  m_uiForm.cbFunction->blockSignals(false);
+  connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
+          SLOT(runPreviewAlgorithm()));
+
+  runPreviewAlgorithm();
 }
 
 } // namespace CustomInterfaces
