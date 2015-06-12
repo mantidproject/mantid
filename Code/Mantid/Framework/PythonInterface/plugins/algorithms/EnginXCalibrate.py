@@ -28,10 +28,10 @@ class EnginXCalibrate(PythonAlgorithm):
     		"Calibrated detector positions. If not specified, default ones are used.")
 
         self.declareProperty('OutputParametersTableName', '', direction=Direction.Input,
-                             doc = 'Name for a table workspace with the calibration parameters calculated by '
-                             'from this algorithm: difc and zero parameters for GSAS. At the moment '
-                             'these two parameters are added as two columns in a single row. If not given, no'
-                             'table is generated.')
+                             doc = 'Name for a table workspace with the calibration parameters calculated '
+                             'from this algorithm: difc and zero parameters for GSAS. these two parameters '
+                             'are added as two columns in a single row. If not given, no table is '
+                             'generated.')
 
         self.declareProperty("Difc", 0.0, direction = Direction.Output,\
     		doc = "Calibrated Difc value for the bank")
