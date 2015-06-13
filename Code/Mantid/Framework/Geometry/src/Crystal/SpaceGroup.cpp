@@ -76,5 +76,30 @@ bool SpaceGroup::isAllowedReflection(const Kernel::V3D &hkl) const {
   return true;
 }
 
+/**
+ * Returns the site symmetry group
+ *
+ * The site symmetry group contains all symmetry operations of a space group
+ * that leave a point unchanged. This method probes the symmetry operations
+ * of the space group and constructs a Group-object using them.
+ *
+ * @param position :: Coordinates of the site.
+ * @return :: Site symmetry group.
+ */
+Group_const_sptr SpaceGroup::getSiteSymmetryGroup(const V3D &position) const {
+  V3D wrappedPosition = Geometry::getWrappedVector(position);
+
+  std::vector<SymmetryOperation> siteSymmetryOps;
+
+  for (auto op = m_allOperations.begin(); op != m_allOperations.end(); ++op) {
+    if (Geometry::getWrappedVector((*op) * wrappedPosition) ==
+        wrappedPosition) {
+      siteSymmetryOps.push_back(*op);
+    }
+  }
+
+  return GroupFactory::create<Group>(siteSymmetryOps);
+}
+
 } // namespace Geometry
 } // namespace Mantid

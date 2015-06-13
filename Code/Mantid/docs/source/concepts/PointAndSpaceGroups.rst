@@ -238,7 +238,51 @@ Please note that for hexagonal and trigonal space groups, where translations of 
     2: [0.333333,0.666667,0.75]
     3: [0.666667,0.333333,0.25]
     4: [0.666667,0.333333,0.75]
-    
+
+Closely related to the generation of equivalent coordinates is the site symmetry group, which leaves a point unchanged:
+
+.. testcode:: ExSiteSymmetryGroupInBuilt
+
+    from mantid.geometry import SpaceGroupFactory, SymmetryElementFactory, SymmetryElement
+
+    def getFullElementSymbol(symmetryElement):
+    # Dictionary for mapping enum values to short strings
+        rotationSenseDict = {
+                                SymmetryElement.RotationSense.Positive: '+',
+                                SymmetryElement.RotationSense.Negative: '-',
+                                SymmetryElement.RotationSense.None: ''
+                            }
+        hmSymbol = element.getHMSymbol()
+        rotationSense = rotationSenseDict[element.getRotationSense()]
+        axis = str(element.getAxis())
+
+        return hmSymbol + rotationSense + ' ' + axis
+
+
+
+    sg = SpaceGroupFactory.createSpaceGroup("P 6/m")
+
+    position = [1./3., 2./3., 0.25]
+    siteSymmetryGroup = sg.getSiteSymmetryGroup(position)
+
+    print "Order of the site symmetry group:", siteSymmetryGroup.getOrder()
+    print "Group elements:"
+    for i, op in enumerate(siteSymmetryGroup.getSymmetryOperations()):
+        element = SymmetryElementFactory.createSymElement(op)
+        print str(i + 1) + ":", op.getIdentifier(), "(" + getFullElementSymbol(element) + ")"
+
+The group contains three symmetry operations:
+
+.. testoutput:: ExSiteSymmetryGroupInBuilt
+
+    Order of the site symmetry group: 3
+    Group elements:
+    1: -x+y,-x,z (3- [0,0,1])
+    2: -y,x-y,z (3+ [0,0,1])
+    3: x,y,z (1 [0,0,0])
+
+An extended example below shows an algorithm to derive the site symmetry group.
+
 Furthermore, it is possible to create a PointGroup-object from a SpaceGroup object in order to obtain information about the crystal system and to perform the Miller index operations provided by PointGroup. For this, PointGroupFactory has a special method:
 
 .. testcode:: ExPointGroupFromSpaceGroup
