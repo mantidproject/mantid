@@ -59,6 +59,11 @@ void export_SpaceGroup() {
       .def("getEquivalentPositions", &getEquivalentPositions,
            "Returns an array with all symmetry equivalents of the supplied "
            "HKL.")
-      .def("isAllowedReflection", &isAllowedReflection)
-      .def("getSiteSymmetryGroup", &getSiteSymmetryGroup);
+      .def("isAllowedReflection", &isAllowedReflection,
+           "Returns True if the supplied reflection is allowed with respect to "
+           "space group symmetry operations.")
+      .def("getPointGroup", &SpaceGroup::getPointGroup,
+           "Returns the point group of the space group.")
+      .def("getSiteSymmetryGroup", &getSiteSymmetryGroup,
+           "Returns the site symmetry group for supplied point coordinates.");
 }

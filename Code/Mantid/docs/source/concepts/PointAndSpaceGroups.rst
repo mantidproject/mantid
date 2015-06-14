@@ -283,24 +283,30 @@ The group contains three symmetry operations:
 
 An extended example below shows an algorithm to derive the site symmetry group.
 
-Furthermore, it is possible to create a PointGroup-object from a SpaceGroup object in order to obtain information about the crystal system and to perform the Miller index operations provided by PointGroup. For this, PointGroupFactory has a special method:
+Furthermore, it is possible to create a PointGroup-object from a SpaceGroup object in order to obtain information about the crystal system and to perform the Miller index operations provided by PointGroup. For this, PointGroupFactory has a special method, but the point group can also be conveniently created directly from the space group object:
 
 .. testcode:: ExPointGroupFromSpaceGroup
 
     from mantid.geometry import PointGroupFactory, SpaceGroupFactory
 
     # Create space group Fd-3m (for example silicon or diamond)
-    sg = SpaceGroupFactory.createSpaceGroup("F d -3 m")
-    
-    pg = PointGroupFactory.createPointGroupFromSpaceGroup(sg)
-    
-    print "Space group no.", sg.getNumber(), "has point group:", pg.getHMSymbol()
+    sg_diamond = SpaceGroupFactory.createSpaceGroup("F d -3 m")
+    pg_diamond = PointGroupFactory.createPointGroupFromSpaceGroup(sg_diamond)
+
+    print "Space group no.", sg_diamond.getNumber(), "has point group:", pg_diamond.getHMSymbol()
+
+    # Related space group F-43m (sphalerite)
+    sg_zincblende = SpaceGroupFactory.createSpaceGroup("F -4 3 m")
+    pg_zincblende = sg_zincblende.getPointGroup()
+
+    print "Space group no.", sg_zincblende.getNumber(), "has point group:", pg_zincblende.getHMSymbol()
     
 The script prints the point group of the space group in question:
     
 .. testoutput:: ExPointGroupFromSpaceGroup
 
     Space group no. 227 has point group: m-3m
+    Space group no. 216 has point group: -43m
     
 While PointGroup offers useful methods to handle reflections, some information can only be obtained from the space group. The presence of translational symmetry causes the contributions from symmetrically equivalent atoms to the structure factor of certain reflections to cancel out completely so that it can not be observed. These systematically absent reflections are characteristic for each space group, a fact that can be used to determine the space group from measured reflection intensities. The following script shows how to check a few reflections:
 
