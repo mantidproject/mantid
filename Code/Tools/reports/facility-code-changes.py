@@ -159,7 +159,7 @@ if __name__ == '__main__':
     generate_commit_data(year_start, year_end)
     generate_file_changes_data(year_start, year_end)
 
-    time.sleep(10)
+    time.sleep(20)
 
     for year in range(year_start, year_end + 1):
         print("------{0}------".format(str(year)))
@@ -182,7 +182,7 @@ if __name__ == '__main__':
             facility_added[date_key] = {}
             facility_removed[date_key] = {}
             
-            freading = open('facility-file-changes-{0}.stdout'.format(date_key),'r')
+            freading = open('facility-file-changes-{0}.stdout'.format(date_key),'r',buffering=0)
 
             # initialize facility counters
             for org in organisations:
@@ -246,7 +246,7 @@ if __name__ == '__main__':
 
             commits = 0
 
-            f2reading = open('facility-commits-{0}.stdout'.format(date_key), 'r')
+            f2reading = open('facility-commits-{0}.stdout'.format(date_key), 'r', buffering=0)
 
             for line in f2reading:
                 found = False
