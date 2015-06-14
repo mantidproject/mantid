@@ -307,7 +307,23 @@ The script prints the point group of the space group in question:
 
     Space group no. 227 has point group: m-3m
     Space group no. 216 has point group: -43m
-    
+
+Sometimes it's useful to reverse the above process - which is not exactly possible, because several space groups may map to the same point group. The space group factory does however provide a way to get all space group symbols that belong to a certain point group:
+
+.. testcode:: ExSpaceGroupFactoryPointGroup
+
+    from mantid.geometry import PointGroupFactory, SpaceGroupFactory
+
+    pg = PointGroupFactory.createPointGroup("m-3")
+
+    print "Space groups with point group m-3:", SpaceGroupFactory.getSpaceGroupsForPointGroup(pg)
+
+The example produces the following output:
+
+.. testoutput:: ExSpaceGroupFactoryPointGroup
+
+    Space groups with point group m-3: ['F d -3','F m -3','I a -3','I m -3','P a -3','P m -3','P n -3']
+
 While PointGroup offers useful methods to handle reflections, some information can only be obtained from the space group. The presence of translational symmetry causes the contributions from symmetrically equivalent atoms to the structure factor of certain reflections to cancel out completely so that it can not be observed. These systematically absent reflections are characteristic for each space group, a fact that can be used to determine the space group from measured reflection intensities. The following script shows how to check a few reflections:
 
 .. testcode:: ExSpaceGroupReflectionIsAllowed
@@ -507,7 +523,7 @@ Building on the example above which showed how to check whether a reflection is 
 
 .. testcode:: ExSpaceGroupCheck
 
-    from mantid.geometry import SpaceGroupFactory
+    from mantid.geometry import SpaceGroupFactory, PointGroupFactory
 
     # Small helper function that distinguishes three cases:
     #   0: The reflection is observed and allowed or not observed and not allowed
@@ -550,11 +566,10 @@ Building on the example above which showed how to check whether a reflection is 
     # Check space groups and store results in a list
     spaceGroupMatchList = []
 
-    # Cubic space groups start at number 195 and go to 230.
-    # Those that belong to Laue class m-3m start at 221, so 10 space groups need to be checked.
-    for n in range(221, 231):
-        # In this example only the first space group is used if more than one are registered for this number.
-        sgSymbol = SpaceGroupFactory.subscribedSpaceGroupSymbols(n)[0]
+    # As described above, point group m-3m is assumed
+    pg = PointGroupFactory.createPointGroup("m-3m")
+    possibleSpaceGroups = SpaceGroupFactory.getSpaceGroupsForPointGroup(pg)
+    for sgSymbol in possibleSpaceGroups:
         sgObject = SpaceGroupFactory.createSpaceGroup(sgSymbol)
 
         # For each (hkl, observed) pair obtain whether this matches the space group's conditions

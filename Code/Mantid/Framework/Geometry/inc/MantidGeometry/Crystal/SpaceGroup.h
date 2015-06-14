@@ -90,13 +90,12 @@ public:
 
   bool isAllowedReflection(const Kernel::V3D &hkl) const;
 
-  PointGroup_sptr getPointGroup();
+  PointGroup_sptr getPointGroup() const;
   Group_const_sptr getSiteSymmetryGroup(const Kernel::V3D &position) const;
 
 protected:
   size_t m_number;
   std::string m_hmSymbol;
-  std::string m_pointGroupSymbol;
 };
 
 typedef boost::shared_ptr<SpaceGroup> SpaceGroup_sptr;

@@ -19,13 +19,11 @@ using namespace Kernel;
  */
 SpaceGroup::SpaceGroup(size_t itNumber, const std::string &hmSymbol,
                        const Group &group)
-    : Group(group), m_number(itNumber), m_hmSymbol(hmSymbol),
-      m_pointGroupSymbol() {}
+    : Group(group), m_number(itNumber), m_hmSymbol(hmSymbol) {}
 
 /// Copy constructor
 SpaceGroup::SpaceGroup(const SpaceGroup &other)
-    : Group(other), m_number(other.m_number), m_hmSymbol(other.m_hmSymbol),
-      m_pointGroupSymbol(other.m_pointGroupSymbol) {}
+    : Group(other), m_number(other.m_number), m_hmSymbol(other.m_hmSymbol) {}
 
 /// Assignment operator, utilizes Group's assignment operator
 SpaceGroup &SpaceGroup::operator=(const SpaceGroup &other) {
@@ -33,7 +31,6 @@ SpaceGroup &SpaceGroup::operator=(const SpaceGroup &other) {
 
   m_number = other.m_number;
   m_hmSymbol = other.m_hmSymbol;
-  m_pointGroupSymbol = other.m_pointGroupSymbol;
 
   return *this;
 }
@@ -84,24 +81,13 @@ bool SpaceGroup::isAllowedReflection(const Kernel::V3D &hkl) const {
  * Returns the point group of the space group
  *
  * This method uses PointGroupFactory to create the point group of the space-
- * group. To avoid parsing the space group symbol over and over again, the
- * point group symbol is stored for subsequent calls to this function. Because
- * the factory is used for construction, a new object is returned each time
- * this method is called.
+ * group. Becausethe factory is used for construction, a new object is returned
+ * each time this method is called.
  *
  * @return :: PointGroup-object.
  */
-PointGroup_sptr SpaceGroup::getPointGroup() {
-  if (m_pointGroupSymbol.empty()) {
-    PointGroup_sptr pointGroup =
-        PointGroupFactory::Instance().createPointGroupFromSpaceGroup(*this);
-
-    m_pointGroupSymbol = pointGroup->getSymbol();
-
-    return pointGroup;
-  }
-
-  return PointGroupFactory::Instance().createPointGroup(m_pointGroupSymbol);
+PointGroup_sptr SpaceGroup::getPointGroup() const {
+  return PointGroupFactory::Instance().createPointGroupFromSpaceGroup(*this);
 }
 
 /**
