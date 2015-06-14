@@ -293,6 +293,8 @@ if __name__ == '__main__':
     csvadded.close()
     csvremoved.close()
 
-
+    f = open('last-updated','w')
+    f.write(str(datetime.datetime.now()))
+    f.close()
 
     print("All done!\n")
