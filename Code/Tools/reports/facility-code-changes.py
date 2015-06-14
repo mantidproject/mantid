@@ -7,6 +7,60 @@ import subprocess
 import csv
 import argparse
 import os
+import time
+
+def generate_file_changes_data(year_start, year_end):
+
+    current_year = int(datetime.datetime.now().strftime("%Y"))
+    current_month = int(datetime.datetime.now().strftime("%m"))
+
+    print('Generating git file change data...')
+
+    for year in range(year_start, year_end + 1):
+        for month in range(1, 13):
+            # Don't go past the current month
+            if current_year == year:
+                if month > current_month:
+                    continue
+            since = "--since='{0}-{1}-1'".format(str(year), str(month))
+            until = "--before='{0}-{1}-{2}'".format(str(year), str(month), str(days_in_month[month-1]))
+
+            date_key = str(year)+'-{0:02d}'.format(month)
+
+            f = open('facility-file-changes-{0}.stdout'.format(date_key),'w',buffering=0)
+            arg_changes = ['git', 'log', '--pretty=format:"%aE"', '--shortstat', since, until]
+            sub = subprocess.Popen(arg_changes, stdout=f, stderr=subprocess.PIPE, cwd=repolocation)
+            f.flush()
+            os.fsync(f.fileno())
+            f.close()
+
+def generate_commit_data(year_start, year_end):
+
+    current_year = int(datetime.datetime.now().strftime("%Y"))
+    current_month = int(datetime.datetime.now().strftime("%m"))
+
+    print('Generating git commit data...')
+
+    for year in range(year_start, year_end + 1):
+        for month in range(1, 13):
+            # Don't go past the current month
+            if current_year == year:
+                if month > current_month:
+                    continue
+
+            since = "--since='{0}-{1}-1'".format(str(year), str(month))
+            until = "--before='{0}-{1}-{2}'".format(str(year), str(month), str(days_in_month[month-1]))
+
+            date_key = str(year)+'-{0:02d}'.format(month)
+
+            f = open('facility-commits-{0}.stdout'.format(date_key),'w',buffering=0)
+            args_commits = ['git', 'log', '--pretty=format:"%aE"', since, until]
+            sub = subprocess.Popen(args_commits, stdout=f, stderr=subprocess.PIPE, cwd=repolocation)
+            f.flush()
+            os.fsync(f.fileno())
+            f.close()
+
+
 
 if __name__ == '__main__':
     print("Generating some random metrics...\n")
@@ -102,6 +156,11 @@ if __name__ == '__main__':
     # year_end = year_start
     year_end = current_year
 
+    generate_commit_data(year_start, year_end)
+    generate_file_changes_data(year_start, year_end)
+
+    time.sleep(10)
+
     for year in range(year_start, year_end + 1):
         print("------{0}------".format(str(year)))
         for month in range(1, 13):
@@ -117,14 +176,6 @@ if __name__ == '__main__':
             until = "--before='{0}-{1}-{2}'".format(str(year), str(month), str(days_in_month[month-1]))
             
             date_key = str(year)+'-{0:02d}'.format(month)
-            
-            f = open('facility-file-changes-{0}.stdout'.format(date_key),'w')
-            arg_changes = ['git', 'log', '--pretty=format:"%aE"', '--shortstat', since, until]
-            sub = subprocess.Popen(arg_changes, stdout=f, stderr=subprocess.PIPE, cwd=repolocation)
-            f.close()
-            
-            # stdout, stderr = sub.communicate()
-            # output = stdout.split('\n')
 
             facility_commits[date_key] = {}
             facility_changed[date_key] = {}
@@ -192,15 +243,9 @@ if __name__ == '__main__':
                     print("Email ({0}) couldn't be matched to a facility!".format(str(email_changes)))
 
             freading.close()
-            
-            f2 = open('facility-commits-{0}.stdout'.format(date_key),'w')
-            args_commits = ['git', 'log', '--pretty=format:"%aE"', since, until]
-            # print(args_commits)
-            sub2 = subprocess.Popen(args_commits, stdout=f2, stderr=subprocess.PIPE, cwd=repolocation)
+
             commits = 0
-            
-            f2.close()
-            
+
             f2reading = open('facility-commits-{0}.stdout'.format(date_key), 'r')
 
             for line in f2reading:
