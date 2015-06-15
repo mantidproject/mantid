@@ -688,7 +688,7 @@ def is_valid_ws_for_removing_zero_errors(input_workspace_name):
 
     if not isValid:
         message = ("Workspace does not seem valid for zero error removal."
-                   "It must have been reduced with Q1D or Qxy" 
+                   "It must have been reduced with Q1D or Qxy"
                    "or it has to be an incident monitor workspace."
                   )
 
