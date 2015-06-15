@@ -936,7 +936,7 @@ void ExperimentInfo::loadSampleAndLogInfoNexus(::NeXus::File *file) {
  * file and cannot
  *                                  be loaded from the IDF.
  */
-void ExperimentInfo::loadExperimentInfoNexus(const std::string& nxFilename, 
+void ExperimentInfo::loadExperimentInfoNexus(const std::string& nxFilename,
                                              ::NeXus::File *file,
                                              std::string &parameterStr) {
   // load sample and log info
@@ -959,39 +959,18 @@ void ExperimentInfo::loadExperimentInfoNexus(const std::string& nxFilename,
 void ExperimentInfo::loadInstrumentInfoNexus(const std::string& nxFilename,
                                              ::NeXus::File *file,
                                              std::string &parameterStr) {
-  std::string instrumentName;
-  std::string instrumentXml;
-  std::string instrumentFilename;
-
   // Try to get the instrument file
   file->openGroup("instrument", "NXinstrument");
+  std::string instrumentName;
   file->readData("name", instrumentName);
 
+  std::string instrumentXml;
   try {
     file->openGroup("instrument_xml", "NXnote");
     file->readData("data", instrumentXml);
     file->closeGroup();
   } catch (NeXus::Exception &ex) {
-    // Just carry on - it might not be there (e.g. old-style processed files)
-    g_log.debug(ex.what());
-  }
-
-  // We first assume this is a new version file, but if the next step fails we
-  // assume its and old version file.
-  int version = 1;
-  try {
-    file->readData("instrument_source", instrumentFilename);
-  } catch (NeXus::Exception &) {
-    version = 0;
-    // In the old version 'processed' file, this was held at the top level (as
-    // was the parameter map)
-    file->closeGroup();
-    try {
-      file->readData("instrument_source", instrumentFilename);
-    } catch (NeXus::Exception &ex) {
-      // Just carry on - it might not be there (e.g. for SNS files)
-      g_log.debug(ex.what());
-    }
+    g_log.debug("Failed to load instrument XML from file.");
   }
 
   try {
@@ -999,17 +978,12 @@ void ExperimentInfo::loadInstrumentInfoNexus(const std::string& nxFilename,
     file->readData("data", parameterStr);
     file->closeGroup();
   } catch (NeXus::Exception &ex) {
-    // Just carry on - it might not be there (e.g. for SNS files)
-    g_log.debug(ex.what());
+    g_log.information("Parameter map entry missing from NeXus file. Continuing without it.");
   }
 
-  if (version == 1) {
-    file->closeGroup();
-  }
-
-  instrumentFilename = Strings::strip(instrumentFilename);;
   instrumentXml = Strings::strip(instrumentXml);
   instrumentName = Strings::strip(instrumentName);
+  std::string instrumentFilename;
   if (!instrumentXml.empty()) {
     // instrument xml is being loaded from the nxs file, set the instrumentFilename
     // to identify the Nexus file as the source of the data
@@ -1020,10 +994,9 @@ void ExperimentInfo::loadInstrumentInfoNexus(const std::string& nxFilename,
   {
     // XML was not included or was empty
     // Use the instrument name to find the file
-    std::string filename =
+    instrumentFilename =
         getInstrumentFilename(instrumentName, getWorkspaceStartDate());
     // And now load the contents
-    instrumentFilename = filename;
     instrumentXml = loadInstrumentXML(instrumentFilename);
   }
 
@@ -1050,7 +1023,7 @@ void ExperimentInfo::loadInstrumentInfoNexus(const std::string& nxFilename,
 
 //-------------------------------------------------------------------------------------------------
 /** Loads the contents of a file and returns the string
- *  The file is assumed to be an IDF, and already checked that 
+ *  The file is assumed to be an IDF, and already checked that
  *  the path is correct.
  *
  * @param filename :: the path to the file
