@@ -102,7 +102,7 @@ class ResNorm(PythonAlgorithm):
             input_str += '%s,i%d;' % (padded_res_ws, idx)
 
         out_name = getWSprefix(self._res_ws) + 'ResNorm_Fit'
-        function = 'name=TabulatedFunction,Workspace=%s,Scaling=1,Shift=0,XScaling=1' % self._van_ws
+        function = 'name=TabulatedFunction,Workspace=%s,Scaling=1,Shift=0,XScaling=1,ties=(Shift=0)' % self._van_ws
 
         fit_params = PlotPeakByLogValue(Input=input_str,
                                         OutputWorkspace=out_name,
