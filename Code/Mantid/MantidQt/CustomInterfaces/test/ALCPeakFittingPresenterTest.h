@@ -44,7 +44,7 @@ public:
   MOCK_CONST_METHOD0(peakPicker, IPeakFunction_const_sptr());
 
   MOCK_METHOD0(initialize, void());
-  MOCK_METHOD1(setDataCurve, void(const QwtData&));
+  MOCK_METHOD2(setDataCurve, void(const QwtData&, const std::vector<double>&));
   MOCK_METHOD1(setFittedCurve, void(const QwtData&));
   MOCK_METHOD1(setPeakPickerEnabled, void(bool));
   MOCK_METHOD1(setPeakPicker, void(const IPeakFunction_const_sptr&));
@@ -155,7 +155,7 @@ public:
     ON_CALL(*m_model, data()).WillByDefault(Return(ws));
 
     // TODO: check better
-    EXPECT_CALL(*m_view, setDataCurve(_));
+    EXPECT_CALL(*m_view, setDataCurve(_,_));
 
     m_model->changeData();
   }

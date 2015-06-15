@@ -45,7 +45,7 @@ public:
   MOCK_CONST_METHOD0(subtractIsChecked, bool());
 
   MOCK_METHOD0(initialize, void());
-  MOCK_METHOD1(setDataCurve, void(const QwtData&));
+  MOCK_METHOD2(setDataCurve, void(const QwtData&, const std::vector<double>&));
   MOCK_METHOD1(displayError, void(const std::string&));
   MOCK_METHOD1(setAvailableLogs, void(const std::vector<std::string>&));
   MOCK_METHOD1(setAvailablePeriods, void(const std::vector<std::string>&));
@@ -123,7 +123,8 @@ public:
                                             QwtDataX(2, 1370, 1E-8),
                                             QwtDataY(0, 0.150, 1E-3),
                                             QwtDataY(1, 0.143, 1E-3),
-                                            QwtDataY(2, 0.128, 1E-3))));
+                                            QwtDataY(2, 0.128, 1E-3)),
+                                            _));
 
     EXPECT_CALL(*m_view, restoreCursor());
 
@@ -138,7 +139,8 @@ public:
     EXPECT_CALL(*m_view, setDataCurve(AllOf(Property(&QwtData::size,3),
                                             QwtDataY(0, 3.00349, 1E-3),
                                             QwtDataY(1, 2.3779, 1E-3),
-                                            QwtDataY(2, 2.47935, 1E-3))));
+                                            QwtDataY(2, 2.47935, 1E-3)),
+                                            _));
 
     m_view->requestLoading();
   }
@@ -151,7 +153,8 @@ public:
     EXPECT_CALL(*m_view, setDataCurve(AllOf(Property(&QwtData::size,3),
                                             QwtDataY(0, 0.137, 1E-3),
                                             QwtDataY(1, 0.141, 1E-3),
-                                            QwtDataY(2, 0.111, 1E-3))));
+                                            QwtDataY(2, 0.111, 1E-3)),
+                                            _));
 
     m_view->requestLoading();
   }
@@ -184,7 +187,7 @@ public:
   {
     // Set last run to one of the different instrument - should cause error within algorithms exec
     ON_CALL(*m_view, lastRun()).WillByDefault(Return("EMU00006473.nxs"));
-    EXPECT_CALL(*m_view, setDataCurve(_)).Times(0);
+    EXPECT_CALL(*m_view, setDataCurve(_,_)).Times(0);
     EXPECT_CALL(*m_view, displayError(StrNe(""))).Times(1);
     m_view->requestLoading();
   }
@@ -192,7 +195,7 @@ public:
   void test_load_invalidRun()
   {
     ON_CALL(*m_view, firstRun()).WillByDefault(Return(""));
-    EXPECT_CALL(*m_view, setDataCurve(_)).Times(0);
+    EXPECT_CALL(*m_view, setDataCurve(_,_)).Times(0);
     EXPECT_CALL(*m_view, displayError(StrNe(""))).Times(1);
     m_view->requestLoading();
   }
@@ -200,7 +203,7 @@ public:
   void test_load_nonExistentFile()
   {
     ON_CALL(*m_view, lastRun()).WillByDefault(Return("non-existent-file"));
-    EXPECT_CALL(*m_view, setDataCurve(_)).Times(0);
+    EXPECT_CALL(*m_view, setDataCurve(_,_)).Times(0);
     EXPECT_CALL(*m_view, displayError(StrNe(""))).Times(1);
     m_view->requestLoading();
   }
@@ -216,7 +219,8 @@ public:
     EXPECT_CALL(*m_view, setDataCurve(AllOf(Property(&QwtData::size,3),
                                             QwtDataY(0, 0.150616, 1E-3),
                                             QwtDataY(1, 0.143444, 1E-3),
-                                            QwtDataY(2, 0.128856, 1E-3))));
+                                            QwtDataY(2, 0.128856, 1E-3)),
+                                            _));
     m_view->requestLoading();
   }
 
@@ -241,10 +245,14 @@ public:
     EXPECT_CALL(*m_view, getForwardGrouping()).Times(1);
     EXPECT_CALL(*m_view, getBackwardGrouping()).Times(1);
     EXPECT_CALL(*m_view, restoreCursor()).Times(1);
-    EXPECT_CALL(*m_view, setDataCurve(AllOf(Property(&QwtData::size, 3), QwtDataX(0, 1350, 1E-8),
-                           QwtDataX(1, 1360, 1E-8), QwtDataX(2, 1370, 1E-8),
-                           QwtDataY(0, 0.150, 1E-3), QwtDataY(1, 0.143, 1E-3),
-                           QwtDataY(2, 0.128, 1E-3))));
+    EXPECT_CALL(*m_view, setDataCurve(AllOf(Property(&QwtData::size, 3),
+                                            QwtDataX(0, 1350, 1E-8),
+                                            QwtDataX(1, 1360, 1E-8),
+                                            QwtDataX(2, 1370, 1E-8),
+                                            QwtDataY(0, 0.150, 1E-3),
+                                            QwtDataY(1, 0.143, 1E-3),
+                                            QwtDataY(2, 0.128, 1E-3)),
+                                            _));
 
     m_view->requestLoading();
   }
@@ -259,10 +267,14 @@ public:
     ON_CALL(*m_view, greenPeriod()).WillByDefault(Return("1"));
     EXPECT_CALL(*m_view, greenPeriod()).Times(1);
     // Check results
-    EXPECT_CALL(*m_view, setDataCurve(AllOf(Property(&QwtData::size, 3), QwtDataX(0, 1350, 1E-8),
-                           QwtDataX(1, 1360, 1E-8), QwtDataX(2, 1370, 1E-8),
-                           QwtDataY(0, 0.012884, 1E-6), QwtDataY(1, 0.022489, 1E-6),
-                           QwtDataY(2, 0.038717, 1E-6))));
+    EXPECT_CALL(*m_view, setDataCurve(AllOf(Property(&QwtData::size, 3),
+                                            QwtDataX(0, 1350, 1E-8),
+                                            QwtDataX(1, 1360, 1E-8),
+                                            QwtDataX(2, 1370, 1E-8),
+                                            QwtDataY(0, 0.012884, 1E-6),
+                                            QwtDataY(1, 0.022489, 1E-6),
+                                            QwtDataY(2, 0.038717, 1E-6)),
+                                            _));
     m_view->requestLoading();
   }
 
@@ -276,7 +288,8 @@ public:
                                             QwtDataX(2, 1364.520, 1E-3),
                                             QwtDataY(0, 0.15004, 1E-5),
                                             QwtDataY(1, 0.14289, 1E-5),
-                                            QwtDataY(2, 0.12837, 1E-5))));
+                                            QwtDataY(2, 0.12837, 1E-5)),
+                                            _));
     m_view->requestLoading();
   }
 

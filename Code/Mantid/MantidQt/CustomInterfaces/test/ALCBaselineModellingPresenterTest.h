@@ -31,8 +31,8 @@ public:
   MOCK_CONST_METHOD0(function, QString());
   MOCK_CONST_METHOD1(sectionRow, SectionRow(int));
 
-  MOCK_METHOD1(setDataCurve, void(const QwtData&));
-  MOCK_METHOD1(setCorrectedCurve, void(const QwtData&));
+  MOCK_METHOD2(setDataCurve, void(const QwtData&, const std::vector<double>&));
+  MOCK_METHOD2(setCorrectedCurve, void(const QwtData&, const std::vector<double>&));
   MOCK_METHOD1(setBaselineCurve, void(const QwtData&));
   MOCK_METHOD1(setFunction, void(IFunction_const_sptr));
 
@@ -150,7 +150,8 @@ public:
 
     EXPECT_CALL(*m_view, setDataCurve(AllOf(Property(&QwtData::size, 3),
                                             QwtDataX(0, 1, 1E-8), QwtDataX(2, 3, 1E-8),
-                                            QwtDataY(0, 2, 1E-8), QwtDataY(2, 4, 1E-8))));
+                                            QwtDataY(0, 2, 1E-8), QwtDataY(2, 4, 1E-8)),
+                                      _));
 
     m_model->changeData();
   }
@@ -161,7 +162,8 @@ public:
 
     EXPECT_CALL(*m_view, setCorrectedCurve(AllOf(Property(&QwtData::size, 3),
                                             QwtDataX(0, 1, 1E-8), QwtDataX(2, 3, 1E-8),
-                                            QwtDataY(0, 3, 1E-8), QwtDataY(2, 5, 1E-8))));
+                                            QwtDataY(0, 3, 1E-8), QwtDataY(2, 5, 1E-8)),
+                                           _));
 
     m_model->changeCorrectedData();
   }
@@ -170,7 +172,7 @@ public:
   {
     ON_CALL(*m_model, correctedData()).WillByDefault(Return(MatrixWorkspace_const_sptr()));
 
-    EXPECT_CALL(*m_view, setCorrectedCurve(Property(&QwtData::size, 0)));
+    EXPECT_CALL(*m_view, setCorrectedCurve(Property(&QwtData::size, 0),_));
 
     m_model->changeCorrectedData();
   }
