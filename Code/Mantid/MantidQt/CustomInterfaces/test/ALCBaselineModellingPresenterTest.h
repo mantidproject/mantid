@@ -76,6 +76,7 @@ MATCHER_P3(FunctionParameter, param, value, delta, "")
 
 MATCHER_P3(QwtDataX, i, value, delta, "") { return fabs(arg.x(i) - value) < delta; }
 MATCHER_P3(QwtDataY, i, value, delta, "") { return fabs(arg.y(i) - value) < delta; }
+MATCHER_P3(VectorValue, i, value, delta, "") { return fabs(arg.at(i) - value) < delta; }
 
 class ALCBaselineModellingPresenterTest : public CxxTest::TestSuite
 {
@@ -151,7 +152,9 @@ public:
     EXPECT_CALL(*m_view, setDataCurve(AllOf(Property(&QwtData::size, 3),
                                             QwtDataX(0, 1, 1E-8), QwtDataX(2, 3, 1E-8),
                                             QwtDataY(0, 2, 1E-8), QwtDataY(2, 4, 1E-8)),
-                                      _));
+                                      AllOf(Property(&std::vector<double>::size,3),
+                                            VectorValue(0, 1, 1E-6),
+                                            VectorValue(2, 1, 1E-6))));
 
     m_model->changeData();
   }
@@ -163,7 +166,9 @@ public:
     EXPECT_CALL(*m_view, setCorrectedCurve(AllOf(Property(&QwtData::size, 3),
                                             QwtDataX(0, 1, 1E-8), QwtDataX(2, 3, 1E-8),
                                             QwtDataY(0, 3, 1E-8), QwtDataY(2, 5, 1E-8)),
-                                           _));
+                                           AllOf(Property(&std::vector<double>::size,3),
+                                            VectorValue(0, 1, 1E-6),
+                                            VectorValue(2, 1, 1E-6))));
 
     m_model->changeCorrectedData();
   }

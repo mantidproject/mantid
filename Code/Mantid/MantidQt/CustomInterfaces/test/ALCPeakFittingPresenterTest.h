@@ -67,6 +67,7 @@ public:
 
 MATCHER_P3(QwtDataX, i, value, delta, "") { return fabs(arg.x(i) - value) < delta; }
 MATCHER_P3(QwtDataY, i, value, delta, "") { return fabs(arg.y(i) - value) < delta; }
+MATCHER_P3(VectorValue, i, value, delta, "") { return fabs(arg.at(i) - value) < delta; }
 
 // DoubleNear matcher was introduced in gmock 1.7 only
 MATCHER_P2(DoubleDelta, value, delta, "") { return fabs(arg - value) < delta; }
@@ -154,9 +155,17 @@ public:
 
     ON_CALL(*m_model, data()).WillByDefault(Return(ws));
 
-    // TODO: check better
-    EXPECT_CALL(*m_view, setDataCurve(_,_));
-
+    EXPECT_CALL(*m_view, setDataCurve(AllOf(Property(&QwtData::size, 3),
+                                            QwtDataX(0, 1, 1E-8),
+                                            QwtDataX(1, 1, 1E-8),
+                                            QwtDataX(2, 1, 1E-8),
+                                            QwtDataY(0, 2, 1E-8),
+                                            QwtDataY(1, 2, 1E-8),
+                                            QwtDataY(2, 2, 1E-8)),
+                                      AllOf(Property(&std::vector<double>::size,3),
+                                            VectorValue(0, 3, 1E-6),
+                                            VectorValue(1, 3, 1E-6),
+                                            VectorValue(2, 3, 1E-6))));
     m_model->changeData();
   }
 

@@ -61,6 +61,7 @@ public:
 
 MATCHER_P3(QwtDataX, i, value, delta, "") { return fabs(arg.x(i) - value) < delta; }
 MATCHER_P3(QwtDataY, i, value, delta, "") { return fabs(arg.y(i) - value) < delta; }
+MATCHER_P3(VectorValue, i, value, delta, "") { return fabs(arg.at(i) - value) < delta; }
 
 class ALCDataLoadingPresenterTest : public CxxTest::TestSuite
 {
@@ -124,7 +125,10 @@ public:
                                             QwtDataY(0, 0.150, 1E-3),
                                             QwtDataY(1, 0.143, 1E-3),
                                             QwtDataY(2, 0.128, 1E-3)),
-                                            _));
+                                      AllOf(Property(&std::vector<double>::size,3),
+                                            VectorValue(0,1.285E-3,1E-6),
+                                            VectorValue(1,1.284E-3,1E-6),
+                                            VectorValue(2,1.280E-3,1E-6))));
 
     EXPECT_CALL(*m_view, restoreCursor());
 
@@ -140,7 +144,10 @@ public:
                                             QwtDataY(0, 3.00349, 1E-3),
                                             QwtDataY(1, 2.3779, 1E-3),
                                             QwtDataY(2, 2.47935, 1E-3)),
-                                            _));
+                                      AllOf(Property(&std::vector<double>::size,3),
+                                            VectorValue(0,0.539,1E-3),
+                                            VectorValue(1,0.535,1E-3),
+                                            VectorValue(2,0.541,1E-3))));
 
     m_view->requestLoading();
   }
@@ -154,7 +161,10 @@ public:
                                             QwtDataY(0, 0.137, 1E-3),
                                             QwtDataY(1, 0.141, 1E-3),
                                             QwtDataY(2, 0.111, 1E-3)),
-                                            _));
+                                      AllOf(Property(&std::vector<double>::size,3),
+                                            VectorValue(0,4.244E-3,1E-6),
+                                            VectorValue(1,4.243E-3,1E-6),
+                                            VectorValue(2,4.200E-3,1E-6))));
 
     m_view->requestLoading();
   }
@@ -220,7 +230,10 @@ public:
                                             QwtDataY(0, 0.150616, 1E-3),
                                             QwtDataY(1, 0.143444, 1E-3),
                                             QwtDataY(2, 0.128856, 1E-3)),
-                                            _));
+                                      AllOf(Property(&std::vector<double>::size,3),
+                                            VectorValue(0,1.282E-3,1E-6),
+                                            VectorValue(1,1.281E-3,1E-6),
+                                            VectorValue(2,1.277E-3,1E-6))));
     m_view->requestLoading();
   }
 
@@ -252,7 +265,10 @@ public:
                                             QwtDataY(0, 0.150, 1E-3),
                                             QwtDataY(1, 0.143, 1E-3),
                                             QwtDataY(2, 0.128, 1E-3)),
-                                            _));
+                                       AllOf(Property(&std::vector<double>::size,3),
+                                            VectorValue(0,1.285E-3,1E-6),
+                                            VectorValue(1,1.284E-3,1E-6),
+                                            VectorValue(2,1.280E-3,1E-6))));
 
     m_view->requestLoading();
   }
@@ -274,7 +290,10 @@ public:
                                             QwtDataY(0, 0.012884, 1E-6),
                                             QwtDataY(1, 0.022489, 1E-6),
                                             QwtDataY(2, 0.038717, 1E-6)),
-                                            _));
+                                       AllOf(Property(&std::vector<double>::size,3),
+                                            VectorValue(0,1.821E-3,1E-6),
+                                            VectorValue(1,1.821E-3,1E-6),
+                                            VectorValue(2,1.817E-3,1E-6))));
     m_view->requestLoading();
   }
 
@@ -289,7 +308,10 @@ public:
                                             QwtDataY(0, 0.15004, 1E-5),
                                             QwtDataY(1, 0.14289, 1E-5),
                                             QwtDataY(2, 0.12837, 1E-5)),
-                                            _));
+                                       AllOf(Property(&std::vector<double>::size,3),
+                                            VectorValue(0,1.285E-3,1E-6),
+                                            VectorValue(1,1.284E-3,1E-6),
+                                            VectorValue(2,1.280E-3,1E-6))));
     m_view->requestLoading();
   }
 
