@@ -63,7 +63,7 @@ class SANS2DNewSettingsCarriedAcrossInBatchMode(stresstesting.MantidStressTest):
 
 class SANS2DTUBESBatchWithZeroErrorCorrection(stresstesting.MantidStressTest):
     """
-    We want to make sure that the BatchMode can remove zero error values 
+    We want to make sure that the BatchMode can remove zero error values
     and replace them with a large default value.
     """
     def runTest(self):
@@ -80,7 +80,7 @@ class SANS2DTUBESBatchWithZeroErrorCorrection(stresstesting.MantidStressTest):
         BatchReduce(csv_file, 'nxs', saveAlgs = saveAlg, plotresults=False, save_as_zero_error_free=True)
         DeleteWorkspace('zero_free_out')
 
-        # The zero correction only occurs for the saved files. Stephen King mentioned that the 
+        # The zero correction only occurs for the saved files. Stephen King mentioned that the
         # original workspaces should not be tampered with
         self._final_output = os.path.join(config['defaultsave.directory'],'zero_free_out.nxs')
         self._final_workspace = 'ws'

@@ -31,6 +31,7 @@ using namespace Mantid::API;
  *  @param parent :: used by QT
  *  @param suggFname :: sets the initial entry in the filename box
  *  @param defSavs :: sets which boxes are ticked
+ *  @param saveAsZeroErrorFree :: if the workspace should be saved with the zero errors replaced by a default value or not
  */
 SaveWorkspaces::SaveWorkspaces(QWidget *parent, const QString & suggFname, QHash<const QCheckBox * const, QString> & defSavs, bool saveAsZeroErrorFree) :
   API::MantidDialog(parent), m_saveAsZeroErrorFree(saveAsZeroErrorFree)

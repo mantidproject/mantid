@@ -436,6 +436,8 @@ void SANSRunWindow::saveWorkspacesDialog()
   connect(m_saveWorkspaces, SIGNAL(closing()),
     this, SLOT(saveWorkspacesClosed()));
   // Connect the request for a zero-error-free workspace
+  // cpp-check does not understand that the input are two references
+  // cppcheck-suppress duplicateExpression
   connect(m_saveWorkspaces, SIGNAL(createZeroErrorFreeWorkspace(QString& , QString&)),
           this, SLOT(createZeroErrorFreeClone(QString&, QString&)));
   // Connect the request for deleting a zero-error-free workspace

@@ -230,8 +230,8 @@ def BatchReduce(filename, format, plotresults=False, saveAlgs={'SaveRKH':'txt'},
                 else:
                     save_names.append(n)
 
-            # If we want to remove zero-errors, we map the original workspace to a cleaned workspace clone, 
-            # else we map it to itself. 
+            # If we want to remove zero-errors, we map the original workspace to a cleaned workspace clone,
+            # else we map it to itself.
             save_names_dict = get_mapped_workspaces(save_names, save_as_zero_error_free)
 
             for algor in saveAlgs.keys():
@@ -383,10 +383,10 @@ def get_mapped_workspaces(save_names, save_as_zero_error_free):
     for name in save_names:
         if save_as_zero_error_free:
             cloned_name = name + '_cloned_temp'
-            message, complete = su.create_zero_error_free_workspace(input_workspace_name = name, output_workspace_name = cloned_name)
+            dummy_message, complete = su.create_zero_error_free_workspace(input_workspace_name = name, output_workspace_name = cloned_name)
             if complete:
                 workspace_dictionary[name] = cloned_name
-            else: 
+            else:
                 workspace_dictionary[name] = name
         else:
             workspace_dictionary[name] = name

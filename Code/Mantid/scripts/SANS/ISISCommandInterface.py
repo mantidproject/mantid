@@ -1164,7 +1164,8 @@ def CreateZeroErrorFreeClonedWorkspace(input_workspace_name, output_workspace_na
         @param output_workspace_name : name of the workspace which will have no zero-error values
         @return: success message
     """
-    message, complete = su.create_zero_error_free_workspace(input_workspace_name = input_workspace_name, output_workspace_name = output_workspace_name)
+    message, complete = su.create_zero_error_free_workspace(input_workspace_name = input_workspace_name,
+                                                            output_workspace_name = output_workspace_name)
     if not complete:
         return message
     else:
