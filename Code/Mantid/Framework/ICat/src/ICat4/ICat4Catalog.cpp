@@ -1,3 +1,4 @@
+#include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/CatalogFactory.h"
 #include "MantidAPI/Progress.h"
 #include "MantidAPI/WorkspaceFactory.h"

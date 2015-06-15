@@ -1,5 +1,8 @@
+#include <stdexcept>
+
 #include "MantidVatesSimpleGuiViewWidgets/ViewBase.h"
 #include "MantidVatesSimpleGuiViewWidgets/BackgroundRgbProvider.h"
+#include "MantidVatesSimpleGuiViewWidgets/ColorSelectionWidget.h"
 #include "MantidVatesSimpleGuiViewWidgets/RebinnedSourcesManager.h"
 #include "MantidVatesAPI/ADSWorkspaceProvider.h"
 #include "MantidAPI/IMDEventWorkspace.h"
@@ -35,13 +38,9 @@
   #pragma warning enable 1170
 #endif
 
-#include <QDebug>
 #include <QHBoxLayout>
 #include <QPointer>
 #include <QSet>
-
-#include <boost/optional.hpp>
-#include <stdexcept>
 
 namespace Mantid
 {
@@ -223,7 +222,11 @@ void ViewBase::setColorScaleState(ColorSelectionWidget *cs)
 
 /**
  * This function checks the current state from the color updater and
- * processes the necessary color changes.
+ * processes the necessary color changes. Similarly to
+ * setColorForBackground(), this method sets a Vtk callback for
+ * changes to the color map made by the user in the Paraview color
+ * editor.
+ *
  * @param colorScale A pointer to the colorscale widget.
  */
 void ViewBase::setColorsForView(ColorSelectionWidget *colorScale)
@@ -244,6 +247,11 @@ void ViewBase::setColorsForView(ColorSelectionWidget *colorScale)
   {
     this->onLogScale(true);
   }
+
+  // This installs the callback as soon as we have colors for this
+  // view. It needs to keep an eye on whether the user edits the color
+  // map for this (new?) representation in the pqColorToolbar.
+  colorUpdater.observeColorScaleEdited(this->getRep(), colorScale);
 }
 
 /**

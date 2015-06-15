@@ -2,6 +2,7 @@
 
 #include "MantidKernel/Memory.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/IMDIterator.h"
 #include "MantidCrystal/BackgroundStrategy.h"
 #include "MantidCrystal/ICluster.h"

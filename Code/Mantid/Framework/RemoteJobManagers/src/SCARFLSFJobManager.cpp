@@ -43,8 +43,8 @@ std::string SCARFLSFJobManager::g_pingBaseURL =
 void SCARFLSFJobManager::authenticate(const std::string &username,
                                       const std::string &password) {
   // base LSFJobManager class only supports a single user presently
-  m_tokenStash.clear();
-  m_transactions.clear();
+  g_tokenStash.clear();
+  g_transactions.clear();
 
   // Do the URI %-encoding, but component by component
   std::string encodedUser = urlComponentEncode(username);
@@ -83,7 +83,7 @@ void SCARFLSFJobManager::authenticate(const std::string &username,
     token_str = "platform_token=" + token_str;
     // insert in the token stash
     UsernameToken tok(username, Token(url, token_str));
-    m_tokenStash.insert(tok); // the password is never stored
+    g_tokenStash.insert(tok); // the password is never stored
     g_log.notice() << "Got authentication token for user '" + username +
                           "'. You are now logged in " << std::endl;
   } else {
@@ -146,28 +146,28 @@ bool SCARFLSFJobManager::ping() {
  * successfully logged in).
  *
  * As the authentication method is specific to SCARF, this logout
- * method has been placed here as specific to SCARF too. Probably it
- * is general to other LSF systems without any/much changes.
+ * method has been placed here as specific to SCARF too. Most likely
+ * it is general to other LSF systems without any/much changes.
  *
  * @param username Username to use (should have authenticated
  * before). Leave it empty to log out the last (maybe only) user that
  * logged in with authenticate().
  */
 void SCARFLSFJobManager::logout(const std::string &username) {
-  if (0 == m_tokenStash.size()) {
+  if (0 == g_tokenStash.size()) {
     throw std::runtime_error("Logout failed. No one is currenlty logged in.");
   }
 
   std::map<std::string, Token>::iterator it;
   if (!username.empty()) {
-    it = m_tokenStash.find(username);
-    if (m_tokenStash.end() == it) {
+    it = g_tokenStash.find(username);
+    if (g_tokenStash.end() == it) {
       throw std::invalid_argument(
           "Logout failed. The username given is not logged in: " + username);
     }
   }
   // only support for single-user
-  Token tok = m_tokenStash.begin()->second;
+  Token tok = g_tokenStash.begin()->second;
 
   // logout query, needs headers = {'Content-Type': 'text/plain', 'Cookie':
   // token,
@@ -196,11 +196,11 @@ void SCARFLSFJobManager::logout(const std::string &username) {
   // successfully logged out, forget the token
   if (username.empty()) {
     // delete first one
-    m_tokenStash.erase(m_tokenStash.begin());
+    g_tokenStash.erase(g_tokenStash.begin());
   } else {
     // delete requested one
-    if (m_tokenStash.end() != it)
-      m_tokenStash.erase(it);
+    if (g_tokenStash.end() != it)
+      g_tokenStash.erase(it);
   }
 }
 

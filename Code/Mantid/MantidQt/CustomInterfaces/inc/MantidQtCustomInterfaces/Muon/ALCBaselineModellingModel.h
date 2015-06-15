@@ -4,6 +4,7 @@
 #include "MantidKernel/System.h"
 #include "MantidQtCustomInterfaces/DllConfig.h"
 
+#include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidQtCustomInterfaces/Muon/IALCBaselineModellingModel.h"
 
 using namespace Mantid::API;

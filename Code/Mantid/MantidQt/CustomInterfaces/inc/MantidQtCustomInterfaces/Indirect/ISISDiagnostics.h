@@ -3,7 +3,7 @@
 
 #include "IndirectDataReductionTab.h"
 #include "ui_ISISDiagnostics.h"
-#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidKernel/System.h"
 
 // Suppress a warning coming out of code that isn't ours

@@ -1182,7 +1182,8 @@ bool LoadISISNexus2::findSpectraDetRangeInFile(
     }
     if (m_monBlockInfo.spectraID_max - m_monBlockInfo.spectraID_min + 1 !=
         static_cast<int64_t>(nmons)) {
-      g_log.warning() << " non-consequent monitor ID-s in the monitor block. "
+      g_log.warning() << "When trying to find the range of monitor spectra: "
+                         "non-consequent monitor ID-s in the monitor block. "
                          "Unexpected situation for the loader\n";
     }
     // at this stage we assume that the only going to load monitors
@@ -1205,7 +1206,8 @@ bool LoadISISNexus2::findSpectraDetRangeInFile(
   m_detBlockInfo.spectraID_max = spectrum_index[ndets - 1];
   if (m_detBlockInfo.spectraID_max - m_detBlockInfo.spectraID_min + 1 !=
       static_cast<int64_t>(m_detBlockInfo.numberOfSpectra)) {
-    g_log.warning() << " non-consequent spectra ID-s in the detectors block. "
+    g_log.warning() << "When trying to find the range of monitor spectra:  "
+                       "non-consequent spectra ID-s in the detectors block. "
                        "Unexpected situation for the loader\n";
   }
 

@@ -23,6 +23,8 @@ namespace MantidQt
 {
   namespace SliceViewer
   {
+    class PeaksPresenter;
+
     /** Abstract view factory. For creating types of IPeakOverlay.
     
     @date 2012-08-24
@@ -51,7 +53,7 @@ namespace MantidQt
     {
     public:
       /// Create a peak view from the index of a peak in the peaks workspace
-      virtual boost::shared_ptr<PeakOverlayView> createView(Mantid::Geometry::PeakTransform_const_sptr transform) const = 0;
+      virtual boost::shared_ptr<PeakOverlayView> createView(PeaksPresenter* const presenter, Mantid::Geometry::PeakTransform_const_sptr transform) const = 0;
       /// Destructor
       virtual ~PeakOverlayViewFactory()
       {

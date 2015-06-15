@@ -1,11 +1,12 @@
-#ifndef MANTID_API_IPEAKSPACE_H_
-#define MANTID_API_IPEAKSPACE_H_
+#ifndef MANTID_API_IPEAKSWORKSPACE_H_
+#define MANTID_API_IPEAKSWORKSPACE_H_
 
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/ExperimentInfo.h"
+#include "MantidAPI/IPeaksWorkspace_fwd.h"
+#include "MantidAPI/ITableWorkspace.h"
 #include "MantidKernel/SpecialCoordinateSystem.h"
 #include <boost/optional.hpp>
 
@@ -153,11 +154,6 @@ protected:
   virtual const std::string toString() const;
 };
 
-/// Typedef for a shared pointer to a peaks workspace.
-typedef boost::shared_ptr<IPeaksWorkspace> IPeaksWorkspace_sptr;
-
-/// Typedef for a shared pointer to a const peaks workspace.
-typedef boost::shared_ptr<const IPeaksWorkspace> IPeaksWorkspace_const_sptr;
 }
 }
 #endif

@@ -196,6 +196,11 @@ void MonteCarloAbsorption::doSimulation(const IDetector *const detector,
     }
   }
 
+  if (0 == numDetected)
+    throw std::runtime_error(
+        "Unexpected inconsistency found while running simulation: the number "
+        "of events detected is 0.");
+
   // Attenuation factor is simply the average value
   attenFactor /= numDetected;
   // Error is 1/sqrt(nevents)

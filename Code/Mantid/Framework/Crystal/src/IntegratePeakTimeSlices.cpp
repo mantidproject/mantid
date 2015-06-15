@@ -1182,7 +1182,7 @@ double DataModeHandler::getNewRCRadius() {
   Vy = VaryHW;
   if (Vx < 0)
     Vx = HalfWidthAtHalfHeightRadius * HalfWidthAtHalfHeightRadius;
-  if (Vx < 0)
+  if (Vy < 0)
     Vy = HalfWidthAtHalfHeightRadius * HalfWidthAtHalfHeightRadius;
 
   double Rx = lastRCRadius / CellWidth - EdgeX;

@@ -3,6 +3,7 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidAPI/ITableWorkspace.h"
 #include "MantidDataHandling/LoadSpiceAscii.h"
 
 using Mantid::DataHandling::LoadSpiceAscii;

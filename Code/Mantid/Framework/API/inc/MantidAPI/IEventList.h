@@ -2,7 +2,7 @@
 #define MANTID_API_IEVENTLIST_H_
 #include "MantidAPI/DllConfig.h"
 #include "MantidKernel/DateAndTime.h"
-#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/ISpectrum.h"
 
 namespace Mantid {

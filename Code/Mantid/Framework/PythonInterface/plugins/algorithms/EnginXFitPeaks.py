@@ -58,8 +58,10 @@ class EnginXFitPeaks(PythonAlgorithm):
         expectedPeaksToF = sorted(self._expectedPeaksInTOF(expectedPeaksD, inWS, wsIndex))
 
         foundPeaks = self._peaksFromFindPeaks(inWS, expectedPeaksToF, wsIndex)
-        if foundPeaks.rowCount() < len(expectedPeaksToF):
-            raise Exception("Some peaks were not found. found (len %d): %s"%(len(foundPeaks),foundPeaks))
+        if foundPeaks.rowCount() < len(expectedPeaksTof):
+            txt = "Peaks effectively found: " + str(foundPeaks)[1:-1]
+            raise Exception("Some peaks from the list of expected peaks were not found by the algorithm "
+                            "FindPeaks. " + txt)
 
         fittedPeaks = self._createFittedPeaksTable()
 

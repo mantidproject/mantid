@@ -1,5 +1,5 @@
 #include "MantidPythonInterface/api/WorkspacePropertyExporter.h"
-#include "MantidAPI/Workspace.h"
+#include "MantidAPI/Workspace_fwd.h"
 #include <boost/python/enum.hpp>
 
 void export_WorkspaceProperty() {

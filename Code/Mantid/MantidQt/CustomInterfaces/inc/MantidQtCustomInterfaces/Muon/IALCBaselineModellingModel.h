@@ -5,7 +5,7 @@
 
 #include "MantidQtCustomInterfaces/DllConfig.h"
 
-#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/IFunction.h"
 
 #include <QObject>

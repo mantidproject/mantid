@@ -209,7 +209,7 @@ private:
   /// parameters or effective (centre, width, height)
   std::size_t
       m_numTableParams; //<Number of parameters in the output table workspace
-  std::size_t m_centre_index; //< Column in output table of peak centre
+  std::size_t m_centreIndex; //< Column in output table of peak centre
   std::string m_peakFuncType;   //< The name of the peak function to fit
   std::string m_backgroundType; //< The type of background to fit
 

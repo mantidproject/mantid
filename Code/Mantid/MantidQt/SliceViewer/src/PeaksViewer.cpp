@@ -2,6 +2,7 @@
 #include "MantidQtSliceViewer/PeaksWorkspaceWidget.h"
 #include "MantidQtSliceViewer/ProxyCompositePeaksPresenter.h"
 #include "MantidQtSliceViewer/PeaksTableColumnsDialog.h"
+#include "MantidAPI/IPeaksWorkspace.h"
 #include <QBoxLayout>
 #include <QLayoutItem>
 
@@ -48,15 +49,18 @@ void PeaksViewer::setPresenter(
   if (layout()) {
     removeLayout(this);
   }
-  this->setLayout(new QVBoxLayout);
+  QVBoxLayout* masterLayout = new QVBoxLayout;
+  this->setLayout(masterLayout);
+
   auto it = workspaces.begin();
   while (it != workspaces.end()) {
     Mantid::API::IPeaksWorkspace_const_sptr ws = *it;
     auto backgroundColour = m_presenter->getBackgroundColour(ws);
     auto foregroundColour = m_presenter->getForegroundColour(ws);
+    bool canAddPeaks = m_presenter->hasPeakAddModeFor(ws);
 
     auto widget = new PeaksWorkspaceWidget(
-        ws, coordinateSystem, foregroundColour, backgroundColour, this);
+        ws, coordinateSystem, foregroundColour, backgroundColour, canAddPeaks ,  this);
 
     connect(widget, SIGNAL(peakColourChanged(
                         Mantid::API::IPeaksWorkspace_const_sptr, QColor)),
@@ -117,6 +121,55 @@ PeaksViewer::~PeaksViewer() {}
  * @return True if there are workspaces to present.
  */
 bool PeaksViewer::hasThingsToShow() const { return m_presenter->size() >= 1; }
+
+void PeaksViewer::   clearPeaksModeRequest(
+    const PeaksWorkspaceWidget *const originWidget, const bool on) {
+  EditMode mode;
+  if (on) {
+    QList<PeaksWorkspaceWidget *> children =
+        qFindChildren<PeaksWorkspaceWidget *>(this);
+    for (int i = 0; i < children.size(); ++i) {
+      PeaksWorkspaceWidget *candidateWidget = children.at(i);
+      // For all but the most recently selected peaks workspace. Exit clear
+      // mode.
+      if (candidateWidget != originWidget) {
+        // Exit clear mode on others.
+        candidateWidget->exitClearPeaksMode();
+      }
+      // One mode, and One Workspace at a time. Cannot be in Add mode for any
+      // Workspace while clearing peaks.
+      candidateWidget->exitAddPeaksMode();
+      mode = DeletePeaks;
+    }
+  } else {
+    mode = None;
+  }
+  m_presenter->editCommand(mode, originWidget->getPeaksWorkspace());
+}
+
+void PeaksViewer::addPeaksModeRequest(const PeaksWorkspaceWidget * const originWidget, const bool on)
+{
+    EditMode mode;
+    if(on) {
+    QList<PeaksWorkspaceWidget *> children =
+        qFindChildren<PeaksWorkspaceWidget *>(this);
+    for (int i = 0; i < children.size(); ++i) {
+      PeaksWorkspaceWidget *candidateWidget = children.at(i);
+      // For all but the most recently selected peaks workspace. Exit clear mode.
+      if(candidateWidget != originWidget){
+          // Exit Add mode on others.
+          candidateWidget->exitAddPeaksMode();
+      }
+      // One mode, and One Workspace at a time. Cannot be in Clear mode for any Workspace while clearing peaks.
+      candidateWidget->exitClearPeaksMode();
+      mode = AddPeaks;
+
+    }
+    } else {
+        mode = None;
+    }
+    m_presenter->editCommand(mode, originWidget->getPeaksWorkspace());
+}
 
 /**
  * Handler for changing the peak radius colour.
@@ -207,7 +260,6 @@ void PeaksViewer::performUpdate() {
     // Now find the PeaksWorkspaceWidget corresponding to this workspace name.
     QList<PeaksWorkspaceWidget *> children =
         qFindChildren<PeaksWorkspaceWidget *>(this);
-    Mantid::API::IPeaksWorkspace_sptr targetPeaksWorkspace;
     for (int i = 0; i < children.size(); ++i) {
       PeaksWorkspaceWidget *candidateWidget = children.at(i);
       Mantid::API::IPeaksWorkspace_const_sptr candidateWorkspace =
@@ -226,6 +278,8 @@ void PeaksViewer::performUpdate() {
           }
         }
       }
+      // We also update the widget in case the workspace has changed for added/deleted peaks
+      candidateWidget->workspaceUpdate();
     }
   }
 }

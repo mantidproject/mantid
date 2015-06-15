@@ -1,7 +1,7 @@
 #ifndef MANTID_CUSTOMINTERFACES_INDIRECTBAYESTAB_H_
 #define MANTID_CUSTOMINTERFACES_INDIRECTBAYESTAB_H_
 
-#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "IndirectTab.h"
 #include "MantidQtMantidWidgets/RangeSelector.h"
 #include "MantidQtAPI/AlgorithmRunner.h"

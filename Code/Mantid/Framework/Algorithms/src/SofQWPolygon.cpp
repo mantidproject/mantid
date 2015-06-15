@@ -26,7 +26,8 @@ using Geometry::Quadrilateral;
 using Geometry::Vertex2D;
 
 /// Default constructor
-SofQWPolygon::SofQWPolygon() : Rebin2D(), m_Qout(), m_thetaPts(), m_thetaWidth(0.0) {}
+SofQWPolygon::SofQWPolygon()
+    : Rebin2D(), m_Qout(), m_thetaPts(), m_thetaWidth(0.0) {}
 
 //----------------------------------------------------------------------------------------------
 
@@ -69,7 +70,8 @@ void SofQWPolygon::exec() {
 
   // Select the calculate Q method based on the mode
   // rather than doing this repeatedly in the loop
-  typedef double (SofQWPolygon::*QCalculation)(double, double, double, double) const;
+  typedef double (SofQWPolygon::*QCalculation)(double, double, double, double)
+      const;
   QCalculation qCalculator;
   if (m_EmodeProperties.m_emode == 1) {
     qCalculator = &SofQWPolygon::calculateDirectQ;
@@ -144,7 +146,8 @@ void SofQWPolygon::exec() {
  * @return The value of Q
  */
 double SofQWPolygon::calculateDirectQ(const double efixed, const double deltaE,
-                                const double twoTheta, const double psi) const {
+                                      const double twoTheta,
+                                      const double psi) const {
   const double ki = std::sqrt(efixed * SofQW::energyToK());
   const double kf = std::sqrt((efixed - deltaE) * SofQW::energyToK());
   const double Qx = ki - kf * std::cos(twoTheta);
@@ -161,9 +164,10 @@ double SofQWPolygon::calculateDirectQ(const double efixed, const double deltaE,
  * @param psi The value of the azimuth
  * @return The value of Q
  */
-double SofQWPolygon::calculateIndirectQ(const double efixed, const double deltaE,
-                                  const double twoTheta,
-                                  const double psi) const {
+double SofQWPolygon::calculateIndirectQ(const double efixed,
+                                        const double deltaE,
+                                        const double twoTheta,
+                                        const double psi) const {
   UNUSED_ARG(psi);
   const double ki = std::sqrt((efixed + deltaE) * SofQW::energyToK());
   const double kf = std::sqrt(efixed * SofQW::energyToK());
@@ -230,6 +234,11 @@ void SofQWPolygon::initThetaCache(API::MatrixWorkspace_const_sptr workspace) {
       }
     }
   }
+
+  if (0 == ndets)
+    throw std::runtime_error(
+        "Unexpected inconsistency found. The number of detectors is 0"
+        ", and the theta width parameter cannot be calculated.");
 
   m_thetaWidth = (maxTheta - minTheta) / static_cast<double>(ndets);
   g_log.information() << "Calculated detector width in theta="

@@ -56,41 +56,10 @@ bool SymmetryElementInversionGenerator::canProcess(
   return operation.matrix() == inversionMatrix;
 }
 
-/**
- * @brief SymmetryElementWithAxisGenerator::determineTranslation
- *
- * According to ITA, 11.2, the translation component of a symmetry operation
- * can be termined with the following algorithm. First, a matrix \f$W\f$ is
- * calculated using the symmetry operation \f$S\f$ and its powers up to its
- * order \f$k\f$, adding the matrices of the resulting operations:
- *
- * \f[
- *  W = W_1(S^0) + W_2(S^1) + \dots + W_k(S^{k-1})
- * \f]
- *
- * The translation vector is then calculation from the vector \f$w\f$ of the
- * operation:
- *
- * \f[
- *  t = \frac{1}{k}\cdot (W \times w)
- * \f]
- *
- * For operations which do not have translation components, this algorithm
- * returns a 0-vector.
- *
- * @param operation :: Symmetry operation, possibly with translation vector.
- * @return Translation vector.
- */
+/// Returns the reduced vector of the operation.
 V3R SymmetryElementWithAxisGenerator::determineTranslation(
     const SymmetryOperation &operation) const {
-  Kernel::IntMatrix translationMatrix(3, 3, false);
-
-  for (size_t i = 0; i < operation.order(); ++i) {
-    translationMatrix += (operation ^ i).matrix();
-  }
-
-  return (translationMatrix * operation.vector()) *
-         RationalNumber(1, static_cast<int>(operation.order()));
+  return operation.reducedVector();
 }
 
 /**
@@ -182,8 +151,8 @@ V3R SymmetryElementWithAxisGenerator::determineAxis(
 
   double sumOfElements = eigenVector.X() + eigenVector.Y() + eigenVector.Z();
 
-  if(sumOfElements < 0) {
-      eigenVector *= -1.0;
+  if (sumOfElements < 0) {
+    eigenVector *= -1.0;
   }
 
   gsl_matrix_free(eigenMatrix);
