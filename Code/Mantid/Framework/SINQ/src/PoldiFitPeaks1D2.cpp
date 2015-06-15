@@ -318,11 +318,12 @@ PoldiFitPeaks1D2::fitPeaks(const PoldiPeakCollection_sptr &peaks) {
 
 int PoldiFitPeaks1D2::getBestChebyshevPolynomialDegree(
     const Workspace2D_sptr &dataWorkspace, const RefinedRange_sptr &range) {
-  int n = 0;
   double chiSquareMin = 1e10;
   int nMin = -1;
 
   try {
+    int n = 0;
+
     while ((n < 3)) {
       IAlgorithm_sptr fit = getFitAlgorithm(dataWorkspace, range, n);
       bool fitSuccess = fit->execute();
