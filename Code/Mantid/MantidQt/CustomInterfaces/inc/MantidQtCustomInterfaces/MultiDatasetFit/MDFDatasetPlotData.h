@@ -17,6 +17,13 @@ namespace API
 }
 }
 
+namespace MantidQt
+{
+namespace MantidWidgets
+{
+  class ErrorCurve;
+}
+}
 
 namespace MantidQt
 {
@@ -24,7 +31,6 @@ namespace CustomInterfaces
 {
 namespace MDF
 {
-class ErrorCurve;
 
 /**
  * Contains graphics for a single data set: fitting data, claculated result, difference.
@@ -46,7 +52,7 @@ private:
   /// Curve object for the fit data (spectrum).
   QwtPlotCurve *m_dataCurve;
   /// Error bar curve for the data
-  ErrorCurve *m_dataErrorCurve;
+  MantidQt::MantidWidgets::ErrorCurve *m_dataErrorCurve;
   /// Curve object for the calculated spectrum after a fit.
   QwtPlotCurve *m_calcCurve;
   /// Curve object for the difference spectrum.

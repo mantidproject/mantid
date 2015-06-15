@@ -124,7 +124,8 @@ def confitSeq(inputWS, func, startX, endX, ftype, bgd,
 
     CopyLogs(InputWorkspace=inputWS, OutputWorkspace=wsname)
 
-    sample_logs = [('convolve_members', convolve),
+    sample_logs = [('sam_workspace', inputWS),
+                   ('convolve_members', convolve),
                    ('fit_program', 'ConvFit'),
                    ('background', bgd),
                    ('delta_function', using_delta_func),
@@ -162,6 +163,8 @@ def confitSeq(inputWS, func, startX, endX, ftype, bgd,
         plotParameters(wsname, Plot)
 
     EndTime('ConvFit')
+
+    return wsname
 
 
 ##############################################################################
