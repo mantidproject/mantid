@@ -4,6 +4,9 @@
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidAPI/CatalogSession.h"
 
+#include <string>
+#include <vector>
+
 namespace Mantid {
 namespace ICat {
 class CatalogSearchParam;
