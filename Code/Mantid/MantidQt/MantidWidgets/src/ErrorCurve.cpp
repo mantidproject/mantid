@@ -13,7 +13,6 @@ namespace MantidWidgets
 /// @param dataCurve :: The curve displaying the data.
 /// @param errors :: A vector with error bars.
 ErrorCurve::ErrorCurve(const QwtPlotCurve* dataCurve, const std::vector<double>& errors)
-//ErrorCurve::ErrorCurve(QwtPlotCurve* dataCurve, const std::vector<double>& errors)
 {
   if (!dataCurve)
   {
@@ -43,7 +42,6 @@ void ErrorCurve::setErrorBars(const std::vector<double>& errors)
 {
   if (errors.size() != m_x.size())
   {
-    std::cout << "ERROR POINTS " << errors.size() << " DATA POINTS " << m_x.size() << "\n";
     throw std::runtime_error("Number of error values is different form the number of data points.");
   }
   m_e = errors;

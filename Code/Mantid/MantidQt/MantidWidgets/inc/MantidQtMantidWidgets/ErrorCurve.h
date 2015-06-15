@@ -15,7 +15,6 @@ class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS ErrorCurve: public QwtPlotItem
 {
 
 public:
-  //ErrorCurve(QwtPlotCurve* dataCurve, const std::vector<double>& errors = std::vector<double>());
   ErrorCurve(const QwtPlotCurve* dataCurve, const std::vector<double>& errors = std::vector<double>());
   /// Set error bars
   void setErrorBars(const std::vector<double>& errors);
