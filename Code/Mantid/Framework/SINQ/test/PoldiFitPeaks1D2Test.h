@@ -97,7 +97,7 @@ public:
     Mantid::Poldi::PoldiFitPeaks1D2 fitPeaks1D;
     fitPeaks1D.initialize();
 
-    TS_ASSERT_EQUALS(fitPeaks1D.propertyCount(), 7);
+    TS_ASSERT_EQUALS(fitPeaks1D.propertyCount(), 8);
 
     std::vector<Property *> properties = fitPeaks1D.getProperties();
     std::set<std::string> names;
@@ -108,6 +108,7 @@ public:
 
     TS_ASSERT_EQUALS(names.count("InputWorkspace"), 1);
     TS_ASSERT_EQUALS(names.count("FwhmMultiples"), 1);
+    TS_ASSERT_EQUALS(names.count("MaximumRelativeFwhm"), 1);
     TS_ASSERT_EQUALS(names.count("PeakFunction"), 1);
     TS_ASSERT_EQUALS(names.count("PoldiPeakTable"), 1);
     TS_ASSERT_EQUALS(names.count("OutputWorkspace"), 1);
@@ -239,6 +240,7 @@ public:
 
   void testPeakIsAcceptable() {
       TestablePoldiFitPeaks1D2 poldiPeakFit;
+      poldiPeakFit.m_maxRelativeFwhm = 0.02;
 
       // The testpeak is acceptable
       TS_ASSERT(poldiPeakFit.peakIsAcceptable(m_testPeak));
@@ -249,20 +251,19 @@ public:
       negativeIntensity->setIntensity(UncertainValue(-190.0));
       TS_ASSERT(!poldiPeakFit.peakIsAcceptable(negativeIntensity));
 
-      // 2. FWHM too large (rel. > 0.02)
+      // 2a. FWHM too large (rel. > 0.02)
       PoldiPeak_sptr tooBroad = m_testPeak->clone();
       tooBroad->setFwhm(UncertainValue(0.021), PoldiPeak::Relative);
       TS_ASSERT(!poldiPeakFit.peakIsAcceptable(tooBroad));
+
+      // 2b. Changing acceptable FWHM
+      poldiPeakFit.m_maxRelativeFwhm = 0.03;
+      TS_ASSERT(poldiPeakFit.peakIsAcceptable(tooBroad));
 
       // 3. FWHM too small (rel. < 0.001)
       PoldiPeak_sptr tooNarrow = m_testPeak->clone();
       tooNarrow->setFwhm(UncertainValue(0.0009), PoldiPeak::Relative);
       TS_ASSERT(!poldiPeakFit.peakIsAcceptable(tooNarrow));
-
-      // 4. Position precision is too low. (rel error > 1e-3)
-      PoldiPeak_sptr lowPrecision = m_testPeak->clone();
-      lowPrecision->setD(UncertainValue(1, 0.0011));
-      TS_ASSERT(!poldiPeakFit.peakIsAcceptable(lowPrecision));
   }
 
   void testGetBestChebyshevPolynomialDegree() {

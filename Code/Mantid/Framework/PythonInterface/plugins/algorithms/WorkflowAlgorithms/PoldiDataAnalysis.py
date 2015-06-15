@@ -48,6 +48,9 @@ class PoldiDataAnalysis(PythonAlgorithm):
                              doc=('Minimum height of peaks. If it is left at 0, the minimum peak height is calculated'
                                   'from background noise.'))
 
+        self.declareProperty("MaximumRelativeFwhm", 0.02, direction=Direction.Input,
+                             doc=('Peaks with a relative FWHM larger than this are removed during the 1D fit.'))
+
         self.declareProperty("ScatteringContributions", "1", direction=Direction.Input,
                              doc=('If there is more than one compound, you may supply estimates of their scattering '
                                   'contributions, which sometimes improves indexing.'))
@@ -93,6 +96,7 @@ class PoldiDataAnalysis(PythonAlgorithm):
         self.expectedPeaks = self.getProperty("ExpectedPeaks").value
         self.profileFunction = self.getProperty("ProfileFunction").value
         self.useGlobalParameters = self.getProperty("TieProfileParameters").value
+        self.maximumRelativeFwhm = self.getProperty("MaximumRelativeFwhm").value
 
         self.globalParameters = ''
         if self.useGlobalParameters:
@@ -178,6 +182,7 @@ class PoldiDataAnalysis(PythonAlgorithm):
         PoldiFitPeaks1D(InputWorkspace=correlationWorkspace,
                         PoldiPeakTable=rawPeaks,
                         FwhmMultiples=3.0,
+                        MaximumRelativeFwhm=self.maximumRelativeFwhm,
                         PeakFunction=self.profileFunction,
                         OutputWorkspace=refinedPeaksName,
                         FitPlotsWorkspace=plotNames)
