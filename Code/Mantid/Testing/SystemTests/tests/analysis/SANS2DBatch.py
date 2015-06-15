@@ -92,7 +92,7 @@ class SANS2DTUBESBatchWithZeroErrorCorrection(stresstesting.MantidStressTest):
         self.disableChecking.append('SpectraMap')
         self.disableChecking.append('Instrument')
         self.disableChecking.append('Axes')
-        return self._final_workspace, "SANS2DTube_withZerroErrorCorrections.nxs"
+        return self._final_workspace, "SANS2DTube_withZeroErrorCorrections.nxs"
 
     def validateMethod(self):
         return "WorkspaceToNexus"
