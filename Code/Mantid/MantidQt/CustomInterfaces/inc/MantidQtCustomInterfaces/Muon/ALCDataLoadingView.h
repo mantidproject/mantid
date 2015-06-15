@@ -13,6 +13,14 @@
 
 namespace MantidQt
 {
+namespace MantidWidgets
+{
+  class ErrorCurve;
+}
+}
+
+namespace MantidQt
+{
 namespace CustomInterfaces
 {
 
@@ -45,6 +53,7 @@ namespace CustomInterfaces
   {
   public:
     ALCDataLoadingView(QWidget* widget);
+    ~ALCDataLoadingView();
 
     // -- IALCDataLoadingView interface ------------------------------------------------------------
 
@@ -86,6 +95,10 @@ namespace CustomInterfaces
 
     /// Loaded data curve
     QwtPlotCurve* m_dataCurve;
+
+    /// Loaded errors
+    MantidQt::MantidWidgets::ErrorCurve* m_dataErrorCurve;
+
   };
 
 } // namespace CustomInterfaces
