@@ -8,7 +8,6 @@ set ( SRC_FILES
 	src/AddSampleLog.cpp
 	src/AddTimeSeriesLog.cpp
 	src/AlignDetectors.cpp
-	src/AlignDetectors2.cpp
 	src/AlphaCalc.cpp
 	src/AnnularRingAbsorption.cpp
 	src/AnyShapeAbsorption.cpp
@@ -272,7 +271,6 @@ set ( INC_FILES
 	inc/MantidAlgorithms/AddSampleLog.h
 	inc/MantidAlgorithms/AddTimeSeriesLog.h
 	inc/MantidAlgorithms/AlignDetectors.h
-	inc/MantidAlgorithms/AlignDetectors2.h
 	inc/MantidAlgorithms/AlphaCalc.h
 	inc/MantidAlgorithms/AnnularRingAbsorption.h
 	inc/MantidAlgorithms/AnyShapeAbsorption.h
@@ -528,7 +526,6 @@ set ( INC_FILES
 )
 
 set(SRC_UNITY_IGNORE_FILES src/AlignDetectors.cpp
-    src/AlignDetectors2.cpp
     src/FFTSmooth.cpp
     src/FFTSmooth2.cpp
     src/FilterBadPulses.cpp
@@ -548,7 +545,6 @@ set ( TEST_FILES
 	AddSampleLogTest.h
 	AddTimeSeriesLogTest.h
 	AlignDetectorsTest.h
-	AlignDetectorsTest2.h
 	AlphaCalcTest.h
 	AnnularRingAbsorptionTest.h
 	AnyShapeAbsorptionTest.h
