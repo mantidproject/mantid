@@ -7,6 +7,7 @@ from mantid import logger, mtd
 import os
 
 
+#pylint: disable=too-many-instance-attributes
 class JumpFit(PythonAlgorithm):
 
     _in_ws = None
