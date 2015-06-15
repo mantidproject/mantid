@@ -131,9 +131,15 @@ namespace CustomInterfaces
     return boost::make_optional(range);
   }
 
-  void ALCDataLoadingView::setDataCurve(const QwtData& data)
-  {
+  void ALCDataLoadingView::setDataCurve(const QwtData &data,
+                                        const std::vector<double> &errors) {
+
+    // Set data
     m_dataCurve->setData(data);
+
+    // Set errors
+    // TODO
+
     m_ui.dataPlot->replot();
   }
 
