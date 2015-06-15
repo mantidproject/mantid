@@ -6,19 +6,12 @@
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Workspace.h"
-#include "MantidAPI/WorkspaceGroup.h"
-#include "MantidAPI/WorkspaceOpOverloads.h"
-#include "MantidDataHandling/LoadInstrument.h"
 #include "MantidDataObjects/EventWorkspace.h"
-#include "MantidDataObjects/Workspace2D.h"
-#include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/Property.h"
-#include "MantidKernel/Timer.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidDataHandling/LoadEventNexus.h"
 #include <cxxtest/TestSuite.h>
 #include <iostream>
-#include <Poco/File.h>
 
 using namespace Mantid::Geometry;
 using namespace Mantid::API;
@@ -490,7 +483,6 @@ public:
 
     auto ws = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(outws);
     auto inst = ws->getInstrument();
-    TS_ASSERT( inst->getFilename().empty() ); // This is how we know we got it from inside the nexus file
     TS_ASSERT_EQUALS( inst->getName(), "HYSPECA" );
     TS_ASSERT_EQUALS( inst->getValidFromDate(), std::string("2011-Jul-20 17:02:48.437294000") );
     TS_ASSERT_EQUALS( inst->getNumberDetectors(), 20483 );

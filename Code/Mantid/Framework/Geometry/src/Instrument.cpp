@@ -4,7 +4,6 @@
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 
-#include <Poco/Path.h>
 #include <queue>
 
 using namespace Mantid::Kernel;
@@ -1070,8 +1069,6 @@ void Instrument::saveNexus(::NeXus::File *file,
   file->writeData("type", "text/xml"); // mimetype
   file->writeData("description", "XML contents of the instrument IDF file.");
   file->closeGroup();
-
-  file->writeData("instrument_source", Poco::Path(getFilename()).getFileName());
 
   // Now the parameter map, as a NXnote via its saveNexus method
   if (isParametrized()) {

@@ -36,7 +36,7 @@ public:
     ::NeXus::File nxFile(m_filename, NXACC_READ);
     nxFile.openGroup("mantid_workspace_1", "NXentry");
     std::string paramString;
-    m_inMemoryExptInfo->loadExperimentInfoNexus(&nxFile, paramString);
+    m_inMemoryExptInfo->loadExperimentInfoNexus(m_filename, &nxFile, paramString);
     m_inMemoryExptInfo->readParameterMap(paramString);
   }
 
@@ -56,8 +56,6 @@ public:
 
   void test_getInstrument_populates_object() {
     auto fileBacked = createTestObject();
-    auto fileBackedInstrument = fileBacked->getInstrument();
-    auto inMemoryInstrument = m_inMemoryExptInfo->getInstrument();
 
     TS_ASSERT_EQUALS(fileBacked->constInstrumentParameters(),
                      m_inMemoryExptInfo->constInstrumentParameters());
