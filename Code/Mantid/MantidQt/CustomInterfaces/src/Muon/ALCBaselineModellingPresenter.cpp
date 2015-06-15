@@ -177,11 +177,13 @@ namespace CustomInterfaces
   {
     if(MatrixWorkspace_const_sptr correctedData = m_model->correctedData())
     {
-      m_view->setCorrectedCurve(*(ALCHelper::curveDataFromWs(correctedData, 0)));
+      m_view->setCorrectedCurve(*(ALCHelper::curveDataFromWs(correctedData, 0)),
+                                ALCHelper::curveErrorsFromWs(correctedData, 0));
     }
     else
     {
-      m_view->setCorrectedCurve(*(ALCHelper::emptyCurveData()));
+      m_view->setCorrectedCurve(*(ALCHelper::emptyCurveData()),
+                                std::vector<double>());
     }
   }
 

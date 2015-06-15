@@ -80,7 +80,8 @@ namespace CustomInterfaces
      * Update displayed corrected data curve
      * @param data :: New curve data
      */
-    virtual void setCorrectedCurve(const QwtData& data) = 0;
+    virtual void setCorrectedCurve(const QwtData &data,
+                                   const std::vector<double> &errors) = 0;
 
     /**
      * Update displayed baseline curve

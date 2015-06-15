@@ -67,7 +67,8 @@ namespace CustomInterfaces
   public slots:
     void initialize();
     void setDataCurve(const QwtData &data, const std::vector<double> &errors);
-    void setCorrectedCurve(const QwtData& data);
+    void setCorrectedCurve(const QwtData &data,
+                           const std::vector<double> &errors);
     void setBaselineCurve(const QwtData& data);
     void setFunction(Mantid::API::IFunction_const_sptr func);
     void setNoOfSectionRows(int rows);
@@ -98,7 +99,8 @@ namespace CustomInterfaces
     QwtPlotCurve *m_dataCurve, *m_fitCurve, *m_correctedCurve;
 
     /// Error curves
-    MantidQt::MantidWidgets::ErrorCurve *m_dataErrorCurve;
+    MantidQt::MantidWidgets::ErrorCurve *m_dataErrorCurve,
+        *m_correctedErrorCurve;
 
     /// Range selectors
     std::map<int, RangeSelector*> m_rangeSelectors;
