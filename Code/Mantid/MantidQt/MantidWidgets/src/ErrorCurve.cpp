@@ -1,4 +1,4 @@
-#include "MantidQtCustomInterfaces/MultiDatasetFit/MDFErrorCurve.h"
+#include "MantidQtMantidWidgets/ErrorCurve.h"
 
 #include <QPainter>
 #include <qwt_scale_map.h>
@@ -6,15 +6,14 @@
 
 namespace MantidQt
 {
-namespace CustomInterfaces
+namespace MantidWidgets
 {
-namespace MDF
-{
- 
+
 /// Create a error curve dependent on a data curve.
 /// @param dataCurve :: The curve displaying the data.
 /// @param errors :: A vector with error bars.
 ErrorCurve::ErrorCurve(const QwtPlotCurve* dataCurve, const std::vector<double>& errors)
+//ErrorCurve::ErrorCurve(QwtPlotCurve* dataCurve, const std::vector<double>& errors)
 {
   if (!dataCurve)
   {
@@ -44,6 +43,7 @@ void ErrorCurve::setErrorBars(const std::vector<double>& errors)
 {
   if (errors.size() != m_x.size())
   {
+    std::cout << "ERROR POINTS " << errors.size() << " DATA POINTS " << m_x.size() << "\n";
     throw std::runtime_error("Number of error values is different form the number of data points.");
   }
   m_e = errors;
@@ -88,6 +88,6 @@ int ErrorCurve::dataSize() const
   return static_cast<int>(m_x.size());
 }
 
-} // MDF
-} // CustomInterfaces
+} // MantidWidgets
 } // MantidQt
+
