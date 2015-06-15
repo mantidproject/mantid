@@ -73,6 +73,25 @@ namespace { // anonymous namespace
       double factor3;
     };
 
+    struct difa_negative {
+      difa_negative(const double difc, const double difa, const double tzero) {
+          factor1 = -0.5 * difc / difa;
+          factor2 = 1. / difa;
+          factor3 = (factor1 * factor1) - (tzero / difa);
+      }
+
+      double operator()(const double tof) const {
+        return factor1 - std::sqrt((tof*factor2) + factor3);
+      }
+
+      /// -0.5*difc/difa
+      double factor1;
+      /// 1/difa
+      double factor2;
+      /// (0.5*difc/difa)^2 - (tzero/difa)
+      double factor3;
+    };
+
     class ConversionFactors {
     public:
         ConversionFactors(ITableWorkspace_const_sptr table) {
@@ -108,8 +127,8 @@ namespace { // anonymous namespace
                 }
             } else if (difa > 0.){
                 return difa_positive(difc, difa, tzero);
-            } else {
-                throw std::runtime_error("difa != 0 branch needs to be written"); // TODO
+            } else { // difa < 0.
+                return difa_negative(difc, difa, tzero);
             }
         }
 
