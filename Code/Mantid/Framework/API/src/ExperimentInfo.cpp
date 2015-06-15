@@ -980,6 +980,8 @@ void ExperimentInfo::loadInstrumentInfoNexus(const std::string& nxFilename,
   } catch (NeXus::Exception &ex) {
     g_log.information("Parameter map entry missing from NeXus file. Continuing without it.");
   }
+  // Close the instrument group
+  file->closeGroup();
 
   instrumentXml = Strings::strip(instrumentXml);
   instrumentName = Strings::strip(instrumentName);
