@@ -20,6 +20,8 @@ REG_DATA_MONITORS_NAME = '-add_monitors' + ADDED_EVENT_DATA_TAG + '[_1-9]*$'
 
 ZERO_ERROR_DEFAULT = 1e6
 
+INCIDENT_MONITOR_TAG = '_incident_monitor'
+
 def deprecated(obj):
     """
     Decorator to apply to functions or classes that we think are not being (or
@@ -670,22 +672,24 @@ def is_valid_ws_for_removing_zero_errors(input_workspace_name):
     '''
     isValid = False
     message = ""
-    ws = mtd[input_workspace_name]
 
-    try:
-        worksapceHistory= ws.getHistory()
-        histories = worksapceHistory.getAlgorithmHistories()
-        for history in histories:
-            name = history.name()
-            if name == 'Q1D' or name == 'Qxy':
-                isValid = True
-                break
-    except:
-        isValid = False
-        message = "Issue checking history of workspace for zero error removal."
+    if input_workspace_name.endswith(INCIDENT_MONITOR_TAG):
+        isValid = True
+    else:
+        try:
+            ws = mtd[input_workspace_name]
+            worksapceHistory= ws.getHistory()
+            histories = worksapceHistory.getAlgorithmHistories()
+            for history in histories:
+                name = history.name()
+                if name == 'Q1D' or name == 'Qxy':
+                    isValid = True
+                    break
+        except:
+            isValid = False
 
     if not isValid:
-        message = "Workspace does not seem valid for zero error removal. It must have been reduced with Q1D or Qxy."
+        message = "Workspace does not seem valid for zero error removal. It must have been reduced with Q1D or Qxy or it has to be an incident monitor workspace."
 
     return message, isValid
 
