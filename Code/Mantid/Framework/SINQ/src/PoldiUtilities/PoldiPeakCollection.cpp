@@ -136,10 +136,14 @@ TableWorkspace_sptr PoldiPeakCollection::asTableWorkspace() {
 
 void PoldiPeakCollection::prepareTable(const TableWorkspace_sptr &table) {
   table->addColumn("str", "HKL");
-  table->addColumn("str", "d");
-  table->addColumn("str", "Q");
-  table->addColumn("str", "Intensity");
-  table->addColumn("str", "FWHM (rel.)");
+  table->addColumn("double", "d");
+  table->addColumn("double", "delta d");
+  table->addColumn("double", "Q");
+  table->addColumn("double", "delta Q");
+  table->addColumn("double", "Intensity");
+  table->addColumn("double", "delta Intensity");
+  table->addColumn("double", "FWHM (rel.)");
+  table->addColumn("double", "delta FWHM (rel.)");
 }
 
 void PoldiPeakCollection::dataToTableLog(const TableWorkspace_sptr &table) {
@@ -158,11 +162,13 @@ void PoldiPeakCollection::peaksToTable(const TableWorkspace_sptr &table) {
   for (std::vector<PoldiPeak_sptr>::const_iterator peak = m_peaks.begin();
        peak != m_peaks.end(); ++peak) {
     TableRow newRow = table->appendRow();
-    newRow << MillerIndicesIO::toString((*peak)->hkl())
-           << UncertainValueIO::toString((*peak)->d())
-           << UncertainValueIO::toString((*peak)->q())
-           << UncertainValueIO::toString((*peak)->intensity())
-           << UncertainValueIO::toString((*peak)->fwhm(PoldiPeak::Relative));
+
+    newRow << MillerIndicesIO::toString((*peak)->hkl()) << (*peak)->d().value()
+           << (*peak)->d().error() << (*peak)->q().value()
+           << (*peak)->q().error() << (*peak)->intensity().value()
+           << (*peak)->intensity().error()
+           << (*peak)->fwhm(PoldiPeak::Relative).value()
+           << (*peak)->fwhm(PoldiPeak::Relative).error();
   }
 }
 
@@ -176,15 +182,15 @@ void PoldiPeakCollection::constructFromTableWorkspace(
 
     for (size_t i = 0; i < newPeakCount; ++i) {
       TableRow nextRow = tableWorkspace->getRow(i);
-      std::string hklString, dString, qString, intensityString, fwhmString;
-      nextRow >> hklString >> dString >> qString >> intensityString >>
-          fwhmString;
+      std::string hklString;
+      double d, deltaD, q, deltaQ, intensity, deltaIntensity, fwhm, deltaFwhm;
+      nextRow >> hklString >> d >> deltaD >> q >> deltaQ >> intensity >>
+          deltaIntensity >> fwhm >> deltaFwhm;
 
-      PoldiPeak_sptr peak =
-          PoldiPeak::create(MillerIndicesIO::fromString(hklString),
-                            UncertainValueIO::fromString(dString),
-                            UncertainValueIO::fromString(intensityString),
-                            UncertainValueIO::fromString(fwhmString));
+      PoldiPeak_sptr peak = PoldiPeak::create(
+          MillerIndicesIO::fromString(hklString), UncertainValue(d, deltaD),
+          UncertainValue(intensity, deltaIntensity),
+          UncertainValue(fwhm, deltaFwhm));
       m_peaks[i] = peak;
     }
   }
@@ -192,16 +198,20 @@ void PoldiPeakCollection::constructFromTableWorkspace(
 
 bool
 PoldiPeakCollection::checkColumns(const TableWorkspace_sptr &tableWorkspace) {
-  if (tableWorkspace->columnCount() != 5) {
+  if (tableWorkspace->columnCount() != 9) {
     return false;
   }
 
   std::vector<std::string> shouldNames;
   shouldNames.push_back("HKL");
   shouldNames.push_back("d");
+  shouldNames.push_back("delta d");
   shouldNames.push_back("Q");
+  shouldNames.push_back("delta Q");
   shouldNames.push_back("Intensity");
+  shouldNames.push_back("delta Intensity");
   shouldNames.push_back("FWHM (rel.)");
+  shouldNames.push_back("delta FWHM (rel.)");
 
   std::vector<std::string> columnNames = tableWorkspace->getColumnNames();
 

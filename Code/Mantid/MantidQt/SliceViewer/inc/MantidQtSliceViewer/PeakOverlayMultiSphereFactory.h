@@ -2,7 +2,7 @@
 #define MANTID_SLICEVIEWER_PEAKOVERLAYMULTISPHERE_FACTORY_H_
 
 #include "MantidQtSliceViewer/PeakOverlayViewFactoryBase.h"
-#include "MantidAPI/IPeaksWorkspace.h"
+#include "MantidAPI/IPeaksWorkspace_fwd.h"
 #include <boost/shared_ptr.hpp>
 
 namespace MantidQt

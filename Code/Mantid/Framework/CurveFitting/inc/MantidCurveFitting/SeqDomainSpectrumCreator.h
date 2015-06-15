@@ -4,7 +4,8 @@
 #include "MantidKernel/System.h"
 #include "MantidAPI/IDomainCreator.h"
 #include "MantidAPI/FunctionDomain1D.h"
-#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/Workspace_fwd.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
 
 namespace Mantid {
 namespace CurveFitting {

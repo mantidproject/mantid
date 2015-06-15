@@ -1,7 +1,7 @@
 #ifndef MANTID_VATES_VTK_MD_HEX_FACTORY_H_
 #define MANTID_VATES_VTK_MD_HEX_FACTORY_H_
 
-#include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidAPI/IMDEventWorkspace_fwd.h"
 #include "MantidDataObjects/MDEventFactory.h"
 #include "MantidDataObjects/MDEventWorkspace.h"
 #include "MantidVatesAPI/Normalization.h"

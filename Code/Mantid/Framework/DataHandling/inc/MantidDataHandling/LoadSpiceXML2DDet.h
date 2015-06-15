@@ -3,8 +3,8 @@
 
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
-#include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidAPI/ITableWorkspace_fwd.h"
 
 namespace Mantid {
 namespace DataHandling {

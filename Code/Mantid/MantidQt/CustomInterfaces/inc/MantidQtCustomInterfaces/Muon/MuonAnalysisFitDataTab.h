@@ -8,7 +8,7 @@
 #include "MantidQtAPI/UserSubWindow.h"
 
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
 
 namespace Ui
 {

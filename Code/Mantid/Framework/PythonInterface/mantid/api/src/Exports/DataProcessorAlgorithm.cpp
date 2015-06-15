@@ -1,5 +1,6 @@
 #include "MantidPythonInterface/api/PythonAlgorithm/DataProcessorAdapter.h"
 #include "MantidPythonInterface/kernel/Policies/VectorToNumpy.h"
+#include "MantidAPI/ITableWorkspace.h"
 #include <boost/python/class.hpp>
 #include <boost/python/overloads.hpp>
 

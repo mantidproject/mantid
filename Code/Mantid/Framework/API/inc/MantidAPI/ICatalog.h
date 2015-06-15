@@ -1,8 +1,11 @@
 #ifndef MANTID_API_ICATLOG_H_
 #define MANTID_API_ICATLOG_H_
 
-#include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidAPI/CatalogSession.h"
+
+#include <string>
+#include <vector>
 
 namespace Mantid {
 namespace ICat {

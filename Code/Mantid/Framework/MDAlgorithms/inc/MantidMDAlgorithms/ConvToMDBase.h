@@ -2,7 +2,7 @@
 #define MANTID_MDALGORITHMS_CONVERTMD_BASE_H
 
 #include "MantidAPI/ExperimentInfo.h"
-#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/Progress.h"
 #include "MantidKernel/Logger.h"

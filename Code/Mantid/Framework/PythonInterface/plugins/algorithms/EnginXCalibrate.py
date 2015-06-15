@@ -1,6 +1,7 @@
 #pylint: disable=no-init,invalid-name
 from mantid.kernel import *
 from mantid.api import *
+import mantid.simpleapi as sapi
 
 
 class EnginXCalibrate(PythonAlgorithm):
@@ -26,6 +27,12 @@ class EnginXCalibrate(PythonAlgorithm):
                 Direction.Input, PropertyMode.Optional),\
     		"Calibrated detector positions. If not specified, default ones are used.")
 
+        self.declareProperty('OutputParametersTableName', '', direction=Direction.Input,
+                             doc = 'Name for a table workspace with the calibration parameters calculated '
+                             'from this algorithm: difc and zero parameters for GSAS. these two parameters '
+                             'are added as two columns in a single row. If not given, no table is '
+                             'generated.')
+
         self.declareProperty("Difc", 0.0, direction = Direction.Output,\
     		doc = "Calibrated Difc value for the bank")
 
@@ -36,16 +43,33 @@ class EnginXCalibrate(PythonAlgorithm):
 
         ws = self._focusRun()
 
+        difc, zero = self._fitParams(ws)
+
+        self._produceOutputs(difc, zero)
+
+    def _fitParams(self, focusedWS):
+        """
+        Fit the GSAS parameters that this algorithm produces: difc and zero
+
+        @param focusedWS: focused workspace to do the fitting on
+
+        @returns a pair of parameters: difc and zero
+        """
         fitPeaksAlg = self.createChildAlgorithm('EnginXFitPeaks')
-        fitPeaksAlg.setProperty('InputWorkspace', ws)
+        fitPeaksAlg.setProperty('InputWorkspace', focusedWS)
         fitPeaksAlg.setProperty('WorkspaceIndex', 0) # There should be only one index anyway
         fitPeaksAlg.setProperty('ExpectedPeaks', self.getProperty('ExpectedPeaks').value)
         fitPeaksAlg.execute()
 
-        self.setProperty('Difc', fitPeaksAlg.getProperty('Difc').value)
-        self.setProperty('Zero', fitPeaksAlg.getProperty('Zero').value)
+        difc = fitPeaksAlg.getProperty('Difc').value
+        zero = fitPeaksAlg.getProperty('Zero').value
+
+        return difc, zero
 
     def _focusRun(self):
+        """
+        Focuses the input workspace by running EnginXFocus which will produce a single spectrum workspace.
+        """
         alg = self.createChildAlgorithm('EnginXFocus')
         alg.setProperty('Filename', self.getProperty('Filename').value)
         alg.setProperty('Bank', self.getProperty('Bank').value)
@@ -57,6 +81,33 @@ class EnginXCalibrate(PythonAlgorithm):
         alg.execute()
 
         return alg.getProperty('OutputWorkspace').value
+
+    def _produceOutputs(self, difc, zero):
+        """
+        Just fills in the output properties as requested
+        @param difc :: the difc GSAS parameter as fitted here
+        @param zero :: the zero GSAS parameter as fitted here
+        """
+        self.setProperty('Difc', difc)
+        self.setProperty('Zero', zero)
+
+        # make output table if requested
+        tblName = self.getPropertyValue("OutputParametersTableName")
+        if '' != tblName:
+            self._generateOutputParTable(tblName)
+
+    def _generateOutputParTable(self, name):
+        """
+        Produces a table workspace with the two calibration parameters
+
+        @param name :: the name to use for the table workspace that is created here
+        """
+        tbl = sapi.CreateEmptyTableWorkspace(OutputWorkspace=name)
+        tbl.addColumn('double', 'difc')
+        tbl.addColumn('double', 'zero')
+        tbl.addRow([float(self.getPropertyValue('difc')), float(self.getPropertyValue('zero'))])
+
+        self.log().information("Output parameters added into a table workspace: %s" % name)
 
 
 AlgorithmFactory.subscribe(EnginXCalibrate)

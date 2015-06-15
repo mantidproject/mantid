@@ -5,14 +5,13 @@
 #include <time.h>
 #endif
 #include "MantidAPI/IEventList.h"
-#include "MantidAPI/IEventWorkspace.h" // get EventType declaration
-#include "MantidAPI/MatrixWorkspace.h" // get MantidVec declaration
 #include "MantidDataObjects/Events.h"
 #include "MantidDataObjects/EventWorkspaceMRU.h"
 #include "MantidKernel/cow_ptr.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/TimeSplitter.h"
+#include "MantidKernel/Unit.h"
 #include <cstddef>
 #include <iosfwd>
 #include <set>

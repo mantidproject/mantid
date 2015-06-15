@@ -3,7 +3,7 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/ExperimentInfo.h"
-#include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidAPI/IMDEventWorkspace_fwd.h"
 #include "MantidAPI/Progress.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidKernel/System.h"

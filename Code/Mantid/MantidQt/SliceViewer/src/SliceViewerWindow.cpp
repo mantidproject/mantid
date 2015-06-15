@@ -1,5 +1,6 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/IMDWorkspace.h"
+#include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidKernel/DataService.h"
 #include "MantidKernel/SingletonHolder.h"
 #include "MantidKernel/VMD.h"
