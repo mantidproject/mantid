@@ -3,8 +3,9 @@
 
 #include "MantidKernel/System.h"
 #include "MantidAPI/IDomainCreator.h"
-#include "MantidAPI/Workspace.h"
-#include "MantidAPI/IPeaksWorkspace.h"
+#include "MantidAPI/Workspace_fwd.h"
+#include "MantidAPI/IPeaksWorkspace_fwd.h"
+#include "MantidAPI/ITableWorkspace_fwd.h"
 
 namespace Mantid {
 namespace CurveFitting {

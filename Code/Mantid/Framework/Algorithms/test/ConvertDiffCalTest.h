@@ -3,6 +3,7 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidAPI/ITableWorkspace.h"
 #include "MantidAlgorithms/ConvertDiffCal.h"
 #include "MantidDataObjects/OffsetsWorkspace.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"

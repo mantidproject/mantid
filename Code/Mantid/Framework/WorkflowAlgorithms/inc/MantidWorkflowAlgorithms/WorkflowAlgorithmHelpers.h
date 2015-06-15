@@ -2,7 +2,7 @@
 #define WORKFLOWALGORITHMHELPERS_H_
 
 #include <string>
-#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidKernel/EmptyValues.h"
 #include "MantidKernel/PropertyManager.h"
 

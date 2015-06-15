@@ -2,7 +2,7 @@
 #define MANTID_VATESAPI_WORKSPACE_PROVIDER_H
 
 #include "MantidKernel/System.h"
-#include "MantidAPI/Workspace.h"
+#include "MantidAPI/Workspace_fwd.h"
 #include <string>
 
 namespace Mantid

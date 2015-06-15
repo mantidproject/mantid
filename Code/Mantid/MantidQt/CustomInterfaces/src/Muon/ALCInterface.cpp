@@ -9,7 +9,9 @@
 
 #include "QInputDialog"
 
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidAPI/ITableWorkspace.h"
 
 namespace MantidQt
 {

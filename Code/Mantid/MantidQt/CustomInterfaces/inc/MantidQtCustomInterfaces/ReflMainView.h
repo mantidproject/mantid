@@ -7,6 +7,10 @@
 #include "MantidQtCustomInterfaces/QReflTableModel.h"
 #include "MantidQtMantidWidgets/HintStrategy.h"
 
+#include <map>
+#include <set>
+#include <string>
+
 namespace MantidQt
 {
   namespace CustomInterfaces

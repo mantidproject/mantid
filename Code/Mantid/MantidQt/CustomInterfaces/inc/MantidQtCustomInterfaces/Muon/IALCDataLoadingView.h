@@ -1,7 +1,7 @@
 #ifndef MANTIDQT_CUSTOMINTERFACES_IALCDATALOADINGVIEW_H_
 #define MANTIDQT_CUSTOMINTERFACES_IALCDATALOADINGVIEW_H_
 
-#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
 
 #include "MantidQtCustomInterfaces/DllConfig.h"
 #include "MantidKernel/System.h"

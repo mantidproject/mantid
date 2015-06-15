@@ -5,6 +5,7 @@
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/MatrixWorkspace.h"
 
 #include <Poco/Notification.h>
 #include <Poco/NotificationCenter.h>

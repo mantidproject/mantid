@@ -8,6 +8,7 @@
 #include "MantidAPI/FuncMinimizerFactory.h"
 #include "MantidAPI/FunctionValues.h"
 #include "MantidAPI/IFuncMinimizer.h"
+#include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"

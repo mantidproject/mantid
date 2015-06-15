@@ -1,7 +1,7 @@
 #ifndef MANTID_API_PROJECTION_H_
 #define MANTID_API_PROJECTION_H_
 
-#include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidKernel/V3D.h"
 
 #include <stdexcept>

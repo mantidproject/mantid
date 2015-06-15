@@ -4,7 +4,7 @@
 #define MANTID_VATES_VTKDATASETFACTORY_H_
 
 #include "MantidAPI/IMDWorkspace.h"
-#include "MantidAPI/Workspace.h"
+#include "MantidAPI/Workspace_fwd.h"
 #include "MantidKernel/System.h"
 #include "vtkDataSet.h"
 #include <boost/shared_ptr.hpp>

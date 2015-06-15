@@ -3,7 +3,7 @@
 
 #include "../Table.h"
 #include "MantidQtAPI/WorkspaceObserver.h"
-#include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/ITableWorkspace_fwd.h"
 
 
 /** A MantidTable appears to be a MantidPlot "Table" object

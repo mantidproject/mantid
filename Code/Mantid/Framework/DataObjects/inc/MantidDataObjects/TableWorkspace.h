@@ -8,6 +8,7 @@
 #include "MantidDataObjects/DllConfig.h"
 #include "MantidDataObjects/TableColumn.h"
 #include "MantidKernel/PropertyManager.h"
+#include "MantidKernel/V3D.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include <boost/shared_ptr.hpp>
 #include <boost/tuple/tuple.hpp>
