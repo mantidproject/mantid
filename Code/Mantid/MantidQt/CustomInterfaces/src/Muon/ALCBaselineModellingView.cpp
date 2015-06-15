@@ -4,6 +4,7 @@
 #include "MantidAPI/FunctionDomain1D.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidQtAPI/HelpWindow.h"
+#include "MantidQtMantidWidgets/ErrorCurve.h"
 
 #include <boost/scoped_array.hpp>
 
@@ -22,9 +23,19 @@ namespace CustomInterfaces
   ALCBaselineModellingView::ALCBaselineModellingView(QWidget* widget)
     : m_widget(widget), m_ui(),
       m_dataCurve(new QwtPlotCurve()), m_fitCurve(new QwtPlotCurve()),
-      m_correctedCurve(new QwtPlotCurve()), m_rangeSelectors(),
+      m_dataErrorCurve(NULL), m_correctedCurve(new QwtPlotCurve()), m_rangeSelectors(),
       m_selectorModifiedMapper(new QSignalMapper(this))
   {}
+
+  ALCBaselineModellingView::~ALCBaselineModellingView()
+  {
+    m_dataCurve->detach();
+    delete m_dataCurve;
+    if (m_dataErrorCurve) {
+      m_dataErrorCurve->detach();
+      delete m_dataErrorCurve;
+    }
+  }
     
   void ALCBaselineModellingView::initialize()
   {
@@ -91,9 +102,23 @@ namespace CustomInterfaces
     return m_ui.sections->rowCount();
   }
 
-  void ALCBaselineModellingView::setDataCurve(const QwtData &data)
+  void
+  ALCBaselineModellingView::setDataCurve(const QwtData &data,
+                                         const std::vector<double> &errors)
   {
+    // Set data
     m_dataCurve->setData(data);
+
+    // Set errors
+    if (m_dataErrorCurve) {
+      m_dataErrorCurve->detach();
+      delete m_dataErrorCurve;
+    }
+    m_dataErrorCurve =
+        new MantidQt::MantidWidgets::ErrorCurve(m_dataCurve, errors);
+    m_dataErrorCurve->attach(m_ui.dataPlot);
+
+    // Replot
     m_ui.dataPlot->replot();
   }
 

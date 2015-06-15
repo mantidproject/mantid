@@ -169,7 +169,8 @@ namespace CustomInterfaces
   {
     MatrixWorkspace_const_sptr data = m_model->data();
     assert(data);
-    m_view->setDataCurve(*(ALCHelper::curveDataFromWs(data, 0)));
+    m_view->setDataCurve(*(ALCHelper::curveDataFromWs(data, 0)),
+                         ALCHelper::curveErrorsFromWs(data, 0));
   }
 
   void ALCBaselineModellingPresenter::updateCorrectedCurve()

@@ -13,6 +13,14 @@
 
 namespace MantidQt
 {
+namespace MantidWidgets
+{
+  class ErrorCurve;
+}
+}
+
+namespace MantidQt
+{
 namespace CustomInterfaces
 {
 
@@ -47,6 +55,7 @@ namespace CustomInterfaces
 
   public:
     ALCBaselineModellingView(QWidget* widget);
+    ~ALCBaselineModellingView();
 
   // -- IALCBaselineModellingView interface --------------------------------------------------------
   public:
@@ -57,7 +66,7 @@ namespace CustomInterfaces
 
   public slots:
     void initialize();
-    void setDataCurve(const QwtData& data);
+    void setDataCurve(const QwtData &data, const std::vector<double> &errors);
     void setCorrectedCurve(const QwtData& data);
     void setBaselineCurve(const QwtData& data);
     void setFunction(Mantid::API::IFunction_const_sptr func);
@@ -87,6 +96,9 @@ namespace CustomInterfaces
 
     /// Plot curves
     QwtPlotCurve *m_dataCurve, *m_fitCurve, *m_correctedCurve;
+
+    /// Error curves
+    MantidQt::MantidWidgets::ErrorCurve *m_dataErrorCurve;
 
     /// Range selectors
     std::map<int, RangeSelector*> m_rangeSelectors;
