@@ -63,6 +63,40 @@ class POLDIDataAnalysisTestSiIndividual(POLDIDataAnalysisTestSi):
         # Maximum residual should not be too large
         self.assertLessThan(maxResidual / maxSum, 0.075)
 
+class POLDIDataAnalysisTestSiIndividualDiscardUnindexed(POLDIDataAnalysisTestSi):
+    def runTest(self):
+        data, expectedPeaks = self.prepareTest()
+        DeleteTableRows(expectedPeaks, '8-20')
+
+        output_remove = PoldiDataAnalysis(InputWorkspace=data,
+                                   MaximumPeakNumber=11,
+                                   ExpectedPeaks=expectedPeaks,
+                                   RemoveUnindexedPeaksFor2DFit=True,
+                                   PlotResult=False)
+
+        # Make sure that it's a workspace group
+        self.assertTrue(isinstance(output_remove, WorkspaceGroup))
+
+        # check that only one set of peaks has been refined
+        refinedPeaks = AnalysisDataService.retrieve('poldi_data_6904_peaks_refined_2d')
+        self.assertEquals(refinedPeaks.rowCount(), 8)
+
+        # Run again with option to keep unindexed peaks.
+        output_keep = PoldiDataAnalysis(InputWorkspace=data,
+                                   MaximumPeakNumber=11,
+                                   ExpectedPeaks=expectedPeaks,
+                                   RemoveUnindexedPeaksFor2DFit=False,
+                                   PlotResult=False)
+
+        # Make sure that it's a workspace group
+        self.assertTrue(isinstance(output_keep, WorkspaceGroup))
+
+        # check that the output peaks are again a workspace group (Si and unindexed)
+        refinedPeaks = AnalysisDataService.retrieve('poldi_data_6904_peaks_refined_2d')
+        self.assertTrue(isinstance(refinedPeaks, WorkspaceGroup))
+
+
+
 class POLDIDataAnalysisTestSiIndividualPseudoVoigtTied(POLDIDataAnalysisTestSi):
     """This test runs PoldiDataAnalysis with Si data, using."""
 

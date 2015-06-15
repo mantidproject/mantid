@@ -118,7 +118,7 @@ DECLARE_ALGORITHM(PoldiFitPeaks1D2)
 
 PoldiFitPeaks1D2::PoldiFitPeaks1D2()
     : m_peaks(), m_profileTemplate(), m_fitplots(new WorkspaceGroup),
-      m_fwhmMultiples(1.0) {}
+      m_fwhmMultiples(1.0), m_maxRelativeFwhm(0.02) {}
 
 PoldiFitPeaks1D2::~PoldiFitPeaks1D2() {}
 
@@ -149,6 +149,11 @@ void PoldiFitPeaks1D2::init() {
   declareProperty("AllowedOverlap", 0.25, allowedOverlapFraction,
                   "If a fraction larger than this value overlaps with the next "
                   "range, the ranges are merged.");
+
+  declareProperty("MaximumRelativeFwhm", 0.02,
+                  "Peaks with a relative FWHM higher"
+                  "than this value will be excluded.",
+                  Direction::Input);
 
   std::vector<std::string> peakFunctions =
       FunctionFactory::Instance().getFunctionNames<IPeakFunction>();
@@ -313,34 +318,45 @@ PoldiFitPeaks1D2::fitPeaks(const PoldiPeakCollection_sptr &peaks) {
 
 int PoldiFitPeaks1D2::getBestChebyshevPolynomialDegree(
     const Workspace2D_sptr &dataWorkspace, const RefinedRange_sptr &range) {
-  int n = 0;
   double chiSquareMin = 1e10;
   int nMin = -1;
 
-  while ((n < 3)) {
-    IAlgorithm_sptr fit = getFitAlgorithm(dataWorkspace, range, n);
-    bool fitSuccess = fit->execute();
+  try {
+    int n = 0;
 
-    if (fitSuccess) {
-      ITableWorkspace_sptr fitCharacteristics =
-          fit->getProperty("OutputParameters");
-      TableRow row =
-          fitCharacteristics->getRow(fitCharacteristics->rowCount() - 1);
+    while ((n < 3)) {
+      IAlgorithm_sptr fit = getFitAlgorithm(dataWorkspace, range, n);
+      bool fitSuccess = fit->execute();
 
-      double chiSquare = row.Double(1);
+      if (fitSuccess) {
+        ITableWorkspace_sptr fitCharacteristics =
+            fit->getProperty("OutputParameters");
+        TableRow row =
+            fitCharacteristics->getRow(fitCharacteristics->rowCount() - 1);
 
-      if (fabs(chiSquare - 1) < fabs(chiSquareMin - 1)) {
-        chiSquareMin = chiSquare;
-        nMin = n;
+        double chiSquare = row.Double(1);
+
+        if (fabs(chiSquare - 1) < fabs(chiSquareMin - 1)) {
+          chiSquareMin = chiSquare;
+          nMin = n;
+        }
       }
-    }
 
-    ++n;
+      ++n;
+    }
+  }
+  catch (std::runtime_error) {
+    nMin = -1;
   }
 
-  g_log.information() << "Chi^2 for range [" << range->getXStart() << " - "
-                      << range->getXEnd() << "] is minimal at n = " << nMin
-                      << " with Chi^2 = " << chiSquareMin << std::endl;
+  if (nMin == -1) {
+    g_log.information() << "Range [" << range->getXStart() << " - "
+                        << range->getXEnd() << "] is excluded.";
+  } else {
+    g_log.information() << "Chi^2 for range [" << range->getXStart() << " - "
+                        << range->getXEnd() << "] is minimal at n = " << nMin
+                        << " with Chi^2 = " << chiSquareMin << std::endl;
+  }
 
   return nMin;
 }
@@ -363,7 +379,8 @@ PoldiPeakCollection_sptr PoldiFitPeaks1D2::getReducedPeakCollection(
 }
 
 bool PoldiFitPeaks1D2::peakIsAcceptable(const PoldiPeak_sptr &peak) const {
-  return peak->intensity() > 0 && peak->fwhm(PoldiPeak::Relative) < 0.02 &&
+  return peak->intensity() > 0 &&
+         peak->fwhm(PoldiPeak::Relative) < m_maxRelativeFwhm &&
          peak->fwhm(PoldiPeak::Relative) > 0.001;
 }
 
@@ -372,6 +389,7 @@ void PoldiFitPeaks1D2::exec() {
 
   // Number of points around the peak center to use for the fit
   m_fwhmMultiples = getProperty("FwhmMultiples");
+  m_maxRelativeFwhm = getProperty("MaximumRelativeFwhm");
 
   // try to construct PoldiPeakCollection from provided TableWorkspace
   TableWorkspace_sptr poldiPeakTable = getProperty("PoldiPeakTable");
