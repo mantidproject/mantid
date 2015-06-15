@@ -55,7 +55,7 @@ class PoldiDataAnalysis(PythonAlgorithm):
         self.declareProperty(WorkspaceProperty("ExpectedPeaks", defaultValue="", direction=Direction.Input),
                              doc='TableWorkspace or WorkspaceGroup with expected peaks used for indexing.')
 
-        self.declareProperty("RemoveUnindexedPeaksFor2DFit", defaultValue=True, direction=Direction.Input,
+        self.declareProperty("RemoveUnindexedPeaksFor2DFit", defaultValue=False, direction=Direction.Input,
                              doc='Discard unindexed peaks for 2D fit, this is always the case if PawleyFit is active.')
 
         allowedProfileFunctions = StringListValidator(self._allowedFunctions)
