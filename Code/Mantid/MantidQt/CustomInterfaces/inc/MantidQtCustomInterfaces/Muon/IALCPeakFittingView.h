@@ -62,6 +62,7 @@ namespace CustomInterfaces
 
     /// Update the data curve displayed
     /// @param data :: New curve data
+    /// @param errors :: New curve errors
     virtual void setDataCurve(const QwtData &data,
                               const std::vector<double> &errors) = 0;
 
