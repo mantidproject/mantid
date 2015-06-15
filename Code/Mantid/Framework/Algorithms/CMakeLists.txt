@@ -32,6 +32,7 @@ set ( SRC_FILES
 	src/ChangeBinOffset.cpp
 	src/ChangeLogTime.cpp
 	src/ChangePulsetime.cpp
+	src/ChangeTimeZero.cpp
 	src/CheckWorkspacesMatch.cpp
 	src/ChopData.cpp
 	src/ClearInstrumentParameters.cpp
@@ -41,6 +42,7 @@ set ( SRC_FILES
 	src/ConjoinWorkspaces.cpp
 	src/ConvertAxesToRealSpace.cpp
 	src/ConvertAxisByFormula.cpp
+	src/ConvertDiffCal.cpp
 	src/ConvertEmptyToTof.cpp
 	src/ConvertFromDistribution.cpp
 	src/ConvertSpectrumAxis.cpp
@@ -250,6 +252,7 @@ set ( SRC_FILES
 	src/UnwrapMonitor.cpp
 	src/UnwrapSNS.cpp
 	src/UpdateScriptRepository.cpp
+	src/VesuvioL1ThetaResolution.cpp
 	src/WeightedMean.cpp
 	src/WeightedMeanOfWorkspace.cpp
 	src/WeightingStrategy.cpp
@@ -292,6 +295,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/ChangeBinOffset.h
 	inc/MantidAlgorithms/ChangeLogTime.h
 	inc/MantidAlgorithms/ChangePulsetime.h
+	inc/MantidAlgorithms/ChangeTimeZero.h
 	inc/MantidAlgorithms/CheckWorkspacesMatch.h
 	inc/MantidAlgorithms/ChopData.h
 	inc/MantidAlgorithms/ClearInstrumentParameters.h
@@ -301,6 +305,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/ConjoinWorkspaces.h
 	inc/MantidAlgorithms/ConvertAxesToRealSpace.h
 	inc/MantidAlgorithms/ConvertAxisByFormula.h
+	inc/MantidAlgorithms/ConvertDiffCal.h
 	inc/MantidAlgorithms/ConvertEmptyToTof.h
 	inc/MantidAlgorithms/ConvertFromDistribution.h
 	inc/MantidAlgorithms/ConvertSpectrumAxis.h
@@ -511,6 +516,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/UnwrapMonitor.h
 	inc/MantidAlgorithms/UnwrapSNS.h
 	inc/MantidAlgorithms/UpdateScriptRepository.h
+	inc/MantidAlgorithms/VesuvioL1ThetaResolution.h
 	inc/MantidAlgorithms/WeightedMean.h
 	inc/MantidAlgorithms/WeightedMeanOfWorkspace.h
 	inc/MantidAlgorithms/WeightingStrategy.h
@@ -563,6 +569,7 @@ set ( TEST_FILES
 	ChangeBinOffsetTest.h
 	ChangeLogTimeTest.h
 	ChangePulsetimeTest.h
+	ChangeTimeZeroTest.h
 	CheckWorkspacesMatchTest.h
 	ChopDataTest.h
 	ClearInstrumentParametersTest.h
@@ -572,6 +579,7 @@ set ( TEST_FILES
 	ConjoinWorkspacesTest.h
 	ConvertAxesToRealSpaceTest.h
 	ConvertAxisByFormulaTest.h
+	ConvertDiffCalTest.h
 	ConvertEmptyToTofTest.h
 	ConvertFromDistributionTest.h
 	ConvertSpectrumAxis2Test.h
@@ -646,6 +654,7 @@ set ( TEST_FILES
 	FitPeakTest.h
 	FixGSASInstrumentFileTest.h
 	FlatPlateAbsorptionTest.h
+	GeneralisedSecondDifferenceTest.h
 	GenerateEventsFilterTest.h
 	GeneratePeaksTest.h
 	GeneratePythonScriptTest.h
@@ -756,6 +765,7 @@ set ( TEST_FILES
 	UnGroupWorkspaceTest.h
 	UnaryOperationTest.h
 	UnwrapSNSTest.h
+	VesuvioL1ThetaResolutionTest.h
 	WeightedMeanOfWorkspaceTest.h
 	WeightedMeanTest.h
 	WeightingStrategyTest.h
@@ -765,6 +775,12 @@ set ( TEST_FILES
 )
 
 set ( TEST_PY_FILES NormaliseToUnityTest.py )
+
+if (COVERALLS)
+    foreach( loop_var ${SRC_FILES} ${INC_FILES})
+      set_property(GLOBAL APPEND PROPERTY COVERAGE_SRCS "${CMAKE_CURRENT_SOURCE_DIR}/${loop_var}")
+    endforeach(loop_var)
+endif()
 
 # Add a precompiled header where they are supported
 enable_precompiled_headers ( inc/MantidAlgorithms/PrecompiledHeader.h SRC_FILES )
@@ -782,7 +798,7 @@ set_property ( TARGET Algorithms PROPERTY FOLDER "MantidFramework" )
 
 include_directories ( inc )
 
-target_link_libraries ( Algorithms ${MANTIDLIBS} ${GSL_LIBRARIES} )
+target_link_libraries ( Algorithms LINK_PRIVATE ${MANTIDLIBS} ${GSL_LIBRARIES} )
 
 # Add the unit tests directory
 add_subdirectory ( test )

@@ -1,5 +1,5 @@
 #pylint: disable=invalid-name
-import refl_window
+import ui_refl_window
 import refl_save
 import refl_choose_col
 import refl_options
@@ -32,7 +32,7 @@ except ImportError:
 
 
 
-class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
+class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
 
     current_instrument = None
     current_table = None
@@ -808,6 +808,12 @@ class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
 
                                 Qmin = min(w1.readX(0))
                                 Qmax = max(w2.readX(0))
+
+                                if len(self.tableMain.item(row, i * 5 + 3).text()) > 0:
+                                    Qmin = float(self.tableMain.item(row, i * 5 + 3).text())
+
+                                if len(self.tableMain.item(row, i * 5 + 4).text()) > 0:
+                                    Qmax = float(self.tableMain.item(row, i * 5 + 4).text())
 
                                 wcomb = combineDataMulti(wksp, outputwksp, overlapLow, overlapHigh, Qmin, Qmax, -dqq, 1, keep=True)
 

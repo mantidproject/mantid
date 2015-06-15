@@ -1,7 +1,7 @@
 #ifndef MANTID_DATAOBJECTS_PEAK_H_
 #define MANTID_DATAOBJECTS_PEAK_H_
 
-#include "MantidAPI/IPeak.h"
+#include "MantidGeometry/Crystal/IPeak.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/Matrix.h"
@@ -21,7 +21,7 @@ namespace DataObjects {
  * @author Janik Zikovsky
  * @date 2011-04-15 13:24:07.963491
  */
-class DLLExport Peak : public API::IPeak {
+class DLLExport Peak : public Geometry::IPeak {
 public:
   /// Allow PeakColumn class to directly access members.
   friend class PeakColumn;
@@ -47,7 +47,7 @@ public:
 
   // Construct a peak from a reference to the interface
 
-  explicit Peak(const API::IPeak &ipeak);
+  explicit Peak(const Geometry::IPeak &ipeak);
   virtual ~Peak();
 
   void setDetectorID(int id);
@@ -146,10 +146,10 @@ private:
   Geometry::IDetector_const_sptr m_det;
 
   /// Name of the parent bank
-  std::string m_BankName;
+  std::string m_bankName;
 
   /// ID of the detector
-  int m_DetectorID;
+  int m_detectorID;
 
   /// H of the peak
   double m_H;
@@ -161,19 +161,19 @@ private:
   double m_L;
 
   /// Integrated peak intensity
-  double m_Intensity;
+  double m_intensity;
 
   /// Error (sigma) on peak intensity
-  double m_SigmaIntensity;
+  double m_sigmaIntensity;
 
   /// Count in the bin at the peak
-  double m_BinCount;
+  double m_binCount;
 
   /// Initial energy of neutrons at the peak
-  double m_InitialEnergy;
+  double m_initialEnergy;
 
   /// Final energy of the neutrons at peak (normally same as m_InitialEnergy)
-  double m_FinalEnergy;
+  double m_finalEnergy;
 
   /// Orientation matrix of the goniometer angles.
   Mantid::Kernel::Matrix<double> m_GoniometerMatrix;
@@ -183,16 +183,16 @@ private:
   Mantid::Kernel::Matrix<double> m_InverseGoniometerMatrix;
 
   /// Originating run number for this peak
-  int m_RunNumber;
+  int m_runNumber;
 
   /// Integrated monitor count over TOF range for this run
-  double m_MonitorCount;
+  double m_monitorCount;
 
   /// Cached row in the detector
-  int m_Row;
+  int m_row;
 
   /// Cached column in the detector
-  int m_Col;
+  int m_col;
 
   /// Cached source position
   Mantid::Kernel::V3D sourcePos;
@@ -202,9 +202,9 @@ private:
   Mantid::Kernel::V3D detPos;
 
   /// save values before setHKL is called for use in SortHKL
-  double orig_H;
-  double orig_K;
-  double orig_L;
+  double m_orig_H;
+  double m_orig_K;
+  double m_orig_L;
 
   /// List of contributing detectors IDs
   std::set<int> m_detIDs;

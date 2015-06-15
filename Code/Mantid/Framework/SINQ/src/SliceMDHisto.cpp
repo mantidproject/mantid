@@ -21,6 +21,8 @@ using namespace Mantid;
 // A reference to the logger is provided by the base class, it is called g_log.
 // It is used to print out information, warning and error messages
 
+SliceMDHisto::SliceMDHisto() : Mantid::API::Algorithm(), m_rank(0), m_dim() {}
+
 void SliceMDHisto::init() {
   declareProperty(new WorkspaceProperty<IMDHistoWorkspace>("InputWorkspace", "",
                                                            Direction::Input));
@@ -35,32 +37,32 @@ void SliceMDHisto::init() {
 void SliceMDHisto::exec() {
   IMDHistoWorkspace_sptr inWS =
       IMDHistoWorkspace_sptr(getProperty("InputWorkspace"));
-  rank = static_cast<unsigned int>(inWS->getNumDims());
-  for (unsigned int i = 0; i < rank; i++) {
+  m_rank = static_cast<unsigned int>(inWS->getNumDims());
+  for (unsigned int i = 0; i < m_rank; i++) {
     boost::shared_ptr<const IMDDimension> arDim = inWS->getDimension(i);
-    dim.push_back(static_cast<int>(arDim->getNBins()));
+    m_dim.push_back(static_cast<int>(arDim->getNBins()));
   }
 
   std::vector<int> start = getProperty("Start");
   std::vector<int> end = getProperty("End");
 
   // some checks
-  if (start.size() < rank || end.size() < rank) {
+  if (start.size() < m_rank || end.size() < m_rank) {
     throw std::runtime_error(
         "Start and end need to be given for each dimension of the dataset");
   }
-  for (unsigned int i = 0; i < rank; i++) {
+  for (unsigned int i = 0; i < m_rank; i++) {
     if (start[i] < 0) {
       start[i] = 0;
     }
-    if (start[i] > dim[i]) {
-      start[i] = dim[i];
+    if (start[i] > m_dim[i]) {
+      start[i] = m_dim[i];
     }
     if (end[i] < 0) {
       end[i] = 0;
     }
-    if (end[i] >= dim[i]) {
-      end[i] = dim[i];
+    if (end[i] >= m_dim[i]) {
+      end[i] = m_dim[i];
     }
     if (end[i] < start[i]) {
       throw std::runtime_error(
@@ -70,7 +72,7 @@ void SliceMDHisto::exec() {
 
   // create the new dadaset
   std::vector<MDHistoDimension_sptr> dimensions;
-  for (unsigned int k = 0; k < rank; ++k) {
+  for (unsigned int k = 0; k < m_rank; ++k) {
     boost::shared_ptr<const IMDDimension> arDim = inWS->getDimension(k);
     dimensions.push_back(MDHistoDimension_sptr(new MDHistoDimension(
         arDim->getName(), arDim->getName(), arDim->getUnits(),
@@ -78,8 +80,8 @@ void SliceMDHisto::exec() {
   }
   MDHistoWorkspace_sptr outWS(new MDHistoWorkspace(dimensions));
 
-  coord_t *sourceDim = (coord_t *)malloc(rank * sizeof(coord_t));
-  coord_t *targetDim = (coord_t *)malloc(rank * sizeof(coord_t));
+  coord_t *sourceDim = (coord_t *)malloc(m_rank * sizeof(coord_t));
+  coord_t *targetDim = (coord_t *)malloc(m_rank * sizeof(coord_t));
   cutData(inWS, outWS, sourceDim, targetDim, start, end, 0);
   free(sourceDim);
   free(targetDim);
@@ -99,7 +101,7 @@ void SliceMDHisto::cutData(Mantid::API::IMDHistoWorkspace_sptr inWS,
   boost::shared_ptr<const IMDDimension> inDim = inWS->getDimension(dim);
   boost::shared_ptr<const IMDDimension> outDim = outWS->getDimension(dim);
   length = end[dim] - start[dim];
-  if (dim == rank - 1) {
+  if (dim == m_rank - 1) {
     MDHistoWorkspace_sptr outWSS =
         boost::dynamic_pointer_cast<MDHistoWorkspace>(outWS);
     for (int i = 0; i < length; i++) {

@@ -4,7 +4,7 @@
 #include <boost/math/special_functions/fpclassify.hpp>
 #include "MantidAPI/Workspace.h"
 #include "MantidAPI/IPeaksWorkspace.h"
-#include "MantidAPI/IPeak.h"
+#include "MantidGeometry/Crystal/IPeak.h"
 #include "MantidGeometry/Crystal/PeakShape.h"
 #include "MantidDataObjects/PeakShapeSpherical.h"
 #include "MantidDataObjects/PeakShapeEllipsoid.h"
@@ -32,7 +32,7 @@
 #include <cmath>
 
 using Mantid::API::IPeaksWorkspace;
-using Mantid::API::IPeak;
+using Mantid::Geometry::IPeak;
 using Mantid::Kernel::V3D;
 
 namespace Mantid

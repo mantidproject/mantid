@@ -276,7 +276,11 @@ ChopperConfiguration::parseStringUnsignedInt(const string &instring) const {
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
-SaveGSASInstrumentFile::SaveGSASInstrumentFile() {}
+SaveGSASInstrumentFile::SaveGSASInstrumentFile()
+    : API::Algorithm(), m_instrument(), m_L1(0.), m_L2(0.), m_2theta(0.),
+      m_frequency(0), m_id_line(), m_sample(), m_vecBankID2File(),
+      m_gsasFileName(), m_configuration(), m_profileMap(), m_gdsp(), m_gdt(),
+      m_galpha(), m_gbeta(), m_bank_mndsp(), m_bank_mxtof() {}
 
 //----------------------------------------------------------------------------------------------
 /** Destructor

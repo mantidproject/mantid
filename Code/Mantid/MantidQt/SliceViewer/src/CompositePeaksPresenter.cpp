@@ -2,7 +2,7 @@
 #include "MantidAPI/IPeaksWorkspace.h"
 #include <stdexcept>
 
-using Mantid::API::PeakTransform_sptr;
+using Mantid::Geometry::PeakTransform_sptr;
 
 namespace MantidQt {
 namespace SliceViewer {
@@ -13,7 +13,7 @@ CompositePeaksPresenter::CompositePeaksPresenter(
     ZoomablePeaksView *const zoomablePlottingWidget,
     PeaksPresenter_sptr defaultPresenter)
     : m_zoomablePlottingWidget(zoomablePlottingWidget),
-      m_default(defaultPresenter), m_owner(NULL), m_zoomedPeakIndex(-1) {
+      m_default(defaultPresenter), m_owner(NULL), m_zoomedPeakIndex(-1){
   if (m_zoomablePlottingWidget == NULL) {
     throw std::runtime_error("Zoomable Plotting Widget is NULL");
   }
@@ -384,6 +384,20 @@ void CompositePeaksPresenter::setPeakSizeOnProjection(const double fraction) {
 }
 
 /**
+ * Enter a peak edit mode
+ * @param mode : Mode to enter.
+ */
+void CompositePeaksPresenter::peakEditMode(EditMode mode) {
+    if (useDefault()) {
+      return m_default->peakEditMode(mode);
+    }
+    for (auto presenterIterator = m_subjects.begin();
+         presenterIterator != m_subjects.end(); ++presenterIterator) {
+      (*presenterIterator)->peakEditMode(mode);
+    }
+}
+
+/**
  * Fraction of the z-range to use as the peak radius.
  * @param fraction to use as the peak radius
  */
@@ -605,7 +619,27 @@ CompositePeaksPresenter::getZoomedPeakPresenter() const {
  * @return a zoomed peak index.
  */
 int CompositePeaksPresenter::getZoomedPeakIndex() const {
-  return m_zoomedPeakIndex;
+    return m_zoomedPeakIndex;
+}
+
+void CompositePeaksPresenter::editCommand(
+    EditMode editMode,
+    boost::weak_ptr<const Mantid::API::IPeaksWorkspace> target) {
+  if (auto ws = target.lock()) {
+
+    // Change the right subject to the desired edit mode.
+    auto targetIterator = this->getPresenterIteratorFromWorkspace(ws);
+    if (targetIterator != m_subjects.end()) {
+      (*targetIterator)->peakEditMode(editMode);
+    }
+    // Reset everything else.
+    for (auto it = m_subjects.begin(); it != m_subjects.end(); ++it) {
+      if (it != targetIterator) {
+        // All other subjects must be in a neutral edit mode.
+        (*it)->peakEditMode(None);
+      }
+    }
+  }
 }
 
 void CompositePeaksPresenter::updatePeaksWorkspace(
@@ -651,5 +685,55 @@ void CompositePeaksPresenter::notifyWorkspaceChanged(
     }
   }
 }
+
+bool CompositePeaksPresenter::deletePeaksIn(PeakBoundingBox box){
+    if (useDefault()) {
+      return m_default->deletePeaksIn(box);
+    }
+    // Forward the request onwards
+    bool result = false;
+    for (auto it = m_subjects.begin(); it != m_subjects.end(); ++it) {
+      result |= (*it)->deletePeaksIn(box);
+    }
+    return result;
+}
+
+bool CompositePeaksPresenter::hasPeakAddModeFor(boost::weak_ptr<const Mantid::API::IPeaksWorkspace> target){
+    bool hasMode  = false;
+    if(auto temp = target.lock()) {
+        auto it = this->getPresenterIteratorFromWorkspace(temp);
+        if(it != m_subjects.end()) {
+            hasMode = (*it)->hasPeakAddMode();
+        }
+    }
+    return hasMode;
+}
+
+bool CompositePeaksPresenter::hasPeakAddMode() const{
+    if (useDefault()) {
+      return m_default->hasPeakAddMode();
+    }
+    // Forward the request onwards
+    bool hasMode = false;
+    for (auto it = m_subjects.begin(); it != m_subjects.end(); ++it) {
+      hasMode |= (*it)->hasPeakAddMode();
+    }
+    return hasMode;
+}
+
+bool CompositePeaksPresenter::addPeakAt(double plotCoordsPointX, double plotCoordsPointY)
+{
+    if (useDefault()) {
+      return m_default->addPeakAt(plotCoordsPointX, plotCoordsPointY);
+    }
+    // Forward the request onwards
+    bool result = false;
+    for (auto it = m_subjects.begin(); it != m_subjects.end(); ++it) {
+      result |= (*it)->addPeakAt(plotCoordsPointX, plotCoordsPointY);
+    }
+    return result;
+}
+
 }
 }
+

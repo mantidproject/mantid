@@ -201,7 +201,6 @@ set ( MANTID_SRCS  src/Mantid/AlgorithmMonitor.cpp
                    src/Mantid/InstrumentWidget/GLColor.cpp
                    src/Mantid/InstrumentWidget/GLObject.cpp
                    src/Mantid/InstrumentWidget/ICompAssemblyActor.cpp
-                   src/Mantid/InstrumentWidget/InputController.cpp
                    src/Mantid/InstrumentWidget/InstrumentActor.cpp
                    src/Mantid/InstrumentWidget/InstrumentTreeModel.cpp
                    src/Mantid/InstrumentWidget/InstrumentTreeWidget.cpp
@@ -438,7 +437,6 @@ set ( MANTID_HDRS  src/Mantid/AlgorithmMonitor.h
                    src/Mantid/InstrumentWidget/GLColor.h
                    src/Mantid/InstrumentWidget/GLObject.h
                    src/Mantid/InstrumentWidget/ICompAssemblyActor.h
-                   src/Mantid/InstrumentWidget/InputController.h
                    src/Mantid/InstrumentWidget/InstrumentActor.h
                    src/Mantid/InstrumentWidget/InstrumentTreeModel.h
                    src/Mantid/InstrumentWidget/InstrumentTreeWidget.h
@@ -701,7 +699,6 @@ set ( MANTID_MOC_FILES src/Mantid/AlgorithmMonitor.h
                        src/Mantid/UserFitFunctionDialog.h
                        src/Mantid/InstrumentWidget/XIntegrationControl.h
                        src/Mantid/InstrumentWidget/BinDialog.h
-                       src/Mantid/InstrumentWidget/InputController.h
                        src/Mantid/InstrumentWidget/InstrumentTreeModel.h
                        src/Mantid/InstrumentWidget/InstrumentTreeWidget.h
                        src/Mantid/InstrumentWidget/InstrumentWindow.h
@@ -880,18 +877,33 @@ add_executable ( MantidPlot ${WIN_CONSOLE} MACOSX_BUNDLE ${ALL_SRC} src/main.cpp
 )
 
 # Library dependencies
-target_link_libraries ( MantidPlot
-                        ${CORE_MANTIDLIBS}
-                        MantidQtAPI MantidWidgets MantidQtSliceViewer MantidQtFactory
-                        MantidQtSpectrumViewer
-                        QtPropertyBrowser ${QT_LIBRARIES}
-                        ${QWT_LIBRARIES} ${QWTPLOT3D_LIBRARIES}
-                        ${QSCINTILLA_LIBRARIES}
-                        ${PYTHON_LIBRARIES}
-                        ${ZLIB_LIBRARIES}
+target_link_libraries ( MantidPlot LINK_PRIVATE 
+            ${CORE_MANTIDLIBS}
+            MantidQtAPI
+            MantidWidgets
+            MantidQtSliceViewer
+            MantidQtFactory
+            MantidQtSpectrumViewer
+            QtPropertyBrowser
+            ${Boost_LIBRARIES}
+            ${POCO_LIBRARIES}
+            ${GSL_LIBRARIES}
+            ${MUPARSER_LIBRARIES}
+            ${QT_LIBRARIES}
+            ${QWT_LIBRARIES}
+            ${QWTPLOT3D_LIBRARIES}
+            ${QSCINTILLA_LIBRARIES}
+            ${PYTHON_LIBRARIES}
+            ${ZLIB_LIBRARIES}
+            ${OPENGL_LIBRARIES}
 )
+
+if (WITH_ASAN)
+  target_link_libraries ( MantidPlot LINK_PRIVATE -lasan )
+endif ()
+
 # Plugin dependencies
-add_dependencies( MantidPlot mantidqtpython )
+add_dependencies( MantidPlot mantidqtpython CompilePyUI )
 
 if (OSX_VERSION VERSION_GREATER 10.8)
   set_target_properties(MantidPlot PROPERTIES INSTALL_RPATH "@executable_path/")

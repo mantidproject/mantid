@@ -19,10 +19,12 @@ namespace DataObjects {
 //----------------------------------------------------------------------------------------------
 /** Default constructor */
 Peak::Peak()
-    : m_H(0), m_K(0), m_L(0), m_Intensity(0), m_SigmaIntensity(0),
-      m_BinCount(0), m_GoniometerMatrix(3, 3, true),
-      m_InverseGoniometerMatrix(3, 3, true), m_RunNumber(0), m_MonitorCount(0),
-      orig_H(0), orig_K(0), orig_L(0), m_peakShape(new NoShape) {}
+    : m_detectorID(-1), m_H(0), m_K(0), m_L(0), m_intensity(0),
+      m_sigmaIntensity(0), m_binCount(0), m_initialEnergy(0.),
+      m_finalEnergy(0.), m_GoniometerMatrix(3, 3, true),
+      m_InverseGoniometerMatrix(3, 3, true), m_runNumber(0), m_monitorCount(0),
+      m_row(-1), m_col(-1), m_orig_H(0), m_orig_K(0), m_orig_L(0),
+      m_peakShape(new NoShape) {}
 
 //----------------------------------------------------------------------------------------------
 /** Constructor that uses the Q position of the peak (in the lab frame).
@@ -30,15 +32,17 @@ Peak::Peak()
  *
  * @param m_inst :: Shared pointer to the instrument for this peak detection
  * @param QLabFrame :: Q of the center of the peak, in reciprocal space
- * @param detectorDistance :: Optional distance between the sample and the detector. Calculated if not explicitly provided.
+ * @param detectorDistance :: Optional distance between the sample and the
+ *detector. Calculated if not explicitly provided.
  *        Used to give a valid TOF. Default 1.0 meters.
  */
 Peak::Peak(Geometry::Instrument_const_sptr m_inst,
-           Mantid::Kernel::V3D QLabFrame, boost::optional<double> detectorDistance)
-    : m_H(0), m_K(0), m_L(0), m_Intensity(0), m_SigmaIntensity(0),
-      m_BinCount(0), m_GoniometerMatrix(3, 3, true),
-      m_InverseGoniometerMatrix(3, 3, true), m_RunNumber(0), m_MonitorCount(0),
-      orig_H(0), orig_K(0), orig_L(0), m_peakShape(new NoShape) {
+           Mantid::Kernel::V3D QLabFrame,
+           boost::optional<double> detectorDistance)
+    : m_H(0), m_K(0), m_L(0), m_intensity(0), m_sigmaIntensity(0),
+      m_binCount(0), m_GoniometerMatrix(3, 3, true),
+      m_InverseGoniometerMatrix(3, 3, true), m_runNumber(0), m_monitorCount(0),
+      m_orig_H(0), m_orig_K(0), m_orig_L(0), m_peakShape(new NoShape) {
   this->setInstrument(m_inst);
   this->setQLabFrame(QLabFrame, detectorDistance);
 }
@@ -52,16 +56,18 @@ Peak::Peak(Geometry::Instrument_const_sptr m_inst,
  * @param QSampleFrame :: Q of the center of the peak, in reciprocal space, in
  *the sample frame (goniometer rotation accounted for).
  * @param goniometer :: a 3x3 rotation matrix
- * @param detectorDistance :: Optional distance between the sample and the detector. Calculated if not explicitly provided.
+ * @param detectorDistance :: Optional distance between the sample and the
+ *detector. Calculated if not explicitly provided.
  *        Used to give a valid TOF. Default 1.0 meters.
  */
 Peak::Peak(Geometry::Instrument_const_sptr m_inst,
            Mantid::Kernel::V3D QSampleFrame,
-           Mantid::Kernel::Matrix<double> goniometer, boost::optional<double> detectorDistance)
-    : m_H(0), m_K(0), m_L(0), m_Intensity(0), m_SigmaIntensity(0),
-      m_BinCount(0), m_GoniometerMatrix(goniometer),
-      m_InverseGoniometerMatrix(goniometer), m_RunNumber(0), m_MonitorCount(0),
-      orig_H(0), orig_K(0), orig_L(0), m_peakShape(new NoShape) {
+           Mantid::Kernel::Matrix<double> goniometer,
+           boost::optional<double> detectorDistance)
+    : m_H(0), m_K(0), m_L(0), m_intensity(0), m_sigmaIntensity(0),
+      m_binCount(0), m_GoniometerMatrix(goniometer),
+      m_InverseGoniometerMatrix(goniometer), m_runNumber(0), m_monitorCount(0),
+      m_orig_H(0), m_orig_K(0), m_orig_L(0), m_peakShape(new NoShape) {
   if (fabs(m_InverseGoniometerMatrix.Invert()) < 1e-8)
     throw std::invalid_argument(
         "Peak::ctor(): Goniometer matrix must non-singular.");
@@ -73,18 +79,18 @@ Peak::Peak(Geometry::Instrument_const_sptr m_inst,
 /** Constructor
  *
  * @param m_inst :: Shared pointer to the instrument for this peak detection
- * @param m_DetectorID :: ID to the detector of the center of the peak
+ * @param m_detectorID :: ID to the detector of the center of the peak
  * @param m_Wavelength :: incident neutron wavelength, in Angstroms
  * @return
  */
-Peak::Peak(Geometry::Instrument_const_sptr m_inst, int m_DetectorID,
+Peak::Peak(Geometry::Instrument_const_sptr m_inst, int m_detectorID,
            double m_Wavelength)
-    : m_H(0), m_K(0), m_L(0), m_Intensity(0), m_SigmaIntensity(0),
-      m_BinCount(0), m_GoniometerMatrix(3, 3, true),
-      m_InverseGoniometerMatrix(3, 3, true), m_RunNumber(0), m_MonitorCount(0),
-      orig_H(0), orig_K(0), orig_L(0), m_peakShape(new NoShape) {
+    : m_H(0), m_K(0), m_L(0), m_intensity(0), m_sigmaIntensity(0),
+      m_binCount(0), m_GoniometerMatrix(3, 3, true),
+      m_InverseGoniometerMatrix(3, 3, true), m_runNumber(0), m_monitorCount(0),
+      m_orig_H(0), m_orig_K(0), m_orig_L(0), m_peakShape(new NoShape) {
   this->setInstrument(m_inst);
-  this->setDetectorID(m_DetectorID);
+  this->setDetectorID(m_detectorID);
   this->setWavelength(m_Wavelength);
 }
 
@@ -92,19 +98,19 @@ Peak::Peak(Geometry::Instrument_const_sptr m_inst, int m_DetectorID,
 /** Constructor
  *
  * @param m_inst :: Shared pointer to the instrument for this peak detection
- * @param m_DetectorID :: ID to the detector of the center of the peak
+ * @param m_detectorID :: ID to the detector of the center of the peak
  * @param m_Wavelength :: incident neutron wavelength, in Angstroms
  * @param HKL :: vector with H,K,L position of the peak
  * @return
  */
-Peak::Peak(Geometry::Instrument_const_sptr m_inst, int m_DetectorID,
+Peak::Peak(Geometry::Instrument_const_sptr m_inst, int m_detectorID,
            double m_Wavelength, Mantid::Kernel::V3D HKL)
-    : m_H(HKL[0]), m_K(HKL[1]), m_L(HKL[2]), m_Intensity(0),
-      m_SigmaIntensity(0), m_BinCount(0), m_GoniometerMatrix(3, 3, true),
-      m_InverseGoniometerMatrix(3, 3, true), m_RunNumber(0), m_MonitorCount(0),
-      orig_H(0), orig_K(0), orig_L(0), m_peakShape(new NoShape) {
+    : m_H(HKL[0]), m_K(HKL[1]), m_L(HKL[2]), m_intensity(0),
+      m_sigmaIntensity(0), m_binCount(0), m_GoniometerMatrix(3, 3, true),
+      m_InverseGoniometerMatrix(3, 3, true), m_runNumber(0), m_monitorCount(0),
+      m_orig_H(0), m_orig_K(0), m_orig_L(0), m_peakShape(new NoShape) {
   this->setInstrument(m_inst);
-  this->setDetectorID(m_DetectorID);
+  this->setDetectorID(m_detectorID);
   this->setWavelength(m_Wavelength);
 }
 
@@ -112,24 +118,24 @@ Peak::Peak(Geometry::Instrument_const_sptr m_inst, int m_DetectorID,
 /** Constructor
  *
  * @param m_inst :: Shared pointer to the instrument for this peak detection
- * @param m_DetectorID :: ID to the detector of the center of the peak
+ * @param m_detectorID :: ID to the detector of the center of the peak
  * @param m_Wavelength :: incident neutron wavelength, in Angstroms
  * @param HKL :: vector with H,K,L position of the peak
  * @param goniometer :: a 3x3 rotation matrix
  * @return
  */
-Peak::Peak(Geometry::Instrument_const_sptr m_inst, int m_DetectorID,
+Peak::Peak(Geometry::Instrument_const_sptr m_inst, int m_detectorID,
            double m_Wavelength, Mantid::Kernel::V3D HKL,
            Mantid::Kernel::Matrix<double> goniometer)
-    : m_H(HKL[0]), m_K(HKL[1]), m_L(HKL[2]), m_Intensity(0),
-      m_SigmaIntensity(0), m_BinCount(0), m_GoniometerMatrix(goniometer),
-      m_InverseGoniometerMatrix(goniometer), m_RunNumber(0), m_MonitorCount(0),
-      orig_H(0), orig_K(0), orig_L(0), m_peakShape(new NoShape) {
+    : m_H(HKL[0]), m_K(HKL[1]), m_L(HKL[2]), m_intensity(0),
+      m_sigmaIntensity(0), m_binCount(0), m_GoniometerMatrix(goniometer),
+      m_InverseGoniometerMatrix(goniometer), m_runNumber(0), m_monitorCount(0),
+      m_orig_H(0), m_orig_K(0), m_orig_L(0), m_peakShape(new NoShape) {
   if (fabs(m_InverseGoniometerMatrix.Invert()) < 1e-8)
     throw std::invalid_argument(
         "Peak::ctor(): Goniometer matrix must non-singular.");
   this->setInstrument(m_inst);
-  this->setDetectorID(m_DetectorID);
+  this->setDetectorID(m_detectorID);
   this->setWavelength(m_Wavelength);
 }
 //----------------------------------------------------------------------------------------------
@@ -142,13 +148,14 @@ Peak::Peak(Geometry::Instrument_const_sptr m_inst, int m_DetectorID,
  */
 Peak::Peak(Geometry::Instrument_const_sptr m_inst, double scattering,
            double m_Wavelength)
-    : m_H(0), m_K(0), m_L(0), m_Intensity(0), m_SigmaIntensity(0),
-      m_BinCount(0), m_GoniometerMatrix(3, 3, true),
-      m_InverseGoniometerMatrix(3, 3, true), m_RunNumber(0), m_MonitorCount(0),
-      orig_H(0), orig_K(0), orig_L(0), m_peakShape(new NoShape) {
+    : m_H(0), m_K(0), m_L(0), m_intensity(0), m_sigmaIntensity(0),
+      m_binCount(0), m_GoniometerMatrix(3, 3, true),
+      m_InverseGoniometerMatrix(3, 3, true), m_runNumber(0), m_monitorCount(0),
+      m_row(-1), m_col(-1), m_orig_H(0), m_orig_K(0), m_orig_L(0),
+      m_peakShape(new NoShape) {
   this->setInstrument(m_inst);
   this->setWavelength(m_Wavelength);
-  m_DetectorID = -1;
+  m_detectorID = -1;
   detPos = V3D(sin(scattering), 0.0, cos(scattering));
 }
 
@@ -158,22 +165,22 @@ Peak::Peak(Geometry::Instrument_const_sptr m_inst, double scattering,
  * @return
  */
 Peak::Peak(const Peak &other)
-    : m_inst(other.m_inst), m_det(other.m_det), m_BankName(other.m_BankName),
-      m_DetectorID(other.m_DetectorID), m_H(other.m_H), m_K(other.m_K),
-      m_L(other.m_L), m_Intensity(other.m_Intensity),
-      m_SigmaIntensity(other.m_SigmaIntensity), m_BinCount(other.m_BinCount),
-      m_InitialEnergy(other.m_InitialEnergy),
-      m_FinalEnergy(other.m_FinalEnergy),
+    : m_inst(other.m_inst), m_det(other.m_det), m_bankName(other.m_bankName),
+      m_detectorID(other.m_detectorID), m_H(other.m_H), m_K(other.m_K),
+      m_L(other.m_L), m_intensity(other.m_intensity),
+      m_sigmaIntensity(other.m_sigmaIntensity), m_binCount(other.m_binCount),
+      m_initialEnergy(other.m_initialEnergy),
+      m_finalEnergy(other.m_finalEnergy),
       m_GoniometerMatrix(other.m_GoniometerMatrix),
       m_InverseGoniometerMatrix(other.m_InverseGoniometerMatrix),
-      m_RunNumber(other.m_RunNumber), m_MonitorCount(other.m_MonitorCount),
-      m_Row(other.m_Row), m_Col(other.m_Col), sourcePos(other.sourcePos),
-      samplePos(other.samplePos), detPos(other.detPos), orig_H(other.orig_H),
-      orig_K(other.orig_K), orig_L(other.orig_L), m_detIDs(other.m_detIDs),
+      m_runNumber(other.m_runNumber), m_monitorCount(other.m_monitorCount),
+      m_row(other.m_row), m_col(other.m_col), sourcePos(other.sourcePos),
+      samplePos(other.samplePos), detPos(other.detPos),
+      m_orig_H(other.m_orig_H), m_orig_K(other.m_orig_K),
+      m_orig_L(other.m_orig_L), m_detIDs(other.m_detIDs),
       m_peakShape(other.m_peakShape->clone())
 
-{
-}
+{}
 
 //----------------------------------------------------------------------------------------------
 /** Constructor making a Peak from IPeak interface
@@ -181,19 +188,19 @@ Peak::Peak(const Peak &other)
  * @param ipeak :: const reference to an IPeak object
  * @return
  */
-Peak::Peak(const API::IPeak &ipeak)
-    : IPeak(ipeak), m_H(ipeak.getH()), m_K(ipeak.getK()), m_L(ipeak.getL()),
-      m_Intensity(ipeak.getIntensity()),
-      m_SigmaIntensity(ipeak.getSigmaIntensity()),
-      m_BinCount(ipeak.getBinCount()),
-      m_InitialEnergy(ipeak.getInitialEnergy()),
-      m_FinalEnergy(ipeak.getFinalEnergy()),
+Peak::Peak(const Geometry::IPeak &ipeak)
+    : IPeak(ipeak), m_detectorID(ipeak.getDetectorID()), m_H(ipeak.getH()),
+      m_K(ipeak.getK()), m_L(ipeak.getL()), m_intensity(ipeak.getIntensity()),
+      m_sigmaIntensity(ipeak.getSigmaIntensity()),
+      m_binCount(ipeak.getBinCount()),
+      m_initialEnergy(ipeak.getInitialEnergy()),
+      m_finalEnergy(ipeak.getFinalEnergy()),
       m_GoniometerMatrix(ipeak.getGoniometerMatrix()),
       m_InverseGoniometerMatrix(ipeak.getGoniometerMatrix()),
-      m_RunNumber(ipeak.getRunNumber()),
-      m_MonitorCount(ipeak.getMonitorCount()),
-      m_peakShape(new NoShape)
-{
+      m_runNumber(ipeak.getRunNumber()),
+      m_monitorCount(ipeak.getMonitorCount()), m_row(ipeak.getRow()),
+      m_col(ipeak.getCol()), m_orig_H(0.), m_orig_K(0.), m_orig_L(0.),
+      m_peakShape(new NoShape) {
   if (fabs(m_InverseGoniometerMatrix.Invert()) < 1e-8)
     throw std::invalid_argument(
         "Peak::ctor(): Goniometer matrix must non-singular.");
@@ -225,8 +232,8 @@ void Peak::setWavelength(double wavelength) {
   // Energy in J of the neutron
   double energy = PhysicalConstants::NeutronMass * velocity * velocity / 2.0;
   // Convert to meV
-  m_InitialEnergy = energy / PhysicalConstants::meV;
-  m_FinalEnergy = m_InitialEnergy;
+  m_initialEnergy = energy / PhysicalConstants::meV;
+  m_finalEnergy = m_initialEnergy;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -244,29 +251,29 @@ void Peak::setDetectorID(int id) {
   if (!m_det)
     throw std::runtime_error("Peak::setInstrument(): No detector was found!");
 
-  this->m_DetectorID = id;
+  this->m_detectorID = id;
   addContributingDetID(id);
 
   detPos = m_det->getPos();
 
   // We now look for the row/column. -1 if not found.
-  m_Row = -1;
-  m_Col = -1;
+  m_row = -1;
+  m_col = -1;
 
   // Go up 2 parents to find the bank/rectangular detector
   IComponent_const_sptr parent = m_det->getParent();
 
   // Find the ROW by looking at the string name of the pixel. E.g. "pixel12"
   // gives row 12.
-  m_Row = Strings::endsWithInt(m_det->getName());
+  m_row = Strings::endsWithInt(m_det->getName());
 
   if (!parent)
     return;
-  m_BankName = parent->getName();
+  m_bankName = parent->getName();
 
   // Find the COLUMN by looking at the string name of the parent. E.g. "tube003"
   // gives column 3.
-  m_Col = Strings::endsWithInt(parent->getName());
+  m_col = Strings::endsWithInt(parent->getName());
 
   parent = parent->getParent();
   // Use the parent if there is no grandparent.
@@ -279,21 +286,21 @@ void Peak::setDetectorID(int id) {
   if (instrument)
     return;
   // Use the grand-parent whenever possible
-  m_BankName = parent->getName();
+  m_bankName = parent->getName();
 
   // Special for rectangular detectors: find the row and column.
   RectangularDetector_const_sptr retDet =
       boost::dynamic_pointer_cast<const RectangularDetector>(parent);
   if (!retDet)
     return;
-  std::pair<int, int> xy = retDet->getXYForDetectorID(m_DetectorID);
-  m_Row = xy.second;
-  m_Col = xy.first;
+  std::pair<int, int> xy = retDet->getXYForDetectorID(m_detectorID);
+  m_row = xy.second;
+  m_col = xy.first;
 }
 
 //----------------------------------------------------------------------------------------------
 /** Get the ID of the detector at the center of the peak  */
-int Peak::getDetectorID() const { return m_DetectorID; }
+int Peak::getDetectorID() const { return m_detectorID; }
 
 //----------------------------------------------------------------------------------------------
 /**
@@ -356,7 +363,7 @@ Geometry::Instrument_const_sptr Peak::getInstrument() const { return m_inst; }
  * final energy)*/
 double Peak::getWavelength() const {
   // Energy in J of the neutron
-  double energy = PhysicalConstants::meV * m_FinalEnergy;
+  double energy = PhysicalConstants::meV * m_finalEnergy;
   // v = sqrt(2.0 * E / m)
   double velocity = sqrt(2.0 * energy / PhysicalConstants::NeutronMass);
   // wavelength = h / mv
@@ -375,8 +382,8 @@ double Peak::getTOF() const {
   double L1 = this->getL1();
   double L2 = this->getL2();
   // Energy in J of the neutron
-  double Ei = PhysicalConstants::meV * m_InitialEnergy;
-  double Ef = PhysicalConstants::meV * m_FinalEnergy;
+  double Ei = PhysicalConstants::meV * m_initialEnergy;
+  double Ef = PhysicalConstants::meV * m_finalEnergy;
   // v = sqrt(2 * E / m)
   double vi = sqrt(2.0 * Ei / PhysicalConstants::NeutronMass);
   double vf = sqrt(2.0 * Ef / PhysicalConstants::NeutronMass);
@@ -409,8 +416,8 @@ double Peak::getDSpacing() const {
   // E_i,f=k_i,f^2*hbar^2/(2 m)
   return 1e10 * PhysicalConstants::h /
          sqrt(2.0 * PhysicalConstants::NeutronMass * PhysicalConstants::meV) /
-         sqrt(m_InitialEnergy + m_FinalEnergy -
-              2.0 * sqrt(m_InitialEnergy * m_FinalEnergy) * cos(two_theta));
+         sqrt(m_initialEnergy + m_finalEnergy -
+              2.0 * sqrt(m_initialEnergy * m_finalEnergy) * cos(two_theta));
 }
 
 //----------------------------------------------------------------------------------------------
@@ -428,7 +435,7 @@ Mantid::Kernel::V3D Peak::getQLabFrame() const {
   detDir /= detDir.norm();
 
   // Energy in J of the neutron
-  double ei = PhysicalConstants::meV * m_InitialEnergy;
+  double ei = PhysicalConstants::meV * m_initialEnergy;
   // v = sqrt(2.0 * E / m)
   double vi = sqrt(2.0 * ei / PhysicalConstants::NeutronMass);
   // wavenumber = h_bar / mv
@@ -484,40 +491,43 @@ void Peak::setQSampleFrame(Mantid::Kernel::V3D QSampleFrame,
  *        This is in inelastic convention: momentum transfer of the LATTICE!
  *        Also, q does have a 2pi factor = it is equal to 2pi/wavelength (in
  *Angstroms).
- * @param detectorDistance :: distance between the sample and the detector. If this is provided. Then we do not
+ * @param detectorDistance :: distance between the sample and the detector. If
+ *this is provided. Then we do not
  * ray trace to find the intersecing detector.
  */
 void Peak::setQLabFrame(Mantid::Kernel::V3D QLabFrame,
                         boost::optional<double> detectorDistance) {
   // Clear out the detector = we can't know them
-  m_DetectorID = -1;
+  m_detectorID = -1;
   m_det = IDetector_sptr();
-  m_Row = -1;
-  m_Col = -1;
-  m_BankName = "None";
-
+  m_row = -1;
+  m_col = -1;
+  m_bankName = "None";
 
   // The q-vector direction of the peak is = goniometer * ub * hkl_vector
   V3D q = QLabFrame;
 
-  /* The incident neutron wavevector is along the beam direction, ki = 1/wl (usually z, but referenceframe is definitive).
+  /* The incident neutron wavevector is along the beam direction, ki = 1/wl
+   * (usually z, but referenceframe is definitive).
    * In the inelastic convention, q = ki - kf.
-   * The final neutron wavector kf = -qx in x; -qy in y; and (-q.beam_dir+1/wl) in beam direction.
+   * The final neutron wavector kf = -qx in x; -qy in y; and (-q.beam_dir+1/wl)
+   * in beam direction.
    * AND: norm(kf) = norm(ki) = 2*pi/wavelength
    * THEREFORE: 1/wl = norm(q)^2 / (2*q.beam_dir)
    */
   double norm_q = q.norm();
-  if(!this->m_inst)
-  {
-      throw std::invalid_argument("Setting QLab without an instrument would lead to an inconsistent state for the Peak");
+  if (!this->m_inst) {
+    throw std::invalid_argument("Setting QLab without an instrument would lead "
+                                "to an inconsistent state for the Peak");
   }
-  boost::shared_ptr<const ReferenceFrame> refFrame = this->m_inst->getReferenceFrame();
+  boost::shared_ptr<const ReferenceFrame> refFrame =
+      this->m_inst->getReferenceFrame();
   const V3D refBeamDir = refFrame->vecPointingAlongBeam();
   const double qBeam = q.scalar_prod(refBeamDir);
 
   if (norm_q == 0.0)
     throw std::invalid_argument("Peak::setQLabFrame(): Q cannot be 0,0,0.");
-  if ( qBeam == 0.0)
+  if (qBeam == 0.0)
     throw std::invalid_argument(
         "Peak::setQLabFrame(): Q cannot be 0 in the beam direction.");
 
@@ -530,7 +540,6 @@ void Peak::setQLabFrame(Mantid::Kernel::V3D QLabFrame,
     throw std::invalid_argument(mess.str());
   }
 
-
   // Save the wavelength
   this->setWavelength(wl);
 
@@ -539,20 +548,19 @@ void Peak::setQLabFrame(Mantid::Kernel::V3D QLabFrame,
   detectorDir.normalize();
 
   // Use the given detector distance to find the detector position.
-  if(detectorDistance.is_initialized())
-  {
-      detPos = samplePos + detectorDir * detectorDistance.get();
-      // We do not-update the detector as by manually setting the distance the client seems to know better.
-  }
-  else
-  {
-      // Find the detector
-      const bool found = findDetector(detectorDir);
-      if (!found)
-      {
-          // This is important, so we ought to log when this fails to happen.
-          g_log.debug("Could not find detector after setting qLab via setQLab with QLab : " + q.toString());
-      }
+  if (detectorDistance.is_initialized()) {
+    detPos = samplePos + detectorDir * detectorDistance.get();
+    // We do not-update the detector as by manually setting the distance the
+    // client seems to know better.
+  } else {
+    // Find the detector
+    const bool found = findDetector(detectorDir);
+    if (!found) {
+      // This is important, so we ought to log when this fails to happen.
+      g_log.debug("Could not find detector after setting qLab via setQLab with "
+                  "QLab : " +
+                  q.toString());
+    }
   }
 }
 
@@ -576,12 +584,13 @@ bool Peak::findDetector() {
 }
 
 /**
- * @brief Peak::findDetector : Find the detector along the beam location. sets the detector, and detector position if found
+ * @brief Peak::findDetector : Find the detector along the beam location. sets
+ * the detector, and detector position if found
  * @param beam : detector direction from the sample as V3D
  * @return True if a detector has been found
  */
 bool Peak::findDetector(const Mantid::Kernel::V3D &beam) {
-    bool found = false;
+  bool found = false;
   // Create a ray tracer
   InstrumentRayTracer tracker(m_inst);
   tracker.traceFromSample(beam);
@@ -627,28 +636,28 @@ bool Peak::findDetector(const Mantid::Kernel::V3D &beam) {
 
 //----------------------------------------------------------------------------------------------
 /** Return the run number this peak was measured at. */
-int Peak::getRunNumber() const { return m_RunNumber; }
+int Peak::getRunNumber() const { return m_runNumber; }
 
 /** Set the run number that measured this peak
- * @param m_RunNumber :: the run number   */
-void Peak::setRunNumber(int m_RunNumber) { this->m_RunNumber = m_RunNumber; }
+ * @param m_runNumber :: the run number   */
+void Peak::setRunNumber(int m_runNumber) { this->m_runNumber = m_runNumber; }
 
 //----------------------------------------------------------------------------------------------
 /** Return the monitor count stored in this peak. */
-double Peak::getMonitorCount() const { return m_MonitorCount; }
+double Peak::getMonitorCount() const { return m_monitorCount; }
 
 /** Set the monitor count for this peak
- * @param m_MonitorCount :: the monitor count */
-void Peak::setMonitorCount(double m_MonitorCount) {
-  this->m_MonitorCount = m_MonitorCount;
+ * @param m_monitorCount :: the monitor count */
+void Peak::setMonitorCount(double m_monitorCount) {
+  this->m_monitorCount = m_monitorCount;
 }
 
 //----------------------------------------------------------------------------------------------
 /** Get the final neutron energy */
-double Peak::getFinalEnergy() const { return m_FinalEnergy; }
+double Peak::getFinalEnergy() const { return m_finalEnergy; }
 
 /** Get the initial (incident) neutron energy */
-double Peak::getInitialEnergy() const { return m_InitialEnergy; }
+double Peak::getInitialEnergy() const { return m_initialEnergy; }
 
 //----------------------------------------------------------------------------------------------
 /** Get the H index of the peak */
@@ -677,17 +686,17 @@ void Peak::setK(double m_K) { this->m_K = m_K; }
 void Peak::setL(double m_L) { this->m_L = m_L; }
 
 /** Set the BankName of this peak
- * @param m_BankName :: index to set   */
-void Peak::setBankName(std::string m_BankName) {
-  this->m_BankName = m_BankName;
+ * @param m_bankName :: index to set   */
+void Peak::setBankName(std::string m_bankName) {
+  this->m_bankName = m_bankName;
 }
 
 /** Set all three H,K,L indices of the peak */
 void Peak::setHKL(double H, double K, double L) {
-  if (orig_H == 0 && orig_K == 0 && orig_L == 0) {
-    orig_H = m_H;
-    orig_K = m_K;
-    orig_L = m_L;
+  if (m_orig_H == 0 && m_orig_K == 0 && m_orig_L == 0) {
+    m_orig_H = m_H;
+    m_orig_K = m_K;
+    m_orig_L = m_L;
   }
   m_H = H;
   m_K = K;
@@ -696,11 +705,11 @@ void Peak::setHKL(double H, double K, double L) {
 
 /** Reset all three H,K,L indices of the peak to values before setHKL */
 void Peak::resetHKL() {
-  if (orig_H == 0 && orig_K == 0 && orig_L == 0)
+  if (m_orig_H == 0 && m_orig_K == 0 && m_orig_L == 0)
     return;
-  m_H = orig_H;
-  m_K = orig_K;
-  m_L = orig_L;
+  m_H = m_orig_H;
+  m_K = m_orig_K;
+  m_L = m_orig_L;
 }
 
 /** Set all HKL
@@ -708,10 +717,10 @@ void Peak::resetHKL() {
  * @param HKL :: vector with x,y,z -> h,k,l
  */
 void Peak::setHKL(Mantid::Kernel::V3D HKL) {
-  if (orig_H == 0 && orig_K == 0 && orig_L == 0) {
-    orig_H = m_H;
-    orig_K = m_K;
-    orig_L = m_L;
+  if (m_orig_H == 0 && m_orig_K == 0 && m_orig_L == 0) {
+    m_orig_H = m_H;
+    m_orig_K = m_K;
+    m_orig_L = m_L;
   }
   m_H = HKL.X();
   m_K = HKL.Y();
@@ -720,38 +729,38 @@ void Peak::setHKL(Mantid::Kernel::V3D HKL) {
 
 //----------------------------------------------------------------------------------------------
 /** Return the # of counts in the bin at its peak*/
-double Peak::getBinCount() const { return m_BinCount; }
+double Peak::getBinCount() const { return m_binCount; }
 
 /** Return the integrated peak intensity */
-double Peak::getIntensity() const { return m_Intensity; }
+double Peak::getIntensity() const { return m_intensity; }
 
 /** Return the error on the integrated peak intensity */
-double Peak::getSigmaIntensity() const { return m_SigmaIntensity; }
+double Peak::getSigmaIntensity() const { return m_sigmaIntensity; }
 
 /** Set the integrated peak intensity
- * @param m_Intensity :: intensity value   */
-void Peak::setIntensity(double m_Intensity) { this->m_Intensity = m_Intensity; }
+ * @param m_intensity :: intensity value   */
+void Peak::setIntensity(double m_intensity) { this->m_intensity = m_intensity; }
 
 /** Set the # of counts in the bin at its peak
- * @param m_BinCount :: counts  */
-void Peak::setBinCount(double m_BinCount) { this->m_BinCount = m_BinCount; }
+ * @param m_binCount :: counts  */
+void Peak::setBinCount(double m_binCount) { this->m_binCount = m_binCount; }
 
 /** Set the error on the integrated peak intensity
- * @param m_SigmaIntensity :: intensity error value   */
-void Peak::setSigmaIntensity(double m_SigmaIntensity) {
-  this->m_SigmaIntensity = m_SigmaIntensity;
+ * @param m_sigmaIntensity :: intensity error value   */
+void Peak::setSigmaIntensity(double m_sigmaIntensity) {
+  this->m_sigmaIntensity = m_sigmaIntensity;
 }
 
 /** Set the final energy
- * @param m_FinalEnergy :: final energy in meV   */
-void Peak::setFinalEnergy(double m_FinalEnergy) {
-  this->m_FinalEnergy = m_FinalEnergy;
+ * @param m_finalEnergy :: final energy in meV   */
+void Peak::setFinalEnergy(double m_finalEnergy) {
+  this->m_finalEnergy = m_finalEnergy;
 }
 
 /** Set the initial energy
- * @param m_InitialEnergy :: initial energy in meV   */
-void Peak::setInitialEnergy(double m_InitialEnergy) {
-  this->m_InitialEnergy = m_InitialEnergy;
+ * @param m_initialEnergy :: initial energy in meV   */
+void Peak::setInitialEnergy(double m_initialEnergy) {
+  this->m_initialEnergy = m_initialEnergy;
 }
 
 // -------------------------------------------------------------------------------------
@@ -782,19 +791,19 @@ Peak::setGoniometerMatrix(Mantid::Kernel::Matrix<double> goniometerMatrix) {
  * best for RectangularDetector instruments (goes up two levels)
  * @return name of the bank.
  */
-std::string Peak::getBankName() const { return m_BankName; }
+std::string Peak::getBankName() const { return m_bankName; }
 
 // -------------------------------------------------------------------------------------
 /** For RectangularDetectors only, returns the row (y) of the pixel of the
 * detector.
 * Returns -1 if it could not find it. */
-int Peak::getRow() const { return m_Row; }
+int Peak::getRow() const { return m_row; }
 
 // -------------------------------------------------------------------------------------
 /** For RectangularDetectors only, returns the column (x) of the pixel of the
  * detector.
  * Returns -1 if it could not find it. */
-int Peak::getCol() const { return m_Col; }
+int Peak::getCol() const { return m_col; }
 
 // -------------------------------------------------------------------------------------
 /** Return the detector position vector */
@@ -863,13 +872,17 @@ const PeakShape &Peak::getPeakShape() const { return *this->m_peakShape; }
  * @brief Set the peak shape
  * @param shape : Desired shape
  */
-void Peak::setPeakShape(Mantid::Geometry::PeakShape *shape) { this->m_peakShape = PeakShape_const_sptr(shape); }
+void Peak::setPeakShape(Mantid::Geometry::PeakShape *shape) {
+  this->m_peakShape = PeakShape_const_sptr(shape);
+}
 
 /**
  * @brief Set the peak shape
  * @param shape : Desired shape
  */
-void Peak::setPeakShape(Mantid::Geometry::PeakShape_const_sptr shape) { this->m_peakShape = shape; }
+void Peak::setPeakShape(Mantid::Geometry::PeakShape_const_sptr shape) {
+  this->m_peakShape = shape;
+}
 
 /**
  * @brief Assignement operator overload
@@ -877,33 +890,33 @@ void Peak::setPeakShape(Mantid::Geometry::PeakShape_const_sptr shape) { this->m_
  * @return this
  */
 Peak &Peak::operator=(const Peak &other) {
-  if(&other != this){
-  m_inst = other.m_inst;
-  m_det = other.m_det;
-  m_BankName = other.m_BankName;
-  m_DetectorID = other.m_DetectorID;
-  m_H = other.m_H;
-  m_K = other.m_K;
-  m_L = other.m_L;
-  m_Intensity = other.m_Intensity;
-  m_SigmaIntensity = other.m_SigmaIntensity;
-  m_BinCount = other.m_BinCount;
-  m_InitialEnergy = other.m_InitialEnergy;
-  m_FinalEnergy = other.m_FinalEnergy;
-  m_GoniometerMatrix = other.m_GoniometerMatrix;
-  m_InverseGoniometerMatrix = other.m_InverseGoniometerMatrix;
-  m_RunNumber = other.m_RunNumber;
-  m_MonitorCount = other.m_MonitorCount;
-  m_Row = other.m_Row;
-  m_Col = other.m_Col;
-  sourcePos = other.sourcePos;
-  samplePos = other.samplePos;
-  detPos = other.detPos;
-  orig_H = other.orig_H;
-  orig_K = other.orig_K;
-  orig_L = other.orig_L;
-  m_detIDs = other.m_detIDs;
-  m_peakShape.reset(other.m_peakShape->clone());
+  if (&other != this) {
+    m_inst = other.m_inst;
+    m_det = other.m_det;
+    m_bankName = other.m_bankName;
+    m_detectorID = other.m_detectorID;
+    m_H = other.m_H;
+    m_K = other.m_K;
+    m_L = other.m_L;
+    m_intensity = other.m_intensity;
+    m_sigmaIntensity = other.m_sigmaIntensity;
+    m_binCount = other.m_binCount;
+    m_initialEnergy = other.m_initialEnergy;
+    m_finalEnergy = other.m_finalEnergy;
+    m_GoniometerMatrix = other.m_GoniometerMatrix;
+    m_InverseGoniometerMatrix = other.m_InverseGoniometerMatrix;
+    m_runNumber = other.m_runNumber;
+    m_monitorCount = other.m_monitorCount;
+    m_row = other.m_row;
+    m_col = other.m_col;
+    sourcePos = other.sourcePos;
+    samplePos = other.samplePos;
+    detPos = other.detPos;
+    m_orig_H = other.m_orig_H;
+    m_orig_K = other.m_orig_K;
+    m_orig_L = other.m_orig_L;
+    m_detIDs = other.m_detIDs;
+    m_peakShape.reset(other.m_peakShape->clone());
   }
   return *this;
 }

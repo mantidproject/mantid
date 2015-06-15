@@ -75,7 +75,7 @@ public:
     QwtWorkspaceSpectrumData data(*ws, 0, true, false);
     TS_ASSERT_DELTA( data.y(1), 2.0, 1e-6);
     TS_ASSERT_DELTA( data.e(1), 3.0, 1e-6);
-    TS_ASSERT_DELTA( data.y(2), 0.0, 1e-6);
+    TS_ASSERT_DELTA( data.y(2), 2.0, 1e-6);
     // Errors should also be zero-ed out.
     TS_ASSERT_DELTA( data.e(2), 0.0, 1e-6);
   }

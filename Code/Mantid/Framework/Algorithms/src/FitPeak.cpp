@@ -38,9 +38,16 @@ namespace Algorithms {
 /** Constructor for FitOneSinglePeak
   */
 FitOneSinglePeak::FitOneSinglePeak()
-    : m_fitMethodSet(false), m_peakRangeSet(false), m_peakWidthSet(false),
-      m_peakWindowSet(false), m_usePeakPositionTolerance(false), m_wsIndex(0),
-      m_numFitCalls(0), m_sstream("") {}
+    : API::Algorithm(), m_fitMethodSet(false), m_peakRangeSet(false),
+      m_peakWidthSet(false), m_peakWindowSet(false),
+      m_usePeakPositionTolerance(false), m_peakFunc(), m_bkgdFunc(),
+      m_dataWS(), m_wsIndex(0), m_minFitX(0.), m_maxFitX(0.), i_minFitX(0),
+      i_maxFitX(0), m_minPeakX(0.), m_maxPeakX(0.), i_minPeakX(0),
+      i_maxPeakX(0), m_bestPeakFunc(), m_bestBkgdFunc(), m_bkupPeakFunc(),
+      m_bkupBkgdFunc(), m_fitErrorPeakFunc(), m_fitErrorBkgdFunc(),
+      m_minimizer("Levenberg-MarquardtMD"), m_costFunction(), m_vecFWHM(),
+      m_peakPositionTolerance(0.), m_userPeakCentre(0.), m_bestRwp(0.),
+      m_finalGoodnessValue(0.), m_numFitCalls(0), m_sstream("") {}
 
 //----------------------------------------------------------------------------------------------
 /** Destructor for FitOneSinglePeak
@@ -544,6 +551,7 @@ void FitOneSinglePeak::highBkgdFit() {
   // Fit the composite function as final
   double compcost = fitCompositeFunction(m_peakFunc, m_bkgdFunc, m_dataWS,
                                          m_wsIndex, m_minFitX, m_maxFitX);
+  m_bestRwp = compcost;
 
   m_sstream << "MultStep-Fit: Best Fitted Peak: " << m_peakFunc->asString()
             << ". Final " << m_costFunction << " = " << compcost << "\n"
@@ -661,8 +669,7 @@ double FitOneSinglePeak::fitFunctionSD(IFunction_sptr fitfunc,
   fit->setProperty("CalcErrors", true);
 
   // Execute fit and get result of fitting background
-  m_sstream << "FitSingleDomain: Fit " << fit->asString()
-            << "; StartX = " << xmin << ", EndX = " << xmax << ".\n";
+  m_sstream << "FitSingleDomain: " << fit->asString() << ".\n";
 
   fit->executeAsChildAlg();
   if (!fit->isExecuted()) {
@@ -797,8 +804,11 @@ double FitOneSinglePeak::fitCompositeFunction(
   // so far the best Rwp
   bool modecal = true;
   // FIXME - This is not a good practise...
+  double backRwp =
+      fitFunctionSD(bkgdfunc, dataws, wsindex, startx, endx, modecal);
+  m_sstream << "Background: Pre-fit Goodness = " << backRwp << "\n";
   m_bestRwp = fitFunctionSD(compfunc, dataws, wsindex, startx, endx, modecal);
-  m_sstream << "Peak+Backgruond: Pre-fit Goodness = " << m_bestRwp << "\n";
+  m_sstream << "Peak+Background: Pre-fit Goodness = " << m_bestRwp << "\n";
 
   map<string, double> bkuppeakmap, bkupbkgdmap;
   push(peakfunc, bkuppeakmap);
@@ -820,11 +830,12 @@ double FitOneSinglePeak::fitCompositeFunction(
               << errorreason << "\n";
 
   double goodness_final = DBL_MAX;
-  if (goodness <= m_bestRwp) {
+  if (goodness <= m_bestRwp && goodness <= backRwp) {
     // Fit for composite function renders a better result
     goodness_final = goodness;
     processNStoreFitResult(goodness_final, true);
-  } else if (goodness > m_bestRwp && m_bestRwp < DBL_MAX) {
+  } else if (goodness > m_bestRwp && m_bestRwp < DBL_MAX &&
+             m_bestRwp <= backRwp) {
     // A worse result is got.  Revert to original function parameters
     m_sstream << "Fit peak/background composite function FAILS to render a "
                  "better solution. "
@@ -833,6 +844,7 @@ double FitOneSinglePeak::fitCompositeFunction(
 
     pop(bkuppeakmap, peakfunc);
     pop(bkupbkgdmap, bkgdfunc);
+    goodness_final = m_bestRwp;
   } else {
     m_sstream << "Fit peak-background function fails in all approaches! \n";
   }
@@ -1011,10 +1023,20 @@ DECLARE_ALGORITHM(FitPeak)
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
-FitPeak::FitPeak() {
-  m_minimizer = "Levenberg-MarquardtMD";
-  m_bestRwp = DBL_MAX;
-}
+FitPeak::FitPeak()
+    : API::Algorithm(), m_dataWS(), m_wsIndex(0), m_peakFunc(), m_bkgdFunc(),
+      m_minFitX(0.), m_maxFitX(0.), m_minPeakX(0.), m_maxPeakX(0.),
+      i_minFitX(0), i_maxFitX(0), i_minPeakX(0), i_maxPeakX(0),
+      m_fitBkgdFirst(false), m_outputRawParams(false), m_userGuessedFWHM(0.),
+      m_userPeakCentre(0.), m_minGuessedPeakWidth(0), m_maxGuessedPeakWidth(0),
+      m_fwhmFitStep(0), m_fitWithStepPeakWidth(false),
+      m_usePeakPositionTolerance(false), m_peakPositionTolerance(0.),
+      m_peakParameterTableWS(), m_bkgdParameterTableWS(),
+      m_peakParameterNames(), m_bkgdParameterNames(),
+      m_minimizer("Levenberg-MarquardtMD"), m_bkupBkgdFunc(), m_bkupPeakFunc(),
+      m_bestPeakFunc(), m_bestBkgdFunc(), m_bestRwp(DBL_MAX),
+      m_finalGoodnessValue(0.), m_vecybkup(), m_vecebkup(), m_costFunction(),
+      m_lightWeightOutput(false) {}
 
 //----------------------------------------------------------------------------------------------
 /** Destructor

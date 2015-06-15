@@ -24,7 +24,7 @@ public:
    @param thetaIncident: incident theta value in degrees
    */
   CalculateReflectometryQx(const double &thetaIncident)
-      : m_cos_theta_i(cos(thetaIncident * to_radians_factor)) {}
+    : m_cos_theta_i(cos(thetaIncident * to_radians_factor)), m_dirQx(0.) {}
   /**
    Setter for the final theta value require for the calculation. Internally
    pre-calculates and caches to cos theta for speed.
@@ -59,7 +59,7 @@ public:
    @param thetaIncident: incident theta value in degrees
    */
   CalculateReflectometryQz(const double &thetaIncident)
-      : m_sin_theta_i(sin(thetaIncident * to_radians_factor)) {}
+      : m_sin_theta_i(sin(thetaIncident * to_radians_factor)), m_dirQz(0.) {}
   /**
    Setter for the final theta value require for the calculation. Internally
    pre-calculates and caches to sine theta for speed.

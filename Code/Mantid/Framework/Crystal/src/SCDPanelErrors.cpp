@@ -77,6 +77,8 @@ SCDPanelErrors::SCDPanelErrors()
       m_endX(-1) {
   initializeAttributeList(m_attrNames);
 
+  SampleX = SampleY = SampleZ = 0.;
+
   a_set = b_set = c_set = alpha_set = beta_set = gamma_set = PeakName_set =
       BankNames_set = endX_set = startX_set = NGroups_set = sampleX_set =
           sampleY_set = sampleZ_set = false;
@@ -279,7 +281,7 @@ void SCDPanelErrors::Check(DataObjects::PeaksWorkspace_sptr &pkwsp,
   }
 }
 
-Instrument_sptr SCDPanelErrors::getNewInstrument(const API::IPeak &peak) const {
+Instrument_sptr SCDPanelErrors::getNewInstrument(const Geometry::IPeak &peak) const {
 
   Geometry::Instrument_const_sptr instSave = peak.getInstrument();
   boost::shared_ptr<Geometry::ParameterMap> pmap(new ParameterMap());
@@ -349,7 +351,7 @@ Instrument_sptr SCDPanelErrors::getNewInstrument(const API::IPeak &peak) const {
   return instChange;
 }
 
-Peak SCDPanelErrors::createNewPeak(const API::IPeak &peak_old,
+Peak SCDPanelErrors::createNewPeak(const Geometry::IPeak &peak_old,
                                    Geometry::Instrument_sptr instrNew,
                                    double T0, double L0) {
   Geometry::Instrument_const_sptr inst = peak_old.getInstrument();
@@ -584,7 +586,7 @@ double SCDPanelErrors::checkForNonsenseParameters() const {
     r += fabs(ry) * .02;
 
   if (fabs(rz) > 15.)
-    r += fabs(ry) * .02;
+    r += fabs(rz) * .02;
 
   return 5. * r;
 }
@@ -1206,7 +1208,7 @@ SCDPanelErrors::calcWorkspace(DataObjects::PeaksWorkspace_sptr &pwks,
 
   for (size_t k = 0; k < bankNames.size(); ++k)
     for (size_t j = 0; j < pwks->rowCount(); ++j) {
-      API::IPeak &peak = pwks->getPeak((int)j);
+      Geometry::IPeak &peak = pwks->getPeak((int)j);
       if (peak.getBankName().compare(bankNames[k]) == 0)
         if (peak.getH() != 0 || peak.getK() != 0 || peak.getL() != 0)
           if (peak.getH() - floor(peak.getH()) < tolerance ||

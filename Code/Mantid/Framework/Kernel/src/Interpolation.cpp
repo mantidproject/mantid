@@ -10,6 +10,15 @@ namespace {
 Logger g_log("Interpolation");
 }
 
+/* Functor for findIndexOfNextLargerValue, used in std::lower_bound to replicate
+   the original behavior.
+*/
+struct LessOrEqualFunctor {
+    bool operator()(const double &lhs, const double &rhs) {
+        return lhs <= rhs;
+    }
+};
+
 /** Constructor default to linear interpolation and x-unit set to TOF
  */
 Interpolation::Interpolation() : m_method("linear") {
@@ -19,23 +28,16 @@ Interpolation::Interpolation() : m_method("linear") {
 
 size_t
 Interpolation::findIndexOfNextLargerValue(const std::vector<double> &data,
-                                          double key, size_t range_start,
-                                          size_t range_end) const {
-  if (range_end < range_start) {
-    throw std::range_error("Value is outside array range.");
+                                          double key) const {
+  auto begin = data.begin();
+  auto end = data.end();
+  auto pos = std::lower_bound(begin, end, key, LessOrEqualFunctor());
+
+  if(pos == end || pos == begin) {
+      throw std::range_error("Value is not in the interpolation range.");
   }
 
-  size_t center = range_start + (range_end - range_start) / 2;
-
-  if (data[center] > key && data[center - 1] <= key) {
-    return center;
-  }
-
-  if (data[center] <= key) {
-    return findIndexOfNextLargerValue(data, key, center + 1, range_end);
-  } else {
-    return findIndexOfNextLargerValue(data, key, range_start, center - 1);
-  }
+  return std::distance(begin, pos);
 }
 
 void Interpolation::setXUnit(const std::string &unit) {
@@ -77,8 +79,8 @@ double Interpolation::value(const double &at) const {
 
   try {
     // otherwise
-    // General case. Find index of next largest value by binary search.
-    size_t idx = findIndexOfNextLargerValue(m_x, at, 1, N - 1);
+    // General case. Find index of next largest value by std::lower_bound.
+    size_t idx = findIndexOfNextLargerValue(m_x, at);
     return m_y[idx - 1] +
            (at - m_x[idx - 1]) * (m_y[idx] - m_y[idx - 1]) /
                (m_x[idx] - m_x[idx - 1]);

@@ -10,9 +10,9 @@
 #include "MantidAPI/CoordTransform.h"
 #include "MantidAPI/IMDIterator.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/PeakTransformHKL.h"
-#include "MantidAPI/PeakTransformQSample.h"
-#include "MantidAPI/PeakTransformQLab.h"
+#include "MantidGeometry/Crystal/PeakTransformHKL.h"
+#include "MantidGeometry/Crystal/PeakTransformQSample.h"
+#include "MantidGeometry/Crystal/PeakTransformQLab.h"
 #include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/IMDEventWorkspace.h"
@@ -42,6 +42,7 @@
 #include "MantidQtSliceViewer/PeaksViewerOverlayDialog.h"
 #include "MantidQtSliceViewer/PeakOverlayViewFactorySelector.h"
 #include "MantidQtMantidWidgets/SelectWorkspacesDialog.h"
+#include "MantidQtMantidWidgets/InputController.h"
 
 #include <qwt_plot_panner.h>
 #include <Poco/AutoPtr.h>
@@ -68,6 +69,10 @@ using MantidQt::API::AlgorithmRunner;
 namespace MantidQt {
 namespace SliceViewer {
 
+const QString SliceViewer::NoNormalizationKey = "No";
+const QString SliceViewer::VolumeNormalizationKey = "Volume";
+const QString SliceViewer::NumEventsNormalizationKey = "# Events";
+
 //------------------------------------------------------------------------------
 /** Constructor */
 SliceViewer::SliceViewer(QWidget *parent)
@@ -78,7 +83,7 @@ SliceViewer::SliceViewer(QWidget *parent)
       m_peaksPresenter(boost::make_shared<CompositePeaksPresenter>(this)),
       m_proxyPeaksPresenter(
           boost::make_shared<ProxyCompositePeaksPresenter>(m_peaksPresenter)),
-      m_peaksSliderWidget(NULL) {
+      m_peaksSliderWidget(NULL){
 
   ui.setupUi(this);
 
@@ -135,6 +140,7 @@ SliceViewer::SliceViewer(QWidget *parent)
                    SLOT(autoRebin_toggled(bool)));
   QObject::connect(ui.btnPeakOverlay, SIGNAL(clicked()), this,
                    SLOT(peakOverlay_clicked()));
+
   // ----------- Other signals ----------------
   QObject::connect(m_colorBar, SIGNAL(colorBarDoubleClicked()), this,
                    SLOT(loadColorMapSlot()));
@@ -222,7 +228,7 @@ void SliceViewer::saveSettings() {
   settings.setValue("TransparentZeros",
                     (m_actionTransparentZeros->isChecked() ? 1 : 0));
   settings.setValue("Normalization",
-                    static_cast<int>(this->getNormalization()));
+                      static_cast<int>(this->getNormalization()));
   settings.endGroup();
 }
 
@@ -336,14 +342,15 @@ void SliceViewer::initMenus() {
 
   QActionGroup *group = new QActionGroup(this);
 
-  action = new QAction(QPixmap(), "No Normalization", this);
+  const QString normalization = " Normalization";
+  action = new QAction(QPixmap(), SliceViewer::NoNormalizationKey + normalization, this);
   m_menuView->addAction(action);
   action->setActionGroup(group);
   action->setCheckable(true);
   connect(action, SIGNAL(triggered()), this, SLOT(changeNormalizationNone()));
   m_actionNormalizeNone = action;
 
-  action = new QAction(QPixmap(), "Volume Normalization", this);
+  action = new QAction(QPixmap(), SliceViewer::VolumeNormalizationKey + normalization, this);
   m_menuView->addAction(action);
   action->setActionGroup(group);
   action->setCheckable(true);
@@ -351,13 +358,19 @@ void SliceViewer::initMenus() {
   connect(action, SIGNAL(triggered()), this, SLOT(changeNormalizationVolume()));
   m_actionNormalizeVolume = action;
 
-  action = new QAction(QPixmap(), "Num. Events Normalization", this);
+  action = new QAction(QPixmap(), SliceViewer::NumEventsNormalizationKey + normalization, this);
   m_menuView->addAction(action);
   action->setActionGroup(group);
   action->setCheckable(true);
   connect(action, SIGNAL(triggered()), this,
           SLOT(changeNormalizationNumEvents()));
   m_actionNormalizeNumEvents = action;
+
+  ui.comboNormalization->addItem(SliceViewer::NoNormalizationKey);
+  ui.comboNormalization->addItem(SliceViewer::VolumeNormalizationKey);
+  ui.comboNormalization->addItem(SliceViewer::NumEventsNormalizationKey);
+
+  connect(this->ui.comboNormalization, SIGNAL(currentIndexChanged(const QString&)), SLOT(onNormalizationChanged(const QString&)));
 
   // --------------- Color options Menu ----------------------------------------
   m_menuColorOptions = new QMenu("&ColorMap", this);
@@ -789,6 +802,20 @@ void SliceViewer::changeNormalizationNumEvents() {
   this->setNormalization(Mantid::API::NumEventsNormalization, true);
 }
 
+/**
+ * @brief Slot to handle change in normalization kicked-off from the combo box.
+ * @param normalizationKey : Text key for type of normalization switched to.
+ */
+void SliceViewer::onNormalizationChanged(const QString& normalizationKey) {
+  if (normalizationKey == SliceViewer::NoNormalizationKey) {
+      changeNormalizationNone();
+  } else if (normalizationKey == SliceViewer::VolumeNormalizationKey) {
+      changeNormalizationVolume();
+  } else {
+      changeNormalizationNumEvents();
+  }
+}
+
 //------------------------------------------------------------------------------
 /** Set the normalization mode for viewing the data
  *
@@ -810,6 +837,17 @@ void SliceViewer::setNormalization(Mantid::API::MDNormalization norm,
   m_actionNormalizeNone->blockSignals(false);
   m_actionNormalizeVolume->blockSignals(false);
   m_actionNormalizeNumEvents->blockSignals(false);
+
+  // Sync the normalization combobox.
+  this->ui.comboNormalization->blockSignals(true);
+  if(norm == Mantid::API::NoNormalization) {
+      this->ui.comboNormalization->setCurrentIndex(0);
+  } else if (norm == Mantid::API::VolumeNormalization) {
+      this->ui.comboNormalization->setCurrentItem(1);
+  } else {
+      this->ui.comboNormalization->setCurrentIndex(2);
+  }
+  this->ui.comboNormalization->blockSignals(false);
 
   m_data->setNormalization(norm);
   if (update)
@@ -2158,12 +2196,14 @@ SliceViewer::setPeaksWorkspaces(const QStringList &list) {
     // Candidate for overplotting as spherical peaks
     viewFactorySelector->registerCandidate(
         boost::make_shared<PeakOverlayMultiSphereFactory>(
-            peaksWS, m_plot, m_plot->canvas(), numberOfChildPresenters));
+            peaksWS, m_plot, m_plot->canvas(), m_spect->xAxis(),
+                    m_spect->yAxis(), numberOfChildPresenters));
     // Candiate for plotting as a markers of peak positions
     viewFactorySelector->registerCandidate(
         boost::make_shared<PeakOverlayMultiCrossFactory>(
             m_ws, transformFactory->createDefaultTransform(), peaksWS, m_plot,
-            m_plot->canvas(), numberOfChildPresenters));
+            m_plot->canvas(), m_spect->xAxis(),
+                    m_spect->yAxis(), numberOfChildPresenters));
     try {
       m_peaksPresenter->addPeaksPresenter(
           boost::make_shared<ConcretePeaksPresenter>(
@@ -2371,6 +2411,7 @@ void SliceViewer::dropEvent(QDropEvent *e) {
     }
   }
 }
+
 
 } // namespace
 }

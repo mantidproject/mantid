@@ -157,10 +157,7 @@ double
 HFIRDarkCurrentSubtraction::getCountingTime(MatrixWorkspace_sptr inputWS) {
   // First, look whether we have the information in the log
   if (inputWS->run().hasProperty("timer")) {
-    Mantid::Kernel::Property *prop = inputWS->run().getProperty("timer");
-    Mantid::Kernel::PropertyWithValue<double> *dp =
-        dynamic_cast<Mantid::Kernel::PropertyWithValue<double> *>(prop);
-    return *dp;
+    return inputWS->run().getPropertyValueAsType<double>("timer");
   } else {
     // If we don't have the information in the log, use the default timer
     // spectrum

@@ -43,13 +43,14 @@ FindPeaks::FindPeaks()
       m_bkgdOrder(0), m_outPeakTableWS(), m_progress(NULL), m_dataWS(),
       m_inputPeakFWHM(0), m_wsIndex(0), singleSpectrum(false),
       m_highBackground(false), m_rawPeaksTable(false), m_numTableParams(0),
-      m_peakFuncType(""), m_backgroundType(""), m_vecPeakCentre(),
-      m_vecFitWindows(), m_backgroundFunction(), m_peakFunction(),
-      m_minGuessedPeakWidth(0), m_maxGuessedPeakWidth(0),
-      m_stepGuessedPeakWidth(0), m_usePeakPositionTolerance(false),
-      m_peakPositionTolerance(0.0), m_fitFunctions(), m_peakLeftIndexes(),
-      m_peakRightIndexes(), m_minimizer("Levenberg-MarquardtMD"),
-      m_costFunction(), m_minHeight(0.0), m_useObsCentre(false) {}
+      m_centreIndex(1) /* for Gaussian */, m_peakFuncType(""),
+      m_backgroundType(""), m_vecPeakCentre(), m_vecFitWindows(),
+      m_backgroundFunction(), m_peakFunction(), m_minGuessedPeakWidth(0),
+      m_maxGuessedPeakWidth(0), m_stepGuessedPeakWidth(0),
+      m_usePeakPositionTolerance(false), m_peakPositionTolerance(0.0),
+      m_fitFunctions(), m_peakLeftIndexes(), m_peakRightIndexes(),
+      m_minimizer("Levenberg-MarquardtMD"), m_costFunction(), m_minHeight(0.0),
+      m_leastMaxObsY(0.), m_useObsCentre(false) {}
 
 //----------------------------------------------------------------------------------------------
 /** Initialize and declare properties.
@@ -296,6 +297,16 @@ void FindPeaks::generateOutputPeakParameterTable() {
     size_t numpeakpars = m_peakFunction->nParams();
     size_t numbkgdpars = m_backgroundFunction->nParams();
     m_numTableParams = numpeakpars + numbkgdpars;
+    if (m_peakFuncType == "Gaussian")
+      m_centreIndex = 1;
+    else if (m_peakFuncType == "LogNormal")
+      m_centreIndex = 1;
+    else if (m_peakFuncType == "Lorentzian")
+      m_centreIndex = 1;
+    else if (m_peakFuncType == "PseudoVoigt")
+      m_centreIndex = 2;
+    else
+      m_centreIndex = m_numTableParams; // bad value
 
     for (size_t i = 0; i < numpeakpars; ++i)
       m_outPeakTableWS->addColumn("double", m_peakParameterNames[i]);
@@ -305,6 +316,7 @@ void FindPeaks::generateOutputPeakParameterTable() {
   } else {
     // Output centre, weight, height, A0, A1 and A2
     m_numTableParams = 6;
+    m_centreIndex = 0;
     m_outPeakTableWS->addColumn("double", "centre");
     m_outPeakTableWS->addColumn("double", "width");
     m_outPeakTableWS->addColumn("double", "height");
@@ -339,6 +351,36 @@ FindPeaks::findPeaksGivenStartingPoints(const std::vector<double> &peakcentres,
   for (int spec = start; spec < end; ++spec) {
     const MantidVec &vecX = m_dataWS->readX(spec);
 
+    double practical_x_min = vecX.front();
+    double practical_x_max = vecX.back();
+    g_log.information() << "actual x-range = [" << practical_x_min << " -> "
+                        << practical_x_max << "]\n";
+    {
+      const MantidVec &vecY = m_dataWS->readY(spec);
+      const MantidVec &vecE = m_dataWS->readE(spec);
+      const size_t numY = vecY.size();
+      size_t i_min = 1;
+      for (; i_min < numY; ++i_min) {
+        if ((vecY[i_min] != 0.) || (vecE[i_min] != 0)) {
+          --i_min; // bring it back one
+          break;
+        }
+      }
+      practical_x_min = vecX[i_min];
+
+      size_t i_max = numY - 2;
+      for (; i_max > i_min; --i_max) {
+        if ((vecY[i_max] != 0.) || (vecE[i_max] != 0)) {
+          ++i_max; // bring it back one
+          break;
+        }
+      }
+      g_log.warning() << "i_min = " << i_min << " i_max = " << i_max << "\n";
+      practical_x_max = vecX[i_max];
+    }
+    g_log.information() << "practical x-range = [" << practical_x_min << " -> "
+                        << practical_x_max << "]\n";
+
     for (std::size_t ipeak = 0; ipeak < numPeaks; ipeak++) {
       // Try to fit at this center
       double x_center = peakcentres[ipeak];
@@ -352,7 +394,7 @@ FindPeaks::findPeaksGivenStartingPoints(const std::vector<double> &peakcentres,
       g_log.information(infoss.str());
 
       // Check whether it is the in data range
-      if (x_center > vecX.front() && x_center < vecX.back()) {
+      if (x_center > practical_x_min && x_center < practical_x_max) {
         if (useWindows)
           fitPeakInWindow(m_dataWS, spec, x_center, fitwindows[2 * ipeak],
                           fitwindows[2 * ipeak + 1]);
@@ -374,7 +416,8 @@ FindPeaks::findPeaksGivenStartingPoints(const std::vector<double> &peakcentres,
       } else {
         g_log.warning() << "Given peak centre " << x_center
                         << " is out side of given data's range ("
-                        << vecX.front() << ", " << vecX.back() << ").\n";
+                        << practical_x_min << ", " << practical_x_max << ").\n";
+        addNonFitRecord(spec, x_center);
       }
 
     } // loop through the peaks specified
@@ -864,7 +907,7 @@ void FindPeaks::fitPeakInWindow(const API::MatrixWorkspace_sptr &input,
                       << ", x-max = " << xmax << "\n";
   if (xmin >= centre_guess || xmax <= centre_guess) {
     g_log.error("Peak centre is on the edge of Fit window. ");
-    addNonFitRecord(spectrum);
+    addNonFitRecord(spectrum, centre_guess);
     return;
   }
 
@@ -881,7 +924,7 @@ void FindPeaks::fitPeakInWindow(const API::MatrixWorkspace_sptr &input,
                   << " is out side of minimum x = " << xmin
                   << ".  Input X ragne = " << vecX.front() << ", "
                   << vecX.back() << "\n";
-    addNonFitRecord(spectrum);
+    addNonFitRecord(spectrum, centre_guess);
     return;
   }
 
@@ -890,7 +933,7 @@ void FindPeaks::fitPeakInWindow(const API::MatrixWorkspace_sptr &input,
   if (i_max < i_centre) {
     g_log.error() << "Input peak centre @ " << centre_guess
                   << " is out side of maximum x = " << xmax << "\n";
-    addNonFitRecord(spectrum);
+    addNonFitRecord(spectrum, centre_guess);
     return;
   }
 
@@ -922,26 +965,24 @@ void FindPeaks::fitSinglePeak(const API::MatrixWorkspace_sptr &input,
     ess << "Peak supposed at " << vecY[i_centre]
         << " does not have enough counts as " << m_leastMaxObsY;
     g_log.debug(ess.str());
-    addNonFitRecord(spectrum);
+    addNonFitRecord(spectrum, vecY[i_centre]);
     return;
   }
 
-  //-------------------------------------------------------------------------
-  // Estimate peak and background parameters for better fitting
-  //-------------------------------------------------------------------------
-  std::stringstream outss;
-  outss << "Fit single peak in X-range " << input->readX(spectrum)[i_min]
-        << ", " << input->readX(spectrum)[i_max] << ", centre at "
-        << input->readX(spectrum)[i_centre] << " (index = " << i_centre
-        << "). ";
-  g_log.information(outss.str());
+  {
+    std::stringstream outss;
+    outss << "Fit single peak in X-range " << vecX[i_min] << ", " << vecX[i_max]
+          << ", centre at " << vecX[i_centre] << " (index = " << i_centre
+          << "). ";
+    g_log.information(outss.str());
+  }
 
   // Estimate background
   std::vector<double> vecbkgdparvalue(3, 0.);
   std::vector<double> vecpeakrange(3, 0.);
-  bool usefpdresult = findPeakBackground(input, spectrum, i_min, i_max,
-                                         vecbkgdparvalue, vecpeakrange);
-  if (!usefpdresult) {
+  int usefpdresult = findPeakBackground(input, spectrum, i_min, i_max,
+                                        vecbkgdparvalue, vecpeakrange);
+  if (usefpdresult < 0) {
     // Estimate background roughly for a failed case
     estimateBackground(vecX, vecY, i_min, i_max, vecbkgdparvalue);
   }
@@ -973,7 +1014,7 @@ void FindPeaks::fitSinglePeak(const API::MatrixWorkspace_sptr &input,
   m_peakFunction->setHeight(est_height);
   m_peakFunction->setFwhm(est_fwhm);
 
-  if (!usefpdresult) {
+  if (usefpdresult < 0) {
     // Estimate peak range based on estimated linear background and peak
     // parameter estimated from observation
     if (!m_useObsCentre)
@@ -996,8 +1037,13 @@ void FindPeaks::fitSinglePeak(const API::MatrixWorkspace_sptr &input,
 
   bool fitsuccess = false;
   if (costfuncvalue < DBL_MAX && costfuncvalue >= 0. &&
-      m_peakFunction->height() > m_minHeight)
+      m_peakFunction->height() > m_minHeight) {
     fitsuccess = true;
+  }
+  if (fitsuccess && m_usePeakPositionTolerance) {
+    fitsuccess = (fabs(m_peakFunction->centre() - vecX[i_centre]) <
+                  m_peakPositionTolerance);
+  }
 
   //-------------------------------------------------------------------------
   // Process Fit result
@@ -1007,7 +1053,7 @@ void FindPeaks::fitSinglePeak(const API::MatrixWorkspace_sptr &input,
     addInfoRow(spectrum, m_peakFunction, m_backgroundFunction, m_rawPeaksTable,
                costfuncvalue);
   else
-    addNonFitRecord(spectrum);
+    addNonFitRecord(spectrum, m_peakFunction->centre());
 
   return;
 }
@@ -1016,10 +1062,10 @@ void FindPeaks::fitSinglePeak(const API::MatrixWorkspace_sptr &input,
 /** Find peak background given a certain range by
   * calling algorithm "FindPeakBackground"
   */
-bool FindPeaks::findPeakBackground(const MatrixWorkspace_sptr &input,
-                                   int spectrum, size_t i_min, size_t i_max,
-                                   std::vector<double> &vecBkgdParamValues,
-                                   std::vector<double> &vecpeakrange) {
+int FindPeaks::findPeakBackground(const MatrixWorkspace_sptr &input,
+                                  int spectrum, size_t i_min, size_t i_max,
+                                  std::vector<double> &vecBkgdParamValues,
+                                  std::vector<double> &vecpeakrange) {
   const MantidVec &vecX = input->readX(spectrum);
 
   // Call FindPeakBackground
@@ -1038,22 +1084,21 @@ bool FindPeaks::findPeakBackground(const MatrixWorkspace_sptr &input,
       estimate->getProperty("OutputWorkspace");
 
   // Determine whether to use FindPeakBackground's result.
-  bool usefitresult = false;
+  int fitresult = -1;
   if (peaklisttablews->columnCount() < 7)
     throw std::runtime_error(
         "No 7th column for use FindPeakBackground result or not. ");
 
   if (peaklisttablews->rowCount() > 0) {
-    int useit = peaklisttablews->Int(0, 6);
-    if (useit > 0)
-      usefitresult = true;
+    int fitresult = peaklisttablews->Int(0, 6);
+    g_log.information() << "fitresult=" << fitresult << "\n";
   }
 
   // Local check whether FindPeakBackground gives a reasonable value
   vecpeakrange.resize(2);
 
-  if (usefitresult) {
-    // Use FitPeakBackgroud's reuslt
+  if (fitresult > 0) {
+    // Use FitPeakBackgroud's result
     size_t i_peakmin, i_peakmax;
     i_peakmin = peaklisttablews->Int(0, 1);
     i_peakmax = peaklisttablews->Int(0, 2);
@@ -1079,17 +1124,18 @@ bool FindPeaks::findPeakBackground(const MatrixWorkspace_sptr &input,
       vecBkgdParamValues[2] = bg2;
 
       g_log.information()
-          << "Backgroun parameters (from FindPeakBackground) A0, A1, A2 = "
-          << bg0 << ", " << bg1 << ", " << bg2 << "\n";
+          << "Background parameters (from FindPeakBackground) A0=" << bg0
+          << ", A1=" << bg1 << ", A2=" << bg2 << "\n";
 
       vecpeakrange[0] = vecX[i_peakmin];
       vecpeakrange[1] = vecX[i_peakmax];
     } else {
       // Do manual estimation again
-      usefitresult = false;
       g_log.debug(
           "FindPeakBackground result is ignored due to wrong in peak range. ");
     }
+  } else {
+    g_log.information("Failed to get background estimation\n");
   }
 
   std::stringstream outx;
@@ -1098,7 +1144,7 @@ bool FindPeaks::findPeakBackground(const MatrixWorkspace_sptr &input,
        << ", " << vecpeakrange[1] << "). ";
   g_log.information(outx.str());
 
-  return usefitresult;
+  return fitresult;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -1280,7 +1326,8 @@ void FindPeaks::estimateBackground(const MantidVec &X, const MantidVec &Y,
     y0 += Y[i_min + i];
 
     xf += X[i_max - i];
-    yf += Y[i_max - i];
+    // X has one more value than Y
+    yf += Y[i_max - i - 1];
   }
   x0 = x0 / static_cast<double>(numavg);
   y0 = y0 / static_cast<double>(numavg);
@@ -1421,8 +1468,11 @@ void FindPeaks::addInfoRow(const size_t spectrum,
       a2 = bkgdfunction->getParameter("A2");
 
     t << a0 << a1 << a2;
+    g_log.warning() << "cen=" << peakcentre << " fwhm=" << fwhm
+                    << " height=" << height << " a0=" << a0 << " a0=" << a1
+                    << " a2=" << a2;
   }
-
+  g_log.warning() << " chsq=" << mincost << "\n";
   // Minimum cost function value
   t << mincost;
 
@@ -1432,17 +1482,23 @@ void FindPeaks::addInfoRow(const size_t spectrum,
 //----------------------------------------------------------------------------------------------
 /** Add the fit record (failure) to output workspace
   * @param spectrum :: spectrum where the peak is
+  * @param centre :: position of the peak centre
   */
-void FindPeaks::addNonFitRecord(const size_t spectrum) {
+void FindPeaks::addNonFitRecord(const size_t spectrum, const double centre) {
   // Add a new row
   API::TableRow t = m_outPeakTableWS->appendRow();
 
+  g_log.information() << "Failed to fit peak at " << centre << "\n";
   // 1st column
   t << static_cast<int>(spectrum);
 
   // Parameters
-  for (std::size_t i = 0; i < m_numTableParams; i++)
-    t << 0.;
+  for (std::size_t i = 0; i < m_numTableParams; i++) {
+    if (i == m_centreIndex)
+      t << centre;
+    else
+      t << 0.;
+  }
 
   // HUGE chi-square
   t << DBL_MAX;
@@ -1490,8 +1546,8 @@ FindPeaks::callFitPeak(const MatrixWorkspace_sptr &dataws, int wsindex,
                        const API::IBackgroundFunction_sptr backgroundfunction,
                        const std::vector<double> &vec_fitwindow,
                        const std::vector<double> &vec_peakrange,
-                       int minGuessFWHM, int maxGuessFWHM,
-                       int guessedFWHMStep) {
+                       int minGuessFWHM, int maxGuessFWHM, int guessedFWHMStep,
+                       int estBackResult) {
   std::stringstream dbss;
   dbss << "[Call FitPeak] Fit 1 peak at X = " << peakfunction->centre()
        << " of spectrum " << wsindex;
@@ -1509,10 +1565,16 @@ FindPeaks::callFitPeak(const MatrixWorkspace_sptr &dataws, int wsindex,
                            guessedFWHMStep, fitwithsteppedfwhm);
   fitpeak.setPeakRange(vec_peakrange[0], vec_peakrange[1]);
 
-  if (m_highBackground)
-    fitpeak.highBkgdFit();
-  else
+  if (estBackResult == 1) {
+    g_log.information("simpleFit");
     fitpeak.simpleFit();
+  } else if (m_highBackground) {
+    g_log.information("highBkgdFit");
+    fitpeak.highBkgdFit();
+  } else {
+    g_log.information("simpleFit");
+    fitpeak.simpleFit();
+  }
 
   double costfuncvalue = fitpeak.getFitCostFunctionValue();
   std::string dbinfo = fitpeak.getDebugMessage();

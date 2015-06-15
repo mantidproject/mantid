@@ -45,6 +45,10 @@ void WeightedMeanMD::execHistoHisto(
   MDHistoWorkspaceIterator *rhs_it =
       dynamic_cast<MDHistoWorkspaceIterator *>(operand->createIterator());
 
+  if (!lhs_it || !rhs_it) {
+    throw std::logic_error("Histo iterators have wrong type.");
+  }
+
   do {
     double lhs_s = lhs_it->getSignal();
     double lhs_err = lhs_it->getError();

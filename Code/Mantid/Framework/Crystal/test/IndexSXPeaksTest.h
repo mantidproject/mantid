@@ -8,10 +8,11 @@
 #include "MantidCrystal/IndexSXPeaks.h"
 #include "MantidCrystal/LoadIsawPeaks.h"
 #include "MantidCrystal/LoadIsawUB.h"
-#include "MantidAPI/IPeak.h"
+#include "MantidGeometry/Crystal/IPeak.h"
 #include <cmath>
 
 using namespace Mantid::API;
+using namespace Mantid::Geometry;
 using namespace Mantid::Crystal;
 using namespace Mantid::DataObjects;
 

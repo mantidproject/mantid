@@ -172,10 +172,9 @@ which must be included. An example is
                   xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 http://schema.mantidproject.org/IDF/1.0/IDFSchema.xsd"
                   name="ARCS"
                   valid-from="1900-01-31 23:59:59"
-                  valid-to="2100-01-31 23:59:59"
-                  last-modified="2010-10-12 08:54:07.279621">
+                  valid-to="2100-01-31 23:59:59">
 
-Of the four attributes in the example above
+Of the attributes in the example above
 
 -  xmlns, xmlns:xsi, xsi:schemaLocation are required attributes that can
    be copied verbatim as above
@@ -186,9 +185,6 @@ Of the four attributes in the example above
    23:59:01
 -  valid-to may optionally be added to indicate the date to which the
    IDF is valid to. If not used, the file is permanently valid. (+)
--  last-modified is optional. Changing it can be used as an alternative
-   to force MantidPlot to reload the IDF, which e.g. might be useful
-   during the build up of an IDF
 
 (+) Both valid-from and valid-to are required to be set using the ISO
 8601 date-time format, i.e. as YYYY-MM-DD HH:MM:SS or

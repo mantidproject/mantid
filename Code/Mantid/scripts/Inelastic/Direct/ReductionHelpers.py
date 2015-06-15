@@ -97,7 +97,14 @@ def get_default_idf_param_list(pInstrument,synonims_list=None):
     params = pInstrument.getParameterNames()
     par_list = {}
     for name in params:
-        par_list[name] = get_default_parameter(pInstrument,name)
+        if synonims_list:
+            if name in synonims_list:
+                key_name=synonims_list[name]
+            else:
+                key_name = name
+        else:
+            key_name = name
+        par_list[key_name] = get_default_parameter(pInstrument,name)
 
 
     return par_list

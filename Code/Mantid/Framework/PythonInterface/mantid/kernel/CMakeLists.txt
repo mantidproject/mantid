@@ -50,6 +50,12 @@ set ( EXPORT_FILES
   src/Exports/Statistics.cpp
 )
 
+set ( MODULE_DEFINITION ${CMAKE_CURRENT_BINARY_DIR}/kernel.cpp )
+create_module ( ${MODULE_TEMPLATE} ${MODULE_DEFINITION} ${EXPORT_FILES} )
+
+#############################################################################################
+# Helper code
+#############################################################################################
 set ( SRC_FILES
   src/Converters/CloneToNumpy.cpp
   src/Converters/NDArrayToVector.cpp
@@ -112,12 +118,6 @@ set ( PY_FILES
 )
 
 #############################################################################################
-# Generate a source file from the export definitions and provided template
-#############################################################################################
-create_module ( ${MODULE_TEMPLATE} ${CMAKE_CURRENT_BINARY_DIR}/kernel.cpp EXPORT_FILES
-                SRC_FILES )
-
-#############################################################################################
 # Add rule to copy over the pure Python files for the module
 #############################################################################################
 set ( OUTPUT_DIR ${PYTHON_PKG_ROOT}/kernel )
@@ -127,7 +127,7 @@ if(CMAKE_GENERATOR STREQUAL Xcode)
   set ( CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PYTHON_PKG_ROOT}/kernel )
 endif()
 
-copy_files_to_dir ( "${PY_FILES}" ${CMAKE_CURRENT_SOURCE_DIR} ${OUTPUT_DIR} 
+copy_files_to_dir ( "${PY_FILES}" ${CMAKE_CURRENT_SOURCE_DIR} ${OUTPUT_DIR}
                      PYTHON_INSTALL_FILES )
 
 #############################################################################################
@@ -156,12 +156,13 @@ configure_file ( ${CMAKE_CURRENT_SOURCE_DIR}/${PACKAGESETUP_PY}.py.in ${CMAKE_CU
 #############################################################################################
 # Create the target for this directory
 #############################################################################################
-
-add_library ( PythonKernelModule ${SRC_FILES} ${INC_FILES} ${PYTHON_INSTALL_FILES} )
+add_library ( PythonKernelModule ${EXPORT_FILES} ${MODULE_DEFINITION} ${SRC_FILES} ${INC_FILES}
+              ${PYTHON_INSTALL_FILES} )
 set_python_properties( PythonKernelModule _kernel )
 set_target_output_directory ( PythonKernelModule ${OUTPUT_DIR} .pyd )
 # Add the required dependencies
-target_link_libraries ( PythonKernelModule Kernel ${Boost_LIBRARIES} ${PYTHON_LIBRARIES} ${PYTHON_DEPS} )
+target_link_libraries ( PythonKernelModule LINK_PRIVATE Kernel ${Boost_LIBRARIES}
+                        ${PYTHON_LIBRARIES} ${PYTHON_DEPS} ${POCO_LIBRARIES} )
 
 if (OSX_VERSION VERSION_GREATER 10.8)
   set_target_properties ( PythonKernelModule PROPERTIES INSTALL_RPATH "@loader_path/../../../MacOS")

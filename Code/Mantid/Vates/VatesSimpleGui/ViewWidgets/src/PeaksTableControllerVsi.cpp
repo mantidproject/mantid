@@ -5,9 +5,9 @@
 #include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/PeakTransformHKL.h"
-#include "MantidAPI/PeakTransformQSample.h"
-#include "MantidAPI/PeakTransformQLab.h"
+#include "MantidGeometry/Crystal/PeakTransformHKL.h"
+#include "MantidGeometry/Crystal/PeakTransformQSample.h"
+#include "MantidGeometry/Crystal/PeakTransformQLab.h"
 #include "MantidKernel/V3D.h"
 #include "MantidKernel/SpecialCoordinateSystem.h"
 #include "MantidKernel/Logger.h"
@@ -75,11 +75,11 @@ PeaksTableControllerVsi::PeaksTableControllerVsi(
       m_presenter(new Mantid::VATES::CompositePeaksPresenterVsi()),
       m_peaksTabWidget(NULL), m_peakMarker(NULL), m_coordinateSystem(Mantid::Kernel::SpecialCoordinateSystem::QLab) {
   m_peakTransformSelector.registerCandidate(
-      boost::make_shared<Mantid::API::PeakTransformHKLFactory>());
+      boost::make_shared<Mantid::Geometry::PeakTransformHKLFactory>());
   m_peakTransformSelector.registerCandidate(
-      boost::make_shared<Mantid::API::PeakTransformQSampleFactory>());
+      boost::make_shared<Mantid::Geometry::PeakTransformQSampleFactory>());
   m_peakTransformSelector.registerCandidate(
-      boost::make_shared<Mantid::API::PeakTransformQLabFactory>());
+      boost::make_shared<Mantid::Geometry::PeakTransformQLabFactory>());
 }
 
 PeaksTableControllerVsi::~PeaksTableControllerVsi() {
@@ -148,9 +148,9 @@ void PeaksTableControllerVsi::addWorkspace(
         Mantid::API::AnalysisDataService::Instance()
             .retrieveWS<Mantid::API::IPeaksWorkspace>(wsName);
 
-    Mantid::API::PeakTransformFactory_sptr transformFactory =
+    Mantid::Geometry::PeakTransformFactory_sptr transformFactory =
         m_peakTransformSelector.makeChoice(dimInfo[0], dimInfo[1]);
-    Mantid::API::PeakTransform_sptr transform =
+    Mantid::Geometry::PeakTransform_sptr transform =
         transformFactory->createTransform(dimInfo[0], dimInfo[1]);
     std::string frame = transform->getFriendlyName();
 
@@ -396,6 +396,9 @@ void PeaksTableControllerVsi::removeLayout(QWidget *widget) {
  * Remove the table.
  */
 void PeaksTableControllerVsi::removeTable() {
+  // Reset the color of peaks sources
+  setPeakSourceColorToDefault();
+
   destroySinglePeakSource();
   if (m_peaksTabWidget) {
     m_peaksTabWidget->deleteLater();
@@ -608,6 +611,50 @@ void PeaksTableControllerVsi::onPeaksSorted(
   // Invoke the ording command on the presenters
   m_presenter->sortPeaksWorkspace(columnToSortBy, sortAscending, ws);
   // Update the tabs
+}
+
+/**
+ * Reset the color of the peaks workspace glyphs to white
+ */
+void PeaksTableControllerVsi::setPeakSourceColorToDefault() {
+  pqServer *server = pqActiveObjects::instance().activeServer();
+  pqServerManagerModel *smModel = pqApplicationCore::instance()->getServerManagerModel();
+  QList<pqPipelineSource *> sources = smModel->findItems<pqPipelineSource *>(server);
+  for (QList<pqPipelineSource *>::iterator src = sources.begin(); src != sources.end(); ++src) {
+
+    std::string xmlName((*src)->getProxy()->GetXMLName());
+    if ((xmlName.find("Peaks Source") != std::string::npos)) {
+        double red = 1.0;
+        double green = 1.0;
+        double blue = 1.0;
+
+        pqDataRepresentation *rep =
+            (*src)
+                ->getRepresentation(pqActiveObjects::instance().activeView());
+        if (!rep)
+        {
+          continue;
+        }
+          pqPipelineRepresentation *pipelineRepresentation =
+              qobject_cast<pqPipelineRepresentation *>(rep);
+        if (!pipelineRepresentation)
+        {
+          continue;
+        }
+        pipelineRepresentation->getProxy()->UpdatePropertyInformation();
+
+        vtkSMDoubleVectorProperty *prop =
+            vtkSMDoubleVectorProperty::SafeDownCast(
+                pipelineRepresentation->getProxy()->GetProperty(
+                    "AmbientColor"));
+        prop->SetElement(0, red);
+        prop->SetElement(1, green);
+        prop->SetElement(2, blue);
+        pipelineRepresentation->getProxy()->UpdateVTKObjects();
+        pipelineRepresentation->updateHelperProxies();
+        pqActiveObjects::instance().activeView()->forceRender();
+    }
+  }
 }
 }
 }

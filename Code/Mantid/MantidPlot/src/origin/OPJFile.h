@@ -85,6 +85,7 @@ struct originWindow {
 	originWindow(std::string _name="", std::string _label="", bool _bHidden=false)
 	:	name(_name)
 	,	label(_label)
+	,	objectID(0)
 	,	bHidden(_bHidden)
 	,	state(Normal)
 	,	title(Both)
@@ -144,10 +145,12 @@ struct spreadSheet : public originWindow {
 	bool bMultisheet;
 	std::vector <spreadColumn> column;
 	spreadSheet(std::string _name="")
-	:	originWindow(_name)
+        :	originWindow(_name)
+        ,	maxRows(0)
 	,	bLoose(true)
 	,	bMultisheet(false)
-	{};
+	,	column()          
+        {};
 };
 
 struct excel : public originWindow {
@@ -178,7 +181,9 @@ struct matrix : public originWindow {
 	HeaderViewType header;
 	std::vector <double> data;
 	matrix(std::string _name="", int _index=0)
-	:	originWindow(_name)
+        :	originWindow(_name)
+        ,       nr_rows(0)
+        ,       nr_cols(0)
 	,	value_type_specification(0)
 	,	significant_digits(6)
 	,	decimal_places(6)
@@ -223,7 +228,15 @@ struct text {
 
 	text(const std::string& _txt="")
 		:	txt(_txt)
-	{};
+		,	clientRect()
+                ,	color(0)
+                ,	fontsize(0)
+                ,	rotation(0)
+                ,	tab(0)
+                ,	border_type(0)
+                ,	attach(0)
+        {};
+
 	text(const std::string& _txt, const rect& _clientRect, int _color, int _fontsize, int _rotation, int _tab, int _border_type, int _attach)
 		:	txt(_txt)
 		,	clientRect(_clientRect)
@@ -256,13 +269,21 @@ struct pieProperties
 	unsigned short distance;
 
 	pieProperties()
-	:	clockwise_rotation(false)
+	:	view_angle(0)
+	,	thickness(0)
+	,	clockwise_rotation(false)
+	,	rotation(0)
+	,	radius(0)
+	,	horizontal_offset(0)
+	,	displaced_sections(0)
+	,	displacement(0)
 	,	format_automatic(false)
 	,	format_values(false)
 	,	format_percentages(false)
 	,	format_categories(false)
 	,	position_associate(false)
-	{};
+	,	distance(0)
+        {};
 };
 
 struct vectorProperties
@@ -283,11 +304,19 @@ struct vectorProperties
 	int const_magnitude;
 
 	vectorProperties()
-	:	arrow_closed(false)
-	,	position(0)
-	,	multiplier(1.0)
-	,	const_angle(0)
-	,	const_magnitude(0)
+        :	color(0)
+        ,	width(0.0)
+        ,	arrow_lenght(0)
+        ,	arrow_angle(0)
+        ,	arrow_closed(false)
+        ,	endXColName()
+        ,	endYColName()
+        ,	position(0)
+        ,	angleColName()
+        ,	magnitudeColName(0)
+        ,	multiplier(1.0)
+        ,	const_angle(0)
+        ,	const_magnitude(0)
 	{};
 };
 
@@ -343,7 +372,15 @@ struct graphAxisBreak {
 	unsigned char minor_ticks_after;
 
 	graphAxisBreak()
-	:	show(false)
+	:   show(false)
+          , log10(false)
+          , from(0.0)
+          , to(0.0)
+          , position(0)
+          , scale_increment_before(0)
+          , scale_increment_after(0)
+          , minor_ticks_before(0)
+          , minor_ticks_after(0)
 	{
 	}
 };
@@ -484,7 +521,9 @@ struct graph : public originWindow {
 
 	graph(std::string _name="")
 	:	originWindow(_name)
-	{};
+        ,	width(0)
+        ,	height(0)
+        {};
 };
 
 struct note : public originWindow {

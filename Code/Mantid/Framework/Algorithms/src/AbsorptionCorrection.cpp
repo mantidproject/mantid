@@ -22,7 +22,7 @@ AbsorptionCorrection::AbsorptionCorrection()
     : API::Algorithm(), m_inputWS(), m_sampleObject(NULL), m_L1s(),
       m_elementVolumes(), m_elementPositions(), m_numVolumeElements(0),
       m_sampleVolume(0.0), m_refAtten(0.0), m_scattering(0), n_lambda(0),
-      x_step(0) {}
+      m_xStep(0), m_emode(0), m_lambdaFixed(0.), EXPONENTIAL() {}
 
 void AbsorptionCorrection::init() {
 
@@ -115,13 +115,13 @@ void AbsorptionCorrection::exec() {
   // If the number of wavelength points has not been given, use them all
   if (isEmpty(n_lambda))
     n_lambda = specSize;
-  x_step = specSize / n_lambda; // Bin step between points to calculate
+  m_xStep = specSize / n_lambda; // Bin step between points to calculate
 
-  if (x_step == 0) // Number of wavelength points >number of histogram points
-    x_step = 1;
+  if (m_xStep == 0) // Number of wavelength points >number of histogram points
+    m_xStep = 1;
 
   std::ostringstream message;
-  message << "Numerical integration performed every " << x_step
+  message << "Numerical integration performed every " << m_xStep
           << " wavelength points" << std::endl;
   g_log.information(message.str());
   message.str("");
@@ -187,8 +187,8 @@ void AbsorptionCorrection::exec() {
     // Get a reference to the Y's in the output WS for storing the factors
     MantidVec &Y = correctionFactors->dataY(i);
 
-    // Loop through the bins in the current spectrum every x_step
-    for (int64_t j = 0; j < specSize; j = j + x_step) {
+    // Loop through the bins in the current spectrum every m_xStep
+    for (int64_t j = 0; j < specSize; j = j + m_xStep) {
       const double lambda = (isHist ? (0.5 * (X[j] + X[j + 1])) : X[j]);
       if (m_emode == 0) // Elastic
       {
@@ -203,15 +203,16 @@ void AbsorptionCorrection::exec() {
       Y[j] /= m_sampleVolume; // Divide by total volume of the cylinder
 
       // Make certain that last point is calculates
-      if (x_step > 1 && j + x_step >= specSize && j + 1 != specSize) {
-        j = specSize - x_step - 1;
+      if (m_xStep > 1 && j + m_xStep >= specSize && j + 1 != specSize) {
+        j = specSize - m_xStep - 1;
       }
     }
 
-    if (x_step > 1) // Interpolate linearly between points separated by x_step,
-                    // last point required
+    if (m_xStep >
+        1) // Interpolate linearly between points separated by m_xStep,
+           // last point required
     {
-      VectorHelper::linearlyInterpolateY(X, Y, static_cast<double>(x_step));
+      VectorHelper::linearlyInterpolateY(X, Y, static_cast<double>(m_xStep));
     }
 
     prog.report();

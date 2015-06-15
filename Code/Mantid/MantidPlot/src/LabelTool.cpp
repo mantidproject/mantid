@@ -126,8 +126,6 @@ void LabelTool::yAxisClicked(const QwtPolygon &y)
 /// Determines the number of curves present on the graph.
 void LabelTool::populateMantidCurves()
 {
-  d_graph->plotWidget();
-  
   int n_curves =  d_graph->curves();
 
   // Determines whether any of the graphs are MantidMatrixCurves (MMCs) and returns their names into a list.

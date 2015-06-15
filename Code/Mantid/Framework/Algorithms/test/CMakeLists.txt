@@ -38,7 +38,17 @@ if ( CXXTEST_FOUND )
                         ../../TestHelpers/src/ScopedFileHelper.cpp
                         )
   cxxtest_add_test ( AlgorithmsTest ${TEST_FILES} )
-  target_link_libraries ( AlgorithmsTest Algorithms DataHandling ${GMOCK_LIBRARIES} )
+  target_link_libraries ( AlgorithmsTest LINK_PRIVATE 
+            Algorithms
+            API
+            DataHandling
+            DataObjects
+            Geometry
+            Kernel
+            Nexus
+            ${Boost_LIBRARIES}
+            ${POCO_LIBRARIES}
+            ${GMOCK_LIBRARIES} )
   add_dependencies ( AlgorithmsTest Crystal CurveFitting )
   add_dependencies ( FrameworkTests AlgorithmsTest )
   # Test data

@@ -88,6 +88,10 @@ protected:
   /// Used by the GSL
   static void fundfun(const gsl_vector *x, void *params, double *f,
                       gsl_vector *g);
+
+private:
+  /// simply init the values for the gsl minimizer
+  void initGSLMMin();
 };
 
 } // namespace CurveFitting

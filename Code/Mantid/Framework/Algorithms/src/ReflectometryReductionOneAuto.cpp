@@ -6,6 +6,7 @@
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/RebinParamsValidator.h"
 #include <boost/optional.hpp>
+#include <boost/assign/list_of.hpp>
 
 namespace Mantid {
 namespace Algorithms {
@@ -106,7 +107,7 @@ void ReflectometryReductionOneAuto::init() {
 
   declareProperty(new PropertyWithValue<int>("I0MonitorIndex",
                                              Mantid::EMPTY_INT(), index_bounds),
-                  "I0 monitor index");
+                  "I0 monitor workspace index");
   declareProperty(new PropertyWithValue<std::string>("ProcessingInstructions",
                                                      "", Direction::Input),
                   "Processing commands to select and add spectrum to make a "
@@ -145,12 +146,48 @@ void ReflectometryReductionOneAuto::init() {
   declareProperty("ThetaOut", Mantid::EMPTY_DBL(),
                   "Calculated final theta in degrees.", Direction::Output);
 
+  declareProperty("NormalizeByIntegratedMonitors", true,
+                  "Normalize by dividing by the integrated monitors.");
+
   declareProperty("CorrectDetectorPositions", true,
                   "Correct detector positions using ThetaIn (if given)");
 
   declareProperty("StrictSpectrumChecking", true,
                   "Strict checking between spectrum numbers in input "
                   "workspaces and transmission workspaces.");
+
+  std::vector<std::string> correctionAlgorithms = boost::assign::list_of(
+      "None")("AutoDetect")("PolynomialCorrection")("ExponentialCorrection");
+  declareProperty("CorrectionAlgorithm", "AutoDetect",
+                  boost::make_shared<StringListValidator>(correctionAlgorithms),
+                  "The type of correction to perform.");
+
+  declareProperty(new ArrayProperty<double>("Polynomial"),
+                  "Coefficients to be passed to the PolynomialCorrection"
+                  " algorithm.");
+
+  declareProperty(
+      new PropertyWithValue<double>("C0", 0.0, Direction::Input),
+      "C0 value to be passed to the ExponentialCorrection algorithm.");
+
+  declareProperty(
+      new PropertyWithValue<double>("C1", 0.0, Direction::Input),
+      "C1 value to be passed to the ExponentialCorrection algorithm.");
+
+  setPropertyGroup("CorrectionAlgorithm", "Polynomial Corrections");
+  setPropertyGroup("Polynomial", "Polynomial Corrections");
+  setPropertyGroup("C0", "Polynomial Corrections");
+  setPropertyGroup("C1", "Polynomial Corrections");
+
+  setPropertySettings("Polynomial", new Kernel::EnabledWhenProperty(
+                                        "CorrectionAlgorithm", IS_EQUAL_TO,
+                                        "PolynomialCorrection"));
+  setPropertySettings(
+      "C0", new Kernel::EnabledWhenProperty("CorrectionAlgorithm", IS_EQUAL_TO,
+                                            "ExponentialCorrection"));
+  setPropertySettings(
+      "C1", new Kernel::EnabledWhenProperty("CorrectionAlgorithm", IS_EQUAL_TO,
+                                            "ExponentialCorrection"));
 
   // Polarization correction inputs --------------
   std::vector<std::string> propOptions;
@@ -290,6 +327,8 @@ void ReflectometryReductionOneAuto::exec() {
 
   bool correct_positions = this->getProperty("CorrectDetectorPositions");
   bool strict_spectrum_checking = this->getProperty("StrictSpectrumChecking");
+  bool norm_by_int_mons = getProperty("NormalizeByIntegratedMonitors");
+  const std::string correction_algorithm = getProperty("CorrectionAlgorithm");
 
   // Pass the arguments and execute the main algorithm.
 
@@ -301,6 +340,7 @@ void ReflectometryReductionOneAuto::exec() {
     refRedOne->setProperty("OutputWorkspace", output_workspace_name);
     refRedOne->setProperty("OutputWorkspaceWavelength",
                            output_workspace_lam_name);
+    refRedOne->setProperty("NormalizeByIntegratedMonitors", norm_by_int_mons);
     refRedOne->setProperty("I0MonitorIndex", i0_monitor_index);
     refRedOne->setProperty("ProcessingInstructions", processing_commands);
     refRedOne->setProperty("WavelengthMin", wavelength_min);
@@ -315,6 +355,68 @@ void ReflectometryReductionOneAuto::exec() {
                            wavelength_integration_max);
     refRedOne->setProperty("CorrectDetectorPositions", correct_positions);
     refRedOne->setProperty("StrictSpectrumChecking", strict_spectrum_checking);
+
+    if (correction_algorithm == "PolynomialCorrection") {
+      // Copy across the polynomial
+      refRedOne->setProperty("CorrectionAlgorithm", "PolynomialCorrection");
+      refRedOne->setProperty("Polynomial", getPropertyValue("Polynomial"));
+    } else if (correction_algorithm == "ExponentialCorrection") {
+      // Copy across c0 and c1
+      refRedOne->setProperty("CorrectionAlgorithm", "ExponentialCorrection");
+      refRedOne->setProperty("C0", getPropertyValue("C0"));
+      refRedOne->setProperty("C1", getPropertyValue("C1"));
+    } else if (correction_algorithm == "AutoDetect") {
+      // Figure out what to do from the instrument
+      try {
+        auto inst = in_ws->getInstrument();
+
+        const std::vector<std::string> corrVec =
+            inst->getStringParameter("correction");
+        const std::string correctionStr = !corrVec.empty() ? corrVec[0] : "";
+
+        if (correctionStr.empty())
+          throw std::runtime_error(
+              "'correction' instrument parameter was not found.");
+
+        const std::vector<std::string> polyVec =
+            inst->getStringParameter("polynomial");
+        const std::string polyStr = !polyVec.empty() ? polyVec[0] : "";
+
+        const std::vector<std::string> c0Vec = inst->getStringParameter("C0");
+        const std::string c0Str = !c0Vec.empty() ? c0Vec[0] : "";
+
+        const std::vector<std::string> c1Vec = inst->getStringParameter("C1");
+        const std::string c1Str = !c1Vec.empty() ? c1Vec[0] : "";
+
+        if (correctionStr == "polynomial" && polyStr.empty())
+          throw std::runtime_error(
+              "'polynomial' instrument parameter was not found.");
+
+        if (correctionStr == "exponential" && (c0Str.empty() || c1Str.empty()))
+          throw std::runtime_error(
+              "'C0' or 'C1' instrument parameter was not found.");
+
+        if (correctionStr == "polynomial") {
+          refRedOne->setProperty("CorrectionAlgorithm", "PolynomialCorrection");
+          refRedOne->setProperty("Polynomial", polyStr);
+        } else if (correctionStr == "exponential") {
+          refRedOne->setProperty("CorrectionAlgorithm",
+                                 "ExponentialCorrection");
+          refRedOne->setProperty("C0", c0Str);
+          refRedOne->setProperty("C1", c1Str);
+        }
+
+      } catch (std::runtime_error &e) {
+        g_log.warning() << "Could not autodetect polynomial correction method. "
+                           "Polynomial correction will not be performed. "
+                           "Reason for failure: " << e.what() << std::endl;
+        refRedOne->setProperty("CorrectionAlgorithm", "None");
+      }
+
+    } else {
+      // None was selected
+      refRedOne->setProperty("CorrectionAlgorithm", "None");
+    }
 
     if (first_ws) {
       refRedOne->setProperty("FirstTransmissionRun", first_ws);

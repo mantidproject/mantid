@@ -15,6 +15,9 @@ from mantid.simpleapi import *
 from mantid.kernel import *
 
 class LiquidsReflectometryReduction(PythonAlgorithm):
+    number_of_pixels_x=0
+    number_of_pixels_y=0
+    TOLERANCE=0.
 
     def category(self):
         return "Reflectometry\\SNS"
@@ -30,38 +33,40 @@ class LiquidsReflectometryReduction(PythonAlgorithm):
 
     def PyInit(self):
         #TODO: Revisit the choice of names when we are entirely rid of the old code.
-        self.declareProperty(IntArrayProperty("RunNumbers"), "List of run numbers to process")
+        self.declareProperty(StringArrayProperty("RunNumbers"), "List of run numbers to process")
         self.declareProperty("NormalizationRunNumber", 0, "Run number of the normalization run to use")
         self.declareProperty(IntArrayProperty("SignalPeakPixelRange", [123, 137],
                                               IntArrayLengthValidator(2), direction=Direction.Input),
-                                              "Pixel range defining the data peak")
+                             "Pixel range defining the data peak")
         self.declareProperty("SubtractSignalBackground", True,
                              doc='If true, the background will be subtracted from the data peak')
         self.declareProperty(IntArrayProperty("SignalBackgroundPixelRange", [123, 137],
                                               IntArrayLengthValidator(2), direction=Direction.Input),
-                                              "Pixel range defining the background. Default:(123,137)")
+                             "Pixel range defining the background. Default:(123,137)")
         self.declareProperty("NormFlag", True, doc="If true, the data will be normalized")
         self.declareProperty(IntArrayProperty("NormPeakPixelRange", [127, 133],
                                               IntArrayLengthValidator(2), direction=Direction.Input),
-                                              "Pixel range defining the normalization peak")
+                             "Pixel range defining the normalization peak")
         self.declareProperty("SubtractNormBackground", True,
                              doc="If true, the background will be subtracted from the normalization peak")
         self.declareProperty(IntArrayProperty("NormBackgroundPixelRange", [127, 137],
                                               IntArrayLengthValidator(2), direction=Direction.Input),
-                                              "Pixel range defining the background for the normalization")
+                             "Pixel range defining the background for the normalization")
         self.declareProperty("LowResDataAxisPixelRangeFlag", True,
-                             doc="If true, the low resolution direction of the data will be cropped according to the lowResDataAxisPixelRange property")
+                             doc="If true, the low resolution direction of the data will be cropped according "+\
+                             "to the lowResDataAxisPixelRange property")
         self.declareProperty(IntArrayProperty("LowResDataAxisPixelRange", [115, 210],
                                               IntArrayLengthValidator(2), direction=Direction.Input),
-                                              "Pixel range to use in the low resolution direction of the data")
+                             "Pixel range to use in the low resolution direction of the data")
         self.declareProperty("LowResNormAxisPixelRangeFlag", True,
-                             doc="If true, the low resolution direction of the normalization run will be cropped according to the LowResNormAxisPixelRange property")
+                             doc="If true, the low resolution direction of the normalization run will be cropped "+\
+                             "according to the LowResNormAxisPixelRange property")
         self.declareProperty(IntArrayProperty("LowResNormAxisPixelRange", [115, 210],
                                               IntArrayLengthValidator(2), direction=Direction.Input),
-                                              "Pixel range to use in the low resolution direction of the normalizaion run")
+                             "Pixel range to use in the low resolution direction of the normalizaion run")
         self.declareProperty(FloatArrayProperty("TOFRange", [0., 340000.],
                                                 FloatArrayLengthValidator(2), direction=Direction.Input),
-                                                "TOF range to use")
+                             "TOF range to use")
         self.declareProperty("TOFRangeFlag", True,
                              doc="If true, the TOF will be cropped according to the TOF range property")
         self.declareProperty("QMin", 0.05, doc="Minimum Q-value")
@@ -81,8 +86,9 @@ class LiquidsReflectometryReduction(PythonAlgorithm):
         self.declareProperty("ApplyPrimaryFraction", False, doc="If true, the primary fraction correction will be applied")
         self.declareProperty(IntArrayProperty("PrimaryFractionRange", [117, 197],
                                               IntArrayLengthValidator(2), direction=Direction.Input),
-                                              "Pixel range to use for calculating the primary fraction correction.")
+                             "Pixel range to use for calculating the primary fraction correction.")
 
+    #pylint: disable=too-many-locals,too-many-branches
     def PyExec(self):
         # The old reduction code had a tolerance value for matching the
         # slit parameters to get the scaling factors
@@ -107,7 +113,12 @@ class LiquidsReflectometryReduction(PythonAlgorithm):
         # If we have multiple files, add them
         file_list = []
         for item in dataRunNumbers:
-            data_file = FileFinder.findRuns("REF_L%d" % item)[0]
+            # The standard mode of operation is to give a run number as input
+            try:
+                data_file = FileFinder.findRuns("REF_L%s" % item)[0]
+            except RuntimeError:
+                # Allow for a file name or file path as input
+                data_file = FileFinder.findRuns(item)[0]
             file_list.append(data_file)
         runs = reduce((lambda x, y: '%s+%s' % (x, y)), file_list)
         ws_event_data = Load(Filename=runs, OutputWorkspace="REF_L_%s" % dataRunNumbers[0])
@@ -285,7 +296,7 @@ class LiquidsReflectometryReduction(PythonAlgorithm):
 
         # Sanity check
         if sum(data_y) == 0:
-            raise RuntimeError, "The reflectivity is all zeros: check your peak selection"
+            raise RuntimeError("The reflectivity is all zeros: check your peak selection")
 
         # Avoid leaving trash behind
         for ws in ['ws_event_data', 'normalized_data', 'q_workspace']:
@@ -313,11 +324,14 @@ class LiquidsReflectometryReduction(PythonAlgorithm):
             tthd_value *= math.pi / 180.0
 
         theta = math.fabs(tthd_value - thi_value) / 2.
+        if theta < 0.001:
+            logger.warning("thi and tthd are equal: is this a direct beam?")
 
         # Add the offset
         angle_offset_deg = self.getProperty("AngleOffset").value
         return theta + angle_offset_deg * math.pi / 180.0
 
+    #pylint: disable=too-many-arguments
     def process_data(self, workspace, tof_range, crop_low_res, low_res_range,
                      peak_range, subtract_background, background_range):
         """
@@ -333,7 +347,7 @@ class LiquidsReflectometryReduction(PythonAlgorithm):
             error_msg = "Requested TOF range does not match data for %s: " % str(workspace)
             error_msg += "[%g, %g] found [%g, %g]" % (tof_range[0], tof_range[1],
                                                       tof_min, tof_max)
-            raise RuntimeError, error_msg
+            raise RuntimeError(error_msg)
 
         tof_step = self.getProperty("TOFSteps").value
         workspace = Rebin(InputWorkspace=workspace, Params=[0, tof_step, tof_max],
@@ -385,6 +399,7 @@ class LiquidsReflectometryReduction(PythonAlgorithm):
 
         return cropped
 
+    #pylint: disable=too-many-locals,too-many-branches
     def apply_scaling_factor(self, workspace):
         """
             Apply scaling factor from reference scaling data
@@ -421,7 +436,7 @@ class LiquidsReflectometryReduction(PythonAlgorithm):
         try:
             s2h = abs(workspace.getRun().getProperty("%sVHeight" % back_slit).value[0])
             s2w = abs(workspace.getRun().getProperty("%sHWidth" % back_slit).value[0])
-        except:
+        except RuntimeError:
             # For backward compatibility with old code
             logger.error("Specified slit could not be found: %s  Trying S2" % back_slit)
             s2h = abs(workspace.getRun().getProperty("S2VHeight").value[0])
@@ -509,6 +524,10 @@ class LiquidsReflectometryReduction(PythonAlgorithm):
             b = float(data_found['b'])
             a_error = float(data_found['error_a'])
             b_error = float(data_found['error_b'])
+            AddSampleLog(Workspace=workspace, LogName='scaling_factor_a', LogText=str(a))
+            AddSampleLog(Workspace=workspace, LogName='scaling_factor_b', LogText=str(b))
+            AddSampleLog(Workspace=workspace, LogName='scaling_factor_a_error', LogText=str(a_error))
+            AddSampleLog(Workspace=workspace, LogName='scaling_factor_b_error', LogText=str(b_error))
 
             # Extract a single spectrum, just so we have the TOF axis
             # to create a normalization workspace

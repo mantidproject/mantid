@@ -293,6 +293,11 @@ void IntegrateMDHistoWorkspace::exec() {
       boost::scoped_ptr<MDHistoWorkspaceIterator> outIterator(
           dynamic_cast<MDHistoWorkspaceIterator *>(outIterators[i]));
 
+      if (!outIterator) {
+        throw std::logic_error(
+            "Failed to cast iterator to MDHistoWorkspaceIterator");
+      }
+
       do {
 
         Mantid::Kernel::VMD outIteratorCenter = outIterator->getCenter();

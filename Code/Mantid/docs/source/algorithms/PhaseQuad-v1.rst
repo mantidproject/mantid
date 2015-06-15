@@ -2,6 +2,20 @@
 
 .. summary::
 
+Overview
+--------
+
+This algorithm provides a method for combining signals from multiple detector segments to form two output 
+signals in quadrature phase. It is of particular use when working with muon spin rotation signals measured 
+using highly segmented detector arrays that are typically found at pulsed muon sources (ISIS has instruments 
+with up to 600 detector elements). The method allows information from individual detectors to be combined in 
+a way that makes full use of the dataset. 
+
+This algorithm is frequently run as a precursor to making a Rotating Reference Frame transformation of 
+the dataset using the algorithm :ref:`algm-RRFMuon`. Both algorithms are fully described in the article 
+by T.M. Riseman and J.H. Brewer [Hyp. Int., 65, (1990), 1107].
+
+
 .. alias::
 
 .. properties::

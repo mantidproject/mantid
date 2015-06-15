@@ -8,6 +8,7 @@ set ( SRC_FILES
 	src/LineViewer.cpp
 	src/PeakBoundingBox.cpp
 	src/PeaksViewerOverlayDialog.cpp
+        src/PeakOverlayInteractive.cpp
 	src/PeakOverlayMultiCross.cpp
 	src/PeakOverlayMultiCrossFactory.cpp
 	src/PeakOverlayMultiSphere.cpp
@@ -42,7 +43,9 @@ set ( INC_FILES
 	inc/MantidQtSliceViewer/LinePlotOptions.h
 	inc/MantidQtSliceViewer/LineViewer.h
 	inc/MantidQtSliceViewer/NullPeaksPresenter.h
-	inc/MantidQtSliceViewer/PeakBoundingBox.h
+	inc/MantidQtSliceViewer/PeakEditMode.h
+        inc/MantidQtSliceViewer/PeakBoundingBox.h
+        inc/MantidQtSliceViewer/PeakOverlayInteractive.h
 	inc/MantidQtSliceViewer/PeakOverlayMultiCross.h
 	inc/MantidQtSliceViewer/PeakOverlayMultiCrossFactory.h
 	inc/MantidQtSliceViewer/PeakOverlayMultiSphere.h
@@ -77,6 +80,7 @@ set ( MOC_FILES
 	inc/MantidQtSliceViewer/LineOverlay.h
 	inc/MantidQtSliceViewer/LineViewer.h
 	inc/MantidQtSliceViewer/LinePlotOptions.h
+        inc/MantidQtSliceViewer/PeakOverlayInteractive.h
  	inc/MantidQtSliceViewer/PeakOverlayMultiCross.h
 	inc/MantidQtSliceViewer/PeakOverlayMultiSphere.h
 	inc/MantidQtSliceViewer/PeaksTableColumnsDialog.h
@@ -136,7 +140,9 @@ set ( ALL_SRC ${SRC_FILES} ${MOCCED_FILES} )
 
 qt4_wrap_ui ( UI_HDRS ${UI_FILES} ) 
 
-include_directories ( ${CMAKE_CURRENT_BINARY_DIR} )
+include_directories ( ${CMAKE_CURRENT_BINARY_DIR})
+
+include_directories ( ../../Framework/DataObjects/inc )
 
 # For Windows:
 add_definitions ( -DIN_MANTIDQT_SLICEVIEWER )
@@ -149,7 +155,15 @@ if (OSX_VERSION VERSION_GREATER 10.8)
 endif ()
 
 # ... and links to other required libs
-target_link_libraries ( MantidQtSliceViewer MantidQtAPI MantidWidgets ${QT_LIBRARIES} ${QWT_LIBRARIES} )
+target_link_libraries ( MantidQtSliceViewer LINK_PRIVATE 
+            MantidQtAPI
+            MantidWidgets
+            DataObjects
+            ${CORE_MANTIDLIBS}
+            ${POCO_LIBRARIES}
+            ${Boost_LIBRARIES}
+            ${QT_LIBRARIES}
+            ${QWT_LIBRARIES} )
 
 ###########################################################################
 # Unit tests setup
@@ -170,7 +184,16 @@ if ( CXXTEST_FOUND )
   )
 
   cxxtest_add_test ( SliceViewerTest ${TEST_FILES} ${GMOCK_TEST_FILES} )
-  target_link_libraries( SliceViewerTest MantidQtSliceViewer DataObjects Crystal ${GMOCK_LIBRARIES} ${GTEST_LIBRARIES} )
+  target_link_libraries( SliceViewerTest LINK_PRIVATE
+            MantidQtSliceViewer
+            DataObjects
+            Crystal
+            ${CORE_MANTIDLIBS}
+            ${Boost_LIBRARIES}
+            ${POCO_LIBRARIES}
+            ${QT_LIBRARIES}
+            ${GMOCK_LIBRARIES}
+            ${GTEST_LIBRARIES} )
 
   add_dependencies( GUITests SliceViewerTest )
   # Add to the 'UnitTests' group in VS

@@ -12,6 +12,7 @@ set ( SRC_FILES
 	src/BivariateNormal.cpp
 	src/Bk2BkExpConvPV.cpp
 	src/BoundaryConstraint.cpp
+	src/CalculateChiSquared.cpp
 	src/CalculateGammaBackground.cpp
 	src/CalculateMSVesuvio.cpp
 	src/Chebyshev.cpp
@@ -53,6 +54,7 @@ set ( SRC_FILES
 	src/Gaussian.cpp
 	src/GaussianComptonProfile.cpp
 	src/GramCharlierComptonProfile.cpp
+	src/IFittingAlgorithm.cpp
 	src/IkedaCarpenterPV.cpp
 	src/LatticeDomainCreator.cpp
 	src/LatticeFunction.cpp
@@ -126,6 +128,7 @@ set ( INC_FILES
 	inc/MantidCurveFitting/BivariateNormal.h
 	inc/MantidCurveFitting/Bk2BkExpConvPV.h
 	inc/MantidCurveFitting/BoundaryConstraint.h
+	inc/MantidCurveFitting/CalculateChiSquared.h
 	inc/MantidCurveFitting/CalculateGammaBackground.h
 	inc/MantidCurveFitting/CalculateMSVesuvio.h
 	inc/MantidCurveFitting/Chebyshev.h
@@ -170,6 +173,7 @@ set ( INC_FILES
 	inc/MantidCurveFitting/Gaussian.h
 	inc/MantidCurveFitting/GaussianComptonProfile.h
 	inc/MantidCurveFitting/GramCharlierComptonProfile.h
+	inc/MantidCurveFitting/IFittingAlgorithm.h
 	inc/MantidCurveFitting/IkedaCarpenterPV.h
 	inc/MantidCurveFitting/Jacobian.h
 	inc/MantidCurveFitting/LatticeDomainCreator.h
@@ -240,6 +244,7 @@ set ( TEST_FILES
 	BivariateNormalTest.h
 	Bk2BkExpConvPVTest.h
 	BoundaryConstraintTest.h
+	CalculateChiSquaredTest.h
 	CalculateGammaBackgroundTest.h
 	CalculateMSVesuvioTest.h
 	ChebyshevTest.h
@@ -335,6 +340,11 @@ set ( TEST_FILES
 	VoigtTest.h
 )
 
+if (COVERALLS)
+    foreach( loop_var ${SRC_FILES} ${INC_FILES})
+      set_property(GLOBAL APPEND PROPERTY COVERAGE_SRCS "${CMAKE_CURRENT_SOURCE_DIR}/${loop_var}")
+    endforeach(loop_var)
+endif()
 
 if(UNITY_BUILD)
   include(UnityBuild)
@@ -358,7 +368,7 @@ set_property ( TARGET CurveFitting PROPERTY FOLDER "MantidFramework" )
 
 include_directories ( inc )
 
-target_link_libraries ( CurveFitting ${MANTIDLIBS} ${GSL_LIBRARIES} )
+target_link_libraries ( CurveFitting LINK_PRIVATE ${MANTIDLIBS} ${GSL_LIBRARIES} )
 
 # Add the unit tests directory
 add_subdirectory ( test )

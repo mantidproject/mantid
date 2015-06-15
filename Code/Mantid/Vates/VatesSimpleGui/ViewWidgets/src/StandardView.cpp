@@ -24,11 +24,13 @@
   #pragma warning enable 1170
 #endif
 
-#include <QHBoxLayout>
 #include <QAction>
+#include <QHBoxLayout>
+#include <QHelpEvent>
 #include <QMenu>
 #include <QMessageBox>
 #include <QString>
+#include <QToolTip>
 
 namespace Mantid
 {
@@ -36,6 +38,51 @@ namespace Vates
 {
 namespace SimpleGui
 {
+
+/**
+ * Simple class for a QMenu where the actions do show their tool tip
+ * strings (this does not happen by default with standard QMenu).
+ */
+class QMenuWithToolTip: public QMenu {
+public:
+  QMenuWithToolTip(QWidget *parent): QMenu(parent)
+  {
+  }
+
+  bool event(QEvent* e) {
+    if (QEvent::ToolTip == e->type()) {
+      // grab the action specific tooltip
+      QHelpEvent *he = dynamic_cast<QHelpEvent*>(e);
+      if (!he)
+        return false;
+      QAction* a = actionAt(he->pos());
+      if (a && a->toolTip() != a->text()) {
+        QToolTip::showText(he->globalPos(), a->toolTip(), this);
+        return true;
+      }
+    }
+    return QMenu::event(e);
+  }
+};
+
+QString StandardView::g_binMDName = "BinMD";
+QString StandardView::g_sliceMDName = "SliceMD";
+QString StandardView::g_cutMDName = "CutMD";
+// important: these label strings must use the name of the corresponding
+// Mantid algorithm as first token (before first space), as it will
+// be used as a parameter when emitting the signal rebin
+QString StandardView::g_binMDLbl = "Fast (" + g_binMDName + ")";
+QString StandardView::g_sliceMDLbl = "Complete (" + g_sliceMDName + ")";
+QString StandardView::g_cutMDLbl = "Horace style (" + g_cutMDName + ")";
+
+const QString tipBefore = "Run the ";
+const QString tipAfter = " Mantid algorithm (the algorithm dialog will show up)";
+QString StandardView::g_binMDToolTipTxt = tipBefore + g_binMDName + tipAfter;
+QString StandardView::g_sliceMDToolTipTxt = tipBefore + g_sliceMDName + tipAfter;
+QString StandardView::g_cutMDToolTipTxt = tipBefore + g_cutMDName + tipAfter;
+
+// To map action labels to algorithm names
+QMap<QString, QString> StandardView::g_actionToAlgName;
 
 /**
  * This function sets up the UI components, adds connections for the view's
@@ -49,14 +96,21 @@ namespace SimpleGui
                                                                  m_cutMDAction(NULL),
                                                                  m_unbinAction(NULL)
 {
-  this->ui.setupUi(this);
-  this->cameraReset = false;
+  this->m_ui.setupUi(this);
+  this->m_cameraReset = false;
+
+  // before setting the button-actions, register their algorithms
+  if (0 == g_actionToAlgName.size()) {
+    g_actionToAlgName.insert(g_binMDLbl, g_binMDName);
+    g_actionToAlgName.insert(g_sliceMDLbl, g_sliceMDName);
+    g_actionToAlgName.insert(g_cutMDLbl, g_cutMDName);
+  }
 
   // Set up the buttons
   setupViewButtons();
 
   // Set the cut button to create a slice on the data
-  QObject::connect(this->ui.cutButton, SIGNAL(clicked()), this,
+  QObject::connect(this->m_ui.cutButton, SIGNAL(clicked()), this,
                    SLOT(onCutButtonClicked()));
 
   // Listen to a change in the active source, to adapt our rebin buttons
@@ -64,12 +118,12 @@ namespace SimpleGui
                    this, SLOT(activeSourceChangeListener(pqPipelineSource*)));
 
   // Set the scale button to create the ScaleWorkspace operator
-  QObject::connect(this->ui.scaleButton, SIGNAL(clicked()),
+  QObject::connect(this->m_ui.scaleButton, SIGNAL(clicked()),
                    this, SLOT(onScaleButtonClicked()));
 
-  this->view = this->createRenderView(this->ui.renderFrame);
+  this->m_view = this->createRenderView(this->m_ui.renderFrame);
 
-  QObject::connect(this->view.data(), SIGNAL(endRender()),
+  QObject::connect(this->m_view.data(), SIGNAL(endRender()),
                    this, SLOT(onRenderDone()));
 
 
@@ -83,15 +137,18 @@ void StandardView::setupViewButtons()
 {
 
   // Populate the rebin button
-  QMenu* rebinMenu = new QMenu(this->ui.rebinToolButton);
+  QMenuWithToolTip* rebinMenu = new QMenuWithToolTip(this->m_ui.rebinToolButton);
 
-  m_binMDAction = new QAction("BinMD", rebinMenu);
+  m_binMDAction = new QAction(g_binMDLbl, rebinMenu);
+  m_binMDAction->setToolTip(g_binMDToolTipTxt);
   m_binMDAction->setIconVisibleInMenu(false);
   
-  m_sliceMDAction = new QAction("SliceMD", rebinMenu);
+  m_sliceMDAction = new QAction(g_sliceMDLbl, rebinMenu);
+  m_sliceMDAction->setToolTip(g_sliceMDToolTipTxt);
   m_sliceMDAction->setIconVisibleInMenu(false);
 
-  m_cutMDAction = new QAction("CutMD", rebinMenu);
+  m_cutMDAction = new QAction(g_cutMDLbl, rebinMenu);
+  m_cutMDAction->setToolTip(g_cutMDToolTipTxt);
   m_cutMDAction->setIconVisibleInMenu(false);
 
   m_unbinAction = new QAction("Remove Rebinning", rebinMenu);
@@ -102,8 +159,8 @@ void StandardView::setupViewButtons()
   rebinMenu->addAction(m_cutMDAction);
   rebinMenu->addAction(m_unbinAction);
 
-  this->ui.rebinToolButton->setPopupMode(QToolButton::InstantPopup);
-  this->ui.rebinToolButton->setMenu(rebinMenu);
+  this->m_ui.rebinToolButton->setPopupMode(QToolButton::InstantPopup);
+  this->m_ui.rebinToolButton->setMenu(rebinMenu);
 
   QObject::connect(m_binMDAction, SIGNAL(triggered()),
                    this, SLOT(onRebin()), Qt::QueuedConnection);
@@ -121,13 +178,13 @@ void StandardView::setupViewButtons()
 void StandardView::destroyView()
 {
   pqObjectBuilder *builder = pqApplicationCore::instance()->getObjectBuilder();
-  this->destroyFilter(builder, QString("Slice"));
-  builder->destroy(this->view);
+  this->destroyFilter(QString("Slice"));
+  builder->destroy(this->m_view);
 }
 
 pqRenderView* StandardView::getView()
 {
-  return this->view.data();
+  return this->m_view.data();
 }
 
 void StandardView::render()
@@ -143,12 +200,12 @@ void StandardView::render()
 
   if (this->isPeaksWorkspace(this->origSrc))
   {
-    this->ui.cutButton->setEnabled(false);
+    this->m_ui.cutButton->setEnabled(false);
   }
 
   // Show the data
   pqDataRepresentation *drep = builder->createDataRepresentation(\
-        this->origSrc->getOutputPort(0), this->view);
+        this->origSrc->getOutputPort(0), this->m_view);
   QString reptype = "Surface";
   if (this->isPeaksWorkspace(this->origSrc))
   {
@@ -182,7 +239,7 @@ void StandardView::onCutButtonClicked()
 void StandardView::onScaleButtonClicked()
 {
   pqObjectBuilder *builder = pqApplicationCore::instance()->getObjectBuilder();
-  this->scaler = builder->createFilter("filters",
+  this->m_scaler = builder->createFilter("filters",
                                        "MantidParaViewScaleWorkspace",
                                        this->getPvActiveSrc());
 }
@@ -193,28 +250,28 @@ void StandardView::onScaleButtonClicked()
  */
 void StandardView::onRenderDone()
 {
-  if (this->cameraReset)
+  if (this->m_cameraReset)
   {
     this->resetCamera();
-    this->cameraReset = false;
+    this->m_cameraReset = false;
   }
 }
 
 void StandardView::renderAll()
 {
-  this->view->render();
+  this->m_view->render();
 }
 
 void StandardView::resetDisplay()
 {
-  this->view->resetDisplay();
-  this->view->forceRender();
+  this->m_view->resetDisplay();
+  this->m_view->forceRender();
 }
 
 void StandardView::resetCamera()
 {
-  this->view->resetCamera();
-  this->view->forceRender();
+  this->m_view->resetCamera();
+  this->m_view->forceRender();
 }
 
 /**
@@ -222,12 +279,12 @@ void StandardView::resetCamera()
  */
 void StandardView::updateUI()
 {
-  this->ui.cutButton->setEnabled(true);
+  this->m_ui.cutButton->setEnabled(true);
 }
 
 void StandardView::updateView()
 {
-  this->cameraReset = true;
+  this->m_cameraReset = true;
 }
 
 void StandardView::closeSubWindows()
@@ -238,14 +295,14 @@ void StandardView::closeSubWindows()
 /**
  * Check if the rebin and unbin buttons should be visible
  * Note that for a rebin button to be visible there may be no
- * MDHisto workspaces present, yet temporary MDHisto workspaces are
- * allowed.
+ * MDHisto workspaces present, yet  MDHisto workspaces which result from 
+ * rebinning within the VSI are allowed.
  */
 void StandardView::setRebinAndUnbinButtons()
 {
-  int numberOfTemporaryWorkspaces = 0;
-  int numberOfTrueMDHistoWorkspaces = 0;
-  int numberOfPeakWorkspaces = 0;
+  unsigned int numberOfInternallyRebinnedWorkspaces = 0;
+  unsigned int numberOfTrueMDHistoWorkspaces = 0;
+  unsigned int numberOfPeakWorkspaces = 0;
 
   pqServer *server = pqActiveObjects::instance().activeServer();
   pqServerManagerModel *smModel = pqApplicationCore::instance()->getServerManagerModel();
@@ -253,9 +310,9 @@ void StandardView::setRebinAndUnbinButtons()
 
   for (QList<pqPipelineSource *>::iterator source = sources.begin(); source != sources.end(); ++source)
   {
-    if (isTemporaryWorkspace(*source))
+    if (isInternallyRebinnedWorkspace(*source))
     {
-      ++numberOfTemporaryWorkspaces;
+      ++numberOfInternallyRebinnedWorkspaces;
     } else if (isMDHistoWorkspace(*source))
     {
       ++numberOfTrueMDHistoWorkspaces;
@@ -270,9 +327,8 @@ void StandardView::setRebinAndUnbinButtons()
   bool allowRebinning = numberOfTrueMDHistoWorkspaces > 0 || numberOfPeakWorkspaces > 0;
   this->allowRebinningOptions(allowRebinning);
 
-  // If there are no temporary workspaces the button should be disabled.
-  const bool allowUnbin = !( numberOfTemporaryWorkspaces == 0 );
-  allowUnbinOption(allowUnbin);
+  // If there are no internally rebinned workspaces the button should be disabled.
+  allowUnbinOption(numberOfInternallyRebinnedWorkspaces > 0);
 }
 
 
@@ -282,7 +338,10 @@ void StandardView::setRebinAndUnbinButtons()
 void StandardView::onRebin()
 {
   if(QAction* action = dynamic_cast<QAction*>(sender())) {
-    emit rebin(action->text().toStdString()); }
+    // split always returns a list of at least one element
+    QString algName = getAlgNameFromMenuLabel(action->text());
+    emit rebin(algName.toStdString());
+  }
 }
 
 /**
@@ -303,7 +362,7 @@ void StandardView::allowUnbinOption(bool allow) {
 
 
 /**
-  * Listen for a change of the active source in order to check if the the 
+  * Listen for a change of the active source in order to check if the
   * active source is an MDEventSource for which we allow rebinning.
   */
 void StandardView::activeSourceChangeListener(pqPipelineSource* source)
@@ -326,24 +385,53 @@ void StandardView::activeSourceChangeListener(pqPipelineSource* source)
     filter = qobject_cast<pqPipelineFilter*>(localSource);
   }
 
-  // Important to first check the temporary source, then for MDEvent source, 
-  // as a temporary source may be an MDEventSource.
+  // Important to first check for an internally rebinned source, then for MDEvent source, 
+  // since the internally rebinned source may be an MDEventSource.
   std::string workspaceType(localSource->getProxy()->GetXMLName());
-  if (isTemporaryWorkspace(localSource))
+
+  // Check if the source is associated with a workspace which was internally rebinned by the VSI.
+  // In this case the user can further rebin or unbin the source.
+  if (isInternallyRebinnedWorkspace(localSource))
   {
     this->allowRebinningOptions(true);
     this->allowUnbinOption(true);
   }
+  // Check if we are dealing with a MDEvent workspace. In this case we allow rebinning, but 
+  // unbinning will not make a lot of sense.
   else if (workspaceType.find("MDEW Source") != std::string::npos)
   {
     this->allowRebinningOptions(true);
     this->allowUnbinOption(false);
   }
+  // Otherwise we must be dealing with either a MDHIsto or PeaksWorkspace
+  // which cannot be neither rebinned nor unbinned.
   else
   {
     this->allowRebinningOptions(false);
     this->allowUnbinOption(false);
   }
+}
+
+/**
+ * Helper for the rebinning menu. For example it will give you the
+ * name of the algorithm CutMD ("CutMD" == g_cutMDName) if you pass
+ * its label in the rebinning menu (g_cutMDToolTipTxt).
+ *
+ * @param menuLbl label (what is shown in the action)
+ * @return Name of the corresponding Mantid algorithm
+ */
+QString StandardView::getAlgNameFromMenuLabel(const QString &menuLbl)
+{
+  QString res;
+  if (g_actionToAlgName.contains(menuLbl))
+  {
+    res = g_actionToAlgName.value(menuLbl);
+  }
+  else {
+    // ideally an informative error would be given here but there doesn't seem to be
+    // a convnient way to do that in these view classes
+  }
+  return res;
 }
 
 } // SimpleGui

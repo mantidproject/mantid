@@ -1,4 +1,4 @@
-# pylint: disable=no-init,invalid-name,attribute-defined-outside-init
+# pylint: disable=no-init,invalid-name,attribute-defined-outside-init,too-many-instance-attributes
 from mantid.simpleapi import *
 from mantid.api import *
 from mantid.kernel import *
@@ -25,6 +25,16 @@ class PoldiDataAnalysis(PythonAlgorithm):
         return False
 
     def PyInit(self):
+        self._allowedFunctions = ["Gaussian", "Lorentzian", "PseudoVoigt", "Voigt"]
+
+        self._globalParameters = {
+            'Gaussian': [],
+            'Lorentzian': [],
+            'PseudoVoigt': ['Mixing'],
+            'Voigt': ['LorentzFWHM']
+        }
+
+
         self.declareProperty(WorkspaceProperty(name="InputWorkspace", defaultValue="", direction=Direction.Input),
                              doc='MatrixWorkspace with 2D POLDI data and valid POLDI instrument.')
 
@@ -37,9 +47,13 @@ class PoldiDataAnalysis(PythonAlgorithm):
         self.declareProperty(WorkspaceProperty("ExpectedPeaks", defaultValue="", direction=Direction.Input),
                              doc='TableWorkspace or WorkspaceGroup with expected peaks used for indexing.')
 
-        allowedProfileFunctions = StringListValidator(["Gaussian", "Lorentzian", "PseudoVoigt", "Voigt"])
+        allowedProfileFunctions = StringListValidator(self._allowedFunctions)
         self.declareProperty("ProfileFunction", "Gaussian", validator=allowedProfileFunctions,
                              direction=Direction.Input)
+
+        self.declareProperty("TieProfileParameters", True, direction=Direction.Input,
+                             doc=('If this option is activated, certain parameters are kept the same for all peaks. '
+                                  'An example is the mixing parameter of the PseudoVoigt function.'))
 
         self.declareProperty("PawleyFit", False, direction=Direction.Input,
                              doc='Should the 2D-fit determine lattice parameters?')
@@ -53,6 +67,10 @@ class PoldiDataAnalysis(PythonAlgorithm):
                              doc=('If this is activated, plot the sum of residuals and calculated spectrum together '
                                   'with the theoretical spectrum and the residuals.'))
 
+        self.declareProperty('OutputRawFitParameters', False, direction=Direction.Input,
+                             doc=('Activating this option produces an output workspace which contains the raw '
+                                  'fit parameters.'))
+
         self.declareProperty(WorkspaceProperty(name="OutputWorkspace", defaultValue="", direction=Direction.Output),
                              doc='WorkspaceGroup with result data from all processing steps.')
 
@@ -63,6 +81,11 @@ class PoldiDataAnalysis(PythonAlgorithm):
         self.inputWorkspace = self.getProperty("InputWorkspace").value
         self.expectedPeaks = self.getProperty("ExpectedPeaks").value
         self.profileFunction = self.getProperty("ProfileFunction").value
+        self.useGlobalParameters = self.getProperty("TieProfileParameters").value
+
+        self.globalParameters = ''
+        if self.useGlobalParameters:
+            self.globalParameters = ','.join(self._globalParameters[self.profileFunction])
 
         correlationSpectrum = self.runCorrelation()
         self.outputWorkspaces.append(correlationSpectrum)
@@ -176,21 +199,31 @@ class PoldiDataAnalysis(PythonAlgorithm):
 
         pawleyFit = self.getProperty('PawleyFit').value
 
+        rawFitParametersWorkspaceName = ''
+        outputRawFitParameters = self.getProperty('OutputRawFitParameters').value
+        if outputRawFitParameters:
+            rawFitParametersWorkspaceName = self.baseName + "_raw_fit_parameters"
+
         PoldiFitPeaks2D(InputWorkspace=self.inputWorkspace,
                         PoldiPeakWorkspace=peaks,
                         PeakProfileFunction=self.profileFunction,
+                        GlobalParameters=self.globalParameters,
                         PawleyFit=pawleyFit,
                         MaximumIterations=100,
                         OutputWorkspace=spectrum2DName,
                         Calculated1DSpectrum=spectrum1DName,
                         RefinedPoldiPeakWorkspace=refinedPeaksName,
-                        RefinedCellParameters=refinedCellName)
+                        RefinedCellParameters=refinedCellName,
+                        RawFitParameters=rawFitParametersWorkspaceName)
 
         workspaces = [AnalysisDataService.retrieve(spectrum2DName),
                       AnalysisDataService.retrieve(spectrum1DName),
                       AnalysisDataService.retrieve(refinedPeaksName)]
         if AnalysisDataService.doesExist(refinedCellName):
             workspaces.append(AnalysisDataService.retrieve(refinedCellName))
+
+        if AnalysisDataService.doesExist(rawFitParametersWorkspaceName):
+            workspaces.append(AnalysisDataService.retrieve(rawFitParametersWorkspaceName))
 
         return workspaces
 
