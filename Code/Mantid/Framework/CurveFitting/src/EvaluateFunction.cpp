@@ -21,7 +21,7 @@ int EvaluateFunction::version() const { return 1; }
 
 /// Algorithm's summary for use in the GUI and help. @see Algorithm::summary
 const std::string EvaluateFunction::summary() const {
-  return "Calculate chi squared for a function and a data set in a workspace.";
+  return "Evaluate a function on a workspace.";
 }
 
 //----------------------------------------------------------------------------------------------
