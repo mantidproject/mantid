@@ -8,29 +8,28 @@ add_subdirectory(PyChop)
 add_subdirectory(TofConverter)
 
 # Chain all required interface custom targets into CompilePyUI
-add_custom_target(CompilePyUI DEPENDS 
-  CompileUIFilterEvents 
-  CompileUIHFIRPowderReduction 
-  CompileUIPyChop 
+add_custom_target(CompilePyUI DEPENDS
+  CompileUIFilterEvents
+  CompileUIHFIRPowderReduction
+  CompileUIPyChop
   CompileUITofConverter
   CompileUIUI
-  CompileUILib1To2 
+  CompileUILib1To2
 )
 
-set ( TEST_PY_FILES 
+set ( TEST_PY_FILES
       test/ConvertToWavelengthTest.py
-      test/DirectReductionHelpersTest.py 
-      test/DirectPropertyManagerTest.py     
+      test/DirectReductionHelpersTest.py
+      test/DirectPropertyManagerTest.py
       test/DirectEnergyConversionTest.py
       test/ISISDirecInelasticConfigTest.py
-      test/IndirectApplyCorrectionsTest.py
       test/IndirectCommonTests.py
-      test/ReductionWrapperTest.py      
-      test/ReflectometryQuickAuxiliaryTest.py 
+      test/ReductionWrapperTest.py
+      test/ReflectometryQuickAuxiliaryTest.py
       test/RunDescriptorTest.py
       test/SansIsisGuiSettings.py
       test/SANSUtilitytests.py
-      test/SettingsTest.py      
+      test/SettingsTest.py
       test/ReductionSettingsTest.py
       )
 
@@ -38,7 +37,7 @@ set ( TEST_PY_FILES
 # python unit tests
 if (PYUNITTEST_FOUND)
   pyunittest_add_test ( ${CMAKE_CURRENT_SOURCE_DIR}/test PythonScriptsTest ${TEST_PY_FILES} )
-  # Trying to add tested modules to python system path 
+  # Trying to add tested modules to python system path
   #set (ENV{PYTHONPATH}  "ENV{PYTHONPATH} ${CMAKE_CURRENT_SOURCE_DIR}/Inelastic" )
 endif ()
 

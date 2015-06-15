@@ -408,7 +408,7 @@ MDTransfModQ::MDTransfModQ()
       m_Ki(1.), m_Ei(1.), m_pEfixedArray(NULL), m_pDetMasks(NULL) {}
 
 std::vector<std::string> MDTransfModQ::getEmodes() const {
-  return Kernel::DeltaEMode().availableTypes();
+  return Kernel::DeltaEMode::availableTypes();
 }
 } // End MDAlgorighms namespace
 } // End Mantid namespace

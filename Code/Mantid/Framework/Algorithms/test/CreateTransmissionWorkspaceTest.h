@@ -166,27 +166,6 @@ public:
     TS_ASSERT_THROWS(alg->setProperty("I0MonitorIndex", -1), std::invalid_argument);
   }
 
-  void test_workspace_index_list_throw_if_not_pairs()
-  {
-    auto alg = construct_standard_algorithm();
-    alg->setProperty("ProcessingInstructions", "0");
-    TS_ASSERT_THROWS(alg->execute(), std::runtime_error);
-  }
-
-  void test_workspace_index_list_values_not_positive_throws()
-  {
-    auto alg = construct_standard_algorithm();
-    alg->setProperty("ProcessingInstructions", "-1, 0"); //-1 is not acceptable.
-    TS_ASSERT_THROWS(alg->execute(), std::invalid_argument);
-  }
-
-  void test_workspace_index_list_min_max_pairs_throw_if_min_greater_than_max()
-  {
-    auto alg = construct_standard_algorithm();
-    alg->setProperty("ProcessingInstructions", "1, 0"); //1 > 0.
-    TS_ASSERT_THROWS(alg->execute(), std::out_of_range);
-  }
-
   void test_execute_one_tranmission()
   {
 

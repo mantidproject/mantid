@@ -208,7 +208,7 @@ class MDHistoWorkspaceTest(unittest.TestCase):
                       AlignedDim2="z,0,10,30", IterateEvents="1", Parallel="0")
         BH = mtd['BH']
         signal = BH.getSignalArray()
-        expected =(30L,20L)
+        expected =(30L, 1L, 20L)
         shape = signal.shape
         self.assertEqual(shape,expected)
         mtd.remove('BH')
@@ -218,7 +218,7 @@ class MDHistoWorkspaceTest(unittest.TestCase):
                        IterateEvents="1", Parallel="0")
         BH = mtd['BH']
         signal = BH.getSignalArray()
-        expected =(20L,)
+        expected =(1L, 20L)
         shape = signal.shape
         self.assertEqual(shape,expected)
         mtd.remove('BH')

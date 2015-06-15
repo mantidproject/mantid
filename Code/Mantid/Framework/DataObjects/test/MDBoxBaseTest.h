@@ -121,6 +121,8 @@ public:
   virtual void refreshCache(Kernel::ThreadScheduler * /*ts*/ = NULL){};
   //virtual void refreshCentroid(Kernel::ThreadScheduler * /*ts*/ = NULL){};
   virtual void calculateCentroid(coord_t * /*centroid*/) const{};
+  virtual void calculateCentroid(coord_t * /*centroid*/,
+                                 const int /*runindex*/) const {};
   virtual coord_t * getCentroid() const{return 0;};
   virtual void integrateSphere(Mantid::API::CoordTransform & /*radiusTransform*/, const coord_t /*radiusSquared*/, signal_t & /*signal*/, signal_t & /*errorSquared*/) const {};
   virtual void centroidSphere(Mantid::API::CoordTransform & /*radiusTransform*/, const coord_t /*radiusSquared*/, coord_t *, signal_t & ) const {};

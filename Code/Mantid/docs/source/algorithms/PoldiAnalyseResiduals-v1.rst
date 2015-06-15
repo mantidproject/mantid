@@ -56,7 +56,7 @@ The output contains the range in which residuals are found:
     
 .. testoutput:: ExSiliconMerged
 
-    Residuals are in the range: [ -2361.48 ,  2651.68 ]
+    Residuals are in the range: [ -2361.49 ,  2651.68 ]
 
 .. categories::
 

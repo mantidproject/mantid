@@ -3,6 +3,7 @@
 
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/IEventList.h"
+#include "MantidAPI/IEventWorkspace_fwd.h"
 
 namespace Mantid {
 
@@ -58,11 +59,6 @@ public:
 protected:
   virtual const std::string toString() const;
 };
-
-/// shared pointer to the matrix workspace base class
-typedef boost::shared_ptr<IEventWorkspace> IEventWorkspace_sptr;
-/// shared pointer to the matrix workspace base class (const version)
-typedef boost::shared_ptr<const IEventWorkspace> IEventWorkspace_const_sptr;
 }
 }
 

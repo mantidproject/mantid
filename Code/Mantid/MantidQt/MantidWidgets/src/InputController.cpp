@@ -1,4 +1,4 @@
-#include "InputController.h"
+#include "MantidQtMantidWidgets/InputController.h"
 
 #include <QMouseEvent>
 #include <QPainter>
@@ -7,6 +7,9 @@
 #include <QApplication>
 
 #include <iostream>
+
+namespace MantidQt {
+namespace MantidWidgets {
 
 //--------------------------------------------------------------------------------
 
@@ -402,7 +405,22 @@ void InputControllerErase::drawCursor()
 {
     m_cursor->fill(QColor(255,255,255,0));
     QPainter painter( m_cursor );
-    painter.fillRect( QRect( 0, 0, m_size, m_size ), QColor(255,255,255,100) );
+
+    auto pen = QPen(Qt::DashLine);
+    QVector<qreal> dashPattern;
+    dashPattern << 4 << 4;
+    pen.setDashPattern(dashPattern);
+    pen.setColor(QColor(0,0,0));
+    painter.setPen(pen);
+    painter.drawRect( QRect( 0, 0, m_size, m_size ) );
+
+    pen.setColor(QColor(255,255,255));
+    pen.setDashOffset(4);
+    painter.setPen(pen);
+    painter.drawRect( QRect( 0, 0, m_size, m_size ) );
+
     m_rect.setSize( QSize(m_size,m_size) );
+}
+}
 }
 

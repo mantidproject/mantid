@@ -146,6 +146,11 @@ m_plotTypeCache(0)
   m_infoPanel = panelStack->addPanel("Selection",m_selectionInfoDisplay);
   m_plotPanel = panelStack->addPanel("Name",m_plot);
 
+  m_selectionType = Single;
+
+  m_infoController = NULL;
+  m_plotController = NULL;
+
   m_activeTool = new QLabel(this);
   // set up the tool bar
 

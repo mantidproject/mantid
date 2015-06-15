@@ -462,7 +462,7 @@
         <item>
          <widget class="QStackedWidget" name="swRebin">
           <property name="currentIndex">
-           <number>1</number>
+           <number>0</number>
           </property>
           <widget class="QWidget" name="pgSingleRebin">
            <layout class="QVBoxLayout" name="verticalLayout_16">
@@ -551,7 +551,7 @@
                  <double>999.990000000000009</double>
                 </property>
                 <property name="singleStep">
-                 <double>0.100000000000000</double>
+                 <double>0.010000000000000</double>
                 </property>
                </widget>
               </item>

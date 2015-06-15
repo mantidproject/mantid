@@ -96,8 +96,6 @@ void TomoReconstruction::cleanup() {
 }
 
 void TomoReconstruction::doSetupSectionParameters() {
-  // TODO: should split the tabs out into their own files?
-
   // geometry, etc. niceties
   // on the left (just plugin names) 1/2, right: 2/3
   QList<int> sizes;
@@ -565,13 +563,10 @@ void TomoReconstruction::doLogin(const std::string &pw) {
     return;
   }
 
-  // TODO (trac #11538): once the remote algorithms are rearranged
-  // into the 'RemoteJobManager' design, this will use...
-  // auto alg = Algorithm::fromString("Authenticate");
-  auto alg = Algorithm::fromString("SCARFTomoReconstruction");
+  auto alg = Algorithm::fromString("Authenticate");
   alg->initialize();
   alg->setPropertyValue("UserName", user);
-  alg->setPropertyValue("Action", "LogIn");
+  alg->setPropertyValue("ComputeResource", getComputeResource());
   alg->setPropertyValue("Password", pw);
   try {
     alg->execute();
@@ -583,20 +578,19 @@ void TomoReconstruction::doLogin(const std::string &pw) {
 }
 
 void TomoReconstruction::doLogout() {
-  // TODO: once the remote algorithms are rearranged into the
-  // 'RemoteJobManager' design, this will use...
-  // auto alg = Algorithm::fromString("???"); - need an alg for this
-  auto alg = Algorithm::fromString("SCARFTomoReconstruction");
+  const std::string comp = getComputeResource();
+  auto alg = Algorithm::fromString("Logout");
   alg->initialize();
-  const std::string user = getUsername();
-  alg->setPropertyValue("UserName", user);
-  alg->setPropertyValue("Action", "LogOut");
+  alg->setProperty("ComputeResource", comp);
+  alg->setProperty("UserName", getUsername());
+
   try {
     alg->execute();
   } catch (std::runtime_error &e) {
     throw std::runtime_error(
         "Error when trying to log out from the remote compute resource " +
-        getComputeResource() + " with username " + user + ": " + e.what());
+        getComputeResource() + " with username " + getUsername() + ": " +
+        e.what());
   }
 }
 
@@ -607,20 +601,23 @@ void TomoReconstruction::doLogout() {
  * @return True if ping succeeded
  */
 bool TomoReconstruction::doPing() {
-  // TODO: once the remote algorithms are rearranged into the
-  // 'RemoteJobManager' design, this will use...
-  // auto alg = Algorithm::fromString("???");
-  auto alg = Algorithm::fromString("SCARFTomoReconstruction");
+  // This actually does more than a simple ping. Ping and check that a
+  // transaction can be created succesfully
+  auto alg = Algorithm::fromString("StartRemoteTransaction");
   alg->initialize();
-  alg->setPropertyValue("UserName", getUsername());
-  alg->setPropertyValue("Action", "Ping");
+  alg->setProperty("ComputeResource", getComputeResource());
+  std::string tid;
   try {
     alg->execute();
+    tid = alg->getPropertyValue("TransactionID");
+    g_log.information() << "Pinged succesfully. Checked that a transaction could "
+      "be created, with ID: " << tid << std::endl;
   } catch (std::runtime_error &e) {
-    throw std::runtime_error(
-        "Error when trying to ping the remote compute resource " +
-        getComputeResource() + ": " + e.what());
+    throw std::runtime_error("Error. Failed to ping and start a transaction on "
+                             "the remote resource." +
+                             std::string(e.what()));
   }
+
   return true;
 }
 
@@ -635,26 +632,37 @@ void TomoReconstruction::doSubmitReconstructionJob() {
     g_log.warning() << "Could not prepare the requested reconstruction job "
                        "submission. There was an error: " +
                            std::string(e.what());
+    return;
   }
 
-  // TODO: once the remote algorithms are rearranged into the
-  // 'RemoteJobManager' design, this will use:
-  // auto transAlg = Algorithm::fromString("StartRemoteTransaction");
-  // auto submitAlg = Algorithm::fromString("SubmitRemoteJob");
-  // submitAlg->setPropertyValue("ComputeResource", res);
-  auto alg = Algorithm::fromString("SCARFTomoReconstruction");
-  alg->initialize();
-  alg->setPropertyValue("Action", "SubmitJob");
-  alg->setPropertyValue("UserName", getUsername());
+  const std::string comp = getComputeResource();
 
-  alg->setProperty("RunnablePath", run);
-  alg->setProperty("JobOptions", opt);
-
+  // with SCARF we use one (pseudo)-transaction for every submission
+  auto transAlg = Algorithm::fromString("StartRemoteTransaction");
+  transAlg->initialize();
+  transAlg->setProperty("ComputeResource", comp);
+  std::string tid;
   try {
-    alg->execute();
+    transAlg->execute();
+    tid = transAlg->getPropertyValue("TransactionID");
+  } catch (std::runtime_error &e) {
+    throw std::runtime_error("Error when trying to start a transaction right "
+                             "before submitting a reconstruction job: " +
+                             std::string(e.what()));
+  }
+
+  auto submitAlg = Algorithm::fromString("SubmitRemoteJob");
+  submitAlg->initialize();
+  submitAlg->setProperty("ComputeResource", comp);
+  submitAlg->setProperty("TaskName", "Mantid tomographic reconstruction job");
+  submitAlg->setProperty("TransactionID", tid);
+  submitAlg->setProperty("ScriptName", run);
+  submitAlg->setProperty("ScriptParams", opt);
+  try {
+    submitAlg->execute();
   } catch (std::runtime_error &e) {
     throw std::runtime_error(
-        "Error when trying to cancel a reconstruction job: " +
+        "Error when trying to submit a reconstruction job: " +
         std::string(e.what()));
   }
 }
@@ -669,7 +677,7 @@ void TomoReconstruction::doSubmitReconstructionJob() {
  */
 void TomoReconstruction::makeRunnableWithOptions(std::string &run,
                                                  std::string &opt) {
-  std::string comp =
+  const std::string comp =
       m_ui.comboBox_run_compute_resource->currentText().toStdString();
 
   checkDataPathsSet();
@@ -722,21 +730,22 @@ void TomoReconstruction::makeRunnableWithOptions(std::string &run,
 }
 
 void TomoReconstruction::doCancelJob(const std::string &id) {
-  // TODO: once the remote algorithms are rearranged into the
-  // 'RemoteJobManager' design, this will use:
-  // auto alg = Algorithm::fromString("EndRemoteTransaction");
-  auto alg = Algorithm::fromString("SCARFTomoReconstruction");
-  alg->initialize();
-  alg->setPropertyValue("UserName", getUsername());
-  alg->setPropertyValue("Action", "CancelJob");
-  alg->setPropertyValue("JobID", id);
+  const std::string comp = getComputeResource();
+
+  auto algJob = Algorithm::fromString("AbortRemoteJob");
+  algJob->initialize();
+  algJob->setPropertyValue("ComputeResource", comp);
+  algJob->setPropertyValue("JobID", id);
   try {
-    alg->execute();
+    algJob->execute();
   } catch (std::runtime_error &e) {
     throw std::runtime_error(
         "Error when trying to cancel a reconstruction job: " +
         std::string(e.what()));
   }
+
+  // doesn't do StopRemoteTransaction. If there are multiple jobs per
+  // transaction there could be others that are still running.
 }
 
 void TomoReconstruction::toolSetupClicked() {
@@ -921,12 +930,12 @@ void TomoReconstruction::getJobStatusInfo() {
     QMutexLocker lockit(&m_statusMutex);
     m_jobsStatus.clear();
     m_jobsStatusCmds.clear();
-    // TODO: udate when we update to remote algorithms v2
-    // As SCARF doesn't provide all the info at the moment, and as we're
-    // using the SCARFTomoReconstruction algorithm, the
-    // IRemoteJobManager::RemoteJobInfo struct is for now used only partially
-    // (cmds out). So this loop feels both incomplete and an unecessary second
-    // step that could be avoided.
+    // TODO: udate when we update to remote algorithms v2 and more
+    // info might become available from SCARF.
+    // As SCARF doesn't provide all the info at the moment, the
+    // IRemoteJobManager::RemoteJobInfo struct is for now used only
+    // partially (cmds out). So this loop feels both incomplete and an
+    // unecessary second step that could be avoided.
     for (size_t i = 0; i < ids.size(); ++i) {
       IRemoteJobManager::RemoteJobInfo ji;
       ji.id = ids[i];
@@ -942,18 +951,9 @@ void TomoReconstruction::doQueryJobStatus(std::vector<std::string> &ids,
                                           std::vector<std::string> &names,
                                           std::vector<std::string> &status,
                                           std::vector<std::string> &cmds) {
-  // TODO: once the remote algorithms are rearranged into the
-  // 'RemoteJobManager' design, this will use...
-  // auto alg = Algorithm::fromString("QueryAllRemoteJobs");
-  // and
-  // auto alg = Algorithm::fromString("QueryRemoteJob");
-
-  // output properties to get: RemoteJobsID, RemoteJobsNames,
-  //    RemoteJobsStatus, RemoteJobsCommands
-  auto alg = Algorithm::fromString("SCARFTomoReconstruction");
+  auto alg = Algorithm::fromString("QueryAllRemoteJobs");
   alg->initialize();
-  alg->setPropertyValue("UserName", getUsername());
-  alg->setPropertyValue("Action", "JobStatus");
+  alg->setPropertyValue("ComputeResource", getComputeResource());
   try {
     alg->execute();
   } catch (std::runtime_error &e) {
@@ -961,10 +961,10 @@ void TomoReconstruction::doQueryJobStatus(std::vector<std::string> &ids,
         "Error when trying to query the status of jobs in " +
         getComputeResource() + ": " + e.what());
   }
-  ids = alg->getProperty("RemoteJobsID");
-  names = alg->getProperty("RemoteJobsNames");
-  status = alg->getProperty("RemoteJobsStatus");
-  cmds = alg->getProperty("RemoteJobsCommands");
+  ids = alg->getProperty("JobId");
+  names = alg->getProperty("JobName");
+  status = alg->getProperty("JobStatusString");
+  cmds = alg->getProperty("CommandLine");
 }
 
 /**
@@ -1289,7 +1289,8 @@ void TomoReconstruction::drawImage(const MatrixWorkspace_sptr &ws) {
   size_t width;
   try {
     width = boost::lexical_cast<size_t>(ws->run().getLogData("Axis1")->value());
-    // TODO: add a settings option for this (like max mem allocation for images)?
+    // TODO: add a settings option for this (like max mem allocation for
+    // images)?
     if (width >= MAXDIM)
       width = MAXDIM;
   } catch (std::exception &e) {
