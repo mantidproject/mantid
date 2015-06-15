@@ -79,6 +79,10 @@ public:
                                 const std::string &localFileName);
 
 protected:
+  /// define the "application type" (or "submission form" in the LSF web portal)
+  virtual std::string guessJobSubmissionAppName(const std::string &runnablePath,
+                                                const std::string &jobOptions);
+
   typedef std::map<std::string, std::string> StringToStringMap;
 
   /// method that deals with the actual HTTP(S) connection (convenient to
