@@ -970,7 +970,7 @@ void ExperimentInfo::loadInstrumentInfoNexus(const std::string& nxFilename,
     file->readData("data", instrumentXml);
     file->closeGroup();
   } catch (NeXus::Exception &ex) {
-    g_log.debug("Failed to load instrument XML from file.");
+    g_log.debug(std::string("Unable to load instrument_xml: ") + ex.what());
   }
 
   try {
@@ -978,6 +978,7 @@ void ExperimentInfo::loadInstrumentInfoNexus(const std::string& nxFilename,
     file->readData("data", parameterStr);
     file->closeGroup();
   } catch (NeXus::Exception &ex) {
+    g_log.debug(std::string("Unable to load instrument_parameter_map: ") + ex.what());
     g_log.information("Parameter map entry missing from NeXus file. Continuing without it.");
   }
   // Close the instrument group
