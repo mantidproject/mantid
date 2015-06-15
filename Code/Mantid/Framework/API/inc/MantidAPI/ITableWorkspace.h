@@ -9,6 +9,7 @@
 #include "MantidAPI/Column.h"
 #include "MantidKernel/V3D.h"
 #include "MantidAPI/LogManager.h"
+#include "MantidAPI/ITableWorkspace_fwd.h"
 
 #ifndef Q_MOC_RUN
 #include <boost/shared_ptr.hpp>
@@ -24,8 +25,6 @@ namespace Mantid {
 //----------------------------------------------------------------------
 
 namespace API {
-
-class ITableWorkspace;
 
 /// Helper class used to create ColumnVector
 class TableColumnHelper {
@@ -403,11 +402,6 @@ public:
 private:
   Column_const_sptr m_column; ///< Pointer to the underlying column
 };
-
-/// Typedef for a shared pointer to \c TableWorkspace
-typedef boost::shared_ptr<ITableWorkspace> ITableWorkspace_sptr;
-/// Typedef for a shared pointer to \c const \c TableWorkspace
-typedef boost::shared_ptr<const ITableWorkspace> ITableWorkspace_const_sptr;
 
 } // namespace API
 } // Namespace Mantid

@@ -284,6 +284,10 @@ void Fit::execConcrete() {
         if (j == i)
           row << 100.0;
         else {
+          if (!covar.gsl()) {
+            throw std::runtime_error("There was an error while allocating the (GSL) covariance matrix "
+                                     "which is needed to produce fitting error results.");
+          }
           row << 100.0 * covar.get(ia, ja) /
                      sqrt(covar.get(ia, ia) * covar.get(ja, ja));
         }

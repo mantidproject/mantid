@@ -1039,6 +1039,7 @@ void MdViewerWidget::checkForUpdates()
 /**
  * This function executes the logic for switching views on the main level
  * window.
+ *
  * @param v the view mode to switch to
  */
 void MdViewerWidget::switchViews(ModeControlWidget::Views v)
@@ -1049,8 +1050,8 @@ void MdViewerWidget::switchViews(ModeControlWidget::Views v)
   // normally it will just close child SliceView windows
   this->currentView->closeSubWindows();
   this->disconnectDialogs();
-
   this->hiddenView = this->createAndSetMainViewWidget(this->ui.viewWidget, v);
+  this->ui.colorSelectionWidget->ignoreColorChangeCallbacks(true);
   this->hiddenView->setColorScaleState(this->ui.colorSelectionWidget);
   this->hiddenView->hide();
   this->viewLayout->removeWidget(this->currentView);
@@ -1086,10 +1087,12 @@ void MdViewerWidget::switchViews(ModeControlWidget::Views v)
   this->updateAppState();
   this->initialView = v; 
 
-  // What about this?
   this->setDestroyedListener();
-
   this->currentView->setVisibilityListener();
+
+  // ignore callbacks until as late as possible to keep desired state
+  // regardless of what the Paraview widgets are doing
+  this->ui.colorSelectionWidget->ignoreColorChangeCallbacks(false);
 }
 
 /**
@@ -1140,6 +1143,15 @@ bool MdViewerWidget::eventFilter(QObject *obj, QEvent *ev)
       return true;
     }
   }
+// IMPORTANT FOR MULTIPLE VSI INSTANCES:
+// The following code block seems to be intended for use with multiple instances
+// but it introduces an undesired behaviour in its current form. This is
+// especially visible when we are dealing with source-filter chains (the active
+// source is more likely to be the filter than the underlying source).
+// Instead of setting oricSrc as the active source we need to devise an alternative
+// strategy, e.g. keep track of the last active source of the particlar
+// VSI instance and set this as the active source.
+#if 0
   if(ev->type() == QEvent::WindowActivate)
   {
     if(this->currentView)
@@ -1149,6 +1161,7 @@ bool MdViewerWidget::eventFilter(QObject *obj, QEvent *ev)
       pqActiveObjects::instance().setActiveSource(this->currentView->origSrc);
     }
   }
+#endif
   return VatesViewerInterface::eventFilter(obj, ev);
 }
 

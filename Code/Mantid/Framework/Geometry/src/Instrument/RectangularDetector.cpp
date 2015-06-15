@@ -51,8 +51,8 @@ RectangularDetector::RectangularDetector(const RectangularDetector *base,
  */
 RectangularDetector::RectangularDetector(const std::string &n,
                                          IComponent *reference)
-    : CompAssembly(n, reference), IObjComponent(NULL), m_minDetId(0),
-      m_maxDetId(0) {
+    : CompAssembly(n, reference), IObjComponent(NULL), m_rectBase(NULL),
+      m_minDetId(0), m_maxDetId(0) {
   init();
   this->setName(n);
   setGeometryHandler(new BitmapGeometryHandler(this));

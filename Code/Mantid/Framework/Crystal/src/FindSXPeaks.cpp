@@ -16,6 +16,10 @@ DECLARE_ALGORITHM(FindSXPeaks)
 using namespace Kernel;
 using namespace API;
 
+FindSXPeaks::FindSXPeaks()
+    : API::Algorithm(), m_MinRange(DBL_MAX), m_MaxRange(-DBL_MAX), m_MinSpec(0),
+      m_MaxSpec(0) {}
+
 /** Initialisation method.
  *
  */

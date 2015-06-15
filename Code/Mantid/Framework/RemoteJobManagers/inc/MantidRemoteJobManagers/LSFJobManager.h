@@ -49,6 +49,9 @@ public:
   virtual void authenticate(const std::string &username,
                             const std::string &password) = 0;
 
+  /// Most likely the logout method specific to SCARFLSF would be valid here
+  virtual void logout(const std::string &username) = 0;
+
   virtual void abortRemoteJob(const std::string &jobID);
 
   virtual std::string
@@ -110,7 +113,7 @@ protected:
   typedef std::pair<std::string, Token> UsernameToken;
 
   // store for username-token pairs
-  std::map<std::string, Token> m_tokenStash;
+  static std::map<std::string, Token> g_tokenStash;
 
   /// Minimal representation of a transaction: an ID and a list of job IDs
   struct Transaction {
@@ -120,7 +123,7 @@ protected:
   };
 
   /// Minimal store for transaction information
-  std::map<std::string, Transaction> m_transactions;
+  static std::map<std::string, Transaction> g_transactions;
 
   // HTTP specifics for SCARF (IBM LSF PAC)
   static std::string g_acceptType;

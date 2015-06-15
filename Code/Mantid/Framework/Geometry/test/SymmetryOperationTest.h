@@ -260,6 +260,21 @@ public:
 
     }
 
+    void testReducedVector()
+    {
+        SymmetryOperation fourThreeScrewAxis("x+3/4,-z+3/4,y+1/4");
+        TS_ASSERT_EQUALS(fourThreeScrewAxis.reducedVector(),  V3R(3, 0, 0) / 4);
+
+        SymmetryOperation glidePlaneC("x,-y,z+1/2");
+        TS_ASSERT_EQUALS(glidePlaneC.reducedVector(), V3R(0, 0, 1) / 2);
+
+        SymmetryOperation noTranslation("-x,-y,-z");
+        TS_ASSERT_EQUALS(noTranslation.reducedVector(), V3R(0, 0, 0));
+
+        SymmetryOperation noTranslationShifted("-x+1/8,-y+1/8,-z+1/8");
+        TS_ASSERT_EQUALS(noTranslationShifted.reducedVector(), V3R(0, 0, 0));
+    }
+
     void testPower()
     {
         SymmetryOperation mirror("x,-y,z");

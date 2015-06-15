@@ -54,12 +54,14 @@ class POLDIFitPeaks2DTest(stresstesting.MantidStressTest):
 
             columns = ["d", "Intensity"]
 
+            print fittedPeaks.rowCount(), referencePeaks.rowCount()
+
             for i in range(referencePeaks.rowCount()):
                 referenceRow = referencePeaks.row(i)
                 fittedRow = fittedPeaks.row(i)
                 for c in columns:
-                    fittedStr = fittedRow[c].split()
-                    value, error = (float(fittedStr[0]), float(fittedStr[-1]))
+                    value = fittedRow[c]
+                    error = fittedRow['delta ' + c]
                     reference = float(referenceRow[c])
 
                     self.assertLessThan(np.fabs(value - reference), error)

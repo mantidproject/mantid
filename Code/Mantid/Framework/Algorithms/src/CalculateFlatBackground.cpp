@@ -79,6 +79,10 @@ void CalculateFlatBackground::exec() {
   const int numHists = static_cast<int>(inputWS->getNumberHistograms());
   const int blocksize = static_cast<int>(inputWS->blocksize());
 
+  if (blocksize == 1)
+    throw std::runtime_error("CalculateFlatBackground with only one bin is "
+                             "not possible.");
+
   m_skipMonitors = getProperty("SkipMonitors");
   // Get the required X range
   double startX, endX;
