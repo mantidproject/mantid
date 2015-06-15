@@ -1,7 +1,11 @@
 #ifndef MANTID_API_IMASKWORKSPACE_H_
 #define MANTID_API_IMASKWORKSPACE_H_
 
-#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidGeometry/IDTypes.h"
+
+#include <boost/shared_ptr.hpp>
+#include <set>
+#include <string>
 
 namespace Mantid {
 namespace API {

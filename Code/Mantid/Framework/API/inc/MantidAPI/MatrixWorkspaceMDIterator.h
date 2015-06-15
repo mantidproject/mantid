@@ -3,8 +3,9 @@
 
 #include "MantidKernel/System.h"
 #include "MantidAPI/IMDIterator.h"
-#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
+#include "MantidKernel/cow_ptr.h"
 
 namespace Mantid {
 namespace API {

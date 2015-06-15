@@ -2,6 +2,7 @@
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/CatalogManager.h"
+#include "MantidAPI/ITableWorkspace.h"
 
 using namespace Mantid::API;
 

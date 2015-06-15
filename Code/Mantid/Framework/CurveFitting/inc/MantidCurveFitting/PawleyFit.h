@@ -3,6 +3,8 @@
 
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/ITableWorkspace_fwd.h"
+#include "MantidAPI/TableRow.h"
 #include "MantidCurveFitting/PawleyFunction.h"
 #include "MantidKernel/Unit.h"
 

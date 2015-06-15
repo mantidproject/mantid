@@ -4,6 +4,7 @@
 #include "MantidQtCustomDialogs/SortTableWorkspaceDialog.h"
 #include "MantidQtAPI/AlgorithmInputHistory.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/ITableWorkspace.h"
 #include "MantidKernel/Exception.h"
 
 

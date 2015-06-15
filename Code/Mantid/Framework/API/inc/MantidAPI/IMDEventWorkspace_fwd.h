@@ -32,7 +32,7 @@ namespace API {
 */
 
 /// forward declare of Mantid::API::IMDEventWorkspace
-class MANTID_API_DLL IMDEventWorkspace;
+class IMDEventWorkspace;
 /// Shared pointer to Mantid::API::IMDEventWorkspace
 typedef boost::shared_ptr<IMDEventWorkspace> IMDEventWorkspace_sptr;
 /// Shared pointer to Mantid::API::IMDEventWorkspace (const version)

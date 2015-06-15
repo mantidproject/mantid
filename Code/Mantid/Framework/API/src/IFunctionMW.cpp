@@ -2,6 +2,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/IFunctionMW.h"
+#include "MantidAPI/MatrixWorkspace.h"
 
 #include <iostream>
 

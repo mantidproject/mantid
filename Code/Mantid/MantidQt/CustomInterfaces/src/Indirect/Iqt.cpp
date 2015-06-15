@@ -1,5 +1,6 @@
 #include "MantidQtCustomInterfaces/Indirect/Iqt.h"
 
+#include "MantidAPI/ITableWorkspace.h"
 #include "MantidQtCustomInterfaces/UserInputValidator.h"
 #include "MantidQtMantidWidgets/RangeSelector.h"
 

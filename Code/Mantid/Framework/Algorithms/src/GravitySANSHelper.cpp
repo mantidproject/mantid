@@ -1,6 +1,8 @@
 #include "MantidAlgorithms/GravitySANSHelper.h"
 #include <math.h>
 
+#include "MantidAPI/MatrixWorkspace.h"
+
 namespace Mantid {
 namespace Algorithms {
 using Kernel::V3D;

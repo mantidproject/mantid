@@ -4,6 +4,7 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/Workspace.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/MemoryManager.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidAPI/NumericAxis.h"

@@ -13,7 +13,7 @@
 #include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidKernel/SpecialCoordinateSystem.h"
-#include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/ITableWorkspace_fwd.h"
 
 namespace Mantid {
 

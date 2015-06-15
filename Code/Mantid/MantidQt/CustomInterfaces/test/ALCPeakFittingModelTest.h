@@ -9,6 +9,7 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/ITableWorkspace.h"
 
 #include "MantidQtCustomInterfaces/Muon/ALCPeakFittingModel.h"
 

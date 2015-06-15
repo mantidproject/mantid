@@ -6,7 +6,7 @@
 #include "MantidKernel/DataService.h"
 #include "MantidKernel/SingletonHolder.h"
 #include "MantidKernel/Exception.h"
-#include "MantidAPI/Workspace.h"
+#include "MantidAPI/Workspace_fwd.h"
 #include "MantidKernel/IPropertyManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 

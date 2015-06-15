@@ -2,7 +2,7 @@
 #define MANTID_CUSTOMINTERFACES_ALCHELPER_H_
 
 #include "MantidKernel/System.h"
-#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/IFunction.h"
 
 #include "qwt_data.h"

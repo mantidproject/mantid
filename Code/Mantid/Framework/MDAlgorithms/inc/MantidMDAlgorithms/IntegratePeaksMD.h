@@ -2,7 +2,7 @@
 #define MANTID_MDALGORITHMS_INTEGRATEPEAKSMD_H_
 
 #include "MantidAPI/Algorithm.h"
-#include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidAPI/IMDEventWorkspace_fwd.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidKernel/System.h"
 #include "MantidDataObjects/MDEventWorkspace.h"

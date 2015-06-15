@@ -3,7 +3,7 @@
 #include "MantidPythonInterface/kernel/TrackingInstanceMethod.h"
 
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/Workspace.h"
+#include "MantidAPI/Workspace_fwd.h"
 
 #include <boost/python/call_method.hpp>
 

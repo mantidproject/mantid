@@ -8,7 +8,7 @@
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidAPI/ISplittersWorkspace.h"
 #include "MantidKernel/TimeSplitter.h"
-#include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 
 namespace Mantid {
