@@ -48,7 +48,6 @@ VatesSimpleGuiQtWidgets
 VatesSimpleGuiViewWidgets
 MantidQtAPI
 vtkRenderingFreeType
-vtkRenderingFreeTypeOpenGL
 ${POCO_LIBRARIES}
 ${Boost_LIBRARIES}
 )
