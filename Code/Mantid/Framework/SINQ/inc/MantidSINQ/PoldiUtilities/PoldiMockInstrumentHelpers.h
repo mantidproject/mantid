@@ -407,10 +407,14 @@ public:
         boost::dynamic_pointer_cast<DataObjects::TableWorkspace>(
             API::WorkspaceFactory::Instance().createTable());
     tableWs->addColumn("str", "HKL");
-    tableWs->addColumn("str", "d");
-    tableWs->addColumn("str", "Q");
-    tableWs->addColumn("str", "Intensity");
-    tableWs->addColumn("str", "FWHM (rel.)");
+    tableWs->addColumn("double", "d");
+    tableWs->addColumn("double", "delta d");
+    tableWs->addColumn("double", "Q");
+    tableWs->addColumn("double", "delta Q");
+    tableWs->addColumn("double", "Intensity");
+    tableWs->addColumn("double", "delta Intensity");
+    tableWs->addColumn("double", "FWHM (rel.)");
+    tableWs->addColumn("double", "delta FWHM (rel.)");
 
     tableWs->logs()->addProperty<std::string>("IntensityType", "Maximum");
     tableWs->logs()->addProperty<std::string>("ProfileFunctionName",
@@ -418,31 +422,31 @@ public:
 
     API::TableRow newRow = tableWs->appendRow();
     newRow << "0 0 0"
-           << "1.108644"
-           << "5.667449"
-           << "3286.152"
-           << "0.002475747";
+           << 1.108644 << 0.0
+           << 5.667449 << 0.0
+           << 3286.152 << 0.0
+           << 0.002475747 << 0.0;
 
     newRow = tableWs->appendRow();
     newRow << "0 0 0"
-           << "1.637539"
-           << "3.836968"
-           << "2951.696"
-           << "0.002516417";
+           << 1.637539 << 0.0
+           << 3.836968 << 0.0
+           << 2951.696 << 0.0
+           << 0.002516417 << 0.0;
 
     newRow = tableWs->appendRow();
     newRow << "0 0 0"
-           << "1.920200"
-           << "3.272152"
-           << "3238.473"
-           << "0.002444439";
+           << 1.920200 << 0.0
+           << 3.272152 << 0.0
+           << 3238.473 << 0.0
+           << 0.002444439 << 0.0;
 
     newRow = tableWs->appendRow();
     newRow << "0 0 0"
-           << "1.245958"
-           << "5.042856"
-           << "2219.592"
-           << "0.002696334";
+           << 1.245958 << 0.0
+           << 5.042856 << 0.0
+           << 2219.592 << 0.0
+           << 0.002696334 << 0.0;
 
     return tableWs;
   }

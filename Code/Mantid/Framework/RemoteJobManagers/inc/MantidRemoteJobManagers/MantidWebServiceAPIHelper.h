@@ -92,6 +92,9 @@ public:
 
   const std::string &getDisplayName() const { return m_displayName; }
 
+  // forget authentication token / cookie
+  void clearSessionCookies();
+
 private:
   // Wraps up some of the boilerplate code needed to execute HTTP GET and POST
   // requests
@@ -120,7 +123,7 @@ private:
   // function
   // takes a NameValueCollection object, so we have to convert.  (WTF Poco
   // devs?!?)
-  static std::vector<Poco::Net::HTTPCookie> m_cookies;
+  static std::vector<Poco::Net::HTTPCookie> g_cookies;
   Poco::Net::NameValueCollection getCookies() const;
 
   mutable Poco::Net::HTTPClientSession *

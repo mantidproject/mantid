@@ -87,7 +87,7 @@ def getMilestones(endpoint, oauth=None):
 
     try:
         json_doc = req.json()
-    except(TypeError, e):
+    except TypeError:
         json_doc = req.json
     milestones.extend(parseMilestones(json_doc))
 

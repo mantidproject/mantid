@@ -362,6 +362,6 @@ private:
 };
 
 } // namespace SliceViewer
-} // namespace Mantid
+} // namespace MantidQt
 
 #endif // SLICEVIEWER_H

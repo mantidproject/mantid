@@ -488,23 +488,29 @@ Output:
 
 .. testcode:: ExGroupDetectorsWithPattern
 
-   # Create Workspace of 5 spectra each with two entries.
-   ws = CreateWorkspace(DataX=[1,2], DataY=[11,12,21,22,31,32,41,42,51,52], NSpec=5)
+   # Create Workspace of 10 spectra each with one bin.
+   ws = CreateWorkspace(DataX=[1], DataY=[1,2,3,4,5,6,7,8,9,10], NSpec=10)
 
-   # Run algorithm adding first two spectra and then keeping last two spectra
-   ws2 = GroupDetectors(ws, GroupingPattern="0+1,3,4")
+   # Run algorithm adding first two spectra and then keep the fourth, add the fifth to seventh, and then keep the last three spectra
+   ws2 = GroupDetectors(ws, GroupingPattern="0+1,3,4-6,7:9")
 
    #print result
    print ws2.readY(0)
    print ws2.readY(1)
    print ws2.readY(2)
+   print ws2.readY(3)
+   print ws2.readY(4)
+   print ws2.readY(5)
 
 Output:
 
 .. testoutput:: ExGroupDetectorsWithPattern
 
-   [ 32.  34.]
-   [ 41.  42.]
-   [ 51.  52.]
+   [ 3.]
+   [ 4.]
+   [ 18.]
+   [ 8.]
+   [ 9.]
+   [ 10.]
 
 .. categories::

@@ -109,6 +109,8 @@ protected:
                          const std::string &crystalSystem,
                          const PoldiPeakCollection_sptr &peakCollection);
 
+  std::string getUserSpecifiedTies(const API::IFunction_sptr &poldiFn);
+
   PoldiPeakCollection_sptr
   getPeakCollectionFromFunction(const API::IFunction_sptr &fitFunction);
 

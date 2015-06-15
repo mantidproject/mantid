@@ -57,7 +57,7 @@ void SetSampleMaterial::init() {
                   "formulas per cubic angstrom will be used instead of "
                   "calculated");
   declareProperty("ZParameter", EMPTY_DBL(), mustBePositive,
-                  "Number of atoms in the unit cell");
+                  "Number of formula units in unit cell");
   declareProperty("UnitCellVolume", EMPTY_DBL(), mustBePositive,
                   "Unit cell volume in Angstoms^3. Will be calculated from the "
                   "OrientedLattice if not supplied.");
@@ -202,20 +202,6 @@ void SetSampleMaterial::exec() {
   // determine the sample number density
   double rho = getProperty("SampleNumberDensity"); // in Angstroms-3
   double zParameter = getProperty("ZParameter");   // number of atoms
-  if (isEmpty(rho)) {
-    double unitCellVolume = getProperty("UnitCellVolume"); // in Angstroms^3
-
-    // get the unit cell volume from the workspace if it isn't set
-    if (isEmpty(unitCellVolume) && expInfo->sample().hasOrientedLattice()) {
-      unitCellVolume = expInfo->sample().getOrientedLattice().volume();
-      g_log.notice() << "found unit cell volume " << unitCellVolume
-                     << " Angstrom^-3\n";
-    }
-    // density is just number of atoms in the unit cell
-    // ...but only calculate it if you have both numbers
-    if ((!isEmpty(zParameter)) && (!isEmpty(unitCellVolume)))
-      rho = zParameter / unitCellVolume;
-  }
 
   // get the scattering information - this will override table values
   double coh_xs = getProperty("CoherentXSection");         // in barns
@@ -273,6 +259,21 @@ void SetSampleMaterial::exec() {
       // normalize the accumulated number by the number of atoms
       neutron = (1. / numAtoms) *
                 neutron; // funny syntax b/c of operators in neutron atom
+      if (isEmpty(rho)) {
+        double unitCellVolume = getProperty("UnitCellVolume"); // in Angstroms^3
+
+        // get the unit cell volume from the workspace if it isn't set
+        if (isEmpty(unitCellVolume) && expInfo->sample().hasOrientedLattice()) {
+          unitCellVolume = expInfo->sample().getOrientedLattice().volume();
+          g_log.notice() << "found unit cell volume " << unitCellVolume
+                         << " Angstrom^-3\n";
+        }
+        // density is just number of atoms in the unit cell
+        // ...but only calculate it if you have both numbers
+        if ((!isEmpty(zParameter)) && (!isEmpty(unitCellVolume)))
+          rho = numAtoms * zParameter / unitCellVolume;
+      }
+
       b_avg = b_avg / numAtoms;
       b_sq_avg = b_sq_avg / numAtoms;
 
@@ -289,6 +290,20 @@ void SetSampleMaterial::exec() {
     fixNeutron(neutron, coh_xs, inc_xs, sigma_atten, sigma_s);
 
     // create the material
+    if (isEmpty(rho)) {
+      double unitCellVolume = getProperty("UnitCellVolume"); // in Angstroms^3
+
+      // get the unit cell volume from the workspace if it isn't set
+      if (isEmpty(unitCellVolume) && expInfo->sample().hasOrientedLattice()) {
+        unitCellVolume = expInfo->sample().getOrientedLattice().volume();
+        g_log.notice() << "found unit cell volume " << unitCellVolume
+                       << " Angstrom^-3\n";
+      }
+      // density is just number of atoms in the unit cell
+      // ...but only calculate it if you have both numbers
+      if ((!isEmpty(zParameter)) && (!isEmpty(unitCellVolume)))
+        rho = zParameter / unitCellVolume;
+    }
     mat.reset(new Material(chemicalSymbol, neutron, rho));
   }
 

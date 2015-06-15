@@ -3,11 +3,11 @@
 #include "MantidGLWidget.h"
 #include "OpenGLError.h"
 #include "PeakMarker2D.h"
-#include "InputController.h"
 
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Objects/Object.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidQtMantidWidgets/InputController.h"
 
 #include <QRgb>
 #include <QSet>
@@ -24,6 +24,7 @@
 
 using namespace Mantid::Geometry;
 using Mantid::Kernel::Exception::NotFoundError;
+using namespace MantidQt::MantidWidgets;
 
 UnwrappedDetector::UnwrappedDetector():
 u(0), v(0), width(0), height(0), uscale(0), vscale(0), detector()
