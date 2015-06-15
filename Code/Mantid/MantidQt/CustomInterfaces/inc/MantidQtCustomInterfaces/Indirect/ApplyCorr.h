@@ -1,7 +1,7 @@
 #ifndef MANTIDQTCUSTOMINTERFACESIDA_APPLYCORR_H_
 #define MANTIDQTCUSTOMINTERFACESIDA_APPLYCORR_H_
 
-#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "ui_ApplyCorr.h"
 #include "IDATab.h"
 

@@ -3,6 +3,7 @@
 #include "MantidGeometry/Crystal/IPeak.h"
 
 #include "MantidAPI/ILatticeFunction.h"
+#include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidAPI/LatticeDomain.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceFactory.h"

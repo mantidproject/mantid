@@ -2,8 +2,8 @@
 #define MANTID_MDALGORITHMS_REFLECTOMETRYMDTRANFORM_H_
 
 #include "MantidAPI/BoxController.h"
-#include "MantidAPI/IEventWorkspace.h"
-#include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidAPI/IEventWorkspace_fwd.h"
+#include "MantidAPI/IMDEventWorkspace_fwd.h"
 
 #include "MantidDataObjects/MDEventFactory.h"
 

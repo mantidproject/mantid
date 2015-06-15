@@ -2,6 +2,7 @@
 
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidCurveFitting/PawleyFunction.h"
+#include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/TableRow.h"
 
 #include "MantidGeometry/Crystal/UnitCell.h"

@@ -1,4 +1,5 @@
 #include "MantidVatesAPI/MDHWInMemoryLoadingPresenter.h"
+#include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidVatesAPI/MDLoadingView.h"
 #include "MantidVatesAPI/MetaDataExtractorUtils.h"
 #include "MantidVatesAPI/ProgressAction.h"

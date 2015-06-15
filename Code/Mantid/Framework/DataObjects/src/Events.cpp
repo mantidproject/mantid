@@ -1,4 +1,5 @@
 #include <stdexcept>
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataObjects/EventList.h"
 #include "MantidDataObjects/Events.h"
 #include "MantidKernel/Exception.h"

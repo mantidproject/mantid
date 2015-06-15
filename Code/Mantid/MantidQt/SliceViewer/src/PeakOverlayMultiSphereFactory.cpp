@@ -1,5 +1,6 @@
 #include "MantidQtSliceViewer/PeakOverlayMultiSphereFactory.h"
 #include "MantidQtSliceViewer/PeakOverlayMultiSphere.h"
+#include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidQtSliceViewer/PeaksPresenter.h"
 #include "MantidKernel/WarningSuppressions.h"
 #include "MantidDataObjects/PeakShapeSpherical.h"

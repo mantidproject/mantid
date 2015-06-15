@@ -1,10 +1,10 @@
 #ifndef MANTID_VATES_vtkSplatterPlotFactory_H_
 #define MANTID_VATES_vtkSplatterPlotFactory_H_
 
-#include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidAPI/IMDEventWorkspace_fwd.h"
 #include "MantidVatesAPI/MetaDataExtractorUtils.h"
 #include "MantidAPI/IMDNode.h"
-#include "MantidAPI/IMDHistoWorkspace.h"
+#include "MantidAPI/IMDHistoWorkspace_fwd.h"
 #include "MantidDataObjects/MDEventFactory.h"
 #include "MantidDataObjects/MDEventWorkspace.h"
 #include "MantidVatesAPI/ThresholdRange.h"

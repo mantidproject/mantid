@@ -1,3 +1,4 @@
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/MemoryManager.h"
 #include "MantidDataObjects/EventList.h"
 #include "MantidDataObjects/EventWorkspaceMRU.h"

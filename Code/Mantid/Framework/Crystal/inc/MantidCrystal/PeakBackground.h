@@ -3,7 +3,7 @@
 
 #include "MantidKernel/System.h"
 #include "MantidKernel/V3D.h"
-#include "MantidAPI/IPeaksWorkspace.h"
+#include "MantidAPI/IPeaksWorkspace_fwd.h"
 #include "MantidAPI/IMDIterator.h"
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidCrystal/HardThresholdBackground.h"

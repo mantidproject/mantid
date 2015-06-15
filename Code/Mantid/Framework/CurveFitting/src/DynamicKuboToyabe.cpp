@@ -4,6 +4,7 @@
 #include "MantidCurveFitting/DynamicKuboToyabe.h"
 #include "MantidAPI/Jacobian.h"
 #include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include <vector>
 
 namespace Mantid

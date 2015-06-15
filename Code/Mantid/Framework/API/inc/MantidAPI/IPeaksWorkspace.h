@@ -4,9 +4,9 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/IPeaksWorkspace_fwd.h"
+#include "MantidAPI/ITableWorkspace.h"
 #include "MantidKernel/SpecialCoordinateSystem.h"
 #include <boost/optional.hpp>
 

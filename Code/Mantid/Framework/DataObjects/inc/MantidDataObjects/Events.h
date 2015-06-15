@@ -7,7 +7,7 @@
 #include <cstddef>
 #include <iosfwd>
 #include <vector>
-#include "MantidAPI/MatrixWorkspace.h" // get MantidVec declaration
+#include "MantidAPI/MatrixWorkspace_fwd.h" // get MantidVec declaration
 #include "MantidKernel/cow_ptr.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/DateAndTime.h"

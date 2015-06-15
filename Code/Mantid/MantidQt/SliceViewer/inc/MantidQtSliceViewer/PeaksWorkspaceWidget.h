@@ -3,8 +3,11 @@
 
 #include <QtGui/QWidget>
 #include "DllOption.h"
-#include "MantidAPI/IPeaksWorkspace.h"
+#include "MantidAPI/IPeaksWorkspace_fwd.h"
 #include "ui_PeaksWorkspaceWidget.h"
+
+#include <set>
+
 namespace MantidQt {
 namespace SliceViewer {
 class PeaksViewer;

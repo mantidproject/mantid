@@ -13,6 +13,7 @@
 #include "MantidVatesAPI/FilteringUpdateProgressAction.h"
 #include "MantidVatesAPI/vtkPeakMarkerFactory.h"
 #include "MantidAPI/Workspace.h"
+#include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidAPI/AnalysisDataService.h"
 
 
