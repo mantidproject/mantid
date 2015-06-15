@@ -374,8 +374,7 @@ PoldiPeakCollection_sptr PoldiFitPeaks1D2::getReducedPeakCollection(
 
 bool PoldiFitPeaks1D2::peakIsAcceptable(const PoldiPeak_sptr &peak) const {
   return peak->intensity() > 0 && peak->fwhm(PoldiPeak::Relative) < 0.02 &&
-         peak->fwhm(PoldiPeak::Relative) > 0.001 &&
-         UncertainValue::errorToValueRatio(peak->q()) < 1e-3;
+         peak->fwhm(PoldiPeak::Relative) > 0.001;
 }
 
 void PoldiFitPeaks1D2::exec() {
