@@ -1,6 +1,6 @@
 #pylint: disable=no-init
 from mantid.api import (PythonAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty,
-                        WorkspaceGroup)
+                        WorkspaceGroup, WorkspaceGroupProperty)
 from mantid.kernel import Direction
 from mantid.simpleapi import *
 
@@ -46,8 +46,8 @@ class ResNorm(PythonAlgorithm):
                              defaultValue=False,
                              doc='Create additional fitting output')
 
-        self.declareProperty(MatrixWorkspaceProperty('OutputWorkspace', '',
-                                                     direction=Direction.Output),
+        self.declareProperty(WorkspaceGroupProperty('OutputWorkspace', '',
+                                                    direction=Direction.Output),
                              doc='Fitted parameter output')
 
 
@@ -81,14 +81,20 @@ class ResNorm(PythonAlgorithm):
 
 
     def PyExec(self):
-        from IndirectCommon import getWSprefix
+        from IndirectCommon import (getWSprefix, getEfixed)
 
-        van_ws = mtd[self._van_ws]
+        # Process vanadium workspace
+        van_ws = ConvertSpectrumAxis(InputWorkspace=self._van_ws,
+                                     OutputWorkspace='__ResNorm_vanadium',
+                                     Target='ElasticQ',
+                                     EMode='Indirect')
+
         num_hist = van_ws.getNumberHistograms()
 
         v_values = van_ws.getAxis(1).extractValues()
         v_unit = van_ws.getAxis(1).getUnit().unitID()
 
+        # Process resolution workspace
         padded_res_ws = self._process_res_ws(num_hist)
 
         input_str = ''
@@ -107,9 +113,16 @@ class ResNorm(PythonAlgorithm):
                                         StartX=self._e_min,
                                         EndX=self._e_max)
 
-        self._process_fit_params(fit_params, v_values, v_unit)
+        params = {'XScaling':'Stretch', 'Scaling':'Intensity'}
+        result_workspaces = []
+        for param_name, output_name in params.items():
+            result_workspaces.append(self._process_fit_params(fit_params, param_name, v_values, v_unit, output_name))
+
+        GroupWorkspaces(InputWorkspaces=result_workspaces,
+                        OutputWorkspace=self._out_ws)
         self.setProperty('OutputWorkspace', self._out_ws)
 
+        DeleteWorkspace(van_ws)
         DeleteWorkspace(padded_res_ws)
         if not self._create_output:
             DeleteWorkspace(fit_params)
@@ -124,11 +137,11 @@ class ResNorm(PythonAlgorithm):
         @return Padded workspace
         """
 
-        norm_res_ws = '__norm_to_unity'
+        norm_res_ws = '__ResNorm_unityres'
         NormaliseToUnity(InputWorkspace=self._res_ws,
                          OutputWorkspace=norm_res_ws)
 
-        ws_name = '__%s_%dspec' % (self._res_ws, num_hist)
+        ws_name = '__ResNorm_res_%s_%dspec' % (self._res_ws, num_hist)
 
         for idx in range(num_hist):
             input_ws_1 = ws_name
@@ -144,35 +157,42 @@ class ResNorm(PythonAlgorithm):
         return mtd[ws_name]
 
 
-    def _process_fit_params(self, fit_params, x_axis, x_unit):
+    #pylint: disable=too-many-arguments
+    def _process_fit_params(self, fit_params, parameter_name, x_axis, x_unit, workspace_suffix=None):
         """
         Generate the output workspace containing fit parameters using the
         fit parameter table from PlotPeakByLogValue.
 
         @param fit_params Fit parameters as table workspace
+        @param parameter_name Parameter name to extract
         @param x_axis Values for X axis of output workspace
         @param x_unit Unit for X axis of output workspace
+        @param workspace_suffix Suffix of result workspace name
         """
 
-        col_names = fit_params.getColumnNames()
+        if workspace_suffix is None:
+            workspace_suffix = parameter_name
 
-        vert_axis_values = ['Scaling', 'Shift', 'XScaling']
+        col_names = fit_params.getColumnNames()
 
         y_values = []
         e_values = []
 
-        for name in vert_axis_values:
-            y_values.extend(fit_params.column(col_names.index(name)))
-            e_values.extend(fit_params.column(col_names.index(name + '_Err')))
+        y_values = fit_params.column(col_names.index(parameter_name))
+        e_values = fit_params.column(col_names.index(parameter_name + '_Err'))
 
-        CreateWorkspace(OutputWorkspace=self._out_ws,
+        ws_name = self._out_ws + '_' + workspace_suffix
+
+        CreateWorkspace(OutputWorkspace=ws_name,
                         DataX=x_axis,
                         DataY=y_values,
                         DataE=e_values,
-                        NSpec=len(vert_axis_values),
+                        NSpec=1,
                         UnitX=x_unit,
                         VerticalAxisUnit='Text',
-                        VerticalAxisValues=vert_axis_values)
+                        VerticalAxisValues=[parameter_name])
+
+        return ws_name
 
 
 # Register algorithm with Mantid
