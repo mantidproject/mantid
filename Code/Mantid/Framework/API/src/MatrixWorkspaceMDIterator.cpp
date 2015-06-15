@@ -1,4 +1,5 @@
 #include "MantidAPI/MatrixWorkspaceMDIterator.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/VMD.h"
 #include "MantidKernel/cow_ptr.h"

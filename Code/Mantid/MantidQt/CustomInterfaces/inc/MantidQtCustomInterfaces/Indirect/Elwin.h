@@ -2,7 +2,7 @@
 #define MANTIDQTCUSTOMINTERFACESIDA_ELWIN_H_
 
 #include "ui_Elwin.h"
-#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidQtCustomInterfaces/Indirect/IDATab.h"
 
 namespace MantidQt

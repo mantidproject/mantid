@@ -2,7 +2,7 @@
 #define MANTID_DATAHANDLING_LOADNEXUSMONITORS_H_
 
 #include "MantidAPI/Algorithm.h"
-#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
 #include <boost/scoped_array.hpp>
 #include <nexus/NeXusFile.hpp>
 #include <nexus/NeXusException.hpp>

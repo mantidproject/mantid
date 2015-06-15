@@ -1,7 +1,7 @@
 #ifndef MANTID_DATAOBJECTS_SPECIALWORKSPACE2D_H_
 #define MANTID_DATAOBJECTS_SPECIALWORKSPACE2D_H_
 
-#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument.h"
 

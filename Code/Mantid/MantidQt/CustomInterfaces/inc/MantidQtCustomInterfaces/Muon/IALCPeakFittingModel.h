@@ -5,7 +5,7 @@
 #include "MantidKernel/System.h"
 
 #include "MantidAPI/IFunction.h"
-#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
 
 #include <QObject>
 

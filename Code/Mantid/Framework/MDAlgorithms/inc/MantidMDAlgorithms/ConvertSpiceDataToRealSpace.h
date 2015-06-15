@@ -5,7 +5,7 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidKernel/FileDescriptor.h"
-#include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidAPI/IMDEventWorkspace_fwd.h"
 
 namespace Mantid {
 namespace MDAlgorithms {

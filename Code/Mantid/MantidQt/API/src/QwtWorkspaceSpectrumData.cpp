@@ -1,4 +1,6 @@
 #include "MantidQtAPI/QwtWorkspaceSpectrumData.h"
+
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidQtAPI/PlotAxis.h"
 
 #include <QStringBuilder>

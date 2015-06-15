@@ -2,7 +2,7 @@
 #define MANTID_API_WORKOPOVERLOADS_H_
 
 #include "MantidAPI/DllConfig.h"
-#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
 
 namespace Mantid {
 namespace API {

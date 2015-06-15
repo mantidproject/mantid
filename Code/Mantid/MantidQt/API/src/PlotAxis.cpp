@@ -1,5 +1,7 @@
 #include "MantidQtAPI/PlotAxis.h"
 
+#include "MantidAPI/MatrixWorkspace.h"
+
 namespace MantidQt
 {
   namespace API

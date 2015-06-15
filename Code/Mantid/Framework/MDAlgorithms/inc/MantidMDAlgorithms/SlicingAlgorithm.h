@@ -3,7 +3,7 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/CoordTransform.h"
-#include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidAPI/IMDEventWorkspace_fwd.h"
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidGeometry/MDGeometry/MDImplicitFunction.h"

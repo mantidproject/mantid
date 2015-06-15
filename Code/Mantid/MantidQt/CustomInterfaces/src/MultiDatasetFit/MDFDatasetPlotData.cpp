@@ -1,5 +1,5 @@
 #include "MantidQtCustomInterfaces/MultiDatasetFit/MDFDatasetPlotData.h"
-#include "MantidQtCustomInterfaces/MultiDatasetFit/MDFErrorCurve.h"
+#include "MantidQtMantidWidgets/ErrorCurve.h"
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -110,7 +110,7 @@ void DatasetPlotData::setData(const Mantid::API::MatrixWorkspace *ws, int wsInde
     m_dataErrorCurve->detach();
     delete m_dataErrorCurve;
   }
-  m_dataErrorCurve = new ErrorCurve(m_dataCurve, ws->readE(wsIndex));
+  m_dataErrorCurve = new MantidQt::MantidWidgets::ErrorCurve(m_dataCurve, ws->readE(wsIndex));
 
   if ( haveFitCurves )
   {

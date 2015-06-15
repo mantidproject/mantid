@@ -4,6 +4,9 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"
 
+#include <boost/make_shared.hpp>
+#include <map>
+
 namespace Mantid {
 namespace API {
 CatalogManagerImpl::CatalogManagerImpl() : m_activeCatalogs() {}

@@ -3,7 +3,7 @@
 
 #include "MantidVatesSimpleGuiViewWidgets/WidgetDllOption.h"
 #include "MantidQtAPI/WorkspaceObserver.h"
-#include "MantidAPI/Workspace.h"
+#include "MantidAPI/Workspace_fwd.h"
 
 // Have to deal with ParaView warnings and Intel compiler the hard way.
 #if defined(__INTEL_COMPILER)

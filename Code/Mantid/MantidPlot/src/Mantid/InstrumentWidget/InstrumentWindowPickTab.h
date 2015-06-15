@@ -4,8 +4,9 @@
 #include "InstrumentWindowTab.h"
 #include "MantidGLWidget.h"
 
+#include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidGeometry/ICompAssembly.h"
-#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidGeometry/IDTypes.h"
 
 class Instrument3DWidget;
 class InstrumentActor;

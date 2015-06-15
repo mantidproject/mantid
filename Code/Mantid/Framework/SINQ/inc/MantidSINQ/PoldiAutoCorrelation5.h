@@ -6,7 +6,7 @@
 //----------------------------------------------------------------------
 #include "MantidSINQ/DllConfig.h"
 #include "MantidAPI/Algorithm.h"
-#include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/TableWorkspace.h"
 

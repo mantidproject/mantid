@@ -2,6 +2,7 @@
 #include "MantidQtSliceViewer/PeaksWorkspaceWidget.h"
 #include "MantidQtSliceViewer/ProxyCompositePeaksPresenter.h"
 #include "MantidQtSliceViewer/PeaksTableColumnsDialog.h"
+#include "MantidAPI/IPeaksWorkspace.h"
 #include <QBoxLayout>
 #include <QLayoutItem>
 

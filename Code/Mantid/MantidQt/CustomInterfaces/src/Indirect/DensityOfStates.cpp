@@ -2,6 +2,9 @@
 
 #include "MantidQtCustomInterfaces/UserInputValidator.h"
 
+#include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/TableRow.h"
+
 #include <QFileInfo>
 #include <QString>
 

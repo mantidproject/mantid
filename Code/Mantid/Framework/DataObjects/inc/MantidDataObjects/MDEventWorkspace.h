@@ -11,7 +11,7 @@
 #include "MantidDataObjects/MDLeanEvent.h"
 #include "MantidDataObjects/MDGridBox.h"
 #include "MantidDataObjects/MDHistoWorkspace.h"
-#include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidAPI/IMDIterator.h"
 
 namespace Mantid {

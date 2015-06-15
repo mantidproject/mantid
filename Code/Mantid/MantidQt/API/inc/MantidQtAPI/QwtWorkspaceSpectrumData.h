@@ -1,7 +1,8 @@
 #ifndef MANTIDQTAPI_QWTWORKSPACESPECTRUMDATA_H
 #define MANTIDQTAPI_QWTWORKSPACESPECTRUMDATA_H
 
-#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidKernel/cow_ptr.h"
 #include "MantidQtAPI/MantidQwtWorkspaceData.h"
 #include "DllOption.h"
 

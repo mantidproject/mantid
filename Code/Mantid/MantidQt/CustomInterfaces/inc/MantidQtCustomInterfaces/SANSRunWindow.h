@@ -16,7 +16,7 @@
 #include <QStringList>
 #include <Poco/NObserver.h>
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidKernel/ConfigService.h"
 #include <vector>
 

@@ -1,6 +1,7 @@
 #include "MantidMDAlgorithms/Quantification/FitResolutionConvolvedModel.h"
 
 #include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidAPI/ITableWorkspace.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidMDAlgorithms/Quantification/ResolutionConvolvedCrossSection.h"
