@@ -75,7 +75,7 @@ ReflectometryTransformQxQz::executeMD(MatrixWorkspace_const_sptr inputWs,
     m_QzCalculation.setThetaFinal(theta_final);
     // Loop over all bins in spectra
     for (size_t binIndex = 0; binIndex < nInputBins; ++binIndex) {
-      const double &wavelength =
+      const double wavelength =
           0.5 * (wavelengths[binIndex] + wavelengths[binIndex + 1]);
       double _qx = m_QxCalculation.execute(wavelength);
       double _qz = m_QzCalculation.execute(wavelength);
@@ -135,7 +135,7 @@ ReflectometryTransformQxQz::execute(MatrixWorkspace_const_sptr inputWs) const {
     m_QzCalculation.setThetaFinal(theta_final);
     // Loop over all bins in spectra
     for (size_t binIndex = 0; binIndex < nInputBins; ++binIndex) {
-      const double &wavelength =
+      const double wavelength =
           0.5 * (wavelengths[binIndex] + wavelengths[binIndex + 1]);
       const double _qx = m_QxCalculation.execute(wavelength);
       const double _qz = m_QzCalculation.execute(wavelength);
