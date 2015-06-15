@@ -3,7 +3,7 @@
 
 #include "ui_SANSRunWindow.h"
 #include "MantidQtAPI/UserSubWindow.h"
-#include "MantidAPI/Workspace.h"
+#include "MantidAPI/Workspace_fwd.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidGeometry/IDetector.h"
 

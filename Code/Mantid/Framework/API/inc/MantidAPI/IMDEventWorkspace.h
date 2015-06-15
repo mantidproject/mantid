@@ -8,7 +8,7 @@
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidAPI/MultipleExperimentInfos.h"
-#include "MantidAPI/Workspace.h"
+#include "MantidAPI/Workspace_fwd.h"
 #include "MantidAPI/IMDNode.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidGeometry/MDGeometry/MDDimensionExtents.h"

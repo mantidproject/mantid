@@ -1,7 +1,7 @@
 #ifndef FITPROPERTYBROWSER_H_
 #define FITPROPERTYBROWSER_H_
 
-#include "MantidAPI/Workspace.h"
+#include "MantidAPI/Workspace_fwd.h"
 #include "MantidAPI/AlgorithmObserver.h"
 #include "WidgetDllOption.h"
 
