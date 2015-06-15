@@ -103,6 +103,7 @@ void JumpFit::runPreviewAlgorithm() { runImpl(); }
 /**
  * Runs algorithm.
  *
+ * @param plot Enable/disable plotting
  * @param save Enable/disable saving
  */
 void JumpFit::runImpl(bool plot, bool save) {
@@ -443,7 +444,7 @@ void JumpFit::fitFunctionSelected(const QString &functionName) {
   for (auto it = m_properties.begin(); it != m_properties.end();) {
     if (it.key().startsWith("parameter_")) {
       delete it.value();
-      m_properties.erase(it);
+      it = m_properties.erase(it);
     } else {
       ++it;
     }
