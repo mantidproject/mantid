@@ -3,6 +3,7 @@
 
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/DeprecatedAlgorithm.h"
 
 namespace Mantid {
 namespace MDAlgorithms {
@@ -30,7 +31,8 @@ namespace MDAlgorithms {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport EvaluateMDFunction : public API::Algorithm {
+class DLLExport EvaluateMDFunction : public API::Algorithm,
+                                     public API::DeprecatedAlgorithm {
 public:
   EvaluateMDFunction();
   virtual ~EvaluateMDFunction();

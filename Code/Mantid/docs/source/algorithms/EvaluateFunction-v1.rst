@@ -28,14 +28,12 @@ Usage
 
 .. testcode:: 2DFunction
 
-    # Define a workspace
+    # Create an empty 2D workspace (100 x 100)
     nx = 100
     ny = 100
-    s = [0] * nx * ny
-    e = [0] * nx * ny
     ws = CreateMDHistoWorkspace(Dimensionality=2, Extents=[-10,10,-10,10], Names="x,y", Units="U,V",
         NumberOfBins='%s,%s' % (nx,ny),
-        SignalInput=s,ErrorInput=e)
+        SignalInput=[0] * nx * ny, ErrorInput=[0] * nx * ny)
     # Evaluate a function
     out = EvaluateFunction('name=UserFunctionMD,Formula=sin(x)*sin(y)','ws')
 
