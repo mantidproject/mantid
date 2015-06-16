@@ -63,8 +63,8 @@ class EnginXFitPeaks(PythonAlgorithm):
 
         if foundPeaks.rowCount() < len(expectedPeaksTof):
             txt = "Peaks effectively found: " + str(foundPeaks)[1:-1]
-            raise Exception("Some peaks from the list of expected peaks were not found by the algorithm "
-                            "FindPeaks. " + txt)
+            raise RuntimeError("Some peaks from the list of expected peaks were not found by the algorithm "
+                               "FindPeaks. " + txt)
 
         difc, zero = self._fitAllPeaks(foundPeaks, expectedPeaksD)
 
@@ -147,6 +147,7 @@ class EnginXFitPeaks(PythonAlgorithm):
         """
         fittedPeaks = self._createFittedPeaksTable()
 
+        peakType = 'BackToBackExponential'
         for i in range(foundPeaks.rowCount()):
             row = foundPeaks.row(i)
             # Peak parameters estimated by FindPeaks
@@ -162,7 +163,7 @@ class EnginXFitPeaks(PythonAlgorithm):
             # Approximate peak intensity, assuming Gaussian shape
             intensity = height * sigma * math.sqrt(2 * math.pi)
 
-            peak = FunctionFactory.createFunction("BackToBackExponential")
+            peak = FunctionFactory.createFunction(peakType)
             peak.setParameter('X0', centre)
             peak.setParameter('S', sigma)
             peak.setParameter('I', intensity)
@@ -192,6 +193,21 @@ class EnginXFitPeaks(PythonAlgorithm):
             self._addParametersToMap(fittedParams, paramTable)
 
             fittedPeaks.addRow(fittedParams)
+
+        # Check if we were able to really fit any peak
+        if 0 == fittedPeaks.rowCount():
+            detailTxt = ("Could find " + str(len(foundPeaks)) + " peaks using the algorithm FindPeaks but " +
+                         "then it was not possible to fit any peak starting from these peaks found and using '" +
+                         peakType + "' as peak function.")
+            raise RuntimeError('Could not fit any peak. Please check the list of expected peaks, as it does not '
+                               'seem to be appropriate for the workspace given. More details: ' +
+                               detailTxt)
+
+        # Better than failing to fit the linear function
+        if 1 == fittedPeaks.rowCount():
+            raise RuntimeError('Could find only one peak. This is not enough to fit the output parameters '
+                               'difc and zero. Please check the list of expected peaks given and if it is '
+                               'appropriate for the workspace')
 
         difc, zero = self._fitDSpacingToTOF(fittedPeaks)
         return (difc, zero)
