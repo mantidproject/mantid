@@ -19,7 +19,8 @@ Kernel::Logger g_log("FileEventDataListener");
 
 /// Constructor
 FileEventDataListener::FileEventDataListener()
-    : ILiveListener(), m_tempWSname("__filelistenerchunk"), m_nextChunk(1),
+    : ILiveListener(), m_filename(), m_runNumber(-1),
+      m_tempWSname("__filelistenerchunk"), m_nextChunk(1),
       m_filePropName("Filename"), m_loaderName(""), m_canLoadMonitors(true),
       m_chunkload(NULL) {
   std::string tfilename =

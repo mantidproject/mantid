@@ -467,8 +467,8 @@ Input
   Allows you to select a reduced NeXus file (*_red.nxs*) or workspace (*_red*) as the
   input to the algorithm.
 
-Rebin Type
-  Selects the SofQW algorithm that will be used.
+Method
+  Selects the :ref:`SofQW <algm-SofQW>` method that will be used.
 
 Q Low, Q Width & Q High
   Q binning parameters that are passed to the SofQW algorithm.

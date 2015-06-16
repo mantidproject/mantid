@@ -143,12 +143,9 @@ class IndirectCalibration(DataProcessorAlgorithm):
             self._intensity_scale = 1 / (total / (number_historgrams - num_zero_spectra))
 
         Scale(InputWorkspace=calib_ws_name,
-              OutputWorkspace=calib_ws_name,
+              OutputWorkspace=self._out_ws,
               Factor=self._intensity_scale,
               Operation='Multiply')
-
-        RenameWorkspace(InputWorkspace=calib_ws_name,
-                        OutputWorkspace=self._out_ws)
 
         # Remove old workspaces
         if len(runs) > 1:

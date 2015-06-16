@@ -125,7 +125,7 @@
       <widget class="QComboBox" name="leLogValue">
        <item>
         <property name="text">
-         <string>last value</string>
+         <string>last_value</string>
         </property>
        </item>
        <item>

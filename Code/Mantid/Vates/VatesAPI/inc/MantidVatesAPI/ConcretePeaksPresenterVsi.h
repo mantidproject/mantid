@@ -3,8 +3,8 @@
 
 #include "MantidKernel/System.h"
 #include "MantidVatesAPI/PeaksPresenterVsi.h"
-#include "MantidAPI/PeakTransform.h"
-#include "MantidAPI/IPeaksWorkspace.h"
+#include "MantidGeometry/Crystal/PeakTransform.h"
+#include "MantidAPI/IPeaksWorkspace_fwd.h"
 #include "MantidVatesAPI/ViewFrustum.h"
 #include "MantidGeometry/Crystal/PeakShape.h"
 #include "MantidKernel/SpecialCoordinateSystem.h"

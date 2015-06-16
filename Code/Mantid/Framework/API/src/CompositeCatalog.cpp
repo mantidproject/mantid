@@ -1,5 +1,7 @@
 #include "MantidAPI/CompositeCatalog.h"
 
+#include <stdexcept>
+
 namespace Mantid {
 namespace API {
 CompositeCatalog::CompositeCatalog() : m_catalogs() {}

@@ -96,16 +96,17 @@ void Rebin2D::exec() {
   MantidVecPtr newXBins;
   MantidVec newYBins;
 
-  this->useFractionalArea = getProperty("UseFractionalArea");
-  MatrixWorkspace_sptr outputWS =
-      createOutputWorkspace(inputWS, newXBins.access(), newYBins);
-  if (this->useFractionalArea &&
+  // Flag for using a RebinnedOutput workspace
+  bool useFractionalArea = getProperty("UseFractionalArea");
+  MatrixWorkspace_sptr outputWS = createOutputWorkspace(
+      inputWS, newXBins.access(), newYBins, useFractionalArea);
+  if (useFractionalArea &&
       !boost::dynamic_pointer_cast<RebinnedOutput>(outputWS)) {
     g_log.warning("Fractional area tracking requires the input workspace to "
                   "contain calculated bin fractions from a parallelpiped rebin "
                   "like SofQW"
                   "Continuing without fractional area tracking");
-    this->useFractionalArea = false;
+    useFractionalArea = false;
   }
 
   // Progress reports & cancellation
@@ -129,7 +130,7 @@ void Rebin2D::exec() {
       const double x_j = oldXEdges[j];
       const double x_jp1 = oldXEdges[j + 1];
       Quadrilateral inputQ = Quadrilateral(x_j, x_jp1, vlo, vhi);
-      if (!this->useFractionalArea) {
+      if (!useFractionalArea) {
         rebinToOutput(inputQ, inputWS, i, j, outputWS, newYBins);
       } else {
         rebinToFractionalOutput(
@@ -141,7 +142,7 @@ void Rebin2D::exec() {
     PARALLEL_END_INTERUPT_REGION
   }
   PARALLEL_CHECK_INTERUPT_REGION
-  if (this->useFractionalArea) {
+  if (useFractionalArea) {
     boost::dynamic_pointer_cast<RebinnedOutput>(outputWS)->finalize();
   }
   normaliseOutput(outputWS, inputWS);
@@ -370,11 +371,13 @@ void Rebin2D::normaliseOutput(MatrixWorkspace_sptr outputWS,
  * boundaries
  * @param newYBins [out] :: An output vector to be filled with the new Y bin
  * boundaries
+ * @param useFractionalArea :: use a RebinnedOutput workspace
  * @return A pointer to the output workspace
  */
 MatrixWorkspace_sptr
 Rebin2D::createOutputWorkspace(MatrixWorkspace_const_sptr parent,
-                               MantidVec &newXBins, MantidVec &newYBins) const {
+                               MantidVec &newXBins, MantidVec &newYBins,
+                               const bool useFractionalArea) const {
   using Kernel::VectorHelper::createAxisFromRebinParams;
   // First create the two sets of bin boundaries
   const int newXSize =
@@ -383,7 +386,7 @@ Rebin2D::createOutputWorkspace(MatrixWorkspace_const_sptr parent,
       createAxisFromRebinParams(getProperty("Axis2Binning"), newYBins);
   // and now the workspace
   MatrixWorkspace_sptr outputWS;
-  if (!this->useFractionalArea) {
+  if (!useFractionalArea) {
     outputWS = WorkspaceFactory::Instance().create(parent, newYSize - 1,
                                                    newXSize, newXSize - 1);
   } else {

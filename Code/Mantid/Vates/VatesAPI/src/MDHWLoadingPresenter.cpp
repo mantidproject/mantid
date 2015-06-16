@@ -1,6 +1,7 @@
 #include "MantidVatesAPI/MDHWLoadingPresenter.h"
 #include "MantidVatesAPI/MDLoadingView.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/IMDHistoWorkspace.h"
 
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidGeometry/MDGeometry/NullImplicitFunction.h"

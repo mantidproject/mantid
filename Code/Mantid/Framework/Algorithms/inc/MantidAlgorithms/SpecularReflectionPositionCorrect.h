@@ -3,7 +3,7 @@
 
 #include "MantidKernel/System.h"
 #include "MantidAlgorithms/SpecularReflectionAlgorithm.h"
-#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
 
 namespace Mantid {
 namespace Algorithms {

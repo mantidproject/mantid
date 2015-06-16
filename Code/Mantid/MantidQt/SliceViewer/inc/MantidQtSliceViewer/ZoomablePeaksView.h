@@ -3,6 +3,8 @@
 
 #include "MantidKernel/System.h"
 #include "MantidKernel/V2D.h"
+#include <boost/shared_ptr.hpp>
+
 
 namespace MantidQt
 {

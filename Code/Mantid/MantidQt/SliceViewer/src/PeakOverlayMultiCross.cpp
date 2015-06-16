@@ -1,13 +1,17 @@
 #include "MantidQtSliceViewer/PeakOverlayMultiCross.h"
+#include "MantidQtSliceViewer/PeaksPresenter.h"
+#include "MantidQtMantidWidgets/InputController.h"
 #include <qwt_plot.h>
 #include <qwt_plot_canvas.h>
 #include <qwt_scale_div.h>
 #include <qpainter.h>
 #include <QPen>
 #include <QMouseEvent>
+#include <QApplication>
+
 
 using namespace Mantid::Kernel;
-using namespace Mantid::API;
+using namespace Mantid::Geometry;
 
 
 namespace MantidQt
@@ -18,17 +22,21 @@ namespace MantidQt
     //----------------------------------------------------------------------------------------------
     /** Constructor
     */
-    PeakOverlayMultiCross::PeakOverlayMultiCross(QwtPlot * plot, QWidget * parent, const VecPhysicalCrossPeak&  vecPhysicalPeaks, const QColor& peakColour)
-      : QWidget( parent ),
-      m_plot(plot),
+    PeakOverlayMultiCross::PeakOverlayMultiCross(PeaksPresenter* const presenter, QwtPlot * plot, QWidget * parent,
+                                                 const VecPhysicalCrossPeak&  vecPhysicalPeaks, const int plotXIndex, const int plotYIndex, const QColor& peakColour)
+      : PeakOverlayInteractive ( presenter, plot, plotXIndex, plotYIndex, parent ),
       m_physicalPeaks(vecPhysicalPeaks),
-      m_peakColour(peakColour)
+      m_peakColour(peakColour),
+      m_cachedOccupancyIntoView(0),
+      m_cachedOccupancyInView(0)
     {
-      setAttribute(Qt::WA_NoMousePropagation, false);
-      this->setVisible(true);
-      setUpdatesEnabled(true);
-
-      setAttribute(Qt::WA_TransparentForMouseEvents);
+        if(vecPhysicalPeaks.size() > 0)
+        {
+            // Cache the occupancy if we can, that way if all physical peaks are removed, we still keep the occupancy settings.
+            VecPhysicalCrossPeak::value_type firstPhysicalPeak = vecPhysicalPeaks.front();
+            m_cachedOccupancyIntoView = firstPhysicalPeak->getOccupancyIntoView();
+            m_cachedOccupancyInView = firstPhysicalPeak->getOccupancyInView();
+        }
     }
 
     //----------------------------------------------------------------------------------------------
@@ -59,26 +67,10 @@ namespace MantidQt
     }
 
 
-    //----------------------------------------------------------------------------------------------
-    /// Return the recommended size of the widget
-    QSize PeakOverlayMultiCross::sizeHint() const
-    {
-      //TODO: Is there a smarter way to find the right size?
-      return QSize(20000, 20000);
-      // Always as big as the canvas
-      //return m_plot->canvas()->size();
-    }
-
-    QSize PeakOverlayMultiCross::size() const
-    { return m_plot->canvas()->size(); }
-    int PeakOverlayMultiCross::height() const
-    { return m_plot->canvas()->height(); }
-    int PeakOverlayMultiCross::width() const
-    { return m_plot->canvas()->width(); }
 
     //----------------------------------------------------------------------------------------------
     /// Paint the overlay
-    void PeakOverlayMultiCross::paintEvent(QPaintEvent * /*event*/)
+    void PeakOverlayMultiCross::doPaintPeaks(QPaintEvent * /*event*/)
     {
       for(size_t i = 0; i < m_viewablePeaks.size(); ++i)
       {
@@ -108,6 +100,7 @@ namespace MantidQt
 
           painter.drawLine(bottomL, topR);
           painter.drawLine(bottomR, topL);
+          painter.end();
         }
       }
     }
@@ -164,6 +157,7 @@ namespace MantidQt
       {
         m_physicalPeaks[i]->setOccupancyInView(fraction);
       }
+      m_cachedOccupancyInView = fraction;
     }
 
     /**
@@ -176,16 +170,17 @@ namespace MantidQt
       {
         m_physicalPeaks[i]->setOccupancyIntoView(fraction);
       }
+      m_cachedOccupancyIntoView = fraction;
     }
 
     double PeakOverlayMultiCross::getOccupancyInView() const
     {
-      return m_physicalPeaks[0]->getOccupancyInView();
+      return m_cachedOccupancyInView;
     }
 
     double PeakOverlayMultiCross::getOccupancyIntoView() const
     {
-      return m_physicalPeaks[0]->getOccupancyIntoView();
+      return m_cachedOccupancyIntoView;
     }
 
     bool PeakOverlayMultiCross::positionOnly() const
@@ -211,6 +206,15 @@ namespace MantidQt
     QColor PeakOverlayMultiCross::getForegroundColour() const
     {
       return m_peakColour;
+    }
+
+    void PeakOverlayMultiCross::takeSettingsFrom(const PeakOverlayView * const source)
+    {
+        this->changeForegroundColour(source->getForegroundColour());
+        this->changeBackgroundColour(source->getBackgroundColour());
+        this->changeOccupancyIntoView(source->getOccupancyIntoView());
+        this->changeOccupancyInView(source->getOccupancyInView());
+        this->showBackgroundRadius(source->isBackgroundShown());
     }
 
   } // namespace Mantid

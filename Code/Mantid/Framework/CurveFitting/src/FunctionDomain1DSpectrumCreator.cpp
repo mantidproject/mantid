@@ -1,5 +1,7 @@
 #include "MantidCurveFitting/FunctionDomain1DSpectrumCreator.h"
 
+#include "MantidAPI/MatrixWorkspace.h"
+
 namespace Mantid {
 namespace CurveFitting {
 

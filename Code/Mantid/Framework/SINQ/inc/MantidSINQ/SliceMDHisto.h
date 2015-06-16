@@ -30,12 +30,12 @@
 
 #include "MantidSINQ/DllConfig.h"
 #include "MantidAPI/Algorithm.h"
-#include "MantidAPI/IMDHistoWorkspace.h"
+#include "MantidAPI/IMDHistoWorkspace_fwd.h"
 
 class MANTID_SINQ_DLL SliceMDHisto : public Mantid::API::Algorithm {
 public:
-  /// (Empty) Constructor
-  SliceMDHisto() : Mantid::API::Algorithm(), dim() {}
+  /// Default constructor
+  SliceMDHisto();
   /// Virtual destructor
   virtual ~SliceMDHisto() {}
   /// Algorithm's name
@@ -56,8 +56,8 @@ private:
   /// Execution code
   void exec();
 
-  unsigned int rank;
-  std::vector<int> dim;
+  unsigned int m_rank;
+  std::vector<int> m_dim;
   void cutData(Mantid::API::IMDHistoWorkspace_sptr inWS,
                Mantid::API::IMDHistoWorkspace_sptr outWS,
                Mantid::coord_t *sourceDim, Mantid::coord_t *targetDim,

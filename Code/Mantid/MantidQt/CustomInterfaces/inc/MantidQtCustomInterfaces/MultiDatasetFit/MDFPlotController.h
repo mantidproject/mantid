@@ -59,6 +59,7 @@ public slots:
   void enablePan();
   void enableRange();
   void updateRange(int index);
+  void showDataErrors(bool);
 private slots:
   void tableUpdated();
   void prevPlot();
@@ -97,6 +98,7 @@ private:
   QPushButton *m_nextPlot;
   QMap<int,boost::shared_ptr<DatasetPlotData>> m_plotData;
   int m_currentIndex;
+  bool m_showDataErrors;
 };
 
 } // MDF

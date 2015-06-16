@@ -5,7 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
-#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -72,8 +72,6 @@ private:
   API::MatrixWorkspace_sptr m_unfilteredWS;
   /// Temporary workspace for keeping the filtered spectrum
   API::MatrixWorkspace_sptr m_filteredWS;
-  /// Variable for storing the lowest x value
-  double m_x0;
 };
 
 } // namespace Algorithm

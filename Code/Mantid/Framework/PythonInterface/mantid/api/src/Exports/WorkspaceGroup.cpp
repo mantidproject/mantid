@@ -9,10 +9,7 @@ using namespace Mantid::API;
 using namespace Mantid::PythonInterface;
 using namespace boost::python;
 
-// clang-format off
-void export_WorkspaceGroup()
-// clang-format on
-{
+void export_WorkspaceGroup() {
   class_<WorkspaceGroup, bases<Workspace>, boost::noncopyable>("WorkspaceGroup",
                                                                no_init)
       .def("getNumberOfEntries", &WorkspaceGroup::getNumberOfEntries,
@@ -42,8 +39,6 @@ void export_WorkspaceGroup()
            (Workspace_sptr (WorkspaceGroup::*)(const size_t) const) &
                WorkspaceGroup::getItem,
            return_value_policy<Policies::ToWeakPtr>());
-
-  //-----------------------------------------------------------------------------------------------
 
   Registry::RegisterWorkspacePtrToPython<WorkspaceGroup>();
 }

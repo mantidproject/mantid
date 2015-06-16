@@ -4,7 +4,7 @@
 #include <string>
 #include <vector>
 #include "MantidAPI/IFileLoader.h"
-#include "MantidAPI/IEventWorkspace.h"
+#include "MantidAPI/IEventWorkspace_fwd.h"
 #include "MantidKernel/System.h"
 
 namespace Mantid {

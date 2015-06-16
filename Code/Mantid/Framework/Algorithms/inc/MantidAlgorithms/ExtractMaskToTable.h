@@ -3,7 +3,7 @@
 
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
-#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidDataObjects/TableWorkspace.h"
 
 namespace Mantid {
@@ -89,9 +89,6 @@ private:
   void addToTableWorkspace(DataObjects::TableWorkspace_sptr outws,
                            std::vector<detid_t> maskeddetids, double xmin,
                            double xmax, std::vector<detid_t> prevmaskedids);
-
-  /// Input workspace type
-  bool m_inputIsMask;
 };
 
 } // namespace Algorithms

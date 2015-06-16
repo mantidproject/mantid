@@ -3,15 +3,15 @@
 #include "MantidPythonInterface/kernel/TrackingInstanceMethod.h"
 
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/Workspace.h"
+#include "MantidAPI/Workspace_fwd.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::PythonInterface;
 using namespace boost::python;
 
-namespace {
 
+namespace {
 
 /**
  * Add an item into the ADS, if it exists then an error is raised
@@ -46,11 +46,11 @@ void addOrReplaceItem(AnalysisDataServiceImpl &self, const std::string &name,
 }
 
 }
-// clang-format off
-void export_AnalysisDataService()
-// clang-format on
-{
-  typedef DataServiceExporter<AnalysisDataServiceImpl, Workspace_sptr> ADSExporter;
+
+
+void export_AnalysisDataService() {
+  typedef DataServiceExporter<AnalysisDataServiceImpl, Workspace_sptr>
+      ADSExporter;
   auto pythonClass = ADSExporter::define("AnalysisDataServiceImpl");
 
   // -- special ADS behaviour --
@@ -65,5 +65,6 @@ void export_AnalysisDataService()
   pythonClass.def("__setitem__", &addOrReplaceItem);
 
   // Instance method
-  TrackingInstanceMethod<AnalysisDataService, ADSExporter::PythonType>::define(pythonClass);
+  TrackingInstanceMethod<AnalysisDataService, ADSExporter::PythonType>::define(
+      pythonClass);
 }

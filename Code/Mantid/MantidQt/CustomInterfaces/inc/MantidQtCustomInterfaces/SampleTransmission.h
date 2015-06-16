@@ -8,7 +8,7 @@
 #include "MantidQtAPI/AlgorithmRunner.h"
 #include "MantidQtAPI/UserSubWindow.h"
 #include "MantidQtAPI/WorkspaceObserver.h"
-#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
 
 
 namespace MantidQt

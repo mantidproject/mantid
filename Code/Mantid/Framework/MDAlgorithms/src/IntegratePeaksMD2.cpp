@@ -506,7 +506,7 @@ void IntegratePeaksMD2::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws) {
         findpeaks->setProperty<bool>("HighBackground", true);
         findpeaks->setProperty<bool>("RawPeakParameters", true);
         std::vector<double> peakPosToFit;
-        peakPosToFit.push_back(static_cast<double>(numSteps / 2));
+        peakPosToFit.push_back(static_cast<double>(numSteps) / 2.0);
         findpeaks->setProperty("PeakPositions", peakPosToFit);
         findpeaks->setProperty<int>("MinGuessedPeakWidth", 4);
         findpeaks->setProperty<int>("MaxGuessedPeakWidth", 4);

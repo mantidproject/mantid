@@ -3,14 +3,14 @@
 
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/IPeaksWorkspace.h"
-#include "MantidAPI/PeakTransform.h"
-#include "MantidAPI/PeakTransformFactory.h"
+#include "MantidGeometry/Crystal/PeakTransform.h"
+#include "MantidGeometry/Crystal/PeakTransformFactory.h"
 #include "MantidQtSliceViewer/PeaksPresenter.h"
 #include "MantidQtSliceViewer/PeakOverlayView.h"
 #include "MantidQtSliceViewer/PeakOverlayViewFactory.h"
 #include "MantidQtSliceViewer/ZoomablePeaksView.h"
 #include "MantidQtSliceViewer/UpdateableOnDemand.h"
-#include "MantidAPI/IPeak.h"
+#include "MantidGeometry/Crystal/IPeak.h"
 #include "MantidKernel/UnitLabel.h"
 #include <boost/regex.hpp>
 #include <gmock/gmock.h>
@@ -18,6 +18,7 @@
 
 using namespace MantidQt::SliceViewer;
 using namespace Mantid::API;
+using namespace Mantid::Geometry;
 using namespace Mantid;
 using boost::regex;
 
@@ -65,8 +66,13 @@ namespace
     MOCK_METHOD1(reInitialize, void(boost::shared_ptr<Mantid::API::IPeaksWorkspace> peaksWS));
     MOCK_CONST_METHOD1(contentsDifferent,
           bool(const PeaksPresenter*  other));
+    MOCK_METHOD1(deletePeaksIn, bool(PeakBoundingBox));
+    MOCK_METHOD1(peakEditMode, void(EditMode));
+    MOCK_METHOD2(addPeakAt, bool(double, double));
+    MOCK_CONST_METHOD0(hasPeakAddMode, bool());
     virtual ~MockPeaksPresenter(){}
   };
+
 
   /*------------------------------------------------------------
   Mock Peaks Presenter, with additional hooks for verifying destruction.
@@ -81,7 +87,7 @@ namespace
   /*------------------------------------------------------------
   Mock Peak Transform
   ------------------------------------------------------------*/
-  class MockPeakTransform : public PeakTransform 
+  class MockPeakTransform : public Geometry::PeakTransform
   {
   public:
     MockPeakTransform()
@@ -93,7 +99,7 @@ namespace
     }
     MOCK_CONST_METHOD0(clone, PeakTransform_sptr());
     MOCK_CONST_METHOD1(transform, Mantid::Kernel::V3D(const Mantid::Kernel::V3D&));
-    MOCK_CONST_METHOD1(transformPeak, Mantid::Kernel::V3D(const Mantid::API::IPeak&)); 
+    MOCK_CONST_METHOD1(transformPeak, Mantid::Kernel::V3D(const Mantid::Geometry::IPeak&));
     MOCK_CONST_METHOD0(getFriendlyName, std::string());
     MOCK_CONST_METHOD0(getCoordinateSystem, Mantid::Kernel::SpecialCoordinateSystem());
   };
@@ -101,7 +107,7 @@ namespace
   /*------------------------------------------------------------
   Mock Peak Transform Factory
   ------------------------------------------------------------*/
-class MockPeakTransformFactory : public PeakTransformFactory 
+class MockPeakTransformFactory : public Geometry::PeakTransformFactory
 {
  public:
   MOCK_CONST_METHOD0(createDefaultTransform, PeakTransform_sptr());
@@ -133,7 +139,11 @@ class MockPeakTransformFactory : public PeakTransformFactory
     MOCK_CONST_METHOD0(isBackgroundShown, bool());
     MOCK_CONST_METHOD0(getForegroundColour, QColor());
     MOCK_CONST_METHOD0(getBackgroundColour, QColor());
-    ~MockPeakOverlayView(){}
+    MOCK_METHOD0(peakDeletionMode, void());
+    MOCK_METHOD0(peakAdditionMode, void());
+    MOCK_METHOD0(peakDisplayMode, void());
+    MOCK_METHOD1(takeSettingsFrom, void(PeakOverlayView const * const));
+    virtual ~MockPeakOverlayView(){}
   };
 
   /*------------------------------------------------------------
@@ -142,7 +152,7 @@ class MockPeakTransformFactory : public PeakTransformFactory
   class MockPeakOverlayFactory : public PeakOverlayViewFactory
   {
   public:
-    MOCK_CONST_METHOD1(createView, boost::shared_ptr<PeakOverlayView>(PeakTransform_const_sptr));
+    MOCK_CONST_METHOD2(createView, boost::shared_ptr<PeakOverlayView>(PeaksPresenter*, PeakTransform_const_sptr));
     MOCK_CONST_METHOD0(getPlotXLabel, std::string());
     MOCK_CONST_METHOD0(getPlotYLabel, std::string());
     MOCK_METHOD0(updateView, void());
@@ -154,7 +164,7 @@ class MockPeakTransformFactory : public PeakTransformFactory
   /*------------------------------------------------------------
   Mock IPeak
   ------------------------------------------------------------*/
-  class MockIPeak : public Mantid::API::IPeak 
+  class MockIPeak : public Mantid::Geometry::IPeak
   {
   public:
     MOCK_METHOD1(setInstrument,

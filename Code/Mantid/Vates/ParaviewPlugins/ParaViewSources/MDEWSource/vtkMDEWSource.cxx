@@ -10,6 +10,7 @@
 #include "vtkUnstructuredGrid.h"
 #include "vtkStreamingDemandDrivenPipeline.h"
 
+#include "MantidVatesAPI/BoxInfo.h"
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidVatesAPI/MDEWInMemoryLoadingPresenter.h"
 #include "MantidVatesAPI/MDLoadingViewAdapter.h"
@@ -20,6 +21,9 @@
 #include "MantidVatesAPI/vtkMD0DFactory.h"
 #include "MantidVatesAPI/FilteringUpdateProgressAction.h"
 #include "MantidVatesAPI/IgnoreZerosThresholdRange.h"
+#include "MantidKernel/WarningSuppressions.h"
+
+#include <boost/optional.hpp>
 
 using namespace Mantid::VATES;
 
@@ -231,6 +235,7 @@ int vtkMDEWSource::RequestData(vtkInformation *, vtkInformationVector **, vtkInf
   return 1;
 }
 
+GCC_DIAG_OFF(strict-aliasing)
 int vtkMDEWSource::RequestInformation(vtkInformation *vtkNotUsed(request), vtkInformationVector **vtkNotUsed(inputVector), vtkInformationVector *outputVector)
 {
   if(m_presenter == NULL && !m_wsName.empty())
@@ -242,6 +247,11 @@ int vtkMDEWSource::RequestInformation(vtkInformation *vtkNotUsed(request), vtkIn
     }
     else
     {
+      // If the MDEvent workspace has had top level splitting applied to it, then use the a depth of 1
+      if (auto split = Mantid::VATES::findRecursionDepthForTopLevelSplitting(m_wsName)) {
+        SetDepth(split.get());
+      }
+
       m_presenter->executeLoadMetadata();
       setTimeRange(outputVector);
     }
@@ -337,3 +347,4 @@ const char* vtkMDEWSource::GetWorkspaceName()
 {
   return m_wsName.c_str();
 }
+

@@ -80,24 +80,6 @@ public:
     TS_ASSERT_EQUALS(filenameonly, obj.getFileNameOnly());
   }
 
-  void testGetModifiedTimestamp()
-  {
-    const std::string filename = ConfigService::Instance().getInstrumentDirectory() + "/IDFs_for_UNIT_TESTING/IDF_for_UNIT_TESTING.xml";
-    Poco::File file(filename);
-
-    IDFObject obj(filename);
-    TS_ASSERT_EQUALS(file.getLastModified(), obj.getLastModified());
-  }
-
-  void testGetFormattedModifiedTimestamp()
-  {
-    const std::string filename = ConfigService::Instance().getInstrumentDirectory() + "/IDFs_for_UNIT_TESTING/IDF_for_UNIT_TESTING.xml";
-    Poco::File file(filename);
-
-    IDFObject obj(filename);
-    TS_ASSERT_EQUALS(Poco::DateTimeFormatter::format(file.getLastModified(), "%Y-%d-%mT%H:%M:%S"), obj.getFormattedLastModified());
-  }
-
   void testGetMangledName()
   {
     const std::string filename = ConfigService::Instance().getInstrumentDirectory() + "/IDFs_for_UNIT_TESTING/IDF_for_UNIT_TESTING.xml";

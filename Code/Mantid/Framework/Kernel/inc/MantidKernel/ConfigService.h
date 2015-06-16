@@ -206,6 +206,8 @@ public:
   const std::vector<std::string> &getInstrumentDirectories() const;
   /// Get instrument search directory
   const std::string getInstrumentDirectory() const;
+  ///get the vtp file directory
+  const std::string getVTPFileDirectory();
   //@}
 
   /// Load facility information from instrumentDir/Facilities.xml file
@@ -326,8 +328,6 @@ private:
 
   /// The list of available facilities
   std::vector<FacilityInfo *> m_facilities;
-  /// Define a flag value for a removed property
-  const std::string m_removedFlag;
 
   /// local cache of proxy details
   Kernel::ProxyInfo m_proxyInfo;

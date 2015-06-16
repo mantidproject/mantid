@@ -10,6 +10,8 @@
  * Added copying of meta data. Mark Koennecke, July 2013
  */
 #include "MantidSINQ/MDHistoToWorkspace2D.h"
+
+#include "MantidAPI/IMDHistoWorkspace.h"
 #include <cmath>
 #include <iostream>
 
@@ -25,6 +27,9 @@ using namespace Mantid;
 // A reference to the logger is provided by the base class, it is called g_log.
 // It is used to print out information, warning and error messages
 
+MDHistoToWorkspace2D::MDHistoToWorkspace2D()
+    : Mantid::API::Algorithm(), m_rank(0), m_currentSpectra(0) {}
+
 void MDHistoToWorkspace2D::init() {
   declareProperty(new WorkspaceProperty<IMDHistoWorkspace>("InputWorkspace", "",
                                                            Direction::Input));
@@ -36,11 +41,12 @@ void MDHistoToWorkspace2D::exec() {
   IMDHistoWorkspace_sptr inWS =
       IMDHistoWorkspace_sptr(getProperty("InputWorkspace"));
 
-  rank = inWS->getNumDims();
+  m_rank = inWS->getNumDims();
   size_t nSpectra = calculateNSpectra(inWS);
   std::cout << "nSpectra = " << nSpectra << std::endl;
 
-  boost::shared_ptr<const IMDDimension> lastDim = inWS->getDimension(rank - 1);
+  boost::shared_ptr<const IMDDimension> lastDim =
+      inWS->getDimension(m_rank - 1);
   std::cout << "spectraLength = " << lastDim->getNBins() << std::endl;
 
   Mantid::DataObjects::Workspace2D_sptr outWS;
@@ -49,9 +55,9 @@ void MDHistoToWorkspace2D::exec() {
           "Workspace2D", nSpectra, lastDim->getNBins(), lastDim->getNBins()));
   outWS->setYUnit("Counts");
 
-  coord_t *pos = (coord_t *)malloc(rank * sizeof(coord_t));
-  memset(pos, 0, rank * sizeof(coord_t));
-  currentSpectra = 0;
+  coord_t *pos = (coord_t *)malloc(m_rank * sizeof(coord_t));
+  memset(pos, 0, m_rank * sizeof(coord_t));
+  m_currentSpectra = 0;
   recurseData(inWS, outWS, 0, pos);
   copyMetaData(inWS, outWS);
 
@@ -62,7 +68,7 @@ void MDHistoToWorkspace2D::exec() {
 
 size_t MDHistoToWorkspace2D::calculateNSpectra(IMDHistoWorkspace_sptr inWS) {
   size_t nSpectra = 1;
-  for (size_t i = 0; i < rank - 1; i++) {
+  for (size_t i = 0; i < m_rank - 1; i++) {
     boost::shared_ptr<const IMDDimension> dim = inWS->getDimension(i);
     nSpectra *= dim->getNBins();
   }
@@ -73,14 +79,14 @@ void MDHistoToWorkspace2D::recurseData(IMDHistoWorkspace_sptr inWS,
                                        Workspace2D_sptr outWS,
                                        size_t currentDim, coord_t *pos) {
   boost::shared_ptr<const IMDDimension> dim = inWS->getDimension(currentDim);
-  if (currentDim == rank - 1) {
-    MantidVec &Y = outWS->dataY(currentSpectra);
+  if (currentDim == m_rank - 1) {
+    MantidVec &Y = outWS->dataY(m_currentSpectra);
     for (unsigned int j = 0; j < dim->getNBins(); j++) {
       pos[currentDim] = dim->getX(j);
       Y[j] = inWS->getSignalAtCoord(
           pos, static_cast<Mantid::API::MDNormalization>(0));
     }
-    MantidVec &E = outWS->dataE(currentSpectra);
+    MantidVec &E = outWS->dataE(m_currentSpectra);
     // MSVC compiler can't figure out the correct overload with out the function
     // cast on sqrt
     std::transform(Y.begin(), Y.end(), E.begin(),
@@ -89,10 +95,10 @@ void MDHistoToWorkspace2D::recurseData(IMDHistoWorkspace_sptr inWS,
     for (unsigned int i = 0; i < dim->getNBins(); i++) {
       xData.push_back(dim->getX(i));
     }
-    outWS->setX(currentSpectra, xData);
-    outWS->getSpectrum(currentSpectra)
-        ->setSpectrumNo(static_cast<specid_t>(currentSpectra));
-    currentSpectra++;
+    outWS->setX(m_currentSpectra, xData);
+    outWS->getSpectrum(m_currentSpectra)
+        ->setSpectrumNo(static_cast<specid_t>(m_currentSpectra));
+    m_currentSpectra++;
   } else {
     // recurse deeper
     for (int i = 0; i < static_cast<int>(dim->getNBins()); i++) {

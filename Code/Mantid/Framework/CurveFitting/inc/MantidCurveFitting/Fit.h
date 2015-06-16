@@ -4,10 +4,11 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAPI/Algorithm.h"
-#include "MantidAPI/IFunction.h"
-#include "MantidAPI/Workspace.h"
-#include "MantidAPI/IDomainCreator.h"
+//#include "MantidAPI/Algorithm.h"
+//#include "MantidAPI/IFunction.h"
+//#include "MantidAPI/Workspace_fwd.h"
+//#include "MantidAPI/IDomainCreator.h"
+#include "MantidCurveFitting/IFittingAlgorithm.h"
 
 namespace Mantid {
 
@@ -93,10 +94,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 File change history is stored at: <https://github.com/mantidproject/mantid>
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport Fit : public API::Algorithm {
+class DLLExport Fit : public IFittingAlgorithm {
 public:
   /// Default constructor
-  Fit() : API::Algorithm(), m_domainType(API::IDomainCreator::Simple){};
+  Fit() : IFittingAlgorithm(){}
   /// Algorithm's name for identification overriding a virtual method
   virtual const std::string name() const { return "Fit"; }
   /// Summary of algorithms purpose
@@ -106,33 +107,11 @@ public:
 
   /// Algorithm's version for identification overriding a virtual method
   virtual int version() const { return (1); }
-  /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const { return "Optimization"; }
 
 protected:
-  // Overridden Algorithm methods
-  void init();
-  void exec();
-  /// Override this method to perform a custom action right after a property was
-  /// set.
-  /// The argument is the property name. Default - do nothing.
-  virtual void afterPropertySet(const std::string &propName);
-  void setFunction();
-  void addWorkspace(const std::string &workspaceNameProperty,
-                    bool addProperties = true);
-  void addWorkspaces();
-  /// Read domain type property and cache the value
-  void setDomainType();
+  void initConcrete();
+  void execConcrete();
   void copyMinimizerOutput(const API::IFuncMinimizer &minimizer);
-
-  /// Pointer to the fitting function
-  API::IFunction_sptr m_function;
-  /// Pointer to a domain creator
-  boost::shared_ptr<API::IDomainCreator> m_domainCreator;
-  friend class API::IDomainCreator;
-  std::vector<std::string> m_workspacePropertyNames;
-  /// Keep the domain type
-  API::IDomainCreator::DomainType m_domainType;
 };
 
 } // namespace CurveFitting

@@ -1,7 +1,7 @@
 #ifndef MANTID_MDALGORITHMS_WEIGHTEDMEANMD_H_
 #define MANTID_MDALGORITHMS_WEIGHTEDMEANMD_H_
 
-#include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidAPI/IMDEventWorkspace_fwd.h"
 #include "MantidDataObjects/MDEventWorkspace.h"
 #include "MantidMDAlgorithms/BinaryOperationMD.h"
 

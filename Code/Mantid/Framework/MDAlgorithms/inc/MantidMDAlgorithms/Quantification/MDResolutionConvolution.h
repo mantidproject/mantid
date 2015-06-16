@@ -25,7 +25,7 @@
 #include "MantidKernel/System.h"
 #include "MantidKernel/ClassMacros.h"
 #include "MantidAPI/ParamFunction.h"
-#include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidAPI/IMDEventWorkspace_fwd.h"
 #include "MantidAPI/IMDIterator.h"
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidMDAlgorithms/Quantification/ForegroundModel.h"

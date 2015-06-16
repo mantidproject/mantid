@@ -8,24 +8,19 @@ using namespace Mantid::API;
 using Mantid::PythonInterface::Registry::RegisterWorkspacePtrToPython;
 using namespace boost::python;
 
-// clang-format off
-void export_IMDEventWorkspace()
-// clang-format on
-{
-  // MDEventWorkspace class
-  class_< IMDEventWorkspace, bases<IMDWorkspace, MultipleExperimentInfos>,
-          boost::noncopyable >("IMDEventWorkspace", no_init)
-    .def("getNPoints", &IMDEventWorkspace::getNPoints,
-         "Returns the total number of points (events) in this workspace")
+void export_IMDEventWorkspace() {
+  // IMDEventWorkspace class
+  class_<IMDEventWorkspace, bases<IMDWorkspace, MultipleExperimentInfos>,
+         boost::noncopyable>("IMDEventWorkspace", no_init)
+      .def("getNPoints", &IMDEventWorkspace::getNPoints,
+           "Returns the total number of points (events) in this workspace")
 
-    .def("getNumDims", &IMDEventWorkspace::getNumDims,
-         "Returns the number of dimensions in this workspace")
+      .def("getNumDims", &IMDEventWorkspace::getNumDims,
+           "Returns the number of dimensions in this workspace")
 
-    .def("getBoxController", (BoxController_sptr(IMDEventWorkspace::*)() )&IMDEventWorkspace::getBoxController,
-         "Returns the BoxController used in this workspace")
-  ;
+      .def("getBoxController", (BoxController_sptr (IMDEventWorkspace::*)()) &
+                                   IMDEventWorkspace::getBoxController,
+           "Returns the BoxController used in this workspace");
 
-  //-----------------------------------------------------------------------------------------------
   RegisterWorkspacePtrToPython<IMDEventWorkspace>();
 }
-

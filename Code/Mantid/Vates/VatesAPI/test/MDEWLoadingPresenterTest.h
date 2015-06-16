@@ -9,6 +9,8 @@
 
 #include "MantidVatesAPI/MDEWLoadingPresenter.h"
 #include "MantidVatesAPI/MDLoadingView.h"
+#include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidAPI/ITableWorkspace.h"
 
 #include "MockObjects.h"
 

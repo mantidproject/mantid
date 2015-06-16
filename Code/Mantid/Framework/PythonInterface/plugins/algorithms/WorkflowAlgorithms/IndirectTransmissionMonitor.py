@@ -98,28 +98,41 @@ class IndirectTransmissionMonitor(PythonAlgorithm):
         Assumes monitors are named monitor1 and monitor2
         """
 
-        instrument = mtd[input_ws].getInstrument()
+        workspace = mtd[input_ws]
+        instrument = workspace.getInstrument()
+
+        # Get workspace index of first detector
+        detector_1_idx = 2
 
         try:
+            # First try to get first detector for current analyser bank
             analyser = instrument.getStringParameter('analyser')[0]
             detector_1_idx = instrument.getComponentByName(analyser)[0].getID() - 1
             logger.information('Got index of first detector for analyser %s: %d' % (analyser, detector_1_idx))
+
         except IndexError:
-            detector_1_idx = 2
-            logger.warning('Could not determine index of first detetcor, using default value.')
+            # If that fails just get the first spectrum which is a detector
+            for spec_idx in range(workspace.getNumberHistograms()):
+                if not workspace.getDetector(spec_idx).isMonitor():
+                    detector_1_idx = spec_idx
+                    logger.information('Got index of first detector in workspace: %d' % (detector_1_idx))
+                    break
 
-        try:
-            monitor_1_idx = self._get_detector_spectrum_index(input_ws, instrument.getComponentByName('monitor1').getID())
+        # Get workspace index of monitor(s)
+        monitor_1_idx = 0
+        monitor_2_idx = None
 
-            monitor_2 = instrument.getComponentByName('monitor2')
-            if monitor_2 is not None:
-                monitor_2_idx = self._get_detector_spectrum_index(input_ws, monitor_2.getID())
-            else:
-                monitor_2_idx = None
+        if instrument.hasParameter('Workflow.Monitor1-SpectrumNumber'):
+            # First try to get monitors based on workflow parameters in IPF
+            monitor_1_idx = int(instrument.getNumberParameter('Workflow.Monitor1-SpectrumNumber')[0])
+
+            if instrument.hasParameter('Workflow.Monitor2-SpectrumNumber'):
+                monitor_2_idx = int(instrument.getNumberParameter('Workflow.Monitor2-SpectrumNumber')[0])
 
             logger.information('Got index of monitors: %d, %s' % (monitor_1_idx, str(monitor_2_idx)))
-        except IndexError:
-            monitor_1_idx = 0
+
+        else:
+            # If that fails just use some default values (correct ~60% of the time)
             monitor_2_idx = 1
             logger.warning('Could not determine index of monitors, using default values.')
 
@@ -149,8 +162,15 @@ class IndirectTransmissionMonitor(PythonAlgorithm):
         _, join = UnwrapMonitor(InputWorkspace=input_ws, OutputWorkspace=out_ws, LRef='37.86')
 
         # Fill bad (dip) in spectrum
-        RemoveBins(InputWorkspace=out_ws, OutputWorkspace=out_ws, Xmin=join - 0.001, Xmax=join + 0.001, Interpolation="Linear")
-        FFTSmooth(InputWorkspace=out_ws, OutputWorkspace=out_ws, WorkspaceIndex=0, IgnoreXBins=True)  # Smooth - FFT
+        RemoveBins(InputWorkspace=out_ws,
+                   OutputWorkspace=out_ws,
+                   Xmin=join-0.001,
+                   Xmax=join+0.001,
+                   Interpolation="Linear")
+        FFTSmooth(InputWorkspace=out_ws,
+                  OutputWorkspace=out_ws,
+                  WorkspaceIndex=0,
+                  IgnoreXBins=True)
 
         DeleteWorkspace(input_ws)
 
@@ -160,13 +180,21 @@ class IndirectTransmissionMonitor(PythonAlgorithm):
     def _trans_mon(self, ws_basename, file_type, input_ws):
         monitor_1_idx, monitor_2_idx, detector_1_idx = self._get_spectra_index(input_ws)
 
-        CropWorkspace(InputWorkspace=input_ws, OutputWorkspace='__m1',
-                      StartWorkspaceIndex=monitor_1_idx, EndWorkspaceIndex=monitor_1_idx)
+        CropWorkspace(InputWorkspace=input_ws,
+                      OutputWorkspace='__m1',
+                      StartWorkspaceIndex=monitor_1_idx,
+                      EndWorkspaceIndex=monitor_1_idx)
+
         if monitor_2_idx is not None:
-            CropWorkspace(InputWorkspace=input_ws, OutputWorkspace='__m2',
-                          StartWorkspaceIndex=monitor_2_idx, EndWorkspaceIndex=monitor_2_idx)
-        CropWorkspace(InputWorkspace=input_ws, OutputWorkspace='__det',
-                      StartWorkspaceIndex=detector_1_idx, EndWorkspaceIndex=detector_1_idx)
+            CropWorkspace(InputWorkspace=input_ws,
+                          OutputWorkspace='__m2',
+                          StartWorkspaceIndex=monitor_2_idx,
+                          EndWorkspaceIndex=monitor_2_idx)
+
+        CropWorkspace(InputWorkspace=input_ws,
+                      OutputWorkspace='__det',
+                      StartWorkspaceIndex=detector_1_idx,
+                      EndWorkspaceIndex=detector_1_idx)
 
         # Check for single or multiple time regimes
         mon_tcb_start = mtd['__m1'].readX(0)[0]
@@ -177,14 +205,19 @@ class IndirectTransmissionMonitor(PythonAlgorithm):
 
         if spec_tcb_start == mon_tcb_start:
             mon_ws = self._unwrap_mon('__m1')  # unwrap the monitor spectrum and convert to wavelength
-            RenameWorkspace(InputWorkspace=mon_ws, OutputWorkspace='__Mon1')
+            RenameWorkspace(InputWorkspace=mon_ws,
+                            OutputWorkspace='__Mon1')
         else:
-            ConvertUnits(InputWorkspace='__m1', OutputWorkspace='__Mon1', Target="Wavelength")
+            ConvertUnits(InputWorkspace='__m1',
+                         OutputWorkspace='__Mon1',
+                         Target="Wavelength")
 
         mon_ws = ws_basename + '_' + file_type
 
         if monitor_2_idx is not None:
-            ConvertUnits(InputWorkspace='__m2', OutputWorkspace='__Mon2', Target="Wavelength")
+            ConvertUnits(InputWorkspace='__m2',
+                         OutputWorkspace='__Mon2',
+                         Target="Wavelength")
             DeleteWorkspace('__m2')
 
             x_in = mtd['__Mon1'].readX(0)
@@ -198,14 +231,23 @@ class IndirectTransmissionMonitor(PythonAlgorithm):
             wmin = max(xmin1, xmin2)
             wmax = min(xmax1, xmax2)
 
-            CropWorkspace(InputWorkspace='__Mon1', OutputWorkspace='__Mon1', XMin=wmin, XMax=wmax)
-            RebinToWorkspace(WorkspaceToRebin='__Mon2', WorkspaceToMatch='__Mon1', OutputWorkspace='__Mon2')
-            Divide(LHSWorkspace='__Mon2', RHSWorkspace='__Mon1', OutputWorkspace=mon_ws)
+            CropWorkspace(InputWorkspace='__Mon1',
+                          OutputWorkspace='__Mon1',
+                          XMin=wmin,
+                          XMax=wmax)
+            RebinToWorkspace(WorkspaceToRebin='__Mon2',
+                             WorkspaceToMatch='__Mon1',
+                             OutputWorkspace='__Mon2')
+            Divide(LHSWorkspace='__Mon2',
+                   RHSWorkspace='__Mon1',
+                   OutputWorkspace=mon_ws)
 
             DeleteWorkspace('__Mon1')
             DeleteWorkspace('__Mon2')
+
         else:
-            RenameWorkspace(InputWorkspace='__Mon1', OutputWorkspace=mon_ws)
+            RenameWorkspace(InputWorkspace='__Mon1',
+                            OutputWorkspace=mon_ws)
 
 
 # Register algorithm with Mantid

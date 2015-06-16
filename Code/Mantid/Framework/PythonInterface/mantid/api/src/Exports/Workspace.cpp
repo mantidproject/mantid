@@ -19,10 +19,7 @@ BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Workspace_isDirtyOverloads,
 ///@endcond
 }
 
-// clang-format off
-void export_Workspace()
-// clang-format on
-{
+void export_Workspace() {
   class_<Workspace, bases<DataItem>, boost::noncopyable>("Workspace", no_init)
       .def("getName", &Workspace::getName,
            return_value_policy<copy_const_reference>(), args("self"),

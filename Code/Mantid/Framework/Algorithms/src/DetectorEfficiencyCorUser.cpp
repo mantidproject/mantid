@@ -18,7 +18,8 @@ DECLARE_ALGORITHM(DetectorEfficiencyCorUser)
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
-DetectorEfficiencyCorUser::DetectorEfficiencyCorUser() {}
+DetectorEfficiencyCorUser::DetectorEfficiencyCorUser()
+    : API::Algorithm(), m_inputWS(), m_outputWS(), m_Ei(0.) {}
 
 //----------------------------------------------------------------------------------------------
 /** Destructor

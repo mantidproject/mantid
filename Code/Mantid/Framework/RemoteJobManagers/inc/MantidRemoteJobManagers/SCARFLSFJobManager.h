@@ -45,6 +45,12 @@ public:
   virtual void logout(const std::string &username = std::string());
 
 private:
+  std::string guessJobSubmissionAppName(const std::string &runnablePath,
+                                        const std::string &jobOptions);
+
+  /// helper to encode uri components (SCARF username / passwords)
+  static std::string urlComponentEncode(const std::string &in);
+
   static std::string g_pingPath;
   static std::string g_logoutPath;
   static std::string g_pingBaseURL;

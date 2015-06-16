@@ -2,32 +2,17 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidDataHandling/GroupDetectors2.h"
+
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidAPI/SpectraAxis.h"
-#include "MantidAPI/WorkspaceOpOverloads.h"
-#include "MantidKernel/ArrayProperty.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidDataHandling/LoadDetectorsGroupingFile.h"
+#include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
-#include "MantidDataHandling/LoadDetectorsGroupingFile.h"
 
-#include <boost/lexical_cast.hpp>
-#include <boost/shared_ptr.hpp>
-#include <iomanip>
-#include <iostream>
-#include <fstream>
-#include <ios>
-#include <set>
-#include <vector>
-#include <numeric>
-
-#include <Poco/StringTokenizer.h>
-#include <Poco/File.h>
-#include <Poco/Path.h>
-#include <Poco/SAX/ContentHandler.h>
-#include <Poco/SAX/Attributes.h>
-#include <Poco/SAX/SAXParser.h>
+#include <boost/regex.hpp>
 
 namespace Mantid {
 namespace DataHandling {
@@ -69,6 +54,15 @@ void GroupDetectors2::init() {
       "A file that consists of lists of spectra numbers to group. See the "
       "help\n"
       "for the file format");
+  declareProperty(
+      "IgnoreGroupNumber", true,
+      "This option is only relevant if you're using MapFile.\n"
+      "If true the spectra will numbered sequentially, starting from one.\n"
+      "Otherwise, the group number will be used for the spectrum numbers.");
+  declareProperty(new PropertyWithValue<std::string>("GroupingPattern", "",
+                                                     Direction::Input),
+                  "Describes how this algorithm should group the detectors. "
+                  "See full instruction list.");
   declareProperty(
       new ArrayProperty<specid_t>("SpectraList"),
       "An array containing a list of the spectrum numbers to combine\n"
@@ -311,6 +305,28 @@ void GroupDetectors2::getGroups(API::MatrixWorkspace_const_sptr workspace,
     return;
   }
 
+  const std::string instructions = getProperty("GroupingPattern");
+  if (!instructions.empty()) {
+    spec2index_map specs2index;
+    const SpectraAxis *axis =
+        dynamic_cast<const SpectraAxis *>(workspace->getAxis(1));
+    if (axis)
+      axis->getSpectraIndexMap(specs2index);
+
+    std::stringstream commandsSS;
+    // Fill commandsSS with the contents of a map file
+    translateInstructions(instructions, commandsSS);
+    // readFile expects the first line to have already been removed, so we do
+    // that, even though we don't use it.
+    std::string firstLine;
+    std::getline(commandsSS, firstLine);
+    // We don't use lineNum either, but it's expected.
+    size_t lineNum = 0;
+    readFile(specs2index, commandsSS, lineNum, unUsedSpec,
+             /* don't ignore group numbers */ false);
+    return;
+  }
+
   // manually specified grouping
   const std::vector<specid_t> spectraList = getProperty("SpectraList");
   const std::vector<detid_t> detectorList = getProperty("DetectorList");
@@ -423,7 +439,8 @@ void GroupDetectors2::processFile(std::string fname,
       totalNumberOfGroups = readInt(firstLine);
     }
 
-    readFile(specs2index, File, lineNum, unUsedSpec);
+    bool ignoreGroupNo = getProperty("IgnoreGroupNumber");
+    readFile(specs2index, File, lineNum, unUsedSpec, ignoreGroupNo);
 
     if (m_GroupSpecInds.size() != static_cast<size_t>(totalNumberOfGroups)) {
       g_log.warning() << "The input file header states there are "
@@ -752,24 +769,30 @@ int GroupDetectors2::readInt(std::string line) {
 * @param File :: the input stream that is linked to the file
 * @param lineNum :: the last line read in the file, is updated by this function
 * @param unUsedSpec :: list of spectra that haven't yet been included in a group
+* @param ignoreGroupNumber :: ignore group numbers when numbering spectra
 * @throw invalid_argument if there is any problem with the file
 */
-void GroupDetectors2::readFile(spec2index_map &specs2index, std::ifstream &File,
+void GroupDetectors2::readFile(spec2index_map &specs2index, std::istream &File,
                                size_t &lineNum,
-                               std::vector<int64_t> &unUsedSpec) {
-  // used in writing the spectra to the outData map. The groups are just
-  // labelled incrementally from 1
-  int spectrumNo = 1;
+                               std::vector<int64_t> &unUsedSpec,
+                               bool ignoreGroupNumber) {
   // go through the rest of the file reading in lists of spectra number to group
+  int oldSpectrumNo = 1;
   while (File) {
+    int groupNo = EMPTY_LINE;
     std::string thisLine;
     do {
       std::getline(File, thisLine), lineNum++;
+      groupNo = readInt(thisLine);
       // we haven't started reading a new group and so if the file ends here it
       // is OK
       if (!File)
         return;
-    } while (readInt(thisLine) == EMPTY_LINE && File);
+    } while (groupNo == EMPTY_LINE && File);
+
+    // If we're ignoring the group number, use the old spectrum number way of
+    // just counting, otherwise use the group number.
+    const int spectrumNo = ignoreGroupNumber ? oldSpectrumNo++ : groupNo;
 
     // the number of spectra that will be combined in the group
     int numberOfSpectra = EMPTY_LINE;
@@ -808,7 +831,6 @@ void GroupDetectors2::readFile(spec2index_map &specs2index, std::ifstream &File,
     if ((m_GroupSpecInds.size() % INTERVAL) == 1) {
       fileReadProg(m_GroupSpecInds.size(), specs2index.size());
     }
-    spectrumNo++;
   }
 }
 /** The function expects that the string passed to it contains a series of
@@ -1283,6 +1305,163 @@ void GroupDetectors2::RangeHelper::getList(const std::string &line,
   if (*(line.end() - 1) == '-') {
     throw std::invalid_argument(
         "'-' found at the end of a list, can't interpret range specification");
+  }
+}
+
+namespace {
+
+/* The following functions are used to translate single operators into
+ * groups, just like the ones this algorithm loads from .map files.
+ *
+ * Each function takes a string, such as "3+4", or "6:10" and then adds
+ * the resulting groups of spectra to outGroups.
+ */
+
+// An add operation, i.e. "3+4" -> [3+4]
+void translateAdd(const std::string &instructions,
+                  std::vector<std::vector<int>> &outGroups) {
+  std::vector<std::string> spectra;
+  boost::split(spectra, instructions, boost::is_any_of("+"));
+
+  std::vector<int> outSpectra;
+  for (auto sIt = spectra.begin(); sIt != spectra.end(); ++sIt) {
+    std::string spectrum = *sIt;
+    // remove leading/trailing whitespace
+    boost::trim(spectrum);
+    // add this spectrum to the group we're about to add
+    outSpectra.push_back(boost::lexical_cast<int>(spectrum));
+  }
+  outGroups.push_back(outSpectra);
+}
+
+// A range summation, i.e. "3-6" -> [3+4+5+6]
+void translateSumRange(const std::string &instructions,
+                       std::vector<std::vector<int>> &outGroups) {
+  // add a group with the sum of the spectra in the range
+  std::vector<std::string> spectra;
+  boost::split(spectra, instructions, boost::is_any_of("-"));
+  if (spectra.size() != 2)
+    throw std::runtime_error("Malformed range (-) operation.");
+  // fetch the start and stop spectra
+  int first = boost::lexical_cast<int>(spectra[0]);
+  int last = boost::lexical_cast<int>(spectra[1]);
+  // swap if they're back to front
+  if (first > last)
+    std::swap(first, last);
+
+  // add all the spectra in the range to the output group
+  std::vector<int> outSpectra;
+  for (int i = first; i <= last; ++i)
+    outSpectra.push_back(i);
+  if (!outSpectra.empty())
+    outGroups.push_back(outSpectra);
+}
+
+// A range insertion, i.e. "3:6" -> [3,4,5,6]
+void translateRange(const std::string &instructions,
+                    std::vector<std::vector<int>> &outGroups) {
+  // add a group per spectra
+  std::vector<std::string> spectra;
+  boost::split(spectra, instructions, boost::is_any_of(":"));
+  if (spectra.size() != 2)
+    throw std::runtime_error("Malformed range (:) operation.");
+  // fetch the start and stop spectra
+  int first = boost::lexical_cast<int>(spectra[0]);
+  int last = boost::lexical_cast<int>(spectra[1]);
+  // swap if they're back to front
+  if (first > last)
+    std::swap(first, last);
+
+  // add all the spectra in the range to separate output groups
+  for (int i = first; i <= last; ++i) {
+    // create group of size 1 with the spectrum in it
+    std::vector<int> newGroup(1, i);
+    // and add it to output
+    outGroups.push_back(newGroup);
+  }
+}
+} // anonymous namespace
+
+/**
+ * Used to validate the inputs for GroupDetectors2
+ *
+ * @returns : A map of the invalid property names to what the problem is.
+ */
+std::map<std::string, std::string> GroupDetectors2::validateInputs() {
+  std::map<std::string, std::string> errors;
+
+  const std::string pattern = getPropertyValue("GroupingPattern");
+
+  boost::regex re(
+      "^\\s*[0-9]+\\s*$|^(\\s*,*[0-9]+(\\s*(,|:|\\+|\\-)\\s*)*[0-9]*)*$");
+  if (!pattern.empty() && !boost::regex_match(pattern, re)) {
+    errors["GroupingPattern"] =
+        "GroupingPattern is not well formed: " + pattern;
+  }
+
+  return errors;
+}
+
+/**
+ * Translate the PerformIndexOperations processing instructions into a format
+ * usable by GroupDetectors.
+ *
+ * @param instructions : Instructions to translate
+ * @param commands : A stringstream to be filled
+ */
+void GroupDetectors2::translateInstructions(const std::string &instructions,
+                                            std::stringstream &commands) {
+  // vector of groups, each group being a vector of its spectra
+  std::vector<std::vector<int>> outGroups;
+
+  // split into comma separated groups, each group potentially containing
+  // an operation (+-:) that produces even more groups.
+  std::vector<std::string> groups;
+  boost::split(groups, instructions, boost::is_any_of(","));
+
+  for (auto gIt = groups.begin(); gIt != groups.end(); ++gIt) {
+    std::string groupStr = *gIt;
+    // remove leading/trailing whitespace
+    boost::trim(groupStr);
+
+    // Look for the various operators in the string. If one is found then
+    // do the necessary translation into groupings.
+    if (groupStr.find("+") != std::string::npos) {
+      // add a group with the given spectra
+      translateAdd(groupStr, outGroups);
+    } else if (groupStr.find("-") != std::string::npos) {
+      translateSumRange(groupStr, outGroups);
+    } else if (groupStr.find(":") != std::string::npos) {
+      translateRange(groupStr, outGroups);
+    } else if (!groupStr.empty()) {
+      // contains no instructions, just add this spectrum as a new group
+      // create group of size 1 with the spectrum in it
+      std::vector<int> newGroup(1, boost::lexical_cast<int>(groupStr));
+      // and add it to output
+      outGroups.push_back(newGroup);
+    }
+  }
+
+  // We now have the groups as a vector of a vector of ints. Turn this into a
+  // string, just like the contents of a map file.
+  commands << outGroups.size() << "\n";
+  for (size_t i = 0; i < outGroups.size(); ++i) {
+    const int groupId = outGroups[i][0] + 1;
+    const int groupSize = static_cast<int>(outGroups[i].size());
+
+    // Comment the output for readability
+    commands << "# Group " << groupId;
+    commands << ", contains " << groupSize << " spectra.\n";
+
+    commands << groupId << "\n";
+    commands << groupSize << "\n";
+
+    // Group members
+    // So far we've been using 0-indexed ids, but the mapfile syntax expects
+    // 1-indexed ids, so we add 1 to the spectra ids here.
+    for (size_t j = 0; j < outGroups[i].size(); ++j)
+      commands << (j > 0 ? " " : "") << outGroups[i][j] + 1;
+    commands << "\n";
   }
 }
 

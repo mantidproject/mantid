@@ -199,6 +199,11 @@ public:
     V3R glideVectorC = V3R(0, 0, 1) / 2;
     SymmetryOperation glidePlaneC("x,-y,z+1/2");
     TS_ASSERT_EQUALS(generator.determineTranslation(glidePlaneC), glideVectorC);
+
+    V3R screwVectorThreeFourth = V3R(3, 0, 0) / 4;
+    SymmetryOperation fourThreeScrewAxis("x+3/4,-z+3/4,y+1/4");
+    TS_ASSERT_EQUALS(generator.determineTranslation(fourThreeScrewAxis),
+                     screwVectorThreeFourth);
   }
 
   void testSymmetryElementRotationDetermineRotationSense() {

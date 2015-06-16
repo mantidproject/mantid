@@ -2,7 +2,7 @@
 #define MANTID_MDALGORITHMS_UNARYOPERATIONMD_H_
 
 #include "MantidAPI/Algorithm.h"
-#include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidAPI/IMDEventWorkspace_fwd.h"
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidKernel/System.h"
 #include "MantidDataObjects/MDHistoWorkspace.h"

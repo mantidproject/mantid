@@ -25,6 +25,10 @@ using namespace Kernel;
 using namespace API;
 using namespace Geometry;
 
+EQSANSTofStructure::EQSANSTofStructure()
+    : API::Algorithm(), frame_tof0(0.), flight_path_correction(false),
+      low_tof_cut(0.), high_tof_cut(0.) {}
+
 void EQSANSTofStructure::init() {
   declareProperty(new WorkspaceProperty<EventWorkspace>(
                       "InputWorkspace", "", Direction::Input,

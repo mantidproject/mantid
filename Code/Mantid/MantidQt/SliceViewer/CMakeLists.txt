@@ -8,6 +8,7 @@ set ( SRC_FILES
 	src/LineViewer.cpp
 	src/PeakBoundingBox.cpp
 	src/PeaksViewerOverlayDialog.cpp
+        src/PeakOverlayInteractive.cpp
 	src/PeakOverlayMultiCross.cpp
 	src/PeakOverlayMultiCrossFactory.cpp
 	src/PeakOverlayMultiSphere.cpp
@@ -42,7 +43,9 @@ set ( INC_FILES
 	inc/MantidQtSliceViewer/LinePlotOptions.h
 	inc/MantidQtSliceViewer/LineViewer.h
 	inc/MantidQtSliceViewer/NullPeaksPresenter.h
-	inc/MantidQtSliceViewer/PeakBoundingBox.h
+	inc/MantidQtSliceViewer/PeakEditMode.h
+        inc/MantidQtSliceViewer/PeakBoundingBox.h
+        inc/MantidQtSliceViewer/PeakOverlayInteractive.h
 	inc/MantidQtSliceViewer/PeakOverlayMultiCross.h
 	inc/MantidQtSliceViewer/PeakOverlayMultiCrossFactory.h
 	inc/MantidQtSliceViewer/PeakOverlayMultiSphere.h
@@ -77,6 +80,7 @@ set ( MOC_FILES
 	inc/MantidQtSliceViewer/LineOverlay.h
 	inc/MantidQtSliceViewer/LineViewer.h
 	inc/MantidQtSliceViewer/LinePlotOptions.h
+        inc/MantidQtSliceViewer/PeakOverlayInteractive.h
  	inc/MantidQtSliceViewer/PeakOverlayMultiCross.h
 	inc/MantidQtSliceViewer/PeakOverlayMultiSphere.h
 	inc/MantidQtSliceViewer/PeaksTableColumnsDialog.h
@@ -136,7 +140,9 @@ set ( ALL_SRC ${SRC_FILES} ${MOCCED_FILES} )
 
 qt4_wrap_ui ( UI_HDRS ${UI_FILES} ) 
 
-include_directories ( ${CMAKE_CURRENT_BINARY_DIR} )
+include_directories ( ${CMAKE_CURRENT_BINARY_DIR})
+
+include_directories ( ../../Framework/DataObjects/inc )
 
 # For Windows:
 add_definitions ( -DIN_MANTIDQT_SLICEVIEWER )
@@ -152,6 +158,7 @@ endif ()
 target_link_libraries ( MantidQtSliceViewer LINK_PRIVATE 
             MantidQtAPI
             MantidWidgets
+            DataObjects
             ${CORE_MANTIDLIBS}
             ${POCO_LIBRARIES}
             ${Boost_LIBRARIES}
@@ -177,7 +184,7 @@ if ( CXXTEST_FOUND )
   )
 
   cxxtest_add_test ( SliceViewerTest ${TEST_FILES} ${GMOCK_TEST_FILES} )
-  target_link_libraries( SliceViewerTest LINK_PRIVATE 
+  target_link_libraries( SliceViewerTest LINK_PRIVATE
             MantidQtSliceViewer
             DataObjects
             Crystal

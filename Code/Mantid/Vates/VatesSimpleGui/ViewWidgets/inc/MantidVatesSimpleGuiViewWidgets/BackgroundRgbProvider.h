@@ -94,9 +94,14 @@ namespace Mantid
 
           /**
            * Callback function for background color changing events
-           *@param caller Calling object.
+           * @param caller Calling object.
+           *
+           * @param eventID vtkCommand event ID for callbacks, not used here
+           * @param clientData vtk client data, not used here
+           * @param callData vtk call data, not used here
            */
-          static void backgroundColorChangeCallbackFunction(vtkObject* caller, long unsigned int, void*, void*);
+          static void backgroundColorChangeCallbackFunction(vtkObject* caller, long unsigned int eventID,
+                                                            void *clientData, void *callData);
 
           static QColor currentBackgroundColor;
 

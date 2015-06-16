@@ -5,7 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
-#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -19,8 +19,8 @@ namespace Algorithms {
 */
 class DLLExport TOFSANSResolutionByPixel : public API::Algorithm {
 public:
-  /// (Empty) Constructor
-  TOFSANSResolutionByPixel() : API::Algorithm() {}
+  /// Default constructor
+  TOFSANSResolutionByPixel();
   /// Virtual destructor
   virtual ~TOFSANSResolutionByPixel() {}
   /// Algorithm's name
@@ -43,7 +43,7 @@ private:
   /// Return the TOF resolution for a particular wavelength
   virtual double getTOFResolution(double wl);
   /// Wavelength resolution (constant for all wavelengths)
-  double wl_resolution;
+  double m_wl_resolution;
 };
 
 } // namespace Algorithms

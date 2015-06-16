@@ -40,10 +40,10 @@ private:
   void exec();
 
   double absor_sphere(double &twoth, double &wl, double &tbar);
-  double smu;    // in 1/cm
-  double amu;    // in 1/cm
-  double radius; // in cm
-  double power_th;
+  double m_smu;    // in 1/cm
+  double m_amu;    // in 1/cm
+  double m_radius; // in cm
+  double m_power_th;
   double spectrumCalc(double TOF, int iSpec,
                       std::vector<std::vector<double>> time,
                       std::vector<std::vector<double>> spectra, size_t id);
