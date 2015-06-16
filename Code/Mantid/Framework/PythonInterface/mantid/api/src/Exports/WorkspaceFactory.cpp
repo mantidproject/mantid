@@ -1,12 +1,14 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/IPeaksWorkspace.h"
+#include "MantidPythonInterface/kernel/Policies/AsType.h"
 
 #include <boost/python/class.hpp>
 #include <boost/python/overloads.hpp>
 
 using namespace boost::python;
 using namespace Mantid::API;
+using namespace Mantid::PythonInterface::Policies;
 
 namespace {
 /**
@@ -65,16 +67,16 @@ void export_WorkspaceFactory() {
                                      arg("XLength") = -1, arg("YLength") = -1)))
 
       .def("create", (createFromScratchPtr)&WorkspaceFactoryImpl::create,
-           createFromScratchDoc,
+           createFromScratchDoc, return_value_policy<AsType<Workspace_sptr>>(),
            (arg("className"), arg("NVectors"), arg("XLength"), arg("YLength")))
 
       .def("createTable", &WorkspaceFactoryImpl::createTable,
            createTable_Overload("Creates an empty TableWorkspace",
-                                (arg("className") = "TableWorkspace")))
+                                (arg("className") = "TableWorkspace"))[return_value_policy<AsType<Workspace_sptr>>()])
 
       .def("createPeaks", &WorkspaceFactoryImpl::createPeaks,
            createPeaks_Overload("Creates an empty PeaksWorkspace",
-                                (arg("className") = "PeaksWorkspace")))
+                                (arg("className") = "PeaksWorkspace"))[return_value_policy<AsType<Workspace_sptr>>()])
 
       .def("Instance", &WorkspaceFactory::Instance,
            return_value_policy<reference_existing_object>(),
