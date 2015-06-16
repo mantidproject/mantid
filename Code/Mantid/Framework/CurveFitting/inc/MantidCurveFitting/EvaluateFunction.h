@@ -1,16 +1,18 @@
-#ifndef MANTID_MDALGORITHMS_EVALUATEMDFUNCTION_H_
-#define MANTID_MDALGORITHMS_EVALUATEMDFUNCTION_H_
+#ifndef MANTID_CURVEFITTING_EVALUATEFUNCTION_H_
+#define MANTID_CURVEFITTING_EVALUATEFUNCTION_H_
 
 #include "MantidKernel/System.h"
-#include "MantidAPI/Algorithm.h"
-#include "MantidAPI/DeprecatedAlgorithm.h"
+#include "MantidCurveFitting/IFittingAlgorithm.h"
 
 namespace Mantid {
-namespace MDAlgorithms {
+namespace CurveFitting {
 
-/** EvaluateMDFunction : TODO: DESCRIPTION
+/**
 
-  Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
+  Evaluate a function (1D or MD) on a domain of an input workspace and save
+  the result in the output workspace.
+
+  Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory, NScD Oak Ridge
   National Laboratory & European Spallation Source
 
   This file is part of Mantid.
@@ -31,23 +33,18 @@ namespace MDAlgorithms {
   File change history is stored at: <https://github.com/mantidproject/mantid>
   Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport EvaluateMDFunction : public API::Algorithm,
-                                     public API::DeprecatedAlgorithm {
+class DLLExport EvaluateFunction : public IFittingAlgorithm {
 public:
-  EvaluateMDFunction();
-  virtual ~EvaluateMDFunction();
-
-  virtual const std::string name() const { return "EvaluateMDFunction"; }
+  virtual const std::string name() const;
   virtual int version() const;
-  virtual const std::string category() const;
   virtual const std::string summary() const;
 
 private:
-  void init();
-  void exec();
+  void initConcrete();
+  void execConcrete();
 };
 
-} // namespace MDAlgorithms
+} // namespace CurveFitting
 } // namespace Mantid
 
-#endif /* MANTID_MDALGORITHMS_EVALUATEMDFUNCTION_H_ */
+#endif /* MANTID_CURVEFITTING_EVALUATEFUNCTION_H_ */
