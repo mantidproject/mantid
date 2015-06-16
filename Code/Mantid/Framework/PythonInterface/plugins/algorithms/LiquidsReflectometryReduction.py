@@ -33,7 +33,7 @@ class LiquidsReflectometryReduction(PythonAlgorithm):
 
     def PyInit(self):
         #TODO: Revisit the choice of names when we are entirely rid of the old code.
-        self.declareProperty(IntArrayProperty("RunNumbers"), "List of run numbers to process")
+        self.declareProperty(StringArrayProperty("RunNumbers"), "List of run numbers to process")
         self.declareProperty("NormalizationRunNumber", 0, "Run number of the normalization run to use")
         self.declareProperty(IntArrayProperty("SignalPeakPixelRange", [123, 137],
                                               IntArrayLengthValidator(2), direction=Direction.Input),
@@ -113,7 +113,12 @@ class LiquidsReflectometryReduction(PythonAlgorithm):
         # If we have multiple files, add them
         file_list = []
         for item in dataRunNumbers:
-            data_file = FileFinder.findRuns("REF_L%d" % item)[0]
+            # The standard mode of operation is to give a run number as input
+            try:
+                data_file = FileFinder.findRuns("REF_L%s" % item)[0]
+            except RuntimeError:
+                # Allow for a file name or file path as input
+                data_file = FileFinder.findRuns(item)[0]
             file_list.append(data_file)
         runs = reduce((lambda x, y: '%s+%s' % (x, y)), file_list)
         ws_event_data = Load(Filename=runs, OutputWorkspace="REF_L_%s" % dataRunNumbers[0])
@@ -519,6 +524,10 @@ class LiquidsReflectometryReduction(PythonAlgorithm):
             b = float(data_found['b'])
             a_error = float(data_found['error_a'])
             b_error = float(data_found['error_b'])
+            AddSampleLog(Workspace=workspace, LogName='scaling_factor_a', LogText=str(a))
+            AddSampleLog(Workspace=workspace, LogName='scaling_factor_b', LogText=str(b))
+            AddSampleLog(Workspace=workspace, LogName='scaling_factor_a_error', LogText=str(a_error))
+            AddSampleLog(Workspace=workspace, LogName='scaling_factor_b_error', LogText=str(b_error))
 
             # Extract a single spectrum, just so we have the TOF axis
             # to create a normalization workspace

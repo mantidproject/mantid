@@ -189,8 +189,21 @@ InstrumentDefinitionParser::parseXML(Kernel::ProgressBase *prog) {
 
   const std::string filename = m_xmlFile->getFileFullPathStr();
 
-  Poco::AutoPtr<NodeList> pNL_type = pRootElem->getElementsByTagName("type");
-  if (pNL_type->length() == 0) {
+  // Get all the type and component element pointers.
+  std::vector<Element*> typeElems;
+  std::vector<Element*> compElems;
+  for (Node *pNode = pRootElem->firstChild(); pNode != 0;
+       pNode = pNode->nextSibling()) {
+    auto pElem = dynamic_cast<Element*>(pNode);
+    if(pElem) {
+      if (pElem->tagName() == "type")
+        typeElems.push_back(pElem);
+      else if (pElem->tagName() == "component")
+        compElems.push_back(pElem);
+    }
+  }
+
+  if (typeElems.empty()) {
     g_log.error("XML file: " + filename + "contains no type elements.");
     throw Kernel::Exception::InstrumentDefinitionError(
         "No type elements in XML instrument file", filename);
@@ -204,9 +217,9 @@ InstrumentDefinitionParser::parseXML(Kernel::ProgressBase *prog) {
   //  * If 'Outline' attribute set for assembly add attribute object_created=no
   //  to tell
   //  create shape for such assembly also later
-  unsigned long numberTypes = pNL_type->length();
-  for (unsigned long iType = 0; iType < numberTypes; iType++) {
-    Element *pTypeElem = static_cast<Element *>(pNL_type->item(iType));
+  const size_t numberTypes = typeElems.size();
+  for (size_t iType = 0; iType < numberTypes; ++iType) {
+    Element *pTypeElem = typeElems[iType];
     std::string typeName = pTypeElem->getAttribute("name");
 
     // check if contain <combine-components-into-one-shape>. If this then such
@@ -249,8 +262,8 @@ InstrumentDefinitionParser::parseXML(Kernel::ProgressBase *prog) {
   }
 
   // Deal with adjusting types containing <combine-components-into-one-shape>
-  for (unsigned long iType = 0; iType < numberTypes; iType++) {
-    Element *pTypeElem = static_cast<Element *>(pNL_type->item(iType));
+  for (size_t iType = 0; iType < numberTypes; ++iType) {
+    Element *pTypeElem = typeElems[iType];
     std::string typeName = pTypeElem->getAttribute("name");
 
     // In this loop only interested in types containing
@@ -312,22 +325,15 @@ InstrumentDefinitionParser::parseXML(Kernel::ProgressBase *prog) {
   //
   // do analysis for each top level component element
   //
-  Poco::AutoPtr<NodeList> pNL_comp =
-      pRootElem->childNodes(); // here get all child nodes
-  unsigned long pNL_comp_length = pNL_comp->length();
-
   if (prog)
-    prog->resetNumSteps(pNL_comp_length, 0.0, 1.0);
-  for (unsigned long i = 0; i < pNL_comp_length; i++) {
+    prog->resetNumSteps(compElems.size(), 0.0, 1.0);
+
+  for (size_t i = 0; i < compElems.size(); ++i) {
     if (prog)
       prog->report("Loading instrument Definition");
 
-    // we are only interest in the top level component elements hence
-    // the reason for the if statement below
-    if ((pNL_comp->item(i))->nodeType() == Node::ELEMENT_NODE &&
-        ((pNL_comp->item(i))->nodeName()).compare("component") == 0) {
-      const Element *pElem = static_cast<Element *>(pNL_comp->item(i));
-
+    const Element *pElem = compElems[i];
+    {
       IdList idList; // structure to possibly be populated with detector IDs
 
       // Get all <location> and <locations> elements contained in component
@@ -360,36 +366,22 @@ InstrumentDefinitionParser::parseXML(Kernel::ProgressBase *prog) {
       // order they are listed in the IDF. The latter needed to get detector IDs
       // assigned
       // as expected
-      Poco::AutoPtr<NodeList> pNL_childs =
-          pElem->childNodes(); // here get all child nodes
-      unsigned long pNL_childs_length = pNL_childs->length();
-      for (unsigned long iLoc = 0; iLoc < pNL_childs_length; iLoc++) {
-        if ((pNL_childs->item(iLoc))->nodeType() == Node::ELEMENT_NODE &&
-            (((pNL_childs->item(iLoc))->nodeName()).compare("location") == 0 ||
-             ((pNL_childs->item(iLoc))->nodeName()).compare("locations") ==
-                 0)) {
-          // if a <location> element
-          if (((pNL_childs->item(iLoc))->nodeName()).compare("location") == 0) {
-            const Element *pLocElem =
-                static_cast<Element *>(pNL_childs->item(iLoc));
-            // process differently depending on whether component is and
-            // assembly or leaf
-            if (isAssembly(pElem->getAttribute("type"))) {
-              appendAssembly(m_instrument.get(), pLocElem, pElem, idList);
-            } else {
-              appendLeaf(m_instrument.get(), pLocElem, pElem, idList);
-            }
+      for (Node *pNode = pElem->firstChild(); pNode != 0;
+          pNode = pNode->nextSibling()) {
+        auto pChildElem = dynamic_cast<Element*>(pNode);
+        if (!pChildElem)
+          continue;
+        if (pChildElem->tagName() == "location") {
+          // process differently depending on whether component is and
+          // assembly or leaf
+          if (isAssembly(pElem->getAttribute("type"))) {
+            appendAssembly(m_instrument.get(), pChildElem, pElem, idList);
+          } else {
+            appendLeaf(m_instrument.get(), pChildElem, pElem, idList);
           }
-
-          // if a <locations> element
-          if (((pNL_childs->item(iLoc))->nodeName()).compare("locations") ==
-              0) {
-            const Element *pLocElems =
-                static_cast<Element *>(pNL_childs->item(iLoc));
-
-            // append <locations> elements in <locations>
-            appendLocations(m_instrument.get(), pLocElems, pElem, idList);
-          }
+        } else if (pChildElem->tagName() == "locations") {
+          // append <locations> elements in <locations>
+          appendLocations(m_instrument.get(), pChildElem, pElem, idList);
         }
       } // finished looping over all childs of this component
 
@@ -461,36 +453,28 @@ void InstrumentDefinitionParser::appendLocations(
     Geometry::ICompAssembly *parent, const Poco::XML::Element *pLocElems,
     const Poco::XML::Element *pCompElem, IdList &idList) {
   // create detached <location> elements from <locations> element
-  const std::string xmlLocation = convertLocationsElement(pLocElems);
-
-  // parse converted <locations> output
-  DOMParser pLocationsParser;
-  Poco::AutoPtr<Document> pLocationsDoc;
-  try {
-    pLocationsDoc = pLocationsParser.parseString(xmlLocation);
-  } catch (...) {
-    throw Kernel::Exception::InstrumentDefinitionError(
-        "Unable to parse XML string", xmlLocation);
-  }
+  Poco::AutoPtr<Document> pLocationsDoc = convertLocationsElement(pLocElems);
 
   // Get pointer to root element
   const Element *pRootLocationsElem = pLocationsDoc->documentElement();
-  if (!pRootLocationsElem->hasChildNodes()) {
-    throw Kernel::Exception::InstrumentDefinitionError(
-        "No root element in XML string", xmlLocation);
-  }
+  const bool assembly = isAssembly(pCompElem->getAttribute("type"));
 
-  Poco::AutoPtr<NodeList> pNL_locInLocs =
-      pRootLocationsElem->getElementsByTagName("location");
-  unsigned long pNL_locInLocs_length = pNL_locInLocs->length();
-  for (unsigned long iInLocs = 0; iInLocs < pNL_locInLocs_length; iInLocs++) {
-    const Element *pLocInLocsElem =
-        static_cast<Element *>(pNL_locInLocs->item(iInLocs));
-    if (isAssembly(pCompElem->getAttribute("type"))) {
-      appendAssembly(parent, pLocInLocsElem, pCompElem, idList);
-    } else {
-      appendLeaf(parent, pLocInLocsElem, pCompElem, idList);
+  Poco::XML::Element *pElem =
+    dynamic_cast<Poco::XML::Element*>(pRootLocationsElem->firstChild());
+
+  while (pElem) {
+    if (pElem->tagName() != "location") {
+      pElem = dynamic_cast<Poco::XML::Element*>(pElem->nextSibling());
+      continue;
     }
+
+    if (assembly) {
+      appendAssembly(parent, pElem, pCompElem, idList);
+    } else {
+      appendLeaf(parent, pElem, pCompElem, idList);
+    }
+
+    pElem = dynamic_cast<Poco::XML::Element*>(pElem->nextSibling());
   }
 }
 
@@ -2570,10 +2554,11 @@ std::string InstrumentDefinitionParser::translateRotateXMLcuboid(
 /// notation for a sequence of \<location\> elements.
 /// This method return this sequence as a xml string
 /// @param pElem Input \<locations\> element
-/// @return XML string
+/// @return XML document containing \<location\> elements
 /// @throw InstrumentDefinitionError Thrown if issues with the content of XML
 /// instrument file
-std::string InstrumentDefinitionParser::convertLocationsElement(
+Poco::AutoPtr<Poco::XML::Document>
+InstrumentDefinitionParser::convertLocationsElement(
     const Poco::XML::Element *pElem) {
   // Number of <location> this <locations> element is shorthand for
   size_t nElements(0);
@@ -2650,25 +2635,22 @@ std::string InstrumentDefinitionParser::convertLocationsElement(
     }
   }
 
-  std::ostringstream xml;
-
-  Poco::XML::XMLWriter writer(xml, Poco::XML::XMLWriter::CANONICAL);
-  writer.startDocument();
-  writer.startElement("", "", "expansion-of-locations-element");
+  Poco::AutoPtr<Document> pDoc = new Document;
+  Poco::AutoPtr<Element> pRoot = pDoc->createElement("expansion-of-locations-element");
+  pDoc->appendChild(pRoot);
 
   for (size_t i = 0; i < nElements; ++i) {
-    Poco::XML::AttributesImpl attr;
+    Poco::AutoPtr<Element> pLoc = pDoc->createElement("location");
 
     if (!name.empty()) {
       // Add name with appropriate numeric postfix
-      attr.addAttribute(
-          "", "", "name", "",
+      pLoc->setAttribute("name",
           name + boost::lexical_cast<std::string>(nameCountStart + i));
     }
 
     // Copy values of all the attributes set
     for (auto it = attrValues.begin(); it != attrValues.end(); ++it) {
-      attr.addAttribute("", "", it->first, "",
+      pLoc->setAttribute(it->first,
                         boost::lexical_cast<std::string>(it->second));
 
       // If attribute has a step, increase the value by the step
@@ -2677,13 +2659,10 @@ std::string InstrumentDefinitionParser::convertLocationsElement(
       }
     }
 
-    writer.emptyElement("", "", "location", attr);
+    pRoot->appendChild(pLoc);
   }
 
-  writer.endElement("", "", "expansion-of-locations-element");
-  writer.endDocument();
-
-  return xml.str();
+  return pDoc;
 }
 
 /** Return a subelement of an XML element, but also checks that there exist

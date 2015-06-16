@@ -15,6 +15,8 @@ public:
   virtual void authenticate(const std::string & /*username*/,
                             const std::string & /*password*/) {}
 
+  virtual void logout(const std::string & /*username*/) {}
+
   virtual std::string submitRemoteJob(const std::string & /*transactionID*/,
                                       const std::string & /*runnable*/,
                                       const std::string & /*param*/,

@@ -31,7 +31,7 @@
 
 #include "MantidSINQ/DllConfig.h"
 #include "MantidAPI/Algorithm.h"
-#include "MantidAPI/IMDHistoWorkspace.h"
+#include "MantidAPI/IMDHistoWorkspace_fwd.h"
 
 class MANTID_SINQ_DLL InvertMDDim : public Mantid::API::Algorithm {
 public:

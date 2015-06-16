@@ -13,7 +13,7 @@
 
 #include <Poco/NObserver.h>
 
-#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "../UserFunction.h"
 #include "../MdiSubWindow.h"

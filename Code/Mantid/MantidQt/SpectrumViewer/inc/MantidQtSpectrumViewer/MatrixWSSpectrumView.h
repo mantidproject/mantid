@@ -2,7 +2,7 @@
 #define MATRIX_WS_SPECTRUM_VIEW_H
 
 #include "MantidQtSpectrumViewer/DllOptionSV.h"
-#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
 
 #include "MantidQtSpectrumViewer/SpectrumView.h"
 

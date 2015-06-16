@@ -117,6 +117,15 @@ PeakShapeEllipsoid* PeakShapeEllipsoid::clone() const {
 
 std::string PeakShapeEllipsoid::shapeName() const { return PeakShapeEllipsoid::ellipsoidShapeName(); }
 
+double PeakShapeEllipsoid::radius() const
+{
+    double radius = m_abc_radii[0];
+    for(int8_t i = 1; i < 3; ++i) {
+        radius = std::max(radius, m_abc_radii[i]);
+    }
+    return radius;
+}
+
 const std::string PeakShapeEllipsoid::ellipsoidShapeName()
 {
     return "ellipsoid";

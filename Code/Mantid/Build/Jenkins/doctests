@@ -66,7 +66,7 @@ rm -f $userprops
 
 data_binary_root=${WORKSPACE}/build/ExternalData
 testdata_dir=${data_binary_root}/Testing/Data
-instrument_dir=/opt/mantidnightly/instrument
+instrument_dir=${WORKSPACE}/Code/Mantid/instrument
 echo "datasearch.directories=${testdata_dir}/DocTest;${testdata_dir}/UnitTest;${instrument_dir}" > $userprops
 echo "UpdateInstrumentDefinitions.OnStartup = 0" >> $userprops
 echo "usagereports.enabled = 0" >> $userprops

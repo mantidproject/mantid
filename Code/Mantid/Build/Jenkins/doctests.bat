@@ -13,7 +13,7 @@ setlocal enableextensions enabledelayedexpansion
 :: Print out the versions of things we are using
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 set CMAKE_BIN_DIR=C:\Program Files (x86)\CMake 2.8\bin
-"%CMAKE_BIN_DIR%\cmake" --version 
+"%CMAKE_BIN_DIR%\cmake" --version
 echo %sha1%
 
 :::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
@@ -85,7 +85,7 @@ echo usagereports.enabled = 0 >> C:\MantidInstall\bin\Mantid.user.properties
 :: User properties file cannot contain backslash characters
 set WORKSPACE_UNIX_STYLE=%WORKSPACE:\=/%
 set DATA_ROOT=!WORKSPACE_UNIX_STYLE!/build/ExternalData/Testing/Data
-echo datasearch.directories = !DATA_ROOT!/UnitTest;!DATA_ROOT!/DocTest;C:/MantidInstall/instrument >> C:\MantidInstall\bin\Mantid.user.properties
+echo datasearch.directories = !DATA_ROOT!/UnitTest;!DATA_ROOT!/DocTest;!WORKSPACE_UNIX_STYLE!/Code/Mantid/instrument >> C:\MantidInstall\bin\Mantid.user.properties
 
 :: Run tests
 C:\MantidInstall\bin\MantidPlot.exe -xq %BUILD_DIR%\docs\runsphinx_doctest.py

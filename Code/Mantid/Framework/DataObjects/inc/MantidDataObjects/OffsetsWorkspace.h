@@ -1,7 +1,7 @@
 #ifndef MANTID_DATAOBJECTS_OFFSETSWORKSPACE_H_
 #define MANTID_DATAOBJECTS_OFFSETSWORKSPACE_H_
 
-#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidDataObjects/SpecialWorkspace2D.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/System.h"

@@ -1,19 +1,19 @@
-#ifndef MDFERRORCURVE_H_
-#define MDFERRORCURVE_H_
+#ifndef MANTIDWIDGETS_ERRORCURVE_H
+#define MANTIDWIDGETS_ERRORCURVE_H
 
+#include "WidgetDllOption.h"
 #include <qwt_plot_item.h>
 #include <qwt_plot_curve.h>
 
 namespace MantidQt
 {
-namespace CustomInterfaces
-{
-namespace MDF
+namespace MantidWidgets
 {
 
 /// Curve to draw error bars.
-class ErrorCurve: public QwtPlotItem
+class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS ErrorCurve: public QwtPlotItem
 {
+
 public:
   ErrorCurve(const QwtPlotCurve* dataCurve, const std::vector<double>& errors = std::vector<double>());
   /// Set error bars
@@ -32,9 +32,7 @@ private:
   QPen m_pen;
 };
 
-} // MDF
-} // CustomInterfaces
+} // MantidWidgets
 } // MantidQt
 
-
-#endif /*MDFERRORCURVE_H_*/
+#endif /* MANTIDWIDGETS_ERRORCURVE_H */

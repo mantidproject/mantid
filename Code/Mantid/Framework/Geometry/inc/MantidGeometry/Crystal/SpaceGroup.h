@@ -87,6 +87,8 @@ public:
     return equivalents;
   }
 
+  bool isAllowedReflection(const Kernel::V3D &hkl) const;
+
 protected:
   size_t m_number;
   std::string m_hmSymbol;

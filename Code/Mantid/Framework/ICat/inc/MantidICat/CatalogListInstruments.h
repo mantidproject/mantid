@@ -2,7 +2,7 @@
 #define MANTID_ICAT_CATALOGLISTINSTRUMENTS_H_
 
 #include "MantidAPI/Algorithm.h"
-#include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidICat/DllConfig.h"
 
 namespace Mantid {

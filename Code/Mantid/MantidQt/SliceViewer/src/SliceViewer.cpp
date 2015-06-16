@@ -42,6 +42,7 @@
 #include "MantidQtSliceViewer/PeaksViewerOverlayDialog.h"
 #include "MantidQtSliceViewer/PeakOverlayViewFactorySelector.h"
 #include "MantidQtMantidWidgets/SelectWorkspacesDialog.h"
+#include "MantidQtMantidWidgets/InputController.h"
 
 #include <qwt_plot_panner.h>
 #include <Poco/AutoPtr.h>
@@ -82,7 +83,7 @@ SliceViewer::SliceViewer(QWidget *parent)
       m_peaksPresenter(boost::make_shared<CompositePeaksPresenter>(this)),
       m_proxyPeaksPresenter(
           boost::make_shared<ProxyCompositePeaksPresenter>(m_peaksPresenter)),
-      m_peaksSliderWidget(NULL) {
+      m_peaksSliderWidget(NULL){
 
   ui.setupUi(this);
 
@@ -2195,12 +2196,14 @@ SliceViewer::setPeaksWorkspaces(const QStringList &list) {
     // Candidate for overplotting as spherical peaks
     viewFactorySelector->registerCandidate(
         boost::make_shared<PeakOverlayMultiSphereFactory>(
-            peaksWS, m_plot, m_plot->canvas(), numberOfChildPresenters));
+            peaksWS, m_plot, m_plot->canvas(), m_spect->xAxis(),
+                    m_spect->yAxis(), numberOfChildPresenters));
     // Candiate for plotting as a markers of peak positions
     viewFactorySelector->registerCandidate(
         boost::make_shared<PeakOverlayMultiCrossFactory>(
             m_ws, transformFactory->createDefaultTransform(), peaksWS, m_plot,
-            m_plot->canvas(), numberOfChildPresenters));
+            m_plot->canvas(), m_spect->xAxis(),
+                    m_spect->yAxis(), numberOfChildPresenters));
     try {
       m_peaksPresenter->addPeaksPresenter(
           boost::make_shared<ConcretePeaksPresenter>(
@@ -2408,6 +2411,7 @@ void SliceViewer::dropEvent(QDropEvent *e) {
     }
   }
 }
+
 
 } // namespace
 }

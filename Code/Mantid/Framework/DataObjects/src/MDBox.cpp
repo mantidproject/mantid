@@ -414,6 +414,43 @@ TMDE(void MDBox)::calculateCentroid(coord_t *centroid) const {
 }
 
 //-----------------------------------------------------------------------------------------------
+/** Calculate the centroid of this box.
+ * @param centroid [out] :: nd-sized array that will be set to the centroid.
+ * @param runindex [in] :: run index used to filter the events.
+ */
+TMDE(void MDBox)::calculateCentroid(coord_t *centroid,
+                                    const int runindex) const {
+  for (size_t d = 0; d < nd; d++)
+    centroid[d] = 0;
+
+  // Signal was calculated before (when adding)
+  // Keep 0.0 if the signal is null. This avoids dividing by 0.0
+  if (this->m_signal == 0)
+    return;
+
+  typename std::vector<MDE>::const_iterator it_end = data.end();
+  for (typename std::vector<MDE>::const_iterator it = data.begin();
+       it != it_end; ++it) {
+    const MDE &Evnt = *it;
+    double signal = Evnt.getSignal();
+    int thisrun = Evnt.getRunIndex();
+    if (thisrun != runindex) {
+      // skip
+      continue;
+    }
+    for (size_t d = 0; d < nd; d++) {
+      // Total up the coordinate weighted by the signal.
+      centroid[d] += Evnt.getCenter(d) * static_cast<coord_t>(signal);
+    }
+  }
+
+  // Normalize by the total signal
+  for (size_t d = 0; d < nd; d++) {
+    centroid[d] /= coord_t(this->m_signal);
+  }
+}
+
+//-----------------------------------------------------------------------------------------------
 /** Calculate the statistics for each dimension of this MDBox, using
  * all the contained events
  * @param stats :: nd-sized fixed array of MDDimensionStats, reset to 0.0
