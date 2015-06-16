@@ -8,10 +8,16 @@ set ( MODULE_TEMPLATE src/dataobjects.cpp.in )
 # -- Do NOT sort this list. The order defines the order in which the export
 #    definitions occur and some depend on their base classes being exported first --
 set ( EXPORT_FILES
+  src/Exports/EventWorkspace.cpp
+  src/Exports/Workspace2D.cpp
+  src/Exports/SpecialWorkspace2D.cpp
+  src/Exports/MaskWorkspace.cpp
+  src/Exports/OffsetsWorkspace.cpp
   src/Exports/MDEventWorkspace.cpp
   src/Exports/MDHistoWorkspace.cpp
+  src/Exports/PeaksWorkspace.cpp
   src/Exports/TableWorkspace.cpp
-  src/Exports/Workspace2D.cpp
+  src/Exports/WorkspaceSingleValue.cpp
 )
 
 set ( MODULE_DEFINITION ${CMAKE_CURRENT_BINARY_DIR}/dataobjects.cpp )

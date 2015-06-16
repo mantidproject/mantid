@@ -2,7 +2,6 @@
 #include "MantidPythonInterface/kernel/Registry/RegisterWorkspacePtrToPython.h"
 
 #include <boost/python/class.hpp>
-#include <boost/python/object/inheritance.hpp>
 
 using Mantid::API::MatrixWorkspace;
 using Mantid::DataObjects::Workspace2D;

@@ -43,6 +43,7 @@ set ( EXPORT_FILES
   src/Exports/MatrixWorkspaceProperty.cpp
   src/Exports/IEventWorkspace.cpp
   src/Exports/IEventWorkspaceProperty.cpp
+  src/Exports/IMaskWorkspace.cpp
   src/Exports/IPeaksWorkspace.cpp
   src/Exports/IPeaksWorkspaceProperty.cpp
   src/Exports/BinaryOperations.cpp
