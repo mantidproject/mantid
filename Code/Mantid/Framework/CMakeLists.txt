@@ -131,8 +131,9 @@ add_subdirectory (ISISLiveData)
 # Add a custom target to build all of the Framework
 ###########################################################################
 
-set ( FRAMEWORK_LIBS Kernel Geometry API PythonKernelModule
-                     PythonGeometryModule PythonAPIModule DataObjects
+set ( FRAMEWORK_LIBS Kernel Geometry API DataObjects
+                     PythonKernelModule PythonGeometryModule PythonAPIModule
+                     PythonDataObjectsModule
                      DataHandling Nexus Algorithms CurveFitting ICat
                      Crystal MDAlgorithms WorkflowAlgorithms
                      LiveData ISISLiveData RemoteAlgorithms RemoteJobManagers

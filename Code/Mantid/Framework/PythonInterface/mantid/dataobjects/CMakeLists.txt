@@ -8,26 +8,24 @@ set ( MODULE_TEMPLATE src/dataobjects.cpp.in )
 # -- Do NOT sort this list. The order defines the order in which the export
 #    definitions occur and some depend on their base classes being exported first --
 set ( EXPORT_FILES
+  src/Exports/MDEventWorkspace.cpp
+  src/Exports/MDHistoWorkspace.cpp
   src/Exports/TableWorkspace.cpp
   src/Exports/Workspace2D.cpp
 )
 
-# Files containing additional helper code that are not related to exporting class/functions
-set ( SRC_FILES
-)
-
-set ( INC_FILES
-)
-
-set ( PY_FILES
-  __init__.py
-)
+set ( MODULE_DEFINITION ${CMAKE_CURRENT_BINARY_DIR}/dataobjects.cpp )
+create_module ( ${MODULE_TEMPLATE} ${MODULE_DEFINITION} ${EXPORT_FILES} )
 
 #############################################################################################
-# Generate a source file from the export definitions
+# Helper code
 #############################################################################################
-create_module ( ${MODULE_TEMPLATE} ${CMAKE_CURRENT_BINARY_DIR}/dataobjects.cpp EXPORT_FILES
-                SRC_FILES )
+set ( SRC_FILES )
+
+set ( INC_FILES )
+
+set ( PY_FILES __init__.py )
+
 
 #############################################################################################
 # Copy over the pure Python files for the module
@@ -49,7 +47,8 @@ copy_files_to_dir ( "${PY_FILES}" ${CMAKE_CURRENT_SOURCE_DIR} ${OUTPUT_DIR}
 set ( FRAMEWORK_DIR ../../.. )
 include_directories ( ${FRAMEWORK_DIR}/DataObjects/inc )
 
-add_library ( PythonDataObjectsModule ${SRC_FILES} ${INC_FILES} ${PYTHON_INSTALL_FILES} )
+add_library ( PythonDataObjectsModule ${MODULE_DEFINITION} ${EXPORT_FILES} ${SRC_FILES}
+              ${INC_FILES} ${PYTHON_INSTALL_FILES} )
 set_python_properties( PythonDataObjectsModule _dataobjects )
 set_target_output_directory ( PythonDataObjectsModule ${OUTPUT_DIR} .pyd )
 

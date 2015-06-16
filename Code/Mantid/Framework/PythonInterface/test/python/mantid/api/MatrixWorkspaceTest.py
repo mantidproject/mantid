@@ -103,6 +103,19 @@ class MatrixWorkspaceTest(unittest.TestCase):
 
         AnalysisDataService.remove(wsname)
 
+    def test_that_a_histogram_workspace_is_returned_as_a_MatrixWorkspace_from_ADS(self):
+        wsname = "MatrixWorkspaceTest_ADS"
+        AnalysisDataService.add(wsname,self._test_ws)
+
+        value = AnalysisDataService[wsname]
+        self.assertTrue(isinstance(value, Workspace))
+        # Have got a MatrixWorkspace back and not just the generic interface
+        self.assertTrue(isinstance(value, MatrixWorkspace))
+        mem = value.getMemorySize()
+        self.assertTrue( (mem > 0) )
+
+        AnalysisDataService.remove(wsname)
+
     def test_read_data_members_give_readonly_numpy_array(self):
         def do_numpy_test(arr):
             self.assertEquals(type(arr), np.ndarray)
