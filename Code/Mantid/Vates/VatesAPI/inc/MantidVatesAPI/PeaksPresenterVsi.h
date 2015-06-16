@@ -2,7 +2,7 @@
 #define MANTID_VATES_PEAKS_PRESENTER_VSI_H
 
 #include "MantidKernel/System.h"
-#include "MantidAPI/IPeaksWorkspace.h"
+#include "MantidAPI/IPeaksWorkspace_fwd.h"
 #include "MantidKernel/V3D.h"
 #include "MantidKernel/SpecialCoordinateSystem.h"
 #include "MantidVatesAPI/ViewFrustum.h"

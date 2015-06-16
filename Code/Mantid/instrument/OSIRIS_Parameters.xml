@@ -73,6 +73,9 @@
 <parameter name="Workflow.SE-log" type="string">
     <value val="sample" />
 </parameter>
+<parameter name="Workflow.SE-log-value" type="string">
+    <value val="last_value" />
+</parameter>
 <parameter name="Workflow.beam-width" type="string">
     <value val="2.2" />
 </parameter>

@@ -5,7 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
-#include "MantidAPI/Workspace.h"
+#include "MantidAPI/Workspace_fwd.h"
 #include "MantidKernel/Property.h"
 #include <climits>
 #include "MantidAPI/WorkspaceGroup.h"

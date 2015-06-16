@@ -121,6 +121,17 @@ public:
       TS_ASSERT(presenter.contentsDifferent(&other));
   }
 
+  void test_peakEditMode(){
+      NullPeaksPresenter presenter;
+      TS_ASSERT_THROWS_NOTHING(presenter.peakEditMode(AddPeaks););
+  }
+
+  void test_deletePeaksIn(){
+      NullPeaksPresenter presenter;
+      PeakBoundingBox fake;
+      TS_ASSERT_THROWS_NOTHING(presenter.deletePeaksIn(fake));
+  }
+
 };
 
 #endif

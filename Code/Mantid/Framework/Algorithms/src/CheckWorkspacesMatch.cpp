@@ -1,12 +1,14 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
+#include "MantidGeometry/Crystal/IPeak.h"
+
 #include "MantidAlgorithms/CheckWorkspacesMatch.h"
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
+#include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
-#include "MantidAPI/IPeak.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidDataObjects/EventWorkspace.h"

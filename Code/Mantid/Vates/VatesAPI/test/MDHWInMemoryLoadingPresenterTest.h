@@ -5,6 +5,8 @@
 #include "MockObjects.h"
 
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/IMDHistoWorkspace.h"
+#include "MantidAPI/ITableWorkspace.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 #include "MantidVatesAPI/FilteringUpdateProgressAction.h"
 #include "MantidVatesAPI/MDHWInMemoryLoadingPresenter.h"

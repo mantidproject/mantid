@@ -1,4 +1,5 @@
 #include "MantidAPI/Projection.h"
+#include "MantidAPI/ITableWorkspace.h"
 
 namespace Mantid {
 namespace API {

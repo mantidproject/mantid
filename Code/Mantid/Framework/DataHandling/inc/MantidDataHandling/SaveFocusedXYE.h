@@ -61,8 +61,8 @@ namespace DataHandling {
 class DLLExport SaveFocusedXYE : public API::Algorithm {
 public:
   enum HeaderType { XYE, MAUD, TOPAS };
-  /// (Empty) Constructor
-  SaveFocusedXYE() : API::Algorithm() {}
+  /// Constructor
+  SaveFocusedXYE();
   /// Virtual destructor
   virtual ~SaveFocusedXYE() {}
   /// Algorithm's name

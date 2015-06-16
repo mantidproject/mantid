@@ -16,7 +16,7 @@
 #include <QStringList>
 #include <Poco/NObserver.h>
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidKernel/ConfigService.h"
 #include <vector>
 
@@ -361,6 +361,7 @@ private:
   bool entriesAreValid(ValMap & vals);
   bool runFilesAreValid();
   QString reduceSingleRun() const;
+  void setValidators();
 
   UserSubWindow * slicingWindow;
 

@@ -1,6 +1,7 @@
 #include "MantidICat/CatalogGetDataFiles.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidAPI/CatalogManager.h"
+#include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/WorkspaceProperty.h"
 
 namespace Mantid {

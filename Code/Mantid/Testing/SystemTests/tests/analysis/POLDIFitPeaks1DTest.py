@@ -64,19 +64,20 @@ class POLDIFitPeaks1DTest(stresstesting.MantidStressTest):
             referencePeaks = mtd["%s_reference_1DFit" % (dataFile)]
             self.assertEqual(calculatedPeaks.rowCount(), referencePeaks.rowCount())
 
-            positions = calculatedPeaks.column(2)
+            positions = calculatedPeaks.column(3)
+            positionErrors = calculatedPeaks.column(4)
             referencePositions = [float(x) for x in referencePeaks.column(0)]
 
-            fwhms = calculatedPeaks.column(4)
+            fwhms = calculatedPeaks.column(7)
+            fwhmErrors = calculatedPeaks.column(8)
             referenceFwhms = [float(x) for x in referencePeaks.column(1)]
 
             for i in range(10):
           # extract position and fwhm with uncertainties
-                positionparts = positions[i].split()
-                position = [float(positionparts[0]), float(positionparts[2])]
+                position = [positions[i], positionErrors[i]]
+                fwhm = [fwhms[i], fwhmErrors[i]]
 
-                fwhmparts = fwhms[i].split()
-                fwhm = [float(fwhmparts[0]), float(fwhmparts[2])]
+                print position, fwhm, referencePositions
 
                 self.assertTrue(self.positionAcceptable(position))
                 self.assertTrue(self.fwhmAcceptable(fwhm))

@@ -17,7 +17,8 @@ DECLARE_ALGORITHM(MaskDetectorsIf)
 using namespace Kernel;
 
 /// Constructor
-MaskDetectorsIf::MaskDetectorsIf() : API::Algorithm() {}
+MaskDetectorsIf::MaskDetectorsIf()
+    : API::Algorithm(), value(0.), select_on(false) {}
 
 /// Destructor
 MaskDetectorsIf::~MaskDetectorsIf() {}

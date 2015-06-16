@@ -69,8 +69,7 @@ createDiffractionEventWorkspace(int numEvents, int numPixels, int numBins) {
   // --------- Load the instrument -----------
   const std::string filename = FileFinder::Instance().getFullPath(
       "IDFs_for_UNIT_TESTING/MINITOPAZ_Definition.xml");
-  InstrumentDefinitionParser parser;
-  parser.initialize(filename, "MINITOPAZ", Strings::loadFile(filename));
+  InstrumentDefinitionParser parser(filename, "MINITOPAZ", Strings::loadFile(filename));
   auto instrument = parser.parseXML(NULL);
   retVal->populateInstrumentParameters();
   retVal->setInstrument(instrument);

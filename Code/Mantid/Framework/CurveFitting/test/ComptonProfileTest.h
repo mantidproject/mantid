@@ -4,6 +4,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidCurveFitting/ComptonProfile.h"
+#include <boost/make_shared.hpp>
 
 using Mantid::CurveFitting::ComptonProfile;
 

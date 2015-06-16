@@ -134,7 +134,7 @@ class EnginXFitPeaksTest(unittest.TestCase):
         # fitting results on some platforms (OSX) are different by ~0.07%
         expected_difc = 17395.620526173196
         self.assertTrue(abs((expected_difc-difc)/expected_difc) < 5e-3)
-        expected_zero = 1050.3378284424373
+        expected_zero = 1058.0490117833390
         self.assertTrue(abs((expected_zero-zero)/expected_zero) < 5e-3)
 
 
@@ -157,7 +157,7 @@ class EnginXFitPeaksTest(unittest.TestCase):
         expected_difc = 17335.67250113934
         # assertLess would be nices, but only available in unittest >= 2.7
         self.assertTrue(abs((expected_difc-difc)/expected_difc) < 5e-3)
-        expected_zero = 950.9440922621866
+        expected_zero = 958.2547157813959
         self.assertTrue(abs((expected_zero-zero)/expected_zero) < 5e-3)
 
 

@@ -63,6 +63,76 @@ class POLDIDataAnalysisTestSiIndividual(POLDIDataAnalysisTestSi):
         # Maximum residual should not be too large
         self.assertLessThan(maxResidual / maxSum, 0.075)
 
+class POLDIDataAnalysisTestSiIndividualDiscardUnindexed(POLDIDataAnalysisTestSi):
+    def runTest(self):
+        data, expectedPeaks = self.prepareTest()
+        DeleteTableRows(expectedPeaks, '8-20')
+
+        output_remove = PoldiDataAnalysis(InputWorkspace=data,
+                                   MaximumPeakNumber=11,
+                                   ExpectedPeaks=expectedPeaks,
+                                   RemoveUnindexedPeaksFor2DFit=True,
+                                   PlotResult=False)
+
+        # Make sure that it's a workspace group
+        self.assertTrue(isinstance(output_remove, WorkspaceGroup))
+
+        # check that only one set of peaks has been refined
+        refinedPeaks = AnalysisDataService.retrieve('poldi_data_6904_peaks_refined_2d')
+        self.assertEquals(refinedPeaks.rowCount(), 8)
+
+        # Run again with option to keep unindexed peaks.
+        output_keep = PoldiDataAnalysis(InputWorkspace=data,
+                                   MaximumPeakNumber=11,
+                                   ExpectedPeaks=expectedPeaks,
+                                   RemoveUnindexedPeaksFor2DFit=False,
+                                   PlotResult=False)
+
+        # Make sure that it's a workspace group
+        self.assertTrue(isinstance(output_keep, WorkspaceGroup))
+
+        # check that the output peaks are again a workspace group (Si and unindexed)
+        refinedPeaks = AnalysisDataService.retrieve('poldi_data_6904_peaks_refined_2d')
+        self.assertTrue(isinstance(refinedPeaks, WorkspaceGroup))
+
+
+
+class POLDIDataAnalysisTestSiIndividualPseudoVoigtTied(POLDIDataAnalysisTestSi):
+    """This test runs PoldiDataAnalysis with Si data, using."""
+
+    def runTest(self):
+        data, expectedPeaks = self.prepareTest()
+
+        output = PoldiDataAnalysis(InputWorkspace=data,
+                                   MaximumPeakNumber=11,
+                                   ProfileFunction="PseudoVoigt",
+                                   TieProfileParameters=True,
+                                   ExpectedPeaks=expectedPeaks,
+                                   PlotResult=False,
+                                   OutputRawFitParameters=True)
+
+        # Make sure that it's a workspace group
+        self.assertTrue(isinstance(output, WorkspaceGroup))
+
+        # check the refined peaks.
+        refinedPeaks = AnalysisDataService.retrieve('poldi_data_6904_peaks_refined_2d')
+        self.assertEquals(refinedPeaks.rowCount(), 11)
+
+        # check that raw parameters exist
+        self.assertTrue(AnalysisDataService.doesExist('poldi_data_6904_raw_fit_parameters'))
+
+        # check that all parameters that have "Mixing" in the name are the same
+        rawFitParameters = AnalysisDataService.retrieve('poldi_data_6904_raw_fit_parameters')
+
+        mixingValues = set()
+        for i in range(rawFitParameters.rowCount()):
+            parameterName = rawFitParameters.cell(i, 0)
+
+            if "Mixing" in parameterName:
+                mixingValues.add(rawFitParameters.cell(i, 1))
+
+        self.assertEquals(len(mixingValues), 1)
+
 class POLDIDataAnalysisTestSiPawley(POLDIDataAnalysisTestSi):
     """This test runs PoldiDataAnalysis with Si data, using."""
 

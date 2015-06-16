@@ -1,5 +1,5 @@
 #pylint: disable=invalid-name
-import refl_window
+import ui_refl_window
 import refl_save
 import refl_choose_col
 import refl_options
@@ -32,7 +32,7 @@ except ImportError:
 
 
 
-class ReflGui(QtGui.QMainWindow, refl_window.Ui_windowRefl):
+class ReflGui(QtGui.QMainWindow, ui_refl_window.Ui_windowRefl):
 
     current_instrument = None
     current_table = None

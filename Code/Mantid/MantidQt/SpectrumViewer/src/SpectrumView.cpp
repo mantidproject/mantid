@@ -1,7 +1,8 @@
 #include <iostream>
 #include "MantidQtSpectrumViewer/SpectrumView.h"
-#include "MantidQtSpectrumViewer/ColorMaps.h"
 
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidQtSpectrumViewer/ColorMaps.h"
 #include "MantidQtSpectrumViewer/SVConnections.h"
 #include "MantidQtSpectrumViewer/SpectrumDisplay.h"
 #include "MantidQtSpectrumViewer/SliderHandler.h"

@@ -2,14 +2,10 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidDataHandling/LoadParameterFile.h"
-#include "MantidDataHandling/LoadInstrument.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidAPI/InstrumentDataService.h"
-#include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/Component.h"
 #include "MantidAPI/Progress.h"
 #include "MantidAPI/FileProperty.h"
-#include "MantidKernel/ArrayProperty.h"
 
 #include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/Document.h>
@@ -19,7 +15,6 @@
 #include <Poco/DOM/NodeFilter.h>
 #include <Poco/DOM/AutoPtr.h>
 #include <Poco/File.h>
-#include <sstream>
 #include "MantidGeometry/Instrument/InstrumentDefinitionParser.h"
 
 using Poco::XML::DOMParser;
@@ -118,9 +113,11 @@ void LoadParameterFile::exec() {
       // First see if the file exists
       Poco::File ipfFile(filename);
       if(!ipfFile.exists()) {
-        std::string directoryName =
-            Kernel::ConfigService::Instance().getInstrumentDirectory();
-        filename = directoryName + "/" + filename;
+        Poco::Path filePath(filename);
+        filename = Poco::Path(Kernel::ConfigService::Instance().getInstrumentDirectory())
+          .makeDirectory().
+          setFileName(filePath.getFileName()).
+          toString();
       }
       g_log.information() << "Parsing from XML file: " << filename
                           << std::endl;

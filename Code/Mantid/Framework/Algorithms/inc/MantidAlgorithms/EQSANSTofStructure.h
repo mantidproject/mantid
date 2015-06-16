@@ -5,9 +5,9 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
-#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidDataObjects/EventWorkspace.h"
-#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -33,8 +33,8 @@ const double CHOPPER_LOCATION[4] = {5700., 7800., 9497., 9507.};
 
 class DLLExport EQSANSTofStructure : public API::Algorithm {
 public:
-  /// (Empty) Constructor
-  EQSANSTofStructure() : API::Algorithm() {}
+  /// Default constructor
+  EQSANSTofStructure();
   /// Virtual destructor
   virtual ~EQSANSTofStructure() {}
   /// Algorithm's name

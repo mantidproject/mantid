@@ -63,6 +63,7 @@ namespace CustomInterfaces
     QString sampleWsName = m_uiForm.dsSampleInput->getCurrentDataName();
     QString sqwWsName = sampleWsName.left(sampleWsName.length() - 4) + "_sqw";
     QString eRebinWsName = sampleWsName.left(sampleWsName.length() - 4) + "_r";
+    QString method = m_uiForm.cbMethod->currentText();
 
     QString rebinString = m_uiForm.spQLow->text() + "," + m_uiForm.spQWidth->text() +
       "," + m_uiForm.spQHigh->text();
@@ -87,14 +88,6 @@ namespace CustomInterfaces
     QString eFixed = getInstrumentDetails()["Efixed"];
 
     IAlgorithm_sptr sqwAlg = AlgorithmManager::Instance().create("SofQW");
-    QString rebinType = m_uiForm.cbRebinType->currentText();
-
-    if(rebinType == "Parallelepiped")
-      sqwAlg->setProperty("Method", "Polygon");
-    else if(rebinType == "Parallelepiped/Fractional Area")
-      sqwAlg->setProperty("Method", "NormalisedPolygon");
-
-    // S(Q, w) algorithm
     sqwAlg->initialize();
 
     BatchAlgorithmRunner::AlgorithmRuntimeProps sqwInputProps;
@@ -107,6 +100,7 @@ namespace CustomInterfaces
     sqwAlg->setProperty("QAxisBinning", rebinString.toStdString());
     sqwAlg->setProperty("EMode", "Indirect");
     sqwAlg->setProperty("EFixed", eFixed.toStdString());
+    sqwAlg->setProperty("Method", method.toStdString());
 
     m_batchAlgoRunner->addAlgorithm(sqwAlg, sqwInputProps);
 
@@ -116,7 +110,7 @@ namespace CustomInterfaces
 
     sampleLogAlg->setProperty("LogName", "rebin_type");
     sampleLogAlg->setProperty("LogType", "String");
-    sampleLogAlg->setProperty("LogText", rebinType.toStdString());
+    sampleLogAlg->setProperty("LogText", method.toStdString());
 
     BatchAlgorithmRunner::AlgorithmRuntimeProps inputToAddSampleLogProps;
     inputToAddSampleLogProps["Workspace"] = sqwWsName.toStdString();

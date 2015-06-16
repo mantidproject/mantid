@@ -2,7 +2,7 @@
 #define MANTID_DATAHANDLING_LOADSAVUTOMOCONFIG_H_
 
 #include "MantidAPI/Algorithm.h"
-#include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/ITableWorkspace_fwd.h"
 
 namespace NeXus {
   class File;

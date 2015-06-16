@@ -1,6 +1,7 @@
 #include "MantidCurveFitting/ComptonScatteringCountRate.h"
 #include "MantidCurveFitting/AugmentedLagrangianOptimizer.h"
 #include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/Math/Optimization/SLSQPMinimizer.h"
 
 #include <boost/bind.hpp>

@@ -25,19 +25,20 @@ namespace Algorithms {
 DECLARE_ALGORITHM(EstimateResolutionDiffraction)
 
 namespace { // hide these constants
-  ///
-  const double MICROSEC_TO_SEC=1.0E-6;
-  ///
-  const double WAVELENGTH_TO_VELOCITY=1.0E10 *
-      PhysicalConstants::h / PhysicalConstants::NeutronMass;
-  /// This is an absurd number for even ultra cold neutrons
-  const double WAVELENGTH_MAX = 1000.;
+///
+const double MICROSEC_TO_SEC = 1.0E-6;
+///
+const double WAVELENGTH_TO_VELOCITY =
+    1.0E10 * PhysicalConstants::h / PhysicalConstants::NeutronMass;
+/// This is an absurd number for even ultra cold neutrons
+const double WAVELENGTH_MAX = 1000.;
 }
 
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
-EstimateResolutionDiffraction::EstimateResolutionDiffraction() {}
+EstimateResolutionDiffraction::EstimateResolutionDiffraction()
+    : m_inputWS(), m_outputWS(), m_centreVelocity(0.), m_L1(0.), m_deltaT(0.) {}
 
 //----------------------------------------------------------------------------------------------
 /** Destructor
@@ -75,19 +76,19 @@ void EstimateResolutionDiffraction::init() {
                   "Name of the output workspace containing delta(d)/d of each "
                   "detector/spectrum.");
 
-  auto positiveDeltaTOF = boost::make_shared<BoundedValidator<double> >();
+  auto positiveDeltaTOF = boost::make_shared<BoundedValidator<double>>();
   positiveDeltaTOF->setLower(0.);
   positiveDeltaTOF->setLowerExclusive(true);
   declareProperty(
       "DeltaTOF", 0., positiveDeltaTOF,
       "DeltaT as the resolution of TOF with unit microsecond (10^-6m).");
 
-  auto positiveWavelength = boost::make_shared<BoundedValidator<double> >();
+  auto positiveWavelength = boost::make_shared<BoundedValidator<double>>();
   positiveWavelength->setLower(0.);
   positiveWavelength->setLowerExclusive(true);
-  declareProperty(
-      "Wavelength", EMPTY_DBL(), positiveWavelength,
-      "Wavelength setting in Angstroms. This overrides what is in the dataset.");
+  declareProperty("Wavelength", EMPTY_DBL(), positiveWavelength,
+                  "Wavelength setting in Angstroms. This overrides what is in "
+                  "the dataset.");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -117,8 +118,7 @@ void EstimateResolutionDiffraction::processAlgProperties() {
 
 double EstimateResolutionDiffraction::getWavelength() {
   double wavelength = getProperty("Wavelength");
-  if (!isEmpty(wavelength))
-  {
+  if (!isEmpty(wavelength)) {
     return wavelength;
   }
 
@@ -136,7 +136,7 @@ double EstimateResolutionDiffraction::getWavelength() {
 
   string unit = cwltimeseries->units();
   if (unit.compare("Angstrom") != 0) {
-    throw runtime_error("Unit is not recognized: "+unit);
+    throw runtime_error("Unit is not recognized: " + unit);
   }
 
   return cwltimeseries->timeAverageValue();
@@ -148,8 +148,7 @@ double EstimateResolutionDiffraction::getWavelength() {
 void EstimateResolutionDiffraction::retrieveInstrumentParameters() {
   double centrewavelength = getWavelength();
   g_log.notice() << "Centre wavelength = " << centrewavelength << " Angstrom\n";
-  if (centrewavelength > WAVELENGTH_MAX)
-  {
+  if (centrewavelength > WAVELENGTH_MAX) {
     throw runtime_error("unphysical wavelength used");
   }
 

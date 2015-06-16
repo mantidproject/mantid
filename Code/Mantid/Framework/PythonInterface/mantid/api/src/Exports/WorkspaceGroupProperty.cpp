@@ -1,10 +1,7 @@
 #include "MantidPythonInterface/api/WorkspacePropertyExporter.h"
 #include "MantidAPI/WorkspaceGroup.h"
 
-// clang-format off
-void export_WorkspaceGroupProperty()
-// clang-format on
-{
+void export_WorkspaceGroupProperty() {
   using Mantid::API::WorkspaceGroup;
   using Mantid::PythonInterface::WorkspacePropertyExporter;
   WorkspacePropertyExporter<WorkspaceGroup>::define("WorkspaceGroupProperty");

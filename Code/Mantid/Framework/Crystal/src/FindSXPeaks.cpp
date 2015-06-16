@@ -16,6 +16,10 @@ DECLARE_ALGORITHM(FindSXPeaks)
 using namespace Kernel;
 using namespace API;
 
+FindSXPeaks::FindSXPeaks()
+    : API::Algorithm(), m_MinRange(DBL_MAX), m_MaxRange(-DBL_MAX), m_MinSpec(0),
+      m_MaxSpec(0) {}
+
 /** Initialisation method.
  *
  */
@@ -224,7 +228,7 @@ void FindSXPeaks::reducePeakList(const peakvector &pcv) {
   for (std::size_t i = 0; i < finalv.size(); i++) {
     finalv[i].reduce();
     try {
-      IPeak *peak = m_peaks->createPeak(finalv[i].getQ());
+      Geometry::IPeak *peak = m_peaks->createPeak(finalv[i].getQ());
       if (peak) {
         peak->setIntensity(finalv[i].getIntensity());
         peak->setDetectorID(finalv[i].getDetectorId());

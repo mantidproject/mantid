@@ -14,7 +14,7 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidQtAPI/MantidQwtWorkspaceData.h"
 #include "MantidKernel/TimeSeriesProperty.h"
-#include "MantidAPI/Workspace.h"
+#include "MantidAPI/Workspace_fwd.h"
 
 #include <QList>
 #include <QMenu>

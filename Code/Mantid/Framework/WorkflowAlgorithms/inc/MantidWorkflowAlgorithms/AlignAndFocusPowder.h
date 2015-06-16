@@ -5,7 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
-#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/GroupingWorkspace.h"
 #include "MantidDataObjects/MaskWorkspace.h"
@@ -62,7 +62,7 @@ Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 class DLLExport AlignAndFocusPowder : public API::Algorithm {
 public:
-  /// Empty Constructor
+  /// Constructor
   AlignAndFocusPowder();
   /// Destructor
   virtual ~AlignAndFocusPowder();

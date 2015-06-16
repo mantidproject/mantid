@@ -23,6 +23,8 @@ using namespace Kernel;
 using namespace API;
 using namespace Geometry;
 
+Q1D2::Q1D2() : API::Algorithm(), m_dataWS(), m_doSolidAngle(false) {}
+
 void Q1D2::init() {
   auto dataVal = boost::make_shared<CompositeValidator>();
   dataVal->add<WorkspaceUnitValidator>("Wavelength");
@@ -81,6 +83,9 @@ void Q1D2::init() {
                   "_sumOfCounts and _sumOfNormFactors equals the workspace"
                   " returned by the property OutputWorkspace "
                   "(default is false).");
+  declareProperty(
+      "ExtraLength", 0.0, mustBePositive,
+      "Additional length for gravity correction.");
 }
 /**
   @ throw invalid_argument if the workspaces are not mututially compatible
@@ -173,7 +178,7 @@ void Q1D2::exec() {
                            binNormEs, norms, normETo2s);
 
     // now read the data from the input workspace, calculate Q for each bin
-    convertWavetoQ(i, doGravity, wavStart, QIn);
+    convertWavetoQ(i, doGravity, wavStart, QIn, getProperty("ExtraLength"));
 
     // Pointers to the counts data and it's error
     MantidVec::const_iterator YIn = m_dataWS->readY(i).begin() + wavStart;
@@ -483,13 +488,15 @@ void Q1D2::normToMask(const size_t offSet, const size_t specIndex,
 *  @param[in] specInd the spectrum to calculate
 *  @param[in] doGravity if to include gravity in the calculation of Q
 *  @param[in] offset index number of the first input bin to use
+*  @param[in] extraLength for gravitational correction
 *  @param[out] Qs points to a preallocated array that is large enough to contain
 * all the calculated Q values
 *  @throw NotFoundError if the detector associated with the spectrum is not
 * found in the instrument definition
 */
 void Q1D2::convertWavetoQ(const size_t specInd, const bool doGravity,
-                          const size_t offset, MantidVec::iterator Qs) const {
+                          const size_t offset, MantidVec::iterator Qs,
+                          const double extraLength) const {
   static const double FOUR_PI = 4.0 * M_PI;
 
   IDetector_const_sptr det = m_dataWS->getDetector(specInd);
@@ -499,7 +506,7 @@ void Q1D2::convertWavetoQ(const size_t specInd, const bool doGravity,
   // going from bin boundaries to bin centered x-values the size goes down one
   const MantidVec::const_iterator end = m_dataWS->readX(specInd).end() - 1;
   if (doGravity) {
-    GravitySANSHelper grav(m_dataWS, det);
+    GravitySANSHelper grav(m_dataWS, det, extraLength);
     for (; waves != end; ++Qs, ++waves) {
       // the HistogramValidator at the start should ensure that we have one more
       // bin on the input wavelengths

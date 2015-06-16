@@ -62,7 +62,9 @@ class EnginXFitPeaks(PythonAlgorithm):
         foundPeaks = findPeaksAlg.getProperty('PeaksList').value
 
         if foundPeaks.rowCount() < len(expectedPeaksTof):
-            raise Exception("Some peaks were not found")
+            txt = "Peaks effectively found: " + str(foundPeaks)[1:-1]
+            raise Exception("Some peaks from the list of expected peaks were not found by the algorithm "
+                            "FindPeaks. " + txt)
 
         difc, zero = self._fitAllPeaks(foundPeaks, expectedPeaksD)
 

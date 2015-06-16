@@ -2,6 +2,8 @@
 #define MANTIDQT_API_SIGNALRANGETEST_H_
 
 #include "MantidQtAPI/SignalRange.h"
+#include "MantidAPI/IMDWorkspace.h"
+#include "MantidKernel/MultiThreaded.h"
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>

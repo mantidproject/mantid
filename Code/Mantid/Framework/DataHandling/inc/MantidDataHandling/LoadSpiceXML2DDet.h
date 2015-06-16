@@ -3,7 +3,8 @@
 
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
-#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidAPI/ITableWorkspace_fwd.h"
 
 namespace Mantid {
 namespace DataHandling {
@@ -89,7 +90,23 @@ private:
   API::MatrixWorkspace_sptr
   createMatrixWorkspace(const std::vector<SpiceXMLNode> &vecxmlnode,
                         const size_t &numpixelx, const size_t &numpixely,
-                        const std::string &detnodename);
+                        const std::string &detnodename,
+                        const bool &loadinstrument);
+
+  /// Set up sample logs from table workspace loaded where SPICE data file is
+  /// loaded
+  void setupSampleLogFromSpiceTable(API::MatrixWorkspace_sptr matrixws,
+                                    API::ITableWorkspace_sptr spicetablews,
+                                    int ptnumber);
+
+  /// Load instrument
+  void loadInstrument(API::MatrixWorkspace_sptr matrixws,
+                      const std::string &idffilename);
+
+  /// Get wavelength from workspace
+  bool getHB3AWavelength(API::MatrixWorkspace_sptr dataws, double &wavelength);
+
+  void setXtoLabQ(API::MatrixWorkspace_sptr dataws, const double &wavelength);
 };
 
 } // namespace DataHandling

@@ -187,9 +187,8 @@ void LoadMcStas::readEventData(
 
     progInitial.report("Loading instrument");
 
-    Geometry::InstrumentDefinitionParser parser;
     std::string instrumentName = "McStas";
-    parser.initialize(filename, instrumentName, instrumentXML);
+    Geometry::InstrumentDefinitionParser parser(filename, instrumentName, instrumentXML);
     std::string instrumentNameMangled = parser.getMangledName();
 
     // Check whether the instrument is already in the InstrumentDataService

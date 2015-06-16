@@ -1006,7 +1006,7 @@ bool ImportOPJ::importGraphs(const OPJFile& opj)
 					graph->setScale(2,rangeX.min,rangeX.max,rangeX.step,ticksX[0],ticksX[1],opj.layerXScale(g,l));
 
 				if(breakY.show)
-					graph->setScale(0,rangeY.min,rangeY.max,rangeY.step,ticksY[0],ticksY[1],opj.layerXScale(g,l),
+					graph->setScale(0,rangeY.min,rangeY.max,rangeY.step,ticksY[0],ticksY[1],opj.layerYScale(g,l),
 					false,
 					breakY.from, breakY.to,
 					breakY.position,

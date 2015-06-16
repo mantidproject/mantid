@@ -5,7 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
-#include "MantidAPI/Workspace.h"
+#include "MantidAPI/Workspace_fwd.h"
 #include "MantidAlgorithms/FFT.h"
 
 namespace Mantid {
@@ -58,8 +58,6 @@ private:
   // Overridden Algorithm methods
   void init();
   void exec();
-
-  bool IgnoreXBins;
 };
 
 } // namespace Algorithm

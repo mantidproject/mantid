@@ -23,6 +23,11 @@ A background range can also be provided which will first calculate
 and subtract a flat background from the raw data before the
 integration is performed.
 
+Workflow
+--------
+
+.. diagram:: TimeSlice-v1_wkflw.dot
+
 Usage
 -----
 

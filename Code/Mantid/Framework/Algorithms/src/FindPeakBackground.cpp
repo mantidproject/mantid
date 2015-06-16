@@ -147,6 +147,12 @@ void FindPeakBackground::exec() {
   }
   MantidVec mask(n - l0, 0.0);
   double xn = static_cast<double>(n - l0);
+  if ((0. == xn) || (0. == xn - 1.0))
+    throw std::runtime_error(
+        "The number of Y values in the input workspace for the "
+        "workspace index given, minus 'l0' or minus 'l0' minus 1, is 0. This "
+        "will produce a "
+        "divide-by-zero");
   do {
     Statistics stats = getStatistics(maskedY);
     Ymean = stats.mean;
@@ -253,9 +259,10 @@ void FindPeakBackground::exec() {
 * @param out_bg1 :: slope
 * @param out_bg2 :: a2 = 0
 */
-void FindPeakBackground::estimateBackground(const MantidVec &X, const MantidVec &Y, const size_t i_min,
-    const size_t i_max, const size_t p_min, const size_t p_max, const bool hasPeak, double &out_bg0,
-    double &out_bg1, double &out_bg2) {
+void FindPeakBackground::estimateBackground(
+    const MantidVec &X, const MantidVec &Y, const size_t i_min,
+    const size_t i_max, const size_t p_min, const size_t p_max,
+    const bool hasPeak, double &out_bg0, double &out_bg1, double &out_bg2) {
   // Validate input
   if (i_min >= i_max)
     throw std::runtime_error("i_min cannot larger or equal to i_max");

@@ -4,7 +4,7 @@
 #include "MantidVatesSimpleGuiViewWidgets/WidgetDllOption.h"
 
 #include "MantidVatesAPI/ADSWorkspaceProvider.h"
-#include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidAPI/IMDEventWorkspace_fwd.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidQtAPI/AlgorithmDialog.h"
 #include "MantidQtMantidWidgets/SlicingAlgorithmDialog.h"

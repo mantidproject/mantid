@@ -564,7 +564,7 @@ void ConvertToMD::findMinMax(
   MDTransfInterface *pQtransf = MDTransfFactory::Instance().create(QMode).get();
   // get number of dimensions this Q transformation generates from the
   // workspace.
-  auto iEmode = Kernel::DeltaEMode().fromString(dEMode);
+  auto iEmode = Kernel::DeltaEMode::fromString(dEMode);
   // get total number of dimensions the workspace would have.
   unsigned int nMatrixDim = pQtransf->getNMatrixDimensions(iEmode, inWS);
   // total number of dimensions

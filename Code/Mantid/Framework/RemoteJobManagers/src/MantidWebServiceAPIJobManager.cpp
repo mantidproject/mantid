@@ -28,8 +28,7 @@ using namespace Mantid::Kernel;
  * (remote) compute resource.
  */
 void MantidWebServiceAPIJobManager::abortRemoteJob(const std::string &jobID) {
-  std::istream &respStream =
-    httpGet("/abort", std::string("JobID=") + jobID);
+  std::istream &respStream = httpGet("/abort", std::string("JobID=") + jobID);
   if (lastStatus() != Poco::Net::HTTPResponse::HTTP_OK) {
     JSONObject resp;
     initFromStream(resp, respStream);
@@ -52,8 +51,7 @@ void MantidWebServiceAPIJobManager::authenticate(const std::string &username,
                                                  const std::string &password) {
   MantidWebServiceAPIHelper helper;
 
-  std::istream &respStream =
-      httpGet("/authenticate", "", username, password);
+  std::istream &respStream = httpGet("/authenticate", "", username, password);
   if (lastStatus() != Poco::Net::HTTPResponse::HTTP_OK) {
     JSONObject resp;
     initFromStream(resp, respStream);
@@ -61,6 +59,26 @@ void MantidWebServiceAPIJobManager::authenticate(const std::string &username,
     resp["Err_Msg"].getValue(errMsg);
     throw(std::runtime_error(errMsg));
   }
+}
+
+/**
+ * Log out from the remote compute resource, which in the API v1. is
+ * not defined so it is just a no-op in the sense that it does not
+ * interact with the server. The current session cookie(s) is cleared
+ * though, so authentication would be required to start transactions
+ * again.
+ *
+ * Note that jobs that are currently running will not be affected by a logout.
+ * This method does not stop the remote transactions that might have been
+ * started, as that would imply more than simply logging out (removing files,
+ * stopping jobs, etc.) .
+ *
+ * @param username Username on the remote resource.
+ */
+void MantidWebServiceAPIJobManager::logout(const std::string &username) {
+  UNUSED_ARG(username);
+
+  clearSessionCookies();
 }
 
 /**
@@ -82,8 +100,8 @@ void MantidWebServiceAPIJobManager::downloadRemoteFile(
     const std::string &localFileName) {
 
   std::istream &respStream =
-      httpGet("/download", std::string("TransID=") + transactionID +
-                                        "&File=" + remoteFileName);
+      httpGet("/download", std::string("TransID=") + transactionID + "&File=" +
+                               remoteFileName);
 
   if (lastStatus() == Poco::Net::HTTPResponse::HTTP_OK) {
 
@@ -146,6 +164,7 @@ MantidWebServiceAPIJobManager::queryAllRemoteJobs() const {
   std::vector<std::string> submitDates;
   std::vector<std::string> startDates;
   std::vector<std::string> completionDates;
+  std::vector<std::string> cmdLines;
 
   JSONObject::const_iterator it = resp.begin();
   while (it != resp.end()) {
@@ -188,6 +207,8 @@ MantidWebServiceAPIJobManager::queryAllRemoteJobs() const {
       startDates.push_back("");
       completionDates.push_back("");
     }
+    // see comment in queryRemoteJob
+    cmdLines.push_back("Not available");
 
     ++it;
   }
@@ -203,6 +224,7 @@ MantidWebServiceAPIJobManager::queryAllRemoteJobs() const {
     info.submitDate = DateAndTime(submitDates[i]);
     info.startDate = DateAndTime(startDates[i]);
     info.completionTime = DateAndTime(completionDates[i]);
+    info.cmdLine = cmdLines[i];
     result.push_back(info);
   }
 
@@ -258,8 +280,7 @@ std::vector<std::string> MantidWebServiceAPIJobManager::queryRemoteFile(
  */
 Mantid::API::IRemoteJobManager::RemoteJobInfo
 MantidWebServiceAPIJobManager::queryRemoteJob(const std::string &jobID) const {
-  std::istream &respStream =
-      httpGet("/query", std::string("JobID=") + jobID);
+  std::istream &respStream = httpGet("/query", std::string("JobID=") + jobID);
   JSONObject resp;
   initFromStream(resp, respStream);
 
@@ -293,9 +314,8 @@ MantidWebServiceAPIJobManager::queryRemoteJob(const std::string &jobID) const {
   info.transactionID = value;
 
   // The time stuff is actually an optional extension.  We could check the
-  // info
-  // URL and see if the server implements it, but it's easier to just look in
-  // the output and see if the values are there...
+  // info URL and see if the server implements it, but it's easier to just look
+  // in the output and see if the values are there...
   if (status.find("SubmitDate") != status.end()) {
     status["SubmitDate"].getValue(value);
     info.submitDate = DateAndTime(value);
@@ -306,6 +326,10 @@ MantidWebServiceAPIJobManager::queryRemoteJob(const std::string &jobID) const {
     status["CompletionDate"].getValue(value);
     info.completionTime = DateAndTime(value);
   }
+
+  // in principle not required for/provided by the Mantid remote job submission
+  // which always implicitly runs something like 'MantidPlot -xq ScriptName'
+  info.cmdLine = "Not available";
 
   return info;
 }
@@ -348,8 +372,8 @@ std::string MantidWebServiceAPIJobManager::startRemoteTransaction() {
 void MantidWebServiceAPIJobManager::stopRemoteTransaction(
     const std::string &transactionID) {
   std::string transId = transactionID;
-  std::istream &respStream = httpGet(
-      "/transaction", std::string("Action=Stop&TransID=") + transId);
+  std::istream &respStream =
+      httpGet("/transaction", std::string("Action=Stop&TransID=") + transId);
 
   if (lastStatus() == Poco::Net::HTTPResponse::HTTP_OK) {
     g_log.information() << "Transaction ID " << transId << " stopped."

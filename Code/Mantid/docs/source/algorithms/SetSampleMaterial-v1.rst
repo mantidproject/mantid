@@ -61,7 +61,7 @@ Number Density
 
 The number density is defined as
 
-.. math:: \rho_n = \frac{ZParameter}{UnitCellVolume}
+.. math:: \rho_n = \frac{N_{atoms}ZParameter}{UnitCellVolume}
 
 It can can be generated in one of two ways:
 
@@ -69,5 +69,22 @@ It can can be generated in one of two ways:
 2. Specifying the ``ZParameter`` and the ``UnitCellVolume`` (or letting
    the algorithm calculate it from the OrientedLattice on the 
    ``InputWorkspace``).
+   
+Linear Absorption Coefficients
+##############################
 
+.. math:: \mu_s = \rho_n \frac{1}{N_{atoms}}\sum_{i}s_{i}n_{i} \text{ units of 1/cm}
+.. math:: s = \sigma_{total scattering}
+.. math:: \mu_a = \rho_n \frac{1}{N_{atoms}}\sum_{i}a_{i}n_{i} \text{ units of 1/cm}
+.. math:: a = \sigma_{absorption} (\lambda=1.8)
+
+References
+----------
+
+The data used in this algorithm comes from the following paper.
+
+#. Varley F. Sears, *Neutron scattering lengths and cross sections*, Neutron News **3:3** (1992) 26
+   `doi: 10.1080/10448639208218770`_
+
+      
 .. categories::

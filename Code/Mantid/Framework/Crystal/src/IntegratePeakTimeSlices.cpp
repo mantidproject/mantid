@@ -28,7 +28,7 @@ namespace Crystal {
 
 DECLARE_ALGORITHM(IntegratePeakTimeSlices)
 
-// Attr, AttributeValues, and StatBase indicies
+// Attr, m_AttributeValues, and StatBase indicies
 #define IStartRow 0
 #define IStartCol 1
 #define INRows 2
@@ -84,49 +84,51 @@ const double MinVariationInXYvalues = .6; // Peak spans one pixel only
 const double MaxCorrCoeffinXY = .9;       // otherwise all data on one line
 }
 
-IntegratePeakTimeSlices::IntegratePeakTimeSlices() : Algorithm(), R0(-1) {
-  debug = false;
+IntegratePeakTimeSlices::IntegratePeakTimeSlices()
+    : Algorithm(), m_R0(-1), m_ROW(0.), m_COL(0.), m_cellWidth(0.),
+      m_cellHeight(0.), m_NROWS(0), m_NCOLS(0) {
+  m_debug = false;
 
-  if (debug)
+  if (m_debug)
     g_log.setLevel(7);
-  EdgePeak = false;
-  NeighborIDs = new int[3];
-  NeighborIDs[0] = 3;
-  NeighborIDs[1] = 2;
-  AttributeNames[0] = "StartRow";
-  AttributeNames[1] = "StartCol";
-  AttributeNames[2] = "NRows";
-  AttributeNames[3] = "NCols";
-  AttributeNames[4] = "SSIxx";
-  AttributeNames[5] = "SSIyy";
-  AttributeNames[6] = "SSIxy";
-  AttributeNames[7] = "SSxx";
-  AttributeNames[8] = "SSyy";
-  AttributeNames[9] = "SSxy";
-  AttributeNames[10] = "SSIx";
-  AttributeNames[11] = "SSIy";
-  AttributeNames[12] = "SSx";
-  AttributeNames[13] = "SSy";
-  AttributeNames[14] = "Intensities";
-  AttributeNames[15] = " SS1";
-  AttributeNames[16] = "Variance";
-  AttributeNames[17] = "TotBoundary";
-  AttributeNames[18] = "NBoundary";
-  AttributeNames[19] = "VarianceBoundary";
+  m_EdgePeak = false;
+  m_NeighborIDs = new int[3];
+  m_NeighborIDs[0] = 3;
+  m_NeighborIDs[1] = 2;
+  m_AttributeNames[0] = "StartRow";
+  m_AttributeNames[1] = "StartCol";
+  m_AttributeNames[2] = "NRows";
+  m_AttributeNames[3] = "NCols";
+  m_AttributeNames[4] = "SSIxx";
+  m_AttributeNames[5] = "SSIyy";
+  m_AttributeNames[6] = "SSIxy";
+  m_AttributeNames[7] = "SSxx";
+  m_AttributeNames[8] = "SSyy";
+  m_AttributeNames[9] = "SSxy";
+  m_AttributeNames[10] = "SSIx";
+  m_AttributeNames[11] = "SSIy";
+  m_AttributeNames[12] = "SSx";
+  m_AttributeNames[13] = "SSy";
+  m_AttributeNames[14] = "Intensities";
+  m_AttributeNames[15] = " SS1";
+  m_AttributeNames[16] = "Variance";
+  m_AttributeNames[17] = "TotBoundary";
+  m_AttributeNames[18] = "NBoundary";
+  m_AttributeNames[19] = "VarianceBoundary";
 
-  ParameterNames[0] = "Background";
-  ParameterNames[1] = "Intensity";
-  ParameterNames[2] = "Mcol";
-  ParameterNames[3] = "Mrow";
-  ParameterNames[4] = "SScol";
-  ParameterNames[5] = "SSrow";
-  ParameterNames[6] = "SSrc";
+  m_ParameterNames[0] = "Background";
+  m_ParameterNames[1] = "Intensity";
+  m_ParameterNames[2] = "Mcol";
+  m_ParameterNames[3] = "Mrow";
+  m_ParameterNames[4] = "SScol";
+  m_ParameterNames[5] = "SSrow";
+  m_ParameterNames[6] = "SSrc";
 
   // for (int i = 0; i < NAttributes; i++)
-  //   AttributeValues[i] = 0;
+  //   m_AttributeValues[i] = 0;
 
   for (int i = 0; i < NParameters; i++)
-    ParameterValues[i] = 0;
+    m_ParameterValues[i] = 0;
 }
 
 double SQRT(double v) {
@@ -135,7 +137,7 @@ double SQRT(double v) {
   return sqrt(v);
 }
 /// Destructor
-IntegratePeakTimeSlices::~IntegratePeakTimeSlices() { delete[] NeighborIDs; }
+IntegratePeakTimeSlices::~IntegratePeakTimeSlices() { delete[] m_NeighborIDs; }
 
 void IntegratePeakTimeSlices::init() {
   declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace", "",
@@ -239,21 +241,21 @@ void IntegratePeakTimeSlices::exec() {
     throw std::runtime_error("Detector pixel is NOT inside the Peaks Bank");
   }
 
-  FindPlane(center, xvec, yvec, ROW, COL, NROWS, NCOLS, CellWidth, CellHeight,
-            peak);
+  FindPlane(m_center, m_xvec, m_yvec, m_ROW, m_COL, m_NROWS, m_NCOLS,
+            m_cellWidth, m_cellHeight, peak);
 
   g_log.debug() << "   Peak Index " << indx << std::endl;
 
   double TotVariance = 0;
   double TotIntensity = 0;
-  double lastRow = ROW;
+  double lastRow = m_ROW;
   double Row0 = lastRow;
-  double lastCol = COL;
+  double lastCol = m_COL;
   double Col0 = lastCol;
   string spec_idList = "";
 
   // For quickly looking up workspace index from det id
-  wi_to_detid_map = inpWkSpace->getDetectorIDToWorkspaceIndexMap();
+  m_wi_to_detid_map = inpWkSpace->getDetectorIDToWorkspaceIndexMap();
 
   TableWorkspace_sptr TabWS =
       boost::shared_ptr<TableWorkspace>(new TableWorkspace(0));
@@ -263,13 +265,13 @@ void IntegratePeakTimeSlices::exec() {
   try {
 
     // Find the workspace index for this detector ID
-    detid2index_map::const_iterator it = wi_to_detid_map.find(detID);
+    detid2index_map::const_iterator it = m_wi_to_detid_map.find(detID);
     size_t wsIndx = (it->second);
 
     double R = CalculatePositionSpan(peak, dQ) / 2;
 
-    R = min<double>(MaxRowColSpan * max<double>(CellWidth, CellHeight), R);
-    R = max<double>(MinRowColSpan * max<double>(CellWidth, CellHeight), R);
+    R = min<double>(MaxRowColSpan * max<double>(m_cellWidth, m_cellHeight), R);
+    R = max<double>(MinRowColSpan * max<double>(m_cellWidth, m_cellHeight), R);
 
     R = 2 * R; // Gets a few more background cells.
     int Chan;
@@ -288,20 +290,21 @@ void IntegratePeakTimeSlices::exec() {
     neighborRadius =
         min<double>(MaxNeighborhoodRadius, NeighborhoodRadiusDivPeakRadius * R);
     int Nneighbors =
-        (int)(neighborRadius * neighborRadius / CellWidth / CellHeight * 4);
+        (int)(neighborRadius * neighborRadius / m_cellWidth / m_cellHeight * 4);
 
     Nneighbors =
         min<int>(Nneighbors, (int)inpWkSpace->getNumberHistograms() - 2);
-    delete[] NeighborIDs;
+    delete[] m_NeighborIDs;
 
-    NeighborIDs = new int[Nneighbors + 2];
-    NeighborIDs[0] = Nneighbors + 2;
-    NeighborIDs[1] = 2;
-    Kernel::V3D Cent = (center + xvec * (Centx - COL) + yvec * (Centy - ROW));
+    m_NeighborIDs = new int[Nneighbors + 2];
+    m_NeighborIDs[0] = Nneighbors + 2;
+    m_NeighborIDs[1] = 2;
+    Kernel::V3D Cent =
+        (m_center + m_xvec * (Centx - m_COL) + m_yvec * (Centy - m_ROW));
 
-    getNeighborPixIDs(panel, Cent, neighborRadius, NeighborIDs);
+    getNeighborPixIDs(panel, Cent, neighborRadius, m_NeighborIDs);
 
-    if (NeighborIDs[1] < 10) {
+    if (m_NeighborIDs[1] < 10) {
       g_log.error("Not enough neighboring pixels to fit ");
       throw std::runtime_error("Not enough neighboring pixels to fit ");
     }
@@ -320,40 +323,41 @@ void IntegratePeakTimeSlices::exec() {
           done = true;
         else {
 
-          int NN = NeighborIDs[1];
+          int NN = m_NeighborIDs[1];
           MatrixWorkspace_sptr Data = WorkspaceFactory::Instance().create(
               std::string("Workspace2D"), 3, NN, NN);
 
-          Kernel::V3D CentPos = center + yvec * (Centy - ROW) * CellHeight +
-                                xvec * (Centx - COL) * CellWidth;
+          Kernel::V3D CentPos = m_center +
+                                m_yvec * (Centy - m_ROW) * m_cellHeight +
+                                m_xvec * (Centx - m_COL) * m_cellWidth;
 
           boost::shared_ptr<DataModeHandler> XXX(new DataModeHandler(
-              R, R, Centy, Centx, CellWidth, CellHeight,
+              R, R, Centy, Centx, m_cellWidth, m_cellHeight,
               getProperty("CalculateVariances"), NBadEdgeCells,
-              NCOLS - NBadEdgeCells, NBadEdgeCells, NROWS - NBadEdgeCells));
-          AttributeValues = XXX;
+              m_NCOLS - NBadEdgeCells, NBadEdgeCells, m_NROWS - NBadEdgeCells));
+          m_AttributeValues = XXX;
           XXX->setCurrentRadius(R);
 
           SetUpData1(Data, inpWkSpace, Chan + dir * t, Chan + dir * t, R,
                      CenterDet->getPos(), spec_idList);
 
-          if (AttributeValues->StatBaseVals(ISSIxx) > 0) {
-            if (AttributeValues->StatBaseVals(IIntensities) > MaxCounts) {
-              MaxCounts = AttributeValues->StatBaseVals(IIntensities);
+          if (m_AttributeValues->StatBaseVals(ISSIxx) > 0) {
+            if (m_AttributeValues->StatBaseVals(IIntensities) > MaxCounts) {
+              MaxCounts = m_AttributeValues->StatBaseVals(IIntensities);
               MaxChan = Chan + dir * t;
             }
-            if (AttributeValues->StatBaseVals(IIntensities) > 0) {
-              Centx = AttributeValues->StatBaseVals(ISSIx) /
-                      AttributeValues->StatBaseVals(IIntensities);
-              Centy = AttributeValues->StatBaseVals(ISSIy) /
-                      AttributeValues->StatBaseVals(IIntensities);
+            if (m_AttributeValues->StatBaseVals(IIntensities) > 0) {
+              Centx = m_AttributeValues->StatBaseVals(ISSIx) /
+                      m_AttributeValues->StatBaseVals(IIntensities);
+              Centy = m_AttributeValues->StatBaseVals(ISSIy) /
+                      m_AttributeValues->StatBaseVals(IIntensities);
             } else
               done = true;
           } else
             done = true;
 
-          if (t >= 3 &&
-              (AttributeValues->StatBaseVals(IIntensities) < MaxCounts / 2.0) &&
+          if (t >= 3 && (m_AttributeValues->StatBaseVals(IIntensities) <
+                         MaxCounts / 2.0) &&
               MaxCounts >= 0)
             done = true;
         }
@@ -361,11 +365,11 @@ void IntegratePeakTimeSlices::exec() {
     if (MaxChan > 0)
       Chan = MaxChan;
 
-    g_log.debug() << "   largest Channel,Radius,CellWidth,CellHeight = " << Chan
-                  << " " << R << " " << CellWidth << " " << CellHeight
-                  << std::endl;
+    g_log.debug() << "   largest Channel,Radius,m_cellWidth,m_cellHeight = "
+                  << Chan << " " << R << " " << m_cellWidth << " "
+                  << m_cellHeight << std::endl;
 
-    if (R < MinRowColSpan / 2 * max<double>(CellWidth, CellHeight) ||
+    if (R < MinRowColSpan / 2 * max<double>(m_cellWidth, m_cellHeight) ||
         dChan < MinTimeSpan) {
       g_log.error("Not enough rows and cols or time channels ");
       throw std::runtime_error("Not enough rows and cols or time channels ");
@@ -380,8 +384,8 @@ void IntegratePeakTimeSlices::exec() {
 
     Mantid::API::Progress prog(this, 0.0, 100.0, (int)dChan);
 
-    // Set from attributes replace by R0
-    R0 = -1;
+    // Set from attributes replace by m_R0
+    m_R0 = -1;
     int LastTableRow = -1;
     boost::shared_ptr<DataModeHandler> origAttributeList(new DataModeHandler());
     boost::shared_ptr<DataModeHandler> lastAttributeList(new DataModeHandler());
@@ -411,10 +415,10 @@ void IntegratePeakTimeSlices::exec() {
 
           double Radius = R;
 
-          if (R0 > 0)
-            Radius = R0;
+          if (m_R0 > 0)
+            Radius = m_R0;
 
-          int NN = NeighborIDs[1];
+          int NN = m_NeighborIDs[1];
 
           MatrixWorkspace_sptr Data = WorkspaceFactory::Instance().create(
               std::string("Workspace2D"), 3, NN,
@@ -427,20 +431,20 @@ void IntegratePeakTimeSlices::exec() {
           SetUpData(Data, inpWkSpace, panel, xchan, xchan, lastCol, lastRow,
                     Cent, neighborRadius, Radius, spec_idList);
 
-          AttributeValues->setTime(time);
+          m_AttributeValues->setTime(time);
 
           // if( dir==1 && chan ==0)
-          //    origAttributeList= AttributeValues;
+          //    origAttributeList= m_AttributeValues;
 
-          ncells = (int)(AttributeValues->StatBaseVals(ISS1));
+          ncells = (int)(m_AttributeValues->StatBaseVals(ISS1));
 
           std::vector<double> params;
           std::vector<double> errs;
           std::vector<std::string> names;
 
-          if (AttributeValues->StatBaseVals(ISSIxx) > 0 &&
-              AttributeValues->IsEnoughData(ParameterValues, g_log) &&
-              ParameterValues[ITINTENS] > 0) {
+          if (m_AttributeValues->StatBaseVals(ISSIxx) > 0 &&
+              m_AttributeValues->IsEnoughData(m_ParameterValues, g_log) &&
+              m_ParameterValues[ITINTENS] > 0) {
             double chisqOverDOF;
 
             Fit(Data, chisqOverDOF, done, names, params, errs, lastRow, lastCol,
@@ -452,18 +456,18 @@ void IntegratePeakTimeSlices::exec() {
               if (isGoodFit(params, errs, names, chisqOverDOF)) {
                 LastTableRow = UpdateOutputWS(
                     TabWS, dir, xchan, params, errs, names, chisqOverDOF,
-                    AttributeValues->time, spec_idList);
+                    m_AttributeValues->time, spec_idList);
 
                 double TotSliceIntensity =
-                    AttributeValues->StatBaseVals(IIntensities);
+                    m_AttributeValues->StatBaseVals(IIntensities);
                 double TotSliceVariance =
-                    AttributeValues->StatBaseVals(IVariance);
+                    m_AttributeValues->StatBaseVals(IVariance);
 
                 updatePeakInformation(params, errs, names, TotVariance,
                                       TotIntensity, TotSliceIntensity,
                                       TotSliceVariance, chisqOverDOF, ncells);
 
-                lastAttributeList = AttributeValues;
+                lastAttributeList = m_AttributeValues;
 
                 if (dir == 1 && chan == 0)
                   origAttributeList = lastAttributeList;
@@ -482,16 +486,17 @@ void IntegratePeakTimeSlices::exec() {
             done = false;
 
             int chanMin, chanMax;
-            if ((dir == 1 && chan == 0) || lastAttributeList->CellHeight <= 0) {
+            if ((dir == 1 && chan == 0) ||
+                lastAttributeList->CellHeight <= 0) {
               chanMin = xchan;
               chanMax = xchan + 1;
               if (dir < 0)
                 chanMax++;
               boost::shared_ptr<DataModeHandler> XXX(
-                  new DataModeHandler(*AttributeValues));
-              AttributeValues = XXX;
+                  new DataModeHandler(*m_AttributeValues));
+              m_AttributeValues = XXX;
               if (X.size() > 0)
-                AttributeValues->setTime((X[chanMax] + X[chanMin]) / 2.0);
+                m_AttributeValues->setTime((X[chanMax] + X[chanMin]) / 2.0);
 
             } else // lastAttributeList exists
 
@@ -503,29 +508,30 @@ void IntegratePeakTimeSlices::exec() {
 
               boost::shared_ptr<DataModeHandler> XXX(
                   new DataModeHandler(*lastAttributeList));
-              AttributeValues = XXX;
+              m_AttributeValues = XXX;
 
-              AttributeValues->setTime((time + AttributeValues->time) / 2.0);
+              m_AttributeValues->setTime((time + m_AttributeValues->time) /
+                                         2.0);
             }
 
-            if (updateNeighbors(panel, AttributeValues->getCurrentCenter(),
-                                Cent, AttributeValues->getCurrentRadius(),
+            if (updateNeighbors(panel, m_AttributeValues->getCurrentCenter(),
+                                Cent, m_AttributeValues->getCurrentRadius(),
                                 neighborRadius))
-              Cent = AttributeValues->getCurrentCenter();
+              Cent = m_AttributeValues->getCurrentCenter();
 
-            int NN = NeighborIDs[1];
+            int NN = m_NeighborIDs[1];
             MatrixWorkspace_sptr Data = WorkspaceFactory::Instance().create(
                 std::string("Workspace2D"), 3, NN, NN);
 
             SetUpData1(Data, inpWkSpace, chanMin, chanMax,
-                       AttributeValues->getCurrentRadius(),
-                       AttributeValues->getCurrentCenter(), spec_idList);
+                       m_AttributeValues->getCurrentRadius(),
+                       m_AttributeValues->getCurrentCenter(), spec_idList);
 
             double chisqOverDOF;
 
             g_log.debug("Try Merge 2 time slices");
-            if (AttributeValues->StatBaseVals(ISSIxx) >= 0 &&
-                AttributeValues->IsEnoughData(ParameterValues, g_log))
+            if (m_AttributeValues->StatBaseVals(ISSIxx) >= 0 &&
+                m_AttributeValues->IsEnoughData(m_ParameterValues, g_log))
 
               Fit(Data, chisqOverDOF, done, names, params, errs, lastRow,
                   lastCol, neighborRadius);
@@ -541,7 +547,7 @@ void IntegratePeakTimeSlices::exec() {
 
               LastTableRow = UpdateOutputWS(
                   TabWS, dir, (chanMin + chanMax) / 2.0, params, errs, names,
-                  chisqOverDOF, AttributeValues->time, spec_idList);
+                  chisqOverDOF, m_AttributeValues->time, spec_idList);
 
               if (lastAttributeList->lastISAWVariance > 0 &&
                   lastAttributeList->CellHeight > 0) {
@@ -550,21 +556,21 @@ void IntegratePeakTimeSlices::exec() {
               }
 
               double TotSliceIntensity =
-                  AttributeValues->StatBaseVals(IIntensities);
+                  m_AttributeValues->StatBaseVals(IIntensities);
 
               double TotSliceVariance =
-                  AttributeValues->StatBaseVals(IVariance);
+                  m_AttributeValues->StatBaseVals(IVariance);
 
               updatePeakInformation(params, errs, names, TotVariance,
                                     TotIntensity, TotSliceIntensity,
                                     TotSliceVariance, chisqOverDOF,
-                                    (int)AttributeValues->StatBaseVals(ISS1));
+                                    (int)m_AttributeValues->StatBaseVals(ISS1));
 
-              // lastAttributeList= AttributeValues;
+              // lastAttributeList= m_AttributeValues;
 
               if (dir == 1 && (chan == 0 || chan == 1)) {
-                AttributeValues->case4 = true;
-                origAttributeList = AttributeValues;
+                m_AttributeValues->case4 = true;
+                origAttributeList = m_AttributeValues;
               } else
                 LastTableRow = -1;
 
@@ -709,7 +715,7 @@ bool IntegratePeakTimeSlices::getNeighborPixIDs(
 }
 
 /**
- * Checks and updates if needed the list of NeighborIDs
+ * Checks and updates if needed the list of m_NeighborIDs
  * @param comp  Component with the neighboring pixels
  * @param CentPos    new Center
  * @param oldCenter   old Center
@@ -723,17 +729,17 @@ bool IntegratePeakTimeSlices::updateNeighbors(
   bool changed = false;
   if (DD + NewRadius > neighborRadius) {
     int NN = int(NStdDevPeakSpan * NeighborhoodRadiusDivPeakRadius * NewRadius /
-                 CellWidth * NStdDevPeakSpan * NeighborhoodRadiusDivPeakRadius *
-                 NewRadius / CellHeight);
-    if (NeighborIDs[0] < NN) {
-      delete[] NeighborIDs;
-      NeighborIDs = new int[NN + 2];
-      NeighborIDs[0] = NN + 2;
+                 m_cellWidth * NStdDevPeakSpan *
+                 NeighborhoodRadiusDivPeakRadius * NewRadius / m_cellHeight);
+    if (m_NeighborIDs[0] < NN) {
+      delete[] m_NeighborIDs;
+      m_NeighborIDs = new int[NN + 2];
+      m_NeighborIDs[0] = NN + 2;
     }
-    NeighborIDs[1] = 2;
+    m_NeighborIDs[1] = 2;
     neighborRadius = NeighborhoodRadiusDivPeakRadius * NewRadius;
 
-    getNeighborPixIDs(comp, CentPos, neighborRadius, NeighborIDs);
+    getNeighborPixIDs(comp, CentPos, neighborRadius, m_NeighborIDs);
     changed = true;
 
   } else // big enough neighborhood so
@@ -752,7 +758,7 @@ bool IntegratePeakTimeSlices::updateNeighbors(
  * NOTE: differentials of Q =mv*sin(scatAng/2)/2 were used to calculate this
  *  Also s=r*theta was used to transfer d ScatAng to distance on a bank.
  */
-double IntegratePeakTimeSlices::CalculatePositionSpan(API::IPeak const &peak,
+double IntegratePeakTimeSlices::CalculatePositionSpan(Geometry::IPeak const &peak,
                                                       const double dQ) {
 
   try {
@@ -796,7 +802,7 @@ double IntegratePeakTimeSlices::CalculatePositionSpan(API::IPeak const &peak,
  * @return The number of time channels around Centerchan to use
  */
 int IntegratePeakTimeSlices::CalculateTimeChannelSpan(
-    API::IPeak const &peak, const double dQ, Mantid::MantidVec const &X,
+    Geometry::IPeak const &peak, const double dQ, Mantid::MantidVec const &X,
     const int specNum, int &Centerchan) {
   UNUSED_ARG(specNum);
   double Q = peak.getQLabFrame().norm(); // getQ( peak)/2/M_PI;
@@ -839,7 +845,7 @@ void IntegratePeakTimeSlices::FindPlane(V3D &center, V3D &xvec, V3D &yvec,
                                         double &ROW, double &COL, int &NROWS,
                                         int &NCOLS, double &pixWidthx,
                                         double &pixHeighty,
-                                        API::IPeak const &peak) const {
+                                        Geometry::IPeak const &peak) const {
 
   NROWS = NCOLS = -1;
   IDetector_const_sptr det = peak.getDetector();
@@ -1176,7 +1182,7 @@ double DataModeHandler::getNewRCRadius() {
   Vy = VaryHW;
   if (Vx < 0)
     Vx = HalfWidthAtHalfHeightRadius * HalfWidthAtHalfHeightRadius;
-  if (Vx < 0)
+  if (Vy < 0)
     Vy = HalfWidthAtHalfHeightRadius * HalfWidthAtHalfHeightRadius;
 
   double Rx = lastRCRadius / CellWidth - EdgeX;
@@ -1194,14 +1200,14 @@ double DataModeHandler::getNewRCRadius() {
 
   double DD = max<double>(sqrt(Vy) * CellHeight, sqrt(Vx) * CellWidth);
   double NewRadius =
-      1.4 *
-      max<double>(MinRowColSpan * max<double>(CellWidth, CellHeight), 4.5 * DD);
+      1.4 * max<double>(MinRowColSpan * max<double>(CellWidth, CellHeight),
+                        4.5 * DD);
   NewRadius = mult * min<double>(baseRCRadius, NewRadius);
   // 1.4 is needed to get more background cells. In rectangle the corners were
   // background
 
-  NewRadius = min<double>(MaxRowColSpan * max<double>(CellWidth, CellHeight),
-                          NewRadius);
+  NewRadius = min<double>(
+      MaxRowColSpan * max<double>(CellWidth, CellHeight), NewRadius);
 
   return NewRadius;
 }
@@ -1457,66 +1463,66 @@ void IntegratePeakTimeSlices::SetUpData(
     double &neighborRadius, // from CentDetspec
     double Radius, string &spec_idList) {
 
-  Kernel::V3D CentPos1 = center + xvec * (CentX - COL) * CellWidth +
-                         yvec * (CentY - ROW) * CellHeight;
+  Kernel::V3D CentPos1 = m_center + m_xvec * (CentX - m_COL) * m_cellWidth +
+                         m_yvec * (CentY - m_ROW) * m_cellHeight;
 
   int NBadEdgeCells = getProperty("NBadEdgePixels");
 
   boost::shared_ptr<DataModeHandler> X(new DataModeHandler(
-      Radius, Radius, CentY, CentX, CellWidth, CellHeight,
-      getProperty("CalculateVariances"), NBadEdgeCells, NCOLS - NBadEdgeCells,
-      NBadEdgeCells, NROWS - NBadEdgeCells));
+      Radius, Radius, CentY, CentX, m_cellWidth, m_cellHeight,
+      getProperty("CalculateVariances"), NBadEdgeCells, m_NCOLS - NBadEdgeCells,
+      NBadEdgeCells, m_NROWS - NBadEdgeCells));
 
-  AttributeValues = X;
-  AttributeValues->setCurrentRadius(Radius);
-  AttributeValues->setCurrentCenter(CentPos1);
+  m_AttributeValues = X;
+  m_AttributeValues->setCurrentRadius(Radius);
+  m_AttributeValues->setCurrentCenter(CentPos1);
 
   SetUpData1(Data, inpWkSpace, chanMin, chanMax, Radius, CentPos1, spec_idList);
 
-  if (AttributeValues->StatBaseVals(ISSIxx) < 0) // Not enough data
+  if (m_AttributeValues->StatBaseVals(ISSIxx) < 0) // Not enough data
     return;
 
-  double NewRadius = AttributeValues->getNewRCRadius();
-  if (R0 > 0) {
-    NewRadius = R0;
+  double NewRadius = m_AttributeValues->getNewRCRadius();
+  if (m_R0 > 0) {
+    NewRadius = m_R0;
   } else {
-    R0 = NewRadius;
+    m_R0 = NewRadius;
   }
 
-  CentX = ParameterValues[IXMEAN];
-  CentY = ParameterValues[IYMEAN];
-  Kernel::V3D CentPos = center + xvec * (CentX - COL) * CellWidth +
-                        yvec * (CentY - ROW) * CellHeight;
+  CentX = m_ParameterValues[IXMEAN];
+  CentY = m_ParameterValues[IYMEAN];
+  Kernel::V3D CentPos = m_center + m_xvec * (CentX - m_COL) * m_cellWidth +
+                        m_yvec * (CentY - m_ROW) * m_cellHeight;
 
   double DD = (CentPos - CentNghbr).norm();
 
   if (DD + NewRadius > neighborRadius) {
     int NN = int(NStdDevPeakSpan * NeighborhoodRadiusDivPeakRadius * NewRadius /
-                 CellWidth * NStdDevPeakSpan * NeighborhoodRadiusDivPeakRadius *
-                 NewRadius / CellHeight);
-    if (NeighborIDs[0] < NN) {
-      delete[] NeighborIDs;
-      NeighborIDs = new int[NN + 2];
-      NeighborIDs[0] = NN + 2;
+                 m_cellWidth * NStdDevPeakSpan *
+                 NeighborhoodRadiusDivPeakRadius * NewRadius / m_cellHeight);
+    if (m_NeighborIDs[0] < NN) {
+      delete[] m_NeighborIDs;
+      m_NeighborIDs = new int[NN + 2];
+      m_NeighborIDs[0] = NN + 2;
     } // else
-    // NN= NeighborIDs[0]-2;
-    NeighborIDs[1] = 2;
+    // NN= m_NeighborIDs[0]-2;
+    m_NeighborIDs[1] = 2;
     neighborRadius = NeighborhoodRadiusDivPeakRadius * NewRadius;
     CentNghbr = CentPos;
-    getNeighborPixIDs(comp, CentPos, neighborRadius, NeighborIDs);
+    getNeighborPixIDs(comp, CentPos, neighborRadius, m_NeighborIDs);
 
   } else // big enough neighborhood so
     neighborRadius -= DD;
 
   // if( changed) CentNghbr = CentPos.
   boost::shared_ptr<DataModeHandler> X1(new DataModeHandler(
-      Radius, NewRadius, CentY, CentX, CellWidth, CellHeight,
-      getProperty("CalculateVariances"), NBadEdgeCells, NCOLS - NBadEdgeCells,
-      NBadEdgeCells, NROWS - NBadEdgeCells));
+      Radius, NewRadius, CentY, CentX, m_cellWidth, m_cellHeight,
+      getProperty("CalculateVariances"), NBadEdgeCells, m_NCOLS - NBadEdgeCells,
+      NBadEdgeCells, m_NROWS - NBadEdgeCells));
 
-  AttributeValues = X1;
-  AttributeValues->setCurrentRadius(NewRadius);
-  AttributeValues->setCurrentCenter(CentPos);
+  m_AttributeValues = X1;
+  m_AttributeValues->setCurrentRadius(NewRadius);
+  m_AttributeValues->setCurrentCenter(CentPos);
   SetUpData1(Data, inpWkSpace, chanMin, chanMax, NewRadius, CentPos,
              spec_idList);
 }
@@ -1539,7 +1545,7 @@ void IntegratePeakTimeSlices::SetUpData1(
     string &spec_idList) {
   UNUSED_ARG(g_log);
   std::vector<double> StatBase(NAttributes);
-  if (NeighborIDs[1] < 10) {
+  if (m_NeighborIDs[1] < 10) {
     StatBase[ISSIxx] = -1;
     return;
   }
@@ -1568,19 +1574,19 @@ void IntegratePeakTimeSlices::SetUpData1(
 
   int N = 0;
   double BoundaryRadius = min<double>(
-      .90 * Radius, Radius - 1.5 * max<double>(CellWidth, CellHeight));
+      .90 * Radius, Radius - 1.5 * max<double>(m_cellWidth, m_cellHeight));
   double minRow = 20000, maxRow = -1, minCol = 20000, maxCol = -1;
 
   int jj = 0;
   Mantid::MantidVecPtr pX;
 
   Mantid::MantidVec &xRef = pX.access();
-  for (int i = 2; i < NeighborIDs[1]; i++) {
-    int DetID = NeighborIDs[i];
+  for (int i = 2; i < m_NeighborIDs[1]; i++) {
+    int DetID = m_NeighborIDs[i];
 
     size_t workspaceIndex;
-    if (wi_to_detid_map.count(DetID) > 0)
-      workspaceIndex = wi_to_detid_map.find(DetID)->second;
+    if (m_wi_to_detid_map.count(DetID) > 0)
+      workspaceIndex = m_wi_to_detid_map.find(DetID)->second;
     else {
       throw std::runtime_error("No workspaceIndex for detID=" +
                                boost::lexical_cast<std::string>(DetID));
@@ -1599,19 +1605,19 @@ void IntegratePeakTimeSlices::SetUpData1(
       spec_idList += boost::lexical_cast<std::string>(
           inpWkSpace->getSpectrum(workspaceIndex)->getSpectrumNo());
 
-      double R1 = dist.scalar_prod(yvec);
-      double R1a = R1 / CellHeight;
+      double R1 = dist.scalar_prod(m_yvec);
+      double R1a = R1 / m_cellHeight;
 
-      double row = ROW + R1a;
+      double row = m_ROW + R1a;
 
-      double C1 = dist.scalar_prod(xvec);
-      double C1a = C1 / CellWidth;
+      double C1 = dist.scalar_prod(m_xvec);
+      double C1a = C1 / m_cellWidth;
 
-      double col = COL + C1a;
+      double col = m_COL + C1a;
 
       if (row > NBadEdges && col > NBadEdges &&
-          (NROWS < 0 || row < NROWS - NBadEdges) &&
-          (NCOLS < 0 || col < NCOLS - NBadEdges)) {
+          (m_NROWS < 0 || row < m_NROWS - NBadEdges) &&
+          (m_NCOLS < 0 || col < m_NCOLS - NBadEdges)) {
         Mantid::MantidVec histogram = inpWkSpace->readY(workspaceIndex);
 
         Mantid::MantidVec histoerrs = inpWkSpace->readE(workspaceIndex);
@@ -1656,16 +1662,16 @@ void IntegratePeakTimeSlices::SetUpData1(
     } // peak within radius
   }   // for each neighbor
 
-  AttributeValues->EdgeY =
-      max<double>(0.0, max<double>(-ROW + minRow + Radius / CellHeight,
-                                   -maxRow + ROW + Radius / CellHeight));
-  AttributeValues->EdgeX =
-      max<double>(0.0, max<double>(-COL + minCol + Radius / CellWidth,
-                                   -maxCol + COL + Radius / CellWidth));
-  if (AttributeValues->EdgeY <= 1)
-    AttributeValues->EdgeY = 0;
-  if (AttributeValues->EdgeX <= 1)
-    AttributeValues->EdgeX = 0;
+  m_AttributeValues->EdgeY =
+      max<double>(0.0, max<double>(-m_ROW + minRow + Radius / m_cellHeight,
+                                   -maxRow + m_ROW + Radius / m_cellHeight));
+  m_AttributeValues->EdgeX =
+      max<double>(0.0, max<double>(-m_COL + minCol + Radius / m_cellWidth,
+                                   -maxCol + m_COL + Radius / m_cellWidth));
+  if (m_AttributeValues->EdgeY <= 1)
+    m_AttributeValues->EdgeY = 0;
+  if (m_AttributeValues->EdgeX <= 1)
+    m_AttributeValues->EdgeX = 0;
 
   Data->setX(0, pX);
   Data->setX(1, pX);
@@ -1674,7 +1680,7 @@ void IntegratePeakTimeSlices::SetUpData1(
   ws->setData(0, yvals, errs);
   ws->setData(1, xvals);
   ws->setData(2, Yvals);
-  AttributeValues->setHeightHalfWidthInfo(xvals, Yvals, yvals);
+  m_AttributeValues->setHeightHalfWidthInfo(xvals, Yvals, yvals);
 
   StatBase[IStartRow] = minRow;
   StatBase[IStartCol] = minCol;
@@ -1684,15 +1690,15 @@ void IntegratePeakTimeSlices::SetUpData1(
   StatBase[ITotBoundary] = TotBoundaryIntensities;
   StatBase[INBoundary] = nBoundaryCells;
   StatBase[IVarBoundary] = TotBoundaryVariances;
-  EdgePeak = AttributeValues->setStatBase(StatBase);
+  m_EdgePeak = m_AttributeValues->setStatBase(StatBase);
 
-  ParameterValues[IBACK] = AttributeValues->getInitBackground();
-  ParameterValues[ITINTENS] = AttributeValues->getInitIntensity();
-  ParameterValues[IXMEAN] = AttributeValues->getInitCol();
-  ParameterValues[IYMEAN] = AttributeValues->getInitRow();
-  ParameterValues[IVXX] = AttributeValues->getInitVarx();
-  ParameterValues[IVYY] = AttributeValues->getInitVary();
-  ParameterValues[IVXY] = AttributeValues->getInitVarxy();
+  m_ParameterValues[IBACK] = m_AttributeValues->getInitBackground();
+  m_ParameterValues[ITINTENS] = m_AttributeValues->getInitIntensity();
+  m_ParameterValues[IXMEAN] = m_AttributeValues->getInitCol();
+  m_ParameterValues[IYMEAN] = m_AttributeValues->getInitRow();
+  m_ParameterValues[IVXX] = m_AttributeValues->getInitVarx();
+  m_ParameterValues[IVYY] = m_AttributeValues->getInitVary();
+  m_ParameterValues[IVXY] = m_AttributeValues->getInitVarxy();
 }
 
 /**
@@ -1765,17 +1771,17 @@ std::string IntegratePeakTimeSlices::CalculateFunctionProperty_Fit() {
 
   fun_str << "name=BivariateNormal,";
 
-  if (AttributeValues->CalcVariances())
+  if (m_AttributeValues->CalcVariances())
     fun_str << "CalcVariances=1";
   else
     fun_str << "CalcVariances=-1";
 
   int NN = NParameters;
-  if (AttributeValues->CalcVariances())
+  if (m_AttributeValues->CalcVariances())
     NN -= 3;
 
   for (int i = 0; i < NN; i++) {
-    fun_str << "," << ParameterNames[i] << "=" << ParameterValues[i];
+    fun_str << "," << m_ParameterNames[i] << "=" << m_ParameterValues[i];
   }
 
   return fun_str.str();
@@ -2014,9 +2020,10 @@ void IntegratePeakTimeSlices::Fit(MatrixWorkspace_sptr &Data,
                                   std::vector<double> &errs, double lastRow,
                                   double lastCol, double neighborRadius) {
 
-  bool CalcVars = AttributeValues->CalcVariances();
+  bool CalcVars = m_AttributeValues->CalcVariances();
   std::vector<std::pair<double, double>> Bounds;
-  std::string Constraints = AttributeValues->CalcConstraints(Bounds, CalcVars);
+  std::string Constraints =
+      m_AttributeValues->CalcConstraints(Bounds, CalcVars);
   IAlgorithm_sptr fit_alg;
   fit_alg = createChildAlgorithm("Fit");
   std::string fun_str = CalculateFunctionProperty_Fit();
@@ -2024,15 +2031,15 @@ void IntegratePeakTimeSlices::Fit(MatrixWorkspace_sptr &Data,
   std::string SSS("   Fit string ");
   SSS += fun_str;
   g_log.debug(SSS);
-  g_log.debug() << "      TotCount=" << AttributeValues->StatBase[IIntensities]
-                << std::endl;
+  g_log.debug() << "      TotCount="
+                << m_AttributeValues->StatBase[IIntensities] << std::endl;
 
   fit_alg->setPropertyValue("Function", fun_str);
 
   fit_alg->setProperty("InputWorkspace", Data);
   fit_alg->setProperty("WorkspaceIndex", 0);
   fit_alg->setProperty("StartX", 0.0);
-  fit_alg->setProperty("EndX", 0.0 + (double)NeighborIDs[1]);
+  fit_alg->setProperty("EndX", 0.0 + (double)m_NeighborIDs[1]);
   fit_alg->setProperty("MaxIterations", 5000);
   fit_alg->setProperty("CreateOutput", true);
 
@@ -2064,13 +2071,13 @@ void IntegratePeakTimeSlices::Fit(MatrixWorkspace_sptr &Data,
       errs.push_back(error);
     }
     if (names.size() < 5) {
-      names.push_back(ParameterNames[IVXX]);
-      names.push_back(ParameterNames[IVYY]);
-      names.push_back(ParameterNames[IVXY]);
+      names.push_back(m_ParameterNames[IVXX]);
+      names.push_back(m_ParameterNames[IVYY]);
+      names.push_back(m_ParameterNames[IVXY]);
       double Varxx, Varxy, Varyy;
-      AttributeValues->CalcVariancesFromData(params[IBACK], params[IXMEAN],
-                                             params[IYMEAN], Varxx, Varxy,
-                                             Varyy, AttributeValues->StatBase);
+      m_AttributeValues->CalcVariancesFromData(
+          params[IBACK], params[IXMEAN], params[IYMEAN], Varxx, Varxy, Varyy,
+          m_AttributeValues->StatBase);
       params.push_back(Varxx);
       params.push_back(Varyy);
       params.push_back(Varxy);
@@ -2104,8 +2111,8 @@ void IntegratePeakTimeSlices::Fit(MatrixWorkspace_sptr &Data,
       sqrtChisq = (chisqOverDOF);
 
     sqrtChisq =
-        max<double>(sqrtChisq, AttributeValues->StatBaseVals(IIntensities) /
-                                   AttributeValues->StatBaseVals(ISS1));
+        max<double>(sqrtChisq, m_AttributeValues->StatBaseVals(IIntensities) /
+                                   m_AttributeValues->StatBaseVals(ISS1));
     sqrtChisq = SQRT(sqrtChisq);
 
     for (size_t kk = 0; kk < params.size(); kk++) {
@@ -2121,7 +2128,7 @@ void IntegratePeakTimeSlices::Fit(MatrixWorkspace_sptr &Data,
       g_log.debug() << endl;
     }
 
-    double intensity = AttributeValues->CalcISAWIntensity(params.data());
+    double intensity = m_AttributeValues->CalcISAWIntensity(params.data());
     g_log.debug() << "IsawIntensity= " << intensity << std::endl;
   }
 }
@@ -2149,13 +2156,13 @@ void IntegratePeakTimeSlices::PreFit(MatrixWorkspace_sptr &Data,
                                      std::vector<double> &errs, double lastRow,
                                      double lastCol, double neighborRadius) {
 
-  double background = ParameterValues[IBACK];
+  double background = m_ParameterValues[IBACK];
   int N = 3;
   if (background <= 0) {
     background = 0;
     N = 1;
   }
-  bool CalcVars = AttributeValues->CalcVariances();
+  bool CalcVars = m_AttributeValues->CalcVariances();
   int NParams = 4;
   if (!CalcVars)
     NParams += 3;
@@ -2171,8 +2178,8 @@ void IntegratePeakTimeSlices::PreFit(MatrixWorkspace_sptr &Data,
     if ((minChiSqOverDOF < 0 || chisqOverDOF < minChiSqOverDOF) &&
         (chisqOverDOF > 0) && !done) {
       for (int j = 0; j < NParams; j++) {
-        Bestparams[j] = ParameterValues[j];
-        Bestnames[j] = ParameterNames[j];
+        Bestparams[j] = m_ParameterValues[j];
+        Bestnames[j] = m_ParameterNames[j];
       }
       minChiSqOverDOF = chisqOverDOF;
     }
@@ -2182,16 +2189,16 @@ void IntegratePeakTimeSlices::PreFit(MatrixWorkspace_sptr &Data,
     if (i + 1 == N - 1)
       background = 0;
 
-    std::vector<double> prms = AttributeValues->GetParams(background);
+    std::vector<double> prms = m_AttributeValues->GetParams(background);
 
     for (int j = 0; j < NParams; j++)
-      ParameterValues[j] = prms[j];
+      m_ParameterValues[j] = prms[j];
   }
-  vector<std::string> ParNames(ParameterNames, ParameterNames + NParams);
+  vector<std::string> ParNames(m_ParameterNames, m_ParameterNames + NParams);
   for (int i = 0; i < NParams; i++) {
     int k = find(Bestnames[i], ParNames);
     if (k >= 0 && k < NParams)
-      ParameterValues[k] = Bestparams[k];
+      m_ParameterValues[k] = Bestparams[k];
   }
 
   Fit(Data, chisqOverDOF, done, names, params, errs, lastRow, lastCol,
@@ -2226,30 +2233,31 @@ bool IntegratePeakTimeSlices::isGoodFit(std::vector<double> const &params,
   int NBadEdgeCells = getProperty("NBadEdgePixels");
   NBadEdgeCells = (int)(.6 * NBadEdgeCells);
   if (params[IXMEAN] < NBadEdgeCells || params[IYMEAN] < NBadEdgeCells ||
-      params[IXMEAN] > NCOLS - NBadEdgeCells ||
-      params[IYMEAN] > NROWS - NBadEdgeCells)
+      params[IXMEAN] > m_NCOLS - NBadEdgeCells ||
+      params[IYMEAN] > m_NROWS - NBadEdgeCells)
     return false;
 
-  int ncells = (int)(AttributeValues->StatBaseVals(ISS1));
+  int ncells = (int)(m_AttributeValues->StatBaseVals(ISS1));
 
-  if (AttributeValues->StatBaseVals(IIntensities) <= 0 ||
-      (AttributeValues->StatBaseVals(IIntensities) - params[Ibk] * ncells) <=
+  if (m_AttributeValues->StatBaseVals(IIntensities) <= 0 ||
+      (m_AttributeValues->StatBaseVals(IIntensities) - params[Ibk] * ncells) <=
           0) {
 
     g_log.debug() << "   Bad Slice. Negative Counts= "
-                  << AttributeValues->StatBaseVals(IIntensities) -
+                  << m_AttributeValues->StatBaseVals(IIntensities) -
                          params[Ibk] * ncells << std::endl;
     ;
     return false;
   }
 
-  double x = params[IIntensity] / (AttributeValues->StatBaseVals(IIntensities) -
-                                   params[Ibk] * ncells);
+  double x =
+      params[IIntensity] /
+      (m_AttributeValues->StatBaseVals(IIntensities) - params[Ibk] * ncells);
 
   if ((x < MinGoodRatioFitvsExpIntenisites ||
        x > MaxGoodRatioFitvsExpIntenisites) &&
-      !EdgePeak) // The fitted intensity should be close to tot intensity -
-                 // background
+      !m_EdgePeak) // The fitted intensity should be close to tot intensity -
+                   // background
   {
     g_log.debug() << "   Bad Slice. Fitted Intensity & Observed "
                      "Intensity(-back) too different. ratio=" << x << std::endl;
@@ -2297,8 +2305,8 @@ bool IntegratePeakTimeSlices::isGoodFit(std::vector<double> const &params,
   if (params[IIntensity] < 0)
     GoodNums = false;
 
-  double IsawIntensity = AttributeValues->CalcISAWIntensity(params.data());
-  double IsawVariance = AttributeValues->CalcISAWIntensityVariance(
+  double IsawIntensity = m_AttributeValues->CalcISAWIntensity(params.data());
+  double IsawVariance = m_AttributeValues->CalcISAWIntensityVariance(
       params.data(), errs.data(), chisqOverDOF);
   if (GoodNums)
     Err = "Isaw Variance is negative";
@@ -2325,8 +2333,8 @@ bool IntegratePeakTimeSlices::isGoodFit(std::vector<double> const &params,
       params[ITINTENS] / 2 / M_PI /
       sqrt(params[IVXX] * params[IVYY] - params[IVXY] * params[IVXY]);
 
-  double AvHeight = AttributeValues->StatBaseVals(IIntensities) /
-                        AttributeValues->StatBaseVals(ISS1) -
+  double AvHeight = m_AttributeValues->StatBaseVals(IIntensities) /
+                        m_AttributeValues->StatBaseVals(ISS1) -
                     params[IBACK];
 
   if (maxPeakHeightTheoretical < 2 * AvHeight || AvHeight < 0 ||
@@ -2337,8 +2345,8 @@ bool IntegratePeakTimeSlices::isGoodFit(std::vector<double> const &params,
     return false;
   }
 
-  double Nrows = std::max<double>(AttributeValues->StatBase[INRows],
-                                  AttributeValues->StatBase[INCol]);
+  double Nrows = std::max<double>(m_AttributeValues->StatBase[INRows],
+                                  m_AttributeValues->StatBase[INCol]);
   if (maxPeakHeightTheoretical < 1 &&
       (params[IVXX] > Nrows * Nrows / 4 || params[IVYY] > Nrows * Nrows / 4)) {
     g_log.debug() << "Peak is too flat " << std::endl;
@@ -2497,9 +2505,10 @@ int IntegratePeakTimeSlices::UpdateOutputWS(
 
   int TableRow = static_cast<int>(TabWS->insertRow(newRowIndex));
 
-  int ncells = (int)(AttributeValues->StatBaseVals(ISS1));
-  double chisq = max<double>(
-      Chisq, AttributeValues->StatBaseVals(IIntensities) / max<int>(ncells, 1));
+  int ncells = (int)(m_AttributeValues->StatBaseVals(ISS1));
+  double chisq =
+      max<double>(Chisq, m_AttributeValues->StatBaseVals(IIntensities) /
+                             max<int>(ncells, 1));
 
   TabWS->getRef<double>(std::string("Background"), TableRow) = params[Ibk];
   TabWS->getRef<double>(std::string("Channel"), TableRow) = chan;
@@ -2519,51 +2528,51 @@ int IntegratePeakTimeSlices::UpdateOutputWS(
   TabWS->getRef<double>(std::string("ChiSqrOverDOF"), TableRow) = chisq;
 
   TabWS->getRef<double>(std::string("TotIntensity"), TableRow) =
-      AttributeValues->StatBaseVals(IIntensities);
+      m_AttributeValues->StatBaseVals(IIntensities);
   TabWS->getRef<double>(std::string("BackgroundError"), TableRow) =
       errs[Ibk] * SQRT(chisq);
   TabWS->getRef<double>(std::string("ISAWIntensity"), TableRow) =
-      AttributeValues->CalcISAWIntensity(params.data());
-  // AttributeValues->StatBaseVals(IIntensities)
+      m_AttributeValues->CalcISAWIntensity(params.data());
+  // m_AttributeValues->StatBaseVals(IIntensities)
   //                                                                   -
   //                                                                   params[Ibk]
   //                                                                   * ncells;
 
   TabWS->getRef<double>(std::string("ISAWIntensityError"), TableRow) =
-      sqrt(AttributeValues->CalcISAWIntensityVariance(params.data(),
-                                                      errs.data(), Chisq));
+      sqrt(m_AttributeValues->CalcISAWIntensityVariance(params.data(),
+                                                        errs.data(), Chisq));
 
   // CalculateIsawIntegrateError(
-  // params[Ibk], errs[Ibk], chisq, AttributeValues->StatBaseVals(IVariance),
+  // params[Ibk], errs[Ibk], chisq, m_AttributeValues->StatBaseVals(IVariance),
   // ncells);
 
   TabWS->getRef<double>(std::string("Time"), TableRow) = time;
 
   TabWS->getRef<double>(std::string("TotalBoundary"), TableRow) =
-      AttributeValues->StatBaseVals(ITotBoundary);
+      m_AttributeValues->StatBaseVals(ITotBoundary);
   TabWS->getRef<double>(std::string("NBoundaryCells"), TableRow) =
-      AttributeValues->StatBaseVals(INBoundary);
+      m_AttributeValues->StatBaseVals(INBoundary);
 
   TabWS->getRef<double>(std::string("Start Row"), TableRow) =
-      AttributeValues->StatBaseVals(IStartRow);
+      m_AttributeValues->StatBaseVals(IStartRow);
   TabWS->getRef<double>(std::string("End Row"), TableRow) =
-      AttributeValues->StatBaseVals(IStartRow) +
-      AttributeValues->StatBaseVals(INRows) - 1;
+      m_AttributeValues->StatBaseVals(IStartRow) +
+      m_AttributeValues->StatBaseVals(INRows) - 1;
 
   TabWS->getRef<double>(std::string("Start Col"), TableRow) =
-      AttributeValues->StatBaseVals(IStartCol);
+      m_AttributeValues->StatBaseVals(IStartCol);
   TabWS->getRef<double>(std::string("End Col"), TableRow) =
-      AttributeValues->StatBaseVals(IStartCol) +
-      AttributeValues->StatBaseVals(INCol) - 1;
+      m_AttributeValues->StatBaseVals(IStartCol) +
+      m_AttributeValues->StatBaseVals(INCol) - 1;
   TabWS->getRef<double>(std::string("TotIntensityError"), TableRow) =
-      SQRT(AttributeValues->StatBaseVals(IVariance));
+      SQRT(m_AttributeValues->StatBaseVals(IVariance));
   TabWS->getRef<string>(std::string("SpecIDs"), TableRow) = spec_idList;
 
   return newRowIndex;
 }
 
 /**
- * Updates AttributeValues with this peak information from this time slice
+ * Updates m_AttributeValues with this peak information from this time slice
  * @param params  The parameter values
  * @param errs    The error in these parameter values
  * @param names   The names of the parameters
@@ -2589,10 +2598,10 @@ void IntegratePeakTimeSlices::updatePeakInformation(
   double err = 0;
   double intensity = 0;
 
-  err = AttributeValues->CalcISAWIntensityVariance(params.data(), errs.data(),
-                                                   chisqdivDOF);
+  err = m_AttributeValues->CalcISAWIntensityVariance(params.data(), errs.data(),
+                                                     chisqdivDOF);
 
-  intensity = AttributeValues->CalcISAWIntensity(params.data());
+  intensity = m_AttributeValues->CalcISAWIntensity(params.data());
   TotIntensity += intensity;
 
   TotVariance += err;

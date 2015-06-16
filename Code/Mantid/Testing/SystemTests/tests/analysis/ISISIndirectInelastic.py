@@ -10,7 +10,7 @@ from mantid.simpleapi import *
 from mantid.api import FileFinder
 
 # Import our workflows.
-from IndirectDataAnalysis import furyfitSeq, furyfitMult, confitSeq, abscorFeeder
+from IndirectDataAnalysis import furyfitSeq, furyfitMult, confitSeq
 
 '''
 - TOSCA only supported by "Reduction" (the Energy Transfer tab of C2E).
@@ -742,7 +742,7 @@ class ISISIndirectInelasticElwinAndMSDFit(ISISIndirectInelasticBase):
         GroupWorkspaces(InputWorkspaces=self.files, OutputWorkspace=elwin_input)
 
         ElasticWindowMultiple(InputWorkspaces=elwin_input, Plot=False,
-                              Range1Start=self.eRange[0], Range1End=self.eRange[1],
+                              IntegrationRangeStart=self.eRange[0], IntegrationRangeEnd=self.eRange[1],
                               OutputInQ=elwin_results[0], OutputInQSquared=elwin_results[1],
                               OutputELF=elwin_results[2])
 
@@ -1162,126 +1162,6 @@ class IRISConvFit(ISISIndirectInelasticConvFit):
 
     def get_reference_files(self):
         return ['II.IRISConvFitSeq.nxs']
-
-#==============================================================================
-
-class ISISIndirectInelasticApplyCorrections(ISISIndirectInelasticBase):
-    '''A base class for the ISIS indirect inelastic Apply Corrections tests
-
-    The workflow is defined in the _run() method, simply
-    define an __init__ method and set the following properties
-    on the object
-    '''
-    # Mark as an abstract class
-    __metaclass__ = ABCMeta
-
-    def _run(self):
-        '''Defines the workflow for the test'''
-        self.tolerance = 1e-4
-
-        LoadNexus(self._sample_workspace + '.nxs', OutputWorkspace=self._sample_workspace)
-        if self._corrections_workspace != '':
-            LoadNexus(self._corrections_workspace + '.nxs', OutputWorkspace=self._corrections_workspace)
-        if self._can_workspace != '':
-            LoadNexus(self._can_workspace + '.nxs', OutputWorkspace=self._can_workspace)
-
-        output_workspaces = self._run_apply_corrections()
-        self.result_names = [output_workspaces['reduced_workspace']]
-
-    def _run_apply_corrections(self):
-        abscorFeeder(self._sample_workspace, self._can_workspace, self._can_geometry,
-                     self._using_corrections, self._corrections_workspace, **self._kwargs)
-        return self._get_output_workspace_names()
-
-    def _get_output_workspace_names(self):
-        """
-        abscorFeeder doesn't return anything, these names should exist in the ADS
-        apply corrections uses the following naming convention:
-        <instrument><sample number>_<analyser><reflection>_<mode>_<can number>
-        """
-
-        if self._can_workspace != '':
-            can_run = mtd[self._can_workspace].getRun()
-            can_run_number = can_run.getProperty('run_number').value
-
-        mode = ''
-        if self._corrections_workspace != '' and self._can_workspace != '':
-            mode = 'Correct_%s' % can_run_number
-        elif self._corrections_workspace != '':
-            mode = 'Corrected'
-        else:
-            mode = 'Subtract_%s' % can_run_number
-
-        workspace_name_stem = self._sample_workspace[:-3] + mode
-
-        output_workspaces = {
-            'reduced_workspace': workspace_name_stem + '_red',
-            'rqw_workspace': workspace_name_stem + '_rqw',
-        }
-
-        if self._can_workspace != '':
-            output_workspaces['result_workspace'] = workspace_name_stem + '_Result'
-
-        return output_workspaces
-
-    def _validate_properties(self):
-        '''Check the object properties are in an expected state to continue'''
-
-#------------------------- IRIS tests -----------------------------------------
-
-class IRISApplyCorrectionsWithCan(ISISIndirectInelasticApplyCorrections):
-    """ Test applying corrections with just a can workspace """
-
-    def __init__(self):
-        ISISIndirectInelasticApplyCorrections.__init__(self)
-
-        self._sample_workspace = 'irs26176_graphite002_red'
-        self._can_workspace = 'irs26173_graphite002_red'
-        self._corrections_workspace = ''
-        self._can_geometry = 'cyl'
-        self._using_corrections = False
-
-        self._kwargs = {'RebinCan':False, 'ScaleOrNotToScale':False,
-                        'factor':1, 'Save':False, 'PlotResult':'None', 'PlotContrib':False}
-
-    def get_reference_files(self):
-        return ['II.IRISApplyCorrectionsWithCan.nxs']
-
-class IRISApplyCorrectionsWithCorrectionsWS(ISISIndirectInelasticApplyCorrections):
-    """ Test applying corrections with a corrections workspace """
-
-    def __init__(self):
-        ISISIndirectInelasticApplyCorrections.__init__(self)
-
-        self._sample_workspace = 'irs26176_graphite002_red'
-        self._can_workspace = ''
-        self._corrections_workspace = 'irs26176_graphite002_cyl_Abs'
-        self._can_geometry = 'cyl'
-        self._using_corrections = True
-
-        self._kwargs = {'RebinCan':False, 'ScaleOrNotToScale':False,
-                        'factor':1, 'Save':False, 'PlotResult':'None', 'PlotContrib':False}
-
-    def get_reference_files(self):
-        return ['II.IRISApplyCorrectionsWithCorrectionsWS.nxs']
-
-class IRISApplyCorrectionsWithBoth(ISISIndirectInelasticApplyCorrections):
-    """ Test applying corrections with both a can and a corrections workspace """
-
-    def __init__(self):
-        ISISIndirectInelasticApplyCorrections.__init__(self)
-
-        self._sample_workspace = 'irs26176_graphite002_red'
-        self._can_workspace = 'irs26173_graphite002_red'
-        self._corrections_workspace = 'irs26176_graphite002_cyl_Abs'
-        self._can_geometry = 'cyl'
-        self._using_corrections = True
-
-        self._kwargs = {'RebinCan':False, 'ScaleOrNotToScale':False,
-                        'factor':1, 'Save':False, 'PlotResult':'None', 'PlotContrib':False}
-
-    def get_reference_files(self):
-        return ['II.IRISApplyCorrections.nxs']
 
 #==============================================================================
 # Transmission Monitor Test

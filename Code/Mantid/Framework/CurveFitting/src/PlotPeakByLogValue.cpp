@@ -236,6 +236,10 @@ void PlotPeakByLogValue::exec() {
         }
         TimeSeriesProperty<double> *logp =
             dynamic_cast<TimeSeriesProperty<double> *>(prop);
+        if (!logp) {
+          throw std::runtime_error("Failed to cast " + logName +
+                                   " to TimeSeriesProperty");
+        }
         logValue = logp->lastValue();
       }
 

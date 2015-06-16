@@ -93,9 +93,8 @@ void CreateTransmissionWorkspaceAuto::init() {
 
   declareProperty(new PropertyWithValue<std::string>("ProcessingInstructions",
                                                      "", Direction::Input),
-                  "Processing instructions on workspace indexes to yield only "
-                  "the detectors of interest. See [[PerformIndexOperations]] "
-                  "for details.");
+                  "Grouping pattern on workspace indexes to yield only "
+                  "the detectors of interest. See GroupDetectors for details.");
 
   declareProperty("WavelengthMin", Mantid::EMPTY_DBL(),
                   "Wavelength Min in angstroms", Direction::Input);

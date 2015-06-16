@@ -26,7 +26,7 @@ DECLARE_COSTFUNCTION(CostFuncLeastSquares, Least squares)
  */
 CostFuncLeastSquares::CostFuncLeastSquares()
     : CostFuncFitting(), m_includePenalty(true), m_value(0), m_pushed(false),
-      m_factor(0.5) {}
+      m_pushedValue(false), m_factor(0.5) {}
 
 /** Calculate value of cost function
  * @return :: The value of the function

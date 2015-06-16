@@ -51,7 +51,7 @@ void ConvertToMDParent::init() {
                   "The modes names are **CopyToMD**, **|Q|** and **Q3D**",
                   Direction::InOut);
   /// temporary, until dEMode is not properly defined on Workspace
-  std::vector<std::string> dE_modes = Kernel::DeltaEMode().availableTypes();
+  std::vector<std::string> dE_modes = Kernel::DeltaEMode::availableTypes();
   declareProperty("dEAnalysisMode", dE_modes[Kernel::DeltaEMode::Direct],
                   boost::make_shared<StringListValidator>(dE_modes),
                   "You can analyze neutron energy transfer in **Direct**, "
@@ -240,7 +240,7 @@ ConvertToMDParent::preprocessDetectorsPositions(
 
           TargTableWS->logs()->addProperty<double>("Ei", Ei, true);
         } else {
-          Emode = Kernel::DeltaEMode().fromString(dEModeRequested);
+          Emode = Kernel::DeltaEMode::fromString(dEModeRequested);
           if (Emode == Kernel::DeltaEMode::Direct)
             throw(std::invalid_argument(
                 "Input neutron's energy has to be present at the workspace as "
@@ -344,7 +344,7 @@ ConvertToMDParent::runPreprocessDetectorsToMDChildUpdatingMasks(
 
   // check and get energy conversion mode to define additional ChildAlgorithm
   // parameters
-  Emode = Kernel::DeltaEMode().fromString(dEModeRequested);
+  Emode = Kernel::DeltaEMode::fromString(dEModeRequested);
   if (Emode == Kernel::DeltaEMode::Indirect)
     childAlg->setProperty("GetEFixed", true);
 
