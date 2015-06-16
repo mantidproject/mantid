@@ -43,6 +43,89 @@ public:
   Kernel::DateAndTime *pulseTimes;
 };
 
+class CompositeWorkspace : public Mantid::DataObjects::EventWorkspace {
+
+public:
+  DataObjects::EventWorkspace_sptr m_ws;
+
+  CompositeWorkspace(DataObjects::EventWorkspace_sptr ws): m_ws(ws){}
+
+  CompositeWorkspace(){}
+
+  // TODO add methods here:
+  std::vector<API::MatrixWorkspace> VecWorkspace;
+
+  Geometry::Instrument_const_sptr getInstrument() const
+  {
+      return m_ws->getInstrument();
+  }
+  const API::Run &run() const
+  {
+      return m_ws->run();
+  }
+  API::Run &mutableRun()
+  {
+      return m_ws->mutableRun();
+  }
+  Mantid::API::ISpectrum* getSpectrum(const size_t index)  {
+      return m_ws->getSpectrum(index);
+  }
+  virtual Mantid::API::Axis* getAxis(const size_t& i) const {
+      return m_ws->getAxis(i);
+  }
+  size_t getNumberHistograms() const  {
+      return m_ws->getNumberHistograms();
+  }
+  virtual const DataObjects::EventList& getEventList(const size_t workspace_index) const {
+      return m_ws->getEventList(workspace_index);
+  }
+  virtual DataObjects::EventList &getEventList(const std::size_t workspace_index){
+      return m_ws->getEventList(workspace_index);
+  }
+
+  void getSpectrumToWorkspaceIndexVector(std::vector<size_t>&out, Mantid::specid_t& offset) const  {
+      return m_ws->getSpectrumToWorkspaceIndexVector(out, offset);
+  }
+  void getDetectorIDToWorkspaceIndexVector(std::vector<size_t>&out, Mantid::specid_t& offset, bool dothrow) const{
+      return m_ws->getDetectorIDToWorkspaceIndexVector(out, offset, dothrow);
+  }
+
+  Kernel::DateAndTime getFirstPulseTime() const  {
+      return m_ws->getFirstPulseTime();
+  }
+  void setAllX(Kernel::cow_ptr<MantidVec>& x)  {
+      return m_ws->setAllX(x);
+  }
+  size_t getNumberEvents() const  {
+      return m_ws->getNumberEvents();
+  }
+  void resizeTo(const size_t size)  {
+      return m_ws->resizeTo(size);
+  }
+  void padSpectra(const std::vector<int32_t>& i)  {
+      return m_ws->padSpectra(i);
+  }
+  void setInstrument(const Geometry::Instrument_const_sptr& inst)  {
+      return m_ws->setInstrument(inst);
+  }
+  void setMonitorWorkspace(const boost::shared_ptr<API::MatrixWorkspace>& monitorWS)  {
+      return m_ws->setMonitorWorkspace(monitorWS);
+  }
+  void updateSpectraUsing(const API::SpectrumDetectorMapping& map)  {
+      return m_ws->updateSpectraUsing(map);
+  }
+
+  DataObjects::EventList* getEventListPtr(size_t i){
+      return m_ws->getEventListPtr(i);
+  }
+
+  void populateInstrumentParameters(){
+      return m_ws->populateInstrumentParameters();
+  }
+};
+
+typedef boost::shared_ptr<CompositeWorkspace> CompositeWorkspace_sptr;
+
 /** @class LoadEventNexus LoadEventNexus.h Nexus/LoadEventNexus.h
 
   Load Event Nexus files.
@@ -144,7 +227,7 @@ public:
   std::string m_filename;
 
   /// The workspace being filled out
-  DataObjects::EventWorkspace_sptr WS;
+  CompositeWorkspace_sptr m_ws;
 
   /// Filter by a minimum time-of-flight
   double filter_tof_min;
