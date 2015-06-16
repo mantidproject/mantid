@@ -50,7 +50,7 @@ private:
     _idf(idf), _vtp(vtp), _xmlText(xmlText), _instName(instName)
     {
     };
-    
+
     ScopedFile _idf;
     ScopedFile _vtp;
     std::string _xmlText;
@@ -73,10 +73,10 @@ private:
     "<type name=\"cylinder-right\" is=\"detector\">"
     "<cylinder id=\"some-shape\">"
     "  <centre-of-bottom-base r=\"0.0\" t=\"0.0\" p=\"0.0\" />"
-    "  <axis x=\"0.0\" y=\"0.0\" z=\"1.0\" />" 
+    "  <axis x=\"0.0\" y=\"0.0\" z=\"1.0\" />"
     "  <radius val=\"0.01\" />"
     "  <height val=\"0.03\" />"
-    "</cylinder>"    
+    "</cylinder>"
     "</type>"
     "<idlist idname=\"cylinder-right\">"
       "<id val=\"1\" />"
@@ -86,20 +86,20 @@ private:
     //expected name
     const std::string vtp_filename = instrument_name + ChecksumHelper::sha1FromString(Strings::strip(idf_file_contents)) + ".vtp";
     const std::string vtp_file_contents="<VTKFile byte_order=\"LittleEndian\" type=\"PolyData\" version=\"1.0\"><PolyData/></VTKFile>";
-    
+
     const std::string instrument_dir = ConfigService::Instance().getInstrumentDirectory() + "/IDFs_for_UNIT_TESTING/";
     std::string vtp_dir = ConfigService::Instance().getVTPFileDirectory();
     if (!put_vtp_next_to_IDF) {
       vtp_dir= ConfigService::Instance().getTempDir();
     }
     ScopedFile idf(idf_file_contents, idf_filename, instrument_dir);
-    ScopedFile vtp(vtp_file_contents, vtp_filename, vtp_dir); 
+    ScopedFile vtp(vtp_file_contents, vtp_filename, vtp_dir);
 
-    return IDFEnvironment(idf, vtp, idf_file_contents, instrument_name); 
+    return IDFEnvironment(idf, vtp, idf_file_contents, instrument_name);
 
   }
 
-  // Helper method to create the IDF File.  
+  // Helper method to create the IDF File.
   ScopedFile createIDFFileObject(const std::string& idf_filename, const std::string& idf_file_contents)
   {
     const std::string instrument_dir = ConfigService::Instance().getInstrumentDirectory() + "/IDFs_for_UNIT_TESTING/";
@@ -114,7 +114,7 @@ public:
   static InstrumentDefinitionParserTest *createSuite() { return new InstrumentDefinitionParserTest(); }
   static void destroySuite( InstrumentDefinitionParserTest *suite ) { delete suite; }
 
-  void test_extract_ref_info() 
+  void test_extract_ref_info()
   {
     std::string filename = ConfigService::Instance().getInstrumentDirectory() + "/IDFs_for_UNIT_TESTING/IDF_for_UNIT_TESTING.xml";
     std::string xmlText = Strings::loadFile(filename);
@@ -142,8 +142,8 @@ public:
     std::string xmlText = Strings::loadFile(filename);
     boost::shared_ptr<const Instrument> i;
 
-    InstrumentDefinitionParser parser(filename, "For Unit Testing", xmlText); 
-    
+    InstrumentDefinitionParser parser(filename, "For Unit Testing", xmlText);
+
     // Parse the XML (remove old vtp file if it exists)
     std::string vtpFilename = parser.createVTPFileName();
     try
@@ -438,7 +438,7 @@ public:
     boost::shared_ptr<const Instrument> i;
 
     // Parse the XML
-    InstrumentDefinitionParser parser(filename, "For Unit Testing2", xmlText); 
+    InstrumentDefinitionParser parser(filename, "For Unit Testing2", xmlText);
     TS_ASSERT_THROWS_NOTHING( i = parser.parseXML(NULL); );
 
     boost::shared_ptr<const IDetector> ptrDetShape = i->getDetector(1100);
@@ -578,7 +578,7 @@ public:
     TS_ASSERT( ptrRot->isValid(V3D(0.5,20.0,0.0)) );
     TS_ASSERT( ptrRot->isValid(V3D(-0.5,20.0,0.0)) );
 
-    // nested rotated cuboids which shape position moved 
+    // nested rotated cuboids which shape position moved
     ptrRot = i->getDetector(1360);
     TS_ASSERT( ptrRot->isValid(V3D(1.0,0.0,0.0)) );
     TS_ASSERT( !ptrRot->isValid(V3D(1.0,0.0,3.0)) );
@@ -594,7 +594,7 @@ public:
     TS_ASSERT( ptrRot->isValid(V3D(0.5,20.0,0.0)) );
 
     // nested rotated cuboids which shape position moved by the
-    // opposite amount as the location of its parent 
+    // opposite amount as the location of its parent
     ptrRot = i->getDetector(1370);
     TS_ASSERT( ptrRot->isValid(V3D(0.0,0.0,0.0)) );
     TS_ASSERT( !ptrRot->isValid(V3D(0.0,0.0,3.0)) );
@@ -626,17 +626,17 @@ public:
 
     TS_ASSERT_EQUALS(instrumentEnv._vtp.getFileName(), parser.createVTPFileName());
   }
-  
+
   void testReadFromCacheInTempDirectory()
   {
     const bool put_vtp_in_instrument_directory = false;
     IDFEnvironment instrumentEnv = create_idf_and_vtp_pair(put_vtp_in_instrument_directory);
-    
+
     const std::string idfFileName = instrumentEnv._idf.getFileName();
     const std::string cacheFileName = instrumentEnv._vtp.getFileName();
-    
+
     MockIDFObject* mockIDF = new MockIDFObject(idfFileName);
-    MockIDFObject* mockCache = new MockIDFObject(cacheFileName); 
+    MockIDFObject* mockCache = new MockIDFObject(cacheFileName);
 
     EXPECT_CALL(*mockIDF, exists()).WillRepeatedly(Return(true));
     EXPECT_CALL(*mockCache, exists()).WillRepeatedly(Return(false)); // Mock expectation set such that geometry Cache file does not exist, so should not be used.
@@ -670,12 +670,12 @@ public:
   void testWriteCacheFileIfCacheDoestExist()
   {
     IDFEnvironment instrumentEnv = create_idf_and_vtp_pair();
-    
+
     const std::string idfFileName = instrumentEnv._idf.getFileName();
     const std::string cacheFileName = "";
-    
+
     MockIDFObject* mockIDF = new MockIDFObject(idfFileName);
-    MockIDFObject* mockCache = new MockIDFObject(cacheFileName); 
+    MockIDFObject* mockCache = new MockIDFObject(cacheFileName);
 
     //make sure the fallback location for the geometry file is deleted
 
@@ -691,7 +691,7 @@ public:
     RemoveFallbackVTPFile(parser);
 
     TS_ASSERT_THROWS_NOTHING(parser.parseXML(NULL));
-   
+
     TS_ASSERT_EQUALS(InstrumentDefinitionParser::WroteGeomCache, parser.getAppliedCachingOption()); // Check that the geometry cache file was used.
     TS_ASSERT(Mock::VerifyAndClearExpectations(mockIDF));
     TS_ASSERT(Mock::VerifyAndClearExpectations(mockCache));
@@ -709,7 +709,7 @@ public:
     const std::string cacheFileName = instrumentEnv._vtp.getFileName(); // We do provide a cache file, but this shouldn't be used.
 
     MockIDFObject* mockIDF = new MockIDFObject(idfFileName);
-    MockIDFObjectWithParentDirectory* mockCache = new MockIDFObjectWithParentDirectory(cacheFileName); 
+    MockIDFObjectWithParentDirectory* mockCache = new MockIDFObjectWithParentDirectory(cacheFileName);
 
     EXPECT_CALL(*mockIDF, exists()).WillRepeatedly(Return(false)); // IDF set not to exist.
     EXPECT_CALL(*mockCache, exists()).WillRepeatedly(Return(false)); // Mock expectation set such that Cache file does not exist, and location is inaccessible.
@@ -749,10 +749,10 @@ public:
       "<type name=\"cylinder-right\" is=\"detector\">"
       "<cylinder id=\"some-shape\">"
       "  <centre-of-bottom-base r=\"0.0\" t=\"0.0\" p=\"0.0\" />"
-      "  <axis x=\"0.0\" y=\"0.0\" z=\"1.0\" />" 
+      "  <axis x=\"0.0\" y=\"0.0\" z=\"1.0\" />"
       "  <radius val=\"0.01\" />"
       "  <height val=\"0.03\" />"
-      "</cylinder>"    
+      "</cylinder>"
       "</type>"
       "<idlist idname=\"cylinder-right\">"
       "<id val=\"1\" />"
@@ -944,38 +944,21 @@ public:
 
 void testLoadingAndParsing()
 {
-    std::string filenameNoExt = ConfigService::Instance().getInstrumentDirectory() + "/IDFs_for_UNIT_TESTING/IDF_for_UNIT_TESTING";
-    std::string filename = filenameNoExt + ".xml";
-    std::string xmlText = Strings::loadFile(filename);
-    boost::shared_ptr<const Instrument> i;
+    const std::string filename = ConfigService::Instance().getInstrumentDirectory() + "/IDFs_for_UNIT_TESTING/IDF_for_UNIT_TESTING.xml";
+    const std::string xmlText = Strings::loadFile(filename);
 
-    // Parse the XML (remove old vtp file if it exists)
-    std::string vtpFilename = filenameNoExt + ".vtp";
-    try
-    {
-      Poco::File vtpFile(vtpFilename);
-      vtpFile.remove();
-    }
-    catch(Poco::FileNotFoundException&) {}
-
+    boost::shared_ptr<const Instrument> instrument;
     InstrumentDefinitionParser parser(filename, "For Unit Testing", xmlText);
-    TS_ASSERT_THROWS_NOTHING( i = parser.parseXML(NULL); );
+    TS_ASSERT_THROWS_NOTHING( instrument = parser.parseXML(NULL) );
 
-    // Remove it for clean test
-    try
-    {
-      Poco::File vtpFile(vtpFilename);
-      vtpFile.remove();
-    }
-    catch(Poco::FileNotFoundException&)
-    {
-      TS_FAIL("Cannot find expected .vtp file next to " + filename);
+    // Clean up VTP file
+    const std::string vtpFilename = parser.createVTPFileName();
+    if ( !vtpFilename.empty() ) {
+      Poco::File(vtpFilename).remove();
     }
 }
 
-}; 
+};
 
 
 #endif /* MANTID_GEOMETRY_INSTRUMENTDEFINITIONPARSERTEST_H_ */
-
-
