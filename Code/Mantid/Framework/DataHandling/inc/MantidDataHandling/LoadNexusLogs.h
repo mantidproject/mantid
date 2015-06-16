@@ -93,6 +93,8 @@ private:
                  boost::shared_ptr<API::MatrixWorkspace> workspace) const;
   void loadVetoPulses(::NeXus::File &file,
                       boost::shared_ptr<API::MatrixWorkspace> workspace) const;
+  void loadNPeriods(::NeXus::File &file,
+                    boost::shared_ptr<API::MatrixWorkspace> workspace) const;
 
   /// Create a time series property
   Kernel::Property *createTimeSeries(::NeXus::File &file,
