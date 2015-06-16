@@ -164,7 +164,6 @@ set ( SRC_FILES
 	src/NormaliseToMonitor.cpp
 	src/NormaliseToUnity.cpp
 	src/OneMinusExponentialCor.cpp
-	src/OverlayEventWorkspace.cpp
 	src/PDFFourierTransform.cpp
 	src/Pause.cpp
 	src/PerformIndexOperations.cpp
@@ -429,7 +428,6 @@ set ( INC_FILES
 	inc/MantidAlgorithms/NormaliseToMonitor.h
 	inc/MantidAlgorithms/NormaliseToUnity.h
 	inc/MantidAlgorithms/OneMinusExponentialCor.h
-	inc/MantidAlgorithms/OverlayEventWorkspace.h
 	inc/MantidAlgorithms/PDFFourierTransform.h
 	inc/MantidAlgorithms/Pause.h
 	inc/MantidAlgorithms/PerformIndexOperations.h
@@ -692,7 +690,6 @@ set ( TEST_FILES
 	NormaliseByDetectorTest.h
 	NormaliseToMonitorTest.h
 	OneMinusExponentialCorTest.h
-	OverlayEventWorkspaceTest.h
 	PDFFourierTransformTest.h
 	PauseTest.h
 	PerformIndexOperationsTest.h
