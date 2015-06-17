@@ -18,6 +18,9 @@ namespace ALCHelper
   /// Create Qwt curve data from a workspace
   boost::shared_ptr<QwtData> curveDataFromWs(MatrixWorkspace_const_sptr ws, size_t wsIndex);
 
+  /// Create error vector from a workspace
+  std::vector<double> curveErrorsFromWs(MatrixWorkspace_const_sptr ws, size_t wsIndex);
+
   /// Create Qwt curve data from a function
   boost::shared_ptr<QwtData> curveDataFromFunction(IFunction_const_sptr func,
                                                  const std::vector<double>& xValues);

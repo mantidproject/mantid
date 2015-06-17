@@ -72,14 +72,18 @@ namespace CustomInterfaces
     /**
      * Update displayed data curve
      * @param data :: New curve data
+     * @param errors :: Curve errors
      */
-    virtual void setDataCurve(const QwtData& data) = 0;
+    virtual void setDataCurve(const QwtData &data,
+                              const std::vector<double> &errors) = 0;
 
     /**
      * Update displayed corrected data curve
      * @param data :: New curve data
+     * @param errors :: Curve errors
      */
-    virtual void setCorrectedCurve(const QwtData& data) = 0;
+    virtual void setCorrectedCurve(const QwtData &data,
+                                   const std::vector<double> &errors) = 0;
 
     /**
      * Update displayed baseline curve

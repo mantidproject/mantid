@@ -13,6 +13,14 @@
 
 namespace MantidQt
 {
+namespace MantidWidgets
+{
+  class ErrorCurve;
+}
+}
+
+namespace MantidQt
+{
 namespace CustomInterfaces
 {
 
@@ -45,6 +53,7 @@ namespace CustomInterfaces
   {
   public:
     ALCDataLoadingView(QWidget* widget);
+    ~ALCDataLoadingView();
 
     // -- IALCDataLoadingView interface ------------------------------------------------------------
 
@@ -65,7 +74,7 @@ namespace CustomInterfaces
     std::string calculationType() const;
     boost::optional< std::pair<double,double> > timeRange() const;
 
-    void setDataCurve(const QwtData& data);
+    void setDataCurve(const QwtData &data, const std::vector<double> &errors);
     void displayError(const std::string &error);
     void setAvailableLogs(const std::vector<std::string> &logs);
     void setAvailablePeriods(const std::vector<std::string> &periods);
@@ -86,6 +95,10 @@ namespace CustomInterfaces
 
     /// Loaded data curve
     QwtPlotCurve* m_dataCurve;
+
+    /// Loaded errors
+    MantidQt::MantidWidgets::ErrorCurve* m_dataErrorCurve;
+
   };
 
 } // namespace CustomInterfaces

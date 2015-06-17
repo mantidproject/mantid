@@ -169,18 +169,21 @@ namespace CustomInterfaces
   {
     MatrixWorkspace_const_sptr data = m_model->data();
     assert(data);
-    m_view->setDataCurve(*(ALCHelper::curveDataFromWs(data, 0)));
+    m_view->setDataCurve(*(ALCHelper::curveDataFromWs(data, 0)),
+                         ALCHelper::curveErrorsFromWs(data, 0));
   }
 
   void ALCBaselineModellingPresenter::updateCorrectedCurve()
   {
     if(MatrixWorkspace_const_sptr correctedData = m_model->correctedData())
     {
-      m_view->setCorrectedCurve(*(ALCHelper::curveDataFromWs(correctedData, 0)));
+      m_view->setCorrectedCurve(*(ALCHelper::curveDataFromWs(correctedData, 0)),
+                                ALCHelper::curveErrorsFromWs(correctedData, 0));
     }
     else
     {
-      m_view->setCorrectedCurve(*(ALCHelper::emptyCurveData()));
+      m_view->setCorrectedCurve(*(ALCHelper::emptyCurveData()),
+                                std::vector<double>());
     }
   }
 
