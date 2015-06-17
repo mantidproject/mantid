@@ -160,7 +160,7 @@ class POLDIDataAnalysisTestSiPawley(POLDIDataAnalysisTestSi):
 
 
 class POLDIDataAnalysisEmptyFile(stresstesting.MantidStressTest):
-    """This test runs PoldiDataAnalysis with Si data, using."""
+    """This test runs PoldiDataAnalysis with Si data, using an empty workspace."""
 
     def runTest(self):
         empty = PoldiLoadRuns(2015, 977)
