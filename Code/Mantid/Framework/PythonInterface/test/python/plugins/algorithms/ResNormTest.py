@@ -42,7 +42,8 @@ class ResNormTest(unittest.TestCase):
         Tests a basic run of ResNorm.
         """
         result = ResNorm(ResolutionWorkspace=self._res_ws,
-                         VanadiumWorkspace=self._van_ws)
+                         VanadiumWorkspace=self._van_ws,
+                         Version=2)
         self._validate_result(result)
 
 
@@ -53,7 +54,8 @@ class ResNormTest(unittest.TestCase):
         result = ResNorm(ResolutionWorkspace=self._res_ws,
                          VanadiumWorkspace=self._van_ws,
                          EnergyMin=-0.1,
-                         EnergyMax=0.1)
+                         EnergyMax=0.1,
+                         Version=2)
         self._validate_result(result)
 
 
@@ -65,7 +67,8 @@ class ResNormTest(unittest.TestCase):
                           ResolutionWorkspace=self._res_ws,
                           VanadiumWorkspace=self._van_ws,
                           EnergyMin=0.1,
-                          EnergyMax=-0.1)
+                          EnergyMax=-0.1,
+                          Version=2)
 
 
 if __name__=="__main__":

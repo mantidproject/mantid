@@ -24,6 +24,9 @@ class ResNorm(PythonAlgorithm):
                   and fitting it to all the groups in the resolution (vanadium)
                   reduction."""
 
+    def version(self):
+        return 2
+
 
     def PyInit(self):
         self.declareProperty(MatrixWorkspaceProperty('ResolutionWorkspace', '',
