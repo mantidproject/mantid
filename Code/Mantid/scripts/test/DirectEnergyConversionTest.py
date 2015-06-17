@@ -1,5 +1,5 @@
 import os, sys
-#os.environ["PATH"] = r"c:\Mantid\Code\builds\br_master\bin\Release;"+os.environ["PATH"]
+os.environ["PATH"] = r"c:\Mantid\Code\builds\br_master\bin\Release;"+os.environ["PATH"]
 from mantid.simpleapi import *
 from mantid import api
 import unittest
@@ -545,9 +545,48 @@ class DirectEnergyConversionTest(unittest.TestCase):
         rez = CheckWorkspacesMatch(result[1],result2[1])
         self.assertEqual(rez,'Success!')
 
+    def test_sum_monitors(self):
+        # create test workspace
+        monitor_ws=CreateSampleWorkspace(Function='Multiple Peaks', NumBanks=6, BankPixelWidth=1,\
+                                            NumEvents=100000, XUnit='Energy', XMin=3, XMax=200, BinWidth=0.1)
+
+        # Place all detectors into appropriate positions as the distance for all detectors
+        # to sum have to be equal
+        mon1_det = monitor_ws.getDetector(0)
+        mon1_pos = mon1_det.getPos()
+        MoveInstrumentComponent(Workspace=monitor_ws,ComponentName= 'Detector', DetectorID=2,
+                                X=mon1_pos.getX(),Y=mon1_pos.getY(), Z=mon1_pos.getZ(),
+                                 RelativePosition=False)
+        MoveInstrumentComponent(Workspace=monitor_ws,ComponentName= 'Detector', DetectorID=3,
+                                X=mon1_pos.getX(),Y=mon1_pos.getY(), Z=mon1_pos.getZ(),
+                                 RelativePosition=False)
+        mon2_det = monitor_ws.getDetector(3)
+        mon2_pos = mon2_det.getPos()
+        MoveInstrumentComponent(Workspace=monitor_ws,ComponentName= 'Detector', DetectorID=4,
+                                X=mon2_pos.getX(),Y=mon2_pos.getY(), Z=mon2_pos.getZ(),
+                                 RelativePosition=False)
+        MoveInstrumentComponent(Workspace=monitor_ws,ComponentName= 'Detector', DetectorID=5,
+                                X=mon2_pos.getX(),Y=mon2_pos.getY(), Z=mon2_pos.getZ(),
+                                 RelativePosition=False)
+        ConvertUnits(InputWorkspace=monitor_ws, OutputWorkspace='monitor_ws', Target='TOF')
+        monitor_ws = mtd['monitor_ws']
+
+        # Estimate energy from two monitors
+        ei,mon1_peak,mon1_index,tzero = \
+            GetEi(InputWorkspace=monitor_ws, Monitor1Spec=1,Monitor2Spec=4,
+                  EnergyEstimate=62.2,FixEi=False)
+        self.assertAlmostEqual(ei,62.15108,3)
+
+
+        tReducer = DirectEnergyConversion(monitor_ws.getInstrument())
+        tReducer.prop_man.ei_mon_spectra= ([1,2,3],6)
+        ei_mon_spectra  = tReducer.prop_man.ei_mon_spectra
+        ei_mon_spectra  = tReducer.sum_monitors_spectra(monitor_ws,ei_mon_spectra)
+
+
 
 
 if __name__=="__main__":
-        test = DirectEnergyConversionTest('test_abs_multirep_with_bkg_and_bleed')
-        test.test_abs_multirep_with_bkg_and_bleed()
+   test = DirectEnergyConversionTest('test_sum_monitors')
+   test.test_sum_monitors()
    #unittest.main()

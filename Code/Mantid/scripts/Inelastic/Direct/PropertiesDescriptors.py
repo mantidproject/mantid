@@ -867,7 +867,11 @@ class EiMonSpectra(prop_helpers.ComplexProperty):
     #
     def _process_monitors_spectra(self,mon_range):
         """A method to process any form of monitor spectra list
-           representation"""
+           representation
+        Called on get rather then on set operation as monitor lists
+        can be set separately through ei-mon1-spec or 'ei-mon2-spec
+        properties and these properties are currently standard properties
+        """
 
         if isinstance(mon_range,str):
             mon_val = mon_range.split(',')
@@ -883,9 +887,8 @@ class EiMonSpectra(prop_helpers.ComplexProperty):
             rez_spectra = int(mon_range)
         return rez_spectra
 
-        return (mon_range,False)
     def validate(self,instance, owner):
-        """"""
+        """ """
         return (True,0,'')
 
 #-----------------------------------------------------------------------------------------
