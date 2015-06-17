@@ -701,6 +701,9 @@ public:
     // Load the Nexus IDF info
     std::string params;
     TS_ASSERT_THROWS_NOTHING(ei.loadInstrumentInfoNexus( &nxFile, params));
+    Instrument_const_sptr inst = ei.getInstrument();
+    TS_ASSERT_EQUALS( inst->getName(), "LOQ" );  // Check instrument name
+    TS_ASSERT_EQUALS( params.size() , 613 );     // Check size of parameter string
 
   }
 
