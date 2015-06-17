@@ -148,7 +148,7 @@ class EnginXFitPeaks(PythonAlgorithm):
 
     def _fitAllPeaks(self, inWS, wsIndex, foundPeaks, expectedPeaksD):
         """
-        This method is the core of EnginXFitPeaks. Ittries to fit as many peaks as there are in the list of 
+        This method is the core of EnginXFitPeaks. Ittries to fit as many peaks as there are in the list of
         expected peaks passed to the algorithm.
 
         The parameters from the (Gaussian) peaks fitted by FindPeaks elsewhere (before calling this method)
