@@ -86,8 +86,9 @@ void MultiDatasetFit::initLayout()
   connect(m_dataController,SIGNAL(spectraRemoved(QList<int>)),m_functionBrowser,SLOT(removeDatasets(QList<int>)));
   connect(m_dataController,SIGNAL(spectraAdded(int)),m_functionBrowser,SLOT(addDatasets(int)));
 
-  m_fitOptionsBrowser = new MantidQt::MantidWidgets::FitOptionsBrowser(NULL);
-  splitter->addWidget( m_fitOptionsBrowser );
+  m_fitOptionsBrowser = new MantidQt::MantidWidgets::FitOptionsBrowser(
+      NULL, MantidQt::MantidWidgets::FitOptionsBrowser::NormalAndSequential);
+  splitter->addWidget(m_fitOptionsBrowser);
 
   m_uiForm.browserLayout->addWidget( splitter );
 
@@ -147,15 +148,65 @@ boost::shared_ptr<Mantid::API::IFunction> MultiDatasetFit::createFunction() cons
   return m_functionBrowser->getGlobalFunction();
 }
 
-/// Run the fitting algorithm.
-void MultiDatasetFit::fit()
+/// Fit the data sets sequentially if there are no global parameters.
+void MultiDatasetFit::fitSequential()
 {
-  if ( !m_functionBrowser->hasFunction() )
+  try
   {
-    QMessageBox::warning( this, "MantidPlot - Warning","Function wasn't set." );
-    return;
-  }
+    auto fun = m_functionBrowser->getGlobalFunction();
+    auto fit = Mantid::API::AlgorithmManager::Instance().create("Fit");
+    fit->initialize();
+    fit->setProperty("Function", fun );
+    fit->setPropertyValue("InputWorkspace", getWorkspaceName(0));
+    fit->setProperty("WorkspaceIndex", getWorkspaceIndex(0));
+    auto range = getFittingRange(0);
+    fit->setProperty( "StartX", range.first );
+    fit->setProperty( "EndX", range.second );
 
+    int n = getNumberOfSpectra();
+    for(int ispec = 1; ispec < n; ++ispec)
+    {
+      std::string suffix = boost::lexical_cast<std::string>(ispec);
+      fit->setPropertyValue( "InputWorkspace_" + suffix, getWorkspaceName(ispec) );
+      fit->setProperty( "WorkspaceIndex_" + suffix, getWorkspaceIndex(ispec) );
+      auto range = getFittingRange(ispec);
+      fit->setProperty( "StartX_" + suffix, range.first );
+      fit->setProperty( "EndX_" + suffix, range.second );
+    }
+
+    m_fitOptionsBrowser->copyPropertiesToAlgorithm(*fit);
+
+    m_outputWorkspaceName = m_fitOptionsBrowser->getProperty("Output").toStdString();
+    if ( m_outputWorkspaceName.empty() )
+    {
+      m_outputWorkspaceName = "out";
+      fit->setPropertyValue("Output",m_outputWorkspaceName);
+      m_fitOptionsBrowser->setProperty("Output","out");
+    }
+    m_outputWorkspaceName += "_Workspace";
+
+    m_fitRunner.reset( new API::AlgorithmRunner() );
+    connect( m_fitRunner.get(),SIGNAL(algorithmComplete(bool)), this, SLOT(finishFit(bool)), Qt::QueuedConnection );
+
+    m_fitRunner->startAlgorithm(fit);
+
+  }
+  catch(std::exception& e)
+  {
+    QString mess(e.what());
+    const int maxSize = 500;
+    if ( mess.size() > maxSize )
+    {
+      mess = mess.mid(0,maxSize);
+      mess += "...";
+    }
+    QMessageBox::critical( this, "MantidPlot - Error", QString("Fit failed:\n\n  %1").arg(mess) );
+  }
+}
+
+/// Fit the data simultaneously.
+void MultiDatasetFit::fitSimultaneous()
+{
   try
   {
     auto fun = createFunction();
@@ -206,6 +257,31 @@ void MultiDatasetFit::fit()
       mess += "...";
     }
     QMessageBox::critical( this, "MantidPlot - Error", QString("Fit failed:\n\n  %1").arg(mess) );
+  }
+}
+
+/// Run the fitting algorithm.
+void MultiDatasetFit::fit()
+{
+  if ( !m_functionBrowser->hasFunction() )
+  {
+    QMessageBox::warning( this, "MantidPlot - Warning","Function wasn't set." );
+    return;
+  }
+
+  auto fittingType = m_fitOptionsBrowser->getCurrentFittingType();
+  
+  if (fittingType == MantidWidgets::FitOptionsBrowser::Normal)
+  {
+    fitSequential();
+  }
+  else if (fittingType == MantidWidgets::FitOptionsBrowser::Sequential)
+  {
+    fitSimultaneous();
+  }
+  else
+  {
+    throw std::logic_error("Unrecognised fitting type. Only Normal and Sequential are accepted.");
   }
 }
 

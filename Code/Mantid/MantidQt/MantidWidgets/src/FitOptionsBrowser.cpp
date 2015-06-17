@@ -44,9 +44,9 @@ namespace MantidWidgets
  * Constructor
  * @param parent :: The parent widget.
  */
-FitOptionsBrowser::FitOptionsBrowser(QWidget *parent)
+FitOptionsBrowser::FitOptionsBrowser(QWidget *parent, FittingType fitType)
   :QWidget(parent),
-  m_decimals(6)
+  m_decimals(6), m_fittingType(fitType)
 {
   // create m_browser
   createBrowser();
@@ -99,6 +99,28 @@ void FitOptionsBrowser::createBrowser()
  */
 void FitOptionsBrowser::createProperties()
 {
+  createCommonProperties();
+  if (m_fittingType == Normal || m_fittingType == NormalAndSequential)
+  {
+    createNormalFitProperties();
+  }
+  if (m_fittingType == Sequential || m_fittingType == NormalAndSequential)
+  {
+    createSequentialFitProperties();
+  }
+}
+
+void FitOptionsBrowser::createCommonProperties()
+{
+  if (m_fittingType == NormalAndSequential)
+  {
+    m_fittingTypeProp = m_enumManager->addProperty("Fitting");
+    QStringList types;
+    types << "Normal" << "Sequential";
+    m_enumManager->setEnumNames(m_fittingTypeProp, types);
+    m_browser->addProperty(m_fittingTypeProp);
+  }
+
   // Create MaxIterations property
   m_maxIterations = m_intManager->addProperty("Max Iterations");
   {
@@ -161,11 +183,16 @@ void FitOptionsBrowser::createProperties()
     addProperty("CostFunction", &FitOptionsBrowser::getCostFunction, &FitOptionsBrowser::setCostFunction);
   }
 
+}
+
+void FitOptionsBrowser::createNormalFitProperties()
+{
   // Create Output property
   m_output = m_stringManager->addProperty("Output");
   {
     m_browser->addProperty(m_output);
     addProperty("Output", &FitOptionsBrowser::getOutput, &FitOptionsBrowser::setOutput);
+    m_normalProperties << m_output;
   }
 
   // Create Ignore property
@@ -173,6 +200,21 @@ void FitOptionsBrowser::createProperties()
   {
     m_browser->addProperty(m_ignoreInvalidData);
     addProperty("IgnoreInvalidData", &FitOptionsBrowser::getIgnoreInvalidData, &FitOptionsBrowser::setIgnoreInvalidData);
+    m_normalProperties << m_ignoreInvalidData;
+  }
+}
+
+void FitOptionsBrowser::createSequentialFitProperties()
+{
+  // Create FitType property
+  m_fitType = m_enumManager->addProperty("Fit Type");
+  {
+    QStringList types;
+    types << "Sequential" << "Individual";
+    m_enumManager->setEnumNames(m_fitType,types);
+    m_enumManager->setValue(m_fitType,0);
+    addProperty("FitType", &FitOptionsBrowser::getFitType, &FitOptionsBrowser::setFitType);
+    m_sequentialProperties << m_fitType;
   }
 }
 
@@ -207,6 +249,10 @@ void FitOptionsBrowser::enumChanged(QtProperty* prop)
   {
     updateMinimizer();
   }
+  else if (prop == m_fittingTypeProp)
+  {
+    switchFitType();
+  }
 }
 
 /**
@@ -239,6 +285,52 @@ void FitOptionsBrowser::updateMinimizer()
     auto prop = createPropertyProperty( *property );
     if ( !*property ) continue;
     m_minimizerGroup->addSubProperty( prop );
+  }
+}
+
+/**
+ * Switch the current fit type according to the value in the FitType property.
+ */
+void FitOptionsBrowser::switchFitType()
+{
+  auto fitType = m_enumManager->value(m_fittingTypeProp);
+  if (fitType == 0)
+  {
+    displayNormalFitProperties();
+  }
+  else
+  {
+    displaySequentialFitProperties();
+  }
+}
+
+/**
+ * Show normal Fit properties and hide the others.
+ */
+void FitOptionsBrowser::displayNormalFitProperties()
+{
+  foreach(QtProperty* prop, m_normalProperties)
+  {
+    m_browser->addProperty(prop);
+  }
+  foreach(QtProperty* prop, m_sequentialProperties)
+  {
+    m_browser->removeProperty(prop);
+  }
+}
+
+/**
+ * Show sequential fit (PlotPeakByLogValue) properties and hide the others.
+ */
+void FitOptionsBrowser::displaySequentialFitProperties()
+{
+  foreach(QtProperty* prop, m_sequentialProperties)
+  {
+    m_browser->addProperty(prop);
+  }
+  foreach(QtProperty* prop, m_normalProperties)
+  {
+    m_browser->removeProperty(prop);
   }
 }
 
@@ -316,8 +408,12 @@ void FitOptionsBrowser::copyPropertiesToAlgorithm(Mantid::API::IAlgorithm& fit) 
 {
     for(auto p = m_getters.constBegin(); p != m_getters.constEnd(); ++p)
     {
-      auto f = p.value();
-      fit.setPropertyValue( p.key().toStdString(), (this->*f)().toStdString() );
+      auto propertyName = p.key().toStdString();
+      if (fit.existsProperty(propertyName))
+      {
+        auto f = p.value();
+        fit.setPropertyValue(propertyName, (this->*f)().toStdString() );
+      }
     }
 }
 
@@ -480,6 +576,42 @@ void FitOptionsBrowser::setIgnoreInvalidData(const QString& value)
 }
 
 /**
+ * Get the value of the FitType property (PlotPeakByLogValue algorithm).
+ */
+QString FitOptionsBrowser::getFitType() const
+{
+  auto value = m_enumManager->value(m_fitType);
+  if (value == 0)
+  {
+    return "Sequential";
+  }
+  else
+  {
+    return "Individual";
+  }
+}
+
+/**
+ * Set new value to the FitType property (PlotPeakByLogValue algorithm).
+ * @param value :: The new value.
+ */
+void FitOptionsBrowser::setFitType(const QString& value)
+{
+  if (value == "Sequential")
+  {
+    m_enumManager->setValue(m_fitType,0);
+  }
+  else if (value == "Individual")
+  {
+    m_enumManager->setValue(m_fitType,1);
+  }
+  else
+  {
+    throw std::runtime_error("Undefined value for property FitType.");
+  }
+}
+
+/**
  * Save the last property values in settings.
  * @param settings :: A QSettings instance provided by the user of this class.
  */
@@ -509,6 +641,15 @@ void FitOptionsBrowser::loadSettings(const QSettings& settings)
   }
 }
 
+/**
+ * Get the current fitting type, ie which algorithm to use:
+ *    Normal for Fit and Sequential for PlotPeakByLogValue.
+ */
+FitOptionsBrowser::FittingType FitOptionsBrowser::getCurrentFittingType() const
+{
+  auto value = m_enumManager->value(m_fittingTypeProp);
+  return static_cast<FitOptionsBrowser::FittingType>(value);
+}
 
 } // MantidWidgets
 } // MantidQt

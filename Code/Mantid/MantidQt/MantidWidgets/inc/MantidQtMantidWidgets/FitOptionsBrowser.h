@@ -43,13 +43,21 @@ class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS FitOptionsBrowser: public QWidget
 {
   Q_OBJECT
 public:
+  /// Support for fitting algorithms:
+  ///   Normal:     Fit
+  ///   Sequential: PlotPeakByLogValue
+  ///   NormalAndSequential: both Fit and PlotPeakByLogValue, toggled with
+  ///       "Fitting" property.
+  enum FittingType {Normal = 0, Sequential, NormalAndSequential};
+
   /// Constructor
-  FitOptionsBrowser(QWidget *parent = NULL);
+  FitOptionsBrowser(QWidget *parent = NULL, FittingType fitType = Normal);
   QString getProperty(const QString& name) const;
   void setProperty(const QString& name, const QString& value);
   void copyPropertiesToAlgorithm(Mantid::API::IAlgorithm& fit) const;
   void saveSettings(QSettings& settings) const;
   void loadSettings(const QSettings& settings);
+  FittingType getCurrentFittingType() const;
 
 private slots:
 
@@ -59,7 +67,14 @@ private:
 
   void createBrowser();
   void createProperties();
+  void createCommonProperties();
+  void createNormalFitProperties();
+  void createSequentialFitProperties();
   void updateMinimizer();
+  void switchFitType();
+  void displayNormalFitProperties();
+  void displaySequentialFitProperties();
+
   QtProperty* createPropertyProperty(Mantid::Kernel::Property* prop);
   QtProperty* addDoubleProperty(const QString& name);
 
@@ -74,6 +89,8 @@ private:
   void setOutput(const QString&);
   QString getIgnoreInvalidData() const;
   void setIgnoreInvalidData(const QString&);
+  QString getFitType() const;
+  void setFitType(const QString&);
 
   void addProperty(const QString& name, 
     QString (FitOptionsBrowser::*getter)()const, 
@@ -95,6 +112,8 @@ private:
   /// Manager for groups of properties
   QtGroupPropertyManager* m_groupManager;
 
+  /// FitType property
+  QtProperty* m_fittingTypeProp;
   /// Minimizer group property
   QtProperty* m_minimizerGroup;
   /// Minimizer property
@@ -107,6 +126,8 @@ private:
   QtProperty* m_output;
   /// IgnoreInvalidData property
   QtProperty* m_ignoreInvalidData;
+  /// FitType property
+  QtProperty* m_fitType;
 
   /// Precision of doubles in m_doubleManager
   int m_decimals;
@@ -115,6 +136,12 @@ private:
   QMap<QString,void (FitOptionsBrowser::*)(const QString&)> m_setters;
   /// Store for the properties getter methods
   QMap<QString,QString (FitOptionsBrowser::*)()const> m_getters;
+  /// The Fitting Type
+  FittingType m_fittingType;
+  /// Store special properties of the normal Fit
+  QList<QtProperty*> m_normalProperties;
+  /// Store special properties of the sequential Fit
+  QList<QtProperty*> m_sequentialProperties;
 };
 
 } // MantidWidgets
