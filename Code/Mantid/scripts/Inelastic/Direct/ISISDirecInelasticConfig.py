@@ -138,6 +138,10 @@ class MantidConfigDirectInelastic(object):
         self._sample_reduction_file = lambda InstrName : '{0}Reduction_Sample.py'.format(InstrName)
         # File name, used as target for copying to user folder for user to deploy as the base for his reduction script
         self._target_reduction_file = lambda InstrName,cycleID : '{0}Reduction_{1}_{2}.py'.format(InstrName,cycleID[0],cycleID[1])
+        # Relative to a particular user path to place links, important to user
+        self._user_specific_link_path='Desktop'
+        # Relative to a particular user name of folders with link to instrument files
+        self._map_mask_link_name = 'instrument_files'
 
         # Static contents of the Mantid Config file
         self._header = ("# This file can be used to override any properties for this installation.\n"
@@ -250,7 +254,7 @@ class MantidConfigDirectInelastic(object):
 
         if platform.system() != 'Windows':
             os.system('chown '+self._fedid+':'+self._fedid+' '+full_target)
-        # Set up the file  creation and modification dates to the users start date
+        # Set up the file creation and modification dates to the users start date
         start_date = self._user.get_start_date()
         file_time = time.mktime(start_date.timetuple())
         os.utime(full_target,(file_time,file_time))
@@ -262,8 +266,10 @@ class MantidConfigDirectInelastic(object):
            The agreement on the naming as currently in ISIS:
            e.g: /archive/NDXMERLIN/Instrument/data/cycle_08_1
         """
+        # cycle folder have short form without leading numbers
+        cycle_fold_n =int(cycle_ID[0])-2000
         folder = os.path.join(self._root_data_folder,'NDX'+instr.upper(),\
-                              'Instrument/data/cycle_'+str(cycle_ID[0])+'_'+str(cycle_ID[1]))
+                              "Instrument/data/cycle_{0:02}_{1}".format(cycle_fold_n,str(cycle_ID[1])))
         return folder
 
     def is_inelastic(self,instr_name):
@@ -381,8 +387,8 @@ class MantidConfigDirectInelastic(object):
         """Save generated Mantid configuration file into user's home folder
            and copy other files, necessary for Mantid to work properly
         """
-
-        config_path = os.path.join(self._home_path,self._fedid,'.mantid')
+        user_path = os.path.join(self._home_path,self._fedid)
+        config_path = os.path.join(user_path,'.mantid')
         if not os.path.exists(config_path):
             err = os.makedirs(config_path)
             if err: 
@@ -400,6 +406,32 @@ class MantidConfigDirectInelastic(object):
         cycleID   = self._user.get_last_cycleID()
         rb_folder = self._user.get_last_rbdir()
         self.copy_reduction_sample(InstrName,cycleID,rb_folder)
+        #
+        self.make_map_mask_links(user_path)
+    #
+    def make_map_mask_links(self,user_path):
+        """The method generates references to map files and places these references
+           to the user's desktop.
+        """
+        # the path where to set up links, important to user
+        links_path = os.path.join(user_path,self._user_specific_link_path)
+        if not os.path.exists(links_path):
+            os.makedirs(links_path)
+            # the path have to belong to user
+            if platform.system() != 'Windows':
+                os.system('chown -R {0}:{0} {1}'.format(self._fedid,links_path))
+
+        map_mask_folder_link = os.path.join(links_path,self._map_mask_link_name)
+        if os.path.exists(map_mask_folder_link):
+            return
+        # create link to map mask folder
+        if platform.system() == 'Windows':
+            # the script is not intended to run on Windows, so this is just for testing
+            mmfl = map_mask_folder_link.replace('/','\\')
+            mmf  = self._map_mask_folder.replace('/','\\')
+            os.system("mklink /J {0} {1}".format(mmfl,mmf))
+        else:
+            os.system('ln -s {0} {1}'.format(self._map_mask_folder,map_mask_folder_link))
 
     def _write_user_config_file(self,config_file_name):
         """Write existing dynamic configuration from memory to
