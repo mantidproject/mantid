@@ -36,7 +36,7 @@ class ILLD2BLoadTest(unittest.TestCase):
 
     def _do_ads_check(self, name):
         self.assertTrue(name in mtd)
-        self.assertTrue(type(mtd[name]) == IMDEventWorkspace)
+        self.assertTrue(isinstance(mtd[name], IMDEventWorkspace))
 
 #====================================================================================
 
