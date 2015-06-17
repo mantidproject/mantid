@@ -216,6 +216,14 @@ void FitOptionsBrowser::createSequentialFitProperties()
     addProperty("FitType", &FitOptionsBrowser::getFitType, &FitOptionsBrowser::setFitType);
     m_sequentialProperties << m_fitType;
   }
+
+  // Create OutputWorkspace property
+  m_outputWorkspace = m_stringManager->addProperty("OutputWorkspace");
+  {
+    m_browser->addProperty(m_outputWorkspace);
+    addProperty("OutputWorkspace", &FitOptionsBrowser::getOutputWorkspace, &FitOptionsBrowser::setOutputWorkspace);
+    m_sequentialProperties << m_outputWorkspace;
+  }
 }
 
 void FitOptionsBrowser::addProperty(const QString& name, 
@@ -609,6 +617,23 @@ void FitOptionsBrowser::setFitType(const QString& value)
   {
     throw std::runtime_error("Undefined value for property FitType.");
   }
+}
+
+/**
+ * Get the value of the OutputWorkspace property (PlotPeakByLogValue algorithm).
+ */
+QString FitOptionsBrowser::getOutputWorkspace() const
+{
+  return m_stringManager->value(m_outputWorkspace);
+}
+
+/**
+ * Set new value to the OutputWorkspace property (PlotPeakByLogValue algorithm).
+ * @param value :: The new value.
+ */
+void FitOptionsBrowser::setOutputWorkspace(const QString& value)
+{
+  m_stringManager->setValue(m_outputWorkspace,value);
 }
 
 /**

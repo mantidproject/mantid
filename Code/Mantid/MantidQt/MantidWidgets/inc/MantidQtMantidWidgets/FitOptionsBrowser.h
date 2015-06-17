@@ -91,6 +91,8 @@ private:
   void setIgnoreInvalidData(const QString&);
   QString getFitType() const;
   void setFitType(const QString&);
+  QString getOutputWorkspace() const;
+  void setOutputWorkspace(const QString&);
 
   void addProperty(const QString& name, 
     QString (FitOptionsBrowser::*getter)()const, 
@@ -122,12 +124,18 @@ private:
   QtProperty* m_costFunction;
   /// MaxIterations property
   QtProperty* m_maxIterations;
+  
+  // Fit properties
   /// Output property
   QtProperty* m_output;
   /// IgnoreInvalidData property
   QtProperty* m_ignoreInvalidData;
+
+  // PlotPeakByLogValue properties
   /// FitType property
   QtProperty* m_fitType;
+  /// OutputWorkspace property
+  QtProperty* m_outputWorkspace;
 
   /// Precision of doubles in m_doubleManager
   int m_decimals;

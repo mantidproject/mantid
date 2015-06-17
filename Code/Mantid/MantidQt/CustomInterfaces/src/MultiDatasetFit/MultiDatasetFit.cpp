@@ -4,6 +4,7 @@
 #include "MantidQtCustomInterfaces/MultiDatasetFit/MDFEditLocalParameterDialog.h"
 
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/FunctionFactory.h"
 
 #include "MantidQtAPI/AlgorithmRunner.h"
 #include "MantidQtMantidWidgets/FitOptionsBrowser.h"
@@ -153,37 +154,24 @@ void MultiDatasetFit::fitSequential()
 {
   try
   {
-    auto fun = m_functionBrowser->getGlobalFunction();
-    auto fit = Mantid::API::AlgorithmManager::Instance().create("Fit");
+    std::ostringstream input;
+
+    int n = getNumberOfSpectra();
+    for(int ispec = 0; ispec < n; ++ispec)
+    {
+      input << getWorkspaceName(ispec) << ",i" << getWorkspaceIndex(ispec) << ";";
+    }
+
+    auto fun = m_functionBrowser->getFunction();
+    auto fit = Mantid::API::AlgorithmManager::Instance().create("PlotPeakByLogValue");
     fit->initialize();
-    fit->setProperty("Function", fun );
-    fit->setPropertyValue("InputWorkspace", getWorkspaceName(0));
-    fit->setProperty("WorkspaceIndex", getWorkspaceIndex(0));
+    fit->setPropertyValue("Function", fun->asString() );
+    fit->setPropertyValue("Input", input.str());
     auto range = getFittingRange(0);
     fit->setProperty( "StartX", range.first );
     fit->setProperty( "EndX", range.second );
 
-    int n = getNumberOfSpectra();
-    for(int ispec = 1; ispec < n; ++ispec)
-    {
-      std::string suffix = boost::lexical_cast<std::string>(ispec);
-      fit->setPropertyValue( "InputWorkspace_" + suffix, getWorkspaceName(ispec) );
-      fit->setProperty( "WorkspaceIndex_" + suffix, getWorkspaceIndex(ispec) );
-      auto range = getFittingRange(ispec);
-      fit->setProperty( "StartX_" + suffix, range.first );
-      fit->setProperty( "EndX_" + suffix, range.second );
-    }
-
     m_fitOptionsBrowser->copyPropertiesToAlgorithm(*fit);
-
-    m_outputWorkspaceName = m_fitOptionsBrowser->getProperty("Output").toStdString();
-    if ( m_outputWorkspaceName.empty() )
-    {
-      m_outputWorkspaceName = "out";
-      fit->setPropertyValue("Output",m_outputWorkspaceName);
-      m_fitOptionsBrowser->setProperty("Output","out");
-    }
-    m_outputWorkspaceName += "_Workspace";
 
     m_fitRunner.reset( new API::AlgorithmRunner() );
     connect( m_fitRunner.get(),SIGNAL(algorithmComplete(bool)), this, SLOT(finishFit(bool)), Qt::QueuedConnection );
@@ -200,7 +188,7 @@ void MultiDatasetFit::fitSequential()
       mess = mess.mid(0,maxSize);
       mess += "...";
     }
-    QMessageBox::critical( this, "MantidPlot - Error", QString("Fit failed:\n\n  %1").arg(mess) );
+    QMessageBox::critical( this, "MantidPlot - Error", QString("PlotPeakByLogValue failed:\n\n  %1").arg(mess) );
   }
 }
 
@@ -273,11 +261,11 @@ void MultiDatasetFit::fit()
   
   if (fittingType == MantidWidgets::FitOptionsBrowser::Normal)
   {
-    fitSequential();
+    fitSimultaneous();
   }
   else if (fittingType == MantidWidgets::FitOptionsBrowser::Sequential)
   {
-    fitSimultaneous();
+    fitSequential();
   }
   else
   {
@@ -338,8 +326,12 @@ void MultiDatasetFit::finishFit(bool error)
   {
     m_plotController->clear();
     m_plotController->update();
-    Mantid::API::IFunction_sptr fun = m_fitRunner->getAlgorithm()->getProperty("Function");
-    updateParameters( *fun );
+    Mantid::API::IFunction_sptr fun;
+    if (m_fitOptionsBrowser->getCurrentFittingType() == MantidWidgets::FitOptionsBrowser::Normal)
+    {
+      fun = m_fitRunner->getAlgorithm()->getProperty("Function");
+      updateParameters( *fun );
+    }
   }
 }
 
