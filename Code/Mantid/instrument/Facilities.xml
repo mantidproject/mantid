@@ -266,7 +266,7 @@
   </instrument>
 
   <instrument name="CHRONUS">
-    <zeropadding size="7"/>
+    <zeropadding size="8"/>
     <technique>Muon spectroscopy</technique>
     <technique>Radio frequency muSR</technique>
     <livedata address="NDXCHRONUS:6789" />
