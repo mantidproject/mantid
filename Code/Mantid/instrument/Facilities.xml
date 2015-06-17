@@ -258,7 +258,8 @@
   </instrument>  
  
   <instrument name="ARGUS">
-    <zeropadding size="7"/>
+    <zeropadding size="7" startRunNumber="1"/>
+    <zeropadding size="8" startRunNumber="57942"/>
     <technique>Muon spectroscopy</technique>
     <technique>Radio frequency muSR</technique>
     <livedata address="NDXARGUS:6789" />
