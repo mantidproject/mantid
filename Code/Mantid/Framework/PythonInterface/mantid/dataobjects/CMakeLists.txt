@@ -60,8 +60,18 @@ set_python_properties( PythonDataObjectsModule _dataobjects )
 set_target_output_directory ( PythonDataObjectsModule ${OUTPUT_DIR} .pyd )
 
 # Add the required dependencies
-target_link_libraries ( PythonDataObjectsModule PythonAPIModule PythonGeometryModule
-                        PythonKernelModule DataObjects )
+target_link_libraries ( PythonDataObjectsModule LINK_PRIVATE
+            PythonAPIModule
+            PythonGeometryModule
+            PythonKernelModule
+            API
+            DataObjects
+            Kernel
+            Geometry
+            ${PYTHON_LIBRARIES}
+            ${POCO_LIBRARIES}
+            ${Boost_LIBRARIES} )
+
 
 if (OSX_VERSION VERSION_GREATER 10.8)
   set_target_properties( PythonDataObjectsModule PROPERTIES
