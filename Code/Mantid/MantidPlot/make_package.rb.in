@@ -141,12 +141,33 @@ if( "@MAKE_VATES@" == "ON" )
             `install_name_tool -id @rpath/#{filename_no_dir} Contents/Libraries/#{filename_no_dir}`
           end
           `install_name_tool -add_rpath @loader_path/../Libraries #{library} > /dev/null 2>&1`
+          `install_name_tool -add_rpath @loader_path/../MacOS #{library} > /dev/null 2>&1`
           `install_name_tool -change #{filename} @rpath/#{filename_no_dir} #{library}`
         end
       end
     end
     p "fixed #{issues_found} issues this iteration!"
     break if issues_found == 0
+  end
+
+  #use install_name_tool to change dependencies form /usr/local to libraries in the package.
+  search_patterns = ["Contents/Libraries/*.dylib"]
+  search_patterns.each do |pattern|
+    Dir[pattern].each do |library|
+      dependencies = `otool -L #{library}`
+      dependencies.split("\n").each do |dependency|
+        currentname = dependency.strip.split(" ")
+        name_split_on_slash = currentname[0].strip.split("/")
+        name_split_on_period = name_split_on_slash[-1].split(".")
+        prefix = name_split_on_period[0]+"."
+        library_filenames.each do |filename|
+          basename = File.basename(filename,"dylib")
+          if prefix == basename
+            `install_name_tool -change #{currentname[0]} @rpath/#{basename+"dylib"} #{library}`
+          end
+        end
+      end
+    end
   end
 end
 
