@@ -669,6 +669,24 @@ class DirectEnergyConversion(object):
         return mono_s
 
 #-------------------------------------------------------------------------------
+    def sum_monitors_spectra(self,monitor_ws,ei_mon_spectra):
+        """Sum monitors spectra for all spectra, specified in the spectra list(s)
+        """
+        spectra_list1=ei_mon_spectra[0]
+        spectra_list2=ei_mon_spectra[1]
+        if isinstance(spectra_list1,list):
+            spectra1 = self._process_spectra_list(monitor_ws,spectra_list1)
+        else:
+            spectra1 = spectra_list1
+        if isinstance(spectra_list2,list):
+            spectra2 = self._process_spectra_list(monitor_ws,spectra_list2)
+        else:
+            spectra2 = spectra_list2
+        return (spectra1,spectra2)
+
+    def _process_spectra_list(self,workspace,spectra_list):
+        """Method sums the specified spectra in the workspace"""
+#-------------------------------------------------------------------------------
     def get_ei(self, data_run, ei_guess):
         """ Calculate incident energy of neutrons and the time of the of the
             peak in the monitor spectrum
@@ -691,6 +709,9 @@ class DirectEnergyConversion(object):
                  format(data_ws.name(),data_ws.getRunNumber()))
         separate_monitors = data_run.is_monws_separate()
         data_run.set_action_suffix('_shifted')
+        # sum monitor spectra if this is requested
+        if RunDescriptor.ei_mon_spectra.need_to_sum_monitors():
+            ei_mon_spectra = self.sum_monitors_spectra(monitor_ws,ei_mon_spectra)
 
 
         # Calculate the incident energy

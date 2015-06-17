@@ -99,17 +99,34 @@
 </parameter>
 
 
-<!-- First spectra number (monitor number) to use when measuring incident energy
-    Should be spectra with well defined energy peak -->
-<parameter name="ei-mon1-spec"  type="int">
+<!-- First spectra number (monitor number) to use when measuring incident energy,
+     or comma separated list of such numbers.
+     Should be spectra with well defined energy peak 
+     If list of numbers is provided, the final spectra will be sum of the spectra numbers provided.
+     It is important to have the detectors for these spectra to be located at the same distance from the source,
+     as the position of the combined detector will be defined by the position of the first spetra's detector.
+-->
+<parameter name="ei-mon1-spec"  type="string">
   <value val="73734"/>
 </parameter>
-<!-- Second spectra number (monitor number) to use when measuring incident energy
-     Should be spectra with well defined energy peak -->
-<parameter name="ei-mon2-spec"  type="int">
+<!-- Second spectra number (monitor number) to use when measuring incident energy,
+     or comma separated list of such numbers.
+     Should be spectra with well defined energy peak.
+     If list of numbers is provided, the final spectra will be sum of the spectra numbers provided.
+     It is important to have the detectors for these spectra to be located at the same distance from the source,
+     as the position of the combined detector will be defined by the position of the first spetra's detector.
+-->
+<parameter name="ei-mon2-spec"  type="string">
   <value val="5506"/>
 </parameter>
 
+<!--
+  description is="List of spectra, used to calculate insident energy of beam in inelastic experiments by GetEi algorithm.
+  
+  It is complex property, dependent on two other properties, ei-mon1-spec and ei-mon2-spec, which define spectra lists 
+  for each of two monitors, used in GetEi calculations
+
+-->
 <parameter name="ei_mon_spectra"  type="string">
   <value val="ei-mon1-spec:ei-mon2-spec"/>
 </parameter>

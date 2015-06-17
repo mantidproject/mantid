@@ -243,6 +243,8 @@ class PropertyManager(NonIDF_Properties):
     #
     mono_correction_factor = MonoCorrectionFactor(NonIDF_Properties.incident_energy,
                                                   NonIDF_Properties.monovan_run)
+    # list of spectra number used to identify ei
+    ei_mon_spectra = EiMonSpectra()
     # property responsible for summing runs
     sum_runs = SumRuns(NonIDF_Properties.sample_run)
     # properties responsible for rotation angle
@@ -418,6 +420,10 @@ class PropertyManager(NonIDF_Properties):
                 #end
                 if new_val != cur_val:
                     changed_descriptors.add(key)
+                    changed_throug_main = True
+                else: # property may be changed through descriptors
+                    changed_throug_main  = False
+
                 # dependencies removed either properties are equal or not
                 try:
                     dependencies = getattr(PropertyManager,key).dependencies()
@@ -426,7 +432,8 @@ class PropertyManager(NonIDF_Properties):
 
                 for dep_name in dependencies:
                     if dep_name in sorted_param:
-                        del sorted_param[dep_name]
+                        if changed_throug_main or (sorted_param[dep_name] == getattr(self,dep_name)):
+                            del sorted_param[dep_name]
             else: # remove property from old changes list not to reapply it again?
                 pass
         #end loop
