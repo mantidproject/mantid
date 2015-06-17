@@ -1,8 +1,11 @@
 #pylint: disable=no-init,attribute-defined-outside-init
 import stresstesting
 import os
+from abc import ABCMeta, abstractmethod
 from mantid.simpleapi import *
 from IndirectImport import is_supported_f2py_platform
+
+#==============================================================================
 
 def _cleanup_files(dirname, filenames):
     """
@@ -15,6 +18,8 @@ def _cleanup_files(dirname, filenames):
             os.remove(path)
         except OSError:
             pass
+
+#==============================================================================
 
 class QLresTest(stresstesting.MantidStressTest):
 
@@ -53,7 +58,8 @@ class QLresTest(stresstesting.MantidStressTest):
                      'irs26176_graphite002_QLr_Parameters.nxs']
         _cleanup_files(config['defaultsave.directory'], filenames)
 
-#========================================================================
+#==============================================================================
+
 class ResNormTest(stresstesting.MantidStressTest):
 
     def skipTests(self):
@@ -86,7 +92,8 @@ class ResNormTest(stresstesting.MantidStressTest):
         filenames = ['irs26173_graphite002_resnrm.lpt']
         _cleanup_files(config['defaultsave.directory'], filenames)
 
-#=========================================================================
+#==============================================================================
+
 class QuestTest(stresstesting.MantidStressTest):
 
     def skipTests(self):
@@ -122,7 +129,8 @@ class QuestTest(stresstesting.MantidStressTest):
                      'irs26176_graphite002_Qsb.ql1']
         _cleanup_files(config['defaultsave.directory'], filenames)
 
-#=============================================================================
+#==============================================================================
+
 class QSeTest(stresstesting.MantidStressTest):
 
     def skipTests(self):
@@ -159,7 +167,8 @@ class QSeTest(stresstesting.MantidStressTest):
                      'irs26176_graphite002_Qse.lpt']
         _cleanup_files(config['defaultsave.directory'], filenames)
 
-#=============================================================================
+#==============================================================================
+
 class QLDataTest(stresstesting.MantidStressTest):
 
     def skipTests(self):
@@ -197,7 +206,8 @@ class QLDataTest(stresstesting.MantidStressTest):
                      'irs26176_graphite002_QLd_Parameters.nxs']
         _cleanup_files(config['defaultsave.directory'], filenames)
 
-#=============================================================================
+#==============================================================================
+
 class QLResNormTest(stresstesting.MantidStressTest):
 
     def skipTests(self):
@@ -238,7 +248,8 @@ class QLResNormTest(stresstesting.MantidStressTest):
                      'irs26176_graphite002_QLd_Parameters.nxs']
         _cleanup_files(config['defaultsave.directory'], filenames)
 
-#=============================================================================
+#==============================================================================
+
 class QLWidthTest(stresstesting.MantidStressTest):
 
     def skipTests(self):
@@ -277,113 +288,103 @@ class QLWidthTest(stresstesting.MantidStressTest):
                      'irs26176_graphite002_QLd_Parameters.nxs']
         _cleanup_files(config['defaultsave.directory'], filenames)
 
-#=============================================================================
+#==============================================================================
 
-class JumpCETest(stresstesting.MantidStressTest):
+class JumpFitFunctionTestBase(stresstesting.MantidStressTest):
+
+    __metaclass__ = ABCMeta
+
+    def __init__(self):
+        stresstesting.MantidStressTest.__init__(self)
+
+        self._sample_name = 'irs26176_graphite002_QLr_Workspace'
+        self._q_range = [0.6, 1.705600]
+        self._width_index = 2
+
+        self._function = ''
+
+    @abstractmethod
+    def get_reference_files(self):
+        '''Returns the name of the reference files to compare against.'''
+        raise NotImplementedError("Implmenent get_reference_files to return "
+                                  "the names of the files to compare against.")
 
     def runTest(self):
-        sname = 'irs26176_graphite002_QLr_Workspace'
-        qrange = [0.6, 1.705600]
-        plotOp = False
-        saveOp = False
+        # Load file
+        filename = self._sample_name + '.nxs'
+        LoadNexusProcessed(Filename=filename,
+                           OutputWorkspace=self._sample_name)
 
-        filename = sname + '.nxs'  # path name for nxs file
-        LoadNexusProcessed(Filename=filename, OutputWorkspace=sname)
+        # Extract the width spectrum
+        ExtractSingleSpectrum(InputWorkspace=self._sample_name,
+                              OutputWorkspace=self._sample_name,
+                              WorkspaceIndex=self._width_index)
 
         # Data must be in HWHM
-        Scale(InputWorkspace=sname, Factor=0.5, OutputWorkspace=sname)
+        Scale(InputWorkspace=self._sample_name,
+              OutputWorkspace=self._sample_name,
+              Factor=0.5)
 
-        JumpFit(InputWorkspace=sname,
-                Function='ChudleyElliot',
-                Width=2,
-                QMin=qrange[0],
-                QMax=qrange[1],
-                Plot=plotOp,
-                Save=saveOp)
+        Fit(InputWorkspace=self._sample_name,
+            Function=self._function,
+            StartX=self._q_range[0],
+            EndX=self._q_range[1],
+            CreateOutput=True,
+            Output=self._sample_name)
 
     def validate(self):
+        return self._sample_name + '_Workspace', self.get_reference_files()
+
+#==============================================================================
+
+class JumpCETest(JumpFitFunctionTestBase):
+
+    def __init__(self):
+        JumpFitFunctionTestBase.__init__(self)
+
+        self._function = 'name=ChudleyElliot,Tau=3.31,L=1.42'
+        self.tolerance = 5e-3
+
+    def get_reference_files(self):
+        return 'ISISIndirectBayes_JumpCETest.nxs'
+
+#==============================================================================
+
+class JumpHallRossTest(JumpFitFunctionTestBase):
+
+    def __init__(self):
+        JumpFitFunctionTestBase.__init__(self)
+
+        self._function = 'name=HallRoss,Tau=2.7,L=1.75'
         self.tolerance = 1e-5
-        return 'irs26176_graphite002_QLr_ChudleyElliot_fit_Workspace','ISISIndirectBayes_JumpCETest.nxs'
 
-#=============================================================================
-class JumpHallRossTest(stresstesting.MantidStressTest):
+    def get_reference_files(self):
+        return 'ISISIndirectBayes_JumpHallRossTest.nxs'
 
-    def runTest(self):
-        sname = 'irs26176_graphite002_QLr_Workspace'
-        qrange = [0.6, 1.705600]
-        plotOp = False
-        saveOp = False
+#==============================================================================
 
-        path = sname+'.nxs'  # path name for nxs file
-        LoadNexusProcessed(Filename=path, OutputWorkspace=sname)
+class JumpFickTest(JumpFitFunctionTestBase):
 
-        # Data must be in HWHM
-        Scale(InputWorkspace=sname, Factor=0.5, OutputWorkspace=sname)
+    def __init__(self):
+        JumpFitFunctionTestBase.__init__(self)
 
-        JumpFit(InputWorkspace=sname,
-                Function='HallRoss',
-                Width=2,
-                QMin=qrange[0],
-                QMax=qrange[1],
-                Plot=plotOp,
-                Save=saveOp)
-
-    def validate(self):
-        self.tolerance = 1e-5
-        return 'irs26176_graphite002_QLr_HallRoss_fit_Workspace','ISISIndirectBayes_JumpHallRossTest.nxs'
-
-#=============================================================================
-class JumpFickTest(stresstesting.MantidStressTest):
-
-    def runTest(self):
-        sname = 'irs26176_graphite002_QLr_Workspace'
-        qrange = [0.6, 1.705600]
-        plotOp = False
-        saveOp = False
-
-        path = sname+'.nxs'  # path name for nxs file
-        LoadNexusProcessed(Filename=path, OutputWorkspace=sname)
-
-        # Data must be in HWHM
-        Scale(InputWorkspace=sname, Factor=0.5, OutputWorkspace=sname)
-
-        JumpFit(InputWorkspace=sname,
-                Function='FickDiffusion',
-                Width=2,
-                QMin=qrange[0],
-                QMax=qrange[1],
-                Plot=plotOp,
-                Save=saveOp)
-
-    def validate(self):
+        self._function = 'name=FickDiffusion,D=0.07'
         self.tolerance = 5e-4
-        return 'irs26176_graphite002_QLr_FickDiffusion_fit_Workspace','ISISIndirectBayes_JumpFickTest.nxs'
 
-#=============================================================================
-class JumpTeixeiraTest(stresstesting.MantidStressTest):
+    def get_reference_files(self):
+        return 'ISISIndirectBayes_JumpFickTest.nxs'
 
-    def runTest(self):
-        sname = 'irs26176_graphite002_QLr_Workspace'
-        qrange = [0.6, 1.705600]
-        plotOp = False
-        saveOp = False
+#==============================================================================
 
-        path = sname+'.nxs'  # path name for nxs file
-        LoadNexusProcessed(Filename=path, OutputWorkspace=sname)
+class JumpTeixeiraTest(JumpFitFunctionTestBase):
 
-        # Data must be in HWHM
-        Scale(InputWorkspace=sname, Factor=0.5, OutputWorkspace=sname)
+    def __init__(self):
+        JumpFitFunctionTestBase.__init__(self)
 
-        JumpFit(InputWorkspace=sname,
-                Function='TeixeiraWater',
-                Width=2,
-                QMin=qrange[0],
-                QMax=qrange[1],
-                Plot=plotOp,
-                Save=saveOp)
+        self._function = 'name=TeixeiraWater,Tau=1.6,L=0.4'
+        self.tolerance = 1e-3
 
-    def validate(self):
-        self.tolerance = 1e-2
-        return 'irs26176_graphite002_QLr_TeixeiraWater_fit_Workspace','ISISIndirectBayes_JumpTeixeiraTest.nxs'
+    def get_reference_files(self):
+        return 'ISISIndirectBayes_JumpTeixeiraTest.nxs'
 
-#=============================================================================
+#==============================================================================
