@@ -3,6 +3,11 @@
 
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/ITableWorkspace_fwd.h"
+#include "MantidDataObjects/SpecialWorkspace2D.h"
+
+#include <H5Cpp.h>
+
 namespace Mantid {
 namespace DataHandling {
 
@@ -42,6 +47,15 @@ public:
 private:
   void init();
   void exec();
+
+  void writeDoubleFieldFromTable(H5::Group &group, const std::string &name);
+  void writeIntFieldFromTable(H5::Group &group, const std::string &name);
+  void writeIntFieldFromSVWS(H5::Group &group, const std::string &name,
+                             DataObjects::SpecialWorkspace2D_const_sptr ws);
+  void generateDetidToIndex();
+
+  API::ITableWorkspace_sptr m_calibrationWS;
+  std::map<detid_t, size_t> m_detidToIndex;
 };
 
 } // namespace DataHandling
