@@ -32,6 +32,7 @@ set ( SRC_FILES
 	src/LoadDaveGrp.cpp
 	src/LoadDetectorInfo.cpp
 	src/LoadDetectorsGroupingFile.cpp
+	src/LoadDiffCal.cpp
 	src/LoadDspacemap.cpp
 	src/LoadEmptyInstrument.cpp
 	src/LoadEventNexus.cpp
@@ -187,6 +188,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/LoadDaveGrp.h
 	inc/MantidDataHandling/LoadDetectorInfo.h
 	inc/MantidDataHandling/LoadDetectorsGroupingFile.h
+	inc/MantidDataHandling/LoadDiffCal.h
 	inc/MantidDataHandling/LoadDspacemap.h
 	inc/MantidDataHandling/LoadEmptyInstrument.h
 	inc/MantidDataHandling/LoadEventNexus.h
@@ -338,6 +340,7 @@ set ( TEST_FILES
 	LoadDaveGrpTest.h
 	LoadDetectorInfoTest.h
 	LoadDetectorsGroupingFileTest.h
+	LoadDiffCalTest.h
 	LoadDspacemapTest.h
 	LoadEmptyInstrumentTest.h
 	LoadEventNexusTest.h
