@@ -74,6 +74,8 @@ void MultiDatasetFit::initLayout()
   connect(m_dataController,SIGNAL(dataSetUpdated(int)),m_plotController,SLOT(updateRange(int)));
   connect(m_plotController,SIGNAL(fittingRangeChanged(int, double, double)),m_dataController,SLOT(setFittingRange(int, double, double)));
   connect(m_uiForm.cbShowDataErrors,SIGNAL(toggled(bool)),m_plotController,SLOT(showDataErrors(bool)));
+  connect(m_uiForm.btnToVisibleRange,SIGNAL(clicked()),m_plotController,SLOT(resetRange()));
+  connect(m_uiForm.btnToFittingRange,SIGNAL(clicked()),m_plotController,SLOT(zoomToRange()));
 
   QSplitter* splitter = new QSplitter(Qt::Vertical,this);
 
