@@ -674,18 +674,43 @@ class DirectEnergyConversion(object):
         """
         spectra_list1=ei_mon_spectra[0]
         spectra_list2=ei_mon_spectra[1]
-        if isinstance(spectra_list1,list):
-            spectra1 = self._process_spectra_list(monitor_ws,spectra_list1)
-        else:
-            spectra1 = spectra_list1
-        if isinstance(spectra_list2,list):
-            spectra2 = self._process_spectra_list(monitor_ws,spectra_list2)
-        else:
-            spectra2 = spectra_list2
-        return (spectra1,spectra2)
+        if not isinstance(spectra_list1,list):
+           spectra_list1 = [spectra_list1]
+        spec_num1 = self._process_spectra_list(monitor_ws,spectra_list1,'spectr_ws1')
 
-    def _process_spectra_list(self,workspace,spectra_list):
-        """Method sums the specified spectra in the workspace"""
+        if not isinstance(spectra_list2,list):
+            spectra_list2 = [spectra_list2]
+        spec_num2 = self._process_spectra_list(monitor_ws,spectra_list2,'spectr_ws2')
+        monitor_ws_name = monitor_ws.name()
+        MergeRuns(InputWorkspaces=['spectr_ws1','spectr_ws2'],OutputWorkspace=monitor_ws_name)
+        return (spec_num1,spec_num2),mtd[monitor_ws_name]
+
+    def _process_spectra_list(self,workspace,spectra_list,target_ws_name='SpectraWS'):
+        """Method moves all detectors of the spectra list into the same position and
+           sums the specified spectra in the workspace"""
+        detPos=None
+        wsIDs=[]
+        for spec_num in spectra_list:
+            specID = workspace.getIndexFromSpectrumNumber(spec_num)
+            if detPos is None:
+                first_detector = workspace.getDetector(specID)
+                detPos = first_detector.getPos()
+            else:
+                MoveInstrumentComponent(Workspace=workspace,ComponentName= 'Detector',
+                                DetectorID=specID,X=detPos.getX(),Y=detPos.getY(),
+                                Z=detPos.getZ(),RelativePosition=False)
+            wsIDs.append(specID)
+
+        if len(spectra_list) == 1:
+            ExtractSingleSpectrum(InputWorkspace=workspace,OutputWorkspace=target_ws_name,
+            WorkspaceIndex=wsIDs[0])
+        else:
+            SumSpectra(InputWorkspace=workspace,OutputWorkspace=target_ws_name,
+            ListOfWorkspaceIndices=wsIDs)
+        ws = mtd[target_ws_name]
+        sp = ws.getSpectrum(0)
+        spectrum_num = sp.getSpectrumNo()
+        return spectrum_num
 #-------------------------------------------------------------------------------
     def get_ei(self, data_run, ei_guess):
         """ Calculate incident energy of neutrons and the time of the of the
@@ -710,14 +735,14 @@ class DirectEnergyConversion(object):
         separate_monitors = data_run.is_monws_separate()
         data_run.set_action_suffix('_shifted')
         # sum monitor spectra if this is requested
-        if RunDescriptor.ei_mon_spectra.need_to_sum_monitors():
-            ei_mon_spectra = self.sum_monitors_spectra(monitor_ws,ei_mon_spectra)
+        if PropertyManager.ei_mon_spectra.need_to_sum_monitors(self.prop_man):
+            ei_mon_spectra,monitor_ws = self.sum_monitors_spectra(monitor_ws,ei_mon_spectra)
 
 
         # Calculate the incident energy
         ei,mon1_peak,mon1_index,tzero = \
-            GetEi(InputWorkspace=monitor_ws, Monitor1Spec=int(ei_mon_spectra[0]),
-                  Monitor2Spec=int(ei_mon_spectra[1]),
+            GetEi(InputWorkspace=monitor_ws, Monitor1Spec=ei_mon_spectra[0],
+                  Monitor2Spec=ei_mon_spectra[1],
                   EnergyEstimate=ei_guess,FixEi=fix_ei)
 
         # Store found incident energy in the class itself
@@ -742,7 +767,7 @@ class DirectEnergyConversion(object):
                InstrumentParameter="DelayTime",Combine=True)
 
         # shift to monitor used to calculate energy transfer
-        spec_num = monitor_ws.getIndexFromSpectrumNumber(int(ei_mon_spectra[0]))
+        spec_num = monitor_ws.getIndexFromSpectrumNumber(ei_mon_spectra[0])
         mon1_det = monitor_ws.getDetector(spec_num)
         mon1_pos = mon1_det.getPos()
         src_name = data_ws.getInstrument().getSource().getName()
