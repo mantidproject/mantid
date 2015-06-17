@@ -62,5 +62,6 @@ echo usagereports.enabled = 0 >> %USERPROPS%
 
 :: Run
 set PKGDIR=%WORKSPACE%\build
+set PATH=C:\MantidInstall\bin;C:\MantidInstall\plugins;%PATH%
 python %WORKSPACE%\Code\Mantid\Testing\SystemTests\scripts\InstallerTests.py -o -d %PKGDIR%
 
