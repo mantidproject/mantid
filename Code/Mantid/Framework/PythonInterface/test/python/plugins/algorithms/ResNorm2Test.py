@@ -3,7 +3,7 @@ from mantid.simpleapi import *
 from mantid.api import MatrixWorkspace, WorkspaceGroup
 
 
-class ResNormTest(unittest.TestCase):
+class ResNorm2Test(unittest.TestCase):
 
     _res_ws = None
     _van_ws = None
