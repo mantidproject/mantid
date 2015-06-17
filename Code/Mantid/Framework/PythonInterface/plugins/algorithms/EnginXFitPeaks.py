@@ -76,6 +76,14 @@ class EnginXFitPeaks(PythonAlgorithm):
 
         self._produceOutputs(difc, zero)
 
+    def _getDefaultPeaks(self):
+        """ Gets default peaks for EnginX algorithm. Values from CeO2 """
+        defaultPeaks = [3.1243, 2.7057, 1.9132, 1.6316, 1.5621, 1.3529, 1.2415,
+                       1.2100, 1.1046, 1.0414, 0.9566, 0.9147, 0.9019, 0.8556,
+                       0.8252, 0.8158, 0.7811]
+
+        return defaultPeaks
+
     def _readInExpectedPeaks(self):
         """ Reads in expected peaks from the .csv file """
         readInArray = []
@@ -94,16 +102,17 @@ class EnginXFitPeaks(PythonAlgorithm):
             else:
                 print "using file"
                 expectedPeaksD = sorted(exPeakArray)
+
+            if None == expectedPeaksD:
+                raise ValueError("Could not read any expected peaks from file: %s" % updateFileName)
         else:
             expectedPeaksD = sorted(self.getProperty('ExpectedPeaks').value)
-        return expectedPeaksD
+            if None == expectedPeaksD:
+                raise ValueError("No expected peaks were given in the property 'ExpectedPeaks', "
+                                 "could not get default expected peaks, and 'ExpectedPeaksFromFile' "
+                                 "was not given either.")
 
-    def _getDefaultPeaks(self):
-        """ Gets default peaks for EnginX algorithm. Values from CeO2 """
-        defaultPeak = [3.1243, 2.7057, 1.9132, 1.6316, 1.5621, 1.3529, 1.2415,
-                       1.2100, 1.1046, 1.0414, 0.9566, 0.9147, 0.9019, 0.8556,
-                       0.8252, 0.8158, 0.7811]
-        return defaultPeak
+        return expectedPeaksD
 
     def _produceOutputs(self, difc, zero):
         """
@@ -139,7 +148,9 @@ class EnginXFitPeaks(PythonAlgorithm):
 
     def _fitAllPeaks(self, inWS, wsIndex, foundPeaks, expectedPeaksD):
         """
-        This tries to fit as many peaks as there are in the list of expected peaks passed to the algorithm.
+        This method is the core of EnginXFitPeaks. Ittries to fit as many peaks as there are in the list of 
+        expected peaks passed to the algorithm.
+
         The parameters from the (Gaussian) peaks fitted by FindPeaks elsewhere (before calling this method)
         are used as initial guesses.
 
@@ -243,44 +254,6 @@ class EnginXFitPeaks(PythonAlgorithm):
         findPeaksAlg.execute()
         foundPeaks = findPeaksAlg.getProperty('PeaksList').value
         return foundPeaks
-
-    def _readInExpectedPeaks(self):
-        """ Reads in expected peaks from the .csv file """
-        readInArray = []
-        exPeakArray = []
-        updateFileName = self.getPropertyValue("ExpectedPeaksFromFile")
-        if updateFileName != "":
-            with open(updateFileName) as f:
-                for line in f:
-                    readInArray.append([float(x) for x in line.split(',')])
-            for a in readInArray:
-                for b in a:
-                    exPeakArray.append(b)
-            if exPeakArray == []:
-                print "File could not be read. Defaults being used."
-                expectedPeaksD = sorted(self.getProperty('ExpectedPeaks').value)
-            else:
-                print "using file"
-                expectedPeaksD = sorted(exPeakArray)
-
-            if None == expectedPeaksD:
-                raise ValueError("Could not read any expected peaks from file: %s" % updateFileName)
-        else:
-            expectedPeaksD = sorted(self.getProperty('ExpectedPeaks').value)
-            if None == expectedPeaksD:
-                raise ValueError("No expected peaks were given in the property 'ExpectedPeaks', "
-                                 "could not get default expected peaks, and 'ExpectedPeaksFromFile' "
-                                 "was not given either.")
-
-        return expectedPeaksD
-
-    def _getDefaultPeaks(self):
-        """ Gets default peaks for EnginX algorithm. Values from CeO2 """
-        defaultPeaks = [3.1243, 2.7057, 1.9132, 1.6316, 1.5621, 1.3529, 1.2415,
-                       1.2100, 1.1046, 1.0414, 0.9566, 0.9147, 0.9019, 0.8556,
-                       0.8252, 0.8158, 0.7811]
-
-        return defaultPeaks
 
     def _fitDSpacingToTOF(self, fittedPeaksTable):
         """ Fits a linear background to the dSpacing <-> TOF relationship and returns fitted difc
