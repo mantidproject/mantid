@@ -29,7 +29,7 @@
 namespace Mantid {
 namespace PythonInterface {
 
-struct ExtractWorkspace {
+struct DLLExport ExtractWorkspace {
   ExtractWorkspace(const boost::python::object &pyvalue);
   bool check() const;
   const API::Workspace_sptr operator()() const;
