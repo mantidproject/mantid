@@ -5,7 +5,7 @@
   <archive>
     <archiveSearch plugin="ISISDataSearch" />
   </archive>
-  
+
   <computeResource name="SCARF@STFC" jobmanagertype="SCARFLSFJobManager">
     <baseURL>https://portal.scarf.rl.ac.uk</baseURL>
   </computeResource>
@@ -20,13 +20,13 @@
       <mac replacement="/archive"></mac>
     </filelocation>
   </catalog>
-  
-  <instrument name="ALF">  
+
+  <instrument name="ALF">
     <technique>Single Crystal Diffraction</technique>
     <livedata address="NDXALF:6789" />
   </instrument>
 
-  <instrument name="CRISP" shortname="CSP">  
+  <instrument name="CRISP" shortname="CSP">
     <technique>Reflectometry</technique>
     <livedata address="NDXCRISP:6789" />
   </instrument>
@@ -53,8 +53,8 @@
     <technique>TOF Direct Geometry Spectroscopy</technique>
     <livedata address="NDXHET:6789" />
   </instrument>
-  
-  <instrument name="HRPD" shortname="HRP">  
+
+  <instrument name="HRPD" shortname="HRP">
     <technique>Powder Diffraction</technique>
     <technique>Neutron Diffraction</technique>
     <livedata address="NDXHRPD:6789" />
@@ -64,7 +64,7 @@
     <technique>Neutron Diffraction</technique>
     <livedata address="NDXINES:6789" />
   </instrument>
-  
+
   <instrument name="INTER">
     <technique>Reflectometry</technique>
     <zeropadding size="8"/>
@@ -122,7 +122,7 @@
   </instrument>
 
   <instrument name="PEARL" shortname="PRL">
-    <zeropadding size="5" startRunNumber="1" prefix="PRL"/> 
+    <zeropadding size="5" startRunNumber="1" prefix="PRL"/>
     <zeropadding size="8" startRunNumber="71010" prefix="PEARL"/>
     <technique>Neutron Diffraction</technique>
     <livedata address="NDXPEARL:6789" />
@@ -138,9 +138,9 @@
     <technique>Neutron Diffraction with isotopic substitution</technique>
     <livedata address="NDXSANDALS:6789" />
   </instrument>
-  
+
   <instrument name="SURF" shortname="SRF">
-    <zeropadding size="5" startRunNumber="1" prefix="SRF"/> 
+    <zeropadding size="5" startRunNumber="1" prefix="SRF"/>
     <zeropadding size="6" startRunNumber="100000" prefix="SRF"/>
     <zeropadding size="8" startRunNumber="104604" prefix="SURF"/>
     <technique>Reflectometry</technique>
@@ -169,7 +169,7 @@
     <technique>TOF Indirect Geometry Diffraction</technique>
     <livedata address="NDXVESUVIO:6789" />
   </instrument>
-  
+
   <instrument name="LET">
     <zeropadding size="8"/>
     <technique>Neutron Spectroscopy</technique>
@@ -214,7 +214,7 @@
     <technique>Small Angle Scattering</technique>
     <livedata address="NDXSANS2D:6789" />
   </instrument>
-  
+
   <instrument name="SANS2D_EVENT" shortname="SANS2D">
     <zeropadding size="8"/>
     <technique>Small Angle Scattering</technique>
@@ -228,7 +228,7 @@
     <technique>Single Crystal Diffraction</technique>
     <livedata address="NDXWISH:6789" />
   </instrument>
-  
+
   <instrument name="HIFI">
     <zeropadding size="8"/>
     <technique>Muon level crossing resonance</technique>
@@ -236,94 +236,94 @@
     <technique>Radio frequency muSR</technique>
     <livedata address="NDXHIFI:6789" />
   </instrument>
-  
+
   <instrument name="MUSR">
     <zeropadding size="8"/>
     <technique>Muon spectroscopy</technique>
     <technique>Radio frequency muSR</technique>
     <livedata address="NDXMUSR:6789" />
   </instrument>
-  
+
   <instrument name="MUT">
     <zeropadding size="8"/>
     <technique>Muon spectroscopy</technique>
     <technique>Radio frequency muSR</technique>
-  </instrument>  
-  
+  </instrument>
+
   <instrument name="EMU">
     <zeropadding size="8"/>
     <technique>Muon spectroscopy</technique>
     <technique>Radio frequency muSR</technique>
     <livedata address="NDXEMU:6789" />
-  </instrument>  
- 
+  </instrument>
+
   <instrument name="ARGUS">
     <zeropadding size="7" startRunNumber="1"/>
     <zeropadding size="8" startRunNumber="57942"/>
     <technique>Muon spectroscopy</technique>
     <technique>Radio frequency muSR</technique>
     <livedata address="NDXARGUS:6789" />
-  </instrument> 
-  
+  </instrument>
+
   <instrument name="CHRONUS">
     <zeropadding size="7"/>
     <technique>Muon spectroscopy</technique>
     <technique>Radio frequency muSR</technique>
     <livedata address="NDXCHRONUS:6789" />
-  </instrument>  
-  
+  </instrument>
+
   <livedata listener="ISISHistoDataListener"/>
 
 </facility>
 
 <facility name="HFIR" FileExtensions=".nxs,.dat,.xml">
-   
-   <instrument name="HB1"> 
+
+   <instrument name="HB1">
       <technique>Triple Axis Spectroscopy</technique>
-   </instrument> 
-   
-   <instrument name="HB1A"> 
+   </instrument>
+
+   <instrument name="HB1A">
       <technique>Triple Axis Spectroscopy</technique>
-   </instrument> 
-   
-   <instrument name="HB2A"> 
+   </instrument>
+
+   <instrument name="HB2A">
       <technique>technique</technique>
-   </instrument> 
-   
-   <instrument name="HB2B"> 
+   </instrument>
+
+   <instrument name="HB2B">
       <technique>technique</technique>
-   </instrument> 
-   
-   <instrument name="WAND"> 
+   </instrument>
+
+   <instrument name="WAND">
       <technique>technique</technique>
-   </instrument> 
-   
-   <instrument name="HB2D"> 
+   </instrument>
+
+   <instrument name="HB2D">
       <technique>technique</technique>
-   </instrument> 
-   
-   <instrument name="HB3"> 
+   </instrument>
+
+   <instrument name="HB3">
       <technique>Triple Axis Spectroscopy</technique>
-   </instrument> 
-   
-   <instrument name="HB3A"> 
+   </instrument>
+
+   <instrument name="HB3A">
       <technique>technique</technique>
-   </instrument> 
-   
-   
-   <instrument name="GPSANS"> 
+   </instrument>
+
+
+   <instrument name="GPSANS">
       <technique>Small Angle Scattering</technique>
-   </instrument> 
-   
-   <instrument name="HIRESSANS"> 
+   </instrument>
+
+   <instrument name="HIRESSANS">
       <technique>Small Angle Scattering</technique>
-   </instrument> 
-   
-   <instrument name="BIOSANS"> 
+   </instrument>
+
+   <instrument name="BIOSANS">
       <technique>Small Angle Scattering</technique>
-   </instrument> 
-   
-</facility> 
+   </instrument>
+
+</facility>
 
 <facility name="SNS" delimiter="_" FileExtensions=".nxs.h5,_event.nxs,.nxs,.dat,_runinfo.xml,_histo.nxs">
 
@@ -345,86 +345,86 @@
        <mac replacement=""></mac>
      </filelocation>
    </catalog>
-  
-   <instrument name="DAS"> 
+
+   <instrument name="DAS">
       <technique>technique</technique>
-   </instrument> 
-   
-   <instrument name="TOF-USANS" beamline="1A"> 
+   </instrument>
+
+   <instrument name="TOF-USANS" beamline="1A">
       <technique>Small Angle Scattering</technique>
-   </instrument> 
-   
+   </instrument>
+
    <instrument name="NOMAD" shortname="NOM" beamline="1B">
    	<technique>Neutron Diffraction</technique>
    	<technique>Neutron Amorphous</technique>
    </instrument>
-   
-   <instrument name="BASIS" shortname="BSS" beamline="2"> 
+
+   <instrument name="BASIS" shortname="BSS" beamline="2">
     <technique>Neutron Spectroscopy</technique>
     <technique>TOF Indirect Geometry Spectroscopy</technique>
     <technique>Neutron Diffraction</technique>
-   </instrument> 
-   
-   <instrument name="SNAP" beamline="3">  
+   </instrument>
+
+   <instrument name="SNAP" beamline="3">
 	<technique>Neutron Diffraction</technique>
-   </instrument> 
-   
-   <instrument name="REF_M" beamline="4A"> 
+   </instrument>
+
+   <instrument name="REF_M" beamline="4A">
       <technique>Reflectometry</technique>
-   </instrument> 
-   
-   <instrument name="REF_L" beamline="4B"> 
+   </instrument>
+
+   <instrument name="REF_L" beamline="4B">
       <technique>Reflectometry</technique>
-   </instrument> 
-   
-   <instrument name="CNCS" beamline="5"> 
+   </instrument>
+
+   <instrument name="CNCS" beamline="5">
     <technique>Neutron Spectroscopy</technique>
     <technique>TOF Direct Geometry Spectroscopy</technique>
     <technique>Neutron Diffraction</technique>
-   </instrument> 
-   
-   <instrument name="EQ-SANS" shortname="EQSANS" beamline="6"> 
+   </instrument>
+
+   <instrument name="EQ-SANS" shortname="EQSANS" beamline="6">
       <technique>Small Angle Scattering</technique>
-   </instrument> 
-   
-   <instrument name="USANS" shortname="USANS" beamline="1A"> 
+   </instrument>
+
+   <instrument name="USANS" shortname="USANS" beamline="1A">
       <technique>Small Angle Scattering</technique>
       <livedata address="usans-daq1.sns.gov:31415" />
-   </instrument> 
-   
-   <instrument name="VULCAN" beamline="7"> 
-	<technique>Neutron Diffraction</technique>
-   </instrument> 
+   </instrument>
 
-   <instrument name="CORELLI" beamline="9"> 
+   <instrument name="VULCAN" beamline="7">
+	<technique>Neutron Diffraction</technique>
+   </instrument>
+
+   <instrument name="CORELLI" beamline="9">
 	<technique>Neutron Diffraction</technique>
 	<technique>Diffuse Scattering</technique>
 	<livedata address="corelli-daq1.sns.gov:31415" />
-   </instrument> 
-      
-   <instrument name="POWGEN" shortname="PG3" beamline="11A"> 
+   </instrument>
+
+   <instrument name="POWGEN" shortname="PG3" beamline="11A">
 	<technique>Neutron Diffraction</technique>
-   </instrument> 
-   
-   <instrument name="MANDI" beamline="11B"> 
+   </instrument>
+
+   <instrument name="MANDI" beamline="11B">
 	<technique>Neutron Diffraction</technique>
 	<technique>Single Crystal Diffraction</technique>
 	<technique>Protein Crystallography</technique>
-   </instrument> 
-   
-   <instrument name="TOPAZ" beamline="12"> 
+   </instrument>
+
+   <instrument name="TOPAZ" beamline="12">
 	<technique>Neutron Diffraction</technique>
     <technique>Single Crystal Diffraction</technique>
     <livedata listener="TOPAZLiveEventDataListener" address="128.219.164.132:9000" />
     <!-- Act like we're ISawEV talking to event_catcher -->
-   </instrument> 
-  
-  <instrument name="HYSPEC" shortname="HYS" beamline="14B"> 
+   </instrument>
+
+  <instrument name="HYSPEC" shortname="HYS" beamline="14B">
     <technique>Neutron Spectroscopy</technique>
     <technique>TOF Direct Geometry Spectroscopy</technique>
     <livedata address="hyspec-sms1.sns.gov:31415" />
-  </instrument> 
-  
+  </instrument>
+
   <instrument name="VISION" shortname="VIS" beamline="16B">
     <technique>Neutron Spectroscopy</technique>
     <technique>TOF Indirect Geometry Spectroscopy</technique>
@@ -432,57 +432,57 @@
     <livedata address="vision-daq1.sns.gov:31415" />
   </instrument>
 
-   <instrument name="SEQUOIA" shortname="SEQ" beamline="17"> 
+   <instrument name="SEQUOIA" shortname="SEQ" beamline="17">
     <technique>Neutron Spectroscopy</technique>
     <technique>TOF Direct Geometry Spectroscopy</technique>
     <technique>Neutron Diffraction</technique>
     <livedata address="sequoia-sms.sns.gov:31415" />
-   </instrument> 
-   
-   <instrument name="ARCS" beamline="18"> 
+   </instrument>
+
+   <instrument name="ARCS" beamline="18">
     <technique>Neutron Spectroscopy</technique>
     <technique>TOF Direct Geometry Spectroscopy</technique>
     <technique>Neutron Diffraction</technique>
-   </instrument> 
-   
-   <instrument name="VENUS"> 
+   </instrument>
+
+   <instrument name="VENUS">
       <technique>Imaging</technique>
       <technique>Tomography</technique>
-   </instrument> 
-   
+   </instrument>
+
    <livedata listener="SNSLiveEventDataListener"/>
 
 </facility>
 
 <facility name="NCNR" FileExtensions=".dat,.xml">
-   <instrument name="NGSANS"> 
+   <instrument name="NGSANS">
       <technique>Small Angle Scattering</technique>
-   </instrument> 
+   </instrument>
 </facility>
 
 <facility name="LENS" FileExtensions=".nxs,.dat,.xml">
-   <instrument name="SANS"> 
+   <instrument name="SANS">
       <technique>Small Angle Scattering</technique>
-   </instrument> 
+   </instrument>
 
 </facility>
 
 <facility name="ILL" zeropadding="6" FileExtensions=".nxs,.hdf,.inx,.asc">
 
   <instrument name="IN4">
-    <technique>Neutron Spectroscopy</technique> 
+    <technique>Neutron Spectroscopy</technique>
     <technique>Reactor Direct Geometry Spectroscopy</technique>
     <technique>Disk chopper time-of-flight spectrometer IN5</technique>
   </instrument>
 
   <instrument name="IN5">
-    <technique>Neutron Spectroscopy</technique> 
+    <technique>Neutron Spectroscopy</technique>
     <technique>Reactor Direct Geometry Spectroscopy</technique>
     <technique>Disk chopper time-of-flight spectrometer IN5</technique>
   </instrument>
 
   <instrument name="IN6">
-    <technique>Neutron Spectroscopy</technique> 
+    <technique>Neutron Spectroscopy</technique>
     <technique>Reactor Direct Geometry Spectroscopy</technique>
     <technique>Cold neutron time-focussing time-of-flight spectrometer</technique>
   </instrument>
@@ -506,18 +506,18 @@
     <technique>Neutron Spectroscopy</technique>
     <technique>Reactor Indirect Geometry Spectroscopy</technique>
   </instrument>
-    
+
   <instrument name="D33">
-    <technique>SANS</technique> 
+    <technique>SANS</technique>
   </instrument>
-  
+
   <instrument name="D2B">
-    <technique>Powder diffraction</technique> 
+    <technique>Powder diffraction</technique>
   </instrument>
-  
+
 
   <instrument name="D17">
-    <technique>Reflectometry</technique> 
+    <technique>Reflectometry</technique>
   </instrument>
 
 </facility>
@@ -547,7 +547,7 @@
   <instrument name="SANS-I">
     <technique>Small Angle Scattering</technique>
   </instrument>
-  
+
   <instrument name="SANS-II">
     <technique>Small Angle Scattering</technique>
   </instrument>
@@ -567,7 +567,7 @@
   <instrument name="FOCUS">
     <technique>Neutron Spectroscopy</technique>
     <technique>TOF Direct Geometry Spectroscopy</technique>
-  </instrument> 
+  </instrument>
 
   <instrument name="Rita-II">
     <technique>Triple Axis Spectroscopy</technique>
@@ -607,13 +607,13 @@
     <zeropadding size="3"/>
     <technique>Muon spectroscopy</technique>
   </instrument>
-  
+
 </facility>
 
 <!--  Reactor Orphee (France) -->
 <facility name="LLB" FileExtensions=".nxs,.hdf">
   <instrument name="MIBEMOL">
-    <technique>Neutron Spectroscopy</technique> 
+    <technique>Neutron Spectroscopy</technique>
     <technique>Reactor Direct Geometry Spectroscopy</technique>
   </instrument>
 </facility>
@@ -621,7 +621,7 @@
 <!--  Facility MLZ (FRMII) (Germany) -->
 <facility name="MLZ" FileExtensions=".nxs,.d_dat">
   <instrument name="DNS">
-    <technique>Neutron Spectroscopy</technique> 
+    <technique>Neutron Spectroscopy</technique>
     <technique>Reactor Direct Geometry Spectroscopy</technique>
     <technique>TOF Direct Geometry Spectroscopy</technique>
     <technique>Neutron Diffraction</technique>
@@ -646,7 +646,7 @@
     <technique>Test Listener</technique>
     <livedata address="localhost:59876" listener="ISISLiveEventDataListener" />
   </instrument>
-  
+
   <instrument name="ADARA_FileReader">
     <technique>Test Listener</technique>
     <livedata listener="FileEventDataListener" address="127.0.0.1:0" />
