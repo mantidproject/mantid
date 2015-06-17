@@ -83,7 +83,7 @@ pqRenderView* ViewBase::createRenderView(QWidget* widget, QString viewName)
   pqActiveObjects::instance().setActiveView(view);
 
   // Place the widget for the render view in the frame provided.
-  hbox->addWidget(view->getWidget());
+  hbox->addWidget(view->widget());
 
   /// Make a connection to the view's endRender signal for later checking.
   QObject::connect(view, SIGNAL(endRender()),
