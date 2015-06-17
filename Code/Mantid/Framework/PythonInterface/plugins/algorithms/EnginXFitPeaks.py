@@ -34,9 +34,9 @@ class EnginXFitPeaks(PythonAlgorithm):
 
         self.declareProperty('OutputParametersTableName', '', direction=Direction.Input,
                              doc = 'Name for a table workspace with the fitted values calculated by '
-                             'this algorithm (Difc and Zero parameters) for GSAS. At the moment '
-                             'these two parameters are added as two columns in a single row. If not given, '
-                             'the table workspaced is not created.')
+                             'this algorithm (Difc and Zero parameters) for GSAS. '
+                             'These two parameters are added as two columns in a single row. If not given, '
+                             'the table workspace is not created.')
 
         self.declareProperty("Difc", 0.0, direction = Direction.Output,\
     		doc = "Fitted Difc value")
