@@ -32,6 +32,8 @@ set ( EXPORT_FILES
   src/Exports/WorkspaceProperty.cpp
   src/Exports/ITableWorkspace.cpp
   src/Exports/ITableWorkspaceProperty.cpp
+  src/Exports/ISplittersWorkspace.cpp
+  src/Exports/ISplittersWorkspaceProperty.cpp
   src/Exports/MDGeometry.cpp
   src/Exports/IMDWorkspace.cpp
   src/Exports/IMDWorkspaceProperty.cpp

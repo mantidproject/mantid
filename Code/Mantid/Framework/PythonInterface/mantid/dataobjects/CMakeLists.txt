@@ -10,6 +10,7 @@ set ( MODULE_TEMPLATE src/dataobjects.cpp.in )
 set ( EXPORT_FILES
   src/Exports/EventWorkspace.cpp
   src/Exports/Workspace2D.cpp
+  src/Exports/RebinnedOutput.cpp
   src/Exports/SpecialWorkspace2D.cpp
   src/Exports/GroupingWorkspace.cpp
   src/Exports/MaskWorkspace.cpp
@@ -18,6 +19,7 @@ set ( EXPORT_FILES
   src/Exports/MDHistoWorkspace.cpp
   src/Exports/PeaksWorkspace.cpp
   src/Exports/TableWorkspace.cpp
+  src/Exports/SplittersWorkspace.cpp
   src/Exports/WorkspaceSingleValue.cpp
 )
 
