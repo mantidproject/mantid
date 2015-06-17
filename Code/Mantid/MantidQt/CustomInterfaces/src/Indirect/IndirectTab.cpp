@@ -183,6 +183,40 @@ namespace CustomInterfaces
 
 
   /**
+   * Gets the suffix of a workspace (i.e. part after last underscore (red, sqw)).
+   *
+   * @param wsName Name of workspace
+   * @return Suffix, or empty string if no underscore
+   */
+  QString IndirectTab:: getWorkspaceSuffix(const QString & wsName)
+  {
+    int lastUnderscoreIndex = wsName.lastIndexOf("_");
+    if(lastUnderscoreIndex == -1)
+      return QString();
+
+    return wsName.right(lastUnderscoreIndex);
+  }
+
+
+  /**
+   * Returns the basename of a workspace (i.e. the part before the last underscore)
+   *
+   * e.g. basename of irs26176_graphite002_red is irs26176_graphite002
+   *
+   * @param wsName Name of workspace
+   * @return Base name, or wsName if no underscore
+   */
+  QString IndirectTab:: getWorkspaceBasename(const QString & wsName)
+  {
+    int lastUnderscoreIndex = wsName.lastIndexOf("_");
+    if(lastUnderscoreIndex == -1)
+      return QString(wsName);
+
+    return wsName.left(lastUnderscoreIndex);
+  }
+
+
+  /**
    * Creates a spectrum plot of one or more workspaces at a given spectrum
    * index.
    *
@@ -239,7 +273,7 @@ namespace CustomInterfaces
     pyInput += "'], range(";
     pyInput += QString::number(specStart);
     pyInput += ",";
-    pyInput += QString::number(specEnd);
+    pyInput += QString::number(specEnd + 1);
     pyInput += "))\n";
 
     m_pythonRunner.runPythonCode(pyInput);
