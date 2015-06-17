@@ -90,14 +90,14 @@ Output:
         , PreserveEvents=False)
 
    print "Number of focussed spectra: " + str(ws.getNumberHistograms())
-   print "What type is the workspace after focussing: " + str(type(ws))
+   print "What type is the workspace after focussing: " + ws.id()
 
 Output:
 
 .. testoutput:: ExEventFocussing
 
    Number of focussed spectra: 2
-   What type is the workspace after focussing: <class 'mantid.api._api.MatrixWorkspace'>
+   What type is the workspace after focussing: Workspace2D
 
 Previous Versions
 -----------------

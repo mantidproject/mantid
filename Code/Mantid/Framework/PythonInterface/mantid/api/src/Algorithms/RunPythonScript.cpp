@@ -1,18 +1,22 @@
 #include "MantidPythonInterface/api/Algorithms/RunPythonScript.h"
+#include "MantidPythonInterface/api/ExtractWorkspace.h"
 #include "MantidPythonInterface/kernel/Environment/ErrorHandling.h"
 #include "MantidPythonInterface/kernel/Environment/Threading.h"
-#include "MantidPythonInterface/kernel/Policies/DowncastingPolicies.h"
-#include "MantidPythonInterface/kernel/Registry/DowncastDataItem.h"
+#include "MantidPythonInterface/kernel/IsNone.h"
 #include "MantidKernel/MandatoryValidator.h"
 
 #include <boost/python/call_method.hpp>
 #include <boost/python/exec.hpp>
 #include <boost/python/extract.hpp>
 #include <boost/python/import.hpp>
+#include <boost/python/to_python_value.hpp>
 #include <boost/regex.hpp>
 
 namespace Mantid {
 namespace PythonInterface {
+
+using namespace API;
+using namespace Kernel;
 
 /// Algorithm's name for identification. @see Algorithm::name
 const std::string RunPythonScript::name() const { return "RunPythonScript"; }
@@ -40,9 +44,6 @@ bool RunPythonScript::checkGroups() { return false; }
  * Initialize the algorithm's properties.
  */
 void RunPythonScript::init() {
-  using namespace API;
-  using namespace Kernel;
-
   declareProperty(
       new WorkspaceProperty<Workspace>("InputWorkspace", "", Direction::Input,
                                        PropertyMode::Optional),
@@ -61,8 +62,6 @@ void RunPythonScript::init() {
 /** Execute the algorithm.
  */
 void RunPythonScript::exec() {
-  using namespace API;
-
   Workspace_sptr outputWS = executeScript(scriptCode());
   setProperty<Workspace_sptr>("OutputWorkspace", outputWS);
 }
@@ -171,16 +170,8 @@ boost::python::dict RunPythonScript::buildLocals() const {
 
   API::Workspace_sptr inputWS = getProperty("InputWorkspace");
   if (inputWS) {
-    // We have a generic workspace ptr but the Python needs to see the derived
-    // type so
-    // that it can access the appropriate methods for that instance
-    // The ToSharedPtrWithDowncast policy is already in place for this and is
-    // used in many
-    // method exports as part of a return_value_policy struct.
-    // It is called manually here.
-    typedef Policies::ToSharedPtrWithDowncast::apply<API::Workspace_sptr>::type
-        WorkspaceDowncaster;
-    locals["input"] = object(handle<>(WorkspaceDowncaster()(inputWS)));
+    locals["input"] =
+        object(handle<>(to_python_value<API::Workspace_sptr>()(inputWS)));
   }
   std::string outputWSName = getPropertyValue("OutputWorkspace");
   if (!outputWSName.empty()) {
@@ -202,25 +193,25 @@ boost::shared_ptr<API::Workspace> RunPythonScript::extractOutputWorkspace(
   using namespace boost::python;
 
   // Might be None, string or a workspace object
-  object pyoutput = locals["output"];
-  if (pyoutput.ptr() == Py_None)
+  auto pyoutput = locals.get("output");
+  if (isNone(pyoutput))
     return Workspace_sptr();
 
-  if (PyObject_HasAttrString(pyoutput.ptr(), "id")) {
-    const auto &entry = Registry::DowncastRegistry::retrieve(
-        call_method<std::string>(pyoutput.ptr(), "id"));
-    return boost::dynamic_pointer_cast<API::Workspace>(
-        entry.fromPythonAsSharedPtr(pyoutput));
+  auto ptrExtract = ExtractWorkspace(pyoutput);
+  if (ptrExtract.check()) {
+    return ptrExtract();
   } else {
-    extract<std::string> stringExtractor(pyoutput);
-    if (stringExtractor.check()) {
+    extract<std::string> extractString(pyoutput);
+    if (extractString.check()) {
       // Will raise an error if the workspace does not exist as the user
-      // requested an output workspace
+      // requested
+      // an output workspace
       // but didn't create one.
-      return AnalysisDataService::Instance().retrieve(stringExtractor());
+      return AnalysisDataService::Instance().retrieve(extractString());
     } else {
-      throw std::runtime_error("Invalid type assigned to 'output' variable. "
-                               "Must be a string or a Workspace object");
+      throw std::runtime_error(
+          "Invalid type assigned to 'output' variable. Must "
+          "be a string or a Workspace object");
     }
   }
 }
