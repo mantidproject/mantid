@@ -1,8 +1,13 @@
 #include "MantidAPI/IMaskWorkspace.h"
+#include "MantidKernel/WarningSuppressions.h"
 #include "MantidPythonInterface/kernel/Registry/RegisterWorkspacePtrToPython.h"
 #include <boost/python/class.hpp>
 #include <boost/python/extract.hpp>
 #include <boost/python/list.hpp>
+
+// clang-format off
+GCC_DIAG_OFF(strict-aliasing)
+// clang-format on
 
 using Mantid::API::IMaskWorkspace;
 using namespace Mantid::PythonInterface::Registry;
@@ -33,8 +38,4 @@ void export_IMaskWorkspace() {
 
   // register pointers
   RegisterWorkspacePtrToPython<IMaskWorkspace>();
-  // /// Check if all detectors in a set are masked
-  // virtual bool isMasked(const std::set<detid_t> &detectorIDs) const = 0;
-
-//    ;
 }
