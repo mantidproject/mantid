@@ -81,7 +81,7 @@ class ResNorm(PythonAlgorithm):
 
 
     def PyExec(self):
-        from IndirectCommon import (getWSprefix, getEfixed)
+        from IndirectCommon import getWSprefix
 
         # Process vanadium workspace
         van_ws = ConvertSpectrumAxis(InputWorkspace=self._van_ws,
