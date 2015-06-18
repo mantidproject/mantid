@@ -102,6 +102,9 @@ class PoldiDataAnalysis(PythonAlgorithm):
         if self.useGlobalParameters:
             self.globalParameters = ','.join(self._globalParameters[self.profileFunction])
 
+        if not self.workspaceHasCounts(self.inputWorkspace):
+            raise RuntimeError("Aborting analysis since workspace " + self.baseName + " does not contain any counts.")
+
         correlationSpectrum = self.runCorrelation()
         self.outputWorkspaces.append(correlationSpectrum)
 
@@ -116,6 +119,17 @@ class PoldiDataAnalysis(PythonAlgorithm):
         RenameWorkspace(outputWs, self.getProperty("OutputWorkspace").valueAsStr)
 
         self.setProperty("OutputWorkspace", outputWs)
+
+    def workspaceHasCounts(self, workspace):
+        integrated = Integration(workspace)
+        summed = SumSpectra(integrated)
+
+        counts = summed.readY(0)[0]
+
+        DeleteWorkspace(integrated)
+        DeleteWorkspace(summed)
+
+        return counts > 0
 
     def runCorrelation(self):
         correlationName = self.baseName + "_correlation"
