@@ -89,7 +89,13 @@ void ExtractSpectra::init() {
   declareProperty(
       new ArrayProperty<size_t>("WorkspaceIndexList"),
       "A comma-separated list of individual workspace indices to read.  Only used if\n"
-      "explicitly set.");
+      "explicitly set. The WorkspaceIndexList is only used if the DetectorList is empty.");
+
+    declareProperty(
+      new ArrayProperty<detid_t>("DetectorList"),
+      "A comma-separated list of individual detector IDs to read.  Only used if\n"
+      "explicitly set. When specifying the WorkspaceIndexList and DetectorList property,\n"
+      "the latter is being selected.");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -376,34 +382,43 @@ void ExtractSpectra::checkProperties() {
   if (!m_commonBoundaries)
     m_maxX = static_cast<int>(m_inputWorkspace->readX(0).size());
 
-  m_spectrumList = getProperty("WorkspaceIndexList");
+  // The hierarchy of inputs is (one is being selected):
+  // 1. DetectorList
+  // 2. WorkspaceIndexList
+  // 3. Start and stop index
+  std::vector<detid_t> detectorList = getProperty("DetectorList");
+  if (!detectorList.empty()) {
+    m_inputWorkspace->getIndicesFromDetectorIDs(detectorList, m_spectrumList);
+  } else {
+    m_spectrumList = getProperty("WorkspaceIndexList");
 
-  if (m_spectrumList.empty()) {
-    int minSpec = getProperty("StartWorkspaceIndex");
-    const int numberOfSpectra =
-        static_cast<int>(m_inputWorkspace->getNumberHistograms());
-    int maxSpec = getProperty("EndWorkspaceIndex");
-    if (isEmpty(maxSpec))
-      maxSpec = numberOfSpectra - 1;
+    if (m_spectrumList.empty()) {
+      int minSpec = getProperty("StartWorkspaceIndex");
+      const int numberOfSpectra =
+          static_cast<int>(m_inputWorkspace->getNumberHistograms());
+      int maxSpec = getProperty("EndWorkspaceIndex");
+      if (isEmpty(maxSpec))
+        maxSpec = numberOfSpectra - 1;
 
-    // Check 'StartSpectrum' is in range 0-numberOfSpectra
-    if (minSpec > numberOfSpectra - 1) {
-      g_log.error("StartWorkspaceIndex out of range!");
-      throw std::out_of_range("StartSpectrum out of range!");
-    }
-    if (maxSpec > numberOfSpectra - 1) {
-      g_log.error("EndWorkspaceIndex out of range!");
-      throw std::out_of_range("EndWorkspaceIndex out of range!");
-    }
-    if (maxSpec < minSpec) {
-      g_log.error("StartWorkspaceIndex must be less than or equal to "
-                  "EndWorkspaceIndex");
-      throw std::out_of_range("StartWorkspaceIndex must be less than or equal "
-                              "to EndWorkspaceIndex");
-    }
-    m_spectrumList.reserve(maxSpec - minSpec + 1);
-    for (size_t i = minSpec; i <= maxSpec; ++i) {
-      m_spectrumList.push_back(i);
+      // Check 'StartSpectrum' is in range 0-numberOfSpectra
+      if (minSpec > numberOfSpectra - 1) {
+        g_log.error("StartWorkspaceIndex out of range!");
+        throw std::out_of_range("StartSpectrum out of range!");
+      }
+      if (maxSpec > numberOfSpectra - 1) {
+        g_log.error("EndWorkspaceIndex out of range!");
+        throw std::out_of_range("EndWorkspaceIndex out of range!");
+      }
+      if (maxSpec < minSpec) {
+        g_log.error("StartWorkspaceIndex must be less than or equal to "
+                    "EndWorkspaceIndex");
+        throw std::out_of_range("StartWorkspaceIndex must be less than or equal "
+                                "to EndWorkspaceIndex");
+      }
+      m_spectrumList.reserve(maxSpec - minSpec + 1);
+      for (size_t i = minSpec; i <= maxSpec; ++i) {
+        m_spectrumList.push_back(i);
+      }
     }
   }
 }
