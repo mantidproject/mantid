@@ -74,7 +74,7 @@ void SaveDiffCal::init() {
           "MaskWorkspace", "", Direction::Input, PropertyMode::Optional),
       "Optional: An Workspace workspace giving which detectors are masked.");
 
-  declareProperty(new FileProperty("Filename", "", FileProperty::Save, ".hd5"),
+  declareProperty(new FileProperty("Filename", "", FileProperty::Save, ".h5"),
                   "Path to the .h5 file that will be created.");
 }
 

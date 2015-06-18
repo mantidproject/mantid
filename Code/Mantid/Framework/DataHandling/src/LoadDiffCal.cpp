@@ -64,7 +64,10 @@ const std::string LoadDiffCal::summary() const {
 /** Initialize the algorithm's properties.
  */
 void LoadDiffCal::init() {
-  declareProperty(new FileProperty("Filename", "", FileProperty::Load, ".hd5"),
+  std::vector<std::string> exts;
+  exts.push_back(".h5");
+  exts.push_back(".hd5");
+  declareProperty(new FileProperty("Filename", "", FileProperty::Load, exts),
                   "Path to the .h5 file.");
 
   declareProperty(new PropertyWithValue<bool>("MakeGroupingWorkspace", true,
